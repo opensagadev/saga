@@ -4,32 +4,23 @@
 // The original unit constructs the homogeneous VuVec header constants.
 #include "nu2api/nucore/nuvuvec.hpp"
 
-// ==== src/nu2api/nucore/nunew.cpp: all remaining content ====
 #include <new>
 
 #include "nu2api/nucore/NuMemoryManager.h"
 #include "nu2api/nucore/numemory.h"
 #include "nu2api/nucore/android/nunew_android.h"
 
-
-
 void *operator new(std::size_t size, const std::nothrow_t &) noexcept;
 
 void *operator new(std::size_t size, u32 alignment, const std::nothrow_t &) noexcept;
-
-
 
 void *operator new[](std::size_t size, const std::nothrow_t &) noexcept;
 
 void *operator new[](std::size_t size, u32 alignment, const std::nothrow_t &) noexcept;
 
-
 void operator delete(void *ptr, const std::nothrow_t &) noexcept;
 
-
 void operator delete[](void *ptr, const std::nothrow_t &) noexcept;
-
-// ==== functions in original address order ====
 
 void *operator new(std::size_t size) {
     if (g_disallowGlobalNew != false) {

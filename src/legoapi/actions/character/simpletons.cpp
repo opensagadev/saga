@@ -12,7 +12,6 @@
 
 #include "legoapi/actions/character/simpletons_types.h"
 
-// ==== src/legoapi/world/levels/episode.cpp: declarations ====
 #include "legoapi/world/levels/episode.h"
 
 #include "MechInputTouch/MechInputTouch_types.h"
@@ -61,24 +60,7 @@ i32 droid_hack;
 static i32 trooperteamcount;
 static f32 teamswitchtimer;
 
-// Episode-global logic and helpers shared across episodes: completion/
-// episode bookkeeping, super-story, boss/cutscene-adjacent helpers. The
-// per-episode level *handlers* live in the matching episodeI..VI.cpp files.
-
-// ===========================================================================
-// Episode bookkeeping
-// ===========================================================================
-
-// ===========================================================================
-// HUD / score helpers
-// ===========================================================================
-
-// ===========================================================================
 // Shared gameplay helpers
-// ===========================================================================
-
-
-
 
 static inline i32 MiniTrooperRandomIndex(minitrooperteam_s *team) {
     return qrand() / (0xffff / team->trooper_count + 1);
@@ -116,8 +98,6 @@ static inline void MiniTrooperMove(minisnowtrooper_s *trooper) {
 }
 
 static const i32 TrooperStepFrames[4] = {1, 2, 1, 0};
-
-// ==== functions in original address order ====
 
 static void GenerateTrooperTeamShape(minitrooperteam_s *team, i32 initialize_rotation) {
     NUVEC width;

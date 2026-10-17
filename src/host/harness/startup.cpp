@@ -4,7 +4,6 @@
 #include "gameapi/gui/apimenu.h"
 #include "legoapi/characters/core/players.h"
 
-
 void HostLoadPermImmediately(void (*load_perm)()) {
     // Keep permanent asset setup while skipping the startup screen loop.
     const i32 previous = LOADEROFF;

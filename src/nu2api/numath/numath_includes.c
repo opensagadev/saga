@@ -4,7 +4,6 @@
 // The original unit constructs the homogeneous VuVec header constants.
 #include "nu2api/nucore/nuvuvec.hpp"
 
-// ==== src/nu2api/numath/nufloat.c: all remaining content ====
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nutrig.h"
 
@@ -32,8 +31,6 @@
 
 static f32 fetol = 0.01f;
 
-
-
 // The original helpers are local but have C linkage.
 #ifdef __cplusplus
 extern "C" {
@@ -48,11 +45,8 @@ f32 NUTRIG_SC1 = 0.008333333767950535f;
 f32 NUTRIG_SC2 = -0.00019841270113829523f;
 f32 NUTRIG_SC3 = 2.7557318844628753e-06f;
 
-
 static f32 pow_x[32], pow_y[32], pow_rv[32];
 static i32 pow_cache_free;
-
-// ==== src/nu2api/numath/nutrig.c: all remaining content ====
 
 #define PI_OVER_4 0.785398f
 #define NEG_1_OVER_6 -0.166667f
@@ -72,31 +66,6 @@ extern "C" {
     static i16 NuASinC(f32 sin) __asm__("NuASin");
 }
 
-
-// ==== src/nu2api/numath/vumath.c: declarations ====
-
-
-extern "C" {
-}
-
-extern "C" {
-}
-
-extern "C" {
-}
-
-extern "C" {
-}
-
-extern "C" {
-}
-
-extern "C" {
-}
-
-// ==== src/nu2api/numath/nuvec.cpp: all remaining content ====
-
-
 NUVEC v000 = {0};
 NUVEC nuvec_zero = {0};
 NUVEC v100 = {1.0f, 0.0f, 0.0f};
@@ -107,40 +76,6 @@ NUVEC v001 = {0.0f, 0.0f, 1.0f};
 NUVEC v111 = {1.0f, 1.0f, 1.0f};
 NUVEC nuvec_one = {1.0f, 1.0f, 1.0f};
 NUVEC nuvec_minus_one = {-1.0f, -1.0f, -1.0f};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ==== src/nu2api/numath/numaths_plain.cpp: all remaining content ====
-
-
-extern "C" {
-
-
-
-
-
-}
-
-// ==== src/nu2api/numath/nuvec4.c: all remaining content ====
-
-
-
-// ==== src/nu2api/numath/numtx.cpp: declarations ====
-
-
 
 NUMTX numtx_zero = {0};
 
@@ -153,53 +88,15 @@ NUMTX numtx_identity = {
 };
 // clang-format on
 
-
-
-
-
-
-
-
-
-
-
-
-// ==== src/nu2api/numath/nuquat.cpp: all remaining content ====
-
-
-
-
-
-// ==== src/nu2api/numath/nuplane.cpp: all remaining content ====
-
-
-
-
-
-
-
-
-
-
-
-// ==== src/nu2api/numath/nurand.cpp: all remaining content ====
-
 u32 fseed;
 
 static NURAND global_rand = {1};
-
-
-
-
-// ==== src/gamelib/nuwind/nuwind_groups.cpp: declarations ====
 
 // The legacy wind-group routines have unoptimized code in the reference.
 extern "C" {
     u32 NuWindQS = 0x1365;
 
 }
-
-// ==== src/legoapi/render/core/nugraph.cpp: all remaining content ====
 
 static i32 curve_points;
 static nuvec_s *curve;
@@ -224,28 +121,11 @@ DECOMP_ASSERT(sizeof(legacy_nugraph_s) == 0x154, "Legacy graph ABI");
 extern "C" i32 nugraphFileLoadGraphOnlyToFile(nugraph_s *graph, NUFILE file);
 extern "C" i32 nugraphFileSaveGraphOnlyToFile(nugraph_s *graph, NUFILE file);
 
-
 extern "C" {
-
-
 i32 nugraphFileLoadGraphOnlyToFile(nugraph_s *graph, NUFILE file);
 
 i32 nugraphFileSaveGraphOnlyToFile(nugraph_s *graph, NUFILE file);
-
-
-
-
-
-
 } // extern "C"
-
-
-
-
-
-
-// ==== src/nu2api/numath/nutrig.cpp: all remaining content ====
-
 
 #define ANG_COUNT 513
 static u16 ang[ANG_COUNT] = {
@@ -289,16 +169,6 @@ static u16 ang[ANG_COUNT] = {
 
 #define NU_ATAN2_LUT(y, x) ang[(y << 9) / x]
 #define NU_ATAN2F_LUT(y, x) ang[(i32)((y * 512.0f) / x)]
-
-
-
-
-
-
-
-
-
-// ==== functions in original address order ====
 
 extern "C" {
     static f32 NuFsel(f32 a, f32 b, f32 c) {

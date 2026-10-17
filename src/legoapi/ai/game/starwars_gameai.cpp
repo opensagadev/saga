@@ -103,7 +103,6 @@ typedef void (*HUBCALLBACK)(WORLDINFO_s *);
 extern "C" void InitFn_PreparingForSpecialMove(PREPARINGSPECIALMOVEFN);
 extern "C" void InitFn_MidSpecialMove(MIDSPECIALMOVEFN);
 
-
 extern HUBCALLBACK Hub_InitAIFn;
 extern HUBCALLBACK Hub_ResetAIFn;
 extern HUBCALLBACK Hub_UpdateAIFn;
@@ -127,19 +126,15 @@ enum STARWARS_AI_CAPABILITY : u32 {
     STARWARS_AI_CAPABILITY_SNAKE = 0x4000,
 };
 
-
 static i32 StarWars_PrepareTakeOverJump(AIPACKET_s *packet, APIOBJECT_s *object, i32);
 
 static i32 StarWars_PrepareObstacle(AIPACKET_s *packet, APIOBJECT_s *object, i32);
 
 static __used__ i32 StarWars_PrepareHoverTube(AIPACKET_s *packet, APIOBJECT_s *apiobject, i32);
 
-
 static i32 StarWars_PrepareBigJump(AIPACKET_s *packet, APIOBJECT_s *object, i32);
 
-
 static i32 StarWars_PrepareHatch(AIPACKET_s *packet, APIOBJECT_s *object, i32);
-
 
 struct STARWARS_PREPARE_SPECIAL_MOVE {
     u32 capabilities;
@@ -154,7 +149,6 @@ STARWARS_PREPARE_SPECIAL_MOVE starwars_prepareforspecialmove[] = {
     {0x1000, StarWars_PrepareBigJump},      {0x8000, StarWars_PrepareTakeOverJump},
     {0x20000000, StarWars_PrepareObstacle}, {0, NULL},
 };
-
 
 static i32 StarWars_MidSpecialMove_BigJump(AISYS_s *, AIPACKET_s *, APIOBJECT_s *object);
 
@@ -173,28 +167,11 @@ MIDSPECIALMOVEFN starwars_midspecialmovefns[] = {
     StarWars_MidSpecialMove_BigJump,
 };
 
-
 f32 jump_stuck_time = 0.1f;
-
-
-
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
-
-
-
-
-
-
-
-
 
 struct starfighter_s;
 struct rtl_s;
 struct rtlidata_s;
-
-
-
 
 struct GAMEMESSAGE_s;
 struct HINT_s;
@@ -209,20 +186,6 @@ struct ripple_node_s;
 struct ripple_set_s;
 struct VuVec;
 
-
-// Camera zoom state
-
-// Graphics loading flags
-
-extern "C" {
-}
-
-
-
-// --- NuGScn graphics-data reader ---
-// NuReadGraphicsData is a C++ static function in the original (GCC clones it,
-// hence the `.isra.NNN` suffix in the ROM symbol table).
-
 // Retail only keeps the IPA-SRA clone, which drops the unused fourth argument.
 #if defined(__i386__)
 #define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone, regparm(2)))
@@ -231,13 +194,6 @@ extern "C" {
 #endif
 
 // --- Extern "C": NuGScn functions have C linkage in original ---
-extern "C" {
-
-} // extern "C"
-
-
-
-
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
@@ -279,32 +235,12 @@ extern "C" {
         NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
     } while (0)
 
-
-
-
-
-
-
-
 // DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
 // red-brick positions come from the Game init values in legogame/game.cpp.
 
-
-
-
-
 extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
 
-
-
-
 extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
-
-extern "C" {
-}
-
-
-
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
     do {                                                                                                               \
@@ -318,13 +254,7 @@ extern "C" {
         }                                                                                                              \
     } while (false)
 
-
 extern i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
-
-
-
-
-// ==== functions in original address order ====
 
 static i32 StarWars_PrepareObstacle(AIPACKET_s *packet, APIOBJECT_s *object, i32) {
     i32 near_index = packet->path_info.dist > 0.5f;

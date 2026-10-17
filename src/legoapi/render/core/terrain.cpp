@@ -65,8 +65,6 @@ namespace {
 
 } // namespace
 
-
-
 namespace {
 
     // Retail scan callers contain the scale-and-normal reconstruction directly.
@@ -261,7 +259,6 @@ extern "C" {
 extern i32 Grass_Available;
 }
 
-
 // Constructs the fixed terrain header and its variable-sized group, index and
 // platform arrays in the caller's arena. The four bounds arrays and the cell
 // assignment array are temporary storage carved backwards from buf_end.
@@ -269,15 +266,7 @@ extern i32 Grass_Available;
 
 #undef IS_SNAN
 
-
-
-
-
 #undef TERRAIN_SCALE_SCAN_SHAPE
-
-
-
-
 
 namespace {
 
@@ -292,27 +281,11 @@ namespace {
 #define TERRAIN_KILL_PLAYER_ATTR __attribute__((noinline, noclone))
 #endif
 
-
-
-
 DECOMP_ASSERT(sizeof(TERRAIN_DEBUG_RECORD) == 100, "Terrain debug record ABI");
-
-
-
 
 i32 TerrainBlockOnBlock(WORLDINFO_s *world, pushblock_s *block, nuvec_s *points, float *heights);
 
 #undef TERRAIN_GET_SCAN_BOUNDS
-
-
-
-
-
-
-
-
-
-
 
 namespace {
 
@@ -321,58 +294,21 @@ namespace {
 
 } // namespace
 
-
-
 namespace {
 
     const f32 NO_TERRAIN_HEIGHT = 2000000.0f;
 
 } // namespace
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // Original 0x378fb0: the optimized rotating scan shares the terrain engine state.
-
 
 namespace {
 
 } // namespace
-
 
 #undef TERRAIN_COLLECT_WALL_SPLINES
 
-
-
 namespace {
 
 } // namespace
-
-
-
-
-
-
 

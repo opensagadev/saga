@@ -25,28 +25,6 @@ struct PLUGPROGRESS {
 
 i32 plug_gizmotype_id = -1;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ==== src/legoapi/ai/core/ai_sys.cpp: declarations ====
-
-
-// ==== functions in original address order ====
-
 static void Plug_Activate(GIZMO *gizmo, i32 active) {
     if (gizmo == NULL) {
         return;

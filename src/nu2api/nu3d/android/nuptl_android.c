@@ -761,4 +761,3 @@ extern "C" void GenericDebinfoDmaTypeUpdate(debinftype *effect) {
     }
 }
 
-// Original provides only the mangled spelling (_Z28NuDebrisRendererFlushBuffersv).

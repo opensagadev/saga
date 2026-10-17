@@ -124,23 +124,14 @@ MemoryManager theMemoryManager;
 BIGBUFFER_s BigBuffer;
 void *theThingManager = NULL;
 
-
 struct AIROW_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-
 DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");
-
-
-
-
-
 
 void bgProcClose() {
 }
-
-
 
 void CloakMovement(GameObject_s *object) {
     const u8 index = object->field_0x1089;
@@ -209,15 +200,6 @@ apply_weights:
     object->field_0x1089 = current_index + 1;
 }
 
-
-
-
-
-
-
-
-
-
 // Debug-capture output helpers consumed by NuDisplayListCaptureSortPriority.
 // Transcribed from the original C-linkage symbols:
 //   NuHtmlBegin    0x2d5ca0   NuHtmlFlush   0x2d5c30
@@ -226,52 +208,11 @@ extern "C" {
 extern NUFILE hfh;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-extern "C" {
-}
-
-extern "C" {
-}
-
-
-
-
-extern "C" {
-}
-
-
-
-
-
-// ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
-
-
 extern i16 id_GAMORREANGUARD;
 
 extern "C" {
     extern i16 id_LANDSPEEDER;
 }
-
-// Written by ThingManager's ctor (original global @0x124f2e0, .bss).
-
-
-
-
-
-
-// Enabled in the target data image.  Ordinary background characters are
-// staggered across frames; special movement states opt back into full-rate
-// processing through the forced-update path.
 
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
@@ -279,20 +220,13 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
     static_assert(sizeof(lego_aiconditiondefs) / sizeof(lego_aiconditiondefs[0]) == 178,
                   "complete game AI condition registry");
 
-
 }
 
 // The special-route list reserves the first ten ids for suit characters.  The
 // remaining ids enumerate the current story list while omitting variants that
 // are represented by those dedicated routes.
 
-
-
 struct CUTSCENEPLAYERCLIP;
-
-
-
-
 
 #if defined(__i386__)
 #define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
@@ -300,56 +234,7 @@ struct CUTSCENEPLAYERCLIP;
 #define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone))
 #endif
 
-// Retail keeps only the IPA-SRA clone, which takes the other object's x and z by address.
-
-extern "C" {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER;
-
-
-
-
-
-
 
 // ThingManager objects return to the theMemoryManager pool (D0 @0x425a50).
 inline void ThingManager::operator delete(void *thing, usize size) {
@@ -359,35 +244,10 @@ inline void ThingManager::operator delete(void *thing, usize size) {
 static eduimenu_s *edTimingMenu;
 static u32 EdAttr[] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
 
-extern "C" {
-}
-
-
-
-
-
-
-
-
-
-
 GameObject_s *FindNearestGameObject(NUVEC *position, GameObject_s *exclude, u32 required_flags, f32 radius,
                                     f32 extra_radius, i32 animation, i32 character_id, i32 player_index,
                                     f32 *distance_squared, i32 horizontal_only, i32 (*filter)(GameObject_s *),
                                     bool first_match);
-
-
-// ==== src/legoapi/misc/memory.cpp: all remaining content ====
-
-
-extern "C" {
-
-
-
-
-} // extern "C"
-
-// ==== functions in original address order ====
 
 // BaseThing defaults @0x424bf0 (dtor) and 0x425990..0x425a20 (interface
 // defaults); RemoveDependancies returns 1, the rest are no-ops. GetName holds

@@ -1,7 +1,6 @@
 // Original translation unit reconstructed from the reference address map.
 // Functions are defined in original address order.
 
-// ==== src/legoapi/misc/supportall.cpp: declarations ====
 #if defined(__SSE__)
 #include <xmmintrin.h>
 #endif
@@ -83,50 +82,17 @@ struct nunativegscene_s;
 
 DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");
 
-
-
-
 extern "C" i16 id_LANDSPEEDER;
-
-
-
-
 
 // Debug-capture output helpers consumed by NuDisplayListCaptureSortPriority.
 // Transcribed from the original C-linkage symbols:
 //   NuHtmlBegin    0x2d5ca0   NuHtmlFlush   0x2d5c30
 //   NuHtmlWrite    0x2d5cd0   NuHtmlHeading1 0x2d5d40
-extern "C" {
-}
-
-
-
-extern "C" {
-}
-
-extern "C" {
-}
-
-
-extern "C" {
-}
-
-
-
-
-// ==== src/legoapi/items/fx/ripples.cpp: declarations ====
-
 
 void NewRumble(nupad_s *pad, f32 strength, i32 mode);
 void NewBuzzFrames(nupad_s *pad, i32 frames, i32 mode);
 
 void FindAnglesXY(NUVEC *, u16 *, u16 *);
-
-
-
-
-
-// ==== functions in original address order ====
 
 void DebrisKillPlayers() {
     DebrisPreCheckCollisions(&GameCam->pos, 50.0f);

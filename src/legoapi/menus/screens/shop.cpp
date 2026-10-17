@@ -288,20 +288,7 @@ static i32 easesubin = 0;
 static f32 inoutscale = 0.0f;
 static char *cheatname = NULL;
 
-
-
-
-
-
-
 static NUVEC HubShopPos = {-26.3f, 0.0f, -49.5f};
-
-
-
-
-
-
-
 
 static i32 SubItemMenu(MENU_s *);
 
@@ -314,32 +301,11 @@ static f32 ShopSinePhase(f32 phase) {
     return (NuTrigTable[(angle >> 1) & 0x7fff] + 1.0f) * 0.5f;
 }
 
-
-
 extern i16 tSELECT, tBACK, tBUY, tPLAY, tSELECTING;
-
-
-
-
-
-
-
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
-
-
-
-
-
-
-
-
 
 struct starfighter_s;
 struct rtl_s;
 struct rtlidata_s;
-
-
 
 extern i16 tHINTS;
 extern i16 tCHARACTERS;
@@ -350,7 +316,6 @@ extern i16 tENTERCODE;
 
 f32 HUB_EPISODESUBTITLEY = -0.745f;
 f32 HUB_EPISODETITLEY = -0.595f;
-
 
 struct GAMEMESSAGE_s;
 struct HINT_s;
@@ -365,21 +330,6 @@ struct ripple_node_s;
 struct ripple_set_s;
 struct VuVec;
 
-
-// Camera zoom state
-
-// Graphics loading flags
-
-
-extern "C" {
-}
-
-
-
-// --- NuGScn graphics-data reader ---
-// NuReadGraphicsData is a C++ static function in the original (GCC clones it,
-// hence the `.isra.NNN` suffix in the ROM symbol table).
-
 // Retail only keeps the IPA-SRA clone, which drops the unused fourth argument.
 #if defined(__i386__)
 #define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone, regparm(2)))
@@ -388,16 +338,6 @@ extern "C" {
 #endif
 
 // --- Extern "C": NuGScn functions have C linkage in original ---
-extern "C" {
-
-} // extern "C"
-
-
-
-
-
-
-
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
@@ -439,40 +379,12 @@ extern "C" {
         NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
     } while (0)
 
-
-
-
-
-
-
-
-
-
-
-
-
 // DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
 // red-brick positions come from the Game init values in legogame/game.cpp.
 
-
-
-
-
 extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
 
-
-
-
-
-
 extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
-
-extern "C" {
-}
-
-
-
-
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
     do {                                                                                                               \
@@ -486,16 +398,7 @@ extern "C" {
         }                                                                                                              \
     } while (false)
 
-
 extern i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
-
-
-
-
-
-
-// ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
-
 
 extern i16 id_GAMORREANGUARD;
 
@@ -503,24 +406,11 @@ extern "C" {
     extern i16 id_LANDSPEEDER;
 }
 
-// Written by ThingManager's ctor (original global @0x124f2e0, .bss).
-
-
-
-
-
-
-// Enabled in the target data image.  Ordinary background characters are
-// staggered across frames; special movement states opt back into full-rate
-// processing through the forced-update path.
-
-
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
 
     static_assert(sizeof(lego_aiconditiondefs) / sizeof(lego_aiconditiondefs[0]) == 178,
                   "complete game AI condition registry");
-
 
 }
 
@@ -528,14 +418,7 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 // remaining ids enumerate the current story list while omitting variants that
 // are represented by those dedicated routes.
 
-
-
 struct CUTSCENEPLAYERCLIP;
-
-
-
-
-
 
 #if defined(__i386__)
 #define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
@@ -543,151 +426,27 @@ struct CUTSCENEPLAYERCLIP;
 #define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone))
 #endif
 
-// Retail keeps only the IPA-SRA clone, which takes the other object's x and z by address.
-
-extern "C" {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER;
-
-
-
-
-
-
-
-
-
 
 // ThingManager objects return to the theMemoryManager pool (D0 @0x425a50).
 inline void ThingManager::operator delete(void *thing, usize size) {
     theMemoryManager.FreePool(thing, size);
 }
 
-extern "C" {
-}
-
-
-
-
-
-
-
-
-
-
-
-
 GameObject_s *FindNearestGameObject(NUVEC *position, GameObject_s *exclude, u32 required_flags, f32 radius,
                                     f32 extra_radius, i32 animation, i32 character_id, i32 player_index,
                                     f32 *distance_squared, i32 horizontal_only, i32 (*filter)(GameObject_s *),
                                     bool first_match);
 
-
-
-// ==== src/legoapi/render/core/screen.cpp: declarations ====
-
-
-
-// The fade system and the four fade effects handed to FadeSystem::AddFade()
-// are screen.cpp globals in the original: its static initializer registers
-// their destructors (original bss @0x127bf20 / 0x127bf08 / 0x127bf00 /
-// 0x127bef8 / 0x127bef0).
-
-// Material handles used by the original 2-D fade paths.
-
-extern "C" {
-}
-
-
-
 SAGA_HOST_WEAK void InitStillRender(variptr_u *, variptr_u);
 
-
-
-
-
-
-
-
-
-
-
-
 void FadeLoop(char *text, i32 direction, float duration, void (*draw)(float));
-
-// ==== src/legoapi/characters/core/characters.cpp: declarations ====
-
 
 // LoadPerm1 is one of the few game-level entry points which wires together
 // otherwise C-linkage engine subsystems.  Keep these declarations local: the
 // individual subsystem TUs intentionally expose their original plain names.
-extern "C" {
-
-}
 
 struct AISYS_s;
-
-// The original table at 0x006281a0.  These are the material animation
-// scripts made available before the permanent things scene is loaded.
-
-
-
-extern "C" {
-}
-
-
-
-
-
-
-
-extern "C" {
-}
-
-
-
-
-
 
 // Retail keeps only the IPA-SRA clone, which receives &*layers.
 #if defined(__i386__)
@@ -695,23 +454,6 @@ extern "C" {
 #else
 #define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone))
 #endif
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ==== functions in original address order ====
 
 static void Shop_GetInput(SHOPINPUT *input) {
     memset(input, 0, sizeof(*input));

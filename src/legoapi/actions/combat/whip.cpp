@@ -21,7 +21,6 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-
 void Whip_MoveCode(GameObject_s *object) {
     if (LEGOCONTEXT_WHIP == -1) {
         return;

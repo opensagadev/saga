@@ -14,16 +14,7 @@
 struct AIROW_s;
 struct nunativegscene_s;
 
-
-
-
 void RenderShadowLights(i32);
-
-
-
-
-
-// ==== functions in original address order ====
 
 void Shadow_SetMode() {
     ShadowMode = 0;

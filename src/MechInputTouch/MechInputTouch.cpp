@@ -79,15 +79,6 @@ static inline void AppendMainControls(NuButtonLayout &layout, MechInputTouchMain
                                    controller, 0x10, static_cast<MechInputTouchMainController::eButtonTypes>(1)));
 }
 
-// ==== src/legoapi/actions/combat/hits.cpp: declarations ====
-
-
-
-
-
-
-// ==== functions in original address order ====
-
 MechInputTouchSystem::MechInputTouchSystem() {
     initialized = 0;
     for (i32 index = 0; index < 10; ++index) {

@@ -4,7 +4,6 @@
 // The original unit constructs the homogeneous VuVec header constants.
 #include "nu2api/nucore/nuvuvec.hpp"
 
-// ==== src/nu2api/nu3d/nuvport_ps2.cpp: all remaining content ====
 #include "nu2api/nu3d/nuvport.h"
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/nucamera.h"
@@ -14,10 +13,6 @@ i32 PS2_VCNTR_X = 640;
 i32 PS2_VCNTR_Y = 360;
 i32 PS2_VREZ_W = 640;
 i32 PS2_VREZ_H = 224;
-
-
-
-// ==== functions in original address order ====
 
 void NuPs2GetViewport(NUVIEWPORT *vp) {
     vp->x = (i32)(((f32)PS2_VCNTR_X - (f32)nurndr_pixel_width * 0.5f) * 16.0f);

@@ -161,7 +161,6 @@
 #include "nu2api/nu3d/nu3d_includes.h"
 #include "nu2api/nuandroid/ios_device.h"
 
-
 extern "C" i32 CutSceneWaiting;
 extern "C" i32 editor_active;
 extern "C" i32 PANELOFF;
@@ -172,7 +171,6 @@ f32 GiveUpTime = 4.0f;
 extern "C" {
     i32 procActive;
 }
-
 
 bool MechInputTouchGestureTracker::OnDown(GameObject_s &, TouchHolder &) {
     return false;
@@ -204,80 +202,24 @@ void MechTouchUIElement::Process(float) {
 void MechTouchUIElement::Render() {
 }
 
-// ==== src/MechInputTouch/MechInputTouch.cpp: declarations ====
-
-
-
-
-
-
-// ==== src/legoapi/actions/combat/hits.cpp: declarations ====
-
-
-
-// ==== functions in original address order ====
-
-// ==== src/legoapi/characters/core/players.cpp: declarations ====
-
-
 struct MechTouchUIElement;
 struct TouchHolder;
 
-// --- Helpers moved from world.cpp ---
-
-// ---- Player start spawn entries ----
-
 // ---- Misc player/gameobject helpers relocated from doorstubs.cpp ----
-
-
-
-
 
 namespace {
 
 } // namespace
 
-
 DECOMP_ASSERT(sizeof(SPECIAL_LAYER_s) == 0xc, "SPECIAL_LAYER_s size");
-
-// ==== src/legoapi/core/input/gamepads.cpp: declarations ====
 
 extern "C" {
     extern "C++" FadeSystem FadeSys;
     extern i32 CutSceneWaiting;
 }
 
-// Original bss @0x127a500: 64 pads x 0x60 bytes.
-// Original bss @0x127a4e0.
-
-
-// Two frames of direction history for each local player.  MovePlayer shifts
-// these before accepting the new input; GamePad_Rotate then reports a stable
-// angular velocity only when both consecutive turns agree.
-
-
-extern "C" {
-
-
-} // extern "C"
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
-
-
-
-
-
 struct nuhspecial_s;
 struct VuVec;
-
-
-// Camera zoom state
-
-// Graphics loading flags
-
-// --- NuGScn graphics-data reader ---
-// NuReadGraphicsData is a C++ static function in the original (GCC clones it,
-// hence the `.isra.NNN` suffix in the ROM symbol table).
 
 // Retail only keeps the IPA-SRA clone, which drops the unused fourth argument.
 #if defined(__i386__)
@@ -288,10 +230,6 @@ struct VuVec;
 static NU_READ_GRAPHICS_DATA_ATTR NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIPTR *buf_end, char *path,
                                                              char *scene_data)
     __asm__("_ZL18NuReadGraphicsDataP9variptr_uS0_PcS1_S1_.isra.104");
-
-// --- Extern "C": NuGScn functions have C linkage in original ---
-
-
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
@@ -333,11 +271,6 @@ static NU_READ_GRAPHICS_DATA_ATTR NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIP
         NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
     } while (0)
 
-
-// DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
-// red-brick positions come from the Game init values in legogame/game.cpp.
-
-
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
     do {                                                                                                               \
         PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
@@ -349,9 +282,6 @@ static NU_READ_GRAPHICS_DATA_ATTR NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIP
             vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
         }                                                                                                              \
     } while (false)
-
-
-// ==== src/legoapi/misc/supportall.cpp: declarations ====
 
 #if defined(__SSE__)
 #include <xmmintrin.h>
@@ -399,26 +329,12 @@ static inline void TexQuadSubmit3D(f32 x, f32 y, i32 colour, i32 u, i32 v) {
     ++g_NuPrim_VertexCount;
 }
 
-
 // Debug-capture output helpers consumed by NuDisplayListCaptureSortPriority.
 // Transcribed from the original C-linkage symbols:
 //   NuHtmlBegin    0x2d5ca0   NuHtmlFlush   0x2d5c30
 //   NuHtmlWrite    0x2d5cd0   NuHtmlHeading1 0x2d5d40
 
-
-
-
-
-// ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
-
 extern i16 id_GAMORREANGUARD;
-
-// Written by ThingManager's ctor (original global @0x124f2e0, .bss).
-
-
-// Enabled in the target data image.  Ordinary background characters are
-// staggered across frames; special movement states opt back into full-rate
-// processing through the forced-update path.
 
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
@@ -428,31 +344,16 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 }
 
-// The special-route list reserves the first ten ids for suit characters.  The
-// remaining ids enumerate the current story list while omitting variants that
-// are represented by those dedicated routes.
-
 #if defined(__i386__)
 #define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
 #else
 #define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone))
 #endif
 
-// Retail keeps only the IPA-SRA clone, which takes the other object's x and z by address.
-
 // ThingManager objects return to the theMemoryManager pool (D0 @0x425a50).
 inline void ThingManager::operator delete(void *thing, usize size) {
     theMemoryManager.FreePool(thing, size);
 }
-
-
-// ==== src/legoapi/misc/memory.cpp: all remaining content ====
-
-// ==== functions in original address order ====
-
-// ==== src/legoapi/core/input/input.cpp: all remaining content ====
-
-// ==== functions in original address order ====
 
 bool MechTouchUI::OnRelease(GameObject_s &, TouchHolder &holder) {
     for (i32 i = 0; i < 32; ++i) {

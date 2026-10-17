@@ -70,24 +70,6 @@ i32 zipup_gizmotype_id = -1;
 static char zipup_outputName[] = "Active";
 static NUVEC ZipUpHookOffset = {0.0f, -0.1143f, -0.0859f};
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 struct AIROW_s;
 struct nuqthdr_s;
 struct nunativegscene_s;
@@ -95,9 +77,7 @@ struct SHOPINPUT;
 
 i32 SuperWeirdo(GameObject_s *);
 
-
 numtl_s *ropemtl;
-
 
 // The retail rope draw inlines these numtx rotations (other units call the
 // exported versions), so this unit carries local copies of their bodies.
@@ -177,15 +157,6 @@ static inline void SetRopeVertex(NURND_VERTEX3D *vertex, f32 x, f32 y, f32 z, f3
     vertex->colour = colour;
 }
 
-
-
-
-// ==== src/legoapi/items/collect/detonator.cpp: declarations ====
-
-
-
-
-
 #define DETONATOR_CONSIDER_NEAREST(index, owner_test)                                                                  \
     if (Detonator[index].active != 0 && (owner_test)) {                                                                \
         const f32 distance = NuVecDistSqr(position, &Detonator[index].position, NULL);                                 \
@@ -195,32 +166,12 @@ static inline void SetRopeVertex(NURND_VERTEX3D *vertex, f32 x, f32 y, f32 z, f3
         }                                                                                                              \
     }
 
-// ==== src/legoapi/items/collect/thermaldetonators.cpp: declarations ====
 // Original translation unit reconstructed from the reference address map.
 // Functions are defined in original address order.
 
-
 i32 SuperWeirdo(GameObject_s *object);
 
-// ==== src/legoapi/menus/core/hint.cpp: declarations ====
-
-// The hint icon transitions and the touch icon x position are dynamically
-// initialized in this unit's static constructor in the reference.
-
-
-// Retail keeps this body as GCC's split-out clone; the inline head stays in
-// the caller.
-
-// Original local callbacks referenced by Hints_LSW.
-
-
 // Each control mode retains its own requested and interpolated hint row.
-
-
-
-// ==== functions in original address order ====
-
-// ==== functions in original address order ====
 
 static i32 ZipUp_ActivateRev(GIZMO *gizmo, i32 active, i32 query) {
     if (gizmo == NULL || gizmo->object == NULL) {

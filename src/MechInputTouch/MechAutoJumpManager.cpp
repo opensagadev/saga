@@ -208,12 +208,6 @@ namespace {
     DECOMP_ASSERT(sizeof(AutoJumpStreakLink) == 0x40, "AutoJumpStreakLink size");
 } // namespace
 
-// ==== src/legoapi/ai/core/aisysall.cpp: declarations ====
-
-
-
-// ---- begin src/legoapi/ai/core/aipathbuild.cpp ----
-
 // The route records use a dense route index, while the editor keeps sixteen
 // independently switchable slots.  The original helper first marks both ends
 // of every route connection, then builds the compact node lookup and matrix.
@@ -222,9 +216,6 @@ namespace {
 #else
 #define AIPATHBUILD_CLONE_ATTR2 __attribute__((noinline, noclone))
 #endif
-// Retail keeps only the IPA-SRA clone, without the unused path index.
-
-// ---- end src/legoapi/ai/core/aipathbuild.cpp ----
 
 // Retail keeps several static helpers here only as GCC clones; these attributes
 // reproduce the clone names and register conventions.
@@ -238,58 +229,10 @@ namespace {
 #define AISYSALL_CLONE_ATTR2_SSE __attribute__((noinline, noclone))
 #endif
 
-// IPA-SRA keeps only the fields this helper reads: values for those read before any call,
-// addresses for those read after one.
-
-
-// IPA-SRA hands this clone the address of system->path_sys rather than the system.
-
-
-
-
-// ---- begin src/gameapi/ai/aisys/aisys.cpp ----
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // Game-specific AI actions and conditions (registered via
 // RegisterAIScriptActions / RegisterAIScriptConditions). These are stubbed to
 // satisfy the symbol baseline; the action/condition logic itself is not
 // decompiled. Each stub matches the mangled symbol of the original binary.
-
 
 extern AIACTIONDEF api_aiactiondefs[55];
 
@@ -299,34 +242,18 @@ DECOMP_ASSERT(sizeof(api_aiactiondefs) == 0x294, "API action registry size");
 
 DECOMP_ASSERT(sizeof(api_aiconditiondefs) == 0x258, "API condition registry size");
 
-// ---- end src/gameapi/ai/aisys/aisys.cpp ----
-
-// ==== src/gameapi/ai/aisys/aiscript.cpp: all remaining content ====
-
-
 #if defined(__i386__)
 #define AISCRIPT_CLONE_ATTR2 __attribute__((noinline, noclone, regparm(2)))
 #else
 #define AISCRIPT_CLONE_ATTR2 __attribute__((noinline, noclone))
 #endif
 
-// Retail inlines the "goto" test into each caller; this is the remaining partial clone.
-
-// Retail inlines the system test into its callers; this is the remaining partial clone.
-
-
-
-
-// ==== src/legoapi/ai/core/ai_sys_stubs.cpp: declarations ====
-
 extern "C" {
-
 #include "legoapi/ai/core/ai_sys_stubs_types.h"
     DECOMP_ASSERT(sizeof(RebuildEditorCreature) == 0xac, "editor creature rebuild stride");
     DECOMP_ASSERT(offsetof(RebuildEditorCreature, path_check) == 0x38, "editor creature path offset");
     DECOMP_ASSERT(offsetof(RebuildEditorCreature, activation_area) == 0x6c, "editor creature area offset");
     DECOMP_ASSERT(offsetof(RebuildEditorCreature, activation) == 0x8f, "editor creature activation offset");
-
 } // extern "C"
 
 #if defined(__i386__)
@@ -335,20 +262,9 @@ extern "C" {
 #define AI_SYS_STUBS_CLONE_ATTR2 __attribute__((noinline, noclone))
 #endif
 
-// Retail keeps only the IPA-SRA clone, without the unused object and elapsed time.
-
-extern "C" {
-
-
-} // extern "C"
-
-// ==== src/editor/area_editor.cpp: all remaining content ====
-
 DECOMP_ASSERT(sizeof(EDAIAREA_s) == 0x44, "area editor record size");
 
 // Item colours shared by the AI editors.
-
-// ==== src/editor/edpath.cpp: all remaining content ====
 
 DECOMP_ASSERT(sizeof(AIPATHCNXTYPE_s) == 0x4c, "editor path connection type size");
 DECOMP_ASSERT(offsetof(AIPATHCNXTYPE_s, flags) == 0x48, "editor path connection options offset");
@@ -403,16 +319,11 @@ static __used__ i32 routeEditor_AddToRoute(EDAIPATHNODE_s *node, EDAIPATHNODE_s 
 #define PATHEDITOR_SETCAMPOS_BODY_ATTR __attribute__((used, noinline, noclone))
 #endif
 
-// ==== src/editor/aieditor.cpp: all remaining content ====
-
-
 #if defined(__i386__)
 #define EDANTINODE_REGPARM1 __attribute__((regparm(1)))
 #else
 #define EDANTINODE_REGPARM1
 #endif
-
-// ==== src/editor/creature_editor.cpp: all remaining content ====
 
 struct EDCREATURE_s;
 
@@ -454,8 +365,6 @@ static __used__ __attribute__((force_align_arg_pointer)) void creatureEditor_cbV
 static __used__ __attribute__((force_align_arg_pointer)) void creatureEditor_cbSetScript(eduimenu_s *, eduiitem_s *item,
                                                                                          unsigned int);
 
-// ==== src/editor/locator_editor.cpp: all remaining content ====
-
 extern "C" {
     struct EDCREATURE_s;
 }
@@ -489,15 +398,6 @@ static __attribute__((noinline, optimize("no-tree-vectorize"))) unsigned int
 AddLocatorToSetAtEnd(EDLOCATORSET_s *set, EDLOCATOR_s *locator) __asm__(
     "_ZL15AddLocatorToSetP14EDLOCATORSET_sP11EDLOCATOR_sS2_.constprop.131");
 
-// ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
-
-// Written by ThingManager's ctor (original global @0x124f2e0, .bss).
-
-
-// Enabled in the target data image.  Ordinary background characters are
-// staggered across frames; special movement states opt back into full-rate
-// processing through the forced-update path.
-
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
 
@@ -505,10 +405,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
                   "complete game AI condition registry");
 
 }
-
-// The special-route list reserves the first ten ids for suit characters.  The
-// remaining ids enumerate the current story list while omitting variants that
-// are represented by those dedicated routes.
 
 #if defined(__i386__)
 #define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
@@ -518,45 +414,15 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 // Retail keeps only the IPA-SRA clone, which takes the other object's x and z by address.
 
-
-// ==== src/gameapi/ai/aisys/aistate.cpp: all remaining content ====
-
-// ==== src/legoapi/gizmo/gizmos/gizmos_gizactions.cpp: declarations ====
-
-
-
-
 namespace {
 #include "legoapi/gizmo/gizmos/gizmos_gizactions_types.h"
 
 } // namespace
 
-// ==== src/legoapi/actions/combat/fighting.cpp: declarations ====
-
-
-
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e4) == 0x7e4, "Quick shoot record offset");
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e8) == 0x7e8, "Quick shoot record count offset");
 DECOMP_ASSERT(offsetof(GameObject_s, quick_shoot_flags) == 0xe2f, "Quick shoot flags offset");
 DECOMP_ASSERT(offsetof(GameObject_s, quick_shoot_bolt_id) == 0xe3e, "Quick shoot bolt ID offset");
-
-// ==== src/legoapi/ai/game/aipathcnxhelper.cpp: declarations ====
-
-// ==== src/legoapi/ai/core/ai_sys.cpp: declarations ====
-
-// ==== src/legoapi/ai/game/gameantinode.cpp: declarations ====
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
-
-
-
-// Camera zoom state
-
-// Graphics loading flags
-
-// --- NuGScn graphics-data reader ---
-// NuReadGraphicsData is a C++ static function in the original (GCC clones it,
-// hence the `.isra.NNN` suffix in the ROM symbol table).
 
 // Retail only keeps the IPA-SRA clone, which drops the unused fourth argument.
 #if defined(__i386__)
@@ -564,9 +430,6 @@ DECOMP_ASSERT(offsetof(GameObject_s, quick_shoot_bolt_id) == 0xe3e, "Quick shoot
 #else
 #define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone))
 #endif
-
-// --- Extern "C": NuGScn functions have C linkage in original ---
-
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
@@ -608,9 +471,6 @@ DECOMP_ASSERT(offsetof(GameObject_s, quick_shoot_bolt_id) == 0xe3e, "Quick shoot
         NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
     } while (0)
 
-// DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
-// red-brick positions come from the Game init values in legogame/game.cpp.
-
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
     do {                                                                                                               \
         PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
@@ -623,32 +483,10 @@ DECOMP_ASSERT(offsetof(GameObject_s, quick_shoot_bolt_id) == 0xe3e, "Quick shoot
         }                                                                                                              \
     } while (false)
 
-
-// ==== src/legoapi/actions/character/starwars.cpp: all remaining content ====
-
 struct AIPACKET_s;
 struct AISYS_s;
 
-// ==== src/editor/antinode_editor.cpp: all remaining content ====
-
-// ==== src/editor/edtoolsall.cpp: declarations ====
-
-
-// ==== src/legoapi/render/core/terrain_stubs.cpp: declarations ====
-
-
-// Runtime-selected groups appended after the fixed terrain allocation.
-
 // NuFileExists @nufile (nucore_plain.cpp).
-
-// ==== functions in original address order ====
-
-// ==== src/MechInputTouch/MechInputTouch.cpp: declarations ====
-
-
-// ==== functions in original address order ====
-
-// ==== functions in original address order ====
 
 MechAutoJumpManager::MechAutoJumpManager(AISYS_s *ai_system) {
     if (ai_system != nullptr) {

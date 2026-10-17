@@ -97,19 +97,16 @@
 void RegisterTakeOverObject(GameObject_s *object);
 i32 players_cannot_exit_speeder;
 
-
 static NUVEC SpeederChaseATATExitLandPos = {-159.0f, 6.869999885559082f, -17.600000381469727f};
 
 extern i16 id_BUGGY, id_GYROCOPTER, id_BOMARRMONK;
 extern i16 id_LANDSPEEDER;
 extern i16 id_HEAVYREPEATINGCANNON, id_TROOPERCANNON;
 
-
 extern GameObject_s *player_tag_to;
 extern GameObject_s *player_tag_from;
 static i32 Tag_Mode = 2;
 void (*Tag_DrawIconFn)(GameObject_s *);
-
 
 struct TAGSCRIPTSTATE {
     AISCRIPTPROCESS processor;
@@ -131,8 +128,6 @@ struct NuIOS_InAppProduct;
 extern i16 tBUNDLESAVINGSAVAILABLE;
 extern f32 text3d_height;
 void GameCam_HitRoll();
-
-
 
 // GCC otherwise rewrites this once-called helper; the original has a separate local body.
 static __attribute__((noinline)) GameObject_s *Tag_FindGameObject_TRANSFER(GameObject_s *object) {
@@ -163,13 +158,6 @@ static __attribute__((noinline)) GameObject_s *Tag_FindGameObject_TRANSFER(GameO
     return nearest;
 }
 
-
-
-
-
-
-
-
 static i32 Tag_FindNextPlayer(GameObject_s *object) {
     i16 index = object->apiobj.field_0x289;
     for (i32 remaining = HIGHGAMEOBJECT - 1; remaining > 0; --remaining) {
@@ -185,9 +173,6 @@ static i32 Tag_FindNextPlayer(GameObject_s *object) {
     }
     return -1;
 }
-
-
-// ==== functions in original address order ====
 
 static void DrawPackButton(GAMEMESSAGE_s *message, nuvec_s *position, float scale) {
     struct InAppProductData {

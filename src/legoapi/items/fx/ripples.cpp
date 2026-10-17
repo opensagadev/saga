@@ -96,9 +96,6 @@ static WORLDINFO_s *RE_worldinfo;
 static ripple_node_s **eraselist;
 static i32 erasecount;
 
-
-
-
 static void RE_end_radius(NUFPAR *parser);
 static void RE_start_radius(NUFPAR *parser);
 static void RE_life(NUFPAR *parser);
@@ -115,21 +112,8 @@ static NUFPCOMJMP RippleEffect_ConfigKeywords[] = {{"texture_name", RE_texture_n
                                                    {"end_radius", RE_end_radius},
                                                    {NULL, NULL}};
 
-// ==== src/legoapi/render/core/render.cpp: declarations ====
-
-
-
-
 struct ripple_node_s;
 struct ripple_set_s;
-
-// Camera zoom state
-
-// Graphics loading flags
-
-// --- NuGScn graphics-data reader ---
-// NuReadGraphicsData is a C++ static function in the original (GCC clones it,
-// hence the `.isra.NNN` suffix in the ROM symbol table).
 
 // Retail only keeps the IPA-SRA clone, which drops the unused fourth argument.
 #if defined(__i386__)
@@ -140,10 +124,6 @@ struct ripple_set_s;
 static NU_READ_GRAPHICS_DATA_ATTR NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIPTR *buf_end, char *path,
                                                              char *scene_data)
     __asm__("_ZL18NuReadGraphicsDataP9variptr_uS0_PcS1_S1_.isra.104");
-
-// --- Extern "C": NuGScn functions have C linkage in original ---
-
-
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
@@ -185,9 +165,6 @@ static NU_READ_GRAPHICS_DATA_ATTR NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIP
         NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
     } while (0)
 
-// DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
-// red-brick positions come from the Game init values in legogame/game.cpp.
-
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
     do {                                                                                                               \
         PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
@@ -199,9 +176,6 @@ static NU_READ_GRAPHICS_DATA_ATTR NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIP
             vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
         }                                                                                                              \
     } while (false)
-
-
-// ==== functions in original address order ====
 
 static void RE_end_radius(NUFPAR *parser) {
     RE_rippleeffect->end_size = NuFParGetFloat(parser);

@@ -9,7 +9,6 @@
 #include <string.h>
 #include "gamelib/util/Refpack.h"
 
-
 static inline void CloneMessageData(NetMessage &message) {
     NetMessage::MessageData *new_data = NULL;
     for (i32 i = 0; i < 512; ++i) {

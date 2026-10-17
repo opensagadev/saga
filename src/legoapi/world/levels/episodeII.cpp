@@ -211,23 +211,12 @@ static DOOKU_C_s dooku_c;
 DECOMP_ASSERT(sizeof(KAMINO_E_s) == 120, "Kamino E state ABI");
 static KAMINO_E_s kamino_e;
 
-
-// Episode 2 level handlers, in the game's Episode_II progression:
-// kamino / factory (geonosis droid factory) / jedi / gunship / bonus gunship /
-// dooku, then the NewTown bonus. The coruscant bounty-hunter pursuit lives in
-// pursuit.cpp, its own translation unit in the original binary.
-
-// ===========================================================================
 // Kamino
-// ===========================================================================
-
 
 nuhspecial_s walllights[2], walllights_disco[2], striplights[2], discolights[2];
 nuhspecial_s discorm_wall_on, discorm_wall_off;
 GIZMO *gizTurrets[2];
 i32 last;
-
-
 
 static inline bool KaminoDiscoPlayerInArea(WORLDINFO_s *world) {
     APIOBJECT *first = world->ai_sys->player_1;
@@ -255,35 +244,16 @@ static inline bool KaminoDiscoOccupied(GameObject_s *object, NUVEC *position) {
     return (x * x + y * y) + z * z < 0.04000000283122063f;
 }
 
-
-
-
-
 static NUVEC kamino_e_centre = {56.5f, -2.890000104904175f, 8.0f};
 static NUVEC kamino_e_gunoffset[2] = {{0.2f, -1.1f, 0.9f}, {-0.2f, -1.1f, 0.9f}};
 
-
-
-
-
-
-// ===========================================================================
 // Geonosis — droid factory (Factory_B / Factory_G)
-// ===========================================================================
 
 static f32 FactoryBConveyorXSpeed;
 static f32 FactoryBConveyorZSpeed;
 f32 FactoryBConveyorStopFrame = 28.0f;
 
-
-
-
-
-
-
-// ===========================================================================
 // Jedi (Jedi_B)
-// ===========================================================================
 
 DECOMP_ASSERT(sizeof(JEDIB_CREATURE_s) == 0x60, "JEDIB_CREATURE_s ABI");
 
@@ -328,7 +298,6 @@ static __attribute__((noinline, noclone)) i32
 JediBInitLocatorBody(AISYS_s **ai_sys, nuvec_s *position, i32 angle, AILOCATOR *locator,
                      f32 radius) __asm__("_ZL16JediBInitLocatorP11WORLDINFO_sP7nuvec_siP11AILOCATOR_sf.isra.5.part.6");
 
-
 static inline i32 JediBInitLocator(WORLDINFO_s *world, nuvec_s *position, i32 angle, AILOCATOR *locator, f32 radius) {
     if (__builtin_expect(netclient != 0, 0)) {
         return 0;
@@ -336,57 +305,17 @@ static inline i32 JediBInitLocator(WORLDINFO_s *world, nuvec_s *position, i32 an
     return JediBInitLocatorBody(&world->ai_sys, position, angle, locator, radius);
 }
 
-
-
-
-
-
-// ===========================================================================
 // Gunship (Gunship_A / Gunship_B)
-// ===========================================================================
-
-
-
-
 
 f32 gunshipb_seekmomseek = 5.0f;
 f32 gunshipb_seekmom = 5.0f;
 f32 gunshipb_seekrange = 4.0f;
 
-// ===========================================================================
-// Bonus gunship (Bonus_Gunship_A / Bonus_Gunship_B)
-// ===========================================================================
-
-
-
-
-
-
-
-// ===========================================================================
 // Dooku (Dooku_C)
-// ===========================================================================
-
-
-
-
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
-
-
-
-
-
-
-
-
 
 struct starfighter_s;
 struct rtl_s;
 struct rtlidata_s;
-
-
-
 
 struct GAMEMESSAGE_s;
 struct HINT_s;
@@ -401,20 +330,6 @@ struct ripple_node_s;
 struct ripple_set_s;
 struct VuVec;
 
-
-// Camera zoom state
-
-// Graphics loading flags
-
-extern "C" {
-}
-
-
-
-// --- NuGScn graphics-data reader ---
-// NuReadGraphicsData is a C++ static function in the original (GCC clones it,
-// hence the `.isra.NNN` suffix in the ROM symbol table).
-
 // Retail only keeps the IPA-SRA clone, which drops the unused fourth argument.
 #if defined(__i386__)
 #define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone, regparm(2)))
@@ -423,13 +338,6 @@ extern "C" {
 #endif
 
 // --- Extern "C": NuGScn functions have C linkage in original ---
-extern "C" {
-
-} // extern "C"
-
-
-
-
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
@@ -471,34 +379,12 @@ extern "C" {
         NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
     } while (0)
 
-
-
-
-
-
-
-
-
-
 // DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
 // red-brick positions come from the Game init values in legogame/game.cpp.
 
-
-
-
-
 extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
 
-
-
-
 extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
-
-extern "C" {
-}
-
-
-
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
     do {                                                                                                               \
@@ -512,45 +398,12 @@ extern "C" {
         }                                                                                                              \
     } while (false)
 
-
 extern i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
-
-
-
-
-// ==== src/legoapi/gizmo/base/gizmo.cpp: declarations ====
-
 
 struct FLOWBOX_s;
 
 DECOMP_ASSERT(sizeof(GIZMOTYPES) == 0xc, "Gizmo type-table header ABI");
 DECOMP_ASSERT(offsetof(GIZMOTYPES, types) == 8, "Gizmo type-table pointer offset");
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 i32 PAINTPUZZLESTAGE;
 i32 played_sound;
@@ -570,18 +423,6 @@ char *paint_light_name[3] = {"off_purple", "off_green", "off_orange"};
 char *paint_target_colour[3] = {"but_orange", "but_green", "but_purple"};
 char *paint_panel_name[3] = {"redp", "yellp", "bluep"};
 char *paint_name[6] = {"red_juice", "yellow_juice", "blue_juice", "orange_juice", "green_juice", "purple_juice"};
-
-
-
-
-
-
-
-
-
-
-
-// ==== functions in original address order ====
 
 static i32 JediBInitLocatorBody(AISYS_s **ai_sys, nuvec_s *position, i32 angle, AILOCATOR *locator, f32 radius) {
     if ((*ai_sys) != NULL) {

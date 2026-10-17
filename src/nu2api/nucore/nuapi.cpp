@@ -64,8 +64,6 @@ extern "C" i32 Nu360GetCommandLine(char **arguments, i32 capacity) {
     return count + 1;
 }
 
-
-
 // Nucore bootstrap helpers; display-list and framebuffer initialization are
 // declared by their owning public headers.
 extern "C" {
@@ -75,22 +73,16 @@ extern "C" {
 void NuRndrInitGeneric(void); // nurndr.cpp (C++ linkage)
 void bgProcInit(void);        // bgproc_android.cpp
 
-
-
 // Frame-end hooks (original bss @0x6bdaec / 0x6bdaf0 / 0x6bdad0).
 void (*preRenderFlashingHack)(void) = NULL;
 void (*postRenderFlashingHack)(void) = NULL;
 void (*nuapi_endframe_callbackfn)(void) = NULL;
-
 
 // The Android command-line provider is empty. These are still the original
 // private cursors consumed by ParseCommandLine, not host process arguments.
 static i32 argc;
 static char **argv;
 
-
 void NuCommandLine(i32 *argc, char ***argv) {
 }
-
-
 

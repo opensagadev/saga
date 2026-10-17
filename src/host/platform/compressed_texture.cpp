@@ -2,8 +2,6 @@
 
 #include "host/platform/compressed_texture.hpp"
 
-// Host implementation of compressed formats unavailable from host GLES.
-
 #include <GLES2/gl2.h>
 
 #include <algorithm>
@@ -17,10 +15,6 @@ extern "C" void *NuIOS_AllocateDefaultTexturePixels(usize bytes) {
     // requested pixels. The matching target retains its original malloc call.
     return malloc(bytes + (bytes % 8 != 0 ? 4 : 0));
 }
-
-// Compatibility for compressed formats supported by the original device but
-// not guaranteed by a desktop GLES implementation. The target texture parser,
-// registry, and upload decisions remain in the reconstructed game sources.
 
 // --- PowerVR 'PVR' v3 / PVRTC support (the "ios" texture format) --------------
 // Container: PVRTC-compressed data is placed in a PVR header. On Android this

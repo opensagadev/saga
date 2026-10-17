@@ -35,7 +35,6 @@ static i64 frameout_count;
 // Original local static of this TU (calls NuSoundSystem::Shutdown).
 namespace {
 }
-// NuSoundSystem::Shutdown() is the original callback target
 
 // Original mutable digest immediately precedes its embedded shader text.
 // Key generation consumes its first eight bytes; the public setter copies all 16.
@@ -55,18 +54,6 @@ char *Trailer[3] = {"demointro", reinterpret_cast<char *>(&tINTRO), NULL};
 
 // Object name the save icon is drawn from.
 char *lsw_memcard_objname = "mem_card";
-
-
-
-// ==== src/nu2api/nucore/nuios_metrics.cpp: all remaining content ====
-
-extern "C" {
-
-
-
-} // extern "C"
-
-// ==== functions in original address order ====
 
 static void NuSoundAppTerminate(void) {
     NuSound.Shutdown();

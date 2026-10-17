@@ -2,23 +2,6 @@
 #include <stdio.h>
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/nu3d/nuvport.h"
-// nurndr_plain.cpp — Host "plain" renderer backend.
-//
-// This TU is the host replacement for the PS2 rendering TU (nurndr).
-// It owns renderer scene/present paths and primitive drawing helpers:
-//
-//   1. Scene lifecycle  — NuRndrBeginScene / NuRndrClear / NuRndrEndScene
-//      builds the current `nurenderscene_s` (0x218 bytes in the original BSS)
-//      and queues it into a 16-slot ring consumed by the render thread.
-//
-//   2. Primitive drawing helpers that call the immediate-mode API in
-//      android/nuprim_android.c, including quad expansion there.
-//
-//   3. Frame present   — moved to the original android/nurndr.c TU.
-//
-// Remaining renderer entry points are retained as link stubs until their
-// subsystems are transcribed. Their signatures are not yet recovered, so
-// they are left as `void(void)`.
 
 #include <float.h>
 #include <string.h>
@@ -52,11 +35,6 @@
 #include "nu2api/nu3d/android/nurenderthread.h"
 #include "nu2api/nu3d/nu3d_includes.h"
 
-// ---------------------------------------------------------------------------
-// Scene state — mirrors original BSS layout
-// ---------------------------------------------------------------------------
-
-
 extern "C" {
     // Scene currently being built.  Size is 0x218 bytes; original lives in BSS
     // and is referenced as a plain object by all render/present code.
@@ -65,47 +43,14 @@ extern struct nurenderscene_s currentScene;
     // Deferred ring: NuRndrEndScene copies the completed scene here; the render
     // thread drains it.  Stride is 0x218, 16 slots (0x2180 bytes total) in the
     // original.
-
 } // extern "C"
 
 // Swap/present pacing flags (original BSS).
 volatile bool g_isBlockedInSwapScreen = false;
 
-// ---------------------------------------------------------------------------
-// Immediate-mode 2D stream state
-// ---------------------------------------------------------------------------
-
-// Display-list cursor for the 2D stream.  Defined in nudlist.cpp.
-
-// ---------------------------------------------------------------------------
-// Forward declarations for C-visible helpers
-// ---------------------------------------------------------------------------
-
 extern "C" {
     void NuDynamicLightAddRenderScene(struct NuDynamicLight *, i32, i32);
 }
-
-// ---------------------------------------------------------------------------
-// Immediate-mode 2D API
-// ---------------------------------------------------------------------------
-
-// ---------------------------------------------------------------------------
-// Scene lifecycle
-// ---------------------------------------------------------------------------
-
-
-
-
-
-
-
-// ---------------------------------------------------------------------------
-// Link stubs — retained for compatibility, not yet implemented
-// ---------------------------------------------------------------------------
-//
-// Every function below exists in the original binary.  Signatures have not
-// been recovered, so they are kept as void(void) stubs.  Grouped by
-// subsystem so it is obvious what is still missing.
 
 // Scene / GScn
 using NUGSCNVIDEOMEMFN = void (*)(NUGSCN *);
@@ -116,12 +61,6 @@ extern NUGSCNVIDEOMEMFN video_mem_to_gscene;
 extern "C" void NuGScnFromVideoMem(NUGSCNVIDEOMEMFN callback);
 class NuDynamicLight;
 extern "C" {
-
-
-
-
-
-
     extern nurenderscene_s currentScene;
 
     // Retail partially inlines the clipping test into NuDisplaySceneRndr and
@@ -134,14 +73,12 @@ extern "C" {
     static NUDISPLAYSCENERNDR_BODY_ATTR void NuDisplaySceneRndrBody(NUDLDLISTSCENE *scene)
         __asm__("NuDisplaySceneRndr.part.101");
 
-
 static void NuDisplaySceneRndrBody(NUDLDLISTSCENE *scene);
 }
 
 extern "C" void NuGScnToVideoMem(NUGSCNVIDEOMEMFN callback);
 
 // Material
-
 
 extern "C" void NuMtlAnimateSetMask(i32 mask);
 extern "C" void NuMtlAnimateSetSpeedScale(f32 speed_scale);
@@ -180,21 +117,6 @@ static inline u32 NuRndrPrimColour(u32 colour) {
     }
     return (colour & 0xff000000u) | ((colour >> 1) & 0x007f7f7fu);
 }
-
-
-
-
-extern "C" {
-}
-
-
-extern "C" {
-}
-
-
-
-
-
 
 // Shader / texture / vertex state
 extern "C" {

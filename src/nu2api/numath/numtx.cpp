@@ -9,89 +9,8 @@
 #include "nu2api/numath/nuvec.h"
 #include "nu2api/nu3d/nucamera.h"
 
-
 // clang-format off
 // clang-format on
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 void NuMtxCalcCheapFaceOnDebug(NUMTX *m, NUVEC *v) {
     NUMTX camera = {
@@ -119,7 +38,4 @@ void NuMtxCalcCheapFaceOnDebug(NUMTX *m, NUVEC *v) {
     m->m31 = v->y;
     m->m32 = v->z;
 }
-
-
-
 

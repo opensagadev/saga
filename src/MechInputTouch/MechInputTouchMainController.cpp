@@ -14,14 +14,6 @@
 u32 colourPurple = 0xffff00ff;
 f32 s_mechTouchTapFrequency = 0.4f;
 
-// ==== src/MechInputTouch/MechInputTouchButton_stubs.cpp: all remaining content ====
-
-// ==== src/MechInputTouch/MechInputTouchButton.cpp: declarations ====
-
-
-
-// ==== functions in original address order ====
-
 MechInputTouchMainController::~MechInputTouchMainController() {
 }
 

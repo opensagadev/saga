@@ -141,11 +141,6 @@ static NuThreadSemaphore events[2] = {
     NuThreadSemaphore(1),
 };
 
-
-// ==== src/legoapi/core/startup/finishloop.cpp: all remaining content ====
-
-// ==== src/legoapi/misc/supportall.cpp: declarations ====
-
 #if defined(__SSE__)
 #include <xmmintrin.h>
 #endif
@@ -153,24 +148,6 @@ static NuThreadSemaphore events[2] = {
 // The reference defines these with dynamic initialization in this unit.
 
 DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");
-
-// Debug-capture output helpers consumed by NuDisplayListCaptureSortPriority.
-// Transcribed from the original C-linkage symbols:
-//   NuHtmlBegin    0x2d5ca0   NuHtmlFlush   0x2d5c30
-//   NuHtmlWrite    0x2d5cd0   NuHtmlHeading1 0x2d5d40
-
-
-
-
-
-// ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
-
-// Written by ThingManager's ctor (original global @0x124f2e0, .bss).
-
-
-// Enabled in the target data image.  Ordinary background characters are
-// staggered across frames; special movement states opt back into full-rate
-// processing through the forced-update path.
 
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
@@ -180,30 +157,16 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 }
 
-// The special-route list reserves the first ten ids for suit characters.  The
-// remaining ids enumerate the current story list while omitting variants that
-// are represented by those dedicated routes.
-
 #if defined(__i386__)
 #define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
 #else
 #define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone))
 #endif
 
-// Retail keeps only the IPA-SRA clone, which takes the other object's x and z by address.
-
 // ThingManager objects return to the theMemoryManager pool (D0 @0x425a50).
 inline void ThingManager::operator delete(void *thing, usize size) {
     theMemoryManager.FreePool(thing, size);
 }
-
-// ==== src/legoapi/misc/memory.cpp: all remaining content ====
-
-// ==== functions in original address order ====
-
-// ==== src/legoapi/misc/supportall_stubs.cpp: all remaining content ====
-
-// ==== functions in original address order ====
 
 static void bgThreadMain(void *data) {
     NuStrNCpy(dummyBuf, g_CrashDumpId, 0x20);

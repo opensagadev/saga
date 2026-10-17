@@ -25,8 +25,6 @@ DECOMP_ASSERT(offsetof(ShaderProgramPool, occupied) == 0x800, "Shader program oc
 DECOMP_ASSERT(offsetof(ShaderProgramPool, next) == 0x808, "Shader program cursor offset");
 static ShaderProgramPool programPool;
 
-// The reference constructs the program pool before the VuVec constants.
-
 // Original Pair type identity only; its element layout is not used here.
 // These two named empty vectors require only the canonical scalar lifetime.
 template <typename First, typename Second> struct Pair;

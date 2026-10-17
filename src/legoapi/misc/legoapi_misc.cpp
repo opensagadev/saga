@@ -32,8 +32,6 @@ extern "C" {
     extern FadeSystem FadeSys;
 }
 
-
-
 void CatIToX(char *output, i32 value) {
     while (*output != '\0')
         ++output;
@@ -47,5 +45,4 @@ void CatI64ToX(char *output, i64 value) {
         ++output;
     *I64ToX(output, value) = '\0';
 }
-
 

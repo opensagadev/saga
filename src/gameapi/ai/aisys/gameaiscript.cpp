@@ -152,60 +152,13 @@
 #include "nu2api/nu3d/nu3d_includes.h"
 #include "nu2api/nucore/android/stubs_android.h"
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 extern "C" void *AIPAthFindPathCnx(AISYS_s *system, AIPATH_s *path, char *from, char *to, i32 *direction);
 
-
 extern f32 ForceThrowSpeed, ForceThrowGravity;
-
-
 
 void MakeThrowVector(NUVEC *, NUVEC *, NUVEC *, NUVEC *, f32, f32);
 
 static i32 Action_SetCurrentSpeed(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **, i32, i32, f32);
-
-
-
-
-
-
-
 
 static i32 Action_GoToOriginalPath(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **, i32, i32, f32);
 
@@ -226,7 +179,6 @@ static i32 Action_SetAnimSpeedMul(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char *
 static i32 Action_ShootAtOpponent(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **, i32, i32, f32);
 
 static i32 Action_SetInvulnerable(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **, i32, i32, f32);
-
 
 static i32 Action_PressJumpButton(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **, i32, i32, f32);
 
@@ -252,39 +204,11 @@ union AI_CONDITION_LEVEL_ARGUMENT {
     isize value;
 };
 
-
-
-
-
 static i32 Action_EngageOpponent(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **, i32, i32, f32);
-
-
-
-
-
-
-
-
-
-
-
-
 
 extern TERRSET *CurTerr;
 
 extern "C" i32 party_under_cover;
-
-
-
-
-
-
-
-
-
-
-
-
 
 enum AI_CREATURE_SET : isize {
     AI_CREATURE_SET_CURRENT = -1,
@@ -292,7 +216,6 @@ enum AI_CREATURE_SET : isize {
     AI_CREATURE_SET_FIRST = 1,
     AI_CREATURE_SET_LAST = 16,
 };
-
 
 static isize AIConditionArgumentValue(void *argument) {
     AI_CONDITION_LEVEL_ARGUMENT condition_argument = {};
@@ -819,7 +742,6 @@ extern "C" {
     extern i16 id_BATTLEDROIDCOMMANDER, id_CLONEEP3, id_CLONEEP3SAND;
 }
 
-
 extern "C" {
     // Keep this registry in the exact order used by the shipped script parser.
     AIACTIONDEF lego_aiactiondefs[] = {
@@ -1196,221 +1118,18 @@ namespace {
     GameAIRegistryCallbacks game_ai_registry_callbacks;
 } // namespace
 
-
-
-
-
-
-
-
 static f32 Condition_IAmAPartyCharacter(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char *, void *) {
     return packet != NULL && packet->owner != NULL && static_cast<i8>(packet->owner->apiobj.field_0x27c) != -1 ? 1.0f
                                                                                                                : 0.0f;
 }
 
-
-
 static f32 Condition_OpponentIsAThreat(AISYS *, AISCRIPTPROCESS *processor, AIPACKET *packet, char *, void *void_arg) {
     return packet != NULL ? static_cast<f32>(packet->opponent_is_threat) : 0.0f;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 static void *Condition_LocatorRangeInit(AISYS *sys, char *arg, AISCRIPT *) {
     return arg != NULL ? AIPathFindLocator(sys, arg) : NULL;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #if defined(__i386__)
 #define GAMEAISCRIPT_CLONE_ATTR2 __attribute__((noinline, noclone, regparm(2)))
@@ -1422,13 +1141,6 @@ static void *Condition_LocatorRangeInit(AISYS *sys, char *arg, AISCRIPT *) {
 static GAMEAISCRIPT_CLONE_ATTR2 void Action_AddPartBody(AISCRIPTPROCESS *processor, char **params, i32 num_params)
     __asm__("_ZL14Action_AddPartP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif.part.58");
 
-
-
-
-
-
-
-
 // The original shooting action calls the out-of-line PartyMemberInWay clone.
 // Retail splits the flag test off as an inline head; the rest is this partial clone.
 static GAMEAISCRIPT_CLONE_ATTR2 i32 PartyMemberInWayBody(GameObject_s *object, GameObject_s *opponent)
@@ -1439,8 +1151,6 @@ static inline i32 PartyMemberInWay(GameObject_s *object, GameObject_s *opponent)
         return false;
     return PartyMemberInWayBody(object, opponent);
 }
-
-
 
 __used__ static i32 Action_SetLocator(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                       i32 param_4, i32 param_5, f32 param_6) {
@@ -1516,35 +1226,6 @@ __used__ static i32 Action_SetLocator(AISYS *sys, AISCRIPTPROCESS *processor, AI
     return 1;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 __used__ static i32 Action_DontPush(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                     i32 param_4, i32 param_5, f32 param_6) {
     (void)processor;
@@ -1600,47 +1281,8 @@ __used__ static i32 Action_DontPush(AISYS *sys, AISCRIPTPROCESS *processor, AIPA
     return 1;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
-
-
 extern i16 id_GAMORREANGUARD;
 extern i32 TERRAINMASK_NONWEAPON, TERRAINMASK_NONDROID;
-
 
 extern "C" {
     extern i16 id_BAT;
@@ -1654,22 +1296,9 @@ extern "C" {
 extern GameObject_s *player_tag_from;
 extern GameObject_s *player_tag_to;
 
-
-
-
-
-
-
-
-
-
-
-
 // Enabled in the target data image.  Ordinary background characters are
 // staggered across frames; special movement states opt back into full-rate
 // processing through the forced-update path.
-
-
 
 static f32 Condition_OnForcePlatform(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument);
 
@@ -1770,7 +1399,6 @@ static f32 Condition_IsSetAlive(AISYS_s *, AISCRIPTPROCESS_s *process, AIPACKET_
 
 static void *Condition_IsSetAliveInit(AISYS_s *, char *arg, AISCRIPT_s *);
 
-
 static f32 Condition_SockXDistanceToPlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *);
 
 static f32 Condition_PlayerDeflectingPart(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *);
@@ -1792,7 +1420,6 @@ static f32 Condition_PlayerDistanceAlongSock(AISYS_s *, AISCRIPTPROCESS_s *, AIP
 static f32 Condition_PlayerInSock(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument);
 
 static void *Condition_PlayerInSockInit(AISYS_s *, char *name, AISCRIPT_s *);
-
 
 extern "C" {
     i32 nbaddies_can_see_players;
@@ -1893,7 +1520,6 @@ static f32 Condition_GotLocatorInSet(AISYS_s *system, AISCRIPTPROCESS_s *process
                                      void *argument);
 
 static void *Condition_GotLocatorInSetInit(AISYS_s *system, char *name, AISCRIPT_s *);
-
 
 static f32 Condition_CanFightLikeAJedi(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *);
 
@@ -2174,46 +1800,16 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
     static_assert(sizeof(lego_aiconditiondefs) / sizeof(lego_aiconditiondefs[0]) == 178,
                   "complete game AI condition registry");
 
-
-
     AIGETNAMEDAPIOBJECT *GetNamedAPIObjectFn;
 }
-
 
 // The special-route list reserves the first ten ids for suit characters.  The
 // remaining ids enumerate the current story list while omitting variants that
 // are represented by those dedicated routes.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 struct CUTSCENEPLAYERCLIP;
 
 extern f32 LevelNameTime, LevelNameMul;
-
-
-
-
 
 #if defined(__i386__)
 #define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
@@ -2221,258 +1817,58 @@ extern f32 LevelNameTime, LevelNameMul;
 #define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone))
 #endif
 
-// Retail keeps only the IPA-SRA clone, which takes the other object's x and z by address.
-
-
-
 extern "C" {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 void SetScriptErrorLevel(SCRIPT_ERROR_LEVEL level);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 extern "C" {
 extern i32 party_under_cover;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // ThingManager objects return to the theMemoryManager pool (D0 @0x425a50).
 inline void ThingManager::operator delete(void *thing, usize size) {
     theMemoryManager.FreePool(thing, size);
 }
 
-
-
-
-
-
-
-
-extern "C" {
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 void DestroySnakeBody(GameObject_s *);
-
-
-
 
 extern GameObject_s * player_tag_to;
 extern GameObject_s * player_tag_from;
 
-
-
-
 void DestroySnakeBody(GameObject_s *obj);
-
 
 extern u16 TargetDeg_Near, TargetDeg_Mid, TargetDeg_Far;
 extern f32 TargetDist_Near2, TargetDist_Mid2;
 
-
 extern i8 (*adtab)[4];
-
-
-
-
-
-
-
-
-
 
 GameObject_s *FindNearestGameObject(NUVEC *position, GameObject_s *exclude, u32 required_flags, f32 radius,
                                     f32 extra_radius, i32 animation, i32 character_id, i32 player_index,
                                     f32 *distance_squared, i32 horizontal_only, i32 (*filter)(GameObject_s *),
                                     bool first_match);
 
-
-
 extern "C" {
     extern i32 freechunkcontrolsptr;
 }
 
-
-
-
-
-// ==== src/legoapi/gizmo/gizmos/gizmos_gizactions.cpp: declarations ====
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 void GameCameraMakeMiniCut3(u32, float, i32, i32, i32, void *, i32, NUVEC *, float, float, float, float, float, float,
                             float, i32, nugspline_s *, char, char);
 
-
 f32 party_follow_offsets[8];
 
-
 struct GIZSPINNER_s;
-
-
-
 
 namespace {
 #include "legoapi/gizmo/gizmos/gizmos_gizactions_types.h"
 
 } // namespace
 
-// ==== src/legoapi/items/collect/bolt.cpp: declarations ====
-
 struct AIROW_s;
 struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
-
-
-
-
-
-
-
-// ==== src/legoapi/actions/character/simpletons.cpp: declarations ====
-
 
 extern "C" {
     extern i16 id_PENGUIN_GOON, id_PENGUIN_GOON_GUN;
@@ -2480,68 +1876,11 @@ extern "C" {
     extern i16 id_RIDDLER_GOON, id_RIDDLER_GOON_GUN;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ==== src/legoapi/characters/core/characters.cpp: declarations ====
-
-
-
 // LoadPerm1 is one of the few game-level entry points which wires together
 // otherwise C-linkage engine subsystems.  Keep these declarations local: the
 // individual subsystem TUs intentionally expose their original plain names.
-extern "C" {
-
-}
 
 struct AISYS_s;
-
-
-// The original table at 0x006281a0.  These are the material animation
-// scripts made available before the permanent things scene is loaded.
-
-
-
-
-
-extern "C" {
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-extern "C" {
-}
-
-
-
-
-
-
-
-
-
 
 // Retail keeps only the IPA-SRA clone, which receives &*layers.
 #if defined(__i386__)
@@ -2550,49 +1889,7 @@ extern "C" {
 #define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone))
 #endif
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 extern i32 STATUS_R, STATUS_G, STATUS_B;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ==== functions in original address order ====
 
 static f32 Condition_GlynTest(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char *, void *) {
     return 1.0f;
@@ -3250,7 +2547,6 @@ static f32 Condition_BoltsDontGetDeflectedBack(AISYS_s *, AISCRIPTPROCESS_s *, A
                                                                                                            : 0.0f;
 }
 
-// The reference executable exposes this condition as an unconditional zero.
 static f32 Condition_CheatProgress(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
     return 0.0f;
 }

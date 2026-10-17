@@ -40,9 +40,6 @@ namespace {
 
 #include "nu2api/nusound/nusound_voice_android_types.h"
 
-
-
-
 #define SL_SLOT(itf, fn_type, byte_offset) (*(fn_type *)((char *)(*(void **)(itf)) + (byte_offset)))
 
 } // namespace
@@ -570,8 +567,4 @@ void NuVoiceAndroid::UpdateSamplePlaybackCount() {
 u64 NuVoiceAndroid::GetPlaybackPositionSamples() {
     return *reinterpret_cast<u64 *>(&this->field11_0x174);
 }
-
-// ---------------------------------------------------------------------------
-// voice factory
-// ---------------------------------------------------------------------------
 

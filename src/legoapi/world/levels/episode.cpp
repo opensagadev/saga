@@ -48,38 +48,6 @@ DECOMP_ASSERT(sizeof(TROOPERCANNON_s) == 0x30, "Trooper cannon state size");
 DECOMP_ASSERT(offsetof(TROOPERCANNON_s, character_name) == 0x0c, "Trooper cannon name offset");
 DECOMP_ASSERT(offsetof(TROOPERCANNON_s, rebuilding) == 0x2c, "Trooper cannon rebuilding offset");
 
-
-
-
-
 struct AIROW_s;
 struct nunativegscene_s;
-
-// Episode-global logic and helpers shared across episodes: completion/
-// episode bookkeeping, super-story, boss/cutscene-adjacent helpers. The
-// per-episode level *handlers* live in the matching episodeI..VI.cpp files.
-
-// ===========================================================================
-// Episode bookkeeping
-// ===========================================================================
-
-
-
-
-// ===========================================================================
-// HUD / score helpers
-// ===========================================================================
-
-// ===========================================================================
-// Shared gameplay helpers
-// ===========================================================================
-
-
-
-
-
-
-
-
-
 

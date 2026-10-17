@@ -4,7 +4,6 @@
 // The original unit constructs the homogeneous VuVec header constants.
 #include "nu2api/nucore/nuvuvec.hpp"
 
-// ==== src/nu2api/nucore/implode.cpp: all remaining content ====
 #include "decomp.h"
 #include "nu2api/nucore/implode.h"
 
@@ -102,9 +101,6 @@ static void decode(u32 size, unsigned char *buf);
 
 static unsigned char buffer[0x2000];
 
-
-
-
 static u32 getmasktbl[5] = {0, 0xff, 0xffff, 0xffffff, 0xffffffff};
 
 #define SELECT(dst, table, shift, count, initial_mask, len)                                                            \
@@ -133,26 +129,15 @@ static u32 blocksize;
 static u16 offset_table[0x100];
 static u8 offset_len[0x13];
 
-
 static u16 literal_table[0x1000];
 static u8 literal_len[0x1fe];
-
 
 u16 implode_left[0x3fb];
 u16 implode_right[0x3fb];
 
-
-
-
-
 u32 implode_bitbuf;
 static u32 subbitbuf;
 static u32 bitcount;
-
-
-
-
-
 
 // Encoding-side memory I/O shares the decoder's input/output buffers.
 static i32 inlen;
@@ -166,19 +151,6 @@ static u16 *freq;
 static u16 *sortptr;
 static u16 len_cnt[17];
 static unsigned char *len;
-
-
-
-
-
-// ==== src/nu2api/nucore/nuapi.c: all remaining content ====
-
-extern "C" {
-}
-
-
-// ==== src/nu2api/nucore/numem.cpp: declarations ====
-
 
 static NUMEMALLOCATION *alloc_list;
 
@@ -195,12 +167,6 @@ extern "C" {
 
 void memmove(void *dest, const void *source, i32 size);
 
-
-
-// ==== src/nu2api/nucore/numem.c: all remaining content ====
-
-// ==== src/nu2api/nucore/nuheap.cpp: all remaining content ====
-
 struct NUHEAPBLOCK {
     u32 size_and_flags;
     NUHEAPBLOCK *next_free;
@@ -215,27 +181,6 @@ struct NUHEAP {
 };
 
 enum NUHEAPBLOCKFLAGS { NUHEAPBLOCK_IN_USE = 0x80000000u, NUHEAPBLOCK_SIZE_MASK = 0x7fffffffu };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ==== src/nu2api/nufile/nufile.cpp: all remaining content ====
-
 
 #ifdef ANDROID
 #include "nu2api/nufile/android/nufile_android.h"
@@ -281,7 +226,6 @@ NUFILE_DEVICE *default_device = &host_device;
 static i32 file_time_count;
 static FILEBUFF file_buff[4];
 
-
 i32 numdevices = 0;
 
 NUFILE_DEVICE devices[16] = {0};
@@ -290,29 +234,9 @@ i32 enum_numdevices;
 
 i32 file_criticalsection;
 
-
 i32 DontDoFileUpperCaseHack;
 
-
-
-
-
-
-
-
-
-
-
-
-
 i32 NuFile_SwapEndianOnWrite;
-
-
-
-
-
-
-
 
 static NUDATFILEINFO *unpack_file_info;
 static NUDATOPENFILEINFO *unpack_file_odi;
@@ -325,32 +249,7 @@ static char read_buffer[0x40000];
 static volatile i32 read_buffer_size;
 static volatile i32 read_buffer_decoded_size;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 NUMEMFILE memfiles[20];
-
-
-
-
-
-
-
-
 
 struct NUPPHEADER {
     u32 magic;
@@ -360,8 +259,6 @@ struct NUPPHEADER {
 
 #define NUPP_SWAP32(value)                                                                                             \
     (((value) >> 24) | (((value) & 0x00ff0000) >> 8) | (((value) & 0x0000ff00) << 8) | ((value) << 24))
-
-
 
 // The original decoder accesses both whole registers and their low bytes.
 // Keep those views together to preserve its byte stores at the file's O0 setting.
@@ -378,13 +275,7 @@ union NUPPADDR {
 static FILEEXTINFO extensions[64];
 static i32 num_extensions;
 
-
-
-
 static void NuFileExtInit(void);
-
-
-// ==== src/nu2api/nufile/nufile_plain.cpp: all remaining content ====
 
 char *iop_image_name = "ioprp300.img";
 
@@ -418,45 +309,11 @@ struct NuFileReadBlock {
 static NuFileReadBlock nufile_blkinfo[1024];
 static i32 blkcnt = 1;
 
-extern "C" {
-
-}
-
-// ==== src/nu2api/nufile/numc.c: declarations ====
-
 // The original unit constructs its six homogeneous vectors.
-
-
-
-
-
-
-
-
-
-
-
-
-// ==== src/nu2api/nufile/nudatfile.cpp: all remaining content ====
-
-
-
 
 i32 datsys_offset = 0;
 
-
-
-// ==== src/nu2api/nufile/nufilepak.cpp: all remaining content ====
-
 static NUFILEPAK_ERROR fpk_err;
-
-
-
-
-
-// ==== src/nu2api/nufile/nufpar.cpp: all remaining content ====
-
-
 
 #define PARSER_COUNT 4
 #define PARSER_BUF_SIZE 0x1000
@@ -467,11 +324,6 @@ static char _fparbuffers[PARSER_COUNT * PARSER_BUF_SIZE];
 static NUFPAR *fpars;
 static char *fparbuffers;
 
-
-
-
-
-
 static i32 old_line_pos;
 
 #define CLAMP_LINE(pos) pos &(parser->line_buf_size - 1)
@@ -479,21 +331,7 @@ static i32 old_line_pos;
 #define CLAMP_WIDE_LINE(pos) pos &((parser->line_buf_size >> 1) - 1)
 #define CLAMP_WIDE_WORD(pos) pos &((parser->word_buf_size >> 1) - 1)
 
-
-
-
-
-
 nufpcomfn *fnInterpreterError;
-
-
-
-// ==== src/nu2api/nucore/nulist.cpp: all remaining content ====
-
-
-
-
-// ==== src/nu2api/nucore/numemhigh.cpp: all remaining content ====
 
 struct NUMEMHIGHBLOCK {
     NUMEMHIGHBLOCK *next;
@@ -502,17 +340,6 @@ struct NUMEMHIGHBLOCK {
 };
 
 static NUMEMHIGHBLOCK *freep;
-
-// ==== src/nu2api/nucore/nuqt.cpp: all remaining content ====
-
-
-
-
-
-
-
-
-// ==== src/nu2api/nucore/nurdpf.cpp: all remaining content ====
 
 typedef struct rdpfctxt_s {
     i32 cur_tok;
@@ -535,56 +362,14 @@ enum {
     TOK_CNT = 9,
 };
 
-
-
 static f32 f_expr(RDPFCTXT *ctx);
 
-
-
-
-
-// ==== src/nu2api/nucore/nustring_plain.cpp: all remaining content ====
-
 i32 global_tr;
-
-#ifdef __ANDROID__
-#endif
-
-
-
-
-
-
-
-
-
-#ifdef __ANDROID__
-#endif
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 static NUSTRINGBANK StringBank[3];
 static i16 CurrentStringBank;
 static i32 nustring_format = 1;
 char *NuBlankString = " ";
-
-
 
 static u16 bad_equiv[][2] = {{'a', '@'}, {'a', '4'}, {'e', '3'}, {'i', '1'},
                              {'l', '1'}, {'o', '0'}, {'t', '7'}, {0, 0}};
@@ -593,27 +378,7 @@ static u16 bad_fluff[] = {'!', 0xffa3, '$', '%', '^', '&', '*', '(', ')', '_', '
 static NUWCHAR **BadWords;
 static i32 NumBadWords;
 
-
-
-
-
-// ==== src/nu2api/nucore/nutime.cpp: all remaining content ====
-
-
 static u32 frameStartTime;
-
-
-
-
-
-// ==== src/nu2api/nucore/nukeyboard.cpp: all remaining content ====
-
-
-// ==== src/nu2api/nucore/numouse.cpp: all remaining content ====
-
-
-// ==== src/nu2api/nucore/nuapi.cpp: declarations ====
-
 
 // Nucore bootstrap helpers; display-list and framebuffer initialization are
 // declared by their owning public headers.
@@ -631,7 +396,6 @@ char *nuapi_target_manager_mac_address;
 i32 nuapi_deferspotfxload;
 i32 nuapi_use_target_manager_for_sound;
 
-
 float nuapi_forced_frame_time;
 i32 nuapi_max_fps = 60;
 
@@ -643,10 +407,6 @@ static i32 argc;
 /* NEEDS-REVIEW: static variable shared with src/nu2api/nucore/nuapi.cpp */
 static char **argv;
 
-
-
-// ==== src/nu2api/nucore/nucore_frame.cpp: all remaining content ====
-
 extern "C" {
     extern void (*preRenderFlashingHack)();
     extern void (*postRenderFlashingHack)();
@@ -656,21 +416,10 @@ f32 NuFrameEnd(void);
 
 }
 
-// ==== src/nu2api/nucore/nucore_plain.cpp: declarations ====
-// Temporary C-linkage compatibility surface for unresolved engine owners.
-//
-// This file collects functions whose original TU has not yet been
-// reconstructed. Domain families move to their evidenced owner as complete
-// groups; this file is not itself evidence of one original nucore TU.
-
-
-
-
 // C++-linkage helpers defined in sibling TUs.
 void NuPadRecordEndFrame(void);                      // nupad_interface.cpp
 
 extern "C" {
-
     // ---------------------------------------------------------------------------
     // Display-list bootstrap (original nucore TU file-statics)
     // ---------------------------------------------------------------------------
@@ -695,17 +444,12 @@ extern "C" {
     DECOMP_ASSERT(sizeof(NuCameraReflect) == 0x84, "camera reflection state size");
     DECOMP_ASSERT(__builtin_offsetof(NuCameraReflect, mtx) == 4, "camera reflection matrix offset");
 
-
     // ---------------------------------------------------------------------------
     // Display list — faithful helpers + pending stubs
     // ---------------------------------------------------------------------------
-
 } // extern "C"
 
-// Local helpers matching original static display-list setters (t local symbols)
-
 extern "C" {
-
     extern "C++" {
         // Original local helper cloned as DisplayListProcessSkin.isra.36 by GCC.
         // It appends the world transform, skin palette, and geometry calls as one
@@ -856,15 +600,9 @@ void NuQFntPrintV(NUQFNT *font, const char *format, va_list arguments);
     // ---------------------------------------------------------------------------
     // PS2 / Xbox legacy shims
     // ---------------------------------------------------------------------------
-
 } // extern "C"
 
 union variptr_u;
-
-// ==== src/nu2api/nucore/nu2api_nucore_misc_stubs.cpp: declarations ====
-
-// ==== src/nu2api/nucore/nupad.cpp: all remaining content ====
-
 
 #define MAX_GAME_PAD_COUNT 2
 
@@ -881,16 +619,7 @@ i16 PlayerLastPort[8] = {-1, -1, -1, -1, -1, -1, -1, -1};
 char UseCorrectDeadZoning;
 i32 enable_touch_controls = 1;
 
-
-
-
-
-
-
-
-
 static f32 ramp_vals[][2] = {{0.0f, 0.0f}, {0.5f, 0.1f}, {0.75f, 0.25f}, {0.85f, 0.5f}, {1.0f, 1.0f}};
-
 
 static f32 ramp_rate = 0.1f;
 
@@ -902,29 +631,6 @@ enum {
     PAD_BUTTON_DOWN = 1 << 0xe,
     PAD_BUTTON_LEFT = 1 << 0xf,
 };
-
-
-
-
-
-
-
-
-// ==== src/nu2api/nucore/nuptrblock.cpp: all remaining content ====
-
-
-// ==== src/nu2api/nucore/nuvideo.cpp: declarations ====
-
-
-
-
-
-// ==== src/nu2api/nucore/nuonline.cpp: all remaining content ====
-
-
-// ==== src/nu2api/nucore/nulanguage.cpp: all remaining content ====
-
-// ==== src/nu2api/nucore/nurdpi.cpp: all remaining content ====
 
 typedef struct rdpictxt_s {
     i32 cur_tok;
@@ -960,17 +666,8 @@ enum {
     TOKI_CNT = 22,
 };
 
-
-
-
-
 static i32 i_expr(RDPICTXT *ctx);
 
-
-
-
-
-// ==== src/nu2api/nucore/nuerror.cpp: all remaining content ====
 extern "C" {
     typedef void (*NuErrorFunctionPtr)(char *, ...);
     typedef void (*NuDebugTTYFunctionPtr)(i32, char *, ...);
@@ -988,19 +685,10 @@ extern "C" {
     void (*nuwarning_handler)(char *);
     i32 DisableDebugMsg;
 
-
-    extern "C++" {
-
-
-
-    }
-
     // Bound to sprintf by symbol so the one-space caption stays a real call, as in the original.
     int NuErrorSprintf(char *buffer, const char *format, ...) __asm__("sprintf");
 
 }
-
-// ==== functions in original address order ====
 
 extern "C" {
 static void NuPrimReset() {

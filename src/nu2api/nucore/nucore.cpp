@@ -54,7 +54,6 @@
 
 extern "C" void NuShaderManagerSetfv(i32, const f32 *);
 
-
 NuApplicationState *NuCore::m_applicationState;
 NuThreadManager *NuCore::m_threadManager;
 
@@ -78,18 +77,6 @@ NuApplicationState *NuCore::GetApplicationState(void) {
 
     return state;
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 extern NUMTX cacheCameraView;
 extern NUMTX cacheCameraProj;

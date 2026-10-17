@@ -130,9 +130,6 @@ NUCOLOUR3 panelamb = {1.0f, 1.0f, 1.0f};
 NUVEC paneldir[3] = {{-1.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 1.0f}, {0.0f, 0.0f, -1.0f}};
 NUCOLOUR3 panelcol[3] = {{1.0f, 0.5f, 0.5f}, {0.5f, 1.0f, 0.5f}, {0.5f, 0.5f, 1.0f}};
 
-extern "C" {
-}
-
 static constexpr u32 kNeutralSpotLightFade = 0x80808080u;
 
 i32 Lighting_HighlightFlash;
@@ -140,68 +137,16 @@ i32 (*Lighting_BlueFlickerFn)(GameObject_s *);
 i32 Lighting_FlashRedOnLastHeart;
 extern f32 GhostLightMul;
 
-
-
-
-
-// ==== src/legoapi/render/core/rtl.c: declarations ====
 // Original RTL TU basename is rtl.c; the source is compiled as C++.
-
 
 DECOMP_ASSERT(sizeof(rtlindex_s) == 0x28, "RTL index size");
 
-extern "C" {
-
-
-
-
-
-
-}
-
-extern "C" {
-
-
-
-}
-
-extern "C" {
-
-
-}
-
-extern "C" {
-
-}
-
-extern "C" {
-
-} // extern "C"
-
-extern "C" {
-
-
-} // extern "C"
-
-// RTL editor state and callbacks from the same original rtl.c text/data run.
-
-// RTL editor callbacks from the same original text run.
-
-// Burnset persistence and editing state from the same original RTL editor run.
-
-
-// RTL editor subsystem stubs (static, internal linkage).
-
-// The original editor keeps a separate help-text start line, initialized to 190.
-
-// ==== src/editor/edlevelall.cpp: declarations ====
 #if defined(__i386__) && defined(__SSE__)
 #include <xmmintrin.h>
 #endif
 #if defined(__i386__) && defined(__SSE2__)
 #include <emmintrin.h>
 #endif
-
 
 #define EDLEVEL_ADD_ACTIVE_SCENE(menu, scene_index)                                                                    \
     do {                                                                                                               \
@@ -219,10 +164,6 @@ DECOMP_ASSERT(offsetof(EdClass, interface) == 0x14, "EdClass interface offset");
 DECOMP_ASSERT(sizeof(EdMember) == 0x08, "EdMember size");
 DECOMP_ASSERT(offsetof(EdMember, reference) == 0x04, "EdMember reference offset");
 
-
-// ==== src/legoapi/characters/motion/camera.cpp: declarations ====
-
-
 // Original data symbol testmovef is float0.005 at 0x617cb0.
 
 DECOMP_ASSERT(sizeof(VIEWCAM_s) == 0x28, "ViewCam size");
@@ -232,18 +173,7 @@ DECOMP_ASSERT(offsetof(VIEWCAM_s, gamepad) == 0x24, "ViewCam gamepad offset");
 DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, path) == 0x40, "Camera context path offset");
 DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context flags offset");
 
-// ==== src/legoapi/render/core/render.cpp: declarations ====
-
 struct rtlidata_s;
-
-
-// Camera zoom state
-
-// Graphics loading flags
-
-// --- NuGScn graphics-data reader ---
-// NuReadGraphicsData is a C++ static function in the original (GCC clones it,
-// hence the `.isra.NNN` suffix in the ROM symbol table).
 
 // Retail only keeps the IPA-SRA clone, which drops the unused fourth argument.
 #if defined(__i386__)
@@ -251,9 +181,6 @@ struct rtlidata_s;
 #else
 #define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone))
 #endif
-
-// --- Extern "C": NuGScn functions have C linkage in original ---
-
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
@@ -295,9 +222,6 @@ struct rtlidata_s;
         NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
     } while (0)
 
-// DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
-// red-brick positions come from the Game init values in legogame/game.cpp.
-
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
     do {                                                                                                               \
         PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
@@ -309,18 +233,6 @@ struct rtlidata_s;
             vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
         }                                                                                                              \
     } while (false)
-
-
-// ==== functions in original address order ====
-
-// ==== src/legoapi/render/light/shadow.cpp: declarations ====
-
-
-
-
-// ==== functions in original address order ====
-
-// ==== functions in original address order ====
 
 void SetLights(NUCOLOUR3 *colour0, NUVEC *direction0, NUCOLOUR3 *colour1, NUVEC *direction1, NUCOLOUR3 *colour2,
                NUVEC *direction2, NUVEC *ambient) {

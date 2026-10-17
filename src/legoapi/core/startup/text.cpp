@@ -189,7 +189,6 @@ extern "C" {
 LANGUAGEDATA Game_LanguageList[7] = {{1, apitxt_ENGLISH}, {2, apitxt_FRENCH}, {4, apitxt_GERMAN}, {5, apitxt_ITALIAN},
                                      {3, apitxt_SPANISH}, {8, apitxt_DANISH}, {-1, NULL}};
 
-// ==== src/legoapi/menus/core/text.cpp: declarations ====
 extern i16 tNULL;
 extern i16 tENGLISH;
 extern i16 tFRENCH;
@@ -211,60 +210,22 @@ char *apitxt_DANISH = const_cast<char *>("Dansk");
 
 // Original .data @0x667ce0; the names are filled in by the static initializer.
 
-
 extern i16 tALONGTIMEAGO;
 
 extern "C" {
-
 void TextRegisterButtonMapFn(void (*fn)(char *, char *));
 void TextRegisterPulseTimerFn(f32 (*fn)(f32));
 }
-
-// ==== functions in original address order ====
-
-// ==== src/legoapi/actions/character/tagging.cpp: declarations ====
-
-
 
 DECOMP_ASSERT(sizeof(TAGTRANSFER_s) == 0x38, "tag transfer size");
 
 i32 (*Tag_NoHiddenIconFn)(GameObject_s *) = NULL;
 char *LEGOASCII_UP = NULL;
 
-// The original keeps this search out of line and passes the object in EAX.
-
-// ==== src/legoapi/items/objects/objectsall.cpp: declarations ====
-
-
-// ==== src/gameapi/edtools/edpartall.cpp: all remaining content ====
-
-extern "C" {
-}
-
-// Retail only keeps the IPA-SRA clone, which takes just the parent menu.
-
-// ==== src/legoapi/render/core/terrain_stubs.cpp: declarations ====
-
-
-// Runtime-selected groups appended after the fixed terrain allocation.
-
-// NuFileExists @nufile (nucore_plain.cpp).
-
-// ==== src/legoapi/render/fx/parts.cpp: declarations ====
-
-
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-
 }
-
-// Forward declarations for local (static) part/gizmo helper stubs.
-
-// Local (static) part (PART_s), pickup (GIZMOPICKUP_s), gizmo flow
-// (GIZFLOW_s/FLOWBOX_s), power-up and space/starfighter helpers. Stubbed as
-// local `t` symbols matching res/libTTapp.so.
-
 
 // The original repeats the per-sound emitter checks for each of the four sound slots.
 #define PART_EMIT_SOUND_ON(slot)                                                                                       \
@@ -277,8 +238,6 @@ extern "C" {
     if (type->sounds[slot] != -1 && type->sound_modes[slot] == (mode))                                                 \
         PlaySfxById(type->sounds[slot], &emitter->position);
 
-// ==== src/gameapi/edtools/edtoolsall_plain.cpp: all remaining content ====
-
 // Retail keeps an unreferenced partial-inlining clone of the old HSV2RGB
 // helper (the non-grey path) in this unit.
 #if defined(__i386__)
@@ -286,10 +245,6 @@ extern "C" {
 #else
 #define HSV2RGB_BODY_ATTR __attribute__((used, noinline, noclone))
 #endif
-
-
-// The original animation editor callbacks and lifecycle share file-local state.
-// ---- begin src/gameapi/edtools/edanimall.cpp ----
 
 // Animation editor subsystem stubs (static, internal linkage).
 
@@ -409,30 +364,10 @@ static __attribute__((used)) void edanimcbMCTBMenu(eduimenu_s *parent, eduiitem_
 
 static __attribute__((used)) void edanimcbLocalSoundMenu(eduimenu_s *parent, eduiitem_s *, u32);
 
-// ---- end src/gameapi/edtools/edanimall.cpp ----
-// ---- begin src/gameapi/edtools/edmenucallbacks.cpp ----
-
-// Editor UI callbacks retained in the original editor's menu code.
-
-// ---- end src/gameapi/edtools/edmenucallbacks.cpp ----
-
-// ---- begin src/gameapi/edtools/edptlall.cpp ----
-
 // The original particle editor's private callbacks and menu state share this TU.
-// ---- begin src/gameapi/edtools/edptlcallbacks.cpp ----
 #if defined(__SSE__)
 #include <xmmintrin.h>
 #endif
-
-// Particle-list editor UI/menu callbacks.
-
-// Particle editor UI/menu callbacks.
-
-// ---- end src/gameapi/edtools/edptlcallbacks.cpp ----
-
-// Particle list editor subsystem stubs (static, internal linkage).
-
-// ---- end src/gameapi/edtools/edptlall.cpp ----
 
 // The original local font helpers read the same private draw state as the
 // editor callbacks, so they belong to this translation unit.
@@ -468,16 +403,8 @@ static inline __attribute__((always_inline)) void eduiFntPrintEx(void *font, int
 }
 #endif
 
-// Only caller prints the property edit buffer left-aligned.
-
-// Only eduiMenuRender calls the integer clip helper, always left-aligned.
-
-
 extern "C" {
-
     // Shared editor font; edmainInit receives and stores the font handle.
-
-
 
     // The editor UI callbacks share this translation unit with their cursor,
     // menu, and interaction state in the original binary.
@@ -558,9 +485,6 @@ static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ..
 
 // Text-picker commit callbacks. Retail keeps them unmangled and local.
 
-// ==== src/gameapi/edtools/edtoolsall.cpp: declarations ====
-
-
 extern EdInputContext * Input;
 
 DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
@@ -616,15 +540,7 @@ inline void EdBitControl::operator delete(void *memory) {
     theMemoryManager.FreePool(memory, sizeof(EdBitControl));
 }
 
-// ---- begin src/gameapi/edtools/edmenucallbacks.cpp ----
-
-
-// ---- end src/gameapi/edtools/edmenucallbacks.cpp ----
-
 extern "C" {
-
-
-
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 
 static __used__ i32 cbInteractMenuCancelChild(edui_interact_s *interact);
@@ -693,26 +609,9 @@ static __used__ void eduicbSelectDirectoryEntry(eduimenu_s *menu, eduiitem_s *it
 static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u32);
 }
 
-// ==== src/legoapi/menus/screens/gamemenuall.cpp: declarations ====
-
 extern f32 HUB_EPISODETITLEY;
 
-// Retail clears these "fast repeat" latches but never sets them.
-
-
-// ==== src/nu2api/nucore/nucore_plain.cpp: declarations ====
-// Temporary C-linkage compatibility surface for unresolved engine owners.
-//
-// This file collects functions whose original TU has not yet been
-// reconstructed. Domain families move to their evidenced owner as complete
-// groups; this file is not itself evidence of one original nucore TU.
-
-
-
-// C++-linkage helpers defined in sibling TUs.
-
 extern "C" {
-
     // ---------------------------------------------------------------------------
     // Display-list bootstrap (original nucore TU file-statics)
     // ---------------------------------------------------------------------------
@@ -737,17 +636,12 @@ extern "C" {
     DECOMP_ASSERT(sizeof(NuCameraReflect) == 0x84, "camera reflection state size");
     DECOMP_ASSERT(__builtin_offsetof(NuCameraReflect, mtx) == 4, "camera reflection matrix offset");
 
-
     // ---------------------------------------------------------------------------
     // Display list — faithful helpers + pending stubs
     // ---------------------------------------------------------------------------
-
 } // extern "C"
 
-// Local helpers matching original static display-list setters (t local symbols)
-
 extern "C" {
-
     extern "C++" {
         // Original local helper cloned as DisplayListProcessSkin.isra.36 by GCC.
         // It appends the world transform, skin palette, and geometry calls as one
@@ -879,22 +773,14 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // PS2 / Xbox legacy shims
     // ---------------------------------------------------------------------------
-
 } // extern "C"
 
 struct nupad_s;
 
-// ==== src/gameapi/edtools/edui.cpp: all remaining content ====
-
-// ==== src/legoapi/actions/character/speederchase.cpp: declarations ====
-
 // This alignment affects PodRaceAUpdate codegen even though the linked address is 32-byte aligned.
-
 
 DECOMP_ASSERT(sizeof(SPEEDERCHASEVALUES) == 0x1c, "Speeder chase tuning stride");
 DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
-
-// ==== src/legoapi/characters/motion/camera.cpp: declarations ====
 
 // Original data symbol testmovef is float0.005 at 0x617cb0.
 
@@ -905,31 +791,10 @@ DECOMP_ASSERT(offsetof(VIEWCAM_s, gamepad) == 0x24, "ViewCam gamepad offset");
 DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, path) == 0x40, "Camera context path offset");
 DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context flags offset");
 
-// ==== src/gameapi/edtools/edfile.cpp: all remaining content ====
-
-
-// ==== src/legoapi/core/config/saveload.cpp: declarations ====
-
-
-
 // Retail keeps the whole body of RenderFileSel3 as the split-out .part clone;
 // the exported function only tests FS_Active.
 
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
-
-
-
-
 struct GAMEMESSAGE_s;
-
-// Camera zoom state
-
-// Graphics loading flags
-
-// --- NuGScn graphics-data reader ---
-// NuReadGraphicsData is a C++ static function in the original (GCC clones it,
-// hence the `.isra.NNN` suffix in the ROM symbol table).
 
 // Retail only keeps the IPA-SRA clone, which drops the unused fourth argument.
 #if defined(__i386__)
@@ -937,9 +802,6 @@ struct GAMEMESSAGE_s;
 #else
 #define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone))
 #endif
-
-// --- Extern "C": NuGScn functions have C linkage in original ---
-
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
@@ -981,9 +843,6 @@ struct GAMEMESSAGE_s;
         NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
     } while (0)
 
-// DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
-// red-brick positions come from the Game init values in legogame/game.cpp.
-
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
     do {                                                                                                               \
         PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
@@ -996,24 +855,7 @@ struct GAMEMESSAGE_s;
         }                                                                                                              \
     } while (false)
 
-
-// ==== functions in original address order ====
-
 extern "C" {
-
-
-}
-
-extern "C" {
-
-
-}
-
-// ==== src/nu2api/nucore/nucore_plain.cpp: declarations ====
-//
-
-extern "C" {
-
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
@@ -1023,14 +865,11 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
-
 } // extern "C"
 
 extern "C" {
-
     extern "C++" {
         static __attribute__((noinline, noclone)) void
         DisplayListProcessSkin(NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry, NUDISPLAYLISTITEM **first_and_last,
@@ -1107,14 +946,7 @@ extern "C" {
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
-
 } // extern "C"
-
-// ==== functions in original address order ====
-
-// ==== functions in original address order ====
-
-// ==== functions in original address order ====
 
 __attribute__((optimize("O2", "tree-vectorize"))) void Tag_DrawIcon_Batman(GameObject_s *object) {
     i32 count;

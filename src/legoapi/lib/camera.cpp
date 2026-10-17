@@ -1,8 +1,6 @@
 // Original translation unit reconstructed from the reference address map.
 // Functions are defined in original address order.
 
-// ==== src/legoapi/characters/motion/camera.cpp: declarations ====
-
 #include "decomp.h"
 #include "legoapi/world/area.h"
 #include "legoapi/core/config/cheat.h"
@@ -118,29 +116,14 @@
 #include "legoapi/characters/motion/camera.h"
 #include "legoapi/lib/camera.h"
 
-
 // Original data symbol testmovef is float0.005 at 0x617cb0.
 
 DECOMP_ASSERT(sizeof(VIEWCAM_s) == 0x28, "ViewCam size");
 DECOMP_ASSERT(offsetof(VIEWCAM_s, pitch) == 0x10, "ViewCam pitch offset");
 DECOMP_ASSERT(offsetof(VIEWCAM_s, gamepad) == 0x24, "ViewCam gamepad offset");
 
-
 DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, path) == 0x40, "Camera context path offset");
 DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context flags offset");
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
-
-
-
-
-// Camera zoom state
-
-// Graphics loading flags
-
-// --- NuGScn graphics-data reader ---
-// NuReadGraphicsData is a C++ static function in the original (GCC clones it,
-// hence the `.isra.NNN` suffix in the ROM symbol table).
 
 // Retail only keeps the IPA-SRA clone, which drops the unused fourth argument.
 #if defined(__i386__)
@@ -148,9 +131,6 @@ DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context fl
 #else
 #define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone))
 #endif
-
-// --- Extern "C": NuGScn functions have C linkage in original ---
-
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
@@ -192,9 +172,6 @@ DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context fl
         NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
     } while (0)
 
-// DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
-// red-brick positions come from the Game init values in legogame/game.cpp.
-
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
     do {                                                                                                               \
         PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
@@ -206,14 +183,6 @@ DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context fl
             vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
         }                                                                                                              \
     } while (false)
-
-
-// ==== functions in original address order ====
-
-// ==== src/legoapi/render/core/terrain.cpp: declarations ====
-
-
-
 
 struct GAMECAMERA_s;
 
@@ -396,8 +365,6 @@ namespace {
 
 } // namespace
 
-// Original 400-pointer table at 0x61e860: 147 named effects, then empty slots.
-
 // Constructs the fixed terrain header and its variable-sized group, index and
 // platform arrays in the caller's arena. The four bounds arrays and the cell
 // assignment array are temporary storage carved backwards from buf_end.
@@ -449,7 +416,6 @@ namespace {
 
 } // namespace
 
-
 namespace {
 
 } // namespace
@@ -463,8 +429,6 @@ namespace {
 namespace {
 
 } // namespace
-
-// ==== src/legoapi/actions/character/simpletons.cpp: declarations ====
 
 static NARROWSOCKEXCEPTION *NarrowSockException;
 
@@ -485,9 +449,6 @@ static inline i32 NarrowSockPositionAllowed(GameObject_s *object, SOCKSYS *syste
     }
     return 1;
 }
-
-
-// ==== functions in original address order ====
 
 void GameCam_ResetLookRot(GAMECAMERA_s *camera) {
     if (camera == NULL) {

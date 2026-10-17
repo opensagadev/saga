@@ -70,18 +70,12 @@
 
 i32 openlevels = 0;
 
-
-
-
-// ==== src/editor/edlevelall.cpp: declarations ====
 #if defined(__i386__) && defined(__SSE__)
 #include <xmmintrin.h>
 #endif
 #if defined(__i386__) && defined(__SSE2__)
 #include <emmintrin.h>
 #endif
-
-
 
 #define EDLEVEL_ADD_ACTIVE_SCENE(menu, scene_index)                                                                    \
     do {                                                                                                               \
@@ -99,12 +93,7 @@ DECOMP_ASSERT(offsetof(EdClass, interface) == 0x14, "EdClass interface offset");
 DECOMP_ASSERT(sizeof(EdMember) == 0x08, "EdMember size");
 DECOMP_ASSERT(offsetof(EdMember, reference) == 0x04, "EdMember reference offset");
 
-
-// ==== src/legoapi/world/area.cpp: all remaining content ====
-
-
 struct APICHARACTERMODELLIST_s;
-
 
 AREADATA *ADataList = NULL;
 
@@ -112,7 +101,6 @@ i32 AREA_DEFAULTBONUSTIMETRIALTIME = 300;
 i32 AREA_DEFAULTCHALLENGETIME = 600;
 
 struct bgprocinfo_s;
-// ==== functions in original address order ====
 
 static void AddToModelList(APICHARACTERMODELLIST_s *list, i32 *count, i32 capacity, i32 character_id, i32 load_model,
                            EXTRAMODEL *extra_models) {

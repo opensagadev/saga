@@ -49,43 +49,14 @@ extern "C" {
     i32 IgnoreWallSplines;
 }
 
-
-
-
 extern "C" {
     extern "C++" void DebrisProcessSpheres(uv1deb *, f32, debinftype *, debkeydatatype_s *, i32);
 }
 
-
-// NuFileExists @nufile (nucore_plain.cpp).
-
-
-
-
 extern "C" {
-
 void Debris(i32 update_panel_time);
-
 } // extern "C"
 
 extern "C" {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 extern "C++" TERRAIN_TRACK_SLOT *AllocTerrId();
-
-
-
 } // extern "C"

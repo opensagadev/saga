@@ -4,7 +4,6 @@
 // The original unit constructs the homogeneous VuVec header constants.
 #include "nu2api/nucore/nuvuvec.hpp"
 
-// ==== src/gamelib/nuwind/nuwind_groups.cpp: all remaining content ====
 #include "gamelib/nuwind/nuwind.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nutrig.h"
@@ -28,8 +27,6 @@ extern "C++" void NuWindFreeGrp(NuWindGType *group);
 
 void NuWindUpdateArray(NUVEC **positions);
 }
-
-// ==== functions in original address order ====
 
 extern "C" {
     void NuWindInit(void) {

@@ -22,9 +22,7 @@
 // functions below were compiled without it.
 #define SCALAR_FN __attribute__((optimize("omit-frame-pointer", "no-tree-vectorize")))
 
-
 static u32 FRAMES_TO_WAIT = 1;
-
 
 void FadeStillWipe::DrawFade() {
     if (wait_till_next_frame != 0)

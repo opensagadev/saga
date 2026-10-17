@@ -11,8 +11,6 @@ i32 NuSoundSource::GetNumInitialBuffers() const {
     return NuSoundSource::sNumInitialBuffers[(u32)this->feed_type];
 }
 
-
-
 NuSoundSource::NuSoundSource(const char *name, SourceType source_type, FeedType feed_type) {
     this->name_length = 1;
     this->name_capacity = 1;

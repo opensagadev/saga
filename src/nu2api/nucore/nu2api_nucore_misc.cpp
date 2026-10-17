@@ -38,12 +38,6 @@
 struct TERRSET;
 extern TERRSET *CurTerr;
 
-
-extern "C" {
-}
-
-
-
 extern "C" void BeginCriticalSectionGL(const char *, i32);
 extern "C" void EndCriticalSectionGL(const char *, i32);
 extern i32 bgProcIsBgThread(void);
@@ -52,24 +46,8 @@ extern MemoryManager theMemoryManager;
 extern "C" void *MemoryManagerAllocPool(MemoryManager *, u32, i32) asm("_ZN13MemoryManager9AllocPoolEji");
 extern "C" void MemoryManagerFreePool(MemoryManager *, void *, u32) asm("_ZN13MemoryManager8FreePoolEPvj");
 
-
-
 extern nurenderscene_s currentScene;
 extern HashRedirect g_shaderProgramRedirects[417];
-
-
-
-
-
-
-
-// NuIOS_SetCullMode is transcribed in android/nuiosdl_gl.cpp (original 0x29c110).
-
-
-
-
-// NuIOSDLMtlCallback is transcribed in android/nuiosdl_gl.cpp (original 0x29c480).
-
 
 // NuIOSDLGeom2DCallback is transcribed in android/nuiosdl_gl.cpp (original 0x29d1a0).
 
@@ -77,11 +55,9 @@ i32 NuIOS_GetInAppProduct(i32, NuIOS_InAppProduct *) {
     return 0;
 }
 
-
 i32 NuIOS_GetPurchaseResult() {
     return 0;
 }
-
 
 void NuIOS_DisplaySystemAlert(char const *) {
 }
@@ -90,12 +66,9 @@ i32 NuIOS_IsProductPurchased(char *) {
     return 0;
 }
 
-
 i32 NuIOS_GetInAppProductByID(char *, NuIOS_InAppProduct *) {
     return 0;
 }
-
-
 
 void NuIOS_GetNumInAppPurchases() {
 }
@@ -104,7 +77,6 @@ i32 NuIOS_PurchaseInAppProduct(char *) {
     return 0;
 }
 
-
 i32 NuIOS_CanMakeInAppPurchases() {
     return 0;
 }
@@ -112,9 +84,7 @@ i32 NuIOS_CanMakeInAppPurchases() {
 void NuIOS_RestoreInAppPurchases() {
 }
 
-
 // NuDebrisRendererFlushBuffers is transcribed in android/nuptl_android.c (original 0x296f35).
-
 
 i32 NuIOS_IsProductPurchasedByNum(i32) {
     return 0;
@@ -122,7 +92,6 @@ i32 NuIOS_IsProductPurchasedByNum(i32) {
 
 void NuIOS_CateInAppPurchaseManager() {
 }
-
 
 i32 NuIOS_GetInAppProductIdentifier(i32, NuIOS_InAppProduct *) {
     return 0;
@@ -136,13 +105,9 @@ i32 NuIOS_AreInAppPurchasesAvailable() {
     return 0;
 }
 
-
-
-
 extern "C" {
     u32 NuLgtSeed = 12345;
 }
-
 
 void NuMemory::MemErrorHandler::CloseDump(NuMemoryManager *, u32) {
 }

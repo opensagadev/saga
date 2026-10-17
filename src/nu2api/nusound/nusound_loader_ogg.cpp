@@ -85,10 +85,6 @@ void *NuSoundHeaderOGG::GetExtendedData() const {
     return (void *)extended_data;
 }
 
-// ==== src/legoapi/audio/gamelib_ogg.cpp: all remaining content ====
-
-// ==== functions in original address order ====
-
 usize NuSoundLoaderOGG::OggCallbackRead(void *dest, usize count, usize size, void *callbacks_) {
     return (*(OGGCallbacksVTable **)callbacks_)->read(callbacks_, dest, count * size);
 }

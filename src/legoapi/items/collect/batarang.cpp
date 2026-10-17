@@ -32,7 +32,6 @@ extern i16 id_CATWOMAN;
 
 i32 GizmoBlowupBlowup(GIZMOBLOWUP_s *, i32, i32, i32, GameObject_s *, i32);
 
-
 static unsigned int Batarang_GetTargetPos(BATARANG_s *batarang, int index, nuvec_s *position) {
     if (batarang->field_0x7d != 0 && batarang->active != 0 && batarang->active == index) {
         GameObject_s *owner = batarang->owner;

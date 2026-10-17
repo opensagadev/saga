@@ -283,13 +283,11 @@ static i32 ForceBackType = 0;
 static f32 ForceBackRadius = 0.0f;
 static f32 ForceBackRadius2 = 0.0f;
 
-
 // The retail move.cpp initializer owns these four managed references.
 MechWeakPtr<MechObjectInterface, 4> nextShootTarget(NULL);
 MechWeakPtr<MechObjectInterface, 4> forceNextAttackOpponent;
 MechWeakPtr<MechObjectInterface, 4> lungeTarget(NULL);
 MechWeakPtr<MechObjectInterface, 4> BobaRocketTarget(NULL);
-
 
 // Original action/context lookup data, with its arrays and pointers in one owner.
 static CHARACTER_CONTEXT_INFO_s _CInfoTab[] = {
@@ -671,7 +669,6 @@ EXTRAACTIONDATA_s ExtraActionData[] = {
     {NULL, 0},
 };
 
-
 float SLAMGRAVITY = -15.0f;
 float TURNTIME = 1.0f;
 static float applygravity_extrahoveroffset;
@@ -730,22 +727,13 @@ extern i16 id_PKDROID, id_PITDROID;
 f32 CamStopBlend = 1.0f;
 i32 netcamera;
 
-extern "C" {
-}
-
-
 static GAMECHARACTERDATA *GetGameCharacterData(GameObject_s *object) {
     return object->apiobj.character_data->game_character;
 }
 
-
 pushblock_s *BlockInBlock(WORLDINFO_s *, pushblock_s *, i32, pushblock_s **);
 void MoveBlocksOverBlock(WORLDINFO_s *, pushblock_s *, i32, nuvec_s *);
 void MoveBlocks(WORLDINFO_s *world, pushblock_s *block, i32 index, nuvec_s *velocity);
-
-
-
-
 
 static inline void CheckFallLand(GameObject_s *object) {
     if (object->character_context == -1 && object->field_0xe31 == 0 && object->apiobj.field_0x27d != 0 &&
@@ -758,22 +746,10 @@ static inline void CheckFallLand(GameObject_s *object) {
         object->movement_runtime_flags &= ~4;
 }
 
-
-
-
-
-extern "C" {
-}
-
-
-
 extern f32 CurrentSpeed;
 
 f32 speeder_smoke_rate = 5.0f;
 f32 speeder_offset_speed = 2.0f;
-
-
-
 
 // Retail splits the guard off as an inline head; the rest is this partial clone.
 static MOVE_CLONE_ATTR1 void SelfDestructCodeBody(GameObject_s *object)
@@ -786,42 +762,25 @@ static inline void SelfDestructCode(GameObject_s *object, i32 pressed) {
     SelfDestructCodeBody(object);
 }
 
-
-
-
-
-
 void MoveBlocksOverBlock(WORLDINFO_s *world, pushblock_s *block, i32 excluded, nuvec_s *velocity);
-
 
 extern i32 LevFlag[4];
 // Original exported level control, initialized to 2 at 0x623d00.
 i32 GUNSHIPAHACK = 2;
 
-
-
 extern "C" i16 id_LANDSPEEDER;
 
-
-
-
 i32 PODSPRINTDEB = 117;
-
 
 // These pod tuning values are zero-initialized in the original image.
 f32 PosSeekPitch[2];
 f32 PODBOOSTHEIGHT;
-
-
 
 f32 zam_smoke_rate = 10.0f;
 f32 test_hoverheight;
 void (*LEGO_SET_SLOWDOWNFN)(GameObject_s *);
 
 static __attribute__((noinline)) void ShieldCode(GameObject_s *object);
-
-
-
 
 static bool JediHasAction(const GameObject_s *object, JEDI_ACTION action) {
     return object->apiobj.character_model->model_data_b[action] != NULL;
@@ -830,7 +789,6 @@ static bool JediHasAction(const GameObject_s *object, JEDI_ACTION action) {
 static i32 ComboOpponent_Behind;
 static f32 ComboOpponent_Range2;
 static f32 PlayerOpponent_Range2;
-
 
 static u8 SetComboOpponent(GameObject_s *object, f32 range, i32 update_heading, i32 mode);
 
@@ -910,22 +868,9 @@ static void FindIncomingThreats(GameObject_s *object) {
         object->field_0xe22 |= 8;
 }
 
-
-
-
-
 // Retail inlines the fade and step checks into each caller; this is the remaining partial clone.
 static MOVE_CLONE_ATTR2 void ForceGlowCode(GameObject_s *object, i32 model)
     __asm__("_ZL13ForceGlowCodeP12GameObject_si.part.34");
-
-
-
-
-
-
-
-
-
 
 // Retail splits the context test off as an inline head; the rest is this partial clone.
 static MOVE_CLONE_ATTR2 void ForcePushCodeBody(GameObject_s *object, i32 held)
@@ -935,8 +880,6 @@ static inline void ForcePushCode(GameObject_s *object, i32 held) {
     if (object->character_context == 0x1b)
         ForcePushCodeBody(object, held);
 }
-
-
 
 static inline __attribute__((always_inline)) void ForceThrowConsiderTarget(GameObject_s *object, i32 i, f32 &distance) {
     if (Player[i] == NULL || (Player[i]->apiobj.field_0x1f8 & 0x1001) != 0x1001 || Player[i]->apiobj.field_0x287 != 0 ||
@@ -951,35 +894,17 @@ static inline __attribute__((always_inline)) void ForceThrowConsiderTarget(GameO
     }
 }
 
-// Retail keeps only the IPA-SRA clone of this function.
 static MOVE_CLONE_ATTR2 void ForceThrowCode(GameObject_s *object, i32 pressed)
     __asm__("_ZL14ForceThrowCodeP12GameObject_sii.isra.13");
 
-
-// Retail keeps only the IPA-SRA clone of this function.
 static MOVE_CLONE_ATTR2 void ForceDeflectCode(GameObject_s *object, i32 pressed, i32 held)
     __asm__("_ZL16ForceDeflectCodeP12GameObject_siii.isra.31");
 
-
-
-
-
-
-
-
-
 i32 show_autojump_hint;
-
-
 
 extern "C" {
     extern i16 id_MINIATST, id_MINIATTE;
 }
-
-
-
-
-
 
 // Fires the jet pack: plays the jump sound, applies the character's jump
 // speed and readies a jet-pack weapon.
@@ -993,9 +918,6 @@ static inline void JetPackLaunch(GameObject_s *object) {
     object->jump_variant_timer = 0.0f;
 }
 
-
-
-
 static i32 IsAFallAnim(i32 animation) {
     if (animation == 5)
         return 1;
@@ -1008,10 +930,7 @@ static i32 IsAFallAnim(i32 animation) {
     return animation == 0x74;
 }
 
-
 i32 SnapPosTaken(WORLDINFO_s *world, pushblock_s *, nuvec_s *position, i32 excluded_index);
-
-
 
 void SetHeadTarget(GameObject_s *object, NUVEC *position, i8 priority, f32 time, f32 minimum_delay, f32 maximum_delay) {
     if (position != NULL) {
@@ -1034,19 +953,8 @@ void SetHeadTarget(GameObject_s *object, NUVEC *position, i8 priority, f32 time,
     }
 }
 
-
-
-
-
-
 void JumpCode(GameObject_s *object, i32 jump_pressed, i32 jump_held, u32 animation_set, i32 action_pressed,
               i32 action_held, i32 hit_effect);
-
-
-
-
-
-
 
 void SetObjAsHeadTarget(GameObject_s *object, GameObject_s *target, signed char, float, float, float) {
     if (target != NULL && object != NULL && target->apiobj.character_data != NULL) {
@@ -1058,26 +966,12 @@ void SetObjAsHeadTarget(GameObject_s *object, GameObject_s *target, signed char,
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-// Retail splits the context test off as an inline head; the rest is this partial clone.
 static MOVE_CLONE_ATTR1 void GrabCodeBody(GameObject_s *object) __asm__("_ZL8GrabCodeP12GameObject_s.part.15");
 
 static inline void GrabCode(GameObject_s *object) {
     if (__builtin_expect(object->character_context == 0x38, 1))
         GrabCodeBody(object);
 }
-
-
 
 DECOMP_ASSERT(sizeof(AWKWARDSHAPESPHERE_s) == 12, "Awkward shape sphere size");
 DECOMP_ASSERT(offsetof(AWKWARDSHAPESPHERE_s, radius) == 8, "Awkward shape sphere radius offset");
@@ -1089,22 +983,11 @@ static AWKWARDSHAPESPHERE_s AwkwardShapeSphere[] = {
     {&id_FIRETRUCK, 2, 1, 0.3f}, {NULL, 0, 0, 0.0f},
 };
 
-
-
-
-
 extern i16 id_MINIATST, id_MINIATTE;
-
-
 
 extern i16 id_SKELETON;
 
 static NUVEC poopos[2];
-
-
-
-// ==== src/legoapi/characters/motion/gameanim.cpp: declarations ====
-
 
 // Retail uses translation-unit-local helpers with compiler-inferred private
 // calling conventions; keep their shared animation-mode call sites intact.
@@ -1113,9 +996,6 @@ extern i16 id_JUMBOHOMINGDROID;
 extern i16 id_GAMORREANGUARD, id_PRINCESSLEIASLAVE, id_LAMASU, id_TAUNWE;
 extern i16 id_PENGUIN, id_UMBRELLA, id_GLIDEPACK;
 
-
-
-
 static inline i16 JediWeaponIdle(GameObject_s *object) {
     if (((object->field_0xe22 & GAMEOBJECT_E22_FLAG_WEAPON_ANIMATION) != 0 || object->field_0xe32 == 1) &&
         object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_ALT_WEAPON_IDLE] != NULL)
@@ -1123,78 +1003,15 @@ static inline i16 JediWeaponIdle(GameObject_s *object) {
     return CHARACTER_ANIMATION_WEAPON_IDLE;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 extern "C" {
-
-
     // Original @0x2c17d0. The non-quaternion ANI4 player uses a compact
     // four-samples-per-word curve stream. Only groups enabled by the node's
     // translation/rotation/scale flags occupy space in that stream.
-
-
-
 } // extern "C"
 
 i32 GizmoFileReadGameAnimSet(GAMEANIMSET_s *set, void *world_ptr,
                              void (*read_object_data)(GAMEANIMOBJ_s *, unsigned char), unsigned char version,
                              char *prefix, char *suffix);
-
-
-
-
-
-// ==== src/legoapi/world/levels/episodeV.cpp: declarations ====
-
 
 extern MechWeakPtr<MechObjectInterface, 4> BobaRocketTarget;
 extern "C" void *AIPAthFindPathCnx(AISYS_s *, AIPATH_s *, char *, char *, i32 *);
@@ -1204,67 +1021,13 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-extern "C" {
-}
 DECOMP_ASSERT(sizeof(HOTHBATTLEE_NETPACKET_s) == 0x58, "Hoth panel packet size");
 DECOMP_ASSERT(offsetof(HOTHBATTLEE_NETPACKET_s, alpha) == 0x24, "Hoth panel packet alpha offset");
 DECOMP_ASSERT(offsetof(HOTHBATTLEE_NETPACKET_s, count) == 0x54, "Hoth panel packet count offset");
 
-
-
-
-
-
-
 f32 rocket_speed = 1.2f;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ===========================================================================
 // Asteroid chase (AsteroidChase_A / B / C / D)
-// ===========================================================================
 
 DECOMP_ASSERT(sizeof(ASTEROID_s) == 0x18, "ASTEROID_s size");
 
@@ -1274,31 +1037,12 @@ DECOMP_ASSERT(offsetof(FINALASTEROID_s, rotation_x) == 0x34, "final asteroid rot
 
 DECOMP_ASSERT(sizeof(ASTEROIDCNETPACKET_s) == 8, "asteroid C network packet size");
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ==== src/legoapi/render/fx/parts.cpp: declarations ====
-
-
-
 struct rtlset;
 
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-
 }
-
 
 // Forward declarations for local (static) part/gizmo helper stubs.
 struct spacelevel_s;
@@ -1310,59 +1054,9 @@ struct quickboltinfo;
 
 extern f32 ForceThrowSpeed, ForceThrowGravity;
 
-
-
-
 extern "C" {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     // The editor loader clears these page IDs with aligned vector stores.
-
-
-
-
-
-
-
-
-
-
-
 } // extern "C"
-
-
-
-extern "C" {
-}
-
-extern "C" {
-
-}
-
-
-
-
-
-
-
-
-
 
 // The original repeats the per-sound emitter checks for each of the four sound slots.
 #define PART_EMIT_SOUND_ON(slot)                                                                                       \
@@ -1376,17 +1070,6 @@ extern "C" {
         PlaySfxById(type->sounds[slot], &emitter->position);
 
 PART_s *FindIncomingPart(void *owner, NUVEC *position, f32 radius, u32 flags, f32 range);
-
-
-
-
-
-
-
-
-
-// ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
-
 
 i32 testlaser_type;
 f32 testlaser_endw = 0.1f;
@@ -1403,25 +1086,11 @@ extern "C" {
     extern i32 FalconDebKey[2];
 }
 
-// Written by ThingManager's ctor (original global @0x124f2e0, .bss).
-
-
-
-
-
-
-// Enabled in the target data image.  Ordinary background characters are
-// staggered across frames; special movement states opt back into full-rate
-// processing through the forced-update path.
-
-
-
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
 
     static_assert(sizeof(lego_aiconditiondefs) / sizeof(lego_aiconditiondefs[0]) == 178,
                   "complete game AI condition registry");
-
 
 }
 
@@ -1429,14 +1098,7 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 // remaining ids enumerate the current story list while omitting variants that
 // are represented by those dedicated routes.
 
-
-
 struct CUTSCENEPLAYERCLIP;
-
-
-
-
-
 
 #if defined(__i386__)
 #define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
@@ -1444,110 +1106,28 @@ struct CUTSCENEPLAYERCLIP;
 #define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone))
 #endif
 
-// Retail keeps only the IPA-SRA clone, which takes the other object's x and z by address.
-
-extern "C" {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER;
 
-
-
-
-
-
-
-
 GIZMOBLOWUP_s *GizmoBlowUp_Hit(GameObject_s *, NUVEC *, i32, f32, NUVEC *, NUVEC *, BOLT_s *, u32, u8 *);
-
-
-
 
 // ThingManager objects return to the theMemoryManager pool (D0 @0x425a50).
 inline void ThingManager::operator delete(void *thing, usize size) {
     theMemoryManager.FreePool(thing, size);
 }
 
-extern "C" {
-}
-
-
-
-
-
-
-
-
 extern i16 id_PKDROID;
-
-
-
-
 
 GameObject_s *FindNearestGameObject(NUVEC *position, GameObject_s *exclude, u32 required_flags, f32 radius,
                                     f32 extra_radius, i32 animation, i32 character_id, i32 player_index,
                                     f32 *distance_squared, i32 horizontal_only, i32 (*filter)(GameObject_s *),
                                     bool first_match);
 
-
-
-// ==== src/legoapi/actions/combat/fighting.cpp: declarations ====
-
-
-
-
-
-
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e4) == 0x7e4, "Quick shoot record offset");
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e8) == 0x7e8, "Quick shoot record count offset");
 DECOMP_ASSERT(offsetof(GameObject_s, quick_shoot_flags) == 0xe2f, "Quick shoot flags offset");
 DECOMP_ASSERT(offsetof(GameObject_s, quick_shoot_bolt_id) == 0xe3e, "Quick shoot bolt ID offset");
 
-
-
-
-// ==== src/legoapi/characters/core/players.cpp: declarations ====
 struct HINT_s;
-
-
 
 struct MechTouchUIElement;
 struct PLAYERITEM_s;
@@ -1556,14 +1136,7 @@ struct PLAYERPACKET_s;
 struct SOCKPOSITION_s;
 struct TouchHolder;
 
-
-
-
 // --- Helpers moved from world.cpp ---
-
-
-
-
 
 static f32 sPreResetMulA = 1.0f / 65535.0f;
 static f32 sPreResetMulB = 0.03f;
@@ -1573,84 +1146,19 @@ static f32 sPreReset1048Scale = 0.5f;
 static f32 sPreResetDivF = 0.21f;
 static f32 sPreResetMulG = 0.035f;
 
-
-
-
-
-// ---- Player start spawn entries ----
-
 // ---- Misc player/gameobject helpers relocated from doorstubs.cpp ----
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 namespace {
 
 } // namespace
 
-
-
-
-
-
-
-
-
-
 DECOMP_ASSERT(sizeof(SPECIAL_LAYER_s) == 0xc, "SPECIAL_LAYER_s size");
-
-
-
-
-
-
-
-
-// ==== src/legoapi/actions/movement/pushing.cpp: declarations ====
-
-
-
-
-
-
-
-
-
-// ==== src/legoapi/characters/motion/camera.cpp: declarations ====
-
 
 // Original data symbol testmovef is float0.005 at 0x617cb0.
 
 DECOMP_ASSERT(sizeof(VIEWCAM_s) == 0x28, "ViewCam size");
 DECOMP_ASSERT(offsetof(VIEWCAM_s, pitch) == 0x10, "ViewCam pitch offset");
 DECOMP_ASSERT(offsetof(VIEWCAM_s, gamepad) == 0x24, "ViewCam gamepad offset");
-
-
-
-
-
-
-
-extern "C" {
-
-
-} // extern "C"
 
 extern "C" i16 id_LANDSPEEDER;
 extern i32 CUTCAMONLY, GUNSHIPAHACK, netcamera, complexsockposition_forcesock, movegamecamera_forcesock;
@@ -1660,110 +1168,24 @@ GameObject_s *FindNearestGameObject(NUVEC *, GameObject_s *, u32, f32, f32, i32,
 DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, path) == 0x40, "Camera context path offset");
 DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context flags offset");
 
-
-
-
-
-
-
-
-
-
-
-
-
-// ==== src/legoapi/audio/specialsfx.cpp: declarations ====
-
-
 static u8 disorientAxis = 7;
 
-
-
-
-
-
-
-// ==== src/legoapi/actions/character/speederchase.cpp: declarations ====
-
 // This alignment affects PodRaceAUpdate codegen even though the linked address is 32-byte aligned.
-
-
 
 DECOMP_ASSERT(sizeof(SPEEDERCHASEVALUES) == 0x1c, "Speeder chase tuning stride");
 DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 
-
-
 i32 IDLESPEEDINNARROWSOCKSONLY = 0;
-
-
-
-
-
-
-
-
-
-
-// ==== src/legoapi/gizmo/base/gizmo.cpp: declarations ====
-
 
 struct FLOWBOX_s;
 
 DECOMP_ASSERT(sizeof(GIZMOTYPES) == 0xc, "Gizmo type-table header ABI");
 DECOMP_ASSERT(offsetof(GIZMOTYPES, types) == 8, "Gizmo type-table pointer offset");
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ==== src/legoapi/misc/legoapi_misc.cpp: declarations ====
-
 extern "C" {
     extern "C++" i32 (*GamePads_IgnoreInputFn)(void);
     extern "C++" FadeSystem FadeSys;
 }
-
-
-
-
-
-
-
-
-// ==== src/legoapi/world/levels/episodeII.cpp: declarations ====
-
 
 struct instNUGCUTSCENE_s;
 
@@ -1798,43 +1220,7 @@ DECOMP_ASSERT(sizeof(DOOKU_C_s) == 20, "Dooku C state ABI");
 
 DECOMP_ASSERT(sizeof(KAMINO_E_s) == 120, "Kamino E state ABI");
 
-
-// Episode 2 level handlers, in the game's Episode_II progression:
-// kamino / factory (geonosis droid factory) / jedi / gunship / bonus gunship /
-// dooku, then the NewTown bonus. The coruscant bounty-hunter pursuit lives in
-// pursuit.cpp, its own translation unit in the original binary.
-
-// ===========================================================================
-// Kamino
-// ===========================================================================
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ===========================================================================
-// Geonosis — droid factory (Factory_B / Factory_G)
-// ===========================================================================
-
-
-
-
-
-
-
-// ===========================================================================
 // Jedi (Jedi_B)
-// ===========================================================================
 
 DECOMP_ASSERT(sizeof(JEDIB_CREATURE_s) == 0x60, "JEDIB_CREATURE_s ABI");
 
@@ -1842,91 +1228,13 @@ DECOMP_ASSERT(sizeof(JEDIB_s) == 0x63ec, "JEDIB_s ABI");
 
 DECOMP_ASSERT(sizeof(JEDIBNETPACKET_s) == 0x20, "JEDIBNETPACKET_s ABI");
 
-// Pushes `position` out of any antinode it falls inside, then resolves it to a
-// path point and fills in `locator` for it. Returns 0 when the point is off the
-// arena or off the path network.
-// JediBInitLocator is inlined into JediB_Init apart from everything after
-// the network check, which retail keeps as the split-out body of the IPA-SRA
-// clone (it only needs &world->ai_sys).
-
-
-
-
-
-// ===========================================================================
-// Gunship (Gunship_A / Gunship_B)
-// ===========================================================================
-
-
-
-
-
-
-// ===========================================================================
-// Bonus gunship (Bonus_Gunship_A / Bonus_Gunship_B)
-// ===========================================================================
-
-
-
-
-
-
-
-// ===========================================================================
 // Dooku (Dooku_C)
-// ===========================================================================
-
-
-
-
-
-// ==== src/legoapi/world/levels/episodeI.cpp: declarations ====
-
 
 static_assert(sizeof(struct LEVFLAGBYTES_s) == 16, "LevFlag must be 16 bytes");
-
-// Episode 1 level handlers: negotiations / gungan / rescue / podrace /
-// podsprint / retake / maul / anakins-flight. This is the only implemented
-// level file; episodes II-VI are still stubs.
-//
-// Functions appear in the original translation unit's address order (see
-// res/libTTapp.so 0x1fa8e0..0x203d50). PodLevel and SetPodMergeAnims live at
-// the end because the original binary defines them in other units.
-
-// --- Cross-file entry points (C linkage) -----------------------------------
-//
-// Declared here rather than in a shared header because episodeI.cpp is their
-// only consumer within the levels module.
 
 extern "C" {
     void *AIPAthFindPathCnx(AISYS_s *, AIPATH_s *, char *, char *, i32 *); // original name keeps the typo
 }
-
-// --- Cross-file entry points (C++ linkage) ---------------------------------
-
-// PodSprintA_Update boulder-seek state.
-
-// --- File-local layout types -----------------------------------------------
-
-// Every caller passes mode 0, so retail keeps only this constprop clone.
-
-// --- File-local state --------------------------------------------------------
-//
-// Names are the original statics (_ZL... symbols in res/libTTapp.so) and must
-// not be renamed. Initial values match the original .data image.
-
-// Mushroom-collapse cutscene state (initial values from the .data image;
-// mushroom_time_* are also mutated by Action_MushroomCollapse).
-
-// Retake-G guard counters (net-shared through retakeg_netpacket).
-
-// Maul boss levels.
-
-// Gungan plains wildlife spawner (0x114 bytes, layout verified against
-// _ZL8gungan_a).
-// ===========================================================================
-// Sniper turrets (shared by PodRace C and PodSprint A)
-// ===========================================================================
 
 // PodSprint_InitAISpline is partially inlined into PodSprintA_Init: the
 // clear, lookup and spline checks are inlined and the crossing scan is the
@@ -1937,99 +1245,8 @@ extern "C" {
 #define PODSPRINT_AISPLINE_BODY_ATTR __attribute__((noinline))
 #endif
 
-// UpdatePacemakerDisplay is inlined into its callers apart from the message
-// update, which retail keeps as the split-out body of the IPA-SRA clone (it
-// only needs &world->lev_objs).
-
-// ===========================================================================
-// Negotiations / Gungan plains / Rescue (coruscant)
-// ===========================================================================
-
-
-
-
-
-
-
-
-
-// ===========================================================================
-// Pod race core (A/B/C laps)
-// ===========================================================================
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ===========================================================================
-// Pod sprint (Sebulba events)
-// ===========================================================================
-
-
-
-
-
-
-
-// ===========================================================================
-// Retake the palace (D/E/G)
-// ===========================================================================
-
-
-
-
-
-
-
-// ===========================================================================
-// Maul boss (A/B/D/E/F)
-// ===========================================================================
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ===========================================================================
-// Anakin's flight (B)
-// ===========================================================================
-
-
-
-
-// ===========================================================================
-// Helpers defined in other original translation units but kept here until
-// they get their own home (their originals live outside the ep1 TU).
-// ===========================================================================
-
-// ==== src/legoapi/ai/core/gameai.cpp: declarations ====
 // Original translation unit reconstructed from the reference address map.
 // Functions are defined in original address order.
-
-
-
-
-
-// ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
-
 
 extern f32 testlaser_endw;
 extern f32 testlaser_sizewab;
@@ -2043,103 +1260,15 @@ extern "C" {
     extern i32 FalconDebKey[2];
 }
 
-// Written by ThingManager's ctor (original global @0x124f2e0, .bss).
-
-
-// Enabled in the target data image.  Ordinary background characters are
-// staggered across frames; special movement states opt back into full-rate
-// processing through the forced-update path.
-
-extern "C" {
-
-
-}
-
-// The special-route list reserves the first ten ids for suit characters.  The
-// remaining ids enumerate the current story list while omitting variants that
-// are represented by those dedicated routes.
-
 #if defined(__i386__)
 #define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
 #else
 #define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone))
 #endif
 
-// Retail keeps only the IPA-SRA clone, which takes the other object's x and z by address.
-
-extern "C" {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-}
-
-extern "C" {
-}
-
-// ==== src/legoapi/gizmos/trigger/ai.cpp: all remaining content ====
-
-
-
-// ==== src/legoapi/ai/game/creature.cpp: declarations ====
-
-
-
-extern "C" {
-}
-
-
-
-
-
-
-// ==== src/legoapi/ai/game/aipathcnxhelper.cpp: declarations ====
-
-
-extern "C" {
-}
-
-
-
-// ==== src/legoapi/ai/core/ai_sys.cpp: declarations ====
-
 struct nuhspecial_s;
 struct minitrooperteam_s;
 struct nuvec_s;
-
-
-
-// ==== src/legoapi/actions/character/simpletons.cpp: declarations ====
-
-
-
-
-// ==== src/legoapi/ai/core/aisysall.cpp: declarations ====
-// Original translation unit reconstructed from the reference address map.
-// Functions are defined in original address order.
-
-
-
-// ---- begin src/legoapi/ai/core/aipathbuild.cpp ----
 
 // The route records use a dense route index, while the editor keeps sixteen
 // independently switchable slots.  The original helper first marks both ends
@@ -2149,12 +1278,6 @@ struct nuvec_s;
 #else
 #define AIPATHBUILD_CLONE_ATTR2 __attribute__((noinline, noclone))
 #endif
-// Retail keeps only the IPA-SRA clone, without the unused path index.
-
-extern "C" {
-}
-
-// ---- end src/legoapi/ai/core/aipathbuild.cpp ----
 
 // Retail keeps several static helpers here only as GCC clones; these attributes
 // reproduce the clone names and register conventions.
@@ -2168,104 +1291,14 @@ extern "C" {
 #define AISYSALL_CLONE_ATTR2_SSE __attribute__((noinline, noclone))
 #endif
 
-// IPA-SRA keeps only the fields this helper reads: values for those read before any call,
-// addresses for those read after one.
-
-
-
 // IPA-SRA hands this clone the address of system->path_sys rather than the system.
 
-
-
-
-
-
-
-
-
-// ---- begin src/gameapi/ai/aisys/aisys.cpp ----
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 extern "C" void *AIPAthFindPathCnx(AISYS_s *system, AIPATH_s *path, char *from, char *to, i32 *direction);
-
-
-
 
 // Game-specific AI actions and conditions (registered via
 // RegisterAIScriptActions / RegisterAIScriptConditions). These are stubbed to
 // satisfy the symbol baseline; the action/condition logic itself is not
 // decompiled. Each stub matches the mangled symbol of the original binary.
-
-
-
 
 extern AIACTIONDEF api_aiactiondefs[55];
 
@@ -2275,98 +1308,25 @@ DECOMP_ASSERT(sizeof(api_aiactiondefs) == 0x294, "API action registry size");
 
 DECOMP_ASSERT(sizeof(api_aiconditiondefs) == 0x258, "API condition registry size");
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ---- end src/gameapi/ai/aisys/aisys.cpp ----
-
-// ==== src/gameapi/ai/aisys/aiscript.cpp: all remaining content ====
-
-
-
-
-
-
-
-
 #if defined(__i386__)
 #define AISCRIPT_CLONE_ATTR2 __attribute__((noinline, noclone, regparm(2)))
 #else
 #define AISCRIPT_CLONE_ATTR2 __attribute__((noinline, noclone))
 #endif
 
-// Retail inlines the "goto" test into each caller; this is the remaining partial clone.
-
-// Retail inlines the system test into its callers; this is the remaining partial clone.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ==== src/legoapi/ai/core/ai_sys_stubs.cpp: declarations ====
-
-
-
 extern "C" {
 extern void (*checkantinodefns[3])(APIOBJECT *, AIANTINODE *, NUVEC *, f32);
     extern void (*checkantinodefns[3])(APIOBJECT_s *, AIANTINODE_s *, NUVEC *, f32);
 }
 
-
-
-
 extern "C" {
-
-
-
 void *AIPAthFindPathCnx(AISYS_s *system, AIPATH_s *path, char *from_name, char *to_name, i32 *direction);
-
-
-
-
 
 #include "legoapi/ai/core/ai_sys_stubs_types.h"
     DECOMP_ASSERT(sizeof(RebuildEditorCreature) == 0xac, "editor creature rebuild stride");
     DECOMP_ASSERT(offsetof(RebuildEditorCreature, path_check) == 0x38, "editor creature path offset");
     DECOMP_ASSERT(offsetof(RebuildEditorCreature, activation_area) == 0x6c, "editor creature area offset");
     DECOMP_ASSERT(offsetof(RebuildEditorCreature, activation) == 0x8f, "editor creature activation offset");
-
-
-
 } // extern "C"
 
 #if defined(__i386__)
@@ -2375,61 +1335,12 @@ void *AIPAthFindPathCnx(AISYS_s *system, AIPATH_s *path, char *from_name, char *
 #define AI_SYS_STUBS_CLONE_ATTR2 __attribute__((noinline, noclone))
 #endif
 
-// Retail keeps only the IPA-SRA clone, without the unused object and elapsed time.
-
-extern "C" {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-} // extern "C"
-
-// ==== src/editor/area_editor.cpp: all remaining content ====
-
 struct nupad_s;
 
 DECOMP_ASSERT(sizeof(EDAIAREA_s) == 0x44, "area editor record size");
 
-// Item colours shared by the AI editors.
-
-// ==== src/editor/edpath.cpp: all remaining content ====
-
-extern "C" {
-}
 DECOMP_ASSERT(sizeof(AIPATHCNXTYPE_s) == 0x4c, "editor path connection type size");
 DECOMP_ASSERT(offsetof(AIPATHCNXTYPE_s, flags) == 0x48, "editor path connection options offset");
-
-
-
-
 
 // Retail splits the null checks into each caller and keeps the body as a
 // partial-inlining clone; its connection searches are fully peeled.
@@ -2468,17 +1379,10 @@ static __used__ void routeEditor_cbCancelRouteUsers(eduimenu_s *menu, eduimenu_s
 
 static __used__ void routeEditor_cbCancelRenameRouteMenu(eduimenu_s *menu, eduimenu_s *);
 
-extern "C" {
-
-
-
-} // extern "C"
-
 static __used__ i32 routeEditor_AddToRoute(EDAIPATHNODE_s *node, EDAIPATHNODE_s *other) __asm__(
     "_ZL22routeEditor_AddToRouteP14EDAIPATHNODE_sS0_.part.7");
 
 static __used__ i32 routeEditor_AddToRoute(EDAIPATHNODE_s *node, EDAIPATHNODE_s *other);
-
 
 // Retail keeps an unreferenced partial-inlining clone of pathEditorSetCamPos:
 // it moves the editor camera to a position at the cursor's height.
@@ -2488,23 +1392,11 @@ static __used__ i32 routeEditor_AddToRoute(EDAIPATHNODE_s *node, EDAIPATHNODE_s 
 #define PATHEDITOR_SETCAMPOS_BODY_ATTR __attribute__((used, noinline, noclone))
 #endif
 
-// ==== src/editor/aieditor.cpp: all remaining content ====
-
-
-
-
 #if defined(__i386__)
 #define EDANTINODE_REGPARM1 __attribute__((regparm(1)))
 #else
 #define EDANTINODE_REGPARM1
 #endif
-
-extern "C" {
-
-
-} // extern "C"
-
-// ==== src/editor/creature_editor.cpp: all remaining content ====
 
 struct EDCREATURE_s;
 struct AIPATHSYS_s;
@@ -2524,7 +1416,6 @@ DECOMP_ASSERT(offsetof(CreatureEditorRecord, activation) == 0x8f, "creature acti
 DECOMP_ASSERT(offsetof(CreatureEditorRecord, view_distance) == 0x9c, "creature view distance offset");
 DECOMP_ASSERT(offsetof(CreatureEditorRecord, negative_min_view_height) == 0xa8, "creature min view height offset");
 DECOMP_ASSERT(sizeof(CreatureEditorRecord) == 0xac, "editor creature record size");
-
 
 #if defined(__i386__)
 #define CREATURE_EDITOR_REGPARM2 __attribute__((regparm(2)))
@@ -2548,8 +1439,6 @@ static __used__ __attribute__((force_align_arg_pointer)) void creatureEditor_cbV
 
 static __used__ __attribute__((force_align_arg_pointer)) void creatureEditor_cbSetScript(eduimenu_s *, eduiitem_s *item,
                                                                                          unsigned int);
-
-// ==== src/editor/locator_editor.cpp: all remaining content ====
 
 extern "C" {
     struct EDCREATURE_s;
@@ -2584,9 +1473,6 @@ static __attribute__((noinline, optimize("no-tree-vectorize"))) unsigned int
 AddLocatorToSetAtEnd(EDLOCATORSET_s *set, EDLOCATOR_s *locator) __asm__(
     "_ZL15AddLocatorToSetP14EDLOCATORSET_sP11EDLOCATOR_sS2_.constprop.131");
 
-// ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
-
-
 extern "C" {
     extern i16 id_BAT;
     extern i16 id_SNAKE;
@@ -2594,25 +1480,13 @@ extern "C" {
     extern i32 FalconDebKey[2];
 }
 
-// Written by ThingManager's ctor (original global @0x124f2e0, .bss).
-
-
-// Enabled in the target data image.  Ordinary background characters are
-// staggered across frames; special movement states opt back into full-rate
-// processing through the forced-update path.
-
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
 
     static_assert(sizeof(lego_aiconditiondefs) / sizeof(lego_aiconditiondefs[0]) == 178,
                   "complete game AI condition registry");
 
-
 }
-
-// The special-route list reserves the first ten ids for suit characters.  The
-// remaining ids enumerate the current story list while omitting variants that
-// are represented by those dedicated routes.
 
 #if defined(__i386__)
 #define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
@@ -2620,94 +1494,16 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 #define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone))
 #endif
 
-// Retail keeps only the IPA-SRA clone, which takes the other object's x and z by address.
-
-extern "C" {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-}
-
-extern "C" {
-}
-
-// ==== src/gameapi/ai/aisys/aistate.cpp: all remaining content ====
-
-
-
-// ==== src/legoapi/gizmo/gizmos/gizmos_gizactions.cpp: declarations ====
-
-
-
-
-
 struct GIZSPINNER_s;
-
-
 
 namespace {
 #include "legoapi/gizmo/gizmos/gizmos_gizactions_types.h"
 
 } // namespace
 
-// ==== src/legoapi/actions/combat/fighting.cpp: declarations ====
-
-
-// ==== src/legoapi/ai/game/aipathcnxhelper.cpp: declarations ====
-
-
-extern "C" {
-}
-
-// ==== src/legoapi/ai/core/ai_sys.cpp: declarations ====
-
-
-// ==== src/legoapi/ai/game/gameantinode.cpp: declarations ====
-
-extern "C" {
-}
-
-
-
-
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
-
-
-
-
-
-
-
-
-
 struct starfighter_s;
 struct rtl_s;
 struct rtlidata_s;
-
-
-
-
 
 struct GAMEMESSAGE_s;
 struct MENU_s;
@@ -2719,20 +1515,6 @@ struct ripple_node_s;
 struct ripple_set_s;
 struct VuVec;
 
-
-// Camera zoom state
-
-// Graphics loading flags
-
-extern "C" {
-}
-
-
-
-// --- NuGScn graphics-data reader ---
-// NuReadGraphicsData is a C++ static function in the original (GCC clones it,
-// hence the `.isra.NNN` suffix in the ROM symbol table).
-
 // Retail only keeps the IPA-SRA clone, which drops the unused fourth argument.
 #if defined(__i386__)
 #define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone, regparm(2)))
@@ -2741,15 +1523,6 @@ extern "C" {
 #endif
 
 // --- Extern "C": NuGScn functions have C linkage in original ---
-extern "C" {
-
-} // extern "C"
-
-
-
-
-
-
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
@@ -2791,38 +1564,12 @@ extern "C" {
         NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
     } while (0)
 
-
-
-
-
-
-
-
-
-
-
-
-
 // DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
 // red-brick positions come from the Game init values in legogame/game.cpp.
 
-
-
-
-
 extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
 
-
-
-
 extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
-
-extern "C" {
-}
-
-
-
-
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
     do {                                                                                                               \
@@ -2836,15 +1583,7 @@ extern "C" {
         }                                                                                                              \
     } while (false)
 
-
 extern i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
-
-
-
-
-
-
-// ==== src/legoapi/actions/character/starwars.cpp: all remaining content ====
 
 struct AIPACKET_s;
 struct APIOBJECT_s;
@@ -2852,279 +1591,25 @@ struct AISYS_s;
 struct AIGROUP_s;
 struct nufpar_s;
 
-
-// ==== src/editor/antinode_editor.cpp: all remaining content ====
-
-// ==== src/editor/edtoolsall.cpp: declarations ====
-
-
-// ==== src/legoapi/render/core/terrain_stubs.cpp: declarations ====
-
-
 // Runtime-selected groups appended after the fixed terrain allocation.
-extern "C" {
-}
-
-
-
 
 extern "C" {
     extern "C++" void DebrisProcessSpheres(uv1deb *, f32, debinftype *, debkeydatatype_s *, i32);
 }
 
-
-// NuFileExists @nufile (nucore_plain.cpp).
-
-
-
-
 extern "C" {
-
-
-} // extern "C"
-
-extern "C" {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 extern "C++" TERRAIN_TRACK_SLOT *AllocTerrId();
-
-
-
-
 } // extern "C"
-
-// ==== functions in original address order ====
-
-extern "C" {
-
-}
-
-extern "C" {
-
-}
-
-extern "C" {
-
-}
-
-extern "C" {
-
-
-
-}
-
-extern "C" {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-}
-
-extern "C" {
-
-}
-
-extern "C" {
-
-}
-
-extern "C" {
-
-
-
-
-
-
-
-
-
-
-}
-
-extern "C" {
-
-
-
-
-
-}
-
-extern "C" {
-
-}
-
-extern "C" {
-
-}
-
-extern "C" {
-
-
-}
-
-extern "C" {
-
-
-}
 
 extern "C" {
 void *AIPAthFindPathCnx(AISYS_s *system, AIPATH_s *path, char *from_name, char *to_name, i32 *direction);
 
 }
 
-extern "C" {
-
-
-
-}
-
-extern "C" {
-
-
-}
-
-extern "C" {
-
-
-
-
-
-
-}
-
-extern "C" {
-
-}
-
-extern "C" {
-
-
-
-
-}
-
-extern "C" {
-
-}
-
-extern "C" {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-}
-
-extern "C" {
-
-
-
-
-}
-
-extern "C" {
-
-
-
-}
-
-extern "C" {
-
-
-}
-
-// ==== functions in original address order ====
-
-// ==== src/legoapi/actions/character/transform.cpp: declarations ====
-
-
-
-
-
-
-
-
-// ==== src/legoapi/items/base/collection.cpp: declarations ====
-
-
 struct GIZMOPICKUP_s;
 struct PART_s;
 
 struct APICHARACTERMODELLIST_s;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ==== src/legoapi/actions/character/snake.cpp: declarations ====
-
-
-
-
-
 
 #define ADD_SNAKE_SEGMENT_DEBRIS(index)                                                                                \
     do {                                                                                                               \
@@ -3164,116 +1649,17 @@ struct APICHARACTERMODELLIST_s;
         }                                                                                                              \
     } while (0)
 
-
-// ==== src/legoapi/actions/movement/jumping.cpp: declarations ====
-
 extern i32 (*Slam_GetDebrisFn)(GameObject_s *, i32);
-
-
-
-
-
-
-
-
-
-
-
-// ==== src/legoapi/actions/movement/carrying.cpp: declarations ====
-
-// Original defaults: 0x668d30 and 0x668d40, each a four-byte integer.
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ==== src/legoapi/menus/core/hint.cpp: declarations ====
-
-// The hint icon transitions and the touch icon x position are dynamically
-// initialized in this unit's static constructor in the reference.
-
-
-// Retail keeps this body as GCC's split-out clone; the inline head stays in
-// the caller.
-
-// Original local callbacks referenced by Hints_LSW.
-
-
-
-// Each control mode retains its own requested and interpolated hint row.
-
-
-
-// ==== src/legoapi/misc/utilities.cpp: declarations ====
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // Retail copies a fully inside end point as one unaligned vector.
 
-// ==== src/legoapi/gizmo/object/gizforce.cpp: all remaining content ====
-
-
 extern f32 ForceThrowGravity;
 
-
-
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
-
-
-
-
-
-// Camera zoom state
-
-// Graphics loading flags
-
-extern "C" {
-}
-
-// --- NuGScn graphics-data reader ---
-// NuReadGraphicsData is a C++ static function in the original (GCC clones it,
-// hence the `.isra.NNN` suffix in the ROM symbol table).
-
-// Retail only keeps the IPA-SRA clone, which drops the unused fourth argument.
 #if defined(__i386__)
 #define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone, regparm(2)))
 #else
 #define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone))
 #endif
-
-// --- Extern "C": NuGScn functions have C linkage in original ---
-extern "C" {
-
-} // extern "C"
-
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
@@ -3315,9 +1701,6 @@ extern "C" {
         NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
     } while (0)
 
-// DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
-// red-brick positions come from the Game init values in legogame/game.cpp.
-
 static inline void RotateForceGlowMatrix(NUMTX *matrix, i32 angle) {
     const f32 cosine = NU_COS_LUT(angle);
     const f32 sine = NU_SIN_LUT(angle);
@@ -3335,9 +1718,6 @@ static inline void RotateForceGlowMatrix(NUMTX *matrix, i32 angle) {
     matrix->m31 = x3 * sine + matrix->m31 * cosine;
 }
 
-extern "C" {
-}
-
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
     do {                                                                                                               \
         PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
@@ -3350,60 +1730,17 @@ extern "C" {
         }                                                                                                              \
     } while (false)
 
-
-// ==== src/legoapi/world/levels/episode.cpp: declarations ====
-
-
-
 DECOMP_ASSERT(sizeof(TROOPERCANNON_s) == 0x30, "Trooper cannon state size");
 DECOMP_ASSERT(offsetof(TROOPERCANNON_s, character_name) == 0x0c, "Trooper cannon name offset");
 DECOMP_ASSERT(offsetof(TROOPERCANNON_s, rebuilding) == 0x2c, "Trooper cannon rebuilding offset");
 
-
-
-// Episode-global logic and helpers shared across episodes: completion/
-// episode bookkeeping, super-story, boss/cutscene-adjacent helpers. The
-// per-episode level *handlers* live in the matching episodeI..VI.cpp files.
-
-// ===========================================================================
-// Episode bookkeeping
-// ===========================================================================
-
-
-
-
-// ===========================================================================
-// HUD / score helpers
-// ===========================================================================
-
-// ===========================================================================
 // Shared gameplay helpers
-// ===========================================================================
-
-
-
-
-
-// ==== src/legoapi/items/collect/batarang.cpp: declarations ====
 
 extern BATARANG_s Batarang[8];
-
-
-
-
-
-
-
-// ==== src/legoapi/gizmo/object/gizmoblowups.cpp: declarations ====
-
-
 
 extern i32 (*BlowupExFunc)(GIZMOBLOWUP_s *, i32);
 extern void (*GizmoBlowUp_SfxFn)(GIZMOBLOWUP_s *, NUVEC *);
 extern i32 (*GizmoBlowUp_NoTargetFn)(WORLDINFO_s *, GameObject_s *);
-
-
-
 
 // Original writable flagremaptab at 0x668520, 32 pairs of 32-bit masks.
 extern "C" {
@@ -3412,64 +1749,16 @@ extern u32 flagremaptab[32][2];
 
 // Definitions from the original gizmoblowups translation unit.
 
-
-
 DECOMP_ASSERT(sizeof(BLOWUPPROGRESS_s) == 0x100, "BLOWUPPROGRESS_s ABI");
 
 DECOMP_ASSERT(offsetof(WORLDINFO_s, blowup_target_candidates) == 0x50d4, "Blowup target candidate-list ABI");
 
-
-
-
-
-
-
-
-
-
-
 GIZMOBLOWUP_s *GizmoBlowUp_Hit(GameObject_s *object, NUVEC *points, i32 point_count, f32 radius, NUVEC *minimum,
                                NUVEC *maximum, BOLT_s *bolt, u32 hit_type, u8 *flags);
-
-
-
-
-
-
-
-
-// ==== src/legoapi/characters/core/characters.cpp: declarations ====
-
 
 // LoadPerm1 is one of the few game-level entry points which wires together
 // otherwise C-linkage engine subsystems.  Keep these declarations local: the
 // individual subsystem TUs intentionally expose their original plain names.
-extern "C" {
-
-}
-
-
-// The original table at 0x006281a0.  These are the material animation
-// scripts made available before the permanent things scene is loaded.
-
-
-
-extern "C" {
-}
-
-
-
-
-
-
-
-extern "C" {
-}
-
-
-
-
-
 
 // Retail keeps only the IPA-SRA clone, which receives &*layers.
 #if defined(__i386__)
@@ -3478,34 +1767,9 @@ extern "C" {
 #define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone))
 #endif
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ==== src/legoapi/props/objects/tubes.cpp: all remaining content ====
-
-
-
-// ==== src/legoapi/misc/supportall.cpp: declarations ====
-// Original translation unit reconstructed from the reference address map.
-// Functions are defined in original address order.
-
 #if defined(__SSE__)
 #include <xmmintrin.h>
 #endif
-
-// The reference defines these with dynamic initialization in this unit.
 
 extern "C" {
     extern i32 FalconDebKey[2];
@@ -3516,42 +1780,12 @@ extern i32 FalconDebKey[2];
 
 DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");
 
-
-
-
-
-
-
 extern "C" i16 id_LANDSPEEDER;
-
-
-
-
 
 // Debug-capture output helpers consumed by NuDisplayListCaptureSortPriority.
 // Transcribed from the original C-linkage symbols:
 //   NuHtmlBegin    0x2d5ca0   NuHtmlFlush   0x2d5c30
 //   NuHtmlWrite    0x2d5cd0   NuHtmlHeading1 0x2d5d40
-extern "C" {
-}
-
-
-
-extern "C" {
-}
-
-extern "C" {
-}
-
-
-extern "C" {
-}
-
-
-
-
-// ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
-
 
 extern "C" {
     extern i16 id_BAT;
@@ -3560,76 +1794,19 @@ extern "C" {
     extern i32 FalconDebKey[2];
 }
 
-// Written by ThingManager's ctor (original global @0x124f2e0, .bss).
-
-
-// Enabled in the target data image.  Ordinary background characters are
-// staggered across frames; special movement states opt back into full-rate
-// processing through the forced-update path.
-
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
 
     static_assert(sizeof(lego_aiconditiondefs) / sizeof(lego_aiconditiondefs[0]) == 178,
                   "complete game AI condition registry");
 
-
 }
-
-// The special-route list reserves the first ten ids for suit characters.  The
-// remaining ids enumerate the current story list while omitting variants that
-// are represented by those dedicated routes.
 
 #if defined(__i386__)
 #define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
 #else
 #define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone))
 #endif
-
-// Retail keeps only the IPA-SRA clone, which takes the other object's x and z by address.
-
-extern "C" {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-}
-
-extern "C" {
-}
-
-// ==== src/legoapi/misc/memory.cpp: all remaining content ====
-
-
-extern "C" {
-
-
-
-
-} // extern "C"
-
-// ==== functions in original address order ====
-
-// ==== functions in original address order ====
 
 static void MoveAnim_Manage(GameObject_s *object, f32 movement_speed, i32 allow_tiptoe, i32 weapon_variant) {
     GAMECHARACTERDATA *game_character = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
@@ -6204,7 +4381,6 @@ i32 GunshipInLevel(LEVELDATA_s *level) {
     return BONUS_GUNSHIPA_LDATA == level;
 }
 
-// Original: 43 bytes.
 i32 CircleLevel(LEVELDATA_s *level) {
     return BONUS_GUNSHIPB_LDATA != NULL && level == BONUS_GUNSHIPB_LDATA;
 }

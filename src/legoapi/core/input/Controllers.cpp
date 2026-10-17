@@ -2,10 +2,7 @@
 #include "nu2api/nucore/nuvuvec.hpp"
 #include "nu2api/nucore/NuInputDevice.h"
 
-// Physical controller hooks (retail Controllers.cpp).
-
 extern "C" {
-
     void Controller_Init(void) {
     }
 
@@ -41,5 +38,4 @@ extern "C" {
         }
         return 1;
     }
-
 } // extern "C"

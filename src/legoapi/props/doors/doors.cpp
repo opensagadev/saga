@@ -30,7 +30,6 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-
 namespace {
     const f32 DOOR_BLOCK_VELOCITY = 10.0f;
 } // namespace

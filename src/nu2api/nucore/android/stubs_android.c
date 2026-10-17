@@ -42,24 +42,11 @@ struct numtx_s;
 struct nupad_s;
 struct rndrstream_s;
 
-// ==== src/nu2api/nucore/nuvideo.cpp: all remaining content ====
-
-
-// ==== src/legoapi/render/core/render_stubs.cpp: declarations ====
-
-
-// ==== src/nu2api/nu3d/android/nutex_android.c: declarations ====
-
-
-
-
 #define TEX_PATH "mnt/sdcard/TTGames/com.wb.lego.tcs/files/androidTextures/"
 
 #ifdef __ANDROID__
 extern "C" __attribute__((weak)) int toupper(int c);
 #endif
-
-// ==== functions in original address order ====
 
 extern "C" {
 extern "C" void NuRndrAddShadowPrims(void) {

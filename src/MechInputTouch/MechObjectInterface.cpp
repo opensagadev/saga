@@ -3,7 +3,6 @@
 
 #include "MechInputTouch/MechInputTouch_types.h"
 
-// ==== src/legoapi/gizmo/base/gizmo.cpp: declarations ====
 #include "legoapi/gizmo/base/gizmo.h"
 #include "legoapi/actions/combat/hits.h"
 #include "decomp.h"
@@ -91,17 +90,12 @@ extern "C" {
 f32 hackFlashTimer;
 GAMEANIMSET_s *hackFlashingGameAnimSet;
 
-// ==== src/legoapi/characters/core/character.cpp: declarations ====
-
-
 // Forward declarations for local (static) character/gameplay helper stubs.
 struct nuvec_s;
 
 // Original 0x120-byte data record @0x00666960. FixUpCharacters copies this
 // canonical prefix into every character before character-specific overrides.
 // These values cover the fully typed common movement and perception fields.
-
-// ==== functions in original address order ====
 
 void MechObjectInterface::GetFloorTargetPos(VuVec &position, i32 mode) const {
     GetPos(position, mode);

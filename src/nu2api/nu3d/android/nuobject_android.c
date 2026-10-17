@@ -38,7 +38,6 @@ extern "C" {
     i32 stopfadeup;
 }
 
-
 static void (*NuFadeObjGlobalSetLightsFn)(void);
 static void (*NuFadeObjSetLightsFn)(void);
 static i32 maxwindmats;

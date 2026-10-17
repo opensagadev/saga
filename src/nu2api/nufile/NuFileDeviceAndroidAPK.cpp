@@ -4,7 +4,6 @@
 #include "nu2api/nufile/nu2api_nufile_types.h"
 #include "nu2api/nucore/nuvuvec.hpp"
 
-// ==== src/nu2api/nufile/android/nufile_android.cpp: declarations ====
 #include "nu2api/nufile/android/nufile_android.h"
 
 #include <stdio.h>
@@ -21,11 +20,7 @@
 #include "java/asset_manager.h"
 #include "java/android.h"
 
-// ==== src/nu2api/nufile/nufile_android.cpp: all remaining content ====
-
 NuFileAndroidAPK *NuFileAndroidAPK::ms_fileId[0x400];
-
-// ==== functions in original address order ====
 
 NuFileDeviceAndroidAPK::~NuFileDeviceAndroidAPK() {
 }

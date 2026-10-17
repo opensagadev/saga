@@ -29,25 +29,6 @@ enum GIZTORP_LEVEL_OBJECT {
 
 i32 giztorpmachine_gizmotype_id;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ==== functions in original address order ====
-
 i32 PartDraw_Torp(PART_s *part) {
     i32 draw = PartDraw_Flickerer(part);
     if (draw != 0 && WORLD->lev_objs[0x7b].active != 0) {

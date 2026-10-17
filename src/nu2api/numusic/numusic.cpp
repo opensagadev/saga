@@ -26,7 +26,6 @@
 #include "nu2api/numusic/numusic.h"
 #include "nu2api/nusound/nusound.h"
 
-
 extern NUFPCOMJMPCTX top_jmp_tab[11];
 
 extern NUFPCOMJMPCTX track_jmp_tab[15];
@@ -36,71 +35,12 @@ i32 MusicOther = 0;
 i32 PlayersUnderAttack = 0;
 i32 (*CheckMusicOtherFn)(void) = NULL;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // i32 GamePlayMusic(LEVELDATA_s *level, i32 check, OPTIONSSAVE_s *options)
 //
 // Picks the level's music tracks and starts playback. `check` is 0 on the
 // boot/init call and 1 when re-invoked from the main loop (where it bails
 // out early if the "other" pair hasn't changed). Classes: 1 = quiet,
 // 2 = action, 0x20 = plain theme (the title music lives here).
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 void NuMusic::GlobalParseErrorFn(nufpar_s *param_1) {
     STUBBED();

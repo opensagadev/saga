@@ -71,24 +71,10 @@
 static_assert(sizeof(struct LEVFLAGBYTES_s) == 16, "LevFlag must be 16 bytes");
 extern struct LEVFLAGBYTES_s LevFlag;
 
-// Episode 1 level handlers: negotiations / gungan / rescue / podrace /
-// podsprint / retake / maul / anakins-flight. This is the only implemented
-// level file; episodes II-VI are still stubs.
-//
-// Functions appear in the original translation unit's address order (see
-// res/libTTapp.so 0x1fa8e0..0x203d50). PodLevel and SetPodMergeAnims live at
-// the end because the original binary defines them in other units.
-
-// --- Cross-file entry points (C linkage) -----------------------------------
-//
-// Declared here rather than in a shared header because episodeI.cpp is their
-// only consumer within the levels module.
-
 extern "C" {
     void *AIPAthFindPathCnx(AISYS_s *, AIPATH_s *, char *, char *, i32 *); // original name keeps the typo
     i32 mine_max_tile = 0x2000;
 }
-
 
 // --- Cross-file entry points (C++ linkage) ---------------------------------
 
@@ -119,8 +105,6 @@ extern "C" {
 }
 extern f32 CurrentSpeed;
 void UpdatePodRaceLapDisplay(float); // defined below
-
-// --- File-local layout types -----------------------------------------------
 
 // Every caller passes mode 0, so retail keeps only this constprop clone.
 static __attribute__((noinline, noclone)) void RacePodAlign(racepod_s *pod, _vuv_s *direction, float amount)
@@ -176,16 +160,11 @@ static struct {
     i16 models[4]; // 0x10c kaadu, gungan, falumpaset, gungan
 } gungan_a;
 
-// ===========================================================================
 // Sniper turrets (shared by PodRace C and PodSprint A)
-// ===========================================================================
 
 static __used__ void PodRaceSnipersUpdate(void);
 
 static __used__ void PodRaceSnipersReset(void);
-
-
-
 
 // PodSprint_InitAISpline is partially inlined into PodSprintA_Init: the
 // clear, lookup and spline checks are inlined and the crossing scan is the
@@ -197,7 +176,6 @@ static __used__ void PodRaceSnipersReset(void);
 #endif
 static PODSPRINT_AISPLINE_BODY_ATTR void PodSprint_InitAISplineBody(PODSPRINT_AISPLINE_s *ai) __asm__(
     "_ZL22PodSprint_InitAISplineP11WORLDINFO_sP20PODSPRINT_AISPLINE_sPc.part.0");
-
 
 static inline void PodSprint_InitAISpline(WORLDINFO_s *world, PODSPRINT_AISPLINE_s *ai, char *name) {
     memset(ai, 0, sizeof(*ai));
@@ -212,7 +190,6 @@ static inline void PodSprint_InitAISpline(WORLDINFO_s *world, PODSPRINT_AISPLINE
 // only needs &world->lev_objs).
 static __attribute__((noinline, noclone)) void UpdatePacemakerDisplayBody(LEVEL_OBJECT_RUNTIME_s **lev_objs) __asm__(
     "_ZL22UpdatePacemakerDisplayP11WORLDINFO_s.isra.7.part.8");
-
 
 static inline void UpdatePacemakerDisplay(WORLDINFO_s *world) {
     if (pod_pacemaker != NULL) {
@@ -231,38 +208,11 @@ static inline void UpdatePacemakerDisplay(WORLDINFO_s *world) {
 
 static __used__ void UpdatePodRaceMines(void);
 
-// ===========================================================================
-// Negotiations / Gungan plains / Rescue (coruscant)
-// ===========================================================================
-
-
-
-
-
-
-
-
-
-// ===========================================================================
 // Pod race core (A/B/C laps)
-// ===========================================================================
 
 void ResetPodStuff();
 
-
-
 void UpdatePodRaceLapDisplay(float arg);
-
-
-
-
-
-
-
-
-
-
-
 
 // Clears the mine pools and resolves the mine special and its no-mine areas.
 static void InitPodRaceMines() {
@@ -282,58 +232,6 @@ static void InitPodRaceMines() {
     }
 }
 
-
-
-
-
-// ===========================================================================
-// Pod sprint (Sebulba events)
-// ===========================================================================
-
-
-
-
-
-
-// ===========================================================================
-// Retake the palace (D/E/G)
-// ===========================================================================
-
-
-
-
-
-
-
-// ===========================================================================
-// Maul boss (A/B/D/E/F)
-// ===========================================================================
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ===========================================================================
-// Anakin's flight (B)
-// ===========================================================================
-
-
-
-
-// ===========================================================================
-// Helpers defined in other original translation units but kept here until
-// they get their own home (their originals live outside the ep1 TU).
-// ===========================================================================
-
 // Original TU near 0x175830.
 void SetPodMergeAnims(ANIMPACKET_s *packet, i32 index) {
     ANIMPACKET_s *a = packet;
@@ -346,36 +244,14 @@ void SetPodMergeAnims(ANIMPACKET_s *packet, i32 index) {
     a->field_0x44 = fabsf(pod_roll[index]);
 }
 
-// ==== src/legoapi/core/net/netplay.cpp: declarations ====
-
 struct AIROW_s;
 struct nunativegscene_s;
-
-
-
-// ==== src/legoapi/actions/character/speederchase.cpp: declarations ====
 
 // This alignment affects PodRaceAUpdate codegen even though the linked address is 32-byte aligned.
 static i32 PodRaceKey[8] __attribute__((aligned(16))) = {-1, -1, -1, -1, -1, -1, -1, -1};
 
-
-
 DECOMP_ASSERT(sizeof(SPEEDERCHASEVALUES) == 0x1c, "Speeder chase tuning stride");
 DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ==== functions in original address order ====
 
 static __used__ void PodRaceSnipersUpdate(void) {
     NUVEC direction;

@@ -83,24 +83,11 @@ ZAMARROW_s zamarrow;
 i32 pursuit_c_hack = 1;
 f32 traffic_test_z = -360.0f;
 
-// ===========================================================================
-// Coruscant — bounty-hunter pursuit (Zam Wesell)
-// ===========================================================================
-
-
-
-
-
-
-
-
-
 // UpdateZamArrow is inlined into its callers apart from the message update,
 // which retail keeps as the split-out body of the IPA-SRA clone (it only needs
 // &world->lev_objs).
 static __attribute__((noinline, noclone)) void
 UpdateZamArrowBody(LEVEL_OBJECT_RUNTIME_s **lev_objs) __asm__("_ZL14UpdateZamArrowP11WORLDINFO_s.isra.5.part.6");
-
 
 static inline void UpdateZamArrow(WORLDINFO_s *world) {
     if (zamarrow.object != NULL && (zamarrow.object->apiobj.field_0x1f8 & 0x1000) != 0 &&
@@ -118,13 +105,6 @@ static inline void UpdateZamArrow(WORLDINFO_s *world) {
         }
     }
 }
-
-
-
-
-
-
-// ==== functions in original address order ====
 
 static void UpdateZamArrowBody(LEVEL_OBJECT_RUNTIME_s **lev_objs) {
     NUVEC position = zamarrow.object->apiobj.upper_position;

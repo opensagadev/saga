@@ -51,7 +51,6 @@ struct nunativegscene_s;
 static i32 snaphack[2];
 static i32 snaphacktimer[2];
 
-
 SPEEDERCHASEANETPACKET_s *speederchasea_netpacket;
 
 u8 troopercannons_beenReset = 0;
@@ -81,24 +80,11 @@ i32 test_ai_combo = 1;
 i32 CanPunchGirls = 1;
 extern i16 id_STORMTROOPER;
 
-
-
-
-
 void SetLevelExBlowupFunc(i32 (*callback)(GIZMOBLOWUP_s *, i32));
-
-
-
-
-
-
-
 
 f32 getPodRoll(i32 index) {
     return pod_roll[index];
 }
-
-// ==== functions in original address order ====
 
 i32 SpeederBlowupHack(GIZMOBLOWUP_s *blowup, i32) {
     if (blowup == NULL) {

@@ -17,13 +17,7 @@
 
 extern GameObject_s *FindGameObject(i32, u32, i32, i32, i32);
 
-// ==== src/legoapi/world/mission.cpp: all remaining content ====
-
-
-
 MISSIONSYS *MissionSys = NULL;
-
-// ==== functions in original address order ====
 
 MISSIONSYS *Missions_Configure(char *file, VARIPTR *bufferStart, VARIPTR *bufferEnd, MISSIONSAVE *save) {
     nufpar_s *fp;

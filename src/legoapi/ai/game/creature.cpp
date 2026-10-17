@@ -221,37 +221,13 @@ struct AIROW_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-
-
-extern "C" {
-}
-
-
-
-
-
-
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
-
-
-
-
-
-
-
-
-
 struct starfighter_s;
 struct rtl_s;
 struct rtlidata_s;
 
-
-
 i32 MatrixReflection(NUMTX *matrix, i32 axis, f32 plane, f32 height, NUMTX *result);
 
 i32 draw_para = 1;
-
 
 struct GAMEMESSAGE_s;
 struct HINT_s;
@@ -266,20 +242,6 @@ struct ripple_node_s;
 struct ripple_set_s;
 struct VuVec;
 
-
-// Camera zoom state
-
-// Graphics loading flags
-
-extern "C" {
-}
-
-
-
-// --- NuGScn graphics-data reader ---
-// NuReadGraphicsData is a C++ static function in the original (GCC clones it,
-// hence the `.isra.NNN` suffix in the ROM symbol table).
-
 // Retail only keeps the IPA-SRA clone, which drops the unused fourth argument.
 #if defined(__i386__)
 #define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone, regparm(2)))
@@ -288,12 +250,6 @@ extern "C" {
 #endif
 
 // --- Extern "C": NuGScn functions have C linkage in original ---
-extern "C" {
-
-} // extern "C"
-
-
-
 
 // These rotations are also used by the shop translation unit. Keep them local
 // so the compiler can inline the matrix arithmetic at each call site.
@@ -351,7 +307,6 @@ static inline void ShopRotateZ(NUMTX *m, NUANG a) {
     m->m31 = m30 * sinx + m->m31 * cosx;
 }
 
-
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
         direction.x = (vx);                                                                                            \
@@ -392,32 +347,13 @@ static inline void ShopRotateZ(NUMTX *m, NUANG a) {
         NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
     } while (0)
 
-
-
-
-
-
-
-
-
 // DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
 // red-brick positions come from the Game init values in legogame/game.cpp.
 
-
-
-
-
 extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
-
-
-
-
-
 
 extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
 
-extern "C" {
-}
 u8 CharClipToBlobShadows;
 
 static inline void DrawSetRotationY(NUMTX *matrix, NUANG angle) {
@@ -426,9 +362,6 @@ static inline void DrawSetRotationY(NUMTX *matrix, NUANG angle) {
     NUMTX value = {cosine, 0.0f, -sine, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, sine, 0.0f, cosine, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f};
     *matrix = value;
 }
-
-
-
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
     do {                                                                                                               \
@@ -442,30 +375,16 @@ static inline void DrawSetRotationY(NUMTX *matrix, NUANG angle) {
         }                                                                                                              \
     } while (false)
 
-
-
-
-
 extern i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
-
-
-
-
-// ==== src/legoapi/characters/core/characters.cpp: declarations ====
-
 
 // LoadPerm1 is one of the few game-level entry points which wires together
 // otherwise C-linkage engine subsystems.  Keep these declarations local: the
 // individual subsystem TUs intentionally expose their original plain names.
-extern "C" {
-
-}
 
 struct AISYS_s;
 
 // The original table at 0x006281a0.  These are the material animation
 // scripts made available before the permanent things scene is loaded.
-
 
 extern "C" VARIPTR characterbuffer_ptr;
 extern "C" VARIPTR characterbuffer_end;
@@ -475,25 +394,9 @@ extern "C" {
     i32 hub_character_ready = -1;
 }
 
-
-
-
-
-
-
-extern "C" {
-}
-
-
-
-
-
-
-
 static u32 LayerBit(u8 layer) {
     return 1u << layer;
 }
-
 
 // Retail keeps only the IPA-SRA clone, which receives &*layers.
 #if defined(__i386__)
@@ -503,29 +406,6 @@ static u32 LayerBit(u8 layer) {
 #endif
 static MOSEISLEY_LAYERS_ATTR void SetLayers_MOSEISLEYCITIZEN(u32 *layers)
     __asm__("_ZL26SetLayers_MOSEISLEYCITIZENP12GameObject_s.isra.2");
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ==== src/legoapi/render/core/terrain.cpp: declarations ====
-
-
-
 
 struct tertype;
 struct terrsitu_s;
@@ -553,8 +433,6 @@ namespace {
     DECOMP_ASSERT(offsetof(TERRAIN_GSCENE, display_scene) == 0x110, "TERRAIN_GSCENE display_scene offset");
 
 } // namespace
-
-
 
 namespace {
 
@@ -718,21 +596,10 @@ namespace {
 
 } // namespace
 
-// Original 400-pointer table at 0x61e860: 147 named effects, then empty slots.
-
-
 // Constructs the fixed terrain header and its variable-sized group, index and
 // platform arrays in the caller's arena. The four bounds arrays and the cell
 // assignment array are temporary storage carved backwards from buf_end.
 #define IS_SNAN(x) (*(u32 *)&(x) == 0xffc00000)
-
-
-
-
-
-
-
-
 
 namespace {
 
@@ -751,18 +618,6 @@ static TERRAIN_KILL_PLAYER_ATTR i32 TerrainKillPlayer(GameObject_s *object, i32 
 
 DECOMP_ASSERT(sizeof(TERRAIN_DEBUG_RECORD) == 100, "Terrain debug record ABI");
 
-
-
-
-
-
-
-
-
-
-
-
-
 namespace {
 
     // Target NewScanRot 0x378fb0 uses 0.1f on both horizontal axes when
@@ -770,57 +625,19 @@ namespace {
 
 } // namespace
 
-
 namespace {
 
 } // namespace
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // Original 0x378fb0: the optimized rotating scan shares the terrain engine state.
 
-
 namespace {
 
 } // namespace
 
-
-
-
 namespace {
 
 } // namespace
-
-
-
-
-
-
-
-// ==== src/legoapi/characters/core/charconfig.cpp: declarations ====
 
 // Retail keeps only the IPA-SRA clones (taking the flags field directly),
 // mangled with the original ANIMLIST_s parameter type.
@@ -833,33 +650,12 @@ namespace {
 #define CC_SET_ANIM_FLAGS_OS_ATTR __attribute__((noinline, noclone))
 #endif
 
-
-
-
-
-
-
-
-
-
-
 // Retail only keeps the clone with strip_comments fixed to 1 (regparm text, filename).
 #if defined(__i386__)
 #define REDIRECT_TEXT_FILE_ATTR __attribute__((noinline, noclone, regparm(2)))
 #else
 #define REDIRECT_TEXT_FILE_ATTR __attribute__((noinline, noclone))
 #endif
-
-
-// ==== src/legoapi/core/net/netplay.cpp: declarations ====
-
-
-
-
-
-// ==== src/legoapi/characters/core/players.cpp: declarations ====
-
-
 
 struct MechTouchUIElement;
 struct PLAYERITEM_s;
@@ -871,38 +667,7 @@ extern i32 complexsockposition_forcesock;
 extern i32 movegamecamera_forcesock;
 extern i32 LevFlag[4];
 
-
-// --- Helpers moved from world.cpp ---
-
-
-
-
-
-
-
-
-
-// ---- Player start spawn entries ----
-
 // ---- Misc player/gameobject helpers relocated from doorstubs.cpp ----
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 namespace {
 
@@ -919,19 +684,9 @@ namespace {
 
 } // namespace
 
-
-
-
-
 static inline PlayerAIFlagBits *PlayerAIFlags(u8 *object, i32 offset) {
     return reinterpret_cast<PlayerAIFlagBits *>(object + offset);
 }
-
-
-
-
-
-
 
 DECOMP_ASSERT(sizeof(SPECIAL_LAYER_s) == 0xc, "SPECIAL_LAYER_s size");
 
@@ -952,16 +707,6 @@ static SPECIAL_LAYER_s SpecialLayer[] = {
     {&id_ROBIN, "nextgen_limbs_blue", 0},  {&id_ROBIN, "hires_limbs_blue", 0},   {&id_ROBIN, "lowres_limbs_blue", 0},
 };
 
-
-
-
-
-
-
-
-// ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
-
-
 extern i16 id_GAMORREANGUARD;
 extern i16 id_MOUSEDROID;
 
@@ -970,23 +715,11 @@ extern "C" {
     extern i16 id_LANDSPEEDER;
 }
 
-// Written by ThingManager's ctor (original global @0x124f2e0, .bss).
-
-
-
-
-
-// Enabled in the target data image.  Ordinary background characters are
-// staggered across frames; special movement states opt back into full-rate
-// processing through the forced-update path.
-
-
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
 
     static_assert(sizeof(lego_aiconditiondefs) / sizeof(lego_aiconditiondefs[0]) == 178,
                   "complete game AI condition registry");
-
 
 }
 
@@ -994,12 +727,7 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 // remaining ids enumerate the current story list while omitting variants that
 // are represented by those dedicated routes.
 
-
 struct CUTSCENEPLAYERCLIP;
-
-
-
-
 
 #if defined(__i386__)
 #define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
@@ -1007,106 +735,28 @@ struct CUTSCENEPLAYERCLIP;
 #define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone))
 #endif
 
-// Retail keeps only the IPA-SRA clone, which takes the other object's x and z by address.
-
-extern "C" {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER;
 
-
-
-
-
-
 extern i16 id_ANAKINJEDISCARRED;
-
-
-
 
 // ThingManager objects return to the theMemoryManager pool (D0 @0x425a50).
 inline void ThingManager::operator delete(void *thing, usize size) {
     theMemoryManager.FreePool(thing, size);
 }
 
-extern "C" {
-}
-
-
-
-
-
-
-
-
 extern f32 Hub_PadSpeed[2];
 void UpdateRumble(RUMBLEPACKET *);
-
-
-
 
 GameObject_s *FindNearestGameObject(NUVEC *position, GameObject_s *exclude, u32 required_flags, f32 radius,
                                     f32 extra_radius, i32 animation, i32 character_id, i32 player_index,
                                     f32 *distance_squared, i32 horizontal_only, i32 (*filter)(GameObject_s *),
                                     bool first_match);
 
-
-// ==== src/legoapi/characters/motion/camera.cpp: declarations ====
-
-
 // Original data symbol testmovef is float0.005 at 0x617cb0.
 
 DECOMP_ASSERT(sizeof(VIEWCAM_s) == 0x28, "ViewCam size");
 DECOMP_ASSERT(offsetof(VIEWCAM_s, pitch) == 0x10, "ViewCam pitch offset");
 DECOMP_ASSERT(offsetof(VIEWCAM_s, gamepad) == 0x24, "ViewCam gamepad offset");
-
-
-
-
-
-
-extern "C" {
-
-
-} // extern "C"
 
 extern "C" i16 id_LANDSPEEDER;
 extern i32 CUTCAMONLY, GUNSHIPAHACK, netcamera, complexsockposition_forcesock, movegamecamera_forcesock;
@@ -1116,14 +766,6 @@ GameObject_s *FindNearestGameObject(NUVEC *, GameObject_s *, u32, f32, f32, i32,
 DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, path) == 0x40, "Camera context path offset");
 DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context flags offset");
 
-
-
-
-
-
-// ==== src/legoapi/characters/motion/move.cpp: declarations ====
-
-
 // The retail move.cpp initializer owns these four managed references.
 extern MechWeakPtr<MechObjectInterface, 4> nextShootTarget;
 extern MechWeakPtr<MechObjectInterface, 4> forceNextAttackOpponent;
@@ -1132,7 +774,6 @@ extern MechWeakPtr<MechObjectInterface, 4> lungeTarget;
 // Original action/context lookup data, with its arrays and pointers in one owner.
 
 extern EXTRAACTIONDATA_s ExtraActionData[33];
-
 
 float spline_xoffset_speed_roll = 16384.0f;
 float spline_xoffset_speed_seek = 4.0f;
@@ -1156,14 +797,6 @@ extern i16 id_SNAKE;
 extern "C" i16 id_MINIATST, id_MINIATTE;
 extern i16 id_PKDROID, id_PITDROID;
 
-// Multiplies the ordinary camera's per-frame position blend.  The original
-// keeps this as writable camera state (default 1.0), rather than folding it
-// into the socket seek rate.
-
-extern "C" {
-}
-
-
 static void ShiftPadDirectionHistory(GameObject_s *object, GAMEPAD_s *pad) {
     i32 player_index = -1;
     if (Player[0] == object) {
@@ -1181,169 +814,37 @@ static void ShiftPadDirectionHistory(GameObject_s *object, GAMEPAD_s *pad) {
     PadOldAngle[player_index] = pad->input_angle;
 }
 
-
-
-
-
-
-
-
-
-extern "C" {
-}
-
-
-
-
-
-
-
-// Retail splits the guard off as an inline head; the rest is this partial clone.
-
-
-
-
 // Original exported level control, initialized to 2 at 0x623d00.
 
-
-
 extern "C" i16 id_LANDSPEEDER;
-
-
-
-// These pod tuning values are zero-initialized in the original image.
-
-
-
-
-
 
 // Retail re-tests the three block animations at each use instead of caching a flag.
 #define HAS_BLOCK_ANIMS(animations)                                                                                    \
     ((animations)[0x1a] != NULL || (animations)[0x1b] != NULL || (animations)[0x1c] != NULL)
 
-// Retail inlines the fade and step checks into each caller; this is the remaining partial clone.
-
-
-// Retail splits the context test off as an inline head; the rest is this partial clone.
-
-// Retail keeps only the IPA-SRA clone of this function.
-
-// Retail keeps only the IPA-SRA clone of this function.
-
-
-
 extern "C" {
     extern i16 id_MINIATST, id_MINIATTE;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// Retail splits the context test off as an inline head; the rest is this partial clone.
-
 
 DECOMP_ASSERT(sizeof(AWKWARDSHAPESPHERE_s) == 12, "Awkward shape sphere size");
 DECOMP_ASSERT(offsetof(AWKWARDSHAPESPHERE_s, radius) == 8, "Awkward shape sphere radius offset");
 
 extern i16 id_MINIATST, id_MINIATTE;
 
-
-
-
-// ==== src/legoapi/characters/motion/gameanim.cpp: declarations ====
-
-
 // Retail uses translation-unit-local helpers with compiler-inferred private
 // calling conventions; keep their shared animation-mode call sites intact.
 
 extern i16 id_PENGUIN, id_UMBRELLA, id_GLIDEPACK;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 extern "C" {
-
-
     // Original @0x2c17d0. The non-quaternion ANI4 player uses a compact
     // four-samples-per-word curve stream. Only groups enabled by the node's
     // translation/rotation/scale flags occupy space in that stream.
-
-
-
 } // extern "C"
 
 i32 GizmoFileReadGameAnimSet(GAMEANIMSET_s *set, void *world_ptr,
                              void (*read_object_data)(GAMEANIMOBJ_s *, unsigned char), unsigned char version,
                              char *prefix, char *suffix);
-
-
-
-
-
-// ==== src/legoapi/world/levels/episodeIII.cpp: declarations ====
 
 extern "C" {
     void *AIPAthFindPathCnx(AISYS_s *, AIPATH_s *, char *, char *, i32 *);
@@ -1358,132 +859,19 @@ DECOMP_ASSERT(offsetof(CRUISERC_s, count_dooku) == 4, "CRUISERC_s Dooku offset")
 
 DECOMP_ASSERT(sizeof(CRUISERDNETPACKET_s) == 12, "Cruiser D packet size");
 
-// Episode 3 level handlers, in the game's Episode_III progression:
-// dogfight / cruiser / grievous / kashyyyk / temple / vader / a-new-hope.
-
-// ===========================================================================
 // Dogfight (Dogfight_A)
-// ===========================================================================
-
 
 extern speedup_s DogFightSpeedList[9];
 
-// ===========================================================================
-// Cruiser (Cruiser_A / Cruiser_C / Cruiser_D)
-// ===========================================================================
-
-
-
-
-
-
-
-
-
-// ===========================================================================
-// Grievous (Grievous_A)
-// ===========================================================================
-
-
-
-
-// ===========================================================================
-// Kashyyyk (Kashyyyk_A / Kashyyyk_B / Kashyyyk_C / Kashyyyk_D)
-// ===========================================================================
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ===========================================================================
-// Temple (Temple_A / Temple_C)
-// ===========================================================================
-
-
-
-
-// ===========================================================================
-// Vader (Vader_A / Vader_B / Vader_C)
-// ===========================================================================
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ===========================================================================
 // A New Hope (ANewHope_A)
-// ===========================================================================
-
-
-// ==== src/legoapi/render/light/shadow.cpp: declarations ====
 
 extern "C" void NuRndrShadowDirCol(const NUVEC *direction, u32 colour, f32 near_distance, f32 far_distance);
-
-
-
-
-
-// ==== src/legoapi/core/input/gamepads.cpp: declarations ====
-
 
 extern "C" {
     extern "C++" FadeSystem FadeSys;
 }
 
-// Original bss @0x127a500: 64 pads x 0x60 bytes.
-// Original bss @0x127a4e0.
-
-
-// Two frames of direction history for each local player.  MovePlayer shifts
-// these before accepting the new input; GamePad_Rotate then reports a stable
-// angular velocity only when both consecutive turns agree.
-
-
-
-
-
-
-
-extern "C" {
-
-
-} // extern "C"
-
-
 void UpdateRumble(RUMBLEPACKET *packet);
-
-
-
-
-
-
-
-
-
-
-
-
-// ==== src/legoapi/misc/supportall.cpp: declarations ====
-// Original translation unit reconstructed from the reference address map.
-// Functions are defined in original address order.
 
 #if defined(__SSE__)
 #include <xmmintrin.h>
@@ -1491,49 +879,17 @@ void UpdateRumble(RUMBLEPACKET *packet);
 
 // The reference defines these with dynamic initialization in this unit.
 
-
 DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");
-
-
-
-
 
 // Debug-capture output helpers consumed by NuDisplayListCaptureSortPriority.
 // Transcribed from the original C-linkage symbols:
 //   NuHtmlBegin    0x2d5ca0   NuHtmlFlush   0x2d5c30
 //   NuHtmlWrite    0x2d5cd0   NuHtmlHeading1 0x2d5d40
-extern "C" {
-}
-
-
-
-extern "C" {
-}
-
-extern "C" {
-}
-
-
-extern "C" {
-}
-
-
-
-
-// ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
-
 
 extern "C" {
     extern i16 id_SNAKE;
     extern i16 id_LANDSPEEDER;
 }
-
-// Written by ThingManager's ctor (original global @0x124f2e0, .bss).
-
-
-// Enabled in the target data image.  Ordinary background characters are
-// staggered across frames; special movement states opt back into full-rate
-// processing through the forced-update path.
 
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
@@ -1541,63 +897,13 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
     static_assert(sizeof(lego_aiconditiondefs) / sizeof(lego_aiconditiondefs[0]) == 178,
                   "complete game AI condition registry");
 
-
 }
-
-// The special-route list reserves the first ten ids for suit characters.  The
-// remaining ids enumerate the current story list while omitting variants that
-// are represented by those dedicated routes.
 
 #if defined(__i386__)
 #define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
 #else
 #define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone))
 #endif
-
-// Retail keeps only the IPA-SRA clone, which takes the other object's x and z by address.
-
-extern "C" {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-}
-
-extern "C" {
-}
-
-// ==== src/legoapi/misc/memory.cpp: all remaining content ====
-
-
-extern "C" {
-
-
-
-
-} // extern "C"
-
-// ==== functions in original address order ====
-
-// ==== functions in original address order ====
 
 static void DrawWeapon_SetSabreObjects(GameObject_s *object, i32 red, i32 green, i32 blue, i32 purple, i32 *models,
                                        i32 *hilt) {

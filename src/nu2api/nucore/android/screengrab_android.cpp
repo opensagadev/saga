@@ -4,15 +4,12 @@
 // The original unit constructs the homogeneous VuVec header constants.
 #include "nu2api/nucore/nuvuvec.hpp"
 
-// ==== src/nu2api/nucore/nuvideo_dump.cpp: all remaining content ====
 #include "nu2api/nucore/nuvideo.h"
 
 #include "nu2api/nu3d/nupostresources.h"
 #include "nu2api/nufile/nufile.h"
 
 #include <cstdio>
-
-// ==== functions in original address order ====
 
 extern "C" {
 extern "C" void NuPs2VideoScreenDump(char *filename, i32 format, f32 scale_x, f32 scale_y, i32 face, i32 x, i32 y) {

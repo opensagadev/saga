@@ -37,8 +37,6 @@ struct SOCKCAMERARESULT {
 };
 DECOMP_ASSERT(sizeof(SOCKCAMERARESULT) == 0x64, "Socket camera result ABI");
 
-
-
 // The Android build is gnu++11, where `register` still steers -O0 allocation; C++17 tooling rejects it.
 #if __cplusplus >= 201703L
 #define SOCK_REGISTER
@@ -192,17 +190,7 @@ static const char *tSockLATERAL = "sock_lateral_";
 static const char *tSockTRACKIN = "sock_trackin_";
 static const char *tSockLIMIT = "sock_limit_";
 
-
-extern "C" {
-
-
-}
-
 static __used__ void SockDataError();
-
-
-
-
 
 SOCKPOSITION TempSPosList[4];
 SOCKPOSITION *TempBestSPos;
@@ -215,13 +203,11 @@ i32 complexsockposition_forcesock = -1;
 static NUVEC temp_sockmidpos;
 static NUVEC temp_sockcampos;
 
-
 static i32 InsideLineXZ(f32 x, f32 z, f32 x0, f32 z0, f32 x1, f32 z1) {
     if ((x - x0) * (z1 - z0) + (x0 - x1) * (z - z0) >= 0.0f)
         return 1;
     return 0;
 }
-
 
 f32 RatioBetweenPlanes(NUVEC *point, NUVEC *point_a, NUVEC *normal_a, NUVEC *point_b, NUVEC *normal_b);
 
@@ -242,26 +228,16 @@ static f32 RatioBetweenEdgesXZ(NUVEC *point, NUVEC *edge_a0, NUVEC *edge_a1, NUV
     return distance_a / (distance_a + distance_b);
 }
 
-
-
-
 extern "C" {
-
-
 f32 EnforceSockYLimits(f32 y, SOCKPOSITION *position, SOCKSYS *sock_sys);
 
-
-
 i32 SockSegmentsAhead(SOCK *sock, i32 segment, i32 *from_segment, i32 *to_segment);
-
 
     struct SOCKPAR_CONTEXT {
         u32 reserved[2];
         SOCKSYS *sock_sys;
         SOCK *sock;
     };
-
-
 } // extern "C"
 
 f32 DistanceToLineXZ(NUVEC *, NUVEC *, NUVEC *);
@@ -274,15 +250,9 @@ static u32 SocksOnPreviousStatus[2];
 void TurnOffAllSocksExcept(SOCKSYS *system, i32 exception);
 void RestoreLastSocksTurnoff(SOCKSYS *system);
 
-// ==== src/legoapi/render/core/render_stubs.cpp: declarations ====
-
 extern "C" {
-
 void PerspectMidPoint(NUVEC *result, NUVEC *first, NUVEC *second, NUVEC *camera_position);
-
 } // extern "C"
-
-// ==== functions in original address order ====
 
 static i32 RotDiff(u16 from, u16 to) {
     i32 difference = (i32)to - (i32)from;

@@ -212,7 +212,6 @@ struct SHOPINPUT;
 
 static u8 *crashdata;
 
-
 namespace {
 
     DECOMP_ASSERT(sizeof(TERRAIN_FILE_CHUNK) == 0x34, "TERRAIN_FILE_CHUNK ABI");
@@ -266,13 +265,6 @@ namespace {
 
 } // namespace
 
-
-
-
-
-// ==== src/legoapi/render/fx/game_deb.cpp: all remaining content ====
-
-
 extern "C" {
     i32 DebrisSuspendDrawObjectSwitch = -1;
 }
@@ -280,10 +272,7 @@ f32 debris_thinning_level = 1.0f;
 i32 debris_detail_level = 4;
 i32 forced_debris_thinning;
 
-
-
 extern "C" {
-
     extern f32 globaltime;
     static u32 debrisseed = 0x5c0999;
 }
@@ -294,29 +283,13 @@ static dma_particle_s *DebrisParticleAt(debkeydatatype_s *key, i16 index, u8 par
     return &key->particle_chunks[index / 32]->particles[index % 32];
 }
 
-
-
 extern "C" {
     extern i32 debrischunks, debrischunksglass, freechunkcontrolsptr;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
 typedef f32 ClipBoxVec4 __attribute__((vector_size(16), aligned(4)));
 
-
 extern "C" {
-
     // These are the original registry globals.  `effecttypes` is the
     // contiguous record arena and `debtab` is the separately allocated table
     // of pointers into it.  Slot zero is reserved by the loader.
@@ -484,22 +457,10 @@ extern "C" {
     };
     void NuRegisterEndFrameCallBackFn(void (*callback)(void));
 
-
-
-
-
-
-
-
     // InitGameDebris @0x3ca2d0. Carves a typed debris system and its entries
     // from the world's particle bump buffer. Pointer-sized fields and sizeof
     // keep the host layout valid without changing the original 32-bit layout.
-
-
 } // extern "C"
-
-
-
 
 extern "C" {
     static i32 debris_rt;
@@ -510,20 +471,7 @@ extern "C" {
     static i32 DebrisCutSceneMode;
     i32 g_renderingDebris;
 
-
-
-
-
-
-
-
-
-
-
-
 }
-
-// ==== src/gameapi/edtools/edtoolsall_plain.cpp: declarations ====
 
 // Retail keeps an unreferenced partial-inlining clone of the old HSV2RGB
 // helper (the non-grey path) in this unit.
@@ -532,11 +480,6 @@ extern "C" {
 #else
 #define HSV2RGB_BODY_ATTR __attribute__((used, noinline, noclone))
 #endif
-
-
-// The original animation editor callbacks and lifecycle share file-local state.
-// ---- begin src/gameapi/edtools/edanimall.cpp ----
-
 
 // Animation editor subsystem stubs (static, internal linkage).
 
@@ -656,18 +599,9 @@ static __attribute__((used)) void edanimcbMCTBMenu(eduimenu_s *parent, eduiitem_
 
 static __attribute__((used)) void edanimcbLocalSoundMenu(eduimenu_s *parent, eduiitem_s *, u32);
 
-// ---- end src/gameapi/edtools/edanimall.cpp ----
-// ---- begin src/gameapi/edtools/edmenucallbacks.cpp ----
-
 extern "C" eduiitem_s *eduiItemColourPickCreate(usize, const void *, EdUiItemCallback, char *);
 
 // Editor UI callbacks retained in the original editor's menu code.
-#pragma GCC push_options
-#pragma GCC optimize("O2", "omit-frame-pointer")
-
-#pragma GCC pop_options
-
-// ---- end src/gameapi/edtools/edmenucallbacks.cpp ----
 
 static i32 edbits_cubecount;
 static i32 edgra_clumpthin = 1;
@@ -678,9 +612,6 @@ static VARIPTR gra_end;
 static char *edpp_save_names[6];
 static i32 edptl_count;
 static NUVEC entry_position;
-
-
-// ---- begin src/gameapi/edtools/edptlall.cpp ----
 
 extern "C" {
     extern u32 edblack[4];
@@ -717,7 +648,6 @@ static edui_slider_s *repeatbox_z_item;
 static void UpdateTotalPtls(debinftype *effect);
 
 // The original particle editor's private callbacks and menu state share this TU.
-// ---- begin src/gameapi/edtools/edptlcallbacks.cpp ----
 #if defined(__SSE__)
 #include <xmmintrin.h>
 #endif
@@ -755,7 +685,6 @@ extern "C" {
     extern DEBRISMOMENTUMADJUSTER gencodetab[7];
 }
 
-
 static eduiitem_s *torus_env1_item;
 static eduiitem_s *torus_env2_item;
 static eduiitem_s *torus_env3_item;
@@ -774,8 +703,6 @@ static edui_slider_s *grad_size_max_item;
 static eduiitem_s *grad_item;
 static eduiitem_s *grad_alpha_item;
 
-extern "C" {
-}
 static void cbPtlCancelGSortMenu(eduimenu_s *, eduimenu_s *);
 static void cbPtlCancelTextureMenu(eduimenu_s *, eduimenu_s *);
 static void cbPtlCancelQuickDeleteMenu(eduimenu_s *, eduimenu_s *);
@@ -1038,8 +965,6 @@ static void cbPtlCancel(eduimenu_s *, eduimenu_s *);
 
 static void cbCancelChangeNameMenu(eduimenu_s *menu, eduimenu_s *);
 
-// ---- end src/gameapi/edtools/edptlcallbacks.cpp ----
-
 void cbFileSaveEffects(eduimenu_s *parent, eduiitem_s *, u32);
 
 static void edptlChangeRepeatBox(eduimenu_s *, eduiitem_s *, u32);
@@ -1114,8 +1039,6 @@ static void edptlcbSetScaleFactor(eduimenu_s *, eduiitem_s *item, u32);
 static void edptlcbSwitchTypeMenu(eduimenu_s *parent, eduiitem_s *, u32);
 static void edptlcbTestDetailMenu(eduimenu_s *parent, eduiitem_s *, u32);
 
-// ---- end src/gameapi/edtools/edptlall.cpp ----
-
 static inline f32 edppInterpolateTorusCurve(const debris_float_key_s *keys, f32 time) {
     for (i32 index = 0; index < 7; ++index) {
         if (time >= keys[index].time && time <= keys[index + 1].time)
@@ -1124,10 +1047,6 @@ static inline f32 edppInterpolateTorusCurve(const debris_float_key_s *keys, f32 
                    keys[index].value;
     }
     return 0.0f;
-}
-
-
-extern "C" {
 }
 
 // The original local font helpers read the same private draw state as the
@@ -1163,10 +1082,7 @@ static inline __attribute__((always_inline)) void eduiFntPrintEx(void *font, int
 }
 #endif
 
-// Only caller prints the property edit buffer left-aligned.
-
 // Only eduiMenuRender calls the integer clip helper, always left-aligned.
-
 
 static void edgraInit();
 static void edgraClose();
@@ -1331,9 +1247,6 @@ extern "C" {
     extern i32 edbri_nearest, edbri_plank_instance_type, edbri_post_instance_type;
 }
 
-
-
-
 extern "C" {
     edanim_param_s AnimParams[64];
     eduimenu_s *edanim_active_menu;
@@ -1423,19 +1336,7 @@ extern i32 edbri_mode;
     i32 edbri_post_interval = 5;
 }
 
-
-
-
-
-
 extern "C" {
-}
-
-
-
-extern "C" {
-
-
     static i32 edbits_local_editor_enabled;
     i32 *edbits_editor_enabled = &edbits_local_editor_enabled;
 
@@ -1453,8 +1354,6 @@ eduiitem_s *eduiItemColourPickCreate(usize data, const void *colours, EdUiItemCa
     // Retail keeps this as the constant-propagated clone of the generic four-step
     // gradient helper; only the hue/value colour picker band reaches it.
 }
-
-// ==== src/gameapi/edtools/edbriall.cpp: all remaining content ====
 
 extern "C" {
     extern eduimenu_s *edbri_active_menu, *edbri_options_menu, *edbri_dpadmode_menu;
@@ -1541,10 +1440,6 @@ static void edbriMakePath(char *path) {
 }
 static void edbricbFileSave(eduimenu_s *menu, eduiitem_s *, u32);
 static void edbricbFileLoad(eduimenu_s *menu, eduiitem_s *, u32);
-
-
-
-// ==== src/gameapi/edtools/edgraall.cpp: all remaining content ====
 
 extern "C" u32 edblack[4];
 extern "C" u32 edgrey[4];
@@ -1705,14 +1600,8 @@ static void edgracbSetClumpTerrainOffset(eduimenu_s *, eduiitem_s *item, u32);
 
 static void edgracbCancelChangeInstanceMenu(eduimenu_s *, eduimenu_s *);
 
-// ==== src/nu2api/numusic/sfx.cpp: all remaining content ====
-
-
-
-
 static float g_audioVersion;
 static u32 seed = 0x20558057;
-
 
 i32 g_numGroups;
 SoundGroup g_groups[128];
@@ -1737,7 +1626,6 @@ static i32 sfx_refcount[1601] = {0};
 
 static char cfgfile_name[256] = "Audio/audio.cfg";
 
-
 static void fnAudioAudio(nufpar_s *fpar);
 
 static void fnAudioSample(nufpar_s *fpar);
@@ -1751,22 +1639,6 @@ static NUFPCOMJMP audioCom[] = {
     {NULL, NULL},
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ==== src/gamelib/crc/crc.cpp: all remaining content ====
-
 static i32 g_crc_initialised = 0;
 i32 *g_crc_table = NULL;
 
@@ -1779,16 +1651,6 @@ static inline char CRC_ToUpper(char c) {
     return c;
 }
 
-
-
-
-
-
-
-// ==== src/legoapi/audio/sfx.cpp: declarations ====
-
-
-
 DECOMP_ASSERT(sizeof(RepeatSfx) == 0x10, "RepeatSfx size");
 
 static f32 MusicVolume = 1.0f;
@@ -1798,48 +1660,6 @@ extern "C" {
     u16 GlobalSfxBits[100];
     u16 SfxBits[100];
 }
-
-
-
-
-
-
-extern "C" {
-}
-
-
-
-
-extern "C" {
-
-
-
-
-
-
-
-
-
-
-
-} // extern "C"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 static inline bool UpdateSecondaryMusicStream() {
     if (NuSound3GetStereoStreamStatus(Music.secondary_stream) == NUSOUND_STEREO_STREAM_FINISHED)
@@ -1851,12 +1671,7 @@ static inline bool UpdateSecondaryMusicStream() {
     return true;
 }
 
-
-// ==== src/nu2api/nusound/nu2api_nusound_plain.cpp: declarations ====
-
-
 typedef void (*SoundBitCallback)(i32 sound_id);
-
 
 extern "C" {
     f32 MASTERVOLUME = 1.0f;
@@ -1865,25 +1680,13 @@ extern "C" {
         MUSIC_PLAYBACK_STOPPED, -1, 0, -1, 0, -1, 0, 0, false, false, {0, 0}, 0.0f, 0.0f, 0, -1, NULL,
     };
 
-
-
 }
-
-// ==== src/legoapi/audio/audio.cpp: declarations ====
-
-// The reference constructs the music manager in this unit's static constructor.
-
 
 extern "C" {
     i32 fake_seeking;
 
-
 }
 
-
-
-
-// ==== src/nu2api/numusic/numusic.cpp: declarations ====
 // NuMusic - the music player (nu2api.2013/numusic/numusic.cpp).
 //
 // Decompressed from the original libTTapp.so. The player owns a parsed
@@ -1901,41 +1704,14 @@ extern "C" {
 // sizeof(Album) == 36 == 4 * 9 and sizeof(Track) == 60 == 4 * 15; those
 // literal forms are kept so the arithmetic matches the original binary.
 
-
-
-
 extern NUFPCOMJMPCTX top_jmp_tab[11];
 
 extern NUFPCOMJMPCTX track_jmp_tab[15];
 
-// Globals driving GamePlayMusic. The original keeps these in the batman TU.
-
-
-// i32 GamePlayMusic(LEVELDATA_s *level, i32 check, OPTIONSSAVE_s *options)
-//
-// Picks the level's music tracks and starts playback. `check` is 0 on the
-// boot/init call and 1 when re-invoked from the main loop (where it bails
-// out early if the "other" pair hasn't changed). Classes: 1 = quiet,
-// 2 = action, 0x20 = plain theme (the title music lives here).
-
-
-// ==== src/legoapi/cutscenes/cutscene_stubs.cpp: declarations ====
-
-
-
 extern "C" {
 extern void *(*DefragCreateInstFn)(void *, NUGCUTSCENE_s *, VARIPTR *);
 
-
 }
-
-extern "C" {
-
-
-
-
-
-} // extern "C"
 
 // Steers a cutscene character's eyes towards a look-at locator and blinks its eyelids.
 // Only version-3 locator animations carry the look and blink channels.
@@ -1949,69 +1725,20 @@ extern "C" {
 
 extern "C" {
     // Aligned four-float row used for retail's movaps matrix copies.
-
 } // extern "C"
 
-// ==== src/legoapi/misc/utilities.cpp: declarations ====
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// Retail copies a fully inside end point as one unaligned vector.
-
-// ==== src/legoapi/misc/supportall.cpp: declarations ====
 #if defined(__SSE__)
 #include <xmmintrin.h>
 #endif
 
-// The reference defines these with dynamic initialization in this unit.
-
-extern "C" {
-}
-
-
 DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");
-
-
-
-
-
-
-
-
-
-
 
 // Debug-capture output helpers consumed by NuDisplayListCaptureSortPriority.
 // Transcribed from the original C-linkage symbols:
 //   NuHtmlBegin    0x2d5ca0   NuHtmlFlush   0x2d5c30
 //   NuHtmlWrite    0x2d5cd0   NuHtmlHeading1 0x2d5d40
-extern "C" {
-}
-
-
 
 void AddChunkToRenderStack(particlechunkrendertype_s *chunk, particlechunkrendertype_s **stack);
-
-
-
 
 extern "C" {
     extern i32 freechunkcontrolsptr;
@@ -2022,7 +1749,6 @@ extern "C" {
 }
 void RemoveChunkFromRenderStack(particlechunkrendertype_s *, particlechunkrendertype_s **);
 
-
 extern "C" {
     extern i32 debrischunks;
     extern i32 debrischunksglass;
@@ -2030,7 +1756,6 @@ extern "C" {
     extern f32 globaltime;
     extern f32 panelglobaltime;
 }
-
 
 void DebrisProcessAllocation();
 
@@ -2054,32 +1779,11 @@ static void ReleaseChunkControl(debris_chunk_control_s *control) {
 
 void DebrisProcessControlChunks(i32 panel_time);
 
-extern "C" {
-}
-
 void DebrisCleanUpDmaDebTypeTables();
 
 extern "C" {
     extern f32 globaltime;
 }
-
-
-
-
-
-
-// ==== src/legoapi/render/light/surfaces.cpp: declarations ====
-
-extern "C" {
-}
-
-
-
-
-
-
-// ==== src/legoapi/render/core/terrain_stubs.cpp: declarations ====
-
 
 TERRSET *CurTerr;
 static PLATSKININFO *PlatSkinInfo;
@@ -2097,18 +1801,10 @@ static i32 debris_update_delay = 3;
 static i32 debris_sort_this_stack;
 static i32 debris_update_this_stack;
 // Runtime-selected groups appended after the fixed terrain allocation.
-extern "C" {
-}
 f32 TerrPlatScanDist = 10.0f;
 i32 cntrots;
 static i32 PlatCodeCallback;
 static TERRAIN_PLATFORM_CALLBACK PlatCallback[8];
-
-
-
-extern "C" {
-}
-
 
 extern "C" {
     extern f32 panelglobaltime;
@@ -2130,84 +1826,24 @@ extern "C" {
     }
 }
 
-
-// NuFileExists @nufile (nucore_plain.cpp).
-
-
-
-
 extern "C" {
-
     // Relative difference between a requested scale and an existing effect scale.
     static inline f32 ScaledEffectDistance(f32 requested_scale, f32 scale) {
         const f32 ratio = requested_scale / scale;
         return ratio > 1.0f ? ratio - 1.0f : 1.0f - ratio;
     }
-
-
-
-
-
 } // extern "C"
-
 
 static const char *errstr[] = {"ERR_UNKNOWN", "ERR_NOTERR",      "ERR_MAXTERLIST", "ERR_MAXTERR",
                                "ERR_INOUT",   "ERR_PLATSKINMAX", "ERR_NOINSTANCE"};
 
 extern "C" {
-
-
-
-
-
-
-
-
-
-
-
     NUVEC *CutoffCameraVec = NULL;
-
-
-
-
 
     i32 debris_render_group;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 extern "C++" TERRAIN_TRACK_SLOT *AllocTerrId();
-
-
-
-
 } // extern "C"
-
-// ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
-
 
 extern i16 id_GAMORREANGUARD;
 
@@ -2215,24 +1851,11 @@ extern "C" {
     extern i16 id_LANDSPEEDER;
 }
 
-// Written by ThingManager's ctor (original global @0x124f2e0, .bss).
-
-
-
-
-
-
-// Enabled in the target data image.  Ordinary background characters are
-// staggered across frames; special movement states opt back into full-rate
-// processing through the forced-update path.
-
-
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
 
     static_assert(sizeof(lego_aiconditiondefs) / sizeof(lego_aiconditiondefs[0]) == 178,
                   "complete game AI condition registry");
-
 
 }
 
@@ -2240,14 +1863,7 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 // remaining ids enumerate the current story list while omitting variants that
 // are represented by those dedicated routes.
 
-
-
 struct CUTSCENEPLAYERCLIP;
-
-
-
-
-
 
 #if defined(__i386__)
 #define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
@@ -2255,81 +1871,12 @@ struct CUTSCENEPLAYERCLIP;
 #define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone))
 #endif
 
-// Retail keeps only the IPA-SRA clone, which takes the other object's x and z by address.
-
-extern "C" {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER;
-
-
-
-
-
-
-
-
-
-
-extern "C" {
-}
-
-
-
-
-
-
-
-
-
-
-
 
 GameObject_s *FindNearestGameObject(NUVEC *position, GameObject_s *exclude, u32 required_flags, f32 radius,
                                     f32 extra_radius, i32 animation, i32 character_id, i32 player_index,
                                     f32 *distance_squared, i32 horizontal_only, i32 (*filter)(GameObject_s *),
                                     bool first_match);
-
-
 
 extern "C" {
     extern i32 freechunkcontrolsptr;
@@ -2337,34 +1884,15 @@ extern "C" {
 
 void RemoveChunkFromRenderStack(particlechunkrendertype_s *chunk, particlechunkrendertype_s **stack);
 
-
-
-// ==== src/legoapi/misc/memory.cpp: declarations ====
-
-
-
 extern "C" {
-
     extern i32 debrischunks;
     extern i32 debrischunksglass;
-
 
     extern i32 freechunkcontrolsptr;
     extern f32 globaltime, panelglobaltime;
 
-
-
-
-
-
     extern "C++" void AddChunkToRenderStack(particlechunkrendertype_s *, particlechunkrendertype_s **);
-
-
 } // extern "C"
-
-// ==== src/legoapi/render/fx/parts.cpp: declarations ====
-
-
 
 struct rtlset;
 
@@ -2388,67 +1916,9 @@ void AddChunkToRenderStack(particlechunkrendertype_s *, particlechunkrendertype_
 struct spacelevel_s;
 struct quickboltinfo;
 
-// Local (static) part (PART_s), pickup (GIZMOPICKUP_s), gizmo flow
-// (GIZFLOW_s/FLOWBOX_s), power-up and space/starfighter helpers. Stubbed as
-// local `t` symbols matching res/libTTapp.so.
-
-
-
-
-
 extern "C" {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     // The editor loader clears these page IDs with aligned vector stores.
-
-
-
-
-
-
-
-
-
-
 } // extern "C"
-
-
-
-extern "C" {
-}
-
-extern "C" {
-
-}
-
-
-
-
-
-
-
-
-
 
 // The original repeats the per-sound emitter checks for each of the four sound slots.
 #define PART_EMIT_SOUND_ON(slot)                                                                                       \
@@ -2461,32 +1931,11 @@ extern "C" {
     if (type->sounds[slot] != -1 && type->sound_modes[slot] == (mode))                                                 \
         PlaySfxById(type->sounds[slot], &emitter->position);
 
-
-
-
-
-
-
-// ==== src/legoapi/characters/motion/camera.cpp: declarations ====
-
-
 // Original data symbol testmovef is float0.005 at 0x617cb0.
 
 DECOMP_ASSERT(sizeof(VIEWCAM_s) == 0x28, "ViewCam size");
 DECOMP_ASSERT(offsetof(VIEWCAM_s, pitch) == 0x10, "ViewCam pitch offset");
 DECOMP_ASSERT(offsetof(VIEWCAM_s, gamepad) == 0x24, "ViewCam gamepad offset");
-
-
-
-
-
-
-
-extern "C" {
-
-
-
-} // extern "C"
 
 extern "C" i16 id_LANDSPEEDER;
 extern i32 CUTCAMONLY, GUNSHIPAHACK, netcamera, complexsockposition_forcesock, movegamecamera_forcesock;
@@ -2496,19 +1945,6 @@ GameObject_s *FindNearestGameObject(NUVEC *, GameObject_s *, u32, f32, f32, i32,
 DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, path) == 0x40, "Camera context path offset");
 DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context flags offset");
 
-
-
-
-
-
-
-
-
-
-
-
-
-// ==== src/gameapi/edtools/edtoolsall.cpp: declarations ====
 #if defined(__SSE__)
 #include <xmmintrin.h>
 #endif
@@ -2519,7 +1955,6 @@ extern "C" NUMTL *edbri_mtl, *edbri_mtl_zoff;
 extern "C" f32 edbri_length, edbri_width;
 extern "C" i32 edbri_rotz, edbri_roty, edbri_planks, edbri_post_interval;
 extern "C" i32 edbri_plank_instance_type, edbri_post_instance_type, edbri_bridges_used;
-
 
 extern f32 Scale;
 DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
@@ -2534,37 +1969,6 @@ extern "C" {
     i32 edbits_particle_level_page;
 }
 
-
-
-
-
-
-
-
-extern "C" {
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 extern EdEnumControl::Item OpenClosedItems[3];
 extern EdEnumControl::Item OnOffItems[3];
 extern EdEnumControl::Item YesNoItems[3];
@@ -2573,37 +1977,9 @@ extern i32 AxisColour[8];
 
 extern f32 MouseScale;
 
-// ==== src/nu2api/nusound/nu2api_nusound_misc.cpp: all remaining content ====
-
-
-
-
-
-// ==== src/gameapi/edtools/edrender.cpp: all remaining content ====
-
-
-
-
-
-
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
-
-
-
-
-
-
-
-
-
 struct starfighter_s;
 struct rtl_s;
 struct rtlidata_s;
-
-
-
-
 
 struct GAMEMESSAGE_s;
 struct HINT_s;
@@ -2618,21 +1994,6 @@ struct ripple_node_s;
 struct ripple_set_s;
 struct VuVec;
 
-
-// Camera zoom state
-
-// Graphics loading flags
-
-
-extern "C" {
-}
-
-
-
-// --- NuGScn graphics-data reader ---
-// NuReadGraphicsData is a C++ static function in the original (GCC clones it,
-// hence the `.isra.NNN` suffix in the ROM symbol table).
-
 // Retail only keeps the IPA-SRA clone, which drops the unused fourth argument.
 #if defined(__i386__)
 #define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone, regparm(2)))
@@ -2641,15 +2002,6 @@ extern "C" {
 #endif
 
 // --- Extern "C": NuGScn functions have C linkage in original ---
-extern "C" {
-
-} // extern "C"
-
-
-
-
-
-
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
@@ -2691,37 +2043,12 @@ extern "C" {
         NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
     } while (0)
 
-
-
-
-
-
-
-
-
-
-
-
 // DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
 // red-brick positions come from the Game init values in legogame/game.cpp.
 
-
-
-
-
 extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
 
-
-
-
 extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
-
-extern "C" {
-}
-
-
-
-
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
     do {                                                                                                               \
@@ -2735,24 +2062,7 @@ extern "C" {
         }                                                                                                              \
     } while (false)
 
-
 extern i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
-
-
-
-
-
-
-// ==== src/legoapi/audio/specialsfx.cpp: declarations ====
-
-
-
-
-
-// ==== src/legoapi/render/core/terrain.cpp: declarations ====
-
-
-
 
 struct tertype;
 struct terrsitu_s;
@@ -2818,7 +2128,6 @@ static i32 platinrange;
 static TERRAIN_SHAPE *ShadPoly;
 static TERRAIN_SHAPE *TerrPoly;
 
-
 static u8 TerrWallInfo;
 static u8 TerrWallTab[4];
 NUVEC TerrWallNorm;
@@ -2827,9 +2136,6 @@ static TERRAIN_SHAPE PlatImpactTer;
 static NUVEC PlatImpactNorm;
 static i32 TerrPolyObj;
 static TERRAIN_SHAPE TerrPolyInfo;
-
-
-
 
 namespace {
 
@@ -3020,24 +2326,11 @@ namespace {
 i16 debug_index;
 
 // Original 400-pointer table at 0x61e860: 147 named effects, then empty slots.
-extern "C" {
-}
-
-
 
 // Constructs the fixed terrain header and its variable-sized group, index and
 // platform arrays in the caller's arena. The four bounds arrays and the cell
 // assignment array are temporary storage carved backwards from buf_end.
 #define IS_SNAN(x) (*(u32 *)&(x) == 0xffc00000)
-
-
-
-
-
-
-
-
-
 
 namespace {
 
@@ -3096,29 +2389,12 @@ static inline void ResolveRayCast(NUVEC *movement) {
     }
 }
 
-
-
-
-
-
-
-
 static NUMTX tertempmat;
 static NUVEC4 tertempvec4;
 
 static f32 TerrWallDeflectYScale;
 
-
-
-
-
 static f32 TerConTol = 0.1f;
-
-
-
-
-
-
 
 namespace {
 
@@ -3146,17 +2422,9 @@ namespace {
 
 } // namespace
 
-
-
-
 namespace {
 
 } // namespace
-
-
-
-
-
 
 static inline TERRAIN_PLATFORM *FindFreeTerrainPlatform(TERRSET *terrain, i32 *index) {
     TERRAIN_PLATFORM *platform = NULL;
@@ -3216,32 +2484,7 @@ static inline i32 InstallExtraTerrainPlatform(TERRSET *terrain, TERRAIN_GROUP *s
     return index;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // Original 0x378fb0: the optimized rotating scan shares the terrain engine state.
-
 
 namespace {
     static bool TerrainHandleVerticesOverlap(const TerrainScanBounds &bounds, const TERRAIN_SHAPE &shape);
@@ -3264,9 +2507,6 @@ namespace {
     }
 
 } // namespace
-
-
-
 
 namespace {
     static TerrainScanBounds TerrainHandleBounds(const NUVEC &position, const NUVEC &movement, f32 radius) {
@@ -3314,14 +2554,6 @@ namespace {
     }
 } // namespace
 
-
-
-
-
-
-
-// ==== src/gameapi/edtools/edgra.cpp: all remaining content ====
-
 extern "C" {
     i32 edgra_units_used;
     i32 edgra_page_used[8];
@@ -3330,59 +2562,13 @@ extern "C" {
     i32 edgra_page_vectors_valid[8];
     NuWindGType *NuWindCreateMtx(u32 *, NUMTX *, i16, f32, f32, i32, f32, f32);
 
-
-
 }
-
-// ==== src/legoapi/characters/motion/charplatforms.cpp: declarations ====
 
 i32 SkinFlipTab[8] = {0, 1, 2, 3, 0, 2, 1, 3};
 
-
-
-
-// ==== src/legoapi/actions/combat/hits.cpp: declarations ====
-
-
-
-
-
-
-// ==== src/legoapi/world/levels.cpp: declarations ====
-
-// Level-system stubs that have not yet been split into a subsystem file.
-
-// ==== src/legoapi/render/core/screen.cpp: declarations ====
-
-
-// The fade system and the four fade effects handed to FadeSystem::AddFade()
-// are screen.cpp globals in the original: its static initializer registers
-// their destructors (original bss @0x127bf20 / 0x127bf08 / 0x127bf00 /
-// 0x127bef8 / 0x127bef0).
-
-// Material handles used by the original 2-D fade paths.
-
-extern "C" {
-}
-
-
-
 SAGA_HOST_WEAK void InitStillRender(variptr_u *, variptr_u);
 
-
-
-
-
-
-
-
-
-
-
-
 void FadeLoop(char *text, i32 direction, float duration, void (*draw)(float));
-
-// ==== functions in original address order ====
 
 void GenDebMomAdjFromPos(debkeydatatype_s *, debinftype *, uv1deb *data) {
     dma_particle_s *particle = reinterpret_cast<dma_particle_s *>(data);

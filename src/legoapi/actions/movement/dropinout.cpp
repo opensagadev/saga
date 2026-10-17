@@ -22,7 +22,6 @@
 struct AIROW_s;
 struct nunativegscene_s;
 
-
 void StartDropIn(GameObject_s *object) {
     if (WORLD->current_level == PODSPRINTA_LDATA || (PODRACE_ADATA != NULL && PODRACE_ADATA == WORLD->area)) {
         return;

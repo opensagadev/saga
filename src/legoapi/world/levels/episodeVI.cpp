@@ -123,32 +123,7 @@ static __used__ i32 gizmoblowuptargetcount;
 static __used__ GIZMOBLOWUP_s *gizmoblowuptarget[4];
 static __used__ f32 rechargetimer;
 
-// Episode 6 level handlers, in the game's Episode_VI progression:
-// jabbas palace / sarlacc pit / speeder chase / endor battle / death star 2
-// battle / emperor fight, plus the senate bonus.
-
-// ===========================================================================
-// Jabba's Palace (JabbasPalace_A / B / D / E)
-// ===========================================================================
-
-
-
-
-
-
-
-
-
-
-
-// ===========================================================================
 // Sarlacc Pit (SarlaccPit_A / B / C)
-// ===========================================================================
-
-
-
-
-
 
 static inline void SarlaccDiscoShow(nuhspecial_s *special) {
     NuSpecialSetVisibility(special, 1);
@@ -159,12 +134,7 @@ static inline void SarlaccDiscoShow(nuhspecial_s *special) {
     }
 }
 
-
-
-
-// ===========================================================================
 // Bonus levels: Lego City, Senate, New Town
-// ===========================================================================
 
 static u8 prevOnTaunTaun;
 static u8 prevOnTractor;
@@ -173,34 +143,7 @@ static u8 prevOnTownCar;
 static u8 prevOnFireTruck;
 static u8 prevOnLifeBoat;
 
-
-
-
-
-
-
-
-// ===========================================================================
-// Endor battle (EndorBattle_A / C)
-// ===========================================================================
-
-
-
-
-
-
-
-// ===========================================================================
-// Death Star 2 battle
-// ===========================================================================
-
-
-
-
-
-// ===========================================================================
 // Emperor fight (EmperorFight_A)
-// ===========================================================================
 
 struct EmperorFightAPacket {
     i32 state;
@@ -217,17 +160,12 @@ static u64 routemask_efloor_on;
 static u64 routemask_efloor_off;
 static nuhspecial_s *hspecial_efloor;
 
-
-
 static inline u64 EmperorFloorAreaMask(WORLDINFO_s *world) {
     i32 index = static_cast<i32>(LevArea[0] - world->ai_sys->areas);
     return static_cast<u64>(static_cast<i64>(static_cast<i32>(1u << (index & 31))));
 }
 
-
-// ===========================================================================
 // Fire / slow-down helpers (Death Star 2 fire)
-// ===========================================================================
 
 SPLINEPOS_s fireSplinePos;
 SPLINEPOS_s fireBackPos;
@@ -237,12 +175,7 @@ f32 fireDeltaPos;
 i32 fire_clip_dist = 1000;
 extern i32 objhitobj_nohurtsfx, objhitobj_noimpactsfx;
 
-
-
-
 static f32 slowDownTimer[2];
-
-// ==== functions in original address order ====
 
 void DeathStar2BattleFire_SetSlowDownMul(GameObject_s *object) {
     if (WORLD->current_level != DEATHSTAR2BATTLEE_LDATA && WORLD->current_level != DEATHSTAR2BATTLEF_LDATA &&

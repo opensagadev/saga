@@ -49,32 +49,18 @@ __attribute__((weak)) bool NuIOS_TextureFormatSupported(i32 format) {
     return g_renderDevice.enabled_extensions[format];
 }
 
-
-
-
-
 #define SQUISH_KDXT1 (1 << 0) // 1
 #define SQUISH_KDXT3 (1 << 1) // 2
 #define SQUISH_KDXT5 (1 << 2) // 4
 
 static const i32 CSWTCH_249[] = {SQUISH_KDXT3, SQUISH_KDXT1, SQUISH_KDXT5};
 
-
-
 SAGA_HOST_HOOK void *NuIOS_AllocateDefaultTexturePixels(usize bytes) {
     return malloc(bytes);
 }
 
-
-
-
-
-
 i32 GetMipOffset(i32 width, i32 height, NUTEXFORMAT format, i32 depth, bool isCubemap, i32 mips, i32 targetMip,
                  i32 targetSlice);
-
-
-// ==== functions in original address order ====
 
 void GetTextureFormatInfo(NUTEXFORMAT texture, u32 &param_2, u32 &param_3) {
     param_2 = 1;

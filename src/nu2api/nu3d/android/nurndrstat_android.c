@@ -18,7 +18,6 @@ extern "C" {
     }
 }
 
-
 extern "C" {
     static void RndrStateClear(NUGLOBALRNDRSTATE *state) {
         state->state.mtl = NULL;

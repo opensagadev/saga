@@ -51,25 +51,7 @@ i32 SuperWeirdo(GameObject_s *object);
 extern i32 TERRAINMASK_NONWEAPON;
 extern "C" f32 brickimpactwait;
 
-
-// ==== src/legoapi/menus/core/hint.cpp: declarations ====
-
-// The hint icon transitions and the touch icon x position are dynamically
-// initialized in this unit's static constructor in the reference.
-
-
-// Retail keeps this body as GCC's split-out clone; the inline head stays in
-// the caller.
-
-// Original local callbacks referenced by Hints_LSW.
-
-
-
 // Each control mode retains its own requested and interpolated hint row.
-
-
-
-// ==== functions in original address order ====
 
 void PartKill_ThermalDetonator(PART_s *part, i32) {
     if (part == NULL) {

@@ -244,7 +244,6 @@ static i32 GameObjectAIUpdateInterval(WORLDINFO_s *world, GameObject_s *object) 
     return interval < 7 ? interval : 7;
 }
 
-
 void CreatureCrate_MoveFn(PART_s *part, f32 elapsed) {
     part->crate_spawn_delay -= elapsed;
     if (part->crate_spawn_delay <= 0.0f) {

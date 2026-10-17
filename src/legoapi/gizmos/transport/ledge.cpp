@@ -48,23 +48,7 @@ static LEDGEPIECE LedgePiece[6] = {
 };
 DECOMP_ASSERT(sizeof(LEDGEPIECE) == 0x20, "LEDGEPIECE ABI");
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 static LEDGE *Ledge_AttachPoint(WORLDINFO_s *world, NUVEC *position, NUVEC *bounds_min, NUVEC *bounds_max, u16 *angle);
-
-
-
 
 static inline void Ledge_TryAttach(WORLDINFO_s *world, GameObject_s *object) {
     if (object->character_context != 0x43 && object->character_context != -1) {
@@ -100,15 +84,8 @@ static inline void Ledge_UpdateUnattached(WORLDINFO_s *world, GameObject_s *obje
         Ledge_TryAttach(world, object);
 }
 
-// ==== src/legoapi/props/objects/ledgeterrain.cpp: declarations ====
-
 struct AIROW_s;
 struct nunativegscene_s;
-
-
-
-
-// ==== functions in original address order ====
 
 static void *Ledges_ReserveBufferSpace(void *world_info) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_info);

@@ -7,7 +7,6 @@
 #include "nu2api/nu3d/numtl.h"
 #include <string.h>
 
-
 struct AIROW_s;
 struct nuqthdr_s;
 struct nunativegscene_s;

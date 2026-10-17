@@ -131,7 +131,6 @@
 
 static void Pup_CollectCharKit(WORLDINFO_s *, GIZMOPICKUP_s *pickup, i32, GameObject_s *object, i32);
 
-
 static void Pup_CollectRedBrick(WORLDINFO_s *, GIZMOPICKUP_s *pickup, i32, GameObject_s *object, i32);
 
 static void Pup_UpdatePurpleCoin(WORLDINFO_s *, GIZMOPICKUP_s *pickup);
@@ -141,7 +140,6 @@ static void Pup_UpdateBlueCoin(WORLDINFO_s *, GIZMOPICKUP_s *pickup);
 static void Pup_UpdatePowerUp(WORLDINFO_s *world, GIZMOPICKUP_s *pickup);
 
 static void Pup_CollectPowerUp(WORLDINFO_s *, GIZMOPICKUP_s *pickup, i32, GameObject_s *object, i32 flags);
-
 
 static void Pup_CollectMinikit(WORLDINFO_s *, GIZMOPICKUP_s *pickup, i32, GameObject_s *object, i32 type);
 
@@ -179,26 +177,11 @@ GIZMOPICKUPSYS_s GizmoPickupSys_Game = {
     GizmoPickupType, CoinTab, 10, 4, 4, 2, 0, 0,
 };
 
-// ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
-
-
 extern i16 id_GAMORREANGUARD;
 
 extern "C" {
     extern i16 id_LANDSPEEDER;
 }
-
-// Written by ThingManager's ctor (original global @0x124f2e0, .bss).
-
-
-
-
-
-
-// Enabled in the target data image.  Ordinary background characters are
-// staggered across frames; special movement states opt back into full-rate
-// processing through the forced-update path.
-
 
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
@@ -206,21 +189,13 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
     static_assert(sizeof(lego_aiconditiondefs) / sizeof(lego_aiconditiondefs[0]) == 178,
                   "complete game AI condition registry");
 
-
 }
 
 // The special-route list reserves the first ten ids for suit characters.  The
 // remaining ids enumerate the current story list while omitting variants that
 // are represented by those dedicated routes.
 
-
-
 struct CUTSCENEPLAYERCLIP;
-
-
-
-
-
 
 #if defined(__i386__)
 #define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
@@ -228,89 +203,17 @@ struct CUTSCENEPLAYERCLIP;
 #define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone))
 #endif
 
-// Retail keeps only the IPA-SRA clone, which takes the other object's x and z by address.
-
-extern "C" {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER;
-
-
-
-
-
-
-
-
-
 
 // ThingManager objects return to the theMemoryManager pool (D0 @0x425a50).
 inline void ThingManager::operator delete(void *thing, usize size) {
     theMemoryManager.FreePool(thing, size);
 }
 
-extern "C" {
-}
-
-
-
-
-
-
-
-
-
-
-
-
 GameObject_s *FindNearestGameObject(NUVEC *position, GameObject_s *exclude, u32 required_flags, f32 radius,
                                     f32 extra_radius, i32 animation, i32 character_id, i32 player_index,
                                     f32 *distance_squared, i32 horizontal_only, i32 (*filter)(GameObject_s *),
                                     bool first_match);
-
-
-
-// ==== src/legoapi/render/fx/parts.cpp: declarations ====
-
 
 ADDPART_s Default_ADDPART = {NULL,
                              0,
@@ -364,9 +267,7 @@ struct rtlset;
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-
 }
-
 
 // Forward declarations for local (static) part/gizmo helper stubs.
 struct spacelevel_s;
@@ -375,8 +276,6 @@ struct spacelevel_s;
 // (GIZFLOW_s/FLOWBOX_s), power-up and space/starfighter helpers. Stubbed as
 // local `t` symbols matching res/libTTapp.so.
 
-
-
 static __used__ void PartImpact_Coin(PART_s *part);
 
 static __used__ void PartStolen_Coin(PART_s *part);
@@ -384,7 +283,6 @@ static __used__ void PartStolen_Coin(PART_s *part);
 static __used__ void PartExtra_BlueCoin(PART_s *part);
 
 static __used__ void PartExtra_PurpleCoin(PART_s *part);
-
 
 static __used__ i32 PowerUp_DrawPart(PART_s *part);
 
@@ -396,8 +294,6 @@ static __used__ void PowerUp_EndMsg(GAMEMESSAGE_s *message);
 
 static __used__ void PowerUp_UpdateMsg(GAMEMESSAGE_s *message);
 
-
-
 static __used__ i32 PartDraw_VehicleHeart(PART_s *part);
 
 static __used__ void PartMove_VehicleHeart(PART_s *part, f32);
@@ -405,61 +301,8 @@ static __used__ void PartMove_VehicleHeart(PART_s *part, f32);
 static __used__ void PartMove_VehiclePickup(PART_s *part, f32);
 
 extern "C" {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     // The editor loader clears these page IDs with aligned vector stores.
-
-
-
-
-
-
-
-
-
-
 } // extern "C"
-
-
-
-extern "C" {
-}
-
-extern "C" {
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // The original repeats the per-sound emitter checks for each of the four sound slots.
 #define PART_EMIT_SOUND_ON(slot)                                                                                       \
@@ -472,16 +315,6 @@ extern "C" {
     if (type->sounds[slot] != -1 && type->sound_modes[slot] == (mode))                                                 \
         PlaySfxById(type->sounds[slot], &emitter->position);
 
-
-
-
-
-
-
-
-// ==== src/legoapi/menus/core/gamemessages.cpp: declarations ====
-
-
 struct AIROW_s;
 struct nuqthdr_s;
 struct nunativegscene_s;
@@ -489,44 +322,15 @@ struct SHOPINPUT;
 
 extern void IncreaseScore(u32 *, u64, i32);
 
-
 static_assert(sizeof(GAME_MESSAGE_DATA) == sizeof(GAMEMESSAGE_s), "game message backing layout");
 static_assert(offsetof(GAME_MESSAGE_DATA, tick_fn) == offsetof(GAMEMESSAGE_s, tick_fn),
               "game message backing callback offset");
 
-
-
-
-
-
-
-
-// ==== src/legoapi/gizmo/gizmos/gizmos_gizmopickups.cpp: all remaining content ====
-
-
-
-// ==== src/legoapi/items/collect/minikits.cpp: declarations ====
-
-
-
-
-
-
-
-
 void IncreaseScore(u32 *, u64, i32);
-
-
-
 
 extern i16 tALLMINIKITSBUILT;
 
-
-
-// ==== src/legoapi/items/base/collection.cpp: declarations ====
-
 u32 GizmoBlowups_TotalScore(void *world);
-
 
 struct GIZMOPICKUP_s;
 struct PART_s;
@@ -534,40 +338,7 @@ struct starfighter_s;
 
 struct APICHARACTERMODELLIST_s;
 
-
-
-
-
-
-
-
-
-
-
-
 u32 GizmoBlowups_TotalScore(void *);
-
-
-
-
-
-// ==== src/legoapi/characters/core/playeritems.cpp: declarations ====
-
-
-
-
-// ==== functions in original address order ====
-
-// ==== src/legoapi/gizmo/object/gizmopickups.cpp: all remaining content ====
-
-
-
-
-
-
-
-
-// ==== functions in original address order ====
 
 void GameMsg_DrawAdjustNewPos_CoinToTotal(GAMEMESSAGE_s *message) {
     message->target_position.x = cointotal_x[message->player_index];

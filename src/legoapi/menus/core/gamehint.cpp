@@ -49,8 +49,6 @@ DECOMP_ASSERT(sizeof(MechHintUIButton) == 0xa8, "MechHintUIButton size");
 DECOMP_ASSERT(offsetof(MechHintUIButton, pending_hint) == 0x7c, "Pending touch hint offset");
 DECOMP_ASSERT(offsetof(MechHintUIButton, display_elapsed) == 0x80, "Touch hint display timer offset");
 
-
-
 void MechHintUIButton::Render() {
     if (NewMode != 0 || NewLData != NULL)
         return;
@@ -148,33 +146,13 @@ void MechHintUIButton::Process(float elapsed) {
         StartPulse();
 }
 
-
 void Hint_Process(float elapsed);
 
-
-
-
-
-
-
-
-
-
-
 void Hint_CancelCurrent();
-
-
-
-
-
-
-
 
 // Static game message and hint helpers. Stubbed to satisfy the symbol baseline.
 
 void RegisterWithHintSys(void (*update_fn)(HINT_s *, i32), HINT_s *hints, u32 *save_bits, i32 save_bit_count);
-
-// ==== src/legoapi/menus/core/hint.cpp: declarations ====
 
 struct AIROW_s;
 struct nunativegscene_s;
@@ -187,15 +165,10 @@ u8 show_unlock_shop_hint = 0;
 u8 show_unlock_customiser_hint = 0;
 u8 show_unlock_minikitviewer_hint = 0;
 
-
 // Retail keeps this body as GCC's split-out clone; the inline head stays in
 // the caller.
 static __attribute__((noinline, noclone)) void DrawHint_LSWBody(HINT_s *hint, i32 max_lines)
     __asm__("_Z12DrawHint_LSWP6HINT_si.part.19");
-
-
-
-
 
 // Original local callbacks referenced by Hints_LSW.
 extern u8 show_lever_hint;
@@ -216,13 +189,9 @@ u8 show_hatmachine_hint;
 
 static __used__ i32 HatMachine_UpdateHint(HINT_s *hint);
 
-
 void RegisterWithHintSys(void (*)(HINT_s *, i32), HINT_s *, u32 *, i32);
 i32 id_HINT_LSW_AUTOJUMP = -1;
 i32 id_HINT_LSW_AUTOJUMP_FAIL = -1;
-
-
-
 
 static __used__ i32 Sith_UpdateHint(HINT_s *);
 
@@ -296,10 +265,6 @@ HINT_s Hints_LSW[55] = {
 // Each control mode retains its own requested and interpolated hint row.
 static i32 updatehints_target_y[2];
 static f32 updatehints_current_y[2];
-
-
-
-// ==== functions in original address order ====
 
 static __used__ i32 Move_UpdateHint(HINT_s *hint) {
     if (MechInputTouchSystem::s_baseControlMode == 0 || player == NULL || player->apiobj.field_0x27d == 0 ||

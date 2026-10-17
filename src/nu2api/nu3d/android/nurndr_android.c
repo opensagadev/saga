@@ -198,9 +198,6 @@ extern "C" void NuShaderProgramSetFragmentParamfv(NUSHADERPROGRAM *program, u32 
     }
 }
 
-// Vertex attribute binding — original 0x293841 / 0x2939fe / 0x293a65.
-// ---------------------------------------------------------------------------
-
 // Original attribute word array layout (leading dword = active mask,
 // then 6 dwords per location):
 //   [+0] mask

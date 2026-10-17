@@ -62,8 +62,6 @@ f32 GizmoBlowUpOpponent_Range2;
 i32 GizmoBlowUpOpponent_Behind;
 i32 (*GizmoBlowUp_NoTargetFn)(WORLDINFO_s *, GameObject_s *) = NULL;
 
-
-
 i32 MAXBLOWUPRANDSPANG = 60;
 extern ADDPART_s Default_ADDPART;
 extern "C" PART_s *AddPart(ADDPART_s *);
@@ -94,14 +92,11 @@ extern "C" {
 
 // Definitions from the original gizmoblowups translation unit.
 
-
-
 static char *Blowup_OutputName[] = {"Blownup", "Punched", "Plugging"};
 
 i32 blowup_gizmotype_id = -1;
 
 DECOMP_ASSERT(sizeof(BLOWUPPROGRESS_s) == 0x100, "BLOWUPPROGRESS_s ABI");
-
 
 extern u16 TargetDeg_Near, TargetDeg_Mid, TargetDeg_Far;
 extern f32 TargetDist_Near2, TargetDist_Mid2;
@@ -1069,7 +1064,6 @@ i32 GizBlowup_InitSingleTerrain(GIZMOBLOWUP_s *blowup) {
     PlatInstRotate(blowup->field_0x10c, 1);
     return 1;
 }
-
 
 void GizBlowup_InitTerrain() {
     if (WORLD->gizmo_blowups != NULL) {

@@ -59,12 +59,6 @@ static f32 MissionIconScale[20];
 static f32 MissionIconTargetX[20];
 static f32 MissionIconX[20];
 
-
-
-
-
-// ==== functions in original address order ====
-
 void EndMissionsMenu() {
     LevLock[3] = 1;
     LevTime[3] = 0.6f;

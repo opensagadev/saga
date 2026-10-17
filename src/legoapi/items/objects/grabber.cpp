@@ -52,25 +52,19 @@ static NUFPCOMJMP Grabber_ConfigKeywords[] = {
     {"scale", Grab_scale},       {"move_xy", Grab_move_xy}, {"type", Grab_type},
     {"invert_x", Grab_invert_x}, {"shadow", Grab_shadow},   {NULL, NULL}};
 
-
-// ==== src/legoapi/gizmo/gizmos/gizmos_grabber.cpp: all remaining content ====
 extern "C++" float FRAMETIME;
 extern "C" {
     struct nuvec_s;
     void PlaySfx(char *, nuvec_s *);
 }
 
-
-
 // Static grabber victim-pos helper. Moved from gizmisc_stubs.cpp.
-
 
 extern ADDPART_s Default_ADDPART;
 extern "C" PART_s *AddPart(ADDPART_s *);
 // Retail only has the IPA-SRA clone of this function.
 static __attribute__((noinline, noclone)) void Grabber_Drop(GRABBER_s *grabber, NUVEC *previous_position)
     __asm__("_ZL12Grabber_DropP9GRABBER_sP7nuvec_s.isra.4");
-
 
 extern "C" {
     void PlaySfxAndSetPitch(char *, NUVEC *, f32);
@@ -88,13 +82,10 @@ GIZMOBLOWUP_s *FindNearestGizmoBlowUp(WORLDINFO_s *, NUVEC *, f32);
 
 extern i32 obstacle_gizmotype_id;
 
-
 void EnableShadowMapRendering(i32);
 void ResetShadowMapRendering();
 i32 MatrixReflection(NUMTX *, i32, f32, f32, NUMTX *);
 i32 MatrixReflectionVU0_AXISY(NUMTX *, f32, f32, NUMTX *);
-
-// ==== functions in original address order ====
 
 static void Grab_invert_x(nufpar_s *) {
     Grab_grabber->invert_x = 1;

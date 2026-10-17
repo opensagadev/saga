@@ -51,20 +51,7 @@ static NUFPCOMJMP Teleport_ConfigKeywords[] = {
     {"crawl", Tel_crawl},   {"flip_flap", Tel_flip_flap}, {"hackycam", Tel_Hacky_Cam}, {"obj", Tel_obj},
     {"flap1", Tel_flap},    {"flap2", Tel_flap},          {"name", Tel_name},          {NULL, NULL}};
 
-
-
-
-
-
-
-
-
-
-
-// ==== src/legoapi/gizmo/gizmos/gizmos_teleport.cpp: all remaining content ====
-
 static i32 FindTeleport_Direction;
-
 
 static inline void Teleport_GetSegment(GameObject_s *object, TELEPORT_s *teleport, i32 *start, i32 *end) {
     const bool forwards = (object->context_variant_flags & 4) != 0;
@@ -108,18 +95,6 @@ static inline void Teleport_SetFacing(GameObject_s *object, NUVEC *start, NUVEC 
         object->apiobj.field_0x276 = facing;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-// ==== functions in original address order ====
 
 static void Tel_1_way(nufpar_s *) {
     Tel_teleport->flags |= 1;

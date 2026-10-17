@@ -55,20 +55,8 @@ f32 SUPERCARRY_JUMPSPEED = 1.4f;
 
 static __used__ i32 SuperCarry_TurnBlowupBackOn(GIZMOBLOWUP_s *blowup, NUVEC *position, u16 angle, i32 keep_matrix);
 
-
-
-
-
-
-
-
-// ==== src/legoapi/gizmo/object/takeoverobjects.cpp: all remaining content ====
-
-
 TAKEOVEROBJECT_s takeoverobjects[8];
 i32 num_takeoverobjects;
-
-// ==== functions in original address order ====
 
 // Original 0x4fab00, 184 bytes.
 static void SuperCarry_PartImpact(PART_s *part) {

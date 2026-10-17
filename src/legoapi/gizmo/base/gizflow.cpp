@@ -505,7 +505,6 @@ void GizFlowStoreProgress(GIZFLOW_s *system, GIZFLOWPROGRESS_s *progress) {
     }
 }
 
-
 void PerformActionFlowBox(GIZFLOW_s *system, FLOWBOX_s *box) {
     if (box != NULL && box->type == 2) {
         for (FLOWBOXACTION_s *action = box->actions; action != NULL; action = action->next) {
@@ -515,8 +514,6 @@ void PerformActionFlowBox(GIZFLOW_s *system, FLOWBOX_s *box) {
         }
     }
 }
-
-
 
 static void CheckIfParentsFinished(GIZFLOW_s *system, FLOWBOX_s *box) {
     for (i32 i = 0; i < box->parent_count; ++i) {
@@ -555,7 +552,6 @@ static void CheckIfParentsFinished(GIZFLOW_s *system, FLOWBOX_s *box) {
         parent->state_flags_low &= ~0x20;
     }
 }
-
 
 static void ResetForLoopEx(GIZFLOW_s *flow, FLOWBOX_s *root, FLOWBOX_s *box, i32 checksum) {
     if (box != root && box->loop_checksum != checksum) {

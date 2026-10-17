@@ -16,8 +16,6 @@
 
 char g_datfileMode = 1;
 
-
-
 i64 NuFileAndroidAPK::Seek(i64 offset, NuFile::SeekOrigin::T origin) {
     i32 next;
     switch (origin) {
@@ -38,12 +36,10 @@ i64 NuFileAndroidAPK::Seek(i64 offset, NuFile::SeekOrigin::T origin) {
     return position;
 }
 
-
 isize NuFileAndroidAPK::Write(const void *buf, usize size) {
     STUBBED();
     return 0;
 }
-
 
 static FILE *g_fileHandles[32] = {NULL};
 

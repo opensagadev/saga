@@ -58,12 +58,6 @@
 #include "legoapi/items/fx/ripples.h"
 #include "legoapi/items/objects/objectsall.h"
 
-// World info lifetime (retail worldinfo.cpp): registering, initialising,
-// activating, streaming and resetting the two WORLDINFO slots.
-
-extern "C" {
-}
-
 /// @brief Pointer to the currently loading world info
 static WORLDINFO *LWORLD = &WorldInfo[0];
 

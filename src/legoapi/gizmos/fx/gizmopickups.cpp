@@ -118,14 +118,6 @@ f32 COINMSGTIME = 1.0f;
 f32 (*GizmoPickups_Collide2DFn)(GameObject_s *) = NULL;
 static GIZMOPICKUPSYS_s *GizmoPickupSys = &GizmoPickupSys_Game;
 
-
-
-
-extern "C" {
-}
-
-
-
 namespace {
 
     enum : i32 {
@@ -180,14 +172,10 @@ namespace {
 
 } // namespace
 
-
-
-
 // Retail keeps this body as GCC's split-out clone; the inline head stays in
 // the caller.
 static __attribute__((noinline, noclone)) void GizmoPickups_UpdateListBody(WORLDINFO *world, GIZMOPICKUP_s *pickups, i32 count, i32 play_nearby_sfx)
     __asm__("_ZL23GizmoPickups_UpdateListP11WORLDINFO_sP13GIZMOPICKUP_sii.part.9");
-
 
 static inline void GizmoPickups_UpdateList(WORLDINFO *world, GIZMOPICKUP_s *pickups, i32 count, i32 play_nearby_sfx) {
     if (world == NULL || pickups == NULL) {
@@ -202,55 +190,16 @@ i32 PickUpFlickerTest = 3;
 i32 PickUpFlickerFrames = 6;
 i32 PickupFlickerFrame;
 
-
-
 static void GizmoPickups_Update(void *world_ptr, void *, float);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ==== src/legoapi/world/world.cpp: declarations ====
-
-
-
-// Globals shared across world loading — defined here until moved to globals.cpp
-
-// --- Players globals ---
-// NOTE: `WORLD` (WORLDINFO) field offsets in world.h are an approximation; the
-// original binary reaches the level/area pointers through WORLDINFO[0x128]
-// while world.h places them at 0x130/0x134.  Players_Init still links and runs
-// with the world.h layout but its level/area guard bytes will differ until that
-// WORLDINFO drift is corrected.
-
 
 // --- World-module helpers (kept with the WorldInfo API) ---
 
 extern WORLDINFO WorldInfo[2];
 
-// ==== src/legoapi/items/base/collection.cpp: declarations ====
-
-
-
 struct GIZMOPICKUP_s;
 struct PART_s;
 
-
 static __used__ void Collection_GetSelectingPlayerIDs(i16 *ids);
-
-// ==== src/legoapi/menus/core/panel.cpp: declarations ====
 
 namespace {
 #include "legoapi/menus/core/panel_types.h"
@@ -264,23 +213,14 @@ static __attribute__((noinline, noclone, hot, section(".text"))) void DrawHitPoi
                                                              float alpha, i32 alignment)
     __asm__("_ZL13DrawHitPointsP12GameObject_sffffifi.constprop.39");
 
-// ==== src/legoapi/render/fx/parts.cpp: declarations ====
-
-
-
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-
 }
-
-
-// Forward declarations for local (static) part/gizmo helper stubs.
 
 // Local (static) part (PART_s), pickup (GIZMOPICKUP_s), gizmo flow
 // (GIZFLOW_s/FLOWBOX_s), power-up and space/starfighter helpers. Stubbed as
 // local `t` symbols matching res/libTTapp.so.
-
 
 static __used__ void PartImpact_Coin(PART_s *part);
 
@@ -306,7 +246,6 @@ static __used__ void PartMove_VehicleHeart(PART_s *part, f32);
 
 static __used__ void PartMove_VehiclePickup(PART_s *part, f32);
 
-
 // The original repeats the per-sound emitter checks for each of the four sound slots.
 #define PART_EMIT_SOUND_ON(slot)                                                                                       \
     if (type->sounds[slot] != -1) {                                                                                    \
@@ -318,18 +257,7 @@ static __used__ void PartMove_VehiclePickup(PART_s *part, f32);
     if (type->sounds[slot] != -1 && type->sound_modes[slot] == (mode))                                                 \
         PlaySfxById(type->sounds[slot], &emitter->position);
 
-// ==== src/legoapi/render/core/terrain_stubs.cpp: declarations ====
-
-
-// Runtime-selected groups appended after the fixed terrain allocation.
-
 // NuFileExists @nufile (nucore_plain.cpp).
-
-// ==== src/legoapi/render/fx/parts_control.cpp: all remaining content ====
-
-// ==== functions in original address order ====
-
-// ==== functions in original address order ====
 
 static i32 GizmoPickups_GetMaxGizmos(void *pickup) {
     WORLDINFO *world = static_cast<WORLDINFO *>(pickup);

@@ -40,7 +40,6 @@ void AITriggerSetSysReset(AITRIGGERSETSYS_s *system) {
     }
 }
 
-
 AITRIGGERSETSYS_s *AITriggerSetSysCreate(VARIPTR *buffer, VARIPTR *buffer_end) {
     AITRIGGERSETSYS_s *system =
         static_cast<AITRIGGERSETSYS_s *>(AISysBufferAlloc(buffer, buffer_end, sizeof(AITRIGGERSETSYS_s)));
@@ -61,7 +60,6 @@ AITRIGGERSET_s *AITriggerSetCreate(AITRIGGERSETSYS_s *system, FLOWBOX_s *box) {
     }
     return NULL;
 }
-
 
 void AITriggerSysAutoSetUp(WORLDINFO_s *world, AITRIGGERSETSYS_s *system) {
     AITRIGGERSET_s *groups[32] = {};
@@ -178,7 +176,6 @@ i32 GameObjectUsingLever(GameObject_s *object, LEVER_s *lever) {
         return object->field_0x788 == lever;
     return 0;
 }
-
 
 void AITriggerSetSysProcess(AITRIGGERSETSYS_s *system) {
     if (system == NULL || player == NULL)

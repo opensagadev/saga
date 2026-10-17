@@ -304,7 +304,6 @@
 #include <emmintrin.h>
 #endif
 
-
 static void cbEdLevelSettingsMenu(eduimenu_s *, eduiitem_s *, u32);
 
 #define EDLEVEL_ADD_ACTIVE_SCENE(menu, scene_index)                                                                    \
@@ -329,7 +328,6 @@ static inline i32 get_class_object_attribute(EdClass *ed_class, void *object, Ed
     return 0;
 }
 
-
 DECOMP_ASSERT(offsetof(EdClass, flags) == 0x04, "EdClass flags offset");
 DECOMP_ASSERT(offsetof(EdClass, members) == 0x08, "EdClass members offset");
 DECOMP_ASSERT(offsetof(EdClass, last_member) == 0x0c, "EdClass last member offset");
@@ -350,7 +348,6 @@ eduimenu_s *edLevelDestroyThisMenu;
 eduimenu_s *edLevelDestroyThisMenu2;
 i32 edlevel_mouseandkeyboard;
 LevelEditor theLevelEditor;
-
 
 EdManipulator theDefaultManipulator;
 EdManMove theMoveManipulator;
@@ -379,17 +376,7 @@ template <typename T> T *CreateObject(MemoryBuffer *buffer) {
     return new (storage) T();
 }
 
-
-
-
-
-
-
-
 eduimenu_s *edLevelNextMenu;
-
-
-// ==== src/gameapi/edtools/edtoolsall.cpp: declarations ====
 
 #if defined(__SSE__)
 #include <xmmintrin.h>
@@ -414,25 +401,15 @@ i32 EdType_NuHSpecial;
 i32 EdType_NuVec;
 i32 EdType_NuMtx;
 
-
 f32 EdManipulator::Scale = 2.0f;
 DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
 i32 pad_disabled;
 eduimenu_s *edLevelPinnedMenu;
 
-
-
 NUMTL *EdDrawMtl[2];
 static i32 NewPrim;
 static i32 NewMtl;
 static const VuMtx *NewMtx;
-
-
-
-
-
-
-
 
 template <i32 Axis> static inline void EdDrawCircle(VuVec const &centre, float radius, i32 colour, i32 segments) {
     VuVec base(0.0f, Axis == 2 ? radius : 0.0f, Axis == 2 ? 0.0f : radius, 0.0f);
@@ -452,15 +429,9 @@ template <i32 Axis> static inline void EdDrawCircle(VuVec const &centre, float r
     }
 }
 
-
-
-
-
-
 __attribute__((force_align_arg_pointer)) void EdDrawPolyCylinder(VuVec const &start, VuVec const &end, i32 sides,
                                                                  i32 colour, i32 cap_colour, float radius, float limit,
                                                                  float offset);
-
 
 static i32 rotation_axis = 1;
 
@@ -567,8 +538,6 @@ static void set_manipulator_attribute(ClassObjectListEntry *entry, i32 attribute
         member.reference->SetAttributeData(member.object, attribute, type, data, 0);
 }
 
-// ==== src/gameapi/edtools/edtoolsall_plain.cpp: declarations ====
-
 // Retail keeps an unreferenced partial-inlining clone of the old HSV2RGB
 // helper (the non-grey path) in this unit.
 #if defined(__i386__)
@@ -578,10 +547,6 @@ static void set_manipulator_attribute(ClassObjectListEntry *entry, i32 attribute
 #endif
 static HSV2RGB_BODY_ATTR void
 HSV2RGBBody(f32 hue, f32 saturation, f32 value, f32 *red, f32 *green, f32 *blue) __asm__("_ZL7HSV2RGBfffPfS_S_.part.18");
-
-
-// The original animation editor callbacks and lifecycle share file-local state.
-// ---- begin src/gameapi/edtools/edanimall.cpp ----
 
 // Animation editor subsystem stubs (static, internal linkage).
 
@@ -701,31 +666,6 @@ static __attribute__((used)) void edanimcbMCTBMenu(eduimenu_s *parent, eduiitem_
 
 static __attribute__((used)) void edanimcbLocalSoundMenu(eduimenu_s *parent, eduiitem_s *, u32);
 
-// ---- end src/gameapi/edtools/edanimall.cpp ----
-// ---- begin src/gameapi/edtools/edmenucallbacks.cpp ----
-
-// Editor UI callbacks retained in the original editor's menu code.
-
-// ---- end src/gameapi/edtools/edmenucallbacks.cpp ----
-
-// ---- begin src/gameapi/edtools/edptlall.cpp ----
-
-// The original particle editor's private callbacks and menu state share this TU.
-// ---- begin src/gameapi/edtools/edptlcallbacks.cpp ----
-
-// Particle-list editor UI/menu callbacks.
-
-// Particle editor UI/menu callbacks.
-
-// ---- end src/gameapi/edtools/edptlcallbacks.cpp ----
-
-// Particle list editor subsystem stubs (static, internal linkage).
-
-// ---- end src/gameapi/edtools/edptlall.cpp ----
-
-extern "C" {
-}
-
 // The original local font helpers read the same private draw state as the
 // editor callbacks, so they belong to this translation unit.
 static __used__ __attribute__((noclone)) void eduiFntPrintExGeneric(void *font, int x, int y,
@@ -772,7 +712,6 @@ static __attribute__((noinline, noclone)) void eduiFntPrintClipEx(void *font, i3
                                                                   i32 clip_width, char *format, ...)
     __asm__("_ZL18eduiFntPrintClipExPviiiiiPcz.constprop.70");
 
-
 extern "C" {
     // Retail only has IPA-SRA clones of these two helpers.
     static __attribute__((noinline, noclone)) void
@@ -785,11 +724,8 @@ extern "C" {
 
 }
 
-
 extern "C" {
-
     // Shared editor font; edmainInit receives and stores the font handle.
-
 
 eduiitem_s *eduiItemColourPickCreate(usize data, const void *colours, EdUiItemCallback callback, char *text);
 
@@ -872,27 +808,7 @@ static void eduiFntPrintExLeft(void *font, int x, int y, int, char *format, ...)
 
 static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ...);
 
-// Text-picker commit callbacks. Retail keeps them unmangled and local.
-
-// ==== src/legoapi/menus/screens/gamemenuall.cpp: declarations ====
-
-
-// Retail clears these "fast repeat" latches but never sets them.
-
-// ==== src/nu2api/nucore/nucore_plain.cpp: declarations ====
-// Temporary C-linkage compatibility surface for unresolved engine owners.
-//
-// This file collects functions whose original TU has not yet been
-// reconstructed. Domain families move to their evidenced owner as complete
-// groups; this file is not itself evidence of one original nucore TU.
-
-
-
-
-// C++-linkage helpers defined in sibling TUs.
-
 extern "C" {
-
     // ---------------------------------------------------------------------------
     // Display-list bootstrap (original nucore TU file-statics)
     // ---------------------------------------------------------------------------
@@ -917,17 +833,12 @@ extern "C" {
     DECOMP_ASSERT(sizeof(NuCameraReflect) == 0x84, "camera reflection state size");
     DECOMP_ASSERT(__builtin_offsetof(NuCameraReflect, mtx) == 4, "camera reflection matrix offset");
 
-
     // ---------------------------------------------------------------------------
     // Display list — faithful helpers + pending stubs
     // ---------------------------------------------------------------------------
-
 } // extern "C"
 
-// Local helpers matching original static display-list setters (t local symbols)
-
 extern "C" {
-
     extern "C++" {
         // Original local helper cloned as DisplayListProcessSkin.isra.36 by GCC.
         // It appends the world transform, skin palette, and geometry calls as one
@@ -989,11 +900,9 @@ extern "C" {
     // Quick-font platform rendering (the generic font run lives in nuqfnt.cpp)
     // ---------------------------------------------------------------------------
 
-
     // ---------------------------------------------------------------------------
     // Rendering / materials / effects (host has GL paths elsewhere)
     // ---------------------------------------------------------------------------
-
 
     // ---------------------------------------------------------------------------
     // Light / wind / particles / debris
@@ -1067,28 +976,15 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // PS2 / Xbox legacy shims
     // ---------------------------------------------------------------------------
-
 } // extern "C"
 
 struct nupad_s;
 union variptr_u;
 
-// ==== src/gameapi/edtools/edui.cpp: all remaining content ====
-
-extern "C" {
-
-
-}
-
-// ==== src/legoapi/actions/character/speederchase.cpp: declarations ====
-
 // This alignment affects PodRaceAUpdate codegen even though the linked address is 32-byte aligned.
-
 
 DECOMP_ASSERT(sizeof(SPEEDERCHASEVALUES) == 0x1c, "Speeder chase tuning stride");
 DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
-
-// ==== src/legoapi/characters/motion/camera.cpp: declarations ====
 
 // Original data symbol testmovef is float0.005 at 0x617cb0.
 
@@ -1099,47 +995,13 @@ DECOMP_ASSERT(offsetof(VIEWCAM_s, gamepad) == 0x24, "ViewCam gamepad offset");
 DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, path) == 0x40, "Camera context path offset");
 DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context flags offset");
 
-// ==== src/gameapi/edtools/edfile.cpp: all remaining content ====
-
-
-
-
-// ==== src/legoapi/core/config/saveload.cpp: declarations ====
-
-
-
-
-
-
-
-
-
-
-
-
-
 // Retail keeps the whole body of RenderFileSel3 as the split-out .part clone;
 // the exported function only tests FS_Active.
 static __attribute__((noinline, noclone)) void RenderFileSel3Body(i32 draw_title)
     __asm__("_Z14RenderFileSel3i.part.38");
 
-
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
-
-
-
 struct nuhspecial_s;
 struct VuVec;
-
-
-// Camera zoom state
-
-// Graphics loading flags
-
-// --- NuGScn graphics-data reader ---
-// NuReadGraphicsData is a C++ static function in the original (GCC clones it,
-// hence the `.isra.NNN` suffix in the ROM symbol table).
 
 // Retail only keeps the IPA-SRA clone, which drops the unused fourth argument.
 #if defined(__i386__)
@@ -1147,9 +1009,6 @@ struct VuVec;
 #else
 #define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone))
 #endif
-
-// --- Extern "C": NuGScn functions have C linkage in original ---
-
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
@@ -1191,9 +1050,6 @@ struct VuVec;
         NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
     } while (0)
 
-// DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
-// red-brick positions come from the Game init values in legogame/game.cpp.
-
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
     do {                                                                                                               \
         PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
@@ -1206,88 +1062,10 @@ struct VuVec;
         }                                                                                                              \
     } while (false)
 
-
-// ==== functions in original address order ====
-
-extern "C" {
-
-
-
-
-
-
-
-
-
-
-
-}
-
-extern "C" {
-
-
-
-
-}
-
 extern "C" {
 eduiitem_s *eduiItemColourPickCreate(usize data, const void *colours, EdUiItemCallback callback, char *text);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
-
-extern "C" {
-
-
-
-
-
-
-
-
-
-
-
-
-
-}
-
-extern "C" {
-
-
-
-
-}
-
-extern "C" {
-
-
-
-}
-
-// ==== src/legoapi/items/objects/placeable.cpp: all remaining content ====
-
 
 i16 Placeable::CurrentLedFile;
 static EdStringControl *edObjectNameControl;
@@ -1308,18 +1086,6 @@ inline void PlaceableNameControl::operator delete(void *memory) {
     theMemoryManager.FreePool(memory, sizeof(PlaceableNameControl));
 }
 
-// ==== src/legoapi/core/config/saveload.cpp: all remaining content ====
-
-// ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
-
-
-// Written by ThingManager's ctor (original global @0x124f2e0, .bss).
-
-
-// Enabled in the target data image.  Ordinary background characters are
-// staggered across frames; special movement states opt back into full-rate
-// processing through the forced-update path.
-
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
 
@@ -1328,33 +1094,18 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 }
 
-// The special-route list reserves the first ten ids for suit characters.  The
-// remaining ids enumerate the current story list while omitting variants that
-// are represented by those dedicated routes.
-
 #if defined(__i386__)
 #define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
 #else
 #define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone))
 #endif
 
-// Retail keeps only the IPA-SRA clone, which takes the other object's x and z by address.
-
-// ==== src/legoapi/items/base/game_object.cpp: all remaining content ====
-
-
-
 // Forward declarations for local (static) game-object helper stubs.
 struct GameObject_s;
 struct nuvec_s;
 struct WORLDINFO_s;
 
-// ==== src/legoapi/characters/motion/camera.cpp: declarations ====
-
-
 extern i32 LevFlag[4];
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
@@ -1408,35 +1159,16 @@ extern i32 LevFlag[4];
         }                                                                                                              \
     } while (false)
 
-// ==== functions in original address order ====
-
-// ==== src/legoapi/characters/core/players.cpp: declarations ====
-
-
-// --- Helpers moved from world.cpp ---
-
-// ---- Player start spawn entries ----
-
 // ---- Misc player/gameobject helpers relocated from doorstubs.cpp ----
 
 namespace {
 
 } // namespace
 
-
 DECOMP_ASSERT(sizeof(SPECIAL_LAYER_s) == 0xc, "SPECIAL_LAYER_s size");
-
-// ==== src/legoapi/characters/core/character.cpp: declarations ====
 
 // Forward declarations for local (static) character/gameplay helper stubs.
 struct EDCREATURE_s;
-
-// Original 0x120-byte data record @0x00666960. FixUpCharacters copies this
-// canonical prefix into every character before character-specific overrides.
-// These values cover the fully typed common movement and perception fields.
-
-// ==== src/legoapi/characters/core/charconfig.cpp: declarations ====
-
 
 // Retail keeps only the IPA-SRA clones (taking the flags field directly),
 // mangled with the original ANIMLIST_s parameter type.
@@ -1449,7 +1181,6 @@ struct EDCREATURE_s;
 #define CC_SET_ANIM_FLAGS_OS_ATTR __attribute__((noinline, noclone))
 #endif
 
-
 // Retail only keeps the clone with strip_comments fixed to 1 (regparm text, filename).
 #if defined(__i386__)
 #define REDIRECT_TEXT_FILE_ATTR __attribute__((noinline, noclone, regparm(2)))
@@ -1457,22 +1188,11 @@ struct EDCREATURE_s;
 #define REDIRECT_TEXT_FILE_ATTR __attribute__((noinline, noclone))
 #endif
 
-// ==== src/legoapi/characters/core/characters.cpp: declarations ====
-
-
-
 // LoadPerm1 is one of the few game-level entry points which wires together
 // otherwise C-linkage engine subsystems.  Keep these declarations local: the
 // individual subsystem TUs intentionally expose their original plain names.
-extern "C" {
-
-}
 
 struct AISYS_s;
-
-// The original table at 0x006281a0.  These are the material animation
-// scripts made available before the permanent things scene is loaded.
-
 
 // Retail keeps only the IPA-SRA clone, which receives &*layers.
 #if defined(__i386__)
@@ -1480,12 +1200,6 @@ struct AISYS_s;
 #else
 #define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone))
 #endif
-
-
-// ==== src/legoapi/menus/screens/menus.cpp: declarations ====
-
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
@@ -1539,67 +1253,14 @@ struct AISYS_s;
         }                                                                                                              \
     } while (false)
 
-// ==== src/gameapi/gui/apimenu.cpp: all remaining content ====
-
-
-// ==== src/legoapi/core/input/gamepads.cpp: declarations ====
-
-
-// Original bss @0x127a500: 64 pads x 0x60 bytes.
-// Original bss @0x127a4e0.
-
-// Two frames of direction history for each local player.  MovePlayer shifts
-// these before accepting the new input; GamePad_Rotate then reports a stable
-// angular velocity only when both consecutive turns agree.
-
-
-
-// ==== src/gameframework/savesystem.cpp: all remaining content ====
-
-// ==== src/legoapi/menus/core/text.cpp: declarations ====
-
-// Original .data @0x667ce0; the names are filled in by the static initializer.
-
-// ==== src/legoapi/items/objects/objectsall.cpp: declarations ====
-
-
-// ==== src/gameapi/edtools/edpartall.cpp: all remaining content ====
-
-extern "C" {
-}
-
-// Retail only keeps the IPA-SRA clone, which takes just the parent menu.
-
-// ==== src/legoapi/render/core/terrain_stubs.cpp: declarations ====
-
-
-// Runtime-selected groups appended after the fixed terrain allocation.
-
-// NuFileExists @nufile (nucore_plain.cpp).
-
-// ==== src/legoapi/render/fx/parts.cpp: declarations ====
-
-
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-
 }
 
-// Forward declarations for local (static) part/gizmo helper stubs.
-
-// Local (static) part (PART_s), pickup (GIZMOPICKUP_s), gizmo flow
-// (GIZFLOW_s/FLOWBOX_s), power-up and space/starfighter helpers. Stubbed as
-// local `t` symbols matching res/libTTapp.so.
-
-
 extern "C" {
-
-
     // The editor loader clears these page IDs with aligned vector stores.
-
 } // extern "C"
-
 
 // The original repeats the per-sound emitter checks for each of the four sound slots.
 #define PART_EMIT_SOUND_ON(slot)                                                                                       \
@@ -1612,20 +1273,7 @@ extern "C" {
     if (type->sounds[slot] != -1 && type->sound_modes[slot] == (mode))                                                 \
         PlaySfxById(type->sounds[slot], &emitter->position);
 
-
-
-
-// ==== src/gameapi/edtools/edtoolsall_plain.cpp: all remaining content ====
-
-// ---- begin src/gameapi/edtools/edmenucallbacks.cpp ----
-
-
-// ---- end src/gameapi/edtools/edmenucallbacks.cpp ----
-
 extern "C" {
-
-
-
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 
 static __used__ i32 cbInteractMenuCancelChild(edui_interact_s *interact);
@@ -1694,18 +1342,7 @@ static __used__ void eduicbSelectDirectoryEntry(eduimenu_s *menu, eduiitem_s *it
 static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u32);
 }
 
-// ==== src/gameapi/edtools/edtoolsall.cpp: declarations ====
-
-
-// ---- begin src/gameapi/edtools/edmenucallbacks.cpp ----
-
-
-// ---- end src/gameapi/edtools/edmenucallbacks.cpp ----
-
 extern "C" {
-
-
-
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 
 static __used__ i32 cbInteractMenuCancelChild(edui_interact_s *interact);
@@ -1774,11 +1411,7 @@ static __used__ void eduicbSelectDirectoryEntry(eduimenu_s *menu, eduiitem_s *it
 static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u32);
 }
 
-// ==== src/nu2api/nucore/nucore_plain.cpp: declarations ====
-//
-
 extern "C" {
-
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
@@ -1788,14 +1421,11 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
-
 } // extern "C"
 
 extern "C" {
-
     extern "C++" {
         static __attribute__((noinline, noclone)) void
         DisplayListProcessSkin(NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry, NUDISPLAYLISTITEM **first_and_last,
@@ -1836,7 +1466,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
@@ -1873,14 +1502,7 @@ extern "C" {
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
-
 } // extern "C"
-
-// ==== src/gameapi/edtools/edui.cpp: all remaining content ====
-
-// ==== src/gameapi/edtools/edfile.cpp: all remaining content ====
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
@@ -1934,23 +1556,7 @@ extern "C" {
         }                                                                                                              \
     } while (false)
 
-// ==== functions in original address order ====
-
 extern "C" {
-
-
-}
-
-extern "C" {
-
-
-}
-
-// ==== src/nu2api/nucore/nucore_plain.cpp: declarations ====
-//
-
-extern "C" {
-
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
@@ -1960,14 +1566,11 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
-
 } // extern "C"
 
 extern "C" {
-
     extern "C++" {
         static __attribute__((noinline, noclone)) void
         DisplayListProcessSkin(NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry, NUDISPLAYLISTITEM **first_and_last,
@@ -2008,7 +1611,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
@@ -2045,19 +1647,7 @@ extern "C" {
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
-
 } // extern "C"
-
-// ==== functions in original address order ====
-
-extern "C" {
-
-
-}
-
-// ==== functions in original address order ====
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
 
 static NU_READ_GRAPHICS_DATA_ATTR NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIPTR *buf_end, char *path,
                                                              char *scene_data)
@@ -2115,10 +1705,6 @@ static NU_READ_GRAPHICS_DATA_ATTR NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIP
         }                                                                                                              \
     } while (false)
 
-// ==== functions in original address order ====
-
-// ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
-
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
 
@@ -2132,27 +1718,6 @@ inline void ThingManager::operator delete(void *thing, usize size) {
     theMemoryManager.FreePool(thing, size);
 }
 
-// ==== src/editor/edtoolsall.cpp: all remaining content ====
-
-
-// ==== functions in original address order ====
-
-// ==== src/legoapi/actions/movement/carrying.cpp: declarations ====
-
-// Original defaults: 0x668d30 and 0x668d40, each a four-byte integer.
-
-// ==== src/legoapi/actions/movement/pushing.cpp: declarations ====
-
-// ==== functions in original address order ====
-
-// ==== src/legoapi/characters/motion/move.cpp: declarations ====
-
-
-
-// The retail move.cpp initializer owns these four managed references.
-
-// Original action/context lookup data, with its arrays and pointers in one owner.
-
 // Retail keeps several of this file's static helpers only as GCC clones; these
 // declarations pin the clone names and register conventions.
 #if defined(__i386__)
@@ -2163,47 +1728,23 @@ inline void ThingManager::operator delete(void *thing, usize size) {
 #define MOVE_CLONE_ATTR2 __attribute__((noinline, noclone))
 #endif
 
-// Retail keeps only the IPA-SRA clone of this function.
-
-// Multiplies the ordinary camera's per-frame position blend.  The original
-// keeps this as writable camera state (default 1.0), rather than folding it
-// into the socket seek rate.
-
-
-
-// Retail splits the guard off as an inline head; the rest is this partial clone.
-
-// Original exported level control, initialized to 2 at 0x623d00.
-
-// These pod tuning values are zero-initialized in the original image.
-
 // Retail re-tests the three block animations at each use instead of caching a flag.
 #define HAS_BLOCK_ANIMS(animations)                                                                                    \
     ((animations)[0x1a] != NULL || (animations)[0x1b] != NULL || (animations)[0x1c] != NULL)
-
-// Retail inlines the fade and step checks into each caller; this is the remaining partial clone.
 
 // Retail splits the context test off as an inline head; the rest is this partial clone.
 
 DECOMP_ASSERT(sizeof(AWKWARDSHAPESPHERE_s) == 12, "Awkward shape sphere size");
 DECOMP_ASSERT(offsetof(AWKWARDSHAPESPHERE_s, radius) == 8, "Awkward shape sphere radius offset");
 
-// ==== src/legoapi/characters/motion/gameanim.cpp: declarations ====
-
 // Retail uses translation-unit-local helpers with compiler-inferred private
 // calling conventions; keep their shared animation-mode call sites intact.
-
-
-// ==== src/legoapi/world/levels/episodeV.cpp: declarations ====
-
 
 DECOMP_ASSERT(sizeof(HOTHBATTLEE_NETPACKET_s) == 0x58, "Hoth panel packet size");
 DECOMP_ASSERT(offsetof(HOTHBATTLEE_NETPACKET_s, alpha) == 0x24, "Hoth panel packet alpha offset");
 DECOMP_ASSERT(offsetof(HOTHBATTLEE_NETPACKET_s, count) == 0x54, "Hoth panel packet count offset");
 
-// ===========================================================================
 // Asteroid chase (AsteroidChase_A / B / C / D)
-// ===========================================================================
 
 DECOMP_ASSERT(sizeof(ASTEROID_s) == 0x18, "ASTEROID_s size");
 
@@ -2213,18 +1754,6 @@ DECOMP_ASSERT(offsetof(FINALASTEROID_s, rotation_x) == 0x34, "final asteroid rot
 
 DECOMP_ASSERT(sizeof(ASTEROIDCNETPACKET_s) == 8, "asteroid C network packet size");
 
-// ==== src/legoapi/render/fx/parts.cpp: declarations ====
-
-extern "C" {
-
-
-}
-
-extern "C" {
-
-
-} // extern "C"
-
 #define PART_EMIT_SOUND_ON(slot)                                                                                       \
     if (type->sounds[slot] != -1) {                                                                                    \
         SetSfxBit_On(type->sounds[slot]);                                                                              \
@@ -2232,8 +1761,6 @@ extern "C" {
             PlaySfxById(type->sounds[slot], &emitter->position);                                                       \
     }
 #define PART_EMIT_SOUND(slot, mode)                                                                                    \
-
-// ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
@@ -2243,46 +1770,25 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 }
 
-// ==== src/legoapi/actions/combat/fighting.cpp: declarations ====
-
-
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e4) == 0x7e4, "Quick shoot record offset");
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e8) == 0x7e8, "Quick shoot record count offset");
 DECOMP_ASSERT(offsetof(GameObject_s, quick_shoot_flags) == 0xe2f, "Quick shoot flags offset");
 DECOMP_ASSERT(offsetof(GameObject_s, quick_shoot_bolt_id) == 0xe3e, "Quick shoot bolt ID offset");
 
-// ---- Player start spawn entries ----
-
-// ---- Misc player/gameobject helpers relocated from doorstubs.cpp ----
-
 namespace {
 
 } // namespace
-
-// ==== src/legoapi/audio/specialsfx.cpp: declarations ====
-
-
-// ==== src/legoapi/gizmo/base/gizmo.cpp: declarations ====
-
 
 struct FLOWBOX_s;
 
 DECOMP_ASSERT(sizeof(GIZMOTYPES) == 0xc, "Gizmo type-table header ABI");
 DECOMP_ASSERT(offsetof(GIZMOTYPES, types) == 8, "Gizmo type-table pointer offset");
 
-// ==== src/legoapi/world/levels/episodeII.cpp: declarations ====
-
-
 static_assert(sizeof(struct GUNSHIP_LEVFLAG_s) == 16, "LevFlag must be 16 bytes");
-
-// --- Cross-file entry points / id globals ---
-//
 
 // Defined in gameapi/edtools/edtoolsall.cpp, which has no header yet.
 
 struct JEDIBNETPACKET_s;
-
-// Jedi_B tuning and spawn tables (unmangled globals in the original).
 
 // --- File-local statics (original _ZL... symbols; not renamed) ---------------
 
@@ -2292,22 +1798,7 @@ DECOMP_ASSERT(sizeof(DOOKU_C_s) == 20, "Dooku C state ABI");
 
 DECOMP_ASSERT(sizeof(KAMINO_E_s) == 120, "Kamino E state ABI");
 
-// Episode 2 level handlers, in the game's Episode_II progression:
-// kamino / factory (geonosis droid factory) / jedi / gunship / bonus gunship /
-// dooku, then the NewTown bonus. The coruscant bounty-hunter pursuit lives in
-// pursuit.cpp, its own translation unit in the original binary.
-
-// ===========================================================================
-// Kamino
-// ===========================================================================
-
-// ===========================================================================
-// Geonosis — droid factory (Factory_B / Factory_G)
-// ===========================================================================
-
-// ===========================================================================
 // Jedi (Jedi_B)
-// ===========================================================================
 
 DECOMP_ASSERT(sizeof(JEDIB_CREATURE_s) == 0x60, "JEDIB_CREATURE_s ABI");
 
@@ -2315,69 +1806,9 @@ DECOMP_ASSERT(sizeof(JEDIB_s) == 0x63ec, "JEDIB_s ABI");
 
 DECOMP_ASSERT(sizeof(JEDIBNETPACKET_s) == 0x20, "JEDIBNETPACKET_s ABI");
 
-// Pushes `position` out of any antinode it falls inside, then resolves it to a
-// path point and fills in `locator` for it. Returns 0 when the point is off the
-// arena or off the path network.
-// JediBInitLocator is inlined into JediB_Init apart from everything after
-// the network check, which retail keeps as the split-out body of the IPA-SRA
-// clone (it only needs &world->ai_sys).
-
-
-// ===========================================================================
-// Gunship (Gunship_A / Gunship_B)
-// ===========================================================================
-
-// ===========================================================================
-// Bonus gunship (Bonus_Gunship_A / Bonus_Gunship_B)
-// ===========================================================================
-
-// ===========================================================================
 // Dooku (Dooku_C)
-// ===========================================================================
-
-// ==== src/legoapi/world/levels/episodeI.cpp: declarations ====
-
 
 static_assert(sizeof(struct LEVFLAGBYTES_s) == 16, "LevFlag must be 16 bytes");
-
-// Episode 1 level handlers: negotiations / gungan / rescue / podrace /
-// podsprint / retake / maul / anakins-flight. This is the only implemented
-// level file; episodes II-VI are still stubs.
-//
-// Functions appear in the original translation unit's address order (see
-// res/libTTapp.so 0x1fa8e0..0x203d50). PodLevel and SetPodMergeAnims live at
-// the end because the original binary defines them in other units.
-
-// --- Cross-file entry points (C linkage) -----------------------------------
-//
-// Declared here rather than in a shared header because episodeI.cpp is their
-// only consumer within the levels module.
-
-// --- Cross-file entry points (C++ linkage) ---------------------------------
-
-// PodSprintA_Update boulder-seek state.
-
-// --- File-local layout types -----------------------------------------------
-
-// Every caller passes mode 0, so retail keeps only this constprop clone.
-
-// --- File-local state --------------------------------------------------------
-//
-// Names are the original statics (_ZL... symbols in res/libTTapp.so) and must
-// not be renamed. Initial values match the original .data image.
-
-// Mushroom-collapse cutscene state (initial values from the .data image;
-// mushroom_time_* are also mutated by Action_MushroomCollapse).
-
-// Retake-G guard counters (net-shared through retakeg_netpacket).
-
-// Maul boss levels.
-
-// Gungan plains wildlife spawner (0x114 bytes, layout verified against
-// _ZL8gungan_a).
-// ===========================================================================
-// Sniper turrets (shared by PodRace C and PodSprint A)
-// ===========================================================================
 
 // PodSprint_InitAISpline is partially inlined into PodSprintA_Init: the
 // clear, lookup and spline checks are inlined and the crossing scan is the
@@ -2388,60 +1819,6 @@ static_assert(sizeof(struct LEVFLAGBYTES_s) == 16, "LevFlag must be 16 bytes");
 #define PODSPRINT_AISPLINE_BODY_ATTR __attribute__((noinline))
 #endif
 
-// UpdatePacemakerDisplay is inlined into its callers apart from the message
-// update, which retail keeps as the split-out body of the IPA-SRA clone (it
-// only needs &world->lev_objs).
-
-// ===========================================================================
-// Negotiations / Gungan plains / Rescue (coruscant)
-// ===========================================================================
-
-// ===========================================================================
-// Pod race core (A/B/C laps)
-// ===========================================================================
-
-
-// ===========================================================================
-// Pod sprint (Sebulba events)
-// ===========================================================================
-
-
-
-// ===========================================================================
-// Retake the palace (D/E/G)
-// ===========================================================================
-
-// ===========================================================================
-// Maul boss (A/B/D/E/F)
-// ===========================================================================
-
-// ===========================================================================
-// Anakin's flight (B)
-// ===========================================================================
-
-// ===========================================================================
-// Helpers defined in other original translation units but kept here until
-// they get their own home (their originals live outside the ep1 TU).
-// ===========================================================================
-
-// ==== src/legoapi/ai/core/gameai.cpp: declarations ====
-
-
-// ==== src/legoapi/gizmos/trigger/ai.cpp: all remaining content ====
-
-// ==== src/legoapi/ai/game/creature.cpp: declarations ====
-
-
-// ==== src/legoapi/ai/game/aipathcnxhelper.cpp: declarations ====
-
-
-// ==== src/legoapi/ai/core/ai_sys.cpp: declarations ====
-
-// ==== src/legoapi/actions/character/simpletons.cpp: declarations ====
-
-
-// ---- begin src/legoapi/ai/core/aipathbuild.cpp ----
-
 // The route records use a dense route index, while the editor keeps sixteen
 // independently switchable slots.  The original helper first marks both ends
 // of every route connection, then builds the compact node lookup and matrix.
@@ -2450,9 +1827,6 @@ static_assert(sizeof(struct LEVFLAGBYTES_s) == 16, "LevFlag must be 16 bytes");
 #else
 #define AIPATHBUILD_CLONE_ATTR2 __attribute__((noinline, noclone))
 #endif
-// Retail keeps only the IPA-SRA clone, without the unused path index.
-
-// ---- end src/legoapi/ai/core/aipathbuild.cpp ----
 
 // Retail keeps several static helpers here only as GCC clones; these attributes
 // reproduce the clone names and register conventions.
@@ -2465,17 +1839,6 @@ static_assert(sizeof(struct LEVFLAGBYTES_s) == 16, "LevFlag must be 16 bytes");
 #define AISYSALL_CLONE_ATTR2 __attribute__((noinline, noclone))
 #define AISYSALL_CLONE_ATTR2_SSE __attribute__((noinline, noclone))
 #endif
-
-// IPA-SRA keeps only the fields this helper reads: values for those read before any call,
-// addresses for those read after one.
-
-
-// IPA-SRA hands this clone the address of system->path_sys rather than the system.
-
-// ---- begin src/gameapi/ai/aisys/aisys.cpp ----
-
-
-
 
 // Game-specific AI actions and conditions (registered via
 // RegisterAIScriptActions / RegisterAIScriptConditions). These are stubbed to
@@ -2490,34 +1853,18 @@ DECOMP_ASSERT(sizeof(api_aiactiondefs) == 0x294, "API action registry size");
 
 DECOMP_ASSERT(sizeof(api_aiconditiondefs) == 0x258, "API condition registry size");
 
-// ---- end src/gameapi/ai/aisys/aisys.cpp ----
-
-// ==== src/gameapi/ai/aisys/aiscript.cpp: all remaining content ====
-
-
 #if defined(__i386__)
 #define AISCRIPT_CLONE_ATTR2 __attribute__((noinline, noclone, regparm(2)))
 #else
 #define AISCRIPT_CLONE_ATTR2 __attribute__((noinline, noclone))
 #endif
 
-// Retail inlines the "goto" test into each caller; this is the remaining partial clone.
-
-// Retail inlines the system test into its callers; this is the remaining partial clone.
-
-
-
-
-// ==== src/legoapi/ai/core/ai_sys_stubs.cpp: declarations ====
-
 extern "C" {
-
 #include "legoapi/ai/core/ai_sys_stubs_types.h"
     DECOMP_ASSERT(sizeof(RebuildEditorCreature) == 0xac, "editor creature rebuild stride");
     DECOMP_ASSERT(offsetof(RebuildEditorCreature, path_check) == 0x38, "editor creature path offset");
     DECOMP_ASSERT(offsetof(RebuildEditorCreature, activation_area) == 0x6c, "editor creature area offset");
     DECOMP_ASSERT(offsetof(RebuildEditorCreature, activation) == 0x8f, "editor creature activation offset");
-
 } // extern "C"
 
 #if defined(__i386__)
@@ -2526,20 +1873,9 @@ extern "C" {
 #define AI_SYS_STUBS_CLONE_ATTR2 __attribute__((noinline, noclone))
 #endif
 
-// Retail keeps only the IPA-SRA clone, without the unused object and elapsed time.
-
-extern "C" {
-
-
-} // extern "C"
-
-// ==== src/editor/area_editor.cpp: all remaining content ====
-
 DECOMP_ASSERT(sizeof(EDAIAREA_s) == 0x44, "area editor record size");
 
 // Item colours shared by the AI editors.
-
-// ==== src/editor/edpath.cpp: all remaining content ====
 
 DECOMP_ASSERT(sizeof(AIPATHCNXTYPE_s) == 0x4c, "editor path connection type size");
 DECOMP_ASSERT(offsetof(AIPATHCNXTYPE_s, flags) == 0x48, "editor path connection options offset");
@@ -2593,15 +1929,11 @@ static __used__ i32 routeEditor_AddToRoute(EDAIPATHNODE_s *node, EDAIPATHNODE_s 
 #define PATHEDITOR_SETCAMPOS_BODY_ATTR __attribute__((used, noinline, noclone))
 #endif
 
-// ==== src/editor/aieditor.cpp: all remaining content ====
-
 #if defined(__i386__)
 #define EDANTINODE_REGPARM1 __attribute__((regparm(1)))
 #else
 #define EDANTINODE_REGPARM1
 #endif
-
-// ==== src/editor/creature_editor.cpp: all remaining content ====
 
 #pragma GCC optimize("O2", "omit-frame-pointer")
 
@@ -2644,8 +1976,6 @@ static __used__ __attribute__((force_align_arg_pointer)) void creatureEditor_cbV
 static __used__ __attribute__((force_align_arg_pointer)) void creatureEditor_cbSetScript(eduimenu_s *, eduiitem_s *item,
                                                                                          unsigned int);
 
-// ==== src/editor/locator_editor.cpp: all remaining content ====
-
 extern "C" {
     struct EDCREATURE_s;
 }
@@ -2679,8 +2009,6 @@ static __attribute__((noinline, optimize("no-tree-vectorize"))) unsigned int
 AddLocatorToSetAtEnd(EDLOCATORSET_s *set, EDLOCATOR_s *locator) __asm__(
     "_ZL15AddLocatorToSetP14EDLOCATORSET_sP11EDLOCATOR_sS2_.constprop.131");
 
-// ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
-
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
 
@@ -2689,21 +2017,10 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 }
 
-// ==== src/gameapi/ai/aisys/aistate.cpp: all remaining content ====
-
-// ==== src/legoapi/gizmo/gizmos/gizmos_gizactions.cpp: declarations ====
-
-
-
-
 namespace {
 #include "legoapi/gizmo/gizmos/gizmos_gizactions_types.h"
 
 } // namespace
-
-// ==== src/legoapi/ai/game/gameantinode.cpp: declarations ====
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
@@ -2757,22 +2074,10 @@ namespace {
         }                                                                                                              \
     } while (false)
 
-// ==== src/legoapi/actions/character/starwars.cpp: all remaining content ====
-
 struct AIPACKET_s;
-
-// ==== src/editor/antinode_editor.cpp: all remaining content ====
-
-// ==== functions in original address order ====
-
-// ==== functions in original address order ====
-
-// ==== src/legoapi/items/base/collection.cpp: declarations ====
 
 struct GIZMOPICKUP_s;
 struct PART_s;
-
-// ==== src/legoapi/actions/character/snake.cpp: declarations ====
 
 #define ADD_SNAKE_SEGMENT_DEBRIS(index)                                                                                \
     do {                                                                                                               \
@@ -2812,30 +2117,6 @@ struct PART_s;
         }                                                                                                              \
     } while (0)
 
-// ==== src/legoapi/actions/movement/jumping.cpp: declarations ====
-
-
-// ==== src/legoapi/menus/core/hint.cpp: declarations ====
-
-// The hint icon transitions and the touch icon x position are dynamically
-// initialized in this unit's static constructor in the reference.
-
-// Retail keeps this body as GCC's split-out clone; the inline head stays in
-// the caller.
-
-// Original local callbacks referenced by Hints_LSW.
-
-// Each control mode retains its own requested and interpolated hint row.
-
-// ==== src/legoapi/misc/utilities.cpp: declarations ====
-
-
-// Retail copies a fully inside end point as one unaligned vector.
-
-// ==== src/legoapi/gizmo/object/gizforce.cpp: all remaining content ====
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
-
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
         direction.x = (vx);                                                                                            \
@@ -2888,31 +2169,9 @@ struct PART_s;
         }                                                                                                              \
     } while (false)
 
-// ==== src/legoapi/world/levels/episode.cpp: declarations ====
-
 DECOMP_ASSERT(sizeof(TROOPERCANNON_s) == 0x30, "Trooper cannon state size");
 DECOMP_ASSERT(offsetof(TROOPERCANNON_s, character_name) == 0x0c, "Trooper cannon name offset");
 DECOMP_ASSERT(offsetof(TROOPERCANNON_s, rebuilding) == 0x2c, "Trooper cannon rebuilding offset");
-
-// Episode-global logic and helpers shared across episodes: completion/
-// episode bookkeeping, super-story, boss/cutscene-adjacent helpers. The
-// per-episode level *handlers* live in the matching episodeI..VI.cpp files.
-
-// ===========================================================================
-// Episode bookkeeping
-// ===========================================================================
-
-// ===========================================================================
-// HUD / score helpers
-// ===========================================================================
-
-// ===========================================================================
-// Shared gameplay helpers
-// ===========================================================================
-
-// ==== src/legoapi/items/collect/batarang.cpp: declarations ====
-
-// ==== src/legoapi/gizmo/object/gizmoblowups.cpp: declarations ====
 
 // Original writable flagremaptab at 0x668520, 32 pairs of 32-bit masks.
 extern "C" {
@@ -2921,34 +2180,13 @@ extern u32 flagremaptab[32][2];
 
 // Definitions from the original gizmoblowups translation unit.
 
-
 DECOMP_ASSERT(sizeof(BLOWUPPROGRESS_s) == 0x100, "BLOWUPPROGRESS_s ABI");
 
 DECOMP_ASSERT(offsetof(WORLDINFO_s, blowup_target_candidates) == 0x50d4, "Blowup target candidate-list ABI");
 
-// ==== src/legoapi/characters/core/characters.cpp: declarations ====
-
-extern "C" {
-
-}
-
-// ==== src/legoapi/props/objects/tubes.cpp: all remaining content ====
-
-// ==== src/legoapi/misc/supportall.cpp: declarations ====
-
-
 // The reference defines these with dynamic initialization in this unit.
 
 DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");
-
-// Debug-capture output helpers consumed by NuDisplayListCaptureSortPriority.
-// Transcribed from the original C-linkage symbols:
-//   NuHtmlBegin    0x2d5ca0   NuHtmlFlush   0x2d5c30
-//   NuHtmlWrite    0x2d5cd0   NuHtmlHeading1 0x2d5d40
-
-
-
-// ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
@@ -2957,16 +2195,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
                   "complete game AI condition registry");
 
 }
-
-// ==== src/legoapi/misc/memory.cpp: all remaining content ====
-
-// ==== functions in original address order ====
-
-// ==== functions in original address order ====
-
-// ==== functions in original address order ====
-
-// ==== src/legoapi/items/base/scene.cpp: all remaining content ====
 
 #if defined(__SSE__) && !defined(__EMSCRIPTEN__)
 #include <xmmintrin.h>
@@ -2983,9 +2211,6 @@ char const *SceneInstance::GetName() const {
 void SceneInstance::SetName(char const *value) {
     name.Set(value);
 }
-
-// ==== src/legoapi/items/base/sceneobject.cpp: all remaining content ====
-
 
 // The original helper has an EdClassInterface primary vtable and an EdSubSystem
 // secondary vtable at +0xc. The field-based types retain those exact layouts.
@@ -3174,8 +2399,6 @@ inline void SceneObject::operator delete(void *pointer) {
     theMemoryManager.FreePool(pointer, sizeof(SceneObject));
 }
 
-// ==== src/gameapi/edtools/edsplines.cpp: all remaining content ====
-
 // EdClassInterface's field-based representation preserves the original ABI for
 // the rest of the editor.  These two objects are its original Itanium vtables:
 // two header words followed by the 31 EdClassInterface slots.
@@ -3319,7 +2542,6 @@ void knotHelperDeletingDestructor(KnotHelper *object) {
     ::operator delete(object);
 }
 
-
 template <typename Ref>
 static Ref *make_spline_reference(EdClass *object_class, char *type, char *name, i32 offset, i32 size, i32 attributes,
                                   EdControl *control, bool add_to_class = true) {
@@ -3400,11 +2622,6 @@ inline void SplinePointBlock::operator delete(void *memory) {
     theMemoryManager.FreePool(memory, sizeof(SplinePointBlock));
 }
 
-// ==== src/legoapi/menus/screens/menus.cpp: all remaining content ====
-
-
-// ==== src/legoapi/render/fx/edsplines.cpp: declarations ====
-
 // The original translation unit exports this internal counter under its unmangled C name.
 static i32 bezierline_depth asm("bezierline_depth");
 
@@ -3412,9 +2629,6 @@ static i32 bezierline_depth asm("bezierline_depth");
 // one unaligned 4-float vector store.
 typedef f32 BezierVec4 __attribute__((vector_size(16)));
 typedef f32 BezierVec4Unaligned __attribute__((vector_size(16), aligned(4)));
-
-
-
 
 // Retail only keeps the split-out body of the IPA-SRA clone, which takes
 // &spline->length and &spline->pts in place of the spline.
@@ -3424,8 +2638,6 @@ typedef f32 BezierVec4Unaligned __attribute__((vector_size(16), aligned(4)));
 #define SPLINE_POINT_ANGLES_ATTR __attribute__((noinline, noclone))
 #endif
 
-// ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
-
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
 
@@ -3434,11 +2646,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 }
 
-// ==== src/legoapi/items/base/game_object.cpp: all remaining content ====
-
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
-
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
         direction.x = (vx);                                                                                            \
@@ -3490,25 +2697,11 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
             vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
         }                                                                                                              \
     } while (false)
-
-// ==== functions in original address order ====
-
-// ---- Player start spawn entries ----
-
-// ---- Misc player/gameobject helpers relocated from doorstubs.cpp ----
 
 namespace {
 
 } // namespace
 
-// ==== src/legoapi/characters/core/characters.cpp: declarations ====
-
-extern "C" {
-
-}
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
-
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
         direction.x = (vx);                                                                                            \
@@ -3560,27 +2753,6 @@ extern "C" {
             vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
         }                                                                                                              \
     } while (false)
-
-// ==== src/gameapi/gui/apimenu.cpp: all remaining content ====
-
-// ==== src/gameframework/savesystem.cpp: all remaining content ====
-
-// ==== src/gameapi/edtools/edpartall.cpp: all remaining content ====
-
-extern "C" {
-}
-
-// ==== src/legoapi/render/fx/parts.cpp: declarations ====
-
-extern "C" {
-
-
-}
-
-extern "C" {
-
-
-} // extern "C"
 
 #define PART_EMIT_SOUND_ON(slot)                                                                                       \
     if (type->sounds[slot] != -1) {                                                                                    \
@@ -3590,17 +2762,7 @@ extern "C" {
     }
 #define PART_EMIT_SOUND(slot, mode)                                                                                    \
 
-// ==== src/gameapi/edtools/edtoolsall_plain.cpp: all remaining content ====
-
-// ---- begin src/gameapi/edtools/edmenucallbacks.cpp ----
-
-
-// ---- end src/gameapi/edtools/edmenucallbacks.cpp ----
-
 extern "C" {
-
-
-
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 
 static __used__ i32 cbInteractMenuCancelChild(edui_interact_s *interact);
@@ -3669,18 +2831,7 @@ static __used__ void eduicbSelectDirectoryEntry(eduimenu_s *menu, eduiitem_s *it
 static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u32);
 }
 
-// ==== src/gameapi/edtools/edtoolsall.cpp: declarations ====
-
-
-// ---- begin src/gameapi/edtools/edmenucallbacks.cpp ----
-
-
-// ---- end src/gameapi/edtools/edmenucallbacks.cpp ----
-
 extern "C" {
-
-
-
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 
 static __used__ i32 cbInteractMenuCancelChild(edui_interact_s *interact);
@@ -3749,11 +2900,7 @@ static __used__ void eduicbSelectDirectoryEntry(eduimenu_s *menu, eduiitem_s *it
 static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u32);
 }
 
-// ==== src/nu2api/nucore/nucore_plain.cpp: declarations ====
-//
-
 extern "C" {
-
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
@@ -3763,14 +2910,11 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
-
 } // extern "C"
 
 extern "C" {
-
     extern "C++" {
         static __attribute__((noinline, noclone)) void
         DisplayListProcessSkin(NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry, NUDISPLAYLISTITEM **first_and_last,
@@ -3847,14 +2991,7 @@ extern "C" {
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
-
 } // extern "C"
-
-// ==== src/gameapi/edtools/edui.cpp: all remaining content ====
-
-// ==== src/gameapi/edtools/edfile.cpp: all remaining content ====
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
@@ -3908,23 +3045,7 @@ extern "C" {
         }                                                                                                              \
     } while (false)
 
-// ==== functions in original address order ====
-
 extern "C" {
-
-
-}
-
-extern "C" {
-
-
-}
-
-// ==== src/nu2api/nucore/nucore_plain.cpp: declarations ====
-//
-
-extern "C" {
-
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
@@ -3934,14 +3055,11 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
-
 } // extern "C"
 
 extern "C" {
-
     extern "C++" {
         static __attribute__((noinline, noclone)) void
         DisplayListProcessSkin(NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry, NUDISPLAYLISTITEM **first_and_last,
@@ -4018,19 +3136,7 @@ extern "C" {
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
-
 } // extern "C"
-
-// ==== functions in original address order ====
-
-extern "C" {
-
-
-}
-
-// ==== functions in original address order ====
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
@@ -4083,10 +3189,6 @@ extern "C" {
             vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
         }                                                                                                              \
     } while (false)
-
-// ==== functions in original address order ====
-
-// ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
@@ -4095,33 +3197,10 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
                   "complete game AI condition registry");
 
 }
-
-// ==== src/editor/edtoolsall.cpp: all remaining content ====
-
-// ==== functions in original address order ====
-
-// ==== functions in original address order ====
-
-// ==== src/legoapi/characters/motion/move.cpp: declarations ====
 
 #define HAS_BLOCK_ANIMS(animations)                                                                                    \
     ((animations)[0x1a] != NULL || (animations)[0x1b] != NULL || (animations)[0x1c] != NULL)
 
-// ===========================================================================
-// ===========================================================================
-
-// ==== src/legoapi/render/fx/parts.cpp: declarations ====
-
-extern "C" {
-
-
-}
-
-extern "C" {
-
-
-} // extern "C"
-
 #define PART_EMIT_SOUND_ON(slot)                                                                                       \
     if (type->sounds[slot] != -1) {                                                                                    \
         SetSfxBit_On(type->sounds[slot]);                                                                              \
@@ -4129,8 +3208,6 @@ extern "C" {
             PlaySfxById(type->sounds[slot], &emitter->position);                                                       \
     }
 #define PART_EMIT_SOUND(slot, mode)                                                                                    \
-
-// ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
@@ -4140,92 +3217,11 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 }
 
-// ---- Player start spawn entries ----
-
-// ---- Misc player/gameobject helpers relocated from doorstubs.cpp ----
-
 namespace {
 
 } // namespace
 
-// ==== src/legoapi/world/levels/episodeII.cpp: declarations ====
-
-//
-
-// ===========================================================================
-// Kamino
-// ===========================================================================
-
-
-// ===========================================================================
-// ===========================================================================
-
-// ===========================================================================
-// ===========================================================================
-
-// ===========================================================================
-// ===========================================================================
-
-// ===========================================================================
-// ===========================================================================
-
-// ===========================================================================
-// ===========================================================================
-
-// ==== src/legoapi/world/levels/episodeI.cpp: declarations ====
-
-//
-
-//
-
-//
-
-// ===========================================================================
-// ===========================================================================
-
-// ===========================================================================
-// ===========================================================================
-
-// ===========================================================================
-// ===========================================================================
-
-// ===========================================================================
-// ===========================================================================
-
-// ===========================================================================
-// ===========================================================================
-
-// ===========================================================================
-// ===========================================================================
-
-// ===========================================================================
-// ===========================================================================
-
-// ===========================================================================
-// ===========================================================================
-
-// ==== src/legoapi/gizmos/trigger/ai.cpp: all remaining content ====
-
-// ==== src/gameapi/ai/aisys/aiscript.cpp: all remaining content ====
-
-// ==== src/legoapi/ai/core/ai_sys_stubs.cpp: declarations ====
-
-extern "C" {
-
-
-} // extern "C"
-
-// ==== src/editor/area_editor.cpp: all remaining content ====
-
-// ==== src/editor/edpath.cpp: all remaining content ====
-
-// ==== src/editor/aieditor.cpp: all remaining content ====
-
-// ==== src/editor/creature_editor.cpp: all remaining content ====
-
 #pragma GCC optimize("O2", "omit-frame-pointer")
-
-// ==== src/editor/locator_editor.cpp: all remaining content ====
 
 extern "C" {
     struct EDCREATURE_s;
@@ -4235,8 +3231,6 @@ extern "C" {
 #else
 #endif
 
-// ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
-
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
 
@@ -4245,15 +3239,9 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 }
 
-// ==== src/gameapi/ai/aisys/aistate.cpp: all remaining content ====
-
-// ==== src/legoapi/gizmo/gizmos/gizmos_gizactions.cpp: declarations ====
-
 namespace {
 
 } // namespace
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
@@ -4306,16 +3294,6 @@ namespace {
             vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
         }                                                                                                              \
     } while (false)
-
-// ==== src/legoapi/actions/character/starwars.cpp: all remaining content ====
-
-// ==== src/editor/antinode_editor.cpp: all remaining content ====
-
-// ==== functions in original address order ====
-
-// ==== functions in original address order ====
-
-// ==== src/legoapi/actions/character/snake.cpp: declarations ====
 
 #define ADD_SNAKE_SEGMENT_DEBRIS(index)                                                                                \
     do {                                                                                                               \
@@ -4355,10 +3333,6 @@ namespace {
         }                                                                                                              \
     } while (0)
 
-// ==== src/legoapi/gizmo/object/gizforce.cpp: all remaining content ====
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
-
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
         direction.x = (vx);                                                                                            \
@@ -4411,30 +3385,9 @@ namespace {
         }                                                                                                              \
     } while (false)
 
-// ===========================================================================
-// ===========================================================================
-
-// ===========================================================================
-// ===========================================================================
-
-// ===========================================================================
-// ===========================================================================
-
-// ==== src/legoapi/gizmo/object/gizmoblowups.cpp: declarations ====
-
 extern "C" {
 extern u32 flagremaptab[32][2];
 }
-
-// ==== src/legoapi/characters/core/characters.cpp: declarations ====
-
-extern "C" {
-
-}
-
-// ==== src/legoapi/props/objects/tubes.cpp: all remaining content ====
-
-// ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
@@ -4444,26 +3397,7 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 }
 
-// ==== src/legoapi/misc/memory.cpp: all remaining content ====
-
-// ==== functions in original address order ====
-
-// ==== functions in original address order ====
-
-// ==== functions in original address order ====
-
-// ==== src/gameapi/edtools/edtoolsall.cpp: declarations ====
-
-
-// ---- begin src/gameapi/edtools/edmenucallbacks.cpp ----
-
-
-// ---- end src/gameapi/edtools/edmenucallbacks.cpp ----
-
 extern "C" {
-
-
-
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 
 static __used__ i32 cbInteractMenuCancelChild(edui_interact_s *interact);
@@ -4532,11 +3466,7 @@ static __used__ void eduicbSelectDirectoryEntry(eduimenu_s *menu, eduiitem_s *it
 static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u32);
 }
 
-// ==== src/nu2api/nucore/nucore_plain.cpp: declarations ====
-//
-
 extern "C" {
-
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
@@ -4546,14 +3476,11 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
-
 } // extern "C"
 
 extern "C" {
-
     extern "C++" {
         static __attribute__((noinline, noclone)) void
         DisplayListProcessSkin(NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry, NUDISPLAYLISTITEM **first_and_last,
@@ -4630,15 +3557,8 @@ extern "C" {
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
-
 } // extern "C"
 
-// ==== src/gameapi/edtools/edui.cpp: all remaining content ====
-
-// ==== src/gameapi/edtools/edfile.cpp: all remaining content ====
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
-
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
         direction.x = (vx);                                                                                            \
@@ -4691,22 +3611,6 @@ extern "C" {
         }                                                                                                              \
     } while (false)
 
-// ==== functions in original address order ====
-
-extern "C" {
-
-
-}
-
-extern "C" {
-
-
-}
-
-// ==== functions in original address order ====
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
-
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
         direction.x = (vx);                                                                                            \
@@ -4747,7 +3651,6 @@ extern "C" {
         NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
     } while (0)
 
-
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
     do {                                                                                                               \
         PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
@@ -4759,35 +3662,9 @@ extern "C" {
             vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
         }                                                                                                              \
     } while (false)
-
-// ==== src/legoapi/misc/utilities.cpp: declarations ====
-
-
-
-
-// ==== src/legoapi/render/fx/edsplines.cpp: declarations ====
-
-// ==== src/legoapi/core/input/qrand.cpp: all remaining content ====
-
-// ==== src/legoapi/characters/motion/move.cpp: declarations ====
 
 #define HAS_BLOCK_ANIMS(animations)                                                                                    \
     ((animations)[0x1a] != NULL || (animations)[0x1b] != NULL || (animations)[0x1c] != NULL)
-
-// ===========================================================================
-// ===========================================================================
-
-// ==== src/legoapi/render/fx/parts.cpp: declarations ====
-
-extern "C" {
-
-
-}
-
-extern "C" {
-
-
-} // extern "C"
 
 #define PART_EMIT_SOUND_ON(slot)                                                                                       \
     if (type->sounds[slot] != -1) {                                                                                    \
@@ -4797,8 +3674,6 @@ extern "C" {
     }
 #define PART_EMIT_SOUND(slot, mode)                                                                                    \
 
-// ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
-
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
 
@@ -4807,101 +3682,16 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 }
 
-// ==== src/legoapi/characters/core/players.cpp: declarations ====
-
-
-// ---- Player start spawn entries ----
-
-// ---- Misc player/gameobject helpers relocated from doorstubs.cpp ----
-
 namespace {
 
 } // namespace
 
-// ==== src/legoapi/world/levels/episodeII.cpp: declarations ====
-
-//
-
-// ===========================================================================
-// Kamino
-// ===========================================================================
-
-// ===========================================================================
-// ===========================================================================
-
-// ===========================================================================
-// ===========================================================================
-
-// ===========================================================================
-// ===========================================================================
-
-// ===========================================================================
-// ===========================================================================
-
-// ===========================================================================
-// ===========================================================================
-
-// ==== src/legoapi/world/levels/episodeI.cpp: declarations ====
-
-//
-
-//
-
-//
-
-// ===========================================================================
-// ===========================================================================
-
-// ===========================================================================
-// ===========================================================================
-
-// ===========================================================================
-// ===========================================================================
-
-// ===========================================================================
-// ===========================================================================
-
-// ===========================================================================
-// ===========================================================================
-
-// ===========================================================================
-// ===========================================================================
-
-// ===========================================================================
-// ===========================================================================
-
-// ===========================================================================
-// ===========================================================================
-
-// ==== src/legoapi/gizmos/trigger/ai.cpp: all remaining content ====
-
-// ==== src/gameapi/ai/aisys/aiscript.cpp: all remaining content ====
-
-// ==== src/legoapi/ai/core/ai_sys_stubs.cpp: declarations ====
-
-extern "C" {
-
-
-} // extern "C"
-
-// ==== src/editor/area_editor.cpp: all remaining content ====
-
-// ==== src/editor/edpath.cpp: all remaining content ====
-
-// ==== src/editor/aieditor.cpp: all remaining content ====
-
-// ==== src/editor/creature_editor.cpp: all remaining content ====
-
 #pragma GCC optimize("O2", "omit-frame-pointer")
-
-// ==== src/editor/locator_editor.cpp: all remaining content ====
 
 extern "C" {
     struct EDCREATURE_s;
 }
 
-// ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
-
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
 
@@ -4910,15 +3700,9 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 }
 
-// ==== src/gameapi/ai/aisys/aistate.cpp: all remaining content ====
-
-// ==== src/legoapi/gizmo/gizmos/gizmos_gizactions.cpp: declarations ====
-
 namespace {
 
 } // namespace
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
@@ -4971,16 +3755,6 @@ namespace {
             vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
         }                                                                                                              \
     } while (false)
-
-// ==== src/legoapi/actions/character/starwars.cpp: all remaining content ====
-
-// ==== src/editor/antinode_editor.cpp: all remaining content ====
-
-// ==== functions in original address order ====
-
-// ==== functions in original address order ====
-
-// ==== src/legoapi/actions/character/snake.cpp: declarations ====
 
 #define ADD_SNAKE_SEGMENT_DEBRIS(index)                                                                                \
     do {                                                                                                               \
@@ -5020,10 +3794,6 @@ namespace {
         }                                                                                                              \
     } while (0)
 
-// ==== src/legoapi/gizmo/object/gizforce.cpp: all remaining content ====
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
-
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
         direction.x = (vx);                                                                                            \
@@ -5075,32 +3845,11 @@ namespace {
             vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
         }                                                                                                              \
     } while (false)
-
-// ===========================================================================
-// ===========================================================================
-
-// ===========================================================================
-// ===========================================================================
-
-// ===========================================================================
-// ===========================================================================
-
-// ==== src/legoapi/gizmo/object/gizmoblowups.cpp: declarations ====
 
 extern "C" {
 extern u32 flagremaptab[32][2];
 }
 
-// ==== src/legoapi/characters/core/characters.cpp: declarations ====
-
-extern "C" {
-
-}
-
-// ==== src/legoapi/props/objects/tubes.cpp: all remaining content ====
-
-// ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
-
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
 
@@ -5109,14 +3858,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 }
 
-// ==== src/legoapi/misc/memory.cpp: all remaining content ====
-
-// ==== functions in original address order ====
-
-// ==== functions in original address order ====
-
-// ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
-
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
 
@@ -5124,11 +3865,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
                   "complete game AI condition registry");
 
 }
-
-// ==== src/legoapi/items/base/game_object.cpp: all remaining content ====
-
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
@@ -5182,28 +3918,12 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
         }                                                                                                              \
     } while (false)
 
-// ==== functions in original address order ====
-
-// ---- Player start spawn entries ----
-
-// ---- Misc player/gameobject helpers relocated from doorstubs.cpp ----
-
 namespace {
 
 } // namespace
-
-// ==== src/legoapi/characters/core/character.cpp: declarations ====
 
 struct numtx_s;
 
-// ==== src/legoapi/characters/core/characters.cpp: declarations ====
-
-extern "C" {
-
-}
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
-
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
         direction.x = (vx);                                                                                            \
@@ -5255,32 +3975,6 @@ extern "C" {
             vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
         }                                                                                                              \
     } while (false)
-
-// ==== src/gameapi/gui/apimenu.cpp: all remaining content ====
-
-// ==== src/gameframework/savesystem.cpp: all remaining content ====
-
-// ==== src/legoapi/menus/core/text.cpp: declarations ====
-
-extern "C" {
-}
-
-// ==== src/gameapi/edtools/edpartall.cpp: all remaining content ====
-
-extern "C" {
-}
-
-// ==== src/legoapi/render/fx/parts.cpp: declarations ====
-
-extern "C" {
-
-
-}
-
-extern "C" {
-
-
-} // extern "C"
 
 #define PART_EMIT_SOUND_ON(slot)                                                                                       \
     if (type->sounds[slot] != -1) {                                                                                    \
@@ -5290,17 +3984,7 @@ extern "C" {
     }
 #define PART_EMIT_SOUND(slot, mode)                                                                                    \
 
-// ==== src/gameapi/edtools/edtoolsall_plain.cpp: all remaining content ====
-
-// ---- begin src/gameapi/edtools/edmenucallbacks.cpp ----
-
-
-// ---- end src/gameapi/edtools/edmenucallbacks.cpp ----
-
 extern "C" {
-
-
-
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 
 static __used__ i32 cbInteractMenuCancelChild(edui_interact_s *interact);
@@ -5369,18 +4053,7 @@ static __used__ void eduicbSelectDirectoryEntry(eduimenu_s *menu, eduiitem_s *it
 static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u32);
 }
 
-// ==== src/gameapi/edtools/edtoolsall.cpp: declarations ====
-
-
-// ---- begin src/gameapi/edtools/edmenucallbacks.cpp ----
-
-
-// ---- end src/gameapi/edtools/edmenucallbacks.cpp ----
-
 extern "C" {
-
-
-
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 
 static __used__ i32 cbInteractMenuCancelChild(edui_interact_s *interact);
@@ -5449,11 +4122,7 @@ static __used__ void eduicbSelectDirectoryEntry(eduimenu_s *menu, eduiitem_s *it
 static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u32);
 }
 
-// ==== src/nu2api/nucore/nucore_plain.cpp: declarations ====
-//
-
 extern "C" {
-
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
@@ -5463,14 +4132,11 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
-
 } // extern "C"
 
 extern "C" {
-
     extern "C++" {
         static __attribute__((noinline, noclone)) void
         DisplayListProcessSkin(NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry, NUDISPLAYLISTITEM **first_and_last,
@@ -5511,7 +4177,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
@@ -5548,14 +4213,7 @@ extern "C" {
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
-
 } // extern "C"
-
-// ==== src/gameapi/edtools/edui.cpp: all remaining content ====
-
-// ==== src/gameapi/edtools/edfile.cpp: all remaining content ====
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
@@ -5609,23 +4267,7 @@ extern "C" {
         }                                                                                                              \
     } while (false)
 
-// ==== functions in original address order ====
-
 extern "C" {
-
-
-}
-
-extern "C" {
-
-
-}
-
-// ==== src/nu2api/nucore/nucore_plain.cpp: declarations ====
-//
-
-extern "C" {
-
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
@@ -5635,14 +4277,11 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
-
 } // extern "C"
 
 extern "C" {
-
     extern "C++" {
         static __attribute__((noinline, noclone)) void
         DisplayListProcessSkin(NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry, NUDISPLAYLISTITEM **first_and_last,
@@ -5683,7 +4322,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
@@ -5720,19 +4358,7 @@ extern "C" {
 
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
-
 } // extern "C"
-
-// ==== functions in original address order ====
-
-extern "C" {
-
-
-}
-
-// ==== functions in original address order ====
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
@@ -5785,10 +4411,6 @@ extern "C" {
             vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
         }                                                                                                              \
     } while (false)
-
-// ==== functions in original address order ====
-
-// ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
@@ -5797,33 +4419,10 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
                   "complete game AI condition registry");
 
 }
-
-// ==== src/editor/edtoolsall.cpp: all remaining content ====
-
-// ==== functions in original address order ====
-
-// ==== functions in original address order ====
-
-// ==== src/legoapi/characters/motion/move.cpp: declarations ====
 
 #define HAS_BLOCK_ANIMS(animations)                                                                                    \
     ((animations)[0x1a] != NULL || (animations)[0x1b] != NULL || (animations)[0x1c] != NULL)
 
-// ===========================================================================
-// ===========================================================================
-
-// ==== src/legoapi/render/fx/parts.cpp: declarations ====
-
-extern "C" {
-
-
-}
-
-extern "C" {
-
-
-} // extern "C"
-
 #define PART_EMIT_SOUND_ON(slot)                                                                                       \
     if (type->sounds[slot] != -1) {                                                                                    \
         SetSfxBit_On(type->sounds[slot]);                                                                              \
@@ -5832,8 +4431,6 @@ extern "C" {
     }
 #define PART_EMIT_SOUND(slot, mode)                                                                                    \
 
-// ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
-
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
 
@@ -5841,99 +4438,17 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
                   "complete game AI condition registry");
 
 }
-
-// ---- Player start spawn entries ----
-
-// ---- Misc player/gameobject helpers relocated from doorstubs.cpp ----
 
 namespace {
 
 } // namespace
 
-// ==== src/legoapi/world/levels/episodeII.cpp: declarations ====
-
-//
-
-// ===========================================================================
-// Kamino
-// ===========================================================================
-
-// ===========================================================================
-// ===========================================================================
-
-// ===========================================================================
-// ===========================================================================
-
-// ===========================================================================
-// ===========================================================================
-
-// ===========================================================================
-// ===========================================================================
-
-// ===========================================================================
-// ===========================================================================
-
-// ==== src/legoapi/world/levels/episodeI.cpp: declarations ====
-
-//
-
-//
-
-//
-
-// ===========================================================================
-// ===========================================================================
-
-// ===========================================================================
-// ===========================================================================
-
-// ===========================================================================
-// ===========================================================================
-
-// ===========================================================================
-// ===========================================================================
-
-// ===========================================================================
-// ===========================================================================
-
-// ===========================================================================
-// ===========================================================================
-
-// ===========================================================================
-// ===========================================================================
-
-// ===========================================================================
-// ===========================================================================
-
-// ==== src/legoapi/gizmos/trigger/ai.cpp: all remaining content ====
-
-// ==== src/gameapi/ai/aisys/aiscript.cpp: all remaining content ====
-
-// ==== src/legoapi/ai/core/ai_sys_stubs.cpp: declarations ====
-
-extern "C" {
-
-
-} // extern "C"
-
-// ==== src/editor/area_editor.cpp: all remaining content ====
-
-// ==== src/editor/edpath.cpp: all remaining content ====
-
-// ==== src/editor/aieditor.cpp: all remaining content ====
-
-// ==== src/editor/creature_editor.cpp: all remaining content ====
-
 #pragma GCC optimize("O2", "omit-frame-pointer")
-
-// ==== src/editor/locator_editor.cpp: all remaining content ====
 
 extern "C" {
     struct EDCREATURE_s;
 }
 
-// ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
-
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
 
@@ -5942,15 +4457,9 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 }
 
-// ==== src/gameapi/ai/aisys/aistate.cpp: all remaining content ====
-
-// ==== src/legoapi/gizmo/gizmos/gizmos_gizactions.cpp: declarations ====
-
 namespace {
 
 } // namespace
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
@@ -6003,16 +4512,6 @@ namespace {
             vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
         }                                                                                                              \
     } while (false)
-
-// ==== src/legoapi/actions/character/starwars.cpp: all remaining content ====
-
-// ==== src/editor/antinode_editor.cpp: all remaining content ====
-
-// ==== functions in original address order ====
-
-// ==== functions in original address order ====
-
-// ==== src/legoapi/actions/character/snake.cpp: declarations ====
 
 #define ADD_SNAKE_SEGMENT_DEBRIS(index)                                                                                \
     do {                                                                                                               \
@@ -6052,10 +4551,6 @@ namespace {
         }                                                                                                              \
     } while (0)
 
-// ==== src/legoapi/gizmo/object/gizforce.cpp: all remaining content ====
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
-
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
         direction.x = (vx);                                                                                            \
@@ -6108,30 +4603,9 @@ namespace {
         }                                                                                                              \
     } while (false)
 
-// ===========================================================================
-// ===========================================================================
-
-// ===========================================================================
-// ===========================================================================
-
-// ===========================================================================
-// ===========================================================================
-
-// ==== src/legoapi/gizmo/object/gizmoblowups.cpp: declarations ====
-
 extern "C" {
 extern u32 flagremaptab[32][2];
 }
-
-// ==== src/legoapi/characters/core/characters.cpp: declarations ====
-
-extern "C" {
-
-}
-
-// ==== src/legoapi/props/objects/tubes.cpp: all remaining content ====
-
-// ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
@@ -6140,23 +4614,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
                   "complete game AI condition registry");
 
 }
-
-// ==== src/legoapi/misc/memory.cpp: all remaining content ====
-
-// ==== functions in original address order ====
-
-// ==== functions in original address order ====
-
-// ==== functions in original address order ====
-
-// ==== functions in original address order ====
-
-// ==== src/gameapi/edtools/edsplines.cpp: declarations ====
-
-// ==== src/legoapi/characters/motion/gameanim.cpp: declarations ====
-
-
-// ==== src/nu2api/nu3d/nuspecial.cpp: declarations ====
 
 DECOMP_ASSERT(offsetof(NuSpecialLegacyLayout, instance) == 0x40, "legacy special instance offset");
 DECOMP_ASSERT(offsetof(NuSpecialLegacyLayout, name) == 0x44, "legacy special name offset");
@@ -6164,25 +4621,9 @@ DECOMP_ASSERT(offsetof(NuSpecialLegacyLayout, flags) == 0x48, "legacy special fl
 DECOMP_ASSERT(offsetof(NuLegacyInstanceLayout, flags) == 0x44, "legacy instance flags offset");
 DECOMP_ASSERT(offsetof(NuLegacyInstanceLayout, animation) == 0x48, "legacy instance animation offset");
 
-
-// ==== src/legoapi/world/world.cpp: declarations ====
-
-
-// Globals shared across world loading — defined here until moved to globals.cpp
-
-// --- Players globals ---
-// NOTE: `WORLD` (WORLDINFO) field offsets in world.h are an approximation; the
-// original binary reaches the level/area pointers through WORLDINFO[0x128]
-// while world.h places them at 0x130/0x134.  Players_Init still links and runs
-// with the world.h layout but its level/area guard bytes will differ until that
-// WORLDINFO drift is corrected.
-
-
 // --- World-module helpers (kept with the WorldInfo API) ---
 
 extern WORLDINFO WorldInfo[2];
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
@@ -6236,18 +4677,9 @@ extern WORLDINFO WorldInfo[2];
         }                                                                                                              \
     } while (false)
 
-// ==== src/legoapi/render/light/surfaces.cpp: declarations ====
-
-
-// ==== src/legoapi/core/startup/game.cpp: declarations ====
-
 namespace {
 
 } // namespace
-
-// ==== functions in original address order ====
-
-// ==== functions in original address order ====
 
 void BaseEditor::Initialise(variptr_u &, variptr_u &, i32 value) {
     field_0x0c = value;

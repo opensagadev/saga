@@ -25,27 +25,6 @@ struct GIZBOMBGENPROGRESS {
     u32 visible_masks[3];
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ==== functions in original address order ====
-
 static void GizmoBombGen_Activate(GIZMO *gizmo, i32 active) {
     if (gizmo != NULL) {
         GIZBOMBGEN *bomb_generator = static_cast<GIZBOMBGEN *>(gizmo->object);

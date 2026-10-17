@@ -8,7 +8,6 @@
 #include "gamelib/util/Network.h"
 #include "nu2api/nucore/android/stubs_android.h"
 
-
 i32 V2SessionManager::mLogHandle;
 char V2SessionManager::mLogFilename[32];
 V2SessionManager *V2SessionManager::mpSessionManager;

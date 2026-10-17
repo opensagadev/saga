@@ -35,9 +35,6 @@ DECOMP_ASSERT(sizeof(RadioEntry) == 0x14, "RadioEntry size");
 
 static RadioEntry radios[8];
 
-
-// ==== functions in original address order ====
-
 void ResetRadios() {
     memset(radios, 0, sizeof(radios));
     radios_playing = 0;

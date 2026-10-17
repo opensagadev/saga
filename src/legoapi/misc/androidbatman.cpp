@@ -51,17 +51,6 @@ i32 app_tbdrawset;
 
 static u8 s_SystemPausedTracks[2];
 
-
-
-
-
-
-
-
-
-
-// ==== functions in original address order ====
-
 static void SystemDidBecomeActiveCallback(const NuPhoneOSMessageData *) {
     if (s_SystemPausedTracks[0] != 0) {
         NuSound3ResumeStereoStream(0);

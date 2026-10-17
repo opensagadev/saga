@@ -22,7 +22,6 @@
 struct AIROW_s;
 struct nunativegscene_s;
 
-
 void Transform_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
     ResetForceGlow(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));
     if (object->character_context != 86) {
@@ -208,5 +207,4 @@ void GizmoBlowup_TransformDraw_Game(GIZMOBLOWUP_s *blowup) {
 
     Transform_DrawTarget(&blowup->mid_position, 1.4f * blowup->target_scale, 0.4f);
 }
-
 

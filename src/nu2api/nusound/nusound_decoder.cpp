@@ -241,10 +241,6 @@ void NuSoundDecoder::RequestBuffer(bool loop, NuSoundWeakPtr<NuSoundBufferCallba
     this->consumed_pos++;
 }
 
-// ---------------------------------------------------------------------------
-// the decode thread
-// ---------------------------------------------------------------------------
-
 // libTTapp.so 0x31f010: 128 zeroed loader slots behind a 128-signal
 // semaphore, then the worker thread (priority 2, cafe/xbox core 2).
 NuSoundDecodeThread::NuSoundDecodeThread() : semaphore(128) {

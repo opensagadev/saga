@@ -64,15 +64,6 @@
 #include "globals.h"
 #include "nu2api/nuandroid/ios_device.h"
 
-// ---------------------------------------------------------------------------
-// ios_graphics — iOS/Android GLES2 platform glue
-//
-// Original iOS path managed its own EGL / framebuffer and a dedicated render
-// thread.  On Android the same code is reused: the "iOS" name is historical.
-// This file contains platform plumbing, thread handoff, frame pacing, and
-// path helpers.
-// ---------------------------------------------------------------------------
-
 // Backing drawable size driven by NuRenderDevice::InitialiseOpenGLContext.
 i32 g_backingWidth;
 i32 g_backingHeight;
@@ -82,61 +73,18 @@ static constexpr u32 kNuClear_Color = 0x100;
 static constexpr u32 kNuClear_Depth = 0x200;
 static constexpr u32 kNuClear_Stencil = 0x800;
 
-
 // ---------------------------------------------------------------------------
 // Framebuffer setup
 // ---------------------------------------------------------------------------
 
 SAGA_HOST_WEAK void NuIOS_AllocateSystemFramebuffers(void);
 
-// ---------------------------------------------------------------------------
-// Diagnostics / caps
-// ---------------------------------------------------------------------------
-
-
-// ---------------------------------------------------------------------------
-// Filesystem paths; the Android documents selection is cached after first use.
-// ---------------------------------------------------------------------------
-
-// Native diagnostics supply a strong host-configured documents-path override.
-
-// ---------------------------------------------------------------------------
-// Render-thread handoff
-//
-// Game thread  ──Wakes──► render thread (via g_wakeRenderThread)
-// Render thread ──Signals──► game thread "allowed to render" observability
-// Render thread ──Signals──► game thread "frame done" (g_renderThreadDoneThread)
-//
-// Three independent mutex/cond pairs mirror the original iOS implementation.
-// The split keeps the "awaiting wake" debug flag independent from the actual
-// wake/completion signals.
-// ---------------------------------------------------------------------------
-
-// Timestamp when the current frame's render was kicked — original
-// @0x66c9a8, set in NuIOS_WakeRenderThread and sampled in
-// NuIOS_WaitForRenderThreadCompletion for 60 Hz pacing.
-
-
-
-// ==== src/nu2api/nucore/nucore_plain.cpp: declarations ====
-// Temporary C-linkage compatibility surface for unresolved engine owners.
-//
-// This file collects functions whose original TU has not yet been
-// reconstructed. Domain families move to their evidenced owner as complete
-// groups; this file is not itself evidence of one original nucore TU.
-
-
-
 extern "C" {
-
     GLuint g_colorRenderbuffer;
     GLuint g_depthRenderbuffer;
 }
 
-// C++-linkage helpers defined in sibling TUs.
-
 extern "C" {
-
     // ---------------------------------------------------------------------------
     // Display-list bootstrap (original nucore TU file-statics)
     // ---------------------------------------------------------------------------
@@ -161,17 +109,12 @@ extern "C" {
     DECOMP_ASSERT(sizeof(NuCameraReflect) == 0x84, "camera reflection state size");
     DECOMP_ASSERT(__builtin_offsetof(NuCameraReflect, mtx) == 4, "camera reflection matrix offset");
 
-
     // ---------------------------------------------------------------------------
     // Display list — faithful helpers + pending stubs
     // ---------------------------------------------------------------------------
-
 } // extern "C"
 
-// Local helpers matching original static display-list setters (t local symbols)
-
 extern "C" {
-
     extern "C++" {
         // Original local helper cloned as DisplayListProcessSkin.isra.36 by GCC.
         // It appends the world transform, skin palette, and geometry calls as one
@@ -317,10 +260,7 @@ static void DisplayListProcessLightmapped(NUDISPLAYLIST *list, NUDISPLAYLISTITEM
     // ---------------------------------------------------------------------------
     // PS2 / Xbox legacy shims
     // ---------------------------------------------------------------------------
-
 } // extern "C"
-
-// ==== functions in original address order ====
 
 extern "C" {
 // Original 0x317070. The packed colour has RGBA bytes from least to most

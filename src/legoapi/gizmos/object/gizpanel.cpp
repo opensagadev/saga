@@ -54,45 +54,13 @@ extern "C" {
 
 void FindAnglesXY(NUVEC *direction, u16 *x_rotation, u16 *y_rotation);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ==== src/legoapi/gizmo/gizmos/gizmos_gizpanel.cpp: all remaining content ====
-
 static __used__ u8 storm_panel_active;
 static __used__ u8 droid_panel_active;
 static __used__ u8 bountyhunter_panel_active;
 
-
 void FindAnglesZX(NUVEC *normal, u16 *x_rotation, u16 *z_rotation);
 i32 SuperWeirdo(GameObject_s *object);
 extern i16 id_GRANDMOFFTARKIN, id_IMPERIALOFFICER, id_IMPERIALSHUTTLEPILOT;
-
-
-
-
-
-
-
-
-
-
-// ==== functions in original address order ====
 
 static i32 GizPanel_GetMaxGizmos(void *world_ptr) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);

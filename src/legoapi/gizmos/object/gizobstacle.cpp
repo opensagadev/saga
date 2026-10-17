@@ -44,12 +44,9 @@ u32 GizObstacles_TotalScore(void *world) {
     return total;
 }
 
-
 namespace {
 
 #include "legoapi/gizmos/object/gizobstacle_types.h"
-
-
 
     DECOMP_ASSERT(sizeof(GIZOBSTACLEPROGRESS_s) == 0x70, "GIZOBSTACLE progress ABI");
 
@@ -984,7 +981,6 @@ ADDGIZMOTYPE *GizObstacles_RegisterGizmo(i32 type_id) {
 
 namespace {
 
-
 // Box-trigger and character-flag tests are expanded in place, as in the reference.
 #define OBSTACLE_USES_BOX_TRIGGER(obstacle) ((obstacle)->mode == 5 || (obstacle)->mode == 6)
 #define OBSTACLE_CHARACTER_FLAGS(object)                                                                               \
@@ -1158,7 +1154,6 @@ void GizObstacle_SetPushControlled(GIZOBSTACLE_s *obstacle, GameObject_s *object
     obstacle->triggering_object = object;
     obstacle->animation_speed = speed;
 }
-
 
 void GizObstacle_SetTechnoControlled(GIZOBSTACLE_s *obstacle, float speed) {
     obstacle->progress_external_control = 1;

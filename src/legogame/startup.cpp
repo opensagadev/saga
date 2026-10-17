@@ -102,13 +102,6 @@
 #include "nu2api/nu3d/nu3d_includes.h"
 #include "nu2api/nuandroid/ios_device.h"
 
-// ---------------------------------------------------------------------------
-// Engine symbols defined in other TUs (declared here to avoid pulling large
-// headers).  Linkage matches the defining TU.
-// ---------------------------------------------------------------------------
-
-// C++ linkage — defined in nu3d.
-
 extern "C" {
     // nucore / nurndr plain stubs and editor helpers (extern "C" TUs).
     void NuLanguageSet(i32 language);
@@ -138,7 +131,6 @@ void UpdateGameMenu(GAMEPAD_s *pad, i32 a2);
 extern i16 id_OBIWANKENOBI;
 extern "C" GAMEPAD_s GamePad[64]; // gamepads.cpp, bss @0x127a500
 extern u8 RAP_WARNING_R, RAP_WARNING_G, RAP_WARNING_B;
-
 
 void *GameBufferAlloc(VARIPTR *buf, VARIPTR *buf_end, i32 size); // gameobjects.cpp
 struct CHARFIXUP;
@@ -200,11 +192,6 @@ static i32 loadlegal_done; // legal texture already attempted
 static NUMTL *legal_mtl;   // material wrapping the legal texture
 
 // ---------------------------------------------------------------------------
-// Permanent-data initialisation (background thread entry).
-// ---------------------------------------------------------------------------
-
-
-// ---------------------------------------------------------------------------
 // Public permutations — thin wrappers that set up the arena.
 // ---------------------------------------------------------------------------
 
@@ -212,7 +199,6 @@ void StartPerm(void) {
     permbuffer_ptr.addr = permbuffer_base.addr;
     permbuffer_end.addr = superbuffer_end.addr;
 }
-
 
 // libTTapp.so 0x470de0: close the permbuffer, carve out the character
 // buffer, and split the remaining superbuffer in half between the two world
@@ -240,10 +226,7 @@ void EndPerm(void) {
     editbuffer_end.addr = superbuffer_end.addr - static_cast<usize>(EDITBUFFERENDSIZE);
 }
 
-// ==== src/legoapi/characters/core/players.cpp: declarations ====
 struct HINT_s;
-
-
 
 struct MechTouchUIElement;
 struct PLAYERITEM_s;
@@ -252,74 +235,17 @@ struct PLAYERPACKET_s;
 struct SOCKPOSITION_s;
 struct TouchHolder;
 
-
-
-
-
-// --- Helpers moved from world.cpp ---
-
-
-
-
-
-
-
-
-
-// ---- Player start spawn entries ----
-
 // ---- Misc player/gameobject helpers relocated from doorstubs.cpp ----
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 namespace {
 
 } // namespace
 
-
-
-
-
-
-
-
-
-
-
 DECOMP_ASSERT(sizeof(SPECIAL_LAYER_s) == 0xc, "SPECIAL_LAYER_s size");
-
-
-
-
-
-
-
-
-// ==== src/legoapi/actions/movement/dropinout.cpp: declarations ====
 
 struct AIROW_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
-
-
-
-// ==== functions in original address order ====
 
 static void LoadPermData(BGPROCINFO *proc) {
     InitMemCard();

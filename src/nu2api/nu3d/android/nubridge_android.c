@@ -4,7 +4,6 @@
 // The original unit constructs the homogeneous VuVec header constants.
 #include "nu2api/nucore/nuvuvec.hpp"
 
-// ==== src/nu2api/nu3d/nubridge.cpp: all remaining content ====
 #include "decomp.h"
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/numath/nutrig.h"
@@ -15,8 +14,6 @@
 #include <stdio.h>
 #include "legoapi/render/core/gameliball.h"
 #include "nu2api/nu3d/android/nubridge_android.h"
-
-
 
 extern "C" {
     struct NUBRIDGE {
@@ -47,9 +44,6 @@ extern "C" {
     NUBRIDGE Bridges[8];
     i32 NuBridgeProc;
 }
-
-
-// ==== functions in original address order ====
 
 i32 NuBridgeAlloc(void) {
     i32 index;

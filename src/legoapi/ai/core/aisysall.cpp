@@ -18,7 +18,6 @@
 #include <float.h>
 #include <math.h>
 
-// ---- begin src/legoapi/ai/core/aipathbuild.cpp ----
 #include "editor/edpath.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "legoapi/ai/core/ai_pathgeometry.h"
@@ -86,7 +85,6 @@
 static i32 iterator_count;
 static f32 ***distance_tables;
 
-
 static __used__ f32 **pathEditorCalculateDistanceTable(AIPATH_s *path, i32 route_mask, variptr_u *cursor,
                                                        variptr_u *end);
 
@@ -102,12 +100,6 @@ static __used__ f32 **pathEditorCalculateDistanceTable(AIPATH_s *path, i32 route
 static AIPATHBUILD_CLONE_ATTR2 void pathEditorCreateSpecialRouteData(AIPATH_s *path, EDAIPATH_s *editor_path,
                                                                      VARIPTR *cursor, VARIPTR *end)
     __asm__("_ZL32pathEditorCreateSpecialRouteDataP8AIPATH_siP10EDAIPATH_sP9variptr_uS4_.isra.81");
-
-
-extern "C" {
-}
-
-// ---- end src/legoapi/ai/core/aipathbuild.cpp ----
 
 struct AIROW_s;
 struct nuqthdr_s;
@@ -134,142 +126,23 @@ static AISYSALL_CLONE_ATTR2_SSE u32 CalculateRightIntersection(f32 object_radius
                                                                f32 shared_radius, AIPATHNODE *after, NUVEC *result)
     __asm__("_ZL26CalculateRightIntersectionP11APIOBJECT_sP11AIPATHCNX_sS2_iiP12AIPATHNODE_sS4_S4_P7nuvec_s.isra.50");
 
-
-
-
 static __attribute__((noinline, noclone)) u32 CalculateIntersection(AISYS *system, AIPACKET *packet, APIOBJECT *object,
                                                                     AIPATHCNX *current_connection,
                                                                     AIPATHCNX *target_connection);
 
-
-
 static AISYSALL_CLONE_ATTR2 void AIMoveFindDivertNode(AIPATH *path, AIPACKET *packet, NUVEC *destination)
     __asm__("_ZL20AIMoveFindDivertNodeP7AISYS_sP8AIPATH_sP10AIPACKET_sP7nuvec_s.isra.26");
 
-
 static AISYSALL_CLONE_ATTR1 i32 AIMoveAdjustDestinationPath(AIPACKET *packet)
     __asm__("_ZL27AIMoveAdjustDestinationPathP7AISYS_sP10AIPACKET_s.isra.48");
-
 
 // IPA-SRA hands this clone the address of system->path_sys rather than the system.
 static AISYSALL_CLONE_ATTR2 i32 AIMoveChooseExitNodePath(AIPATHSYS **path_sys, AIPACKET *packet)
     __asm__("_ZL24AIMoveChooseExitNodePathP7AISYS_sP10AIPACKET_s.isra.82");
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ---- begin src/gameapi/ai/aisys/aisys.cpp ----
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 void AddGameMsgCount(NUVEC *position, i32 count, i32 total, u8 red, u8 green, u8 blue, f32 duration);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 extern void KillParts(GameObject_s *object, i32 part, i32 joint, i32 visible, f32 velocity, i32 flags, u16 *part_ids);
-
-
-
-
-
 
 extern "C" void *AIPAthFindPathCnx(AISYS_s *system, AIPATH_s *path, char *from, char *to, i32 *direction);
 
@@ -282,29 +155,6 @@ extern "C" PART_s *AddPart(ADDPART_s *);
 void PartCollide_3D(PART_s *);
 
 void MakeThrowVector(NUVEC *, NUVEC *, NUVEC *, NUVEC *, f32, f32);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 static void ActionCopyParam(char *destination, i32 capacity, const char *source) {
     i32 index = 0;
@@ -376,11 +226,6 @@ __used__ static i32 Action_DontPush(AISYS *sys, AISCRIPTPROCESS *processor, AIPA
 __used__ static i32 Action_GoToNode(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                     i32 param_count, i32 first_time, f32 elapsed);
 
-
-
-
-
-
 __used__ static i32 Action_SetParam(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                     i32 param_count, i32, f32);
 
@@ -404,7 +249,6 @@ __used__ static i32 Action_GoToOrigin(AISYS *sys, AISCRIPTPROCESS *processor, AI
 
 __used__ static i32 Action_NoLosCheck(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                       i32 param_4, i32 param_5, f32 param_6);
-
 
 static i32 Action_ResetTimer(AISYS *, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params, i32 param_count,
                              i32 is_first_time, f32);
@@ -492,21 +336,11 @@ static i32 Action_ShadowTerrain(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, ch
 __used__ static i32 Action_ClearInterrupt(AISYS *, AISCRIPTPROCESS *processor, AIPACKET *, char **params,
                                           i32 param_count, i32 is_first_time, f32);
 
-
 __used__ static i32 Action_FollowOpponent(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                           i32 param_count, i32 first_time, f32);
 
 __used__ static i32 Action_GoToNodeRandom(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                           i32 param_count, i32 first_time, f32 elapsed);
-
-
-
-
-
-
-
-
-
 
 void PartKill_ForceThrow(PART_s *, i32);
 
@@ -515,7 +349,6 @@ __used__ static i32 Action_SetHearDistance(AISYS *sys, AISCRIPTPROCESS *processo
 
 __used__ static i32 Action_SetViewDistance(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                            i32 param_4, i32 param_5, f32 param_6);
-
 
 __used__ static i32 Action_CheckWallSplines(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                             i32 param_4, i32 param_5, f32 param_6);
@@ -563,7 +396,6 @@ static f32 Condition_PathBlocked(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKE
 static f32 Condition_PlayerRange(AISYS *sys, AISCRIPTPROCESS *, AIPACKET *packet, char *, void *);
 
 static f32 Condition_TimeOffPath(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *, void *);
-
 
 static f32 Condition_LocatorRange(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *, void *void_arg);
 
@@ -725,11 +557,6 @@ static f32 Condition_NearestPlayerToLocator(AISYS_s *sys, AISCRIPTPROCESS_s *pro
 
 static f32 Condition_OpponentOnPath(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *, void *);
 
-
-
-
-
-
 AIACTIONDEF api_aiactiondefs[] = {
     {"Idle", Action_Idle, 0, 0, 0},
     {"SetState", Action_SetState, 0, 0, 0},
@@ -845,37 +672,7 @@ DECOMP_ASSERT(sizeof(api_aiactiondefs) == 0x294, "API action registry size");
 
 DECOMP_ASSERT(sizeof(api_aiconditiondefs) == 0x258, "API condition registry size");
 
-
-
-
-
-
-
-
-
-
-
-
-
 AIANTINODE dynamic_antinodes[64] = {};
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ---- end src/gameapi/ai/aisys/aisys.cpp ----
-
-// ==== src/gameapi/ai/aisys/aiscript.cpp: all remaining content ====
-
-
 
 static void *load_pakfile;
 static char *load_path;
@@ -906,8 +703,6 @@ static i32 ExpressionNameLookupFailed;
 i32 AiParseExpressionFailed;
 
 GAMEPARAMTOFLOAT *GameParamToFloatFn;
-
-
 
 static void *AIScriptBufferAlloc(VARIPTR *buf, VARIPTR *buf_end, usize size) {
     void *ret;
@@ -978,12 +773,9 @@ static void xActions(NUFPAR *parser);
 static AISCRIPT_CLONE_ATTR2 void ConditionsParseFinalise(AICONDITION *cond, NUFPAR *parser)
     __asm__("_ZL23ConditionsParseFinaliseP13AICONDITION_sP8nufpar_s.part.51");
 
-
 // Retail inlines the system test into its callers; this is the remaining partial clone.
 static AISCRIPT_CLONE_ATTR2 void AIScriptFindRefScripts(AISYS *sys, AISCRIPT *script)
     __asm__("_ZL22AIScriptFindRefScriptsP7AISYS_sP10AISCRIPT_s.part.61");
-
-
 
 static AICONDITIONDEF *AIConditionFind(char *name) {
     AICONDITIONDEF *def;
@@ -1006,7 +798,6 @@ static AICONDITIONDEF *AIConditionFind(char *name) {
 }
 
 static void AIScriptCopyConditions(NULISTHDR *src, NULISTHDR *dst, VARIPTR *buf, VARIPTR *buf_end);
-
 
 static void xConditions(NUFPAR *parser);
 
@@ -1050,7 +841,6 @@ static NUFPCOMJMP cfgtab_Script[] = {
 
 i32 ai_usepackfile = 1;
 i32 ai_onlyusepackfile;
-
 
 static AISCRIPT *AIScriptLoadPakFile(void *pak, char *script_file, char *path, VARIPTR *buf, VARIPTR *buf_end) {
     AISCRIPT *script;
@@ -1216,24 +1006,9 @@ static i32 AIScriptBuildDerivedScript(AISCRIPT *script, VARIPTR *buf, VARIPTR *b
     return 1;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
 static AISCRIPTPROCESS *AiEvalExpressionProcessor;
 static AIPACKET *AiEvalExpressionPacket;
 
-
-
-// ==== src/legoapi/ai/core/ai_sys_stubs.cpp: declarations ====
 #include "editor/edpath.h"
 #include "legoapi/ai/core/ai_sys_stubs.h"
 #include "legoapi/world/world_shared.h"
@@ -1262,11 +1037,9 @@ static AIPACKET *AiEvalExpressionPacket;
 
 static const u32 iAISysPathColoursG[5] = {0xffff0000, 0xff00ff00, 0xff00ffff, 0xffff00ff, 0xffffff00};
 
-
 static __used__ i32 RowMoveWander(AIGROUP *group, AIROW *row, AIROW *previous, APIOBJECT *leader);
 
 static __used__ i32 RowMoveTowards(AIGROUP *group, AIROW *row, AIROW *previous, APIOBJECT *leader);
-
 
 static void AISysCheckAntinode_Rectangle(APIOBJECT *object, AIANTINODE *antinode, NUVEC *difference, f32 radius);
 
@@ -1283,12 +1056,10 @@ extern "C" {
     extern void (*checkantinodefns[3])(APIOBJECT_s *, AIANTINODE_s *, NUVEC *, f32);
 }
 
-
 typedef i32 MIDSPECIALMOVE(AISYS *system, AIPACKET *packet, APIOBJECT *object);
 extern MIDSPECIALMOVE *MidSpecialMoveFn;
 
 extern "C" void (*GameAISYSRebuildFromEditorDataFn)(AISYS *, VARIPTR *, VARIPTR *);
-
 
 static void *AISysLoadAlloc(AISYS *system, u32 size) {
     return AISysBufferAlloc(&system->storage_cursor, &system->storage_end, size);
@@ -1537,7 +1308,6 @@ static AIAREA *AISysLoadFindArea(AISYS *system, char *name) {
 }
 
 #include "legoapi/ai/core/ai_pathgeometry.h"
-
 
 static void AISysResetPathSearchConnectionChecks(AIPATH *path) {
     if (path == NULL || path->nodes == NULL || path->node_count == 0) {
@@ -1842,23 +1612,12 @@ static void AISysLoadAntinodes(AISYS *system, i32 version, NUGSCN *scene, char *
 }
 
 extern "C" {
-
-
-
 void *AIPAthFindPathCnx(AISYS_s *system, AIPATH_s *path, char *from_name, char *to_name, i32 *direction);
-
-
-
-
 
     DECOMP_ASSERT(sizeof(RebuildEditorCreature) == 0xac, "editor creature rebuild stride");
     DECOMP_ASSERT(offsetof(RebuildEditorCreature, path_check) == 0x38, "editor creature path offset");
     DECOMP_ASSERT(offsetof(RebuildEditorCreature, activation_area) == 0x6c, "editor creature area offset");
     DECOMP_ASSERT(offsetof(RebuildEditorCreature, activation) == 0x8f, "editor creature activation offset");
-
-
-
-
 } // extern "C"
 
 static AICONDITION *AIScriptFinishStateConditions(NULISTHDR *conditions, AIPACKET *packet, AISCRIPTPROCESS *processor,
@@ -1895,40 +1654,10 @@ static AI_SYS_STUBS_CLONE_ATTR2 AICONDITION *AIScriptProcessStateConditions(AISY
     __asm__("_ZL30AIScriptProcessStateConditionsP7AISYS_sP11nulisthdr_sP11APIOBJECT_s"
             "P10AIPACKET_sP17AISCRIPTPROCESS_sfi.isra.77");
 
-
 extern "C" {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     f32 AiRndrCullDistance;
 
     AIEDITOR_RENDER_STATE *aieditor;
-
-
-
-
-
-
-
-
 
     typedef void AIEDITORCALLBACK(void);
     typedef void AIEDITORREBUILDCALLBACK(AISYS *, VARIPTR *, VARIPTR *);
@@ -1941,20 +1670,13 @@ extern "C" {
 
 void InitFn_AIPathDeleted(AIEDITORCALLBACK *function);
 
-
 void InitFn_AIPathNodeMoved(AIEDITORPATHNODECALLBACK *function);
 
 void InitFn_GameAISYSRebuildFromEditorData(AIEDITORREBUILDCALLBACK *function);
 
 void InitFn_GameAISave(AIEDITORCALLBACK *function);
-
-
-
-
-
 } // extern "C"
 
-// ==== src/editor/area_editor.cpp: all remaining content ====
 #include "decomp.h"
 #include "editor/aieditor_state.h"
 #include "editor/aieditor_settings.h"
@@ -2014,9 +1736,6 @@ static __used__ void areaEditor_cbRenameAreaMenu(eduimenu_s *parent, eduiitem_s 
 static __used__ void areaEditor_cbAreaCylinderToggle(eduimenu_s *, eduiitem_s *item, unsigned int);
 
 __attribute__((optimize("no-tree-loop-optimize"))) void areaEditor_Enter();
-
-
-
 
 static eduimenu_s *areaEditorOptionsMenu() {
     eduimenu_s *menu =
@@ -2128,8 +1847,6 @@ static EDAIAREA_s *areaEditorCreateArea() {
     }
 }
 
-
-// ==== src/editor/edpath.cpp: all remaining content ====
 #include "decomp.h"
 #include "editor/edpath.h"
 #include "editor/path_connections.h"
@@ -2164,10 +1881,6 @@ DECOMP_ASSERT(sizeof(AIPATHCNXTYPE_s) == 0x4c, "editor path connection type size
 DECOMP_ASSERT(offsetof(AIPATHCNXTYPE_s, flags) == 0x48, "editor path connection options offset");
 static AIPATHCNXTYPE_s aipathcnxtypes[32];
 static i32 naipathcnxtypes;
-
-
-
-
 
 // Retail splits the null checks into each caller and keeps the body as a
 // partial-inlining clone; its connection searches are fully peeled.
@@ -2213,8 +1926,6 @@ DECOMP_ASSERT(offsetof(EdUiNameInputItem, max_name_length) == 0x15a, "editor nam
 
 void pathEditorDrawNode(NUVEC *position, f32 radius, f32 lower_height, f32 upper_height, u32 colour, numtl_s *material,
                         i32 segments, i32 solid);
-
-
 
 static __used__ void pathEditor_cbCreatePath(eduimenu_s *, eduiitem_s *, u32);
 
@@ -2283,28 +1994,12 @@ static __used__ void routeEditor_cbCancelRouteUsers(eduimenu_s *menu, eduimenu_s
 
 static __used__ void routeEditor_cbCancelRenameRouteMenu(eduimenu_s *menu, eduimenu_s *);
 
-extern "C" {
-
-
-
-
-
-
-} // extern "C"
-
-
-
-
-
 static __used__ i32 routeEditor_AddToRoute(EDAIPATHNODE_s *node, EDAIPATHNODE_s *other) __asm__(
     "_ZL22routeEditor_AddToRouteP14EDAIPATHNODE_sS0_.part.7");
 
 static __used__ i32 routeEditor_AddToRoute(EDAIPATHNODE_s *node, EDAIPATHNODE_s *other);
 
-
-
 static __used__ void pathEditor_DestroySharedNode(EDAISHAREDPATHNODE_s *shared);
-
 
 static inline i32 pathEditor_FirstFreeConnection(EDAIPATHNODE_s *node) {
     if (node->connections[0].node == NULL)
@@ -2347,7 +2042,6 @@ static inline bool pathEditor_HasConnection(EDAIPATHNODE_s *node, EDAIPATHNODE_s
            node->connections[6].node == other || node->connections[7].node == other;
 }
 
-
 // Retail keeps an unreferenced partial-inlining clone of pathEditorSetCamPos:
 // it moves the editor camera to a position at the cursor's height.
 #if defined(__i386__)
@@ -2357,8 +2051,6 @@ static inline bool pathEditor_HasConnection(EDAIPATHNODE_s *node, EDAIPATHNODE_s
 #endif
 static PATHEDITOR_SETCAMPOS_BODY_ATTR void pathEditorSetCamPosBody(nuvec_s *position)
     __asm__("_ZL19pathEditorSetCamPosP7nuvec_si.part.43");
-
-// ==== src/editor/aieditor.cpp: all remaining content ====
 
 #include "decomp.h"
 #include "editor/edpath.h"
@@ -2448,10 +2140,7 @@ static __attribute__((noinline,
 
 __attribute__((optimize("no-tree-loop-optimize"))) void antinodeEditor_Enter();
 
-
-
 static void antinodeEditor_cbSelectType(eduimenu_s *parent, eduiitem_s *, unsigned int);
-
 
 static void antinodeEditor_cbDeleteAntinode(eduimenu_s *, eduiitem_s *item, unsigned int);
 
@@ -2460,7 +2149,6 @@ static void antinodeEditor_cbCancelDeleteAntinodeMenu(eduimenu_s *, eduimenu_s *
 static __attribute__((force_align_arg_pointer)) EDANTINODE_REGPARM1 void
 antinodeEditor_AntinodeMoved(EDANTINODE_s *node);
 
-
 static __used__ void aieditor_cbSetEditorMode(eduimenu_s *, eduiitem_s *item, unsigned int);
 
 static __used__ void aieditor_cbCancelSelectEditorMode(eduimenu_s *menu, eduimenu_s *);
@@ -2468,7 +2156,6 @@ static __used__ void aieditor_cbCancelSelectEditorMode(eduimenu_s *menu, eduimen
 static __used__ void aieditor_cbCancelSaveMenu(eduimenu_s *, eduiitem_s *, unsigned int);
 
 extern "C" {
-
     typedef void AIEDITORMOVEPLAYERS(NUVEC *position);
     AIEDITORMOVEPLAYERS *AIEditorMovePlayersFn;
 
@@ -2476,38 +2163,12 @@ extern "C" {
 
 void InitFn_AIEditorMovePlayers(AIEDITORMOVEPLAYERS *function);
 
-
-
-
-
-
-
 i32 aieditor_Register(const char *name, void (*enter)(), void (*callback_24)(), void (*callback_28)(),
                           void (*leave)());
 
-
-
-
-
 __attribute__((force_align_arg_pointer)) void aieditor_SetCurrentScript(char *name,
                                                                             const AIEditorScriptSelection *selection);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 } // extern "C"
-
-// ==== src/editor/creature_editor.cpp: all remaining content ====
 
 #include "decomp.h"
 #include "editor/edpath_types.h"
@@ -2713,7 +2374,6 @@ static __used__ void creatureEditor_cb_max_t_respawn(eduimenu_s *, eduiitem_s *i
 static __used__ void creatureEditor_cb_stagger_start(eduimenu_s *, eduiitem_s *item, unsigned int);
 
 extern "C" {
-
     f32 aieditor_y_tolerance = 0.1f;
 
 __attribute__((optimize("O2", "omit-frame-pointer"))) void creatureEditorSaveData(AIPATHSYS_s *system);
@@ -2729,12 +2389,10 @@ __attribute__((optimize("O2", "omit-frame-pointer"), force_align_arg_pointer)) v
 
 __attribute__((optimize("O2", "omit-frame-pointer"), force_align_arg_pointer)) void
     creatureEditor_RenderAllCreatures(void);
-
 } // extern "C"
 
 __attribute__((optimize("O2"), force_align_arg_pointer)) eduimenu_s *creatureEditor_Process(nupad_s *pad);
 
-// ==== src/editor/locator_editor.cpp: all remaining content ====
 #include "decomp.h"
 #include "editor/edpath_types.h"
 #include "editor/aieditor_state.h"
@@ -2781,7 +2439,6 @@ static void DestroyLocator(EDLOCATOR_s *);
 static unsigned int AddLocatorToSet(EDLOCATORSET_s *, EDLOCATOR_s *, EDLOCATOR_s *);
 #endif
 static __used__ void locatorEditor_cbAddLocatorsByNameYesNo(eduimenu_s *, eduiitem_s *, u32);
-
 
 static __used__ void locatorEditor_cbDeleteLocator(eduimenu_s *, eduiitem_s *item, u32);
 static __used__ void locatorEditor_cbSetLocatorSet(eduimenu_s *, eduiitem_s *item, u32);
@@ -2837,7 +2494,6 @@ static inline void LocatorSetRemove(EDLOCATORSET_s *set, EDLOCATOR_s *locator) {
     }
 }
 
-
 static __used__ unsigned int AddLocatorToSet(EDLOCATORSET_s *set, EDLOCATOR_s *locator, EDLOCATOR_s *before);
 
 #if defined(__i386__)
@@ -2848,22 +2504,8 @@ static __attribute__((noinline, optimize("no-tree-vectorize"))) unsigned int
 AddLocatorToSetAtEnd(EDLOCATORSET_s *set, EDLOCATOR_s *locator) __asm__(
     "_ZL15AddLocatorToSetP14EDLOCATORSET_sP11EDLOCATOR_sS2_.constprop.131");
 
-
-extern "C" {
-
-
-
-
-
-
-
-} // extern "C"
-
-
-
 __attribute__((optimize("no-tree-vectorize"))) eduimenu_s *locatorEditor_Process(nupad_s *pad);
 
-// ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/menus/core/panel.h"
 #include "legoapi/ai/core/legoai.h"
@@ -2953,7 +2595,6 @@ __attribute__((optimize("no-tree-vectorize"))) eduimenu_s *locatorEditor_Process
 
 extern i16 id_GAMORREANGUARD;
 
-
 extern "C" {
     extern i16 id_BAT;
     extern i16 id_SNAKE;
@@ -2966,185 +2607,17 @@ extern "C" {
 extern GameObject_s *player_tag_from;
 extern GameObject_s *player_tag_to;
 
-
-
-
-
-
 #include "legoapi/items/objects/gameobjects_types.h"
-
-
-
-
-
-
-// Enabled in the target data image.  Ordinary background characters are
-// staggered across frames; special movement states opt back into full-rate
-// processing through the forced-update path.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 extern "C" {
 extern i32 nbaddies_can_see_players;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
 
     static_assert(sizeof(lego_aiconditiondefs) / sizeof(lego_aiconditiondefs[0]) == 178,
                   "complete game AI condition registry");
-
 
     CHARACTERNAMEFN *LevelCharacterNameFn;
     CHARACTERNAMEFN *SpecialRouteCharacterNameFn;
@@ -3177,36 +2650,9 @@ static SCRIPT_ERROR_LEVEL ScriptErrorLevel;
 // remaining ids enumerate the current story list while omitting variants that
 // are represented by those dedicated routes.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 struct CUTSCENEPLAYERCLIP;
 
 extern f32 LevelNameTime, LevelNameMul;
-
-
-
-
 
 #if defined(__i386__)
 #define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
@@ -3214,200 +2660,38 @@ extern f32 LevelNameTime, LevelNameMul;
 #define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone))
 #endif
 
-// Retail keeps only the IPA-SRA clone, which takes the other object's x and z by address.
-
-
-
 extern "C" {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 void SetScriptErrorLevel(SCRIPT_ERROR_LEVEL level);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 void FindAnglesZX(NUVEC *, u16 *, u16 *);
 extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER;
 
-
-
-
-
-
-
-
-
-
-
-
-
 extern i16 id_ANAKINJEDISCARRED;
-
-
-
 
 extern "C" {
 extern i32 party_under_cover;
 }
 
-
-
 i32 SphereSphereOverlapScaleY(NUVEC *, f32, f32, NUVEC *, f32, f32);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-extern "C" {
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 void DestroySnakeBody(GameObject_s *);
 void BlowUpSnakeBody(GameObject_s *);
 
-
-
-
 extern GameObject_s * player_tag_to;
 extern GameObject_s * player_tag_from;
 
-
-
-
 void DestroySnakeBody(GameObject_s *obj);
-
 
 extern u16 TargetDeg_Near, TargetDeg_Mid, TargetDeg_Far;
 extern f32 TargetDist_Near2, TargetDist_Mid2;
 
-
 extern i8 (*adtab)[4];
-
-
-
-
-
-
-
-
-
 
 GameObject_s *FindNearestGameObject(NUVEC *position, GameObject_s *exclude, u32 required_flags, f32 radius,
                                     f32 extra_radius, i32 animation, i32 character_id, i32 player_index,
                                     f32 *distance_squared, i32 horizontal_only, i32 (*filter)(GameObject_s *),
                                     bool first_match);
-
-
 
 extern "C" {
     extern i32 freechunkcontrolsptr;
@@ -3415,17 +2699,11 @@ extern "C" {
 
 void RemoveChunkFromRenderStack(particlechunkrendertype_s *chunk, particlechunkrendertype_s **stack);
 
-
-
-
-// ==== src/gameapi/ai/aisys/aistate.cpp: all remaining content ====
 #include "gameapi/ai/aisys/aisys.h"
 
 #include "nu2api/nucore/nulist.h"
 #include "nu2api/nucore/nustring.h"
 
-
-// ==== src/legoapi/gizmo/gizmos/gizmos_gizactions.cpp: declarations ====
 #include "decomp.h"
 #include "gameapi/ai/aisys/aisys.h"
 #include "globals.h"
@@ -3457,36 +2735,13 @@ void RemoveChunkFromRenderStack(particlechunkrendertype_s *chunk, particlechunkr
 #include "legoapi/render/fx/spline_position.h"
 #include "legoapi/render/fx/parts.h"
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 struct GIZSPINNER_s;
-
-
-
 
 namespace {
 #include "legoapi/gizmo/gizmos/gizmos_gizactions_types.h"
 
 } // namespace
 
-// ==== src/legoapi/actions/combat/fighting.cpp: declarations ====
 #include "decomp.h"
 #include "legoapi/actions/combat/fighting.h"
 #include "legoapi/actions/combat/hits.h"
@@ -3518,28 +2773,15 @@ namespace {
 
 #include <stdlib.h>
 
-
 extern void (*Punch_HitHoldFn)(GameObject_s *, GameObject_s *);
 extern i32 (*Punch_GetDamageFn)(GameObject_s *, GameObject_s *);
 extern void (*Punch_HitExtraCodeFn)(GameObject_s *, nuvec_s *);
-
-
-
-
-
-
 
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e4) == 0x7e4, "Quick shoot record offset");
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e8) == 0x7e8, "Quick shoot record count offset");
 DECOMP_ASSERT(offsetof(GameObject_s, quick_shoot_flags) == 0xe2f, "Quick shoot flags offset");
 DECOMP_ASSERT(offsetof(GameObject_s, quick_shoot_bolt_id) == 0xe3e, "Quick shoot bolt ID offset");
 
-
-
-
-
-
-// ==== src/legoapi/ai/game/aipathcnxhelper.cpp: declarations ====
 #include "decomp.h"
 #include "legoapi/gizmos/object/gizbuildits.h"
 #include "gameapi/ai/aisys/aisys.h"
@@ -3560,31 +2802,16 @@ DECOMP_ASSERT(offsetof(GameObject_s, quick_shoot_bolt_id) == 0xe3e, "Quick shoot
 #include <stdint.h>
 #include "nu2api/nucore/nulist.h"
 
-
 extern "C" void *AIPAthFindPathCnx(AISYS_s *, AIPATH_s *, char *, char *, i32 *);
-extern "C" {
-}
-
-
 
 __attribute__((force_align_arg_pointer)) void pathEditorDrawNode(nuvec_s *position, float radius, float lower_height,
                                                                  float upper_height, u32 colour, numtl_s *material,
                                                                  i32 segments, i32 solid);
 
-
-
 AIPATHCNXHELPER_s *AIPathCnxHelperSys_Find(AIPATHCNXHELPERSYS_s *system, GameObject_s *object, AIPATHCNX_s *connection,
                                            u8 direction, u8 type,
                                            i32 (*filter)(AIPATHCNXHELPER_s *, GameObject_s *, AIPATHCNX_s *, u8, u8));
 
-
-
-
-
-
-
-
-// ==== src/legoapi/ai/core/ai_sys.cpp: declarations ====
 #include "legoapi/world/world_shared.h"
 #include "decomp.h"
 #include "legoapi/items/base/apiobject.h"
@@ -3598,9 +2825,6 @@ AIPATHCNXHELPER_s *AIPathCnxHelperSys_Find(AIPATHCNXHELPERSYS_s *system, GameObj
 struct nuhspecial_s;
 struct minitrooperteam_s;
 
-
-
-// ==== src/legoapi/ai/game/gameantinode.cpp: declarations ====
 #include "legoapi/ai/game/gameantinode.h"
 #include "legoapi/legoapi_types.h"
 #include "decomp.h"
@@ -3622,24 +2846,11 @@ struct minitrooperteam_s;
 #include "nu2api/nu3d/nuspecial.h"
 #include <string.h>
 
-extern "C" {
-}
 void GameAntinode_FindGridPosition(WORLDINFO_s *, NUVEC *, f32, f32, u8 *, u8 *, u8 *, u8 *);
-
-
-
 
 void GameAntinode_FindGridPosition(WORLDINFO_s *world, NUVEC *position, f32 radius_x, f32 radius_z, u8 *min_x,
                                    u8 *min_z, u8 *max_x, u8 *max_z);
 
-
-
-
-
-
-
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
 #include "decomp.h"
 #include "gameapi/edtools/edbri_internal.h"
 #include "gameapi/edtools/edstubs.h"
@@ -3679,19 +2890,9 @@ void GameAntinode_FindGridPosition(WORLDINFO_s *world, NUVEC *position, f32 radi
 #include <math.h>
 #include <string.h>
 
-
-
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/numath/nutrig.h"
-
-
-
-
-
-
-
-
 
 #include "gameapi/gui/apimenu.h"
 #include "gameframework/saveload.h"
@@ -3750,9 +2951,6 @@ struct rtlidata_s;
 
 #include <string.h>
 
-
-
-
 struct GAMEMESSAGE_s;
 struct HINT_s;
 struct MENU_s;
@@ -3765,23 +2963,6 @@ struct ripple_node_s;
 struct ripple_set_s;
 struct VuVec;
 
-
-
-// Camera zoom state
-
-// Graphics loading flags
-
-
-extern "C" {
-}
-
-
-
-// --- NuGScn graphics-data reader ---
-// NuReadGraphicsData is a C++ static function in the original (GCC clones it,
-// hence the `.isra.NNN` suffix in the ROM symbol table).
-
-
 // Retail only keeps the IPA-SRA clone, which drops the unused fourth argument.
 #if defined(__i386__)
 #define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone, regparm(2)))
@@ -3790,30 +2971,10 @@ extern "C" {
 #endif
 
 // --- Extern "C": NuGScn functions have C linkage in original ---
-extern "C" {
-
-} // extern "C"
-
-
-
-
-
 
 extern "C" {
     f32 aiEditor_DrawYOffset = 0.25f;
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 #include "nu2api/nu3d/nuprim.h"
 #include "nu2api/nu3d/nuprim_internal.h"
@@ -3859,78 +3020,14 @@ extern "C" {
         NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
     } while (0)
 
-
-
 extern i16 tNONEWBESTTIME, tNEWBESTTIME;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
 // red-brick positions come from the Game init values in legogame/game.cpp.
 
-
-
-
-
-
-
-
-
 extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
 
-
-
-
-
-
-
-
-
-
-
-
 extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
-
-extern "C" {
-}
-
-
-
-
-
-
-
-
-
-
-
-
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
     do {                                                                                                               \
@@ -3944,41 +3041,16 @@ extern "C" {
         }                                                                                                              \
     } while (false)
 
-
-
-
-
-
-
-
-
 extern i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
-
 
 #include "legoapi/legoapi_types.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/nu3d/nurndr.h"
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 extern "C" {
     extern nurenderscene_s currentScene;
 }
 
-// ==== src/legoapi/actions/character/starwars.cpp: all remaining content ====
 #include "decomp.h"
 #include "gameapi/ai/aisys/aisys.h"
 
@@ -3994,14 +3066,11 @@ PREPARINGSPECIALMOVEFN PreparingForSpecialMoveFn = NULL;
 MIDSPECIALMOVEFN MidSpecialMoveFn = NULL;
 
 extern "C" {
-
 void InitFn_MidSpecialMove(MIDSPECIALMOVEFN function);
 
 void InitFn_PreparingForSpecialMove(PREPARINGSPECIALMOVEFN function);
-
 } // extern "C"
 
-// ==== src/editor/antinode_editor.cpp: all remaining content ====
 #include "decomp.h"
 #include "globals.h"
 #include "editor/aieditor_state.h"
@@ -4018,17 +3087,6 @@ void InitFn_PreparingForSpecialMove(PREPARINGSPECIALMOVEFN function);
 #include "nu2api/nu3d/nuspecial.h"
 #include <string.h>
 
-extern "C" {
-}
-
-extern "C" {
-
-
-
-
-} // extern "C"
-
-// ==== src/editor/edtoolsall.cpp: declarations ====
 #include "decomp.h"
 #include "editor/edpath.h"
 #include "editor/antinode_editor_private.h"
@@ -4053,18 +3111,11 @@ extern "C" {
     void creatureEditor_RenderAllCreatures();
 }
 
-
-
-
-
-
 #include "editor/edtoolsall_types.h"
 
 __attribute__((force_align_arg_pointer)) i32 creatureEditor_CalculatePos(EDCREATURE_s *creature, i32 index,
                                                                          nuvec_s *position, i32 check_path);
 
-
-// ==== src/legoapi/render/core/terrain_stubs.cpp: declarations ====
 #include "legoapi/world/world_shared.h"
 #include "decomp.h"
 #include "legoapi/legoapi_types.h"
@@ -4097,17 +3148,12 @@ __attribute__((force_align_arg_pointer)) i32 creatureEditor_CalculatePos(EDCREAT
 
 i32 geom;
 // Runtime-selected groups appended after the fixed terrain allocation.
-extern "C" {
-}
 #include "legoapi/render/core/terrain_stubs_types.h"
-
-
 
 extern "C" {
     void *NuScratchAlloc32(i32 size);
     void NuScratchRelease(void);
 }
-
 
 extern "C" {
     extern i32 EDPP_MAX_TYPES;
@@ -4130,126 +3176,15 @@ extern "C" {
     }
 }
 
-
-// NuFileExists @nufile (nucore_plain.cpp).
-
-
-
-
 extern "C" {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-} // extern "C"
-
-
-
-extern "C" {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 void PlatInstBounce(i32 index, f32 impulse, f32 spring, f32 damping);
-
-
-
-
-
-
-
-
-
 
 void PlatformRemoveCallback(void (*function)(void *));
 
 void PlatformUpdateCallback(void (*function)(void *), void *argument);
 
-
-
 extern "C++" TERRAIN_TRACK_SLOT *AllocTerrId();
-
-
-
-
-
-
-
-
 } // extern "C"
-
-// ==== functions in original address order ====
 
 static i32 AiParseExpressionNameLoopup(char *name, f32 *float_out, i32 *int_out) {
     f32 value;

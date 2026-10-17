@@ -33,7 +33,6 @@
 using nu2api::HashRedirect;
 using nu2api::LoadedUniqueShaderRecord;
 
-
 // Redirect / preloaded tables (nudlist_tables_gen.inc, built into
 // nushadermanager_gen.cpp).
 extern HashRedirect g_vertexShaderRedirects[792];
@@ -44,11 +43,6 @@ extern LoadedUniqueShaderRecord g_loadedUniquePixelShaders[558];
 u32 g_cachedUniformMask[4];
 u32 g_textureSemanticMask[4];
 i32 g_shaderBufferCriticalSection = -1;
-
-
-
-
-// ==== functions in original address order ====
 
 void ShaderManagerOpenGL::adaptShaderMaterialForShaderVersion(NUSHADERMTLDESC *desc) {
     u8 *vtx_desc = reinterpret_cast<u8 *>(&desc->vtx_desc);

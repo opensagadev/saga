@@ -4,16 +4,12 @@
 // The original unit constructs the homogeneous VuVec header constants.
 #include "nu2api/nucore/nuvuvec.hpp"
 
-// ==== src/nu2api/nucore/nulst.cpp: all remaining content ====
 #include "nu2api/nucore/nulst.h"
 
 #include <stddef.h>
 
 #include "nu2api/nucore/numemory.h"
 #include "nu2api/nucore/nuthread.h"
-
-
-// ==== functions in original address order ====
 
 NULSTHDR *NuLstCreate(i32 element_count, i32 element_size) {
     NULSTHDR *list;

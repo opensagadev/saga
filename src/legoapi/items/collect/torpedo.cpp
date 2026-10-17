@@ -47,22 +47,9 @@
 
 static TORPEDOPACKET TorpedoPackets[16];
 
-
-
-
-
-
 f32 TORPEDOGRABRANGE2 = 36.0f;
 f32 steal_torpedo_timer = 2.0f;
 f32 steal_torpedo_range = 2.0f;
-
-
-
-
-
-
-
-
 
 // DrawTorpedos expands the Y rotation with the stored 32-bit angle; the trig
 // table index is taken from the untruncated value.
@@ -83,15 +70,6 @@ static inline void Torpedo_RotateY(NUMTX *m, i32 a) {
     m->m30 = m30 * cosx + m->m32 * sinx;
     m->m32 = m->m32 * cosx - m30 * sinx;
 }
-
-
-
-
-
-
-
-
-// ==== functions in original address order ====
 
 void InitTorpedoPackets() {
     memset(TorpedoPackets, 0, sizeof(TorpedoPackets));

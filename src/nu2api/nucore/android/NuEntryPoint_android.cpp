@@ -4,7 +4,6 @@
 // The original unit constructs the homogeneous VuVec header constants.
 #include "nu2api/nucore/nuvuvec.hpp"
 
-// ==== src/java/android.cpp: all remaining content ====
 #include "java/java.h"
 #include "java/android.h"
 
@@ -57,7 +56,6 @@ static bool g_validSurface;
 static i32 android_argc;
 static char *android_argv[32];
 
-
 static inline void UpdateApplicationStatus() {
     NuApplicationState *state = NuCore::GetApplicationState();
     NUAPPLICATIONSTATUS previous = state->GetStatus();
@@ -74,8 +72,6 @@ static inline void UpdateApplicationStatus() {
         }
     }
 }
-
-// ==== functions in original address order ====
 
 extern "C" {
     void Java_com_tt_tech_TTActivity_nativeSetScreenDimesions(JNIEnv *, jobject, jfloat width, jfloat height) {

@@ -144,14 +144,8 @@ static NUVEC4 RadialMoveCentre;
 static __used__ f32 RadialPlayerRadius[2];
 static __used__ f32 MaxRadialCamY;
 
-
-
 f32 MissileDist = -3.0f;
 static NUVEC4 PlayerPos, PlayerVel;
-
-
-
-
 
 anakin_door_setup_s DoorSetupList[15] = {
     {"door1", "door1r", 15.0f, 1.0f, 0, {}, {-1.0f, 0.0f, 0.0f}, -0.5f, 0.0f},
@@ -171,7 +165,6 @@ anakin_door_setup_s DoorSetupList[15] = {
     // The retail table stores an empty string here, not a null name.
     {"", NULL, 0.0f, 0.0f, 0, {}, {0.0f, 0.0f, 0.0f}, 0.0f, 0.0f},
 };
-
 
 #if defined(__i386__)
 #define CHRIS_REGPARM1 __attribute__((regparm(1)))
@@ -252,58 +245,9 @@ static inline void DrawSpaceJet(i32 player_index, i32 key_index, bool left) {
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
-
-
-
-
-
-
-
-
-
-
-
-
 struct starfighter_s;
 struct rtl_s;
 struct rtlidata_s;
-
-
-
-
-
 
 struct GAMEMESSAGE_s;
 struct HINT_s;
@@ -318,23 +262,6 @@ struct ripple_node_s;
 struct ripple_set_s;
 struct VuVec;
 
-
-
-// Camera zoom state
-
-// Graphics loading flags
-
-
-extern "C" {
-}
-
-
-
-// --- NuGScn graphics-data reader ---
-// NuReadGraphicsData is a C++ static function in the original (GCC clones it,
-// hence the `.isra.NNN` suffix in the ROM symbol table).
-
-
 // Retail only keeps the IPA-SRA clone, which drops the unused fourth argument.
 #if defined(__i386__)
 #define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone, regparm(2)))
@@ -343,30 +270,6 @@ extern "C" {
 #endif
 
 // --- Extern "C": NuGScn functions have C linkage in original ---
-extern "C" {
-
-} // extern "C"
-
-
-
-
-
-
-extern "C" {
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
@@ -408,78 +311,14 @@ extern "C" {
         NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
     } while (0)
 
-
-
 extern i16 tNONEWBESTTIME, tNEWBESTTIME;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
 // red-brick positions come from the Game init values in legogame/game.cpp.
 
-
-
-
-
-
-
-
-
 extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
 
-
-
-
-
-
-
-
-
-
-
-
 extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
-
-extern "C" {
-}
-
-
-
-
-
-
-
-
-
-
-
-
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
     do {                                                                                                               \
@@ -493,57 +332,20 @@ extern "C" {
         }                                                                                                              \
     } while (false)
 
-
-
-
-
-
-
-
-
 extern i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 extern "C" {
     extern nurenderscene_s currentScene;
 }
 
-// ==== src/legoapi/render/fx/edsplines.cpp: declarations ====
-
-
-
-// The original translation unit exports this internal counter under its unmangled C name.
-
 extern "C" {
     char *FSP_Extension = ".FSP";
 }
-
 
 // The original copies the aligned spline point to the caller's vector as
 // one unaligned 4-float vector store.
 typedef f32 BezierVec4 __attribute__((vector_size(16)));
 typedef f32 BezierVec4Unaligned __attribute__((vector_size(16), aligned(4)));
-
-
-
-
-
 
 // Retail only keeps the split-out body of the IPA-SRA clone, which takes
 // &spline->length and &spline->pts in place of the spline.
@@ -553,143 +355,25 @@ typedef f32 BezierVec4Unaligned __attribute__((vector_size(16), aligned(4)));
 #define SPLINE_POINT_ANGLES_ATTR __attribute__((noinline, noclone))
 #endif
 
-
-
-
-
-
-
-
-
-
-
-
-
-// ==== src/legoapi/audio/audio.cpp: declarations ====
-
-
-// The reference constructs the music manager in this unit's static constructor.
-
-
-
-extern "C" {
-
-
-
-
-
-}
-
-
-
-
-
-// ==== src/legoapi/core/input/gamepads.cpp: declarations ====
-
-
 extern i32 (*GamePads_IgnoreInputFn)(void);
 extern "C" {
     extern "C++" FadeSystem FadeSys;
     extern i32 CutSceneWaiting;
 }
 
-// Original bss @0x127a500: 64 pads x 0x60 bytes.
-// Original bss @0x127a4e0.
-
-
-// Two frames of direction history for each local player.  MovePlayer shifts
-// these before accepting the new input; GamePad_Rotate then reports a stable
-// angular velocity only when both consecutive turns agree.
-
-
-
-
-
-
-
-
-
-
-
-extern "C" {
-
-
-} // extern "C"
-
-
-
-
-
-
-
 f32 MulDist = 0.5f;
 f32 SpeedAdd = 1.0f;
 f32 SpeedDist = 5.0f;
 f32 MulAdd = 0.0f;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ==== src/legoapi/actions/character/speederchase.cpp: declarations ====
-
-
 // This alignment affects PodRaceAUpdate codegen even though the linked address is 32-byte aligned.
-
-
-
 
 DECOMP_ASSERT(sizeof(SPEEDERCHASEVALUES) == 0x1c, "Speeder chase tuning stride");
 DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 
-
-
-
-
-
-
-
-
 void SetLevelExBlowupFunc(i32 (*callback)(GIZMOBLOWUP_s *, i32));
 
-
-
-
-
-
-
-
-
-
-
-
-extern "C" {
-
-
-
-} // extern "C"
-
-
-
-
-// ==== src/legoapi/characters/motion/chris_stubs.cpp: all remaining content ====
-
-
 anakin_door_s *volatile AnakinC = NULL;
-
-
-// ==== functions in original address order ====
 
 static void MakeWingFormation(_vuv_s *start, _vuv_s *target, f32 duration, i32 mode) {
     spacelevel_s *space = WORLD->space_level;

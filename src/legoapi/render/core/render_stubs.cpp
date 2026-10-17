@@ -23,11 +23,5 @@ struct numtl_s;
 typedef struct numtl_s NUMTL;
 
 extern "C" {
-
     extern nurenderscene_s currentScene;
-
-
-
-
-
 } // extern "C"

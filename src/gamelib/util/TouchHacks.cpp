@@ -309,7 +309,6 @@ bool TouchHacks::CanTagTo(GameObject_s &source, GameObject_s &target) {
     return !(dx * dx + dy * dy + dz * dz > 4.0f);
 }
 
-
 bool TouchHacks::CanToggleTo(GameObject_s &object, i32 id) {
     if (object.id == id)
         return false;

@@ -10,7 +10,6 @@
 #include <ogg/ogg.h>
 #include "nu2api/nu3d/nutex.h"
 
-// ==== src/nu2api/nucore/deflate.cpp: all remaining content ====
 #include "nu2api/nucore/deflate.h"
 
 #include <string.h>
@@ -28,11 +27,8 @@ static inline i32 ReverseBits(i32 x) {
     return x;
 }
 
-
-
 static u8 DefaultLengths[288] = {0};
 static u8 DefaultDistances[32] = {0};
-
 
 #define DROPBITS(ctx, n)                                                                                               \
     ({                                                                                                                 \
@@ -136,20 +132,14 @@ static i32 DistanceBase[32] = {1,    2,    3,    4,    5,    7,     9,     13,  
 static i32 DistanceExtraBits[32] = {0, 0, 0, 0, 1, 1, 2,  2,  3,  3,  4,  4,  5,  5,  6, 6,
                                     7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13, 0, 0};
 
-
-
 enum {
     BLOCK_DYNAMIC_HUFFMAN = 0,
     BLOCK_FIXED_HUFFMAN = 1,
     BLOCK_UNCOMPRESSED = 2,
 };
 
-
 static u8 LengthDeZigZag[19] = {0x10, 0x11, 0x12, 0x00, 0x08, 0x07, 0x09, 0x06, 0x0a, 0x05,
                                 0x0b, 0x04, 0x0c, 0x03, 0x0d, 0x02, 0x0e, 0x01, 0x0f};
-
-
-// ==== functions in original address order ====
 
 u32 BuildHuffmanTree(DEFHUFFMAN *tree, u8 *codeLengths, i32 symbolCount) {
     u32 nextCode[16];

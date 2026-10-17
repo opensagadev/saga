@@ -61,34 +61,23 @@
 #include "nu2api/nucore/nupad_interface.h"
 #include "nu2api/numath/numath_includes.h"
 #include "nu2api/nusound/nusound3_include.h"
-extern "C" {
-}
 //
 // This file collects functions whose original TU has not yet been
 // reconstructed. Domain families move to their evidenced owner as complete
 // groups; this file is not itself evidence of one original nucore TU.
 
-
-
-
-
 struct ani3_animheader_s;
 struct nuanimdatachunk_s;
 
 extern "C" {
-
 extern GLuint g_colorRenderbuffer;
 extern GLuint g_depthRenderbuffer;
 }
-
 
 using NUHGOBJVIDEOMEMFN = void (*)(nuhgobj_s *);
 
 extern NUHGOBJVIDEOMEMFN hgobj_to_video_mem;
 extern NUHGOBJVIDEOMEMFN video_mem_to_hgobj;
-
-extern "C" {
-}
 
 // C++-linkage helpers defined in sibling TUs.
 void NuPadRecordEndFrame(void);                      // nupad_interface.cpp
@@ -96,7 +85,6 @@ i32 NuCameraClipHGobj(nugscn_s *, NUMTX *, NUMTX *); // nu2api_nucore_misc.cpp
 i32 findrange(nugscn_s *, i32);                      // utilities.cpp
 
 extern "C" {
-
     // ---------------------------------------------------------------------------
     // Display-list bootstrap (original nucore TU file-statics)
     // ---------------------------------------------------------------------------
@@ -123,18 +111,12 @@ extern "C" {
 
     extern nurenderscene_s currentScene;
 
-
     // ---------------------------------------------------------------------------
     // Display list — faithful helpers + pending stubs
     // ---------------------------------------------------------------------------
-
-
 } // extern "C"
 
-// Local helpers matching original static display-list setters (t local symbols)
-
 extern "C" {
-
     extern "C++" {
         // Original local helper cloned as DisplayListProcessSkin.isra.36 by GCC.
         // It appends the world transform, skin palette, and geometry calls as one
@@ -165,12 +147,9 @@ static void DisplayListProcessLightmapped(NUDISPLAYLIST *list, NUDISPLAYLISTITEM
                                                   void **transform_packet, f32 alpha);
     }
 
-
-
     // ---------------------------------------------------------------------------
     // Scene / render-scene
     // ---------------------------------------------------------------------------
-
 
     // ---------------------------------------------------------------------------
     // Frame lifecycle (NuFrameEnd is faithful; neighbours are stubs)
@@ -206,11 +185,9 @@ void NuIOS_RecordFlurryEvent(char *event_name);
 
     extern "C++" void NuAnimDataChunkDestroy(nuanimdatachunk_s *chunk);
 
-
     // ---------------------------------------------------------------------------
     // Bridge / file / heap / memory
     // ---------------------------------------------------------------------------
-
 
     static void *dirnames[16];
     static i32 numdirs;
@@ -250,20 +227,13 @@ void NuQFntPrintV(NUQFNT *font, const char *format, va_list arguments);
     extern nurenderscene_s currentScene;
     i32 NuLgtArcLaserOldCnt;
 
-
-
     // ---------------------------------------------------------------------------
     // Light / wind / particles / debris
     // ---------------------------------------------------------------------------
 
-
-
-
-
     // ---------------------------------------------------------------------------
     // Gobj / hierarchy / scene graph
     // ---------------------------------------------------------------------------
-
 
 #include "nu2api/nucore/nucore_plain_types.h"
 void NuHGobjFromVideoMem(NUHGOBJVIDEOMEMFN callback);
@@ -277,9 +247,6 @@ void NuHGobjToVideoMem(NUHGOBJVIDEOMEMFN callback);
     // ---------------------------------------------------------------------------
     // Culling / visibility / portals / occlusion
     // ---------------------------------------------------------------------------
-
-
-
 
     DECOMP_ASSERT(sizeof(NuInstanceTreeNode) == 0x0c, "instance tree node stride");
     DECOMP_ASSERT(sizeof(NuInstanceTreeBounds) == 0x20, "instance tree bounds stride");
@@ -337,16 +304,13 @@ void NuRegisterEndFrameCallBackFn(void (*callback)(void));
     // Rendering extras
     // ---------------------------------------------------------------------------
 
-
     // ---------------------------------------------------------------------------
     // PS2 / Xbox legacy shims
     // ---------------------------------------------------------------------------
-
 } // extern "C"
 
 struct nupad_s;
 struct nuframebuffer_s;
 struct nushaderobject_s;
 union variptr_u;
-
 

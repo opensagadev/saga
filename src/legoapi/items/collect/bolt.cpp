@@ -59,14 +59,6 @@
 struct AIROW_s;
 struct nunativegscene_s;
 
-
-
-
-
-
-
-// ==== src/legoapi/items/collect/bolts.cpp: declarations ====
-
 struct spacelevel_s;
 
 static void UpdateBolt_Geonosian(BOLT_s *);
@@ -74,20 +66,7 @@ static void EndBolt_EwokTorpedo(BOLT_s *);
 
 #include "legoapi/items/collect/bolttypes_lsw.inc"
 
-
-// Configuration entry point and parser callbacks share the original BT state.
-
-
-
-
-extern "C" {
-}
-
-
 extern "C" void PlaySfx(char *, NUVEC *);
-
-
-
 
 __attribute__((force_align_arg_pointer)) void Bolt_AddDeflectedBolt(BOLT_s *bolt, nuvec_s *direction, nuvec_s *normal,
                                                                     unsigned char *processed);
@@ -97,50 +76,20 @@ __attribute__((force_align_arg_pointer)) void Bolt_AddDeflectedBolt(BOLT_s *bolt
 static __attribute__((noinline, noclone)) i32 Bolt_HitPlat(BOLT_s *bolt, u8 *hit_flags)
     __asm__("_ZL12Bolt_HitPlatP6BOLT_sPhP11WORLDINFO_s.isra.38");
 
-
-
-
-
-
 // The original caller appears to treat this u16-returning function as i32;
 // correcting this declaration lowers its match.
 
 static __used__ void UpdateBolt_Geonosian(BOLT_s *bolt);
 
-
 static __used__ void EndBolt_EwokTorpedo(BOLT_s *bolt);
 
-
-extern "C" {
-}
-
-
-// ==== src/legoapi/core/config/saveload.cpp: declarations ====
-
-
 extern void (*FS_Callback)(char *, char *);
-
 
 // Retail keeps the whole body of RenderFileSel3 as the split-out .part clone;
 // the exported function only tests FS_Active.
 
-
-
-
-
-
-
 extern "C" void StartFileSel(char *title, char *path, char *filter, char *filter_out,
                              void (*callback)(char *, char *));
-
-
-
-extern "C" {
-
-
-} // extern "C"
-
-// ==== functions in original address order ====
 
 static __used__ void EndBolt_EwokTorpedo(BOLT_s *bolt) {
     Detonate(&bolt->position, 0);

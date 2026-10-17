@@ -81,44 +81,13 @@ float MechInputTouchVirtualConsoleController::s_defaultDPadPosY_SmallScreen = -0
 float MechInputTouchVirtualConsoleController::s_defaultButtonsPosX_SmallScreen = 0.62f;
 float MechInputTouchVirtualConsoleController::s_defaultButtonsPosY_SmallScreen = -0.49f;
 
-// ==== src/legoapi/core/startup/virtual.cpp: declarations ====
-
-
-
-// ==== src/legoapi/core/input/gamepads.cpp: declarations ====
-
-
-
 extern "C" {
     extern "C++" FadeSystem FadeSys;
 }
 
-// Original bss @0x127a500: 64 pads x 0x60 bytes.
-// Original bss @0x127a4e0.
-
-// Two frames of direction history for each local player.  MovePlayer shifts
-// these before accepting the new input; GamePad_Rotate then reports a stable
-// angular velocity only when both consecutive turns agree.
-
-
-
-
-
-// ==== src/legoapi/misc/legoapi_misc.cpp: declarations ====
-
 extern "C" {
     extern "C++" FadeSystem FadeSys;
 }
-
-// ==== src/legoapi/actions/combat/hits.cpp: declarations ====
-
-
-
-// ==== src/legoapi/core/net/netplay.cpp: declarations ====
-
-// ==== functions in original address order ====
-
-// ==== functions in original address order ====
 
 MechInputTouchVirtualConsoleController::~MechInputTouchVirtualConsoleController() {
     delete buttons[0];

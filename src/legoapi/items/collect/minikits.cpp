@@ -102,31 +102,13 @@ static VARIPTR minikits_savecharacterbufferptr;
 extern "C" VARIPTR characterbuffer_ptr;
 extern "C" VARIPTR characterbuffer_end;
 
-
 char *LEGOASCII_BIGARROW = NULL;
 
 extern i32 LEGOOBJ_MINIKIT, LEGOOBJ_CHARKIT;
 void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 
-// ==== src/legoapi/gizmo/base/gizmo_sys.cpp: declarations ====
-
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
-
-
-
-
-
 struct GAMEMESSAGE_s;
 struct nuhspecial_s;
-
-// Camera zoom state
-
-// Graphics loading flags
-
-// --- NuGScn graphics-data reader ---
-// NuReadGraphicsData is a C++ static function in the original (GCC clones it,
-// hence the `.isra.NNN` suffix in the ROM symbol table).
 
 // Retail only keeps the IPA-SRA clone, which drops the unused fourth argument.
 #if defined(__i386__)
@@ -139,10 +121,6 @@ static NU_READ_GRAPHICS_DATA_ATTR NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIP
     __asm__("_ZL18NuReadGraphicsDataP9variptr_uS0_PcS1_S1_.isra.104");
 
 // --- Extern "C": NuGScn functions have C linkage in original ---
-extern "C" {
-
-} // extern "C"
-
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
@@ -197,7 +175,6 @@ f32 PANEL_MINIKITCOUNTY = -0.1f;
 i32 LEGOOBJ_CHARKIT = -1;
 i32 LEGOOBJ_MINIKIT = -1;
 
-
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
     do {                                                                                                               \
         PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
@@ -209,9 +186,6 @@ i32 LEGOOBJ_MINIKIT = -1;
             vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
         }                                                                                                              \
     } while (false)
-
-
-// ==== functions in original address order ====
 
 void MiniKits_Init(variptr_u *buffer, variptr_u *) {
     const usize aligned = (buffer->addr + 3) & ~static_cast<usize>(3);

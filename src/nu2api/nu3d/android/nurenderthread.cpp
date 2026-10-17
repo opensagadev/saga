@@ -45,8 +45,6 @@ static void *dynamicLights_safe[16];
 static i32 dynamicLightsCount_safe;
 
 // Game-thread scene-parameter queue (defined in nurndr_plain.cpp).
-extern "C" {
-}
 static VARIPTR nuspecial_vertex_offsets_safe;
 static i32 nuspecial_vertex_noffsets_safe;
 
@@ -55,15 +53,6 @@ extern const f32 nuvec4_one[4] = {1.0f, 1.0f, 1.0f, 1.0f};
 extern "C" void NuShaderManagerSetfv(i32 id, const f32 *values);
 i32 global_frame_count = 0;
 i32 global_frame_count_paused = 0;
-
-
-
-
-
-
-
-
-// ==== functions in original address order ====
 
 void NuRenderThreadCreate(void) {
     NuIOS_InitRenderThread();

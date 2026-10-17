@@ -3,7 +3,6 @@
 // This is the first unit in .text (0xe3110); it has no constructor, so the
 // reference keeps no trace of its file name.
 
-// ==== src/nu2api/nuandroid/ios_graphics.cpp: declarations ====
 #include "nu2api/nuandroid/ios_graphics.h"
 #include "java/android.h"
 
@@ -68,29 +67,6 @@
 #include "nu2api/nuandroid/ios_device.h"
 
 // ---------------------------------------------------------------------------
-// ios_graphics — iOS/Android GLES2 platform glue
-//
-// Original iOS path managed its own EGL / framebuffer and a dedicated render
-// thread.  On Android the same code is reused: the "iOS" name is historical.
-// This file contains platform plumbing, thread handoff, frame pacing, and
-// path helpers.
-// ---------------------------------------------------------------------------
-
-// Backing drawable size driven by NuRenderDevice::InitialiseOpenGLContext.
-
-// Nu-side DX-style clear flags, translated to GL masks below.
-
-
-// ---------------------------------------------------------------------------
-// Framebuffer setup
-// ---------------------------------------------------------------------------
-
-// ---------------------------------------------------------------------------
-// Diagnostics / caps
-// ---------------------------------------------------------------------------
-
-
-// ---------------------------------------------------------------------------
 // Filesystem paths; the Android documents selection is cached after first use.
 // ---------------------------------------------------------------------------
 
@@ -127,22 +103,7 @@ static i32 g_renderThreadDoneThread;
 // NuIOS_WaitForRenderThreadCompletion for 60 Hz pacing.
 i64 g_renderStartTime;
 
-
-
-
-// ==== src/nu2api/nucore/nucore_plain.cpp: declarations ====
-// Temporary C-linkage compatibility surface for unresolved engine owners.
-//
-// This file collects functions whose original TU has not yet been
-// reconstructed. Domain families move to their evidenced owner as complete
-// groups; this file is not itself evidence of one original nucore TU.
-
-
-
-// C++-linkage helpers defined in sibling TUs.
-
 extern "C" {
-
     // ---------------------------------------------------------------------------
     // Display-list bootstrap (original nucore TU file-statics)
     // ---------------------------------------------------------------------------
@@ -167,17 +128,12 @@ extern "C" {
     DECOMP_ASSERT(sizeof(NuCameraReflect) == 0x84, "camera reflection state size");
     DECOMP_ASSERT(__builtin_offsetof(NuCameraReflect, mtx) == 4, "camera reflection matrix offset");
 
-
     // ---------------------------------------------------------------------------
     // Display list — faithful helpers + pending stubs
     // ---------------------------------------------------------------------------
-
 } // extern "C"
 
-// Local helpers matching original static display-list setters (t local symbols)
-
 extern "C" {
-
     extern "C++" {
         // Original local helper cloned as DisplayListProcessSkin.isra.36 by GCC.
         // It appends the world transform, skin palette, and geometry calls as one
@@ -230,7 +186,6 @@ static void DisplayListProcessLightmapped(NUDISPLAYLIST *list, NUDISPLAYLISTITEM
 
     // Locale string is owned by the Android/JNI TU; cache only its index here.
     i32 g_languageIndex = -1; // original .data @0x616b80
-
 
     // ---------------------------------------------------------------------------
     // Animation / curves / data
@@ -325,10 +280,7 @@ static void DisplayListProcessLightmapped(NUDISPLAYLIST *list, NUDISPLAYLISTITEM
     // ---------------------------------------------------------------------------
     // PS2 / Xbox legacy shims
     // ---------------------------------------------------------------------------
-
 } // extern "C"
-
-// ==== functions in original address order ====
 
 i32 NuIOS_ShouldUseMSAA(void) {
     return 0;
@@ -553,7 +505,6 @@ extern "C" {
 
 }
 
-// Native diagnostics supply a strong host-configured documents-path override.
 SAGA_HOST_WEAK char *NuIOS_GetDocumentsPath(void) {
     if (g_internalPath[0] == '\0') {
         FILE *marker = fopen("mnt/sdcard/TTGames/com.ttfusion.legosaga/save.here", "rb");

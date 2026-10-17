@@ -92,11 +92,9 @@
 #include "nu2api/nu3d/nuprim.h"
 #include "nu2api/nu3d/nupostparams.h"
 
-
 GAMEMESSAGE_s GameMessage[128] = {};
 
 static i32 GameMessageIndex;
-
 
 static_assert(sizeof(GAME_MESSAGE_DATA) == sizeof(GAMEMESSAGE_s), "game message backing layout");
 static_assert(offsetof(GAME_MESSAGE_DATA, tick_fn) == offsetof(GAMEMESSAGE_s, tick_fn),
@@ -107,28 +105,13 @@ ADDGAMEMSG AddGameMsg_Default = {
     NULL, 0,     0.0f,  0.0f, NULL, NULL, NULL, NULL, NULL, -1, 0,    0xff, 0,
 };
 
-
 void *AddGameMessage(char *text, nuvec_s *position, float scale, nuvec_s *target_position, float target_scale,
                      unsigned char red, unsigned char green, unsigned char blue, u32 flags, float duration);
-
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
-
-
-
 
 struct GAMEMESSAGE_s;
 struct nuhspecial_s;
 
 nuhspecial_s *(*GameMsg_GetExtraObjFn)(GAMEMESSAGE_s *);
-
-// Camera zoom state
-
-// Graphics loading flags
-
-// --- NuGScn graphics-data reader ---
-// NuReadGraphicsData is a C++ static function in the original (GCC clones it,
-// hence the `.isra.NNN` suffix in the ROM symbol table).
 
 // Retail only keeps the IPA-SRA clone, which drops the unused fourth argument.
 #if defined(__i386__)
@@ -139,9 +122,6 @@ nuhspecial_s *(*GameMsg_GetExtraObjFn)(GAMEMESSAGE_s *);
 static NU_READ_GRAPHICS_DATA_ATTR NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIPTR *buf_end, char *path,
                                                              char *scene_data)
     __asm__("_ZL18NuReadGraphicsDataP9variptr_uS0_PcS1_S1_.isra.104");
-
-// --- Extern "C": NuGScn functions have C linkage in original ---
-
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
@@ -183,11 +163,6 @@ static NU_READ_GRAPHICS_DATA_ATTR NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIP
         NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
     } while (0)
 
-// DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
-// red-brick positions come from the Game init values in legogame/game.cpp.
-
-
-
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
     do {                                                                                                               \
         PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
@@ -199,8 +174,6 @@ static NU_READ_GRAPHICS_DATA_ATTR NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIP
             vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
         }                                                                                                              \
     } while (false)
-
-// ==== functions in original address order ====
 
 void ResetGameMessages() {
     for (i32 i = 0; i < 128; i++) {

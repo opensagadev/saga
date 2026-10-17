@@ -5,7 +5,6 @@
 
 #include <string.h>
 
-// ==== src/nu2api/nusound/nusound_system.cpp: declarations ====
 #include "nu2api/nusound/nusound_system.hpp"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nucore/numemory.h"
@@ -88,8 +87,6 @@ static NuSoundMixMatrix *CreateRoutingMatrix(u32 from, u32 to, const f32 *values
     }
     return matrix;
 }
-
-// ==== functions in original address order ====
 
 NuSoundRoutingTable::NuSoundRoutingTable(char const *table_name) {
     intrusive_next = NULL;

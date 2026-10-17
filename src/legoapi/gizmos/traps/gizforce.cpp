@@ -50,8 +50,6 @@ u32 GizForce_TotalScore(void *world) {
     return total;
 }
 
-
-
 i32 force_gizmotype_id = -1;
 
 // Older Force data stores sound names in the level configuration instead of the gizmo file.

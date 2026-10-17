@@ -91,9 +91,6 @@ u32 LEGOOBJ_DEFAULTLASTCOIN = -1;
 
 // --- World-module helpers (kept with the WorldInfo API) ---
 
-
-
-
 WORLDINFO WorldInfo[2];
 
 f32 g_BgLoadDelayHackTimer;
@@ -101,8 +98,4 @@ f32 g_BgLoadDelayHackTimer;
 volatile i32 waiting_for_level;
 i32 level_already_loaded = -1;
 i32 next_level;
-
-
-extern "C" {
-}
 

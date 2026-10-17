@@ -19,12 +19,6 @@
 #include "nu2api/nusound/nusound3_include.h"
 #include "nu2api/nusound/nusound_routing.h"
 
-
-
-
-
-
-
 bool NuSoundStreamDesc::DecodeStreamOnOpen() const {
     return false;
 }

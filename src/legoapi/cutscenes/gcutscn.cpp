@@ -121,21 +121,10 @@
 #include "legoapi/render/core/gameliball.h"
 #include "nu2api/nu3d/nu3d_includes.h"
 
-
-
-
-
-
-
-
-// ==== src/legoapi/cutscenes/cutscene.cpp: declarations ====
-
-
 struct instNUGCUTCHAR_s;
 struct NUGCUTCHAR_s;
 struct NUGCUTRIGID_s;
 struct instNUGCUTRIGID_s;
-
 
 NUMTX cutscenecammtx = {};
 i32 cutscenecamchange = 0;
@@ -148,8 +137,6 @@ i32 CameraDOFHack = 0;
 u8 set_cutscenecammtx = 0;
 
 // --- Extern "C" block: functions with confirmed C linkage in original libTTapp.so ---
-extern "C" {
-}
 
 DECOMP_ASSERT(sizeof(CutSceneTriggerNameEntry) == 0x34, "cutscene trigger name entry stride");
 DECOMP_ASSERT(offsetof(CutSceneTriggerNameTable, entries) == 0x0c, "cutscene trigger name table entries offset");
@@ -327,19 +314,13 @@ static NUGCUT_FIXPTRS_ATTR(2) void NuGCutSceneFixPtrsAnims(NUGCUTSCENE_s *cutsce
 static NUGCUT_FIXPTRS_ATTR(1) void NuGCutSceneFixPtrsNoAnims(NUGCUTSCENE_s *cutscene)
     __asm__("_ZL18NuGCutSceneFixPtrsP13NUGCUTSCENE_sii.constprop.43");
 
-
 extern "C" {
-
     i32 NuGCutDebFixUp_SearchAllPages = 0;
     NUGCUTLOCATORFNENTRY_s *locatorfns = NULL;
     NUGCUTUPDATELOCATORVFXFN UpdateLocatorVfxFn = NULL;
     NUGCUTRELEASELOCATORVFXFN ReleaseLocatorVfxFn = NULL;
     NUGCUTTRIGGERLOCATORVFXFN TriggerLocatorVfxFn = NULL;
     NUGCUTLOOKUPLOCATORVFXFN LookupLocatorVfxFn = NULL;
-
-
-
-
 } // extern "C"
 
 struct instNUGCUTSCENE_s;
@@ -347,8 +328,6 @@ struct NUGCUTLOCATORSYS_s;
 struct instNUGCUTLOCATOR_s;
 struct NUGCUTLOCATOR_s;
 struct numtx_s;
-
-
 
 // Retail only keeps the IPA-SRA clone, which drops the unused frame argument.
 #if defined(__i386__)
@@ -360,9 +339,6 @@ static INST_LOCATOR_SYS_END_ATTR void instNuGCutLocatorSysEnd(instNUGCUTLOCATORS
                                                               NUGCUTLOCATORSYS_s *system)
     __asm__("_ZL23instNuGCutLocatorSysEndP22instNUGCUTLOCATORSYS_sP18NUGCUTLOCATORSYS_sf.isra.8");
 
-
-
-
 static inline u8 instNuGCutSceneLastStream(instNUGCUTSCENE_s *instance) {
     return instance->cutscene_copy->last_stream;
 }
@@ -372,18 +348,7 @@ static inline NUGCUTSCENE_s *instNuGCutSceneCurrentStreamBuffer(instNUGCUTSCENE_
     return (&instance->stream_buffer_0)[(static_cast<u32>(instance->flags_8b) >> 4) & 1];
 }
 
-
-
-
-
-
 static __used__ void instNuGCutTriggerSysUpdate(instNUGCUTSCENE_s *instance, float frame);
-
-
-
-// ==== src/legoapi/cutscenes/cutscene_stubs.cpp: declarations ====
-
-
 
 extern "C" {
     CutSceneCleanUpEntry *DefragCutSceneList;
@@ -397,9 +362,7 @@ extern "C" {
     void (*DefragInstDestroyedFn)(void *);
     i32 DefragCutSceneListSize;
 
-
 }
-
 
 // Steers a cutscene character's eyes towards a look-at locator and blinks its eyelids.
 // Only version-3 locator animations carry the look and blink channels.
@@ -419,11 +382,7 @@ static INST_LOOKAT_UPDATE_ATTR void instNuGCutLookAtLocatorUpdate(i32 *effect_ha
 extern "C" {
     // Aligned four-float row used for retail's movaps matrix copies.
     typedef f32 LocatorMtxRow __attribute__((vector_size(16)));
-
-
 } // extern "C"
-
-// ==== src/nu2api/nusound/nu2api_nusound_plain.cpp: all remaining content ====
 
 extern "C" {
     i32 g_NuSoundMaxVoicesPerSample = 3;
@@ -433,26 +392,19 @@ extern "C" {
 
 }
 
-// ==== src/nu2api/nucore/nucore_plain.cpp: declarations ====
 // Temporary C-linkage compatibility surface for unresolved engine owners.
 //
 // This file collects functions whose original TU has not yet been
 // reconstructed. Domain families move to their evidenced owner as complete
 // groups; this file is not itself evidence of one original nucore TU.
 
-
-
 struct ani3_animheader_s;
 
 extern "C" {
-
     i32 NuGCutAudioStream = 0;
 }
 
-// C++-linkage helpers defined in sibling TUs.
-
 extern "C" {
-
     // ---------------------------------------------------------------------------
     // Display-list bootstrap (original nucore TU file-statics)
     // ---------------------------------------------------------------------------
@@ -477,17 +429,12 @@ extern "C" {
     DECOMP_ASSERT(sizeof(NuCameraReflect) == 0x84, "camera reflection state size");
     DECOMP_ASSERT(__builtin_offsetof(NuCameraReflect, mtx) == 4, "camera reflection matrix offset");
 
-
     // ---------------------------------------------------------------------------
     // Display list — faithful helpers + pending stubs
     // ---------------------------------------------------------------------------
-
 } // extern "C"
 
-// Local helpers matching original static display-list setters (t local symbols)
-
 extern "C" {
-
     extern "C++" {
         // Original local helper cloned as DisplayListProcessSkin.isra.36 by GCC.
         // It appends the world transform, skin palette, and geometry calls as one
@@ -537,8 +484,6 @@ extern "C" {
     // Animation / curves / data
     // ---------------------------------------------------------------------------
 
-
-
     // ---------------------------------------------------------------------------
     // Bridge / file / heap / memory
     // ---------------------------------------------------------------------------
@@ -555,7 +500,6 @@ extern "C" {
     // Rendering / materials / effects (host has GL paths elsewhere)
     // ---------------------------------------------------------------------------
 
-
     // ---------------------------------------------------------------------------
     // Light / wind / particles / debris
     // ---------------------------------------------------------------------------
@@ -563,7 +507,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // Gobj / hierarchy / scene graph
     // ---------------------------------------------------------------------------
-
 
 #include "nu2api/nucore/nucore_plain_types.h"
 
@@ -623,49 +566,26 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // PS2 / Xbox legacy shims
     // ---------------------------------------------------------------------------
-
 } // extern "C"
 
 union variptr_u;
-
-// ==== src/nu2api/nucore/nugcutscene_anim.cpp: all remaining content ====
-
-
 
 char CurveFilterLOCATORScale[] = {6, 7, 8, static_cast<char>(0xff)};
 char CurveFilterLOCATOR[] = {6, 7, static_cast<char>(0xff)};
 char CurveFilterSFX[] = {3, static_cast<char>(0xff)};
 
-
-
-// ==== src/legoapi/characters/motion/gameanim.cpp: declarations ====
-
-// Retail uses translation-unit-local helpers with compiler-inferred private
-// calling conventions; keep their shared animation-mode call sites intact.
-
-
 extern "C" {
-
     // Original @0x2c17d0. The non-quaternion ANI4 player uses a compact
     // four-samples-per-word curve stream. Only groups enabled by the node's
     // translation/rotation/scale flags occupy space in that stream.
-
-
-
 } // extern "C"
 
-
-// ==== src/legoapi/ai/core/ai_sys_stubs.cpp: all remaining content ====
-
-
 extern "C" {
-
 #include "legoapi/ai/core/ai_sys_stubs_types.h"
     DECOMP_ASSERT(sizeof(RebuildEditorCreature) == 0xac, "editor creature rebuild stride");
     DECOMP_ASSERT(offsetof(RebuildEditorCreature, path_check) == 0x38, "editor creature path offset");
     DECOMP_ASSERT(offsetof(RebuildEditorCreature, activation_area) == 0x6c, "editor creature area offset");
     DECOMP_ASSERT(offsetof(RebuildEditorCreature, activation) == 0x8f, "editor creature activation offset");
-
 } // extern "C"
 
 #if defined(__i386__)
@@ -673,10 +593,6 @@ extern "C" {
 #else
 #define AI_SYS_STUBS_CLONE_ATTR2 __attribute__((noinline, noclone))
 #endif
-
-// Retail keeps only the IPA-SRA clone, without the unused object and elapsed time.
-
-// ==== src/nu2api/nucore/nugcutscene.cpp: all remaining content ====
 
 // Callback storage is declared in reverse linked-BSS order because the
 // original GCC 4.7 -O3 object emits these definitions in reverse source order.
@@ -696,18 +612,7 @@ extern "C" {
     NUGCUTSCENESFXFIXUPFN NuCutSceneSFXFixUp = NULL;
     NUGCUTSCENESFXUPDATEFN NuCutSceneSFXUpdate = NULL;
     NUGCUTSCENEREQUESTSFXFN NuCutSceneRequestSFX = NULL;
-
 } // extern "C"
-
-// ==== src/legoapi/cutscenes/cutscenes.cpp: declarations ====
-
-
-extern "C" {
-}
-
-
-extern "C" {
-}
 
 // Retail only keeps the split-out body of the IPA-SRA clone (the unused
 // cutscene index dropped), called with world and cut in registers.
@@ -720,41 +625,9 @@ extern "C" {
 // The loop re-reads the active cut through CutStopInfo after each SmartTextEx call.
 #define CUT_STOP static_cast<CUTINFO *>(CutStopInfo)
 
-
-// ==== functions in original address order ====
-
 static __used__ __attribute__((noinline)) void instNuGCutTriggerSysUpdate(instNUGCUTSCENE_s *instance, float frame);
 
 static __attribute__((noinline)) void instNuGCutSceneClipTest(instNUGCUTSCENE_s *instance);
-
-extern "C" {
-
-
-
-}
-
-extern "C" {
-
-}
-
-extern "C" {
-
-}
-
-extern "C" {
-
-
-}
-
-extern "C" {
-
-}
-
-extern "C" {
-
-}
-
-// ==== functions in original address order ====
 
 static void copyAnims(NUGCUTSCENE_s *destination, NUGCUTSCENE_s *source) {
     NUGCUTCAMERASYS_s *destination_camera = destination->camera_system;

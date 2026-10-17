@@ -150,7 +150,6 @@ struct nunativegscene_s;
 struct SHOPINPUT;
 
 extern "C" {
-
     i32 DEVCDDVDROM_Interrogate(NUFILE_DEVICE *device) {
         device->status = 1;
         return 1;
@@ -163,14 +162,10 @@ extern "C" {
 
     void DebugLog(void) {
     }
-
 } // extern "C"
 
-// ==== src/legoapi/menus/screens/gamestatus_lsw.cpp: declarations ====
 // Original translation unit reconstructed from the reference address map.
 // Functions are defined in original address order.
-
-
 
 extern "C" STATUSPACKET_s StatusPacket;
 
@@ -178,15 +173,9 @@ void IncreaseScore(u32 *, u64, i32);
 static i32 gamedemo_option;
 static i32 goldbrickmsgcount;
 
-
 STATUS_STAGE_s *StatusStages;
 static i32 DrawGoldBrick_Stage;
 static i32 DrawGoldBrick_Phase;
-
-
-
-
-
 
 extern "C" TIMER BonusTimer;
 extern i16 tSUPERSTORYCOMPLETE, tNEWBESTTIME, tLEVELCOMPLETE, tMISSIONCOMPLETE;
@@ -203,53 +192,18 @@ static inline bool StatusRumbleTargetsPlayer(i32 player, i32 index) {
     return player == index || player == -1;
 }
 
-
-
-
-
 extern i16 tTRUEJEDI, tSTORY, tFREEPLAY;
-
-
 
 extern "C" i32 reset_area;
 
-
 extern i16 tMAP, tRESTART, tFINISHSTORY, tCONTINUESTORY, tFINALCHAPTERLOCKED, tNEXTCHAPTERLOCKED;
-extern "C" {
-}
-
-// Retail keeps this body as GCC's split-out clone; the inline head stays in
-// the caller.
-
-// Retail keeps this body as GCC's split-out clone; the inline head stays in
-// the caller.
 
 // Retail keeps the active-stage drawing as the split-out .part clone of
 // LevelComplete_LSW_Draw; the inline head only tests `active`.
 
-
-// ==== src/legoapi/core/net/netplay.cpp: declarations ====
-
-
-
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
-
-
-
-
-
-
-
-
-
 struct starfighter_s;
 struct rtl_s;
 struct rtlidata_s;
-
-
-
-
 
 struct GAMEMESSAGE_s;
 struct HINT_s;
@@ -264,21 +218,6 @@ struct ripple_node_s;
 struct ripple_set_s;
 struct VuVec;
 
-
-// Camera zoom state
-
-// Graphics loading flags
-
-
-extern "C" {
-}
-
-
-
-// --- NuGScn graphics-data reader ---
-// NuReadGraphicsData is a C++ static function in the original (GCC clones it,
-// hence the `.isra.NNN` suffix in the ROM symbol table).
-
 // Retail only keeps the IPA-SRA clone, which drops the unused fourth argument.
 #if defined(__i386__)
 #define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone, regparm(2)))
@@ -287,13 +226,6 @@ extern "C" {
 #endif
 
 // --- Extern "C": NuGScn functions have C linkage in original ---
-extern "C" {
-
-} // extern "C"
-
-
-
-
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
@@ -337,33 +269,12 @@ extern "C" {
 
 extern i16 tNONEWBESTTIME, tNEWBESTTIME;
 
-
-
-
-
-
-
-
 // DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
 // red-brick positions come from the Game init values in legogame/game.cpp.
 
-
-
-
-
-
 extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
 
-
-
-
 extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
-
-extern "C" {
-}
-
-
-
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
     do {                                                                                                               \
@@ -377,43 +288,13 @@ extern "C" {
         }                                                                                                              \
     } while (false)
 
-
 extern i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
-
-
-
-
-// ==== src/legoapi/characters/core/characters.cpp: declarations ====
-
 
 // LoadPerm1 is one of the few game-level entry points which wires together
 // otherwise C-linkage engine subsystems.  Keep these declarations local: the
 // individual subsystem TUs intentionally expose their original plain names.
-extern "C" {
-
-}
 
 struct AISYS_s;
-
-// The original table at 0x006281a0.  These are the material animation
-// scripts made available before the permanent things scene is loaded.
-
-
-extern "C" {
-}
-
-
-
-
-
-
-extern "C" {
-}
-
-
-
-
-
 
 // Retail keeps only the IPA-SRA clone, which receives &*layers.
 #if defined(__i386__)
@@ -421,28 +302,6 @@ extern "C" {
 #else
 #define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone))
 #endif
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ==== src/legoapi/cutscenes/cutscenes.cpp: declarations ====
-
-
-
-
-extern "C" {
-}
-
 
 // Retail only keeps the split-out body of the IPA-SRA clone (the unused
 // cutscene index dropped), called with world and cut in registers.
@@ -452,73 +311,25 @@ extern "C" {
 #define CUTSCENE_START_ATTR __attribute__((noinline, noclone))
 #endif
 
-
-
-
-
-
 // The loop re-reads the active cut through CutStopInfo after each SmartTextEx call.
 #define CUT_STOP static_cast<CUTINFO *>(CutStopInfo)
-
-
-
-
 
 extern i16 tLEVELCOMPLETE, tFREEPLAYUNLOCKED, tSUPERSTORYCOMPLETE, tBONUSUNLOCKED;
 extern i16 tEPISODEVUNLOCKED, tEPISODEVIUNLOCKED, tCHALLENGECOMPLETE, tOUTOFTIME;
 extern i16 tYOUDIDNTCOLLECTALL10CANISTERS, tMISSIONCOMPLETE, tSTORYCLIPSUNLOCKED;
 
-// ==== src/legoapi/items/collect/minikits.cpp: declarations ====
-
-
-
-
-
-
-
 extern i32 currentminikit, newminikitcount;
 extern i16 tMINIKIT;
-
-
-
 
 extern i16 tALLMINIKITSBUILT;
 
 extern NUCOLOUR3 panelcol[3], panelamb;
 
-
-
-// ==== functions in original address order ====
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
-
-
-
-
-
-// Camera zoom state
-
-// Graphics loading flags
-
-extern "C" {
-}
-
-// --- NuGScn graphics-data reader ---
-// NuReadGraphicsData is a C++ static function in the original (GCC clones it,
-// hence the `.isra.NNN` suffix in the ROM symbol table).
-
-// Retail only keeps the IPA-SRA clone, which drops the unused fourth argument.
 #if defined(__i386__)
 #define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone, regparm(2)))
 #else
 #define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone))
 #endif
-
-// --- Extern "C": NuGScn functions have C linkage in original ---
-extern "C" {
-
-} // extern "C"
-
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
@@ -560,13 +371,7 @@ extern "C" {
         NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
     } while (0)
 
-// DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
-// red-brick positions come from the Game init values in legogame/game.cpp.
-
 STATUSMINIKITPART_s KitPart[10];
-
-extern "C" {
-}
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
     do {                                                                                                               \
@@ -580,42 +385,11 @@ extern "C" {
         }                                                                                                              \
     } while (false)
 
-
-// ==== src/legoapi/characters/core/characters.cpp: declarations ====
-
-
-// LoadPerm1 is one of the few game-level entry points which wires together
-// otherwise C-linkage engine subsystems.  Keep these declarations local: the
-// individual subsystem TUs intentionally expose their original plain names.
-extern "C" {
-
-}
-
-// The original table at 0x006281a0.  These are the material animation
-// scripts made available before the permanent things scene is loaded.
-
-extern "C" {
-}
-
-
-extern "C" {
-}
-
-// Retail keeps only the IPA-SRA clone, which receives &*layers.
 #if defined(__i386__)
 #define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone, regparm(1)))
 #else
 #define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone))
 #endif
-
-// ==== src/legoapi/core/startup/finishloop.cpp: declarations ====
-
-extern "C" {
-}
-
-
-
-// ==== src/legoapi/items/collect/minikits.cpp: declarations ====
 
 f32 slideseek;
 f32 pop_timer;
@@ -623,8 +397,6 @@ f32 jibberlen = 0.1f;
 f32 slidetime = 0.25f;
 
 rtldata_s KitPartRTL;
-
-// ==== functions in original address order ====
 
 void SetDrawGoldBrick(STATUSPACKET_s *packet, i32) {
     const i32 stage = packet->current_gold_brick;

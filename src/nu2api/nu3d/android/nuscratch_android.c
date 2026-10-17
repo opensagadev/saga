@@ -7,7 +7,6 @@ extern "C" {
     u8 PS2_SCRATCH_BASE[0x8000];
 }
 
-
 extern "C" {
     static u8 *ps2_scratch_free;
 

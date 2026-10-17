@@ -12,7 +12,6 @@ u32 colourBlack = 0xff000000;
 u32 colourRed = 0xff0000ff;
 struct numtl_s *g_nuMtlHandleNull;
 
-
 void MechInputTouchButton::ClearTouchLocked(bool force) {
     if (!force) {
         MechSystems::Get()->input_touch_system.SetTouchLockedBy(touch_locked_by, NULL, false);
@@ -212,8 +211,6 @@ void MechInputTouchButtonFaker::Update(NuInputTouchData const *data) {
         ClearTouchLocked(false);
     }
 }
-
-
 
 MechInputTouchButtonControlled::MechInputTouchButtonControlled(MechInputTouchMainController &, i32 index)
     : MechInputTouchButton(NuTouchInputElement::TYPE(), 2, 0), controller_index(index) {

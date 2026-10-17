@@ -60,35 +60,6 @@ struct HATMACHINEPROGRESS {
 
 i32 hatmachine_gizmotype_id = -1;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ==== functions in original address order ====
-
 static i32 HatMachine_GetMaxGizmos(void *world_ptr) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
     return world != NULL ? world->current_level->max_hat_machines : 0;

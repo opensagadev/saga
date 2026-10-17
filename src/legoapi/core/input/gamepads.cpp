@@ -99,36 +99,12 @@ static i32 RotationDistance(i32 difference) {
     return difference < 0 ? -difference : difference;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ==== src/legoapi/misc/legoapi_misc.cpp: declarations ====
-
 extern "C" {
     extern i32 CutSceneWaiting;
     extern i32 editor_active;
     extern "C++" i32 (*GamePads_IgnoreInputFn)(void);
     extern "C++" FadeSystem FadeSys;
 }
-
-
-// ==== src/legoapi/actions/combat/hits.cpp: declarations ====
-
-
-
-// ==== src/legoapi/core/net/netplay.cpp: declarations ====
-
-// ==== functions in original address order ====
 
 GAMEPAD_s *GamePad_Allocate() {
     for (i32 i = 0; i < 64; i++) {

@@ -67,31 +67,9 @@ f32 MechInputTouchMenuController::PackButtonY = 0.0f;
 bool MechInputTouchMenuController::PackButtonActive = false;
 NuVec2 MechInputTouchMenuController::LastTouchPos = {0.0f, 0.0f};
 
-// ==== src/legoapi/core/startup/virtual.cpp: declarations ====
-
-
-// ==== src/legoapi/core/input/gamepads.cpp: declarations ====
-
-
-
-// Original bss @0x127a500: 64 pads x 0x60 bytes.
-// Original bss @0x127a4e0.
-
 // Two frames of direction history for each local player.  MovePlayer shifts
 // these before accepting the new input; GamePad_Rotate then reports a stable
 // angular velocity only when both consecutive turns agree.
-
-
-// ==== src/legoapi/misc/legoapi_misc.cpp: declarations ====
-
-// ==== src/legoapi/actions/combat/hits.cpp: declarations ====
-
-
-// ==== src/legoapi/core/net/netplay.cpp: declarations ====
-
-// ==== functions in original address order ====
-
-// ==== functions in original address order ====
 
 void MechInputTouchMenuController::Update(NuInputTouchData const *input) {
     for (i32 index = 0; index < 4; ++index) {

@@ -199,11 +199,6 @@ STATUS_STAGE_s StatusStages_LSW[] = {
     {NULL, NULL, NULL, -1, 0xffff, 0, 0, 0, 0.0f, 0.0f},
 };
 
-
-
-
-
-
 extern i16 tSUPERSTORYCOMPLETE, tNEWBESTTIME, tLEVELCOMPLETE, tMISSIONCOMPLETE;
 extern i16 tNONEWBESTTIME;
 extern i16 tNEWHIGHSCORE, tNONEWHIGHSCORE;
@@ -211,51 +206,20 @@ extern i16 tCHALLENGECOMPLETE, tMINIKIT;
 i32 newminikitcount;
 i32 currentminikit;
 
-
-
-
-
-
-
 extern i32 STATUS_R, STATUS_G, STATUS_B;
 extern i16 tUNLOCKED;
 
-
 extern i16 tTRUEJEDI, tSTORY, tFREEPLAY;
 
-
-
-
-
-
-
-
 static f32 nextsoundpercent = 5.0f;
-
-
-
-extern "C" {
-}
-
-
 
 // Retail keeps this body as GCC's split-out clone; the inline head stays in
 // the caller.
 static __attribute__((noinline, noclone)) void SuperStoryTime_LSW_DrawBody(STATUS_STAGE_s *stage, STATUSPACKET_s *packet)
     __asm__("_Z23SuperStoryTime_LSW_DrawP14STATUS_STAGE_sP14STATUSPACKET_si.part.12");
 
-
-
-
-// Retail keeps this body as GCC's split-out clone; the inline head stays in
-// the caller.
 static __attribute__((noinline, noclone)) void SuperStoryScore_LSW_DrawBody(STATUS_STAGE_s *stage, STATUSPACKET_s *packet)
     __asm__("_Z24SuperStoryScore_LSW_DrawP14STATUS_STAGE_sP14STATUSPACKET_si.part.8");
-
-
-
-
-
 
 extern i16 tFREEPLAYUNLOCKED, tEPISODEVUNLOCKED, tEPISODEVIUNLOCKED, tBONUSUNLOCKED;
 extern i16 tOUTOFTIME, tYOUDIDNTCOLLECTALL10CANISTERS, tSTORYCLIPSUNLOCKED;
@@ -268,33 +232,11 @@ static __attribute__((noinline, noclone)) void LevelComplete_LSW_DrawActive(STAT
                                                                          STATUSPACKET_s *packet)
     __asm__("_Z22LevelComplete_LSW_DrawP14STATUS_STAGE_sP14STATUSPACKET_si.part.27");
 
-
-
 extern i16 tWINNER;
-
-
-// ==== src/legoapi/core/net/netplay.cpp: declarations ====
-
-
-
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
-
-
-
-
-
-
-
-
 
 struct starfighter_s;
 struct rtl_s;
 struct rtlidata_s;
-
-
-
-
 
 struct GAMEMESSAGE_s;
 struct HINT_s;
@@ -309,21 +251,6 @@ struct ripple_node_s;
 struct ripple_set_s;
 struct VuVec;
 
-
-// Camera zoom state
-
-// Graphics loading flags
-
-
-extern "C" {
-}
-
-
-
-// --- NuGScn graphics-data reader ---
-// NuReadGraphicsData is a C++ static function in the original (GCC clones it,
-// hence the `.isra.NNN` suffix in the ROM symbol table).
-
 // Retail only keeps the IPA-SRA clone, which drops the unused fourth argument.
 #if defined(__i386__)
 #define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone, regparm(2)))
@@ -332,13 +259,6 @@ extern "C" {
 #endif
 
 // --- Extern "C": NuGScn functions have C linkage in original ---
-extern "C" {
-
-} // extern "C"
-
-
-
-
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
@@ -382,36 +302,14 @@ extern "C" {
 
 extern i16 tNONEWBESTTIME, tNEWBESTTIME;
 
-
-
-
-
-
-
-
-
 // DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
 // red-brick positions come from the Game init values in legogame/game.cpp.
 
-
-
-
-
 extern i32 currentminikit;
-
 
 extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
 
-
-
-
 extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
-
-extern "C" {
-}
-
-
-
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
     do {                                                                                                               \
@@ -425,43 +323,13 @@ extern "C" {
         }                                                                                                              \
     } while (false)
 
-
 extern i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
-
-
-
-
-// ==== src/legoapi/characters/core/characters.cpp: declarations ====
-
 
 // LoadPerm1 is one of the few game-level entry points which wires together
 // otherwise C-linkage engine subsystems.  Keep these declarations local: the
 // individual subsystem TUs intentionally expose their original plain names.
-extern "C" {
-
-}
 
 struct AISYS_s;
-
-// The original table at 0x006281a0.  These are the material animation
-// scripts made available before the permanent things scene is loaded.
-
-
-extern "C" {
-}
-
-
-
-
-
-
-extern "C" {
-}
-
-
-
-
-
 
 // Retail keeps only the IPA-SRA clone, which receives &*layers.
 #if defined(__i386__)
@@ -470,35 +338,9 @@ extern "C" {
 #define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone))
 #endif
 
-
-
-
-
-
-
-
-
-
-
-
 f32 COLLECTION_Y_STATUS = -0.3f;
 static i32 playedappearsfx;
 static i32 playedmovesfx;
-
-
-
-
-
-
-
-// ==== src/legoapi/cutscenes/cutscenes.cpp: declarations ====
-
-
-
-
-extern "C" {
-}
-
 
 // Retail only keeps the split-out body of the IPA-SRA clone (the unused
 // cutscene index dropped), called with world and cut in registers.
@@ -508,20 +350,8 @@ extern "C" {
 #define CUTSCENE_START_ATTR __attribute__((noinline, noclone))
 #endif
 
-
-
-
-
-
 // The loop re-reads the active cut through CutStopInfo after each SmartTextEx call.
 #define CUT_STOP static_cast<CUTINFO *>(CutStopInfo)
-
-
-
-
-
-
-
 
 extern i32 STATUS_R;
 extern i32 STATUS_G;
@@ -530,38 +360,10 @@ extern i16 tLEVELCOMPLETE, tFREEPLAYUNLOCKED, tSUPERSTORYCOMPLETE, tBONUSUNLOCKE
 extern i16 tEPISODEVUNLOCKED, tEPISODEVIUNLOCKED, tCHALLENGECOMPLETE, tOUTOFTIME;
 extern i16 tYOUDIDNTCOLLECTALL10CANISTERS, tMISSIONCOMPLETE, tSTORYCLIPSUNLOCKED;
 
-
-
-
-
-
-
-// ==== src/legoapi/items/collect/minikits.cpp: declarations ====
-
-
-
-
-
-
-
 extern i32 currentminikit, newminikitcount;
 extern i16 tMINIKIT;
 
-
-
-
-
-
-
-
 extern i16 tALLMINIKITSBUILT;
-
-
-
-
-
-
-// ==== functions in original address order ====
 
 i32 InitStatusScreen_LSW(WORLDINFO_s *, STATUSPACKET_s *) {
     STUBBED();

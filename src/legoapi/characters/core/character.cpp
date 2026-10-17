@@ -2,7 +2,6 @@
 #include "globals.h"
 #include "legoapi/characters/core/character.h"
 
-
 #include "legoapi/characters/core/CharacterObjectInterface.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/audio/sfx.h"
@@ -558,12 +557,4 @@ GAMECHARACTERDATA GCDATA_DEFAULT = {
 };
 
 i32 g_loadingCharacterInHub;
-
-
-
-
-
-
-
-
 

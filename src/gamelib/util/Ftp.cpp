@@ -7,7 +7,6 @@
 #include "nu2api/nucore/nustring.h"
 #include "gamelib/util/Network.h"
 
-
 i32 NetFtpManager::Abort(char const *, NetAddress const &, i32, i32) {
     return 0;
 }

@@ -132,7 +132,6 @@ static const char CustomiseLetter[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ- 0123456789";
 u16 CustomiseRotY[2], CustomiseTiltX[2], CustomiseTiltZ[2];
 extern i16 tPLAYER1, tPLAYER2;
 
-
 // Animations the customiser cycles through on the game's character preview, terminated by -1.
 i16 CustomiserActionList_Game[] = {97, 190, 98, 99, -1};
 
@@ -150,8 +149,6 @@ static CUSTOMISER_GAMESETTING Customiser_GameSetting[] = {
     {"stormtrooperhelmet", 0, 0x40000},
     {NULL, 0, 0},
 };
-
-
 
 static u16 *Customiser_GetSelection(i32 side) {
     return Game.customizer[side].pieces;
@@ -228,8 +225,6 @@ static u16 *Customiser_GetSelection(i32 side) {
         runtime->field_0x117 = static_cast<u8>(LightSabre_ColourFromObj(runtime->weapon_model, NULL));                 \
     } while (0)
 
-
-
 static i32 Customise_FindLetter(char character) {
     i32 letter = 0;
     for (; letter != 38; ++letter)
@@ -238,48 +233,19 @@ static i32 Customise_FindLetter(char character) {
     return letter == 38 ? 0 : letter;
 }
 
-
-
-
-
-// ==== src/legoapi/characters/core/characters.cpp: declarations ====
-
-
 // LoadPerm1 is one of the few game-level entry points which wires together
 // otherwise C-linkage engine subsystems.  Keep these declarations local: the
 // individual subsystem TUs intentionally expose their original plain names.
-extern "C" {
-
-}
 
 struct AISYS_s;
 
 // The original table at 0x006281a0.  These are the material animation
 // scripts made available before the permanent things scene is loaded.
 
-
 struct AIROW_s;
 struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
-
-
-extern "C" {
-}
-
-
-
-
-
-
-
-extern "C" {
-}
-
-
-
-
-
 
 // Retail keeps only the IPA-SRA clone, which receives &*layers.
 #if defined(__i386__)
@@ -287,23 +253,6 @@ extern "C" {
 #else
 #define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone))
 #endif
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ==== functions in original address order ====
 
 static void UpdateCustomPieceAnim(CUSTOMPIECEANIM *anim, u16 minimum, u16 maximum) {
     if (anim->elapsed < anim->duration) {

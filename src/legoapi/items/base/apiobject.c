@@ -90,7 +90,6 @@ static void GameObjectForceApart2D(APIOBJECT *first, APIOBJECT *second) {
 }
 
 extern "C" {
-
     float AnimEndFrame(CHARACTERMODEL_s *model, i32 animation) {
         if (animation != -1 && model->model_data_b[animation] != NULL) {
             return NuAnimEndFrame(model->model_data_b[animation]);
@@ -806,7 +805,6 @@ extern "C" {
         }
         memset(model->points_of_interest, 0, sizeof(model->points_of_interest));
     }
-
 } // extern "C"
 
 static void NormalizeAnimPath(char *path) {
@@ -881,7 +879,6 @@ static bool ShouldLoadAnimation(const CHARACTERANIM_s &animation, i32 area_anima
 }
 
 extern "C" {
-
     void APIObjectRegisterAnimRedirect(ANIMREDIRECTFN fn, void *list, char *directory) {
         i32 length = NuStrLen(directory);
         RedirectAnimFn = fn;
@@ -1371,7 +1368,6 @@ extern "C" {
         }
         return 1.0f + NuRandFloat() * (NuAnimEndFrame(model->model_data_b[animation]) - 1.0f);
     }
-
 } // extern "C"
 
 static f32 UpdateAnimTimer(CHARACTERMODEL_s *model, ANIMPACKET_s *packet, i16 animation, f32 time, f32 frame_step,
@@ -1462,7 +1458,6 @@ static f32 UpdateAnimTimer(CHARACTERMODEL_s *model, ANIMPACKET_s *packet, i16 an
 }
 
 extern "C" {
-
     void UpdateAnimPacket(CHARACTERMODEL_s *model, ANIMPACKET_s *packet, f32 frame_step, f32 movement_speed,
                           f32 blend_step, f32 backwards_multiplier) {
         i32 backwards = 0;
@@ -1795,7 +1790,6 @@ extern "C" {
         }
         return 0;
     }
-
 } // extern "C"
 
 void RootFnEx(NUMTX *matrix, void *data, NUVEC *sampled_root, NUVEC *, NUVEC *translation, f32, i32 include_y) {
@@ -1852,7 +1846,6 @@ void RootFnEx(NUMTX *matrix, void *data, NUVEC *sampled_root, NUVEC *, NUVEC *tr
 }
 
 extern "C" {
-
     void RootFn(NUMTX *matrix, void *data, NUVEC *source_root, NUVEC *target_root, NUVEC *root_delta, f32 blend) {
         RootFnEx(matrix, data, source_root, target_root, root_delta, blend, 0);
     }
@@ -2951,5 +2944,4 @@ extern "C" {
         }
         return NULL;
     }
-
 } // extern "C"

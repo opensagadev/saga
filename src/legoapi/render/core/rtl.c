@@ -188,7 +188,6 @@ void edrtlInitBurnset(burnset_s *set) {
 }
 
 extern "C" {
-
     i32 rtlFindByUserId(usize rtl_set, i32 user_id) {
         if (rtl_set != 0) {
             rtlset *set = reinterpret_cast<rtlset *>(rtl_set);
@@ -1082,7 +1081,6 @@ extern "C" {
         rtlCalcShadow(lighting_data);
         _NuTimeBarSlotEnd(0, 6);
     }
-
 } // extern "C"
 
 static __used__ void rtlApplyModifiersToChainLight(rtl_s *light) {
@@ -1194,10 +1192,6 @@ static __used__ void rtlProcessLight(rtl_s *light, f32 elapsed) {
 }
 
 extern "C" {
-
-
-
-
     void rtlProcessLights(void *set, f32 frame_time) {
         rtl_s *light;
         i32 i;
@@ -1221,7 +1215,6 @@ extern "C" {
             }
         }
     }
-
 } // extern "C"
 
 static void RefreshUI();
@@ -1432,7 +1425,6 @@ extern "C" {
         }
         return NULL;
     }
-
 } // extern "C"
 
 // RTL editor state and callbacks from the same original rtl.c text/data run.
@@ -2266,8 +2258,6 @@ static __used__ void InitUI() {
     eduiMenuFitWidth(fog_main_menu, 5);
     NuQFntPopCoordinateSystem();
 }
-
-// RTL editor callbacks from the same original text run.
 
 // Burnset persistence and editing state from the same original RTL editor run.
 
@@ -3626,7 +3616,6 @@ extern "C" void edrtlCalculateBurnoutEx(burnset_s *set, NuBloomParameters *param
                           camera_position, frame_time);
 }
 
-
 static void edrtlRndrLine3d(nuvtx_tc1_s *vertices, numtl_s *, numtx_s *matrix) {
     NUMTX *transform;
     NUVEC start;
@@ -3693,7 +3682,6 @@ static void edrtlDrawCursor() {
     line[1].colour = -1;
     edrtlRndrLine3d(line, mtls[0], NULL);
 }
-
 
 extern "C" void edrtlDrawLight(i32 index) {
     edrtlDrawLightEx(index, 0);

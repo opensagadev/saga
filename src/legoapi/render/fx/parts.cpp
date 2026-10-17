@@ -74,35 +74,16 @@
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-
 }
 
 void FindAnglesZX(NUVEC *, u16 *, u16 *);
 
-// Forward declarations for local (static) part/gizmo helper stubs.
-
-// Local (static) part (PART_s), pickup (GIZMOPICKUP_s), gizmo flow
-// (GIZFLOW_s/FLOWBOX_s), power-up and space/starfighter helpers. Stubbed as
-// local `t` symbols matching res/libTTapp.so.
-
-
 extern "C" {
-
-
     // The editor loader clears these page IDs with aligned vector stores.
-
-
-
-
-
 } // extern "C"
 
 extern u16 TargetDeg_Near, TargetDeg_Mid, TargetDeg_Far;
 extern f32 TargetDist_Near2, TargetDist_Mid2;
-
-extern "C" {
-
-}
 
 static i32 PDEBCOUNT;
 static char **PDebNameList;
@@ -118,20 +99,9 @@ static char **PDebNameList;
     if (type->sounds[slot] != -1 && type->sound_modes[slot] == (mode))                                                 \
         PlaySfxById(type->sounds[slot], &emitter->position);
 
-
 extern "C" f32 brickimpactwait;
 
-// ==== src/legoapi/render/core/terrain_stubs.cpp: declarations ====
-
-
-// Runtime-selected groups appended after the fixed terrain allocation.
-
 // NuFileExists @nufile (nucore_plain.cpp).
-
-
-// ==== src/legoapi/render/fx/parts_control.cpp: all remaining content ====
-
-// ==== functions in original address order ====
 
 void InitPartTable(char **names) {
     PDEBCOUNT = 0;

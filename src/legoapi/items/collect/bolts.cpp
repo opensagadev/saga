@@ -59,7 +59,6 @@
 #include "legoapi/misc/utilities.h"
 #include "legoapi/render/core/gameliball.h"
 
-
 static void Bolt_Debris_Default(BOLT_s *, NUVEC *, i32, NUVEC *, i32);
 static void Bolt_GetShootOrigin_Default(GameObject_s *, NUVEC *);
 static i32 Bolt_GetShootDirection_Default(GameObject_s *, NUVEC *);
@@ -134,7 +133,6 @@ static NUFPCOMJMP BoltType_ConfigKeywords[] = {
     {NULL, NULL},
 };
 
-
 f32 BOLT_SHOOTFLASHTIME = 0.1f;
 void FindAnglesXY(NUVEC *, u16 *, u16 *);
 void CalculateInterceptVector(NUVEC *, NUVEC *, NUVEC *, f32, NUVEC *, NUVEC *);
@@ -142,19 +140,8 @@ void GameAudio_PlaySfxById(i32, NUVEC *, i32, i32);
 
 i32 MatrixReflectionVU0_AXISY(NUMTX *, f32, f32, NUMTX *);
 
-
-extern "C" {
-}
 i32 SphereSphereOverlapScaleY(NUVEC *, f32, f32, NUVEC *, f32, f32);
 void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
-
-
-
-
-
-
-
-
 
 i32 addbolt_nosfx;
 BOLT_s *objhitobj_bolt;
@@ -168,10 +155,6 @@ __attribute__((force_align_arg_pointer)) void Bolt_AddDeflectedBolt(BOLT_s *bolt
 static __attribute__((noinline, noclone)) i32 Bolt_HitPlat(BOLT_s *bolt, u8 *hit_flags)
     __asm__("_ZL12Bolt_HitPlatP6BOLT_sPhP11WORLDINFO_s.isra.38");
 
-
-
-
-
 GIZMOBLOWUP_s *GizmoBlowUp_Hit(GameObject_s *, NUVEC *, i32, f32, NUVEC *, NUVEC *, BOLT_s *, u32, u8 *);
 // The original caller appears to treat this u16-returning function as i32;
 // correcting this declaration lowers its match.
@@ -180,17 +163,12 @@ i32 addbolt_noobjmom, addbolt_newsfx;
 NUVEC addbolt_newpos;
 i32 (*BoltInitSfxFn)(GameObject_s *);
 
-
-
 static __used__ void Bolt_Debris_Default(BOLT_s *bolt, nuvec_s *points, int point, nuvec_s *, int);
 
 static __used__ void Bolt_GetShootOrigin_Default(GameObject_s *object, nuvec_s *position);
 
 static __used__ i32 Bolt_GetShootDirection_Default(GameObject_s *object, nuvec_s *direction);
 
-
-extern "C" {
-}
 void FindAnglesZX(NUVEC *, u16 *, u16 *);
 
 static inline i32 Bolt_HitScenery(BOLT_s *bolt, NUVEC *points, u8 *processed, WORLDINFO_s *world) {
@@ -210,34 +188,10 @@ static inline i32 Bolt_HitScenery(BOLT_s *bolt, NUVEC *points, u8 *processed, WO
                          Bolt_HitPartMode(bolt)) != NULL;
 }
 
-// ==== src/legoapi/items/collect/bolt.cpp: declarations ====
-
-
-
-// ==== src/legoapi/items/collect/bolts.cpp: declarations ====
-
-
 extern BOLTTYPE_s GlobalBoltType[44];
-
-
-extern "C" {
-}
-
-
-extern "C" {
-}
-
-// ==== src/legoapi/core/config/saveload.cpp: declarations ====
-
-
 
 // Retail keeps the whole body of RenderFileSel3 as the split-out .part clone;
 // the exported function only tests FS_Active.
-
-
-// ==== functions in original address order ====
-
-// ==== functions in original address order ====
 
 static __used__ void BT_nodeflect(nufpar_s *) {
     BT_bolttype->field_60 |= 0x100;

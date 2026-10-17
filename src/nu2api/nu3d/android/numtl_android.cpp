@@ -92,7 +92,6 @@ i32 g_alphaTestEnabled = 0;
 u32 g_alphaFunc = 0;
 u32 g_alphaRef = 0;
 
-
 NuVertexFormatPS *g_nuDebrisVertexFormat;
 NuVertexFormatPS *g_nuFaceOnVertexFormat;
 NuVertexFormatPS *g_nuFallbackVertexFormat;
@@ -115,7 +114,6 @@ static NUSHADERPROGRAM *g_faceonProgram = nullptr;      // _ZL15g_faceonProgram
 static NUSHADERPROGRAM *g_faceonDecalProgram = nullptr; // _ZL20g_faceonDecalProgram
 static NUSHADERPROGRAM *g_debrisProgram = nullptr;      // _ZL15g_debrisProgram
 static NUSHADERPROGRAM *g_debrisGlassProgram = nullptr;
-
 
 // Refraction texture used by glass debris — lazily allocated.
 static i32 NuIOSDLMtlCallback_refractionRT = 0;                 // @0x99b480
@@ -149,10 +147,6 @@ static inline char DebrisGlassSelector(const numtl_s *mtl) {
 
 static constexpr char kGlassDebrisMarker = (char)-0x69; // 0x97
 
-
-
-
-
 // Helpers for the debris constant block (original walks the programme's
 // i16 param table: pairs of {semantic, loc|class}).
 // The reference unit clears the usage masks in its static constructor while
@@ -177,74 +171,11 @@ namespace {
 
 } // namespace
 
-// ==== src/nu2api/nu3d/numtl.cpp: declarations ====
-
-
 DECOMP_ASSERT(sizeof(MTL_OVERRIDE_RECORD) == 12, "Material override payload ABI");
 DECOMP_ASSERT(offsetof(NUMTL, shader_desc) + offsetof(NUSHADERMTLDESC, vtx_desc) == 0x1f0,
               "Material override vertex descriptor offset");
 
-
-// ==== src/nu2api/nu3d/nurndr_plain.cpp: declarations ====
-// nurndr_plain.cpp — Host "plain" renderer backend.
-//
-// This TU is the host replacement for the PS2 rendering TU (nurndr).
-// It owns renderer scene/present paths and primitive drawing helpers:
-//
-//   1. Scene lifecycle  — NuRndrBeginScene / NuRndrClear / NuRndrEndScene
-//      builds the current `nurenderscene_s` (0x218 bytes in the original BSS)
-//      and queues it into a 16-slot ring consumed by the render thread.
-//
-//   2. Primitive drawing helpers that call the immediate-mode API in
-//      android/nuprim_android.c, including quad expansion there.
-//
-//   3. Frame present   — moved to the original android/nurndr.c TU.
-//
-// Remaining renderer entry points are retained as link stubs until their
-// subsystems are transcribed. Their signatures are not yet recovered, so
-// they are left as `void(void)`.
-
-
-
-// ---------------------------------------------------------------------------
-// Scene state — mirrors original BSS layout
-// ---------------------------------------------------------------------------
-
-// Swap/present pacing flags (original BSS).
-
-// ---------------------------------------------------------------------------
-// Immediate-mode 2D stream state
-// ---------------------------------------------------------------------------
-
-// Display-list cursor for the 2D stream.  Defined in nudlist.cpp.
-
-// ---------------------------------------------------------------------------
-// Forward declarations for C-visible helpers
-// ---------------------------------------------------------------------------
-
-// ---------------------------------------------------------------------------
-// Immediate-mode 2D API
-// ---------------------------------------------------------------------------
-
-// ---------------------------------------------------------------------------
-// Scene lifecycle
-// ---------------------------------------------------------------------------
-
-
-
-
-// ---------------------------------------------------------------------------
-// Link stubs — retained for compatibility, not yet implemented
-// ---------------------------------------------------------------------------
-//
-// Every function below exists in the original binary.  Signatures have not
-// been recovered, so they are kept as void(void) stubs.  Grouped by
-// subsystem so it is obvious what is still missing.
-
-// Scene / GScn
-
 extern "C" {
-
     // Retail partially inlines the clipping test into NuDisplaySceneRndr and
     // keeps the body as its stack-argument .part clone.
 #if defined(__i386__)
@@ -255,23 +186,12 @@ extern "C" {
     static NUDISPLAYSCENERNDR_BODY_ATTR void NuDisplaySceneRndrBody(NUDLDLISTSCENE *scene)
         __asm__("NuDisplaySceneRndr.part.101");
 
-
 }
-
-// Material
-
-
-// Debug / visualisation geometry
-
 
 // Shader / texture / vertex state
-extern "C" {
-}
 static void NuTexGenTexture(void) {
     STUBBED();
 }
-
-// ==== functions in original address order ====
 
 void NuMtlCreatePS(NUMTL *mtl, i32 is_3d) {
     NuShaderMtlDescInit(&mtl->shader_desc);

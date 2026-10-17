@@ -29,7 +29,6 @@
 #include "legoapi/render/fx/particles.h"
 #include "legoapi/world/levels/levels.h"
 
-
 static void GizActions_EnableSock(GIZFLOW_s *, FLOWBOX_s *, char **params, int count) {
     i32 sock_index = -1;
     i32 enabled = 1;

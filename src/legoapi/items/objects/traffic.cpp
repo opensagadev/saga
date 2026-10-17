@@ -54,8 +54,6 @@ static NUFPCOMJMP Traffic_ConfigKeywords[] = {
     {NULL, NULL},
 };
 
-// ==== functions in original address order ====
-
 static void Traffic_tfactor(NUFPAR *parser) {
     reference_trafficanim.tfactor = NuFParGetFloat(parser);
 }

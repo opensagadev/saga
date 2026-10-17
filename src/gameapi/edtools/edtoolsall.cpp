@@ -193,13 +193,8 @@ extern "C" i32 edbri_rotz, edbri_roty, edbri_planks, edbri_post_interval;
 extern "C" i32 edbri_plank_instance_type, edbri_post_instance_type, edbri_bridges_used;
 extern "C" eduiitem_s *eduiItemColourPickCreate(usize, const void *, EdUiItemCallback, char *);
 
-
 extern f32 Scale;
 DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
-
-
-
-
 
 extern "C" {
     char edgra_filter_string[16] = "GRASS";
@@ -208,197 +203,17 @@ extern "C" {
     extern NUMTL *edpp_mtl, *edpp_boxmtl;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-extern "C" {
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 __attribute__((force_align_arg_pointer)) void EdDrawPolyCylinder(VuVec const &start, VuVec const &end, i32 sides,
                                                                  i32 colour, i32 cap_colour, float radius, float limit,
                                                                  float offset);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 eduiitem_s *eduiItemFileSelectorCreate(u32 data, eduiiattr_s *colours, EdUiItemCallback callback, char *text);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 EdEnumControl::Item EdEnumControl::OpenClosedItems[] = {{"Open", 1}, {"Closed", 0}, {NULL, 0}};
 EdEnumControl::Item EdEnumControl::OnOffItems[] = {{"On", 1}, {"Off", 0}, {NULL, 0}};
 EdEnumControl::Item EdEnumControl::YesNoItems[] = {{"Yes", 1}, {"No", 0}, {NULL, 0}};
 
-
-
-
-
-
-
-
-
-
-
 extern i32 AxisColour[8];
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 inline EdMatrixControl::~EdMatrixControl() {
     Destroy();
@@ -408,21 +223,9 @@ inline void EdMatrixControl::operator delete(void *memory) {
     theMemoryManager.FreePool(memory, sizeof(EdMatrixControl));
 }
 
-
-
-
-
-
-
-
 inline void EdStringControl::operator delete(void *memory) {
     theMemoryManager.FreePool(memory, sizeof(EdStringControl));
 }
-
-
-
-
-
 
 template <> f32 EdValueControl<f32>::MouseScale = 100.0f;
 
@@ -523,9 +326,6 @@ __attribute__((force_align_arg_pointer)) void EdValueControl<f32>::cbButton(edui
     eduiItemPropSetText(static_cast<edui_prop_s *>(item), updated_text);
 }
 
-
-
-
 inline EdVectorControl::~EdVectorControl() {
     Destroy();
 }
@@ -533,10 +333,6 @@ inline EdVectorControl::~EdVectorControl() {
 inline void EdVectorControl::operator delete(void *memory) {
     theMemoryManager.FreePool(memory, sizeof(EdVectorControl));
 }
-
-
-
-
 
 void EdClassInterface::ClearLevel(i32) {
 }
@@ -612,71 +408,12 @@ void SplineHelper::Flush() {
 void KnotHelper::Flush() {
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 inline EdClassObjectNameControl::~EdClassObjectNameControl() {
 }
 
 inline void EdClassObjectNameControl::operator delete(void *memory) {
     theMemoryManager.FreePool(memory, sizeof(EdClassObjectNameControl));
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 inline EdSubSystem::~EdSubSystem() {
 }
@@ -710,22 +447,6 @@ inline void EdBitControl::operator delete(void *memory) {
     theMemoryManager.FreePool(memory, sizeof(EdBitControl));
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ==== src/gameapi/edtools/edtoolsall_plain.cpp: declarations ====
-
 // Retail keeps an unreferenced partial-inlining clone of the old HSV2RGB
 // helper (the non-grey path) in this unit.
 #if defined(__i386__)
@@ -735,11 +456,6 @@ inline void EdBitControl::operator delete(void *memory) {
 #endif
 static HSV2RGB_BODY_ATTR void
 HSV2RGBBody(f32 hue, f32 saturation, f32 value, f32 *red, f32 *green, f32 *blue) __asm__("_ZL7HSV2RGBfffPfS_S_.part.18");
-
-
-// The original animation editor callbacks and lifecycle share file-local state.
-// ---- begin src/gameapi/edtools/edanimall.cpp ----
-
 
 // Animation editor subsystem stubs (static, internal linkage).
 
@@ -859,10 +575,6 @@ static __attribute__((used)) void edanimcbMCTBMenu(eduimenu_s *parent, eduiitem_
 
 static __attribute__((used)) void edanimcbLocalSoundMenu(eduimenu_s *parent, eduiitem_s *, u32);
 
-// ---- end src/gameapi/edtools/edanimall.cpp ----
-// ---- begin src/gameapi/edtools/edmenucallbacks.cpp ----
-
-
 // Editor UI callbacks retained in the original editor's menu code.
 #pragma GCC push_options
 #pragma GCC optimize("O2", "omit-frame-pointer")
@@ -916,10 +628,7 @@ static __used__ void cbCopy(eduimenu_s *, eduiitem_s *, u32);
 static __used__ void cbPaste(eduimenu_s *, eduiitem_s *, u32);
 static __used__ i32 cbProcessColourPick(eduimenu_s *menu, eduiitem_s *item, float delta_time, nupad_s *pad);
 
-
-
 extern "C" {
-
 static __used__ void cbGradChange(void);
 
 static __used__ void cbSel(eduimenu_s *, eduiitem_s *item);
@@ -935,12 +644,9 @@ static __used__ void cbgpcfgCopy(eduimenu_s *menu, eduiitem_s *item, u32 value);
 static __used__ void cbgpcfgDel(eduimenu_s *menu, eduiitem_s *item, u32 value);
 
 static __used__ void cbgpcfgPaste(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
 } // extern "C"
 
 #pragma GCC pop_options
-
-// ---- end src/gameapi/edtools/edmenucallbacks.cpp ----
 
 static i32 editor_return;
 static i32 bShowCursor = 1;
@@ -962,9 +668,6 @@ static char eduiPropTextStore[256];
 static char *textrow[4];
 static char TextPickCopyBuffer[0x40];
 static i32 cursor_flash;
-
-
-// ---- begin src/gameapi/edtools/edptlall.cpp ----
 
 extern "C" {
     extern u32 edblack[4];
@@ -997,7 +700,6 @@ static void cbPtlChangeIvalOff(eduimenu_s *, eduiitem_s *, u32);
 static void cbPtlChangeIvalOffRan(eduimenu_s *, eduiitem_s *, u32);
 
 // The original particle editor's private callbacks and menu state share this TU.
-// ---- begin src/gameapi/edtools/edptlcallbacks.cpp ----
 #if defined(__SSE__)
 #include <xmmintrin.h>
 #endif
@@ -1017,7 +719,6 @@ static void cbPtlTorusMenu(eduimenu_s *, eduiitem_s *, u32);
 static void cbCancelChangeNameMenu(eduimenu_s *, eduimenu_s *);
 static void cbPtlChangeTextureSelect(eduimenu_s *, eduiitem_s *, u32);
 
-
 extern "C" {
     extern u32 edblack[4];
     extern u32 edgrey[4];
@@ -1026,10 +727,6 @@ extern "C" {
     extern DEBRISMOMENTUMADJUSTER gencodetab[7];
 }
 
-
-
-extern "C" {
-}
 static void cbPtlQuickDeleteType(eduimenu_s *, eduiitem_s *, u32);
 static void cbPtlSelTextureType(eduimenu_s *, eduiitem_s *, u32);
 static void cbPtlTextureSelectMenu(eduimenu_s *, eduiitem_s *, u32);
@@ -1070,65 +767,19 @@ static void cbChangeTorusRad2(eduimenu_s *, eduiitem_s *, u32);
 
 // Particle-list editor UI/menu callbacks.
 
-
-
-
-
 static void edptlcbScaleEffectMenu(eduimenu_s *parent, eduiitem_s *, u32);
-
-
 
 static void edptlcbApplyScaleFactor(eduimenu_s *menu, eduiitem_s *, u32);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // Particle editor UI/menu callbacks.
-
-
-
-
-
-
-
 
 static void cbPtlSelType(eduimenu_s *menu, eduiitem_s *item, u32);
 
-
-
-
-
 static void cbPtlCopySize(eduimenu_s *, eduiitem_s *item, u32);
-
-
 
 static void cbPtlGravMenu(eduimenu_s *menu, eduiitem_s *, u32);
 
-
-
-
-
 static void cbPtlAddEffect(eduimenu_s *menu, eduiitem_s *, u32);
-
-
-
 
 static void cbPtlSetFacing(eduimenu_s *, eduiitem_s *item, u32);
 
@@ -1140,22 +791,15 @@ static void cbPtlCopyEffect(eduimenu_s *menu, eduiitem_s *, u32);
 
 static void cbPtlCutOffMenu(eduimenu_s *parent, eduiitem_s *, u32);
 
-
-
 static void cbPtlSelReadout(eduimenu_s *, eduiitem_s *item, u32);
 
-
-
 static void cbChangeNameMenu(eduimenu_s *menu, eduiitem_s *, u32);
-
 
 static void cbPtlChangeCutOn(eduimenu_s *, eduiitem_s *item, u32);
 
 static void cbPtlEmitVelMenu(eduimenu_s *menu, eduiitem_s *, u32);
 
 static void cbPtlReadoutMenu(eduimenu_s *menu, eduiitem_s *, u32);
-
-
 
 static void cbPtlVarEmitMenu(eduimenu_s *parent, eduiitem_s *, u32);
 
@@ -1168,7 +812,6 @@ static void cbChangeTorusRad1(eduimenu_s *, eduiitem_s *item, u32);
 static void cbChangeTorusRad2(eduimenu_s *, eduiitem_s *item, u32);
 
 static void cbFileLoadEffects(eduimenu_s *parent, eduiitem_s *, u32);
-
 
 static void cbPtlChangeCutOff(eduimenu_s *, eduiitem_s *item, u32);
 
@@ -1185,9 +828,6 @@ static void cbPtlVarStartMenu(eduimenu_s *parent, eduiitem_s *, u32);
 static void cbPtlChangeEmitVel(eduimenu_s *, eduiitem_s *item, u32);
 
 static void cbChangeGenRateMenu(eduimenu_s *parent, eduiitem_s *, u32);
-
-
-
 
 static void cbPtlChangePriority(eduimenu_s *, eduiitem_s *item, u32);
 
@@ -1217,41 +857,9 @@ static void cbPtlChangeCameraCutOff(eduimenu_s *, eduiitem_s *item, u32);
 
 static void cbPtlChangeTextureSelect(eduimenu_s *menu, eduiitem_s *item, u32);
 
-
 static void cbPtlToggleDynamicPriority(eduimenu_s *, eduiitem_s *item, u32);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 static void cbCancelChangeNameMenu(eduimenu_s *menu, eduimenu_s *);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ---- end src/gameapi/edtools/edptlcallbacks.cpp ----
 
 void cbFileSaveEffects(eduimenu_s *parent, eduiitem_s *, u32);
 
@@ -1271,7 +879,6 @@ static void edptlcbStopPage(eduimenu_s *, eduiitem_s *, u32);
 static void edptlcbClearPage(eduimenu_s *, eduiitem_s *, u32);
 
 static void cbPtlRepeatBoxMenu(eduimenu_s *parent, eduiitem_s *, u32);
-
 
 // Particle list editor subsystem stubs (static, internal linkage).
 
@@ -1310,10 +917,6 @@ static void edptlcbSetMasterGroup(eduimenu_s *, eduiitem_s *item, u32);
 static void edptlcbSetScaleFactor(eduimenu_s *, eduiitem_s *item, u32);
 static void edptlcbSwitchTypeMenu(eduimenu_s *parent, eduiitem_s *, u32);
 static void edptlcbTestDetailMenu(eduimenu_s *parent, eduiitem_s *, u32);
-
-// ---- end src/gameapi/edtools/edptlall.cpp ----
-
-
 
 extern "C" {
     __attribute__((visibility("hidden"))) void tpentOnEnter(eduimenu_s *, eduiitem_s *, u32);
@@ -1466,9 +1069,6 @@ static __attribute__((noinline, noclone)) void eduiFntPrintClipEx(void *font, i3
 static i32 show_x_scale_help;
 static i32 show_y_scale_help;
 
-
-
-
 extern "C" {
     static i32 eduicbProcessGradPick(eduimenu_s *, eduiitem_s *, f32, nupad_s *);
     static i32 eduicbProcessFilePick(eduimenu_s *, eduiitem_s *, f32, nupad_s *);
@@ -1511,7 +1111,6 @@ extern u32 eddarkred[4];
     i32 ui_bgmtl;
     i32 ui_outmtl;
 
-
 extern NUMTL * edpp_mtl;
 extern NUMTL * edpp_boxmtl;
 extern i32 edpp_copy_mode;
@@ -1522,39 +1121,13 @@ extern i32 edpp_copyroty;
 
 }
 
-
-
-
-
-
-
-
-
-
-
-
 extern "C" {
     extern NUMTL *edbri_mtl, *edbri_mtl_zoff;
     extern eduimenu_s *edbri_options_menu, *edbri_active_menu;
     extern i32 edbri_nearest, edbri_plank_instance_type, edbri_post_instance_type;
 }
 
-
-
-
-
-
-
-
-
-
-
-
 static NUVEC *ed_loc;
-
-extern "C" {
-}
-
 
 extern "C" {
 extern char edbits_general_save_directory[256];
@@ -1587,17 +1160,6 @@ extern i32 edbri_planks;
 extern i32 edbri_post_interval;
 }
 
-
-
-
-
-
-
-
-extern "C" {
-}
-
-
 static edcam_s gp_cam = {
     {0.0f, 0.0f, 0.0f},
     0,
@@ -1627,7 +1189,6 @@ static edcam_s gp_cam = {
         EDCAM_FREEDOM_YAW | EDCAM_FREEDOM_DISTANCE,
     {0, 0, 0},
 };
-
 
 static NUCAMERA *edmaincam = NULL;
 static NUCAMERA *edinternalcam = NULL;
@@ -1662,7 +1223,6 @@ extern "C" {
     i32 PadFlyMode = 0;
     NUMTX *ed_remap_mtx = NULL;
     i32 edmain_cursor_enabled = 0;
-
 
 void edanimUpdateObjects(float elapsed);
 
@@ -1707,9 +1267,7 @@ static __used__ void cbmcfgCancel(eduimenu_s *menu, eduimenu_s *);
 static __used__ void cbMMRegSel(eduimenu_s *, eduiitem_s *selected, u32);
 static __used__ void cbMMEditorConfig(eduimenu_s *menu, eduiitem_s *, u32);
 
-
 static __used__ void eduicbDestroyDirectoryList(eduimenu_s *menu, eduimenu_s *);
-
 
 static __used__ i32 eduicbInteractColourPick(edui_interact_s *interact);
 static __used__ i32 eduicbInteractExpander(edui_interact_s *interact);
@@ -1781,9 +1339,6 @@ static __used__ void eduicbSelectDirectoryEntry(eduimenu_s *menu, eduiitem_s *it
 static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u32);
 }
 
-
-
-
 // Text-picker commit callbacks. Retail keeps them unmangled and local.
 extern "C" {
 __attribute__((visibility("hidden"), optimize("O3"))) void tpentOnEnter(eduimenu_s *menu, eduiitem_s *item,
@@ -1792,8 +1347,6 @@ __attribute__((visibility("hidden"), optimize("O3"))) void tpentOnEnter(eduimenu
 __attribute__((visibility("hidden"), optimize("O3"))) void tpentPropOnEnter(eduimenu_s *menu, eduiitem_s *item,
                                                                                 unsigned int buttons);
 }
-
-// ==== src/legoapi/menus/screens/gamemenuall.cpp: declarations ====
 
 struct AIROW_s;
 struct nuqthdr_s;
@@ -1819,203 +1372,41 @@ extern i32 memcard_formatfailed;
 extern void (*drawslotinfofn)(f32, f32, i32, i32);
 extern void (*drawslotsfn)(MENU *, f32);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 void MenuInitialiseEx(MENUFNINFO *menu_info, i32 menu_id_count, i32 language_count,
                       void (*draw_save_slots_info_fn)(f32, f32, i32, i32), i32 is_fade_enabled, i32 is_shadow_enabled);
 
 void MenuInitialise(MENUFNINFO *menu_info, i32 menu_id_count, i32 language_count,
                     void (*draw_save_slots_fn)(MENU *, f32), i32 is_fade_enabled, i32 is_shadow_enabled);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 extern "C" {
-
 extern f32 MENUBOTY;
 extern f32 MENUENTRYEXWIDTH;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 void MenuSetPreDrawFn(void (*draw_fn)(MENU *));
 
 void MenuSetHeaderDrawFn(void (*draw_fn)(void));
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 } // extern "C"
 
-// ==== src/nu2api/nucore/nucore_plain.cpp: declarations ====
 // Temporary C-linkage compatibility surface for unresolved engine owners.
-extern "C" {
-}
 //
 // This file collects functions whose original TU has not yet been
 // reconstructed. Domain families move to their evidenced owner as complete
 // groups; this file is not itself evidence of one original nucore TU.
 
-
-
-
-
 struct ani3_animheader_s;
 struct nuanimdatachunk_s;
 
 extern "C" {
-
 extern GLuint g_colorRenderbuffer;
 extern GLuint g_depthRenderbuffer;
 }
 
-
 using NUHGOBJVIDEOMEMFN = void (*)(nuhgobj_s *);
-
-
-extern "C" {
-}
 
 // C++-linkage helpers defined in sibling TUs.
 void NuPadRecordEndFrame(void);                      // nupad_interface.cpp
 
 extern "C" {
-
     // ---------------------------------------------------------------------------
     // Display-list bootstrap (original nucore TU file-statics)
     // ---------------------------------------------------------------------------
@@ -2044,18 +1435,12 @@ extern "C" {
 
     extern nurenderscene_s currentScene;
 
-
     // ---------------------------------------------------------------------------
     // Display list — faithful helpers + pending stubs
     // ---------------------------------------------------------------------------
-
-
 } // extern "C"
 
-// Local helpers matching original static display-list setters (t local symbols)
-
 extern "C" {
-
     extern "C++" {
         // Original local helper cloned as DisplayListProcessSkin.isra.36 by GCC.
         // It appends the world transform, skin palette, and geometry calls as one
@@ -2079,12 +1464,9 @@ extern "C" {
                     "sPPvf.isra.34");
     }
 
-
-
     // ---------------------------------------------------------------------------
     // Scene / render-scene
     // ---------------------------------------------------------------------------
-
 
     // ---------------------------------------------------------------------------
     // Frame lifecycle (NuFrameEnd is faithful; neighbours are stubs)
@@ -2115,13 +1497,9 @@ void NuIOS_RecordFlurryEvent(char *event_name);
 
     extern "C++" void NuAnimDataChunkDestroy(nuanimdatachunk_s *chunk);
 
-
     // ---------------------------------------------------------------------------
     // Bridge / file / heap / memory
     // ---------------------------------------------------------------------------
-
-
-
 
     // ---------------------------------------------------------------------------
     // Math / geometry
@@ -2142,21 +1520,15 @@ void NuQFntPrintV(NUQFNT *font, const char *format, va_list arguments);
 
     extern nurenderscene_s currentScene;
 
-
-
     // ---------------------------------------------------------------------------
     // Light / wind / particles / debris
     // ---------------------------------------------------------------------------
-
-
-
 
     void NuWindUpdateArray(NUVEC **);
 
     // ---------------------------------------------------------------------------
     // Gobj / hierarchy / scene graph
     // ---------------------------------------------------------------------------
-
 
 #include "nu2api/nucore/nucore_plain_types.h"
 void NuHGobjFromVideoMem(NUHGOBJVIDEOMEMFN callback);
@@ -2188,9 +1560,6 @@ void NuHGobjToVideoMem(NUHGOBJVIDEOMEMFN callback);
     // ---------------------------------------------------------------------------
     // Culling / visibility / portals / occlusion
     // ---------------------------------------------------------------------------
-
-
-
 
     DECOMP_ASSERT(sizeof(NuInstanceTreeNode) == 0x0c, "instance tree node stride");
     DECOMP_ASSERT(sizeof(NuInstanceTreeBounds) == 0x20, "instance tree bounds stride");
@@ -2247,21 +1616,15 @@ void NuRegisterEndFrameCallBackFn(void (*callback)(void));
     // Rendering extras
     // ---------------------------------------------------------------------------
 
-
     // ---------------------------------------------------------------------------
     // PS2 / Xbox legacy shims
     // ---------------------------------------------------------------------------
-
 } // extern "C"
 
 struct nupad_s;
 struct nuframebuffer_s;
 struct nushaderobject_s;
 union variptr_u;
-
-
-
-// ==== src/gameapi/edtools/edui.cpp: all remaining content ====
 
 extern "C" {
     static void eduicbItemExpanderClose(edui_expander_s *expander) {
@@ -2280,80 +1643,24 @@ extern "C" {
         }
     }
 
-
 }
 
-
-// ==== src/legoapi/actions/character/speederchase.cpp: declarations ====
-
-
 // This alignment affects PodRaceAUpdate codegen even though the linked address is 32-byte aligned.
-
-
-
 
 DECOMP_ASSERT(sizeof(SPEEDERCHASEVALUES) == 0x1c, "Speeder chase tuning stride");
 DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 
-
-
-
-
-
-
-
-
 void SetLevelExBlowupFunc(i32 (*callback)(GIZMOBLOWUP_s *, i32));
 
-
-
-
-
-
-
-
-
-
-
-
 extern "C" {
-
     i32 edmain_auto_speed = 1;
-
-
 } // extern "C"
-
-
-
-
-// ==== src/legoapi/characters/motion/camera.cpp: declarations ====
-
 
 // Original data symbol testmovef is float0.005 at 0x617cb0.
 
 DECOMP_ASSERT(sizeof(VIEWCAM_s) == 0x28, "ViewCam size");
 DECOMP_ASSERT(offsetof(VIEWCAM_s, pitch) == 0x10, "ViewCam pitch offset");
 DECOMP_ASSERT(offsetof(VIEWCAM_s, gamepad) == 0x24, "ViewCam gamepad offset");
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-extern "C" {
-
-
-
-} // extern "C"
 
 extern "C" i16 id_LANDSPEEDER;
 extern f32 newgamecamtime, cutscenecam_focalLength, CamStopBlend, EMPERORFIGHTA_CAMDYHACK;
@@ -2368,38 +1675,9 @@ extern NUMTX CutCamMtx;
 DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, path) == 0x40, "Camera context path offset");
 DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context flags offset");
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 extern "C" {
-
     i32 near_clip_at_cursor;
-
-
-
-
-
 } // extern "C"
-
-// ==== src/gameapi/edtools/edfile.cpp: all remaining content ====
-
-
 
 static i32 edfile_media;
 i32 edfile_handle = -1;
@@ -2413,40 +1691,6 @@ i32 edfile_lock[2];
 
 i32 edfile_readwrongendianess;
 i32 edfile_mcresult;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ==== src/legoapi/core/config/saveload.cpp: declarations ====
-
 
 extern i32 memcard_deleteneeded, memcard_deletestarted, memcard_deletefailed;
 extern i32 memcard_formatme, memcard_formatting, memcard_formatfailed;
@@ -2479,14 +1723,6 @@ u8 FS_RefreshDir;
 u8 FS_ShowVolumes;
 void (*FS_Callback)(char *, char *);
 
-
-
-
-
-
-
-
-
 static inline u32 FS_EncodedDateKey(const char *name) {
     u32 key = static_cast<u8>(name[6]) - 'A';
     key = key * 13 + static_cast<u8>(name[5]) - 'A';
@@ -2499,20 +1735,6 @@ static inline u32 FS_EncodedDateKey(const char *name) {
     return key + static_cast<u8>(name[1]) - 'A';
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 char *SortStrings[4] = {const_cast<char *>("A to Z"), const_cast<char *>("Z to A"), const_cast<char *>("Old to New"),
                         const_cast<char *>("New To Old")};
 
@@ -2521,64 +1743,21 @@ char *SortStrings[4] = {const_cast<char *>("A to Z"), const_cast<char *>("Z to A
 static __attribute__((noinline, noclone)) void RenderFileSel3Body(i32 draw_title)
     __asm__("_Z14RenderFileSel3i.part.38");
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 extern "C" void StartFileSel(char *title, char *path, char *filter, char *filter_out,
                              void (*callback)(char *, char *));
 
-
-
 extern "C" {
-
-
 void SaveSystemInitialiseEx(i32 slots, void *makeSaveHash, void *save, i32 saveSize, void *header, i32 headerSize,
                                 i32 autosave, void (*drawSaveIcon)(void));
 
 void SetSaveSuccessFn(void (*callback)(void));
-
-
-
-
 } // extern "C"
-
-// ==== src/legoapi/render/core/render.cpp: declarations ====
-
-
-
-
-
-
-
-
-
-
-
 
 struct starfighter_s;
 struct rtl_s;
 struct rtlidata_s;
 
-
-
-
 extern f32 HUB_EPISODETITLEY;
-
 
 struct GAMEMESSAGE_s;
 struct HINT_s;
@@ -2593,23 +1772,7 @@ struct ripple_node_s;
 struct ripple_set_s;
 struct VuVec;
 
-
 extern f32 MENUBOTY;
-
-// Camera zoom state
-
-// Graphics loading flags
-
-
-extern "C" {
-}
-
-
-
-// --- NuGScn graphics-data reader ---
-// NuReadGraphicsData is a C++ static function in the original (GCC clones it,
-// hence the `.isra.NNN` suffix in the ROM symbol table).
-
 
 // Retail only keeps the IPA-SRA clone, which drops the unused fourth argument.
 #if defined(__i386__)
@@ -2619,30 +1782,6 @@ extern "C" {
 #endif
 
 // --- Extern "C": NuGScn functions have C linkage in original ---
-extern "C" {
-
-} // extern "C"
-
-
-
-
-
-
-extern "C" {
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
@@ -2684,78 +1823,14 @@ extern "C" {
         NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
     } while (0)
 
-
-
 extern i16 tNONEWBESTTIME, tNEWBESTTIME;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
 // red-brick positions come from the Game init values in legogame/game.cpp.
 
-
-
-
-
-
-
-
-
 extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
 
-
-
-
-
-
-
-
-
-
-
-
 extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
-
-extern "C" {
-}
-
-
-
-
-
-
-
-
-
-
-
-
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
     do {                                                                                                               \
@@ -2769,38 +1844,11 @@ extern "C" {
         }                                                                                                              \
     } while (false)
 
-
-
-
-
-
-
-
-
 extern i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 extern "C" {
     extern nurenderscene_s currentScene;
 }
-
-// ==== functions in original address order ====
 
 extern "C" {
     static __used__ void cbMMRegSel(eduimenu_s *, eduiitem_s *selected, u32) {

@@ -76,7 +76,6 @@ static inline i32 NuNetSessionRecvFrom(void *data, i32 size, nunetaddr_s *addres
     return reinterpret_cast<NuNetSessionRecvFromFn>(vtable[23])(theSession, data, size, address);
 }
 
-
 struct NuNetEmuSegment {
     u16 offset;
     u16 size;

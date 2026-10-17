@@ -55,55 +55,12 @@ struct TUBEPROGRESS {
 
 static void Tubes_Update(void *world_ptr, void *progress_ptr, float frame_time);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ==== src/legoapi/menus/core/gamehint.cpp: declarations ====
-
-
-
-
 #include "legoapi/menus/core/gamehint_types.h"
 DECOMP_ASSERT(sizeof(MechHintUIButton) == 0xa8, "MechHintUIButton size");
 DECOMP_ASSERT(offsetof(MechHintUIButton, pending_hint) == 0x7c, "Pending touch hint offset");
 DECOMP_ASSERT(offsetof(MechHintUIButton, display_elapsed) == 0x80, "Touch hint display timer offset");
 
-
-// Static game message and hint helpers. Stubbed to satisfy the symbol baseline.
-
-// ==== src/legoapi/menus/core/hint.cpp: declarations ====
-
-// The hint icon transitions and the touch icon x position are dynamically
-// initialized in this unit's static constructor in the reference.
-// Retail keeps this body as GCC's split-out clone; the inline head stays in
-// the caller.
-
-// Original local callbacks referenced by Hints_LSW.
-
-
 // Each control mode retains its own requested and interpolated hint row.
-
-// ==== functions in original address order ====
-
-// ==== functions in original address order ====
 
 static void *Tubes_ReserveBufferSpace(void *world_ptr) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);

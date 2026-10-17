@@ -15,9 +15,6 @@
 struct AIROW_s;
 struct nunativegscene_s;
 
-
-
-
 void CharPlatforms_Reset(CHARPLATFORMSYS_s *system) {
     if (system == NULL) {
         return;
@@ -115,7 +112,6 @@ void CharPlatforms_Configure(WORLDINFO_s *world, char *config) {
         world->char_platform_sys = NULL;
     }
 }
-
 
 GameObject_s *CharPlatform_FindObjFromPlatID(CHARPLATFORMSYS_s *system, i32 platform_id) {
     if (system == NULL) {

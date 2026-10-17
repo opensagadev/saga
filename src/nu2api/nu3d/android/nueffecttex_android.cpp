@@ -50,15 +50,6 @@ DECOMP_ASSERT(sizeof(EffectTexturePool) == 0x810, "Effect texture pool size");
 static NativeEffectTexturePool nativeTexPool;
 static EffectTexturePool texturePool;
 
-// ==== src/nu2api/nucore/android/nupostresource_create.cpp: all remaining content ====
-
-// ==== src/nu2api/nu3d/nutex.cpp: declarations ====
-
-
-
-
-// ==== functions in original address order ====
-
 extern "C" {
     void NuEffectTexLockVP(void *buffer, void *buffer_end) {
         (void)buffer;
