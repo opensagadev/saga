@@ -190,7 +190,6 @@ extern "C" {
 
 // Burnset persistence and editing state from the same original RTL editor run.
 
-extern "C" burnset_s *edrtlBurnoutLoad(char *filename, VARIPTR *buffer, i32);
 
 // RTL editor subsystem stubs (static, internal linkage).
 
@@ -315,7 +314,6 @@ struct rtlidata_s;
         }                                                                                                              \
     } while (false)
 
-extern f32 SeekLinearF(f32, f32, f32);
 
 // ==== functions in original address order ====
 

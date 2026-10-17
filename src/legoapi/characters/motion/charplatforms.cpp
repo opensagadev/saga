@@ -14,9 +14,7 @@
 struct AIROW_s;
 struct nunativegscene_s;
 
-extern "C" void NewTerrPlatformsOff(void);
 
-extern "C" void NewTerrPlatformsOff();
 
 
 void CharPlatforms_Reset(CHARPLATFORMSYS_s *system) {

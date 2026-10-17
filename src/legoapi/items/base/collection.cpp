@@ -289,7 +289,6 @@ i32 LEGOOBJ_ICON_FRAME_GREEN = -1;
 nuhspecial_s *collection_draw_hspecial;
 i32 (*collection_draw_IsValidFn)(COLLECTION_s *, i32);
 void (*Collection_GetSelectingPlayerIDsFn)(i16 *);
-void DrawCharIcon(i32, f32, f32, f32, f32, i32, f32, f32, i32, nuhspecial_s *);
 
 static inline u32 Collection_NeighbourFlags(i32 col, i32 row, i32 sx, i32 sy) {
     if (sx == -1 || sy == -1)
@@ -890,7 +889,6 @@ struct nufpar_s;
 // Runtime-selected groups appended after the fixed terrain allocation.
 
 // NuFileExists @nufile (nucore_plain.cpp).
-extern "C" i32 NuFileExists(char *name);
 
 // ==== functions in original address order ====
 
@@ -1822,9 +1820,6 @@ namespace {
 // ==== src/gameapi/gui/apimenu.cpp: all remaining content ====
 
 
-extern "C" void SmartTextEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment,
-                            u8 red, u8 green, u8 blue, f32 max_width, i32 max_lines, void *message_box,
-                            i32 suppress_draw, u32 alpha);
 
 // ==== src/legoapi/core/input/gamepads.cpp: declarations ====
 
@@ -2315,7 +2310,6 @@ extern "C" {
 
 void LevelComplete_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32);
 
-extern "C" i32 NuStrCpy(char *, const char *);
 
 // Retail keeps this body as GCC's split-out clone; the inline head stays in
 // the caller.
@@ -2344,9 +2338,7 @@ DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");
 //   NuHtmlBegin    0x2d5ca0   NuHtmlFlush   0x2d5c30
 //   NuHtmlWrite    0x2d5cd0   NuHtmlHeading1 0x2d5d40
 
-extern "C" void NuHtmlWrite(const char *text, ...);
 
-extern "C" void NuHtmlHeading1(const char *fmt, ...);
 
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 

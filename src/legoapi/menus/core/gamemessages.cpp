@@ -190,8 +190,6 @@ static NU_READ_GRAPHICS_DATA_ATTR NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIP
 // red-brick positions come from the Game init values in legogame/game.cpp.
 
 
-i32 DrawPanel3DObjectNoAlpha(float x, float y, float z, float scale_x, float scale_y, float scale_z, u16 rotate_x,
-                             u16 rotate_y, u16 rotate_z, nuhspecial_s *special, i32 rotate_order);
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
     do {                                                                                                               \

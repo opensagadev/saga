@@ -164,7 +164,6 @@ extern "C" {
 
 void ClearAICreatures();
 // Defined in gameapi/edtools/edtoolsall.cpp, which has no header yet.
-nugspline_s *edSpline_SplineFind(nugscn_s *scene, char *name);
 
 struct JEDIBNETPACKET_s;
 
@@ -209,8 +208,6 @@ static DOOKU_C_s dooku_c;
 DECOMP_ASSERT(sizeof(KAMINO_E_s) == 120, "Kamino E state ABI");
 static KAMINO_E_s kamino_e;
 
-extern i16 id_PADMECLAWED, id_BATTLEDROIDSECURITY, id_SUPERBATTLEDROID, id_JARJAR, id_LUMINARA, id_SHAAKTI,
-    id_BATTLEDROIDGEONOSIAN;
 i32 OnOrInsidePlane(NUVEC *, NUVEC *, NUVEC *, NUVEC *, f32, f32 *);
 
 // Episode 2 level handlers, in the game's Episode_II progression:
@@ -222,7 +219,6 @@ i32 OnOrInsidePlane(NUVEC *, NUVEC *, NUVEC *, NUVEC *, f32, f32 *);
 // Kamino
 // ===========================================================================
 
-void KaminoA_AlwaysUpdate(WORLDINFO_s *);
 
 GIZTURRET_s *GizTurret_FindByName(GIZTURRETSYS_s *, char *);
 nuhspecial_s walllights[2], walllights_disco[2], striplights[2], discolights[2];
@@ -230,9 +226,7 @@ nuhspecial_s discorm_wall_on, discorm_wall_off;
 GIZMO *gizTurrets[2];
 i32 last;
 
-void KaminoC_Init(WORLDINFO_s *world);
 
-void KaminoC_Reset(WORLDINFO_s *world);
 
 static inline bool KaminoDiscoPlayerInArea(WORLDINFO_s *world) {
     APIOBJECT *first = world->ai_sys->player_1;
@@ -259,28 +253,18 @@ static inline bool KaminoDiscoOccupied(GameObject_s *object, NUVEC *position) {
     f32 z = position->z - object->apiobj.position.z;
     return (x * x + y * y) + z * z < 0.04000000283122063f;
 }
-void KaminoC_Update(WORLDINFO_s *world);
-
-void KaminoD_Init(WORLDINFO_s *world);
 
 
-void KaminoE_Init(WORLDINFO_s *world);
 
-void KaminoE_Reset(WORLDINFO_s *world);
+
 
 static NUVEC kamino_e_centre = {56.5f, -2.890000104904175f, 8.0f};
 static NUVEC kamino_e_gunoffset[2] = {{0.2f, -1.1f, 0.9f}, {-0.2f, -1.1f, 0.9f}};
 
-void KaminoE_AlwaysUpdate(WORLDINFO_s *);
-void KaminoE_Update(WORLDINFO_s *world);
 
-void KaminoE_Draw(WORLDINFO_s *world);
 
-void KaminoF_Init(WORLDINFO_s *world);
 
-void KaminoOutro_Init(WORLDINFO_s *);
 
-void NbKaminoA_Init(WORLDINFO_s *world);
 
 // ===========================================================================
 // Geonosis — droid factory (Factory_B / Factory_G)
@@ -290,17 +274,11 @@ static f32 FactoryBConveyorXSpeed;
 static f32 FactoryBConveyorZSpeed;
 f32 FactoryBConveyorStopFrame = 28.0f;
 
-void FactoryB_Init(WORLDINFO_s *world);
 
-void FactoryB_Reset(WORLDINFO_s *world);
 
-void FactoryB_Update(WORLDINFO_s *world);
 
-void FactoryB_Draw(WORLDINFO_s *);
 
-void FactoryG_Update(WORLDINFO_s *world);
 
-void FactoryG_Init(WORLDINFO_s *world);
 
 // ===========================================================================
 // Jedi (Jedi_B)
@@ -358,77 +336,49 @@ static inline i32 JediBInitLocator(WORLDINFO_s *world, nuvec_s *position, i32 an
 }
 
 
-void JediB_Init(WORLDINFO_s *world);
 
-void JediB_Reset(WORLDINFO_s *world);
 
-void JediB_DrawPanel(WORLDINFO_s *);
 
-void JediB_Update(WORLDINFO_s *world);
 
 // ===========================================================================
 // Gunship (Gunship_A / Gunship_B)
 // ===========================================================================
 
-void GunshipA_Init(WORLDINFO_s *world);
 
-void GunshipA_Update(WORLDINFO_s *world);
 
-void GunshipA_Draw(WORLDINFO_s *world);
 
-void GunshipB_Reset(WORLDINFO_s *world);
 
 f32 gunshipb_seekmomseek = 5.0f;
 f32 gunshipb_seekmom = 5.0f;
 f32 gunshipb_seekrange = 4.0f;
-f32 SeekValF(f32 current, f32 target, f32 rate);
 
 // ===========================================================================
 // Bonus gunship (Bonus_Gunship_A / Bonus_Gunship_B)
 // ===========================================================================
 
-void BonusGunshipA_Reset(WORLDINFO_s *);
 
-void BonusGunshipA_Update(WORLDINFO_s *world);
 
-void BonusGunshipB_Init(WORLDINFO_s *world);
 
-void BonusGunshipB_Reset(WORLDINFO_s *);
 
-void BonusGunshipB_Update(WORLDINFO_s *world);
 
-void BonusGunshipB_Panel(WORLDINFO_s *);
 
 // ===========================================================================
 // Dooku (Dooku_C)
 // ===========================================================================
 
-void DookuC_Init(WORLDINFO_s *world);
 
-void DookuC_Reset(WORLDINFO_s *world);
 
-void DookuC_Update(WORLDINFO_s *world);
 
-void DookuC_DrawPanel(WORLDINFO_s *);
 
 // ==== src/legoapi/render/core/render.cpp: declarations ====
 
-extern "C" void edbriStartAllPages(void);
 
 
-extern "C" void LocaledbitsDrawSolidEllipseXY(NUVEC *centre, f32 radius_x, f32 radius_z, i32 rotation, f32 lower_y,
-                                              f32 upper_y, u32 colour, i32, i32 segments);
 
-extern "C" void LocaledbitsDrawCircleXY(NUVEC *centre, f32 radius, u32 colour, i32, i32 segments);
 
-extern "C" void LocaledbitsDrawSolidCircleXY(NUVEC *centre, f32 radius, f32 lower_y, f32 upper_y, u32 colour, i32,
-                                             i32 segments);
 
-extern "C" void RndrOSquare(NUVEC *centre, f32 radius, i32 colour);
 
-extern "C" void RndrOSphere(NUVEC *centre, f32 radius, i32 colour, i32 segments, i32);
 
-extern "C" void RndrCircleXZ(NUVEC *centre, f32 radius, i32 colour, i32 segments);
 
 struct starfighter_s;
 struct rtl_s;
@@ -450,12 +400,6 @@ struct ripple_node_s;
 struct ripple_set_s;
 struct VuVec;
 
-extern "C" i32 NuRndrBeginScene(i32);
-extern "C" void NuRndrEndScene(void);
-extern u8 MENUENTRYR, MENUENTRYG, MENUENTRYB;
-extern f32 cointotaltime;
-extern f32 statstime;
-f32 GetAspectRatio();
 
 // Camera zoom state
 
@@ -466,7 +410,6 @@ extern "C" {
 }
 
 
-extern "C" void NuGScnUpdate(NUGSCN *gscn, f32 frame_delta);
 
 // --- NuGScn graphics-data reader ---
 // NuReadGraphicsData is a C++ static function in the original (GCC clones it,
@@ -484,8 +427,6 @@ extern "C" {
 
 } // extern "C"
 
-i32 Draw3DObject(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x_rotation, u16 y_rotation,
-                 u16 z_rotation, float scale_x, float scale_y, float scale_z, i32 rotate_order);
 
 
 
@@ -532,7 +473,6 @@ i32 Draw3DObject(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x_
 
 
 
-void *AddGameMessage(char *, NUVEC *, f32, NUVEC *, f32, u8, u8, u8, u32, f32);
 
 
 extern nuhspecial_s green_light;
@@ -540,40 +480,28 @@ extern nuhspecial_s painttargetcolour[3];
 extern nuhspecial_s paintlights[3];
 
 
-void DrawStatusIcons(STATUSPACKET_s *status, float y, float alpha);
 
 
 
 // DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
 // red-brick positions come from the Game init values in legogame/game.cpp.
-extern "C" void Text3D(char *, f32, f32, f32, f32, f32, f32, u32, u8, u8, u8);
-
-void DrawMiniKitCount(float position, float scale, i32 count, i32 maximum);
-
-i32 Draw3DObjectAlpha(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x_rotation, u16 y_rotation,
-                      u16 z_rotation, float scale_x, float scale_y, float scale_z, i32 rotate_order, float alpha);
 
 
 
-extern i16 tUNKNOWN, tPOWERBRICK, tLOCKED, tGOLDBRICK;
-extern "C" void PlaySfx(char *, NUVEC *);
 
 
-void DrawPanel3DObjectMtx(nuhspecial_s *special, numtx_s *matrix, float alpha);
+extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
+
+
 
 
 extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
 
-extern AREADATA *PODSPRINT_ADATA;
 extern "C" {
 }
 
-void DrawGameMessage_Targets(GAMEMESSAGE_s *message, nuvec_s *position, float scale);
 
-i32 DrawPanel3DObjectNoAlpha(float x, float y, float z, float scale_x, float scale_y, float scale_z, u16 rotate_x,
-                             u16 rotate_y, u16 rotate_z, nuhspecial_s *special, i32 rotate_order);
 
-extern void DrawMenuEntry(MENU_s *, char *);
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
     do {                                                                                                               \
@@ -588,12 +516,9 @@ extern void DrawMenuEntry(MENU_s *, char *);
     } while (false)
 
 
-void Transform_DrawTarget(NUVEC *, f32, f32);
-extern i16 id_ANAKINJEDISCARRED, id_WEIRDO1, id_WEIRDO2, id_CATAPULT, id_CHEWBACCA, id_WOOKIEE, id_TWOFACE;
-extern i32 PickUpFlickerTest, PickUpFlickerFrames, PickupFlickerFrame;
+extern i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
 
 
-extern f32 SeekLinearF(f32, f32, f32);
 
 
 // ==== src/legoapi/gizmo/base/gizmo.cpp: declarations ====
@@ -610,7 +535,6 @@ DECOMP_ASSERT(offsetof(GIZMOTYPES, types) == 8, "Gizmo type-table pointer offset
 
 
 
-i32 GizmoGetTypeIDByName(GIZMOSYS_s *gizmo_sys, char *name);
 
 
 
@@ -625,7 +549,6 @@ i32 GizmoGetTypeIDByName(GIZMOSYS_s *gizmo_sys, char *name);
 
 
 
-NUVEC *GizmoGetPos(GIZMOSYS_s *, GIZMO_s *gizmo);
 
 
 
@@ -657,13 +580,10 @@ char *paint_name[6] = {"red_juice", "yellow_juice", "blue_juice", "orange_juice"
 
 
 
-i32 GizmoSysWriteInfo(GIZMOSYS_s *gizmo_sys, char *path, nugscn_s *scene);
-
-i32 GizmoGetNumOutputs(GIZMOSYS_s *gizmo_sys, GIZMO_s *gizmo);
 
 
 
-void GizmoActivateReverse(GIZMOSYS_s *system, GIZMO_s *gizmo, i32 reverse, i32 visibility, i32);
+
 
 // ==== functions in original address order ====
 

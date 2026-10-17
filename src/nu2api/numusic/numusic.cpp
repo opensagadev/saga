@@ -75,7 +75,6 @@ i32 (*CheckMusicOtherFn)(void) = NULL;
 
 
 
-extern "C" f32 numusicGetDuckVolume(void);
 
 // i32 GamePlayMusic(LEVELDATA_s *level, i32 check, OPTIONSSAVE_s *options)
 //

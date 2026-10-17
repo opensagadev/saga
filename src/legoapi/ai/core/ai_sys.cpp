@@ -14,4 +14,3 @@ struct nuvec_s;
 
 void *GameBufferAlloc(VARIPTR *, VARIPTR *, i32);
 
-extern "C" void *AISysLoad(void *buf, void *buf_end, i32 size, void *gscn, char *dir, char *name, char *param);

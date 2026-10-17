@@ -630,7 +630,6 @@ DECOMP_ASSERT(offsetof(GameObject_s, quick_shoot_bolt_id) == 0xe3e, "Quick shoot
         }                                                                                                              \
     } while (false)
 
-extern f32 SeekLinearF(f32, f32, f32);
 
 // ==== src/legoapi/actions/character/starwars.cpp: all remaining content ====
 
@@ -648,7 +647,6 @@ struct AISYS_s;
 // Runtime-selected groups appended after the fixed terrain allocation.
 
 // NuFileExists @nufile (nucore_plain.cpp).
-extern "C" i32 NuFileExists(char *name);
 
 // ==== functions in original address order ====
 

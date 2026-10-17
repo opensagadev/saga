@@ -105,7 +105,6 @@ DECOMP_ASSERT(offsetof(EdMember, reference) == 0x04, "EdMember reference offset"
 
 struct APICHARACTERMODELLIST_s;
 
-extern AREADATA *DOGFIGHT_ADATA;
 
 AREADATA *ADataList = NULL;
 

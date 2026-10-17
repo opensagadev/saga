@@ -84,7 +84,6 @@ void FindAnglesZX(NUVEC *, u16 *, u16 *);
 // (GIZFLOW_s/FLOWBOX_s), power-up and space/starfighter helpers. Stubbed as
 // local `t` symbols matching res/libTTapp.so.
 
-extern WORLDINFO_s *WORLD;
 
 extern "C" {
 
@@ -121,7 +120,6 @@ static char **PDebNameList;
 i32 LineIntersectSphere(NUVEC *, NUVEC *, NUVEC *, f32, f32 *);
 
 extern "C" f32 brickimpactwait;
-extern "C" i32 GetSfxId(const char *);
 extern "C" void PlaySfxByIdAndSetVolume(i32, NUVEC *, f32);
 
 // ==== src/legoapi/render/core/terrain_stubs.cpp: declarations ====
@@ -130,9 +128,7 @@ extern "C" void PlaySfxByIdAndSetVolume(i32, NUVEC *, f32);
 // Runtime-selected groups appended after the fixed terrain allocation.
 
 // NuFileExists @nufile (nucore_plain.cpp).
-extern "C" i32 NuFileExists(char *name);
 
-extern "C" i32 PARTLookupTypePageOnly(char *, i32);
 extern "C" part_type_s part_types[128];
 
 // ==== src/legoapi/render/fx/parts_control.cpp: all remaining content ====

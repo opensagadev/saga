@@ -111,7 +111,6 @@ static inline void Teleport_SetFacing(GameObject_s *object, NUVEC *start, NUVEC 
 }
 
 
-TELEPORT_s *Teleport_Find(GameObject_s *object, float range_squared, VuVec *position);
 
 
 

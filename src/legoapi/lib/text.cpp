@@ -307,22 +307,16 @@ static LANGUAGEDATA Text_LanguageList_Default[7] = {{1, apitxt_ENGLISH}, {2, api
                                                     {-1, NULL}};
 LANGUAGEDATA *Text_LanguageList = Text_LanguageList_Default;
 extern "C" {
-    void NuQFntSetJustifiedTolerances(float squash, float stretch);
-    unsigned char *NuUTF8CharFromUnicode(unsigned char *text, u16 character);
     VUFNT *LoadGameFont(char *, char *, variptr_u *, variptr_u *, i32);
     VUFNT *LoadButtonFont(char *, char *, variptr_u *, variptr_u *, i32);
 }
 void (*Text_GameSetLanguageFn)(i32);
 void Text_InsertCommasIntoNumber(char *number, char *text, i32 length);
 void GameDrawMenuEntry(MENU *menu, char *text);
-extern "C" void BackupMenu(void);
 extern "C" {
 }
 static VUFNT *app_fnt;
 extern "C" {
-    void NuMtxSetRotationX(NUMTX *mtx, i32 angle);
-    void NuMtxRotateY(NUMTX *mtx, i32 angle);
-    void NuMtxRotateZ(NUMTX *mtx, i32 angle);
 }
 
 static TEXTCRAWL_s *s_crawlPtr = nullptr;
@@ -362,8 +356,6 @@ static inline u8 Text_MenuColourLerp(u8 first, u8 second, f32 amount) {
         static_cast<i32>(static_cast<f32>(first) * amount + static_cast<f32>(second) * (1.0f - amount)));
 }
 
-extern "C" void Text3DStringEncode(char *src, u16 *dst);
-extern "C" void SetQFont2D(void);
 
 // ==== src/legoapi/world/levels/levels.cpp: declarations ====
 
@@ -394,7 +386,6 @@ extern WORLDINFO WorldInfo[2];
 
 
 
-extern "C" f32 NuFrameEnd(void);
 
 
 struct bgprocinfo_s;
@@ -490,7 +481,6 @@ struct STATUSPACKET_s;
 struct TouchHolder;
 struct nuhspecial_s;
 
-extern u8 MENUENTRYR, MENUENTRYG, MENUENTRYB;
 
 // Camera zoom state
 
@@ -571,7 +561,6 @@ extern u8 MENUENTRYR, MENUENTRYG, MENUENTRYB;
 extern f32 ICONXPOS_TOUCHYFEELY;
 extern f32 ICONYPOS_TOUCHYFEELY;
 
-extern "C" i32 NewMode, Paused, editor_active, CutSceneWaiting, PANELOFF;
 void MechHintUIButton_OnClick_Callback(MechTouchUIElement &, TouchHolder &);
 
 #include "legoapi/menus/core/gamehint_types.h"
@@ -696,9 +685,7 @@ struct instNUGCUTSCENE_s;
 
 
 
-extern "C" ADDPART_s Default_ADDPART;
 
-extern "C" PART_s *AddPart(ADDPART_s *);
 
 // Game-specific AI actions and conditions (registered via
 // RegisterAIScriptActions / RegisterAIScriptConditions). These are stubbed to
@@ -1011,7 +998,6 @@ struct AIPACKET_s;
 // Runtime-selected groups appended after the fixed terrain allocation.
 
 // NuFileExists @nufile (nucore_plain.cpp).
-extern "C" i32 NuFileExists(char *name);
 
 // ==== functions in original address order ====
 
@@ -1043,7 +1029,6 @@ extern "C" {
 // (GIZFLOW_s/FLOWBOX_s), power-up and space/starfighter helpers. Stubbed as
 // local `t` symbols matching res/libTTapp.so.
 
-extern WORLDINFO_s *WORLD;
 
 extern "C" {
 
@@ -1485,9 +1470,6 @@ static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u
 
 // ==== src/legoapi/menus/screens/gamemenuall.cpp: declarations ====
 
-extern "C" u8 MENUNORMALR;
-extern "C" u8 MENUNORMALG;
-extern "C" u8 MENUNORMALB;
 
 // Retail clears these "fast repeat" latches but never sets them.
 
@@ -1894,7 +1876,6 @@ extern "C" {
 
 // ==== src/legoapi/core/startup/game.cpp: declarations ====
 
-extern "C" i32 Paused;
 
 namespace {
 
@@ -1915,7 +1896,6 @@ extern "C" {
 // ==== src/legoapi/menus/screens/menus.cpp: declarations ====
 
 
-extern "C" bool TestForController(void);
 
 // ==== src/legoapi/render/core/render.cpp: declarations ====
 
@@ -1976,10 +1956,6 @@ extern "C" bool TestForController(void);
 
 
 
-extern "C" bool TestForController();
-extern "C" void SmartTextEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment,
-                            u8 red, u8 green, u8 blue, f32 max_width, i32 max_lines, void *message_box,
-                            i32 suppress_draw, u32 alpha);
 
 
 // ==== src/legoapi/core/input/gamepads.cpp: declarations ====
@@ -2005,15 +1981,10 @@ extern "C" {
 // ==== src/legoapi/menus/core/text.cpp: declarations ====
 
 extern "C" {
-    void NuQFntSetJustifiedTolerances(float squash, float stretch);
-    unsigned char *NuUTF8CharFromUnicode(unsigned char *text, u16 character);
 }
 extern "C" {
 }
 extern "C" {
-    void NuMtxSetRotationX(NUMTX *mtx, i32 angle);
-    void NuMtxRotateY(NUMTX *mtx, i32 angle);
-    void NuMtxRotateZ(NUMTX *mtx, i32 angle);
 }
 
 
@@ -2506,7 +2477,6 @@ extern "C" {
 }
 
 extern "C" {
-extern "C" void Text3DStringEncode(char *src, u16 *dst);
 
 }
 
@@ -2520,26 +2490,18 @@ extern "C" {
 
 extern "C" {
 
-extern "C" void SetQFont2D(void);
 
 }
 
 // ==== src/legoapi/menus/screens/gamestatus_lsw.cpp: declarations ====
 
 
-extern "C" void BackupMenu();
 
 void LevelComplete_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32);
 
-extern "C" i32 NuStrCpy(char *, const char *);
 
-extern "C" void NuStrCat(char *, const char *);
 
 extern "C" {
-    extern u8 MENUENTRYR, MENUENTRYG, MENUENTRYB;
-    extern u8 MENUNORMALR, MENUNORMALG, MENUNORMALB;
-    extern u8 MENUFLASH0R, MENUFLASH0G, MENUFLASH0B;
-    extern u8 MENUFLASH1R, MENUFLASH1G, MENUFLASH1B;
 }
 
 // Retail keeps this body as GCC's split-out clone; the inline head stays in
@@ -2946,15 +2908,10 @@ extern "C" {
 // ==== src/legoapi/menus/core/text.cpp: declarations ====
 
 extern "C" {
-    void NuQFntSetJustifiedTolerances(float squash, float stretch);
-    unsigned char *NuUTF8CharFromUnicode(unsigned char *text, u16 character);
 }
 extern "C" {
 }
 extern "C" {
-    void NuMtxSetRotationX(NUMTX *mtx, i32 angle);
-    void NuMtxRotateY(NUMTX *mtx, i32 angle);
-    void NuMtxRotateZ(NUMTX *mtx, i32 angle);
 }
 
 extern "C" {
@@ -3445,7 +3402,6 @@ extern "C" {
 }
 
 extern "C" {
-extern "C" void Text3DStringEncode(char *src, u16 *dst);
 
 }
 
@@ -3459,7 +3415,6 @@ extern "C" {
 
 extern "C" {
 
-extern "C" void SetQFont2D(void);
 
 }
 
@@ -3715,7 +3670,6 @@ DECOMP_ASSERT(sizeof(JEDIBNETPACKET_s) == 0x20, "JEDIBNETPACKET_s ABI");
 // the network check, which retail keeps as the split-out body of the IPA-SRA
 // clone (it only needs &world->ai_sys).
 
-void JediB_Init(WORLDINFO_s *world);
 
 // ===========================================================================
 // Gunship (Gunship_A / Gunship_B)
@@ -3794,15 +3748,12 @@ static_assert(sizeof(struct LEVFLAGBYTES_s) == 16, "LevFlag must be 16 bytes");
 // Pod race core (A/B/C laps)
 // ===========================================================================
 
-void PodRaceAUpdate(WORLDINFO_s *world);
 
 // ===========================================================================
 // Pod sprint (Sebulba events)
 // ===========================================================================
 
-void PodSprintA_Init(WORLDINFO_s *world);
 
-void PodSprintA_Update(WORLDINFO_s *world);
 
 // ===========================================================================
 // Retake the palace (D/E/G)
@@ -4102,9 +4053,7 @@ DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");
 //   NuHtmlBegin    0x2d5ca0   NuHtmlFlush   0x2d5c30
 //   NuHtmlWrite    0x2d5cd0   NuHtmlHeading1 0x2d5d40
 
-extern "C" void NuHtmlWrite(const char *text, ...);
 
-extern "C" void NuHtmlHeading1(const char *fmt, ...);
 
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 

@@ -150,9 +150,7 @@ static constexpr char kGlassDebrisMarker = (char)-0x69; // 0x97
 
 
 
-extern "C" void NuMtlSetRenderStatesPS(numtl_s *mtl);
 
-extern "C" void NuIOS_SetVertexFormat(usize fmt);
 
 // Helpers for the debris constant block (original walks the programme's
 // i16 param table: pairs of {semantic, loc|class}).
@@ -231,11 +229,8 @@ DECOMP_ASSERT(offsetof(NUMTL, shader_desc) + offsetof(NUSHADERMTLDESC, vtx_desc)
 // Scene lifecycle
 // ---------------------------------------------------------------------------
 
-extern "C" i32 NuRndrBeginScene(i32 /*begin_flags*/);
 
-extern "C" void NuRndrClear(i32 clear_flags, i32 bg_colour, f32 alpha);
 
-extern "C" void NuRndrEndScene(void);
 
 // ---------------------------------------------------------------------------
 // Link stubs — retained for compatibility, not yet implemented

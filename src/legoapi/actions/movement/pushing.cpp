@@ -264,7 +264,6 @@ i32 PushBlock(GameObject_s *object);
 void StartLunge(GameObject_s *object, f32 speed, f32 height);
 void PlayLandSfx(GameObject_s *object, i32 variant, i32 force);
 void AlertSurroundingCreatures(GameObject_s *object, NUVEC *position);
-extern "C" i32 ParticlesPerSecond(f32 rate, f32 elapsed);
 
 // ==== src/legoapi/characters/motion/move.cpp: declarations ====
 
@@ -277,7 +276,6 @@ extern "C" i32 ParticlesPerSecond(f32 rate, f32 elapsed);
 
 void FastWeaponIn(GameObject_s *object, i32 sound);
 void AlertSurroundingCreatures(GameObject_s *, NUVEC *);
-void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 // Retail keeps several of this file's static helpers only as GCC clones; these
 // declarations pin the clone names and register conventions.
 #if defined(__i386__)
@@ -366,8 +364,6 @@ extern "C" {
 // (GIZFLOW_s/FLOWBOX_s), power-up and space/starfighter helpers. Stubbed as
 // local `t` symbols matching res/libTTapp.so.
 
-extern i32 HIGHGAMEOBJECT, VehicleArea;
-extern WORLDINFO_s *WORLD;
 
 extern "C" {
 
@@ -446,7 +442,6 @@ DECOMP_ASSERT(offsetof(GameObject_s, quick_shoot_bolt_id) == 0xe3e, "Quick shoot
 
 // ---- Misc player/gameobject helpers relocated from doorstubs.cpp ----
 
-void GameAudio_PlaySfx(i32 sfx, NUVEC *position, i32 flags, i32 volume);
 
 namespace {
 
@@ -539,7 +534,6 @@ DECOMP_ASSERT(sizeof(JEDIBNETPACKET_s) == 0x20, "JEDIBNETPACKET_s ABI");
 // the network check, which retail keeps as the split-out body of the IPA-SRA
 // clone (it only needs &world->ai_sys).
 
-void JediB_Init(WORLDINFO_s *world);
 
 // ===========================================================================
 // Gunship (Gunship_A / Gunship_B)
@@ -618,15 +612,12 @@ static_assert(sizeof(struct LEVFLAGBYTES_s) == 16, "LevFlag must be 16 bytes");
 // Pod race core (A/B/C laps)
 // ===========================================================================
 
-void PodRaceAUpdate(WORLDINFO_s *world);
 
 // ===========================================================================
 // Pod sprint (Sebulba events)
 // ===========================================================================
 
-void PodSprintA_Init(WORLDINFO_s *world);
 
-void PodSprintA_Update(WORLDINFO_s *world);
 
 // ===========================================================================
 // Retake the palace (D/E/G)
@@ -705,9 +696,7 @@ struct nuvec_s;
 
 
 
-extern "C" ADDPART_s Default_ADDPART;
 
-extern "C" PART_s *AddPart(ADDPART_s *);
 
 // Game-specific AI actions and conditions (registered via
 // RegisterAIScriptActions / RegisterAIScriptConditions). These are stubbed to
@@ -932,7 +921,6 @@ i32 Action_ReleaseLocator(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet,
                           i32 first_time, float);
 
 struct GIZSPINNER_s;
-extern u32 GAMEPAD_SPECIAL, GAMEPAD_JUMP, GAMEPAD_TOGGLERIGHT;
 
 i32 Action_GetLocatorFromSet(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,
                              i32 param_count, i32 first_time, float);
@@ -1040,7 +1028,6 @@ struct AISYS_s;
 // Runtime-selected groups appended after the fixed terrain allocation.
 
 // NuFileExists @nufile (nucore_plain.cpp).
-extern "C" i32 NuFileExists(char *name);
 
 // ==== functions in original address order ====
 
@@ -1254,9 +1241,7 @@ DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");
 //   NuHtmlBegin    0x2d5ca0   NuHtmlFlush   0x2d5c30
 //   NuHtmlWrite    0x2d5cd0   NuHtmlHeading1 0x2d5d40
 
-extern "C" void NuHtmlWrite(const char *text, ...);
 
-extern "C" void NuHtmlHeading1(const char *fmt, ...);
 
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 

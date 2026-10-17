@@ -81,7 +81,6 @@ static constexpr u32 kNuClear_Color = 0x100;
 static constexpr u32 kNuClear_Depth = 0x200;
 static constexpr u32 kNuClear_Stencil = 0x800;
 
-extern "C" void Nu360_dxClear(u32 clear_flags, u32 colour);
 
 // ---------------------------------------------------------------------------
 // Framebuffer setup

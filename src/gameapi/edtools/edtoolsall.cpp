@@ -243,7 +243,7 @@ extern i32 edgra_copy_source;
     extern debinftype *effecttypes;
     extern i32 edpp_usememcard;
     extern i32 edpp_copy_mode, edpp_copyrotz, edpp_copyroty, edpp_copy_source_count, edpp_copy_enclosed;
-    extern i32 edpp_readout, edpp_num_orphans;
+    extern i32 edpp_readout;
     extern i32 globalframes;
     extern NUMTL *edpp_mtl, *edpp_boxmtl;
     void edppDrawSpheres(debinftype *, i32);
@@ -344,7 +344,6 @@ i32 edSpline_FindAllBeg(NUGSCN *scene, char *prefix, NUGSPLINE **results, i32 ca
 
 i32 edSpline_FindAllSub(NUGSCN *scene, char *name, NUGSPLINE **results, i32 capacity);
 
-NUGSPLINE *edSpline_SplineFind(NUGSCN *scene, char *name);
 
 void edSpline_SplineList(nugscn_s *);
 
@@ -371,16 +370,13 @@ void edbriDetermineNearest(float distance);
 
 
 
-void edanimDetermineNearestAnim(float distance);
 
 
 eduiitem_s *eduiItemFileSelectorCreate(u32 data, eduiiattr_s *colours, EdUiItemCallback callback, char *text);
 
 
-void edanimDetermineNearestSound(float distance);
 
 
-void edanimDetermineNearestParticle(float distance);
 
 void EdDrawEnd();
 
@@ -949,7 +945,6 @@ static __attribute__((used)) void edanimcbLocalSoundMenu(eduimenu_s *parent, edu
 // ---- end src/gameapi/edtools/edanimall.cpp ----
 // ---- begin src/gameapi/edtools/edmenucallbacks.cpp ----
 
-extern "C" i32 PS2_REZ_H;
 extern "C" void cbCancelSubMenu(eduimenu_s *, eduimenu_s *);
 
 // Editor UI callbacks retained in the original editor's menu code.
@@ -1033,10 +1028,8 @@ static __used__ void cbgpcfgPaste(eduimenu_s *menu, eduiitem_s *item, u32 value)
 
 // ---- end src/gameapi/edtools/edmenucallbacks.cpp ----
 
-extern "C" void edgraClumpsReset(void);
 extern "C" void edbitsDrawCircleTilted(NUVEC *centre, f32 radius, i32 colour, NUMTL *material, i32 rotation_z,
                                        i32 rotation_y);
-extern "C" i32 NuRndrDoingScreenGrab;
 static i32 editor_return;
 static i32 bShowCursor = 1;
 static NUQFNT *edui_font;
@@ -1504,7 +1497,6 @@ extern "C" {
     extern i32 ui_outmtl;
     void NuRndrRect2di(i32 x, i32 y, i32 width, i32 height, i32 colour, numtl_s *material);
     void NuRndrGradRect2di(i32 x, i32 y, i32 width, i32 height, i32 *colours, numtl_s *material);
-    void NuRndrLineRect2di(i32 x, i32 y, i32 width, i32 height, i32 colour, numtl_s *material);
     void NuRndrLine2di(i32 x0, i32 y0, i32 x1, i32 y1, i32 colour, numtl_s *material);
     void NuRndrLineStrip2di(i32 *points, f32 *uvs, i32 count, i32 colour, numtl_s *material);
     void NuRndrTriStrip2di(i32 *points, f32 *uvs, i32 count, i32 colour, numtl_s *material);
@@ -1711,7 +1703,6 @@ extern u32 eddarkred[4];
     i32 ui_bgmtl;
     i32 ui_outmtl;
 
-extern NUMTL * edgra_mtl_zoff;
 
 extern i32 edpp_copy_source[8];
 extern i32 edpp_usememcard;
@@ -1844,7 +1835,6 @@ extern part_emit_s part_emits[40];
 extern i32 part_page_on[8];
 extern i32 part_page_used[8];
 extern i32 edpart_instances_used;
-extern NUGSCN * edanim_page_scene[8];
 extern f32 edanim_cam_dist;
 }
 
@@ -1924,7 +1914,6 @@ extern "C" {
 extern "C" void do_Pad_Standard_camera(edcam_s *camera, f32 delta_time, nupad_s *pad);
 extern "C" void do_maya_mouse_camera(edcam_s *camera);
 extern "C" void do_mouse_flymode_camera(edcam_s *camera, f32 delta_time);
-extern "C" i32 NuKeyboard(i32 key);
 
 static edcam_s gp_cam = {
     {0.0f, 0.0f, 0.0f},
@@ -2000,7 +1989,6 @@ void edbitsDrawBBox(NUVEC *minimum, NUVEC *maximum, i32 colour, numtl_s *materia
     void edbitsDrawOvalXY(NUVEC *, f32, f32, i32, NUMTL *);
 void edbitsDrawCircleTilted(NUVEC *centre, f32 radius, i32 colour, NUMTL *material, i32 rotation_z,
                                 i32 rotation_y);
-void edbitsDrawCircleXY(NUVEC *centre, f32 radius, i32 colour, NUMTL *material);
 void edbitsDrawOvalXY(NUVEC *centre, f32 radius_x, f32 radius_z, i32 colour, NUMTL *material);
 void edbitsDrawSphere(NUVEC *centre, f32 radius, i32 colour, NUMTL *material);
 i32 edbitsLookupInstance(char *name, NUGSCN *scene);
@@ -2070,7 +2058,6 @@ eduiitem_s *eduiItemTextSelectorCreate(usize data, const void *colours, i32 grou
     eduiitem_s *edui_last_item;
 void eduiSetCameraEnabled(i32 enabled);
 void eduiSetCursorColour(u32 colour);
-void eduiSetFont(NUQFNT *font);
 void eduiSetFontScale(f32 x, f32 y);
 void CreateTestMenu(void *font);
 void TestMenu(nupad_s *pad);
@@ -2190,11 +2177,8 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-extern f32 ICONSIZE, ICONX, DROPINALPHA, HUB_EPISODETITLEY;
-extern i16 tSELECT, tSELECTED, tSELECTING, tEXIT, tCANCEL;
-void DrawCharIcon(i32, f32, f32, f32, f32, i32, f32, f32, i32, nuhspecial_s *);
-f32 GetAspectRatio();
-extern "C" void BackupMenu(void);
+extern f32 HUB_EPISODETITLEY;
+extern i16 tSELECT, tSELECTED, tSELECTING;
 extern "C" void BackupMenuNoFn(void);
 extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 extern "C" void NuIOS_RecordFlurryEvent(char *event_name);
@@ -2204,14 +2188,7 @@ extern "C" void DrawMenuButtonPromptsEx(i32 confirm_prompt, i32 cancel_prompt, i
                                         u8 blue, u8 alpha);
 extern i16 tLOCKED;
 extern i16 tPOWERBRICK;
-extern "C" OPTIONSSAVE TempOptions;
-extern f32 minikittime;
-f32 GameSetSoundVolume(OPTIONSSAVE *options);
-f32 GameSetMusicVolume(OPTIONSSAVE *options);
 extern f32 newgamecamtime;
-extern "C" u8 MENUNORMALR;
-extern "C" u8 MENUNORMALG;
-extern "C" u8 MENUNORMALB;
 extern "C" f32 MENUBOTY;
 extern "C" void Draw_NOTENOUGHSPACE(void);
 extern "C" void Draw_SPACENEEDED(void);
@@ -2225,8 +2202,6 @@ extern i32 memcard_formatting;
 extern i32 memcard_formatme;
 extern i32 memcard_formatfailed;
 
-extern "C" i32 memcard_autosaveenabled;
-extern "C" i32 memcard_autosavedisabled;
 // Retail clears these "fast repeat" latches but never sets them.
 extern void (*drawslotinfofn)(f32, f32, i32, i32);
 extern void (*drawslotsfn)(MENU *, f32);
@@ -2260,9 +2235,6 @@ extern void (*drawslotsfn)(MENU *, f32);
 
 
 
-void IconScenes_Init(char *path, variptr_u *buf, variptr_u *);
-
-void IconScenes_Load(APICHARACTERMODELLIST_s *list, i32, variptr_u *buf, variptr_u *buf_end);
 
 
 
@@ -2282,7 +2254,7 @@ void IconScenes_Load(APICHARACTERMODELLIST_s *list, i32, variptr_u *buf, variptr
 
 
 
-NUGSCN *IconScene_FindById(i32 character_id);
+
 
 
 
@@ -2590,20 +2562,8 @@ void NuIOS_ShowAchievements(void);
 
 void NuAnimBuffCreateScratch(nuanimbuff_s *buffer);
 void NuAnimBuffDestroyScratch(nuanimbuff_s *buffer);
-void NuAnimCurve2SetApplyToJointTransLoc(nuanimcurve2_s *curves, i8 *types, i8 flags, nuanimtime_s *time,
-                                             nuhgobjjoint_s *joint, NUVEC *scale, NUVEC *parent_scale, NUMTX *matrix,
-                                             NUJOINTANIM_s *override_anim, NUVEC *root_translation,
-                                             NUVEC *locator_translation);
-void NuAnimCurve2SetApplyToJoint(nuanimcurve2_s *curves, i8 *types, i8 flags, nuanimtime_s *time,
-                                     nuhgobjjoint_s *joint, NUVEC *scale, NUVEC *parent_scale, NUMTX *matrix,
-                                     NUJOINTANIM_s *override_anim);
 void *NuAnimCurveCreate(void);
 void NuAnimCurveDestroy(void *curve);
-void NuAnimCurveSetApplyBlendToJoint2(nuanimcurveset_s *first, nuanimtime_s *first_time, nuanimcurveset_s *second,
-                                          nuanimtime_s *second_time, f32 blend, nuhgobjjoint_s *joint, NUVEC *scale,
-                                          NUVEC *parent_scale, NUMTX *matrix, NUJOINTANIM_s *override_anim);
-void NuAnimCurveSetApplyToMatrix(nuanimcurveset_s *set, nuanimtime_s *time, NUMTX *matrix);
-void NuAnimData2CalcMatrix(nuanimdata_s *animation, i32 node, f32 frame, numtx_s *matrix);
 void NuAnimData2CalcTime(nuanimdata2_s *anim, f32 frame, nuanimtime_s *time);
 void NuAnimDataCalcTime(void *animation, f32 frame, nuanimtime_s *time);
     extern "C++" void NuAnimDataChunkDestroy(nuanimdatachunk_s *chunk);
@@ -2652,7 +2612,6 @@ void NuLightSpeedBlurOldCameraPos(const NUMTX *camera);
 void NuLightSpeedBlurScale(f32 x, f32 y);
 
 
-void NuLgtSetArcMat(NUMTL *material, f32 u0, f32 v0, f32 u1, f32 v1);
 i32 NuSpecialDrawSmoothSkin(void *special, NUMTX *skin_matrices, NUMTX *world_matrix);
 i32 NuSpecialDrawSmoothSkinDwa(void *special, NUMTX *skin_matrices, NUMTX *world_matrix,
                                    DEFORMERWEIGHTSARRAY *blend_values);
@@ -2678,7 +2637,6 @@ void NuDynamicLightSetEnabled(NuDynamicLight *light, i32 enabled);
 void NuDynamicLightSetParameterf(NuDynamicLight *light, i32 parameter, f32 value);
 void NuDynamicLightSetParameteri(NuDynamicLight *light, i32 parameter, i32 value);
 void NuDynamicLightSetUsedOnSpecials(NuDynamicLight *light, i32 enabled);
-void NuDynamicLightSetupCustomCameraFrustum(NuDynamicLight *light, NUCAMERA *camera, const f32 *splits, i32 count);
 i32 NuDynamicLightTestShadowExtrusionExtent(NuDynamicLight *light, const NUVEC *center, const NUVEC *extent,
                                                 i32 render_set);
 void NuDynamicLightTestShadowExtrusions(NuDynamicLight *light, const VuVec *first, const VuVec *second);
@@ -2741,12 +2699,6 @@ NUGSCN *NuGHGRelocate(NUGSCN *scene, VARIPTR *destination);
     // ---------------------------------------------------------------------------
 
 
-i32 NuPortalClipTest(NUGSCN *scene, NUVEC *position, f32 radius, i16 room_id);
-i32 NuPortalNumRooms(NUGSCN *scene);
-void NuPortalResetActive(NUGSCN *scene);
-i32 NuPortalRoomClipTest(NUGSCN *scene, i16 room_id);
-void NuPortalRoomClipTestAll(NUGSCN *scene, u8 *room_visibility);
-i32 NuPortalWhichRoom(NUGSCN *scene, NUVEC *position);
 extern i32 VisiSysCameraLock;
 extern i32 LoadedOcclusionData;
 extern i32 UsingOcclusionData;
@@ -2841,7 +2793,6 @@ struct nuframebuffer_s;
 struct nushaderobject_s;
 union variptr_u;
 
-void NuLgtSetArcMatEx(i32 type, numtl_s *material, f32 u0, f32 v0, f32 u1, f32 v1);
 
 
 // ==== src/gameapi/edtools/edui.cpp: all remaining content ====
@@ -2866,7 +2817,6 @@ extern "C" {
 
 }
 
-extern "C" void eduiMenuDestroyItems(eduimenu_s *menu);
 
 // ==== src/legoapi/actions/character/speederchase.cpp: declarations ====
 
@@ -2890,16 +2840,12 @@ extern i32 ObjInNarrowSock(GameObject_s *, SOCKSYS *, i32);
 
 void SetLevelExBlowupFunc(i32 (*callback)(GIZMOBLOWUP_s *, i32));
 
-void SpeederChaseA_Init(WORLDINFO_s *world);
-
-
-void SpeederChaseA_Panel(WORLDINFO_s *);
-
-void SpeederChaseA_Reset(WORLDINFO_s *);
 
 
 
-void SpeederChaseA_Update(WORLDINFO_s *world);
+
+
+
 
 
 
@@ -2913,12 +2859,8 @@ void cbSetAutoSpeed(eduimenu_s *, eduiitem_s *item, u32);
 
 } // extern "C"
 
-extern "C" void AddDebrisEffect(i32 *, i32, f32, f32, f32);
-extern "C" void DebrisPosOrientationMtx(i32, NUMTX *);
-extern "C" void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
 
 
-extern "C" f32 pod_roll[2];
 f32 getPodRoll(i32 index);
 
 // ==== src/legoapi/characters/motion/camera.cpp: declarations ====
@@ -2933,7 +2875,6 @@ DECOMP_ASSERT(offsetof(VIEWCAM_s, gamepad) == 0x24, "ViewCam gamepad offset");
 
 
 
-void GameCam_Judder(GAMECAMERA_s *camera, float amount, i32 axis, nuvec_s *source);
 
 
 
@@ -2943,8 +2884,6 @@ void GameCam_Judder(GAMECAMERA_s *camera, float amount, i32 axis, nuvec_s *sourc
 
 
 
-void GameCameraMakeMiniCut2(nuvec_s *camera, nuvec_s *target, i32 target_guid, float start, float end, float blend_in,
-                            float blend_out, i32 follow_target, i32 follow_camera, i32 borders);
 
 
 
@@ -2955,12 +2894,10 @@ extern "C" {
 
 } // extern "C"
 
-extern "C" i16 id_GRABCONTROL, id_GRABR2CONTROL, id_LANDSPEEDER, id_ATST, id_DEWBACK;
+extern "C" i16 id_LANDSPEEDER;
 extern f32 newgamecamtime, cutscenecam_focalLength, CamStopBlend, EMPERORFIGHTA_CAMDYHACK;
-extern "C" i32 NewMode;
-extern i32 CUTCAMONLY, CUTCAM, GUNSHIPAHACK, netcamera, complexsockposition_forcesock, movegamecamera_forcesock;
+extern i32 CUTCAMONLY, GUNSHIPAHACK, netcamera, complexsockposition_forcesock, movegamecamera_forcesock;
 extern NUMTX cutscenecammtx, CutCamMtx;
-extern AREADATA_s *PODRACE_ADATA;
 f32 getPodRoll(i32);
 extern "C" void NuLightSpeedBlur(i32 reuse_camera, f32 scale);
 GameObject_s *FindNearestGameObject(NUVEC *, GameObject_s *, u32, f32, f32, i32, i32, i32, f32 *, i32,
@@ -2990,7 +2927,6 @@ void CentreTwoPlayerCamera(NUVEC *, NUVEC *, NUVEC *, NUVEC *);
 void CentreTwoPlayerCamera(nuvec_s *center, nuvec_s *player_a, nuvec_s *player_b, nuvec_s *reference);
 
 
-void do_Pad_flymode_camera(edcam_s *camera, float delta_time, nupad_s *pad);
 
 
 
@@ -3184,15 +3120,12 @@ void FS_BuildFilterOutBlocks(char *input);
 void FS_SetCursorToLastFileName();
 
 
-extern "C" i32 ProcessFileSel2(f32 elapsed, nupad_s *pad);
 
-extern "C" void FileSelKill(void);
 
 
 extern "C" void StartFileSel(char *title, char *path, char *filter, char *filter_out,
                              void (*callback)(char *, char *));
 
-extern "C" void RenderFileSel2(i32 x, i32 y, i32 *width, i32 *height);
 
 i32 LoadState(i32, variptr_u *, variptr_u *, variptr_u *, variptr_u *, variptr_u *, variptr_u *);
 
@@ -3219,25 +3152,16 @@ void loadsaveCallEachFrame(void);
 // ==== src/legoapi/render/core/render.cpp: declarations ====
 
 
-extern "C" void edbriStartAllPages(void);
 
 
 
 extern "C" void edDrawCross(NUVEC *centre, u8 red, u8 green, u8 blue);
 
-extern "C" void LocaledbitsDrawSolidEllipseXY(NUVEC *centre, f32 radius_x, f32 radius_z, i32 rotation, f32 lower_y,
-                                              f32 upper_y, u32 colour, i32, i32 segments);
 
-extern "C" void LocaledbitsDrawCircleXY(NUVEC *centre, f32 radius, u32 colour, i32, i32 segments);
 
-extern "C" void LocaledbitsDrawSolidCircleXY(NUVEC *centre, f32 radius, f32 lower_y, f32 upper_y, u32 colour, i32,
-                                             i32 segments);
 
-extern "C" void RndrOSquare(NUVEC *centre, f32 radius, i32 colour);
 
-extern "C" void RndrOSphere(NUVEC *centre, f32 radius, i32 colour, i32 segments, i32);
 
-extern "C" void RndrCircleXZ(NUVEC *centre, f32 radius, i32 colour, i32 segments);
 
 struct starfighter_s;
 struct rtl_s;
@@ -3245,7 +3169,6 @@ struct rtlidata_s;
 
 
 
-i32 MatrixReflection(NUMTX *matrix, i32 axis, f32 plane, f32 height, NUMTX *result);
 
 extern f32 HUB_EPISODETITLEY;
 
@@ -3266,16 +3189,11 @@ struct VuVec;
 
 extern nuhspecial_s *(*GameMsg_GetExtraObjFn)(GAMEMESSAGE_s *);
 
-extern "C" i32 NuRndrBeginScene(i32);
-extern "C" void NuRndrEndScene(void);
 extern "C" void NuRndrGradRect2di(i32, i32, i32, i32, i32 *, numtl_s *);
 extern "C" void NuRndrRect2di(i32, i32, i32, i32, i32, numtl_s *);
 extern "C" void NuCameraUnlock(void);
 extern "C" void NuCameraRelock(void);
 extern f32 MENUBOTY;
-extern u8 MENUENTRYR, MENUENTRYG, MENUENTRYB;
-extern f32 cointotaltime;
-extern f32 statstime;
 
 // Camera zoom state
 
@@ -3287,7 +3205,6 @@ extern "C" {
 }
 
 
-extern "C" void NuGScnUpdate(NUGSCN *gscn, f32 frame_delta);
 
 // --- NuGScn graphics-data reader ---
 // NuReadGraphicsData is a C++ static function in the original (GCC clones it,
@@ -3319,8 +3236,6 @@ extern f32 aiEditor_LocatorWidth;
 
 
 
-i32 Draw3DObject(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x_rotation, u16 y_rotation,
-                 u16 z_rotation, float scale_x, float scale_y, float scale_z, i32 rotate_order);
 
 
 
@@ -3398,7 +3313,6 @@ extern i16 tNONEWBESTTIME, tNEWBESTTIME;
 
 
 
-void DrawStatusIcons(STATUSPACKET_s *status, float y, float alpha);
 
 
 
@@ -3407,22 +3321,16 @@ void DrawStatusIcons(STATUSPACKET_s *status, float y, float alpha);
 
 // DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
 // red-brick positions come from the Game init values in legogame/game.cpp.
-extern "C" void Text3D(char *, f32, f32, f32, f32, f32, f32, u32, u8, u8, u8);
-
-void DrawMiniKitCount(float position, float scale, i32 count, i32 maximum);
-
-
-
-i32 Draw3DObjectAlpha(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x_rotation, u16 y_rotation,
-                      u16 z_rotation, float scale_x, float scale_y, float scale_z, i32 rotate_order, float alpha);
 
 
 
 
 
-extern i16 tUNKNOWN, tPOWERBRICK, tLOCKED, tGOLDBRICK;
-extern "C" void PlaySfx(char *, NUVEC *);
-void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
+
+
+
+
+extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
 
 
 
@@ -3433,26 +3341,20 @@ void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 void DrawGameObjectsDraw(i32);
 
 
-void DrawPanel3DObjectMtx(nuhspecial_s *special, numtx_s *matrix, float alpha);
 
 
 
 extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
 
-extern AREADATA *PODSPRINT_ADATA;
 extern "C" {
 }
 
 
 
 
-void DrawGameMessage_Targets(GAMEMESSAGE_s *message, nuvec_s *position, float scale);
-
-i32 DrawPanel3DObjectNoAlpha(float x, float y, float z, float scale_x, float scale_y, float scale_z, u16 rotate_x,
-                             u16 rotate_y, u16 rotate_z, nuhspecial_s *special, i32 rotate_order);
 
 
-extern void DrawMenuEntry(MENU_s *, char *);
+
 
 
 
@@ -3479,13 +3381,10 @@ extern void DrawMenuEntry(MENU_s *, char *);
 
 
 
-void Transform_DrawTarget(NUVEC *, f32, f32);
-extern i16 id_ANAKINJEDISCARRED, id_WEIRDO1, id_WEIRDO2, id_CATAPULT, id_CHEWBACCA, id_WOOKIEE, id_TWOFACE;
-extern i32 PickUpFlickerTest, PickUpFlickerFrames, PickupFlickerFrame;
+extern i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
 
 
 
-extern f32 SeekLinearF(f32, f32, f32);
 
 
 

@@ -142,16 +142,10 @@ struct AIROW_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-extern "C" i32 NewMode;
-extern "C" i32 reset_load;
-extern "C" i32 Paused;
 extern "C" STATUSPACKET_s StatusPacket;
 
-extern "C" i32 MenuInMemoryCard();
 void IncreaseScore(u32 *, u64, i32);
-extern "C" void PlaySfx(char *, nuvec_s *);
 void FinishStatusPacket(i32);
-extern "C" void BackupMenu();
 void Text_FillInExtendedSaveInfo();
 void DrawStatusBG_LSW(STATUSPACKET_s *);
 i32 InitStatusScreen_LSW(WORLDINFO_s *, STATUSPACKET_s *);
@@ -271,8 +265,7 @@ void Save_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapse
 extern i16 tSUPERSTORYCOMPLETE, tNEWBESTTIME, tLEVELCOMPLETE, tMISSIONCOMPLETE;
 extern i16 tNONEWBESTTIME;
 extern i16 tNEWHIGHSCORE, tNONEWHIGHSCORE;
-extern i16 tCHALLENGECOMPLETE, tTRUEHERO, tMINIKIT;
-extern "C" i32 NuStrCpy(char *, const char *);
+extern i16 tCHALLENGECOMPLETE, tMINIKIT;
 i32 AddToCollection(i32);
 i32 newminikitcount;
 i32 currentminikit;
@@ -294,7 +287,6 @@ void RedBrick_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active
 void RedBrick_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet);
 
 extern i16 tTRUEJEDI, tSTORY, tFREEPLAY;
-extern "C" void NuStrCat(char *, const char *);
 
 void TrueHero_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active);
 
@@ -314,12 +306,7 @@ void RegisterStatusScreen(STATUS_STAGE_s *stages, i32 *, REGISTERSTATUSPACKET_s 
 
 void ResetStatusPacket_LSW(STATUSPACKET_s *packet);
 
-extern f32 text3d_width, text3d_height;
 extern "C" {
-    extern u8 MENUENTRYR, MENUENTRYG, MENUENTRYB;
-    extern u8 MENUNORMALR, MENUNORMALG, MENUNORMALB;
-    extern u8 MENUFLASH0R, MENUFLASH0G, MENUFLASH0B;
-    extern u8 MENUFLASH1R, MENUFLASH1G, MENUFLASH1B;
 }
 
 f32 getFinishedStatusAlpha(STATUSPACKET_s *packet);
@@ -388,22 +375,13 @@ void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *);
 
 // ==== src/legoapi/render/core/render.cpp: declarations ====
 
-extern "C" void edbriStartAllPages(void);
 
 
-extern "C" void LocaledbitsDrawSolidEllipseXY(NUVEC *centre, f32 radius_x, f32 radius_z, i32 rotation, f32 lower_y,
-                                              f32 upper_y, u32 colour, i32, i32 segments);
 
-extern "C" void LocaledbitsDrawCircleXY(NUVEC *centre, f32 radius, u32 colour, i32, i32 segments);
 
-extern "C" void LocaledbitsDrawSolidCircleXY(NUVEC *centre, f32 radius, f32 lower_y, f32 upper_y, u32 colour, i32,
-                                             i32 segments);
 
-extern "C" void RndrOSquare(NUVEC *centre, f32 radius, i32 colour);
 
-extern "C" void RndrOSphere(NUVEC *centre, f32 radius, i32 colour, i32 segments, i32);
 
-extern "C" void RndrCircleXZ(NUVEC *centre, f32 radius, i32 colour, i32 segments);
 
 struct starfighter_s;
 struct rtl_s;
@@ -411,7 +389,6 @@ struct rtlidata_s;
 
 
 
-i32 MatrixReflection(NUMTX *matrix, i32 axis, f32 plane, f32 height, NUMTX *result);
 
 
 struct GAMEMESSAGE_s;
@@ -427,13 +404,6 @@ struct ripple_node_s;
 struct ripple_set_s;
 struct VuVec;
 
-extern "C" i32 NuRndrBeginScene(i32);
-extern "C" void NuRndrEndScene(void);
-extern u8 MENUENTRYR, MENUENTRYG, MENUENTRYB;
-extern f32 cointotaltime;
-extern void SetLevelLights(void *set, f32 scale);
-extern f32 statstime;
-f32 GetAspectRatio();
 
 // Camera zoom state
 
@@ -445,7 +415,6 @@ extern "C" {
 }
 
 
-extern "C" void NuGScnUpdate(NUGSCN *gscn, f32 frame_delta);
 
 // --- NuGScn graphics-data reader ---
 // NuReadGraphicsData is a C++ static function in the original (GCC clones it,
@@ -463,8 +432,6 @@ extern "C" {
 
 } // extern "C"
 
-i32 Draw3DObject(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x_rotation, u16 y_rotation,
-                 u16 z_rotation, float scale_x, float scale_y, float scale_z, i32 rotate_order);
 
 
 
@@ -514,24 +481,18 @@ extern i16 tNONEWBESTTIME, tNEWBESTTIME;
 void DrawBonusTime(STATUSPACKET_s *packet, float position, i32 alpha);
 
 
-void *AddGameMessage(char *, NUVEC *, f32, NUVEC *, f32, u8, u8, u8, u32, f32);
 
 
 
-void DrawStatusIcons(STATUSPACKET_s *status, float y, float alpha);
 
 
 
 // DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
 // red-brick positions come from the Game init values in legogame/game.cpp.
-extern "C" void Text3D(char *, f32, f32, f32, f32, f32, f32, u32, u8, u8, u8);
 
-void DrawMiniKitCount(float position, float scale, i32 count, i32 maximum);
 
 void DrawStatusBG_LSW(STATUSPACKET_s *status);
 
-i32 Draw3DObjectAlpha(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x_rotation, u16 y_rotation,
-                      u16 z_rotation, float scale_x, float scale_y, float scale_z, i32 rotate_order, float alpha);
 
 
 extern i32 currentminikit;
@@ -540,26 +501,18 @@ extern f32 slideseek;
 void DrawStatusMiniKit(float x, float y, float z, float built_scale, float new_scale, i32 count, STATUSPACKET_s *packet,
                        float slide);
 
-extern i16 tUNKNOWN, tPOWERBRICK, tLOCKED, tGOLDBRICK;
-extern "C" void PlaySfx(char *, NUVEC *);
-void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
+extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
 
 
-void DrawPanel3DObjectMtx(nuhspecial_s *special, numtx_s *matrix, float alpha);
 
 
 extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
 
-extern AREADATA *PODSPRINT_ADATA;
 extern "C" {
 }
 
-void DrawGameMessage_Targets(GAMEMESSAGE_s *message, nuvec_s *position, float scale);
 
-i32 DrawPanel3DObjectNoAlpha(float x, float y, float z, float scale_x, float scale_y, float scale_z, u16 rotate_x,
-                             u16 rotate_y, u16 rotate_z, nuhspecial_s *special, i32 rotate_order);
 
-extern void DrawMenuEntry(MENU_s *, char *);
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
     do {                                                                                                               \
@@ -574,12 +527,9 @@ extern void DrawMenuEntry(MENU_s *, char *);
     } while (false)
 
 
-void Transform_DrawTarget(NUVEC *, f32, f32);
-extern i16 id_ANAKINJEDISCARRED, id_WEIRDO1, id_WEIRDO2, id_CATAPULT, id_CHEWBACCA, id_WOOKIEE, id_TWOFACE;
-extern i32 PickUpFlickerTest, PickUpFlickerFrames, PickupFlickerFrame;
+extern i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
 
 
-extern f32 SeekLinearF(f32, f32, f32);
 
 
 // ==== src/legoapi/characters/core/characters.cpp: declarations ====
@@ -593,7 +543,6 @@ extern "C" {
 }
 
 struct AISYS_s;
-void AIScriptLoadAll(char *path, VARIPTR *buf, VARIPTR *buf_end, AISYS_s *sys);
 
 // The original table at 0x006281a0.  These are the material animation
 // scripts made available before the permanent things scene is loaded.
@@ -611,7 +560,6 @@ extern "C" {
 }
 
 
-extern "C" NUVEC plr_lastpos;
 
 
 
@@ -639,7 +587,6 @@ void NextStatusStage(STATUSPACKET_s *);
 void NewStatusRumbleBuzz(i32, f32, f32, i32);
 void Collection_Draw(COLLECTION_s *, f32, f32, f32, APICHARACTERMODELLIST_s *, f32, i32);
 void Collection_GetPos(COLLECTION_s *, i32, f32 *, f32 *);
-void DrawCharIcon(i32, f32, f32, f32, f32, i32, f32, f32, i32, nuhspecial_s *);
 f32 COLLECTION_Y_STATUS = -0.3f;
 static i32 playedappearsfx;
 static i32 playedmovesfx;
@@ -659,16 +606,10 @@ void CollectCharactersOff_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, 
 
 
 
-void SetLevelLights(void *, f32);
-i32 MatrixReflection(NUMTX *, i32, f32, f32, NUMTX *);
-void FindAnglesZX(NUVEC *, u16 *, u16 *);
-extern "C" void APITransparentCharDraw(nuhgobj_s *, NUMTX *, i32, i16 *, NUMTX *, void **, i32);
-extern AREADATA_s *BONUS_GUNSHIP_ADATA;
 
 extern "C" {
 }
 
-extern "C" i32 drawcharactermodel_nobsa;
 
 // Retail only keeps the split-out body of the IPA-SRA clone (the unused
 // cutscene index dropped), called with world and cut in registers.
@@ -682,8 +623,6 @@ extern "C" i32 drawcharactermodel_nobsa;
 
 
 
-extern "C" f32 *NuGCutLocatorCalcMtx(NUGCUTLOCATOR_s *, f32, NUMTX *, nuanimtime_s *);
-extern "C" i32 NuGCutLocatorIsVisble(NUGCUTLOCATOR_s *, f32, nuanimtime_s *, f32 *, f32 *);
 
 // The loop re-reads the active cut through CutStopInfo after each SmartTextEx call.
 #define CUT_STOP static_cast<CUTINFO *>(CutStopInfo)
@@ -698,7 +637,6 @@ void Exit_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapse
 
 void Fade_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
 
-extern "C" void *NuAnimData2FixPtrs(void *, isize, isize, i32);
 
 extern i32 STATUS_R;
 extern i32 STATUS_G;
@@ -707,7 +645,6 @@ extern f32 iconalphaoverride;
 extern i16 tLEVELCOMPLETE, tFREEPLAYUNLOCKED, tSUPERSTORYCOMPLETE, tBONUSUNLOCKED;
 extern i16 tEPISODEVUNLOCKED, tEPISODEVIUNLOCKED, tCHALLENGECOMPLETE, tOUTOFTIME;
 extern i16 tYOUDIDNTCOLLECTALL10CANISTERS, tMISSIONCOMPLETE, tSTORYCLIPSUNLOCKED;
-void *AddGameMessage(char *, nuvec_s *, f32, nuvec_s *, f32, u8, u8, u8, u32, f32);
 
 void GoldBrick_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active);
 
@@ -726,7 +663,6 @@ void LevelComplete_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, flo
 
 
 
-extern f32 KITPOSX, PANEL_MINIKITY, PANEL_MINIKITSCALE;
 
 
 
@@ -748,7 +684,7 @@ void MiniKit_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float ela
 
 
 
-extern i16 id_SLAVE1, tALLMINIKITSBUILT;
+extern i16 tALLMINIKITSBUILT;
 
 void AllMiniKits_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current);
 

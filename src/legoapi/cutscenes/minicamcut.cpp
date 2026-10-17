@@ -102,7 +102,6 @@
 void FindAnglesXY(nuvec_s *, u16 *, u16 *);
 MINICAM_s MiniCam = {};
 
-void Minicam_AddDeltas(float duration);
 
 
 
@@ -130,8 +129,6 @@ extern nugspline_s ObstacleCamCutSpline;
 extern i32 ObstacleCamTargetGuid;
 extern NUVEC ObstacleCamCutPts[2];
 
-void GameCameraMakeMiniCut2(nuvec_s *camera, nuvec_s *target, i32 target_guid, float start, float end, float blend_in,
-                            float blend_out, i32 follow_target, i32 follow_camera, i32 borders);
 
 nugspline_s ObstacleCamCutSpline;
 i32 ObstacleCamTargetGuid;
@@ -216,7 +213,6 @@ DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context fl
         }                                                                                                              \
     } while (false)
 
-extern f32 SeekLinearF(f32, f32, f32);
 
 // ==== functions in original address order ====
 

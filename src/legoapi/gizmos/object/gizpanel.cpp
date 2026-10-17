@@ -71,7 +71,6 @@ void FindAnglesXY(NUVEC *direction, u16 *x_rotation, u16 *y_rotation);
 // ==== src/legoapi/gizmo/gizmos/gizmos_gizpanel.cpp: all remaining content ====
 
 extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
-extern "C" void PlaySfx(char *, nuvec_s *);
 void FastWeaponIn(GameObject_s *, i32);
 void MakeBaddiesForgetAboutParty(i32);
 void SetProtocolDroidInterfaceAction(GameObject_s *);
@@ -84,25 +83,17 @@ extern "C" f32 GIZPANEL_PLAYERPOSLIFT;
 
 void FindAnglesZX(NUVEC *normal, u16 *x_rotation, u16 *z_rotation);
 i32 SuperWeirdo(GameObject_s *object);
-extern i16 id_DARTHVADER, id_GRANDMOFFTARKIN, id_IMPERIALOFFICER, id_IMPERIALSHUTTLEPILOT;
-void GizPanel_GetAbsTargetPos(GIZPANEL_s *panel, nuvec_s *target_position, i32 player_position);
+extern i16 id_GRANDMOFFTARKIN, id_IMPERIALOFFICER, id_IMPERIALSHUTTLEPILOT;
 
 void GizPanel_Use(GameObject_s &object, GIZPANEL_s &panel);
 
-void GizPanel_Reset(GIZPANEL_s *panel);
 
 void GizPanel_PlaySfx(char *name, nuvec_s *position, i32 player_bits);
 
-i32 GizPanel_BeingUsed(GIZPANEL_s *panel);
 
-GIZPANEL_s *GizPanel_FindByName(WORLDINFO_s *world, char *name);
 
-i32 GizPanel_CanUsePanel(GameObject_s *object, GIZPANEL_s *panel);
 
-GIZPANEL_s *GizPanel_FindNearest(WORLDINFO_s *world, nuvec_s *position, GameObject_s *object, float *distance_squared,
-                                 i32 check_eligibility);
 
-void GizPanel_GetAbsPlayerPos(GIZPANEL_s *panel, nuvec_s *position);
 
 
 // ==== functions in original address order ====

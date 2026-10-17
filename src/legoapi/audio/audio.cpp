@@ -304,7 +304,6 @@
 #include "nu2api/nusound/nusound_decoder.hpp"
 #include "nu2api/nusound/nusound3_include_types.h"
 
-extern "C" i32 DoubleScore;
 i32 (*GameAudio_ActionMusicFn)(void) = NULL;
 static f32 sticky_attack_timeout[2] = {1.0f, 6.0f};
 static i32 CurrentMusicPair_Quiet = -1;
@@ -325,12 +324,10 @@ static i32 MusicPlrsHoldAttack;
 NuMusic music_man;
 
 void legoSetCutVolume(float v);
-void legoSetMusicVolume(float v);
 
 extern "C" void SetSoundVolume(f32);
 
 
-i32 GamePlayMusic(LEVELDATA_s *level, i32 check, OPTIONSSAVE_s *options);
 
 // ==== src/legoapi/audio/sfx.cpp: declarations ====
 
@@ -350,10 +347,7 @@ extern SoundTable CurrentSFXTAB;
 }
 
 extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
-void GameCam_NewShake(GAMECAMERA_s *camera, f32 amount, f32 duration, f32 speed);
-void GameCam_Judder(GAMECAMERA_s *camera, f32 amount, i32 axis, nuvec_s *source);
 
-extern "C" f32 chattersfxwait;
 
 static GAMEAUDIO GameAudio_Default;
 static GAMEAUDIO *GameAudio = &GameAudio_Default;
@@ -364,7 +358,6 @@ extern "C" {
 
 extern "C" {
 
-void PlaySfx(char *name, struct nuvec_s *position);
 
 void PlaySfxById(i32 sfx_id, nuvec_s *position);
 
@@ -375,7 +368,6 @@ void SfxBitsRestore(SoundTable *table);
 
 } // extern "C"
 
-void GameAudio_PlaySfxById(i32 sfx_id, nuvec_s *position, i32 flags, i32);
 
 
 // ==== src/legogame/game.cpp: declarations ====
@@ -383,8 +375,6 @@ void GameAudio_PlaySfxById(i32 sfx_id, nuvec_s *position, i32 flags, i32);
 
 
 
-extern "C" void PlaySfx(char *, NUVEC *);
-void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 
 
 
@@ -395,7 +385,6 @@ void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 
 // Written by ThingManager's ctor (original global @0x124f2e0, .bss).
 
-void legoSetMusicVolume(float);
 
 
 // Enabled in the target data image.  Ordinary background characters are
@@ -423,7 +412,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 // Retail keeps only the IPA-SRA clone, which takes the other object's x and z by address.
 
 extern "C" void MenuRegisterSoundFX(i32 move, i32 select, i32 back, i32 no_entry);
-void GameAudio_PlaySfxById(i32 sfx_id, nuvec_s *position, i32 flags, i32 volume);
 
 
 
@@ -509,7 +497,6 @@ struct nuhspecial_s;
         }                                                                                                              \
     } while (false)
 
-extern f32 SeekLinearF(f32, f32, f32);
 
 // ==== src/legoapi/gizmo/gizmos/gizmos_gizmopickups.cpp: declarations ====
 
@@ -517,9 +504,7 @@ extern f32 SeekLinearF(f32, f32, f32);
 
 extern f32 ICONXPOS_TOUCHYFEELY;
 extern f32 ICONYPOS_TOUCHYFEELY;
-f32 SeekLinearF(f32, f32, f32);
 
-extern "C" i32 NewMode, Paused, editor_active, CutSceneWaiting, PANELOFF;
 void MechHintUIButton_OnClick_Callback(MechTouchUIElement &, TouchHolder &);
 
 #include "legoapi/menus/core/gamehint_types.h"
@@ -650,9 +635,7 @@ struct instNUGCUTSCENE_s;
 
 
 
-extern "C" ADDPART_s Default_ADDPART;
 
-extern "C" PART_s *AddPart(ADDPART_s *);
 
 // Game-specific AI actions and conditions (registered via
 // RegisterAIScriptActions / RegisterAIScriptConditions). These are stubbed to
@@ -967,7 +950,6 @@ struct nufpar_s;
 // Runtime-selected groups appended after the fixed terrain allocation.
 
 // NuFileExists @nufile (nucore_plain.cpp).
-extern "C" i32 NuFileExists(char *name);
 
 // ==== functions in original address order ====
 
@@ -999,8 +981,6 @@ extern "C" {
 // (GIZFLOW_s/FLOWBOX_s), power-up and space/starfighter helpers. Stubbed as
 // local `t` symbols matching res/libTTapp.so.
 
-extern i32 HIGHGAMEOBJECT, VehicleArea;
-extern WORLDINFO_s *WORLD;
 
 extern "C" {
 
@@ -1009,7 +989,6 @@ extern "C" {
 
 } // extern "C"
 
-WORLDINFO_s *WorldInfo_CurrentlyActive();
 
 // The original repeats the per-sound emitter checks for each of the four sound slots.
 #define PART_EMIT_SOUND_ON(slot)                                                                                       \
@@ -1022,13 +1001,11 @@ WORLDINFO_s *WorldInfo_CurrentlyActive();
     if (type->sounds[slot] != -1 && type->sound_modes[slot] == (mode))                                                 \
         PlaySfxById(type->sounds[slot], &emitter->position);
 
-extern "C" i32 GetSfxId(const char *);
 extern "C" void PlaySfxByIdAndSetVolume(i32, NUVEC *, f32);
 
 
 
 
-void GameCam_NewShake(GAMECAMERA_s *, f32, f32, f32);
 
 // ==== src/gameapi/edtools/edtoolsall_plain.cpp: all remaining content ====
 
@@ -1448,8 +1425,6 @@ static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u
 
 // ==== src/legoapi/menus/screens/gamemenuall.cpp: declarations ====
 
-f32 GameSetSoundVolume(OPTIONSSAVE *options);
-f32 GameSetMusicVolume(OPTIONSSAVE *options);
 
 // Retail clears these "fast repeat" latches but never sets them.
 
@@ -1661,7 +1636,6 @@ DECOMP_ASSERT(sizeof(VIEWCAM_s) == 0x28, "ViewCam size");
 DECOMP_ASSERT(offsetof(VIEWCAM_s, pitch) == 0x10, "ViewCam pitch offset");
 DECOMP_ASSERT(offsetof(VIEWCAM_s, gamepad) == 0x24, "ViewCam gamepad offset");
 
-void GameCam_Judder(GAMECAMERA_s *camera, float amount, i32 axis, nuvec_s *source);
 
 
 DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, path) == 0x40, "Camera context path offset");
@@ -1874,11 +1848,9 @@ extern "C" {
 #define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone))
 #endif
 
-extern "C" void PlaySfx(char *, nuvec_s *);
 
 // ==== src/legoapi/core/startup/game.cpp: declarations ====
 
-extern "C" i32 Paused;
 
 namespace {
 
@@ -1953,9 +1925,6 @@ void MenuRegisterSoundFX(i32 move, i32 select, i32 back, i32 no_entry);
 
 
 
-extern "C" void SmartTextEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment,
-                            u8 red, u8 green, u8 blue, f32 max_width, i32 max_lines, void *message_box,
-                            i32 suppress_draw, u32 alpha);
 
 // ==== src/legoapi/core/input/gamepads.cpp: declarations ====
 
@@ -1970,7 +1939,6 @@ extern "C" {
 // angular velocity only when both consecutive turns agree.
 
 
-void NewRumbleAllPlayers(float strength, float duration, i32 frames, i32);
 
 // ==== src/gameframework/savesystem.cpp: all remaining content ====
 
@@ -2491,7 +2459,6 @@ void LevelComplete_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 a
 // The reference defines these with dynamic initialization in this unit.
 
 extern "C" {
-    extern f32 chattersfxwait, tieonsfxwait, tieoffsfxwait;
 }
 
 
@@ -2502,9 +2469,7 @@ DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");
 //   NuHtmlBegin    0x2d5ca0   NuHtmlFlush   0x2d5c30
 //   NuHtmlWrite    0x2d5cd0   NuHtmlHeading1 0x2d5d40
 
-extern "C" void NuHtmlWrite(const char *text, ...);
 
-extern "C" void NuHtmlHeading1(const char *fmt, ...);
 
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 
@@ -2936,7 +2901,6 @@ struct MechTouchUIElement;
 
 // ---- Misc player/gameobject helpers relocated from doorstubs.cpp ----
 
-void GameAudio_PlaySfx(i32 sfx, NUVEC *position, i32 flags, i32 volume);
 
 namespace {
 
@@ -3595,7 +3559,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 // ==== src/legoapi/actions/movement/pushing.cpp: declarations ====
 
-extern "C" i32 ParticlesPerSecond(f32 rate, f32 elapsed);
 
 // ==== functions in original address order ====
 
@@ -3705,7 +3668,6 @@ namespace {
 
 // ==== src/legoapi/audio/specialsfx.cpp: declarations ====
 
-extern "C" i32 GetSfxId(const char *name);
 
 // ==== src/legoapi/gizmo/base/gizmo.cpp: declarations ====
 
@@ -3772,7 +3734,6 @@ DECOMP_ASSERT(sizeof(JEDIBNETPACKET_s) == 0x20, "JEDIBNETPACKET_s ABI");
 // the network check, which retail keeps as the split-out body of the IPA-SRA
 // clone (it only needs &world->ai_sys).
 
-void JediB_Init(WORLDINFO_s *world);
 
 // ===========================================================================
 // Gunship (Gunship_A / Gunship_B)
@@ -3851,15 +3812,12 @@ static_assert(sizeof(struct LEVFLAGBYTES_s) == 16, "LevFlag must be 16 bytes");
 // Pod race core (A/B/C laps)
 // ===========================================================================
 
-void PodRaceAUpdate(WORLDINFO_s *world);
 
 // ===========================================================================
 // Pod sprint (Sebulba events)
 // ===========================================================================
 
-void PodSprintA_Init(WORLDINFO_s *world);
 
-void PodSprintA_Update(WORLDINFO_s *world);
 
 // ===========================================================================
 // Retake the palace (D/E/G)
@@ -4140,7 +4098,6 @@ extern "C" {
 // ==== src/legoapi/misc/supportall.cpp: declarations ====
 
 extern "C" {
-    extern f32 chattersfxwait, tieonsfxwait, tieoffsfxwait;
 }
 
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
@@ -4797,7 +4754,6 @@ extern "C" {
 
 extern "C" {
 
-void PlaySfx(char *name, struct nuvec_s *position);
 
 void PlaySfxById(i32 sfx_id, nuvec_s *position);
 
@@ -6005,7 +5961,6 @@ extern "C" {
 // ==== src/legoapi/misc/supportall.cpp: declarations ====
 
 extern "C" {
-    extern f32 chattersfxwait, tieonsfxwait, tieoffsfxwait;
 }
 
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
@@ -7482,7 +7437,6 @@ extern "C" {
 // ==== src/legoapi/misc/supportall.cpp: declarations ====
 
 extern "C" {
-    extern f32 chattersfxwait, tieonsfxwait, tieoffsfxwait;
 }
 
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====

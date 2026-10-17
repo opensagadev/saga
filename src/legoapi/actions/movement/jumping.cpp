@@ -303,7 +303,6 @@ void PlayJumpSfx(GameObject_s *, i32);
 void PlaySabreSfx(char *, GameObject_s *, NUVEC *, i32);
 void Punch_Hit(GameObject_s *, GameObject_s *, f32, f32);
 void StartQuickShoot(GameObject_s *, i32);
-extern "C" i32 AddGameDebrisRot(APIDEBRISSYS_s *, i32, NUVEC *, i32, u16, u16);
 i32 (*FindSlamOrigin_UseCPosFn)(GameObject_s *) = NULL;
 void (*Jump_EndOfLandContextFn)(GameObject_s *) = NULL;
 // Retail keeps several of this file's static helpers only as GCC clones; these
@@ -318,7 +317,6 @@ void (*Jump_EndOfLandContextFn)(GameObject_s *) = NULL;
 
 // Retail keeps only the IPA-SRA clone of this function.
 i32 PodLevel(AREADATA_s *);
-extern i16 id_YODA, id_YODAGHOST;
 
 // Multiplies the ordinary camera's per-frame position blend.  The original
 // keeps this as writable camera state (default 1.0), rather than folding it
@@ -410,7 +408,6 @@ extern "C" {
 // (GIZFLOW_s/FLOWBOX_s), power-up and space/starfighter helpers. Stubbed as
 // local `t` symbols matching res/libTTapp.so.
 
-extern WORLDINFO_s *WORLD;
 
 extern "C" {
 
@@ -419,7 +416,6 @@ extern "C" {
 
 } // extern "C"
 
-WORLDINFO_s *WorldInfo_CurrentlyActive();
 
 // The original repeats the per-sound emitter checks for each of the four sound slots.
 #define PART_EMIT_SOUND_ON(slot)                                                                                       \
@@ -437,7 +433,7 @@ WORLDINFO_s *WorldInfo_CurrentlyActive();
 
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 
-extern i16 id_YODA, id_YODAGHOST, id_GAMORREANGUARD, id_JANGOFETT;
+extern i16 id_GAMORREANGUARD;
 
 // Written by ThingManager's ctor (original global @0x124f2e0, .bss).
 
@@ -461,7 +457,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 // remaining ids enumerate the current story list while omitting variants that
 // are represented by those dedicated routes.
 
-f32 GameShadow(GameObject_s *object, nuvec_s *position, f32 probe_height, i32 terrain_mask);
 
 #if defined(__i386__)
 #define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
@@ -512,7 +507,6 @@ DECOMP_ASSERT(sizeof(SPECIAL_LAYER_s) == 0xc, "SPECIAL_LAYER_s size");
 
 void FastWeaponIn(GameObject_s *, i32);
 
-extern "C" i32 ParticlesPerSecond(f32 rate, f32 elapsed);
 
 // ==== src/legoapi/characters/motion/camera.cpp: declarations ====
 
@@ -522,7 +516,6 @@ DECOMP_ASSERT(sizeof(VIEWCAM_s) == 0x28, "ViewCam size");
 DECOMP_ASSERT(offsetof(VIEWCAM_s, pitch) == 0x10, "ViewCam pitch offset");
 DECOMP_ASSERT(offsetof(VIEWCAM_s, gamepad) == 0x24, "ViewCam gamepad offset");
 
-void GameCam_Judder(GAMECAMERA_s *camera, float amount, i32 axis, nuvec_s *source);
 
 
 DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, path) == 0x40, "Camera context path offset");
@@ -601,7 +594,6 @@ DECOMP_ASSERT(sizeof(JEDIBNETPACKET_s) == 0x20, "JEDIBNETPACKET_s ABI");
 // the network check, which retail keeps as the split-out body of the IPA-SRA
 // clone (it only needs &world->ai_sys).
 
-void JediB_Init(WORLDINFO_s *world);
 
 // ===========================================================================
 // Gunship (Gunship_A / Gunship_B)
@@ -680,15 +672,12 @@ static_assert(sizeof(struct LEVFLAGBYTES_s) == 16, "LevFlag must be 16 bytes");
 // Pod race core (A/B/C laps)
 // ===========================================================================
 
-void PodRaceAUpdate(WORLDINFO_s *world);
 
 // ===========================================================================
 // Pod sprint (Sebulba events)
 // ===========================================================================
 
-void PodSprintA_Init(WORLDINFO_s *world);
 
-void PodSprintA_Update(WORLDINFO_s *world);
 
 // ===========================================================================
 // Retake the palace (D/E/G)
@@ -773,9 +762,7 @@ extern void Player_ClearContext(GameObject_s *object, i32 mode);
 
 extern void Player_ResetContexts(PLAYERPACKET_s *packet);
 
-extern "C" ADDPART_s Default_ADDPART;
 
-extern "C" PART_s *AddPart(ADDPART_s *);
 
 // Game-specific AI actions and conditions (registered via
 // RegisterAIScriptActions / RegisterAIScriptConditions). These are stubbed to
@@ -1000,7 +987,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 i32 Action_ReleaseLocator(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
                           i32 first_time, float);
 
-extern u32 GAMEPAD_SPECIAL, GAMEPAD_JUMP, GAMEPAD_TOGGLERIGHT;
 
 i32 Action_GetLocatorFromSet(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,
                              i32 param_count, i32 first_time, float);
@@ -1108,7 +1094,6 @@ struct AISYS_s;
 // Runtime-selected groups appended after the fixed terrain allocation.
 
 // NuFileExists @nufile (nucore_plain.cpp).
-extern "C" i32 NuFileExists(char *name);
 
 // ==== functions in original address order ====
 
@@ -1330,9 +1315,7 @@ DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");
 //   NuHtmlBegin    0x2d5ca0   NuHtmlFlush   0x2d5c30
 //   NuHtmlWrite    0x2d5cd0   NuHtmlHeading1 0x2d5d40
 
-extern "C" void NuHtmlWrite(const char *text, ...);
 
-extern "C" void NuHtmlHeading1(const char *fmt, ...);
 
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 

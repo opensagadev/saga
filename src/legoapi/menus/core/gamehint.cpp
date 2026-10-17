@@ -44,10 +44,9 @@ extern f32 ICONYPOS_VIRTUALS;
 extern f32 (*Hint_AlphaTargetFn)();
 extern i32 (*Hub_PanelBusyFn)();
 extern i32 only_process_this_hint_id;
-f32 SeekLinearF(f32, f32, f32);
 void Hint_SetHint(HINT_s *, i32, i32);
 
-extern "C" i32 NewMode, Paused, editor_active, CutSceneWaiting, PANELOFF;
+extern "C" i32 editor_active, CutSceneWaiting, PANELOFF;
 void MechHintUIButton_OnClick_Callback(MechTouchUIElement &, TouchHolder &);
 
 #include "legoapi/menus/core/gamehint_types.h"
@@ -225,7 +224,6 @@ i32 DragBomb_UpdateHint(HINT_s *hint);
 // Original local callbacks referenced by Hints_LSW.
 extern u8 show_lever_hint;
 extern i32 show_autojump_hint;
-extern AREADATA_s *PODRACE_ADATA, *PODSPRINT_ADATA, *BONUS_GUNSHIP_ADATA;
 
 static __used__ i32 Jump_UpdateHint(HINT_s *hint);
 

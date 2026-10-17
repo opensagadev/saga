@@ -22,7 +22,6 @@
 extern "C" {
     u64 GameAntinode_grid[64];
     extern f32 default_path_heighttol;
-    AIANTINODE_s *AIAntinodeCreateSingleFrame(NUVEC *, f32);
 }
 i32 ViewCamGetMode();
 NUVEC *ViewCamGetTgt();

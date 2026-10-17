@@ -277,7 +277,6 @@ i32 MechInputTouchMenuController::PackButtonID = -1;
 // ==== src/legoapi/render/core/screen.cpp: declarations ====
 
 
-f32 GetAspectRatio();
 
 // The fade system and the four fade effects handed to FadeSystem::AddFade()
 // are screen.cpp globals in the original: its static initializer registers
@@ -299,10 +298,6 @@ extern nuhspecial_s *hackFlashingSpecial;
 // ==== src/legoapi/menus/core/hud.cpp: all remaining content ====
 void RndrTexQuad(f32, f32, f32, f32, i32, numtl_s *, i32);
 
-extern "C" i32 NewMode;
-extern "C" i32 editor_active;
-extern "C" i32 CutSceneWaiting;
-extern "C" i32 Paused;
 
 namespace {
 
@@ -488,8 +483,6 @@ extern "C" {
 // (GIZFLOW_s/FLOWBOX_s), power-up and space/starfighter helpers. Stubbed as
 // local `t` symbols matching res/libTTapp.so.
 
-extern i32 HIGHGAMEOBJECT, VehicleArea;
-extern WORLDINFO_s *WORLD;
 
 extern "C" {
 
@@ -498,7 +491,6 @@ extern "C" {
 
 } // extern "C"
 
-WORLDINFO_s *WorldInfo_CurrentlyActive();
 
 // The original repeats the per-sound emitter checks for each of the four sound slots.
 #define PART_EMIT_SOUND_ON(slot)                                                                                       \
@@ -535,7 +527,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 // remaining ids enumerate the current story list while omitting variants that
 // are represented by those dedicated routes.
 
-f32 GameShadow(GameObject_s *object, nuvec_s *position, f32 probe_height, i32 terrain_mask);
 
 #if defined(__i386__)
 #define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
@@ -666,7 +657,6 @@ DECOMP_ASSERT(sizeof(JEDIBNETPACKET_s) == 0x20, "JEDIBNETPACKET_s ABI");
 // the network check, which retail keeps as the split-out body of the IPA-SRA
 // clone (it only needs &world->ai_sys).
 
-void JediB_Init(WORLDINFO_s *world);
 
 // ===========================================================================
 // Gunship (Gunship_A / Gunship_B)
@@ -745,15 +735,12 @@ static_assert(sizeof(struct LEVFLAGBYTES_s) == 16, "LevFlag must be 16 bytes");
 // Pod race core (A/B/C laps)
 // ===========================================================================
 
-void PodRaceAUpdate(WORLDINFO_s *world);
 
 // ===========================================================================
 // Pod sprint (Sebulba events)
 // ===========================================================================
 
-void PodSprintA_Init(WORLDINFO_s *world);
 
-void PodSprintA_Update(WORLDINFO_s *world);
 
 // ===========================================================================
 // Retake the palace (D/E/G)
@@ -825,9 +812,7 @@ struct nuvec_s;
 // ---- begin src/gameapi/ai/aisys/aisys.cpp ----
 
 
-extern "C" ADDPART_s Default_ADDPART;
 
-extern "C" PART_s *AddPart(ADDPART_s *);
 
 // Game-specific AI actions and conditions (registered via
 // RegisterAIScriptActions / RegisterAIScriptConditions). These are stubbed to
@@ -1131,7 +1116,6 @@ struct AISYS_s;
 // Runtime-selected groups appended after the fixed terrain allocation.
 
 // NuFileExists @nufile (nucore_plain.cpp).
-extern "C" i32 NuFileExists(char *name);
 
 // ==== functions in original address order ====
 
@@ -1340,9 +1324,7 @@ void RndrTexQuad3D(VuMtx const &matrix, i32 colour, numtl_s *material);
 //   NuHtmlBegin    0x2d5ca0   NuHtmlFlush   0x2d5c30
 //   NuHtmlWrite    0x2d5cd0   NuHtmlHeading1 0x2d5d40
 
-extern "C" void NuHtmlWrite(const char *text, ...);
 
-extern "C" void NuHtmlHeading1(const char *fmt, ...);
 
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 

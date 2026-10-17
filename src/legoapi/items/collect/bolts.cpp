@@ -160,7 +160,6 @@ i32 Bolt_HitPartMode(BOLT_s *bolt);
 void Bolt_HitGameObjectRC(NetMessage &);
 i32 Bolt_HitGameObject(BOLT_s *bolt, GameObject_s *object, NUVEC *points, NUVEC *, NUVEC *, f32 radius, u8 *);
 
-i32 Bolt_HitGameObjects(BOLT_s *bolt, NUVEC *points, NUVEC *minimum, NUVEC *maximum, f32 radius, u8 *hit_flags);
 
 i32 addbolt_nosfx;
 BOLT_s *objhitobj_bolt;
@@ -207,7 +206,6 @@ static __used__ i32 Bolt_GetShootDirection_Default(GameObject_s *object, nuvec_s
 
 extern "C" {
     void NewTerrHitInfo(u8 *);
-    void NewRayCastGetImpactNormal(NUVEC *);
     i32 NewShadowOnPlatform();
 }
 f32 FindReflectionNoPlatforms(NUVEC *);
@@ -247,7 +245,6 @@ extern "C" {
 
 
 extern "C" {
-    void NewRayCastGetImpactNormal(NUVEC *);
 }
 
 // ==== src/legoapi/core/config/saveload.cpp: declarations ====

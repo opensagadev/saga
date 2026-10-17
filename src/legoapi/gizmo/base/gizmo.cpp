@@ -330,7 +330,6 @@ ADDGIZMOTYPE Default_ADDGIZMOTYPE = {
 GIZMOTYPES *gizmotypes;
 
 
-i32 GizmoGetTypeIDByName(GIZMOSYS_s *gizmo_sys, char *name);
 
 
 
@@ -350,7 +349,6 @@ static void GizmoAppendSpecialError(GIZMOSYS *gizmo_sys, const char *text) {
 
 
 
-i32 GizmoGetNumOutputs(GIZMOSYS_s *gizmo_sys, GIZMO_s *gizmo);
 
 
 // ==== src/legoapi/gizmo/base/gizmo_sys.cpp: declarations ====
@@ -948,7 +946,6 @@ struct AISYS_s;
 // Runtime-selected groups appended after the fixed terrain allocation.
 
 // NuFileExists @nufile (nucore_plain.cpp).
-extern "C" i32 NuFileExists(char *name);
 
 // ==== functions in original address order ====
 
@@ -979,7 +976,6 @@ extern "C" {
 // (GIZFLOW_s/FLOWBOX_s), power-up and space/starfighter helpers. Stubbed as
 // local `t` symbols matching res/libTTapp.so.
 
-extern "C" i32 NuGScnNumSpecials(nugscn_s *);
 
 // The original repeats the per-sound emitter checks for each of the four sound slots.
 #define PART_EMIT_SOUND_ON(slot)                                                                                       \
@@ -1882,9 +1878,6 @@ namespace {
 // ==== src/gameapi/gui/apimenu.cpp: all remaining content ====
 
 
-extern "C" void SmartTextEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment,
-                            u8 red, u8 green, u8 blue, f32 max_width, i32 max_lines, void *message_box,
-                            i32 suppress_draw, u32 alpha);
 
 // ==== src/legoapi/core/input/gamepads.cpp: declarations ====
 
@@ -2371,7 +2364,6 @@ extern "C" {
 
 void LevelComplete_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32);
 
-extern "C" i32 NuStrCpy(char *, const char *);
 
 // Retail keeps this body as GCC's split-out clone; the inline head stays in
 // the caller.
@@ -2402,9 +2394,7 @@ extern "C" {
 extern char unknown[8];
 }
 
-extern "C" void NuHtmlWrite(const char *text, ...);
 
-extern "C" void NuHtmlHeading1(const char *fmt, ...);
 
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 

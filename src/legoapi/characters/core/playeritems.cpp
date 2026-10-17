@@ -235,7 +235,6 @@ struct PLAYERITEMTYPE_s;
 static PLAYERITEMTYPE_s *PlayerItemType = NULL;
 static i32 PLAYERITEMTYPECOUNT = 0;
 
-extern i8 BoltType_FindIDByName(char *name, WORLDINFO *world);
 
 // ---- Player start spawn entries ----
 
@@ -436,7 +435,6 @@ extern "C" {
 // Runtime-selected groups appended after the fixed terrain allocation.
 
 // NuFileExists @nufile (nucore_plain.cpp).
-extern "C" i32 NuFileExists(char *name);
 
 // ==== src/legoapi/render/fx/parts.cpp: declarations ====
 

@@ -92,7 +92,6 @@ u32 LEGOOBJ_DEFAULTLASTCOIN = -1;
 
 void SetAreaPickupGravity(i32 area, i32 level);
 
-void StoreLevelProgressFn(WORLDINFO_s *world, LEVEL_PROGRESS_s *progress, i32 area_progress);
 
 void SaveSceneObjectAnimTFactors(NUGSCN *gscn);
 void CalculateWorldSize(WORLDINFO *world);

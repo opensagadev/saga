@@ -56,7 +56,6 @@ f32 SUPERCARRY_JUMPSPEED = 1.4f;
 static __used__ i32 SuperCarry_TurnBlowupBackOn(GIZMOBLOWUP_s *blowup, NUVEC *position, u16 angle, i32 keep_matrix);
 
 
-void SuperCarry_GetObjectPos(GameObject_s *object, NUVEC *position, NUVEC *secondary_position);
 
 
 

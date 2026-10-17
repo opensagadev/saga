@@ -249,7 +249,6 @@ i32 LIFTPLAYER;
 f32 TOGGLEREPEATTIME = 0.25f;
 i32 (*Player_ToggleSubCharacterFn)(GameObject_s *, i32, i32);
 void (*Player_ToggledCharacterFn)(GameObject_s *, i32);
-void GameAudio_PlaySfx(i32 sfx, NUVEC *position, i32 flags, i32 volume);
 
 i32 Player_HasDoubleBoltDamage(GameObject_s *object);
 
@@ -406,7 +405,6 @@ extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 // DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
 // red-brick positions come from the Game init values in legogame/game.cpp.
 
-void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
     do {                                                                                                               \
@@ -427,7 +425,6 @@ void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 
 // ==== src/legoapi/core/input/gamepads.cpp: declarations ====
 
-extern WORLDINFO_s *WORLD;
 extern "C" {
     extern "C++" FadeSystem FadeSys;
 }
@@ -472,7 +469,6 @@ extern "C" {
 // Runtime-selected groups appended after the fixed terrain allocation.
 
 // NuFileExists @nufile (nucore_plain.cpp).
-extern "C" i32 NuFileExists(char *name);
 
 // ==== src/legoapi/render/fx/parts.cpp: declarations ====
 
@@ -490,9 +486,7 @@ extern "C" {
 // (GIZFLOW_s/FLOWBOX_s), power-up and space/starfighter helpers. Stubbed as
 // local `t` symbols matching res/libTTapp.so.
 
-extern i32 HIGHGAMEOBJECT, VehicleArea;
 
-WORLDINFO_s *WorldInfo_CurrentlyActive();
 
 // The original repeats the per-sound emitter checks for each of the four sound slots.
 #define PART_EMIT_SOUND_ON(slot)                                                                                       \

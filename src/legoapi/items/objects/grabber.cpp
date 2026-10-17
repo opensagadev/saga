@@ -58,7 +58,6 @@ extern "C" {
     void PlaySfx(char *, nuvec_s *);
 }
 
-NUVEC *Grabber_GetGrabPos(GRABBER_s *grabber, numtx_s *matrix);
 
 
 // Static grabber victim-pos helper. Moved from gizmisc_stubs.cpp.
@@ -73,17 +72,11 @@ static __attribute__((noinline, noclone)) void Grabber_Drop(GRABBER_s *grabber, 
 
 
 extern "C" {
-    extern i16 id_GRABCONTROL, id_GRABR2CONTROL, id_GRABMACHINE;
     void PlaySfxAndSetPitch(char *, NUVEC *, f32);
-    AIANTINODE_s *AIAntinodeCreateSingleFrame(NUVEC *, f32);
 }
-extern WORLDINFO_s *WORLD;
-extern LEVELDATA *DEATHSTARESCAPEB_LDATA, *JABBASPALACEB_LDATA, *CLOUDCITYTRAPA_LDATA;
 GameObject_s *FindGameObject(i32, u32, i32, i32, i32);
 GameObject_s *FindNearestGameObject(NUVEC *, GameObject_s *, u32, f32, f32, i32, i32, i32, f32 *, i32,
                                     i32 (*)(GameObject_s *), bool);
-f32 SeekValF(f32, f32, f32);
-u16 SeekRot(u16, u16, f32);
 u16 GamePad_InputAngle(GameObject_s *, GAMEPAD_s *);
 f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
 void FindAnglesZX(NUVEC *, u16 *, u16 *);
@@ -95,12 +88,9 @@ GIZMOBLOWUP_s *FindNearestGizmoBlowUp(WORLDINFO_s *, NUVEC *, f32);
 
 extern i32 obstacle_gizmotype_id;
 
-void GameCam_NewShake(GAMECAMERA_s *, f32, f32, f32);
 EXPLOSION *AddExplosion(NUVEC *, f32, f32, GameObject_s *, i32, i32);
 void PartKill_Grabber(PART_s *part, i32);
 
-extern i32 CHARSHADOWS_ON, Paused;
-extern MAKELAYERLISTFN MakeLayerList;
 void EnableShadowMapRendering(i32);
 void ResetShadowMapRendering();
 i32 MatrixReflection(NUMTX *, i32, f32, f32, NUMTX *);

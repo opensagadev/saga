@@ -102,10 +102,8 @@ static VARIPTR minikits_savecharacterbufferptr;
 extern "C" VARIPTR characterbuffer_ptr;
 extern "C" VARIPTR characterbuffer_end;
 
-extern f32 KITPOSX, PANEL_MINIKITY, PANEL_MINIKITSCALE;
 
 char *LEGOASCII_BIGARROW = NULL;
-i32 MatrixReflection(NUMTX *, i32, f32, f32, NUMTX *);
 
 extern i32 LEGOOBJ_MINIKIT, LEGOOBJ_CHARKIT;
 void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
@@ -118,7 +116,6 @@ void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 
 
 
-i32 MatrixReflection(NUMTX *matrix, i32 axis, f32 plane, f32 height, NUMTX *result);
 
 struct GAMEMESSAGE_s;
 struct nuhspecial_s;
@@ -199,10 +196,7 @@ f32 PANEL_MINIKITCOUNTY = -0.1f;
 // red-brick positions come from the Game init values in legogame/game.cpp.
 i32 LEGOOBJ_CHARKIT = -1;
 i32 LEGOOBJ_MINIKIT = -1;
-extern "C" void Text3D(char *, f32, f32, f32, f32, f32, f32, u32, u8, u8, u8);
 
-i32 DrawPanel3DObjectNoAlpha(float x, float y, float z, float scale_x, float scale_y, float scale_z, u16 rotate_x,
-                             u16 rotate_y, u16 rotate_z, nuhspecial_s *special, i32 rotate_order);
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
     do {                                                                                                               \

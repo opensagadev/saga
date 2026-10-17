@@ -137,7 +137,6 @@ extern "C" {
     extern VARIPTR characterbuffer_end;
 }
 void BackDrop_Init(char *path, VARIPTR *buf, VARIPTR *buf_end);
-void TextCrawl_Draw(float dt, i32 paragraphs, float alpha, char *text);
 void LoadPerm1(void);
 void LoadPerm2(void);
 void RegisterHelpers(void);
@@ -279,7 +278,6 @@ struct TouchHolder;
 
 void CheckForPlayersTurnedOff();
 
-extern "C" NUVEC plr_lastpos;
 
 void ResetPlayerMoves(GameObject_s *obj);
 i32 TagCharacter(GameObject_s *source, GameObject_s *target, i32 mode);
@@ -289,11 +287,8 @@ void Player_ResetContexts(PLAYERPACKET_s *packet);
 
 // --- Helpers moved from world.cpp ---
 
-void Players_InitPositions(WORLDINFO *world);
 
-extern i8 BoltType_FindIDByName(char *name, WORLDINFO *world);
 
-void PlayerItemTypes_Reset(WORLDINFO *world);
 
 
 
@@ -312,14 +307,12 @@ void PlayerItemTypes_Reset(WORLDINFO *world);
 
 
 
-i32 Players_AveragePos(nuvec_s *position, SOCKPOSITION_s *socket_position);
 
 
 
 
 
 
-void GameAudio_PlaySfx(i32 sfx, NUVEC *position, i32 flags, i32 volume);
 
 
 
@@ -329,7 +322,6 @@ namespace {
 } // namespace
 
 
-void SetFlicker(GameObject_s *object, float duration);
 
 
 
@@ -340,7 +332,6 @@ void ResetPlayerMoves(GameObject_s *object);
 
 
 
-i32 ActivePlayerInRange(nuvec_s *position, float range_squared, float *distance_squared);
 
 DECOMP_ASSERT(sizeof(SPECIAL_LAYER_s) == 0xc, "SPECIAL_LAYER_s size");
 
@@ -348,12 +339,8 @@ DECOMP_ASSERT(sizeof(SPECIAL_LAYER_s) == 0xc, "SPECIAL_LAYER_s size");
 
 
 
-bool FindNearestPlayerToVec(nuvec_s *position, GameObject_s **nearest_player, float &distance_squared,
-                            bool require_character_flags, u32 character_flags);
 
 
-bool FindFurthestPlayerFromVec(nuvec_s *position, GameObject_s **furthest_player, float &distance_squared,
-                               bool require_character_flags, u32 character_flags);
 
 // ==== src/legoapi/actions/movement/dropinout.cpp: declarations ====
 

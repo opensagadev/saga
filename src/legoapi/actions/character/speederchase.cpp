@@ -90,21 +90,13 @@ void ResetTrooperCannons(WORLDINFO_s *world, i32 trooper_id);
 void UpdateTrooperCannons(WORLDINFO_s *world);
 i32 GoingForwardsAlongNarrowSock(GameObject_s *object);
 
-void SpeederChaseA_Init(WORLDINFO_s *world);
-
-void SpeederChaseA_Panel(WORLDINFO_s *);
-
-void SpeederChaseA_Reset(WORLDINFO_s *);
 
 
-void SpeederChaseA_Update(WORLDINFO_s *world);
 
 
-extern "C" void AddDebrisEffect(i32 *, i32, f32, f32, f32);
-extern "C" void DebrisPosOrientationMtx(i32, NUMTX *);
-extern "C" void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
 
-extern "C" f32 pod_roll[2];
+
+
 f32 getPodRoll(i32 index) {
     return pod_roll[index];
 }

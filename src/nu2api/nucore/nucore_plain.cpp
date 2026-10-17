@@ -230,20 +230,8 @@ void NuIOS_RecordFlurryEvent(char *event_name);
 
 void NuAnimBuffCreateScratch(nuanimbuff_s *buffer);
 void NuAnimBuffDestroyScratch(nuanimbuff_s *buffer);
-void NuAnimCurve2SetApplyToJointTransLoc(nuanimcurve2_s *curves, i8 *types, i8 flags, nuanimtime_s *time,
-                                             nuhgobjjoint_s *joint, NUVEC *scale, NUVEC *parent_scale, NUMTX *matrix,
-                                             NUJOINTANIM_s *override_anim, NUVEC *root_translation,
-                                             NUVEC *locator_translation);
-void NuAnimCurve2SetApplyToJoint(nuanimcurve2_s *curves, i8 *types, i8 flags, nuanimtime_s *time,
-                                     nuhgobjjoint_s *joint, NUVEC *scale, NUVEC *parent_scale, NUMTX *matrix,
-                                     NUJOINTANIM_s *override_anim);
 void *NuAnimCurveCreate(void);
 void NuAnimCurveDestroy(void *curve);
-void NuAnimCurveSetApplyBlendToJoint2(nuanimcurveset_s *first, nuanimtime_s *first_time, nuanimcurveset_s *second,
-                                          nuanimtime_s *second_time, f32 blend, nuhgobjjoint_s *joint, NUVEC *scale,
-                                          NUVEC *parent_scale, NUMTX *matrix, NUJOINTANIM_s *override_anim);
-void NuAnimCurveSetApplyToMatrix(nuanimcurveset_s *set, nuanimtime_s *time, NUMTX *matrix);
-void NuAnimData2CalcMatrix(nuanimdata_s *animation, i32 node, f32 frame, numtx_s *matrix);
 void NuAnimData2CalcTime(nuanimdata2_s *anim, f32 frame, nuanimtime_s *time);
 void NuAnimDataCalcTime(void *animation, f32 frame, nuanimtime_s *time);
     extern "C++" void NuAnimDataChunkDestroy(nuanimdatachunk_s *chunk);
@@ -306,7 +294,6 @@ void NuLightSpeedBlurScale(f32 x, f32 y);
     i32 NuLgtArcLaserOldCnt;
 
 
-void NuLgtSetArcMat(NUMTL *material, f32 u0, f32 v0, f32 u1, f32 v1);
 i32 NuSpecialDrawSmoothSkin(void *special, NUMTX *skin_matrices, NUMTX *world_matrix);
 i32 NuSpecialDrawSmoothSkinDwa(void *special, NUMTX *skin_matrices, NUMTX *world_matrix,
                                    DEFORMERWEIGHTSARRAY *blend_values);
@@ -332,7 +319,6 @@ void NuDynamicLightSetEnabled(NuDynamicLight *light, i32 enabled);
 void NuDynamicLightSetParameterf(NuDynamicLight *light, i32 parameter, f32 value);
 void NuDynamicLightSetParameteri(NuDynamicLight *light, i32 parameter, i32 value);
 void NuDynamicLightSetUsedOnSpecials(NuDynamicLight *light, i32 enabled);
-void NuDynamicLightSetupCustomCameraFrustum(NuDynamicLight *light, NUCAMERA *camera, const f32 *splits, i32 count);
 i32 NuDynamicLightTestShadowExtrusionExtent(NuDynamicLight *light, const NUVEC *center, const NUVEC *extent,
                                                 i32 render_set);
 void NuDynamicLightTestShadowExtrusions(NuDynamicLight *light, const VuVec *first, const VuVec *second);
@@ -373,12 +359,6 @@ NUGSCN *NuGHGRelocate(NUGSCN *scene, VARIPTR *destination);
     // ---------------------------------------------------------------------------
 
 
-i32 NuPortalClipTest(NUGSCN *scene, NUVEC *position, f32 radius, i16 room_id);
-i32 NuPortalNumRooms(NUGSCN *scene);
-void NuPortalResetActive(NUGSCN *scene);
-i32 NuPortalRoomClipTest(NUGSCN *scene, i16 room_id);
-void NuPortalRoomClipTestAll(NUGSCN *scene, u8 *room_visibility);
-i32 NuPortalWhichRoom(NUGSCN *scene, NUVEC *position);
 extern i32 VisiSysCameraLock;
 extern i32 LoadedOcclusionData;
 extern i32 UsingOcclusionData;
@@ -474,5 +454,4 @@ struct nuframebuffer_s;
 struct nushaderobject_s;
 union variptr_u;
 
-void NuLgtSetArcMatEx(i32 type, numtl_s *material, f32 u0, f32 v0, f32 u1, f32 v1);
 

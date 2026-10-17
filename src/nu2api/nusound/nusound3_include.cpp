@@ -345,7 +345,6 @@ DECOMP_ASSERT(sizeof(NuSound3Stream::mVoice) == 0x10, "NuSound3Stream voice poin
 static NuSoundBuffer g_NuSoundStreamBuffers[4];
 static NuSoundListener g_NuSoundListener;
 
-extern "C" f32 NuSound3GetStreamPlaybackTime(i32 stream_index);
 
 static NuSoundStreamer *g_NuSoundStreamer = NULL;
 static u16 *g_NuSoundLoadBits = NULL;
@@ -353,11 +352,9 @@ static u16 *g_NuSoundLoadBitsCache = NULL;
 static i32 g_NuSoundNumLoadBitShorts = 0;
 static NuThread *g_NuSoundLoadThread = NULL;
 
-extern "C" void NuSound3StopVoice(NuSoundVoice *voice);
 
 void NuSound3SampleLoadThread(void *arg);
 
-nusound_filename_info_s *ConfigureMusic(char *file, VARIPTR *bufferStart, VARIPTR *bufferEnd);
 
 
 f32 PS2VolumeToScalar(i32 volume);
@@ -1053,7 +1050,6 @@ struct nufpar_s;
 // Runtime-selected groups appended after the fixed terrain allocation.
 
 // NuFileExists @nufile (nucore_plain.cpp).
-extern "C" i32 NuFileExists(char *name);
 
 // ==== functions in original address order ====
 
@@ -1990,9 +1986,6 @@ namespace {
 // ==== src/gameapi/gui/apimenu.cpp: all remaining content ====
 
 
-extern "C" void SmartTextEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment,
-                            u8 red, u8 green, u8 blue, f32 max_width, i32 max_lines, void *message_box,
-                            i32 suppress_draw, u32 alpha);
 
 // ==== src/legoapi/core/input/gamepads.cpp: declarations ====
 
@@ -2481,9 +2474,7 @@ extern "C" {
 
 void LevelComplete_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32);
 
-extern "C" i32 NuStrCpy(char *, const char *);
 
-extern "C" void NuStrCat(char *, const char *);
 
 // Retail keeps this body as GCC's split-out clone; the inline head stays in
 // the caller.
@@ -2511,9 +2502,7 @@ DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");
 //   NuHtmlBegin    0x2d5ca0   NuHtmlFlush   0x2d5c30
 //   NuHtmlWrite    0x2d5cd0   NuHtmlHeading1 0x2d5d40
 
-extern "C" void NuHtmlWrite(const char *text, ...);
 
-extern "C" void NuHtmlHeading1(const char *fmt, ...);
 
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 

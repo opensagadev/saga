@@ -93,16 +93,14 @@ void TakeOver2GetIn(GameObject_s *, GameObject_s *);
 void PlayLandSfx(GameObject_s *, i32, i32);
 f32 SpeederChaseATATInOutMul(NUVEC *, NUVEC *);
 i32 players_cannot_exit_speeder;
-extern i16 id_ATAT, id_SPEEDERBIKE;
-extern "C" i16 id_GRABCONTROL, id_GRABR2CONTROL;
 
 void AICreatureResumeScript(GameObject_s *);
 
 static NUVEC SpeederChaseATATExitLandPos = {-159.0f, 6.869999885559082f, -17.600000381469727f};
 
-extern i16 id_BUGGY, id_GYROCOPTER, id_BANTHA, id_BOMARRMONK, id_DEWBACK;
-extern i16 id_LANDSPEEDER, id_FLASHSPEEDER, id_TAUNTAUN, id_SPEEDERBIKE;
-extern i16 id_HEAVYREPEATINGCANNON, id_BIGGUN, id_TROOPERCANNON, id_STAP2, id_CLONEWALKER;
+extern i16 id_BUGGY, id_GYROCOPTER, id_BOMARRMONK;
+extern i16 id_LANDSPEEDER;
+extern i16 id_HEAVYREPEATINGCANNON, id_TROOPERCANNON;
 void PlayJumpSfx(GameObject_s *, i32);
 void ReleaseForce(GameObject_s *, i32);
 void ReleasePush(GameObject_s *);

@@ -96,7 +96,6 @@ static i32 erasecount;
 
 void InitRippleMtl(char *name, numtl_s **result, variptr_u *buffer, variptr_u *buffer_end);
 
-extern "C" void NuMtlDestroy(numtl_s *);
 
 i32 LookupRippleEffectIndex(char *name);
 

@@ -27,7 +27,6 @@
 #include <string.h>
 
 extern "C" void NuTexAnimSetSignals(u32 signals);
-extern "C" void NewTerrPlatformsOff(void);
 void FindAnglesZX(NUVEC *normal, u16 *x_rotation, u16 *z_rotation);
 
 static void Signal_SetVisibility(SIGNAL *signal, i32 visible);

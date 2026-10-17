@@ -51,7 +51,6 @@ extern "C" void *MemoryManagerAllocPool(MemoryManager *, u32, i32) asm("_ZN13Mem
 extern "C" void MemoryManagerFreePool(MemoryManager *, void *, u32) asm("_ZN13MemoryManager8FreePoolEPvj");
 
 extern "C" void NuAnimData2CalcTime(nuanimdata2_s *, f32, nuanimtime_s *);
-extern "C" f32 NuAnimCurve2CalcValEx(nuanimcurve2_s *, nuanimtime_s *, u32);
 void NuGCutRigidCalcMtx_3(NUGCUTRIGID_s *, f32, numtx_s *);
 
 

@@ -42,16 +42,13 @@
 #include "legoapi/world/world_shared.h"
 
 void InitMission(MISSIONSYS *, i32);
-extern f32 ICONSIZE, ICONX, DROPINALPHA, HUB_EPISODETITLEY;
-extern i16 tSELECT, tSELECTED, tSELECTING, tEXIT, tCANCEL;
-void DrawCharIcon(i32, f32, f32, f32, f32, i32, f32, f32, i32, nuhspecial_s *);
+extern f32 HUB_EPISODETITLEY;
+extern i16 tSELECT, tSELECTED, tSELECTING;
 void Hub_DrawImportantBrick(i32, f32, f32, f32, i32, i32);
-f32 GetAspectRatio();
 extern "C" void SmartText(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
                           u8 green, u8 blue, f32 max_width, i32 max_lines);
 extern i16 tOUTOFTIME;
 extern "C" TIMER BonusTimer;
-extern "C" void PlaySfx(char *, NUVEC *);
 extern void SetBonusWinner(i32);
 extern void ResetGameMessages(void);
 extern GameObject_s *FindGameObject(i32, u32, i32, i32, i32);

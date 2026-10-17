@@ -160,7 +160,6 @@ void RndrTexQuad(f32, f32, f32, f32, i32, numtl_s *, i32);
 
 extern "C" i32 CutSceneWaiting;
 extern "C" i32 editor_active;
-extern "C" i32 NewMode;
 extern "C" i32 PANELOFF;
 f32 TagButtonSize = ICONSIZE;
 f32 BorderWidth = 0.02f;
@@ -240,7 +239,6 @@ struct TouchHolder;
 
 // ---- Misc player/gameobject helpers relocated from doorstubs.cpp ----
 
-void GameAudio_PlaySfx(i32 sfx, NUVEC *position, i32 flags, i32 volume);
 
 void PlayerButton_OnHold_Callback(MechTouchUIElement &element, TouchHolder &);
 
@@ -257,8 +255,6 @@ DECOMP_ASSERT(sizeof(SPECIAL_LAYER_s) == 0xc, "SPECIAL_LAYER_s size");
 
 // ==== src/legoapi/core/input/gamepads.cpp: declarations ====
 
-extern "C" void BackupMenu(void);
-extern WORLDINFO_s *WORLD;
 extern "C" {
     extern "C++" FadeSystem FadeSys;
     extern i32 CutSceneWaiting;
@@ -287,7 +283,6 @@ extern "C" {
 struct nuhspecial_s;
 struct VuVec;
 
-f32 GetAspectRatio();
 
 // Camera zoom state
 
@@ -428,13 +423,11 @@ void NuHtmlFlush(i32 force);
 
 extern "C" void NuHtmlBegin(void *file);
 
-extern "C" void NuHtmlWrite(const char *text, ...);
 
-extern "C" void NuHtmlHeading1(const char *fmt, ...);
 
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 
-extern i16 id_YODA, id_YODAGHOST, id_GAMORREANGUARD, id_JANGOFETT;
+extern i16 id_GAMORREANGUARD;
 
 // Written by ThingManager's ctor (original global @0x124f2e0, .bss).
 

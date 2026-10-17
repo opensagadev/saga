@@ -79,7 +79,6 @@
 
 // Nu-side DX-style clear flags, translated to GL masks below.
 
-extern "C" void Nu360_dxClear(u32 clear_flags, u32 colour);
 
 // ---------------------------------------------------------------------------
 // Framebuffer setup

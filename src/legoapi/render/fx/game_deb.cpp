@@ -69,7 +69,6 @@
 
 // The reference defines these with dynamic initialization in this unit.
 
-void ClearLevelProgress(i32, WORLDINFO_s *);
 extern "C" ripple_set_s *ripples;
 
 struct AIROW_s;
@@ -78,17 +77,12 @@ struct nunativegscene_s;
 DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");
 
 
-extern "C" void edrtlCalculateBurnoutEx(burnset_s *set, NuBloomParameters *parameters, NUVEC *camera_position,
-                                        f32 frame_time);
 
 void FindSlamOrigin(GameObject_s *, NUVEC *, NUVEC *);
 EXPLOSION *AddExplosion(NUVEC *, f32, f32, GameObject_s *, i32, i32);
 
-extern AREADATA_s *PODRACE_ADATA;
-extern AREADATA_s *BONUS_GUNSHIP_ADATA;
 extern "C" i16 id_LANDSPEEDER;
 void PodDust(WORLDINFO_s *, GameObject_s *);
-extern "C" void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
 
 
 i32 CannotKill(GameObject_s *object);
@@ -97,7 +91,6 @@ extern "C" i32 DebrisCollisionCheckScaleY(NUVEC *position, f32 radius, f32 y_sca
 extern "C" i32 DebrisTorusCollisionCheckScaleY(NUVEC *position, f32 radius, f32 y_scale);
 
 
-void DebrisProcessSpheres(uv1deb *data, float time, debinftype *effect, debkeydatatype_s *key, i32 finite);
 
 // Debug-capture output helpers consumed by NuDisplayListCaptureSortPriority.
 // Transcribed from the original C-linkage symbols:
@@ -107,9 +100,7 @@ extern "C" {
 extern char unknown[8];
 }
 
-extern "C" void NuHtmlWrite(const char *text, ...);
 
-extern "C" void NuHtmlHeading1(const char *fmt, ...);
 
 extern "C" {
 }
@@ -117,13 +108,11 @@ extern "C" {
 extern "C" {
 }
 
-extern "C" void DebReAlloc(debkeydatatype_s *, i32);
 
 extern "C" {
 }
 
 
-void RndrArrow(float x, float y, float scale, i32 angle, i32 colour);
 
 
 // ==== src/legoapi/items/fx/ripples.cpp: declarations ====
@@ -139,7 +128,6 @@ void BuildRippleMtx(numtx_s *matrix, nuvec_s *normal, nuvec_s *position, u16, u1
 void VecRotateAxis(NUVEC *, u16, NUVEC *);
 void AddRipple(ripple_set_s *, NUMTX *, float, float, float, float, RGBA, RGBA, i32, numtl_s *, NUVEC *);
 
-extern "C" void NuMtlDestroy(numtl_s *);
 
 void AddRipple(ripple_set_s *set, numtx_s *matrix, float size, float growth, float lifetime, float delay,
                RGBA start_color, RGBA end_color, i32 flags, numtl_s *material, nuvec_s *velocity);

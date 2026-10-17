@@ -117,7 +117,6 @@ NUVEC nuvec_minus_one = {-1.0f, -1.0f, -1.0f};
 
 
 
-void NuVecInvMtxTransform(NUVEC *out, NUVEC *v, NUMTX *m);
 
 
 
@@ -128,9 +127,7 @@ void NuVecInvMtxTransform(NUVEC *out, NUVEC *v, NUMTX *m);
 
 extern "C" {
 
-f32 NuLog10(f32 x);
 
-f32 NuExp10(f32 x);
 
 
 

@@ -44,7 +44,6 @@
 #include "nu2api/nu3d/nudlist.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nutex.h"
-extern "C" i32 GetSfxId(const char *);
 extern i32 testlaser_type;
 extern f32 testlaser_sizew, testlaser_sizel, testlaser_sizewab, testlaser_endw;
 
@@ -115,7 +114,6 @@ GIZMO *obstMirrorBall;
 GIZMO *forceMirrorBall;
 nuhspecial_s LevSpecial[7];
 void *LevelBuildits[2];
-extern i32 obstacle_gizmotype_id, force_gizmotype_id;
 static __used__ i32 power;
 static __used__ i32 recharging;
 static __used__ i32 target_shield[2];
@@ -132,39 +130,24 @@ static __used__ f32 rechargetimer;
 // Jabba's Palace (JabbasPalace_A / B / D / E)
 // ===========================================================================
 
-void JabbasPalaceA_Init(WORLDINFO_s *world);
 
-void JabbasPalaceB_Init(WORLDINFO_s *world);
 
-void JabbasPalaceE_Init(WORLDINFO_s *world);
 
-void JabbasPalaceA_Reset(WORLDINFO_s *);
 
-void JabbasPalaceB_Reset(WORLDINFO_s *);
 
-void JabbasPalaceD_Reset(WORLDINFO_s *world);
 
-void JabbasPalaceE_Reset(WORLDINFO_s *world);
 
-void JabbasPalaceE_Panel(WORLDINFO_s *);
 
-void JabbasPalaceA_Update(WORLDINFO_s *);
 
-void JabbasPalaceE_Update(WORLDINFO_s *world);
 
 // ===========================================================================
 // Sarlacc Pit (SarlaccPit_A / B / C)
 // ===========================================================================
 
-void SarlaccPitA_Draw(WORLDINFO_s *);
 
-void SarlaccPitA_Reset(WORLDINFO_s *world);
 
-void SarlaccPitB_Init(WORLDINFO_s *);
 
-void SarlaccPitB_Reset(WORLDINFO_s *world);
 
-void SarlaccPitB_Update(WORLDINFO_s *world);
 
 static inline void SarlaccDiscoShow(nuhspecial_s *special) {
     NuSpecialSetVisibility(special, 1);
@@ -175,11 +158,8 @@ static inline void SarlaccDiscoShow(nuhspecial_s *special) {
     }
 }
 
-void SarlaccPitC_Init(WORLDINFO_s *);
 
-void SarlaccPitC_Update(WORLDINFO_s *world);
 
-void SarlaccPitC_Reset(WORLDINFO_s *world);
 
 // ===========================================================================
 // Bonus levels: Lego City, Senate, New Town
@@ -192,46 +172,30 @@ static u8 prevOnTownCar;
 static u8 prevOnFireTruck;
 static u8 prevOnLifeBoat;
 
-void LegoCity_Init(WORLDINFO_s *world);
 
-void LegoCity_Reset(WORLDINFO_s *world);
 
-void LegoCity_Update(WORLDINFO_s *world);
 
-void SenateA_Init(WORLDINFO_s *world);
 
-void NewTown_Init(WORLDINFO_s *world);
 
-void NewTown_Reset(WORLDINFO_s *world);
 
-void NewTown_Update(WORLDINFO_s *world);
 
 // ===========================================================================
 // Endor battle (EndorBattle_A / C)
 // ===========================================================================
 
-void EndorBattleA_Init(WORLDINFO_s *world);
 
-void EndorBattleC_Init(WORLDINFO_s *world);
 
-void EndorBattleA_Update(WORLDINFO_s *);
 
-void Platform_Init(WORLDINFO_s *world);
 
-void Platform_Reset(WORLDINFO_s *);
 
-void E1CharacterBonus_Init(WORLDINFO_s *world);
 
 // ===========================================================================
 // Death Star 2 battle
 // ===========================================================================
 
-void DeathStar2BattleD_Init(WORLDINFO_s *world);
-
-void DeathStar2BattleD_Update(WORLDINFO_s *);
 
 
-void DeathStar2BattleA_AlwaysUpdate(WORLDINFO_s *);
+
 
 // ===========================================================================
 // Emperor fight (EmperorFight_A)
@@ -252,17 +216,13 @@ static u64 routemask_efloor_on;
 static u64 routemask_efloor_off;
 static nuhspecial_s *hspecial_efloor;
 
-void EmperorFightA_Init(WORLDINFO_s *world);
 
-void EmperorFightA_Reset(WORLDINFO_s *world);
 
 static inline u64 EmperorFloorAreaMask(WORLDINFO_s *world) {
     i32 index = static_cast<i32>(LevArea[0] - world->ai_sys->areas);
     return static_cast<u64>(static_cast<i64>(static_cast<i32>(1u << (index & 31))));
 }
-void EmperorFightA_Update(WORLDINFO_s *world);
 
-void EmperorFightA_Panel(WORLDINFO_s *);
 
 // ===========================================================================
 // Fire / slow-down helpers (Death Star 2 fire)
@@ -280,11 +240,8 @@ void DeathStar2BattleFire_UpdateSlowDownMul(f32 dt);
 extern i32 objhitobj_nohurtsfx, objhitobj_noimpactsfx;
 extern "C" void AddVariableShotDebrisEffectTimed3(i32, NUVEC *, NUVEC *, i32, f32, NUMTX *, NUMTX *);
 
-void DeathStar2BattleFire_Draw(WORLDINFO_s *world);
 
-void DeathStar2BattleFire_Init(WORLDINFO_s *world);
 
-void DeathStar2BattleFire_Update(WORLDINFO_s *world);
 
 static f32 slowDownTimer[2];
 

@@ -119,7 +119,6 @@ MemoryManager theMemoryManager;
 BIGBUFFER_s BigBuffer;
 void *theThingManager = NULL;
 
-void ClearLevelProgress(i32, WORLDINFO_s *);
 
 struct AIROW_s;
 struct nunativegscene_s;
@@ -141,8 +140,6 @@ void RndrTexQuad(f32 x, f32 y, f32 width, f32 height, i32 colour, numtl_s *mater
 void bgProcClose() {
 }
 
-extern "C" void edrtlCalculateBurnoutEx(burnset_s *set, NuBloomParameters *parameters, NUVEC *camera_position,
-                                        f32 frame_time);
 
 void bgprocFreeze();
 
@@ -220,15 +217,11 @@ void bgProcAbortAll();
 
 void bgprocUnFreeze();
 
-extern AREADATA_s *PODRACE_ADATA;
-extern AREADATA_s *BONUS_GUNSHIP_ADATA;
-extern "C" void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
 
 i32 bgprocIsFreezing();
 
 
 
-void DebrisProcessSpheres(uv1deb *data, float time, debinftype *effect, debkeydatatype_s *key, i32 finite);
 
 // Debug-capture output helpers consumed by NuDisplayListCaptureSortPriority.
 // Transcribed from the original C-linkage symbols:
@@ -243,9 +236,7 @@ void NuHtmlFlush(i32 force);
 
 extern "C" void NuHtmlBegin(void *file);
 
-extern "C" void NuHtmlWrite(const char *text, ...);
 
-extern "C" void NuHtmlHeading1(const char *fmt, ...);
 
 extern "C" void NuHtmlBanner(void);
 
@@ -267,7 +258,6 @@ extern "C" {
 extern "C" {
 }
 
-extern "C" void DebReAlloc(debkeydatatype_s *, i32);
 
 VARIPTR *DisplayListRenderBuffer();
 
@@ -279,25 +269,21 @@ extern "C" {
 void TBRESET();
 
 
-void RndrArrow(float x, float y, float scale, i32 angle, i32 colour);
 
 
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 
 
-extern i16 id_YODA, id_YODAGHOST, id_GAMORREANGUARD, id_JANGOFETT;
+extern i16 id_GAMORREANGUARD;
 
 extern "C" {
-    extern i16 id_LANDSPEEDER, id_MILLENNIUMFALCON;
+    extern i16 id_LANDSPEEDER;
 }
 
 // Written by ThingManager's ctor (original global @0x124f2e0, .bss).
 
-void legoSetMusicVolume(float);
-APIOBJECT *GameAPIOBJECTFromObjID(u8 object_id);
 
 
-extern "C" i32 AISysSetLevelPath(AISYS_s *system, char *path_name);
 
 
 
@@ -319,12 +305,10 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 // are represented by those dedicated routes.
 
 
-f32 GameShadow(GameObject_s *object, nuvec_s *position, f32 probe_height, i32 terrain_mask);
 
 struct CUTSCENEPLAYERCLIP;
 
 
-extern "C" i32 NewRayCastScaleYMask(NUVEC *, NUVEC *, f32, f32, i32, u32);
 
 
 
@@ -367,11 +351,6 @@ extern "C" {
 
 
 
-void GameAISysReset(AISYS_s *system);
-
-void GameAudio_PlaySfxById(i32 sfx_id, nuvec_s *position, i32 flags, i32 volume);
-
-void *GameBufferAlloc(variptr_u *buf, variptr_u *buf_end, i32 size);
 
 
 
@@ -380,15 +359,14 @@ void *GameBufferAlloc(variptr_u *buf, variptr_u *buf_end, i32 size);
 
 
 
-u16 SeekRot(u16, u16, f32);
-extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER, id_ATST;
+
+
+extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER;
 
 
 
 
 
-extern "C" i16 id_THEEMPEROR, id_IMPERIALGUARD, id_BODYGUARD;
-extern "C" i32 AddGameDebrisRot(APIDEBRISSYS_s *, i32, NUVEC *, i32, u16, u16);
 
 
 // ThingManager objects return to the theMemoryManager pool (D0 @0x425a50).
@@ -408,8 +386,6 @@ extern "C" {
 
 
 
-extern AREADATA *PODSPRINT_ADATA;
-extern i16 id_ANAKINSNEWPOD, id_ANAKINSNEWPODGREEN, id_SEBULBASPOD;
 
 
 

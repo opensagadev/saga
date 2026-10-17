@@ -210,4 +210,3 @@ void GizmoBlowup_TransformDraw_Game(GIZMOBLOWUP_s *blowup) {
 
 void InterpolateRotationMatrix(numtx_s *result, numtx_s *first, numtx_s *second, float fraction);
 
-void QuatInterpolateRotationMatrix(NUMTX *result, NUMTX *first, NUMTX *second, f32 fraction);

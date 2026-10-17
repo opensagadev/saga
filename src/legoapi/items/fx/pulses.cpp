@@ -24,7 +24,6 @@ void AddLevelSfxFromId(i32 sfx_id, i32 *sfx_ids, i32 *sfx_count, i32 max_sfx);
 void GameAudio_PlaySfxById(i32 sfx_id, NUVEC *position, i32 flags, i32 volume);
 void TakeHitRumble(GameObject_s *object, f32 strength);
 void KillRumble(GameObject_s *object);
-extern "C" void AddFiniteShotDebrisEffect(i32 *handle, i32 effect, NUVEC *position, i32 count);
 
 void Pulses_Reset(PULSESYS_s *pulse_sys) {
     PULSESYS_s *current_pulse_sys = pulse_sys;

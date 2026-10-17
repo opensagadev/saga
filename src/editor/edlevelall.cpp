@@ -358,8 +358,6 @@ LevelEditor theLevelEditor;
 
 extern "C" void eduiSetCameraEnabled(i32);
 eduimenu_s *GetMenuActiveChild(eduimenu_s *);
-extern "C" void NuFntSet(i32);
-extern "C" void NuFntScale(i32, i32);
 extern "C" void NuRndrRect2di(i32, i32, i32, i32, i32, NUMTL *);
 extern "C" void eduiSetCursorColour(u32);
 extern "C" void eduiSetFontScale(f32, f32);
@@ -839,7 +837,6 @@ extern "C" {
 
 }
 
-extern "C" i32 NuKeyboard(i32 key);
 
 extern "C" {
 
@@ -1625,7 +1622,6 @@ void LoadPerm1();
 
 // ==== src/legoapi/core/input/gamepads.cpp: declarations ====
 
-extern WORLDINFO_s *WORLD;
 
 // Original bss @0x127a500: 64 pads x 0x60 bytes.
 // Original bss @0x127a4e0.
@@ -1635,7 +1631,6 @@ extern WORLDINFO_s *WORLD;
 // angular velocity only when both consecutive turns agree.
 
 
-extern "C" f32 NuFsqrt(f32);
 
 // ==== src/gameframework/savesystem.cpp: all remaining content ====
 
@@ -1659,7 +1654,6 @@ extern "C" {
 // Runtime-selected groups appended after the fixed terrain allocation.
 
 // NuFileExists @nufile (nucore_plain.cpp).
-extern "C" i32 NuFileExists(char *name);
 
 // ==== src/legoapi/render/fx/parts.cpp: declarations ====
 
@@ -2411,7 +2405,6 @@ DECOMP_ASSERT(sizeof(JEDIBNETPACKET_s) == 0x20, "JEDIBNETPACKET_s ABI");
 // the network check, which retail keeps as the split-out body of the IPA-SRA
 // clone (it only needs &world->ai_sys).
 
-void JediB_Init(WORLDINFO_s *world);
 
 // ===========================================================================
 // Gunship (Gunship_A / Gunship_B)
@@ -2490,15 +2483,12 @@ static_assert(sizeof(struct LEVFLAGBYTES_s) == 16, "LevFlag must be 16 bytes");
 // Pod race core (A/B/C laps)
 // ===========================================================================
 
-void PodRaceAUpdate(WORLDINFO_s *world);
 
 // ===========================================================================
 // Pod sprint (Sebulba events)
 // ===========================================================================
 
-void PodSprintA_Init(WORLDINFO_s *world);
 
-void PodSprintA_Update(WORLDINFO_s *world);
 
 // ===========================================================================
 // Retake the palace (D/E/G)
@@ -2568,9 +2558,7 @@ void PodSprintA_Update(WORLDINFO_s *world);
 // ---- begin src/gameapi/ai/aisys/aisys.cpp ----
 
 
-extern "C" ADDPART_s Default_ADDPART;
 
-extern "C" PART_s *AddPart(ADDPART_s *);
 
 // Game-specific AI actions and conditions (registered via
 // RegisterAIScriptActions / RegisterAIScriptConditions). These are stubbed to
@@ -3047,9 +3035,7 @@ DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");
 //   NuHtmlBegin    0x2d5ca0   NuHtmlFlush   0x2d5c30
 //   NuHtmlWrite    0x2d5cd0   NuHtmlHeading1 0x2d5d40
 
-extern "C" void NuHtmlWrite(const char *text, ...);
 
-extern "C" void NuHtmlHeading1(const char *fmt, ...);
 
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 
@@ -6284,7 +6270,6 @@ DECOMP_ASSERT(offsetof(NuSpecialLegacyLayout, flags) == 0x48, "legacy special fl
 DECOMP_ASSERT(offsetof(NuLegacyInstanceLayout, flags) == 0x44, "legacy instance flags offset");
 DECOMP_ASSERT(offsetof(NuLegacyInstanceLayout, animation) == 0x48, "legacy instance animation offset");
 
-extern "C" i32 NuSpecialExistsFn(void *special_ptr);
 
 // ==== src/legoapi/world/world.cpp: declarations ====
 

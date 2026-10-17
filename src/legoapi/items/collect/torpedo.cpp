@@ -48,7 +48,6 @@
 static TORPEDOPACKET TorpedoPackets[16];
 
 
-TORPEDOPACKET *GetTorpedoPacket(void);
 
 
 
@@ -61,11 +60,9 @@ f32 steal_torpedo_range = 2.0f;
 
 
 
-void Torpedo_InitRicochet(BOLT_s *bolt, nuvec_s *position);
 
 
 
-void DrawTorpedoTargetSprite(void *, unsigned char, float);
 
 // DrawTorpedos expands the Y rotation with the stored 32-bit angle; the trig
 // table index is taken from the untruncated value.

@@ -190,14 +190,10 @@ struct nunativegscene_s;
 struct SHOPINPUT;
 
 MENUPACKET_s MenuPacket = {};
-extern f32 ICONSIZE, ICONX, DROPINALPHA, HUB_EPISODETITLEY;
-extern i16 tSELECT, tSELECTED, tSELECTING, tEXIT, tCANCEL;
-void DrawCharIcon(i32, f32, f32, f32, f32, i32, f32, f32, i32, nuhspecial_s *);
-f32 GetAspectRatio();
-extern "C" void BackupMenu(void);
+extern f32 HUB_EPISODETITLEY;
+extern i16 tSELECT, tSELECTED, tSELECTING;
 extern "C" void BackupMenuNoFn(void);
 extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
-extern "C" void NuIOS_RecordFlurryEvent(char *event_name);
 extern "C" void DrawMenuButtonPrompts(i32 confirm_prompt, i32 cancel_prompt, i32 enabled, u8 red, u8 green, u8 blue,
                                       u8 alpha);
 extern "C" void DrawMenuButtonPromptsEx(i32 confirm_prompt, i32 cancel_prompt, i32 flags, i32 enabled, u8 red, u8 green,
@@ -230,14 +226,6 @@ extern char *apitxt_FORMATTINGCOMPLETE;
 extern char *apiGameName;
 extern char *apitxt_YES;
 extern char *apitxt_NO;
-extern "C" OPTIONSSAVE TempOptions;
-extern f32 minikittime;
-extern "C" TIMER BonusTimer;
-f32 GameSetSoundVolume(OPTIONSSAVE *options);
-f32 GameSetMusicVolume(OPTIONSSAVE *options);
-extern "C" u8 MENUNORMALR;
-extern "C" u8 MENUNORMALG;
-extern "C" u8 MENUNORMALB;
 extern "C" f32 sfx_wait;
 extern "C" f32 MENUBOTY;
 void Draw_NODATAAVAILABLE();
@@ -285,8 +273,6 @@ f32 memcard_loadmessage_delay;
 f32 memcard_loadresult_delay;
 i32 SAVESIZE = 50;
 
-extern "C" i32 memcard_autosaveenabled;
-extern "C" i32 memcard_autosavedisabled;
 static i32 header_r;
 static i32 header_g;
 static i32 header_b;
@@ -309,7 +295,6 @@ u8 RAP_WARNING_R = 0xff;
 
 static i32 g_enableButtonPrompts = 1;
 
-extern "C" i32 FinishLoop_On;
 
 static inline i32 MenuSlotColourLerp(u32 first, u32 second, f32 amount) {
     return static_cast<i32>(first * amount + second * (1.0f - amount));
@@ -342,9 +327,7 @@ void MenuUpdateSave(MENU_s *menu);
 
 
 
-void IconScenes_Init(char *path, variptr_u *buf, variptr_u *);
 
-void IconScenes_Load(APICHARACTERMODELLIST_s *list, i32, variptr_u *buf, variptr_u *buf_end);
 
 void MenuDrawLoading(MENU_s *);
 
@@ -356,7 +339,6 @@ void MenuUpdateLoading(MENU_s *);
 
 void MenuUpdateSaving(MENU_s *);
 
-NUGSCN *IconScene_FindById(i32 character_id);
 
 void MenuDrawFormatting(MENU_s *);
 
@@ -537,29 +519,16 @@ void RemapAddr(void *new_base, void *old_base, void **address);
 // ==== src/legoapi/menus/screens/menus.cpp: declarations ====
 
 
-extern "C" void NewMenu(i32 menu_id, i32 menu_y, i32 param3);
-extern "C" bool TestForController(void);
-extern "C" GAMEPAD_s GamePad[64];
-extern "C" i32 reset_area;
 
 // ==== src/legoapi/render/core/render.cpp: declarations ====
 
-extern "C" void edbriStartAllPages(void);
 
 
-extern "C" void LocaledbitsDrawSolidEllipseXY(NUVEC *centre, f32 radius_x, f32 radius_z, i32 rotation, f32 lower_y,
-                                              f32 upper_y, u32 colour, i32, i32 segments);
 
-extern "C" void LocaledbitsDrawCircleXY(NUVEC *centre, f32 radius, u32 colour, i32, i32 segments);
 
-extern "C" void LocaledbitsDrawSolidCircleXY(NUVEC *centre, f32 radius, f32 lower_y, f32 upper_y, u32 colour, i32,
-                                             i32 segments);
 
-extern "C" void RndrOSquare(NUVEC *centre, f32 radius, i32 colour);
 
-extern "C" void RndrOSphere(NUVEC *centre, f32 radius, i32 colour, i32 segments, i32);
 
-extern "C" void RndrCircleXZ(NUVEC *centre, f32 radius, i32 colour, i32 segments);
 
 struct starfighter_s;
 struct rtl_s;
@@ -567,7 +536,6 @@ struct rtlidata_s;
 
 
 
-i32 MatrixReflection(NUMTX *matrix, i32 axis, f32 plane, f32 height, NUMTX *result);
 
 
 struct GAMEMESSAGE_s;
@@ -583,8 +551,6 @@ struct ripple_node_s;
 struct ripple_set_s;
 struct VuVec;
 
-extern "C" i32 NuRndrBeginScene(i32);
-extern "C" void NuRndrEndScene(void);
 extern "C" void NuRndrRect2di(i32, i32, i32, i32, i32, numtl_s *);
 extern char *apitxt_EMPTY;
 extern char *apitxt_PRESENT;
@@ -598,14 +564,6 @@ extern char *apitxt_CORRUPTLOAD;
 extern f32 MENUBOTY;
 extern f32 memcard_loadmessage_delay;
 extern f32 memcard_loadresult_delay;
-extern u8 MENUENTRYR, MENUENTRYG, MENUENTRYB;
-extern f32 cointotaltime;
-extern "C" f32 MainRenderTime;
-extern "C" i32 editor_active;
-extern "C" i32 screendump;
-extern "C" i32 PANELOFF;
-extern void SetLevelLights(void *set, f32 scale);
-extern f32 statstime;
 
 // Camera zoom state
 
@@ -617,7 +575,6 @@ extern "C" {
 }
 
 
-extern "C" void NuGScnUpdate(NUGSCN *gscn, f32 frame_delta);
 
 // --- NuGScn graphics-data reader ---
 // NuReadGraphicsData is a C++ static function in the original (GCC clones it,
@@ -636,8 +593,6 @@ extern "C" {
 } // extern "C"
 
 
-i32 Draw3DObject(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x_rotation, u16 y_rotation,
-                 u16 z_rotation, float scale_x, float scale_y, float scale_z, i32 rotate_order);
 
 
 
@@ -691,41 +646,28 @@ i32 Draw3DObject(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x_
 
 
 
-void DrawStatusIcons(STATUSPACKET_s *status, float y, float alpha);
 
 
 
 // DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
 // red-brick positions come from the Game init values in legogame/game.cpp.
-extern "C" void Text3D(char *, f32, f32, f32, f32, f32, f32, u32, u8, u8, u8);
-
-void DrawMiniKitCount(float position, float scale, i32 count, i32 maximum);
-
-i32 Draw3DObjectAlpha(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x_rotation, u16 y_rotation,
-                      u16 z_rotation, float scale_x, float scale_y, float scale_z, i32 rotate_order, float alpha);
 
 
 
-extern i16 tUNKNOWN, tPOWERBRICK, tLOCKED, tGOLDBRICK;
-extern "C" void PlaySfx(char *, NUVEC *);
-void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 
 
-void DrawPanel3DObjectMtx(nuhspecial_s *special, numtx_s *matrix, float alpha);
+extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
+
+
 
 extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
 
-extern AREADATA *PODSPRINT_ADATA;
 extern "C" {
 }
 
 
-void DrawGameMessage_Targets(GAMEMESSAGE_s *message, nuvec_s *position, float scale);
 
-i32 DrawPanel3DObjectNoAlpha(float x, float y, float z, float scale_x, float scale_y, float scale_z, u16 rotate_x,
-                             u16 rotate_y, u16 rotate_z, nuhspecial_s *special, i32 rotate_order);
 
-extern void DrawMenuEntry(MENU_s *, char *);
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
     do {                                                                                                               \
@@ -740,12 +682,9 @@ extern void DrawMenuEntry(MENU_s *, char *);
     } while (false)
 
 
-void Transform_DrawTarget(NUVEC *, f32, f32);
-extern i16 id_ANAKINJEDISCARRED, id_WEIRDO1, id_WEIRDO2, id_CATAPULT, id_CHEWBACCA, id_WOOKIEE, id_TWOFACE;
-extern i32 PickUpFlickerTest, PickUpFlickerFrames, PickupFlickerFrame;
+extern i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
 
 
-extern f32 SeekLinearF(f32, f32, f32);
 
 
 
@@ -754,7 +693,6 @@ extern f32 SeekLinearF(f32, f32, f32);
 
 
 
-extern "C" i32 NuIOS_IsWidescreen(void);
 void MenuDrawLoad(MENU *menu);
 void MenuDrawLoading(MENU *menu);
 void MenuDrawAutoSaveCancel(MENU *menu);
@@ -812,18 +750,9 @@ void MenuUpdateSave(MENU *menu);
 void MenuUpdateSaveCancel(MENU *menu);
 void MenuUpdateSaveConfirm(MENU *menu);
 void MenuUpdateSaving(MENU *menu);
-extern "C" VARIPTR characterbuffer_ptr;
-extern "C" VARIPTR characterbuffer_end;
-extern "C" void SoundKillAll(void);
 struct CUTSCENEPLAYERCLIP;
-extern "C" i32 NewMode;
-extern "C" i32 SuperStory;
 
 
-void Arcade_DrawEndMenu(MENU *menu);
-void Arcade_UpdateEndMenu(MENU *menu);
-void MenuDrawEpisodes(MENU *menu);
-void MenuUpdateEpisodes(MENU *menu);
 
 MENU GameMenu[10];
 
@@ -847,10 +776,6 @@ f32 MenuAlpha;
 i32 MenuA;
 f32 MENUTEXTSCALE = 0.5f;
 
-extern "C" bool TestForController();
-extern "C" void SmartTextEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment,
-                            u8 red, u8 green, u8 blue, f32 max_width, i32 max_lines, void *message_box,
-                            i32 suppress_draw, u32 alpha);
 
 MENUFNINFO MenuInfo[TOTAL_MENUS_COUNT] = {
     {1000, MenuEnterSave, MenuDrawSave, MenuUpdateSave, MenuExitSave, -1, -1, 0},
@@ -966,14 +891,12 @@ i32 shop_quit;
 i32 shop_save_done;
 GAMESAVE_s TempGame = {};
 
-extern "C" i32 TriggerAutoSave(void);
 
 
 
 // ==== src/legoapi/core/input/gamepads.cpp: declarations ====
 
 
-extern WORLDINFO_s *WORLD;
 extern "C" {
     extern "C++" FadeSystem FadeSys;
 }
@@ -997,24 +920,17 @@ extern "C" {
 
 } // extern "C"
 
-void PadOutPause(i32 port, WORLDINFO_s *world);
 
 
 
-extern "C" f32 NuFsqrt(f32);
-extern "C" f32 NuRandFloat();
-void GameCam_NewShake(GAMECAMERA_s *, f32, f32, f32);
-
-
-void NewRumbleAllPlayers(float strength, float duration, i32 frames, i32);
 
 
 
-void NewBuzz(nupad_s *pad, float duration, i32);
 
 
 
-void NewRumble(nupad_s *pad, float strength, i32);
+
+
 
 // ==== src/gameframework/savesystem.cpp: all remaining content ====
 
@@ -1088,15 +1004,12 @@ void SerialiseString(EdStream &stream, void *data, i32 count);
 
 
 
-extern "C" i32 ProcessFileSel2(f32 elapsed, nupad_s *pad);
 
-extern "C" void FileSelKill(void);
 
 
 extern "C" void StartFileSel(char *title, char *path, char *filter, char *filter_out,
                              void (*callback)(char *, char *));
 
-extern "C" void RenderFileSel2(i32 x, i32 y, i32 *width, i32 *height);
 
 i32 LoadState(i32, variptr_u *, variptr_u *, variptr_u *, variptr_u *, variptr_u *, variptr_u *);
 
@@ -1123,34 +1036,22 @@ void (*buttonmapfn)(char *, char *);
 f32 (*pulsetimerfn)(f32);
 extern "C" {
     i32 smarttextex_drawmessagebox = 0;
-    void NuQFntSetJustifiedTolerances(float squash, float stretch);
-    unsigned char *NuUnicodeCharFromUTF8(u16 *character, unsigned char *text);
-    unsigned char *NuUTF8CharFromUnicode(unsigned char *text, u16 character);
     void NuQFntDestroy(VUFNT *font);
     void NuRndrRect2di(i32 x, i32 y, i32 width, i32 height, i32 colour, numtl_s *material);
 }
 extern "C" {
 }
 extern "C" {
-    void NuMtxSetRotationX(NUMTX *mtx, i32 angle);
-    void NuMtxRotateY(NUMTX *mtx, i32 angle);
-    void NuMtxRotateZ(NUMTX *mtx, i32 angle);
 }
 void Text3DStringEncodeFont(unsigned char *src, u16 *dst, void *font);
 void MatrixTextStringEncode(void *font, unsigned char *source, u16 *destination);
 i32 SplitTextFindNextWS(unsigned char *text, i32 position);
 extern "C" void TextDecode(char *source, unsigned char *dest);
-extern "C" void Text3DEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
-                         u8 green, u8 blue, i32 alpha);
-extern "C" void Text3DEx2(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u8 alignment, u8 red,
-                          u8 green, u8 blue, i32 alpha);
-void Text_MakeTime(float time, i32 show_hours, i32 show_minutes, i32 show_centiseconds, char *text);
 
 extern f32 APITEXTSCALEX;
 extern f32 APITEXTSCALEY;
 
 
-void TextCrawl_Draw(float dt, i32 paragraphs, float alpha, char *text);
 
 void TextDecodeCodeword(char *source, char *destination);
 static f32 QFONTSCALEX = 1.0f;
@@ -1173,24 +1074,18 @@ f32 TextPrintSubstring(unsigned char *text, f32 x, f32 y, f32 z, f32 x_scale, f3
 NUMTL *MessageMtl;
 i32 MessageMtlInit;
 
-extern "C" void MessageBoxInitMtl(void);
 
 
 
 extern "C" {
 void FixUpButtonsInFont(VUFNT *game_font, VUFNT *button_font);
 
-void Set3DGameFont(VUFNT *font);
-void SetGameFont(VUFNT *font);
-void SmartTextSetFont(VUFNT *font);
 void TextDecode(char *source, unsigned char *dest);
 void TextRegisterButtonMapFn(void (*fn)(char *, char *));
 void TextRegisterPulseTimerFn(f32 (*fn)(f32));
 }
 
 
-extern "C" void Text3DStringEncode(char *src, u16 *dst);
-extern "C" void SetQFont2D(void);
 
 // ==== src/legoapi/items/objects/objectsall.cpp: declarations ====
 // Original translation unit reconstructed from the reference address map.
@@ -1201,7 +1096,6 @@ extern "C" void SetQFont2D(void);
 
 
 
-extern "C" void KillPart(PART_s *, i32);
 
 i32 FindNextBreak(unsigned char *text, i32 index);
 
@@ -1230,16 +1124,13 @@ i32 FindNearestBreak(unsigned char *text, i32 index);
 
 
 
-void LevelObjects_InitForLevel(WORLDINFO_s *world);
 
-void EquivalentObjects_Configure(WORLDINFO_s *world, char *config);
 
 // ==== src/gameapi/edtools/edpartall.cpp: all remaining content ====
 
 
 extern "C" {
-    extern char edbits_level_save_directory[256], edbits_level_save_name[256], edbits_level_save_extension[256];
-    extern i32 edbits_part_general_page, edbits_part_level_page;
+    extern i32 edbits_part_level_page;
 }
 
 extern "C" {
@@ -1264,7 +1155,6 @@ extern "C" {
 extern "C" {
 }
 
-void RayImpact(NUVEC *);
 
 extern "C" {
     extern "C++" void DebrisProcessSpheres(uv1deb *, f32, debinftype *, debkeydatatype_s *, i32);
@@ -1272,13 +1162,8 @@ extern "C" {
 
 
 // NuFileExists @nufile (nucore_plain.cpp).
-extern "C" i32 NuFileExists(char *name);
 
-extern "C" void TerrainSetCur(void *terrain);
-extern "C" void TerrSetPlatScanDist(f32 dist);
 
-extern "C" void TerrainPlatformNewUpdate(void);
-extern "C" i32 PARTLookupTypePageOnly(char *, i32);
 
 
 extern "C" {
@@ -1296,13 +1181,9 @@ extern "C" {
 
 
 
-i32 NewRayCastEx(NUVEC *position, NUVEC *movement, f32 radius, i32 scan_flags);
 
-i32 NewRayCastScaleY(NUVEC *position, NUVEC *movement, f32 radius, f32 scale_y, i32 scan_flags);
 
-    f32 NewShadowEx(NUVEC *position, i32 handle, f32 height_above, f32 height_below, i32 terrain_mask);
 
-f32 NewShadow(NUVEC *position, f32 height_above, f32 height_below, i32 terrain_mask);
 
 
 
@@ -1328,7 +1209,6 @@ extern "C" {
 
 }
 
-void FindAnglesZX(NUVEC *, u16 *, u16 *);
 
 // Forward declarations for local (static) part/gizmo helper stubs.
 struct spacelevel_s;
@@ -1338,17 +1218,11 @@ struct quickboltinfo;
 // (GIZFLOW_s/FLOWBOX_s), power-up and space/starfighter helpers. Stubbed as
 // local `t` symbols matching res/libTTapp.so.
 
-extern i32 HIGHGAMEOBJECT, VehicleArea;
-i32 SphereSphereOverlapScaleY(NUVEC *, f32, f32, NUVEC *, f32, f32);
-
-extern "C" f32 coinimpactwait;
-
-extern "C" void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
 
 
 
-extern AREADATA_s *PODRACE_ADATA;
-extern AREADATA_s *BONUS_GUNSHIP_ADATA;
+
+
 
 extern "C" {
 
@@ -1379,14 +1253,10 @@ extern "C" {
 
 
 
-void UpdateParts(f32 time);
 
 } // extern "C"
 
-PART_s *TargetPart(GameObject_s *object, nuvec_s *position, nuvec_s *direction, f32 radius, f32 range_squared,
-                   i32 directional, i32 bolt_id);
 
-extern "C" i32 NuGScnNumSpecials(nugscn_s *);
 
 extern "C" {
 }
@@ -1395,16 +1265,11 @@ extern "C" {
 
 }
 
-extern "C" PART_s *HitParts(GameObject_s *owner, NUVEC *positions, i32 count, f32 radius, NUVEC *minimum,
-                            NUVEC *maximum, u32 flags);
 
 
-void LoadPartFile(WORLDINFO *world);
-
-void AddPartDebris(PARTDEBSYS_s *system, i32 index, nuvec_s *position);
 
 
-WORLDINFO_s *WorldInfo_CurrentlyActive();
+
 
 
 
@@ -1420,8 +1285,6 @@ WORLDINFO_s *WorldInfo_CurrentlyActive();
     if (type->sounds[slot] != -1 && type->sound_modes[slot] == (mode))                                                 \
         PlaySfxById(type->sounds[slot], &emitter->position);
 
-extern "C" f32 brickimpactwait;
-extern "C" i32 GetSfxId(const char *);
 
 
 
@@ -1563,14 +1426,11 @@ static __attribute__((used)) void edanimcbLocalSoundMenu(eduimenu_s *parent, edu
 // ---- end src/gameapi/edtools/edanimall.cpp ----
 // ---- begin src/gameapi/edtools/edmenucallbacks.cpp ----
 
-extern "C" i32 PS2_REZ_H;
 
 // Editor UI callbacks retained in the original editor's menu code.
 
 // ---- end src/gameapi/edtools/edmenucallbacks.cpp ----
 
-extern "C" void edgraClumpsReset(void);
-extern "C" i32 NuRndrDoingScreenGrab;
 
 // ---- begin src/gameapi/edtools/edptlall.cpp ----
 
@@ -1602,7 +1462,6 @@ extern "C" {
 
 extern "C" {
     void NuRndrRect2di(i32 x, i32 y, i32 width, i32 height, i32 colour, numtl_s *material);
-    void NuRndrLineRect2di(i32 x, i32 y, i32 width, i32 height, i32 colour, numtl_s *material);
 }
 
 // The original local font helpers read the same private draw state as the
@@ -1650,14 +1509,12 @@ extern "C" {
     // GCC 4.7 emits these file-scope objects in reverse declaration order, so
     // each group below mirrors the original linked order in reverse.
 
-extern NUMTL * edgra_mtl_zoff;
 
 
 }
 
 
 extern "C" {
-extern NUGSCN * edanim_page_scene[8];
 }
 
 
@@ -1667,18 +1524,15 @@ extern "C" {
 extern "C" {
 }
 
-extern "C" i32 NuKeyboard(i32 key);
 
 
 extern "C" {
 
 
-void edbitsDrawCircleXY(NUVEC *centre, f32 radius, i32 colour, NUMTL *material);
 
     // Shared editor font; edmainInit receives and stores the font handle.
 
 
-void eduiSetFont(NUQFNT *font);
 
     // The editor UI callbacks share this translation unit with their cursor,
     // menu, and interaction state in the original binary.
@@ -1777,7 +1631,7 @@ extern f32 Scale;
 DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
 
 extern "C" {
-    extern i32 edpp_readout, edpp_num_orphans;
+    extern i32 edpp_readout;
 }
 
 
@@ -1793,19 +1647,15 @@ extern "C" {
 
 
 
-NUGSPLINE *edSpline_SplineFind(NUGSCN *scene, char *name);
 
 
 
 
 
-void edanimDetermineNearestAnim(float distance);
 
 
 
-void edanimDetermineNearestSound(float distance);
 
-void edanimDetermineNearestParticle(float distance);
 
 extern EdEnumControl::Item OpenClosedItems[3];
 extern EdEnumControl::Item OnOffItems[3];
@@ -1920,7 +1770,6 @@ extern "C" {
 
 extern "C" {
     void NuRndrRect2di(i32 x, i32 y, i32 width, i32 height, i32 colour, numtl_s *material);
-    void NuRndrLineRect2di(i32 x, i32 y, i32 width, i32 height, i32 colour, numtl_s *material);
 }
 
 // The original local font helpers read the same private draw state as the
@@ -1941,13 +1790,8 @@ extern "C" {
     // GCC 4.7 emits these file-scope objects in reverse declaration order, so
     // each group below mirrors the original linked order in reverse.
 
-extern NUMTL * edgra_mtl_zoff;
 
 
-}
-
-extern "C" {
-extern NUGSCN * edanim_page_scene[8];
 }
 
 extern "C" {
@@ -1957,14 +1801,15 @@ extern "C" {
 }
 
 extern "C" {
+}
+
+extern "C" {
 
 
-void edbitsDrawCircleXY(NUVEC *centre, f32 radius, i32 colour, NUMTL *material);
 
     // Shared editor font; edmainInit receives and stores the font handle.
 
 
-void eduiSetFont(NUQFNT *font);
 
     // The editor UI callbacks share this translation unit with their cursor,
     // menu, and interaction state in the original binary.
@@ -2072,11 +1917,8 @@ extern u8 RAP_WARNING_G;
 extern u8 RAP_WARNING_R;
 
 
-void IconScenes_Init(char *path, variptr_u *buf, variptr_u *);
 
-void IconScenes_Load(APICHARACTERMODELLIST_s *list, i32, variptr_u *buf, variptr_u *buf_end);
 
-NUGSCN *IconScene_FindById(i32 character_id);
 
 extern "C" {
 
@@ -2242,18 +2084,6 @@ extern "C" {
     // Animation / curves / data
     // ---------------------------------------------------------------------------
 
-void NuAnimCurve2SetApplyToJointTransLoc(nuanimcurve2_s *curves, i8 *types, i8 flags, nuanimtime_s *time,
-                                             nuhgobjjoint_s *joint, NUVEC *scale, NUVEC *parent_scale, NUMTX *matrix,
-                                             NUJOINTANIM_s *override_anim, NUVEC *root_translation,
-                                             NUVEC *locator_translation);
-void NuAnimCurve2SetApplyToJoint(nuanimcurve2_s *curves, i8 *types, i8 flags, nuanimtime_s *time,
-                                     nuhgobjjoint_s *joint, NUVEC *scale, NUVEC *parent_scale, NUMTX *matrix,
-                                     NUJOINTANIM_s *override_anim);
-void NuAnimCurveSetApplyBlendToJoint2(nuanimcurveset_s *first, nuanimtime_s *first_time, nuanimcurveset_s *second,
-                                          nuanimtime_s *second_time, f32 blend, nuhgobjjoint_s *joint, NUVEC *scale,
-                                          NUVEC *parent_scale, NUMTX *matrix, NUJOINTANIM_s *override_anim);
-void NuAnimCurveSetApplyToMatrix(nuanimcurveset_s *set, nuanimtime_s *time, NUMTX *matrix);
-void NuAnimData2CalcMatrix(nuanimdata_s *animation, i32 node, f32 frame, numtx_s *matrix);
 
 
     // ---------------------------------------------------------------------------
@@ -2277,13 +2107,11 @@ void NuQFntDestroy(VUFNT *font);
 
 
 
-void NuLgtSetArcMat(NUMTL *material, f32 u0, f32 v0, f32 u1, f32 v1);
 
     // ---------------------------------------------------------------------------
     // Light / wind / particles / debris
     // ---------------------------------------------------------------------------
 
-void NuDynamicLightSetupCustomCameraFrustum(NuDynamicLight *light, NUCAMERA *camera, const f32 *splits, i32 count);
 
 
     // ---------------------------------------------------------------------------
@@ -2302,12 +2130,6 @@ void NuDynamicLightSetupCustomCameraFrustum(NuDynamicLight *light, NUCAMERA *cam
     // ---------------------------------------------------------------------------
 
 
-i32 NuPortalClipTest(NUGSCN *scene, NUVEC *position, f32 radius, i16 room_id);
-i32 NuPortalNumRooms(NUGSCN *scene);
-void NuPortalResetActive(NUGSCN *scene);
-i32 NuPortalRoomClipTest(NUGSCN *scene, i16 room_id);
-void NuPortalRoomClipTestAll(NUGSCN *scene, u8 *room_visibility);
-i32 NuPortalWhichRoom(NUGSCN *scene, NUVEC *position);
 
 void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
     DECOMP_ASSERT(sizeof(NuInstanceTreeNode) == 0x0c, "instance tree node stride");
@@ -2369,7 +2191,6 @@ struct nuframebuffer_s;
 struct nushaderobject_s;
 union variptr_u;
 
-void NuLgtSetArcMatEx(i32 type, numtl_s *material, f32 u0, f32 v0, f32 u1, f32 v1);
 
 
 // ==== src/gameapi/edtools/edui.cpp: all remaining content ====
@@ -2379,7 +2200,6 @@ extern "C" {
 
 }
 
-extern "C" void eduiMenuDestroyItems(eduimenu_s *menu);
 
 // ==== src/legoapi/actions/character/speederchase.cpp: declarations ====
 
@@ -2394,20 +2214,13 @@ DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 
 
 
-void SpeederChaseA_Init(WORLDINFO_s *world);
-
-void SpeederChaseA_Panel(WORLDINFO_s *);
-
-void SpeederChaseA_Reset(WORLDINFO_s *);
 
 
-void SpeederChaseA_Update(WORLDINFO_s *world);
 
 
-extern "C" void AddDebrisEffect(i32 *, i32, f32, f32, f32);
-extern "C" void DebrisPosOrientationMtx(i32, NUMTX *);
 
-extern "C" f32 pod_roll[2];
+
+
 
 // ==== src/legoapi/characters/motion/camera.cpp: declarations ====
 
@@ -2420,21 +2233,18 @@ DECOMP_ASSERT(offsetof(VIEWCAM_s, gamepad) == 0x24, "ViewCam gamepad offset");
 
 
 
-void GameCam_Judder(GAMECAMERA_s *camera, float amount, i32 axis, nuvec_s *source);
 
 
 
 
-void GameCameraMakeMiniCut2(nuvec_s *camera, nuvec_s *target, i32 target_guid, float start, float end, float blend_in,
-                            float blend_out, i32 follow_target, i32 follow_camera, i32 borders);
 
 extern "C" {
 
 
 } // extern "C"
 
-extern "C" i16 id_GRABCONTROL, id_GRABR2CONTROL, id_LANDSPEEDER, id_ATST, id_DEWBACK;
-extern i32 CUTCAMONLY, CUTCAM, GUNSHIPAHACK, netcamera, complexsockposition_forcesock, movegamecamera_forcesock;
+extern "C" i16 id_LANDSPEEDER;
+extern i32 CUTCAMONLY, GUNSHIPAHACK, netcamera, complexsockposition_forcesock, movegamecamera_forcesock;
 GameObject_s *FindNearestGameObject(NUVEC *, GameObject_s *, u32, f32, f32, i32, i32, i32, f32 *, i32,
                                     i32 (*)(GameObject_s *), bool);
 
@@ -2452,7 +2262,6 @@ DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context fl
 
 
 
-void do_Pad_flymode_camera(edcam_s *camera, float delta_time, nupad_s *pad);
 
 // ==== src/gameapi/edtools/edfile.cpp: all remaining content ====
 
@@ -2689,7 +2498,6 @@ extern "C" {
 
 
 
-extern "C" void eduiMenuDestroyItems(eduimenu_s *menu);
 
 
 
@@ -2743,7 +2551,6 @@ extern "C" {
 
 
 
-void eduiSetFont(NUQFNT *font);
 
 
 
@@ -2775,14 +2582,11 @@ extern "C" {
 }
 
 extern "C" {
-extern "C" void RenderFileSel2(i32 x, i32 y, i32 *width, i32 *height);
 
 }
 
 extern "C" {
-extern "C" i32 ProcessFileSel2(f32 elapsed, nupad_s *pad);
 
-extern "C" void FileSelKill(void);
 
 }
 
@@ -2795,11 +2599,8 @@ extern "C" void StartFileSel(char *title, char *path, char *filter, char *filter
 
 extern "C" {
 
-extern "C" void RndrOSphere(NUVEC *centre, f32 radius, i32 colour, i32 segments, i32);
 
-extern "C" void RndrCircleXZ(NUVEC *centre, f32 radius, i32 colour, i32 segments);
 
-extern "C" void RndrOSquare(NUVEC *centre, f32 radius, i32 colour);
 
 
 }
@@ -2917,18 +2718,6 @@ extern "C" {
     // Animation / curves / data
     // ---------------------------------------------------------------------------
 
-void NuAnimCurve2SetApplyToJointTransLoc(nuanimcurve2_s *curves, i8 *types, i8 flags, nuanimtime_s *time,
-                                             nuhgobjjoint_s *joint, NUVEC *scale, NUVEC *parent_scale, NUMTX *matrix,
-                                             NUJOINTANIM_s *override_anim, NUVEC *root_translation,
-                                             NUVEC *locator_translation);
-void NuAnimCurve2SetApplyToJoint(nuanimcurve2_s *curves, i8 *types, i8 flags, nuanimtime_s *time,
-                                     nuhgobjjoint_s *joint, NUVEC *scale, NUVEC *parent_scale, NUMTX *matrix,
-                                     NUJOINTANIM_s *override_anim);
-void NuAnimCurveSetApplyBlendToJoint2(nuanimcurveset_s *first, nuanimtime_s *first_time, nuanimcurveset_s *second,
-                                          nuanimtime_s *second_time, f32 blend, nuhgobjjoint_s *joint, NUVEC *scale,
-                                          NUVEC *parent_scale, NUMTX *matrix, NUJOINTANIM_s *override_anim);
-void NuAnimCurveSetApplyToMatrix(nuanimcurveset_s *set, nuanimtime_s *time, NUMTX *matrix);
-void NuAnimData2CalcMatrix(nuanimdata_s *animation, i32 node, f32 frame, numtx_s *matrix);
 
 
     // ---------------------------------------------------------------------------
@@ -2952,13 +2741,11 @@ void NuQFntDestroy(VUFNT *font);
 
 
 
-void NuLgtSetArcMat(NUMTL *material, f32 u0, f32 v0, f32 u1, f32 v1);
 
     // ---------------------------------------------------------------------------
     // Light / wind / particles / debris
     // ---------------------------------------------------------------------------
 
-void NuDynamicLightSetupCustomCameraFrustum(NuDynamicLight *light, NUCAMERA *camera, const f32 *splits, i32 count);
 
 
     // ---------------------------------------------------------------------------
@@ -2977,12 +2764,6 @@ void NuDynamicLightSetupCustomCameraFrustum(NuDynamicLight *light, NUCAMERA *cam
     // ---------------------------------------------------------------------------
 
 
-i32 NuPortalClipTest(NUGSCN *scene, NUVEC *position, f32 radius, i16 room_id);
-i32 NuPortalNumRooms(NUGSCN *scene);
-void NuPortalResetActive(NUGSCN *scene);
-i32 NuPortalRoomClipTest(NUGSCN *scene, i16 room_id);
-void NuPortalRoomClipTestAll(NUGSCN *scene, u8 *room_visibility);
-i32 NuPortalWhichRoom(NUGSCN *scene, NUVEC *position);
 
 void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
     DECOMP_ASSERT(sizeof(NuInstanceTreeNode) == 0x0c, "instance tree node stride");
@@ -3041,8 +2822,6 @@ extern "C" {
 }
 
 extern "C" {
-extern "C" PART_s *HitParts(GameObject_s *owner, NUVEC *positions, i32 count, f32 radius, NUVEC *minimum,
-                            NUVEC *maximum, u32 flags);
 
 
 
@@ -3065,7 +2844,6 @@ extern "C" {
 extern "C" {
 
 
-void UpdateParts(f32 time);
 
 
 }

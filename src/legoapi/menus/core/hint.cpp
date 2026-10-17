@@ -320,7 +320,6 @@ extern f32 ICONYPOS_TOUCHYFEELY;
 f32 (*Hint_AlphaTargetFn)();
 i32 (*Hub_PanelBusyFn)();
 extern i32 only_process_this_hint_id;
-f32 SeekLinearF(f32, f32, f32);
 void Hint_SetHint(HINT_s *, i32, i32);
 
 void MechHintUIButton_OnClick_Callback(MechTouchUIElement &, TouchHolder &);
@@ -489,7 +488,6 @@ struct nuhspecial_s;
     } while (false)
 
 
-extern f32 SeekLinearF(f32, f32, f32);
 
 // ==== functions in original address order ====
 
@@ -572,7 +570,7 @@ void LoadPerm1();
 // ==== src/legoapi/menus/screens/gamemenuall.cpp: declarations ====
 
 
-extern f32 ICONSIZE, ICONX, DROPINALPHA, HUB_EPISODETITLEY;
+extern f32 HUB_EPISODETITLEY;
 extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 
 // Retail clears these "fast repeat" latches but never sets them.
@@ -637,7 +635,6 @@ extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 // ==== src/gameapi/gui/apimenu.cpp: all remaining content ====
 
 
-extern "C" i32 SuperStory;
 
 // ==== src/legoapi/core/input/gamepads.cpp: declarations ====
 
@@ -653,7 +650,6 @@ extern "C" {
 // angular velocity only when both consecutive turns agree.
 
 
-extern "C" f32 NuFsqrt(f32);
 
 // ==== src/gameframework/savesystem.cpp: all remaining content ====
 
@@ -685,7 +681,6 @@ extern "C" {
 // Runtime-selected groups appended after the fixed terrain allocation.
 
 // NuFileExists @nufile (nucore_plain.cpp).
-extern "C" i32 NuFileExists(char *name);
 
 // ==== src/legoapi/render/fx/parts.cpp: declarations ====
 
@@ -711,7 +706,6 @@ extern "C" {
 
 } // extern "C"
 
-WORLDINFO_s *WorldInfo_CurrentlyActive();
 
 // The original repeats the per-sound emitter checks for each of the four sound slots.
 #define PART_EMIT_SOUND_ON(slot)                                                                                       \
@@ -1791,7 +1785,6 @@ DECOMP_ASSERT(sizeof(JEDIBNETPACKET_s) == 0x20, "JEDIBNETPACKET_s ABI");
 // the network check, which retail keeps as the split-out body of the IPA-SRA
 // clone (it only needs &world->ai_sys).
 
-void JediB_Init(WORLDINFO_s *world);
 
 // ===========================================================================
 // Gunship (Gunship_A / Gunship_B)
@@ -1870,15 +1863,12 @@ static_assert(sizeof(struct LEVFLAGBYTES_s) == 16, "LevFlag must be 16 bytes");
 // Pod race core (A/B/C laps)
 // ===========================================================================
 
-void PodRaceAUpdate(WORLDINFO_s *world);
 
 // ===========================================================================
 // Pod sprint (Sebulba events)
 // ===========================================================================
 
-void PodSprintA_Init(WORLDINFO_s *world);
 
-void PodSprintA_Update(WORLDINFO_s *world);
 
 // ===========================================================================
 // Retake the palace (D/E/G)
@@ -1948,9 +1938,7 @@ void PodSprintA_Update(WORLDINFO_s *world);
 // ---- begin src/gameapi/ai/aisys/aisys.cpp ----
 
 
-extern "C" ADDPART_s Default_ADDPART;
 
-extern "C" PART_s *AddPart(ADDPART_s *);
 
 // Game-specific AI actions and conditions (registered via
 // RegisterAIScriptActions / RegisterAIScriptConditions). These are stubbed to
@@ -2414,9 +2402,7 @@ DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");
 //   NuHtmlBegin    0x2d5ca0   NuHtmlFlush   0x2d5c30
 //   NuHtmlWrite    0x2d5cd0   NuHtmlHeading1 0x2d5d40
 
-extern "C" void NuHtmlWrite(const char *text, ...);
 
-extern "C" void NuHtmlHeading1(const char *fmt, ...);
 
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 

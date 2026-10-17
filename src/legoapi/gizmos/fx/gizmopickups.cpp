@@ -121,12 +121,10 @@ static GIZMOPICKUPSYS_s *GizmoPickupSys = &GizmoPickupSys_Game;
 
 
 extern "C" {
-    i32 NuPortalWhichRoom(NUGSCN *scene, NUVEC *position);
 }
 
 extern u8 CharClipToBlobShadows;
 
-void FindAnglesZX(NUVEC *normal, u16 *x_rotation, u16 *z_rotation);
 void SetAreaPickupGravity(i32 area, i32 level);
 
 namespace {
@@ -183,7 +181,7 @@ namespace {
 
 } // namespace
 
-extern char *LEGOASCII_UP, *LEGOASCII_DOWN;
+extern char *LEGOASCII_UP;
 
 extern char *LEGOASCII_BIGARROW;
 
@@ -248,13 +246,11 @@ extern WORLDINFO WorldInfo[2];
 
 // ==== src/legoapi/items/base/collection.cpp: declarations ====
 
-extern "C" i32 DoubleScore;
 
 
 struct GIZMOPICKUP_s;
 struct PART_s;
 
-void DrawCharIcon(i32, f32, f32, f32, f32, i32, f32, f32, i32, nuhspecial_s *);
 
 static __used__ void Collection_GetSelectingPlayerIDs(i16 *ids);
 
@@ -283,7 +279,6 @@ extern "C" {
 
 }
 
-void FindAnglesZX(NUVEC *, u16 *, u16 *);
 
 // Forward declarations for local (static) part/gizmo helper stubs.
 
@@ -291,8 +286,6 @@ void FindAnglesZX(NUVEC *, u16 *, u16 *);
 // (GIZFLOW_s/FLOWBOX_s), power-up and space/starfighter helpers. Stubbed as
 // local `t` symbols matching res/libTTapp.so.
 
-extern i32 HIGHGAMEOBJECT, VehicleArea;
-extern WORLDINFO_s *WORLD;
 
 static __used__ void PartImpact_Coin(PART_s *part);
 
@@ -318,7 +311,6 @@ static __used__ void PartMove_VehicleHeart(PART_s *part, f32);
 
 static __used__ void PartMove_VehiclePickup(PART_s *part, f32);
 
-WORLDINFO_s *WorldInfo_CurrentlyActive();
 
 // The original repeats the per-sound emitter checks for each of the four sound slots.
 #define PART_EMIT_SOUND_ON(slot)                                                                                       \
@@ -337,7 +329,6 @@ WORLDINFO_s *WorldInfo_CurrentlyActive();
 // Runtime-selected groups appended after the fixed terrain allocation.
 
 // NuFileExists @nufile (nucore_plain.cpp).
-extern "C" i32 NuFileExists(char *name);
 
 // ==== src/legoapi/render/fx/parts_control.cpp: all remaining content ====
 

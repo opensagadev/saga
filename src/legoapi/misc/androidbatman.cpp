@@ -57,7 +57,6 @@ static u8 s_SystemPausedTracks[2];
 
 
 
-extern "C" void NuIOS_FreeMemoryForSuspend(void);
 
 
 

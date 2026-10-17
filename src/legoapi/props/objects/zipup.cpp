@@ -94,13 +94,11 @@ struct SHOPINPUT;
 i32 SuperWeirdo(GameObject_s *);
 void SetWeaponIn(GameObject_s *);
 void FastWeaponOut(GameObject_s *, i32);
-void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 void PlayJumpSfx(GameObject_s *, i32);
 
 
 numtl_s *ropemtl;
 
-void InitRopeMtl(char *name, variptr_u *buffer, variptr_u *buffer_end);
 
 // The retail rope draw inlines these numtx rotations (other units call the
 // exported versions), so this unit carries local copies of their bodies.
@@ -180,12 +178,8 @@ static inline void SetRopeVertex(NURND_VERTEX3D *vertex, f32 x, f32 y, f32 z, f3
     vertex->colour = colour;
 }
 
-void DrawRopeSingle(nuvec_s *start, nuvec_s *end, float amount, numtl_s *material, float time, float grow_time,
-                    float spacing, float scale);
 
 
-ZIPUP *ZipUp_FindNearest(WORLDINFO_s *world, nuvec_s *position, float radius, float *distance, i32 *endpoint,
-                         GameObject_s *object, bool touch);
 
 // ==== src/legoapi/items/collect/detonator.cpp: declarations ====
 
@@ -208,11 +202,7 @@ ZIPUP *ZipUp_FindNearest(WORLDINFO_s *world, nuvec_s *position, float radius, fl
 
 
 EXPLOSION *AddExplosion(nuvec_s *, f32, f32, GameObject_s *, i32, i32);
-void GameCam_NewShake(GAMECAMERA_s *, f32, f32, f32);
-void GameCam_Judder(GAMECAMERA_s *, f32, i32, nuvec_s *);
-i32 MatrixReflection(NUMTX *matrix, i32 axis, f32 plane, f32 height, NUMTX *result);
 i32 SuperWeirdo(GameObject_s *object);
-extern "C" f32 brickimpactwait;
 
 // ==== src/legoapi/menus/core/hint.cpp: declarations ====
 
@@ -224,7 +214,6 @@ extern "C" f32 brickimpactwait;
 // the caller.
 
 // Original local callbacks referenced by Hints_LSW.
-extern AREADATA_s *PODRACE_ADATA, *PODSPRINT_ADATA, *BONUS_GUNSHIP_ADATA;
 
 
 // Each control mode retains its own requested and interpolated hint row.

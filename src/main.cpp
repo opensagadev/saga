@@ -56,7 +56,6 @@ char *Trailer[3] = {"demointro", reinterpret_cast<char *>(&tINTRO), NULL};
 // Object name the save icon is drawn from.
 char *lsw_memcard_objname = "mem_card";
 
-extern "C" i32 NuMain(i32 argc, char **argv);
 
 
 // ==== src/nu2api/nucore/nuios_metrics.cpp: all remaining content ====

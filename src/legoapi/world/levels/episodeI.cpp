@@ -235,21 +235,13 @@ static __used__ void UpdatePodRaceMines(void);
 // Negotiations / Gungan plains / Rescue (coruscant)
 // ===========================================================================
 
-void NegotiationsA_Init(WORLDINFO_s *world);
 
-void NegotiationsB_Init(WORLDINFO_s *world);
 
-void GunganA_Update(WORLDINFO_s *world);
 
-void GunganA_Init(WORLDINFO_s *world);
 
-void RescueA_Init(WORLDINFO_s *world);
 
-void RescueB_Init(WORLDINFO_s *);
 
-void RescueC_Init(WORLDINFO_s *world);
 
-void RescueE_Init(WORLDINFO_s *world);
 
 // ===========================================================================
 // Pod race core (A/B/C laps)
@@ -259,32 +251,22 @@ void ResetPodStuff();
 
 void PodRaceUpdate(WORLDINFO_s *world, float dt);
 
-void PodRacePanel(WORLDINFO_s *world);
 
 void UpdatePodRaceLapDisplay(float arg);
 
-void PodRaceAlwasyUpdate(WORLDINFO_s *world);
 
-void PodRaceAUpdate(WORLDINFO_s *world);
 
-void PodRaceA_AlwaysUpdate(WORLDINFO_s *world);
 
-void PodRaceADraw(WORLDINFO_s *world);
 
 i32 Action_MushroomCollapse(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
                             i32 first_time, float);
 
-void PodRaceBUpdate(WORLDINFO_s *world);
 
-void PodRaceCUpdate(WORLDINFO_s *world);
 
 void PodRaceReset();
 
-void PodRaceCReset(WORLDINFO_s *world);
 
-void PodRaceBReset(WORLDINFO_s *world);
 
-void PodRaceAReset(WORLDINFO_s *world);
 
 // Clears the mine pools and resolves the mine special and its no-mine areas.
 static void InitPodRaceMines() {
@@ -304,83 +286,52 @@ static void InitPodRaceMines() {
     }
 }
 
-void PodRaceInit(WORLDINFO_s *world);
 
-void PodRaceCInit(WORLDINFO_s *world);
 
-void PodRaceBInit(WORLDINFO_s *world);
 
-void PodRaceAInit(WORLDINFO_s *world);
 
 // ===========================================================================
 // Pod sprint (Sebulba events)
 // ===========================================================================
 
-float PodSprint_RollMul(GameObject_s *object);
 
-void PodSprintA_Init(WORLDINFO_s *world);
 
-void PodSprintA_Update(WORLDINFO_s *world);
 
-void PodSprintA_Panel(WORLDINFO_s *world);
 
-void PodSprintA_Reset(WORLDINFO_s *world);
 
 // ===========================================================================
 // Retake the palace (D/E/G)
 // ===========================================================================
 
-void RetakeD_Init(WORLDINFO_s *world);
 
-void RetakeE_Init(WORLDINFO_s *world);
 
-void RetakeG_Init(WORLDINFO_s *world);
 
-void RetakeG_Reset(WORLDINFO_s *);
 
-void RetakeG_Update(WORLDINFO_s *world);
 
-void RetakeG_Panel(WORLDINFO_s *world);
 
 // ===========================================================================
 // Maul boss (A/B/D/E/F)
 // ===========================================================================
 
-void MaulA_Init(WORLDINFO_s *world);
 
-void MaulA_Reset(WORLDINFO_s *world);
 
-void MaulA_Update(WORLDINFO_s *);
 
-void MaulA_Panel(WORLDINFO_s *world);
 
-void MaulB_Init(WORLDINFO_s *world);
 
-void MaulD_Init(WORLDINFO_s *);
 
-void MaulD_Update(WORLDINFO_s *);
 
-void MaulE_Init(WORLDINFO_s *);
 
-void MaulE_Update(WORLDINFO_s *);
 
-void MaulF_Init(WORLDINFO_s *world);
 
-void MaulF_Reset(WORLDINFO_s *world);
 
-void MaulF_Update(WORLDINFO_s *);
 
-void MaulF_Panel(WORLDINFO_s *world);
 
 // ===========================================================================
 // Anakin's flight (B)
 // ===========================================================================
 
-void AnakinsFlightB_Init(WORLDINFO_s *world);
 
-void AnakinsFlightB_Update(WORLDINFO_s *);
 
-void AnakinsFlightB_Draw(WORLDINFO_s *world);
 
 // ===========================================================================
 // Helpers defined in other original translation units but kept here until
@@ -420,21 +371,13 @@ DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 
 
 
-void SpeederChaseA_Init(WORLDINFO_s *world);
-
-void SpeederChaseA_Panel(WORLDINFO_s *);
-
-void SpeederChaseA_Reset(WORLDINFO_s *);
 
 
-void SpeederChaseA_Update(WORLDINFO_s *world);
 
 
-extern "C" void AddDebrisEffect(i32 *, i32, f32, f32, f32);
-extern "C" void DebrisPosOrientationMtx(i32, NUMTX *);
-extern "C" void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
 
-extern "C" f32 pod_roll[2];
+
+
 
 // ==== functions in original address order ====
 

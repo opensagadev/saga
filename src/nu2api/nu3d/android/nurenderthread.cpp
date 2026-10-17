@@ -55,21 +55,15 @@ extern const f32 nuvec4_one[4] = {1.0f, 1.0f, 1.0f, 1.0f};
 
 extern "C" i32 NuDynamicLightIsEnabled(void *light);
 extern "C" void NuShaderManagerSetfv(i32 id, const f32 *values);
-void NuIOS_CopyBackbufferToTexture(NUNATIVETEX *tex, bool depth);
 extern "C" i32 NuDynamicLightIsEnabled(void *light);
-extern "C" void NuDisplayListDraw2D(void);
 i32 global_frame_count = 0;
 i32 global_frame_count_paused = 0;
 
-extern "C" void NuRenderThreadLock(void);
-
-extern "C" void NuRenderThreadUnlock(void);
 
 
-extern "C" void NuRenderThreadPrepareRender(void);
 
 
-extern "C" void NuRenderThreadStartRender(void);
+
 
 
 // ==== functions in original address order ====

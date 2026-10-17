@@ -39,7 +39,6 @@ const char *g_textureName;
 i32 g_fileSize;
 
 extern i32 g_loadingCharacterInHub;
-extern "C" const i16 *_toupper_tab_;
 
 SAGA_HOST_HOOK void NuIOS_UploadCompressedTexture(GLenum target, GLint level, GLenum internal_format, GLsizei width,
                                                   GLsizei height, GLint border, GLsizei image_size, const void *data) {
@@ -60,7 +59,6 @@ __attribute__((weak)) bool NuIOS_TextureFormatSupported(i32 format) {
 
 static const i32 CSWTCH_249[] = {SQUISH_KDXT3, SQUISH_KDXT1, SQUISH_KDXT5};
 
-void DecompressTextureToRGBA(unsigned char *ddsData, u32 size, unsigned char *&outBuffer);
 
 
 SAGA_HOST_HOOK void *NuIOS_AllocateDefaultTexturePixels(usize bytes) {

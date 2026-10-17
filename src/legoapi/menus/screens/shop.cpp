@@ -154,10 +154,7 @@
 #include "legoapi/characters/core/customiser.h"
 #include "nu2api/numusic/numusic.h"
 #include "legoapi/characters/core/characters_types.h"
-extern "C" void NuIOS_RecordFlurryEvent(char *);
-void SetLevelLights(void *, f32);
 void DrawItem(nuhspecial_s *, nuvec_s *, float, float, float, u16, u16, u16);
-i32 Draw3DObject(WORLDINFO_s *, i32, nuvec_s *, u16, u16, u16, float, float, float, i32);
 void *AddGameMessage(char *, NUVEC *, f32, NUVEC *, f32, u8, u8, u8, u32, f32);
 extern f32 HUB_EPISODETITLEY;
 extern f32 HUB_EPISODESUBTITLEY;
@@ -297,17 +294,14 @@ extern void DrawItemMenu2D();
 extern void InitAlphaList();
 extern void InitExtraList();
 
-i32 DoShopMenu(MENU_s *menu);
 
 
-i32 UpdateShop(MENU_s *menu);
 
 
 
 static NUVEC HubShopPos = {-26.3f, 0.0f, -49.5f};
 
 
-void GetShopCamLookPos(nuvec_s *position);
 
 
 
@@ -335,7 +329,7 @@ static f32 ShopSinePhase(f32 phase) {
 
 
 i32 ItemMenu(MENU_s *menu);
-extern i16 tSELECT, tEXIT, tBACK, tBUY, tPLAY, tSELECTING;
+extern i16 tSELECT, tBACK, tBUY, tPLAY, tSELECTING;
 
 
 void DrawCodeMenu();
@@ -352,22 +346,13 @@ void DrawSubItems();
 
 // ==== src/legoapi/render/core/render.cpp: declarations ====
 
-extern "C" void edbriStartAllPages(void);
 
 
-extern "C" void LocaledbitsDrawSolidEllipseXY(NUVEC *centre, f32 radius_x, f32 radius_z, i32 rotation, f32 lower_y,
-                                              f32 upper_y, u32 colour, i32, i32 segments);
 
-extern "C" void LocaledbitsDrawCircleXY(NUVEC *centre, f32 radius, u32 colour, i32, i32 segments);
 
-extern "C" void LocaledbitsDrawSolidCircleXY(NUVEC *centre, f32 radius, f32 lower_y, f32 upper_y, u32 colour, i32,
-                                             i32 segments);
 
-extern "C" void RndrOSquare(NUVEC *centre, f32 radius, i32 colour);
 
-extern "C" void RndrOSphere(NUVEC *centre, f32 radius, i32 colour, i32 segments, i32);
 
-extern "C" void RndrCircleXZ(NUVEC *centre, f32 radius, i32 colour, i32 segments);
 
 struct starfighter_s;
 struct rtl_s;
@@ -399,17 +384,6 @@ struct ripple_node_s;
 struct ripple_set_s;
 struct VuVec;
 
-extern "C" i32 NuRndrBeginScene(i32);
-extern "C" void NuRndrEndScene(void);
-extern u8 MENUENTRYR, MENUENTRYG, MENUENTRYB;
-extern f32 cointotaltime;
-extern "C" f32 MainRenderTime;
-extern "C" i32 editor_active;
-extern "C" i32 screendump;
-extern "C" i32 PANELOFF;
-extern void SetLevelLights(void *set, f32 scale);
-extern f32 statstime;
-f32 GetAspectRatio();
 
 // Camera zoom state
 
@@ -421,7 +395,6 @@ extern "C" {
 }
 
 
-extern "C" void NuGScnUpdate(NUGSCN *gscn, f32 frame_delta);
 
 // --- NuGScn graphics-data reader ---
 // NuReadGraphicsData is a C++ static function in the original (GCC clones it,
@@ -440,8 +413,6 @@ extern "C" {
 } // extern "C"
 
 
-i32 Draw3DObject(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x_rotation, u16 y_rotation,
-                 u16 z_rotation, float scale_x, float scale_y, float scale_z, i32 rotate_order);
 
 
 
@@ -500,46 +471,33 @@ void DrawItemMenu2D();
 
 
 
-void DrawStatusIcons(STATUSPACKET_s *status, float y, float alpha);
 
 
 
 // DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
 // red-brick positions come from the Game init values in legogame/game.cpp.
-extern "C" void Text3D(char *, f32, f32, f32, f32, f32, f32, u32, u8, u8, u8);
-
-void DrawMiniKitCount(float position, float scale, i32 count, i32 maximum);
-
-i32 Draw3DObjectAlpha(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x_rotation, u16 y_rotation,
-                      u16 z_rotation, float scale_x, float scale_y, float scale_z, i32 rotate_order, float alpha);
 
 
 
-extern i16 tUNKNOWN, tPOWERBRICK, tLOCKED, tGOLDBRICK;
-extern "C" void PlaySfx(char *, NUVEC *);
-void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
+
+
+extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
 
 void DrawSubItemMenu2D();
 
 void DrawSubItemMenu3D();
 
 
-void DrawPanel3DObjectMtx(nuhspecial_s *special, numtx_s *matrix, float alpha);
 
 
 extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
 
-extern AREADATA *PODSPRINT_ADATA;
 extern "C" {
 }
 
 
-void DrawGameMessage_Targets(GAMEMESSAGE_s *message, nuvec_s *position, float scale);
 
-i32 DrawPanel3DObjectNoAlpha(float x, float y, float z, float scale_x, float scale_y, float scale_z, u16 rotate_x,
-                             u16 rotate_y, u16 rotate_z, nuhspecial_s *special, i32 rotate_order);
 
-extern void DrawMenuEntry(MENU_s *, char *);
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
     do {                                                                                                               \
@@ -554,12 +512,9 @@ extern void DrawMenuEntry(MENU_s *, char *);
     } while (false)
 
 
-void Transform_DrawTarget(NUVEC *, f32, f32);
-extern i16 id_ANAKINJEDISCARRED, id_WEIRDO1, id_WEIRDO2, id_CATAPULT, id_CHEWBACCA, id_WOOKIEE, id_TWOFACE;
-extern i32 PickUpFlickerTest, PickUpFlickerFrames, PickupFlickerFrame;
+extern i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
 
 
-extern f32 SeekLinearF(f32, f32, f32);
 
 
 
@@ -567,20 +522,16 @@ extern f32 SeekLinearF(f32, f32, f32);
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 
 
-extern "C" f32 sabrerubwait;
-extern i16 id_YODA, id_YODAGHOST, id_GAMORREANGUARD, id_JANGOFETT;
+extern i16 id_GAMORREANGUARD;
 
 extern "C" {
-    extern i16 id_LANDSPEEDER, id_MILLENNIUMFALCON;
+    extern i16 id_LANDSPEEDER;
 }
 
 // Written by ThingManager's ctor (original global @0x124f2e0, .bss).
 
-void legoSetMusicVolume(float);
-APIOBJECT *GameAPIOBJECTFromObjID(u8 object_id);
 
 
-extern "C" i32 AISysSetLevelPath(AISYS_s *system, char *path_name);
 
 
 
@@ -588,7 +539,6 @@ extern "C" i32 AISysSetLevelPath(AISYS_s *system, char *path_name);
 // staggered across frames; special movement states opt back into full-rate
 // processing through the forced-update path.
 
-extern "C" f32 NuAnimEndFrameOld(void *animation);
 
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
@@ -603,22 +553,14 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 // remaining ids enumerate the current story list while omitting variants that
 // are represented by those dedicated routes.
 
-extern "C" i32 SHADOWCALLS;
 
-f32 GameShadow(GameObject_s *object, nuvec_s *position, f32 probe_height, i32 terrain_mask);
 
-extern "C" f32 MainRenderTargetTime;
 struct CUTSCENEPLAYERCLIP;
 
-extern "C" i32 DoubleScore;
-extern "C" TIMER BonusTimer;
 
 
-extern "C" i32 NewRayCastScaleYMask(NUVEC *, NUVEC *, f32, f32, i32, u32);
-extern "C" i32 RAYCASTCALLS;
 
 
-extern "C" i32 party_cant_be_under_cover;
 
 #if defined(__i386__)
 #define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
@@ -659,12 +601,6 @@ extern "C" {
 
 
 
-void GameAISysReset(AISYS_s *system);
-
-void GameAudio_PlaySfxById(i32 sfx_id, nuvec_s *position, i32 flags, i32 volume);
-
-
-void *GameBufferAlloc(variptr_u *buf, variptr_u *buf_end, i32 size);
 
 
 
@@ -673,8 +609,10 @@ void *GameBufferAlloc(variptr_u *buf, variptr_u *buf_end, i32 size);
 
 
 
-u16 SeekRot(u16, u16, f32);
-extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER, id_ATST;
+
+
+
+extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER;
 
 
 
@@ -682,8 +620,6 @@ extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER, id_ATST;
 
 
 
-extern "C" i16 id_THEEMPEROR, id_IMPERIALGUARD, id_BODYGUARD;
-extern "C" i32 AddGameDebrisRot(APIDEBRISSYS_s *, i32, NUVEC *, i32, u16, u16);
 
 
 
@@ -704,9 +640,6 @@ void InitExtraList();
 
 
 
-extern "C" i32 adaptivedifficulty[3];
-extern i16 id_ANAKINSNEWPOD, id_ANAKINSNEWPODGREEN, id_SEBULBASPOD;
-extern "C" f32 tieonsfxwait, tieoffsfxwait;
 
 
 
@@ -729,14 +662,10 @@ void InitAlphaList();
 extern Fade fade;
 
 // Material handles used by the original 2-D fade paths.
-extern NUMTL * FadeMtl2;
-extern NUMTL * FadeMtl;
 
 extern "C" {
 }
-void BackDrop_Draw(f32, i32);
 
-extern "C" f32 NuIOS_GetAspectRatio(void);
 
 
 SAGA_HOST_WEAK void InitStillRender(variptr_u *, variptr_u);
@@ -750,7 +679,6 @@ SAGA_HOST_WEAK void InitStillRender(variptr_u *, variptr_u);
 
 
 
-void FadeLoop_DrawObj(float alpha);
 
 
 void FadeLoop(char *text, i32 direction, float duration, void (*draw)(float));
@@ -766,17 +694,11 @@ extern "C" {
 }
 
 struct AISYS_s;
-void AIScriptLoadAll(char *path, VARIPTR *buf, VARIPTR *buf_end, AISYS_s *sys);
 
 // The original table at 0x006281a0.  These are the material animation
 // scripts made available before the permanent things scene is loaded.
 
-extern "C" ripple_set_s *ripples;
-extern "C" NUMTL *ShadowMat;
 
-extern "C" VARIPTR characterbuffer_ptr;
-extern "C" VARIPTR characterbuffer_end;
-extern "C" i32 waiting_for_character;
 
 extern "C" {
 }
@@ -791,7 +713,6 @@ extern "C" {
 }
 
 
-extern "C" NUVEC plr_lastpos;
 
 
 
@@ -813,14 +734,10 @@ extern "C" NUVEC plr_lastpos;
 
 
 
-extern "C" VARIPTR characterbuffer_base;
 
 
-extern "C" void PlaySfx(char *, nuvec_s *);
-void DrawCharIcon(i32, f32, f32, f32, f32, i32, f32, f32, i32, nuhspecial_s *);
 
 
-extern "C" i32 dagobah_training;
 
 // ==== functions in original address order ====
 

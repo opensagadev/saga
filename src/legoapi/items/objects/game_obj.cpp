@@ -159,7 +159,7 @@ extern i8 (*adtab)[4];
 extern i32 do_player_tag;
 extern f32 player_tag_timer;
 extern GameObject_s *player_tag_from, *player_tag_to;
-extern i32 disable_narrow_socks, players_cannot_exit_speeder, BuildUpDone;
+extern i32 players_cannot_exit_speeder;
 extern i16 id_ANAKINJEDI, id_ANAKINJEDISCARRED, id_GAMORREANGUARD, id_MOUSEDROID, id_OBIWANKENOBIEP3, id_PKDROID, id_SNAKE,
     id_WOOKIEE;
 extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER;

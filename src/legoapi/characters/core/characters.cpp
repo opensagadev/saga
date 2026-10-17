@@ -221,7 +221,6 @@ extern "C" {
 // The original table at 0x006281a0.  These are the material animation
 // scripts made available before the permanent things scene is loaded.
 
-extern "C" VARIPTR characterbuffer_ptr;
 
 
 void HairMovement(GameObject_s *object) {
@@ -630,7 +629,6 @@ nuhspecial_s *CharScene_FindHSpecial(WORLDINFO_s *world, i32 character_id);
 #define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone))
 #endif
 
-extern "C" VARIPTR characterbuffer_base;
 
 void ResetCharacterBuffer(i32 force_reset) {
     if (force_reset == 0 && Area != -1 && Area == last_area) {
@@ -656,7 +654,6 @@ extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 static NUGSCN **IconScene;
 static char IconPath[0x40] = "stuff\\icons\\";
 
-NUGSCN *IconScene_FindById(i32 character_id);
 
 // ==== src/legoapi/menus/screens/menus.cpp: declarations ====
 
@@ -759,7 +756,6 @@ extern "C" {
 // angular velocity only when both consecutive turns agree.
 
 
-extern "C" f32 NuFsqrt(f32);
 
 // ==== src/gameframework/savesystem.cpp: all remaining content ====
 
@@ -792,7 +788,6 @@ extern "C" {
 // Runtime-selected groups appended after the fixed terrain allocation.
 
 // NuFileExists @nufile (nucore_plain.cpp).
-extern "C" i32 NuFileExists(char *name);
 
 // ==== src/legoapi/render/fx/parts.cpp: declarations ====
 
@@ -810,7 +805,6 @@ extern "C" {
 // (GIZFLOW_s/FLOWBOX_s), power-up and space/starfighter helpers. Stubbed as
 // local `t` symbols matching res/libTTapp.so.
 
-WORLDINFO_s *WorldInfo_CurrentlyActive();
 
 // The original repeats the per-sound emitter checks for each of the four sound slots.
 #define PART_EMIT_SOUND_ON(slot)                                                                                       \

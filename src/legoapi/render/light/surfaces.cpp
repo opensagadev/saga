@@ -298,7 +298,6 @@ extern "C" {
 
 f32 FindReflectionNoPlatforms(NUVEC *position);
 i32 UnderWater(GameObject_s *object);
-void FindAnglesZX(NUVEC *normal, u16 *x_rotation, u16 *z_rotation);
 extern "C" i32 NewShadowOnPlatform();
 extern "C" i32 ShadowRoofInfo();
 
@@ -317,7 +316,6 @@ i32 IntersectWater(GameObject_s *object);
 
 // Original action/context lookup data, with its arrays and pointers in one owner.
 
-void FindAnglesZX(NUVEC *, u16 *, u16 *);
 // Retail keeps several of this file's static helpers only as GCC clones; these
 // declarations pin the clone names and register conventions.
 #if defined(__i386__)
@@ -405,7 +403,6 @@ extern "C" {
 // (GIZFLOW_s/FLOWBOX_s), power-up and space/starfighter helpers. Stubbed as
 // local `t` symbols matching res/libTTapp.so.
 
-extern i32 HIGHGAMEOBJECT, VehicleArea;
 
 extern "C" {
 
@@ -414,7 +411,6 @@ extern "C" {
 
 } // extern "C"
 
-WORLDINFO_s *WorldInfo_CurrentlyActive();
 
 // The original repeats the per-sound emitter checks for each of the four sound slots.
 #define PART_EMIT_SOUND_ON(slot)                                                                                       \
@@ -432,7 +428,6 @@ WORLDINFO_s *WorldInfo_CurrentlyActive();
 
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 
-extern i32 TERRAINMASK_NONWEAPON, TERRAINMASK_NONDROID;
 
 // Written by ThingManager's ctor (original global @0x124f2e0, .bss).
 
@@ -453,7 +448,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 // remaining ids enumerate the current story list while omitting variants that
 // are represented by those dedicated routes.
 
-f32 GameShadow(GameObject_s *object, nuvec_s *position, f32 probe_height, i32 terrain_mask);
 
 #if defined(__i386__)
 #define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
@@ -579,7 +573,6 @@ DECOMP_ASSERT(sizeof(JEDIBNETPACKET_s) == 0x20, "JEDIBNETPACKET_s ABI");
 // the network check, which retail keeps as the split-out body of the IPA-SRA
 // clone (it only needs &world->ai_sys).
 
-void JediB_Init(WORLDINFO_s *world);
 
 // ===========================================================================
 // Gunship (Gunship_A / Gunship_B)
@@ -658,15 +651,12 @@ static_assert(sizeof(struct LEVFLAGBYTES_s) == 16, "LevFlag must be 16 bytes");
 // Pod race core (A/B/C laps)
 // ===========================================================================
 
-void PodRaceAUpdate(WORLDINFO_s *world);
 
 // ===========================================================================
 // Pod sprint (Sebulba events)
 // ===========================================================================
 
-void PodSprintA_Init(WORLDINFO_s *world);
 
-void PodSprintA_Update(WORLDINFO_s *world);
 
 // ===========================================================================
 // Retake the palace (D/E/G)
@@ -740,9 +730,7 @@ struct nuvec_s;
 
 
 
-extern "C" ADDPART_s Default_ADDPART;
 
-extern "C" PART_s *AddPart(ADDPART_s *);
 
 // Game-specific AI actions and conditions (registered via
 // RegisterAIScriptActions / RegisterAIScriptConditions). These are stubbed to
@@ -1072,7 +1060,6 @@ struct AISYS_s;
 // Runtime-selected groups appended after the fixed terrain allocation.
 
 // NuFileExists @nufile (nucore_plain.cpp).
-extern "C" i32 NuFileExists(char *name);
 
 // ==== functions in original address order ====
 
@@ -1281,9 +1268,7 @@ DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");
 //   NuHtmlBegin    0x2d5ca0   NuHtmlFlush   0x2d5c30
 //   NuHtmlWrite    0x2d5cd0   NuHtmlHeading1 0x2d5d40
 
-extern "C" void NuHtmlWrite(const char *text, ...);
 
-extern "C" void NuHtmlHeading1(const char *fmt, ...);
 
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 
@@ -2331,9 +2316,7 @@ namespace {
 
 } // namespace
 
-extern "C" i32 EShadowInfo(void);
 
-extern "C" i32 ShadowInfo(void);
 
 // Original 0x378fb0: the optimized rotating scan shares the terrain engine state.
 

@@ -195,7 +195,6 @@ void OctreeRndr(u8 *visibility, nuoctreenode_s *root, i32 enabled);
 
 extern "C" i32 edppLoadPage(char *path, i32 flag, usize scene);
 // NuFileExists @nufile (nucore_plain.cpp).
-extern "C" i32 NuFileExists(char *name);
 
 
 extern "C" {
@@ -247,7 +246,6 @@ extern "C" {
 
 } // extern "C"
 
-WORLDINFO_s *WorldInfo_CurrentlyActive();
 
 // The original repeats the per-sound emitter checks for each of the four sound slots.
 #define PART_EMIT_SOUND_ON(slot)                                                                                       \

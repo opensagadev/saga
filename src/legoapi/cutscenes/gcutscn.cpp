@@ -154,10 +154,8 @@ i32 CameraDOFHack = 0;
 u8 set_cutscenecammtx = 0;
 
 // --- Extern "C" block: functions with confirmed C linkage in original libTTapp.so ---
-extern "C" void *NuAnimData2FixPtrs(void *, isize, isize, i32);
 extern "C" StateAnim *StateAnimFixPtrs(StateAnim *, isize);
 extern "C" i32 StateAnimEvaluate(StateAnim *, u8 *, u8 *, f32);
-extern "C" void NuAnimCurve2SetApplyToMatrix_3(ani3_animheader_s *, i32, f32, NUMTX *);
 extern "C" {
     extern i32 NuGCutDebFixUp_SearchAllPages;
     extern NUGCUTLOCATORFNENTRY_s *locatorfns;
@@ -362,13 +360,10 @@ struct NUGCUTLOCATORSYS_s;
 struct instNUGCUTLOCATOR_s;
 struct NUGCUTLOCATOR_s;
 struct numtx_s;
-extern "C" f32 *NuGCutLocatorCalcMtx(NUGCUTLOCATOR_s *, f32, NUMTX *, nuanimtime_s *);
-extern "C" i32 NuGCutLocatorIsVisble(NUGCUTLOCATOR_s *, f32, nuanimtime_s *, f32 *, f32 *);
 extern "C" void NuAnimData2CalcTime(nuanimdata2_s *, f32, nuanimtime_s *);
 extern "C" void instNuGCutLocatorUpdate(instNUGCUTSCENE_s *, NUGCUTLOCATORSYS_s *, instNUGCUTLOCATOR_s *,
                                         NUGCUTLOCATOR_s *, f32, NUMTX *, i32);
 
-extern "C" void DebFreeInstantly(i32 *handle);
 
 
 // Retail only keeps the IPA-SRA clone, which drops the unused frame argument.
@@ -383,7 +378,6 @@ static INST_LOCATOR_SYS_END_ATTR void instNuGCutLocatorSysEnd(instNUGCUTLOCATORS
 
 void instNuGCutSceneEndFirstFrame(instNUGCUTSCENE_s *instance);
 
-extern "C" void instNuGCutSceneEnd(instNUGCUTSCENE_s *instance);
 
 
 static inline u8 instNuGCutSceneLastStream(instNUGCUTSCENE_s *instance) {
@@ -672,18 +666,13 @@ union variptr_u;
 
 // ==== src/nu2api/nucore/nugcutscene_anim.cpp: all remaining content ====
 
-f32 *NuGCutLocatorCalcMtx_3(NUGCUTLOCATOR_s *locator, numtx_s *mtx, float frame);
 
-extern "C" f32 *NuGCutLocatorCalcMtx(NUGCUTLOCATOR_s *locator, float frame, NUMTX *mtx, nuanimtime_s *time);
 
 char CurveFilterLOCATORScale[] = {6, 7, 8, static_cast<char>(0xff)};
 char CurveFilterLOCATOR[] = {6, 7, static_cast<char>(0xff)};
 char CurveFilterSFX[] = {3, static_cast<char>(0xff)};
 
-i32 NuGCutLocatorIsVisble_3(NUGCUTLOCATOR_s *locator, float frame, float *scale, float *rate);
 
-extern "C" i32 NuGCutLocatorIsVisble(NUGCUTLOCATOR_s *locator, float frame, nuanimtime_s *time, float *scale,
-                                     float *rate);
 
 // ==== src/legoapi/characters/motion/gameanim.cpp: declarations ====
 
@@ -789,18 +778,14 @@ void instNuGCutSceneStart(instNUGCUTSCENE_s *instance);
 }
 
 extern "C" {
-extern "C" f32 *NuGCutLocatorCalcMtx(NUGCUTLOCATOR_s *locator, float frame, NUMTX *mtx, nuanimtime_s *time);
 
 }
 
 extern "C" {
-extern "C" i32 NuGCutLocatorIsVisble(NUGCUTLOCATOR_s *locator, float frame, nuanimtime_s *time, float *scale,
-                                     float *rate);
 
 }
 
 extern "C" {
-extern "C" void instNuGCutSceneEnd(instNUGCUTSCENE_s *instance);
 
 void instNuGCutSceneDestroy(instNUGCUTSCENE_s *instance);
 

@@ -162,9 +162,7 @@ void NuHtmlFlush(i32 force);
 
 extern "C" void NuHtmlBegin(void *file);
 
-extern "C" void NuHtmlWrite(const char *text, ...);
 
-extern "C" void NuHtmlHeading1(const char *fmt, ...);
 
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 

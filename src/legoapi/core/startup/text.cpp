@@ -251,7 +251,6 @@ extern "C" {
 // Runtime-selected groups appended after the fixed terrain allocation.
 
 // NuFileExists @nufile (nucore_plain.cpp).
-extern "C" i32 NuFileExists(char *name);
 
 // ==== src/legoapi/render/fx/parts.cpp: declarations ====
 
@@ -269,8 +268,6 @@ extern "C" {
 // (GIZFLOW_s/FLOWBOX_s), power-up and space/starfighter helpers. Stubbed as
 // local `t` symbols matching res/libTTapp.so.
 
-extern i32 HIGHGAMEOBJECT, VehicleArea;
-extern WORLDINFO_s *WORLD;
 
 // The original repeats the per-sound emitter checks for each of the four sound slots.
 #define PART_EMIT_SOUND_ON(slot)                                                                                       \
@@ -702,7 +699,7 @@ static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u
 
 // ==== src/legoapi/menus/screens/gamemenuall.cpp: declarations ====
 
-extern f32 ICONSIZE, ICONX, DROPINALPHA, HUB_EPISODETITLEY;
+extern f32 HUB_EPISODETITLEY;
 extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 
 // Retail clears these "fast repeat" latches but never sets them.

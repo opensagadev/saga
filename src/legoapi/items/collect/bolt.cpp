@@ -61,10 +61,8 @@ bool LineIntersectCircle(NUVEC *, NUVEC *, NUVEC *, f32);
 BOLT_s *FindIncomingBolt(GameObject_s *object, i32 exclude_players, i32 mark_direct_hit);
 
 
-void GuidedMissile_Move(PART_s *part, float time);
 
 
-extern "C" i16 id_SPEEDERBIKE;
 
 // ==== src/legoapi/items/collect/bolts.cpp: declarations ====
 
@@ -78,7 +76,6 @@ static void EndBolt_EwokTorpedo(BOLT_s *);
 
 // Configuration entry point and parser callbacks share the original BT state.
 
-void BoltTypes_Configure(WORLDINFO_s *world, char *config);
 
 
 
@@ -88,11 +85,9 @@ extern "C" {
 
 extern "C" void PlaySfx(char *, NUVEC *);
 i32 Player_HasDoubleBoltDamage_FromBolt(BOLT_s *);
-void GameCam_NewShake(GAMECAMERA_s *, f32, f32, f32);
 EXPLOSION *AddExplosion(NUVEC *, f32, f32, GameObject_s *, i32, i32);
 
 
-i32 Bolt_HitGameObjects(BOLT_s *bolt, NUVEC *points, NUVEC *minimum, NUVEC *maximum, f32 radius, u8 *hit_flags);
 
 
 __attribute__((force_align_arg_pointer)) void Bolt_AddDeflectedBolt(BOLT_s *bolt, nuvec_s *direction, nuvec_s *normal,
@@ -104,11 +99,9 @@ static __attribute__((noinline, noclone)) i32 Bolt_HitPlat(BOLT_s *bolt, u8 *hit
     __asm__("_ZL12Bolt_HitPlatP6BOLT_sPhP11WORLDINFO_s.isra.38");
 
 
-extern AREADATA *DOGFIGHT_ADATA;
 
 
 
-BOLT_s *Bolt_Find(i32 type_id, NUVEC *position, GameObject_s *owner);
 
 // The original caller appears to treat this u16-returning function as i32;
 // correcting this declaration lowers its match.
@@ -119,13 +112,10 @@ static __used__ void UpdateBolt_Geonosian(BOLT_s *bolt);
 EXPLOSION *Detonate(NUVEC *, u16);
 static __used__ void EndBolt_EwokTorpedo(BOLT_s *bolt);
 
-void BoltTypes_Init(WORLDINFO_s *world);
 
 extern "C" {
-    void NewRayCastGetImpactNormal(NUVEC *);
 }
 
-i8 BoltType_FindIDByName(char *name, WORLDINFO *world);
 
 // ==== src/legoapi/core/config/saveload.cpp: declarations ====
 
@@ -140,15 +130,12 @@ void SerialiseString(EdStream &stream, void *data, i32 count);
 
 
 
-extern "C" i32 ProcessFileSel2(f32 elapsed, nupad_s *pad);
 
-extern "C" void FileSelKill(void);
 
 
 extern "C" void StartFileSel(char *title, char *path, char *filter, char *filter_out,
                              void (*callback)(char *, char *));
 
-extern "C" void RenderFileSel2(i32 x, i32 y, i32 *width, i32 *height);
 
 i32 LoadState(i32, variptr_u *, variptr_u *, variptr_u *, variptr_u *, variptr_u *, variptr_u *);
 

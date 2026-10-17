@@ -58,9 +58,7 @@ bool TouchHacks::ShouldBlock(GameObject_s &object) {
 
 NUCOLOUR3 flashCol = {2.0f, 2.0f, 2.0f};
 bool TouchHacks::TouchControlsActive;
-extern "C" i16 id_GRABCONTROL, id_WICKET, id_EWOK;
-extern "C" i16 id_ATST, id_ATST_LOWRES;
-extern "C" i16 id_WATTO, id_GONKDROID;
+extern "C" i16 id_WATTO;
 
 bool TouchHacks::AiPlayerTakeDamageOnKillRescue(GameObject_s &) {
     return TouchControlsActive;
@@ -327,7 +325,7 @@ bool TouchHacks::CanToggleTo(GameObject_s &object, i32 id) {
 }
 
 void Move_CHARACTER(GameObject_s *);
-extern i16 id_SKELETON, id_GRIEVOUS, id_BODYGUARD, id_ATAT, id_STAP, id_STAP2;
+extern i16 id_SKELETON;
 
 bool TouchHacks::CanTagVehicle(GameObject_s &object, GameObject_s &vehicle) {
     CHARACTERDATA *character = object.apiobj.character_data;

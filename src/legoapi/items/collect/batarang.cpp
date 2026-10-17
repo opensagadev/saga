@@ -26,13 +26,11 @@
 #include <string.h>
 
 extern BATARANG_s Batarang[8];
-extern "C" i16 id_ROBIN;
 extern i16 id_CATWOMAN;
 
 i32 StunGameObject(GameObject_s *, GameObject_s *, f32, i32);
 void Detonator_Detonate(DETONATOR_s *);
 i32 GizmoBlowupBlowup(GIZMOBLOWUP_s *, i32, i32, i32, GameObject_s *, i32);
-f32 SeekValF(f32, f32, f32);
 
 i32 Batarang_SeekToTarget(BATARANG_s *);
 i32 Batarang_StartTargetting(GameObject_s *);

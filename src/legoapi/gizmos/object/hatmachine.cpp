@@ -77,7 +77,6 @@ i32 hatmachine_gizmotype_id = -1;
 
 
 
-void Hat_GetAbsTargetPos(HATMACHINE_s *machine, NUVEC *position);
 
 
 
@@ -86,9 +85,7 @@ void Hat_GetAbsTargetPos(HATMACHINE_s *machine, NUVEC *position);
 
 
 
-HATMACHINE *HatMachine_FindNearest(WORLDINFO_s *world, nuvec_s *position, GameObject_s *object, float *distance);
 
-i32 HatMachine_BeingUsed(HATMACHINE_s *hat_machine);
 
 
 

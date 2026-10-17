@@ -318,7 +318,7 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 // Retail keeps only the IPA-SRA clone, which takes the other object's x and z by address.
 
-extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER, id_ATST;
+extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER;
 
 u8 grapple_attach_frames = 5;
 
@@ -444,7 +444,7 @@ DECOMP_ASSERT(sizeof(VIEWCAM_s) == 0x28, "ViewCam size");
 DECOMP_ASSERT(offsetof(VIEWCAM_s, pitch) == 0x10, "ViewCam pitch offset");
 DECOMP_ASSERT(offsetof(VIEWCAM_s, gamepad) == 0x24, "ViewCam gamepad offset");
 
-extern "C" i16 id_GRABCONTROL, id_GRABR2CONTROL, id_LANDSPEEDER, id_ATST, id_DEWBACK;
+extern "C" i16 id_LANDSPEEDER;
 extern i32 LevFlag[4];
 
 DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, path) == 0x40, "Camera context path offset");
@@ -539,7 +539,6 @@ extern "C" {
 // ==== src/legoapi/characters/core/players.cpp: declarations ====
 
 
-extern "C" NUVEC plr_lastpos;
 
 
 // --- Helpers moved from world.cpp ---
@@ -691,7 +690,6 @@ extern "C" {
 
 // ==== src/legoapi/core/input/gamepads.cpp: declarations ====
 
-extern WORLDINFO_s *WORLD;
 
 // Original bss @0x127a500: 64 pads x 0x60 bytes.
 // Original bss @0x127a4e0.
@@ -701,7 +699,6 @@ extern WORLDINFO_s *WORLD;
 // angular velocity only when both consecutive turns agree.
 
 
-extern "C" f32 NuFsqrt(f32);
 
 // ==== src/gameframework/savesystem.cpp: all remaining content ====
 
@@ -733,7 +730,6 @@ extern "C" {
 // Runtime-selected groups appended after the fixed terrain allocation.
 
 // NuFileExists @nufile (nucore_plain.cpp).
-extern "C" i32 NuFileExists(char *name);
 
 // ==== src/legoapi/render/fx/parts.cpp: declarations ====
 
@@ -752,7 +748,6 @@ extern "C" {
 // (GIZFLOW_s/FLOWBOX_s), power-up and space/starfighter helpers. Stubbed as
 // local `t` symbols matching res/libTTapp.so.
 
-extern i32 HIGHGAMEOBJECT, VehicleArea;
 
 extern "C" {
 
@@ -1324,7 +1319,6 @@ extern "C" {
     // Culling / visibility / portals / occlusion
     // ---------------------------------------------------------------------------
 
-i32 NuPortalWhichRoom(NUGSCN *scene, NUVEC *position);
 
     DECOMP_ASSERT(sizeof(NuInstanceTreeNode) == 0x0c, "instance tree node stride");
     DECOMP_ASSERT(sizeof(NuInstanceTreeBounds) == 0x20, "instance tree bounds stride");
@@ -1535,7 +1529,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 
-i32 NuPortalWhichRoom(NUGSCN *scene, NUVEC *position);
 
     // ---------------------------------------------------------------------------
     // Viewport
@@ -1690,7 +1683,7 @@ inline void ThingManager::operator delete(void *thing, usize size) {
 extern "C" i16 id_BASKETCANNON;
 // Retail keeps only the IPA-SRA clone of this function.
 i32 PodLevel(AREADATA_s *);
-extern "C" i16 id_ATST, id_MINIATST, id_ATST_LOWRES, id_MINIATAT, id_MINIATTE;
+extern "C" i16 id_MINIATST, id_MINIATTE;
 
 // Multiplies the ordinary camera's per-frame position blend.  The original
 // keeps this as writable camera state (default 1.0), rather than folding it
@@ -1703,7 +1696,7 @@ i32 PodLevel(AREADATA_s *area);
 
 // Original exported level control, initialized to 2 at 0x623d00.
 
-extern "C" i16 id_LANDSPEEDER, id_WOOKIEFLYER, id_STAP2;
+extern "C" i16 id_LANDSPEEDER;
 
 // These pod tuning values are zero-initialized in the original image.
 
@@ -1716,7 +1709,7 @@ extern "C" i16 id_LANDSPEEDER, id_WOOKIEFLYER, id_STAP2;
 // Retail splits the context test off as an inline head; the rest is this partial clone.
 
 extern "C" {
-    extern i16 id_ATST, id_MINIATST, id_ATST_LOWRES, id_ATAT, id_MINIATAT, id_MINIATTE;
+    extern i16 id_MINIATST, id_MINIATTE;
 }
 
 static void ClearLastSafeTakeoverSource(GameObject_s *object) {
@@ -1870,7 +1863,6 @@ DECOMP_ASSERT(sizeof(JEDIBNETPACKET_s) == 0x20, "JEDIBNETPACKET_s ABI");
 // the network check, which retail keeps as the split-out body of the IPA-SRA
 // clone (it only needs &world->ai_sys).
 
-void JediB_Init(WORLDINFO_s *world);
 
 // ===========================================================================
 // Gunship (Gunship_A / Gunship_B)
@@ -1949,15 +1941,12 @@ static_assert(sizeof(struct LEVFLAGBYTES_s) == 16, "LevFlag must be 16 bytes");
 // Pod race core (A/B/C laps)
 // ===========================================================================
 
-void PodRaceAUpdate(WORLDINFO_s *world);
 
 // ===========================================================================
 // Pod sprint (Sebulba events)
 // ===========================================================================
 
-void PodSprintA_Init(WORLDINFO_s *world);
 
-void PodSprintA_Update(WORLDINFO_s *world);
 
 // ===========================================================================
 // Retake the palace (D/E/G)
@@ -2037,9 +2026,7 @@ extern "C" {
 // ---- begin src/gameapi/ai/aisys/aisys.cpp ----
 
 
-extern "C" ADDPART_s Default_ADDPART;
 
-extern "C" PART_s *AddPart(ADDPART_s *);
 
 // Game-specific AI actions and conditions (registered via
 // RegisterAIScriptActions / RegisterAIScriptConditions). These are stubbed to
@@ -2531,9 +2518,7 @@ DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");
 //   NuHtmlBegin    0x2d5ca0   NuHtmlFlush   0x2d5c30
 //   NuHtmlWrite    0x2d5cd0   NuHtmlHeading1 0x2d5d40
 
-extern "C" void NuHtmlWrite(const char *text, ...);
 
-extern "C" void NuHtmlHeading1(const char *fmt, ...);
 
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 

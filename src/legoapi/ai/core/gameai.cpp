@@ -185,7 +185,6 @@ struct nunativegscene_s;
 struct SHOPINPUT;
 
 
-extern "C" i32 adaptivedifficulty[3];
 
 i8 adtabentries[9][4] = {{-1, -1, -1, -1}, {-1, -1, -1, 0}, {-1, -1, 0, 0}, {-1, 0, 0, 0}, {0, 0, 0, 0},
                          {1, 0, 0, 0},     {1, 1, 0, 0},    {1, 1, 1, 0},   {1, 1, 1, 1}};
@@ -201,9 +200,7 @@ void SetObjAsHeadTarget(GameObject_s *, GameObject_s *, i8, f32, f32, f32);
 void SetBallooningHeight(GameObject_s *, f32);
 void GameObjectSetCanUse(GameObject_s *, void *, u8, u8, f32);
 i32 Suit_GetIndex(SUIT_s *);
-extern "C" f32 sabrerubwait;
-extern i16 id_YODA, id_YODAGHOST, id_GAMORREANGUARD, id_JANGOFETT;
-extern i32 TERRAINMASK_NONWEAPON, TERRAINMASK_NONDROID;
+extern i16 id_GAMORREANGUARD;
 f32 DEFENDTIME = 4.0f;
 extern f32 jump_stuck_time;
 i32 teleport_all_freeplay_modes = 1;
@@ -211,13 +208,12 @@ i32 drop_in_teleport = 3;
 
 extern "C" {
     void AddToAIGroup(AIGROUP_s *group, APIOBJECT_s *object);
-    extern i16 id_LANDSPEEDER, id_MILLENNIUMFALCON;
+    extern i16 id_LANDSPEEDER;
 }
 
 // Written by ThingManager's ctor (original global @0x124f2e0, .bss).
 extern void oneAtOnce_MaintainArray();
 
-void legoSetMusicVolume(float);
 void ResetPlayerMoves(GameObject_s *object);
 void GetTopBot(GameObject_s *object);
 void ResetRumble(RUMBLEPACKET *packet);
@@ -225,7 +221,6 @@ void Player_ClearContext(GameObject_s *object, i32 mode);
 void Player_ResetContexts(PLAYERPACKET_s *packet);
 void StarWars_GameAISysInit();
 void ClearAICreatures();
-APIOBJECT *GameAPIOBJECTFromObjID(u8 object_id);
 i32 EquivalentObject_Find(WORLDINFO_s *world, nuhspecial_s *special);
 void AIPathCnxControlSysReset(AIPATHCNXCONTROLSYS_s *system);
 void AIPathCnxHelperSysReset(WORLDINFO_s *world, AIPATHCNXHELPERSYS_s *system);
@@ -233,7 +228,6 @@ void InitAICreatures(AISYS_s *system);
 void ResetAICreatures(AISYS_s *system);
 
 
-extern "C" i32 AISysSetLevelPath(AISYS_s *system, char *path_name);
 
 
 
@@ -244,7 +238,6 @@ extern "C" i32 AISysSetLevelPath(AISYS_s *system, char *path_name);
 static const f32 AI_RESPAWN_DELAY = 2.0f;
 
 
-extern "C" f32 NuAnimEndFrameOld(void *animation);
 
 extern "C" {
 extern i32 nbaddies_can_see_players;
@@ -289,27 +282,17 @@ static const char *skip_chars[] = {"Batman", "Robin", "Glide_Pack", NULL};
 
 
 
-extern "C" i32 SHADOWCALLS;
 
-f32 GameShadow(GameObject_s *object, nuvec_s *position, f32 probe_height, i32 terrain_mask);
 
-extern "C" f32 MainRenderTime;
-extern "C" f32 MainRenderTargetTime;
 struct CUTSCENEPLAYERCLIP;
 
-extern "C" i32 DoubleScore;
-extern "C" TIMER BonusTimer;
-extern "C" i32 screendump;
 
 
-extern "C" i32 NewRayCastScaleYMask(NUVEC *, NUVEC *, f32, f32, i32, u32);
-extern "C" i32 RAYCASTCALLS;
 
 
 f32 draw_attention_distance = 2.0f;
 extern f32 party_follow_offsets[8];
 extern "C" i32 party_under_cover;
-extern "C" i32 party_cant_be_under_cover;
 extern GameObject_s *alert_obj;
 void AITriggerSetSysProcess(AITRIGGERSETSYS_s *system);
 i32 Hub_InMenu();
@@ -388,14 +371,9 @@ void SetScriptErrorLevel(SCRIPT_ERROR_LEVEL level);
 
 
 
-void GameAISysReset(AISYS_s *system);
 
 extern f32 alert_timer;
 
-void GameAudio_PlaySfxById(i32 sfx_id, nuvec_s *position, i32 flags, i32 volume);
-
-
-void *GameBufferAlloc(variptr_u *buf, variptr_u *buf_end, i32 size);
 
 
 
@@ -404,9 +382,9 @@ void *GameBufferAlloc(variptr_u *buf, variptr_u *buf_end, i32 size);
 
 
 
-void FindAnglesZX(NUVEC *, u16 *, u16 *);
-u16 SeekRot(u16, u16, f32);
-extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER, id_ATST;
+
+
+extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER;
 
 
 
@@ -428,9 +406,6 @@ void GameCreatureOpponentSelection(AISYS_s *system, i32 count, APIOBJECT_s **obj
                                    APIOBJECT_s **goodies, i32 baddy_count, APIOBJECT_s **baddies, u64 awareness,
                                    float);
 
-extern "C" i16 id_THEEMPEROR, id_IMPERIALGUARD, id_BODYGUARD;
-i32 SphereSphereOverlapScaleY(NUVEC *, f32, f32, NUVEC *, f32, f32);
-extern "C" i32 AddGameDebrisRot(APIDEBRISSYS_s *, i32, NUVEC *, i32, u16, u16);
 
 
 
@@ -450,9 +425,6 @@ extern "C" {
 
 
 
-extern AREADATA *PODSPRINT_ADATA;
-extern i16 id_ANAKINSNEWPOD, id_ANAKINSNEWPODGREEN, id_SEBULBASPOD;
-extern "C" f32 tieonsfxwait, tieoffsfxwait;
 
 
 
@@ -512,7 +484,6 @@ struct minitrooperteam_s;
 struct nuvec_s;
 
 
-extern "C" void *AISysLoad(void *buf, void *buf_end, i32 size, void *gscn, char *dir, char *name, char *param);
 
 // ==== src/legoapi/actions/character/simpletons.cpp: declarations ====
 
@@ -565,22 +536,13 @@ extern "C" {
 // addresses for those read after one.
 
 
-extern "C" i32 WithinConnection(AISYS *system, NUVEC *position, AIPATH *path, AIPATHCNX *connection, i32 checks,
-                                AIPATHCNX *previous_connection, i32 route, i32 ground, AIPATHINFO *path_info,
-                                f32 radius, i32 update_once);
 
 // IPA-SRA hands this clone the address of system->path_sys rather than the system.
 
-extern "C" void AISysFindRoute(AIPACKET *packet);
 
-extern "C" void AISysCharacterSetPathCnx(AIPACKET *packet, NUVEC *position, AIPATHCNX *connection, i32 direction);
 
-extern "C" void AISysCharacterSetPath(AIPACKET *packet, AIPATH *path);
 
-extern "C" f32 AIPathNodeDistanceToPathNode(AIPATH *path, i32 start_node, i32 destination_node, i32 route_index,
-                                            u32 excluded_route_mask);
 
-extern "C" i32 AISysGetCharacterWaypoint(const AIPACKET *packet, NUVEC *position);
 
 
 
@@ -645,9 +607,7 @@ extern "C" i32 AISysGetCharacterWaypoint(const AIPACKET *packet, NUVEC *position
 
 
 
-void AddGameMsgCount(NUVEC *position, i32 count, i32 total, u8 red, u8 green, u8 blue, f32 duration);
 
-extern "C" void ComplexSockAngles(SOCKROT *angles);
 
 
 extern void Player_ClearContext(GameObject_s *object, i32 mode);
@@ -656,16 +616,12 @@ extern void Player_ResetContexts(PLAYERPACKET_s *packet);
 
 
 
-extern void InitSplinePosition(SPLINEPOS_s *position, nugspline_s *spline, f32 distance, i32 looping);
 
 
 extern "C" void *AIPAthFindPathCnx(AISYS_s *system, AIPATH_s *path, char *from, char *to, i32 *direction);
 
-extern "C" ADDPART_s Default_ADDPART;
 
-extern "C" PART_s *AddPart(ADDPART_s *);
 
-void MakeThrowVector(NUVEC *, NUVEC *, NUVEC *, NUVEC *, f32, f32);
 
 // Game-specific AI actions and conditions (registered via
 // RegisterAIScriptActions / RegisterAIScriptConditions). These are stubbed to
@@ -683,61 +639,31 @@ DECOMP_ASSERT(sizeof(api_aiactiondefs) == 0x294, "API action registry size");
 
 DECOMP_ASSERT(sizeof(api_aiconditiondefs) == 0x258, "API condition registry size");
 
-extern "C" void *AISysBufferAlloc(VARIPTR *cursor, VARIPTR *end, u32 size);
 
-extern "C" void ResetAIMessageSys(AIMESSAGESYS_s *sys);
 
-extern "C" AIMESSAGESYS_s *CreateAIMessageSys(VARIPTR *cursor, VARIPTR *end, i32 count);
 
-extern "C" void ClearAIMessageSys(AIMESSAGESYS_s *system);
 
-extern "C" AIMESSAGE_s *CheckAIMessage(AIMESSAGESYS_s *system, char *name, AIMESSAGE_s *message);
 
-extern "C" f32 GetAIMessage(AIMESSAGESYS_s *system, char *name, AIMESSAGE_s *message);
 
-extern "C" void SetAIMessage(AIMESSAGESYS_s *system, char *name, f32 value, AIMESSAGE_s *message);
 
-extern "C" AIMESSAGE_s *QueryAIMessage(AIMESSAGESYS_s *system, AIMESSAGE_s *message);
 
-extern "C" void RemoveAIMessage(AIMESSAGESYS_s *system, char *name, AIMESSAGE_s *message);
 
-extern "C" AILOCALMESSAGE_s *FindLocalAIMessage(AISCRIPTPROCESS *processor, char *name);
 
-extern "C" void AddLocalAIMessage(AISCRIPTPROCESS *processor, AILOCALMESSAGE_s *message, char *name);
 
-extern "C" AIPATHCNX *AIPathFindPathCnxFromIX(AISYS *system, AIPATH *path, u8 from_index, u8 to_index);
 
-extern AIANTINODE dynamic_antinodes[64];
 
 extern "C" f32 default_path_heighttol;
 
-extern "C" void AISetPathHeightTol(f32 tolerance);
 
-extern "C" AIANTINODE *AIAntinodeCreate(NUVEC *position, f32 radius);
 
-extern "C" AIANTINODE *AIAntinodeCreateSingleFrame(NUVEC *position, f32 radius);
 
-extern "C" void AIAntinodeDestroy(AIANTINODE *antinode);
 
-extern "C" void AIAntinodeCullSingleFrame(void);
 
-extern "C" void AIAntinodeMove(AIANTINODE *antinode, NUVEC *position, f32 radius, f32 below, f32 above);
 
-extern "C" void AIFormationFollow(AIPACKET *packet);
 
-extern "C" void AILocatorSet_CheckLocatorsStillAssigned(AISYS *system, AILOCATORSET *locator_set);
 
-extern "C" void AILocatorSet_AssignNearestLocator(AISYS *system, AILOCATORSET *locator_set, APIOBJECT *object,
-                                                  f32 max_range, NUVEC *position, NUVEC *second_position,
-                                                  f32 off_screen_radius, i32 ignore_assigned);
 
-extern "C" void AILocatorSet_AssignFurthestLocator(AISYS *system, AILOCATORSET *locator_set, APIOBJECT *object,
-                                                   f32 max_range, NUVEC *position, NUVEC *second_position,
-                                                   f32 off_screen_radius, i32 ignore_assigned);
 
-extern "C" void AILocatorSet_AssignRandomLocator(AISYS *system, AILOCATORSET *locator_set, APIOBJECT *object,
-                                                 f32 max_range, NUVEC *position, f32 off_screen_radius,
-                                                 i32 ignore_assigned);
 
 // ---- end src/gameapi/ai/aisys/aisys.cpp ----
 
@@ -780,7 +706,6 @@ extern "C" void AILocatorSet_AssignRandomLocator(AISYS *system, AILOCATORSET *lo
 // ==== src/legoapi/ai/core/ai_sys_stubs.cpp: declarations ====
 
 
-extern "C" f32 (*GetCharacterGoalSpeedFn)(APIOBJECT *);
 
 extern "C" {
 extern void (*checkantinodefns[3])(APIOBJECT *, AIANTINODE *, NUVEC *, f32);
@@ -793,23 +718,18 @@ extern void (*checkantinodefns[3])(APIOBJECT *, AIANTINODE *, NUVEC *, f32);
     extern void (*checkantinodefns[3])(APIOBJECT_s *, AIANTINODE_s *, NUVEC *, f32);
 }
 
-extern "C" i32 AISysSetLevelPath(AISYS *system, char *path_name);
 
-extern "C" void AIPathNodeUpdatePos(AISYS *system, AIPATH *path, AIPATHNODE *node);
 
 
 extern "C" {
 
-    AIPATHNODE *AIPathFindNode(AISYS *system, AIPATH *path, char *name);
 
 
 void *AIPAthFindPathCnx(AISYS_s *system, AIPATH_s *path, char *from_name, char *to_name, i32 *direction);
 
 
 
-AIPATHNODE *AIPathFindNode(AISYS *system, AIPATH *path, char *name);
 
-void AIPathNodeUpdatePos(AISYS *system, AIPATH *path, AIPATHNODE *node);
 
 #include "legoapi/ai/core/ai_sys_stubs_types.h"
     DECOMP_ASSERT(sizeof(RebuildEditorCreature) == 0xac, "editor creature rebuild stride");
@@ -838,7 +758,6 @@ extern "C" {
 
 
 
-AIAREA *AISysFindArea(AISYS *sys, char *name);
 
 
 
@@ -856,7 +775,6 @@ void AddToAIGroup(AIGROUP *group, APIOBJECT *object);
 
 
 
-void CalculateLocatorDirection(i32 direction, numtx_s *matrix, NUVEC *out);
 
 
 
@@ -880,16 +798,12 @@ DECOMP_ASSERT(sizeof(EDAIAREA_s) == 0x44, "area editor record size");
 
 extern "C" {
     extern f32 default_path_heighttol;
-    extern char *(*SpecialRouteCharacterNameFn)(u8);
 }
 DECOMP_ASSERT(sizeof(AIPATHCNXTYPE_s) == 0x4c, "editor path connection type size");
 DECOMP_ASSERT(offsetof(AIPATHCNXTYPE_s, flags) == 0x48, "editor path connection options offset");
 
-extern "C" void aieditor_ClearAllPathCnxTypes(void);
 
-extern "C" void aieditor_RegisterDefaultPathCnxTypes(void);
 
-extern "C" void aieditor_RegisterPathCnxType(const char *name, u32 connection_flag, void *context, u32 flags);
 
 
 // Retail splits the null checks into each caller and keeps the body as a
@@ -986,7 +900,6 @@ DECOMP_ASSERT(offsetof(CreatureEditorRecord, view_distance) == 0x9c, "creature v
 DECOMP_ASSERT(offsetof(CreatureEditorRecord, negative_min_view_height) == 0xa8, "creature min view height offset");
 DECOMP_ASSERT(sizeof(CreatureEditorRecord) == 0xac, "editor creature record size");
 
-extern "C" void (*ClearAICreaturesFn)();
 extern "C" u8 default_activate_difficulty;
 extern "C" u8 default_min_n_respawns;
 extern "C" u8 default_max_n_respawns;
@@ -1020,7 +933,6 @@ static __used__ __attribute__((force_align_arg_pointer)) void creatureEditor_cbS
 
 extern "C" {
     struct EDCREATURE_s;
-    extern void (*ClearAICreaturesFn)();
     extern u8 default_activate_difficulty;
     extern u8 default_min_n_respawns;
     extern u8 default_max_n_respawns;
@@ -1066,7 +978,7 @@ extern i32 drop_in_teleport;
 
 extern "C" {
     void AddToAIGroup(AIGROUP_s *group, APIOBJECT_s *object);
-    extern i16 id_LANDSPEEDER, id_MILLENNIUMFALCON;
+    extern i16 id_LANDSPEEDER;
 }
 
 // Written by ThingManager's ctor (original global @0x124f2e0, .bss).
@@ -1157,17 +1069,12 @@ extern "C" {
 
 
 
-i32 Action_EndCameraCut(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s *, char **params, i32 param_count,
-                        i32 first_time, float);
 
-i32 Action_PlayCutScene(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **params, i32 param_count, i32 first_time,
-                        float);
 
 i32 Action_ReleaseLocator(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
                           i32 first_time, float);
 
 struct GIZSPINNER_s;
-extern u32 GAMEPAD_SPECIAL, GAMEPAD_JUMP, GAMEPAD_TOGGLERIGHT;
 
 i32 Action_GetLocatorFromSet(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,
                              i32 param_count, i32 first_time, float);
@@ -1185,7 +1092,6 @@ namespace {
 
 void Player_ClearContext(GameObject_s *, i32);
 void Player_ResetContexts(PLAYERPACKET_s *);
-extern "C" void KillPart(PART_s *, i32);
 
 
 bool IsDownSwipe(NuVec2 const &start, NuVec2 const &end);
@@ -1210,36 +1116,21 @@ extern "C" {
 
 extern "C" {
     extern f32 default_path_heighttol;
-    AIANTINODE_s *AIAntinodeCreateSingleFrame(NUVEC *, f32);
 }
 
-void *GameAntnode_CreateSys(WORLDINFO_s *world, variptr_u *buf, variptr_u *buf_end, i32 count);
 
-GAMEANTINODE_s *GameAntinode_RegisterAntiNode(GAMEANTINODESYS_s *system, NUVEC *position, f32 radius, f32 extent_x,
-                                              f32 extent_z, u16 angle, i32 shape, f32 duration);
 
-GAMEANTINODE_s *GameAntinode_RegisterAntiNodeUsingData(GAMEANTINODESYS_s *system, NUVEC *position, u16 angle,
-                                                       GAMEANTINODEDATA_s *data, f32 duration, i32 disabled);
 
 
 // ==== src/legoapi/render/core/render.cpp: declarations ====
 
-extern "C" void edbriStartAllPages(void);
 
 
-extern "C" void LocaledbitsDrawSolidEllipseXY(NUVEC *centre, f32 radius_x, f32 radius_z, i32 rotation, f32 lower_y,
-                                              f32 upper_y, u32 colour, i32, i32 segments);
 
-extern "C" void LocaledbitsDrawCircleXY(NUVEC *centre, f32 radius, u32 colour, i32, i32 segments);
 
-extern "C" void LocaledbitsDrawSolidCircleXY(NUVEC *centre, f32 radius, f32 lower_y, f32 upper_y, u32 colour, i32,
-                                             i32 segments);
 
-extern "C" void RndrOSquare(NUVEC *centre, f32 radius, i32 colour);
 
-extern "C" void RndrOSphere(NUVEC *centre, f32 radius, i32 colour, i32 segments, i32);
 
-extern "C" void RndrCircleXZ(NUVEC *centre, f32 radius, i32 colour, i32 segments);
 
 struct starfighter_s;
 struct rtl_s;
@@ -1247,7 +1138,6 @@ struct rtlidata_s;
 
 
 
-i32 MatrixReflection(NUMTX *matrix, i32 axis, f32 plane, f32 height, NUMTX *result);
 
 
 struct GAMEMESSAGE_s;
@@ -1262,15 +1152,6 @@ struct ripple_node_s;
 struct ripple_set_s;
 struct VuVec;
 
-extern "C" i32 NuRndrBeginScene(i32);
-extern "C" void NuRndrEndScene(void);
-extern u8 MENUENTRYR, MENUENTRYG, MENUENTRYB;
-extern f32 cointotaltime;
-extern "C" i32 editor_active;
-extern "C" i32 PANELOFF;
-extern void SetLevelLights(void *set, f32 scale);
-extern f32 statstime;
-f32 GetAspectRatio();
 
 // Camera zoom state
 
@@ -1281,7 +1162,6 @@ extern "C" {
 }
 
 
-extern "C" void NuGScnUpdate(NUGSCN *gscn, f32 frame_delta);
 
 // --- NuGScn graphics-data reader ---
 // NuReadGraphicsData is a C++ static function in the original (GCC clones it,
@@ -1300,8 +1180,6 @@ extern "C" {
 } // extern "C"
 
 
-i32 Draw3DObject(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x_rotation, u16 y_rotation,
-                 u16 z_rotation, float scale_x, float scale_y, float scale_z, i32 rotate_order);
 
 
 
@@ -1355,27 +1233,19 @@ i32 Draw3DObject(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x_
 
 
 
-void DrawStatusIcons(STATUSPACKET_s *status, float y, float alpha);
 
 
 
 // DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
 // red-brick positions come from the Game init values in legogame/game.cpp.
-extern "C" void Text3D(char *, f32, f32, f32, f32, f32, f32, u32, u8, u8, u8);
-
-void DrawMiniKitCount(float position, float scale, i32 count, i32 maximum);
-
-i32 Draw3DObjectAlpha(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x_rotation, u16 y_rotation,
-                      u16 z_rotation, float scale_x, float scale_y, float scale_z, i32 rotate_order, float alpha);
 
 
 
-extern i16 tUNKNOWN, tPOWERBRICK, tLOCKED, tGOLDBRICK;
-extern "C" void PlaySfx(char *, NUVEC *);
-void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 
 
-void DrawPanel3DObjectMtx(nuhspecial_s *special, numtx_s *matrix, float alpha);
+extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
+
+
 
 
 extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
@@ -1384,12 +1254,8 @@ extern "C" {
 }
 
 
-void DrawGameMessage_Targets(GAMEMESSAGE_s *message, nuvec_s *position, float scale);
 
-i32 DrawPanel3DObjectNoAlpha(float x, float y, float z, float scale_x, float scale_y, float scale_z, u16 rotate_x,
-                             u16 rotate_y, u16 rotate_z, nuhspecial_s *special, i32 rotate_order);
 
-extern void DrawMenuEntry(MENU_s *, char *);
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
     do {                                                                                                               \
@@ -1404,12 +1270,9 @@ extern void DrawMenuEntry(MENU_s *, char *);
     } while (false)
 
 
-void Transform_DrawTarget(NUVEC *, f32, f32);
-extern i16 id_ANAKINJEDISCARRED, id_WEIRDO1, id_WEIRDO2, id_CATAPULT, id_CHEWBACCA, id_WOOKIEE, id_TWOFACE;
-extern i32 PickUpFlickerTest, PickUpFlickerFrames, PickupFlickerFrame;
+extern i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
 
 
-extern f32 SeekLinearF(f32, f32, f32);
 
 
 
@@ -1437,7 +1300,6 @@ extern "C" {
 
 
 
-void RayImpact(NUVEC *);
 
 extern "C" {
     extern "C++" void DebrisProcessSpheres(uv1deb *, f32, debinftype *, debkeydatatype_s *, i32);
@@ -1445,13 +1307,8 @@ extern "C" {
 
 
 // NuFileExists @nufile (nucore_plain.cpp).
-extern "C" i32 NuFileExists(char *name);
 
-extern "C" void TerrainSetCur(void *terrain);
-extern "C" void TerrSetPlatScanDist(f32 dist);
 
-extern "C" void TerrainPlatformNewUpdate(void);
-extern "C" i32 PARTLookupTypePageOnly(char *, i32);
 
 
 extern "C" {
@@ -1469,13 +1326,9 @@ extern "C" {
 
 
 
-i32 NewRayCastEx(NUVEC *position, NUVEC *movement, f32 radius, i32 scan_flags);
 
-i32 NewRayCastScaleY(NUVEC *position, NUVEC *movement, f32 radius, f32 scale_y, i32 scan_flags);
 
-    f32 NewShadowEx(NUVEC *position, i32 handle, f32 height_above, f32 height_below, i32 terrain_mask);
 
-f32 NewShadow(NUVEC *position, f32 height_above, f32 height_below, i32 terrain_mask);
 
 
 
@@ -1537,7 +1390,6 @@ extern "C" {
 
 
 
-extern "C" void AISetPathHeightTol(f32 tolerance);
 
 }
 
@@ -1555,18 +1407,12 @@ void AddToAIGroup(AIGROUP *group, APIOBJECT *object);
 
 
 
-extern "C" void *AISysLoad(void *buf, void *buf_end, i32 size, void *gscn, char *dir, char *name, char *param);
 
 
-extern "C" AIANTINODE *AIAntinodeCreate(NUVEC *position, f32 radius);
 
-extern "C" AIANTINODE *AIAntinodeCreateSingleFrame(NUVEC *position, f32 radius);
 
-extern "C" void AIAntinodeDestroy(AIANTINODE *antinode);
 
-extern "C" void AIAntinodeCullSingleFrame(void);
 
-extern "C" void AIAntinodeMove(AIANTINODE *antinode, NUVEC *position, f32 radius, f32 below, f32 above);
 
 }
 
@@ -1575,13 +1421,6 @@ extern "C" {
 
 
 
-extern "C" void AISysCharacterSetPath(AIPACKET *packet, AIPATH *path);
-
-}
-
-extern "C" {
-extern "C" f32 AIPathNodeDistanceToPathNode(AIPATH *path, i32 start_node, i32 destination_node, i32 route_index,
-                                            u32 excluded_route_mask);
 
 }
 
@@ -1591,13 +1430,15 @@ extern "C" {
 
 extern "C" {
 
-AIAREA *AISysFindArea(AISYS *sys, char *name);
+}
+
+extern "C" {
+
 
 }
 
 extern "C" {
 
-AIPATHNODE *AIPathFindNode(AISYS *system, AIPATH *path, char *name);
 
 }
 
@@ -1607,20 +1448,13 @@ void *AIPAthFindPathCnx(AISYS_s *system, AIPATH_s *path, char *from_name, char *
 }
 
 extern "C" {
-extern "C" AIPATHCNX *AIPathFindPathCnxFromIX(AISYS *system, AIPATH *path, u8 from_index, u8 to_index);
 
-void AIPathNodeUpdatePos(AISYS *system, AIPATH *path, AIPATHNODE *node);
 
-extern "C" i32 WithinConnection(AISYS *system, NUVEC *position, AIPATH *path, AIPATHCNX *connection, i32 checks,
-                                AIPATHCNX *previous_connection, i32 route, i32 ground, AIPATHINFO *path_info,
-                                f32 radius, i32 update_once);
 
 }
 
 extern "C" {
-extern "C" void AISysFindRoute(AIPACKET *packet);
 
-extern "C" void AISysCharacterSetPathCnx(AIPACKET *packet, NUVEC *position, AIPATHCNX *connection, i32 direction);
 
 }
 
@@ -1629,7 +1463,6 @@ extern "C" {
 
 
 
-extern "C" void AIFormationFollow(AIPACKET *packet);
 
 
 }
@@ -1641,55 +1474,29 @@ extern "C" {
 extern "C" {
 
 
-extern "C" i32 AISysGetCharacterWaypoint(const AIPACKET *packet, NUVEC *position);
 
-extern "C" void LocaledbitsDrawSolidCircleXY(NUVEC *centre, f32 radius, f32 lower_y, f32 upper_y, u32 colour, i32,
-                                             i32 segments);
 
 }
 
 extern "C" {
-extern "C" void LocaledbitsDrawSolidEllipseXY(NUVEC *centre, f32 radius_x, f32 radius_z, i32 rotation, f32 lower_y,
-                                              f32 upper_y, u32 colour, i32, i32 segments);
 
 }
 
 extern "C" {
-extern "C" void LocaledbitsDrawCircleXY(NUVEC *centre, f32 radius, u32 colour, i32, i32 segments);
 
-extern "C" void ResetAIMessageSys(AIMESSAGESYS_s *sys);
 
-extern "C" AIMESSAGESYS_s *CreateAIMessageSys(VARIPTR *cursor, VARIPTR *end, i32 count);
 
-extern "C" void ClearAIMessageSys(AIMESSAGESYS_s *system);
 
-extern "C" AIMESSAGE_s *CheckAIMessage(AIMESSAGESYS_s *system, char *name, AIMESSAGE_s *message);
 
-extern "C" f32 GetAIMessage(AIMESSAGESYS_s *system, char *name, AIMESSAGE_s *message);
 
-extern "C" void SetAIMessage(AIMESSAGESYS_s *system, char *name, f32 value, AIMESSAGE_s *message);
 
-extern "C" AIMESSAGE_s *QueryAIMessage(AIMESSAGESYS_s *system, AIMESSAGE_s *message);
 
-extern "C" void RemoveAIMessage(AIMESSAGESYS_s *system, char *name, AIMESSAGE_s *message);
 
-extern "C" AILOCALMESSAGE_s *FindLocalAIMessage(AISCRIPTPROCESS *processor, char *name);
 
-extern "C" void AddLocalAIMessage(AISCRIPTPROCESS *processor, AILOCALMESSAGE_s *message, char *name);
 
-extern "C" void AILocatorSet_CheckLocatorsStillAssigned(AISYS *system, AILOCATORSET *locator_set);
 
-extern "C" void AILocatorSet_AssignNearestLocator(AISYS *system, AILOCATORSET *locator_set, APIOBJECT *object,
-                                                  f32 max_range, NUVEC *position, NUVEC *second_position,
-                                                  f32 off_screen_radius, i32 ignore_assigned);
 
-extern "C" void AILocatorSet_AssignFurthestLocator(AISYS *system, AILOCATORSET *locator_set, APIOBJECT *object,
-                                                   f32 max_range, NUVEC *position, NUVEC *second_position,
-                                                   f32 off_screen_radius, i32 ignore_assigned);
 
-extern "C" void AILocatorSet_AssignRandomLocator(AISYS *system, AILOCATORSET *locator_set, APIOBJECT *object,
-                                                 f32 max_range, NUVEC *position, f32 off_screen_radius,
-                                                 i32 ignore_assigned);
 
 
 
@@ -1702,11 +1509,8 @@ extern "C" void AILocatorSet_AssignRandomLocator(AISYS *system, AILOCATORSET *lo
 
 extern "C" {
 
-extern "C" void aieditor_ClearAllPathCnxTypes(void);
 
-extern "C" void aieditor_RegisterPathCnxType(const char *name, u32 connection_flag, void *context, u32 flags);
 
-extern "C" void aieditor_RegisterDefaultPathCnxTypes(void);
 
 }
 

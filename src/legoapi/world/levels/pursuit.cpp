@@ -87,21 +87,13 @@ f32 traffic_test_z = -360.0f;
 // Coruscant — bounty-hunter pursuit (Zam Wesell)
 // ===========================================================================
 
-void BountyHunterPursuitA_Init(WORLDINFO_s *world);
 
-void BountyHunterPursuitB_Init(WORLDINFO_s *);
 
-void BountyHunterPursuitC_Init(WORLDINFO_s *);
 
-void BountyHunterPursuitD_Init(WORLDINFO_s *);
 
-void BountyHunterPursuitA_Reset(WORLDINFO_s *world);
 
-void BountyHunterPursuitB_Reset(WORLDINFO_s *world);
 
-void BountyHunterPursuitC_Reset(WORLDINFO_s *world);
 
-void BountyHunterPursuitD_Reset(WORLDINFO_s *world);
 
 // UpdateZamArrow is inlined into its callers apart from the message update,
 // which retail keeps as the split-out body of the IPA-SRA clone (it only needs
@@ -127,13 +119,9 @@ static inline void UpdateZamArrow(WORLDINFO_s *world) {
     }
 }
 
-void BountyHunterPursuitB_Update(WORLDINFO_s *world);
 
-void BountyHunterPursuitA_Update(WORLDINFO_s *world);
 
-void BountyHunterPursuitC_Update(WORLDINFO_s *world);
 
-void BountyHunterPursuitD_Update(WORLDINFO_s *);
 
 
 // ==== functions in original address order ====

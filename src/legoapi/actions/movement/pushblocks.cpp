@@ -298,7 +298,6 @@ i32 TerrainBlockOnBlock(WORLDINFO_s *, pushblock_s *, NUVEC *, f32 *);
 
 pushblock_s *NearestPushBlock(WORLDINFO_s *world, nuvec_s *position, float range);
 
-extern "C" f32 NuFmax(f32, f32);
 void PushSeekComplete(pushblock_s *block, i32 index);
 
 i32 OtherBlockInRange(WORLDINFO_s *world, pushblock_s *block, nuvec_s *position, i32 excluded);
@@ -326,10 +325,8 @@ enum PUSHBLOCK_CONFIG_FLAGS {
 
 i32 pushblock_gizmotype_id;
 
-extern "C" char *NuIToA(i32 value, char *buffer, i32 radix);
 void ResetPushProgress(WORLDINFO_s *world, void *progress);
 void ResetSinglePushBlock(WORLDINFO_s *world, pushblock_s *push_block, i32 index);
-void KnockPushBlock(pushblock_s *push_block, NUVEC *direction);
 void MoveBlocks(WORLDINFO_s *world, pushblock_s *push_block, i32 index, NUVEC *velocity);
 void PushSeekComplete(pushblock_s *push_block, i32 snap_index);
 
@@ -337,8 +334,6 @@ extern i32 LEGOHINT_PUSHBLOCKS;
 static NUVEC hothbtestpos = {29.0f, 0.0f, 13.0f};
 i32 SnapPosTaken(WORLDINFO_s *, pushblock_s *, NUVEC *, i32);
 i32 OtherBlockInRange(WORLDINFO_s *, pushblock_s *, NUVEC *, i32);
-f32 SeekValF(f32, f32, f32);
-void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 void AddShoveObject(nuhspecial_s *, i16);
 void UpdatePushBlocks(void *world_ptr, void *, float);
 
@@ -378,8 +373,6 @@ void AlertSurroundingCreatures(GameObject_s *object, NUVEC *position);
 
 // Original action/context lookup data, with its arrays and pointers in one owner.
 
-extern "C" void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
-extern "C" void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
 // Retail keeps several of this file's static helpers only as GCC clones; these
 // declarations pin the clone names and register conventions.
 #if defined(__i386__)
@@ -392,7 +385,7 @@ extern "C" void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
 
 // Retail keeps only the IPA-SRA clone of this function.
 i32 PodLevel(AREADATA_s *);
-extern "C" i16 id_ATAT, id_DODGEM;
+extern "C" i16 id_DODGEM;
 
 // Multiplies the ordinary camera's per-frame position blend.  The original
 // keeps this as writable camera state (default 1.0), rather than folding it
@@ -409,7 +402,7 @@ i32 PodLevel(AREADATA_s *area);
 extern i32 LevFlag[4];
 // Original exported level control, initialized to 2 at 0x623d00.
 
-extern "C" i16 id_LANDSPEEDER, id_WOOKIEFLYER, id_STAP2;
+extern "C" i16 id_LANDSPEEDER;
 
 // These pod tuning values are zero-initialized in the original image.
 
@@ -424,16 +417,15 @@ extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 // Retail splits the context test off as an inline head; the rest is this partial clone.
 
 extern "C" {
-    extern i16 id_ATST, id_MINIATST, id_ATST_LOWRES, id_ATAT, id_MINIATAT, id_MINIATTE;
+    extern i16 id_MINIATST, id_MINIATTE;
 }
 
-f32 SeekValF(f32 current, f32 target, f32 rate);
 
 
 DECOMP_ASSERT(sizeof(AWKWARDSHAPESPHERE_s) == 12, "Awkward shape sphere size");
 DECOMP_ASSERT(offsetof(AWKWARDSHAPESPHERE_s, radius) == 8, "Awkward shape sphere radius offset");
 
-extern i16 id_GEONOSIAN, id_MINIATST, id_ATST_LOWRES, id_ATAT, id_MINIATAT, id_MINIATTE, id_SENTRYDROID;
+extern i16 id_MINIATST, id_MINIATTE;
 
 // ==== src/legoapi/characters/motion/gameanim.cpp: declarations ====
 
@@ -443,12 +435,10 @@ extern i16 id_GEONOSIAN, id_MINIATST, id_ATST_LOWRES, id_ATAT, id_MINIATAT, id_M
 
 
 
-void EvalAnim(nuhspecial_s *special, float frame, numtx_s *matrix, i32 include_instance_translation);
 
 // ==== src/legoapi/world/levels/episodeV.cpp: declarations ====
 
 
-extern "C" i16 id_PROBEDROID, id_ATST_LOWRES, id_ATAT;
 extern AILOCATOR_s * locator;
 
 DECOMP_ASSERT(sizeof(HOTHBATTLEE_NETPACKET_s) == 0x58, "Hoth panel packet size");
@@ -483,7 +473,6 @@ extern "C" {
 // (GIZFLOW_s/FLOWBOX_s), power-up and space/starfighter helpers. Stubbed as
 // local `t` symbols matching res/libTTapp.so.
 
-extern WORLDINFO_s *WORLD;
 
 extern "C" {
 
@@ -516,7 +505,7 @@ extern "C" {
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 
 extern "C" {
-    extern i16 id_LANDSPEEDER, id_MILLENNIUMFALCON;
+    extern i16 id_LANDSPEEDER;
 }
 
 // Written by ThingManager's ctor (original global @0x124f2e0, .bss).
@@ -527,7 +516,6 @@ extern "C" {
 // processing through the forced-update path.
 
 
-extern "C" f32 NuAnimEndFrameOld(void *animation);
 
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
@@ -541,7 +529,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 // remaining ids enumerate the current story list while omitting variants that
 // are represented by those dedicated routes.
 
-f32 GameShadow(GameObject_s *object, nuvec_s *position, f32 probe_height, i32 terrain_mask);
 
 #if defined(__i386__)
 #define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
@@ -551,7 +538,6 @@ f32 GameShadow(GameObject_s *object, nuvec_s *position, f32 probe_height, i32 te
 
 // Retail keeps only the IPA-SRA clone, which takes the other object's x and z by address.
 
-extern "C" i16 id_THEEMPEROR, id_IMPERIALGUARD, id_BODYGUARD;
 
 // ThingManager objects return to the theMemoryManager pool (D0 @0x425a50).
 inline void ThingManager::operator delete(void *thing, usize size) {
@@ -570,7 +556,6 @@ DECOMP_ASSERT(offsetof(GameObject_s, quick_shoot_bolt_id) == 0xe3e, "Quick shoot
 struct HINT_s;
 
 
-extern "C" NUVEC plr_lastpos;
 
 // --- Helpers moved from world.cpp ---
 
@@ -578,7 +563,6 @@ extern "C" NUVEC plr_lastpos;
 
 // ---- Misc player/gameobject helpers relocated from doorstubs.cpp ----
 
-void GameAudio_PlaySfx(i32 sfx, NUVEC *position, i32 flags, i32 volume);
 
 namespace {
 
@@ -595,7 +579,7 @@ DECOMP_ASSERT(sizeof(VIEWCAM_s) == 0x28, "ViewCam size");
 DECOMP_ASSERT(offsetof(VIEWCAM_s, pitch) == 0x10, "ViewCam pitch offset");
 DECOMP_ASSERT(offsetof(VIEWCAM_s, gamepad) == 0x24, "ViewCam gamepad offset");
 
-extern "C" i16 id_GRABCONTROL, id_GRABR2CONTROL, id_LANDSPEEDER, id_ATST, id_DEWBACK;
+extern "C" i16 id_LANDSPEEDER;
 
 DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, path) == 0x40, "Camera context path offset");
 DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context flags offset");
@@ -611,8 +595,6 @@ DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context fl
 DECOMP_ASSERT(sizeof(SPEEDERCHASEVALUES) == 0x1c, "Speeder chase tuning stride");
 DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 
-extern "C" void AddDebrisEffect(i32 *, i32, f32, f32, f32);
-extern "C" void DebrisPosOrientationMtx(i32, NUMTX *);
 
 // ==== src/legoapi/gizmo/base/gizmo.cpp: declarations ====
 
@@ -680,7 +662,6 @@ DECOMP_ASSERT(sizeof(JEDIBNETPACKET_s) == 0x20, "JEDIBNETPACKET_s ABI");
 // the network check, which retail keeps as the split-out body of the IPA-SRA
 // clone (it only needs &world->ai_sys).
 
-void JediB_Init(WORLDINFO_s *world);
 
 // ===========================================================================
 // Gunship (Gunship_A / Gunship_B)
@@ -759,15 +740,12 @@ static_assert(sizeof(struct LEVFLAGBYTES_s) == 16, "LevFlag must be 16 bytes");
 // Pod race core (A/B/C laps)
 // ===========================================================================
 
-void PodRaceAUpdate(WORLDINFO_s *world);
 
 // ===========================================================================
 // Pod sprint (Sebulba events)
 // ===========================================================================
 
-void PodSprintA_Init(WORLDINFO_s *world);
 
-void PodSprintA_Update(WORLDINFO_s *world);
 
 // ===========================================================================
 // Retake the palace (D/E/G)
@@ -792,7 +770,7 @@ void PodSprintA_Update(WORLDINFO_s *world);
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 
 extern "C" {
-    extern i16 id_LANDSPEEDER, id_MILLENNIUMFALCON;
+    extern i16 id_LANDSPEEDER;
 }
 
 // ==== src/legoapi/gizmos/trigger/ai.cpp: all remaining content ====
@@ -852,9 +830,7 @@ struct nuvec_s;
 
 
 
-extern "C" ADDPART_s Default_ADDPART;
 
-extern "C" PART_s *AddPart(ADDPART_s *);
 
 // Game-specific AI actions and conditions (registered via
 // RegisterAIScriptActions / RegisterAIScriptConditions). These are stubbed to
@@ -1064,7 +1040,7 @@ AddLocatorToSetAtEnd(EDLOCATORSET_s *set, EDLOCATOR_s *locator) __asm__(
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 
 extern "C" {
-    extern i16 id_LANDSPEEDER, id_MILLENNIUMFALCON;
+    extern i16 id_LANDSPEEDER;
 }
 
 extern "C" {
@@ -1194,7 +1170,6 @@ extern "C" {
 }
 
 // NuFileExists @nufile (nucore_plain.cpp).
-extern "C" i32 NuFileExists(char *name);
 
 extern "C" {
 
@@ -1398,8 +1373,6 @@ extern "C" {
 
 // ==== src/legoapi/props/objects/tubes.cpp: all remaining content ====
 
-extern "C" void AddVariableShotDebrisEffectTimed1(i32 effect, NUVEC *position, i32 count, f32 time, i16 z_rotation,
-                                                  i16 y_rotation, NUMTX *orientation);
 
 // ==== src/legoapi/misc/supportall.cpp: declarations ====
 
@@ -1416,14 +1389,12 @@ DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");
 //   NuHtmlBegin    0x2d5ca0   NuHtmlFlush   0x2d5c30
 //   NuHtmlWrite    0x2d5cd0   NuHtmlHeading1 0x2d5d40
 
-extern "C" void NuHtmlWrite(const char *text, ...);
 
-extern "C" void NuHtmlHeading1(const char *fmt, ...);
 
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 
 extern "C" {
-    extern i16 id_LANDSPEEDER, id_MILLENNIUMFALCON;
+    extern i16 id_LANDSPEEDER;
 }
 
 extern "C" {
@@ -2334,7 +2305,7 @@ void MoveBlocksOverBlock(WORLDINFO_s *world, pushblock_s *block, i32 excluded, n
     ((animations)[0x1a] != NULL || (animations)[0x1b] != NULL || (animations)[0x1c] != NULL)
 
 extern "C" {
-    extern i16 id_ATST, id_MINIATST, id_ATST_LOWRES, id_ATAT, id_MINIATAT, id_MINIATTE;
+    extern i16 id_MINIATST, id_MINIATTE;
 }
 
 i32 SnapPosTaken(WORLDINFO_s *world, pushblock_s *, nuvec_s *position, i32 excluded_index);
@@ -2372,7 +2343,7 @@ extern "C" {
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 
 extern "C" {
-    extern i16 id_LANDSPEEDER, id_MILLENNIUMFALCON;
+    extern i16 id_LANDSPEEDER;
 }
 
 extern "C" {
@@ -2449,7 +2420,7 @@ namespace {
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 
 extern "C" {
-    extern i16 id_LANDSPEEDER, id_MILLENNIUMFALCON;
+    extern i16 id_LANDSPEEDER;
 }
 
 // ==== src/legoapi/gizmos/trigger/ai.cpp: all remaining content ====
@@ -2490,7 +2461,7 @@ extern "C" {
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 
 extern "C" {
-    extern i16 id_LANDSPEEDER, id_MILLENNIUMFALCON;
+    extern i16 id_LANDSPEEDER;
 }
 
 extern "C" {
@@ -2711,7 +2682,7 @@ extern "C" {
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 
 extern "C" {
-    extern i16 id_LANDSPEEDER, id_MILLENNIUMFALCON;
+    extern i16 id_LANDSPEEDER;
 }
 
 extern "C" {
@@ -2738,7 +2709,6 @@ extern "C" {
 
 
 struct pushblock_s;
-extern "C" void NewTerrPlatformsOff();
 
 namespace {
 #include "legoapi/render/core/terrain_types.h"
@@ -2957,11 +2927,8 @@ namespace {
 
 } // namespace
 
-extern "C" i32 EShadowInfo(void);
 
-extern "C" void NewTerrPlatformsOff(void);
 
-extern "C" i32 ShadowInfo(void);
 
 // Original 0x378fb0: the optimized rotating scan shares the terrain engine state.
 

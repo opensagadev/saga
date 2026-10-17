@@ -45,9 +45,8 @@
 #include "legoapi/audio/sfx.h"
 #include <stdio.h>
 
-extern i16 id_RANCOR, id_ANAKINJEDI;
+extern i16 id_ANAKINJEDI;
 bool CalculateRayBoxIntersection(VuVec const &, VuVec const &, VuVec const &, VuVec const &, f32, f32 &);
-extern "C" void NewRayCastGetImpactNormal(NUVEC *);
 f32 CalcCapsuleIntersectDistance(VuVec const &, VuVec const &, f32, VuVec const &, f32);
 extern NuVirtualTouchDevice *inputTouchDevice;
 extern i32 players_cannot_exit_speeder;
@@ -84,10 +83,8 @@ static inline void AppendMainControls(NuButtonLayout &layout, MechInputTouchMain
 // ==== src/legoapi/actions/combat/hits.cpp: declarations ====
 
 
-extern i32 disable_narrow_socks, players_cannot_exit_speeder, BuildUpDone;
+extern i32 players_cannot_exit_speeder;
 
-extern LEVELDATA_s *SPEEDERCHASEA_LDATA;
-extern LEVELDATA_s *VADERC_LDATA;
 
 bool CalculateRayBoxIntersection(VuVec const &minimum, VuVec const &maximum, VuVec const &start, VuVec const &direction,
                                  float maximum_distance, float &distance);

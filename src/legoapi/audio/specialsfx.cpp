@@ -267,10 +267,6 @@
 #include "legoapi/gizmo/base/GizObstacleObjectInterface.h"
 
 
-extern "C" i32 GetSfxId(const char *name);
-extern "C" void NuGScnGetSpecial(nuhspecial_s *special, NUGSCN *scene, i32 index);
-extern "C" i32 IsSfxLooping(i32 sfx_id);
-void GameAudio_PlaySfxById(i32 sfx_id, nuvec_s *position, i32 flags, i32 volume);
 i32 GetAnimDirection(nuinstanim_s *animation);
 
 i32 SpecialSfxLoad(char *path, WORLDINFO_s *world);
@@ -297,7 +293,6 @@ void PlaySfxById(i32 sfx_id, nuvec_s *position);
 
 } // extern "C"
 
-void GameAudio_PlaySfxById(i32 sfx_id, nuvec_s *position, i32 flags, i32);
 
 // ==== src/legogame/game.cpp: declarations ====
 
@@ -316,7 +311,6 @@ void GameAudio_PlaySfxById(i32 sfx_id, nuvec_s *position, i32 flags, i32);
 // staggered across frames; special movement states opt back into full-rate
 // processing through the forced-update path.
 
-extern "C" f32 NuAnimEndFrameOld(void *animation);
 
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
@@ -868,7 +862,6 @@ struct AISYS_s;
 // Runtime-selected groups appended after the fixed terrain allocation.
 
 // NuFileExists @nufile (nucore_plain.cpp).
-extern "C" i32 NuFileExists(char *name);
 
 // ==== functions in original address order ====
 
@@ -899,7 +892,6 @@ extern "C" {
 // (GIZFLOW_s/FLOWBOX_s), power-up and space/starfighter helpers. Stubbed as
 // local `t` symbols matching res/libTTapp.so.
 
-extern WORLDINFO_s *WORLD;
 
 // The original repeats the per-sound emitter checks for each of the four sound slots.
 #define PART_EMIT_SOUND_ON(slot)                                                                                       \
@@ -912,7 +904,6 @@ extern WORLDINFO_s *WORLD;
     if (type->sounds[slot] != -1 && type->sound_modes[slot] == (mode))                                                 \
         PlaySfxById(type->sounds[slot], &emitter->position);
 
-extern "C" i32 GetSfxId(const char *);
 
 // ==== src/gameapi/edtools/edtoolsall_plain.cpp: all remaining content ====
 
@@ -1810,9 +1801,6 @@ namespace {
 // ==== src/gameapi/gui/apimenu.cpp: all remaining content ====
 
 
-extern "C" void SmartTextEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment,
-                            u8 red, u8 green, u8 blue, f32 max_width, i32 max_lines, void *message_box,
-                            i32 suppress_draw, u32 alpha);
 
 // ==== src/legoapi/core/input/gamepads.cpp: declarations ====
 
@@ -2325,9 +2313,7 @@ DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");
 //   NuHtmlBegin    0x2d5ca0   NuHtmlFlush   0x2d5c30
 //   NuHtmlWrite    0x2d5cd0   NuHtmlHeading1 0x2d5d40
 
-extern "C" void NuHtmlWrite(const char *text, ...);
 
-extern "C" void NuHtmlHeading1(const char *fmt, ...);
 
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 

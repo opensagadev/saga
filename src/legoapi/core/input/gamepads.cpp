@@ -57,7 +57,6 @@
 #include "nu2api/nusound/nusound.h"
 
 extern "C" void NuSound3AddRumble(nupad_s *, f32, i32, i32, f32);
-extern WORLDINFO_s *WORLD;
 extern i32 (*GamePads_IgnoreInputFn)(void);
 extern NUPAD *pActivePad;
 extern "C" {
@@ -100,10 +99,8 @@ static i32 RotationDistance(i32 difference) {
 }
 
 
-void PadOutPause(i32 port, WORLDINFO_s *world);
 
 
-void NewRumbleAllPlayers(float strength, float duration, i32 frames, i32);
 
 void VirtualControlDPad_OnDown_Callback(MechTouchUIElement &element, TouchHolder &touch);
 
@@ -114,11 +111,9 @@ void VirtualControlButtonMover_OnDown_Callback(MechTouchUIElement &element, Touc
 void VirtualControlDPad_LockButton_OnClick_Callback(MechTouchUIElement &element, TouchHolder &);
 
 
-void NewBuzz(nupad_s *pad, float duration, i32);
 
 
 
-void NewRumble(nupad_s *pad, float strength, i32);
 
 // ==== src/legoapi/misc/legoapi_misc.cpp: declarations ====
 

@@ -25,8 +25,6 @@ extern void DrawFadeScreenWipe(void);
 extern "C" void NuRndrRect2di(i32, i32, i32, i32, i32, numtl_s *);
 
 extern NUMTL *ScreenFadeMtl;
-extern NUMTL *FadeMtl2;
-extern NUMTL *FadeMtl;
 
 static u32 FRAMES_TO_WAIT = 1;
 

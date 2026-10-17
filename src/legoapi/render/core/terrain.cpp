@@ -45,8 +45,7 @@ struct terrsitu_s;
 struct PLATSKININFO;
 struct GAMECAMERA_s;
 struct pushblock_s;
-extern i16 id_SNAKE, id_TRACTOR;
-extern "C" void NewTerrPlatformsOff();
+extern i16 id_SNAKE;
 
 namespace {
 #include "legoapi/render/core/terrain_types.h"
@@ -65,7 +64,6 @@ namespace {
 
 } // namespace
 
-extern "C" void NuRndrLine3dDbg(f32, f32, f32, f32, f32, f32, i32);
 
 
 namespace {
@@ -262,7 +260,6 @@ extern "C" {
 extern i32 Grass_Available;
 }
 
-extern "C" void TerrainSetImpactData(void *impact_data, i32 *impact_count, i32 maximum_impacts);
 
 // Constructs the fixed terrain header and its variable-sized group, index and
 // platform arrays in the caller's arena. The four bounds arrays and the cell
@@ -271,20 +268,15 @@ extern "C" void TerrainSetImpactData(void *impact_data, i32 *impact_count, i32 m
 
 #undef IS_SNAN
 
-extern "C" void *TerrainInitEx(i32 level_num, void *buf, void *buf_end, i32 options, char *path, void *gscn,
-                               i32 scene_id, u32 max_group_indices, u32 max_groups, u32 max_platforms);
 i32 UnderWater(GameObject_s *object);
 
 
-i32 CheckSphereTer(NUVEC *position, f32 radius);
 
 
 void ScanTerrain(i32 scan_type, i32 terrain_mask, i32 scan_flags);
 #undef TERRAIN_SCALE_SCAN_SHAPE
 
-NUVEC TerrainSkin(PLATSKININFO *info, nuvec_s *position, float weight, i32 mode);
 
-void RotateVec(NUVEC *source, NUVEC *destination);
 
 
 
@@ -308,33 +300,20 @@ void MakePlayPlanes(GAMECAMERA_s *camera);
 DECOMP_ASSERT(sizeof(TERRAIN_DEBUG_RECORD) == 100, "Terrain debug record ABI");
 
 
-extern "C" i32 NewRayCastPlatForm(NUVEC *position, NUVEC *movement, f32 radius, f32 separation_epsilon,
-                                  i32 platform_index, i32 terrain_mask);
 
-extern "C" void *NuScratchAlloc32(i32 size);
-extern "C" void NuScratchRelease();
 
 i32 TerrainBlockOnBlock(WORLDINFO_s *world, pushblock_s *block, nuvec_s *points, float *heights);
 
 #undef TERRAIN_GET_SCAN_BOUNDS
 
 
-extern "C" void *NuScratchAlloc32(i32 size);
-extern "C" void NuScratchRelease();
 
-extern "C" void FullDeflect(NUVEC *normal, NUVEC *movement, NUVEC *result);
 
-void FullDeflectSmallY(NUVEC *normal, NUVEC *movement, NUVEC *result);
 
-extern "C" void FullReflect(NUVEC *normal, NUVEC *movement, NUVEC *result);
 
-extern "C" void TerrainSetPlatConnectTol(f32 tolerance);
 
-extern "C" void TerrainSetWallDeflectYScale(f32 scale);
 
-NUVEC TerCrossProduct(NUVEC *a, NUVEC *b);
 
-extern "C" void noterraininit(void);
 
 
 namespace {
@@ -353,66 +332,34 @@ namespace {
 
 } // namespace
 
-extern "C" i32 EShadowInfo(void);
 
-extern "C" i32 EShadowRoofInfo(void);
 
-extern "C" void NewTerrPlatformsOff(void);
 
-extern "C" void CubeImpact(NUMTX *current, NUMTX *previous, NUVEC *normal, f32 scale, NUVEC *impact);
 
-extern "C" void NewTerrainScaleYMask(NUVEC *position, NUVEC *movement, u8 *hit_flags, i32 object_index, f32 radius,
-                                     f32 collision_radius, f32 object_scale, i32 embedded_retry, i32 scan_flags,
-                                     i32 terrain_mask);
 
-extern "C" f32 NewRayCastGetTOFI(void);
 
-extern "C" i32 NewRayCastGetImpactTerrainType(void);
 
-extern "C" void NewRayCastGetImpactNormal(NUVEC *normal);
 
-extern "C" f32 NewRayCastGetEmbedDist(void);
 
-extern "C" i32 NewRayCastHitWallSpline(void);
 
-extern "C" i32 NewRayCast(NUVEC *position, NUVEC *movement, f32 radius, i32 scan_flags);
 
-extern "C" i32 NewRayCastScaleYMask(NUVEC *position, NUVEC *movement, f32 radius, f32 scale_y, i32 scan_flags,
-                                    u32 terrain_mask);
 
-extern "C" i32 NewRayCastMask(NUVEC *position, NUVEC *movement, f32 radius, i32 terrain_mask, i32 scan_flags);
 
-extern "C" i32 NewRayCastSet(NUVEC *position, NUVEC *movement, f32 radius, f32 separation_epsilon, f32 compare_epsilon,
-                             i32 scan_type, i32 scan_flags);
 
-extern "C" i32 NewRayCastSetMask(NUVEC *position, NUVEC *movement, f32 radius, f32 separation_epsilon,
-                                 f32 compare_epsilon, i32 scan_type, i32 terrain_mask, i32 scan_flags);
 
 extern "C" void NewTerrAxisFreedom(TERRAIN_AXIS_FREEDOM_SHAPE *shape, NUVEC *position);
 
-extern "C" i16 NewPlatPickupInst(void *object, i32 type);
-
-extern "C" i32 NewRayCastSetHandel(NUVEC *position, NUVEC *movement, f32 radius, f32 separation_epsilon,
-                                   f32 compare_epsilon, i16 *handle, i32 scan_type);
 
 
-extern "C" i32 TerrainPlatId(void);
 
-extern "C" i32 TerrainIntensityInfo();
 
-extern "C" i32 TerrainInfo();
 
-extern "C" i32 TerrainInfoExtra();
 
-extern "C" i32 ShadowInfo(void);
 
-extern "C" i32 ShadowIntensityInfo(void);
+
 
 // Original 0x378fb0: the optimized rotating scan shares the terrain engine state.
-extern "C" void *NuScratchAlloc32(i32);
-extern "C" void NuScratchRelease();
 
-extern "C" void TerrainPlatformOldUpdate(void);
 
 namespace {
 
@@ -422,19 +369,14 @@ namespace {
 #undef TERRAIN_COLLECT_WALL_SPLINES
 
 
-extern "C" i16 *NewScanHandel(nuvec_s *position, nuvec_s *movement, f32 radius, i32 scan_type, i16 *subset);
 
 namespace {
 
 } // namespace
 
 
-extern "C" void TerrainTrackFlush(void);
 
 
-extern "C" f32 NewShadowEx(NUVEC *position, i32, f32 height_above, f32 height_below, i32 terrain_mask);
 
 
-void PlatformConnect(char *track_id, NUVEC *position_delta, NUVEC *movement_delta, i32 platform_index);
 
-void RayImpact(NUVEC *movement);

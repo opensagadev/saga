@@ -92,7 +92,6 @@ void VirtualControlDPad_LockButton_OnClick_Callback(MechTouchUIElement &, TouchH
 
 
 
-extern WORLDINFO_s *WORLD;
 extern "C" {
     extern "C++" FadeSystem FadeSys;
 }

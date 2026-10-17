@@ -517,7 +517,6 @@ void PerformActionFlowBox(GIZFLOW_s *system, FLOWBOX_s *box) {
     }
 }
 
-void GizmoSysStoreProgress(GIZMOSYS_s *system, void *world, i32 progress_index);
 
 void GizmoTypeStoreProgress(GIZMOSYS_s *system, void *world, i32 progress_index, i32 type_id, char *name);
 

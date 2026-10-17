@@ -234,12 +234,8 @@
 #include "legoapi/items/base/animpacket.h"
 
 extern i32 ACTIVECUTCOUNT;
-extern "C" i32 CUTDRAWWORLD;
-extern "C" i32 Paused;
-extern "C" i32 CutSceneWaiting;
 extern i32 CUTCAMONLY;
 extern i32 cut_waiting_for_new_level;
-extern "C" i32 newlevel_resumecutaudio;
 extern CUTSYS *CS_cutsys;
 CUTSCENESYS *CutSceneSys;
 
@@ -255,17 +251,13 @@ extern "C" {
     void NuGCutSceneSysUpdate(i32, i32, f32);
 }
 
-void SetLevelLights(void *, f32);
 void NewLevelFromMenu(LEVELDATA_s *, i32, i32, i32);
 void FindAndSetLights(NUVEC *, f32, void *);
 void SetZeroLights(void);
 void GameFog_Reset(void);
-i32 MatrixReflection(NUMTX *, i32, f32, f32, NUMTX *);
 f32 FindReflectionNoPlatforms(NUVEC *);
 extern "C" i32 NewShadowOnPlatform(void);
-void FindAnglesZX(NUVEC *, u16 *, u16 *);
 void CharScene_Draw(WORLDINFO_s *, i32, NUMTX *, NUMTX *);
-extern "C" void APITransparentCharDraw(nuhgobj_s *, NUMTX *, i32, i16 *, NUMTX *, void **, i32);
 extern "C" void instNuGCutLocatorUpdate(instNUGCUTSCENE_s *, NUGCUTLOCATORSYS_s *, instNUGCUTLOCATOR_s *,
                                         NUGCUTLOCATOR_s *, f32, NUMTX *, i32);
 void CutScenePlayer_SetObjects(CUTINFO *);
@@ -294,8 +286,6 @@ extern i32 CUTSKIPLOCK;
 f32 LevelNameMul;
 f32 LevelNameTime;
 
-extern "C" i32 drawcharactermodel_nobsa;
-extern "C" i32 NewMode;
 
 extern "C" {
     void PauseGameCut(void);
@@ -322,8 +312,6 @@ static inline i32 CutScene_Start(WORLDINFO_s *world, CUTINFO *cut, i32) {
 }
 
 
-extern "C" f32 *NuGCutLocatorCalcMtx(NUGCUTLOCATOR_s *, f32, NUMTX *, nuanimtime_s *);
-extern "C" i32 NuGCutLocatorIsVisble(NUGCUTLOCATOR_s *, f32, nuanimtime_s *, f32 *, f32 *);
 extern "C" void NuAnimData2CalcTime(nuanimdata2_s *, f32, nuanimtime_s *);
 
 static __used__ void LocatorFunction_Blaster(instNUGCUTSCENE_s *, NUGCUTLOCATORSYS_s *, instNUGCUTLOCATOR_s *,
@@ -618,7 +606,6 @@ typedef isize __attribute__((may_alias)) NuGCutWord;
 #define NUGCUT_FIXPTRS_ATTR(n) __attribute__((noinline, noclone))
 #endif
 
-extern "C" void NuGCutSceneSysInit(NUGCUTLOCATORFNENTRY_s *locator_functions);
 
 extern "C" {
 
@@ -640,7 +627,6 @@ struct numtx_s;
 #define INST_LOCATOR_SYS_END_ATTR __attribute__((noinline, noclone))
 #endif
 
-extern "C" void instNuGCutSceneEnd(instNUGCUTSCENE_s *instance);
 
 static __used__ void instNuGCutTriggerSysUpdate(instNUGCUTSCENE_s *instance, float frame);
 
@@ -905,10 +891,7 @@ union variptr_u;
 
 // ==== src/nu2api/nucore/nugcutscene_anim.cpp: all remaining content ====
 
-extern "C" f32 *NuGCutLocatorCalcMtx(NUGCUTLOCATOR_s *locator, float frame, NUMTX *mtx, nuanimtime_s *time);
 
-extern "C" i32 NuGCutLocatorIsVisble(NUGCUTLOCATOR_s *locator, float frame, nuanimtime_s *time, float *scale,
-                                     float *rate);
 
 // ==== src/legoapi/characters/motion/gameanim.cpp: declarations ====
 
@@ -968,7 +951,6 @@ static __used__ __attribute__((noinline)) void instNuGCutTriggerSysUpdate(instNU
 
 extern "C" {
 
-extern "C" void NuGCutSceneSysInit(NUGCUTLOCATORFNENTRY_s *locator_functions);
 
 }
 
@@ -983,18 +965,14 @@ void instNuGCutSceneStart(instNUGCUTSCENE_s *instance);
 }
 
 extern "C" {
-extern "C" f32 *NuGCutLocatorCalcMtx(NUGCUTLOCATOR_s *locator, float frame, NUMTX *mtx, nuanimtime_s *time);
 
 }
 
 extern "C" {
-extern "C" i32 NuGCutLocatorIsVisble(NUGCUTLOCATOR_s *locator, float frame, nuanimtime_s *time, float *scale,
-                                     float *rate);
 
 }
 
 extern "C" {
-extern "C" void instNuGCutSceneEnd(instNUGCUTSCENE_s *instance);
 
 void instNuGCutSceneDestroy(instNUGCUTSCENE_s *instance);
 
@@ -1025,7 +1003,6 @@ extern "C" {
 
 extern "C" {
 extern "C" {
-extern "C" void NuGCutSceneSysInit(NUGCUTLOCATORFNENTRY_s *locator_functions);
 
 }
 }
@@ -1057,22 +1034,18 @@ void instNuGCutSceneServiceLoad(void);
 
 extern "C" {
 extern "C" {
-extern "C" f32 *NuGCutLocatorCalcMtx(NUGCUTLOCATOR_s *locator, float frame, NUMTX *mtx, nuanimtime_s *time);
 
 }
 }
 
 extern "C" {
 extern "C" {
-extern "C" i32 NuGCutLocatorIsVisble(NUGCUTLOCATOR_s *locator, float frame, nuanimtime_s *time, float *scale,
-                                     float *rate);
 
 }
 }
 
 extern "C" {
 extern "C" {
-extern "C" void instNuGCutSceneEnd(instNUGCUTSCENE_s *instance);
 
 }
 }
@@ -1121,7 +1094,6 @@ extern "C" {
 
 // ---- Misc player/gameobject helpers relocated from doorstubs.cpp ----
 
-void GameAudio_PlaySfx(i32 sfx, NUVEC *position, i32 flags, i32 volume);
 
 namespace {
 
@@ -1204,12 +1176,10 @@ extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 
 
 
-i32 MatrixReflection(NUMTX *matrix, i32 axis, f32 plane, f32 height, NUMTX *result);
 
 
 struct nuhspecial_s;
 
-extern void SetLevelLights(void *set, f32 scale);
 
 // Camera zoom state
 
@@ -1273,7 +1243,6 @@ extern void SetLevelLights(void *set, f32 scale);
 // DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
 // red-brick positions come from the Game init values in legogame/game.cpp.
 
-void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
@@ -1292,16 +1261,11 @@ void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 // ==== src/gameapi/gui/apimenu.cpp: all remaining content ====
 
 
-extern "C" i32 SuperStory;
 
 
-extern "C" void SmartTextEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment,
-                            u8 red, u8 green, u8 blue, f32 max_width, i32 max_lines, void *message_box,
-                            i32 suppress_draw, u32 alpha);
 
 // ==== src/legoapi/core/input/gamepads.cpp: declarations ====
 
-extern WORLDINFO_s *WORLD;
 extern "C" {
     extern "C++" FadeSystem FadeSys;
 }
@@ -1348,7 +1312,6 @@ extern "C" {
 // Runtime-selected groups appended after the fixed terrain allocation.
 
 // NuFileExists @nufile (nucore_plain.cpp).
-extern "C" i32 NuFileExists(char *name);
 
 extern "C" {
 
@@ -1370,7 +1333,6 @@ extern "C" {
 // (GIZFLOW_s/FLOWBOX_s), power-up and space/starfighter helpers. Stubbed as
 // local `t` symbols matching res/libTTapp.so.
 
-WORLDINFO_s *WorldInfo_CurrentlyActive();
 
 // The original repeats the per-sound emitter checks for each of the four sound slots.
 #define PART_EMIT_SOUND_ON(slot)                                                                                       \
@@ -1383,7 +1345,6 @@ WORLDINFO_s *WorldInfo_CurrentlyActive();
     if (type->sounds[slot] != -1 && type->sound_modes[slot] == (mode))                                                 \
         PlaySfxById(type->sounds[slot], &emitter->position);
 
-extern "C" i32 GetSfxId(const char *);
 
 // ==== src/gameapi/edtools/edtoolsall_plain.cpp: all remaining content ====
 
@@ -1934,7 +1895,7 @@ DECOMP_ASSERT(offsetof(VIEWCAM_s, pitch) == 0x10, "ViewCam pitch offset");
 DECOMP_ASSERT(offsetof(VIEWCAM_s, gamepad) == 0x24, "ViewCam gamepad offset");
 
 
-extern i32 CUTCAMONLY, CUTCAM, GUNSHIPAHACK, netcamera, complexsockposition_forcesock, movegamecamera_forcesock;
+extern i32 CUTCAMONLY, GUNSHIPAHACK, netcamera, complexsockposition_forcesock, movegamecamera_forcesock;
 
 DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, path) == 0x40, "Camera context path offset");
 DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context flags offset");
@@ -2200,7 +2161,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 // remaining ids enumerate the current story list while omitting variants that
 // are represented by those dedicated routes.
 
-f32 GameShadow(GameObject_s *object, nuvec_s *position, f32 probe_height, i32 terrain_mask);
 
 
 #if defined(__i386__)

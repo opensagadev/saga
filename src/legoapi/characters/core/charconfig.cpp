@@ -930,7 +930,6 @@ static REDIRECT_TEXT_FILE_ATTR i32 RedirectTextFile(char *text, char *filename)
     __asm__("_ZL16RedirectTextFilePcS_i.constprop.54");
 
 
-void CharConfig_CalculateJumpStats(float jump_speed, float gravity, float *duration, float *height);
 
 // ==== src/legoapi/characters/core/characters.cpp: declarations ====
 
@@ -1093,7 +1092,6 @@ extern "C" {
 // Runtime-selected groups appended after the fixed terrain allocation.
 
 // NuFileExists @nufile (nucore_plain.cpp).
-extern "C" i32 NuFileExists(char *name);
 
 // ==== src/legoapi/render/fx/parts.cpp: declarations ====
 
@@ -1122,7 +1120,6 @@ extern "C" {
     if (type->sounds[slot] != -1 && type->sound_modes[slot] == (mode))                                                 \
         PlaySfxById(type->sounds[slot], &emitter->position);
 
-extern "C" i32 GetSfxId(const char *);
 
 // ==== src/gameapi/edtools/edtoolsall_plain.cpp: all remaining content ====
 

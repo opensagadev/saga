@@ -61,7 +61,6 @@ i32 (*GizmoBlowUp_NoTargetFn)(WORLDINFO_s *, GameObject_s *) = NULL;
 
 void GizBlowup_DeleteTerrain();
 void GizmoBlowupUpdateMatrix(GIZMOBLOWUP_s *blowup);
-void GizmoBlowUp_AddEffects(NUVEC *position, GIZMOBLOWUP_s *blowup, i32 count, i32 flags, GameObject_s *object);
 void GameAntiNodeData_Init(GAMEANTINODEDATA_s *data, nuhspecial_s *special);
 i32 GizBlowup_InitSingleTerrain(GIZMOBLOWUP_s *blowup);
 void GizBlowup_DeleteSingleTerrain(GIZMOBLOWUP_s *blowup);
@@ -74,8 +73,6 @@ extern ADDPART_s Default_ADDPART;
 extern "C" PART_s *AddPart(ADDPART_s *);
 i32 PartDraw_Flickerer(PART_s *);
 void PartStop_Flickerer(PART_s *);
-void GameCam_NewShake(GAMECAMERA_s *, f32, f32, f32);
-void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 i32 ReleaseHearts();
 EXPLOSION *AddExplosion(NUVEC *, f32, f32, GameObject_s *, i32, i32);
 

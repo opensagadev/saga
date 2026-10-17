@@ -25,11 +25,6 @@
 struct AIROW_s;
 struct nunativegscene_s;
 
-extern "C" void NuSound3StopRumble(void);
-extern "C" i32 NewMode;
-extern "C" i32 Paused;
-extern "C" i32 memcard_autosavedisabled;
-extern "C" i32 memcard_autosaveenabled;
 
 namespace {
 

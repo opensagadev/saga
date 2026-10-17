@@ -131,14 +131,9 @@ extern i32 LevFlag[4];
 static spacelevel_scale_s STARFIGHTERDRAWSCALE __attribute__((aligned(16)));
 NUVEC Jetpos = {0.15f, 0.08f, 0.32f};
 void DrawCross_Now(_vuv_s *position, f32 size, i32 colour, i32 mode);
-extern LEVELDATA_s *DOGFIGHTA_LDATA;
 // Four debug door keys start enabled and are restored by each restart.
 i32 DogDebKey[4] __attribute__((aligned(16))) = {-1, -1, -1, -1};
 struct quickboltinfo;
-extern "C" void NuSpecialList(NUGSCN *);
-extern "C" i32 NuSpecialFind(NUGSCN *, nuhspecial_s *, char *, i32);
-extern "C" i32 NuSpecialExistsFn(void *);
-extern "C" nuvec_s *NuSpecialGetPos(void *);
 void ChrisAnakinCReset();
 static NUVEC4 RadialMoveCentre;
 static __used__ f32 RadialPlayerRadius[2];
@@ -153,7 +148,6 @@ static NUVEC4 PlayerPos, PlayerVel;
 
 void ChrisAnakinAUpdate(WORLDINFO_s *);
 
-void ChrisDogFightAUpdate(WORLDINFO_s *world);
 
 anakin_door_setup_s DoorSetupList[15] = {
     {"door1", "door1r", 15.0f, 1.0f, 0, {}, {-1.0f, 0.0f, 0.0f}, -0.5f, 0.0f},
@@ -260,7 +254,6 @@ void ChrisAnakinADraw();
 
 void ChrisAnakinDDraw();
 
-void ChrisDogFightADraw(WORLDINFO_s *world);
 
 
 void ChrisRadialCam(nuvec_s *position, nuvec_s *target);
@@ -277,7 +270,6 @@ void ChrisAnakinDInit(WORLDINFO_s *world);
 
 void DogFightARestart();
 
-void ChrisDogFightAReset(WORLDINFO_s *world);
 
 void ChrisDogFightAPanel(WORLDINFO_s *);
 
@@ -299,7 +291,6 @@ void ChrisAnakinDUpdate(WORLDINFO_s *);
 void ChrisAfterBurnerCam(nuvec_s *, nuvec_s *camera);
 
 
-void ChrisDogFightAInit(WORLDINFO_s *world);
 
 i32 DidBoltHitChrisJobby(WORLDINFO_s *, BOLT_s *);
 
@@ -311,24 +302,15 @@ i32 DidBoltHitChrisJobby(WORLDINFO_s *, BOLT_s *);
 // ==== src/legoapi/render/core/render.cpp: declarations ====
 
 
-extern "C" void edbriStartAllPages(void);
 
 
 
 
-extern "C" void LocaledbitsDrawSolidEllipseXY(NUVEC *centre, f32 radius_x, f32 radius_z, i32 rotation, f32 lower_y,
-                                              f32 upper_y, u32 colour, i32, i32 segments);
 
-extern "C" void LocaledbitsDrawCircleXY(NUVEC *centre, f32 radius, u32 colour, i32, i32 segments);
 
-extern "C" void LocaledbitsDrawSolidCircleXY(NUVEC *centre, f32 radius, f32 lower_y, f32 upper_y, u32 colour, i32,
-                                             i32 segments);
 
-extern "C" void RndrOSquare(NUVEC *centre, f32 radius, i32 colour);
 
-extern "C" void RndrOSphere(NUVEC *centre, f32 radius, i32 colour, i32 segments, i32);
 
-extern "C" void RndrCircleXZ(NUVEC *centre, f32 radius, i32 colour, i32 segments);
 
 struct starfighter_s;
 struct rtl_s;
@@ -336,7 +318,6 @@ struct rtlidata_s;
 
 
 
-i32 MatrixReflection(NUMTX *matrix, i32 axis, f32 plane, f32 height, NUMTX *result);
 
 
 void DrawGameObjectsDraw(i32 pass);
@@ -356,12 +337,6 @@ struct VuVec;
 
 extern nuhspecial_s *(*GameMsg_GetExtraObjFn)(GAMEMESSAGE_s *);
 
-extern "C" i32 NuRndrBeginScene(i32);
-extern "C" void NuRndrEndScene(void);
-extern u8 MENUENTRYR, MENUENTRYG, MENUENTRYB;
-extern f32 cointotaltime;
-extern f32 statstime;
-f32 GetAspectRatio();
 
 // Camera zoom state
 
@@ -373,7 +348,6 @@ extern "C" {
 }
 
 
-extern "C" void NuGScnUpdate(NUGSCN *gscn, f32 frame_delta);
 
 // --- NuGScn graphics-data reader ---
 // NuReadGraphicsData is a C++ static function in the original (GCC clones it,
@@ -406,8 +380,6 @@ extern f32 aiEditor_LocatorWidth;
 
 
 
-i32 Draw3DObject(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x_rotation, u16 y_rotation,
-                 u16 z_rotation, float scale_x, float scale_y, float scale_z, i32 rotate_order);
 
 
 
@@ -488,7 +460,6 @@ void DrawBoxMtx_Now(_vum_s *, _vuv_s *, i32, i32);
 
 
 
-void DrawStatusIcons(STATUSPACKET_s *status, float y, float alpha);
 
 
 
@@ -497,22 +468,16 @@ void DrawStatusIcons(STATUSPACKET_s *status, float y, float alpha);
 
 // DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
 // red-brick positions come from the Game init values in legogame/game.cpp.
-extern "C" void Text3D(char *, f32, f32, f32, f32, f32, f32, u32, u8, u8, u8);
-
-void DrawMiniKitCount(float position, float scale, i32 count, i32 maximum);
-
-
-
-i32 Draw3DObjectAlpha(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x_rotation, u16 y_rotation,
-                      u16 z_rotation, float scale_x, float scale_y, float scale_z, i32 rotate_order, float alpha);
 
 
 
 
 
-extern i16 tUNKNOWN, tPOWERBRICK, tLOCKED, tGOLDBRICK;
-extern "C" void PlaySfx(char *, NUVEC *);
-void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
+
+
+
+
+extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
 
 
 
@@ -523,26 +488,20 @@ void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 void DrawGameObjectsDraw(i32);
 
 
-void DrawPanel3DObjectMtx(nuhspecial_s *special, numtx_s *matrix, float alpha);
 
 
 
 extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
 
-extern AREADATA *PODSPRINT_ADATA;
 extern "C" {
 }
 
 
 
 
-void DrawGameMessage_Targets(GAMEMESSAGE_s *message, nuvec_s *position, float scale);
-
-i32 DrawPanel3DObjectNoAlpha(float x, float y, float z, float scale_x, float scale_y, float scale_z, u16 rotate_x,
-                             u16 rotate_y, u16 rotate_z, nuhspecial_s *special, i32 rotate_order);
 
 
-extern void DrawMenuEntry(MENU_s *, char *);
+
 
 
 
@@ -569,13 +528,10 @@ extern void DrawMenuEntry(MENU_s *, char *);
 
 
 
-void Transform_DrawTarget(NUVEC *, f32, f32);
-extern i16 id_ANAKINJEDISCARRED, id_WEIRDO1, id_WEIRDO2, id_CATAPULT, id_CHEWBACCA, id_WOOKIEE, id_TWOFACE;
-extern i32 PickUpFlickerTest, PickUpFlickerFrames, PickupFlickerFrame;
+extern i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
 
 
 
-extern f32 SeekLinearF(f32, f32, f32);
 
 
 
@@ -617,7 +573,6 @@ typedef f32 BezierVec4Unaligned __attribute__((vector_size(16), aligned(4)));
 
 
 
-void CalcSplinePoint(flightspline_s *spline, _vuv_s *result, float along);
 
 f32 BezierLineLength(VuVec &start, VuVec &first_control, VuVec &end, VuVec &second_control);
 
@@ -635,9 +590,7 @@ f32 BezierLineLength(VuVec &start, VuVec &first_control, VuVec &end, VuVec &seco
 
 
 
-i32 OutSideSplineArea(nuvec_s *position, nugspline_s *spline, nuvec_s *edge_end, nuvec_s *edge_start, i32 inside);
 
-void InitSplinePosition(SPLINEPOS_s *position, nugspline_s *spline, float distance, i32 looping);
 
 
 void CalcSplinePointFromDist(flightspline_s *spline, _vuv_s *result, float distance);
@@ -645,19 +598,16 @@ void CalcSplinePointFromDist(flightspline_s *spline, _vuv_s *result, float dista
 
 
 
-void LevelSplines_InitForLevel(WORLDINFO_s *world);
 
 // ==== src/legoapi/audio/audio.cpp: declarations ====
 
 
 // The reference constructs the music manager in this unit's static constructor.
-extern NuMusic music_man;
 
 extern "C" void SetPreSeekStartPoint(f32 start_point);
 
 
 void SpaceAudioPoint();
-void legoSetMusicVolume(float v);
 extern "C" {
 extern i32 fake_seeking;
 
@@ -677,13 +627,10 @@ i32 MusicState(void);
 
 
 
-i32 GamePlayMusic(LEVELDATA_s *level, i32 check, OPTIONSSAVE_s *options);
 
 // ==== src/legoapi/core/input/gamepads.cpp: declarations ====
 
 
-extern "C" void BackupMenu(void);
-extern WORLDINFO_s *WORLD;
 extern i32 (*GamePads_IgnoreInputFn)(void);
 extern "C" {
     extern "C++" FadeSystem FadeSys;
@@ -713,16 +660,12 @@ extern "C" {
 
 } // extern "C"
 
-void PadOutPause(i32 port, WORLDINFO_s *world);
 
 
 
 
 void TakeHitRumble(GameObject_s *object, float strength);
 
-extern "C" f32 NuFsqrt(f32);
-extern "C" f32 NuRandFloat();
-void GameCam_NewShake(GAMECAMERA_s *, f32, f32, f32);
 
 f32 MulDist = 0.5f;
 f32 SpeedAdd = 1.0f;
@@ -732,7 +675,6 @@ f32 MulAdd = 0.0f;
 
 
 
-void NewRumbleAllPlayers(float strength, float duration, i32 frames, i32);
 
 
 
@@ -741,11 +683,9 @@ void NewRumbleAllPlayers(float strength, float duration, i32 frames, i32);
 
 
 
-void NewBuzz(nupad_s *pad, float duration, i32);
 
 
 
-void NewRumble(nupad_s *pad, float strength, i32);
 
 // ==== src/legoapi/actions/character/speederchase.cpp: declarations ====
 
@@ -769,16 +709,12 @@ void TakeHitRumble(GameObject_s *, f32);
 
 void SetLevelExBlowupFunc(i32 (*callback)(GIZMOBLOWUP_s *, i32));
 
-void SpeederChaseA_Init(WORLDINFO_s *world);
-
-
-void SpeederChaseA_Panel(WORLDINFO_s *);
-
-void SpeederChaseA_Reset(WORLDINFO_s *);
 
 
 
-void SpeederChaseA_Update(WORLDINFO_s *world);
+
+
+
 
 
 
@@ -792,12 +728,8 @@ void cbSetAutoSpeed(eduimenu_s *, eduiitem_s *item, u32);
 
 } // extern "C"
 
-extern "C" void AddDebrisEffect(i32 *, i32, f32, f32, f32);
-extern "C" void DebrisPosOrientationMtx(i32, NUMTX *);
-extern "C" void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
 
 
-extern "C" f32 pod_roll[2];
 
 // ==== src/legoapi/characters/motion/chris_stubs.cpp: all remaining content ====
 

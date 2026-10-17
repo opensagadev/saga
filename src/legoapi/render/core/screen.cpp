@@ -288,7 +288,6 @@
 
 void ClearScreen();
 
-f32 GetAspectRatio();
 
 // The fade system and the four fade effects handed to FadeSystem::AddFade()
 // are screen.cpp globals in the original: its static initializer registers
@@ -315,14 +314,10 @@ i32 cut_waiting_for_new_level;
 
 extern "C" {
 }
-void BackDrop_Draw(f32, i32);
 
-extern "C" i32 NuRndrBeginScene(i32);
-extern "C" void NuRndrEndScene(void);
 extern "C" void NuBackbufferCopy(i32);
 
 extern f32 CameraZoom;
-extern "C" f32 NuIOS_GetAspectRatio(void);
 
 
 
@@ -331,7 +326,6 @@ nugscn_s *FadeLoop_ObjScene;
 nuhspecial_s FadeLoop_ObjHSpecial;
 
 
-void FadeLoop_DrawObj(float alpha);
 
 // ==== src/legoapi/render/core/render.cpp: declarations ====
 
@@ -342,14 +336,11 @@ struct nuhspecial_s;
 
 extern "C" void NuRndrGradRect2di(i32, i32, i32, i32, i32 *, numtl_s *);
 extern "C" void NuRndrRect2di(i32, i32, i32, i32, i32, numtl_s *);
-extern "C" i32 editor_active;
-extern "C" i32 screendump;
 
 // Camera zoom state
 
 // Graphics loading flags
 
-extern "C" void NuGScnUpdate(NUGSCN *gscn, f32 frame_delta);
 
 // --- NuGScn graphics-data reader ---
 // NuReadGraphicsData is a C++ static function in the original (GCC clones it,
@@ -413,7 +404,6 @@ extern "C" {
 
 // DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
 // red-brick positions come from the Game init values in legogame/game.cpp.
-extern "C" void Text3D(char *, f32, f32, f32, f32, f32, f32, u32, u8, u8, u8);
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
     do {                                                                                                               \
@@ -427,7 +417,6 @@ extern "C" void Text3D(char *, f32, f32, f32, f32, f32, f32, u32, u8, u8, u8);
         }                                                                                                              \
     } while (false)
 
-extern f32 SeekLinearF(f32, f32, f32);
 
 static NUGSCN *backdrop_scene = nullptr;
 
@@ -459,16 +448,12 @@ void BackDrop_UpdateColours(i32 instant);
 // ==== src/legoapi/core/startup/finishloop.cpp: declarations ====
 
 extern "C" {
-    f32 NuFrameEnd(void);
 }
 
-void BackDrop_Draw(f32 alpha, i32 flags);
 
 
 // ==== src/legoapi/render/fx/particles.cpp: declarations ====
 
-extern "C" i32 back_rgba[2];
-extern "C" f32 MainRenderTime;
 extern "C" {
 }
 
@@ -690,7 +675,6 @@ extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 
 // Retail clears these "fast repeat" latches but never sets them.
 
-extern "C" i32 FinishLoop_On;
 
 // ==== src/legoapi/menus/screens/menus.cpp: declarations ====
 
@@ -757,7 +741,6 @@ extern "C" {
 
 // ==== src/legoapi/core/input/gamepads.cpp: declarations ====
 
-extern WORLDINFO_s *WORLD;
 extern "C" {
     extern "C++" FadeSystem FadeSys;
 }
@@ -770,7 +753,6 @@ extern "C" {
 // angular velocity only when both consecutive turns agree.
 
 
-extern "C" f32 NuFsqrt(f32);
 
 // ==== src/gameframework/savesystem.cpp: all remaining content ====
 
@@ -792,7 +774,6 @@ extern "C" {
 
 }
 
-extern "C" void SetQFont2D(void);
 
 // ==== src/legoapi/items/objects/objectsall.cpp: declarations ====
 
@@ -810,7 +791,6 @@ extern "C" {
 // Runtime-selected groups appended after the fixed terrain allocation.
 
 // NuFileExists @nufile (nucore_plain.cpp).
-extern "C" i32 NuFileExists(char *name);
 
 // ==== src/legoapi/render/fx/parts.cpp: declarations ====
 
@@ -1655,7 +1635,6 @@ extern "C" {
 
 extern "C" {
 
-extern "C" void SetQFont2D(void);
 
 
 }
@@ -1937,7 +1916,6 @@ DECOMP_ASSERT(sizeof(JEDIBNETPACKET_s) == 0x20, "JEDIBNETPACKET_s ABI");
 // the network check, which retail keeps as the split-out body of the IPA-SRA
 // clone (it only needs &world->ai_sys).
 
-void JediB_Init(WORLDINFO_s *world);
 
 // ===========================================================================
 // Gunship (Gunship_A / Gunship_B)
@@ -2016,15 +1994,12 @@ static_assert(sizeof(struct LEVFLAGBYTES_s) == 16, "LevFlag must be 16 bytes");
 // Pod race core (A/B/C laps)
 // ===========================================================================
 
-void PodRaceAUpdate(WORLDINFO_s *world);
 
 // ===========================================================================
 // Pod sprint (Sebulba events)
 // ===========================================================================
 
-void PodSprintA_Init(WORLDINFO_s *world);
 
-void PodSprintA_Update(WORLDINFO_s *world);
 
 // ===========================================================================
 // Retake the palace (D/E/G)
@@ -2094,9 +2069,7 @@ void PodSprintA_Update(WORLDINFO_s *world);
 // ---- begin src/gameapi/ai/aisys/aisys.cpp ----
 
 
-extern "C" ADDPART_s Default_ADDPART;
 
-extern "C" PART_s *AddPart(ADDPART_s *);
 
 // Game-specific AI actions and conditions (registered via
 // RegisterAIScriptActions / RegisterAIScriptConditions). These are stubbed to
@@ -2580,9 +2553,7 @@ DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");
 //   NuHtmlBegin    0x2d5ca0   NuHtmlFlush   0x2d5c30
 //   NuHtmlWrite    0x2d5cd0   NuHtmlHeading1 0x2d5d40
 
-extern "C" void NuHtmlWrite(const char *text, ...);
 
-extern "C" void NuHtmlHeading1(const char *fmt, ...);
 
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 

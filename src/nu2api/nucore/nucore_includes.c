@@ -147,7 +147,6 @@ static u32 bitcount;
 
 
 
-unsigned char ImplodeGetByteFromMem();
 
 
 // Encoding-side memory I/O shares the decoder's input/output buffers.
@@ -357,7 +356,6 @@ struct NUPPHEADER {
 #define NUPP_SWAP32(value)                                                                                             \
     (((value) >> 24) | (((value) & 0x00ff0000) >> 8) | (((value) & 0x0000ff00) << 8) | ((value) << 24))
 
-extern "C" void NuPPUnpack(void *source, void *destination);
 
 
 // The original decoder accesses both whole registers and their low bytes.
@@ -371,7 +369,6 @@ union NUPPADDR {
     uintptr_t value;
     u8 *bytes;
 };
-extern "C" void NuPPUnpack(void *source, void *destination);
 
 static FILEEXTINFO extensions[64];
 static i32 num_extensions;
@@ -434,7 +431,6 @@ extern "C" {
 
 
 
-extern "C" i32 NuMcFormat(i32 port, i32 slot);
 
 
 // ==== src/nu2api/nufile/nudatfile.cpp: all remaining content ====
@@ -442,13 +438,10 @@ extern "C" i32 NuMcFormat(i32 port, i32 slot);
 
 isize BinarySearch(u32 element, u32 *array, usize length);
 
-i32 NuDatFileFindHash(nudathdr_s *header, char *name);
 
 i32 datsys_offset = 0;
 
-i32 NuDatFileFindTree(nudathdr_s *header, char *name);
 
-i64 NuDatCalcPos(nudathdr_s *header, i32 index);
 
 // ==== src/nu2api/nufile/nufilepak.cpp: all remaining content ====
 
@@ -552,7 +545,6 @@ static f32 f_expr(RDPFCTXT *ctx);
 i32 global_tr;
 
 #ifdef __ANDROID__
-extern "C" int sprintf(char *dest, const char *format, ...);
 #endif
 
 
@@ -564,7 +556,6 @@ extern "C" int sprintf(char *dest, const char *format, ...);
 
 
 #ifdef __ANDROID__
-extern "C" char *strstr(const char *haystack, const char *needle);
 #endif
 
 
@@ -897,7 +888,6 @@ i32 enable_touch_controls = 1;
 
 
 
-extern "C" void NuPadSetStatus(i32 pad, i32 status);
 
 
 

@@ -15,4 +15,3 @@
 struct FLOWBOX_s;
 
 
-GIZMOSYS *CreateGizmoSys(void *world, VARIPTR *buf, VARIPTR *buf_end);

@@ -43,8 +43,6 @@ struct nunativegscene_s;
 
 MechWeakPtr<MechObjectInterface, 4> NextThermalTarget;
 
-void GameCam_NewShake(GAMECAMERA_s *, f32, f32, f32);
-void GameCam_Judder(GAMECAMERA_s *, f32, i32, nuvec_s *);
 void AlertSurroundingCreatures(GameObject_s *, NUVEC *);
 EXPLOSION *Detonate(nuvec_s *position, u16 flags);
 i32 MatrixReflection(NUMTX *matrix, i32 axis, f32 plane, f32 height, NUMTX *result);
@@ -68,7 +66,6 @@ void PartKill_ThermalDetonator(PART_s *part, i32);
 // the caller.
 
 // Original local callbacks referenced by Hints_LSW.
-extern AREADATA_s *PODRACE_ADATA, *PODSPRINT_ADATA, *BONUS_GUNSHIP_ADATA;
 
 extern AREADATA *JABBASPALACE_ADATA;
 

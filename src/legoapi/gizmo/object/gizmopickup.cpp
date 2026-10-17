@@ -178,20 +178,16 @@ GIZMOPICKUPSYS_s GizmoPickupSys_Game = {
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 
 
-extern "C" f32 sabrerubwait;
-extern i16 id_YODA, id_YODAGHOST, id_GAMORREANGUARD, id_JANGOFETT;
+extern i16 id_GAMORREANGUARD;
 
 extern "C" {
-    extern i16 id_LANDSPEEDER, id_MILLENNIUMFALCON;
+    extern i16 id_LANDSPEEDER;
 }
 
 // Written by ThingManager's ctor (original global @0x124f2e0, .bss).
 
-void legoSetMusicVolume(float);
-APIOBJECT *GameAPIOBJECTFromObjID(u8 object_id);
 
 
-extern "C" i32 AISysSetLevelPath(AISYS_s *system, char *path_name);
 
 
 
@@ -199,7 +195,6 @@ extern "C" i32 AISysSetLevelPath(AISYS_s *system, char *path_name);
 // staggered across frames; special movement states opt back into full-rate
 // processing through the forced-update path.
 
-extern "C" f32 NuAnimEndFrameOld(void *animation);
 
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
@@ -214,24 +209,14 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 // remaining ids enumerate the current story list while omitting variants that
 // are represented by those dedicated routes.
 
-extern "C" i32 SHADOWCALLS;
 
-f32 GameShadow(GameObject_s *object, nuvec_s *position, f32 probe_height, i32 terrain_mask);
 
-extern "C" f32 MainRenderTime;
-extern "C" f32 MainRenderTargetTime;
 struct CUTSCENEPLAYERCLIP;
 
-extern "C" i32 DoubleScore;
-extern "C" TIMER BonusTimer;
-extern "C" i32 screendump;
 
 
-extern "C" i32 NewRayCastScaleYMask(NUVEC *, NUVEC *, f32, f32, i32, u32);
-extern "C" i32 RAYCASTCALLS;
 
 
-extern "C" i32 party_cant_be_under_cover;
 
 #if defined(__i386__)
 #define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
@@ -272,12 +257,6 @@ extern "C" {
 
 
 
-void GameAISysReset(AISYS_s *system);
-
-void GameAudio_PlaySfxById(i32 sfx_id, nuvec_s *position, i32 flags, i32 volume);
-
-
-void *GameBufferAlloc(variptr_u *buf, variptr_u *buf_end, i32 size);
 
 
 
@@ -286,9 +265,10 @@ void *GameBufferAlloc(variptr_u *buf, variptr_u *buf_end, i32 size);
 
 
 
-void FindAnglesZX(NUVEC *, u16 *, u16 *);
-u16 SeekRot(u16, u16, f32);
-extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER, id_ATST;
+
+
+
+extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER;
 
 
 
@@ -296,9 +276,6 @@ extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER, id_ATST;
 
 
 
-extern "C" i16 id_THEEMPEROR, id_IMPERIALGUARD, id_BODYGUARD;
-i32 SphereSphereOverlapScaleY(NUVEC *, f32, f32, NUVEC *, f32, f32);
-extern "C" i32 AddGameDebrisRot(APIDEBRISSYS_s *, i32, NUVEC *, i32, u16, u16);
 
 
 
@@ -319,10 +296,6 @@ void ConstantRumble(GameObject_s *object, f32 strength, f32 phase);
 
 
 
-extern "C" i32 adaptivedifficulty[3];
-extern AREADATA *PODSPRINT_ADATA;
-extern i16 id_ANAKINSNEWPOD, id_ANAKINSNEWPODGREEN, id_SEBULBASPOD;
-extern "C" f32 tieonsfxwait, tieoffsfxwait;
 
 
 
@@ -400,21 +373,15 @@ struct spacelevel_s;
 // (GIZFLOW_s/FLOWBOX_s), power-up and space/starfighter helpers. Stubbed as
 // local `t` symbols matching res/libTTapp.so.
 
-extern i32 HIGHGAMEOBJECT, VehicleArea;
-extern WORLDINFO_s *WORLD;
-extern "C" void KillPart(PART_s *, i32);
 void SetCoinType(i32 model, GIZMOPICKUP_s *pickup);
 u16 GameCam_GetAdjustedYRot(GAMECAMERA_s *camera);
-void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 
-extern "C" f32 coinimpactwait;
 extern "C" void PlaySfxAndSetVolume(char *, NUVEC *, f32);
 
 static __used__ void PartImpact_Coin(PART_s *part);
 
 static __used__ void PartStolen_Coin(PART_s *part);
 
-extern "C" void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
 static __used__ void PartExtra_BlueCoin(PART_s *part);
 
 static __used__ void PartExtra_PurpleCoin(PART_s *part);
@@ -431,8 +398,6 @@ static __used__ void PowerUp_EndMsg(GAMEMESSAGE_s *message);
 static __used__ void PowerUp_UpdateMsg(GAMEMESSAGE_s *message);
 
 
-extern AREADATA_s *PODRACE_ADATA;
-extern AREADATA_s *BONUS_GUNSHIP_ADATA;
 
 static __used__ i32 PartDraw_VehicleHeart(PART_s *part);
 
@@ -469,14 +434,10 @@ extern "C" {
 
 
 
-void UpdateParts(f32 time);
 
 } // extern "C"
 
-PART_s *TargetPart(GameObject_s *object, nuvec_s *position, nuvec_s *direction, f32 radius, f32 range_squared,
-                   i32 directional, i32 bolt_id);
 
-extern "C" i32 NuGScnNumSpecials(nugscn_s *);
 
 extern "C" {
 }
@@ -485,16 +446,11 @@ extern "C" {
 
 }
 
-extern "C" PART_s *HitParts(GameObject_s *owner, NUVEC *positions, i32 count, f32 radius, NUVEC *minimum,
-                            NUVEC *maximum, u32 flags);
 
 
-void LoadPartFile(WORLDINFO *world);
-
-void AddPartDebris(PARTDEBSYS_s *system, i32 index, nuvec_s *position);
 
 
-WORLDINFO_s *WorldInfo_CurrentlyActive();
+
 void PartCollide_2D(PART_s *);
 void PartUpdate_Heart(PART_s *);
 
@@ -526,15 +482,12 @@ void AddCoinsAsParts(i32 type_id, nuvec_s *position, nuvec_s *velocity, float li
     if (type->sounds[slot] != -1 && type->sound_modes[slot] == (mode))                                                 \
         PlaySfxById(type->sounds[slot], &emitter->position);
 
-extern "C" f32 brickimpactwait;
-extern "C" i32 GetSfxId(const char *);
 
 
 void PartUpdate_Heart(PART_s *part);
 
 
 
-void GameCam_NewShake(GAMECAMERA_s *, f32, f32, f32);
 
 
 // ==== src/legoapi/menus/core/gamemessages.cpp: declarations ====
@@ -556,41 +509,31 @@ static_assert(offsetof(GAME_MESSAGE_DATA, tick_fn) == offsetof(GAMEMESSAGE_s, ti
 
 
 
-void AddFancyMessage(char *text, float x, float y, float scale, float duration, i32 message_id, i32 colour_type);
 
 
 
-void AddGameMsgCount(nuvec_s *position, i32 count, i32 total, unsigned char red, unsigned char green,
-                     unsigned char blue, float field_0xd4);
 
 
 // ==== src/legoapi/gizmo/gizmos/gizmos_gizmopickups.cpp: all remaining content ====
 
 
-void GizmoPickup_CollectCoin(WORLDINFO_s *world, nuvec_s *position, i32 type_index, i32 model_variant,
-                             GameObject_s *object, i32);
 
 // ==== src/legoapi/items/collect/minikits.cpp: declarations ====
 
-extern "C" VARIPTR characterbuffer_ptr;
-extern "C" VARIPTR characterbuffer_end;
 
 
 
-extern f32 KITPOSX, PANEL_MINIKITY, PANEL_MINIKITSCALE;
 void Hint_SetHintFromId(i32, i32, i32);
 
 
 
-i32 MatrixReflection(NUMTX *, i32, f32, f32, NUMTX *);
 
 void IncreaseScore(u32 *, u64, i32);
-extern "C" void PlaySfx(char *, nuvec_s *);
 
 
 
 
-extern i16 id_SLAVE1, tALLMINIKITSBUILT;
+extern i16 tALLMINIKITSBUILT;
 
 
 
@@ -609,10 +552,8 @@ struct APICHARACTERMODELLIST_s;
 
 
 
-void DrawCharIcon(i32, f32, f32, f32, f32, i32, f32, f32, i32, nuhspecial_s *);
 
 
-void Collection_CreateMaster(char *file, i16 *idlist, COLLECTION_s *collection, i32 param4, float param5);
 
 
 
@@ -626,10 +567,8 @@ u32 GizmoBlowups_TotalScore(void *);
 
 // ==== src/legoapi/characters/core/playeritems.cpp: declarations ====
 
-void GameAudio_PlaySfx(i32 sfx, NUVEC *position, i32 flags, i32 volume);
 
 
-extern "C" i32 ParticlesPerSecond(f32 rate, f32 elapsed);
 
 // ==== functions in original address order ====
 
@@ -641,10 +580,7 @@ void AddHeartAsPart(GameObject_s *, NUVEC *, NUVEC *, f32, f32);
 void AddTorpedoAsPart(NUVEC *, NUVEC *, f32, f32);
 void PowerUp_AddPart(NUVEC *, NUVEC *, f32, f32);
 
-void AddCoinsToPanel(i32 coins, nuvec_s *position, i32 player, float, GameObject_s *, i32 random_types);
 
-void AddPickups(i32 coins, i32 hearts, i32 torpedoes, i32 powerups, nuvec_s *position, nuvec_s *direction, float,
-                i32 player_id, float speed, float lifetime, GameObject_s *owner, i32, i32 panel, bool consolidate);
 
 
 

@@ -38,7 +38,6 @@ void AITriggerSetSysReset(AITRIGGERSETSYS_s *system) {
     }
 }
 
-extern "C" void *AISysBufferAlloc(VARIPTR *, VARIPTR *, u32);
 
 AITRIGGERSETSYS_s *AITriggerSetSysCreate(VARIPTR *buffer, VARIPTR *buffer_end) {
     AITRIGGERSETSYS_s *system =
