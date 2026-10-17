@@ -34,7 +34,7 @@ struct SHOPINPUT;
 static i32 bezierline_depth asm("bezierline_depth");
 
 extern "C" {
-    char *FSP_Extension = ".FSP";
+extern char * FSP_Extension;
     extern f32 PODRACE_SPLINEINC;
 }
 
@@ -104,77 +104,7 @@ void BezierLineEval(VuVec &result, VuVec &start, VuVec &first_control, VuVec &en
     result.x = x;
 }
 
-void CalcSplinePoint(flightspline_s *spline, _vuv_s *result, float along) {
-    const f32 scaled = (spline->point_count - 1) * along;
-    i32 index = static_cast<i32>(scaled);
-    const f32 fraction = scaled - index;
-    // The endpoint vectors occupy aligned stack slots in the retail evaluator.
-    _vuv_s first __attribute__((aligned(16)));
-    _vuv_s last __attribute__((aligned(16)));
-    NUVEC_ALIGNED16 direction;
-    _vuv_s *previous;
-    if (!(index <= 0)) {
-        // Retail retains the pre-clamp fraction and permits index == count;
-        // callers must supply the corresponding neighboring point storage.
-        if (index > spline->point_count)
-            index = spline->point_count;
-        previous = &spline->points[index - 1];
-    } else {
-        direction.x = spline->points[0].x - spline->points[1].x;
-        direction.y = spline->points[0].y - spline->points[1].y;
-        direction.z = spline->points[0].z - spline->points[1].z;
-        NuVecNorm(&direction, &direction);
-        direction.x *= 10.0f;
-        direction.y *= 10.0f;
-        direction.z *= 10.0f;
-        first.x = spline->points[0].x + direction.x;
-        first.y = spline->points[0].y + direction.y;
-        first.z = spline->points[0].z + direction.z;
-        first.w = spline->points[0].w;
-        previous = &first;
-        index = 0;
-    }
-
-    _vuv_s *current = &spline->points[index];
-    _vuv_s *next = &spline->points[index + 1];
-    _vuv_s *following;
-    if (!(index < spline->point_count - 2)) {
-        const i32 end = spline->point_count - 1;
-        direction.x = spline->points[end].x - spline->points[end - 1].x;
-        direction.y = spline->points[end].y - spline->points[end - 1].y;
-        direction.z = spline->points[end].z - spline->points[end - 1].z;
-        NuVecNorm(&direction, &direction);
-        direction.x *= 10.0f;
-        direction.y *= 10.0f;
-        direction.z *= 10.0f;
-        _vuv_s *end_point = &spline->points[spline->point_count - 1];
-        last.x = end_point->x + direction.x;
-        last.y = end_point->y + direction.y;
-        last.z = end_point->z + direction.z;
-        last.w = end_point->w;
-        following = &last;
-    } else {
-        following = &spline->points[index + 2];
-    }
-
-    const _vuv_s after = *following;
-    const _vuv_s before = *previous;
-    const f32 squared = fraction * fraction;
-    const f32 cubed = fraction * squared;
-    result->x = (((current->x - next->x) * 3.0f - before.x + after.x) * cubed +
-                 ((before.x * 2.0f - current->x * 5.0f + next->x * 4.0f - after.x) * squared +
-                  (current->x * 2.0f + (next->x - before.x) * fraction))) *
-                0.5f;
-    result->y = (((current->y - next->y) * 3.0f - before.y + after.y) * cubed +
-                 ((before.y * 2.0f - current->y * 5.0f + next->y * 4.0f - after.y) * squared +
-                  (current->y * 2.0f + (next->y - before.y) * fraction))) *
-                0.5f;
-    result->w = current->w + (next->w - current->w) * fraction;
-    result->z = (((current->z - next->z) * 3.0f - before.z + after.z) * cubed +
-                 ((before.z * 2.0f - current->z * 5.0f + next->z * 4.0f - after.z) * squared +
-                  (current->z * 2.0f + (next->z - before.z) * fraction))) *
-                0.5f;
-}
+void CalcSplinePoint(flightspline_s *spline, _vuv_s *result, float along);
 
 f32 BezierLineLength(VuVec &start, VuVec &first_control, VuVec &end, VuVec &second_control) {
     VuVec first{(start.x + first_control.x) * 0.5f, (start.y + first_control.y) * 0.5f,
@@ -263,99 +193,7 @@ static inline void SplinePointAngles(NUGSPLINE *spline, i32 index, i32 looping, 
     SplinePointAnglesBody(&spline->length, &spline->pts, index, looping, pitch, angle);
 }
 
-void FlightSpline_Init(WORLDINFO_s *world, flightspline_s *splines, i32 capacity) {
-    char filename[256];
-    sprintf(filename, "%s%s", world->config_file, FSP_Extension);
-    EdFileSetMedia(1);
-    if (!EdFileOpen(filename, NUFILE_READ))
-        return;
-
-    const i32 version = EdFileReadInt();
-    const i32 count = EdFileReadInt();
-    // The file is trusted to fit the supplied storage, as in the retail loader.
-    for (i32 i = 0; i < count; ++i) {
-        flightspline_s *spline = &splines[i];
-        spline->point_count = EdFileReadInt();
-        spline->field_0x408 = EdFileReadFloat();
-        spline->id = EdFileReadInt();
-        spline->unknown_528 = 1;
-        if (version > 1) {
-            spline->field_0x40c = EdFileReadFloat();
-            spline->field_0x514 = EdFileReadInt();
-        } else {
-            spline->field_0x40c = 0.0f;
-            spline->field_0x514 = 0;
-        }
-        if (version > 2) {
-            spline->field_0x51c = EdFileReadInt();
-            spline->field_0x520 = EdFileReadInt();
-        } else {
-            spline->field_0x51c = -1;
-            spline->field_0x520 = i;
-        }
-        for (i32 point = 0; point < spline->point_count; ++point) {
-            spline->points[point].x = EdFileReadFloat();
-            spline->points[point].y = EdFileReadFloat();
-            spline->points[point].z = EdFileReadFloat();
-            spline->points[point].w = EdFileReadFloat();
-        }
-    }
-
-    i32 i;
-    if (version > 3) {
-        for (i = 0; i < count; ++i) {
-            flightspline_s *spline = &splines[i];
-            spline->length = EdFileReadFloat();
-            if (version == 4) {
-                f32 distance = 0.0f;
-                _vuv_s previous, current;
-                NUVEC difference;
-                for (i32 point = 0; point < spline->point_count; ++point) {
-                    CalcSplinePoint(spline, &previous, static_cast<f32>(point) / spline->point_count);
-                    for (i32 sample = 1; sample <= 10; ++sample) {
-                        CalcSplinePoint(spline, &current, (sample / 10.0f + point) / spline->point_count);
-                        difference.x = current.x - previous.x;
-                        difference.y = current.y - previous.y;
-                        difference.z = current.z - previous.z;
-                        distance += NuVecMag(&difference);
-                        previous = current;
-                    }
-                    spline->cumulative_distances[point] = distance;
-                }
-                spline->length = distance;
-            } else {
-                for (i32 point = 0; point < spline->point_count; ++point)
-                    spline->cumulative_distances[point] = EdFileReadFloat();
-            }
-        }
-    } else {
-        for (i = 0; i < count; ++i) {
-            flightspline_s *spline = &splines[i];
-            f32 distance = 0.0f;
-            if (spline->point_count != 0) {
-                _vuv_s current;
-                CalcSplinePoint(spline, &current, 1.0f);
-                f32 along = 1.0f;
-                do {
-                    const _vuv_s previous = current;
-                    if (PODRACE_ADATA != NULL && PODRACE_ADATA == WORLD->area)
-                        along -= PODRACE_SPLINEINC;
-                    else
-                        along -= 0.01f;
-                    if (along < 0.0f)
-                        along = 0.0f;
-                    CalcSplinePoint(spline, &current, along);
-                    NUVEC difference{current.x - previous.x, current.y - previous.y, current.z - previous.z};
-                    distance += NuVecMag(&difference);
-                } while (along > 0.0f);
-            }
-            spline->length = distance;
-        }
-    }
-    for (; i < capacity; ++i)
-        splines[i].point_count = 0;
-    EdFileClose();
-}
+void FlightSpline_Init(WORLDINFO_s *world, flightspline_s *splines, i32 capacity);
 
 void PointAlongSpline(NUGSPLINE *spline, f32 along, NUVEC *position, u16 *angle, u16 *pitch, i32 looping) {
     if (angle != NULL)
@@ -525,21 +363,7 @@ void GetNearestSplinePos(NUVEC *origin, SPLINEPOS_s *result, NUGSPLINE *spline, 
     }
 }
 
-void CalcSplinePointFromDist(flightspline_s *spline, _vuv_s *result, float distance) {
-    if (distance >= spline->length) {
-        distance = 1.0f;
-    } else {
-        for (i32 index = 0; index < spline->point_count; ++index) {
-            const f32 end = spline->cumulative_distances[index];
-            if (end > distance) {
-                const f32 start = index == 0 ? 0.0f : spline->cumulative_distances[index - 1];
-                distance = ((distance - start) / (end - start) + index) / spline->point_count;
-                break;
-            }
-        }
-    }
-    CalcSplinePoint(spline, result, distance);
-}
+void CalcSplinePointFromDist(flightspline_s *spline, _vuv_s *result, float distance);
 
 LEVELSPLINE *LevSplList;
 static i32 levspl_i_start = -1;

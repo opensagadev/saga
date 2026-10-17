@@ -235,105 +235,16 @@ void GameCam_NewShake(GAMECAMERA_s *, f32, f32, f32);
 void GameCam_Judder(GAMECAMERA_s *, f32, i32, NUVEC *);
 i32 GameRayCast(NUVEC *, NUVEC *, f32, i32);
 
-f32 MulDist = 0.5f;
-f32 SpeedAdd = 1.0f;
-f32 SpeedDist = 5.0f;
-f32 MulAdd = 0.0f;
+extern f32 MulDist;
+extern f32 SpeedAdd;
+extern f32 SpeedDist;
+extern f32 MulAdd;
 
 extern "C" void SetPreSeekStartPoint(f32 start_point);
 
-void SpaceResetAudioPoint() {
-    for (i32 door = 6; door >= 0; --door) {
-        for (i32 player = 0; player < 2; ++player) {
-            if (Player[player] != NULL && Player[player]->sock_position.distance > DogFightDoors.doors[door].distance) {
-                music_man.SetTrackEntryTimeByClass(TRACK_CLASS_ACTION, DogFightDoors.doors[door].timer);
-                music_man.SetTrackEntryTimeByClass(TRACK_CLASS_NOMUSIC, DogFightDoors.doors[door].timer);
-                return;
-            }
-        }
-    }
-    SetPreSeekStartPoint(0.0f);
-}
+void SpaceResetAudioPoint();
 
-void SpaceRumbleProcess() {
-    NUVEC_ALIGNED16 origin;
-    if (Player[0] != NULL && Player[0]->apiobj.player_controlled) {
-        origin = Player[0]->apiobj.position;
-    } else if (Player[1] != NULL) {
-        origin = Player[1]->apiobj.position;
-    }
-
-    NUMTX_ALIGNED16 matrix;
-    NuMtxSetRotationY(&matrix, 0x2000);
-    NuMtxRotateZ(&matrix, 0x2000);
-
-    NUVEC4 ray;
-    ray.w = 1.0f;
-    f32 nearest = 35.0f;
-    for (i32 i = 0; i < 12; ++i) {
-        switch (i) {
-            case 0:
-            case 6:
-                ray.x = -35.0f;
-                ray.y = 0.0f;
-                ray.z = 0.0f;
-                break;
-            case 1:
-            case 7:
-                ray.x = 35.0f;
-                ray.y = 0.0f;
-                ray.z = 0.0f;
-                break;
-            case 2:
-            case 8:
-                ray.y = -35.0f;
-                ray.x = 0.0f;
-                ray.z = 0.0f;
-                break;
-            case 3:
-            case 9:
-                ray.y = 35.0f;
-                ray.x = 0.0f;
-                ray.z = 0.0f;
-                break;
-            case 4:
-            case 10:
-                ray.z = -35.0f;
-                ray.x = 0.0f;
-                ray.y = 0.0f;
-                break;
-            case 5:
-            case 11:
-                ray.z = 35.0f;
-                ray.x = 0.0f;
-                ray.y = 0.0f;
-                break;
-        }
-        if (i > 5) {
-            NuVec4MtxTransformVU0(&ray, &ray, &matrix);
-        }
-        if (GameRayCast(&origin, reinterpret_cast<NUVEC *>(&ray), 0.5f, 0) != 0) {
-            ray.x = NuFsqrt(ray.x * ray.x + ray.y * ray.y + ray.z * ray.z);
-            if (ray.x < nearest) {
-                nearest = ray.x;
-            }
-        }
-    }
-
-    if (nearest < 35.0f) {
-        f32 amount = 1.0f - nearest / 35.0f;
-        GameCam_NewShake(GameCam, MulDist * amount + MulAdd, 0.2f, SpeedDist * amount + SpeedAdd);
-        f32 scaled_strength = amount * 0.5f;
-        f32 strength = 0.35f < scaled_strength ? 0.35f : scaled_strength;
-        NewRumbleAllPlayers(strength, 0.0f, 0, 0);
-    }
-    SpaceRumbleTimer -= FRAMETIME;
-    if (SpaceRumbleTimer < 0.0f) {
-        GameCam_Judder(GameCam, 0.2f, 2, NULL);
-        NewRumbleAllPlayers(0.3f, 0.0f, 0, 0);
-        SpaceRumbleTimer = NuRandFloat() * 10.0f + 3.0f;
-    }
-}
+void SpaceRumbleProcess();
 
 void NewRumbleAllPlayers(float strength, float duration, i32 frames, i32) {
     if (frames > 0) {

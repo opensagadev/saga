@@ -270,60 +270,13 @@ void Hub_InitFreePlaySelect(i32, i32, i32);
 void WipeBackToHub();
 static void Hub_MakeFreePlayList(i32 first_model, i32 second_model);
 
-enum HUB_DOOR_MENU_ID {
-    HUB_DOOR_MENU_STANDARD = 15,
-    HUB_DOOR_MENU_BONUS = 16,
-    HUB_DOOR_MENU_VEHICLE = 17,
-    HUB_DOOR_MENU_EPISODE_BONUS = 18,
-};
+#include "legoapi/world/levels/hub_types.h"
 
-enum HUB_VEHICLE_COLLECTION_MASK : u32 {
-    HUB_VEHICLE_COLLECTION_ALLOWED = 0x04002000,
-    HUB_VEHICLE_COLLECTION_REQUIRED = 0x00002000,
-};
 
-enum HUB_FREEPLAY_MODEL_FLAGS : u32 {
-    HUB_FREEPLAY_MODEL_VEHICLE = 0x00002000,
-    HUB_FREEPLAY_MODEL_MINIKIT = 0x04000000,
-};
 
-enum HUB_AUDIO_EVENT {
-    HUB_AUDIO_EVENT_OPEN_DOOR_MENU = 0x2d,
-};
 
-enum {
-    HUB_VEHICLE_ID_CAPACITY = 344,
-};
 
-struct HUBAREAINFO_s {
-    const char *area_name;
-    const char *door_name;
-    const char *lock_name;
-    const char *bonus_gizmo_name;
-    const char *bonus_gizmo_name_2;
-    f32 panel_offset;
-    f32 panel_scale;
-    u8 flags;
-    u8 force_open;
-    AREADATA_s *area;
-    GIZMO *door;
-    nuhspecial_s lock;
-    GIZMO *bonus_gizmo;
-    GIZMO *bonus_gizmo_2;
-};
 
-struct HUBEPISODEINFO_s {
-    i16 episode;
-    i16 flags;
-    const char *door_name;
-    const char *lock_on_name;
-    const char *lock_off_name;
-    u8 force_open;
-    EPISODEDATA *data;
-    GIZMO *door;
-    nuhspecial_s lock_on;
-    nuhspecial_s lock_off;
-};
 
 #if UINTPTR_MAX == 0xffffffff
 DECOMP_ASSERT(sizeof(HUBAREAINFO_s) == 0x3c, "HUBAREAINFO_s size");
@@ -440,8 +393,7 @@ i32 Hub_PanelBusy();
 
 void Hub_UpdateKit();
 
-void Hub_CallBarman(GameObject_s *) {
-}
+void Hub_CallBarman(GameObject_s *);
 
 void Hub_ClearStats();
 
@@ -600,10 +552,6 @@ void Hub_Reset(WORLDINFO_s *world);
 
 extern i16 tARCADE_NAME, tARCADE_NEEDTWOPLAYERS;
 extern i32 Arcade_BothPlayersActive();
-struct ARCADE_LEVEL_s {
-    AREADATA **area;
-    i16 *character_id;
-};
 extern ARCADE_LEVEL_s ArcadeLevel[12];
 static void Hub_DrawArcadeStats(float alpha);
 

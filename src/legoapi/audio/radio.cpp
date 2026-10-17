@@ -1,3 +1,6 @@
+// Original translation unit reconstructed from the reference address map.
+// Functions are defined in original address order.
+
 #include "decomp.h"
 #include "globals.h"
 #include "legoapi/audio/sfx.h"
@@ -34,6 +37,15 @@ DECOMP_ASSERT(sizeof(RadioEntry) == 0x14, "RadioEntry size");
 static RadioEntry radios[8];
 
 void GizmoBlowupUpdateMatrix(GIZMOBLOWUP_s *blowup);
+
+void ResetRadios();
+
+void UpdateRadios();
+
+void PlayRadio(char *special_name, char *blowup_name, i32 play);
+
+
+// ==== functions in original address order ====
 
 void ResetRadios() {
     memset(radios, 0, sizeof(radios));
@@ -156,3 +168,4 @@ void PlayRadio(char *special_name, char *blowup_name, i32 play) {
         memset(radio, 0, sizeof(*radio));
     }
 }
+

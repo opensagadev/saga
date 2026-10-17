@@ -59,8 +59,7 @@ build:target --per_file_copt=^src/legoapi/menus/core/text\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/menus/core/hud\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/menus/core/gamemessages\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/menus/core/gamemessages\.cpp$@-ftree-vectorize
-build:target --per_file_copt=^src/legoapi/menus/core/gamehint\.cpp$@-O2
-build:target --per_file_copt=^src/legoapi/menus/core/gamehint\.cpp$@-ftree-vectorize
+build:target --per_file_copt=^src/legoapi/menus/core/gamehint\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/menus/core/hint\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/menus/screens/gamestatus_lsw\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/menus/screens/gamestatus_lsw\.cpp$@-ftree-vectorize
@@ -144,12 +143,11 @@ build:target --per_file_copt=^src/legoapi/characters/motion/gameanim\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/characters/motion/gameanim\.cpp$@-ftree-vectorize
 build:target --per_file_copt=^src/legoapi/characters/motion/animation\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/characters/motion/contexts\.cpp$@-O3
-build:target --per_file_copt=^src/legoapi/characters/motion/chris\.cpp$@-O2
+build:target --per_file_copt=^src/legoapi/characters/motion/chris\.cpp$@-O3
+build:target --per_file_copt=^src/legoapi/characters/motion/chris\.cpp$@-fno-ipa-sra
 # The original keeps ResetSpaceLevel's full local symbol and passes its two
 # pointer arguments in eax/edx; disabling IPA-SRA reproduces that exact shape.
-build:target --per_file_copt=^src/legoapi/characters/motion/chris\.cpp$@-fno-ipa-sra
 # The retail static constructor stores its VuVec constants with movaps.
-build:target --per_file_copt=^src/legoapi/characters/motion/chris\.cpp$@-ftree-vectorize
 # Both pivot routines use optimized loop and vector lowering in the target.
 build:target --per_file_copt=^src/legoapi/characters/motion/charpivot\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/cutscenes/cutscene\.cpp$@-O2
@@ -199,8 +197,6 @@ build:target --per_file_copt=^src/legoapi/gizmo/object/gizbuildit\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmo/object/gizbuildit\.cpp$@-fno-ipa-sra
 # Turret lookup and hint traversal use the same optimized leaf/loop forms as
 # the surrounding generated gizmo translation units.
-build:target --per_file_copt=^src/legoapi/gizmo/gizmos/gizmos_grabber\.cpp$@-O2
-build:target --per_file_copt=^src/legoapi/gizmo/gizmos/gizmos_grabber\.cpp$@-ftree-vectorize
 build:target --per_file_copt=^src/legoapi/world/world\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/world/worldinfo\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/world/levelconfig\.cpp$@-O3
@@ -500,7 +496,6 @@ build:target --per_file_copt=^src/nu2api/nu3d/android/nuvertexformat_android\.cp
 # Measured against the original: these units' system creators, Hub stubs,
 # object-interface statics and C helpers match only when optimized.
 build:target --per_file_copt=^src/legoapi/ai/core/ai_sys\.cpp$@-O2
-build:target --per_file_copt=^src/legoapi/ai/game/lsw_hub_ai_stubs\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/ai/core/legoai\.cpp$@-O3
 build:target --per_file_copt=^src/MechInputTouch/MechObjectInterface\.cpp$@-O3
 
@@ -510,7 +505,6 @@ build:target --per_file_copt=^src/legoapi/misc/legoapi_status\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/items/objects/things\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/misc/supportall_stubs\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/misc/stream\.cpp$@-O2
-build:target --per_file_copt=^src/legoapi/characters/motion/chris_stubs\.cpp$@-O2
 build --per_file_copt=^src/nu2api/nucore/nucore_includes\.c$@-x,c++,-std=gnu++11
 build --per_file_copt=^src/nu2api/nucore/android/nuerror_android\.c$@-x,c++,-std=gnu++11
 build --per_file_copt=^src/nu2api/numath/numath_includes\.c$@-x,c++,-std=gnu++11

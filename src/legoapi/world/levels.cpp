@@ -11,9 +11,7 @@
 
 // Level-system stubs that have not yet been split into a subsystem file.
 
-i32 GetTableLocator(void) {
-    return 0;
-}
+i32 GetTableLocator(void);
 
 AILOCATOR_s *LocalGetRandomLocator(AILOCATOR_s **locators, i32 count, f32 clip_radius, NUVEC *position,
                                    f32 max_distance, i32 outside_camera, f32 max_delta_y, f32 min_delta_y);
@@ -48,8 +46,6 @@ void NewLevelFromMenu(LEVELDATA_s *level, i32 menu_id, i32 menu_y, i32) {
     }
 }
 
-i32 GetCounterLocator(i32) {
-    return 0;
-}
+i32 GetCounterLocator(i32);
 
 void OffPlat(i32);

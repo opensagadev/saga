@@ -699,17 +699,7 @@ static void NewCharacterIdle(GameObject_s *object, i32 default_idle);
 
 void UpdateCharacterIdle(GameObject_s *object);
 
-void UpdateCharacterIDs() {
-    const u16 count = ShopCollection.count_y;
-    if (count) {
-        COLLECTID *collect = ShopCollection.list;
-        shopitem_s *item = CharItems;
-        for (i32 i = 0; i < count; ++i, ++item, ++collect) {
-            item->price = collect->field3_0x4;
-            item->item_id = collect->id;
-        }
-    }
-}
+void UpdateCharacterIDs();
 
 void CharScenes_AreaLoad(APICHARACTERMODELLIST_s *list, variptr_u *buf, variptr_u buf_end) {
     char path[128];

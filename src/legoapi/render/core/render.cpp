@@ -132,8 +132,8 @@ extern i16 tENTERCODE;
 i32 AnakinGreenSabre(GameObject_s *object);
 i32 MatrixReflection(NUMTX *matrix, i32 axis, f32 plane, f32 height, NUMTX *result);
 
-f32 HUB_EPISODESUBTITLEY = -0.745f;
-f32 HUB_EPISODETITLEY = -0.595f;
+extern f32 HUB_EPISODESUBTITLEY;
+extern f32 HUB_EPISODETITLEY;
 extern i32 draw_para;
 
 void DrawGameObjectsDraw(i32 pass);
@@ -540,128 +540,16 @@ extern "C" {
     }
 } // extern "C"
 
-i32 solid_cable;
-i32 nsegments_drawn;
-f32 slack_factor = 1.0f;
-f32 cable_slack = 1.0f;
-f32 nsegments_per_unit = 6.0f;
+extern i32 solid_cable;
+extern i32 nsegments_drawn;
+extern f32 slack_factor;
+extern f32 cable_slack;
+extern f32 nsegments_per_unit;
 extern CABLE_s cables[8];
 extern f32 tow_length;
 extern NUMTL *SolidMtl3D;
 
-void DrawCables() {
-    NUVEC step;
-    NURND_VERTEX3D vertices[2];
-    NUVEC &start = vertices[0].position;
-    NUVEC &end = vertices[1].position;
-    vertices[0].colour = 0xff000000;
-    vertices[1].colour = 0xff000000;
-    nsegments_drawn = 0;
-    for (CABLE_s *current = cables; current != cables + 8; ++current) {
-        CABLE_s &cable = *current;
-        if ((cable.flags_1e9 & 1) == 0) {
-            continue;
-        }
-
-        const f32 y_span = cable.points[cable.point_count - 1].y - cable.points[0].y;
-        if ((cable.flags_1e9 & 4) != 0) {
-            cable.slack += FRAMETIME * cable_slack * slack_factor;
-            if (cable.slack > cable_slack) {
-                cable.slack = cable_slack;
-            }
-        } else if (cable.total_length >= tow_length) {
-            cable.slack = 0.0f;
-        } else {
-            f32 fraction = cable.total_length / tow_length;
-            if (fraction > 1.0f) {
-                fraction = 0.0f;
-            } else {
-                fraction = 1.0f - fraction;
-            }
-            cable.slack = fraction * cable_slack;
-        }
-
-        f32 distance_along = 0.0f;
-        if (cable.slack == 0.0f) {
-            for (i32 segment = 0; segment < cable.point_count - 1; ++segment) {
-                const f32 start_fraction = NuFdiv(distance_along, cable.total_length);
-                start = cable.points[segment];
-                start.y = start_fraction * y_span + cable.points[0].y;
-                distance_along += cable.segment_lengths[segment];
-                const f32 end_fraction = NuFdiv(distance_along, cable.total_length);
-                end = cable.points[segment + 1];
-                end.y = y_span * end_fraction + cable.points[0].y;
-                if (solid_cable != 0) {
-                    DrawRopeSingle(&start, &end, 1.0f, ropemtl, end_fraction, end_fraction, 10.0f, 5.0f);
-                } else {
-                    NuRndrLine3d(vertices, SolidMtl3D, NULL);
-                }
-            }
-        } else {
-            const f32 subdivision_scale = cable.total_length * nsegments_per_unit;
-            NUVEC endpoint = cable.points[0];
-            endpoint.y = y_span * 0.0f + cable.points[0].y;
-            f32 ground_start = GameShadow(NULL, &endpoint, 5.0f, -1);
-            if (ground_start == 2000000.0f) {
-                ground_start = endpoint.y;
-            }
-            for (i32 segment = 0; segment < cable.point_count - 1; ++segment) {
-                NUVEC previous = endpoint;
-                endpoint = cable.points[segment + 1];
-                endpoint.y = NuFdiv(distance_along + cable.segment_lengths[segment], cable.total_length) * y_span +
-                             cable.points[0].y;
-                f32 ground_end = GameShadow(NULL, &endpoint, 5.0f, -1);
-                if (ground_end == 2000000.0f) {
-                    ground_end = endpoint.y;
-                }
-
-                NuVecSub(&step, &endpoint, &previous);
-                const f32 segment_length = cable.segment_lengths[segment];
-                const f32 subdivisions = static_cast<f32>(
-                    ceil(static_cast<double>(NuFdiv(segment_length, cable.total_length) * subdivision_scale)));
-                const f32 step_length = NuFdiv(segment_length, subdivisions);
-                NuVecScale(&step, &step, NuFdiv(step_length, segment_length));
-                const f32 half_step = 0.5f * step_length;
-                NUVEC cursor = previous;
-                f32 local_distance = 0.0f;
-                while (local_distance + half_step < cable.segment_lengths[segment]) {
-                    start = cursor;
-                    const f32 global_distance = distance_along + local_distance;
-                    start.y -= cable.slack *
-                               NU_SIN_LUT(static_cast<i32>(NuFdiv(global_distance, cable.total_length) * 32768.0f));
-                    const f32 start_fraction = NuFdiv(local_distance, cable.segment_lengths[segment]);
-                    const f32 start_floor =
-                        start_fraction * ground_end + (1.0f - start_fraction) * ground_start + 0.05f;
-                    if (start_floor > start.y) {
-                        start.y = start_floor;
-                    } else {
-                        start.y = start.y;
-                    }
-                    NuVecAdd(&cursor, &cursor, &step);
-                    end = cursor;
-                    const f32 phase = NuFdiv(global_distance + step_length, cable.total_length);
-                    const i32 angle = !(phase > 1.0f) ? static_cast<i32>(phase * 32768.0f) : 32768;
-                    local_distance += step_length;
-                    const f32 end_sag = cable.slack * NU_SIN_LUT(angle);
-                    end.y -= end_sag;
-                    const f32 end_fraction = NuFdiv(local_distance, cable.segment_lengths[segment]);
-                    const f32 end_floor = end_fraction * ground_end + (1.0f - end_fraction) * ground_start + 0.05f;
-                    if (end.y < end_floor) {
-                        end.y = end_floor;
-                    }
-                    if (solid_cable != 0) {
-                        DrawRopeSingle(&start, &end, 1.0f, ropemtl, end_sag, end_sag, 10.0f, 5.0f);
-                    } else {
-                        NuRndrLine3d(vertices, SolidMtl3D, NULL);
-                    }
-                    ++nsegments_drawn;
-                }
-                distance_along += cable.segment_lengths[segment];
-                ground_start = ground_end;
-            }
-        }
-    }
-}
+void DrawCables();
 
 void DrawRipple(ripple_node_s *node) {
     NURND_VERTEX3D vertices[4];
@@ -687,8 +575,7 @@ void DrawRipple(ripple_node_s *node) {
 
 void DrawAreaBox(nuvec_s *position, nuvec_s *size, i32 rotation, i32 colour);
 
-void DrawBox_Now(_vuv_s *, _vuv_s *, i32, i32) {
-}
+void DrawBox_Now(_vuv_s *, _vuv_s *, i32, i32);
 
 extern "C" {
 extern f32 aiEditor_DrawYOffset;
@@ -787,8 +674,7 @@ extern const u8 HintRGB[5][3] = {
     {255, 0, 0}, {0, 255, 0}, {0, 127, 255}, {127, 0, 255}, {255, 255, 0},
 };
 
-void DrawLine_Now(_vuv_s *, _vuv_s *, i32, i32) {
-}
+void DrawLine_Now(_vuv_s *, _vuv_s *, i32, i32);
 
 void DrawParallax(nuhspecial_s *special) {
     if (NuIOS_IsLowEndDevice() != 0 && WORLD != NULL && WORLD->current_level != NULL &&
@@ -809,18 +695,7 @@ void DrawParallax(nuhspecial_s *special) {
     NuRndrStateSetFogEnabled(1);
 }
 
-void DrawQuestion(nuvec_s *position, float scale_value, float y_push) {
-    if (position && NuSpecialExistsFn(&question)) {
-        NUMTX_ALIGNED16 matrix;
-        NuMtxSetIdentity(&matrix);
-        NUVEC scale;
-        scale.x = scale.y = scale.z = scale_value;
-        NuMtxSetScale(&matrix, &scale);
-        *reinterpret_cast<NUVEC *>(&matrix.m30) = *position;
-        matrix.m31 += y_push;
-        NuSpecialDrawAt(&question, &matrix);
-    }
-}
+void DrawQuestion(nuvec_s *position, float scale_value, float y_push);
 
 void DrawRectRGBA(float x, float y, float width, float height, u32 colour, numtl_s *material, i32 alignment,
                   float scale) {
@@ -956,8 +831,7 @@ void DrawAlphaGrid(i32 rows, i32 cols, NuBloomParameters *parameters) {
 }
 #undef ALPHA_GRID_VERTEX
 
-void DrawArrow_Now(_vum_s *, float, i32, i32) {
-}
+void DrawArrow_Now(_vum_s *, float, i32, i32);
 
 extern i16 tNONEWBESTTIME, tNEWBESTTIME;
 void Text_MakeTime(f32, i32, i32, i32, char *);
@@ -989,8 +863,7 @@ void DrawBonusTime(STATUSPACKET_s *packet, float position, i32 alpha) {
              static_cast<u8>(static_cast<u8>(alpha) >> 1));
 }
 
-void DrawCross_Now(_vuv_s *, float, i32, i32) {
-}
+void DrawCross_Now(_vuv_s *, float, i32, i32);
 
 void DrawPauseFade() {
     if (editor_active != 0 || screendump != 0)
@@ -1260,8 +1133,7 @@ void DrawBezierLine(VuVec &start, VuVec &start_control, VuVec &end, VuVec &end_c
     --bezier_draw_depth;
 }
 
-void DrawBoxMtx_Now(_vum_s *, _vuv_s *, i32, i32) {
-}
+void DrawBoxMtx_Now(_vum_s *, _vuv_s *, i32, i32);
 
 void *AddGameMessage(char *, NUVEC *, f32, NUVEC *, f32, u8, u8, u8, u32, f32);
 
@@ -1297,29 +1169,7 @@ void DrawCutBorders(i32 widescreen) {
 void DrawExplosions() {
 }
 
-void DrawItemMenu2D() {
-    if (0.0f < ShopNameAlpha) {
-        i16 text_id;
-        if (picked == 0) {
-            text_id = tHINTS;
-        } else if (picked == 1) {
-            text_id = tCHARACTERS;
-        } else if (picked == 2) {
-            text_id = tEXTRAS;
-        } else if (picked == 4) {
-            text_id = tGOLDBRICKS;
-        } else if (picked == 5) {
-            text_id = tSTORYCLIPS;
-        } else {
-            text_id = tENTERCODE;
-        }
-
-        const i32 alpha = static_cast<i32>(ShopNameAlpha * 128.0f);
-        const f32 y = (HUB_EPISODETITLEY + HUB_EPISODESUBTITLEY) * 0.5f;
-        SmartTextEx(TTab[text_id], 0.0f, y, 1.0f, 0.8f, 0.8f, 0.8f, 0, 255, 255, 255, 1.7f, 1, NULL, 0,
-                    static_cast<u32>(alpha));
-    }
-}
+void DrawItemMenu2D();
 
 void DrawStatusText(char *text, u16 angle, float x, float y, float scale, u32 colour, i32 alignment) {
     static NUMTX status_mtx;
@@ -1846,171 +1696,9 @@ extern i16 tUNKNOWN, tPOWERBRICK, tLOCKED, tGOLDBRICK;
 extern "C" void PlaySfx(char *, NUVEC *);
 void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 
-void DrawSubItemMenu2D() {
-    shopitem_s *items;
-    i32 *ids;
-    if (picked == 0) {
-        items = HintItems;
-        ids = HintShelfIds;
-    } else if (picked == 1) {
-        items = CharItems;
-        ids = CharShelfIds;
-    } else if (picked == 2) {
-        items = ExtraItems;
-        ids = ExtraShelfIds;
-    } else if (picked == 4) {
-        items = BrickItems;
-        ids = BrickShelfIds;
-    } else if (picked == 5) {
-        items = CutItems;
-        ids = CutShelfIds;
-    } else {
-        return;
-    }
-    if (items) {
-        char title[128], subtitle[128];
-        char *name = items[ids[3]].name;
-        i32 buyable = 0;
-        i32 show_name = 0;
-        if (items[ids[3]].type == 1) {
-            if (__builtin_expect(items[ids[3]].unlocked == 1, 1))
-                show_name = 1;
-            else if (__builtin_expect(!!(CollectIDUnlocked(static_cast<u16>(items[ids[3]].item_id))), 0))
-                buyable = show_name = 1;
-            else {
-                f32 scale = 0.7f * ShopLockedScale;
-                SmartTextEx(TTab[tLOCKED], 0.0f, (HUB_EPISODETITLEY + HUB_EPISODESUBTITLEY) * 0.5f, 1.0f, scale, scale,
-                            scale, 0, 255, 0, 0, 1.7f, 1, NULL, 0, static_cast<i32>(128.0f * ShopNameAlpha));
-            }
-        } else if (items[ids[3]].type == 0) {
-            buyable = items[ids[3]].unlocked != 1 && items[ids[3]].price != 0;
-        } else if (items[ids[3]].type == 2) {
-            const i32 id = static_cast<u16>(items[ids[3]].item_id);
-            NuStrCpy(subtitle, TTab[Cheat[id].text_id ? *Cheat[id].text_id : tUNKNOWN]);
-            name = subtitle;
-            i8 area = static_cast<i8>(Cheat[id].area);
-            if (items[ids[3]].unlocked == 1)
-                show_name = 1;
-            else if (id <= 7 || area == -1 || Game.area_save[area].red_brick_collected)
-                buyable = show_name = 1;
-            else {
-                sprintf(title, "%s %i", TTab[tPOWERBRICK], id - 7);
-                f32 scale = 0.6f * ShopLockedScale;
-                SmartTextEx(title, 0.0f, HUB_EPISODETITLEY, 1.0f, 0.6f, 0.6f, 0.6f, 0, 255, 255, 255, 1.7f, 1, NULL, 0,
-                            static_cast<i32>(128.0f * ShopNameAlpha));
-                SmartTextEx(TTab[tLOCKED], 0.0f, HUB_EPISODESUBTITLEY, 1.0f, scale, scale, scale, 0, 255, 0, 0, 1.7f, 1,
-                            NULL, 0, static_cast<i32>(128.0f * ShopNameAlpha));
-            }
-        } else if (items[ids[3]].type == 4) {
-            const i32 id = static_cast<u16>(items[ids[3]].item_id);
-            sprintf(title, "%s %i", TTab[tGOLDBRICK], id + 1);
-            name = title;
-            if (items[ids[3]].unlocked == 1)
-                show_name = 1;
-            else if (!(static_cast<f32>(id * 3600) > Game.field30_0x7c2c))
-                buyable = show_name = 1;
-            else {
-                SmartTextEx(title, 0.0f, HUB_EPISODETITLEY, 1.0f, 0.6f, 0.6f, 0.6f, 0, 255, 255, 255, 1.7f, 1, NULL, 0,
-                            static_cast<i32>(128.0f * ShopNameAlpha));
-                f32 scale = 0.6f * ShopLockedScale;
-                SmartTextEx(TTab[tLOCKED], 0.0f, HUB_EPISODESUBTITLEY, 1.0f, scale, scale, scale, 0, 255, 0, 0, 1.7f, 1,
-                            NULL, 0, static_cast<i32>(128.0f * ShopNameAlpha));
-            }
-        } else if (items[ids[3]].type == 5) {
-            const i32 id = static_cast<u16>(items[ids[3]].item_id);
-            i32 available = CutScenePlayer_CanStart(id);
-            CutScenePlayer_GetText(id, title, subtitle, available);
-            SmartTextEx(title, 0.0f, HUB_EPISODETITLEY, 1.0f, 0.6f, 0.6f, 0.6f, 0, 255, 255, 255, 1.7f, 1, NULL, 0,
-                        static_cast<i32>(128.0f * ShopNameAlpha));
-            if (available && shopcutsceneplayer)
-                SmartTextEx(subtitle, 0.0f, HUB_EPISODESUBTITLEY, 1.0f, 0.6f, 0.6f, 0.6f, 0, 255, 191, 0, 1.7f, 1, NULL,
-                            0, static_cast<i32>(128.0f * ShopNameAlpha));
-            else {
-                f32 scale = 0.6f * ShopLockedScale;
-                SmartTextEx(TTab[tLOCKED], 0.0f, HUB_EPISODESUBTITLEY, 1.0f, scale, scale, scale, 0, 255, 0, 0, 1.7f, 1,
-                            NULL, 0, static_cast<i32>(128.0f * ShopNameAlpha));
-            }
-        }
-        i32 price;
-        switch (items[ids[3]].type) {
-            case 0:
-                price = items[HintShelfIds[3]].price;
-                break;
-            case 2:
-                price = items[ExtraShelfIds[3]].price;
-                break;
-            case 4:
-                price = items[BrickShelfIds[3]].price;
-                break;
-            case 5:
-                return;
-            case 1:
-                price = items[CharShelfIds[3]].price;
-                break;
-            default:
-                price = items[CharShelfIds[3]].price;
-                break;
-        }
-        if (subitemselected > 0) {
-            if (!buyable) {
-                ShopLockedScale = 1.5f;
-                GameAudio_PlaySfx(0x32, NULL, 0, 0);
-                subitemselected = 0;
-            } else if (Game.coins < price) {
-                CoinTotalScale = 1.5f;
-                PlaySfx("Shop_NotEnufMuny", &SubShelfPos[3]);
-                subitemselected = 0;
-            }
-        }
-        if (!(ShopNameAlpha > 0.0f))
-            return;
-        if (show_name) {
-            f32 y = buyable ? HUB_EPISODETITLEY : (HUB_EPISODETITLEY + HUB_EPISODESUBTITLEY) * 0.5f;
-            f32 scale = buyable ? 0.6f : 0.8f;
-            SmartTextEx(name, 0.0f, y, 1.0f, scale, scale, scale, 0, 255, 255, 255, 1.7f, 1, NULL, 0,
-                        static_cast<i32>(128.0f * ShopNameAlpha));
-        }
-        if (buyable)
-            CoinTotal_Draw(price, HUB_EPISODESUBTITLEY, 1.2f, 0, ShopNameAlpha, 255, 191, 0);
-        if (subitemselected == 2) {
-            f32 pulse = 1.0f;
-            if (!TestForController()) {
-                f32 since_touch = GlobalTimer.time_elapsed - (LastTouchTime + 2.0f);
-                if (since_touch > 4.0f) {
-                    i32 angle = static_cast<i32>(NuFmod(since_touch, 4.0f) * 0.25f * 65536.0f);
-                    f32 value = NuTrigTable[(angle >> 1) & 0x7fff] - 0.8f;
-                    if (!(value < 0.0f))
-                        pulse = value + 1.0f;
-                }
-            }
-            f32 size = ICONSIZE * pulse;
-            DrawPanel3DObject(-0.3f, -0.3f, 1.0f, size, size, size, 0, 0, 0, &WORLD->lev_objs[165].special, 0,
-                              ShopNameAlpha);
-            DrawPanel3DObject(0.3f, -0.3f, 1.0f, size, size, size, 0, 0, 0, &WORLD->lev_objs[165].special, 0,
-                              ShopNameAlpha);
-            f32 text_size = pulse * 0.6f;
-            f32 alpha = static_cast<i32>(128.0f * ShopNameAlpha);
-            u8 text_alpha = static_cast<i32>(alpha);
-            Text3DEx("$", -0.3f, -0.3f, 1.0f, 1.3f * text_size, text_size, text_size, 0, 0, 255, 0, text_alpha);
-            Text3DEx("X", 0.3f, -0.31f, 1.0f, 1.3f * text_size, text_size, text_size, 0, 255, 0, 0, text_alpha);
-            MENU_s *menu = &GameMenu[GameMenuLevel];
-            menu->item_x[11] = -0.3f;
-            menu->item_y[11] = -0.3f;
-            menu->item_x[12] = 0.3f;
-            menu->item_y[12] = -0.3f;
-            menu->item_width[11] = size;
-            menu->item_column[11] = 0;
-            menu->item_row[11] = 2;
-            menu->item_column[12] = 1;
-            menu->item_width[12] = size;
-            menu->item_row[12] = 2;
-        }
-    }
-}
+void DrawSubItemMenu2D();
 
-void DrawSubItemMenu3D() {
-    DrawSubItems();
-}
+void DrawSubItemMenu3D();
 
 void Draw_NOMEMORYCARD();
 
@@ -2351,14 +2039,7 @@ void DrawAABox(_vuv_s *position, _vuv_s *size, i32 colour) {
     NuCameraRelock();
 }
 
-void DrawArrow(nuhspecial_s *special, float scale_value) {
-    if (NuSpecialExistsFn(special)) {
-        NUVEC scale = {scale_value, scale_value, scale_value};
-        NUMTX matrix = *NuSpecialGetDrawMtx(special);
-        NuMtxPreScale(&matrix, &scale);
-        NuSpecialDrawAt(special, &matrix);
-    }
-}
+void DrawArrow(nuhspecial_s *special, float scale_value);
 
 void DrawCross(nuvec_s *centre, float radius, numtl_s *material, i32 colour) {
     if (material != NULL) {

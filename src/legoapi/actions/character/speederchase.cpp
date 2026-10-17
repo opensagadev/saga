@@ -1,3 +1,6 @@
+// Original translation unit reconstructed from the reference address map.
+// Functions are defined in original address order.
+
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/nucore/nustring.h"
@@ -87,28 +90,14 @@ void TakeHitRumble(GameObject_s *, f32);
 
 void PodLoseSpeed(GameObject_s *object, i32 hit, i32 rumble);
 
-i32 SpeederBlowupHack(GIZMOBLOWUP_s *blowup, i32) {
-    if (blowup == NULL) {
-        return 1;
-    }
-    return NuStrCmp(blowup->name, "thermocrate_011") != 0 && NuStrCmp(blowup->name, "thermocrate_021") != 0 &&
-           NuStrCmp(blowup->name, "thermocrate_031") != 0 && NuStrCmp(blowup->name, "minikit101") != 0;
-}
+i32 SpeederBlowupHack(GIZMOBLOWUP_s *blowup, i32);
 
 f32 FindPodHoverHeight(GameObject_s *object);
 
 extern i32 ObjInNarrowSock(GameObject_s *, SOCKSYS *, i32);
 extern i32 IDLESPEEDINNARROWSOCKSONLY;
 
-i32 ObjIsTargetSpeeder(GameObject_s *object) {
-    if (object->id != id_SPEEDERBIKE) {
-        return 0;
-    }
-    if (object->field_0xcc0 == NULL) {
-        return 0;
-    }
-    return object->apiobj.field_0x27c == -1;
-}
+i32 ObjIsTargetSpeeder(GameObject_s *object);
 f32 GetVehicleSpeedMul(GameObject_s *object, f32 speed);
 
 void SetLevelExBlowupFunc(i32 (*callback)(GIZMOBLOWUP_s *, i32));
@@ -116,6 +105,73 @@ void InitTrooperCannons(WORLDINFO_s *world);
 void ResetTrooperCannons(WORLDINFO_s *world, i32 trooper_id);
 void UpdateTrooperCannons(WORLDINFO_s *world);
 i32 GoingForwardsAlongNarrowSock(GameObject_s *object);
+
+void SpeederChaseA_Init(WORLDINFO_s *world);
+
+void ProcessCurrentSpeed(WORLDINFO_s *world, speedup_s *speedup);
+
+void SpeederChaseA_Panel(WORLDINFO_s *);
+
+void SpeederChaseA_Reset(WORLDINFO_s *);
+
+i32 SpeedersDroppedBack();
+
+i32 Action_SpeederBeingChased(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **, i32, i32 first_time,
+                              f32 elapsed);
+
+void SpeederChaseA_Update(WORLDINFO_s *world);
+
+// Original 0x4f2e50, 258 bytes. The original returns an integer.
+i32 ObjOpponentStillThere(GameObject_s *object, GameObject_s *opponent, f32 gap) {
+    i32 result = 0;
+    if (object->force_target != NULL) {
+        NUVEC forward, difference;
+        NuVecRotateY(&forward, &v001, object->apiobj.field_0x276);
+        f32 distance = NuVecDistSqr(&opponent->apiobj.position, &object->apiobj.position, &difference);
+        f32 dot = forward.x * difference.x + forward.z * difference.z;
+        if (static_cast<i8>(object->context_flags) < 0 ? dot <= 0.0f : dot >= 0.0f) {
+            f32 radius = object->apiobj.field_0x1dc + opponent->apiobj.field_0x1dc + gap;
+            result = distance < radius * radius;
+        }
+    }
+    return result;
+}
+
+f32 SpeederChaseATATInOutMul(nuvec_s *start, nuvec_s *end);
+
+f32 GetVehicleAreaRememberSpeed();
+
+i32 SpeederChase_ObjIsAGroundTroop(GameObject_s *object);
+
+extern "C" {
+
+extern i32 edmain_auto_speed;
+
+void cbSetAutoSpeed(eduimenu_s *, eduiitem_s *item, u32);
+
+} // extern "C"
+
+extern "C" void AddDebrisEffect(i32 *, i32, f32, f32, f32);
+extern "C" void DebrisPosOrientationMtx(i32, NUMTX *);
+extern "C" void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
+
+void PodDust(WORLDINFO_s *world, GameObject_s *object);
+
+extern "C" f32 pod_roll[2];
+f32 getPodRoll(i32 index) {
+    return pod_roll[index];
+}
+
+
+// ==== functions in original address order ====
+
+i32 SpeederBlowupHack(GIZMOBLOWUP_s *blowup, i32) {
+    if (blowup == NULL) {
+        return 1;
+    }
+    return NuStrCmp(blowup->name, "thermocrate_011") != 0 && NuStrCmp(blowup->name, "thermocrate_021") != 0 &&
+           NuStrCmp(blowup->name, "thermocrate_031") != 0 && NuStrCmp(blowup->name, "minikit101") != 0;
+}
 
 void SpeederChaseA_Init(WORLDINFO_s *world) {
     speederchasea_netpacket = static_cast<SPEEDERCHASEANETPACKET_s *>(SetLevelHack(7));
@@ -182,48 +238,94 @@ void SpeederChaseA_Init(WORLDINFO_s *world) {
     }
 }
 
-void ProcessCurrentSpeed(WORLDINFO_s *world, speedup_s *speedup) {
-    spacelevel_s *space = world->space_level;
-    while (speedup->distance != 0.0f) {
-        if (speedup->distance > space->door_elapsed && speedup->distance <= space->door_countdown) {
-            space->value_one_a = speedup->speed;
-        }
-        ++speedup;
+void SpeederChaseA_Reset(WORLDINFO_s *) {
+    troopercannons_beenReset = 0;
+    InitBikeParts();
+    LevAIMessage[0] = CheckGizAIMessage(gizaimessagesys, "SpeedersToKill", NULL);
+    LevAIMessage[1] = CheckGizAIMessage(gizaimessagesys, "SpeedersKilled", NULL);
+    LevAIMessage[2] = CheckGizAIMessage(gizaimessagesys, "Stage", NULL);
+    LevAIMessage[3] = CheckGizAIMessage(gizaimessagesys, "Phase", NULL);
+    LevAIMessage[4] = CheckGizAIMessage(gizaimessagesys, "KeepPlayersOnSpeeders", NULL);
+    LevAIMessage[5] = CheckGizAIMessage(gizaimessagesys, "SpeederMode", NULL);
+    players_going_forward = 1;
+}
+
+void SpeederChaseA_Update(WORLDINFO_s *world) {
+    ResetTrooperCannons(world, id_STORMTROOPER);
+    UpdateTrooperCannons(world);
+
+    if (netclient == 0) {
+        players_cannot_exit_speeder = LevAIMessage[4] != NULL && LevAIMessage[4]->value == 1.0f;
     }
 
-    f32 target_speed = space->value_one_a;
-    if (static_cast<u16>(GameCam->sock_position.next_segment - 120) <= 30) {
-        if (static_cast<i8>(LevBlowUp[0]->state_flags) < 0) {
-            target_speed *= 0.25f;
-        } else if (static_cast<i8>(LevBlowUp[1]->state_flags) < 0) {
-            target_speed *= 0.25f;
-        } else if (static_cast<i8>(LevBlowUp[2]->state_flags) < 0) {
-            target_speed *= 0.25f;
-        } else if (static_cast<i8>(LevBlowUp[3]->state_flags) < 0) {
-            target_speed *= 0.25f;
-        } else if (static_cast<i8>(LevBlowUp[4]->state_flags) < 0) {
-            target_speed *= 0.25f;
+    WORLDINFO_s *current_world = WORLD;
+    const i16 bike_id = id_SPEEDERBIKE;
+    LEVELDATA *chase_level = SPEEDERCHASEA_LDATA;
+    if (disable_narrow_socks != 0) {
+        if (Player[0] != NULL) {
+            Player[0]->field_0xf03 &= ~1;
+        }
+        if (Player[1] != NULL) {
+            Player[1]->field_0xf03 &= ~1;
+        }
+    } else {
+        for (i32 i = 0; i < 2; ++i) {
+            GameObject_s *object = Player[i];
+            if (object != NULL && current_world->current_level == chase_level && object->id == bike_id &&
+                object->field_0xcc0 != NULL && object->field_0xcc0->apiobj.player_controlled) {
+                object->field_0xf03 |= 1;
+            } else if (object != NULL) {
+                object->field_0xf03 &= ~1;
+            }
         }
     }
 
-    if (target_speed > space->value_one_b) {
-        space->value_one_b += FRAMETIME * 0.25f;
-        if (space->value_one_b > target_speed) {
-            space->value_one_b = target_speed;
+    players_going_forward = 1;
+    for (i32 i = 0; i < 2; ++i) {
+        GameObject_s *object = Player[i];
+        if (!(object != NULL && static_cast<i8>(object->apiobj.flags_low) < 0 &&
+              (object->apiobj.field_0x1f4 & 0x40000) == 0 &&
+              (GoingForwardsAlongNarrowSock(object) == 0 || Player[i]->field_0x7a5 == 0x2a))) {
+            continue;
         }
-    } else if (space->value_one_b > target_speed) {
-        space->value_one_b -= FRAMETIME * 0.25f;
-        if (space->value_one_b < target_speed) {
-            space->value_one_b = target_speed;
-        }
+        players_going_forward = 0;
+        break;
     }
-    f32 current_speed = space->value_one_b;
-    f32 vehicle_speed = current_speed * 20.0f;
-    world->sock_sys->sock[0].current_speed = vehicle_speed;
 
-    if (world->current_level == DOGFIGHTA_LDATA && vehicle_speed != 0.0f) {
-        space->normalized_speed = vehicle_speed / 11.0f;
-    }
+    u8 *sound_flags = reinterpret_cast<u8 *>(LevSfxFlag);
+
+#define UPDATE_FORCE_FIELD_SOUND(index)                                                                                \
+    do {                                                                                                               \
+        nuinstanim_s *animation = NuSpecialGetInstAnim(&LevHSpecial[index]);                                           \
+        NUVEC *position = NuSpecialGetDrawPos(&LevHSpecial[index]);                                                    \
+        if (animation != NULL) {                                                                                       \
+            void *animation_data = WORLD->current_gscn->instance_animation_data[animation->anim_ix];                   \
+            if (sound_flags[index] == 0) {                                                                             \
+                if (animation->ltime > 0.0f && animation->ltime != NuAnimEndFrameOld(animation_data)) {                \
+                    PlaySfx("env_laser_gate_on", position);                                                            \
+                    sound_flags[index] = 1;                                                                            \
+                }                                                                                                      \
+            } else if ((animation->flags & NUINSTANIM_FLAG_PLAYING) != 0 ||                                            \
+                       animation->ltime != NuAnimEndFrameOld(animation_data)) {                                        \
+                PlaySfx("env_laser_gate_lp", position);                                                                \
+            } else {                                                                                                   \
+                PlaySfx("env_laser_gate_off", position);                                                               \
+                sound_flags[index] = 0;                                                                                \
+            }                                                                                                          \
+        }                                                                                                              \
+    } while (0)
+
+    UPDATE_FORCE_FIELD_SOUND(0);
+    UPDATE_FORCE_FIELD_SOUND(1);
+    UPDATE_FORCE_FIELD_SOUND(2);
+    UPDATE_FORCE_FIELD_SOUND(3);
+    UPDATE_FORCE_FIELD_SOUND(4);
+    UPDATE_FORCE_FIELD_SOUND(5);
+    UPDATE_FORCE_FIELD_SOUND(6);
+    UPDATE_FORCE_FIELD_SOUND(7);
+    UPDATE_FORCE_FIELD_SOUND(8);
+
+#undef UPDATE_FORCE_FIELD_SOUND
 }
 
 void SpeederChaseA_Panel(WORLDINFO_s *) {
@@ -264,16 +366,21 @@ void SpeederChaseA_Panel(WORLDINFO_s *) {
     }
 }
 
-void SpeederChaseA_Reset(WORLDINFO_s *) {
-    troopercannons_beenReset = 0;
-    InitBikeParts();
-    LevAIMessage[0] = CheckGizAIMessage(gizaimessagesys, "SpeedersToKill", NULL);
-    LevAIMessage[1] = CheckGizAIMessage(gizaimessagesys, "SpeedersKilled", NULL);
-    LevAIMessage[2] = CheckGizAIMessage(gizaimessagesys, "Stage", NULL);
-    LevAIMessage[3] = CheckGizAIMessage(gizaimessagesys, "Phase", NULL);
-    LevAIMessage[4] = CheckGizAIMessage(gizaimessagesys, "KeepPlayersOnSpeeders", NULL);
-    LevAIMessage[5] = CheckGizAIMessage(gizaimessagesys, "SpeederMode", NULL);
-    players_going_forward = 1;
+i32 ObjIsTargetSpeeder(GameObject_s *object) {
+    if (object->id != id_SPEEDERBIKE) {
+        return 0;
+    }
+    if (object->field_0xcc0 == NULL) {
+        return 0;
+    }
+    return object->apiobj.field_0x27c == -1;
+}
+
+i32 SpeederChase_ObjIsAGroundTroop(GameObject_s *object) {
+    if (object == NULL) {
+        return 1;
+    }
+    return (object->apiobj.character_data->model_flags & 0x2000) == 0;
 }
 
 i32 SpeedersDroppedBack() {
@@ -464,100 +571,6 @@ i32 Action_SpeederBeingChased(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_
     return 0;
 }
 
-void SpeederChaseA_Update(WORLDINFO_s *world) {
-    ResetTrooperCannons(world, id_STORMTROOPER);
-    UpdateTrooperCannons(world);
-
-    if (netclient == 0) {
-        players_cannot_exit_speeder = LevAIMessage[4] != NULL && LevAIMessage[4]->value == 1.0f;
-    }
-
-    WORLDINFO_s *current_world = WORLD;
-    const i16 bike_id = id_SPEEDERBIKE;
-    LEVELDATA *chase_level = SPEEDERCHASEA_LDATA;
-    if (disable_narrow_socks != 0) {
-        if (Player[0] != NULL) {
-            Player[0]->field_0xf03 &= ~1;
-        }
-        if (Player[1] != NULL) {
-            Player[1]->field_0xf03 &= ~1;
-        }
-    } else {
-        for (i32 i = 0; i < 2; ++i) {
-            GameObject_s *object = Player[i];
-            if (object != NULL && current_world->current_level == chase_level && object->id == bike_id &&
-                object->field_0xcc0 != NULL && object->field_0xcc0->apiobj.player_controlled) {
-                object->field_0xf03 |= 1;
-            } else if (object != NULL) {
-                object->field_0xf03 &= ~1;
-            }
-        }
-    }
-
-    players_going_forward = 1;
-    for (i32 i = 0; i < 2; ++i) {
-        GameObject_s *object = Player[i];
-        if (!(object != NULL && static_cast<i8>(object->apiobj.flags_low) < 0 &&
-              (object->apiobj.field_0x1f4 & 0x40000) == 0 &&
-              (GoingForwardsAlongNarrowSock(object) == 0 || Player[i]->field_0x7a5 == 0x2a))) {
-            continue;
-        }
-        players_going_forward = 0;
-        break;
-    }
-
-    u8 *sound_flags = reinterpret_cast<u8 *>(LevSfxFlag);
-
-#define UPDATE_FORCE_FIELD_SOUND(index)                                                                                \
-    do {                                                                                                               \
-        nuinstanim_s *animation = NuSpecialGetInstAnim(&LevHSpecial[index]);                                           \
-        NUVEC *position = NuSpecialGetDrawPos(&LevHSpecial[index]);                                                    \
-        if (animation != NULL) {                                                                                       \
-            void *animation_data = WORLD->current_gscn->instance_animation_data[animation->anim_ix];                   \
-            if (sound_flags[index] == 0) {                                                                             \
-                if (animation->ltime > 0.0f && animation->ltime != NuAnimEndFrameOld(animation_data)) {                \
-                    PlaySfx("env_laser_gate_on", position);                                                            \
-                    sound_flags[index] = 1;                                                                            \
-                }                                                                                                      \
-            } else if ((animation->flags & NUINSTANIM_FLAG_PLAYING) != 0 ||                                            \
-                       animation->ltime != NuAnimEndFrameOld(animation_data)) {                                        \
-                PlaySfx("env_laser_gate_lp", position);                                                                \
-            } else {                                                                                                   \
-                PlaySfx("env_laser_gate_off", position);                                                               \
-                sound_flags[index] = 0;                                                                                \
-            }                                                                                                          \
-        }                                                                                                              \
-    } while (0)
-
-    UPDATE_FORCE_FIELD_SOUND(0);
-    UPDATE_FORCE_FIELD_SOUND(1);
-    UPDATE_FORCE_FIELD_SOUND(2);
-    UPDATE_FORCE_FIELD_SOUND(3);
-    UPDATE_FORCE_FIELD_SOUND(4);
-    UPDATE_FORCE_FIELD_SOUND(5);
-    UPDATE_FORCE_FIELD_SOUND(6);
-    UPDATE_FORCE_FIELD_SOUND(7);
-    UPDATE_FORCE_FIELD_SOUND(8);
-
-#undef UPDATE_FORCE_FIELD_SOUND
-}
-
-// Original 0x4f2e50, 258 bytes. The original returns an integer.
-i32 ObjOpponentStillThere(GameObject_s *object, GameObject_s *opponent, f32 gap) {
-    i32 result = 0;
-    if (object->force_target != NULL) {
-        NUVEC forward, difference;
-        NuVecRotateY(&forward, &v001, object->apiobj.field_0x276);
-        f32 distance = NuVecDistSqr(&opponent->apiobj.position, &object->apiobj.position, &difference);
-        f32 dot = forward.x * difference.x + forward.z * difference.z;
-        if (static_cast<i8>(object->context_flags) < 0 ? dot <= 0.0f : dot >= 0.0f) {
-            f32 radius = object->apiobj.field_0x1dc + opponent->apiobj.field_0x1dc + gap;
-            result = distance < radius * radius;
-        }
-    }
-    return result;
-}
-
 f32 SpeederChaseATATInOutMul(nuvec_s *start, nuvec_s *end) {
     f32 distance = NuVecXZDist(start, end, NULL) * 0.125f;
     if (distance > 1.0f)
@@ -565,30 +578,3 @@ f32 SpeederChaseATATInOutMul(nuvec_s *start, nuvec_s *end) {
     return MAX(0.1f, distance);
 }
 
-f32 GetVehicleAreaRememberSpeed();
-
-i32 SpeederChase_ObjIsAGroundTroop(GameObject_s *object) {
-    if (object == NULL) {
-        return 1;
-    }
-    return (object->apiobj.character_data->model_flags & 0x2000) == 0;
-}
-
-extern "C" {
-
-extern i32 edmain_auto_speed;
-
-void cbSetAutoSpeed(eduimenu_s *, eduiitem_s *item, u32);
-
-} // extern "C"
-
-extern "C" void AddDebrisEffect(i32 *, i32, f32, f32, f32);
-extern "C" void DebrisPosOrientationMtx(i32, NUMTX *);
-extern "C" void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
-
-void PodDust(WORLDINFO_s *world, GameObject_s *object);
-
-extern "C" f32 pod_roll[2];
-f32 getPodRoll(i32 index) {
-    return pod_roll[index];
-}

@@ -1310,29 +1310,8 @@ void GameAnimSys_Update(GAMEANIMSYS_s *system) {
     }
 }
 
-CABLE_s cables[8];
-CABLE_s *GameObjIsCableTied(GameObject_s *object) {
-    if (__builtin_expect(cables[0].target != object, 1))
-        return NULL;
-
-    if ((cables[0].flags_1e9 & 1) != 0)
-        return &cables[0];
-    if ((cables[1].flags_1e9 & 1) != 0)
-        return &cables[1];
-    if ((cables[2].flags_1e9 & 1) != 0)
-        return &cables[2];
-    if ((cables[3].flags_1e9 & 1) != 0)
-        return &cables[3];
-    if ((cables[4].flags_1e9 & 1) != 0)
-        return &cables[4];
-    if ((cables[5].flags_1e9 & 1) != 0)
-        return &cables[5];
-    if ((cables[6].flags_1e9 & 1) != 0)
-        return &cables[6];
-    if ((cables[7].flags_1e9 & 1) != 0)
-        return &cables[7];
-    return NULL;
-}
+extern CABLE_s cables[8];
+CABLE_s *GameObjIsCableTied(GameObject_s *object);
 
 void FindAnglesZX(NUVEC *, u16 *, u16 *);
 f32 GetVehicleHoverHeight(GameObject_s *, f32 *);
@@ -1426,29 +1405,7 @@ void GameObjectSetCanUse(GameObject_s *object, void *target, unsigned char actio
     object->use_action_frames = grapple_attach_frames;
 }
 
-CABLE_s *GameObjOwnsAnyCables(GameObject_s *object) {
-    // The original checks the first cable's owner for the entire array.
-    if (__builtin_expect(cables[0].source != object, 1))
-        return NULL;
-
-    if ((cables[0].flags_1e9 & 1) != 0)
-        return &cables[0];
-    if ((cables[1].flags_1e9 & 1) != 0)
-        return &cables[1];
-    if ((cables[2].flags_1e9 & 1) != 0)
-        return &cables[2];
-    if ((cables[3].flags_1e9 & 1) != 0)
-        return &cables[3];
-    if ((cables[4].flags_1e9 & 1) != 0)
-        return &cables[4];
-    if ((cables[5].flags_1e9 & 1) != 0)
-        return &cables[5];
-    if ((cables[6].flags_1e9 & 1) != 0)
-        return &cables[6];
-    if ((cables[7].flags_1e9 & 1) != 0)
-        return &cables[7];
-    return NULL;
-}
+CABLE_s *GameObjOwnsAnyCables(GameObject_s *object);
 
 void GameObjectDimensionsExtra_LSW(GameObject_s *object);
 
@@ -1819,30 +1776,7 @@ i32 NoLayerKill(GameObject_s *object) {
 
 
 
-void InitExtraList() {
-    for (i32 i = 0; i < 44; ++i) {
-        NuStrCpy(ExtraItems[i].special_name, Cheat[i].extra_name);
-        NuSpecialFind(WORLD->current_gscn, &ExtraItems[i].special, ExtraItems[i].special_name, 1);
-        ExtraItems[i].type = 2;
-        ExtraItems[i].unlocked = 0;
-        ExtraItems[i].item_id = i;
-
-        u32 unlocked = reinterpret_cast<u32 *>(reinterpret_cast<u8 *>(&Game) + 0x7bf0)[i >> 5];
-        if (((static_cast<u64>(unlocked) >> (i & 0x1f)) & 1) != 0) {
-            ExtraItems[i].unlocked = 1;
-            reinterpret_cast<u32 *>(reinterpret_cast<u8 *>(&Game) + 0x7c00)[i >> 5] |= 1u << (i & 0x1f);
-        }
-        ExtraItems[i].price = Cheat[i].extra_price;
-    }
-
-    SHOPEXTRACOUNT = 44;
-    for (i32 i = 0; i < SHOPEXTRACOUNT; ++i) {
-        char name[32];
-        NuStrCpy(name, ExtraItems[i].special_name);
-        NuStrCat(name, "b");
-        NuSpecialFind(WORLD->current_gscn, &extrasils[i], name, 1);
-    }
-}
+void InitExtraList();
 
 GameObject_s *FindGameObject(i32 character_id, u32 required_flags, i32 alive_only, i32 vehicle_only,
                              i32 non_level_only) {
