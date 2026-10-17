@@ -90,9 +90,6 @@ f32 cutscenecam_focalLength = 0.0f;
 i32 CameraDOFHack = 0;
 u8 set_cutscenecammtx = 0;
 
-// --- Extern "C" block: functions with confirmed C linkage in original libTTapp.so ---
-
-
 static instNUGCUTSCENE_s *background_cutscene_instances;
 static instNUGCUTSCENE_s *active_cutscene_instances;
 static i32 cutscene_synchro_counter;
@@ -108,8 +105,6 @@ extern "C" {
 
 }
 
-// The relocation tables are patched as plain words, so every fixup aliases
-// cutscene->string_delta and re-reads it.
 typedef isize __attribute__((may_alias)) NuGCutWord;
 #define NUGCUT_WORD(field) (*reinterpret_cast<NuGCutWord *>(&(field)))
 #define NUGCUT_RELOCATE(field, delta) \
@@ -254,8 +249,6 @@ static inline __attribute__((always_inline)) void NuGCutSceneFixPtrs_Title(NUGCU
     NUGCUT_RELOCATE(cutscene->bounds, cutscene->string_delta);
 }
 
-// Retail keeps NuGCutSceneFixPtrs only as two constant-propagated clones:
-// .44 relocates animations by anim_delta, .43 is the anim_delta == 0 case.
 #if defined(__i386__)
 #define NUGCUT_FIXPTRS_ATTR(n) __attribute__((noinline, noclone, regparm(n)))
 #else
@@ -281,7 +274,6 @@ struct instNUGCUTLOCATOR_s;
 struct NUGCUTLOCATOR_s;
 struct numtx_s;
 
-// Retail only keeps the IPA-SRA clone, which drops the unused frame argument.
 #if defined(__i386__)
 #define INST_LOCATOR_SYS_END_ATTR __attribute__((noinline, noclone, regparm(2)))
 #else
@@ -316,10 +308,6 @@ extern "C" {
 
 }
 
-// Steers a cutscene character's eyes towards a look-at locator and blinks its eyelids.
-// Only version-3 locator animations carry the look and blink channels.
-// Retail only keeps the IPA-SRA clone: the system is dropped and the instance
-// locator is replaced by its effect handle slot.
 #if defined(__i386__)
 #define INST_LOOKAT_UPDATE_ATTR __attribute__((noinline, noclone, regparm(2), sseregparm))
 #else
@@ -343,12 +331,6 @@ extern "C" {
     i32 gcutSoundVol = 100;
 
 }
-
-// Temporary C-linkage compatibility surface for unresolved engine owners.
-//
-// This file collects functions whose original TU has not yet been
-// reconstructed. Domain families move to their evidenced owner as complete
-// groups; this file is not itself evidence of one original nucore TU.
 
 struct ani3_animheader_s;
 
@@ -377,7 +359,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // Camera (thin wrappers; full matrix work is in NuCameraSetEx)
     // ---------------------------------------------------------------------------
-
 
     // ---------------------------------------------------------------------------
     // Display list — faithful helpers + pending stubs
@@ -458,7 +439,6 @@ extern "C" {
     // Gobj / hierarchy / scene graph
     // ---------------------------------------------------------------------------
 
-
     // ---------------------------------------------------------------------------
     // Input / pad / key / mouse
     // ---------------------------------------------------------------------------
@@ -466,7 +446,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // Culling / visibility / portals / occlusion
     // ---------------------------------------------------------------------------
-
 
     // ---------------------------------------------------------------------------
     // Viewport
@@ -523,15 +502,6 @@ extern "C" {
     // translation/rotation/scale flags occupy space in that stream.
 } // extern "C"
 
-extern "C" {
-} // extern "C"
-
-#if defined(__i386__)
-#define AI_SYS_STUBS_CLONE_ATTR2 __attribute__((noinline, noclone, regparm(2)))
-#else
-#define AI_SYS_STUBS_CLONE_ATTR2 __attribute__((noinline, noclone))
-#endif
-
 // Callback storage is declared in reverse linked-BSS order because the
 // original GCC 4.7 -O3 object emits these definitions in reverse source order.
 extern "C" {
@@ -551,17 +521,6 @@ extern "C" {
     NUGCUTSCENESFXUPDATEFN NuCutSceneSFXUpdate = NULL;
     NUGCUTSCENEREQUESTSFXFN NuCutSceneRequestSFX = NULL;
 } // extern "C"
-
-// Retail only keeps the split-out body of the IPA-SRA clone (the unused
-// cutscene index dropped), called with world and cut in registers.
-#if defined(__i386__)
-#define CUTSCENE_START_ATTR __attribute__((noinline, noclone, regparm(2)))
-#else
-#define CUTSCENE_START_ATTR __attribute__((noinline, noclone))
-#endif
-
-// The loop re-reads the active cut through CutStopInfo after each SmartTextEx call.
-#define CUT_STOP static_cast<CUTINFO *>(CutStopInfo)
 
 static __used__ __attribute__((noinline)) void instNuGCutTriggerSysUpdate(instNUGCUTSCENE_s *instance, float frame);
 static __attribute__((noinline)) void instNuGCutSceneClipTest(instNUGCUTSCENE_s *instance);

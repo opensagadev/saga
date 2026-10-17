@@ -900,7 +900,6 @@ using NUHGOBJVIDEOMEMFN = void (*)(nuhgobj_s *);
 NUHGOBJVIDEOMEMFN hgobj_to_video_mem;
 NUHGOBJVIDEOMEMFN video_mem_to_hgobj;
 
-// C++-linkage helpers defined in sibling TUs.
 i32 NuCameraClipHGobj(nugscn_s *, NUMTX *, NUMTX *); // nu2api_nucore_misc.cpp
 i32 findrange(nugscn_s *, i32);                      // utilities.cpp
 
@@ -1163,7 +1162,6 @@ struct nupad_s;
 struct nuframebuffer_s;
 union variptr_u;
 
-// ---------------------------------------------------------------------------
 struct TimeBarSet {
     i32 uses_buffer;
     i32 slot_count;
@@ -1234,48 +1232,11 @@ static const i32 cubeEdgeIndices[12][2] = {
     {0, 1}, {1, 2}, {2, 3}, {3, 0}, {4, 5}, {5, 6}, {6, 7}, {7, 4}, {0, 4}, {1, 5}, {2, 6}, {3, 7},
 };
 
-// Retail copies a fully inside end point as one unaligned vector.
 typedef f32 RawClipVec4 __attribute__((vector_size(16), aligned(4)));
 
 i32 findrange(nugscn_s *scene, i32 first_joint);
 
-// Retail only keeps the split-out body of the IPA-SRA clone, which takes
-// &spline->length and &spline->pts in place of the spline.
-#if defined(__i386__)
-#define SPLINE_POINT_ANGLES_ATTR __attribute__((noinline, noclone, regparm(2)))
-#else
-#define SPLINE_POINT_ANGLES_ATTR __attribute__((noinline, noclone))
-#endif
-
-// Retail keeps several of this file's static helpers only as GCC clones; these
-// declarations pin the clone names and register conventions.
-#if defined(__i386__)
-#define MOVE_CLONE_ATTR1 __attribute__((noinline, noclone, regparm(1)))
-#define MOVE_CLONE_ATTR2 __attribute__((noinline, noclone, regparm(2)))
-#else
-#define MOVE_CLONE_ATTR1 __attribute__((noinline, noclone))
-#define MOVE_CLONE_ATTR2 __attribute__((noinline, noclone))
-#endif
-
-// Retail splits the guard off as an inline head; the rest is this partial clone.
-
 extern i32 LevFlag[4];
-
-// Retail re-tests the three block animations at each use instead of caching a flag.
-#define HAS_BLOCK_ANIMS(animations)                                                                                    \
-    ((animations)[0x1a] != NULL || (animations)[0x1b] != NULL || (animations)[0x1c] != NULL)
-
-// Retail splits the context test off as an inline head; the rest is this partial clone.
-
-
-// Retail uses translation-unit-local helpers with compiler-inferred private
-// calling conventions; keep their shared animation-mode call sites intact.
-
-
-// Asteroid chase (AsteroidChase_A / B / C / D)
-
-
-
 
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
@@ -1286,17 +1247,6 @@ extern "C" {
     // The editor loader clears these page IDs with aligned vector stores.
 } // extern "C"
 
-// The original repeats the per-sound emitter checks for each of the four sound slots.
-#define PART_EMIT_SOUND_ON(slot)                                                                                       \
-    if (type->sounds[slot] != -1) {                                                                                    \
-        SetSfxBit_On(type->sounds[slot]);                                                                              \
-        if (type->sound_modes[slot] == 4)                                                                              \
-            PlaySfxById(type->sounds[slot], &emitter->position);                                                       \
-    }
-#define PART_EMIT_SOUND(slot, mode)                                                                                    \
-    if (type->sounds[slot] != -1 && type->sound_modes[slot] == (mode))                                                 \
-        PlaySfxById(type->sounds[slot], &emitter->position);
-
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
 
@@ -1305,17 +1255,10 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 }
 
-#if defined(__i386__)
-#define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
-#else
-#define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone))
-#endif
-
 // ThingManager objects return to the theMemoryManager pool (D0 @0x425a50).
 inline void ThingManager::operator delete(void *thing, usize size) {
     theMemoryManager.FreePool(thing, size);
 }
-
 
 // ---- Misc player/gameobject helpers relocated from doorstubs.cpp ----
 
@@ -1323,76 +1266,16 @@ namespace {
 
 } // namespace
 
-
-// Original data symbol testmovef is float0.005 at 0x617cb0.
-
-
-
 // This alignment affects PodRaceAUpdate codegen even though the linked address is 32-byte aligned.
 
 DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 
 struct FLOWBOX_s;
 
-
-
-// Defined in gameapi/edtools/edtoolsall.cpp, which has no header yet.
-
 struct JEDIBNETPACKET_s;
-
-// --- File-local statics (original _ZL... symbols; not renamed) ---------------
-
-
-
-
-// Jedi (Jedi_B)
-
-
-
-
-// Dooku (Dooku_C)
-
-
-// PodSprint_InitAISpline is partially inlined into PodSprintA_Init: the
-// clear, lookup and spline checks are inlined and the crossing scan is the
-// split-out body.
-#if defined(__i386__)
-#define PODSPRINT_AISPLINE_BODY_ATTR __attribute__((noinline, regparm(1)))
-#else
-#define PODSPRINT_AISPLINE_BODY_ATTR __attribute__((noinline))
-#endif
-
-// Helpers defined in other original translation units but kept here until
-// they get their own home (their originals live outside the ep1 TU).
 
 struct nuhspecial_s;
 struct nuvec_s;
-
-// The route records use a dense route index, while the editor keeps sixteen
-// independently switchable slots.  The original helper first marks both ends
-// of every route connection, then builds the compact node lookup and matrix.
-#if defined(__i386__)
-#define AIPATHBUILD_CLONE_ATTR2 __attribute__((noinline, noclone, regparm(2)))
-#else
-#define AIPATHBUILD_CLONE_ATTR2 __attribute__((noinline, noclone))
-#endif
-
-// Retail keeps several static helpers here only as GCC clones; these attributes
-// reproduce the clone names and register conventions.
-#if defined(__i386__)
-#define AISYSALL_CLONE_ATTR1 __attribute__((noinline, noclone, regparm(1)))
-#define AISYSALL_CLONE_ATTR2 __attribute__((noinline, noclone, regparm(2)))
-#define AISYSALL_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
-#else
-#define AISYSALL_CLONE_ATTR1 __attribute__((noinline, noclone))
-#define AISYSALL_CLONE_ATTR2 __attribute__((noinline, noclone))
-#define AISYSALL_CLONE_ATTR2_SSE __attribute__((noinline, noclone))
-#endif
-
-// Game-specific AI actions and conditions (registered via
-// RegisterAIScriptActions / RegisterAIScriptConditions). These are stubbed to
-// satisfy the symbol baseline; the action/condition logic itself is not
-// decompiled. Each stub matches the mangled symbol of the original binary.
 
 extern AIACTIONDEF api_aiactiondefs[55];
 extern AICONDITIONDEF api_aiconditiondefs[50];
@@ -1401,32 +1284,9 @@ DECOMP_ASSERT(sizeof(api_aiactiondefs) == 0x294, "API action registry size");
 
 DECOMP_ASSERT(sizeof(api_aiconditiondefs) == 0x258, "API condition registry size");
 
-#if defined(__i386__)
-#define AISCRIPT_CLONE_ATTR2 __attribute__((noinline, noclone, regparm(2)))
-#else
-#define AISCRIPT_CLONE_ATTR2 __attribute__((noinline, noclone))
-#endif
-
-extern "C" {
-} // extern "C"
-
-#if defined(__i386__)
-#define AI_SYS_STUBS_CLONE_ATTR2 __attribute__((noinline, noclone, regparm(2)))
-#else
-#define AI_SYS_STUBS_CLONE_ATTR2 __attribute__((noinline, noclone))
-#endif
-
-
-// Item colours shared by the AI editors.
-
-
-// Retail splits the null checks into each caller and keeps the body as a
-// partial-inlining clone; its connection searches are fully peeled.
-
 struct EDAISHAREDPATHNODE_s;
 struct eduimenu_s;
 struct eduiitem_s;
-
 
 static __used__ void pathEditor_cbCancelRenamePathMenu(eduimenu_s *, eduimenu_s *);
 static __used__ void pathEditor_cbCancelRenameNodeMenu(eduimenu_s *, eduimenu_s *);
@@ -1449,28 +1309,7 @@ static __used__ i32 routeEditor_AddToRoute(EDAIPATHNODE_s *node, EDAIPATHNODE_s 
 
 static __used__ i32 routeEditor_AddToRoute(EDAIPATHNODE_s *node, EDAIPATHNODE_s *other);
 
-// Retail keeps an unreferenced partial-inlining clone of pathEditorSetCamPos:
-// it moves the editor camera to a position at the cursor's height.
-#if defined(__i386__)
-#define PATHEDITOR_SETCAMPOS_BODY_ATTR __attribute__((used, noinline, noclone, regparm(1)))
-#else
-#define PATHEDITOR_SETCAMPOS_BODY_ATTR __attribute__((used, noinline, noclone))
-#endif
-
-#if defined(__i386__)
-#define EDANTINODE_REGPARM1 __attribute__((regparm(1)))
-#else
-#define EDANTINODE_REGPARM1
-#endif
-
 struct EDCREATURE_s;
-
-
-#if defined(__i386__)
-#define CREATURE_EDITOR_REGPARM2 __attribute__((regparm(2)))
-#else
-#define CREATURE_EDITOR_REGPARM2
-#endif
 
 #if defined(__i386__)
 #define CREATURE_EDITOR_REGPARM1 __attribute__((regparm(1)))
@@ -1506,12 +1345,6 @@ static __used__ __attribute__((optimize("no-tree-vectorize"))) void
 locatorEditor_cbAddLocatorsByNameYesNo(eduimenu_s *, eduiitem_s *item, u32);
 static __used__ __attribute__((optimize("no-tree-vectorize"))) void DestroyLocator(EDLOCATOR_s *locator);
 
-#if defined(__i386__)
-#define LOCATOR_SET_BODY_ATTR __attribute__((noinline, optimize("no-tree-vectorize"), regparm(2)))
-#else
-#define LOCATOR_SET_BODY_ATTR __attribute__((noinline, optimize("no-tree-vectorize")))
-#endif
-
 static __used__ unsigned int AddLocatorToSet(EDLOCATORSET_s *set, EDLOCATOR_s *locator, EDLOCATOR_s *before);
 
 #if defined(__i386__)
@@ -1525,7 +1358,6 @@ AddLocatorToSetAtEnd(EDLOCATORSET_s *set, EDLOCATOR_s *locator) __asm__(
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
 
-
 }
 
 namespace {
@@ -1534,7 +1366,6 @@ namespace {
 
 struct VuVec;
 
-// Retail only keeps the IPA-SRA clone, which drops the unused fourth argument.
 #if defined(__i386__)
 #define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone, regparm(2)))
 #else
@@ -1581,307 +1412,39 @@ struct VuVec;
         NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
     } while (0)
 
-#define SWIPE_PRIM_UV(U, V)                                                                                            \
-    do {                                                                                                               \
-        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
-        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
-            vertex->float_uv[0] = (U);                                                                                 \
-            vertex->float_uv[1] = (V);                                                                                 \
-        } else {                                                                                                       \
-            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
-            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
-        }                                                                                                              \
-    } while (false)
-
 struct AIPACKET_s;
 struct AISYS_s;
 
-// NuFileExists @nufile (nucore_plain.cpp).
-
 struct GIZMOPICKUP_s;
 struct PART_s;
-
-#define ADD_SNAKE_SEGMENT_DEBRIS(index)                                                                                \
-    do {                                                                                                               \
-        const i32 segment_index = (index);                                                                             \
-        NUMTX matrix;                                                                                                  \
-        NUANGVEC angles;                                                                                               \
-        angles.y = NuAngAdd(object->snake_body->segments[segment_index].yaw, 0x8000);                                  \
-        angles.x = object->snake_body->segments[segment_index].pitch;                                                  \
-        NuMtxSetRotationXYVU0(&matrix, &angles);                                                                       \
-        if (object->snake_body->scale != 1.0f) {                                                                       \
-            NUVEC scale = {object->snake_body->scale, object->snake_body->scale, object->snake_body->scale};           \
-            NuMtxPreScale(&matrix, &scale);                                                                            \
-        }                                                                                                              \
-        matrix.m30 += object->snake_body->segments[segment_index].position.x;                                          \
-        matrix.m31 += object->snake_body->segments[segment_index].position.y + object->snake_body->scale * 0.02f;      \
-        matrix.m32 += object->snake_body->segments[segment_index].position.z;                                          \
-        i32 special_index = segment_index == object->snake_body->segment_count - 1 ? 2 : segment_index % 2;            \
-        nuhspecial_s *special = &snake_hspecials[special_index];                                                       \
-        if (NuSpecialExistsFn(special)) {                                                                              \
-            NUVEC momentum;                                                                                            \
-            SetKillPartMom(&momentum);                                                                                 \
-            momentum.y += 1.0f;                                                                                        \
-            ADDPART_s part = Default_ADDPART;                                                                          \
-            part.matrix = &matrix;                                                                                     \
-            part.velocity = &momentum;                                                                                 \
-            part.field_14 = 0.1f;                                                                                      \
-            part.field_18 = 0.1f;                                                                                      \
-            part.gravity = -5.0f;                                                                                      \
-            part.special = special;                                                                                    \
-            part.flags = 0x90;                                                                                         \
-            part.stop_fn = PartStop_Flickerer;                                                                         \
-            part.draw_fn = PartDraw_Flickerer;                                                                         \
-            part.field_3c = PartImpact_Brick;                                                                          \
-            part.time_step = FRAMETIME;                                                                                \
-            part.lighting = reinterpret_cast<PARTLIGHTSOURCE_s *>(&object->light_data);                                \
-            AddPart(&part);                                                                                            \
-        }                                                                                                              \
-    } while (0)
-
-#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
-    do {                                                                                                               \
-        direction.x = (vx);                                                                                            \
-        direction.y = -(vy) * camera.aspect;                                                                           \
-        direction.z = adjacent;                                                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        brightness = direction.y * 0.5f + 0.5f;                                                                        \
-        if (brightness <= near_angle)                                                                                  \
-            brightness = near_scale * parameters->intensity;                                                           \
-        else if (brightness >= far_angle)                                                                              \
-            brightness = far_scale * parameters->intensity;                                                            \
-        else                                                                                                           \
-            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
-        if (parameters->directional) {                                                                                 \
-            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
-            if (angle < parameters->direction_near_angle) {                                                            \
-                brightness += 128.0f * parameters->direction_far_scale;                                                \
-            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
-                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
-                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
-                                      parameters->direction_bias);                                                     \
-                brightness +=                                                                                          \
-                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
-                              parameters->direction_near_scale);                                                       \
-            }                                                                                                          \
-        }                                                                                                              \
-        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
-                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
-        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
-                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
-        else                                                                                                           \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
-        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
-    } while (0)
-
-#define SWIPE_PRIM_UV(U, V)                                                                                            \
-    do {                                                                                                               \
-        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
-        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
-            vertex->float_uv[0] = (U);                                                                                 \
-            vertex->float_uv[1] = (V);                                                                                 \
-        } else {                                                                                                       \
-            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
-            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
-        }                                                                                                              \
-    } while (false)
-
 
 // Original writable flagremaptab at 0x668520, 32 pairs of 32-bit masks.
 extern "C" {
 extern u32 flagremaptab[32][2];
 }
 
-// Definitions from the original gizmoblowups translation unit.
-
-
-
-// LoadPerm1 is one of the few game-level entry points which wires together
-// otherwise C-linkage engine subsystems.  Keep these declarations local: the
-// individual subsystem TUs intentionally expose their original plain names.
-
-// Retail keeps only the IPA-SRA clone, which receives &*layers.
-#if defined(__i386__)
-#define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone, regparm(1)))
-#else
-#define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone))
-#endif
-
 #if defined(__SSE__)
 #include <xmmintrin.h>
 #endif
 
-// The reference defines these with dynamic initialization in this unit.
-
-
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
-
 
 }
 
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
 
-
 }
 
-// Forward declarations for local (static) game-object helper stubs.
 struct GameObject_s;
 struct WORLDINFO_s;
-
-#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
-    do {                                                                                                               \
-        direction.x = (vx);                                                                                            \
-        direction.y = -(vy) * camera.aspect;                                                                           \
-        direction.z = adjacent;                                                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        brightness = direction.y * 0.5f + 0.5f;                                                                        \
-        if (brightness <= near_angle)                                                                                  \
-            brightness = near_scale * parameters->intensity;                                                           \
-        else if (brightness >= far_angle)                                                                              \
-            brightness = far_scale * parameters->intensity;                                                            \
-        else                                                                                                           \
-            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
-        if (parameters->directional) {                                                                                 \
-            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
-            if (angle < parameters->direction_near_angle) {                                                            \
-                brightness += 128.0f * parameters->direction_far_scale;                                                \
-            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
-                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
-                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
-                                      parameters->direction_bias);                                                     \
-                brightness +=                                                                                          \
-                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
-                              parameters->direction_near_scale);                                                       \
-            }                                                                                                          \
-        }                                                                                                              \
-        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
-                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
-        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
-                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
-        else                                                                                                           \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
-        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
-    } while (0)
-
-#define SWIPE_PRIM_UV(U, V)                                                                                            \
-    do {                                                                                                               \
-        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
-        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
-            vertex->float_uv[0] = (U);                                                                                 \
-            vertex->float_uv[1] = (V);                                                                                 \
-        } else {                                                                                                       \
-            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
-            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
-        }                                                                                                              \
-    } while (false)
 
 namespace {
 
 } // namespace
 
 struct numtx_s;
-
-// Retail keeps only the IPA-SRA clones (taking the flags field directly),
-// mangled with the original ANIMLIST_s parameter type.
-#if defined(__i386__)
-#define CC_SET_ANIM_FLAGS_ATTR __attribute__((noinline, noclone, regparm(2)))
-// The u32 clone keeps retail's push-based prologue only when size-optimized.
-#define CC_SET_ANIM_FLAGS_OS_ATTR __attribute__((noinline, noclone, optimize("Os"), regparm(2)))
-#else
-#define CC_SET_ANIM_FLAGS_ATTR __attribute__((noinline, noclone))
-#define CC_SET_ANIM_FLAGS_OS_ATTR __attribute__((noinline, noclone))
-#endif
-
-// Retail only keeps the clone with strip_comments fixed to 1 (regparm text, filename).
-#if defined(__i386__)
-#define REDIRECT_TEXT_FILE_ATTR __attribute__((noinline, noclone, regparm(2)))
-#else
-#define REDIRECT_TEXT_FILE_ATTR __attribute__((noinline, noclone))
-#endif
-
-#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
-    do {                                                                                                               \
-        direction.x = (vx);                                                                                            \
-        direction.y = -(vy) * camera.aspect;                                                                           \
-        direction.z = adjacent;                                                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        brightness = direction.y * 0.5f + 0.5f;                                                                        \
-        if (brightness <= near_angle)                                                                                  \
-            brightness = near_scale * parameters->intensity;                                                           \
-        else if (brightness >= far_angle)                                                                              \
-            brightness = far_scale * parameters->intensity;                                                            \
-        else                                                                                                           \
-            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
-        if (parameters->directional) {                                                                                 \
-            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
-            if (angle < parameters->direction_near_angle) {                                                            \
-                brightness += 128.0f * parameters->direction_far_scale;                                                \
-            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
-                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
-                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
-                                      parameters->direction_bias);                                                     \
-                brightness +=                                                                                          \
-                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
-                              parameters->direction_near_scale);                                                       \
-            }                                                                                                          \
-        }                                                                                                              \
-        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
-                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
-        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
-                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
-        else                                                                                                           \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
-        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
-    } while (0)
-
-#define SWIPE_PRIM_UV(U, V)                                                                                            \
-    do {                                                                                                               \
-        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
-        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
-            vertex->float_uv[0] = (U);                                                                                 \
-            vertex->float_uv[1] = (V);                                                                                 \
-        } else {                                                                                                       \
-            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
-            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
-        }                                                                                                              \
-    } while (false)
-
-// Original .data @0x667ce0; the names are filled in by the static initializer.
-
-#define PART_EMIT_SOUND_ON(slot)                                                                                       \
-    if (type->sounds[slot] != -1) {                                                                                    \
-        SetSfxBit_On(type->sounds[slot]);                                                                              \
-        if (type->sound_modes[slot] == 4)                                                                              \
-            PlaySfxById(type->sounds[slot], &emitter->position);                                                       \
-    }
-#define PART_EMIT_SOUND(slot, mode)                                                                                    \
-
-// Retail keeps an unreferenced partial-inlining clone of the old HSV2RGB
-// helper (the non-grey path) in this unit.
-#if defined(__i386__)
-#define HSV2RGB_BODY_ATTR __attribute__((used, noinline, noclone, regparm(2), sseregparm))
-#else
-#define HSV2RGB_BODY_ATTR __attribute__((used, noinline, noclone))
-#endif
-
-// Animation editor subsystem stubs (static, internal linkage).
 
 static __attribute__((used)) void edanimcbCubeMap(eduimenu_s *, eduiitem_s *, u32);
 static __attribute__((used)) void edanimcbFileLoad(eduimenu_s *menu, eduiitem_s *, u32);
@@ -1904,8 +1467,6 @@ static __attribute__((used)) void edanimcbMCTBCardFormat(eduimenu_s *menu, eduii
 static __attribute__((used)) void edanimcbSetSoundTiming(eduimenu_s *, eduiitem_s *item, u32);
 static __attribute__((used)) void edanimcbSetSwitchDelay(eduimenu_s *, eduiitem_s *item, u32);
 static __attribute__((used)) void edanimcbSwitchTypeMenu(eduimenu_s *, eduiitem_s *, u32);
-
-// Remaining animation-editor UI/menu callbacks.
 
 static __attribute__((used)) void edanimcbCancelSoundMenu(eduimenu_s *, eduimenu_s *);
 static __attribute__((used)) void edanimcbMCTBCardPresent(eduimenu_s *menu, eduiitem_s *, u32);
@@ -1954,26 +1515,20 @@ static __attribute__((used)) void edanimcbSwitchTypeMenu(eduimenu_s *parent, edu
 static __attribute__((used)) void edanimcbMCTBMenu(eduimenu_s *parent, eduiitem_s *, u32);
 static __attribute__((used)) void edanimcbLocalSoundMenu(eduimenu_s *parent, eduiitem_s *, u32);
 
-// The original local font helpers read the same private draw state as the
-// editor callbacks, so they belong to this translation unit.
 static __used__ __attribute__((noclone)) void eduiFntPrintExGeneric(void *font, int x, int y,
                                                                                 int alignment, char *format, ...)
     __asm__("_ZL14eduiFntPrintExPviiiPcz");
 static __used__ void eduiFntPrintExGeneric(void *font, int x, int y, int alignment, char *format, ...);
 
-// Left-aligned (16) specialisation of the integer print helper.
 static __attribute__((noclone)) void eduiFntPrintExLeft(void *font, int x, int y, int alignment,
                                                                   char *format, ...)
     __asm__("_ZL14eduiFntPrintExPviiiPcz.constprop.67");
 
-// Centred (64) specialisation of the integer print helper.
 static __attribute__((noclone)) void eduiFntPrintExCentre(void *font, int x, int y, int alignment,
                                                                     char *format, ...)
     __asm__("_ZL14eduiFntPrintExPviiiPcz.constprop.68");
 
 #if defined(__clang__)
-// Clang has no __builtin_va_arg_pack; format here and print the result. The
-// generic helper already owns this overload's mangled name, so rename it.
 static void eduiFntPrintEx(void *font, int x, int y, int alignment, char *format, ...)
     __asm__("eduiFntPrintExFormatted");
 #else
@@ -2059,10 +1614,7 @@ static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u
 static void eduiFntPrintExLeft(void *font, int x, int y, int, char *format, ...);
 static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ...);
 
-// Text-picker commit callbacks. Retail keeps them unmangled and local.
-
 extern EdInputContext * Input;
-
 
 inline EdMatrixControl::~EdMatrixControl() {
     Destroy();
@@ -2269,58 +1821,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
 } // extern "C"
 
-#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
-    do {                                                                                                               \
-        direction.x = (vx);                                                                                            \
-        direction.y = -(vy) * camera.aspect;                                                                           \
-        direction.z = adjacent;                                                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        brightness = direction.y * 0.5f + 0.5f;                                                                        \
-        if (brightness <= near_angle)                                                                                  \
-            brightness = near_scale * parameters->intensity;                                                           \
-        else if (brightness >= far_angle)                                                                              \
-            brightness = far_scale * parameters->intensity;                                                            \
-        else                                                                                                           \
-            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
-        if (parameters->directional) {                                                                                 \
-            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
-            if (angle < parameters->direction_near_angle) {                                                            \
-                brightness += 128.0f * parameters->direction_far_scale;                                                \
-            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
-                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
-                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
-                                      parameters->direction_bias);                                                     \
-                brightness +=                                                                                          \
-                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
-                              parameters->direction_near_scale);                                                       \
-            }                                                                                                          \
-        }                                                                                                              \
-        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
-                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
-        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
-                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
-        else                                                                                                           \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
-        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
-    } while (0)
-
-#define SWIPE_PRIM_UV(U, V)                                                                                            \
-    do {                                                                                                               \
-        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
-        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
-            vertex->float_uv[0] = (U);                                                                                 \
-            vertex->float_uv[1] = (V);                                                                                 \
-        } else {                                                                                                       \
-            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
-            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
-        }                                                                                                              \
-    } while (false)
-
 extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -2418,78 +1918,13 @@ static NU_READ_GRAPHICS_DATA_ATTR NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIP
                                                              char *scene_data)
     __asm__("_ZL18NuReadGraphicsDataP9variptr_uS0_PcS1_S1_.isra.104");
 
-#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
-    do {                                                                                                               \
-        direction.x = (vx);                                                                                            \
-        direction.y = -(vy) * camera.aspect;                                                                           \
-        direction.z = adjacent;                                                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        brightness = direction.y * 0.5f + 0.5f;                                                                        \
-        if (brightness <= near_angle)                                                                                  \
-            brightness = near_scale * parameters->intensity;                                                           \
-        else if (brightness >= far_angle)                                                                              \
-            brightness = far_scale * parameters->intensity;                                                            \
-        else                                                                                                           \
-            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
-        if (parameters->directional) {                                                                                 \
-            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
-            if (angle < parameters->direction_near_angle) {                                                            \
-                brightness += 128.0f * parameters->direction_far_scale;                                                \
-            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
-                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
-                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
-                                      parameters->direction_bias);                                                     \
-                brightness +=                                                                                          \
-                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
-                              parameters->direction_near_scale);                                                       \
-            }                                                                                                          \
-        }                                                                                                              \
-        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
-                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
-        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
-                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
-        else                                                                                                           \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
-        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
-    } while (0)
-
-#define SWIPE_PRIM_UV(U, V)                                                                                            \
-    do {                                                                                                               \
-        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
-        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
-            vertex->float_uv[0] = (U);                                                                                 \
-            vertex->float_uv[1] = (V);                                                                                 \
-        } else {                                                                                                       \
-            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
-            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
-        }                                                                                                              \
-    } while (false)
-
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
-
 
 }
 
-#define HAS_BLOCK_ANIMS(animations)                                                                                    \
-    ((animations)[0x1a] != NULL || (animations)[0x1b] != NULL || (animations)[0x1c] != NULL)
-
-#define PART_EMIT_SOUND_ON(slot)                                                                                       \
-    if (type->sounds[slot] != -1) {                                                                                    \
-        SetSfxBit_On(type->sounds[slot]);                                                                              \
-        if (type->sound_modes[slot] == 4)                                                                              \
-            PlaySfxById(type->sounds[slot], &emitter->position);                                                       \
-    }
-#define PART_EMIT_SOUND(slot, mode)                                                                                    \
-
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
-
 
 }
 
@@ -2501,161 +1936,14 @@ extern "C" {
     struct EDCREATURE_s;
 }
 
-#if defined(__i386__)
-#else
-#endif
-
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
-
 
 }
 
 namespace {
 
 } // namespace
-
-#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
-    do {                                                                                                               \
-        direction.x = (vx);                                                                                            \
-        direction.y = -(vy) * camera.aspect;                                                                           \
-        direction.z = adjacent;                                                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        brightness = direction.y * 0.5f + 0.5f;                                                                        \
-        if (brightness <= near_angle)                                                                                  \
-            brightness = near_scale * parameters->intensity;                                                           \
-        else if (brightness >= far_angle)                                                                              \
-            brightness = far_scale * parameters->intensity;                                                            \
-        else                                                                                                           \
-            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
-        if (parameters->directional) {                                                                                 \
-            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
-            if (angle < parameters->direction_near_angle) {                                                            \
-                brightness += 128.0f * parameters->direction_far_scale;                                                \
-            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
-                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
-                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
-                                      parameters->direction_bias);                                                     \
-                brightness +=                                                                                          \
-                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
-                              parameters->direction_near_scale);                                                       \
-            }                                                                                                          \
-        }                                                                                                              \
-        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
-                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
-        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
-                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
-        else                                                                                                           \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
-        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
-    } while (0)
-
-#define SWIPE_PRIM_UV(U, V)                                                                                            \
-    do {                                                                                                               \
-        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
-        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
-            vertex->float_uv[0] = (U);                                                                                 \
-            vertex->float_uv[1] = (V);                                                                                 \
-        } else {                                                                                                       \
-            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
-            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
-        }                                                                                                              \
-    } while (false)
-
-#define ADD_SNAKE_SEGMENT_DEBRIS(index)                                                                                \
-    do {                                                                                                               \
-        const i32 segment_index = (index);                                                                             \
-        NUMTX matrix;                                                                                                  \
-        NUANGVEC angles;                                                                                               \
-        angles.y = NuAngAdd(object->snake_body->segments[segment_index].yaw, 0x8000);                                  \
-        angles.x = object->snake_body->segments[segment_index].pitch;                                                  \
-        NuMtxSetRotationXYVU0(&matrix, &angles);                                                                       \
-        if (object->snake_body->scale != 1.0f) {                                                                       \
-            NUVEC scale = {object->snake_body->scale, object->snake_body->scale, object->snake_body->scale};           \
-            NuMtxPreScale(&matrix, &scale);                                                                            \
-        }                                                                                                              \
-        matrix.m30 += object->snake_body->segments[segment_index].position.x;                                          \
-        matrix.m31 += object->snake_body->segments[segment_index].position.y + object->snake_body->scale * 0.02f;      \
-        matrix.m32 += object->snake_body->segments[segment_index].position.z;                                          \
-        i32 special_index = segment_index == object->snake_body->segment_count - 1 ? 2 : segment_index % 2;            \
-        nuhspecial_s *special = &snake_hspecials[special_index];                                                       \
-        if (NuSpecialExistsFn(special)) {                                                                              \
-            NUVEC momentum;                                                                                            \
-            SetKillPartMom(&momentum);                                                                                 \
-            momentum.y += 1.0f;                                                                                        \
-            ADDPART_s part = Default_ADDPART;                                                                          \
-            part.matrix = &matrix;                                                                                     \
-            part.velocity = &momentum;                                                                                 \
-            part.field_14 = 0.1f;                                                                                      \
-            part.field_18 = 0.1f;                                                                                      \
-            part.gravity = -5.0f;                                                                                      \
-            part.special = special;                                                                                    \
-            part.flags = 0x90;                                                                                         \
-            part.stop_fn = PartStop_Flickerer;                                                                         \
-            part.draw_fn = PartDraw_Flickerer;                                                                         \
-            part.field_3c = PartImpact_Brick;                                                                          \
-            part.time_step = FRAMETIME;                                                                                \
-            part.lighting = reinterpret_cast<PARTLIGHTSOURCE_s *>(&object->light_data);                                \
-            AddPart(&part);                                                                                            \
-        }                                                                                                              \
-    } while (0)
-
-#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
-    do {                                                                                                               \
-        direction.x = (vx);                                                                                            \
-        direction.y = -(vy) * camera.aspect;                                                                           \
-        direction.z = adjacent;                                                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        brightness = direction.y * 0.5f + 0.5f;                                                                        \
-        if (brightness <= near_angle)                                                                                  \
-            brightness = near_scale * parameters->intensity;                                                           \
-        else if (brightness >= far_angle)                                                                              \
-            brightness = far_scale * parameters->intensity;                                                            \
-        else                                                                                                           \
-            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
-        if (parameters->directional) {                                                                                 \
-            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
-            if (angle < parameters->direction_near_angle) {                                                            \
-                brightness += 128.0f * parameters->direction_far_scale;                                                \
-            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
-                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
-                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
-                                      parameters->direction_bias);                                                     \
-                brightness +=                                                                                          \
-                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
-                              parameters->direction_near_scale);                                                       \
-            }                                                                                                          \
-        }                                                                                                              \
-        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
-                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
-        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
-                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
-        else                                                                                                           \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
-        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
-    } while (0)
-
-#define SWIPE_PRIM_UV(U, V)                                                                                            \
-    do {                                                                                                               \
-        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
-        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
-            vertex->float_uv[0] = (U);                                                                                 \
-            vertex->float_uv[1] = (V);                                                                                 \
-        } else {                                                                                                       \
-            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
-            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
-        }                                                                                                              \
-    } while (false)
 
 extern "C" {
 extern u32 flagremaptab[32][2];
@@ -2664,18 +1952,11 @@ extern u32 flagremaptab[32][2];
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
 
-
 }
 
 #if defined(__i386__) && defined(__SSE__)
 #include <xmmintrin.h>
 #endif
-
-// EdClassInterface's field-based representation preserves the original ABI for
-// the rest of the editor.  These two objects are its original Itanium vtables:
-// two header words followed by the 31 EdClassInterface slots.
-#define EDVT_SYMBOL(name, symbol) extern "C" void name() asm(symbol)
-#define EDVT_SLOT(field, symbol) reinterpret_cast<decltype(EdClassInterfaceVTable::field)>(symbol)
 
 inline SplineObject::SplineObject()
     : next(NULL), previous(NULL), knots{}, points{}, led_file(Placeable::CurrentLedFile) {
@@ -2724,62 +2005,7 @@ inline void SplinePointBlock::operator delete(void *memory) {
     theMemoryManager.FreePool(memory, sizeof(SplinePointBlock));
 }
 
-
-// --- World-module helpers (kept with the WorldInfo API) ---
-
 extern WORLDINFO WorldInfo[2];
-
-#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
-    do {                                                                                                               \
-        direction.x = (vx);                                                                                            \
-        direction.y = -(vy) * camera.aspect;                                                                           \
-        direction.z = adjacent;                                                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        brightness = direction.y * 0.5f + 0.5f;                                                                        \
-        if (brightness <= near_angle)                                                                                  \
-            brightness = near_scale * parameters->intensity;                                                           \
-        else if (brightness >= far_angle)                                                                              \
-            brightness = far_scale * parameters->intensity;                                                            \
-        else                                                                                                           \
-            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
-        if (parameters->directional) {                                                                                 \
-            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
-            if (angle < parameters->direction_near_angle) {                                                            \
-                brightness += 128.0f * parameters->direction_far_scale;                                                \
-            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
-                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
-                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
-                                      parameters->direction_bias);                                                     \
-                brightness +=                                                                                          \
-                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
-                              parameters->direction_near_scale);                                                       \
-            }                                                                                                          \
-        }                                                                                                              \
-        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
-                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
-        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
-                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
-        else                                                                                                           \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
-        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
-    } while (0)
-
-#define SWIPE_PRIM_UV(U, V)                                                                                            \
-    do {                                                                                                               \
-        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
-        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
-            vertex->float_uv[0] = (U);                                                                                 \
-            vertex->float_uv[1] = (V);                                                                                 \
-        } else {                                                                                                       \
-            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
-            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
-        }                                                                                                              \
-    } while (false)
 
 namespace {
 
@@ -2806,9 +2032,6 @@ extern "C" {
     NUJOINTPROCANIMFN JointProcAnimFn;
 } // extern "C"
 
-// These are extern (U) in the original level.cpp.o — defined here as stubs
-// until the original defining file is decompiled.
-
 struct bgprocinfo_s;
 
 extern i32 LevFlag[4]; // shared per-level 16-byte state scratch
@@ -2816,91 +2039,15 @@ extern i32 LevFlag[4]; // shared per-level 16-byte state scratch
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
 
-
 }
 
 struct STATUSPACKET_s;
 struct TouchHolder;
 
-#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
-    do {                                                                                                               \
-        direction.x = (vx);                                                                                            \
-        direction.y = -(vy) * camera.aspect;                                                                           \
-        direction.z = adjacent;                                                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        brightness = direction.y * 0.5f + 0.5f;                                                                        \
-        if (brightness <= near_angle)                                                                                  \
-            brightness = near_scale * parameters->intensity;                                                           \
-        else if (brightness >= far_angle)                                                                              \
-            brightness = far_scale * parameters->intensity;                                                            \
-        else                                                                                                           \
-            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
-        if (parameters->directional) {                                                                                 \
-            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
-            if (angle < parameters->direction_near_angle) {                                                            \
-                brightness += 128.0f * parameters->direction_far_scale;                                                \
-            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
-                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
-                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
-                                      parameters->direction_bias);                                                     \
-                brightness +=                                                                                          \
-                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
-                              parameters->direction_near_scale);                                                       \
-            }                                                                                                          \
-        }                                                                                                              \
-        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
-                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
-        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
-                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
-        else                                                                                                           \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
-        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
-    } while (0)
-
-#define SWIPE_PRIM_UV(U, V)                                                                                            \
-    do {                                                                                                               \
-        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
-        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
-            vertex->float_uv[0] = (U);                                                                                 \
-            vertex->float_uv[1] = (V);                                                                                 \
-        } else {                                                                                                       \
-            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
-            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
-        }                                                                                                              \
-    } while (false)
-
-
-// --- Extern "C" block: functions with confirmed C linkage in original libTTapp.so ---
-
-
-// The relocation tables are patched as plain words, so every fixup aliases
-// cutscene->string_delta and re-reads it.
 typedef isize __attribute__((may_alias)) NuGCutWord;
 #define NUGCUT_WORD(field) (*reinterpret_cast<NuGCutWord *>(&(field)))
-#define NUGCUT_RELOCATE(field, delta) \
-    (NUGCUT_WORD(field) = NUGCUT_WORD(field) != 0 ? NUGCUT_WORD(field) + (delta) : 0)
-
-// Retail keeps NuGCutSceneFixPtrs only as two constant-propagated clones:
-// .44 relocates animations by anim_delta, .43 is the anim_delta == 0 case.
-#if defined(__i386__)
-#define NUGCUT_FIXPTRS_ATTR(n) __attribute__((noinline, noclone, regparm(n)))
-#else
-#define NUGCUT_FIXPTRS_ATTR(n) __attribute__((noinline, noclone))
-#endif
 
 struct instNUGCUTSCENE_s;
-
-// Retail only keeps the IPA-SRA clone, which drops the unused frame argument.
-#if defined(__i386__)
-#define INST_LOCATOR_SYS_END_ATTR __attribute__((noinline, noclone, regparm(2)))
-#else
-#define INST_LOCATOR_SYS_END_ATTR __attribute__((noinline, noclone))
-#endif
 
 extern "C" {
     struct EDCREATURE_s;
@@ -2909,72 +2056,11 @@ extern "C" {
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
 
-
 }
 
 namespace {
 
 } // namespace
-
-#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
-    do {                                                                                                               \
-        direction.x = (vx);                                                                                            \
-        direction.y = -(vy) * camera.aspect;                                                                           \
-        direction.z = adjacent;                                                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        brightness = direction.y * 0.5f + 0.5f;                                                                        \
-        if (brightness <= near_angle)                                                                                  \
-            brightness = near_scale * parameters->intensity;                                                           \
-        else if (brightness >= far_angle)                                                                              \
-            brightness = far_scale * parameters->intensity;                                                            \
-        else                                                                                                           \
-            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
-        if (parameters->directional) {                                                                                 \
-            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
-            if (angle < parameters->direction_near_angle) {                                                            \
-                brightness += 128.0f * parameters->direction_far_scale;                                                \
-            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
-                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
-                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
-                                      parameters->direction_bias);                                                     \
-                brightness +=                                                                                          \
-                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
-                              parameters->direction_near_scale);                                                       \
-            }                                                                                                          \
-        }                                                                                                              \
-        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
-                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
-        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
-                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
-        else                                                                                                           \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
-        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
-    } while (0)
-
-#define SWIPE_PRIM_UV(U, V)                                                                                            \
-    do {                                                                                                               \
-        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
-        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
-            vertex->float_uv[0] = (U);                                                                                 \
-            vertex->float_uv[1] = (V);                                                                                 \
-        } else {                                                                                                       \
-            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
-            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
-        }                                                                                                              \
-    } while (false)
-
-#define PART_EMIT_SOUND_ON(slot)                                                                                       \
-    if (type->sounds[slot] != -1) {                                                                                    \
-        SetSfxBit_On(type->sounds[slot]);                                                                              \
-        if (type->sound_modes[slot] == 4)                                                                              \
-            PlaySfxById(type->sounds[slot], &emitter->position);                                                       \
-    }
-#define PART_EMIT_SOUND(slot, mode)                                                                                    \
 
 extern "C" {
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
@@ -3190,58 +2276,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 } // extern "C"
-
-#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
-    do {                                                                                                               \
-        direction.x = (vx);                                                                                            \
-        direction.y = -(vy) * camera.aspect;                                                                           \
-        direction.z = adjacent;                                                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        brightness = direction.y * 0.5f + 0.5f;                                                                        \
-        if (brightness <= near_angle)                                                                                  \
-            brightness = near_scale * parameters->intensity;                                                           \
-        else if (brightness >= far_angle)                                                                              \
-            brightness = far_scale * parameters->intensity;                                                            \
-        else                                                                                                           \
-            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
-        if (parameters->directional) {                                                                                 \
-            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
-            if (angle < parameters->direction_near_angle) {                                                            \
-                brightness += 128.0f * parameters->direction_far_scale;                                                \
-            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
-                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
-                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
-                                      parameters->direction_bias);                                                     \
-                brightness +=                                                                                          \
-                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
-                              parameters->direction_near_scale);                                                       \
-            }                                                                                                          \
-        }                                                                                                              \
-        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
-                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
-        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
-                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
-        else                                                                                                           \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
-        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
-    } while (0)
-
-#define SWIPE_PRIM_UV(U, V)                                                                                            \
-    do {                                                                                                               \
-        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
-        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
-            vertex->float_uv[0] = (U);                                                                                 \
-            vertex->float_uv[1] = (V);                                                                                 \
-        } else {                                                                                                       \
-            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
-            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
-        }                                                                                                              \
-    } while (false)
 
 extern "C" {
     // ---------------------------------------------------------------------------
@@ -3340,66 +2374,6 @@ namespace {
 
 } // namespace
 
-#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
-    do {                                                                                                               \
-        direction.x = (vx);                                                                                            \
-        direction.y = -(vy) * camera.aspect;                                                                           \
-        direction.z = adjacent;                                                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        brightness = direction.y * 0.5f + 0.5f;                                                                        \
-        if (brightness <= near_angle)                                                                                  \
-            brightness = near_scale * parameters->intensity;                                                           \
-        else if (brightness >= far_angle)                                                                              \
-            brightness = far_scale * parameters->intensity;                                                            \
-        else                                                                                                           \
-            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
-        if (parameters->directional) {                                                                                 \
-            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
-            if (angle < parameters->direction_near_angle) {                                                            \
-                brightness += 128.0f * parameters->direction_far_scale;                                                \
-            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
-                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
-                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
-                                      parameters->direction_bias);                                                     \
-                brightness +=                                                                                          \
-                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
-                              parameters->direction_near_scale);                                                       \
-            }                                                                                                          \
-        }                                                                                                              \
-        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
-                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
-        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
-                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
-        else                                                                                                           \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
-        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
-    } while (0)
-
-#define SWIPE_PRIM_UV(U, V)                                                                                            \
-    do {                                                                                                               \
-        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
-        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
-            vertex->float_uv[0] = (U);                                                                                 \
-            vertex->float_uv[1] = (V);                                                                                 \
-        } else {                                                                                                       \
-            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
-            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
-        }                                                                                                              \
-    } while (false)
-
-#define PART_EMIT_SOUND_ON(slot)                                                                                       \
-    if (type->sounds[slot] != -1) {                                                                                    \
-        SetSfxBit_On(type->sounds[slot]);                                                                              \
-        if (type->sound_modes[slot] == 4)                                                                              \
-            PlaySfxById(type->sounds[slot], &emitter->position);                                                       \
-    }
-#define PART_EMIT_SOUND(slot, mode)                                                                                    \
-
 extern "C" {
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 static __used__ i32 cbInteractMenuCancelChild(edui_interact_s *interact);
@@ -3615,58 +2589,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
 } // extern "C"
 
-#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
-    do {                                                                                                               \
-        direction.x = (vx);                                                                                            \
-        direction.y = -(vy) * camera.aspect;                                                                           \
-        direction.z = adjacent;                                                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        brightness = direction.y * 0.5f + 0.5f;                                                                        \
-        if (brightness <= near_angle)                                                                                  \
-            brightness = near_scale * parameters->intensity;                                                           \
-        else if (brightness >= far_angle)                                                                              \
-            brightness = far_scale * parameters->intensity;                                                            \
-        else                                                                                                           \
-            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
-        if (parameters->directional) {                                                                                 \
-            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
-            if (angle < parameters->direction_near_angle) {                                                            \
-                brightness += 128.0f * parameters->direction_far_scale;                                                \
-            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
-                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
-                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
-                                      parameters->direction_bias);                                                     \
-                brightness +=                                                                                          \
-                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
-                              parameters->direction_near_scale);                                                       \
-            }                                                                                                          \
-        }                                                                                                              \
-        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
-                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
-        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
-                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
-        else                                                                                                           \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
-        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
-    } while (0)
-
-#define SWIPE_PRIM_UV(U, V)                                                                                            \
-    do {                                                                                                               \
-        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
-        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
-            vertex->float_uv[0] = (U);                                                                                 \
-            vertex->float_uv[1] = (V);                                                                                 \
-        } else {                                                                                                       \
-            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
-            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
-        }                                                                                                              \
-    } while (false)
-
 extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -3759,30 +2681,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 } // extern "C"
-
-// Retail only keeps the split-out body of the IPA-SRA clone (the unused
-// cutscene index dropped), called with world and cut in registers.
-#if defined(__i386__)
-#define CUTSCENE_START_ATTR __attribute__((noinline, noclone, regparm(2)))
-#else
-#define CUTSCENE_START_ATTR __attribute__((noinline, noclone))
-#endif
-
-// The loop re-reads the active cut through CutStopInfo after each SmartTextEx call.
-#define CUT_STOP static_cast<CUTINFO *>(CutStopInfo)
-
-#define NUGCUT_RELOCATE(field, delta) \
-    (NUGCUT_WORD(field) = NUGCUT_WORD(field) != 0 ? NUGCUT_WORD(field) + (delta) : 0)
-
-// Steers a cutscene character's eyes towards a look-at locator and blinks its eyelids.
-// Only version-3 locator animations carry the look and blink channels.
-// Retail only keeps the IPA-SRA clone: the system is dropped and the instance
-// locator is replaced by its effect handle slot.
-#if defined(__i386__)
-#define INST_LOOKAT_UPDATE_ATTR __attribute__((noinline, noclone, regparm(2), sseregparm))
-#else
-#define INST_LOOKAT_UPDATE_ATTR __attribute__((noinline, noclone))
-#endif
 
 extern "C" {
     // ---------------------------------------------------------------------------
@@ -3880,66 +2778,12 @@ extern "C" {
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
 
-
 }
 
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
 
-
 }
-
-#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
-    do {                                                                                                               \
-        direction.x = (vx);                                                                                            \
-        direction.y = -(vy) * camera.aspect;                                                                           \
-        direction.z = adjacent;                                                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        brightness = direction.y * 0.5f + 0.5f;                                                                        \
-        if (brightness <= near_angle)                                                                                  \
-            brightness = near_scale * parameters->intensity;                                                           \
-        else if (brightness >= far_angle)                                                                              \
-            brightness = far_scale * parameters->intensity;                                                            \
-        else                                                                                                           \
-            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
-        if (parameters->directional) {                                                                                 \
-            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
-            if (angle < parameters->direction_near_angle) {                                                            \
-                brightness += 128.0f * parameters->direction_far_scale;                                                \
-            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
-                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
-                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
-                                      parameters->direction_bias);                                                     \
-                brightness +=                                                                                          \
-                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
-                              parameters->direction_near_scale);                                                       \
-            }                                                                                                          \
-        }                                                                                                              \
-        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
-                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
-        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
-                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
-        else                                                                                                           \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
-        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
-    } while (0)
-
-#define SWIPE_PRIM_UV(U, V)                                                                                            \
-    do {                                                                                                               \
-        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
-        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
-            vertex->float_uv[0] = (U);                                                                                 \
-            vertex->float_uv[1] = (V);                                                                                 \
-        } else {                                                                                                       \
-            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
-            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
-        }                                                                                                              \
-    } while (false)
 
 struct MechTouchUIElement;
 
@@ -3947,66 +2791,6 @@ namespace {
 
 } // namespace
 
-#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
-    do {                                                                                                               \
-        direction.x = (vx);                                                                                            \
-        direction.y = -(vy) * camera.aspect;                                                                           \
-        direction.z = adjacent;                                                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        brightness = direction.y * 0.5f + 0.5f;                                                                        \
-        if (brightness <= near_angle)                                                                                  \
-            brightness = near_scale * parameters->intensity;                                                           \
-        else if (brightness >= far_angle)                                                                              \
-            brightness = far_scale * parameters->intensity;                                                            \
-        else                                                                                                           \
-            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
-        if (parameters->directional) {                                                                                 \
-            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
-            if (angle < parameters->direction_near_angle) {                                                            \
-                brightness += 128.0f * parameters->direction_far_scale;                                                \
-            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
-                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
-                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
-                                      parameters->direction_bias);                                                     \
-                brightness +=                                                                                          \
-                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
-                              parameters->direction_near_scale);                                                       \
-            }                                                                                                          \
-        }                                                                                                              \
-        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
-                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
-        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
-                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
-        else                                                                                                           \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
-        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
-    } while (0)
-
-#define SWIPE_PRIM_UV(U, V)                                                                                            \
-    do {                                                                                                               \
-        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
-        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
-            vertex->float_uv[0] = (U);                                                                                 \
-            vertex->float_uv[1] = (V);                                                                                 \
-        } else {                                                                                                       \
-            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
-            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
-        }                                                                                                              \
-    } while (false)
-
-#define PART_EMIT_SOUND_ON(slot)                                                                                       \
-    if (type->sounds[slot] != -1) {                                                                                    \
-        SetSfxBit_On(type->sounds[slot]);                                                                              \
-        if (type->sound_modes[slot] == 4)                                                                              \
-            PlaySfxById(type->sounds[slot], &emitter->position);                                                       \
-    }
-#define PART_EMIT_SOUND(slot, mode)                                                                                    \
-
 extern "C" {
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 static __used__ i32 cbInteractMenuCancelChild(edui_interact_s *interact);
@@ -4222,58 +3006,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
 } // extern "C"
 
-#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
-    do {                                                                                                               \
-        direction.x = (vx);                                                                                            \
-        direction.y = -(vy) * camera.aspect;                                                                           \
-        direction.z = adjacent;                                                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        brightness = direction.y * 0.5f + 0.5f;                                                                        \
-        if (brightness <= near_angle)                                                                                  \
-            brightness = near_scale * parameters->intensity;                                                           \
-        else if (brightness >= far_angle)                                                                              \
-            brightness = far_scale * parameters->intensity;                                                            \
-        else                                                                                                           \
-            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
-        if (parameters->directional) {                                                                                 \
-            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
-            if (angle < parameters->direction_near_angle) {                                                            \
-                brightness += 128.0f * parameters->direction_far_scale;                                                \
-            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
-                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
-                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
-                                      parameters->direction_bias);                                                     \
-                brightness +=                                                                                          \
-                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
-                              parameters->direction_near_scale);                                                       \
-            }                                                                                                          \
-        }                                                                                                              \
-        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
-                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
-        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
-                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
-        else                                                                                                           \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
-        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
-    } while (0)
-
-#define SWIPE_PRIM_UV(U, V)                                                                                            \
-    do {                                                                                                               \
-        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
-        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
-            vertex->float_uv[0] = (U);                                                                                 \
-            vertex->float_uv[1] = (V);                                                                                 \
-        } else {                                                                                                       \
-            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
-            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
-        }                                                                                                              \
-    } while (false)
-
 extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -4367,78 +3099,13 @@ extern "C" {
     // ---------------------------------------------------------------------------
 } // extern "C"
 
-#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
-    do {                                                                                                               \
-        direction.x = (vx);                                                                                            \
-        direction.y = -(vy) * camera.aspect;                                                                           \
-        direction.z = adjacent;                                                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        brightness = direction.y * 0.5f + 0.5f;                                                                        \
-        if (brightness <= near_angle)                                                                                  \
-            brightness = near_scale * parameters->intensity;                                                           \
-        else if (brightness >= far_angle)                                                                              \
-            brightness = far_scale * parameters->intensity;                                                            \
-        else                                                                                                           \
-            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
-        if (parameters->directional) {                                                                                 \
-            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
-            if (angle < parameters->direction_near_angle) {                                                            \
-                brightness += 128.0f * parameters->direction_far_scale;                                                \
-            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
-                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
-                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
-                                      parameters->direction_bias);                                                     \
-                brightness +=                                                                                          \
-                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
-                              parameters->direction_near_scale);                                                       \
-            }                                                                                                          \
-        }                                                                                                              \
-        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
-                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
-        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
-                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
-        else                                                                                                           \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
-        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
-    } while (0)
-
-#define SWIPE_PRIM_UV(U, V)                                                                                            \
-    do {                                                                                                               \
-        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
-        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
-            vertex->float_uv[0] = (U);                                                                                 \
-            vertex->float_uv[1] = (V);                                                                                 \
-        } else {                                                                                                       \
-            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
-            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
-        }                                                                                                              \
-    } while (false)
-
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
-
 
 }
 
-#define HAS_BLOCK_ANIMS(animations)                                                                                    \
-    ((animations)[0x1a] != NULL || (animations)[0x1b] != NULL || (animations)[0x1c] != NULL)
-
-#define PART_EMIT_SOUND_ON(slot)                                                                                       \
-    if (type->sounds[slot] != -1) {                                                                                    \
-        SetSfxBit_On(type->sounds[slot]);                                                                              \
-        if (type->sound_modes[slot] == 4)                                                                              \
-            PlaySfxById(type->sounds[slot], &emitter->position);                                                       \
-    }
-#define PART_EMIT_SOUND(slot, mode)                                                                                    \
-
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
-
 
 }
 
@@ -4453,154 +3120,11 @@ extern "C" {
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
 
-
 }
 
 namespace {
 
 } // namespace
-
-#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
-    do {                                                                                                               \
-        direction.x = (vx);                                                                                            \
-        direction.y = -(vy) * camera.aspect;                                                                           \
-        direction.z = adjacent;                                                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        brightness = direction.y * 0.5f + 0.5f;                                                                        \
-        if (brightness <= near_angle)                                                                                  \
-            brightness = near_scale * parameters->intensity;                                                           \
-        else if (brightness >= far_angle)                                                                              \
-            brightness = far_scale * parameters->intensity;                                                            \
-        else                                                                                                           \
-            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
-        if (parameters->directional) {                                                                                 \
-            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
-            if (angle < parameters->direction_near_angle) {                                                            \
-                brightness += 128.0f * parameters->direction_far_scale;                                                \
-            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
-                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
-                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
-                                      parameters->direction_bias);                                                     \
-                brightness +=                                                                                          \
-                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
-                              parameters->direction_near_scale);                                                       \
-            }                                                                                                          \
-        }                                                                                                              \
-        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
-                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
-        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
-                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
-        else                                                                                                           \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
-        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
-    } while (0)
-
-#define SWIPE_PRIM_UV(U, V)                                                                                            \
-    do {                                                                                                               \
-        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
-        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
-            vertex->float_uv[0] = (U);                                                                                 \
-            vertex->float_uv[1] = (V);                                                                                 \
-        } else {                                                                                                       \
-            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
-            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
-        }                                                                                                              \
-    } while (false)
-
-#define ADD_SNAKE_SEGMENT_DEBRIS(index)                                                                                \
-    do {                                                                                                               \
-        const i32 segment_index = (index);                                                                             \
-        NUMTX matrix;                                                                                                  \
-        NUANGVEC angles;                                                                                               \
-        angles.y = NuAngAdd(object->snake_body->segments[segment_index].yaw, 0x8000);                                  \
-        angles.x = object->snake_body->segments[segment_index].pitch;                                                  \
-        NuMtxSetRotationXYVU0(&matrix, &angles);                                                                       \
-        if (object->snake_body->scale != 1.0f) {                                                                       \
-            NUVEC scale = {object->snake_body->scale, object->snake_body->scale, object->snake_body->scale};           \
-            NuMtxPreScale(&matrix, &scale);                                                                            \
-        }                                                                                                              \
-        matrix.m30 += object->snake_body->segments[segment_index].position.x;                                          \
-        matrix.m31 += object->snake_body->segments[segment_index].position.y + object->snake_body->scale * 0.02f;      \
-        matrix.m32 += object->snake_body->segments[segment_index].position.z;                                          \
-        i32 special_index = segment_index == object->snake_body->segment_count - 1 ? 2 : segment_index % 2;            \
-        nuhspecial_s *special = &snake_hspecials[special_index];                                                       \
-        if (NuSpecialExistsFn(special)) {                                                                              \
-            NUVEC momentum;                                                                                            \
-            SetKillPartMom(&momentum);                                                                                 \
-            momentum.y += 1.0f;                                                                                        \
-            ADDPART_s part = Default_ADDPART;                                                                          \
-            part.matrix = &matrix;                                                                                     \
-            part.velocity = &momentum;                                                                                 \
-            part.field_14 = 0.1f;                                                                                      \
-            part.field_18 = 0.1f;                                                                                      \
-            part.gravity = -5.0f;                                                                                      \
-            part.special = special;                                                                                    \
-            part.flags = 0x90;                                                                                         \
-            part.stop_fn = PartStop_Flickerer;                                                                         \
-            part.draw_fn = PartDraw_Flickerer;                                                                         \
-            part.field_3c = PartImpact_Brick;                                                                          \
-            part.time_step = FRAMETIME;                                                                                \
-            part.lighting = reinterpret_cast<PARTLIGHTSOURCE_s *>(&object->light_data);                                \
-            AddPart(&part);                                                                                            \
-        }                                                                                                              \
-    } while (0)
-
-#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
-    do {                                                                                                               \
-        direction.x = (vx);                                                                                            \
-        direction.y = -(vy) * camera.aspect;                                                                           \
-        direction.z = adjacent;                                                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        brightness = direction.y * 0.5f + 0.5f;                                                                        \
-        if (brightness <= near_angle)                                                                                  \
-            brightness = near_scale * parameters->intensity;                                                           \
-        else if (brightness >= far_angle)                                                                              \
-            brightness = far_scale * parameters->intensity;                                                            \
-        else                                                                                                           \
-            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
-        if (parameters->directional) {                                                                                 \
-            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
-            if (angle < parameters->direction_near_angle) {                                                            \
-                brightness += 128.0f * parameters->direction_far_scale;                                                \
-            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
-                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
-                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
-                                      parameters->direction_bias);                                                     \
-                brightness +=                                                                                          \
-                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
-                              parameters->direction_near_scale);                                                       \
-            }                                                                                                          \
-        }                                                                                                              \
-        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
-                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
-        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
-                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
-        else                                                                                                           \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
-        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
-    } while (0)
-
-#define SWIPE_PRIM_UV(U, V)                                                                                            \
-    do {                                                                                                               \
-        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
-        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
-            vertex->float_uv[0] = (U);                                                                                 \
-            vertex->float_uv[1] = (V);                                                                                 \
-        } else {                                                                                                       \
-            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
-            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
-        }                                                                                                              \
-    } while (false)
 
 extern "C" {
 extern u32 flagremaptab[32][2];
@@ -4608,7 +3132,6 @@ extern u32 flagremaptab[32][2];
 
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
-
 
 }
 
@@ -5294,66 +3817,6 @@ i32 NuQFntModeStackIndex;
 struct NuBloomParameters;
 struct _vuv_s;
 
-#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
-    do {                                                                                                               \
-        direction.x = (vx);                                                                                            \
-        direction.y = -(vy) * camera.aspect;                                                                           \
-        direction.z = adjacent;                                                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        brightness = direction.y * 0.5f + 0.5f;                                                                        \
-        if (brightness <= near_angle)                                                                                  \
-            brightness = near_scale * parameters->intensity;                                                           \
-        else if (brightness >= far_angle)                                                                              \
-            brightness = far_scale * parameters->intensity;                                                            \
-        else                                                                                                           \
-            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
-        if (parameters->directional) {                                                                                 \
-            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
-            if (angle < parameters->direction_near_angle) {                                                            \
-                brightness += 128.0f * parameters->direction_far_scale;                                                \
-            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
-                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
-                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
-                                      parameters->direction_bias);                                                     \
-                brightness +=                                                                                          \
-                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
-                              parameters->direction_near_scale);                                                       \
-            }                                                                                                          \
-        }                                                                                                              \
-        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
-                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
-        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
-                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
-        else                                                                                                           \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
-        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
-    } while (0)
-
-#define SWIPE_PRIM_UV(U, V)                                                                                            \
-    do {                                                                                                               \
-        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
-        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
-            vertex->float_uv[0] = (U);                                                                                 \
-            vertex->float_uv[1] = (V);                                                                                 \
-        } else {                                                                                                       \
-            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
-            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
-        }                                                                                                              \
-    } while (false)
-
-#define PART_EMIT_SOUND_ON(slot)                                                                                       \
-    if (type->sounds[slot] != -1) {                                                                                    \
-        SetSfxBit_On(type->sounds[slot]);                                                                              \
-        if (type->sound_modes[slot] == 4)                                                                              \
-            PlaySfxById(type->sounds[slot], &emitter->position);                                                       \
-    }
-#define PART_EMIT_SOUND(slot, mode)                                                                                    \
-
 extern "C" {
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 static __used__ i32 cbInteractMenuCancelChild(edui_interact_s *interact);
@@ -5568,58 +4031,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 } // extern "C"
-
-#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
-    do {                                                                                                               \
-        direction.x = (vx);                                                                                            \
-        direction.y = -(vy) * camera.aspect;                                                                           \
-        direction.z = adjacent;                                                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        brightness = direction.y * 0.5f + 0.5f;                                                                        \
-        if (brightness <= near_angle)                                                                                  \
-            brightness = near_scale * parameters->intensity;                                                           \
-        else if (brightness >= far_angle)                                                                              \
-            brightness = far_scale * parameters->intensity;                                                            \
-        else                                                                                                           \
-            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
-        if (parameters->directional) {                                                                                 \
-            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
-            if (angle < parameters->direction_near_angle) {                                                            \
-                brightness += 128.0f * parameters->direction_far_scale;                                                \
-            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
-                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
-                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
-                                      parameters->direction_bias);                                                     \
-                brightness +=                                                                                          \
-                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
-                              parameters->direction_near_scale);                                                       \
-            }                                                                                                          \
-        }                                                                                                              \
-        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
-                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
-        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
-                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
-        else                                                                                                           \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
-        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
-    } while (0)
-
-#define SWIPE_PRIM_UV(U, V)                                                                                            \
-    do {                                                                                                               \
-        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
-        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
-            vertex->float_uv[0] = (U);                                                                                 \
-            vertex->float_uv[1] = (V);                                                                                 \
-        } else {                                                                                                       \
-            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
-            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
-        }                                                                                                              \
-    } while (false)
 
 extern "C" {
     // ---------------------------------------------------------------------------
@@ -5717,125 +4128,12 @@ extern "C" {
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
 
-
 }
-
-#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
-    do {                                                                                                               \
-        direction.x = (vx);                                                                                            \
-        direction.y = -(vy) * camera.aspect;                                                                           \
-        direction.z = adjacent;                                                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        brightness = direction.y * 0.5f + 0.5f;                                                                        \
-        if (brightness <= near_angle)                                                                                  \
-            brightness = near_scale * parameters->intensity;                                                           \
-        else if (brightness >= far_angle)                                                                              \
-            brightness = far_scale * parameters->intensity;                                                            \
-        else                                                                                                           \
-            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
-        if (parameters->directional) {                                                                                 \
-            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
-            if (angle < parameters->direction_near_angle) {                                                            \
-                brightness += 128.0f * parameters->direction_far_scale;                                                \
-            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
-                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
-                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
-                                      parameters->direction_bias);                                                     \
-                brightness +=                                                                                          \
-                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
-                              parameters->direction_near_scale);                                                       \
-            }                                                                                                          \
-        }                                                                                                              \
-        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
-                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
-        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
-                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
-        else                                                                                                           \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
-        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
-    } while (0)
-
-#define SWIPE_PRIM_UV(U, V)                                                                                            \
-    do {                                                                                                               \
-        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
-        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
-            vertex->float_uv[0] = (U);                                                                                 \
-            vertex->float_uv[1] = (V);                                                                                 \
-        } else {                                                                                                       \
-            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
-            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
-        }                                                                                                              \
-    } while (false)
 
 namespace {
 
 } // namespace
 
-#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
-    do {                                                                                                               \
-        direction.x = (vx);                                                                                            \
-        direction.y = -(vy) * camera.aspect;                                                                           \
-        direction.z = adjacent;                                                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        brightness = direction.y * 0.5f + 0.5f;                                                                        \
-        if (brightness <= near_angle)                                                                                  \
-            brightness = near_scale * parameters->intensity;                                                           \
-        else if (brightness >= far_angle)                                                                              \
-            brightness = far_scale * parameters->intensity;                                                            \
-        else                                                                                                           \
-            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
-        if (parameters->directional) {                                                                                 \
-            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
-            if (angle < parameters->direction_near_angle) {                                                            \
-                brightness += 128.0f * parameters->direction_far_scale;                                                \
-            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
-                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
-                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
-                                      parameters->direction_bias);                                                     \
-                brightness +=                                                                                          \
-                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
-                              parameters->direction_near_scale);                                                       \
-            }                                                                                                          \
-        }                                                                                                              \
-        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
-                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
-        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
-                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
-        else                                                                                                           \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
-        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
-    } while (0)
-
-#define SWIPE_PRIM_UV(U, V)                                                                                            \
-    do {                                                                                                               \
-        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
-        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
-            vertex->float_uv[0] = (U);                                                                                 \
-            vertex->float_uv[1] = (V);                                                                                 \
-        } else {                                                                                                       \
-            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
-            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
-        }                                                                                                              \
-    } while (false)
-
-#define PART_EMIT_SOUND_ON(slot)                                                                                       \
-    if (type->sounds[slot] != -1) {                                                                                    \
-        SetSfxBit_On(type->sounds[slot]);                                                                              \
-        if (type->sound_modes[slot] == 4)                                                                              \
-            PlaySfxById(type->sounds[slot], &emitter->position);                                                       \
-    }
-#define PART_EMIT_SOUND(slot, mode)                                                                                    \
-
 extern "C" {
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 static __used__ i32 cbInteractMenuCancelChild(edui_interact_s *interact);
@@ -6051,58 +4349,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
 } // extern "C"
 
-#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
-    do {                                                                                                               \
-        direction.x = (vx);                                                                                            \
-        direction.y = -(vy) * camera.aspect;                                                                           \
-        direction.z = adjacent;                                                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        brightness = direction.y * 0.5f + 0.5f;                                                                        \
-        if (brightness <= near_angle)                                                                                  \
-            brightness = near_scale * parameters->intensity;                                                           \
-        else if (brightness >= far_angle)                                                                              \
-            brightness = far_scale * parameters->intensity;                                                            \
-        else                                                                                                           \
-            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
-        if (parameters->directional) {                                                                                 \
-            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
-            if (angle < parameters->direction_near_angle) {                                                            \
-                brightness += 128.0f * parameters->direction_far_scale;                                                \
-            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
-                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
-                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
-                                      parameters->direction_bias);                                                     \
-                brightness +=                                                                                          \
-                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
-                              parameters->direction_near_scale);                                                       \
-            }                                                                                                          \
-        }                                                                                                              \
-        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
-                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
-        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
-                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
-        else                                                                                                           \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
-        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
-    } while (0)
-
-#define SWIPE_PRIM_UV(U, V)                                                                                            \
-    do {                                                                                                               \
-        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
-        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
-            vertex->float_uv[0] = (U);                                                                                 \
-            vertex->float_uv[1] = (V);                                                                                 \
-        } else {                                                                                                       \
-            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
-            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
-        }                                                                                                              \
-    } while (false)
-
 extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -6196,78 +4442,13 @@ extern "C" {
     // ---------------------------------------------------------------------------
 } // extern "C"
 
-#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
-    do {                                                                                                               \
-        direction.x = (vx);                                                                                            \
-        direction.y = -(vy) * camera.aspect;                                                                           \
-        direction.z = adjacent;                                                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        brightness = direction.y * 0.5f + 0.5f;                                                                        \
-        if (brightness <= near_angle)                                                                                  \
-            brightness = near_scale * parameters->intensity;                                                           \
-        else if (brightness >= far_angle)                                                                              \
-            brightness = far_scale * parameters->intensity;                                                            \
-        else                                                                                                           \
-            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
-        if (parameters->directional) {                                                                                 \
-            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
-            if (angle < parameters->direction_near_angle) {                                                            \
-                brightness += 128.0f * parameters->direction_far_scale;                                                \
-            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
-                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
-                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
-                                      parameters->direction_bias);                                                     \
-                brightness +=                                                                                          \
-                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
-                              parameters->direction_near_scale);                                                       \
-            }                                                                                                          \
-        }                                                                                                              \
-        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
-                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
-        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
-                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
-        else                                                                                                           \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
-        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
-    } while (0)
-
-#define SWIPE_PRIM_UV(U, V)                                                                                            \
-    do {                                                                                                               \
-        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
-        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
-            vertex->float_uv[0] = (U);                                                                                 \
-            vertex->float_uv[1] = (V);                                                                                 \
-        } else {                                                                                                       \
-            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
-            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
-        }                                                                                                              \
-    } while (false)
-
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
-
 
 }
 
-#define HAS_BLOCK_ANIMS(animations)                                                                                    \
-    ((animations)[0x1a] != NULL || (animations)[0x1b] != NULL || (animations)[0x1c] != NULL)
-
-#define PART_EMIT_SOUND_ON(slot)                                                                                       \
-    if (type->sounds[slot] != -1) {                                                                                    \
-        SetSfxBit_On(type->sounds[slot]);                                                                              \
-        if (type->sound_modes[slot] == 4)                                                                              \
-            PlaySfxById(type->sounds[slot], &emitter->position);                                                       \
-    }
-#define PART_EMIT_SOUND(slot, mode)                                                                                    \
-
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
-
 
 }
 
@@ -6282,154 +4463,11 @@ extern "C" {
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
 
-
 }
 
 namespace {
 
 } // namespace
-
-#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
-    do {                                                                                                               \
-        direction.x = (vx);                                                                                            \
-        direction.y = -(vy) * camera.aspect;                                                                           \
-        direction.z = adjacent;                                                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        brightness = direction.y * 0.5f + 0.5f;                                                                        \
-        if (brightness <= near_angle)                                                                                  \
-            brightness = near_scale * parameters->intensity;                                                           \
-        else if (brightness >= far_angle)                                                                              \
-            brightness = far_scale * parameters->intensity;                                                            \
-        else                                                                                                           \
-            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
-        if (parameters->directional) {                                                                                 \
-            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
-            if (angle < parameters->direction_near_angle) {                                                            \
-                brightness += 128.0f * parameters->direction_far_scale;                                                \
-            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
-                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
-                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
-                                      parameters->direction_bias);                                                     \
-                brightness +=                                                                                          \
-                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
-                              parameters->direction_near_scale);                                                       \
-            }                                                                                                          \
-        }                                                                                                              \
-        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
-                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
-        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
-                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
-        else                                                                                                           \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
-        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
-    } while (0)
-
-#define SWIPE_PRIM_UV(U, V)                                                                                            \
-    do {                                                                                                               \
-        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
-        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
-            vertex->float_uv[0] = (U);                                                                                 \
-            vertex->float_uv[1] = (V);                                                                                 \
-        } else {                                                                                                       \
-            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
-            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
-        }                                                                                                              \
-    } while (false)
-
-#define ADD_SNAKE_SEGMENT_DEBRIS(index)                                                                                \
-    do {                                                                                                               \
-        const i32 segment_index = (index);                                                                             \
-        NUMTX matrix;                                                                                                  \
-        NUANGVEC angles;                                                                                               \
-        angles.y = NuAngAdd(object->snake_body->segments[segment_index].yaw, 0x8000);                                  \
-        angles.x = object->snake_body->segments[segment_index].pitch;                                                  \
-        NuMtxSetRotationXYVU0(&matrix, &angles);                                                                       \
-        if (object->snake_body->scale != 1.0f) {                                                                       \
-            NUVEC scale = {object->snake_body->scale, object->snake_body->scale, object->snake_body->scale};           \
-            NuMtxPreScale(&matrix, &scale);                                                                            \
-        }                                                                                                              \
-        matrix.m30 += object->snake_body->segments[segment_index].position.x;                                          \
-        matrix.m31 += object->snake_body->segments[segment_index].position.y + object->snake_body->scale * 0.02f;      \
-        matrix.m32 += object->snake_body->segments[segment_index].position.z;                                          \
-        i32 special_index = segment_index == object->snake_body->segment_count - 1 ? 2 : segment_index % 2;            \
-        nuhspecial_s *special = &snake_hspecials[special_index];                                                       \
-        if (NuSpecialExistsFn(special)) {                                                                              \
-            NUVEC momentum;                                                                                            \
-            SetKillPartMom(&momentum);                                                                                 \
-            momentum.y += 1.0f;                                                                                        \
-            ADDPART_s part = Default_ADDPART;                                                                          \
-            part.matrix = &matrix;                                                                                     \
-            part.velocity = &momentum;                                                                                 \
-            part.field_14 = 0.1f;                                                                                      \
-            part.field_18 = 0.1f;                                                                                      \
-            part.gravity = -5.0f;                                                                                      \
-            part.special = special;                                                                                    \
-            part.flags = 0x90;                                                                                         \
-            part.stop_fn = PartStop_Flickerer;                                                                         \
-            part.draw_fn = PartDraw_Flickerer;                                                                         \
-            part.field_3c = PartImpact_Brick;                                                                          \
-            part.time_step = FRAMETIME;                                                                                \
-            part.lighting = reinterpret_cast<PARTLIGHTSOURCE_s *>(&object->light_data);                                \
-            AddPart(&part);                                                                                            \
-        }                                                                                                              \
-    } while (0)
-
-#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
-    do {                                                                                                               \
-        direction.x = (vx);                                                                                            \
-        direction.y = -(vy) * camera.aspect;                                                                           \
-        direction.z = adjacent;                                                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        brightness = direction.y * 0.5f + 0.5f;                                                                        \
-        if (brightness <= near_angle)                                                                                  \
-            brightness = near_scale * parameters->intensity;                                                           \
-        else if (brightness >= far_angle)                                                                              \
-            brightness = far_scale * parameters->intensity;                                                            \
-        else                                                                                                           \
-            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
-        if (parameters->directional) {                                                                                 \
-            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
-            if (angle < parameters->direction_near_angle) {                                                            \
-                brightness += 128.0f * parameters->direction_far_scale;                                                \
-            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
-                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
-                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
-                                      parameters->direction_bias);                                                     \
-                brightness +=                                                                                          \
-                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
-                              parameters->direction_near_scale);                                                       \
-            }                                                                                                          \
-        }                                                                                                              \
-        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
-                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
-        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
-                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
-        else                                                                                                           \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
-        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
-    } while (0)
-
-#define SWIPE_PRIM_UV(U, V)                                                                                            \
-    do {                                                                                                               \
-        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
-        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
-            vertex->float_uv[0] = (U);                                                                                 \
-            vertex->float_uv[1] = (V);                                                                                 \
-        } else {                                                                                                       \
-            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
-            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
-        }                                                                                                              \
-    } while (false)
 
 extern "C" {
 extern u32 flagremaptab[32][2];
@@ -6437,7 +4475,6 @@ extern u32 flagremaptab[32][2];
 
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
-
 
 }
 
@@ -6594,8 +4631,6 @@ f32 global_windscale = 1.0f;
 
 i32 global_GobjWasDrawnUnreflected;
 
-// Shader / texture / vertex state
-
 struct nuvec4_s;
 
 i32 nurndr_pixel_width;
@@ -6698,7 +4733,6 @@ extern "C" {
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
 
-
 }
 
 static f32 curx;
@@ -6723,7 +4757,6 @@ namespace {
 } // namespace
 
 namespace {
-
 
 } // namespace
 
@@ -6805,269 +4838,24 @@ EDGRA_RETAIN_MENU(edgracbCancelClumpTerrainMenu);
 EDGRA_RETAIN_MENU(edgracbCancelChangeInstanceMenu);
 EDGRA_RETAIN_MENU(edgracbCancelClumpPropertiesMenu);
 
-// Remaining grass-editor UI/menu callbacks.
-
-
-#define CRC32_POLY 0x04C11DB7
-
-
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
 
-
 }
 
-#define PART_EMIT_SOUND_ON(slot)                                                                                       \
-    if (type->sounds[slot] != -1) {                                                                                    \
-        SetSfxBit_On(type->sounds[slot]);                                                                              \
-        if (type->sound_modes[slot] == 4)                                                                              \
-            PlaySfxById(type->sounds[slot], &emitter->position);                                                       \
-    }
-#define PART_EMIT_SOUND(slot, mode)                                                                                    \
-
-#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
-    do {                                                                                                               \
-        direction.x = (vx);                                                                                            \
-        direction.y = -(vy) * camera.aspect;                                                                           \
-        direction.z = adjacent;                                                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        brightness = direction.y * 0.5f + 0.5f;                                                                        \
-        if (brightness <= near_angle)                                                                                  \
-            brightness = near_scale * parameters->intensity;                                                           \
-        else if (brightness >= far_angle)                                                                              \
-            brightness = far_scale * parameters->intensity;                                                            \
-        else                                                                                                           \
-            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
-        if (parameters->directional) {                                                                                 \
-            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
-            if (angle < parameters->direction_near_angle) {                                                            \
-                brightness += 128.0f * parameters->direction_far_scale;                                                \
-            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
-                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
-                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
-                                      parameters->direction_bias);                                                     \
-                brightness +=                                                                                          \
-                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
-                              parameters->direction_near_scale);                                                       \
-            }                                                                                                          \
-        }                                                                                                              \
-        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
-                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
-        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
-                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
-        else                                                                                                           \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
-        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
-    } while (0)
-
-#define SWIPE_PRIM_UV(U, V)                                                                                            \
-    do {                                                                                                               \
-        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
-        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
-            vertex->float_uv[0] = (U);                                                                                 \
-            vertex->float_uv[1] = (V);                                                                                 \
-        } else {                                                                                                       \
-            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
-            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
-        }                                                                                                              \
-    } while (false)
-
 namespace {
-
-
-
 
 } // namespace
 
 namespace {
 
-    // Retail scan callers contain the scale-and-normal reconstruction directly.
-#define TERRAIN_SCALE_SCAN_SHAPE(candidate_arg, group_arg, writer_arg)                                                 \
-    do {                                                                                                               \
-        TERRAIN_SHAPE *&scale_candidate = (candidate_arg);                                                             \
-        const TERRAIN_GROUP &scale_group = (group_arg);                                                                \
-        TerrainScanWriter *scale_writer = (writer_arg);                                                                \
-        if (TerI->object_scale != 1.0f) {                                                                              \
-            TERRAIN_SHAPE *source = scale_candidate;                                                                   \
-            scale_candidate = &ScaleTerrain[scale_writer->scaled_shape_count];                                         \
-            scale_candidate->material[0] = source->material[0];                                                        \
-            scale_candidate->material[1] = source->material[1];                                                        \
-            scale_candidate->flags = source->flags;                                                                    \
-            scale_candidate->normal_flags = source->normal_flags;                                                      \
-                                                                                                                       \
-            for (i32 vector_index = 0; vector_index < 3; ++vector_index) {                                             \
-                scale_candidate->vectors[vector_index].x = source->vectors[vector_index].x;                            \
-                scale_candidate->vectors[vector_index].z = source->vectors[vector_index].z;                            \
-                scale_candidate->vectors[vector_index].y =                                                             \
-                    (source->vectors[vector_index].y + scale_group.origin.y) * TerI->inverse_object_scale -            \
-                    scale_group.origin.y;                                                                              \
-            }                                                                                                          \
-                                                                                                                       \
-            if (source->normals[1].y < 65535.0f) {                                                                     \
-                scale_candidate->vectors[3].x = source->vectors[3].x;                                                  \
-                scale_candidate->vectors[3].z = source->vectors[3].z;                                                  \
-                scale_candidate->vectors[3].y =                                                                        \
-                    (source->vectors[3].y + scale_group.origin.y) * TerI->inverse_object_scale - scale_group.origin.y; \
-                                                                                                                       \
-                const f32 length = NuFsqrt(source->normals[1].x * source->normals[1].x +                               \
-                                           source->normals[1].y * source->normals[1].y * TerI->object_scale_sq +       \
-                                           source->normals[1].z * source->normals[1].z);                               \
-                const f32 inverse_length = length == 0.0f ? 0.0f : 1.0f / length;                                      \
-                scale_candidate->normals[1].x = source->normals[1].x * inverse_length;                                 \
-                scale_candidate->normals[1].y = source->normals[1].y * TerI->object_scale * inverse_length;            \
-                scale_candidate->normals[1].z = source->normals[1].z * inverse_length;                                 \
-            } else {                                                                                                   \
-                scale_candidate->normals[1].y = 65536.0f;                                                              \
-            }                                                                                                          \
-                                                                                                                       \
-            const f32 length = NuFsqrt(source->normals[0].x * source->normals[0].x +                                   \
-                                       source->normals[0].y * source->normals[0].y * TerI->object_scale_sq +           \
-                                       source->normals[0].z * source->normals[0].z);                                   \
-            const f32 inverse_length = length == 0.0f ? 0.0f : 1.0f / length;                                          \
-            scale_candidate->normals[0].x = source->normals[0].x * inverse_length;                                     \
-            scale_candidate->normals[0].y = source->normals[0].y * TerI->object_scale * inverse_length;                \
-            scale_candidate->normals[0].z = source->normals[0].z * inverse_length;                                     \
-            ++scale_writer->scaled_shape_count;                                                                        \
-        }                                                                                                              \
-    } while (0)
-
-    // Preserve the retail arithmetic ordering and the sweep-diagonal service
-    // call, even in the wall-only caller where its result is unused.
-#define TERRAIN_GET_SCAN_BOUNDS(bounds_arg, radius_arg, wall_arg)                                                      \
-    do {                                                                                                               \
-        TerrainScanBounds &scan_bounds = (bounds_arg);                                                                 \
-        f32 &bounds_radius = (radius_arg);                                                                             \
-        const TerrainQuery_s &scan_query = *TerI;                                                                      \
-        if (scan_query.scan_result != 1) {                                                                             \
-            const f32 move_length = NuFsqrt(scan_query.movement.x * scan_query.movement.x +                            \
-                                            scan_query.movement.y * scan_query.movement.y +                            \
-                                            scan_query.movement.z * scan_query.movement.z);                            \
-            const TerrainQuery_s &sphere_query = *TerI;                                                                \
-            const f32 reach = (wall_arg) ? 0.1f + sphere_query.collision_radius + move_length                          \
-                                         : move_length + 0.1f + sphere_query.collision_radius;                         \
-            const f32 vertical = reach * sphere_query.object_scale;                                                    \
-            scan_bounds.max_x = sphere_query.position.x + 0.05f + reach;                                               \
-            scan_bounds.max_z = sphere_query.position.z + 0.05f + reach;                                               \
-            scan_bounds.min_x = sphere_query.position.x - 0.05f - reach;                                               \
-            scan_bounds.min_z = sphere_query.position.z - 0.05f - reach;                                               \
-            scan_bounds.min_y = sphere_query.position.y - 0.05f - vertical;                                            \
-            scan_bounds.max_y = sphere_query.position.y + 0.05f + vertical;                                            \
-            bounds_radius = reach;                                                                                     \
-        } else {                                                                                                       \
-            const f32 radius = scan_query.collision_radius;                                                            \
-            if (!(scan_query.movement.x > 0.0f)) {                                                                     \
-                scan_bounds.min_x = scan_query.position.x + scan_query.movement.x - 0.02f - radius;                    \
-                scan_bounds.max_x = scan_query.position.x + 0.02f + radius;                                            \
-            } else {                                                                                                   \
-                scan_bounds.min_x = scan_query.position.x - 0.02f - radius;                                            \
-                scan_bounds.max_x = scan_query.position.x + scan_query.movement.x + 0.02f + radius;                    \
-            }                                                                                                          \
-            if (!(scan_query.movement.y > 0.0f)) {                                                                     \
-                scan_bounds.min_y = scan_query.position.y + scan_query.movement.y - 0.02f - radius;                    \
-                scan_bounds.max_y = scan_query.position.y + 0.02f + radius;                                            \
-            } else {                                                                                                   \
-                scan_bounds.min_y = scan_query.position.y - 0.02f - radius;                                            \
-                scan_bounds.max_y = scan_query.position.y + scan_query.movement.y + 0.02f + radius;                    \
-            }                                                                                                          \
-            if (!(scan_query.movement.z > 0.0f)) {                                                                     \
-                scan_bounds.min_z = scan_query.position.z + scan_query.movement.z - 0.02f - radius;                    \
-                scan_bounds.max_z = scan_query.position.z + 0.02f + radius;                                            \
-            } else {                                                                                                   \
-                scan_bounds.min_z = scan_query.position.z - 0.02f - radius;                                            \
-                scan_bounds.max_z = scan_query.position.z + scan_query.movement.z + 0.02f + radius;                    \
-            }                                                                                                          \
-            const f32 dx = scan_bounds.min_x - scan_bounds.max_x;                                                      \
-            const f32 dy = scan_bounds.min_y - scan_bounds.max_y;                                                      \
-            const f32 dz = scan_bounds.min_z - scan_bounds.max_z;                                                      \
-            bounds_radius = NuFsqrt(dx * dx + dy * dy + dz * dz);                                                      \
-        }                                                                                                              \
-        if (!(wall_arg) && scan_query.object_scale > 1.0f)                                                             \
-            bounds_radius += (scan_query.object_scale - 1.0f) * scan_query.collision_radius;                           \
-    } while (0)
-
-    // These wall-spline traversals are part of all three retail scan bodies.
-#define TERRAIN_COLLECT_WALL_SPLINES(bounds_arg, mask_arg, clear_arg, reset_empty_arg)                                 \
-    do {                                                                                                               \
-        TerrainScanBounds wall_bounds = (bounds_arg);                                                                  \
-        const i32 wall_mask = (mask_arg);                                                                              \
-        const bool wall_clear_override = (clear_arg);                                                                  \
-        wall_bounds.min_x -= 0.02f;                                                                                    \
-        wall_bounds.min_z -= 0.02f;                                                                                    \
-        wall_bounds.max_x += 0.02f;                                                                                    \
-        wall_bounds.max_z += 0.02f;                                                                                    \
-        if ((reset_empty_arg) || (CurTerr->spatial_nodes != NULL && WallSplCount < 64))                                \
-            WallSplCount = 0;                                                                                          \
-        for (TERRAIN_SPATIAL_NODE *node = CurTerr->spatial_nodes; node != NULL;                                        \
-             node = *reinterpret_cast<TERRAIN_SPATIAL_NODE **>(reinterpret_cast<u8 *>(node) - sizeof(void *))) {       \
-            const u8 mask = node->field_0x02 >> 8;                                                                     \
-            if (mask != 0 && (mask & wall_mask) == 0)                                                                  \
-                continue;                                                                                              \
-            for (i32 first = 0; first < node->point_count; first += 16) {                                              \
-                NUVEC *points = node->points + first;                                                                  \
-                i32 end = node->point_count;                                                                           \
-                if (points[0].y != 2147483648.0f) {                                                                    \
-                    if (!(points[1].y >= wall_bounds.min_x && wall_bounds.max_x >= points[0].y &&                      \
-                          points[3].y >= wall_bounds.min_z && wall_bounds.max_z >= points[2].y))                       \
-                        continue;                                                                                      \
-                    end = MIN(end, first + 16);                                                                        \
-                }                                                                                                      \
-                for (i32 i = first; i < end; ++i) {                                                                    \
-                    NUVEC &a = node->points[i];                                                                        \
-                    NUVEC &b = node->points[i + 1];                                                                    \
-                    if (!((a.x >= wall_bounds.min_x && wall_bounds.max_x >= b.x) ||                                    \
-                          (b.x >= wall_bounds.min_x && wall_bounds.max_x >= a.x)))                                     \
-                        continue;                                                                                      \
-                    if (!((a.z >= wall_bounds.min_z && wall_bounds.max_z >= b.z) ||                                    \
-                          (b.z >= wall_bounds.min_z && wall_bounds.max_z >= a.z)))                                     \
-                        continue;                                                                                      \
-                    if (WallSplCount < 64) {                                                                           \
-                        WallSplList[WallSplCount].position = a;                                                        \
-                        WallSplList[WallSplCount + 1].position = b;                                                    \
-                        for (i32 p = 0; p < 2; ++p) {                                                                  \
-                            u8 *material = WallSplList[WallSplCount + p].material;                                     \
-                            material[0] = static_cast<u8>(node->field_0x02);                                           \
-                            material[1] = mask;                                                                        \
-                            material[2] = 0;                                                                           \
-                            material[3] = 0;                                                                           \
-                        }                                                                                              \
-                        WallSplCount += 2;                                                                             \
-                    }                                                                                                  \
-                }                                                                                                      \
-            }                                                                                                          \
-        }                                                                                                              \
-        if (wall_clear_override)                                                                                       \
-            TerrOverRideScan = NULL;                                                                                   \
-    } while (0)
-
 } // namespace
-
-// Constructs the fixed terrain header and its variable-sized group, index and
-// platform arrays in the caller's arena. The four bounds arrays and the cell
-// assignment array are temporary storage carved backwards from buf_end.
-#define IS_SNAN(x) (*(u32 *)&(x) == 0xffc00000)
 
 namespace {
 
-
 } // namespace
 
-// Retail only keeps the IPA-SRA clone, which takes &normal->y.
-#if defined(__i386__)
-#define TERRAIN_KILL_PLAYER_ATTR __attribute__((noinline, noclone, regparm(2)))
-#else
-#define TERRAIN_KILL_PLAYER_ATTR __attribute__((noinline, noclone))
-#endif
-
-
 namespace {
-
-    // Target NewScanRot 0x378fb0 uses 0.1f on both horizontal axes when
-    // selecting the terrain shapes that can contain the cast point.
 
 } // namespace
 
@@ -7097,46 +4885,6 @@ extern "C" {
 extern const u8 HintRGB[5][3] = {
     {255, 0, 0}, {0, 255, 0}, {0, 127, 255}, {127, 0, 255}, {255, 255, 0},
 };
-
-#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
-    do {                                                                                                               \
-        direction.x = (vx);                                                                                            \
-        direction.y = -(vy) * camera.aspect;                                                                           \
-        direction.z = adjacent;                                                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        brightness = direction.y * 0.5f + 0.5f;                                                                        \
-        if (brightness <= near_angle)                                                                                  \
-            brightness = near_scale * parameters->intensity;                                                           \
-        else if (brightness >= far_angle)                                                                              \
-            brightness = far_scale * parameters->intensity;                                                            \
-        else                                                                                                           \
-            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
-        if (parameters->directional) {                                                                                 \
-            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
-            if (angle < parameters->direction_near_angle) {                                                            \
-                brightness += 128.0f * parameters->direction_far_scale;                                                \
-            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
-                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
-                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
-                                      parameters->direction_bias);                                                     \
-                brightness +=                                                                                          \
-                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
-                              parameters->direction_near_scale);                                                       \
-            }                                                                                                          \
-        }                                                                                                              \
-        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
-                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
-        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
-                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
-        else                                                                                                           \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
-        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
-    } while (0)
 
 static u8 cacheValues[256];
 
@@ -7181,18 +4929,6 @@ f32 BOSSICONY = 0.0f;
 i32 FPSDISPLAY = 0;
 i32 ShowPlayerCoordinate = 0;
 
-#define SWIPE_PRIM_UV(U, V)                                                                                            \
-    do {                                                                                                               \
-        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
-        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
-            vertex->float_uv[0] = (U);                                                                                 \
-            vertex->float_uv[1] = (V);                                                                                 \
-        } else {                                                                                                       \
-            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
-            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
-        }                                                                                                              \
-    } while (false)
-
 extern "C" {
     extern nurenderscene_s currentScene;
 }
@@ -7225,14 +4961,6 @@ i32 draw_octree = 1;
 
 void OctreeRndr(u8 *visibility, nuoctreenode_s *root, i32 enabled);
 
-#define PART_EMIT_SOUND_ON(slot)                                                                                       \
-    if (type->sounds[slot] != -1) {                                                                                    \
-        SetSfxBit_On(type->sounds[slot]);                                                                              \
-        if (type->sound_modes[slot] == 4)                                                                              \
-            PlaySfxById(type->sounds[slot], &emitter->position);                                                       \
-    }
-#define PART_EMIT_SOUND(slot, mode)                                                                                    \
-
 extern "C" {
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 static __used__ i32 cbInteractMenuCancelChild(edui_interact_s *interact);
@@ -7448,58 +5176,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
 } // extern "C"
 
-#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
-    do {                                                                                                               \
-        direction.x = (vx);                                                                                            \
-        direction.y = -(vy) * camera.aspect;                                                                           \
-        direction.z = adjacent;                                                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        brightness = direction.y * 0.5f + 0.5f;                                                                        \
-        if (brightness <= near_angle)                                                                                  \
-            brightness = near_scale * parameters->intensity;                                                           \
-        else if (brightness >= far_angle)                                                                              \
-            brightness = far_scale * parameters->intensity;                                                            \
-        else                                                                                                           \
-            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
-        if (parameters->directional) {                                                                                 \
-            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
-            if (angle < parameters->direction_near_angle) {                                                            \
-                brightness += 128.0f * parameters->direction_far_scale;                                                \
-            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
-                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
-                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
-                                      parameters->direction_bias);                                                     \
-                brightness +=                                                                                          \
-                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
-                              parameters->direction_near_scale);                                                       \
-            }                                                                                                          \
-        }                                                                                                              \
-        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
-                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
-        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
-                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
-        else                                                                                                           \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
-        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
-    } while (0)
-
-#define SWIPE_PRIM_UV(U, V)                                                                                            \
-    do {                                                                                                               \
-        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
-        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
-            vertex->float_uv[0] = (U);                                                                                 \
-            vertex->float_uv[1] = (V);                                                                                 \
-        } else {                                                                                                       \
-            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
-            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
-        }                                                                                                              \
-    } while (false)
-
 extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -7592,181 +5268,16 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
 } // extern "C"
-
-#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
-    do {                                                                                                               \
-        direction.x = (vx);                                                                                            \
-        direction.y = -(vy) * camera.aspect;                                                                           \
-        direction.z = adjacent;                                                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        brightness = direction.y * 0.5f + 0.5f;                                                                        \
-        if (brightness <= near_angle)                                                                                  \
-            brightness = near_scale * parameters->intensity;                                                           \
-        else if (brightness >= far_angle)                                                                              \
-            brightness = far_scale * parameters->intensity;                                                            \
-        else                                                                                                           \
-            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
-        if (parameters->directional) {                                                                                 \
-            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
-            if (angle < parameters->direction_near_angle) {                                                            \
-                brightness += 128.0f * parameters->direction_far_scale;                                                \
-            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
-                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
-                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
-                                      parameters->direction_bias);                                                     \
-                brightness +=                                                                                          \
-                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
-                              parameters->direction_near_scale);                                                       \
-            }                                                                                                          \
-        }                                                                                                              \
-        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
-                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
-        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
-                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
-        else                                                                                                           \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
-        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
-    } while (0)
-
-#define SWIPE_PRIM_UV(U, V)                                                                                            \
-    do {                                                                                                               \
-        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
-        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
-            vertex->float_uv[0] = (U);                                                                                 \
-            vertex->float_uv[1] = (V);                                                                                 \
-        } else {                                                                                                       \
-            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
-            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
-        }                                                                                                              \
-    } while (false)
 
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
 
-
 }
-
-#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
-    do {                                                                                                               \
-        direction.x = (vx);                                                                                            \
-        direction.y = -(vy) * camera.aspect;                                                                           \
-        direction.z = adjacent;                                                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        brightness = direction.y * 0.5f + 0.5f;                                                                        \
-        if (brightness <= near_angle)                                                                                  \
-            brightness = near_scale * parameters->intensity;                                                           \
-        else if (brightness >= far_angle)                                                                              \
-            brightness = far_scale * parameters->intensity;                                                            \
-        else                                                                                                           \
-            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
-        if (parameters->directional) {                                                                                 \
-            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
-            if (angle < parameters->direction_near_angle) {                                                            \
-                brightness += 128.0f * parameters->direction_far_scale;                                                \
-            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
-                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
-                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
-                                      parameters->direction_bias);                                                     \
-                brightness +=                                                                                          \
-                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
-                              parameters->direction_near_scale);                                                       \
-            }                                                                                                          \
-        }                                                                                                              \
-        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
-                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
-        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
-                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
-        else                                                                                                           \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
-        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
-    } while (0)
-
-#define SWIPE_PRIM_UV(U, V)                                                                                            \
-    do {                                                                                                               \
-        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
-        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
-            vertex->float_uv[0] = (U);                                                                                 \
-            vertex->float_uv[1] = (V);                                                                                 \
-        } else {                                                                                                       \
-            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
-            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
-        }                                                                                                              \
-    } while (false)
 
 namespace {
 
 } // namespace
 
-#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
-    do {                                                                                                               \
-        direction.x = (vx);                                                                                            \
-        direction.y = -(vy) * camera.aspect;                                                                           \
-        direction.z = adjacent;                                                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        brightness = direction.y * 0.5f + 0.5f;                                                                        \
-        if (brightness <= near_angle)                                                                                  \
-            brightness = near_scale * parameters->intensity;                                                           \
-        else if (brightness >= far_angle)                                                                              \
-            brightness = far_scale * parameters->intensity;                                                            \
-        else                                                                                                           \
-            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
-        if (parameters->directional) {                                                                                 \
-            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
-            if (angle < parameters->direction_near_angle) {                                                            \
-                brightness += 128.0f * parameters->direction_far_scale;                                                \
-            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
-                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
-                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
-                                      parameters->direction_bias);                                                     \
-                brightness +=                                                                                          \
-                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
-                              parameters->direction_near_scale);                                                       \
-            }                                                                                                          \
-        }                                                                                                              \
-        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
-                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
-        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
-                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
-        else                                                                                                           \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
-        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
-    } while (0)
-
-#define SWIPE_PRIM_UV(U, V)                                                                                            \
-    do {                                                                                                               \
-        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
-        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
-            vertex->float_uv[0] = (U);                                                                                 \
-            vertex->float_uv[1] = (V);                                                                                 \
-        } else {                                                                                                       \
-            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
-            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
-        }                                                                                                              \
-    } while (false)
-
-#define PART_EMIT_SOUND_ON(slot)                                                                                       \
-    if (type->sounds[slot] != -1) {                                                                                    \
-        SetSfxBit_On(type->sounds[slot]);                                                                              \
-        if (type->sound_modes[slot] == 4)                                                                              \
-            PlaySfxById(type->sounds[slot], &emitter->position);                                                       \
-    }
-#define PART_EMIT_SOUND(slot, mode)                                                                                    \
-
 extern "C" {
 static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
 static __used__ i32 cbInteractMenuCancelChild(edui_interact_s *interact);
@@ -7982,58 +5493,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
 } // extern "C"
 
-#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
-    do {                                                                                                               \
-        direction.x = (vx);                                                                                            \
-        direction.y = -(vy) * camera.aspect;                                                                           \
-        direction.z = adjacent;                                                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        brightness = direction.y * 0.5f + 0.5f;                                                                        \
-        if (brightness <= near_angle)                                                                                  \
-            brightness = near_scale * parameters->intensity;                                                           \
-        else if (brightness >= far_angle)                                                                              \
-            brightness = far_scale * parameters->intensity;                                                            \
-        else                                                                                                           \
-            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
-        if (parameters->directional) {                                                                                 \
-            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
-            if (angle < parameters->direction_near_angle) {                                                            \
-                brightness += 128.0f * parameters->direction_far_scale;                                                \
-            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
-                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
-                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
-                                      parameters->direction_bias);                                                     \
-                brightness +=                                                                                          \
-                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
-                              parameters->direction_near_scale);                                                       \
-            }                                                                                                          \
-        }                                                                                                              \
-        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
-                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
-        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
-                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
-        else                                                                                                           \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
-        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
-    } while (0)
-
-#define SWIPE_PRIM_UV(U, V)                                                                                            \
-    do {                                                                                                               \
-        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
-        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
-            vertex->float_uv[0] = (U);                                                                                 \
-            vertex->float_uv[1] = (V);                                                                                 \
-        } else {                                                                                                       \
-            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
-            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
-        }                                                                                                              \
-    } while (false)
-
 extern "C" {
     // ---------------------------------------------------------------------------
     // ---------------------------------------------------------------------------
@@ -8127,78 +5586,13 @@ extern "C" {
     // ---------------------------------------------------------------------------
 } // extern "C"
 
-#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
-    do {                                                                                                               \
-        direction.x = (vx);                                                                                            \
-        direction.y = -(vy) * camera.aspect;                                                                           \
-        direction.z = adjacent;                                                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        brightness = direction.y * 0.5f + 0.5f;                                                                        \
-        if (brightness <= near_angle)                                                                                  \
-            brightness = near_scale * parameters->intensity;                                                           \
-        else if (brightness >= far_angle)                                                                              \
-            brightness = far_scale * parameters->intensity;                                                            \
-        else                                                                                                           \
-            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
-        if (parameters->directional) {                                                                                 \
-            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
-            if (angle < parameters->direction_near_angle) {                                                            \
-                brightness += 128.0f * parameters->direction_far_scale;                                                \
-            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
-                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
-                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
-                                      parameters->direction_bias);                                                     \
-                brightness +=                                                                                          \
-                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
-                              parameters->direction_near_scale);                                                       \
-            }                                                                                                          \
-        }                                                                                                              \
-        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
-                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
-        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
-                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
-        else                                                                                                           \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
-        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
-    } while (0)
-
-#define SWIPE_PRIM_UV(U, V)                                                                                            \
-    do {                                                                                                               \
-        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
-        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
-            vertex->float_uv[0] = (U);                                                                                 \
-            vertex->float_uv[1] = (V);                                                                                 \
-        } else {                                                                                                       \
-            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
-            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
-        }                                                                                                              \
-    } while (false)
-
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
-
 
 }
 
-#define HAS_BLOCK_ANIMS(animations)                                                                                    \
-    ((animations)[0x1a] != NULL || (animations)[0x1b] != NULL || (animations)[0x1c] != NULL)
-
-#define PART_EMIT_SOUND_ON(slot)                                                                                       \
-    if (type->sounds[slot] != -1) {                                                                                    \
-        SetSfxBit_On(type->sounds[slot]);                                                                              \
-        if (type->sound_modes[slot] == 4)                                                                              \
-            PlaySfxById(type->sounds[slot], &emitter->position);                                                       \
-    }
-#define PART_EMIT_SOUND(slot, mode)                                                                                    \
-
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
-
 
 }
 
@@ -8213,154 +5607,11 @@ extern "C" {
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
 
-
 }
 
 namespace {
 
 } // namespace
-
-#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
-    do {                                                                                                               \
-        direction.x = (vx);                                                                                            \
-        direction.y = -(vy) * camera.aspect;                                                                           \
-        direction.z = adjacent;                                                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        brightness = direction.y * 0.5f + 0.5f;                                                                        \
-        if (brightness <= near_angle)                                                                                  \
-            brightness = near_scale * parameters->intensity;                                                           \
-        else if (brightness >= far_angle)                                                                              \
-            brightness = far_scale * parameters->intensity;                                                            \
-        else                                                                                                           \
-            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
-        if (parameters->directional) {                                                                                 \
-            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
-            if (angle < parameters->direction_near_angle) {                                                            \
-                brightness += 128.0f * parameters->direction_far_scale;                                                \
-            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
-                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
-                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
-                                      parameters->direction_bias);                                                     \
-                brightness +=                                                                                          \
-                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
-                              parameters->direction_near_scale);                                                       \
-            }                                                                                                          \
-        }                                                                                                              \
-        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
-                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
-        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
-                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
-        else                                                                                                           \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
-        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
-    } while (0)
-
-#define SWIPE_PRIM_UV(U, V)                                                                                            \
-    do {                                                                                                               \
-        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
-        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
-            vertex->float_uv[0] = (U);                                                                                 \
-            vertex->float_uv[1] = (V);                                                                                 \
-        } else {                                                                                                       \
-            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
-            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
-        }                                                                                                              \
-    } while (false)
-
-#define ADD_SNAKE_SEGMENT_DEBRIS(index)                                                                                \
-    do {                                                                                                               \
-        const i32 segment_index = (index);                                                                             \
-        NUMTX matrix;                                                                                                  \
-        NUANGVEC angles;                                                                                               \
-        angles.y = NuAngAdd(object->snake_body->segments[segment_index].yaw, 0x8000);                                  \
-        angles.x = object->snake_body->segments[segment_index].pitch;                                                  \
-        NuMtxSetRotationXYVU0(&matrix, &angles);                                                                       \
-        if (object->snake_body->scale != 1.0f) {                                                                       \
-            NUVEC scale = {object->snake_body->scale, object->snake_body->scale, object->snake_body->scale};           \
-            NuMtxPreScale(&matrix, &scale);                                                                            \
-        }                                                                                                              \
-        matrix.m30 += object->snake_body->segments[segment_index].position.x;                                          \
-        matrix.m31 += object->snake_body->segments[segment_index].position.y + object->snake_body->scale * 0.02f;      \
-        matrix.m32 += object->snake_body->segments[segment_index].position.z;                                          \
-        i32 special_index = segment_index == object->snake_body->segment_count - 1 ? 2 : segment_index % 2;            \
-        nuhspecial_s *special = &snake_hspecials[special_index];                                                       \
-        if (NuSpecialExistsFn(special)) {                                                                              \
-            NUVEC momentum;                                                                                            \
-            SetKillPartMom(&momentum);                                                                                 \
-            momentum.y += 1.0f;                                                                                        \
-            ADDPART_s part = Default_ADDPART;                                                                          \
-            part.matrix = &matrix;                                                                                     \
-            part.velocity = &momentum;                                                                                 \
-            part.field_14 = 0.1f;                                                                                      \
-            part.field_18 = 0.1f;                                                                                      \
-            part.gravity = -5.0f;                                                                                      \
-            part.special = special;                                                                                    \
-            part.flags = 0x90;                                                                                         \
-            part.stop_fn = PartStop_Flickerer;                                                                         \
-            part.draw_fn = PartDraw_Flickerer;                                                                         \
-            part.field_3c = PartImpact_Brick;                                                                          \
-            part.time_step = FRAMETIME;                                                                                \
-            part.lighting = reinterpret_cast<PARTLIGHTSOURCE_s *>(&object->light_data);                                \
-            AddPart(&part);                                                                                            \
-        }                                                                                                              \
-    } while (0)
-
-#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
-    do {                                                                                                               \
-        direction.x = (vx);                                                                                            \
-        direction.y = -(vy) * camera.aspect;                                                                           \
-        direction.z = adjacent;                                                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        brightness = direction.y * 0.5f + 0.5f;                                                                        \
-        if (brightness <= near_angle)                                                                                  \
-            brightness = near_scale * parameters->intensity;                                                           \
-        else if (brightness >= far_angle)                                                                              \
-            brightness = far_scale * parameters->intensity;                                                            \
-        else                                                                                                           \
-            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
-        if (parameters->directional) {                                                                                 \
-            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
-            if (angle < parameters->direction_near_angle) {                                                            \
-                brightness += 128.0f * parameters->direction_far_scale;                                                \
-            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
-                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
-                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
-                                      parameters->direction_bias);                                                     \
-                brightness +=                                                                                          \
-                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
-                              parameters->direction_near_scale);                                                       \
-            }                                                                                                          \
-        }                                                                                                              \
-        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
-                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
-        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
-                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
-        else                                                                                                           \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
-        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
-    } while (0)
-
-#define SWIPE_PRIM_UV(U, V)                                                                                            \
-    do {                                                                                                               \
-        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
-        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
-            vertex->float_uv[0] = (U);                                                                                 \
-            vertex->float_uv[1] = (V);                                                                                 \
-        } else {                                                                                                       \
-            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
-            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
-        }                                                                                                              \
-    } while (false)
 
 extern "C" {
 extern u32 flagremaptab[32][2];
@@ -8369,60 +5620,7 @@ extern u32 flagremaptab[32][2];
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
 
-
 }
-
-#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
-    do {                                                                                                               \
-        direction.x = (vx);                                                                                            \
-        direction.y = -(vy) * camera.aspect;                                                                           \
-        direction.z = adjacent;                                                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        brightness = direction.y * 0.5f + 0.5f;                                                                        \
-        if (brightness <= near_angle)                                                                                  \
-            brightness = near_scale * parameters->intensity;                                                           \
-        else if (brightness >= far_angle)                                                                              \
-            brightness = far_scale * parameters->intensity;                                                            \
-        else                                                                                                           \
-            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
-        if (parameters->directional) {                                                                                 \
-            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
-            if (angle < parameters->direction_near_angle) {                                                            \
-                brightness += 128.0f * parameters->direction_far_scale;                                                \
-            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
-                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
-                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
-                                      parameters->direction_bias);                                                     \
-                brightness +=                                                                                          \
-                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
-                              parameters->direction_near_scale);                                                       \
-            }                                                                                                          \
-        }                                                                                                              \
-        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
-                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
-        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
-                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
-        else                                                                                                           \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
-        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
-    } while (0)
-
-#define SWIPE_PRIM_UV(U, V)                                                                                            \
-    do {                                                                                                               \
-        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
-        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
-            vertex->float_uv[0] = (U);                                                                                 \
-            vertex->float_uv[1] = (V);                                                                                 \
-        } else {                                                                                                       \
-            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
-            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
-        }                                                                                                              \
-    } while (false)
 
 static i32 max_materials;
 static NUMTL *material_list;

@@ -5,7 +5,10 @@
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nu3d/numtl.h"
+#include "nu2api/numath/nuvec.h"
 #include <string.h>
+
+extern f32 FRAMETIME;
 
 struct AIROW_s;
 struct nuqthdr_s;

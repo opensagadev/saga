@@ -162,8 +162,6 @@ u8 show_unlock_shop_hint = 0;
 u8 show_unlock_customiser_hint = 0;
 u8 show_unlock_minikitviewer_hint = 0;
 
-// Retail keeps this body as GCC's split-out clone; the inline head stays in
-// the caller.
 static __attribute__((noinline, noclone)) void DrawHint_LSWBody(HINT_s *hint, i32 max_lines)
     __asm__("_Z12DrawHint_LSWP6HINT_si.part.19");
 
@@ -250,7 +248,6 @@ HINT_s Hints_LSW[55] = {
     {{-1, -1}, 0, {255, 0, 0}, 1000, 1.0f, 1.0f, {NULL}, NULL, {0, 0, 0, 0}, 0.0f},
 };
 
-// Each control mode retains its own requested and interpolated hint row.
 static i32 updatehints_target_y[2];
 static f32 updatehints_current_y[2];
 

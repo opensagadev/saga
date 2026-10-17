@@ -8,7 +8,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "nu2api/nucore/nuvuvec.hpp"
 
 // The 16-byte type alignment supplies the trailing padding in the original 0x810-byte pool.
 struct __attribute__((aligned(16))) ShaderProgramPool {
@@ -24,6 +23,9 @@ DECOMP_ASSERT(sizeof(ShaderProgramPool) == 0x810, "Shader program pool ABI");
 DECOMP_ASSERT(offsetof(ShaderProgramPool, occupied) == 0x800, "Shader program occupancy offset");
 DECOMP_ASSERT(offsetof(ShaderProgramPool, next) == 0x808, "Shader program cursor offset");
 static ShaderProgramPool programPool;
+
+// The reference constructs the program pool before the VuVec constants.
+#include "nu2api/nucore/nuvuvec.hpp"
 
 // Original Pair type identity only; its element layout is not used here.
 // These two named empty vectors require only the canonical scalar lifetime.

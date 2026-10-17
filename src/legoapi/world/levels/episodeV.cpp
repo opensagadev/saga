@@ -172,11 +172,6 @@ static inline void HothBattle_AssignSpawnLocator(GameObject_s *object, AILOCATOR
     }
 }
 
-// Asteroid chase (AsteroidChase_A / B / C / D)
-
-
-
-
 i32 nasteroids;
 ASTEROID_s asteroids[128];
 FINALASTEROID_s finalAsteroid;
@@ -211,7 +206,6 @@ extern "C" {
 
 }
 
-// Forward declarations for local (static) part/gizmo helper stubs.
 struct spacelevel_s;
 struct quickboltinfo;
 
@@ -219,36 +213,11 @@ extern "C" {
     // The editor loader clears these page IDs with aligned vector stores.
 } // extern "C"
 
-// The original repeats the per-sound emitter checks for each of the four sound slots.
-#define PART_EMIT_SOUND_ON(slot)                                                                                       \
-    if (type->sounds[slot] != -1) {                                                                                    \
-        SetSfxBit_On(type->sounds[slot]);                                                                              \
-        if (type->sound_modes[slot] == 4)                                                                              \
-            PlaySfxById(type->sounds[slot], &emitter->position);                                                       \
-    }
-#define PART_EMIT_SOUND(slot, mode)                                                                                    \
-    if (type->sounds[slot] != -1 && type->sound_modes[slot] == (mode))                                                 \
-        PlaySfxById(type->sounds[slot], &emitter->position);
-
-
 TROOPERCANNON_s troopercannons[4];
-
-// Shared gameplay helpers
 
 static __used__ void KilledTrooperCannon(GameObject_s *object);
 
-// LoadPerm1 is one of the few game-level entry points which wires together
-// otherwise C-linkage engine subsystems.  Keep these declarations local: the
-// individual subsystem TUs intentionally expose their original plain names.
-
 struct AISYS_s;
-
-// Retail keeps only the IPA-SRA clone, which receives &*layers.
-#if defined(__i386__)
-#define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone, regparm(1)))
-#else
-#define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone))
-#endif
 
 extern i16 tALLMINIKITSBUILT;
 
@@ -294,80 +263,10 @@ struct ripple_node_s;
 struct ripple_set_s;
 struct VuVec;
 
-// Retail only keeps the IPA-SRA clone, which drops the unused fourth argument.
-#if defined(__i386__)
-#define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone, regparm(2)))
-#else
-#define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone))
-#endif
-
-// --- Extern "C": NuGScn functions have C linkage in original ---
-
-#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
-    do {                                                                                                               \
-        direction.x = (vx);                                                                                            \
-        direction.y = -(vy) * camera.aspect;                                                                           \
-        direction.z = adjacent;                                                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        brightness = direction.y * 0.5f + 0.5f;                                                                        \
-        if (brightness <= near_angle)                                                                                  \
-            brightness = near_scale * parameters->intensity;                                                           \
-        else if (brightness >= far_angle)                                                                              \
-            brightness = far_scale * parameters->intensity;                                                            \
-        else                                                                                                           \
-            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
-        if (parameters->directional) {                                                                                 \
-            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
-            if (angle < parameters->direction_near_angle) {                                                            \
-                brightness += 128.0f * parameters->direction_far_scale;                                                \
-            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
-                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
-                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
-                                      parameters->direction_bias);                                                     \
-                brightness +=                                                                                          \
-                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
-                              parameters->direction_near_scale);                                                       \
-            }                                                                                                          \
-        }                                                                                                              \
-        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
-                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
-        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
-                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
-        else                                                                                                           \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
-        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
-    } while (0)
-
-// DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
-// red-brick positions come from the Game init values in legogame/game.cpp.
-
 extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
 extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
 
-#define SWIPE_PRIM_UV(U, V)                                                                                            \
-    do {                                                                                                               \
-        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
-        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
-            vertex->float_uv[0] = (U);                                                                                 \
-            vertex->float_uv[1] = (V);                                                                                 \
-        } else {                                                                                                       \
-            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
-            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
-        }                                                                                                              \
-    } while (false)
-
 extern i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
-
-#if defined(__i386__)
-#define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone, regparm(1)))
-#else
-#define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone))
-#endif
 
 struct tertype;
 struct terrsitu_s;
@@ -378,197 +277,17 @@ extern "C" i16 id_SNAKE;
 
 namespace {
 
+} // namespace
 
-
+namespace {
 
 } // namespace
 
 namespace {
 
-    // Retail scan callers contain the scale-and-normal reconstruction directly.
-#define TERRAIN_SCALE_SCAN_SHAPE(candidate_arg, group_arg, writer_arg)                                                 \
-    do {                                                                                                               \
-        TERRAIN_SHAPE *&scale_candidate = (candidate_arg);                                                             \
-        const TERRAIN_GROUP &scale_group = (group_arg);                                                                \
-        TerrainScanWriter *scale_writer = (writer_arg);                                                                \
-        if (TerI->object_scale != 1.0f) {                                                                              \
-            TERRAIN_SHAPE *source = scale_candidate;                                                                   \
-            scale_candidate = &ScaleTerrain[scale_writer->scaled_shape_count];                                         \
-            scale_candidate->material[0] = source->material[0];                                                        \
-            scale_candidate->material[1] = source->material[1];                                                        \
-            scale_candidate->flags = source->flags;                                                                    \
-            scale_candidate->normal_flags = source->normal_flags;                                                      \
-                                                                                                                       \
-            for (i32 vector_index = 0; vector_index < 3; ++vector_index) {                                             \
-                scale_candidate->vectors[vector_index].x = source->vectors[vector_index].x;                            \
-                scale_candidate->vectors[vector_index].z = source->vectors[vector_index].z;                            \
-                scale_candidate->vectors[vector_index].y =                                                             \
-                    (source->vectors[vector_index].y + scale_group.origin.y) * TerI->inverse_object_scale -            \
-                    scale_group.origin.y;                                                                              \
-            }                                                                                                          \
-                                                                                                                       \
-            if (source->normals[1].y < 65535.0f) {                                                                     \
-                scale_candidate->vectors[3].x = source->vectors[3].x;                                                  \
-                scale_candidate->vectors[3].z = source->vectors[3].z;                                                  \
-                scale_candidate->vectors[3].y =                                                                        \
-                    (source->vectors[3].y + scale_group.origin.y) * TerI->inverse_object_scale - scale_group.origin.y; \
-                                                                                                                       \
-                const f32 length = NuFsqrt(source->normals[1].x * source->normals[1].x +                               \
-                                           source->normals[1].y * source->normals[1].y * TerI->object_scale_sq +       \
-                                           source->normals[1].z * source->normals[1].z);                               \
-                const f32 inverse_length = length == 0.0f ? 0.0f : 1.0f / length;                                      \
-                scale_candidate->normals[1].x = source->normals[1].x * inverse_length;                                 \
-                scale_candidate->normals[1].y = source->normals[1].y * TerI->object_scale * inverse_length;            \
-                scale_candidate->normals[1].z = source->normals[1].z * inverse_length;                                 \
-            } else {                                                                                                   \
-                scale_candidate->normals[1].y = 65536.0f;                                                              \
-            }                                                                                                          \
-                                                                                                                       \
-            const f32 length = NuFsqrt(source->normals[0].x * source->normals[0].x +                                   \
-                                       source->normals[0].y * source->normals[0].y * TerI->object_scale_sq +           \
-                                       source->normals[0].z * source->normals[0].z);                                   \
-            const f32 inverse_length = length == 0.0f ? 0.0f : 1.0f / length;                                          \
-            scale_candidate->normals[0].x = source->normals[0].x * inverse_length;                                     \
-            scale_candidate->normals[0].y = source->normals[0].y * TerI->object_scale * inverse_length;                \
-            scale_candidate->normals[0].z = source->normals[0].z * inverse_length;                                     \
-            ++scale_writer->scaled_shape_count;                                                                        \
-        }                                                                                                              \
-    } while (0)
-
-    // Preserve the retail arithmetic ordering and the sweep-diagonal service
-    // call, even in the wall-only caller where its result is unused.
-#define TERRAIN_GET_SCAN_BOUNDS(bounds_arg, radius_arg, wall_arg)                                                      \
-    do {                                                                                                               \
-        TerrainScanBounds &scan_bounds = (bounds_arg);                                                                 \
-        f32 &bounds_radius = (radius_arg);                                                                             \
-        const TerrainQuery_s &scan_query = *TerI;                                                                      \
-        if (scan_query.scan_result != 1) {                                                                             \
-            const f32 move_length = NuFsqrt(scan_query.movement.x * scan_query.movement.x +                            \
-                                            scan_query.movement.y * scan_query.movement.y +                            \
-                                            scan_query.movement.z * scan_query.movement.z);                            \
-            const TerrainQuery_s &sphere_query = *TerI;                                                                \
-            const f32 reach = (wall_arg) ? 0.1f + sphere_query.collision_radius + move_length                          \
-                                         : move_length + 0.1f + sphere_query.collision_radius;                         \
-            const f32 vertical = reach * sphere_query.object_scale;                                                    \
-            scan_bounds.max_x = sphere_query.position.x + 0.05f + reach;                                               \
-            scan_bounds.max_z = sphere_query.position.z + 0.05f + reach;                                               \
-            scan_bounds.min_x = sphere_query.position.x - 0.05f - reach;                                               \
-            scan_bounds.min_z = sphere_query.position.z - 0.05f - reach;                                               \
-            scan_bounds.min_y = sphere_query.position.y - 0.05f - vertical;                                            \
-            scan_bounds.max_y = sphere_query.position.y + 0.05f + vertical;                                            \
-            bounds_radius = reach;                                                                                     \
-        } else {                                                                                                       \
-            const f32 radius = scan_query.collision_radius;                                                            \
-            if (!(scan_query.movement.x > 0.0f)) {                                                                     \
-                scan_bounds.min_x = scan_query.position.x + scan_query.movement.x - 0.02f - radius;                    \
-                scan_bounds.max_x = scan_query.position.x + 0.02f + radius;                                            \
-            } else {                                                                                                   \
-                scan_bounds.min_x = scan_query.position.x - 0.02f - radius;                                            \
-                scan_bounds.max_x = scan_query.position.x + scan_query.movement.x + 0.02f + radius;                    \
-            }                                                                                                          \
-            if (!(scan_query.movement.y > 0.0f)) {                                                                     \
-                scan_bounds.min_y = scan_query.position.y + scan_query.movement.y - 0.02f - radius;                    \
-                scan_bounds.max_y = scan_query.position.y + 0.02f + radius;                                            \
-            } else {                                                                                                   \
-                scan_bounds.min_y = scan_query.position.y - 0.02f - radius;                                            \
-                scan_bounds.max_y = scan_query.position.y + scan_query.movement.y + 0.02f + radius;                    \
-            }                                                                                                          \
-            if (!(scan_query.movement.z > 0.0f)) {                                                                     \
-                scan_bounds.min_z = scan_query.position.z + scan_query.movement.z - 0.02f - radius;                    \
-                scan_bounds.max_z = scan_query.position.z + 0.02f + radius;                                            \
-            } else {                                                                                                   \
-                scan_bounds.min_z = scan_query.position.z - 0.02f - radius;                                            \
-                scan_bounds.max_z = scan_query.position.z + scan_query.movement.z + 0.02f + radius;                    \
-            }                                                                                                          \
-            const f32 dx = scan_bounds.min_x - scan_bounds.max_x;                                                      \
-            const f32 dy = scan_bounds.min_y - scan_bounds.max_y;                                                      \
-            const f32 dz = scan_bounds.min_z - scan_bounds.max_z;                                                      \
-            bounds_radius = NuFsqrt(dx * dx + dy * dy + dz * dz);                                                      \
-        }                                                                                                              \
-        if (!(wall_arg) && scan_query.object_scale > 1.0f)                                                             \
-            bounds_radius += (scan_query.object_scale - 1.0f) * scan_query.collision_radius;                           \
-    } while (0)
-
-    // These wall-spline traversals are part of all three retail scan bodies.
-#define TERRAIN_COLLECT_WALL_SPLINES(bounds_arg, mask_arg, clear_arg, reset_empty_arg)                                 \
-    do {                                                                                                               \
-        TerrainScanBounds wall_bounds = (bounds_arg);                                                                  \
-        const i32 wall_mask = (mask_arg);                                                                              \
-        const bool wall_clear_override = (clear_arg);                                                                  \
-        wall_bounds.min_x -= 0.02f;                                                                                    \
-        wall_bounds.min_z -= 0.02f;                                                                                    \
-        wall_bounds.max_x += 0.02f;                                                                                    \
-        wall_bounds.max_z += 0.02f;                                                                                    \
-        if ((reset_empty_arg) || (CurTerr->spatial_nodes != NULL && WallSplCount < 64))                                \
-            WallSplCount = 0;                                                                                          \
-        for (TERRAIN_SPATIAL_NODE *node = CurTerr->spatial_nodes; node != NULL;                                        \
-             node = *reinterpret_cast<TERRAIN_SPATIAL_NODE **>(reinterpret_cast<u8 *>(node) - sizeof(void *))) {       \
-            const u8 mask = node->field_0x02 >> 8;                                                                     \
-            if (mask != 0 && (mask & wall_mask) == 0)                                                                  \
-                continue;                                                                                              \
-            for (i32 first = 0; first < node->point_count; first += 16) {                                              \
-                NUVEC *points = node->points + first;                                                                  \
-                i32 end = node->point_count;                                                                           \
-                if (points[0].y != 2147483648.0f) {                                                                    \
-                    if (!(points[1].y >= wall_bounds.min_x && wall_bounds.max_x >= points[0].y &&                      \
-                          points[3].y >= wall_bounds.min_z && wall_bounds.max_z >= points[2].y))                       \
-                        continue;                                                                                      \
-                    end = MIN(end, first + 16);                                                                        \
-                }                                                                                                      \
-                for (i32 i = first; i < end; ++i) {                                                                    \
-                    NUVEC &a = node->points[i];                                                                        \
-                    NUVEC &b = node->points[i + 1];                                                                    \
-                    if (!((a.x >= wall_bounds.min_x && wall_bounds.max_x >= b.x) ||                                    \
-                          (b.x >= wall_bounds.min_x && wall_bounds.max_x >= a.x)))                                     \
-                        continue;                                                                                      \
-                    if (!((a.z >= wall_bounds.min_z && wall_bounds.max_z >= b.z) ||                                    \
-                          (b.z >= wall_bounds.min_z && wall_bounds.max_z >= a.z)))                                     \
-                        continue;                                                                                      \
-                    if (WallSplCount < 64) {                                                                           \
-                        WallSplList[WallSplCount].position = a;                                                        \
-                        WallSplList[WallSplCount + 1].position = b;                                                    \
-                        for (i32 p = 0; p < 2; ++p) {                                                                  \
-                            u8 *material = WallSplList[WallSplCount + p].material;                                     \
-                            material[0] = static_cast<u8>(node->field_0x02);                                           \
-                            material[1] = mask;                                                                        \
-                            material[2] = 0;                                                                           \
-                            material[3] = 0;                                                                           \
-                        }                                                                                              \
-                        WallSplCount += 2;                                                                             \
-                    }                                                                                                  \
-                }                                                                                                      \
-            }                                                                                                          \
-        }                                                                                                              \
-        if (wall_clear_override)                                                                                       \
-            TerrOverRideScan = NULL;                                                                                   \
-    } while (0)
-
 } // namespace
 
-// Original 400-pointer table at 0x61e860: 147 named effects, then empty slots.
-
-// Constructs the fixed terrain header and its variable-sized group, index and
-// platform arrays in the caller's arena. The four bounds arrays and the cell
-// assignment array are temporary storage carved backwards from buf_end.
-#define IS_SNAN(x) (*(u32 *)&(x) == 0xffc00000)
-
 namespace {
-
-
-} // namespace
-
-// Retail only keeps the IPA-SRA clone, which takes &normal->y.
-#if defined(__i386__)
-#define TERRAIN_KILL_PLAYER_ATTR __attribute__((noinline, noclone, regparm(2)))
-#else
-#define TERRAIN_KILL_PLAYER_ATTR __attribute__((noinline, noclone))
-#endif
-
-
-namespace {
-
-    // Target NewScanRot 0x378fb0 uses 0.1f on both horizontal axes when
-    // selecting the terrain shapes that can contain the cast point.
 
 } // namespace
 
@@ -586,24 +305,6 @@ namespace {
 
 } // namespace
 
-// Retail keeps only the IPA-SRA clones (taking the flags field directly),
-// mangled with the original ANIMLIST_s parameter type.
-#if defined(__i386__)
-#define CC_SET_ANIM_FLAGS_ATTR __attribute__((noinline, noclone, regparm(2)))
-// The u32 clone keeps retail's push-based prologue only when size-optimized.
-#define CC_SET_ANIM_FLAGS_OS_ATTR __attribute__((noinline, noclone, optimize("Os"), regparm(2)))
-#else
-#define CC_SET_ANIM_FLAGS_ATTR __attribute__((noinline, noclone))
-#define CC_SET_ANIM_FLAGS_OS_ATTR __attribute__((noinline, noclone))
-#endif
-
-// Retail only keeps the clone with strip_comments fixed to 1 (regparm text, filename).
-#if defined(__i386__)
-#define REDIRECT_TEXT_FILE_ATTR __attribute__((noinline, noclone, regparm(2)))
-#else
-#define REDIRECT_TEXT_FILE_ATTR __attribute__((noinline, noclone))
-#endif
-
 struct MechTouchUIElement;
 struct PLAYERITEM_s;
 struct PLAYERITEMTYPE_s;
@@ -615,7 +316,6 @@ struct SOCKPOSITION_s;
 namespace {
 
 } // namespace
-
 
 extern i16 id_GAMORREANGUARD;
 
@@ -631,17 +331,7 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 }
 
-// The special-route list reserves the first ten ids for suit characters.  The
-// remaining ids enumerate the current story list while omitting variants that
-// are represented by those dedicated routes.
-
 struct CUTSCENEPLAYERCLIP;
-
-#if defined(__i386__)
-#define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
-#else
-#define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone))
-#endif
 
 extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER;
 
@@ -655,51 +345,26 @@ GameObject_s *FindNearestGameObject(NUVEC *position, GameObject_s *exclude, u32 
                                     f32 *distance_squared, i32 horizontal_only, i32 (*filter)(GameObject_s *),
                                     bool first_match);
 
-// Original data symbol testmovef is float0.005 at 0x617cb0.
-
-
 extern "C" i16 id_LANDSPEEDER;
 extern i32 CUTCAMONLY, GUNSHIPAHACK, netcamera, complexsockposition_forcesock, movegamecamera_forcesock;
 GameObject_s *FindNearestGameObject(NUVEC *, GameObject_s *, u32, f32, f32, i32, i32, i32, f32 *, i32,
                                     i32 (*)(GameObject_s *), bool);
 
-
-// The retail move.cpp initializer owns these four managed references.
 extern MechWeakPtr<MechObjectInterface, 4> nextShootTarget;
 extern MechWeakPtr<MechObjectInterface, 4> forceNextAttackOpponent;
 extern MechWeakPtr<MechObjectInterface, 4> lungeTarget;
 
-// Original action/context lookup data, with its arrays and pointers in one owner.
-
 extern EXTRAACTIONDATA_s ExtraActionData[33];
 
-// Retail keeps several of this file's static helpers only as GCC clones; these
-// declarations pin the clone names and register conventions.
-#if defined(__i386__)
-#define MOVE_CLONE_ATTR1 __attribute__((noinline, noclone, regparm(1)))
-#define MOVE_CLONE_ATTR2 __attribute__((noinline, noclone, regparm(2)))
-#else
-#define MOVE_CLONE_ATTR1 __attribute__((noinline, noclone))
-#define MOVE_CLONE_ATTR2 __attribute__((noinline, noclone))
-#endif
-
-// Retail keeps only the IPA-SRA clone of this function.
 extern i16 id_BUZZDROID;
 extern "C" i16 id_MINIATST, id_MINIATTE;
 extern i16 id_PKDROID, id_PITDROID;
 
-// Original exported level control, initialized to 2 at 0x623d00.
-
 extern "C" i16 id_LANDSPEEDER;
-
-// Retail re-tests the three block animations at each use instead of caching a flag.
-#define HAS_BLOCK_ANIMS(animations)                                                                                    \
-    ((animations)[0x1a] != NULL || (animations)[0x1b] != NULL || (animations)[0x1c] != NULL)
 
 extern "C" {
     extern i16 id_MINIATST, id_MINIATTE;
 }
-
 
 extern i16 id_MINIATST, id_MINIATTE;
 
@@ -717,11 +382,6 @@ extern "C" {
     void *AIPAthFindPathCnx(AISYS_s *, AIPATH_s *, char *, char *, i32 *);
 }
 
-
-
-
-// Dogfight (Dogfight_A)
-
 extern speedup_s DogFightSpeedList[9];
 
 extern "C" {
@@ -732,12 +392,6 @@ extern "C" {
 #include <xmmintrin.h>
 #endif
 
-
-// Debug-capture output helpers consumed by NuDisplayListCaptureSortPriority.
-// Transcribed from the original C-linkage symbols:
-//   NuHtmlBegin    0x2d5ca0   NuHtmlFlush   0x2d5c30
-//   NuHtmlWrite    0x2d5cd0   NuHtmlHeading1 0x2d5d40
-
 extern "C" {
     extern i16 id_LANDSPEEDER;
 }
@@ -745,14 +399,7 @@ extern "C" {
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
 
-
 }
-
-#if defined(__i386__)
-#define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
-#else
-#define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone))
-#endif
 
 static void Asteroid_AddParts(GIZMOBLOWUP_s *blowup) {
     i32 special_indices[4] = {0, -1, -1, -1};

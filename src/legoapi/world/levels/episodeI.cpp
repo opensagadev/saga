@@ -158,9 +158,6 @@ static struct {
 static __used__ void PodRaceSnipersUpdate(void);
 static __used__ void PodRaceSnipersReset(void);
 
-// PodSprint_InitAISpline is partially inlined into PodSprintA_Init: the
-// clear, lookup and spline checks are inlined and the crossing scan is the
-// split-out body.
 #if defined(__i386__)
 #define PODSPRINT_AISPLINE_BODY_ATTR __attribute__((noinline, regparm(1)))
 #else

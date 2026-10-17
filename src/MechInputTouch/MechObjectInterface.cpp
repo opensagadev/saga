@@ -37,7 +37,6 @@
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/numusic/sfx.h"
 
-
 extern "C" {
     extern f32 hackFlashTimer;
     extern GAMEANIMSET_s *hackFlashingGameAnimSet;
@@ -47,7 +46,6 @@ extern "C" {
 f32 hackFlashTimer;
 GAMEANIMSET_s *hackFlashingGameAnimSet;
 
-// Forward declarations for local (static) character/gameplay helper stubs.
 struct nuvec_s;
 
 // Original 0x120-byte data record @0x00666960. FixUpCharacters copies this

@@ -49,20 +49,12 @@
 #include "legoapi/render/core/gameliball.h"
 #include "legoapi/world/levels/episodeI.h"
 
-// The reference defines these with dynamic initialization in this unit.
-
 extern "C" ripple_set_s *ripples;
 
 struct AIROW_s;
 struct nunativegscene_s;
 
-
 extern "C" i16 id_LANDSPEEDER;
-
-// Debug-capture output helpers consumed by NuDisplayListCaptureSortPriority.
-// Transcribed from the original C-linkage symbols:
-//   NuHtmlBegin    0x2d5ca0   NuHtmlFlush   0x2d5c30
-//   NuHtmlWrite    0x2d5cd0   NuHtmlHeading1 0x2d5d40
 
 void NewRumble(nupad_s *pad, f32 strength, i32 mode);
 void NewBuzzFrames(nupad_s *pad, i32 frames, i32 mode);

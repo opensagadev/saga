@@ -56,7 +56,6 @@
 #include "nu2api/numath/numtx.h"
 #include "nu2api/nucore/nuhgobj.h"
 
-// The reference defines these with dynamic initialization in this unit.
 MemoryManager theMemoryManager;
 BIGBUFFER_s BigBuffer;
 void *theThingManager = NULL;
@@ -64,7 +63,6 @@ void *theThingManager = NULL;
 struct AIROW_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
-
 
 void bgProcClose() {
 }
@@ -158,17 +156,7 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 }
 
-// The special-route list reserves the first ten ids for suit characters.  The
-// remaining ids enumerate the current story list while omitting variants that
-// are represented by those dedicated routes.
-
 struct CUTSCENEPLAYERCLIP;
-
-#if defined(__i386__)
-#define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
-#else
-#define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone))
-#endif
 
 extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER;
 

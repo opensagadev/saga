@@ -4,8 +4,10 @@
 #include "legoapi/world/world.h"
 #include "nu2api/nufile/nufpar.h"
 #include "nu2api/nucore/nustring.h"
+#include "nu2api/nu3d/nutex.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/numath/nuvec.h"
+#include "globals.h"
 
 struct AIROW_s;
 struct nuqthdr_s;

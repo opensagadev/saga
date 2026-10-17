@@ -26,7 +26,6 @@ NUVEC EShadRoofNorm;
 f32 ShadRoofY;
 f32 EShadRoofY;
 TerrainLastImpact_s TerrLastImpact;
-// Runtime-selected groups appended after the fixed terrain allocation.
 i32 WallSplinesOnly;
 extern "C" {
     i32 IgnoreWallSplines;

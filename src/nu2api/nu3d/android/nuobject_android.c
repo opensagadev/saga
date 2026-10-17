@@ -37,6 +37,8 @@ extern "C" {
     i32 stopfadeup;
 }
 
+#include "nu2api/numath/vuvec_internal.h"
+
 static void (*NuFadeObjGlobalSetLightsFn)(void);
 static void (*NuFadeObjSetLightsFn)(void);
 static i32 maxwindmats;

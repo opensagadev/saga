@@ -4,7 +4,6 @@
 #include "decomp.h"
 #include "nu2api/nu3d/nurndr.h"
 
-// The original unit constructs its six homogeneous vectors.
 #include "nu2api/nucore/nuvuvec.hpp"
 #include "nu2api/nucore/nuapi.h"
 #include "legoapi/world/world_shared.h"
@@ -30,8 +29,6 @@ struct nugscn_s;
 struct numtx_s;
 struct nupad_s;
 struct rndrstream_s;
-
-#define TEX_PATH "mnt/sdcard/TTGames/com.wb.lego.tcs/files/androidTextures/"
 
 #ifdef __ANDROID__
 extern "C" __attribute__((weak)) int toupper(int c);

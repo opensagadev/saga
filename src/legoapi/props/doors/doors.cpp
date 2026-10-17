@@ -5,6 +5,7 @@
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/gizmo/base/gizmo.h"
+#include "legoapi/gizmos/transport/gizportal.h"
 #include "legoapi/menus/screens/gamestructure.h"
 #include "legoapi/props/doors/door.h"
 #include "legoapi/world/area.h"
@@ -14,6 +15,7 @@
 #include "legoapi/world/world_shared.h"
 #include "nu2api/nu3d/nugscn.h"
 #include "nu2api/nu3d/nuportal.h"
+#include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nucore/nuanim3.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nufile/nufpar.h"
@@ -21,12 +23,13 @@
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nuvec.h"
-#include "legoapi/world/levels/hub.h"
 
 struct AIROW_s;
 struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
+
+void Hub_ActivateDoorMenu(LEVELDATA_s **level);
 
 namespace {
     const f32 DOOR_BLOCK_VELOCITY = 10.0f;

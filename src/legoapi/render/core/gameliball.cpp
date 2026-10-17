@@ -135,7 +135,6 @@ static u8 *crashdata;
 
 namespace {
 
-
     inline void BuildTerrainSpatialBounds(TERRAIN_SPATIAL_NODE *node) {
         // Every block covers sixteen terrain cells and therefore seventeen
         // boundary points.  The original stores the aggregate X/Z bounds in
@@ -393,16 +392,6 @@ extern "C" {
 
 }
 
-// Retail keeps an unreferenced partial-inlining clone of the old HSV2RGB
-// helper (the non-grey path) in this unit.
-#if defined(__i386__)
-#define HSV2RGB_BODY_ATTR __attribute__((used, noinline, noclone, regparm(2), sseregparm))
-#else
-#define HSV2RGB_BODY_ATTR __attribute__((used, noinline, noclone))
-#endif
-
-// Animation editor subsystem stubs (static, internal linkage).
-
 static __attribute__((used)) void edanimcbCubeMap(eduimenu_s *, eduiitem_s *, u32);
 static __attribute__((used)) void edanimcbFileLoad(eduimenu_s *menu, eduiitem_s *, u32);
 static __attribute__((used)) void edanimcbFileSave(eduimenu_s *menu, eduiitem_s *, u32);
@@ -424,8 +413,6 @@ static __attribute__((used)) void edanimcbMCTBCardFormat(eduimenu_s *menu, eduii
 static __attribute__((used)) void edanimcbSetSoundTiming(eduimenu_s *, eduiitem_s *item, u32);
 static __attribute__((used)) void edanimcbSetSwitchDelay(eduimenu_s *, eduiitem_s *item, u32);
 static __attribute__((used)) void edanimcbSwitchTypeMenu(eduimenu_s *, eduiitem_s *, u32);
-
-// Remaining animation-editor UI/menu callbacks.
 
 static __attribute__((used)) void edanimcbCancelSoundMenu(eduimenu_s *, eduimenu_s *);
 static __attribute__((used)) void edanimcbMCTBCardPresent(eduimenu_s *menu, eduiitem_s *, u32);
@@ -520,7 +507,6 @@ static edui_slider_s *repeatbox_x_item;
 static edui_slider_s *repeatbox_z_item;
 static void UpdateTotalPtls(debinftype *effect);
 
-// The original particle editor's private callbacks and menu state share this TU.
 #if defined(__SSE__)
 #include <xmmintrin.h>
 #endif
@@ -825,25 +811,19 @@ static inline f32 edppInterpolateTorusCurve(const debris_float_key_s *keys, f32 
     return 0.0f;
 }
 
-// The original local font helpers read the same private draw state as the
-// editor callbacks, so they belong to this translation unit.
 static __used__ __attribute__((noclone)) void eduiFntPrintExGeneric(void *font, int x, int y,
                                                                                 int alignment, char *format, ...)
     __asm__("_ZL14eduiFntPrintExPviiiPcz");
 
-// Left-aligned (16) specialisation of the integer print helper.
 static __attribute__((noclone)) void eduiFntPrintExLeft(void *font, int x, int y, int alignment,
                                                                   char *format, ...)
     __asm__("_ZL14eduiFntPrintExPviiiPcz.constprop.67");
 
-// Centred (64) specialisation of the integer print helper.
 static __attribute__((noclone)) void eduiFntPrintExCentre(void *font, int x, int y, int alignment,
                                                                     char *format, ...)
     __asm__("_ZL14eduiFntPrintExPviiiPcz.constprop.68");
 
 #if defined(__clang__)
-// Clang has no __builtin_va_arg_pack; format here and print the result. The
-// generic helper already owns this overload's mangled name, so rename it.
 static void eduiFntPrintEx(void *font, int x, int y, int alignment, char *format, ...)
     __asm__("eduiFntPrintExFormatted");
 #else
@@ -857,8 +837,6 @@ static inline __attribute__((always_inline)) void eduiFntPrintEx(void *font, int
         eduiFntPrintExGeneric(font, x, y, alignment, format, __builtin_va_arg_pack());
 }
 #endif
-
-// Only eduiMenuRender calls the integer clip helper, always left-aligned.
 
 static void edgraInit();
 static void edgraClose();
@@ -1368,7 +1346,6 @@ SoundGroup g_groups[128];
 i32 g_lenGroupBuffer;
 i16 g_groupBuffer[512];
 
-
 NUSOUNDINFO *g_soundInfo;
 NUSOUNDINFO *g_revertSoundInfo;
 
@@ -1407,7 +1384,6 @@ static inline char CRC_ToUpper(char c) {
     return c;
 }
 
-
 static f32 MusicVolume = 1.0f;
 static f32 CutVolume = 0.8f;
 
@@ -1442,23 +1418,6 @@ extern "C" {
 
 }
 
-// NuMusic - the music player (nu2api.2013/numusic/numusic.cpp).
-//
-// Decompressed from the original libTTapp.so. The player owns a parsed
-// music.cfg "album" table (albums -> tracks), a shared entry-time pool and two
-// stereo-stream voices. The boot path for the title music is:
-//
-//   LoadPermData -> ConfigureMusic -> NuMusic::Initialise("audio\\music.cfg")
-//   NuMain -> GamePlayMusic(titles level) -> SelectTrackByHandle x3
-//           -> PlayTrack(0x20) -> PlayTrackI -> Voice::Load -> Voice::Play
-//           -> NuSound3PlayStereoV (host nusound streamer)
-//   per-frame: NuMusic::Process (fades, ducking, volume mixing)
-//
-// Track handles pack (albumIndex << 11) | trackIndexInAlbum. The original
-// constructs/validates them through reciprocal multiplies because
-// sizeof(Album) == 36 == 4 * 9 and sizeof(Track) == 60 == 4 * 15; those
-// literal forms are kept so the arithmetic matches the original binary.
-
 extern NUFPCOMJMPCTX top_jmp_tab[11];
 extern NUFPCOMJMPCTX track_jmp_tab[15];
 
@@ -1467,16 +1426,6 @@ extern void *(*DefragCreateInstFn)(void *, NUGCUTSCENE_s *, VARIPTR *);
 
 }
 
-// Steers a cutscene character's eyes towards a look-at locator and blinks its eyelids.
-// Only version-3 locator animations carry the look and blink channels.
-// Retail only keeps the IPA-SRA clone: the system is dropped and the instance
-// locator is replaced by its effect handle slot.
-#if defined(__i386__)
-#define INST_LOOKAT_UPDATE_ATTR __attribute__((noinline, noclone, regparm(2), sseregparm))
-#else
-#define INST_LOOKAT_UPDATE_ATTR __attribute__((noinline, noclone))
-#endif
-
 extern "C" {
     // Aligned four-float row used for retail's movaps matrix copies.
 } // extern "C"
@@ -1484,12 +1433,6 @@ extern "C" {
 #if defined(__SSE__)
 #include <xmmintrin.h>
 #endif
-
-
-// Debug-capture output helpers consumed by NuDisplayListCaptureSortPriority.
-// Transcribed from the original C-linkage symbols:
-//   NuHtmlBegin    0x2d5ca0   NuHtmlFlush   0x2d5c30
-//   NuHtmlWrite    0x2d5cd0   NuHtmlHeading1 0x2d5d40
 
 void AddChunkToRenderStack(particlechunkrendertype_s *chunk, particlechunkrendertype_s **stack);
 
@@ -1612,17 +1555,7 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 }
 
-// The special-route list reserves the first ten ids for suit characters.  The
-// remaining ids enumerate the current story list while omitting variants that
-// are represented by those dedicated routes.
-
 struct CUTSCENEPLAYERCLIP;
-
-#if defined(__i386__)
-#define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
-#else
-#define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone))
-#endif
 
 extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER;
 
@@ -1663,7 +1596,6 @@ extern "C" {
 
 void AddChunkToRenderStack(particlechunkrendertype_s *, particlechunkrendertype_s **);
 
-// Forward declarations for local (static) part/gizmo helper stubs.
 struct spacelevel_s;
 struct quickboltinfo;
 
@@ -1671,25 +1603,10 @@ extern "C" {
     // The editor loader clears these page IDs with aligned vector stores.
 } // extern "C"
 
-// The original repeats the per-sound emitter checks for each of the four sound slots.
-#define PART_EMIT_SOUND_ON(slot)                                                                                       \
-    if (type->sounds[slot] != -1) {                                                                                    \
-        SetSfxBit_On(type->sounds[slot]);                                                                              \
-        if (type->sound_modes[slot] == 4)                                                                              \
-            PlaySfxById(type->sounds[slot], &emitter->position);                                                       \
-    }
-#define PART_EMIT_SOUND(slot, mode)                                                                                    \
-    if (type->sounds[slot] != -1 && type->sound_modes[slot] == (mode))                                                 \
-        PlaySfxById(type->sounds[slot], &emitter->position);
-
-// Original data symbol testmovef is float0.005 at 0x617cb0.
-
-
 extern "C" i16 id_LANDSPEEDER;
 extern i32 CUTCAMONLY, GUNSHIPAHACK, netcamera, complexsockposition_forcesock, movegamecamera_forcesock;
 GameObject_s *FindNearestGameObject(NUVEC *, GameObject_s *, u32, f32, f32, i32, i32, i32, f32 *, i32,
                                     i32 (*)(GameObject_s *), bool);
-
 
 #if defined(__SSE__)
 #include <xmmintrin.h>
@@ -1736,72 +1653,8 @@ struct ripple_node_s;
 struct ripple_set_s;
 struct VuVec;
 
-// Retail only keeps the IPA-SRA clone, which drops the unused fourth argument.
-#if defined(__i386__)
-#define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone, regparm(2)))
-#else
-#define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone))
-#endif
-
-// --- Extern "C": NuGScn functions have C linkage in original ---
-
-#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
-    do {                                                                                                               \
-        direction.x = (vx);                                                                                            \
-        direction.y = -(vy) * camera.aspect;                                                                           \
-        direction.z = adjacent;                                                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        brightness = direction.y * 0.5f + 0.5f;                                                                        \
-        if (brightness <= near_angle)                                                                                  \
-            brightness = near_scale * parameters->intensity;                                                           \
-        else if (brightness >= far_angle)                                                                              \
-            brightness = far_scale * parameters->intensity;                                                            \
-        else                                                                                                           \
-            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
-        if (parameters->directional) {                                                                                 \
-            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
-            if (angle < parameters->direction_near_angle) {                                                            \
-                brightness += 128.0f * parameters->direction_far_scale;                                                \
-            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
-                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
-                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
-                                      parameters->direction_bias);                                                     \
-                brightness +=                                                                                          \
-                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
-                              parameters->direction_near_scale);                                                       \
-            }                                                                                                          \
-        }                                                                                                              \
-        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
-                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
-        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
-                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
-        else                                                                                                           \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
-        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
-    } while (0)
-
-// DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
-// red-brick positions come from the Game init values in legogame/game.cpp.
-
 extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
 extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
-
-#define SWIPE_PRIM_UV(U, V)                                                                                            \
-    do {                                                                                                               \
-        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
-        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
-            vertex->float_uv[0] = (U);                                                                                 \
-            vertex->float_uv[1] = (V);                                                                                 \
-        } else {                                                                                                       \
-            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
-            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
-        }                                                                                                              \
-    } while (false)
 
 extern i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
 
@@ -1839,9 +1692,6 @@ static i32 TerrShapeAdjCnt;
 
 namespace {
 #include "legoapi/render/core/terrain_types.h"
-
-
-
 
 } // namespace
 
@@ -1894,7 +1744,6 @@ namespace {
         writer->group_shape_count = 0;
     }
 
-    // Retail scan callers contain the scale-and-normal reconstruction directly.
 #define TERRAIN_SCALE_SCAN_SHAPE(candidate_arg, group_arg, writer_arg)                                                 \
     do {                                                                                                               \
         TERRAIN_SHAPE *&scale_candidate = (candidate_arg);                                                             \
@@ -1944,8 +1793,6 @@ namespace {
         }                                                                                                              \
     } while (0)
 
-    // Preserve the retail arithmetic ordering and the sweep-diagonal service
-    // call, even in the wall-only caller where its result is unused.
 #define TERRAIN_GET_SCAN_BOUNDS(bounds_arg, radius_arg, wall_arg)                                                      \
     do {                                                                                                               \
         TerrainScanBounds &scan_bounds = (bounds_arg);                                                                 \
@@ -1998,7 +1845,6 @@ namespace {
             bounds_radius += (scan_query.object_scale - 1.0f) * scan_query.collision_radius;                           \
     } while (0)
 
-    // These wall-spline traversals are part of all three retail scan bodies.
 #define TERRAIN_COLLECT_WALL_SPLINES(bounds_arg, mask_arg, clear_arg, reset_empty_arg)                                 \
     do {                                                                                                               \
         TerrainScanBounds wall_bounds = (bounds_arg);                                                                  \
@@ -2056,25 +1902,11 @@ namespace {
 
 i16 debug_index;
 
-// Original 400-pointer table at 0x61e860: 147 named effects, then empty slots.
-
-// Constructs the fixed terrain header and its variable-sized group, index and
-// platform arrays in the caller's arena. The four bounds arrays and the cell
-// assignment array are temporary storage carved backwards from buf_end.
 #define IS_SNAN(x) (*(u32 *)&(x) == 0xffc00000)
 
 namespace {
 
-
 } // namespace
-
-// Retail only keeps the IPA-SRA clone, which takes &normal->y.
-#if defined(__i386__)
-#define TERRAIN_KILL_PLAYER_ATTR __attribute__((noinline, noclone, regparm(2)))
-#else
-#define TERRAIN_KILL_PLAYER_ATTR __attribute__((noinline, noclone))
-#endif
-
 
 static inline void ResetRayCastState() {
     plathitid = -1;

@@ -31,14 +31,10 @@ extern i16 id_SNAKE;
 
 namespace {
 
-
-
-
 } // namespace
 
 namespace {
 
-    // Retail scan callers contain the scale-and-normal reconstruction directly.
 #define TERRAIN_SCALE_SCAN_SHAPE(candidate_arg, group_arg, writer_arg)                                                 \
     do {                                                                                                               \
         TERRAIN_SHAPE *&scale_candidate = (candidate_arg);                                                             \
@@ -88,8 +84,6 @@ namespace {
         }                                                                                                              \
     } while (0)
 
-    // Preserve the retail arithmetic ordering and the sweep-diagonal service
-    // call, even in the wall-only caller where its result is unused.
 #define TERRAIN_GET_SCAN_BOUNDS(bounds_arg, radius_arg, wall_arg)                                                      \
     do {                                                                                                               \
         TerrainScanBounds &scan_bounds = (bounds_arg);                                                                 \
@@ -142,7 +136,6 @@ namespace {
             bounds_radius += (scan_query.object_scale - 1.0f) * scan_query.collision_radius;                           \
     } while (0)
 
-    // These wall-spline traversals are part of all three retail scan bodies.
 #define TERRAIN_COLLECT_WALL_SPLINES(bounds_arg, mask_arg, clear_arg, reset_empty_arg)                                 \
     do {                                                                                                               \
         TerrainScanBounds wall_bounds = (bounds_arg);                                                                  \
@@ -230,9 +223,6 @@ extern "C" {
 extern i32 Grass_Available;
 }
 
-// Constructs the fixed terrain header and its variable-sized group, index and
-// platform arrays in the caller's arena. The four bounds arrays and the cell
-// assignment array are temporary storage carved backwards from buf_end.
 #define IS_SNAN(x) (*(u32 *)&(x) == 0xffc00000)
 
 #undef IS_SNAN
@@ -241,25 +231,13 @@ extern i32 Grass_Available;
 
 namespace {
 
-
 } // namespace
-
-// Retail only keeps the IPA-SRA clone, which takes &normal->y.
-#if defined(__i386__)
-#define TERRAIN_KILL_PLAYER_ATTR __attribute__((noinline, noclone, regparm(2)))
-#else
-#define TERRAIN_KILL_PLAYER_ATTR __attribute__((noinline, noclone))
-#endif
-
 
 i32 TerrainBlockOnBlock(WORLDINFO_s *world, pushblock_s *block, nuvec_s *points, float *heights);
 
 #undef TERRAIN_GET_SCAN_BOUNDS
 
 namespace {
-
-    // Target NewScanRot 0x378fb0 uses 0.1f on both horizontal axes when
-    // selecting the terrain shapes that can contain the cast point.
 
 } // namespace
 

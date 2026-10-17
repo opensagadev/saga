@@ -29,7 +29,6 @@
 #include "nu2api/nucore/nuapi.h"
 #include "nu2api/nucore/nuthread.h"
 
-// The original unit constructs its six homogeneous vectors.
 #include "nu2api/nucore/nuvuvec.hpp"
 #include "nu2api/nu3d/nu3d_includes.h"
 

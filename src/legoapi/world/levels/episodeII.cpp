@@ -104,8 +104,6 @@ extern "C" {
     void *AIPAthFindPathCnx(AISYS_s *, AIPATH_s *, char *, char *, i32 *); // legoapi/ai pathfinding
 }
 
-// Defined in gameapi/edtools/edtoolsall.cpp, which has no header yet.
-
 struct JEDIBNETPACKET_s;
 
 // Jedi_B tuning and spawn tables (unmangled globals in the original).
@@ -133,8 +131,6 @@ extern "C" {
     u32 jedib_seed = 0x11;
     JEDIBNETPACKET_s *jedib_netpacket;
 }
-
-// --- File-local statics (original _ZL... symbols; not renamed) ---------------
 
 static KAMINODISCO_s kaminodisco;
 KAMINOC_PACKET_s *kaminoc_netpacket;
@@ -187,12 +183,7 @@ static f32 FactoryBConveyorXSpeed;
 static f32 FactoryBConveyorZSpeed;
 f32 FactoryBConveyorStopFrame = 28.0f;
 
-// Jedi (Jedi_B)
-
-
-
 static JEDIB_s jedi_b;
-
 
 static JEDIB_PHASE_s jedi_b_phase1[8] = {
     {&id_DROIDEKA, "phase_droids"},
@@ -242,8 +233,6 @@ f32 gunshipb_seekmomseek = 5.0f;
 f32 gunshipb_seekmom = 5.0f;
 f32 gunshipb_seekrange = 4.0f;
 
-// Dooku (Dooku_C)
-
 struct starfighter_s;
 struct rtl_s;
 struct rtlidata_s;
@@ -261,77 +250,12 @@ struct ripple_node_s;
 struct ripple_set_s;
 struct VuVec;
 
-// Retail only keeps the IPA-SRA clone, which drops the unused fourth argument.
-#if defined(__i386__)
-#define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone, regparm(2)))
-#else
-#define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone))
-#endif
-
-// --- Extern "C": NuGScn functions have C linkage in original ---
-
-#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
-    do {                                                                                                               \
-        direction.x = (vx);                                                                                            \
-        direction.y = -(vy) * camera.aspect;                                                                           \
-        direction.z = adjacent;                                                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        brightness = direction.y * 0.5f + 0.5f;                                                                        \
-        if (brightness <= near_angle)                                                                                  \
-            brightness = near_scale * parameters->intensity;                                                           \
-        else if (brightness >= far_angle)                                                                              \
-            brightness = far_scale * parameters->intensity;                                                            \
-        else                                                                                                           \
-            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
-        if (parameters->directional) {                                                                                 \
-            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
-            if (angle < parameters->direction_near_angle) {                                                            \
-                brightness += 128.0f * parameters->direction_far_scale;                                                \
-            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
-                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
-                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
-                                      parameters->direction_bias);                                                     \
-                brightness +=                                                                                          \
-                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
-                              parameters->direction_near_scale);                                                       \
-            }                                                                                                          \
-        }                                                                                                              \
-        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
-                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
-        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
-                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
-        else                                                                                                           \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
-        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
-    } while (0)
-
-// DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
-// red-brick positions come from the Game init values in legogame/game.cpp.
-
 extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
 extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
-
-#define SWIPE_PRIM_UV(U, V)                                                                                            \
-    do {                                                                                                               \
-        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
-        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
-            vertex->float_uv[0] = (U);                                                                                 \
-            vertex->float_uv[1] = (V);                                                                                 \
-        } else {                                                                                                       \
-            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
-            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
-        }                                                                                                              \
-    } while (false)
 
 extern i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
 
 struct FLOWBOX_s;
-
 
 i32 PAINTPUZZLESTAGE;
 i32 played_sound;

@@ -59,13 +59,10 @@ f32 LastTouchTime;
 #include <xmmintrin.h>
 #endif
 
-// The reference defines these with dynamic initialization in this unit.
-
 static i32 TBGAMECOUNT;
 static i32 TBDRAWCOUNT;
 static i32 TBPLAYERCOUNT;
 static i32 TBAICOUNT;
-
 
 static TIMINGBAR_LABEL GameTB[12];
 static TIMINGBAR_LABEL PlayerTB[12];
@@ -121,12 +118,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
                   "complete game AI condition registry");
 
 }
-
-#if defined(__i386__)
-#define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
-#else
-#define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone))
-#endif
 
 // ThingManager objects return to the theMemoryManager pool (D0 @0x425a50).
 inline void ThingManager::operator delete(void *thing, usize size) {

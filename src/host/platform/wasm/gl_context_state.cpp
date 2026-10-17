@@ -6,6 +6,13 @@
 
 #include "nu2api/nu3d/NuRenderDevice.h"
 
+// Android gives every GL thread one of four shared EGL contexts. Objects are
+// shared, but each context keeps its own bindings, so a loader thread binding
+// a texture for upload never disturbs the render thread's bindings or the
+// renderer's binding caches. WebGL offers a single context to all threads.
+// Track the per-context bindings the game relies on and restore them when a
+// thread takes the GL critical section.
+
 extern "C" {
     void __real_glActiveTexture(GLenum texture);
     void __real_glBindTexture(GLenum target, GLuint texture);

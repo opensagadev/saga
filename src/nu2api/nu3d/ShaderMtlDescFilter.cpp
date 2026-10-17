@@ -5,6 +5,7 @@
 #include "nu2api/nu3d/numtl.h"
 #include "nu2api/nu3d/nushader.h"
 #include <cstring>
+#include "nu2api/nucore/nuthread.h"
 
 // Material descriptor filter (retail ShaderMtlDescFilter.cpp).
 

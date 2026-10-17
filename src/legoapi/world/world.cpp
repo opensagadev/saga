@@ -26,7 +26,6 @@
 #include "nu2api/nusound/nusound.h"
 #include "MechInputTouch/MechInputTouch_types.h"
 
-// Globals shared across world loading — defined here until moved to globals.cpp
 TIMER LevelTimer;
 
 void (*WorldInfo_InitMenuFn)(WORLDINFO *, i32 *, i32 *) = NULL;
@@ -60,8 +59,6 @@ u32 BackUpPlayers[0x872];
 GizForceLOSState_s GizForceLOSInfo[2];
 i32 DEFAULT_PLAYERHITPOINTS = 8;
 u32 LEGOOBJ_DEFAULTLASTCOIN = -1;
-
-// --- World-module helpers (kept with the WorldInfo API) ---
 
 WORLDINFO WorldInfo[2];
 

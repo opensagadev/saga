@@ -142,14 +142,10 @@ i32 ObjHitObj(GameObject_s *, GameObject_s *, i32, u16, i32, i32);
 __attribute__((force_align_arg_pointer)) void Bolt_AddDeflectedBolt(BOLT_s *bolt, nuvec_s *direction, nuvec_s *normal,
                                                                     unsigned char *processed);
 
-// Retail only has the IPA-SRA clone of Bolt_HitPlat(BOLT_s *, u8 *, WORLDINFO_s *), which drops the
-// unused world argument.
 static __attribute__((noinline, noclone)) i32 Bolt_HitPlat(BOLT_s *bolt, u8 *hit_flags)
     __asm__("_ZL12Bolt_HitPlatP6BOLT_sPhP11WORLDINFO_s.isra.38");
 
 GIZMOBLOWUP_s *GizmoBlowUp_Hit(GameObject_s *, NUVEC *, i32, f32, NUVEC *, NUVEC *, BOLT_s *, u32, u8 *);
-// The original caller appears to treat this u16-returning function as i32;
-// correcting this declaration lowers its match.
 i32 ObjHitObj_Flags(GameObject_s *);
 i32 addbolt_noobjmom, addbolt_newsfx;
 NUVEC addbolt_newpos;

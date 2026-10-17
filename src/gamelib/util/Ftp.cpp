@@ -5,7 +5,8 @@
 #include "gamelib_util_types.h"
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nucore/nustring.h"
-#include "gamelib/util/Network.h"
+
+extern TTNetwork theNetwork;
 
 i32 NetFtpManager::Abort(char const *, NetAddress const &, i32, i32) {
     return 0;

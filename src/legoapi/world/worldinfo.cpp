@@ -1,12 +1,15 @@
 #include "decomp.h"
 #include "legoapi/world/world.h"
 #include "legoapi/world/level.h"
+#include "legoapi/world/levels/levels.h"
 #include "legoapi/world/world_shared.h"
 #include "legoapi/audio/sfx.h"
 #include "legoapi/render/core/terrain.h"
 #include "legoapi/render/fx/game_deb.h"
 #include "gameapi/edtools/edpp_internal.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
 #include "legoapi/items/collect/minikits.h"
+#include "legoapi/gizmos/transport/teleport.h"
 #include "legoapi/render/fx/parts.h"
 #include "legoapi/render/light/lighting.h"
 #include "legoapi/render/light/surfaces.h"
@@ -22,13 +25,23 @@
 #include "legoapi/world/area.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/core/charconfig.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/core/input/qrand.h"
+#include "legoapi/world/level.h"
 #include "legoapi/characters/core/players.h"
+#include "legoapi/characters/motion/gameanim.h"
+#include "legoapi/ai/game/creature.h"
 #include "legoapi/gizmo/base/gizmo.h"
+#include "legoapi/gizmo/base/gizflow.h"
+#include "legoapi/items/objects/grabber.h"
+#include "legoapi/items/base/collection.h"
 #include "legoapi/menus/screens/store.h"
 #include "legoapi/items/base/apiobject.h"
 #include "legoapi/props/system/socksys.h"
 #include "legoapi/core/input/timer.h"
+#include "legogame/game.h"
 #include "nu2api/nu3d/nutex.h"
+#include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nudlist.h"
 #include "nu2api/nu3d/nuportal.h"
 #include "nu2api/nuandroid/ios_graphics.h"
@@ -40,11 +53,17 @@
 #include "nu2api/nusound/nusound.h"
 #include "MechInputTouch/MechInputTouch_types.h"
 #include "gameapi/edtools/edgra.h"
-#include "legoapi/characters/core/characters.h"
-#include "legoapi/characters/core/customiser.h"
-#include "legoapi/cutscenes/cutscenes.h"
-#include "legoapi/items/fx/ripples.h"
-#include "legoapi/items/objects/objectsall.h"
+
+// World info lifetime (retail worldinfo.cpp): registering, initialising,
+// activating, streaming and resetting the two WORLDINFO slots.
+
+void CutScenes_Destroy(CUTSYS *system);
+void CharScenes_LevelDump(WORLDINFO *world);
+void Customiser_DumpAll(CUSTOMISER *, WORLDINFO *);
+void DestroyRippleMtls(WORLDINFO *);
+extern "C" {
+    extern i32 part_page_on[8];
+}
 
 /// @brief Pointer to the currently loading world info
 static WORLDINFO *LWORLD = &WorldInfo[0];

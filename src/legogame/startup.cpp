@@ -228,7 +228,6 @@ namespace {
 
 } // namespace
 
-
 struct AIROW_s;
 struct nunativegscene_s;
 struct SHOPINPUT;

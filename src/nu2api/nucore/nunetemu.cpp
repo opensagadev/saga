@@ -2,27 +2,47 @@
 #include "decomp.h"
 #include <float.h>
 #include "nu2api/nucore/nucore.hpp"
+#include "nu2api/nucore/nuapi.h"
 #include <new>
 #include <stddef.h>
 #include <string.h>
 #include <math.h>
 #include <stdlib.h>
 #include "nu2api/nucore/nustring.h"
+#include "nu2api/nu3d/NuRenderDevice.h"
+#include "nu2api/nucore/NuCopyFilter.h"
 #include "nu2api/nucore/NuDataPortManager.h"
+#include "nu2api/nucore/NuDeferredFilter.h"
 #include "nu2api/nucore/NuDeferredFilterGen.h"
+#include "nu2api/nucore/NuDeviceSpecs.h"
+#include "nu2api/nucore/NuDynamicLight.h"
+#include "nu2api/nu3d/nugscn.h"
 #include "nu2api/nu3d/nuportal.h"
+#include "nu2api/nu3d/numtl.h"
+#include "nu2api/nu3d/nucamera.h"
+#include "nu2api/nu3d/nurendercontext.h"
 #include "nu2api/nu3d/nurndr.h"
+#include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nurand.h"
+#include "nu2api/nucore/NuMainFilter.h"
 #include "nu2api/nucore/NuMainFilterGen.h"
+#include "nu2api/nucore/NuMotionAccumFilter.h"
 #include "nu2api/nucore/NuMotionAccumFilterGen.h"
+#include "nu2api/nucore/NuMotionFilter.h"
 #include "nu2api/nucore/NuMotionFilterGen.h"
 #include "nu2api/nucore/NuNetEmu.h"
 #include "nu2api/nucore/NuPlatform.h"
 #include "nu2api/nucore/NuPostFilter.h"
 #include "nu2api/nucore/NuPostFilterGen.h"
+#include "nu2api/nucore/NuSpeedBlurFilter.h"
 #include "nu2api/nucore/NuSpeedBlurFilterGen.h"
+#include "nu2api/nucore/NuVoiceAndroid.h"
 #include "gamelib/util/Utilities.h"
+#include "nu2api/nucore/numemory.h"
 #include "nu2api/nucore/nuthread.h"
+#include "nu2api/nu3d/nupostresources.h"
+#include "nu2api/nu3d/nushader.h"
+#include "nu2api/nu3d/nupostdraw.h"
 #include "nu2api/nu3d/android/nurndr_android.h"
 #include "nu2api/nu3d/android/nupostshaders.h"
 #include "nu2api/numath/nuvec4.h"
@@ -31,8 +51,6 @@
 #include "nu2api/nu3d/nuqfnt.h"
 
 #include <stdio.h>
-#include "gamelib/util/Refpack.h"
-#include "nu2api/nucore/unref.h"
 
 // Network condition emulator (retail nunetemu.cpp): packet batching,
 // splitting and stats for the emulated link.
@@ -55,6 +73,9 @@ static inline i32 NuNetSessionRecvFrom(void *data, i32 size, nunetaddr_s *addres
     void **vtable = *reinterpret_cast<void ***>(theSession);
     return reinterpret_cast<NuNetSessionRecvFromFn>(vtable[23])(theSession, data, size, address);
 }
+
+extern i32 unref(unsigned char *, unsigned char *);
+extern i32 refpack(unsigned char *, abi_long, unsigned char *);
 
 struct NuNetEmuSegment {
     u16 offset;

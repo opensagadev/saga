@@ -47,7 +47,6 @@ namespace {
 
 #include "legoapi/gizmos/object/gizobstacle_types.h"
 
-
     static void ClearObstacleProgress(GIZOBSTACLEPROGRESS_s *progress) {
         if (progress == NULL) {
             return;
@@ -978,7 +977,6 @@ ADDGIZMOTYPE *GizObstacles_RegisterGizmo(i32 type_id) {
 
 namespace {
 
-// Box-trigger and character-flag tests are expanded in place, as in the reference.
 #define OBSTACLE_USES_BOX_TRIGGER(obstacle) ((obstacle)->mode == 5 || (obstacle)->mode == 6)
 #define OBSTACLE_CHARACTER_FLAGS(object)                                                                               \
     static_cast<const OBSTACLE_CHARACTER_DATA_FLAGS_s *>(static_cast<const void *>((object)->apiobj.character_data))

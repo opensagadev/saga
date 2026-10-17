@@ -10,8 +10,6 @@
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nu3d/nutex.h"
 
-
-
 #include "MechInputTouch/MechInputTouch_types.h"
 #include "gameapi/edtools/edstubs.h"
 #include "legoapi/characters/core/character.h"

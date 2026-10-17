@@ -93,7 +93,6 @@ static char *Blowup_OutputName[] = {"Blownup", "Punched", "Plugging"};
 
 i32 blowup_gizmotype_id = -1;
 
-
 extern u16 TargetDeg_Near, TargetDeg_Mid, TargetDeg_Far;
 extern f32 TargetDist_Near2, TargetDist_Mid2;
 

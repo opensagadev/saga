@@ -321,12 +321,3 @@ void Detonator_MoveCode(GameObject_s *object) {
     PlaySfx(const_cast<char *>("imp_thermalDet_attach"), &detonator->position);
 }
 
-#define DETONATOR_CONSIDER_NEAREST(index, owner_test)                                                                  \
-    if (Detonator[index].active != 0 && (owner_test)) {                                                                \
-        const f32 distance = NuVecDistSqr(position, &Detonator[index].position, NULL);                                 \
-        if (distance < nearest_distance) {                                                                             \
-            nearest_distance = distance;                                                                               \
-            nearest = &Detonator[index];                                                                               \
-        }                                                                                                              \
-    }
-

@@ -191,7 +191,6 @@ static i32 ForceBackType = 0;
 static f32 ForceBackRadius = 0.0f;
 static f32 ForceBackRadius2 = 0.0f;
 
-// The retail move.cpp initializer owns these four managed references.
 MechWeakPtr<MechObjectInterface, 4> nextShootTarget(NULL);
 MechWeakPtr<MechObjectInterface, 4> forceNextAttackOpponent;
 MechWeakPtr<MechObjectInterface, 4> lungeTarget(NULL);
@@ -603,8 +602,6 @@ i32 ForcePush_SuperPush;
 i32 ForcePush_Waft;
 i16 *objhitobj_killparts_yrot;
 i32 objhitobj_noimpactsfx;
-// Retail keeps several of this file's static helpers only as GCC clones; these
-// declarations pin the clone names and register conventions.
 #if defined(__i386__)
 #define MOVE_CLONE_ATTR1 __attribute__((noinline, noclone, regparm(1)))
 #define MOVE_CLONE_ATTR2 __attribute__((noinline, noclone, regparm(2)))
@@ -617,7 +614,6 @@ static MOVE_CLONE_ATTR2 void CommunicateCode(GameObject_s *, i32)
     __asm__("_ZL15CommunicateCodeP12GameObject_sii.constprop.74");
 static MOVE_CLONE_ATTR1 void AwkwardShapeCode(GameObject_s *)
     __asm__("_ZL16AwkwardShapeCodeP12GameObject_si.constprop.78");
-// Retail keeps only the IPA-SRA clone of this function.
 static MOVE_CLONE_ATTR2 void ForceCode(GameObject_s *, i32, i32) __asm__("_ZL9ForceCodeP12GameObject_siii.isra.29");
 extern i16 tCHEAT_SELFDESTRUCT;
 extern i16 id_BUZZDROID;
@@ -659,7 +655,6 @@ extern f32 CurrentSpeed;
 f32 speeder_smoke_rate = 5.0f;
 f32 speeder_offset_speed = 2.0f;
 
-// Retail splits the guard off as an inline head; the rest is this partial clone.
 static MOVE_CLONE_ATTR1 void SelfDestructCodeBody(GameObject_s *object)
     __asm__("_ZL16SelfDestructCodeP12GameObject_si.part.10");
 
@@ -723,7 +718,6 @@ static inline i32 ComboJump(GameObject_s *object) {
     return 1;
 }
 
-// Retail re-tests the three block animations at each use instead of caching a flag.
 #define HAS_BLOCK_ANIMS(animations)                                                                                    \
     ((animations)[0x1a] != NULL || (animations)[0x1b] != NULL || (animations)[0x1c] != NULL)
 
@@ -779,7 +773,6 @@ static void FindIncomingThreats(GameObject_s *object) {
 static MOVE_CLONE_ATTR2 void ForceGlowCode(GameObject_s *object, i32 model)
     __asm__("_ZL13ForceGlowCodeP12GameObject_si.part.34");
 
-// Retail splits the context test off as an inline head; the rest is this partial clone.
 static MOVE_CLONE_ATTR2 void ForcePushCodeBody(GameObject_s *object, i32 held)
     __asm__("_ZL13ForcePushCodeP12GameObject_sii.isra.32.part.33");
 
@@ -880,7 +873,6 @@ static inline void GrabCode(GameObject_s *object) {
         GrabCodeBody(object);
 }
 
-
 static AWKWARDSHAPESPHERE_s AwkwardShapeSphere[] = {
     {&id_RANCOR, 4, 0, 0.3f},    {&id_DEWBACK, 1, 1, 0.2f},  {&id_DEWBACK, 2, 0, 0.125f}, {&id_DEWBACK, 3, 0, 0.1f},
     {&id_DEWBACK, 4, 0, 0.075f}, {&id_BIGGUN, 3, 0, 0.175f}, {&id_BIGGUN, 4, 0, 0.175f},  {&id_BIGGUN, 5, 0, 0.175f},
@@ -891,9 +883,6 @@ static AWKWARDSHAPESPHERE_s AwkwardShapeSphere[] = {
 extern i16 id_MINIATST, id_MINIATTE;
 extern i16 id_SKELETON;
 static NUVEC poopos[2];
-
-// Retail uses translation-unit-local helpers with compiler-inferred private
-// calling conventions; keep their shared animation-mode call sites intact.
 
 extern i16 id_JUMBOHOMINGDROID;
 extern i16 id_GAMORREANGUARD, id_PRINCESSLEIASLAVE, id_LAMASU, id_TAUNWE;
@@ -924,13 +913,7 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-
 f32 rocket_speed = 1.2f;
-
-// Asteroid chase (AsteroidChase_A / B / C / D)
-
-
-
 
 struct rtlset;
 
@@ -939,30 +922,14 @@ extern "C" {
 
 }
 
-// Forward declarations for local (static) part/gizmo helper stubs.
 struct spacelevel_s;
 struct quickboltinfo;
-
-// Local (static) part (PART_s), pickup (GIZMOPICKUP_s), gizmo flow
-// (GIZFLOW_s/FLOWBOX_s), power-up and space/starfighter helpers. Stubbed as
-// local `t` symbols matching res/libTTapp.so.
 
 extern f32 ForceThrowSpeed, ForceThrowGravity;
 
 extern "C" {
     // The editor loader clears these page IDs with aligned vector stores.
 } // extern "C"
-
-// The original repeats the per-sound emitter checks for each of the four sound slots.
-#define PART_EMIT_SOUND_ON(slot)                                                                                       \
-    if (type->sounds[slot] != -1) {                                                                                    \
-        SetSfxBit_On(type->sounds[slot]);                                                                              \
-        if (type->sound_modes[slot] == 4)                                                                              \
-            PlaySfxById(type->sounds[slot], &emitter->position);                                                       \
-    }
-#define PART_EMIT_SOUND(slot, mode)                                                                                    \
-    if (type->sounds[slot] != -1 && type->sound_modes[slot] == (mode))                                                 \
-        PlaySfxById(type->sounds[slot], &emitter->position);
 
 PART_s *FindIncomingPart(void *owner, NUVEC *position, f32 radius, u32 flags, f32 range);
 
@@ -989,17 +956,7 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 }
 
-// The special-route list reserves the first ten ids for suit characters.  The
-// remaining ids enumerate the current story list while omitting variants that
-// are represented by those dedicated routes.
-
 struct CUTSCENEPLAYERCLIP;
-
-#if defined(__i386__)
-#define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
-#else
-#define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone))
-#endif
 
 extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER;
 
@@ -1016,7 +973,6 @@ GameObject_s *FindNearestGameObject(NUVEC *position, GameObject_s *exclude, u32 
                                     f32 extra_radius, i32 animation, i32 character_id, i32 player_index,
                                     f32 *distance_squared, i32 horizontal_only, i32 (*filter)(GameObject_s *),
                                     bool first_match);
-
 
 struct HINT_s;
 
@@ -1043,15 +999,10 @@ namespace {
 
 } // namespace
 
-
-// Original data symbol testmovef is float0.005 at 0x617cb0.
-
-
 extern "C" i16 id_LANDSPEEDER;
 extern i32 CUTCAMONLY, GUNSHIPAHACK, netcamera, complexsockposition_forcesock, movegamecamera_forcesock;
 GameObject_s *FindNearestGameObject(NUVEC *, GameObject_s *, u32, f32, f32, i32, i32, i32, f32 *, i32,
                                     i32 (*)(GameObject_s *), bool);
-
 
 static u8 disorientAxis = 7;
 
@@ -1063,7 +1014,6 @@ i32 IDLESPEEDINNARROWSOCKSONLY = 0;
 
 struct FLOWBOX_s;
 
-
 extern "C" {
     extern "C++" i32 (*GamePads_IgnoreInputFn)(void);
     extern "C++" FadeSystem FadeSys;
@@ -1071,14 +1021,11 @@ extern "C" {
 
 struct instNUGCUTSCENE_s;
 
-
 // --- Cross-file entry points / id globals ---
 //
 extern "C" {
     void *AIPAthFindPathCnx(AISYS_s *, AIPATH_s *, char *, char *, i32 *); // legoapi/ai pathfinding
 }
-
-// Defined in gameapi/edtools/edtoolsall.cpp, which has no header yet.
 
 struct JEDIBNETPACKET_s;
 
@@ -1093,34 +1040,9 @@ extern "C" {
     // Seed the arena's own random stream starts from, so a level lays out the same way each time.
 }
 
-// --- File-local statics (original _ZL... symbols; not renamed) ---------------
-
-
-
-
-// Jedi (Jedi_B)
-
-
-
-
-// Dooku (Dooku_C)
-
-
 extern "C" {
     void *AIPAthFindPathCnx(AISYS_s *, AIPATH_s *, char *, char *, i32 *); // original name keeps the typo
 }
-
-// PodSprint_InitAISpline is partially inlined into PodSprintA_Init: the
-// clear, lookup and spline checks are inlined and the crossing scan is the
-// split-out body.
-#if defined(__i386__)
-#define PODSPRINT_AISPLINE_BODY_ATTR __attribute__((noinline, regparm(1)))
-#else
-#define PODSPRINT_AISPLINE_BODY_ATTR __attribute__((noinline))
-#endif
-
-// Original translation unit reconstructed from the reference address map.
-// Functions are defined in original address order.
 
 extern f32 testlaser_endw;
 extern f32 testlaser_sizewab;
@@ -1134,45 +1056,11 @@ extern "C" {
     extern i32 FalconDebKey[2];
 }
 
-#if defined(__i386__)
-#define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
-#else
-#define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone))
-#endif
-
 struct nuhspecial_s;
 struct minitrooperteam_s;
 struct nuvec_s;
 
-// The route records use a dense route index, while the editor keeps sixteen
-// independently switchable slots.  The original helper first marks both ends
-// of every route connection, then builds the compact node lookup and matrix.
-#if defined(__i386__)
-#define AIPATHBUILD_CLONE_ATTR2 __attribute__((noinline, noclone, regparm(2)))
-#else
-#define AIPATHBUILD_CLONE_ATTR2 __attribute__((noinline, noclone))
-#endif
-
-// Retail keeps several static helpers here only as GCC clones; these attributes
-// reproduce the clone names and register conventions.
-#if defined(__i386__)
-#define AISYSALL_CLONE_ATTR1 __attribute__((noinline, noclone, regparm(1)))
-#define AISYSALL_CLONE_ATTR2 __attribute__((noinline, noclone, regparm(2)))
-#define AISYSALL_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
-#else
-#define AISYSALL_CLONE_ATTR1 __attribute__((noinline, noclone))
-#define AISYSALL_CLONE_ATTR2 __attribute__((noinline, noclone))
-#define AISYSALL_CLONE_ATTR2_SSE __attribute__((noinline, noclone))
-#endif
-
-// IPA-SRA hands this clone the address of system->path_sys rather than the system.
-
 extern "C" void *AIPAthFindPathCnx(AISYS_s *system, AIPATH_s *path, char *from, char *to, i32 *direction);
-
-// Game-specific AI actions and conditions (registered via
-// RegisterAIScriptActions / RegisterAIScriptConditions). These are stubbed to
-// satisfy the symbol baseline; the action/condition logic itself is not
-// decompiled. Each stub matches the mangled symbol of the original binary.
 
 extern AIACTIONDEF api_aiactiondefs[55];
 extern AICONDITIONDEF api_aiconditiondefs[50];
@@ -1181,12 +1069,6 @@ DECOMP_ASSERT(sizeof(api_aiactiondefs) == 0x294, "API action registry size");
 
 DECOMP_ASSERT(sizeof(api_aiconditiondefs) == 0x258, "API condition registry size");
 
-#if defined(__i386__)
-#define AISCRIPT_CLONE_ATTR2 __attribute__((noinline, noclone, regparm(2)))
-#else
-#define AISCRIPT_CLONE_ATTR2 __attribute__((noinline, noclone))
-#endif
-
 extern "C" {
 extern void (*checkantinodefns[3])(APIOBJECT *, AIANTINODE *, NUVEC *, f32);
     extern void (*checkantinodefns[3])(APIOBJECT_s *, AIANTINODE_s *, NUVEC *, f32);
@@ -1194,27 +1076,14 @@ extern void (*checkantinodefns[3])(APIOBJECT *, AIANTINODE *, NUVEC *, f32);
 
 extern "C" {
 void *AIPAthFindPathCnx(AISYS_s *system, AIPATH_s *path, char *from_name, char *to_name, i32 *direction);
-
 } // extern "C"
 
-#if defined(__i386__)
-#define AI_SYS_STUBS_CLONE_ATTR2 __attribute__((noinline, noclone, regparm(2)))
-#else
-#define AI_SYS_STUBS_CLONE_ATTR2 __attribute__((noinline, noclone))
-#endif
-
 struct nupad_s;
-
-
-
-// Retail splits the null checks into each caller and keeps the body as a
-// partial-inlining clone; its connection searches are fully peeled.
 
 struct EDAISHAREDPATHNODE_s;
 struct AIPATH_s;
 struct eduimenu_s;
 struct eduiitem_s;
-
 
 static __used__ void pathEditor_cbCancelRenamePathMenu(eduimenu_s *, eduimenu_s *);
 static __used__ void pathEditor_cbCancelRenameNodeMenu(eduimenu_s *, eduimenu_s *);
@@ -1237,29 +1106,8 @@ static __used__ i32 routeEditor_AddToRoute(EDAIPATHNODE_s *node, EDAIPATHNODE_s 
 
 static __used__ i32 routeEditor_AddToRoute(EDAIPATHNODE_s *node, EDAIPATHNODE_s *other);
 
-// Retail keeps an unreferenced partial-inlining clone of pathEditorSetCamPos:
-// it moves the editor camera to a position at the cursor's height.
-#if defined(__i386__)
-#define PATHEDITOR_SETCAMPOS_BODY_ATTR __attribute__((used, noinline, noclone, regparm(1)))
-#else
-#define PATHEDITOR_SETCAMPOS_BODY_ATTR __attribute__((used, noinline, noclone))
-#endif
-
-#if defined(__i386__)
-#define EDANTINODE_REGPARM1 __attribute__((regparm(1)))
-#else
-#define EDANTINODE_REGPARM1
-#endif
-
 struct EDCREATURE_s;
 struct AIPATHSYS_s;
-
-
-#if defined(__i386__)
-#define CREATURE_EDITOR_REGPARM2 __attribute__((regparm(2)))
-#else
-#define CREATURE_EDITOR_REGPARM2
-#endif
 
 #if defined(__i386__)
 #define CREATURE_EDITOR_REGPARM1 __attribute__((regparm(1)))
@@ -1295,12 +1143,6 @@ static __used__ __attribute__((optimize("no-tree-vectorize"))) void
 locatorEditor_cbAddLocatorsByNameYesNo(eduimenu_s *, eduiitem_s *item, u32);
 static __used__ __attribute__((optimize("no-tree-vectorize"))) void DestroyLocator(EDLOCATOR_s *locator);
 
-#if defined(__i386__)
-#define LOCATOR_SET_BODY_ATTR __attribute__((noinline, optimize("no-tree-vectorize"), regparm(2)))
-#else
-#define LOCATOR_SET_BODY_ATTR __attribute__((noinline, optimize("no-tree-vectorize")))
-#endif
-
 static __used__ unsigned int AddLocatorToSet(EDLOCATORSET_s *set, EDLOCATOR_s *locator, EDLOCATOR_s *before);
 
 #if defined(__i386__)
@@ -1321,14 +1163,7 @@ extern "C" {
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
 
-
 }
-
-#if defined(__i386__)
-#define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
-#else
-#define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone))
-#endif
 
 struct GIZSPINNER_s;
 
@@ -1350,72 +1185,8 @@ struct ripple_node_s;
 struct ripple_set_s;
 struct VuVec;
 
-// Retail only keeps the IPA-SRA clone, which drops the unused fourth argument.
-#if defined(__i386__)
-#define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone, regparm(2)))
-#else
-#define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone))
-#endif
-
-// --- Extern "C": NuGScn functions have C linkage in original ---
-
-#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
-    do {                                                                                                               \
-        direction.x = (vx);                                                                                            \
-        direction.y = -(vy) * camera.aspect;                                                                           \
-        direction.z = adjacent;                                                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        brightness = direction.y * 0.5f + 0.5f;                                                                        \
-        if (brightness <= near_angle)                                                                                  \
-            brightness = near_scale * parameters->intensity;                                                           \
-        else if (brightness >= far_angle)                                                                              \
-            brightness = far_scale * parameters->intensity;                                                            \
-        else                                                                                                           \
-            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
-        if (parameters->directional) {                                                                                 \
-            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
-            if (angle < parameters->direction_near_angle) {                                                            \
-                brightness += 128.0f * parameters->direction_far_scale;                                                \
-            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
-                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
-                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
-                                      parameters->direction_bias);                                                     \
-                brightness +=                                                                                          \
-                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
-                              parameters->direction_near_scale);                                                       \
-            }                                                                                                          \
-        }                                                                                                              \
-        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
-                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
-        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
-                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
-        else                                                                                                           \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
-        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
-    } while (0)
-
-// DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
-// red-brick positions come from the Game init values in legogame/game.cpp.
-
 extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
 extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
-
-#define SWIPE_PRIM_UV(U, V)                                                                                            \
-    do {                                                                                                               \
-        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
-        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
-            vertex->float_uv[0] = (U);                                                                                 \
-            vertex->float_uv[1] = (V);                                                                                 \
-        } else {                                                                                                       \
-            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
-            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
-        }                                                                                                              \
-    } while (false)
 
 extern i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
 
@@ -1424,8 +1195,6 @@ struct APIOBJECT_s;
 struct AISYS_s;
 struct AIGROUP_s;
 struct nufpar_s;
-
-// Runtime-selected groups appended after the fixed terrain allocation.
 
 extern "C" {
     extern "C++" void DebrisProcessSpheres(uv1deb *, f32, debinftype *, debkeydatatype_s *, i32);
@@ -1445,95 +1214,9 @@ struct PART_s;
 
 struct APICHARACTERMODELLIST_s;
 
-#define ADD_SNAKE_SEGMENT_DEBRIS(index)                                                                                \
-    do {                                                                                                               \
-        const i32 segment_index = (index);                                                                             \
-        NUMTX matrix;                                                                                                  \
-        NUANGVEC angles;                                                                                               \
-        angles.y = NuAngAdd(object->snake_body->segments[segment_index].yaw, 0x8000);                                  \
-        angles.x = object->snake_body->segments[segment_index].pitch;                                                  \
-        NuMtxSetRotationXYVU0(&matrix, &angles);                                                                       \
-        if (object->snake_body->scale != 1.0f) {                                                                       \
-            NUVEC scale = {object->snake_body->scale, object->snake_body->scale, object->snake_body->scale};           \
-            NuMtxPreScale(&matrix, &scale);                                                                            \
-        }                                                                                                              \
-        matrix.m30 += object->snake_body->segments[segment_index].position.x;                                          \
-        matrix.m31 += object->snake_body->segments[segment_index].position.y + object->snake_body->scale * 0.02f;      \
-        matrix.m32 += object->snake_body->segments[segment_index].position.z;                                          \
-        i32 special_index = segment_index == object->snake_body->segment_count - 1 ? 2 : segment_index % 2;            \
-        nuhspecial_s *special = &snake_hspecials[special_index];                                                       \
-        if (NuSpecialExistsFn(special)) {                                                                              \
-            NUVEC momentum;                                                                                            \
-            SetKillPartMom(&momentum);                                                                                 \
-            momentum.y += 1.0f;                                                                                        \
-            ADDPART_s part = Default_ADDPART;                                                                          \
-            part.matrix = &matrix;                                                                                     \
-            part.velocity = &momentum;                                                                                 \
-            part.field_14 = 0.1f;                                                                                      \
-            part.field_18 = 0.1f;                                                                                      \
-            part.gravity = -5.0f;                                                                                      \
-            part.special = special;                                                                                    \
-            part.flags = 0x90;                                                                                         \
-            part.stop_fn = PartStop_Flickerer;                                                                         \
-            part.draw_fn = PartDraw_Flickerer;                                                                         \
-            part.field_3c = PartImpact_Brick;                                                                          \
-            part.time_step = FRAMETIME;                                                                                \
-            part.lighting = reinterpret_cast<PARTLIGHTSOURCE_s *>(&object->light_data);                                \
-            AddPart(&part);                                                                                            \
-        }                                                                                                              \
-    } while (0)
-
 extern i32 (*Slam_GetDebrisFn)(GameObject_s *, i32);
 
-// Retail copies a fully inside end point as one unaligned vector.
-
 extern f32 ForceThrowGravity;
-
-#if defined(__i386__)
-#define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone, regparm(2)))
-#else
-#define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone))
-#endif
-
-#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
-    do {                                                                                                               \
-        direction.x = (vx);                                                                                            \
-        direction.y = -(vy) * camera.aspect;                                                                           \
-        direction.z = adjacent;                                                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        brightness = direction.y * 0.5f + 0.5f;                                                                        \
-        if (brightness <= near_angle)                                                                                  \
-            brightness = near_scale * parameters->intensity;                                                           \
-        else if (brightness >= far_angle)                                                                              \
-            brightness = far_scale * parameters->intensity;                                                            \
-        else                                                                                                           \
-            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
-        if (parameters->directional) {                                                                                 \
-            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
-            if (angle < parameters->direction_near_angle) {                                                            \
-                brightness += 128.0f * parameters->direction_far_scale;                                                \
-            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
-                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
-                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
-                                      parameters->direction_bias);                                                     \
-                brightness +=                                                                                          \
-                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
-                              parameters->direction_near_scale);                                                       \
-            }                                                                                                          \
-        }                                                                                                              \
-        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
-                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
-        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
-                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
-        else                                                                                                           \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
-        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
-    } while (0)
 
 static inline void RotateForceGlowMatrix(NUMTX *matrix, i32 angle) {
     const f32 cosine = NU_COS_LUT(angle);
@@ -1552,21 +1235,6 @@ static inline void RotateForceGlowMatrix(NUMTX *matrix, i32 angle) {
     matrix->m31 = x3 * sine + matrix->m31 * cosine;
 }
 
-#define SWIPE_PRIM_UV(U, V)                                                                                            \
-    do {                                                                                                               \
-        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
-        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
-            vertex->float_uv[0] = (U);                                                                                 \
-            vertex->float_uv[1] = (V);                                                                                 \
-        } else {                                                                                                       \
-            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
-            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
-        }                                                                                                              \
-    } while (false)
-
-
-// Shared gameplay helpers
-
 extern BATARANG_s Batarang[8];
 extern i32 (*BlowupExFunc)(GIZMOBLOWUP_s *, i32);
 extern void (*GizmoBlowUp_SfxFn)(GIZMOBLOWUP_s *, NUVEC *);
@@ -1577,23 +1245,8 @@ extern "C" {
 extern u32 flagremaptab[32][2];
 }
 
-// Definitions from the original gizmoblowups translation unit.
-
-
-
 GIZMOBLOWUP_s *GizmoBlowUp_Hit(GameObject_s *object, NUVEC *points, i32 point_count, f32 radius, NUVEC *minimum,
                                NUVEC *maximum, BOLT_s *bolt, u32 hit_type, u8 *flags);
-
-// LoadPerm1 is one of the few game-level entry points which wires together
-// otherwise C-linkage engine subsystems.  Keep these declarations local: the
-// individual subsystem TUs intentionally expose their original plain names.
-
-// Retail keeps only the IPA-SRA clone, which receives &*layers.
-#if defined(__i386__)
-#define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone, regparm(1)))
-#else
-#define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone))
-#endif
 
 #if defined(__SSE__)
 #include <xmmintrin.h>
@@ -1606,13 +1259,7 @@ extern "C" {
 
 extern i32 FalconDebKey[2];
 
-
 extern "C" i16 id_LANDSPEEDER;
-
-// Debug-capture output helpers consumed by NuDisplayListCaptureSortPriority.
-// Transcribed from the original C-linkage symbols:
-//   NuHtmlBegin    0x2d5ca0   NuHtmlFlush   0x2d5c30
-//   NuHtmlWrite    0x2d5cd0   NuHtmlHeading1 0x2d5d40
 
 extern "C" {
     extern i16 id_BAT;
@@ -1624,14 +1271,7 @@ extern "C" {
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
 
-
 }
-
-#if defined(__i386__)
-#define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
-#else
-#define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone))
-#endif
 
 static void MoveAnim_Manage(GameObject_s *object, f32 movement_speed, i32 allow_tiptoe, i32 weapon_variant) {
     GAMECHARACTERDATA *game_character = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);

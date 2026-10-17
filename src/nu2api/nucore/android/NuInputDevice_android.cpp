@@ -1,4 +1,5 @@
 #include "decomp.h"
+#include "nu2api/nucore/android/NuInputDevice_android.h"
 
 #include <pthread.h>
 #include <math.h>

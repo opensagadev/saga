@@ -33,6 +33,7 @@ extern "C" {
 i32 g_renderContext_zFunc = 3;
 
 extern "C" {
+
     void NuRenderContextInit(void) {
         memcpy(g_renderContext_view, &numtx_identity, sizeof(numtx_identity));
         memcpy(g_renderContext_projection, &numtx_identity, sizeof(numtx_identity));

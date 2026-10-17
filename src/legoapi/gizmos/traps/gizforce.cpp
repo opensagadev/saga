@@ -2,39 +2,6 @@
 #include "legoapi/gizmo/base/GizForceObjectInterface.h"
 #include "legoapi/world/world.h"
 #include "legoapi/legoapi_types.h"
-#include "batman.h"
-#include "decomp.h"
-#include "globals.h"
-#include "gameapi/edtools/edfile.h"
-#include "legoapi/audio/sfx.h"
-#include "legoapi/actions/combat/shovesys.h"
-#include "legoapi/characters/motion/gameanim.h"
-#include "legoapi/characters/motion.h"
-#include "legoapi/characters/core/playeritems.h"
-#include "legoapi/core/config/cheat.h"
-#include "legoapi/core/input/qrand.h"
-#include "legoapi/core/input/gamepads.h"
-#include "legoapi/gizmo/object/gizmoblowups.h"
-#include "legoapi/gizmo/object/gizmopickup.h"
-#include "legoapi/misc/supportall.h"
-#include "legoapi/misc/utilities.h"
-#include "legoapi/render/core/terrain.h"
-#include "legoapi/render/fx.h"
-#include "legoapi/render/fx/parts.h"
-#include "legoapi/items/objects/gameobjects.h"
-#include "legoapi/world/area.h"
-#include "legoapi/world/level.h"
-#include "nu2api/nu3d/nuspecial.h"
-#include "nu2api/nu3d/nuportal.h"
-#include "nu2api/nu3d/nucamera.h"
-#include "nu2api/nu3d/nurndr.h"
-#include "nu2api/nucore/nustring.h"
-#include "nu2api/numath/numtx.h"
-#include "nu2api/numath/nutrig.h"
-#include "nu2api/numusic/sfx.h"
-#include "nu2api/nufile/nufpar.h"
-#include <string.h>
-#include "legoapi/characters/core/players.h"
 
 u32 GizForce_TotalScore(void *world) {
     GIZFORCESYS_s *system = static_cast<WORLDINFO_s *>(world)->giz_force_sys;
@@ -48,6 +15,43 @@ u32 GizForce_TotalScore(void *world) {
     }
     return total;
 }
+
+#include "batman.h"
+#include "decomp.h"
+#include "globals.h"
+#include "gameapi/edtools/edfile.h"
+#include "legoapi/audio/sfx.h"
+#include "legoapi/actions/combat/shovesys.h"
+#include "legoapi/characters/motion/gameanim.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/characters/core/playeritems.h"
+#include "legoapi/core/config/cheat.h"
+#include "legoapi/core/input/qrand.h"
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/gizmo/object/gizmoblowups.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/gizmo/object/gizmopickup.h"
+#include "legoapi/misc/supportall.h"
+#include "legoapi/misc/utilities.h"
+#include "legoapi/render/core/terrain.h"
+#include "legoapi/render/fx.h"
+#include "legoapi/render/fx/parts.h"
+#include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/legoapi_types.h"
+#include "legoapi/world/area.h"
+#include "legoapi/world/world.h"
+#include "legoapi/world/level.h"
+#include "nu2api/nu3d/nuspecial.h"
+#include "nu2api/nu3d/nuportal.h"
+#include "nu2api/nu3d/nucamera.h"
+#include "nu2api/nu3d/nurndr.h"
+#include "nu2api/nucore/nustring.h"
+#include "nu2api/numath/numtx.h"
+#include "nu2api/numath/nutrig.h"
+#include "nu2api/numusic/sfx.h"
+#include "nu2api/nufile/nufpar.h"
+
+#include <string.h>
 
 i32 force_gizmotype_id = -1;
 
@@ -801,6 +805,7 @@ static NUVEC *GizmoForce_GetPos(GIZMO *gizmo) {
 }
 
 void Bolt_AddDeflectedBolt(BOLT_s *, nuvec_s *, nuvec_s *, unsigned char *);
+i32 Player_HasDoubleBoltDamage_FromBolt(BOLT_s *);
 
 // Retail keeps this body as GCC's split-out clone; the inline head stays in
 // the caller.

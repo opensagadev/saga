@@ -41,6 +41,7 @@ static void *g_lastPartEffect;
 static u32 g_FrameVertexCount;
 static u32 g_writeBufferIndex;
 static u32 g_readBufferIndex = 1;
+
 static u32 g_IdealDynamicVBSize = 0xc800;
 
 static void NuIOSBindVAO(u32 vao) {
@@ -760,3 +761,4 @@ extern "C" void GenericDebinfoDmaTypeUpdate(debinftype *effect) {
     }
 }
 
+// Original provides only the mangled spelling (_Z28NuDebrisRendererFlushBuffersv).

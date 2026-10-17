@@ -158,9 +158,6 @@ static inline void SetRopeVertex(NURND_VERTEX3D *vertex, f32 x, f32 y, f32 z, f3
         }                                                                                                              \
     }
 
-// Original translation unit reconstructed from the reference address map.
-// Functions are defined in original address order.
-
 i32 SuperWeirdo(GameObject_s *object);
 
 // Each control mode retains its own requested and interpolated hint row.

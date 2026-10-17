@@ -49,9 +49,6 @@ namespace {
 
 namespace {
 
-    // OpenSL interface vtable slots as used by libTTapp.so.
-
-
 } // namespace
 
 // ---------------------------------------------------------------------------

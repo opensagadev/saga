@@ -204,26 +204,12 @@ static i32 Customise_FindLetter(char character) {
     return letter == 38 ? 0 : letter;
 }
 
-// LoadPerm1 is one of the few game-level entry points which wires together
-// otherwise C-linkage engine subsystems.  Keep these declarations local: the
-// individual subsystem TUs intentionally expose their original plain names.
-
 struct AISYS_s;
-
-// The original table at 0x006281a0.  These are the material animation
-// scripts made available before the permanent things scene is loaded.
 
 struct AIROW_s;
 struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
-
-// Retail keeps only the IPA-SRA clone, which receives &*layers.
-#if defined(__i386__)
-#define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone, regparm(1)))
-#else
-#define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone))
-#endif
 
 static void UpdateCustomPieceAnim(CUSTOMPIECEANIM *anim, u16 minimum, u16 maximum) {
     if (anim->elapsed < anim->duration) {

@@ -4,6 +4,7 @@
 #include "nu2api/nucore/nuvuvec.hpp"
 
 extern "C" {
+
     void NuFramebufferInitEx(u32, u32, VARIPTR *, VARIPTR) {
     }
 
@@ -83,6 +84,7 @@ extern "C" {
     nuframebuffer_s *NuFramebufferGetObject(i32) {
         return NULL;
     }
+
 } // extern "C"
 
 void NuFramebuffer360BeginZPass(i32) {

@@ -6,11 +6,13 @@
 #include "java/native_window.h"
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/android/nutex_ios_ex.h"
+#include "nu2api/nu3d/android/NuGLES2Extensions.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nucore/common.h"
 #include "nu2api/nucore/nucore.hpp"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nuplatform/nudevicespecs.hpp"
+#include "nu2api/nuplatform/nuplatform.h"
 
 #include <EGL/egl.h>
 #include <GLES2/gl2.h>

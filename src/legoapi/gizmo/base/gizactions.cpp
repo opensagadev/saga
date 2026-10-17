@@ -5,6 +5,7 @@
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/characters/motion.h"
+#include "legoapi/cutscenes/cutscenes.h"
 #include "legoapi/gizmo/base/gizactions.h"
 #include "legoapi/gizmo/base/gizmo.h"
 #include "legoapi/gizmos/object/gizbuildits.h"
@@ -24,9 +25,10 @@
 #include "legoapi/world/world.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nu3d/nuspecial.h"
-#include "legoapi/audio/radio.h"
-#include "legoapi/render/fx/particles.h"
-#include "legoapi/world/levels/levels.h"
+
+void SetEffectVisibility(char *name, i32 visible);
+i32 EffectOffProgress_Update(LEVEL_PROGRESS_s *progress, char *name, i32 visible);
+void PlayRadio(char *special_name, char *blowup_name, i32 play);
 
 static void GizActions_EnableSock(GIZFLOW_s *, FLOWBOX_s *, char **params, int count) {
     i32 sock_index = -1;

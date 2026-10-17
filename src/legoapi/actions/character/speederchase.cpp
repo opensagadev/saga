@@ -40,7 +40,6 @@
 struct AIROW_s;
 struct nunativegscene_s;
 
-// This alignment affects PodRaceAUpdate codegen even though the linked address is 32-byte aligned.
 static i32 snaphack[2];
 static i32 snaphacktimer[2];
 

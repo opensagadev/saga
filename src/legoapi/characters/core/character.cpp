@@ -16,7 +16,6 @@ struct numtx_s;
 struct APICHARACTERMODELLIST_s;
 struct EXTRAMODEL;
 
-// Forward declarations for local (static) character/gameplay helper stubs.
 struct nuvec_s;
 struct EDCREATURE_s;
 struct APIOBJECT_s;

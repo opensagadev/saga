@@ -58,9 +58,6 @@ static f32 ***distance_tables;
 static __used__ f32 **pathEditorCalculateDistanceTable(AIPATH_s *path, i32 route_mask, variptr_u *cursor,
                                                        variptr_u *end);
 
-// The route records use a dense route index, while the editor keeps sixteen
-// independently switchable slots.  The original helper first marks both ends
-// of every route connection, then builds the compact node lookup and matrix.
 #if defined(__i386__)
 #define AIPATHBUILD_CLONE_ATTR2 __attribute__((noinline, noclone, regparm(2)))
 #else
@@ -76,8 +73,6 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-// Retail keeps several static helpers here only as GCC clones; these attributes
-// reproduce the clone names and register conventions.
 #if defined(__i386__)
 #define AISYSALL_CLONE_ATTR1 __attribute__((noinline, noclone, regparm(1)))
 #define AISYSALL_CLONE_ATTR2 __attribute__((noinline, noclone, regparm(2)))
@@ -106,7 +101,6 @@ static AISYSALL_CLONE_ATTR2 void AIMoveFindDivertNode(AIPATH *path, AIPACKET *pa
 static AISYSALL_CLONE_ATTR1 i32 AIMoveAdjustDestinationPath(AIPACKET *packet)
     __asm__("_ZL27AIMoveAdjustDestinationPathP7AISYS_sP10AIPACKET_s.isra.48");
 
-// IPA-SRA hands this clone the address of system->path_sys rather than the system.
 static AISYSALL_CLONE_ATTR2 i32 AIMoveChooseExitNodePath(AIPATHSYS **path_sys, AIPACKET *packet)
     __asm__("_ZL24AIMoveChooseExitNodePathP7AISYS_sP10AIPACKET_s.isra.82");
 
@@ -162,11 +156,6 @@ static bool ActionValidOpponent(GameObject_s *opponent) {
            opponent->apiobj.field_0x287 == 0 && opponent->character_context != CHARACTER_CONTEXT_DOOMED &&
            !(opponent->apiobj.player_controlled && opponent->spawn_protection_timer > 0.0f);
 }
-
-// Game-specific AI actions and conditions (registered via
-// RegisterAIScriptActions / RegisterAIScriptConditions). These are stubbed to
-// satisfy the symbol baseline; the action/condition logic itself is not
-// decompiled. Each stub matches the mangled symbol of the original binary.
 
 static i32 Action_Idle(AISYS *, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params, i32 param_count,
                        i32 is_first_time, f32 elapsed);
@@ -1525,7 +1514,6 @@ static void AISysLoadAntinodes(AISYS *system, i32 version, NUGSCN *scene, char *
 
 extern "C" {
 void *AIPAthFindPathCnx(AISYS_s *system, AIPATH_s *path, char *from_name, char *to_name, i32 *direction);
-
 } // extern "C"
 
 static AICONDITION *AIScriptFinishStateConditions(NULISTHDR *conditions, AIPACKET *packet, AISCRIPTPROCESS *processor,
@@ -1602,7 +1590,6 @@ void InitFn_GameAISave(AIEDITORCALLBACK *function);
 #include <stdio.h>
 
 struct nupad_s;
-
 
 static inline EDAIAREA_s *&area_selected() {
     return *reinterpret_cast<EDAIAREA_s **>(reinterpret_cast<u8 *>(aieditor) + 0x37a48);
@@ -1783,8 +1770,6 @@ extern "C" {
 static AIPATHCNXTYPE_s aipathcnxtypes[32];
 static i32 naipathcnxtypes;
 
-// Retail splits the null checks into each caller and keeps the body as a
-// partial-inlining clone; its connection searches are fully peeled.
 static __attribute__((noinline, noclone, optimize("peel-loops"))) void DestroyAIPathNodeBody(EDAIPATHNODE_s *,
                                                                                             EDAIPATH_s *)
     __asm__("_ZL17DestroyAIPathNodeP14EDAIPATHNODE_sP10EDAIPATH_s.part.42");
@@ -1821,7 +1806,6 @@ struct AIPATH_s;
 struct eduimenu_s;
 struct eduiitem_s;
 struct nuvec_s;
-
 
 void pathEditorDrawNode(NUVEC *position, f32 radius, f32 lower_height, f32 upper_height, u32 colour, numtl_s *material,
                         i32 segments, i32 solid);
@@ -1910,8 +1894,6 @@ static inline bool pathEditor_HasConnection(EDAIPATHNODE_s *node, EDAIPATHNODE_s
            node->connections[6].node == other || node->connections[7].node == other;
 }
 
-// Retail keeps an unreferenced partial-inlining clone of pathEditorSetCamPos:
-// it moves the editor camera to a position at the cursor's height.
 #if defined(__i386__)
 #define PATHEDITOR_SETCAMPOS_BODY_ATTR __attribute__((used, noinline, noclone, regparm(1)))
 #else
@@ -2054,7 +2036,6 @@ __attribute__((force_align_arg_pointer)) void aieditor_SetCurrentScript(char *na
 #include <string.h>
 struct EDCREATURE_s;
 struct AIPATHSYS_s;
-
 
 static inline __attribute__((always_inline)) NULISTHDR *creatureEditor_AreaList() {
     return reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x37a40);
@@ -2403,8 +2384,6 @@ extern "C" {
     extern i32 FalconDebKey[2];
 }
 
-// Written by ThingManager's ctor (original global @0x124f2e0, .bss).
-
 extern GameObject_s *player_tag_from;
 extern GameObject_s *player_tag_to;
 
@@ -2447,19 +2426,9 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 static SCRIPT_ERROR_LEVEL ScriptErrorLevel;
 
-// The special-route list reserves the first ten ids for suit characters.  The
-// remaining ids enumerate the current story list while omitting variants that
-// are represented by those dedicated routes.
-
 struct CUTSCENEPLAYERCLIP;
 
 extern f32 LevelNameTime, LevelNameMul;
-
-#if defined(__i386__)
-#define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
-#else
-#define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone))
-#endif
 
 extern "C" {
 void SetScriptErrorLevel(SCRIPT_ERROR_LEVEL level);
@@ -2569,7 +2538,6 @@ namespace {
 extern void (*Punch_HitHoldFn)(GameObject_s *, GameObject_s *);
 extern i32 (*Punch_GetDamageFn)(GameObject_s *, GameObject_s *);
 extern void (*Punch_HitExtraCodeFn)(GameObject_s *, nuvec_s *);
-
 
 #include "decomp.h"
 #include "legoapi/gizmos/object/gizbuildits.h"
@@ -2736,15 +2704,6 @@ struct ripple_node_s;
 struct ripple_set_s;
 struct VuVec;
 
-// Retail only keeps the IPA-SRA clone, which drops the unused fourth argument.
-#if defined(__i386__)
-#define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone, regparm(2)))
-#else
-#define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone))
-#endif
-
-// --- Extern "C": NuGScn functions have C linkage in original ---
-
 extern "C" {
     f32 aiEditor_DrawYOffset = 0.25f;
 }
@@ -2753,65 +2712,10 @@ extern "C" {
 #include "nu2api/nu3d/nuprim_internal.h"
 #include "nu2api/nu3d/nupostparams.h"
 
-#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
-    do {                                                                                                               \
-        direction.x = (vx);                                                                                            \
-        direction.y = -(vy) * camera.aspect;                                                                           \
-        direction.z = adjacent;                                                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
-        NuVecNorm(&direction, &direction);                                                                             \
-        brightness = direction.y * 0.5f + 0.5f;                                                                        \
-        if (brightness <= near_angle)                                                                                  \
-            brightness = near_scale * parameters->intensity;                                                           \
-        else if (brightness >= far_angle)                                                                              \
-            brightness = far_scale * parameters->intensity;                                                            \
-        else                                                                                                           \
-            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
-        if (parameters->directional) {                                                                                 \
-            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
-            if (angle < parameters->direction_near_angle) {                                                            \
-                brightness += 128.0f * parameters->direction_far_scale;                                                \
-            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
-                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
-                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
-                                      parameters->direction_bias);                                                     \
-                brightness +=                                                                                          \
-                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
-                              parameters->direction_near_scale);                                                       \
-            }                                                                                                          \
-        }                                                                                                              \
-        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
-                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
-                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
-        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
-                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
-        else                                                                                                           \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
-        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
-    } while (0)
-
 extern i16 tNONEWBESTTIME, tNEWBESTTIME;
-
-// DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
-// red-brick positions come from the Game init values in legogame/game.cpp.
 
 extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
 extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
-
-#define SWIPE_PRIM_UV(U, V)                                                                                            \
-    do {                                                                                                               \
-        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
-        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
-            vertex->float_uv[0] = (U);                                                                                 \
-            vertex->float_uv[1] = (V);                                                                                 \
-        } else {                                                                                                       \
-            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
-            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
-        }                                                                                                              \
-    } while (false)
 
 extern i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
 
@@ -2915,7 +2819,6 @@ __attribute__((force_align_arg_pointer)) i32 creatureEditor_CalculatePos(EDCREAT
 #include <stddef.h>
 
 i32 geom;
-// Runtime-selected groups appended after the fixed terrain allocation.
 
 extern "C" {
     void *NuScratchAlloc32(i32 size);

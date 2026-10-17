@@ -9,6 +9,7 @@
 #include "legoapi/audio/sfx.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/motion.h"
+#include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/items/base/apiobject.h"
 #include "legoapi/items/base/collection.h"
 #include "legoapi/items/objects/gameobjects.h"
@@ -24,13 +25,13 @@
 #include "nu2api/nucore/nuvuvec.hpp"
 #include "legoapi/render/core/terrain.h"
 #include "legoapi/world/area.h"
-#include "legoapi/characters/motion/move.h"
-#include "legoapi/items/fx/explosions.h"
-#include "legoapi/items/objects/cable.h"
-#include "legoapi/render/core/gameliball.h"
+#include "legoapi/world/world.h"
 
+f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
 i32 SuperWeirdo(GameObject_s *);
 i32 GizForce_StoodOnForce(GIZFORCE_s *, GameObject_s *);
+EXPLOSION *AddExplosion(NUVEC *, f32, f32, GameObject_s *, i32, i32);
+extern "C" void PlaySfxAndSetVolume(char *, NUVEC *, f32);
 
 i32 TouchHacks::GetLoseStudsDieValue() {
     return BonusArea != 0 ? 10000 : 1000;
@@ -59,7 +60,10 @@ bool TouchHacks::ShouldBlock(GameObject_s &object) {
 
 NUCOLOUR3 flashCol = {2.0f, 2.0f, 2.0f};
 bool TouchHacks::TouchControlsActive;
-extern "C" i16 id_WATTO;
+extern i32 BonusArea;
+extern "C" i16 id_GRABCONTROL, id_WICKET, id_EWOK;
+extern "C" i16 id_ATST, id_ATST_LOWRES;
+extern "C" i16 id_WATTO, id_GONKDROID;
 
 bool TouchHacks::AiPlayerTakeDamageOnKillRescue(GameObject_s &) {
     return TouchControlsActive;
@@ -308,6 +312,8 @@ bool TouchHacks::CanTagTo(GameObject_s &source, GameObject_s &target) {
     return !(dx * dx + dy * dy + dz * dz > 4.0f);
 }
 
+void Move_DEFAULT(GameObject_s *);
+
 bool TouchHacks::CanToggleTo(GameObject_s &object, i32 id) {
     if (object.id == id)
         return false;
@@ -324,7 +330,13 @@ bool TouchHacks::CanToggleTo(GameObject_s &object, i32 id) {
     return true;
 }
 
-extern i16 id_SKELETON;
+void Move_CHARACTER(GameObject_s *);
+void Move_WEIRDO(GameObject_s *);
+void Move_JEDI(GameObject_s *);
+void Move_DROIDGENERIC(GameObject_s *);
+void Move_JAWA(GameObject_s *);
+void Move_GEONOSIAN(GameObject_s *);
+extern i16 id_SKELETON, id_GRIEVOUS, id_BODYGUARD, id_ATAT, id_STAP, id_STAP2;
 
 bool TouchHacks::CanTagVehicle(GameObject_s &object, GameObject_s &vehicle) {
     CHARACTERDATA *character = object.apiobj.character_data;
@@ -485,6 +497,7 @@ nucolour3_s *TouchHacks::GetFlashColour() {
     return &flashCol;
 }
 
+CABLE_s *GameObjIsCableTied(GameObject_s *);
 i32 TouchHacks::ShouldDeflectBolt(GameObject_s &object, BOLT_s &bolt) {
     if (!TouchControlsActive || VehicleArea == 0)
         return 0;

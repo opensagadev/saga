@@ -1245,14 +1245,8 @@ extern "C" {
     extern i32 FalconDebKey[2];
 }
 
-// Written by ThingManager's ctor (original global @0x124f2e0, .bss).
-
 extern GameObject_s *player_tag_from;
 extern GameObject_s *player_tag_to;
-
-// Enabled in the target data image.  Ordinary background characters are
-// staggered across frames; special movement states opt back into full-rate
-// processing through the forced-update path.
 
 static f32 Condition_OnForcePlatform(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument);
 static f32 Condition_PlayerOnForcePlatform(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument);
@@ -1619,23 +1613,12 @@ extern "C" {
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
 
-
     AIGETNAMEDAPIOBJECT *GetNamedAPIObjectFn;
 }
-
-// The special-route list reserves the first ten ids for suit characters.  The
-// remaining ids enumerate the current story list while omitting variants that
-// are represented by those dedicated routes.
 
 struct CUTSCENEPLAYERCLIP;
 
 extern f32 LevelNameTime, LevelNameMul;
-
-#if defined(__i386__)
-#define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
-#else
-#define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone))
-#endif
 
 extern "C" {
 void SetScriptErrorLevel(SCRIPT_ERROR_LEVEL level);
@@ -1694,18 +1677,7 @@ extern "C" {
     extern i16 id_RIDDLER_GOON, id_RIDDLER_GOON_GUN;
 }
 
-// LoadPerm1 is one of the few game-level entry points which wires together
-// otherwise C-linkage engine subsystems.  Keep these declarations local: the
-// individual subsystem TUs intentionally expose their original plain names.
-
 struct AISYS_s;
-
-// Retail keeps only the IPA-SRA clone, which receives &*layers.
-#if defined(__i386__)
-#define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone, regparm(1)))
-#else
-#define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone))
-#endif
 
 extern i32 STATUS_R, STATUS_G, STATUS_B;
 

@@ -61,15 +61,6 @@ i32 openlevels = 0;
 #include <emmintrin.h>
 #endif
 
-#define EDLEVEL_ADD_ACTIVE_SCENE(menu, scene_index)                                                                    \
-    do {                                                                                                               \
-        LevelEditorScene *scene = theLevelEditor.GetEdScene(scene_index);                                              \
-        if (scene != NULL && scene->active)                                                                            \
-            eduiMenuAddItem(menu, eduiItemToggleCreate((scene_index) << 6, &EdLevelAttr, scene->editable, 1,           \
-                                                       ClassEditor::cbEdFilterLED, scene->name));                      \
-    } while (0)
-
-
 struct APICHARACTERMODELLIST_s;
 
 AREADATA *ADataList = NULL;

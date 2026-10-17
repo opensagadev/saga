@@ -60,6 +60,7 @@ JavaVM *g_javaVM = &host_javaVM;
 jclass g_activityClass;
 
 extern "C" {
+
     jint JNI_OnLoad(JavaVM *vm, void *reserved) {
         return JNI_OK;
     }
@@ -159,4 +160,5 @@ extern "C" {
     void Java_com_tt_tech_TTActivity_nativeUpdateGamepadAxisValues(void) {
         STUBBED();
     }
+
 } // extern "C"

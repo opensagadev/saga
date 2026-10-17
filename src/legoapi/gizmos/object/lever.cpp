@@ -14,6 +14,9 @@
 #include "legoapi/characters/motion/animlist.h"
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/characters/motion/gameanim.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/characters/motion/animlist.h"
+#include "legoapi/core/input/gamepads.h"
 #include "legoapi/menus/core/gamehint.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/items/objects/gameobjects.h"
@@ -31,6 +34,7 @@
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nuvec.h"
 
+f32 GameShadow(GameObject_s *object, NUVEC *position, f32 probe_height, i32 platform_id);
 void FindAnglesZX(NUVEC *normal, u16 *x_rotation, u16 *z_rotation);
 
 struct LEVERPROGRESS {
@@ -44,6 +48,7 @@ DECOMP_ASSERT(sizeof(LEVERPROGRESS) == 0xc, "LEVER progress ABI");
 LEVER_CONFIG LeverSys = {0x55, 0};
 
 extern "C" u8 show_lever_hint;
+void Hint_SetComplete(i32);
 
 void ReleaseLever(GameObject_s *object) {
     if (object->character_context == 0x4a) {

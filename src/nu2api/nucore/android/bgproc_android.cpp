@@ -80,9 +80,6 @@ static NuThreadSemaphore events[2] = {
 #include <xmmintrin.h>
 #endif
 
-// The reference defines these with dynamic initialization in this unit.
-
-
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
 
@@ -90,12 +87,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
                   "complete game AI condition registry");
 
 }
-
-#if defined(__i386__)
-#define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
-#else
-#define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone))
-#endif
 
 // ThingManager objects return to the theMemoryManager pool (D0 @0x425a50).
 inline void ThingManager::operator delete(void *thing, usize size) {

@@ -11,14 +11,16 @@
 #include "legoapi/gizmo/object/gizmoblowups.h"
 #include "legoapi/items/base/animpacket.h"
 #include "legoapi/legoapi_types.h"
+#include "nu2api/nu3d/nutex.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nuvec.h"
-#include "legoapi/actions/movement/climbing.h"
 
 struct AIROW_s;
 struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
+
+void SetWeaponIn(GameObject_s *object);
 
 void Whip_MoveCode(GameObject_s *object) {
     if (LEGOCONTEXT_WHIP == -1) {

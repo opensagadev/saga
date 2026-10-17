@@ -62,17 +62,6 @@ extern f32 TargetDist_Near2, TargetDist_Mid2;
 static i32 PDEBCOUNT;
 static char **PDebNameList;
 
-// The original repeats the per-sound emitter checks for each of the four sound slots.
-#define PART_EMIT_SOUND_ON(slot)                                                                                       \
-    if (type->sounds[slot] != -1) {                                                                                    \
-        SetSfxBit_On(type->sounds[slot]);                                                                              \
-        if (type->sound_modes[slot] == 4)                                                                              \
-            PlaySfxById(type->sounds[slot], &emitter->position);                                                       \
-    }
-#define PART_EMIT_SOUND(slot, mode)                                                                                    \
-    if (type->sounds[slot] != -1 && type->sound_modes[slot] == (mode))                                                 \
-        PlaySfxById(type->sounds[slot], &emitter->position);
-
 extern "C" f32 brickimpactwait;
 
 // NuFileExists @nufile (nucore_plain.cpp).

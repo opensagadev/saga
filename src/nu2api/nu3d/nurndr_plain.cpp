@@ -63,8 +63,6 @@ static void NuDisplaySceneRndrBody(NUDLDLISTSCENE *scene);
 
 extern "C" void NuGScnToVideoMem(NUGSCNVIDEOMEMFN callback);
 
-// Material
-
 extern "C" void NuMtlAnimateSetMask(i32 mask);
 extern "C" void NuMtlAnimateSetSpeedScale(f32 speed_scale);
 static void NuMtlCreate3D(void) {

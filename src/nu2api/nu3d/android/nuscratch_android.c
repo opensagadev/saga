@@ -1,11 +1,12 @@
 // Android scratch allocator. The original TU owns the backing store and
 // repeats the alignment/push sequence in each public allocation entry point.
 #include "nu2api/nucore/numem.h"
-#include "nu2api/nucore/nuvuvec.hpp"
 
 extern "C" {
     u8 PS2_SCRATCH_BASE[0x8000];
 }
+
+#include "nu2api/nucore/nuvuvec.hpp"
 
 extern "C" {
     static u8 *ps2_scratch_free;

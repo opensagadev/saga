@@ -48,7 +48,6 @@ using NUHGOBJVIDEOMEMFN = void (*)(nuhgobj_s *);
 extern NUHGOBJVIDEOMEMFN hgobj_to_video_mem;
 extern NUHGOBJVIDEOMEMFN video_mem_to_hgobj;
 
-// C++-linkage helpers defined in sibling TUs.
 void NuPadRecordEndFrame(void);                      // nupad_interface.cpp
 i32 NuCameraClipHGobj(nugscn_s *, NUMTX *, NUMTX *); // nu2api_nucore_misc.cpp
 i32 findrange(nugscn_s *, i32);                      // utilities.cpp
@@ -74,7 +73,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // Camera (thin wrappers; full matrix work is in NuCameraSetEx)
     // ---------------------------------------------------------------------------
-
 
     extern nurenderscene_s currentScene;
 

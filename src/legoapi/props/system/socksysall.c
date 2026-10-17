@@ -4,7 +4,6 @@
 #include "decomp.h"
 #include "legoapi/props/system/socksys.h"
 
-// The original unit constructs its six homogeneous vectors.
 #include "nu2api/nucore/nuvuvec.hpp"
 #include "legoapi/render/core/terrain.h"
 #include <stdio.h>

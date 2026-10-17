@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "gamelib_util_types.h"
 #include "nu2api/nucore/nuvuvec.hpp"
 

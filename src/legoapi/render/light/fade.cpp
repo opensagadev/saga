@@ -2,6 +2,7 @@
 #include "batman.h"
 #include "globals.h"
 #include "gameapi/edtools/edgra.h"
+#include "legoapi/characters/motion.h"
 #include "legoapi/core/startup/main.h"
 #include "legoapi/menus/core/text.h"
 #include "legoapi/legoapi_types.h"
@@ -10,16 +11,27 @@
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/audio/sfx.h"
 #include "legoapi/world/levels/levels.h"
+#include "nu2api/nu3d/numtl.h"
 #include "nu2api/nu3d/nurndr.h"
+#include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nucore/nuapi.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nutrig.h"
-#include "nu2api/nu3d/nu3d_includes.h"
 // The file is built with -ftree-vectorize for the VuVec initializers; the
 // functions below were compiled without it.
 #define SCALAR_FN __attribute__((optimize("omit-frame-pointer", "no-tree-vectorize")))
+extern f32 FRAMETIME;
+extern i32 pause_rndr_on;
+extern i32 wait_till_next_frame;
+extern void DrawFadeScreenWipe(void);
+extern "C" void NuRndrRect2di(i32, i32, i32, i32, i32, numtl_s *);
+
+extern NUMTL *ScreenFadeMtl;
+extern NUMTL *FadeMtl2;
+extern NUMTL *FadeMtl;
 
 static u32 FRAMES_TO_WAIT = 1;
+
 
 void FadeStillWipe::DrawFade() {
     if (wait_till_next_frame != 0)

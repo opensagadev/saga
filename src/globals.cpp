@@ -15,7 +15,6 @@
 #include "nu2api/nucore/nuanim3.h"
 #include "nu2api/nusound/nusound.h"
 #include "gamelib/util/gamelib_util_types.h"
-#include "legoapi/menus/core/lsw_text_data.inc"
 
 struct CUSTOMISER;
 struct GIZAIMESSAGESYS_s;
@@ -24,6 +23,10 @@ char *ASCII_DOWN = const_cast<char *>("\xc2\xa3");
 char *LEGOASCII_DOWN = NULL;
 char *txt_UNKNOWN = const_cast<char *>("?");
 u8 PlayerRGB[2][3] = {{0, 127, 255}, {0, 255, 0}};
+
+// ----------------------------------------------------------------------
+// Shared game globals, grouped by subsystem. See src/globals.h.
+// ----------------------------------------------------------------------
 
 // ------------------------------------------------------------------------
 // Frame rate & timestep
@@ -317,6 +320,7 @@ TERRAIN_LAYER_s TerLayer[17] = {
 };
 GameObject_s *player = NULL;
 GameObject_s *player2 = NULL;
+extern GameObject_s *CutDeadVehiclePlayer;
 f32 avg_currentspeed_mul = 0.0f;
 i32 pause_rndr_on = 0;
 f32 pause_fade = 0.0f;
@@ -1265,6 +1269,7 @@ CHARVARIANT CharVariants_Game[23] = {
     {"walker_2legs"}, {"walker_4legs"}, {"hoverdroid"}, {"critter"},   {"naboostarfighter"},
     {"henchman"},     {NULL},           {NULL},
 };
+#include "legoapi/menus/core/lsw_text_data.inc"
 TEXTCRAWL_s TextCrawl_LSW = {&tCHAPTER, &tVEHICLEBONUS, &tCHARACTERBONUS, 3};
 
 void *theGameThings = NULL;
@@ -1323,6 +1328,7 @@ i32 PauseMenus_Align;
 u8 MENUEXITR = 0xff;
 u8 MENUEXITG = 0xbf;
 u8 MENUEXITB;
+extern i32 from_save_and_exit;
 u8 MENULOSTR1 = 0xbf;
 u8 MENULOSTG1 = 0x5f;
 u8 MENULOSTB1;

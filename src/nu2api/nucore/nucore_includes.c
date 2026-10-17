@@ -389,7 +389,6 @@ f32 NuFrameEnd(void);
 
 }
 
-// C++-linkage helpers defined in sibling TUs.
 void NuPadRecordEndFrame(void);                      // nupad_interface.cpp
 
 extern "C" {
@@ -413,7 +412,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // Camera (thin wrappers; full matrix work is in NuCameraSetEx)
     // ---------------------------------------------------------------------------
-
 
     // ---------------------------------------------------------------------------
     // Display list — faithful helpers + pending stubs

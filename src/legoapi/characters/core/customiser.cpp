@@ -3,6 +3,7 @@
 #include "legoapi/legoapi_types.h"
 #include "globals.h"
 #include "batman.h"
+#include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/menus/screens/store.h"
 #include "legoapi/menus/screens/gamestructure.h"
 #include "legoapi/characters/core/character.h"

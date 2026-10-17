@@ -1,14 +1,17 @@
 #include "nu2api/nusound/nusound_source.hpp"
-#include "nu2api/nucore/numemory.h"
-#include "nu2api/nusound/nusound_loader.hpp"
-#include "globals.h"
-#include <cstring>
 
 const i32 NuSoundSource::sNumInitialBuffers[2] = {1, 2};
 
 i32 NuSoundSource::GetNumInitialBuffers() const {
     return NuSoundSource::sNumInitialBuffers[(u32)this->feed_type];
 }
+#include "nu2api/nusound/nusound_weakptr.hpp"
+
+#include "nu2api/nucore/numemory.h"
+#include "nu2api/nusound/nusound_loader.hpp"
+
+#include "globals.h"
+#include <cstring>
 
 NuSoundSource::NuSoundSource(const char *name, SourceType source_type, FeedType feed_type) {
     this->name_length = 1;

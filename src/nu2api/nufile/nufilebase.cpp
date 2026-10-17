@@ -3,7 +3,6 @@
 
 #include "nu2api/nucore/nustring.h"
 
-// The original unit constructs its six homogeneous vectors.
 #include "nu2api/nucore/nuvuvec.hpp"
 
 NuFileBase::NuFileBase(const char *filepath, NuFile::OpenMode::T mode, u32 type) {

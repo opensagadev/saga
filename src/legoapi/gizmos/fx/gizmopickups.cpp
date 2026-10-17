@@ -138,8 +138,6 @@ namespace {
 
 } // namespace
 
-// Retail keeps this body as GCC's split-out clone; the inline head stays in
-// the caller.
 static __attribute__((noinline, noclone)) void GizmoPickups_UpdateListBody(WORLDINFO *world, GIZMOPICKUP_s *pickups, i32 count, i32 play_nearby_sfx)
     __asm__("_ZL23GizmoPickups_UpdateListP11WORLDINFO_sP13GIZMOPICKUP_sii.part.9");
 
@@ -157,8 +155,6 @@ i32 PickUpFlickerFrames = 6;
 i32 PickupFlickerFrame;
 
 static void GizmoPickups_Update(void *world_ptr, void *, float);
-
-// --- World-module helpers (kept with the WorldInfo API) ---
 
 extern WORLDINFO WorldInfo[2];
 
@@ -183,10 +179,6 @@ extern "C" {
 
 }
 
-// Local (static) part (PART_s), pickup (GIZMOPICKUP_s), gizmo flow
-// (GIZFLOW_s/FLOWBOX_s), power-up and space/starfighter helpers. Stubbed as
-// local `t` symbols matching res/libTTapp.so.
-
 static __used__ void PartImpact_Coin(PART_s *part);
 static __used__ void PartStolen_Coin(PART_s *part);
 static __used__ void PartExtra_BlueCoin(PART_s *part);
@@ -199,17 +191,6 @@ static __used__ void PowerUp_UpdateMsg(GAMEMESSAGE_s *message);
 static __used__ i32 PartDraw_VehicleHeart(PART_s *part);
 static __used__ void PartMove_VehicleHeart(PART_s *part, f32);
 static __used__ void PartMove_VehiclePickup(PART_s *part, f32);
-
-// The original repeats the per-sound emitter checks for each of the four sound slots.
-#define PART_EMIT_SOUND_ON(slot)                                                                                       \
-    if (type->sounds[slot] != -1) {                                                                                    \
-        SetSfxBit_On(type->sounds[slot]);                                                                              \
-        if (type->sound_modes[slot] == 4)                                                                              \
-            PlaySfxById(type->sounds[slot], &emitter->position);                                                       \
-    }
-#define PART_EMIT_SOUND(slot, mode)                                                                                    \
-    if (type->sounds[slot] != -1 && type->sound_modes[slot] == (mode))                                                 \
-        PlaySfxById(type->sounds[slot], &emitter->position);
 
 // NuFileExists @nufile (nucore_plain.cpp).
 
