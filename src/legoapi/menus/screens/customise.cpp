@@ -441,8 +441,6 @@ void InitPlayerAI(GameObject_s *);
 void Player_ClearContext(GameObject_s *, i32);
 void ResetPlayerMoves(GameObject_s *);
 void Player_ResetContexts(PLAYERPACKET_s *);
-void InitSurfaceInfo(GameObject_s *);
-i32 SetObjOnSurface(GameObject_s *, i32);
 void GizForce_ResetLOS(GameObject_s *);
 i32 StartSlide(GameObject_s *, i32);
 
@@ -499,7 +497,6 @@ void CollectCharcters_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 ac
 
 void CollectCharcters_Skip(STATUS_STAGE_s *stage, STATUSPACKET_s *packet);
 
-nuhspecial_s *CharScene_FindHSpecial(WORLDINFO_s *world, i32 character_id);
 
 void PostAnimate_ASTROMECH(GameObject_s *object);
 

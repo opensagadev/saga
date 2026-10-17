@@ -767,25 +767,18 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-extern i32 only_process_this_hint_id;
-extern f32 ICONXPOS_VIRTUALS;
-extern f32 ICONYPOS_VIRTUALS;
-extern f32 ICONYPOS_TOUCHYFEELY;
-extern f32 AlphaBlendTime;
 
 // The hint icon transitions and the touch icon x position are dynamically
 // initialized in this unit's static constructor in the reference.
 extern HintVectorTransition hintIconPos;
 extern HintScalarTransition hintIconScale;
 extern HintScalarTransition hintYPop;
-extern f32 ICONXPOS_TOUCHYFEELY;
 static __used__ i32 Attack_UpdateHint(HINT_s *);
 
 u8 show_unlock_shop_hint = 0;
 u8 show_unlock_customiser_hint = 0;
 u8 show_unlock_minikitviewer_hint = 0;
 
-i32 HINT_COMPLETE(i32 hint_id);
 
 i32 Tilt_UpdateHint(HINT_s *);
 
@@ -802,9 +795,7 @@ void DrawHint_LSW(HINT_s *hint, i32 max_lines);
 
 i32 Dodge_UpdateHint(HINT_s *hint);
 
-void SET_HINT_COMPLETE(i32 hint_id);
 
-void CLEAR_HINT_COMPLETE(i32 hint_id);
 
 i32 DragBomb_UpdateHint(HINT_s *hint);
 
@@ -812,7 +803,6 @@ i32 DragBomb_UpdateHint(HINT_s *hint);
 extern u8 show_lever_hint;
 extern i32 show_autojump_hint;
 extern AREADATA_s *PODRACE_ADATA, *PODSPRINT_ADATA, *BONUS_GUNSHIP_ADATA;
-extern FadeSystem FadeSys;
 
 static __used__ i32 Jump_UpdateHint(HINT_s *hint);
 

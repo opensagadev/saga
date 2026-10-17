@@ -213,10 +213,6 @@ i32 ZipUps_UpdateHint(HINT_s *hint);
 
 #include <string.h>
 
-struct AIROW_s;
-struct nuqthdr_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
 
 void Batarangs_CheckLostData(void *);
 EXPLOSION *Detonate(nuvec_s *, u16);
@@ -280,10 +276,6 @@ DETONATOR_s *Detonator_FindNearest(nuvec_s *position, float radius, GameObject_s
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/numath/nutrig.h"
 
-struct AIROW_s;
-struct nuqthdr_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
 
 extern MechWeakPtr<MechObjectInterface, 4> NextThermalTarget;
 
@@ -309,19 +301,14 @@ extern "C" f32 brickimpactwait;
 
 void ThermalDetonator_Throw(GameObject_s *object);
 
-i32 PartDraw_ThermalDetonator(PART_s *part);
 
 void PartKill_ThermalDetonator(PART_s *part, i32);
 
 i32 ThermalDetonator_MoveCode(GameObject_s *object);
 
-void ThermalDetonator_ThrowMom(GameObject_s *object, nuvec_s *velocity);
 
-void PartImpact_ThermalDetonator(PART_s *part);
 
-void PartUpdate_ThermalDetonator(PART_s *part);
 
-EXPLOSION *Detonate(nuvec_s *position, u16 flags);
 
 // ==== src/legoapi/menus/core/hint.cpp: declarations ====
 #include "decomp.h"
@@ -348,10 +335,6 @@ EXPLOSION *Detonate(nuvec_s *position, u16 flags);
 #include "legoapi/world/level.h"
 #include "legoapi/world/levels/levels.h"
 
-struct AIROW_s;
-struct nuqthdr_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
 
 extern i32 only_process_this_hint_id;
 extern f32 ICONXPOS_VIRTUALS;
@@ -452,7 +435,6 @@ i32 ZipUps_UpdateHint(HINT_s *);
 i32 Push_UpdateHints(HINT_s *);
 i32 GizPanel_UpdateHint(HINT_s *);
 i32 Shop_UpdateHint(HINT_s *);
-extern HINT_s Hints_LSW[55];
 
 // Each control mode retains its own requested and interpolated hint row.
 
@@ -462,21 +444,13 @@ void MenuDrawHints(MENU_s *menu);
 
 // ==== functions in original address order ====
 
-void PartKill_ThermalDetonator(PART_s *part, i32);
 
-i32 PartDraw_ThermalDetonator(PART_s *part);
 
-void PartUpdate_ThermalDetonator(PART_s *part);
 
-void PartImpact_ThermalDetonator(PART_s *part);
 
-void ThermalDetonator_Throw(GameObject_s *object);
 
-void ThermalDetonator_ThrowMom(GameObject_s *object, nuvec_s *velocity);
 
-i32 ThermalDetonator_MoveCode(GameObject_s *object);
 
-i32 ShinyMetal_UpdateHint(HINT_s *hint);
 
 
 // ==== functions in original address order ====

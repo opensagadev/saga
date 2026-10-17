@@ -95,7 +95,6 @@ static void HatMachines_StoreProgress(void *world_ptr, void *, void *progress_pt
 
 void Hat_GetAbsTargetPos(HATMACHINE_s *machine, NUVEC *position);
 
-static void HatMachine_Reset(HATMACHINE_s *machine);
 
 static void HatMachines_Reset(void *world_ptr, void *, void *progress_ptr);
 

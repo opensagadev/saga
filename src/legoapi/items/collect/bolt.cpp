@@ -164,11 +164,9 @@ extern "C" {
     void KillPart(PART_s *, i32);
 }
 i32 SphereSphereOverlapScaleY(NUVEC *, f32, f32, NUVEC *, f32, f32);
-void GameAudio_PlaySfxById(i32, NUVEC *, i32, i32);
 void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 
 void Bolt_PlayHitSfx(BOLT_s *bolt);
-void Bolt_End(BOLT_s *, i32);
 void NewRumble(nupad_s *, f32, i32);
 
 PART_s *Bolt_HitParts(BOLT_s *bolt, NUVEC *points, NUVEC *minimum, NUVEC *maximum, f32 radius, i32 reason);
@@ -208,12 +206,9 @@ extern f32 DEACTIVATEDTIME;
 i32 Player_HasDeflectBolts(GameObject_s *);
 i32 CannotKill(GameObject_s *);
 i32 NewBlockAction(GameObject_s *);
-void FindAnglesXY(NUVEC *, u16 *, u16 *);
-void CalculateInterceptVector(NUVEC *, NUVEC *, NUVEC *, f32, NUVEC *, NUVEC *);
 void ObjHitShield(GameObject_s *, GameObject_s *, i32, BOLT_s *);
 i32 ObjHitObj(GameObject_s *, GameObject_s *, i32, u16, i32, i32);
 void NewBuzz(nupad_s *, f32, i32);
-void GameCam_HitJudder();
 
 __attribute__((force_align_arg_pointer)) void Bolt_AddDeflectedBolt(BOLT_s *bolt, nuvec_s *direction, nuvec_s *normal,
                                                                     unsigned char *processed);
@@ -248,8 +243,6 @@ GIZMOBLOWUP_s *GizmoBlowUp_Hit(GameObject_s *, NUVEC *, i32, f32, NUVEC *, NUVEC
 // correcting this declaration lowers its match.
 i32 ObjHitObj_Flags(GameObject_s *);
 extern i32 addbolt_noobjmom;
-extern i32 addbolt_newsfx;
-extern NUVEC addbolt_newpos;
 extern i32 (*BoltInitSfxFn)(GameObject_s *);
 void Bolt_Init(void *storage, NetMessage &message);
 

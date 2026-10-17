@@ -120,7 +120,6 @@ void ResetGameMessages(void);
 void Tag_ResetTransfers(void);
 void Tag_SetMode(i32 mode);
 u32 TotalLevelCoinTally(WORLDINFO_s *, u32 *, u32 *, u32 *, u32 *, u32 *, u32 *, u32 *);
-void GameCameraMakeMiniCut(nugspline_s *, f32, f32, f32, f32, i32, i32);
 extern i32 bonusmodearcade;
 extern u32 arcade_placed_stud_total;
 extern f32 DEFAULT_MOVE_RANGE;
@@ -129,10 +128,8 @@ extern i32 last_chatter_sfx;
 extern i32 FalconDebKey[2];
 extern f32 LevelNameTime;
 extern f32 LevelNameMul;
-extern rtldata_s lev_rtldata;
 void Hint_Reset(void);
 void Hint_CancelCurrent(void);
-void Hint_SetHintFromId(i32, i32, i32);
 void TrafficAnimSys_Reset(TRAFFICANIMSYS_s *);
 void Pulses_Reset(PULSESYS_s *);
 void ResetRepeatSfx(void);
@@ -145,16 +142,6 @@ void ResetForceBack(void);
 void ClearAICreatures(void);
 void ReStoreStatusTakeOverObjectSys(i32 restore_progress);
 void InitPlayerAI(GameObject_s *object);
-void ResetPlayer(GameObject_s *, i32, nuvec_s *, i32);
-f32 GetVehicleAreaRememberSpeed();
-void ResetRadios();
-void AITriggerSetSysReset(AITRIGGERSETSYS_s *);
-void AITriggerSysAutoSetUp(WORLDINFO_s *, AITRIGGERSETSYS_s *);
-void CharPlatforms_Reset(CHARPLATFORMSYS_s *);
-void CutScene_StartAudio();
-void oneAtOnce_SetNumAttackers(i32);
-void SetSoundFadeDist(WORLDINFO_s *, OPTIONSSAVE_s *);
-void EffectOffProgress_Reset(LEVEL_PROGRESS_s *);
 extern GAMECAMERA_s *GameCam;
 extern "C" ripple_set_s *ripples;
 extern "C" void ResetParts(void);
@@ -162,8 +149,6 @@ extern "C" void NuSound3StopRumble(void);
 extern "C" f32 chattersfxwait;
 extern "C" f32 tieonsfxwait;
 extern "C" f32 tieoffsfxwait;
-extern GameObject_s *alert_obj;
-extern f32 alert_timer;
 
 struct AIROW_s;
 struct nuqthdr_s;
@@ -235,7 +220,6 @@ extern u16 TargetDeg_Mid;
 extern u16 TargetDeg_Far;
 extern i32 party_under_cover;
 extern i32 makebaddiesforgetinresetbits;
-void MakeBaddiesForgetAboutParty(i32);
 extern i32 nbaddies_can_see_players;
 extern i32 reset_reimport;
 
@@ -668,8 +652,6 @@ extern "C" {
 
 extern "C" void DebReAlloc2(debkeydatatype_s *);
 extern "C" void DebReAlloc(debkeydatatype_s *, i32);
-void RemoveChunkFromRenderStack(particlechunkrendertype_s *, particlechunkrendertype_s **);
-void DebrisReleaseControlStackLock(void);
 
 void DebrisProcessAllocation();
 
@@ -1069,7 +1051,6 @@ void AnimatePlayer(GameObject_s *object);
 void TerrainPlayer(GameObject_s *object);
 void KeepOnScreen(GameObject_s *object);
 void SetPlayer();
-void InitPlayerAI(GameObject_s *object);
 void ResetPlayerMoves(GameObject_s *object);
 void MovePlayerSpline(GameObject_s *object);
 void GetTopBot(GameObject_s *object);
@@ -1395,7 +1376,6 @@ extern i32 active_neutral_count;
 extern "C" i32 party_under_cover;
 extern "C" i32 party_cant_be_under_cover;
 extern AREADATA *VADER_ADATA;
-extern GameObject_s *alert_obj;
 void AITriggerSetSysProcess(AITRIGGERSETSYS_s *system);
 i32 Hub_InMenu();
 extern i32 test_new_interaction;
@@ -1472,7 +1452,6 @@ void SetScriptErrorLevel(SCRIPT_ERROR_LEVEL level);
 }
 
 extern f32 OFFSCREEN_CATCHUP_TIME;
-extern f32 drop_back_in_timer;
 
 i32 TryToTeleportToNextNode(GameObject_s *object, AIPATHNODE_s *node, i32 tightrope);
 
@@ -1488,11 +1467,6 @@ void Game_KillPart(PART_s *part, i32 reason);
 
 void GameAISysReset(AISYS_s *system);
 
-extern "C" i32 party_under_cover;
-extern "C" i32 party_cant_be_under_cover;
-extern GameObject_s *alert_obj;
-extern f32 alert_timer;
-extern AREADATA *VADER_ADATA;
 
 void MakeBaddiesForgetAboutParty(i32 check_hostility);
 
@@ -1506,7 +1480,6 @@ void GameFog_Update(WORLDINFO_s *world);
 
 void *GameBufferAlloc(variptr_u *buf, variptr_u *buf_end, i32 size);
 
-void GameAISysSetGame();
 
 void GameAudio_AddSfx(i32 sfx, i32 *sfx_ids, i32 *sfx_count, i32 max_sfx);
 
@@ -1555,7 +1528,6 @@ void GameAntiNodeData_Init(GAMEANTINODEDATA_s *data, nuhspecial_s *special);
 
 void GameAntiNodeData_Read(GAMEANTINODEDATA_s *data);
 
-APIOBJECT *GameAPIOBJECTFromObjID(u8 object_id);
 
 i32 GameDrawCharacterModel(CHARACTERMODEL_s *model, ANIMPACKET_s *animation, NUMTX *matrix, NUMTX *secondary_matrix,
                            NUMTX *reflection_matrix, NUMTX *auxiliary_matrix, GameObject_s *object, u32 flags);
@@ -1569,9 +1541,7 @@ void GameLoadCharacterModels(APICHARACTERMODELLIST_s *list, i32 append, VARIPTR 
 
 void Game_WorldInfo_InitMenu(WORLDINFO_s *world, i32 *menu_id, i32 *);
 
-extern GameObject_s *alert_obj;
 extern NUVEC alert_pos;
-extern f32 alert_timer;
 extern "C" {
 extern i32 party_under_cover;
 }
@@ -1581,11 +1551,9 @@ void GameCreatureOpponentSelection(AISYS_s *system, i32 count, APIOBJECT_s **obj
                                    APIOBJECT_s **goodies, i32 baddy_count, APIOBJECT_s **baddies, u64 awareness,
                                    float);
 
-void GameObjectDimensionsExtra_LSW(GameObject_s *object);
 
 i32 AnakinGreenSabre(GameObject_s *object);
 extern "C" i16 id_THEEMPEROR, id_IMPERIALGUARD, id_BODYGUARD;
-i32 CannotKill(GameObject_s *object);
 i32 SphereSphereOverlapScaleY(NUVEC *, f32, f32, NUVEC *, f32, f32);
 GIZMOBLOWUP_s *GizmoBlowUp_Hit(GameObject_s *, NUVEC *, i32, f32, NUVEC *, NUVEC *, BOLT_s *, u32, u8 *);
 void AlertSurroundingCreatures(GameObject_s *, NUVEC *);
@@ -1700,10 +1668,8 @@ void ReleaseEat(GameObject_s *);
 void ReleasePush(GameObject_s *);
 void ReleaseForce(GameObject_s *, i32);
 void LoseHelmet(GameObject_s *, i32, i32);
-EXPLOSION *AddExplosion(NUVEC *, f32, f32, GameObject_s *, i32, i32);
 extern EXPLOSION Explosion[8];
 extern i32 speeder_hitpoints_lost;
-extern i16 id_MOUSEDROID;
 
 void ConstantRumble(GameObject_s *object, f32 strength, f32 phase);
 
@@ -1712,8 +1678,6 @@ void PowerUp_Update(GameObject_s *object);
 
 extern GameObject_s * player_tag_to;
 extern GameObject_s * player_tag_from;
-extern f32 player_tag_timer;
-extern i32 do_player_tag;
 i32 TakeOverYodaSeekDistanceHack(GameObject_s *, GameObject_s *, NUVEC *);
 extern char *ASCII_DOWN;
 
@@ -1727,13 +1691,11 @@ void RemoveGameObject(GameObject_s *obj, i32);
 
 extern u16 TargetDeg_Near, TargetDeg_Mid, TargetDeg_Far;
 extern f32 TargetDist_Near2, TargetDist_Mid2;
-BOLTTYPE_s *BoltType_FindByID(i32, WORLDINFO_s *);
 
 extern i32 nethost;
 extern i16 id_PKDROID;
 void ResetAICreature(GameObject_s *, AISYS_s *);
 void SpawnCreatureFromCrate(GameObject_s *, f32, f32);
-void SetToLastSafePos(GameObject_s *);
 GameObject_s *GetOtherActivePlayer(GameObject_s *);
 void TakeOverGameObject(GameObject_s *, GameObject_s *, i32, i32);
 
@@ -1780,7 +1742,6 @@ void RegisterTakeOverObject(GameObject_s *object);
 
 void DeactivateGameObject(GameObject_s *object);
 
-i32 EquivalentObject_Find(WORLDINFO_s *world, nuhspecial_s *special);
 
 GameObject_s *FindNearestGameObject(NUVEC *position, GameObject_s *exclude, u32 required_flags, f32 radius,
                                     f32 extra_radius, i32 animation, i32 character_id, i32 player_index,
@@ -1803,7 +1764,6 @@ void RemoveChunkFromRenderStack(particlechunkrendertype_s *chunk, particlechunkr
 
 void RemoveChunkControlFromStack(debris_chunk_control_s *control, debris_chunk_control_s **stack);
 
-extern "C" debkeydatatype_s *debris_keystack;
 
 void RemoveDebrisEffectFromStack(debkeydatatype_s *key);
 
@@ -1818,11 +1778,7 @@ void RemoveDebrisEffectFromStack(debkeydatatype_s *key);
 
 void DebFreeChunksInstantly(i32 *);
 void RemoveDebrisEffectFromStack(debkeydatatype_s *);
-void RemoveAnyChunkControls(i32 *);
 void AddChunkControlToStack(debris_chunk_control_s *, debris_chunk_control_s **);
-void DebrisGetControlStackLock();
-void DebrisReleaseControlStackLock();
-void RemoveChunkFromRenderStack(particlechunkrendertype_s *, particlechunkrendertype_s **);
 
 extern "C" {
 

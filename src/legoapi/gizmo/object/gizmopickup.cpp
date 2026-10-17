@@ -829,11 +829,7 @@ void Game_KillPart(PART_s *part, i32 reason);
 
 void GameAISysReset(AISYS_s *system);
 
-extern "C" i32 party_under_cover;
-extern "C" i32 party_cant_be_under_cover;
-extern GameObject_s *alert_obj;
 extern f32 alert_timer;
-extern AREADATA *VADER_ADATA;
 
 void MakeBaddiesForgetAboutParty(i32 check_hostility);
 
@@ -847,7 +843,6 @@ void GameFog_Update(WORLDINFO_s *world);
 
 void *GameBufferAlloc(variptr_u *buf, variptr_u *buf_end, i32 size);
 
-void GameAISysSetGame();
 
 void GameAudio_AddSfx(i32 sfx, i32 *sfx_ids, i32 *sfx_count, i32 max_sfx);
 
@@ -896,7 +891,6 @@ void GameAntiNodeData_Init(GAMEANTINODEDATA_s *data, nuhspecial_s *special);
 
 void GameAntiNodeData_Read(GAMEANTINODEDATA_s *data);
 
-APIOBJECT *GameAPIOBJECTFromObjID(u8 object_id);
 
 i32 GameDrawCharacterModel(CHARACTERMODEL_s *model, ANIMPACKET_s *animation, NUMTX *matrix, NUMTX *secondary_matrix,
                            NUMTX *reflection_matrix, NUMTX *auxiliary_matrix, GameObject_s *object, u32 flags);
@@ -910,9 +904,7 @@ void GameLoadCharacterModels(APICHARACTERMODELLIST_s *list, i32 append, VARIPTR 
 
 void Game_WorldInfo_InitMenu(WORLDINFO_s *world, i32 *menu_id, i32 *);
 
-extern GameObject_s *alert_obj;
 extern NUVEC alert_pos;
-extern f32 alert_timer;
 extern "C" {
 extern i32 party_under_cover;
 }
@@ -922,7 +914,6 @@ void GameCreatureOpponentSelection(AISYS_s *system, i32 count, APIOBJECT_s **obj
                                    APIOBJECT_s **goodies, i32 baddy_count, APIOBJECT_s **baddies, u64 awareness,
                                    float);
 
-void GameObjectDimensionsExtra_LSW(GameObject_s *object);
 
 i32 AnakinGreenSabre(GameObject_s *object);
 extern "C" i16 id_THEEMPEROR, id_IMPERIALGUARD, id_BODYGUARD;
@@ -1045,7 +1036,6 @@ void LoseHelmet(GameObject_s *, i32, i32);
 EXPLOSION *AddExplosion(NUVEC *, f32, f32, GameObject_s *, i32, i32);
 extern EXPLOSION Explosion[8];
 extern i32 speeder_hitpoints_lost;
-extern i16 id_MOUSEDROID;
 
 void ConstantRumble(GameObject_s *object, f32 strength, f32 phase);
 
@@ -1054,8 +1044,6 @@ void PowerUp_Update(GameObject_s *object);
 
 extern GameObject_s * player_tag_to;
 extern GameObject_s * player_tag_from;
-extern f32 player_tag_timer;
-extern i32 do_player_tag;
 i32 TakeOverYodaSeekDistanceHack(GameObject_s *, GameObject_s *, NUVEC *);
 extern char *ASCII_DOWN;
 
@@ -1069,13 +1057,11 @@ void RemoveGameObject(GameObject_s *obj, i32);
 
 extern u16 TargetDeg_Near, TargetDeg_Mid, TargetDeg_Far;
 extern f32 TargetDist_Near2, TargetDist_Mid2;
-BOLTTYPE_s *BoltType_FindByID(i32, WORLDINFO_s *);
 
 extern i32 nethost;
 extern i16 id_PKDROID;
 void ResetAICreature(GameObject_s *, AISYS_s *);
 void SpawnCreatureFromCrate(GameObject_s *, f32, f32);
-void SetToLastSafePos(GameObject_s *);
 GameObject_s *GetOtherActivePlayer(GameObject_s *);
 void TakeOverGameObject(GameObject_s *, GameObject_s *, i32, i32);
 
@@ -1122,7 +1108,6 @@ void RegisterTakeOverObject(GameObject_s *object);
 
 void DeactivateGameObject(GameObject_s *object);
 
-i32 EquivalentObject_Find(WORLDINFO_s *world, nuhspecial_s *special);
 
 GameObject_s *FindNearestGameObject(NUVEC *position, GameObject_s *exclude, u32 required_flags, f32 radius,
                                     f32 extra_radius, i32 animation, i32 character_id, i32 player_index,
@@ -1341,11 +1326,9 @@ void NuPartSetSeed(i32 seed);
 void AddDebrisEffectToStack(debkeydatatype_s *);
 void AddChunkToRenderStack(particlechunkrendertype_s *, particlechunkrendertype_s **);
 void AddChunkControlToStack(debris_chunk_control_s *, debris_chunk_control_s **);
-void RemoveChunkControlFromStack(debris_chunk_control_s *, debris_chunk_control_s **);
 void DebrisProcessSpheres(uv1deb *, f32, debinftype *, debkeydatatype_s *, i32);
 void DebrisGetControlStackLock();
 void DebrisReleaseControlStackLock();
-void FindAnglesZX(NUVEC *, u16 *, u16 *);
 extern f32 AreaPickupGravity;
 extern i16 temp_xrot;
 extern i16 temp_zrot;
@@ -1364,10 +1347,7 @@ extern GameObject_s *Obj;
 extern i32 HIGHGAMEOBJECT, VehicleArea;
 extern WORLDINFO_s *WORLD;
 extern GAMECAMERA_s *GameCam;
-extern f32 ForceThrowSpeed, ForceThrowGravity;
 extern "C" void KillPart(PART_s *, i32);
-i32 SphereSphereOverlapScaleY(NUVEC *, f32, f32, NUVEC *, f32, f32);
-void DeflectPart(PART_s *, GameObject_s *, f32, f32, i32, i32);
 void SetCoinType(i32 model, GIZMOPICKUP_s *pickup);
 u16 GameCam_GetAdjustedYRot(GAMECAMERA_s *camera);
 void CollectPowerUp(GameObject_s *, NUVEC *, u16, i32);
@@ -1375,7 +1355,6 @@ void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 void NewBuzz(nupad_s *, f32, i32);
 void CollectHitPoint(GameObject_s *object, NUVEC *position, i32);
 void GameCam_Judder(GAMECAMERA_s *, f32, i32, NUVEC *);
-void ReleasePush(GameObject_s *);
 void ObjHitShield(GameObject_s *, GameObject_s *, i32, BOLT_s *);
 i32 CannotKill(GameObject_s *);
 
@@ -1408,7 +1387,6 @@ static __used__ void PowerUp_UpdateMsg(GAMEMESSAGE_s *message);
 
 void CollectPowerUp(GameObject_s *object, NUVEC *position, u16 rotation, i32);
 
-extern WORLDINFO_s *WORLD;
 extern AREADATA_s *PODRACE_ADATA;
 extern AREADATA_s *BONUS_GUNSHIP_ADATA;
 extern AREADATA_s *GUNSHIP_ADATA;
@@ -1584,9 +1562,6 @@ void UpdateParts(f32 time);
 
 } // extern "C"
 
-extern u16 TargetDeg_Near, TargetDeg_Mid, TargetDeg_Far;
-extern f32 TargetDist_Near2, TargetDist_Mid2;
-BOLTTYPE_s *BoltType_FindByID(i32, WORLDINFO_s *);
 PART_s *TargetPart(GameObject_s *object, nuvec_s *position, nuvec_s *direction, f32 radius, f32 range_squared,
                    i32 directional, i32 bolt_id);
 
@@ -1613,7 +1588,6 @@ i32 edpartLoadPageEx(char *path, i8 mode, nugscn_s **scenes, i32 scene_count);
 i32 edpartLoadPage(char *path, i32 mode, void *scene);
 }
 
-void PartTimeSlip();
 
 extern "C" PART_s *HitParts(GameObject_s *owner, NUVEC *positions, i32 count, f32 radius, NUVEC *minimum,
                             NUVEC *maximum, u32 flags);
@@ -1629,7 +1603,6 @@ i32 SetPartTarget(GameObject_s *object, PART_s *target);
 
 WORLDINFO_s *WorldInfo_CurrentlyActive();
 extern f32 FRAMETIME;
-void PartCollide_3D(PART_s *);
 void PartCollide_2D(PART_s *);
 void PartUpdate_Heart(PART_s *);
 void PartStop_Flickerer(PART_s *);
@@ -1651,8 +1624,6 @@ void PartCollide_2D(PART_s *part);
 
 void PartCollide_3D(PART_s *part);
 
-WORLDINFO_s *WorldInfo_CurrentlyActive();
-extern f32 FRAMETIME;
 void PartStop_Coin(PART_s *part);
 
 void AddCoinsAsParts(i32 type_id, nuvec_s *position, nuvec_s *velocity, float lifetime, float scale);
@@ -1676,7 +1647,6 @@ PART_s *FindIncomingPart(void *owner, NUVEC *position, f32 radius, u32 flags, f3
 
 void edpartDestroy(i32 index);
 
-void PartCleanupTypes();
 
 extern "C" f32 brickimpactwait;
 extern "C" i32 GetSfxId(const char *);
@@ -1761,7 +1731,6 @@ void AddFancyMessage(char *text, float x, float y, float scale, float duration, 
 
 void EndScoreMessage(GAMEMESSAGE_s *message);
 
-void ResetGameMessages();
 
 i32 FindGameMsgsWithID(i32 id, i32 remove, i32 player, GAMEMESSAGE_s *exclude);
 
@@ -1771,7 +1740,6 @@ void AddGameMsgCount(nuvec_s *position, i32 count, i32 total, unsigned char red,
 void AddFancyMessageRGB(char *text, float x, float y, float scale, float duration, i32 message_id, unsigned char red,
                         unsigned char green, unsigned char blue);
 
-void UpdateGameMessages();
 
 void TransformGameMessages(nuvec_s *camera_position, nuvec_s *camera_scale, nuvec_s *camera_direction);
 
@@ -1793,8 +1761,6 @@ void TransformGameMessages(nuvec_s *camera_position, nuvec_s *camera_scale, nuve
 #include "legoapi/world/area.h"
 #include "legoapi/world/world.h"
 
-extern "C" i32 DoubleScore;
-extern "C" TIMER BonusTimer;
 
 void NewBuzz(nupad_s *pad, f32 amount, i32 flags);
 
@@ -1843,10 +1809,6 @@ static __used__ float GizmoPickups_Collide2D(GameObject_s *object);
 #include <stdio.h>
 #include <string.h>
 
-struct AIROW_s;
-struct nuqthdr_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
 
 extern HUBMINIKITPIECES_s ** Char_MiniKit;
 extern "C" VARIPTR characterbuffer_ptr;
@@ -1898,9 +1860,6 @@ void MiniKit_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float ela
 
 extern i32 LEGOOBJ_MINIKIT, LEGOOBJ_CHARKIT;
 void EndChallenge(i32, i32);
-void GameCam_Judder(GAMECAMERA_s *, f32, i32, NUVEC *);
-void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
-void MiniKit_GameMsg_End(GAMEMESSAGE_s *message);
 
 void ResetMinikitCounter();
 
@@ -1917,11 +1876,9 @@ extern NUVEC paneldir[3];
 
 void AllMiniKits_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
 
-void AddStatusMiniKitParts();
 
 void CharacterMiniKits_Dump(WORLDINFO_s *world);
 
-void MiniKit_GameMsg_Update(GAMEMESSAGE_s *message);
 
 void SetEffectVisibility(char *, i32);
 
@@ -1944,7 +1901,6 @@ i32 EffectOffProgress_Update(LEVEL_PROGRESS_s *progress, char *name, i32 visible
 #include "legoapi/characters/core/players.h"
 
 u32 GizmoBlowups_TotalScore(void *world);
-extern "C" i32 DoubleScore;
 
 #include "decomp.h"
 #include "globals.h"
@@ -1997,7 +1953,6 @@ extern nuhspecial_s * collection_draw_hspecial;
 extern i32 (*collection_draw_IsValidFn)(COLLECTION_s *, i32);
 extern void (*Collection_GetSelectingPlayerIDsFn)(i16 *);
 void DrawCharIcon(i32, f32, f32, f32, f32, i32, f32, f32, i32, nuhspecial_s *);
-extern FadeSystem FadeSys;
 
 
 void Collection_Draw(COLLECTION_s *collection, float x, float y, float scale, APICHARACTERMODELLIST_s *models,
@@ -2027,17 +1982,13 @@ static __used__ void Collection_GetSelectingPlayerIDs(i16 *ids);
 
 void ReleaseEat(GameObject_s *object);
 
-i32 AddToCollection(i32 id);
 
-void ResetCoinPacket(COINPACKET_s *packet);
 
-void UpdateCoinPacket(COINPACKET_s *packet, i32 active, i32 player_index);
 
 u32 GizmoBlowups_TotalScore(void *);
 u32 GizForce_TotalScore(void *);
 u32 GizObstacles_TotalScore(void *);
 u32 GizTurrets_TotalScore(void *);
-u32 GameAI_TotalScore();
 
 u32 TotalLevelCoinTally(WORLDINFO_s *world, u32 *pickups, u32 *blowups, u32 *buildits, u32 *forces, u32 *obstacles,
                         u32 *turrets, u32 *characters);
@@ -2072,20 +2023,13 @@ void ReCalculateCompletionPoints();
 #include "nu2api/nucore/nuanim3.h"
 #include "nu2api/numath/nuvec.h"
 
-struct AIROW_s;
-struct nuqthdr_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
 
 void GameAudio_PlaySfx(i32 sfx, NUVEC *position, i32 flags, i32 volume);
 void ResetCharacterIdle(GameObject_s *object, i32 mode, i32 animation);
 extern i32 (*Fighting_WeaponInActionFn)(GameObject_s *);
 extern i32 (*Fighting_WeaponOutActionFn)(GameObject_s *);
 
-extern "C" i32 adaptivedifficulty[3];
-extern f32 DEFENDTIME;
 
-extern i8 (*adtab)[4];
 
 void SetWeaponIn(GameObject_s *object);
 
@@ -2121,83 +2065,43 @@ void WeaponScalingCode(GameObject_s *object);
 
 // ==== functions in original address order ====
 
-void GameMsg_DrawAdjustNewPos_CoinToTotal(GAMEMESSAGE_s *message);
 
-static void Pup_CollectCharKit(WORLDINFO_s *, GIZMOPICKUP_s *pickup, i32, GameObject_s *object, i32);
 
-static void EndRedBrickMessage(GAMEMESSAGE_s *);
 
-static __used__ void PartMove_VehiclePickup(PART_s *part, f32);
 
-static __used__ void PowerUp_ImpactPart(PART_s *part);
 
-static __used__ i32 PartDraw_VehicleHeart(PART_s *part);
 
-static __used__ void PartMove_VehicleHeart(PART_s *part, f32);
 
-void EndScoreMessage(GAMEMESSAGE_s *message);
 
-static __used__ void PowerUp_UpdateMsg(GAMEMESSAGE_s *message);
 
-static void Pup_CollectRedBrick(WORLDINFO_s *, GIZMOPICKUP_s *pickup, i32, GameObject_s *object, i32);
 
-static void Pup_UpdatePurpleCoin(WORLDINFO_s *, GIZMOPICKUP_s *pickup);
 
-static __used__ void PartImpact_Coin(PART_s *part);
 
-static __used__ i32 PowerUp_DrawPart(PART_s *part);
 
-static __used__ void PartExtra_BlueCoin(PART_s *part);
 
-static __used__ void PartExtra_PurpleCoin(PART_s *part);
 
-static void Pup_UpdateBlueCoin(WORLDINFO_s *, GIZMOPICKUP_s *pickup);
 
-static __used__ void PowerUp_EndMsg(GAMEMESSAGE_s *message);
 
-void PowerUp_Particles(WORLDINFO_s *world, NUVEC *position);
 
-static void Pup_UpdatePowerUp(WORLDINFO_s *world, GIZMOPICKUP_s *pickup);
 
-static __used__ void PowerUp_UpdatePart(PART_s *part);
 
-void CollectPowerUp(GameObject_s *object, NUVEC *position, u16 rotation, i32);
 
-static void Pup_CollectPowerUp(WORLDINFO_s *, GIZMOPICKUP_s *pickup, i32, GameObject_s *object, i32 flags);
 
-void PowerUp_Update(GameObject_s *object);
 
-void GizmoPickup_CollectCoin(WORLDINFO_s *world, nuvec_s *position, i32 type_index, i32 model_variant,
-                             GameObject_s *object, i32);
 
-void Pup_CollectCoin(WORLDINFO_s *world, GIZMOPICKUP_s *pickup, i32 type, GameObject_s *object, i32 arg);
 
-void CollectMinikit(nuvec_s *position, char *name, i32);
 
-static void Pup_CollectMinikit(WORLDINFO_s *, GIZMOPICKUP_s *pickup, i32, GameObject_s *object, i32 type);
 
-void AddTorpedoAsPart(nuvec_s *position, nuvec_s *velocity, float scale, float lifetime);
 
-void AddHeartAsPart(GameObject_s *recipient, nuvec_s *position, nuvec_s *velocity, float scale, float lifetime);
 
-void PowerUp_AddPart(NUVEC *position, NUVEC *velocity, f32 scale, f32 lifetime);
 
-void AddCoinsAsParts(i32 type_id, nuvec_s *position, nuvec_s *velocity, float lifetime, float scale);
 
-u32 TotalLevelCoinTally(WORLDINFO_s *world, u32 *pickups, u32 *blowups, u32 *buildits, u32 *forces, u32 *obstacles,
-                        u32 *turrets, u32 *characters);
 
-void CollectHitPoint(GameObject_s *object, NUVEC *position, i32);
 
-static void Pup_CollectHeart(WORLDINFO_s *, GIZMOPICKUP_s *pickup, i32, GameObject_s *object, i32 flags);
 
-i32 ReleaseHearts();
 
-void SetCoinType(i32 model, GIZMOPICKUP_s *pickup);
 
-static __used__ void PartStolen_Coin(PART_s *part);
 
-void PartStop_Coin(PART_s *part);
 
 
 // ==== src/legoapi/gizmo/object/gizmopickups.cpp: all remaining content ====
@@ -2224,12 +2128,7 @@ void PartStop_Coin(PART_s *part);
 #include "legoapi/world/level.h"
 #include "nu2api/numath/nuvec.h"
 
-struct AIROW_s;
-struct nuqthdr_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
 
-WORLDINFO_s *WorldInfo_CurrentlyActive();
 void MakePartVector(NUVEC *, NUVEC *, f32);
 void AddCoinsAsParts(i32, NUVEC *, NUVEC *, f32, f32);
 void AddHeartAsPart(GameObject_s *, NUVEC *, NUVEC *, f32, f32);

@@ -58,7 +58,6 @@ char *lsw_memcard_objname = "mem_card";
 
 extern "C" i32 NuMain(i32 argc, char **argv);
 
-static void NuSoundAppTerminate(void);
 
 // ==== src/nu2api/nucore/nuios_metrics.cpp: all remaining content ====
 #include "nu2api/nuandroid/ios_graphics.h"

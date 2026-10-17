@@ -181,7 +181,6 @@ static inline void SarlaccDiscoShow(nuhspecial_s *special) {
     }
 }
 
-void SarlaccPitB_SpecialUpdate(WORLDINFO_s *);
 
 void SarlaccPitC_Init(WORLDINFO_s *);
 
@@ -265,7 +264,6 @@ static nuhspecial_s *hspecial_efloor;
 
 void EmperorFightA_Init(WORLDINFO_s *world);
 
-extern i32 obstacle_gizmotype_id, force_gizmotype_id;
 void EmperorFightA_Reset(WORLDINFO_s *world);
 
 static inline u64 EmperorFloorAreaMask(WORLDINFO_s *world) {
@@ -300,8 +298,6 @@ void DeathStar2BattleFire_Update(WORLDINFO_s *world);
 
 static f32 slowDownTimer[2];
 f32 DeathStar2BattleFire_GetSlowDownMul(GameObject_s *object);
-void DeathStar2BattleFire_SetSlowDownMul(GameObject_s *object);
-void DeathStar2BattleFire_UpdateSlowDownMul(f32 dt);
 
 
 // ==== functions in original address order ====

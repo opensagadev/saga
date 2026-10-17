@@ -216,7 +216,6 @@ void ChrisAnakinAReset(WORLDINFO_s *world);
 
 void ChrisAnakinBReset();
 
-void ChrisAnakinCReset();
 
 void ChrisAnakinDReset(WORLDINFO_s *world);
 
@@ -551,7 +550,6 @@ void DrawCharIcon(i32 character_id, float x, float y, float z, float scale, i32 
 
 extern const u8 HintRGB[5][3];
 
-void DrawLine_Now(_vuv_s *, _vuv_s *, i32, i32);
 
 void DrawParallax(nuhspecial_s *special);
 
@@ -780,7 +778,6 @@ void DrawGameMessage_Targets(GAMEMESSAGE_s *message, nuvec_s *position, float sc
 i32 DrawPanel3DObjectNoAlpha(float x, float y, float z, float scale_x, float scale_y, float scale_z, u16 rotate_x,
                              u16 rotate_y, u16 rotate_z, nuhspecial_s *special, i32 rotate_order);
 
-i32 DrawPanel3DObjectMtxNoAlpha(nuhspecial_s *special, numtx_s *matrix);
 
 extern void DrawMenuEntry(MENU_s *, char *);
 void Draw_OK(MENU_s *menu);
@@ -831,7 +828,6 @@ void Transform_DrawTarget(NUVEC *, f32, f32);
 extern i16 id_ANAKINJEDISCARRED, id_WEIRDO1, id_WEIRDO2, id_CATAPULT, id_CHEWBACCA, id_WOOKIEE, id_TWOFACE;
 extern i32 PickUpFlickerTest, PickUpFlickerFrames, PickupFlickerFrame;
 
-static void DrawParaphernalia(GameObject_s *object);
 
 #include "legoapi/legoapi_types.h"
 #include "nu2api/numath/numtx.h"
@@ -902,10 +898,6 @@ void DisplaySceneRndrSpecials(NUDLDLISTSCENE *scene, i32, void *visibility_conte
 #include <string.h>
 #include <stdio.h>
 
-struct AIROW_s;
-struct nuqthdr_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
 
 // The original translation unit exports this internal counter under its unmangled C name.
 
@@ -980,13 +972,8 @@ void LevelSplines_InitForLevel(WORLDINFO_s *world);
 #include "nu2api/numusic/numusic.h"
 #include "nu2api/numusic/sfx.h"
 
-struct AIROW_s;
-struct nuqthdr_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
 
 extern "C" i32 DoubleScore;
-extern i32 Paused;
 extern i32 (*GameAudio_ActionMusicFn)();
 // The reference constructs the music manager in this unit's static constructor.
 extern NuMusic music_man;
@@ -1134,7 +1121,6 @@ void NewBuzzFrames(nupad_s *pad, i32 frames, i32);
 
 void TakeHitRumble(GameObject_s *object, float strength);
 
-extern f32 SpaceRumbleTimer;
 extern "C" f32 NuFsqrt(f32);
 extern "C" f32 NuRandFloat();
 void GameCam_NewShake(GAMECAMERA_s *, f32, f32, f32);
@@ -1146,7 +1132,6 @@ f32 SpeedAdd = 1.0f;
 f32 SpeedDist = 5.0f;
 f32 MulAdd = 0.0f;
 
-extern "C" void SetPreSeekStartPoint(f32 start_point);
 
 void SpaceResetAudioPoint();
 
@@ -1216,10 +1201,6 @@ void NewRumble(nupad_s *pad, float strength, i32);
 #include "nu2api/nu3d/nutex.h"
 #include <string.h>
 
-struct AIROW_s;
-struct nuqthdr_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
 
 // This alignment affects PodRaceAUpdate codegen even though the linked address is 32-byte aligned.
 
@@ -1324,10 +1305,6 @@ f32 getPodRoll(i32 index);
 #include "nu2api/nu3d/nutex.h"
 #include <string.h>
 
-struct AIROW_s;
-struct nuqthdr_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
 
 anakin_door_s *volatile AnakinC = NULL;
 

@@ -151,7 +151,6 @@ extern i32 ButtonScaleMode;
 
 f32 TextPrintSubstring(unsigned char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, i32 colour,
                        i32 button_font);
-void Text_DecodeButtons(char *source, char *destination);
 extern char * txtpath_JAPANESE;
 extern char * txtpath_DANISH;
 extern char * txtpath_SPANISH;
@@ -160,18 +159,14 @@ extern char * txtpath_GERMAN;
 extern char * txtpath_FRENCH;
 extern char * txtpath_ENGLISH;
 
-char *Text_GetLanguagePath(i32 language);
 void Text_InitStringTable(i32 count, variptr_u *buf, variptr_u *);
 void Text_InitLanguageList(LANGUAGEDATA *language_list);
 void Text_SetLanguage_Game(i32 language);
-void Text3DStringEncodeFont(unsigned char *src, u16 *dst, void *font);
 void Text_InitDefaultStrings();
-void Text_LoadAndFixUpStrings(unsigned char *filename, unsigned char **buffer, char **table, i32 count);
 i32 Text_GetMaxOverallStrings();
 void Text_LocaliseDecimalPoint(char *text);
 void Text_ExpandAllButtonStrings(char *input, char *output);
 void Text_FillInExtendedSaveInfo();
-void Text_InsertCommasIntoNumber(char *number, char *text, i32 length);
 extern NUMTL * MessageMtl;
 extern i32 MessageMtlInit;
 
@@ -229,11 +224,8 @@ void MenuUpdateViewTextStrings(MENU_s *menu);
 void MenuDrawViewTextStrings(MENU_s *menu);
 
 abi_ulong GetMatchLength(unsigned char *first, unsigned char *second, abi_ulong maximum);
-i32 SplitTextFindNextWS(unsigned char *text, i32 position);
-void MatrixTextStringEncode(void *font, unsigned char *source, u16 *destination);
 extern "C" void Text3DStringEncode(char *src, u16 *dst);
 extern "C" void SetQFont2D(void);
-void IntroText_SetTextID(i32 id);
 void IntroText_Draw(float alpha);
 
 i32 GetMenuID(void);

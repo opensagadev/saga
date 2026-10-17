@@ -391,7 +391,6 @@ void *CutScenes_Load(char *config, NUGSCN *gscn1, NUGSCN *gscn2, i32 param1, VAR
 extern "C" void *NuAnimData2FixPtrs(void *, isize, isize, i32);
 extern "C" StateAnim *StateAnimFixPtrs(StateAnim *, isize);
 extern "C" i32 StateAnimEvaluate(StateAnim *, u8 *, u8 *, f32);
-void instNuGCutSceneResetCamLock(instNUGCUTSCENE_s *instance);
 extern "C" void NuAnimCurve2SetApplyToMatrix_3(ani3_animheader_s *, i32, f32, NUMTX *);
 extern "C" {
     extern i32 NuGCutDebFixUp_SearchAllPages;
@@ -640,8 +639,6 @@ extern "C" void instNuGCutLocatorUpdate(instNUGCUTSCENE_s *, NUGCUTLOCATORSYS_s 
                                         NUGCUTLOCATOR_s *, f32, NUMTX *, i32);
 i32 Draw3DObjectMtx(WORLDINFO_s *, i32, numtx_s *);
 
-void instNuGCutSceneEndButNotSystems(instNUGCUTSCENE_s *instance);
-void instNuGCutSceneResetCamLock(instNUGCUTSCENE_s *instance);
 extern "C" void DebFreeInstantly(i32 *handle);
 
 static void instNuGCutRigidSysEnd(instNUGCUTSCENE_s *instance, float frame);
@@ -724,9 +721,6 @@ static void copyAnims(NUGCUTSCENE_s *destination, NUGCUTSCENE_s *source);
 #include <cfloat>
 #include <string.h>
 
-extern "C" i32 NuGCutLocatorIsVisble(NUGCUTLOCATOR_s *, f32, nuanimtime_s *, f32 *, f32 *);
-extern "C" f32 *NuGCutLocatorCalcMtx(NUGCUTLOCATOR_s *, f32, NUMTX *, nuanimtime_s *);
-void instNuGCutSceneEndButNotSystems(instNUGCUTSCENE_s *instance);
 void instNuGCutSceneResetCamLock(instNUGCUTSCENE_s *);
 
 extern "C" {
@@ -2172,12 +2166,9 @@ void NuSetCutSceneRigidPostRenderFn(NUGCUTSCENERIGIDPOSTRENDERFN function);
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nufloat.h"
 
-extern i32 ACTIVECUTCOUNT;
 extern "C" i32 CUTDRAWWORLD;
 extern "C" i32 Paused;
-extern i32 CUTCAM;
 extern "C" i32 CutSceneWaiting;
-extern i32 CUTCAMONLY;
 extern i32 cut_waiting_for_new_level;
 extern volatile i32 waiting_for_level;
 extern "C" i32 newlevel_resumecutaudio;
@@ -2204,7 +2195,6 @@ extern "C" {
 }
 
 void SetLevelLights(void *, f32);
-void NewLevelFromMenu(LEVELDATA_s *, i32, i32, i32);
 void FindAndSetLights(NUVEC *, f32, void *);
 void SetZeroLights(void);
 void GameFog_Reset(void);
@@ -2219,8 +2209,6 @@ i32 qrand(void);
 void NewRumbleAllPlayers(f32, f32, i32, i32);
 f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
 extern "C" void APITransparentCharDraw(nuhgobj_s *, NUMTX *, i32, i16 *, NUMTX *, void **, i32);
-extern "C" void instNuGCutLocatorUpdate(instNUGCUTSCENE_s *, NUGCUTLOCATORSYS_s *, instNUGCUTLOCATOR_s *,
-                                        NUGCUTLOCATOR_s *, f32, NUMTX *, i32);
 CUTSCENEPLAYERCLIP *CutScenePlayer_Active(void);
 void CutScenePlayer_SetObjects(CUTINFO *);
 extern "C" void DebrisSetRenderGroup(i32);
@@ -2299,9 +2287,6 @@ i32 CutScene_IsSkippable(CUTINFO *cut);
 
 i32 CutScene_StartFn_LSW(CUTINFO *cut);
 
-extern "C" f32 *NuGCutLocatorCalcMtx(NUGCUTLOCATOR_s *, f32, NUMTX *, nuanimtime_s *);
-extern "C" i32 NuGCutLocatorIsVisble(NUGCUTLOCATOR_s *, f32, nuanimtime_s *, f32 *, f32 *);
-extern "C" void NuAnimData2CalcTime(nuanimdata2_s *, f32, nuanimtime_s *);
 
 
 
@@ -2351,8 +2336,6 @@ void Exit_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapse
 
 void Fade_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
 
-extern "C" void *NuAnimData2FixPtrs(void *, isize, isize, i32);
-extern "C" StateAnim *StateAnimFixPtrs(StateAnim *, isize);
 
 NUGCUTSCENE_s *RelocateCutScene(NUGCUTSCENE_s *source, variptr_u *buffer);
 
@@ -2385,8 +2368,6 @@ void GoldBrick_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float e
 void LevelComplete_LSW_Skip(STATUS_STAGE_s *stage, STATUSPACKET_s *packet);
 
 void SetDrawGoldBrick(STATUSPACKET_s *, i32);
-void NewStatusRumbleBuzz(i32, f32, f32, i32);
-extern "C" void PlaySfx(char *, nuvec_s *);
 
 void LevelComplete_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
 

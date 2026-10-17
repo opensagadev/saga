@@ -141,7 +141,6 @@ GIZPANEL_s *GizPanel_FindNearest(WORLDINFO_s *world, nuvec_s *position, GameObje
 
 void GizPanel_GetAbsPlayerPos(GIZPANEL_s *panel, nuvec_s *position);
 
-void GizPanel_GetAbsTargetPos(GIZPANEL_s *panel, nuvec_s *target_position, i32 player_position);
 
 #include "legoapi/gizmo/base/GizPanelObjectInterface.h"
 

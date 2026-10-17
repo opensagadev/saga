@@ -104,7 +104,6 @@ extern i16 id_ATAT, id_SPEEDERBIKE;
 extern "C" i16 id_GRABCONTROL, id_GRABR2CONTROL;
 
 void AICreatureResumeScript(GameObject_s *);
-f32 SpeederChaseATATInOutMul(NUVEC *, NUVEC *);
 
 static NUVEC SpeederChaseATATExitLandPos = {-159.0f, 6.869999885559082f, -17.600000381469727f};
 
@@ -117,7 +116,6 @@ extern u8 PlayerRGB[2][3];
 extern i16 id_BUGGY, id_GYROCOPTER, id_BANTHA, id_BOMARRMONK, id_DEWBACK;
 extern i16 id_LANDSPEEDER, id_FLASHSPEEDER, id_TAUNTAUN, id_SPEEDERBIKE;
 extern i16 id_HEAVYREPEATINGCANNON, id_BIGGUN, id_TROOPERCANNON, id_STAP2, id_CLONEWALKER;
-f32 SpeederChaseATATInOutMul(NUVEC *, NUVEC *);
 void PlayJumpSfx(GameObject_s *, i32);
 void ReleaseForce(GameObject_s *, i32);
 void ReleasePush(GameObject_s *);
@@ -125,14 +123,11 @@ void Player_ResetContexts(PLAYERPACKET_s *);
 void SetWeaponIn(GameObject_s *);
 void GameCam_Blend(GAMECAMERA_s *, f32, f32, i32);
 void GameCam_Judder(GAMECAMERA_s *, f32, i32, NUVEC *);
-void NewBuzz(nupad_s *, f32, i32);
-void Hint_SetComplete(i32);
 
 
 void ResetForceGlow(PLAYERPACKET_s *);
 extern i32 CUTSKIPLOCK;
 void GizForce_ResetLOS(GameObject_s *);
-void AICreatureResumeScript(GameObject_s *);
 
 extern GameObject_s *player_tag_to;
 extern GameObject_s *player_tag_from;

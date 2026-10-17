@@ -122,7 +122,6 @@ void ResetGameMessages(void);
 void Tag_ResetTransfers(void);
 void Tag_SetMode(i32 mode);
 u32 TotalLevelCoinTally(WORLDINFO_s *, u32 *, u32 *, u32 *, u32 *, u32 *, u32 *, u32 *);
-void GameCameraMakeMiniCut(nugspline_s *, f32, f32, f32, f32, i32, i32);
 extern i32 bonusmodearcade;
 extern u32 arcade_placed_stud_total;
 extern f32 DEFAULT_MOVE_RANGE;
@@ -131,10 +130,8 @@ extern i32 last_chatter_sfx;
 extern i32 FalconDebKey[2];
 extern f32 LevelNameTime;
 extern f32 LevelNameMul;
-extern rtldata_s lev_rtldata;
 void Hint_Reset(void);
 void Hint_CancelCurrent(void);
-void Hint_SetHintFromId(i32, i32, i32);
 void TrafficAnimSys_Reset(TRAFFICANIMSYS_s *);
 void Pulses_Reset(PULSESYS_s *);
 void ResetRepeatSfx(void);
@@ -147,16 +144,6 @@ void ResetForceBack(void);
 void ClearAICreatures(void);
 void ReStoreStatusTakeOverObjectSys(i32 restore_progress);
 void InitPlayerAI(GameObject_s *object);
-void ResetPlayer(GameObject_s *, i32, nuvec_s *, i32);
-f32 GetVehicleAreaRememberSpeed();
-void ResetRadios();
-void AITriggerSetSysReset(AITRIGGERSETSYS_s *);
-void AITriggerSysAutoSetUp(WORLDINFO_s *, AITRIGGERSETSYS_s *);
-void CharPlatforms_Reset(CHARPLATFORMSYS_s *);
-void CutScene_StartAudio();
-void oneAtOnce_SetNumAttackers(i32);
-void SetSoundFadeDist(WORLDINFO_s *, OPTIONSSAVE_s *);
-void EffectOffProgress_Reset(LEVEL_PROGRESS_s *);
 extern GAMECAMERA_s *GameCam;
 extern "C" ripple_set_s *ripples;
 extern "C" void ResetParts(void);
@@ -164,8 +151,6 @@ extern "C" void NuSound3StopRumble(void);
 extern "C" f32 chattersfxwait;
 extern "C" f32 tieonsfxwait;
 extern "C" f32 tieoffsfxwait;
-extern GameObject_s *alert_obj;
-extern f32 alert_timer;
 
 struct AIROW_s;
 struct nuqthdr_s;
@@ -189,7 +174,6 @@ extern u16 TargetDeg_Mid;
 extern u16 TargetDeg_Far;
 extern i32 party_under_cover;
 extern i32 makebaddiesforgetinresetbits;
-void MakeBaddiesForgetAboutParty(i32);
 extern i32 nbaddies_can_see_players;
 extern i32 reset_reimport;
 
@@ -334,8 +318,6 @@ extern "C" {
 
 extern "C" void DebReAlloc2(debkeydatatype_s *);
 extern "C" void DebReAlloc(debkeydatatype_s *, i32);
-void RemoveChunkFromRenderStack(particlechunkrendertype_s *, particlechunkrendertype_s **);
-void DebrisReleaseControlStackLock(void);
 
 void DebrisProcessAllocation();
 
@@ -397,10 +379,6 @@ void TBCLOSEFN(char *name, i32 type);
 #include <string.h>
 #include "nu2api/nu3d/nutex.h"
 
-struct AIROW_s;
-struct nuqthdr_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
 
 
 void InitRipples(ripple_set_s **result, variptr_u *buf, variptr_u *, i32 count);
@@ -420,7 +398,6 @@ void ResetRippleSet(ripple_set_s *set);
 
 void UpdateRippleSet(ripple_set_s *set);
 
-extern "C" ripple_set_s *ripples;
 void VecRotateAxis(NUVEC *, u16, NUVEC *);
 void AddRipple(ripple_set_s *, NUMTX *, float, float, float, float, RGBA, RGBA, i32, numtl_s *, NUVEC *);
 

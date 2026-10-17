@@ -406,13 +406,11 @@ extern void (*Player_ClearContextFn)(GameObject_s *, i32);
 void Whip_Release(GameObject_s *);
 i32 SpecialMove_ReleaseVictim(GameObject_s *);
 
-void Player_ClearContext(GameObject_s *object, i32 mode);
 
 i32 Player_HasFastBuild(GameObject_s *player);
 
 void PlayerItemTypes_Init(PLAYERITEMTYPE_s *types);
 
-void Player_ResetContexts(PLAYERPACKET_s *packet);
 
 void Player_CopyEssentials(GameObject_s *source, GameObject_s *destination);
 
@@ -469,7 +467,6 @@ void InitPlayerAI(GameObject_s *object);
 
 void ResetPlayerAI(GameObject_s *object);
 
-void StarWars_AutoSetAICapabilities(GameObject_s *object);
 
 i32 MakePlayerList(i32 count);
 
@@ -510,7 +507,6 @@ bool FindNearestPlayerToVec(nuvec_s *position, GameObject_s **nearest_player, fl
 extern i32 (*LastSafePosExtraFn)(GameObject_s *);
 extern void (*GameObjectDimensionsExtraFn)(GameObject_s *);
 
-void CheckForPlayersTurnedOff();
 
 bool FindFurthestPlayerFromVec(nuvec_s *position, GameObject_s **furthest_player, float &distance_squared,
                                bool require_character_flags, u32 character_flags);
@@ -547,9 +543,6 @@ struct SHOPINPUT;
 extern i32 drop_in_teleport;
 extern i32 teleport_all_freeplay_modes;
 
-void ResetPlayerMoves(GameObject_s *object);
-void Player_ClearContext(GameObject_s *object, i32 mode);
-void Player_ResetContexts(PLAYERPACKET_s *packet);
 void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *data);
 void ReleaseEat(GameObject_s *object);
 void AICreatureResumeScript(GameObject_s *object);
