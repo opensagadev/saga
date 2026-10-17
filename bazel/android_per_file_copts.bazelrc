@@ -443,9 +443,9 @@ build:target --per_file_copt=^src/MechInputTouch/MechObjectInterface\.cpp$@-O3
 # keep or improve their matches when the whole unit is optimized.
 build:target --per_file_copt=^src/legoapi/misc/legoapi_status\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/items/objects/things\.cpp$@-O3
-build --per_file_copt=^src/nu2api/nucore/nucore_includes\.c$@-x,c++,-std=gnu++11
+build --per_file_copt=^src/nu2api/nucore/nucore_includes\.c$@-x,c++,-std=gnu++11,-fno-rtti
 build --per_file_copt=^src/nu2api/nucore/android/nuerror_android\.c$@-x,c++,-std=gnu++11
-build --per_file_copt=^src/nu2api/numath/numath_includes\.c$@-x,c++,-std=gnu++11
+build --per_file_copt=^src/nu2api/numath/numath_includes\.c$@-x,c++,-std=gnu++11,-fno-rtti
 build --per_file_copt=^src/nu2api/nu3d/nuvport\.c$@-x,c++,-std=gnu++11
 build --per_file_copt=^src/nu2api/nucore/listman\.c$@-x,c++,-std=gnu++11
 build --per_file_copt=^src/nu2api/nu3d/android/nubridge_android\.c$@-x,c++,-std=gnu++11

@@ -4669,9 +4669,15 @@ NUANG NuAngSub(NUANG a, NUANG b) {
     return difference;
 }
 
+// The original's register hints change its codegen; C++17 hosts reject the keyword.
+#ifdef __ANDROID__
+#define NU_POWER2_REGISTER register
+#else
+#define NU_POWER2_REGISTER
+#endif
 i32 NuPower2(i32 value) {
-    register i32 power;
-    register i32 input;
+    NU_POWER2_REGISTER i32 power;
+    NU_POWER2_REGISTER i32 input;
     if (value > 127) {
         power = 128;
     } else {

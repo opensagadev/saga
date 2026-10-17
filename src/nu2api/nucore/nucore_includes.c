@@ -6661,6 +6661,7 @@ i32 NuVSPrintf(char *dest, const char *format, va_list args) {
     return vsprintf(dest, format, args);
 }
 
+#ifdef __ANDROID__
 extern "C" {
 // The original library supplies its own sprintf (NuSPrintf), which formats
 // through vsprintf and returns the resulting string length. Native hosts keep
@@ -6674,6 +6675,7 @@ extern "C" int sprintf(char *dest, const char *format, ...) {
 }
 
 }
+#endif
 
 i32 NuSPrintfW(NUWCHAR *dest, NUWCHAR *format, ...) {
     // The original initializes this local but never reads it.
