@@ -375,6 +375,8 @@ inline void EdClassObjectNameControl::operator delete(void *memory) {
 inline EdSubSystem::~EdSubSystem() {
 }
 
+SAGA_TARGET_INLINE_COPY(inline EdControl::~EdControl() {})
+
 inline void EdControl::operator delete(void *memory) {
     theMemoryManager.FreePool(memory, sizeof(EdControl));
 }

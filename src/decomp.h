@@ -106,6 +106,14 @@ static inline u32 SagaHostX86F32ToU32(f32 value) {
 #define SAGA_HOST_LINKABLE_DTOR inline
 #endif
 
+// A further inline copy of such a destructor for another unit that the
+// original inlines it into; host builds link the single strong definition.
+#ifdef HOST_BUILD
+#define SAGA_TARGET_INLINE_COPY(...)
+#else
+#define SAGA_TARGET_INLINE_COPY(...) __VA_ARGS__
+#endif
+
 #ifdef HOST_BUILD
 #define SAGA_HOST_STATIC static
 #define SAGA_HOST_SAFE_MEMSET(dest, value, size)                                                                       \
