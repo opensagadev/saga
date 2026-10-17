@@ -45,9 +45,7 @@ extern i32 DefragCutSceneListSize;
 
 extern "C" {
 
-    i32 CheckStreamFileID(void) {
-        return 0;
-    }
+i32 CheckStreamFileID(void);
 
     u8 ForceScenePlayBack;
 

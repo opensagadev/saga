@@ -16,13 +16,7 @@
 
 char g_datfileMode = 1;
 
-NuFileAndroidAPK::NuFileAndroidAPK(const char *filepath, NuFile::OpenMode::T mode)
-    : NuFileBase(filepath, mode, 0x534f2020) {
-}
 
-NuFileAndroidAPK::~NuFileAndroidAPK() {
-    Close();
-}
 
 i64 NuFileAndroidAPK::Seek(i64 offset, NuFile::SeekOrigin::T origin) {
     i32 next;
@@ -44,54 +38,12 @@ i64 NuFileAndroidAPK::Seek(i64 offset, NuFile::SeekOrigin::T origin) {
     return position;
 }
 
-isize NuFileAndroidAPK::Read(void *buf, usize size) {
-    if (chunk_size != 0) {
-        u64 remaining = size < static_cast<usize>(file_size - position) ? size : file_size - position;
-        i32 start = position;
-        u8 *output = static_cast<u8 *>(buf);
-        while (position < file_size) {
-            u32 index = static_cast<u32>(position) / chunk_size;
-            if (asset_index != index) {
-                char next_path[256];
-                strcpy(next_path, asset_path);
-                char *part = strstr(next_path, ".0000.jpg");
-                sprintf(part, ".%04d.jpg", index);
-                AAsset_close(asset);
-                asset = AAssetManager_open(g_assetManager, next_path, AASSET_MODE_UNKNOWN);
-                asset_index = index;
-            }
-            i32 current = position;
-            i32 chunk = chunk_size;
-            AAsset_seek(asset, current - index * chunk, SEEK_SET);
-            i32 amount = ((current & -chunk) + chunk) - current;
-            if (static_cast<i64>(amount) > static_cast<i64>(remaining)) {
-                amount = remaining;
-            }
-            u32 count = AAsset_read(asset, output, amount);
-            remaining -= count;
-            position += count;
-            output += count;
-            if (remaining == 0)
-                break;
-        }
-        return position - start;
-    } else {
-        AAsset_seek(asset, position, SEEK_SET);
-        return AAsset_read(asset, buf, size);
-    }
-}
 
 isize NuFileAndroidAPK::Write(const void *buf, usize size) {
     STUBBED();
     return 0;
 }
 
-void NuFileAndroidAPK::Close() {
-    if (asset != NULL) {
-        AAsset_close(asset);
-        asset = NULL;
-    }
-}
 
 static FILE *g_fileHandles[32] = {NULL};
 

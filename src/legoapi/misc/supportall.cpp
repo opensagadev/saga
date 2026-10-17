@@ -109,8 +109,7 @@ void bgProcClose() {
 extern "C" void edrtlCalculateBurnoutEx(burnset_s *set, NuBloomParameters *parameters, NUVEC *camera_position,
                                         f32 frame_time);
 
-void bgprocFreeze() {
-}
+void bgprocFreeze();
 
 void CloakMovement(GameObject_s *object) {
     const u8 index = object->field_0x1089;
@@ -182,74 +181,21 @@ apply_weights:
 
 void RndrTexQuad3D(VuMtx const &matrix, i32 colour, numtl_s *material);
 
-void bgProcAbortAll() {
-}
+void bgProcAbortAll();
 
-void bgprocUnFreeze() {
-}
+void bgprocUnFreeze();
 
 extern AREADATA_s *PODRACE_ADATA;
 extern AREADATA_s *BONUS_GUNSHIP_ADATA;
 extern AREADATA_s *GUNSHIP_ADATA;
 extern "C" void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
 
-i32 bgprocIsFreezing() {
-    i32 freezing = 1;
-    if (bgproc_frozen == 0)
-        freezing = bgproc_freeze != 0;
-    return freezing;
-}
+i32 bgprocIsFreezing();
 
 void DebFreeWithoutKey(debkeydatatype_s *key);
 
 i32 RndrUnfilledCircle(f32 x, f32 y, f32 radius, f32 border_width, f32 aspect, i32 colour, f32 progress, f32 z,
-                       numtl_s *material) {
-    NuPrim2DBegin(1, 7, material);
-
-    radius *= 0.5f;
-    const f32 inner_radius = radius - border_width * 0.5f;
-
-    NuRndrPrimSetColour(colour);
-    NuRndrPrimUV(0.0f, 1.0f);
-    NuPrim2DAddXYZ(static_cast<f32>(PS2_VREZ_W) * x, static_cast<f32>(PS2_VREZ_H) * (y - radius), z);
-
-    NuRndrPrimSetColour(colour);
-    NuRndrPrimUV(0.0f, 0.0f);
-    NuPrim2DAddXYZ(static_cast<f32>(PS2_VREZ_W) * x, static_cast<f32>(PS2_VREZ_H) * (y - inner_radius), z);
-
-    const f32 segments = progress * 360.0f;
-    // Retail CVTTSS2SI returns integer-indefinite for unordered/out-of-range
-    // inputs. The touch widgets actually pass packed colours as progress;
-    // the intrinsic keeps that no-segment result well defined.
-#if defined(__SSE__)
-    const i32 segment_count = _mm_cvtt_ss2si(_mm_set_ss(segments));
-#else
-    const i32 segment_count =
-        segments >= -2147483648.0f && segments < 2147483648.0f ? static_cast<i32>(segments) : INT_MIN;
-#endif
-    if (segment_count >= 0) {
-        f32 angle = 0.0f;
-        for (i32 segment = 0; segment <= segment_count; ++segment, angle += 0.017455555f) {
-            const f32 sine = NuSinf(angle);
-            const f32 negative_cosine = -NuCosf(angle);
-            const f32 outer_x = radius * sine * aspect + x;
-            const f32 outer_y = radius * negative_cosine + y;
-            const f32 inner_x = inner_radius * sine * aspect + x;
-            const f32 inner_y = inner_radius * negative_cosine + y;
-
-            NuRndrPrimSetColour(colour);
-            NuRndrPrimUV(0.0f, 1.0f);
-            NuPrim2DAddXYZ(static_cast<f32>(PS2_VREZ_W) * outer_x, static_cast<f32>(PS2_VREZ_H) * outer_y, z);
-
-            NuRndrPrimSetColour(colour);
-            NuRndrPrimUV(0.0f, 0.0f);
-            NuPrim2DAddXYZ(static_cast<f32>(PS2_VREZ_W) * inner_x, static_cast<f32>(PS2_VREZ_H) * inner_y, z);
-        }
-    }
-
-    NuPrim2DEnd();
-    return 1;
-}
+                       numtl_s *material);
 
 void DebrisProcessSpheres(uv1deb *data, float time, debinftype *effect, debkeydatatype_s *key, i32 finite);
 
@@ -460,50 +406,7 @@ void TBRESET();
 
 void TBOPENFN(char *name, i32 type);
 
-void RndrArrow(float x, float y, float scale, i32 angle, i32 colour) {
-    NUVEC points[4] = {};
-    points[0].x = -1.0f;
-    points[0].y = -1.0f;
-    points[1].y = 1.0f;
-    points[2].y = -0.5f;
-    points[3].x = 1.0f;
-    points[3].y = -1.0f;
-    const f32 aspect = GetAspectRatio();
-    NuVecRotateZ(&points[0], &points[0], angle);
-    NuVecRotateZ(&points[1], &points[1], angle);
-    NuVecRotateZ(&points[2], &points[2], angle);
-    NuVecRotateZ(&points[3], &points[3], angle);
-    points[0].x *= scale;
-    points[0].y *= scale;
-    points[1].x *= scale;
-    points[1].y *= scale;
-    points[2].x *= scale;
-    points[2].y *= scale;
-    points[3].x *= scale;
-    points[3].y *= scale;
-    points[0].x *= aspect;
-    points[1].x *= aspect;
-    points[2].x *= aspect;
-    points[3].x *= aspect;
-    points[0].x += x;
-    points[0].y += y;
-    points[1].x += x;
-    points[1].y += y;
-    points[2].x += x;
-    points[2].y += y;
-    points[3].x += x;
-    points[3].y += y;
-    NuPrim2DBegin(1, 5, NULL);
-    NuRndrPrimSetColour(colour);
-    NuPrim2DAddXYZ(static_cast<f32>(PS2_VREZ_W) * points[0].x, static_cast<f32>(PS2_VREZ_H) * points[0].y, 0.0f);
-    NuRndrPrimSetColour(colour);
-    NuPrim2DAddXYZ(static_cast<f32>(PS2_VREZ_W) * points[1].x, static_cast<f32>(PS2_VREZ_H) * points[1].y, 0.0f);
-    NuRndrPrimSetColour(colour);
-    NuPrim2DAddXYZ(static_cast<f32>(PS2_VREZ_W) * points[2].x, static_cast<f32>(PS2_VREZ_H) * points[2].y, 0.0f);
-    NuRndrPrimSetColour(colour);
-    NuPrim2DAddXYZ(static_cast<f32>(PS2_VREZ_W) * points[3].x, static_cast<f32>(PS2_VREZ_H) * points[3].y, 0.0f);
-    NuPrim2DEnd();
-}
+void RndrArrow(float x, float y, float scale, i32 angle, i32 colour);
 
 void TBCLOSEFN(char *name, i32 type);
 

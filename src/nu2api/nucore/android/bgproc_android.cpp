@@ -1,3 +1,6 @@
+// Original translation unit reconstructed from the reference address map.
+// Functions are defined in original address order.
+
 #include "nu2api/nucore/bgproc.h"
 
 #include <stdarg.h>
@@ -30,6 +33,182 @@ static NuThreadSemaphore events[2] = {
     NuThreadSemaphore(1),
     NuThreadSemaphore(1),
 };
+
+static void bgThreadMain(void *data);
+
+// ==== src/legoapi/core/startup/finishloop.cpp: all remaining content ====
+#include "legoapi/core/startup/main.h"
+#include "decomp.h"
+#include "globals.h"
+#include "legoapi/legoapi_types.h"
+#include "legoapi/world/levels/levels.h"
+#include "nu2api/nucore/nuapi.h"
+#include "nu2api/nu3d/nucamera.h"
+#include "nu2api/nu3d/nurndr.h"
+#include "nu2api/numath/numtx.h"
+#include "nu2api/nu3d/nutex.h"
+
+// ==== src/legoapi/misc/supportall.cpp: declarations ====
+
+#if defined(__SSE__)
+#include <xmmintrin.h>
+#endif
+#include "nu2api/nu3d/nuprim.h"
+#include "nu2api/nu3d/nuprim_internal.h"
+#include "legoapi/misc/supportall.h"
+#include "legoapi/render/core/screen.h"
+#include "nu2api/nu3d/nuvport.h"
+#include "nu2api/nu3d/android/nuptl_android.h"
+#include "nu2api/nu3d/android/nutimebar_plain.h"
+#include "nu2api/numath/nuvec.h"
+#include "nu2api/numath/nufloat.h"
+#include "nu2api/numath/nutrig.h"
+#include "legoapi/core/config/cheat.h"
+#include "legoapi/actions/character/streaks.h"
+#include "legoapi/actions/combat/hits.h"
+#include <stdio.h>
+#include <limits.h>
+#include "legoapi/core/input/qrand.h"
+#include "gameapi/ai/aisys/aisys.h"
+#include "legoapi/characters/core/character.h"
+#include "legoapi/characters/core/players.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/world/mission.h"
+#include "legoapi/gizmo/base/gizmo.h"
+#include "legoapi/gizmo/base/gizflow.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/gizmos/transport/teleport.h"
+#include "legoapi/items/base/apiobject.h"
+#include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/menus/core/panel.h"
+#include "legoapi/props/doors/door.h"
+#include "legoapi/props/system/socksys.h"
+#include "legoapi/render/core/render.h"
+#include "legoapi/render/core/rtl.h"
+#include "legoapi/render/fx.h"
+#include "legoapi/render/fx/game_deb.h"
+#include "legoapi/world/level.h"
+#include "legoapi/world/area.h"
+#include "legoapi/world/areas.h"
+#include "nu2api/nu3d/nudlist.h"
+#include "nu2api/nu3d/numtl.h"
+#include "nu2api/nu3d/nupostparams.h"
+#include "nu2api/nu3d/nurndrstat.h"
+#include "nu2api/nufile/nufile.h"
+#include "nu2api/numath/nurand.h"
+#include "legoapi/world/world.h"
+#include "legoapi/items/base/collection.h"
+#include "nu2api/nu3d/nuspecial.h"
+
+// The reference defines these with dynamic initialization in this unit.
+extern MemoryManager theMemoryManager;
+#include "legoapi/misc/supportall_types.h"
+
+DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");
+
+// Debug-capture output helpers consumed by NuDisplayListCaptureSortPriority.
+// Transcribed from the original C-linkage symbols:
+//   NuHtmlBegin    0x2d5ca0   NuHtmlFlush   0x2d5c30
+//   NuHtmlWrite    0x2d5cd0   NuHtmlHeading1 0x2d5d40
+
+void NuHtmlFlush(i32 force);
+
+extern "C" void NuHtmlBegin(void *file);
+
+extern "C" void NuHtmlWrite(const char *text, ...);
+
+extern "C" void NuHtmlHeading1(const char *fmt, ...);
+
+// ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
+#include "legoapi/ai/core/legoai.h"
+#include "legoapi/items/objects/objectsall.h"
+#include "legoapi/items/collect/torpedo.h"
+#include "legoapi/actions/movement/carrying.h"
+#include "legoapi/gizmos/object/gizbuildits.h"
+#include "legoapi/gizmo/object/gizmoblowups.h"
+#include "legoapi/audio/audio.h"
+#include "legoapi/gizmos/transport/grapples.h"
+#include "legoapi/gizmos/transport/gizportal.h"
+#include "legoapi/gizmos/door/zipups.h"
+#include "legoapi/menus/screens/arcade.h"
+#include "gameapi/edtools/edfile.h"
+#include "gameapi/edtools/edui.h"
+#include "gameapi/gui/apimenu.h"
+#include "gamelib/util/gamelib_util_types.h"
+#include "legoapi/cutscenes/cutscenes.h"
+#include "legoapi/render/core/terrain.h"
+#include "legoapi/render/light/lighting.h"
+#include "legoapi/render/light/shadow.h"
+#include "legoapi/render/fx/parts.h"
+#include "legoapi/render/fx/spline_position.h"
+#include "nu2api/nucore/nupad.h"
+#include "legoapi/ai/core/ai_sys_stubs.h"
+#include "legoapi/props/objects/techno.h"
+#include "legoapi/characters/motion/gameanim.h"
+#include "legoapi/characters/core/CharacterObjectInterface.h"
+#include "legoapi/characters/core/charconfig.h"
+#include "legoapi/menus/core/gamehint.h"
+#include "legoapi/menus/core/gamemessages.h"
+#include "legoapi/gizmos/object/gizobstacles.h"
+#include "legoapi/gizmos/trigger/gizspecial.h"
+#include "legoapi/gizmos/traps/gizforce.h"
+#include "legoapi/gizmos/door/spinner.h"
+#include "legoapi/menus/screens/shop.h"
+#include "legoapi/menus/screens/store.h"
+#include "MechInputTouch/MechInputTouch_types.h"
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/core/input/timer.h"
+#include "legoapi/core/input/timing.h"
+#include "nu2api/nu3d/nuqfnt.h"
+#include "nu2api/numusic/sfx.h"
+#include "nu2api/nucore/numemory.h"
+#include "nu2api/nu3d/nuportal.h"
+#include "legoapi/audio/sfx.h"
+#include "nu2api/nuandroid/ios_graphics.h"
+#include "nu2api/nu3d/nulgtlaser.h"
+#include "nu2api/nucore/nugcutscene.h"
+#include "nu2api/nucore/nuhgobj.h"
+
+// Written by ThingManager's ctor (original global @0x124f2e0, .bss).
+
+#include "legoapi/items/objects/gameobjects_types.h"
+
+// Enabled in the target data image.  Ordinary background characters are
+// staggered across frames; special movement states opt back into full-rate
+// processing through the forced-update path.
+
+extern "C" {
+extern AICONDITIONDEF lego_aiconditiondefs[178];
+
+    static_assert(sizeof(lego_aiconditiondefs) / sizeof(lego_aiconditiondefs[0]) == 178,
+                  "complete game AI condition registry");
+
+}
+
+// The special-route list reserves the first ten ids for suit characters.  The
+// remaining ids enumerate the current story list while omitting variants that
+// are represented by those dedicated routes.
+
+#if defined(__i386__)
+#define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
+#else
+#define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone))
+#endif
+
+// Retail keeps only the IPA-SRA clone, which takes the other object's x and z by address.
+
+// ThingManager objects return to the theMemoryManager pool (D0 @0x425a50).
+inline void ThingManager::operator delete(void *thing, usize size) {
+    theMemoryManager.FreePool(thing, size);
+}
+
+// ==== src/legoapi/misc/memory.cpp: all remaining content ====
+
+// ==== functions in original address order ====
+
+// ==== src/legoapi/misc/supportall_stubs.cpp: all remaining content ====
+
+// ==== functions in original address order ====
 
 static void bgThreadMain(void *data) {
     NuStrNCpy(dummyBuf, g_CrashDumpId, 0x20);
@@ -74,75 +253,15 @@ static void bgThreadMain(void *data) {
     }
 }
 
-void bgProcInit() {
-    static i32 init;
-
-    if (init == 0) {
-        init = 1;
-
-        procinfo_pool = NuLstCreate(0x10, sizeof(BGPROCINFO));
-
-        g_bgCritSec = NuThreadCreateCriticalSection();
-        g_performingBgProcWorkCritSec = NuThreadCreateCriticalSection();
-
-        g_bgProcThread = NuCore::m_threadManager->CreateThread(
-            bgThreadMain, NULL, 0, "bgProc", 0x100000, NUTHREADCAFECORE_UNKNOWN_1, NUTHREADXBOX360CORE_UNKNOWN_1);
+BGPROCINFO *bgGetProcActive(void) {
+    if (cur_pi != NULL) {
+        return cur_pi;
     }
+
+    return (BGPROCINFO *)NuLstGetNext(procinfo_pool, NULL);
 }
 
-BGPROCINFO *bgPostRequest(bgprocdofn *do_fn, bgprocackfn *ack_fn, void *data, i32 data_size) {
-    BGPROCINFO local __attribute__((aligned(16)));
-    BGPROCINFO *info;
-
-    if (!multithreaded) {
-        local.work_started = false;
-        local.unknown_flag_2 = false;
-
-        local.do_fn = do_fn;
-        local.ack_fn = ack_fn;
-
-        local.vars = NULL;
-        local.var_count = 0;
-
-        if (data_size != 0 && data != NULL) {
-            memcpy(local.data, data, data_size);
-        }
-
-        if (do_fn != NULL) {
-            (*do_fn)(&local);
-        }
-
-        if (ack_fn != NULL) {
-            (*ack_fn)(&local);
-        }
-
-        // ORIG_BUG: This is returned uninitialized.
-        return info;
-    }
-
-    NuThreadCriticalSectionBegin(g_bgCritSec);
-
-    info = (BGPROCINFO *)NuLstAllocTail(procinfo_pool);
-    if (info != NULL) {
-        info->work_started = false;
-        info->unknown_flag_2 = false;
-
-        info->ack_fn = ack_fn;
-        info->do_fn = do_fn;
-
-        info->vars = NULL;
-        info->var_count = 0;
-
-        if (data_size != 0 && data != NULL) {
-            memcpy(info->data, data, data_size);
-        }
-    }
-
-    NuThreadCriticalSectionEnd(g_bgCritSec);
-
-    events[0].Signal();
-
-    return info;
+void bgSuspendMain(i32) {
 }
 
 BGPROCINFO *bgPostRequestV(bgprocdofn *do_fn, bgprocackfn *ack_fn, i32 first_type, ...) {
@@ -206,14 +325,98 @@ BGPROCINFO *bgPostRequestV(bgprocdofn *do_fn, bgprocackfn *ack_fn, i32 first_typ
     return info;
 }
 
-BGPROCINFO *bgGetProcActive(void) {
-    if (cur_pi != NULL) {
-        return cur_pi;
+BGPROCINFO *bgPostRequest(bgprocdofn *do_fn, bgprocackfn *ack_fn, void *data, i32 data_size) {
+    BGPROCINFO local __attribute__((aligned(16)));
+    BGPROCINFO *info;
+
+    if (!multithreaded) {
+        local.work_started = false;
+        local.unknown_flag_2 = false;
+
+        local.do_fn = do_fn;
+        local.ack_fn = ack_fn;
+
+        local.vars = NULL;
+        local.var_count = 0;
+
+        if (data_size != 0 && data != NULL) {
+            memcpy(local.data, data, data_size);
+        }
+
+        if (do_fn != NULL) {
+            (*do_fn)(&local);
+        }
+
+        if (ack_fn != NULL) {
+            (*ack_fn)(&local);
+        }
+
+        // ORIG_BUG: This is returned uninitialized.
+        return info;
     }
 
-    return (BGPROCINFO *)NuLstGetNext(procinfo_pool, NULL);
+    NuThreadCriticalSectionBegin(g_bgCritSec);
+
+    info = (BGPROCINFO *)NuLstAllocTail(procinfo_pool);
+    if (info != NULL) {
+        info->work_started = false;
+        info->unknown_flag_2 = false;
+
+        info->ack_fn = ack_fn;
+        info->do_fn = do_fn;
+
+        info->vars = NULL;
+        info->var_count = 0;
+
+        if (data_size != 0 && data != NULL) {
+            memcpy(info->data, data, data_size);
+        }
+    }
+
+    NuThreadCriticalSectionEnd(g_bgCritSec);
+
+    events[0].Signal();
+
+    return info;
+}
+
+void bgProcInit() {
+    static i32 init;
+
+    if (init == 0) {
+        init = 1;
+
+        procinfo_pool = NuLstCreate(0x10, sizeof(BGPROCINFO));
+
+        g_bgCritSec = NuThreadCreateCriticalSection();
+        g_performingBgProcWorkCritSec = NuThreadCreateCriticalSection();
+
+        g_bgProcThread = NuCore::m_threadManager->CreateThread(
+            bgThreadMain, NULL, 0, "bgProc", 0x100000, NUTHREADCAFECORE_UNKNOWN_1, NUTHREADXBOX360CORE_UNKNOWN_1);
+    }
+}
+
+void bgProcAbortAll() {
+}
+
+void bgprocFreeze() {
+}
+
+void bgprocUnFreeze() {
+}
+
+i32 bgprocIsFrozen() {
+    return bgproc_frozen;
+}
+
+i32 bgprocIsFreezing() {
+    i32 freezing = 1;
+    if (bgproc_frozen == 0)
+        freezing = bgproc_freeze != 0;
+    return freezing;
 }
 
 i32 bgProcIsBgThread(void) {
     return NuCore::m_threadManager->GetCurrentThread() == g_bgProcThread;
 }
+

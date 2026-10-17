@@ -1,3 +1,6 @@
+// Original translation unit reconstructed from the reference address map.
+// Functions are defined in original address order.
+
 // Render-thread scene processing — transcribed originals.
 //
 //   NuRenderThreadPrepareRender        original 0x2a5ee0 (game thread)
@@ -34,10 +37,6 @@ static i32 renderThreadIsLocked;
 pthread_t g_renderThread;
 thread_local i32 gt_currentThreadId = -1;
 
-extern "C" i32 NuRenderThreadIsCurrentThread(void) {
-    return gt_currentThreadId == 0;
-}
-
 // Original file-static double buffers (bss 0x119db.. / 0x119fd..).
 static nurenderscene_s sceneParameters_safe[16];
 static i32 sceneParametersCount_safe;
@@ -66,21 +65,21 @@ extern "C" void NuDisplayListDraw2D(void);
 i32 global_frame_count = 0;
 i32 global_frame_count_paused = 0;
 
-extern "C" void NuRenderThreadLock(void) {
-    BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nurenderthread.cpp", 134);
-    NuThreadCriticalSectionBegin(renderThreadCS);
-    renderThreadIsLocked++;
-}
+extern "C" void NuRenderThreadLock(void);
 
-extern "C" void NuRenderThreadUnlock(void) {
-    renderThreadIsLocked--;
-    NuThreadCriticalSectionEnd(renderThreadCS);
-    EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nurenderthread.cpp", 153);
-}
+extern "C" void NuRenderThreadUnlock(void);
 
-extern "C" i32 NuRenderThreadIsLocked(void) {
-    return renderThreadIsLocked;
-}
+void *renderThread_main(void *arg);
+
+extern "C" void NuRenderThreadPrepareRender(void);
+
+i64 getCurrentTime();
+
+extern "C" void NuRenderThreadStartRender(void);
+
+i32 renderThread_processRenderScenes(void);
+
+// ==== functions in original address order ====
 
 void NuRenderThreadCreate(void) {
     NuIOS_InitRenderThread();
@@ -92,23 +91,25 @@ void NuRenderThreadDestroy(void) {
     NuThreadDestroyCriticalSection(renderThreadCS);
 }
 
-void *renderThread_main(void *arg) {
-    (void)arg;
-    NuRenderSetThisTreadAsRender();
-    NuIOSInitOpenGLES();
+extern "C" {
+extern "C" i32 NuRenderThreadIsCurrentThread(void) {
+    return gt_currentThreadId == 0;
+}
 
-    for (;;) {
-        NuIOS_WaitUntilAllowedToRender();
-        NuIOS_SetRenderIncomplete();
-        BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nurenderthread.cpp", 259);
-        NuRenderThreadLock();
-        glFrontFace(GL_CW);
-        renderThread_processRenderScenes();
-        NuRenderThreadUnlock();
-        NuRenderDeviceSwapBuffers();
-        NuIOS_SetRenderComplete();
-        EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nurenderthread.cpp", 269);
-    }
+extern "C" void NuRenderThreadLock(void) {
+    BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nurenderthread.cpp", 134);
+    NuThreadCriticalSectionBegin(renderThreadCS);
+    renderThreadIsLocked++;
+}
+
+extern "C" i32 NuRenderThreadIsLocked(void) {
+    return renderThreadIsLocked;
+}
+
+extern "C" void NuRenderThreadUnlock(void) {
+    renderThreadIsLocked--;
+    NuThreadCriticalSectionEnd(renderThreadCS);
+    EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nurenderthread.cpp", 153);
 }
 
 // original 0x2a5ee0 — runs on the GAME thread from NuRndrSwapScreen: snapshots
@@ -149,6 +150,8 @@ extern "C" void NuRenderThreadPrepareRender(void) {
     sceneParametersCount = 0;
 }
 
+}
+
 // Original 0x2a6020: C++ render-thread clock helper, distinct from the C platform entry point.
 i64 getCurrentTime() {
     struct timespec ts;
@@ -156,10 +159,13 @@ i64 getCurrentTime() {
     return (i64)ts.tv_sec * 1000 + (i64)ts.tv_nsec;
 }
 
+extern "C" {
 // original 0x2a6080
 extern "C" void NuRenderThreadStartRender(void) {
     g_renderStartTime = getCurrentTime();
     NuIOS_WakeRenderThread();
+}
+
 }
 
 // original 0x2a61a0 — runs on the RENDER thread. Drains the safe scene list:
@@ -259,3 +265,23 @@ i32 renderThread_processRenderScenes(void) {
     sceneParametersCount_safe = 0;
     return drew ? 1 : 0;
 }
+
+void *renderThread_main(void *arg) {
+    (void)arg;
+    NuRenderSetThisTreadAsRender();
+    NuIOSInitOpenGLES();
+
+    for (;;) {
+        NuIOS_WaitUntilAllowedToRender();
+        NuIOS_SetRenderIncomplete();
+        BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nurenderthread.cpp", 259);
+        NuRenderThreadLock();
+        glFrontFace(GL_CW);
+        renderThread_processRenderScenes();
+        NuRenderThreadUnlock();
+        NuRenderDeviceSwapBuffers();
+        NuIOS_SetRenderComplete();
+        EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nurenderthread.cpp", 269);
+    }
+}
+

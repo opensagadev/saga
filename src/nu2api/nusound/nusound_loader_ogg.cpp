@@ -1,5 +1,8 @@
+// Original translation unit reconstructed from the reference address map.
+// Functions are defined in original address order.
+
 #include "decomp.h"
-#include "nusound_loader_ogg.hpp"
+#include "nu2api/nusound/nusound_loader_ogg.hpp"
 
 #include <new>
 
@@ -19,18 +22,95 @@ namespace {
     };
 } // namespace
 
-i32 NuSoundLoaderOGG::OGGFileCallbacks::Read(void *dest, u32 size) {
-    return NuFileRead(file, dest, size);
+NuSoundStreamDesc::DataFormat NuSoundHeaderOGG::GetDecodedDataFormat() const {
+    return DataFormat::ZERO;
+}
+
+u64 NuSoundHeaderOGG::GetEncodedLengthBytes() const {
+    return encoded_length_bytes;
+}
+
+u64 NuSoundHeaderOGG::GetLengthSamples() const {
+    return length_samples;
+}
+
+f32 NuSoundHeaderOGG::GetLengthSeconds() const {
+    return length_seconds;
+}
+
+u64 NuSoundHeaderOGG::GetDataOffset() const {
+    return 0;
+}
+
+u32 NuSoundHeaderOGG::GetNumChannels() const {
+    return num_channels;
+}
+
+u32 NuSoundHeaderOGG::GetSampleRate() const {
+    return sample_rate;
+}
+
+u32 NuSoundHeaderOGG::GetBitsPerChannel() const {
+    return bits_per_channel;
+}
+
+u32 NuSoundHeaderOGG::GetBlockSize() const {
+    return block_size;
+}
+
+NuSoundStreamDesc::DataFormat NuSoundHeaderOGG::GetEncodedDataFormat() const {
+    return DataFormat::THREE;
+}
+
+u64 NuSoundHeaderOGG::GetDecodedLengthBytes() const {
+    return decoded_length_bytes;
+}
+
+u16 NuSoundHeaderOGG::GetInterleaveSize() const {
+    return bits_per_channel / 8;
+}
+
+u16 NuSoundHeaderOGG::GetFormatID() const {
+    return format_id;
+}
+
+u16 NuSoundHeaderOGG::GetExtendedDataSize() const {
+    return extended_data_size;
+}
+
+void *NuSoundHeaderOGG::GetExtendedData() const {
+    return (void *)extended_data;
+}
+
+// ==== src/legoapi/audio/gamelib_ogg.cpp: all remaining content ====
+#include "legoapi/legoapi_types.h"
+#include <stdlib.h>
+#include <string.h>
+
+// ==== functions in original address order ====
+
+usize NuSoundLoaderOGG::OggCallbackRead(void *dest, usize count, usize size, void *callbacks_) {
+    return (*(OGGCallbacksVTable **)callbacks_)->read(callbacks_, dest, count * size);
+}
+
+int NuSoundLoaderOGG::OggCallbackSeek(void *callbacks, i64 offset, i32 origin) { // NOLINT(google-runtime-int)
+    return (*(OGGCallbacksVTable **)callbacks)->seek(callbacks, (i32)offset, origin);
+}
+
+long NuSoundLoaderOGG::OggCallbackTell(void *callbacks) { // NOLINT(google-runtime-int)
+    return (*(OGGCallbacksVTable **)callbacks)->get_position(callbacks);
 }
 
 void NuSoundLoaderOGG::OGGFileCallbacks::SetFile(NUFILE file) {
     this->file = file;
 }
 
-NuSoundLoaderOGG::NuSoundLoaderOGG() : buffer(NULL) {
+NUFILE NuSoundLoaderOGG::OGGFileCallbacks::GetFile() const {
+    return file;
 }
 
-NuSoundLoaderOGG::~NuSoundLoaderOGG() {
+void NuSoundLoaderOGG::OGGFileCallbacks::Close() {
+    NuFileClose(file);
 }
 
 NuSoundStreamDesc *NuSoundLoaderOGG::CreateHeader() {
@@ -45,6 +125,13 @@ NuSoundStreamDesc *NuSoundLoaderOGG::CreateHeader() {
     return header;
 }
 
+bool NuSoundLoaderOGG::SeekTime(f64 seconds) {
+    NuIOS_IsLowEndDevice();
+    NuSoundHeaderOGG *header = (NuSoundHeaderOGG *)desc;
+    i32 iVar2 = ov_time_seek(&header->ogg_file, seconds);
+    return iVar2 == 0;
+}
+
 bool NuSoundLoaderOGG::SeekPCMSample(u64 index) {
     NuIOS_IsLowEndDevice();
 
@@ -53,11 +140,9 @@ bool NuSoundLoaderOGG::SeekPCMSample(u64 index) {
     return ret == 0;
 }
 
-bool NuSoundLoaderOGG::SeekTime(f64 seconds) {
-    NuIOS_IsLowEndDevice();
-    NuSoundHeaderOGG *header = (NuSoundHeaderOGG *)desc;
-    i32 iVar2 = ov_time_seek(&header->ogg_file, seconds);
-    return iVar2 == 0;
+bool NuSoundLoaderOGG::SeekRawData(u64 position) {
+    u64 data_offset = this->desc->GetDataOffset();
+    return NuFileSeek(file, data_offset + position, NUFILE_SEEK_START) != 0;
 }
 
 i32 NuSoundLoaderOGG::OGGFileCallbacks::Seek(i32 offset, u32 origin) {
@@ -76,34 +161,15 @@ i32 NuSoundLoaderOGG::OGGFileCallbacks::Seek(i32 offset, u32 origin) {
     return NuFileSeek(file, offset, seek);
 }
 
-void NuSoundLoaderOGG::OGGFileCallbacks::Close() {
-    NuFileClose(file);
-}
-
-NUFILE NuSoundLoaderOGG::OGGFileCallbacks::GetFile() const {
-    return file;
+NuSoundLoaderOGG::~NuSoundLoaderOGG() {
 }
 
 i32 NuSoundLoaderOGG::OGGFileCallbacks::GetPosition() const {
     return NuFilePos(file);
 }
 
-int NuSoundLoaderOGG::OggCallbackClose(void *callbacks) {
-    (void)callbacks;
-    return 0;
-}
-
-int NuSoundLoaderOGG::OggCallbackSeek(void *callbacks, i64 offset, i32 origin) { // NOLINT(google-runtime-int)
-    return (*(OGGCallbacksVTable **)callbacks)->seek(callbacks, (i32)offset, origin);
-}
-
-long NuSoundLoaderOGG::OggCallbackTell(void *callbacks) { // NOLINT(google-runtime-int)
-    return (*(OGGCallbacksVTable **)callbacks)->get_position(callbacks);
-}
-
-bool NuSoundLoaderOGG::SeekRawData(u64 position) {
-    u64 data_offset = this->desc->GetDataOffset();
-    return NuFileSeek(file, data_offset + position, NUFILE_SEEK_START) != 0;
+i32 NuSoundLoaderOGG::OGGFileCallbacks::Read(void *dest, u32 size) {
+    return NuFileRead(file, dest, size);
 }
 
 i32 NuSoundLoaderOGG::OpenFileForStreaming(const char *path, bool flag) {
@@ -114,21 +180,36 @@ i32 NuSoundLoaderOGG::OpenFileForStreaming(const char *path, bool flag) {
     return this->file == 0 ? 2 : 1;
 }
 
-void NuSoundLoaderOGG::Close() {
-    NuSoundHeaderOGG *header = (NuSoundHeaderOGG *)this->desc;
-    if (header != NULL) {
-        NuIOS_IsLowEndDevice();
-        ov_clear(&header->ogg_file);
+extern "C" {
+    void *OggAllocMem(u32 bytes) {
+        void *memory = malloc(bytes);
+        memset(memory, 0, bytes);
+        return memory;
     }
-    if (this->file != 0) {
-        NuFileClose(this->file);
+
+    void *OggReAllocMem(void *memory, u32 bytes) {
+        return realloc(memory, bytes);
     }
-    FreeMemoryBuffer();
-    this->file = 0;
+
+    void OggFreeMem(void *memory) {
+        free(memory);
+    }
+
 }
 
-usize NuSoundLoaderOGG::OggCallbackRead(void *dest, usize count, usize size, void *callbacks_) {
-    return (*(OGGCallbacksVTable **)callbacks_)->read(callbacks_, dest, count * size);
+int NuSoundLoaderOGG::OggCallbackClose(void *callbacks) {
+    (void)callbacks;
+    return 0;
+}
+
+NuSoundLoaderOGG::NuSoundLoaderOGG() : buffer(NULL) {
+}
+
+void NuSoundLoaderOGG::FreeMemoryBuffer() {
+    if (buffer != NULL) {
+        NU_FREE(buffer);
+        buffer = NULL;
+    }
 }
 
 i32 NuSoundLoaderOGG::ReadHeader(NuSoundStreamDesc *desc) {
@@ -207,69 +288,16 @@ i32 NuSoundLoaderOGG::ReadHeader(NuSoundStreamDesc *desc) {
     return 3;
 }
 
-void NuSoundLoaderOGG::FreeMemoryBuffer() {
-    if (buffer != NULL) {
-        NU_FREE(buffer);
-        buffer = NULL;
+void NuSoundLoaderOGG::Close() {
+    NuSoundHeaderOGG *header = (NuSoundHeaderOGG *)this->desc;
+    if (header != NULL) {
+        NuIOS_IsLowEndDevice();
+        ov_clear(&header->ogg_file);
     }
+    if (this->file != 0) {
+        NuFileClose(this->file);
+    }
+    FreeMemoryBuffer();
+    this->file = 0;
 }
 
-NuSoundStreamDesc::DataFormat NuSoundHeaderOGG::GetDecodedDataFormat() const {
-    return DataFormat::ZERO;
-}
-
-u64 NuSoundHeaderOGG::GetEncodedLengthBytes() const {
-    return encoded_length_bytes;
-}
-
-u64 NuSoundHeaderOGG::GetLengthSamples() const {
-    return length_samples;
-}
-
-f32 NuSoundHeaderOGG::GetLengthSeconds() const {
-    return length_seconds;
-}
-
-u64 NuSoundHeaderOGG::GetDataOffset() const {
-    return 0;
-}
-
-u32 NuSoundHeaderOGG::GetNumChannels() const {
-    return num_channels;
-}
-
-u32 NuSoundHeaderOGG::GetSampleRate() const {
-    return sample_rate;
-}
-
-u32 NuSoundHeaderOGG::GetBitsPerChannel() const {
-    return bits_per_channel;
-}
-
-u32 NuSoundHeaderOGG::GetBlockSize() const {
-    return block_size;
-}
-
-NuSoundStreamDesc::DataFormat NuSoundHeaderOGG::GetEncodedDataFormat() const {
-    return DataFormat::THREE;
-}
-
-u64 NuSoundHeaderOGG::GetDecodedLengthBytes() const {
-    return decoded_length_bytes;
-}
-
-u16 NuSoundHeaderOGG::GetInterleaveSize() const {
-    return bits_per_channel / 8;
-}
-
-u16 NuSoundHeaderOGG::GetFormatID() const {
-    return format_id;
-}
-
-u16 NuSoundHeaderOGG::GetExtendedDataSize() const {
-    return extended_data_size;
-}
-
-void *NuSoundHeaderOGG::GetExtendedData() const {
-    return (void *)extended_data;
-}

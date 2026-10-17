@@ -1,3 +1,6 @@
+// Original translation unit reconstructed from the reference address map.
+// Functions are defined in original address order.
+
 // NuSoundAndroid — decompiled from libTTapp.so
 // (nu2api.2013/nusound/android/nusound_android.cpp).
 //
@@ -15,6 +18,104 @@
 
 NuSoundAndroid NuSound;
 i32 NuSoundAndroid::m_workerThreadCount = 0;
+
+namespace {
+    // ObjectItf / SLEngineItf slot typedefs for the InitAudioDevice flow.
+    typedef u32 (*ObjectRealizeFn)(void *, u32);
+    typedef u32 (*ObjectGetInterfaceFn)(void *, const void *, void **);
+    typedef u32 (*EngineCreateOutputMixFn)(void *, void **, u32, const void **, const u32 *);
+    typedef u32 (*QuerySupportedProfilesFn)(void *, u16 *);
+    typedef u32 (*QueryAvailableVoicesFn)(void *, u32, i16 *, u32 *, i16 *);
+    typedef u32 (*VolumeSetVolumeLevelFn)(void *, i32);
+    typedef u32 (*EnvironmentalReverbSetPropertiesFn)(void *, const void *);
+
+#define SL_SLOT(itf, fn_type, byte_offset) (*(fn_type *)((char *)(*(void **)(itf)) + (byte_offset)))
+
+} // namespace
+
+// ==== src/nu2api/nusound/nusound_voice_android.cpp: declarations ====
+// NuVoiceAndroid — decompiled from libTTapp.so
+//
+// Platform voice on top of NuSoundVoice: one OpenSL ES AudioPlayer per voice
+// with an ANDROIDSIMPLEBUFFERQUEUE (the device write is the Enqueue call in
+// SubmitBuffer) and a VOLUME interface for gain / stereo position. The
+// original drove OpenSL through its interface vtables; the exact slots
+// libTTapp.so used are reproduced below so the transcription stays faithful.
+
+#include "nu2api/nusound/nu2api_nusound_types.h"
+#include <new>
+#include <stdio.h>
+#include <string.h>
+#include "nu2api/nusound/nusound_streamer.hpp"
+#include <math.h>
+namespace {
+
+    // OpenSL interface vtable slots as used by libTTapp.so.
+
+#include "nu2api/nusound/nusound_voice_android_types.h"
+
+} // namespace
+// ---------------------------------------------------------------------------
+// construction / destruction
+// ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// the device write
+// ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// device lifecycle
+// ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// per-frame device state
+// ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// async events
+// ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// playback position
+// ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// voice factory
+// ---------------------------------------------------------------------------
+
+// ==== functions in original address order ====
+
+void NuSoundAndroid::ShutdownAudioDevice() {
+    // libTTapp.so 0x32aec0 only drops the worker count. Object ownership is
+    // released by the surrounding NuSound shutdown path.
+    if (NuSoundAndroid::m_workerThreadCount != 0) {
+        NuSoundAndroid::m_workerThreadCount--;
+    }
+}
+
+NuSoundEffect *NuSoundAndroid::CreateEffect(NuSoundEffect::EffectType) {
+    return NULL;
+}
+
+NuSoundVoice *NuSoundVoiceFactoryAndroid_PCM::CreateVoice(NuSoundSource *source, bool loop) {
+    NuVoiceAndroid *voice = (NuVoiceAndroid *)NuSoundSystem::_AllocMemory(
+        NuSoundSystem::MemoryDiscipline::SCRATCH, sizeof(NuVoiceAndroid), 4,
+        "i:/SagaTouch-Android_9176564/nu2api.2013/nusound/android/nusound_android.cpp:292");
+    if (voice != NULL) {
+        new (voice) NuVoiceAndroid(source, loop);
+    }
+    return voice;
+}
+
+NuSoundVoice *NuSoundAndroid::CreateVoice(NuSoundSource *source, bool loop) {
+    return NuSoundSystem::CreateVoice(source, loop);
+}
+
+void NuSoundAndroid::UpdateAudioDevice() {
+    // The original only polls the application state here.
+    NuApplicationState *state = NuCore::GetApplicationState();
+    state->GetStatus();
+}
 
 void NuSoundAndroid::AndroidNuSoundClockThread(void *) {
     // 5 ms tick driving the audio clock callbacks (the callback list is
@@ -34,18 +135,6 @@ NuSoundAndroid::~NuSoundAndroid() {
 NuSoundAndroid::NuSoundAndroid() : NuSoundSystem() {
     NuSoundVoiceFactoryAndroid_PCM *factory = new NuSoundVoiceFactoryAndroid_PCM();
     this->factory_list.RegisterFactory(factory, NuSoundStreamDesc::DataFormat::ZERO);
-}
-
-NuSoundEffect *NuSoundAndroid::CreateEffect(NuSoundEffect::EffectType) {
-    return NULL;
-}
-
-NuSoundVoice *NuSoundAndroid::CreateVoice(NuSoundSource *source, bool loop) {
-    return NuSoundSystem::CreateVoice(source, loop);
-}
-
-bool NuSoundAndroid::IsValidBitRate(u32 bits) {
-    return !(bits != 16 && bits != 8);
 }
 
 bool NuSoundAndroid::IsValidSampleRate(u32 rate_millis) {
@@ -76,26 +165,16 @@ bool NuSoundAndroid::IsValidSampleRate(u32 rate_millis) {
     return rate_millis == 192000000;
 }
 
+bool NuSoundAndroid::IsValidBitRate(u32 bits) {
+    return !(bits != 16 && bits != 8);
+}
+
 u32 NuSoundAndroid::ReportErrorCode(u32 error, const char *message) {
     if (error != 0) {
         LOG_WARN("NuSound error %u: %s", error, message);
     }
     return error;
 }
-
-namespace {
-    // ObjectItf / SLEngineItf slot typedefs for the InitAudioDevice flow.
-    typedef u32 (*ObjectRealizeFn)(void *, u32);
-    typedef u32 (*ObjectGetInterfaceFn)(void *, const void *, void **);
-    typedef u32 (*EngineCreateOutputMixFn)(void *, void **, u32, const void **, const u32 *);
-    typedef u32 (*QuerySupportedProfilesFn)(void *, u16 *);
-    typedef u32 (*QueryAvailableVoicesFn)(void *, u32, i16 *, u32 *, i16 *);
-    typedef u32 (*VolumeSetVolumeLevelFn)(void *, i32);
-    typedef u32 (*EnvironmentalReverbSetPropertiesFn)(void *, const void *);
-
-#define SL_SLOT(itf, fn_type, byte_offset) (*(fn_type *)((char *)(*(void **)(itf)) + (byte_offset)))
-
-} // namespace
 
 // libTTapp.so 0x32b1d0: create the engine object, realize it, query the
 // engine capabilities, fetch the engine interface, create + realize the
@@ -181,16 +260,3 @@ bool NuSoundAndroid::InitAudioDevice() {
     return true;
 }
 
-void NuSoundAndroid::ShutdownAudioDevice() {
-    // libTTapp.so 0x32aec0 only drops the worker count. Object ownership is
-    // released by the surrounding NuSound shutdown path.
-    if (NuSoundAndroid::m_workerThreadCount != 0) {
-        NuSoundAndroid::m_workerThreadCount--;
-    }
-}
-
-void NuSoundAndroid::UpdateAudioDevice() {
-    // The original only polls the application state here.
-    NuApplicationState *state = NuCore::GetApplicationState();
-    state->GetStatus();
-}

@@ -1,3 +1,6 @@
+// Original translation unit reconstructed from the reference address map.
+// Functions are defined in original address order.
+
 #include <string.h>
 
 #include "decomp.h"
@@ -59,83 +62,13 @@ i32 g_alphaTestEnabled = 0;
 u32 g_alphaFunc = 0;
 u32 g_alphaRef = 0;
 
-// Original numtl_android.cpp, 0x29c090..0x29c0fd and 0x29ca00..0x29ca2d.
-// The plane occupies bits 4..11 of the first material word.
-void NuMtlInsert(NUMTL *mtl, i32 plane) {
-    mtl->renderplane = static_cast<u8>(plane);
-}
-
-extern "C" void NuMtlSetRenderPlane(NUMTL *mtl, i8 plane) {
-    mtl->renderplane = static_cast<u8>(plane);
-    NuMtlInsert(mtl, plane);
-}
-
-extern "C" void NuMtlCopy(NUMTL *destination, const NUMTL *source) {
-    // The original copies the material, retaining the destination display list at +0x3c.
-    NUDISPLAYLIST *display_list = destination->display_list;
-    *destination = *source;
-    destination->display_list = display_list;
-}
+void NuMtlInsert(NUMTL *mtl, i32 plane);
 
 NuVertexFormatPS *g_nuDebrisVertexFormat;
 NuVertexFormatPS *g_nuFaceOnVertexFormat;
 NuVertexFormatPS *g_nuFallbackVertexFormat;
 NuVertexFormatPS *g_nuFullscreenVertexFormat;
 NuVertexFormatPS *g_nuPrimVertexFormat;
-
-void NuMtlInitExPS(VARIPTR *buf) {
-    NUNATIVETEX *tex;
-    NUVERTEXDESCRIPTOR vtx_desc;
-
-    BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/numtl_android.cpp", 0x2ed);
-
-    tex = (NUNATIVETEX *)buf->void_ptr;
-    buf->addr = (usize)tex + sizeof(NUNATIVETEX);
-
-    memset(tex, 0, sizeof(NUNATIVETEX));
-
-    tex->size = sizeof(DebrisGlassIOS_Tex);
-    tex->image_data = DebrisGlassIOS_Tex;
-    g_DebrisGlassDistortTID = NuTexCreateNative(tex, true);
-
-    vtx_desc.flags = 0;
-    vtx_desc.has_position = true;
-
-    g_nuFullscreenVertexFormat = NuGetVertexDeclaration(vtx_desc);
-
-    vtx_desc.has_diffuse = true;
-    vtx_desc.tex_coord_mode = 1;
-
-    g_nuPrimVertexFormat = NuGetVertexDeclaration(vtx_desc);
-    g_nuDebrisVertexFormat = NuGetVertexDeclaration(vtx_desc);
-    g_nuFallbackVertexFormat = NuGetVertexDeclaration(vtx_desc);
-
-    vtx_desc.tex_coord_mode = 5;
-    g_nuFaceOnVertexFormat = NuGetVertexDeclaration(vtx_desc);
-
-    EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/numtl_android.cpp", 0x305);
-}
-
-void NuMtlCreatePS(NUMTL *mtl, i32 is_3d) {
-    NuShaderMtlDescInit(&mtl->shader_desc);
-
-    if (mtl->tex_id > 0) {
-        mtl->shader_desc.diffuse_map_tex_id[0] = mtl->tex_id;
-        mtl->shader_desc.unknown_a8 = 1;
-        mtl->shader_desc.vtx_desc.tex_coord_mode = 1;
-    } else {
-        mtl->shader_desc.diffuse_color[0] = RGBA_TO_NUCOLOUR32(
-            mtl->diffuse_color.r * 128.0f, mtl->diffuse_color.g * 128.0f, mtl->diffuse_color.b * 128.0f, 0xff);
-    }
-
-    if (!is_3d) {
-        mtl->shader_desc.vtx_desc.has_no_transform = 1;
-    }
-}
-
-void NuMtlSetShaderDescPS(NUMTL *mtl, NUSHADERMTLDESC *desc) {
-    mtl->shader_desc = *desc;
-}
 
 // Material display-list backend (original numtl_android.cpp, 0x29bf60..).
 extern "C" {
@@ -154,7 +87,7 @@ static NUSHADERPROGRAM *g_faceonDecalProgram = nullptr; // _ZL20g_faceonDecalPro
 static NUSHADERPROGRAM *g_debrisProgram = nullptr;      // _ZL15g_debrisProgram
 static NUSHADERPROGRAM *g_debrisGlassProgram = nullptr;
 
-#include "nuios_shader_sources.inc"
+#include "nu2api/nu3d/android/nuios_shader_sources.inc"
 
 // Refraction texture used by glass debris — lazily allocated.
 static i32 NuIOSDLMtlCallback_refractionRT = 0;                 // @0x99b480
@@ -188,6 +121,337 @@ static inline char DebrisGlassSelector(const numtl_s *mtl) {
 
 static constexpr char kGlassDebrisMarker = (char)-0x69; // 0x97
 
+void NuIOS_SetCullMode(i32 mode);
+
+#include "nu2api/nu3d/android/nublend_internal.h"
+
+extern "C" void NuMtlSetRenderStatesPS(numtl_s *mtl);
+
+extern "C" void NuIOS_SetVertexFormat(usize fmt);
+
+// Helpers for the debris constant block (original walks the programme's
+// i16 param table: pairs of {semantic, loc|class}).
+// The reference unit clears the usage masks in its static constructor while
+// the packet pointers stay in initialized data.
+static inline NUSHADERUSAGEMASK EmptyShaderUsageMask() {
+    NUSHADERUSAGEMASK mask = {{0, 0, 0, 0}};
+    return mask;
+}
+
+extern "C" {
+    ShaderPacketStateMapping g_packetToShaderStateMappings[2] = {
+        {EmptyShaderUsageMask(), &g_boundLightPacket},
+        {EmptyShaderUsageMask(), &g_boundCameraPacket},
+    };
+}
+
+namespace {
+    constexpr i16 kParamViewProj = 0;        // semantic 0
+    constexpr i16 kParamView = 0x0c;         // semantic 12
+    constexpr i16 kParamKonstColourA = 0x30; // semantic 48
+    constexpr i16 kParamTerminator = (i16)-0x8000;
+
+} // namespace
+
+// ==== src/nu2api/nu3d/numtl.cpp: declarations ====
+
+#include "gamelib/util/gamelib_util_types.h"
+#include "nu2api/nu3d/nuspecial.h"
+#include "nu2api/nucore/common.h"
+#include "nu2api/nucore/nulst.h"
+#include "nu2api/nufile/nufile.h"
+#include "nu2api/nufile/nu2api_nufile_types.h"
+
+#include "nu2api/nu3d/numtl_types.h"
+DECOMP_ASSERT(sizeof(MTL_OVERRIDE_RECORD) == 12, "Material override payload ABI");
+DECOMP_ASSERT(offsetof(NUMTL, shader_desc) + offsetof(NUSHADERMTLDESC, vtx_desc) == 0x1f0,
+              "Material override vertex descriptor offset");
+
+void NuShaderMtlDescInit(NUSHADERMTLDESC *desc);
+
+// ==== src/nu2api/nu3d/nurndr_plain.cpp: declarations ====
+#include "nu2api/nu3d/nuhspecial.h"
+#include <stdio.h>
+#include "nu2api/nu3d/nuvport.h"
+// nurndr_plain.cpp — Host "plain" renderer backend.
+//
+// This TU is the host replacement for the PS2 rendering TU (nurndr).
+// It owns renderer scene/present paths and primitive drawing helpers:
+//
+//   1. Scene lifecycle  — NuRndrBeginScene / NuRndrClear / NuRndrEndScene
+//      builds the current `nurenderscene_s` (0x218 bytes in the original BSS)
+//      and queues it into a 16-slot ring consumed by the render thread.
+//
+//   2. Primitive drawing helpers that call the immediate-mode API in
+//      android/nuprim_android.c, including quad expansion there.
+//
+//   3. Frame present   — moved to the original android/nurndr.c TU.
+//
+// Remaining renderer entry points are retained as link stubs until their
+// subsystems are transcribed. Their signatures are not yet recovered, so
+// they are left as `void(void)`.
+
+#include <float.h>
+#include "nu2api/nu3d/nuprim_internal.h"
+#include "nu2api/numath/nufloat.h"
+#include "nu2api/numath/nutrig.h"
+#include "nu2api/numath/nurand.h"
+#include "nu2api/numath/nuvec.h"
+
+#include "nu2api/nucore/nucore.hpp"
+#include "globals.h"
+#include "nu2api/nu3d/nutexanm.h"
+#include "nu2api/nucore/nuthread.h"
+#include "nu2api/nu3d/nugscn.h"
+#include "nu2api/nu3d/nudlist.h"
+#include "nu2api/nu3d/nuprim.h"
+#include "nu2api/nu3d/nucamera.h"
+#include "nu2api/nuandroid/ios_graphics.h"
+#include "nu2api/nu3d/android/nuptl_android.h"
+
+// ---------------------------------------------------------------------------
+// Scene state — mirrors original BSS layout
+// ---------------------------------------------------------------------------
+
+// Swap/present pacing flags (original BSS).
+
+// ---------------------------------------------------------------------------
+// Immediate-mode 2D stream state
+// ---------------------------------------------------------------------------
+
+// Display-list cursor for the 2D stream.  Defined in nudlist.cpp.
+
+// ---------------------------------------------------------------------------
+// Forward declarations for C-visible helpers
+// ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// Immediate-mode 2D API
+// ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// Scene lifecycle
+// ---------------------------------------------------------------------------
+
+extern "C" i32 NuRndrBeginScene(i32 /*begin_flags*/);
+
+extern "C" void NuRndrClear(i32 clear_flags, i32 bg_colour, f32 alpha);
+
+extern "C" void NuRndrEndScene(void);
+
+// ---------------------------------------------------------------------------
+// Link stubs — retained for compatibility, not yet implemented
+// ---------------------------------------------------------------------------
+//
+// Every function below exists in the original binary.  Signatures have not
+// been recovered, so they are kept as void(void) stubs.  Grouped by
+// subsystem so it is obvious what is still missing.
+
+// Scene / GScn
+
+extern "C" {
+
+    // Retail partially inlines the clipping test into NuDisplaySceneRndr and
+    // keeps the body as its stack-argument .part clone.
+#if defined(__i386__)
+#define NUDISPLAYSCENERNDR_BODY_ATTR __attribute__((noinline, noclone, regparm(0)))
+#else
+#define NUDISPLAYSCENERNDR_BODY_ATTR __attribute__((noinline, noclone))
+#endif
+    static NUDISPLAYSCENERNDR_BODY_ATTR void NuDisplaySceneRndrBody(NUDLDLISTSCENE *scene)
+        __asm__("NuDisplaySceneRndr.part.101");
+
+void NuDisplaySceneRndr(void *display_scene);
+
+}
+
+// Material
+
+extern "C" void NuDisplayListAnimateMtls(f32 frame_time);
+
+// Debug / visualisation geometry
+
+#include "nu2api/nu3d/nurndr_plain_types.h"
+
+// Shader / texture / vertex state
+extern "C" {
+extern void * g_boundCameraPacket;
+}
+static void NuTexGenTexture(void) {
+    STUBBED();
+}
+
+// ==== functions in original address order ====
+
+void NuMtlCreatePS(NUMTL *mtl, i32 is_3d) {
+    NuShaderMtlDescInit(&mtl->shader_desc);
+
+    if (mtl->tex_id > 0) {
+        mtl->shader_desc.diffuse_map_tex_id[0] = mtl->tex_id;
+        mtl->shader_desc.unknown_a8 = 1;
+        mtl->shader_desc.vtx_desc.tex_coord_mode = 1;
+    } else {
+        mtl->shader_desc.diffuse_color[0] = RGBA_TO_NUCOLOUR32(
+            mtl->diffuse_color.r * 128.0f, mtl->diffuse_color.g * 128.0f, mtl->diffuse_color.b * 128.0f, 0xff);
+    }
+
+    if (!is_3d) {
+        mtl->shader_desc.vtx_desc.has_no_transform = 1;
+    }
+}
+
+// original 0x29bc50 — refresh the material's shader desc, (re)acquire its
+// shader objects and rebuild the platform vertex declaration.
+void NuMtlUpdatePS(numtl_s *mtl) {
+    if (0 < mtl->tex_id) {
+        mtl->shader_desc.diffuse_map_tex_id[0] = mtl->tex_id;
+
+        i32 count = mtl->shader_desc.unknown_a8;
+        if (count == 0) {
+            count = 1;
+        }
+        mtl->shader_desc.unknown_a8 = count;
+
+        // Vtx-desc tex-unit nibble: at least one unit.
+        u8 b = ((u8 *)&mtl->shader_desc.vtx_desc)[1];
+        u8 units = (b >> 3) & 7;
+        if (units == 0) {
+            units = 1;
+        }
+        ((u8 *)&mtl->shader_desc.vtx_desc)[1] = (b & 199) | (units << 3);
+    }
+
+    if ((((u8 *)&mtl->shader_desc.vtx_desc)[3] & 4) != 0) {
+        mtl->shader_desc.flagsbits_1bb |= 0x80;
+        mtl->shader_desc.flags |= 0x200000;
+    }
+
+    if (0 < mtl->shader_desc.shader_id) {
+        NuShaderManagerReleaseShader(NuShaderManagerGetShaderById(mtl->shader_desc.shader_id));
+    }
+    if (0 < mtl->shader_desc.shader_variant_id) {
+        NuShaderManagerReleaseShader(NuShaderManagerGetShaderById(mtl->shader_desc.shader_variant_id));
+    }
+
+    if (!(((char *)&mtl->attribs)[6] < 0 && mtl->display_list == NULL)) {
+        if (mtl->shader_desc.blend_op2 != 0xff) {
+            void *shader = NuShaderManagerRetrieveShaderVariant(&mtl->shader_desc, mtl, 0x10);
+            if (shader != NULL) {
+                mtl->shader_desc.shader_variant_id = -1;
+                mtl->shader_desc.shader_id = *(i16 *)shader;
+            }
+        }
+    } else {
+        if (mtl->shader_desc.blend_op2 != 0xff) {
+            ((u8 *)&mtl->shader_desc.vtx_desc)[2] |= 4;
+            void *shader = NuShaderManagerRetrieveShader(&mtl->shader_desc, mtl);
+            if (shader != NULL) {
+                mtl->shader_desc.shader_id = *(i16 *)shader;
+            }
+        }
+    }
+
+    mtl->vertex_decl = NuGetVertexDeclaration(mtl->shader_desc.vtx_desc);
+
+    if (mtl->tex_id == 0) {
+        i32 packed = ((i32)(mtl->diffuse_color.r * 255.0f) & 0xff) | 0xff000000 |
+                     (((i32)(mtl->diffuse_color.g * 255.0f) & 0xff) << 8) |
+                     (((i32)(mtl->diffuse_color.b * 255.0f) & 0xff) << 16);
+        mtl->shader_desc.diffuse_color[0] = (NUCOLOUR32)packed;
+    }
+}
+
+void NuMtlSetUVOffsetPS(numtl_s *mtl, u32 layer, float u, float v) {
+    mtl->shader_desc.tex_anim_offsets[layer][0] = u;
+    mtl->shader_desc.tex_anim_offsets[layer][1] = v;
+}
+
+void NuMtlAddEx(numtl_s *, i32) {
+    STUBBED();
+}
+
+extern "C" {
+extern "C" void NuMtlAnimateShaderMtlTextures(f32 frame_time) {
+    static i32 firstcall = 1;
+    static f32 sinetime;
+    sinetime += frame_time;
+    if (firstcall) {
+        for (i32 i = 0; i < global_dlist_manager.ndisplay_lists; ++i) {
+            NUDLDLISTSCENE *scene = global_dlist_manager.dlists[i];
+            if (scene->gscene->shader_texture_animation_enabled) {
+                for (i32 j = 0; j < static_cast<i32>(scene->nmtls); ++j) {
+                    NUMTL *material = scene->mtls[j];
+                    for (i32 layer = 0; layer < 4; ++layer) {
+                        material->shader_desc.tex_anim_offsets[layer][0] = 0.0f;
+                        material->shader_desc.tex_anim_offsets[layer][1] = 0.0f;
+                    }
+                }
+            }
+        }
+        firstcall = 0;
+    }
+}
+
+extern "C" void NuMtlAnimate(f32 frame_time) {
+    NuDisplayListAnimateMtls(frame_time * mtl_animation_speed_scale);
+}
+
+}
+
+void NuMtlSetShaderDescPS(NUMTL *mtl, NUSHADERMTLDESC *desc) {
+    mtl->shader_desc = *desc;
+}
+
+extern "C" {
+// original 0x29bf60, 265 bytes — the four special-material programs are built from
+// shader strings compiled into libTTapp.so rather than from scene resources.
+extern "C" void NuIOSMtlInit(void) {
+    g_packetToShaderStateMappings[0].mask.semantics[0] = 0;
+    g_packetToShaderStateMappings[0].mask.semantics[1] = 0x0fe00000;
+    g_packetToShaderStateMappings[0].mask.semantics[2] = 0x00806800;
+    g_packetToShaderStateMappings[0].mask.semantics[3] = 0;
+    g_packetToShaderStateMappings[1].mask.semantics[0] = 0;
+    g_packetToShaderStateMappings[1].mask.semantics[1] = 0x60000000;
+    g_packetToShaderStateMappings[1].mask.semantics[2] = 0x00400600;
+    g_packetToShaderStateMappings[1].mask.semantics[3] = 0;
+    BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/numtl_android.cpp", 0x1d0);
+    g_ps3default_2d_t0xc0 = nullptr;
+    g_faceonProgram = NuShaderProgramCreateIOS(reinterpret_cast<const char *>(FaceOn_vx),
+                                               reinterpret_cast<const char *>(FaceOn_Hi_px));
+    g_faceonDecalProgram = NuShaderProgramCreateIOS(reinterpret_cast<const char *>(FaceOn_vx),
+                                                    reinterpret_cast<const char *>(FaceOn_Hi_px));
+    g_debrisProgram =
+        NuShaderProgramCreateIOS(reinterpret_cast<const char *>(debris_vx), reinterpret_cast<const char *>(debris_px));
+    g_debrisGlassProgram = NuShaderProgramCreateIOS(reinterpret_cast<const char *>(debris_vx),
+                                                    reinterpret_cast<const char *>(debris_glass_px));
+    EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/numtl_android.cpp", 0x1f3);
+}
+
+// original 0x29c070
+extern "C" void NuIOS_SetVertexFormat(usize fmt) {
+    g_boundVertexFormat = reinterpret_cast<NuVertexFormatPS *>(fmt);
+}
+
+}
+
+// Original numtl_android.cpp, 0x29c090..0x29c0fd and 0x29ca00..0x29ca2d.
+// The plane occupies bits 4..11 of the first material word.
+void NuMtlInsert(NUMTL *mtl, i32 plane) {
+    mtl->renderplane = static_cast<u8>(plane);
+}
+
+extern "C" {
+extern "C" void NuMtlSetRenderPlane(NUMTL *mtl, i8 plane) {
+    mtl->renderplane = static_cast<u8>(plane);
+    NuMtlInsert(mtl, plane);
+}
+
+}
+
+void NuMtlDisableCulling() {
+    STUBBED();
+}
+
 // original 0x29c110 — mirrors GL cull state, flipping front/back when the
 // reflection pass is active.
 void NuIOS_SetCullMode(i32 mode) {
@@ -217,8 +481,7 @@ void NuIOS_SetCullMode(i32 mode) {
     prevCullMode = (i32)idx;
 }
 
-#include "nu2api/nu3d/android/nublend_internal.h"
-
+extern "C" {
 extern "C" void NuMtlSetRenderStatesPS(numtl_s *mtl) {
     bool isDebris = (mtl->shader_desc.vtx_desc.flags & 0x100000) != 0;
 
@@ -250,57 +513,6 @@ extern "C" void NuMtlSetRenderStatesPS(numtl_s *mtl) {
     NuIOS_SetCullMode(mtl->attribs.cull_mode);
 }
 
-// original 0x29c070
-extern "C" void NuIOS_SetVertexFormat(usize fmt) {
-    g_boundVertexFormat = reinterpret_cast<NuVertexFormatPS *>(fmt);
-}
-
-// Helpers for the debris constant block (original walks the programme's
-// i16 param table: pairs of {semantic, loc|class}).
-// The reference unit clears the usage masks in its static constructor while
-// the packet pointers stay in initialized data.
-static inline NUSHADERUSAGEMASK EmptyShaderUsageMask() {
-    NUSHADERUSAGEMASK mask = {{0, 0, 0, 0}};
-    return mask;
-}
-
-extern "C" {
-    ShaderPacketStateMapping g_packetToShaderStateMappings[2] = {
-        {EmptyShaderUsageMask(), &g_boundLightPacket},
-        {EmptyShaderUsageMask(), &g_boundCameraPacket},
-    };
-}
-
-namespace {
-    constexpr i16 kParamViewProj = 0;        // semantic 0
-    constexpr i16 kParamView = 0x0c;         // semantic 12
-    constexpr i16 kParamKonstColourA = 0x30; // semantic 48
-    constexpr i16 kParamTerminator = (i16)-0x8000;
-
-} // namespace
-
-// original 0x29bf60, 265 bytes — the four special-material programs are built from
-// shader strings compiled into libTTapp.so rather than from scene resources.
-extern "C" void NuIOSMtlInit(void) {
-    g_packetToShaderStateMappings[0].mask.semantics[0] = 0;
-    g_packetToShaderStateMappings[0].mask.semantics[1] = 0x0fe00000;
-    g_packetToShaderStateMappings[0].mask.semantics[2] = 0x00806800;
-    g_packetToShaderStateMappings[0].mask.semantics[3] = 0;
-    g_packetToShaderStateMappings[1].mask.semantics[0] = 0;
-    g_packetToShaderStateMappings[1].mask.semantics[1] = 0x60000000;
-    g_packetToShaderStateMappings[1].mask.semantics[2] = 0x00400600;
-    g_packetToShaderStateMappings[1].mask.semantics[3] = 0;
-    BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/numtl_android.cpp", 0x1d0);
-    g_ps3default_2d_t0xc0 = nullptr;
-    g_faceonProgram = NuShaderProgramCreateIOS(reinterpret_cast<const char *>(FaceOn_vx),
-                                               reinterpret_cast<const char *>(FaceOn_Hi_px));
-    g_faceonDecalProgram = NuShaderProgramCreateIOS(reinterpret_cast<const char *>(FaceOn_vx),
-                                                    reinterpret_cast<const char *>(FaceOn_Hi_px));
-    g_debrisProgram =
-        NuShaderProgramCreateIOS(reinterpret_cast<const char *>(debris_vx), reinterpret_cast<const char *>(debris_px));
-    g_debrisGlassProgram = NuShaderProgramCreateIOS(reinterpret_cast<const char *>(debris_vx),
-                                                    reinterpret_cast<const char *>(debris_glass_px));
-    EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/numtl_android.cpp", 0x1f3);
 }
 
 // original 0x29c480 — per-material display-list callback.  Selects the GL
@@ -439,3 +651,47 @@ void NuIOSDLReflectionCallback(void *arg) {
         NuIOS_SetCullMode(g_renderContext_materialInUse->attribs.cull_mode);
     }
 }
+
+extern "C" {
+extern "C" void NuMtlCopy(NUMTL *destination, const NUMTL *source) {
+    // The original copies the material, retaining the destination display list at +0x3c.
+    NUDISPLAYLIST *display_list = destination->display_list;
+    *destination = *source;
+    destination->display_list = display_list;
+}
+
+}
+
+void NuMtlInitExPS(VARIPTR *buf) {
+    NUNATIVETEX *tex;
+    NUVERTEXDESCRIPTOR vtx_desc;
+
+    BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/numtl_android.cpp", 0x2ed);
+
+    tex = (NUNATIVETEX *)buf->void_ptr;
+    buf->addr = (usize)tex + sizeof(NUNATIVETEX);
+
+    memset(tex, 0, sizeof(NUNATIVETEX));
+
+    tex->size = sizeof(DebrisGlassIOS_Tex);
+    tex->image_data = DebrisGlassIOS_Tex;
+    g_DebrisGlassDistortTID = NuTexCreateNative(tex, true);
+
+    vtx_desc.flags = 0;
+    vtx_desc.has_position = true;
+
+    g_nuFullscreenVertexFormat = NuGetVertexDeclaration(vtx_desc);
+
+    vtx_desc.has_diffuse = true;
+    vtx_desc.tex_coord_mode = 1;
+
+    g_nuPrimVertexFormat = NuGetVertexDeclaration(vtx_desc);
+    g_nuDebrisVertexFormat = NuGetVertexDeclaration(vtx_desc);
+    g_nuFallbackVertexFormat = NuGetVertexDeclaration(vtx_desc);
+
+    vtx_desc.tex_coord_mode = 5;
+    g_nuFaceOnVertexFormat = NuGetVertexDeclaration(vtx_desc);
+
+    EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/numtl_android.cpp", 0x305);
+}
+

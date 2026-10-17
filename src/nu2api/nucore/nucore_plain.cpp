@@ -3987,147 +3987,8 @@ void NuGCutCharAnimProcess(NUGCUTCHAR_s *character, f32 frame, NUMTX *matrix, i3
     // Input / pad / key / mouse
     // ---------------------------------------------------------------------------
 
-    static inline void NuPadCopyTouchFields(NuInputTouch *destination, const NuInputTouch *source) {
-        destination->unknown_04 = source->unknown_04;
-        destination->unknown_00 = source->unknown_00;
-        destination->unknown_08 = source->unknown_08;
-        destination->unknown_01 = source->unknown_01;
-        destination->unknown_0c = source->unknown_0c;
-        destination->unknown_02 = source->unknown_02;
-        destination->unknown_10 = source->unknown_10;
-        destination->unknown_14 = source->unknown_14;
-    }
-    void NuPad_Interface_TouchScreenInput(i32 x, i32 y, i32 prior_x, i32 prior_y, i32 is_down, i32 is_up, i32 is_move,
-                                          i32 is_cancelled) {
-        NuInputDevice *device = inputManager->GetDevice(0);
-        if (device == NULL) {
-            return;
-        }
-
-        // The retail routine writes directly to the touch data at device+0x198.
-        NuInputTouchData *data = reinterpret_cast<NuInputTouchData *>(reinterpret_cast<u8 *>(device) + 0x198);
-        f32 width = static_cast<f32>(g_backingWidth);
-        f32 height = static_cast<f32>(g_backingHeight);
-        f32 old_x = static_cast<f32>(prior_x) / width;
-        f32 old_y = static_cast<f32>(prior_y) / height;
-
-        if (is_cancelled != 0) {
-            f32 aspect = width / height;
-            i32 count = data->touch_count;
-            if (count > 0) {
-                f32 nearest_distance = FLT_MAX;
-                i32 nearest;
-                for (i32 i = 0; i < count; ++i) {
-                    f32 dx = (data->touch_events[i].unknown_04 - old_x) * aspect;
-                    f32 dy = data->touch_events[i].unknown_08 - old_y;
-                    f32 distance = dx * dx + dy * dy;
-                    if (distance < nearest_distance) {
-                        nearest_distance = distance;
-                        nearest = i;
-                    }
-                }
-                if (nearest_distance <= 0.04f) {
-                    used_touch_IDs[data->touch_events[nearest].unknown_14] = false;
-                    NuInputTouch *source = &data->touch_events[nearest + 1];
-                    for (i32 i = nearest + 1; i < count; ++i) {
-                        NuPadCopyTouchFields(source - 1, source);
-                        ++source;
-                    }
-                    NuInputTouch *last = &data->touch_events[count - 1];
-                    last->unknown_04 = 0.0f;
-                    last->unknown_08 = 0.0f;
-                    last->unknown_0c = 0.0f;
-                    last->unknown_10 = 0.0f;
-                    last->unknown_00 = 0;
-                    last->unknown_01 = 0;
-                    last->unknown_02 = 0;
-                    last->unknown_14 = 0;
-                    data->touch_count = count - 1;
-                    return;
-                }
-            }
-            memset(data->touch_events, 0, sizeof(data->touch_events));
-            data->touch_count = 0;
-            memset(used_touch_IDs, 0, sizeof(used_touch_IDs));
-            return;
-        }
-
-        f32 new_x = static_cast<f32>(x) / width;
-        f32 new_y = static_cast<f32>(y) / height;
-        if (is_move != 0) {
-            i32 free_id = 0;
-            while (free_id < 10 && used_touch_IDs[free_id]) {
-                ++free_id;
-            }
-            for (i32 i = 0; i < 10; ++i) {
-                NuInputTouch *touch = &data->touch_events[i];
-                if (!touch->unknown_00 && !touch->unknown_01 && !touch->unknown_02) {
-                    touch->unknown_04 = new_x;
-                    touch->unknown_00 = 0;
-                    touch->unknown_08 = new_y;
-                    touch->unknown_01 = 0;
-                    touch->unknown_0c = 0.0f;
-                    touch->unknown_10 = 0.0f;
-                    touch->unknown_02 = 1;
-                    touch->unknown_14 = free_id;
-                    used_touch_IDs[free_id] = true;
-                    ++data->touch_count;
-                    return;
-                }
-            }
-            return;
-        }
-
-        if (is_up != 0) {
-            i32 selected = 10;
-            for (i32 i = 0; i < 10; ++i) {
-                NuInputTouch *touch = &data->touch_events[i];
-                if ((touch->unknown_00 || touch->unknown_02) &&
-                    ((touch->unknown_04 == old_x && touch->unknown_08 == old_y) ||
-                     (touch->unknown_0c == old_x && touch->unknown_10 == old_y))) {
-                    selected = i;
-                    break;
-                }
-            }
-            used_touch_IDs[data->touch_events[selected].unknown_14] = false;
-            NuInputTouch *source = &data->touch_events[selected + 1];
-            for (i32 i = selected + 1; i < static_cast<i32>(data->touch_count); ++i) {
-                NuPadCopyTouchFields(source - 1, source);
-                ++source;
-            }
-            NuInputTouch *last = &data->touch_events[--data->touch_count];
-            last->unknown_01 = 0;
-            last->unknown_00 = 0;
-            last->unknown_02 = 0;
-            last->unknown_04 = 0.0f;
-            last->unknown_08 = 0.0f;
-            last->unknown_0c = 0.0f;
-            last->unknown_10 = 0.0f;
-            last->unknown_14 = 0;
-            return;
-        }
-
-        if (is_down != 0) {
-            i32 selected = 10;
-            for (i32 i = 0; i < 10; ++i) {
-                NuInputTouch *touch = &data->touch_events[i];
-                if (!((touch->unknown_00 || touch->unknown_02) && touch->unknown_04 == old_x &&
-                      touch->unknown_08 == old_y)) {
-                    continue;
-                }
-                selected = i;
-                break;
-            }
-            NuInputTouch *touch = &data->touch_events[selected];
-            touch->unknown_00 = 1;
-            touch->unknown_01 = 0;
-            touch->unknown_02 = 0;
-            touch->unknown_04 = new_x;
-            touch->unknown_08 = new_y;
-            touch->unknown_0c = old_x;
-            touch->unknown_10 = old_y;
-        }
-    }
+void NuPad_Interface_TouchScreenInput(i32 x, i32 y, i32 prior_x, i32 prior_y, i32 is_down, i32 is_up, i32 is_move,
+                                          i32 is_cancelled);
     // ---------------------------------------------------------------------------
     // Culling / visibility / portals / occlusion
     // ---------------------------------------------------------------------------
@@ -4538,10 +4399,7 @@ void NuGCutCharAnimProcess(NUGCUTCHAR_s *character, f32 frame, NUMTX *matrix, i3
     // Rendering extras
     // ---------------------------------------------------------------------------
 
-    i32 NuStreamInit(void) {
-        // Retail returns zero.
-        return 0;
-    }
+i32 NuStreamInit(void);
 
     // ---------------------------------------------------------------------------
     // PS2 / Xbox legacy shims

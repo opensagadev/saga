@@ -14,7 +14,7 @@
 #include "nu2api/nucore/numemory.h"
 #include "nu2api/numath/nufloat.h"
 
-struct nutextureformat_e {};
+#include "nu2api/nu3d/nutex_types.h"
 struct nutexanimprog_s;
 
 nutexmanager_s *g_texman;
@@ -295,9 +295,7 @@ void MapToGrid(NUVEC *grid, NUVEC *fraction, i32 *column, i32 *row, NUVEC *posit
     fraction->z = grid->z - fraction->z;
 }
 
-void NuTextureCreate3D(i32, i32, i32, i32, i32, nutextureformat_e) {
-    // The original body is an intentional no-op.
-}
+void NuTextureCreate3D(i32, i32, i32, i32, i32, nutextureformat_e);
 
 void NuTexManagerStream(nugscn_s *) {
     streamOff = 1;

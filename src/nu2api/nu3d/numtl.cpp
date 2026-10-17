@@ -48,11 +48,7 @@ extern "C" i32 NuSpecialForceToAlpha(nuhspecial_s *special) {
 static i32 max_materials;
 static NUMTL *material_list;
 static NULSTHDR *g_overrideList;
-struct MTL_OVERRIDE_RECORD {
-    NUMTL *material;
-    NUMTL *original;
-    NUVERTEXDESCRIPTOR vertex_descriptor;
-};
+#include "nu2api/nu3d/numtl_types.h"
 DECOMP_ASSERT(sizeof(MTL_OVERRIDE_RECORD) == 12, "Material override payload ABI");
 DECOMP_ASSERT(offsetof(NUMTL, shader_desc) + offsetof(NUSHADERMTLDESC, vtx_desc) == 0x1f0,
               "Material override vertex descriptor offset");
@@ -367,76 +363,10 @@ void NuMtlUpdate(NUMTL *mtl) {
     mtl->version++;
 }
 
-void NuMtlAddEx(numtl_s *, i32) {
-    STUBBED();
-}
+void NuMtlAddEx(numtl_s *, i32);
 
-// original 0x29bc50 — refresh the material's shader desc, (re)acquire its
-// shader objects and rebuild the platform vertex declaration.
-void NuMtlUpdatePS(numtl_s *mtl) {
-    if (0 < mtl->tex_id) {
-        mtl->shader_desc.diffuse_map_tex_id[0] = mtl->tex_id;
+void NuMtlUpdatePS(numtl_s *mtl);
 
-        i32 count = mtl->shader_desc.unknown_a8;
-        if (count == 0) {
-            count = 1;
-        }
-        mtl->shader_desc.unknown_a8 = count;
+void NuMtlSetUVOffsetPS(numtl_s *mtl, u32 layer, float u, float v);
 
-        // Vtx-desc tex-unit nibble: at least one unit.
-        u8 b = ((u8 *)&mtl->shader_desc.vtx_desc)[1];
-        u8 units = (b >> 3) & 7;
-        if (units == 0) {
-            units = 1;
-        }
-        ((u8 *)&mtl->shader_desc.vtx_desc)[1] = (b & 199) | (units << 3);
-    }
-
-    if ((((u8 *)&mtl->shader_desc.vtx_desc)[3] & 4) != 0) {
-        mtl->shader_desc.flagsbits_1bb |= 0x80;
-        mtl->shader_desc.flags |= 0x200000;
-    }
-
-    if (0 < mtl->shader_desc.shader_id) {
-        NuShaderManagerReleaseShader(NuShaderManagerGetShaderById(mtl->shader_desc.shader_id));
-    }
-    if (0 < mtl->shader_desc.shader_variant_id) {
-        NuShaderManagerReleaseShader(NuShaderManagerGetShaderById(mtl->shader_desc.shader_variant_id));
-    }
-
-    if (!(((char *)&mtl->attribs)[6] < 0 && mtl->display_list == NULL)) {
-        if (mtl->shader_desc.blend_op2 != 0xff) {
-            void *shader = NuShaderManagerRetrieveShaderVariant(&mtl->shader_desc, mtl, 0x10);
-            if (shader != NULL) {
-                mtl->shader_desc.shader_variant_id = -1;
-                mtl->shader_desc.shader_id = *(i16 *)shader;
-            }
-        }
-    } else {
-        if (mtl->shader_desc.blend_op2 != 0xff) {
-            ((u8 *)&mtl->shader_desc.vtx_desc)[2] |= 4;
-            void *shader = NuShaderManagerRetrieveShader(&mtl->shader_desc, mtl);
-            if (shader != NULL) {
-                mtl->shader_desc.shader_id = *(i16 *)shader;
-            }
-        }
-    }
-
-    mtl->vertex_decl = NuGetVertexDeclaration(mtl->shader_desc.vtx_desc);
-
-    if (mtl->tex_id == 0) {
-        i32 packed = ((i32)(mtl->diffuse_color.r * 255.0f) & 0xff) | 0xff000000 |
-                     (((i32)(mtl->diffuse_color.g * 255.0f) & 0xff) << 8) |
-                     (((i32)(mtl->diffuse_color.b * 255.0f) & 0xff) << 16);
-        mtl->shader_desc.diffuse_color[0] = (NUCOLOUR32)packed;
-    }
-}
-
-void NuMtlSetUVOffsetPS(numtl_s *mtl, u32 layer, float u, float v) {
-    mtl->shader_desc.tex_anim_offsets[layer][0] = u;
-    mtl->shader_desc.tex_anim_offsets[layer][1] = v;
-}
-
-void NuMtlDisableCulling() {
-    STUBBED();
-}
+void NuMtlDisableCulling();

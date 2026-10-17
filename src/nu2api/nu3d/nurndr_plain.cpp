@@ -396,35 +396,14 @@ static u32 mtl_animation_mask = 0x00ffffff;
 
 extern "C" void NuDisplayListAnimateMtls(f32 frame_time);
 
-extern "C" void NuMtlAnimate(f32 frame_time) {
-    NuDisplayListAnimateMtls(frame_time * mtl_animation_speed_scale);
-}
+extern "C" void NuMtlAnimate(f32 frame_time);
 extern "C" void NuMtlAnimateSetMask(i32 mask) {
     mtl_animation_mask = mask;
 }
 extern "C" void NuMtlAnimateSetSpeedScale(f32 speed_scale) {
     mtl_animation_speed_scale = speed_scale;
 }
-extern "C" void NuMtlAnimateShaderMtlTextures(f32 frame_time) {
-    static i32 firstcall = 1;
-    static f32 sinetime;
-    sinetime += frame_time;
-    if (firstcall) {
-        for (i32 i = 0; i < global_dlist_manager.ndisplay_lists; ++i) {
-            NUDLDLISTSCENE *scene = global_dlist_manager.dlists[i];
-            if (scene->gscene->shader_texture_animation_enabled) {
-                for (i32 j = 0; j < static_cast<i32>(scene->nmtls); ++j) {
-                    NUMTL *material = scene->mtls[j];
-                    for (i32 layer = 0; layer < 4; ++layer) {
-                        material->shader_desc.tex_anim_offsets[layer][0] = 0.0f;
-                        material->shader_desc.tex_anim_offsets[layer][1] = 0.0f;
-                    }
-                }
-            }
-        }
-        firstcall = 0;
-    }
-}
+extern "C" void NuMtlAnimateShaderMtlTextures(f32 frame_time);
 static void NuMtlCreate3D(void) {
     STUBBED();
 }
@@ -765,10 +744,7 @@ extern "C" void NuRndrGradRectUV2di(i32 x, i32 y, i32 w, i32 h, f32 u0, f32 v0, 
     NuPrim2DEnd();
 }
 static i32 dump_state = -1;
-struct ScreenGrabTileParams {
-    u16 width;
-    i8 channels[4];
-};
+#include "nu2api/nu3d/nurndr_plain_types.h"
 extern "C" void NuRndrScreenGrabTileInit(void *, i32, f32, f32, f32);
 extern "C" void NuRndrScreenGrabTileDeInit(void *);
 extern "C" void NuRndrScreenGrabTileBegin(void **);
@@ -946,12 +922,6 @@ extern "C" i32 NuRndrHighResScreenGrab(char *prefix, f32 scale, f32 a, f32 b, f3
     return 1;
 }
 
-struct NuLineVertex2D {
-    f32 x, y;
-    f32 unused[2];
-    i32 colour;
-    f32 u, v;
-};
 
 extern "C" i32 NuRndrLine2d(NuLineVertex2D *vertices, NUMTL *material) {
     NuPrim2DBegin(2, 7, material);
@@ -1585,9 +1555,6 @@ extern "C" void NuShaderGetDirtyMask(NUSHADERUSAGEMASK *mask, NUSHADEROBJECT *sh
     } else {
         shader->last_camera_packet = camera_packet;
     }
-}
-static void NuTexGenTexture(void) {
-    STUBBED();
 }
 extern "C" void NuTextureBlendEffect(i32 arg0, i32 arg1, NUVEC4 *parameters) {
     currentScene.texture_blend_arg0 = arg0;

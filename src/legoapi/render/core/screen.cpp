@@ -58,9 +58,7 @@ void ClearScreen() {
     NuPrimSetCoordinateSystem(NuPrimCoordSystemStack[NuPrimCSPos]);
 }
 
-f32 GetAspectRatio() {
-    return static_cast<f32>(g_backingHeight) / static_cast<f32>(g_backingWidth);
-}
+f32 GetAspectRatio();
 
 // The fade system and the four fade effects handed to FadeSystem::AddFade()
 // are screen.cpp globals in the original: its static initializer registers

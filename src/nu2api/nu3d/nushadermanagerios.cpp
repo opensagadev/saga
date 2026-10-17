@@ -1,13 +1,16 @@
+// Original translation unit reconstructed from the reference address map.
+// Functions are defined in original address order.
+
 #include "decomp.h"
 #include "nu2api/nucore/nuvuvec.hpp"
 #include "nu2api/nucore/nuapi.h"
 #include "nu2api/nu3d/android/nutex_android.h"
 #include "nu2api/nu3d/ShaderManagerOpenGL.h"
 #include "gamelib/util/gamelib_util_types.h"
-#include "nushader_plain.h"
+#include "nu2api/nu3d/nushader_plain.h"
 #include "nu2api/nu3d/nu2api_nu3d_types.h"
-#include "nushader.h"
-#include "nushader_internal.h"
+#include "nu2api/nu3d/nushader.h"
+#include "nu2api/nu3d/nushader_internal.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nu3d/android/nurndr_android.h"
 #include "nu2api/nu3d/android/nutex_ios_ex.h"
@@ -42,6 +45,14 @@ extern LoadedUniqueShaderRecord g_loadedUniquePixelShaders[558];
 u32 g_cachedUniformMask[4];
 u32 g_textureSemanticMask[4];
 i32 g_shaderBufferCriticalSection = -1;
+
+bool LookupHash(u32 key, u32 *value, HashRedirect *redirects, u32 count);
+
+bool LoadShaderSource(char **source, i32 *size, u32 key, bool pixel_stage);
+
+bool LookupPreloadedShaderObject(u32 key, u32 **shader, LoadedUniqueShaderRecord *records, u32 count);
+
+// ==== functions in original address order ====
 
 void ShaderManagerOpenGL::adaptShaderMaterialForShaderVersion(NUSHADERMTLDESC *desc) {
     u8 *vtx_desc = reinterpret_cast<u8 *>(&desc->vtx_desc);
@@ -318,7 +329,6 @@ void ShaderManagerOpenGL::setElementfv(SHADERSEMANTIC_enum semantic, i32, float 
 }
 
 void ShaderManagerOpenGL::setElementsfv(SHADERSEMANTIC_enum semantic, i32, i32, float const *values) {
-    // The original Android implementation ignores the element range.
     nu2api::ShaderUniformRecord &uniform = nu2api::g_shaderUniforms[semantic];
     const i32 count = static_cast<i32>(uniform.data.metadata[0]);
     if (count <= 4) {
@@ -327,10 +337,10 @@ void ShaderManagerOpenGL::setElementsfv(SHADERSEMANTIC_enum semantic, i32, i32, 
 }
 
 void ShaderManagerOpenGL::setElementsfv_transpose(SHADERSEMANTIC_enum semantic, i32, i32, float const *values) {
-    // The original Android implementation ignores the element range.
     nu2api::ShaderUniformRecord &uniform = nu2api::g_shaderUniforms[semantic];
     const i32 count = static_cast<i32>(uniform.data.metadata[0]);
     if (count <= 4) {
         std::memcpy(uniform.data.values, values, static_cast<size_t>(count) << 4);
     }
 }
+

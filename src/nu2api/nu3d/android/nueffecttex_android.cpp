@@ -1,3 +1,6 @@
+// Original translation unit reconstructed from the reference address map.
+// Functions are defined in original address order.
+
 #include "decomp.h"
 #include "nu2api/nucore/nuvuvec.hpp"
 #include "nu2api/nu3d/nutex.h"
@@ -36,47 +39,87 @@ DECOMP_ASSERT(sizeof(EffectTexturePool) == 0x810, "Effect texture pool size");
 static NativeEffectTexturePool nativeTexPool;
 static EffectTexturePool texturePool;
 
+// ==== src/nu2api/nucore/android/nupostresource_create.cpp: all remaining content ====
+
+// ==== src/nu2api/nu3d/nutex.cpp: declarations ====
+#include "nu2api/nu3d/nutexanm.h"
+#include "nu2api/nu3d/nugscn.h"
+
+#include "nu2api/nu3d/android/nutex_android.h"
+#include "nu2api/nucore/common.h"
+#include "nu2api/nucore/nuthread.h"
+#include "nu2api/nucore/nustring.h"
+#include <pthread.h>
+#include <string.h>
+#include "nu2api/nucore/numemory.h"
+#include "nu2api/numath/nufloat.h"
+
+#include "nu2api/nu3d/nutex_types.h"
+
+NUNATIVETEX *NuTexGetNative(i32 tex_id);
+
+// ==== functions in original address order ====
+
 extern "C" {
     void NuEffectTexLockVP(void *buffer, void *buffer_end) {
         (void)buffer;
         (void)buffer_end;
     }
+
     void NuEffectTexUnlockVP(void) {
     }
+
     void *NuEffectTexGetLockedVP(void) {
         // Retail returns null.
         return NULL;
     }
+
     void *NuEffectTexCreate1D(void) {
-        // Retail returns null.
         return NULL;
     }
+
+// The Android binary supplies empty platform entry points for these resources.
+// Host builds define it in host/platform/postresource_create.cpp instead.
+#if defined(__ANDROID__)
+extern "C" nueffecttex_s *NuEffectTexCreate2D(i32, i32, i32, i32, i32) {
+}
+#endif
+
+}
+
+void NuTextureCreate3D(i32, i32, i32, i32, i32, nutextureformat_e) {
+    // The original body is an intentional no-op.
+}
+
+extern "C" {
     void NuEffectTexCreateCube(void) {
         // Retail no-op.
     }
+
     void NuEffectTex360Create2D_aliased(void) {
-        // Retail no-op.
     }
+
     void NuEffectTex360Create3D_aliased(void) {
-        // Retail no-op.
     }
+
     void NuEffectTexCreateCube_aliased(void) {
-        // Retail no-op.
     }
+
     void NuEffectTexCreateFromNativeTex(void) {
-        // Retail no-op.
     }
+
     void NuEffectTexMapNative(nueffecttex_s *texture) {
-        // Retail no-op.
     }
+
     void NuEffectTexUnmapNative(void) {
-        // Retail no-op.
     }
+
     void NuEffectTexGetDimension(nueffecttex_s *texture, i32 lod, i32 *width, i32 *height) {
         const i16 *dimensions = reinterpret_cast<const i16 *>(texture);
         *width = (dimensions[1] >> lod) & ~1;
         *height = (dimensions[2] >> lod) & ~1;
     }
+
     nueffecttex_s *NuEffectTexGetEffectFromNative(i32 tex_id) {
         NativeEffectTexture *texture = (NativeEffectTexture *)NuTexGetNative(tex_id);
         isize index = ((u8 *)texture - (u8 *)nativeTexPool.entries) / (isize)sizeof(NativeEffectTexture);
@@ -84,4 +127,5 @@ extern "C" {
             return texture->effect;
         return NULL;
     }
+
 }

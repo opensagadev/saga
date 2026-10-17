@@ -108,9 +108,7 @@ void PlaySfxByIdAndSetVolume(i32 sfx_id, nuvec_s *position, f32 volume);
 
 void ClearLinkedCutSceneMusic(void *context);
 
-    void SOUND_SFXRequest_Table(void) {
-        // Platform placeholder in the Android build.
-    }
+void SOUND_SFXRequest_Table(void);
 
 void SetLinkedCutSceneMusic(void *context, i32 state);
 
