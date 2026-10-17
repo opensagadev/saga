@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 82.92358,
+    "fuzzy_match_percent": 82.92295,
     "total_code": "4722419",
-    "matched_code": "652474",
-    "matched_code_percent": 13.816521,
+    "matched_code": "651705",
+    "matched_code_percent": 13.800237,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
@@ -38531,14 +38531,6 @@
           "match_percent": 99.35294
         },
         {
-          "name": "_Z23ResetAdaptiveDifficultyv",
-          "demangled_name": "ResetAdaptiveDifficulty()",
-          "address": 1161296,
-          "offset": 271328,
-          "size": 38,
-          "match_percent": 100.0
-        },
-        {
           "name": "_Z8LoopCodeP12GameObject_siiP9GAMEPAD_si",
           "demangled_name": "LoopCode(GameObject_s*, int, int, GAMEPAD_s*, int)",
           "address": 1396960,
@@ -38896,7 +38888,7 @@
           "address": 1556320,
           "offset": 666352,
           "size": 686,
-          "match_percent": 86.79141
+          "match_percent": 87.368095
         },
         {
           "name": "_Z25AIPathCnxControllerCreateP21AIPATHCNXCONTROLSYS_sP7AISYS_sP8AIPATH_sPcS5_iS5_ii",
@@ -40517,22 +40509,6 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/character.o",
       "functions": [
         {
-          "name": "_ZL15ExtraDieSfx_LSWP12GameObject_s",
-          "demangled_name": "ExtraDieSfx_LSW(GameObject_s*)",
-          "address": 1158672,
-          "offset": 268704,
-          "size": 90,
-          "match_percent": 99.958336
-        },
-        {
-          "name": "_ZL16ExtraHurtSfx_LSWP12GameObject_s",
-          "demangled_name": "ExtraHurtSfx_LSW(GameObject_s*)",
-          "address": 1158768,
-          "offset": 268800,
-          "size": 90,
-          "match_percent": 99.958336
-        },
-        {
           "name": "_ZNK24CharacterObjectInterface13GetTargetNameEv",
           "demangled_name": "CharacterObjectInterface::GetTargetName() const",
           "address": 4484064,
@@ -40666,14 +40642,6 @@
           "offset": 27456,
           "size": 93,
           "match_percent": 99.35294
-        },
-        {
-          "name": "_Z11LSW_SetIndyi",
-          "demangled_name": "LSW_SetIndy(int)",
-          "address": 1170576,
-          "offset": 280608,
-          "size": 232,
-          "match_percent": 99.98
         },
         {
           "name": "_Z9LoadPerm1v",
@@ -46722,28 +46690,12 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/game.o",
       "functions": [
         {
-          "name": "_Z7NewGamev",
-          "demangled_name": "NewGame()",
-          "address": 1172336,
-          "offset": 282368,
-          "size": 1523,
-          "match_percent": 94.24856
-        },
-        {
-          "name": "_Z12InitGameModev",
-          "demangled_name": "InitGameMode()",
-          "address": 1175424,
-          "offset": 285456,
-          "size": 989,
-          "match_percent": 100.0
-        },
-        {
           "name": "_Z13IncreaseScorePjyi",
           "demangled_name": "IncreaseScore(unsigned int*, unsigned long long, int)",
           "address": 4805776,
           "offset": 3915808,
           "size": 345,
-          "match_percent": 98.94505
+          "match_percent": 100.0
         },
         {
           "name": "_Z15RegisterHelpersv",
@@ -47028,14 +46980,6 @@
       "source": "src/legoapi/cutscenes/cutscene.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/cutscene.o",
       "functions": [
-        {
-          "name": "_ZL35CutScene_OverrideConfigFileName_LSWPcii",
-          "demangled_name": "CutScene_OverrideConfigFileName_LSW(char*, int, int)",
-          "address": 1160208,
-          "offset": 270240,
-          "size": 323,
-          "match_percent": 99.45238
-        },
         {
           "name": "_ZL9CS_no_fogP8nufpar_s",
           "demangled_name": "CS_no_fog(nufpar_s*)",
@@ -51192,14 +51136,6 @@
       "source": "src/legoapi/gizmo/gizmos/gizmos_gizmopickups.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/gizmos_gizmopickups.o",
       "functions": [
-        {
-          "name": "_ZL22GizmoPickups_Collide2DP12GameObject_s",
-          "demangled_name": "GizmoPickups_Collide2D(GameObject_s*)",
-          "address": 1156144,
-          "offset": 266176,
-          "size": 72,
-          "match_percent": 99.95238
-        },
         {
           "name": "_Z23GizmoPickup_CollectCoinP11WORLDINFO_sP7nuvec_siiP12GameObject_si",
           "demangled_name": "GizmoPickup_CollectCoin(WORLDINFO_s*, nuvec_s*, int, int, GameObject_s*, int)",
@@ -58182,22 +58118,6 @@
           "match_percent": 99.35294
         },
         {
-          "name": "_ZL32Collection_GetSelectingPlayerIDsPs",
-          "demangled_name": "Collection_GetSelectingPlayerIDs(short*)",
-          "address": 1159104,
-          "offset": 269136,
-          "size": 149,
-          "match_percent": 92.61905
-        },
-        {
-          "name": "_Z27ReCalculateCompletionPointsv",
-          "demangled_name": "ReCalculateCompletionPoints()",
-          "address": 1170816,
-          "offset": 280848,
-          "size": 1511,
-          "match_percent": 66.82567
-        },
-        {
           "name": "_Z10ReleaseEatP12GameObject_s",
           "demangled_name": "ReleaseEat(GameObject_s*)",
           "address": 1403456,
@@ -58340,22 +58260,6 @@
       "source": "src/legoapi/items/base/game_object.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/game_object.o",
       "functions": [
-        {
-          "name": "_ZL19PauseGame_ExtraCodev",
-          "demangled_name": "PauseGame_ExtraCode()",
-          "address": 1157408,
-          "offset": 267440,
-          "size": 27,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL24SurfaceInfo_ExtraReflectP12GameObject_s",
-          "demangled_name": "SurfaceInfo_ExtraReflect(GameObject_s*)",
-          "address": 1158112,
-          "offset": 268144,
-          "size": 217,
-          "match_percent": 99.91111
-        },
         {
           "name": "_ZL20TrenchKilledCallbackP12GameObject_s",
           "demangled_name": "TrenchKilledCallback(GameObject_s*)",
@@ -60797,38 +60701,6 @@
           "match_percent": 99.35294
         },
         {
-          "name": "_ZL20LEGO_AllGoldBricksFnv",
-          "demangled_name": "LEGO_AllGoldBricksFn()",
-          "address": 1155584,
-          "offset": 265616,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z16Game_IgnoreInputv",
-          "demangled_name": "Game_IgnoreInput()",
-          "address": 1156368,
-          "offset": 266400,
-          "size": 27,
-          "match_percent": 73.125
-        },
-        {
-          "name": "_ZL17LEGO_100PercentFnv",
-          "demangled_name": "LEGO_100PercentFn()",
-          "address": 1156880,
-          "offset": 266912,
-          "size": 131,
-          "match_percent": 99.875
-        },
-        {
-          "name": "_Z29GameObjectDimensionsExtra_LSWP12GameObject_s",
-          "demangled_name": "GameObjectDimensionsExtra_LSW(GameObject_s*)",
-          "address": 1158016,
-          "offset": 268048,
-          "size": 81,
-          "match_percent": 100.0
-        },
-        {
           "name": "_Z13Game_KillPartP6PART_si",
           "demangled_name": "Game_KillPart(PART_s*, int)",
           "address": 1185008,
@@ -61633,22 +61505,6 @@
           "offset": 24336,
           "size": 93,
           "match_percent": 99.35294
-        },
-        {
-          "name": "_Z11DoBuckStartP12GameObject_s",
-          "demangled_name": "DoBuckStart(GameObject_s*)",
-          "address": 1162432,
-          "offset": 272464,
-          "size": 3069,
-          "match_percent": 89.870705
-        },
-        {
-          "name": "_Z18BuckStartExtra_LSWP12GameObject_s",
-          "demangled_name": "BuckStartExtra_LSW(GameObject_s*)",
-          "address": 1165504,
-          "offset": 275536,
-          "size": 34,
-          "match_percent": 100.0
         },
         {
           "name": "_Z12Boulder_KillP6PART_si",
@@ -63895,22 +63751,6 @@
           "match_percent": 99.35294
         },
         {
-          "name": "_ZL19GameMsg_GetExtraObjP13GAMEMESSAGE_s",
-          "demangled_name": "GameMsg_GetExtraObj(GAMEMESSAGE_s*)",
-          "address": 1156320,
-          "offset": 266352,
-          "size": 48,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL21GameMsg_EndDelay_GameP13GAMEMESSAGE_s",
-          "demangled_name": "GameMsg_EndDelay_Game(GAMEMESSAGE_s*)",
-          "address": 1158336,
-          "offset": 268368,
-          "size": 326,
-          "match_percent": 94.77273
-        },
-        {
           "name": "_Z18Percent_UpdateHintP6HINT_s",
           "demangled_name": "Percent_UpdateHint(HINT_s*)",
           "address": 1761280,
@@ -65326,22 +65166,6 @@
           "match_percent": 99.35294
         },
         {
-          "name": "_Z22MenuUpdateEndChallengeP6MENU_s",
-          "demangled_name": "MenuUpdateEndChallenge(MENU_s*)",
-          "address": 1173968,
-          "offset": 284000,
-          "size": 153,
-          "match_percent": 99.92105
-        },
-        {
-          "name": "_Z20MenuDrawEndChallengeP6MENU_s",
-          "demangled_name": "MenuDrawEndChallenge(MENU_s*)",
-          "address": 1174128,
-          "offset": 284160,
-          "size": 520,
-          "match_percent": 99.84
-        },
-        {
           "name": "_Z13MenuInitClipsP6MENU_s",
           "demangled_name": "MenuInitClips(MENU_s*)",
           "address": 1790096,
@@ -65571,7 +65395,7 @@
           "address": 4351104,
           "offset": 3461136,
           "size": 314,
-          "match_percent": 99.50746
+          "match_percent": 99.95522
         },
         {
           "name": "_Z13MenuEnterSaveP6MENU_s",
@@ -65579,7 +65403,7 @@
           "address": 4351424,
           "offset": 3461456,
           "size": 566,
-          "match_percent": 96.95122
+          "match_percent": 97.07317
         },
         {
           "name": "BackupMenu",
@@ -66699,14 +66523,6 @@
           "offset": 8976,
           "size": 93,
           "match_percent": 99.35294
-        },
-        {
-          "name": "_Z14SetBonusWinneri",
-          "demangled_name": "SetBonusWinner(int)",
-          "address": 1174656,
-          "offset": 284688,
-          "size": 86,
-          "match_percent": 100.0
         },
         {
           "name": "_Z15ResetIconWibblev",
@@ -68149,14 +67965,6 @@
           "offset": 10896,
           "size": 93,
           "match_percent": 99.35294
-        },
-        {
-          "name": "_Z16BuyAllShopExtrasv",
-          "demangled_name": "BuyAllShopExtras()",
-          "address": 1174976,
-          "offset": 285008,
-          "size": 181,
-          "match_percent": 89.72222
         },
         {
           "name": "_ZL13Shop_GetInputP9SHOPINPUT",
@@ -78929,30 +78737,6 @@
           "match_percent": 100.0
         },
         {
-          "name": "_ZL28MatrixReflection_CanOverridev",
-          "demangled_name": "MatrixReflection_CanOverride()",
-          "address": 1155824,
-          "offset": 265856,
-          "size": 90,
-          "match_percent": 86.15385
-        },
-        {
-          "name": "_ZL14PauseRenderOffv",
-          "demangled_name": "PauseRenderOff()",
-          "address": 1156496,
-          "offset": 266528,
-          "size": 29,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL14BackDrop_AlphaPf",
-          "demangled_name": "BackDrop_Alpha(float*)",
-          "address": 1156528,
-          "offset": 266560,
-          "size": 343,
-          "match_percent": 99.95294
-        },
-        {
           "name": "_Z19DrawForceGlowSpriteP7nuvec_sfifP12GameObject_s",
           "demangled_name": "DrawForceGlowSprite(nuvec_s*, float, int, float, GameObject_s*)",
           "address": 1442544,
@@ -87699,22 +87483,6 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/1/missions.o",
       "functions": [
         {
-          "name": "_Z13InitChallengei",
-          "demangled_name": "InitChallenge(int)",
-          "address": 1173872,
-          "offset": 283904,
-          "size": 81,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z12EndChallengeii",
-          "demangled_name": "EndChallenge(int, int)",
-          "address": 1174752,
-          "offset": 284784,
-          "size": 213,
-          "match_percent": 99.73333
-        },
-        {
           "name": "_Z13Mission_ClearP12MISSIONSYS_s",
           "demangled_name": "Mission_Clear(MISSIONSYS_s*)",
           "address": 5115312,
@@ -88088,6 +87856,14 @@
           "match_percent": 100.0
         },
         {
+          "name": "_ZL20LEGO_AllGoldBricksFnv",
+          "demangled_name": "LEGO_AllGoldBricksFn()",
+          "address": 1155584,
+          "offset": 265616,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
           "name": "_ZL16LastSafePosExtraP12GameObject_s",
           "demangled_name": "LastSafePosExtra(GameObject_s*)",
           "address": 1155600,
@@ -88102,6 +87878,14 @@
           "offset": 265808,
           "size": 39,
           "match_percent": 100.0
+        },
+        {
+          "name": "_ZL28MatrixReflection_CanOverridev",
+          "demangled_name": "MatrixReflection_CanOverride()",
+          "address": 1155824,
+          "offset": 265856,
+          "size": 90,
+          "match_percent": 86.15385
         },
         {
           "name": "_ZL21CutScenePlayer_AcceptP18CUTSCENEPLAYERCLIP",
@@ -88128,11 +87912,35 @@
           "match_percent": 100.0
         },
         {
+          "name": "_ZL22GizmoPickups_Collide2DP12GameObject_s",
+          "demangled_name": "GizmoPickups_Collide2D(GameObject_s*)",
+          "address": 1156144,
+          "offset": 266176,
+          "size": 72,
+          "match_percent": 99.95238
+        },
+        {
           "name": "_ZL20GizmoBlowUp_NoTargetP11WORLDINFO_sP12GameObject_s",
           "demangled_name": "GizmoBlowUp_NoTarget(WORLDINFO_s*, GameObject_s*)",
           "address": 1156224,
           "offset": 266256,
           "size": 86,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL19GameMsg_GetExtraObjP13GAMEMESSAGE_s",
+          "demangled_name": "GameMsg_GetExtraObj(GAMEMESSAGE_s*)",
+          "address": 1156320,
+          "offset": 266352,
+          "size": 48,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z16Game_IgnoreInputv",
+          "demangled_name": "Game_IgnoreInput()",
+          "address": 1156368,
+          "offset": 266400,
+          "size": 27,
           "match_percent": 100.0
         },
         {
@@ -88144,12 +87952,44 @@
           "match_percent": 100.0
         },
         {
+          "name": "_ZL14PauseRenderOffv",
+          "demangled_name": "PauseRenderOff()",
+          "address": 1156496,
+          "offset": 266528,
+          "size": 29,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL14BackDrop_AlphaPf",
+          "demangled_name": "BackDrop_Alpha(float*)",
+          "address": 1156528,
+          "offset": 266560,
+          "size": 343,
+          "match_percent": 99.95294
+        },
+        {
+          "name": "_ZL17LEGO_100PercentFnv",
+          "demangled_name": "LEGO_100PercentFn()",
+          "address": 1156880,
+          "offset": 266912,
+          "size": 131,
+          "match_percent": 78.025
+        },
+        {
           "name": "_ZL15CheckMusicOtherv",
           "demangled_name": "CheckMusicOther()",
           "address": 1157024,
           "offset": 267056,
           "size": 372,
           "match_percent": 45.932693
+        },
+        {
+          "name": "_ZL19PauseGame_ExtraCodev",
+          "demangled_name": "PauseGame_ExtraCode()",
+          "address": 1157408,
+          "offset": 267440,
+          "size": 27,
+          "match_percent": 100.0
         },
         {
           "name": "_ZL28GizBuildit_AutoBuildPos_GamePvP7nuvec_sS1_Pt",
@@ -88184,6 +88024,46 @@
           "match_percent": 100.0
         },
         {
+          "name": "_Z29GameObjectDimensionsExtra_LSWP12GameObject_s",
+          "demangled_name": "GameObjectDimensionsExtra_LSW(GameObject_s*)",
+          "address": 1158016,
+          "offset": 268048,
+          "size": 81,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL24SurfaceInfo_ExtraReflectP12GameObject_s",
+          "demangled_name": "SurfaceInfo_ExtraReflect(GameObject_s*)",
+          "address": 1158112,
+          "offset": 268144,
+          "size": 217,
+          "match_percent": 99.91111
+        },
+        {
+          "name": "_ZL21GameMsg_EndDelay_GameP13GAMEMESSAGE_s",
+          "demangled_name": "GameMsg_EndDelay_Game(GAMEMESSAGE_s*)",
+          "address": 1158336,
+          "offset": 268368,
+          "size": 326,
+          "match_percent": 94.77273
+        },
+        {
+          "name": "_ZL15ExtraDieSfx_LSWP12GameObject_s",
+          "demangled_name": "ExtraDieSfx_LSW(GameObject_s*)",
+          "address": 1158672,
+          "offset": 268704,
+          "size": 90,
+          "match_percent": 99.958336
+        },
+        {
+          "name": "_ZL16ExtraHurtSfx_LSWP12GameObject_s",
+          "demangled_name": "ExtraHurtSfx_LSW(GameObject_s*)",
+          "address": 1158768,
+          "offset": 268800,
+          "size": 90,
+          "match_percent": 99.958336
+        },
+        {
           "name": "_ZL17BigJump_EndOfLandP12GameObject_s",
           "demangled_name": "BigJump_EndOfLand(GameObject_s*)",
           "address": 1158864,
@@ -88198,6 +88078,14 @@
           "offset": 269008,
           "size": 128,
           "match_percent": 100.0
+        },
+        {
+          "name": "_ZL32Collection_GetSelectingPlayerIDsPs",
+          "demangled_name": "Collection_GetSelectingPlayerIDs(short*)",
+          "address": 1159104,
+          "offset": 269136,
+          "size": 149,
+          "match_percent": 92.61905
         },
         {
           "name": "_ZL13ActionMusicFnv",
@@ -88224,6 +88112,14 @@
           "match_percent": 98.36066
         },
         {
+          "name": "_ZL35CutScene_OverrideConfigFileName_LSWPcii",
+          "demangled_name": "CutScene_OverrideConfigFileName_LSW(char*, int, int)",
+          "address": 1160208,
+          "offset": 270240,
+          "size": 323,
+          "match_percent": 99.45238
+        },
+        {
           "name": "_ZL22Punch_HitExtraCode_LSWP12GameObject_sP7nuvec_s",
           "demangled_name": "Punch_HitExtraCode_LSW(GameObject_s*, nuvec_s*)",
           "address": 1160544,
@@ -88248,12 +88144,36 @@
           "match_percent": 100.0
         },
         {
+          "name": "_Z23ResetAdaptiveDifficultyv",
+          "demangled_name": "ResetAdaptiveDifficulty()",
+          "address": 1161296,
+          "offset": 271328,
+          "size": 38,
+          "match_percent": 100.0
+        },
+        {
           "name": "_Z20InitGameBeforeConfigv",
           "demangled_name": "InitGameBeforeConfig()",
           "address": 1161344,
           "offset": 271376,
           "size": 1077,
-          "match_percent": 88.045265
+          "match_percent": 87.921814
+        },
+        {
+          "name": "_Z11DoBuckStartP12GameObject_s",
+          "demangled_name": "DoBuckStart(GameObject_s*)",
+          "address": 1162432,
+          "offset": 272464,
+          "size": 3069,
+          "match_percent": 89.895256
+        },
+        {
+          "name": "_Z18BuckStartExtra_LSWP12GameObject_s",
+          "demangled_name": "BuckStartExtra_LSW(GameObject_s*)",
+          "address": 1165504,
+          "offset": 275536,
+          "size": 34,
+          "match_percent": 100.0
         },
         {
           "name": "_Z19InitGameAfterConfigv",
@@ -88261,7 +88181,79 @@
           "address": 1165552,
           "offset": 275584,
           "size": 5015,
-          "match_percent": 73.74856
+          "match_percent": 73.758156
+        },
+        {
+          "name": "_Z11LSW_SetIndyi",
+          "demangled_name": "LSW_SetIndy(int)",
+          "address": 1170576,
+          "offset": 280608,
+          "size": 232,
+          "match_percent": 99.98
+        },
+        {
+          "name": "_Z27ReCalculateCompletionPointsv",
+          "demangled_name": "ReCalculateCompletionPoints()",
+          "address": 1170816,
+          "offset": 280848,
+          "size": 1511,
+          "match_percent": 65.70218
+        },
+        {
+          "name": "_Z7NewGamev",
+          "demangled_name": "NewGame()",
+          "address": 1172336,
+          "offset": 282368,
+          "size": 1523,
+          "match_percent": 94.24856
+        },
+        {
+          "name": "_Z13InitChallengei",
+          "demangled_name": "InitChallenge(int)",
+          "address": 1173872,
+          "offset": 283904,
+          "size": 81,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z22MenuUpdateEndChallengeP6MENU_s",
+          "demangled_name": "MenuUpdateEndChallenge(MENU_s*)",
+          "address": 1173968,
+          "offset": 284000,
+          "size": 153,
+          "match_percent": 99.92105
+        },
+        {
+          "name": "_Z20MenuDrawEndChallengeP6MENU_s",
+          "demangled_name": "MenuDrawEndChallenge(MENU_s*)",
+          "address": 1174128,
+          "offset": 284160,
+          "size": 520,
+          "match_percent": 99.99
+        },
+        {
+          "name": "_Z14SetBonusWinneri",
+          "demangled_name": "SetBonusWinner(int)",
+          "address": 1174656,
+          "offset": 284688,
+          "size": 86,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z12EndChallengeii",
+          "demangled_name": "EndChallenge(int, int)",
+          "address": 1174752,
+          "offset": 284784,
+          "size": 213,
+          "match_percent": 99.98333
+        },
+        {
+          "name": "_Z16BuyAllShopExtrasv",
+          "demangled_name": "BuyAllShopExtras()",
+          "address": 1174976,
+          "offset": 285008,
+          "size": 181,
+          "match_percent": 89.72222
         },
         {
           "name": "_ZL24GizBuildIt_FinishFn_GameP12GIZBUILDIT_s",
@@ -88270,6 +88262,14 @@
           "offset": 285200,
           "size": 243,
           "match_percent": 100.0
+        },
+        {
+          "name": "_Z12InitGameModev",
+          "demangled_name": "InitGameMode()",
+          "address": 1175424,
+          "offset": 285456,
+          "size": 989,
+          "match_percent": 99.87234
         },
         {
           "name": "_Z18StoreLevelProgressP11WORLDINFO_s",
@@ -88309,7 +88309,7 @@
           "address": 4677184,
           "offset": 3787216,
           "size": 152,
-          "match_percent": 100.0
+          "match_percent": 99.63415
         },
         {
           "name": "_Z19NewAreaMusicChangesv",
@@ -126078,7 +126078,8 @@
         "legoapi/menus/screens/menus.cpp.o",
         "legoapi/render/core/gameliball.cpp.o",
         "legoapi/render/core/screen.cpp.o",
-        "legoapi/render/light/fade.cpp.o"
+        "legoapi/render/light/fade.cpp.o",
+        "legogame/game.cpp.o"
       ]
     },
     {
@@ -126094,7 +126095,8 @@
         "legoapi/menus/screens/menus.cpp.o",
         "legoapi/render/core/gameliball.cpp.o",
         "legoapi/render/core/screen.cpp.o",
-        "legoapi/render/light/fade.cpp.o"
+        "legoapi/render/light/fade.cpp.o",
+        "legogame/game.cpp.o"
       ]
     },
     {
@@ -126110,7 +126112,8 @@
         "legoapi/menus/screens/menus.cpp.o",
         "legoapi/render/core/gameliball.cpp.o",
         "legoapi/render/core/screen.cpp.o",
-        "legoapi/render/light/fade.cpp.o"
+        "legoapi/render/light/fade.cpp.o",
+        "legogame/game.cpp.o"
       ]
     },
     {
@@ -126126,7 +126129,8 @@
         "legoapi/menus/screens/menus.cpp.o",
         "legoapi/render/core/gameliball.cpp.o",
         "legoapi/render/core/screen.cpp.o",
-        "legoapi/render/light/fade.cpp.o"
+        "legoapi/render/light/fade.cpp.o",
+        "legogame/game.cpp.o"
       ]
     },
     {
@@ -126142,7 +126146,8 @@
         "legoapi/menus/screens/menus.cpp.o",
         "legoapi/render/core/gameliball.cpp.o",
         "legoapi/render/core/screen.cpp.o",
-        "legoapi/render/light/fade.cpp.o"
+        "legoapi/render/light/fade.cpp.o",
+        "legogame/game.cpp.o"
       ]
     },
     {
@@ -126158,7 +126163,8 @@
         "legoapi/menus/screens/menus.cpp.o",
         "legoapi/render/core/gameliball.cpp.o",
         "legoapi/render/core/screen.cpp.o",
-        "legoapi/render/light/fade.cpp.o"
+        "legoapi/render/light/fade.cpp.o",
+        "legogame/game.cpp.o"
       ]
     },
     {
@@ -126174,7 +126180,8 @@
         "legoapi/menus/screens/menus.cpp.o",
         "legoapi/render/core/gameliball.cpp.o",
         "legoapi/render/core/screen.cpp.o",
-        "legoapi/render/light/fade.cpp.o"
+        "legoapi/render/light/fade.cpp.o",
+        "legogame/game.cpp.o"
       ]
     },
     {
@@ -126190,7 +126197,8 @@
         "legoapi/menus/screens/menus.cpp.o",
         "legoapi/render/core/gameliball.cpp.o",
         "legoapi/render/core/screen.cpp.o",
-        "legoapi/render/light/fade.cpp.o"
+        "legoapi/render/light/fade.cpp.o",
+        "legogame/game.cpp.o"
       ]
     },
     {
@@ -126206,7 +126214,8 @@
         "legoapi/menus/screens/menus.cpp.o",
         "legoapi/render/core/gameliball.cpp.o",
         "legoapi/render/core/screen.cpp.o",
-        "legoapi/render/light/fade.cpp.o"
+        "legoapi/render/light/fade.cpp.o",
+        "legogame/game.cpp.o"
       ]
     },
     {
@@ -126222,7 +126231,8 @@
         "legoapi/menus/screens/menus.cpp.o",
         "legoapi/render/core/gameliball.cpp.o",
         "legoapi/render/core/screen.cpp.o",
-        "legoapi/render/light/fade.cpp.o"
+        "legoapi/render/light/fade.cpp.o",
+        "legogame/game.cpp.o"
       ]
     },
     {
@@ -126238,7 +126248,8 @@
         "legoapi/menus/screens/menus.cpp.o",
         "legoapi/render/core/gameliball.cpp.o",
         "legoapi/render/core/screen.cpp.o",
-        "legoapi/render/light/fade.cpp.o"
+        "legoapi/render/light/fade.cpp.o",
+        "legogame/game.cpp.o"
       ]
     },
     {
@@ -126254,7 +126265,8 @@
         "legoapi/menus/screens/menus.cpp.o",
         "legoapi/render/core/gameliball.cpp.o",
         "legoapi/render/core/screen.cpp.o",
-        "legoapi/render/light/fade.cpp.o"
+        "legoapi/render/light/fade.cpp.o",
+        "legogame/game.cpp.o"
       ]
     },
     {
@@ -126270,7 +126282,8 @@
         "legoapi/menus/screens/menus.cpp.o",
         "legoapi/render/core/gameliball.cpp.o",
         "legoapi/render/core/screen.cpp.o",
-        "legoapi/render/light/fade.cpp.o"
+        "legoapi/render/light/fade.cpp.o",
+        "legogame/game.cpp.o"
       ]
     },
     {
@@ -126286,7 +126299,8 @@
         "legoapi/menus/screens/menus.cpp.o",
         "legoapi/render/core/gameliball.cpp.o",
         "legoapi/render/core/screen.cpp.o",
-        "legoapi/render/light/fade.cpp.o"
+        "legoapi/render/light/fade.cpp.o",
+        "legogame/game.cpp.o"
       ]
     },
     {
@@ -126302,7 +126316,8 @@
         "legoapi/menus/screens/menus.cpp.o",
         "legoapi/render/core/gameliball.cpp.o",
         "legoapi/render/core/screen.cpp.o",
-        "legoapi/render/light/fade.cpp.o"
+        "legoapi/render/light/fade.cpp.o",
+        "legogame/game.cpp.o"
       ]
     },
     {
@@ -126318,7 +126333,8 @@
         "legoapi/menus/screens/menus.cpp.o",
         "legoapi/render/core/gameliball.cpp.o",
         "legoapi/render/core/screen.cpp.o",
-        "legoapi/render/light/fade.cpp.o"
+        "legoapi/render/light/fade.cpp.o",
+        "legogame/game.cpp.o"
       ]
     },
     {
@@ -126334,7 +126350,8 @@
         "legoapi/menus/screens/menus.cpp.o",
         "legoapi/render/core/gameliball.cpp.o",
         "legoapi/render/core/screen.cpp.o",
-        "legoapi/render/light/fade.cpp.o"
+        "legoapi/render/light/fade.cpp.o",
+        "legogame/game.cpp.o"
       ]
     },
     {
@@ -126350,7 +126367,8 @@
         "legoapi/menus/screens/menus.cpp.o",
         "legoapi/render/core/gameliball.cpp.o",
         "legoapi/render/core/screen.cpp.o",
-        "legoapi/render/light/fade.cpp.o"
+        "legoapi/render/light/fade.cpp.o",
+        "legogame/game.cpp.o"
       ]
     },
     {
@@ -126366,7 +126384,8 @@
         "legoapi/menus/screens/menus.cpp.o",
         "legoapi/render/core/gameliball.cpp.o",
         "legoapi/render/core/screen.cpp.o",
-        "legoapi/render/light/fade.cpp.o"
+        "legoapi/render/light/fade.cpp.o",
+        "legogame/game.cpp.o"
       ]
     },
     {
@@ -126950,7 +126969,8 @@
       "candidate_units": [
         "gameapi/edtools/edtoolsall.cpp.o",
         "legoapi/items/objects/objectsall.cpp.o",
-        "legoapi/menus/screens/gamemenuall.cpp.o"
+        "legoapi/menus/screens/gamemenuall.cpp.o",
+        "legogame/game.cpp.o"
       ]
     },
     {
@@ -126963,7 +126983,8 @@
       "candidate_units": [
         "gameapi/edtools/edtoolsall.cpp.o",
         "legoapi/items/objects/objectsall.cpp.o",
-        "legoapi/menus/screens/gamemenuall.cpp.o"
+        "legoapi/menus/screens/gamemenuall.cpp.o",
+        "legogame/game.cpp.o"
       ]
     },
     {
@@ -126976,7 +126997,8 @@
       "candidate_units": [
         "gameapi/edtools/edtoolsall.cpp.o",
         "legoapi/items/objects/objectsall.cpp.o",
-        "legoapi/menus/screens/gamemenuall.cpp.o"
+        "legoapi/menus/screens/gamemenuall.cpp.o",
+        "legogame/game.cpp.o"
       ]
     },
     {
@@ -127002,7 +127024,8 @@
       "candidate_units": [
         "gameapi/edtools/edtoolsall.cpp.o",
         "legoapi/items/objects/objectsall.cpp.o",
-        "legoapi/menus/screens/gamemenuall.cpp.o"
+        "legoapi/menus/screens/gamemenuall.cpp.o",
+        "legogame/game.cpp.o"
       ]
     },
     {
@@ -127015,7 +127038,8 @@
       "candidate_units": [
         "gameapi/edtools/edtoolsall.cpp.o",
         "legoapi/items/objects/objectsall.cpp.o",
-        "legoapi/menus/screens/gamemenuall.cpp.o"
+        "legoapi/menus/screens/gamemenuall.cpp.o",
+        "legogame/game.cpp.o"
       ]
     },
     {
@@ -127028,7 +127052,8 @@
       "candidate_units": [
         "gameapi/edtools/edtoolsall.cpp.o",
         "legoapi/items/objects/objectsall.cpp.o",
-        "legoapi/menus/screens/gamemenuall.cpp.o"
+        "legoapi/menus/screens/gamemenuall.cpp.o",
+        "legogame/game.cpp.o"
       ]
     },
     {

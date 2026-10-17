@@ -473,20 +473,7 @@ i32 Shop_UpdateHint(HINT_s *hint) {
     return 0;
 }
 
-void BuyAllShopExtras() {
-    WORLDINFO_s *world = WORLD;
-    shopitem_s *item = ExtraItems;
-    for (i32 i = 0; i < 44; ++i, ++item) {
-        Game.purchased_extra_bits[i >> 5] |= 1u << (i & 31);
-        if (world->current_level == HUB_LDATA)
-            item->unlocked = 1;
-        i8 area = static_cast<i8>(Cheat[i].area);
-        if (area != -1 && Game.area_save[area].red_brick_collected == 0)
-            Game.area_save[area].red_brick_collected = 1;
-    }
-    Game.unlocked_extra_bits[0] = 0xffffffff;
-    Game.unlocked_extra_bits[1] = 0xffffffff;
-}
+void BuyAllShopExtras();
 
 void GetShopCamLookPos(nuvec_s *position) {
     if (menuptr == ItemMenu && splshelf != NULL && picked != -1)

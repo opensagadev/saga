@@ -227,27 +227,9 @@ __used__ void TrenchKilledCallback(GameObject_s *object) {
     }
 }
 
-static __used__ void SurfaceInfo_ExtraReflect(GameObject_s *object) {
-    if (WORLD->current_level == CRUISERE_LDATA && object->field_0x1020 == 2000000.0f &&
-        object->apiobj.position.x < 11.0f) {
-        object->field_0x1087 = 3;
-        object->field_0x1020 = -39.2f;
-    }
-    if (WORLD->current_level == DEATHSTARRESCUED_LDATA) {
-        if (object->apiobj.position.z > 20.75f) {
-            object->field_0x1020 = 22.4f;
-            object->field_0x1087 = 3;
-        }
-        if (object->apiobj.position.x < -20.75f) {
-            object->field_0x1087 = 1;
-            object->field_0x1020 = -22.4f;
-        }
-    }
-}
+static __used__ void SurfaceInfo_ExtraReflect(GameObject_s *object);
 
-static __used__ void PauseGame_ExtraCode() {
-    Hub_ResetPanel();
-}
+static __used__ void PauseGame_ExtraCode();
 
 static __used__ i32 SpecialObjectFilter(void *object) {
     return theSceneObjectHelper.scene_id == static_cast<SpecialObject *>(object)->scene_id;

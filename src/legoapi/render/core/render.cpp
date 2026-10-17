@@ -2539,21 +2539,9 @@ SwipeDecalRenderer::SwipeDecalRenderer(TouchHolder &holder, i32 index, SwipeDeca
 }
 
 extern i32 GetMenuID(void);
-static __used__ i32 PauseRenderOff() {
-    GetMenuID();
-    return 0;
-}
+static __used__ i32 PauseRenderOff();
 
-static __used__ i32 MatrixReflection_CanOverride() {
-    i32 result = 1;
-    if (WORLD->current_level == DEATHSTARESCAPEA_LDATA) {
-        const i8 sock = GameCam->sock_position.location.sock;
-        if (sock != 0) {
-            result = sock == 3;
-        }
-    }
-    return result;
-}
+static __used__ i32 MatrixReflection_CanOverride();
 
 static void DrawWeapon_SetSabreObjects(GameObject_s *object, i32 red, i32 green, i32 blue, i32 purple, i32 *models,
                                        i32 *hilt);
@@ -2604,40 +2592,7 @@ i32 backdrop_black = 0;
 
 void (*BackDrop_AlphaFn)(float *) = nullptr;
 
-static __used__ void BackDrop_Alpha(float *alpha) {
-    extern STATUSPACKET_s StatusPacket;
-    extern i32 selectmodemode;
-    extern f32 selectmodetime;
-    if (WORLD != NULL) {
-        LEVELDATA *level = WORLD->current_level;
-        if (level == TITLES_LDATA) {
-            *alpha *= newgamealpha;
-            return;
-        }
-        if (level == CREDITS_LDATA && CreditsFlag == 3) {
-            *alpha *= CreditsAlpha;
-            return;
-        }
-        if ((level->flags & 0x400) != 0 && StatusPacket.status_flags != 0 && StatusPacket.stage->type == 12 &&
-            (StatusPacket.mode_flags & 0x10) == 0) {
-            const f32 time = StatusPacket.stage->field_0x18;
-            if (time < 0.5f) {
-                *alpha = 1.0f - (time + time);
-            } else {
-                *alpha = 0.0f;
-            }
-            return;
-        }
-    }
-    if (GetMenuID() == 15 && selectmodemode == 4) {
-        const f32 time = selectmodetime;
-        if (time < 0.5f) {
-            *alpha = 1.0f - (time + time);
-        } else {
-            *alpha = 0.0f;
-        }
-    }
-}
+static __used__ void BackDrop_Alpha(float *alpha);
 
 void BackDrop_Init(char *path, variptr_u *buf, variptr_u *buf_end) {
     if (backdrop_scene == NULL) {

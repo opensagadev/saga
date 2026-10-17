@@ -961,21 +961,7 @@ extern "C" void NuGCutSceneSysUpdate(i32 paused, i32 skip, f32 elapsed);
 
 extern "C" void NuGCutSceneSysRender(i32 paused);
 
-static __used__ void CutScene_OverrideConfigFileName_LSW(char *filename, int, int) {
-    if (PODSPRINT_ADATA == NULL || WorldInfo_CurrentlyActive()->area != PODSPRINT_ADATA) {
-        return;
-    }
-    if (NuStrIStr(filename, const_cast<char *>("episodei\\ep1_podrace_")) != filename) {
-        return;
-    }
-    char *suffix = filename + NuStrLen(const_cast<char *>("episodei\\ep1_podrace_"));
-    if (NuStrICmp(suffix, "arrival1") == 0 || NuStrICmp(suffix, "arrival2") == 0 ||
-        NuStrICmp(suffix, "arrival3") == 0 || NuStrICmp(suffix, "arrival4") == 0 || NuStrICmp(suffix, "intro") == 0 ||
-        NuStrICmp(suffix, "tuskenraiders") == 0 || NuStrICmp(suffix, "outro1") == 0 ||
-        NuStrICmp(suffix, "outro2") == 0) {
-        NuStrCat(filename, "_sprint");
-    }
-}
+static __used__ void CutScene_OverrideConfigFileName_LSW(char *filename, int, int);
 
 void NewCopyAnims(instNUGCUTSCENE_s *instance);
 

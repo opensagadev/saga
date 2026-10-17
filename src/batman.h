@@ -331,7 +331,7 @@ extern "C" {
     extern i32 FinishLoop_On;
     extern LANGUAGEDATA Game_LanguageList[7];
     extern OPTIONSSAVE *Game_OptionsSave;
-    extern i32 (*GamePads_IgnoreInputFn)(void);
+    extern "C++" i32 (*GamePads_IgnoreInputFn)(void);
     extern i32 g_introState;
     extern i32 Grass_Available;
     extern f32 g_val;

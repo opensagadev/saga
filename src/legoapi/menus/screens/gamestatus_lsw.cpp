@@ -196,11 +196,7 @@ void AddStatusStage(STATUSPACKET_s *packet, i32 type, i32 gold_brick_enabled) {
     packet->stage_count = index + 1;
 }
 
-void SetBonusWinner(i32 player) {
-    BonusWinner = player;
-    GameCam_Blend(GameCam, 1.5f, 0.0f, 1);
-    LookAtBoth = 1;
-}
+void SetBonusWinner(i32 player);
 
 STATUS_STAGE_s *FindStatusStage(i32 type) {
     for (i32 i = 0; StatusStages[i].type != -1; ++i) {

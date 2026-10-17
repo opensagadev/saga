@@ -22,11 +22,7 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-struct ADAPTIVEDIFFICULTY_s {
-    i32 difficulty;
-    f32 multiplier;
-    f32 elapsed;
-};
+#include "legoapi/ai/core/gameai_types.h"
 
 extern "C" i32 adaptivedifficulty[3];
 
@@ -46,12 +42,7 @@ extern i32 GoingForwardsAlongNarrowSock(GameObject_s *object);
 
 i32 CheckPosAIArea(AIAREA_s *area, nuvec_s *position, float tolerance);
 
-void ResetAdaptiveDifficulty() {
-    ADAPTIVEDIFFICULTY_s *difficulty = (ADAPTIVEDIFFICULTY_s *)adaptivedifficulty;
-    difficulty->multiplier = 0.5f;
-    difficulty->elapsed = 0.0f;
-    difficulty->difficulty = -4;
-}
+void ResetAdaptiveDifficulty();
 
 void LoopCode(GameObject_s *object, i32 jump_pressed, i32, GAMEPAD_s *pad, i32 allow_loop) {
     if (WORLD->area != NULL) {

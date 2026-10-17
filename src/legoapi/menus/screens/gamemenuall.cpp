@@ -397,24 +397,7 @@ void MenuEnterInsertCard(MENU_s *);
 
 void MenuExitCardWarning(MENU_s *);
 
-void MenuDrawEndChallenge(MENU_s *) {
-    if (MenuStopDraw != 0)
-        return;
-    if (ChallengeMode != 2) {
-        SmartText(TTab[tOUTOFTIME], 0.0f, STATSPOSY, 1.0f, 1.0f, 1.0f, 1.0f, 0,
-                  191 + (static_cast<u32>(menu_flash) < 1 ? 64 : 0), 31 + (static_cast<u32>(menu_flash) < 1 ? 32 : 0),
-                  0, 1.7f, 1);
-    } else if (NuFmod(GameTimer.time_elapsed, 0.3f) < 0.2f) {
-        char text[64];
-        f32 remaining = static_cast<f32>(static_cast<i32>(ADataList[WORLD->level_sub_id].challenge_trial_time)) -
-                        ChallengeTimer.time_elapsed;
-        if (remaining < 0.0f)
-            remaining = 0.0f;
-        Text_MakeTime(remaining, 0, 1, 1, text);
-        Text3D(text, 0.0f, STATSPOSY, 1.0f, 0.6f, 0.6f, 0.6f, 0, 255, 191, 0);
-    }
-    DrawMiniKitCount(minikittime, MiniKitScale, AreaGlobals.values.field_0x20, 10);
-}
+void MenuDrawEndChallenge(MENU_s *);
 
 void MenuDrawFormatCancel(MENU_s *menu);
 
@@ -461,14 +444,7 @@ void MenuDrawNotEnoughSpace(MENU_s *);
 
 
 
-void MenuUpdateEndChallenge(MENU_s *menu) {
-    if (menu->menu_time >= 5.0f) {
-        CompleteLevel(WORLD);
-    } else if (menu->menu_time >= 1.5f && BonusWinFlag == 0) {
-        PlaySfx(const_cast<char *>("Victory"), NULL);
-        BonusWinFlag = 1;
-    }
-}
+void MenuUpdateEndChallenge(MENU_s *menu);
 
 void MenuUpdateFormatCancel(MENU_s *menu);
 

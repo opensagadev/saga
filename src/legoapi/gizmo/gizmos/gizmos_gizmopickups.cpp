@@ -107,8 +107,4 @@ void GizmoPickup_CollectCoin(WORLDINFO_s *world, nuvec_s *position, i32 type_ind
     }
 }
 
-static __used__ float GizmoPickups_Collide2D(GameObject_s *object) {
-    if (WORLD->current_level == SPEEDERCHASEA_LDATA && object->id == id_SPEEDERBIKE)
-        return 2.0f;
-    return 0.0f;
-}
+static __used__ float GizmoPickups_Collide2D(GameObject_s *object);

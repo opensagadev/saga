@@ -105,7 +105,7 @@ extern "C" {
     i16 id_GEONOSIAN = -1;
     i16 id_BOB = -1;
     i16 id_WATTO = -1;
-    i16 id_CHEWBACCA = -1;
+extern i16 id_CHEWBACCA;
     i16 id_WOOKIEE = -1;
     i16 id_ATST = -1;
     i16 id_ATST_LOWRES = -1;
@@ -603,17 +603,9 @@ CharacterObjectInterface::~CharacterObjectInterface() {
     object->mech_object_interface = NULL;
 }
 
-static __used__ void ExtraDieSfx_LSW(GameObject_s *object) {
-    if (object->id == id_CHEWBACCA && Cheat[4].enabled != 0) {
-        PlaySfx("C3_Death", &object->apiobj.collision_position);
-    }
-}
+static __used__ void ExtraDieSfx_LSW(GameObject_s *object);
 
-static __used__ void ExtraHurtSfx_LSW(GameObject_s *object) {
-    if (object->id == id_CHEWBACCA && Cheat[4].enabled != 0) {
-        PlaySfx("C3_Death", &object->apiobj.collision_position);
-    }
-}
+static __used__ void ExtraHurtSfx_LSW(GameObject_s *object);
 
 extern AREADATA *DAGOBAH_ADATA;
 extern AREADATA *DEATHSTARESCAPE_ADATA;

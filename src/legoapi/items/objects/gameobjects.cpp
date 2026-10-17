@@ -1189,10 +1189,7 @@ void SnapCreaturePos(GameObject_s *object, NUVEC *position, i32 angle, AIPATHINF
     }
 }
 
-i32 Game_IgnoreInput() {
-    extern i32 newgamecam;
-    return newgamecam != 0;
-}
+i32 Game_IgnoreInput();
 
 extern i16 id_GONKDROID;
 u32 GameAI_TotalScore();
@@ -1569,10 +1566,7 @@ void GameCreatureOpponentSelection(AISYS_s *system, i32 count, APIOBJECT_s **obj
                                    APIOBJECT_s **goodies, i32 baddy_count, APIOBJECT_s **baddies, u64 awareness,
                                    float);
 
-void GameObjectDimensionsExtra_LSW(GameObject_s *object) {
-    if (object->id == id_ATAT && object->character_context == 0x17 && object->context_animation == 0x41)
-        object->apiobj.field_0x1dc *= 2.0f;
-}
+void GameObjectDimensionsExtra_LSW(GameObject_s *object);
 
 i32 AnakinGreenSabre(GameObject_s *object);
 extern "C" i16 id_THEEMPEROR, id_IMPERIALGUARD, id_BODYGUARD;
@@ -2432,19 +2426,8 @@ extern CUSTOMISER *CharacterCustomiser;
 extern CUSTOMPIECE *Customiser_FindPieceByName(CUSTOMISER *, char *, i32 *, i32 *);
 extern void Customiser_Set100PercentPieces(CUSTOMISER *);
 
-static __used__ void LEGO_100PercentFn() {
-    if (CharacterCustomiser != NULL) {
-        Customiser_Set100PercentPieces(CharacterCustomiser);
-        i32 index;
-        i32 piece;
-        if (Customiser_FindPieceByName(CharacterCustomiser, "hat_hair_00", &index, &piece) != NULL && index != -1 &&
-            piece != -1) {
-            CharacterCustomiser->save->pieces[index] = static_cast<i16>(piece);
-        }
-    }
-}
-static __used__ void LEGO_AllGoldBricksFn() {
-}
+static __used__ void LEGO_100PercentFn();
+static __used__ void LEGO_AllGoldBricksFn();
 
 i32 NoLayerKill(GameObject_s *object) {
     GAMECHARACTERDATA *data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);

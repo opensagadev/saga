@@ -42,36 +42,7 @@ extern FadeSystem FadeSys;
 i32 GetMenuID();
 void MechHintUIButton_OnClick_Callback(MechTouchUIElement &, TouchHolder &);
 
-struct MechHintUIButton : MechTouchUITexButton {
-    HINT_s *active_hint;
-    HINT_s *pending_hint;
-    f32 display_elapsed;
-    f32 *slide_target;
-    f32 slide_from, slide_to, slide_elapsed, slide_duration, slide_delay, slide;
-    u8 pulse_active;
-    f32 pulse_remaining;
-
-    MechHintUIButton() : MechTouchUITexButton(VuVec(ICONXPOS_TOUCHYFEELY, ICONYPOS_TOUCHYFEELY, 0.0f, 1.0f), 0.075f) {
-        slide_elapsed = 0.0f;
-        slide_duration = -1.0f;
-        slide_delay = 0.0f;
-        active_hint = NULL;
-        pending_hint = NULL;
-        slide_target = &slide;
-        on_click = MechHintUIButton_OnClick_Callback;
-    }
-    ~MechHintUIButton() override {
-    }
-    void __attribute__((weak)) Process(float) override;
-    void __attribute__((weak)) Render() override;
-    void StartPulse() {
-        static f32 PulseAgainTime = 2.0f;
-        pulse_active = 1;
-        pulse_remaining = PulseAgainTime;
-        if (visible)
-            MechSystems::Get()->NewRadarPulse(position, false);
-    }
-};
+#include "legoapi/menus/core/gamehint_types.h"
 DECOMP_ASSERT(sizeof(MechHintUIButton) == 0xa8, "MechHintUIButton size");
 DECOMP_ASSERT(offsetof(MechHintUIButton, pending_hint) == 0x7c, "Pending touch hint offset");
 DECOMP_ASSERT(offsetof(MechHintUIButton, display_elapsed) == 0x80, "Touch hint display timer offset");
@@ -750,30 +721,9 @@ void Hint_Draw(i32 viewport) {
 
 // Static game message and hint helpers. Stubbed to satisfy the symbol baseline.
 
-static __used__ nuhspecial_s *GameMsg_GetExtraObj(GAMEMESSAGE_s *message) {
-    if (message->icon == 0xd0)
-        return &WORLD->lev_objs[0xd1].special;
-    return NULL;
-}
+static __used__ nuhspecial_s *GameMsg_GetExtraObj(GAMEMESSAGE_s *message);
 
-static __used__ void GameMsg_EndDelay_Game(GAMEMESSAGE_s *message) {
-    if (message->score == 0)
-        return;
-    if (VehicleArea != 0) {
-        DrawBuildUpTime = COINMSGTIME + 1.0f;
-        return;
-    }
-    if (message->field_0xfe != 1)
-        return;
-
-    AddGameDebris(WORLD->debris_sys, 0x38, &message->position_a);
-    if (WORLD->area != NULL && (WORLD->area->flags & 0x100) != 0) {
-        message->position.x += static_cast<f32>(qrand()) * (1.0f / 65535.0f) * 0.2f - 0.1f;
-        message->position.y += static_cast<f32>(qrand()) * (1.0f / 65535.0f) * 0.2f - 0.1f;
-        message->position.z += static_cast<f32>(qrand()) * (1.0f / 65535.0f) * 0.2f - 0.1f;
-        message->field_0xf9 = 0;
-    }
-}
+static __used__ void GameMsg_EndDelay_Game(GAMEMESSAGE_s *message);
 
 i32 Percent_UpdateHint(HINT_s *hint) {
     i32 control_mode = MechInputTouchSystem::s_baseControlMode;

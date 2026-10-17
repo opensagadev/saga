@@ -55,34 +55,7 @@ extern i16 id_SNOWMOB;
 f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
 void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 
-i32 DoBuckStart(GameObject_s *object) {
-    NUVEC delta;
-    WORLDINFO_s *world = WorldInfo_CurrentlyActive();
-    if (world->current_level != HOTHESCAPEB_LDATA || object->id != id_SNOWMOB)
-        return 0;
-    i32 jumped = 0;
-    NUVEC forward = {0.0f, 0.0f, 1.0f};
-    for (i32 i = 0; i < 8; ++i) {
-        GameObject_s *player = Player[i];
-        if (player == NULL || (player->apiobj.field_0x1f8 & 0x1001) != 0x1001 || player->apiobj.field_0x287 != 0 ||
-            player->field_0xcc0 != NULL)
-            continue;
-
-        NuVecSub(&delta, &player->apiobj.lower_position, reinterpret_cast<NUVEC *>(&object->joint_matrices[1].m30));
-        if (delta.y > -0.01f && delta.y < 0.1f && delta.x * delta.x + delta.z * delta.z < 0.04000000283122063f) {
-            NUVEC destination;
-            NuVecRotateY(&destination, &forward, object->apiobj.field_0x276);
-            NuVecAdd(&destination, &destination, &Player[i]->apiobj.collision_position);
-            f32 height = GameShadow(NULL, &destination, 5.0f, -1);
-            if (height != 2000000.0f)
-                destination.y = height;
-            StartBigJump(Player[i], &destination, 0, 1.0f, 1.0f, 1, 0);
-            jumped = 1;
-        }
-    }
-    GameAudio_PlaySfx(4, &object->apiobj.collision_position, 0, 0);
-    return jumped;
-}
+i32 DoBuckStart(GameObject_s *object);
 
 pushblock_s *BlockInBlock(WORLDINFO_s *world, pushblock_s *block, i32 excluded, pushblock_s **support) {
     NUVEC *position = block->position;
@@ -185,9 +158,7 @@ i32 FindNextBreak(unsigned char *text, i32 index);
 
 i32 FindNearestBreak(unsigned char *text, i32 index);
 
-void BuckStartExtra_LSW(GameObject_s *object) {
-    DoBuckStart(object);
-}
+void BuckStartExtra_LSW(GameObject_s *object);
 
 void Buck_StartRiderJump(GameObject_s *rider, GameObject_s *mount) {
     u16 angle = qrand();

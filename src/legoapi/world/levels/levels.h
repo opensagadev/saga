@@ -54,7 +54,7 @@ extern i32 TimingBarSet;
 extern struct AREADATA_s *PODRACE_ADATA;
 extern struct AREADATA_s *JEDI_ADATA;
 extern struct AREADATA_s *DOOKU_ADATA;
-extern i16 id_ANAKINPADAWAN;
+extern "C" i16 id_ANAKINPADAWAN;
 extern MINESYS_s minesys; // held by value in the original (0x748 bytes)
 extern i32 nethost;
 extern i32 mine_count;

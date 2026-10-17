@@ -15,28 +15,9 @@ extern void ResetGameMessages(void);
 extern GameObject_s *FindGameObject(i32, u32, i32, i32, i32);
 
 
-void EndChallenge(i32 param1, i32 param2) {
-    if (netclient == 0 || param2 == 0) {
-        ChallengeMode = param1;
-        SetBonusWinner(qrand() / 0x8000);
-        if (Player[BonusWinner] == NULL || !Player[BonusWinner]->apiobj.player_controlled) {
-            BonusWinner = (BonusWinner == 0);
-        }
-        BonusWinFlag = 0;
-        NewMenu(10, -1, -1);
-        ResetGameMessages();
-        if (param1 == 3) {
-            PlaySfx("MK-Panel", 0);
-        }
-    }
-}
+void EndChallenge(i32 param1, i32 param2);
 
-void InitChallenge(i32) {
-    ChallengeMode = 1;
-    ResetTimer(&ChallengeTimer, 0.0f);
-    Cheats_TurnOff(0);
-    AreaGlobals.values.field_0x1c = 0;
-}
+void InitChallenge(i32);
 
 void Mission_Clear(MISSIONSYS *ms) {
     if (ms == NULL) {

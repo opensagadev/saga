@@ -150,29 +150,7 @@ APICHARACTERMODELLIST_s PermModelList[] = {{-1, 0}};
 
 #include "legoapi/characters/core/characters_types.h"
 
-void LSW_SetIndy(i32) {
-    LedgeTerrain_On = 0;
-    Grapples_Available = 0;
-    SuperCarry_Bash = 0;
-    SuperCarry_Jump = 0;
-    PUNCHGAP = 0.3f;
-    PUNCHCHARGAP = 0.3f;
-    HINTS_ON = 1;
-
-    TechnoSys.interaction_time = 0.2f;
-    TechnoSys.idle_offset = v000;
-    TechnoSys.active_offset = v000;
-    TechnoSys.active_effect_id = 0x2c;
-    TechnoSys.success_effect_id = -1;
-    TechnoSys.failure_effect_id = -1;
-    TechnoSys.complete_offset = v000;
-    TechnoSys.floor_target_object_id = LEGO_OBJECT_FLOOR_TARGET;
-    TechnoSys.activation_effect_id = 0x2d;
-    TechnoSys.completion_effect_id = 0x2e;
-
-    LeverSys.floor_target_object_id = LEGO_OBJECT_FLOOR_TARGET;
-    GameAudio_SetActionMusicTimes(1.0f, 6.0f);
-}
+void LSW_SetIndy(i32);
 
 void HairMovement(GameObject_s *object) {
     constexpr f32 gravity = -1.8325958f;
