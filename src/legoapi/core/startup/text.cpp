@@ -39,8 +39,6 @@ extern char * ASCII_UP;
 #include "nu2api/numath/nutrig.h"
 #include <stdio.h>
 #include <string.h>
-i32 FindNextBreak(unsigned char *, i32);
-i32 FindNearestBreak(unsigned char *, i32);
 extern char **TTab;
 extern i16 tNULL;
 extern i16 tUNKNOWN;
@@ -84,10 +82,7 @@ extern void (*Text_GameSetLanguageFn)(i32);
 char *Text_GetLanguagePath(i32 language);
 void Text_LoadAndFixUpStrings(unsigned char *filename, unsigned char **buffer, char **table, i32 count);
 void IntroText_SetTextID(i32 id);
-void Text_InsertCommasIntoNumber(char *number, char *text, i32 length);
 void Text_DecodeButtons(char *source, char *destination);
-void GameDrawMenuEntry(MENU *menu, char *text);
-extern "C" void BackupMenu(void);
 extern "C" {
     extern u8 MENUFLASH1R;
     extern u8 MENUFLASH1G;
@@ -102,7 +97,6 @@ extern "C" {
     extern u8 MENUNORMALG;
     extern u8 MENUNORMALB;
 }
-void Text_LoadFont(char *path, variptr_u *buf, variptr_u *buf_end);
 #include "nu2api/numath/numtx.h"
 extern "C" {
     void NuMtxSetRotationX(NUMTX *mtx, i32 angle);
@@ -110,9 +104,6 @@ extern "C" {
     void NuMtxRotateZ(NUMTX *mtx, i32 angle);
     void NuMtxTranslate(NUMTX *mtx, NUVEC *vec);
 }
-void Text3DStringEncodeFont(unsigned char *src, u16 *dst, void *font);
-void MatrixTextStringEncode(void *font, unsigned char *source, u16 *destination);
-i32 SplitTextFindNextWS(unsigned char *text, i32 position);
 extern "C" void TextDecode(char *source, unsigned char *dest);
 extern "C" void Text3DEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
                          u8 green, u8 blue, i32 alpha);
@@ -120,37 +111,20 @@ extern "C" void Text3DEx2(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_sc
                           u8 green, u8 blue, i32 alpha);
 void Text_MakeTime(float time, i32 show_hours, i32 show_minutes, i32 show_centiseconds, char *text);
 
-extern f32 APITEXTSCALEX;
-extern f32 APITEXTSCALEY;
-extern i32 textcrawlactive;
-extern i32 Arcade_TextCrawlID;
-extern i32 Arcade_TextCrawlParagraphs;
-extern i32 g_bgloadAsFastAsPossibleHack;
 
 void TextCrawl_Init(TEXTCRAWL_s *crawl, i32 id, i32 unk);
 
 void TextCrawl_Draw(float dt, i32 paragraphs, float alpha, char *text);
 f32 TextPulseTimer(f32 delay);
 
-void Text_InitTable(TEXTENTRY *entry, i32 first, i32 last);
 void Text_MakeScore(u32 score, char *text);
 extern i16 tALONGTIMEAGO;
 void Text_LoadStrings(variptr_u *buf, variptr_u *buf_end);
 void Text_SetLanguage(i32 language);
-void *Text_IsFontLoaded();
-void TextDecodeCodeword(char *source, char *destination);
 extern f32 g_buttonFontScalePulse;
 extern f32 smarttextex_longestwidth;
 extern i32 MenuStopDraw;
-extern i32 smarttext_fwn;
-extern i32 apitext_half_rgb;
-extern u8 text_preset_b[10];
-extern u8 text_preset_g[10];
-extern u8 text_preset_r[10];
-extern i32 ButtonScaleMode;
 
-f32 TextPrintSubstring(unsigned char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, i32 colour,
-                       i32 button_font);
 extern char * txtpath_JAPANESE;
 extern char * txtpath_DANISH;
 extern char * txtpath_SPANISH;
@@ -159,7 +133,6 @@ extern char * txtpath_GERMAN;
 extern char * txtpath_FRENCH;
 extern char * txtpath_ENGLISH;
 
-void Text_InitStringTable(i32 count, variptr_u *buf, variptr_u *);
 void Text_InitLanguageList(LANGUAGEDATA *language_list);
 void Text_SetLanguage_Game(i32 language);
 void Text_InitDefaultStrings();
@@ -167,8 +140,6 @@ i32 Text_GetMaxOverallStrings();
 void Text_LocaliseDecimalPoint(char *text);
 void Text_ExpandAllButtonStrings(char *input, char *output);
 void Text_FillInExtendedSaveInfo();
-extern NUMTL * MessageMtl;
-extern i32 MessageMtlInit;
 
 extern "C" void MessageBoxInitMtl(void);
 
@@ -223,14 +194,11 @@ void MenuUpdateViewTextStrings(MENU_s *menu);
 
 void MenuDrawViewTextStrings(MENU_s *menu);
 
-abi_ulong GetMatchLength(unsigned char *first, unsigned char *second, abi_ulong maximum);
 extern "C" void Text3DStringEncode(char *src, u16 *dst);
 extern "C" void SetQFont2D(void);
-void IntroText_Draw(float alpha);
 
 i32 GetMenuID(void);
 
-i32 GetParentMenuID();
 
 // ==== functions in original address order ====
 

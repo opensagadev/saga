@@ -15,9 +15,7 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-extern i32 VehicleArea;
 
-extern "C" void NuRndrShadowDirCol(const NUVEC *direction, u32 colour, f32 near_distance, f32 far_distance);
 
 f32 BlobShadowFade(NUVEC *position, f32 fade_start, f32 fade_end, f32 alpha) {
     if (alpha <= 0.0f) {
@@ -51,7 +49,6 @@ void InitShadowLights() {
 void RenderShadowLights(i32) {
 }
 
-void ConfigureComplexShadow(GameObject_s *object);
 
 void ResetShadowMapRendering() {
 }

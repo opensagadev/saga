@@ -137,12 +137,10 @@ struct nunativegscene_s;
 struct SHOPINPUT;
 
 extern f32 LEDGETERRAINLOOKAHEAD;
-extern i32 LedgeTerrain_CheckAnims;
 
 
 LEDGE *Ledge_FindNearest(WORLDINFO_s *world, NUVEC *position, GameObject_s *object, f32 *distance_squared);
 
-void LedgeTerrain_MoveCode(GameObject_s *object);
 
 i32 LedgeTerrain_SetTargetMom(GameObject_s *object);
 

@@ -32,7 +32,6 @@ static i64 frameout_count;
 
 // Original local static of this TU (calls NuSoundSystem::Shutdown).
 namespace {
-    void nuSoundAppTerminate(void);
 }
 // NuSoundSystem::Shutdown() is the original callback target
 static void NuSoundAppTerminate(void);

@@ -324,18 +324,11 @@ extern "C" {
 
 struct AISYS_s;
 void AIScriptLoadAll(char *path, VARIPTR *buf, VARIPTR *buf_end, AISYS_s *sys);
-void InitTexAnimScripts(char **names);
-void BackDrop_Init(char *path, VARIPTR *buf, VARIPTR *buf_end);
 
-extern i32 PARTPAGE_GENERAL;
 
 // The original table at 0x006281a0.  These are the material animation
 // scripts made available before the permanent things scene is loaded.
-extern char * TexAnimList_LSW[32];
 
-void InitRipples(ripple_set_s **, VARIPTR *, VARIPTR *, i32);
-void CreateFadeMaterials();
-void CreateUsefulMaterials();
 extern "C" ripple_set_s *ripples;
 extern "C" NUMTL *ShadowMat;
 
@@ -344,14 +337,10 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-void CharConfig_ConfigureAll(i32 permanent, nufpcomjmp_s *game_keywords);
-void ExtraCharacterFixUpAfterConfig();
-extern i32 CHARPAK;
 
 extern i32 GetMenuID(void);
 extern i32 InCollectList_Index(i32 id, COLLECTID *list, i32 count);
 extern i32 Collection_Got(i32 id);
-extern void Customiser_SaveModelTextureIDs(CUSTOMISER *customiser, CHARACTERMODEL_s *model);
 extern CUSTOMISER *CharacterCustomiser;
 extern "C" VARIPTR characterbuffer_ptr;
 extern "C" VARIPTR characterbuffer_end;
@@ -362,19 +351,14 @@ extern "C" {
 extern i32 hub_character_ready;
 }
 
-extern APICHARACTERMODELLIST_s PermModelList[1];
 
 #include "legoapi/characters/core/characters_types.h"
 
 void LSW_SetIndy(i32);
 
-void HairMovement(GameObject_s *object);
 
-void HeadMovement(GameObject_s *object);
 
-nuhspecial_s *CharScene_FindHSpecial(WORLDINFO_s *world, i32 character_id);
 
-void CharScene_Draw(WORLDINFO_s *world, i32 character_id, numtx_s *matrix, numtx_s *reflection_matrix);
 
 i32 CharIDFromName(char *name);
 
@@ -382,7 +366,6 @@ CHARACTERDATA *CDataFromName(char *name);
 
 i32 RedirectAnim(char *directory, ANIMREDIRECT *redirects, ANIMLIST_s *animation_list, char *path);
 
-void CharScenes_Init(variptr_u *buf, variptr_u *);
 
 void CharScenes_LevelLoad(WORLDINFO *world);
 
@@ -392,14 +375,10 @@ extern "C" {
     void PlaySfx(char *, nuvec_s *);
     void PlaySfxAndSetVolume(char *, nuvec_s *, f32);
 }
-void Move_CHARACTER(GameObject_s *);
-void Animate_CHARACTER(GameObject_s *);
 
-void FixUpCharacters(CHARFIXUP *fixup);
 
 void PostAnimate_FETT(GameObject_s *object);
 
-void ResetAICreature(GameObject_s *, AISYS_s *);
 void LightGameObject(GameObject_s *, void *);
 void InitSurfaceInfo(GameObject_s *);
 i32 SetObjOnSurface(GameObject_s *, i32);
@@ -409,18 +388,12 @@ void FinishWeirdoNames(i32 which);
 
 GameObject_s *ActivateCharacter(char *name, nuvec_s *position, i32 angle);
 
-extern i32 addcreature_override_id_check;
 
-extern f32 default_mover_extra;
 extern void SetGameObjectCharacterData(GameObject_s *obj);
-extern void GetTopBot(GameObject_s *obj);
-extern void GameObjectDimensions(GameObject_s *obj);
 extern void GameObjectOrigin(GameObject_s *obj);
 extern void ResetCharacterIdle(GameObject_s *obj, i32 mode, i32 idle);
-extern void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *data);
 
 
-static void SetLayers_BOB(GameObject_s *object);
 
 // Retail keeps only the IPA-SRA clone, which receives &*layers.
 #if defined(__i386__)
@@ -434,14 +407,7 @@ static void SetLayers_MOSEISLEYCITIZEN(u32 *layers);
 
 i32 InitCreature(GameObject_s *obj, i32 id, i32 param);
 
-void Shards_HandleLostObj(WORLDINFO_s *, GameObject_s *);
-void LoseHelmet(GameObject_s *, i32, i32);
-void DestroySnakeBody(GameObject_s *);
 void InitPlayerAI(GameObject_s *);
-void Player_ClearContext(GameObject_s *, i32);
-void ResetPlayerMoves(GameObject_s *);
-void Player_ResetContexts(PLAYERPACKET_s *);
-void GizForce_ResetLOS(GameObject_s *);
 i32 StartSlide(GameObject_s *, i32);
 
 i32 NewPlayerCharacter(GameObject_s *object, i32 id, i32 old_id, i32);
@@ -451,26 +417,21 @@ i32 GetDefaultIdle(GameObject_s *obj);
 
 void ResetCharacterIdle(GameObject_s *object, i32 mode, i32 animation);
 
-static void NewCharacterIdle(GameObject_s *object, i32 default_idle);
 
-void UpdateCharacterIdle(GameObject_s *object);
 
 void UpdateCharacterIDs();
 
-void CharScenes_AreaLoad(APICHARACTERMODELLIST_s *list, variptr_u *buf, variptr_u buf_end);
 
 void CharScenes_AreaDump();
 
 void SetMoveAndAnimateFunctions(u32 model_flag_mask, u32 model_flag_value, u32 game_flag_mask, u32 game_flag_value,
                                 i32 movement_type, void *move_function, void *animate_function, void *draw_function);
 
-void DeactivateGameObject(GameObject_s *);
 
 void DeactivateCharacter(char *name);
 
 void LoadSingleCharacter(bgprocinfo_s *);
 
-void CharScenes_LevelDump(WORLDINFO_s *world);
 
 void UpdateCharacterLoad();
 
@@ -481,63 +442,35 @@ extern i32 last_area;
 
 void ResetCharacterBuffer(i32 force_reset);
 
-void NextStatusStage(STATUSPACKET_s *);
-i32 AddToCollection(i32);
-void NewStatusRumbleBuzz(i32, f32, f32, i32);
 void GameAudio_PlaySfx(i32, nuvec_s *, i32, i32);
 extern "C" void PlaySfx(char *, nuvec_s *);
-void Collection_Draw(COLLECTION_s *, f32, f32, f32, APICHARACTERMODELLIST_s *, f32, i32);
-void Collection_GetPos(COLLECTION_s *, i32, f32 *, f32 *);
 void DrawCharIcon(i32, f32, f32, f32, f32, i32, f32, f32, i32, nuhspecial_s *);
 extern f32 ICONSIZE;
 extern i32 STATUS_R, STATUS_G, STATUS_B;
-extern f32 COLLECTION_Y_STATUS;
 
-void CollectCharcters_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active);
 
-void CollectCharcters_Skip(STATUS_STAGE_s *stage, STATUSPACKET_s *packet);
 
 
 void PostAnimate_ASTROMECH(GameObject_s *object);
 
-AILOCATOR_s *LocalGetRandomLocator(AILOCATOR_s **locators, i32 count, f32 clip_radius, NUVEC *position,
-                                   f32 max_distance, i32 outside_camera, f32 max_delta_y, f32 min_delta_y);
 
-AILOCATOR_s *LocalGetNearestLocator(AILOCATOR_s **locators, i32 count, f32 clip_radius, NUVEC *position,
-                                    f32 max_distance, i32 outside_camera, f32 max_delta_y, f32 min_delta_y);
 
-i32 newCharactersCollected(STATUSPACKET_s *);
 
-void CollectCharcters_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
 
-i32 SetProtocolDroidFallAnim(GameObject_s *object);
 
-void CollectCharactersOff_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active);
 
-void CollectCharactersOff_Skip(STATUS_STAGE_s *, STATUSPACKET_s *);
 
-void ScaleGameObject(GameObject_s *obj);
 
 void SetGameObjectCharacterData(GameObject_s *obj);
 
-void CollectCharactersOff_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
 
 extern "C" i32 dagobah_training;
 
-i32 TakeOverYodaSeekDistanceHack(GameObject_s *object, GameObject_s *luke, nuvec_s *offset);
 
-void SetProtocolDroidInterfaceAction(GameObject_s *object);
 
-void SetProtocolDroidDeactivatedAction(GameObject_s *object);
 
-extern NUMTL * lightningmat;
-extern NUMTL *DebMat[10];
-extern "C" void NuWaterInit(void);
-extern "C" void NuBridgeInit(void);
 
-void LoadPerm1();
 
-void LoadPerm2();
 
 // ==== functions in original address order ====
 

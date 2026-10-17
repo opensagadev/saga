@@ -23,12 +23,6 @@ struct SHOPINPUT;
 
 i32 LineIntersectSphere(NUVEC *, NUVEC *, NUVEC *, f32, f32 *);
 bool LineIntersectCircle(NUVEC *, NUVEC *, NUVEC *, f32);
-void Game_KillPart(PART_s *part, i32 reason);
-extern "C" void NewPartRotation(PART_s *part);
-extern f32 guided_life;
-extern f32 guided_start_time;
-extern i32 guided_rotate_speed;
-extern f32 guided_speed;
 
 BOLT_s *FindIncomingBolt(GameObject_s *object, i32 exclude_players, i32 mark_direct_hit) {
     BOLT_s *nearest = NULL;
@@ -71,7 +65,6 @@ void GuidedMissile_Move(PART_s *part, float time);
 void GuidedMissile_Deflect(PART_s *part);
 
 extern "C" i16 id_SPEEDERBIKE;
-i32 InitBolt_AddMomentumType_LSW(BOLT_s *bolt, GameObject_s *object, NUVEC *momentum);
 
 // ==== src/legoapi/items/collect/bolts.cpp: declarations ====
 #include "legoapi/legoapi_types.h"
@@ -117,16 +110,12 @@ extern f32 BOLT_OVERRIDE_PLAYERBOLTDURATION;
 struct spacelevel_s;
 struct quickboltinfo;
 
-static void Bolt_Debris_Default(BOLT_s *, NUVEC *, i32, NUVEC *, i32);
-static void Bolt_GetShootOrigin_Default(GameObject_s *, NUVEC *);
-static i32 Bolt_GetShootDirection_Default(GameObject_s *, NUVEC *);
 static void UpdateBolt_Geonosian(BOLT_s *);
 static void EndBolt_EwokTorpedo(BOLT_s *);
 void BoltTypes_Reset(WORLDINFO_s *);
 
 #include "legoapi/items/collect/bolttypes_lsw.inc"
 
-extern BOLTTYPE_s GlobalBoltType_Default;
 extern BOLTSYS * BoltSys;
 
 
@@ -136,40 +125,23 @@ extern BOLTSYS * BoltSys;
 
 void BoltTypes_Configure(WORLDINFO_s *world, char *config);
 
-BOLT_s *Bolt_Alloc();
 
-extern i32 addbolt_newsfx;
-extern NUVEC addbolt_newpos;
-extern f32 BOLT_SHOOTFLASHTIME;
 f32 Bolt_ObjTargetPosYAdjust(GameObject_s *);
-void FindAnglesXY(NUVEC *, u16 *, u16 *);
-void CalculateInterceptVector(NUVEC *, NUVEC *, NUVEC *, f32, NUVEC *, NUVEC *);
-void GameAudio_PlaySfxById(i32, NUVEC *, i32, i32);
 
-void Bolt_Shoot(GameObject_s *object, i32 type_id, i32 fire_flags);
 
-i32 MatrixReflectionVU0_AXISY(NUMTX *, f32, f32, NUMTX *);
 void Bolt_End(BOLT_s *, i32);
 extern i32 Paused;
 
-void Bolts_Draw(WORLDINFO_s *world);
 
-void Bolts_Reset();
 
-void BoltSys_Init(BOLTSYS *system);
 
-void Bolt_Reflect(nuvec_s *normal, nuvec_s *incoming, nuvec_s *out);
 
 extern "C" {
     void KillPart(PART_s *, i32);
 }
-i32 SphereSphereOverlapScaleY(NUVEC *, f32, f32, NUVEC *, f32, f32);
-void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 
-void Bolt_PlayHitSfx(BOLT_s *bolt);
 void NewRumble(nupad_s *, f32, i32);
 
-PART_s *Bolt_HitParts(BOLT_s *bolt, NUVEC *points, NUVEC *minimum, NUVEC *maximum, f32 radius, i32 reason);
 
 void BoltTypes_Reset(WORLDINFO_s *world);
 
@@ -182,32 +154,19 @@ EXPLOSION *AddExplosion(NUVEC *, f32, f32, GameObject_s *, i32, i32);
 
 void Bolt_Debris_LSW(BOLT_s *bolt, nuvec_s *points, i32 point, nuvec_s *, i32 no_explosion);
 
-i32 Bolt_HitPartMode(BOLT_s *bolt);
 
 i32 Bolt_HitPart_LSW(BOLT_s *, PART_s *part);
 
 BOLTTYPE_s *BoltType_FindByID(i32 id, WORLDINFO_s *world);
 
 void Bolt_HitGameObjectRC(NetMessage &);
-i32 Bolt_HitGameObject(BOLT_s *bolt, GameObject_s *object, NUVEC *points, NUVEC *, NUVEC *, f32 radius, u8 *);
 
-i32 KaminoE_CheckPlatHit(BOLT_s *);
 
-i32 Bolt_HitPlatFn_LSW(BOLT_s *bolt);
 
 i32 Bolt_HitGameObjects(BOLT_s *bolt, NUVEC *points, NUVEC *minimum, NUVEC *maximum, f32 radius, u8 *hit_flags);
 
-i32 Bolt_HitCustomFn_LSW(BOLT_s *bolt, nuvec_s *points);
 
 extern i32 addbolt_nosfx;
-extern BOLT_s * objhitobj_bolt;
-extern i32 i_temp_xrot;
-extern f32 DEACTIVATEDTIME;
-i32 Player_HasDeflectBolts(GameObject_s *);
-i32 CannotKill(GameObject_s *);
-i32 NewBlockAction(GameObject_s *);
-void ObjHitShield(GameObject_s *, GameObject_s *, i32, BOLT_s *);
-i32 ObjHitObj(GameObject_s *, GameObject_s *, i32, u16, i32, i32);
 void NewBuzz(nupad_s *, f32, i32);
 
 __attribute__((force_align_arg_pointer)) void Bolt_AddDeflectedBolt(BOLT_s *bolt, nuvec_s *direction, nuvec_s *normal,
@@ -234,15 +193,9 @@ void Bolt_End(BOLT_s *bolt, i32 run_callback);
 
 BOLT_s *Bolt_Find(i32 type_id, NUVEC *position, GameObject_s *owner);
 
-void Bolt_Free(BOLT_s *bolt);
 
-static i32 Bolt_RayCast(BOLT_s *, NUVEC *, NUVEC *, f32);
-i32 GizmoSys_BoltHit(GIZMOSYS_s *, void *, BOLT_s *, NUVEC *, NUVEC *, NUVEC *, f32, u8 *);
-GIZMOBLOWUP_s *GizmoBlowUp_Hit(GameObject_s *, NUVEC *, i32, f32, NUVEC *, NUVEC *, BOLT_s *, u32, u8 *);
 // The original caller appears to treat this u16-returning function as i32;
 // correcting this declaration lowers its match.
-i32 ObjHitObj_Flags(GameObject_s *);
-extern i32 addbolt_noobjmom;
 extern i32 (*BoltInitSfxFn)(GameObject_s *);
 void Bolt_Init(void *storage, NetMessage &message);
 
@@ -264,11 +217,8 @@ extern "C" {
     i32 NewShadowOnPlatform();
 }
 f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
-f32 FindReflectionNoPlatforms(NUVEC *);
-void FindAnglesZX(NUVEC *, u16 *, u16 *);
 
 
-void Bolts_Update(WORLDINFO_s *world);
 
 i8 BoltType_FindIDByName(char *name, WORLDINFO *world);
 
@@ -295,40 +245,12 @@ i8 BoltType_FindIDByName(char *name, WORLDINFO *world);
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/nu3d/nuspecial.h"
 
-extern i32 MenuLoadStarted;
-extern i32 memcard_slot;
-extern i32 memcard_cardchanged;
-extern i32 memcard_slotsused;
-extern i32 memcard_saveneeded;
-extern i32 memcard_savestarted;
-extern i32 memcard_savefailed;
-extern i32 memcard_loadneeded;
-extern i32 memcard_loadstarted;
-extern i32 memcard_loadfailed;
-extern i32 memcard_loadcorrupt;
-extern f32 memcard_savemessage_delay;
-extern f32 memcard_saveresult_delay;
-extern f32 memcard_loadmessage_delay;
-extern f32 memcard_loadresult_delay;
 extern i32 memcard_deleteneeded, memcard_deletestarted, memcard_deletefailed;
 extern i32 memcard_formatme, memcard_formatting, memcard_formatfailed;
 extern i16 (*memcard_hashfn)(void);
-extern i32 numfilteroutblocks;
-extern char filteroutblocks[8][12];
-extern i32 numfilterblocks;
-extern char filterblocks[8][96];
 
-extern char FS_FileList[65536];
 extern char FS_LastFileName[64];
 extern char FS_Path[256];
-extern i32 FS_NumFiles;
-extern i32 FS_CurrentPosFileNum;
-extern i32 FS_CursorLine;
-extern char FS_ParentEntry[8];
-extern i32 FS_SortMode;
-extern char * FS_CurrentCursorPos;
-extern char * FS_CurrentPos;
-extern char * FS_FileListEnd;
 extern char FS_Title[64];
 extern char FS_Filter[256];
 extern char FS_FilterOut[256];
@@ -348,60 +270,32 @@ void FS_SortStrings(char *, char *, i32);
 i32 FS_FileNameFilter(char *);
 void FS_MakeDateTimeString(FS_FILEENTRYHDR *, char *);
 
-extern f32 memcard_autosavecanceldelay;
-extern f32 memcard_formatmessage_delay;
-extern f32 memcard_formatresult_delay;
-extern f32 memcard_createmessage_delay;
-extern f32 memcard_createresult_delay;
-extern f32 memcard_deletemessage_delay;
-extern f32 memcard_deleteresult_delay;
-extern f32 memcard_message_delay;
-extern f32 memcard_result_delay;
-extern i32 memcard_justformatted;
-extern i32 saveload_autosavedisabled;
 
 void InitMemCard();
 
-i32 SaveGizmoSys(GIZMOSYS_s *, char *, char *);
 
-void SerialiseInt(EdStream &stream, void *data, i32);
 
-void FS_GetDirList(char *path, char *filter, char *filter_out);
 
-void SerialiseChar(EdStream &stream, void *data, i32);
 
-i32 FS_PrevNameLen(char *name);
 
 
 void FS_SortStrings(char *start, char *end, i32 mode);
 
-void SerialiseFloat(EdStream &stream, void *data, i32);
 
-void SerialiseNuMtx(EdStream &stream, void *data, i32);
 
-void SerialiseNuVec(EdStream &stream, void *data, i32);
 
-void SerialiseShort(EdStream &stream, void *data, i32);
 
-void SerialiseVuMtx(EdStream &stream, void *data, i32);
 
-void SerialiseVuVec(EdStream &stream, void *data, i32);
 
-void FS_MoveCursorUp(i32 steps);
 
 void SerialiseString(EdStream &stream, void *data, i32 count);
 
-void SerialiseColour3(EdStream &stream, void *data, i32);
 
 i32 FS_FileNameFilter(char *name);
 
-void FS_MakeDateString(FS_FILEENTRYHDR *entry, char *output);
 
-void FS_MakeTimeString(FS_FILEENTRYHDR *entry, char *output);
 
-extern "C" void NuRndrRect2d(f32 x, f32 y, f32 z, f32 width, f32 height, i32 colour, NUMTL *material);
 
-extern char * SortStrings[4];
 
 // Retail keeps the whole body of RenderFileSel3 as the split-out .part clone;
 // the exported function only tests FS_Active.
@@ -414,19 +308,12 @@ void RenderFileSel3(i32 draw_title);
 
 void RenderFileSel();
 
-void FS_MoveCursorDown(i32 steps);
 
-f32 FS_GetDirTextWidth();
 
-char *FS_GetFilterString(char *input, char *output);
 
-i32 getsaveload_status();
 
-i32 FS_GetPadWithRepeat(nupad_s *pad, float repeat, float elapsed);
 
-void SerialiseNuHSpecial(EdStream &stream, void *data, i32);
 
-void SerialiseStringAddr(EdStream &stream, void *data, i32 count);
 
 void FS_BuildFilterBlocks(char *input);
 
@@ -434,7 +321,6 @@ void FS_MakeDateTimeString(FS_FILEENTRYHDR *entry, char *output);
 
 void FS_BuildFilterOutBlocks(char *input);
 
-void FS_SetCursorToLastFileName();
 
 i32 ProcessFileSel3(f32 elapsed, nupad_s *pad);
 

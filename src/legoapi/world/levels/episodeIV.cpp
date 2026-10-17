@@ -221,13 +221,8 @@ struct WORLDINFO_s;
 struct BOLT_s;
 struct debinftype;
 
-extern void SetGameObjectCharacterData(GameObject_s *obj);
 extern void GetTopBot(GameObject_s *obj);
-extern void GameObjectDimensions(GameObject_s *obj);
 extern void GameObjectOrigin(GameObject_s *obj);
-extern void ResetCharacterIdle(GameObject_s *obj, i32 mode, i32 idle);
-extern void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *data);
-extern void Hub_ResetPanel();
 extern f32 VehicleTurnOrLoopOffset(GameObject_s *object);
 extern void StartTurn(GameObject_s *object);
 
@@ -252,8 +247,6 @@ extern "C" {
     extern i16 id_ZAMSSPEEDER;
 }
 
-extern i32 addcreature_override_id_check;
-extern f32 default_mover_extra;
 f32 trench_max_height_move = 5.0f;
 f32 trench_roll_f = 5000.0f;
 f32 trench_seek_z = 0.5f;
@@ -270,9 +263,7 @@ __used__ void TrenchMove(GameObject_s *object);
 
 __used__ void TrenchKilledCallback(GameObject_s *object);
 
-static __used__ void SurfaceInfo_ExtraReflect(GameObject_s *object);
 
-static __used__ void PauseGame_ExtraCode();
 
 
 // ==== src/legoapi/world/levels/episodeIII.cpp: declarations ====
@@ -323,11 +314,9 @@ extern "C" {
 #include "nu2api/nu3d/nutex.h"
 
 i32 Players_AveragePos(NUVEC *, SOCKPOSITION_s *);
-extern i16 id_PALPATINE;
 extern i16 id_WOOKIEE;
 
 extern PART_s * boulder_part[2];
-extern i32 boulder_blowup_type;
 
 void Boulder_Move(PART_s *, f32);
 void Boulder_Kill(PART_s *, i32);
@@ -336,7 +325,6 @@ DECOMP_ASSERT(sizeof(VADERA_s) == 0x30, "VADERA_s size");
 DECOMP_ASSERT(offsetof(VADERA_s, big_jump_locator) == 0x24, "VADERA_s locator offset");
 
 
-static void VaderA_StartCollapseStage(WORLDINFO_s *world);
 
 
 DECOMP_ASSERT(offsetof(CRUISERC_s, count_dooku) == 4, "CRUISERC_s Dooku offset");
@@ -360,7 +348,6 @@ extern CRUISERDNETPACKET_s * cruiserd_netpacket;
 // ===========================================================================
 
 extern AREADATA *DOGFIGHT_ADATA;
-void DogFightARestart();
 
 extern speedup_s DogFightSpeedList[9];
 
@@ -438,7 +425,6 @@ void TempleC_AlwaysUpdate(WORLDINFO_s *);
 // Vader (Vader_A / Vader_B / Vader_C)
 // ===========================================================================
 
-extern void * vadera_netpacket;
 
 
 
@@ -450,8 +436,6 @@ void VaderA_Init(WORLDINFO_s *world);
 
 void VaderB_Init(WORLDINFO_s *);
 
-extern i32 Vader_ObiWanKilledAnakin;
-extern void * vaderc_netpacket;
 
 void VaderC_Init(WORLDINFO_s *world);
 
@@ -473,7 +457,6 @@ void VaderB_DrawPanel(WORLDINFO_s *);
 
 void VaderC_DrawPanel(WORLDINFO_s *);
 
-void VaderA_GoneThroughDoor(WORLDINFO_s *world, DOOR_s *door);
 
 
 // ===========================================================================
@@ -515,7 +498,6 @@ void ANewHopeA_Init(WORLDINFO_s *world);
 #include <string.h>
 
 
-extern f32 BUCK_RIDERJUMPCLEARANCE;
 extern void (*BuckStartExtraFn)(GameObject_s *);
 void NewRumble(nupad_s *, f32, i32);
 
@@ -525,30 +507,22 @@ extern i16 id_SNOWMOB;
 f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
 void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 
-i32 DoBuckStart(GameObject_s *object);
 
-pushblock_s *BlockInBlock(WORLDINFO_s *world, pushblock_s *block, i32 excluded, pushblock_s **support);
 
 extern PART_s *boulder_part[2];
-extern NUVEC boulder_oldpos[2];
 extern "C" void KillPart(PART_s *, i32);
 
 void Boulder_Kill(PART_s *part, i32);
 
 void Boulder_Move(PART_s *part, float);
 
-void Buck_MoveCode(GameObject_s *object, i32 start);
-
-i32 FindNextBreak(unsigned char *text, i32 index);
 
 
-i32 FindNearestBreak(unsigned char *text, i32 index);
 
-void BuckStartExtra_LSW(GameObject_s *object);
+
 
 void Buck_StartRiderJump(GameObject_s *rider, GameObject_s *mount);
 
-void SetEffectVisibility(char *name, i32 visible);
 
 i32 Conveyor_AdjustSpeed(NUVEC *velocity);
 
@@ -574,17 +548,8 @@ void EquivalentObjects_Configure(WORLDINFO_s *world, char *config);
 #include <stdio.h>
 #include <string.h>
 
-void edpartDoInput(nupad_s *pad);
-void edpartDetermineNearest(f32 distance);
-void edpartDrawCursor();
-void edpartHighlightNearest();
 void edpartScaleType(i32 type, f32 scale);
 void edpartInitType(i32 type);
-void edpartDestroy(i32 index);
-void edpartPlace(i32 index, nuvec_s *position);
-void edpartCreate(nuvec_s *position, i32 type);
-void edpartMultipleCopyCopy();
-void edpartMultipleCopyClear();
 i32 edpartSaveEffects(char *path, char page);
 
 extern "C" {
@@ -725,14 +690,6 @@ static void edpartSetScaleFactor(eduimenu_s *, eduiitem_s *, u32);
 static void edpartApplyScaleType(eduimenu_s *, eduiitem_s *, u32);
 static void edpartChangeDebrisScale(eduimenu_s *, eduiitem_s *, u32);
 static void edpartChangeInstanceScale(eduimenu_s *, eduiitem_s *, u32);
-static void edpartCancelCutOffMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelSScaleMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelEmitTimeMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelScaleTypeMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelDebrisScaleMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelInstanceScaleMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelChangeGenRateMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelChangeNameMenu(eduimenu_s *, eduimenu_s *);
 
 static void edpartChangeGrav(eduimenu_s *, eduiitem_s *, u32);
 static void edpartChangeBounce(eduimenu_s *, eduiitem_s *, u32);
@@ -744,25 +701,10 @@ static void edpartChangeVarEmit(eduimenu_s *, eduiitem_s *, u32);
 static void edpartChangeVarStart(eduimenu_s *, eduiitem_s *, u32);
 static void edpartChangeMaxLife(eduimenu_s *, eduiitem_s *, u32);
 static void edpartChangeRanMaxLife(eduimenu_s *, eduiitem_s *, u32);
-static void edpartCancelGravMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelTintMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelEmitVelMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelVarEmitMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelVarStartMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelChangeMaxLifeMenu(eduimenu_s *, eduimenu_s *);
 static void edpartSoundIDMenu(eduimenu_s *, eduiitem_s *, u32);
 static void edpartSoundControlMenu(eduimenu_s *, eduiitem_s *, u32);
-static void edpartCancelSoundXMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelSoundsMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelSoundIDMenu(eduimenu_s *, eduimenu_s *);
 static void edpartSwitchTypeMenu(eduimenu_s *, eduiitem_s *, u32);
 static void edpartSetSwitchId(eduimenu_s *, eduiitem_s *, u32);
-static void edpartCancelSwitchMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelSwitchTypeMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelSoundControlMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelDataMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelEmitMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelDebrisSettingsMenu(eduimenu_s *, eduimenu_s *);
 static void edpartChangeNameMenu(eduimenu_s *, eduiitem_s *, u32);
 static void edpartDeleteType(eduimenu_s *, eduiitem_s *, u32);
 static void edpartMoveList(eduimenu_s *, eduiitem_s *, u32);
@@ -781,37 +723,18 @@ static void edpartGeneralTypeMenu(eduimenu_s *, eduiitem_s *, u32);
 static void edpartLevelTypeMenu(eduimenu_s *, eduiitem_s *, u32);
 static void edpartAddGeneralType(eduimenu_s *, eduiitem_s *, u32);
 static void edpartAddLevelType(eduimenu_s *, eduiitem_s *, u32);
-static void edpartCancelTypeMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelGeneralTypeMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelLevelTypeMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelInstanceSettingsMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelImpactPartMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelDieDebrisMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelImpactDebrisMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelEmitterDebrisMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelTrail1DebrisMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelTrail2DebrisMenu(eduimenu_s *, eduimenu_s *);
 static void edpartGeneralPartIndexMenu(eduimenu_s *, eduiitem_s *, u32);
 static void edpartLevelPartIndexMenu(eduimenu_s *, eduiitem_s *, u32);
 static void edpartGeneralDebrisIndexMenu(eduimenu_s *, eduiitem_s *, u32);
 static void edpartLevelDebrisIndexMenu(eduimenu_s *, eduiitem_s *, u32);
 static void edpartChangeDebrisPerSec(eduimenu_s *, eduiitem_s *, u32);
-static void edpartCancelPartIndexMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelDebrisIndexMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelInstanceOrientMenu(eduimenu_s *, eduimenu_s *);
 static void edpartChangeInstanceRot(eduimenu_s *, eduiitem_s *, u32);
 static void edpartChangeInstanceVarRot(eduimenu_s *, eduiitem_s *, u32);
-static void edpartCancelInstanceFlagsMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelInstanceMenu(eduimenu_s *, eduimenu_s *);
 static void edpartSetInstanceType(eduimenu_s *, eduiitem_s *, u32);
 static void edpartSetDistribution(eduimenu_s *, eduiitem_s *, u32);
 static void edpartWorldInstanceMenu(eduimenu_s *, eduiitem_s *, u32);
 static void edpartThingsInstanceMenu(eduimenu_s *, eduiitem_s *, u32);
 static void edpartInstanceOrphansMenu(eduimenu_s *, eduiitem_s *, u32);
-static void edpartCancelWorldInstanceMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelThingsInstanceMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelInstanceOrphansMenu(eduimenu_s *, eduimenu_s *);
-static void edpartCancelMessageMenu(eduimenu_s *, eduimenu_s *);
 static void edpartDeleteInstanceOrphan(eduimenu_s *, eduiitem_s *, u32);
 static void edpartDeleteAllInstanceOrphans(eduimenu_s *, eduiitem_s *, u32);
 static void edpartDeleteAllInstanceDuplicates(eduimenu_s *, eduiitem_s *, u32);
@@ -824,29 +747,11 @@ extern i32 edpart_particle_list;
 }
 
 
-static void edpartInit();
-static i32 edpartProc(float delta_time, nupad_s *pad);
-static void edpartApply();
-static void edpartClose();
-static void edpartEnter();
-static void edpartRender();
-static void edpartSelType(eduimenu_s *menu, eduiitem_s *item, u32);
-static void edpartCopyType(eduimenu_s *menu, eduiitem_s *, u32);
-static void edpartDataMenu(eduimenu_s *menu, eduiitem_s *, u32);
-static void edpartEmitMenu(eduimenu_s *menu, eduiitem_s *, u32);
 static void edpartGravMenu(eduimenu_s *menu, eduiitem_s *, u32);
 static void edpartMoveList(eduimenu_s *menu, eduiitem_s *, u32);
-static void edpartTintMenu(eduimenu_s *menu, eduiitem_s *, u32);
-static void edpartTypeMenu(eduimenu_s *menu, eduiitem_s *, u32);
 static void edpartChangeGrav(eduimenu_s *, eduiitem_s *item, u32);
-static void edpartChangeName(eduimenu_s *, eduiitem_s *item, u32);
 static void edpartCutOffMenu(eduimenu_s *menu, eduiitem_s *, u32);
 static void edpartDeleteType(eduimenu_s *menu, eduiitem_s *, u32);
-static void edpartSScaleMenu(eduimenu_s *menu, eduiitem_s *, u32);
-static void edpartSetSoundID(eduimenu_s *menu, eduiitem_s *item, u32);
-static void edpartSoundXMenu(eduimenu_s *menu, eduiitem_s *item, u32);
-static void edpartSoundsMenu(eduimenu_s *menu, eduiitem_s *, u32);
-static void edpartSwitchMenu(eduimenu_s *menu, eduiitem_s *, u32);
 static void edpartChangeTintB(eduimenu_s *, eduiitem_s *item, u32);
 static void edpartChangeTintG(eduimenu_s *, eduiitem_s *item, u32);
 static void edpartChangeTintR(eduimenu_s *, eduiitem_s *item, u32);
@@ -860,29 +765,19 @@ static void edpartChangeCutOff(eduimenu_s *, eduiitem_s *item, u32);
 static void edpartChangeIvalOn(eduimenu_s *, eduiitem_s *item, u32);
 static void edpartChangeSScale(eduimenu_s *, eduiitem_s *item, u32);
 static void edpartEmitTimeMenu(eduimenu_s *menu, eduiitem_s *, u32);
-static void edpartInstanceMenu(eduimenu_s *menu, eduiitem_s *, u32);
-static void edpartToggleFilter(eduimenu_s *, eduiitem_s *item, u32);
 static void edpartVarStartMenu(eduimenu_s *menu, eduiitem_s *, u32);
-static void edpartCancelOptMenu(eduimenu_s *, eduimenu_s *);
 static void edpartChangeEmitVel(eduimenu_s *, eduiitem_s *item, u32);
-static void edpartChangeGenRate(eduimenu_s *, eduiitem_s *item, u32);
 static void edpartChangeIvalOff(eduimenu_s *, eduiitem_s *item, u32);
 static void edpartChangeMaxLife(eduimenu_s *, eduiitem_s *item, u32);
 static void edpartChangeVarEmit(eduimenu_s *, eduiitem_s *item, u32);
-static void edpartDieDebrisMenu(eduimenu_s *menu, eduiitem_s *, u32);
 static void edpartLevelTypeMenu(eduimenu_s *menu, eduiitem_s *, u32);
-static void edpartScaleTypeMenu(eduimenu_s *menu, eduiitem_s *, u32);
-static void edpartSetSwitchType(eduimenu_s *menu, eduiitem_s *item, u32);
 static void edpartAddGeneralType(eduimenu_s *menu, eduiitem_s *, u32);
 static void edpartApplyScaleType(eduimenu_s *menu, eduiitem_s *, u32);
 static void edpartChangeNameMenu(eduimenu_s *menu, eduiitem_s *, u32);
 static void edpartChangeVarStart(eduimenu_s *, eduiitem_s *item, u32);
-static void edpartImpactPartMenu(eduimenu_s *menu, eduiitem_s *, u32);
 static void edpartSetScaleFactor(eduimenu_s *, eduiitem_s *item, u32);
 static void edpartSwitchTypeMenu(eduimenu_s *menu, eduiitem_s *, u32);
 static void edpartChangeIvalOnRan(eduimenu_s *, eduiitem_s *item, u32);
-static void edpartChangePartIndex(eduimenu_s *, eduiitem_s *item, u32);
-static void edpartDebrisScaleMenu(eduimenu_s *menu, eduiitem_s *, u32);
 static void edpartFileLoadEffects(eduimenu_s *parent, eduiitem_s *, u32);
 
 
@@ -890,30 +785,24 @@ static void edpartFileSaveEffects(eduimenu_s *parent, eduiitem_s *, u32);
 static void edpartGeneralTypeMenu(eduimenu_s *menu, eduiitem_s *, u32);
 static void edpartSetDistribution(eduimenu_s *, eduiitem_s *item, u32);
 static void edpartSetInstanceType(eduimenu_s *, eduiitem_s *item, u32);
-static void edpartSetSoundControl(eduimenu_s *menu, eduiitem_s *item, u32);
 
 
 
 
-static void edpartChangeFilterName(eduimenu_s *, eduiitem_s *item, u32);
 
 static void edpartChangeIvalOffRan(eduimenu_s *, eduiitem_s *item, u32);
 
 static void edpartChangeRanMaxLife(eduimenu_s *, eduiitem_s *item, u32);
 
-static void edpartImpactDebrisMenu(eduimenu_s *menu, eduiitem_s *, u32);
 
 static void edpartSoundControlMenu(eduimenu_s *menu, eduiitem_s *item, u32);
 
-static void edpartTrail1DebrisMenu(eduimenu_s *menu, eduiitem_s *, u32);
-
-static void edpartTrail2DebrisMenu(eduimenu_s *menu, eduiitem_s *, u32);
 
 
 
 
 
-static void edpartChangeDebrisIndex(eduimenu_s *, eduiitem_s *item, u32);
+
 
 static void edpartChangeDebrisScale(eduimenu_s *, eduiitem_s *item, u32);
 
@@ -921,13 +810,9 @@ static void edpartChangeGenRateMenu(eduimenu_s *menu, eduiitem_s *, u32);
 
 static void edpartChangeInstanceRot(eduimenu_s *, eduiitem_s *item, u32);
 
-static void edpartChangeMaxLifeMenu(eduimenu_s *menu, eduiitem_s *, u32);
 
-static void edpartEmitterDebrisMenu(eduimenu_s *menu, eduiitem_s *, u32);
 
-static void edpartInstanceFlagsMenu(eduimenu_s *menu, eduiitem_s *, u32);
 
-static void edpartInstanceScaleMenu(eduimenu_s *menu, eduiitem_s *, u32);
 
 static void edpartWorldInstanceMenu(eduimenu_s *parent, eduiitem_s *, u32);
 
@@ -938,9 +823,7 @@ static void edpartChangeDebrisPerSec(eduimenu_s *, eduiitem_s *item, u32);
 
 static void edpartChangeInstanceFlag(eduimenu_s *, eduiitem_s *item, u32);
 
-static void edpartDebrisSettingsMenu(eduimenu_s *menu, eduiitem_s *, u32);
 
-static void edpartInstanceOrientMenu(eduimenu_s *menu, eduiitem_s *, u32);
 
 // Retail only keeps the IPA-SRA clone, which takes just the parent menu.
 static __attribute__((noinline, noclone)) void edpartPartIndexMenu(eduimenu_s *menu) __asm__("_ZL19edpartPartIndexMenuP10eduimenu_sP10eduiitem_sj.isra.12");
@@ -969,7 +852,6 @@ static void edpartFileSaveEffectsLevel(eduimenu_s *parent, eduiitem_s *, u32);
 
 static void edpartGeneralPartIndexMenu(eduimenu_s *menu, eduiitem_s *item, u32 value);
 
-static void edpartInstanceSettingsMenu(eduimenu_s *menu, eduiitem_s *, u32);
 
 // Retail only keeps the IPA-SRA clone, which takes just the parent menu.
 static __attribute__((noinline, noclone)) void edpartDebrisIndexMenu(eduimenu_s *menu) __asm__("_ZL21edpartDebrisIndexMenuP10eduimenu_sP10eduiitem_sj.isra.13");
@@ -1043,7 +925,6 @@ extern i16 TerrImpact;
 extern i32 terrhitflags;
 extern i32 TERRAINMASK_NONWEAPON;
 extern i32 TERRAINMASK_NONDROID;
-extern i32 geom;
 extern NUVEC TerrImpactPos;
 extern NUVEC TerrImpactNormal;
 extern NUVEC ShadNorm;
@@ -1059,10 +940,7 @@ extern i32 WallSplinesOnly;
 extern "C" {
 extern i32 IgnoreWallSplines;
 }
-extern f32 TerrPlatScanDist;
-extern i32 cntrots;
 #include "legoapi/render/core/terrain_stubs_types.h"
-void ScanTerrIDRemovePlat(i32 platform_index);
 
 void TerrainSkinAllocate(terrsitu_s *terrain_group);
 
@@ -1073,23 +951,8 @@ extern "C" {
     void NuScratchRelease(void);
 }
 
-TERRAIN_TRACK_SLOT *ScanTerrId(void *hit_flags);
-void ScanTerrain(i32 scan_type, i32 terrain_mask, i32 scan_flags);
-i32 PlatformChecks(i32 count, NUVEC *movement);
 i32 HitTerrain(void);
-void TerrainImpactNorm(void);
 void RayImpact(NUVEC *);
-void StorePlatImpact(void);
-i32 TerrainPlatformEmbedded(NUVEC *movement);
-i32 TerrShapeSideStep(NUVEC *position, NUVEC *movement, u8 *hit_flags);
-void TerrainImpact(NUVEC *position, NUVEC *movement, u8 *hit_flags);
-void TerrFlush(void);
-void NewScanRot(NUVEC *position, i32 terrain_mask);
-f32 NewCast(NUVEC *position, f32 height_above, f32 height_below);
-void TerrDrawPlat(tertype *terrain, i16 index);
-void RemoveChunkControlFromStack(debris_chunk_control_s *, debris_chunk_control_s **);
-i32 DebrisSingleCollisionCheckScaleYFlag(i32, NUVEC *, f32, f32, u8);
-i32 DebrisSingleTorusCollisionCheckScaleYFlag(i32, NUVEC *, f32, f32, u8);
 
 extern "C" {
     i32 DebrisCollisionCheckScaleYFlag(NUVEC *, f32, f32, u8);
@@ -1201,7 +1064,6 @@ i32 DebrisCollisionCheckScaleYFlag(NUVEC *position, f32 radius, f32 y_scale, u8 
 
 } // extern "C"
 
-void DebrisTimeSlip(i32 group);
 
 
 extern "C" {
@@ -1441,11 +1303,7 @@ void UpdatePlatinst(i32 index, void *object);
 extern ADDPART_s Default_ADDPART;
 
 struct rtlset;
-extern rtlset * PartRTL;
-extern f32 PARTSCALEUPTIME;
 void NewPartOrderedRotation(PART_s *);
-void PartTimeSlip();
-void PartCleanupTypes();
 void UpdatePartEmits(f32);
 
 extern "C" {
@@ -1522,12 +1380,8 @@ void NuPartSetSeed(i32 seed);
     void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
 }
 
-void AddDebrisEffectToStack(debkeydatatype_s *);
 void AddChunkToRenderStack(particlechunkrendertype_s *, particlechunkrendertype_s **);
-void AddChunkControlToStack(debris_chunk_control_s *, debris_chunk_control_s **);
 void DebrisProcessSpheres(uv1deb *, f32, debinftype *, debkeydatatype_s *, i32);
-void DebrisGetControlStackLock();
-void DebrisReleaseControlStackLock();
 void FindAnglesZX(NUVEC *, u16 *, u16 *);
 extern f32 AreaPickupGravity;
 extern i16 temp_xrot;
@@ -1549,22 +1403,14 @@ extern WORLDINFO_s *WORLD;
 extern GAMECAMERA_s *GameCam;
 extern f32 ForceThrowSpeed, ForceThrowGravity;
 i32 SphereSphereOverlapScaleY(NUVEC *, f32, f32, NUVEC *, f32, f32);
-void DeflectPart(PART_s *, GameObject_s *, f32, f32, i32, i32);
-void SetCoinType(i32 model, GIZMOPICKUP_s *pickup);
-u16 GameCam_GetAdjustedYRot(GAMECAMERA_s *camera);
 void CollectPowerUp(GameObject_s *, NUVEC *, u16, i32);
 void NewBuzz(nupad_s *, f32, i32);
 void CollectHitPoint(GameObject_s *object, NUVEC *position, i32);
 void GameCam_Judder(GAMECAMERA_s *, f32, i32, NUVEC *);
-void ReleasePush(GameObject_s *);
-void ObjHitShield(GameObject_s *, GameObject_s *, i32, BOLT_s *);
-i32 CannotKill(GameObject_s *);
 
 
 
-extern "C" f32 coinimpactwait;
 extern i32 GAMEDEMO;
-extern "C" void PlaySfxAndSetVolume(char *, NUVEC *, f32);
 
 
 
@@ -1760,10 +1606,7 @@ PART_s *TargetPart(GameObject_s *object, nuvec_s *position, nuvec_s *direction, 
 
 extern "C" i32 NuGScnNumSpecials(nugscn_s *);
 i32 edpartLookupObjectInScene(char *name, nugscn_s *scene);
-i32 edpartLookupDebrisEffect(char *name);
-extern "C" i32 GetSfxIdN(char *, i32);
 
-void edpartLoadSingleType(part_typedesc_s *type, i32 version, i32 page);
 
 extern "C" {
 extern i32 edpart_nearest;
@@ -1801,25 +1644,19 @@ void PartUpdate_Heart(PART_s *);
 void PartStop_Flickerer(PART_s *);
 i32 PartDraw_Flickerer(PART_s *);
 
-void AddTorpedoAsPart(nuvec_s *position, nuvec_s *velocity, float scale, float lifetime);
 
-void AddHeartAsPart(GameObject_s *recipient, nuvec_s *position, nuvec_s *velocity, float scale, float lifetime);
 
-void PowerUp_AddPart(NUVEC *position, NUVEC *velocity, f32 scale, f32 lifetime);
 
 void PowerUp_Particles(WORLDINFO_s *world, NUVEC *position);
 
 i32 FindPartDebris(PARTDEBSYS_s *system, char *name);
 
-void MakePartVector(NUVEC *velocity, NUVEC *direction, f32 scale);
 
 void PartCollide_2D(PART_s *part);
 
 void PartCollide_3D(PART_s *part);
 
-void PartStop_Coin(PART_s *part);
 
-void AddCoinsAsParts(i32 type_id, nuvec_s *position, nuvec_s *velocity, float lifetime, float scale);
 
 // The original repeats the per-sound emitter checks for each of the four sound slots.
 #define PART_EMIT_SOUND_ON(slot)                                                                                       \
@@ -1834,19 +1671,15 @@ void AddCoinsAsParts(i32 type_id, nuvec_s *position, nuvec_s *velocity, float li
 
 void UpdatePartEmits(f32 time);
 
-i32 LineIntersectSphere(NUVEC *, NUVEC *, NUVEC *, f32, f32 *);
-
-PART_s *FindIncomingPart(void *owner, NUVEC *position, f32 radius, u32 flags, f32 range);
 
 
 
-extern "C" f32 brickimpactwait;
+
 
 void PartImpact_Brick(PART_s *part);
 
 void PartUpdate_Heart(PART_s *part);
 
-void Asteroid_PartKill(PART_s *part, i32 reason);
 
 void PartStop_Flickerer(PART_s *part);
 
@@ -1857,11 +1690,8 @@ void GameCam_NewShake(GAMECAMERA_s *, f32, f32, f32);
 
 void PartKill_ForceThrow(PART_s *part, i32);
 
-void PartImpact_Basketball(PART_s *part);
 
-void PartUpdate_Basketball(PART_s *part);
 
-PART_s *Part_FindFromHSpecial(nuhspecial_s *special);
 
 void NewPartOrderedRotation(PART_s *part);
 
@@ -2075,11 +1905,6 @@ extern "C" void cbCancelSubMenu(eduimenu_s *, eduimenu_s *);
 
 
 
-static __used__ void cbColourPickSel(eduimenu_s *menu, eduiitem_s *, u32);
-static __used__ void cbToggleIndicatorMode(eduimenu_s *, eduiitem_s *item, u32);
-static __used__ void cbCopy(eduimenu_s *, eduiitem_s *, u32);
-static __used__ void cbPaste(eduimenu_s *, eduiitem_s *, u32);
-static __used__ i32 cbProcessColourPick(eduimenu_s *menu, eduiitem_s *item, float delta_time, nupad_s *pad);
 
 extern "C" void CreateColourPicker(void);
 
@@ -2109,10 +1934,6 @@ static __used__ void cbgpcfgPaste(eduimenu_s *menu, eduiitem_s *item, u32 value)
 
 // ---- end src/gameapi/edtools/edmenucallbacks.cpp ----
 
-float edanimPlayerAnimDistance(i32 parameter_index);
-void edgraDoInput(nupad_s *pad);
-void edgraDetermineNearestInstance(f32 distance);
-void edgraDrawCursor();
 extern "C" void edgraClumpsReset(void);
 extern "C" void edbitsDrawCircleTilted(NUVEC *centre, f32 radius, i32 colour, NUMTL *material, i32 rotation_z,
                                        i32 rotation_y);
@@ -2162,10 +1983,7 @@ extern i32 edbits_particle_char_page;
     void edppRestartAllEffectsInLevel(void);
 }
 
-void edppStartSingleEffect(i32 index);
 void edppPtlDestroy(i32 index);
-void edppDestroyAllPages();
-i32 edppSaveEffects(char *filename, char page);
 void cbFileSaveEffects(eduimenu_s *, eduiitem_s *, u32);
 static void edptlcbClipboardMenu(eduimenu_s *, eduiitem_s *, u32);
 static void edptlcbOrphanListMenu(eduimenu_s *, eduiitem_s *, u32);
@@ -2188,7 +2006,6 @@ static void cbPtlChangeIvalOn(eduimenu_s *, eduiitem_s *, u32);
 static void cbPtlChangeIvalOnRan(eduimenu_s *, eduiitem_s *, u32);
 static void cbPtlChangeIvalOff(eduimenu_s *, eduiitem_s *, u32);
 static void cbPtlChangeIvalOffRan(eduimenu_s *, eduiitem_s *, u32);
-static void UpdateTotalPtls(debinftype *effect);
 
 // The original particle editor's private callbacks and menu state share this TU.
 // ---- begin src/gameapi/edtools/edptlcallbacks.cpp ----
@@ -2221,12 +2038,6 @@ extern "C" {
     extern eduimenu_s *namemenu;
 }
 
-static void cbPtlCancelSScaleMenu(eduimenu_s *, eduimenu_s *);
-static void cbPtlCancelGravMenu(eduimenu_s *, eduimenu_s *);
-static void cbPtlCancelEmitVelMenu(eduimenu_s *, eduimenu_s *);
-static void cbPtlCancelReadoutMenu(eduimenu_s *, eduimenu_s *);
-static void cbPtlCancelDamageMenu(eduimenu_s *, eduimenu_s *);
-static void cbPtlCancelDamageFlagMenu(eduimenu_s *, eduimenu_s *);
 static void cbPtlChangeGrav(eduimenu_s *, eduiitem_s *, u32);
 static void cbPtlChangeEmitVel(eduimenu_s *, eduiitem_s *, u32);
 static void cbPtlChangeSScale(eduimenu_s *, eduiitem_s *, u32);
@@ -2234,9 +2045,7 @@ static void cbPtlSelReadout(eduimenu_s *, eduiitem_s *, u32);
 static void cbPtlChangeDamageFlags(eduimenu_s *, eduiitem_s *, u32);
 static void cbPtlDamageFlagMenu(eduimenu_s *, eduiitem_s *, u32);
 static void cbPtlTorusMenu(eduimenu_s *, eduiitem_s *, u32);
-static void edptlcbCancelSoundControlMenu(eduimenu_s *, eduimenu_s *);
 static void cbCancelChangeNameMenu(eduimenu_s *, eduimenu_s *);
-static void cbCancelMessageMenu(eduimenu_s *, eduimenu_s *);
 static void cbPtlChangeTextureSelect(eduimenu_s *, eduiitem_s *, u32);
 
 
@@ -2321,29 +2130,21 @@ extern "C" {
     extern eduimenu_s *ptlvarstartmenu;
     extern eduimenu_s *ptlstartvelmenu;
 }
-static void cbPtlCancelGSortMenu(eduimenu_s *, eduimenu_s *);
-static void cbPtlCancelTextureMenu(eduimenu_s *, eduimenu_s *);
-static void cbPtlCancelQuickDeleteMenu(eduimenu_s *, eduimenu_s *);
 static void cbPtlQuickDeleteType(eduimenu_s *, eduiitem_s *, u32);
 static void cbPtlSelTextureType(eduimenu_s *, eduiitem_s *, u32);
 static void cbPtlTextureSelectMenu(eduimenu_s *, eduiitem_s *, u32);
 static void cbPtlAddEffect(eduimenu_s *, eduiitem_s *, u32);
 static void cbPtlCopyEffect(eduimenu_s *, eduiitem_s *, u32);
 static void cbPtlDeleteEffect(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlCancelDataMenu(eduimenu_s *, eduimenu_s *);
 static void cbChangeNameMenu(eduimenu_s *, eduiitem_s *, u32);
 static void cbPtlQuickDeleteMenu(eduimenu_s *, eduiitem_s *, u32);
 static void cbPtlReadoutMenu(eduimenu_s *, eduiitem_s *, u32);
 static void cbFileLoadEffects(eduimenu_s *, eduiitem_s *, u32);
-static void cbCancelEffectListMenu(eduimenu_s *, eduimenu_s *);
-static void cbPtlCancelTypeMenu(eduimenu_s *, eduimenu_s *);
 static void cbPtlSelType(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlCancelInstanceSettingsMenu(eduimenu_s *, eduimenu_s *);
 static void cbPtlChangePriority(eduimenu_s *, eduiitem_s *, u32);
 static void cbPtlToggleDynamicPriority(eduimenu_s *, eduiitem_s *, u32);
 static void cbPtlSetFacing(eduimenu_s *, eduiitem_s *, u32);
 static void edptlcbScaleEffectMenu(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlCancelEmitMenu(eduimenu_s *, eduimenu_s *);
 static void cbPtlEmitVelMenu(eduimenu_s *, eduiitem_s *, u32);
 static void cbPtlGravMenu(eduimenu_s *, eduiitem_s *, u32);
 static void cbPtlVarStartMenu(eduimenu_s *, eduiitem_s *, u32);
@@ -2353,143 +2154,81 @@ static void cbChangeGenRateMenu(eduimenu_s *, eduiitem_s *, u32);
 static void cbChangeETimeMenu(eduimenu_s *, eduiitem_s *, u32);
 static void cbPtlEmitTimeMenu(eduimenu_s *, eduiitem_s *, u32);
 static void cbPtlCutOffMenu(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlCancelSizeMenu(eduimenu_s *, eduimenu_s *);
-static void cbPtlApplySize(eduimenu_s *, eduiitem_s *, u32);
 static void cbPtlCopySize(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlCancelColMenu(eduimenu_s *, eduimenu_s *);
-static void cbPtlApplyGrad(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlCancelJibMenu(eduimenu_s *, eduimenu_s *);
-static void cbPtlCancelRotMenu(eduimenu_s *, eduimenu_s *);
-static void cbPtlApplyJib(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlApplyRot(eduimenu_s *, eduiitem_s *, u32);
-static void edptlcbCancelScaleEffectMenu(eduimenu_s *, eduimenu_s *);
 static void edptlcbApplyScaleFactor(eduimenu_s *, eduiitem_s *, u32);
-static void cbCancelChangeGenRateMenu(eduimenu_s *, eduimenu_s *);
-static void cbCancelChangeETimeMenu(eduimenu_s *, eduimenu_s *);
-static void cbPtlCancelCutOffMenu(eduimenu_s *, eduimenu_s *);
 static void cbPtlChangeRepeatFlag(eduimenu_s *, eduiitem_s *, u32);
 static void cbPtlChangeCutOff(eduimenu_s *, eduiitem_s *, u32);
 static void cbPtlChangeCutOn(eduimenu_s *, eduiitem_s *, u32);
 static void cbPtlChangeDrawCutOff(eduimenu_s *, eduiitem_s *, u32);
 static void cbPtlChangeSoundCutOff(eduimenu_s *, eduiitem_s *, u32);
 static void cbPtlChangeCameraCutOff(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlCancelVarEmitMenu(eduimenu_s *, eduimenu_s *);
-static void cbPtlCancelStartVelMenu(eduimenu_s *, eduimenu_s *);
-static void cbPtlCancelVarStartMenu(eduimenu_s *, eduimenu_s *);
-static void cbPtlCancelEmitTimeMenu(eduimenu_s *, eduimenu_s *);
-static void cbPtlCancelCollMenu(eduimenu_s *, eduimenu_s *);
-static void cbPtlApplyCollEnv(eduimenu_s *, eduiitem_s *, u32);
 static void cbChangeNumCollSpheres(eduimenu_s *, eduiitem_s *, u32);
 static void cbPtlDefaultCollEnv(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlCancelTorusMenu(eduimenu_s *, eduimenu_s *);
 static void cbChangeTorusLife(eduimenu_s *, eduiitem_s *, u32);
 static void cbChangeTorusRad1(eduimenu_s *, eduiitem_s *, u32);
 static void cbChangeTorusRad2(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlApplyTorusEnv1(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlApplyTorusEnv2(eduimenu_s *, eduiitem_s *, u32);
-static void cbPtlApplyTorusEnv3(eduimenu_s *, eduiitem_s *, u32);
 
 // Particle-list editor UI/menu callbacks.
 
-static void edptlcbApplyStarPoints(eduimenu_s *, eduiitem_s *item, u32);
 
-static void edptlcbCancelGhostMenu(eduimenu_s *, eduimenu_s *);
 
-static void edptlcbCancelGroupMenu(eduimenu_s *, eduimenu_s *);
 
-static void edptlcbChangeCSDisable(eduimenu_s *, eduiitem_s *item, u32);
 
 static void edptlcbScaleEffectMenu(eduimenu_s *parent, eduiitem_s *, u32);
 
-static void edptlcbSetDebrisDetail(eduimenu_s *, eduiitem_s *item, u32);
 
-static void edptlcbSetSoundControl(eduimenu_s *menu, eduiitem_s *item, u32);
 
 static void edptlcbApplyScaleFactor(eduimenu_s *menu, eduiitem_s *, u32);
 
-static void edptlcbCancelBounceMenu(eduimenu_s *, eduimenu_s *);
 
-static void edptlcbCancelDetailMenu(eduimenu_s *, eduimenu_s *);
 
-static void edptlcbCancelSoundXMenu(eduimenu_s *, eduimenu_s *);
 
-static void edptlcbCancelSoundsMenu(eduimenu_s *, eduimenu_s *);
 
-static void edptlcbCancelSwitchMenu(eduimenu_s *, eduimenu_s *);
 
-static void edptlcbSoundControlMenu(eduimenu_s *menu, eduiitem_s *item, u32);
 
-static void edptlcbApplyBounceFactor(eduimenu_s *, eduiitem_s *item, u32);
 
-static void edptlcbApplyBounceOffset(eduimenu_s *, eduiitem_s *item, u32);
 
-static void edptlcbCancelSoundIDMenu(eduimenu_s *, eduimenu_s *);
 
-static void edptlcbSetDebrisThinning(eduimenu_s *, eduiitem_s *item, u32);
 
-static void edptlcbCancelDpadModeMenu(eduimenu_s *, eduimenu_s *);
 
-static void edptlcbCancelDrawflagMenu(eduimenu_s *, eduimenu_s *);
 
-static void edptlcbJumpToGameLocation(eduimenu_s *, eduiitem_s *item, u32);
 
-static void edptlChangeRepeatBoxXZLock(eduimenu_s *, eduiitem_s *item, u32);
 
-static void edptlcbCancelClipboardMenu(eduimenu_s *, eduimenu_s *);
 
-static void edptlcbCancelOrphanListMenu(eduimenu_s *, eduimenu_s *);
 
-static void edptlcbCancelSwitchTypeMenu(eduimenu_s *, eduimenu_s *);
 
-static void edptlcbCancelTestDetailMenu(eduimenu_s *, eduimenu_s *);
 
 
 
 // Particle editor UI/menu callbacks.
 
-static void cbChangeName(eduimenu_s *, eduiitem_s *item, u32);
 
-static void cbPtlChangeX(eduimenu_s *menu, eduiitem_s *item, u32);
 
-static void cbPtlChangeY(eduimenu_s *menu, eduiitem_s *item, u32);
 
-static void cbPtlChangeZ(eduimenu_s *menu, eduiitem_s *item, u32);
 
-static void cbPtlColMenu(eduimenu_s *parent, eduiitem_s *, u32);
 
-static void cbPtlJibMenu(eduimenu_s *parent, eduiitem_s *, u32);
 
-static void cbPtlRotMenu(eduimenu_s *parent, eduiitem_s *, u32);
 
 static void cbPtlSelType(eduimenu_s *menu, eduiitem_s *item, u32);
 
-static void cbPtlShowAll(eduimenu_s *, eduiitem_s *, u32);
 
 
 
-static void cbPtlCollMenu(eduimenu_s *parent, eduiitem_s *, u32);
 
 static void cbPtlCopySize(eduimenu_s *, eduiitem_s *item, u32);
 
-static void cbPtlDataMenu(eduimenu_s *parent, eduiitem_s *, u32);
 
-static void cbPtlEmitMenu(eduimenu_s *parent, eduiitem_s *, u32);
 
 static void cbPtlGravMenu(eduimenu_s *menu, eduiitem_s *, u32);
 
-static void cbPtlSelGCode(eduimenu_s *menu, eduiitem_s *item, u32);
 
-static void cbPtlSelGSort(eduimenu_s *menu, eduiitem_s *item, u32);
 
-static void cbPtlSizeMenu(eduimenu_s *parent, eduiitem_s *, u32);
 
-static void cbPtlTypeMenu(eduimenu_s *parent, eduiitem_s *, u32);
 
 static void cbPtlAddEffect(eduimenu_s *menu, eduiitem_s *, u32);
 
 
 
-static void cbPtlGSortMenu(eduimenu_s *menu, eduiitem_s *, u32);
 
 static void cbPtlSetFacing(eduimenu_s *, eduiitem_s *item, u32);
 
@@ -2501,19 +2240,14 @@ static void cbPtlCopyEffect(eduimenu_s *menu, eduiitem_s *, u32);
 
 static void cbPtlCutOffMenu(eduimenu_s *parent, eduiitem_s *, u32);
 
-static void cbPtlDamageMenu(eduimenu_s *menu, eduiitem_s *, u32);
 
-static void cbPtlSScaleMenu(eduimenu_s *menu, eduiitem_s *, u32);
 
 static void cbPtlSelReadout(eduimenu_s *, eduiitem_s *item, u32);
 
-static void cbPtlSnapToggle(eduimenu_s *, eduiitem_s *item, u32);
 
-static void cbSelEffectList(eduimenu_s *menu, eduiitem_s *item, u32);
 
 static void cbChangeNameMenu(eduimenu_s *menu, eduiitem_s *, u32);
 
-static void cbEffectListMenu(eduimenu_s *parent, eduiitem_s *, u32);
 
 static void cbPtlChangeCutOn(eduimenu_s *, eduiitem_s *item, u32);
 
@@ -2521,9 +2255,7 @@ static void cbPtlEmitVelMenu(eduimenu_s *menu, eduiitem_s *, u32);
 
 static void cbPtlReadoutMenu(eduimenu_s *menu, eduiitem_s *, u32);
 
-static void cbPtlSetXZFacing(eduimenu_s *, eduiitem_s *item, u32);
 
-static void cbPtlTextureMenu(eduimenu_s *menu, eduiitem_s *, u32);
 
 static void cbPtlVarEmitMenu(eduimenu_s *parent, eduiitem_s *, u32);
 
@@ -2585,11 +2317,9 @@ static void cbPtlChangeCameraCutOff(eduimenu_s *, eduiitem_s *item, u32);
 
 static void cbPtlChangeTextureSelect(eduimenu_s *menu, eduiitem_s *item, u32);
 
-static void cbPtlInstanceSettingsMenu(eduimenu_s *parent, eduiitem_s *, u32);
 
 static void cbPtlToggleDynamicPriority(eduimenu_s *, eduiitem_s *item, u32);
 
-static void cbPtlCancel(eduimenu_s *, eduimenu_s *);
 
 
 
@@ -2630,47 +2360,31 @@ static void edptlcbDrawflagMenu(eduimenu_s *, eduiitem_s *, u32);
 static void edptlcbApplyStarRatio(eduimenu_s *, eduiitem_s *, u32);
 static void edptlcbApplyGhostTime(eduimenu_s *, eduiitem_s *, u32);
 static void edptlcbApplyNumGhosts(eduimenu_s *, eduiitem_s *, u32);
-static void edptlcbCancelStarMenu(eduimenu_s *, eduimenu_s *);
 static void edptlcbSetMasterGroup(eduimenu_s *, eduiitem_s *, u32);
 static void edptlcbSetMaxThin(eduimenu_s *, eduiitem_s *, u32);
 static void edptlcbTestDetailMenu(eduimenu_s *, eduiitem_s *, u32);
 static void edptlcbSetSwitchId(eduimenu_s *, eduiitem_s *, u32);
 static void edptlcbSetSwitchVar(eduimenu_s *, eduiitem_s *, u32);
 static void edptlcbSwitchTypeMenu(eduimenu_s *, eduiitem_s *, u32);
-static void edptlcbCancelPageMenu(eduimenu_s *, eduimenu_s *);
 static void edptlcbStartPage(eduimenu_s *, eduiitem_s *, u32);
 static void edptlcbStopPage(eduimenu_s *, eduiitem_s *, u32);
 static void edptlcbClearPage(eduimenu_s *, eduiitem_s *, u32);
 
-static void cbPtlCancelRepeatBoxMenu(eduimenu_s *, eduimenu_s *);
 static void cbPtlRepeatBoxMenu(eduimenu_s *parent, eduiitem_s *, u32);
 
 
 // Particle list editor subsystem stubs (static, internal linkage).
 
-static void edptlcbPageMenu(eduimenu_s *parent, eduiitem_s *, u32);
-static void edptlcbSetGroup(eduimenu_s *, eduiitem_s *item, u32);
 static void edptlcbStarMenu(eduimenu_s *parent, eduiitem_s *, u32);
 static void edptlcbStopPage(eduimenu_s *, eduiitem_s *item, u32);
 static void edptlcbClearPage(eduimenu_s *, eduiitem_s *item, u32);
 static void edptlcbGhostMenu(eduimenu_s *parent, eduiitem_s *, u32);
-static void edptlcbGroupMenu(eduimenu_s *parent, eduiitem_s *, u32);
-static void edptlcbSetDetail(eduimenu_s *, eduiitem_s *item, u32);
 void edppStartPage(i32 page);
 static void edptlcbStartPage(eduimenu_s *, eduiitem_s *item, u32);
-static void edptlcbBounceMenu(eduimenu_s *parent, eduiitem_s *, u32);
-static void edptlcbDetailMenu(eduimenu_s *parent, eduiitem_s *, u32);
 static void edptlcbSetMaxThin(eduimenu_s *, eduiitem_s *item, u32);
-static void edptlcbSetSoundID(eduimenu_s *menu, eduiitem_s *item, u32);
-static void edptlcbSoundXMenu(eduimenu_s *parent, eduiitem_s *item, u32);
-static void edptlcbSoundsMenu(eduimenu_s *parent, eduiitem_s *, u32);
-static void edptlcbSwitchMenu(eduimenu_s *parent, eduiitem_s *, u32);
-static void edptlcbSetDpadMode(eduimenu_s *, eduiitem_s *item, u32);
-static void edptlcbSetDrawflag(eduimenu_s *, eduiitem_s *item, u32);
 static void edptlcbSetSwitchId(eduimenu_s *, eduiitem_s *item, u32);
 static void edptlcbSoundIDMenu(eduimenu_s *parent, eduiitem_s *item, u32);
 static void edptlcbCutClipboard(eduimenu_s *menu, eduiitem_s *, u32);
-static void edptlcbDpadModeMenu(eduimenu_s *parent, eduiitem_s *, u32);
 static void edptlcbDrawflagMenu(eduimenu_s *parent, eduiitem_s *, u32);
 static void edptlcbSetSwitchVar(eduimenu_s *, eduiitem_s *item, u32);
 static void edptlChangeRepeatBox(eduimenu_s *, eduiitem_s *item, u32);
@@ -2693,7 +2407,6 @@ static void edptlcbChangeRampTime(eduimenu_s *, eduiitem_s *item, u32);
 static void edptlcbEmptyClipboard(eduimenu_s *menu, eduiitem_s *, u32);
 static void edptlcbOrphanListMenu(eduimenu_s *parent, eduiitem_s *, u32);
 static void edptlcbPasteClipboard(eduimenu_s *menu, eduiitem_s *, u32);
-static void edptlcbResetParticles(eduimenu_s *, eduiitem_s *, u32);
 static void edptlcbSetMasterGroup(eduimenu_s *, eduiitem_s *item, u32);
 static void edptlcbSetScaleFactor(eduimenu_s *, eduiitem_s *item, u32);
 static void edptlcbSwitchTypeMenu(eduimenu_s *parent, eduiitem_s *, u32);
@@ -2702,10 +2415,7 @@ static void edptlcbTestDetailMenu(eduimenu_s *parent, eduiitem_s *, u32);
 // ---- end src/gameapi/edtools/edptlall.cpp ----
 
 
-void edppDoInput(nupad_s *pad);
 void edppDetermineNearest(f32 distance);
-void edppDrawCursor();
-void edppHighlightNearest();
 extern "C" void DebrisStatusNormal(i32 *handle);
 
 extern "C" {
@@ -2786,34 +2496,10 @@ static __attribute__((noinline, noclone)) void eduiFntPrintClipEx(void *font, i3
     __asm__("_ZL18eduiFntPrintClipExPviiiiiPcz.constprop.70");
 static void eduiFntPrintClipEx(void *font, i32 x, i32 y, i32, i32 clip_x, i32 clip_width, char *format, ...);
 
-extern "C" i32 nugraphAddPoint(nugraph_s *graph, f32 x, f32 y);
-extern "C" i32 nugraphDeletePoint(nugraph_s *graph, i32 index);
 extern "C" i32 nugraphCalcCurve(nugraph_s *graph, i32 point_count);
-extern "C" f32 nugraphGetYatX(nugraph_s *graph, f32 x, i32 mode);
 
 #include "gameapi/edtools/edtools_types.h"
 
-static void edgraInit();
-static void edgraClose();
-static void edgraEnter();
-static i32 edgraProc(f32 delta_time, nupad_s *pad);
-static void edgraRender();
-static void edppInit();
-static void edppClose();
-static void edppEnter();
-static void edppApply();
-static i32 edppProc(f32 delta_time, nupad_s *pad);
-static void edppRender();
-static void edbriInit();
-static void edbriClose();
-static void edbriEnter();
-static i32 edbriProc(f32 delta_time, nupad_s *pad);
-static void edbriRender();
-static void edanimInit();
-static void edanimClose();
-static void edanimEnter();
-static i32 edanimProc(f32 delta_time, nupad_s *pad);
-static void edanimRender();
 
 extern "C" {
     void nugraphInit(nugraph_s *graph);
@@ -3073,9 +2759,7 @@ extern i32 edpp_facroty;
 
 
 
-void edbriDoInput(nupad_s *);
 void edbriDetermineNearest(f32);
-void edbriDrawCursor();
 extern "C" {
     extern NUMTL *edbri_mtl, *edbri_mtl_zoff;
     extern eduimenu_s *edbri_options_menu, *edbri_active_menu;
@@ -3091,12 +2775,9 @@ extern "C" {
 
 
 
-void edgraClumpReseed(i32 index);
 
 edgra_individual_s *GetIndGrassClump(i32 clump, i32 element);
 
-void edgraClumpDestroy(i32 index);
-void edbitsDoSingleDump(i32 face);
 void edbriBridgeUpdate(i32 bridge, NUGSCN *scene);
 
 
@@ -3223,19 +2904,12 @@ extern i32 edbri_post_interval;
 
 
 
-void FileLoadSingleEffectType(debinftype *, i32, char);
-extern "C" void NuBridgeInit(void);
 extern "C" void NuBridgeRemove(i32 bridge);
-extern "C" i32 NuBridgeCreate(NUGSCN *, nuhspecial_s *, nuhspecial_s *, NUVEC *, NUVEC *, f32, i16, f32, f32, f32, f32,
-                              i32, f32, f32, i32, u32);
 
 void edbriBridgeUpdate(i32 index, NUGSCN *scene);
 
-void edbriBridgePlace(i32 index, NUVEC *position);
 
-i32 edbriBridgeCreate(NUVEC *position);
 
-void edbriBridgeDestroy(i32 index);
 
 void edanimDetermineNearestAnim(f32);
 void edppDetermineNearest(float);
@@ -3695,9 +3369,6 @@ extern VuVec SpherePos2;
 extern EdInputContext * Input;
 extern MemoryManager theMemoryManager;
 extern LevelEditor theLevelEditor;
-extern PropertyTool thePropertyTool;
-extern eduiiattr_s EdLevelAttr;
-extern i32 EdLevelFnt;
 extern "C" void eduiSetCameraEnabled(i32);
 extern "C" void eduicbItemDestroy(eduimenu_s *, eduiitem_s *);
 extern "C" i32 edbri_nearest;
@@ -3709,14 +3380,8 @@ extern "C" i32 edbri_plank_instance_type, edbri_post_instance_type, edbri_bridge
 extern "C" void NuRndrRect2di(i32, i32, i32, i32, i32, NUMTL *);
 extern "C" void NuRndrLine2di(i32, i32, i32, i32, i32, NUMTL *);
 extern "C" void edbitsDrawCircleTilted(NUVEC *, f32, i32, NUMTL *, i32, i32);
-NUVEC NuFadeObjGetAngleTerrainValues(NUVEC *);
 extern "C" void eduiAddPropTextPickEnt(eduimenu_s *, eduiitem_s *);
-extern "C" char *GetSfxName(i32);
 extern "C" void PlaySfxById(i32, nuvec_s *);
-static i32 get_manipulator_attribute(ClassObjectListEntry *, i32, i32, void *);
-static void set_manipulator_attribute(ClassObjectListEntry *, i32, i32, void *);
-void cbEdLevelDestroy(eduimenu_s *, eduimenu_s *);
-void cbEdLevelDestroyOnSelect(eduimenu_s *, eduiitem_s *, u32);
 extern i32 EdType_Char;
 extern i32 EdType_Short;
 extern i32 EdType_Int;
@@ -3743,30 +3408,17 @@ void SerialiseNuVec(EdStream &, void *, i32);
 void SerialiseNuMtx(EdStream &, void *, i32);
 
 extern f32 Scale;
-extern EdManipulator theDefaultManipulator;
-extern EdManMove theMoveManipulator;
-extern EdManRotate theRotateManipulator;
-extern EdManScale theScaleManipulator;
-extern SplineTool theSplineTool;
 DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
 extern SplineHelper theSplineHelper;
 extern KnotHelper theKnotHelper;
-extern ClassEditor theClassEditor;
-extern i32 pad_disabled;
 extern EdSystem theEdSystem;
-extern eduimenu_s * edLevelPinnedMenu;
 
-void eduiSetPinnedMenu(eduimenu_s *menu);
 
-void edSetPadDisabled(i32 disabled);
 
-i32 edGetPadDisabled();
 
-extern NUMTL * EdDrawMtl[2];
 void EdDrawPolyArrow(VuVec const &, VuVec const &, i32, i32, float, float, float, float);
 void EdDrawPolyCylinder(VuMtx const &, float, float, float, i32, i32, i32, i32);
 void EdDrawMtx(VuMtx const *);
-extern char * EDSPLINE_FILECHECK;
 
 extern "C" {
 extern char edgra_filter_string[16];
@@ -3820,40 +3472,29 @@ extern i32 edbits_particle_level_page;
 
 i32 edpartLookupObjectInScene(char *, NUGSCN *);
 
-void EdTerrInit(void *, void *);
 
-void edDrawLine(nuvec_s *, nuvec_s *, unsigned char, unsigned char, unsigned char);
 
-void EdDrawBegin(i32 material);
 
 
 void edppDetermineNearest(f32);
-void edppMultipleCopyPaste();
-void edppMultipleCopyCopy();
-void edppMultipleCopyClear();
 i32 edppPtlCreate(NUVEC *, i32);
 i32 edppPtlPlace(i32, NUVEC *);
 
 
-void EdTerrShadow(nuvec_s *position, float height_above, float height_below, i32 terrain_mask);
 
 
 i32 edppPtlPlace(i32 index, NUVEC *position);
 
-void EdDrawPolyTri(VuVec const &a, VuVec const &b, VuVec const &c, i32 colour);
 
 void edanimDoInput(nupad_s *pad);
 
-i32 edbriFileSave(char *path);
 
 i32 edppPtlCreate(NUVEC *position, i32 effect_index);
 
-i32 edgraFileSave(char *path);
 
 
 void EdDrawLineCube(VuMtx const &transform, float size, i32 colour);
 
-void EdDrawPolyAxis(VuMtx const &transform, float size, i32 opacity);
 
 i32 edanimFileSave(char *path);
 
@@ -3873,32 +3514,23 @@ void EdDrawPolyArrow(VuVec const &start, VuVec const &end, i32 sides, i32 colour
                      float radius_factor, float radius_offset);
 
 
-void edgraClumpPlace(i32 index, NUVEC *position);
 
 
-void edpartPtlShelve(i32 index);
 
 void edpartScaleType(i32 index, float scale);
 
 
-void EdDrawLineSphere(VuVec const &center, float radius, float scale, i32 colour);
 
-void EdDrawPolySector(VuVec const &center, float radius, i32 axis, i32 first_angle, i32 last_angle, i32 colour,
-                      i32 segments);
 
 void edanimDrawCursor();
 
 extern "C" i32 part_emits_used;
 
 
-i32 edgraClumpCreate(NUVEC *position);
 
 
-void EdDrawLineCircleX(VuVec const &centre, float radius, i32 colour, i32 segments);
 
-void EdDrawLineCircleZ(VuVec const &centre, float radius, i32 colour, i32 segments);
 
-void EdDrawLineCircleY(VuVec const &centre, float radius, i32 colour, i32 segments);
 
 void EdDrawLineSegment(VuVec const &a, VuVec const &b, i32 colour);
 
@@ -3906,9 +3538,7 @@ i32 edanimParamCreate(i32 instance_id);
 
 i32 edpartSaveEffects(char *filename, char page);
 
-void edppPtlChangeType(i32 index, i32 effect_index);
 
-i32 edppPtlCreateCopy(NUVEC *position, i32 source_index);
 
 void EdDrawPolyCylinder(VuMtx const &transform, float half_length, float radius, float end_radius, i32 sides,
                         i32 colour, i32 cap_start, i32 cap_end);
@@ -3920,34 +3550,25 @@ __attribute__((force_align_arg_pointer)) void EdDrawPolyCylinder(VuVec const &st
 void edanimParamDestroy(i32 index);
 
 
-void edgraCalculatePage(char page, i32 calculate_vectors);
 
-void edgraInstancePlace(i32 index, NUVEC *position);
 
-i32 edpartLookupObject(char *name);
 
-i32 edSpline_FindAllBeg(NUGSCN *scene, char *prefix, NUGSPLINE **results, i32 capacity);
 
 i32 LoadEditorSplines(char *path, VARIPTR *buf, VARIPTR *buf_end);
 
-i32 edSpline_FindAllSub(NUGSCN *scene, char *name, NUGSPLINE **results, i32 capacity);
 
 NUGSPLINE *edSpline_SplineFind(NUGSCN *scene, char *name);
 
-void edSpline_SplineList(nugscn_s *);
 
 void edanimParticlePlace(i32 index, NUVEC *position);
 
 void edanimStartAllPages();
 
-void edgraInstanceCreate(NUVEC *position);
 
-i32 edpartPtlChangeType(i32 index, i32 type);
 
 
 void edanimParticleCreate(NUVEC *position);
 
-void edgraInstanceDestroy(i32 index);
 
 void edppDetermineNearest(float max_distance_squared);
 
@@ -3955,9 +3576,7 @@ void edppDetermineNearest(float max_distance_squared);
 
 void edbriDetermineNearest(float distance);
 
-void edgraSortVectorBuffer(i32 index);
 
-void edpartDestroyAllPages();
 
 
 
@@ -3972,7 +3591,6 @@ void edanimDetermineNearestAnim(float distance);
 
 void edgraDetermineNearestClump(f32 distance);
 
-eduiitem_s *eduiItemFileSelectorCreate(u32 data, eduiiattr_s *colours, EdUiItemCallback callback, char *text);
 
 void edanimRenderParticleEmitters(i32 parameter_index);
 
@@ -3981,11 +3599,9 @@ void edanimDetermineNearestSound(float distance);
 
 void edanimDetermineNearestParticle(float distance);
 
-void EdDrawEnd();
 
 void EdDrawMtx(VuMtx const *matrix);
 
-i32 EdTerrRay(VuVec &, VuVec &);
 
 
 
@@ -4163,7 +3779,6 @@ inline void EdVectorControl::operator delete(void *memory) {
 
 
 
-extern EdSfxNameControl * sfxNameControl;
 
 
 
@@ -4191,8 +3806,6 @@ extern EdSfxNameControl * sfxNameControl;
 
 
 
-extern eduimenu_s *edLevelDestroyThisMenu;
-extern eduimenu_s *edLevelDestroyThisMenu2;
 
 
 
@@ -5618,7 +5231,6 @@ __attribute__((visibility("hidden"), optimize("O3"))) void tpentPropOnEnter(edui
 
 extern MENUPACKET_s MenuPacket;
 extern i32 NextArea_FreePlay;
-void InitMission(MISSIONSYS *, i32);
 extern f32 ICONSIZE, ICONX, DROPINALPHA, HUB_EPISODETITLEY;
 extern i16 tSELECT, tSELECTED, tSELECTING, tEXIT, tCANCEL;
 void DrawCharIcon(i32, f32, f32, f32, f32, i32, f32, f32, i32, nuhspecial_s *);
@@ -5627,139 +5239,44 @@ f32 GetAspectRatio();
 extern "C" void BackupMenu(void);
 extern "C" void BackupMenuNoFn(void);
 extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
-extern "C" void SmartText(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
-                          u8 green, u8 blue, f32 max_width, i32 max_lines);
 extern "C" void NuIOS_RecordFlurryEvent(char *event_name);
 extern "C" void DrawMenuButtonPrompts(i32 confirm_prompt, i32 cancel_prompt, i32 enabled, u8 red, u8 green, u8 blue,
                                       u8 alpha);
 extern "C" void DrawMenuButtonPromptsEx(i32 confirm_prompt, i32 cancel_prompt, i32 flags, i32 enabled, u8 red, u8 green,
                                         u8 blue, u8 alpha);
 extern i32 SAVESLOTS;
-extern i32 MenuSFX;
-extern i32 MENUSFX_MENUSELECT;
-extern i32 MENUSFX_MENUBACK;
-extern i32 MENUSFX_MENUNOENTRY;
-extern i32 MENUSFX_MENUMOVE;
-extern char *apitxt_LOADGAME;
-extern char *apitxt_SAVEGAME;
-extern char *apitxt_CONFIRMSAVE;
-extern char *apitxt_CONFIRMOVERWRITE;
-extern char *apitxt_CONFIRMLOAD;
-extern char *apitxt_DOYOUWANTTOABORT;
-extern char *apitxt_DOYOUWANTTOABORTLOAD;
-extern char *apitxt_DOYOUWANTTOABORTFORMAT;
-extern char *apitxt_CONFIRMDELETE;
-extern char *apitxt_RETRY;
-extern char *apitxt_SLOT;
-extern char *apitxt_NEWSAVE;
-extern char *apitxt_CANCEL;
-extern char *apitxt_NODATAAVAILABLE;
-extern char *apitxt_NOTENOUGHSPACE;
-extern char *apitxt_DELETEGAME;
-extern char *apitxt_DELETING;
-extern char *apitxt_DELETECOMPLETE;
-extern char *apitxt_FORMATTING;
-extern char *apitxt_FORMATTINGCOMPLETE;
-extern char *apiGameName;
-extern char *apitxt_YES;
-extern char *apitxt_NO;
 extern char **TTab;
-extern i16 tSELECTCONTROLS;
-extern i16 tCONTROLSCANBECHANGED;
-extern i16 tCLASSIC;
-extern i16 tTOUCHSCREEN;
-extern i16 tCONTROLLERCONNECTED;
-extern i16 tCONTROLS;
-extern i16 tCONSOLE;
-extern i16 tTOUCH;
-extern i16 tSURROUNDSOUND;
-extern i16 tAUDIOVOLUME;
-extern i16 tMUSIC;
-extern i16 tWIDESCREEN;
-extern i16 tON;
-extern i16 tOFF;
-extern i16 tACCEPT;
-extern i16 tBACK;
-extern i16 tCONTINUE;
 extern i16 tCANCEL;
-extern i16 tSTORY;
-extern i16 tFREEPLAY;
-extern i16 tREPLAYSTORY;
 extern i16 tLOCKED;
-extern i16 tAVAILABLETOBUY;
 extern i16 tPOWERBRICK;
-extern i16 tHOWTOPLAY;
 extern "C" OPTIONSSAVE TempOptions;
 extern i32 menu_flash;
-extern i16 tOUTOFTIME;
 extern f32 minikittime;
-extern "C" TIMER BonusTimer;
 extern f32 text3d_height;
 extern f32 text3d_width;
 extern i32 Paused;
-extern f32 PauseMenus_X;
-extern i32 PauseMenus_Align;
-void GameDrawMenuEntry(MENU *menu, char *text);
-i32 GetParentMenuID(void);
 f32 GameSetSoundVolume(OPTIONSSAVE *options);
 f32 GameSetMusicVolume(OPTIONSSAVE *options);
-void SfxCheckMusicOnOff(OPTIONSSAVE *options);
-void NewGame(void);
-void NuIOS_RestoreInAppPurchases(void);
-extern i32 startnewgame;
-extern i32 startnewgame_initiated;
 extern f32 newgamecamtime;
 extern i32 newgamecam;
 extern "C" u8 MENUNORMALR;
 extern "C" u8 MENUNORMALG;
 extern "C" u8 MENUNORMALB;
-extern "C" f32 sfx_wait;
 extern "C" f32 MENUBOTY;
 void Draw_AUTOSAVEWARNING();
-void Draw_NODATAAVAILABLE();
-void Draw_NOMEMORYCARD();
 extern "C" void Draw_NOTENOUGHSPACE(void);
 extern "C" void Draw_SPACENEEDED(void);
 extern "C" void Draw_CHECKINGMEMORYCARD(void);
 extern "C" void Draw_DONOTREMOVEMEMORYCARD(void);
-void Draw_OK(MENU_s *menu);
 
-extern i32 memcard_cardchanged;
-extern i32 MenuASCancelFinished;
-extern i32 MenuCardWarningState;
-extern i32 ButtonScaleMode;
-extern i32 Menu_InLoadFlow;
-extern i32 Menu_InWarningFlow;
-extern i32 Menu_LastFlow;
-extern i32 MenuLoadStarted;
-extern i32 memcard_slot;
-extern i32 Menu_InSaveFlow;
-extern i32 Menu_DisableCancel;
-extern i32 Menu_InHeaderSave;
-extern i32 Menu_Overwriteflag;
-extern i32 memcard_slotsused;
 extern i32 memcard_saveneeded;
-extern i32 memcard_savestarted;
-extern i32 memcard_savefailed;
 extern i32 memcard_loadneeded;
-extern i32 memcard_loadstarted;
-extern i32 memcard_loadfailed;
-extern i32 memcard_loadcorrupt;
 extern i32 memcard_deleteneeded;
 extern i32 memcard_deletestarted;
 extern i32 memcard_deletefailed;
-extern f32 memcard_deletemessage_delay;
-extern f32 memcard_deleteresult_delay;
 extern i32 memcard_formatting;
 extern i32 memcard_formatme;
 extern i32 memcard_formatfailed;
-extern f32 memcard_formatmessage_delay;
-extern f32 memcard_formatresult_delay;
-extern f32 memcard_savemessage_delay;
-extern f32 memcard_saveresult_delay;
-extern f32 memcard_loadmessage_delay;
-extern f32 memcard_loadresult_delay;
-extern i32 SAVESIZE;
 
 extern i32 memcard_autosave;
 extern "C" i32 memcard_autosaveenabled;
@@ -5768,61 +5285,32 @@ extern "C" i32 memcard_autosavedisabled;
 extern void (*drawslotinfofn)(f32, f32, i32, i32);
 extern void (*drawslotsfn)(MENU *, f32);
 
-extern char * extrasavetext;
-extern f32 extrasavealpha;
-extern u8 RAP_WARNING_B;
-extern u8 RAP_WARNING_G;
-extern u8 RAP_WARNING_R;
 
 
-extern i32 hub_new_level;
-extern i32 hub_selectmode;
-extern f32 selectmodetime;
-extern i32 selectmodemode;
-extern "C" i32 FinishLoop_On;
 extern FadeSystem FadeSys;
-void Hub_DrawFreePlaySelect();
-void Hub_InitFreePlaySelect(i32 area, i32 first_model, i32 second_model);
-void Hub_UpdateFreePlaySelect();
-void WipeBackToHub();
-void NewLevelFromMenu(LEVELDATA_s *level, i32 menu_id, i32 menu_y, i32 remember_hub);
 
 
 
 
 void APIMenuDrawMemCardSlots(MENU *menu, f32 y);
 
-void MenuDrawLoad(MENU_s *menu);
-
-void MenuDrawSave(MENU_s *menu);
-
-
-void MenuExitLoad(MENU_s *);
-
-void MenuExitSave(MENU_s *);
-
-void MenuDrawClips(MENU_s *);
-
-void MenuEnterLoad(MENU_s *menu);
-
-void MenuEnterSave(MENU_s *menu);
-
-void MenuInitClips(MENU_s *);
-
-void MenuStartLoad();
-
-void MenuStartSave();
 
 
 
 
-void MenuDrawNoData(MENU_s *menu);
 
-void MenuDrawSaving(MENU_s *);
 
-void MenuUpdateLoad(MENU_s *menu);
 
-void MenuUpdateSave(MENU_s *menu);
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5833,85 +5321,52 @@ void IconScenes_Init(char *path, variptr_u *buf, variptr_u *);
 
 void IconScenes_Load(APICHARACTERMODELLIST_s *list, i32, variptr_u *buf, variptr_u *buf_end);
 
-void MenuDrawLoading(MENU_s *);
 
 
 
 
-i32 MenuIsAvailable();
-
-void MenuUpdateClips(MENU_s *);
-
-void MenuDrawDeleting(MENU_s *);
-
-void MenuDrawFreePlay(MENU_s *);
 
 
 
-void MenuInitFreePlay(MENU_s *menu);
 
 
 
-void MenuUpdateNoData(MENU_s *menu);
 
-void MenuUpdateLoading(MENU_s *);
 
-void MenuUpdateSaving(MENU_s *);
+
+
+
 
 
 
 NUGSCN *IconScene_FindById(i32 character_id);
 
 
-void MenuDrawFormatting(MENU_s *);
-
-void MenuDrawInsertCard(MENU_s *);
-
-void MenuDrawLoadCancel(MENU_s *menu);
-
-void MenuDrawSaveCancel(MENU_s *menu);
-
-void MenuUpdateDeleting(MENU_s *);
-
-void MenuUpdateFreePlay(MENU_s *);
 
 
-void MenuDrawCardWarning(MENU_s *);
-
-void MenuDrawFileCorrupt(MENU_s *);
-
-void MenuDrawLoadConfirm(MENU_s *menu);
-
-void MenuDrawSaveConfirm(MENU_s *menu);
-
-void MenuEnterHeaderSave(MENU_s *);
-
-void MenuEnterInsertCard(MENU_s *);
-
-void MenuExitCardWarning(MENU_s *);
-
-void MenuDrawEndChallenge(MENU_s *);
-
-void MenuDrawFormatCancel(MENU_s *menu);
-
-void MenuDrawNoMemoryCard(MENU_s *menu);
-
-void MenuEnterCardWarning(MENU_s *);
-
-void MenuEnterSaveConfirm(MENU_s *);
 
 
-void MenuUpdateFormatting(MENU_s *);
 
-void MenuUpdateLoadCancel(MENU_s *menu);
 
-void MenuUpdateSaveCancel(MENU_s *menu);
 
-void MenuUpdateInsertCard(MENU_s *menu);
 
-void MenuDrawDeleteConfirm(MENU_s *menu);
 
-void MenuDrawFormatConfirm(MENU_s *);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 void MenuInitialiseEx(MENUFNINFO *menu_info, i32 menu_id_count, i32 language_count,
                       void (*draw_save_slots_info_fn)(f32, f32, i32, i32), i32 is_fade_enabled, i32 is_shadow_enabled);
@@ -5919,52 +5374,30 @@ void MenuInitialiseEx(MENUFNINFO *menu_info, i32 menu_id_count, i32 language_cou
 void MenuInitialise(MENUFNINFO *menu_info, i32 menu_id_count, i32 language_count,
                     void (*draw_save_slots_fn)(MENU *, f32), i32 is_fade_enabled, i32 is_shadow_enabled);
 
-void MenuEnterNoMemoryCard(MENU_s *);
-
-void MenuEnterStartNewGame(MENU_s *);
-
-void MenuUpdateCardWarning(MENU_s *menu);
-
-void MenuUpdateFileCorrupt(MENU_s *menu);
-
-void MenuUpdateLoadConfirm(MENU_s *menu);
-
-void MenuUpdateSaveConfirm(MENU_s *menu);
-
-void MenuDrawAutoSaveCancel(MENU_s *menu);
-
-void MenuDrawNotEnoughSpace(MENU_s *);
 
 
 
-void MenuUpdateEndChallenge(MENU_s *menu);
-
-void MenuUpdateFormatCancel(MENU_s *menu);
-
-void MenuUpdateNoMemoryCard(MENU_s *menu);
-
-void MenuDrawAutoSaveWarning(MENU_s *menu);
-
-void MenuDrawDoNotRemoveCard(MENU_s *);
-
-void MenuEnterAutoSaveCancel(MENU_s *menu);
-
-void MenuUpdateDeleteConfirm(MENU_s *menu);
-
-void MenuUpdateFormatConfirm(MENU_s *menu);
-
-void MenuEnterAutoSaveWarning(MENU_s *);
-
-extern f32 memcard_autosavecanceldelay;
-void MenuUpdateAutoSaveCancel(MENU_s *menu);
-
-void MenuUpdateNotEnoughSpace(MENU_s *menu);
 
 
 
-void MenuUpdateAutoSaveWarning(MENU_s *menu);
 
-void MenuUpdateDoNotRemoveCard(MENU_s *menu);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 extern "C" {
 
@@ -6130,8 +5563,6 @@ extern i32 NuLgtLaserOldCnt;
 #include "nu2api/nu3d/android/nutex_ios_ex.h"
 #include "nu2api/nu3d/nuqfnt.h"
 
-void NuErrorPrint(char *);
-void NuDebugMsgPrint(char *);
 extern NUQFNT *system_qfont;
 void NuLgtArcLaserEx(i32 type, NUVEC *start, NUVEC *end, NUVEC *control, f32 width, f32 segment_length, f32 wobble,
                      f32 duration, i32 colour, i32 flags);
@@ -6174,12 +5605,9 @@ void NuLgtArcLaserEx(i32 type, NUVEC *start, NUVEC *end, NUVEC *control, f32 wid
 #include "nu2api/numath/numtx.h"
 #include "globals.h"
 
-extern NuInputManager *inputManager;
-extern bool used_touch_IDs[10];
 
 struct ani3_animheader_s;
 struct nuanimdatachunk_s;
-nuanimdatachunk_s *NuAnimDataChunkCreate(i32 curve_set_count);
 
 extern "C" {
 
@@ -6195,8 +5623,6 @@ extern GLuint g_depthRenderbuffer;
 
 using NUHGOBJVIDEOMEMFN = void (*)(nuhgobj_s *);
 
-extern NUHGOBJVIDEOMEMFN hgobj_to_video_mem;
-extern NUHGOBJVIDEOMEMFN video_mem_to_hgobj;
 
 extern "C" {
     extern NUGLOBALRNDRSTATE render_state;
@@ -6806,11 +6232,8 @@ extern "C" void eduiMenuDestroyItems(eduimenu_s *menu);
 
 #include "legoapi/actions/character/speederchase_types.h"
 
-extern SPEEDERCHASEANETPACKET_s * speederchasea_netpacket;
 
-extern u8 troopercannons_beenReset;
 extern i32 players_going_forward;
-extern i32 players_cannot_exit_speeder;
 
 extern f32 zoom_ahead_extra;
 extern f32 zoom_ahead_extra_time;
@@ -6827,34 +6250,21 @@ DECOMP_ASSERT(sizeof(SPEEDERCHASEVALUES) == 0x1c, "Speeder chase tuning stride")
 DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 
 extern i32 objopponent_ignoreaiopponent;
-extern i32 test_ai_combo;
-extern i32 CanPunchGirls;
 extern i16 id_GAMORREANGUARD;
 extern i16 id_STORMTROOPER;
-i32 SpecialMove_Check(GameObject_s *, GameObject_s *);
-u32 SpecialMove_GetFlags(i32, u32);
 
 void PodKeyReset();
 
-void TakeHitRumble(GameObject_s *, f32);
 
 void PodLoseSpeed(GameObject_s *object, i32 hit, i32 rumble);
 
-i32 SpeederBlowupHack(GIZMOBLOWUP_s *blowup, i32);
 
-f32 FindPodHoverHeight(GameObject_s *object);
 
 extern i32 ObjInNarrowSock(GameObject_s *, SOCKSYS *, i32);
-extern i32 IDLESPEEDINNARROWSOCKSONLY;
 
 i32 ObjIsTargetSpeeder(GameObject_s *object);
-f32 GetVehicleSpeedMul(GameObject_s *object, f32 speed);
 
 void SetLevelExBlowupFunc(i32 (*callback)(GIZMOBLOWUP_s *, i32));
-void InitTrooperCannons(WORLDINFO_s *world);
-void ResetTrooperCannons(WORLDINFO_s *world, i32 trooper_id);
-void UpdateTrooperCannons(WORLDINFO_s *world);
-i32 GoingForwardsAlongNarrowSock(GameObject_s *object);
 
 void SpeederChaseA_Init(WORLDINFO_s *world);
 
@@ -6864,7 +6274,6 @@ void SpeederChaseA_Panel(WORLDINFO_s *);
 
 void SpeederChaseA_Reset(WORLDINFO_s *);
 
-i32 SpeedersDroppedBack();
 
 i32 Action_SpeederBeingChased(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **, i32, i32 first_time,
                               f32 elapsed);
@@ -6873,11 +6282,8 @@ void SpeederChaseA_Update(WORLDINFO_s *world);
 
 i32 ObjOpponentStillThere(GameObject_s *object, GameObject_s *opponent, f32 gap);
 
-f32 SpeederChaseATATInOutMul(nuvec_s *start, nuvec_s *end);
 
-f32 GetVehicleAreaRememberSpeed();
 
-i32 SpeederChase_ObjIsAGroundTroop(GameObject_s *object);
 
 extern "C" {
 
@@ -6890,7 +6296,6 @@ void cbSetAutoSpeed(eduimenu_s *, eduiitem_s *item, u32);
 extern "C" void AddDebrisEffect(i32 *, i32, f32, f32, f32);
 extern "C" void DebrisPosOrientationMtx(i32, NUMTX *);
 
-void PodDust(WORLDINFO_s *world, GameObject_s *object);
 
 extern "C" f32 pod_roll[2];
 f32 getPodRoll(i32 index);
@@ -6933,20 +6338,11 @@ f32 getPodRoll(i32 index);
 
 void Minicam_InitSystem(void);
 extern "C" void NuLightSpeedBlurOldCameraPos(const NUMTX *camera);
-void GameCam_ResetLookRot(GAMECAMERA_s *camera);
 i32 GetMenuID(void);
-i32 OnOrInsidePlane(NUVEC *point, NUVEC *plane_point, NUVEC *plane_normal, NUVEC *corrected_point, f32 normal_offset,
-                    f32 *distance_out);
-void Surface_Deflect(NUVEC *normal, NUVEC *movement, NUVEC *result, i32 mode);
-void SpecialMove_Cancel(GameObject_s *object);
-void Hint_CancelCurrent(void);
 extern AREADATA_s *PODSPRINT_ADATA;
-extern AREADATA_s *BATTLEOVERCORUSCANT_ADATA;
 
 #include "legoapi/characters/motion/camera_types.h"
-extern VIEWCAM_s ViewCam;
 // Original data symbol testmovef is float0.005 at 0x617cb0.
-extern f32 testmovef;
 
 DECOMP_ASSERT(sizeof(VIEWCAM_s) == 0x28, "ViewCam size");
 DECOMP_ASSERT(offsetof(VIEWCAM_s, pitch) == 0x10, "ViewCam pitch offset");
@@ -6958,23 +6354,15 @@ void GameCam_Reset(GAMECAMERA_s *camera);
 
 void GameCam_Judder(GAMECAMERA_s *camera, float amount, i32 axis, nuvec_s *source);
 
-void GameCam_HitRoll();
 
 void GameCam_NewShake(GAMECAMERA_s *camera, float amount, float duration, float speed);
 
 void GameCam_HitJudder();
 
-void GameCam_UpdateShake(GAMECAMERA_s *camera, float ambient_amount);
 
 
-void GameCam_UpdateLookRot(GAMECAMERA_s *camera);
 
-void GameCameraMakeMiniCut(nugspline_s *spline, f32 start, f32 end, f32 blend_in, f32 blend_out, i32 borders,
-                           i32 hold_until_players_move);
 
-extern nugspline_s ObstacleCamCutSpline;
-extern i32 ObstacleCamTargetGuid;
-extern NUVEC ObstacleCamCutPts[2];
 
 void GameCameraMakeMiniCut2(nuvec_s *camera, nuvec_s *target, i32 target_guid, float start, float end, float blend_in,
                             float blend_out, i32 follow_target, i32 follow_camera, i32 borders);
@@ -6994,29 +6382,19 @@ f32 CameraEmitterDistance(NUVEC *position);
 } // extern "C"
 
 extern "C" i16 id_GRABCONTROL, id_GRABR2CONTROL, id_LANDSPEEDER, id_ATST, id_DEWBACK;
-extern "C" f32 MainRenderTime;
 extern f32 newgamecamtime, cutscenecam_focalLength, CamStopBlend, EMPERORFIGHTA_CAMDYHACK;
 extern "C" i32 NewMode;
 extern i32 CUTCAMONLY, CUTCAM, GUNSHIPAHACK, netcamera, complexsockposition_forcesock, movegamecamera_forcesock;
 extern NUMTX cutscenecammtx, CutCamMtx;
-extern u8 set_cutscenecammtx;
-extern NUGSPLINE *hub_minikitviewer_camspl;
 f32 getPodRoll(i32);
-f32 PodSprint_InStartCountdown(WORLDINFO_s *);
-i32 PodRace_InStartCountdown(WORLDINFO_s *);
-extern "C" i32 editor_active;
-extern "C" void NuSpeedBlurSetMotionFactors(f32 pan, f32 pull, f32 clamp);
 extern "C" void NuLightSpeedBlur(i32 reuse_camera, f32 scale);
 GameObject_s *FindNearestGameObject(NUVEC *, GameObject_s *, u32, f32, f32, i32, i32, i32, f32 *, i32,
                                     i32 (*)(GameObject_s *), bool);
 void Minicam_Update();
 void Customiser_GetActiveWeirdoIndex(i32 *, i32 *);
-void MakePlayPlanes(GAMECAMERA_s *);
 i32 GameRayCast(NUVEC *, NUVEC *, f32, i32);
 
 extern NUVEC CustomisePos[2];
-extern f32 HUB_MINIKITVIEWER_CAMDY;
-extern f32 PodCamDist;
 extern f32 EMPERORFIGHTA_CAMDYHACK;
 extern i32 movegamecamera_forcesock;
 extern NUMTX CutCamMtx;
@@ -7027,37 +6405,28 @@ i32 Grapple_LookAtPos(GameObject_s *, NUVEC *);
 void CentreTwoPlayerCamera(NUVEC *, NUVEC *, NUVEC *, NUVEC *);
 
 
-void MoveGameCamera(GAMECAMERA_s *camera);
 
-void ViewCamDraw();
 
-void KeepOnScreen(GameObject_s *object);
 
 NUVEC *ViewCamGetTgt();
 
 i32 ViewCamGetMode();
 
-void SetDepthOfField();
 
-void SpeedBlur_Apply(WORLDINFO_s *world);
 
-void SpeedBlur_Update();
 
 void ViewCamSetActive(i32 mode, GAMEPAD_s *gamepad);
 
 void KeepPointOnScreen(NUVEC *position, NUVEC *velocity);
 
-void SetCameraMatrices();
 
 GAMEPAD_s *ViewCamGetGamePad();
 
 void CentreTwoPlayerCamera(nuvec_s *center, nuvec_s *player_a, nuvec_s *player_b, nuvec_s *reference);
 
-void KeepVehicleOnScreen(GameObject_s *object, i32 sides, i32 top, i32 bottom);
 
 void do_Pad_flymode_camera(edcam_s *camera, float delta_time, nupad_s *pad);
 
-void InitCameraTargetMaterial();
 
 
 void GetTopBot(GameObject_s *object);
@@ -7085,16 +6454,9 @@ void do_mouse_flymode_camera(edcam_s *camera, f32 delta_time);
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/nufile/nufilepak.h"
 
-extern i32 edfile_handle;
-extern i32 edfile_write_flag;
 
 
-extern char edfile_buffer[4096];
-extern i32 edfile_buffer_pointer;
-extern i32 edfile_lock[2];
 
-extern i32 edfile_readwrongendianess;
-extern i32 edfile_mcresult;
 
 void EdFileSwapEndianess16(void *data);
 
@@ -7106,13 +6468,10 @@ void EdFileSetMedia(i32 media);
 
 void EdFileSetPakFile(void *pak);
 
-void EdFileResetBuffers();
 
-void EdFileFillBuffer();
 
 i32 EdFileOpen(char *filepath, NUFILEMODE mode);
 
-void EdFileFlushBuffer();
 
 i32 EdFileClose();
 
@@ -7184,22 +6543,9 @@ i32 EdFileBackup(char *source, char *destination);
 extern i32 memcard_deleteneeded, memcard_deletestarted, memcard_deletefailed;
 extern i32 memcard_formatme, memcard_formatting, memcard_formatfailed;
 extern i16 (*memcard_hashfn)(void);
-extern i32 numfilteroutblocks;
-extern char filteroutblocks[8][12];
-extern i32 numfilterblocks;
-extern char filterblocks[8][96];
 
-extern char FS_FileList[65536];
 extern char FS_LastFileName[64];
 extern char FS_Path[256];
-extern i32 FS_NumFiles;
-extern i32 FS_CurrentPosFileNum;
-extern i32 FS_CursorLine;
-extern char FS_ParentEntry[8];
-extern i32 FS_SortMode;
-extern char * FS_CurrentCursorPos;
-extern char * FS_CurrentPos;
-extern char * FS_FileListEnd;
 extern char FS_Title[64];
 extern char FS_Filter[256];
 extern char FS_FilterOut[256];
@@ -7219,24 +6565,14 @@ void FS_SortStrings(char *, char *, i32);
 i32 FS_FileNameFilter(char *);
 void FS_MakeDateTimeString(FS_FILEENTRYHDR *, char *);
 
-extern f32 memcard_createmessage_delay;
-extern f32 memcard_createresult_delay;
-extern f32 memcard_message_delay;
-extern f32 memcard_result_delay;
-extern i32 memcard_justformatted;
-extern i32 saveload_autosavedisabled;
 
-void InitMemCard();
 
-i32 SaveGizmoSys(GIZMOSYS_s *, char *, char *);
 
 void SerialiseInt(EdStream &stream, void *data, i32);
 
-void FS_GetDirList(char *path, char *filter, char *filter_out);
 
 void SerialiseChar(EdStream &stream, void *data, i32);
 
-i32 FS_PrevNameLen(char *name);
 
 
 void FS_SortStrings(char *start, char *end, i32 mode);
@@ -7253,7 +6589,6 @@ void SerialiseVuMtx(EdStream &stream, void *data, i32);
 
 void SerialiseVuVec(EdStream &stream, void *data, i32);
 
-void FS_MoveCursorUp(i32 steps);
 
 void SerialiseString(EdStream &stream, void *data, i32 count);
 
@@ -7261,13 +6596,9 @@ void SerialiseColour3(EdStream &stream, void *data, i32);
 
 i32 FS_FileNameFilter(char *name);
 
-void FS_MakeDateString(FS_FILEENTRYHDR *entry, char *output);
 
-void FS_MakeTimeString(FS_FILEENTRYHDR *entry, char *output);
 
-extern "C" void NuRndrRect2d(f32 x, f32 y, f32 z, f32 width, f32 height, i32 colour, NUMTL *material);
 
-extern char * SortStrings[4];
 
 // Retail keeps the whole body of RenderFileSel3 as the split-out .part clone;
 // the exported function only tests FS_Active.
@@ -7280,19 +6611,13 @@ void RenderFileSel3(i32 draw_title);
 
 void RenderFileSel();
 
-void FS_MoveCursorDown(i32 steps);
 
-f32 FS_GetDirTextWidth();
 
-char *FS_GetFilterString(char *input, char *output);
 
-i32 getsaveload_status();
 
-i32 FS_GetPadWithRepeat(nupad_s *pad, float repeat, float elapsed);
 
 void SerialiseNuHSpecial(EdStream &stream, void *data, i32);
 
-void SerialiseStringAddr(EdStream &stream, void *data, i32 count);
 
 void FS_BuildFilterBlocks(char *input);
 
@@ -7300,7 +6625,6 @@ void FS_MakeDateTimeString(FS_FILEENTRYHDR *entry, char *output);
 
 void FS_BuildFilterOutBlocks(char *input);
 
-void FS_SetCursorToLastFileName();
 
 i32 ProcessFileSel3(f32 elapsed, nupad_s *pad);
 
@@ -7378,7 +6702,6 @@ i32 TriggerAutoSave(void);
 #include <math.h>
 #include <string.h>
 
-void DrawSubItems();
 
 extern "C" void edbriStartAllPages(void);
 
@@ -7386,7 +6709,6 @@ extern "C" void edbriStartAllPages(void);
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/numath/nutrig.h"
 
-extern "C" void AiRndrLine3dDbg(f32, f32, f32, f32, f32, f32, u32);
 
 extern "C" void edDrawCross(NUVEC *centre, u8 red, u8 green, u8 blue);
 
@@ -7462,24 +6784,12 @@ struct rtlidata_s;
 #include <string.h>
 
 extern i32 VehicleArea;
-extern f32 FORCEGLOWTIME;
-extern i16 tHINTS;
-extern i16 tCHARACTERS;
-extern i16 tEXTRAS;
-extern i16 tGOLDBRICKS;
-extern i16 tSTORYCLIPS;
-extern i16 tENTERCODE;
 i32 AnakinGreenSabre(GameObject_s *object);
 i32 MatrixReflection(NUMTX *matrix, i32 axis, f32 plane, f32 height, NUMTX *result);
 
-extern f32 HUB_EPISODESUBTITLEY;
 extern f32 HUB_EPISODETITLEY;
-extern i32 draw_para;
 
 void DrawGameObjectsDraw(i32 pass);
-void EnableShadowMapRendering(i32 enable);
-void ResetShadowMapRendering();
-static void DrawParaphernalia(GameObject_s *object);
 
 struct GAMEMESSAGE_s;
 struct HINT_s;
@@ -7496,29 +6806,14 @@ struct VuVec;
 
 extern nuhspecial_s *(*GameMsg_GetExtraObjFn)(GAMEMESSAGE_s *);
 
-extern "C" i32 StateAnimEvaluate2(StateAnim *state, u8 *index, char *value, f32 frame);
 extern "C" i32 NuRndrBeginScene(i32);
 extern "C" void NuRndrEndScene(void);
 extern "C" void NuRndrGradRect2di(i32, i32, i32, i32, i32 *, numtl_s *);
 extern "C" void NuRndrRect2di(i32, i32, i32, i32, i32, numtl_s *);
 extern "C" void NuCameraUnlock(void);
 extern "C" void NuCameraRelock(void);
-extern char *apitxt_EMPTY;
-extern char *apitxt_PRESENT;
-extern char *apitxt_AUTOSAVE_WARNING;
-extern char *apitxt_LOADING;
-extern char *apitxt_SAVING;
-extern char *apitxt_OK;
-extern char *apitxt_GAMELOADED;
-extern char *apitxt_GAMELOADING;
-extern char *apitxt_FAILEDTOLOAD;
-extern char *apitxt_CORRUPTLOAD;
 extern char *ASCII_DOWN;
 extern char *ASCII_UP;
-extern i16 tCURRENTGAME;
-extern i16 tEMPTY;
-extern i16 tGAME;
-extern i16 tNOSPACE;
 extern f32 MENUTEXTSCALE;
 extern f32 MENUBOTY;
 extern f32 AUTOSAVEICONY;
@@ -7539,11 +6834,7 @@ extern u8 MENUFLASH1B;
 extern f32 menu_pulse;
 extern f32 menu_pulsate;
 extern f32 cointotaltime;
-extern "C" i32 screendump;
-extern f32 pause_fade;
-extern "C" i32 PANELOFF;
 extern i32 noscenespecials;
-extern void RotateGameMatrix(numtx_s *matrix, i32 order, u16 x, u16 y, u16 z);
 extern void SetLevelLights(void *set, f32 scale);
 extern f32 ICONX;
 extern f32 ICONSIZE;
@@ -7553,11 +6844,8 @@ void Hint_Draw(i32 player_index);
 extern i32 CutScenePlayer_CanStart(i32 cutscene_id);
 
 // Camera zoom state
-extern f32 CameraZoom;
 
 // Graphics loading flags
-extern i32 RemoveDirectionalMaps;
-extern i32 RemoveNormalMaps;
 
 extern NUVIDEORESHEADER g_VideoResHeader;
 
@@ -7575,7 +6863,6 @@ extern "C" void NuGScnUpdate(NUGSCN *gscn, f32 frame_delta);
 // NuReadGraphicsData is a C++ static function in the original (GCC clones it,
 // hence the `.isra.NNN` suffix in the ROM symbol table).
 
-extern "C" void NuSevereWarning(const char *format, ...);
 
 // Retail only keeps the IPA-SRA clone, which drops the unused fourth argument.
 #if defined(__i386__)
@@ -7583,9 +6870,6 @@ extern "C" void NuSevereWarning(const char *format, ...);
 #else
 #define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone))
 #endif
-static NU_READ_GRAPHICS_DATA_ATTR NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIPTR *buf_end, char *path,
-                                                             char *scene_data)
-    __asm__("_ZL18NuReadGraphicsDataP9variptr_uS0_PcS1_S1_.isra.104");
 
 // --- Extern "C": NuGScn functions have C linkage in original ---
 extern "C" {
@@ -7597,22 +6881,10 @@ NUGSCN *NuGHGFixup(NUGSCN *scene, void *);
 nuhgobj_s *NuGHGRead(char *path, VARIPTR *buf, VARIPTR buf_end);
 } // extern "C"
 
-extern i32 solid_cable;
-extern i32 nsegments_drawn;
-extern f32 slack_factor;
-extern f32 cable_slack;
-extern f32 nsegments_per_unit;
-extern CABLE_s cables[8];
-extern f32 tow_length;
-extern NUMTL *SolidMtl3D;
 
-void DrawCables();
 
-void DrawRipple(ripple_node_s *node);
 
-void DrawAreaBox(nuvec_s *position, nuvec_s *size, i32 rotation, i32 colour);
 
-void DrawBox_Now(_vuv_s *, _vuv_s *, i32, i32);
 
 extern "C" {
 extern f32 aiEditor_DrawYOffset;
@@ -7620,9 +6892,7 @@ extern f32 aiEditor_LocatorWidth;
     void AiRndrLine3d(NURND_VERTEX3D *, NUMTL *, NUMTX *);
 }
 
-void DrawLocator(nuvec_s *position, float radius, i32 rotation, i32 colour);
 
-void Draw_LOADED();
 
 i32 Draw3DObject(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x_rotation, u16 y_rotation,
                  u16 z_rotation, float scale_x, float scale_y, float scale_z, i32 rotate_order);
@@ -7632,20 +6902,12 @@ void DrawCharIcon(i32 character_id, float x, float y, float z, float scale, i32 
 
 extern const u8 HintRGB[5][3];
 
-void DrawLine_Now(_vuv_s *, _vuv_s *, i32, i32);
-
-void DrawParallax(nuhspecial_s *special);
-
-void DrawQuestion(nuvec_s *position, float scale_value, float y_push);
-
-void DrawRectRGBA(float x, float y, float width, float height, u32 colour, numtl_s *material, i32 alignment,
-                  float scale);
-
-void DrawItem(nuhspecial_s *special, nuvec_s *position, float scale_value, float unused, float y_push, u16 x_rot,
-              u16 y_rot, u16 z_rot);
 
 
-void Draw_LOADING();
+
+
+
+
 
 #include "nu2api/nu3d/nuprim.h"
 #include "nu2api/nu3d/nuprim_internal.h"
@@ -7691,51 +6953,33 @@ void Draw_LOADING();
         NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
     } while (0)
 
-void DrawAlphaGrid(i32 rows, i32 cols, NuBloomParameters *parameters);
 
-void DrawArrow_Now(_vum_s *, float, i32, i32);
 
 extern i16 tNONEWBESTTIME, tNEWBESTTIME;
 void Text_MakeTime(f32, i32, i32, i32, char *);
 
-void DrawBonusTime(STATUSPACKET_s *packet, float position, i32 alpha);
 
-void DrawCross_Now(_vuv_s *, float, i32, i32);
 
 void DrawPauseFade();
 
 
-void DrawRippleSet(ripple_set_s *set);
 
 
 
-void ClearScreen();
 
 
 
-void DrawAlphaImage(i32 rows, i32 cols, numtl_s *material, i32 use_pixel_offsets, NuBloomParameters *parameters);
 
-void DrawBezierLine(VuVec &start, VuVec &start_control, VuVec &end, VuVec &end_control, numtl_s *material, i32 colour);
 
-void DrawBoxMtx_Now(_vum_s *, _vuv_s *, i32, i32);
 
-void *AddGameMessage(char *, NUVEC *, f32, NUVEC *, f32, u8, u8, u8, u32, f32);
 
-void DrawCutBorders(i32 widescreen);
 
-void DrawExplosions();
 
-void DrawItemMenu2D();
 
-void DrawStatusText(char *text, u16 angle, float x, float y, float scale, u32 colour, i32 alignment);
 
 i32 Draw3DObjectMtx(WORLDINFO_s *world, i32 object_index, numtx_s *mtx);
 
-void DrawGameObjects();
 
-extern nuhspecial_s green_light;
-extern nuhspecial_s painttargetcolour[3];
-extern nuhspecial_s paintlights[3];
 
 void DrawPaintLights();
 
@@ -7743,23 +6987,16 @@ void DrawStatusIcons(STATUSPACKET_s *status, float y, float alpha);
 
 void DrawTouchPrompt(char *prompt, char *unused_label, bool hovered, bool large);
 
-void Draw_LOADFAILED();
 
-void DrawAreaCylinder(nuvec_s *centre, nuvec_s *size, i32 colour);
 
-void DrawCameraTarget(nuvec_s *);
 
 void DrawGameMessages();
 
 extern f32 KITPOSX;
 extern f32 KITPOSY;
-extern f32 KITPOS2X;
-extern f32 KITPOS2Y;
 extern f32 PANEL_MINIKITSCALE;
 extern f32 PANEL_REDBRICKSCALE;
 extern f32 PANEL_MINIKITY;
-extern f32 PANEL_MINIKITCOUNTSCALE;
-extern f32 PANEL_MINIKITCOUNTY;
 // DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
 // red-brick positions come from the Game init values in legogame/game.cpp.
 extern i32 DRAWBGLOAD;
@@ -7774,45 +7011,31 @@ extern i32 Arcade_Points[2];
 extern f32 BOSSICONY;
 extern i32 FPSDISPLAY;
 extern i32 ShowPlayerCoordinate;
-extern i32 LEGOOBJ_CHARKIT;
-extern i32 LEGOOBJ_MINIKIT;
 i32 DrawPanel3DObjectNoAlpha(f32, f32, f32, f32, f32, f32, u16, u16, u16, nuhspecial_s *, i32);
 extern "C" void Text3D(char *, f32, f32, f32, f32, f32, f32, u32, u8, u8, u8);
 
 void DrawMiniKitCount(float position, float scale, i32 count, i32 maximum);
 
-void DrawStatusBG_LSW(STATUSPACKET_s *status);
 
-void Draw_LOADCORRUPT();
 
 i32 Draw3DObjectAlpha(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x_rotation, u16 y_rotation,
                       u16 z_rotation, float scale_x, float scale_y, float scale_z, i32 rotate_order, float alpha);
 
-void DrawCameraTarget2(nuvec_s *);
 
 i32 DrawPanel3DObject(float x, float y, float z, float scale_x, float scale_y, float scale_z, u16 rotate_x,
                       u16 rotate_y, u16 rotate_z, nuhspecial_s *special, i32 rotate_order, float alpha);
 
 extern STATUSMINIKITPART_s KitPart[10];
-extern i32 currentminikit;
-extern f32 slideseek;
 
-i32 DrawPanel3DObjectMtxNoAlpha(nuhspecial_s *special, numtx_s *matrix);
-void DrawStatusMiniKit(float x, float y, float z, float built_scale, float new_scale, i32 count, STATUSPACKET_s *packet,
-                       float slide);
 
 extern i16 tUNKNOWN, tPOWERBRICK, tLOCKED, tGOLDBRICK;
 extern "C" void PlaySfx(char *, NUVEC *);
 
-void DrawSubItemMenu2D();
-
-void DrawSubItemMenu3D();
 
 
-void DrawFadeScreenWipe();
 
 
-void DrawForceGlowSprite(nuvec_s *position, float radius, i32 model, float alpha, GameObject_s *);
+
 
 void DrawGameObjectsDraw(i32);
 
@@ -7823,34 +7046,20 @@ void DrawPanel3DObjectMtx(nuhspecial_s *special, numtx_s *matrix, float alpha);
 
 
 extern i32 dco_locatorposonly;
-extern i32 dco_id;
-extern i32 dco_reflectaxis;
-extern i32 dco_wearinghat;
-extern u16 dco_prerotatez;
-extern f32 dco_reflectcoord;
-extern GAMECHARACTERDATA_s * dco_gcdata;
-extern CHARACTERMODEL_s * dco_cmodel;
 extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
 void DrawObjectOnCharacter(WORLDINFO_s *world, GameObject_s *object, i32 object_id, nuhspecial_s *special, i32 locator,
                            i32 second_locator, NUMTX *joints, i32 reflect, u32 layers, NUMTX *rotation,
                            NUVEC *translation, f32 alpha, f32 scale);
 
-extern f32 DropInOutScale(GameObject_s *object);
-extern void ApplyExtraRotation(GameObject_s *object, NUMTX *matrix);
-extern AREADATA *DEATHSTARBATTLE2_ADATA;
 extern AREADATA *PODSPRINT_ADATA;
 extern "C" {
     extern i16 id_ATST;
     extern i16 id_ATST_LOWRES;
     extern i16 id_ATAT;
 }
-extern u8 CharClipToBlobShadows;
 
 
-i32 DrawGameObjectsProcess();
 
-void DrawStatusTextFraction(i32 current, i32 total, float x, float y, u16 angle, float scale, u32 colour,
-                            float animation, float animation_duration);
 
 void DrawGameMessage_Targets(GAMEMESSAGE_s *message, nuvec_s *position, float scale);
 
@@ -7860,14 +7069,9 @@ i32 DrawPanel3DObjectNoAlpha(float x, float y, float z, float scale_x, float sca
 
 extern void DrawMenuEntry(MENU_s *, char *);
 
-void DrawAABox(_vuv_s *position, _vuv_s *size, i32 colour);
 
-void DrawArrow(nuhspecial_s *special, float scale_value);
 
-void DrawCross(nuvec_s *centre, float radius, numtl_s *material, i32 colour);
 
-extern f32 SwipeDecalRenderer_MaxWidth;
-extern f32 SwipeDecalRenderer_MinWidth;
 
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
@@ -7891,10 +7095,6 @@ extern i32 GetMenuID(void);
 
 
 
-void CharScene_Draw(WORLDINFO_s *, i32, NUMTX *, NUMTX *);
-void CharMiniKit_Draw(i32, NUMTX *, i32, f32, f32);
-void Customiser_DrawAccessories(CUSTOMISER *, GameObject_s *, NUMTX *);
-i32 Batarang_GetObjectFromCharID(i32);
 void Grapple_DrawLine(GameObject_s *);
 void Transform_DrawTarget(NUVEC *, f32, f32);
 extern i16 id_ANAKINJEDISCARRED, id_WEIRDO1, id_WEIRDO2, id_CATAPULT, id_CHEWBACCA, id_WOOKIEE, id_TWOFACE;
@@ -7911,30 +7111,18 @@ extern f32 SeekLinearF(f32, f32, f32);
 
 
 
-extern f32 backdrop_top_r;
-extern f32 backdrop_top_g;
-extern f32 backdrop_top_b;
-extern f32 backdrop_bot_r;
-extern f32 backdrop_bot_g;
-extern f32 backdrop_bot_b;
 
 
-extern i32 backdrop_black;
 
 extern void (*BackDrop_AlphaFn)(float *);
 
 
-void BackDrop_Init(char *path, variptr_u *buf, variptr_u *buf_end);
 
-void BackDrop_Dump();
 
-void BackDrop_Update(float dt);
 
 void BackDrop_ResetColours();
 
-void BackDrop_UpdateColours(i32 instant);
 
-void BackDrop_Draw(float alpha, i32 flags);
 
 extern "C" {
     extern nurenderscene_s currentScene;
@@ -9470,44 +8658,26 @@ void edpartClearPage(i8 page);
 #include "legoapi/render/fx/spline_position.h"
 #include "legoapi/render/fx/parts.h"
 
-i32 Action_SetState(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s *, char **params, i32 param_count,
-                    i32 is_first_time, float);
 
-void AISysGetPathPos2(AISYS_s *, NUVEC *, AIPATHINFO_s *, NUVEC *, AIPATH_s *, i32);
-void GameObjectSetCanUse(GameObject_s *, void *, u8, u8, f32);
 
 i32 Action_CameraCut(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params, i32 param_count,
                      i32 first_time, f32);
 
-i32 Action_UsePanel(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params, i32 param_count,
-                    i32 first_time, f32 elapsed);
 
-i32 Action_UseTechno(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params, i32 param_count,
-                     i32 first_time, f32 elapsed);
 
 i32 Action_EndCameraCut(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s *, char **params, i32 param_count,
                         i32 first_time, float);
 
-i32 Action_PullLever(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params, i32 param_count,
-                     i32 first_time, f32 elapsed);
 
 i32 Action_PlayCutScene(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **params, i32 param_count, i32 first_time,
                         float);
 
-i32 Action_FollowPlayer(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params, i32 param_count,
-                        i32 first_time, float);
 
-i32 Action_SetVisibility(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **params, i32 param_count, i32 first_time,
-                         float);
 
 i32 Action_HelpWithTriggers(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float);
 
-i32 Action_UseTriggerSet(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,
-                         i32 param_count, i32 first_time, f32 elapsed);
 
 
-i32 Action_BoulderSection(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,
-                          i32 param_count, i32 first_time, f32);
 
 i32 Action_ReleaseLocator(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
                           i32 first_time, float);
@@ -9515,20 +8685,12 @@ i32 Action_ReleaseLocator(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet,
 void GameCameraMakeMiniCut3(u32, float, i32, i32, i32, void *, i32, NUVEC *, float, float, float, float, float, float,
                             float, i32, nugspline_s *, char, char);
 
-i32 Action_DynamicCameraCut(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,
-                            i32 param_count, i32 first_time, float);
 
-extern f32 party_follow_offsets[8];
-extern "C" i32 party_under_cover;
 extern f32 drop_back_in_timer;
 
-i32 Action_GameFollowPlayer(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,
-                            i32 param_count, i32 first_time, float);
 
 struct GIZSPINNER_s;
-f32 GizSpinner_GetNearestTargetPoint(GIZSPINNER_s *, NUVEC *, NUVEC *, NUVEC *, i32);
 void ClearSpecialMove(GameObject_s *);
-extern i32 spinner_gizmotype_id;
 extern u32 GAMEPAD_SPECIAL, GAMEPAD_JUMP, GAMEPAD_TOGGLERIGHT;
 extern f32 ai_moveradius;
 

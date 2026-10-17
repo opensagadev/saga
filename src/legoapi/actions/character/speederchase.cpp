@@ -79,26 +79,18 @@ DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 i32 objopponent_ignoreaiopponent;
 i32 test_ai_combo = 1;
 i32 CanPunchGirls = 1;
-extern i16 id_GAMORREANGUARD;
 extern i16 id_STORMTROOPER;
-i32 SpecialMove_Check(GameObject_s *, GameObject_s *);
-u32 SpecialMove_GetFlags(i32, u32);
 
 void PodKeyReset();
 
-void TakeHitRumble(GameObject_s *, f32);
 
 void PodLoseSpeed(GameObject_s *object, i32 hit, i32 rumble);
 
 i32 SpeederBlowupHack(GIZMOBLOWUP_s *blowup, i32);
 
-f32 FindPodHoverHeight(GameObject_s *object);
 
-extern i32 ObjInNarrowSock(GameObject_s *, SOCKSYS *, i32);
-extern i32 IDLESPEEDINNARROWSOCKSONLY;
 
 i32 ObjIsTargetSpeeder(GameObject_s *object);
-f32 GetVehicleSpeedMul(GameObject_s *object, f32 speed);
 
 void SetLevelExBlowupFunc(i32 (*callback)(GIZMOBLOWUP_s *, i32));
 void InitTrooperCannons(WORLDINFO_s *world);
@@ -108,7 +100,6 @@ i32 GoingForwardsAlongNarrowSock(GameObject_s *object);
 
 void SpeederChaseA_Init(WORLDINFO_s *world);
 
-void ProcessCurrentSpeed(WORLDINFO_s *world, speedup_s *speedup);
 
 void SpeederChaseA_Panel(WORLDINFO_s *);
 
@@ -139,7 +130,6 @@ i32 ObjOpponentStillThere(GameObject_s *object, GameObject_s *opponent, f32 gap)
 
 f32 SpeederChaseATATInOutMul(nuvec_s *start, nuvec_s *end);
 
-f32 GetVehicleAreaRememberSpeed();
 
 i32 SpeederChase_ObjIsAGroundTroop(GameObject_s *object);
 
@@ -155,7 +145,6 @@ extern "C" void AddDebrisEffect(i32 *, i32, f32, f32, f32);
 extern "C" void DebrisPosOrientationMtx(i32, NUMTX *);
 extern "C" void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
 
-void PodDust(WORLDINFO_s *world, GameObject_s *object);
 
 extern "C" f32 pod_roll[2];
 f32 getPodRoll(i32 index) {

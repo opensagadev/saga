@@ -138,7 +138,6 @@ void (*Tag_DrawIconFn)(GameObject_s *);
 
 
 extern i16 id_LUKESKYWALKERDAGOBAH;
-i32 TakeOverYodaSeekDistanceHack(GameObject_s *, GameObject_s *, NUVEC *);
 
 struct TAGSCRIPTSTATE {
     AISCRIPTPROCESS processor;
@@ -156,8 +155,6 @@ DECOMP_ASSERT(offsetof(GameObject_s, current_hp) == 0x108b, "Tag signed health A
 
 extern i32 VehicleArea;
 extern "C" i32 menu_i_pack;
-extern char *ASCII_DOWN;
-void CollideGameObjects(WORLDINFO_s *world);
 i32 GetMenuID();
 void Hint_CancelCurrent();
 i32 InCollectList_Index(i32, COLLECTID *, i32);

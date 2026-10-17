@@ -34,7 +34,6 @@ struct SHOPINPUT;
 
 MechWeakPtr<MechObjectInterface, 4> NextThermalTarget;
 
-EXPLOSION *AddExplosion(nuvec_s *, f32, f32, GameObject_s *, i32, i32);
 void NewRumbleAllPlayers(f32, f32, i32, i32);
 void GameCam_NewShake(GAMECAMERA_s *, f32, f32, f32);
 void GameCam_Judder(GAMECAMERA_s *, f32, i32, nuvec_s *);
@@ -91,27 +90,15 @@ i32 ThermalDetonator_MoveCode(GameObject_s *object);
 #include "legoapi/world/levels/levels.h"
 
 
-extern i32 only_process_this_hint_id;
-extern f32 ICONXPOS_VIRTUALS;
-extern f32 ICONYPOS_VIRTUALS;
-extern f32 ICONYPOS_TOUCHYFEELY;
-extern f32 AlphaBlendTime;
 
 // The hint icon transitions and the touch icon x position are dynamically
 // initialized in this unit's static constructor in the reference.
 extern HintVectorTransition hintIconPos;
 extern HintScalarTransition hintIconScale;
 extern HintScalarTransition hintYPop;
-extern f32 ICONXPOS_TOUCHYFEELY;
-static __used__ i32 Attack_UpdateHint(HINT_s *);
 
-extern u8 show_unlock_shop_hint;
-extern u8 show_unlock_customiser_hint;
-extern u8 show_unlock_minikitviewer_hint;
 
-i32 HINT_COMPLETE(i32 hint_id);
 
-i32 Tilt_UpdateHint(HINT_s *);
 
 f32 CurrentHintAlpha();
 
@@ -122,50 +109,28 @@ static __attribute__((noinline, noclone)) void DrawHint_LSWBody(HINT_s *hint, i3
 
 static void DrawHint_LSWBody(HINT_s *hint, i32 max_lines);
 
-void DrawHint_LSW(HINT_s *hint, i32 max_lines);
 
-i32 Dodge_UpdateHint(HINT_s *hint);
 
-void SET_HINT_COMPLETE(i32 hint_id);
 
-void CLEAR_HINT_COMPLETE(i32 hint_id);
 
-i32 DragBomb_UpdateHint(HINT_s *hint);
 
 // Original local callbacks referenced by Hints_LSW.
-extern u8 show_lever_hint;
-extern i32 show_autojump_hint;
 extern AREADATA_s *PODRACE_ADATA, *PODSPRINT_ADATA, *BONUS_GUNSHIP_ADATA;
 extern FadeSystem FadeSys;
 
-static __used__ i32 Jump_UpdateHint(HINT_s *hint);
 
-static __used__ i32 Move_UpdateHint(HINT_s *hint);
 
-static __used__ i32 Lever_UpdateHint(HINT_s *);
 
-static __used__ i32 AutoJump_UpdateHint(HINT_s *hint);
 
-static __used__ i32 VehicleStuff_UpdateHint(HINT_s *hint);
 
-static __used__ i32 HoldTag_UpdateHint(HINT_s *);
 
-extern u8 show_hatmachine_hint;
 
-static __used__ i32 HatMachine_UpdateHint(HINT_s *hint);
 
-extern HINTUIBUTTON_s *hintUIButton;
 
-void *GetHintFromUIButton();
 
-extern HINT_s Hints_LSW[55];
 void RegisterWithHintSys(void (*)(HINT_s *, i32), HINT_s *, u32 *, i32);
-extern i32 id_HINT_LSW_AUTOJUMP;
-extern i32 id_HINT_LSW_AUTOJUMP_FAIL;
 
-void initGameHintSys_LSW();
 
-i32 SmartBomb_UpdateHint(HINT_s *);
 
 extern AREADATA *JABBASPALACE_ADATA;
 
@@ -173,23 +138,12 @@ i32 ShinyMetal_UpdateHint(HINT_s *hint);
 
 f32 CurrentHintButtonScale();
 
-void initGameHintSys_Batman();
 
-i32 IndyUnlocked_UpdateHint(HINT_s *hint);
 
-static __used__ i32 Sith_UpdateHint(HINT_s *);
 
-static __used__ void PlayerButton_PlayHint(HINT_s *);
 
-static __used__ i32 UnlockHubStuff_UpdateHint(HINT_s *hint);
 
-static __used__ i32 PlayerButton_UpdateHint(HINT_s *hint);
 
-i32 GizForce_UpdateHint(HINT_s *);
-i32 ZipUps_UpdateHint(HINT_s *);
-i32 Push_UpdateHints(HINT_s *);
-i32 GizPanel_UpdateHint(HINT_s *);
-i32 Shop_UpdateHint(HINT_s *);
 
 // Each control mode retains its own requested and interpolated hint row.
 

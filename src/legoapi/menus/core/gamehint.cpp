@@ -723,11 +723,8 @@ void Hint_Draw(i32 viewport) {
 
 // Static game message and hint helpers. Stubbed to satisfy the symbol baseline.
 
-static __used__ nuhspecial_s *GameMsg_GetExtraObj(GAMEMESSAGE_s *message);
 
-static __used__ void GameMsg_EndDelay_Game(GAMEMESSAGE_s *message);
 
-i32 Percent_UpdateHint(HINT_s *hint);
 
 void RegisterWithHintSys(void (*update_fn)(HINT_s *, i32), HINT_s *hints, u32 *save_bits, i32 save_bit_count) {
     hintsys.update_fn = update_fn;
@@ -780,7 +777,6 @@ u8 show_unlock_customiser_hint = 0;
 u8 show_unlock_minikitviewer_hint = 0;
 
 
-i32 Tilt_UpdateHint(HINT_s *);
 
 f32 CurrentHintAlpha();
 
@@ -822,7 +818,6 @@ static __used__ i32 HatMachine_UpdateHint(HINT_s *hint);
 
 extern HINTUIBUTTON_s *hintUIButton;
 
-void *GetHintFromUIButton();
 
 extern HINT_s Hints_LSW[55];
 void RegisterWithHintSys(void (*)(HINT_s *, i32), HINT_s *, u32 *, i32);
@@ -833,7 +828,6 @@ void initGameHintSys_LSW();
 
 i32 SmartBomb_UpdateHint(HINT_s *);
 
-extern AREADATA *JABBASPALACE_ADATA;
 
 i32 ShinyMetal_UpdateHint(HINT_s *hint);
 
@@ -841,7 +835,6 @@ f32 CurrentHintButtonScale();
 
 void initGameHintSys_Batman();
 
-i32 IndyUnlocked_UpdateHint(HINT_s *hint);
 
 static __used__ i32 Sith_UpdateHint(HINT_s *);
 

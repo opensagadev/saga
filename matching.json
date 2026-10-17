@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 82.914276,
+    "fuzzy_match_percent": 83.071976,
     "total_code": "4722419",
-    "matched_code": "661878",
-    "matched_code_percent": 14.0156555,
+    "matched_code": "662886",
+    "matched_code_percent": 14.037001,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 7071,
-    "matched_functions_percent": 52.537334,
+    "matched_functions": 7073,
+    "matched_functions_percent": 52.552193,
     "total_units": 1
   },
   "text": {
@@ -39053,7 +39053,7 @@
           "address": 1035968,
           "offset": 146000,
           "size": 877,
-          "match_percent": 68.25551
+          "match_percent": 65.977974
         },
         {
           "name": "_Z21Player_CopyEssentialsP12GameObject_sS0_",
@@ -39101,7 +39101,7 @@
           "address": 1037632,
           "offset": 147664,
           "size": 357,
-          "match_percent": 92.39024
+          "match_percent": 93.60976
         },
         {
           "name": "_ZL16NewCharacterIdleP12GameObject_si",
@@ -39117,7 +39117,7 @@
           "address": 1038656,
           "offset": 148688,
           "size": 1537,
-          "match_percent": 86.85714
+          "match_percent": 90.4846
         },
         {
           "name": "_Z11AddCreatureii",
@@ -39133,7 +39133,7 @@
           "address": 1040336,
           "offset": 150368,
           "size": 682,
-          "match_percent": 90.55556
+          "match_percent": 91.47222
         },
         {
           "name": "_Z12Players_Initv",
@@ -39141,7 +39141,7 @@
           "address": 1041024,
           "offset": 151056,
           "size": 1719,
-          "match_percent": 50.81768
+          "match_percent": 50.35083
         },
         {
           "name": "_Z16ResetPlayerMovesP12GameObject_s",
@@ -39165,7 +39165,7 @@
           "address": 1044656,
           "offset": 154688,
           "size": 589,
-          "match_percent": 51.5
+          "match_percent": 43.375
         },
         {
           "name": "_Z17ActivateCharacterPcP7nuvec_si",
@@ -39181,7 +39181,7 @@
           "address": 1045808,
           "offset": 155840,
           "size": 1760,
-          "match_percent": 77.49487
+          "match_percent": 78.22051
         },
         {
           "name": "_Z11ResetPlayerP12GameObject_siP7nuvec_si",
@@ -39189,7 +39189,7 @@
           "address": 1047568,
           "offset": 157600,
           "size": 2198,
-          "match_percent": 79.93348
+          "match_percent": 81.95279
         },
         {
           "name": "_Z22SetPlayerGroupPositionfff",
@@ -39205,7 +39205,7 @@
           "address": 1050000,
           "offset": 160032,
           "size": 494,
-          "match_percent": 74.93805
+          "match_percent": 81.19469
         },
         {
           "name": "_Z12KeepOnScreenP12GameObject_s",
@@ -39213,7 +39213,7 @@
           "address": 1050496,
           "offset": 160528,
           "size": 2970,
-          "match_percent": 78.70973
+          "match_percent": 79.494415
         },
         {
           "name": "_Z16MovePlayerSplineP12GameObject_s",
@@ -39221,7 +39221,7 @@
           "address": 1053472,
           "offset": 163504,
           "size": 1752,
-          "match_percent": 87.03315
+          "match_percent": 94.709946
         },
         {
           "name": "_Z10MovePlayerP12GameObject_s",
@@ -39229,7 +39229,7 @@
           "address": 1055232,
           "offset": 165264,
           "size": 3219,
-          "match_percent": 45.1032
+          "match_percent": 46.15116
         },
         {
           "name": "_Z13TerrainPlayerP12GameObject_s",
@@ -39237,7 +39237,7 @@
           "address": 1058464,
           "offset": 168496,
           "size": 12323,
-          "match_percent": 15.067366
+          "match_percent": 25.950384
         },
         {
           "name": "_Z13AnimatePlayerP12GameObject_s",
@@ -39253,7 +39253,7 @@
           "address": 1071808,
           "offset": 181840,
           "size": 7204,
-          "match_percent": 85.56335
+          "match_percent": 86.55505
         },
         {
           "name": "_Z16AnakinGreenSabreP12GameObject_s",
@@ -39301,7 +39301,7 @@
           "address": 1084464,
           "offset": 194496,
           "size": 724,
-          "match_percent": 95.0
+          "match_percent": 100.0
         },
         {
           "name": "_Z17AvailableToPlayerjiii",
@@ -39365,7 +39365,7 @@
           "address": 1091424,
           "offset": 201456,
           "size": 4100,
-          "match_percent": 70.47619
+          "match_percent": 72.453026
         },
         {
           "name": "_ZL17DrawParaphernaliaP12GameObject_s",
@@ -39373,7 +39373,7 @@
           "address": 1095536,
           "offset": 205568,
           "size": 12138,
-          "match_percent": 19.297644
+          "match_percent": 63.853535
         },
         {
           "name": "_Z19DrawGameObjectsDrawi",
@@ -39381,7 +39381,7 @@
           "address": 1107680,
           "offset": 217712,
           "size": 586,
-          "match_percent": 85.723404
+          "match_percent": 86.78723
         },
         {
           "name": "_Z15DrawGameObjectsv",
@@ -84630,7 +84630,7 @@
           "address": 2193680,
           "offset": 1303712,
           "size": 792,
-          "match_percent": 86.82184
+          "match_percent": 81.87931
         },
         {
           "name": "_ZL16Asteroids_Updatev",
@@ -84662,7 +84662,7 @@
           "address": 2196480,
           "offset": 1306512,
           "size": 284,
-          "match_percent": 96.82539
+          "match_percent": 100.0
         },
         {
           "name": "_ZL19KilledTrooperCannonP12GameObject_s",
@@ -84846,7 +84846,7 @@
           "address": 2203424,
           "offset": 1313456,
           "size": 997,
-          "match_percent": 78.958336
+          "match_percent": 91.375
         },
         {
           "name": "_Z19AsteroidChaseB_DrawP11WORLDINFO_s",
@@ -84894,7 +84894,7 @@
           "address": 2207920,
           "offset": 1317952,
           "size": 2073,
-          "match_percent": 99.155106
+          "match_percent": 99.981636
         },
         {
           "name": "_Z20AsteroidChaseD_PanelP11WORLDINFO_s",
@@ -84926,7 +84926,7 @@
           "address": 2210304,
           "offset": 1320336,
           "size": 312,
-          "match_percent": 98.58667
+          "match_percent": 99.986664
         },
         {
           "name": "_Z19CloudCityTrapB_InitP11WORLDINFO_s",
@@ -84942,7 +84942,7 @@
           "address": 2210880,
           "offset": 1320912,
           "size": 312,
-          "match_percent": 97.975
+          "match_percent": 99.975
         },
         {
           "name": "_Z20CloudCityTrapC_ResetP11WORLDINFO_s",
@@ -84966,7 +84966,7 @@
           "address": 2211792,
           "offset": 1321824,
           "size": 104,
-          "match_percent": 89.645164
+          "match_percent": 99.96774
         },
         {
           "name": "_Z21CloudCityEscapeA_InitP11WORLDINFO_s",
@@ -84998,7 +84998,7 @@
           "address": 2213104,
           "offset": 1323136,
           "size": 191,
-          "match_percent": 96.71429
+          "match_percent": 99.97959
         },
         {
           "name": "_Z21CloudCityEscapeC_InitP11WORLDINFO_s",
@@ -85214,7 +85214,7 @@
           "address": 2222272,
           "offset": 1332304,
           "size": 1236,
-          "match_percent": 57.975525
+          "match_percent": 58.534966
         },
         {
           "name": "_Z23HothBattle_StartNewWavev",
@@ -85230,7 +85230,7 @@
           "address": 2224000,
           "offset": 1334032,
           "size": 1898,
-          "match_percent": 80.12676
+          "match_percent": 80.92958
         },
         {
           "name": "_Z22HothBattleE_UpdateWavev",
@@ -85238,7 +85238,7 @@
           "address": 2225904,
           "offset": 1335936,
           "size": 3136,
-          "match_percent": 80.420204
+          "match_percent": 82.67936
         },
         {
           "name": "_Z18HothBattleE_UpdateP11WORLDINFO_s",

@@ -63,7 +63,6 @@
 // ---------------------------------------------------------------------------
 
 // C++ linkage — defined in nu3d.
-NUMTL *NuMtlCreate3D(i32 count);
 
 extern "C" {
     // nucore / nurndr plain stubs and editor helpers (extern "C" TUs).
@@ -125,10 +124,6 @@ extern "C" {
     extern VARIPTR characterbuffer_end;
 }
 void BackDrop_Init(char *path, VARIPTR *buf, VARIPTR *buf_end);
-void BackDrop_Draw(float alpha, i32 flags);
-void BackDrop_Update(float dt);
-void BackDrop_ResetColours();
-void BackDrop_UpdateColours(i32 instant);
 void TextCrawl_Init(TEXTCRAWL_s *crawl, i32 id, i32 unk);
 void TextCrawl_Draw(float dt, i32 paragraphs, float alpha, char *text);
 void LoadPerm1(void);
@@ -321,33 +316,16 @@ void CheckForPlayersTurnedOff();
 
 extern "C" NUVEC plr_lastpos;
 
-extern void GetTopBot(GameObject_s *obj);
-extern f32 FindGunshipHoverHeight(GameObject_s *obj);
-extern f32 GetVehicleSpeedMul(GameObject_s *obj, f32 input);
-extern i32 ObjInNarrowSock(GameObject_s *obj, SOCKSYS *socks, i32 level);
-extern i32 complexsockposition_forcesock;
-extern i32 movegamecamera_forcesock;
 extern AREADATA *BONUS_GUNSHIP_ADATA;
-extern AREADATA *BATTLEOVERCORUSCANT_ADATA;
-extern i32 LevFlag[4];
-extern void GameObjectDimensions(GameObject_s *obj);
 extern void GameObjectOrigin(GameObject_s *obj);
-extern void ResetRumble(RUMBLEPACKET *packet);
-extern void CurrentStart(GameObject_s *obj, i32 mode, i32 start);
 extern void InitSurfaceInfo(GameObject_s *obj);
 extern i32 SetObjOnSurface(GameObject_s *obj, i32 mode);
-extern void GizForce_ResetLOS(GameObject_s *obj);
-void Arcade_PlayerKilled(i32 player, i32 active);
 void ResetPlayerAI(GameObject_s *obj);
 void ResetPlayerMoves(GameObject_s *obj);
-void SetProtocolDroidDeactivatedAction(GameObject_s *);
 i32 TagCharacter(GameObject_s *source, GameObject_s *target, i32 mode);
 void NewBuzz(nupad_s *, f32, i32);
-void GameAudio_PlaySfxById(i32 sfx_id, nuvec_s *position, i32 flags, i32 volume);
-f32 VehicleTurnOrLoopOffset(GameObject_s *object);
 void Player_ClearContext(GameObject_s *object, i32 mode);
 void Player_ResetContexts(PLAYERPACKET_s *packet);
-extern "C" f32 chattersfxwait;
 
 void Players_Init(void);
 
@@ -394,7 +372,6 @@ NUVEC *Player_StartPos(GameObject_s *obj);
 
 i32 PlayersDropInOut();
 
-i32 PlayerItem_GotAmmo(PLAYERITEM_s *item);
 
 i32 Players_AveragePos(nuvec_s *position, SOCKPOSITION_s *socket_position);
 
@@ -403,8 +380,6 @@ i32 Players_BothActive();
 PLAYERITEMTYPE_s *PlayerItemType_Find(i32 id);
 
 extern void (*Player_ClearContextFn)(GameObject_s *, i32);
-void Whip_Release(GameObject_s *);
-i32 SpecialMove_ReleaseVictim(GameObject_s *);
 
 
 i32 Player_HasFastBuild(GameObject_s *player);
@@ -414,16 +389,11 @@ void PlayerItemTypes_Init(PLAYERITEMTYPE_s *types);
 
 void Player_CopyEssentials(GameObject_s *source, GameObject_s *destination);
 
-i32 Player_HasDeflectBolts(GameObject_s *object);
 
-extern i32 FULLDEBUGTOGGLE;
-extern i32 LIFTPLAYER;
-extern f32 TOGGLEREPEATTIME;
 extern i32 (*Player_ToggleSubCharacterFn)(GameObject_s *, i32, i32);
 extern void (*Player_ToggledCharacterFn)(GameObject_s *, i32);
 extern FadeSystem FadeSys;
 extern i32 LEGOHINT_FREEPLAYTOGGLE;
-void Hint_SetComplete(i32 hint_id);
 void Move_DEFAULT(GameObject_s *object);
 void GameCam_Blend(GAMECAMERA_s *camera, f32 duration, f32 curve, i32 mode);
 void GameAudio_PlaySfx(i32 sfx, NUVEC *position, i32 flags, i32 volume);
@@ -432,17 +402,12 @@ void Player_ToggleCharacter(GameObject_s *object, i32 direction, i32 sound);
 
 i32 Player_HasInvincibility(GameObject_s *object);
 
-i32 Player_HasDoubleBoltDamage(GameObject_s *object);
 
-void PlayerButton_OnHold_Callback(MechTouchUIElement &element, TouchHolder &);
 
 i32 Player_HasDoubleWeaponDamage(GameObject_s *object);
 
-void PlayerButton_OnLeave_Callback(MechTouchUIElement &element, TouchHolder &holder);
 
-i32 Player_HasDoubleBoltDamage_FromBolt(BOLT_s *bolt);
 
-void PlayerButton_OnClick_Callback_NextButton(MechTouchUIElement &element, TouchHolder &);
 
 extern u32 (*CanPushObstaclesFn)(GameObject_s *);
 
@@ -452,9 +417,7 @@ namespace {
 
 } // namespace
 
-void ResetPlayer(GameObject_s *obj, i32 reset_moves, nuvec_s *position, i32 snap_to_surface);
 
-void StarWars_AutoSetAICapabilities(GameObject_s *object);
 i32 CanPullLevers(i32 id);
 extern f32 DEFAULT_MOVE_RANGE;
 
@@ -471,23 +434,17 @@ void ResetPlayerAI(GameObject_s *object);
 i32 MakePlayerList(i32 count);
 
 void ResetPlayerPacket(PLAYERPACKET_s *, CHARACTERDATA_s *);
-void ResetCharacterIdle(GameObject_s *, i32, i32);
-void SetGameObjectCharacterData(GameObject_s *);
-void ResetCoinPacket(COINPACKET_s *);
 
 void ResetPlayerMoves(GameObject_s *object);
 
-void SetToLastSafePos(GameObject_s *object);
 
 i32 AvailableToPlayer(u32 character_flags, i32 weapon_action, i32 context, i32 require_all);
 
 i32 GetNumLocalPlayers();
 
-i32 UnderPlayerControl(GameObject_s *object);
 
 i32 ActivePlayerInRange(nuvec_s *position, float range_squared, float *distance_squared);
 
-GameObject_s *GetOtherActivePlayer(GameObject_s *object);
 
 
 DECOMP_ASSERT(sizeof(SPECIAL_LAYER_s) == 0xc, "SPECIAL_LAYER_s size");
@@ -511,9 +468,7 @@ extern void (*GameObjectDimensionsExtraFn)(GameObject_s *);
 bool FindFurthestPlayerFromVec(nuvec_s *position, GameObject_s **furthest_player, float &distance_squared,
                                bool require_character_flags, u32 character_flags);
 
-void AveragePlayerCurrentSpeedMul();
 
-void SetPlayer();
 
 // ==== src/legoapi/actions/movement/dropinout.cpp: declarations ====
 #include "decomp.h"
@@ -544,20 +499,13 @@ extern i32 drop_in_teleport;
 extern i32 teleport_all_freeplay_modes;
 
 void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *data);
-void ReleaseEat(GameObject_s *object);
-void AICreatureResumeScript(GameObject_s *object);
 
-void StartDropIn(GameObject_s *object);
 
-void StartDropOut(GameObject_s *object);
 
-void DropInOutCode(GameObject_s *object);
 
-f32 DropInOutScale(GameObject_s *object);
 
 i32 FreePlay_DropInToPlayerPos(GameObject_s *object);
 
-void DropOut(i32 player_index, i32 resume, i32 silent, i32);
 
 // ==== functions in original address order ====
 

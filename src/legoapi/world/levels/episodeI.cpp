@@ -402,7 +402,6 @@ void AnakinsFlightB_Draw(WORLDINFO_s *world);
 // they get their own home (their originals live outside the ep1 TU).
 // ===========================================================================
 
-i32 PodLevel(AREADATA_s *area);
 
 // Original TU near 0x175830.
 void SetPodMergeAnims(ANIMPACKET_s *packet, i32 index) {
@@ -444,17 +443,10 @@ extern u8 net_recievedFreePlayList;
 
 void GetClientMineInfo(nuvec_s **positions, u64 **present, u64 **exploded);
 
-extern void Player_ResetContexts(PLAYERPACKET_s *packet);
-extern void CharShadows_Reset(PLAYERPACKET_s *packet);
-extern void ResetForceGlow(PLAYERPACKET_s *packet);
 
-void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *);
 
-void FinishLoop_Network();
 
-i32 FinishStatusPacket_LSW(WORLDINFO_s *, STATUSPACKET_s *, i32);
 
-void setObjInNetWaitContext(GameObject_s *object, i32 animation);
 
 // ==== src/legoapi/actions/character/speederchase.cpp: declarations ====
 #include "nu2api/numath/nutrig.h"
@@ -502,11 +494,8 @@ static i32 PodRaceKey[8] __attribute__((aligned(16))) = {-1, -1, -1, -1, -1, -1,
 
 #include "legoapi/actions/character/speederchase_types.h"
 
-extern SPEEDERCHASEANETPACKET_s * speederchasea_netpacket;
 
-extern u8 troopercannons_beenReset;
 extern i32 players_going_forward;
-extern i32 players_cannot_exit_speeder;
 
 extern f32 zoom_ahead_extra;
 extern f32 zoom_ahead_extra_time;
@@ -523,44 +512,26 @@ DECOMP_ASSERT(sizeof(SPEEDERCHASEVALUES) == 0x1c, "Speeder chase tuning stride")
 DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 
 extern i32 objopponent_ignoreaiopponent;
-extern i32 test_ai_combo;
-extern i32 CanPunchGirls;
-extern i16 id_GAMORREANGUARD;
-extern i16 id_STORMTROOPER;
-i32 SpecialMove_Check(GameObject_s *, GameObject_s *);
-u32 SpecialMove_GetFlags(i32, u32);
 
 void PodKeyReset();
 
-void TakeHitRumble(GameObject_s *, f32);
 
 void PodLoseSpeed(GameObject_s *object, i32 hit, i32 rumble);
 
-i32 SpeederBlowupHack(GIZMOBLOWUP_s *blowup, i32);
 
-f32 FindPodHoverHeight(GameObject_s *object);
 
-extern i32 ObjInNarrowSock(GameObject_s *, SOCKSYS *, i32);
-extern i32 IDLESPEEDINNARROWSOCKSONLY;
 
 i32 ObjIsTargetSpeeder(GameObject_s *object);
-f32 GetVehicleSpeedMul(GameObject_s *object, f32 speed);
 
 void SetLevelExBlowupFunc(i32 (*callback)(GIZMOBLOWUP_s *, i32));
-void InitTrooperCannons(WORLDINFO_s *world);
-void ResetTrooperCannons(WORLDINFO_s *world, i32 trooper_id);
-void UpdateTrooperCannons(WORLDINFO_s *world);
-i32 GoingForwardsAlongNarrowSock(GameObject_s *object);
 
 void SpeederChaseA_Init(WORLDINFO_s *world);
 
-void ProcessCurrentSpeed(WORLDINFO_s *world, speedup_s *speedup);
 
 void SpeederChaseA_Panel(WORLDINFO_s *);
 
 void SpeederChaseA_Reset(WORLDINFO_s *);
 
-i32 SpeedersDroppedBack();
 
 i32 Action_SpeederBeingChased(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **, i32, i32 first_time,
                               f32 elapsed);
@@ -569,11 +540,8 @@ void SpeederChaseA_Update(WORLDINFO_s *world);
 
 i32 ObjOpponentStillThere(GameObject_s *object, GameObject_s *opponent, f32 gap);
 
-f32 SpeederChaseATATInOutMul(nuvec_s *start, nuvec_s *end);
 
-f32 GetVehicleAreaRememberSpeed();
 
-i32 SpeederChase_ObjIsAGroundTroop(GameObject_s *object);
 
 extern "C" {
 
@@ -590,7 +558,6 @@ extern "C" void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
 void PodDust(WORLDINFO_s *world, GameObject_s *object);
 
 extern "C" f32 pod_roll[2];
-f32 getPodRoll(i32 index);
 
 // ==== functions in original address order ====
 
