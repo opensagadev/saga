@@ -30760,6 +30760,22 @@
           "match_percent": 100.0
         },
         {
+          "name": "tpentPropOnEnter",
+          "demangled_name": "tpentPropOnEnter",
+          "address": 3805152,
+          "offset": 2915184,
+          "size": 131,
+          "match_percent": 74.189186
+        },
+        {
+          "name": "tpentOnEnter",
+          "demangled_name": "tpentOnEnter",
+          "address": 3805296,
+          "offset": 2915328,
+          "size": 119,
+          "match_percent": 77.5
+        },
+        {
           "name": "cbmcfgCancel",
           "demangled_name": "cbmcfgCancel",
           "address": 3805424,
@@ -68001,29 +68017,6 @@
           "offset": 4530432,
           "size": 136,
           "match_percent": 80.34042
-        }
-      ]
-    },
-    {
-      "name": "legoapi/misc/legoapi_misc_c.c.o",
-      "source": "src/legoapi/misc/legoapi_misc_c.c",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/legoapi_misc_c.o",
-      "functions": [
-        {
-          "name": "tpentPropOnEnter",
-          "demangled_name": "tpentPropOnEnter",
-          "address": 3805152,
-          "offset": 2915184,
-          "size": 131,
-          "match_percent": 74.189186
-        },
-        {
-          "name": "tpentOnEnter",
-          "demangled_name": "tpentOnEnter",
-          "address": 3805296,
-          "offset": 2915328,
-          "size": 119,
-          "match_percent": 77.5
         }
       ]
     },
@@ -129877,7 +129870,7 @@
     }
   ],
   "summary": {
-    "bazel_units": 487,
+    "bazel_units": 486,
     "functions": 13454,
     "assigned_functions": 12845,
     "ambiguous_functions": 282,

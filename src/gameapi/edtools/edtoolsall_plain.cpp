@@ -5396,3 +5396,36 @@ static void eduiFntPrintExEditBuffer(void *font, float x, float y, int, char *fo
                        arguments);
     va_end(arguments);
 }
+
+// Text-picker commit callbacks. Retail keeps them unmangled and local.
+extern "C" {
+    __attribute__((visibility("hidden"), optimize("O3"))) void tpentOnEnter(eduimenu_s *menu, eduiitem_s *item,
+                                                                            unsigned int buttons) {
+        void *original = *(void **)((char *)item + 0x0c);
+        void (*callback)(void *, void *, unsigned int) =
+            *(void (**)(void *, void *, unsigned int))((char *)original + 0x15c);
+        void *parent = *(void **)((char *)menu + 0x40);
+
+        NuStrCpy((char *)original + 0x4c, (char *)item + 0x4c);
+        if (callback)
+            callback(parent, original, buttons);
+        eduiMenuDetach(menu);
+        eduiMenuDestroy(menu);
+    }
+
+    __attribute__((visibility("hidden"), optimize("O3"))) void tpentPropOnEnter(eduimenu_s *menu, eduiitem_s *item,
+                                                                                unsigned int buttons) {
+        void *original = *(void **)((char *)item + 0x0c);
+        void (*callback)(void *, void *, unsigned int) =
+            *(void (**)(void *, void *, unsigned int))((char *)original + 0x78);
+        eduimenu_s *parent = *(eduimenu_s **)((char *)menu + 0x40);
+
+        NuStrCpy(*(char **)((char *)original + 0x64), (char *)item + 0x4c);
+        if (callback)
+            callback(parent, original, buttons);
+        eduiMenuDetach(menu);
+        eduiMenuDestroy(menu);
+        if (parent)
+            eduiSetActiveMenu(parent);
+    }
+}

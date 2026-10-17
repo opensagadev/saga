@@ -542,7 +542,6 @@ build:target --per_file_copt=^src/legoapi/ai/core/ai_sys\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/ai/game/lsw_hub_ai_stubs\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/ai/core/legoai\.cpp$@-O3
 build:target --per_file_copt=^src/MechInputTouch/MechObjectInterface\.cpp$@-O3
-build:target --per_file_copt=^src/legoapi/misc/legoapi_misc_c\.c$@-O2
 
 # These units' reference VuVec initializers are vectorized, and their functions
 # keep or improve their matches when the whole unit is optimized.
