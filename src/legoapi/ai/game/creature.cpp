@@ -4449,10 +4449,11 @@ void ResetAICreatures(AISYS_s *system) {
         }
 
         object.apiobj.flags_high &= static_cast<u8>(~APIOBJECT_HIGH_FLAG_CHARACTER);
-        const bool permanently_removed =
-            WORLD->level_progress != NULL && object_index < 64 &&
-            (WORLD->level_progress->disabled_ai_object_mask[object_index / 32] & (1u << (object_index & 31))) != 0;
-        if (permanently_removed) {
+        LEVEL_PROGRESS_s *progress = WORLD->level_progress;
+        if (progress != NULL && ((((static_cast<u64>(progress->disabled_ai_object_mask[1]) << 32) |
+                                    progress->disabled_ai_object_mask[0]) >>
+                                   object_index) &
+                                  1) != 0) {
             object.ai.reset_mode = AI_CREATURE_RESET_DISABLED;
             object.apiobj.field_0x287 = 1;
             continue;
