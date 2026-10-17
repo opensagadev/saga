@@ -1,3 +1,6 @@
+// Original translation unit reconstructed from the reference address map.
+// Functions are defined in original address order.
+
 #include "legoapi/gizmo/object/giztorpedo.h"
 
 #include "batman.h"
@@ -25,6 +28,41 @@ enum GIZTORP_LEVEL_OBJECT {
 };
 
 i32 giztorpmachine_gizmotype_id;
+
+i32 PartDraw_Torp(PART_s *part);
+
+static void GizTorp_SetVisibility(GIZMO *gizmo, i32 visible);
+
+static void GizTorp_Activate(GIZMO *gizmo, i32 active);
+
+static void GizTorps_Reset(void *world_ptr, void *, void *);
+
+static void GizTorp_Update(void *world_ptr, void *, float);
+
+static i32 GizTorp_GetMaxGizmos(void *world_ptr);
+
+static char *GizTorp_GetGizmoName(GIZMO *gizmo);
+
+static i32 GizTorp_GetOutput(GIZMO *, i32, i32);
+
+static char *GizTorp_GetOutputName(GIZMO *, i32 output_index);
+
+static i32 GizTorp_GetNumOutputs(GIZMO *);
+
+static i32 GizTorp_Load(void *world_ptr, void *);
+
+static void *GizTorps_ReserveBufferSpace(void *world_ptr);
+
+static void GizTorp_Draw(void *world_ptr, void *, float);
+
+static void GizTorp_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *world_ptr, void *);
+
+GIZTORPMACHINE *GizTorpMachine_FindNearest(WORLDINFO_s *world, NUVEC *position, f32 *distance_squared);
+
+ADDGIZMOTYPE *GizTorpMachine_RegisterGizmo(i32 type_id);
+
+
+// ==== functions in original address order ====
 
 i32 PartDraw_Torp(PART_s *part) {
     i32 draw = PartDraw_Flickerer(part);
@@ -274,3 +312,4 @@ ADDGIZMOTYPE *GizTorpMachine_RegisterGizmo(i32 type_id) {
 
     return &addtype;
 }
+

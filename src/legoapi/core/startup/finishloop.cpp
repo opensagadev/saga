@@ -75,8 +75,4 @@ void FinishLoop(i32 frames) {
 void bgSuspendMain(i32) {
 }
 
-void EndOfDemo(i32) {
-    NewLData = TITLES_LDATA;
-    new_level_from_menu = 1;
-    NewGame();
-}
+void EndOfDemo(i32);

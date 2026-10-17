@@ -1,3 +1,6 @@
+// Original translation unit reconstructed from the reference address map.
+// Functions are defined in original address order.
+
 #include "decomp.h"
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nu3d/nutex.h"
@@ -26,3 +29,4346 @@ extern "C" {
 void Debug_Print(void);
 
 } // extern "C"
+
+// ==== src/legoapi/menus/screens/gamestatus_lsw.cpp: declarations ====
+// Original translation unit reconstructed from the reference address map.
+// Functions are defined in original address order.
+
+#include <string.h>
+#include <stdio.h>
+
+#include "decomp.h"
+#include "globals.h"
+#include "gameframework/saveload.h"
+#include "legoapi/legoapi_types.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/items/base/collection.h"
+#include "legoapi/core/input/qrand.h"
+#include "legoapi/core/input/timer.h"
+#include "legoapi/world/area.h"
+#include "legoapi/world/level.h"
+#include "legoapi/world/world.h"
+#include "nu2api/nu3d/nutex.h"
+#include "nu2api/numath/nutrig.h"
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/menus/core/text.h"
+#include "legoapi/menus/screens/gamestatus_lsw.h"
+#include "legoapi/menus/screens/store.h"
+#include "legoapi/menus/screens/gamestructure.h"
+#include "gameapi/gui/apimenu.h"
+#include "MechInputTouch/MechInputTouch_types.h"
+#include "legoapi/render/core/render.h"
+#include "legoapi/menus/core/panel.h"
+#include "legoapi/menus/core/gamemessage.h"
+#include "legoapi/menus/core/gamemessages.h"
+#include "legoapi/gizmo/object/gizmopickup.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/render/fx.h"
+#include "legoapi/world/levels/episode.h"
+#include "legoapi/world/levels/levels.h"
+#include "legoapi/world/mission.h"
+#include "legoapi/characters/core/players.h"
+#include "legoapi/props/doors/door.h"
+#include "nu2api/numath/nufloat.h"
+#include "nu2api/nusound/nusound.h"
+#include "legoapi/render/core/screen.h"
+
+struct AIROW_s;
+struct nuqthdr_s;
+struct nunativegscene_s;
+struct SHOPINPUT;
+
+extern "C" i32 NewMode;
+extern "C" i32 reset_load;
+extern "C" i32 Paused;
+extern FadeSystem FadeSys;
+extern "C" i32 screendump;
+extern "C" STATUSPACKET_s StatusPacket;
+extern AREADATA *NEGOTIATIONS_ADATA;
+
+extern "C" i32 MenuInMemoryCard();
+void ResetRumble(RUMBLEPACKET *packet);
+void ReCalculateCompletionPoints();
+void StatusStage_Reset(STATUS_STAGE_s *stage);
+void GameCam_Blend(GAMECAMERA_s *camera, f32 duration, f32 curve, i32 mode);
+void IncreaseScore(u32 *, u64, i32);
+extern "C" void PlaySfx(char *, nuvec_s *);
+void GameAudio_PlaySfx(i32, nuvec_s *, i32, i32);
+void FinishStatusPacket(i32);
+extern "C" void BackupMenu();
+void Text_FillInExtendedSaveInfo();
+void DrawStatusBG_LSW(STATUSPACKET_s *);
+i32 InitStatusScreen_LSW(WORLDINFO_s *, STATUSPACKET_s *);
+i32 FinishStatusPacket_LSW(WORLDINFO_s *, STATUSPACKET_s *, i32);
+void ResetStatusPacket_LSW(STATUSPACKET_s *);
+void RegisterStatusScreen(STATUS_STAGE_s *, i32 *, REGISTERSTATUSPACKET_s *);
+void EndOfDemo(i32);
+static i32 gamedemo_option;
+static i32 goldbrickmsgcount;
+
+i32 AddGoldBrickMessage(STATUSPACKET_s *packet, i16 brick);
+extern f32 DROPINALPHA;
+extern f32 PANEL_SCOREX;
+extern f32 PANEL_SCORESCALE;
+extern i16 tCOINTOTAL;
+extern i16 tSELECT;
+extern i16 tSELECTING;
+void Text_MakeScore(u32, char *);
+void Status_DrawPromptMenu(STATUSPACKET_s *, i32, f32);
+f32 getFinishedStatusAlpha(STATUSPACKET_s *);
+extern f32 STATUS_TITLE_Y;
+
+extern u16 hub_iconang[4];
+STATUS_STAGE_s *StatusStages;
+extern f32 iconalphaoverride;
+extern f32 icon_y;
+extern i32 draw_player_icons;
+extern i32 status_prompt;
+static i32 DrawGoldBrick_Stage;
+static i32 DrawGoldBrick_Phase;
+void RedBrick_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32);
+void RedBrick_LSW_Update(STATUS_STAGE_s *, STATUSPACKET_s *, f32);
+void RedBrick_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *);
+void CollectCharcters_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32);
+void CollectCharcters_Update(STATUS_STAGE_s *, STATUSPACKET_s *, f32);
+void CollectCharcters_Skip(STATUS_STAGE_s *, STATUSPACKET_s *);
+void CollectCharactersOff_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32);
+void CollectCharactersOff_Update(STATUS_STAGE_s *, STATUSPACKET_s *, f32);
+void CollectCharactersOff_Skip(STATUS_STAGE_s *, STATUSPACKET_s *);
+void Coins_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32);
+void Coins_LSW_Update(STATUS_STAGE_s *, STATUSPACKET_s *, f32);
+void Coins_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *);
+void TrueHero_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32);
+void TrueHero_LSW_Update(STATUS_STAGE_s *, STATUSPACKET_s *, f32);
+void TrueHero_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *);
+void MiniKit_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32);
+void MiniKit_LSW_Update(STATUS_STAGE_s *, STATUSPACKET_s *, f32);
+void MiniKit_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *);
+void AllMiniKits_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32);
+void AllMiniKits_LSW_Update(STATUS_STAGE_s *, STATUSPACKET_s *, f32);
+void AllMiniKits_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *);
+void GoldBrick_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32);
+void GoldBrick_LSW_Update(STATUS_STAGE_s *, STATUSPACKET_s *, f32);
+void GoldBrick_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *);
+void LevelComplete_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32);
+void LevelComplete_LSW_Update(STATUS_STAGE_s *, STATUSPACKET_s *, f32);
+void LevelComplete_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *);
+void BonusTime_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32);
+void BonusTime_LSW_Update(STATUS_STAGE_s *, STATUSPACKET_s *, f32);
+void BonusTime_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *);
+void ChallangeCash_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32);
+void ChallangeCash_Update(STATUS_STAGE_s *, STATUSPACKET_s *, f32);
+void ChallangeCash_Skip(STATUS_STAGE_s *, STATUSPACKET_s *);
+void SuperStoryTime_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32);
+void SuperStoryTime_LSW_Update(STATUS_STAGE_s *, STATUSPACKET_s *, f32);
+void SuperStoryTime_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *);
+void SuperStoryScore_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32);
+void SuperStoryScore_LSW_Update(STATUS_STAGE_s *, STATUSPACKET_s *, f32);
+void SuperStoryScore_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *);
+void BonusComplete_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32);
+void BonusComplete_LSW_Update(STATUS_STAGE_s *, STATUSPACKET_s *, f32);
+void BonusComplete_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *);
+void BonusWin_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32);
+void BonusWin_LSW_Update(STATUS_STAGE_s *, STATUSPACKET_s *, f32);
+void BonusWin_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *);
+void Prompt_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32);
+void Prompt_LSW_Update(STATUS_STAGE_s *, STATUSPACKET_s *, f32);
+void Exit_LSW_Update(STATUS_STAGE_s *, STATUSPACKET_s *, f32);
+void Save_LSW_Update(STATUS_STAGE_s *, STATUSPACKET_s *, f32);
+void Fade_LSW_Update(STATUS_STAGE_s *, STATUSPACKET_s *, f32);
+
+extern STATUSPACKET_LSW_s StatusPacket_LSW;
+extern STATUS_STAGE_s StatusStages_LSW[34];
+
+void AddStatusStage(STATUSPACKET_s *packet, i32 type, i32 gold_brick_enabled);
+
+void SetBonusWinner(i32 player);
+
+STATUS_STAGE_s *FindStatusStage(i32 type);
+
+void NextStatusStage(STATUSPACKET_s *packet);
+
+void Prompt_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active);
+
+void ResetIconWibble();
+
+void Save_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+
+extern i32 from_save_and_exit;
+extern "C" TIMER BonusTimer;
+extern i16 id_SLAVE1;
+extern i16 tSUPERSTORYCOMPLETE, tNEWBESTTIME, tLEVELCOMPLETE, tMISSIONCOMPLETE;
+extern i16 tNONEWBESTTIME;
+extern i16 tNEWHIGHSCORE, tNONEWHIGHSCORE;
+extern i16 tCHALLENGECOMPLETE, tTRUEHERO, tMINIKIT;
+extern "C" void NuIOS_RecordFlurryEvent(char *);
+extern "C" i32 NuStrCpy(char *, const char *);
+i32 AddToCollection(i32);
+i32 Mission_CurrentState(MISSIONSYS *);
+i32 newCharactersCollected(STATUSPACKET_s *);
+void StatusPacketReset(STATUSPACKET_s *);
+extern i32 newminikitcount;
+extern i32 currentminikit;
+static u32 collect_suit_bits;
+
+NEWMINIPIECE_s NewMiniPiece[10];
+
+void InitStatusScreen(WORLDINFO_s *world);
+
+void SetDrawGoldBrick(STATUSPACKET_s *packet, i32);
+
+static inline bool StatusRumbleTargetsPlayer(i32 player, i32 index) {
+    return player == index || player == -1;
+}
+
+void NewStatusRumbleBuzz(i32 player, float amount, float buzz, i32 priority);
+
+f32 StatusIconsOnOff(f32 progress);
+
+
+void UpdateIconWibble();
+
+void Prompt_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+
+extern i32 STATUS_R, STATUS_G, STATUS_B;
+extern i16 tUNLOCKED;
+i32 DrawPanel3DObjectNoAlpha(f32, f32, f32, f32, f32, f32, u16, u16, u16, nuhspecial_s *, i32);
+void RedBrick_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active);
+
+void RedBrick_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet);
+
+void StatusPacketReset(STATUSPACKET_s *packet);
+
+void StatusStage_Reset(STATUS_STAGE_s *stage);
+
+extern i16 tTRUEJEDI, tSTORY, tFREEPLAY;
+extern "C" void NuStrCat(char *, const char *);
+
+void TrueHero_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active);
+
+void TrueHero_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet);
+
+i32 UpdateAchievements(STATUSPACKET_s *);
+
+void UpdateStatusScreen(WORLDINFO_s *);
+
+void DrawStatusScreen(WORLDINFO_s *);
+
+extern "C" STATUSPACKET_s StatusPacket;
+extern FadeSystem FadeSys;
+extern "C" i32 reset_area;
+extern i32 grab_screen_image;
+void InitChallenge(i32);
+void InitMission(MISSIONSYS_s *, i32);
+
+void FinishStatusPacket(i32 choice);
+
+void RedBrick_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+
+void TrueHero_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+
+i32 InitStatusScreen_LSW(WORLDINFO_s *, STATUSPACKET_s *);
+
+void RegisterStatusScreen(STATUS_STAGE_s *stages, i32 *, REGISTERSTATUSPACKET_s *registration);
+
+void ResetStatusPacket_LSW(STATUSPACKET_s *packet);
+
+extern i16 tMAP, tRESTART, tFINISHSTORY, tCONTINUESTORY, tFINALCHAPTERLOCKED, tNEXTCHAPTERLOCKED;
+extern f32 text3d_width, text3d_height;
+extern "C" {
+    extern u8 MENUENTRYR, MENUENTRYG, MENUENTRYB;
+    extern u8 MENUNORMALR, MENUNORMALG, MENUNORMALB;
+    extern u8 MENUFLASH0R, MENUFLASH0G, MENUFLASH0B;
+    extern u8 MENUFLASH1R, MENUFLASH1G, MENUFLASH1B;
+}
+void Hint_SetHintFromId(i32, i32, i32);
+void Hint_SetComplete(i32);
+void Hint_Draw(i32);
+
+f32 getFinishedStatusAlpha(STATUSPACKET_s *packet);
+
+void Status_DrawPromptMenu(STATUSPACKET_s *packet, i32 selected, float alpha);
+
+// Retail keeps this body as GCC's split-out clone; the inline head stays in
+// the caller.
+static __attribute__((noinline, noclone)) void SuperStoryTime_LSW_DrawBody(STATUS_STAGE_s *stage, STATUSPACKET_s *packet)
+    __asm__("_Z23SuperStoryTime_LSW_DrawP14STATUS_STAGE_sP14STATUSPACKET_si.part.12");
+
+static void SuperStoryTime_LSW_DrawBody(STATUS_STAGE_s *stage, STATUSPACKET_s *packet);
+
+void SuperStoryTime_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current);
+
+void SuperStoryTime_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet);
+
+void LSW_registerStatusScreen();
+
+// Retail keeps this body as GCC's split-out clone; the inline head stays in
+// the caller.
+static __attribute__((noinline, noclone)) void SuperStoryScore_LSW_DrawBody(STATUS_STAGE_s *stage, STATUSPACKET_s *packet)
+    __asm__("_Z24SuperStoryScore_LSW_DrawP14STATUS_STAGE_sP14STATUSPACKET_si.part.8");
+
+static void SuperStoryScore_LSW_DrawBody(STATUS_STAGE_s *stage, STATUSPACKET_s *packet);
+
+void SuperStoryScore_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current);
+
+void SuperStoryScore_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet);
+
+void SuperStoryTime_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+
+void SuperStoryScore_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+
+extern i16 tFREEPLAYUNLOCKED, tEPISODEVUNLOCKED, tEPISODEVIUNLOCKED, tBONUSUNLOCKED;
+extern i16 tOUTOFTIME, tYOUDIDNTCOLLECTALL10CANISTERS, tSTORYCLIPSUNLOCKED;
+extern i16 tEPISODEICOMPLETE, tEPISODEIICOMPLETE, tEPISODEIIICOMPLETE;
+extern i16 tEPISODEIVCOMPLETE, tEPISODEVCOMPLETE, tEPISODEVICOMPLETE;
+
+// Retail keeps the active-stage drawing as the split-out .part clone of
+// LevelComplete_LSW_Draw; the inline head only tests `active`.
+static __attribute__((noinline, noclone)) void LevelComplete_LSW_DrawActive(STATUS_STAGE_s *stage,
+                                                                         STATUSPACKET_s *packet)
+    __asm__("_Z22LevelComplete_LSW_DrawP14STATUS_STAGE_sP14STATUSPACKET_si.part.27");
+
+static void LevelComplete_LSW_DrawActive(STATUS_STAGE_s *stage, STATUSPACKET_s *packet);
+
+void LevelComplete_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active);
+
+void Coins_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active);
+void Coins_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet);
+void Coins_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+extern i16 tWINNER;
+void DrawBonusTime(STATUSPACKET_s *, f32, i32);
+
+void BonusWin_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current);
+void BonusWin_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *);
+void BonusTime_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current);
+void BonusTime_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *);
+void ChallangeCash_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 draw);
+void ChallangeCash_Skip(STATUS_STAGE_s *, STATUSPACKET_s *);
+void BonusWin_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+void BonusTime_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+void ChallangeCash_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+void BonusComplete_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current);
+void BonusComplete_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet);
+void BonusComplete_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+
+// ==== src/legoapi/core/net/netplay.cpp: declarations ====
+#include "decomp.h"
+#include "legoapi/core/net/netplay.h"
+#include "legoapi/legoapi_types.h"
+#include "legoapi/core/input/qrand.h"
+#include "nu2api/nu3d/nutex.h"
+#include "nu2api/numath/nuvec.h"
+#include "globals.h"
+#include "legoapi/characters/core/players.h"
+#include "legoapi/render/core/screen.h"
+#include "legoapi/world/world.h"
+#include "legoapi/world/area.h"
+#include "legoapi/world/level.h"
+#include "legoapi/world/levels/levels.h"
+#include "legoapi/world/mission.h"
+#include "nu2api/nusound/nusound.h"
+
+struct AIROW_s;
+struct nuqthdr_s;
+struct nunativegscene_s;
+struct SHOPINPUT;
+
+extern APICHARACTERMODELLIST_s NetFreePlayModelList[49];
+extern i8 net_FreePlayModelCount;
+extern u8 net_recievedFreePlayList;
+
+void GetClientMineInfo(nuvec_s **positions, u64 **present, u64 **exploded);
+
+extern void Player_ResetContexts(PLAYERPACKET_s *packet);
+extern void CharShadows_Reset(PLAYERPACKET_s *packet);
+extern void ResetForceGlow(PLAYERPACKET_s *packet);
+
+void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *);
+
+void FinishLoop_Network();
+
+i32 FinishStatusPacket_LSW(WORLDINFO_s *, STATUSPACKET_s *, i32);
+
+void setObjInNetWaitContext(GameObject_s *object, i32 animation);
+
+// ==== src/legoapi/render/core/render.cpp: declarations ====
+#include "decomp.h"
+#include "gameapi/edtools/edbri_internal.h"
+#include "gameapi/edtools/edstubs.h"
+#include "legoapi/render/core/render.h"
+#include "legoapi/items/collect/torpedo.h"
+#include "legoapi/actions/character/transform.h"
+#include "legoapi/actions/movement/carrying.h"
+#include "legoapi/actions/character/snake.h"
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/gizmos/object/gizbuildits.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/gizmos/door/zipups.h"
+#include "legoapi/menus/core/text.h"
+#include "legoapi/menus/core/gamehint.h"
+#include "MechInputTouch/MechInputTouch_types.h"
+#include "gamelib/util/gamelib_util_types.h"
+#include "legoapi/menus/core/panel.h"
+#include "legoapi/menus/core/gamemessages.h"
+#include "legoapi/characters/core/players.h"
+#include "legoapi/menus/screens/gamemenuall.h"
+#include "legoapi/menus/screens/arcade.h"
+#include "legoapi/render/light/fade_material.h"
+#include "legoapi/render/fx/edsplines.h"
+#include "legoapi/render/fx.h"
+#include "legoapi/world/levels/levels.h"
+#include "legoapi/world/level.h"
+#include "legoapi/world/world.h"
+#include "nu2api/nu3d/numtl.h"
+#include "nu2api/nu3d/nurndrstat.h"
+#include "nu2api/nu3d/nuspecial.h"
+#include "nu2api/nuandroid/ios_graphics.h"
+#include "nu2api/nu3d/android/nuportal_android.h"
+#include "nu2api/nu3d/nuvport.h"
+#include "nu2api/nucore/nuvuvec.hpp"
+#include "legoapi/cutscenes/cutscenes.h"
+#include <stdio.h>
+#include <math.h>
+#include <string.h>
+
+void DrawSubItems();
+
+extern "C" void edbriStartAllPages(void);
+
+#include "nu2api/nu3d/nurndr.h"
+#include "nu2api/nu3d/nucamera.h"
+#include "nu2api/numath/nutrig.h"
+
+extern "C" void AiRndrLine3dDbg(f32, f32, f32, f32, f32, f32, u32);
+
+extern "C" void edDrawCross(NUVEC *centre, u8 red, u8 green, u8 blue);
+
+extern "C" void LocaledbitsDrawSolidEllipseXY(NUVEC *centre, f32 radius_x, f32 radius_z, i32 rotation, f32 lower_y,
+                                              f32 upper_y, u32 colour, i32, i32 segments);
+
+extern "C" void LocaledbitsDrawCircleXY(NUVEC *centre, f32 radius, u32 colour, i32, i32 segments);
+
+extern "C" void LocaledbitsDrawSolidCircleXY(NUVEC *centre, f32 radius, f32 lower_y, f32 upper_y, u32 colour, i32,
+                                             i32 segments);
+
+extern "C" void RndrOSquare(NUVEC *centre, f32 radius, i32 colour);
+
+extern "C" void RndrOSphere(NUVEC *centre, f32 radius, i32 colour, i32 segments, i32);
+
+extern "C" void RndrCircleXZ(NUVEC *centre, f32 radius, i32 colour, i32 segments);
+
+#include "gameapi/gui/apimenu.h"
+#include "gameframework/saveload.h"
+#include "legoapi/menus/core/text.h"
+#include "legoapi/characters/core/character.h"
+#include "legoapi/characters/core/players.h"
+#include "legoapi/characters/motion/gameanim.h"
+#include "legoapi/characters/motion/animlist.h"
+#include "legoapi/core/config/cheat.h"
+#include "legoapi/world/level.h"
+#include "legoapi/core/input/timer.h"
+#include "legoapi/gizmo/base/gizmo.h"
+#include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/items/base/collection.h"
+#include "legoapi/menus/screens/shop.h"
+#include "legoapi/world/area.h"
+#include "legoapi/world/levels/episode.h"
+#include "legoapi/world/mission.h"
+#include "legoapi/world/world_shared.h"
+#include "globals.h"
+#include "nu2api/nu3d/nutexanm.h"
+struct starfighter_s;
+struct rtl_s;
+struct rtlidata_s;
+
+#include "legoapi/render/core/SwipeDecalRenderer.h"
+#include "nu2api/nu3d/nuprim_internal.h"
+#include "nu2api/nu3d/nudlist.h"
+#include "nu2api/nu3d/nucamera.h"
+#include "nu2api/nu3d/nuqfnt.h"
+#include "nu2api/nu3d/nurndrstat.h"
+#include "nu2api/nu3d/nurndr.h"
+#include "nu2api/nu3d/nurndr.h"
+#include "nu2api/nu3d/nuvport.h"
+#include "nu2api/nu3d/NuRenderDevice.h"
+#include "nu2api/nu3d/nuspecial.h"
+#include "nu2api/nu3d/nutex.h"
+#include "nu2api/nu3d/numtl.h"
+#include "nu2api/nu3d/android/nurndr_android.h"
+#include "nu2api/nu3d/android/nugscn_android.h"
+#include "nu2api/nuandroid/ios_graphics.h"
+#include "nu2api/nucore/bgproc.h"
+#include "nu2api/nucore/nuapi.h"
+#include "nu2api/nucore/nuanim3.h"
+#include "nu2api/nucore/nugcutscene.h"
+#include "nu2api/nucore/nuhgobj.h"
+#include "nu2api/nucore/nuptrblock.h"
+#include "nu2api/nucore/nustring.h"
+#include "nu2api/nucore/nuthread.h"
+#include "nu2api/nufile/nufile.h"
+#include "nu2api/numath/numath.h"
+#include "nu2api/numath/numtx.h"
+#include "nu2api/numath/nufloat.h"
+#include "nu2api/numath/nutrig.h"
+#include "nu2api/numath/nuvec.h"
+
+#include <string.h>
+
+extern i32 VehicleArea;
+extern i32 GAMEDEMO;
+extern f32 FORCEGLOWTIME;
+extern i16 tHINTS;
+extern i16 tCHARACTERS;
+extern i16 tEXTRAS;
+extern i16 tGOLDBRICKS;
+extern i16 tSTORYCLIPS;
+extern i16 tENTERCODE;
+i32 AnakinGreenSabre(GameObject_s *object);
+i32 MatrixReflection(NUMTX *matrix, i32 axis, f32 plane, f32 height, NUMTX *result);
+
+extern f32 HUB_EPISODESUBTITLEY;
+extern f32 HUB_EPISODETITLEY;
+extern i32 draw_para;
+
+void DrawGameObjectsDraw(i32 pass);
+void EnableShadowMapRendering(i32 enable);
+void ResetShadowMapRendering();
+static void DrawParaphernalia(GameObject_s *object);
+
+struct GAMEMESSAGE_s;
+struct HINT_s;
+struct MENU_s;
+struct NuBloomParameters;
+struct STATUSPACKET_s;
+struct TouchHolder;
+struct _vum_s;
+struct _vuv_s;
+struct nuhspecial_s;
+struct ripple_node_s;
+struct ripple_set_s;
+struct VuVec;
+
+extern nuhspecial_s *(*GameMsg_GetExtraObjFn)(GAMEMESSAGE_s *);
+
+extern "C" i32 StateAnimEvaluate2(StateAnim *state, u8 *index, char *value, f32 frame);
+extern "C" i32 NuRndrBeginScene(i32);
+extern "C" void NuRndrEndScene(void);
+extern "C" void NuRndrGradRect2di(i32, i32, i32, i32, i32 *, numtl_s *);
+extern "C" void NuRndrRect2di(i32, i32, i32, i32, i32, numtl_s *);
+extern "C" void NuCameraUnlock(void);
+extern "C" void NuCameraRelock(void);
+extern char *apiGameName;
+extern char *apitxt_EMPTY;
+extern char *apitxt_PRESENT;
+extern char *apitxt_AUTOSAVE_WARNING;
+extern char *apitxt_LOADING;
+extern char *apitxt_SAVING;
+extern char *apitxt_NODATAAVAILABLE;
+extern char *apitxt_OK;
+extern char *apitxt_GAMELOADED;
+extern char *apitxt_GAMELOADING;
+extern char *apitxt_FAILEDTOLOAD;
+extern char *apitxt_CORRUPTLOAD;
+extern char *ASCII_DOWN;
+extern char *ASCII_UP;
+extern i16 tCURRENTGAME;
+extern i16 tEMPTY;
+extern i16 tGAME;
+extern i16 tNOSPACE;
+extern f32 MENUTEXTSCALE;
+extern f32 MENUBOTY;
+extern f32 AUTOSAVEICONY;
+extern f32 AUTOSAVEICONX;
+extern f32 AUTOSAVEICONSIZE;
+extern f32 MenuAlpha;
+extern i32 MenuA;
+extern f32 memcard_loadmessage_delay;
+extern f32 memcard_loadresult_delay;
+extern u8 MENUNORMALR;
+extern u8 MENUNORMALG;
+extern u8 MENUNORMALB;
+extern u8 MENUENTRYR, MENUENTRYG, MENUENTRYB;
+extern u8 MENUFLASH0R;
+extern u8 MENUFLASH0G;
+extern u8 MENUFLASH0B;
+extern u8 MENUFLASH1R;
+extern u8 MENUFLASH1G;
+extern u8 MENUFLASH1B;
+extern f32 menu_pulse;
+extern f32 menu_pulsate;
+extern i32 menu_flash;
+extern f32 text3d_height;
+extern f32 text3d_width;
+extern FadeSystem FadeSys;
+extern f32 cointotaltime;
+extern "C" f32 MainRenderTime;
+extern "C" i32 editor_active;
+extern i32 Paused;
+extern "C" i32 screendump;
+extern f32 pause_fade;
+extern "C" i32 PANELOFF;
+extern i32 noscenespecials;
+extern void RotateGameMatrix(numtx_s *matrix, i32 order, u16 x, u16 y, u16 z);
+extern void SetLevelLights(void *set, f32 scale);
+extern f32 ICONX;
+extern f32 ICONSIZE;
+extern f32 DROPINALPHA;
+extern f32 statstime;
+f32 GetAspectRatio();
+void Hint_Draw(i32 player_index);
+extern i32 CutScenePlayer_CanStart(i32 cutscene_id);
+
+// Camera zoom state
+extern f32 CameraZoom;
+
+// Graphics loading flags
+extern i32 RemoveDirectionalMaps;
+extern i32 RemoveNormalMaps;
+
+extern NUVIDEORESHEADER g_VideoResHeader;
+
+extern "C" {
+    i32 NuDisplayListRndrSpecial(nuhspecial_s *special, NUMTX *mtx, i32 skinned, NUMTX *skin_mtx,
+                                 DEFORMERWEIGHTSARRAY *blend_values);
+    void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
+}
+
+void SetCameraZoom(f32 zoom);
+
+extern "C" void NuGScnUpdate(NUGSCN *gscn, f32 frame_delta);
+
+// --- NuGScn graphics-data reader ---
+// NuReadGraphicsData is a C++ static function in the original (GCC clones it,
+// hence the `.isra.NNN` suffix in the ROM symbol table).
+
+extern "C" void NuSevereWarning(const char *format, ...);
+
+// Retail only keeps the IPA-SRA clone, which drops the unused fourth argument.
+#if defined(__i386__)
+#define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone, regparm(2)))
+#else
+#define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone))
+#endif
+static NU_READ_GRAPHICS_DATA_ATTR NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIPTR *buf_end, char *path,
+                                                             char *scene_data)
+    __asm__("_ZL18NuReadGraphicsDataP9variptr_uS0_PcS1_S1_.isra.104");
+
+// --- Extern "C": NuGScn functions have C linkage in original ---
+extern "C" {
+NUGSCN *NuGScnReadForMultiRender(VARIPTR *buf, VARIPTR buf_end, char *path, i32 render_count);
+
+NUGSCN *NuGScnRead(VARIPTR *buf, VARIPTR buf_end, char *path);
+void NuGScnReadFromMemory(NUGSCN *scene);
+NUGSCN *NuGHGFixup(NUGSCN *scene, void *);
+nuhgobj_s *NuGHGRead(char *path, VARIPTR *buf, VARIPTR buf_end);
+} // extern "C"
+
+extern i32 solid_cable;
+extern i32 nsegments_drawn;
+extern f32 slack_factor;
+extern f32 cable_slack;
+extern f32 nsegments_per_unit;
+extern CABLE_s cables[8];
+extern f32 tow_length;
+extern NUMTL *SolidMtl3D;
+
+void DrawCables();
+
+void DrawRipple(ripple_node_s *node);
+
+void DrawAreaBox(nuvec_s *position, nuvec_s *size, i32 rotation, i32 colour);
+
+void DrawBox_Now(_vuv_s *, _vuv_s *, i32, i32);
+
+extern "C" {
+extern f32 aiEditor_DrawYOffset;
+extern f32 aiEditor_LocatorWidth;
+    void AiRndrLine3d(NURND_VERTEX3D *, NUMTL *, NUMTX *);
+}
+
+void DrawLocator(nuvec_s *position, float radius, i32 rotation, i32 colour);
+
+void Draw_LOADED();
+
+i32 Draw3DObject(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x_rotation, u16 y_rotation,
+                 u16 z_rotation, float scale_x, float scale_y, float scale_z, i32 rotate_order);
+
+void DrawCharIcon(i32 character_id, float x, float y, float z, float scale, i32 frame_object_id, float character_alpha,
+                  float frame_alpha, i32 draw_character, nuhspecial_s *override_special);
+
+extern const u8 HintRGB[5][3];
+
+void DrawLine_Now(_vuv_s *, _vuv_s *, i32, i32);
+
+void DrawParallax(nuhspecial_s *special);
+
+void DrawQuestion(nuvec_s *position, float scale_value, float y_push);
+
+void DrawRectRGBA(float x, float y, float width, float height, u32 colour, numtl_s *material, i32 alignment,
+                  float scale);
+
+void DrawItem(nuhspecial_s *special, nuvec_s *position, float scale_value, float unused, float y_push, u16 x_rot,
+              u16 y_rot, u16 z_rot);
+
+
+void Draw_LOADING();
+
+#include "nu2api/nu3d/nuprim.h"
+#include "nu2api/nu3d/nuprim_internal.h"
+#include "nu2api/nu3d/nupostparams.h"
+
+#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
+    do {                                                                                                               \
+        direction.x = (vx);                                                                                            \
+        direction.y = -(vy) * camera.aspect;                                                                           \
+        direction.z = adjacent;                                                                                        \
+        NuVecNorm(&direction, &direction);                                                                             \
+        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
+        NuVecNorm(&direction, &direction);                                                                             \
+        brightness = direction.y * 0.5f + 0.5f;                                                                        \
+        if (brightness <= near_angle)                                                                                  \
+            brightness = near_scale * parameters->intensity;                                                           \
+        else if (brightness >= far_angle)                                                                              \
+            brightness = far_scale * parameters->intensity;                                                            \
+        else                                                                                                           \
+            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
+        if (parameters->directional) {                                                                                 \
+            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
+            if (angle < parameters->direction_near_angle) {                                                            \
+                brightness += 128.0f * parameters->direction_far_scale;                                                \
+            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
+                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
+                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
+                                      parameters->direction_bias);                                                     \
+                brightness +=                                                                                          \
+                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
+                              parameters->direction_near_scale);                                                       \
+            }                                                                                                          \
+        }                                                                                                              \
+        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
+                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
+                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
+                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
+        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
+            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
+                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
+        else                                                                                                           \
+            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
+        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
+    } while (0)
+
+void DrawAlphaGrid(i32 rows, i32 cols, NuBloomParameters *parameters);
+
+void DrawArrow_Now(_vum_s *, float, i32, i32);
+
+extern i16 tNONEWBESTTIME, tNEWBESTTIME;
+void Text_MakeTime(f32, i32, i32, i32, char *);
+
+void DrawBonusTime(STATUSPACKET_s *packet, float position, i32 alpha);
+
+void DrawCross_Now(_vuv_s *, float, i32, i32);
+
+void DrawPauseFade();
+
+
+void DrawRippleSet(ripple_set_s *set);
+
+
+
+void ClearScreen();
+
+
+
+void DrawAlphaImage(i32 rows, i32 cols, numtl_s *material, i32 use_pixel_offsets, NuBloomParameters *parameters);
+
+void DrawBezierLine(VuVec &start, VuVec &start_control, VuVec &end, VuVec &end_control, numtl_s *material, i32 colour);
+
+void DrawBoxMtx_Now(_vum_s *, _vuv_s *, i32, i32);
+
+void *AddGameMessage(char *, NUVEC *, f32, NUVEC *, f32, u8, u8, u8, u32, f32);
+
+void DrawCutBorders(i32 widescreen);
+
+void DrawExplosions();
+
+void DrawItemMenu2D();
+
+void DrawStatusText(char *text, u16 angle, float x, float y, float scale, u32 colour, i32 alignment);
+
+i32 Draw3DObjectMtx(WORLDINFO_s *world, i32 object_index, numtx_s *mtx);
+
+void DrawGameObjects();
+
+extern nuhspecial_s green_light;
+extern nuhspecial_s painttargetcolour[3];
+extern nuhspecial_s paintlights[3];
+
+void DrawPaintLights();
+
+void DrawStatusIcons(STATUSPACKET_s *status, float y, float alpha);
+
+void DrawTouchPrompt(char *prompt, char *unused_label, bool hovered, bool large);
+
+void Draw_LOADFAILED();
+
+void DrawAreaCylinder(nuvec_s *centre, nuvec_s *size, i32 colour);
+
+void DrawCameraTarget(nuvec_s *);
+
+void DrawGameMessages();
+
+extern f32 KITPOSX;
+extern f32 KITPOSY;
+extern f32 KITPOS2X;
+extern f32 KITPOS2Y;
+extern f32 PANEL_MINIKITSCALE;
+extern f32 PANEL_REDBRICKSCALE;
+extern f32 PANEL_MINIKITY;
+extern f32 PANEL_MINIKITCOUNTSCALE;
+extern f32 PANEL_MINIKITCOUNTY;
+// DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
+// red-brick positions come from the Game init values in legogame/game.cpp.
+extern i32 DRAWBGLOAD;
+extern u16 PowerUp_PanelYRot[2];
+extern f32 PowerUp_PanelPosMul[2];
+extern f32 POWERUPOBJSIZE;
+extern f32 REDBRICKPOSX;
+extern f32 REDBRICKPOSY;
+extern f32 REDBRICKPOS2X;
+extern f32 REDBRICKPOS2Y;
+extern i32 Arcade_Points[2];
+extern f32 BOSSICONY;
+extern i32 FPSDISPLAY;
+extern i32 ShowPlayerCoordinate;
+extern i32 LEGOOBJ_CHARKIT;
+extern i32 LEGOOBJ_MINIKIT;
+i32 DrawPanel3DObjectNoAlpha(f32, f32, f32, f32, f32, f32, u16, u16, u16, nuhspecial_s *, i32);
+extern "C" void Text3D(char *, f32, f32, f32, f32, f32, f32, u32, u8, u8, u8);
+
+void DrawMiniKitCount(float position, float scale, i32 count, i32 maximum);
+
+void DrawStatusBG_LSW(STATUSPACKET_s *status);
+
+void Draw_LOADCORRUPT();
+
+i32 Draw3DObjectAlpha(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x_rotation, u16 y_rotation,
+                      u16 z_rotation, float scale_x, float scale_y, float scale_z, i32 rotate_order, float alpha);
+
+void DrawCameraTarget2(nuvec_s *);
+
+i32 DrawPanel3DObject(float x, float y, float z, float scale_x, float scale_y, float scale_z, u16 rotate_x,
+                      u16 rotate_y, u16 rotate_z, nuhspecial_s *special, i32 rotate_order, float alpha);
+
+extern STATUSMINIKITPART_s KitPart[10];
+extern i32 currentminikit;
+extern f32 slideseek;
+
+i32 DrawPanel3DObjectMtxNoAlpha(nuhspecial_s *special, numtx_s *matrix);
+void DrawStatusMiniKit(float x, float y, float z, float built_scale, float new_scale, i32 count, STATUSPACKET_s *packet,
+                       float slide);
+
+extern i16 tUNKNOWN, tPOWERBRICK, tLOCKED, tGOLDBRICK;
+extern "C" void PlaySfx(char *, NUVEC *);
+void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
+
+void DrawSubItemMenu2D();
+
+void DrawSubItemMenu3D();
+
+void Draw_NOMEMORYCARD();
+
+void DrawFadeScreenWipe();
+
+
+void DrawForceGlowSprite(nuvec_s *position, float radius, i32 model, float alpha, GameObject_s *);
+
+void DrawGameObjectsDraw(i32);
+
+void Draw_AUTOSAVECANCEL();
+
+void DrawPanel3DObjectMtx(nuhspecial_s *special, numtx_s *matrix, float alpha);
+
+void Draw_AUTOSAVEWARNING();
+
+void Draw_NODATAAVAILABLE();
+
+extern i32 dco_locatorposonly;
+extern i32 dco_id;
+extern i32 dco_reflectaxis;
+extern i32 dco_wearinghat;
+extern u16 dco_prerotatez;
+extern f32 dco_reflectcoord;
+extern GAMECHARACTERDATA_s * dco_gcdata;
+extern CHARACTERMODEL_s * dco_cmodel;
+extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
+void DrawObjectOnCharacter(WORLDINFO_s *world, GameObject_s *object, i32 object_id, nuhspecial_s *special, i32 locator,
+                           i32 second_locator, NUMTX *joints, i32 reflect, u32 layers, NUMTX *rotation,
+                           NUVEC *translation, f32 alpha, f32 scale);
+
+extern f32 DropInOutScale(GameObject_s *object);
+extern void ApplyExtraRotation(GameObject_s *object, NUMTX *matrix);
+extern AREADATA *DEATHSTARBATTLE2_ADATA;
+extern AREADATA *PODSPRINT_ADATA;
+extern "C" {
+    extern i16 id_ATST;
+    extern i16 id_ATST_LOWRES;
+    extern i16 id_ATAT;
+}
+extern u8 CharClipToBlobShadows;
+
+
+i32 DrawGameObjectsProcess();
+
+void DrawStatusTextFraction(i32 current, i32 total, float x, float y, u16 angle, float scale, u32 colour,
+                            float animation, float animation_duration);
+
+void DrawGameMessage_Targets(GAMEMESSAGE_s *message, nuvec_s *position, float scale);
+
+i32 DrawPanel3DObjectNoAlpha(float x, float y, float z, float scale_x, float scale_y, float scale_z, u16 rotate_x,
+                             u16 rotate_y, u16 rotate_z, nuhspecial_s *special, i32 rotate_order);
+
+i32 DrawPanel3DObjectMtxNoAlpha(nuhspecial_s *special, numtx_s *matrix);
+
+extern void DrawMenuEntry(MENU_s *, char *);
+void Draw_OK(MENU_s *menu);
+
+void DrawAABox(_vuv_s *position, _vuv_s *size, i32 colour);
+
+void DrawArrow(nuhspecial_s *special, float scale_value);
+
+void DrawCross(nuvec_s *centre, float radius, numtl_s *material, i32 colour);
+
+extern f32 SwipeDecalRenderer_MaxWidth;
+extern f32 SwipeDecalRenderer_MinWidth;
+
+
+#define SWIPE_PRIM_UV(U, V)                                                                                            \
+    do {                                                                                                               \
+        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
+        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
+            vertex->float_uv[0] = (U);                                                                                 \
+            vertex->float_uv[1] = (V);                                                                                 \
+        } else {                                                                                                       \
+            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
+            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
+        }                                                                                                              \
+    } while (false)
+
+
+
+
+extern i32 GetMenuID(void);
+static __used__ i32 PauseRenderOff();
+
+static __used__ i32 MatrixReflection_CanOverride();
+
+static void DrawWeapon_SetSabreObjects(GameObject_s *object, i32 red, i32 green, i32 blue, i32 purple, i32 *models,
+                                       i32 *hilt);
+
+static void DrawWeapons(GameObject_s *object, i32 reflection, f32 weapon_scale);
+
+static void DrawCharacterAttachments(GameObject_s *object, NUMTX *joint_matrices);
+
+void CharScene_Draw(WORLDINFO_s *, i32, NUMTX *, NUMTX *);
+void CharMiniKit_Draw(i32, NUMTX *, i32, f32, f32);
+void Customiser_DrawAccessories(CUSTOMISER *, GameObject_s *, NUMTX *);
+i32 Batarang_GetObjectFromCharID(i32);
+void Grapple_DrawLine(GameObject_s *);
+void Transform_DrawTarget(NUVEC *, f32, f32);
+extern i16 id_ANAKINJEDISCARRED, id_WEIRDO1, id_WEIRDO2, id_CATAPULT, id_CHEWBACCA, id_WOOKIEE, id_TWOFACE;
+extern i32 PickUpFlickerTest, PickUpFlickerFrames, PickupFlickerFrame;
+
+static void DrawParaphernalia(GameObject_s *object);
+
+#include "legoapi/legoapi_types.h"
+#include "nu2api/numath/numtx.h"
+#include "nu2api/nu3d/nurndr.h"
+
+extern i32 qrand(void);
+extern f32 SeekLinearF(f32, f32, f32);
+
+
+
+
+extern f32 backdrop_top_r;
+extern f32 backdrop_top_g;
+extern f32 backdrop_top_b;
+extern f32 backdrop_bot_r;
+extern f32 backdrop_bot_g;
+extern f32 backdrop_bot_b;
+
+
+extern i32 backdrop_black;
+
+extern void (*BackDrop_AlphaFn)(float *);
+
+static __used__ void BackDrop_Alpha(float *alpha);
+
+void BackDrop_Init(char *path, variptr_u *buf, variptr_u *buf_end);
+
+void BackDrop_Dump();
+
+void BackDrop_Update(float dt);
+
+void BackDrop_ResetColours();
+
+void BackDrop_UpdateColours(i32 instant);
+
+void BackDrop_Draw(float alpha, i32 flags);
+
+extern "C" {
+    extern nurenderscene_s currentScene;
+void DisplaySceneRndrSpecials(NUDLDLISTSCENE *scene, i32, void *visibility_context);
+}
+
+// ==== src/legoapi/characters/core/characters.cpp: declarations ====
+#include "nu2api/nu3d/nuportal.h"
+#include "decomp.h"
+#include "legoapi/actions/character/suit.h"
+#include "legoapi/actions/character/streaks.h"
+#include "gameapi/ai/aisys/aisys.h"
+#include "globals.h"
+#include "legoapi/legoapi_types.h"
+#include "legoapi/world/world_shared.h"
+#include "nu2api/nu3d/nucamera.h"
+#include "nu2api/nu3d/numtl.h"
+#include "nu2api/nu3d/nulgtlaser.h"
+#include "nu2api/nu3d/nutex.h"
+#include "legoapi/core/input/qrand.h"
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/characters/core/character.h"
+#include "legoapi/characters/core/charconfig.h"
+#include "legoapi/characters/core/players.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/characters/motion/gameanim.h"
+#include "legoapi/items/base/collection.h"
+#include "legoapi/items/base/apiobject.h"
+#include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/menus/screens/store.h"
+#include "legoapi/menus/screens/gamestructure.h"
+#include "legoapi/menus/screens/shop.h"
+#include "legoapi/render/fx.h"
+#include "legoapi/render/light/lighting.h"
+#include "legoapi/render/core/terrain.h"
+#include "legoapi/gizmos/object/lever.h"
+#include "legoapi/gizmos/door/zipups.h"
+#include "legoapi/gizmo/base/gizmo.h"
+#include "legoapi/gizmo/base/gizmessage.h"
+#include "legoapi/gizmos/object/gizobstacles.h"
+#include "legoapi/gizmos/object/gizbuildits.h"
+#include "legoapi/gizmos/object/newblowup.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/gizmos/transport/grapples.h"
+#include "legoapi/props/objects/tightrope.h"
+#include "legoapi/gizmos/door/spinner.h"
+#include "legoapi/gizmos/trigger/minicut.h"
+#include "legoapi/gizmos/transport/tubes.h"
+#include "legoapi/gizmos/traps/gizturrets.h"
+#include "legoapi/gizmos/trigger/ai.h"
+#include "legoapi/gizmos/trigger/giztimer.h"
+#include "legoapi/gizmos/trigger/gizrandom.h"
+#include "legoapi/gizmos/trigger/gizspecial.h"
+#include "legoapi/props/doors/door.h"
+#include "legoapi/gizmos/door/plugs.h"
+#include "legoapi/gizmos/door/push.h"
+#include "legoapi/gizmos/fx/edgizshadowmachine.h"
+#include "legoapi/gizmos/transport/gizportal.h"
+#include "legoapi/props/objects/techno.h"
+#include "legoapi/world/level.h"
+#include "legoapi/world/areas.h"
+#include "legoapi/world/world.h"
+#include "legoapi/world/mission.h"
+#include "gameapi/ai/aisys/aisys.h"
+#include "gameapi/edtools/edstubs.h"
+#include "nu2api/nucore/bgproc.h"
+#include "nu2api/nu3d/nudlist.h"
+#include "nu2api/nu3d/nuspecial.h"
+#include "nu2api/nucore/nustring.h"
+
+#include <string.h>
+#include <stdio.h>
+#include <math.h>
+#include "legoapi/menus/core/text.h"
+#include "legoapi/actions/character/specialmoves.h"
+#include "legoapi/audio/audio.h"
+#include "legoapi/characters/core/customiser.h"
+#include "nu2api/numusic/numusic.h"
+#include "nu2api/numath/nutrig.h"
+
+
+// LoadPerm1 is one of the few game-level entry points which wires together
+// otherwise C-linkage engine subsystems.  Keep these declarations local: the
+// individual subsystem TUs intentionally expose their original plain names.
+extern "C" {
+    i32 rtlInitDynamic(VARIPTR *, VARIPTR, i32);
+    void DebrisSetup(VARIPTR *, VARIPTR, char *, i32, i32, i32);
+    void DebrisRegisterCutoffCameraVec(void *);
+    void edgraSetup(VARIPTR *, VARIPTR, i32, i32, i32);
+    void InitParts(i32, VARIPTR *, VARIPTR *);
+    void ParticleReset(void);
+    i32 NuFileExists(char *);
+    i32 NuStrCpy(char *, const char *);
+    i32 edppLoadPage(char *, i32, usize);
+    void NuRndrShadowInit(u8 *);
+    void NuTexAnimProgSysInit(void);
+    void terrainpickupinit(char *, void **);
+
+    extern f32 animduration_blendouttime;
+    extern i32 Grass_Available;
+    extern i32 DEBPAGE_GENERAL;
+    extern i32 DEBPAGE_CHARACTER;
+    extern void *perm_debrissys;
+}
+
+struct AISYS_s;
+void AIScriptLoadAll(char *path, VARIPTR *buf, VARIPTR *buf_end, AISYS_s *sys);
+void InitTexAnimScripts(char **names);
+void BackDrop_Init(char *path, VARIPTR *buf, VARIPTR *buf_end);
+
+extern i32 PARTPAGE_GENERAL;
+
+// The original table at 0x006281a0.  These are the material animation
+// scripts made available before the permanent things scene is loaded.
+extern char * TexAnimList_LSW[32];
+
+void InitRipples(ripple_set_s **, VARIPTR *, VARIPTR *, i32);
+void CreateFadeMaterials();
+void CreateUsefulMaterials();
+extern "C" ripple_set_s *ripples;
+extern "C" NUMTL *ShadowMat;
+
+struct AIROW_s;
+struct nuqthdr_s;
+struct nunativegscene_s;
+struct SHOPINPUT;
+
+void CharConfig_ConfigureAll(i32 permanent, nufpcomjmp_s *game_keywords);
+void ExtraCharacterFixUpAfterConfig();
+extern i32 CHARPAK;
+
+extern i32 GetMenuID(void);
+extern i32 InCollectList_Index(i32 id, COLLECTID *list, i32 count);
+extern i32 Collection_Got(i32 id);
+extern void Customiser_SaveModelTextureIDs(CUSTOMISER *customiser, CHARACTERMODEL_s *model);
+extern CUSTOMISER *CharacterCustomiser;
+extern "C" VARIPTR characterbuffer_ptr;
+extern "C" VARIPTR characterbuffer_end;
+extern "C" i32 waiting_for_character;
+extern f32 WaitingForCharacterTime;
+
+extern "C" {
+extern i32 hub_character_ready;
+}
+
+extern APICHARACTERMODELLIST_s PermModelList[1];
+
+#include "legoapi/characters/core/characters_types.h"
+
+void LSW_SetIndy(i32);
+
+void HairMovement(GameObject_s *object);
+
+void HeadMovement(GameObject_s *object);
+
+nuhspecial_s *CharScene_FindHSpecial(WORLDINFO_s *world, i32 character_id);
+
+void CharScene_Draw(WORLDINFO_s *world, i32 character_id, numtx_s *matrix, numtx_s *reflection_matrix);
+
+i32 CharIDFromName(char *name);
+
+CHARACTERDATA *CDataFromName(char *name);
+
+i32 RedirectAnim(char *directory, ANIMREDIRECT *redirects, ANIMLIST_s *animation_list, char *path);
+
+void CharScenes_Init(variptr_u *buf, variptr_u *);
+
+void CharScenes_LevelLoad(WORLDINFO *world);
+
+extern i16 tUNKNOWN;
+extern "C" {
+    extern i16 id_R2Q5;
+    void PlaySfx(char *, nuvec_s *);
+    void PlaySfxAndSetVolume(char *, nuvec_s *, f32);
+}
+void Move_CHARACTER(GameObject_s *);
+void Animate_CHARACTER(GameObject_s *);
+
+void FixUpCharacters(CHARFIXUP *fixup);
+
+void PostAnimate_FETT(GameObject_s *object);
+
+void ResetAICreature(GameObject_s *, AISYS_s *);
+void LightGameObject(GameObject_s *, void *);
+void InitSurfaceInfo(GameObject_s *);
+i32 SetObjOnSurface(GameObject_s *, i32);
+extern "C" NUVEC plr_lastpos;
+
+void FinishWeirdoNames(i32 which);
+
+GameObject_s *ActivateCharacter(char *name, nuvec_s *position, i32 angle);
+
+extern i32 addcreature_override_id_check;
+
+extern f32 default_mover_extra;
+extern void SetGameObjectCharacterData(GameObject_s *obj);
+extern void GetTopBot(GameObject_s *obj);
+extern void GameObjectDimensions(GameObject_s *obj);
+extern void GameObjectOrigin(GameObject_s *obj);
+extern void ResetCharacterIdle(GameObject_s *obj, i32 mode, i32 idle);
+extern void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *data);
+
+
+static void SetLayers_BOB(GameObject_s *object);
+
+// Retail keeps only the IPA-SRA clone, which receives &*layers.
+#if defined(__i386__)
+#define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone, regparm(1)))
+#else
+#define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone))
+#endif
+static MOSEISLEY_LAYERS_ATTR void SetLayers_MOSEISLEYCITIZEN(u32 *layers)
+    __asm__("_ZL26SetLayers_MOSEISLEYCITIZENP12GameObject_s.isra.2");
+static void SetLayers_MOSEISLEYCITIZEN(u32 *layers);
+
+i32 InitCreature(GameObject_s *obj, i32 id, i32 param);
+
+void Shards_HandleLostObj(WORLDINFO_s *, GameObject_s *);
+void LoseHelmet(GameObject_s *, i32, i32);
+void DestroySnakeBody(GameObject_s *);
+void InitPlayerAI(GameObject_s *);
+void Player_ClearContext(GameObject_s *, i32);
+void ResetPlayerMoves(GameObject_s *);
+void Player_ResetContexts(PLAYERPACKET_s *);
+void InitSurfaceInfo(GameObject_s *);
+i32 SetObjOnSurface(GameObject_s *, i32);
+void GizForce_ResetLOS(GameObject_s *);
+i32 StartSlide(GameObject_s *, i32);
+
+i32 NewPlayerCharacter(GameObject_s *object, i32 id, i32 old_id, i32);
+
+
+i32 GetDefaultIdle(GameObject_s *obj);
+
+void ResetCharacterIdle(GameObject_s *object, i32 mode, i32 animation);
+
+static void NewCharacterIdle(GameObject_s *object, i32 default_idle);
+
+void UpdateCharacterIdle(GameObject_s *object);
+
+void UpdateCharacterIDs();
+
+void CharScenes_AreaLoad(APICHARACTERMODELLIST_s *list, variptr_u *buf, variptr_u buf_end);
+
+void CharScenes_AreaDump();
+
+void SetMoveAndAnimateFunctions(u32 model_flag_mask, u32 model_flag_value, u32 game_flag_mask, u32 game_flag_value,
+                                i32 movement_type, void *move_function, void *animate_function, void *draw_function);
+
+void DeactivateGameObject(GameObject_s *);
+
+void DeactivateCharacter(char *name);
+
+void LoadSingleCharacter(bgprocinfo_s *);
+
+void CharScenes_LevelDump(WORLDINFO_s *world);
+
+void UpdateCharacterLoad();
+
+extern "C" VARIPTR characterbuffer_base;
+extern i32 CHARACTERBUFFERSIZE;
+extern i32 Area;
+extern i32 last_area;
+
+void ResetCharacterBuffer(i32 force_reset);
+
+void NextStatusStage(STATUSPACKET_s *);
+i32 AddToCollection(i32);
+void NewStatusRumbleBuzz(i32, f32, f32, i32);
+void GameAudio_PlaySfx(i32, nuvec_s *, i32, i32);
+extern "C" void PlaySfx(char *, nuvec_s *);
+void Collection_Draw(COLLECTION_s *, f32, f32, f32, APICHARACTERMODELLIST_s *, f32, i32);
+void Collection_GetPos(COLLECTION_s *, i32, f32 *, f32 *);
+void DrawCharIcon(i32, f32, f32, f32, f32, i32, f32, f32, i32, nuhspecial_s *);
+extern f32 ICONSIZE;
+extern i32 STATUS_R, STATUS_G, STATUS_B;
+extern f32 COLLECTION_Y_STATUS;
+
+void CollectCharcters_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active);
+
+void CollectCharcters_Skip(STATUS_STAGE_s *stage, STATUSPACKET_s *packet);
+
+nuhspecial_s *CharScene_FindHSpecial(WORLDINFO_s *world, i32 character_id);
+
+void PostAnimate_ASTROMECH(GameObject_s *object);
+
+AILOCATOR_s *LocalGetRandomLocator(AILOCATOR_s **locators, i32 count, f32 clip_radius, NUVEC *position,
+                                   f32 max_distance, i32 outside_camera, f32 max_delta_y, f32 min_delta_y);
+
+AILOCATOR_s *LocalGetNearestLocator(AILOCATOR_s **locators, i32 count, f32 clip_radius, NUVEC *position,
+                                    f32 max_distance, i32 outside_camera, f32 max_delta_y, f32 min_delta_y);
+
+i32 newCharactersCollected(STATUSPACKET_s *);
+
+void CollectCharcters_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+
+i32 SetProtocolDroidFallAnim(GameObject_s *object);
+
+void CollectCharactersOff_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active);
+
+void CollectCharactersOff_Skip(STATUS_STAGE_s *, STATUSPACKET_s *);
+
+void ScaleGameObject(GameObject_s *obj);
+
+void SetGameObjectCharacterData(GameObject_s *obj);
+
+void CollectCharactersOff_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+
+extern "C" i32 dagobah_training;
+
+i32 TakeOverYodaSeekDistanceHack(GameObject_s *object, GameObject_s *luke, nuvec_s *offset);
+
+void SetProtocolDroidInterfaceAction(GameObject_s *object);
+
+void SetProtocolDroidDeactivatedAction(GameObject_s *object);
+
+extern NUMTL * lightningmat;
+extern NUMTL *DebMat[10];
+extern "C" void NuWaterInit(void);
+extern "C" void NuBridgeInit(void);
+
+void LoadPerm1();
+
+void LoadPerm2();
+
+// ==== src/legoapi/cutscenes/cutscenes.cpp: declarations ====
+#include "decomp.h"
+#include "legoapi/legoapi_types.h"
+#include "legoapi/cutscenes/cutscenes.h"
+#include "legoapi/render/light/surfaces.h"
+#include "legoapi/audio/sfx.h"
+#include "globals.h"
+#include "MechInputTouch/MechInputTouch_types.h"
+#include "legoapi/characters/core/character.h"
+#include "legoapi/characters/core/players.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/core/config/cheat.h"
+#include "legoapi/core/input/qrand.h"
+#include "legoapi/gizmo/base/gizmo.h"
+#include "legoapi/menus/core/panel.h"
+#include "legoapi/menus/core/text.h"
+#include "legoapi/menus/screens/store.h"
+#include "legoapi/menus/screens/gamestructure.h"
+#include "legoapi/world/area.h"
+#include "legoapi/world/world.h"
+#include "legoapi/items/base/apiobject.h"
+#include "legoapi/props/doors/door.h"
+#include "legoapi/world/level.h"
+#include "legoapi/world/levels/levels.h"
+#include "legoapi/render/light/shadow.h"
+#include "legoapi/render/core/terrain.h"
+#include "legoapi/render/core/render.h"
+#include "legoapi/render/fx/parts.h"
+#include "legoapi/render/core/screen.h"
+#include "nu2api/nuandroid/ios_graphics.h"
+#include "nu2api/nu3d/nucamera.h"
+#include "nu2api/nucore/nuhgobj.h"
+#include "nu2api/nucore/nugcutscene.h"
+#include "nu2api/nucore/bgproc.h"
+#include "nu2api/nucore/nustring.h"
+#include "nu2api/nufile/nufpar.h"
+#include "nu2api/nu3d/nugscn.h"
+#include "nu2api/nu3d/nurndr.h"
+#include "nu2api/nu3d/nuspecial.h"
+#include "nu2api/numusic/numusic.h"
+#include "nu2api/nusound/nusound.h"
+
+#include <string.h>
+#include <stdio.h>
+#include "legoapi/world/mission.h"
+#include "legoapi/world/levels/episode.h"
+#include "nu2api/numath/nutrig.h"
+#include "nu2api/numath/nufloat.h"
+
+extern i32 ACTIVECUTCOUNT;
+extern "C" i32 CUTDRAWWORLD;
+extern "C" i32 Paused;
+extern i32 CUTCAM;
+extern "C" i32 CutSceneWaiting;
+extern i32 CUTCAMONLY;
+extern i32 cut_waiting_for_new_level;
+extern volatile i32 waiting_for_level;
+extern "C" i32 newlevel_resumecutaudio;
+extern CUTSYS *CS_cutsys;
+extern FadeSystem FadeSys;
+extern CUTSCENESYS * CutSceneSys;
+
+static void CutScene_DrawCharacter(instNUGCUTSCENE_s *, NUGCUTSCENE_s *, instNUGCUTCHAR_s *, NUGCUTCHAR_s *, f32, i32);
+static void CutScene_EvalCharacter(instNUGCUTSCENE_s *, NUGCUTSCENE_s *, instNUGCUTCHAR_s *, NUGCUTCHAR_s *, f32);
+static void CutScene_FindCharacters(NUGCUTSCENE_s *);
+static void CutScene_ResetCharacters(instNUGCUTSCENE_s *);
+static void CutScene_RigidPostRender(NUGCUTRIGID_s *, instNUGCUTRIGID_s *, NUMTX *);
+static void CutScene_CreateCharacterInstance(NUGCUTCHAR_s *, instNUGCUTCHAR_s *, variptr_u *);
+
+extern "C" {
+    i32 instNuGCutSceneIsFinished(instNUGCUTSCENE_s *instance);
+    void instNuGCutScenePause(instNUGCUTSCENE_s *, u8);
+    void instNuGCutSceneReset(instNUGCUTSCENE_s *);
+    void instNuGCutSceneStart(instNUGCUTSCENE_s *);
+    void instNuGCutSceneStop(instNUGCUTSCENE_s *);
+    void instNuGCutSceneDestroy(instNUGCUTSCENE_s *);
+    void NuGCutSceneSysRender(i32);
+    void NuGCutSceneSysUpdate(i32, i32, f32);
+}
+
+void SetLevelLights(void *, f32);
+void NewLevelFromMenu(LEVELDATA_s *, i32, i32, i32);
+void FindAndSetLights(NUVEC *, f32, void *);
+void SetZeroLights(void);
+void GameFog_Reset(void);
+void EnableShadowMapRendering(i32);
+void ResetShadowMapRendering(void);
+i32 MatrixReflection(NUMTX *, i32, f32, f32, NUMTX *);
+f32 FindReflectionNoPlatforms(NUVEC *);
+extern "C" i32 NewShadowOnPlatform(void);
+void FindAnglesZX(NUVEC *, u16 *, u16 *);
+void CharScene_Draw(WORLDINFO_s *, i32, NUMTX *, NUMTX *);
+i32 qrand(void);
+void NewRumbleAllPlayers(f32, f32, i32, i32);
+f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
+extern "C" void APITransparentCharDraw(nuhgobj_s *, NUMTX *, i32, i16 *, NUMTX *, void **, i32);
+extern "C" void instNuGCutLocatorUpdate(instNUGCUTSCENE_s *, NUGCUTLOCATORSYS_s *, instNUGCUTLOCATOR_s *,
+                                        NUGCUTLOCATOR_s *, f32, NUMTX *, i32);
+CUTSCENEPLAYERCLIP *CutScenePlayer_Active(void);
+void CutScenePlayer_SetObjects(CUTINFO *);
+extern "C" void DebrisSetRenderGroup(i32);
+extern AREADATA_s *BONUS_GUNSHIP_ADATA;
+extern AREADATA_s *GUNSHIP_ADATA;
+extern AREADATA_s *BATTLEOVERCORUSCANT_ADATA;
+
+
+extern "C" {
+    extern i16 id_ANAKINSPODGREEN;
+    extern i16 id_ANAKINSNEWPOD;
+    extern i16 id_ANAKINSNEWPODGREEN;
+    extern i16 id_REPUBLICGUNSHIP_GREEN;
+    extern i16 id_NEW_REPUBLIC_GUNSHIP_GREEN;
+    extern i16 id_JEDISTARFIGHTERYELLOWEP3;
+}
+
+extern i32 CutInstEndCount;
+extern i32 NewCutInfoCount;
+extern u8 cutskip_dontplaylevelintro;
+extern i32 CUTNOFOG;
+extern i32 CUTSKIPLOCK;
+extern f32 LevelNameMul;
+extern f32 LevelNameTime;
+
+extern "C" i32 drawcharactermodel_nobsa;
+extern "C" i32 NewMode;
+void GameAudio_PlaySfx(i32, nuvec_s *, i32, i32);
+
+extern "C" {
+    void PauseGameCut(void);
+    void PlaySfxById(i32 sfx_id, nuvec_s *position);
+    extern instNUGCUTSCENE_s *cutscene_load_instance;
+    void instNuGCutSceneServiceLoad(void);
+    void NuGCutSceneSysPostBackgroundLoad(void);
+}
+
+
+
+// Retail only keeps the split-out body of the IPA-SRA clone (the unused
+// cutscene index dropped), called with world and cut in registers.
+#if defined(__i386__)
+#define CUTSCENE_START_ATTR __attribute__((noinline, noclone, regparm(2)))
+#else
+#define CUTSCENE_START_ATTR __attribute__((noinline, noclone))
+#endif
+static CUTSCENE_START_ATTR i32 CutScene_StartBody(WORLDINFO_s *world, CUTINFO *cut)
+    __asm__("_ZL14CutScene_StartP11WORLDINFO_sP7CUTINFOi.isra.24.part.25");
+
+
+void CutScenes_End();
+
+void CutScenes_Draw(WORLDINFO_s *world);
+
+void CutScenes_Stop(CUTSYS *system);
+
+void CutScenes_Reset(WORLDINFO_s *world);
+
+void CutScenes_Start(WORLDINFO_s *world);
+
+void CutScenes_Update(WORLDINFO_s *world, i32 paused);
+
+CUTINFO *CutScene_Find(CUTSYS *cutscene_system, char *name);
+
+void CutScenes_Destroy(CUTSYS *system);
+
+void *CutScene_FindInst(CUTSYS *system, char *name);
+
+i32 CutScene_HasPlayed(CUTINFO *cut);
+
+void CutScene_SnapToEnd(CUTINFO *cut);
+
+void CutScene_StartAudio();
+
+i32 CutScene_IsSkippable(CUTINFO *cut);
+
+i32 CutScene_StartFn_LSW(CUTINFO *cut);
+
+extern "C" f32 *NuGCutLocatorCalcMtx(NUGCUTLOCATOR_s *, f32, NUMTX *, nuanimtime_s *);
+extern "C" i32 NuGCutLocatorIsVisble(NUGCUTLOCATOR_s *, f32, nuanimtime_s *, f32 *, f32 *);
+extern "C" void NuAnimData2CalcTime(nuanimdata2_s *, f32, nuanimtime_s *);
+
+
+
+void CutScenes_InitSystem(CUTSCENESYS *system);
+
+extern i32 dco_id;
+extern i32 dco_reflectaxis;
+extern i32 dco_wearinghat;
+extern f32 dco_reflectcoord;
+extern GAMECHARACTERDATA_s *dco_gcdata;
+extern CHARACTERMODEL_s *dco_cmodel;
+
+
+
+
+
+
+
+// The loop re-reads the active cut through CutStopInfo after each SmartTextEx call.
+#define CUT_STOP static_cast<CUTINFO *>(CutStopInfo)
+void CutScene_DrawSubtitles();
+
+void CutScene_StoppedFn_LSW(CUTINFO *cut);
+
+void CutScenes_BGLoadManager();
+
+void CutScenes_ConfigureList(char *filename, variptr_u *buffer, variptr_u);
+
+void CutScene_PreUpdateFn_LSW(CUTINFO *cut);
+
+void CutScene_PostUpdateFn_LSW();
+
+i32 CutScene_PlayingOrRequested(CUTINFO *cut);
+
+i32 CutScene_ReplaceCharacterModelFn_LSW(CUTINFO *cut, NUGCUTCHAR_s *character);
+
+CUTINFO *NewCutScene(CUTINFO *cut, CUTSYS *system, char *name, i32);
+
+void ResetScene(nugscn_s *scene, SCENEPROGRESS_s *progress);
+
+void NextStatusStage(STATUSPACKET_s *);
+void FinishStatusPacket(i32);
+f32 StatusIconsOnOff(f32);
+extern f32 icon_y;
+
+void Exit_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+
+void Fade_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+
+extern "C" void *NuAnimData2FixPtrs(void *, isize, isize, i32);
+extern "C" StateAnim *StateAnimFixPtrs(StateAnim *, isize);
+
+NUGCUTSCENE_s *RelocateCutScene(NUGCUTSCENE_s *source, variptr_u *buffer);
+
+extern i32 STATUS_R;
+extern i32 STATUS_G;
+extern i32 STATUS_B;
+extern f32 iconalphaoverride;
+extern i16 tTRUEJEDI, tSTORY, tFREEPLAY;
+extern i16 tLEVELCOMPLETE, tFREEPLAYUNLOCKED, tSUPERSTORYCOMPLETE, tBONUSUNLOCKED;
+extern i16 tEPISODEVUNLOCKED, tEPISODEVIUNLOCKED, tCHALLENGECOMPLETE, tOUTOFTIME;
+extern i16 tYOUDIDNTCOLLECTALL10CANISTERS, tMISSIONCOMPLETE, tSTORYCLIPSUNLOCKED;
+extern i16 tEPISODEICOMPLETE, tEPISODEIICOMPLETE, tEPISODEIIICOMPLETE;
+extern i16 tEPISODEIVCOMPLETE, tEPISODEVCOMPLETE, tEPISODEVICOMPLETE;
+f32 getFinishedStatusAlpha(STATUSPACKET_s *);
+void IncreaseScore(u32 *, u64, i32);
+void NewStatusRumbleBuzz(i32, f32, f32, i32);
+void Text_MakeScore(u32, char *);
+void AddFancyMessage(char *, f32, f32, f32, f32, i32, i32);
+void *AddGameMessage(char *, nuvec_s *, f32, nuvec_s *, f32, u8, u8, u8, u32, f32);
+extern "C" void PlaySfx(char *, nuvec_s *);
+extern "C" void Text3D(char *, f32, f32, f32, f32, f32, f32, u32, u8, u8, u8);
+i32 DrawPanel3DObjectNoAlpha(f32, f32, f32, f32, f32, f32, u16, u16, u16, nuhspecial_s *, i32);
+
+void GoldBrick_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active);
+
+void GoldBrick_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet);
+
+void GoldBrick_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+
+void LevelComplete_LSW_Skip(STATUS_STAGE_s *stage, STATUSPACKET_s *packet);
+
+void SetDrawGoldBrick(STATUSPACKET_s *, i32);
+void NewStatusRumbleBuzz(i32, f32, f32, i32);
+extern "C" void PlaySfx(char *, nuvec_s *);
+
+void LevelComplete_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+
+// ==== src/legoapi/items/collect/minikits.cpp: declarations ====
+#include "decomp.h"
+#include "legoapi/items/collect/minikits.h"
+#include "globals.h"
+#include "legoapi/items/base/collection.h"
+#include "legoapi/audio/sfx.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/gizmo/object/gizmopickup.h"
+#include "legoapi/legoapi_types.h"
+#include "legoapi/world/area.h"
+#include "legoapi/world/world.h"
+#include "legoapi/world/world_shared.h"
+#include "nu2api/nu3d/nutex.h"
+#include "nu2api/nucore/nustring.h"
+#include "legoapi/menus/core/gamehint.h"
+#include "legoapi/menus/core/text.h"
+#include "legoapi/menus/core/gamemessages.h"
+#include "legoapi/menus/screens/store.h"
+#include "legoapi/menus/screens/gamestatus_lsw.h"
+#include "legoapi/characters/core/character.h"
+#include "legoapi/characters/core/players.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/core/input/qrand.h"
+#include "legoapi/core/input/timer.h"
+#include "legoapi/misc/utilities.h"
+#include "legoapi/render/core/render.h"
+#include "legoapi/render/fx.h"
+#include "legoapi/render/fx/parts.h"
+#include "legoapi/render/light/lighting.h"
+#include "nu2api/numath/numtx.h"
+#include "nu2api/numath/nutrig.h"
+#include "nu2api/numath/nufloat.h"
+#include "nu2api/nu3d/nugscn.h"
+#include "nu2api/nu3d/nurndr.h"
+#include "nu2api/nu3d/nuspecial.h"
+#include <math.h>
+#include <stdio.h>
+#include <string.h>
+
+struct AIROW_s;
+struct nuqthdr_s;
+struct nunativegscene_s;
+struct SHOPINPUT;
+
+extern HUBMINIKITPIECES_s ** Char_MiniKit;
+extern "C" VARIPTR characterbuffer_ptr;
+extern "C" VARIPTR characterbuffer_end;
+
+void MiniKits_Init(variptr_u *buffer, variptr_u *);
+
+void CharacterMiniKits_Load(COLLECTION_s *collection, WORLDINFO *world, VARIPTR *buf, VARIPTR *buf_end);
+
+extern f32 KITPOSX, PANEL_MINIKITY, PANEL_MINIKITSCALE;
+void MiniKit_GameMsg_Update(GAMEMESSAGE_s *message);
+void MiniKit_GameMsg_End(GAMEMESSAGE_s *message);
+void Hint_SetHintFromId(i32, i32, i32);
+
+void CollectMinikit(nuvec_s *position, char *name, i32);
+
+i32 AllMiniKitsDone(AREASAVE_s *save);
+
+extern char * LEGOASCII_BIGARROW;
+i32 MatrixReflection(NUMTX *, i32, f32, f32, NUMTX *);
+void CharMiniKit_Draw(i32 id, numtx_s *matrix, i32 reflection_axis, float reflection_plane, float reflection_height);
+
+extern i32 currentminikit, newminikitcount;
+extern f32 slideseek;
+extern f32 pop_timer;
+extern f32 jibberlen;
+extern f32 slidetime;
+void NextStatusStage(STATUSPACKET_s *);
+void SetDrawGoldBrick(STATUSPACKET_s *, i32);
+void IncreaseScore(u32 *, u64, i32);
+void NewStatusRumbleBuzz(i32, f32, f32, i32);
+extern "C" void PlaySfx(char *, nuvec_s *);
+void AddStatusMiniKitParts();
+void DrawStatusMiniKit(f32, f32, f32, f32, f32, i32, STATUSPACKET_s *, f32);
+void DrawMiniKitCount(f32, f32, i32, i32);
+f32 getFinishedStatusAlpha(STATUSPACKET_s *);
+extern f32 STATUS_TITLE_Y;
+extern i16 tMINIKIT;
+
+void MiniKit_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current);
+
+void MiniKit_LSW_Skip(STATUS_STAGE_s *stage, STATUSPACKET_s *packet);
+
+void CollectAllMiniKits(AREASAVE_s *save);
+
+i32 UpdateNewMiniKits(STATUSPACKET_s *, STATUS_STAGE_s *stage);
+
+void MiniKit_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+
+extern i32 LEGOOBJ_MINIKIT, LEGOOBJ_CHARKIT;
+void EndChallenge(i32, i32);
+void GameCam_Judder(GAMECAMERA_s *, f32, i32, NUVEC *);
+void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
+void MiniKit_GameMsg_End(GAMEMESSAGE_s *message);
+
+void ResetMinikitCounter();
+
+extern i16 id_SLAVE1, tALLMINIKITSBUILT;
+extern i32 STATUS_R, STATUS_G, STATUS_B;
+
+void AllMiniKits_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current);
+
+void AllMiniKits_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet);
+
+extern rtldata_s KitPartRTL;
+extern NUCOLOUR3 panelcol[3], panelamb;
+extern NUVEC paneldir[3];
+
+void AllMiniKits_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+
+void AddStatusMiniKitParts();
+
+void CharacterMiniKits_Dump(WORLDINFO_s *world);
+
+void MiniKit_GameMsg_Update(GAMEMESSAGE_s *message);
+
+void SetEffectVisibility(char *, i32);
+
+void EffectOffProgress_Reset(LEVEL_PROGRESS_s *progress);
+
+
+void IncrementMinikitCounter(GameObject_s *);
+
+i32 EffectOffProgress_Update(LEVEL_PROGRESS_s *progress, char *name, i32 visible);
+
+// ==== functions in original address order ====
+
+i32 InitStatusScreen_LSW(WORLDINFO_s *, STATUSPACKET_s *);
+
+i32 FinishStatusPacket_LSW(WORLDINFO_s *, STATUSPACKET_s *, i32);
+
+void DrawStatusBG_LSW(STATUSPACKET_s *status);
+
+void CollectCharactersOff_Skip(STATUS_STAGE_s *, STATUSPACKET_s *);
+
+void BonusTime_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *);
+
+void BonusWin_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *);
+
+void ChallangeCash_Skip(STATUS_STAGE_s *, STATUSPACKET_s *);
+
+void ResetStatusPacket_LSW(STATUSPACKET_s *packet);
+
+void SuperStoryScore_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet);
+
+void SuperStoryTime_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet);
+
+void BonusComplete_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet);
+
+void LevelComplete_LSW_Skip(STATUS_STAGE_s *stage, STATUSPACKET_s *packet);
+
+void GoldBrick_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet);
+
+void RedBrick_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet);
+
+void AllMiniKits_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet);
+
+void TrueHero_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet);
+
+void ChallangeCash_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 draw);
+
+void ChallangeCash_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+
+void Coins_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet);
+
+void MiniKit_LSW_Skip(STATUS_STAGE_s *stage, STATUSPACKET_s *packet);
+
+void TrueHero_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+
+void CollectCharactersOff_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active);
+
+void CollectCharcters_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active);
+
+void CollectCharcters_Skip(STATUS_STAGE_s *stage, STATUSPACKET_s *packet);
+
+void GoldBrick_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+
+void MiniKit_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+
+void Fade_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+
+void Exit_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+
+void CollectCharactersOff_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+
+void Save_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+
+void BonusComplete_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current);
+
+void BonusWin_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+
+void RedBrick_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+
+void AllMiniKits_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+
+
+void SuperStoryScore_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current);
+
+void SuperStoryScore_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+
+void SuperStoryTime_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+
+void Coins_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+
+
+void SuperStoryTime_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current);
+
+void BonusTime_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+
+void BonusComplete_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+
+void LevelComplete_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+
+void CollectCharcters_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+
+void Prompt_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active);
+
+void Prompt_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+
+void GoldBrick_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active);
+
+void RedBrick_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active);
+
+void TrueHero_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active);
+
+
+f32 getFinishedStatusAlpha(STATUSPACKET_s *packet);
+
+void BonusWin_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current);
+
+void BonusTime_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current);
+
+void LevelComplete_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active);
+
+void Coins_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active);
+
+void AllMiniKits_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current);
+
+void MiniKit_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current);
+
+void LSW_registerStatusScreen();
+
+
+// ==== src/legoapi/render/core/render.cpp: declarations ====
+#include "decomp.h"
+#include "gameapi/edtools/edbri_internal.h"
+#include "gameapi/edtools/edstubs.h"
+#include "legoapi/render/core/render.h"
+#include "legoapi/items/collect/torpedo.h"
+#include "legoapi/actions/character/transform.h"
+#include "legoapi/actions/movement/carrying.h"
+#include "legoapi/actions/character/snake.h"
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/gizmos/object/gizbuildits.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/gizmos/door/zipups.h"
+#include "legoapi/menus/core/text.h"
+#include "legoapi/menus/core/gamehint.h"
+#include "MechInputTouch/MechInputTouch_types.h"
+#include "gamelib/util/gamelib_util_types.h"
+#include "legoapi/menus/core/panel.h"
+#include "legoapi/menus/core/gamemessages.h"
+#include "legoapi/characters/core/players.h"
+#include "legoapi/menus/screens/gamemenuall.h"
+#include "legoapi/menus/screens/arcade.h"
+#include "legoapi/render/light/fade_material.h"
+#include "legoapi/render/fx/edsplines.h"
+#include "legoapi/render/fx.h"
+#include "legoapi/world/levels/levels.h"
+#include "legoapi/world/level.h"
+#include "legoapi/world/world.h"
+#include "nu2api/nu3d/numtl.h"
+#include "nu2api/nu3d/nurndrstat.h"
+#include "nu2api/nu3d/nuspecial.h"
+#include "nu2api/nuandroid/ios_graphics.h"
+#include "nu2api/nu3d/android/nuportal_android.h"
+#include "nu2api/nu3d/nuvport.h"
+#include "nu2api/nucore/nuvuvec.hpp"
+#include "legoapi/cutscenes/cutscenes.h"
+#include <stdio.h>
+#include <math.h>
+#include <string.h>
+
+void DrawSubItems();
+
+extern "C" void edbriStartAllPages(void);
+
+#include "nu2api/nu3d/nurndr.h"
+#include "nu2api/nu3d/nucamera.h"
+#include "nu2api/numath/nutrig.h"
+
+extern "C" void AiRndrLine3dDbg(f32, f32, f32, f32, f32, f32, u32);
+
+extern "C" void edDrawCross(NUVEC *centre, u8 red, u8 green, u8 blue);
+
+extern "C" void LocaledbitsDrawSolidEllipseXY(NUVEC *centre, f32 radius_x, f32 radius_z, i32 rotation, f32 lower_y,
+                                              f32 upper_y, u32 colour, i32, i32 segments);
+
+extern "C" void LocaledbitsDrawCircleXY(NUVEC *centre, f32 radius, u32 colour, i32, i32 segments);
+
+extern "C" void LocaledbitsDrawSolidCircleXY(NUVEC *centre, f32 radius, f32 lower_y, f32 upper_y, u32 colour, i32,
+                                             i32 segments);
+
+extern "C" void RndrOSquare(NUVEC *centre, f32 radius, i32 colour);
+
+extern "C" void RndrOSphere(NUVEC *centre, f32 radius, i32 colour, i32 segments, i32);
+
+extern "C" void RndrCircleXZ(NUVEC *centre, f32 radius, i32 colour, i32 segments);
+
+#include "gameapi/gui/apimenu.h"
+#include "gameframework/saveload.h"
+#include "legoapi/menus/core/text.h"
+#include "legoapi/characters/core/character.h"
+#include "legoapi/characters/core/players.h"
+#include "legoapi/characters/motion/gameanim.h"
+#include "legoapi/characters/motion/animlist.h"
+#include "legoapi/core/config/cheat.h"
+#include "legoapi/world/level.h"
+#include "legoapi/core/input/timer.h"
+#include "legoapi/gizmo/base/gizmo.h"
+#include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/items/base/collection.h"
+#include "legoapi/menus/screens/shop.h"
+#include "legoapi/world/area.h"
+#include "legoapi/world/levels/episode.h"
+#include "legoapi/world/mission.h"
+#include "legoapi/world/world_shared.h"
+#include "globals.h"
+#include "nu2api/nu3d/nutexanm.h"
+struct starfighter_s;
+struct rtl_s;
+struct rtlidata_s;
+
+#include "legoapi/render/core/SwipeDecalRenderer.h"
+#include "nu2api/nu3d/nuprim_internal.h"
+#include "nu2api/nu3d/nudlist.h"
+#include "nu2api/nu3d/nucamera.h"
+#include "nu2api/nu3d/nuqfnt.h"
+#include "nu2api/nu3d/nurndrstat.h"
+#include "nu2api/nu3d/nurndr.h"
+#include "nu2api/nu3d/nurndr.h"
+#include "nu2api/nu3d/nuvport.h"
+#include "nu2api/nu3d/NuRenderDevice.h"
+#include "nu2api/nu3d/nuspecial.h"
+#include "nu2api/nu3d/nutex.h"
+#include "nu2api/nu3d/numtl.h"
+#include "nu2api/nu3d/android/nurndr_android.h"
+#include "nu2api/nu3d/android/nugscn_android.h"
+#include "nu2api/nuandroid/ios_graphics.h"
+#include "nu2api/nucore/bgproc.h"
+#include "nu2api/nucore/nuapi.h"
+#include "nu2api/nucore/nuanim3.h"
+#include "nu2api/nucore/nugcutscene.h"
+#include "nu2api/nucore/nuhgobj.h"
+#include "nu2api/nucore/nuptrblock.h"
+#include "nu2api/nucore/nustring.h"
+#include "nu2api/nucore/nuthread.h"
+#include "nu2api/nufile/nufile.h"
+#include "nu2api/numath/numath.h"
+#include "nu2api/numath/numtx.h"
+#include "nu2api/numath/nufloat.h"
+#include "nu2api/numath/nutrig.h"
+#include "nu2api/numath/nuvec.h"
+
+#include <string.h>
+
+extern i32 VehicleArea;
+extern i32 GAMEDEMO;
+extern f32 FORCEGLOWTIME;
+extern i16 tHINTS;
+extern i16 tCHARACTERS;
+extern i16 tEXTRAS;
+extern i16 tGOLDBRICKS;
+extern i16 tSTORYCLIPS;
+extern i16 tENTERCODE;
+i32 AnakinGreenSabre(GameObject_s *object);
+i32 MatrixReflection(NUMTX *matrix, i32 axis, f32 plane, f32 height, NUMTX *result);
+
+extern f32 HUB_EPISODESUBTITLEY;
+extern f32 HUB_EPISODETITLEY;
+extern i32 draw_para;
+
+void DrawGameObjectsDraw(i32 pass);
+void EnableShadowMapRendering(i32 enable);
+void ResetShadowMapRendering();
+static void DrawParaphernalia(GameObject_s *object);
+
+struct GAMEMESSAGE_s;
+struct HINT_s;
+struct MENU_s;
+struct NuBloomParameters;
+struct STATUSPACKET_s;
+struct TouchHolder;
+struct _vum_s;
+struct _vuv_s;
+struct nuhspecial_s;
+struct ripple_node_s;
+struct ripple_set_s;
+struct VuVec;
+
+extern nuhspecial_s *(*GameMsg_GetExtraObjFn)(GAMEMESSAGE_s *);
+
+extern "C" i32 StateAnimEvaluate2(StateAnim *state, u8 *index, char *value, f32 frame);
+extern "C" i32 NuRndrBeginScene(i32);
+extern "C" void NuRndrEndScene(void);
+extern "C" void NuRndrGradRect2di(i32, i32, i32, i32, i32 *, numtl_s *);
+extern "C" void NuRndrRect2di(i32, i32, i32, i32, i32, numtl_s *);
+extern "C" void NuCameraUnlock(void);
+extern "C" void NuCameraRelock(void);
+extern char *apiGameName;
+extern char *apitxt_EMPTY;
+extern char *apitxt_PRESENT;
+extern char *apitxt_AUTOSAVE_WARNING;
+extern char *apitxt_LOADING;
+extern char *apitxt_SAVING;
+extern char *apitxt_NODATAAVAILABLE;
+extern char *apitxt_OK;
+extern char *apitxt_GAMELOADED;
+extern char *apitxt_GAMELOADING;
+extern char *apitxt_FAILEDTOLOAD;
+extern char *apitxt_CORRUPTLOAD;
+extern char *ASCII_DOWN;
+extern char *ASCII_UP;
+extern i16 tCURRENTGAME;
+extern i16 tEMPTY;
+extern i16 tGAME;
+extern i16 tNOSPACE;
+extern f32 MENUTEXTSCALE;
+extern f32 MENUBOTY;
+extern f32 AUTOSAVEICONY;
+extern f32 AUTOSAVEICONX;
+extern f32 AUTOSAVEICONSIZE;
+extern f32 MenuAlpha;
+extern i32 MenuA;
+extern f32 memcard_loadmessage_delay;
+extern f32 memcard_loadresult_delay;
+extern u8 MENUNORMALR;
+extern u8 MENUNORMALG;
+extern u8 MENUNORMALB;
+extern u8 MENUENTRYR, MENUENTRYG, MENUENTRYB;
+extern u8 MENUFLASH0R;
+extern u8 MENUFLASH0G;
+extern u8 MENUFLASH0B;
+extern u8 MENUFLASH1R;
+extern u8 MENUFLASH1G;
+extern u8 MENUFLASH1B;
+extern f32 menu_pulse;
+extern f32 menu_pulsate;
+extern i32 menu_flash;
+extern f32 text3d_height;
+extern f32 text3d_width;
+extern FadeSystem FadeSys;
+extern f32 cointotaltime;
+extern "C" f32 MainRenderTime;
+extern "C" i32 editor_active;
+extern i32 Paused;
+extern "C" i32 screendump;
+extern f32 pause_fade;
+extern "C" i32 PANELOFF;
+extern i32 noscenespecials;
+extern void RotateGameMatrix(numtx_s *matrix, i32 order, u16 x, u16 y, u16 z);
+extern void SetLevelLights(void *set, f32 scale);
+extern f32 ICONX;
+extern f32 ICONSIZE;
+extern f32 DROPINALPHA;
+extern f32 statstime;
+f32 GetAspectRatio();
+void Hint_Draw(i32 player_index);
+extern i32 CutScenePlayer_CanStart(i32 cutscene_id);
+
+// Camera zoom state
+extern f32 CameraZoom;
+
+// Graphics loading flags
+extern i32 RemoveDirectionalMaps;
+extern i32 RemoveNormalMaps;
+
+extern NUVIDEORESHEADER g_VideoResHeader;
+
+extern "C" {
+    i32 NuDisplayListRndrSpecial(nuhspecial_s *special, NUMTX *mtx, i32 skinned, NUMTX *skin_mtx,
+                                 DEFORMERWEIGHTSARRAY *blend_values);
+    void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
+}
+
+void SetCameraZoom(f32 zoom);
+
+extern "C" void NuGScnUpdate(NUGSCN *gscn, f32 frame_delta);
+
+// --- NuGScn graphics-data reader ---
+// NuReadGraphicsData is a C++ static function in the original (GCC clones it,
+// hence the `.isra.NNN` suffix in the ROM symbol table).
+
+extern "C" void NuSevereWarning(const char *format, ...);
+
+// Retail only keeps the IPA-SRA clone, which drops the unused fourth argument.
+#if defined(__i386__)
+#define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone, regparm(2)))
+#else
+#define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone))
+#endif
+static NU_READ_GRAPHICS_DATA_ATTR NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIPTR *buf_end, char *path,
+                                                             char *scene_data)
+    __asm__("_ZL18NuReadGraphicsDataP9variptr_uS0_PcS1_S1_.isra.104");
+
+// --- Extern "C": NuGScn functions have C linkage in original ---
+extern "C" {
+NUGSCN *NuGScnReadForMultiRender(VARIPTR *buf, VARIPTR buf_end, char *path, i32 render_count);
+
+NUGSCN *NuGScnRead(VARIPTR *buf, VARIPTR buf_end, char *path);
+void NuGScnReadFromMemory(NUGSCN *scene);
+NUGSCN *NuGHGFixup(NUGSCN *scene, void *);
+nuhgobj_s *NuGHGRead(char *path, VARIPTR *buf, VARIPTR buf_end);
+} // extern "C"
+
+extern i32 solid_cable;
+extern i32 nsegments_drawn;
+extern f32 slack_factor;
+extern f32 cable_slack;
+extern f32 nsegments_per_unit;
+extern CABLE_s cables[8];
+extern f32 tow_length;
+extern NUMTL *SolidMtl3D;
+
+void DrawCables();
+
+void DrawRipple(ripple_node_s *node);
+
+void DrawAreaBox(nuvec_s *position, nuvec_s *size, i32 rotation, i32 colour);
+
+void DrawBox_Now(_vuv_s *, _vuv_s *, i32, i32);
+
+extern "C" {
+extern f32 aiEditor_DrawYOffset;
+extern f32 aiEditor_LocatorWidth;
+    void AiRndrLine3d(NURND_VERTEX3D *, NUMTL *, NUMTX *);
+}
+
+void DrawLocator(nuvec_s *position, float radius, i32 rotation, i32 colour);
+
+void Draw_LOADED();
+
+i32 Draw3DObject(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x_rotation, u16 y_rotation,
+                 u16 z_rotation, float scale_x, float scale_y, float scale_z, i32 rotate_order);
+
+void DrawCharIcon(i32 character_id, float x, float y, float z, float scale, i32 frame_object_id, float character_alpha,
+                  float frame_alpha, i32 draw_character, nuhspecial_s *override_special);
+
+extern const u8 HintRGB[5][3];
+
+void DrawLine_Now(_vuv_s *, _vuv_s *, i32, i32);
+
+void DrawParallax(nuhspecial_s *special);
+
+void DrawQuestion(nuvec_s *position, float scale_value, float y_push);
+
+void DrawRectRGBA(float x, float y, float width, float height, u32 colour, numtl_s *material, i32 alignment,
+                  float scale);
+
+void DrawItem(nuhspecial_s *special, nuvec_s *position, float scale_value, float unused, float y_push, u16 x_rot,
+              u16 y_rot, u16 z_rot);
+
+
+void Draw_LOADING();
+
+#include "nu2api/nu3d/nuprim.h"
+#include "nu2api/nu3d/nuprim_internal.h"
+#include "nu2api/nu3d/nupostparams.h"
+
+#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
+    do {                                                                                                               \
+        direction.x = (vx);                                                                                            \
+        direction.y = -(vy) * camera.aspect;                                                                           \
+        direction.z = adjacent;                                                                                        \
+        NuVecNorm(&direction, &direction);                                                                             \
+        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
+        NuVecNorm(&direction, &direction);                                                                             \
+        brightness = direction.y * 0.5f + 0.5f;                                                                        \
+        if (brightness <= near_angle)                                                                                  \
+            brightness = near_scale * parameters->intensity;                                                           \
+        else if (brightness >= far_angle)                                                                              \
+            brightness = far_scale * parameters->intensity;                                                            \
+        else                                                                                                           \
+            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
+        if (parameters->directional) {                                                                                 \
+            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
+            if (angle < parameters->direction_near_angle) {                                                            \
+                brightness += 128.0f * parameters->direction_far_scale;                                                \
+            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
+                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
+                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
+                                      parameters->direction_bias);                                                     \
+                brightness +=                                                                                          \
+                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
+                              parameters->direction_near_scale);                                                       \
+            }                                                                                                          \
+        }                                                                                                              \
+        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
+                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
+                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
+                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
+        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
+            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
+                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
+        else                                                                                                           \
+            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
+        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
+    } while (0)
+
+void DrawAlphaGrid(i32 rows, i32 cols, NuBloomParameters *parameters);
+
+void DrawArrow_Now(_vum_s *, float, i32, i32);
+
+extern i16 tNONEWBESTTIME, tNEWBESTTIME;
+void Text_MakeTime(f32, i32, i32, i32, char *);
+
+void DrawBonusTime(STATUSPACKET_s *packet, float position, i32 alpha);
+
+void DrawCross_Now(_vuv_s *, float, i32, i32);
+
+void DrawPauseFade();
+
+
+void DrawRippleSet(ripple_set_s *set);
+
+
+
+void ClearScreen();
+
+
+
+void DrawAlphaImage(i32 rows, i32 cols, numtl_s *material, i32 use_pixel_offsets, NuBloomParameters *parameters);
+
+void DrawBezierLine(VuVec &start, VuVec &start_control, VuVec &end, VuVec &end_control, numtl_s *material, i32 colour);
+
+void DrawBoxMtx_Now(_vum_s *, _vuv_s *, i32, i32);
+
+void *AddGameMessage(char *, NUVEC *, f32, NUVEC *, f32, u8, u8, u8, u32, f32);
+
+void DrawCutBorders(i32 widescreen);
+
+void DrawExplosions();
+
+void DrawItemMenu2D();
+
+void DrawStatusText(char *text, u16 angle, float x, float y, float scale, u32 colour, i32 alignment);
+
+i32 Draw3DObjectMtx(WORLDINFO_s *world, i32 object_index, numtx_s *mtx);
+
+void DrawGameObjects();
+
+extern nuhspecial_s green_light;
+extern nuhspecial_s painttargetcolour[3];
+extern nuhspecial_s paintlights[3];
+
+void DrawPaintLights();
+
+void DrawStatusIcons(STATUSPACKET_s *status, float y, float alpha);
+
+void DrawTouchPrompt(char *prompt, char *unused_label, bool hovered, bool large);
+
+void Draw_LOADFAILED();
+
+void DrawAreaCylinder(nuvec_s *centre, nuvec_s *size, i32 colour);
+
+void DrawCameraTarget(nuvec_s *);
+
+void DrawGameMessages();
+
+extern f32 KITPOSX;
+extern f32 KITPOSY;
+extern f32 KITPOS2X;
+extern f32 KITPOS2Y;
+extern f32 PANEL_MINIKITSCALE;
+extern f32 PANEL_REDBRICKSCALE;
+extern f32 PANEL_MINIKITY;
+extern f32 PANEL_MINIKITCOUNTSCALE;
+extern f32 PANEL_MINIKITCOUNTY;
+// DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
+// red-brick positions come from the Game init values in legogame/game.cpp.
+extern i32 DRAWBGLOAD;
+extern u16 PowerUp_PanelYRot[2];
+extern f32 PowerUp_PanelPosMul[2];
+extern f32 POWERUPOBJSIZE;
+extern f32 REDBRICKPOSX;
+extern f32 REDBRICKPOSY;
+extern f32 REDBRICKPOS2X;
+extern f32 REDBRICKPOS2Y;
+extern i32 Arcade_Points[2];
+extern f32 BOSSICONY;
+extern i32 FPSDISPLAY;
+extern i32 ShowPlayerCoordinate;
+extern i32 LEGOOBJ_CHARKIT;
+extern i32 LEGOOBJ_MINIKIT;
+i32 DrawPanel3DObjectNoAlpha(f32, f32, f32, f32, f32, f32, u16, u16, u16, nuhspecial_s *, i32);
+extern "C" void Text3D(char *, f32, f32, f32, f32, f32, f32, u32, u8, u8, u8);
+
+void DrawMiniKitCount(float position, float scale, i32 count, i32 maximum);
+
+void DrawStatusBG_LSW(STATUSPACKET_s *status);
+
+void Draw_LOADCORRUPT();
+
+i32 Draw3DObjectAlpha(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x_rotation, u16 y_rotation,
+                      u16 z_rotation, float scale_x, float scale_y, float scale_z, i32 rotate_order, float alpha);
+
+void DrawCameraTarget2(nuvec_s *);
+
+i32 DrawPanel3DObject(float x, float y, float z, float scale_x, float scale_y, float scale_z, u16 rotate_x,
+                      u16 rotate_y, u16 rotate_z, nuhspecial_s *special, i32 rotate_order, float alpha);
+
+STATUSMINIKITPART_s KitPart[10];
+extern i32 currentminikit;
+extern f32 slideseek;
+
+i32 DrawPanel3DObjectMtxNoAlpha(nuhspecial_s *special, numtx_s *matrix);
+void DrawStatusMiniKit(float x, float y, float z, float built_scale, float new_scale, i32 count, STATUSPACKET_s *packet,
+                       float slide);
+
+extern i16 tUNKNOWN, tPOWERBRICK, tLOCKED, tGOLDBRICK;
+extern "C" void PlaySfx(char *, NUVEC *);
+void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
+
+void DrawSubItemMenu2D();
+
+void DrawSubItemMenu3D();
+
+void Draw_NOMEMORYCARD();
+
+void DrawFadeScreenWipe();
+
+
+void DrawForceGlowSprite(nuvec_s *position, float radius, i32 model, float alpha, GameObject_s *);
+
+void DrawGameObjectsDraw(i32);
+
+void Draw_AUTOSAVECANCEL();
+
+void DrawPanel3DObjectMtx(nuhspecial_s *special, numtx_s *matrix, float alpha);
+
+void Draw_AUTOSAVEWARNING();
+
+void Draw_NODATAAVAILABLE();
+
+extern i32 dco_locatorposonly;
+extern i32 dco_id;
+extern i32 dco_reflectaxis;
+extern i32 dco_wearinghat;
+extern u16 dco_prerotatez;
+extern f32 dco_reflectcoord;
+extern GAMECHARACTERDATA_s * dco_gcdata;
+extern CHARACTERMODEL_s * dco_cmodel;
+extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
+void DrawObjectOnCharacter(WORLDINFO_s *world, GameObject_s *object, i32 object_id, nuhspecial_s *special, i32 locator,
+                           i32 second_locator, NUMTX *joints, i32 reflect, u32 layers, NUMTX *rotation,
+                           NUVEC *translation, f32 alpha, f32 scale);
+
+extern f32 DropInOutScale(GameObject_s *object);
+extern void ApplyExtraRotation(GameObject_s *object, NUMTX *matrix);
+extern AREADATA *DEATHSTARBATTLE2_ADATA;
+extern AREADATA *PODSPRINT_ADATA;
+extern "C" {
+    extern i16 id_ATST;
+    extern i16 id_ATST_LOWRES;
+    extern i16 id_ATAT;
+}
+extern u8 CharClipToBlobShadows;
+
+
+i32 DrawGameObjectsProcess();
+
+void DrawStatusTextFraction(i32 current, i32 total, float x, float y, u16 angle, float scale, u32 colour,
+                            float animation, float animation_duration);
+
+void DrawGameMessage_Targets(GAMEMESSAGE_s *message, nuvec_s *position, float scale);
+
+i32 DrawPanel3DObjectNoAlpha(float x, float y, float z, float scale_x, float scale_y, float scale_z, u16 rotate_x,
+                             u16 rotate_y, u16 rotate_z, nuhspecial_s *special, i32 rotate_order);
+
+i32 DrawPanel3DObjectMtxNoAlpha(nuhspecial_s *special, numtx_s *matrix);
+
+extern void DrawMenuEntry(MENU_s *, char *);
+void Draw_OK(MENU_s *menu);
+
+void DrawAABox(_vuv_s *position, _vuv_s *size, i32 colour);
+
+void DrawArrow(nuhspecial_s *special, float scale_value);
+
+void DrawCross(nuvec_s *centre, float radius, numtl_s *material, i32 colour);
+
+extern f32 SwipeDecalRenderer_MaxWidth;
+extern f32 SwipeDecalRenderer_MinWidth;
+
+
+#define SWIPE_PRIM_UV(U, V)                                                                                            \
+    do {                                                                                                               \
+        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
+        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
+            vertex->float_uv[0] = (U);                                                                                 \
+            vertex->float_uv[1] = (V);                                                                                 \
+        } else {                                                                                                       \
+            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
+            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
+        }                                                                                                              \
+    } while (false)
+
+
+
+
+extern i32 GetMenuID(void);
+static __used__ i32 PauseRenderOff();
+
+static __used__ i32 MatrixReflection_CanOverride();
+
+static void DrawWeapon_SetSabreObjects(GameObject_s *object, i32 red, i32 green, i32 blue, i32 purple, i32 *models,
+                                       i32 *hilt);
+
+static void DrawWeapons(GameObject_s *object, i32 reflection, f32 weapon_scale);
+
+static void DrawCharacterAttachments(GameObject_s *object, NUMTX *joint_matrices);
+
+void CharScene_Draw(WORLDINFO_s *, i32, NUMTX *, NUMTX *);
+void CharMiniKit_Draw(i32, NUMTX *, i32, f32, f32);
+void Customiser_DrawAccessories(CUSTOMISER *, GameObject_s *, NUMTX *);
+i32 Batarang_GetObjectFromCharID(i32);
+void Grapple_DrawLine(GameObject_s *);
+void Transform_DrawTarget(NUVEC *, f32, f32);
+extern i16 id_ANAKINJEDISCARRED, id_WEIRDO1, id_WEIRDO2, id_CATAPULT, id_CHEWBACCA, id_WOOKIEE, id_TWOFACE;
+extern i32 PickUpFlickerTest, PickUpFlickerFrames, PickupFlickerFrame;
+
+static void DrawParaphernalia(GameObject_s *object);
+
+#include "legoapi/legoapi_types.h"
+#include "nu2api/numath/numtx.h"
+#include "nu2api/nu3d/nurndr.h"
+
+extern i32 qrand(void);
+extern f32 SeekLinearF(f32, f32, f32);
+
+
+
+
+extern f32 backdrop_top_r;
+extern f32 backdrop_top_g;
+extern f32 backdrop_top_b;
+extern f32 backdrop_bot_r;
+extern f32 backdrop_bot_g;
+extern f32 backdrop_bot_b;
+
+
+extern i32 backdrop_black;
+
+extern void (*BackDrop_AlphaFn)(float *);
+
+static __used__ void BackDrop_Alpha(float *alpha);
+
+void BackDrop_Init(char *path, variptr_u *buf, variptr_u *buf_end);
+
+void BackDrop_Dump();
+
+void BackDrop_Update(float dt);
+
+void BackDrop_ResetColours();
+
+void BackDrop_UpdateColours(i32 instant);
+
+void BackDrop_Draw(float alpha, i32 flags);
+
+extern "C" {
+    extern nurenderscene_s currentScene;
+void DisplaySceneRndrSpecials(NUDLDLISTSCENE *scene, i32, void *visibility_context);
+}
+
+// ==== src/legoapi/characters/core/characters.cpp: declarations ====
+#include "nu2api/nu3d/nuportal.h"
+#include "decomp.h"
+#include "legoapi/actions/character/suit.h"
+#include "legoapi/actions/character/streaks.h"
+#include "gameapi/ai/aisys/aisys.h"
+#include "globals.h"
+#include "legoapi/legoapi_types.h"
+#include "legoapi/world/world_shared.h"
+#include "nu2api/nu3d/nucamera.h"
+#include "nu2api/nu3d/numtl.h"
+#include "nu2api/nu3d/nulgtlaser.h"
+#include "nu2api/nu3d/nutex.h"
+#include "legoapi/core/input/qrand.h"
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/characters/core/character.h"
+#include "legoapi/characters/core/charconfig.h"
+#include "legoapi/characters/core/players.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/characters/motion/gameanim.h"
+#include "legoapi/items/base/collection.h"
+#include "legoapi/items/base/apiobject.h"
+#include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/menus/screens/store.h"
+#include "legoapi/menus/screens/gamestructure.h"
+#include "legoapi/menus/screens/shop.h"
+#include "legoapi/render/fx.h"
+#include "legoapi/render/light/lighting.h"
+#include "legoapi/render/core/terrain.h"
+#include "legoapi/gizmos/object/lever.h"
+#include "legoapi/gizmos/door/zipups.h"
+#include "legoapi/gizmo/base/gizmo.h"
+#include "legoapi/gizmo/base/gizmessage.h"
+#include "legoapi/gizmos/object/gizobstacles.h"
+#include "legoapi/gizmos/object/gizbuildits.h"
+#include "legoapi/gizmos/object/newblowup.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/gizmos/transport/grapples.h"
+#include "legoapi/props/objects/tightrope.h"
+#include "legoapi/gizmos/door/spinner.h"
+#include "legoapi/gizmos/trigger/minicut.h"
+#include "legoapi/gizmos/transport/tubes.h"
+#include "legoapi/gizmos/traps/gizturrets.h"
+#include "legoapi/gizmos/trigger/ai.h"
+#include "legoapi/gizmos/trigger/giztimer.h"
+#include "legoapi/gizmos/trigger/gizrandom.h"
+#include "legoapi/gizmos/trigger/gizspecial.h"
+#include "legoapi/props/doors/door.h"
+#include "legoapi/gizmos/door/plugs.h"
+#include "legoapi/gizmos/door/push.h"
+#include "legoapi/gizmos/fx/edgizshadowmachine.h"
+#include "legoapi/gizmos/transport/gizportal.h"
+#include "legoapi/props/objects/techno.h"
+#include "legoapi/world/level.h"
+#include "legoapi/world/areas.h"
+#include "legoapi/world/world.h"
+#include "legoapi/world/mission.h"
+#include "gameapi/ai/aisys/aisys.h"
+#include "gameapi/edtools/edstubs.h"
+#include "nu2api/nucore/bgproc.h"
+#include "nu2api/nu3d/nudlist.h"
+#include "nu2api/nu3d/nuspecial.h"
+#include "nu2api/nucore/nustring.h"
+
+#include <string.h>
+#include <stdio.h>
+#include <math.h>
+#include "legoapi/menus/core/text.h"
+#include "legoapi/actions/character/specialmoves.h"
+#include "legoapi/audio/audio.h"
+#include "legoapi/characters/core/customiser.h"
+#include "nu2api/numusic/numusic.h"
+#include "nu2api/numath/nutrig.h"
+
+
+// LoadPerm1 is one of the few game-level entry points which wires together
+// otherwise C-linkage engine subsystems.  Keep these declarations local: the
+// individual subsystem TUs intentionally expose their original plain names.
+extern "C" {
+    i32 rtlInitDynamic(VARIPTR *, VARIPTR, i32);
+    void DebrisSetup(VARIPTR *, VARIPTR, char *, i32, i32, i32);
+    void DebrisRegisterCutoffCameraVec(void *);
+    void edgraSetup(VARIPTR *, VARIPTR, i32, i32, i32);
+    void InitParts(i32, VARIPTR *, VARIPTR *);
+    void ParticleReset(void);
+    i32 NuFileExists(char *);
+    i32 NuStrCpy(char *, const char *);
+    i32 edppLoadPage(char *, i32, usize);
+    void NuRndrShadowInit(u8 *);
+    void NuTexAnimProgSysInit(void);
+    void terrainpickupinit(char *, void **);
+
+    extern f32 animduration_blendouttime;
+    extern i32 Grass_Available;
+    extern i32 DEBPAGE_GENERAL;
+    extern i32 DEBPAGE_CHARACTER;
+    extern void *perm_debrissys;
+}
+
+struct AISYS_s;
+void AIScriptLoadAll(char *path, VARIPTR *buf, VARIPTR *buf_end, AISYS_s *sys);
+void InitTexAnimScripts(char **names);
+void BackDrop_Init(char *path, VARIPTR *buf, VARIPTR *buf_end);
+
+extern i32 PARTPAGE_GENERAL;
+
+// The original table at 0x006281a0.  These are the material animation
+// scripts made available before the permanent things scene is loaded.
+extern char * TexAnimList_LSW[32];
+
+void InitRipples(ripple_set_s **, VARIPTR *, VARIPTR *, i32);
+void CreateFadeMaterials();
+void CreateUsefulMaterials();
+extern "C" ripple_set_s *ripples;
+extern "C" NUMTL *ShadowMat;
+
+struct AIROW_s;
+struct nuqthdr_s;
+struct nunativegscene_s;
+struct SHOPINPUT;
+
+void CharConfig_ConfigureAll(i32 permanent, nufpcomjmp_s *game_keywords);
+void ExtraCharacterFixUpAfterConfig();
+extern i32 CHARPAK;
+
+extern i32 GetMenuID(void);
+extern i32 InCollectList_Index(i32 id, COLLECTID *list, i32 count);
+extern i32 Collection_Got(i32 id);
+extern void Customiser_SaveModelTextureIDs(CUSTOMISER *customiser, CHARACTERMODEL_s *model);
+extern CUSTOMISER *CharacterCustomiser;
+extern "C" VARIPTR characterbuffer_ptr;
+extern "C" VARIPTR characterbuffer_end;
+extern "C" i32 waiting_for_character;
+extern f32 WaitingForCharacterTime;
+
+extern "C" {
+extern i32 hub_character_ready;
+}
+
+extern APICHARACTERMODELLIST_s PermModelList[1];
+
+#include "legoapi/characters/core/characters_types.h"
+
+void LSW_SetIndy(i32);
+
+void HairMovement(GameObject_s *object);
+
+void HeadMovement(GameObject_s *object);
+
+nuhspecial_s *CharScene_FindHSpecial(WORLDINFO_s *world, i32 character_id);
+
+void CharScene_Draw(WORLDINFO_s *world, i32 character_id, numtx_s *matrix, numtx_s *reflection_matrix);
+
+i32 CharIDFromName(char *name);
+
+CHARACTERDATA *CDataFromName(char *name);
+
+i32 RedirectAnim(char *directory, ANIMREDIRECT *redirects, ANIMLIST_s *animation_list, char *path);
+
+void CharScenes_Init(variptr_u *buf, variptr_u *);
+
+void CharScenes_LevelLoad(WORLDINFO *world);
+
+extern i16 tUNKNOWN;
+extern "C" {
+    extern i16 id_R2Q5;
+    void PlaySfx(char *, nuvec_s *);
+    void PlaySfxAndSetVolume(char *, nuvec_s *, f32);
+}
+void Move_CHARACTER(GameObject_s *);
+void Animate_CHARACTER(GameObject_s *);
+
+void FixUpCharacters(CHARFIXUP *fixup);
+
+void PostAnimate_FETT(GameObject_s *object);
+
+void ResetAICreature(GameObject_s *, AISYS_s *);
+void LightGameObject(GameObject_s *, void *);
+void InitSurfaceInfo(GameObject_s *);
+i32 SetObjOnSurface(GameObject_s *, i32);
+extern "C" NUVEC plr_lastpos;
+
+void FinishWeirdoNames(i32 which);
+
+GameObject_s *ActivateCharacter(char *name, nuvec_s *position, i32 angle);
+
+extern i32 addcreature_override_id_check;
+
+extern f32 default_mover_extra;
+extern void SetGameObjectCharacterData(GameObject_s *obj);
+extern void GetTopBot(GameObject_s *obj);
+extern void GameObjectDimensions(GameObject_s *obj);
+extern void GameObjectOrigin(GameObject_s *obj);
+extern void ResetCharacterIdle(GameObject_s *obj, i32 mode, i32 idle);
+extern void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *data);
+
+
+static void SetLayers_BOB(GameObject_s *object);
+
+// Retail keeps only the IPA-SRA clone, which receives &*layers.
+#if defined(__i386__)
+#define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone, regparm(1)))
+#else
+#define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone))
+#endif
+static MOSEISLEY_LAYERS_ATTR void SetLayers_MOSEISLEYCITIZEN(u32 *layers)
+    __asm__("_ZL26SetLayers_MOSEISLEYCITIZENP12GameObject_s.isra.2");
+static void SetLayers_MOSEISLEYCITIZEN(u32 *layers);
+
+i32 InitCreature(GameObject_s *obj, i32 id, i32 param);
+
+void Shards_HandleLostObj(WORLDINFO_s *, GameObject_s *);
+void LoseHelmet(GameObject_s *, i32, i32);
+void DestroySnakeBody(GameObject_s *);
+void InitPlayerAI(GameObject_s *);
+void Player_ClearContext(GameObject_s *, i32);
+void ResetPlayerMoves(GameObject_s *);
+void Player_ResetContexts(PLAYERPACKET_s *);
+void InitSurfaceInfo(GameObject_s *);
+i32 SetObjOnSurface(GameObject_s *, i32);
+void GizForce_ResetLOS(GameObject_s *);
+i32 StartSlide(GameObject_s *, i32);
+
+i32 NewPlayerCharacter(GameObject_s *object, i32 id, i32 old_id, i32);
+
+
+i32 GetDefaultIdle(GameObject_s *obj);
+
+void ResetCharacterIdle(GameObject_s *object, i32 mode, i32 animation);
+
+static void NewCharacterIdle(GameObject_s *object, i32 default_idle);
+
+void UpdateCharacterIdle(GameObject_s *object);
+
+void UpdateCharacterIDs();
+
+void CharScenes_AreaLoad(APICHARACTERMODELLIST_s *list, variptr_u *buf, variptr_u buf_end);
+
+void CharScenes_AreaDump();
+
+void SetMoveAndAnimateFunctions(u32 model_flag_mask, u32 model_flag_value, u32 game_flag_mask, u32 game_flag_value,
+                                i32 movement_type, void *move_function, void *animate_function, void *draw_function);
+
+void DeactivateGameObject(GameObject_s *);
+
+void DeactivateCharacter(char *name);
+
+void LoadSingleCharacter(bgprocinfo_s *);
+
+void CharScenes_LevelDump(WORLDINFO_s *world);
+
+void UpdateCharacterLoad();
+
+extern "C" VARIPTR characterbuffer_base;
+extern i32 CHARACTERBUFFERSIZE;
+extern i32 Area;
+extern i32 last_area;
+
+void ResetCharacterBuffer(i32 force_reset);
+
+void NextStatusStage(STATUSPACKET_s *);
+i32 AddToCollection(i32);
+void NewStatusRumbleBuzz(i32, f32, f32, i32);
+void GameAudio_PlaySfx(i32, nuvec_s *, i32, i32);
+extern "C" void PlaySfx(char *, nuvec_s *);
+void Collection_Draw(COLLECTION_s *, f32, f32, f32, APICHARACTERMODELLIST_s *, f32, i32);
+void Collection_GetPos(COLLECTION_s *, i32, f32 *, f32 *);
+void DrawCharIcon(i32, f32, f32, f32, f32, i32, f32, f32, i32, nuhspecial_s *);
+extern f32 ICONSIZE;
+extern i32 STATUS_R, STATUS_G, STATUS_B;
+extern f32 COLLECTION_Y_STATUS;
+
+void CollectCharcters_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active);
+
+void CollectCharcters_Skip(STATUS_STAGE_s *stage, STATUSPACKET_s *packet);
+
+nuhspecial_s *CharScene_FindHSpecial(WORLDINFO_s *world, i32 character_id);
+
+void PostAnimate_ASTROMECH(GameObject_s *object);
+
+AILOCATOR_s *LocalGetRandomLocator(AILOCATOR_s **locators, i32 count, f32 clip_radius, NUVEC *position,
+                                   f32 max_distance, i32 outside_camera, f32 max_delta_y, f32 min_delta_y);
+
+AILOCATOR_s *LocalGetNearestLocator(AILOCATOR_s **locators, i32 count, f32 clip_radius, NUVEC *position,
+                                    f32 max_distance, i32 outside_camera, f32 max_delta_y, f32 min_delta_y);
+
+i32 newCharactersCollected(STATUSPACKET_s *);
+
+void CollectCharcters_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+
+i32 SetProtocolDroidFallAnim(GameObject_s *object);
+
+void CollectCharactersOff_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active);
+
+void CollectCharactersOff_Skip(STATUS_STAGE_s *, STATUSPACKET_s *);
+
+void ScaleGameObject(GameObject_s *obj);
+
+void SetGameObjectCharacterData(GameObject_s *obj);
+
+void CollectCharactersOff_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+
+extern "C" i32 dagobah_training;
+
+i32 TakeOverYodaSeekDistanceHack(GameObject_s *object, GameObject_s *luke, nuvec_s *offset);
+
+void SetProtocolDroidInterfaceAction(GameObject_s *object);
+
+void SetProtocolDroidDeactivatedAction(GameObject_s *object);
+
+extern NUMTL * lightningmat;
+extern NUMTL *DebMat[10];
+extern "C" void NuWaterInit(void);
+extern "C" void NuBridgeInit(void);
+
+void LoadPerm1();
+
+void LoadPerm2();
+
+// ==== src/legoapi/core/startup/finishloop.cpp: declarations ====
+#include "legoapi/core/startup/main.h"
+#include "decomp.h"
+#include "globals.h"
+#include "legoapi/legoapi_types.h"
+#include "legoapi/world/levels/levels.h"
+#include "nu2api/nucore/nuapi.h"
+#include "nu2api/nucore/bgproc.h"
+#include "nu2api/nucore/android/NuThread_android.h"
+#include "nu2api/nu3d/nucamera.h"
+#include "nu2api/nu3d/nurndr.h"
+#include "nu2api/numath/numtx.h"
+#include "nu2api/nu3d/nutex.h"
+
+struct AIROW_s;
+struct nuqthdr_s;
+struct nunativegscene_s;
+struct SHOPINPUT;
+
+extern "C" {
+    extern i32 FinishLoop_On;
+    i32 NuRndrBeginScene(i32 flags);
+    void NuRndrEndScene(void);
+    f32 NuFrameEnd(void);
+    void edGraEnableTerrainSwap(void);
+    void edGraDisableTerrainSwap(void);
+}
+
+void BackDrop_Draw(f32 alpha, i32 flags);
+void NewGame(void);
+
+void FinishLoop(i32 frames);
+
+void bgSuspendMain(i32);
+
+void EndOfDemo(i32);
+
+// ==== src/legoapi/items/collect/minikits.cpp: declarations ====
+#include "decomp.h"
+#include "legoapi/items/collect/minikits.h"
+#include "globals.h"
+#include "legoapi/items/base/collection.h"
+#include "legoapi/audio/sfx.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/gizmo/object/gizmopickup.h"
+#include "legoapi/legoapi_types.h"
+#include "legoapi/world/area.h"
+#include "legoapi/world/world.h"
+#include "legoapi/world/world_shared.h"
+#include "nu2api/nu3d/nutex.h"
+#include "nu2api/nucore/nustring.h"
+#include "legoapi/menus/core/gamehint.h"
+#include "legoapi/menus/core/text.h"
+#include "legoapi/menus/core/gamemessages.h"
+#include "legoapi/menus/screens/store.h"
+#include "legoapi/menus/screens/gamestatus_lsw.h"
+#include "legoapi/characters/core/character.h"
+#include "legoapi/characters/core/players.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/core/input/qrand.h"
+#include "legoapi/core/input/timer.h"
+#include "legoapi/misc/utilities.h"
+#include "legoapi/render/core/render.h"
+#include "legoapi/render/fx.h"
+#include "legoapi/render/fx/parts.h"
+#include "legoapi/render/light/lighting.h"
+#include "nu2api/numath/numtx.h"
+#include "nu2api/numath/nutrig.h"
+#include "nu2api/numath/nufloat.h"
+#include "nu2api/nu3d/nugscn.h"
+#include "nu2api/nu3d/nurndr.h"
+#include "nu2api/nu3d/nuspecial.h"
+#include <math.h>
+#include <stdio.h>
+#include <string.h>
+
+struct AIROW_s;
+struct nuqthdr_s;
+struct nunativegscene_s;
+struct SHOPINPUT;
+
+extern HUBMINIKITPIECES_s ** Char_MiniKit;
+extern "C" VARIPTR characterbuffer_ptr;
+extern "C" VARIPTR characterbuffer_end;
+
+void MiniKits_Init(variptr_u *buffer, variptr_u *);
+
+void CharacterMiniKits_Load(COLLECTION_s *collection, WORLDINFO *world, VARIPTR *buf, VARIPTR *buf_end);
+
+extern f32 KITPOSX, PANEL_MINIKITY, PANEL_MINIKITSCALE;
+void MiniKit_GameMsg_Update(GAMEMESSAGE_s *message);
+void MiniKit_GameMsg_End(GAMEMESSAGE_s *message);
+void Hint_SetHintFromId(i32, i32, i32);
+
+void CollectMinikit(nuvec_s *position, char *name, i32);
+
+i32 AllMiniKitsDone(AREASAVE_s *save);
+
+extern char * LEGOASCII_BIGARROW;
+i32 MatrixReflection(NUMTX *, i32, f32, f32, NUMTX *);
+void CharMiniKit_Draw(i32 id, numtx_s *matrix, i32 reflection_axis, float reflection_plane, float reflection_height);
+
+extern i32 currentminikit, newminikitcount;
+f32 slideseek;
+f32 pop_timer;
+f32 jibberlen = 0.1f;
+f32 slidetime = 0.25f;
+void NextStatusStage(STATUSPACKET_s *);
+void SetDrawGoldBrick(STATUSPACKET_s *, i32);
+void IncreaseScore(u32 *, u64, i32);
+void NewStatusRumbleBuzz(i32, f32, f32, i32);
+extern "C" void PlaySfx(char *, nuvec_s *);
+void AddStatusMiniKitParts();
+void DrawStatusMiniKit(f32, f32, f32, f32, f32, i32, STATUSPACKET_s *, f32);
+void DrawMiniKitCount(f32, f32, i32, i32);
+f32 getFinishedStatusAlpha(STATUSPACKET_s *);
+extern f32 STATUS_TITLE_Y;
+extern i16 tMINIKIT;
+
+void MiniKit_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current);
+
+void MiniKit_LSW_Skip(STATUS_STAGE_s *stage, STATUSPACKET_s *packet);
+
+void CollectAllMiniKits(AREASAVE_s *save);
+
+i32 UpdateNewMiniKits(STATUSPACKET_s *, STATUS_STAGE_s *stage);
+
+void MiniKit_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+
+extern i32 LEGOOBJ_MINIKIT, LEGOOBJ_CHARKIT;
+void EndChallenge(i32, i32);
+void GameCam_Judder(GAMECAMERA_s *, f32, i32, NUVEC *);
+void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
+void MiniKit_GameMsg_End(GAMEMESSAGE_s *message);
+
+void ResetMinikitCounter();
+
+extern i16 id_SLAVE1, tALLMINIKITSBUILT;
+extern i32 STATUS_R, STATUS_G, STATUS_B;
+
+void AllMiniKits_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current);
+
+void AllMiniKits_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet);
+
+rtldata_s KitPartRTL;
+extern NUCOLOUR3 panelcol[3], panelamb;
+extern NUVEC paneldir[3];
+
+void AllMiniKits_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+
+void AddStatusMiniKitParts();
+
+void CharacterMiniKits_Dump(WORLDINFO_s *world);
+
+void MiniKit_GameMsg_Update(GAMEMESSAGE_s *message);
+
+void SetEffectVisibility(char *, i32);
+
+void EffectOffProgress_Reset(LEVEL_PROGRESS_s *progress);
+
+
+void IncrementMinikitCounter(GameObject_s *);
+
+i32 EffectOffProgress_Update(LEVEL_PROGRESS_s *progress, char *name, i32 visible);
+
+// ==== functions in original address order ====
+
+void SetDrawGoldBrick(STATUSPACKET_s *packet, i32) {
+    const i32 stage = packet->current_gold_brick;
+    if (packet->gold_brick_enabled[stage] != 0) {
+        DrawGoldBrick_Stage = stage;
+        DrawGoldBrick_Phase = packet->stage->field_0x14;
+    }
+}
+
+void DrawStatusText(char *text, u16 angle, float x, float y, float scale, u32 colour, i32 alignment) {
+    static NUMTX status_mtx;
+
+    NUVEC origin = {0.0f, 0.0f, 800.0f};
+    NUVEC position = {x * 350.0f, y * 300.0f, 0.0f};
+    u16 encoded[512];
+
+    NuQFntSetJustifiedTolerances(1.2f, 1.2f);
+    NuMtxSetIdentity(&status_mtx);
+    NuMtxSetRotationX(&status_mtx, 0);
+    NuMtxRotateY(&status_mtx, 0);
+    NuMtxRotateZ(&status_mtx, angle);
+    NuMtxTranslate(&status_mtx, &origin);
+    NuMtxTranslate(&status_mtx, &position);
+    NuMtxMul(&status_mtx, &status_mtx, NuCameraGetMtx());
+
+    NuQFntSet(QFont3DZ);
+    NuQFntSetMtx(QFont3DZ, &status_mtx);
+    NuQFntPushPrintMode(NUQFNT_CSMODE_ABSOLUTE);
+    NuQFntSetCoordinateSystem(NUQFNT_CSMODE_ABSOLUTE);
+    NuQFntSetColour(QFont3DZ, colour);
+    NuQFntSetScale(QFont3DZ, scale, scale);
+    Text3DStringEncode(text, encoded);
+
+    switch (alignment) {
+        case 2: {
+            const f32 height = NuQFntHeight(QFont3DZ);
+            NuQFntMove(QFont3DZ, 0.0f, -height * 0.5f, 0.0f);
+            break;
+        }
+        case 8: {
+            const f32 height = NuQFntHeight(QFont3DZ);
+            const f32 width = NuQFntPrintLenW(QFont3DZ, encoded);
+            NuQFntMove(QFont3DZ, -width, -height * 0.5f, 0.0f);
+            break;
+        }
+        default: {
+            const f32 height = NuQFntHeight(QFont3DZ);
+            const f32 width = NuQFntPrintLenW(QFont3DZ, encoded);
+            NuQFntMove(QFont3DZ, -width * 0.5f, -height * 0.5f, 0.0f);
+            break;
+        }
+    }
+    NuQFntPrintW(QFont3DZ, encoded);
+    NuQFntPopPrintMode();
+    NuQFntSetCoordinateSystem(NUQFNT_CSMODE_NORMALISED);
+}
+
+void DrawStatusTextFraction(i32 current, i32 total, float x, float y, u16 angle, float scale, u32 colour,
+                            float animation, float animation_duration) {
+    char text[16];
+    u16 encoded[64];
+    NUMTX matrix;
+    NUVEC origin = {0.0f, 0.0f, 800.0f};
+    NUVEC position = {x * 400.0f, y * 250.0f, 0.0f};
+    NuQFntSetJustifiedTolerances(1.2f, 1.2f);
+    NuMtxSetIdentity(&matrix);
+    NuMtxSetRotationX(&matrix, 0);
+    NuMtxRotateY(&matrix, 0);
+    NuMtxRotateZ(&matrix, angle);
+    NuMtxTranslate(&matrix, &origin);
+    NuMtxTranslate(&matrix, &position);
+    NuMtxMul(&matrix, &matrix, NuCameraGetMtx());
+    NuQFntSet(QFont3DZ);
+    NuQFntSetMtx(QFont3DZ, &matrix);
+    NuQFntPushPrintMode(NUQFNT_CSMODE_ABSOLUTE);
+    NuQFntSetCoordinateSystem(NUQFNT_CSMODE_ABSOLUTE);
+    NuQFntSetColour(QFont3DZ, colour);
+    NuQFntSetScale(QFont3DZ, scale, scale);
+    sprintf(text, "%i/%i", current, total);
+    Text3DStringEncode(text, encoded);
+    const f32 full_width = NuQFntPrintLenW(QFont3DZ, encoded);
+    const f32 height = NuQFntHeight(QFont3DZ);
+    NuQFntMove(QFont3DZ, -full_width * 0.5f, -height * 0.5f, 0.0f);
+    if (animation > 0.0f) {
+        const i32 wave_angle = static_cast<i32>((animation / animation_duration) * 32768.0f + 16384.0f);
+        const f32 blend = 1.0f - (NuTrigTable[(wave_angle >> 1) & 0x7fff] + 1.0f) * 0.5f;
+        const f32 wave = 1.0f - blend;
+        const f32 small_scale = scale - 0.5f + wave * 0.5f;
+        const f32 large_scale = 0.5f + scale - wave * 0.5f;
+        sprintf(text, "/%i", total);
+        Text3DStringEncode(text, encoded);
+        const f32 suffix_width = NuQFntPrintLenW(QFont3DZ, encoded);
+        const f32 suffix_offset = full_width - suffix_width;
+        const f32 half_full_width = 0.5f * full_width;
+        const f32 suffix_x = suffix_offset - half_full_width;
+        const f32 suffix_height = NuQFntHeight(QFont3DZ);
+        NuQFntMove(QFont3DZ, suffix_x, -suffix_height * 0.5f, 0.0f);
+        NuQFntPrintW(QFont3DZ, encoded);
+        sprintf(text, "%i", current);
+        Text3DStringEncode(text, encoded);
+        const f32 current_width = NuQFntPrintLenW(QFont3DZ, encoded);
+        NuQFntSetScale(QFont3DZ, large_scale, large_scale);
+        const f32 large_width = NuQFntPrintLenW(QFont3DZ, encoded);
+        const f32 current_center = current_width * 0.5f - half_full_width;
+        const f32 large_x = current_center - large_width * 0.5f;
+        const f32 large_height = NuQFntHeight(QFont3DZ);
+        NuQFntMove(QFont3DZ, large_x, -large_height * 0.5f, 0.0f);
+        NuQFntPrintW(QFont3DZ, encoded);
+        NuQFntSetScale(QFont3DZ, small_scale, small_scale);
+        const f32 small_width = NuQFntPrintLenW(QFont3DZ, encoded);
+        const f32 small_x = current_center - small_width * 0.5f;
+        const f32 small_height = NuQFntHeight(QFont3DZ);
+        NuQFntMove(QFont3DZ, small_x, -small_height * 0.5f, 0.0f);
+        NuQFntPrintW(QFont3DZ, encoded);
+    } else {
+        sprintf(text, "%i", current);
+        Text3DStringEncode(text, encoded);
+        NuQFntPrintW(QFont3DZ, encoded);
+        sprintf(text, "/%i", total);
+        Text3DStringEncode(text, encoded);
+        NuQFntPrintW(QFont3DZ, encoded);
+    }
+    NuQFntPopPrintMode();
+    NuQFntSetCoordinateSystem(NUQFNT_CSMODE_NORMALISED);
+}
+
+STATUS_STAGE_s *FindStatusStage(i32 type) {
+    for (i32 i = 0; StatusStages[i].type != -1; ++i) {
+        if (StatusStages[i].type == type) {
+            return &StatusStages[i];
+        }
+    }
+    return NULL;
+}
+
+void StatusStage_Reset(STATUS_STAGE_s *stage) {
+    if (stage != NULL) {
+        stage->field_0x18 = 0;
+        stage->field_0x1c = 1.0f;
+        stage->field_0x14 = -1;
+        stage->field_0x12 = 0;
+    }
+}
+
+void NewStatusRumbleBuzz(i32 player, float amount, float buzz, i32 priority) {
+    if (amount > 0.0f) {
+        if (StatusPacket.player0_active != 0 && StatusRumbleTargetsPlayer(player, 0)) {
+            if (__builtin_expect(StatusPacket.player0_rumble_time <= 0.0f, 0) ||
+                __builtin_expect(amount > StatusPacket.player0_rumble_time /
+                                              StatusPacket.player0_rumble_duration *
+                                              StatusPacket.player0_rumble_amount,
+                                 0)) {
+                StatusPacket.player0_rumble_amount = amount;
+                StatusPacket.player0_rumble_duration = amount;
+                StatusPacket.player0_rumble_time = amount;
+            }
+            if (buzz > StatusPacket.player0_buzz_amount) {
+                StatusPacket.player0_buzz_amount = buzz;
+            }
+            if (priority > 0 && ++priority > StatusPacket.player0_rumble_priority) {
+                StatusPacket.player0_rumble_priority = static_cast<u8>(priority);
+            }
+        }
+        if (StatusPacket.player1_active != 0 && StatusRumbleTargetsPlayer(player, 1)) {
+            if (__builtin_expect(StatusPacket.player1_rumble_time <= 0.0f, 0) ||
+                __builtin_expect(amount > StatusPacket.player1_rumble_time /
+                                              StatusPacket.player1_rumble_duration *
+                                              StatusPacket.player1_rumble_amount,
+                                 0)) {
+                StatusPacket.player1_rumble_amount = amount;
+                StatusPacket.player1_rumble_duration = amount;
+                StatusPacket.player1_rumble_time = amount;
+            }
+            if (buzz > StatusPacket.player1_buzz_amount) {
+                StatusPacket.player1_buzz_amount = buzz;
+            }
+            if (priority > 0 && ++priority > StatusPacket.player1_rumble_priority) {
+                StatusPacket.player1_rumble_priority = static_cast<u8>(priority);
+            }
+        }
+    } else {
+        if (StatusPacket.player0_active != 0 && StatusRumbleTargetsPlayer(player, 0)) {
+            if (buzz > StatusPacket.player0_buzz_amount) {
+                StatusPacket.player0_buzz_amount = buzz;
+            }
+            if (priority > 0 && ++priority > StatusPacket.player0_rumble_priority) {
+                StatusPacket.player0_rumble_priority = static_cast<u8>(priority);
+            }
+        }
+        if (StatusPacket.player1_active != 0 && StatusRumbleTargetsPlayer(player, 1)) {
+            if (buzz > StatusPacket.player1_buzz_amount) {
+                StatusPacket.player1_buzz_amount = buzz;
+            }
+            if (priority > 0 && ++priority > StatusPacket.player1_rumble_priority) {
+                StatusPacket.player1_rumble_priority = static_cast<u8>(priority);
+            }
+        }
+    }
+}
+
+void NextStatusStage(STATUSPACKET_s *packet) {
+    if (packet->stage != NULL) {
+        if (packet->stage->field_0x14 == -1 && packet->field_0x68 > packet->stage->field_0x18) {
+            packet->field_0xb0 |= 2;
+            return;
+        }
+        packet->stage->field_0x12 = 1;
+    }
+
+    STATUS_STAGE_s *stage = packet->stage;
+    ++packet->current_gold_brick;
+    packet->previous_stage_2 = packet->previous_stage;
+    packet->previous_stage = stage;
+    packet->stage = packet->next_stage;
+    packet->next_stage = FindStatusStage(packet->stage_types[packet->current_gold_brick + 1]);
+
+    while (packet->stage == NULL || packet->next_stage == NULL) {
+        if (packet->stage == NULL && packet->next_stage != NULL) {
+            packet->stage = packet->next_stage;
+            packet->next_stage = NULL;
+        }
+
+        ++packet->current_gold_brick;
+        if (!(packet->current_gold_brick + 1 < packet->stage_count)) {
+            packet->next_stage = FindStatusStage(10);
+        } else {
+            packet->next_stage = FindStatusStage(packet->stage_types[packet->current_gold_brick + 1]);
+        }
+    }
+
+    StatusStage_Reset(packet->stage);
+    packet->field_0xb0 &= ~2;
+    status_prompt = 0;
+
+    if ((packet->stage != NULL && packet->stage->type == 11) || packet->stage->type == 10) {
+        ResetRumble(reinterpret_cast<RUMBLEPACKET *>(&packet->player0_rumble_amount));
+        ResetRumble(reinterpret_cast<RUMBLEPACKET *>(&packet->player1_rumble_amount));
+    }
+    if (packet->stage != NULL && packet->stage->type == 11) {
+        ReCalculateCompletionPoints();
+    }
+}
+
+i32 AddGoldBrickMessage(STATUSPACKET_s *packet, i16 brick) {
+    if (goldbrickmsgcount < 16) {
+        reinterpret_cast<i16 *>(packet->field_0x12c)[goldbrickmsgcount] = brick;
+        ++goldbrickmsgcount;
+    }
+    AddToGoldBricks();
+    return 1;
+}
+
+void AddStatusStage(STATUSPACKET_s *packet, i32 type, i32 gold_brick_enabled) {
+    const u8 index = packet->stage_count;
+    packet->stage_types[index] = static_cast<i8>(type);
+    packet->gold_brick_enabled[index] = static_cast<u8>(gold_brick_enabled);
+    packet->stage_count = index + 1;
+}
+
+i32 newCharactersCollected(STATUSPACKET_s *) {
+    i32 count = 0;
+    for (i16 *player_id = Area_PlayerIDList; *player_id != -1 && count < 7; ++player_id) {
+        const i16 player = *player_id;
+        const i32 id = player;
+        i32 previous = 0;
+        while (previous < count && StatusCollectList.ids[previous] != id) {
+            ++previous;
+        }
+        if (previous == count) {
+            if (__builtin_expect(Game_CharacterSave != NULL && (Game_CharacterSave[id] & 1) != 0, 1)) {
+                continue;
+            }
+            const i32 index = InCollectList_Index(id, MasterCollection.list, MasterCollection.count_y);
+            if (__builtin_expect(index != -1 && MasterCollection.list[index].can_buy == 0, 0)) {
+                StatusCollectList.ids[count++] = player;
+                if (MasterCollection.list[index].field5_0x9 != 0) {
+                    AddToCompletionPoints(POINTS_PER_CHARACTER);
+                }
+            }
+        }
+    }
+    StatusCollectList.ids[count] = -1;
+    return count;
+}
+
+void StatusPacketReset(STATUSPACKET_s *packet) {
+    const STATUSPACKET_LSW_s *lsw_packet = packet->lsw_packet;
+    auto init_callback = packet->init_callback;
+    auto finish_callback = packet->finish_callback;
+    void (*reset_callback)(STATUSPACKET_s *) = packet->reset_callback;
+    void (*draw_background_callback)(STATUSPACKET_s *) = packet->draw_background_callback;
+    const f32 field_0x68 = packet->field_0x68;
+
+    reset_callback(packet);
+    memset(packet, 0, sizeof(*packet));
+
+    packet->reset_callback = reset_callback;
+    packet->lsw_packet = const_cast<STATUSPACKET_LSW_s *>(lsw_packet);
+    packet->init_callback = init_callback;
+    packet->finish_callback = finish_callback;
+    packet->draw_background_callback = draw_background_callback;
+    packet->field_0x68 = field_0x68;
+}
+
+void InitStatusScreen(WORLDINFO_s *world) {
+    STATUSPACKET_s &p = StatusPacket;
+    char event[64];
+    if (__builtin_expect(p.lsw_packet == NULL, 0)) {
+        return;
+    }
+    for (i32 i = 0; StatusStages[i].type != -1; ++i) {
+        StatusStage_Reset(&StatusStages[i]);
+    }
+    StatusPacketReset(&p);
+    icon_y = STATSPOSY;
+    newminikitcount = 0;
+    currentminikit = 0;
+    p.field_0xb0 &= 0xfe;
+    ResetRumble(reinterpret_cast<RUMBLEPACKET *>(&p.player0_rumble_amount));
+    ResetRumble(reinterpret_cast<RUMBLEPACKET *>(&p.player1_rumble_amount));
+    CoinTotalScale = 1.0f;
+    goldbrickmsgcount = 0;
+    if (netclient == 0) {
+        if (Player[0] == NULL) {
+            p.player0_model = 0xffff;
+        } else {
+            p.player0_model = Player[0]->id;
+            p.player0_active = Player[0]->apiobj.player_controlled;
+            p.coins_remaining[0] = Player[0]->coinpacket == NULL ? 0 : Player[0]->coinpacket->coins;
+            ++p.status_flags;
+        }
+        if (Player[1] == NULL) {
+            p.player1_model = 0xffff;
+        } else {
+            p.player1_model = Player[1]->id;
+            p.player1_active = Player[1]->apiobj.player_controlled;
+            p.coins_remaining[1] = Player[1]->coinpacket == NULL ? 0 : Player[1]->coinpacket->coins;
+            ++p.status_flags;
+        }
+    }
+    if (p.status_flags == 0) {
+        return;
+    }
+    p.stage_count = 0;
+    p.super_story_mode = SuperStory;
+    p.free_play = FreePlay;
+    p.saved_and_exited = from_save_and_exit;
+    p.continue_story = 0;
+    p.mission = Mission_Active(NULL);
+    if (p.mission == NULL)
+        p.mission_state = 0;
+    else
+        p.mission_state = Mission_CurrentState(NULL);
+    if (__builtin_expect(from_save_and_exit != 0, 1)) {
+        from_save_and_exit = 0;
+        level_already_loaded = -1;
+    }
+    p.next_area = -1;
+    p.field_0xbe = -1;
+    p.newly_completed = 0;
+    p.field_0xbd = 0;
+    p.challenge_state = ChallengeMode;
+    const i32 area = static_cast<i8>(world->level_sub_id);
+    p.next_area_unlocked = 0;
+    p.score = &Game.coins;
+    p.previous_completion = Game.completion;
+    p.previous_gold_bricks = Game.field_0x7c26[0];
+    p.area_id = area;
+    p.displayed_gold_bricks = Game.field_0x7c26[0];
+    p.vehicle_area = 0;
+    p.bonus_mode = 0;
+    p.super_bonus_mode = 0;
+    i32 episode = -1;
+    if (__builtin_expect(area == -1, 0)) {
+        p.area = NULL;
+        p.episode = NULL;
+        p.chapter = -1;
+    } else {
+        p.area = ADataList + area;
+        p.episode_id = p.area->episode_index;
+        episode = p.episode_id;
+        if (episode != -1) {
+            p.episode = EDataList + static_cast<i8>(p.area->episode_index);
+        }
+        p.chapter = p.area->area_index;
+        if ((p.area->flags & AREAFLAG_VEHICLE_AREA) != 0)
+            p.vehicle_area = 1;
+        if ((p.area->flags & AREAFLAG_BONUS_AREA) != 0)
+            p.bonus_mode = 1;
+        if (__builtin_expect((p.area->flags & 0x100) != 0, 0))
+            p.super_bonus_mode = 1;
+    }
+    if (p.init_callback(world, &p) != 0) {
+        return;
+    }
+    if ((p.mode_flags & 4) != 0) {
+        if (NewLData == STATUS_LDATA || WORLD->current_level == STATUS_LDATA) {
+            const u32 previous_score = Game.episode_save[episode].superstory_score_target;
+            p.previous_best_score = previous_score;
+            p.previous_best_time = Game.episode_save[episode].superstory_time_limit;
+            p.superstory_time = SuperStoryTimer.time_elapsed;
+            p.superstory_score = SuperStoryScore;
+            i32 gold = 0;
+            if (episode == -1) {
+                p.new_best_score = 0;
+                p.new_best_time = 0.0f;
+                p.time_reward_score = *p.score;
+            } else {
+                f32 new_time = p.superstory_time;
+                if (new_time < p.previous_best_time)
+                    Game.episode_save[episode].superstory_time_limit = new_time;
+                else
+                    new_time = 0.0f;
+                p.new_best_time = new_time;
+                u32 new_score = p.superstory_score;
+                if (new_score > previous_score)
+                    Game.episode_save[episode].superstory_score_target = new_score;
+                else
+                    new_score = 0;
+                p.new_best_score = new_score;
+                if (__builtin_expect(Game.episode_save[episode].superstory_complete == 0, 1)) {
+                    Game.episode_save[episode].superstory_complete = 1;
+                    AddToCompletionPoints(POINTS_PER_SUPERSTORY);
+                    if (GOLDBRICKFORSUPERSTORY != 0)
+                        gold = AddGoldBrickMessage(&p, tSUPERSTORYCOMPLETE);
+                }
+                p.time_reward_score = *p.score;
+                if (p.new_best_time != 0.0f) {
+                    u64 reward = static_cast<i64>(static_cast<i32>(p.previous_best_time - p.new_best_time) * 100);
+                    if (reward < 100)
+                        reward = 100;
+                    IncreaseScore(&p.time_reward_score, reward, 0);
+                }
+            }
+            p.final_reward_score = p.time_reward_score;
+            IncreaseScore(&p.final_reward_score, static_cast<u64>(p.superstory_score), 0);
+            AddStatusStage(&p, 14, gold);
+            AddStatusStage(&p, 15, 0);
+            AddStatusStage(&p, 16, 0);
+            if (Game.field_0x7c26[0] > p.previous_gold_bricks)
+                AddStatusStage(&p, 19, 0);
+            if (netclient == 0 && (p.new_best_time != 0.0f || p.new_best_score != 0 || p.superstory_score != 0)) {
+                AddStatusStage(&p, 11, 0);
+            }
+            hub_from_superstory = static_cast<i8>(p.area->episode_index);
+        }
+        AddStatusStage(&p, 10, 0);
+        p.current_gold_brick = -1;
+        p.stage_types[p.stage_count] = -1;
+        p.next_stage = FindStatusStage(p.stage_types[0]);
+        NextStatusStage(&p);
+        if (episode != -1 && p.chapter < EDataList[episode].regular_areas) {
+            p.next_area = EDataList[episode].area_ids[p.chapter + 1];
+            if (p.next_area != -1 && (ADataList[p.next_area].flags & 2) != 0)
+                hub_from_superstory = episode;
+        }
+        return;
+    }
+    if ((p.mode_flags & 1) != 0 && area != -1) {
+        p.field_0xb0 = (p.field_0xb0 & 0xdf) | ((BonusWinner & 1) << 5);
+        p.elapsed_time = BonusTimer.time_elapsed;
+        p.previous_best_time = Game.area_save[area].challenge_trial_time;
+        i32 gold = 0;
+        if (p.previous_best_time <= 0.0f || p.elapsed_time < p.previous_best_time) {
+            if (WORLD->area->challenge_trial_time != 0 && WORLD->area->challenge_trial_time <= p.previous_best_time) {
+                AddToCompletionPoints(POINTS_PER_TIMETRIAL);
+                gold = AddGoldBrickMessage(&p, tNEWBESTTIME);
+            }
+            p.new_best_time = p.elapsed_time;
+            Game.area_save[area].challenge_trial_time = p.elapsed_time;
+        }
+        if ((p.mode_flags & 2) == 0) {
+            AddStatusStage(&p, 20, 0);
+            if (p.elapsed_time < p.previous_best_time)
+                AddStatusStage(&p, 3, 0);
+        } else {
+            if (Game.area_save[p.area_id].area_complete == 0) {
+                Game.area_save[p.area_id].area_complete = 1;
+                AddToCompletionPoints(POINTS_PER_SUPERBONUSCOMPLETE);
+                p.newly_completed = 1;
+                if (GOLDBRICKFORSUPERBONUS != 0)
+                    gold = AddGoldBrickMessage(&p, tLEVELCOMPLETE);
+            }
+            AddStatusStage(&p, 22, gold);
+            gold = 0;
+        }
+        AddStatusStage(&p, 21, gold);
+        if (Game.field_0x7c26[0] > p.previous_gold_bricks)
+            AddStatusStage(&p, 19, 0);
+        AddStatusStage(&p, 9, 0);
+        AddStatusStage(&p, 10, 0);
+        if (netclient == 0)
+            AddStatusStage(&p, 11, 0);
+        AddStatusStage(&p, 12, 0);
+        p.current_gold_brick = -1;
+        p.stage_types[p.stage_count] = -1;
+        p.next_stage = FindStatusStage(p.stage_types[0]);
+        NextStatusStage(&p);
+        draw_player_icons = 1;
+        return;
+    }
+    if (p.mission_state != 0) {
+        p.elapsed_time = MissionSys->timer.time_elapsed;
+        p.newly_completed = 0;
+        p.original_score = *p.score;
+        p.reward_score = p.original_score;
+        i32 gold = 0;
+        if (p.mission_state == 2) {
+            const i32 mission = static_cast<i8>(MissionSys->mission->count);
+            if (Game_MissionSave == NULL || reinterpret_cast<u8 *>(Game_MissionSave)[0x50 + mission] == 0) {
+                if (Game_MissionSave != NULL)
+                    reinterpret_cast<u8 *>(Game_MissionSave)[0x50 + mission] = 1;
+                AddToCompletionPoints(POINTS_PER_MISSION);
+                gold = AddGoldBrickMessage(&p, tMISSIONCOMPLETE);
+                sprintf(event, "bounty_mission_%i_complete", static_cast<i8>(MissionSys->mission->count) + 1);
+                NuIOS_RecordFlurryEvent(event);
+            }
+            u64 reward = static_cast<i64>(static_cast<i32>(static_cast<u16>(p.mission->time) - p.elapsed_time) * 150);
+            if (reward < 150)
+                reward = 150;
+            IncreaseScore(&p.reward_score, reward, 0);
+            if (Game_MissionSave != NULL) {
+                f32 &best = reinterpret_cast<f32 *>(Game_MissionSave)[static_cast<i8>(MissionSys->mission->count)];
+                if (best == 0.0f || p.elapsed_time < best)
+                    best = p.elapsed_time;
+            }
+        }
+        AddStatusStage(&p, 26, gold);
+        if (Game.field_0x7c26[0] > p.previous_gold_bricks)
+            AddStatusStage(&p, 19, 0);
+        AddStatusStage(&p, 9, 0);
+        AddStatusStage(&p, 10, 0);
+        goto challenge_finish;
+    }
+    if (p.challenge_state != 0) {
+        p.elapsed_time = ChallengeTimer.time_elapsed;
+        p.original_score = *p.score;
+        p.reward_score = p.original_score;
+        if (p.challenge_state == 2) {
+            i32 gold = 0;
+            if (Game.area_save[p.area_id].field_0x5[2] == 0) {
+                AddToCompletionPoints(POINTS_PER_CHALLENGE);
+                if (__builtin_expect(GOLDBRICKFORCHALLENGE != 0, 1))
+                    gold = AddGoldBrickMessage(&p, tCHALLENGECOMPLETE);
+                Game.area_save[p.area_id].field_0x5[2] = 1;
+                if (p.episode_id != -1 && p.chapter != -1) {
+                    sprintf(event, "challenge_ep%i_ch%i_complete", p.episode_id + 1, p.chapter + 1);
+                    NuIOS_RecordFlurryEvent(event);
+                }
+            }
+            u64 reward =
+                static_cast<i64>(static_cast<i32>(ADataList[p.area_id].challenge_trial_time - p.elapsed_time) * 500);
+            if (reward < 500)
+                reward = 500;
+            IncreaseScore(&p.reward_score, reward, 0);
+            AddStatusStage(&p, 23, 0);
+            if (p.challenge_state == 2 && gold != 0)
+                AddStatusStage(&p, 25, 0);
+        } else
+            AddStatusStage(&p, 23, 0);
+        if (Game.field_0x7c26[0] > p.previous_gold_bricks)
+            AddStatusStage(&p, 19, 0);
+        AddStatusStage(&p, 9, 0);
+        AddStatusStage(&p, 10, 0);
+    challenge_finish:
+        if (netclient == 0)
+            AddStatusStage(&p, 11, 0);
+        AddStatusStage(&p, 12, 0);
+        p.current_gold_brick = -1;
+        p.stage_types[p.stage_count] = -1;
+        p.next_stage = FindStatusStage(p.stage_types[0]);
+        NextStatusStage(&p);
+        draw_player_icons = 1;
+        cointotal_i_obj[0] = cointotal_i_obj[1] = 0xc3;
+        return;
+    }
+    if (area != -1) {
+        if (BuildUpDone != 0)
+            p.field_0xb0 |= 4;
+        p.minikit_count = Game.area_save[area].field_0x5[0] + AreaGlobals.values.field_0x10;
+        p.minikit_max = (p.area->flags & 0x10) != 0 ? 10 : 0;
+        if (p.minikit_count > p.minikit_max)
+            p.minikit_count = p.minikit_max;
+        p.true_hero_target = static_cast<u32>(p.area->true_hero_targets[p.free_play]);
+    }
+    p.area_time = AreaTimer.time_elapsed;
+    const u64 total = static_cast<u64>(p.coins_remaining[0]) + p.coins_remaining[1];
+    if (total >= 4000000000ULL)
+        p.collected_score = 4000000000.0f;
+    else
+        p.collected_score = static_cast<f32>(p.coins_remaining[0] + p.coins_remaining[1]);
+    p.newly_completed = 0;
+    if ((p.field_0xb0 & 4) != 0) {
+        p.true_hero_percent = 100.0f;
+    } else {
+        f32 numerator = p.collected_score * 100.0f;
+        if (numerator != 0.0f && p.true_hero_target != 0.0f) {
+            f32 percent = numerator / p.true_hero_target;
+            p.true_hero_percent = 99.0f < percent ? 99.0f : percent;
+        } else {
+            p.true_hero_percent = 0.0f;
+        }
+    }
+    p.coins_collected[0] = p.coins_remaining[0];
+    p.coins_collected[1] = p.coins_remaining[1];
+    draw_player_icons = 0;
+    if (area != -1) {
+        if ((p.field_0xb0 & 0x40) == 0 && p.episode != NULL && p.chapter < p.episode->regular_areas) {
+            p.next_area = p.episode->area_ids[p.chapter + 1];
+            if (p.chapter < p.episode->regular_areas - 1)
+                p.field_0xb0 |= 8;
+        }
+        for (i32 i = 0; i < AreaGlobals.values.field_0x10; ++i) {
+            if (Game.area_save[area].field_0x5[0] < 10)
+                ++Game.area_save[area].field_0x5[0];
+            u8 *save = Game.level_save + NewMiniPiece[i].level * 0x54;
+            if (save[0x50] < 10) {
+                NuStrCpy(reinterpret_cast<char *>(save + save[0x50] * 8), NewMiniPiece[i].name);
+                ++save[0x50];
+            }
+        }
+        i32 gold;
+        i32 completed_episode;
+        if ((p.field_0xb0 & 0x40) == 0 && Game.area_save[area].area_complete == 0 && (p.area->flags & 0x26) == 0) {
+            Game.area_save[area].area_complete = 1;
+            p.newly_completed = 1;
+            AddToCompletionPoints(POINTS_PER_STORY);
+            gold = 0;
+            if ((p.mode_flags & 1) == 0 && (p.area->flags & 0x800) == 0)
+                gold = AddGoldBrickMessage(&p, tLEVELCOMPLETE);
+            if (p.episode != NULL && Episode_IsComplete(p.episode, NULL) != 0)
+                completed_episode = static_cast<i8>(p.area->episode_index);
+            else
+                completed_episode = 0;
+            if (p.episode_id != -1 && p.chapter != -1) {
+                sprintf(event, "story_ep%i_ch%i_complete", p.episode_id + 1, p.chapter + 1);
+                NuIOS_RecordFlurryEvent(event);
+            }
+            if (p.area == NEGOTIATIONS_ADATA) {
+                Game.area_save[EDataList[1].area_ids[0]].complete = 1;
+                Game.area_save[EDataList[2].area_ids[0]].complete = 1;
+                Game.area_save[EDataList[3].area_ids[0]].complete = 1;
+                Game.area_save[EDataList[4].area_ids[0]].complete = 1;
+                Game.area_save[EDataList[5].area_ids[0]].complete = 1;
+            }
+            if ((p.field_0xb0 & 8) != 0)
+                Game.area_save[p.next_area].complete = 1;
+            else if (p.episode != NULL) {
+                const i32 bonus = Episode_FindAreaFromFlags(p.episode, 5, 4);
+                const i32 bonus2 = Episode_FindAreaFromFlags(p.episode, 5, 5);
+                if (bonus != -1)
+                    Game.area_save[bonus].complete = 1;
+                if (bonus2 != -1)
+                    Game.area_save[bonus2].complete = 1;
+                hub_startoutsidebonusdoor_area = bonus2;
+            }
+        } else {
+            gold = 0;
+            completed_episode = 0;
+        }
+        if (p.newly_completed != 0)
+            AddStatusStage(&p, 13, gold);
+        if (completed_episode != 0)
+            AddStatusStage(&p, completed_episode + 29, 0);
+    }
+    if (p.area != NULL && static_cast<i8>(p.area->cheat) != -1 && Game.area_save[area].field_0x5[1] == 0 &&
+        AreaGlobals.values.field_0x08 != 0) {
+        AddToCompletionPoints(POINTS_PER_REDBRICK);
+        Game.area_save[area].field_0x5[1] = 1;
+        AddStatusStage(&p, 18, 0);
+        if (p.episode_id != -1 && p.chapter != -1) {
+            sprintf(event, "redbrick_ep%i_ch%i_awarded", p.episode_id + 1, p.chapter + 1);
+            NuIOS_RecordFlurryEvent(event);
+        }
+    }
+    if (p.newly_completed != 0 && newCharactersCollected(&p) > 0) {
+        AddStatusStage(&p, 35, 0);
+        AddStatusStage(&p, 36, 0);
+        RememberPlayerIDs(1, static_cast<i16>(p.player0_model), static_cast<i16>(p.player1_model));
+    }
+    if (area != -1 && ((p.area->flags & 0x136) == 0x10 || (p.area->flags & 0x4000) != 0)) {
+        if (BOTHTRUEJEDIGOLDBRICKS != 0) {
+            u8 &complete = Game.area_save[area].true_hero_complete[(p.field_0xb0 >> 6) & 1];
+            if (complete == 0) {
+                if ((p.field_0xb0 & 4) != 0) {
+                    complete = 1;
+                    AddToCompletionPoints(POINTS_PER_TRUEJEDI);
+                    AddStatusStage(&p, 1, AddGoldBrickMessage(&p, tTRUEHERO));
+                } else if (p.collected_score > 0.0f)
+                    AddStatusStage(&p, 2, 0);
+            }
+        } else if (Game.area_save[area].true_hero_complete[0] == 0 && Game.area_save[area].true_hero_complete[1] == 0) {
+            if ((p.field_0xb0 & 4) != 0) {
+                Game.area_save[area].true_hero_complete[0] = Game.area_save[area].true_hero_complete[1] = 1;
+                AddToCompletionPoints(POINTS_PER_TRUEJEDI);
+                AddStatusStage(&p, 1, AddGoldBrickMessage(&p, tTRUEHERO));
+                if (p.episode_id != -1 && p.chapter != -1) {
+                    sprintf(event, "truejedi_ep%i_ch%i_awarded", p.episode_id + 1, p.chapter + 1);
+                    NuIOS_RecordFlurryEvent(event);
+                } else {
+                    sprintf(event, "truejedi_%s_awarded", p.area->file);
+                    NuIOS_RecordFlurryEvent(event);
+                }
+            } else if (p.collected_score > 0.0f && (p.mode_flags & 8) == 0)
+                AddStatusStage(&p, 2, 0);
+        }
+    }
+    if (p.collected_score > 0.0f)
+        AddStatusStage(&p, 3, 0);
+    if (p.minikit_max != 0 && (p.area->flags & 0x36) == 0x10 &&
+        Game.area_save[area].minikit_complete == SAVE_INCOMPLETE && AreaGlobals.values.field_0x10 > 0) {
+        p.new_minikits = AreaGlobals.values.field_0x10;
+        i32 gold = 0;
+        if (p.minikit_max <= Game.area_save[area].field_0x5[0]) {
+            Game.area_save[area].minikit_complete = SAVE_COMPLETE;
+            p.field_0xb0 |= 0x10;
+            AddToCompletionPoints(POINTS_PER_MINIKIT);
+            gold = AddGoldBrickMessage(&p, tMINIKIT);
+        }
+        if (from_save_and_exit == 0 || p.new_minikits != 0)
+            AddStatusStage(&p, 4, gold);
+        if ((p.field_0xb0 & 0x10) != 0 && AllMiniKitsDone(Game.area_save) != 0) {
+            AddToCollection(id_SLAVE1);
+            AddStatusStage(&p, 17, 0);
+        }
+    }
+    if (Game.field_0x7c26[0] > p.previous_gold_bricks)
+        AddStatusStage(&p, 19, 0);
+    if ((p.mode_flags & 8) == 0)
+        AddStatusStage(&p, 9, 0);
+    AddStatusStage(&p, 10, 0);
+    if (netclient == 0)
+        AddStatusStage(&p, 11, 0);
+    AddStatusStage(&p, 12, 0);
+    p.current_gold_brick = -1;
+    p.stage_types[p.stage_count] = -1;
+    p.next_stage = FindStatusStage(p.stage_types[0]);
+    NextStatusStage(&p);
+    collect_suit_bits = Game.initial_store_pack_flags;
+    Game.initial_store_pack_flags = areaSuitBits;
+}
+
+void EndOfDemo(i32) {
+    NewLData = TITLES_LDATA;
+    new_level_from_menu = 1;
+    NewGame();
+}
+
+void DrawStatusIcons(STATUSPACKET_s *status, float y, float alpha) {
+    const f32 x = ICONX;
+    const f32 icon_alpha = (status->player0_active == 0 ? 0.25f : 1.0f) * alpha;
+    const f32 size = ICONSIZE;
+    DrawCharIcon(static_cast<i16>(status->player0_model), -x, y, 0.0f, size, 0xa5, icon_alpha, icon_alpha, 1, NULL);
+}
+
+f32 StatusIconsOnOff(f32 progress) {
+    return (STATSPOSY - STATSPOS2Y) * NuTrigTable[(static_cast<i32>(progress * 16384.0f) >> 1) & 0x7fff] + STATSPOS2Y;
+}
+
+i32 UpdateNewMiniKits(STATUSPACKET_s *, STATUS_STAGE_s *stage) {
+    if (stage->field_0x18 > stage->field_0x1c) {
+        stage->field_0x18 = 0.0f;
+        ++currentminikit;
+        pop_timer = 0.5f;
+        slideseek = 1.0f;
+        return 1;
+    }
+    if ((stage->field_0x1c - jibberlen) - slidetime < stage->field_0x18 &&
+        stage->field_0x18 <= stage->field_0x1c - jibberlen) {
+        slideseek = ((stage->field_0x1c - stage->field_0x18) - jibberlen) / slidetime;
+    }
+    return 0;
+}
+
+void DrawStatusMiniKit(float x, float y, float z, float built_scale, float new_scale, i32 count, STATUSPACKET_s *packet,
+                       float slide) {
+    if (WORLD->minikit.gscn == NULL || WORLD->minikit.field_0x4 == NULL)
+        return;
+
+    HUBMINIKITPIECE_s *pieces = static_cast<HUBMINIKITPIECE_s *>(WORLD->minikit.field_0x4);
+    NUVEC built_size = {built_scale, built_scale, built_scale};
+    NUVEC new_size = {new_scale, new_scale, new_scale};
+    NUVEC offset = v000;
+    const u8 current_direction = pieces[currentminikit].direction;
+    if (__builtin_expect(current_direction <= 5, 0)) {
+        switch (current_direction) {
+            case 0:
+                offset.x += 0.035f * NuTrigTable[(static_cast<i32>(slide * 32768.0f) >> 1) & 0x7fff];
+                break;
+            case 1:
+                offset.x -= 0.035f * NuTrigTable[(static_cast<i32>(slide * 32768.0f) >> 1) & 0x7fff];
+                break;
+            case 2:
+                offset.y += 0.035f * NuTrigTable[(static_cast<i32>(slide * 32768.0f) >> 1) & 0x7fff];
+                break;
+            case 3:
+                offset.y -= 0.035f * NuTrigTable[(static_cast<i32>(slide * 32768.0f) >> 1) & 0x7fff];
+                break;
+            case 4:
+                offset.z -= 0.035f * NuTrigTable[(static_cast<i32>(slide * 32768.0f) >> 1) & 0x7fff];
+                break;
+            case 5:
+                offset.z += 0.035f * NuTrigTable[(static_cast<i32>(slide * 32768.0f) >> 1) & 0x7fff];
+                break;
+        }
+    }
+
+    if (__builtin_expect(packet->minikit_max != 0 && WORLD->minikit.field_0x8 != 0 && count > 0, 1)) {
+        i32 i = 0;
+        do {
+            HUBMINIKITPIECE_s &piece = pieces[i];
+            NUMTX_ALIGNED16 matrix = piece.matrix;
+            if (i >= currentminikit) {
+                NuMtxScale(&matrix, &new_size);
+                i32 piece_angle = 0x2000;
+                if (i == currentminikit) {
+                    const f32 phase = slideseek * 16384.0f + 49152.0f + 16384.0f;
+                    piece_angle = (static_cast<i32>(phase) >> 1) & 0x7fff;
+                }
+                const f32 oscillation = NuTrigTable[piece_angle];
+                const HUBMINIKITPIECE_s *animated_pieces = static_cast<HUBMINIKITPIECE_s *>(WORLD->minikit.field_0x4);
+                const HUBMINIKITPIECE_s &animated_piece = animated_pieces[i];
+                if (__builtin_expect(animated_piece.direction <= 5, 1)) {
+                    switch (animated_piece.direction) {
+                        case 0:
+                            matrix.m30 -=
+                                (static_cast<f32>(static_cast<i32>(animated_piece.direction_index)) * 0.025f + 0.25f) *
+                                oscillation;
+                            break;
+                        case 1:
+                            matrix.m30 +=
+                                (static_cast<f32>(static_cast<i32>(animated_piece.direction_index)) * 0.025f + 0.25f) *
+                                oscillation;
+                            break;
+                        case 2:
+                            matrix.m31 -=
+                                (static_cast<f32>(static_cast<i32>(animated_piece.direction_index)) * 0.025f + 0.25f) *
+                                oscillation;
+                            break;
+                        case 3:
+                            matrix.m31 +=
+                                (static_cast<f32>(static_cast<i32>(animated_piece.direction_index)) * 0.025f + 0.25f) *
+                                oscillation;
+                            break;
+                        case 4:
+                            matrix.m32 +=
+                                (static_cast<f32>(static_cast<i32>(animated_piece.direction_index)) * 0.025f + 0.25f) *
+                                oscillation;
+                            break;
+                        case 5:
+                            matrix.m32 -=
+                                (static_cast<f32>(static_cast<i32>(animated_piece.direction_index)) * 0.025f + 0.25f) *
+                                oscillation;
+                            break;
+                    }
+                }
+            } else {
+                NuMtxScale(&matrix, &built_size);
+            }
+            if (i <= currentminikit) {
+                matrix.m32 += offset.z;
+                matrix.m31 += offset.y;
+                matrix.m30 += offset.x;
+            }
+
+            const NUANG rotation_y =
+                static_cast<u16>(static_cast<i32>(NuFmod(GameTimer.time_elapsed, 2.0f) * 0.5f * 65536.0f));
+            const f32 y0 = matrix.m00;
+            const f32 y1 = matrix.m10;
+            const f32 y2 = matrix.m20;
+            const f32 y3 = matrix.m30;
+            const f32 cy = NU_COS_LUT(rotation_y);
+            const f32 sy = NU_SIN_LUT(rotation_y);
+            matrix.m00 = y0 * cy + matrix.m02 * sy;
+            matrix.m02 = matrix.m02 * cy - y0 * sy;
+            matrix.m10 = y1 * cy + matrix.m12 * sy;
+            matrix.m12 = matrix.m12 * cy - y1 * sy;
+            matrix.m20 = y2 * cy + matrix.m22 * sy;
+            matrix.m22 = matrix.m22 * cy - y2 * sy;
+            matrix.m30 = y3 * cy + matrix.m32 * sy;
+            matrix.m32 = matrix.m32 * cy - y3 * sy;
+
+            const u16 z_phase =
+                static_cast<u16>(static_cast<i32>(NuFmod(GameTimer.time_elapsed, 2.24f) / 2.24f * 65536.0f));
+            const NUANG rotation_z = static_cast<u16>(static_cast<i32>(2730.0f * NU_SIN_LUT(z_phase)));
+            const f32 z0 = matrix.m00;
+            const f32 z1 = matrix.m10;
+            const f32 z2 = matrix.m20;
+            const f32 z3 = matrix.m30;
+            const f32 cz = NU_COS_LUT(rotation_z);
+            const f32 sz = NU_SIN_LUT(rotation_z);
+            matrix.m00 = z0 * cz - matrix.m01 * sz;
+            matrix.m01 = z0 * sz + matrix.m01 * cz;
+            matrix.m10 = z1 * cz - matrix.m11 * sz;
+            matrix.m11 = z1 * sz + matrix.m11 * cz;
+            matrix.m20 = z2 * cz - matrix.m21 * sz;
+            matrix.m21 = z2 * sz + matrix.m21 * cz;
+            matrix.m30 = z3 * cz - matrix.m31 * sz;
+            matrix.m31 = z3 * sz + matrix.m31 * cz;
+
+            const u16 x_phase =
+                static_cast<u16>(static_cast<i32>(NuFmod(GameTimer.time_elapsed, 1.87f) / 1.87f * 65536.0f));
+            const NUANG rotation_x = static_cast<u16>(static_cast<i32>(2730.0f * NU_SIN_LUT(x_phase) - 5461.0f));
+            const f32 x0 = matrix.m01;
+            const f32 x1 = matrix.m11;
+            const f32 x2 = matrix.m21;
+            const f32 x3 = matrix.m31;
+            const f32 cx = NU_COS_LUT(rotation_x);
+            const f32 sx = NU_SIN_LUT(rotation_x);
+            matrix.m01 = x0 * cx - matrix.m02 * sx;
+            matrix.m02 = x0 * sx + matrix.m02 * cx;
+            matrix.m11 = x1 * cx - matrix.m12 * sx;
+            matrix.m12 = x1 * sx + matrix.m12 * cx;
+            matrix.m21 = x2 * cx - matrix.m22 * sx;
+            matrix.m22 = x2 * sx + matrix.m22 * cx;
+            matrix.m31 = x3 * cx - matrix.m32 * sx;
+            matrix.m32 = x3 * sx + matrix.m32 * cx;
+
+            matrix.m31 += y * PANEL3DMULY;
+            matrix.m32 += z;
+            matrix.m30 += x * PANEL3DMULX;
+
+            if (i < 10) {
+                KitPart[i].matrix = matrix;
+                KitPart[i].special = &static_cast<HUBMINIKITPIECE_s *>(WORLD->minikit.field_0x4)[i].special;
+                KitPart[i].enabled = 1;
+            }
+            if (WORLD->lev_objs[206].active != 0)
+                DrawPanel3DObjectMtxNoAlpha(&static_cast<HUBMINIKITPIECE_s *>(WORLD->minikit.field_0x4)[i].special,
+                                            &matrix);
+            ++i;
+            if (i >= packet->minikit_max || i >= WORLD->minikit.field_0x8 || i == count)
+                break;
+            pieces = static_cast<HUBMINIKITPIECE_s *>(WORLD->minikit.field_0x4);
+        } while (true);
+    }
+}
+
+void AddStatusMiniKitParts() {
+    NUVEC target_position = {0.0f, STATSPOSY, 1.0f};
+    for (i32 i = 0; i < 3; ++i) {
+        KitPartRTL.intensity[i] = panelcol[i];
+        KitPartRTL.direction[i] = paneldir[i];
+    }
+    KitPartRTL.ambient.x = panelamb.r;
+    KitPartRTL.ambient.y = panelamb.g;
+    KitPartRTL.ambient.z = panelamb.b;
+
+    f32 delay = 0.0f;
+    for (i32 i = 0; i < 10; ++i) {
+        if (KitPart[i].enabled == 0) {
+            continue;
+        }
+        NUVEC velocity = {0.0f, (static_cast<f32>(qrand()) * (1.0f / 65535.0f)) * 0.25f + 0.25f, 0.0f};
+        NuVecRotateZ(&velocity, &velocity, qrand());
+        ADDPART_s part = Default_ADDPART;
+        part.matrix = &KitPart[i].matrix;
+        part.velocity = &velocity;
+        part.flags = 0x480;
+        part.gravity = 0.0f;
+        part.special = KitPart[i].special;
+        part.lighting = reinterpret_cast<PARTLIGHTSOURCE_s *>(&KitPartRTL);
+        part.time_step = FRAMETIME;
+        AddPart(&part);
+
+        for (i32 coin = 0; coin < 5; ++coin) {
+            NUVEC position = {0.0f, (static_cast<f32>(qrand()) * (1.0f / 65535.0f)) * 0.1f, 1.0f};
+            NuVecRotateZ(&position, &position, qrand());
+            ADDGAMEMSG_ALIGNED16 message = AddGameMsg_Default;
+            message.position = &position;
+            message.target_scale = 0.75f;
+            message.player_index = qrand() / 0x8000;
+            target_position.x = cointotal_x[message.player_index];
+            message.target_position = &target_position;
+            message.target_scale = COINTOTAL_COINSIZE;
+            message.icon = static_cast<i16>(GizmoPickupType[2].first_model_id);
+            message.special = &WORLD->lev_objs[message.icon].special;
+            message.flags = 0x112d;
+            message.duration = COINMSGTIME;
+            message.score = GizmoPickupType[2].score;
+            message.end_fn = EndScoreMessage;
+            message.field_0x20 = delay;
+            message.update_fn = GameMsg_DrawAdjustNewPos_CoinToTotal;
+            message.field_0x4e = 1;
+            AddGameMsg(&message);
+            if (delay == 0.0f) {
+                NewStatusRumbleBuzz(-1, 0.0f, 0.0f, 1);
+                AddGameDebris(WORLD->debris_sys, 0x38, &position);
+            }
+            delay += 0.1f;
+        }
+    }
+    SetPanelLights(1.0f);
+}
+
+void Status_DrawPromptMenu(STATUSPACKET_s *packet, i32 selected, float alpha) {
+    i32 labels[2];
+    labels[1] = -1;
+    MENU_s *menu = &GameMenu[GameMenuLevel];
+    bool locked = false;
+    if ((packet->mode_flags & 1) != 0 || packet->challenge_state != 0) {
+        labels[0] = tRESTART;
+        labels[1] = tMAP;
+    } else if (packet->mission_state != 0) {
+        labels[0] = tRESTART;
+        labels[1] = tMAP;
+    } else if ((packet->field_0xb0 & 0x40) != 0 ||
+               (packet->area_id != -1 && ADataList[packet->area_id].episode_index == 0xff)) {
+        labels[0] = tMAP;
+    } else {
+        labels[0] = tFINISHSTORY;
+        if ((packet->field_0xb0 & 8) != 0) {
+            if (packet->next_area != -1 && (ADataList[packet->next_area].flags & 2) == 0 &&
+                Game.area_save[packet->next_area].complete == 0) {
+                labels[0] = tMAP;
+                const i16 text =
+                    ADataList[packet->next_area].area_index == 5 ? tFINALCHAPTERLOCKED : tNEXTCHAPTERLOCKED;
+                SmartTextEx(TTab[text], 0.0f, 0.325f, 1.0f, 0.5f, 0.5f, 0.5f, 0, 255, 63, 0, 1.7f, 1, NULL, 0,
+                            static_cast<i32>(alpha * 128.0f));
+                locked = true;
+            } else {
+                if (packet->next_area == -1 || (ADataList[packet->next_area].flags & 2) == 0) {
+                    labels[0] = tCONTINUESTORY;
+                }
+                labels[1] = tMAP;
+            }
+        } else if (packet->next_area == -1 || (ADataList[packet->next_area].flags & 2) == 0) {
+            labels[0] = tCONTINUESTORY;
+        }
+    }
+    const i32 count = labels[1] == -1 ? 1 : 2;
+    f32 y = count == 1 ? 0.125f : 0.1f;
+    if (!locked && count == 2 && packet->newly_completed != 0 && packet->area != NULL &&
+        packet->area == NEGOTIATIONS_ADATA) {
+        Hint_SetHintFromId(0x26c, 0, 1);
+        Hint_SetComplete(0x26c);
+        Hint_Draw(-1);
+        y = 0.48999998f;
+    }
+    if ((packet->mode_flags & 1) != 0) {
+        y += 0.075f;
+    }
+    for (i32 i = 0; i < count; ++i) {
+        i32 red, green, blue;
+        if (selected != 0 && status_prompt == i && TestForController()) {
+            if (menu_pulsate > 0.0f) {
+                const f32 inverse = 1.0f - menu_pulsate;
+                red = static_cast<u32>(MENUFLASH0R) * menu_pulsate + static_cast<u32>(MENUFLASH1R) * inverse;
+                green = static_cast<u32>(MENUFLASH0G) * menu_pulsate + static_cast<u32>(MENUFLASH1G) * inverse;
+                blue = static_cast<u32>(MENUFLASH0B) * menu_pulsate + static_cast<u32>(MENUFLASH1B) * inverse;
+            } else if (menu_flash == 0) {
+                red = MENUFLASH1R;
+                blue = MENUFLASH1B;
+                green = MENUFLASH1G;
+            } else {
+                red = MENUFLASH0R;
+                blue = MENUFLASH0B;
+                green = MENUFLASH0G;
+            }
+        } else if (menu_pulse > 0.0f) {
+            const f32 inverse = 1.0f - menu_pulse;
+            red = static_cast<u32>(MENUFLASH0R) * menu_pulse + static_cast<u32>(MENUNORMALR) * inverse;
+            green = static_cast<u32>(MENUFLASH0G) * menu_pulse + static_cast<u32>(MENUNORMALG) * inverse;
+            blue = static_cast<u32>(MENUFLASH0B) * menu_pulse + static_cast<u32>(MENUNORMALB) * inverse;
+        } else {
+            red = MENUENTRYR;
+            green = MENUENTRYG;
+            blue = MENUENTRYB;
+        }
+        smarttextex_drawmessagebox = 1;
+        SmartTextEx(TTab[labels[i]], 0.0f, y, 1.0f, 0.7f, 0.7f, 0.7f, 0, red, green, blue, 1.7f, 1, NULL, 0,
+                    static_cast<i32>(alpha * 128.0f) & 0xff);
+        menu->item_x[i] = 0.0f;
+        menu->item_y[i] = y;
+        menu->item_width[i] = text3d_width;
+        menu->item_height[i] = text3d_height;
+        menu->item_column[i] = 0;
+        menu->item_row[i] = i;
+        y -= 0.2f;
+    }
+}
+
+void DrawBonusTime(STATUSPACKET_s *packet, float position, i32 alpha) {
+    const f32 y = -0.5f * position;
+    char *title;
+    i32 red, green;
+    if (packet->new_best_time != 0.0f) {
+        title = TTab[tNEWBESTTIME];
+        red = 0;
+        green = 255;
+    } else {
+        title = TTab[tNONEWBESTTIME];
+        red = 255;
+        green = 0;
+    }
+    SmartTextEx(title, 0.0f, 0.15f + y, 1.0f, 0.7f, 0.7f, 0.7f, 0, red, green, 0, 1.7f, 1, NULL, 0,
+                static_cast<u8>(alpha));
+    char time[256];
+    char previous[256];
+    Text_MakeTime(packet->new_best_time != 0.0f ? packet->new_best_time : packet->elapsed_time, 1, 1, 1, time);
+    Text3DEx(time, 0.0f, 0.0f + y, 1.0f, 0.7f, 0.7f, 0.7f, 0, 255, 255, 255, static_cast<u8>(alpha));
+    Text_MakeTime(packet->previous_best_time, 1, 1, 1, time);
+    NuStrCpy(previous, "(");
+    NuStrCat(previous, time);
+    NuStrCat(previous, ")");
+    Text3DEx(previous, 0.0f, y - 0.15f, 1.0f, 0.7f, 0.7f, 0.7f, 0, 255, 255, 255,
+             static_cast<u8>(static_cast<u8>(alpha) >> 1));
+}
+
+void DrawStatusScreen(WORLDINFO_s *) {
+    iconalphaoverride = -1.0f;
+    memset(KitPart, 0, sizeof(KitPart));
+
+    if (GAMEDEMO != 0) {
+        if (GAMEDEMO != 1 || FadeSys.fade != 0.0f)
+            return;
+        char *exit_text = TTab[tEXIT];
+        char *freeplay_text = TTab[tFREEPLAY];
+        f32 y = -0.75f - 0.5f * MENUDY;
+        {
+            const i32 option = 0;
+            char *text = freeplay_text;
+            i32 red, green, blue;
+            if (gamedemo_option == option && TestForController() != 0) {
+                if (menu_pulsate > 0.0f) {
+                    red = static_cast<i32>(static_cast<u32>(MENUFLASH0R) * menu_pulsate +
+                                           static_cast<u32>(MENUFLASH1R) * (1.0f - menu_pulsate));
+                    green = static_cast<i32>(static_cast<u32>(MENUFLASH0G) * menu_pulsate +
+                                             static_cast<u32>(MENUFLASH1G) * (1.0f - menu_pulsate));
+                    blue = static_cast<i32>(static_cast<u32>(MENUFLASH0B) * menu_pulsate +
+                                            static_cast<u32>(MENUFLASH1B) * (1.0f - menu_pulsate));
+                } else if (menu_flash != 0) {
+                    green = MENUFLASH0G;
+                    red = MENUFLASH0R;
+                    blue = MENUFLASH0B;
+                } else {
+                    blue = MENUFLASH1B;
+                    green = MENUFLASH1G;
+                    red = MENUFLASH1R;
+                }
+            } else if (menu_pulse > 0.0f) {
+                green = static_cast<i32>(static_cast<u32>(MENUFLASH0G) * menu_pulse +
+                                         static_cast<u32>(MENUNORMALG) * (1.0f - menu_pulse));
+                red = static_cast<i32>(static_cast<u32>(MENUFLASH0R) * menu_pulse +
+                                       static_cast<u32>(MENUNORMALR) * (1.0f - menu_pulse));
+                blue = static_cast<i32>(static_cast<u32>(MENUFLASH0B) * menu_pulse +
+                                        static_cast<u32>(MENUNORMALB) * (1.0f - menu_pulse));
+            } else {
+                green = MENUENTRYG;
+                red = MENUENTRYR;
+                blue = MENUENTRYB;
+            }
+            Text3D(text, 0.0f, y, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 0, red & 255, green & 255,
+                   blue & 255);
+        }
+        y += MENUDY;
+        {
+            const i32 option = 1;
+            char *text = exit_text;
+            i32 red, green, blue;
+            if (gamedemo_option == option && TestForController() != 0) {
+                if (menu_pulsate > 0.0f) {
+                    green = static_cast<i32>(static_cast<u32>(MENUFLASH0G) * menu_pulsate +
+                                             static_cast<u32>(MENUFLASH1G) * (1.0f - menu_pulsate));
+                    red = static_cast<i32>(static_cast<u32>(MENUFLASH0R) * menu_pulsate +
+                                           static_cast<u32>(MENUFLASH1R) * (1.0f - menu_pulsate));
+                    blue = static_cast<i32>(static_cast<u32>(MENUFLASH0B) * menu_pulsate +
+                                            static_cast<u32>(MENUFLASH1B) * (1.0f - menu_pulsate));
+                } else if (menu_flash != 0) {
+                    red = MENUFLASH0R;
+                    green = MENUFLASH0G;
+                    blue = MENUFLASH0B;
+                } else {
+                    green = MENUFLASH1G;
+                    red = MENUFLASH1R;
+                    blue = MENUFLASH1B;
+                }
+            } else if (menu_pulse > 0.0f) {
+                red = static_cast<i32>(static_cast<u32>(MENUFLASH0R) * menu_pulse +
+                                       static_cast<u32>(MENUNORMALR) * (1.0f - menu_pulse));
+                green = static_cast<i32>(static_cast<u32>(MENUFLASH0G) * menu_pulse +
+                                         static_cast<u32>(MENUNORMALG) * (1.0f - menu_pulse));
+                blue = static_cast<i32>(static_cast<u32>(MENUFLASH0B) * menu_pulse +
+                                        static_cast<u32>(MENUNORMALB) * (1.0f - menu_pulse));
+            } else {
+                red = MENUENTRYR;
+                green = MENUENTRYG;
+                blue = MENUENTRYB;
+            }
+            Text3D(text, 0.0f, y, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 0, red & 255, green & 255,
+                   blue & 255);
+        }
+        return;
+    }
+    if (FadeSys.fade > 0.0f) {
+        return;
+    }
+
+    STATUSPACKET_s *status = &StatusPacket;
+    if (status->status_flags != 0) {
+
+        if (status->draw_background_callback != NULL) {
+            status->draw_background_callback(status);
+        }
+
+        i32 stage_index = 1;
+        for (STATUS_STAGE_s *stage = StatusStages; stage->type != -1; stage = StatusStages + stage_index++) {
+            if (stage->draw_callback != NULL) {
+                if (stage == status->stage)
+                    stage->draw_callback(stage, status, 1);
+                else
+                    stage->draw_callback(stage, status, 0);
+            }
+        }
+
+        STATUS_STAGE_s *stage = status->stage;
+        f32 alpha;
+        if (stage->type == 11) {
+            return;
+        } else if (stage->type == 12) {
+            alpha = 0.0f;
+        } else if (stage->type == 10) {
+            alpha = stage->field_0x18 < 1.0f ? 1.0f - stage->field_0x18 : 0.0f;
+        } else {
+            alpha = 1.0f;
+            if (stage->type == 19 && stage->field_0x14 != 0) {
+                const f32 time = stage->field_0x18;
+                if (time < 1.0f) {
+                    alpha = 1.0f - time;
+                } else {
+                    const f32 fade_start = stage->field_0x1c - 1.0f;
+                    alpha = 0.0f;
+                    if (time >= fade_start)
+                        alpha = (time - fade_start) / (stage->field_0x1c - fade_start);
+                }
+            }
+        }
+
+        if (draw_player_icons != 0) {
+            DrawStatusIcons(status, icon_y, iconalphaoverride >= 0.0f ? iconalphaoverride : alpha);
+        }
+    } else {
+        char time[256];
+        const f32 remaining = MAX(0.0f, 6.0f - GameTimer.time_elapsed);
+        Text_MakeTime(remaining, 0, 0, 0, time);
+        const f32 y_phase = NuFmod(GameTimer.time_elapsed, 0.5f);
+        const f32 y = 0.01f * NuTrigTable[static_cast<u16>(static_cast<i32>((y_phase + y_phase) * 65536.0f)) >> 1];
+        const f32 x_phase = NuFmod(GameTimer.time_elapsed, 0.432f);
+        const f32 x = 0.01f * NuTrigTable[static_cast<u16>(static_cast<i32>(x_phase / 0.432f * 65536.0f)) >> 1];
+        Text3D(time, x, y, 1.0f, 1.0f, 1.0f, 1.0f, 0, 255, 191, 0);
+    }
+}
+
+void FinishStatusPacket(i32 choice) {
+    LOG_INFO("level results choice=%d flags=%x challenge=%d mission=%d", choice, StatusPacket.mode_flags,
+             StatusPacket.challenge_state, StatusPacket.mission_state);
+    RememberPlayerIDs(1, static_cast<i16>(StatusPacket.player0_model), static_cast<i16>(StatusPacket.player1_model));
+    if (StatusPacket.finish_callback(WORLD, &StatusPacket, choice) != 0) {
+        return;
+    }
+    NewLData = HUB_LDATA;
+    if (choice == 0 &&
+        ((StatusPacket.mode_flags & 1) != 0 || StatusPacket.challenge_state != 0 || StatusPacket.mission_state != 0)) {
+        NewLData = Area_FindNextPlayLevel(ADataList[StatusPacket.area->index].levels[0]);
+        ResetBits = 0xffffffbf;
+        reset_area = 1;
+        FadeSys.SetFade(FADETYPE{FADE_TYPE_STILL_WIPE}, 0);
+        NeedScreenGrab(1);
+        GrabStillScreen();
+        if (StatusPacket.challenge_state != 0) {
+            InitChallenge(StatusPacket.area->index);
+        }
+        if (StatusPacket.mission_state != 0) {
+            InitMission(MissionSys, static_cast<i8>(MissionSys->mission->count));
+            NewLData = &LDataList[MissionSys->mission->level];
+        }
+    } else if (choice == 0 && StatusPacket.next_area != -1) {
+        NewLData = &LDataList[ADataList[StatusPacket.next_area].levels[0]];
+        if ((ADataList[StatusPacket.next_area].flags & 2) != 0) {
+            grab_screen_image = 1;
+        } else {
+            loadareacharacters_no_backdrop_reset = 1;
+            if ((StatusPacket.mode_flags & 4) != 0) {
+                finishloop_backdroponly = 1;
+            }
+        }
+    } else if ((StatusPacket.mode_flags & 4) != 0 ||
+               ((StatusPacket.area->flags & 4) != 0 && (StatusPacket.field_0xb0 & 0x40) == 0)) {
+        NewLData = CREDITS_LDATA;
+    }
+    if ((StatusPacket.mode_flags & 8) != 0) {
+        NewLData = HUB_LDATA;
+    }
+    if (NewLData->area_index != -1 && (ADataList[NewLData->area_index].flags & 0x40) != 0 &&
+        StatusPacket.mission_state != 0 && MissionSys->mission != NULL) {
+        hub_from_mission = static_cast<i8>(MissionSys->mission->count);
+    }
+    if (NewLData == HUB_LDATA) {
+        OldBonusScore[0] = 0;
+        OldBonusScore[1] = 0;
+    } else {
+        for (i32 i = 0; i < 2; ++i) {
+            OldBonusScore[i] = BonusScore[i];
+        }
+    }
+    NuSound3StopRumble();
+}
+
+void UpdateStatusScreen(WORLDINFO_s *) {
+    const f32 elapsed = FRAMETIME;
+    CoinTotalScale = SeekLinearF(CoinTotalScale, 1.0f, FRAMETIME * 3.0f);
+    DrawGoldBrick_Phase = -1;
+    DrawGoldBrick_Stage = -1;
+    if (GAMEDEMO != 0) {
+        if (GAMEDEMO == 1) {
+            if (FadeSys.fade != 0.0f || NewLData != NULL) {
+                return;
+            }
+            for (i32 player = 0; player < 2; ++player) {
+                if (__builtin_expect((player == 0 ? StatusPacket.player0_active : StatusPacket.player1_active) == 0, 1)) {
+                    continue;
+                }
+                if ((GamePad[player].buttons_pressed & GAMEPAD_MENUSELECT) != 0) {
+                    GameAudio_PlaySfx(0x30, NULL, 0, 0);
+                    if (gamedemo_option == 0) {
+                        GAMEDEMO = 2;
+                        NewLData = HUB_LDATA;
+                        new_level_from_menu = 1;
+                    } else if (gamedemo_option == 1) {
+                        EndOfDemo(0);
+                    }
+                    return;
+                }
+                if (((GamePad[player].left_directions | GamePad[player].buttons_pressed) & GAMEPAD_DUP) != 0) {
+                    if (gamedemo_option > 0) {
+                        --gamedemo_option;
+                        GameAudio_PlaySfx(0x2f, NULL, 0, 0);
+                    }
+                    return;
+                }
+                if ((GamePad[player].left_directions & GAMEPAD_DDOWN) == 0) {
+                    if ((GamePad[player].buttons_pressed & GAMEPAD_DDOWN) == 0) {
+                        continue;
+                    }
+                }
+                if (gamedemo_option < 1) {
+                    ++gamedemo_option;
+                    GameAudio_PlaySfx(0x2f, NULL, 0, 0);
+                }
+                return;
+            }
+        } else if (GAMEDEMO == 2) {
+            if (GameTimer.time_elapsed >= 8.0f) {
+                EndOfDemo(0);
+            }
+        }
+        return;
+    }
+    if (StatusPacket.status_flags == 0) {
+        return;
+    }
+    if ((StatusPacket.field_0xb0 & 2) == 0) {
+        bool skip = MechInputTouchMenuController::AnyTouchesThisFrame > 0;
+        if (skip) {
+            MechInputTouchMenuController::AnyTouchesThisFrame = 0;
+        } else {
+            const u32 button = __builtin_expect(Text_Language != 0, 0) ? GAMEPAD_JUMP : GAMEPAD_MENUSELECT;
+            skip = (StatusPacket.player0_active != 0 && (GamePad[0].buttons_pressed & button) != 0) ||
+                   (StatusPacket.player1_active != 0 && (GamePad[1].buttons_pressed & button) != 0);
+        }
+        if (skip) {
+            if (StatusPacket.stage == NULL) {
+                return;
+            }
+            if (StatusPacket.stage->skip_callback != NULL) {
+                StatusPacket.stage->skip_callback(StatusPacket.stage, &StatusPacket);
+            }
+        }
+    }
+    if (StatusPacket.stage != NULL && StatusPacket.stage->update_callback != NULL) {
+        StatusPacket.stage->update_callback(StatusPacket.stage, &StatusPacket, elapsed);
+    }
+    if (StatusPacket.status_flags == 0 && GameTimer.time_elapsed >= 5.0f) {
+        FinishStatusPacket(0);
+    }
+}
+
+i32 UpdateAchievements(STATUSPACKET_s *) {
+    STUBBED();
+    return 0;
+}
+
+void RegisterStatusScreen(STATUS_STAGE_s *stages, i32 *, REGISTERSTATUSPACKET_s *registration) {
+    StatusStages = stages;
+    StatusPacket.init_callback = registration->init_callback;
+    StatusPacket.finish_callback = registration->finish_callback;
+    StatusPacket.reset_callback = registration->reset_callback;
+    StatusPacket.lsw_packet = registration->lsw_packet;
+    StatusPacket.draw_background_callback = registration->draw_background_callback;
+    StatusPacket.field_0x68 = registration->stage_delay;
+}
+

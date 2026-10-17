@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 82.91638,
+    "fuzzy_match_percent": 82.91688,
     "total_code": "4722419",
-    "matched_code": "661693",
-    "matched_code_percent": 14.011739,
+    "matched_code": "661377",
+    "matched_code_percent": 14.005047,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 7070,
-    "matched_functions_percent": 52.529907,
+    "matched_functions": 7069,
+    "matched_functions_percent": 52.522476,
     "total_units": 1
   },
   "text": {
@@ -39747,6 +39747,14 @@
           "offset": 1169248,
           "size": 710,
           "match_percent": 100.0
+        },
+        {
+          "name": "_Z23DrawGameMessage_TargetsP13GAMEMESSAGE_sP7nuvec_sf",
+          "demangled_name": "DrawGameMessage_Targets(GAMEMESSAGE_s*, nuvec_s*, float)",
+          "address": 2059936,
+          "offset": 1169968,
+          "size": 706,
+          "match_percent": 99.94118
         }
       ]
     },
@@ -40396,62 +40404,6 @@
           "offset": 27456,
           "size": 93,
           "match_percent": 99.35294
-        },
-        {
-          "name": "_Z25CollectCharactersOff_SkipP14STATUS_STAGE_sP14STATUSPACKET_s",
-          "demangled_name": "CollectCharactersOff_Skip(STATUS_STAGE_s*, STATUSPACKET_s*)",
-          "address": 2019888,
-          "offset": 1129920,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z25CollectCharactersOff_DrawP14STATUS_STAGE_sP14STATUSPACKET_si",
-          "demangled_name": "CollectCharactersOff_Draw(STATUS_STAGE_s*, STATUSPACKET_s*, int)",
-          "address": 2022720,
-          "offset": 1132752,
-          "size": 218,
-          "match_percent": 99.962265
-        },
-        {
-          "name": "_Z21CollectCharcters_DrawP14STATUS_STAGE_sP14STATUSPACKET_si",
-          "demangled_name": "CollectCharcters_Draw(STATUS_STAGE_s*, STATUSPACKET_s*, int)",
-          "address": 2022944,
-          "offset": 1132976,
-          "size": 1409,
-          "match_percent": 86.70144
-        },
-        {
-          "name": "_Z21CollectCharcters_SkipP14STATUS_STAGE_sP14STATUSPACKET_s",
-          "demangled_name": "CollectCharcters_Skip(STATUS_STAGE_s*, STATUSPACKET_s*)",
-          "address": 2024368,
-          "offset": 1134400,
-          "size": 131,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z27CollectCharactersOff_UpdateP14STATUS_STAGE_sP14STATUSPACKET_sf",
-          "demangled_name": "CollectCharactersOff_Update(STATUS_STAGE_s*, STATUSPACKET_s*, float)",
-          "address": 2027184,
-          "offset": 1137216,
-          "size": 101,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z23CollectCharcters_UpdateP14STATUS_STAGE_sP14STATUSPACKET_sf",
-          "demangled_name": "CollectCharcters_Update(STATUS_STAGE_s*, STATUSPACKET_s*, float)",
-          "address": 2034256,
-          "offset": 1144288,
-          "size": 321,
-          "match_percent": 99.97059
-        },
-        {
-          "name": "_Z22newCharactersCollectedP14STATUSPACKET_s",
-          "demangled_name": "newCharactersCollected(STATUSPACKET_s*)",
-          "address": 2428896,
-          "offset": 1538928,
-          "size": 342,
-          "match_percent": 65.625
         },
         {
           "name": "_Z14CharIDFromNamePc",
@@ -46655,14 +46607,6 @@
           "match_percent": 99.35294
         },
         {
-          "name": "_Z22FinishStatusPacket_LSWP11WORLDINFO_sP14STATUSPACKET_si",
-          "demangled_name": "FinishStatusPacket_LSW(WORLDINFO_s*, STATUSPACKET_s*, int)",
-          "address": 2019824,
-          "offset": 1129856,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
           "name": "_Z18FinishLoop_Networkv",
           "demangled_name": "FinishLoop_Network()",
           "address": 4760592,
@@ -46900,14 +46844,6 @@
       "source": "src/legoapi/core/startup/finishloop.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/finishloop.o",
       "functions": [
-        {
-          "name": "_Z9EndOfDemoi",
-          "demangled_name": "EndOfDemo(int)",
-          "address": 2435792,
-          "offset": 1545824,
-          "size": 55,
-          "match_percent": 100.0
-        },
         {
           "name": "_Z13bgSuspendMaini",
           "demangled_name": "bgSuspendMain(int)",
@@ -47612,62 +47548,6 @@
           "offset": 298976,
           "size": 611,
           "match_percent": 93.83648
-        },
-        {
-          "name": "_Z22LevelComplete_LSW_SkipP14STATUS_STAGE_sP14STATUSPACKET_s",
-          "demangled_name": "LevelComplete_LSW_Skip(STATUS_STAGE_s*, STATUSPACKET_s*)",
-          "address": 2020112,
-          "offset": 1130144,
-          "size": 118,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z18GoldBrick_LSW_SkipP14STATUS_STAGE_sP14STATUSPACKET_s",
-          "demangled_name": "GoldBrick_LSW_Skip(STATUS_STAGE_s*, STATUSPACKET_s*)",
-          "address": 2020240,
-          "offset": 1130272,
-          "size": 49,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z20GoldBrick_LSW_UpdateP14STATUS_STAGE_sP14STATUSPACKET_sf",
-          "demangled_name": "GoldBrick_LSW_Update(STATUS_STAGE_s*, STATUSPACKET_s*, float)",
-          "address": 2024512,
-          "offset": 1134544,
-          "size": 1134,
-          "match_percent": 94.07049
-        },
-        {
-          "name": "_Z15Fade_LSW_UpdateP14STATUS_STAGE_sP14STATUSPACKET_sf",
-          "demangled_name": "Fade_LSW_Update(STATUS_STAGE_s*, STATUSPACKET_s*, float)",
-          "address": 2026784,
-          "offset": 1136816,
-          "size": 230,
-          "match_percent": 99.98485
-        },
-        {
-          "name": "_Z15Exit_LSW_UpdateP14STATUS_STAGE_sP14STATUSPACKET_sf",
-          "demangled_name": "Exit_LSW_Update(STATUS_STAGE_s*, STATUSPACKET_s*, float)",
-          "address": 2027024,
-          "offset": 1137056,
-          "size": 153,
-          "match_percent": 99.61539
-        },
-        {
-          "name": "_Z24LevelComplete_LSW_UpdateP14STATUS_STAGE_sP14STATUSPACKET_sf",
-          "demangled_name": "LevelComplete_LSW_Update(STATUS_STAGE_s*, STATUSPACKET_s*, float)",
-          "address": 2033632,
-          "offset": 1143664,
-          "size": 609,
-          "match_percent": 99.96032
-        },
-        {
-          "name": "_Z18GoldBrick_LSW_DrawP14STATUS_STAGE_sP14STATUSPACKET_si",
-          "demangled_name": "GoldBrick_LSW_Draw(STATUS_STAGE_s*, STATUSPACKET_s*, int)",
-          "address": 2035824,
-          "offset": 1145856,
-          "size": 1047,
-          "match_percent": 92.676926
         },
         {
           "name": "_ZL32CutScene_CreateCharacterInstanceP12NUGCUTCHAR_sP16instNUGCUTCHAR_sP9variptr_u",
@@ -59639,70 +59519,6 @@
           "match_percent": 99.35294
         },
         {
-          "name": "_Z20AllMiniKits_LSW_SkipP14STATUS_STAGE_sP14STATUSPACKET_s",
-          "demangled_name": "AllMiniKits_LSW_Skip(STATUS_STAGE_s*, STATUSPACKET_s*)",
-          "address": 2020352,
-          "offset": 1130384,
-          "size": 34,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z16MiniKit_LSW_SkipP14STATUS_STAGE_sP14STATUSPACKET_s",
-          "demangled_name": "MiniKit_LSW_Skip(STATUS_STAGE_s*, STATUSPACKET_s*)",
-          "address": 2022000,
-          "offset": 1132032,
-          "size": 141,
-          "match_percent": 90.44118
-        },
-        {
-          "name": "_Z18MiniKit_LSW_UpdateP14STATUS_STAGE_sP14STATUSPACKET_sf",
-          "demangled_name": "MiniKit_LSW_Update(STATUS_STAGE_s*, STATUSPACKET_s*, float)",
-          "address": 2025648,
-          "offset": 1135680,
-          "size": 1130,
-          "match_percent": 86.88841
-        },
-        {
-          "name": "_Z22AllMiniKits_LSW_UpdateP14STATUS_STAGE_sP14STATUSPACKET_sf",
-          "demangled_name": "AllMiniKits_LSW_Update(STATUS_STAGE_s*, STATUSPACKET_s*, float)",
-          "address": 2028512,
-          "offset": 1138544,
-          "size": 231,
-          "match_percent": 99.92727
-        },
-        {
-          "name": "_Z20AllMiniKits_LSW_DrawP14STATUS_STAGE_sP14STATUSPACKET_si",
-          "demangled_name": "AllMiniKits_LSW_Draw(STATUS_STAGE_s*, STATUSPACKET_s*, int)",
-          "address": 2046832,
-          "offset": 1156864,
-          "size": 1467,
-          "match_percent": 80.607635
-        },
-        {
-          "name": "_Z16MiniKit_LSW_DrawP14STATUS_STAGE_sP14STATUSPACKET_si",
-          "demangled_name": "MiniKit_LSW_Draw(STATUS_STAGE_s*, STATUSPACKET_s*, int)",
-          "address": 2048304,
-          "offset": 1158336,
-          "size": 2863,
-          "match_percent": 66.31424
-        },
-        {
-          "name": "_Z17UpdateNewMiniKitsP14STATUSPACKET_sP14STATUS_STAGE_s",
-          "demangled_name": "UpdateNewMiniKits(STATUSPACKET_s*, STATUS_STAGE_s*)",
-          "address": 2436144,
-          "offset": 1546176,
-          "size": 158,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z21AddStatusMiniKitPartsv",
-          "demangled_name": "AddStatusMiniKitParts()",
-          "address": 2439264,
-          "offset": 1549296,
-          "size": 2855,
-          "match_percent": 82.01473
-        },
-        {
           "name": "_Z13MiniKits_InitP9variptr_uS0_",
           "demangled_name": "MiniKits_Init(variptr_u*, variptr_u*)",
           "address": 4806128,
@@ -59764,7 +59580,7 @@
           "address": 4811056,
           "offset": 3921088,
           "size": 316,
-          "match_percent": 100.0
+          "match_percent": 99.77273
         }
       ]
     },
@@ -66487,6 +66303,30 @@
           "match_percent": 100.0
         },
         {
+          "name": "_Z22FinishStatusPacket_LSWP11WORLDINFO_sP14STATUSPACKET_si",
+          "demangled_name": "FinishStatusPacket_LSW(WORLDINFO_s*, STATUSPACKET_s*, int)",
+          "address": 2019824,
+          "offset": 1129856,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z16DrawStatusBG_LSWP14STATUSPACKET_s",
+          "demangled_name": "DrawStatusBG_LSW(STATUSPACKET_s*)",
+          "address": 2019840,
+          "offset": 1129872,
+          "size": 39,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z25CollectCharactersOff_SkipP14STATUS_STAGE_sP14STATUSPACKET_s",
+          "demangled_name": "CollectCharactersOff_Skip(STATUS_STAGE_s*, STATUSPACKET_s*)",
+          "address": 2019888,
+          "offset": 1129920,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
           "name": "_Z18BonusTime_LSW_SkipP14STATUS_STAGE_sP14STATUSPACKET_s",
           "demangled_name": "BonusTime_LSW_Skip(STATUS_STAGE_s*, STATUSPACKET_s*)",
           "address": 2019904,
@@ -66543,10 +66383,34 @@
           "match_percent": 100.0
         },
         {
+          "name": "_Z22LevelComplete_LSW_SkipP14STATUS_STAGE_sP14STATUSPACKET_s",
+          "demangled_name": "LevelComplete_LSW_Skip(STATUS_STAGE_s*, STATUSPACKET_s*)",
+          "address": 2020112,
+          "offset": 1130144,
+          "size": 118,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z18GoldBrick_LSW_SkipP14STATUS_STAGE_sP14STATUSPACKET_s",
+          "demangled_name": "GoldBrick_LSW_Skip(STATUS_STAGE_s*, STATUSPACKET_s*)",
+          "address": 2020240,
+          "offset": 1130272,
+          "size": 49,
+          "match_percent": 100.0
+        },
+        {
           "name": "_Z17RedBrick_LSW_SkipP14STATUS_STAGE_sP14STATUSPACKET_s",
           "demangled_name": "RedBrick_LSW_Skip(STATUS_STAGE_s*, STATUSPACKET_s*)",
           "address": 2020304,
           "offset": 1130336,
+          "size": 34,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z20AllMiniKits_LSW_SkipP14STATUS_STAGE_sP14STATUSPACKET_s",
+          "demangled_name": "AllMiniKits_LSW_Skip(STATUS_STAGE_s*, STATUSPACKET_s*)",
+          "address": 2020352,
+          "offset": 1130384,
           "size": 34,
           "match_percent": 100.0
         },
@@ -66583,12 +66447,84 @@
           "match_percent": 100.0
         },
         {
+          "name": "_Z16MiniKit_LSW_SkipP14STATUS_STAGE_sP14STATUSPACKET_s",
+          "demangled_name": "MiniKit_LSW_Skip(STATUS_STAGE_s*, STATUSPACKET_s*)",
+          "address": 2022000,
+          "offset": 1132032,
+          "size": 141,
+          "match_percent": 90.44118
+        },
+        {
           "name": "_Z19TrueHero_LSW_UpdateP14STATUS_STAGE_sP14STATUSPACKET_sf",
           "demangled_name": "TrueHero_LSW_Update(STATUS_STAGE_s*, STATUSPACKET_s*, float)",
           "address": 2022144,
           "offset": 1132176,
           "size": 570,
           "match_percent": 99.88393
+        },
+        {
+          "name": "_Z25CollectCharactersOff_DrawP14STATUS_STAGE_sP14STATUSPACKET_si",
+          "demangled_name": "CollectCharactersOff_Draw(STATUS_STAGE_s*, STATUSPACKET_s*, int)",
+          "address": 2022720,
+          "offset": 1132752,
+          "size": 218,
+          "match_percent": 99.962265
+        },
+        {
+          "name": "_Z21CollectCharcters_DrawP14STATUS_STAGE_sP14STATUSPACKET_si",
+          "demangled_name": "CollectCharcters_Draw(STATUS_STAGE_s*, STATUSPACKET_s*, int)",
+          "address": 2022944,
+          "offset": 1132976,
+          "size": 1409,
+          "match_percent": 86.70144
+        },
+        {
+          "name": "_Z21CollectCharcters_SkipP14STATUS_STAGE_sP14STATUSPACKET_s",
+          "demangled_name": "CollectCharcters_Skip(STATUS_STAGE_s*, STATUSPACKET_s*)",
+          "address": 2024368,
+          "offset": 1134400,
+          "size": 131,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z20GoldBrick_LSW_UpdateP14STATUS_STAGE_sP14STATUSPACKET_sf",
+          "demangled_name": "GoldBrick_LSW_Update(STATUS_STAGE_s*, STATUSPACKET_s*, float)",
+          "address": 2024512,
+          "offset": 1134544,
+          "size": 1134,
+          "match_percent": 94.14978
+        },
+        {
+          "name": "_Z18MiniKit_LSW_UpdateP14STATUS_STAGE_sP14STATUSPACKET_sf",
+          "demangled_name": "MiniKit_LSW_Update(STATUS_STAGE_s*, STATUSPACKET_s*, float)",
+          "address": 2025648,
+          "offset": 1135680,
+          "size": 1130,
+          "match_percent": 86.88841
+        },
+        {
+          "name": "_Z15Fade_LSW_UpdateP14STATUS_STAGE_sP14STATUSPACKET_sf",
+          "demangled_name": "Fade_LSW_Update(STATUS_STAGE_s*, STATUSPACKET_s*, float)",
+          "address": 2026784,
+          "offset": 1136816,
+          "size": 230,
+          "match_percent": 99.98485
+        },
+        {
+          "name": "_Z15Exit_LSW_UpdateP14STATUS_STAGE_sP14STATUSPACKET_sf",
+          "demangled_name": "Exit_LSW_Update(STATUS_STAGE_s*, STATUSPACKET_s*, float)",
+          "address": 2027024,
+          "offset": 1137056,
+          "size": 153,
+          "match_percent": 99.61539
+        },
+        {
+          "name": "_Z27CollectCharactersOff_UpdateP14STATUS_STAGE_sP14STATUSPACKET_sf",
+          "demangled_name": "CollectCharactersOff_Update(STATUS_STAGE_s*, STATUSPACKET_s*, float)",
+          "address": 2027184,
+          "offset": 1137216,
+          "size": 101,
+          "match_percent": 100.0
         },
         {
           "name": "_Z15Save_LSW_UpdateP14STATUS_STAGE_sP14STATUSPACKET_sf",
@@ -66621,6 +66557,14 @@
           "offset": 1138352,
           "size": 185,
           "match_percent": 99.95349
+        },
+        {
+          "name": "_Z22AllMiniKits_LSW_UpdateP14STATUS_STAGE_sP14STATUSPACKET_sf",
+          "demangled_name": "AllMiniKits_LSW_Update(STATUS_STAGE_s*, STATUSPACKET_s*, float)",
+          "address": 2028512,
+          "offset": 1138544,
+          "size": 231,
+          "match_percent": 99.92727
         },
         {
           "name": "_Z24SuperStoryScore_LSW_DrawP14STATUS_STAGE_sP14STATUSPACKET_si.part.8",
@@ -66695,6 +66639,22 @@
           "match_percent": 98.95082
         },
         {
+          "name": "_Z24LevelComplete_LSW_UpdateP14STATUS_STAGE_sP14STATUSPACKET_sf",
+          "demangled_name": "LevelComplete_LSW_Update(STATUS_STAGE_s*, STATUSPACKET_s*, float)",
+          "address": 2033632,
+          "offset": 1143664,
+          "size": 609,
+          "match_percent": 99.96032
+        },
+        {
+          "name": "_Z23CollectCharcters_UpdateP14STATUS_STAGE_sP14STATUSPACKET_sf",
+          "demangled_name": "CollectCharcters_Update(STATUS_STAGE_s*, STATUSPACKET_s*, float)",
+          "address": 2034256,
+          "offset": 1144288,
+          "size": 321,
+          "match_percent": 99.97059
+        },
+        {
           "name": "_Z15Prompt_LSW_DrawP14STATUS_STAGE_sP14STATUSPACKET_si",
           "demangled_name": "Prompt_LSW_Draw(STATUS_STAGE_s*, STATUSPACKET_s*, int)",
           "address": 2034592,
@@ -66711,12 +66671,20 @@
           "match_percent": 26.28866
         },
         {
+          "name": "_Z18GoldBrick_LSW_DrawP14STATUS_STAGE_sP14STATUSPACKET_si",
+          "demangled_name": "GoldBrick_LSW_Draw(STATUS_STAGE_s*, STATUSPACKET_s*, int)",
+          "address": 2035824,
+          "offset": 1145856,
+          "size": 1047,
+          "match_percent": 90.45641
+        },
+        {
           "name": "_Z17RedBrick_LSW_DrawP14STATUS_STAGE_sP14STATUSPACKET_si",
           "demangled_name": "RedBrick_LSW_Draw(STATUS_STAGE_s*, STATUSPACKET_s*, int)",
           "address": 2036880,
           "offset": 1146912,
           "size": 745,
-          "match_percent": 87.02857
+          "match_percent": 90.3
         },
         {
           "name": "_Z17TrueHero_LSW_DrawP14STATUS_STAGE_sP14STATUSPACKET_si",
@@ -66775,140 +66743,28 @@
           "match_percent": 64.525
         },
         {
+          "name": "_Z20AllMiniKits_LSW_DrawP14STATUS_STAGE_sP14STATUSPACKET_si",
+          "demangled_name": "AllMiniKits_LSW_Draw(STATUS_STAGE_s*, STATUSPACKET_s*, int)",
+          "address": 2046832,
+          "offset": 1156864,
+          "size": 1467,
+          "match_percent": 80.50347
+        },
+        {
+          "name": "_Z16MiniKit_LSW_DrawP14STATUS_STAGE_sP14STATUSPACKET_si",
+          "demangled_name": "MiniKit_LSW_Draw(STATUS_STAGE_s*, STATUSPACKET_s*, int)",
+          "address": 2048304,
+          "offset": 1158336,
+          "size": 2863,
+          "match_percent": 66.31424
+        },
+        {
           "name": "_Z24LSW_registerStatusScreenv",
           "demangled_name": "LSW_registerStatusScreen()",
           "address": 2051168,
           "offset": 1161200,
           "size": 110,
           "match_percent": 80.291664
-        },
-        {
-          "name": "_Z16SetDrawGoldBrickP14STATUSPACKET_si",
-          "demangled_name": "SetDrawGoldBrick(STATUSPACKET_s*, int)",
-          "address": 2425536,
-          "offset": 1535568,
-          "size": 54,
-          "match_percent": 99.818184
-        },
-        {
-          "name": "_Z15FindStatusStagei",
-          "demangled_name": "FindStatusStage(int)",
-          "address": 2427808,
-          "offset": 1537840,
-          "size": 70,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z17StatusStage_ResetP14STATUS_STAGE_s",
-          "demangled_name": "StatusStage_Reset(STATUS_STAGE_s*)",
-          "address": 2427888,
-          "offset": 1537920,
-          "size": 36,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z19NewStatusRumbleBuzziffi",
-          "demangled_name": "NewStatusRumbleBuzz(int, float, float, int)",
-          "address": 2427936,
-          "offset": 1537968,
-          "size": 359,
-          "match_percent": 56.490196
-        },
-        {
-          "name": "_Z15NextStatusStageP14STATUSPACKET_s",
-          "demangled_name": "NextStatusStage(STATUSPACKET_s*)",
-          "address": 2428304,
-          "offset": 1538336,
-          "size": 451,
-          "match_percent": 88.69524
-        },
-        {
-          "name": "_Z19AddGoldBrickMessageP14STATUSPACKET_ss",
-          "demangled_name": "AddGoldBrickMessage(STATUSPACKET_s*, short)",
-          "address": 2428768,
-          "offset": 1538800,
-          "size": 68,
-          "match_percent": 99.882355
-        },
-        {
-          "name": "_Z14AddStatusStageP14STATUSPACKET_sii",
-          "demangled_name": "AddStatusStage(STATUSPACKET_s*, int, int)",
-          "address": 2428848,
-          "offset": 1538880,
-          "size": 48,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z17StatusPacketResetP14STATUSPACKET_s",
-          "demangled_name": "StatusPacketReset(STATUSPACKET_s*)",
-          "address": 2429248,
-          "offset": 1539280,
-          "size": 224,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z16InitStatusScreenP11WORLDINFO_s",
-          "demangled_name": "InitStatusScreen(WORLDINFO_s*)",
-          "address": 2429472,
-          "offset": 1539504,
-          "size": 6315,
-          "match_percent": 69.121475
-        },
-        {
-          "name": "_Z16StatusIconsOnOfff",
-          "demangled_name": "StatusIconsOnOff(float)",
-          "address": 2436048,
-          "offset": 1546080,
-          "size": 92,
-          "match_percent": 99.95
-        },
-        {
-          "name": "_Z21Status_DrawPromptMenuP14STATUSPACKET_sif",
-          "demangled_name": "Status_DrawPromptMenu(STATUSPACKET_s*, int, float)",
-          "address": 2442128,
-          "offset": 1552160,
-          "size": 1885,
-          "match_percent": 66.319305
-        },
-        {
-          "name": "_Z16DrawStatusScreenP11WORLDINFO_s",
-          "demangled_name": "DrawStatusScreen(WORLDINFO_s*)",
-          "address": 2444672,
-          "offset": 1554704,
-          "size": 2554,
-          "match_percent": 75.08247
-        },
-        {
-          "name": "_Z18FinishStatusPacketi",
-          "demangled_name": "FinishStatusPacket(int)",
-          "address": 2447232,
-          "offset": 1557264,
-          "size": 732,
-          "match_percent": 98.0814
-        },
-        {
-          "name": "_Z18UpdateStatusScreenP11WORLDINFO_s",
-          "demangled_name": "UpdateStatusScreen(WORLDINFO_s*)",
-          "address": 2447968,
-          "offset": 1558000,
-          "size": 879,
-          "match_percent": 68.88776
-        },
-        {
-          "name": "_Z18UpdateAchievementsP14STATUSPACKET_s",
-          "demangled_name": "UpdateAchievements(STATUSPACKET_s*)",
-          "address": 2448848,
-          "offset": 1558880,
-          "size": 9,
-          "match_percent": 82.22222
-        },
-        {
-          "name": "_Z20RegisterStatusScreenP14STATUS_STAGE_sPiP22REGISTERSTATUSPACKET_s",
-          "demangled_name": "RegisterStatusScreen(STATUS_STAGE_s*, int*, REGISTERSTATUSPACKET_s*)",
-          "address": 2448864,
-          "offset": 1558896,
-          "size": 67,
-          "match_percent": 100.0
         }
       ]
     },
@@ -68347,6 +68203,206 @@
           "offset": 11184,
           "size": 93,
           "match_percent": 99.35294
+        },
+        {
+          "name": "_Z16SetDrawGoldBrickP14STATUSPACKET_si",
+          "demangled_name": "SetDrawGoldBrick(STATUSPACKET_s*, int)",
+          "address": 2425536,
+          "offset": 1535568,
+          "size": 54,
+          "match_percent": 99.818184
+        },
+        {
+          "name": "_Z14DrawStatusTextPctfffji",
+          "demangled_name": "DrawStatusText(char*, unsigned short, float, float, float, unsigned int, int)",
+          "address": 2425600,
+          "offset": 1535632,
+          "size": 721,
+          "match_percent": 99.95
+        },
+        {
+          "name": "_Z22DrawStatusTextFractioniifftfjff",
+          "demangled_name": "DrawStatusTextFraction(int, int, float, float, unsigned short, float, unsigned int, float, float)",
+          "address": 2426336,
+          "offset": 1536368,
+          "size": 1463,
+          "match_percent": 99.92405
+        },
+        {
+          "name": "_Z15FindStatusStagei",
+          "demangled_name": "FindStatusStage(int)",
+          "address": 2427808,
+          "offset": 1537840,
+          "size": 70,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z17StatusStage_ResetP14STATUS_STAGE_s",
+          "demangled_name": "StatusStage_Reset(STATUS_STAGE_s*)",
+          "address": 2427888,
+          "offset": 1537920,
+          "size": 36,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z19NewStatusRumbleBuzziffi",
+          "demangled_name": "NewStatusRumbleBuzz(int, float, float, int)",
+          "address": 2427936,
+          "offset": 1537968,
+          "size": 359,
+          "match_percent": 56.490196
+        },
+        {
+          "name": "_Z15NextStatusStageP14STATUSPACKET_s",
+          "demangled_name": "NextStatusStage(STATUSPACKET_s*)",
+          "address": 2428304,
+          "offset": 1538336,
+          "size": 451,
+          "match_percent": 88.69524
+        },
+        {
+          "name": "_Z19AddGoldBrickMessageP14STATUSPACKET_ss",
+          "demangled_name": "AddGoldBrickMessage(STATUSPACKET_s*, short)",
+          "address": 2428768,
+          "offset": 1538800,
+          "size": 68,
+          "match_percent": 99.882355
+        },
+        {
+          "name": "_Z14AddStatusStageP14STATUSPACKET_sii",
+          "demangled_name": "AddStatusStage(STATUSPACKET_s*, int, int)",
+          "address": 2428848,
+          "offset": 1538880,
+          "size": 48,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z22newCharactersCollectedP14STATUSPACKET_s",
+          "demangled_name": "newCharactersCollected(STATUSPACKET_s*)",
+          "address": 2428896,
+          "offset": 1538928,
+          "size": 342,
+          "match_percent": 65.625
+        },
+        {
+          "name": "_Z17StatusPacketResetP14STATUSPACKET_s",
+          "demangled_name": "StatusPacketReset(STATUSPACKET_s*)",
+          "address": 2429248,
+          "offset": 1539280,
+          "size": 224,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z16InitStatusScreenP11WORLDINFO_s",
+          "demangled_name": "InitStatusScreen(WORLDINFO_s*)",
+          "address": 2429472,
+          "offset": 1539504,
+          "size": 6315,
+          "match_percent": 69.12509
+        },
+        {
+          "name": "_Z9EndOfDemoi",
+          "demangled_name": "EndOfDemo(int)",
+          "address": 2435792,
+          "offset": 1545824,
+          "size": 55,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z15DrawStatusIconsP14STATUSPACKET_sff",
+          "demangled_name": "DrawStatusIcons(STATUSPACKET_s*, float, float)",
+          "address": 2435856,
+          "offset": 1545888,
+          "size": 178,
+          "match_percent": 98.02702
+        },
+        {
+          "name": "_Z16StatusIconsOnOfff",
+          "demangled_name": "StatusIconsOnOff(float)",
+          "address": 2436048,
+          "offset": 1546080,
+          "size": 92,
+          "match_percent": 99.95
+        },
+        {
+          "name": "_Z17UpdateNewMiniKitsP14STATUSPACKET_sP14STATUS_STAGE_s",
+          "demangled_name": "UpdateNewMiniKits(STATUSPACKET_s*, STATUS_STAGE_s*)",
+          "address": 2436144,
+          "offset": 1546176,
+          "size": 158,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z17DrawStatusMiniKitfffffiP14STATUSPACKET_sf",
+          "demangled_name": "DrawStatusMiniKit(float, float, float, float, float, int, STATUSPACKET_s*, float)",
+          "address": 2436304,
+          "offset": 1546336,
+          "size": 2955,
+          "match_percent": 82.19339
+        },
+        {
+          "name": "_Z21AddStatusMiniKitPartsv",
+          "demangled_name": "AddStatusMiniKitParts()",
+          "address": 2439264,
+          "offset": 1549296,
+          "size": 2855,
+          "match_percent": 82.46409
+        },
+        {
+          "name": "_Z21Status_DrawPromptMenuP14STATUSPACKET_sif",
+          "demangled_name": "Status_DrawPromptMenu(STATUSPACKET_s*, int, float)",
+          "address": 2442128,
+          "offset": 1552160,
+          "size": 1885,
+          "match_percent": 66.319305
+        },
+        {
+          "name": "_Z13DrawBonusTimeP14STATUSPACKET_sfi",
+          "demangled_name": "DrawBonusTime(STATUSPACKET_s*, float, int)",
+          "address": 2444016,
+          "offset": 1554048,
+          "size": 656,
+          "match_percent": 93.87705
+        },
+        {
+          "name": "_Z16DrawStatusScreenP11WORLDINFO_s",
+          "demangled_name": "DrawStatusScreen(WORLDINFO_s*)",
+          "address": 2444672,
+          "offset": 1554704,
+          "size": 2554,
+          "match_percent": 75.46392
+        },
+        {
+          "name": "_Z18FinishStatusPacketi",
+          "demangled_name": "FinishStatusPacket(int)",
+          "address": 2447232,
+          "offset": 1557264,
+          "size": 732,
+          "match_percent": 98.0814
+        },
+        {
+          "name": "_Z18UpdateStatusScreenP11WORLDINFO_s",
+          "demangled_name": "UpdateStatusScreen(WORLDINFO_s*)",
+          "address": 2447968,
+          "offset": 1558000,
+          "size": 879,
+          "match_percent": 69.091835
+        },
+        {
+          "name": "_Z18UpdateAchievementsP14STATUSPACKET_s",
+          "demangled_name": "UpdateAchievements(STATUSPACKET_s*)",
+          "address": 2448848,
+          "offset": 1558880,
+          "size": 9,
+          "match_percent": 82.22222
+        },
+        {
+          "name": "_Z20RegisterStatusScreenP14STATUS_STAGE_sPiP22REGISTERSTATUSPACKET_s",
+          "demangled_name": "RegisterStatusScreen(STATUS_STAGE_s*, int*, REGISTERSTATUSPACKET_s*)",
+          "address": 2448864,
+          "offset": 1558896,
+          "size": 67,
+          "match_percent": 100.0
         },
         {
           "name": "DEVCDDVDROM_Interrogate",
@@ -78674,62 +78730,6 @@
           "offset": 243616,
           "size": 9,
           "match_percent": 100.0
-        },
-        {
-          "name": "_Z16DrawStatusBG_LSWP14STATUSPACKET_s",
-          "demangled_name": "DrawStatusBG_LSW(STATUSPACKET_s*)",
-          "address": 2019840,
-          "offset": 1129872,
-          "size": 39,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z23DrawGameMessage_TargetsP13GAMEMESSAGE_sP7nuvec_sf",
-          "demangled_name": "DrawGameMessage_Targets(GAMEMESSAGE_s*, nuvec_s*, float)",
-          "address": 2059936,
-          "offset": 1169968,
-          "size": 706,
-          "match_percent": 99.94118
-        },
-        {
-          "name": "_Z14DrawStatusTextPctfffji",
-          "demangled_name": "DrawStatusText(char*, unsigned short, float, float, float, unsigned int, int)",
-          "address": 2425600,
-          "offset": 1535632,
-          "size": 721,
-          "match_percent": 99.95
-        },
-        {
-          "name": "_Z22DrawStatusTextFractioniifftfjff",
-          "demangled_name": "DrawStatusTextFraction(int, int, float, float, unsigned short, float, unsigned int, float, float)",
-          "address": 2426336,
-          "offset": 1536368,
-          "size": 1463,
-          "match_percent": 99.8924
-        },
-        {
-          "name": "_Z15DrawStatusIconsP14STATUSPACKET_sff",
-          "demangled_name": "DrawStatusIcons(STATUSPACKET_s*, float, float)",
-          "address": 2435856,
-          "offset": 1545888,
-          "size": 178,
-          "match_percent": 98.02702
-        },
-        {
-          "name": "_Z17DrawStatusMiniKitfffffiP14STATUSPACKET_sf",
-          "demangled_name": "DrawStatusMiniKit(float, float, float, float, float, int, STATUSPACKET_s*, float)",
-          "address": 2436304,
-          "offset": 1546336,
-          "size": 2955,
-          "match_percent": 82.19339
-        },
-        {
-          "name": "_Z13DrawBonusTimeP14STATUSPACKET_sfi",
-          "demangled_name": "DrawBonusTime(STATUSPACKET_s*, float, int)",
-          "address": 2444016,
-          "offset": 1554048,
-          "size": 656,
-          "match_percent": 93.87705
         },
         {
           "name": "NuGScnUpdate",

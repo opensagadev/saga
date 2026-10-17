@@ -1,3 +1,6 @@
+// Original translation unit reconstructed from the reference address map.
+// Functions are defined in original address order.
+
 #include "decomp.h"
 #include "gameapi/edtools/edui.h"
 #include <stdio.h>
@@ -63,6 +66,27 @@ static i32 hub_mission;
 static f32 MissionIconScale[20];
 static f32 MissionIconTargetX[20];
 static f32 MissionIconX[20];
+
+void EndMissionsMenu();
+
+void MenuInitMissions(MENU_s *);
+
+void MenuDrawMissions(MENU_s *menu);
+
+void MenuUpdateEndMission(MENU_s *menu);
+
+void MenuDrawEndMission(MENU_s *);
+
+void InitMission(MISSIONSYS *ms, i32 idx);
+
+void MenuUpdateMissions(MENU_s *menu);
+
+void EndMission(MISSIONSYS *ms, i32 param1, i32 param2);
+
+void CheckMissionEnd(MISSIONSYS *ms);
+
+
+// ==== functions in original address order ====
 
 void EndMissionsMenu() {
     LevLock[3] = 1;
@@ -365,3 +389,4 @@ void CheckMissionEnd(MISSIONSYS *ms) {
         }
     }
 }
+

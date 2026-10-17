@@ -1,3 +1,6 @@
+// Original translation unit reconstructed from the reference address map.
+// Functions are defined in original address order.
+
 #include "decomp.h"
 #include "legoapi/misc/androidbatman.h"
 
@@ -47,6 +50,25 @@ i32 app_tbaiset;
 i32 app_tbdrawset;
 
 static u8 s_SystemPausedTracks[2];
+
+static void SystemDidBecomeActiveCallback(const NuPhoneOSMessageData *);
+
+static void SystemPauseCallback(const NuPhoneOSMessageData *);
+
+static void TouchCallback(const NuPhoneOSMessageData *message);
+
+i32 Text_ExpandButtonString(char *input, char *output);
+
+void GameFog_Set();
+
+void GamePad_InitButtons();
+
+extern "C" void NuIOS_FreeMemoryForSuspend(void);
+
+void InitOnce(i32 argc, char **param_2);
+
+
+// ==== functions in original address order ====
 
 static void SystemDidBecomeActiveCallback(const NuPhoneOSMessageData *) {
     if (s_SystemPausedTracks[0] != 0) {
@@ -162,6 +184,7 @@ void GamePad_InitButtons() {
     GAMEPAD_TOGGLERIGHT = 10;
 }
 
+extern "C" {
 extern "C" void NuIOS_FreeMemoryForSuspend(void) {
     const char *source_path = "i:/SagaTouch-Android_9176564/saga/androidbatman.cpp";
     BeginCriticalSectionGL(source_path, 270);
@@ -171,6 +194,8 @@ extern "C" void NuIOS_FreeMemoryForSuspend(void) {
     EndCriticalSectionGL(source_path, 279);
     NuThreadCriticalSectionBegin(g_performingBgProcWorkCritSec);
     NuThreadCriticalSectionBegin(g_writingSaveCriticalSection);
+}
+
 }
 
 void InitOnce(i32 argc, char **param_2) {
@@ -221,3 +246,4 @@ void InitOnce(i32 argc, char **param_2) {
     app_tbaiset = NuTimeBarCreateSet(0);
     app_tbdrawset = NuTimeBarCreateSet(0);
 }
+

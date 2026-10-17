@@ -1,3 +1,6 @@
+// Original translation unit reconstructed from the reference address map.
+// Functions are defined in original address order.
+
 #include "legoapi/items/collect/torpedo.h"
 
 #include "decomp.h"
@@ -43,6 +46,71 @@
 #include <string.h>
 
 static TORPEDOPACKET TorpedoPackets[16];
+
+void InitTorpedoPackets();
+
+TORPEDOPACKET *GetTorpedoPacket(void);
+
+void FreeTorpedoPacket(TORPEDOPACKET_s **packet);
+
+void DropTorpedoPickups(TORPEDOPACKET_s *packet, i32 count);
+
+i32 getMaxTorpedos(GameObject_s *object);
+
+f32 TORPEDOGRABRANGE2 = 36.0f;
+f32 steal_torpedo_timer = 2.0f;
+f32 steal_torpedo_range = 2.0f;
+
+void Torpedo_UpdateJobbies(GameObject_s *object);
+
+void *FindNearestTorpTarget(WORLDINFO_s *world, NUVEC *position, f32 distance_squared, u8 *target_type);
+
+void TorpedoCode(GameObject_s *object, i32 fire, f32 fire_cooldown);
+
+void HomeNearestTorpTarget(BOLT_s *bolt, TORPEDOPACKET_s *packet);
+
+void Torpedo_InitRicochet(BOLT_s *bolt, nuvec_s *position);
+
+void Torpedo_Ricochet(BOLT_s *bolt, TORPEDOPACKET_s *packet);
+
+void TorpedoHitTarget(BOLT_s *bolt);
+
+void DrawTorpedoTargetSprite(void *, unsigned char, float);
+
+// DrawTorpedos expands the Y rotation with the stored 32-bit angle; the trig
+// table index is taken from the untruncated value.
+static inline void Torpedo_RotateY(NUMTX *m, i32 a) {
+    f32 cosx = NU_COS_LUT(a);
+    f32 sinx = NU_SIN_LUT(a);
+    f32 m00 = m->m00;
+    f32 m10 = m->m10;
+    f32 m20 = m->m20;
+    f32 m30 = m->m30;
+
+    m->m00 = m00 * cosx + m->m02 * sinx;
+    m->m02 = m->m02 * cosx - m00 * sinx;
+    m->m10 = m10 * cosx + m->m12 * sinx;
+    m->m12 = m->m12 * cosx - m10 * sinx;
+    m->m20 = m20 * cosx + m->m22 * sinx;
+    m->m22 = m->m22 * cosx - m20 * sinx;
+    m->m30 = m30 * cosx + m->m32 * sinx;
+    m->m32 = m->m32 * cosx - m30 * sinx;
+}
+
+void DrawTorpedos(GameObject_s *object);
+
+void Torpedo_InitBolt(BOLT_s *bolt);
+
+void Torpedo_UpdateBolt(BOLT_s *bolt);
+
+f32 Torpedo_Scale(BOLT_s *bolt);
+
+void Torpedo_EndBolt(BOLT_s *bolt);
+
+void Torpedo_Shoot(GameObject_s *object);
+
+
+// ==== functions in original address order ====
 
 void InitTorpedoPackets() {
     memset(TorpedoPackets, 0, sizeof(TorpedoPackets));
@@ -91,10 +159,6 @@ i32 getMaxTorpedos(GameObject_s *object) {
         return 5;
     return 3;
 }
-
-f32 TORPEDOGRABRANGE2 = 36.0f;
-f32 steal_torpedo_timer = 2.0f;
-f32 steal_torpedo_range = 2.0f;
 
 void Torpedo_UpdateJobbies(GameObject_s *object) {
     TORPEDOPACKET *packet = object->torpedo;
@@ -601,26 +665,6 @@ void TorpedoHitTarget(BOLT_s *bolt) {
 void DrawTorpedoTargetSprite(void *, unsigned char, float) {
 }
 
-// DrawTorpedos expands the Y rotation with the stored 32-bit angle; the trig
-// table index is taken from the untruncated value.
-static inline void Torpedo_RotateY(NUMTX *m, i32 a) {
-    f32 cosx = NU_COS_LUT(a);
-    f32 sinx = NU_SIN_LUT(a);
-    f32 m00 = m->m00;
-    f32 m10 = m->m10;
-    f32 m20 = m->m20;
-    f32 m30 = m->m30;
-
-    m->m00 = m00 * cosx + m->m02 * sinx;
-    m->m02 = m->m02 * cosx - m00 * sinx;
-    m->m10 = m10 * cosx + m->m12 * sinx;
-    m->m12 = m->m12 * cosx - m10 * sinx;
-    m->m20 = m20 * cosx + m->m22 * sinx;
-    m->m22 = m->m22 * cosx - m20 * sinx;
-    m->m30 = m30 * cosx + m->m32 * sinx;
-    m->m32 = m->m32 * cosx - m30 * sinx;
-}
-
 void DrawTorpedos(GameObject_s *object) {
     TORPEDOPACKET *packet = object->torpedo;
     if (packet == NULL)
@@ -756,3 +800,4 @@ void Torpedo_Shoot(GameObject_s *object) {
     }
     Hint_SetComplete(0x289);
 }
+

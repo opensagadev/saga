@@ -1,3 +1,6 @@
+// Original translation unit reconstructed from the reference address map.
+// Functions are defined in original address order.
+
 #include "decomp.h"
 #include "gameapi/ai/aisys/aisys.h"
 #include "globals.h"
@@ -71,23 +74,703 @@ enum STARWARS_AI_CAPABILITY : u32 {
 
 extern void SetSpecialMove(GameObject_s *, AIPATHNODE_s *, AIPATHNODE_s *, char);
 
-static i32 StarWars_PrepareTakeOverJump(AIPACKET_s *packet, APIOBJECT_s *object, i32) {
-    GameObject_s *owner = object->objptr;
-    i32 result = 0;
-    if ((owner->apiobj.character_data->game_character->flags_090 & 0x40) != 0) {
-        result = 1;
-        GameObject_s *participant = owner->field_0xcc0;
-        if (participant != NULL) {
-            AIPATHNODE *destination =
-                &packet->path_info.path
-                     ->nodes[packet->path_info.connection->node_indices[packet->path_info.direction == 0]];
-            ReleaseTakeOver(participant, 1);
-            StartBigJump(participant, &destination->position, 0, 0.5f, 1.0f, 0, 0);
-            SetSpecialMove(participant, destination, NULL, 3);
-        }
-    }
-    return result;
+static i32 StarWars_PrepareTakeOverJump(AIPACKET_s *packet, APIOBJECT_s *object, i32);
+
+static i32 StarWars_PrepareObstacle(AIPACKET_s *packet, APIOBJECT_s *object, i32);
+
+static __used__ i32 StarWars_PrepareHoverTube(AIPACKET_s *packet, APIOBJECT_s *apiobject, i32);
+
+extern "C" AIPATHNODE *AIPathFindNode(AISYS *, AIPATH *, char *);
+
+static i32 StarWars_PrepareBigJump(AIPACKET_s *packet, APIOBJECT_s *object, i32);
+
+extern void GameObjectSetCanUse(GameObject_s *, void *, u8, u8, f32);
+
+static i32 StarWars_PrepareHatch(AIPACKET_s *packet, APIOBJECT_s *object, i32);
+
+i32 StarWars_PrepareJump(AIPACKET_s *, APIOBJECT_s *, i32);
+i32 StarWars_PrepareR2D2Glide(AIPACKET_s *, APIOBJECT_s *, i32);
+
+struct STARWARS_PREPARE_SPECIAL_MOVE {
+    u32 capabilities;
+    PREPARINGSPECIALMOVEFN prepare;
+};
+DECOMP_ASSERT(sizeof(STARWARS_PREPARE_SPECIAL_MOVE) == 8, "special move preparation entry size");
+DECOMP_ASSERT(offsetof(STARWARS_PREPARE_SPECIAL_MOVE, prepare) == 4, "special move preparation callback offset");
+
+STARWARS_PREPARE_SPECIAL_MOVE starwars_prepareforspecialmove[] = {
+    {0x23, StarWars_PrepareJump},           {4, StarWars_PrepareR2D2Glide},
+    {0x18, StarWars_PrepareHatch},          {0x40, StarWars_PrepareHoverTube},
+    {0x1000, StarWars_PrepareBigJump},      {0x8000, StarWars_PrepareTakeOverJump},
+    {0x20000000, StarWars_PrepareObstacle}, {0, NULL},
+};
+
+static i32 StarWars_PreparingForSpecialMove(AIPACKET_s *packet, APIOBJECT_s *object, i32 checks);
+
+static i32 StarWars_MidSpecialMove_BigJump(AISYS_s *, AIPACKET_s *, APIOBJECT_s *object);
+
+static i32 StarWars_MidSpecialMove_UseHatch(AISYS_s *, AIPACKET_s *, APIOBJECT_s *object);
+
+static i32 StarWars_MidSpecialMove_StartJump(AISYS_s *, AIPACKET_s *, APIOBJECT_s *object);
+
+extern TERRSET *CurTerr;
+
+static i32 StarWars_MidSpecialMove_Default(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *object);
+
+MIDSPECIALMOVEFN starwars_midspecialmovefns[] = {
+    StarWars_MidSpecialMove_Default,
+    StarWars_MidSpecialMove_StartJump,
+    StarWars_MidSpecialMove_UseHatch,
+    StarWars_MidSpecialMove_BigJump,
+};
+
+static i32 StarWars_MidSpecialMove(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *object);
+
+f32 jump_stuck_time = 0.1f;
+
+i32 StarWars_PrepareJump(AIPACKET_s *packet, APIOBJECT_s *object, i32 checks);
+
+void StarWars_GameAISysInit();
+
+extern "C" i16 id_GEONOSIAN;
+
+i32 StarWars_PrepareR2D2Glide(AIPACKET_s *packet, APIOBJECT_s *object, i32);
+
+u32 StarWars_ParseAIPathCnxFlag(char *name);
+
+void StarWars_AutoSetAICapabilities(GameObject_s *object);
+
+// ==== src/legoapi/render/core/render.cpp: declarations ====
+#include "decomp.h"
+#include "gameapi/edtools/edbri_internal.h"
+#include "gameapi/edtools/edstubs.h"
+#include "legoapi/render/core/render.h"
+#include "legoapi/items/collect/torpedo.h"
+#include "legoapi/actions/character/transform.h"
+#include "legoapi/actions/movement/carrying.h"
+#include "legoapi/actions/character/snake.h"
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/gizmos/object/gizbuildits.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/gizmos/door/zipups.h"
+#include "legoapi/menus/core/text.h"
+#include "legoapi/menus/core/gamehint.h"
+#include "MechInputTouch/MechInputTouch_types.h"
+#include "gamelib/util/gamelib_util_types.h"
+#include "legoapi/menus/core/panel.h"
+#include "legoapi/menus/core/gamemessages.h"
+#include "legoapi/characters/core/players.h"
+#include "legoapi/menus/screens/gamemenuall.h"
+#include "legoapi/menus/screens/arcade.h"
+#include "legoapi/render/light/fade_material.h"
+#include "legoapi/render/fx/edsplines.h"
+#include "legoapi/render/fx.h"
+#include "legoapi/world/levels/levels.h"
+#include "legoapi/world/level.h"
+#include "legoapi/world/world.h"
+#include "nu2api/nu3d/numtl.h"
+#include "nu2api/nu3d/nurndrstat.h"
+#include "nu2api/nu3d/nuspecial.h"
+#include "nu2api/nuandroid/ios_graphics.h"
+#include "nu2api/nu3d/android/nuportal_android.h"
+#include "nu2api/nu3d/nuvport.h"
+#include "nu2api/nucore/nuvuvec.hpp"
+#include "legoapi/cutscenes/cutscenes.h"
+#include <stdio.h>
+#include <math.h>
+#include <string.h>
+
+void DrawSubItems();
+
+extern "C" void edbriStartAllPages(void);
+
+#include "nu2api/nu3d/nurndr.h"
+#include "nu2api/nu3d/nucamera.h"
+#include "nu2api/numath/nutrig.h"
+
+extern "C" void AiRndrLine3dDbg(f32, f32, f32, f32, f32, f32, u32);
+
+extern "C" void edDrawCross(NUVEC *centre, u8 red, u8 green, u8 blue);
+
+extern "C" void LocaledbitsDrawSolidEllipseXY(NUVEC *centre, f32 radius_x, f32 radius_z, i32 rotation, f32 lower_y,
+                                              f32 upper_y, u32 colour, i32, i32 segments);
+
+extern "C" void LocaledbitsDrawCircleXY(NUVEC *centre, f32 radius, u32 colour, i32, i32 segments);
+
+extern "C" void LocaledbitsDrawSolidCircleXY(NUVEC *centre, f32 radius, f32 lower_y, f32 upper_y, u32 colour, i32,
+                                             i32 segments);
+
+extern "C" void RndrOSquare(NUVEC *centre, f32 radius, i32 colour);
+
+extern "C" void RndrOSphere(NUVEC *centre, f32 radius, i32 colour, i32 segments, i32);
+
+extern "C" void RndrCircleXZ(NUVEC *centre, f32 radius, i32 colour, i32 segments);
+
+#include "gameapi/gui/apimenu.h"
+#include "gameframework/saveload.h"
+#include "legoapi/menus/core/text.h"
+#include "legoapi/characters/core/character.h"
+#include "legoapi/characters/core/players.h"
+#include "legoapi/characters/motion/gameanim.h"
+#include "legoapi/characters/motion/animlist.h"
+#include "legoapi/core/config/cheat.h"
+#include "legoapi/world/level.h"
+#include "legoapi/core/input/timer.h"
+#include "legoapi/gizmo/base/gizmo.h"
+#include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/items/base/collection.h"
+#include "legoapi/menus/screens/shop.h"
+#include "legoapi/world/area.h"
+#include "legoapi/world/levels/episode.h"
+#include "legoapi/world/mission.h"
+#include "legoapi/world/world_shared.h"
+#include "globals.h"
+#include "nu2api/nu3d/nutexanm.h"
+struct starfighter_s;
+struct rtl_s;
+struct rtlidata_s;
+
+#include "legoapi/render/core/SwipeDecalRenderer.h"
+#include "nu2api/nu3d/nuprim_internal.h"
+#include "nu2api/nu3d/nudlist.h"
+#include "nu2api/nu3d/nucamera.h"
+#include "nu2api/nu3d/nuqfnt.h"
+#include "nu2api/nu3d/nurndrstat.h"
+#include "nu2api/nu3d/nurndr.h"
+#include "nu2api/nu3d/nurndr.h"
+#include "nu2api/nu3d/nuvport.h"
+#include "nu2api/nu3d/NuRenderDevice.h"
+#include "nu2api/nu3d/nuspecial.h"
+#include "nu2api/nu3d/nutex.h"
+#include "nu2api/nu3d/numtl.h"
+#include "nu2api/nu3d/android/nurndr_android.h"
+#include "nu2api/nu3d/android/nugscn_android.h"
+#include "nu2api/nuandroid/ios_graphics.h"
+#include "nu2api/nucore/bgproc.h"
+#include "nu2api/nucore/nuapi.h"
+#include "nu2api/nucore/nuanim3.h"
+#include "nu2api/nucore/nugcutscene.h"
+#include "nu2api/nucore/nuhgobj.h"
+#include "nu2api/nucore/nuptrblock.h"
+#include "nu2api/nucore/nustring.h"
+#include "nu2api/nucore/nuthread.h"
+#include "nu2api/nufile/nufile.h"
+#include "nu2api/numath/numath.h"
+#include "nu2api/numath/numtx.h"
+#include "nu2api/numath/nufloat.h"
+#include "nu2api/numath/nutrig.h"
+#include "nu2api/numath/nuvec.h"
+
+#include <string.h>
+
+extern i32 VehicleArea;
+extern i32 GAMEDEMO;
+extern f32 FORCEGLOWTIME;
+extern i16 tHINTS;
+extern i16 tCHARACTERS;
+extern i16 tEXTRAS;
+extern i16 tGOLDBRICKS;
+extern i16 tSTORYCLIPS;
+extern i16 tENTERCODE;
+i32 AnakinGreenSabre(GameObject_s *object);
+i32 MatrixReflection(NUMTX *matrix, i32 axis, f32 plane, f32 height, NUMTX *result);
+
+extern f32 HUB_EPISODESUBTITLEY;
+extern f32 HUB_EPISODETITLEY;
+extern i32 draw_para;
+
+void DrawGameObjectsDraw(i32 pass);
+void EnableShadowMapRendering(i32 enable);
+void ResetShadowMapRendering();
+static void DrawParaphernalia(GameObject_s *object);
+
+struct GAMEMESSAGE_s;
+struct HINT_s;
+struct MENU_s;
+struct NuBloomParameters;
+struct STATUSPACKET_s;
+struct TouchHolder;
+struct _vum_s;
+struct _vuv_s;
+struct nuhspecial_s;
+struct ripple_node_s;
+struct ripple_set_s;
+struct VuVec;
+
+extern nuhspecial_s *(*GameMsg_GetExtraObjFn)(GAMEMESSAGE_s *);
+
+extern "C" i32 StateAnimEvaluate2(StateAnim *state, u8 *index, char *value, f32 frame);
+extern "C" i32 NuRndrBeginScene(i32);
+extern "C" void NuRndrEndScene(void);
+extern "C" void NuRndrGradRect2di(i32, i32, i32, i32, i32 *, numtl_s *);
+extern "C" void NuRndrRect2di(i32, i32, i32, i32, i32, numtl_s *);
+extern "C" void NuCameraUnlock(void);
+extern "C" void NuCameraRelock(void);
+extern char *apiGameName;
+extern char *apitxt_EMPTY;
+extern char *apitxt_PRESENT;
+extern char *apitxt_AUTOSAVE_WARNING;
+extern char *apitxt_LOADING;
+extern char *apitxt_SAVING;
+extern char *apitxt_NODATAAVAILABLE;
+extern char *apitxt_OK;
+extern char *apitxt_GAMELOADED;
+extern char *apitxt_GAMELOADING;
+extern char *apitxt_FAILEDTOLOAD;
+extern char *apitxt_CORRUPTLOAD;
+extern char *ASCII_DOWN;
+extern char *ASCII_UP;
+extern i16 tCURRENTGAME;
+extern i16 tEMPTY;
+extern i16 tGAME;
+extern i16 tNOSPACE;
+extern f32 MENUTEXTSCALE;
+extern f32 MENUBOTY;
+extern f32 AUTOSAVEICONY;
+extern f32 AUTOSAVEICONX;
+extern f32 AUTOSAVEICONSIZE;
+extern f32 MenuAlpha;
+extern i32 MenuA;
+extern f32 memcard_loadmessage_delay;
+extern f32 memcard_loadresult_delay;
+extern u8 MENUNORMALR;
+extern u8 MENUNORMALG;
+extern u8 MENUNORMALB;
+extern u8 MENUENTRYR, MENUENTRYG, MENUENTRYB;
+extern u8 MENUFLASH0R;
+extern u8 MENUFLASH0G;
+extern u8 MENUFLASH0B;
+extern u8 MENUFLASH1R;
+extern u8 MENUFLASH1G;
+extern u8 MENUFLASH1B;
+extern f32 menu_pulse;
+extern f32 menu_pulsate;
+extern i32 menu_flash;
+extern f32 text3d_height;
+extern f32 text3d_width;
+extern FadeSystem FadeSys;
+extern f32 cointotaltime;
+extern "C" f32 MainRenderTime;
+extern "C" i32 editor_active;
+extern i32 Paused;
+extern "C" i32 screendump;
+extern f32 pause_fade;
+extern "C" i32 PANELOFF;
+extern i32 noscenespecials;
+extern void RotateGameMatrix(numtx_s *matrix, i32 order, u16 x, u16 y, u16 z);
+extern void SetLevelLights(void *set, f32 scale);
+extern f32 ICONX;
+extern f32 ICONSIZE;
+extern f32 DROPINALPHA;
+extern f32 statstime;
+f32 GetAspectRatio();
+void Hint_Draw(i32 player_index);
+extern i32 CutScenePlayer_CanStart(i32 cutscene_id);
+
+// Camera zoom state
+extern f32 CameraZoom;
+
+// Graphics loading flags
+extern i32 RemoveDirectionalMaps;
+extern i32 RemoveNormalMaps;
+
+extern NUVIDEORESHEADER g_VideoResHeader;
+
+extern "C" {
+    i32 NuDisplayListRndrSpecial(nuhspecial_s *special, NUMTX *mtx, i32 skinned, NUMTX *skin_mtx,
+                                 DEFORMERWEIGHTSARRAY *blend_values);
+    void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 }
+
+void SetCameraZoom(f32 zoom);
+
+extern "C" void NuGScnUpdate(NUGSCN *gscn, f32 frame_delta);
+
+// --- NuGScn graphics-data reader ---
+// NuReadGraphicsData is a C++ static function in the original (GCC clones it,
+// hence the `.isra.NNN` suffix in the ROM symbol table).
+
+extern "C" void NuSevereWarning(const char *format, ...);
+
+// Retail only keeps the IPA-SRA clone, which drops the unused fourth argument.
+#if defined(__i386__)
+#define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone, regparm(2)))
+#else
+#define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone))
+#endif
+static NU_READ_GRAPHICS_DATA_ATTR NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIPTR *buf_end, char *path,
+                                                             char *scene_data)
+    __asm__("_ZL18NuReadGraphicsDataP9variptr_uS0_PcS1_S1_.isra.104");
+
+// --- Extern "C": NuGScn functions have C linkage in original ---
+extern "C" {
+NUGSCN *NuGScnReadForMultiRender(VARIPTR *buf, VARIPTR buf_end, char *path, i32 render_count);
+
+NUGSCN *NuGScnRead(VARIPTR *buf, VARIPTR buf_end, char *path);
+void NuGScnReadFromMemory(NUGSCN *scene);
+NUGSCN *NuGHGFixup(NUGSCN *scene, void *);
+nuhgobj_s *NuGHGRead(char *path, VARIPTR *buf, VARIPTR buf_end);
+} // extern "C"
+
+extern i32 solid_cable;
+extern i32 nsegments_drawn;
+extern f32 slack_factor;
+extern f32 cable_slack;
+extern f32 nsegments_per_unit;
+extern CABLE_s cables[8];
+extern f32 tow_length;
+extern NUMTL *SolidMtl3D;
+
+void DrawCables();
+
+void DrawRipple(ripple_node_s *node);
+
+void DrawAreaBox(nuvec_s *position, nuvec_s *size, i32 rotation, i32 colour);
+
+void DrawBox_Now(_vuv_s *, _vuv_s *, i32, i32);
+
+extern "C" {
+extern f32 aiEditor_DrawYOffset;
+extern f32 aiEditor_LocatorWidth;
+    void AiRndrLine3d(NURND_VERTEX3D *, NUMTL *, NUMTX *);
+}
+
+void DrawLocator(nuvec_s *position, float radius, i32 rotation, i32 colour);
+
+void Draw_LOADED();
+
+i32 Draw3DObject(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x_rotation, u16 y_rotation,
+                 u16 z_rotation, float scale_x, float scale_y, float scale_z, i32 rotate_order);
+
+void DrawCharIcon(i32 character_id, float x, float y, float z, float scale, i32 frame_object_id, float character_alpha,
+                  float frame_alpha, i32 draw_character, nuhspecial_s *override_special);
+
+extern const u8 HintRGB[5][3];
+
+void DrawLine_Now(_vuv_s *, _vuv_s *, i32, i32);
+
+void DrawParallax(nuhspecial_s *special);
+
+void DrawQuestion(nuvec_s *position, float scale_value, float y_push);
+
+void DrawRectRGBA(float x, float y, float width, float height, u32 colour, numtl_s *material, i32 alignment,
+                  float scale);
+
+void DrawItem(nuhspecial_s *special, nuvec_s *position, float scale_value, float unused, float y_push, u16 x_rot,
+              u16 y_rot, u16 z_rot);
+
+
+void Draw_LOADING();
+
+#include "nu2api/nu3d/nuprim.h"
+#include "nu2api/nu3d/nuprim_internal.h"
+#include "nu2api/nu3d/nupostparams.h"
+
+#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
+    do {                                                                                                               \
+        direction.x = (vx);                                                                                            \
+        direction.y = -(vy) * camera.aspect;                                                                           \
+        direction.z = adjacent;                                                                                        \
+        NuVecNorm(&direction, &direction);                                                                             \
+        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
+        NuVecNorm(&direction, &direction);                                                                             \
+        brightness = direction.y * 0.5f + 0.5f;                                                                        \
+        if (brightness <= near_angle)                                                                                  \
+            brightness = near_scale * parameters->intensity;                                                           \
+        else if (brightness >= far_angle)                                                                              \
+            brightness = far_scale * parameters->intensity;                                                            \
+        else                                                                                                           \
+            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
+        if (parameters->directional) {                                                                                 \
+            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
+            if (angle < parameters->direction_near_angle) {                                                            \
+                brightness += 128.0f * parameters->direction_far_scale;                                                \
+            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
+                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
+                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
+                                      parameters->direction_bias);                                                     \
+                brightness +=                                                                                          \
+                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
+                              parameters->direction_near_scale);                                                       \
+            }                                                                                                          \
+        }                                                                                                              \
+        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
+                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
+                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
+                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
+        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
+            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
+                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
+        else                                                                                                           \
+            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
+        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
+    } while (0)
+
+void DrawAlphaGrid(i32 rows, i32 cols, NuBloomParameters *parameters);
+
+void DrawArrow_Now(_vum_s *, float, i32, i32);
+
+extern i16 tNONEWBESTTIME, tNEWBESTTIME;
+void Text_MakeTime(f32, i32, i32, i32, char *);
+
+void DrawBonusTime(STATUSPACKET_s *packet, float position, i32 alpha);
+
+void DrawCross_Now(_vuv_s *, float, i32, i32);
+
+void DrawPauseFade();
+
+
+void DrawRippleSet(ripple_set_s *set);
+
+
+
+void ClearScreen();
+
+
+
+void DrawAlphaImage(i32 rows, i32 cols, numtl_s *material, i32 use_pixel_offsets, NuBloomParameters *parameters);
+
+void DrawBezierLine(VuVec &start, VuVec &start_control, VuVec &end, VuVec &end_control, numtl_s *material, i32 colour);
+
+void DrawBoxMtx_Now(_vum_s *, _vuv_s *, i32, i32);
+
+void *AddGameMessage(char *, NUVEC *, f32, NUVEC *, f32, u8, u8, u8, u32, f32);
+
+void DrawCutBorders(i32 widescreen);
+
+void DrawExplosions();
+
+void DrawItemMenu2D();
+
+void DrawStatusText(char *text, u16 angle, float x, float y, float scale, u32 colour, i32 alignment);
+
+i32 Draw3DObjectMtx(WORLDINFO_s *world, i32 object_index, numtx_s *mtx);
+
+void DrawGameObjects();
+
+extern nuhspecial_s green_light;
+extern nuhspecial_s painttargetcolour[3];
+extern nuhspecial_s paintlights[3];
+
+void DrawPaintLights();
+
+void DrawStatusIcons(STATUSPACKET_s *status, float y, float alpha);
+
+void DrawTouchPrompt(char *prompt, char *unused_label, bool hovered, bool large);
+
+void Draw_LOADFAILED();
+
+void DrawAreaCylinder(nuvec_s *centre, nuvec_s *size, i32 colour);
+
+void DrawCameraTarget(nuvec_s *);
+
+void DrawGameMessages();
+
+extern f32 KITPOSX;
+extern f32 KITPOSY;
+extern f32 KITPOS2X;
+extern f32 KITPOS2Y;
+extern f32 PANEL_MINIKITSCALE;
+extern f32 PANEL_REDBRICKSCALE;
+extern f32 PANEL_MINIKITY;
+extern f32 PANEL_MINIKITCOUNTSCALE;
+extern f32 PANEL_MINIKITCOUNTY;
+// DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
+// red-brick positions come from the Game init values in legogame/game.cpp.
+extern i32 DRAWBGLOAD;
+extern u16 PowerUp_PanelYRot[2];
+extern f32 PowerUp_PanelPosMul[2];
+extern f32 POWERUPOBJSIZE;
+extern f32 REDBRICKPOSX;
+extern f32 REDBRICKPOSY;
+extern f32 REDBRICKPOS2X;
+extern f32 REDBRICKPOS2Y;
+extern i32 Arcade_Points[2];
+extern f32 BOSSICONY;
+extern i32 FPSDISPLAY;
+extern i32 ShowPlayerCoordinate;
+extern i32 LEGOOBJ_CHARKIT;
+extern i32 LEGOOBJ_MINIKIT;
+i32 DrawPanel3DObjectNoAlpha(f32, f32, f32, f32, f32, f32, u16, u16, u16, nuhspecial_s *, i32);
+extern "C" void Text3D(char *, f32, f32, f32, f32, f32, f32, u32, u8, u8, u8);
+
+void DrawMiniKitCount(float position, float scale, i32 count, i32 maximum);
+
+void DrawStatusBG_LSW(STATUSPACKET_s *status);
+
+void Draw_LOADCORRUPT();
+
+i32 Draw3DObjectAlpha(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x_rotation, u16 y_rotation,
+                      u16 z_rotation, float scale_x, float scale_y, float scale_z, i32 rotate_order, float alpha);
+
+void DrawCameraTarget2(nuvec_s *);
+
+i32 DrawPanel3DObject(float x, float y, float z, float scale_x, float scale_y, float scale_z, u16 rotate_x,
+                      u16 rotate_y, u16 rotate_z, nuhspecial_s *special, i32 rotate_order, float alpha);
+
+extern STATUSMINIKITPART_s KitPart[10];
+extern i32 currentminikit;
+extern f32 slideseek;
+
+i32 DrawPanel3DObjectMtxNoAlpha(nuhspecial_s *special, numtx_s *matrix);
+void DrawStatusMiniKit(float x, float y, float z, float built_scale, float new_scale, i32 count, STATUSPACKET_s *packet,
+                       float slide);
+
+extern i16 tUNKNOWN, tPOWERBRICK, tLOCKED, tGOLDBRICK;
+extern "C" void PlaySfx(char *, NUVEC *);
+void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
+
+void DrawSubItemMenu2D();
+
+void DrawSubItemMenu3D();
+
+void Draw_NOMEMORYCARD();
+
+void DrawFadeScreenWipe();
+
+
+void DrawForceGlowSprite(nuvec_s *position, float radius, i32 model, float alpha, GameObject_s *);
+
+void DrawGameObjectsDraw(i32);
+
+void Draw_AUTOSAVECANCEL();
+
+void DrawPanel3DObjectMtx(nuhspecial_s *special, numtx_s *matrix, float alpha);
+
+void Draw_AUTOSAVEWARNING();
+
+void Draw_NODATAAVAILABLE();
+
+extern i32 dco_locatorposonly;
+extern i32 dco_id;
+extern i32 dco_reflectaxis;
+extern i32 dco_wearinghat;
+extern u16 dco_prerotatez;
+extern f32 dco_reflectcoord;
+extern GAMECHARACTERDATA_s * dco_gcdata;
+extern CHARACTERMODEL_s * dco_cmodel;
+extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
+void DrawObjectOnCharacter(WORLDINFO_s *world, GameObject_s *object, i32 object_id, nuhspecial_s *special, i32 locator,
+                           i32 second_locator, NUMTX *joints, i32 reflect, u32 layers, NUMTX *rotation,
+                           NUVEC *translation, f32 alpha, f32 scale);
+
+extern f32 DropInOutScale(GameObject_s *object);
+extern void ApplyExtraRotation(GameObject_s *object, NUMTX *matrix);
+extern AREADATA *DEATHSTARBATTLE2_ADATA;
+extern AREADATA *PODSPRINT_ADATA;
+extern "C" {
+    extern i16 id_ATST;
+    extern i16 id_ATST_LOWRES;
+    extern i16 id_ATAT;
+}
+extern u8 CharClipToBlobShadows;
+
+
+i32 DrawGameObjectsProcess();
+
+void DrawStatusTextFraction(i32 current, i32 total, float x, float y, u16 angle, float scale, u32 colour,
+                            float animation, float animation_duration);
+
+void DrawGameMessage_Targets(GAMEMESSAGE_s *message, nuvec_s *position, float scale);
+
+i32 DrawPanel3DObjectNoAlpha(float x, float y, float z, float scale_x, float scale_y, float scale_z, u16 rotate_x,
+                             u16 rotate_y, u16 rotate_z, nuhspecial_s *special, i32 rotate_order);
+
+i32 DrawPanel3DObjectMtxNoAlpha(nuhspecial_s *special, numtx_s *matrix);
+
+extern void DrawMenuEntry(MENU_s *, char *);
+void Draw_OK(MENU_s *menu);
+
+void DrawAABox(_vuv_s *position, _vuv_s *size, i32 colour);
+
+void DrawArrow(nuhspecial_s *special, float scale_value);
+
+void DrawCross(nuvec_s *centre, float radius, numtl_s *material, i32 colour);
+
+extern f32 SwipeDecalRenderer_MaxWidth;
+extern f32 SwipeDecalRenderer_MinWidth;
+
+
+#define SWIPE_PRIM_UV(U, V)                                                                                            \
+    do {                                                                                                               \
+        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
+        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
+            vertex->float_uv[0] = (U);                                                                                 \
+            vertex->float_uv[1] = (V);                                                                                 \
+        } else {                                                                                                       \
+            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
+            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
+        }                                                                                                              \
+    } while (false)
+
+
+
+
+extern i32 GetMenuID(void);
+static __used__ i32 PauseRenderOff();
+
+static __used__ i32 MatrixReflection_CanOverride();
+
+static void DrawWeapon_SetSabreObjects(GameObject_s *object, i32 red, i32 green, i32 blue, i32 purple, i32 *models,
+                                       i32 *hilt);
+
+static void DrawWeapons(GameObject_s *object, i32 reflection, f32 weapon_scale);
+
+static void DrawCharacterAttachments(GameObject_s *object, NUMTX *joint_matrices);
+
+void CharScene_Draw(WORLDINFO_s *, i32, NUMTX *, NUMTX *);
+void CharMiniKit_Draw(i32, NUMTX *, i32, f32, f32);
+void Customiser_DrawAccessories(CUSTOMISER *, GameObject_s *, NUMTX *);
+i32 Batarang_GetObjectFromCharID(i32);
+void Grapple_DrawLine(GameObject_s *);
+void Transform_DrawTarget(NUVEC *, f32, f32);
+extern i16 id_ANAKINJEDISCARRED, id_WEIRDO1, id_WEIRDO2, id_CATAPULT, id_CHEWBACCA, id_WOOKIEE, id_TWOFACE;
+extern i32 PickUpFlickerTest, PickUpFlickerFrames, PickupFlickerFrame;
+
+static void DrawParaphernalia(GameObject_s *object);
+
+#include "legoapi/legoapi_types.h"
+#include "nu2api/numath/numtx.h"
+#include "nu2api/nu3d/nurndr.h"
+
+extern i32 qrand(void);
+extern f32 SeekLinearF(f32, f32, f32);
+
+
+
+
+extern f32 backdrop_top_r;
+extern f32 backdrop_top_g;
+extern f32 backdrop_top_b;
+extern f32 backdrop_bot_r;
+extern f32 backdrop_bot_g;
+extern f32 backdrop_bot_b;
+
+
+extern i32 backdrop_black;
+
+extern void (*BackDrop_AlphaFn)(float *);
+
+static __used__ void BackDrop_Alpha(float *alpha);
+
+void BackDrop_Init(char *path, variptr_u *buf, variptr_u *buf_end);
+
+void BackDrop_Dump();
+
+void BackDrop_Update(float dt);
+
+void BackDrop_ResetColours();
+
+void BackDrop_UpdateColours(i32 instant);
+
+void BackDrop_Draw(float alpha, i32 flags);
+
+extern "C" {
+    extern nurenderscene_s currentScene;
+void DisplaySceneRndrSpecials(NUDLDLISTSCENE *scene, i32, void *visibility_context);
+}
+
+// ==== functions in original address order ====
 
 static i32 StarWars_PrepareObstacle(AIPACKET_s *packet, APIOBJECT_s *object, i32) {
     i32 near_index = packet->path_info.dist > 0.5f;
@@ -142,6 +825,111 @@ static i32 StarWars_PrepareObstacle(AIPACKET_s *packet, APIOBJECT_s *object, i32
     return 1;
 }
 
+static i32 StarWars_MidSpecialMove_StartJump(AISYS_s *, AIPACKET_s *, APIOBJECT_s *object) {
+    GameObject_s *owner = object->objptr;
+    if (owner->character_context == 0) {
+        SetSpecialMove(owner, owner->ai.special_move_node, NULL, 0);
+        owner->ai.movement_destination = owner->ai.special_move_node->position;
+        owner->ai.movement_stopping_distance = 0.0f;
+    } else {
+        owner->pad_gamepad->buttons_pressed |= GAMEPAD_JUMP;
+        object->collision_priority |= 0x4000;
+    }
+    return 1;
+}
+
+static i32 StarWars_PrepareTakeOverJump(AIPACKET_s *packet, APIOBJECT_s *object, i32) {
+    GameObject_s *owner = object->objptr;
+    i32 result = 0;
+    if ((owner->apiobj.character_data->game_character->flags_090 & 0x40) != 0) {
+        result = 1;
+        GameObject_s *participant = owner->field_0xcc0;
+        if (participant != NULL) {
+            AIPATHNODE *destination =
+                &packet->path_info.path
+                     ->nodes[packet->path_info.connection->node_indices[packet->path_info.direction == 0]];
+            ReleaseTakeOver(participant, 1);
+            StartBigJump(participant, &destination->position, 0, 0.5f, 1.0f, 0, 0);
+            SetSpecialMove(participant, destination, NULL, 3);
+        }
+    }
+    return result;
+}
+
+i32 StarWars_PrepareR2D2Glide(AIPACKET_s *packet, APIOBJECT_s *object, i32) {
+    GameObject_s *owner = object->objptr;
+    AIPATHNODE *nodes = packet->path_info.path->nodes;
+    AIPATHCNX *connection = packet->path_info.connection;
+    AIPATHNODE *destination = &nodes[connection->node_indices[packet->path_info.direction == 0]];
+    AIPATHNODE *source = &nodes[connection->node_indices[packet->path_info.direction]];
+    NUVEC offset;
+    if ((connection->traversal_flags[packet->path_info.direction] & 0x800) != 0) {
+        offset.z = destination->position.z - source->position.z;
+        offset.y = 0.0f;
+        offset.x = destination->position.x - source->position.x;
+        f32 radius = source->radius - packet->mover_height;
+        if (radius < 0.0f) {
+            radius = 0.0f;
+        }
+        NuVecScale(&offset, &offset, radius / connection->horizontal_distance);
+        NuVecAdd(&packet->movement_destination, &source->position, &offset);
+        packet->runtime_flags |= 0x80;
+        packet->movement_stopping_distance = 0.0f;
+        object->collision_priority |= 0x2000;
+        return 1;
+    }
+    if (!(packet->terrain_origin.y >= destination->min_height)) {
+        return 0;
+    }
+    if (!(NuVecXZDistSqr(&object->position, &destination->position, &offset) >= destination->radius_squared)) {
+        return 0;
+    }
+    if (TryToTeleportToNextNode(owner, destination, 0) != 0) {
+        return 0;
+    }
+    packet->path_connection_state = 0;
+    SetSpecialMove(owner, destination, source, 0);
+    owner->pad_gamepad->buttons_held |= GAMEPAD_JUMP;
+    if (owner->id != id_GEONOSIAN || owner->field_0xe31 == 3 || owner->field_0xe31 == 0) {
+        owner->pad_gamepad->buttons_pressed |= GAMEPAD_JUMP;
+    }
+    packet->movement_stopping_distance = 0.0f;
+    packet->movement_destination = packet->special_move_node->position;
+    object->collision_priority |= 0x2000;
+    return 1;
+}
+
+static i32 StarWars_PrepareBigJump(AIPACKET_s *packet, APIOBJECT_s *object, i32) {
+    GameObject_s *owner = object->objptr;
+    AIPATHNODE *nodes = packet->path_info.path->nodes;
+    i32 source_index = packet->path_info.connection->node_indices[packet->path_info.direction];
+    i32 destination_index = packet->path_info.connection->node_indices[packet->path_info.direction == 0];
+    if (owner->ai.inside_path_node == destination_index || owner->character_context == 0x2b) {
+        return 0;
+    }
+    if ((packet->path_info.connection->traversal_flags[packet->path_info.direction] & 0x800) != 0) {
+        packet->movement_destination = nodes[source_index].position;
+        packet->runtime_flags |= 0x80;
+        packet->movement_stopping_distance = 0.0f;
+        object->collision_priority |= 0x2000;
+        return 1;
+    }
+    AIPATHNODE *destination = &nodes[destination_index];
+    if (TryToTeleportToNextNode(owner, destination, 0) != 0) {
+        return 1;
+    }
+    if (WORLD->current_level == TEMPLEB_LDATA && destination->name != NULL &&
+        NuStrICmp(destination->name, "stairs_top") == 0) {
+        AIPATHNODE *alternate = AIPathFindNode(WORLD->ai_sys, NULL, "stairs_top2");
+        if (alternate != NULL) {
+            destination = alternate;
+        }
+    }
+    StartBigJump(owner, &destination->position, 0, 0.5f, 1.0f, 0, 0);
+    SetSpecialMove(owner, destination, NULL, 3);
+    return 0;
+}
+
 static __used__ i32 StarWars_PrepareHoverTube(AIPACKET_s *packet, APIOBJECT_s *apiobject, i32) {
     GameObject_s *object = apiobject->objptr;
     AIPATH_s *path = packet->path_info.path;
@@ -187,41 +975,6 @@ static __used__ i32 StarWars_PrepareHoverTube(AIPACKET_s *packet, APIOBJECT_s *a
     return 1;
 }
 
-extern "C" AIPATHNODE *AIPathFindNode(AISYS *, AIPATH *, char *);
-
-static i32 StarWars_PrepareBigJump(AIPACKET_s *packet, APIOBJECT_s *object, i32) {
-    GameObject_s *owner = object->objptr;
-    AIPATHNODE *nodes = packet->path_info.path->nodes;
-    i32 source_index = packet->path_info.connection->node_indices[packet->path_info.direction];
-    i32 destination_index = packet->path_info.connection->node_indices[packet->path_info.direction == 0];
-    if (owner->ai.inside_path_node == destination_index || owner->character_context == 0x2b) {
-        return 0;
-    }
-    if ((packet->path_info.connection->traversal_flags[packet->path_info.direction] & 0x800) != 0) {
-        packet->movement_destination = nodes[source_index].position;
-        packet->runtime_flags |= 0x80;
-        packet->movement_stopping_distance = 0.0f;
-        object->collision_priority |= 0x2000;
-        return 1;
-    }
-    AIPATHNODE *destination = &nodes[destination_index];
-    if (TryToTeleportToNextNode(owner, destination, 0) != 0) {
-        return 1;
-    }
-    if (WORLD->current_level == TEMPLEB_LDATA && destination->name != NULL &&
-        NuStrICmp(destination->name, "stairs_top") == 0) {
-        AIPATHNODE *alternate = AIPathFindNode(WORLD->ai_sys, NULL, "stairs_top2");
-        if (alternate != NULL) {
-            destination = alternate;
-        }
-    }
-    StartBigJump(owner, &destination->position, 0, 0.5f, 1.0f, 0, 0);
-    SetSpecialMove(owner, destination, NULL, 3);
-    return 0;
-}
-
-extern void GameObjectSetCanUse(GameObject_s *, void *, u8, u8, f32);
-
 static i32 StarWars_PrepareHatch(AIPACKET_s *packet, APIOBJECT_s *object, i32) {
     GameObject_s *owner = object->objptr;
     if (!(owner->special_move_timer <= 0.0f)) {
@@ -257,65 +1010,6 @@ static i32 StarWars_PrepareHatch(AIPACKET_s *packet, APIOBJECT_s *object, i32) {
     }
     object->collision_priority |= 0x2000;
     return 1;
-}
-
-i32 StarWars_PrepareJump(AIPACKET_s *, APIOBJECT_s *, i32);
-i32 StarWars_PrepareR2D2Glide(AIPACKET_s *, APIOBJECT_s *, i32);
-
-struct STARWARS_PREPARE_SPECIAL_MOVE {
-    u32 capabilities;
-    PREPARINGSPECIALMOVEFN prepare;
-};
-DECOMP_ASSERT(sizeof(STARWARS_PREPARE_SPECIAL_MOVE) == 8, "special move preparation entry size");
-DECOMP_ASSERT(offsetof(STARWARS_PREPARE_SPECIAL_MOVE, prepare) == 4, "special move preparation callback offset");
-
-STARWARS_PREPARE_SPECIAL_MOVE starwars_prepareforspecialmove[] = {
-    {0x23, StarWars_PrepareJump},           {4, StarWars_PrepareR2D2Glide},
-    {0x18, StarWars_PrepareHatch},          {0x40, StarWars_PrepareHoverTube},
-    {0x1000, StarWars_PrepareBigJump},      {0x8000, StarWars_PrepareTakeOverJump},
-    {0x20000000, StarWars_PrepareObstacle}, {0, NULL},
-};
-
-static i32 StarWars_PreparingForSpecialMove(AIPACKET_s *packet, APIOBJECT_s *object, i32 checks) {
-    GameObject_s *owner = object->objptr;
-    if (owner->character_context == 0x5b) {
-        owner->pad_gamepad->buttons_pressed |= GAMEPAD_JUMP;
-    }
-    u32 flags = packet->path_info.connection->traversal_flags[packet->path_info.direction];
-    if (flags != 0 && (flags & 0x40000000) == 0) {
-        u32 capabilities = flags & packet->capabilities;
-        if ((flags & 0x8000) != 0 && (owner->apiobj.character_data->game_character->flags_090 & 0x40) == 0 &&
-            owner->takeover_target == NULL && owner->character_context != 0x3c && (capabilities & 0xffff7fff) == 0) {
-            AIScriptSetBaseScriptStateByName(&object->ai->script_process, "TakeOverJump");
-            return 1;
-        }
-        if (capabilities != 0 && (flags & 0x98000000) == 0) {
-            STARWARS_PREPARE_SPECIAL_MOVE *entry = starwars_prepareforspecialmove;
-            for (; entry->prepare != NULL; ++entry) {
-                if ((entry->capabilities & capabilities) != 0) {
-                    if (entry->prepare(packet, object, checks) != 0) {
-                        return 1;
-                    }
-                    break;
-                }
-            }
-        } else {
-            packet->movement_destination = object->position;
-            packet->movement_stopping_distance = 0.0f;
-            object->collision_priority |= 0x2000;
-            return 1;
-        }
-    }
-    if ((packet->movement_event_flags & 0x20) != 0 && (owner->tag_context_flags & 2) == 0 &&
-        drop_back_in_timer > 0.0f &&
-        (packet->path_info.connection->traversal_flags[packet->path_info.direction] & 0xd8000000) == 0) {
-        TryToTeleportToNextNode(
-            owner,
-            &packet->path_info.path
-                 ->nodes[packet->path_info.connection->node_indices[packet->path_info.direction == 0]],
-            0);
-    }
-    return 0;
 }
 
 static i32 StarWars_MidSpecialMove_BigJump(AISYS_s *, AIPACKET_s *, APIOBJECT_s *object) {
@@ -357,20 +1051,21 @@ static i32 StarWars_MidSpecialMove_UseHatch(AISYS_s *, AIPACKET_s *, APIOBJECT_s
     return 0;
 }
 
-static i32 StarWars_MidSpecialMove_StartJump(AISYS_s *, AIPACKET_s *, APIOBJECT_s *object) {
+static i32 StarWars_MidSpecialMove(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *object) {
     GameObject_s *owner = object->objptr;
-    if (owner->character_context == 0) {
-        SetSpecialMove(owner, owner->ai.special_move_node, NULL, 0);
-        owner->ai.movement_destination = owner->ai.special_move_node->position;
-        owner->ai.movement_stopping_distance = 0.0f;
-    } else {
-        owner->pad_gamepad->buttons_pressed |= GAMEPAD_JUMP;
-        object->collision_priority |= 0x4000;
+    owner->special_move_timer -= FRAMETIME;
+    if (owner->ai.special_move_node != NULL) {
+        if (TryToTeleportToNextNode(owner, owner->ai.special_move_node, 0) != 0) {
+            ClearSpecialMove(owner);
+        } else {
+            MIDSPECIALMOVEFN function = starwars_midspecialmovefns[static_cast<i8>(owner->field_0x1092)];
+            if (function != NULL) {
+                return function(system, packet, object);
+            }
+        }
     }
-    return 1;
+    return 0;
 }
-
-extern TERRSET *CurTerr;
 
 static i32 StarWars_MidSpecialMove_Default(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *object) {
     GameObject_s *owner = object->objptr;
@@ -433,30 +1128,47 @@ static i32 StarWars_MidSpecialMove_Default(AISYS_s *system, AIPACKET_s *packet, 
     return 1;
 }
 
-MIDSPECIALMOVEFN starwars_midspecialmovefns[] = {
-    StarWars_MidSpecialMove_Default,
-    StarWars_MidSpecialMove_StartJump,
-    StarWars_MidSpecialMove_UseHatch,
-    StarWars_MidSpecialMove_BigJump,
-};
-
-static i32 StarWars_MidSpecialMove(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *object) {
+static i32 StarWars_PreparingForSpecialMove(AIPACKET_s *packet, APIOBJECT_s *object, i32 checks) {
     GameObject_s *owner = object->objptr;
-    owner->special_move_timer -= FRAMETIME;
-    if (owner->ai.special_move_node != NULL) {
-        if (TryToTeleportToNextNode(owner, owner->ai.special_move_node, 0) != 0) {
-            ClearSpecialMove(owner);
-        } else {
-            MIDSPECIALMOVEFN function = starwars_midspecialmovefns[static_cast<i8>(owner->field_0x1092)];
-            if (function != NULL) {
-                return function(system, packet, object);
-            }
+    if (owner->character_context == 0x5b) {
+        owner->pad_gamepad->buttons_pressed |= GAMEPAD_JUMP;
+    }
+    u32 flags = packet->path_info.connection->traversal_flags[packet->path_info.direction];
+    if (flags != 0 && (flags & 0x40000000) == 0) {
+        u32 capabilities = flags & packet->capabilities;
+        if ((flags & 0x8000) != 0 && (owner->apiobj.character_data->game_character->flags_090 & 0x40) == 0 &&
+            owner->takeover_target == NULL && owner->character_context != 0x3c && (capabilities & 0xffff7fff) == 0) {
+            AIScriptSetBaseScriptStateByName(&object->ai->script_process, "TakeOverJump");
+            return 1;
         }
+        if (capabilities != 0 && (flags & 0x98000000) == 0) {
+            STARWARS_PREPARE_SPECIAL_MOVE *entry = starwars_prepareforspecialmove;
+            for (; entry->prepare != NULL; ++entry) {
+                if ((entry->capabilities & capabilities) != 0) {
+                    if (entry->prepare(packet, object, checks) != 0) {
+                        return 1;
+                    }
+                    break;
+                }
+            }
+        } else {
+            packet->movement_destination = object->position;
+            packet->movement_stopping_distance = 0.0f;
+            object->collision_priority |= 0x2000;
+            return 1;
+        }
+    }
+    if ((packet->movement_event_flags & 0x20) != 0 && (owner->tag_context_flags & 2) == 0 &&
+        drop_back_in_timer > 0.0f &&
+        (packet->path_info.connection->traversal_flags[packet->path_info.direction] & 0xd8000000) == 0) {
+        TryToTeleportToNextNode(
+            owner,
+            &packet->path_info.path
+                 ->nodes[packet->path_info.connection->node_indices[packet->path_info.direction == 0]],
+            0);
     }
     return 0;
 }
-
-f32 jump_stuck_time = 0.1f;
 
 i32 StarWars_PrepareJump(AIPACKET_s *packet, APIOBJECT_s *object, i32 checks) {
     GameObject_s *owner = object->objptr;
@@ -675,49 +1387,55 @@ void StarWars_GameAISysInit() {
     mechAutoJumpCantReachFlags = 0xffedfe7f;
 }
 
-extern "C" i16 id_GEONOSIAN;
+void StarWars_AutoSetAICapabilities(GameObject_s *object) {
+    CHARACTERDATA *character = object->apiobj.character_data;
+    const u32 path_capabilities = character->ai_path_capabilities;
+    object->ai.capabilities = path_capabilities | STARWARS_AI_CAPABILITY_DEFAULT;
+    if ((object->apiobj.field_0x1f4 & 1) != 0) {
+        object->ai.capabilities =
+            path_capabilities | STARWARS_AI_CAPABILITY_DEFAULT | STARWARS_AI_CAPABILITY_OBJECT_STATE_SET;
+    } else if ((object->apiobj.field_0x1f4 & 4) == 0) {
+        object->ai.capabilities =
+            path_capabilities | STARWARS_AI_CAPABILITY_DEFAULT | STARWARS_AI_CAPABILITY_OBJECT_STATE_CLEAR;
+    }
 
-i32 StarWars_PrepareR2D2Glide(AIPACKET_s *packet, APIOBJECT_s *object, i32) {
-    GameObject_s *owner = object->objptr;
-    AIPATHNODE *nodes = packet->path_info.path->nodes;
-    AIPATHCNX *connection = packet->path_info.connection;
-    AIPATHNODE *destination = &nodes[connection->node_indices[packet->path_info.direction == 0]];
-    AIPATHNODE *source = &nodes[connection->node_indices[packet->path_info.direction]];
-    NUVEC offset;
-    if ((connection->traversal_flags[packet->path_info.direction] & 0x800) != 0) {
-        offset.z = destination->position.z - source->position.z;
-        offset.y = 0.0f;
-        offset.x = destination->position.x - source->position.x;
-        f32 radius = source->radius - packet->mover_height;
-        if (radius < 0.0f) {
-            radius = 0.0f;
-        }
-        NuVecScale(&offset, &offset, radius / connection->horizontal_distance);
-        NuVecAdd(&packet->movement_destination, &source->position, &offset);
-        packet->runtime_flags |= 0x80;
-        packet->movement_stopping_distance = 0.0f;
-        object->collision_priority |= 0x2000;
-        return 1;
+    if (object->apiobj.character_model->model_data_b[6] != NULL) {
+        object->ai.capabilities |= STARWARS_AI_CAPABILITY_MODEL_ATTACHMENT;
     }
-    if (!(packet->terrain_origin.y >= destination->min_height)) {
-        return 0;
+
+    if ((character->model_flags & 0x00200008) == 0x8) {
+        object->ai.capabilities |= STARWARS_AI_CAPABILITY_MODEL_FLAG_8_EXCLUSIVE;
     }
-    if (!(NuVecXZDistSqr(&object->position, &destination->position, &offset) >= destination->radius_squared)) {
-        return 0;
+    const u32 model_flags = character->model_flags;
+    if ((model_flags & 0x8) != 0) {
+        object->ai.capabilities |= STARWARS_AI_CAPABILITY_MODEL_FLAG_8;
     }
-    if (TryToTeleportToNextNode(owner, destination, 0) != 0) {
-        return 0;
+
+    const u32 game_flags = static_cast<GAMECHARACTERDATA *>(character->field11_0x24)->flags_090;
+    if ((game_flags & 0x00400000) != 0) {
+        object->ai.capabilities |= STARWARS_AI_CAPABILITY_EXTENDED_JUMP;
     }
-    packet->path_connection_state = 0;
-    SetSpecialMove(owner, destination, source, 0);
-    owner->pad_gamepad->buttons_held |= GAMEPAD_JUMP;
-    if (owner->id != id_GEONOSIAN || owner->field_0xe31 == 3 || owner->field_0xe31 == 0) {
-        owner->pad_gamepad->buttons_pressed |= GAMEPAD_JUMP;
+    if ((model_flags & 0x00040000) != 0) {
+        object->ai.capabilities |= STARWARS_AI_CAPABILITY_MODEL_FLAG_40000;
     }
-    packet->movement_stopping_distance = 0.0f;
-    packet->movement_destination = packet->special_move_node->position;
-    object->collision_priority |= 0x2000;
-    return 1;
+    if ((model_flags & 0x40) != 0) {
+        object->ai.capabilities |= STARWARS_AI_CAPABILITY_MODEL_FLAG_40;
+    }
+    if ((model_flags & 0x00100000) != 0) {
+        object->ai.capabilities |= STARWARS_AI_CAPABILITY_MODEL_FLAG_100000;
+    }
+    if ((model_flags & 0x2000) != 0) {
+        object->ai.capabilities |= STARWARS_AI_CAPABILITY_MODEL_FLAG_2000;
+    }
+    if ((model_flags & 0x88) != 0 || (game_flags & 0x40) != 0) {
+        object->ai.capabilities |= STARWARS_AI_CAPABILITY_SPECIAL_MOVEMENT;
+    }
+    if (object->apiobj.field_0x27c != -1) {
+        object->ai.capabilities |= STARWARS_AI_CAPABILITY_PLAYER_SLOT;
+    }
+    if (object->id == id_SNAKE) {
+        object->ai.capabilities |= STARWARS_AI_CAPABILITY_SNAKE;
+    }
 }
 
 u32 StarWars_ParseAIPathCnxFlag(char *name) {
@@ -790,53 +1508,19 @@ u32 StarWars_ParseAIPathCnxFlag(char *name) {
     return 0;
 }
 
-void StarWars_AutoSetAICapabilities(GameObject_s *object) {
-    CHARACTERDATA *character = object->apiobj.character_data;
-    const u32 path_capabilities = character->ai_path_capabilities;
-    object->ai.capabilities = path_capabilities | STARWARS_AI_CAPABILITY_DEFAULT;
-    if ((object->apiobj.field_0x1f4 & 1) != 0) {
-        object->ai.capabilities =
-            path_capabilities | STARWARS_AI_CAPABILITY_DEFAULT | STARWARS_AI_CAPABILITY_OBJECT_STATE_SET;
-    } else if ((object->apiobj.field_0x1f4 & 4) == 0) {
-        object->ai.capabilities =
-            path_capabilities | STARWARS_AI_CAPABILITY_DEFAULT | STARWARS_AI_CAPABILITY_OBJECT_STATE_CLEAR;
-    }
-
-    if (object->apiobj.character_model->model_data_b[6] != NULL) {
-        object->ai.capabilities |= STARWARS_AI_CAPABILITY_MODEL_ATTACHMENT;
-    }
-
-    if ((character->model_flags & 0x00200008) == 0x8) {
-        object->ai.capabilities |= STARWARS_AI_CAPABILITY_MODEL_FLAG_8_EXCLUSIVE;
-    }
-    const u32 model_flags = character->model_flags;
-    if ((model_flags & 0x8) != 0) {
-        object->ai.capabilities |= STARWARS_AI_CAPABILITY_MODEL_FLAG_8;
-    }
-
-    const u32 game_flags = static_cast<GAMECHARACTERDATA *>(character->field11_0x24)->flags_090;
-    if ((game_flags & 0x00400000) != 0) {
-        object->ai.capabilities |= STARWARS_AI_CAPABILITY_EXTENDED_JUMP;
-    }
-    if ((model_flags & 0x00040000) != 0) {
-        object->ai.capabilities |= STARWARS_AI_CAPABILITY_MODEL_FLAG_40000;
-    }
-    if ((model_flags & 0x40) != 0) {
-        object->ai.capabilities |= STARWARS_AI_CAPABILITY_MODEL_FLAG_40;
-    }
-    if ((model_flags & 0x00100000) != 0) {
-        object->ai.capabilities |= STARWARS_AI_CAPABILITY_MODEL_FLAG_100000;
-    }
-    if ((model_flags & 0x2000) != 0) {
-        object->ai.capabilities |= STARWARS_AI_CAPABILITY_MODEL_FLAG_2000;
-    }
-    if ((model_flags & 0x88) != 0 || (game_flags & 0x40) != 0) {
-        object->ai.capabilities |= STARWARS_AI_CAPABILITY_SPECIAL_MOVEMENT;
-    }
-    if (object->apiobj.field_0x27c != -1) {
-        object->ai.capabilities |= STARWARS_AI_CAPABILITY_PLAYER_SLOT;
-    }
-    if (object->id == id_SNAKE) {
-        object->ai.capabilities |= STARWARS_AI_CAPABILITY_SNAKE;
-    }
+void DrawGameMessage_Targets(GAMEMESSAGE_s *message, nuvec_s *position, float scale) {
+    const i32 alpha_integer = message->alpha;
+    const f32 base_alpha = static_cast<f32>(alpha_integer);
+    const u16 angle = static_cast<i32>(NuFmod(GameTimer.time_elapsed_mod_seconds, 0.25f) * 4.0f * 65536.0f);
+    const f32 y_offset = 0.3f * scale;
+    const i32 alpha = static_cast<i32>((NuTrigTable[(angle >> 1) & 0x7fff] * 0.2f + 0.8f) * base_alpha) & 0xff;
+    Text3DEx(ASCII_DOWN, position->x, position->y + y_offset, position->z, scale, scale, scale, 0, message->red,
+             message->green, message->blue, alpha);
+    Text3DEx(ASCII_UP, position->x, position->y - y_offset, position->z, scale, scale, scale, 0, message->red,
+             message->green, message->blue, alpha);
+    Text3DEx(const_cast<char *>(">"), position->x - 0.25f * scale, position->y, position->z, scale, scale, scale, 0,
+             message->red, message->green, message->blue, alpha);
+    Text3DEx(const_cast<char *>("<"), position->x + 0.25f * scale, position->y, position->z, scale, scale, scale, 0,
+             message->red, message->green, message->blue, alpha);
 }
+

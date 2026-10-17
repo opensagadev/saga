@@ -35,10 +35,7 @@ void FinishLoop_Network() {
     STUBBED();
 }
 
-i32 FinishStatusPacket_LSW(WORLDINFO_s *, STATUSPACKET_s *, i32) {
-    STUBBED();
-    return 0;
-}
+i32 FinishStatusPacket_LSW(WORLDINFO_s *, STATUSPACKET_s *, i32);
 
 void setObjInNetWaitContext(GameObject_s *object, i32 animation) {
     if (object != NULL) {

@@ -836,32 +836,7 @@ void DrawArrow_Now(_vum_s *, float, i32, i32);
 extern i16 tNONEWBESTTIME, tNEWBESTTIME;
 void Text_MakeTime(f32, i32, i32, i32, char *);
 
-void DrawBonusTime(STATUSPACKET_s *packet, float position, i32 alpha) {
-    const f32 y = -0.5f * position;
-    char *title;
-    i32 red, green;
-    if (packet->new_best_time != 0.0f) {
-        title = TTab[tNEWBESTTIME];
-        red = 0;
-        green = 255;
-    } else {
-        title = TTab[tNONEWBESTTIME];
-        red = 255;
-        green = 0;
-    }
-    SmartTextEx(title, 0.0f, 0.15f + y, 1.0f, 0.7f, 0.7f, 0.7f, 0, red, green, 0, 1.7f, 1, NULL, 0,
-                static_cast<u8>(alpha));
-    char time[256];
-    char previous[256];
-    Text_MakeTime(packet->new_best_time != 0.0f ? packet->new_best_time : packet->elapsed_time, 1, 1, 1, time);
-    Text3DEx(time, 0.0f, 0.0f + y, 1.0f, 0.7f, 0.7f, 0.7f, 0, 255, 255, 255, static_cast<u8>(alpha));
-    Text_MakeTime(packet->previous_best_time, 1, 1, 1, time);
-    NuStrCpy(previous, "(");
-    NuStrCat(previous, time);
-    NuStrCat(previous, ")");
-    Text3DEx(previous, 0.0f, y - 0.15f, 1.0f, 0.7f, 0.7f, 0.7f, 0, 255, 255, 255,
-             static_cast<u8>(static_cast<u8>(alpha) >> 1));
-}
+void DrawBonusTime(STATUSPACKET_s *packet, float position, i32 alpha);
 
 void DrawCross_Now(_vuv_s *, float, i32, i32);
 
@@ -1171,53 +1146,7 @@ void DrawExplosions() {
 
 void DrawItemMenu2D();
 
-void DrawStatusText(char *text, u16 angle, float x, float y, float scale, u32 colour, i32 alignment) {
-    static NUMTX status_mtx;
-
-    NUVEC origin = {0.0f, 0.0f, 800.0f};
-    NUVEC position = {x * 350.0f, y * 300.0f, 0.0f};
-    u16 encoded[512];
-
-    NuQFntSetJustifiedTolerances(1.2f, 1.2f);
-    NuMtxSetIdentity(&status_mtx);
-    NuMtxSetRotationX(&status_mtx, 0);
-    NuMtxRotateY(&status_mtx, 0);
-    NuMtxRotateZ(&status_mtx, angle);
-    NuMtxTranslate(&status_mtx, &origin);
-    NuMtxTranslate(&status_mtx, &position);
-    NuMtxMul(&status_mtx, &status_mtx, NuCameraGetMtx());
-
-    NuQFntSet(QFont3DZ);
-    NuQFntSetMtx(QFont3DZ, &status_mtx);
-    NuQFntPushPrintMode(NUQFNT_CSMODE_ABSOLUTE);
-    NuQFntSetCoordinateSystem(NUQFNT_CSMODE_ABSOLUTE);
-    NuQFntSetColour(QFont3DZ, colour);
-    NuQFntSetScale(QFont3DZ, scale, scale);
-    Text3DStringEncode(text, encoded);
-
-    switch (alignment) {
-        case 2: {
-            const f32 height = NuQFntHeight(QFont3DZ);
-            NuQFntMove(QFont3DZ, 0.0f, -height * 0.5f, 0.0f);
-            break;
-        }
-        case 8: {
-            const f32 height = NuQFntHeight(QFont3DZ);
-            const f32 width = NuQFntPrintLenW(QFont3DZ, encoded);
-            NuQFntMove(QFont3DZ, -width, -height * 0.5f, 0.0f);
-            break;
-        }
-        default: {
-            const f32 height = NuQFntHeight(QFont3DZ);
-            const f32 width = NuQFntPrintLenW(QFont3DZ, encoded);
-            NuQFntMove(QFont3DZ, -width * 0.5f, -height * 0.5f, 0.0f);
-            break;
-        }
-    }
-    NuQFntPrintW(QFont3DZ, encoded);
-    NuQFntPopPrintMode();
-    NuQFntSetCoordinateSystem(NUQFNT_CSMODE_NORMALISED);
-}
+void DrawStatusText(char *text, u16 angle, float x, float y, float scale, u32 colour, i32 alignment);
 
 i32 Draw3DObjectMtx(WORLDINFO_s *world, i32 object_index, numtx_s *mtx) {
     if (object_index == -1) {
@@ -1244,12 +1173,7 @@ extern nuhspecial_s paintlights[3];
 
 void DrawPaintLights();
 
-void DrawStatusIcons(STATUSPACKET_s *status, float y, float alpha) {
-    const f32 x = ICONX;
-    const f32 icon_alpha = (status->player0_active == 0 ? 0.25f : 1.0f) * alpha;
-    const f32 size = ICONSIZE;
-    DrawCharIcon(static_cast<i16>(status->player0_model), -x, y, 0.0f, size, 0xa5, icon_alpha, icon_alpha, 1, NULL);
-}
+void DrawStatusIcons(STATUSPACKET_s *status, float y, float alpha);
 
 void DrawTouchPrompt(char *prompt, char *unused_label, bool hovered, bool large) {
     (void)unused_label;
@@ -1471,13 +1395,7 @@ void DrawMiniKitCount(float position, float scale, i32 count, i32 maximum) {
     Text3D(text, x, y + PANEL_MINIKITCOUNTY, 1.0f, size, size, size, 0, 255, 0, 127);
 }
 
-void DrawStatusBG_LSW(STATUSPACKET_s *status) {
-    STATUS_STAGE_s *stage = status->stage;
-    if (stage->field_0x14 == -1) {
-        stage->field_0x18 = 0;
-        stage->field_0x14 = 0;
-    }
-}
+void DrawStatusBG_LSW(STATUSPACKET_s *status);
 
 void Draw_LOADCORRUPT();
 
@@ -1523,174 +1441,13 @@ i32 DrawPanel3DObject(float x, float y, float z, float scale_x, float scale_y, f
     return 0;
 }
 
-STATUSMINIKITPART_s KitPart[10];
+extern STATUSMINIKITPART_s KitPart[10];
 extern i32 currentminikit;
 extern f32 slideseek;
 
 i32 DrawPanel3DObjectMtxNoAlpha(nuhspecial_s *special, numtx_s *matrix);
 void DrawStatusMiniKit(float x, float y, float z, float built_scale, float new_scale, i32 count, STATUSPACKET_s *packet,
-                       float slide) {
-    if (WORLD->minikit.gscn == NULL || WORLD->minikit.field_0x4 == NULL)
-        return;
-
-    HUBMINIKITPIECE_s *pieces = static_cast<HUBMINIKITPIECE_s *>(WORLD->minikit.field_0x4);
-    NUVEC built_size = {built_scale, built_scale, built_scale};
-    NUVEC new_size = {new_scale, new_scale, new_scale};
-    NUVEC offset = v000;
-    const u8 current_direction = pieces[currentminikit].direction;
-    if (__builtin_expect(current_direction <= 5, 0)) {
-        switch (current_direction) {
-            case 0:
-                offset.x += 0.035f * NuTrigTable[(static_cast<i32>(slide * 32768.0f) >> 1) & 0x7fff];
-                break;
-            case 1:
-                offset.x -= 0.035f * NuTrigTable[(static_cast<i32>(slide * 32768.0f) >> 1) & 0x7fff];
-                break;
-            case 2:
-                offset.y += 0.035f * NuTrigTable[(static_cast<i32>(slide * 32768.0f) >> 1) & 0x7fff];
-                break;
-            case 3:
-                offset.y -= 0.035f * NuTrigTable[(static_cast<i32>(slide * 32768.0f) >> 1) & 0x7fff];
-                break;
-            case 4:
-                offset.z -= 0.035f * NuTrigTable[(static_cast<i32>(slide * 32768.0f) >> 1) & 0x7fff];
-                break;
-            case 5:
-                offset.z += 0.035f * NuTrigTable[(static_cast<i32>(slide * 32768.0f) >> 1) & 0x7fff];
-                break;
-        }
-    }
-
-    if (__builtin_expect(packet->minikit_max != 0 && WORLD->minikit.field_0x8 != 0 && count > 0, 1)) {
-        i32 i = 0;
-        do {
-            HUBMINIKITPIECE_s &piece = pieces[i];
-            NUMTX_ALIGNED16 matrix = piece.matrix;
-            if (i >= currentminikit) {
-                NuMtxScale(&matrix, &new_size);
-                i32 piece_angle = 0x2000;
-                if (i == currentminikit) {
-                    const f32 phase = slideseek * 16384.0f + 49152.0f + 16384.0f;
-                    piece_angle = (static_cast<i32>(phase) >> 1) & 0x7fff;
-                }
-                const f32 oscillation = NuTrigTable[piece_angle];
-                const HUBMINIKITPIECE_s *animated_pieces = static_cast<HUBMINIKITPIECE_s *>(WORLD->minikit.field_0x4);
-                const HUBMINIKITPIECE_s &animated_piece = animated_pieces[i];
-                if (__builtin_expect(animated_piece.direction <= 5, 1)) {
-                    switch (animated_piece.direction) {
-                        case 0:
-                            matrix.m30 -=
-                                (static_cast<f32>(static_cast<i32>(animated_piece.direction_index)) * 0.025f + 0.25f) *
-                                oscillation;
-                            break;
-                        case 1:
-                            matrix.m30 +=
-                                (static_cast<f32>(static_cast<i32>(animated_piece.direction_index)) * 0.025f + 0.25f) *
-                                oscillation;
-                            break;
-                        case 2:
-                            matrix.m31 -=
-                                (static_cast<f32>(static_cast<i32>(animated_piece.direction_index)) * 0.025f + 0.25f) *
-                                oscillation;
-                            break;
-                        case 3:
-                            matrix.m31 +=
-                                (static_cast<f32>(static_cast<i32>(animated_piece.direction_index)) * 0.025f + 0.25f) *
-                                oscillation;
-                            break;
-                        case 4:
-                            matrix.m32 +=
-                                (static_cast<f32>(static_cast<i32>(animated_piece.direction_index)) * 0.025f + 0.25f) *
-                                oscillation;
-                            break;
-                        case 5:
-                            matrix.m32 -=
-                                (static_cast<f32>(static_cast<i32>(animated_piece.direction_index)) * 0.025f + 0.25f) *
-                                oscillation;
-                            break;
-                    }
-                }
-            } else {
-                NuMtxScale(&matrix, &built_size);
-            }
-            if (i <= currentminikit) {
-                matrix.m32 += offset.z;
-                matrix.m31 += offset.y;
-                matrix.m30 += offset.x;
-            }
-
-            const NUANG rotation_y =
-                static_cast<u16>(static_cast<i32>(NuFmod(GameTimer.time_elapsed, 2.0f) * 0.5f * 65536.0f));
-            const f32 y0 = matrix.m00;
-            const f32 y1 = matrix.m10;
-            const f32 y2 = matrix.m20;
-            const f32 y3 = matrix.m30;
-            const f32 cy = NU_COS_LUT(rotation_y);
-            const f32 sy = NU_SIN_LUT(rotation_y);
-            matrix.m00 = y0 * cy + matrix.m02 * sy;
-            matrix.m02 = matrix.m02 * cy - y0 * sy;
-            matrix.m10 = y1 * cy + matrix.m12 * sy;
-            matrix.m12 = matrix.m12 * cy - y1 * sy;
-            matrix.m20 = y2 * cy + matrix.m22 * sy;
-            matrix.m22 = matrix.m22 * cy - y2 * sy;
-            matrix.m30 = y3 * cy + matrix.m32 * sy;
-            matrix.m32 = matrix.m32 * cy - y3 * sy;
-
-            const u16 z_phase =
-                static_cast<u16>(static_cast<i32>(NuFmod(GameTimer.time_elapsed, 2.24f) / 2.24f * 65536.0f));
-            const NUANG rotation_z = static_cast<u16>(static_cast<i32>(2730.0f * NU_SIN_LUT(z_phase)));
-            const f32 z0 = matrix.m00;
-            const f32 z1 = matrix.m10;
-            const f32 z2 = matrix.m20;
-            const f32 z3 = matrix.m30;
-            const f32 cz = NU_COS_LUT(rotation_z);
-            const f32 sz = NU_SIN_LUT(rotation_z);
-            matrix.m00 = z0 * cz - matrix.m01 * sz;
-            matrix.m01 = z0 * sz + matrix.m01 * cz;
-            matrix.m10 = z1 * cz - matrix.m11 * sz;
-            matrix.m11 = z1 * sz + matrix.m11 * cz;
-            matrix.m20 = z2 * cz - matrix.m21 * sz;
-            matrix.m21 = z2 * sz + matrix.m21 * cz;
-            matrix.m30 = z3 * cz - matrix.m31 * sz;
-            matrix.m31 = z3 * sz + matrix.m31 * cz;
-
-            const u16 x_phase =
-                static_cast<u16>(static_cast<i32>(NuFmod(GameTimer.time_elapsed, 1.87f) / 1.87f * 65536.0f));
-            const NUANG rotation_x = static_cast<u16>(static_cast<i32>(2730.0f * NU_SIN_LUT(x_phase) - 5461.0f));
-            const f32 x0 = matrix.m01;
-            const f32 x1 = matrix.m11;
-            const f32 x2 = matrix.m21;
-            const f32 x3 = matrix.m31;
-            const f32 cx = NU_COS_LUT(rotation_x);
-            const f32 sx = NU_SIN_LUT(rotation_x);
-            matrix.m01 = x0 * cx - matrix.m02 * sx;
-            matrix.m02 = x0 * sx + matrix.m02 * cx;
-            matrix.m11 = x1 * cx - matrix.m12 * sx;
-            matrix.m12 = x1 * sx + matrix.m12 * cx;
-            matrix.m21 = x2 * cx - matrix.m22 * sx;
-            matrix.m22 = x2 * sx + matrix.m22 * cx;
-            matrix.m31 = x3 * cx - matrix.m32 * sx;
-            matrix.m32 = x3 * sx + matrix.m32 * cx;
-
-            matrix.m31 += y * PANEL3DMULY;
-            matrix.m32 += z;
-            matrix.m30 += x * PANEL3DMULX;
-
-            if (i < 10) {
-                KitPart[i].matrix = matrix;
-                KitPart[i].special = &static_cast<HUBMINIKITPIECE_s *>(WORLD->minikit.field_0x4)[i].special;
-                KitPart[i].enabled = 1;
-            }
-            if (WORLD->lev_objs[206].active != 0)
-                DrawPanel3DObjectMtxNoAlpha(&static_cast<HUBMINIKITPIECE_s *>(WORLD->minikit.field_0x4)[i].special,
-                                            &matrix);
-            ++i;
-            if (i >= packet->minikit_max || i >= WORLD->minikit.field_0x8 || i == count)
-                break;
-            pieces = static_cast<HUBMINIKITPIECE_s *>(WORLD->minikit.field_0x4);
-        } while (true);
-    }
-}
+                       float slide);
 
 extern i16 tUNKNOWN, tPOWERBRICK, tLOCKED, tGOLDBRICK;
 extern "C" void PlaySfx(char *, NUVEC *);
@@ -1913,89 +1670,9 @@ extern u8 CharClipToBlobShadows;
 i32 DrawGameObjectsProcess();
 
 void DrawStatusTextFraction(i32 current, i32 total, float x, float y, u16 angle, float scale, u32 colour,
-                            float animation, float animation_duration) {
-    char text[16];
-    u16 encoded[64];
-    NUMTX matrix;
-    NUVEC origin = {0.0f, 0.0f, 800.0f};
-    NUVEC position = {x * 400.0f, y * 250.0f, 0.0f};
-    NuQFntSetJustifiedTolerances(1.2f, 1.2f);
-    NuMtxSetIdentity(&matrix);
-    NuMtxSetRotationX(&matrix, 0);
-    NuMtxRotateY(&matrix, 0);
-    NuMtxRotateZ(&matrix, angle);
-    NuMtxTranslate(&matrix, &origin);
-    NuMtxTranslate(&matrix, &position);
-    NuMtxMul(&matrix, &matrix, NuCameraGetMtx());
-    NuQFntSet(QFont3DZ);
-    NuQFntSetMtx(QFont3DZ, &matrix);
-    NuQFntPushPrintMode(NUQFNT_CSMODE_ABSOLUTE);
-    NuQFntSetCoordinateSystem(NUQFNT_CSMODE_ABSOLUTE);
-    NuQFntSetColour(QFont3DZ, colour);
-    NuQFntSetScale(QFont3DZ, scale, scale);
-    sprintf(text, "%i/%i", current, total);
-    Text3DStringEncode(text, encoded);
-    const f32 full_width = NuQFntPrintLenW(QFont3DZ, encoded);
-    const f32 height = NuQFntHeight(QFont3DZ);
-    NuQFntMove(QFont3DZ, -full_width * 0.5f, -height * 0.5f, 0.0f);
-    if (animation > 0.0f) {
-        const i32 wave_angle = static_cast<i32>((animation / animation_duration) * 32768.0f + 16384.0f);
-        const f32 blend = 1.0f - (NuTrigTable[(wave_angle >> 1) & 0x7fff] + 1.0f) * 0.5f;
-        const f32 wave = 1.0f - blend;
-        const f32 small_scale = scale - 0.5f + wave * 0.5f;
-        const f32 large_scale = 0.5f + scale - wave * 0.5f;
-        sprintf(text, "/%i", total);
-        Text3DStringEncode(text, encoded);
-        const f32 suffix_width = NuQFntPrintLenW(QFont3DZ, encoded);
-        const f32 suffix_offset = full_width - suffix_width;
-        const f32 half_full_width = 0.5f * full_width;
-        const f32 suffix_x = suffix_offset - half_full_width;
-        const f32 suffix_height = NuQFntHeight(QFont3DZ);
-        NuQFntMove(QFont3DZ, suffix_x, -suffix_height * 0.5f, 0.0f);
-        NuQFntPrintW(QFont3DZ, encoded);
-        sprintf(text, "%i", current);
-        Text3DStringEncode(text, encoded);
-        const f32 current_width = NuQFntPrintLenW(QFont3DZ, encoded);
-        NuQFntSetScale(QFont3DZ, large_scale, large_scale);
-        const f32 large_width = NuQFntPrintLenW(QFont3DZ, encoded);
-        const f32 current_center = current_width * 0.5f - half_full_width;
-        const f32 large_x = current_center - large_width * 0.5f;
-        const f32 large_height = NuQFntHeight(QFont3DZ);
-        NuQFntMove(QFont3DZ, large_x, -large_height * 0.5f, 0.0f);
-        NuQFntPrintW(QFont3DZ, encoded);
-        NuQFntSetScale(QFont3DZ, small_scale, small_scale);
-        const f32 small_width = NuQFntPrintLenW(QFont3DZ, encoded);
-        const f32 small_x = current_center - small_width * 0.5f;
-        const f32 small_height = NuQFntHeight(QFont3DZ);
-        NuQFntMove(QFont3DZ, small_x, -small_height * 0.5f, 0.0f);
-        NuQFntPrintW(QFont3DZ, encoded);
-    } else {
-        sprintf(text, "%i", current);
-        Text3DStringEncode(text, encoded);
-        NuQFntPrintW(QFont3DZ, encoded);
-        sprintf(text, "/%i", total);
-        Text3DStringEncode(text, encoded);
-        NuQFntPrintW(QFont3DZ, encoded);
-    }
-    NuQFntPopPrintMode();
-    NuQFntSetCoordinateSystem(NUQFNT_CSMODE_NORMALISED);
-}
+                            float animation, float animation_duration);
 
-void DrawGameMessage_Targets(GAMEMESSAGE_s *message, nuvec_s *position, float scale) {
-    const i32 alpha_integer = message->alpha;
-    const f32 base_alpha = static_cast<f32>(alpha_integer);
-    const u16 angle = static_cast<i32>(NuFmod(GameTimer.time_elapsed_mod_seconds, 0.25f) * 4.0f * 65536.0f);
-    const f32 y_offset = 0.3f * scale;
-    const i32 alpha = static_cast<i32>((NuTrigTable[(angle >> 1) & 0x7fff] * 0.2f + 0.8f) * base_alpha) & 0xff;
-    Text3DEx(ASCII_DOWN, position->x, position->y + y_offset, position->z, scale, scale, scale, 0, message->red,
-             message->green, message->blue, alpha);
-    Text3DEx(ASCII_UP, position->x, position->y - y_offset, position->z, scale, scale, scale, 0, message->red,
-             message->green, message->blue, alpha);
-    Text3DEx(const_cast<char *>(">"), position->x - 0.25f * scale, position->y, position->z, scale, scale, scale, 0,
-             message->red, message->green, message->blue, alpha);
-    Text3DEx(const_cast<char *>("<"), position->x + 0.25f * scale, position->y, position->z, scale, scale, scale, 0,
-             message->red, message->green, message->blue, alpha);
-}
+void DrawGameMessage_Targets(GAMEMESSAGE_s *message, nuvec_s *position, float scale);
 
 i32 DrawPanel3DObjectNoAlpha(float x, float y, float z, float scale_x, float scale_y, float scale_z, u16 rotate_x,
                              u16 rotate_y, u16 rotate_z, nuhspecial_s *special, i32 rotate_order) {

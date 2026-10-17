@@ -1,3 +1,6 @@
+// Original translation unit reconstructed from the reference address map.
+// Functions are defined in original address order.
+
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/menus/core/panel.h"
 #include "legoapi/ai/core/legoai.h"
@@ -175,6 +178,82 @@ void RememberPlayerIDs(i32, i32, i32);
 void Tag_NewTransfer(GameObject_s *, GameObject_s *);
 
 
+static void DrawPackButton(GAMEMESSAGE_s *message, nuvec_s *position, float scale);
+
+static void TakeOver_SetAction(GameObject_s *rider, GameObject_s *vehicle);
+
+void Tag_SetMode(i32 mode);
+
+// GCC otherwise rewrites this once-called helper; the original has a separate local body.
+static __attribute__((noinline)) GameObject_s *Tag_FindGameObject_TRANSFER(GameObject_s *object) {
+    f32 nearest_distance = object->character_context == 0x17 ? 1.44f : 0.48999998f;
+    const i32 count = Tag_Mode == 3 ? HIGHGAMEOBJECT : 8;
+    GameObject_s *nearest = NULL;
+    for (i32 index = 0; index < count; ++index) {
+        GameObject_s *candidate = Tag_Mode == 3 ? &Obj[index] : Player[index];
+        if (candidate == NULL || (candidate->apiobj.field_0x1f8 & 0x1001) != 0x1001 || candidate == object ||
+            candidate->apiobj.field_0x287 != 0 || (candidate->tag_context_flags & 2) != 0) {
+            continue;
+        }
+        const i8 context = candidate->character_context;
+        if (context == 0x17 || context == 0x3d || (CInfo[context].flags & 0x8000) != 0 ||
+            ((candidate->field_0xf00 & 2) != 0 && object->id != id_LUKESKYWALKERDAGOBAH)) {
+            continue;
+        }
+        NUVEC direction;
+        const f32 distance = NuVecDistSqr(&object->apiobj.position, &candidate->apiobj.position, &direction);
+        if (distance < nearest_distance) {
+            NuVecRotateY(&direction, &direction, -static_cast<u32>(object->apiobj.field_0x276));
+            if (direction.z < 0.0f) {
+                nearest_distance = distance;
+                nearest = candidate;
+            }
+        }
+    }
+    return nearest;
+}
+
+i32 TagCode(GameObject_s *source, GameObject_s *destination, i32 takeover, i32 blend_camera, i32);
+
+i32 TagCharacter(GameObject_s *source, GameObject_s *target, i32 mode);
+
+void GetTakeOverPos(GameObject_s *object, nuvec_s *position);
+
+void ReleaseTakeOver(GameObject_s *object, i32);
+
+void ReleaseAllTakeOvers();
+
+i32 TakeOverYoda(GameObject_s *rider, GameObject_s *vehicle, i32 blend_camera, i32);
+
+void TakeOverGameObject2(GameObject_s *rider, GameObject_s *vehicle, i32 blend_camera);
+
+void TakeOver2GetIn(GameObject_s *rider, GameObject_s *vehicle);
+
+static i32 Tag_FindNextPlayer(GameObject_s *object) {
+    i16 index = object->apiobj.field_0x289;
+    for (i32 remaining = HIGHGAMEOBJECT - 1; remaining > 0; --remaining) {
+        if (++index == HIGHGAMEOBJECT)
+            index = 0;
+        GameObject_s *candidate = &Obj[index];
+        if (candidate == object || candidate == NULL || (candidate->apiobj.field_0x1f8 & 0x1001) != 0x1001 ||
+            candidate->apiobj.field_0x287 != 0 || candidate->apiobj.field_0x27c == -1 ||
+            (candidate->tag_flags & 2) != 0 || (candidate->field_0xf00 & 2) != 0 ||
+            (CInfo[candidate->character_context].flags & 0x800) != 0)
+            continue;
+        return candidate->apiobj.field_0x27c;
+    }
+    return -1;
+}
+
+void Tag_Check(GameObject_s *object);
+
+void TakeOverGameObject(GameObject_s *rider, GameObject_s *vehicle, i32 blend_camera, i32 immediate);
+
+__attribute__((force_align_arg_pointer)) void TakeOverCode(GameObject_s *object, i32 tag_pressed);
+
+
+// ==== functions in original address order ====
+
 static void DrawPackButton(GAMEMESSAGE_s *message, nuvec_s *position, float scale) {
     struct InAppProductData {
         u8 field_0x0[0x300];
@@ -293,35 +372,6 @@ static void TakeOver_SetAction(GameObject_s *rider, GameObject_s *vehicle) {
 
 void Tag_SetMode(i32 mode) {
     Tag_Mode = mode;
-}
-
-// GCC otherwise rewrites this once-called helper; the original has a separate local body.
-static __attribute__((noinline)) GameObject_s *Tag_FindGameObject_TRANSFER(GameObject_s *object) {
-    f32 nearest_distance = object->character_context == 0x17 ? 1.44f : 0.48999998f;
-    const i32 count = Tag_Mode == 3 ? HIGHGAMEOBJECT : 8;
-    GameObject_s *nearest = NULL;
-    for (i32 index = 0; index < count; ++index) {
-        GameObject_s *candidate = Tag_Mode == 3 ? &Obj[index] : Player[index];
-        if (candidate == NULL || (candidate->apiobj.field_0x1f8 & 0x1001) != 0x1001 || candidate == object ||
-            candidate->apiobj.field_0x287 != 0 || (candidate->tag_context_flags & 2) != 0) {
-            continue;
-        }
-        const i8 context = candidate->character_context;
-        if (context == 0x17 || context == 0x3d || (CInfo[context].flags & 0x8000) != 0 ||
-            ((candidate->field_0xf00 & 2) != 0 && object->id != id_LUKESKYWALKERDAGOBAH)) {
-            continue;
-        }
-        NUVEC direction;
-        const f32 distance = NuVecDistSqr(&object->apiobj.position, &candidate->apiobj.position, &direction);
-        if (distance < nearest_distance) {
-            NuVecRotateY(&direction, &direction, -static_cast<u32>(object->apiobj.field_0x276));
-            if (direction.z < 0.0f) {
-                nearest_distance = distance;
-                nearest = candidate;
-            }
-        }
-    }
-    return nearest;
 }
 
 i32 TagCode(GameObject_s *source, GameObject_s *destination, i32 takeover, i32 blend_camera, i32) {
@@ -695,22 +745,6 @@ void TakeOver2GetIn(GameObject_s *rider, GameObject_s *vehicle) {
     PlayJumpSfx(rider, 0);
 }
 
-static i32 Tag_FindNextPlayer(GameObject_s *object) {
-    i16 index = object->apiobj.field_0x289;
-    for (i32 remaining = HIGHGAMEOBJECT - 1; remaining > 0; --remaining) {
-        if (++index == HIGHGAMEOBJECT)
-            index = 0;
-        GameObject_s *candidate = &Obj[index];
-        if (candidate == object || candidate == NULL || (candidate->apiobj.field_0x1f8 & 0x1001) != 0x1001 ||
-            candidate->apiobj.field_0x287 != 0 || candidate->apiobj.field_0x27c == -1 ||
-            (candidate->tag_flags & 2) != 0 || (candidate->field_0xf00 & 2) != 0 ||
-            (CInfo[candidate->character_context].flags & 0x800) != 0)
-            continue;
-        return candidate->apiobj.field_0x27c;
-    }
-    return -1;
-}
-
 void Tag_Check(GameObject_s *object) {
     NUVEC difference;
     DECOMP_ASSERT(offsetof(GameObject_s, tag_player_index) == 0x7b4, "Tag player index ABI");
@@ -1039,3 +1073,4 @@ __attribute__((force_align_arg_pointer)) void TakeOverCode(GameObject_s *object,
         }
     }
 }
+

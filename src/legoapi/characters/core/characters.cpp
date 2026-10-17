@@ -805,76 +805,11 @@ void Collection_GetPos(COLLECTION_s *, i32, f32 *, f32 *);
 void DrawCharIcon(i32, f32, f32, f32, f32, i32, f32, f32, i32, nuhspecial_s *);
 extern f32 ICONSIZE;
 extern i32 STATUS_R, STATUS_G, STATUS_B;
-f32 COLLECTION_Y_STATUS = -0.3f;
-static i32 playedappearsfx;
-static i32 playedmovesfx;
+extern f32 COLLECTION_Y_STATUS;
 
-void CollectCharcters_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active) {
-    COLLECTION_s *collection = packet->vehicle_area ? &VehicleCollection : &CharacterCollection;
-    if (active == 0)
-        return;
-    if (stage->field_0x14 == 0) {
-        const f32 offscreen = (1.0f - fabsf(COLLECTION_Y_STATUS)) + 1.0f;
-        const f32 ratio = NuFdiv(stage->field_0x18, stage->field_0x1c);
-        Collection_Draw(collection, 0.0f,
-                        NuTrigTable[(static_cast<i32>(ratio * 16384.0f) >> 1) & 0x7fff] *
-                                (COLLECTION_Y_STATUS + offscreen) -
-                            offscreen,
-                        collection->field_10, NULL, 1.0f, 0);
-        return;
-    }
-    const i32 id = StatusCollectList.ids[stage->field_0x14 - 1];
-    if (id == -1)
-        return;
-    Collection_Draw(collection, 0.0f, COLLECTION_Y_STATUS, collection->field_10, NULL, 1.0f, 0);
-    f32 time = stage->field_0x18;
-    f32 x = 0.0f, y = 0.7f, size = 0.4f, icon_alpha = 1.0f, text_alpha;
-    if (time < 0.5f) {
-        if (time > 0.25f && playedappearsfx == 0) {
-            PlaySfx(const_cast<char *>("Char_Icon_App"), NULL);
-            playedappearsfx = 1;
-            time = stage->field_0x18;
-        }
-        text_alpha = NuTrigTable[(static_cast<i32>((time + time) * 16384.0f) >> 1) & 0x7fff];
-        icon_alpha = time + time;
-    } else if (time < 2.0f) {
-        text_alpha = 1.0f;
-        playedappearsfx = 0;
-        playedmovesfx = 0;
-    } else {
-        text_alpha = 1.0f - NuTrigTable[(static_cast<i32>((time - 2.0f) * 16384.0f) >> 1) & 0x7fff];
-        if (playedmovesfx == 0) {
-            PlaySfx(const_cast<char *>("Char_Icon_Slide"), NULL);
-            playedmovesfx = 1;
-        }
-        const f32 blend =
-            1.0f - (NuTrigTable[(static_cast<i32>((time - 2.0f) * 32768.0f + 16384.0f) >> 1) & 0x7fff] + 1.0f) * 0.5f;
-        if (InCollectList_Index(id, collection->list, collection->count_y) != -1) {
-            f32 target_x, target_y;
-            Collection_GetPos(collection, id, &target_x, &target_y);
-            f32 target_size = collection->field_10 * ICONSIZE;
-            if (Game_OptionsSave != NULL && Game_OptionsSave->field11_0xb != 0)
-                target_size *= 0.875f;
-            x = target_x * blend + 0.0f;
-            y = (target_y - 0.7f) * blend + 0.7f;
-            size = (target_size - 0.4f) * blend + 0.4f;
-        }
-    }
-    DrawCharIcon(id, x, y, 0.0f, size, 0xa7, icon_alpha, icon_alpha, 1, NULL);
-    SmartTextEx(TTab[CDataList[id].name_id], 0.0f, 0.35f, 1.0f, 0.6f, 0.6f, 0.6f, 0, STATUS_R, STATUS_G, STATUS_B, 1.7f,
-                1, NULL, 0, static_cast<i32>(text_alpha * 128.0f));
-}
+void CollectCharcters_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active);
 
-void CollectCharcters_Skip(STATUS_STAGE_s *stage, STATUSPACKET_s *packet) {
-    if (stage->field_0x14 == 0)
-        stage->field_0x14 = 1;
-    while (StatusCollectList.ids[stage->field_0x14 - 1] != -1) {
-        AddToCollection(StatusCollectList.ids[stage->field_0x14 - 1]);
-        ++stage->field_0x14;
-    }
-    NextStatusStage(packet);
-    NextStatusStage(packet);
-}
+void CollectCharcters_Skip(STATUS_STAGE_s *stage, STATUSPACKET_s *packet);
 
 nuhspecial_s *CharScene_FindHSpecial(WORLDINFO_s *world, i32 character_id) {
     nuhspecial_s *special;
@@ -899,94 +834,21 @@ AILOCATOR_s *LocalGetRandomLocator(AILOCATOR_s **locators, i32 count, f32 clip_r
 AILOCATOR_s *LocalGetNearestLocator(AILOCATOR_s **locators, i32 count, f32 clip_radius, NUVEC *position,
                                     f32 max_distance, i32 outside_camera, f32 max_delta_y, f32 min_delta_y);
 
-i32 newCharactersCollected(STATUSPACKET_s *) {
-    i32 count = 0;
-    for (i16 *player_id = Area_PlayerIDList; *player_id != -1 && count < 7; ++player_id) {
-        const i16 player = *player_id;
-        const i32 id = player;
-        i32 previous = 0;
-        while (previous < count && StatusCollectList.ids[previous] != id) {
-            ++previous;
-        }
-        if (previous == count) {
-            if (__builtin_expect(Game_CharacterSave != NULL && (Game_CharacterSave[id] & 1) != 0, 1)) {
-                continue;
-            }
-            const i32 index = InCollectList_Index(id, MasterCollection.list, MasterCollection.count_y);
-            if (__builtin_expect(index != -1 && MasterCollection.list[index].can_buy == 0, 0)) {
-                StatusCollectList.ids[count++] = player;
-                if (MasterCollection.list[index].field5_0x9 != 0) {
-                    AddToCompletionPoints(POINTS_PER_CHARACTER);
-                }
-            }
-        }
-    }
-    StatusCollectList.ids[count] = -1;
-    return count;
-}
+i32 newCharactersCollected(STATUSPACKET_s *);
 
-void CollectCharcters_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed) {
-    if (stage->field_0x14 == 0) {
-        stage->field_0x1c = 1.0f;
-        stage->field_0x18 += elapsed;
-        if (stage->field_0x18 >= 1.0f) {
-            stage->field_0x14 = 1;
-            if (StatusCollectList.ids[0] == -1) {
-                GameAudio_PlaySfx(0x32, NULL, 0, 0);
-                NewStatusRumbleBuzz(-1, 0.6f, 0.0f, 0);
-                NextStatusStage(packet);
-            } else {
-                stage->field_0x18 = 0.0f;
-                stage->field_0x1c = 3.0f;
-            }
-        }
-    } else {
-        stage->field_0x18 += elapsed;
-        if (stage->field_0x18 >= stage->field_0x1c) {
-            AddToCollection(StatusCollectList.ids[stage->field_0x14 - 1]);
-            PlaySfx(const_cast<char *>("LegoClicks"), NULL);
-            ++stage->field_0x14;
-            stage->field_0x18 = 0.0f;
-            stage->field_0x1c = 3.0f;
-            if (StatusCollectList.ids[stage->field_0x14 - 1] == -1)
-                NextStatusStage(packet);
-        }
-    }
-}
+void CollectCharcters_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
 
 i32 SetProtocolDroidFallAnim(GameObject_s *object);
 
-void CollectCharactersOff_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active) {
-    COLLECTION_s *collection = packet->vehicle_area ? &VehicleCollection : &CharacterCollection;
-    if (active == 0)
-        return;
-    f32 alpha = 1.0f;
-    if (stage->field_0x14 > 0)
-        alpha = 1.0f - NuFdiv(stage->field_0x18, stage->field_0x1c);
-    Collection_Draw(collection, 0.0f, COLLECTION_Y_STATUS, collection->field_10, NULL, alpha, 0);
-}
+void CollectCharactersOff_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active);
 
-void CollectCharactersOff_Skip(STATUS_STAGE_s *, STATUSPACKET_s *) {
-}
+void CollectCharactersOff_Skip(STATUS_STAGE_s *, STATUSPACKET_s *);
 
 void ScaleGameObject(GameObject_s *obj);
 
 void SetGameObjectCharacterData(GameObject_s *obj);
 
-void CollectCharactersOff_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed) {
-    switch (stage->field_0x14) {
-        case 0:
-            stage->field_0x18 = 0.0f;
-            stage->field_0x1c = 1.0f;
-            stage->field_0x14 = 1;
-            break;
-        case 1:
-            stage->field_0x18 += elapsed;
-            if (stage->field_0x18 >= stage->field_0x1c)
-                NextStatusStage(packet);
-            break;
-    }
-}
+void CollectCharactersOff_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
 
 extern "C" i32 dagobah_training;
 
