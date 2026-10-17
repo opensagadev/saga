@@ -47,15 +47,7 @@ static i32 PodRaceKey[8] __attribute__((aligned(16))) = {-1, -1, -1, -1, -1, -1,
 static i32 snaphack[2];
 static i32 snaphacktimer[2];
 
-struct SPEEDERCHASEANETPACKET_s {
-    u8 field_0x0;
-    u8 speeder_count;
-    u8 speeders_killed;
-    u8 field_0x3;
-    u8 panel_state;
-    u8 field_0x5;
-    u8 field_0x6;
-};
+#include "legoapi/actions/character/speederchase_types.h"
 
 SPEEDERCHASEANETPACKET_s *speederchasea_netpacket;
 
@@ -670,16 +662,9 @@ i32 SpeederChase_ObjIsAGroundTroop(GameObject_s *object) {
 
 extern "C" {
 
-    i32 edmain_auto_speed = 1;
+extern i32 edmain_auto_speed;
 
-    void cbSetAutoSpeed(eduimenu_s *, eduiitem_s *item, u32) {
-        edmain_auto_speed = item->highlighted;
-        if (edmain_auto_speed != 0) {
-            edcamSetAutoSpeed(0.15f, 0.2f, 0.01f, 0.1f);
-        } else {
-            edcamSetAutoSpeed(0.0f, 0.0f, 0.0f, 0.0f);
-        }
-    }
+void cbSetAutoSpeed(eduimenu_s *, eduiitem_s *item, u32);
 
 } // extern "C"
 

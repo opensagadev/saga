@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 83.07672,
+    "fuzzy_match_percent": 83.08588,
     "total_code": "4722419",
-    "matched_code": "649748",
-    "matched_code_percent": 13.758797,
+    "matched_code": "651044",
+    "matched_code_percent": 13.78624,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 7008,
-    "matched_functions_percent": 52.06925,
+    "matched_functions": 7010,
+    "matched_functions_percent": 52.084106,
     "total_units": 1
   },
   "text": {
@@ -24895,261 +24895,6 @@
       ]
     },
     {
-      "name": "gameapi/edtools/edfile.cpp.o",
-      "source": "src/gameapi/edtools/edfile.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_gameapi/edfile.o",
-      "functions": [
-        {
-          "name": "EdFileSwapEndianess16",
-          "demangled_name": "EdFileSwapEndianess16",
-          "address": 3823872,
-          "offset": 2933904,
-          "size": 17,
-          "match_percent": 100.0
-        },
-        {
-          "name": "EdFileSwapEndianess32",
-          "demangled_name": "EdFileSwapEndianess32",
-          "address": 3823904,
-          "offset": 2933936,
-          "size": 31,
-          "match_percent": 100.0
-        },
-        {
-          "name": "EdFileSetReadWrongEndianess",
-          "demangled_name": "EdFileSetReadWrongEndianess",
-          "address": 3823936,
-          "offset": 2933968,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "EdFileSetMedia",
-          "demangled_name": "EdFileSetMedia",
-          "address": 3823952,
-          "offset": 2933984,
-          "size": 24,
-          "match_percent": 99.85714
-        },
-        {
-          "name": "EdFileSetPakFile",
-          "demangled_name": "EdFileSetPakFile",
-          "address": 3823984,
-          "offset": 2934016,
-          "size": 24,
-          "match_percent": 99.85714
-        },
-        {
-          "name": "_Z18EdFileResetBuffersv",
-          "demangled_name": "EdFileResetBuffers()",
-          "address": 3824016,
-          "offset": 2934048,
-          "size": 83,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z16EdFileFillBufferv",
-          "demangled_name": "EdFileFillBuffer()",
-          "address": 3824112,
-          "offset": 2934144,
-          "size": 130,
-          "match_percent": 99.965515
-        },
-        {
-          "name": "EdFileOpen",
-          "demangled_name": "EdFileOpen",
-          "address": 3824256,
-          "offset": 2934288,
-          "size": 322,
-          "match_percent": 89.65169
-        },
-        {
-          "name": "_Z17EdFileFlushBufferv",
-          "demangled_name": "EdFileFlushBuffer()",
-          "address": 3824592,
-          "offset": 2934624,
-          "size": 113,
-          "match_percent": 87.96667
-        },
-        {
-          "name": "EdFileClose",
-          "demangled_name": "EdFileClose",
-          "address": 3824720,
-          "offset": 2934752,
-          "size": 135,
-          "match_percent": 96.878784
-        },
-        {
-          "name": "EdFileWrite",
-          "demangled_name": "EdFileWrite",
-          "address": 3824864,
-          "offset": 2934896,
-          "size": 153,
-          "match_percent": 93.52941
-        },
-        {
-          "name": "EdFileWriteFloat",
-          "demangled_name": "EdFileWriteFloat",
-          "address": 3825024,
-          "offset": 2935056,
-          "size": 92,
-          "match_percent": 100.0
-        },
-        {
-          "name": "EdFileWriteInt",
-          "demangled_name": "EdFileWriteInt",
-          "address": 3825120,
-          "offset": 2935152,
-          "size": 88,
-          "match_percent": 100.0
-        },
-        {
-          "name": "EdFileWriteUnsignedInt",
-          "demangled_name": "EdFileWriteUnsignedInt",
-          "address": 3825216,
-          "offset": 2935248,
-          "size": 88,
-          "match_percent": 100.0
-        },
-        {
-          "name": "EdFileWriteShort",
-          "demangled_name": "EdFileWriteShort",
-          "address": 3825312,
-          "offset": 2935344,
-          "size": 89,
-          "match_percent": 100.0
-        },
-        {
-          "name": "EdFileWriteUnsignedShort",
-          "demangled_name": "EdFileWriteUnsignedShort",
-          "address": 3825408,
-          "offset": 2935440,
-          "size": 89,
-          "match_percent": 100.0
-        },
-        {
-          "name": "EdFileWriteChar",
-          "demangled_name": "EdFileWriteChar",
-          "address": 3825504,
-          "offset": 2935536,
-          "size": 50,
-          "match_percent": 100.0
-        },
-        {
-          "name": "EdFileWriteUnsignedChar",
-          "demangled_name": "EdFileWriteUnsignedChar",
-          "address": 3825568,
-          "offset": 2935600,
-          "size": 50,
-          "match_percent": 100.0
-        },
-        {
-          "name": "EdFileWriteNuVec",
-          "demangled_name": "EdFileWriteNuVec",
-          "address": 3825632,
-          "offset": 2935664,
-          "size": 84,
-          "match_percent": 100.0
-        },
-        {
-          "name": "EdFileRead",
-          "demangled_name": "EdFileRead",
-          "address": 3825728,
-          "offset": 2935760,
-          "size": 137,
-          "match_percent": 94.14893
-        },
-        {
-          "name": "EdFileReadFloat",
-          "demangled_name": "EdFileReadFloat",
-          "address": 3825872,
-          "offset": 2935904,
-          "size": 85,
-          "match_percent": 100.0
-        },
-        {
-          "name": "EdFileReadInt",
-          "demangled_name": "EdFileReadInt",
-          "address": 3825968,
-          "offset": 2936000,
-          "size": 85,
-          "match_percent": 100.0
-        },
-        {
-          "name": "EdFileReadUnsignedInt",
-          "demangled_name": "EdFileReadUnsignedInt",
-          "address": 3826064,
-          "offset": 2936096,
-          "size": 85,
-          "match_percent": 100.0
-        },
-        {
-          "name": "EdFileReadShort",
-          "demangled_name": "EdFileReadShort",
-          "address": 3826160,
-          "offset": 2936192,
-          "size": 86,
-          "match_percent": 100.0
-        },
-        {
-          "name": "EdFileReadUnsignedShort",
-          "demangled_name": "EdFileReadUnsignedShort",
-          "address": 3826256,
-          "offset": 2936288,
-          "size": 86,
-          "match_percent": 100.0
-        },
-        {
-          "name": "EdFileReadChar",
-          "demangled_name": "EdFileReadChar",
-          "address": 3826352,
-          "offset": 2936384,
-          "size": 47,
-          "match_percent": 100.0
-        },
-        {
-          "name": "EdFileReadUnsignedChar",
-          "demangled_name": "EdFileReadUnsignedChar",
-          "address": 3826400,
-          "offset": 2936432,
-          "size": 47,
-          "match_percent": 100.0
-        },
-        {
-          "name": "EdFileReadNuVec",
-          "demangled_name": "EdFileReadNuVec",
-          "address": 3826448,
-          "offset": 2936480,
-          "size": 63,
-          "match_percent": 100.0
-        },
-        {
-          "name": "EdFileWriteMemCard",
-          "demangled_name": "EdFileWriteMemCard",
-          "address": 3826512,
-          "offset": 2936544,
-          "size": 89,
-          "match_percent": 100.0
-        },
-        {
-          "name": "EdFileReadMemCard",
-          "demangled_name": "EdFileReadMemCard",
-          "address": 3826608,
-          "offset": 2936640,
-          "size": 89,
-          "match_percent": 100.0
-        },
-        {
-          "name": "EdFileBackup",
-          "demangled_name": "EdFileBackup",
-          "address": 3826704,
-          "offset": 2936736,
-          "size": 318,
-          "match_percent": 93.150536
-        }
-      ]
-    },
-    {
       "name": "gameapi/edtools/edpartall.cpp.o",
       "source": "src/gameapi/edtools/edpartall.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_gameapi/edpartall.o",
@@ -26825,6 +26570,2518 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_gameapi/edtoolsall.o",
       "functions": [
         {
+          "name": "cbMMRegSel",
+          "demangled_name": "cbMMRegSel",
+          "address": 3732720,
+          "offset": 2842752,
+          "size": 61,
+          "match_percent": 99.888885
+        },
+        {
+          "name": "eduicbInteractSel",
+          "demangled_name": "eduicbInteractSel",
+          "address": 3732784,
+          "offset": 2842816,
+          "size": 125,
+          "match_percent": 88.789474
+        },
+        {
+          "name": "eduicbProcessTexturePick",
+          "demangled_name": "eduicbProcessTexturePick",
+          "address": 3732912,
+          "offset": 2842944,
+          "size": 824,
+          "match_percent": 73.41558
+        },
+        {
+          "name": "eduicbProcessSlider",
+          "demangled_name": "eduicbProcessSlider",
+          "address": 3733744,
+          "offset": 2843776,
+          "size": 684,
+          "match_percent": 94.95092
+        },
+        {
+          "name": "eduicbProcessSeparator",
+          "demangled_name": "eduicbProcessSeparator",
+          "address": 3734432,
+          "offset": 2844464,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduicbItemDestroyExpander",
+          "demangled_name": "eduicbItemDestroyExpander",
+          "address": 3734448,
+          "offset": 2844480,
+          "size": 78,
+          "match_percent": 100.0
+        },
+        {
+          "name": "cbSel",
+          "demangled_name": "cbSel",
+          "address": 3734528,
+          "offset": 2844560,
+          "size": 25,
+          "match_percent": 99.833336
+        },
+        {
+          "name": "cbGradChange",
+          "demangled_name": "cbGradChange",
+          "address": 3734560,
+          "offset": 2844592,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "cbInteractMenuTitle",
+          "demangled_name": "cbInteractMenuTitle",
+          "address": 3734576,
+          "offset": 2844608,
+          "size": 144,
+          "match_percent": 99.83784
+        },
+        {
+          "name": "cbInteractMenuScrollUp",
+          "demangled_name": "cbInteractMenuScrollUp",
+          "address": 3734720,
+          "offset": 2844752,
+          "size": 36,
+          "match_percent": 100.0
+        },
+        {
+          "name": "cbInteractMenuScrollDown",
+          "demangled_name": "cbInteractMenuScrollDown",
+          "address": 3734768,
+          "offset": 2844800,
+          "size": 36,
+          "match_percent": 100.0
+        },
+        {
+          "name": "cbInteractMenuCancelChild",
+          "demangled_name": "cbInteractMenuCancelChild",
+          "address": 3734816,
+          "offset": 2844848,
+          "size": 45,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL6cbCopyP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbCopy(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3734864,
+          "offset": 2844896,
+          "size": 141,
+          "match_percent": 92.41936
+        },
+        {
+          "name": "eduicbItemDestroyProp",
+          "demangled_name": "eduicbItemDestroyProp",
+          "address": 3735008,
+          "offset": 2845040,
+          "size": 192,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduicbItemDestroyFilter",
+          "demangled_name": "eduicbItemDestroyFilter",
+          "address": 3735200,
+          "offset": 2845232,
+          "size": 94,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduicbItemDestroy",
+          "demangled_name": "eduicbItemDestroy",
+          "address": 3735296,
+          "offset": 2845328,
+          "size": 190,
+          "match_percent": 99.42105
+        },
+        {
+          "name": "eduicbItemSliderDestroy",
+          "demangled_name": "eduicbItemSliderDestroy",
+          "address": 3735488,
+          "offset": 2845520,
+          "size": 111,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduicbItemFilePickDestroy",
+          "demangled_name": "eduicbItemFilePickDestroy",
+          "address": 3735600,
+          "offset": 2845632,
+          "size": 111,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduicbItemTextPickDestroy",
+          "demangled_name": "eduicbItemTextPickDestroy",
+          "address": 3735712,
+          "offset": 2845744,
+          "size": 117,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL14eduiFntPrintExPviiiPcz",
+          "demangled_name": "eduiFntPrintEx(void*, int, int, int, char*, ...)",
+          "address": 3735840,
+          "offset": 2845872,
+          "size": 232,
+          "match_percent": 99.98485
+        },
+        {
+          "name": "_ZL18eduiFntPrintClipExPvffiffPcz",
+          "demangled_name": "eduiFntPrintClipEx(void*, float, float, int, float, float, char*, ...)",
+          "address": 3736080,
+          "offset": 2846112,
+          "size": 422,
+          "match_percent": 71.521736
+        },
+        {
+          "name": "eduicbProcessGraph",
+          "demangled_name": "eduicbProcessGraph",
+          "address": 3736512,
+          "offset": 2846544,
+          "size": 1367,
+          "match_percent": 68.91139
+        },
+        {
+          "name": "eduicbProcessGreyPick",
+          "demangled_name": "eduicbProcessGreyPick",
+          "address": 3737888,
+          "offset": 2847920,
+          "size": 297,
+          "match_percent": 75.136986
+        },
+        {
+          "name": "_ZL7HSV2RGBfffPfS_S_.part.18",
+          "demangled_name": "HSV2RGB(float, float, float, float*, float*, float*) [clone .part.18]",
+          "address": 3738192,
+          "offset": 2848224,
+          "size": 365,
+          "match_percent": 99.94253
+        },
+        {
+          "name": "_ZL14eduiFntPrintExPviiiPcz.constprop.67",
+          "demangled_name": "eduiFntPrintEx(void*, int, int, int, char*, ...) [clone .constprop.67]",
+          "address": 3738560,
+          "offset": 2848592,
+          "size": 182,
+          "match_percent": 99.68
+        },
+        {
+          "name": "_ZL14eduiFntPrintExPvffiPcz.constprop.66",
+          "demangled_name": "eduiFntPrintEx(void*, float, float, int, char*, ...) [clone .constprop.66]",
+          "address": 3738752,
+          "offset": 2848784,
+          "size": 104,
+          "match_percent": 99.91304
+        },
+        {
+          "name": "_ZL14eduiFntPrintExPviiiPcz.constprop.68",
+          "demangled_name": "eduiFntPrintEx(void*, int, int, int, char*, ...) [clone .constprop.68]",
+          "address": 3738864,
+          "offset": 2848896,
+          "size": 207,
+          "match_percent": 99.72414
+        },
+        {
+          "name": "_ZL18eduiFntPrintClipExPviiiiiPcz.constprop.70",
+          "demangled_name": "eduiFntPrintClipEx(void*, int, int, int, int, int, char*, ...) [clone .constprop.70]",
+          "address": 3739072,
+          "offset": 2849104,
+          "size": 290,
+          "match_percent": 71.9
+        },
+        {
+          "name": "eduiRenderGraphLine",
+          "demangled_name": "eduiRenderGraphLine",
+          "address": 3739376,
+          "offset": 2849408,
+          "size": 334,
+          "match_percent": 98.455696
+        },
+        {
+          "name": "_ZL19eduiDrawGrad4StepsViiiiffiiiii.constprop.59",
+          "demangled_name": "eduiDrawGrad4StepsV(int, int, int, int, float, float, int, int, int, int, int) [clone .constprop.59]",
+          "address": 3739712,
+          "offset": 2849744,
+          "size": 1993,
+          "match_percent": 62.374115
+        },
+        {
+          "name": "eduicbRenderSeparator",
+          "demangled_name": "eduicbRenderSeparator",
+          "address": 3741712,
+          "offset": 2851744,
+          "size": 283,
+          "match_percent": 87.9863
+        },
+        {
+          "name": "eduicbRenderGradPick",
+          "demangled_name": "eduicbRenderGradPick",
+          "address": 3742000,
+          "offset": 2852032,
+          "size": 1046,
+          "match_percent": 64.18315
+        },
+        {
+          "name": "eduicbRenderSel",
+          "demangled_name": "eduicbRenderSel",
+          "address": 3743056,
+          "offset": 2853088,
+          "size": 546,
+          "match_percent": 86.333336
+        },
+        {
+          "name": "eduicbRenderSliderInt",
+          "demangled_name": "eduicbRenderSliderInt",
+          "address": 3743616,
+          "offset": 2853648,
+          "size": 838,
+          "match_percent": 90.125
+        },
+        {
+          "name": "eduicbRenderTexturePick",
+          "demangled_name": "eduicbRenderTexturePick",
+          "address": 3744464,
+          "offset": 2854496,
+          "size": 1752,
+          "match_percent": 22.229382
+        },
+        {
+          "name": "eduicbRenderTextSelector",
+          "demangled_name": "eduicbRenderTextSelector",
+          "address": 3746224,
+          "offset": 2856256,
+          "size": 472,
+          "match_percent": 98.39286
+        },
+        {
+          "name": "eduicbRenderNumber",
+          "demangled_name": "eduicbRenderNumber",
+          "address": 3746704,
+          "offset": 2856736,
+          "size": 464,
+          "match_percent": 99.88182
+        },
+        {
+          "name": "eduicbRenderGraph",
+          "demangled_name": "eduicbRenderGraph",
+          "address": 3747168,
+          "offset": 2857200,
+          "size": 4706,
+          "match_percent": 79.57158
+        },
+        {
+          "name": "eduicbRenderFilePick",
+          "demangled_name": "eduicbRenderFilePick",
+          "address": 3751888,
+          "offset": 2861920,
+          "size": 812,
+          "match_percent": 88.90206
+        },
+        {
+          "name": "eduicbRenderCheck",
+          "demangled_name": "eduicbRenderCheck",
+          "address": 3752704,
+          "offset": 2862736,
+          "size": 764,
+          "match_percent": 82.94686
+        },
+        {
+          "name": "eduicbRenderGreyPick",
+          "demangled_name": "eduicbRenderGreyPick",
+          "address": 3753472,
+          "offset": 2863504,
+          "size": 800,
+          "match_percent": 87.02956
+        },
+        {
+          "name": "eduicbRenderColourSlider",
+          "demangled_name": "eduicbRenderColourSlider",
+          "address": 3754272,
+          "offset": 2864304,
+          "size": 996,
+          "match_percent": 85.1046
+        },
+        {
+          "name": "eduicbRenderTextPick",
+          "demangled_name": "eduicbRenderTextPick",
+          "address": 3755280,
+          "offset": 2865312,
+          "size": 4406,
+          "match_percent": 65.92968
+        },
+        {
+          "name": "eduicbRenderSlider",
+          "demangled_name": "eduicbRenderSlider",
+          "address": 3759696,
+          "offset": 2869728,
+          "size": 882,
+          "match_percent": 89.87864
+        },
+        {
+          "name": "eduicbItemExpanderClose",
+          "demangled_name": "eduicbItemExpanderClose",
+          "address": 3760592,
+          "offset": 2870624,
+          "size": 1079,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduicbProcessExpander",
+          "demangled_name": "eduicbProcessExpander",
+          "address": 3761680,
+          "offset": 2871712,
+          "size": 111,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduicbInteractExpander",
+          "demangled_name": "eduicbInteractExpander",
+          "address": 3761792,
+          "offset": 2871824,
+          "size": 224,
+          "match_percent": 76.14085
+        },
+        {
+          "name": "eduicbInteractProp",
+          "demangled_name": "eduicbInteractProp",
+          "address": 3762016,
+          "offset": 2872048,
+          "size": 761,
+          "match_percent": 65.570656
+        },
+        {
+          "name": "eduicbInteractFilter",
+          "demangled_name": "eduicbInteractFilter",
+          "address": 3762784,
+          "offset": 2872816,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduicbProcessColourSlider",
+          "demangled_name": "eduicbProcessColourSlider",
+          "address": 3762800,
+          "offset": 2872832,
+          "size": 1052,
+          "match_percent": 68.57204
+        },
+        {
+          "name": "eduicbProcessColourPick",
+          "demangled_name": "eduicbProcessColourPick",
+          "address": 3763856,
+          "offset": 2873888,
+          "size": 1024,
+          "match_percent": 99.29482
+        },
+        {
+          "name": "eduicbInteractColourPick",
+          "demangled_name": "eduicbInteractColourPick",
+          "address": 3764880,
+          "offset": 2874912,
+          "size": 1174,
+          "match_percent": 75.185455
+        },
+        {
+          "name": "eduicbRenderColourPick",
+          "demangled_name": "eduicbRenderColourPick",
+          "address": 3766064,
+          "offset": 2876096,
+          "size": 2741,
+          "match_percent": 37.23663
+        },
+        {
+          "name": "eduicbRenderSelWithClipColour",
+          "demangled_name": "eduicbRenderSelWithClipColour",
+          "address": 3768816,
+          "offset": 2878848,
+          "size": 955,
+          "match_percent": 86.381355
+        },
+        {
+          "name": "edmainSetReturn",
+          "demangled_name": "edmainSetReturn",
+          "address": 3769776,
+          "offset": 2879808,
+          "size": 24,
+          "match_percent": 99.85714
+        },
+        {
+          "name": "cbMMReturnToApp",
+          "demangled_name": "cbMMReturnToApp",
+          "address": 3769808,
+          "offset": 2879840,
+          "size": 34,
+          "match_percent": 100.0
+        },
+        {
+          "name": "cbMMCancel",
+          "demangled_name": "cbMMCancel",
+          "address": 3769856,
+          "offset": 2879888,
+          "size": 34,
+          "match_percent": 100.0
+        },
+        {
+          "name": "edmainCurrent",
+          "demangled_name": "edmainCurrent",
+          "address": 3769904,
+          "offset": 2879936,
+          "size": 35,
+          "match_percent": 99.8
+        },
+        {
+          "name": "edmainActivate",
+          "demangled_name": "edmainActivate",
+          "address": 3769952,
+          "offset": 2879984,
+          "size": 178,
+          "match_percent": 99.89474
+        },
+        {
+          "name": "edmainSetCamera",
+          "demangled_name": "edmainSetCamera",
+          "address": 3770144,
+          "offset": 2880176,
+          "size": 134,
+          "match_percent": 99.976746
+        },
+        {
+          "name": "edmainGetCamera",
+          "demangled_name": "edmainGetCamera",
+          "address": 3770288,
+          "offset": 2880320,
+          "size": 22,
+          "match_percent": 99.875
+        },
+        {
+          "name": "edmainExtCamera",
+          "demangled_name": "edmainExtCamera",
+          "address": 3770320,
+          "offset": 2880352,
+          "size": 31,
+          "match_percent": 99.71429
+        },
+        {
+          "name": "edmainSetCursorEnabled",
+          "demangled_name": "edmainSetCursorEnabled",
+          "address": 3770352,
+          "offset": 2880384,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
+          "name": "edmainGetCursorEnabled",
+          "demangled_name": "edmainGetCursorEnabled",
+          "address": 3770384,
+          "offset": 2880416,
+          "size": 22,
+          "match_percent": 100.0
+        },
+        {
+          "name": "edGetMainMenu",
+          "demangled_name": "edGetMainMenu",
+          "address": 3770416,
+          "offset": 2880448,
+          "size": 22,
+          "match_percent": 99.875
+        },
+        {
+          "name": "edmainRegisterLocVec",
+          "demangled_name": "edmainRegisterLocVec",
+          "address": 3770448,
+          "offset": 2880480,
+          "size": 24,
+          "match_percent": 99.85714
+        },
+        {
+          "name": "edmainQueryLocVec",
+          "demangled_name": "edmainQueryLocVec",
+          "address": 3770480,
+          "offset": 2880512,
+          "size": 22,
+          "match_percent": 99.875
+        },
+        {
+          "name": "eduiSetGlobalSliderAccel",
+          "demangled_name": "eduiSetGlobalSliderAccel",
+          "address": 3770512,
+          "offset": 2880544,
+          "size": 68,
+          "match_percent": 99.8
+        },
+        {
+          "name": "eduiInitMaterials",
+          "demangled_name": "eduiInitMaterials",
+          "address": 3770592,
+          "offset": 2880624,
+          "size": 321,
+          "match_percent": 93.233765
+        },
+        {
+          "name": "eduiSetRenderPlane",
+          "demangled_name": "eduiSetRenderPlane",
+          "address": 3770928,
+          "offset": 2880960,
+          "size": 113,
+          "match_percent": 97.93104
+        },
+        {
+          "name": "eduiMenuAddItem",
+          "demangled_name": "eduiMenuAddItem",
+          "address": 3771056,
+          "offset": 2881088,
+          "size": 68,
+          "match_percent": 94.318184
+        },
+        {
+          "name": "eduiMenuAddItemFirst",
+          "demangled_name": "eduiMenuAddItemFirst",
+          "address": 3771136,
+          "offset": 2881168,
+          "size": 69,
+          "match_percent": 88.333336
+        },
+        {
+          "name": "eduiMenuAddItemLast",
+          "demangled_name": "eduiMenuAddItemLast",
+          "address": 3771216,
+          "offset": 2881248,
+          "size": 68,
+          "match_percent": 92.333336
+        },
+        {
+          "name": "eduiMenuAddItemAfter",
+          "demangled_name": "eduiMenuAddItemAfter",
+          "address": 3771296,
+          "offset": 2881328,
+          "size": 118,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduiMenuAddItemBefore",
+          "demangled_name": "eduiMenuAddItemBefore",
+          "address": 3771424,
+          "offset": 2881456,
+          "size": 118,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduiMenuItemMoveUp",
+          "demangled_name": "eduiMenuItemMoveUp",
+          "address": 3771552,
+          "offset": 2881584,
+          "size": 93,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduiMenuItemMoveDown",
+          "demangled_name": "eduiMenuItemMoveDown",
+          "address": 3771648,
+          "offset": 2881680,
+          "size": 93,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduiMenuSortItemsByTxt",
+          "demangled_name": "eduiMenuSortItemsByTxt",
+          "address": 3771744,
+          "offset": 2881776,
+          "size": 158,
+          "match_percent": 89.18033
+        },
+        {
+          "name": "eduiMenuSelectFirstEntry",
+          "demangled_name": "eduiMenuSelectFirstEntry",
+          "address": 3771904,
+          "offset": 2881936,
+          "size": 16,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduiMenuRemoveItem",
+          "demangled_name": "eduiMenuRemoveItem",
+          "address": 3771920,
+          "offset": 2881952,
+          "size": 133,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduiGetAnalougePadValue",
+          "demangled_name": "eduiGetAnalougePadValue",
+          "address": 3772064,
+          "offset": 2882096,
+          "size": 264,
+          "match_percent": 99.85965
+        },
+        {
+          "name": "eduiMenuCreate",
+          "demangled_name": "eduiMenuCreate",
+          "address": 3772336,
+          "offset": 2882368,
+          "size": 263,
+          "match_percent": 99.96875
+        },
+        {
+          "name": "eduiMenuSetAttr",
+          "demangled_name": "eduiMenuSetAttr",
+          "address": 3772608,
+          "offset": 2882640,
+          "size": 70,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduiMenuSetTransparency",
+          "demangled_name": "eduiMenuSetTransparency",
+          "address": 3772688,
+          "offset": 2882720,
+          "size": 127,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduiMenuSetDisabled",
+          "demangled_name": "eduiMenuSetDisabled",
+          "address": 3772816,
+          "offset": 2882848,
+          "size": 59,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduiMenuHighlight",
+          "demangled_name": "eduiMenuHighlight",
+          "address": 3772880,
+          "offset": 2882912,
+          "size": 112,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduicbProcessSel",
+          "demangled_name": "eduicbProcessSel",
+          "address": 3772992,
+          "offset": 2883024,
+          "size": 152,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduiItemSetText",
+          "demangled_name": "eduiItemSetText",
+          "address": 3773152,
+          "offset": 2883184,
+          "size": 255,
+          "match_percent": 98.95238
+        },
+        {
+          "name": "_ZL21cbToggleIndicatorModeP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbToggleIndicatorMode(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3773408,
+          "offset": 2883440,
+          "size": 225,
+          "match_percent": 99.76087
+        },
+        {
+          "name": "_ZL19cbProcessColourPickP10eduimenu_sP10eduiitem_sfP7nupad_s",
+          "demangled_name": "cbProcessColourPick(eduimenu_s*, eduiitem_s*, float, nupad_s*)",
+          "address": 3773648,
+          "offset": 2883680,
+          "size": 281,
+          "match_percent": 99.74545
+        },
+        {
+          "name": "eduiItemSelCreate",
+          "demangled_name": "eduiItemSelCreate",
+          "address": 3773936,
+          "offset": 2883968,
+          "size": 388,
+          "match_percent": 79.631065
+        },
+        {
+          "name": "eduiItemSelWithClipColourCreate",
+          "demangled_name": "eduiItemSelWithClipColourCreate",
+          "address": 3774336,
+          "offset": 2884368,
+          "size": 87,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduiItemCheckCreate",
+          "demangled_name": "eduiItemCheckCreate",
+          "address": 3774432,
+          "offset": 2884464,
+          "size": 103,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduiItemToggleCreate",
+          "demangled_name": "eduiItemToggleCreate",
+          "address": 3774544,
+          "offset": 2884576,
+          "size": 103,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduiItemTextPickSetFmt",
+          "demangled_name": "eduiItemTextPickSetFmt",
+          "address": 3774656,
+          "offset": 2884688,
+          "size": 234,
+          "match_percent": 99.98182
+        },
+        {
+          "name": "eduiItemTextPickCreate",
+          "demangled_name": "eduiItemTextPickCreate",
+          "address": 3774896,
+          "offset": 2884928,
+          "size": 436,
+          "match_percent": 91.26667
+        },
+        {
+          "name": "cbCompateDirentByDateAsc",
+          "demangled_name": "cbCompateDirentByDateAsc",
+          "address": 3775344,
+          "offset": 2885376,
+          "size": 19,
+          "match_percent": 100.0
+        },
+        {
+          "name": "cbCompateDirentByDateDec",
+          "demangled_name": "cbCompateDirentByDateDec",
+          "address": 3775376,
+          "offset": 2885408,
+          "size": 19,
+          "match_percent": 100.0
+        },
+        {
+          "name": "cbCompateDirentBySizeAsc",
+          "demangled_name": "cbCompateDirentBySizeAsc",
+          "address": 3775408,
+          "offset": 2885440,
+          "size": 53,
+          "match_percent": 100.0
+        },
+        {
+          "name": "cbCompateDirentBySizeDec",
+          "demangled_name": "cbCompateDirentBySizeDec",
+          "address": 3775472,
+          "offset": 2885504,
+          "size": 33,
+          "match_percent": 100.0
+        },
+        {
+          "name": "cbCompateDirentByNameAsc",
+          "demangled_name": "cbCompateDirentByNameAsc",
+          "address": 3775520,
+          "offset": 2885552,
+          "size": 48,
+          "match_percent": 100.0
+        },
+        {
+          "name": "cbCompateDirentByNameDec",
+          "demangled_name": "cbCompateDirentByNameDec",
+          "address": 3775568,
+          "offset": 2885600,
+          "size": 48,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduiItemFilePickSetFmt",
+          "demangled_name": "eduiItemFilePickSetFmt",
+          "address": 3775616,
+          "offset": 2885648,
+          "size": 220,
+          "match_percent": 99.98148
+        },
+        {
+          "name": "eduiItemFilePickCreate",
+          "demangled_name": "eduiItemFilePickCreate",
+          "address": 3775840,
+          "offset": 2885872,
+          "size": 388,
+          "match_percent": 92.69697
+        },
+        {
+          "name": "eduiGradStageSetRGB",
+          "demangled_name": "eduiGradStageSetRGB",
+          "address": 3776240,
+          "offset": 2886272,
+          "size": 426,
+          "match_percent": 82.4
+        },
+        {
+          "name": "eduiGradStageSetHSV",
+          "demangled_name": "eduiGradStageSetHSV",
+          "address": 3776672,
+          "offset": 2886704,
+          "size": 446,
+          "match_percent": 89.33929
+        },
+        {
+          "name": "eduiGradStageAdd",
+          "demangled_name": "eduiGradStageAdd",
+          "address": 3777120,
+          "offset": 2887152,
+          "size": 356,
+          "match_percent": 73.34021
+        },
+        {
+          "name": "eduiGradStageAddRGB",
+          "demangled_name": "eduiGradStageAddRGB",
+          "address": 3777488,
+          "offset": 2887520,
+          "size": 419,
+          "match_percent": 86.197914
+        },
+        {
+          "name": "eduiGradStageDelete",
+          "demangled_name": "eduiGradStageDelete",
+          "address": 3777920,
+          "offset": 2887952,
+          "size": 101,
+          "match_percent": 86.32353
+        },
+        {
+          "name": "eduicbItemGradPickDestroy",
+          "demangled_name": "eduicbItemGradPickDestroy",
+          "address": 3778032,
+          "offset": 2888064,
+          "size": 91,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduiGradPickRead",
+          "demangled_name": "eduiGradPickRead",
+          "address": 3778128,
+          "offset": 2888160,
+          "size": 621,
+          "match_percent": 70.95395
+        },
+        {
+          "name": "eduiItemGradPickCreate",
+          "demangled_name": "eduiItemGradPickCreate",
+          "address": 3778752,
+          "offset": 2888784,
+          "size": 340,
+          "match_percent": 91.22581
+        },
+        {
+          "name": "eduiItemGreyGradPickCreate",
+          "demangled_name": "eduiItemGreyGradPickCreate",
+          "address": 3779104,
+          "offset": 2889136,
+          "size": 69,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduiItemDataGradPickCreate",
+          "demangled_name": "eduiItemDataGradPickCreate",
+          "address": 3779184,
+          "offset": 2889216,
+          "size": 104,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduiItemColourPickSetHSV",
+          "demangled_name": "eduiItemColourPickSetHSV",
+          "address": 3779296,
+          "offset": 2889328,
+          "size": 67,
+          "match_percent": 99.92308
+        },
+        {
+          "name": "eduiItemColourPickSetRGB",
+          "demangled_name": "eduiItemColourPickSetRGB",
+          "address": 3779376,
+          "offset": 2889408,
+          "size": 453,
+          "match_percent": 81.39604
+        },
+        {
+          "name": "_ZL7cbPasteP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPaste(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3779840,
+          "offset": 2889872,
+          "size": 231,
+          "match_percent": 99.80769
+        },
+        {
+          "name": "eduiItemColourPickCreate",
+          "demangled_name": "eduiItemColourPickCreate",
+          "address": 3780080,
+          "offset": 2890112,
+          "size": 380,
+          "match_percent": 90.81443
+        },
+        {
+          "name": "eduiItemGreyPickCreate",
+          "demangled_name": "eduiItemGreyPickCreate",
+          "address": 3780464,
+          "offset": 2890496,
+          "size": 87,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduiItemTexturePickCreate",
+          "demangled_name": "eduiItemTexturePickCreate",
+          "address": 3780560,
+          "offset": 2890592,
+          "size": 380,
+          "match_percent": 91.0
+        },
+        {
+          "name": "eduiItemGraphCreate",
+          "demangled_name": "eduiItemGraphCreate",
+          "address": 3780944,
+          "offset": 2890976,
+          "size": 484,
+          "match_percent": 93.0087
+        },
+        {
+          "name": "eduiItemGraphAddOnionSkin",
+          "demangled_name": "eduiItemGraphAddOnionSkin",
+          "address": 3781440,
+          "offset": 2891472,
+          "size": 151,
+          "match_percent": 95.210526
+        },
+        {
+          "name": "eduiItemGraphSetCursor",
+          "demangled_name": "eduiItemGraphSetCursor",
+          "address": 3781600,
+          "offset": 2891632,
+          "size": 146,
+          "match_percent": 99.95
+        },
+        {
+          "name": "eduiItemGraphSetLabels",
+          "demangled_name": "eduiItemGraphSetLabels",
+          "address": 3781760,
+          "offset": 2891792,
+          "size": 151,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduiItemSliderSetValEx",
+          "demangled_name": "eduiItemSliderSetValEx",
+          "address": 3781920,
+          "offset": 2891952,
+          "size": 93,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduiItemSliderSetVal",
+          "demangled_name": "eduiItemSliderSetVal",
+          "address": 3782016,
+          "offset": 2892048,
+          "size": 62,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduicbInteractSlider",
+          "demangled_name": "eduicbInteractSlider",
+          "address": 3782080,
+          "offset": 2892112,
+          "size": 102,
+          "match_percent": 99.88461
+        },
+        {
+          "name": "eduiItemSliderSetFmt",
+          "demangled_name": "eduiItemSliderSetFmt",
+          "address": 3782192,
+          "offset": 2892224,
+          "size": 220,
+          "match_percent": 99.98148
+        },
+        {
+          "name": "eduiItemSliderSetGranularity",
+          "demangled_name": "eduiItemSliderSetGranularity",
+          "address": 3782416,
+          "offset": 2892448,
+          "size": 18,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduiItemSliderCreate",
+          "demangled_name": "eduiItemSliderCreate",
+          "address": 3782448,
+          "offset": 2892480,
+          "size": 420,
+          "match_percent": 90.59259
+        },
+        {
+          "name": "eduiItemSliderCreateInt",
+          "demangled_name": "eduiItemSliderCreateInt",
+          "address": 3782880,
+          "offset": 2892912,
+          "size": 146,
+          "match_percent": 99.86487
+        },
+        {
+          "name": "eduiItemNumberCreate",
+          "demangled_name": "eduiItemNumberCreate",
+          "address": 3783040,
+          "offset": 2893072,
+          "size": 115,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduiItemTextSelectorCreate",
+          "demangled_name": "eduiItemTextSelectorCreate",
+          "address": 3783168,
+          "offset": 2893200,
+          "size": 412,
+          "match_percent": 89.71698
+        },
+        {
+          "name": "eduiItemPropSetText",
+          "demangled_name": "eduiItemPropSetText",
+          "address": 3783584,
+          "offset": 2893616,
+          "size": 255,
+          "match_percent": 98.95238
+        },
+        {
+          "name": "eduiGetCameraEnabled",
+          "demangled_name": "eduiGetCameraEnabled",
+          "address": 3783840,
+          "offset": 2893872,
+          "size": 22,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduiSetCameraEnabled",
+          "demangled_name": "eduiSetCameraEnabled",
+          "address": 3783872,
+          "offset": 2893904,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuKeyToAscii",
+          "demangled_name": "NuKeyToAscii",
+          "address": 3783904,
+          "offset": 2893936,
+          "size": 78,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduicbProcessPropKeyboard.isra.27",
+          "demangled_name": "eduicbProcessPropKeyboard.isra.27",
+          "address": 3783984,
+          "offset": 2894016,
+          "size": 610,
+          "match_percent": 42.15116
+        },
+        {
+          "name": "eduicbProcessProp",
+          "demangled_name": "eduicbProcessProp",
+          "address": 3784608,
+          "offset": 2894640,
+          "size": 282,
+          "match_percent": 99.82353
+        },
+        {
+          "name": "eduiItemPropCreateEx",
+          "demangled_name": "eduiItemPropCreateEx",
+          "address": 3784896,
+          "offset": 2894928,
+          "size": 420,
+          "match_percent": 90.97298
+        },
+        {
+          "name": "eduiItemPropCreate",
+          "demangled_name": "eduiItemPropCreate",
+          "address": 3785328,
+          "offset": 2895360,
+          "size": 98,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduiItemSeparatorCreate",
+          "demangled_name": "eduiItemSeparatorCreate",
+          "address": 3785440,
+          "offset": 2895472,
+          "size": 335,
+          "match_percent": 90.518074
+        },
+        {
+          "name": "eduicbMenuOpenAllexpanders",
+          "demangled_name": "eduicbMenuOpenAllexpanders",
+          "address": 3785776,
+          "offset": 2895808,
+          "size": 74,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduicbMenuCloseAllexpanders",
+          "demangled_name": "eduicbMenuCloseAllexpanders",
+          "address": 3785856,
+          "offset": 2895888,
+          "size": 70,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduiMenuFitWidth",
+          "demangled_name": "eduiMenuFitWidth",
+          "address": 3785936,
+          "offset": 2895968,
+          "size": 800,
+          "match_percent": 84.03553
+        },
+        {
+          "name": "edmainSetMainMenuScale",
+          "demangled_name": "edmainSetMainMenuScale",
+          "address": 3786736,
+          "offset": 2896768,
+          "size": 76,
+          "match_percent": 99.833336
+        },
+        {
+          "name": "eduiMenuDestroyItems",
+          "demangled_name": "eduiMenuDestroyItems",
+          "address": 3786816,
+          "offset": 2896848,
+          "size": 85,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduiMenuDestroy",
+          "demangled_name": "eduiMenuDestroy",
+          "address": 3786912,
+          "offset": 2896944,
+          "size": 239,
+          "match_percent": 99.183334
+        },
+        {
+          "name": "eduicbCancelMessageMenu",
+          "demangled_name": "eduicbCancelMessageMenu",
+          "address": 3787152,
+          "offset": 2897184,
+          "size": 58,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduicbPickCFGCancel",
+          "demangled_name": "eduicbPickCFGCancel",
+          "address": 3787216,
+          "offset": 2897248,
+          "size": 34,
+          "match_percent": 100.0
+        },
+        {
+          "name": "edmainClose",
+          "demangled_name": "edmainClose",
+          "address": 3787264,
+          "offset": 2897296,
+          "size": 183,
+          "match_percent": 99.73333
+        },
+        {
+          "name": "edmainRegister",
+          "demangled_name": "edmainRegister",
+          "address": 3787456,
+          "offset": 2897488,
+          "size": 95,
+          "match_percent": 99.88
+        },
+        {
+          "name": "eduiIitemExpanderSetDepth",
+          "demangled_name": "eduiIitemExpanderSetDepth",
+          "address": 3787552,
+          "offset": 2897584,
+          "size": 113,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduiItemExpanderAddChild",
+          "demangled_name": "eduiItemExpanderAddChild",
+          "address": 3787680,
+          "offset": 2897712,
+          "size": 151,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduiItemExpanderCreate",
+          "demangled_name": "eduiItemExpanderCreate",
+          "address": 3787840,
+          "offset": 2897872,
+          "size": 348,
+          "match_percent": 91.548386
+        },
+        {
+          "name": "eduiItemFilterAddItem",
+          "demangled_name": "eduiItemFilterAddItem",
+          "address": 3788192,
+          "offset": 2898224,
+          "size": 37,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduiItemFilterRemoveItem",
+          "demangled_name": "eduiItemFilterRemoveItem",
+          "address": 3788240,
+          "offset": 2898272,
+          "size": 66,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduicbProcessFilter",
+          "demangled_name": "eduicbProcessFilter",
+          "address": 3788320,
+          "offset": 2898352,
+          "size": 654,
+          "match_percent": 90.462364
+        },
+        {
+          "name": "eduiItemFilterCreate",
+          "demangled_name": "eduiItemFilterCreate",
+          "address": 3788976,
+          "offset": 2899008,
+          "size": 364,
+          "match_percent": 90.25
+        },
+        {
+          "name": "eduiItemRender",
+          "demangled_name": "eduiItemRender",
+          "address": 3789344,
+          "offset": 2899376,
+          "size": 670,
+          "match_percent": 91.210526
+        },
+        {
+          "name": "eduiSetUsingMenuFocus",
+          "demangled_name": "eduiSetUsingMenuFocus",
+          "address": 3790016,
+          "offset": 2900048,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduiGetUsingMenuFocus",
+          "demangled_name": "eduiGetUsingMenuFocus",
+          "address": 3790048,
+          "offset": 2900080,
+          "size": 22,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduiSetDefaultActiveMenu",
+          "demangled_name": "eduiSetDefaultActiveMenu",
+          "address": 3790080,
+          "offset": 2900112,
+          "size": 24,
+          "match_percent": 99.85714
+        },
+        {
+          "name": "eduiSetActiveMenu",
+          "demangled_name": "eduiSetActiveMenu",
+          "address": 3790112,
+          "offset": 2900144,
+          "size": 105,
+          "match_percent": 75.6875
+        },
+        {
+          "name": "eduiMenuAttach",
+          "demangled_name": "eduiMenuAttach",
+          "address": 3790224,
+          "offset": 2900256,
+          "size": 74,
+          "match_percent": 100.0
+        },
+        {
+          "name": "cbSubMenu",
+          "demangled_name": "cbSubMenu",
+          "address": 3790304,
+          "offset": 2900336,
+          "size": 45,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduiCreate3LineMessageMenu",
+          "demangled_name": "eduiCreate3LineMessageMenu",
+          "address": 3790352,
+          "offset": 2900384,
+          "size": 466,
+          "match_percent": 99.71028
+        },
+        {
+          "name": "eduiCreateMessageMenu",
+          "demangled_name": "eduiCreateMessageMenu",
+          "address": 3790832,
+          "offset": 2900864,
+          "size": 253,
+          "match_percent": 84.16129
+        },
+        {
+          "name": "eduicbProcessGradPick",
+          "demangled_name": "eduicbProcessGradPick",
+          "address": 3791088,
+          "offset": 2901120,
+          "size": 1125,
+          "match_percent": 82.70543
+        },
+        {
+          "name": "eduicbAttachDirectoryList.isra.32",
+          "demangled_name": "eduicbAttachDirectoryList.isra.32",
+          "address": 3792224,
+          "offset": 2902256,
+          "size": 1031,
+          "match_percent": 50.103584
+        },
+        {
+          "name": "eduicbProcessFilePick",
+          "demangled_name": "eduicbProcessFilePick",
+          "address": 3793264,
+          "offset": 2903296,
+          "size": 95,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduiAddTextPickEntEx",
+          "demangled_name": "eduiAddTextPickEntEx",
+          "address": 3793360,
+          "offset": 2903392,
+          "size": 233,
+          "match_percent": 99.82143
+        },
+        {
+          "name": "eduiAddPropTextPickEnt",
+          "demangled_name": "eduiAddPropTextPickEnt",
+          "address": 3793600,
+          "offset": 2903632,
+          "size": 144,
+          "match_percent": 98.97436
+        },
+        {
+          "name": "eduiAddTextPickEnt",
+          "demangled_name": "eduiAddTextPickEnt",
+          "address": 3793744,
+          "offset": 2903776,
+          "size": 186,
+          "match_percent": 94.510635
+        },
+        {
+          "name": "eduicbProcessTextPick",
+          "demangled_name": "eduicbProcessTextPick",
+          "address": 3793936,
+          "offset": 2903968,
+          "size": 2363,
+          "match_percent": 56.310284
+        },
+        {
+          "name": "cbMMEditorConfig",
+          "demangled_name": "cbMMEditorConfig",
+          "address": 3796304,
+          "offset": 2906336,
+          "size": 62,
+          "match_percent": 99.94444
+        },
+        {
+          "name": "eduiGetActiveMenu",
+          "demangled_name": "eduiGetActiveMenu",
+          "address": 3796368,
+          "offset": 2906400,
+          "size": 22,
+          "match_percent": 99.875
+        },
+        {
+          "name": "eduiMenuRender",
+          "demangled_name": "eduiMenuRender",
+          "address": 3796400,
+          "offset": 2906432,
+          "size": 2808,
+          "match_percent": 55.832096
+        },
+        {
+          "name": "eduiMenuFitOnScreen",
+          "demangled_name": "eduiMenuFitOnScreen",
+          "address": 3799216,
+          "offset": 2909248,
+          "size": 171,
+          "match_percent": 99.94118
+        },
+        {
+          "name": "eduicbRenderProp",
+          "demangled_name": "eduicbRenderProp",
+          "address": 3799392,
+          "offset": 2909424,
+          "size": 3872,
+          "match_percent": 42.56407
+        },
+        {
+          "name": "eduicbRenderFilter",
+          "demangled_name": "eduicbRenderFilter",
+          "address": 3803264,
+          "offset": 2913296,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduiMenuDetach",
+          "demangled_name": "eduiMenuDetach",
+          "address": 3803280,
+          "offset": 2913312,
+          "size": 120,
+          "match_percent": 99.96875
+        },
+        {
+          "name": "_ZL15cbColourPickSelP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbColourPickSel(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3803408,
+          "offset": 2913440,
+          "size": 205,
+          "match_percent": 99.85714
+        },
+        {
+          "name": "cbCancelSubMenu",
+          "demangled_name": "cbCancelSubMenu",
+          "address": 3803616,
+          "offset": 2913648,
+          "size": 34,
+          "match_percent": 100.0
+        },
+        {
+          "name": "cbgpcfgPaste",
+          "demangled_name": "cbgpcfgPaste",
+          "address": 3803664,
+          "offset": 2913696,
+          "size": 238,
+          "match_percent": 80.59649
+        },
+        {
+          "name": "cbgpcfgCopy",
+          "demangled_name": "cbgpcfgCopy",
+          "address": 3803904,
+          "offset": 2913936,
+          "size": 177,
+          "match_percent": 81.93617
+        },
+        {
+          "name": "cbgpcfgDel",
+          "demangled_name": "cbgpcfgDel",
+          "address": 3804096,
+          "offset": 2914128,
+          "size": 114,
+          "match_percent": 99.4375
+        },
+        {
+          "name": "cbgpcfgAdd",
+          "demangled_name": "cbgpcfgAdd",
+          "address": 3804224,
+          "offset": 2914256,
+          "size": 242,
+          "match_percent": 85.68965
+        },
+        {
+          "name": "cbgpcfgCPPress",
+          "demangled_name": "cbgpcfgCPPress",
+          "address": 3804480,
+          "offset": 2914512,
+          "size": 171,
+          "match_percent": 90.37778
+        },
+        {
+          "name": "eduicbSelectDirectoryExit",
+          "demangled_name": "eduicbSelectDirectoryExit",
+          "address": 3804656,
+          "offset": 2914688,
+          "size": 56,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduicbSelectDirectoryEntry",
+          "demangled_name": "eduicbSelectDirectoryEntry",
+          "address": 3804720,
+          "offset": 2914752,
+          "size": 359,
+          "match_percent": 95.03615
+        },
+        {
+          "name": "eduicbDestroyDirectoryList",
+          "demangled_name": "eduicbDestroyDirectoryList",
+          "address": 3805088,
+          "offset": 2915120,
+          "size": 56,
+          "match_percent": 100.0
+        },
+        {
+          "name": "tpentPropOnEnter",
+          "demangled_name": "tpentPropOnEnter",
+          "address": 3805152,
+          "offset": 2915184,
+          "size": 131,
+          "match_percent": 74.189186
+        },
+        {
+          "name": "tpentOnEnter",
+          "demangled_name": "tpentOnEnter",
+          "address": 3805296,
+          "offset": 2915328,
+          "size": 119,
+          "match_percent": 77.5
+        },
+        {
+          "name": "cbmcfgCancel",
+          "demangled_name": "cbmcfgCancel",
+          "address": 3805424,
+          "offset": 2915456,
+          "size": 34,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduicbRenderExpander",
+          "demangled_name": "eduicbRenderExpander",
+          "address": 3805472,
+          "offset": 2915504,
+          "size": 1601,
+          "match_percent": 57.507004
+        },
+        {
+          "name": "eduiGetTopLevelParent",
+          "demangled_name": "eduiGetTopLevelParent",
+          "address": 3807088,
+          "offset": 2917120,
+          "size": 49,
+          "match_percent": 88.947365
+        },
+        {
+          "name": "eduiGetActiveMenuParent",
+          "demangled_name": "eduiGetActiveMenuParent",
+          "address": 3807152,
+          "offset": 2917184,
+          "size": 36,
+          "match_percent": 99.9
+        },
+        {
+          "name": "eduiClearActiveMenu",
+          "demangled_name": "eduiClearActiveMenu",
+          "address": 3807200,
+          "offset": 2917232,
+          "size": 36,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduiMenuIsActive",
+          "demangled_name": "eduiMenuIsActive",
+          "address": 3807248,
+          "offset": 2917280,
+          "size": 71,
+          "match_percent": 83.0
+        },
+        {
+          "name": "eduiMenuProcessSelectedItem",
+          "demangled_name": "eduiMenuProcessSelectedItem",
+          "address": 3807328,
+          "offset": 2917360,
+          "size": 80,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduiMenuEnsureSelection",
+          "demangled_name": "eduiMenuEnsureSelection",
+          "address": 3807408,
+          "offset": 2917440,
+          "size": 22,
+          "match_percent": 98.333336
+        },
+        {
+          "name": "eduiCursorOverMenu",
+          "demangled_name": "eduiCursorOverMenu",
+          "address": 3807440,
+          "offset": 2917472,
+          "size": 92,
+          "match_percent": 99.93104
+        },
+        {
+          "name": "eduiCheckForPadMenuCancel",
+          "demangled_name": "eduiCheckForPadMenuCancel",
+          "address": 3807536,
+          "offset": 2917568,
+          "size": 128,
+          "match_percent": 50.28205
+        },
+        {
+          "name": "cbInteractMenuScrollTo",
+          "demangled_name": "cbInteractMenuScrollTo",
+          "address": 3807664,
+          "offset": 2917696,
+          "size": 145,
+          "match_percent": 98.545456
+        },
+        {
+          "name": "cbInteractMenuKeySelect",
+          "demangled_name": "cbInteractMenuKeySelect",
+          "address": 3807824,
+          "offset": 2917856,
+          "size": 90,
+          "match_percent": 99.81481
+        },
+        {
+          "name": "eduiMenuProcessInput",
+          "demangled_name": "eduiMenuProcessInput",
+          "address": 3807920,
+          "offset": 2917952,
+          "size": 1039,
+          "match_percent": 68.82566
+        },
+        {
+          "name": "eduiFlushInteracts",
+          "demangled_name": "eduiFlushInteracts",
+          "address": 3808960,
+          "offset": 2918992,
+          "size": 26,
+          "match_percent": 99.875
+        },
+        {
+          "name": "eduiProcessInteracts",
+          "demangled_name": "eduiProcessInteracts",
+          "address": 3808992,
+          "offset": 2919024,
+          "size": 422,
+          "match_percent": 52.44275
+        },
+        {
+          "name": "eduiMenuProcessAux",
+          "demangled_name": "eduiMenuProcessAux",
+          "address": 3809424,
+          "offset": 2919456,
+          "size": 203,
+          "match_percent": 99.67308
+        },
+        {
+          "name": "eduiMenuProcess",
+          "demangled_name": "eduiMenuProcess",
+          "address": 3809632,
+          "offset": 2919664,
+          "size": 154,
+          "match_percent": 99.95349
+        },
+        {
+          "name": "eduiRenderInteracts",
+          "demangled_name": "eduiRenderInteracts",
+          "address": 3809792,
+          "offset": 2919824,
+          "size": 1329,
+          "match_percent": 99.98412
+        },
+        {
+          "name": "eduiShowCursor",
+          "demangled_name": "eduiShowCursor",
+          "address": 3811136,
+          "offset": 2921168,
+          "size": 24,
+          "match_percent": 99.85714
+        },
+        {
+          "name": "eduiGetCursorCoords",
+          "demangled_name": "eduiGetCursorCoords",
+          "address": 3811168,
+          "offset": 2921200,
+          "size": 60,
+          "match_percent": 99.63636
+        },
+        {
+          "name": "eduiSetCursorCoords",
+          "demangled_name": "eduiSetCursorCoords",
+          "address": 3811232,
+          "offset": 2921264,
+          "size": 56,
+          "match_percent": 99.55556
+        },
+        {
+          "name": "eduiGetCursorDelta",
+          "demangled_name": "eduiGetCursorDelta",
+          "address": 3811296,
+          "offset": 2921328,
+          "size": 60,
+          "match_percent": 99.63636
+        },
+        {
+          "name": "eduiUsedAlgPad",
+          "demangled_name": "eduiUsedAlgPad",
+          "address": 3811360,
+          "offset": 2921392,
+          "size": 113,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduiProcessCursorDefault",
+          "demangled_name": "eduiProcessCursorDefault",
+          "address": 3811488,
+          "offset": 2921520,
+          "size": 470,
+          "match_percent": 99.72449
+        },
+        {
+          "name": "eduiProcessCursor",
+          "demangled_name": "eduiProcessCursor",
+          "address": 3811968,
+          "offset": 2922000,
+          "size": 46,
+          "match_percent": 100.0
+        },
+        {
+          "name": "edmainProcess",
+          "demangled_name": "edmainProcess",
+          "address": 3812016,
+          "offset": 2922048,
+          "size": 373,
+          "match_percent": 83.16304
+        },
+        {
+          "name": "eduiSetCursorColour",
+          "demangled_name": "eduiSetCursorColour",
+          "address": 3812400,
+          "offset": 2922432,
+          "size": 24,
+          "match_percent": 99.85714
+        },
+        {
+          "name": "eduiRenderCursor",
+          "demangled_name": "eduiRenderCursor",
+          "address": 3812432,
+          "offset": 2922464,
+          "size": 1016,
+          "match_percent": 84.72986
+        },
+        {
+          "name": "edmainRender",
+          "demangled_name": "edmainRender",
+          "address": 3813456,
+          "offset": 2923488,
+          "size": 266,
+          "match_percent": 99.92308
+        },
+        {
+          "name": "eduiInit",
+          "demangled_name": "eduiInit",
+          "address": 3813728,
+          "offset": 2923760,
+          "size": 137,
+          "match_percent": 99.90625
+        },
+        {
+          "name": "edmainInit",
+          "demangled_name": "edmainInit",
+          "address": 3813872,
+          "offset": 2923904,
+          "size": 1047,
+          "match_percent": 92.27823
+        },
+        {
+          "name": "edmainInitEx",
+          "demangled_name": "edmainInitEx",
+          "address": 3814928,
+          "offset": 2924960,
+          "size": 122,
+          "match_percent": 100.0
+        },
+        {
+          "name": "eduiSetFont",
+          "demangled_name": "eduiSetFont",
+          "address": 3815056,
+          "offset": 2925088,
+          "size": 24,
+          "match_percent": 99.85714
+        },
+        {
+          "name": "eduiSetFontScale",
+          "demangled_name": "eduiSetFontScale",
+          "address": 3815088,
+          "offset": 2925120,
+          "size": 40,
+          "match_percent": 99.71429
+        },
+        {
+          "name": "CreateTestMenu",
+          "demangled_name": "CreateTestMenu",
+          "address": 3815136,
+          "offset": 2925168,
+          "size": 1119,
+          "match_percent": 99.64789
+        },
+        {
+          "name": "TestMenu",
+          "demangled_name": "TestMenu",
+          "address": 3816256,
+          "offset": 2926288,
+          "size": 66,
+          "match_percent": 99.875
+        },
+        {
+          "name": "eduiItemColourSliderCreate",
+          "demangled_name": "eduiItemColourSliderCreate",
+          "address": 3816336,
+          "offset": 2926368,
+          "size": 460,
+          "match_percent": 91.84615
+        },
+        {
+          "name": "edcamSetSpeedPos",
+          "demangled_name": "edcamSetSpeedPos",
+          "address": 3816800,
+          "offset": 2926832,
+          "size": 54,
+          "match_percent": 99.666664
+        },
+        {
+          "name": "edcamSetSpeed",
+          "demangled_name": "edcamSetSpeed",
+          "address": 3816864,
+          "offset": 2926896,
+          "size": 68,
+          "match_percent": 99.63636
+        },
+        {
+          "name": "cbmcfgCameraSpeed",
+          "demangled_name": "cbmcfgCameraSpeed",
+          "address": 3816944,
+          "offset": 2926976,
+          "size": 91,
+          "match_percent": 99.8421
+        },
+        {
+          "name": "edcamSetAutoSpeed",
+          "demangled_name": "edcamSetAutoSpeed",
+          "address": 3817040,
+          "offset": 2927072,
+          "size": 62,
+          "match_percent": 99.94118
+        },
+        {
+          "name": "cbSetAutoSpeed",
+          "demangled_name": "cbSetAutoSpeed",
+          "address": 3817104,
+          "offset": 2927136,
+          "size": 130,
+          "match_percent": 100.0
+        },
+        {
+          "name": "edcamSetMouseSensitivity",
+          "demangled_name": "edcamSetMouseSensitivity",
+          "address": 3817248,
+          "offset": 2927280,
+          "size": 54,
+          "match_percent": 99.666664
+        },
+        {
+          "name": "edcamSetAdjustFreedom",
+          "demangled_name": "edcamSetAdjustFreedom",
+          "address": 3817312,
+          "offset": 2927344,
+          "size": 110,
+          "match_percent": 99.93939
+        },
+        {
+          "name": "_Z21do_Pad_flymode_cameraP7edcam_sfP7nupad_s",
+          "demangled_name": "do_Pad_flymode_camera(edcam_s*, float, nupad_s*)",
+          "address": 3817424,
+          "offset": 2927456,
+          "size": 1505,
+          "match_percent": 99.91964
+        },
+        {
+          "name": "do_Pad_Standard_camera",
+          "demangled_name": "do_Pad_Standard_camera",
+          "address": 3818944,
+          "offset": 2928976,
+          "size": 1189,
+          "match_percent": 99.1502
+        },
+        {
+          "name": "do_maya_mouse_camera",
+          "demangled_name": "do_maya_mouse_camera",
+          "address": 3820144,
+          "offset": 2930176,
+          "size": 1329,
+          "match_percent": 77.460526
+        },
+        {
+          "name": "do_mouse_flymode_camera",
+          "demangled_name": "do_mouse_flymode_camera",
+          "address": 3821488,
+          "offset": 2931520,
+          "size": 1178,
+          "match_percent": 99.44758
+        },
+        {
+          "name": "edcamMoveEx",
+          "demangled_name": "edcamMoveEx",
+          "address": 3822672,
+          "offset": 2932704,
+          "size": 172,
+          "match_percent": 100.0
+        },
+        {
+          "name": "edcamMove",
+          "demangled_name": "edcamMove",
+          "address": 3822848,
+          "offset": 2932880,
+          "size": 43,
+          "match_percent": 100.0
+        },
+        {
+          "name": "edcamSetPos",
+          "demangled_name": "edcamSetPos",
+          "address": 3822896,
+          "offset": 2932928,
+          "size": 69,
+          "match_percent": 99.57143
+        },
+        {
+          "name": "edcamSetAng",
+          "demangled_name": "edcamSetAng",
+          "address": 3822976,
+          "offset": 2933008,
+          "size": 32,
+          "match_percent": 99.71429
+        },
+        {
+          "name": "edcamSetPosAng",
+          "demangled_name": "edcamSetPosAng",
+          "address": 3823008,
+          "offset": 2933040,
+          "size": 89,
+          "match_percent": 99.55556
+        },
+        {
+          "name": "edcamGetPosAng",
+          "demangled_name": "edcamGetPosAng",
+          "address": 3823104,
+          "offset": 2933136,
+          "size": 100,
+          "match_percent": 99.82143
+        },
+        {
+          "name": "edcamGetPosAngSnap",
+          "demangled_name": "edcamGetPosAngSnap",
+          "address": 3823216,
+          "offset": 2933248,
+          "size": 100,
+          "match_percent": 99.82143
+        },
+        {
+          "name": "_Z17edcamSetContolleri",
+          "demangled_name": "edcamSetContoller(int)",
+          "address": 3823328,
+          "offset": 2933360,
+          "size": 41,
+          "match_percent": 99.8
+        },
+        {
+          "name": "edcamSetDist",
+          "demangled_name": "edcamSetDist",
+          "address": 3823376,
+          "offset": 2933408,
+          "size": 28,
+          "match_percent": 99.85714
+        },
+        {
+          "name": "edcamGetDist",
+          "demangled_name": "edcamGetDist",
+          "address": 3823408,
+          "offset": 2933440,
+          "size": 22,
+          "match_percent": 99.875
+        },
+        {
+          "name": "edcamGetEdCam",
+          "demangled_name": "edcamGetEdCam",
+          "address": 3823440,
+          "offset": 2933472,
+          "size": 22,
+          "match_percent": 100.0
+        },
+        {
+          "name": "edcamSetOffset",
+          "demangled_name": "edcamSetOffset",
+          "address": 3823472,
+          "offset": 2933504,
+          "size": 42,
+          "match_percent": 99.7
+        },
+        {
+          "name": "edcamGetOffset",
+          "demangled_name": "edcamGetOffset",
+          "address": 3823520,
+          "offset": 2933552,
+          "size": 42,
+          "match_percent": 99.7
+        },
+        {
+          "name": "edcamMtx",
+          "demangled_name": "edcamMtx",
+          "address": 3823568,
+          "offset": 2933600,
+          "size": 197,
+          "match_percent": 95.48889
+        },
+        {
+          "name": "edcamSet",
+          "demangled_name": "edcamSet",
+          "address": 3823776,
+          "offset": 2933808,
+          "size": 56,
+          "match_percent": 100.0
+        },
+        {
+          "name": "edcamGetPosPointer",
+          "demangled_name": "edcamGetPosPointer",
+          "address": 3823840,
+          "offset": 2933872,
+          "size": 22,
+          "match_percent": 100.0
+        },
+        {
+          "name": "EdFileSwapEndianess16",
+          "demangled_name": "EdFileSwapEndianess16",
+          "address": 3823872,
+          "offset": 2933904,
+          "size": 17,
+          "match_percent": 100.0
+        },
+        {
+          "name": "EdFileSwapEndianess32",
+          "demangled_name": "EdFileSwapEndianess32",
+          "address": 3823904,
+          "offset": 2933936,
+          "size": 31,
+          "match_percent": 100.0
+        },
+        {
+          "name": "EdFileSetReadWrongEndianess",
+          "demangled_name": "EdFileSetReadWrongEndianess",
+          "address": 3823936,
+          "offset": 2933968,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "EdFileSetMedia",
+          "demangled_name": "EdFileSetMedia",
+          "address": 3823952,
+          "offset": 2933984,
+          "size": 24,
+          "match_percent": 99.85714
+        },
+        {
+          "name": "EdFileSetPakFile",
+          "demangled_name": "EdFileSetPakFile",
+          "address": 3823984,
+          "offset": 2934016,
+          "size": 24,
+          "match_percent": 99.85714
+        },
+        {
+          "name": "_Z18EdFileResetBuffersv",
+          "demangled_name": "EdFileResetBuffers()",
+          "address": 3824016,
+          "offset": 2934048,
+          "size": 83,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z16EdFileFillBufferv",
+          "demangled_name": "EdFileFillBuffer()",
+          "address": 3824112,
+          "offset": 2934144,
+          "size": 130,
+          "match_percent": 99.965515
+        },
+        {
+          "name": "EdFileOpen",
+          "demangled_name": "EdFileOpen",
+          "address": 3824256,
+          "offset": 2934288,
+          "size": 322,
+          "match_percent": 89.65169
+        },
+        {
+          "name": "_Z17EdFileFlushBufferv",
+          "demangled_name": "EdFileFlushBuffer()",
+          "address": 3824592,
+          "offset": 2934624,
+          "size": 113,
+          "match_percent": 87.96667
+        },
+        {
+          "name": "EdFileClose",
+          "demangled_name": "EdFileClose",
+          "address": 3824720,
+          "offset": 2934752,
+          "size": 135,
+          "match_percent": 96.878784
+        },
+        {
+          "name": "EdFileWrite",
+          "demangled_name": "EdFileWrite",
+          "address": 3824864,
+          "offset": 2934896,
+          "size": 153,
+          "match_percent": 93.52941
+        },
+        {
+          "name": "EdFileWriteFloat",
+          "demangled_name": "EdFileWriteFloat",
+          "address": 3825024,
+          "offset": 2935056,
+          "size": 92,
+          "match_percent": 100.0
+        },
+        {
+          "name": "EdFileWriteInt",
+          "demangled_name": "EdFileWriteInt",
+          "address": 3825120,
+          "offset": 2935152,
+          "size": 88,
+          "match_percent": 100.0
+        },
+        {
+          "name": "EdFileWriteUnsignedInt",
+          "demangled_name": "EdFileWriteUnsignedInt",
+          "address": 3825216,
+          "offset": 2935248,
+          "size": 88,
+          "match_percent": 100.0
+        },
+        {
+          "name": "EdFileWriteShort",
+          "demangled_name": "EdFileWriteShort",
+          "address": 3825312,
+          "offset": 2935344,
+          "size": 89,
+          "match_percent": 100.0
+        },
+        {
+          "name": "EdFileWriteUnsignedShort",
+          "demangled_name": "EdFileWriteUnsignedShort",
+          "address": 3825408,
+          "offset": 2935440,
+          "size": 89,
+          "match_percent": 100.0
+        },
+        {
+          "name": "EdFileWriteChar",
+          "demangled_name": "EdFileWriteChar",
+          "address": 3825504,
+          "offset": 2935536,
+          "size": 50,
+          "match_percent": 100.0
+        },
+        {
+          "name": "EdFileWriteUnsignedChar",
+          "demangled_name": "EdFileWriteUnsignedChar",
+          "address": 3825568,
+          "offset": 2935600,
+          "size": 50,
+          "match_percent": 100.0
+        },
+        {
+          "name": "EdFileWriteNuVec",
+          "demangled_name": "EdFileWriteNuVec",
+          "address": 3825632,
+          "offset": 2935664,
+          "size": 84,
+          "match_percent": 100.0
+        },
+        {
+          "name": "EdFileRead",
+          "demangled_name": "EdFileRead",
+          "address": 3825728,
+          "offset": 2935760,
+          "size": 137,
+          "match_percent": 94.14893
+        },
+        {
+          "name": "EdFileReadFloat",
+          "demangled_name": "EdFileReadFloat",
+          "address": 3825872,
+          "offset": 2935904,
+          "size": 85,
+          "match_percent": 100.0
+        },
+        {
+          "name": "EdFileReadInt",
+          "demangled_name": "EdFileReadInt",
+          "address": 3825968,
+          "offset": 2936000,
+          "size": 85,
+          "match_percent": 99.4
+        },
+        {
+          "name": "EdFileReadUnsignedInt",
+          "demangled_name": "EdFileReadUnsignedInt",
+          "address": 3826064,
+          "offset": 2936096,
+          "size": 85,
+          "match_percent": 99.4
+        },
+        {
+          "name": "EdFileReadShort",
+          "demangled_name": "EdFileReadShort",
+          "address": 3826160,
+          "offset": 2936192,
+          "size": 86,
+          "match_percent": 100.0
+        },
+        {
+          "name": "EdFileReadUnsignedShort",
+          "demangled_name": "EdFileReadUnsignedShort",
+          "address": 3826256,
+          "offset": 2936288,
+          "size": 86,
+          "match_percent": 100.0
+        },
+        {
+          "name": "EdFileReadChar",
+          "demangled_name": "EdFileReadChar",
+          "address": 3826352,
+          "offset": 2936384,
+          "size": 47,
+          "match_percent": 100.0
+        },
+        {
+          "name": "EdFileReadUnsignedChar",
+          "demangled_name": "EdFileReadUnsignedChar",
+          "address": 3826400,
+          "offset": 2936432,
+          "size": 47,
+          "match_percent": 100.0
+        },
+        {
+          "name": "EdFileReadNuVec",
+          "demangled_name": "EdFileReadNuVec",
+          "address": 3826448,
+          "offset": 2936480,
+          "size": 63,
+          "match_percent": 100.0
+        },
+        {
+          "name": "EdFileWriteMemCard",
+          "demangled_name": "EdFileWriteMemCard",
+          "address": 3826512,
+          "offset": 2936544,
+          "size": 89,
+          "match_percent": 100.0
+        },
+        {
+          "name": "EdFileReadMemCard",
+          "demangled_name": "EdFileReadMemCard",
+          "address": 3826608,
+          "offset": 2936640,
+          "size": 89,
+          "match_percent": 100.0
+        },
+        {
+          "name": "EdFileBackup",
+          "demangled_name": "EdFileBackup",
+          "address": 3826704,
+          "offset": 2936736,
+          "size": 318,
+          "match_percent": 93.150536
+        },
+        {
+          "name": "_Z21FS_MakeDateTimeStringP15FS_FILEENTRYHDRPc",
+          "demangled_name": "FS_MakeDateTimeString(FS_FILEENTRYHDR*, char*)",
+          "address": 3827024,
+          "offset": 2937056,
+          "size": 117,
+          "match_percent": 99.83871
+        },
+        {
+          "name": "_Z17FS_MakeTimeStringP15FS_FILEENTRYHDRPc",
+          "demangled_name": "FS_MakeTimeString(FS_FILEENTRYHDR*, char*)",
+          "address": 3827152,
+          "offset": 2937184,
+          "size": 81,
+          "match_percent": 99.77273
+        },
+        {
+          "name": "_Z17FS_MakeDateStringP15FS_FILEENTRYHDRPc",
+          "demangled_name": "FS_MakeDateString(FS_FILEENTRYHDR*, char*)",
+          "address": 3827248,
+          "offset": 2937280,
+          "size": 84,
+          "match_percent": 99.77273
+        },
+        {
+          "name": "_Z14RenderFileSel3i.part.38",
+          "demangled_name": "RenderFileSel3(int) [clone .part.38]",
+          "address": 3827344,
+          "offset": 2937376,
+          "size": 3315,
+          "match_percent": 89.1872
+        },
+        {
+          "name": "_Z17FS_MoveCursorDowni",
+          "demangled_name": "FS_MoveCursorDown(int)",
+          "address": 3830672,
+          "offset": 2940704,
+          "size": 170,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z14FS_PrevNameLenPc",
+          "demangled_name": "FS_PrevNameLen(char*)",
+          "address": 3830848,
+          "offset": 2940880,
+          "size": 98,
+          "match_percent": 19.897436
+        },
+        {
+          "name": "_Z15FS_MoveCursorUpi",
+          "demangled_name": "FS_MoveCursorUp(int)",
+          "address": 3830960,
+          "offset": 2940992,
+          "size": 153,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z14RenderFileSel3i",
+          "demangled_name": "RenderFileSel3(int)",
+          "address": 3831120,
+          "offset": 2941152,
+          "size": 37,
+          "match_percent": 100.0
+        },
+        {
+          "name": "RenderFileSel2",
+          "demangled_name": "RenderFileSel2",
+          "address": 3831168,
+          "offset": 2941200,
+          "size": 114,
+          "match_percent": 99.96154
+        },
+        {
+          "name": "_Z13RenderFileSelv",
+          "demangled_name": "RenderFileSel()",
+          "address": 3831296,
+          "offset": 2941328,
+          "size": 34,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z18FS_GetDirTextWidthv",
+          "demangled_name": "FS_GetDirTextWidth()",
+          "address": 3831344,
+          "offset": 2941376,
+          "size": 274,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z18FS_GetFilterStringPcS_",
+          "demangled_name": "FS_GetFilterString(char*, char*)",
+          "address": 3831632,
+          "offset": 2941664,
+          "size": 389,
+          "match_percent": 49.11278
+        },
+        {
+          "name": "_Z17FS_FileNameFilterPc",
+          "demangled_name": "FS_FileNameFilter(char*)",
+          "address": 3832032,
+          "offset": 2942064,
+          "size": 515,
+          "match_percent": 44.52349
+        },
+        {
+          "name": "_Z20FS_BuildFilterBlocksPc",
+          "demangled_name": "FS_BuildFilterBlocks(char*)",
+          "address": 3832560,
+          "offset": 2942592,
+          "size": 165,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z23FS_BuildFilterOutBlocksPc",
+          "demangled_name": "FS_BuildFilterOutBlocks(char*)",
+          "address": 3832736,
+          "offset": 2942768,
+          "size": 131,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z14FS_SortStringsPcS_i",
+          "demangled_name": "FS_SortStrings(char*, char*, int)",
+          "address": 3832880,
+          "offset": 2942912,
+          "size": 774,
+          "match_percent": 99.69302
+        },
+        {
+          "name": "_Z26FS_SetCursorToLastFileNamev",
+          "demangled_name": "FS_SetCursorToLastFileName()",
+          "address": 3833664,
+          "offset": 2943696,
+          "size": 251,
+          "match_percent": 82.47369
+        },
+        {
+          "name": "_Z13FS_GetDirListPcS_S_",
+          "demangled_name": "FS_GetDirList(char*, char*, char*)",
+          "address": 3833920,
+          "offset": 2943952,
+          "size": 984,
+          "match_percent": 67.72201
+        },
+        {
+          "name": "_Z19FS_GetPadWithRepeatP7nupad_sff",
+          "demangled_name": "FS_GetPadWithRepeat(nupad_s*, float, float)",
+          "address": 3834912,
+          "offset": 2944944,
+          "size": 111,
+          "match_percent": 99.75
+        },
+        {
+          "name": "_Z15ProcessFileSel3fP7nupad_s",
+          "demangled_name": "ProcessFileSel3(float, nupad_s*)",
+          "address": 3835024,
+          "offset": 2945056,
+          "size": 1169,
+          "match_percent": 98.37405
+        },
+        {
+          "name": "ProcessFileSel2",
+          "demangled_name": "ProcessFileSel2",
+          "address": 3836208,
+          "offset": 2946240,
+          "size": 46,
+          "match_percent": 100.0
+        },
+        {
+          "name": "FileSelKill",
+          "demangled_name": "FileSelKill",
+          "address": 3836256,
+          "offset": 2946288,
+          "size": 60,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z14ProcessFileSelfP7nupad_s",
+          "demangled_name": "ProcessFileSel(float, nupad_s*)",
+          "address": 3836320,
+          "offset": 2946352,
+          "size": 79,
+          "match_percent": 100.0
+        },
+        {
+          "name": "FS_SetFileSelPathFromName",
+          "demangled_name": "FS_SetFileSelPathFromName",
+          "address": 3836400,
+          "offset": 2946432,
+          "size": 248,
+          "match_percent": 100.0
+        },
+        {
+          "name": "StartFileSel",
+          "demangled_name": "StartFileSel",
+          "address": 3836656,
+          "offset": 2946688,
+          "size": 219,
+          "match_percent": 100.0
+        },
+        {
           "name": "_Z26eduiItemFileSelectorCreatejP11eduiiattr_sPFvP10eduimenu_sP10eduiitem_sjEPc",
           "demangled_name": "eduiItemFileSelectorCreate(unsigned int, eduiiattr_s*, void (*)(eduimenu_s*, eduiitem_s*, unsigned int), char*)",
           "address": 3836880,
@@ -26833,11 +29090,91 @@
           "match_percent": 93.21978
         },
         {
+          "name": "cbTriggerSubMenu",
+          "demangled_name": "cbTriggerSubMenu",
+          "address": 3837248,
+          "offset": 2947280,
+          "size": 111,
+          "match_percent": 99.6129
+        },
+        {
+          "name": "cbCancelSubMenuFromItem",
+          "demangled_name": "cbCancelSubMenuFromItem",
+          "address": 3837360,
+          "offset": 2947392,
+          "size": 34,
+          "match_percent": 100.0
+        },
+        {
+          "name": "cbNearClipAtCursor",
+          "demangled_name": "cbNearClipAtCursor",
+          "address": 3837408,
+          "offset": 2947440,
+          "size": 31,
+          "match_percent": 100.0
+        },
+        {
+          "name": "edDrawCross",
+          "demangled_name": "edDrawCross",
+          "address": 3837440,
+          "offset": 2947472,
+          "size": 294,
+          "match_percent": 99.98485
+        },
+        {
           "name": "_Z10edDrawLineP7nuvec_sS0_hhh",
           "demangled_name": "edDrawLine(nuvec_s*, nuvec_s*, unsigned char, unsigned char, unsigned char)",
           "address": 3837744,
           "offset": 2947776,
           "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "AddColourPick",
+          "demangled_name": "AddColourPick",
+          "address": 3837760,
+          "offset": 2947792,
+          "size": 535,
+          "match_percent": 89.0
+        },
+        {
+          "name": "CreateColourPicker",
+          "demangled_name": "CreateColourPicker",
+          "address": 3838304,
+          "offset": 2948336,
+          "size": 457,
+          "match_percent": 86.86598
+        },
+        {
+          "name": "RndrOSphere",
+          "demangled_name": "RndrOSphere",
+          "address": 3838768,
+          "offset": 2948800,
+          "size": 591,
+          "match_percent": 100.0
+        },
+        {
+          "name": "RndrCircleXZ",
+          "demangled_name": "RndrCircleXZ",
+          "address": 3839360,
+          "offset": 2949392,
+          "size": 591,
+          "match_percent": 100.0
+        },
+        {
+          "name": "RndrOSquare",
+          "demangled_name": "RndrOSquare",
+          "address": 3839952,
+          "offset": 2949984,
+          "size": 1156,
+          "match_percent": 89.400925
+        },
+        {
+          "name": "FlushMenuHighlights",
+          "demangled_name": "FlushMenuHighlights",
+          "address": 3841120,
+          "offset": 2951152,
+          "size": 40,
           "match_percent": 100.0
         },
         {
@@ -26942,7 +29279,7 @@
           "address": 4344560,
           "offset": 3454592,
           "size": 256,
-          "match_percent": 98.81579
+          "match_percent": 98.42105
         },
         {
           "name": "_Z17LoadEditorSplinesPcP9variptr_uS1_",
@@ -26974,7 +29311,7 @@
           "address": 4909568,
           "offset": 4019600,
           "size": 253,
-          "match_percent": 87.47059
+          "match_percent": 87.37647
         },
         {
           "name": "_Z19edSpline_FindAllSubP8nugscn_sPcPP11nugspline_si",
@@ -26982,7 +29319,7 @@
           "address": 4909824,
           "offset": 4019856,
           "size": 245,
-          "match_percent": 86.03191
+          "match_percent": 85.6383
         },
         {
           "name": "_ZN24EdClassObjectNameControl6RenderEv",
@@ -27286,7 +29623,7 @@
           "address": 5482192,
           "offset": 4592224,
           "size": 158,
-          "match_percent": 99.931816
+          "match_percent": 99.59091
         },
         {
           "name": "_ZN15EdMatrixControl7RefreshEv",
@@ -27294,7 +29631,7 @@
           "address": 5482800,
           "offset": 4592832,
           "size": 843,
-          "match_percent": 99.107315
+          "match_percent": 99.03415
         },
         {
           "name": "_ZN13EdInputStream15SerialiseStringEPPc",
@@ -27470,7 +29807,7 @@
           "address": 5491264,
           "offset": 4601296,
           "size": 383,
-          "match_percent": 92.94175
+          "match_percent": 94.05825
         },
         {
           "name": "_ZN12EdBitControl12cbSelectItemEP10eduimenu_sP10eduiitem_sj",
@@ -27774,7 +30111,7 @@
           "address": 5502896,
           "offset": 4612928,
           "size": 1716,
-          "match_percent": 79.16774
+          "match_percent": 76.783875
         },
         {
           "name": "_Z18EdDrawPolyCylinderRK5VuVecS1_iiifff",
@@ -27830,7 +30167,7 @@
           "address": 5506864,
           "offset": 4616896,
           "size": 2954,
-          "match_percent": 87.43471
+          "match_percent": 87.74597
         },
         {
           "name": "_ZN13EdManipulator15GetAxisLocatorsER5VuVecPS0_P5VuMtx",
@@ -28118,7 +30455,7 @@
           "address": 5537504,
           "offset": 4647536,
           "size": 364,
-          "match_percent": 90.11818
+          "match_percent": 89.42727
         },
         {
           "name": "_ZN5EdRef11GetTypeSizeEii",
@@ -28182,7 +30519,7 @@
           "address": 5539152,
           "offset": 4649184,
           "size": 115,
-          "match_percent": 99.65116
+          "match_percent": 100.0
         },
         {
           "name": "_ZN10EdRegistry8GetClassEi",
@@ -29320,1950 +31657,6 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_gameapi/edtoolsall_plain.o",
       "functions": [
         {
-          "name": "cbMMRegSel",
-          "demangled_name": "cbMMRegSel",
-          "address": 3732720,
-          "offset": 2842752,
-          "size": 61,
-          "match_percent": 99.888885
-        },
-        {
-          "name": "eduicbInteractSel",
-          "demangled_name": "eduicbInteractSel",
-          "address": 3732784,
-          "offset": 2842816,
-          "size": 125,
-          "match_percent": 99.947365
-        },
-        {
-          "name": "eduicbProcessTexturePick",
-          "demangled_name": "eduicbProcessTexturePick",
-          "address": 3732912,
-          "offset": 2842944,
-          "size": 824,
-          "match_percent": 73.41558
-        },
-        {
-          "name": "eduicbProcessSlider",
-          "demangled_name": "eduicbProcessSlider",
-          "address": 3733744,
-          "offset": 2843776,
-          "size": 684,
-          "match_percent": 94.95092
-        },
-        {
-          "name": "eduicbProcessSeparator",
-          "demangled_name": "eduicbProcessSeparator",
-          "address": 3734432,
-          "offset": 2844464,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduicbItemDestroyExpander",
-          "demangled_name": "eduicbItemDestroyExpander",
-          "address": 3734448,
-          "offset": 2844480,
-          "size": 78,
-          "match_percent": 100.0
-        },
-        {
-          "name": "cbSel",
-          "demangled_name": "cbSel",
-          "address": 3734528,
-          "offset": 2844560,
-          "size": 25,
-          "match_percent": 99.833336
-        },
-        {
-          "name": "cbGradChange",
-          "demangled_name": "cbGradChange",
-          "address": 3734560,
-          "offset": 2844592,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "cbInteractMenuTitle",
-          "demangled_name": "cbInteractMenuTitle",
-          "address": 3734576,
-          "offset": 2844608,
-          "size": 144,
-          "match_percent": 99.83784
-        },
-        {
-          "name": "cbInteractMenuScrollUp",
-          "demangled_name": "cbInteractMenuScrollUp",
-          "address": 3734720,
-          "offset": 2844752,
-          "size": 36,
-          "match_percent": 100.0
-        },
-        {
-          "name": "cbInteractMenuScrollDown",
-          "demangled_name": "cbInteractMenuScrollDown",
-          "address": 3734768,
-          "offset": 2844800,
-          "size": 36,
-          "match_percent": 100.0
-        },
-        {
-          "name": "cbInteractMenuCancelChild",
-          "demangled_name": "cbInteractMenuCancelChild",
-          "address": 3734816,
-          "offset": 2844848,
-          "size": 45,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL6cbCopyP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbCopy(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3734864,
-          "offset": 2844896,
-          "size": 141,
-          "match_percent": 92.41936
-        },
-        {
-          "name": "eduicbItemDestroyProp",
-          "demangled_name": "eduicbItemDestroyProp",
-          "address": 3735008,
-          "offset": 2845040,
-          "size": 192,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduicbItemDestroyFilter",
-          "demangled_name": "eduicbItemDestroyFilter",
-          "address": 3735200,
-          "offset": 2845232,
-          "size": 94,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduicbItemDestroy",
-          "demangled_name": "eduicbItemDestroy",
-          "address": 3735296,
-          "offset": 2845328,
-          "size": 190,
-          "match_percent": 99.42105
-        },
-        {
-          "name": "eduicbItemSliderDestroy",
-          "demangled_name": "eduicbItemSliderDestroy",
-          "address": 3735488,
-          "offset": 2845520,
-          "size": 111,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduicbItemFilePickDestroy",
-          "demangled_name": "eduicbItemFilePickDestroy",
-          "address": 3735600,
-          "offset": 2845632,
-          "size": 111,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduicbItemTextPickDestroy",
-          "demangled_name": "eduicbItemTextPickDestroy",
-          "address": 3735712,
-          "offset": 2845744,
-          "size": 117,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL14eduiFntPrintExPviiiPcz",
-          "demangled_name": "eduiFntPrintEx(void*, int, int, int, char*, ...)",
-          "address": 3735840,
-          "offset": 2845872,
-          "size": 232,
-          "match_percent": 99.36364
-        },
-        {
-          "name": "_ZL18eduiFntPrintClipExPvffiffPcz",
-          "demangled_name": "eduiFntPrintClipEx(void*, float, float, int, float, float, char*, ...)",
-          "address": 3736080,
-          "offset": 2846112,
-          "size": 422,
-          "match_percent": 71.521736
-        },
-        {
-          "name": "eduicbProcessGraph",
-          "demangled_name": "eduicbProcessGraph",
-          "address": 3736512,
-          "offset": 2846544,
-          "size": 1367,
-          "match_percent": 67.18355
-        },
-        {
-          "name": "eduicbProcessGreyPick",
-          "demangled_name": "eduicbProcessGreyPick",
-          "address": 3737888,
-          "offset": 2847920,
-          "size": 297,
-          "match_percent": 75.136986
-        },
-        {
-          "name": "_ZL7HSV2RGBfffPfS_S_.part.18",
-          "demangled_name": "HSV2RGB(float, float, float, float*, float*, float*) [clone .part.18]",
-          "address": 3738192,
-          "offset": 2848224,
-          "size": 365,
-          "match_percent": 99.94253
-        },
-        {
-          "name": "_ZL14eduiFntPrintExPviiiPcz.constprop.67",
-          "demangled_name": "eduiFntPrintEx(void*, int, int, int, char*, ...) [clone .constprop.67]",
-          "address": 3738560,
-          "offset": 2848592,
-          "size": 182,
-          "match_percent": 99.98
-        },
-        {
-          "name": "_ZL14eduiFntPrintExPvffiPcz.constprop.66",
-          "demangled_name": "eduiFntPrintEx(void*, float, float, int, char*, ...) [clone .constprop.66]",
-          "address": 3738752,
-          "offset": 2848784,
-          "size": 104,
-          "match_percent": 99.91304
-        },
-        {
-          "name": "_ZL14eduiFntPrintExPviiiPcz.constprop.68",
-          "demangled_name": "eduiFntPrintEx(void*, int, int, int, char*, ...) [clone .constprop.68]",
-          "address": 3738864,
-          "offset": 2848896,
-          "size": 207,
-          "match_percent": 99.98276
-        },
-        {
-          "name": "_ZL18eduiFntPrintClipExPviiiiiPcz.constprop.70",
-          "demangled_name": "eduiFntPrintClipEx(void*, int, int, int, int, int, char*, ...) [clone .constprop.70]",
-          "address": 3739072,
-          "offset": 2849104,
-          "size": 290,
-          "match_percent": 72.3
-        },
-        {
-          "name": "eduiRenderGraphLine",
-          "demangled_name": "eduiRenderGraphLine",
-          "address": 3739376,
-          "offset": 2849408,
-          "size": 334,
-          "match_percent": 98.455696
-        },
-        {
-          "name": "_ZL19eduiDrawGrad4StepsViiiiffiiiii.constprop.59",
-          "demangled_name": "eduiDrawGrad4StepsV(int, int, int, int, float, float, int, int, int, int, int) [clone .constprop.59]",
-          "address": 3739712,
-          "offset": 2849744,
-          "size": 1993,
-          "match_percent": 62.374115
-        },
-        {
-          "name": "eduicbRenderSeparator",
-          "demangled_name": "eduicbRenderSeparator",
-          "address": 3741712,
-          "offset": 2851744,
-          "size": 283,
-          "match_percent": 91.671234
-        },
-        {
-          "name": "eduicbRenderGradPick",
-          "demangled_name": "eduicbRenderGradPick",
-          "address": 3742000,
-          "offset": 2852032,
-          "size": 1046,
-          "match_percent": 63.49817
-        },
-        {
-          "name": "eduicbRenderSel",
-          "demangled_name": "eduicbRenderSel",
-          "address": 3743056,
-          "offset": 2853088,
-          "size": 546,
-          "match_percent": 86.333336
-        },
-        {
-          "name": "eduicbRenderSliderInt",
-          "demangled_name": "eduicbRenderSliderInt",
-          "address": 3743616,
-          "offset": 2853648,
-          "size": 838,
-          "match_percent": 90.125
-        },
-        {
-          "name": "eduicbRenderTexturePick",
-          "demangled_name": "eduicbRenderTexturePick",
-          "address": 3744464,
-          "offset": 2854496,
-          "size": 1752,
-          "match_percent": 32.96134
-        },
-        {
-          "name": "eduicbRenderTextSelector",
-          "demangled_name": "eduicbRenderTextSelector",
-          "address": 3746224,
-          "offset": 2856256,
-          "size": 472,
-          "match_percent": 98.4375
-        },
-        {
-          "name": "eduicbRenderNumber",
-          "demangled_name": "eduicbRenderNumber",
-          "address": 3746704,
-          "offset": 2856736,
-          "size": 464,
-          "match_percent": 98.40909
-        },
-        {
-          "name": "eduicbRenderGraph",
-          "demangled_name": "eduicbRenderGraph",
-          "address": 3747168,
-          "offset": 2857200,
-          "size": 4706,
-          "match_percent": 84.202286
-        },
-        {
-          "name": "eduicbRenderFilePick",
-          "demangled_name": "eduicbRenderFilePick",
-          "address": 3751888,
-          "offset": 2861920,
-          "size": 812,
-          "match_percent": 88.90206
-        },
-        {
-          "name": "eduicbRenderCheck",
-          "demangled_name": "eduicbRenderCheck",
-          "address": 3752704,
-          "offset": 2862736,
-          "size": 764,
-          "match_percent": 82.50242
-        },
-        {
-          "name": "eduicbRenderGreyPick",
-          "demangled_name": "eduicbRenderGreyPick",
-          "address": 3753472,
-          "offset": 2863504,
-          "size": 800,
-          "match_percent": 87.02956
-        },
-        {
-          "name": "eduicbRenderColourSlider",
-          "demangled_name": "eduicbRenderColourSlider",
-          "address": 3754272,
-          "offset": 2864304,
-          "size": 996,
-          "match_percent": 85.1046
-        },
-        {
-          "name": "eduicbRenderTextPick",
-          "demangled_name": "eduicbRenderTextPick",
-          "address": 3755280,
-          "offset": 2865312,
-          "size": 4406,
-          "match_percent": 65.92968
-        },
-        {
-          "name": "eduicbRenderSlider",
-          "demangled_name": "eduicbRenderSlider",
-          "address": 3759696,
-          "offset": 2869728,
-          "size": 882,
-          "match_percent": 89.87864
-        },
-        {
-          "name": "eduicbProcessExpander",
-          "demangled_name": "eduicbProcessExpander",
-          "address": 3761680,
-          "offset": 2871712,
-          "size": 111,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduicbInteractExpander",
-          "demangled_name": "eduicbInteractExpander",
-          "address": 3761792,
-          "offset": 2871824,
-          "size": 224,
-          "match_percent": 76.14085
-        },
-        {
-          "name": "eduicbInteractProp",
-          "demangled_name": "eduicbInteractProp",
-          "address": 3762016,
-          "offset": 2872048,
-          "size": 761,
-          "match_percent": 65.570656
-        },
-        {
-          "name": "eduicbInteractFilter",
-          "demangled_name": "eduicbInteractFilter",
-          "address": 3762784,
-          "offset": 2872816,
-          "size": 5,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduicbProcessColourSlider",
-          "demangled_name": "eduicbProcessColourSlider",
-          "address": 3762800,
-          "offset": 2872832,
-          "size": 1052,
-          "match_percent": 68.57204
-        },
-        {
-          "name": "eduicbProcessColourPick",
-          "demangled_name": "eduicbProcessColourPick",
-          "address": 3763856,
-          "offset": 2873888,
-          "size": 1024,
-          "match_percent": 99.29482
-        },
-        {
-          "name": "eduicbInteractColourPick",
-          "demangled_name": "eduicbInteractColourPick",
-          "address": 3764880,
-          "offset": 2874912,
-          "size": 1174,
-          "match_percent": 75.185455
-        },
-        {
-          "name": "eduicbRenderColourPick",
-          "demangled_name": "eduicbRenderColourPick",
-          "address": 3766064,
-          "offset": 2876096,
-          "size": 2741,
-          "match_percent": 42.93517
-        },
-        {
-          "name": "eduicbRenderSelWithClipColour",
-          "demangled_name": "eduicbRenderSelWithClipColour",
-          "address": 3768816,
-          "offset": 2878848,
-          "size": 955,
-          "match_percent": 86.381355
-        },
-        {
-          "name": "edmainSetReturn",
-          "demangled_name": "edmainSetReturn",
-          "address": 3769776,
-          "offset": 2879808,
-          "size": 24,
-          "match_percent": 99.85714
-        },
-        {
-          "name": "cbMMReturnToApp",
-          "demangled_name": "cbMMReturnToApp",
-          "address": 3769808,
-          "offset": 2879840,
-          "size": 34,
-          "match_percent": 100.0
-        },
-        {
-          "name": "cbMMCancel",
-          "demangled_name": "cbMMCancel",
-          "address": 3769856,
-          "offset": 2879888,
-          "size": 34,
-          "match_percent": 100.0
-        },
-        {
-          "name": "edmainCurrent",
-          "demangled_name": "edmainCurrent",
-          "address": 3769904,
-          "offset": 2879936,
-          "size": 35,
-          "match_percent": 99.8
-        },
-        {
-          "name": "edmainActivate",
-          "demangled_name": "edmainActivate",
-          "address": 3769952,
-          "offset": 2879984,
-          "size": 178,
-          "match_percent": 99.89474
-        },
-        {
-          "name": "edmainSetCamera",
-          "demangled_name": "edmainSetCamera",
-          "address": 3770144,
-          "offset": 2880176,
-          "size": 134,
-          "match_percent": 99.976746
-        },
-        {
-          "name": "edmainGetCamera",
-          "demangled_name": "edmainGetCamera",
-          "address": 3770288,
-          "offset": 2880320,
-          "size": 22,
-          "match_percent": 99.875
-        },
-        {
-          "name": "edmainExtCamera",
-          "demangled_name": "edmainExtCamera",
-          "address": 3770320,
-          "offset": 2880352,
-          "size": 31,
-          "match_percent": 99.71429
-        },
-        {
-          "name": "edmainSetCursorEnabled",
-          "demangled_name": "edmainSetCursorEnabled",
-          "address": 3770352,
-          "offset": 2880384,
-          "size": 24,
-          "match_percent": 100.0
-        },
-        {
-          "name": "edmainGetCursorEnabled",
-          "demangled_name": "edmainGetCursorEnabled",
-          "address": 3770384,
-          "offset": 2880416,
-          "size": 22,
-          "match_percent": 100.0
-        },
-        {
-          "name": "edGetMainMenu",
-          "demangled_name": "edGetMainMenu",
-          "address": 3770416,
-          "offset": 2880448,
-          "size": 22,
-          "match_percent": 99.875
-        },
-        {
-          "name": "edmainRegisterLocVec",
-          "demangled_name": "edmainRegisterLocVec",
-          "address": 3770448,
-          "offset": 2880480,
-          "size": 24,
-          "match_percent": 99.85714
-        },
-        {
-          "name": "edmainQueryLocVec",
-          "demangled_name": "edmainQueryLocVec",
-          "address": 3770480,
-          "offset": 2880512,
-          "size": 22,
-          "match_percent": 99.875
-        },
-        {
-          "name": "eduiSetGlobalSliderAccel",
-          "demangled_name": "eduiSetGlobalSliderAccel",
-          "address": 3770512,
-          "offset": 2880544,
-          "size": 68,
-          "match_percent": 99.8
-        },
-        {
-          "name": "eduiInitMaterials",
-          "demangled_name": "eduiInitMaterials",
-          "address": 3770592,
-          "offset": 2880624,
-          "size": 321,
-          "match_percent": 93.233765
-        },
-        {
-          "name": "eduiSetRenderPlane",
-          "demangled_name": "eduiSetRenderPlane",
-          "address": 3770928,
-          "offset": 2880960,
-          "size": 113,
-          "match_percent": 97.93104
-        },
-        {
-          "name": "eduiMenuAddItem",
-          "demangled_name": "eduiMenuAddItem",
-          "address": 3771056,
-          "offset": 2881088,
-          "size": 68,
-          "match_percent": 94.318184
-        },
-        {
-          "name": "eduiMenuAddItemFirst",
-          "demangled_name": "eduiMenuAddItemFirst",
-          "address": 3771136,
-          "offset": 2881168,
-          "size": 69,
-          "match_percent": 88.333336
-        },
-        {
-          "name": "eduiMenuAddItemLast",
-          "demangled_name": "eduiMenuAddItemLast",
-          "address": 3771216,
-          "offset": 2881248,
-          "size": 68,
-          "match_percent": 92.333336
-        },
-        {
-          "name": "eduiMenuAddItemAfter",
-          "demangled_name": "eduiMenuAddItemAfter",
-          "address": 3771296,
-          "offset": 2881328,
-          "size": 118,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduiMenuAddItemBefore",
-          "demangled_name": "eduiMenuAddItemBefore",
-          "address": 3771424,
-          "offset": 2881456,
-          "size": 118,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduiMenuItemMoveUp",
-          "demangled_name": "eduiMenuItemMoveUp",
-          "address": 3771552,
-          "offset": 2881584,
-          "size": 93,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduiMenuItemMoveDown",
-          "demangled_name": "eduiMenuItemMoveDown",
-          "address": 3771648,
-          "offset": 2881680,
-          "size": 93,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduiMenuSortItemsByTxt",
-          "demangled_name": "eduiMenuSortItemsByTxt",
-          "address": 3771744,
-          "offset": 2881776,
-          "size": 158,
-          "match_percent": 89.18033
-        },
-        {
-          "name": "eduiMenuSelectFirstEntry",
-          "demangled_name": "eduiMenuSelectFirstEntry",
-          "address": 3771904,
-          "offset": 2881936,
-          "size": 16,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduiMenuRemoveItem",
-          "demangled_name": "eduiMenuRemoveItem",
-          "address": 3771920,
-          "offset": 2881952,
-          "size": 133,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduiGetAnalougePadValue",
-          "demangled_name": "eduiGetAnalougePadValue",
-          "address": 3772064,
-          "offset": 2882096,
-          "size": 264,
-          "match_percent": 99.85965
-        },
-        {
-          "name": "eduiMenuCreate",
-          "demangled_name": "eduiMenuCreate",
-          "address": 3772336,
-          "offset": 2882368,
-          "size": 263,
-          "match_percent": 99.96875
-        },
-        {
-          "name": "eduiMenuSetAttr",
-          "demangled_name": "eduiMenuSetAttr",
-          "address": 3772608,
-          "offset": 2882640,
-          "size": 70,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduiMenuSetTransparency",
-          "demangled_name": "eduiMenuSetTransparency",
-          "address": 3772688,
-          "offset": 2882720,
-          "size": 127,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduiMenuSetDisabled",
-          "demangled_name": "eduiMenuSetDisabled",
-          "address": 3772816,
-          "offset": 2882848,
-          "size": 59,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduiMenuHighlight",
-          "demangled_name": "eduiMenuHighlight",
-          "address": 3772880,
-          "offset": 2882912,
-          "size": 112,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduicbProcessSel",
-          "demangled_name": "eduicbProcessSel",
-          "address": 3772992,
-          "offset": 2883024,
-          "size": 152,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduiItemSetText",
-          "demangled_name": "eduiItemSetText",
-          "address": 3773152,
-          "offset": 2883184,
-          "size": 255,
-          "match_percent": 98.95238
-        },
-        {
-          "name": "_ZL21cbToggleIndicatorModeP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbToggleIndicatorMode(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3773408,
-          "offset": 2883440,
-          "size": 225,
-          "match_percent": 99.76087
-        },
-        {
-          "name": "_ZL19cbProcessColourPickP10eduimenu_sP10eduiitem_sfP7nupad_s",
-          "demangled_name": "cbProcessColourPick(eduimenu_s*, eduiitem_s*, float, nupad_s*)",
-          "address": 3773648,
-          "offset": 2883680,
-          "size": 281,
-          "match_percent": 99.74545
-        },
-        {
-          "name": "eduiItemSelCreate",
-          "demangled_name": "eduiItemSelCreate",
-          "address": 3773936,
-          "offset": 2883968,
-          "size": 388,
-          "match_percent": 79.631065
-        },
-        {
-          "name": "eduiItemSelWithClipColourCreate",
-          "demangled_name": "eduiItemSelWithClipColourCreate",
-          "address": 3774336,
-          "offset": 2884368,
-          "size": 87,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduiItemCheckCreate",
-          "demangled_name": "eduiItemCheckCreate",
-          "address": 3774432,
-          "offset": 2884464,
-          "size": 103,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduiItemToggleCreate",
-          "demangled_name": "eduiItemToggleCreate",
-          "address": 3774544,
-          "offset": 2884576,
-          "size": 103,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduiItemTextPickSetFmt",
-          "demangled_name": "eduiItemTextPickSetFmt",
-          "address": 3774656,
-          "offset": 2884688,
-          "size": 234,
-          "match_percent": 99.98182
-        },
-        {
-          "name": "eduiItemTextPickCreate",
-          "demangled_name": "eduiItemTextPickCreate",
-          "address": 3774896,
-          "offset": 2884928,
-          "size": 436,
-          "match_percent": 91.26667
-        },
-        {
-          "name": "eduiItemFilePickSetFmt",
-          "demangled_name": "eduiItemFilePickSetFmt",
-          "address": 3775616,
-          "offset": 2885648,
-          "size": 220,
-          "match_percent": 99.98148
-        },
-        {
-          "name": "eduiItemFilePickCreate",
-          "demangled_name": "eduiItemFilePickCreate",
-          "address": 3775840,
-          "offset": 2885872,
-          "size": 388,
-          "match_percent": 92.69697
-        },
-        {
-          "name": "eduiGradStageSetRGB",
-          "demangled_name": "eduiGradStageSetRGB",
-          "address": 3776240,
-          "offset": 2886272,
-          "size": 426,
-          "match_percent": 82.4
-        },
-        {
-          "name": "eduiGradStageSetHSV",
-          "demangled_name": "eduiGradStageSetHSV",
-          "address": 3776672,
-          "offset": 2886704,
-          "size": 446,
-          "match_percent": 89.33929
-        },
-        {
-          "name": "eduiGradStageAdd",
-          "demangled_name": "eduiGradStageAdd",
-          "address": 3777120,
-          "offset": 2887152,
-          "size": 356,
-          "match_percent": 73.34021
-        },
-        {
-          "name": "eduiGradStageAddRGB",
-          "demangled_name": "eduiGradStageAddRGB",
-          "address": 3777488,
-          "offset": 2887520,
-          "size": 419,
-          "match_percent": 86.197914
-        },
-        {
-          "name": "eduiGradStageDelete",
-          "demangled_name": "eduiGradStageDelete",
-          "address": 3777920,
-          "offset": 2887952,
-          "size": 101,
-          "match_percent": 86.32353
-        },
-        {
-          "name": "eduicbItemGradPickDestroy",
-          "demangled_name": "eduicbItemGradPickDestroy",
-          "address": 3778032,
-          "offset": 2888064,
-          "size": 91,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduiGradPickRead",
-          "demangled_name": "eduiGradPickRead",
-          "address": 3778128,
-          "offset": 2888160,
-          "size": 621,
-          "match_percent": 70.95395
-        },
-        {
-          "name": "eduiItemGradPickCreate",
-          "demangled_name": "eduiItemGradPickCreate",
-          "address": 3778752,
-          "offset": 2888784,
-          "size": 340,
-          "match_percent": 91.22581
-        },
-        {
-          "name": "eduiItemGreyGradPickCreate",
-          "demangled_name": "eduiItemGreyGradPickCreate",
-          "address": 3779104,
-          "offset": 2889136,
-          "size": 69,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduiItemDataGradPickCreate",
-          "demangled_name": "eduiItemDataGradPickCreate",
-          "address": 3779184,
-          "offset": 2889216,
-          "size": 104,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduiItemColourPickSetHSV",
-          "demangled_name": "eduiItemColourPickSetHSV",
-          "address": 3779296,
-          "offset": 2889328,
-          "size": 67,
-          "match_percent": 99.92308
-        },
-        {
-          "name": "eduiItemColourPickSetRGB",
-          "demangled_name": "eduiItemColourPickSetRGB",
-          "address": 3779376,
-          "offset": 2889408,
-          "size": 453,
-          "match_percent": 81.39604
-        },
-        {
-          "name": "_ZL7cbPasteP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPaste(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3779840,
-          "offset": 2889872,
-          "size": 231,
-          "match_percent": 99.80769
-        },
-        {
-          "name": "eduiItemColourPickCreate",
-          "demangled_name": "eduiItemColourPickCreate",
-          "address": 3780080,
-          "offset": 2890112,
-          "size": 380,
-          "match_percent": 90.81443
-        },
-        {
-          "name": "eduiItemGreyPickCreate",
-          "demangled_name": "eduiItemGreyPickCreate",
-          "address": 3780464,
-          "offset": 2890496,
-          "size": 87,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduiItemTexturePickCreate",
-          "demangled_name": "eduiItemTexturePickCreate",
-          "address": 3780560,
-          "offset": 2890592,
-          "size": 380,
-          "match_percent": 91.0
-        },
-        {
-          "name": "eduiItemGraphCreate",
-          "demangled_name": "eduiItemGraphCreate",
-          "address": 3780944,
-          "offset": 2890976,
-          "size": 484,
-          "match_percent": 90.22609
-        },
-        {
-          "name": "eduiItemGraphAddOnionSkin",
-          "demangled_name": "eduiItemGraphAddOnionSkin",
-          "address": 3781440,
-          "offset": 2891472,
-          "size": 151,
-          "match_percent": 95.210526
-        },
-        {
-          "name": "eduiItemGraphSetCursor",
-          "demangled_name": "eduiItemGraphSetCursor",
-          "address": 3781600,
-          "offset": 2891632,
-          "size": 146,
-          "match_percent": 99.95
-        },
-        {
-          "name": "eduiItemGraphSetLabels",
-          "demangled_name": "eduiItemGraphSetLabels",
-          "address": 3781760,
-          "offset": 2891792,
-          "size": 151,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduiItemSliderSetValEx",
-          "demangled_name": "eduiItemSliderSetValEx",
-          "address": 3781920,
-          "offset": 2891952,
-          "size": 93,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduiItemSliderSetVal",
-          "demangled_name": "eduiItemSliderSetVal",
-          "address": 3782016,
-          "offset": 2892048,
-          "size": 62,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduicbInteractSlider",
-          "demangled_name": "eduicbInteractSlider",
-          "address": 3782080,
-          "offset": 2892112,
-          "size": 102,
-          "match_percent": 99.88461
-        },
-        {
-          "name": "eduiItemSliderSetFmt",
-          "demangled_name": "eduiItemSliderSetFmt",
-          "address": 3782192,
-          "offset": 2892224,
-          "size": 220,
-          "match_percent": 99.98148
-        },
-        {
-          "name": "eduiItemSliderSetGranularity",
-          "demangled_name": "eduiItemSliderSetGranularity",
-          "address": 3782416,
-          "offset": 2892448,
-          "size": 18,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduiItemSliderCreate",
-          "demangled_name": "eduiItemSliderCreate",
-          "address": 3782448,
-          "offset": 2892480,
-          "size": 420,
-          "match_percent": 90.59259
-        },
-        {
-          "name": "eduiItemSliderCreateInt",
-          "demangled_name": "eduiItemSliderCreateInt",
-          "address": 3782880,
-          "offset": 2892912,
-          "size": 146,
-          "match_percent": 99.86487
-        },
-        {
-          "name": "eduiItemNumberCreate",
-          "demangled_name": "eduiItemNumberCreate",
-          "address": 3783040,
-          "offset": 2893072,
-          "size": 115,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduiItemTextSelectorCreate",
-          "demangled_name": "eduiItemTextSelectorCreate",
-          "address": 3783168,
-          "offset": 2893200,
-          "size": 412,
-          "match_percent": 89.71698
-        },
-        {
-          "name": "eduiItemPropSetText",
-          "demangled_name": "eduiItemPropSetText",
-          "address": 3783584,
-          "offset": 2893616,
-          "size": 255,
-          "match_percent": 98.95238
-        },
-        {
-          "name": "eduiGetCameraEnabled",
-          "demangled_name": "eduiGetCameraEnabled",
-          "address": 3783840,
-          "offset": 2893872,
-          "size": 22,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduiSetCameraEnabled",
-          "demangled_name": "eduiSetCameraEnabled",
-          "address": 3783872,
-          "offset": 2893904,
-          "size": 24,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduicbProcessPropKeyboard.isra.27",
-          "demangled_name": "eduicbProcessPropKeyboard.isra.27",
-          "address": 3783984,
-          "offset": 2894016,
-          "size": 610,
-          "match_percent": 42.15116
-        },
-        {
-          "name": "eduicbProcessProp",
-          "demangled_name": "eduicbProcessProp",
-          "address": 3784608,
-          "offset": 2894640,
-          "size": 282,
-          "match_percent": 99.64706
-        },
-        {
-          "name": "eduiItemPropCreateEx",
-          "demangled_name": "eduiItemPropCreateEx",
-          "address": 3784896,
-          "offset": 2894928,
-          "size": 420,
-          "match_percent": 90.97298
-        },
-        {
-          "name": "eduiItemPropCreate",
-          "demangled_name": "eduiItemPropCreate",
-          "address": 3785328,
-          "offset": 2895360,
-          "size": 98,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduiItemSeparatorCreate",
-          "demangled_name": "eduiItemSeparatorCreate",
-          "address": 3785440,
-          "offset": 2895472,
-          "size": 335,
-          "match_percent": 90.518074
-        },
-        {
-          "name": "eduiMenuFitWidth",
-          "demangled_name": "eduiMenuFitWidth",
-          "address": 3785936,
-          "offset": 2895968,
-          "size": 800,
-          "match_percent": 83.95939
-        },
-        {
-          "name": "edmainSetMainMenuScale",
-          "demangled_name": "edmainSetMainMenuScale",
-          "address": 3786736,
-          "offset": 2896768,
-          "size": 76,
-          "match_percent": 99.833336
-        },
-        {
-          "name": "eduiMenuDestroy",
-          "demangled_name": "eduiMenuDestroy",
-          "address": 3786912,
-          "offset": 2896944,
-          "size": 239,
-          "match_percent": 99.183334
-        },
-        {
-          "name": "eduicbCancelMessageMenu",
-          "demangled_name": "eduicbCancelMessageMenu",
-          "address": 3787152,
-          "offset": 2897184,
-          "size": 58,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduicbPickCFGCancel",
-          "demangled_name": "eduicbPickCFGCancel",
-          "address": 3787216,
-          "offset": 2897248,
-          "size": 34,
-          "match_percent": 100.0
-        },
-        {
-          "name": "edmainClose",
-          "demangled_name": "edmainClose",
-          "address": 3787264,
-          "offset": 2897296,
-          "size": 183,
-          "match_percent": 99.73333
-        },
-        {
-          "name": "edmainRegister",
-          "demangled_name": "edmainRegister",
-          "address": 3787456,
-          "offset": 2897488,
-          "size": 95,
-          "match_percent": 99.88
-        },
-        {
-          "name": "eduiIitemExpanderSetDepth",
-          "demangled_name": "eduiIitemExpanderSetDepth",
-          "address": 3787552,
-          "offset": 2897584,
-          "size": 113,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduiItemExpanderAddChild",
-          "demangled_name": "eduiItemExpanderAddChild",
-          "address": 3787680,
-          "offset": 2897712,
-          "size": 151,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduiItemExpanderCreate",
-          "demangled_name": "eduiItemExpanderCreate",
-          "address": 3787840,
-          "offset": 2897872,
-          "size": 348,
-          "match_percent": 91.548386
-        },
-        {
-          "name": "eduiItemFilterAddItem",
-          "demangled_name": "eduiItemFilterAddItem",
-          "address": 3788192,
-          "offset": 2898224,
-          "size": 37,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduiItemFilterRemoveItem",
-          "demangled_name": "eduiItemFilterRemoveItem",
-          "address": 3788240,
-          "offset": 2898272,
-          "size": 66,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduicbProcessFilter",
-          "demangled_name": "eduicbProcessFilter",
-          "address": 3788320,
-          "offset": 2898352,
-          "size": 654,
-          "match_percent": 90.38172
-        },
-        {
-          "name": "eduiItemFilterCreate",
-          "demangled_name": "eduiItemFilterCreate",
-          "address": 3788976,
-          "offset": 2899008,
-          "size": 364,
-          "match_percent": 90.25
-        },
-        {
-          "name": "eduiItemRender",
-          "demangled_name": "eduiItemRender",
-          "address": 3789344,
-          "offset": 2899376,
-          "size": 670,
-          "match_percent": 88.39766
-        },
-        {
-          "name": "eduiSetUsingMenuFocus",
-          "demangled_name": "eduiSetUsingMenuFocus",
-          "address": 3790016,
-          "offset": 2900048,
-          "size": 24,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduiGetUsingMenuFocus",
-          "demangled_name": "eduiGetUsingMenuFocus",
-          "address": 3790048,
-          "offset": 2900080,
-          "size": 22,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduiSetDefaultActiveMenu",
-          "demangled_name": "eduiSetDefaultActiveMenu",
-          "address": 3790080,
-          "offset": 2900112,
-          "size": 24,
-          "match_percent": 99.85714
-        },
-        {
-          "name": "eduiSetActiveMenu",
-          "demangled_name": "eduiSetActiveMenu",
-          "address": 3790112,
-          "offset": 2900144,
-          "size": 105,
-          "match_percent": 75.6875
-        },
-        {
-          "name": "eduiMenuAttach",
-          "demangled_name": "eduiMenuAttach",
-          "address": 3790224,
-          "offset": 2900256,
-          "size": 74,
-          "match_percent": 100.0
-        },
-        {
-          "name": "cbSubMenu",
-          "demangled_name": "cbSubMenu",
-          "address": 3790304,
-          "offset": 2900336,
-          "size": 45,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduiCreate3LineMessageMenu",
-          "demangled_name": "eduiCreate3LineMessageMenu",
-          "address": 3790352,
-          "offset": 2900384,
-          "size": 466,
-          "match_percent": 99.71028
-        },
-        {
-          "name": "eduiCreateMessageMenu",
-          "demangled_name": "eduiCreateMessageMenu",
-          "address": 3790832,
-          "offset": 2900864,
-          "size": 253,
-          "match_percent": 84.16129
-        },
-        {
-          "name": "eduicbProcessGradPick",
-          "demangled_name": "eduicbProcessGradPick",
-          "address": 3791088,
-          "offset": 2901120,
-          "size": 1125,
-          "match_percent": 82.70543
-        },
-        {
-          "name": "eduicbAttachDirectoryList.isra.32",
-          "demangled_name": "eduicbAttachDirectoryList.isra.32",
-          "address": 3792224,
-          "offset": 2902256,
-          "size": 1031,
-          "match_percent": 49.840637
-        },
-        {
-          "name": "eduicbProcessFilePick",
-          "demangled_name": "eduicbProcessFilePick",
-          "address": 3793264,
-          "offset": 2903296,
-          "size": 95,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduiAddTextPickEntEx",
-          "demangled_name": "eduiAddTextPickEntEx",
-          "address": 3793360,
-          "offset": 2903392,
-          "size": 233,
-          "match_percent": 99.82143
-        },
-        {
-          "name": "eduiAddPropTextPickEnt",
-          "demangled_name": "eduiAddPropTextPickEnt",
-          "address": 3793600,
-          "offset": 2903632,
-          "size": 144,
-          "match_percent": 98.97436
-        },
-        {
-          "name": "eduiAddTextPickEnt",
-          "demangled_name": "eduiAddTextPickEnt",
-          "address": 3793744,
-          "offset": 2903776,
-          "size": 186,
-          "match_percent": 94.510635
-        },
-        {
-          "name": "eduicbProcessTextPick",
-          "demangled_name": "eduicbProcessTextPick",
-          "address": 3793936,
-          "offset": 2903968,
-          "size": 2363,
-          "match_percent": 55.91312
-        },
-        {
-          "name": "cbMMEditorConfig",
-          "demangled_name": "cbMMEditorConfig",
-          "address": 3796304,
-          "offset": 2906336,
-          "size": 62,
-          "match_percent": 99.94444
-        },
-        {
-          "name": "eduiGetActiveMenu",
-          "demangled_name": "eduiGetActiveMenu",
-          "address": 3796368,
-          "offset": 2906400,
-          "size": 22,
-          "match_percent": 99.875
-        },
-        {
-          "name": "eduiMenuRender",
-          "demangled_name": "eduiMenuRender",
-          "address": 3796400,
-          "offset": 2906432,
-          "size": 2808,
-          "match_percent": 56.450222
-        },
-        {
-          "name": "eduiMenuFitOnScreen",
-          "demangled_name": "eduiMenuFitOnScreen",
-          "address": 3799216,
-          "offset": 2909248,
-          "size": 171,
-          "match_percent": 99.94118
-        },
-        {
-          "name": "eduicbRenderProp",
-          "demangled_name": "eduicbRenderProp",
-          "address": 3799392,
-          "offset": 2909424,
-          "size": 3872,
-          "match_percent": 42.477386
-        },
-        {
-          "name": "eduicbRenderFilter",
-          "demangled_name": "eduicbRenderFilter",
-          "address": 3803264,
-          "offset": 2913296,
-          "size": 5,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduiMenuDetach",
-          "demangled_name": "eduiMenuDetach",
-          "address": 3803280,
-          "offset": 2913312,
-          "size": 120,
-          "match_percent": 99.96875
-        },
-        {
-          "name": "_ZL15cbColourPickSelP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbColourPickSel(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3803408,
-          "offset": 2913440,
-          "size": 205,
-          "match_percent": 99.85714
-        },
-        {
-          "name": "cbgpcfgPaste",
-          "demangled_name": "cbgpcfgPaste",
-          "address": 3803664,
-          "offset": 2913696,
-          "size": 238,
-          "match_percent": 80.59649
-        },
-        {
-          "name": "cbgpcfgCopy",
-          "demangled_name": "cbgpcfgCopy",
-          "address": 3803904,
-          "offset": 2913936,
-          "size": 177,
-          "match_percent": 81.93617
-        },
-        {
-          "name": "cbgpcfgDel",
-          "demangled_name": "cbgpcfgDel",
-          "address": 3804096,
-          "offset": 2914128,
-          "size": 114,
-          "match_percent": 99.4375
-        },
-        {
-          "name": "cbgpcfgAdd",
-          "demangled_name": "cbgpcfgAdd",
-          "address": 3804224,
-          "offset": 2914256,
-          "size": 242,
-          "match_percent": 85.68965
-        },
-        {
-          "name": "cbgpcfgCPPress",
-          "demangled_name": "cbgpcfgCPPress",
-          "address": 3804480,
-          "offset": 2914512,
-          "size": 171,
-          "match_percent": 90.37778
-        },
-        {
-          "name": "eduicbSelectDirectoryExit",
-          "demangled_name": "eduicbSelectDirectoryExit",
-          "address": 3804656,
-          "offset": 2914688,
-          "size": 56,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduicbSelectDirectoryEntry",
-          "demangled_name": "eduicbSelectDirectoryEntry",
-          "address": 3804720,
-          "offset": 2914752,
-          "size": 359,
-          "match_percent": 95.03615
-        },
-        {
-          "name": "eduicbDestroyDirectoryList",
-          "demangled_name": "eduicbDestroyDirectoryList",
-          "address": 3805088,
-          "offset": 2915120,
-          "size": 56,
-          "match_percent": 100.0
-        },
-        {
-          "name": "tpentPropOnEnter",
-          "demangled_name": "tpentPropOnEnter",
-          "address": 3805152,
-          "offset": 2915184,
-          "size": 131,
-          "match_percent": 74.189186
-        },
-        {
-          "name": "tpentOnEnter",
-          "demangled_name": "tpentOnEnter",
-          "address": 3805296,
-          "offset": 2915328,
-          "size": 119,
-          "match_percent": 77.5
-        },
-        {
-          "name": "cbmcfgCancel",
-          "demangled_name": "cbmcfgCancel",
-          "address": 3805424,
-          "offset": 2915456,
-          "size": 34,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduicbRenderExpander",
-          "demangled_name": "eduicbRenderExpander",
-          "address": 3805472,
-          "offset": 2915504,
-          "size": 1601,
-          "match_percent": 57.857143
-        },
-        {
-          "name": "eduiGetTopLevelParent",
-          "demangled_name": "eduiGetTopLevelParent",
-          "address": 3807088,
-          "offset": 2917120,
-          "size": 49,
-          "match_percent": 88.947365
-        },
-        {
-          "name": "eduiGetActiveMenuParent",
-          "demangled_name": "eduiGetActiveMenuParent",
-          "address": 3807152,
-          "offset": 2917184,
-          "size": 36,
-          "match_percent": 99.9
-        },
-        {
-          "name": "eduiClearActiveMenu",
-          "demangled_name": "eduiClearActiveMenu",
-          "address": 3807200,
-          "offset": 2917232,
-          "size": 36,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduiMenuIsActive",
-          "demangled_name": "eduiMenuIsActive",
-          "address": 3807248,
-          "offset": 2917280,
-          "size": 71,
-          "match_percent": 83.0
-        },
-        {
-          "name": "eduiMenuProcessSelectedItem",
-          "demangled_name": "eduiMenuProcessSelectedItem",
-          "address": 3807328,
-          "offset": 2917360,
-          "size": 80,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduiMenuEnsureSelection",
-          "demangled_name": "eduiMenuEnsureSelection",
-          "address": 3807408,
-          "offset": 2917440,
-          "size": 22,
-          "match_percent": 98.333336
-        },
-        {
-          "name": "eduiCursorOverMenu",
-          "demangled_name": "eduiCursorOverMenu",
-          "address": 3807440,
-          "offset": 2917472,
-          "size": 92,
-          "match_percent": 99.93104
-        },
-        {
-          "name": "eduiCheckForPadMenuCancel",
-          "demangled_name": "eduiCheckForPadMenuCancel",
-          "address": 3807536,
-          "offset": 2917568,
-          "size": 128,
-          "match_percent": 50.28205
-        },
-        {
-          "name": "cbInteractMenuScrollTo",
-          "demangled_name": "cbInteractMenuScrollTo",
-          "address": 3807664,
-          "offset": 2917696,
-          "size": 145,
-          "match_percent": 98.545456
-        },
-        {
-          "name": "cbInteractMenuKeySelect",
-          "demangled_name": "cbInteractMenuKeySelect",
-          "address": 3807824,
-          "offset": 2917856,
-          "size": 90,
-          "match_percent": 99.81481
-        },
-        {
-          "name": "eduiMenuProcessInput",
-          "demangled_name": "eduiMenuProcessInput",
-          "address": 3807920,
-          "offset": 2917952,
-          "size": 1039,
-          "match_percent": 68.875
-        },
-        {
-          "name": "eduiFlushInteracts",
-          "demangled_name": "eduiFlushInteracts",
-          "address": 3808960,
-          "offset": 2918992,
-          "size": 26,
-          "match_percent": 99.875
-        },
-        {
-          "name": "eduiProcessInteracts",
-          "demangled_name": "eduiProcessInteracts",
-          "address": 3808992,
-          "offset": 2919024,
-          "size": 422,
-          "match_percent": 52.44275
-        },
-        {
-          "name": "eduiMenuProcessAux",
-          "demangled_name": "eduiMenuProcessAux",
-          "address": 3809424,
-          "offset": 2919456,
-          "size": 203,
-          "match_percent": 99.67308
-        },
-        {
-          "name": "eduiMenuProcess",
-          "demangled_name": "eduiMenuProcess",
-          "address": 3809632,
-          "offset": 2919664,
-          "size": 154,
-          "match_percent": 99.95349
-        },
-        {
-          "name": "eduiRenderInteracts",
-          "demangled_name": "eduiRenderInteracts",
-          "address": 3809792,
-          "offset": 2919824,
-          "size": 1329,
-          "match_percent": 99.888885
-        },
-        {
-          "name": "eduiShowCursor",
-          "demangled_name": "eduiShowCursor",
-          "address": 3811136,
-          "offset": 2921168,
-          "size": 24,
-          "match_percent": 99.85714
-        },
-        {
-          "name": "eduiGetCursorCoords",
-          "demangled_name": "eduiGetCursorCoords",
-          "address": 3811168,
-          "offset": 2921200,
-          "size": 60,
-          "match_percent": 99.63636
-        },
-        {
-          "name": "eduiSetCursorCoords",
-          "demangled_name": "eduiSetCursorCoords",
-          "address": 3811232,
-          "offset": 2921264,
-          "size": 56,
-          "match_percent": 99.55556
-        },
-        {
-          "name": "eduiGetCursorDelta",
-          "demangled_name": "eduiGetCursorDelta",
-          "address": 3811296,
-          "offset": 2921328,
-          "size": 60,
-          "match_percent": 99.63636
-        },
-        {
-          "name": "eduiUsedAlgPad",
-          "demangled_name": "eduiUsedAlgPad",
-          "address": 3811360,
-          "offset": 2921392,
-          "size": 113,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduiProcessCursorDefault",
-          "demangled_name": "eduiProcessCursorDefault",
-          "address": 3811488,
-          "offset": 2921520,
-          "size": 470,
-          "match_percent": 99.72449
-        },
-        {
-          "name": "eduiProcessCursor",
-          "demangled_name": "eduiProcessCursor",
-          "address": 3811968,
-          "offset": 2922000,
-          "size": 46,
-          "match_percent": 100.0
-        },
-        {
-          "name": "edmainProcess",
-          "demangled_name": "edmainProcess",
-          "address": 3812016,
-          "offset": 2922048,
-          "size": 373,
-          "match_percent": 82.83696
-        },
-        {
-          "name": "eduiSetCursorColour",
-          "demangled_name": "eduiSetCursorColour",
-          "address": 3812400,
-          "offset": 2922432,
-          "size": 24,
-          "match_percent": 99.85714
-        },
-        {
-          "name": "eduiRenderCursor",
-          "demangled_name": "eduiRenderCursor",
-          "address": 3812432,
-          "offset": 2922464,
-          "size": 1016,
-          "match_percent": 84.65877
-        },
-        {
-          "name": "edmainRender",
-          "demangled_name": "edmainRender",
-          "address": 3813456,
-          "offset": 2923488,
-          "size": 266,
-          "match_percent": 93.07692
-        },
-        {
-          "name": "eduiInit",
-          "demangled_name": "eduiInit",
-          "address": 3813728,
-          "offset": 2923760,
-          "size": 137,
-          "match_percent": 99.90625
-        },
-        {
-          "name": "edmainInit",
-          "demangled_name": "edmainInit",
-          "address": 3813872,
-          "offset": 2923904,
-          "size": 1047,
-          "match_percent": 92.15726
-        },
-        {
-          "name": "edmainInitEx",
-          "demangled_name": "edmainInitEx",
-          "address": 3814928,
-          "offset": 2924960,
-          "size": 122,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduiSetFont",
-          "demangled_name": "eduiSetFont",
-          "address": 3815056,
-          "offset": 2925088,
-          "size": 24,
-          "match_percent": 99.85714
-        },
-        {
-          "name": "eduiSetFontScale",
-          "demangled_name": "eduiSetFontScale",
-          "address": 3815088,
-          "offset": 2925120,
-          "size": 40,
-          "match_percent": 99.71429
-        },
-        {
-          "name": "CreateTestMenu",
-          "demangled_name": "CreateTestMenu",
-          "address": 3815136,
-          "offset": 2925168,
-          "size": 1119,
-          "match_percent": 99.64789
-        },
-        {
-          "name": "TestMenu",
-          "demangled_name": "TestMenu",
-          "address": 3816256,
-          "offset": 2926288,
-          "size": 66,
-          "match_percent": 99.875
-        },
-        {
-          "name": "eduiItemColourSliderCreate",
-          "demangled_name": "eduiItemColourSliderCreate",
-          "address": 3816336,
-          "offset": 2926368,
-          "size": 460,
-          "match_percent": 91.84615
-        },
-        {
-          "name": "edcamSetSpeedPos",
-          "demangled_name": "edcamSetSpeedPos",
-          "address": 3816800,
-          "offset": 2926832,
-          "size": 54,
-          "match_percent": 99.666664
-        },
-        {
-          "name": "edcamSetSpeed",
-          "demangled_name": "edcamSetSpeed",
-          "address": 3816864,
-          "offset": 2926896,
-          "size": 68,
-          "match_percent": 99.63636
-        },
-        {
-          "name": "cbmcfgCameraSpeed",
-          "demangled_name": "cbmcfgCameraSpeed",
-          "address": 3816944,
-          "offset": 2926976,
-          "size": 91,
-          "match_percent": 99.8421
-        },
-        {
-          "name": "edcamSetAutoSpeed",
-          "demangled_name": "edcamSetAutoSpeed",
-          "address": 3817040,
-          "offset": 2927072,
-          "size": 62,
-          "match_percent": 99.94118
-        },
-        {
-          "name": "edcamSetMouseSensitivity",
-          "demangled_name": "edcamSetMouseSensitivity",
-          "address": 3817248,
-          "offset": 2927280,
-          "size": 54,
-          "match_percent": 99.666664
-        },
-        {
-          "name": "edcamSetAdjustFreedom",
-          "demangled_name": "edcamSetAdjustFreedom",
-          "address": 3817312,
-          "offset": 2927344,
-          "size": 110,
-          "match_percent": 99.93939
-        },
-        {
-          "name": "edcamMoveEx",
-          "demangled_name": "edcamMoveEx",
-          "address": 3822672,
-          "offset": 2932704,
-          "size": 172,
-          "match_percent": 100.0
-        },
-        {
-          "name": "edcamMove",
-          "demangled_name": "edcamMove",
-          "address": 3822848,
-          "offset": 2932880,
-          "size": 43,
-          "match_percent": 100.0
-        },
-        {
-          "name": "edcamSetPos",
-          "demangled_name": "edcamSetPos",
-          "address": 3822896,
-          "offset": 2932928,
-          "size": 69,
-          "match_percent": 99.57143
-        },
-        {
-          "name": "edcamSetAng",
-          "demangled_name": "edcamSetAng",
-          "address": 3822976,
-          "offset": 2933008,
-          "size": 32,
-          "match_percent": 99.71429
-        },
-        {
-          "name": "edcamSetPosAng",
-          "demangled_name": "edcamSetPosAng",
-          "address": 3823008,
-          "offset": 2933040,
-          "size": 89,
-          "match_percent": 99.55556
-        },
-        {
-          "name": "edcamGetPosAng",
-          "demangled_name": "edcamGetPosAng",
-          "address": 3823104,
-          "offset": 2933136,
-          "size": 100,
-          "match_percent": 99.82143
-        },
-        {
-          "name": "edcamGetPosAngSnap",
-          "demangled_name": "edcamGetPosAngSnap",
-          "address": 3823216,
-          "offset": 2933248,
-          "size": 100,
-          "match_percent": 99.82143
-        },
-        {
-          "name": "_Z17edcamSetContolleri",
-          "demangled_name": "edcamSetContoller(int)",
-          "address": 3823328,
-          "offset": 2933360,
-          "size": 41,
-          "match_percent": 99.8
-        },
-        {
-          "name": "edcamSetDist",
-          "demangled_name": "edcamSetDist",
-          "address": 3823376,
-          "offset": 2933408,
-          "size": 28,
-          "match_percent": 99.85714
-        },
-        {
-          "name": "edcamGetDist",
-          "demangled_name": "edcamGetDist",
-          "address": 3823408,
-          "offset": 2933440,
-          "size": 22,
-          "match_percent": 99.875
-        },
-        {
-          "name": "edcamGetEdCam",
-          "demangled_name": "edcamGetEdCam",
-          "address": 3823440,
-          "offset": 2933472,
-          "size": 22,
-          "match_percent": 100.0
-        },
-        {
-          "name": "edcamSetOffset",
-          "demangled_name": "edcamSetOffset",
-          "address": 3823472,
-          "offset": 2933504,
-          "size": 42,
-          "match_percent": 99.7
-        },
-        {
-          "name": "edcamGetOffset",
-          "demangled_name": "edcamGetOffset",
-          "address": 3823520,
-          "offset": 2933552,
-          "size": 42,
-          "match_percent": 99.7
-        },
-        {
-          "name": "edcamMtx",
-          "demangled_name": "edcamMtx",
-          "address": 3823568,
-          "offset": 2933600,
-          "size": 197,
-          "match_percent": 95.48889
-        },
-        {
-          "name": "edcamSet",
-          "demangled_name": "edcamSet",
-          "address": 3823776,
-          "offset": 2933808,
-          "size": 56,
-          "match_percent": 100.0
-        },
-        {
-          "name": "edcamGetPosPointer",
-          "demangled_name": "edcamGetPosPointer",
-          "address": 3823840,
-          "offset": 2933872,
-          "size": 22,
-          "match_percent": 100.0
-        },
-        {
-          "name": "AddColourPick",
-          "demangled_name": "AddColourPick",
-          "address": 3837760,
-          "offset": 2947792,
-          "size": 535,
-          "match_percent": 89.0
-        },
-        {
-          "name": "CreateColourPicker",
-          "demangled_name": "CreateColourPicker",
-          "address": 3838304,
-          "offset": 2948336,
-          "size": 457,
-          "match_percent": 86.86598
-        },
-        {
           "name": "edpartRegisterPointerToGameCharLocation",
           "demangled_name": "edpartRegisterPointerToGameCharLocation",
           "address": 4296640,
@@ -31293,37 +31686,6 @@
           "address": 4344208,
           "offset": 3454240,
           "size": 352,
-          "match_percent": 100.0
-        }
-      ]
-    },
-    {
-      "name": "gameapi/edtools/edui.cpp.o",
-      "source": "src/gameapi/edtools/edui.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_gameapi/edui.o",
-      "functions": [
-        {
-          "name": "eduicbMenuOpenAllexpanders",
-          "demangled_name": "eduicbMenuOpenAllexpanders",
-          "address": 3785776,
-          "offset": 2895808,
-          "size": 74,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduicbMenuCloseAllexpanders",
-          "demangled_name": "eduicbMenuCloseAllexpanders",
-          "address": 3785856,
-          "offset": 2895888,
-          "size": 70,
-          "match_percent": 100.0
-        },
-        {
-          "name": "eduiMenuDestroyItems",
-          "demangled_name": "eduiMenuDestroyItems",
-          "address": 3786816,
-          "offset": 2896848,
-          "size": 85,
           "match_percent": 100.0
         }
       ]
@@ -35037,14 +35399,6 @@
           "offset": 1462048,
           "size": 127,
           "match_percent": 99.90323
-        },
-        {
-          "name": "cbSetAutoSpeed",
-          "demangled_name": "cbSetAutoSpeed",
-          "address": 3817104,
-          "offset": 2927136,
-          "size": 130,
-          "match_percent": 100.0
         },
         {
           "name": "_Z21ObjOpponentStillThereP12GameObject_sS0_f",
@@ -42414,46 +42768,6 @@
           "match_percent": 99.96111
         },
         {
-          "name": "_Z21do_Pad_flymode_cameraP7edcam_sfP7nupad_s",
-          "demangled_name": "do_Pad_flymode_camera(edcam_s*, float, nupad_s*)",
-          "address": 3817424,
-          "offset": 2927456,
-          "size": 1505,
-          "match_percent": 99.91964
-        },
-        {
-          "name": "do_Pad_Standard_camera",
-          "demangled_name": "do_Pad_Standard_camera",
-          "address": 3818944,
-          "offset": 2928976,
-          "size": 1189,
-          "match_percent": 99.1502
-        },
-        {
-          "name": "do_maya_mouse_camera",
-          "demangled_name": "do_maya_mouse_camera",
-          "address": 3820144,
-          "offset": 2930176,
-          "size": 1329,
-          "match_percent": 77.460526
-        },
-        {
-          "name": "do_mouse_flymode_camera",
-          "demangled_name": "do_mouse_flymode_camera",
-          "address": 3821488,
-          "offset": 2931520,
-          "size": 1178,
-          "match_percent": 99.44758
-        },
-        {
-          "name": "cbNearClipAtCursor",
-          "demangled_name": "cbNearClipAtCursor",
-          "address": 3837408,
-          "offset": 2947440,
-          "size": 31,
-          "match_percent": 100.0
-        },
-        {
           "name": "_Z9GetTopBotP12GameObject_s",
           "demangled_name": "GetTopBot(GameObject_s*)",
           "address": 4643984,
@@ -45035,206 +45349,6 @@
           "match_percent": 100.0
         },
         {
-          "name": "_Z21FS_MakeDateTimeStringP15FS_FILEENTRYHDRPc",
-          "demangled_name": "FS_MakeDateTimeString(FS_FILEENTRYHDR*, char*)",
-          "address": 3827024,
-          "offset": 2937056,
-          "size": 117,
-          "match_percent": 99.83871
-        },
-        {
-          "name": "_Z17FS_MakeTimeStringP15FS_FILEENTRYHDRPc",
-          "demangled_name": "FS_MakeTimeString(FS_FILEENTRYHDR*, char*)",
-          "address": 3827152,
-          "offset": 2937184,
-          "size": 81,
-          "match_percent": 99.77273
-        },
-        {
-          "name": "_Z17FS_MakeDateStringP15FS_FILEENTRYHDRPc",
-          "demangled_name": "FS_MakeDateString(FS_FILEENTRYHDR*, char*)",
-          "address": 3827248,
-          "offset": 2937280,
-          "size": 84,
-          "match_percent": 99.77273
-        },
-        {
-          "name": "_Z14RenderFileSel3i.part.38",
-          "demangled_name": "RenderFileSel3(int) [clone .part.38]",
-          "address": 3827344,
-          "offset": 2937376,
-          "size": 3315,
-          "match_percent": 89.1632
-        },
-        {
-          "name": "_Z17FS_MoveCursorDowni",
-          "demangled_name": "FS_MoveCursorDown(int)",
-          "address": 3830672,
-          "offset": 2940704,
-          "size": 170,
-          "match_percent": 97.89474
-        },
-        {
-          "name": "_Z14FS_PrevNameLenPc",
-          "demangled_name": "FS_PrevNameLen(char*)",
-          "address": 3830848,
-          "offset": 2940880,
-          "size": 98,
-          "match_percent": 19.897436
-        },
-        {
-          "name": "_Z15FS_MoveCursorUpi",
-          "demangled_name": "FS_MoveCursorUp(int)",
-          "address": 3830960,
-          "offset": 2940992,
-          "size": 153,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z14RenderFileSel3i",
-          "demangled_name": "RenderFileSel3(int)",
-          "address": 3831120,
-          "offset": 2941152,
-          "size": 37,
-          "match_percent": 100.0
-        },
-        {
-          "name": "RenderFileSel2",
-          "demangled_name": "RenderFileSel2",
-          "address": 3831168,
-          "offset": 2941200,
-          "size": 114,
-          "match_percent": 99.96154
-        },
-        {
-          "name": "_Z13RenderFileSelv",
-          "demangled_name": "RenderFileSel()",
-          "address": 3831296,
-          "offset": 2941328,
-          "size": 34,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z18FS_GetDirTextWidthv",
-          "demangled_name": "FS_GetDirTextWidth()",
-          "address": 3831344,
-          "offset": 2941376,
-          "size": 274,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z18FS_GetFilterStringPcS_",
-          "demangled_name": "FS_GetFilterString(char*, char*)",
-          "address": 3831632,
-          "offset": 2941664,
-          "size": 389,
-          "match_percent": 49.11278
-        },
-        {
-          "name": "_Z17FS_FileNameFilterPc",
-          "demangled_name": "FS_FileNameFilter(char*)",
-          "address": 3832032,
-          "offset": 2942064,
-          "size": 515,
-          "match_percent": 44.52349
-        },
-        {
-          "name": "_Z20FS_BuildFilterBlocksPc",
-          "demangled_name": "FS_BuildFilterBlocks(char*)",
-          "address": 3832560,
-          "offset": 2942592,
-          "size": 165,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z23FS_BuildFilterOutBlocksPc",
-          "demangled_name": "FS_BuildFilterOutBlocks(char*)",
-          "address": 3832736,
-          "offset": 2942768,
-          "size": 131,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z14FS_SortStringsPcS_i",
-          "demangled_name": "FS_SortStrings(char*, char*, int)",
-          "address": 3832880,
-          "offset": 2942912,
-          "size": 774,
-          "match_percent": 99.69302
-        },
-        {
-          "name": "_Z26FS_SetCursorToLastFileNamev",
-          "demangled_name": "FS_SetCursorToLastFileName()",
-          "address": 3833664,
-          "offset": 2943696,
-          "size": 251,
-          "match_percent": 82.67105
-        },
-        {
-          "name": "_Z13FS_GetDirListPcS_S_",
-          "demangled_name": "FS_GetDirList(char*, char*, char*)",
-          "address": 3833920,
-          "offset": 2943952,
-          "size": 984,
-          "match_percent": 67.702705
-        },
-        {
-          "name": "_Z19FS_GetPadWithRepeatP7nupad_sff",
-          "demangled_name": "FS_GetPadWithRepeat(nupad_s*, float, float)",
-          "address": 3834912,
-          "offset": 2944944,
-          "size": 111,
-          "match_percent": 99.75
-        },
-        {
-          "name": "_Z15ProcessFileSel3fP7nupad_s",
-          "demangled_name": "ProcessFileSel3(float, nupad_s*)",
-          "address": 3835024,
-          "offset": 2945056,
-          "size": 1169,
-          "match_percent": 98.37405
-        },
-        {
-          "name": "ProcessFileSel2",
-          "demangled_name": "ProcessFileSel2",
-          "address": 3836208,
-          "offset": 2946240,
-          "size": 46,
-          "match_percent": 100.0
-        },
-        {
-          "name": "FileSelKill",
-          "demangled_name": "FileSelKill",
-          "address": 3836256,
-          "offset": 2946288,
-          "size": 60,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z14ProcessFileSelfP7nupad_s",
-          "demangled_name": "ProcessFileSel(float, nupad_s*)",
-          "address": 3836320,
-          "offset": 2946352,
-          "size": 79,
-          "match_percent": 100.0
-        },
-        {
-          "name": "FS_SetFileSelPathFromName",
-          "demangled_name": "FS_SetFileSelPathFromName",
-          "address": 3836400,
-          "offset": 2946432,
-          "size": 248,
-          "match_percent": 100.0
-        },
-        {
-          "name": "StartFileSel",
-          "demangled_name": "StartFileSel",
-          "address": 3836656,
-          "offset": 2946688,
-          "size": 219,
-          "match_percent": 100.0
-        },
-        {
           "name": "SaveSystemInitialiseEx",
           "demangled_name": "SaveSystemInitialiseEx",
           "address": 4364464,
@@ -45256,7 +45370,7 @@
           "address": 4365072,
           "offset": 3475104,
           "size": 2782,
-          "match_percent": 69.6144
+          "match_percent": 69.6624
         },
         {
           "name": "loadsaveCallEachFrame",
@@ -65269,86 +65383,6 @@
           "match_percent": 100.0
         },
         {
-          "name": "cbCompateDirentByDateAsc",
-          "demangled_name": "cbCompateDirentByDateAsc",
-          "address": 3775344,
-          "offset": 2885376,
-          "size": 19,
-          "match_percent": 100.0
-        },
-        {
-          "name": "cbCompateDirentByDateDec",
-          "demangled_name": "cbCompateDirentByDateDec",
-          "address": 3775376,
-          "offset": 2885408,
-          "size": 19,
-          "match_percent": 100.0
-        },
-        {
-          "name": "cbCompateDirentBySizeAsc",
-          "demangled_name": "cbCompateDirentBySizeAsc",
-          "address": 3775408,
-          "offset": 2885440,
-          "size": 53,
-          "match_percent": 100.0
-        },
-        {
-          "name": "cbCompateDirentBySizeDec",
-          "demangled_name": "cbCompateDirentBySizeDec",
-          "address": 3775472,
-          "offset": 2885504,
-          "size": 33,
-          "match_percent": 100.0
-        },
-        {
-          "name": "cbCompateDirentByNameAsc",
-          "demangled_name": "cbCompateDirentByNameAsc",
-          "address": 3775520,
-          "offset": 2885552,
-          "size": 48,
-          "match_percent": 100.0
-        },
-        {
-          "name": "cbCompateDirentByNameDec",
-          "demangled_name": "cbCompateDirentByNameDec",
-          "address": 3775568,
-          "offset": 2885600,
-          "size": 48,
-          "match_percent": 100.0
-        },
-        {
-          "name": "cbCancelSubMenu",
-          "demangled_name": "cbCancelSubMenu",
-          "address": 3803616,
-          "offset": 2913648,
-          "size": 34,
-          "match_percent": 100.0
-        },
-        {
-          "name": "cbTriggerSubMenu",
-          "demangled_name": "cbTriggerSubMenu",
-          "address": 3837248,
-          "offset": 2947280,
-          "size": 111,
-          "match_percent": 99.6129
-        },
-        {
-          "name": "cbCancelSubMenuFromItem",
-          "demangled_name": "cbCancelSubMenuFromItem",
-          "address": 3837360,
-          "offset": 2947392,
-          "size": 34,
-          "match_percent": 100.0
-        },
-        {
-          "name": "FlushMenuHighlights",
-          "demangled_name": "FlushMenuHighlights",
-          "address": 3841120,
-          "offset": 2951152,
-          "size": 40,
-          "match_percent": 100.0
-        },
-        {
           "name": "_Z19MenuEnterInsertCardP6MENU_s",
           "demangled_name": "MenuEnterInsertCard(MENU_s*)",
           "address": 4348560,
@@ -65858,7 +65892,7 @@
           "address": 4358384,
           "offset": 3468416,
           "size": 102,
-          "match_percent": 99.48276
+          "match_percent": 100.0
         },
         {
           "name": "MenuInMemoryCardLoad",
@@ -78452,7 +78486,7 @@
           "address": 2989136,
           "offset": 2099168,
           "size": 1303,
-          "match_percent": 71.833336
+          "match_percent": 71.88182
         },
         {
           "name": "_Z9DrawAABoxP6_vuv_sS0_i",
@@ -78533,38 +78567,6 @@
           "offset": 2235808,
           "size": 108,
           "match_percent": 100.0
-        },
-        {
-          "name": "edDrawCross",
-          "demangled_name": "edDrawCross",
-          "address": 3837440,
-          "offset": 2947472,
-          "size": 294,
-          "match_percent": 99.98485
-        },
-        {
-          "name": "RndrOSphere",
-          "demangled_name": "RndrOSphere",
-          "address": 3838768,
-          "offset": 2948800,
-          "size": 591,
-          "match_percent": 100.0
-        },
-        {
-          "name": "RndrCircleXZ",
-          "demangled_name": "RndrCircleXZ",
-          "address": 3839360,
-          "offset": 2949392,
-          "size": 591,
-          "match_percent": 100.0
-        },
-        {
-          "name": "RndrOSquare",
-          "demangled_name": "RndrOSquare",
-          "address": 3839952,
-          "offset": 2949984,
-          "size": 1156,
-          "match_percent": 89.400925
         },
         {
           "name": "LocaledbitsDrawSolidCircleXY",
@@ -103019,14 +103021,6 @@
           "match_percent": 99.32836
         },
         {
-          "name": "NuKeyToAscii",
-          "demangled_name": "NuKeyToAscii",
-          "address": 3783904,
-          "offset": 2893936,
-          "size": 78,
-          "match_percent": 100.0
-        },
-        {
           "name": "NuPartResetGlobalTime",
           "demangled_name": "NuPartResetGlobalTime",
           "address": 4314576,
@@ -125420,18 +125414,6 @@
       ]
     },
     {
-      "name": "eduicbItemExpanderClose",
-      "demangled_name": "eduicbItemExpanderClose",
-      "address": 3760592,
-      "offset": 2870624,
-      "size": 1079,
-      "match_percent": 11.219512,
-      "candidate_units": [
-        "gameapi/edtools/edtoolsall_plain.cpp.o",
-        "gameapi/edtools/edui.cpp.o"
-      ]
-    },
-    {
       "name": "NuFabs",
       "demangled_name": "NuFabs",
       "address": 3841160,
@@ -129870,10 +129852,10 @@
     }
   ],
   "summary": {
-    "bazel_units": 486,
+    "bazel_units": 484,
     "functions": 13454,
-    "assigned_functions": 12845,
-    "ambiguous_functions": 282,
+    "assigned_functions": 12846,
+    "ambiguous_functions": 281,
     "unassigned_functions": 327
   }
 }

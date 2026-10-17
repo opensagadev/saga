@@ -5892,9 +5892,10 @@ f32 CameraEmitterDistance(NUVEC *position);
 } // extern "C"
 
 extern "C" i16 id_GRABCONTROL, id_GRABR2CONTROL, id_LANDSPEEDER, id_ATST, id_DEWBACK;
-extern f32 MainRenderTime, newgamecamtime, cutscenecam_focalLength, CamStopBlend, EMPERORFIGHTA_CAMDYHACK;
-extern i32 CUTCAMONLY, CUTCAM, NewMode, GUNSHIPAHACK, netcamera, complexsockposition_forcesock,
-    movegamecamera_forcesock;
+extern "C" f32 MainRenderTime;
+extern f32 newgamecamtime, cutscenecam_focalLength, CamStopBlend, EMPERORFIGHTA_CAMDYHACK;
+extern "C" i32 NewMode;
+extern i32 CUTCAMONLY, CUTCAM, GUNSHIPAHACK, netcamera, complexsockposition_forcesock, movegamecamera_forcesock;
 extern i32 LevFlag[4];
 extern NUMTX cutscenecammtx, CutCamMtx;
 extern u8 set_cutscenecammtx;

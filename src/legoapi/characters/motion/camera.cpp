@@ -471,9 +471,10 @@ f32 CameraEmitterDistance(NUVEC *position);
 } // extern "C"
 
 extern "C" i16 id_GRABCONTROL, id_GRABR2CONTROL, id_LANDSPEEDER, id_ATST, id_DEWBACK;
-extern f32 MainRenderTime, newgamecamtime, cutscenecam_focalLength, CamStopBlend, EMPERORFIGHTA_CAMDYHACK;
-extern i32 CUTCAMONLY, CUTCAM, NewMode, GUNSHIPAHACK, netcamera, complexsockposition_forcesock,
-    movegamecamera_forcesock;
+extern "C" f32 MainRenderTime;
+extern f32 newgamecamtime, cutscenecam_focalLength, CamStopBlend, EMPERORFIGHTA_CAMDYHACK;
+extern "C" i32 NewMode;
+extern i32 CUTCAMONLY, CUTCAM, GUNSHIPAHACK, netcamera, complexsockposition_forcesock, movegamecamera_forcesock;
 extern i32 LevFlag[4];
 extern NUMTX cutscenecammtx, CutCamMtx;
 extern u8 set_cutscenecammtx;
@@ -1953,91 +1954,7 @@ void KeepVehicleOnScreen(GameObject_s *object, i32 sides, i32 top, i32 bottom) {
     }
 }
 
-void do_Pad_flymode_camera(edcam_s *camera, float delta_time, nupad_s *pad) {
-    constexpr f32 kNominalFrameTime = 1.0f / 60.0f;
-    constexpr f32 kPitchSpeedScale = 32.0f;
-    constexpr f32 kYawSpeedScale = 64.0f;
-    constexpr f32 kPositionSpeedScale = 0.01f;
-    constexpr i32 kPadDeadZone = 32;
-    constexpr i32 kPitchLimit = 0x4000;
-
-    const f32 frame_scale = delta_time / kNominalFrameTime;
-    const f32 move_speed = camera->auto_move_dist_scale == 0.0f
-                               ? 1.0f
-                               : camera->auto_move_base + NuFabs(camera->distance) * camera->auto_move_dist_scale;
-    const f32 zoom_speed = camera->auto_zoom_dist_scale == 0.0f
-                               ? 1.0f
-                               : camera->auto_zoom_base + NuFabs(camera->distance) * camera->auto_zoom_dist_scale;
-
-    NUVEC opposite_offset;
-    opposite_offset.z = 0.0f;
-    opposite_offset.y = 0.0f;
-    opposite_offset.x = 0.0f;
-    NUMTX rotation = numtx_identity;
-    NuMtxRotateX(&rotation, camera->pitch);
-    NuMtxRotateY(&rotation, camera->yaw);
-
-    opposite_offset.z = -camera->distance;
-    NuVecMtxRotate(&opposite_offset, &opposite_offset, &rotation);
-    NUVEC old_opposite;
-    NuVecAdd(&old_opposite, &camera->position, &opposite_offset);
-
-    const i32 pad_yaw = NuPs2ApplyDeadZone(pad->analog_right_x, kPadDeadZone);
-    const i32 yaw_speed = camera->pad_yaw_speed;
-    const i32 pad_pitch = NuPs2ApplyDeadZone(pad->analog_right_y, kPadDeadZone);
-    i32 pitch_delta = static_cast<i32>(static_cast<f32>(pad_pitch) * static_cast<f32>(camera->pad_pitch_speed) *
-                                       delta_time * kPitchSpeedScale);
-    if ((camera->freedoms & EDCAM_FREEDOM_INVERT_PAD_PITCH) != 0) {
-        pitch_delta = -pitch_delta;
-    }
-    if ((camera->freedoms & EDCAM_FREEDOM_PITCH) != 0) {
-        camera->pitch += pitch_delta;
-        camera->pitch = MIN(kPitchLimit, camera->pitch);
-        camera->pitch = MAX(-kPitchLimit, camera->pitch);
-    }
-    if ((camera->freedoms & EDCAM_FREEDOM_YAW) != 0) {
-        camera->yaw +=
-            static_cast<i32>(static_cast<f32>(pad_yaw) * static_cast<f32>(yaw_speed) * delta_time * kYawSpeedScale);
-    }
-
-    rotation = numtx_identity;
-    NuMtxRotateX(&rotation, camera->pitch);
-    NuMtxRotateY(&rotation, camera->yaw);
-    opposite_offset.z = -camera->distance;
-    opposite_offset.y = 0.0f;
-    opposite_offset.x = 0.0f;
-    NuVecMtxRotate(&opposite_offset, &opposite_offset, &rotation);
-    NUVEC new_opposite;
-    NuVecAdd(&new_opposite, &camera->position, &opposite_offset);
-    NuVecAdd(&camera->position, &camera->position, &new_opposite);
-    NuVecSub(&camera->position, &camera->position, &old_opposite);
-
-    NUVEC movement = {0.0f, 0.0f, 0.0f};
-    const i32 pad_move_x = NuPs2ApplyDeadZone(pad->analog_left_x, kPadDeadZone);
-    movement.x -= static_cast<f32>(pad_move_x) * delta_time * camera->distance * kPositionSpeedScale;
-    const i32 pad_move_z = NuPs2ApplyDeadZone(pad->analog_left_y, kPadDeadZone);
-    movement.z += static_cast<f32>(pad_move_z) * delta_time * camera->distance * kPositionSpeedScale;
-
-    movement.y += static_cast<f32>(pad->analog_l1) * camera->position_speed.y * move_speed * frame_scale * 0.5f;
-    movement.y -= static_cast<f32>(pad->analog_l2) * camera->position_speed.y * move_speed * frame_scale * 0.5f;
-
-    if (camera->allow_distance) {
-        camera->distance += static_cast<f32>(pad->analog_r1) * camera->distance_speed * zoom_speed * frame_scale;
-        camera->distance -= static_cast<f32>(pad->analog_r2) * camera->distance_speed * zoom_speed * frame_scale;
-        camera->distance = MIN(-camera->minimum_distance, camera->distance);
-    }
-
-    NuVecMtxRotate(&movement, &movement, &rotation);
-    if ((camera->freedoms & EDCAM_FREEDOM_POSITION_X) != 0) {
-        camera->position.x += movement.x;
-    }
-    if ((camera->freedoms & EDCAM_FREEDOM_POSITION_Y) != 0) {
-        camera->position.y += movement.y;
-    }
-    if ((camera->freedoms & EDCAM_FREEDOM_POSITION_Z) != 0) {
-        camera->position.z += movement.z;
-    }
-}
+void do_Pad_flymode_camera(edcam_s *camera, float delta_time, nupad_s *pad);
 
 void InitCameraTargetMaterial() {
 }
@@ -2070,211 +1987,14 @@ void GetTopBot(GameObject_s *object) {
 
 extern "C" {
 
-    i32 near_clip_at_cursor;
+extern i32 near_clip_at_cursor;
 
-    void cbNearClipAtCursor(eduimenu_s *, eduiitem_s *item, u32) {
-        near_clip_at_cursor = reinterpret_cast<const u8 *>(item)[0x11] & 1;
-    }
+void cbNearClipAtCursor(eduimenu_s *, eduiitem_s *item, u32);
 
-    void do_Pad_Standard_camera(edcam_s *camera, f32 delta_time, nupad_s *pad) {
-        NUVEC movement = {0.0f, 0.0f, 0.0f};
-        if (!pad->is_valid)
-            return;
+void do_Pad_Standard_camera(edcam_s *camera, f32 delta_time, nupad_s *pad);
 
-        const f32 frame_scale = delta_time / (1.0f / 60.0f);
-        const f32 move_speed = camera->auto_move_dist_scale == 0.0f
-                                   ? 1.0f
-                                   : NuFabs(camera->distance) * camera->auto_move_dist_scale + camera->auto_move_base;
-        const f32 zoom_speed = camera->auto_zoom_dist_scale == 0.0f
-                                   ? 1.0f
-                                   : NuFabs(camera->distance) * camera->auto_zoom_dist_scale + camera->auto_zoom_base;
+void do_maya_mouse_camera(edcam_s *camera);
 
-        const u8 pad_yaw_axis = pad->analog_right_x;
-        const u8 pad_pitch_axis = pad->analog_right_y;
-        if (camera->freedoms & EDCAM_FREEDOM_DISTANCE) {
-            f32 zoom_in = static_cast<f32>(pad->analog_r1) * camera->distance_speed * zoom_speed;
-            if (zoom_in > 1.0f)
-                zoom_in = 1.0f;
-            camera->distance += zoom_in * frame_scale;
-            f32 zoom_out = static_cast<f32>(pad->analog_r2) * camera->distance_speed * zoom_speed;
-            if (zoom_out > 1.0f)
-                zoom_out = 1.0f;
-            camera->distance -= zoom_out * frame_scale;
-            camera->distance = MIN(-camera->minimum_distance, camera->distance);
-        }
-        if (camera->freedoms & EDCAM_FREEDOM_PITCH) {
-            const i32 pitch_input = NuPs2ApplyDeadZone(pad_pitch_axis, 32);
-            camera->pitch -=
-                static_cast<i32>(static_cast<f32>(pitch_input * camera->pad_pitch_speed) * delta_time * 64.0f);
-            camera->pitch = MIN(0x4000, camera->pitch);
-            camera->pitch = MAX(-0x4000, camera->pitch);
-        }
-        if (camera->freedoms & EDCAM_FREEDOM_YAW) {
-            const i32 yaw_input = NuPs2ApplyDeadZone(pad_yaw_axis, 32);
-            camera->yaw -= static_cast<i32>(static_cast<f32>(yaw_input * camera->pad_yaw_speed) * delta_time * 64.0f);
-        }
-
-        if (camera->freedoms & EDCAM_FREEDOM_POSITION_Y) {
-            movement.y += static_cast<f32>(pad->analog_l1) * camera->position_speed.y * move_speed * frame_scale * 0.5f;
-            movement.y -= static_cast<f32>(pad->analog_l2) * camera->position_speed.y * move_speed * frame_scale * 0.5f;
-        }
-        if (camera->freedoms & EDCAM_FREEDOM_POSITION_Z) {
-            movement.z = -static_cast<f32>(NuPs2ApplyDeadZone(pad->analog_left_y, 32)) * camera->position_speed.y *
-                         move_speed * frame_scale;
-        }
-        if (camera->freedoms & EDCAM_FREEDOM_POSITION_X) {
-            movement.x = static_cast<f32>(NuPs2ApplyDeadZone(pad->analog_left_x, 32)) * camera->position_speed.y *
-                         move_speed * frame_scale;
-        }
-        NuVecRotateY(&movement, &movement, camera->yaw);
-        NuVecAdd(&camera->position, &camera->position, &movement);
-
-        NUVEC snap_delta;
-        NuVecSub(&snap_delta, &camera->position, &camera->snap_origin);
-        snap_delta.x /= camera->snap_step.x;
-        snap_delta.y /= camera->snap_step.y;
-        snap_delta.z /= camera->snap_step.z;
-        camera->snapped_position.x = NuFloor(snap_delta.x) * camera->snap_step.x + camera->snap_origin.x;
-        camera->snapped_position.y = NuFloor(snap_delta.y) * camera->snap_step.y + camera->snap_origin.y;
-        camera->snapped_position.z = NuFloor(snap_delta.z) * camera->snap_step.z + camera->snap_origin.z;
-    }
-
-    void do_maya_mouse_camera(edcam_s *camera) {
-        static i16 TargetAng;
-        static i16 MouseOldAng;
-
-        f32 zoom_scale = camera->auto_zoom_dist_scale == 0.0f
-                             ? 1.0f
-                             : NuFabs(camera->distance) * camera->auto_zoom_dist_scale + camera->auto_zoom_base;
-        NUVEC movement = {0.0f, 0.0f, 0.0f};
-        if (NuKeyboard(0x38) != 0) {
-
-            const f32 mouse_x = NuMouseReadXVel() * camera->mouse_pitch_speed;
-            const f32 mouse_y = NuMouseReadYVel() * camera->mouse_yaw_speed;
-            const f32 mouse_z = NuMouseReadZVel() * camera->mouse_move_speed;
-            const u32 buttons = NuMouseReadButtons();
-
-            if (buttons == 2 || buttons == 5) {
-                if (camera->freedoms & EDCAM_FREEDOM_DISTANCE) {
-                    if (mouse_y != 0.0f || mouse_x != 0.0f)
-                        TargetAng = static_cast<i16>(NuAtan2D(-mouse_x, -mouse_y));
-                    u16 angle = static_cast<u16>(TargetAng);
-                    i32 difference = static_cast<u16>(angle - MouseOldAng);
-                    if (difference > 0x7fff)
-                        difference -= 0x10000;
-                    if (abs(difference) > 20000)
-                        angle = static_cast<u16>(TargetAng);
-                    else
-                        angle = static_cast<u16>(MouseOldAng + difference / 4);
-                    MouseOldAng = angle;
-
-                    f32 sine = NU_SIN_LUT(static_cast<u16>(angle) + 0x2000);
-                    if (NuFabs(sine) > 0.1f) {
-                        if (sine > 0.0f)
-                            sine -= 0.1f;
-                        else
-                            sine += 0.1f;
-                        f32 distance = NuFsqrt(mouse_x * mouse_x + mouse_y * mouse_y) * sine *
-                                           (zoom_scale * camera->distance_speed) * camera->mouse_move_speed +
-                                       camera->distance;
-                        const f32 minimum = -camera->minimum_distance;
-                        camera->distance = MIN(minimum, distance);
-                    }
-                }
-            } else if (buttons == 3 || buttons == 4) {
-                movement.x += mouse_x * 0.0078125f;
-                movement.y -= mouse_y * 0.0078125f;
-            } else if (buttons == 1) {
-                if (camera->freedoms & EDCAM_FREEDOM_PITCH) {
-                    camera->pitch -= static_cast<i32>(mouse_y * 16.0f);
-                    if (camera->pitch > 0x4000)
-                        camera->pitch = 0x4000;
-                    if (camera->pitch < -0x4000)
-                        camera->pitch = -0x4000;
-                }
-                if (camera->freedoms & EDCAM_FREEDOM_YAW)
-                    camera->yaw -= static_cast<i32>(mouse_x * 16.0f);
-            }
-
-            const f32 distance = camera->distance - zoom_scale * camera->distance_speed * mouse_z;
-            const f32 minimum = -camera->minimum_distance;
-            camera->distance = MIN(minimum, distance);
-
-            NUMTX rotation = numtx_identity;
-            NuMtxRotateX(&rotation, camera->pitch);
-            NuMtxRotateY(&rotation, camera->yaw);
-            NuVecMtxRotate(&movement, &movement, &rotation);
-            if (camera->freedoms & EDCAM_FREEDOM_POSITION_X)
-                camera->position.x += movement.x;
-            if (camera->freedoms & EDCAM_FREEDOM_POSITION_Y)
-                camera->position.y += movement.y;
-            if (camera->freedoms & EDCAM_FREEDOM_POSITION_Z)
-                camera->position.z += movement.z;
-        }
-    }
-
-    void do_mouse_flymode_camera(edcam_s *camera, f32 delta_time) {
-        f32 zoom_scale = camera->auto_zoom_dist_scale == 0.0f
-                             ? 1.0f
-                             : NuFabs(camera->distance) * camera->auto_zoom_dist_scale + camera->auto_zoom_base;
-
-        f32 mouse_y = NuMouseReadYRel();
-        f32 mouse_x = NuMouseReadXRel();
-        f32 mouse_z = NuMouseReadZRel();
-        u32 buttons = NuMouseReadButtons();
-        if (camera->allow_distance) {
-            f32 distance = camera->distance - mouse_z * camera->distance_speed * zoom_scale;
-            camera->distance = MIN(-camera->minimum_distance, distance);
-        }
-
-        NUVEC opposite_offset;
-        opposite_offset.z = 0.0f;
-        opposite_offset.y = 0.0f;
-        opposite_offset.x = 0.0f;
-        NUMTX rotation = numtx_identity;
-        NuMtxRotateX(&rotation, camera->pitch);
-        NuMtxRotateY(&rotation, camera->yaw);
-        opposite_offset.z = -camera->distance;
-        NuVecMtxRotate(&opposite_offset, &opposite_offset, &rotation);
-        NUVEC opposite_positions[2];
-        NUVEC &old_opposite = opposite_positions[0];
-        NuVecAdd(&old_opposite, &camera->position, &opposite_offset);
-
-        i32 pitch;
-        if (!camera->allow_pitch)
-            pitch = camera->pitch;
-        else
-            pitch = static_cast<i32>(mouse_y * 16.0f) + camera->pitch;
-        pitch = MIN(0x4000, pitch);
-        pitch = MAX(pitch, -0x4000);
-        camera->pitch = pitch;
-        if (camera->allow_yaw)
-            camera->yaw += static_cast<i32>(mouse_x * 16.0f);
-
-        rotation = numtx_identity;
-        NuMtxRotateX(&rotation, camera->pitch);
-        NuMtxRotateY(&rotation, camera->yaw);
-        opposite_offset.z = -camera->distance;
-        opposite_offset.y = 0.0f;
-        opposite_offset.x = 0.0f;
-        NuVecMtxRotate(&opposite_offset, &opposite_offset, &rotation);
-        NUVEC &new_opposite = opposite_positions[1];
-        NuVecAdd(&new_opposite, &camera->position, &opposite_offset);
-        NuVecAdd(&camera->position, &camera->position, &new_opposite);
-        NuVecSub(&camera->position, &camera->position, &old_opposite);
-
-        NUVEC movement = {0.0f, 0.0f, 0.0f};
-        if (buttons == 2)
-            movement.z = delta_time * camera->distance;
-        else if (buttons == 1)
-            movement.z = -delta_time * camera->distance;
-        NuVecMtxRotate(&movement, &movement, &rotation);
-        if (camera->allow_position_x)
-            camera->position.x += movement.x;
-        if (camera->allow_position_y)
-            camera->position.y += movement.y;
-        if (camera->allow_position_z)
-            camera->position.z += movement.z;
-    }
+void do_mouse_flymode_camera(edcam_s *camera, f32 delta_time);
 
 } // extern "C"

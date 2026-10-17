@@ -47,12 +47,7 @@ extern "C" void edbriStartAllPages(void);
 
 extern "C" void AiRndrLine3dDbg(f32, f32, f32, f32, f32, f32, u32);
 
-extern "C" void edDrawCross(NUVEC *centre, u8 red, u8 green, u8 blue) {
-    i32 colour = 0xff000000 | red | (green << 8) | (blue << 16);
-    NuRndrLine3dDbg(centre->x - 0.5f, centre->y, centre->z, centre->x + 0.5f, centre->y, centre->z, colour);
-    NuRndrLine3dDbg(centre->x, centre->y - 0.5f, centre->z, centre->x, centre->y + 0.5f, centre->z, colour);
-    NuRndrLine3dDbg(centre->x, centre->y, centre->z - 0.5f, centre->x, centre->y, centre->z + 0.5f, colour);
-}
+extern "C" void edDrawCross(NUVEC *centre, u8 red, u8 green, u8 blue);
 
 extern "C" void LocaledbitsDrawSolidEllipseXY(NUVEC *centre, f32 radius_x, f32 radius_z, i32 rotation, f32 lower_y,
                                               f32 upper_y, u32 colour, i32, i32 segments) {
@@ -114,80 +109,11 @@ extern "C" void LocaledbitsDrawSolidCircleXY(NUVEC *centre, f32 radius, f32 lowe
     }
 }
 
-extern "C" void RndrOSquare(NUVEC *centre, f32 radius, i32 colour) {
-    f32 corners[4][2] = {{-1.0f, -1.0f}, {1.0f, -1.0f}, {1.0f, 1.0f}, {-1.0f, 1.0f}};
-    NUMTX_ALIGNED32 matrix = global_camera.mtx;
-    matrix.m31 = centre->y;
-    matrix.m30 = centre->x;
-    matrix.m32 = centre->z;
-    for (i32 remaining = 4; remaining > 0; --remaining) {
-        const i32 i = 4 - remaining;
-        NUVEC_ALIGNED16 start;
-        NUVEC_ALIGNED16 end;
-        if (i == 0) {
-            start = NUVEC{-radius, -radius, 0.0f};
-            end = NUVEC{radius, -radius, 0.0f};
-        } else {
-            const f32 start_y = corners[i][1] * radius;
-            const f32 end_x = corners[(i + 1) & 3][0] * radius;
-            const f32 end_y = corners[(i + 1) & 3][1] * radius;
-            const f32 start_x = corners[i][0] * radius;
-            start = NUVEC{start_x, start_y, 0.0f};
-            end = NUVEC{end_x, end_y, 0.0f};
-        }
-        NuVecMtxTransform(&start, &start, &matrix);
-        NuVecMtxTransform(&end, &end, &matrix);
-        NuRndrLine3dDbg(start.x, start.y, start.z, end.x, end.y, end.z, colour);
-    }
-}
+extern "C" void RndrOSquare(NUVEC *centre, f32 radius, i32 colour);
 
-extern "C" void RndrOSphere(NUVEC *centre, f32 radius, i32 colour, i32 segments, i32) {
-    NUMTX_ALIGNED32 matrix = global_camera.mtx;
-    matrix.m30 = centre->x;
-    matrix.m31 = centre->y;
-    matrix.m32 = centre->z;
-    i32 step = 65536 / segments;
-    NURND_VERTEX3D vertices[2];
-    vertices[0].position.x = radius;
-    vertices[0].position.y = 0.0f;
-    vertices[0].position.z = 0.0f;
-    vertices[0].colour = colour;
-    vertices[1].colour = colour;
-    NuVecRotateZ(&vertices[1].position, &vertices[0].position, step);
-    for (i32 i = 0; i < segments; ++i) {
-        NUVEC_ALIGNED16 start = vertices[0].position;
-        NUVEC_ALIGNED16 end = vertices[1].position;
-        NuVecMtxTransform(&start, &start, &matrix);
-        NuVecMtxTransform(&end, &end, &matrix);
-        NuRndrLine3dDbg(start.x, start.y, start.z, end.x, end.y, end.z, vertices[0].colour);
-        vertices[0].position = vertices[1].position;
-        NuVecRotateZ(&vertices[1].position, &vertices[1].position, step);
-    }
-}
+extern "C" void RndrOSphere(NUVEC *centre, f32 radius, i32 colour, i32 segments, i32);
 
-extern "C" void RndrCircleXZ(NUVEC *centre, f32 radius, i32 colour, i32 segments) {
-    NUMTX_ALIGNED32 matrix = numtx_identity;
-    matrix.m30 = centre->x;
-    matrix.m31 = centre->y;
-    matrix.m32 = centre->z;
-    i32 step = 65536 / segments;
-    NURND_VERTEX3D vertices[2];
-    vertices[0].position.x = radius;
-    vertices[0].position.y = 0.0f;
-    vertices[0].position.z = 0.0f;
-    vertices[0].colour = colour;
-    vertices[1].colour = colour;
-    NuVecRotateY(&vertices[1].position, &vertices[0].position, step);
-    for (i32 i = 0; i < segments; ++i) {
-        NUVEC_ALIGNED16 start = vertices[0].position;
-        NUVEC_ALIGNED16 end = vertices[1].position;
-        NuVecMtxTransform(&start, &start, &matrix);
-        NuVecMtxTransform(&end, &end, &matrix);
-        NuRndrLine3dDbg(start.x, start.y, start.z, end.x, end.y, end.z, vertices[0].colour);
-        vertices[0].position = vertices[1].position;
-        NuVecRotateY(&vertices[1].position, &vertices[1].position, step);
-    }
-}
+extern "C" void RndrCircleXZ(NUVEC *centre, f32 radius, i32 colour, i32 segments);
 
 #include "gameapi/gui/apimenu.h"
 #include "gameframework/saveload.h"

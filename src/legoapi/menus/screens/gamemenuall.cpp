@@ -1670,13 +1670,7 @@ extern "C" {
     void Draw_SPACENEEDED(void) {
     }
 
-    void FlushMenuHighlights(eduimenu_s *menu) {
-        for (eduiitem_s *item = menu->first; item != NULL; item = item->next) {
-            if (item->type == 0) {
-                item->highlighted = 0;
-            }
-        }
-    }
+void FlushMenuHighlights(eduimenu_s *menu);
 
     i32 MenuCurrentID(void) {
         return MenuInfo[GameMenu[GameMenuLevel].menu].id;
@@ -2120,62 +2114,22 @@ extern "C" {
         return MenuResult;
     }
 
-    void cbCancelSubMenu(eduimenu_s *menu, eduimenu_s *) {
-        eduiMenuDetach(menu);
-    }
+void cbCancelSubMenu(eduimenu_s *menu, eduimenu_s *);
 
-    void cbCancelSubMenuFromItem(eduimenu_s *menu, eduiitem_s *, u32) {
-        eduiMenuDetach(menu);
-    }
+void cbCancelSubMenuFromItem(eduimenu_s *menu, eduiitem_s *, u32);
 
-    i32 cbCompateDirentByDateAsc(const void *first, const void *second) {
-        return static_cast<const FilePickDirectoryEntry *>(first)->year -
-               static_cast<const FilePickDirectoryEntry *>(second)->year;
-    }
+i32 cbCompateDirentByDateAsc(const void *first, const void *second);
 
-    i32 cbCompateDirentByDateDec(const void *first, const void *second) {
-        return static_cast<const FilePickDirectoryEntry *>(second)->year -
-               static_cast<const FilePickDirectoryEntry *>(first)->year;
-    }
+i32 cbCompateDirentByDateDec(const void *first, const void *second);
 
-    i32 cbCompateDirentByNameAsc(const void *first, const void *second) {
-        return NuStrCmp(static_cast<const FilePickDirectoryEntry *>(first)->name,
-                        static_cast<const FilePickDirectoryEntry *>(second)->name);
-    }
+i32 cbCompateDirentByNameAsc(const void *first, const void *second);
 
-    i32 cbCompateDirentByNameDec(const void *first, const void *second) {
-        return NuStrCmp(static_cast<const FilePickDirectoryEntry *>(second)->name,
-                        static_cast<const FilePickDirectoryEntry *>(first)->name);
-    }
+i32 cbCompateDirentByNameDec(const void *first, const void *second);
 
-    i32 cbCompateDirentBySizeAsc(const void *first, const void *second) {
-        i32 first_size = static_cast<const FilePickDirectoryEntry *>(first)->size;
-        i32 second_size = static_cast<const FilePickDirectoryEntry *>(second)->size;
-        if (first_size < second_size)
-            return -1;
-        if (first_size > second_size)
-            return 1;
-        return 0;
-    }
+i32 cbCompateDirentBySizeAsc(const void *first, const void *second);
 
-    i32 cbCompateDirentBySizeDec(const void *first, const void *second) {
-        i32 first_size = static_cast<const FilePickDirectoryEntry *>(first)->size;
-        i32 second_size = static_cast<const FilePickDirectoryEntry *>(second)->size;
-        if (first_size < second_size)
-            return 1;
-        if (first_size > second_size)
-            return -1;
-        return 0;
-    }
+i32 cbCompateDirentBySizeDec(const void *first, const void *second);
 
-    void cbTriggerSubMenu(eduimenu_s *menu, eduiitem_s *item, u32) {
-        eduimenu_s *submenu = static_cast<eduimenu_s *>(item->data_ptr);
-        if (submenu != NULL) {
-            eduiMenuAttach(menu, submenu);
-            submenu->x = item->x + 10;
-            submenu->y = MIN(50, PS2_REZ_H * 2 - submenu->height);
-        }
-        item->highlighted = 0;
-    }
+void cbTriggerSubMenu(eduimenu_s *menu, eduiitem_s *item, u32);
 
 } // extern "C"

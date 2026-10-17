@@ -3384,11 +3384,7 @@ extern "C" {
         NuAnimBuffEvaluate_3(&buffer, object, matrices, animation, root_fn, &root_translation, root_data);
         NuAnimBuffDestroyScratch(&buffer);
     }
-    struct NuLegacyDwaChunk {
-        i32 node_count;
-        i32 reserved_04;
-        nuanimcurveset_s **curve_sets;
-    };
+#include "nu2api/nucore/nucore_plain_types.h"
     static inline NuLegacyDwaChunk *NuLegacyDwaGetChunk(void *animation, i32 index) {
         NuLegacyDwaChunk **chunks = *reinterpret_cast<NuLegacyDwaChunk ***>(static_cast<u8 *>(animation) + 0xc);
         return chunks[index];
@@ -4123,38 +4119,8 @@ extern "C" {
     // Input / pad / key / mouse
     // ---------------------------------------------------------------------------
 
-    struct NUKEYCHAR {
-        u32 key;
-        u8 normal;
-        u8 shifted;
-        u8 padding[2];
-    };
-    NUKEYCHAR NuKeyChar[65] = {
-        {0x2, 0x31, 0x21, {0, 0}},  {0x3, 0x32, 0x22, {0, 0}},  {0x4, 0x33, 0xa3, {0, 0}},  {0x5, 0x34, 0x24, {0, 0}},
-        {0x6, 0x35, 0x25, {0, 0}},  {0x7, 0x36, 0x5e, {0, 0}},  {0x8, 0x37, 0x26, {0, 0}},  {0x9, 0x38, 0x2a, {0, 0}},
-        {0xa, 0x39, 0x28, {0, 0}},  {0xb, 0x30, 0x29, {0, 0}},  {0xc, 0x2d, 0x5f, {0, 0}},  {0xd, 0x3d, 0x2b, {0, 0}},
-        {0xf, 0x09, 0x09, {0, 0}},  {0x10, 0x71, 0x51, {0, 0}}, {0x11, 0x77, 0x57, {0, 0}}, {0x12, 0x65, 0x45, {0, 0}},
-        {0x13, 0x72, 0x52, {0, 0}}, {0x14, 0x74, 0x54, {0, 0}}, {0x15, 0x79, 0x59, {0, 0}}, {0x16, 0x75, 0x55, {0, 0}},
-        {0x17, 0x69, 0x49, {0, 0}}, {0x18, 0x6f, 0x4f, {0, 0}}, {0x19, 0x70, 0x50, {0, 0}}, {0x1a, 0x5b, 0x7b, {0, 0}},
-        {0x1b, 0x5d, 0x7d, {0, 0}}, {0x1e, 0x61, 0x41, {0, 0}}, {0x1f, 0x73, 0x53, {0, 0}}, {0x20, 0x64, 0x44, {0, 0}},
-        {0x21, 0x66, 0x46, {0, 0}}, {0x22, 0x67, 0x47, {0, 0}}, {0x23, 0x68, 0x48, {0, 0}}, {0x24, 0x6a, 0x4a, {0, 0}},
-        {0x25, 0x6b, 0x4b, {0, 0}}, {0x26, 0x6c, 0x4c, {0, 0}}, {0x27, 0x3b, 0x3a, {0, 0}}, {0x28, 0x27, 0x40, {0, 0}},
-        {0x2b, 0x5c, 0x3f, {0, 0}}, {0x2c, 0x7a, 0x5a, {0, 0}}, {0x2d, 0x78, 0x58, {0, 0}}, {0x2e, 0x63, 0x43, {0, 0}},
-        {0x2f, 0x76, 0x56, {0, 0}}, {0x30, 0x62, 0x42, {0, 0}}, {0x31, 0x6e, 0x4e, {0, 0}}, {0x32, 0x6d, 0x4d, {0, 0}},
-        {0x33, 0x2c, 0x3c, {0, 0}}, {0x34, 0x2e, 0x3e, {0, 0}}, {0x35, 0x2f, 0x00, {0, 0}}, {0x37, 0x2a, 0x2a, {0, 0}},
-        {0x39, 0x20, 0x20, {0, 0}}, {0x47, 0x37, 0x37, {0, 0}}, {0x48, 0x38, 0x38, {0, 0}}, {0x49, 0x39, 0x39, {0, 0}},
-        {0x4a, 0x2d, 0x2d, {0, 0}}, {0x4b, 0x34, 0x34, {0, 0}}, {0x4c, 0x35, 0x35, {0, 0}}, {0x4d, 0x36, 0x36, {0, 0}},
-        {0x4e, 0x2b, 0x2b, {0, 0}}, {0x4f, 0x31, 0x31, {0, 0}}, {0x50, 0x32, 0x32, {0, 0}}, {0x51, 0x33, 0x33, {0, 0}},
-        {0x52, 0x30, 0x30, {0, 0}}, {0x53, 0x2e, 0x2e, {0, 0}}, {0x8d, 0x3d, 0x3d, {0, 0}}, {0xb5, 0x2f, 0x2f, {0, 0}},
-        {0x0, 0x00, 0x00, {0, 0}},
-    };
-    i32 NuKeyToAscii(u32 key, i32 shifted) {
-        for (NUKEYCHAR *entry = NuKeyChar; entry->key != 0; ++entry) {
-            if (entry->key == key)
-                return shifted ? entry->shifted : entry->normal;
-        }
-        return 0;
-    }
+extern NUKEYCHAR NuKeyChar[65];
+i32 NuKeyToAscii(u32 key, i32 shifted);
     static inline void NuPadCopyTouchFields(NuInputTouch *destination, const NuInputTouch *source) {
         destination->unknown_04 = source->unknown_04;
         destination->unknown_00 = source->unknown_00;
@@ -4477,33 +4443,6 @@ extern "C" {
         }
         return result;
     }
-    struct NuInstanceTreeNode {
-        u16 bounds_index;
-        u16 subtree_instance_count;
-        u16 child_count;
-        u16 first_child;
-        u16 instance_count;
-        u16 first_instance;
-    };
-    struct NuInstanceTreeBounds {
-        NUVEC center;
-        f32 center_w;
-        NUVEC extent;
-        f32 extent_w;
-    };
-    struct NuInstanceTree_s {
-        u32 reserved_00;
-        u32 reserved_04;
-        u16 *instance_indices;
-        NuInstanceTreeBounds *instance_bounds;
-        u32 reserved_10;
-        NuInstanceTreeNode *nodes;
-        NuInstanceTreeBounds *node_bounds;
-        u16 tree_count;
-        u16 reserved_1e;
-        u16 *roots;
-        f32 *far_clips;
-    };
     DECOMP_ASSERT(sizeof(NuInstanceTreeNode) == 0x0c, "instance tree node stride");
     DECOMP_ASSERT(sizeof(NuInstanceTreeBounds) == 0x20, "instance tree bounds stride");
     DECOMP_ASSERT(sizeof(NuInstanceTree_s) == 0x28, "instance tree size");
@@ -4571,20 +4510,6 @@ extern "C" {
         }
     }
 
-    struct NuVisibilityOcclusionGrid {
-        u32 reserved_00;
-        i32 width;
-        f32 min_x;
-        f32 max_x;
-        f32 min_z;
-        f32 max_z;
-        f32 scale_x;
-        f32 scale_z;
-        i32 mode;
-        u32 output_size;
-        u32 reserved_28;
-        u8 **cells;
-    };
     void NuVisiOcclusion(NuVisibilityResult *result) {
         NUMTX *camera = NuCameraGetMtx();
         NuVisibilityOcclusionGrid *grid = static_cast<NuVisibilityOcclusionGrid *>(result->occlusion_data);
