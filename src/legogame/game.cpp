@@ -296,27 +296,11 @@ void InitGameAfterConfig(void);
 
 void InitGameBeforeConfig(void);
 
-void CompleteLevel(WORLDINFO *world) {
-    grab_screen_image = 1;
-
-    if (NewLData == NULL || ((NewLData->flags & 0xe0) != 0 && FreePlay != 0)) {
-        LEVELDATA *statusLevel = Area_FindStatusLevel(world->area, NULL);
-        NewLData = statusLevel;
-        if (statusLevel == NULL) {
-            NewLData = HUB_LDATA;
-        }
-    }
-
-    if (waiting_for_level != -1) {
-        waiting_for_new_level = 1;
-    }
-}
+void CompleteLevel(WORLDINFO *world);
 
 void StoreLevelProgress(WORLDINFO *world);
 
-void NewAreaMusicChanges(void) {
-    BeenAttacked = 0;
-}
+void NewAreaMusicChanges(void);
 
 void Game_WorldInfo_InitLast(WORLDINFO *world);
 

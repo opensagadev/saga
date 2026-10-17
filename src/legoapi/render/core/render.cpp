@@ -131,7 +131,7 @@ struct ripple_node_s;
 struct ripple_set_s;
 struct VuVec;
 
-nuhspecial_s *(*GameMsg_GetExtraObjFn)(GAMEMESSAGE_s *);
+extern nuhspecial_s *(*GameMsg_GetExtraObjFn)(GAMEMESSAGE_s *);
 
 extern "C" i32 StateAnimEvaluate2(StateAnim *state, u8 *index, char *value, f32 frame);
 extern "C" i32 NuRndrBeginScene(i32);
@@ -180,7 +180,7 @@ void Hint_Draw(i32 player_index);
 extern i32 CutScenePlayer_CanStart(i32 cutscene_id);
 
 // Camera zoom state
-f32 CameraZoom = 1.0f;
+extern f32 CameraZoom;
 
 // Graphics loading flags
 i32 RemoveDirectionalMaps = 0;
@@ -194,9 +194,7 @@ extern "C" {
     void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 }
 
-void SetCameraZoom(f32 zoom) {
-    CameraZoom = zoom;
-}
+void SetCameraZoom(f32 zoom);
 
 extern "C" void NuGScnUpdate(NUGSCN *gscn, f32 frame_delta) {
     NUMTX *animation_matrix = gscn->instance_animation_matrices;
@@ -495,155 +493,26 @@ extern "C" {
     }
 } // extern "C"
 
-void DrawRipple(ripple_node_s *node) {
-    NURND_VERTEX3D vertices[4];
-    vertices[0].position = {0.0f, node->size, 0.0f};
-    vertices[1].position = {-node->size, 0.0f, 0.0f};
-    vertices[2].position = {node->size, -0.0f, 0.0f};
-    vertices[3].position = {-0.0f, -node->size, 0.0f};
-    vertices[0].u = 1.0f;
-    vertices[0].v = 0.0f;
-    vertices[1].u = 0.0f;
-    vertices[1].v = 0.0f;
-    vertices[2].u = 1.0f;
-    vertices[2].v = 1.0f;
-    vertices[3].u = 1.0f;
-    vertices[3].v = 0.0f;
-    vertices[0].colour = node->color.value;
-    vertices[1].colour = node->color.value;
-    vertices[2].colour = node->color.value;
-    vertices[3].colour = node->color.value;
-    NUMTX matrix = node->matrix;
-    NuRndrTriStrip3dClip(vertices, 4, &matrix, node->material);
-}
+void DrawRipple(ripple_node_s *node);
 
 extern "C" {
     f32 aiEditor_LocatorWidth = 0.25f;
 }
 
 i32 Draw3DObject(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x_rotation, u16 y_rotation,
-                 u16 z_rotation, float scale_x, float scale_y, float scale_z, i32 rotate_order) {
-    if (object_index == -1) {
-        return 1;
-    }
-    if (world == NULL) {
-        world = WorldInfo_CurrentlyActive();
-    }
-    if (world == NULL) {
-        return 1;
-    }
-    if (world->lev_objs[object_index].active != 0 && (scale_x != 0.0f || scale_y != 0.0f || scale_z != 0.0f)) {
-        NUVEC scale = {scale_x, scale_y, scale_z};
-        NUMTX_ALIGNED16 matrix;
-        NuMtxSetScale(&matrix, &scale);
-        RotateGameMatrix(&matrix, rotate_order, x_rotation, y_rotation, z_rotation);
-        NuMtxTranslate(&matrix, position);
-        return NuSpecialDrawAt(&world->lev_objs[object_index].special, &matrix);
-    }
-    return 0;
-}
+                 u16 z_rotation, float scale_x, float scale_y, float scale_z, i32 rotate_order);
 
 void DrawCharIcon(i32 character_id, float x, float y, float z, float scale, i32 frame_object_id, float character_alpha,
-                  float frame_alpha, i32 draw_character, nuhspecial_s *override_special) {
-    WORLDINFO *world = WorldInfo_CurrentlyActive();
-    const u16 character_spin = static_cast<u16>(drawcharicon_hspecial_spin);
-    drawcharicon_hspecial_spin = 0;
-
-    if (ObjTabList == NULL || world == NULL) {
-        return;
-    }
-
-    nuhspecial_s special;
-    if (drawcharicon_find != 0) {
-        NuSpecialFind(things_scene, &special, ObjTabList[frame_object_id].name, 1);
-    } else {
-        special = world->lev_objs[frame_object_id].special;
-    }
-
-    if (NuSpecialExistsFn(&special) != 0) {
-        DrawPanel3DObject(x, y, z + 1.0f, scale, scale, scale, 0, 0, 0, &special, 0, frame_alpha);
-    }
-
-    if (draw_character != 0) {
-        if (override_special != NULL && NuSpecialExistsFn(override_special) != 0) {
-            const f32 special_scale = scale * drawcharicon_hspecial_scale;
-            DrawPanel3DObject(x, y, z + 1.0f + drawcharicon_hspecial_dz, special_scale, special_scale, special_scale, 0,
-                              character_spin, 0, override_special, 0, character_alpha);
-        } else {
-            i32 icon_object_id;
-            if (character_id == -1) {
-                icon_object_id = LEGOOBJ_ICON_QUESTION;
-            } else {
-                icon_object_id = CDataList[character_id].field20_0x42;
-                if (icon_object_id != -1 && GCDataList[character_id].field275_0x116 == 0 &&
-                    icon_object_id != LEGOOBJ_ICON_WEIRDO) {
-                    ++icon_object_id;
-                }
-            }
-
-            if (icon_object_id != -1) {
-                if (drawcharicon_find != 0) {
-                    NUGSCN *icon_scene = character_id == -1 ? NULL : IconScene_FindById(character_id);
-                    if (icon_scene != NULL) {
-                        NuSpecialFind(icon_scene, &special, ObjTabList[icon_object_id].name, 1);
-                    } else {
-                        NuSpecialFind(things_scene, &special, ObjTabList[icon_object_id].name, 1);
-                    }
-                } else {
-                    special = world->lev_objs[icon_object_id].special;
-                }
-
-                if (NuSpecialExistsFn(&special) != 0) {
-                    DrawPanel3DObject(x, y, z + 1.0f, scale, scale, scale, 0, 0, 0, &special, 0, character_alpha);
-                }
-            }
-        }
-    }
-
-    drawcharicon_find = 0;
-    drawcharicon_i_panel = -1;
-}
+                  float frame_alpha, i32 draw_character, nuhspecial_s *override_special);
 
 extern const u8 HintRGB[5][3] = {
     {255, 0, 0}, {0, 255, 0}, {0, 127, 255}, {127, 0, 255}, {255, 255, 0},
 };
 
-void DrawParallax(nuhspecial_s *special) {
-    if (NuIOS_IsLowEndDevice() != 0 && WORLD != NULL && WORLD->current_level != NULL &&
-        WORLD->current_level->data_display.far_clip < 20000.0f &&
-        WORLD->current_level->data_display.fog_start < 20000.0f) {
-        return;
-    }
-
-    const f32 uniform_scale = pNuCam->far_clip * 0.05f;
-    NUVEC scale = {uniform_scale, uniform_scale, uniform_scale};
-    NUMTX_ALIGNED16 matrix;
-    NuMtxSetScale(&matrix, &scale);
-    matrix.m30 = pNuCam->mtx.m30;
-    matrix.m31 = pNuCam->mtx.m31;
-    matrix.m32 = pNuCam->mtx.m32;
-    NuRndrStateSetFogEnabled(0);
-    NuSpecialDrawAt(special, &matrix);
-    NuRndrStateSetFogEnabled(1);
-}
+void DrawParallax(nuhspecial_s *special);
 
 void DrawRectRGBA(float x, float y, float width, float height, u32 colour, numtl_s *material, i32 alignment,
-                  float scale) {
-    const float scaled_width = width * scale;
-    const float scaled_height = height * scale;
-    const i32 rect_width = static_cast<i32>(scaled_width * 10240.0f * 0.5f);
-    const i32 rect_height = static_cast<i32>(scaled_height * 3584.0f * 0.5f);
-    if ((alignment & 5) == 4)
-        y += scaled_height;
-    else if ((alignment & 5) == 0)
-        y += scaled_height * 0.5f;
-    if ((alignment & 10) == 8)
-        x -= scaled_width;
-    else if ((alignment & 10) == 0)
-        x -= scaled_width * 0.5f;
-    NuRndrRect2di(static_cast<i32>((x + 1.0f) * 0.5f * 10240.0f),
-                  static_cast<i32>((2.0f - (y + 1.0f)) * 0.5f * 3584.0f), rect_width, rect_height, colour, material);
-}
+                  float scale);
 
 #include "nu2api/nu3d/nuprim.h"
 #include "nu2api/nu3d/nuprim_internal.h"
@@ -757,37 +626,9 @@ void DrawAlphaGrid(i32 rows, i32 cols, NuBloomParameters *parameters) {
 
 void Text_MakeTime(f32, i32, i32, i32, char *);
 
-void DrawPauseFade() {
-    if (editor_active != 0 || screendump != 0)
-        return;
+void DrawPauseFade();
 
-    f32 step = FRAMETIME * 2.0f;
-    i32 fade;
-    if (Paused == 0 && NetPaused == 0) {
-        fade = static_cast<i32>(pause_fade - step);
-        if (fade < 0)
-            fade = 0;
-    } else {
-        fade = static_cast<i32>(pause_fade + step);
-        if (fade > 0) {
-            pause_fade = 1.0f;
-            return;
-        }
-    }
-    pause_fade = static_cast<f32>(fade);
-}
-
-void DrawRippleSet(ripple_set_s *set) {
-    if (set == NULL)
-        return;
-    ripple_node_s *node = set->newest;
-    for (i32 i = 0; i < set->active_count; ++i) {
-        if (node != NULL) {
-            DrawRipple(node);
-            node = node->next;
-        }
-    }
-}
+void DrawRippleSet(ripple_set_s *set);
 
 static u8 cacheValues[256];
 
@@ -1023,231 +864,29 @@ void DrawBezierLine(VuVec &start, VuVec &start_control, VuVec &end, VuVec &end_c
     --bezier_draw_depth;
 }
 
-void DrawCutBorders(i32 widescreen) {
-    if (!(CutBorderScale > 0.0f)) {
-        return;
-    }
+void DrawCutBorders(i32 widescreen);
 
-    NuRndrBeginScene(-1);
-    f32 border_scale = 0.1f;
-    const CUTINFO *cut = static_cast<CUTINFO *>(CutStopInfo);
-    if (cut != NULL && (cut->flags & 0x4000) != 0) {
-        border_scale = 0.21276596f;
-    } else {
-        const CUTSYS *system = WORLD->cutscene_sys;
-        if (system != NULL && system->count == 1 && (system->cuts[0]->flags & 0x4000) != 0) {
-            border_scale = 0.21276596f;
-        }
-    }
-    if (widescreen != 0) {
-        border_scale = (border_scale * 4.0f - 0.5f) / 3.0f;
-    }
-    if (border_scale < 0.02f) {
-        border_scale = 0.02f;
-    }
-    const i32 height =
-        static_cast<i32>(border_scale * 3584.0f * NU_SIN_LUT(static_cast<i32>(CutBorderScale * 16384.0f)));
-    NuRndrRect2di(0, 0, 0x2800, height, 0x80ffffff, FadeMtl);
-    NuRndrRect2di(0, 0xe00 - height, 0x2800, height, 0x80ffffff, FadeMtl);
-    NuRndrEndScene();
-}
+void DrawExplosions();
 
-void DrawExplosions() {
-}
-
-i32 Draw3DObjectMtx(WORLDINFO_s *world, i32 object_index, numtx_s *mtx) {
-    if (object_index == -1) {
-        return 1;
-    }
-    if (world == NULL) {
-        world = WorldInfo_CurrentlyActive();
-    }
-    if (world == NULL) {
-        return 1;
-    }
-    LEVEL_OBJECT_RUNTIME &object = world->lev_objs[object_index];
-    if (object.active != 0) {
-        return NuSpecialDrawAt(&object.special, mtx);
-    }
-    return 0;
-}
+i32 Draw3DObjectMtx(WORLDINFO_s *world, i32 object_index, numtx_s *mtx);
 
 void DrawPaintLights();
 
 void DrawStatusIcons(STATUSPACKET_s *status, float y, float alpha);
 
-void DrawTouchPrompt(char *prompt, char *unused_label, bool hovered, bool large) {
-    (void)unused_label;
-    float text_x_offset;
-    float text_y_offset;
+void DrawTouchPrompt(char *prompt, char *unused_label, bool hovered, bool large);
 
-    // Retained from the original routine even though the result is unused.
-    NuFmod(GlobalTimer.time_elapsed_mod_seconds, 0.5f);
+void DrawGameMessages();
 
-    if (NuStrICmp(prompt, ">") == 0) {
-        text_x_offset = 0.005f;
-        text_y_offset = 0.0f;
-    } else if (NuStrICmp(prompt, "<<") == 0) {
-        text_x_offset = -0.01f;
-        text_y_offset = 0.0f;
-    } else if (NuStrICmp(prompt, "II") == 0) {
-        text_x_offset = 0.0f;
-        text_y_offset = -0.01f;
-    } else {
-        text_x_offset = 0.0f;
-        text_y_offset = 0.0f;
-    }
-
-    const float zero = 0.0f;
-    float pulse = 1.0f;
-    if (TestForController() == 0) {
-        const float elapsed_since_touch = GlobalTimer.time_elapsed - (LastTouchTime + zero);
-        if (elapsed_since_touch > 4.0f) {
-            const float phase = NuFmod(elapsed_since_touch, 4.0f);
-            const i32 angle = static_cast<i32>(phase * 0.25f * 65536.0f);
-            const float wave = NuTrigTable[(angle >> 1) & 0x7fff] - 0.8f;
-            if (!(wave < zero)) {
-                pulse = wave + 1.0f;
-            }
-        }
-    }
-
-    float icon_scale = ICONSIZE;
-    if (!hovered) {
-        if (!large) {
-            DrawPanel3DObject(ICONX, STATSPOSY, 1.0f, icon_scale, icon_scale, icon_scale, 0, 0, 0,
-                              &WORLD->lev_objs[0xa5].special, 0, 0.75f);
-            pulse = 0.6f;
-        } else {
-            icon_scale *= pulse;
-            DrawPanel3DObject(ICONX, STATSPOSY, 1.0f, icon_scale, icon_scale, icon_scale, 0, 0, 0,
-                              &WORLD->lev_objs[0xa5].special, 0, 0.75f);
-            pulse *= 0.6f;
-        }
-    } else {
-        icon_scale *= 1.25f;
-        DrawPanel3DObject(ICONX, STATSPOSY, 1.0f, icon_scale, icon_scale, icon_scale, 0, 0, 0,
-                          &WORLD->lev_objs[0xa5].special, 0, 0.75f);
-        pulse = 0.75f;
-    }
-
-    if (prompt != NULL) {
-        Text3DEx(prompt, ICONX + text_x_offset * pulse, STATSPOSY + text_y_offset * pulse, 1.0f, pulse * 1.3f, pulse,
-                 pulse, 0, 255, 255, 255, 0x60);
-    }
-}
-
-void DrawGameMessages() {
-    extern GAMEMESSAGE_s GameMessage[128];
-    extern i32 DrawPanel3DObjectNoAlpha(float, float, float, float, float, float, u16, u16, u16, nuhspecial_s *, i32);
-
-    GAMEMESSAGE_s *message = GameMessage;
-    GAMEMESSAGE_s *end = message + 128;
-    for (; message != end; ++message) {
-        if (message->active == 0) {
-            continue;
-        }
-        if (message->field_0xfb != 0 && (message->flags & 0x40000) == 0) {
-            continue;
-        }
-        if (message->field_0xd0 > 0.0f) {
-            continue;
-        }
-        if (!(message->duration > message->elapsed) && message->field_0xfa == 0) {
-            continue;
-        }
-
-        u32 flags = message->flags;
-        f32 progress = message->elapsed / message->duration;
-        if ((flags & 0x100) != 0) {
-            progress = 1.0f - NU_SIN_LUT(static_cast<i32>(progress * 16384.0f + 16384.0f));
-        } else if ((flags & 0x200) != 0) {
-            progress = NU_SIN_LUT(static_cast<i32>(progress * 16384.0f));
-        } else if ((flags & 0x400) != 0) {
-            progress = NU_SIN_LUT(static_cast<i32>(progress * 32768.0f));
-        } else if ((flags & 0x800) != 0) {
-            progress = 1.0f - NU_SIN_LUT(static_cast<i32>(progress * 32768.0f));
-        }
-
-        f32 scale = (flags & 5) == 5 ? message->field_0xb8 : message->field_0xb4;
-        NUVEC position = message->start_position;
-        if (message->field_0xd4 != 0.0f && message->field_0xfb == 0) {
-            const f32 limit = message->field_0xd4;
-            if (position.x < -limit) {
-                position.x = -limit;
-            } else if (position.x > limit) {
-                position.x = limit;
-            }
-            if (position.y < -limit) {
-                position.y = -limit;
-            } else if (position.y > limit) {
-                position.y = limit;
-            }
-        }
-
-        if ((flags & 8) != 0) {
-            if (message->update_fn != NULL) {
-                message->update_fn(message);
-                flags = message->flags;
-            }
-            position.x = position.x + (message->target_position.x - position.x) * progress;
-            position.y = position.y + (message->target_position.y - position.y) * progress;
-            position.z = position.z + (message->target_position.z - position.z) * progress;
-        }
-        if ((flags & 0x20) != 0) {
-            scale += (message->target_scale - scale) * progress;
-        }
-        position.z += message->field_0xc8;
-        position.x += message->field_0xc4;
-
-        if (message->draw_callback != NULL) {
-            message->draw_callback(message, &position, scale);
-            continue;
-        }
-
-        if (NuSpecialExistsFn(&message->special) != 0) {
-            const u32 draw_flags = message->flags;
-            if ((draw_flags & 0x20000) != 0) {
-                DrawPanel3DObjectNoAlpha(position.x, position.y, position.z, scale, scale, scale, message->field_0xe0,
-                                         message->rotation_y, message->field_0xe4, &message->special, 2);
-            } else {
-                const f32 alpha = (draw_flags & 0x10000) != 0 ? static_cast<f32>(message->alpha) / 128.0f : 1.0f;
-                DrawPanel3DObject(position.x, position.y, position.z, scale, scale, scale, message->field_0xe0,
-                                  message->rotation_y, message->field_0xe4, &message->special, 2, alpha);
-            }
-            if (GameMsg_GetExtraObjFn != NULL) {
-                nuhspecial_s *extra = GameMsg_GetExtraObjFn(message);
-                if (extra != NULL && NuSpecialExistsFn(extra) != 0) {
-                    const u32 draw_flags = message->flags;
-                    if ((draw_flags & 0x20000) != 0) {
-                        DrawPanel3DObjectNoAlpha(position.x, position.y, position.z, scale, scale, scale,
-                                                 message->field_0xe0, message->rotation_y, message->field_0xe4, extra,
-                                                 2);
-                    } else {
-                        const f32 alpha =
-                            (draw_flags & 0x10000) != 0 ? static_cast<f32>(message->alpha) / 128.0f : 1.0f;
-                        DrawPanel3DObject(position.x, position.y, position.z, scale, scale, scale, message->field_0xe0,
-                                          message->rotation_y, message->field_0xe4, extra, 2, alpha);
-                    }
-                }
-            }
-        } else {
-            char *text = message->text != NULL ? message->text : message->text_buffer;
-            Text3DEx(text, position.x, position.y, position.z, scale, scale, scale, message->field_0xfc, message->red,
-                     message->green, message->blue, message->alpha);
-        }
-    }
-}
-
-f32 KITPOSX = -0.725f;
-f32 KITPOSY = -0.7f;
-f32 KITPOS2X = -1.275f;
-f32 KITPOS2Y = -1.3f;
-f32 PANEL_MINIKITSCALE = 0.25f;
+extern f32 KITPOSX;
+extern f32 KITPOSY;
+extern f32 KITPOS2X;
+extern f32 KITPOS2Y;
+extern f32 PANEL_MINIKITSCALE;
 f32 PANEL_REDBRICKSCALE = 0.4f;
-f32 PANEL_MINIKITY = 0.03f;
-f32 PANEL_MINIKITCOUNTSCALE = 0.5f;
-f32 PANEL_MINIKITCOUNTY = -0.1f;
+extern f32 PANEL_MINIKITY;
+extern f32 PANEL_MINIKITCOUNTSCALE;
+extern f32 PANEL_MINIKITCOUNTY;
 // DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
 // red-brick positions come from the Game init values in legogame/game.cpp.
 i32 DRAWBGLOAD = 0;
@@ -1262,264 +901,43 @@ i32 Arcade_Points[2] = {0};
 f32 BOSSICONY = 0.0f;
 i32 FPSDISPLAY = 0;
 i32 ShowPlayerCoordinate = 0;
-i32 LEGOOBJ_CHARKIT = -1;
-i32 LEGOOBJ_MINIKIT = -1;
+extern i32 LEGOOBJ_CHARKIT;
+extern i32 LEGOOBJ_MINIKIT;
 i32 DrawPanel3DObjectNoAlpha(f32, f32, f32, f32, f32, f32, u16, u16, u16, nuhspecial_s *, i32);
 extern "C" void Text3D(char *, f32, f32, f32, f32, f32, f32, u32, u8, u8, u8);
 
-void DrawMiniKitCount(float position, float scale, i32 count, i32 maximum) {
-    const i32 model = ChallengeMode != 0 ? LEGOOBJ_CHARKIT : LEGOOBJ_MINIKIT;
-    if (model == -1 || position <= 0.0f)
-        return;
-    const f32 blend = NuTrigTable[(static_cast<i32>(position * 16384.0f) >> 1) & 0x7fff];
-    const f32 x = (KITPOSX - KITPOS2X) * blend + KITPOS2X;
-    const f32 y = (KITPOSY - KITPOS2Y) * blend + KITPOS2Y;
-    WORLDINFO_s *world = WorldInfo_CurrentlyActive();
-    if (world->lev_objs[model].active != 0) {
-        const u16 rotation =
-            static_cast<u16>(static_cast<i32>(NuFmod(GlobalTimer.time_elapsed, 4.0f) * 0.25f * 65536.0f));
-        const i16 tilt = static_cast<i16>(1820.0f * NuTrigTable[rotation & 0x7fff]);
-        const f32 size = scale * PANEL_MINIKITSCALE;
-        DrawPanel3DObjectNoAlpha(x, PANEL_MINIKITY + y, 1.0f, size, size, size, tilt, rotation, 0,
-                                 &world->lev_objs[model].special, 2);
-    }
-    char text[32];
-    sprintf(text, "%i/%i", count, maximum);
-    const f32 size = scale * PANEL_MINIKITCOUNTSCALE;
-    Text3D(text, x, y + PANEL_MINIKITCOUNTY, 1.0f, size, size, size, 0, 255, 0, 127);
-}
+void DrawMiniKitCount(float position, float scale, i32 count, i32 maximum);
 
 i32 Draw3DObjectAlpha(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x_rotation, u16 y_rotation,
-                      u16 z_rotation, float scale_x, float scale_y, float scale_z, i32 rotate_order, float alpha) {
-    if (object_index == -1) {
-        return 1;
-    }
-    if (world == NULL) {
-        world = WorldInfo_CurrentlyActive();
-    }
-    if (world == NULL) {
-        return 1;
-    }
-    if (world->lev_objs[object_index].active != 0 && (scale_x != 0.0f || scale_y != 0.0f || scale_z != 0.0f)) {
-        NUVEC scale = {scale_x, scale_y, scale_z};
-        NUMTX_ALIGNED16 matrix;
-        NuMtxSetScale(&matrix, &scale);
-        RotateGameMatrix(&matrix, rotate_order, x_rotation, y_rotation, z_rotation);
-        NuMtxTranslate(&matrix, position);
-        return NuSpecialDrawAtAlpha(&world->lev_objs[object_index].special, &matrix, alpha);
-    }
-    return 0;
-}
+                      u16 z_rotation, float scale_x, float scale_y, float scale_z, i32 rotate_order, float alpha);
 
 i32 DrawPanel3DObject(float x, float y, float z, float scale_x, float scale_y, float scale_z, u16 rotate_x,
-                      u16 rotate_y, u16 rotate_z, nuhspecial_s *special, i32 rotate_order, float alpha) {
-    if (alpha > 0.0f && special != NULL && NuSpecialExistsFn(special) != 0 &&
-        (scale_y != 0.0f || scale_x != 0.0f || scale_z != 0.0f)) {
-        NUVEC scale = {scale_x / CameraZoom, scale_y / CameraZoom, scale_z / CameraZoom};
-        NUMTX_ALIGNED16 matrix;
-        NuMtxSetScale(&matrix, &scale);
-        RotateGameMatrix(&matrix, rotate_order, rotate_x, rotate_y, rotate_z);
-        matrix.m30 = x * PANEL3DMULX;
-        matrix.m31 = y * PANEL3DMULY;
-        matrix.m32 = z;
-        NuMtxMulVU0(&matrix, &matrix, NuCameraGetMtx());
-        NuSpecialDrawAtAlpha(special, &matrix, alpha);
-    }
-    return 0;
-}
+                      u16 rotate_y, u16 rotate_z, nuhspecial_s *special, i32 rotate_order, float alpha);
 
 extern STATUSMINIKITPART_s KitPart[10];
 
 extern i16 tUNKNOWN, tPOWERBRICK, tLOCKED, tGOLDBRICK;
 
-void DrawFadeScreenWipe() {
-    NuRndrBeginScene(-1);
-    extern numtl_s *SolidMtl;
-
-    FadeSystem &fade_info = FadeSys;
-    const f32 fade_amount = fade_info.fade;
-    const u32 direction = fade_info.direction;
-    i32 gradient[4];
-    i32 solid_x = 0;
-    i32 solid_y = 0;
-    i32 solid_width = 10240;
-    i32 solid_height = 3584;
-
-    if ((direction & 3) != 0) {
-        i32 gradient_x;
-        const bool positive = (direction & 1) != 0;
-        if ((positive && fade_info.rate > 0.0f) || (!positive && !(fade_info.rate > 0.0f))) {
-            gradient[0] = static_cast<i32>(0x80000000u);
-            gradient[1] = 0;
-            gradient[2] = static_cast<i32>(0x80000000u);
-            gradient[3] = 0;
-            solid_width = static_cast<i32>(fade_amount * 10240.0f);
-            gradient_x = solid_width;
-        } else {
-            gradient[0] = 0;
-            gradient[1] = static_cast<i32>(0x80000000u);
-            gradient[2] = 0;
-            gradient[3] = static_cast<i32>(0x80000000u);
-            const f32 edge = (1.0f - fade_amount) * 10240.0f;
-            solid_x = static_cast<i32>(edge);
-            solid_width = 10240 - solid_x;
-            gradient_x = static_cast<i32>(edge - 1024.0f);
-        }
-        NuRndrGradRect2di(gradient_x, 0, 1024, 3584, gradient, FadeMtl2);
-    } else if ((direction & 0xc) != 0) {
-        // The vertical sign test is the same two-way rate/direction test as
-        // the horizontal one, with bit 2 selecting the opposite side.
-        i32 gradient_y;
-        const bool positive = (direction & 4) == 0;
-        if ((positive && fade_info.rate > 0.0f) || (!positive && !(fade_info.rate > 0.0f))) {
-            gradient[0] = 0;
-            gradient[1] = 0;
-            gradient[2] = static_cast<i32>(0x80000000u);
-            gradient[3] = static_cast<i32>(0x80000000u);
-            const f32 edge = (1.0f - fade_amount) * 3584.0f;
-            solid_y = static_cast<i32>(edge);
-            solid_height = 3584 - solid_y;
-            gradient_y = static_cast<i32>(edge - 358.0f);
-        } else {
-            gradient[0] = static_cast<i32>(0x80000000u);
-            gradient[1] = static_cast<i32>(0x80000000u);
-            gradient[2] = 0;
-            gradient[3] = 0;
-            solid_height = static_cast<i32>(fade_amount * 3584.0f);
-            gradient_y = solid_height;
-        }
-        NuRndrGradRect2di(0, gradient_y, 10240, 358, gradient, FadeMtl2);
-    }
-
-    if (!(fade_amount < 0.0f)) {
-        NuRndrRect2di(solid_x, solid_y, solid_width, solid_height, 0, SolidMtl);
-    }
-    NuRndrEndScene();
-}
+void DrawFadeScreenWipe();
 
 void Draw_AUTOSAVECANCEL();
 
-void DrawPanel3DObjectMtx(nuhspecial_s *special, numtx_s *matrix, float alpha) {
-    if (!(alpha <= 0.0f)) {
-        NUVEC scale = {1.0f / CameraZoom, 1.0f / CameraZoom, 1.0f / CameraZoom};
-        NuMtxPreScale(matrix, &scale);
-        if (special != NULL && NuSpecialExistsFn(special) != 0) {
-            NuMtxMulVU0(matrix, matrix, NuCameraGetMtx());
-            NuSpecialDrawAtAlpha(special, matrix, alpha);
-        }
-    }
-}
+void DrawPanel3DObjectMtx(nuhspecial_s *special, numtx_s *matrix, float alpha);
 
 void Draw_AUTOSAVEWARNING();
 
-i32 dco_locatorposonly;
-i32 dco_id = -1;
-i32 dco_reflectaxis;
-i32 dco_wearinghat;
-u16 dco_prerotatez;
-f32 dco_reflectcoord = 2000000.0f;
-GAMECHARACTERDATA_s *dco_gcdata;
-CHARACTERMODEL_s *dco_cmodel;
-void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
+extern i32 dco_locatorposonly;
+extern i32 dco_id;
+extern i32 dco_reflectaxis;
+extern i32 dco_wearinghat;
+extern u16 dco_prerotatez;
+extern f32 dco_reflectcoord;
+extern GAMECHARACTERDATA_s * dco_gcdata;
+extern CHARACTERMODEL_s * dco_cmodel;
+extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
 void DrawObjectOnCharacter(WORLDINFO_s *world, GameObject_s *object, i32 object_id, nuhspecial_s *special, i32 locator,
                            i32 second_locator, NUMTX *joints, i32 reflect, u32 layers, NUMTX *rotation,
-                           NUVEC *translation, f32 alpha, f32 scale) {
-    i32 position_only = dco_locatorposonly;
-    dco_locatorposonly = 0;
-    u16 rotate_z = dco_prerotatez;
-    dco_prerotatez = 0;
-    i32 id, axis, hat;
-    f32 plane;
-    CHARACTERMODEL_s *model;
-    if (object != NULL) {
-        id = object->id;
-        model = object->apiobj.character_model;
-        hat = object->field_0x108e;
-        axis = object->field_0x1087;
-        plane = object->field_0x1020;
-    } else {
-        id = dco_id;
-        if (id == -1 || dco_gcdata == NULL || dco_cmodel == NULL)
-            return;
-        model = dco_cmodel;
-        axis = dco_reflectaxis;
-        plane = dco_reflectcoord;
-        hat = dco_wearinghat;
-    }
-    dco_gcdata = NULL;
-    dco_cmodel = NULL;
-    dco_id = -1;
-    dco_reflectaxis = 0;
-    dco_reflectcoord = 2000000.0f;
-    dco_wearinghat = 0;
-    if (world == NULL)
-        world = WorldInfo_CurrentlyActive();
-    if (object_id != -1) {
-        if (!world->lev_objs[object_id].active)
-            return;
-    } else if (special == NULL || !NuSpecialExistsFn(special)) {
-        return;
-    }
-    if (locator == -1 || model->points_of_interest[locator] == NULL)
-        return;
-    NUMTX matrix, reflected, first, second;
-    if (position_only)
-        NuMtxSetTranslation(&matrix, reinterpret_cast<NUVEC *>(&joints[locator].m30));
-    else
-        matrix = joints[locator];
-    if (second_locator != -1 && model->points_of_interest[second_locator] != NULL) {
-        NUVEC position = {matrix.m30, matrix.m31, matrix.m32};
-        if (!position_only) {
-            first = matrix;
-            first.m30 = first.m31 = first.m32 = 0.0f;
-            second = joints[second_locator];
-            second.m30 = second.m31 = second.m32 = 0.0f;
-            QuatInterpolateRotationMatrix(&matrix, &first, &second, 0.5f);
-        }
-        matrix.m30 = (position.x + joints[second_locator].m30) * 0.5f;
-        matrix.m31 = (position.y + joints[second_locator].m31) * 0.5f;
-        matrix.m32 = (position.z + joints[second_locator].m32) * 0.5f;
-    }
-    if (rotate_z != 0)
-        NuMtxPreRotateZ(&matrix, rotate_z);
-    if (object_id != -1 && CutSceneSys->field_04 == object_id && DisguiseAdjustFn != NULL) {
-        NUVEC adjustment, offset;
-        DisguiseAdjustFn(id, hat, &adjustment, &offset);
-        if (adjustment.x != 1.0f || adjustment.y != 1.0f || adjustment.z != 1.0f)
-            NuMtxPreScale(&matrix, &adjustment);
-        if (offset.x != 0.0f || offset.y != 0.0f || offset.z != 0.0f)
-            NuMtxPreTranslate(&matrix, &offset);
-    }
-    if (rotation != NULL) {
-        NUVEC position = {matrix.m30, matrix.m31, matrix.m32};
-        NuMtxMulR(&matrix, rotation, &matrix);
-        matrix.m30 = position.x;
-        matrix.m31 = position.y;
-        matrix.m32 = position.z;
-    }
-    if (translation != NULL)
-        NuMtxTranslate(&matrix, translation);
-    i32 use_alpha = 0;
-    if (object_id != -1) {
-        special = &world->lev_objs[object_id].special;
-        if (ObjTabList != NULL)
-            use_alpha = ObjTabList[object_id].pad_01;
-    }
-    if (scale != 1.0f)
-        NuMtxPreScaleU(&matrix, scale);
-    if (!use_alpha)
-        NuSpecialDrawAt(special, &matrix);
-    else
-        NuSpecialDrawAtAlpha(special, &matrix, alpha);
-    if (reflect && MatrixReflection(&matrix, axis, plane, world->current_level->unknown_0cc, &reflected)) {
-        NuRndrStartReflectionRender(0);
-        if (use_alpha)
-            NuSpecialDrawAtAlpha(special, &reflected, alpha);
-        else
-            NuSpecialDrawAt(special, &reflected);
-        NuRndrEndReflectionRender();
-    }
-}
+                           NUVEC *translation, f32 alpha, f32 scale);
 
 extern AREADATA *PODSPRINT_ADATA;
 extern "C" {
@@ -1531,27 +949,9 @@ extern "C" {
 void DrawGameMessage_Targets(GAMEMESSAGE_s *message, nuvec_s *position, float scale);
 
 i32 DrawPanel3DObjectNoAlpha(float x, float y, float z, float scale_x, float scale_y, float scale_z, u16 rotate_x,
-                             u16 rotate_y, u16 rotate_z, nuhspecial_s *special, i32 rotate_order) {
-    if (special != NULL && NuSpecialExistsFn(special) != 0 && (scale_y != 0.0f || scale_x != 0.0f || scale_z != 0.0f)) {
-        NUVEC scale = {scale_x / CameraZoom, scale_y / CameraZoom, scale_z / CameraZoom};
-        NUMTX_ALIGNED16 matrix;
-        NuMtxSetScale(&matrix, &scale);
-        RotateGameMatrix(&matrix, rotate_order, rotate_x, rotate_y, rotate_z);
-        matrix.m30 = x * PANEL3DMULX;
-        matrix.m31 = y * PANEL3DMULY;
-        matrix.m32 = z;
-        NuMtxMulVU0(&matrix, &matrix, NuCameraGetMtx());
-        NuSpecialDrawAt(special, &matrix);
-    }
-    return 0;
-}
+                             u16 rotate_y, u16 rotate_z, nuhspecial_s *special, i32 rotate_order);
 
-i32 DrawPanel3DObjectMtxNoAlpha(nuhspecial_s *special, numtx_s *matrix) {
-    if (special == NULL || NuSpecialExistsFn(special) == 0)
-        return 0;
-    NuMtxMulVU0(matrix, matrix, NuCameraGetMtx());
-    return NuSpecialDrawAt(special, matrix);
-}
+i32 DrawPanel3DObjectMtxNoAlpha(nuhspecial_s *special, numtx_s *matrix);
 
 extern void DrawMenuEntry(MENU_s *, char *);
 
@@ -1571,29 +971,11 @@ void DrawAABox(_vuv_s *position, _vuv_s *size, i32 colour) {
     NuCameraRelock();
 }
 
-void DrawCross(nuvec_s *centre, float radius, numtl_s *material, i32 colour) {
-    if (material != NULL) {
-        colour = (((i32)(material->diffuse_color.b * 255.0f) & 255) << 16) |
-                 (((i32)(material->diffuse_color.g * 255.0f) & 255) << 8) |
-                 ((i32)(material->diffuse_color.r * 255.0f) & 255);
-    }
-    NuRndrLine3dDbg(centre->x - radius, centre->y, centre->z, centre->x + radius, centre->y, centre->z, colour);
-    NuRndrLine3dDbg(centre->x, centre->y - radius, centre->z, centre->x, centre->y + radius, centre->z, colour);
-    NuRndrLine3dDbg(centre->x, centre->y, centre->z - radius, centre->x, centre->y, centre->z + radius, colour);
-}
+void DrawCross(nuvec_s *centre, float radius, numtl_s *material, i32 colour);
 
-f32 SwipeDecalRenderer_MaxWidth = 0.6f;
-f32 SwipeDecalRenderer_MinWidth = 0.2f;
+extern f32 SwipeDecalRenderer_MaxWidth;
+extern f32 SwipeDecalRenderer_MinWidth;
 
-void SwipeDecalRenderer::Process(float frame_time) {
-    width.Process(frame_time);
-    alpha.Process(frame_time);
-
-    if (alpha.value > 0.5f && !alpha.IsActive() && !width.IsActive()) {
-        alpha.Start(*alpha.target, 0.0f, 0.3f);
-        alpha.delay = 0.2f;
-    }
-}
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
     do {                                                                                                               \
@@ -1607,74 +989,9 @@ void SwipeDecalRenderer::Process(float frame_time) {
         }                                                                                                              \
     } while (false)
 
-void SwipeDecalRenderer::Render() {
-    NUVEC vertices[4] = {
-        {-0.037499998f, 0.0f, 0.0f},
-        {0.037499998f, 0.0f, 0.0f},
-        {-0.037499998f, -width.value, 0.0f},
-        {0.037499998f, -width.value, 0.0f},
-    };
-    const f32 uv_height = width.value / width.to;
-
-    NuVecRotateZ(&vertices[0], &vertices[0], angle);
-    NuVecRotateZ(&vertices[1], &vertices[1], angle);
-    NuVecRotateZ(&vertices[2], &vertices[2], angle);
-    NuVecRotateZ(&vertices[3], &vertices[3], angle);
-    for (i32 i = 0; i < 4; ++i) {
-        vertices[i].x += x;
-        vertices[i].y += 1.0f - y;
-    }
-
-    NuPrim2DBegin(1, 7, MechSystems::Get()->swipe_material);
-    u32 colour = (static_cast<u32>(static_cast<i32>(alpha.value * 128.0f)) << 24) | 0x000080;
-    if (style != static_cast<Style>(1)) {
-        if (__builtin_expect(style == static_cast<Style>(2), 0))
-            colour = (static_cast<u32>(static_cast<i32>(alpha.value * 255.0f)) << 24) | 0x0000ff;
-        else
-            colour |= 0x808000;
-    }
-
-    NuRndrPrimSetColour(colour);
-    SWIPE_PRIM_UV(0.0f, 0.0f);
-    NuPrim2DAddXYZ(static_cast<f32>(PS2_VREZ_W) * vertices[0].x, static_cast<f32>(PS2_VREZ_H) * vertices[0].y, 0.0f);
-    NuRndrPrimSetColour(colour);
-    SWIPE_PRIM_UV(1.0f, 0.0f);
-    NuPrim2DAddXYZ(static_cast<f32>(PS2_VREZ_W) * vertices[1].x, static_cast<f32>(PS2_VREZ_H) * vertices[1].y, 0.0f);
-    NuRndrPrimSetColour(colour);
-    SWIPE_PRIM_UV(0.0f, uv_height);
-    NuPrim2DAddXYZ(static_cast<f32>(PS2_VREZ_W) * vertices[2].x, static_cast<f32>(PS2_VREZ_H) * vertices[2].y, 0.0f);
-    NuRndrPrimSetColour(colour);
-    SWIPE_PRIM_UV(1.0f, uv_height);
-    NuPrim2DAddXYZ(static_cast<f32>(PS2_VREZ_W) * vertices[3].x, static_cast<f32>(PS2_VREZ_H) * vertices[3].y, 0.0f);
-    NuPrim2DEnd();
-}
 
 #undef SWIPE_PRIM_UV
 
-SwipeDecalRenderer::SwipeDecalRenderer(TouchHolder &holder, i32 index, SwipeDecalRenderer::Style style) {
-    alpha.Initialize();
-    width.Initialize();
-    this->style = style;
-
-    const NuVec2 &swipe_point = holder.swipe_samples[index].position;
-    const f32 swipe_x = (swipe_point.x + 1.0f) * 0.5f;
-    const f32 swipe_y = (swipe_point.y + 1.0f) * 0.5f;
-    const f32 current_x = (holder.touch_position.x + 1.0f) * 0.5f;
-    const f32 current_y = (holder.touch_position.y + 1.0f) * 0.5f;
-    const f32 dx = current_x - swipe_x;
-    const f32 dy = current_y - swipe_y;
-    f32 target_width = NuFsqrt(dx * dx + dy * dy);
-    // MAX/MIN expand the inner MIN twice, which gives retail's re-tested clamp branches.
-    target_width = MAX(SwipeDecalRenderer_MinWidth, MIN(target_width, SwipeDecalRenderer_MaxWidth));
-
-    width.Start(0.0f, target_width, 0.1f);
-    *width.target = 0.0f;
-    x = swipe_x;
-    y = swipe_y;
-    angle = NuAtan2D(dx, dy);
-    alpha.Start(0.02f, 1.0f, 0.1f);
-    *alpha.target = 0.02f;
-}
 
 extern i32 GetMenuID(void);
 static __used__ i32 PauseRenderOff();
@@ -1692,155 +1009,34 @@ extern i32 PickUpFlickerTest, PickUpFlickerFrames, PickupFlickerFrame;
 extern i32 qrand(void);
 extern f32 SeekLinearF(f32, f32, f32);
 
-static NUGSCN *backdrop_scene = nullptr;
 
-static nuhspecial_s backdrop_hspecial[4];
 
-static f32 backdrop_back_wait = 0.0f;
 
-f32 backdrop_top_r = 0.0f;
-f32 backdrop_top_g = 0.0f;
-f32 backdrop_top_b = 0.0f;
-f32 backdrop_bot_r = 0.0f;
-f32 backdrop_bot_g = 0.0f;
-f32 backdrop_bot_b = 24.0f;
+extern f32 backdrop_top_r;
+extern f32 backdrop_top_g;
+extern f32 backdrop_top_b;
+extern f32 backdrop_bot_r;
+extern f32 backdrop_bot_g;
+extern f32 backdrop_bot_b;
 
-static f32 backdrop_top_tr = 0.0f;
-static f32 backdrop_top_tg = 0.0f;
-static f32 backdrop_top_tb = 0.0f;
-static f32 backdrop_bot_tr = 0.0f;
-static f32 backdrop_bot_tg = 0.0f;
-static f32 backdrop_bot_tb = 24.0f;
 
-i32 backdrop_black = 0;
+extern i32 backdrop_black;
 
-void (*BackDrop_AlphaFn)(float *) = nullptr;
+extern void (*BackDrop_AlphaFn)(float *);
 
 static __used__ void BackDrop_Alpha(float *alpha);
 
-void BackDrop_Init(char *path, variptr_u *buf, variptr_u *buf_end) {
-    if (backdrop_scene == NULL) {
-        backdrop_scene = NuGScnRead(buf, *buf_end, path);
-    }
-    memset(backdrop_hspecial, 0, sizeof(backdrop_hspecial));
-    if (backdrop_scene == NULL) {
-        return;
-    }
-    NuSpecialFind(backdrop_scene, &backdrop_hspecial[0], (char *)"ball1", 1);
-    NuSpecialFind(backdrop_scene, &backdrop_hspecial[1], (char *)"ball2", 1);
-    NuSpecialFind(backdrop_scene, &backdrop_hspecial[2], (char *)"ball3", 1);
-    NuSpecialFind(backdrop_scene, &backdrop_hspecial[3], (char *)"ball4", 1);
-}
+void BackDrop_Init(char *path, variptr_u *buf, variptr_u *buf_end);
 
-void BackDrop_Dump() {
-    if (backdrop_scene != NULL) {
-        NuGScnRemove(backdrop_scene);
-    }
-}
+void BackDrop_Dump();
 
-void BackDrop_Update(float dt) {
-    if (backdrop_scene != NULL) {
-        NuGScnUpdate(backdrop_scene, dt * 60.0f);
-    }
-}
+void BackDrop_Update(float dt);
 
-void BackDrop_ResetColours() {
-    backdrop_top_r = 0.0f;
-    backdrop_top_g = 0.0f;
-    backdrop_top_b = 0.0f;
-    backdrop_bot_r = 0.0f;
-    backdrop_bot_g = 0.0f;
-    backdrop_bot_b = 0.0f;
-    backdrop_back_wait = 0.0001f;
-    backdrop_top_tr = 0.0f;
-    backdrop_top_tg = 0.0f;
-    backdrop_top_tb = 0.0f;
-    backdrop_bot_tr = 0.0f;
-    backdrop_bot_tg = 0.0f;
-    backdrop_bot_tb = 0.0f;
-}
+void BackDrop_ResetColours();
 
-void BackDrop_UpdateColours(i32 instant) {
-    if (backdrop_black) {
-        backdrop_top_r = 0.0f;
-        backdrop_top_g = 0.0f;
-        backdrop_top_b = 0.0f;
-        backdrop_bot_r = 0.0f;
-        backdrop_bot_g = 0.0f;
-        backdrop_bot_b = 0.0f;
-        return;
-    }
+void BackDrop_UpdateColours(i32 instant);
 
-    if (backdrop_back_wait > 0.0f) {
-        backdrop_back_wait -= FRAMETIME;
-        if (!(0.0f >= backdrop_back_wait)) {
-            return;
-        }
-        if (instant != 0) {
-            backdrop_top_tb = 0.0f;
-            backdrop_top_tg = 0.0f;
-            backdrop_top_tr = 0.0f;
-            backdrop_bot_tb = 0.0f;
-            backdrop_bot_tg = 0.0f;
-            backdrop_bot_tr = 0.0f;
-        } else {
-            backdrop_top_tr = 0.0f;
-            backdrop_top_tg = 0.0f;
-            backdrop_top_tb = 0.0f;
-            backdrop_bot_tr = 0.0f;
-            backdrop_bot_tg = 0.0f;
-            backdrop_bot_tb = 0.0f;
-        }
-        return;
-    }
-
-    if (backdrop_top_r == backdrop_top_tr && backdrop_top_g == backdrop_top_tg && backdrop_top_b == backdrop_top_tb &&
-        backdrop_bot_r == backdrop_bot_tr && backdrop_bot_g == backdrop_bot_tg && backdrop_bot_b == backdrop_bot_tb) {
-        backdrop_back_wait = static_cast<f32>(qrand()) * (1.0f / 65535.0f) * 2.5f + 2.5f;
-        return;
-    }
-
-    const f32 step = FRAMETIME * 10.0f;
-    backdrop_top_r = SeekLinearF(backdrop_top_r, backdrop_top_tr, step);
-    backdrop_top_g = SeekLinearF(backdrop_top_g, backdrop_top_tg, step);
-    backdrop_top_b = SeekLinearF(backdrop_top_b, backdrop_top_tb, step);
-    backdrop_bot_r = SeekLinearF(backdrop_bot_r, backdrop_bot_tr, step);
-    backdrop_bot_g = SeekLinearF(backdrop_bot_g, backdrop_bot_tg, step);
-    backdrop_bot_b = SeekLinearF(backdrop_bot_b, backdrop_bot_tb, step);
-}
-
-void BackDrop_Draw(float alpha, i32 flags) {
-    if (backdrop_scene == NULL) {
-        return;
-    }
-    if (flags == 0 && BackDrop_AlphaFn != NULL) {
-        BackDrop_AlphaFn(&alpha);
-    }
-    if (!(alpha > 0.0f)) {
-        return;
-    }
-
-    for (i32 special_index = 0; special_index < 2; ++special_index) {
-        nuhspecial_s *special = &backdrop_hspecial[special_index];
-        if (NuSpecialExistsFn(special) == 0) {
-            continue;
-        }
-        // Retail realigns the frame (and esp,-16) for this matrix.
-        NUMTX_ALIGNED16 mtx = *NuSpecialGetDrawMtx(special);
-        NuSpecialDrawAtAlpha(special, &mtx, alpha);
-        f32 x = mtx.m30;
-        f32 y = mtx.m31;
-        f32 z = mtx.m32;
-        u16 angle = (u16)qrand();
-        for (i32 i = 0; i < 3; ++i) {
-            mtx.m30 = NU_SIN_LUT(angle) * 0.01f + x;
-            mtx.m31 = NU_COS_LUT(angle) * 0.01f + y;
-            mtx.m32 = z;
-            NuSpecialDrawAtAlpha(special, &mtx, alpha);
-            angle = (u16)(angle + 0x5555);
-        }
-    }
-}
+void BackDrop_Draw(float alpha, i32 flags);
 
 extern "C" {
     extern nurenderscene_s currentScene;

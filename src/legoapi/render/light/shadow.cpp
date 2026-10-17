@@ -13,49 +13,21 @@
 struct AIROW_s;
 struct nunativegscene_s;
 
-f32 BlobShadowFade(NUVEC *position, f32 fade_start, f32 fade_end, f32 alpha) {
-    if (alpha <= 0.0f) {
-        return 0.0f;
-    }
+f32 BlobShadowFade(NUVEC *position, f32 fade_start, f32 fade_end, f32 alpha);
 
-    NUVEC camera_delta;
-    NuVecSub(&camera_delta, position, NUMTX_GET_ROW_VEC(&pNuCam->mtx, 3));
-    const f32 distance_squared =
-        camera_delta.x * camera_delta.x + camera_delta.y * camera_delta.y + camera_delta.z * camera_delta.z;
+void SetShadowLight();
 
-    if (distance_squared < fade_end * fade_end) {
-        if (__builtin_expect(distance_squared > fade_start * fade_start, 0)) {
-            const f32 distance = NuFsqrt(distance_squared);
-            return (1.0f - (distance - fade_start) / (fade_end - fade_start)) * alpha;
-        }
-        return alpha;
-    }
-    return 0.0f;
-}
+void InitShadowLights();
 
-void SetShadowLight() {
-    STUBBED();
-}
+void RenderShadowLights(i32);
 
-void InitShadowLights() {
-}
+void ResetShadowMapRendering();
 
-void RenderShadowLights(i32) {
-}
+void EnableShadowMapRendering(i32);
 
-void ResetShadowMapRendering() {
-}
+void ResetShadowMapRenderingFn();
 
-void EnableShadowMapRendering(i32) {
-}
-
-void ResetShadowMapRenderingFn() {
-    ResetShadowMapRendering();
-}
-
-void EnableShadowMapRenderingFn() {
-    EnableShadowMapRendering(0);
-}
+void EnableShadowMapRenderingFn();
 
 // ==== functions in original address order ====
 

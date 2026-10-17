@@ -76,51 +76,9 @@ extern "C" void TerrSetPlatScanDist(f32 dist);
 extern "C" void TerrainPlatformNewUpdate(void);
 extern "C" i32 PARTLookupTypePageOnly(char *, i32);
 extern "C" part_type_s part_types[128];
-void *InitPartDebris(VARIPTR *buf, VARIPTR *, i32 capacity, i32 named_count, char **names, i32 page) {
-    PARTDEBSYS_s *system = static_cast<PARTDEBSYS_s *>(BUFFER_ALLOC(buf, sizeof(PARTDEBSYS_s), 16));
-    if (__builtin_expect(system == NULL, 0))
-        return system;
-    system->entries = NULL;
-    system->capacity = capacity;
-    system->named_count = named_count;
-    system->entries = static_cast<PARTDEBENTRY_s *>(BUFFER_ALLOC(buf, capacity * sizeof(PARTDEBENTRY_s), 16));
-    if (system->entries == NULL)
-        return NULL;
-    memset(system->entries, -1, capacity * sizeof(PARTDEBENTRY_s));
-    i32 i = 0;
-    if (names != NULL) {
-        for (; i < system->named_count; ++i) {
-            NuStrCpy(system->entries[i].name, names[i]);
-            system->entries[i].type_id = -1;
-            system->entries[i].type_id = PARTLookupTypePageOnly(system->entries[i].name, page);
-        }
-    }
-    for (i32 type = 0; type < 128 && i < system->capacity; ++type) {
-        system->entries[i].type_id = -1;
-        if (__builtin_expect(part_types[type].variant_count > 0, 1)) {
-            NuStrCpy(system->entries[i].name, part_types[type].name);
-            system->entries[i].type_id = PARTLookupTypePageOnly(system->entries[i].name, page);
-            ++i;
-        }
-    }
-    for (; i < system->capacity; ++i)
-        system->entries[i].type_id = -1;
-    return system;
-}
+void *InitPartDebris(VARIPTR *buf, VARIPTR *, i32 capacity, i32 named_count, char **names, i32 page);
 
-// Particles_Load @0x4a2a50.
-void Particles_Load(WORLDINFO *world, char **debris_name, i32 count, i32 flags) {
-    char path[0x100];
-
-    world->page_pp = -1;
-    sprintf(path, "%s.ptl", world->config_file);
-    if (NuFileExists(path) != 0) {
-        world->page_pp = edppLoadPage(path, 1, reinterpret_cast<usize>(world->current_gscn));
-    }
-
-    world->debris_sys = (APIDEBRISSYS_s *)InitGameDebris(&world->giz_buffer, &world->unknown_0108, count, flags,
-                                                         debris_name, (char)world->page_pp);
-}
+void Particles_Load(WORLDINFO *world, char **debris_name, i32 count, i32 flags);
 
 extern "C" {
 

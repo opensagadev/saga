@@ -102,50 +102,11 @@ u32 LEGOOBJ_DEFAULTLASTCOIN = -1;
 
 // --- World-module helpers (kept with the WorldInfo API) ---
 
-void SetAreaPickupGravity(i32 area, i32 level) {
-    AreaPickupGravity = -6.0f;
-    if (area < 0 || area >= AREACOUNT) {
-        return;
-    }
-    AREADATA *ad = &ADataList[area];
-    if (ad->flags & AREAFLAG_NOPICKUPGRAVITY) {
-        if ((*(u8 *)((char *)LDataList + level * 0x144 + 0x66) & 0x40) == 0) {
-            AreaPickupGravity = 0.0f;
-            return;
-        }
-    }
-    if (ad->flags & AREAFLAG_VEHICLE_AREA) {
-        AreaPickupGravity = -20.0f;
-    }
-}
+void SetAreaPickupGravity(i32 area, i32 level);
 
 void StoreLevelProgressFn(WORLDINFO_s *world, LEVEL_PROGRESS_s *progress, i32 area_progress);
 
-void SaveSceneObjectAnimTFactors(NUGSCN *gscn) {
-    i32 count;
-    char *p;
-    void *obj;
-
-    if (gscn == NULL) {
-        return;
-    }
-    if (*(void **)((char *)gscn + 0x110) != NULL) {
-        return;
-    }
-    count = *(i32 *)((char *)gscn + 0x1c);
-    p = *(char **)((char *)gscn + 0x20) + count * 0x50;
-    if (count == 0) {
-        return;
-    }
-    do {
-        p -= 0x50;
-        obj = *(void **)(p + 0x48);
-        if (obj != NULL) {
-            *(f32 *)((char *)obj + 0x54) = *(f32 *)((char *)obj + 0x40);
-        }
-        count--;
-    } while (count != 0);
-}
+void SaveSceneObjectAnimTFactors(NUGSCN *gscn);
 void CalculateWorldSize(WORLDINFO *world);
 
 WORLDINFO WorldInfo[2];

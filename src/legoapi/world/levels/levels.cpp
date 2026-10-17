@@ -60,403 +60,52 @@ static void Titles_Update(WORLDINFO *);
 
 static void Titles_Draw(WORLDINFO *);
 
-i32 Text_StripComments(char *text, char *dest, i32 param) {
-    char *start = text;
-    char *end = text + NuStrLen(text);
-    char *out = dest;
-    while (text <= end) {
-        char c = *text;
-        if (c == '#' || c == ';' || (c == '/' && text[1] == '/')) {
-            if (c == '/') {
-                text++;
-            }
-            while (c != '\r' && c != '\n' && c != '\0') {
-                c = *++text;
-            }
-            *out++ = c;
-            text++;
-        } else {
-            if (param != 0 && (c == ',' || c == '=')) {
-                c = ' ';
-            }
-            *out++ = c;
-            text++;
-        }
-    }
-    *out = '\0';
-    return (i32)(out - dest);
-}
+i32 Text_StripComments(char *text, char *dest, i32 param);
 
 LEVELDATA *LDataList = NULL;
-LEVELDATA *NEWGAME_LDATA = NULL;
-LEVELDATA *LOADGAME_LDATA = NULL;
+extern LEVELDATA * NEWGAME_LDATA;
+extern LEVELDATA * LOADGAME_LDATA;
 
-static i32 MAXLDATA = 0x64;
 
 i32 LEVELCOUNT;
 
 LEVELDATA *Levels_ConfigureList(char *file, VARIPTR *buf, VARIPTR *buf_end, i32 max_level_count, i32 *level_count_out,
-                                LEVELSETDEFAULTSFN *set_defaults_fn) {
-    NUFPAR *parser;
-    i32 in_level_config;
-    i32 n;
-    LEVELDATA *level_data;
-    LEVELDATA *cur_level;
-    i32 i;
-    i32 j;
-
-    parser = NuFParCreate(file);
-
-    MAXLDATA = max_level_count;
-    n = 0;
-
-    level_data = (LEVELDATA *)ALIGN(buf->addr, 0x4);
-    buf->void_ptr = level_data;
-
-    cur_level = level_data;
-
-    in_level_config = 0;
-
-    while (NuFParGetLine(parser) != 0) {
-        NuFParGetWord(parser);
-        if (parser->word_buf[0] != '\0') {
-            if (in_level_config) {
-                if (NuStrICmp(parser->word_buf, "level_end") == 0) {
-                    in_level_config = 0;
-
-                    if (cur_level->dir[0] == '\0' || cur_level->name[0] == '\0' ||
-                        (cur_level->flags & LEVEL_TEST) != 0) {
-                        continue;
-                    }
-
-                    if ((cur_level->flags & LEVEL_NEWGAME) != 0) {
-                        NEWGAME_LDATA = cur_level;
-                    }
-
-                    if ((cur_level->flags & LEVEL_LOADGAME) != 0) {
-                        LOADGAME_LDATA = cur_level;
-                    }
-
-                    n++;
-                    in_level_config = 0;
-                    cur_level++;
-
-                    continue;
-                }
-
-                if (NuStrICmp(parser->word_buf, "dir") == 0) {
-                    if (NuFParGetWord(parser) != 0 && NuStrLen(parser->word_buf) < 0x40) {
-                        NuStrCpy(cur_level->dir, parser->word_buf);
-                    }
-                } else if (NuStrICmp(parser->word_buf, "file") == 0) {
-                    if (NuFParGetWord(parser) != 0 && NuStrLen(parser->word_buf) < 0x20) {
-                        NuStrCpy(cur_level->name, parser->word_buf);
-                    }
-                }
-
-                if (NuStrICmp(parser->word_buf, "test_level") == 0) {
-                    cur_level->flags |= LEVEL_TEST;
-                } else if (NuStrICmp(parser->word_buf, "intro_level") == 0) {
-                    cur_level->flags |= LEVEL_INTRO;
-                } else if (NuStrICmp(parser->word_buf, "midtro_level") == 0 ||
-                           NuStrICmp(parser->word_buf, "cutscene_level") == 0) {
-                    cur_level->flags |= LEVEL_MIDTRO;
-                } else if (NuStrICmp(parser->word_buf, "outro_level") == 0) {
-                    cur_level->flags |= LEVEL_OUTRO;
-                } else if (NuStrICmp(parser->word_buf, "status_level") == 0) {
-                    cur_level->flags &= ~LEVEL_GAMEPLAY;
-                    cur_level->flags &= ~LEVEL_TERRAIN;
-                    cur_level->flags |= LEVEL_STATUS;
-                } else if (NuStrICmp(parser->word_buf, "newgame_level") == 0) {
-                    if (NEWGAME_LDATA == NULL) {
-                        cur_level->flags |= LEVEL_NEWGAME;
-                    }
-                } else if (NuStrICmp(parser->word_buf, "loadgame_level") == 0) {
-                    if (LOADGAME_LDATA == NULL) {
-                        cur_level->flags |= LEVEL_LOADGAME;
-                    }
-                }
-
-                continue;
-            }
-
-            if (NuStrICmp(parser->word_buf, "level_start") == 0 && n < MAXLDATA) {
-                cur_level->dir[0] = '\0';
-                cur_level->name[0] = '\0';
-
-                cur_level->unknown_060 = -1;
-
-                cur_level->idx = n;
-
-                cur_level->flags = LEVEL_GAMEPLAY | LEVEL_UNKNOWN_FLAG_4 | LEVEL_TERRAIN;
-
-                cur_level->load_fn = NULL;
-                cur_level->init_fn = NULL;
-                cur_level->reset_fn = NULL;
-                cur_level->update_fn = NULL;
-                cur_level->always_update_fn = NULL;
-                cur_level->draw_fn = NULL;
-                cur_level->draw_status_fn = NULL;
-
-                cur_level->data_display.unknown_14 = 20000;
-                cur_level->data_display.unknown_00 = 0.1f;
-                cur_level->data_display.unknown_04 = 0.15f;
-                cur_level->data_display.far_clip = 20000.0f;
-                cur_level->data_display.fog_start = 20100.0f;
-                cur_level->data_display.particle_thin = g_isLowEndDevice ? 4.0f : 1.0f;
-                cur_level->data_display.bg_red_bottom = 0;
-                cur_level->data_display.bg_red_top = 0;
-                cur_level->data_display.bg_green_bottom = 0;
-                cur_level->data_display.bg_green_top = 0;
-                cur_level->data_display.bg_blue_bottom = 0;
-                cur_level->data_display.bg_blue_top = 0;
-
-                cur_level->music_index = -1;
-
-                cur_level->unknown_11c = 0.0f;
-                cur_level->unknown_120 = 1.0f;
-
-                cur_level->unknown_0a2 = -1;
-                cur_level->max_ter_platforms = 0x80;
-                cur_level->max_ter_groups = 0x100;
-                cur_level->unknown_0a8 = -1;
-                cur_level->unknown_0aa = -1;
-
-                cur_level->mipmap_mode = 0x03;
-                cur_level->blob_shadow_alpha = 0x7f;
-                cur_level->unknown_0ae = -1;
-                cur_level->area_index = -1;
-
-                cur_level->unknown_0b8 = 0x50;
-
-                cur_level->cam_tilt = 0.0f;
-
-                cur_level->hover_height = 0.0f;
-
-                cur_level->unknown_0b9 = 0x50;
-                cur_level->unknown_0ba = 0x50;
-                cur_level->unknown_0bb = 0x32;
-                cur_level->unknown_0bc = 0x00;
-                cur_level->unknown_0bd = 0x00;
-                cur_level->unknown_0be = 0x00;
-                cur_level->unknown_0bf = 0x00;
-
-                cur_level->unknown_0c0 = 0.5f;
-                cur_level->cam_pullback_dist = 0.0f;
-                cur_level->cam_lateral_dist = 0.0f;
-                cur_level->unknown_0cc = 2e+06f;
-
-                cur_level->area_level_index = -1;
-                cur_level->blob_shadow_fade_near = 5;
-                cur_level->blob_shadow_fade_far = 10;
-                cur_level->cam_pos_seek = 5;
-                cur_level->cam_angle_seek = 5;
-                cur_level->camera_judder_distance = 10;
-                cur_level->unknown_0da = 5;
-                cur_level->unknown_0db = 5;
-
-                cur_level->conveyor_x_speed = 0.0f;
-                cur_level->conveyor_z_speed = 0.0f;
-
-                for (i = 0; i < 2; i++) {
-                    for (j = 0; j < 3; j++) {
-                        cur_level->music_tracks[j][i] = -1;
-                    }
-                }
-
-                in_level_config = 1;
-
-                if (set_defaults_fn != NULL) {
-                    (*set_defaults_fn)(cur_level);
-                }
-            }
-        }
-    }
-
-    NuFParDestroy(parser);
-
-    if (n == 0) {
-        return NULL;
-    }
-
-    buf->void_ptr = cur_level;
-
-    if (level_count_out != NULL) {
-        *level_count_out = n;
-    }
-
-    return level_data;
-}
+                                LEVELSETDEFAULTSFN *set_defaults_fn);
 
 void Level_SetDefaults(LEVELDATA *level);
 
-LEVELDATA *Level_FindByName(char *name, i32 *idx_out) {
-    for (i32 i = 0; i < LEVELCOUNT; i++) {
-        if (NuStrICmp(LDataList[i].name, name) == 0) {
-            if (idx_out != NULL) {
-                *idx_out = i;
-            }
+LEVELDATA *Level_FindByName(char *name, i32 *idx_out);
 
-            return &LDataList[i];
-        }
-    }
-
-    if (idx_out != NULL) {
-        *idx_out = -1;
-    }
-
-    return NULL;
-}
-
-void Level_Draw(WORLDINFO *world) {
-    if (world->current_level->draw_fn != NULL) {
-        world->current_level->draw_fn(world);
-    }
-}
+void Level_Draw(WORLDINFO *world);
 
 LEVELFIXUP LevFixUp;
 
-void Levels_FixUp(LEVELFIXUP *fixup) {
-    if (fixup != NULL) {
-        for (; fixup->name != NULL; fixup++) {
-            if (fixup->level != NULL) {
-                LEVELDATA *level = Level_FindByName(fixup->name, NULL);
-                *fixup->level = level;
-                if (level != NULL) {
-                    if (fixup->load_fn != NULL) {
-                        level->load_fn = fixup->load_fn;
-                    }
-                    if (fixup->init_fn != NULL) {
-                        level->init_fn = fixup->init_fn;
-                    }
-                    if (fixup->reset_fn != NULL) {
-                        level->reset_fn = fixup->reset_fn;
-                    }
-                    if (fixup->update_fn != NULL) {
-                        level->update_fn = fixup->update_fn;
-                    }
-                    if (fixup->always_update_fn != NULL) {
-                        level->always_update_fn = fixup->always_update_fn;
-                    }
-                    if (fixup->draw_fn != NULL) {
-                        level->draw_fn = fixup->draw_fn;
-                    }
-                    if (fixup->draw_status_fn != NULL) {
-                        level->draw_status_fn = fixup->draw_status_fn;
-                    }
-                }
-            }
-        }
-    }
-}
+void Levels_FixUp(LEVELFIXUP *fixup);
 
-void Level_RegisterGameConfigKeywords(nufpcomjmp_s *beforeLoadKeywords, nufpcomjmp_s *afterLoadKeywords) {
-    Level_ConfigBeforeLoad_GameKeywords = beforeLoadKeywords;
-    Level_ConfigAfterLoad_GameKeywords = afterLoadKeywords;
-}
+void Level_RegisterGameConfigKeywords(nufpcomjmp_s *beforeLoadKeywords, nufpcomjmp_s *afterLoadKeywords);
 
 LEVELDATA *ANEWHOPELEVELS[4];
 void Credits_Load(WORLDINFO_s *, variptr_u *, variptr_u *);
 
 void FixUpLevels(LEVELFIXUP *fixup);
 
-void Level_Update(WORLDINFO *world) {
-    void (*updateFn)(WORLDINFO *) = world->current_level->update_fn;
-    if (updateFn != NULL) {
-        updateFn(world);
-    }
+void Level_Update(WORLDINFO *world);
 
-    if (DoubleScoreTime > 0.0f) {
-        if ((i32)(GameTimer.time_elapsed + GameTimer.time_elapsed) !=
-            (i32)(GameTimer.last_time_elapsed + GameTimer.last_time_elapsed)) {
-            GameAudio_PlaySfxAndSetVolume(0x35, NULL, DoubleScoreTime);
-        }
-    }
+i32 LevelObject_GetReflection(i32 objId);
 
-    if (AreaGlobals.values.field_0x00 == 0) {
-        if (Cheats_CheckFlags(0x2000) != 0) {
-            AreaGlobals.values.field_0x00 = 1;
-        }
-    }
-}
+char *LevelObject_FindNameFromIndex(i32 index);
 
-i32 LevelObject_GetReflection(i32 objId) {
-    if (objId != -1 && LEVOBJREF_FIRSTOBJ <= objId && objId <= LEVOBJREF_LASTOBJ) {
-        objId = (objId - LEVOBJREF_FIRSTOBJ) + LEVOBJREF_FIRSTREFOBJ;
-    }
-    return objId;
-}
+i32 LevelObject_FindIndexFromName(char *name);
 
-char *LevelObject_FindNameFromIndex(i32 index) {
-    char *name = (char *)"";
-    if (ObjTabList != NULL && index >= 0 && index < LEVELOBJECTCOUNT) {
-        name = ObjTabList[index].name;
-    }
-    return name;
-}
+i32 LevelObject_FindIndexFromName_RefOnly(char *name);
 
-i32 LevelObject_FindIndexFromName(char *name) {
-    if (ObjTabList != NULL && LEVELOBJECTCOUNT > 0) {
-        for (i32 i = 0; i < LEVELOBJECTCOUNT; i++) {
-            if (NuStrICmp(ObjTabList[i].name, name) == 0) {
-                return i;
-            }
-        }
-    }
-    return -1;
-}
-
-i32 LevelObject_FindIndexFromName_RefOnly(char *name) {
-    if (ObjTabList != NULL && LEVOBJREF_FIRSTOBJ != -1 && LEVOBJREF_FIRSTOBJ <= LEVOBJREF_LASTOBJ) {
-        for (i32 i = LEVOBJREF_FIRSTOBJ; i <= LEVOBJREF_LASTOBJ; ++i) {
-            if (NuStrICmp(ObjTabList[i].name, name) == 0) {
-                return i;
-            }
-        }
-    }
-    return -1;
-}
-
-void GameAnimSys_ClearProgress(i32 idx) {
-    if (idx < 0) {
-        return;
-    }
-    if (idx >= gameanimsysprogress.count) {
-        return;
-    }
-    u8 *data = gameanimsysprogress.entries[idx];
-    if (gameanimsysprogress.entry_size <= 0) {
-        return;
-    }
-    for (i32 i = 0; i < gameanimsysprogress.entry_size; i++) {
-        data[i] = 0;
-    }
-}
+void GameAnimSys_ClearProgress(i32 idx);
 
 void ClearLevelProgress(i32 index, WORLDINFO *world);
 
-void GoToNewLevel(i32 levelIdx) {
-    NewLData = &LDataList[levelIdx];
-    if (waiting_for_level != -1) {
-        waiting_for_new_level = 1;
-    }
-}
+void GoToNewLevel(i32 levelIdx);
 
-void Level_LoadConfigFile(WORLDINFO *world) {
-    char name[128];
-
-    ConfigBuffer[0] = '\0';
-    sprintf(name, "%s.txt", world->config_file);
-
-    world->giz_buffer.void_ptr = (void *)ALIGN((usize)world->giz_buffer.void_ptr, 4);
-    i32 bytesRead = NuFileLoadBuffer(name, world->giz_buffer.void_ptr, 0x10000);
-    world->config_count = bytesRead;
-    if (bytesRead > 0) {
-        ((char *)world->giz_buffer.void_ptr)[bytesRead] = '\0';
-        bytesRead = Text_StripComments((char *)world->giz_buffer.void_ptr, ConfigBuffer, 1);
-        world->config_count = bytesRead;
-    }
-}
+void Level_LoadConfigFile(WORLDINFO *world);
 
 // ==== src/legoapi/world/world.cpp: declarations ====
 #include "decomp.h"

@@ -146,75 +146,12 @@ void AIMoveDirectlyToDestination(AISYS_s *, AIPACKET_s *packet, APIOBJECT_s *obj
 void AIMoveToDestinationAvoidingCamera(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *object, i32 checks);
 
 bool AISysNodeCanReachThisJumpConnection(GameObject_s &, AIPATH_s &path, unsigned char node_index,
-                                         AIPATHCNX_s &jump_connection, i32 jump_direction) {
-    u8 from_node = jump_connection.node_indices[jump_direction];
-    u8 to_node = jump_connection.node_indices[jump_direction == 0];
-    while (node_index != from_node) {
-        if (node_index == to_node) {
-            return 0;
-        }
-        u8 connection_index = path.route_matrix[node_index][from_node];
-        if (connection_index == 0xff) {
-            return 0;
-        }
-        AIPATHCNX *connection = path.nodes[node_index].connections[connection_index];
-        if (connection == NULL) {
-            return 0;
-        }
-        u8 direction = node_index == connection->node_indices[1];
-        if ((connection->traversal_flags[direction] & mechAutoJumpCantReachFlags) != 0) {
-            return 0;
-        }
-        node_index = connection->node_indices[direction ^ 1];
-    }
-    return 1;
-}
+                                         AIPATHCNX_s &jump_connection, i32 jump_direction);
 
 bool AISysCharacterCanReachThisJumpConnection(GameObject_s &object, AIPATH_s &path, AIPATHCNX_s &jump_connection,
-                                              i32 jump_direction) {
-    if (object.ai.path_info.path != &path || object.ai.path_info.connection == NULL) {
-        return 0;
-    }
-    u8 node_index = object.ai.path_info.dist < 0.5f ? object.ai.path_info.connection->node_indices[0]
-                                                    : object.ai.path_info.connection->node_indices[1];
-    return AISysNodeCanReachThisJumpConnection(object, path, node_index, jump_connection, jump_direction);
-}
+                                              i32 jump_direction);
 
-u32 DoSomeChecks(GameObject_s &object, AIPATH_s &path, AIPATHCNX_s &connection, i32 direction) {
-    AIPATHNODE *node = &path.nodes[connection.node_indices[direction]];
-    if (!(object.ai.terrain_origin.y > node->min_height && object.ai.terrain_origin.y < node->max_height)) {
-        return 0;
-    }
-    WORLDINFO *world = WorldInfo_CurrentlyActive();
-    if (world != NULL && world->current_level == E1CHARACTERBONUSA_LDATA) {
-        AIPATHNODE *other_node = &path.nodes[connection.node_indices[direction == 0]];
-        if (node->position.y - other_node->position.y > 0.5f) {
-            return 0;
-        }
-    }
-    f32 distance = NuVecXZDistSqr(&object.ai.terrain_origin, &node->position, NULL);
-    u32 result = 0;
-    if (distance >= node->radius_squared) {
-        if (distance < testAutoJumpXZCanUseRangeSqr) {
-            result |= 1;
-        }
-        if (distance < testAutoJumpXZCanDisplayRangeSqr) {
-            result |= 2;
-        }
-    } else if (distance < node->radius_squared) {
-        result = 1;
-        if (distance < testAutoJumpXZCanDisplayRangeSqr) {
-            result |= 2;
-        }
-    }
-    if (result == 0 || !AISysCharacterCanReachThisJumpConnection(object, path, connection, direction)) {
-        return 0;
-    }
-    if ((connection.traversal_flags[direction] & object.ai.capabilities & mechAutoJumpFlags) != 0) {
-        result |= 4;
-    }
-    return result;
-}
+u32 DoSomeChecks(GameObject_s &object, AIPATH_s &path, AIPATHCNX_s &connection, i32 direction);
 
 void AICircle(AISYS_s *, AIPACKET_s *packet, APIOBJECT_s *object, i32);
 

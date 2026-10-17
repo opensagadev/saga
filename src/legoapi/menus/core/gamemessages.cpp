@@ -1,3 +1,6 @@
+// Original translation unit reconstructed from the reference address map.
+// Functions are defined in original address order.
+
 #include <cstdio>
 
 #include "decomp.h"
@@ -21,9 +24,6 @@
 #include "nu2api/numath/nuvec.h"
 #include "nu2api/numath/nutrig.h"
 
-struct AIROW_s;
-struct nunativegscene_s;
-
 void AddFancyMessageRGB(char *, float, float, float, float, i32, unsigned char, unsigned char, unsigned char);
 
 GAMEMESSAGE_s GameMessage[128] = {};
@@ -40,6 +40,188 @@ ADDGAMEMSG AddGameMsg_Default = {
     NULL, &v000, &v000, 1.0f, 1.0f, 0xff, 0xff, 0xff, 0x80, 0,  1.0f, 0.0f, 0, -1,
     NULL, 0,     0.0f,  0.0f, NULL, NULL, NULL, NULL, NULL, -1, 0,    0xff, 0,
 };
+
+GAMEMESSAGE_s *AddGameMsg(ADDGAMEMSG *message);
+
+void *AddGameMessage(char *text, nuvec_s *position, float scale, nuvec_s *target_position, float target_scale,
+                     unsigned char red, unsigned char green, unsigned char blue, u32 flags, float duration);
+
+void AddFancyMessageRGB(char *text, float x, float y, float scale, float duration, i32 message_id, unsigned char red,
+                        unsigned char green, unsigned char blue);
+
+// ==== src/legoapi/render/core/render.cpp: declarations ====
+#include "gameapi/edtools/edbri_internal.h"
+#include "gameapi/edtools/edstubs.h"
+#include "legoapi/render/core/render.h"
+#include "legoapi/items/collect/torpedo.h"
+#include "legoapi/actions/character/transform.h"
+#include "legoapi/actions/movement/carrying.h"
+#include "legoapi/actions/character/snake.h"
+#include "legoapi/gizmos/object/gizbuildits.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/gizmos/door/zipups.h"
+#include "legoapi/menus/core/text.h"
+#include "legoapi/menus/core/gamehint.h"
+#include "MechInputTouch/MechInputTouch_types.h"
+#include "gamelib/util/gamelib_util_types.h"
+#include "legoapi/characters/core/players.h"
+#include "legoapi/menus/screens/gamemenuall.h"
+#include "legoapi/menus/screens/arcade.h"
+#include "legoapi/render/light/fade_material.h"
+#include "legoapi/render/fx/edsplines.h"
+#include "legoapi/render/fx.h"
+#include "legoapi/world/levels/levels.h"
+#include "legoapi/world/level.h"
+#include "nu2api/nu3d/numtl.h"
+#include "nu2api/nu3d/nurndrstat.h"
+#include "nu2api/nuandroid/ios_graphics.h"
+#include "nu2api/nu3d/android/nuportal_android.h"
+#include "nu2api/nu3d/nuvport.h"
+#include "nu2api/nucore/nuvuvec.hpp"
+#include "legoapi/cutscenes/cutscenes.h"
+#include <stdio.h>
+#include <math.h>
+#include <string.h>
+
+#include "nu2api/nu3d/nurndr.h"
+
+#include "gameframework/saveload.h"
+#include "legoapi/characters/core/character.h"
+#include "legoapi/characters/motion/gameanim.h"
+#include "legoapi/characters/motion/animlist.h"
+#include "legoapi/core/config/cheat.h"
+#include "legoapi/core/input/timer.h"
+#include "legoapi/gizmo/base/gizmo.h"
+#include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/items/base/collection.h"
+#include "legoapi/menus/screens/shop.h"
+#include "legoapi/world/levels/episode.h"
+#include "legoapi/world/mission.h"
+#include "legoapi/world/world_shared.h"
+#include "nu2api/nu3d/nutexanm.h"
+
+#include "legoapi/render/core/SwipeDecalRenderer.h"
+#include "nu2api/nu3d/nuprim_internal.h"
+#include "nu2api/nu3d/nudlist.h"
+#include "nu2api/nu3d/nuqfnt.h"
+#include "nu2api/nu3d/NuRenderDevice.h"
+#include "nu2api/nu3d/android/nurndr_android.h"
+#include "nu2api/nu3d/android/nugscn_android.h"
+#include "nu2api/nucore/bgproc.h"
+#include "nu2api/nucore/nuapi.h"
+#include "nu2api/nucore/nuanim3.h"
+#include "nu2api/nucore/nugcutscene.h"
+#include "nu2api/nucore/nuhgobj.h"
+#include "nu2api/nucore/nuptrblock.h"
+#include "nu2api/nucore/nuthread.h"
+#include "nu2api/nufile/nufile.h"
+#include "nu2api/numath/numath.h"
+#include "nu2api/numath/numtx.h"
+#include "nu2api/numath/nufloat.h"
+
+struct GAMEMESSAGE_s;
+struct nuhspecial_s;
+
+nuhspecial_s *(*GameMsg_GetExtraObjFn)(GAMEMESSAGE_s *);
+
+// Camera zoom state
+
+// Graphics loading flags
+
+// --- NuGScn graphics-data reader ---
+// NuReadGraphicsData is a C++ static function in the original (GCC clones it,
+// hence the `.isra.NNN` suffix in the ROM symbol table).
+
+// Retail only keeps the IPA-SRA clone, which drops the unused fourth argument.
+#if defined(__i386__)
+#define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone, regparm(2)))
+#else
+#define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone))
+#endif
+static NU_READ_GRAPHICS_DATA_ATTR NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIPTR *buf_end, char *path,
+                                                             char *scene_data)
+    __asm__("_ZL18NuReadGraphicsDataP9variptr_uS0_PcS1_S1_.isra.104");
+
+// --- Extern "C": NuGScn functions have C linkage in original ---
+
+#include "nu2api/nu3d/nuprim.h"
+#include "nu2api/nu3d/nupostparams.h"
+
+#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
+    do {                                                                                                               \
+        direction.x = (vx);                                                                                            \
+        direction.y = -(vy) * camera.aspect;                                                                           \
+        direction.z = adjacent;                                                                                        \
+        NuVecNorm(&direction, &direction);                                                                             \
+        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
+        NuVecNorm(&direction, &direction);                                                                             \
+        brightness = direction.y * 0.5f + 0.5f;                                                                        \
+        if (brightness <= near_angle)                                                                                  \
+            brightness = near_scale * parameters->intensity;                                                           \
+        else if (brightness >= far_angle)                                                                              \
+            brightness = far_scale * parameters->intensity;                                                            \
+        else                                                                                                           \
+            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
+        if (parameters->directional) {                                                                                 \
+            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
+            if (angle < parameters->direction_near_angle) {                                                            \
+                brightness += 128.0f * parameters->direction_far_scale;                                                \
+            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
+                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
+                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
+                                      parameters->direction_bias);                                                     \
+                brightness +=                                                                                          \
+                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
+                              parameters->direction_near_scale);                                                       \
+            }                                                                                                          \
+        }                                                                                                              \
+        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
+                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
+                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
+                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
+        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
+            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
+                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
+        else                                                                                                           \
+            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
+        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
+    } while (0)
+
+// DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
+// red-brick positions come from the Game init values in legogame/game.cpp.
+i32 DrawPanel3DObjectNoAlpha(f32, f32, f32, f32, f32, f32, u16, u16, u16, nuhspecial_s *, i32);
+
+i32 DrawPanel3DObject(float x, float y, float z, float scale_x, float scale_y, float scale_z, u16 rotate_x,
+                      u16 rotate_y, u16 rotate_z, nuhspecial_s *special, i32 rotate_order, float alpha);
+
+i32 DrawPanel3DObjectNoAlpha(float x, float y, float z, float scale_x, float scale_y, float scale_z, u16 rotate_x,
+                             u16 rotate_y, u16 rotate_z, nuhspecial_s *special, i32 rotate_order);
+
+#define SWIPE_PRIM_UV(U, V)                                                                                            \
+    do {                                                                                                               \
+        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
+        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
+            vertex->float_uv[0] = (U);                                                                                 \
+            vertex->float_uv[1] = (V);                                                                                 \
+        } else {                                                                                                       \
+            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
+            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
+        }                                                                                                              \
+    } while (false)
+
+static __used__ i32 PauseRenderOff();
+
+static __used__ i32 MatrixReflection_CanOverride();
+
+static __used__ void BackDrop_Alpha(float *alpha);
+
+// ==== functions in original address order ====
+
+void ResetGameMessages() {
+    for (i32 i = 0; i < 128; i++) {
+        GameMessage[i].active = 0;
+    }
+}
 
 GAMEMESSAGE_s *AddGameMsg(ADDGAMEMSG *message) {
     GAME_MESSAGE_DATA *slot;
@@ -198,91 +380,6 @@ void *AddGameMessage(char *text, nuvec_s *position, float scale, nuvec_s *target
     return AddGameMsg(&message);
 }
 
-void AddFancyMessage(char *text, float x, float y, float scale, float duration, i32 message_id, i32 colour_type) {
-    const i32 red = 0xff;
-    const i32 green = 0xff - ((static_cast<u32>(colour_type) < 1) << 6);
-    const i32 blue = ~(-static_cast<i32>(static_cast<u32>(colour_type) < 1)) & 0xff;
-    AddFancyMessageRGB(text, x, y, scale, duration, message_id, red, green, blue);
-}
-
-void EndScoreMessage(GAMEMESSAGE_s *message);
-
-void ResetGameMessages() {
-    for (i32 i = 0; i < 128; i++) {
-        GameMessage[i].active = 0;
-    }
-}
-
-i32 FindGameMsgsWithID(i32 id, i32 remove, i32 player, GAMEMESSAGE_s *exclude) {
-    i32 count = 0;
-    GAME_MESSAGE_DATA *message = reinterpret_cast<GAME_MESSAGE_DATA *>(&GameMessage[0]);
-    GAME_MESSAGE_DATA *end = reinterpret_cast<GAME_MESSAGE_DATA *>(&GameMessage[128]);
-    GAME_MESSAGE_DATA *excluded = reinterpret_cast<GAME_MESSAGE_DATA *>(exclude);
-
-    if (remove == 0) {
-        if (player != -1) {
-            for (; message != end; ++message) {
-                if (message->active != 0 && static_cast<i8>(message->field_0xfe) == id && message != excluded &&
-                    static_cast<i8>(message->field_0xfd) == player) {
-                    ++count;
-                }
-            }
-        } else {
-            for (; message != end; ++message) {
-                if (message->active != 0 && static_cast<i8>(message->field_0xfe) == id && message != excluded) {
-                    ++count;
-                }
-            }
-        }
-    } else {
-        if (player != -1) {
-            for (; message != end; ++message) {
-                if (message->active != 0 && static_cast<i8>(message->field_0xfe) == id && message != excluded &&
-                    static_cast<i8>(message->field_0xfd) == player) {
-                    ++count;
-                    message->active = 0;
-                }
-            }
-        } else {
-            for (; message != end; ++message) {
-                if (message->active != 0 && static_cast<i8>(message->field_0xfe) == id && message != excluded) {
-                    ++count;
-                    message->active = 0;
-                }
-            }
-        }
-    }
-    return count;
-}
-
-void AddGameMsgCount(nuvec_s *position, i32 count, i32 total, unsigned char red, unsigned char green,
-                     unsigned char blue, float field_0xd4) {
-    char text[32];
-    sprintf(text, "%i/%i", count, total);
-
-    void *message = position != NULL ? AddGameMessage(text, position, 0.6f, NULL, 0.8f, red, green, blue, 0x4023, 1.0f)
-                                     : AddGameMessage(text, &v001, 0.6f, NULL, 0.8f, red, green, blue, 0x4020, 1.0f);
-    if (message != NULL) {
-        *reinterpret_cast<float *>(reinterpret_cast<char *>(message) + 0xd4) = field_0xd4;
-    }
-}
-
-void AddFancyMessageRGB(char *text, float x, float y, float scale, float duration, i32 message_id, unsigned char red,
-                        unsigned char green, unsigned char blue) {
-    if (message_id != 0) {
-        GameAudio_PlaySfx(0x2c, NULL, 0, 0);
-        GameAudio_PlaySfx(0x26, NULL, 0, 0);
-        NewRumbleAllPlayers(0.7f, 0.0f, 0, 0);
-        GameCam_NewShake(GameCam, 1.0f, 1.0f, 1.0f);
-    }
-
-    NUVEC position = {x, y, 1.0f};
-    scale += scale;
-    const f32 scale_offset = scale * 0.5f;
-    AddGameMessage(text, &position, scale, &position, scale + scale_offset, red, green, blue, 0x4020, duration);
-    AddGameMessage(text, &position, scale, &position, scale - scale_offset, red, green, blue, 0x4020, duration);
-}
-
 void UpdateGameMessages() {
     using MessageFn = void (*)(GAMEMESSAGE_s *);
     GAME_MESSAGE_DATA *message = reinterpret_cast<GAME_MESSAGE_DATA *>(&GameMessage[0]);
@@ -398,3 +495,183 @@ void TransformGameMessages(nuvec_s *camera_position, nuvec_s *camera_scale, nuve
         message->start_position.z = 1.0f;
     }
 }
+
+void DrawGameMessages() {
+    extern GAMEMESSAGE_s GameMessage[128];
+    extern i32 DrawPanel3DObjectNoAlpha(float, float, float, float, float, float, u16, u16, u16, nuhspecial_s *, i32);
+
+    GAMEMESSAGE_s *message = GameMessage;
+    GAMEMESSAGE_s *end = message + 128;
+    for (; message != end; ++message) {
+        if (message->active == 0) {
+            continue;
+        }
+        if (message->field_0xfb != 0 && (message->flags & 0x40000) == 0) {
+            continue;
+        }
+        if (message->field_0xd0 > 0.0f) {
+            continue;
+        }
+        if (!(message->duration > message->elapsed) && message->field_0xfa == 0) {
+            continue;
+        }
+
+        u32 flags = message->flags;
+        f32 progress = message->elapsed / message->duration;
+        if ((flags & 0x100) != 0) {
+            progress = 1.0f - NU_SIN_LUT(static_cast<i32>(progress * 16384.0f + 16384.0f));
+        } else if ((flags & 0x200) != 0) {
+            progress = NU_SIN_LUT(static_cast<i32>(progress * 16384.0f));
+        } else if ((flags & 0x400) != 0) {
+            progress = NU_SIN_LUT(static_cast<i32>(progress * 32768.0f));
+        } else if ((flags & 0x800) != 0) {
+            progress = 1.0f - NU_SIN_LUT(static_cast<i32>(progress * 32768.0f));
+        }
+
+        f32 scale = (flags & 5) == 5 ? message->field_0xb8 : message->field_0xb4;
+        NUVEC position = message->start_position;
+        if (message->field_0xd4 != 0.0f && message->field_0xfb == 0) {
+            const f32 limit = message->field_0xd4;
+            if (position.x < -limit) {
+                position.x = -limit;
+            } else if (position.x > limit) {
+                position.x = limit;
+            }
+            if (position.y < -limit) {
+                position.y = -limit;
+            } else if (position.y > limit) {
+                position.y = limit;
+            }
+        }
+
+        if ((flags & 8) != 0) {
+            if (message->update_fn != NULL) {
+                message->update_fn(message);
+                flags = message->flags;
+            }
+            position.x = position.x + (message->target_position.x - position.x) * progress;
+            position.y = position.y + (message->target_position.y - position.y) * progress;
+            position.z = position.z + (message->target_position.z - position.z) * progress;
+        }
+        if ((flags & 0x20) != 0) {
+            scale += (message->target_scale - scale) * progress;
+        }
+        position.z += message->field_0xc8;
+        position.x += message->field_0xc4;
+
+        if (message->draw_callback != NULL) {
+            message->draw_callback(message, &position, scale);
+            continue;
+        }
+
+        if (NuSpecialExistsFn(&message->special) != 0) {
+            const u32 draw_flags = message->flags;
+            if ((draw_flags & 0x20000) != 0) {
+                DrawPanel3DObjectNoAlpha(position.x, position.y, position.z, scale, scale, scale, message->field_0xe0,
+                                         message->rotation_y, message->field_0xe4, &message->special, 2);
+            } else {
+                const f32 alpha = (draw_flags & 0x10000) != 0 ? static_cast<f32>(message->alpha) / 128.0f : 1.0f;
+                DrawPanel3DObject(position.x, position.y, position.z, scale, scale, scale, message->field_0xe0,
+                                  message->rotation_y, message->field_0xe4, &message->special, 2, alpha);
+            }
+            if (GameMsg_GetExtraObjFn != NULL) {
+                nuhspecial_s *extra = GameMsg_GetExtraObjFn(message);
+                if (extra != NULL && NuSpecialExistsFn(extra) != 0) {
+                    const u32 draw_flags = message->flags;
+                    if ((draw_flags & 0x20000) != 0) {
+                        DrawPanel3DObjectNoAlpha(position.x, position.y, position.z, scale, scale, scale,
+                                                 message->field_0xe0, message->rotation_y, message->field_0xe4, extra,
+                                                 2);
+                    } else {
+                        const f32 alpha =
+                            (draw_flags & 0x10000) != 0 ? static_cast<f32>(message->alpha) / 128.0f : 1.0f;
+                        DrawPanel3DObject(position.x, position.y, position.z, scale, scale, scale, message->field_0xe0,
+                                          message->rotation_y, message->field_0xe4, extra, 2, alpha);
+                    }
+                }
+            }
+        } else {
+            char *text = message->text != NULL ? message->text : message->text_buffer;
+            Text3DEx(text, position.x, position.y, position.z, scale, scale, scale, message->field_0xfc, message->red,
+                     message->green, message->blue, message->alpha);
+        }
+    }
+}
+
+i32 FindGameMsgsWithID(i32 id, i32 remove, i32 player, GAMEMESSAGE_s *exclude) {
+    i32 count = 0;
+    GAME_MESSAGE_DATA *message = reinterpret_cast<GAME_MESSAGE_DATA *>(&GameMessage[0]);
+    GAME_MESSAGE_DATA *end = reinterpret_cast<GAME_MESSAGE_DATA *>(&GameMessage[128]);
+    GAME_MESSAGE_DATA *excluded = reinterpret_cast<GAME_MESSAGE_DATA *>(exclude);
+
+    if (remove == 0) {
+        if (player != -1) {
+            for (; message != end; ++message) {
+                if (message->active != 0 && static_cast<i8>(message->field_0xfe) == id && message != excluded &&
+                    static_cast<i8>(message->field_0xfd) == player) {
+                    ++count;
+                }
+            }
+        } else {
+            for (; message != end; ++message) {
+                if (message->active != 0 && static_cast<i8>(message->field_0xfe) == id && message != excluded) {
+                    ++count;
+                }
+            }
+        }
+    } else {
+        if (player != -1) {
+            for (; message != end; ++message) {
+                if (message->active != 0 && static_cast<i8>(message->field_0xfe) == id && message != excluded &&
+                    static_cast<i8>(message->field_0xfd) == player) {
+                    ++count;
+                    message->active = 0;
+                }
+            }
+        } else {
+            for (; message != end; ++message) {
+                if (message->active != 0 && static_cast<i8>(message->field_0xfe) == id && message != excluded) {
+                    ++count;
+                    message->active = 0;
+                }
+            }
+        }
+    }
+    return count;
+}
+
+void AddGameMsgCount(nuvec_s *position, i32 count, i32 total, unsigned char red, unsigned char green,
+                     unsigned char blue, float field_0xd4) {
+    char text[32];
+    sprintf(text, "%i/%i", count, total);
+
+    void *message = position != NULL ? AddGameMessage(text, position, 0.6f, NULL, 0.8f, red, green, blue, 0x4023, 1.0f)
+                                     : AddGameMessage(text, &v001, 0.6f, NULL, 0.8f, red, green, blue, 0x4020, 1.0f);
+    if (message != NULL) {
+        *reinterpret_cast<float *>(reinterpret_cast<char *>(message) + 0xd4) = field_0xd4;
+    }
+}
+
+void AddFancyMessageRGB(char *text, float x, float y, float scale, float duration, i32 message_id, unsigned char red,
+                        unsigned char green, unsigned char blue) {
+    if (message_id != 0) {
+        GameAudio_PlaySfx(0x2c, NULL, 0, 0);
+        GameAudio_PlaySfx(0x26, NULL, 0, 0);
+        NewRumbleAllPlayers(0.7f, 0.0f, 0, 0);
+        GameCam_NewShake(GameCam, 1.0f, 1.0f, 1.0f);
+    }
+
+    NUVEC position = {x, y, 1.0f};
+    scale += scale;
+    const f32 scale_offset = scale * 0.5f;
+    AddGameMessage(text, &position, scale, &position, scale + scale_offset, red, green, blue, 0x4020, duration);
+    AddGameMessage(text, &position, scale, &position, scale - scale_offset, red, green, blue, 0x4020, duration);
+}
+
+void AddFancyMessage(char *text, float x, float y, float scale, float duration, i32 message_id, i32 colour_type) {
+    const i32 red = 0xff;
+    const i32 green = 0xff - ((static_cast<u32>(colour_type) < 1) << 6);
+    const i32 blue = ~(-static_cast<i32>(static_cast<u32>(colour_type) < 1)) & 0xff;
+    AddFancyMessageRGB(text, x, y, scale, duration, message_id, red, green, blue);
+}
+

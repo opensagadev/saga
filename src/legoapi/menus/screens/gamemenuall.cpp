@@ -208,59 +208,12 @@ void MenuUpdateLoad(MENU_s *menu);
 
 void MenuUpdateSave(MENU_s *menu);
 
-static NUGSCN **IconScene;
-static char IconPath[0x40] = "stuff\\icons\\";
 
-void IconScenes_Dump() {
-    if (IconScene == NULL) {
-        return;
-    }
+void IconScenes_Dump();
 
-    for (i32 i = 0; i < CHARCOUNT; ++i) {
-        if (IconScene[i] != NULL) {
-            NuGScnRemove(IconScene[i]);
-            IconScene[i] = NULL;
-        }
-    }
-}
+void IconScenes_Init(char *path, variptr_u *buf, variptr_u *);
 
-void IconScenes_Init(char *path, variptr_u *buf, variptr_u *) {
-    const usize table_size = static_cast<usize>(CHARCOUNT) * sizeof(*IconScene);
-    IconScene = reinterpret_cast<NUGSCN **>(ALIGN(buf->addr, 4));
-    buf->addr = reinterpret_cast<usize>(IconScene) + table_size;
-    memset(IconScene, 0, table_size);
-
-    if (path != NULL && NuStrLen(path) <= 0x3f) {
-        NuStrCpy(IconPath, path);
-    }
-}
-
-void IconScenes_Load(APICHARACTERMODELLIST_s *list, i32, variptr_u *buf, variptr_u *buf_end) {
-    if (list == NULL || IconScene == NULL) {
-        return;
-    }
-
-    for (; list->model_id != -1; ++list) {
-        const i32 character_id = list->model_id;
-        if (IconScene[character_id] != NULL || list->count == 0) {
-            continue;
-        }
-
-        const i32 object_index = CDataList[character_id].field20_0x42;
-        if (object_index == -1) {
-            continue;
-        }
-
-        char path[0x100];
-        NuStrCpy(path, IconPath);
-        NuStrCat(path, LevelObject_FindNameFromIndex(object_index));
-        NuStrCat(path, ".gsc");
-        IconScene[character_id] = NuGScnRead(buf, *buf_end, path);
-        if (IconScene[character_id] != NULL && IconScene[character_id]->display_list != NULL) {
-            IconScene[character_id]->display_list->flags |= NU_DISPLAYSCENE_FLAG_NEEDS_BUILD;
-        }
-    }
-}
+void IconScenes_Load(APICHARACTERMODELLIST_s *list, i32, variptr_u *buf, variptr_u *buf_end);
 
 void MenuDrawLoading(MENU_s *);
 
@@ -272,12 +225,7 @@ void MenuUpdateLoading(MENU_s *);
 
 void MenuUpdateSaving(MENU_s *);
 
-NUGSCN *IconScene_FindById(i32 character_id) {
-    if (character_id < 0 || character_id >= CHARCOUNT) {
-        return NULL;
-    }
-    return IconScene[character_id];
-}
+NUGSCN *IconScene_FindById(i32 character_id);
 
 void MenuDrawFormatting(MENU_s *);
 

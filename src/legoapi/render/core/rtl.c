@@ -32,17 +32,7 @@
 struct nuqtdim_s;
 struct nuqthdr_s;
 struct rtl_s;
-struct rtlindex_s {
-    i32 enabled;
-    u8 reserved_04[8];
-    i32 width;
-    i32 depth;
-    f32 scale;
-    f32 offset_x;
-    f32 offset_z;
-    char **cells;
-    u8 reserved_24[4];
-};
+#include "legoapi/render/core/rtl_types.h"
 DECOMP_ASSERT(sizeof(rtlindex_s) == 0x28, "RTL index size");
 struct NUFRUSTRUM;
 
@@ -1205,17 +1195,11 @@ static __used__ void rtlProcessLight(rtl_s *light, f32 elapsed) {
 
 extern "C" {
 
-    char *rtlGetEnvPath(void) {
-        return const_cast<char *>("_new");
-    }
+char *rtlGetEnvPath(void);
 
-    char *rtlGetEnvSceneName(void) {
-        return WORLD->config_file;
-    }
+char *rtlGetEnvSceneName(void);
 
-    rtlset *rtlGetEnvSet(void) {
-        return WORLD->rtl_set;
-    }
+rtlset *rtlGetEnvSet(void);
 
     void rtlProcessLights(void *set, f32 frame_time) {
         rtl_s *light;
@@ -1456,13 +1440,6 @@ extern "C" {
 
 // RTL editor state and callbacks from the same original rtl.c text/data run.
 
-// Debug line vertex layout used by the RTL editor line helper.
-struct nuvtx_tc1_s {
-    NUVEC position; // 0x00
-    NUVEC normal;   // 0x0c
-    i32 colour;     // 0x18
-    f32 uv[2];      // 0x1c
-};
 struct numtl_s;
 struct numtx_s;
 

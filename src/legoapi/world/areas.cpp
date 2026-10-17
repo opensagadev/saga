@@ -1,3 +1,6 @@
+// Original translation unit reconstructed from the reference address map.
+// Functions are defined in original address order.
+
 #include "decomp.h"
 #include "batman.h"
 #include <stdlib.h>
@@ -37,6 +40,97 @@
 i32 openlevels = 0;
 
 static void AddToModelList(APICHARACTERMODELLIST_s *list, i32 *count, i32 capacity, i32 character_id, i32 load_model,
+                           EXTRAMODEL *extra_models);
+
+AREADATA *Area_FindByName(char *name, i32 *indexDest);
+
+SUPERCOUNTER *SuperCounters_FindPickup(WORLDINFO_s *world, GIZMO_s *gizmo, nuvec_s *position,
+                                       SUPERCOUNTERPICKUP **pickup_dest);
+
+// ==== src/editor/edlevelall.cpp: declarations ====
+#include "gameapi/edtools/edcam.h"
+#include "MechInputTouch/MechInputTouch_types.h"
+#include "gameapi/edtools/gameapi_edtools_types.h"
+#include "gameapi/edtools/edui.h"
+#include "legoapi/render/core/rtl.h"
+#include "legoapi/render/light/lighting.h"
+#include "nu2api/nucore/nukeyboard.h"
+#include "nu2api/nu3d/numtl.h"
+#include "nu2api/nu3d/nuqfnt.h"
+#include "nu2api/nu3d/nurndr.h"
+#include "nu2api/nu3d/nugscn.h"
+#include "nu2api/nucore/NuDynamicLight.h"
+#if defined(__i386__) && defined(__SSE__)
+#include <xmmintrin.h>
+#endif
+#if defined(__i386__) && defined(__SSE2__)
+#include <emmintrin.h>
+#endif
+#include "nu2api/numath/nutrig.h"
+#include "nu2api/numath/nurand.h"
+#include "nu2api/nufile/nufile.h"
+#include <new>
+#include <float.h>
+
+#include <stdio.h>
+
+extern eduiiattr_s EdLevelAttr;
+
+#define EDLEVEL_ADD_ACTIVE_SCENE(menu, scene_index)                                                                    \
+    do {                                                                                                               \
+        LevelEditorScene *scene = theLevelEditor.GetEdScene(scene_index);                                              \
+        if (scene != NULL && scene->active)                                                                            \
+            eduiMenuAddItem(menu, eduiItemToggleCreate((scene_index) << 6, &EdLevelAttr, scene->editable, 1,           \
+                                                       ClassEditor::cbEdFilterLED, scene->name));                      \
+    } while (0)
+
+DECOMP_ASSERT(offsetof(EdClass, flags) == 0x04, "EdClass flags offset");
+DECOMP_ASSERT(offsetof(EdClass, members) == 0x08, "EdClass members offset");
+DECOMP_ASSERT(offsetof(EdClass, last_member) == 0x0c, "EdClass last member offset");
+DECOMP_ASSERT(offsetof(EdClass, member_count) == 0x10, "EdClass member count offset");
+DECOMP_ASSERT(offsetof(EdClass, interface) == 0x14, "EdClass interface offset");
+DECOMP_ASSERT(sizeof(EdMember) == 0x08, "EdMember size");
+DECOMP_ASSERT(offsetof(EdMember, reference) == 0x04, "EdMember reference offset");
+
+extern LevelEditor theLevelEditor;
+
+// ==== src/legoapi/world/area.cpp: all remaining content ====
+#include "legoapi/render/core/screen.h"
+
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/core/input/timer.h"
+#include "legoapi/menus/core/text.h"
+#include "legoapi/render/core/render.h"
+#include "nu2api/nucore/nuapi.h"
+#include "nu2api/nucore/bgproc.h"
+#include "nu2api/nu3d/nudlist.h"
+#include "nu2api/nu3d/nucamera.h"
+#include "nu2api/numath/nufloat.h"
+#include "nu2api/nusound/nusound.h"
+#include "legoapi/world/world.h"
+
+struct APICHARACTERMODELLIST_s;
+
+extern NUGSCN *area_scene;
+extern NUGSCN *vehicle_scene;
+extern NUGSCN *big_icon_scene;
+extern i16 Area_PlayerModelList[18];
+extern APICHARACTERMODELLIST_s Area_MissionModelList[49];
+extern APICHARACTERMODELLIST_s Area_StoryModelList[52];
+extern i32 Area_PlayerModelCount;
+extern AREADATA *DOGFIGHT_ADATA;
+
+AREADATA *ADataList = NULL;
+
+i32 AREA_DEFAULTBONUSTIMETRIALTIME = 300;
+i32 AREA_DEFAULTCHALLENGETIME = 600;
+
+struct bgprocinfo_s;
+static __used__ void LoadAreaData(bgprocinfo_s *);
+
+// ==== functions in original address order ====
+
+static void AddToModelList(APICHARACTERMODELLIST_s *list, i32 *count, i32 capacity, i32 character_id, i32 load_model,
                            EXTRAMODEL *extra_models) {
     if (*count < capacity && InModelList(list, character_id, NULL) == 0) {
         list[*count].count = static_cast<i16>(load_model);
@@ -61,8 +155,6 @@ static void AddToModelList(APICHARACTERMODELLIST_s *list, i32 *count, i32 capaci
         }
     }
 }
-
-void Areas_OpenAll(i32 mode);
 
 AREADATA *Areas_ConfigureList(char *file, VARIPTR *bufferStart, VARIPTR *bufferEnd, i32 count, i32 *countDest) {
     nufpar_s *fp = NuFParCreate(file);
@@ -863,9 +955,42 @@ void Area_Configure(i32 area, i32 param, EXTRAMODEL *models, i16 *s) {
     }
 }
 
-void ClearUpAreaData();
+void DumpAreaData(i32 mode, i32) {
+    if (big_icon_scene != NULL) {
+        NuGScnRemove(big_icon_scene);
+    }
+    big_icon_scene = NULL;
+    if (area_scene != NULL) {
+        NuGScnRemove(area_scene);
+    }
+    area_scene = NULL;
+    if (vehicle_scene != NULL) {
+        NuGScnRemove(vehicle_scene);
+    }
+    vehicle_scene = NULL;
+    if (Customiser_AccessoriesLoaded == 2) {
+        Customiser_RestoreModelTextureIDs(Game_Customiser);
+    } else if (Customiser_AccessoriesLoaded == 1) {
+        Customiser_DumpAccessories(Game_Customiser);
+    }
+    Customiser_AccessoriesLoaded = 0;
+    IconScenes_Dump();
+    CharScenes_AreaDump();
+    APIDumpCharacterModels(mode);
+    Particles_DumpAreaPage();
+}
 
-void ClearAreaProgress(i32 a, i32 b);
+i32 AreaFromMiniKitID(i32 minikitId) {
+    i32 i;
+
+    for (i = 0; i < AREACOUNT; i++) {
+        if (ADataList[i].minikit_id == minikitId) {
+            return i;
+        }
+    }
+
+    return -1;
+}
 
 void Areas_CompleteAllBuildUps(AREASAVE_s *save) {
     if (save == NULL) {
@@ -879,4 +1004,16 @@ void Areas_CompleteAllBuildUps(AREASAVE_s *save) {
     }
 }
 
-void NewArea();
+i32 Area_CharIDInCurrentList(i32 character_id) {
+    i32 result = -1;
+    if (CurrentCList != NULL) {
+        for (i32 index = 0; CurrentStoryCList[index].model_id != -1 && index != 64; ++index) {
+            if (CurrentStoryCList[index].model_id != character_id)
+                continue;
+            result = index;
+            break;
+        }
+    }
+    return result;
+}
+

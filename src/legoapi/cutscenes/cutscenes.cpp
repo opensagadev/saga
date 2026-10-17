@@ -1,3 +1,6 @@
+// Original translation unit reconstructed from the reference address map.
+// Functions are defined in original address order.
+
 #include "decomp.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/cutscenes/cutscenes.h"
@@ -97,22 +100,12 @@ extern "C" void instNuGCutLocatorUpdate(instNUGCUTSCENE_s *, NUGCUTLOCATORSYS_s 
 CUTSCENEPLAYERCLIP *CutScenePlayer_Active(void);
 void CutScenePlayer_SetObjects(CUTINFO *);
 extern "C" void DebrisSetRenderGroup(i32);
-extern AREADATA_s *BONUS_GUNSHIP_ADATA;
-extern AREADATA_s *GUNSHIP_ADATA;
 
 static u8 CutBlobShadowAlpha;
 static f32 CutBlobShadowFadeNear;
 static f32 CutBlobShadowFadeFar;
 static f32 CutReflectRange;
 static f32 CutReflectRange2;
-
-extern "C" {
-    extern i16 id_ANAKINSNEWPOD;
-    extern i16 id_ANAKINSNEWPODGREEN;
-    extern i16 id_REPUBLICGUNSHIP_GREEN;
-    extern i16 id_NEW_REPUBLIC_GUNSHIP_GREEN;
-    extern i16 id_JEDISTARFIGHTERYELLOWEP3;
-}
 
 i32 CutInstEndCount;
 static instNUGCUTSCENE_s *CutInstEnd[4];
@@ -143,15 +136,9 @@ extern "C" {
     void NuGCutSceneSysPostBackgroundLoad(void);
 }
 
-static void bgAckStreamCutScene(bgprocinfo_s *) {
-    stream_cut_issued = 0;
-}
+static void bgAckStreamCutScene(bgprocinfo_s *);
 
-static void bgLoadStreamCutScene(bgprocinfo_s *) {
-    if (cutscene_load_instance != NULL) {
-        instNuGCutSceneServiceLoad();
-    }
-}
+static void bgLoadStreamCutScene(bgprocinfo_s *);
 
 // Retail only keeps the split-out body of the IPA-SRA clone (the unused
 // cutscene index dropped), called with world and cut in registers.
@@ -162,588 +149,2425 @@ static void bgLoadStreamCutScene(bgprocinfo_s *) {
 #endif
 static CUTSCENE_START_ATTR i32 CutScene_StartBody(WORLDINFO_s *world, CUTINFO *cut)
     __asm__("_ZL14CutScene_StartP11WORLDINFO_sP7CUTINFOi.isra.24.part.25");
-static i32 CutScene_StartBody(WORLDINFO_s *world, CUTINFO *cut) {
-    if (cut->music_handle != -1) {
-        g_lastCutsceneTime = 0.0f;
-        g_accumCutsceneTime = 0.0f;
-        g_lastCutInfo = NULL;
-    }
-    instNuGCutSceneReset(static_cast<instNUGCUTSCENE_s *>(cut->instance));
-    if (CutScene_StartFn != NULL) {
-        CutScene_StartFn(cut);
-    }
-    if (CutScenePlayer_Active() != 0) {
-        CutScenePlayer_SetObjects(cut);
-    }
-    static_cast<instNUGCUTSCENE_s *>(cut->instance)->rate = cut->frames_per_second * FRAMETIME;
-    instNuGCutSceneStart(static_cast<instNUGCUTSCENE_s *>(cut->instance));
-    if ((cut->flags & 0x200) != 0) {
-        static_cast<instNUGCUTSCENE_s *>(cut->instance)->flags_88 |= 8;
-    } else {
-        static_cast<instNUGCUTSCENE_s *>(cut->instance)->flags_88 &= ~8U;
-    }
-    cut->field_58 = 0.0f;
-
-    if (cut->music_handle != -1) {
-        music_man.SelectTrackByHandle(TRACK_CLASS_CUTSCENE, cut->music_handle);
-        i32 status = music_man.PlayTrack(TRACK_CLASS_CUTSCENE, 0);
-        static_cast<instNUGCUTSCENE_s *>(cut->instance)->rate = 0.0f;
-        if ((cut->flags & 1) == 0 || status != 1) {
-            cutaudiopaused = 0;
-        } else {
-            CutSceneWaiting = 1;
-            PauseGameAudio(0);
-            cutaudiopaused = 1;
-        }
-    } else {
-        PauseGameAudio(0);
-        SetLinkedCutSceneMusic(static_cast<instNUGCUTSCENE_s *>(cut->instance),
-                               cut->linked_audio == 0 ? MUSIC_PLAYBACK_DUAL_STREAM
-                                                      : MUSIC_PLAYBACK_DUAL_STREAM_PENDING);
-        static_cast<instNUGCUTSCENE_s *>(cut->instance)->rate = cut->frames_per_second * FRAMETIME;
-        if ((cut->flags & 1) != 0) {
-            CutSceneWaiting = 0;
-            cutaudiopaused = 0;
-        }
-    }
-
-    if ((cut->flags & 1) == 0) {
-        return 1;
-    }
-    Panel_Clear();
-    CutFrame = 0;
-    for (i32 i = 0; i < world->cutscene_sys->count; ++i) {
-        CUTINFO *other = world->cutscene_sys->cuts[i];
-        instNUGCUTSCENE_s *other_instance = static_cast<instNUGCUTSCENE_s *>(other->instance);
-        if ((other_instance->flags_88 & 2) != 0) {
-            if (other == cut || (other->flags & 1) == 0) {
-                other_instance->rate = 0.0f;
-                instNuGCutScenePause(static_cast<instNUGCUTSCENE_s *>(world->cutscene_sys->cuts[i]->instance), 1);
-            } else {
-                other_instance->rate = 0.0f;
-                instNuGCutSceneStop(other_instance);
-            }
-        }
-    }
-    CUTSTOPGAME = 1;
-    CUTNOFOG = cut->flags & 4;
-    CUTDRAWWORLD = cut->flags & 2;
-    CutStopInfo = cut;
-    DebrisSetRenderGroup(cut->debris_render_group);
-    LevelNameTime = 0.0f;
-    LevelNameMul = 0.0f;
-    ACTIVECUTCOUNT = 1;
-    CutBorderScale = 1.0f;
-    cut_waiting_for_new_level = 0;
-    GameFog_Reset();
-    for (CUTSCENETEXANIM &animation : cut->texture_animations) {
-        if (animation.index != -1) {
-            texanimbits &= ~(1U << (animation.index & 0x1f));
-        }
-    }
-    return 1;
-}
+static i32 CutScene_StartBody(WORLDINFO_s *world, CUTINFO *cut);
 
 static inline i32 CutScene_Start(WORLDINFO_s *world, CUTINFO *cut, i32) {
     return CutScene_StartBody(world, cut);
 }
 
-void CutScenes_End() {
-    if (CutScenePlayer_Active() != 0 && NewLData != NULL && NewLData == HUB_LDATA) {
-        return;
-    }
-    for (i32 i = 0; i < CutInstEndCount; ++i) {
-        instNuGCutSceneEnd(CutInstEnd[i]);
-        if (i == CutInstEndStop) {
-            CUTSTOPGAME = 0;
-            CutStopInfo = NULL;
-            GameCam_Reset(GameCam);
-        }
-    }
-}
-
-void CutScenes_Draw(WORLDINFO_s *world) {
-    if (world->cutscene_sys != NULL && ACTIVECUTCOUNT > 0) {
-        SetLevelLights(world->rtl_set, 1.0f);
-
-        CUTINFO *cut = static_cast<CUTINFO *>(CutStopInfo);
-        if (cut == NULL) {
-            CutBlobShadowAlpha = static_cast<u8>(world->current_level->blob_shadow_alpha);
-            CutBlobShadowFadeNear = static_cast<f32>(static_cast<u8>(world->current_level->blob_shadow_fade_near));
-            CutBlobShadowFadeFar = static_cast<f32>(static_cast<u8>(world->current_level->blob_shadow_fade_far));
-            CutReflectRange = static_cast<f32>(static_cast<u8>(world->current_level->reflection_range));
-        } else {
-            CutBlobShadowAlpha = cut->blob_shadow_alpha;
-            CutBlobShadowFadeNear = static_cast<f32>(cut->blob_shadow_fade_near);
-            CutBlobShadowFadeFar = static_cast<f32>(cut->blob_shadow_fade_far);
-            CutReflectRange = static_cast<f32>(cut->reflection_range);
-        }
-        CutReflectRange2 = CutReflectRange * CutReflectRange;
-        NuGCutSceneSysRender(Paused);
-
-        if (CUTDRAWWORLD != 0 && world->current_gscn != NULL) {
-            SetLevelLights(world->rtl_set, 1.0f);
-            NuGScnRndr3(world->current_gscn);
-            if (world->gizmo_sys != NULL && CutStopInfo != NULL &&
-                (static_cast<CUTINFO *>(CutStopInfo)->flags & 0x8000) != 0) {
-                GizmoSysDraw(world->gizmo_sys, world, FRAMETIME);
-            }
-        }
-    }
-}
-
-void CutScenes_Stop(CUTSYS *system) {
-    if (system == NULL || system->count <= 0) {
-        return;
-    }
-    for (i32 i = 0; i < system->count; ++i) {
-        CUTINFO *cut = system->cuts[i];
-        if (cut->instance != NULL) {
-            instNuGCutSceneStop(static_cast<instNUGCUTSCENE_s *>(cut->instance));
-        }
-    }
-}
-
-void CutScenes_Reset(WORLDINFO_s *world) {
-    CUTSYS *system = world->cutscene_sys;
-    if (system != NULL) {
-        auto system_count = system->count;
-        for (i32 i = 0; i < system_count; ++i) {
-            CUTINFO *cut = system->cuts[i];
-            instNUGCUTSCENE_s *instance = static_cast<instNUGCUTSCENE_s *>(cut->instance);
-            if (instance == NULL)
-                continue;
-            NUGCUTCHARSYS_s *characters = static_cast<NUGCUTSCENE_s *>(cut->scene)->character_system;
-            instNUGCUTCHARSYS_s *runtime = instance->character_instance;
-            if (runtime == NULL || characters == NULL)
-                continue;
-            for (i32 j = 0; j < characters->character_count; ++j) {
-                instNUGCUTCHAR_s *character = &runtime->characters[j];
-                if (character->character != reinterpret_cast<void *>(1))
-                    continue;
-                NUGCUTCHAR_s *definition = &characters->characters[j];
-                if ((character->field_14 & 2) == 0) {
-                    char *model_file = definition->model_file;
-                    i32 p;
-                    for (p = 0; p < 8; ++p) {
-                        GameObject_s *player = Player[p];
-                        if (player != NULL && (player->apiobj.flags_low & 1) != 0 &&
-                            NuStrICmp(player->apiobj.character_data->file, model_file) == 0) {
-                            character->character = player;
-                            break;
-                        }
-                    }
-                    if (p == 8) {
-                        character->character = NULL;
-                    }
-                } else {
-                    character->character = NULL;
-                }
-                definition->character = character->character;
-            }
-        }
-    }
-    cutaudiopaused = 0;
-    CutStopInfo = NULL;
-    CutSceneWaiting = 0;
-    CutBorderScale = 0.0f;
-    if (world->cutscene_sys != NULL && reset_restart != 0 &&
-        ((world->current_level->flags & 0xe0) != 0 || world->level_progress == NULL ||
-         (world->level_progress->flags & 2) == 0)) {
-        CUTINFO *cut = NULL;
-        CUTSCENEPLAYERCLIP *clip = CutScenePlayer_Active();
-        if (clip != NULL && world->cutscene_sys->count > 0) {
-            if (clip->name[0] != '\0')
-                cut = CutScene_Find(world->cutscene_sys, clip->name);
-            if (cut == NULL)
-                cut = world->cutscene_sys->cuts[0];
-        }
-        if (cut == NULL && cutskip_dontplaylevelintro == 0) {
-            for (i32 i = 0; i < world->cutscene_sys->count; ++i) {
-                if ((world->cutscene_sys->cuts[i]->flags & 0x1000) == 0) {
-                    continue;
-                }
-                cut = world->cutscene_sys->cuts[i];
-                break;
-            }
-        }
-        if (cut != NULL) {
-            MechSystems::Get()->PauseButton().skip_prompt_timer = 0.0f;
-            if (cut->instance != NULL) {
-                bool start = true;
-                LEVEL_PROGRESS_s *progress = world->level_progress;
-                if (world->cutscene_sys != NULL) {
-                    i32 index = -1;
-                    for (i32 i = 0; i < world->cutscene_sys->count; ++i) {
-                        if (world->cutscene_sys->cuts[i] == cut)
-                            index = i;
-                    }
-                    if (progress != NULL) {
-                        u32 mask = 1u << (index & 31);
-                        if (static_cast<i16>(index) != -1 && (cut->playback_flags & 1) != 0 &&
-                            (progress->played_cutscene_mask & mask) != 0)
-                            start = false;
-                        else
-                            progress->played_cutscene_mask |= mask;
-                    }
-                }
-                if (start && CutScene_Start(world, cut, 0) != 0)
-                    CutBorderScale = 1.0f;
-            }
-        }
-    }
-    NewCutInfoCount = 0;
-    cutskip_dontplaylevelintro = 0;
-    cut_waiting_for_new_level = 0;
-}
-
-void CutScenes_Start(WORLDINFO_s *world) {
-    for (i32 i = 0; i < NewCutInfoCount; ++i) {
-        CUTINFO *cut = NewCutInfo[i];
-        MechSystems::Get()->PauseButton().skip_prompt_timer = 0.0f;
-        if (cut == NULL || cut->instance == NULL) {
-            continue;
-        }
-        LEVEL_PROGRESS_s *level_progress = world->level_progress;
-        i32 cutscene_index = -1;
-        if (world->cutscene_sys != NULL) {
-            for (i32 j = 0; j < world->cutscene_sys->count; ++j) {
-                if (world->cutscene_sys->cuts[j] == cut) {
-                    cutscene_index = j;
-                }
-            }
-            if (level_progress != NULL) {
-                const u32 bit = 1U << (cutscene_index & 0x1f);
-                if (static_cast<i16>(cutscene_index) != -1 && (cut->end_flags & 1) != 0 &&
-                    (level_progress->played_cutscene_mask & bit) != 0) {
-                    continue;
-                }
-                level_progress->played_cutscene_mask |= bit;
-            }
-        }
-        CutScene_Start(world, cut, cutscene_index);
-    }
-    NewCutInfoCount = 0;
-}
-
-void CutScenes_Update(WORLDINFO_s *world, i32 paused) {
-    FADETYPE fade_type;
-    i32 active_before[32];
-    if (CutScenePlayer_Active() != 0 && CutStopInfo != NULL) {
-        CutScenePlayer_SetObjects(static_cast<CUTINFO *>(CutStopInfo));
-    }
-
-    CutInstEnd[0] = NULL;
-    CutInstEndStop = -1;
-    CUTSTOPGAME = 0;
-    CutInstEndCount = 0;
-    CUTCAMONLY = 0;
-    CutStopInfo = NULL;
-    CUTCAM = 0;
-    CUTDRAWWORLD = 0;
-    CUTNOFOG = 0;
-    CUTSKIPLOCK = 0;
-
-    if (world->cutscene_sys == NULL) {
-        return;
-    }
-
-    i32 stop_index = -1;
-    for (i32 i = 0; i < world->cutscene_sys->count; ++i) {
-        CUTINFO *cut = world->cutscene_sys->cuts[i];
-        if (cut->instance == NULL) {
-            continue;
-        }
-        instNUGCUTSCENE_s *instance = reinterpret_cast<instNUGCUTSCENE_s *>(cut->instance);
-        if ((instance->flags_88 & 2) == 0) {
-            continue;
-        }
-        if ((cut->flags & 1) != 0) {
-            CUTDRAWWORLD = cut->flags & 2;
-            CUTNOFOG = cut->flags & 4;
-            CUTSTOPGAME = 1;
-            CutStopInfo = cut;
-            stop_index = i;
-            DebrisSetRenderGroup(cut->debris_render_group);
-            ++CutFrame;
-            LevelNameTime = 0.0f;
-            LevelNameMul = 0.0f;
-            break;
-        } else if ((cut->flags & 0x20) != 0) {
-            CUTCAMONLY = 1;
-        }
-    }
-    if (stop_index == -1) {
-        DebrisSetRenderGroup(1);
-    }
-
-    ACTIVECUTCOUNT = 0;
-    for (i32 i = 0; i < world->cutscene_sys->count; ++i) {
-        CUTINFO *cut = world->cutscene_sys->cuts[i];
-        if (cut->instance == NULL) {
-            active_before[i] = 0;
-            continue;
-        }
-        instNUGCUTSCENE_s *instance = static_cast<instNUGCUTSCENE_s *>(cut->instance);
-        if ((instance->flags_88 & 2) == 0) {
-            active_before[i] = 0;
-            continue;
-        }
-
-        active_before[i] = 1;
-        cut->previous_frame = instance->current_frame;
-        cut->field_58 += FRAMETIME;
-        if (cutaudiopaused != 0 && cut->field_58 >= 3.0f) {
-            cutaudiopaused = 0;
-        }
-
-        if (i == stop_index || stop_index == -1) {
-            if (!(NOSOUND == 0 && NOMUSIC == 0 && i == stop_index && cut->music_handle != -1 &&
-                  instance->rate == 0.0f && cutaudiopaused != 0 &&
-                  music_man.GetStatus(TRACK_CLASS_CUTSCENE, NULL) != 4)) {
-                if (static_cast<instNUGCUTSCENE_s *>(cut->instance)->current_frame == 1.0f && cut->music_handle != -1 &&
-                    music_man.GetStatus(TRACK_CLASS_CUTSCENE, NULL) != 4) {
-                    music_man.PlayTrack(TRACK_CLASS_CUTSCENE, 0);
-                } else if (music_man.GetStatus(TRACK_CLASS_CUTSCENE, NULL) == 4) {
-                    if (g_lastCutInfo != cut) {
-                        g_accumCutsceneTime += g_lastCutsceneTime;
-                        g_lastCutsceneTime =
-                            static_cast<NUGCUTSCENE_s *>(cut->scene)->duration / cut->frames_per_second;
-                        g_lastCutInfo = cut;
-                    }
-                    f32 audio_frame = (music_man.GetPlaybackTime(TRACK_CLASS_CUTSCENE) - g_accumCutsceneTime) *
-                                      cut->frames_per_second;
-                    if (audio_frame < 0.0f) {
-                        audio_frame = 0.0f;
-                    }
-                    f32 rate = audio_frame - (static_cast<instNUGCUTSCENE_s *>(cut->instance)->current_frame - 1.0f);
-                    static_cast<instNUGCUTSCENE_s *>(cut->instance)->rate = rate < 0.0f ? 0.0f : rate;
-                } else {
-                    static_cast<instNUGCUTSCENE_s *>(cut->instance)->rate = cut->frames_per_second * FRAMETIME;
-                }
-
-                if (i == stop_index && CutSceneWaiting != 0) {
-                    CutSceneWaiting = 0;
-                    cutaudiopaused = 0;
-                }
-            } else {
-                static_cast<instNUGCUTSCENE_s *>(cut->instance)->rate = 0.0f;
-                CutSceneWaiting = 1;
-            }
-
-            instNuGCutScenePause(static_cast<instNUGCUTSCENE_s *>(cut->instance), 0);
-            if (CutScene_PreUpdateFn != NULL) {
-                CutScene_PreUpdateFn(cut);
-            }
-            for (i32 j = 0; j < 4; ++j) {
-                CUTSCENETEXANIM *animation = &cut->texture_animations[j];
-                if (animation->index != -1) {
-                    const u32 bit = 1U << animation->index;
-                    if ((texanimbits & bit) == 0 &&
-                        animation->frame <= static_cast<instNUGCUTSCENE_s *>(cut->instance)->current_frame) {
-                        texanimbits |= bit;
-                    }
-                }
-            }
-        } else {
-            instance->rate = 0.0f;
-            instNuGCutScenePause(instance, 1);
-        }
-        ++ACTIVECUTCOUNT;
-    }
-
-    if (g_isLowEndDevice != 0 && ACTIVECUTCOUNT > 0) {
-        drawcharactermodel_nobsa = 0;
-    }
-    NuGCutSceneSysUpdate(paused, 0, 1.0f);
-    if (CutScene_PostUpdateFn != NULL) {
-        CutScene_PostUpdateFn();
-    }
-
-    if (paused == 0) {
-        for (i32 i = 0; i < world->cutscene_sys->count; ++i) {
-            CUTINFO *cut = world->cutscene_sys->cuts[i];
-            if (cut->instance == NULL || active_before[i] == 0) {
-                continue;
-            }
-            instNUGCUTSCENE_s *instance = static_cast<instNUGCUTSCENE_s *>(cut->instance);
-            if (instance->rate > 0.0f) {
-                for (i32 j = 0; j < 6; ++j) {
-                    CUTSCENESFX *sfx = &cut->sfx[j];
-                    if (sfx->id != -1 && cut->previous_frame < sfx->frame &&
-                        sfx->frame <= static_cast<instNUGCUTSCENE_s *>(cut->instance)->current_frame) {
-                        PlaySfxById(sfx->id, (sfx->flags & 1) != 0 ? &sfx->position : NULL);
-                    }
-                }
-            }
-
-            if ((i != stop_index || stop_index == -1) &&
-                instNuGCutSceneIsFinished(static_cast<instNUGCUTSCENE_s *>(cut->instance)) != 0) {
-                if (CutScene_StoppedFn != NULL) {
-                    CutScene_StoppedFn(cut);
-                }
-                if (CutInstEndCount < 4) {
-                    instance = static_cast<instNUGCUTSCENE_s *>(cut->instance);
-                    CutInstEnd[CutInstEndCount++] = instance;
-                    instance->flags_88 |= 2;
-                }
-            }
-        }
-    }
-    if (stop_index == -1) {
-        return;
-    }
-
-    CUTINFO *stop_cut = world->cutscene_sys->cuts[stop_index];
-    GameFog_Reset();
-    if (instNuGCutSceneIsFinished(static_cast<instNUGCUTSCENE_s *>(stop_cut->instance)) == 0) {
-        return;
-    }
-    if (NewLData == NULL || NewLData == WORLD->current_level || NewLData != HUB_LDATA) {
-
-        fade_type.type = FADE_TYPE_STILL_WIPE;
-        FadeSys.SetFade(fade_type, 0);
-    }
-    if (CutScene_StoppedFn != NULL) {
-        CutScene_StoppedFn(stop_cut);
-    }
-    for (i32 i = 0; i < 4; ++i) {
-        if (stop_cut->texture_animations[i].index != -1) {
-            texanimbits &= ~(1U << stop_cut->texture_animations[i].index);
-        }
-    }
-
-    if (stop_cut->skip_level != -1) {
-        NewLData = &LDataList[stop_cut->skip_level];
-        if (HUB_LDATA != NULL && NewLData == HUB_LDATA) {
-            if (CutScenePlayer_Active() != 0) {
-                NewLevelFromMenu(HUB_LDATA, -1, -1, 1);
-                hub_from_cutsceneplayer = 1;
-            } else if (WORLD->area != NULL && (WORLD->area->flags & 2) != 0) {
-                NewLData = SuperStory == 0 ? CREDITS_LDATA : STATUS_LDATA;
-            }
-        } else if (CutScenePlayer_Active() != 0 &&
-                   ((NewLData->flags & (LEVEL_OUTRO | LEVEL_MIDTRO | LEVEL_INTRO)) == 0 &&
-                    (stop_cut->end_flags & 2) == 0)) {
-            NewLevelFromMenu(HUB_LDATA, -1, -1, 1);
-            hub_from_cutsceneplayer = 1;
-        }
-        if (waiting_for_level != -1) {
-            cut_waiting_for_new_level = 1;
-            PauseGameCut();
-            music_man.PauseTrack(TRACK_CLASS_CUTSCENE);
-            newlevel_resumecutaudio = 1;
-        }
-    } else {
-        CUTINFO *next = NewCutScene(NULL, world->cutscene_sys, stop_cut->next_cutscene, 0);
-        if (CutScenePlayer_Active() != 0 && next == NULL) {
-            NewLevelFromMenu(HUB_LDATA, -1, -1, 1);
-            hub_from_cutsceneplayer = 1;
-        } else if ((stop_cut->flags & 0x400) != 0) {
-            NewMode = 1;
-        } else if (stop_cut->door_name[0] != '\0') {
-            DOOR_s *door = Door_FindByName(world, stop_cut->door_name);
-            if (door != NULL) {
-                Door_GoThrough(world, door, 1);
-            }
-        } else if ((stop_cut->flags & 0x100) != 0) {
-            FADETYPE fade_type;
-            fade_type.type = FADE_TYPE_STILL_WIPE;
-            FadeSys.SetFade(fade_type, 0);
-            NeedScreenGrab(1);
-            FadeSys.SetStage(1);
-            GameAudio_PlaySfx(0x2d, NULL, 0, 0);
-        }
-    }
-    CUTNOFOG = 0;
-
-    if (CutInstEndCount < 4) {
-        instNUGCUTSCENE_s *stop_instance = static_cast<instNUGCUTSCENE_s *>(stop_cut->instance);
-        CutInstEndStop = CutInstEndCount;
-        CutInstEnd[CutInstEndCount++] = stop_instance;
-        stop_instance->flags_88 |= 2;
-    }
-}
-
-CUTINFO *CutScene_Find(CUTSYS *cutscene_system, char *name) {
-    if (name == NULL || cutscene_system == NULL) {
-        return NULL;
-    }
-
-    for (i32 i = 0; i < cutscene_system->count; ++i) {
-        if (NuStrICmp(cutscene_system->cuts[i]->name, name) == 0) {
-            return cutscene_system->cuts[i];
-        }
-    }
-    return NULL;
-}
-
-void CutScenes_Destroy(CUTSYS *system) {
-    if (system == NULL || system->count <= 0) {
-        return;
-    }
-    for (i32 i = 0; i < system->count; ++i) {
-        if (system->cuts[i]->instance != NULL) {
-            instNuGCutSceneDestroy(static_cast<instNUGCUTSCENE_s *>(system->cuts[i]->instance));
-            system->cuts[i]->instance = NULL;
-        }
-    }
-    for (i32 i = 0; i < system->count; ++i) {
-        if (system->cuts[i]->scene != NULL) {
-            NuGCutSceneDestroy(static_cast<NUGCUTSCENE_s *>(system->cuts[i]->scene));
-            system->cuts[i]->scene = NULL;
-        }
-    }
-}
-
-void *CutScene_FindInst(CUTSYS *system, char *name) {
-    if (system != NULL) {
-        for (i32 i = 0; i < system->count; ++i) {
-            if (NuStrICmp(system->cuts[i]->name, name) == 0) {
-                return system->cuts[i]->instance;
-            }
-        }
-    }
-    return NULL;
-}
-
-i32 CutScene_HasPlayed(CUTINFO *cut) {
-    WORLDINFO_s *world = WorldInfo_CurrentlyActive();
-    CUTSYS *cutscene_system = world->cutscene_sys;
-    if (cut == NULL || cutscene_system == NULL || cutscene_system->count <= 0) {
-        return 0;
-    }
-
-    i32 cutscene_index = -1;
-    for (i32 index = 0; index < cutscene_system->count; ++index) {
-        if (cutscene_system->cuts[index] == cut) {
-            cutscene_index = index;
-        }
-    }
-    i32 has_played = 0;
-    if (cutscene_index != -1) {
-        world = WorldInfo_CurrentlyActive();
-        has_played = (world->level_progress->played_cutscene_mask & (1 << cutscene_index)) != 0;
-    }
-    return has_played;
-}
-
-void CutScene_SnapToEnd(CUTINFO *cut) {
-    if (cut != NULL) {
-        instNuGCutSceneEnd(static_cast<instNUGCUTSCENE_s *>(cut->instance));
-    }
-}
-
-void CutScene_StartAudio() {
-}
-
-i32 CutScene_IsSkippable(CUTINFO *cut) {
-    return FadeSys.fade == 0.0f && cut != NULL && (cut != CutStopInfo || CutSceneWaiting == 0 || cutaudiopaused == 0);
-}
+CUTINFO *CutScene_Find(CUTSYS *cutscene_system, char *name);
 
 extern "C" f32 *NuGCutLocatorCalcMtx(NUGCUTLOCATOR_s *, f32, NUMTX *, nuanimtime_s *);
 extern "C" i32 NuGCutLocatorIsVisble(NUGCUTLOCATOR_s *, f32, nuanimtime_s *, f32 *, f32 *);
 extern "C" void NuAnimData2CalcTime(nuanimdata2_s *, f32, nuanimtime_s *);
+
+static __used__ void LocatorFunction_Blaster(instNUGCUTSCENE_s *, NUGCUTLOCATORSYS_s *, instNUGCUTLOCATOR_s *,
+                                             NUGCUTLOCATOR_s *locator, float frame, numtx_s *parent_mtx, int);
+
+static NUGCUTLOCATORFNENTRY_s cutscene_locatorfns[] = {
+    {"blaster", 0, 0, 0, LocatorFunction_Blaster},
+    {NULL, 0, 0, 0, NULL},
+};
+
+extern i32 dco_id;
+extern i32 dco_reflectaxis;
+extern i32 dco_wearinghat;
+extern f32 dco_reflectcoord;
+extern GAMECHARACTERDATA_s *dco_gcdata;
+extern CHARACTERMODEL_s *dco_cmodel;
+
+static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTSCENE_s *cutscene,
+                                   instNUGCUTCHAR_s *instance, NUGCUTCHAR_s *character, f32 frame, i32 paused);
+
+static void CutScene_EvalCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTSCENE_s *, instNUGCUTCHAR_s *instance,
+                                   NUGCUTCHAR_s *character, f32 frame);
+
+static void CutScene_FindCharacters(NUGCUTSCENE_s *cutscene);
+
+static void CutScene_ResetCharacters(instNUGCUTSCENE_s *instance);
+
+static void CutScene_RigidPostRender(NUGCUTRIGID_s *rigid, instNUGCUTRIGID_s *instance, NUMTX *matrix);
+
+static void CutScene_CreateCharacterInstance(NUGCUTCHAR_s *character, instNUGCUTCHAR_s *instance, variptr_u *);
+
+// The loop re-reads the active cut through CutStopInfo after each SmartTextEx call.
+#define CUT_STOP static_cast<CUTINFO *>(CutStopInfo)
+
+CUTINFO *NewCutScene(CUTINFO *cut, CUTSYS *system, char *name, i32);
+
+i32 STATUS_R = 255;
+i32 STATUS_G = 191;
+i32 STATUS_B;
+
+// ==== src/legoapi/cutscenes/cutscene.cpp: all remaining content ====
+#include "legoapi/audio/audio.h"
+#include "legoapi/cutscenes/cutscene_defrag.h"
+#include "legoapi/world/world_shared.h"
+
+#include <math.h>
+
+#include "legoapi/render/fx.h"
+#include "nu2api/nucore/nuthread.h"
+#include "nu2api/numath/nuquat.h"
+#include "nu2api/numusic/sfx.h"
+struct CUTSCENEPLAYERCLIP;
+struct instNUGCUTCHAR_s;
+struct NUGCUTCHAR_s;
+struct NUGCUTRIGID_s;
+struct instNUGCUTRIGID_s;
+
+static i32 CS_area = 0;
+CUTSYS *CS_cutsys = NULL;
+static WORLDINFO *CS_worldinfo = NULL;
+static CUTINFO *CS_CutInfo;
+static VARIPTR *CS_buffptr;
+static VARIPTR *CS_buffend;
+static i32 CS_texanimcount;
+static i32 CS_fadefogcount;
+
+static void CS_play_sfx(NUFPAR *fp);
+
+static void CS_sfx(NUFPAR *fp);
+
+i32 CUTCOUNT = 0;
+CutSceneListEntry *CutList = NULL;
+void (*CutScene_OverrideConfigFileNameFn)(char *, i32, i32) = NULL;
+i32 ACTIVECUTCOUNT = 0;
+f32 CutSceneScale = 1.0f;
+extern "C" {
+    u8 CUTSUBTITLEDEFAULT_R = 0xff;
+    u8 CUTSUBTITLEDEFAULT_G = 0xff;
+    u8 CUTSUBTITLEDEFAULT_B = 0xff;
+    u8 CUTSUBTITLEDEFAULT_A = 0x80;
+    u8 CUTSUBTITLEDEFAULT_ALIGN = 0;
+    f32 CUTSUBTITLEDEFAULT_X = 0.0f;
+    f32 CUTSUBTITLEDEFAULT_Y = -0.5f;
+    f32 CUTSUBTITLEDEFAULT_SCALEX = 1.0f;
+    f32 CUTSUBTITLEDEFAULT_SCALEY = 1.0f;
+    f32 CUTSUBTITLEDEFAULT_FITWIDTH = 1.7f;
+}
+i32 CUTCAM = 0;
+i32 CUTCAMONLY = 0;
+
+static void CS_no_fog(NUFPAR *);
+
+static void CS_lowend_lowbits(NUFPAR *);
+
+static void CS_is_outro(NUFPAR *);
+
+static void CS_unskippable_in_story(NUFPAR *);
+
+static void CS_skip_use_goto(NUFPAR *);
+
+static void CS_in_game(NUFPAR *);
+
+static void CS_snap_out(NUFPAR *);
+
+static void CS_cam_only(NUFPAR *);
+
+static void CS_wipe_out(NUFPAR *);
+
+static void CS_new_mode(NUFPAR *);
+
+static void CS_replace_players(NUFPAR *);
+
+static void CS_looping(NUFPAR *);
+
+static void CS_start_cam(NUFPAR *);
+
+static void CS_super_widescreen(NUFPAR *);
+
+static void CS_level_intro(NUFPAR *);
+
+static void CS_hold_audio(NUFPAR *);
+
+static void CS_playonce(NUFPAR *);
+
+static void CS_nextcutscene_inplayablelevel(NUFPAR *);
+
+static void CS_farclip(NUFPAR *fp);
+
+static void CS_render_group(NUFPAR *fp);
+
+static void CS_reflect_range(NUFPAR *fp);
+
+static void CS_blobshadow_fadefar(NUFPAR *fp);
+
+static void CS_blobshadow_fadenear(NUFPAR *fp);
+
+static void CS_blobshadow_alpha(NUFPAR *fp);
+
+static void CS_nearclip(NUFPAR *fp);
+
+static void CS_burnout_flare(NUFPAR *fp);
+
+static void CS_burnout_intensity(NUFPAR *fp);
+
+static void CS_burnout_threshold(NUFPAR *fp);
+
+static void CS_fpsec(NUFPAR *fp);
+
+static void CS_lowend_disthack(NUFPAR *fp);
+
+static void CS_draw_gizmo_sys(NUFPAR *fp);
+
+static void CS_deb_page(NUFPAR *fp);
+
+static void CS_draw_world(NUFPAR *fp);
+
+static void CS_next_cut_scene(NUFPAR *fp);
+
+static void CS_go_through_door(NUFPAR *fp);
+
+static void CS_tex_anim(NUFPAR *fp);
+
+static void CS_fadefog(NUFPAR *fp);
+
+static void CS_cutsceneplayerobj(NUFPAR *fp);
+
+static void CS_goto_level(NUFPAR *fp);
+
+static inline void CS_subtitle(NUFPAR *fp);
+
+static NUFPCOMJMP CutScene_ConfigKeywords[] = {
+    {const_cast<char *>("fpsec"), CS_fpsec},
+    {const_cast<char *>("no_fog"), CS_no_fog},
+    {const_cast<char *>("draw_world"), CS_draw_world},
+    {const_cast<char *>("lowend_lowbits"), CS_lowend_lowbits},
+    {const_cast<char *>("lowend_disthack"), CS_lowend_disthack},
+    {const_cast<char *>("is_outro"), CS_is_outro},
+    {const_cast<char *>("unskippable_in_story"), CS_unskippable_in_story},
+    {const_cast<char *>("skip_use_goto"), CS_skip_use_goto},
+    {const_cast<char *>("in_game"), CS_in_game},
+    {const_cast<char *>("blobshadow_alpha"), CS_blobshadow_alpha},
+    {const_cast<char *>("blobshadow_fadenear"), CS_blobshadow_fadenear},
+    {const_cast<char *>("blobshadow_fadefar"), CS_blobshadow_fadefar},
+    {const_cast<char *>("reflect_range"), CS_reflect_range},
+    {const_cast<char *>("render_group"), CS_render_group},
+    {const_cast<char *>("deb_page"), CS_deb_page},
+    {const_cast<char *>("snap_out"), CS_snap_out},
+    {const_cast<char *>("wipe_out"), CS_wipe_out},
+    {const_cast<char *>("new_mode"), CS_new_mode},
+    {const_cast<char *>("cam_only"), CS_cam_only},
+    {const_cast<char *>("replace_players"), CS_replace_players},
+    {const_cast<char *>("burnout_threshold"), CS_burnout_threshold},
+    {const_cast<char *>("burnout_intensity"), CS_burnout_intensity},
+    {const_cast<char *>("burnout_flare"), CS_burnout_flare},
+    {const_cast<char *>("looping"), CS_looping},
+    {const_cast<char *>("start_cam"), CS_start_cam},
+    {const_cast<char *>("super_widescreen"), CS_super_widescreen},
+    {const_cast<char *>("go_through_door"), CS_go_through_door},
+    {const_cast<char *>("sfx"), CS_sfx},
+    {const_cast<char *>("play_sfx"), CS_play_sfx},
+    {const_cast<char *>("goto_level"), CS_goto_level},
+    {const_cast<char *>("next_cut_scene"), CS_next_cut_scene},
+    {const_cast<char *>("holdaudio"), CS_hold_audio},
+    {const_cast<char *>("hold_audio"), CS_hold_audio},
+    {const_cast<char *>("level_intro"), CS_level_intro},
+    {const_cast<char *>("tex_anim"), CS_tex_anim},
+    {const_cast<char *>("fadefog"), CS_fadefog},
+    {const_cast<char *>("subtitle"), CS_subtitle},
+    {const_cast<char *>("play_once"), CS_playonce},
+    {const_cast<char *>("nextcutscene_inplayablelevel"), CS_nextcutscene_inplayablelevel},
+    {const_cast<char *>("cutsceneplayerobj"), CS_cutsceneplayerobj},
+    {const_cast<char *>("cutsceneplayer_obj"), CS_cutsceneplayerobj},
+    {const_cast<char *>("nearclip_360"), CS_nearclip},
+    {const_cast<char *>("farclip_360"), CS_farclip},
+    {const_cast<char *>("nearclip_pc"), CS_nearclip},
+    {const_cast<char *>("farclip_pc"), CS_farclip},
+    {const_cast<char *>("nearclip"), CS_nearclip},
+    {const_cast<char *>("farclip"), CS_farclip},
+    {const_cast<char *>("drawgizmosys"), CS_draw_gizmo_sys},
+    {NULL, NULL},
+};
+
+static void CutScene_Configure(CUTINFO *cut, char *name, VARIPTR *buf, VARIPTR *buf_end);
+
+static CUTSYS *CutScenes_LoadFromList(NUGSCN *gscn1, NUGSCN *gscn2, i32 param1, VARIPTR *buf, VARIPTR *buf_end,
+                                      i32 param2, i32 param3, WORLDINFO *world) {
+    CUTSYS *sys;
+    void *initial;
+    CUTINFO *cut;
+    CUTINFO *entries[32];
+    char full_path[128];
+    char config_name[128];
+
+    CS_area = param2;
+    initial = buf->void_ptr;
+    sys = (CUTSYS *)ALIGN((usize)initial, 4);
+    buf->void_ptr = sys + 1;
+    CS_cutsys = sys;
+    CS_worldinfo = world;
+    sys->character_bits = reinterpret_cast<u32 *>(buf->void_ptr);
+    buf->void_ptr = reinterpret_cast<char *>(buf->void_ptr) + ((CHARCOUNT + 0x1f) / 32) * 4;
+    for (i32 i = 0; i < CUTCOUNT; ++i) {
+        if (CutList[i].level != param3) {
+            continue;
+        }
+        void *saved = buf->void_ptr;
+        entries[sys->count] = reinterpret_cast<CUTINFO *>(saved);
+        buf->addr = ALIGN(buf->addr + sizeof(*cut), 4);
+        cut = entries[sys->count];
+        NuStrCpy(full_path, "cut\\");
+        NuStrCat(full_path, CutList[i].directory);
+        NuStrCat(full_path, "\\");
+        NuStrCat(full_path, CutList[i].filename);
+        NuStrCpy(config_name, full_path);
+        NuStrCat(config_name, ".txt");
+        CutScene_Configure(cut, config_name, buf, buf_end);
+        if ((cut->flags & 0x800) != 0 || InStory() != 0 ||
+            (LDataList[param3].flags & (LEVEL_INTRO | LEVEL_MIDTRO | LEVEL_OUTRO)) != 0) {
+            NuStrCpy(config_name, full_path);
+            NuStrCat(config_name, ".cu2");
+            cut->scene = NuGCutSceneLoad(config_name, buf, buf_end, 0);
+            if (cut->scene != NULL) {
+                NuStrCpy(cut->name, CutList[i].filename);
+                NuGCutSceneFixUp(reinterpret_cast<NUGCUTSCENE_s *>(cut->scene), gscn1, 0, param1);
+                NuGCutSceneFixUpExtra(reinterpret_cast<NUGCUTSCENE_s *>(cut->scene), gscn2);
+                cut->instance = instNuGCutSceneCreate(reinterpret_cast<NUGCUTSCENE_s *>(cut->scene), NULL, NULL,
+                                                      CutList[i].filename, buf, 0);
+                if (cut->instance != NULL) {
+                    reinterpret_cast<instNUGCUTSCENE_s *>(cut->instance)->rate =
+                        cut->frames_per_second * DEFAULTFRAMETIME;
+                    buf->addr = ALIGN(buf->addr, 0x10);
+                }
+                ++sys->count;
+                continue;
+            }
+        }
+        buf->void_ptr = saved;
+    }
+    if (sys->count <= 0) {
+        buf->void_ptr = initial;
+        return NULL;
+    }
+    sys->cuts = reinterpret_cast<CUTINFO **>(buf->void_ptr);
+    const usize table_size = sys->count * sizeof(CUTINFO *);
+    memmove(sys->cuts, entries, table_size);
+    buf->addr = ALIGN(buf->addr + table_size * sys->count, 4);
+    return sys;
+}
+
+// --- Extern "C" block: functions with confirmed C linkage in original libTTapp.so ---
+
+#include "legoapi/cutscenes/cutscene_types.h"
+DECOMP_ASSERT(sizeof(CutSceneTriggerNameEntry) == 0x34, "cutscene trigger name entry stride");
+DECOMP_ASSERT(offsetof(CutSceneTriggerNameTable, entries) == 0x0c, "cutscene trigger name table entries offset");
+
+// Exported (default visibility) in the original library.
+
+// The relocation tables are patched as plain words, so every fixup aliases
+// cutscene->string_delta and re-reads it.
+typedef isize __attribute__((may_alias)) NuGCutWord;
+#define NUGCUT_WORD(field) (*reinterpret_cast<NuGCutWord *>(&(field)))
+#define NUGCUT_RELOCATE(field, delta) \
+    (NUGCUT_WORD(field) = NUGCUT_WORD(field) != 0 ? NUGCUT_WORD(field) + (delta) : 0)
+
+// Retail keeps NuGCutSceneFixPtrs only as two constant-propagated clones:
+// .44 relocates animations by anim_delta, .43 is the anim_delta == 0 case.
+#if defined(__i386__)
+#define NUGCUT_FIXPTRS_ATTR(n) __attribute__((noinline, noclone, regparm(n)))
+#else
+#define NUGCUT_FIXPTRS_ATTR(n) __attribute__((noinline, noclone))
+#endif
+
+extern "C" void NuGCutSceneSysInit(NUGCUTLOCATORFNENTRY_s *locator_functions);
+
+extern "C" {
+
+NUGCUTSCENE_s *NuGCutSceneLoad(char *name, VARIPTR *buf, VARIPTR *buf_end, i32 flags);
+
+void NuGCutSceneDestroy(NUGCUTSCENE_s *cutscene);
+
+void NuGCutSceneFixUp(NUGCUTSCENE_s *cutscene, NUGSCN *scene, i32 flags, i32 area);
+void NuGCutSceneFixUpExtra(NUGCUTSCENE_s *cutscene, NUGSCN *area);
+instNUGCUTSCENE_s *instNuGCutSceneCreate(NUGCUTSCENE_s *cutscene, NUGSCN *scene, void *extra, char *name,
+                                             VARIPTR *buf, i32 flags);
+
+} // extern "C"
+
+struct instNUGCUTSCENE_s;
+struct NUGCUTLOCATORSYS_s;
+struct instNUGCUTLOCATOR_s;
+struct NUGCUTLOCATOR_s;
+struct numtx_s;
+i32 Draw3DObjectMtx(WORLDINFO_s *, i32, numtx_s *);
+
+// Retail only keeps the IPA-SRA clone, which drops the unused frame argument.
+#if defined(__i386__)
+#define INST_LOCATOR_SYS_END_ATTR __attribute__((noinline, noclone, regparm(2)))
+#else
+#define INST_LOCATOR_SYS_END_ATTR __attribute__((noinline, noclone))
+#endif
+
+extern "C" void instNuGCutSceneEnd(instNUGCUTSCENE_s *instance);
+
+static __used__ void instNuGCutTriggerSysUpdate(instNUGCUTSCENE_s *instance, float frame);
+
+static __used__ void CutScene_OverrideConfigFileName_LSW(char *filename, int, int);
+
+// ==== src/legoapi/cutscenes/gcutscn.cpp: declarations ====
+
+#include "nu2api/nu3d/numtl.h"
+
+#include "legoapi/items/base/collection.h"
+#include "gameapi/gui/apimenu.h"
+
+i32 (*CutScenePlayer_AcceptFn)(CUTSCENEPLAYERCLIP *) = NULL;
+extern i32 NextArea_FreePlay;
+extern i16 tCHAPTER;
+
+CUTSCENEPLAYER_s *CutScenePlayer = NULL;
+
+CUTSCENEPLAYERCLIP *CutScenePlayer_Active();
+
+void CutScenePlayer_SetObjects(CUTINFO *cut);
+
+// ==== src/legoapi/cutscenes/cutscene.cpp: declarations ====
+
+extern "C" void instNuGCutSceneDestroy(instNUGCUTSCENE_s *);
+
+extern i32 CUTCOUNT;
+extern CutSceneListEntry * CutList;
+extern void (*CutScene_OverrideConfigFileNameFn)(char *, i32, i32);
+
+extern "C" {
+extern instNUGCUTSCENE_s * cutscene_load_instance;
+
+}
+
+#define NUGCUT_RELOCATE(field, delta) \
+    (NUGCUT_WORD(field) = NUGCUT_WORD(field) != 0 ? NUGCUT_WORD(field) + (delta) : 0)
+
+extern "C" {
+
+NUGCUTSCENE_s *NuGCutSceneLoad(char *name, VARIPTR *buf, VARIPTR *buf_end, i32 flags);
+
+void NuGCutSceneDestroy(NUGCUTSCENE_s *cutscene);
+
+void NuGCutSceneFixUp(NUGCUTSCENE_s *cutscene, NUGSCN *scene, i32 flags, i32 area);
+void NuGCutSceneFixUpExtra(NUGCUTSCENE_s *cutscene, NUGSCN *area);
+instNUGCUTSCENE_s *instNuGCutSceneCreate(NUGCUTSCENE_s *cutscene, NUGSCN *scene, void *extra, char *name,
+                                             VARIPTR *buf, i32 flags);
+
+void instNuGCutSceneStart(instNUGCUTSCENE_s *instance);
+
+void instNuGCutSceneDestroy(instNUGCUTSCENE_s *instance);
+
+} // extern "C"
+
+// ==== src/legoapi/cutscenes/cutscene_stubs.cpp: declarations ====
+#include "nu2api/nucore/NuDynamicLight.h"
+#include "nu2api/nu3d/nuprim.h"
+#include "nu2api/numath/nuvec4.h"
+#include "nu2api/nu3d/nutexanm.h"
+
+#include <cfloat>
+
+extern "C" {
+
+    void NuAnimData2CalcTime(nuanimdata2_s *, f32, nuanimtime_s *);
+    void NuMtxPreTranslate(NUMTX *, NUVEC *);
+    void NuMtxMul(NUMTX *, NUMTX *, NUMTX *);
+    i32 NuStrICmp(const char *, const char *);
+    void instNuGCutSceneStart(instNUGCUTSCENE_s *);
+
+}
+
+// Steers a cutscene character's eyes towards a look-at locator and blinks its eyelids.
+// Only version-3 locator animations carry the look and blink channels.
+// Retail only keeps the IPA-SRA clone: the system is dropped and the instance
+// locator is replaced by its effect handle slot.
+#if defined(__i386__)
+#define INST_LOOKAT_UPDATE_ATTR __attribute__((noinline, noclone, regparm(2), sseregparm))
+#else
+#define INST_LOOKAT_UPDATE_ATTR __attribute__((noinline, noclone))
+#endif
+
+extern "C" {
+    // Aligned four-float row used for retail's movaps matrix copies.
+
+void instNuGCutLocatorUpdate(instNUGCUTSCENE_s *instance, NUGCUTLOCATORSYS_s *system,
+                                 instNUGCUTLOCATOR_s *inst_locator, NUGCUTLOCATOR_s *locator, f32 frame,
+                                 NUMTX *parent_mtx, i32 paused);
+
+} // extern "C"
+
+// ==== src/nu2api/nusound/nu2api_nusound_plain.cpp: all remaining content ====
+#include "gameapi/edtools/edanim_internal.h"
+#include "gameapi/edtools/gameapi_edtools_types.h"
+
+// ==== src/nu2api/nucore/nucore_plain.cpp: declarations ====
+// Temporary C-linkage compatibility surface for unresolved engine owners.
+#include "nu2api/nu3d/nulgtlaser.h"
+#include "nu2api/nucore/nuonline.h"
+//
+// This file collects functions whose original TU has not yet been
+// reconstructed. Domain families move to their evidenced owner as complete
+// groups; this file is not itself evidence of one original nucore TU.
+
+#include <stdarg.h>
+#include <float.h>
+#include <GLES2/gl2.h>
+#include "nu2api/nucore/numem.h"
+#include "nu2api/nucore/numemory.h"
+#include "nu2api/nu3d/nutex.h"
+#include "nu2api/nu3d/android/nutex_ios_ex.h"
+#include "nu2api/nu3d/nuqfnt.h"
+
+#include "java/android.h"
+#include "java/java.h"
+#include "nu2api/nucore/common.h"
+#include "nu2api/nucore/nuanim3.h"
+#include "nu2api/nucore/nuapi.h"
+#include "nu2api/nucore/nupad.h"
+#include "nu2api/nucore/NuInputDevice.h"
+#include "nu2api/nucore/NuInputManager.h"
+#include "nu2api/nucore/nuptrblock.h"
+#include "nu2api/nufile/nufile.h"
+#include "nu2api/nu3d/nudlist.h"
+#include "nu2api/nu3d/nurndrstat.h"
+#include "nu2api/nu3d/nuspecial_internal.h"
+#include "nu2api/nu3d/nupostresources.h"
+#include "nu2api/nu3d/android/nutimebar_plain.h"
+#include "nu2api/nu3d/nuvport.h"
+#include "nu2api/nu3d/nuocclusion.h"
+#include "nu2api/nu3d/nurendercontext.h"
+#include "nu2api/nu3d/nuscreen.hpp"
+#include "nu2api/nu3d/NuRenderDevice.h"
+#include "nu2api/nucore/nuvuvec.hpp"
+#include "nu2api/numath/numtx.h"
+
+struct ani3_animheader_s;
+
+// C++-linkage helpers defined in sibling TUs.
+
+extern "C" {
+
+    // ---------------------------------------------------------------------------
+    // Display-list bootstrap (original nucore TU file-statics)
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // Redirected symbols — real bodies live elsewhere (kept as comments)
+    // ---------------------------------------------------------------------------
+
+    // Nu360_dxClear(u32,u32) is implemented in ios_graphics.cpp (original 0x317070).
+    // NuDisplayListSwapBuffersBeginFrame / EndFrame are transcribed in full
+    // in nudlist.cpp (originals 0x2eb5d0 / 0x2eaef0).
+    // NuHtmlBegin(void*) is transcribed in legoapi/misc/supportall.cpp (original 0x2d5ca0).
+    // NuIOS_SetVertexFormat is transcribed in nuiosdl_gl.cpp (original 0x29c070).
+    // NuIOS_WaitForRenderThreadCompletion is transcribed in ios_graphics.cpp (original 0xe34b0).
+    // NuIOS_WakeRenderThread is transcribed in ios_graphics.cpp (original 0xe3590).
+    // NuRenderContextSetZFunc is transcribed below (original 0x2a3860).
+
+    // ---------------------------------------------------------------------------
+    // Camera (thin wrappers; full matrix work is in NuCameraSetEx)
+    // ---------------------------------------------------------------------------
+
+    DECOMP_ASSERT(sizeof(NuCameraReflect) == 0x84, "camera reflection state size");
+    DECOMP_ASSERT(__builtin_offsetof(NuCameraReflect, mtx) == 4, "camera reflection matrix offset");
+
+void NuCameraSetEx(NUCAMERA *cam, i32 fast);
+
+    // ---------------------------------------------------------------------------
+    // Display list — faithful helpers + pending stubs
+    // ---------------------------------------------------------------------------
+
+} // extern "C"
+
+// Local helpers matching original static display-list setters (t local symbols)
+
+extern "C" {
+
+    extern "C++" {
+        // Original local helper cloned as DisplayListProcessSkin.isra.36 by GCC.
+        // It appends the world transform, skin palette, and geometry calls as one
+        // contiguous run in the material display list.
+        static __attribute__((noinline, noclone)) void
+        DisplayListProcessSkin(NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry, NUDISPLAYLISTITEM **first_and_last,
+                               NUMTX *world_matrix, void **transform_packet, NUMTX *skin_matrices,
+                               DEFORMERWEIGHTSARRAY *deformer_weights, i32 shadow_caster)
+            __asm__("_ZL22DisplayListProcessSkinP7numtl_sP15nudisplaylist_sP19nudisplaylistitem_sPS4_P7numtx_"
+                    "sPPvS7_P22deformerweightsarray_si.isra.36");
+
+        // Original local helper cloned as DisplayListProcessLightmapped.isra.34.
+        // Lightmapped geometry carries an AE/AF/B0 setup command two entries before
+        // its geometry command. Keep that setup command adjacent to the dynamic
+        // transform and geometry entries when the special is submitted.
+        static __attribute__((noinline, noclone)) void
+        DisplayListProcessLightmapped(NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry,
+                                      NUDISPLAYLISTITEM **first_and_last, NUMTX *world_matrix, void **transform_packet,
+                                      f32 alpha)
+            __asm__("_ZL29DisplayListProcessLightmappedP7numtl_sP15nudisplaylist_sP19nudisplaylistitem_sPS4_P7numtx_"
+                    "sPPvf.isra.34");
+    }
+
+    // ---------------------------------------------------------------------------
+    // Scene / render-scene
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // Frame lifecycle (NuFrameEnd is faithful; neighbours are stubs)
+    // ---------------------------------------------------------------------------
+
+    // Per-frame animation/pad update hooks (originals take the frame time).
+
+    // Frame-end callbacks (original bss @0x6bdaec/0x6bdaf0/0x6bdad0).
+
+    // Faithful transcription of the original frame-end pump. Waits for the
+    // target frame interval, ticks material/tex/wind anims, swaps screens
+    // via NuRndrSwapScreenEx, then advances nuapi clocks and pad state.
+
+    // ---------------------------------------------------------------------------
+    // iOS / platform
+    // ---------------------------------------------------------------------------
+
+    // Locale string is owned by the Android/JNI TU; cache only its index here.
+
+    // ---------------------------------------------------------------------------
+    // Animation / curves / data
+    // ---------------------------------------------------------------------------
+
+void NuAnimData2CalcTime(nuanimdata2_s *anim, f32 frame, nuanimtime_s *time);
+
+    // ---------------------------------------------------------------------------
+    // Bridge / file / heap / memory
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // Math / geometry
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // Quick-font platform rendering (the generic font run lives in nuqfnt.cpp)
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // Rendering / materials / effects (host has GL paths elsewhere)
+    // ---------------------------------------------------------------------------
+
+i32 NuSpecialDrawAt(void *special, NUMTX *mtx);
+
+    // ---------------------------------------------------------------------------
+    // Light / wind / particles / debris
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // Gobj / hierarchy / scene graph
+    // ---------------------------------------------------------------------------
+
+void NuHGobjEval(nuhgobj_s *object, i32 override_count, nuhgobjjointoverride_s *overrides, NUMTX *matrices);
+void NuHGobjEvalAnim2(nuhgobj_s *object, ani3_animheader_s *animation, f32 time, i32 override_count,
+                          NUJOINTANIM_s *overrides, NUMTX *matrices);
+
+#include "nu2api/nucore/nucore_plain_types.h"
+void NuHGobjEvalAnimBlend2(nuhgobj_s *object, ani3_animheader_s *animation_a, f32 time_a,
+                               ani3_animheader_s *animation_b, f32 time_b, f32 blend, i32 override_count,
+                               NUJOINTANIM_s *overrides, NUMTX *matrices);
+void **NuHGobjEvalDwa2(i32 render_count, i16 *render_indices, nuanimdata2_s *animation, f32 frame);
+void **NuHGobjEvalDwaBlend2(i32 render_count, i16 *render_indices, nuanimdata2_s *animation_a, f32 frame_a,
+                                nuanimdata2_s *animation_b, f32 frame_b, f32 blend);
+i32 NuHGobjRndrMtxDwa(nuhgobj_s *object, NUMTX *world_matrix, i32 render_count, i16 *render_indices,
+                          NUMTX *joint_matrices, void **blend_values, i32);
+void NuGCutCharAnimProcess(NUGCUTCHAR_s *character, f32 frame, NUMTX *matrix, i32 *visible, u32 *animation_index,
+                               f32 *animation_rate, f32 *blend_time, f32 *animation_start_frame, i32 *layer_mask);
+
+    // ---------------------------------------------------------------------------
+    // Input / pad / key / mouse
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // Culling / visibility / portals / occlusion
+    // ---------------------------------------------------------------------------
+
+    DECOMP_ASSERT(sizeof(NuInstanceTreeNode) == 0x0c, "instance tree node stride");
+    DECOMP_ASSERT(sizeof(NuInstanceTreeBounds) == 0x20, "instance tree bounds stride");
+    DECOMP_ASSERT(sizeof(NuInstanceTree_s) == 0x28, "instance tree size");
+    DECOMP_ASSERT(offsetof(NuInstanceTree_s, nodes) == 0x14, "instance tree nodes offset");
+    DECOMP_ASSERT(offsetof(NuInstanceTree_s, roots) == 0x20, "instance tree roots offset");
+    DECOMP_ASSERT(offsetof(NuInstanceTree_s, far_clips) == 0x24, "instance tree far clips offset");
+
+    // ---------------------------------------------------------------------------
+    // Viewport
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // Strings / conversion / Unicode
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // Containers / lists / params
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // Debug / error / profiling
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // Thread / misc OS
+    // ---------------------------------------------------------------------------
+
+#ifndef ANDROID
+    void NuGetCurrentThreadId(void) {
+        STUBBED();
+    }
+#endif
+#ifndef ANDROID
+    void NuThreadCreate(void) {
+        STUBBED();
+    }
+#endif
+    // ---------------------------------------------------------------------------
+    // Spline / online / net / other gameplay support
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // Rendering extras
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // PS2 / Xbox legacy shims
+    // ---------------------------------------------------------------------------
+
+} // extern "C"
+
+struct nupad_s;
+union variptr_u;
+
+// ==== src/nu2api/nucore/nugcutscene_anim.cpp: all remaining content ====
+
+extern "C" f32 *NuGCutLocatorCalcMtx(NUGCUTLOCATOR_s *locator, float frame, NUMTX *mtx, nuanimtime_s *time);
+
+extern "C" i32 NuGCutLocatorIsVisble(NUGCUTLOCATOR_s *locator, float frame, nuanimtime_s *time, float *scale,
+                                     float *rate);
+
+// ==== src/legoapi/characters/motion/gameanim.cpp: declarations ====
+#include "legoapi/gizmos/object/gizbuildits.h"
+#include "gameapi/edtools/edfile.h"
+#include "legoapi/characters/motion/gameanim.h"
+#include "legoapi/gizmo/base/gizactions.h"
+#include "legoapi/items/objects/gameobjects.h"
+#include "nu2api/numath/nurand.h"
+
+// Retail uses translation-unit-local helpers with compiler-inferred private
+// calling conventions; keep their shared animation-mode call sites intact.
+
+#include "legoapi/characters/motion/gameanim_types.h"
+
+// ==== src/legoapi/ai/core/ai_sys_stubs.cpp: all remaining content ====
+#include "editor/edpath.h"
+#include "legoapi/ai/core/ai_sys_stubs.h"
+#include "editor/aieditor_state.h"
+#include "editor/antinode_editor_private.h"
+#include "gameapi/ai/aisys/aisys.h"
+#include "nu2api/nufile/nufilepak.h"
+#include "nu2api/numath/nuang.h"
+#include "nu2api/numath/nuvec.h"
+#include "nu2api/numath/nuplane.h"
+
+#include "legoapi/ai/core/ai_pathgeometry.h"
+
+extern "C" {
+
+#include "legoapi/ai/core/ai_sys_stubs_types.h"
+    DECOMP_ASSERT(sizeof(RebuildEditorCreature) == 0xac, "editor creature rebuild stride");
+    DECOMP_ASSERT(offsetof(RebuildEditorCreature, path_check) == 0x38, "editor creature path offset");
+    DECOMP_ASSERT(offsetof(RebuildEditorCreature, activation_area) == 0x6c, "editor creature area offset");
+    DECOMP_ASSERT(offsetof(RebuildEditorCreature, activation) == 0x8f, "editor creature activation offset");
+
+} // extern "C"
+
+#if defined(__i386__)
+#define AI_SYS_STUBS_CLONE_ATTR2 __attribute__((noinline, noclone, regparm(2)))
+#else
+#define AI_SYS_STUBS_CLONE_ATTR2 __attribute__((noinline, noclone))
+#endif
+
+// Retail keeps only the IPA-SRA clone, without the unused object and elapsed time.
+
+// ==== src/nu2api/nucore/nugcutscene.cpp: all remaining content ====
+
+// Callback storage is declared in reverse linked-BSS order because the
+// original GCC 4.7 -O3 object emits these definitions in reverse source order.
+extern "C" {
+
+void NuSetCutSceneCharacterRenderFn(NUGCUTSCENECHARACTERRENDERFN function);
+
+void NuSetCutSceneCharacterEvalFn(NUGCUTSCENECHARACTEREVALFN function);
+
+void NuSetCutSceneFindCharactersFn(NUGCUTSCENEFINDCHARACTERSFN function);
+
+void NuSetCutSceneResetCharactersFn(NUGCUTSCENERESETCHARACTERSFN function);
+
+void NuSetCutSceneCharacterCreateDataFn(NUGCUTSCENECHARACTERCREATEDATAFN function);
+
+void NuSetCutSceneRigidPostRenderFn(NUGCUTSCENERIGIDPOSTRENDERFN function);
+} // extern "C"
+
+// ==== src/legoapi/cutscenes/cutscenes.cpp: declarations ====
+
+extern CUTSCENESYS * CutSceneSys;
+
+extern "C" {
+    void instNuGCutSceneStart(instNUGCUTSCENE_s *);
+    void instNuGCutSceneDestroy(instNUGCUTSCENE_s *);
+}
+
+extern "C" {
+    extern instNUGCUTSCENE_s *cutscene_load_instance;
+}
+
+// ==== functions in original address order ====
+
+static __used__ __attribute__((noinline)) void instNuGCutTriggerSysUpdate(instNUGCUTSCENE_s *instance, float frame);
+
+extern "C" {
+
+extern "C" void NuGCutSceneSysInit(NUGCUTLOCATORFNENTRY_s *locator_functions);
+
+}
+
+extern "C" {
+NUGCUTSCENE_s *NuGCutSceneLoad(char *name, VARIPTR *buf, VARIPTR *buf_end, i32 flags);
+
+void NuGCutSceneDestroy(NUGCUTSCENE_s *cutscene);
+
+void NuGCutSceneFixUp(NUGCUTSCENE_s *cutscene, NUGSCN *scene, i32 flags, i32 area);
+
+void NuGCutSceneFixUpExtra(NUGCUTSCENE_s *cutscene, NUGSCN *area);
+
+instNUGCUTSCENE_s *instNuGCutSceneCreate(NUGCUTSCENE_s *cutscene, NUGSCN *scene, void *extra, char *name,
+                                             VARIPTR *buf, i32 flags);
+
+void instNuGCutSceneStart(instNUGCUTSCENE_s *instance);
+
+}
+
+extern "C" {
+extern "C" f32 *NuGCutLocatorCalcMtx(NUGCUTLOCATOR_s *locator, float frame, NUMTX *mtx, nuanimtime_s *time);
+
+}
+
+extern "C" {
+extern "C" i32 NuGCutLocatorIsVisble(NUGCUTLOCATOR_s *locator, float frame, nuanimtime_s *time, float *scale,
+                                     float *rate);
+
+}
+
+extern "C" {
+extern "C" void instNuGCutSceneEnd(instNUGCUTSCENE_s *instance);
+
+void instNuGCutSceneDestroy(instNUGCUTSCENE_s *instance);
+
+}
+
+extern "C" {
+void NuGCutCharAnimProcess(NUGCUTCHAR_s *character, f32 frame, NUMTX *matrix, i32 *visible, u32 *animation_index,
+                               f32 *animation_rate, f32 *blend_time, f32 *animation_start_frame, i32 *layer_mask);
+
+}
+
+extern "C" {
+void instNuGCutLocatorUpdate(instNUGCUTSCENE_s *instance, NUGCUTLOCATORSYS_s *system,
+                                 instNUGCUTLOCATOR_s *inst_locator, NUGCUTLOCATOR_s *locator, f32 frame,
+                                 NUMTX *parent_mtx, i32 paused);
+
+}
+
+extern "C" {
+
+void NuSetCutSceneCharacterRenderFn(NUGCUTSCENECHARACTERRENDERFN function);
+
+void NuSetCutSceneCharacterEvalFn(NUGCUTSCENECHARACTEREVALFN function);
+
+void NuSetCutSceneFindCharactersFn(NUGCUTSCENEFINDCHARACTERSFN function);
+
+void NuSetCutSceneResetCharactersFn(NUGCUTSCENERESETCHARACTERSFN function);
+
+void NuSetCutSceneCharacterCreateDataFn(NUGCUTSCENECHARACTERCREATEDATAFN function);
+
+void NuSetCutSceneRigidPostRenderFn(NUGCUTSCENERIGIDPOSTRENDERFN function);
+
+}
+
+// ==== functions in original address order ====
+
+extern "C" {
+extern "C" {
+extern "C" void NuGCutSceneSysInit(NUGCUTLOCATORFNENTRY_s *locator_functions);
+
+}
+}
+
+extern "C" {
+NUGCUTSCENE_s *NuGCutSceneLoad(char *name, VARIPTR *buf, VARIPTR *buf_end, i32 flags);
+
+void NuGCutSceneDestroy(NUGCUTSCENE_s *cutscene);
+
+void NuGCutSceneFixUp(NUGCUTSCENE_s *cutscene, NUGSCN *scene, i32 flags, i32 area);
+
+void NuGCutSceneFixUpExtra(NUGCUTSCENE_s *cutscene, NUGSCN *area);
+
+void NuGCutSceneSysPostBackgroundLoad(void);
+
+instNUGCUTSCENE_s *instNuGCutSceneCreate(NUGCUTSCENE_s *cutscene, NUGSCN *scene, void *extra, char *name,
+                                             VARIPTR *buf, i32 flags);
+
+void instNuGCutSceneStop(instNUGCUTSCENE_s *instance);
+
+i32 instNuGCutSceneIsFinished(instNUGCUTSCENE_s *instance);
+
+void instNuGCutSceneReset(instNUGCUTSCENE_s *instance);
+
+void instNuGCutSceneStart(instNUGCUTSCENE_s *instance);
+
+void instNuGCutScenePause(instNUGCUTSCENE_s *instance, u8 paused);
+
+}
+
+extern "C" {
+void instNuGCutSceneServiceLoad(void);
+
+}
+
+extern "C" {
+extern "C" {
+extern "C" f32 *NuGCutLocatorCalcMtx(NUGCUTLOCATOR_s *locator, float frame, NUMTX *mtx, nuanimtime_s *time);
+
+}
+}
+
+extern "C" {
+extern "C" {
+extern "C" i32 NuGCutLocatorIsVisble(NUGCUTLOCATOR_s *locator, float frame, nuanimtime_s *time, float *scale,
+                                     float *rate);
+
+}
+}
+
+extern "C" {
+extern "C" {
+extern "C" void instNuGCutSceneEnd(instNUGCUTSCENE_s *instance);
+
+}
+}
+
+extern "C" {
+void instNuGCutSceneDestroy(instNUGCUTSCENE_s *instance);
+
+}
+
+extern "C" {
+void NuGCutCharAnimProcess(NUGCUTCHAR_s *character, f32 frame, NUMTX *matrix, i32 *visible, u32 *animation_index,
+                               f32 *animation_rate, f32 *blend_time, f32 *animation_start_frame, i32 *layer_mask);
+
+}
+
+extern "C" {
+void instNuGCutLocatorUpdate(instNUGCUTSCENE_s *instance, NUGCUTLOCATORSYS_s *system,
+                                 instNUGCUTLOCATOR_s *inst_locator, NUGCUTLOCATOR_s *locator, f32 frame,
+                                 NUMTX *parent_mtx, i32 paused);
+
+}
+
+extern "C" {
+extern "C" {
+extern "C" void NuGCutSceneSysUpdate(i32 paused, i32 skip, f32 elapsed);
+
+extern "C" void NuGCutSceneSysRender(i32 paused);
+
+}
+}
+
+extern "C" {
+
+void NuSetCutSceneCharacterRenderFn(NUGCUTSCENECHARACTERRENDERFN function);
+
+void NuSetCutSceneCharacterEvalFn(NUGCUTSCENECHARACTEREVALFN function);
+
+void NuSetCutSceneFindCharactersFn(NUGCUTSCENEFINDCHARACTERSFN function);
+
+void NuSetCutSceneResetCharactersFn(NUGCUTSCENERESETCHARACTERSFN function);
+
+void NuSetCutSceneCharacterCreateDataFn(NUGCUTSCENECHARACTERCREATEDATAFN function);
+
+void NuSetCutSceneRigidPostRenderFn(NUGCUTSCENERIGIDPOSTRENDERFN function);
+
+}
+
+// ==== src/legoapi/characters/core/players.cpp: declarations ====
+
+#include "gameapi/edtools/edstubs.h"
+#include "legoapi/characters/core/charconfig.h"
+#include "legoapi/gizmos/transport/gizportal.h"
+#include "legoapi/menus/screens/shop.h"
+#include "legoapi/actions/movement/carrying.h"
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/props/system/socksys.h"
+#include "legoapi/render/light/lighting.h"
+#include "legoapi/core/input/timer.h"
+#include "legogame/game.h"
+#include "nu2api/nucore/nutime.h"
+
+// --- Helpers moved from world.cpp ---
+
+// ---- Player start spawn entries ----
+
+// ---- Misc player/gameobject helpers relocated from doorstubs.cpp ----
+
+void GameAudio_PlaySfx(i32 sfx, NUVEC *position, i32 flags, i32 volume);
+
+namespace {
+
+} // namespace
+
+#include "legoapi/characters/core/players_types.h"
+
+DECOMP_ASSERT(sizeof(SPECIAL_LAYER_s) == 0xc, "SPECIAL_LAYER_s size");
+
+// ==== src/legoapi/characters/core/character.cpp: declarations ====
+
+#include "legoapi/characters/core/CharacterObjectInterface.h"
+
+// Forward declarations for local (static) character/gameplay helper stubs.
+struct nuvec_s;
+
+extern "C" {
+extern i16 id_GUNGAN;
+
+}
+
+extern i32 CHARCOUNT;
+extern CHARACTERDATA * CDataList;
+// Original 0x120-byte data record @0x00666960. FixUpCharacters copies this
+// canonical prefix into every character before character-specific overrides.
+// These values cover the fully typed common movement and perception fields.
+
+static __used__ void ExtraDieSfx_LSW(GameObject_s *object);
+
+static __used__ void ExtraHurtSfx_LSW(GameObject_s *object);
+
+// ==== src/legoapi/characters/core/charconfig.cpp: declarations ====
+
+#include <stdlib.h>
+
+// Retail keeps only the IPA-SRA clones (taking the flags field directly),
+// mangled with the original ANIMLIST_s parameter type.
+#if defined(__i386__)
+#define CC_SET_ANIM_FLAGS_ATTR __attribute__((noinline, noclone, regparm(2)))
+// The u32 clone keeps retail's push-based prologue only when size-optimized.
+#define CC_SET_ANIM_FLAGS_OS_ATTR __attribute__((noinline, noclone, optimize("Os"), regparm(2)))
+#else
+#define CC_SET_ANIM_FLAGS_ATTR __attribute__((noinline, noclone))
+#define CC_SET_ANIM_FLAGS_OS_ATTR __attribute__((noinline, noclone))
+#endif
+
+extern CHARCONFIG_s charconfig;
+
+// Retail only keeps the clone with strip_comments fixed to 1 (regparm text, filename).
+#if defined(__i386__)
+#define REDIRECT_TEXT_FILE_ATTR __attribute__((noinline, noclone, regparm(2)))
+#else
+#define REDIRECT_TEXT_FILE_ATTR __attribute__((noinline, noclone))
+#endif
+
+// ==== src/legoapi/characters/core/characters.cpp: declarations ====
+
+#include "nu2api/nu3d/nuportal.h"
+#include "legoapi/actions/character/suit.h"
+#include "legoapi/actions/character/streaks.h"
+#include "legoapi/gizmos/object/lever.h"
+#include "legoapi/gizmos/door/zipups.h"
+#include "legoapi/gizmo/base/gizmessage.h"
+#include "legoapi/gizmos/object/gizobstacles.h"
+#include "legoapi/gizmos/object/newblowup.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/gizmos/transport/grapples.h"
+#include "legoapi/props/objects/tightrope.h"
+#include "legoapi/gizmos/door/spinner.h"
+#include "legoapi/gizmos/trigger/minicut.h"
+#include "legoapi/gizmos/transport/tubes.h"
+#include "legoapi/gizmos/traps/gizturrets.h"
+#include "legoapi/gizmos/trigger/ai.h"
+#include "legoapi/gizmos/trigger/giztimer.h"
+#include "legoapi/gizmos/trigger/gizrandom.h"
+#include "legoapi/gizmos/trigger/gizspecial.h"
+#include "legoapi/gizmos/door/plugs.h"
+#include "legoapi/gizmos/door/push.h"
+#include "legoapi/gizmos/fx/edgizshadowmachine.h"
+#include "legoapi/props/objects/techno.h"
+#include "legoapi/world/areas.h"
+
+#include "legoapi/actions/character/specialmoves.h"
+#include "legoapi/characters/core/customiser.h"
+
+// LoadPerm1 is one of the few game-level entry points which wires together
+// otherwise C-linkage engine subsystems.  Keep these declarations local: the
+// individual subsystem TUs intentionally expose their original plain names.
+extern "C" {
+    i32 NuFileExists(char *);
+    i32 NuStrCpy(char *, const char *);
+
+}
+
+// The original table at 0x006281a0.  These are the material animation
+// scripts made available before the permanent things scene is loaded.
+
+#include "legoapi/characters/core/characters_types.h"
+
+// Retail keeps only the IPA-SRA clone, which receives &*layers.
+#if defined(__i386__)
+#define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone, regparm(1)))
+#else
+#define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone))
+#endif
+
+void LoadPerm1();
+
+// ==== src/legoapi/menus/screens/gamemenuall.cpp: declarations ====
+
+#include "gameapi/edtools/edui.h"
+#include "gameapi/gui/apimenu_internal.h"
+#include "gameframework/saveload.h"
+#include "legoapi/core/config/fileselect.h"
+#include "legoapi/menus/screens/gamemenuall.h"
+
+extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
+extern char **TTab;
+extern i32 Paused;
+
+// Retail clears these "fast repeat" latches but never sets them.
+
+// ==== src/legoapi/menus/screens/menus.cpp: declarations ====
+#include "batman.h"
+#include "gamelib/crc/crc.h"
+
+#include "legoapi/render/light/fade.h"
+
+// ==== src/legoapi/render/core/render.cpp: declarations ====
+#include "gameapi/edtools/edbri_internal.h"
+#include "legoapi/items/collect/torpedo.h"
+#include "legoapi/actions/character/transform.h"
+#include "legoapi/actions/character/snake.h"
+#include "legoapi/menus/core/gamehint.h"
+#include "gamelib/util/gamelib_util_types.h"
+#include "legoapi/menus/core/gamemessages.h"
+#include "legoapi/menus/screens/arcade.h"
+#include "legoapi/render/light/fade_material.h"
+#include "legoapi/render/fx/edsplines.h"
+#include "nu2api/nu3d/android/nuportal_android.h"
+
+#include "legoapi/characters/motion/animlist.h"
+
+#include "legoapi/render/core/SwipeDecalRenderer.h"
+#include "nu2api/nu3d/nuprim_internal.h"
+#include "nu2api/nu3d/android/nurndr_android.h"
+#include "nu2api/nu3d/android/nugscn_android.h"
+#include "nu2api/numath/numath.h"
+
+i32 MatrixReflection(NUMTX *matrix, i32 axis, f32 plane, f32 height, NUMTX *result);
+
+void EnableShadowMapRendering(i32 enable);
+void ResetShadowMapRendering();
+
+struct nuhspecial_s;
+
+extern void SetLevelLights(void *set, f32 scale);
+
+// Camera zoom state
+
+// Graphics loading flags
+
+// --- NuGScn graphics-data reader ---
+// NuReadGraphicsData is a C++ static function in the original (GCC clones it,
+// hence the `.isra.NNN` suffix in the ROM symbol table).
+
+// Retail only keeps the IPA-SRA clone, which drops the unused fourth argument.
+#if defined(__i386__)
+#define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone, regparm(2)))
+#else
+#define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone))
+#endif
+
+// --- Extern "C": NuGScn functions have C linkage in original ---
+
+#include "nu2api/nu3d/nupostparams.h"
+
+#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
+    do {                                                                                                               \
+        direction.x = (vx);                                                                                            \
+        direction.y = -(vy) * camera.aspect;                                                                           \
+        direction.z = adjacent;                                                                                        \
+        NuVecNorm(&direction, &direction);                                                                             \
+        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
+        NuVecNorm(&direction, &direction);                                                                             \
+        brightness = direction.y * 0.5f + 0.5f;                                                                        \
+        if (brightness <= near_angle)                                                                                  \
+            brightness = near_scale * parameters->intensity;                                                           \
+        else if (brightness >= far_angle)                                                                              \
+            brightness = far_scale * parameters->intensity;                                                            \
+        else                                                                                                           \
+            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
+        if (parameters->directional) {                                                                                 \
+            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
+            if (angle < parameters->direction_near_angle) {                                                            \
+                brightness += 128.0f * parameters->direction_far_scale;                                                \
+            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
+                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
+                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
+                                      parameters->direction_bias);                                                     \
+                brightness +=                                                                                          \
+                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
+                              parameters->direction_near_scale);                                                       \
+            }                                                                                                          \
+        }                                                                                                              \
+        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
+                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
+                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
+                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
+        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
+            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
+                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
+        else                                                                                                           \
+            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
+        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
+    } while (0)
+
+i32 Draw3DObjectMtx(WORLDINFO_s *world, i32 object_index, numtx_s *mtx);
+
+// DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
+// red-brick positions come from the Game init values in legogame/game.cpp.
+
+void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
+
+void DrawObjectOnCharacter(WORLDINFO_s *world, GameObject_s *object, i32 object_id, nuhspecial_s *special, i32 locator,
+                           i32 second_locator, NUMTX *joints, i32 reflect, u32 layers, NUMTX *rotation,
+                           NUVEC *translation, f32 alpha, f32 scale);
+
+#define SWIPE_PRIM_UV(U, V)                                                                                            \
+    do {                                                                                                               \
+        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
+        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
+            vertex->float_uv[0] = (U);                                                                                 \
+            vertex->float_uv[1] = (V);                                                                                 \
+        } else {                                                                                                       \
+            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
+            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
+        }                                                                                                              \
+    } while (false)
+
+extern i32 qrand(void);
+
+// ==== src/gameapi/gui/apimenu.cpp: all remaining content ====
+
+#include "legoapi/core/startup/main.h"
+#include "legoapi/menus/screens/movies.h"
+#include "nu2api/nucore/nuvideo.h"
+
+void GameAudio_PlaySfx(i32 sfx, nuvec_s *position, i32 volume, i32 flags);
+extern "C" i32 SuperStory;
+
+extern i32 reset_restart;
+
+extern "C" void SmartTextEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment,
+                            u8 red, u8 green, u8 blue, f32 max_width, i32 max_lines, void *message_box,
+                            i32 suppress_draw, u32 alpha);
+
+// ==== src/legoapi/core/input/gamepads.cpp: declarations ====
+#include "legoapi/misc/androidbatman.h"
+#include "legoapi/items/collect/spacelevel.h"
+
+extern GAMECAMERA_s *GameCam;
+extern WORLDINFO_s *WORLD;
+extern "C" {
+    extern i32 Paused;
+    extern i32 NewMode;
+    extern "C++" FadeSystem FadeSys;
+    extern i32 CutSceneWaiting;
+}
+
+// Original bss @0x127a500: 64 pads x 0x60 bytes.
+// Original bss @0x127a4e0.
+
+// Two frames of direction history for each local player.  MovePlayer shifts
+// these before accepting the new input; GamePad_Rotate then reports a stable
+// angular velocity only when both consecutive turns agree.
+
+f32 GamePad_Rotate(GameObject_s *object);
+
+// ==== src/gameframework/savesystem.cpp: all remaining content ====
+
+// ==== src/legoapi/core/config/saveload.cpp: declarations ====
+
+extern u8 FS_Active;
+
+// Retail keeps the whole body of RenderFileSel3 as the split-out .part clone;
+// the exported function only tests FS_Active.
+
+void RenderFileSel3(i32 draw_title);
+
+// ==== src/legoapi/menus/core/text.cpp: declarations ====
+#include "nu2api/nu3d/nushader_plain.h"
+
+// Original .data @0x667ce0; the names are filled in by the static initializer.
+
+i32 Text_GetMaxOverallStrings();
+
+extern "C" {
+
+void SmartTextEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
+                     u8 green, u8 blue, f32 max_width, i32 max_lines, void *message_box, i32 suppress_draw, u32 alpha);
+}
+
+// ==== src/legoapi/items/objects/objectsall.cpp: declarations ====
+
+#include "legoapi/actions/movement/jumping.h"
+#include "legoapi/items/objects/objectsall.h"
+#include "legoapi/gizmo/object/gizmoblowups.h"
+
+// ==== src/gameapi/edtools/edpartall.cpp: all remaining content ====
+#include "gameapi/edtools/edpart_internal.h"
+#include "gameapi/edtools/edcam.h"
+
+extern "C" {
+    void eduiMenuRender(eduimenu_s *menu);
+}
+
+// Retail only keeps the IPA-SRA clone, which takes just the parent menu.
+
+// ==== src/legoapi/render/core/terrain_stubs.cpp: declarations ====
+#include "legoapi/render/core/terrain_internal.h"
+#include "legoapi/render/core/gameliball.h"
+#include "legoapi/render/fx/game_deb.h"
+#include "gameapi/edtools/edpp_internal.h"
+#include "nu2api/numath/numtx_inline.h"
+#include "nu2api/nu3d/android/nurain_android.h"
+#include "nu2api/nu3d/android/nuptl_android.h"
+
+#include <stddef.h>
+
+extern NUVEC ShadNorm;
+// Runtime-selected groups appended after the fixed terrain allocation.
+#include "legoapi/render/core/terrain_stubs_types.h"
+
+// NuFileExists @nufile (nucore_plain.cpp).
+extern "C" i32 NuFileExists(char *name);
+
+extern "C" {
+
+extern i32 debris_render_group;
+
+} // extern "C"
+
+// ==== src/legoapi/render/fx/parts.cpp: declarations ====
+#include "legoapi/actions/combat/hits.h"
+#include "legoapi/render/core/rtl.h"
+#include "legoapi/gizmo/object/gizmopickup.h"
+#include "legoapi/gizmo/object/giztorpedo.h"
+
+extern "C" {
+    // Shared suspend flag consulted by all timed debris emitters.
+
+    void SetSfxBit_On(i32);
+    void PlaySfxById(i32, NUVEC *);
+
+}
+
+// Forward declarations for local (static) part/gizmo helper stubs.
+
+// Local (static) part (PART_s), pickup (GIZMOPICKUP_s), gizmo flow
+// (GIZFLOW_s/FLOWBOX_s), power-up and space/starfighter helpers. Stubbed as
+// local `t` symbols matching res/libTTapp.so.
+
+WORLDINFO_s *WorldInfo_CurrentlyActive();
+extern f32 FRAMETIME;
+
+// The original repeats the per-sound emitter checks for each of the four sound slots.
+#define PART_EMIT_SOUND_ON(slot)                                                                                       \
+    if (type->sounds[slot] != -1) {                                                                                    \
+        SetSfxBit_On(type->sounds[slot]);                                                                              \
+        if (type->sound_modes[slot] == 4)                                                                              \
+            PlaySfxById(type->sounds[slot], &emitter->position);                                                       \
+    }
+#define PART_EMIT_SOUND(slot, mode)                                                                                    \
+    if (type->sounds[slot] != -1 && type->sound_modes[slot] == (mode))                                                 \
+        PlaySfxById(type->sounds[slot], &emitter->position);
+
+extern "C" i32 GetSfxId(const char *);
+
+// ==== src/gameapi/edtools/edtoolsall_plain.cpp: all remaining content ====
+#include "gameapi/edtools/edgra.h"
+#include "gameapi/edtools/edui_colour.h"
+#include "nu2api/nucore/numouse.h"
+#include "nu2api/nucore/nukeyboard.h"
+#include "gameapi/edtools/edrender.h"
+#include "gameapi/edtools/edgra_internal.h"
+#include "nu2api/nu3d/android/nuobject_android.h"
+
+// Retail keeps an unreferenced partial-inlining clone of the old HSV2RGB
+// helper (the non-grey path) in this unit.
+#if defined(__i386__)
+#define HSV2RGB_BODY_ATTR __attribute__((used, noinline, noclone, regparm(2), sseregparm))
+#else
+#define HSV2RGB_BODY_ATTR __attribute__((used, noinline, noclone))
+#endif
+
+// The original animation editor callbacks and lifecycle share file-local state.
+// ---- begin src/gameapi/edtools/edanimall.cpp ----
+
+// Animation editor subsystem stubs (static, internal linkage).
+
+static __attribute__((used)) void edanimcbCubeMap(eduimenu_s *, eduiitem_s *, u32);
+static __attribute__((used)) void edanimcbFileLoad(eduimenu_s *menu, eduiitem_s *, u32);
+static __attribute__((used)) void edanimcbFileSave(eduimenu_s *menu, eduiitem_s *, u32);
+static __attribute__((used)) void edanimcbMCTBMenu(eduimenu_s *, eduiitem_s *, u32);
+static __attribute__((used)) void edanimcbSoundMenu(eduimenu_s *, eduiitem_s *, u32);
+static __attribute__((used)) void edanimcbBouncyMenu(eduimenu_s *, eduiitem_s *, u32);
+static __attribute__((used)) void edanimcbSwitchMenu(eduimenu_s *, eduiitem_s *, u32);
+static __attribute__((used)) void edanimcbSetSwitchId(eduimenu_s *, eduiitem_s *item, u32);
+static __attribute__((used)) void edanimcbMCTBCardType(eduimenu_s *menu, eduiitem_s *, u32);
+static __attribute__((used)) void edanimcbParticleMenu(eduimenu_s *, eduiitem_s *, u32);
+static __attribute__((used)) void edanimcbSetSoundType(eduimenu_s *menu, eduiitem_s *item, u32);
+static __attribute__((used)) void edanimcbSetSwitchVar(eduimenu_s *, eduiitem_s *item, u32);
+static __attribute__((used)) void edanimcbCancelOptMenu(eduimenu_s *, eduimenu_s *);
+static __attribute__((used)) void edanimcbSetSwitchType(eduimenu_s *menu, eduiitem_s *item, u32);
+static __attribute__((used)) void edanimcbSoundTypeMenu(eduimenu_s *, eduiitem_s *, u32);
+static __attribute__((used)) void edanimcbCancelMCTBMenu(eduimenu_s *, eduimenu_s *);
+static __attribute__((used)) void edanimcbLocalSoundMenu(eduimenu_s *, eduiitem_s *, u32);
+static __attribute__((used)) void edanimcbMCTBCardFormat(eduimenu_s *menu, eduiitem_s *, u32);
+static __attribute__((used)) void edanimcbSetSoundTiming(eduimenu_s *, eduiitem_s *item, u32);
+static __attribute__((used)) void edanimcbSetSwitchDelay(eduimenu_s *, eduiitem_s *item, u32);
+static __attribute__((used)) void edanimcbSwitchTypeMenu(eduimenu_s *, eduiitem_s *, u32);
+
+// Remaining animation-editor UI/menu callbacks.
+
+static __attribute__((used)) void edanimcbCancelSoundMenu(eduimenu_s *, eduimenu_s *);
+
+static __attribute__((used)) void edanimcbMCTBCardPresent(eduimenu_s *menu, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbSetParticleRate(eduimenu_s *, eduiitem_s *item, u32);
+
+static __attribute__((used)) void edanimcbSetParticleType(eduimenu_s *menu, eduiitem_s *item, u32);
+
+static __attribute__((used)) void edanimcbToggleSoundType(eduimenu_s *menu, eduiitem_s *item, u32);
+
+static __attribute__((used)) void edanimcbCancelBouncyMenu(eduimenu_s *, eduimenu_s *);
+
+static __attribute__((used)) void edanimcbCancelSwitchMenu(eduimenu_s *, eduimenu_s *);
+
+static __attribute__((used)) void edanimcbMCTBCardLoadSlot(eduimenu_s *menu, eduiitem_s *item, u32);
+
+static __attribute__((used)) void edanimcbMCTBCardSaveSlot(eduimenu_s *menu, eduiitem_s *item, u32);
+
+static __attribute__((used)) void edanimcbMCTBCardUnFormat(eduimenu_s *menu, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbParticleTypeMenu(eduimenu_s *, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbSetBouncyDamping(eduimenu_s *, eduiitem_s *item, u32);
+
+static __attribute__((used)) void edanimcbSetBouncyTension(eduimenu_s *, eduiitem_s *item, u32);
+
+static __attribute__((used)) void edanimcbLocalParticleMenu(eduimenu_s *, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbMCTBCardFreeSpace(eduimenu_s *menu, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbMCTBCardSlotsUsed(eduimenu_s *menu, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbSetLocalSoundType(eduimenu_s *menu, eduiitem_s *item, u32);
+
+static __attribute__((used)) void edanimcbCancelParticleMenu(eduimenu_s *, eduimenu_s *);
+
+static __attribute__((used)) void edanimcbLocalSoundTypeMenu(eduimenu_s *, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbMCTBCardDeleteSlot(eduimenu_s *menu, eduiitem_s *item, u32);
+
+static __attribute__((used)) void edanimcbCancelSoundTypeMenu(eduimenu_s *, eduimenu_s *);
+
+static __attribute__((used)) void edanimcbMCTBCardCheckFormat(eduimenu_s *menu, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbSetBouncyPlayerGrav(eduimenu_s *, eduiitem_s *item, u32);
+
+static __attribute__((used)) void edanimcbCancelLocalSoundMenu(eduimenu_s *, eduimenu_s *);
+
+static __attribute__((used)) void edanimcbCancelSwitchTypeMenu(eduimenu_s *, eduimenu_s *);
+
+static __attribute__((used)) void edanimcbMCTBCardCheckKeyCard(eduimenu_s *menu, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbMCTBCardWriteKeyCard(eduimenu_s *menu, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbSetLocalParticleType(eduimenu_s *menu, eduiitem_s *item, u32);
+
+static __attribute__((used)) void edanimcbToggleParticleSwitch(eduimenu_s *, eduiitem_s *item, u32);
+
+static __attribute__((used)) void edanimcbLocalParticleTypeMenu(eduimenu_s *, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbCancelParticleTypeMenu(eduimenu_s *, eduimenu_s *);
+
+static __attribute__((used)) void edanimcbCancelLocalParticleMenu(eduimenu_s *, eduimenu_s *);
+
+static __attribute__((used)) void edanimcbCancelLocalSoundTypeMenu(eduimenu_s *, eduimenu_s *);
+
+static __attribute__((used)) void edanimcbCancelLocalParticleTypeMenu(eduimenu_s *, eduimenu_s *);
+
+static __attribute__((used)) void edanimcbBouncyMenu(eduimenu_s *parent, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbSoundMenu(eduimenu_s *parent, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbParticleMenu(eduimenu_s *parent, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbSwitchMenu(eduimenu_s *parent, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbLocalParticleMenu(eduimenu_s *parent, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbSoundTypeMenu(eduimenu_s *parent, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbLocalSoundTypeMenu(eduimenu_s *parent, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbLocalParticleTypeMenu(eduimenu_s *parent, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbParticleTypeMenu(eduimenu_s *parent, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbSwitchTypeMenu(eduimenu_s *parent, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbMCTBMenu(eduimenu_s *parent, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbLocalSoundMenu(eduimenu_s *parent, eduiitem_s *, u32);
+
+// ---- end src/gameapi/edtools/edanimall.cpp ----
+// ---- begin src/gameapi/edtools/edmenucallbacks.cpp ----
+#include <cstdio>
+
+// Editor UI callbacks retained in the original editor's menu code.
+#pragma GCC push_options
+#pragma GCC optimize("O2", "omit-frame-pointer")
+
+extern "C" {
+
+static __used__ void cbGradChange(void);
+
+static __used__ void cbSel(eduimenu_s *, eduiitem_s *item);
+
+static __used__ void cbSubMenu(eduimenu_s *menu, eduiitem_s *item);
+
+static __used__ void cbgpcfgAdd(eduimenu_s *menu, eduiitem_s *item, u32 value);
+
+static __used__ void cbgpcfgCPPress(eduimenu_s *menu, eduiitem_s *item, u32 value);
+
+static __used__ void cbgpcfgCopy(eduimenu_s *menu, eduiitem_s *item, u32 value);
+
+static __used__ void cbgpcfgDel(eduimenu_s *menu, eduiitem_s *item, u32 value);
+
+static __used__ void cbgpcfgPaste(eduimenu_s *menu, eduiitem_s *item, u32 value);
+
+} // extern "C"
+
+#pragma GCC pop_options
+
+// ---- end src/gameapi/edtools/edmenucallbacks.cpp ----
+
+// ---- begin src/gameapi/edtools/edptlall.cpp ----
+
+extern "C" {
+    extern i32 debris_render_group;
+}
+
+// The original particle editor's private callbacks and menu state share this TU.
+// ---- begin src/gameapi/edtools/edptlcallbacks.cpp ----
+#if defined(__SSE__)
+#include <xmmintrin.h>
+#endif
+
+// Particle-list editor UI/menu callbacks.
+
+// Particle editor UI/menu callbacks.
+
+// ---- end src/gameapi/edtools/edptlcallbacks.cpp ----
+
+// Particle list editor subsystem stubs (static, internal linkage).
+
+// ---- end src/gameapi/edtools/edptlall.cpp ----
+
+// The original local font helpers read the same private draw state as the
+// editor callbacks, so they belong to this translation unit.
+static __used__ __attribute__((noclone)) void eduiFntPrintExGeneric(void *font, int x, int y,
+                                                                                int alignment, char *format, ...)
+    __asm__("_ZL14eduiFntPrintExPviiiPcz");
+static __used__ void eduiFntPrintExGeneric(void *font, int x, int y, int alignment, char *format, ...);
+
+// Left-aligned (16) specialisation of the integer print helper.
+static __attribute__((noclone)) void eduiFntPrintExLeft(void *font, int x, int y, int alignment,
+                                                                  char *format, ...)
+    __asm__("_ZL14eduiFntPrintExPviiiPcz.constprop.67");
+
+// Centred (64) specialisation of the integer print helper.
+static __attribute__((noclone)) void eduiFntPrintExCentre(void *font, int x, int y, int alignment,
+                                                                    char *format, ...)
+    __asm__("_ZL14eduiFntPrintExPviiiPcz.constprop.68");
+
+#if defined(__clang__)
+// Clang has no __builtin_va_arg_pack; format here and print the result. The
+// generic helper already owns this overload's mangled name, so rename it.
+static void eduiFntPrintEx(void *font, int x, int y, int alignment, char *format, ...)
+    __asm__("eduiFntPrintExFormatted");
+#else
+static inline __attribute__((always_inline)) void eduiFntPrintEx(void *font, int x, int y, int alignment,
+                                                                 char *format, ...) {
+    if (__builtin_constant_p(alignment) && alignment == 16)
+        eduiFntPrintExLeft(font, x, y, alignment, format, __builtin_va_arg_pack());
+    else if (__builtin_constant_p(alignment) && alignment == 64)
+        eduiFntPrintExCentre(font, x, y, alignment, format, __builtin_va_arg_pack());
+    else
+        eduiFntPrintExGeneric(font, x, y, alignment, format, __builtin_va_arg_pack());
+}
+#endif
+
+// Only caller prints the property edit buffer left-aligned.
+
+static __used__ void eduiFntPrintClipEx(void *font, float x, float y, int alignment, float clip_x, float clip_width,
+                                        char *format, ...);
+// Only eduiMenuRender calls the integer clip helper, always left-aligned.
+
+#include "gameapi/edtools/edtools_types.h"
+
+extern "C" {
+
+    // Shared editor font; edmainInit receives and stores the font handle.
+
+void edmainInit(void *font, char *configuration_file);
+
+void eduiMenuRender(eduimenu_s *menu);
+
+    // The editor UI callbacks share this translation unit with their cursor,
+    // menu, and interaction state in the original binary.
+
+static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
+
+static __used__ i32 cbInteractMenuCancelChild(edui_interact_s *interact);
+
+static __used__ void cbMMReturnToApp(eduimenu_s *, eduiitem_s *, u32);
+
+static __used__ void cbmcfgCameraSpeed(eduimenu_s *, eduiitem_s *item, u32);
+
+static __used__ void cbmcfgCancel(eduimenu_s *menu, eduimenu_s *);
+
+static __used__ void cbMMRegSel(eduimenu_s *, eduiitem_s *selected, u32);
+static __used__ void cbMMEditorConfig(eduimenu_s *menu, eduiitem_s *, u32);
+
+static __used__ void eduicbDestroyDirectoryList(eduimenu_s *menu, eduimenu_s *);
+
+static __used__ i32 eduicbInteractColourPick(edui_interact_s *interact);
+static __used__ i32 eduicbInteractExpander(edui_interact_s *interact);
+static __used__ i32 eduicbInteractProp(struct edui_interact_s *interact);
+static __used__ i32 eduicbInteractFilter(struct edui_interact_s *interact);
+static __used__ i32 eduicbInteractSel(edui_interact_s *interact);
+static __used__ void eduicbItemDestroyExpander(eduimenu_s *menu, eduiitem_s *item);
+static __used__ void eduicbItemDestroyFilter(eduimenu_s *menu, eduiitem_s *item);
+static __used__ void eduicbItemFilePickDestroy(eduimenu_s *menu, eduiitem_s *item);
+static __used__ void eduicbItemGradPickDestroy(eduimenu_s *, eduiitem_s *item);
+static __used__ void eduicbItemSliderDestroy(eduimenu_s *menu, eduiitem_s *item);
+static __used__ void eduicbItemTextPickDestroy(eduimenu_s *menu, eduiitem_s *item);
+static __used__ void eduicbPickCFGCancel(eduimenu_s *menu, eduimenu_s *);
+
+static __used__ i32 eduicbProcessColourPick(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
+static __used__ i32 eduicbProcessColourSlider(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
+static __used__ i32 eduicbProcessExpander(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
+static __used__ i32 eduicbProcessFilePick(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
+static __used__ i32 eduicbProcessFilter(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
+static __used__ i32 eduicbProcessGradPick(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
+static __used__ i32 eduicbProcessGraph(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
+static __used__ i32 eduicbProcessGreyPick(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
+static __used__ i32 eduicbProcessProp(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
+static __used__ i32 eduicbProcessSel(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
+static __used__ i32 eduicbProcessSeparator(eduimenu_s *, eduiitem_s *, f32, nupad_s *);
+static __used__ i32 eduicbProcessSlider(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
+static __used__ i32 eduicbProcessTextPick(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
+static __used__ i32 eduicbProcessTexturePick(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
+__attribute__((force_align_arg_pointer)) static __used__ i32 eduicbRenderCheck(eduimenu_s *, eduiitem_s *item,
+                                                                                   i32 x, i32 y, i32 width, i32);
+    // Retail keeps this as the constant-propagated clone of the generic four-step
+    // gradient helper; only the hue/value colour picker band reaches it.
+static __used__ i32 eduicbRenderColourPick(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderColourSlider(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderExpander(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderFilePick(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderGradPick(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderGraph(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32 selected);
+static __used__ i32 eduicbRenderGreyPick(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderNumber(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderProp(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderFilter(struct eduimenu_s *menu, struct eduiitem_s *item, i32 x, i32 y, i32 scale,
+                                           i32 selected);
+static __used__ i32 eduicbRenderSel(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderSelWithClipColour(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width,
+                                                      i32);
+static __used__ i32 eduicbRenderSeparator(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderSlider(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderSliderInt(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderTextPick(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderTextSelector(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderTexturePick(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ void eduicbSelectDirectoryEntry(eduimenu_s *menu, eduiitem_s *item, u32 value);
+static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u32);
+}
+
+static void eduiFntPrintExLeft(void *font, int x, int y, int, char *format, ...);
+
+static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ...);
+
+// Text-picker commit callbacks. Retail keeps them unmangled and local.
+
+// ==== src/gameapi/edtools/edtoolsall.cpp: declarations ====
+
+#include "legoapi/misc/utilities.h"
+#include "nu2api/nu3d/nuspline.h"
+#include <new>
+
+extern EdInputContext * Input;
+extern MemoryManager theMemoryManager;
+extern "C" void PlaySfxById(i32, nuvec_s *);
+
+DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
+
+inline EdMatrixControl::~EdMatrixControl() {
+    Destroy();
+}
+
+inline void EdMatrixControl::operator delete(void *memory) {
+    theMemoryManager.FreePool(memory, sizeof(EdMatrixControl));
+}
+
+inline void EdStringControl::operator delete(void *memory) {
+    theMemoryManager.FreePool(memory, sizeof(EdStringControl));
+}
+
+template <> inline void EdValueControl<f32>::operator delete(void *memory) {
+    theMemoryManager.FreePool(memory, sizeof(EdValueControl<f32>));
+}
+
+inline void EdFloatControl::operator delete(void *memory) {
+    theMemoryManager.FreePool(memory, sizeof(EdFloatControl));
+}
+
+inline EdVectorControl::~EdVectorControl() {
+    Destroy();
+}
+
+inline void EdVectorControl::operator delete(void *memory) {
+    theMemoryManager.FreePool(memory, sizeof(EdVectorControl));
+}
+
+inline EdClassObjectNameControl::~EdClassObjectNameControl() {
+}
+
+inline void EdClassObjectNameControl::operator delete(void *memory) {
+    theMemoryManager.FreePool(memory, sizeof(EdClassObjectNameControl));
+}
+
+inline EdSubSystem::~EdSubSystem() {
+}
+
+inline void EdControl::operator delete(void *memory) {
+    theMemoryManager.FreePool(memory, sizeof(EdControl));
+}
+
+// Match each control's allocation type, rather than inheriting the base size.
+inline void EdEnumControl::operator delete(void *memory) {
+    theMemoryManager.FreePool(memory, sizeof(EdEnumControl));
+}
+
+inline void EdBitControl::operator delete(void *memory) {
+    theMemoryManager.FreePool(memory, sizeof(EdBitControl));
+}
+
+// ---- begin src/gameapi/edtools/edmenucallbacks.cpp ----
+#include <cstdio>
+
+#pragma GCC push_options
+#pragma GCC optimize("O2", "omit-frame-pointer")
+
+extern "C" {
+
+static __used__ void cbGradChange(void);
+
+static __used__ void cbSel(eduimenu_s *, eduiitem_s *item);
+
+static __used__ void cbSubMenu(eduimenu_s *menu, eduiitem_s *item);
+
+static __used__ void cbgpcfgAdd(eduimenu_s *menu, eduiitem_s *item, u32 value);
+
+static __used__ void cbgpcfgCPPress(eduimenu_s *menu, eduiitem_s *item, u32 value);
+
+static __used__ void cbgpcfgCopy(eduimenu_s *menu, eduiitem_s *item, u32 value);
+
+static __used__ void cbgpcfgDel(eduimenu_s *menu, eduiitem_s *item, u32 value);
+
+static __used__ void cbgpcfgPaste(eduimenu_s *menu, eduiitem_s *item, u32 value);
+
+} // extern "C"
+
+#pragma GCC pop_options
+
+// ---- end src/gameapi/edtools/edmenucallbacks.cpp ----
+
+// ---- begin src/gameapi/edtools/edptlall.cpp ----
+
+extern "C" {
+    extern i32 debris_render_group;
+}
+
+// ---- end src/gameapi/edtools/edptlall.cpp ----
+
+extern "C" {
+
+void edmainInit(void *font, char *configuration_file);
+
+void eduiMenuRender(eduimenu_s *menu);
+
+static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
+
+static __used__ i32 cbInteractMenuCancelChild(edui_interact_s *interact);
+
+static __used__ void cbMMReturnToApp(eduimenu_s *, eduiitem_s *, u32);
+
+static __used__ void cbmcfgCameraSpeed(eduimenu_s *, eduiitem_s *item, u32);
+
+static __used__ void cbmcfgCancel(eduimenu_s *menu, eduimenu_s *);
+
+static __used__ void cbMMRegSel(eduimenu_s *, eduiitem_s *selected, u32);
+static __used__ void cbMMEditorConfig(eduimenu_s *menu, eduiitem_s *, u32);
+
+static __used__ void eduicbDestroyDirectoryList(eduimenu_s *menu, eduimenu_s *);
+
+static __used__ i32 eduicbInteractColourPick(edui_interact_s *interact);
+static __used__ i32 eduicbInteractExpander(edui_interact_s *interact);
+static __used__ i32 eduicbInteractProp(struct edui_interact_s *interact);
+static __used__ i32 eduicbInteractFilter(struct edui_interact_s *interact);
+static __used__ i32 eduicbInteractSel(edui_interact_s *interact);
+static __used__ void eduicbItemDestroyExpander(eduimenu_s *menu, eduiitem_s *item);
+static __used__ void eduicbItemDestroyFilter(eduimenu_s *menu, eduiitem_s *item);
+static __used__ void eduicbItemFilePickDestroy(eduimenu_s *menu, eduiitem_s *item);
+static __used__ void eduicbItemGradPickDestroy(eduimenu_s *, eduiitem_s *item);
+static __used__ void eduicbItemSliderDestroy(eduimenu_s *menu, eduiitem_s *item);
+static __used__ void eduicbItemTextPickDestroy(eduimenu_s *menu, eduiitem_s *item);
+static __used__ void eduicbPickCFGCancel(eduimenu_s *menu, eduimenu_s *);
+
+static __used__ i32 eduicbProcessColourPick(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
+static __used__ i32 eduicbProcessColourSlider(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
+static __used__ i32 eduicbProcessExpander(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
+static __used__ i32 eduicbProcessFilePick(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
+static __used__ i32 eduicbProcessFilter(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
+static __used__ i32 eduicbProcessGradPick(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
+static __used__ i32 eduicbProcessGraph(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
+static __used__ i32 eduicbProcessGreyPick(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
+static __used__ i32 eduicbProcessProp(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
+static __used__ i32 eduicbProcessSel(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
+static __used__ i32 eduicbProcessSeparator(eduimenu_s *, eduiitem_s *, f32, nupad_s *);
+static __used__ i32 eduicbProcessSlider(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
+static __used__ i32 eduicbProcessTextPick(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
+static __used__ i32 eduicbProcessTexturePick(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
+__attribute__((force_align_arg_pointer)) static __used__ i32 eduicbRenderCheck(eduimenu_s *, eduiitem_s *item,
+                                                                                   i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderColourPick(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderColourSlider(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderExpander(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderFilePick(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderGradPick(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderGraph(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32 selected);
+static __used__ i32 eduicbRenderGreyPick(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderNumber(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderProp(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderFilter(struct eduimenu_s *menu, struct eduiitem_s *item, i32 x, i32 y, i32 scale,
+                                           i32 selected);
+static __used__ i32 eduicbRenderSel(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderSelWithClipColour(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width,
+                                                      i32);
+static __used__ i32 eduicbRenderSeparator(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderSlider(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderSliderInt(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderTextPick(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderTextSelector(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderTexturePick(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ void eduicbSelectDirectoryEntry(eduimenu_s *menu, eduiitem_s *item, u32 value);
+static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u32);
+}
+
+// ==== src/nu2api/nucore/nucore_plain.cpp: declarations ====
+//
+
+extern "C" {
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+void NuCameraSetEx(NUCAMERA *cam, i32 fast);
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+} // extern "C"
+
+extern "C" {
+
+    extern "C++" {
+        static __attribute__((noinline, noclone)) void
+        DisplayListProcessSkin(NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry, NUDISPLAYLISTITEM **first_and_last,
+                               NUMTX *world_matrix, void **transform_packet, NUMTX *skin_matrices,
+                               DEFORMERWEIGHTSARRAY *deformer_weights, i32 shadow_caster)
+            __asm__("_ZL22DisplayListProcessSkinP7numtl_sP15nudisplaylist_sP19nudisplaylistitem_sPS4_P7numtx_"
+                    "sPPvS7_P22deformerweightsarray_si.isra.36");
+
+        static __attribute__((noinline, noclone)) void
+        DisplayListProcessLightmapped(NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry,
+                                      NUDISPLAYLISTITEM **first_and_last, NUMTX *world_matrix, void **transform_packet,
+                                      f32 alpha)
+            __asm__("_ZL29DisplayListProcessLightmappedP7numtl_sP15nudisplaylist_sP19nudisplaylistitem_sPS4_P7numtx_"
+                    "sPPvf.isra.34");
+    }
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+i32 NuSpecialDrawAt(void *special, NUMTX *mtx);
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+void NuHGobjEval(nuhgobj_s *object, i32 override_count, nuhgobjjointoverride_s *overrides, NUMTX *matrices);
+void NuHGobjEvalAnim2(nuhgobj_s *object, ani3_animheader_s *animation, f32 time, i32 override_count,
+                          NUJOINTANIM_s *overrides, NUMTX *matrices);
+
+void NuHGobjEvalAnimBlend2(nuhgobj_s *object, ani3_animheader_s *animation_a, f32 time_a,
+                               ani3_animheader_s *animation_b, f32 time_b, f32 blend, i32 override_count,
+                               NUJOINTANIM_s *overrides, NUMTX *matrices);
+void **NuHGobjEvalDwa2(i32 render_count, i16 *render_indices, nuanimdata2_s *animation, f32 frame);
+void **NuHGobjEvalDwaBlend2(i32 render_count, i16 *render_indices, nuanimdata2_s *animation_a, f32 frame_a,
+                                nuanimdata2_s *animation_b, f32 frame_b, f32 blend);
+i32 NuHGobjRndrMtxDwa(nuhgobj_s *object, NUMTX *world_matrix, i32 render_count, i16 *render_indices,
+                          NUMTX *joint_matrices, void **blend_values, i32);
+void NuGCutCharAnimProcess(NUGCUTCHAR_s *character, f32 frame, NUMTX *matrix, i32 *visible, u32 *animation_index,
+                               f32 *animation_rate, f32 *blend_time, f32 *animation_start_frame, i32 *layer_mask);
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // Viewport
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+} // extern "C"
+
+// ==== src/gameapi/edtools/edui.cpp: all remaining content ====
+
+// ==== src/legoapi/actions/character/speederchase.cpp: declarations ====
+#include "legoapi/actions/character/speederchase.h"
+#include "legoapi/gizmo/base/GizBlowupObjectInterface.h"
+
+// This alignment affects PodRaceAUpdate codegen even though the linked address is 32-byte aligned.
+
+#include "legoapi/actions/character/speederchase_types.h"
+
+extern SPEEDERCHASEVALUES speedervals[4];
+DECOMP_ASSERT(sizeof(SPEEDERCHASEVALUES) == 0x1c, "Speeder chase tuning stride");
+DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
+
+// ==== src/legoapi/characters/motion/camera.cpp: declarations ====
+#include "legoapi/render/fx/spline_position.h"
+#include "legoapi/cutscenes/minicamcut.h"
+
+#include "legoapi/characters/motion/camera_types.h"
+// Original data symbol testmovef is float0.005 at 0x617cb0.
+
+DECOMP_ASSERT(sizeof(VIEWCAM_s) == 0x28, "ViewCam size");
+DECOMP_ASSERT(offsetof(VIEWCAM_s, pitch) == 0x10, "ViewCam pitch offset");
+DECOMP_ASSERT(offsetof(VIEWCAM_s, gamepad) == 0x24, "ViewCam gamepad offset");
+
+void GameCam_Reset(GAMECAMERA_s *camera);
+
+extern i32 CUTCAMONLY, CUTCAM, GUNSHIPAHACK, netcamera, complexsockposition_forcesock, movegamecamera_forcesock;
+
+DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, path) == 0x40, "Camera context path offset");
+DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context flags offset");
+
+// ==== src/gameapi/edtools/edfile.cpp: all remaining content ====
+
+// ==== src/legoapi/render/core/render.cpp: declarations ====
+
+#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
+    do {                                                                                                               \
+        direction.x = (vx);                                                                                            \
+        direction.y = -(vy) * camera.aspect;                                                                           \
+        direction.z = adjacent;                                                                                        \
+        NuVecNorm(&direction, &direction);                                                                             \
+        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
+        NuVecNorm(&direction, &direction);                                                                             \
+        brightness = direction.y * 0.5f + 0.5f;                                                                        \
+        if (brightness <= near_angle)                                                                                  \
+            brightness = near_scale * parameters->intensity;                                                           \
+        else if (brightness >= far_angle)                                                                              \
+            brightness = far_scale * parameters->intensity;                                                            \
+        else                                                                                                           \
+            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
+        if (parameters->directional) {                                                                                 \
+            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
+            if (angle < parameters->direction_near_angle) {                                                            \
+                brightness += 128.0f * parameters->direction_far_scale;                                                \
+            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
+                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
+                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
+                                      parameters->direction_bias);                                                     \
+                brightness +=                                                                                          \
+                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
+                              parameters->direction_near_scale);                                                       \
+            }                                                                                                          \
+        }                                                                                                              \
+        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
+                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
+                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
+                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
+        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
+            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
+                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
+        else                                                                                                           \
+            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
+        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
+    } while (0)
+
+#define SWIPE_PRIM_UV(U, V)                                                                                            \
+    do {                                                                                                               \
+        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
+        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
+            vertex->float_uv[0] = (U);                                                                                 \
+            vertex->float_uv[1] = (V);                                                                                 \
+        } else {                                                                                                       \
+            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
+            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
+        }                                                                                                              \
+    } while (false)
+
+// ==== functions in original address order ====
+
+extern "C" {
+
+void eduiMenuRender(eduimenu_s *menu);
+
+}
+
+extern "C" {
+
+void edmainInit(void *font, char *configuration_file);
+
+}
+
+// ==== src/nu2api/nucore/nucore_plain.cpp: declarations ====
+//
+
+extern "C" {
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+void NuCameraSetEx(NUCAMERA *cam, i32 fast);
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+} // extern "C"
+
+extern "C" {
+
+    extern "C++" {
+        static __attribute__((noinline, noclone)) void
+        DisplayListProcessSkin(NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry, NUDISPLAYLISTITEM **first_and_last,
+                               NUMTX *world_matrix, void **transform_packet, NUMTX *skin_matrices,
+                               DEFORMERWEIGHTSARRAY *deformer_weights, i32 shadow_caster)
+            __asm__("_ZL22DisplayListProcessSkinP7numtl_sP15nudisplaylist_sP19nudisplaylistitem_sPS4_P7numtx_"
+                    "sPPvS7_P22deformerweightsarray_si.isra.36");
+
+        static __attribute__((noinline, noclone)) void
+        DisplayListProcessLightmapped(NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry,
+                                      NUDISPLAYLISTITEM **first_and_last, NUMTX *world_matrix, void **transform_packet,
+                                      f32 alpha)
+            __asm__("_ZL29DisplayListProcessLightmappedP7numtl_sP15nudisplaylist_sP19nudisplaylistitem_sPS4_P7numtx_"
+                    "sPPvf.isra.34");
+    }
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+i32 NuSpecialDrawAt(void *special, NUMTX *mtx);
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+void NuHGobjEval(nuhgobj_s *object, i32 override_count, nuhgobjjointoverride_s *overrides, NUMTX *matrices);
+void NuHGobjEvalAnim2(nuhgobj_s *object, ani3_animheader_s *animation, f32 time, i32 override_count,
+                          NUJOINTANIM_s *overrides, NUMTX *matrices);
+
+void NuHGobjEvalAnimBlend2(nuhgobj_s *object, ani3_animheader_s *animation_a, f32 time_a,
+                               ani3_animheader_s *animation_b, f32 time_b, f32 blend, i32 override_count,
+                               NUJOINTANIM_s *overrides, NUMTX *matrices);
+void **NuHGobjEvalDwa2(i32 render_count, i16 *render_indices, nuanimdata2_s *animation, f32 frame);
+void **NuHGobjEvalDwaBlend2(i32 render_count, i16 *render_indices, nuanimdata2_s *animation_a, f32 frame_a,
+                                nuanimdata2_s *animation_b, f32 frame_b, f32 blend);
+i32 NuHGobjRndrMtxDwa(nuhgobj_s *object, NUMTX *world_matrix, i32 render_count, i16 *render_indices,
+                          NUMTX *joint_matrices, void **blend_values, i32);
+void NuGCutCharAnimProcess(NUGCUTCHAR_s *character, f32 frame, NUMTX *matrix, i32 *visible, u32 *animation_index,
+                               f32 *animation_rate, f32 *blend_time, f32 *animation_start_frame, i32 *layer_mask);
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // Viewport
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+} // extern "C"
+
+// ==== functions in original address order ====
+
+// ==== functions in original address order ====
+
+extern "C" {
+void SmartTextEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
+                     u8 green, u8 blue, f32 max_width, i32 max_lines, void *message_box, i32 suppress_draw, u32 alpha);
+
+}
+
+// ==== src/legoapi/render/core/render.cpp: declarations ====
+
+static NU_READ_GRAPHICS_DATA_ATTR NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIPTR *buf_end, char *path,
+                                                             char *scene_data)
+    __asm__("_ZL18NuReadGraphicsDataP9variptr_uS0_PcS1_S1_.isra.104");
+
+#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
+    do {                                                                                                               \
+        direction.x = (vx);                                                                                            \
+        direction.y = -(vy) * camera.aspect;                                                                           \
+        direction.z = adjacent;                                                                                        \
+        NuVecNorm(&direction, &direction);                                                                             \
+        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
+        NuVecNorm(&direction, &direction);                                                                             \
+        brightness = direction.y * 0.5f + 0.5f;                                                                        \
+        if (brightness <= near_angle)                                                                                  \
+            brightness = near_scale * parameters->intensity;                                                           \
+        else if (brightness >= far_angle)                                                                              \
+            brightness = far_scale * parameters->intensity;                                                            \
+        else                                                                                                           \
+            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
+        if (parameters->directional) {                                                                                 \
+            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
+            if (angle < parameters->direction_near_angle) {                                                            \
+                brightness += 128.0f * parameters->direction_far_scale;                                                \
+            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
+                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
+                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
+                                      parameters->direction_bias);                                                     \
+                brightness +=                                                                                          \
+                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
+                              parameters->direction_near_scale);                                                       \
+            }                                                                                                          \
+        }                                                                                                              \
+        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
+                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
+                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
+                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
+        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
+            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
+                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
+        else                                                                                                           \
+            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
+        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
+    } while (0)
+
+#define SWIPE_PRIM_UV(U, V)                                                                                            \
+    do {                                                                                                               \
+        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
+        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
+            vertex->float_uv[0] = (U);                                                                                 \
+            vertex->float_uv[1] = (V);                                                                                 \
+        } else {                                                                                                       \
+            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
+            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
+        }                                                                                                              \
+    } while (false)
+
+static __used__ i32 PauseRenderOff();
+
+static __used__ i32 MatrixReflection_CanOverride();
+
+static __used__ void BackDrop_Alpha(float *alpha);
+
+// ==== functions in original address order ====
+
+// ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
+#include "legoapi/ai/core/legoai.h"
+#include "legoapi/gizmos/traps/gizforce.h"
+#include "legoapi/core/input/timing.h"
+
+// Written by ThingManager's ctor (original global @0x124f2e0, .bss).
+
+#include "legoapi/items/objects/gameobjects_types.h"
+
+// Enabled in the target data image.  Ordinary background characters are
+// staggered across frames; special movement states opt back into full-rate
+// processing through the forced-update path.
+
+extern "C" {
+extern AICONDITIONDEF lego_aiconditiondefs[178];
+
+    static_assert(sizeof(lego_aiconditiondefs) / sizeof(lego_aiconditiondefs[0]) == 178,
+                  "complete game AI condition registry");
+
+}
+
+// The special-route list reserves the first ten ids for suit characters.  The
+// remaining ids enumerate the current story list while omitting variants that
+// are represented by those dedicated routes.
+
+f32 GameShadow(GameObject_s *object, nuvec_s *position, f32 probe_height, i32 terrain_mask);
+
+extern CUTSCENEPLAYERCLIP *CutScenePlayer_Active();
+
+#if defined(__i386__)
+#define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
+#else
+#define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone))
+#endif
+
+// Retail keeps only the IPA-SRA clone, which takes the other object's x and z by address.
+
+// ThingManager objects return to the theMemoryManager pool (D0 @0x425a50).
+inline void ThingManager::operator delete(void *thing, usize size) {
+    theMemoryManager.FreePool(thing, size);
+}
+
+static __used__ void LEGO_100PercentFn();
+static __used__ void LEGO_AllGoldBricksFn();
+
+// ==== src/editor/edtoolsall.cpp: all remaining content ====
+#include "nu2api/nucore/nulist.h"
+
+#include "editor/edtoolsall_types.h"
+
+// ==== functions in original address order ====
+
+// ==== src/legoapi/actions/movement/carrying.cpp: declarations ====
+
+// Original defaults: 0x668d30 and 0x668d40, each a four-byte integer.
+
+// ==== src/legoapi/actions/movement/pushing.cpp: declarations ====
+#include "legoapi/items/base/animpacket.h"
+
+// ==== functions in original address order ====
+
+// ==== functions in original address order ====
+
+static void CS_no_fog(NUFPAR *) {
+    CS_CutInfo->flags |= 4;
+}
+
+static void CS_lowend_lowbits(NUFPAR *) {
+    CS_CutInfo->flags |= 0x10000;
+}
+
+static void CS_is_outro(NUFPAR *) {
+    CS_CutInfo->flags |= 0x20000;
+}
+
+static void CS_unskippable_in_story(NUFPAR *) {
+    CS_CutInfo->flags |= 0x40000;
+}
+
+static void CS_skip_use_goto(NUFPAR *) {
+    CS_CutInfo->flags |= 0x80000;
+}
+
+static void CS_in_game(NUFPAR *) {
+    CS_CutInfo->flags &= ~3U;
+    CS_CutInfo->flags |= 0x800;
+}
+
+static void CS_snap_out(NUFPAR *) {
+    CS_CutInfo->flags |= 0x10;
+}
+
+static void CS_cam_only(NUFPAR *) {
+    CS_CutInfo->flags |= 0x20;
+}
+
+static void CS_wipe_out(NUFPAR *) {
+    CS_CutInfo->flags |= 0x100;
+}
+
+static void CS_new_mode(NUFPAR *) {
+    CS_CutInfo->flags |= 0x400;
+}
+
+static void CS_replace_players(NUFPAR *) {
+    CS_CutInfo->flags |= 0x40;
+}
+
+static void CS_looping(NUFPAR *) {
+    CS_CutInfo->flags |= 0x200;
+}
+
+static void CS_start_cam(NUFPAR *) {
+    CS_CutInfo->flags |= 0x2000;
+}
+
+static void CS_super_widescreen(NUFPAR *) {
+    CS_CutInfo->flags |= 0x4000;
+}
+
+static void CS_level_intro(NUFPAR *) {
+    CS_CutInfo->flags |= 0x1000;
+}
+
+static void CS_hold_audio(NUFPAR *) {
+    CS_CutInfo->linked_audio = 1;
+}
+
+static void CS_playonce(NUFPAR *) {
+    CS_CutInfo->end_flags |= 1;
+}
+
+static void CS_nextcutscene_inplayablelevel(NUFPAR *) {
+    CS_CutInfo->end_flags |= 2;
+}
+
+static void CutScene_CreateCharacterInstance(NUGCUTCHAR_s *character, instNUGCUTCHAR_s *instance, variptr_u *) {
+    if ((character->flags & 2) != 0) {
+        instance->character_model = character->character_model;
+    }
+}
+
+static void CutScene_ResetCharacters(instNUGCUTSCENE_s *instance) {
+    NUGCUTSCENE_s *cutscene = instance->cutscene;
+    NUGCUTCHARSYS_s *character_system = cutscene->character_system;
+    instNUGCUTCHARSYS_s *character_instance = instance->character_instance;
+
+    i32 i = 0;
+    while (i < character_system->character_count) {
+        instNUGCUTCHAR_s *character = &character_instance->characters[i];
+        character->field_04 = 0;
+        character->field_14 = 0;
+        character->field_15 = 0xff;
+        ++i;
+    }
+}
+
+static void bgAckStreamCutScene(bgprocinfo_s *) {
+    stream_cut_issued = 0;
+}
 
 static __used__ void LocatorFunction_Blaster(instNUGCUTSCENE_s *, NUGCUTLOCATORSYS_s *, instNUGCUTLOCATOR_s *,
                                              NUGCUTLOCATOR_s *locator, float frame, numtx_s *parent_mtx, int) {
@@ -767,28 +2591,23 @@ static __used__ void LocatorFunction_Blaster(instNUGCUTSCENE_s *, NUGCUTLOCATORS
     }
 }
 
-static NUGCUTLOCATORFNENTRY_s cutscene_locatorfns[] = {
-    {"blaster", 0, 0, 0, LocatorFunction_Blaster},
-    {NULL, 0, 0, 0, NULL},
-};
-
-void CutScenes_InitSystem(CUTSCENESYS *system) {
-    CutSceneSys = system;
-    NuGCutSceneSysInit(cutscene_locatorfns);
-    NuSetCutSceneCharacterRenderFn(CutScene_DrawCharacter);
-    NuSetCutSceneFindCharactersFn(CutScene_FindCharacters);
-    NuSetCutSceneCharacterCreateDataFn(CutScene_CreateCharacterInstance);
-    NuSetCutSceneResetCharactersFn(CutScene_ResetCharacters);
-    NuSetCutSceneCharacterEvalFn(CutScene_EvalCharacter);
-    NuSetCutSceneRigidPostRenderFn(CutScene_RigidPostRender);
+static void CutScene_EvalCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTSCENE_s *, instNUGCUTCHAR_s *instance,
+                                   NUGCUTCHAR_s *character, f32 frame) {
+    GameObject_s *object = NULL;
+    if ((character->flags & 2) == 0) {
+        object = static_cast<GameObject_s *>(instance->character_model);
+    }
+    i32 visible;
+    NUMTX_ALIGNED32 matrix;
+    NuGCutCharAnimProcess(character, frame, &matrix, &visible, NULL, NULL, NULL, NULL, NULL);
+    if (static_cast<i8>(cutscene_instance->flags_88) < 0) {
+        NuMtxMul(&matrix, &matrix, &cutscene_instance->matrix);
+    }
+    if (object != NULL) {
+        object->apiobj.field_0xb8 = matrix;
+        object->apiobj.position = *NUMTX_GET_ROW_VEC(&matrix, 3);
+    }
 }
-
-extern i32 dco_id;
-extern i32 dco_reflectaxis;
-extern i32 dco_wearinghat;
-extern f32 dco_reflectcoord;
-extern GAMECHARACTERDATA_s *dco_gcdata;
-extern CHARACTERMODEL_s *dco_cmodel;
 
 static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTSCENE_s *cutscene,
                                    instNUGCUTCHAR_s *instance, NUGCUTCHAR_s *character, f32 frame, i32 paused) {
@@ -1209,71 +3028,287 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
     }
 }
 
-static void CutScene_EvalCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTSCENE_s *, instNUGCUTCHAR_s *instance,
-                                   NUGCUTCHAR_s *character, f32 frame) {
-    GameObject_s *object = NULL;
-    if ((character->flags & 2) == 0) {
-        object = static_cast<GameObject_s *>(instance->character_model);
-    }
-    i32 visible;
-    NUMTX_ALIGNED32 matrix;
-    NuGCutCharAnimProcess(character, frame, &matrix, &visible, NULL, NULL, NULL, NULL, NULL);
-    if (static_cast<i8>(cutscene_instance->flags_88) < 0) {
-        NuMtxMul(&matrix, &matrix, &cutscene_instance->matrix);
-    }
-    if (object != NULL) {
-        object->apiobj.field_0xb8 = matrix;
-        object->apiobj.position = *NUMTX_GET_ROW_VEC(&matrix, 3);
+static void bgLoadStreamCutScene(bgprocinfo_s *) {
+    if (cutscene_load_instance != NULL) {
+        instNuGCutSceneServiceLoad();
     }
 }
 
-static void CutScene_FindCharacters(NUGCUTSCENE_s *cutscene) {
-    NUGCUTCHARSYS_s *system = cutscene->character_system;
-    for (i32 i = 0; i < system->character_count; ++i) {
-        NUGCUTCHAR_s *character = &system->characters[i];
-        CUTSYS *cutscene_system = CS_cutsys;
-        character->flags |= 2;
-        NUGCUTLOCATORSYS_s *locator_system = cutscene->locator_system;
-        char *name = character->name;
+static void CutScene_Configure(CUTINFO *cut, char *name, VARIPTR *buf, VARIPTR *buf_end) {
+    CUTSCENEPLAYEROBJ state_entries[32];
 
-        i32 model_index;
-        for (model_index = 0; model_index < apicharsys->loaded_model_count; ++model_index) {
-            i32 character_id = apicharsys->models[model_index].model_id;
-            if (NuStrICmp(name, CDataList[character_id].file) == 0) {
-                CHARACTERMODEL_s *model = &apicharsys->models[model_index];
-                character_id = model->model_id;
-                character->character_model = model;
-                if (character_id != -1) {
-                    cutscene_system->character_bits[character_id / 32] |= 1U << (character_id & 0x1f);
-                }
-                goto resolve_locators;
+    CS_CutInfo = cut;
+    CS_buffptr = buf;
+    CS_buffend = buf_end;
+    cut->state_count = 0;
+    cut->flags = 3;
+    cut->frames_per_second = 30.0f;
+    cut->burnout_threshold = 1.0f;
+    cut->burnout_intensity = 0.0f;
+    cut->burnout_flare = 0.0f;
+    cut->camera_near_clip = 0.0f;
+    cut->camera_far_clip = 0;
+    cut->legacy_music_index = -1;
+    cut->skip_level = -1;
+    cut->debris_render_group = 2;
+    cut->linked_audio = 0;
+    cut->door_name[0] = '\0';
+    cut->next_cutscene[0] = '\0';
+    cut->music_handle = -1;
+
+    for (i32 i = 0; i < 6; ++i) {
+        cut->sfx[i].id = -1;
+    }
+    cut->blob_shadow_alpha = 0xff;
+    cut->blob_shadow_fade_near = 0xff;
+    cut->blob_shadow_fade_far = 0xff;
+    cut->reflection_range = 0xff;
+    for (i32 i = 0; i < 4; ++i) {
+        cut->texture_animations[i].index = -1;
+    }
+    for (i32 i = 0; i < 2; ++i) {
+        cut->fade_fog[i].frame = 0.0f;
+        cut->fade_fog[i].near_distance = 0.0f;
+        cut->fade_fog[i].far_distance = 0.0f;
+        cut->fade_fog[i].value = 0.0f;
+    }
+    cut->subtitle_count = 0;
+    cut->subtitle_data = NULL;
+    cut->end_flags &= ~3U;
+    cut->pad_18b = 0;
+    cut->low_end_distance = 0.0f;
+    cut->state_entries = state_entries;
+
+    NUFPAR *fp = NuFParCreate(name);
+    if (fp == NULL) {
+        return;
+    }
+    CS_texanimcount = 0;
+    CS_fadefogcount = 0;
+    NuFParPushCom(fp, CutScene_ConfigKeywords);
+    while (NuFParGetLine(fp) != 0) {
+        if (NuFParGetWord(fp) == 0) {
+            continue;
+        }
+        NuFParInterpretWord(fp);
+    }
+    NuFParDestroy(fp);
+
+    CUTINFO *info = CS_CutInfo;
+    if (info->blob_shadow_fade_near > info->blob_shadow_fade_far) {
+        info->blob_shadow_fade_near = info->blob_shadow_fade_far;
+    }
+    if (info->subtitle_data != NULL && info->subtitle_count == 0) {
+        info->subtitle_data = NULL;
+    }
+    if (info->state_count == 0) {
+        info->state_entries = NULL;
+    } else {
+        buf->void_ptr = reinterpret_cast<void *>(ALIGN(buf->addr, 4));
+        info->state_entries = reinterpret_cast<CUTSCENEPLAYEROBJ *>(buf->void_ptr);
+        const i32 size = info->state_count * sizeof(CUTSCENEPLAYEROBJ);
+        memmove(info->state_entries, state_entries, size);
+        buf->void_ptr = reinterpret_cast<char *>(buf->void_ptr) + size;
+    }
+}
+
+static void CS_farclip(NUFPAR *fp) {
+    CS_CutInfo->camera_far_clip = static_cast<u16>(NuFParGetInt(fp));
+}
+
+static void CS_render_group(NUFPAR *fp) {
+    CS_CutInfo->debris_render_group = static_cast<i8>(NuFParGetInt(fp));
+}
+
+static void CS_reflect_range(NUFPAR *fp) {
+    CS_CutInfo->reflection_range = static_cast<u8>(NuFParGetInt(fp));
+}
+
+static void CS_blobshadow_fadefar(NUFPAR *fp) {
+    CS_CutInfo->blob_shadow_fade_far = static_cast<u8>(NuFParGetInt(fp));
+}
+
+static void CS_blobshadow_fadenear(NUFPAR *fp) {
+    CS_CutInfo->blob_shadow_fade_near = static_cast<u8>(NuFParGetInt(fp));
+}
+
+static void CS_blobshadow_alpha(NUFPAR *fp) {
+    i32 alpha = NuFParGetInt(fp);
+    alpha = alpha < 0 ? 0 : alpha;
+    alpha = alpha > 0xfe ? 0xfe : alpha;
+    CS_CutInfo->blob_shadow_alpha = static_cast<u8>(alpha);
+}
+
+static void CS_nearclip(NUFPAR *fp) {
+    CS_CutInfo->camera_near_clip = NuFParGetFloat(fp);
+}
+
+static void CS_burnout_flare(NUFPAR *fp) {
+    CS_CutInfo->burnout_flare = NuFParGetFloat(fp);
+    CS_CutInfo->flags |= 0x80;
+}
+
+static void CS_burnout_intensity(NUFPAR *fp) {
+    CS_CutInfo->burnout_intensity = NuFParGetFloat(fp);
+    CS_CutInfo->flags |= 0x80;
+}
+
+static void CS_burnout_threshold(NUFPAR *fp) {
+    CS_CutInfo->burnout_threshold = NuFParGetFloat(fp);
+    CS_CutInfo->flags |= 0x80;
+}
+
+static void CS_fpsec(NUFPAR *fp) {
+    CS_CutInfo->frames_per_second = NuFParGetFloat(fp);
+}
+
+static inline void CS_subtitle(NUFPAR *fp) {
+    if (CS_CutInfo->subtitle_data == NULL) {
+        CS_CutInfo->subtitle_data = reinterpret_cast<CUTSCENESUBTITLE *>(CS_buffptr->addr);
+    }
+
+    CUTSCENESUBTITLE *subtitle = &CS_CutInfo->subtitle_data[CS_CutInfo->subtitle_count];
+    subtitle->text_id = -1;
+    subtitle->start_frame = 0.0f;
+    subtitle->end_frame = 0.0f;
+    subtitle->red = CUTSUBTITLEDEFAULT_R;
+    subtitle->green = CUTSUBTITLEDEFAULT_G;
+    subtitle->blue = CUTSUBTITLEDEFAULT_B;
+    subtitle->alpha = CUTSUBTITLEDEFAULT_A;
+    subtitle->alignment = CUTSUBTITLEDEFAULT_ALIGN;
+    subtitle->x = CUTSUBTITLEDEFAULT_X;
+    subtitle->y = CUTSUBTITLEDEFAULT_Y;
+    subtitle->x_scale = CUTSUBTITLEDEFAULT_SCALEX;
+    subtitle->y_scale = CUTSUBTITLEDEFAULT_SCALEY;
+    subtitle->max_width = CUTSUBTITLEDEFAULT_FITWIDTH;
+    subtitle->fade_time = 0.0f;
+
+    while (NuFParGetWord(fp) != 0) {
+        if (NuStrICmp(fp->word_buf, "text_id") == 0) {
+            subtitle->text_id = static_cast<i16>(NuFParGetInt(fp));
+        } else if (NuStrICmp(fp->word_buf, "colour") == 0) {
+            subtitle->red = static_cast<u8>(NuFParGetFloat(fp) * 255.0f);
+            subtitle->green = static_cast<u8>(NuFParGetFloat(fp) * 255.0f);
+            subtitle->blue = static_cast<u8>(NuFParGetFloat(fp) * 255.0f);
+            subtitle->alpha = static_cast<u8>(NuFParGetFloat(fp) * 128.0f);
+        } else if (NuStrICmp(fp->word_buf, "r") == 0) {
+            subtitle->red = static_cast<u8>(NuFParGetFloat(fp) * 255.0f);
+        } else if (NuStrICmp(fp->word_buf, "g") == 0) {
+            subtitle->green = static_cast<u8>(NuFParGetFloat(fp) * 255.0f);
+        } else if (NuStrICmp(fp->word_buf, "b") == 0) {
+            subtitle->blue = static_cast<u8>(NuFParGetFloat(fp) * 255.0f);
+        } else if (NuStrICmp(fp->word_buf, "a") == 0) {
+            subtitle->alpha = static_cast<u8>(NuFParGetFloat(fp) * 128.0f);
+        } else if (NuStrICmp(fp->word_buf, "align") == 0) {
+            if (NuStrICmp(fp->word_buf, "centre") == 0) {
+                subtitle->alignment = 0;
+            } else if (NuStrICmp(fp->word_buf, "top") == 0) {
+                subtitle->alignment = 1;
+            } else if (NuStrICmp(fp->word_buf, "top_right") == 0) {
+                subtitle->alignment = 9;
+            } else if (NuStrICmp(fp->word_buf, "right") == 0) {
+                subtitle->alignment = 8;
+            } else if (NuStrICmp(fp->word_buf, "bottom_right") == 0) {
+                subtitle->alignment = 12;
+            } else if (NuStrICmp(fp->word_buf, "bottom") == 0) {
+                subtitle->alignment = 4;
+            } else if (NuStrICmp(fp->word_buf, "bottom_left") == 0) {
+                subtitle->alignment = 6;
+            } else if (NuStrICmp(fp->word_buf, "left") == 0) {
+                subtitle->alignment = 2;
+            } else if (NuStrICmp(fp->word_buf, "top_left") == 0) {
+                subtitle->alignment = 3;
             }
+        } else if (NuStrICmp(fp->word_buf, "start_time") == 0) {
+            subtitle->start_frame = NuFabs(NuFParGetFloat(fp));
+        } else if (NuStrICmp(fp->word_buf, "end_time") == 0) {
+            subtitle->end_frame = NuFabs(NuFParGetFloat(fp));
+        } else if (NuStrICmp(fp->word_buf, "pos") == 0) {
+            subtitle->x = NuFParGetFloat(fp);
+            subtitle->y = NuFParGetFloat(fp);
+        } else if (NuStrICmp(fp->word_buf, "x") == 0) {
+            subtitle->x = NuFParGetFloat(fp);
+        } else if (NuStrICmp(fp->word_buf, "y") == 0) {
+            subtitle->y = NuFParGetFloat(fp);
         }
-        character->character_model = NULL;
 
-    resolve_locators:
-        if (character->has_locator != 0 && reinterpret_cast<isize>(character->locator) <= 0xfe) {
-            isize locator_index = reinterpret_cast<isize>(character->locator);
-            character->locator_index = static_cast<u8>(reinterpret_cast<usize>(character->locator));
-            character->locator = &locator_system->locators[locator_index];
-        } else {
-            character->locator_index = 0xff;
+        if (NuStrICmp(fp->word_buf, "scale") == 0) {
+            subtitle->x_scale = NuFParGetFloat(fp);
+            subtitle->y_scale = subtitle->x_scale;
+        } else if (NuStrICmp(fp->word_buf, "x_scale") == 0) {
+            subtitle->x_scale = NuFParGetFloat(fp);
+        } else if (NuStrICmp(fp->word_buf, "y_scale") == 0) {
+            subtitle->y_scale = NuFParGetFloat(fp);
+        } else if (NuStrICmp(fp->word_buf, "fit_width") == 0) {
+            subtitle->max_width = NuFabs(NuFParGetFloat(fp));
+        } else if (NuStrICmp(fp->word_buf, "fade_time") == 0) {
+            subtitle->fade_time = NuFabs(NuFParGetFloat(fp));
+        }
+    }
+
+    i16 text_id = subtitle->text_id;
+    if (text_id >= 0 && text_id < Text_GetMaxOverallStrings() && TTab[text_id] != NULL &&
+        subtitle->start_frame < subtitle->end_frame) {
+        if (subtitle->fade_time > 0.0f && subtitle->end_frame - subtitle->start_frame < subtitle->fade_time * 2.0f) {
+            subtitle->fade_time = 0.0f;
+        }
+        CS_buffptr->addr += sizeof(CUTSCENESUBTITLE);
+        ++CS_CutInfo->subtitle_count;
+    }
+}
+
+static void CS_lowend_disthack(NUFPAR *fp) {
+    if (NuFParGetWord(fp) != 0) {
+        f32 distance = NuAToF(fp->word_buf);
+        if (distance > 0.0f) {
+            CS_CutInfo->low_end_distance = distance;
         }
     }
 }
 
-static void CutScene_ResetCharacters(instNUGCUTSCENE_s *instance) {
-    NUGCUTSCENE_s *cutscene = instance->cutscene;
-    NUGCUTCHARSYS_s *character_system = cutscene->character_system;
-    instNUGCUTCHARSYS_s *character_instance = instance->character_instance;
+static void CS_draw_gizmo_sys(NUFPAR *fp) {
+    if (NuFParGetWord(fp) == 0) {
+        return;
+    }
+    if (NuStrICmp(fp->word_buf, "on") == 0) {
+        CS_CutInfo->flags |= 0x8000;
+    } else if (NuStrICmp(fp->word_buf, "off") == 0) {
+        CS_CutInfo->flags &= ~0x8000U;
+    }
+}
 
-    i32 i = 0;
-    while (i < character_system->character_count) {
-        instNUGCUTCHAR_s *character = &character_instance->characters[i];
-        character->field_04 = 0;
-        character->field_14 = 0;
-        character->field_15 = 0xff;
-        ++i;
+static void CS_deb_page(NUFPAR *fp) {
+    if (NuFParGetWord(fp) == 0) {
+        return;
+    }
+    if (NuStrICmp(fp->word_buf, "level") == 0) {
+        CS_CutInfo->flags |= 8;
+    } else {
+        CS_CutInfo->flags &= ~8U;
+    }
+}
+
+static void CS_draw_world(NUFPAR *fp) {
+    if (NuFParGetWord(fp) == 0) {
+        return;
+    }
+    if (NuStrICmp(fp->word_buf, "on") == 0) {
+        CS_CutInfo->flags |= 2;
+    } else if (NuStrICmp(fp->word_buf, "off") == 0) {
+        CS_CutInfo->flags &= ~2U;
+    }
+}
+
+static void CS_next_cut_scene(NUFPAR *fp) {
+    if (NuFParGetWord(fp) != 0 && NuStrLen(fp->word_buf) <= 0x3f) {
+        NuStrCpy(CS_CutInfo->next_cutscene, fp->word_buf);
+        CS_CutInfo->linked_audio = 1;
+    }
+}
+
+static void CS_go_through_door(NUFPAR *fp) {
+    if (NuFParGetWord(fp) != 0 && NuStrLen(fp->word_buf) <= 0xf) {
+        NuStrCpy(CS_CutInfo->door_name, fp->word_buf);
     }
 }
 
@@ -1319,52 +3354,180 @@ static void CutScene_RigidPostRender(NUGCUTRIGID_s *rigid, instNUGCUTRIGID_s *in
     }
 }
 
-static void CutScene_CreateCharacterInstance(NUGCUTCHAR_s *character, instNUGCUTCHAR_s *instance, variptr_u *) {
-    if ((character->flags & 2) != 0) {
-        instance->character_model = character->character_model;
+static void CS_tex_anim(NUFPAR *fp) {
+    if (CS_texanimcount > 3) {
+        return;
+    }
+    // Retail re-reads the cut info and slot for each store.
+    if ((CS_CutInfo->texture_animations[CS_texanimcount].index = NuFParGetInt(fp)) == -1) {
+        return;
+    }
+    if ((CS_CutInfo->texture_animations[CS_texanimcount].frame = static_cast<f32>(NuFParGetInt(fp))) >= 0.0f) {
+        ++CS_texanimcount;
     }
 }
 
-// The loop re-reads the active cut through CutStopInfo after each SmartTextEx call.
-#define CUT_STOP static_cast<CUTINFO *>(CutStopInfo)
-void CutScene_DrawSubtitles() {
-    if (CutStopInfo == NULL || CUT_STOP->subtitle_data == NULL) {
+static void CS_fadefog(NUFPAR *fp) {
+    if (CS_fadefogcount > 1) {
         return;
     }
-
-    CUTSCENESUBTITLE *subtitle = CUT_STOP->subtitle_data;
-    for (i32 i = 0; i < CUT_STOP->subtitle_count; ++i, ++subtitle) {
-        f32 frame = CUT_STOP->field_58;
-        if (frame >= subtitle->start_frame && subtitle->end_frame >= frame) {
-            f32 alpha = 1.0f;
-            if (subtitle->fade_time > 0.0f) {
-                f32 fade_end = subtitle->start_frame + subtitle->fade_time;
-                if (fade_end > frame) {
-                    alpha = (frame - subtitle->start_frame) / (fade_end - subtitle->start_frame);
-                } else {
-                    f32 fade_start = subtitle->end_frame - subtitle->fade_time;
-                    if (frame > fade_start) {
-                        alpha = 1.0f - (frame - fade_start) / (subtitle->end_frame - fade_start);
-                    }
+    f32 value;
+    CS_CutInfo->fade_fog[CS_fadefogcount].frame = value = NuFParGetFloat(fp);
+    if (value >= 0.0f) {
+        CS_CutInfo->fade_fog[CS_fadefogcount].near_distance = value = NuFParGetFloat(fp);
+        if (value >= 0.0f) {
+            CS_CutInfo->fade_fog[CS_fadefogcount].far_distance = value = NuFParGetFloat(fp);
+            if (value >= 0.0f) {
+                CS_CutInfo->fade_fog[CS_fadefogcount].value = value = NuFParGetFloat(fp);
+                if (value >= 0.0f) {
+                    ++CS_fadefogcount;
                 }
             }
-
-            SmartTextEx(TTab[subtitle->text_id], subtitle->x, subtitle->y, 1.0f, subtitle->x_scale, subtitle->y_scale,
-                        1.0f, subtitle->alignment, subtitle->red, subtitle->green, subtitle->blue, subtitle->max_width,
-                        1, NULL, 0, static_cast<i32>(static_cast<f32>(static_cast<i32>(subtitle->alpha)) * alpha));
         }
     }
 }
-#undef CUT_STOP
 
-void CutScene_StoppedFn_LSW(CUTINFO *cut);
-
-void CutScenes_BGLoadManager() {
-    if (cutscene_load_instance != NULL && stream_cut_issued == 0) {
-        stream_cut_issued = 1;
-        bgPostRequest(bgLoadStreamCutScene, bgAckStreamCutScene, NULL, 0);
+static void CS_cutsceneplayerobj(NUFPAR *fp) {
+    if (CS_CutInfo->state_count > 0x1f || NuFParGetWord(fp) == 0) {
+        return;
     }
-    NuGCutSceneSysPostBackgroundLoad();
+
+    if (NuSpecialFind(CS_worldinfo->current_gscn, &CS_CutInfo->state_entries[CS_CutInfo->state_count].special,
+                      fp->word_buf, 1) == 0) {
+        return;
+    }
+    // Every flag update re-indexes the entry: the u8 store may alias state_count.
+#define CS_STATE_FLAGS CS_CutInfo->state_entries[CS_CutInfo->state_count].flags
+    CS_STATE_FLAGS &= ~CLIP_OBJECT_SHOW;
+    CS_STATE_FLAGS &= ~CLIP_OBJECT_HIDE;
+    while (NuFParGetWord(fp) != 0) {
+        if (NuStrICmp(fp->word_buf, "on") == 0) {
+            CS_STATE_FLAGS |= CLIP_OBJECT_SHOW;
+            CS_STATE_FLAGS &= ~CLIP_OBJECT_HIDE;
+        } else if (NuStrICmp(fp->word_buf, "off") == 0) {
+            CS_STATE_FLAGS &= ~CLIP_OBJECT_SHOW;
+            CS_STATE_FLAGS |= CLIP_OBJECT_HIDE;
+        } else if (NuStrICmp(fp->word_buf, "end_anim") == 0 || NuStrICmp(fp->word_buf, "endanim") == 0 ||
+                   NuStrICmp(fp->word_buf, "anim_end") == 0 || NuStrICmp(fp->word_buf, "animend") == 0) {
+            CS_STATE_FLAGS &= ~CLIP_OBJECT_SHOW;
+            CS_STATE_FLAGS &= ~CLIP_OBJECT_HIDE;
+            CS_STATE_FLAGS |= CLIP_OBJECT_ANIM_END;
+        }
+    }
+#undef CS_STATE_FLAGS
+    ++CS_CutInfo->state_count;
+}
+
+static void CS_goto_level(NUFPAR *fp) {
+    if (NuFParGetWord(fp) == 0) {
+        return;
+    }
+    // Retail realigns the frame (and esp,-16) and keeps both out-parameters in 16-byte aligned slots.
+    i32 level_index __attribute__((aligned(16)));
+    Level_FindByName(fp->word_buf, &level_index);
+    if (level_index != -1 && &LDataList[level_index] == HUB_LDATA && CS_area != -1) {
+        i32 status_index __attribute__((aligned(16)));
+        Area_FindStatusLevel(&ADataList[CS_area], &status_index);
+        if (status_index != -1) {
+            level_index = status_index;
+        }
+    }
+    CS_CutInfo->skip_level = static_cast<i16>(level_index);
+}
+
+static void CS_play_sfx(NUFPAR *fp) {
+    if (NuFParGetWord(fp) == 0) {
+        return;
+    }
+
+    i32 sfx_id = GetSfxId(fp->word_buf);
+    if (sfx_id == -1) {
+        return;
+    }
+
+    i32 slot;
+    if (CS_CutInfo->sfx[0].id == -1) {
+        slot = 0;
+    } else if (CS_CutInfo->sfx[1].id == -1) {
+        slot = 1;
+    } else if (CS_CutInfo->sfx[2].id == -1) {
+        slot = 2;
+    } else if (CS_CutInfo->sfx[3].id == -1) {
+        slot = 3;
+    } else if (CS_CutInfo->sfx[4].id == -1) {
+        slot = 4;
+    } else if (CS_CutInfo->sfx[5].id == -1) {
+        slot = 5;
+    } else {
+        return;
+    }
+
+    CS_CutInfo->sfx[slot].id = static_cast<i16>(sfx_id);
+    CS_CutInfo->sfx[slot].flags &= ~1U;
+    while (NuFParGetWord(fp) != 0) {
+        if (NuStrICmp(fp->word_buf, "frame") == 0) {
+            CS_CutInfo->sfx[slot].frame = NuFParGetFloat(fp);
+            if (CS_CutInfo->sfx[slot].frame < 1.0f) {
+                CS_CutInfo->sfx[slot].frame = 1.0f;
+            }
+        } else if (NuStrICmp(fp->word_buf, "pos") == 0) {
+            if (NuFParGetFloat(fp) == 0.0f) {
+                continue;
+            }
+            CS_CutInfo->sfx[slot].position.x = NuAToF(fp->word_buf);
+            if (NuFParGetFloat(fp) == 0.0f) {
+                continue;
+            }
+            CS_CutInfo->sfx[slot].position.y = NuAToF(fp->word_buf);
+            if (NuFParGetFloat(fp) == 0.0f) {
+                continue;
+            }
+            CS_CutInfo->sfx[slot].position.z = NuAToF(fp->word_buf);
+            CS_CutInfo->sfx[slot].flags |= 1;
+        }
+    }
+}
+
+static void CS_sfx(NUFPAR *fp) {
+    if (NuFParGetWord(fp) != 0) {
+        CS_CutInfo->legacy_music_index = GetMusicIndex(fp->word_buf, MusicInfo, -1);
+        CS_CutInfo->music_handle = music_man.GetTrackHandle(TRACK_CLASS_CUTSCENE, fp->word_buf);
+    }
+}
+
+static void CutScene_FindCharacters(NUGCUTSCENE_s *cutscene) {
+    NUGCUTCHARSYS_s *system = cutscene->character_system;
+    for (i32 i = 0; i < system->character_count; ++i) {
+        NUGCUTCHAR_s *character = &system->characters[i];
+        CUTSYS *cutscene_system = CS_cutsys;
+        character->flags |= 2;
+        NUGCUTLOCATORSYS_s *locator_system = cutscene->locator_system;
+        char *name = character->name;
+
+        i32 model_index;
+        for (model_index = 0; model_index < apicharsys->loaded_model_count; ++model_index) {
+            i32 character_id = apicharsys->models[model_index].model_id;
+            if (NuStrICmp(name, CDataList[character_id].file) == 0) {
+                CHARACTERMODEL_s *model = &apicharsys->models[model_index];
+                character_id = model->model_id;
+                character->character_model = model;
+                if (character_id != -1) {
+                    cutscene_system->character_bits[character_id / 32] |= 1U << (character_id & 0x1f);
+                }
+                goto resolve_locators;
+            }
+        }
+        character->character_model = NULL;
+
+    resolve_locators:
+        if (character->has_locator != 0 && reinterpret_cast<isize>(character->locator) <= 0xfe) {
+            isize locator_index = reinterpret_cast<isize>(character->locator);
+            character->locator_index = static_cast<u8>(reinterpret_cast<usize>(character->locator));
+            character->locator = &locator_system->locators[locator_index];
+        } else {
+            character->locator_index = 0xff;
+        }
+    }
 }
 
 void CutScenes_ConfigureList(char *filename, variptr_u *buffer, variptr_u) {
@@ -1453,19 +3616,144 @@ void CutScenes_ConfigureList(char *filename, variptr_u *buffer, variptr_u) {
     }
 }
 
-i32 CutScene_PlayingOrRequested(CUTINFO *cut) {
-    if (cut == NULL) {
-        if (CutStopInfo != NULL || NewCutInfoCount != 0)
-            return 1;
-        return 0;
+void *CutScenes_Load(char *config, NUGSCN *gscn1, NUGSCN *gscn2, i32 param1, VARIPTR *buf, VARIPTR *buf_end, i32 param2,
+                     i32 param3, WORLDINFO *world) {
+    NUFPAR *fp;
+    CUTSYS *sys;
+    void *initial;
+    CUTINFO *cut;
+    // Retail realigns the frame (and esp,-16) and keeps the name buffer in a 16-byte aligned slot.
+    char name[128] __attribute__((aligned(16)));
+    CUTINFO *entries[32];
+    char full_path[128];
+    char config_name[128];
+
+    if (CutList != NULL && CUTCOUNT > 0) {
+        return CutScenes_LoadFromList(gscn1, gscn2, param1, buf, buf_end, param2, param3, world);
     }
-    if (cut == CutStopInfo)
-        return 1;
-    for (i32 i = 0; i < NewCutInfoCount; ++i) {
-        if (NewCutInfo[i] == cut)
-            return 1;
+    {
+        if (config == NULL) {
+            return NULL;
+        }
+
+        fp = NuFParCreateMem((char *)"cutscenes", config, 0xffff);
+        if (fp == NULL) {
+            return NULL;
+        }
+
+        CS_area = param2;
+        initial = buf->void_ptr;
+        sys = (CUTSYS *)ALIGN((usize)initial, 4);
+        buf->void_ptr = sys + 1;
+        CS_cutsys = sys;
+        CS_worldinfo = world;
+        sys->character_bits = reinterpret_cast<u32 *>(buf->void_ptr);
+        buf->void_ptr = reinterpret_cast<char *>(buf->void_ptr) + ((CHARCOUNT + 0x1f) / 32) * 4;
+
+        while (NuFParGetLine(fp) != 0) {
+            if (NuFParGetWord(fp) == 0 || NuStrICmp(fp->word_buf, "cutscene") != 0 || sys->count > 0x1f ||
+                NuFParGetWord(fp) == 0) {
+                continue;
+            }
+
+            cut = (CUTINFO *)buf->void_ptr;
+            entries[sys->count] = cut;
+            buf->addr = ALIGN(buf->addr + sizeof(*cut), 4);
+            NuStrLwr(name, fp->word_buf);
+            i32 dot = NuStrLen(name) - 1;
+            while (dot > 0 && name[dot] != '.') {
+                --dot;
+            }
+            if (name[dot] == '.') {
+                name[dot] = '\0';
+            }
+
+            if (name[0] == 'c' && name[1] == 'u' && name[2] == 't' && name[3] == '\\') {
+                NuStrCpy(name, name + 4);
+            }
+            NuStrCpy(config_name, name);
+            if (CutScene_OverrideConfigFileNameFn != NULL) {
+                CutScene_OverrideConfigFileNameFn(config_name, param2, param3);
+            }
+            NuStrCpy(full_path, "cut\\");
+            NuStrCat(full_path, config_name);
+            NuStrCat(full_path, ".txt");
+            CutScene_Configure(cut, full_path, buf, buf_end);
+            NuStrCpy(full_path, "cut\\");
+            NuStrCat(full_path, name);
+            NuStrCat(full_path, ".txt");
+
+            if ((cut->flags & 0x800) == 0 && InStory() == 0 &&
+                (LDataList[param3].flags & (LEVEL_INTRO | LEVEL_MIDTRO | LEVEL_OUTRO)) == 0) {
+                buf->void_ptr = cut;
+                continue;
+            }
+            buf->void_ptr = (char *)ALIGN(buf->addr, 0x40);
+            NuStrCpy(full_path, "cut\\");
+            NuStrCat(full_path, name);
+            NuStrCat(full_path, ".cu2");
+            cut->scene = NuGCutSceneLoad(full_path, buf, buf_end, 0);
+            if (cut->scene == NULL) {
+                NuStrCpy(full_path, "cut\\");
+                NuStrCat(full_path, name);
+                NuStrCat(full_path, ".cut");
+                cut->scene = NuGCutSceneLoad(full_path, buf, buf_end, 0);
+                if (cut->scene == NULL) {
+                    buf->void_ptr = cut;
+                    continue;
+                }
+            }
+            i32 separator = NuStrLen(name) - 1;
+            while (separator >= 0 && name[separator] != '\\') {
+                --separator;
+            }
+            NuStrCpy(cut->name, name + separator + 1);
+            NuGCutSceneFixUp(reinterpret_cast<NUGCUTSCENE_s *>(cut->scene), gscn1, 0, param1);
+            NuGCutSceneFixUpExtra(reinterpret_cast<NUGCUTSCENE_s *>(cut->scene), gscn2);
+            cut->instance =
+                instNuGCutSceneCreate(reinterpret_cast<NUGCUTSCENE_s *>(cut->scene), NULL, NULL, name, buf, 0);
+            if (cut->instance != NULL) {
+                reinterpret_cast<instNUGCUTSCENE_s *>(cut->instance)->rate = cut->frames_per_second * DEFAULTFRAMETIME;
+                buf->void_ptr = (char *)ALIGN(buf->addr, 0x10);
+            }
+            sys->count++;
+        }
+        NuFParDestroy(fp);
+        if (sys->count <= 0) {
+            buf->void_ptr = initial;
+            return NULL;
+        }
+        sys->cuts = reinterpret_cast<CUTINFO **>(buf->void_ptr);
+        const usize table_size = sys->count * sizeof(CUTINFO *);
+        memmove(sys->cuts, entries, table_size);
+        // Retail reserves count pointer-table rows after copying the count entries.
+        buf->addr = ALIGN(buf->addr + table_size * sys->count, 4);
+        return sys;
     }
-    return 0;
+}
+
+void *CutScene_FindInst(CUTSYS *system, char *name) {
+    if (system != NULL) {
+        for (i32 i = 0; i < system->count; ++i) {
+            if (NuStrICmp(system->cuts[i]->name, name) == 0) {
+                return system->cuts[i]->instance;
+            }
+        }
+    }
+    return NULL;
+}
+
+CUTINFO *CutScene_Find(CUTSYS *cutscene_system, char *name) {
+    if (name == NULL || cutscene_system == NULL) {
+        return NULL;
+    }
+
+    for (i32 i = 0; i < cutscene_system->count; ++i) {
+        if (NuStrICmp(cutscene_system->cuts[i]->name, name) == 0) {
+            return cutscene_system->cuts[i];
+        }
+    }
+    return NULL;
 }
 
 CUTINFO *NewCutScene(CUTINFO *cut, CUTSYS *system, char *name, i32) {
@@ -1482,15 +3770,827 @@ CUTINFO *NewCutScene(CUTINFO *cut, CUTSYS *system, char *name, i32) {
     return NULL;
 }
 
-extern "C" void *NuAnimData2FixPtrs(void *, isize, isize, i32);
+i32 CutScene_PlayingOrRequested(CUTINFO *cut) {
+    if (cut == NULL) {
+        if (CutStopInfo != NULL || NewCutInfoCount != 0)
+            return 1;
+        return 0;
+    }
+    if (cut == CutStopInfo)
+        return 1;
+    for (i32 i = 0; i < NewCutInfoCount; ++i) {
+        if (NewCutInfo[i] == cut)
+            return 1;
+    }
+    return 0;
+}
 
-i32 STATUS_R = 255;
-i32 STATUS_G = 191;
-i32 STATUS_B;
-void Text_MakeScore(u32, char *);
-extern "C" void PlaySfx(char *, nuvec_s *);
-extern "C" void Text3D(char *, f32, f32, f32, f32, f32, f32, u32, u8, u8, u8);
-i32 DrawPanel3DObjectNoAlpha(f32, f32, f32, f32, f32, f32, u16, u16, u16, nuhspecial_s *, i32);
+i32 CutScene_HasPlayed(CUTINFO *cut) {
+    WORLDINFO_s *world = WorldInfo_CurrentlyActive();
+    CUTSYS *cutscene_system = world->cutscene_sys;
+    if (cut == NULL || cutscene_system == NULL || cutscene_system->count <= 0) {
+        return 0;
+    }
 
-extern "C" void PlaySfx(char *, nuvec_s *);
+    i32 cutscene_index = -1;
+    for (i32 index = 0; index < cutscene_system->count; ++index) {
+        if (cutscene_system->cuts[index] == cut) {
+            cutscene_index = index;
+        }
+    }
+    i32 has_played = 0;
+    if (cutscene_index != -1) {
+        world = WorldInfo_CurrentlyActive();
+        has_played = (world->level_progress->played_cutscene_mask & (1 << cutscene_index)) != 0;
+    }
+    return has_played;
+}
+
+void CutScene_SnapToEnd(CUTINFO *cut) {
+    if (cut != NULL) {
+        instNuGCutSceneEnd(static_cast<instNUGCUTSCENE_s *>(cut->instance));
+    }
+}
+
+void CutScene_StartAudio() {
+}
+
+void CutScenes_Stop(CUTSYS *system) {
+    if (system == NULL || system->count <= 0) {
+        return;
+    }
+    for (i32 i = 0; i < system->count; ++i) {
+        CUTINFO *cut = system->cuts[i];
+        if (cut->instance != NULL) {
+            instNuGCutSceneStop(static_cast<instNUGCUTSCENE_s *>(cut->instance));
+        }
+    }
+}
+
+void CutScenes_Destroy(CUTSYS *system) {
+    if (system == NULL || system->count <= 0) {
+        return;
+    }
+    for (i32 i = 0; i < system->count; ++i) {
+        if (system->cuts[i]->instance != NULL) {
+            instNuGCutSceneDestroy(static_cast<instNUGCUTSCENE_s *>(system->cuts[i]->instance));
+            system->cuts[i]->instance = NULL;
+        }
+    }
+    for (i32 i = 0; i < system->count; ++i) {
+        if (system->cuts[i]->scene != NULL) {
+            NuGCutSceneDestroy(static_cast<NUGCUTSCENE_s *>(system->cuts[i]->scene));
+            system->cuts[i]->scene = NULL;
+        }
+    }
+}
+
+i32 CutScene_IsSkippable(CUTINFO *cut) {
+    return FadeSys.fade == 0.0f && cut != NULL && (cut != CutStopInfo || CutSceneWaiting == 0 || cutaudiopaused == 0);
+}
+
+void CutScenes_Draw(WORLDINFO_s *world) {
+    if (world->cutscene_sys != NULL && ACTIVECUTCOUNT > 0) {
+        SetLevelLights(world->rtl_set, 1.0f);
+
+        CUTINFO *cut = static_cast<CUTINFO *>(CutStopInfo);
+        if (cut == NULL) {
+            CutBlobShadowAlpha = static_cast<u8>(world->current_level->blob_shadow_alpha);
+            CutBlobShadowFadeNear = static_cast<f32>(static_cast<u8>(world->current_level->blob_shadow_fade_near));
+            CutBlobShadowFadeFar = static_cast<f32>(static_cast<u8>(world->current_level->blob_shadow_fade_far));
+            CutReflectRange = static_cast<f32>(static_cast<u8>(world->current_level->reflection_range));
+        } else {
+            CutBlobShadowAlpha = cut->blob_shadow_alpha;
+            CutBlobShadowFadeNear = static_cast<f32>(cut->blob_shadow_fade_near);
+            CutBlobShadowFadeFar = static_cast<f32>(cut->blob_shadow_fade_far);
+            CutReflectRange = static_cast<f32>(cut->reflection_range);
+        }
+        CutReflectRange2 = CutReflectRange * CutReflectRange;
+        NuGCutSceneSysRender(Paused);
+
+        if (CUTDRAWWORLD != 0 && world->current_gscn != NULL) {
+            SetLevelLights(world->rtl_set, 1.0f);
+            NuGScnRndr3(world->current_gscn);
+            if (world->gizmo_sys != NULL && CutStopInfo != NULL &&
+                (static_cast<CUTINFO *>(CutStopInfo)->flags & 0x8000) != 0) {
+                GizmoSysDraw(world->gizmo_sys, world, FRAMETIME);
+            }
+        }
+    }
+}
+
+void CutScenes_BGLoadManager() {
+    if (cutscene_load_instance != NULL && stream_cut_issued == 0) {
+        stream_cut_issued = 1;
+        bgPostRequest(bgLoadStreamCutScene, bgAckStreamCutScene, NULL, 0);
+    }
+    NuGCutSceneSysPostBackgroundLoad();
+}
+
+void CutScenes_InitSystem(CUTSCENESYS *system) {
+    CutSceneSys = system;
+    NuGCutSceneSysInit(cutscene_locatorfns);
+    NuSetCutSceneCharacterRenderFn(CutScene_DrawCharacter);
+    NuSetCutSceneFindCharactersFn(CutScene_FindCharacters);
+    NuSetCutSceneCharacterCreateDataFn(CutScene_CreateCharacterInstance);
+    NuSetCutSceneResetCharactersFn(CutScene_ResetCharacters);
+    NuSetCutSceneCharacterEvalFn(CutScene_EvalCharacter);
+    NuSetCutSceneRigidPostRenderFn(CutScene_RigidPostRender);
+}
+
+void CutScene_DrawSubtitles() {
+    if (CutStopInfo == NULL || CUT_STOP->subtitle_data == NULL) {
+        return;
+    }
+
+    CUTSCENESUBTITLE *subtitle = CUT_STOP->subtitle_data;
+    for (i32 i = 0; i < CUT_STOP->subtitle_count; ++i, ++subtitle) {
+        f32 frame = CUT_STOP->field_58;
+        if (frame >= subtitle->start_frame && subtitle->end_frame >= frame) {
+            f32 alpha = 1.0f;
+            if (subtitle->fade_time > 0.0f) {
+                f32 fade_end = subtitle->start_frame + subtitle->fade_time;
+                if (fade_end > frame) {
+                    alpha = (frame - subtitle->start_frame) / (fade_end - subtitle->start_frame);
+                } else {
+                    f32 fade_start = subtitle->end_frame - subtitle->fade_time;
+                    if (frame > fade_start) {
+                        alpha = 1.0f - (frame - fade_start) / (subtitle->end_frame - fade_start);
+                    }
+                }
+            }
+
+            SmartTextEx(TTab[subtitle->text_id], subtitle->x, subtitle->y, 1.0f, subtitle->x_scale, subtitle->y_scale,
+                        1.0f, subtitle->alignment, subtitle->red, subtitle->green, subtitle->blue, subtitle->max_width,
+                        1, NULL, 0, static_cast<i32>(static_cast<f32>(static_cast<i32>(subtitle->alpha)) * alpha));
+        }
+    }
+}
+
+void CutScenePlayer_Configure(char *file, VARIPTR *buffer, VARIPTR *, i16 *clip_text, i16 *intro, i16 *midtro,
+                              i16 *outro, i16 *ending) {
+    NUFPAR *fp = NuFParCreate(file);
+    if (fp == NULL)
+        return;
+    CUTSCENEPLAYER_s player;
+    buffer->addr = (buffer->addr + 3) & ~3U;
+    player.clips = reinterpret_cast<CUTSCENEPLAYERCLIP *>(buffer->addr);
+    player.active = NULL;
+    player.clip_count = 0;
+    player.clip_text = clip_text;
+    player.intro_text = intro;
+    player.midtro_text = midtro;
+    player.outro_text = outro;
+    player.ending_text = ending;
+    while (NuFParGetLine(fp)) {
+        if (NuFParGetWord(fp) && !(NuStrICmp(fp->word_buf, "clip"))) {
+            CUTSCENEPLAYERCLIP *clip = &player.clips[player.clip_count];
+            clip->level_id = -1;
+            clip->type = CLIP_INTRO;
+            clip->name[0] = 0;
+            clip->guest_episode = -1;
+            while (NuFParGetWord(fp)) {
+                if (NuStrICmp(fp->word_buf, "in_level") == 0) {
+                    i32 level;
+                    if (NuFParGetWord(fp) && Level_FindByName(fp->word_buf, &level))
+                        clip->level_id = level;
+                } else if (NuStrICmp(fp->word_buf, "name") == 0) {
+                    if (NuFParGetWord(fp) && NuStrLen(fp->word_buf) <= 63)
+                        NuStrCpy(clip->name, fp->word_buf);
+                } else if (NuStrICmp(fp->word_buf, "intro") == 0)
+                    clip->type = CLIP_INTRO;
+                else if (NuStrICmp(fp->word_buf, "midtro") == 0)
+                    clip->type = CLIP_MIDTRO;
+                else if (NuStrICmp(fp->word_buf, "outro") == 0)
+                    clip->type = CLIP_OUTRO;
+                else if (NuStrICmp(fp->word_buf, "ending") == 0)
+                    clip->type = CLIP_ENDING;
+                else if (NuStrICmp(fp->word_buf, "guest_in_episode") == 0 && NuFParGetWord(fp))
+                    clip->guest_episode = NuAToI(fp->word_buf);
+            }
+            if (clip->level_id != -1 && (CutScenePlayer_AcceptFn == NULL || CutScenePlayer_AcceptFn(clip)))
+                ++player.clip_count;
+        }
+    }
+    NuFParDestroy(fp);
+    if (player.clip_count == 0) {
+        return;
+    }
+    buffer->void_ptr = &player.clips[player.clip_count];
+    memmove(buffer->void_ptr, &player, sizeof(player));
+    CutScenePlayer = reinterpret_cast<CUTSCENEPLAYER_s *>(buffer->void_ptr);
+    buffer->addr += sizeof(player);
+}
+
+i32 CutScenePlayer_CountEpisodeClips(i32 episode, i32 include_guests, i16 *ids) {
+    i32 count = 0;
+    CUTSCENEPLAYER_s *player = CutScenePlayer;
+    if (player != NULL) {
+        i32 clip_count = player->clip_count;
+        if (__builtin_expect(clip_count != 0, 1)) {
+            LEVELDATA *levels = LDataList;
+            CUTSCENEPLAYERCLIP *clip = player->clips;
+            for (i32 i = 0; i < clip_count; ++i, ++clip) {
+                if (__builtin_expect(levels[clip->level_id].episode_index == episode ||
+                    (include_guests != 0 && clip->guest_episode == episode), 1)) {
+                    if (ids != NULL) {
+                        ids[count++] = i;
+                        clip_count = player->clip_count;
+                    } else {
+                        ++count;
+                    }
+                }
+            }
+        }
+    }
+    return count;
+}
+
+void CutScenePlayer_Reset() {
+    if (CutScenePlayer != NULL) {
+        CutScenePlayer->active = 0;
+    }
+}
+
+void *CutScenePlayer_Available(void) {
+    return CutScenePlayer;
+}
+
+CUTSCENEPLAYERCLIP *CutScenePlayer_Active() {
+    return CutScenePlayer != NULL ? CutScenePlayer->active : 0;
+}
+
+void CutScenes_End() {
+    if (CutScenePlayer_Active() != 0 && NewLData != NULL && NewLData == HUB_LDATA) {
+        return;
+    }
+    for (i32 i = 0; i < CutInstEndCount; ++i) {
+        instNuGCutSceneEnd(CutInstEnd[i]);
+        if (i == CutInstEndStop) {
+            CUTSTOPGAME = 0;
+            CutStopInfo = NULL;
+            GameCam_Reset(GameCam);
+        }
+    }
+}
+
+i32 CutScenePlayer_CanStart(i32 clip_id) {
+    if (CutScenePlayer != NULL && clip_id >= 0 && clip_id < CutScenePlayer->clip_count) {
+        const i32 area_id = static_cast<i8>(LDataList[CutScenePlayer->clips[clip_id].level_id].area_index);
+        if (area_id != -1) {
+            AREADATA_s *area = &ADataList[area_id];
+            if ((area->flags & 2) == 0) {
+                if (Game_AreaSave != NULL && Game_AreaSave[area_id].area_complete != 0)
+                    return 1;
+            } else {
+                const i32 episode = static_cast<i8>(area->episode_index);
+                if (episode != -1 && Episode_IsComplete(&EDataList[episode], NULL))
+                    return 2;
+            }
+        }
+    }
+    return 0;
+}
+
+void CutScenePlayer_Start(i32 clip_id, i32 door) {
+    if (CutScenePlayer != NULL && clip_id >= 0 && clip_id < CutScenePlayer->clip_count) {
+        NewLevelFromMenu(&LDataList[CutScenePlayer->clips[clip_id].level_id], -1, -1, 1);
+        CutScenePlayer->active = &CutScenePlayer->clips[clip_id];
+        NextArea_FreePlay = 0;
+        FreePlay = 0;
+        CutScenePlayer->return_door = door;
+    }
+}
+
+void CutScenePlayer_GetText(i32 id, char *title, char *subtitle, i32 mode) {
+    if (CutScenePlayer == NULL) {
+        if (title != NULL)
+            NuStrCpy(title, "?");
+        if (subtitle != NULL)
+            NuStrCpy(subtitle, "?");
+        return;
+    }
+    if (title != NULL) {
+        if (mode <= 1) {
+            if (CutScenePlayer->clip_text != NULL)
+                sprintf(title, TTab[*CutScenePlayer->clip_text], id + 1);
+            else
+                sprintf(title, "Clip %i", id + 1);
+        } else
+            title[0] = 0;
+        if (mode != 0) {
+            char *type_text = NULL;
+            switch (CutScenePlayer->clips[id].type) {
+                case CLIP_INTRO:
+                    if (CutScenePlayer->intro_text)
+                        type_text = TTab[*CutScenePlayer->intro_text];
+                    break;
+                case CLIP_MIDTRO:
+                    if (CutScenePlayer->midtro_text)
+                        type_text = TTab[*CutScenePlayer->midtro_text];
+                    break;
+                case CLIP_OUTRO:
+                    if (CutScenePlayer->outro_text)
+                        type_text = TTab[*CutScenePlayer->outro_text];
+                    break;
+                case CLIP_ENDING:
+                    if (CutScenePlayer->ending_text)
+                        type_text = TTab[*CutScenePlayer->ending_text];
+                    break;
+            }
+            if (mode <= 1)
+                NuStrCat(title, " - ");
+            else {
+                title[0] = 0;
+                if (mode != 2) {
+                    const i32 area = LDataList[CutScenePlayer->clips[id].level_id].area_index;
+                    if (area != -1 && !(ADataList[area].flags & 2)) {
+                        const i32 chapter = static_cast<i8>(ADataList[area].area_index);
+                        if (chapter != -1) {
+                            sprintf(title, "%s %i", TTab[tCHAPTER], chapter + 1);
+                            NuStrCat(title, " - ");
+                        }
+                    }
+                }
+            }
+            NuStrCat(title, type_text);
+        }
+    }
+    if (subtitle != NULL) {
+        LEVELDATA_s *level = &LDataList[CutScenePlayer->clips[id].level_id];
+        if (level->area_index != -1) {
+            AREADATA_s *area = &ADataList[level->area_index];
+            if (!(area->flags & 2) || level->episode_index != -1) {
+                const i32 text_id = !(area->flags & 2) ? area->name_id : EDataList[level->episode_index].text_id;
+                NuStrCpy(subtitle, TTab[text_id]);
+                return;
+            }
+        }
+        NuStrCpy(subtitle, "?");
+    }
+}
+
+void CutScenePlayer_SetObjects(CUTINFO *cut) {
+    if (CutScenePlayer_Active() != NULL && cut->state_entries != NULL) {
+        for (i32 i = 0; i < cut->state_count; ++i) {
+            CUTSCENEPLAYEROBJ *entry = &cut->state_entries[i];
+            const u8 flags = entry->flags;
+            if (flags & CLIP_OBJECT_SHOW)
+                NuSpecialSetVisibility(&entry->special, 1);
+            else if (flags & CLIP_OBJECT_HIDE)
+                NuSpecialSetVisibility(&entry->special, 0);
+            else if (flags & CLIP_OBJECT_ANIM_END) {
+                f32 end = NuSpecialGetAnimEndFrame(&entry->special);
+                nuinstanim_s *anim = NuSpecialGetInstAnim(&cut->state_entries[i].special);
+                if (anim != NULL) {
+                    anim->ltime = end;
+                    anim->playing = 1;
+                }
+            }
+        }
+    }
+}
+
+void CutScenes_Update(WORLDINFO_s *world, i32 paused) {
+    FADETYPE fade_type;
+    i32 active_before[32];
+    if (CutScenePlayer_Active() != 0 && CutStopInfo != NULL) {
+        CutScenePlayer_SetObjects(static_cast<CUTINFO *>(CutStopInfo));
+    }
+
+    CutInstEnd[0] = NULL;
+    CutInstEndStop = -1;
+    CUTSTOPGAME = 0;
+    CutInstEndCount = 0;
+    CUTCAMONLY = 0;
+    CutStopInfo = NULL;
+    CUTCAM = 0;
+    CUTDRAWWORLD = 0;
+    CUTNOFOG = 0;
+    CUTSKIPLOCK = 0;
+
+    if (world->cutscene_sys == NULL) {
+        return;
+    }
+
+    i32 stop_index = -1;
+    for (i32 i = 0; i < world->cutscene_sys->count; ++i) {
+        CUTINFO *cut = world->cutscene_sys->cuts[i];
+        if (cut->instance == NULL) {
+            continue;
+        }
+        instNUGCUTSCENE_s *instance = reinterpret_cast<instNUGCUTSCENE_s *>(cut->instance);
+        if ((instance->flags_88 & 2) == 0) {
+            continue;
+        }
+        if ((cut->flags & 1) != 0) {
+            CUTDRAWWORLD = cut->flags & 2;
+            CUTNOFOG = cut->flags & 4;
+            CUTSTOPGAME = 1;
+            CutStopInfo = cut;
+            stop_index = i;
+            DebrisSetRenderGroup(cut->debris_render_group);
+            ++CutFrame;
+            LevelNameTime = 0.0f;
+            LevelNameMul = 0.0f;
+            break;
+        } else if ((cut->flags & 0x20) != 0) {
+            CUTCAMONLY = 1;
+        }
+    }
+    if (stop_index == -1) {
+        DebrisSetRenderGroup(1);
+    }
+
+    ACTIVECUTCOUNT = 0;
+    for (i32 i = 0; i < world->cutscene_sys->count; ++i) {
+        CUTINFO *cut = world->cutscene_sys->cuts[i];
+        if (cut->instance == NULL) {
+            active_before[i] = 0;
+            continue;
+        }
+        instNUGCUTSCENE_s *instance = static_cast<instNUGCUTSCENE_s *>(cut->instance);
+        if ((instance->flags_88 & 2) == 0) {
+            active_before[i] = 0;
+            continue;
+        }
+
+        active_before[i] = 1;
+        cut->previous_frame = instance->current_frame;
+        cut->field_58 += FRAMETIME;
+        if (cutaudiopaused != 0 && cut->field_58 >= 3.0f) {
+            cutaudiopaused = 0;
+        }
+
+        if (i == stop_index || stop_index == -1) {
+            if (!(NOSOUND == 0 && NOMUSIC == 0 && i == stop_index && cut->music_handle != -1 &&
+                  instance->rate == 0.0f && cutaudiopaused != 0 &&
+                  music_man.GetStatus(TRACK_CLASS_CUTSCENE, NULL) != 4)) {
+                if (static_cast<instNUGCUTSCENE_s *>(cut->instance)->current_frame == 1.0f && cut->music_handle != -1 &&
+                    music_man.GetStatus(TRACK_CLASS_CUTSCENE, NULL) != 4) {
+                    music_man.PlayTrack(TRACK_CLASS_CUTSCENE, 0);
+                } else if (music_man.GetStatus(TRACK_CLASS_CUTSCENE, NULL) == 4) {
+                    if (g_lastCutInfo != cut) {
+                        g_accumCutsceneTime += g_lastCutsceneTime;
+                        g_lastCutsceneTime =
+                            static_cast<NUGCUTSCENE_s *>(cut->scene)->duration / cut->frames_per_second;
+                        g_lastCutInfo = cut;
+                    }
+                    f32 audio_frame = (music_man.GetPlaybackTime(TRACK_CLASS_CUTSCENE) - g_accumCutsceneTime) *
+                                      cut->frames_per_second;
+                    if (audio_frame < 0.0f) {
+                        audio_frame = 0.0f;
+                    }
+                    f32 rate = audio_frame - (static_cast<instNUGCUTSCENE_s *>(cut->instance)->current_frame - 1.0f);
+                    static_cast<instNUGCUTSCENE_s *>(cut->instance)->rate = rate < 0.0f ? 0.0f : rate;
+                } else {
+                    static_cast<instNUGCUTSCENE_s *>(cut->instance)->rate = cut->frames_per_second * FRAMETIME;
+                }
+
+                if (i == stop_index && CutSceneWaiting != 0) {
+                    CutSceneWaiting = 0;
+                    cutaudiopaused = 0;
+                }
+            } else {
+                static_cast<instNUGCUTSCENE_s *>(cut->instance)->rate = 0.0f;
+                CutSceneWaiting = 1;
+            }
+
+            instNuGCutScenePause(static_cast<instNUGCUTSCENE_s *>(cut->instance), 0);
+            if (CutScene_PreUpdateFn != NULL) {
+                CutScene_PreUpdateFn(cut);
+            }
+            for (i32 j = 0; j < 4; ++j) {
+                CUTSCENETEXANIM *animation = &cut->texture_animations[j];
+                if (animation->index != -1) {
+                    const u32 bit = 1U << animation->index;
+                    if ((texanimbits & bit) == 0 &&
+                        animation->frame <= static_cast<instNUGCUTSCENE_s *>(cut->instance)->current_frame) {
+                        texanimbits |= bit;
+                    }
+                }
+            }
+        } else {
+            instance->rate = 0.0f;
+            instNuGCutScenePause(instance, 1);
+        }
+        ++ACTIVECUTCOUNT;
+    }
+
+    if (g_isLowEndDevice != 0 && ACTIVECUTCOUNT > 0) {
+        drawcharactermodel_nobsa = 0;
+    }
+    NuGCutSceneSysUpdate(paused, 0, 1.0f);
+    if (CutScene_PostUpdateFn != NULL) {
+        CutScene_PostUpdateFn();
+    }
+
+    if (paused == 0) {
+        for (i32 i = 0; i < world->cutscene_sys->count; ++i) {
+            CUTINFO *cut = world->cutscene_sys->cuts[i];
+            if (cut->instance == NULL || active_before[i] == 0) {
+                continue;
+            }
+            instNUGCUTSCENE_s *instance = static_cast<instNUGCUTSCENE_s *>(cut->instance);
+            if (instance->rate > 0.0f) {
+                for (i32 j = 0; j < 6; ++j) {
+                    CUTSCENESFX *sfx = &cut->sfx[j];
+                    if (sfx->id != -1 && cut->previous_frame < sfx->frame &&
+                        sfx->frame <= static_cast<instNUGCUTSCENE_s *>(cut->instance)->current_frame) {
+                        PlaySfxById(sfx->id, (sfx->flags & 1) != 0 ? &sfx->position : NULL);
+                    }
+                }
+            }
+
+            if ((i != stop_index || stop_index == -1) &&
+                instNuGCutSceneIsFinished(static_cast<instNUGCUTSCENE_s *>(cut->instance)) != 0) {
+                if (CutScene_StoppedFn != NULL) {
+                    CutScene_StoppedFn(cut);
+                }
+                if (CutInstEndCount < 4) {
+                    instance = static_cast<instNUGCUTSCENE_s *>(cut->instance);
+                    CutInstEnd[CutInstEndCount++] = instance;
+                    instance->flags_88 |= 2;
+                }
+            }
+        }
+    }
+    if (stop_index == -1) {
+        return;
+    }
+
+    CUTINFO *stop_cut = world->cutscene_sys->cuts[stop_index];
+    GameFog_Reset();
+    if (instNuGCutSceneIsFinished(static_cast<instNUGCUTSCENE_s *>(stop_cut->instance)) == 0) {
+        return;
+    }
+    if (NewLData == NULL || NewLData == WORLD->current_level || NewLData != HUB_LDATA) {
+
+        fade_type.type = FADE_TYPE_STILL_WIPE;
+        FadeSys.SetFade(fade_type, 0);
+    }
+    if (CutScene_StoppedFn != NULL) {
+        CutScene_StoppedFn(stop_cut);
+    }
+    for (i32 i = 0; i < 4; ++i) {
+        if (stop_cut->texture_animations[i].index != -1) {
+            texanimbits &= ~(1U << stop_cut->texture_animations[i].index);
+        }
+    }
+
+    if (stop_cut->skip_level != -1) {
+        NewLData = &LDataList[stop_cut->skip_level];
+        if (HUB_LDATA != NULL && NewLData == HUB_LDATA) {
+            if (CutScenePlayer_Active() != 0) {
+                NewLevelFromMenu(HUB_LDATA, -1, -1, 1);
+                hub_from_cutsceneplayer = 1;
+            } else if (WORLD->area != NULL && (WORLD->area->flags & 2) != 0) {
+                NewLData = SuperStory == 0 ? CREDITS_LDATA : STATUS_LDATA;
+            }
+        } else if (CutScenePlayer_Active() != 0 &&
+                   ((NewLData->flags & (LEVEL_OUTRO | LEVEL_MIDTRO | LEVEL_INTRO)) == 0 &&
+                    (stop_cut->end_flags & 2) == 0)) {
+            NewLevelFromMenu(HUB_LDATA, -1, -1, 1);
+            hub_from_cutsceneplayer = 1;
+        }
+        if (waiting_for_level != -1) {
+            cut_waiting_for_new_level = 1;
+            PauseGameCut();
+            music_man.PauseTrack(TRACK_CLASS_CUTSCENE);
+            newlevel_resumecutaudio = 1;
+        }
+    } else {
+        CUTINFO *next = NewCutScene(NULL, world->cutscene_sys, stop_cut->next_cutscene, 0);
+        if (CutScenePlayer_Active() != 0 && next == NULL) {
+            NewLevelFromMenu(HUB_LDATA, -1, -1, 1);
+            hub_from_cutsceneplayer = 1;
+        } else if ((stop_cut->flags & 0x400) != 0) {
+            NewMode = 1;
+        } else if (stop_cut->door_name[0] != '\0') {
+            DOOR_s *door = Door_FindByName(world, stop_cut->door_name);
+            if (door != NULL) {
+                Door_GoThrough(world, door, 1);
+            }
+        } else if ((stop_cut->flags & 0x100) != 0) {
+            FADETYPE fade_type;
+            fade_type.type = FADE_TYPE_STILL_WIPE;
+            FadeSys.SetFade(fade_type, 0);
+            NeedScreenGrab(1);
+            FadeSys.SetStage(1);
+            GameAudio_PlaySfx(0x2d, NULL, 0, 0);
+        }
+    }
+    CUTNOFOG = 0;
+
+    if (CutInstEndCount < 4) {
+        instNUGCUTSCENE_s *stop_instance = static_cast<instNUGCUTSCENE_s *>(stop_cut->instance);
+        CutInstEndStop = CutInstEndCount;
+        CutInstEnd[CutInstEndCount++] = stop_instance;
+        stop_instance->flags_88 |= 2;
+    }
+}
+
+static i32 CutScene_StartBody(WORLDINFO_s *world, CUTINFO *cut) {
+    if (cut->music_handle != -1) {
+        g_lastCutsceneTime = 0.0f;
+        g_accumCutsceneTime = 0.0f;
+        g_lastCutInfo = NULL;
+    }
+    instNuGCutSceneReset(static_cast<instNUGCUTSCENE_s *>(cut->instance));
+    if (CutScene_StartFn != NULL) {
+        CutScene_StartFn(cut);
+    }
+    if (CutScenePlayer_Active() != 0) {
+        CutScenePlayer_SetObjects(cut);
+    }
+    static_cast<instNUGCUTSCENE_s *>(cut->instance)->rate = cut->frames_per_second * FRAMETIME;
+    instNuGCutSceneStart(static_cast<instNUGCUTSCENE_s *>(cut->instance));
+    if ((cut->flags & 0x200) != 0) {
+        static_cast<instNUGCUTSCENE_s *>(cut->instance)->flags_88 |= 8;
+    } else {
+        static_cast<instNUGCUTSCENE_s *>(cut->instance)->flags_88 &= ~8U;
+    }
+    cut->field_58 = 0.0f;
+
+    if (cut->music_handle != -1) {
+        music_man.SelectTrackByHandle(TRACK_CLASS_CUTSCENE, cut->music_handle);
+        i32 status = music_man.PlayTrack(TRACK_CLASS_CUTSCENE, 0);
+        static_cast<instNUGCUTSCENE_s *>(cut->instance)->rate = 0.0f;
+        if ((cut->flags & 1) == 0 || status != 1) {
+            cutaudiopaused = 0;
+        } else {
+            CutSceneWaiting = 1;
+            PauseGameAudio(0);
+            cutaudiopaused = 1;
+        }
+    } else {
+        PauseGameAudio(0);
+        SetLinkedCutSceneMusic(static_cast<instNUGCUTSCENE_s *>(cut->instance),
+                               cut->linked_audio == 0 ? MUSIC_PLAYBACK_DUAL_STREAM
+                                                      : MUSIC_PLAYBACK_DUAL_STREAM_PENDING);
+        static_cast<instNUGCUTSCENE_s *>(cut->instance)->rate = cut->frames_per_second * FRAMETIME;
+        if ((cut->flags & 1) != 0) {
+            CutSceneWaiting = 0;
+            cutaudiopaused = 0;
+        }
+    }
+
+    if ((cut->flags & 1) == 0) {
+        return 1;
+    }
+    Panel_Clear();
+    CutFrame = 0;
+    for (i32 i = 0; i < world->cutscene_sys->count; ++i) {
+        CUTINFO *other = world->cutscene_sys->cuts[i];
+        instNUGCUTSCENE_s *other_instance = static_cast<instNUGCUTSCENE_s *>(other->instance);
+        if ((other_instance->flags_88 & 2) != 0) {
+            if (other == cut || (other->flags & 1) == 0) {
+                other_instance->rate = 0.0f;
+                instNuGCutScenePause(static_cast<instNUGCUTSCENE_s *>(world->cutscene_sys->cuts[i]->instance), 1);
+            } else {
+                other_instance->rate = 0.0f;
+                instNuGCutSceneStop(other_instance);
+            }
+        }
+    }
+    CUTSTOPGAME = 1;
+    CUTNOFOG = cut->flags & 4;
+    CUTDRAWWORLD = cut->flags & 2;
+    CutStopInfo = cut;
+    DebrisSetRenderGroup(cut->debris_render_group);
+    LevelNameTime = 0.0f;
+    LevelNameMul = 0.0f;
+    ACTIVECUTCOUNT = 1;
+    CutBorderScale = 1.0f;
+    cut_waiting_for_new_level = 0;
+    GameFog_Reset();
+    for (CUTSCENETEXANIM &animation : cut->texture_animations) {
+        if (animation.index != -1) {
+            texanimbits &= ~(1U << (animation.index & 0x1f));
+        }
+    }
+    return 1;
+}
+
+void CutScenes_Reset(WORLDINFO_s *world) {
+    CUTSYS *system = world->cutscene_sys;
+    if (system != NULL) {
+        auto system_count = system->count;
+        for (i32 i = 0; i < system_count; ++i) {
+            CUTINFO *cut = system->cuts[i];
+            instNUGCUTSCENE_s *instance = static_cast<instNUGCUTSCENE_s *>(cut->instance);
+            if (instance == NULL)
+                continue;
+            NUGCUTCHARSYS_s *characters = static_cast<NUGCUTSCENE_s *>(cut->scene)->character_system;
+            instNUGCUTCHARSYS_s *runtime = instance->character_instance;
+            if (runtime == NULL || characters == NULL)
+                continue;
+            for (i32 j = 0; j < characters->character_count; ++j) {
+                instNUGCUTCHAR_s *character = &runtime->characters[j];
+                if (character->character != reinterpret_cast<void *>(1))
+                    continue;
+                NUGCUTCHAR_s *definition = &characters->characters[j];
+                if ((character->field_14 & 2) == 0) {
+                    char *model_file = definition->model_file;
+                    i32 p;
+                    for (p = 0; p < 8; ++p) {
+                        GameObject_s *player = Player[p];
+                        if (player != NULL && (player->apiobj.flags_low & 1) != 0 &&
+                            NuStrICmp(player->apiobj.character_data->file, model_file) == 0) {
+                            character->character = player;
+                            break;
+                        }
+                    }
+                    if (p == 8) {
+                        character->character = NULL;
+                    }
+                } else {
+                    character->character = NULL;
+                }
+                definition->character = character->character;
+            }
+        }
+    }
+    cutaudiopaused = 0;
+    CutStopInfo = NULL;
+    CutSceneWaiting = 0;
+    CutBorderScale = 0.0f;
+    if (world->cutscene_sys != NULL && reset_restart != 0 &&
+        ((world->current_level->flags & 0xe0) != 0 || world->level_progress == NULL ||
+         (world->level_progress->flags & 2) == 0)) {
+        CUTINFO *cut = NULL;
+        CUTSCENEPLAYERCLIP *clip = CutScenePlayer_Active();
+        if (clip != NULL && world->cutscene_sys->count > 0) {
+            if (clip->name[0] != '\0')
+                cut = CutScene_Find(world->cutscene_sys, clip->name);
+            if (cut == NULL)
+                cut = world->cutscene_sys->cuts[0];
+        }
+        if (cut == NULL && cutskip_dontplaylevelintro == 0) {
+            for (i32 i = 0; i < world->cutscene_sys->count; ++i) {
+                if ((world->cutscene_sys->cuts[i]->flags & 0x1000) == 0) {
+                    continue;
+                }
+                cut = world->cutscene_sys->cuts[i];
+                break;
+            }
+        }
+        if (cut != NULL) {
+            MechSystems::Get()->PauseButton().skip_prompt_timer = 0.0f;
+            if (cut->instance != NULL) {
+                bool start = true;
+                LEVEL_PROGRESS_s *progress = world->level_progress;
+                if (world->cutscene_sys != NULL) {
+                    i32 index = -1;
+                    for (i32 i = 0; i < world->cutscene_sys->count; ++i) {
+                        if (world->cutscene_sys->cuts[i] == cut)
+                            index = i;
+                    }
+                    if (progress != NULL) {
+                        u32 mask = 1u << (index & 31);
+                        if (static_cast<i16>(index) != -1 && (cut->playback_flags & 1) != 0 &&
+                            (progress->played_cutscene_mask & mask) != 0)
+                            start = false;
+                        else
+                            progress->played_cutscene_mask |= mask;
+                    }
+                }
+                if (start && CutScene_Start(world, cut, 0) != 0)
+                    CutBorderScale = 1.0f;
+            }
+        }
+    }
+    NewCutInfoCount = 0;
+    cutskip_dontplaylevelintro = 0;
+    cut_waiting_for_new_level = 0;
+}
+
+void CutScenes_Start(WORLDINFO_s *world) {
+    for (i32 i = 0; i < NewCutInfoCount; ++i) {
+        CUTINFO *cut = NewCutInfo[i];
+        MechSystems::Get()->PauseButton().skip_prompt_timer = 0.0f;
+        if (cut == NULL || cut->instance == NULL) {
+            continue;
+        }
+        LEVEL_PROGRESS_s *level_progress = world->level_progress;
+        i32 cutscene_index = -1;
+        if (world->cutscene_sys != NULL) {
+            for (i32 j = 0; j < world->cutscene_sys->count; ++j) {
+                if (world->cutscene_sys->cuts[j] == cut) {
+                    cutscene_index = j;
+                }
+            }
+            if (level_progress != NULL) {
+                const u32 bit = 1U << (cutscene_index & 0x1f);
+                if (static_cast<i16>(cutscene_index) != -1 && (cut->end_flags & 1) != 0 &&
+                    (level_progress->played_cutscene_mask & bit) != 0) {
+                    continue;
+                }
+                level_progress->played_cutscene_mask |= bit;
+            }
+        }
+        CutScene_Start(world, cut, cutscene_index);
+    }
+    NewCutInfoCount = 0;
+}
 

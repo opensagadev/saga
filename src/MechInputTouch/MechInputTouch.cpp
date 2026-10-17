@@ -1,3 +1,6 @@
+// Original translation unit reconstructed from the reference address map.
+// Functions are defined in original address order.
+
 #include "decomp.h"
 #include "gameapi/gui/apimenu.h"
 #include "globals.h"
@@ -9,7 +12,7 @@
 #include "nu2api/nu3d/nuspline.h"
 #include "legoapi/gizmos/object/gizpanel.h"
 #include "legoapi/gizmos/object/gizbuildits.h"
-#include "MechInputTouch_types.h"
+#include "MechInputTouch/MechInputTouch_types.h"
 #include "gamelib/util/gamelib_util_types.h"
 #include "legoapi/gizmo/base/GizForceObjectInterface.h"
 #include "legoapi/items/base/apiobject.h"
@@ -29,17 +32,12 @@
 #include "legoapi/characters/motion.h"
 
 extern i16 id_RANCOR, id_ANAKINJEDI;
-extern i16 id_YODA;
 i32 GameRayCast(NUVEC *, NUVEC *, f32, i32);
 bool CalculateRayBoxIntersection(VuVec const &, VuVec const &, VuVec const &, VuVec const &, f32, f32 &);
 extern "C" void NewRayCastGetImpactNormal(NUVEC *);
 f32 CalcCapsuleIntersectDistance(VuVec const &, VuVec const &, f32, VuVec const &, f32);
-void PerformPauseButtonStuff();
 extern NuVirtualTouchDevice *inputTouchDevice;
 extern i32 players_cannot_exit_speeder;
-void TakeOver2GetIn(GameObject_s *, GameObject_s *);
-void Tag_NewTransfer(GameObject_s *, GameObject_s *);
-i32 TagCode(GameObject_s *, GameObject_s *, i32, i32, i32);
 
 i32 MechInputTouchSystem::s_baseControlMode = 1;
 i32 MechInputTouchSystem::s_actualTouchMode = 2;
@@ -48,164 +46,237 @@ char const *MechInputTouchSystem::GetName() {
     return "MechInputTouchSystem";
 }
 
-MechAutoJumpConnection *MechAutoJumpGetBest(JumpTriggerPacket const &packet, i32 heading) {
-    if (!TouchHacks::TouchControlsActive || WORLD == NULL || WORLD->mech_auto_jump_manager == NULL) {
-        return NULL;
-    }
-
-    MechAutoJumpConnection *current = reinterpret_cast<MechAutoJumpConnection *>(
-        NuLinkedListGetHead(&WORLD->mech_auto_jump_manager->jump_connections));
-    MechAutoJumpConnection *best = NULL;
-
-    if (packet.type == 3) {
-        i32 desired = NuAtan2D(packet.end.x - packet.start.x, packet.end.y - packet.start.y);
-        if (current == NULL) {
-            return NULL;
-        }
-        i32 best_difference = 0x4000;
-        do {
-            if (current->allow_streak && current->use_path_direction) {
-                AIPATHNODE *nodes = current->path->nodes;
-                AIPATHCNX *connection = current->connection;
-                i32 direction = current->direction;
-                NUVEC *to_position = &nodes[connection->node_indices[direction == 0]].position;
-                NUVEC *from_position = &nodes[connection->node_indices[direction]].position;
-                NUVEC from_screen;
-                NUVEC to_screen;
-                NuCameraTransformScreenClip(&from_screen, from_position, 1, NULL);
-                NuCameraTransformScreenClip(&to_screen, to_position, 1, NULL);
-                i32 angle = NuAtan2D(to_screen.x - from_screen.x, to_screen.y - from_screen.y);
-                i32 difference = RotDiff(static_cast<u16>(angle), static_cast<u16>(desired));
-                difference = difference < 0 ? -difference : difference;
-                if (difference < best_difference) {
-                    best_difference = difference;
-                    best = current;
-                }
-            }
-            current = reinterpret_cast<MechAutoJumpConnection *>(NuLinkedListGetNext(
-                &WORLD->mech_auto_jump_manager->jump_connections, reinterpret_cast<NULISTLNK *>(current)));
-        } while (current != NULL);
-        return best;
-    }
-
-    i32 best_difference = 0x2aab;
-    while (current != NULL) {
-        if (current->allow_streak && current->use_path_direction) {
-            i32 angle = current->connection->rotation;
-            if (current->direction != 0) {
-                angle = NuAngAdd(0x8000, angle);
-            }
-            i32 difference = RotDiff(static_cast<u16>(heading), static_cast<u16>(angle));
-            difference = difference < 0 ? -difference : difference;
-            if (difference < best_difference) {
-                best_difference = difference;
-                best = current;
-            }
-        }
-        current = reinterpret_cast<MechAutoJumpConnection *>(NuLinkedListGetNext(
-            &WORLD->mech_auto_jump_manager->jump_connections, reinterpret_cast<NULISTLNK *>(current)));
-    }
-    return best;
+static inline NuButtonLayout &GetTouchLayout(NuVirtualTouchDevice &device, i32 index) {
+    return *reinterpret_cast<NuButtonLayout *>(reinterpret_cast<u8 *>(&device) + 0xd4 + index * 0xcc);
 }
 
-void MechAutoJumpSetIsUsing(GameObject_s &object, MechAutoJumpConnection &connection) {
-    object.ai.path_info.connection = connection.connection;
-    object.ai.path_info.direction = connection.direction;
-
-    WORLDINFO *world = WorldInfo_CurrentlyActive();
-    if (world != NULL && world->mech_auto_jump_manager != NULL) {
-        for (MechAutoJumpConnection *current = reinterpret_cast<MechAutoJumpConnection *>(
-                 NuLinkedListGetHead(&world->mech_auto_jump_manager->jump_connections));
-             current != NULL;
-             current = reinterpret_cast<MechAutoJumpConnection *>(NuLinkedListGetNext(
-                 &world->mech_auto_jump_manager->jump_connections, reinterpret_cast<NULISTLNK *>(current)))) {
-            current->is_using = 0;
-            current->cooldown = 0.0f;
-        }
-    }
-    connection.is_using = 1;
+static inline void AppendTouchElement(NuButtonLayout &layout, NuTouchInputElement *element) {
+    u32 index = layout.unknown_c8;
+    layout.elements[index] = element;
+    layout.unknown_c8 = index + 1;
 }
 
-void MechTouchUITagButton_OnClick_Callback(MechTouchUIElement &element, TouchHolder &) {
-    MechTouchUITagButton &button = static_cast<MechTouchUITagButton &>(element);
-    MechObjectInterface *interface = button.target_object.Get();
-    GameObject_s *target = interface != NULL ? interface->GetCharacterObject() : NULL;
-    if (target == NULL || player == NULL || (player->field_0xcc0 != NULL && player->field_0xcc0->id != id_YODA) ||
-        button.disabled != 0) {
-        GameAudio_PlaySfx(0x32, NULL, 0, 0);
-        return;
-    }
-
-    Hint_SetComplete(0x5f6);
-    player->pause_input_state = 0;
-    bool tagged = false;
-    if ((target->field_0xf00 & 2) != 0) {
-        TakeOver2GetIn(target, player);
-        tagged = true;
-    } else if (TagCode(player, target, 0, 0, 1) == 1) {
-        Tag_NewTransfer(player, target);
-        tagged = true;
-    }
-    if (tagged) {
-        GameAudio_PlaySfx(0x21, NULL, 0, 0);
-    }
-    target->pause_input_state = 0;
+static inline void AppendMainControls(NuButtonLayout &layout, MechInputTouchMainController &controller) {
+    AppendTouchElement(layout, new MechInputTouchMainDummyStick(controller, NuTouchInputElement::TYPE_RIGHT_STICK));
+    AppendTouchElement(layout, new MechInputTouchMainDummyButton(
+                                   controller, 0x80, static_cast<MechInputTouchMainController::eButtonTypes>(0)));
+    AppendTouchElement(layout, new MechInputTouchMainDummyButton(
+                                   controller, 0x20, static_cast<MechInputTouchMainController::eButtonTypes>(3)));
+    AppendTouchElement(layout, new MechInputTouchMainDummyButton(
+                                   controller, 0x40, static_cast<MechInputTouchMainController::eButtonTypes>(2)));
+    AppendTouchElement(layout, new MechInputTouchMainDummyButton(
+                                   controller, 0x10, static_cast<MechInputTouchMainController::eButtonTypes>(1)));
 }
 
-void MechTouchUIPauseButton_OnClick_Callback(MechTouchUIElement &element, TouchHolder &) {
-    static_cast<MechTouchUIPauseButton &>(element).disable_timer = 0.5f;
-    PerformPauseButtonStuff();
-}
+// ==== src/legoapi/actions/combat/hits.cpp: declarations ====
+#include "legoapi/actions/combat/hits.h"
+#include "legoapi/core/config/cheat.h"
+#include "legoapi/actions/character/speederchase.h"
+#include "legoapi/characters/motion/gameanim.h"
+#include "legoapi/characters/core/players.h"
+#include "legoapi/items/collect/torpedo.h"
+#include "legoapi/gizmo/object/gizmopickup.h"
+#include "nu2api/nu3d/nutex.h"
+#include "nu2api/numath/nufloat.h"
 
-void MechTouchUIPartySelector_OnRelease_Callback(MechTouchUIElement &element, TouchHolder &) {
-    MechTouchUICharIcon &icon = static_cast<MechTouchUICharIcon &>(element);
-    if (icon.selector->field_0x88 != 0) {
-        return;
-    }
-    if (player == NULL || player->field_0xcc0 != NULL || icon.disabled != 0) {
-        GameAudio_PlaySfx(0x32, NULL, 0, 0);
-        return;
-    }
-    if (icon.hovered == 0) {
-        return;
-    }
+#include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/world/world_shared.h"
+#include "legoapi/render/core/terrain.h"
+#include "legoapi/audio/sfx.h"
+#include <stdio.h>
 
-    if (FreePlay != 0) {
-        Hint_SetComplete(0x5f5);
-        NewPlayerCharacter(player, icon.character_id, player->id, 1);
-        GameAudio_PlaySfx(0x24, NULL, 0, 0);
-        player->pause_input_state = 0;
-        return;
-    }
+extern i32 disable_narrow_socks, players_cannot_exit_speeder, BuildUpDone;
 
-    Hint_SetComplete(0x5f4);
-    GameObject_s *target = NULL;
-    for (i32 i = 0; i < 8; ++i) {
-        if (Player[i] != NULL && Player[i]->id == icon.character_id) {
-            target = Player[i];
-            break;
-        }
+extern i16 id_SPEEDERBIKE;
+extern AREADATA_s *PODSPRINT_ADATA;
+extern LEVELDATA_s *SPEEDERCHASEA_LDATA;
+extern LEVELDATA_s *VADERC_LDATA;
+
+bool CalculateRayBoxIntersection(VuVec const &minimum, VuVec const &maximum, VuVec const &start, VuVec const &direction,
+                                 float maximum_distance, float &distance);
+
+f32 CalcCapsuleIntersectDistance(VuVec const &start, VuVec const &direction, f32 maximum_distance, VuVec const &centre,
+                                 f32 radius);
+
+// ==== functions in original address order ====
+
+MechInputTouchSystem::MechInputTouchSystem() {
+    initialized = 0;
+    for (i32 index = 0; index < 10; ++index) {
+        locked_buttons[index] = NULL;
+        locked_touch_ids[index] = 0xff;
     }
-    if (target != NULL) {
-        bool tagged = false;
-        if ((target->field_0xf00 & 2) == 0) {
-            if (TagCode(player, target, 0, 0, 1) == 1) {
-                Tag_NewTransfer(player, target);
-                tagged = true;
-            }
-        } else {
-            TakeOver2GetIn(target, player);
-            tagged = true;
-        }
-        if (tagged) {
-            GameAudio_PlaySfx(0x21, NULL, 0, 0);
-        }
-        target->pause_input_state = 0;
-    }
-    player->pause_input_state = 0;
 }
 
 void MechInputTouchSystem::AddChangeLayoutButtons(NuVirtualTouchDevice &, i32) {
+}
+
+void MechInputTouchSystem::CreateGamePlayLayoutConsoleMode(NuVirtualTouchDevice &device, i32 index) {
+    AddChangeLayoutButtons(device, index);
+    MechInputTouchVirtualConsoleController *controller =
+        reinterpret_cast<MechInputTouchVirtualConsoleController *>(NU_ALLOC(0x98, 4, 1, "Main", 0));
+    if (controller != NULL) {
+        new (controller) MechInputTouchVirtualConsoleController(0);
+    }
+    NuButtonLayout &layout = GetTouchLayout(device, index);
+    AppendTouchElement(layout, reinterpret_cast<NuTouchInputElement *>(controller));
+    AppendMainControls(layout, *reinterpret_cast<MechInputTouchMainController *>(controller));
+}
+
+void MechInputTouchSystem::CreateGamePlayLayoutGestureBased(NuVirtualTouchDevice &device, i32 index) {
+    device.GetAspectRatio();
+    AddChangeLayoutButtons(device, index);
+    MechInputTouchGestureBasedController *controller = new MechInputTouchGestureBasedController(0, {0});
+    MechSystems::Get()->gesture_controller = controller;
+    NuButtonLayout &layout = GetTouchLayout(device, index);
+    AppendTouchElement(layout, controller);
+    AppendMainControls(layout, *controller);
+}
+
+void MechInputTouchSystem::CreateGamePlayLayoutGestureBased_Podrace(NuVirtualTouchDevice &device, i32 index) {
+    AddChangeLayoutButtons(device, index);
+    MechInputTouchPodraceController *controller =
+        reinterpret_cast<MechInputTouchPodraceController *>(NU_ALLOC(0x78, 4, 1, "Main", 0));
+    if (controller != NULL) {
+        new (controller) MechInputTouchPodraceController(0);
+    }
+    MechSystems::Get()->gesture_controller = reinterpret_cast<MechInputTouchGestureBasedController *>(controller);
+    NuButtonLayout &layout = GetTouchLayout(device, index);
+    AppendTouchElement(layout, reinterpret_cast<NuTouchInputElement *>(controller));
+    AppendMainControls(layout, *reinterpret_cast<MechInputTouchMainController *>(controller));
+}
+
+void MechInputTouchSystem::CreateGamePlayLayoutGestureBased_Cavalry(NuVirtualTouchDevice &device, i32 index) {
+    AddChangeLayoutButtons(device, index);
+    MechInputTouchBonusCavalryController *controller =
+        new (::operator new(0x78)) MechInputTouchBonusCavalryController(0);
+    MechSystems::Get()->gesture_controller = reinterpret_cast<MechInputTouchGestureBasedController *>(controller);
+    NuButtonLayout &layout = GetTouchLayout(device, index);
+    AppendTouchElement(layout, reinterpret_cast<NuTouchInputElement *>(controller));
+    AppendMainControls(layout, *reinterpret_cast<MechInputTouchMainController *>(controller));
+}
+
+void MechInputTouchSystem::CreateGamePlayLayoutGestureBased_DeathStarTurret(NuVirtualTouchDevice &device, i32 index) {
+    AddChangeLayoutButtons(device, index);
+    MechInputTouchDeathStarTurretController *controller =
+        new (::operator new(0x7c)) MechInputTouchDeathStarTurretController(0);
+    MechSystems::Get()->gesture_controller = reinterpret_cast<MechInputTouchGestureBasedController *>(controller);
+    NuButtonLayout &layout = GetTouchLayout(device, index);
+    AppendTouchElement(layout, reinterpret_cast<NuTouchInputElement *>(controller));
+    AppendMainControls(layout, *reinterpret_cast<MechInputTouchMainController *>(controller));
+}
+
+void MechInputTouchSystem::CreateGamePlayLayoutGestureBased_SpeederChase(NuVirtualTouchDevice &device, i32 index) {
+    AddChangeLayoutButtons(device, index);
+    MechInputTouchSpeederChaseController *controller =
+        reinterpret_cast<MechInputTouchSpeederChaseController *>(NU_ALLOC(0x80, 4, 1, "Main", 0));
+    if (controller != NULL) {
+        new (controller) MechInputTouchSpeederChaseController(0);
+    }
+    MechSystems::Get()->gesture_controller = reinterpret_cast<MechInputTouchGestureBasedController *>(controller);
+    NuButtonLayout &layout = GetTouchLayout(device, index);
+    AppendTouchElement(layout, reinterpret_cast<NuTouchInputElement *>(controller));
+    AppendMainControls(layout, *reinterpret_cast<MechInputTouchMainController *>(controller));
+}
+
+void MechInputTouchSystem::CreateGamePlayLayoutBlank(NuVirtualTouchDevice &, i32) {
+}
+
+void MechInputTouchSystem::CreateGamePanels() {
+    if (inputTouchDevice == NULL) {
+        return;
+    }
+
+    inputTouchDevice->AddAlwaysActiveElement(
+        reinterpret_cast<NuTouchInputElement *>(&MechSystems::Get()->gesture_tracking_system));
+
+    MechInputTouchMenuController *menu_controller = new MechInputTouchMenuController(0);
+    MechSystems::Get()->menu_controller = menu_controller;
+    inputTouchDevice->AddAlwaysActiveElement(reinterpret_cast<NuTouchInputElement *>(menu_controller));
+
+    inputTouchDevice->GetAspectRatio();
+    CreateGamePlayLayoutConsoleMode(*inputTouchDevice, 1);
+    CreateGamePlayLayoutGestureBased(*inputTouchDevice, 2);
+    CreateGamePlayLayoutGestureBased_Podrace(*inputTouchDevice, 3);
+    CreateGamePlayLayoutGestureBased_Cavalry(*inputTouchDevice, 4);
+    CreateGamePlayLayoutGestureBased_DeathStarTurret(*inputTouchDevice, 5);
+    CreateGamePlayLayoutGestureBased_SpeederChase(*inputTouchDevice, 6);
+    CreateGamePlayLayoutBlank(*inputTouchDevice, 7);
+
+    control_mode = SuperOptions.touch_controls != 0 ? 2 : 1;
+    inputTouchDevice->SetCurrentLayoutIndex(control_mode);
+}
+
+void MechInputTouchSystem::Init() {
+    CreateGamePanels();
+    initialized = 1;
+}
+
+bool CalculateRayBoxIntersection(VuVec const &minimum, VuVec const &maximum, VuVec const &start, VuVec const &direction,
+                                 float maximum_distance, float &distance) {
+    f32 near_distance;
+    f32 far_distance;
+    if (direction.x >= 0.0f) {
+        near_distance = (minimum.x - start.x) / direction.x;
+        far_distance = (maximum.x - start.x) / direction.x;
+    } else {
+        near_distance = (maximum.x - start.x) / direction.x;
+        far_distance = (minimum.x - start.x) / direction.x;
+    }
+
+    f32 axis_near_distance;
+    f32 axis_far_distance;
+    if (direction.y >= 0.0f) {
+        axis_near_distance = (minimum.y - start.y) / direction.y;
+        axis_far_distance = (maximum.y - start.y) / direction.y;
+    } else {
+        axis_near_distance = (maximum.y - start.y) / direction.y;
+        axis_far_distance = (minimum.y - start.y) / direction.y;
+    }
+
+    if (near_distance > axis_far_distance || axis_near_distance > far_distance) {
+        return false;
+    }
+    near_distance = MAX(axis_near_distance, near_distance);
+    far_distance = MIN(axis_far_distance, far_distance);
+
+    if (direction.z >= 0.0f) {
+        axis_near_distance = (minimum.z - start.z) / direction.z;
+        axis_far_distance = (maximum.z - start.z) / direction.z;
+    } else {
+        axis_near_distance = (maximum.z - start.z) / direction.z;
+        axis_far_distance = (minimum.z - start.z) / direction.z;
+    }
+
+    if (near_distance > axis_far_distance || axis_near_distance > far_distance) {
+        return false;
+    }
+    far_distance = MIN(axis_far_distance, far_distance);
+    near_distance = MAX(axis_near_distance, near_distance);
+    distance = near_distance;
+    return maximum_distance > near_distance && far_distance > 0.0f;
+}
+
+f32 CalcCapsuleIntersectDistance(VuVec const &start, VuVec const &direction, f32 maximum_distance, VuVec const &centre,
+                                 f32 radius) {
+    const f32 delta_x = centre.x - start.x;
+    const f32 delta_y = centre.y - start.y;
+    const f32 delta_z = centre.z - start.z;
+    f32 distance = direction.x * delta_x + direction.y * delta_y + direction.z * delta_z;
+
+    if (distance >= 0.0f && distance < maximum_distance) {
+        const f32 distance_from_axis_squared =
+            delta_x * delta_x + delta_y * delta_y + delta_z * delta_z - distance * distance;
+        if (radius * radius >= distance_from_axis_squared) {
+            return distance;
+        }
+    }
+    return 1.0e9f;
+}
+
+void MechInputTouchSystem::ConvertToScreenCoords(float x, float y, float &screen_x, float &screen_y) {
+    screen_x = (x - 0.5f) * 2.0f;
+    screen_y = -(y - 0.5f) * 2.0f;
 }
 
 i32 MechInputTouchSystem::ChooseTouchLayout(bool) {
@@ -254,138 +325,6 @@ done:
     return layout;
 }
 
-void MechInputTouchSystem::ConvertToScreenCoords(float x, float y, float &screen_x, float &screen_y) {
-    screen_x = (x - 0.5f) * 2.0f;
-    screen_y = -(y - 0.5f) * 2.0f;
-}
-
-bool MechInputTouchSystem::CouldTouchBeLockedBy(u32 touch_id, MechInputTouchButton *button) {
-    for (i32 index = 0; index < 10; ++index) {
-        if (locked_touch_ids[index] == touch_id) {
-            return locked_buttons[index] == NULL || locked_buttons[index] == button;
-        }
-    }
-    return true;
-}
-
-void MechInputTouchSystem::CreateGamePanels() {
-    if (inputTouchDevice == NULL) {
-        return;
-    }
-
-    inputTouchDevice->AddAlwaysActiveElement(
-        reinterpret_cast<NuTouchInputElement *>(&MechSystems::Get()->gesture_tracking_system));
-
-    MechInputTouchMenuController *menu_controller = new MechInputTouchMenuController(0);
-    MechSystems::Get()->menu_controller = menu_controller;
-    inputTouchDevice->AddAlwaysActiveElement(reinterpret_cast<NuTouchInputElement *>(menu_controller));
-
-    inputTouchDevice->GetAspectRatio();
-    CreateGamePlayLayoutConsoleMode(*inputTouchDevice, 1);
-    CreateGamePlayLayoutGestureBased(*inputTouchDevice, 2);
-    CreateGamePlayLayoutGestureBased_Podrace(*inputTouchDevice, 3);
-    CreateGamePlayLayoutGestureBased_Cavalry(*inputTouchDevice, 4);
-    CreateGamePlayLayoutGestureBased_DeathStarTurret(*inputTouchDevice, 5);
-    CreateGamePlayLayoutGestureBased_SpeederChase(*inputTouchDevice, 6);
-    CreateGamePlayLayoutBlank(*inputTouchDevice, 7);
-
-    control_mode = SuperOptions.touch_controls != 0 ? 2 : 1;
-    inputTouchDevice->SetCurrentLayoutIndex(control_mode);
-}
-
-static inline NuButtonLayout &GetTouchLayout(NuVirtualTouchDevice &device, i32 index) {
-    return *reinterpret_cast<NuButtonLayout *>(reinterpret_cast<u8 *>(&device) + 0xd4 + index * 0xcc);
-}
-
-static inline void AppendTouchElement(NuButtonLayout &layout, NuTouchInputElement *element) {
-    u32 index = layout.unknown_c8;
-    layout.elements[index] = element;
-    layout.unknown_c8 = index + 1;
-}
-
-static inline void AppendMainControls(NuButtonLayout &layout, MechInputTouchMainController &controller) {
-    AppendTouchElement(layout, new MechInputTouchMainDummyStick(controller, NuTouchInputElement::TYPE_RIGHT_STICK));
-    AppendTouchElement(layout, new MechInputTouchMainDummyButton(
-                                   controller, 0x80, static_cast<MechInputTouchMainController::eButtonTypes>(0)));
-    AppendTouchElement(layout, new MechInputTouchMainDummyButton(
-                                   controller, 0x20, static_cast<MechInputTouchMainController::eButtonTypes>(3)));
-    AppendTouchElement(layout, new MechInputTouchMainDummyButton(
-                                   controller, 0x40, static_cast<MechInputTouchMainController::eButtonTypes>(2)));
-    AppendTouchElement(layout, new MechInputTouchMainDummyButton(
-                                   controller, 0x10, static_cast<MechInputTouchMainController::eButtonTypes>(1)));
-}
-
-void MechInputTouchSystem::CreateGamePlayLayoutBlank(NuVirtualTouchDevice &, i32) {
-}
-
-void MechInputTouchSystem::CreateGamePlayLayoutConsoleMode(NuVirtualTouchDevice &device, i32 index) {
-    AddChangeLayoutButtons(device, index);
-    MechInputTouchVirtualConsoleController *controller =
-        reinterpret_cast<MechInputTouchVirtualConsoleController *>(NU_ALLOC(0x98, 4, 1, "Main", 0));
-    if (controller != NULL) {
-        new (controller) MechInputTouchVirtualConsoleController(0);
-    }
-    NuButtonLayout &layout = GetTouchLayout(device, index);
-    AppendTouchElement(layout, reinterpret_cast<NuTouchInputElement *>(controller));
-    AppendMainControls(layout, *reinterpret_cast<MechInputTouchMainController *>(controller));
-}
-
-void MechInputTouchSystem::CreateGamePlayLayoutGestureBased(NuVirtualTouchDevice &device, i32 index) {
-    device.GetAspectRatio();
-    AddChangeLayoutButtons(device, index);
-    MechInputTouchGestureBasedController *controller = new MechInputTouchGestureBasedController(0, {0});
-    MechSystems::Get()->gesture_controller = controller;
-    NuButtonLayout &layout = GetTouchLayout(device, index);
-    AppendTouchElement(layout, controller);
-    AppendMainControls(layout, *controller);
-}
-
-void MechInputTouchSystem::CreateGamePlayLayoutGestureBased_Cavalry(NuVirtualTouchDevice &device, i32 index) {
-    AddChangeLayoutButtons(device, index);
-    MechInputTouchBonusCavalryController *controller =
-        new (::operator new(0x78)) MechInputTouchBonusCavalryController(0);
-    MechSystems::Get()->gesture_controller = reinterpret_cast<MechInputTouchGestureBasedController *>(controller);
-    NuButtonLayout &layout = GetTouchLayout(device, index);
-    AppendTouchElement(layout, reinterpret_cast<NuTouchInputElement *>(controller));
-    AppendMainControls(layout, *reinterpret_cast<MechInputTouchMainController *>(controller));
-}
-
-void MechInputTouchSystem::CreateGamePlayLayoutGestureBased_DeathStarTurret(NuVirtualTouchDevice &device, i32 index) {
-    AddChangeLayoutButtons(device, index);
-    MechInputTouchDeathStarTurretController *controller =
-        new (::operator new(0x7c)) MechInputTouchDeathStarTurretController(0);
-    MechSystems::Get()->gesture_controller = reinterpret_cast<MechInputTouchGestureBasedController *>(controller);
-    NuButtonLayout &layout = GetTouchLayout(device, index);
-    AppendTouchElement(layout, reinterpret_cast<NuTouchInputElement *>(controller));
-    AppendMainControls(layout, *reinterpret_cast<MechInputTouchMainController *>(controller));
-}
-
-void MechInputTouchSystem::CreateGamePlayLayoutGestureBased_Podrace(NuVirtualTouchDevice &device, i32 index) {
-    AddChangeLayoutButtons(device, index);
-    MechInputTouchPodraceController *controller =
-        reinterpret_cast<MechInputTouchPodraceController *>(NU_ALLOC(0x78, 4, 1, "Main", 0));
-    if (controller != NULL) {
-        new (controller) MechInputTouchPodraceController(0);
-    }
-    MechSystems::Get()->gesture_controller = reinterpret_cast<MechInputTouchGestureBasedController *>(controller);
-    NuButtonLayout &layout = GetTouchLayout(device, index);
-    AppendTouchElement(layout, reinterpret_cast<NuTouchInputElement *>(controller));
-    AppendMainControls(layout, *reinterpret_cast<MechInputTouchMainController *>(controller));
-}
-
-void MechInputTouchSystem::CreateGamePlayLayoutGestureBased_SpeederChase(NuVirtualTouchDevice &device, i32 index) {
-    AddChangeLayoutButtons(device, index);
-    MechInputTouchSpeederChaseController *controller =
-        reinterpret_cast<MechInputTouchSpeederChaseController *>(NU_ALLOC(0x80, 4, 1, "Main", 0));
-    if (controller != NULL) {
-        new (controller) MechInputTouchSpeederChaseController(0);
-    }
-    MechSystems::Get()->gesture_controller = reinterpret_cast<MechInputTouchGestureBasedController *>(controller);
-    NuButtonLayout &layout = GetTouchLayout(device, index);
-    AppendTouchElement(layout, reinterpret_cast<NuTouchInputElement *>(controller));
-    AppendMainControls(layout, *reinterpret_cast<MechInputTouchMainController *>(controller));
-}
-
 f32 MechInputTouchSystem::DetermineMoveDir2D(GameObject_s &object, VuVec const &target, bool flatten,
                                              VuVec &direction) {
     VuVec object_position(object.apiobj.collision_position.x, object.apiobj.collision_position.y,
@@ -413,6 +352,72 @@ f32 MechInputTouchSystem::DetermineMoveDir2D(GameObject_s &object, VuVec const &
         direction = VuVec(0.0f, 0.0f, 0.0f, 1.0f);
     }
     return magnitude;
+}
+
+MechInputTouchButton *MechInputTouchSystem::TouchLockedBy(u32 touch_id) {
+    for (i32 index = 0; index < 10; ++index) {
+        if (locked_touch_ids[index] == touch_id) {
+            return locked_buttons[index];
+        }
+    }
+    return NULL;
+}
+
+bool MechInputTouchSystem::CouldTouchBeLockedBy(u32 touch_id, MechInputTouchButton *button) {
+    for (i32 index = 0; index < 10; ++index) {
+        if (locked_touch_ids[index] == touch_id) {
+            return locked_buttons[index] == NULL || locked_buttons[index] == button;
+        }
+    }
+    return true;
+}
+
+void MechInputTouchSystem::SetTouchLockedBy(u32 touch_id, MechInputTouchButton *button, bool) {
+    for (i32 index = 0; index < 10; ++index) {
+        if (locked_touch_ids[index] == touch_id) {
+            MechInputTouchButton *previous = locked_buttons[index];
+            if (previous != NULL) {
+                if (previous == button) {
+                    return;
+                }
+                previous->ClearTouchLocked(true);
+            }
+            locked_buttons[index] = button;
+            if (button == NULL) {
+                locked_touch_ids[index] = 0xff;
+            }
+            return;
+        }
+    }
+
+    if (button != NULL) {
+        for (i32 index = 0; index < 10; ++index) {
+            if (locked_touch_ids[index] == 0xff) {
+                locked_touch_ids[index] = touch_id;
+                locked_buttons[index] = button;
+                return;
+            }
+        }
+    }
+}
+
+void MechInputTouchSystem::ResetAllOwners() {
+    for (i32 index = 0; index < 10; ++index) {
+        if (locked_buttons[index] != NULL) {
+            locked_buttons[index]->Reset();
+        }
+    }
+}
+
+void MechInputTouchSystem::ProcessEvenWhenPaused(ThingProcessData *data) {
+    if (inputTouchDevice == NULL) {
+        return;
+    }
+    const i32 layout = ChooseTouchLayout(data->paused != 0);
+    if (inputTouchDevice->GetCurrentLayoutIndex() != static_cast<u32>(layout)) {
+        ResetAllOwners();
+        inputTouchDevice->SetCurrentLayoutIndex(layout);
+    }
 }
 
 void MechInputTouchSystem::FindTargetForce(WORLDINFO_s *world, GameObject_s &object, VuVec const &start,
@@ -825,72 +830,3 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
     return required_target == NULL || required_target == best ? best : NULL;
 }
 
-void MechInputTouchSystem::Init() {
-    CreateGamePanels();
-    initialized = 1;
-}
-
-MechInputTouchSystem::MechInputTouchSystem() {
-    initialized = 0;
-    for (i32 index = 0; index < 10; ++index) {
-        locked_buttons[index] = NULL;
-        locked_touch_ids[index] = 0xff;
-    }
-}
-
-void MechInputTouchSystem::ProcessEvenWhenPaused(ThingProcessData *data) {
-    if (inputTouchDevice == NULL) {
-        return;
-    }
-    const i32 layout = ChooseTouchLayout(data->paused != 0);
-    if (inputTouchDevice->GetCurrentLayoutIndex() != static_cast<u32>(layout)) {
-        ResetAllOwners();
-        inputTouchDevice->SetCurrentLayoutIndex(layout);
-    }
-}
-
-void MechInputTouchSystem::SetTouchLockedBy(u32 touch_id, MechInputTouchButton *button, bool) {
-    for (i32 index = 0; index < 10; ++index) {
-        if (locked_touch_ids[index] == touch_id) {
-            MechInputTouchButton *previous = locked_buttons[index];
-            if (previous != NULL) {
-                if (previous == button) {
-                    return;
-                }
-                previous->ClearTouchLocked(true);
-            }
-            locked_buttons[index] = button;
-            if (button == NULL) {
-                locked_touch_ids[index] = 0xff;
-            }
-            return;
-        }
-    }
-
-    if (button != NULL) {
-        for (i32 index = 0; index < 10; ++index) {
-            if (locked_touch_ids[index] == 0xff) {
-                locked_touch_ids[index] = touch_id;
-                locked_buttons[index] = button;
-                return;
-            }
-        }
-    }
-}
-
-void MechInputTouchSystem::ResetAllOwners() {
-    for (i32 index = 0; index < 10; ++index) {
-        if (locked_buttons[index] != NULL) {
-            locked_buttons[index]->Reset();
-        }
-    }
-}
-
-MechInputTouchButton *MechInputTouchSystem::TouchLockedBy(u32 touch_id) {
-    for (i32 index = 0; index < 10; ++index) {
-        if (locked_touch_ids[index] == touch_id) {
-            return locked_buttons[index];
-        }
-    }
-    return NULL;
-}

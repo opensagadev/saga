@@ -162,11 +162,7 @@ set_flags:
     load_flowbox->freeplay = (load_g_flags & 0x40) == 0;
 }
 
-struct FLOWREMAP {
-    i16 parents[16];
-    i16 children[32];
-    u8 parent_outputs[16];
-};
+#include "legoapi/gizmo/base/gizflow_types.h"
 DECOMP_ASSERT(sizeof(FLOWREMAP) == 0x70, "Flow remap ABI");
 DECOMP_ASSERT(offsetof(FLOWREMAP, children) == 0x20, "Flow remap children offset");
 DECOMP_ASSERT(offsetof(FLOWREMAP, parent_outputs) == 0x60, "Flow remap output offset");
@@ -275,11 +271,6 @@ static void loadSumBox(nufpar_s *parser) {
     load_conditionParam = NuFParGetInt(parser);
 }
 
-struct FLOWCONDITIONTYPE {
-    i32 type;
-    char *name;
-    nufpcomfn *load;
-};
 static const FLOWCONDITIONTYPE ConditionTypes[] = {
     {0, "All", NULL},  {1, "Any", NULL},           {2, "None", NULL}, {3, "Sum", loadSumBox},
     {4, "loop", NULL}, {5, "exactly", loadSumBox}, {-1, NULL, NULL},
@@ -514,18 +505,7 @@ void GizFlowStoreProgress(GIZFLOW_s *system, GIZFLOWPROGRESS_s *progress) {
     }
 }
 
-i32 GizmoTypeGetProgress(GIZMOSYS_s *system, void *, i32 progress_index, i32 type_id, char *name, void **result) {
-    if (name != NULL && type_id == -1)
-        type_id = GizmoGetTypeIDByName(system, name);
-    if (type_id == -1)
-        return 0;
-    GIZMOTYPE *type = &gizmotypes->types[type_id];
-    void *progress = NULL;
-    if (type->buffer != NULL && progress_index >= 0 && progress_index < gizmotypes->unknown)
-        progress = type->buffer[progress_index].void_ptr;
-    *result = progress;
-    return type->fns.unknown1 != -1 ? type->fns.unknown1 : 0;
-}
+i32 GizmoTypeGetProgress(GIZMOSYS_s *system, void *, i32 progress_index, i32 type_id, char *name, void **result);
 
 void PerformActionFlowBox(GIZFLOW_s *system, FLOWBOX_s *box) {
     if (box != NULL && box->type == 2) {
@@ -537,37 +517,9 @@ void PerformActionFlowBox(GIZFLOW_s *system, FLOWBOX_s *box) {
     }
 }
 
-void GizmoSysStoreProgress(GIZMOSYS_s *system, void *world, i32 progress_index) {
-    GizmoSysClearLevelProgress(world, progress_index);
-    if (gizmotypes == NULL || system == NULL)
-        return;
-    GIZMOTYPE *type = gizmotypes->types;
-    GIZMOSET *set = system->sets;
-    for (i32 i = 0; i < gizmotypes->count; ++i, ++type, ++set) {
-        if (type->fns.store_progress_fn != NULL) {
-            if (progress_index >= 0 && type->buffer != NULL)
-                type->fns.store_progress_fn(world, set->unknown, type->buffer[progress_index].void_ptr);
-            else
-                type->fns.store_progress_fn(world, set->unknown, NULL);
-        }
-    }
-}
+void GizmoSysStoreProgress(GIZMOSYS_s *system, void *world, i32 progress_index);
 
-void GizmoTypeStoreProgress(GIZMOSYS_s *system, void *world, i32 progress_index, i32 type_id, char *name) {
-    if (name != NULL && type_id == -1)
-        type_id = GizmoGetTypeIDByName(system, name);
-    if (type_id == -1)
-        return;
-    GIZMOTYPE *type = &gizmotypes->types[type_id];
-    GIZMOSET *set = &system->sets[type_id];
-    void *progress = NULL;
-    if (type->buffer != NULL && progress_index >= 0 && progress_index < gizmotypes->unknown)
-        progress = type->buffer[progress_index].void_ptr;
-    if (type->fns.clear_progress_fn != NULL)
-        type->fns.clear_progress_fn(world, progress);
-    if (type->fns.store_progress_fn != NULL)
-        type->fns.store_progress_fn(world, set->unknown, progress);
-}
+void GizmoTypeStoreProgress(GIZMOSYS_s *system, void *world, i32 progress_index, i32 type_id, char *name);
 
 static void CheckIfParentsFinished(GIZFLOW_s *system, FLOWBOX_s *box) {
     for (i32 i = 0; i < box->parent_count; ++i) {
@@ -641,11 +593,6 @@ static i32 CheckOutputGizmoFlowBox(GIZFLOW_s *, FLOWBOX_s *, u8);
 static i32 CheckOutputActionFlowBox(GIZFLOW_s *, FLOWBOX_s *, u8);
 static i32 CheckOutputConditionFlowBox(GIZFLOW_s *, FLOWBOX_s *, u8);
 static u8 getNextLoopChecksum();
-struct FLOWBOXTYPE {
-    void (*reset)(GIZFLOW_s *, FLOWBOX_s *);
-    i32 (*process)(GIZFLOW_s *, FLOWBOX_s *, u8);
-    i32 (*check_output)(GIZFLOW_s *, FLOWBOX_s *, u8);
-};
 static FLOWBOXTYPE flowboxtypes[] = {
     {ResetGizmoFlowBox, ProcessGizmoFlowBox, CheckOutputGizmoFlowBox},
     {NULL, ProcessConditionFlowBox, CheckOutputConditionFlowBox},

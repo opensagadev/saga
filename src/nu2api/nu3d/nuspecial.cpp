@@ -906,18 +906,7 @@ extern "C" void NuSpecialSetDrawPos(nuhspecial_s *special, NUVEC *pos) {
     }
 }
 
-f32 NuSpecialGetAnimPos(nuhspecial_s *special) {
-    nuinstanim_s *animation = NuSpecialGetInstAnim(special);
-    if (animation == NULL || special->scene->instance_animation_data[animation->anim_ix] == NULL) {
-        return 0.0f;
-    }
-    f32 end_frame = NuSpecialGetAnimEndFrame(special);
-    f32 position = (animation->ltime - 1.0f) / (end_frame - 1.0f);
-    if (position < 0.0f) {
-        return 0.0f;
-    }
-    return position > 1.0f ? 1.0f : position;
-}
+f32 NuSpecialGetAnimPos(nuhspecial_s *special);
 
 extern "C" void NuDisplayListUpdateSpecial(nuhspecial_s *special) {
     NUDISPLAYSPECIAL *display = static_cast<NUDISPLAYSPECIAL *>(special->display_special);

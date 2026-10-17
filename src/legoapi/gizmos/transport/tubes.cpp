@@ -1,3 +1,6 @@
+// Original translation unit reconstructed from the reference address map.
+// Functions are defined in original address order.
+
 #include "legoapi/gizmos/transport/tubes.h"
 
 #include "decomp.h"
@@ -28,6 +31,134 @@ struct TUBEPROGRESS {
 };
 
 static void Tubes_Update(void *world_ptr, void *progress_ptr, float frame_time);
+
+static void *Tubes_ReserveBufferSpace(void *world_ptr);
+
+static void Tube_Activate(GIZMO *gizmo, i32 active);
+
+static i32 Tube_ActivateRev(GIZMO *gizmo, i32 reverse, i32 check_only);
+
+static void Tube_SetVisibility(GIZMO *gizmo, i32 visible);
+
+static void Tubes_Reset(void *world_ptr, void *, void *progress_ptr);
+
+static void Tubes_Draw(void *, void *, float);
+
+static i32 Tubes_GetMaxGizmos(void *world_ptr);
+
+static char *Tube_GetGizmoName(GIZMO *gizmo);
+
+static i32 Tube_GetOutput(GIZMO *gizmo, i32, i32);
+
+static char *Tube_GetOutputName(GIZMO *, i32);
+
+static i32 Tube_GetNumOutputs(GIZMO *);
+
+static NUVEC *Tube_GetPos(GIZMO *gizmo);
+
+static void Tubes_ClearProgress(void *, void *progress_ptr);
+
+static void *Tubes_AllocateProgressData(VARIPTR *buffer, VARIPTR *buffer_end);
+
+static void Tubes_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *world_ptr, void *);
+
+static i32 Tubes_Load(void *world_ptr, void *);
+
+static void Tubes_StoreProgress(void *world_ptr, void *, void *progress_ptr);
+
+i32 Tube_InCylinder(GameObject_s *object, TUBE *tube, f32 *horizontal_distance_squared, i32 ignore_height);
+
+void Tube_SetObjBit(TUBE *tube, i32 object_index);
+
+i32 Tube_IsObjBitSet(TUBE *tube, i32 object_index);
+
+static void Tubes_Update(void *world_ptr, void *, float frame_time);
+
+// ==== src/legoapi/menus/core/gamehint.cpp: declarations ====
+
+#include "legoapi/characters/motion.h"
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/core/input/qrand.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/legoapi_types.h"
+#include "MechInputTouch/MechInputTouch_types.h"
+#include "legoapi/world/area.h"
+#include "legoapi/core/input/timer.h"
+#include "legoapi/render/core/render.h"
+#include "legoapi/render/fx.h"
+#include "legoapi/menus/core/text.h"
+#include "legoapi/menus/core/gamehint.h"
+#include "nu2api/numath/nuvec.h"
+#include "legoapi/world/mission.h"
+
+extern HINTSYS_s hintsys;
+extern f32 AlphaBlendTime;
+extern f32 ICONX;
+extern f32 ICONXPOS_TOUCHYFEELY;
+extern f32 ICONYPOS_TOUCHYFEELY;
+
+void MechHintUIButton_OnClick_Callback(MechTouchUIElement &, TouchHolder &);
+
+#include "legoapi/menus/core/gamehint_types.h"
+DECOMP_ASSERT(sizeof(MechHintUIButton) == 0xa8, "MechHintUIButton size");
+DECOMP_ASSERT(offsetof(MechHintUIButton, pending_hint) == 0x7c, "Pending touch hint offset");
+DECOMP_ASSERT(offsetof(MechHintUIButton, display_elapsed) == 0x80, "Touch hint display timer offset");
+
+void MechHintUIButton_OnClick_Callback(MechTouchUIElement &element, TouchHolder &);
+
+// Static game message and hint helpers. Stubbed to satisfy the symbol baseline.
+
+// ==== src/legoapi/menus/core/hint.cpp: declarations ====
+#include "legoapi/core/config/cheat.h"
+#include "legoapi/gizmos/object/gizbuildits.h"
+#include "legoapi/gizmos/transport/teleport.h"
+#include "legoapi/menus/core/panel.h"
+#include "nu2api/nu3d/nutex.h"
+#include "legoapi/characters/core/players.h"
+#include "gameapi/gui/apimenu.h"
+#include "legoapi/world/levels/levels.h"
+
+// The hint icon transitions and the touch icon x position are dynamically
+// initialized in this unit's static constructor in the reference.
+extern HintVectorTransition hintIconPos;
+extern HintScalarTransition hintIconScale;
+extern HintScalarTransition hintYPop;
+static __used__ i32 Attack_UpdateHint(HINT_s *);
+
+// Retail keeps this body as GCC's split-out clone; the inline head stays in
+// the caller.
+
+// Original local callbacks referenced by Hints_LSW.
+
+static __used__ i32 Jump_UpdateHint(HINT_s *hint);
+
+static __used__ i32 Move_UpdateHint(HINT_s *hint);
+
+static __used__ i32 Lever_UpdateHint(HINT_s *);
+
+static __used__ i32 AutoJump_UpdateHint(HINT_s *hint);
+
+static __used__ i32 VehicleStuff_UpdateHint(HINT_s *hint);
+
+static __used__ i32 HoldTag_UpdateHint(HINT_s *);
+
+static __used__ i32 HatMachine_UpdateHint(HINT_s *hint);
+
+extern HINT_s Hints_LSW[55];
+
+static __used__ i32 Sith_UpdateHint(HINT_s *);
+
+static __used__ void PlayerButton_PlayHint(HINT_s *);
+
+static __used__ i32 UnlockHubStuff_UpdateHint(HINT_s *hint);
+
+static __used__ i32 PlayerButton_UpdateHint(HINT_s *hint);
+
+// Each control mode retains its own requested and interpolated hint row.
+
+// ==== functions in original address order ====
+
+// ==== functions in original address order ====
 
 static void *Tubes_ReserveBufferSpace(void *world_ptr) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
@@ -421,3 +552,59 @@ i32 ObjInTube(GameObject_s *object) {
     }
     return 0;
 }
+
+void MechHintUIButton_OnClick_Callback(MechTouchUIElement &element, TouchHolder &) {
+    MechHintUIButton &button = static_cast<MechHintUIButton &>(element);
+    hintsys.active_hint = button.active_hint;
+    if (button.active_hint != NULL) {
+        if (button.active_hint->on_display != NULL)
+            button.active_hint->on_display(button.active_hint);
+        if (button.active_hint != NULL) {
+            const f32 blend = AlphaBlendTime;
+            button.pending_hint = NULL;
+            button.slide_from = *button.slide_target;
+            button.slide_to = -1.5f;
+            button.slide_elapsed = 0.0f;
+            button.slide_delay = 0.0f;
+            button.active_hint = NULL;
+            button.slide_duration = blend;
+            button.alpha_from = *button.alpha_target;
+            button.pulse_active = 0;
+            button.alpha_to = 0.0f;
+            button.alpha_elapsed = 0.0f;
+            button.alpha_delay = 0.0f;
+            button.alpha_duration = blend;
+        }
+    }
+    const f32 x = button.slide;
+    const f32 y = button.position.y;
+    hintIconPos.from = VuVec(x, y, 1.0f, 1.0f);
+    hintIconPos.to = VuVec(-ICONX, -0.7f, 1.0f, 1.0f);
+    hintIconPos.duration = 0.5f;
+    hintIconPos.delay = 0.0f;
+    hintIconPos.elapsed = 0.0f;
+    hintIconPos.target->z = 1.0f;
+    hintIconPos.target->w = 1.0f;
+    hintIconPos.target->x = x;
+    hintIconPos.target->y = y;
+    const f32 scale = button.scale;
+    hintIconScale.from = scale;
+    hintIconScale.to = 0.5f;
+    hintIconScale.elapsed = 0.0f;
+    hintIconScale.duration = 0.5f;
+    hintIconScale.delay = 0.0f;
+    *hintIconScale.target = scale;
+    hintYPop.value = 0.0f;
+    hintYPop.from = 0.0f;
+    hintYPop.to = 32768.0f;
+    hintYPop.elapsed = 0.0f;
+    hintYPop.duration = 0.4f;
+    hintYPop.delay = 0.0f;
+    *hintYPop.target = 0.0f;
+    *button.slide_target = button.slide_to;
+    button.slide = -1.5f;
+    button.slide_to = -1.5f;
+    button.slide_elapsed = button.slide_duration;
+    GameAudio_PlaySfx(0x30, NULL, 0, 0);
+}
+

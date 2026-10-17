@@ -35,9 +35,7 @@ extern u8 FS_RefreshDir;
 extern u8 FS_ShowVolumes;
 extern void (*FS_Callback)(char *, char *);
 
-i32 SaveGizmoSys(GIZMOSYS_s *, char *, char *) {
-    return 0;
-}
+i32 SaveGizmoSys(GIZMOSYS_s *, char *, char *);
 
 void SerialiseInt(EdStream &stream, void *data, i32) {
     stream.SerialiseBuffer(data, 4, 1);

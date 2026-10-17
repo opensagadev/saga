@@ -16,29 +16,5 @@ void *GameBufferAlloc(VARIPTR *, VARIPTR *, i32);
 
 extern "C" void *AISysLoad(void *buf, void *buf_end, i32 size, void *gscn, char *dir, char *name, char *param);
 void *AIPathCnxControlSysCreate(VARIPTR *buf, VARIPTR *buf_end, i32 count);
-void *AIPathCnxHelperSysCreate(VARIPTR *buf, VARIPTR *buf_end, i32 count) {
-    if (count == 0) {
-        return NULL;
-    }
-    AIPATHCNXHELPERSYS_s *system =
-        static_cast<AIPATHCNXHELPERSYS_s *>(AISysBufferAlloc(buf, buf_end, sizeof(AIPATHCNXHELPERSYS_s)));
-    if (system != NULL) {
-        system->helpers = static_cast<AIPATHCNXHELPER_s *>(
-            AISysBufferAlloc(buf, buf_end, static_cast<u32>(count) * sizeof(AIPATHCNXHELPER_s)));
-        if (system->helpers != NULL) {
-            system->field_0x00 = static_cast<i16>(count);
-        }
-    }
-    return system;
-}
-void *CreateClimbObjectSys(VARIPTR *buf, VARIPTR *buf_end, i32 count) {
-    if (count == 0)
-        return NULL;
-    CLIMBOBJECTSYS_s *system = static_cast<CLIMBOBJECTSYS_s *>(GameBufferAlloc(buf, buf_end, sizeof(CLIMBOBJECTSYS_s)));
-    if (system == NULL)
-        return NULL;
-    system->capacity = static_cast<u16>(count);
-    system->objects =
-        static_cast<CLIMBOBJECT_s *>(GameBufferAlloc(buf, buf_end, system->capacity * sizeof(CLIMBOBJECT_s)));
-    return system;
-}
+void *AIPathCnxHelperSysCreate(VARIPTR *buf, VARIPTR *buf_end, i32 count);
+void *CreateClimbObjectSys(VARIPTR *buf, VARIPTR *buf_end, i32 count);

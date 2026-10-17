@@ -222,23 +222,7 @@ f32 KnotHelper::DistanceToObject(VuVec &origin, VuVec &direction, void *object, 
     return distance < 0.0f ? 0.0f : distance;
 }
 
-f32 SplineLength(nugspline_s *spline, i32 closed) {
-    if (spline == NULL || spline->length < 2)
-        return 0.0f;
-    i32 segment_count = closed != 0 ? spline->length : spline->length - 1;
-    f32 length = 0.0f;
-    NUVEC *previous = spline->pts;
-    i32 segment = 0;
-    do {
-        NUVEC *next = &spline->pts[segment == spline->length - 1 ? 0 : segment + 1];
-        NUVEC difference;
-        NuVecSub(&difference, next, previous);
-        length += NuVecMag(&difference);
-        previous = next;
-        ++segment;
-    } while (segment < segment_count);
-    return length;
-}
+f32 SplineLength(nugspline_s *spline, i32 closed);
 
 void *KnotHelper::CreateObject(void *, i32, i32) {
     SplineKnot *selected_knot = NULL;

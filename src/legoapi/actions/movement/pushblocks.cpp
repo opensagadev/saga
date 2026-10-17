@@ -1,3 +1,6 @@
+// Original translation unit reconstructed from the reference address map.
+// Functions are defined in original address order.
+
 #include "legoapi/actions/movement/pushblocks.h"
 
 #include <math.h>
@@ -20,17 +23,9 @@
 extern i32 LEGOCONTEXT_PUSH;
 void AlertSurroundingCreatures(GameObject_s *, NUVEC *);
 
-struct AIROW_s;
-struct nuqthdr_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
-
 pushblock_s *BlockInBlock(WORLDINFO_s *, pushblock_s *, i32, pushblock_s **);
 
-enum PushBlockCompletionFlags {
-    PUSH_BLOCK_FIRST_OUTPUT_FLAG = 1 << 3,
-    PUSH_BLOCK_ANY_OUTPUT_MASK = 0x7f8,
-};
+#include "legoapi/actions/movement/pushblocks_types.h"
 
 u32 (*CanPushBlocksFn)(GameObject_s *) = NULL;
 i32 pushposincrease;
@@ -42,6 +37,3506 @@ void ResetSinglePushBlockHeight(WORLDINFO_s *, pushblock_s *, i32);
 i32 TerrainBlockOnBlock(WORLDINFO_s *, pushblock_s *, NUVEC *, f32 *);
 f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
 
+void KnockPushBlock(pushblock_s *block, nuvec_s *direction);
+
+pushblock_s *NearestPushBlock(WORLDINFO_s *world, nuvec_s *position, float range);
+
+extern "C" f32 NuFmax(f32, f32);
+void NewBuzz(nupad_s *, f32, i32);
+void PushSeekComplete(pushblock_s *block, i32 index);
+
+i32 OtherBlockInRange(WORLDINFO_s *world, pushblock_s *block, nuvec_s *position, i32 excluded);
+
+void ResetSinglePushBlock(WORLDINFO_s *, pushblock_s *block, i32);
+
+pushblock_s *NearestFacingPushBlock(WORLDINFO_s *world, GameObject_s *object, float range);
+
+void ResetSinglePushBlockHeight(WORLDINFO_s *world, pushblock_s *block, i32 index);
+
+i32 GizPushBlock_EndFrameCompleted(pushblock_s *push_block, i32 output_index);
+
+i32 PushBlock(GameObject_s *object);
+
+// ==== src/legoapi/gizmos/door/push.cpp: all remaining content ====
+#include "legoapi/gizmos/door/push.h"
+
+#include "gameapi/edtools/edfile.h"
+#include "legoapi/world/world.h"
+#include "legoapi/render/light/surfaces.h"
+#include "nu2api/nucore/numem.h"
+#include "nu2api/nucore/nustring.h"
+#include "nu2api/numath/nufloat.h"
+
+#include <string.h>
+
+DECOMP_ASSERT(sizeof(PUSHPROGRESS) == 0x24c, "push-block progress size");
+
+enum PUSHBLOCK_CONFIG_FLAGS {
+    PUSHBLOCK_FLAG_VISIBLE = 1 << 2,
+    PUSHBLOCK_FLAG_STATE = 1 << 1,
+};
+
+i32 pushblock_gizmotype_id;
+
+extern "C" char *NuIToA(i32 value, char *buffer, i32 radix);
+void ResetPushProgress(WORLDINFO_s *world, void *progress);
+void ResetSinglePushBlock(WORLDINFO_s *world, pushblock_s *push_block, i32 index);
+void KnockPushBlock(pushblock_s *push_block, NUVEC *direction);
+void GizObstacles_AddTrigger(NUVEC *position);
+void MoveBlocks(WORLDINFO_s *world, pushblock_s *push_block, i32 index, NUVEC *velocity);
+void PushSeekComplete(pushblock_s *push_block, i32 snap_index);
+
+extern i32 LEGOHINT_PUSHBLOCKS;
+static NUVEC hothbtestpos = {29.0f, 0.0f, 13.0f};
+i32 SnapPosTaken(WORLDINFO_s *, pushblock_s *, NUVEC *, i32);
+i32 OtherBlockInRange(WORLDINFO_s *, pushblock_s *, NUVEC *, i32);
+f32 SeekValF(f32, f32, f32);
+i32 GameAudio_GetPlrSfxBits(void *);
+void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
+void Hint_SetComplete(i32);
+void AddShoveObject(nuhspecial_s *, i16);
+void UpdatePushBlocks(void *world_ptr, void *, float);
+
+static void *PushBlocks_ReserveBufferSpace(void *world_ptr);
+
+static i32 Push_GetMaxGizmos(void *world_ptr);
+
+static char *GizPush_GetGizmoName(GIZMO *gizmo);
+
+i32 GizPush_GetNumOutputs(GIZMO *gizmo);
+
+static void Push_ClearProgress(void *, void *progress_ptr);
+
+static void *Push_AllocateProgressData(VARIPTR *buffer, VARIPTR *buffer_end);
+
+static void Push_SetVisibility(GIZMO *gizmo, i32 visible);
+
+static void Push_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *world_ptr, void *);
+
+static i32 edpush_Load(void *world_ptr, void *);
+
+static char outputName[13] = "Any Complete";
+
+char *GizPush_GetOutputName(GIZMO *gizmo, i32 output_index);
+
+static void Push_StoreProgress(void *world_ptr, void *, void *progress_ptr);
+
+static i32 Pushblocks_BoltHitPlat(void *world_ptr, void *push_blocks_ptr, BOLT *bolt, unsigned char *);
+
+static void Push_Activate(GIZMO *gizmo, i32 active);
+
+static void Push_Reset(void *world, void *, void *progress);
+
+i32 GizPush_GetOutput(GIZMO *gizmo, i32 output_index, i32);
+
+// ==== src/legoapi/actions/movement/pushing.cpp: declarations ====
+
+#include "legoapi/world/area.h"
+#include "gamelib/util/gamelib_util_types.h"
+#include "legoapi/props/system/socksys.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/audio/audio.h"
+#include "legoapi/audio/sfx.h"
+#include "legoapi/items/base/animpacket.h"
+#include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/actions/movement/jumping.h"
+#include "legoapi/gizmos/object/gizobstacles.h"
+#include "nu2api/nu3d/nutex.h"
+
+void ResetPushProgress(WORLDINFO_s *world, void *progress_data);
+
+extern i16 id_GONKDROID;
+
+void AlertSurroundingCreatures(GameObject_s *object, NUVEC *position);
+
+// ==== src/legoapi/characters/motion/move.cpp: declarations ====
+
+#include <stdlib.h>
+#include "legoapi/items/collect/torpedo.h"
+#include "legoapi/actions/combat/hits.h"
+#include "legoapi/gizmos/object/gizbuildits.h"
+#include "legoapi/gizmos/object/hatmachine.h"
+#include "legoapi/characters/motion/action_info.h"
+#include "legoapi/actions/character/snake.h"
+#include "MechInputTouch/MechInputTouch_types.h"
+#include "nu2api/nu3d/nuqfnt.h"
+
+#include "legoapi/actions/movement/carrying.h"
+#include "legoapi/core/config/cheat.h"
+#include "legoapi/gizmos/traps/gizforce.h"
+#include "legoapi/gizmos/traps/attracto.h"
+#include "legoapi/props/objects/signal.h"
+#include "legoapi/gizmos/door/securitydoors.h"
+#include "legoapi/props/objects/techno.h"
+#include "legoapi/gizmos/object/gizpanel.h"
+#include "legoapi/gizmos/transport/tubes.h"
+#include "legoapi/gizmos/transport/teleport.h"
+#include "legoapi/gizmos/door/zipups.h"
+#include "legoapi/gizmos/transport/grapples.h"
+#include "legoapi/props/objects/tightrope.h"
+#include "legoapi/menus/screens/shop.h"
+#include "legoapi/menus/core/gamemessage.h"
+#include "legoapi/render/core/rtl.h"
+#include "legoapi/render/core/render.h"
+#include "legoapi/render/fx.h"
+#include "legoapi/render/fx/parts.h"
+#include "legoapi/render/fx/edsplines.h"
+#include "legoapi/render/fx/spline_position.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/gizmo/object/gizmopickup.h"
+#include "legoapi/world/mission.h"
+#include "nu2api/nucore/nupad.h"
+#include "nu2api/nu3d/nucamera.h"
+#include "nu2api/nu3d/nulgtlaser.h"
+#include "nu2api/nuandroid/ios_graphics.h"
+#include "nu2api/numath/nurand.h"
+#include "nu2api/numath/nuang.h"
+#include "nu2api/numath/numtx.h"
+#include "nu2api/numath/numtx_inline.h"
+
+// The retail move.cpp initializer owns these four managed references.
+
+// Original action/context lookup data, with its arrays and pointers in one owner.
+
+extern "C" void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
+extern "C" void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
+extern i16 id_IMPERIALGUARD;
+// Retail keeps several of this file's static helpers only as GCC clones; these
+// declarations pin the clone names and register conventions.
+#if defined(__i386__)
+#define MOVE_CLONE_ATTR1 __attribute__((noinline, noclone, regparm(1)))
+#define MOVE_CLONE_ATTR2 __attribute__((noinline, noclone, regparm(2)))
+#else
+#define MOVE_CLONE_ATTR1 __attribute__((noinline, noclone))
+#define MOVE_CLONE_ATTR2 __attribute__((noinline, noclone))
+#endif
+
+// Retail keeps only the IPA-SRA clone of this function.
+i32 PodLevel(AREADATA_s *);
+extern "C" i16 id_ATAT, id_DODGEM;
+
+// Multiplies the ordinary camera's per-frame position blend.  The original
+// keeps this as writable camera state (default 1.0), rather than folding it
+// into the socket seek rate.
+
+extern "C" {
+    extern i16 id_BODYGUARD;
+    extern i16 id_GRIEVOUS;
+}
+
+#include "legoapi/characters/motion/move_types.h"
+
+i32 PodLevel(AREADATA_s *area);
+
+// Retail splits the guard off as an inline head; the rest is this partial clone.
+
+extern i32 LevFlag[4];
+// Original exported level control, initialized to 2 at 0x623d00.
+
+extern "C" i16 id_LANDSPEEDER, id_WOOKIEFLYER, id_STAP2;
+
+// These pod tuning values are zero-initialized in the original image.
+
+extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
+
+// Retail re-tests the three block animations at each use instead of caching a flag.
+#define HAS_BLOCK_ANIMS(animations)                                                                                    \
+    ((animations)[0x1a] != NULL || (animations)[0x1b] != NULL || (animations)[0x1c] != NULL)
+
+// Retail inlines the fade and step checks into each caller; this is the remaining partial clone.
+
+// Retail splits the context test off as an inline head; the rest is this partial clone.
+
+extern "C" {
+    extern i16 id_ATST, id_MINIATST, id_ATST_LOWRES, id_ATAT, id_MINIATAT, id_MINIATTE;
+}
+
+f32 SeekValF(f32 current, f32 target, f32 rate);
+
+extern i16 id_ATAT;
+
+DECOMP_ASSERT(sizeof(AWKWARDSHAPESPHERE_s) == 12, "Awkward shape sphere size");
+DECOMP_ASSERT(offsetof(AWKWARDSHAPESPHERE_s, radius) == 8, "Awkward shape sphere radius offset");
+
+extern i16 id_GEONOSIAN, id_MINIATST, id_ATST_LOWRES, id_ATAT, id_MINIATAT, id_MINIATTE, id_SENTRYDROID;
+
+// ==== src/legoapi/characters/motion/gameanim.cpp: declarations ====
+#include "nu2api/nu3d/nutexanm.h"
+#include "legoapi/gizmo/base/gizmo.h"
+#include "legoapi/items/base/apiobject.h"
+#include "legoapi/world/levels/levels.h"
+#include "nu2api/nu3d/nurndr.h"
+#include "nu2api/nucore/nugcutscene.h"
+#include "nu2api/nucore/nuhgobj.h"
+#include "nu2api/numath/nuquat.h"
+#include "nu2api/numath/nuvec4.h"
+#include "nu2api/numusic/sfx.h"
+
+#include <float.h>
+
+void EvalAnim(nuhspecial_s *special, f32 frame, numtx_s *matrix, i32 include_instance_translation);
+// Retail uses translation-unit-local helpers with compiler-inferred private
+// calling conventions; keep their shared animation-mode call sites intact.
+
+extern i16 id_BODYGUARD;
+
+#include "legoapi/characters/motion/gameanim_types.h"
+
+void EvalAnim(nuhspecial_s *special, float frame, numtx_s *matrix, i32 include_instance_translation);
+
+// ==== src/legoapi/world/levels/episodeV.cpp: declarations ====
+#include "gameapi/ai/aisys/aisys.h"
+#include "gameapi/ai/aisys/aipath.h"
+#include "legoapi/ai/core/ai_sys_stubs.h"
+#include "legoapi/ai/core/legoai.h"
+#include "legoapi/ai/game/creature.h"
+#include "legoapi/gizmos/object/newblowup.h"
+#include "legoapi/gizmos/traps/gizbombgen.h"
+#include "legoapi/gizmos/traps/gizturrets.h"
+#include "legoapi/gizmo/base/GizBlowupObjectInterface.h"
+#include "legoapi/menus/core/panel.h"
+#include "nu2api/nucore/numechptr.hpp"
+#include "nu2api/nucore/nuvuvec.hpp"
+#include "nu2api/nu3d/nuspline.h"
+
+#include <stdio.h>
+
+extern "C" i16 id_PROBEDROID, id_ATST_LOWRES, id_ATAT;
+extern AILOCATOR_s * locator;
+
+#include "legoapi/world/levels/episodeV_types.h"
+DECOMP_ASSERT(sizeof(HOTHBATTLEE_NETPACKET_s) == 0x58, "Hoth panel packet size");
+DECOMP_ASSERT(offsetof(HOTHBATTLEE_NETPACKET_s, alpha) == 0x24, "Hoth panel packet alpha offset");
+DECOMP_ASSERT(offsetof(HOTHBATTLEE_NETPACKET_s, count) == 0x54, "Hoth panel packet count offset");
+
+// ===========================================================================
+// Asteroid chase (AsteroidChase_A / B / C / D)
+// ===========================================================================
+
+DECOMP_ASSERT(sizeof(ASTEROID_s) == 0x18, "ASTEROID_s size");
+
+DECOMP_ASSERT(sizeof(FINALASTEROID_s) == 0x3c, "final asteroid size");
+DECOMP_ASSERT(offsetof(FINALASTEROID_s, blowup_count) == 0x2c, "final asteroid blowup count offset");
+DECOMP_ASSERT(offsetof(FINALASTEROID_s, rotation_x) == 0x34, "final asteroid rotation offset");
+
+DECOMP_ASSERT(sizeof(ASTEROIDCNETPACKET_s) == 8, "asteroid C network packet size");
+
+// ==== src/legoapi/render/fx/parts.cpp: declarations ====
+#include "gameapi/edtools/edpart_internal.h"
+#include "gameapi/edtools/edpp_internal.h"
+#include "gameapi/edtools/edstubs.h"
+#include "gameapi/gui/apimenu.h"
+#include "legoapi/menus/core/gamemessages.h"
+#include "legoapi/gizmo/object/giztorpedo.h"
+#include "legoapi/gizmo/object/gizmoblowups.h"
+#include "legoapi/world/world_shared.h"
+#include "legoapi/characters/core/customiser.h"
+#include "nu2api/nu3d/nuportal.h"
+#include "nu2api/nu3d/android/nuptl_android.h"
+#include "nu2api/nu3d/nurndrstat.h"
+#include "nu2api/nufile/nufile.h"
+
+extern ADDPART_s Default_ADDPART;
+
+extern "C" {
+    void DebFreeInstantly(i32 *handle);
+    // Shared suspend flag consulted by all timed debris emitters.
+
+    void SetSfxBit_On(i32);
+    void PlaySfxById(i32, NUVEC *);
+
+    void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
+}
+
+// Forward declarations for local (static) part/gizmo helper stubs.
+
+// Local (static) part (PART_s), pickup (GIZMOPICKUP_s), gizmo flow
+// (GIZFLOW_s/FLOWBOX_s), power-up and space/starfighter helpers. Stubbed as
+// local `t` symbols matching res/libTTapp.so.
+
+extern WORLDINFO_s *WORLD;
+
+extern "C" {
+
+void AddDebrisEffect(i32 *handle, i32 effect_index, f32 x, f32 y, f32 z);
+
+    void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
+
+PART_s *AddPart(ADDPART_s *params);
+
+    void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
+
+void AddVariableShotDebrisEffect(i32 effect, NUVEC *position, i32 count, i16 z_rotation, i16 y_rotation);
+
+void AddVariableShotDebrisEffectTimed1(i32 effect, NUVEC *position, i32 count, f32 time, i16 z_rotation,
+                                           i16 y_rotation, NUMTX *particle_orientation);
+
+    // The editor loader clears these page IDs with aligned vector stores.
+
+    void DebFreeInstantly(i32 *);
+
+} // extern "C"
+
+extern f32 FRAMETIME;
+void PartStop_Flickerer(PART_s *);
+i32 PartDraw_Flickerer(PART_s *);
+
+// The original repeats the per-sound emitter checks for each of the four sound slots.
+#define PART_EMIT_SOUND_ON(slot)                                                                                       \
+    if (type->sounds[slot] != -1) {                                                                                    \
+        SetSfxBit_On(type->sounds[slot]);                                                                              \
+        if (type->sound_modes[slot] == 4)                                                                              \
+            PlaySfxById(type->sounds[slot], &emitter->position);                                                       \
+    }
+#define PART_EMIT_SOUND(slot, mode)                                                                                    \
+    if (type->sounds[slot] != -1 && type->sound_modes[slot] == (mode))                                                 \
+        PlaySfxById(type->sounds[slot], &emitter->position);
+
+void PartImpact_Brick(PART_s *part);
+
+void PartStop_Flickerer(PART_s *part);
+
+i32 PartDraw_Flickerer(PART_s *part);
+
+// ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
+#include "legoapi/items/objects/objectsall.h"
+#include "legoapi/actions/character/streaks.h"
+#include "legoapi/gizmos/transport/gizportal.h"
+#include "legoapi/menus/screens/arcade.h"
+#include "gameapi/edtools/edui.h"
+#include "legoapi/cutscenes/cutscenes.h"
+#include "legoapi/render/light/lighting.h"
+#include "legoapi/render/light/shadow.h"
+#include "legoapi/characters/core/CharacterObjectInterface.h"
+#include "legoapi/characters/core/charconfig.h"
+#include "legoapi/menus/core/gamehint.h"
+#include "legoapi/gizmos/trigger/gizspecial.h"
+#include "legoapi/gizmos/door/spinner.h"
+#include "legoapi/menus/screens/store.h"
+#include "legoapi/props/doors/door.h"
+#include "legoapi/core/input/timer.h"
+#include "legoapi/core/input/timing.h"
+#include "nu2api/nucore/numemory.h"
+#include "nu2api/nu3d/android/nutimebar_plain.h"
+
+extern "C" {
+    extern NUVEC plr_lastpos;
+    extern i16 id_GRIEVOUS;
+    extern i16 id_BODYGUARD;
+    extern i16 id_IMPERIALGUARD;
+    extern i16 id_JAWA;
+    extern i16 id_UGNAUGHT;
+    extern i16 id_ATAT;
+    extern i16 id_GONKDROID;
+    extern i16 id_LANDSPEEDER, id_MILLENNIUMFALCON;
+    void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
+    void AddDebrisEffect(i32 *, i32, f32, f32, f32);
+    void DebrisPosOrientationMtx(i32, NUMTX *);
+    void DebFreeInstantly(i32 *);
+    void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
+}
+
+// Written by ThingManager's ctor (original global @0x124f2e0, .bss).
+
+#include "legoapi/items/objects/gameobjects_types.h"
+
+// Enabled in the target data image.  Ordinary background characters are
+// staggered across frames; special movement states opt back into full-rate
+// processing through the forced-update path.
+
+extern TERRSET *CurTerr;
+
+extern "C" f32 NuAnimEndFrameOld(void *animation);
+
+extern "C" {
+extern AICONDITIONDEF lego_aiconditiondefs[178];
+
+    static_assert(sizeof(lego_aiconditiondefs) / sizeof(lego_aiconditiondefs[0]) == 178,
+                  "complete game AI condition registry");
+
+}
+
+// The special-route list reserves the first ten ids for suit characters.  The
+// remaining ids enumerate the current story list while omitting variants that
+// are represented by those dedicated routes.
+
+f32 GameShadow(GameObject_s *object, nuvec_s *position, f32 probe_height, i32 terrain_mask);
+
+#if defined(__i386__)
+#define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
+#else
+#define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone))
+#endif
+
+// Retail keeps only the IPA-SRA clone, which takes the other object's x and z by address.
+
+extern "C" i16 id_THEEMPEROR, id_IMPERIALGUARD, id_BODYGUARD;
+
+// ThingManager objects return to the theMemoryManager pool (D0 @0x425a50).
+inline void ThingManager::operator delete(void *thing, usize size) {
+    theMemoryManager.FreePool(thing, size);
+}
+
+// ==== src/legoapi/actions/combat/fighting.cpp: declarations ====
+#include "legoapi/actions/combat/fighting.h"
+#include "legoapi/characters/motion/animlist.h"
+#include "legoapi/characters/motion/contexts.h"
+#include "legoapi/characters/core/playeritems.h"
+#include "legoapi/actions/character/speederchase.h"
+#include "legoapi/misc/utilities.h"
+
+i32 qrand();
+
+DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e4) == 0x7e4, "Quick shoot record offset");
+DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e8) == 0x7e8, "Quick shoot record count offset");
+DECOMP_ASSERT(offsetof(GameObject_s, quick_shoot_flags) == 0xe2f, "Quick shoot flags offset");
+DECOMP_ASSERT(offsetof(GameObject_s, quick_shoot_bolt_id) == 0xe3e, "Quick shoot bolt ID offset");
+
+// ==== src/legoapi/characters/core/players.cpp: declarations ====
+struct HINT_s;
+
+#include "legoapi/items/base/collection.h"
+#include "legoapi/world/levels/episode.h"
+#include "legogame/game.h"
+#include "nu2api/nucore/nutime.h"
+#include "nu2api/nufile/nufpar.h"
+
+extern "C" NUVEC plr_lastpos;
+
+// --- Helpers moved from world.cpp ---
+
+// ---- Player start spawn entries ----
+
+// ---- Misc player/gameobject helpers relocated from doorstubs.cpp ----
+
+void Hint_SetComplete(i32 hint_id);
+void GameAudio_PlaySfx(i32 sfx, NUVEC *position, i32 flags, i32 volume);
+
+namespace {
+
+} // namespace
+
+#include "legoapi/characters/core/players_types.h"
+
+DECOMP_ASSERT(sizeof(SPECIAL_LAYER_s) == 0xc, "SPECIAL_LAYER_s size");
+
+// ==== src/legoapi/characters/motion/camera.cpp: declarations ====
+#include "legoapi/menus/screens/gamemenuall.h"
+#include "legoapi/cutscenes/minicamcut.h"
+#include "nu2api/nucore/nukeyboard.h"
+#include "nu2api/nucore/numouse.h"
+
+#include "legoapi/characters/motion/camera_types.h"
+// Original data symbol testmovef is float0.005 at 0x617cb0.
+
+DECOMP_ASSERT(sizeof(VIEWCAM_s) == 0x28, "ViewCam size");
+DECOMP_ASSERT(offsetof(VIEWCAM_s, pitch) == 0x10, "ViewCam pitch offset");
+DECOMP_ASSERT(offsetof(VIEWCAM_s, gamepad) == 0x24, "ViewCam gamepad offset");
+
+extern "C" i16 id_GRABCONTROL, id_GRABR2CONTROL, id_LANDSPEEDER, id_ATST, id_DEWBACK;
+
+DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, path) == 0x40, "Camera context path offset");
+DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context flags offset");
+
+// ==== src/legoapi/audio/specialsfx.cpp: declarations ====
+
+i32 qrand(void);
+
+// ==== src/legoapi/actions/character/speederchase.cpp: declarations ====
+#include "legoapi/items/collect/spacelevel.h"
+#include "gameapi/edtools/edcam.h"
+
+// This alignment affects PodRaceAUpdate codegen even though the linked address is 32-byte aligned.
+
+#include "legoapi/actions/character/speederchase_types.h"
+
+extern SPEEDERCHASEVALUES speedervals[4];
+DECOMP_ASSERT(sizeof(SPEEDERCHASEVALUES) == 0x1c, "Speeder chase tuning stride");
+DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
+
+extern "C" void AddDebrisEffect(i32 *, i32, f32, f32, f32);
+extern "C" void DebrisPosOrientationMtx(i32, NUMTX *);
+
+// ==== src/legoapi/gizmo/base/gizmo.cpp: declarations ====
+
+#include "legoapi/gizmo/base/GizBuildItObjectInterface.h"
+#include "legoapi/gizmo/base/GizForceObjectInterface.h"
+#include "legoapi/gizmo/base/GizLeverObjectInterface.h"
+#include "legoapi/gizmo/base/GizObstacleObjectInterface.h"
+#include "legoapi/gizmo/base/GizPanelObjectInterface.h"
+#include "legoapi/gizmo/base/GizTurretObjectInterface.h"
+#include "legoapi/gizmo/base/HatMachineObjectInterface.h"
+#include "legoapi/gizmo/base/TeleportObjectInterface.h"
+#include "legoapi/gizmos/trigger/ai.h"
+#include "legoapi/gizmos/fx/edgizshadowmachine.h"
+#include "legoapi/gizmo/base/gizmessage.h"
+#include "legoapi/gizmos/trigger/gizrandom.h"
+#include "legoapi/gizmos/trigger/giztimer.h"
+#include "legoapi/gizmos/object/lever.h"
+#include "legoapi/gizmos/trigger/minicut.h"
+#include "legoapi/gizmos/door/plugs.h"
+#include "legoapi/items/collect/bolts.h"
+#include "legoapi/gizmos/fx/guidelines.h"
+#include "legoapi/gizmos/transport/ledges.h"
+#include "legoapi/gizmos/traps/shards.h"
+
+struct FLOWBOX_s;
+
+DECOMP_ASSERT(sizeof(GIZMOTYPES) == 0xc, "Gizmo type-table header ABI");
+DECOMP_ASSERT(offsetof(GIZMOTYPES, types) == 8, "Gizmo type-table pointer offset");
+
+extern ADDGIZMOTYPE Default_ADDGIZMOTYPE;
+
+VARIPTR *GizmoBufferAlloc(VARIPTR *buffer, VARIPTR *buffer_end, i32 size);
+
+GIZMO *AddGizmo(GIZMOSYS *gizmo_sys, i32 type_id, char *name, void *object);
+
+i32 Gizmo_FindNuSpecial(nugscn_s *scene, nuhspecial_s *special, char *name, i32 flags, GIZMOSYS *gizmo_sys,
+                        char *prefix, char *suffix);
+
+// ==== src/legoapi/misc/legoapi_misc.cpp: declarations ====
+#include "gameframework/saveload.h"
+#include "legoapi/menus/screens/gamestructure.h"
+
+// ==== src/legoapi/world/levels/episodeII.cpp: declarations ====
+
+#include "nu2api/nu3d/nuhspecial.h"
+
+#include "legoapi/world/levels/episodeII_types.h"
+static_assert(sizeof(struct GUNSHIP_LEVFLAG_s) == 16, "LevFlag must be 16 bytes");
+
+// --- Cross-file entry points / id globals ---
+//
+
+// Defined in gameapi/edtools/edtoolsall.cpp, which has no header yet.
+
+struct JEDIBNETPACKET_s;
+
+// Jedi_B tuning and spawn tables (unmangled globals in the original).
+
+// --- File-local statics (original _ZL... symbols; not renamed) ---------------
+
+DECOMP_ASSERT(sizeof(KAMINODISCO_s) == 1000, "Kamino disco original layout");
+
+DECOMP_ASSERT(sizeof(DOOKU_C_s) == 20, "Dooku C state ABI");
+
+DECOMP_ASSERT(sizeof(KAMINO_E_s) == 120, "Kamino E state ABI");
+
+// Episode 2 level handlers, in the game's Episode_II progression:
+// kamino / factory (geonosis droid factory) / jedi / gunship / bonus gunship /
+// dooku, then the NewTown bonus. The coruscant bounty-hunter pursuit lives in
+// pursuit.cpp, its own translation unit in the original binary.
+
+// ===========================================================================
+// Kamino
+// ===========================================================================
+
+// ===========================================================================
+// Geonosis — droid factory (Factory_B / Factory_G)
+// ===========================================================================
+
+// ===========================================================================
+// Jedi (Jedi_B)
+// ===========================================================================
+
+DECOMP_ASSERT(sizeof(JEDIB_CREATURE_s) == 0x60, "JEDIB_CREATURE_s ABI");
+
+DECOMP_ASSERT(sizeof(JEDIB_s) == 0x63ec, "JEDIB_s ABI");
+
+DECOMP_ASSERT(sizeof(JEDIBNETPACKET_s) == 0x20, "JEDIBNETPACKET_s ABI");
+
+// Pushes `position` out of any antinode it falls inside, then resolves it to a
+// path point and fills in `locator` for it. Returns 0 when the point is off the
+// arena or off the path network.
+// JediBInitLocator is inlined into JediB_Init apart from everything after
+// the network check, which retail keeps as the split-out body of the IPA-SRA
+// clone (it only needs &world->ai_sys).
+
+void JediB_Init(WORLDINFO_s *world);
+
+// ===========================================================================
+// Gunship (Gunship_A / Gunship_B)
+// ===========================================================================
+
+// ===========================================================================
+// Bonus gunship (Bonus_Gunship_A / Bonus_Gunship_B)
+// ===========================================================================
+
+// ===========================================================================
+// Dooku (Dooku_C)
+// ===========================================================================
+
+// ==== src/legoapi/world/levels/episodeI.cpp: declarations ====
+
+#include "legoapi/misc.h"
+#include "legoapi/world/levels/podrace.h"
+
+#include "legoapi/world/levels/episodeI_types.h"
+static_assert(sizeof(struct LEVFLAGBYTES_s) == 16, "LevFlag must be 16 bytes");
+
+// Episode 1 level handlers: negotiations / gungan / rescue / podrace /
+// podsprint / retake / maul / anakins-flight. This is the only implemented
+// level file; episodes II-VI are still stubs.
+//
+// Functions appear in the original translation unit's address order (see
+// res/libTTapp.so 0x1fa8e0..0x203d50). PodLevel and SetPodMergeAnims live at
+// the end because the original binary defines them in other units.
+
+// --- Cross-file entry points (C linkage) -----------------------------------
+//
+// Declared here rather than in a shared header because episodeI.cpp is their
+// only consumer within the levels module.
+
+// --- Cross-file entry points (C++ linkage) ---------------------------------
+
+// PodSprintA_Update boulder-seek state.
+
+// --- File-local layout types -----------------------------------------------
+
+// Every caller passes mode 0, so retail keeps only this constprop clone.
+
+// --- File-local state --------------------------------------------------------
+//
+// Names are the original statics (_ZL... symbols in res/libTTapp.so) and must
+// not be renamed. Initial values match the original .data image.
+
+// Mushroom-collapse cutscene state (initial values from the .data image;
+// mushroom_time_* are also mutated by Action_MushroomCollapse).
+
+// Retake-G guard counters (net-shared through retakeg_netpacket).
+
+// Maul boss levels.
+
+// Gungan plains wildlife spawner (0x114 bytes, layout verified against
+// _ZL8gungan_a).
+// ===========================================================================
+// Sniper turrets (shared by PodRace C and PodSprint A)
+// ===========================================================================
+
+// PodSprint_InitAISpline is partially inlined into PodSprintA_Init: the
+// clear, lookup and spline checks are inlined and the crossing scan is the
+// split-out body.
+#if defined(__i386__)
+#define PODSPRINT_AISPLINE_BODY_ATTR __attribute__((noinline, regparm(1)))
+#else
+#define PODSPRINT_AISPLINE_BODY_ATTR __attribute__((noinline))
+#endif
+
+// UpdatePacemakerDisplay is inlined into its callers apart from the message
+// update, which retail keeps as the split-out body of the IPA-SRA clone (it
+// only needs &world->lev_objs).
+
+// ===========================================================================
+// Negotiations / Gungan plains / Rescue (coruscant)
+// ===========================================================================
+
+// ===========================================================================
+// Pod race core (A/B/C laps)
+// ===========================================================================
+
+void PodRaceAUpdate(WORLDINFO_s *world);
+
+// ===========================================================================
+// Pod sprint (Sebulba events)
+// ===========================================================================
+
+void PodSprintA_Init(WORLDINFO_s *world);
+
+void PodSprintA_Update(WORLDINFO_s *world);
+
+// ===========================================================================
+// Retake the palace (D/E/G)
+// ===========================================================================
+
+// ===========================================================================
+// Maul boss (A/B/D/E/F)
+// ===========================================================================
+
+// ===========================================================================
+// Anakin's flight (B)
+// ===========================================================================
+
+// ===========================================================================
+// Helpers defined in other original translation units but kept here until
+// they get their own home (their originals live outside the ep1 TU).
+// ===========================================================================
+
+// ==== src/legoapi/ai/core/gameai.cpp: declarations ====
+
+#include "legoapi/ai/core/gameai_types.h"
+
+// ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
+
+extern "C" {
+    extern NUVEC plr_lastpos;
+    extern i16 id_GRIEVOUS;
+    extern i16 id_BODYGUARD;
+    extern i16 id_IMPERIALGUARD;
+    extern i16 id_JAWA;
+    extern i16 id_UGNAUGHT;
+    extern i16 id_ATAT;
+    extern i16 id_GONKDROID;
+    extern i16 id_LANDSPEEDER, id_MILLENNIUMFALCON;
+    void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
+    void AddDebrisEffect(i32 *, i32, f32, f32, f32);
+    void DebrisPosOrientationMtx(i32, NUMTX *);
+    void DebFreeInstantly(i32 *);
+    void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
+}
+
+// ==== src/legoapi/gizmos/trigger/ai.cpp: all remaining content ====
+
+// ==== src/legoapi/ai/game/creature.cpp: declarations ====
+
+extern "C" {
+    extern NUVEC plr_lastpos;
+}
+
+#include "legoapi/ai/game/creature_types.h"
+
+void AlertSurroundingCreatures(GameObject_s *object, nuvec_s *position);
+
+// ==== src/legoapi/ai/game/aipathcnxhelper.cpp: declarations ====
+
+#include <stdint.h>
+#include "nu2api/nucore/nulist.h"
+
+// ==== src/legoapi/ai/core/ai_sys.cpp: declarations ====
+#include "gameapi/ai/aisys/aiscript_types.h"
+
+struct nuhspecial_s;
+struct nuvec_s;
+
+// ==== src/legoapi/actions/character/simpletons.cpp: declarations ====
+
+#include "legoapi/actions/character/simpletons_types.h"
+
+// ---- begin src/legoapi/ai/core/aipathbuild.cpp ----
+#include "editor/edpath.h"
+
+// The route records use a dense route index, while the editor keeps sixteen
+// independently switchable slots.  The original helper first marks both ends
+// of every route connection, then builds the compact node lookup and matrix.
+#if defined(__i386__)
+#define AIPATHBUILD_CLONE_ATTR2 __attribute__((noinline, noclone, regparm(2)))
+#else
+#define AIPATHBUILD_CLONE_ATTR2 __attribute__((noinline, noclone))
+#endif
+// Retail keeps only the IPA-SRA clone, without the unused path index.
+
+// ---- end src/legoapi/ai/core/aipathbuild.cpp ----
+
+// Retail keeps several static helpers here only as GCC clones; these attributes
+// reproduce the clone names and register conventions.
+#if defined(__i386__)
+#define AISYSALL_CLONE_ATTR1 __attribute__((noinline, noclone, regparm(1)))
+#define AISYSALL_CLONE_ATTR2 __attribute__((noinline, noclone, regparm(2)))
+#define AISYSALL_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
+#else
+#define AISYSALL_CLONE_ATTR1 __attribute__((noinline, noclone))
+#define AISYSALL_CLONE_ATTR2 __attribute__((noinline, noclone))
+#define AISYSALL_CLONE_ATTR2_SSE __attribute__((noinline, noclone))
+#endif
+
+// IPA-SRA keeps only the fields this helper reads: values for those read before any call,
+// addresses for those read after one.
+
+#include "legoapi/ai/core/ai_pathgeometry.h"
+
+// IPA-SRA hands this clone the address of system->path_sys rather than the system.
+
+// ---- begin src/gameapi/ai/aisys/aisys.cpp ----
+
+#include "batman.h"
+
+#include "legoapi/gizmo/object/takeoverobjects.h"
+
+extern "C" ADDPART_s Default_ADDPART;
+
+extern "C" PART_s *AddPart(ADDPART_s *);
+
+// Game-specific AI actions and conditions (registered via
+// RegisterAIScriptActions / RegisterAIScriptConditions). These are stubbed to
+// satisfy the symbol baseline; the action/condition logic itself is not
+// decompiled. Each stub matches the mangled symbol of the original binary.
+
+extern AIACTIONDEF api_aiactiondefs[55];
+
+extern AICONDITIONDEF api_aiconditiondefs[50];
+
+DECOMP_ASSERT(sizeof(api_aiactiondefs) == 0x294, "API action registry size");
+
+DECOMP_ASSERT(sizeof(api_aiconditiondefs) == 0x258, "API condition registry size");
+
+// ---- end src/gameapi/ai/aisys/aisys.cpp ----
+
+// ==== src/gameapi/ai/aisys/aiscript.cpp: all remaining content ====
+
+#include "nu2api/nucore/common.h"
+#include "nu2api/nucore/nurdp.h"
+#include "nu2api/nufile/nufilepak.h"
+
+#if defined(__i386__)
+#define AISCRIPT_CLONE_ATTR2 __attribute__((noinline, noclone, regparm(2)))
+#else
+#define AISCRIPT_CLONE_ATTR2 __attribute__((noinline, noclone))
+#endif
+
+// Retail inlines the "goto" test into each caller; this is the remaining partial clone.
+
+// Retail inlines the system test into its callers; this is the remaining partial clone.
+
+#include "legoapi/ai/core/aisysall_types.h"
+
+void RegisterAIScriptActions(AIACTIONDEF *action_defs);
+
+void RegisterAIScriptConditions(AICONDITIONDEF *cond_defs);
+
+// ==== src/legoapi/ai/core/ai_sys_stubs.cpp: declarations ====
+#include "editor/aieditor_state.h"
+#include "editor/antinode_editor_private.h"
+#include "nu2api/numath/nuplane.h"
+
+extern "C" {
+
+#include "legoapi/ai/core/ai_sys_stubs_types.h"
+    DECOMP_ASSERT(sizeof(RebuildEditorCreature) == 0xac, "editor creature rebuild stride");
+    DECOMP_ASSERT(offsetof(RebuildEditorCreature, path_check) == 0x38, "editor creature path offset");
+    DECOMP_ASSERT(offsetof(RebuildEditorCreature, activation_area) == 0x6c, "editor creature area offset");
+    DECOMP_ASSERT(offsetof(RebuildEditorCreature, activation) == 0x8f, "editor creature activation offset");
+
+} // extern "C"
+
+#if defined(__i386__)
+#define AI_SYS_STUBS_CLONE_ATTR2 __attribute__((noinline, noclone, regparm(2)))
+#else
+#define AI_SYS_STUBS_CLONE_ATTR2 __attribute__((noinline, noclone))
+#endif
+
+// Retail keeps only the IPA-SRA clone, without the unused object and elapsed time.
+
+extern "C" {
+
+extern AIEDITOR_RENDER_STATE * aieditor;
+
+} // extern "C"
+
+// ==== src/editor/area_editor.cpp: all remaining content ====
+#include "editor/aieditor_settings.h"
+
+struct nupad_s;
+
+DECOMP_ASSERT(sizeof(EDAIAREA_s) == 0x44, "area editor record size");
+
+// Item colours shared by the AI editors.
+
+// ==== src/editor/edpath.cpp: all remaining content ====
+#include "editor/path_connections.h"
+
+DECOMP_ASSERT(sizeof(AIPATHCNXTYPE_s) == 0x4c, "editor path connection type size");
+DECOMP_ASSERT(offsetof(AIPATHCNXTYPE_s, flags) == 0x48, "editor path connection options offset");
+
+// Retail splits the null checks into each caller and keeps the body as a
+// partial-inlining clone; its connection searches are fully peeled.
+
+struct EDAISHAREDPATHNODE_s;
+struct eduimenu_s;
+struct eduiitem_s;
+
+DECOMP_ASSERT(offsetof(EdUiNameInputItem, name) == 0x4c, "editor name input offset");
+DECOMP_ASSERT(offsetof(EdUiNameInputItem, max_name_length) == 0x15a, "editor name input limit offset");
+
+static __used__ void pathEditor_cbCancelRenamePathMenu(eduimenu_s *, eduimenu_s *);
+static __used__ void pathEditor_cbCancelRenameNodeMenu(eduimenu_s *, eduimenu_s *);
+static __used__ void pathEditor_cbCancelSelectMenu(eduimenu_s *, eduimenu_s *);
+static __used__ void pathEditor_cbSetCurrentPath(eduimenu_s *, eduiitem_s *, u32);
+
+static __used__ void pathEditor_cbSetCurrentPath(eduimenu_s *, eduiitem_s *item, u32);
+
+static __used__ void pathEditor_cbCancelSelectMenu(eduimenu_s *menu, eduimenu_s *);
+
+static __used__ void pathEditor_cbCancelRenameNodeMenu(eduimenu_s *menu, eduimenu_s *);
+
+static __used__ void pathEditor_cbCancelRenamePathMenu(eduimenu_s *menu, eduimenu_s *);
+
+static __used__ void routeEditor_cbCancelRouteUsers(eduimenu_s *, eduimenu_s *);
+static __used__ void routeEditor_cbSetRouteUsers(eduimenu_s *, eduiitem_s *, u32);
+
+static __used__ __attribute__((optimize("peel-loops"))) void routeEditor_cbRenameRoute(eduimenu_s *, eduiitem_s *item, u32);
+
+static __used__ void routeEditor_cbCancelRenameRouteMenu(eduimenu_s *, eduimenu_s *);
+
+static __used__ void routeEditor_cbSetRouteUsers(eduimenu_s *, eduiitem_s *item, u32);
+
+static __used__ void routeEditor_cbCancelRouteUsers(eduimenu_s *menu, eduimenu_s *);
+
+static __used__ void routeEditor_cbCancelRenameRouteMenu(eduimenu_s *menu, eduimenu_s *);
+
+static __used__ i32 routeEditor_AddToRoute(EDAIPATHNODE_s *node, EDAIPATHNODE_s *other) __asm__(
+    "_ZL22routeEditor_AddToRouteP14EDAIPATHNODE_sS0_.part.7");
+
+static __used__ i32 routeEditor_AddToRoute(EDAIPATHNODE_s *node, EDAIPATHNODE_s *other);
+
+static __used__ void pathEditor_DestroySharedNode(EDAISHAREDPATHNODE_s *shared);
+
+// Retail keeps an unreferenced partial-inlining clone of pathEditorSetCamPos:
+// it moves the editor camera to a position at the cursor's height.
+#if defined(__i386__)
+#define PATHEDITOR_SETCAMPOS_BODY_ATTR __attribute__((used, noinline, noclone, regparm(1)))
+#else
+#define PATHEDITOR_SETCAMPOS_BODY_ATTR __attribute__((used, noinline, noclone))
+#endif
+
+// ==== src/editor/aieditor.cpp: all remaining content ====
+
+#include "gameapi/edtools/edrender.h"
+#include "legoapi/render/core/terrain_internal.h"
+#include "nu2api/nu3d/numtl.h"
+
+#if defined(__i386__)
+#define EDANTINODE_REGPARM1 __attribute__((regparm(1)))
+#else
+#define EDANTINODE_REGPARM1
+#endif
+
+// ==== src/editor/creature_editor.cpp: all remaining content ====
+
+#include "editor/edpath_types.h"
+#pragma GCC optimize("O2", "omit-frame-pointer")
+struct EDCREATURE_s;
+
+DECOMP_ASSERT(offsetof(CreatureEditorRecord, valid_positions) == 0x54, "creature valid position mask offset");
+DECOMP_ASSERT(offsetof(CreatureEditorRecord, position) == 0x28, "creature position offset");
+DECOMP_ASSERT(offsetof(CreatureEditorRecord, script_name) == 0x18, "creature script name offset");
+DECOMP_ASSERT(offsetof(CreatureEditorRecord, script_params) == 0x70, "creature script params offset");
+DECOMP_ASSERT(offsetof(CreatureEditorRecord, angle) == 0x34, "creature angle offset");
+DECOMP_ASSERT(offsetof(CreatureEditorRecord, character_type) == 0x58, "creature character type offset");
+DECOMP_ASSERT(offsetof(CreatureEditorRecord, path) == 0x3c, "creature path offset");
+DECOMP_ASSERT(offsetof(CreatureEditorRecord, set) == 0x5a, "creature set offset");
+DECOMP_ASSERT(offsetof(CreatureEditorRecord, flags) == 0x68, "creature flags offset");
+DECOMP_ASSERT(offsetof(CreatureEditorRecord, activation_area) == 0x6c, "creature activation area offset");
+DECOMP_ASSERT(offsetof(CreatureEditorRecord, trigger_area) == 0x80, "creature trigger area offset");
+DECOMP_ASSERT(offsetof(CreatureEditorRecord, activation) == 0x8f, "creature activation offset");
+DECOMP_ASSERT(offsetof(CreatureEditorRecord, view_distance) == 0x9c, "creature view distance offset");
+DECOMP_ASSERT(offsetof(CreatureEditorRecord, negative_min_view_height) == 0xa8, "creature min view height offset");
+DECOMP_ASSERT(sizeof(CreatureEditorRecord) == 0xac, "editor creature record size");
+
+#if defined(__i386__)
+#define CREATURE_EDITOR_REGPARM2 __attribute__((regparm(2)))
+#else
+#define CREATURE_EDITOR_REGPARM2
+#endif
+
+#if defined(__i386__)
+#define CREATURE_EDITOR_REGPARM1 __attribute__((regparm(1)))
+#else
+#define CREATURE_EDITOR_REGPARM1
+#endif
+static __used__
+    __attribute__((always_inline)) CREATURE_EDITOR_REGPARM1 void creatureEditor_Updated(EDCREATURE_s *creature);
+
+static __used__ void creatureEditor_cbCancelMenu(eduimenu_s *menu, eduimenu_s *);
+
+static __used__ __attribute__((force_align_arg_pointer)) void creatureEditor_cbResetParams(eduimenu_s *menu,
+                                                                                           eduiitem_s *, unsigned int);
+
+static __used__ __attribute__((force_align_arg_pointer)) void creatureEditor_cbVisionMenu(eduimenu_s *parent,
+                                                                                          eduiitem_s *, unsigned int);
+
+static __used__ __attribute__((force_align_arg_pointer)) void creatureEditor_cbSetScript(eduimenu_s *, eduiitem_s *item,
+                                                                                         unsigned int);
+
+static __used__ void creatureEditor_cbSetScriptParam(eduimenu_s *menu, eduiitem_s *item, unsigned int);
+
+static __used__ void creatureEditor_cbSetActivation(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+static __used__ void creatureEditor_cbSetType(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+static __used__ void creatureEditor_cbSetAreaActivation(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+static __used__ void creatureEditor_cbSetLocator(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+static __used__ void creatureEditor_cbSelectRespawnLocator(eduimenu_s *parent, eduiitem_s *, unsigned int);
+
+static __used__ void creatureEditor_cbSelectLocator(eduimenu_s *parent, eduiitem_s *, unsigned int);
+
+static __used__ void creatureEditor_cbSelectTriggerArea(eduimenu_s *parent, eduiitem_s *, unsigned int);
+
+static __used__ void creatureEditor_cbSetRespawnLocator(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+static __used__ void creatureEditor_cb_assigntoset(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+static __used__ void creatureEditor_cbSetTriggerArea(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+static __used__ void creatureEditor_cb_ngroup(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+static __used__ void creatureEditor_cb_nacross(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+static __used__ void creatureEditor_cb_xspacing(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+static __used__ void creatureEditor_cb_zspacing(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+static __used__ void creatureEditor_cb_difficulty(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+static __used__ void creatureEditor_cb_heardistance(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+static __used__ void creatureEditor_cb_viewdistance(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+static __used__ void creatureEditor_cb_minviewheight(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+static __used__ void creatureEditor_cb_maxviewheight(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+static __used__ void creatureEditor_cb_min_n_respawns(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+static __used__ void creatureEditor_cb_max_n_respawns(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+static __used__ void creatureEditor_cb_min_t_respawn(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+static __used__ void creatureEditor_cb_max_t_respawn(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+static __used__ void creatureEditor_cb_stagger_start(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+// ==== src/editor/locator_editor.cpp: all remaining content ====
+
+extern "C" {
+    struct EDCREATURE_s;
+}
+
+#if defined(__i386__)
+static void __attribute__((regparm(1))) DestroyLocator(EDLOCATOR_s *);
+static unsigned int __attribute__((regparm(2))) AddLocatorToSet(EDLOCATORSET_s *, EDLOCATOR_s *, EDLOCATOR_s *);
+#else
+static void DestroyLocator(EDLOCATOR_s *);
+static unsigned int AddLocatorToSet(EDLOCATORSET_s *, EDLOCATOR_s *, EDLOCATOR_s *);
+#endif
+static __used__ void locatorEditor_cbAddLocatorsByNameYesNo(eduimenu_s *, eduiitem_s *, u32);
+
+static __used__ __attribute__((optimize("no-tree-vectorize"))) void
+locatorEditor_cbAddLocatorsByNameYesNo(eduimenu_s *, eduiitem_s *item, u32);
+static __used__ void locatorEditor_cbCancelRenameMenu(eduimenu_s *menu, eduimenu_s *);
+static __used__ void locatorEditor_cbCancelSelectLocatorSet(eduimenu_s *menu, eduimenu_s *);
+static __used__ void locatorEditor_cbCancelRenameLocatorSetMenu(eduimenu_s *, eduimenu_s *);
+
+static __used__ __attribute__((optimize("no-tree-vectorize"))) void DestroyLocator(EDLOCATOR_s *locator);
+
+#if defined(__i386__)
+#define LOCATOR_SET_BODY_ATTR __attribute__((noinline, optimize("no-tree-vectorize"), regparm(2)))
+#else
+#define LOCATOR_SET_BODY_ATTR __attribute__((noinline, optimize("no-tree-vectorize")))
+#endif
+
+static __used__ unsigned int AddLocatorToSet(EDLOCATORSET_s *set, EDLOCATOR_s *locator, EDLOCATOR_s *before);
+
+#if defined(__i386__)
+static __attribute__((noinline, optimize("no-tree-vectorize"), regparm(2))) unsigned int
+#else
+static __attribute__((noinline, optimize("no-tree-vectorize"))) unsigned int
+#endif
+AddLocatorToSetAtEnd(EDLOCATORSET_s *set, EDLOCATOR_s *locator) __asm__(
+    "_ZL15AddLocatorToSetP14EDLOCATORSET_sP11EDLOCATOR_sS2_.constprop.131");
+
+// ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
+
+extern "C" {
+    extern NUVEC plr_lastpos;
+    extern i16 id_GRIEVOUS;
+    extern i16 id_BODYGUARD;
+    extern i16 id_IMPERIALGUARD;
+    extern i16 id_JAWA;
+    extern i16 id_UGNAUGHT;
+    extern i16 id_ATAT;
+    extern i16 id_GONKDROID;
+    extern i16 id_LANDSPEEDER, id_MILLENNIUMFALCON;
+    void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
+    void AddDebrisEffect(i32 *, i32, f32, f32, f32);
+    void DebrisPosOrientationMtx(i32, NUMTX *);
+    void DebFreeInstantly(i32 *);
+    void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
+}
+
+extern "C" {
+extern AICONDITIONDEF lego_aiconditiondefs[178];
+
+    static_assert(sizeof(lego_aiconditiondefs) / sizeof(lego_aiconditiondefs[0]) == 178,
+                  "complete game AI condition registry");
+
+}
+
+// ==== src/gameapi/ai/aisys/aistate.cpp: all remaining content ====
+
+// ==== src/legoapi/gizmo/gizmos/gizmos_gizactions.cpp: declarations ====
+
+i32 Action_ReleaseLocator(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
+                          i32 first_time, float);
+
+i32 Action_GetLocatorFromSet(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,
+                             i32 param_count, i32 first_time, float);
+
+i32 Action_AssignLocatorInSet(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
+                              i32 first_time, float);
+
+namespace {
+#include "legoapi/gizmo/gizmos/gizmos_gizactions_types.h"
+
+} // namespace
+
+// ==== src/legoapi/ai/game/gameantinode.cpp: declarations ====
+#include "legoapi/ai/game/gameantinode.h"
+
+// ==== src/legoapi/render/core/render.cpp: declarations ====
+#include "gameapi/edtools/edbri_internal.h"
+#include "legoapi/actions/character/transform.h"
+#include "legoapi/menus/core/text.h"
+#include "legoapi/render/light/fade_material.h"
+#include "nu2api/nu3d/android/nuportal_android.h"
+#include "nu2api/nu3d/nuvport.h"
+
+#include "legoapi/render/core/SwipeDecalRenderer.h"
+#include "nu2api/nu3d/nuprim_internal.h"
+#include "nu2api/nu3d/nudlist.h"
+#include "nu2api/nu3d/NuRenderDevice.h"
+#include "nu2api/nu3d/android/nurndr_android.h"
+#include "nu2api/nu3d/android/nugscn_android.h"
+#include "nu2api/nucore/bgproc.h"
+#include "nu2api/nucore/nuapi.h"
+#include "nu2api/nucore/nuptrblock.h"
+#include "nu2api/nucore/nuthread.h"
+
+// Camera zoom state
+
+// Graphics loading flags
+
+// --- NuGScn graphics-data reader ---
+// NuReadGraphicsData is a C++ static function in the original (GCC clones it,
+// hence the `.isra.NNN` suffix in the ROM symbol table).
+
+// Retail only keeps the IPA-SRA clone, which drops the unused fourth argument.
+#if defined(__i386__)
+#define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone, regparm(2)))
+#else
+#define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone))
+#endif
+
+// --- Extern "C": NuGScn functions have C linkage in original ---
+
+#include "nu2api/nu3d/nuprim.h"
+#include "nu2api/nu3d/nupostparams.h"
+
+#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
+    do {                                                                                                               \
+        direction.x = (vx);                                                                                            \
+        direction.y = -(vy) * camera.aspect;                                                                           \
+        direction.z = adjacent;                                                                                        \
+        NuVecNorm(&direction, &direction);                                                                             \
+        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
+        NuVecNorm(&direction, &direction);                                                                             \
+        brightness = direction.y * 0.5f + 0.5f;                                                                        \
+        if (brightness <= near_angle)                                                                                  \
+            brightness = near_scale * parameters->intensity;                                                           \
+        else if (brightness >= far_angle)                                                                              \
+            brightness = far_scale * parameters->intensity;                                                            \
+        else                                                                                                           \
+            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
+        if (parameters->directional) {                                                                                 \
+            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
+            if (angle < parameters->direction_near_angle) {                                                            \
+                brightness += 128.0f * parameters->direction_far_scale;                                                \
+            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
+                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
+                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
+                                      parameters->direction_bias);                                                     \
+                brightness +=                                                                                          \
+                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
+                              parameters->direction_near_scale);                                                       \
+            }                                                                                                          \
+        }                                                                                                              \
+        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
+                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
+                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
+                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
+        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
+            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
+                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
+        else                                                                                                           \
+            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
+        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
+    } while (0)
+
+// DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
+// red-brick positions come from the Game init values in legogame/game.cpp.
+
+extern "C" {
+    extern i16 id_ATAT;
+}
+
+#define SWIPE_PRIM_UV(U, V)                                                                                            \
+    do {                                                                                                               \
+        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
+        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
+            vertex->float_uv[0] = (U);                                                                                 \
+            vertex->float_uv[1] = (V);                                                                                 \
+        } else {                                                                                                       \
+            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
+            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
+        }                                                                                                              \
+    } while (false)
+
+extern i32 qrand(void);
+
+// ==== src/legoapi/actions/character/starwars.cpp: all remaining content ====
+
+struct AIPACKET_s;
+struct AISYS_s;
+
+// ==== src/editor/antinode_editor.cpp: all remaining content ====
+
+// ==== src/editor/edtoolsall.cpp: declarations ====
+
+#include "editor/edtoolsall_types.h"
+
+// ==== src/legoapi/render/core/terrain_stubs.cpp: declarations ====
+#include "legoapi/render/core/gameliball.h"
+#include "legoapi/render/fx/game_deb.h"
+#include "nu2api/nu3d/android/nurain_android.h"
+
+#include <stddef.h>
+
+extern TERRSET * CurTerr;
+// Runtime-selected groups appended after the fixed terrain allocation.
+#include "legoapi/render/core/terrain_stubs_types.h"
+
+extern "C" {
+    void DebFreeInstantly(i32 *);
+}
+
+// NuFileExists @nufile (nucore_plain.cpp).
+extern "C" i32 NuFileExists(char *name);
+
+extern "C" {
+
+void DebrisPosOrientationMtx(i32 handle, NUMTX *source);
+
+i32 FindPlatInst(i32 instance);
+
+void PlatOnOff(i32 index, i32 enabled);
+
+} // extern "C"
+
+// ==== functions in original address order ====
+
+// ==== functions in original address order ====
+
+// ==== src/legoapi/items/base/collection.cpp: declarations ====
+
+struct GIZMOPICKUP_s;
+struct PART_s;
+
+// ==== src/legoapi/actions/character/snake.cpp: declarations ====
+
+#define ADD_SNAKE_SEGMENT_DEBRIS(index)                                                                                \
+    do {                                                                                                               \
+        const i32 segment_index = (index);                                                                             \
+        NUMTX matrix;                                                                                                  \
+        NUANGVEC angles;                                                                                               \
+        angles.y = NuAngAdd(object->snake_body->segments[segment_index].yaw, 0x8000);                                  \
+        angles.x = object->snake_body->segments[segment_index].pitch;                                                  \
+        NuMtxSetRotationXYVU0(&matrix, &angles);                                                                       \
+        if (object->snake_body->scale != 1.0f) {                                                                       \
+            NUVEC scale = {object->snake_body->scale, object->snake_body->scale, object->snake_body->scale};           \
+            NuMtxPreScale(&matrix, &scale);                                                                            \
+        }                                                                                                              \
+        matrix.m30 += object->snake_body->segments[segment_index].position.x;                                          \
+        matrix.m31 += object->snake_body->segments[segment_index].position.y + object->snake_body->scale * 0.02f;      \
+        matrix.m32 += object->snake_body->segments[segment_index].position.z;                                          \
+        i32 special_index = segment_index == object->snake_body->segment_count - 1 ? 2 : segment_index % 2;            \
+        nuhspecial_s *special = &snake_hspecials[special_index];                                                       \
+        if (NuSpecialExistsFn(special)) {                                                                              \
+            NUVEC momentum;                                                                                            \
+            SetKillPartMom(&momentum);                                                                                 \
+            momentum.y += 1.0f;                                                                                        \
+            ADDPART_s part = Default_ADDPART;                                                                          \
+            part.matrix = &matrix;                                                                                     \
+            part.velocity = &momentum;                                                                                 \
+            part.field_14 = 0.1f;                                                                                      \
+            part.field_18 = 0.1f;                                                                                      \
+            part.gravity = -5.0f;                                                                                      \
+            part.special = special;                                                                                    \
+            part.flags = 0x90;                                                                                         \
+            part.stop_fn = PartStop_Flickerer;                                                                         \
+            part.draw_fn = PartDraw_Flickerer;                                                                         \
+            part.field_3c = PartImpact_Brick;                                                                          \
+            part.time_step = FRAMETIME;                                                                                \
+            part.lighting = reinterpret_cast<PARTLIGHTSOURCE_s *>(&object->light_data);                                \
+            AddPart(&part);                                                                                            \
+        }                                                                                                              \
+    } while (0)
+
+// ==== src/legoapi/actions/movement/jumping.cpp: declarations ====
+
+#include "legoapi/actions/movement/jumping_types.h"
+
+// ==== src/legoapi/actions/movement/carrying.cpp: declarations ====
+
+// Original defaults: 0x668d30 and 0x668d40, each a four-byte integer.
+
+// ==== src/legoapi/menus/core/hint.cpp: declarations ====
+
+// The hint icon transitions and the touch icon x position are dynamically
+// initialized in this unit's static constructor in the reference.
+
+// Retail keeps this body as GCC's split-out clone; the inline head stays in
+// the caller.
+
+// Original local callbacks referenced by Hints_LSW.
+
+// Each control mode retains its own requested and interpolated hint row.
+
+// ==== src/legoapi/misc/utilities.cpp: declarations ====
+
+#include <ctype.h>
+
+// Retail copies a fully inside end point as one unaligned vector.
+
+// ==== src/legoapi/gizmo/object/gizforce.cpp: all remaining content ====
+
+// ==== src/legoapi/render/core/render.cpp: declarations ====
+
+#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
+    do {                                                                                                               \
+        direction.x = (vx);                                                                                            \
+        direction.y = -(vy) * camera.aspect;                                                                           \
+        direction.z = adjacent;                                                                                        \
+        NuVecNorm(&direction, &direction);                                                                             \
+        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
+        NuVecNorm(&direction, &direction);                                                                             \
+        brightness = direction.y * 0.5f + 0.5f;                                                                        \
+        if (brightness <= near_angle)                                                                                  \
+            brightness = near_scale * parameters->intensity;                                                           \
+        else if (brightness >= far_angle)                                                                              \
+            brightness = far_scale * parameters->intensity;                                                            \
+        else                                                                                                           \
+            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
+        if (parameters->directional) {                                                                                 \
+            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
+            if (angle < parameters->direction_near_angle) {                                                            \
+                brightness += 128.0f * parameters->direction_far_scale;                                                \
+            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
+                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
+                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
+                                      parameters->direction_bias);                                                     \
+                brightness +=                                                                                          \
+                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
+                              parameters->direction_near_scale);                                                       \
+            }                                                                                                          \
+        }                                                                                                              \
+        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
+                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
+                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
+                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
+        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
+            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
+                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
+        else                                                                                                           \
+            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
+        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
+    } while (0)
+
+extern "C" {
+    extern i16 id_ATAT;
+}
+
+#define SWIPE_PRIM_UV(U, V)                                                                                            \
+    do {                                                                                                               \
+        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
+        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
+            vertex->float_uv[0] = (U);                                                                                 \
+            vertex->float_uv[1] = (V);                                                                                 \
+        } else {                                                                                                       \
+            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
+            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
+        }                                                                                                              \
+    } while (false)
+
+// ==== src/legoapi/world/levels/episode.cpp: declarations ====
+
+#include "legoapi/world/levels/episode_types.h"
+DECOMP_ASSERT(sizeof(TROOPERCANNON_s) == 0x30, "Trooper cannon state size");
+DECOMP_ASSERT(offsetof(TROOPERCANNON_s, character_name) == 0x0c, "Trooper cannon name offset");
+DECOMP_ASSERT(offsetof(TROOPERCANNON_s, rebuilding) == 0x2c, "Trooper cannon rebuilding offset");
+
+// Episode-global logic and helpers shared across episodes: completion/
+// episode bookkeeping, super-story, boss/cutscene-adjacent helpers. The
+// per-episode level *handlers* live in the matching episodeI..VI.cpp files.
+
+// ===========================================================================
+// Episode bookkeeping
+// ===========================================================================
+
+// ===========================================================================
+// HUD / score helpers
+// ===========================================================================
+
+// ===========================================================================
+// Shared gameplay helpers
+// ===========================================================================
+
+// ==== src/legoapi/items/collect/batarang.cpp: declarations ====
+#include "legoapi/items/collect/batarang.h"
+
+void NewRumble(nupad_s *, f32, i32);
+
+// ==== src/legoapi/gizmo/object/gizmoblowups.cpp: declarations ====
+
+// Original writable flagremaptab at 0x668520, 32 pairs of 32-bit masks.
+extern "C" {
+extern u32 flagremaptab[32][2];
+}
+
+// Definitions from the original gizmoblowups translation unit.
+
+#include "legoapi/gizmo/object/gizmoblowups_types.h"
+
+DECOMP_ASSERT(sizeof(BLOWUPPROGRESS_s) == 0x100, "BLOWUPPROGRESS_s ABI");
+
+DECOMP_ASSERT(offsetof(WORLDINFO_s, blowup_target_candidates) == 0x50d4, "Blowup target candidate-list ABI");
+
+// ==== src/legoapi/characters/core/characters.cpp: declarations ====
+#include "legoapi/actions/character/suit.h"
+#include "legoapi/world/areas.h"
+
+#include "legoapi/actions/character/specialmoves.h"
+#include "nu2api/numusic/numusic.h"
+
+// LoadPerm1 is one of the few game-level entry points which wires together
+// otherwise C-linkage engine subsystems.  Keep these declarations local: the
+// individual subsystem TUs intentionally expose their original plain names.
+extern "C" {
+    i32 NuFileExists(char *);
+    i32 NuStrCpy(char *, const char *);
+
+}
+
+// The original table at 0x006281a0.  These are the material animation
+// scripts made available before the permanent things scene is loaded.
+
+#include "legoapi/characters/core/characters_types.h"
+
+// Retail keeps only the IPA-SRA clone, which receives &*layers.
+#if defined(__i386__)
+#define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone, regparm(1)))
+#else
+#define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone))
+#endif
+
+void GameAudio_PlaySfx(i32, nuvec_s *, i32, i32);
+
+// ==== src/legoapi/props/objects/tubes.cpp: all remaining content ====
+
+extern "C" void AddVariableShotDebrisEffectTimed1(i32 effect, NUVEC *position, i32 count, f32 time, i16 z_rotation,
+                                                  i16 y_rotation, NUMTX *orientation);
+void NewRumble(nupad_s *pad, f32 strength, i32 mode);
+void NewBuzz(nupad_s *pad, f32 duration, i32 mode);
+
+// ==== src/legoapi/misc/supportall.cpp: declarations ====
+
+#if defined(__SSE__)
+#include <xmmintrin.h>
+#endif
+#include "legoapi/misc/supportall.h"
+#include "legoapi/render/core/screen.h"
+#include <stdarg.h>
+#include <limits.h>
+#include "legoapi/gizmo/base/gizflow.h"
+
+// The reference defines these with dynamic initialization in this unit.
+extern MemoryManager theMemoryManager;
+#include "legoapi/misc/supportall_types.h"
+
+DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");
+
+// Debug-capture output helpers consumed by NuDisplayListCaptureSortPriority.
+// Transcribed from the original C-linkage symbols:
+//   NuHtmlBegin    0x2d5ca0   NuHtmlFlush   0x2d5c30
+//   NuHtmlWrite    0x2d5cd0   NuHtmlHeading1 0x2d5d40
+
+extern "C" void NuHtmlWrite(const char *text, ...);
+
+extern "C" void NuHtmlHeading1(const char *fmt, ...);
+
+// ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
+
+extern "C" {
+    extern NUVEC plr_lastpos;
+    extern i16 id_GRIEVOUS;
+    extern i16 id_BODYGUARD;
+    extern i16 id_IMPERIALGUARD;
+    extern i16 id_JAWA;
+    extern i16 id_UGNAUGHT;
+    extern i16 id_ATAT;
+    extern i16 id_GONKDROID;
+    extern i16 id_LANDSPEEDER, id_MILLENNIUMFALCON;
+    void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
+    void AddDebrisEffect(i32 *, i32, f32, f32, f32);
+    void DebrisPosOrientationMtx(i32, NUMTX *);
+    void DebFreeInstantly(i32 *);
+    void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
+}
+
+extern "C" {
+extern AICONDITIONDEF lego_aiconditiondefs[178];
+
+    static_assert(sizeof(lego_aiconditiondefs) / sizeof(lego_aiconditiondefs[0]) == 178,
+                  "complete game AI condition registry");
+
+}
+
+// ==== src/legoapi/misc/memory.cpp: all remaining content ====
+
+extern "C" {
+
+void DebFreeInstantly(i32 *handle);
+
+} // extern "C"
+
+// ==== functions in original address order ====
+
+// ==== functions in original address order ====
+
+// ==== functions in original address order ====
+
+// ==== src/legoapi/items/objects/objectsall.cpp: declarations ====
+
+pushblock_s *BlockInBlock(WORLDINFO_s *world, pushblock_s *block, i32 excluded, pushblock_s **support);
+
+// ==== src/gameapi/edtools/edpartall.cpp: all remaining content ====
+#include "gameapi/edtools/gameapi_edtools_types.h"
+
+extern "C" {
+    void eduiMenuRender(eduimenu_s *menu);
+}
+
+// Retail only keeps the IPA-SRA clone, which takes just the parent menu.
+
+// ==== src/legoapi/render/core/terrain_stubs.cpp: declarations ====
+
+extern "C" {
+    void DebFreeInstantly(i32 *);
+}
+
+extern "C" {
+
+void DebrisPosOrientationMtx(i32 handle, NUMTX *source);
+
+i32 FindPlatInst(i32 instance);
+
+void PlatOnOff(i32 index, i32 enabled);
+
+} // extern "C"
+
+// ==== src/legoapi/render/fx/parts.cpp: declarations ====
+
+extern "C" {
+    void DebFreeInstantly(i32 *handle);
+
+    void SetSfxBit_On(i32);
+    void PlaySfxById(i32, NUVEC *);
+
+    void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
+}
+
+extern "C" {
+
+void AddDebrisEffect(i32 *handle, i32 effect_index, f32 x, f32 y, f32 z);
+
+    void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
+
+PART_s *AddPart(ADDPART_s *params);
+
+    void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
+
+void AddVariableShotDebrisEffect(i32 effect, NUVEC *position, i32 count, i16 z_rotation, i16 y_rotation);
+
+void AddVariableShotDebrisEffectTimed1(i32 effect, NUVEC *position, i32 count, f32 time, i16 z_rotation,
+                                           i16 y_rotation, NUMTX *particle_orientation);
+
+    void DebFreeInstantly(i32 *);
+
+} // extern "C"
+
+#define PART_EMIT_SOUND_ON(slot)                                                                                       \
+    if (type->sounds[slot] != -1) {                                                                                    \
+        SetSfxBit_On(type->sounds[slot]);                                                                              \
+        if (type->sound_modes[slot] == 4)                                                                              \
+            PlaySfxById(type->sounds[slot], &emitter->position);                                                       \
+    }
+#define PART_EMIT_SOUND(slot, mode)                                                                                    \
+
+// ==== src/gameapi/edtools/edtoolsall_plain.cpp: all remaining content ====
+#include "gameapi/edtools/edanim_internal.h"
+#include "gameapi/edtools/edgra.h"
+#include "gameapi/edtools/edui_colour.h"
+#include "gameapi/edtools/edgra_internal.h"
+#include "nu2api/nu3d/android/nuobject_android.h"
+#include "nu2api/nucore/nuvideo.h"
+
+// Retail keeps an unreferenced partial-inlining clone of the old HSV2RGB
+// helper (the non-grey path) in this unit.
+#if defined(__i386__)
+#define HSV2RGB_BODY_ATTR __attribute__((used, noinline, noclone, regparm(2), sseregparm))
+#else
+#define HSV2RGB_BODY_ATTR __attribute__((used, noinline, noclone))
+#endif
+
+// The original animation editor callbacks and lifecycle share file-local state.
+// ---- begin src/gameapi/edtools/edanimall.cpp ----
+
+// Animation editor subsystem stubs (static, internal linkage).
+
+static __attribute__((used)) void edanimcbCubeMap(eduimenu_s *, eduiitem_s *, u32);
+static __attribute__((used)) void edanimcbFileLoad(eduimenu_s *menu, eduiitem_s *, u32);
+static __attribute__((used)) void edanimcbFileSave(eduimenu_s *menu, eduiitem_s *, u32);
+static __attribute__((used)) void edanimcbMCTBMenu(eduimenu_s *, eduiitem_s *, u32);
+static __attribute__((used)) void edanimcbSoundMenu(eduimenu_s *, eduiitem_s *, u32);
+static __attribute__((used)) void edanimcbBouncyMenu(eduimenu_s *, eduiitem_s *, u32);
+static __attribute__((used)) void edanimcbSwitchMenu(eduimenu_s *, eduiitem_s *, u32);
+static __attribute__((used)) void edanimcbSetSwitchId(eduimenu_s *, eduiitem_s *item, u32);
+static __attribute__((used)) void edanimcbMCTBCardType(eduimenu_s *menu, eduiitem_s *, u32);
+static __attribute__((used)) void edanimcbParticleMenu(eduimenu_s *, eduiitem_s *, u32);
+static __attribute__((used)) void edanimcbSetSoundType(eduimenu_s *menu, eduiitem_s *item, u32);
+static __attribute__((used)) void edanimcbSetSwitchVar(eduimenu_s *, eduiitem_s *item, u32);
+static __attribute__((used)) void edanimcbCancelOptMenu(eduimenu_s *, eduimenu_s *);
+static __attribute__((used)) void edanimcbSetSwitchType(eduimenu_s *menu, eduiitem_s *item, u32);
+static __attribute__((used)) void edanimcbSoundTypeMenu(eduimenu_s *, eduiitem_s *, u32);
+static __attribute__((used)) void edanimcbCancelMCTBMenu(eduimenu_s *, eduimenu_s *);
+static __attribute__((used)) void edanimcbLocalSoundMenu(eduimenu_s *, eduiitem_s *, u32);
+static __attribute__((used)) void edanimcbMCTBCardFormat(eduimenu_s *menu, eduiitem_s *, u32);
+static __attribute__((used)) void edanimcbSetSoundTiming(eduimenu_s *, eduiitem_s *item, u32);
+static __attribute__((used)) void edanimcbSetSwitchDelay(eduimenu_s *, eduiitem_s *item, u32);
+static __attribute__((used)) void edanimcbSwitchTypeMenu(eduimenu_s *, eduiitem_s *, u32);
+
+// Remaining animation-editor UI/menu callbacks.
+
+static __attribute__((used)) void edanimcbCancelSoundMenu(eduimenu_s *, eduimenu_s *);
+
+static __attribute__((used)) void edanimcbMCTBCardPresent(eduimenu_s *menu, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbSetParticleRate(eduimenu_s *, eduiitem_s *item, u32);
+
+static __attribute__((used)) void edanimcbSetParticleType(eduimenu_s *menu, eduiitem_s *item, u32);
+
+static __attribute__((used)) void edanimcbToggleSoundType(eduimenu_s *menu, eduiitem_s *item, u32);
+
+static __attribute__((used)) void edanimcbCancelBouncyMenu(eduimenu_s *, eduimenu_s *);
+
+static __attribute__((used)) void edanimcbCancelSwitchMenu(eduimenu_s *, eduimenu_s *);
+
+static __attribute__((used)) void edanimcbMCTBCardLoadSlot(eduimenu_s *menu, eduiitem_s *item, u32);
+
+static __attribute__((used)) void edanimcbMCTBCardSaveSlot(eduimenu_s *menu, eduiitem_s *item, u32);
+
+static __attribute__((used)) void edanimcbMCTBCardUnFormat(eduimenu_s *menu, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbParticleTypeMenu(eduimenu_s *, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbSetBouncyDamping(eduimenu_s *, eduiitem_s *item, u32);
+
+static __attribute__((used)) void edanimcbSetBouncyTension(eduimenu_s *, eduiitem_s *item, u32);
+
+static __attribute__((used)) void edanimcbLocalParticleMenu(eduimenu_s *, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbMCTBCardFreeSpace(eduimenu_s *menu, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbMCTBCardSlotsUsed(eduimenu_s *menu, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbSetLocalSoundType(eduimenu_s *menu, eduiitem_s *item, u32);
+
+static __attribute__((used)) void edanimcbCancelParticleMenu(eduimenu_s *, eduimenu_s *);
+
+static __attribute__((used)) void edanimcbLocalSoundTypeMenu(eduimenu_s *, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbMCTBCardDeleteSlot(eduimenu_s *menu, eduiitem_s *item, u32);
+
+static __attribute__((used)) void edanimcbCancelSoundTypeMenu(eduimenu_s *, eduimenu_s *);
+
+static __attribute__((used)) void edanimcbMCTBCardCheckFormat(eduimenu_s *menu, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbSetBouncyPlayerGrav(eduimenu_s *, eduiitem_s *item, u32);
+
+static __attribute__((used)) void edanimcbCancelLocalSoundMenu(eduimenu_s *, eduimenu_s *);
+
+static __attribute__((used)) void edanimcbCancelSwitchTypeMenu(eduimenu_s *, eduimenu_s *);
+
+static __attribute__((used)) void edanimcbMCTBCardCheckKeyCard(eduimenu_s *menu, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbMCTBCardWriteKeyCard(eduimenu_s *menu, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbSetLocalParticleType(eduimenu_s *menu, eduiitem_s *item, u32);
+
+static __attribute__((used)) void edanimcbToggleParticleSwitch(eduimenu_s *, eduiitem_s *item, u32);
+
+static __attribute__((used)) void edanimcbLocalParticleTypeMenu(eduimenu_s *, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbCancelParticleTypeMenu(eduimenu_s *, eduimenu_s *);
+
+static __attribute__((used)) void edanimcbCancelLocalParticleMenu(eduimenu_s *, eduimenu_s *);
+
+static __attribute__((used)) void edanimcbCancelLocalSoundTypeMenu(eduimenu_s *, eduimenu_s *);
+
+static __attribute__((used)) void edanimcbCancelLocalParticleTypeMenu(eduimenu_s *, eduimenu_s *);
+
+static __attribute__((used)) void edanimcbBouncyMenu(eduimenu_s *parent, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbSoundMenu(eduimenu_s *parent, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbParticleMenu(eduimenu_s *parent, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbSwitchMenu(eduimenu_s *parent, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbLocalParticleMenu(eduimenu_s *parent, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbSoundTypeMenu(eduimenu_s *parent, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbLocalSoundTypeMenu(eduimenu_s *parent, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbLocalParticleTypeMenu(eduimenu_s *parent, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbParticleTypeMenu(eduimenu_s *parent, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbSwitchTypeMenu(eduimenu_s *parent, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbMCTBMenu(eduimenu_s *parent, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbLocalSoundMenu(eduimenu_s *parent, eduiitem_s *, u32);
+
+// ---- end src/gameapi/edtools/edanimall.cpp ----
+// ---- begin src/gameapi/edtools/edmenucallbacks.cpp ----
+#include <cstdio>
+
+// Editor UI callbacks retained in the original editor's menu code.
+#pragma GCC push_options
+#pragma GCC optimize("O2", "omit-frame-pointer")
+
+extern "C" {
+
+static __used__ void cbGradChange(void);
+
+static __used__ void cbSel(eduimenu_s *, eduiitem_s *item);
+
+static __used__ void cbSubMenu(eduimenu_s *menu, eduiitem_s *item);
+
+static __used__ void cbgpcfgAdd(eduimenu_s *menu, eduiitem_s *item, u32 value);
+
+static __used__ void cbgpcfgCPPress(eduimenu_s *menu, eduiitem_s *item, u32 value);
+
+static __used__ void cbgpcfgCopy(eduimenu_s *menu, eduiitem_s *item, u32 value);
+
+static __used__ void cbgpcfgDel(eduimenu_s *menu, eduiitem_s *item, u32 value);
+
+static __used__ void cbgpcfgPaste(eduimenu_s *menu, eduiitem_s *item, u32 value);
+
+} // extern "C"
+
+#pragma GCC pop_options
+
+// ---- end src/gameapi/edtools/edmenucallbacks.cpp ----
+
+// ---- begin src/gameapi/edtools/edptlall.cpp ----
+
+extern "C" {
+    void DebFreeInstantly(i32 *handle);
+}
+
+// The original particle editor's private callbacks and menu state share this TU.
+// ---- begin src/gameapi/edtools/edptlcallbacks.cpp ----
+
+extern "C" {
+    void AddDebrisEffect(i32 *handle, i32 effect_index, f32 x, f32 y, f32 z);
+}
+
+// Particle-list editor UI/menu callbacks.
+
+// Particle editor UI/menu callbacks.
+
+// ---- end src/gameapi/edtools/edptlcallbacks.cpp ----
+
+// Particle list editor subsystem stubs (static, internal linkage).
+
+// ---- end src/gameapi/edtools/edptlall.cpp ----
+
+// The original local font helpers read the same private draw state as the
+// editor callbacks, so they belong to this translation unit.
+static __used__ __attribute__((noclone)) void eduiFntPrintExGeneric(void *font, int x, int y,
+                                                                                int alignment, char *format, ...)
+    __asm__("_ZL14eduiFntPrintExPviiiPcz");
+static __used__ void eduiFntPrintExGeneric(void *font, int x, int y, int alignment, char *format, ...);
+
+// Left-aligned (16) specialisation of the integer print helper.
+static __attribute__((noclone)) void eduiFntPrintExLeft(void *font, int x, int y, int alignment,
+                                                                  char *format, ...)
+    __asm__("_ZL14eduiFntPrintExPviiiPcz.constprop.67");
+
+// Centred (64) specialisation of the integer print helper.
+static __attribute__((noclone)) void eduiFntPrintExCentre(void *font, int x, int y, int alignment,
+                                                                    char *format, ...)
+    __asm__("_ZL14eduiFntPrintExPviiiPcz.constprop.68");
+
+#if defined(__clang__)
+// Clang has no __builtin_va_arg_pack; format here and print the result. The
+// generic helper already owns this overload's mangled name, so rename it.
+static void eduiFntPrintEx(void *font, int x, int y, int alignment, char *format, ...)
+    __asm__("eduiFntPrintExFormatted");
+#else
+static inline __attribute__((always_inline)) void eduiFntPrintEx(void *font, int x, int y, int alignment,
+                                                                 char *format, ...) {
+    if (__builtin_constant_p(alignment) && alignment == 16)
+        eduiFntPrintExLeft(font, x, y, alignment, format, __builtin_va_arg_pack());
+    else if (__builtin_constant_p(alignment) && alignment == 64)
+        eduiFntPrintExCentre(font, x, y, alignment, format, __builtin_va_arg_pack());
+    else
+        eduiFntPrintExGeneric(font, x, y, alignment, format, __builtin_va_arg_pack());
+}
+#endif
+
+// Only caller prints the property edit buffer left-aligned.
+
+static __used__ void eduiFntPrintClipEx(void *font, float x, float y, int alignment, float clip_x, float clip_width,
+                                        char *format, ...);
+// Only eduiMenuRender calls the integer clip helper, always left-aligned.
+
+#include "gameapi/edtools/edtools_types.h"
+
+extern "C" {
+    void DebFreeInstantly(i32 *);
+    void AddDebrisEffect(i32 *, i32, f32, f32, f32);
+}
+
+extern "C" {
+
+    // Shared editor font; edmainInit receives and stores the font handle.
+
+void edmainInit(void *font, char *configuration_file);
+
+void eduiMenuRender(eduimenu_s *menu);
+
+    // The editor UI callbacks share this translation unit with their cursor,
+    // menu, and interaction state in the original binary.
+
+static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
+
+static __used__ i32 cbInteractMenuCancelChild(edui_interact_s *interact);
+
+static __used__ void cbMMReturnToApp(eduimenu_s *, eduiitem_s *, u32);
+
+static __used__ void cbmcfgCameraSpeed(eduimenu_s *, eduiitem_s *item, u32);
+
+static __used__ void cbmcfgCancel(eduimenu_s *menu, eduimenu_s *);
+
+static __used__ void cbMMRegSel(eduimenu_s *, eduiitem_s *selected, u32);
+static __used__ void cbMMEditorConfig(eduimenu_s *menu, eduiitem_s *, u32);
+
+static __used__ void eduicbDestroyDirectoryList(eduimenu_s *menu, eduimenu_s *);
+
+static __used__ i32 eduicbInteractColourPick(edui_interact_s *interact);
+static __used__ i32 eduicbInteractExpander(edui_interact_s *interact);
+static __used__ i32 eduicbInteractProp(struct edui_interact_s *interact);
+static __used__ i32 eduicbInteractFilter(struct edui_interact_s *interact);
+static __used__ i32 eduicbInteractSel(edui_interact_s *interact);
+static __used__ void eduicbItemDestroyExpander(eduimenu_s *menu, eduiitem_s *item);
+static __used__ void eduicbItemDestroyFilter(eduimenu_s *menu, eduiitem_s *item);
+static __used__ void eduicbItemFilePickDestroy(eduimenu_s *menu, eduiitem_s *item);
+static __used__ void eduicbItemGradPickDestroy(eduimenu_s *, eduiitem_s *item);
+static __used__ void eduicbItemSliderDestroy(eduimenu_s *menu, eduiitem_s *item);
+static __used__ void eduicbItemTextPickDestroy(eduimenu_s *menu, eduiitem_s *item);
+static __used__ void eduicbPickCFGCancel(eduimenu_s *menu, eduimenu_s *);
+
+static __used__ i32 eduicbProcessColourPick(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
+static __used__ i32 eduicbProcessColourSlider(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
+static __used__ i32 eduicbProcessExpander(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
+static __used__ i32 eduicbProcessFilePick(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
+static __used__ i32 eduicbProcessFilter(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
+static __used__ i32 eduicbProcessGradPick(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
+static __used__ i32 eduicbProcessGraph(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
+static __used__ i32 eduicbProcessGreyPick(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
+static __used__ i32 eduicbProcessProp(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
+static __used__ i32 eduicbProcessSel(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
+static __used__ i32 eduicbProcessSeparator(eduimenu_s *, eduiitem_s *, f32, nupad_s *);
+static __used__ i32 eduicbProcessSlider(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
+static __used__ i32 eduicbProcessTextPick(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
+static __used__ i32 eduicbProcessTexturePick(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
+__attribute__((force_align_arg_pointer)) static __used__ i32 eduicbRenderCheck(eduimenu_s *, eduiitem_s *item,
+                                                                                   i32 x, i32 y, i32 width, i32);
+    // Retail keeps this as the constant-propagated clone of the generic four-step
+    // gradient helper; only the hue/value colour picker band reaches it.
+static __used__ i32 eduicbRenderColourPick(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderColourSlider(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderExpander(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderFilePick(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderGradPick(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderGraph(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32 selected);
+static __used__ i32 eduicbRenderGreyPick(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderNumber(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderProp(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderFilter(struct eduimenu_s *menu, struct eduiitem_s *item, i32 x, i32 y, i32 scale,
+                                           i32 selected);
+static __used__ i32 eduicbRenderSel(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderSelWithClipColour(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width,
+                                                      i32);
+static __used__ i32 eduicbRenderSeparator(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderSlider(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderSliderInt(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderTextPick(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderTextSelector(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderTexturePick(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ void eduicbSelectDirectoryEntry(eduimenu_s *menu, eduiitem_s *item, u32 value);
+static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u32);
+}
+
+static void eduiFntPrintExLeft(void *font, int x, int y, int, char *format, ...);
+
+static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ...);
+
+// Text-picker commit callbacks. Retail keeps them unmangled and local.
+
+// ==== src/gameapi/edtools/edtoolsall.cpp: declarations ====
+
+#include "nu2api/nucore/NuDynamicLight.h"
+#include <new>
+
+extern EdInputContext * Input;
+extern "C" void PlaySfxById(i32, nuvec_s *);
+
+DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
+
+extern "C" {
+    void DebFreeInstantly(i32 *);
+    void AddDebrisEffect(i32 *, i32, f32, f32, f32);
+}
+
+extern "C" {
+    void DebFreeInstantly(i32 *);
+}
+
+inline EdMatrixControl::~EdMatrixControl() {
+    Destroy();
+}
+
+inline void EdMatrixControl::operator delete(void *memory) {
+    theMemoryManager.FreePool(memory, sizeof(EdMatrixControl));
+}
+
+inline void EdStringControl::operator delete(void *memory) {
+    theMemoryManager.FreePool(memory, sizeof(EdStringControl));
+}
+
+template <> inline void EdValueControl<f32>::operator delete(void *memory) {
+    theMemoryManager.FreePool(memory, sizeof(EdValueControl<f32>));
+}
+
+inline void EdFloatControl::operator delete(void *memory) {
+    theMemoryManager.FreePool(memory, sizeof(EdFloatControl));
+}
+
+inline EdVectorControl::~EdVectorControl() {
+    Destroy();
+}
+
+inline void EdVectorControl::operator delete(void *memory) {
+    theMemoryManager.FreePool(memory, sizeof(EdVectorControl));
+}
+
+inline EdClassObjectNameControl::~EdClassObjectNameControl() {
+}
+
+inline void EdClassObjectNameControl::operator delete(void *memory) {
+    theMemoryManager.FreePool(memory, sizeof(EdClassObjectNameControl));
+}
+
+inline EdSubSystem::~EdSubSystem() {
+}
+
+inline void EdControl::operator delete(void *memory) {
+    theMemoryManager.FreePool(memory, sizeof(EdControl));
+}
+
+// Match each control's allocation type, rather than inheriting the base size.
+inline void EdEnumControl::operator delete(void *memory) {
+    theMemoryManager.FreePool(memory, sizeof(EdEnumControl));
+}
+
+inline void EdBitControl::operator delete(void *memory) {
+    theMemoryManager.FreePool(memory, sizeof(EdBitControl));
+}
+
+// ---- begin src/gameapi/edtools/edmenucallbacks.cpp ----
+#include <cstdio>
+
+#pragma GCC push_options
+#pragma GCC optimize("O2", "omit-frame-pointer")
+
+extern "C" {
+
+static __used__ void cbGradChange(void);
+
+static __used__ void cbSel(eduimenu_s *, eduiitem_s *item);
+
+static __used__ void cbSubMenu(eduimenu_s *menu, eduiitem_s *item);
+
+static __used__ void cbgpcfgAdd(eduimenu_s *menu, eduiitem_s *item, u32 value);
+
+static __used__ void cbgpcfgCPPress(eduimenu_s *menu, eduiitem_s *item, u32 value);
+
+static __used__ void cbgpcfgCopy(eduimenu_s *menu, eduiitem_s *item, u32 value);
+
+static __used__ void cbgpcfgDel(eduimenu_s *menu, eduiitem_s *item, u32 value);
+
+static __used__ void cbgpcfgPaste(eduimenu_s *menu, eduiitem_s *item, u32 value);
+
+} // extern "C"
+
+#pragma GCC pop_options
+
+// ---- end src/gameapi/edtools/edmenucallbacks.cpp ----
+
+// ---- begin src/gameapi/edtools/edptlall.cpp ----
+
+extern "C" {
+    void DebFreeInstantly(i32 *handle);
+}
+
+// ---- begin src/gameapi/edtools/edptlcallbacks.cpp ----
+
+extern "C" {
+    void AddDebrisEffect(i32 *handle, i32 effect_index, f32 x, f32 y, f32 z);
+}
+
+// ---- end src/gameapi/edtools/edptlcallbacks.cpp ----
+
+// ---- end src/gameapi/edtools/edptlall.cpp ----
+
+extern "C" {
+    void DebFreeInstantly(i32 *);
+    void AddDebrisEffect(i32 *, i32, f32, f32, f32);
+}
+
+extern "C" {
+
+void edmainInit(void *font, char *configuration_file);
+
+void eduiMenuRender(eduimenu_s *menu);
+
+static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
+
+static __used__ i32 cbInteractMenuCancelChild(edui_interact_s *interact);
+
+static __used__ void cbMMReturnToApp(eduimenu_s *, eduiitem_s *, u32);
+
+static __used__ void cbmcfgCameraSpeed(eduimenu_s *, eduiitem_s *item, u32);
+
+static __used__ void cbmcfgCancel(eduimenu_s *menu, eduimenu_s *);
+
+static __used__ void cbMMRegSel(eduimenu_s *, eduiitem_s *selected, u32);
+static __used__ void cbMMEditorConfig(eduimenu_s *menu, eduiitem_s *, u32);
+
+static __used__ void eduicbDestroyDirectoryList(eduimenu_s *menu, eduimenu_s *);
+
+static __used__ i32 eduicbInteractColourPick(edui_interact_s *interact);
+static __used__ i32 eduicbInteractExpander(edui_interact_s *interact);
+static __used__ i32 eduicbInteractProp(struct edui_interact_s *interact);
+static __used__ i32 eduicbInteractFilter(struct edui_interact_s *interact);
+static __used__ i32 eduicbInteractSel(edui_interact_s *interact);
+static __used__ void eduicbItemDestroyExpander(eduimenu_s *menu, eduiitem_s *item);
+static __used__ void eduicbItemDestroyFilter(eduimenu_s *menu, eduiitem_s *item);
+static __used__ void eduicbItemFilePickDestroy(eduimenu_s *menu, eduiitem_s *item);
+static __used__ void eduicbItemGradPickDestroy(eduimenu_s *, eduiitem_s *item);
+static __used__ void eduicbItemSliderDestroy(eduimenu_s *menu, eduiitem_s *item);
+static __used__ void eduicbItemTextPickDestroy(eduimenu_s *menu, eduiitem_s *item);
+static __used__ void eduicbPickCFGCancel(eduimenu_s *menu, eduimenu_s *);
+
+static __used__ i32 eduicbProcessColourPick(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
+static __used__ i32 eduicbProcessColourSlider(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
+static __used__ i32 eduicbProcessExpander(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
+static __used__ i32 eduicbProcessFilePick(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
+static __used__ i32 eduicbProcessFilter(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
+static __used__ i32 eduicbProcessGradPick(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
+static __used__ i32 eduicbProcessGraph(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
+static __used__ i32 eduicbProcessGreyPick(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
+static __used__ i32 eduicbProcessProp(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
+static __used__ i32 eduicbProcessSel(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
+static __used__ i32 eduicbProcessSeparator(eduimenu_s *, eduiitem_s *, f32, nupad_s *);
+static __used__ i32 eduicbProcessSlider(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
+static __used__ i32 eduicbProcessTextPick(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
+static __used__ i32 eduicbProcessTexturePick(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
+__attribute__((force_align_arg_pointer)) static __used__ i32 eduicbRenderCheck(eduimenu_s *, eduiitem_s *item,
+                                                                                   i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderColourPick(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderColourSlider(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderExpander(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderFilePick(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderGradPick(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderGraph(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32 selected);
+static __used__ i32 eduicbRenderGreyPick(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderNumber(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderProp(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderFilter(struct eduimenu_s *menu, struct eduiitem_s *item, i32 x, i32 y, i32 scale,
+                                           i32 selected);
+static __used__ i32 eduicbRenderSel(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderSelWithClipColour(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width,
+                                                      i32);
+static __used__ i32 eduicbRenderSeparator(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderSlider(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderSliderInt(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderTextPick(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderTextSelector(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderTexturePick(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ void eduicbSelectDirectoryEntry(eduimenu_s *menu, eduiitem_s *item, u32 value);
+static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u32);
+}
+
+// ==== src/legoapi/menus/screens/gamemenuall.cpp: declarations ====
+#include "gameapi/gui/apimenu_internal.h"
+#include "legoapi/core/config/fileselect.h"
+#include "nu2api/nu3d/nugscn.h"
+
+// Retail clears these "fast repeat" latches but never sets them.
+
+// ==== src/nu2api/nucore/nucore_plain.cpp: declarations ====
+// Temporary C-linkage compatibility surface for unresolved engine owners.
+#include "nu2api/nucore/nuonline.h"
+//
+// This file collects functions whose original TU has not yet been
+// reconstructed. Domain families move to their evidenced owner as complete
+// groups; this file is not itself evidence of one original nucore TU.
+
+#include <GLES2/gl2.h>
+#include "nu2api/nu3d/android/nutex_ios_ex.h"
+
+#include "java/android.h"
+#include "java/java.h"
+#include "nu2api/nucore/NuInputDevice.h"
+#include "nu2api/nucore/NuInputManager.h"
+#include "nu2api/nu3d/nuspecial_internal.h"
+#include "nu2api/nu3d/nupostresources.h"
+#include "nu2api/nu3d/nuocclusion.h"
+#include "nu2api/nu3d/nurendercontext.h"
+#include "nu2api/nu3d/nuscreen.hpp"
+
+// C++-linkage helpers defined in sibling TUs.
+
+extern "C" {
+
+    // ---------------------------------------------------------------------------
+    // Display-list bootstrap (original nucore TU file-statics)
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // Redirected symbols — real bodies live elsewhere (kept as comments)
+    // ---------------------------------------------------------------------------
+
+    // Nu360_dxClear(u32,u32) is implemented in ios_graphics.cpp (original 0x317070).
+    // NuDisplayListSwapBuffersBeginFrame / EndFrame are transcribed in full
+    // in nudlist.cpp (originals 0x2eb5d0 / 0x2eaef0).
+    // NuHtmlBegin(void*) is transcribed in legoapi/misc/supportall.cpp (original 0x2d5ca0).
+    // NuIOS_SetVertexFormat is transcribed in nuiosdl_gl.cpp (original 0x29c070).
+    // NuIOS_WaitForRenderThreadCompletion is transcribed in ios_graphics.cpp (original 0xe34b0).
+    // NuIOS_WakeRenderThread is transcribed in ios_graphics.cpp (original 0xe3590).
+    // NuRenderContextSetZFunc is transcribed below (original 0x2a3860).
+
+    // ---------------------------------------------------------------------------
+    // Camera (thin wrappers; full matrix work is in NuCameraSetEx)
+    // ---------------------------------------------------------------------------
+
+    DECOMP_ASSERT(sizeof(NuCameraReflect) == 0x84, "camera reflection state size");
+    DECOMP_ASSERT(__builtin_offsetof(NuCameraReflect, mtx) == 4, "camera reflection matrix offset");
+
+void NuCameraSetEx(NUCAMERA *cam, i32 fast);
+
+    // ---------------------------------------------------------------------------
+    // Display list — faithful helpers + pending stubs
+    // ---------------------------------------------------------------------------
+
+} // extern "C"
+
+// Local helpers matching original static display-list setters (t local symbols)
+
+extern "C" {
+
+    extern "C++" {
+        // Original local helper cloned as DisplayListProcessSkin.isra.36 by GCC.
+        // It appends the world transform, skin palette, and geometry calls as one
+        // contiguous run in the material display list.
+        static __attribute__((noinline, noclone)) void
+        DisplayListProcessSkin(NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry, NUDISPLAYLISTITEM **first_and_last,
+                               NUMTX *world_matrix, void **transform_packet, NUMTX *skin_matrices,
+                               DEFORMERWEIGHTSARRAY *deformer_weights, i32 shadow_caster)
+            __asm__("_ZL22DisplayListProcessSkinP7numtl_sP15nudisplaylist_sP19nudisplaylistitem_sPS4_P7numtx_"
+                    "sPPvS7_P22deformerweightsarray_si.isra.36");
+
+        // Original local helper cloned as DisplayListProcessLightmapped.isra.34.
+        // Lightmapped geometry carries an AE/AF/B0 setup command two entries before
+        // its geometry command. Keep that setup command adjacent to the dynamic
+        // transform and geometry entries when the special is submitted.
+        static __attribute__((noinline, noclone)) void
+        DisplayListProcessLightmapped(NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry,
+                                      NUDISPLAYLISTITEM **first_and_last, NUMTX *world_matrix, void **transform_packet,
+                                      f32 alpha)
+            __asm__("_ZL29DisplayListProcessLightmappedP7numtl_sP15nudisplaylist_sP19nudisplaylistitem_sPS4_P7numtx_"
+                    "sPPvf.isra.34");
+    }
+
+    // ---------------------------------------------------------------------------
+    // Scene / render-scene
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // Frame lifecycle (NuFrameEnd is faithful; neighbours are stubs)
+    // ---------------------------------------------------------------------------
+
+    // Per-frame animation/pad update hooks (originals take the frame time).
+
+    // Frame-end callbacks (original bss @0x6bdaec/0x6bdaf0/0x6bdad0).
+
+    // Faithful transcription of the original frame-end pump. Waits for the
+    // target frame interval, ticks material/tex/wind anims, swaps screens
+    // via NuRndrSwapScreenEx, then advances nuapi clocks and pad state.
+
+    // ---------------------------------------------------------------------------
+    // iOS / platform
+    // ---------------------------------------------------------------------------
+
+    // Locale string is owned by the Android/JNI TU; cache only its index here.
+
+    // ---------------------------------------------------------------------------
+    // Animation / curves / data
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // Bridge / file / heap / memory
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // Math / geometry
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // Quick-font platform rendering (the generic font run lives in nuqfnt.cpp)
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // Rendering / materials / effects (host has GL paths elsewhere)
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // Light / wind / particles / debris
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // Gobj / hierarchy / scene graph
+    // ---------------------------------------------------------------------------
+
+#include "nu2api/nucore/nucore_plain_types.h"
+
+    // ---------------------------------------------------------------------------
+    // Input / pad / key / mouse
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // Culling / visibility / portals / occlusion
+    // ---------------------------------------------------------------------------
+
+    DECOMP_ASSERT(sizeof(NuInstanceTreeNode) == 0x0c, "instance tree node stride");
+    DECOMP_ASSERT(sizeof(NuInstanceTreeBounds) == 0x20, "instance tree bounds stride");
+    DECOMP_ASSERT(sizeof(NuInstanceTree_s) == 0x28, "instance tree size");
+    DECOMP_ASSERT(offsetof(NuInstanceTree_s, nodes) == 0x14, "instance tree nodes offset");
+    DECOMP_ASSERT(offsetof(NuInstanceTree_s, roots) == 0x20, "instance tree roots offset");
+    DECOMP_ASSERT(offsetof(NuInstanceTree_s, far_clips) == 0x24, "instance tree far clips offset");
+
+    // ---------------------------------------------------------------------------
+    // Viewport
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // Strings / conversion / Unicode
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // Containers / lists / params
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // Debug / error / profiling
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // Thread / misc OS
+    // ---------------------------------------------------------------------------
+
+#ifndef ANDROID
+    void NuGetCurrentThreadId(void) {
+        STUBBED();
+    }
+#endif
+#ifndef ANDROID
+    void NuThreadCreate(void) {
+        STUBBED();
+    }
+#endif
+    // ---------------------------------------------------------------------------
+    // Spline / online / net / other gameplay support
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // Rendering extras
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // PS2 / Xbox legacy shims
+    // ---------------------------------------------------------------------------
+
+} // extern "C"
+
+// ==== src/gameapi/edtools/edui.cpp: all remaining content ====
+
+// ==== src/gameapi/edtools/edfile.cpp: all remaining content ====
+
+void EdFileRead(void *buf, i32 len);
+
+f32 EdFileReadFloat();
+
+i32 EdFileReadInt();
+
+char EdFileReadChar();
+
+// ==== src/legoapi/core/config/saveload.cpp: declarations ====
+
+extern u8 FS_Active;
+
+// Retail keeps the whole body of RenderFileSel3 as the split-out .part clone;
+// the exported function only tests FS_Active.
+
+void RenderFileSel3(i32 draw_title);
+
+// ==== src/legoapi/render/core/render.cpp: declarations ====
+
+#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
+    do {                                                                                                               \
+        direction.x = (vx);                                                                                            \
+        direction.y = -(vy) * camera.aspect;                                                                           \
+        direction.z = adjacent;                                                                                        \
+        NuVecNorm(&direction, &direction);                                                                             \
+        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
+        NuVecNorm(&direction, &direction);                                                                             \
+        brightness = direction.y * 0.5f + 0.5f;                                                                        \
+        if (brightness <= near_angle)                                                                                  \
+            brightness = near_scale * parameters->intensity;                                                           \
+        else if (brightness >= far_angle)                                                                              \
+            brightness = far_scale * parameters->intensity;                                                            \
+        else                                                                                                           \
+            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
+        if (parameters->directional) {                                                                                 \
+            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
+            if (angle < parameters->direction_near_angle) {                                                            \
+                brightness += 128.0f * parameters->direction_far_scale;                                                \
+            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
+                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
+                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
+                                      parameters->direction_bias);                                                     \
+                brightness +=                                                                                          \
+                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
+                              parameters->direction_near_scale);                                                       \
+            }                                                                                                          \
+        }                                                                                                              \
+        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
+                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
+                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
+                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
+        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
+            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
+                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
+        else                                                                                                           \
+            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
+        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
+    } while (0)
+
+extern "C" {
+    extern i16 id_ATAT;
+}
+
+#define SWIPE_PRIM_UV(U, V)                                                                                            \
+    do {                                                                                                               \
+        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
+        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
+            vertex->float_uv[0] = (U);                                                                                 \
+            vertex->float_uv[1] = (V);                                                                                 \
+        } else {                                                                                                       \
+            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
+            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
+        }                                                                                                              \
+    } while (false)
+
+// ==== functions in original address order ====
+
+extern "C" {
+
+void eduiMenuRender(eduimenu_s *menu);
+
+}
+
+extern "C" {
+
+void edmainInit(void *font, char *configuration_file);
+
+}
+
+// ==== src/nu2api/nucore/nucore_plain.cpp: declarations ====
+//
+
+extern "C" {
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+void NuCameraSetEx(NUCAMERA *cam, i32 fast);
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+} // extern "C"
+
+extern "C" {
+
+    extern "C++" {
+        static __attribute__((noinline, noclone)) void
+        DisplayListProcessSkin(NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry, NUDISPLAYLISTITEM **first_and_last,
+                               NUMTX *world_matrix, void **transform_packet, NUMTX *skin_matrices,
+                               DEFORMERWEIGHTSARRAY *deformer_weights, i32 shadow_caster)
+            __asm__("_ZL22DisplayListProcessSkinP7numtl_sP15nudisplaylist_sP19nudisplaylistitem_sPS4_P7numtx_"
+                    "sPPvS7_P22deformerweightsarray_si.isra.36");
+
+        static __attribute__((noinline, noclone)) void
+        DisplayListProcessLightmapped(NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry,
+                                      NUDISPLAYLISTITEM **first_and_last, NUMTX *world_matrix, void **transform_packet,
+                                      f32 alpha)
+            __asm__("_ZL29DisplayListProcessLightmappedP7numtl_sP15nudisplaylist_sP19nudisplaylistitem_sPS4_P7numtx_"
+                    "sPPvf.isra.34");
+    }
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // Viewport
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+} // extern "C"
+
+// ==== functions in original address order ====
+
+extern "C" {
+
+PART_s *AddPart(ADDPART_s *params);
+
+}
+
+// ==== src/legoapi/characters/motion/move.cpp: declarations ====
+
+extern "C" {
+    extern i16 id_BODYGUARD;
+    extern i16 id_GRIEVOUS;
+}
+
+void MoveBlocksOverBlock(WORLDINFO_s *, pushblock_s *, i32, nuvec_s *);
+void MoveBlocks(WORLDINFO_s *world, pushblock_s *block, i32 index, nuvec_s *velocity);
+
+void MoveBlocksOverBlock(WORLDINFO_s *world, pushblock_s *block, i32 excluded, nuvec_s *velocity);
+
+#define HAS_BLOCK_ANIMS(animations)                                                                                    \
+    ((animations)[0x1a] != NULL || (animations)[0x1b] != NULL || (animations)[0x1c] != NULL)
+
+extern "C" {
+    extern i16 id_ATST, id_MINIATST, id_ATST_LOWRES, id_ATAT, id_MINIATAT, id_MINIATTE;
+}
+
+i32 SnapPosTaken(WORLDINFO_s *world, pushblock_s *, nuvec_s *position, i32 excluded_index);
+
+// ===========================================================================
+// ===========================================================================
+
+// ==== src/legoapi/render/fx/parts.cpp: declarations ====
+
+extern "C" {
+    void DebFreeInstantly(i32 *handle);
+
+    void SetSfxBit_On(i32);
+    void PlaySfxById(i32, NUVEC *);
+
+    void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
+}
+
+extern "C" {
+
+void AddDebrisEffect(i32 *handle, i32 effect_index, f32 x, f32 y, f32 z);
+
+    void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
+
+PART_s *AddPart(ADDPART_s *params);
+
+    void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
+
+void AddVariableShotDebrisEffect(i32 effect, NUVEC *position, i32 count, i16 z_rotation, i16 y_rotation);
+
+void AddVariableShotDebrisEffectTimed1(i32 effect, NUVEC *position, i32 count, f32 time, i16 z_rotation,
+                                           i16 y_rotation, NUMTX *particle_orientation);
+
+    void DebFreeInstantly(i32 *);
+
+} // extern "C"
+
+#define PART_EMIT_SOUND_ON(slot)                                                                                       \
+    if (type->sounds[slot] != -1) {                                                                                    \
+        SetSfxBit_On(type->sounds[slot]);                                                                              \
+        if (type->sound_modes[slot] == 4)                                                                              \
+            PlaySfxById(type->sounds[slot], &emitter->position);                                                       \
+    }
+#define PART_EMIT_SOUND(slot, mode)                                                                                    \
+
+// ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
+
+extern "C" {
+    extern NUVEC plr_lastpos;
+    extern i16 id_GRIEVOUS;
+    extern i16 id_BODYGUARD;
+    extern i16 id_IMPERIALGUARD;
+    extern i16 id_JAWA;
+    extern i16 id_UGNAUGHT;
+    extern i16 id_ATAT;
+    extern i16 id_GONKDROID;
+    extern i16 id_LANDSPEEDER, id_MILLENNIUMFALCON;
+    void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
+    void AddDebrisEffect(i32 *, i32, f32, f32, f32);
+    void DebrisPosOrientationMtx(i32, NUMTX *);
+    void DebFreeInstantly(i32 *);
+    void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
+}
+
+extern "C" {
+extern AICONDITIONDEF lego_aiconditiondefs[178];
+
+    static_assert(sizeof(lego_aiconditiondefs) / sizeof(lego_aiconditiondefs[0]) == 178,
+                  "complete game AI condition registry");
+
+}
+
+// ---- Player start spawn entries ----
+
+// ---- Misc player/gameobject helpers relocated from doorstubs.cpp ----
+
+namespace {
+
+} // namespace
+
+// ==== src/legoapi/world/levels/episodeII.cpp: declarations ====
+
+//
+
+// ===========================================================================
+// Kamino
+// ===========================================================================
+
+// ===========================================================================
+// ===========================================================================
+
+// ===========================================================================
+// ===========================================================================
+
+// ===========================================================================
+// ===========================================================================
+
+// ===========================================================================
+// ===========================================================================
+
+// ===========================================================================
+// ===========================================================================
+
+// ==== src/legoapi/world/levels/episodeI.cpp: declarations ====
+
+//
+
+//
+
+//
+
+// ===========================================================================
+// ===========================================================================
+
+// ===========================================================================
+// ===========================================================================
+
+// ===========================================================================
+// ===========================================================================
+
+// ===========================================================================
+// ===========================================================================
+
+// ===========================================================================
+// ===========================================================================
+
+// ===========================================================================
+// ===========================================================================
+
+// ===========================================================================
+// ===========================================================================
+
+// ===========================================================================
+// ===========================================================================
+
+// ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
+
+extern "C" {
+    extern NUVEC plr_lastpos;
+    extern i16 id_GRIEVOUS;
+    extern i16 id_BODYGUARD;
+    extern i16 id_IMPERIALGUARD;
+    extern i16 id_JAWA;
+    extern i16 id_UGNAUGHT;
+    extern i16 id_ATAT;
+    extern i16 id_GONKDROID;
+    extern i16 id_LANDSPEEDER, id_MILLENNIUMFALCON;
+    void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
+    void AddDebrisEffect(i32 *, i32, f32, f32, f32);
+    void DebrisPosOrientationMtx(i32, NUMTX *);
+    void DebFreeInstantly(i32 *);
+    void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
+}
+
+// ==== src/legoapi/gizmos/trigger/ai.cpp: all remaining content ====
+
+// ==== src/legoapi/ai/game/creature.cpp: declarations ====
+
+extern "C" {
+    extern NUVEC plr_lastpos;
+}
+
+// ==== src/gameapi/ai/aisys/aiscript.cpp: all remaining content ====
+
+// ==== src/legoapi/ai/core/ai_sys_stubs.cpp: declarations ====
+
+extern "C" {
+
+extern AIEDITOR_RENDER_STATE * aieditor;
+
+} // extern "C"
+
+// ==== src/editor/area_editor.cpp: all remaining content ====
+
+// ==== src/editor/edpath.cpp: all remaining content ====
+
+// ==== src/editor/aieditor.cpp: all remaining content ====
+
+// ==== src/editor/creature_editor.cpp: all remaining content ====
+
+#pragma GCC optimize("O2", "omit-frame-pointer")
+
+// ==== src/editor/locator_editor.cpp: all remaining content ====
+
+extern "C" {
+    struct EDCREATURE_s;
+}
+
+#if defined(__i386__)
+#else
+#endif
+
+// ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
+
+extern "C" {
+    extern NUVEC plr_lastpos;
+    extern i16 id_GRIEVOUS;
+    extern i16 id_BODYGUARD;
+    extern i16 id_IMPERIALGUARD;
+    extern i16 id_JAWA;
+    extern i16 id_UGNAUGHT;
+    extern i16 id_ATAT;
+    extern i16 id_GONKDROID;
+    extern i16 id_LANDSPEEDER, id_MILLENNIUMFALCON;
+    void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
+    void AddDebrisEffect(i32 *, i32, f32, f32, f32);
+    void DebrisPosOrientationMtx(i32, NUMTX *);
+    void DebFreeInstantly(i32 *);
+    void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
+}
+
+extern "C" {
+extern AICONDITIONDEF lego_aiconditiondefs[178];
+
+    static_assert(sizeof(lego_aiconditiondefs) / sizeof(lego_aiconditiondefs[0]) == 178,
+                  "complete game AI condition registry");
+
+}
+
+// ==== src/gameapi/ai/aisys/aistate.cpp: all remaining content ====
+
+// ==== src/legoapi/gizmo/gizmos/gizmos_gizactions.cpp: declarations ====
+
+namespace {
+
+} // namespace
+
+// ==== src/legoapi/render/core/render.cpp: declarations ====
+
+#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
+    do {                                                                                                               \
+        direction.x = (vx);                                                                                            \
+        direction.y = -(vy) * camera.aspect;                                                                           \
+        direction.z = adjacent;                                                                                        \
+        NuVecNorm(&direction, &direction);                                                                             \
+        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
+        NuVecNorm(&direction, &direction);                                                                             \
+        brightness = direction.y * 0.5f + 0.5f;                                                                        \
+        if (brightness <= near_angle)                                                                                  \
+            brightness = near_scale * parameters->intensity;                                                           \
+        else if (brightness >= far_angle)                                                                              \
+            brightness = far_scale * parameters->intensity;                                                            \
+        else                                                                                                           \
+            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
+        if (parameters->directional) {                                                                                 \
+            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
+            if (angle < parameters->direction_near_angle) {                                                            \
+                brightness += 128.0f * parameters->direction_far_scale;                                                \
+            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
+                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
+                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
+                                      parameters->direction_bias);                                                     \
+                brightness +=                                                                                          \
+                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
+                              parameters->direction_near_scale);                                                       \
+            }                                                                                                          \
+        }                                                                                                              \
+        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
+                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
+                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
+                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
+        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
+            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
+                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
+        else                                                                                                           \
+            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
+        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
+    } while (0)
+
+extern "C" {
+    extern i16 id_ATAT;
+}
+
+#define SWIPE_PRIM_UV(U, V)                                                                                            \
+    do {                                                                                                               \
+        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
+        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
+            vertex->float_uv[0] = (U);                                                                                 \
+            vertex->float_uv[1] = (V);                                                                                 \
+        } else {                                                                                                       \
+            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
+            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
+        }                                                                                                              \
+    } while (false)
+
+// ==== src/legoapi/actions/character/starwars.cpp: all remaining content ====
+
+// ==== src/editor/antinode_editor.cpp: all remaining content ====
+
+// ==== src/legoapi/render/core/terrain_stubs.cpp: declarations ====
+
+extern "C" {
+    void DebFreeInstantly(i32 *);
+}
+
+extern "C" {
+
+void DebrisPosOrientationMtx(i32 handle, NUMTX *source);
+
+i32 FindPlatInst(i32 instance);
+
+void PlatOnOff(i32 index, i32 enabled);
+
+} // extern "C"
+
+// ==== functions in original address order ====
+
+// ==== functions in original address order ====
+
+// ==== src/legoapi/actions/character/snake.cpp: declarations ====
+
+#define ADD_SNAKE_SEGMENT_DEBRIS(index)                                                                                \
+    do {                                                                                                               \
+        const i32 segment_index = (index);                                                                             \
+        NUMTX matrix;                                                                                                  \
+        NUANGVEC angles;                                                                                               \
+        angles.y = NuAngAdd(object->snake_body->segments[segment_index].yaw, 0x8000);                                  \
+        angles.x = object->snake_body->segments[segment_index].pitch;                                                  \
+        NuMtxSetRotationXYVU0(&matrix, &angles);                                                                       \
+        if (object->snake_body->scale != 1.0f) {                                                                       \
+            NUVEC scale = {object->snake_body->scale, object->snake_body->scale, object->snake_body->scale};           \
+            NuMtxPreScale(&matrix, &scale);                                                                            \
+        }                                                                                                              \
+        matrix.m30 += object->snake_body->segments[segment_index].position.x;                                          \
+        matrix.m31 += object->snake_body->segments[segment_index].position.y + object->snake_body->scale * 0.02f;      \
+        matrix.m32 += object->snake_body->segments[segment_index].position.z;                                          \
+        i32 special_index = segment_index == object->snake_body->segment_count - 1 ? 2 : segment_index % 2;            \
+        nuhspecial_s *special = &snake_hspecials[special_index];                                                       \
+        if (NuSpecialExistsFn(special)) {                                                                              \
+            NUVEC momentum;                                                                                            \
+            SetKillPartMom(&momentum);                                                                                 \
+            momentum.y += 1.0f;                                                                                        \
+            ADDPART_s part = Default_ADDPART;                                                                          \
+            part.matrix = &matrix;                                                                                     \
+            part.velocity = &momentum;                                                                                 \
+            part.field_14 = 0.1f;                                                                                      \
+            part.field_18 = 0.1f;                                                                                      \
+            part.gravity = -5.0f;                                                                                      \
+            part.special = special;                                                                                    \
+            part.flags = 0x90;                                                                                         \
+            part.stop_fn = PartStop_Flickerer;                                                                         \
+            part.draw_fn = PartDraw_Flickerer;                                                                         \
+            part.field_3c = PartImpact_Brick;                                                                          \
+            part.time_step = FRAMETIME;                                                                                \
+            part.lighting = reinterpret_cast<PARTLIGHTSOURCE_s *>(&object->light_data);                                \
+            AddPart(&part);                                                                                            \
+        }                                                                                                              \
+    } while (0)
+
+// ==== src/legoapi/gizmo/object/gizforce.cpp: all remaining content ====
+
+// ==== src/legoapi/render/core/render.cpp: declarations ====
+
+#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
+    do {                                                                                                               \
+        direction.x = (vx);                                                                                            \
+        direction.y = -(vy) * camera.aspect;                                                                           \
+        direction.z = adjacent;                                                                                        \
+        NuVecNorm(&direction, &direction);                                                                             \
+        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
+        NuVecNorm(&direction, &direction);                                                                             \
+        brightness = direction.y * 0.5f + 0.5f;                                                                        \
+        if (brightness <= near_angle)                                                                                  \
+            brightness = near_scale * parameters->intensity;                                                           \
+        else if (brightness >= far_angle)                                                                              \
+            brightness = far_scale * parameters->intensity;                                                            \
+        else                                                                                                           \
+            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
+        if (parameters->directional) {                                                                                 \
+            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
+            if (angle < parameters->direction_near_angle) {                                                            \
+                brightness += 128.0f * parameters->direction_far_scale;                                                \
+            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
+                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
+                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
+                                      parameters->direction_bias);                                                     \
+                brightness +=                                                                                          \
+                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
+                              parameters->direction_near_scale);                                                       \
+            }                                                                                                          \
+        }                                                                                                              \
+        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
+                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
+                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
+                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
+        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
+            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
+                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
+        else                                                                                                           \
+            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
+        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
+    } while (0)
+
+extern "C" {
+    extern i16 id_ATAT;
+}
+
+#define SWIPE_PRIM_UV(U, V)                                                                                            \
+    do {                                                                                                               \
+        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
+        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
+            vertex->float_uv[0] = (U);                                                                                 \
+            vertex->float_uv[1] = (V);                                                                                 \
+        } else {                                                                                                       \
+            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
+            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
+        }                                                                                                              \
+    } while (false)
+
+// ===========================================================================
+// ===========================================================================
+
+// ===========================================================================
+// ===========================================================================
+
+// ===========================================================================
+// ===========================================================================
+
+// ==== src/legoapi/gizmo/object/gizmoblowups.cpp: declarations ====
+
+extern "C" {
+extern u32 flagremaptab[32][2];
+}
+
+// ==== src/legoapi/characters/core/characters.cpp: declarations ====
+
+extern "C" {
+    i32 NuFileExists(char *);
+    i32 NuStrCpy(char *, const char *);
+
+}
+
+// ==== src/legoapi/props/objects/tubes.cpp: all remaining content ====
+
+// ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
+
+extern "C" {
+    extern NUVEC plr_lastpos;
+    extern i16 id_GRIEVOUS;
+    extern i16 id_BODYGUARD;
+    extern i16 id_IMPERIALGUARD;
+    extern i16 id_JAWA;
+    extern i16 id_UGNAUGHT;
+    extern i16 id_ATAT;
+    extern i16 id_GONKDROID;
+    extern i16 id_LANDSPEEDER, id_MILLENNIUMFALCON;
+    void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
+    void AddDebrisEffect(i32 *, i32, f32, f32, f32);
+    void DebrisPosOrientationMtx(i32, NUMTX *);
+    void DebFreeInstantly(i32 *);
+    void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
+}
+
+extern "C" {
+extern AICONDITIONDEF lego_aiconditiondefs[178];
+
+    static_assert(sizeof(lego_aiconditiondefs) / sizeof(lego_aiconditiondefs[0]) == 178,
+                  "complete game AI condition registry");
+
+}
+
+// ==== src/legoapi/misc/memory.cpp: all remaining content ====
+
+extern "C" {
+
+void DebFreeInstantly(i32 *handle);
+
+} // extern "C"
+
+// ==== functions in original address order ====
+
+// ==== functions in original address order ====
+
+// ==== src/legoapi/render/core/terrain.cpp: declarations ====
+
+#include <new>
+
+#include "nu2api/nuplatform/nudevicespecs.hpp"
+
+struct pushblock_s;
+extern "C" void NewTerrPlatformsOff();
+
+namespace {
+#include "legoapi/render/core/terrain_types.h"
+    DECOMP_ASSERT(sizeof(TERRAIN_SCENE_OBJECT) == 0x50, "TERRAIN_SCENE_OBJECT ABI");
+
+    DECOMP_ASSERT(sizeof(TERRAIN_DISPLAY_OBJECT) == 0xd0, "TERRAIN_DISPLAY_OBJECT ABI");
+    DECOMP_ASSERT(offsetof(TERRAIN_DISPLAY_OBJECT, transform) == 0xb8, "TERRAIN_DISPLAY_OBJECT transform offset");
+    DECOMP_ASSERT(offsetof(TERRAIN_DISPLAY_OBJECT, scene_object_index) == 0xc0,
+                  "TERRAIN_DISPLAY_OBJECT scene_object_index offset");
+
+    DECOMP_ASSERT(offsetof(TERRAIN_DISPLAY_SCENE, object_count) == 0x6c, "TERRAIN_DISPLAY_SCENE object_count offset");
+
+    DECOMP_ASSERT(offsetof(TERRAIN_GSCENE, object_count) == 0x1c, "TERRAIN_GSCENE object_count offset");
+    DECOMP_ASSERT(offsetof(TERRAIN_GSCENE, object_map_present) == 0x58, "TERRAIN_GSCENE object_map_present offset");
+    DECOMP_ASSERT(offsetof(TERRAIN_GSCENE, display_scene) == 0x110, "TERRAIN_GSCENE display_scene offset");
+
+} // namespace
+
+f32 GameShadow(GameObject_s *object, NUVEC *position, f32 probe_height, i32 terrain_mask);
+
+namespace {
+
+    // Retail scan callers contain the scale-and-normal reconstruction directly.
+#define TERRAIN_SCALE_SCAN_SHAPE(candidate_arg, group_arg, writer_arg)                                                 \
+    do {                                                                                                               \
+        TERRAIN_SHAPE *&scale_candidate = (candidate_arg);                                                             \
+        const TERRAIN_GROUP &scale_group = (group_arg);                                                                \
+        TerrainScanWriter *scale_writer = (writer_arg);                                                                \
+        if (TerI->object_scale != 1.0f) {                                                                              \
+            TERRAIN_SHAPE *source = scale_candidate;                                                                   \
+            scale_candidate = &ScaleTerrain[scale_writer->scaled_shape_count];                                         \
+            scale_candidate->material[0] = source->material[0];                                                        \
+            scale_candidate->material[1] = source->material[1];                                                        \
+            scale_candidate->flags = source->flags;                                                                    \
+            scale_candidate->normal_flags = source->normal_flags;                                                      \
+                                                                                                                       \
+            for (i32 vector_index = 0; vector_index < 3; ++vector_index) {                                             \
+                scale_candidate->vectors[vector_index].x = source->vectors[vector_index].x;                            \
+                scale_candidate->vectors[vector_index].z = source->vectors[vector_index].z;                            \
+                scale_candidate->vectors[vector_index].y =                                                             \
+                    (source->vectors[vector_index].y + scale_group.origin.y) * TerI->inverse_object_scale -            \
+                    scale_group.origin.y;                                                                              \
+            }                                                                                                          \
+                                                                                                                       \
+            if (source->normals[1].y < 65535.0f) {                                                                     \
+                scale_candidate->vectors[3].x = source->vectors[3].x;                                                  \
+                scale_candidate->vectors[3].z = source->vectors[3].z;                                                  \
+                scale_candidate->vectors[3].y =                                                                        \
+                    (source->vectors[3].y + scale_group.origin.y) * TerI->inverse_object_scale - scale_group.origin.y; \
+                                                                                                                       \
+                const f32 length = NuFsqrt(source->normals[1].x * source->normals[1].x +                               \
+                                           source->normals[1].y * source->normals[1].y * TerI->object_scale_sq +       \
+                                           source->normals[1].z * source->normals[1].z);                               \
+                const f32 inverse_length = length == 0.0f ? 0.0f : 1.0f / length;                                      \
+                scale_candidate->normals[1].x = source->normals[1].x * inverse_length;                                 \
+                scale_candidate->normals[1].y = source->normals[1].y * TerI->object_scale * inverse_length;            \
+                scale_candidate->normals[1].z = source->normals[1].z * inverse_length;                                 \
+            } else {                                                                                                   \
+                scale_candidate->normals[1].y = 65536.0f;                                                              \
+            }                                                                                                          \
+                                                                                                                       \
+            const f32 length = NuFsqrt(source->normals[0].x * source->normals[0].x +                                   \
+                                       source->normals[0].y * source->normals[0].y * TerI->object_scale_sq +           \
+                                       source->normals[0].z * source->normals[0].z);                                   \
+            const f32 inverse_length = length == 0.0f ? 0.0f : 1.0f / length;                                          \
+            scale_candidate->normals[0].x = source->normals[0].x * inverse_length;                                     \
+            scale_candidate->normals[0].y = source->normals[0].y * TerI->object_scale * inverse_length;                \
+            scale_candidate->normals[0].z = source->normals[0].z * inverse_length;                                     \
+            ++scale_writer->scaled_shape_count;                                                                        \
+        }                                                                                                              \
+    } while (0)
+
+    // Preserve the retail arithmetic ordering and the sweep-diagonal service
+    // call, even in the wall-only caller where its result is unused.
+#define TERRAIN_GET_SCAN_BOUNDS(bounds_arg, radius_arg, wall_arg)                                                      \
+    do {                                                                                                               \
+        TerrainScanBounds &scan_bounds = (bounds_arg);                                                                 \
+        f32 &bounds_radius = (radius_arg);                                                                             \
+        const TerrainQuery_s &scan_query = *TerI;                                                                      \
+        if (scan_query.scan_result != 1) {                                                                             \
+            const f32 move_length = NuFsqrt(scan_query.movement.x * scan_query.movement.x +                            \
+                                            scan_query.movement.y * scan_query.movement.y +                            \
+                                            scan_query.movement.z * scan_query.movement.z);                            \
+            const TerrainQuery_s &sphere_query = *TerI;                                                                \
+            const f32 reach = (wall_arg) ? 0.1f + sphere_query.collision_radius + move_length                          \
+                                         : move_length + 0.1f + sphere_query.collision_radius;                         \
+            const f32 vertical = reach * sphere_query.object_scale;                                                    \
+            scan_bounds.max_x = sphere_query.position.x + 0.05f + reach;                                               \
+            scan_bounds.max_z = sphere_query.position.z + 0.05f + reach;                                               \
+            scan_bounds.min_x = sphere_query.position.x - 0.05f - reach;                                               \
+            scan_bounds.min_z = sphere_query.position.z - 0.05f - reach;                                               \
+            scan_bounds.min_y = sphere_query.position.y - 0.05f - vertical;                                            \
+            scan_bounds.max_y = sphere_query.position.y + 0.05f + vertical;                                            \
+            bounds_radius = reach;                                                                                     \
+        } else {                                                                                                       \
+            const f32 radius = scan_query.collision_radius;                                                            \
+            if (!(scan_query.movement.x > 0.0f)) {                                                                     \
+                scan_bounds.min_x = scan_query.position.x + scan_query.movement.x - 0.02f - radius;                    \
+                scan_bounds.max_x = scan_query.position.x + 0.02f + radius;                                            \
+            } else {                                                                                                   \
+                scan_bounds.min_x = scan_query.position.x - 0.02f - radius;                                            \
+                scan_bounds.max_x = scan_query.position.x + scan_query.movement.x + 0.02f + radius;                    \
+            }                                                                                                          \
+            if (!(scan_query.movement.y > 0.0f)) {                                                                     \
+                scan_bounds.min_y = scan_query.position.y + scan_query.movement.y - 0.02f - radius;                    \
+                scan_bounds.max_y = scan_query.position.y + 0.02f + radius;                                            \
+            } else {                                                                                                   \
+                scan_bounds.min_y = scan_query.position.y - 0.02f - radius;                                            \
+                scan_bounds.max_y = scan_query.position.y + scan_query.movement.y + 0.02f + radius;                    \
+            }                                                                                                          \
+            if (!(scan_query.movement.z > 0.0f)) {                                                                     \
+                scan_bounds.min_z = scan_query.position.z + scan_query.movement.z - 0.02f - radius;                    \
+                scan_bounds.max_z = scan_query.position.z + 0.02f + radius;                                            \
+            } else {                                                                                                   \
+                scan_bounds.min_z = scan_query.position.z - 0.02f - radius;                                            \
+                scan_bounds.max_z = scan_query.position.z + scan_query.movement.z + 0.02f + radius;                    \
+            }                                                                                                          \
+            const f32 dx = scan_bounds.min_x - scan_bounds.max_x;                                                      \
+            const f32 dy = scan_bounds.min_y - scan_bounds.max_y;                                                      \
+            const f32 dz = scan_bounds.min_z - scan_bounds.max_z;                                                      \
+            bounds_radius = NuFsqrt(dx * dx + dy * dy + dz * dz);                                                      \
+        }                                                                                                              \
+        if (!(wall_arg) && scan_query.object_scale > 1.0f)                                                             \
+            bounds_radius += (scan_query.object_scale - 1.0f) * scan_query.collision_radius;                           \
+    } while (0)
+
+    // These wall-spline traversals are part of all three retail scan bodies.
+#define TERRAIN_COLLECT_WALL_SPLINES(bounds_arg, mask_arg, clear_arg, reset_empty_arg)                                 \
+    do {                                                                                                               \
+        TerrainScanBounds wall_bounds = (bounds_arg);                                                                  \
+        const i32 wall_mask = (mask_arg);                                                                              \
+        const bool wall_clear_override = (clear_arg);                                                                  \
+        wall_bounds.min_x -= 0.02f;                                                                                    \
+        wall_bounds.min_z -= 0.02f;                                                                                    \
+        wall_bounds.max_x += 0.02f;                                                                                    \
+        wall_bounds.max_z += 0.02f;                                                                                    \
+        if ((reset_empty_arg) || (CurTerr->spatial_nodes != NULL && WallSplCount < 64))                                \
+            WallSplCount = 0;                                                                                          \
+        for (TERRAIN_SPATIAL_NODE *node = CurTerr->spatial_nodes; node != NULL;                                        \
+             node = *reinterpret_cast<TERRAIN_SPATIAL_NODE **>(reinterpret_cast<u8 *>(node) - sizeof(void *))) {       \
+            const u8 mask = node->field_0x02 >> 8;                                                                     \
+            if (mask != 0 && (mask & wall_mask) == 0)                                                                  \
+                continue;                                                                                              \
+            for (i32 first = 0; first < node->point_count; first += 16) {                                              \
+                NUVEC *points = node->points + first;                                                                  \
+                i32 end = node->point_count;                                                                           \
+                if (points[0].y != 2147483648.0f) {                                                                    \
+                    if (!(points[1].y >= wall_bounds.min_x && wall_bounds.max_x >= points[0].y &&                      \
+                          points[3].y >= wall_bounds.min_z && wall_bounds.max_z >= points[2].y))                       \
+                        continue;                                                                                      \
+                    end = MIN(end, first + 16);                                                                        \
+                }                                                                                                      \
+                for (i32 i = first; i < end; ++i) {                                                                    \
+                    NUVEC &a = node->points[i];                                                                        \
+                    NUVEC &b = node->points[i + 1];                                                                    \
+                    if (!((a.x >= wall_bounds.min_x && wall_bounds.max_x >= b.x) ||                                    \
+                          (b.x >= wall_bounds.min_x && wall_bounds.max_x >= a.x)))                                     \
+                        continue;                                                                                      \
+                    if (!((a.z >= wall_bounds.min_z && wall_bounds.max_z >= b.z) ||                                    \
+                          (b.z >= wall_bounds.min_z && wall_bounds.max_z >= a.z)))                                     \
+                        continue;                                                                                      \
+                    if (WallSplCount < 64) {                                                                           \
+                        WallSplList[WallSplCount].position = a;                                                        \
+                        WallSplList[WallSplCount + 1].position = b;                                                    \
+                        for (i32 p = 0; p < 2; ++p) {                                                                  \
+                            u8 *material = WallSplList[WallSplCount + p].material;                                     \
+                            material[0] = static_cast<u8>(node->field_0x02);                                           \
+                            material[1] = mask;                                                                        \
+                            material[2] = 0;                                                                           \
+                            material[3] = 0;                                                                           \
+                        }                                                                                              \
+                        WallSplCount += 2;                                                                             \
+                    }                                                                                                  \
+                }                                                                                                      \
+            }                                                                                                          \
+        }                                                                                                              \
+        if (wall_clear_override)                                                                                       \
+            TerrOverRideScan = NULL;                                                                                   \
+    } while (0)
+
+} // namespace
+
+// Original 400-pointer table at 0x61e860: 147 named effects, then empty slots.
+
+// Constructs the fixed terrain header and its variable-sized group, index and
+// platform arrays in the caller's arena. The four bounds arrays and the cell
+// assignment array are temporary storage carved backwards from buf_end.
+#define IS_SNAN(x) (*(u32 *)&(x) == 0xffc00000)
+
+namespace {
+
+    DECOMP_ASSERT(sizeof(TERRAIN_IMPACT_RECORD) == 0x1c, "TERRAIN_IMPACT_RECORD ABI");
+
+} // namespace
+
+// Retail only keeps the IPA-SRA clone, which takes &normal->y.
+#if defined(__i386__)
+#define TERRAIN_KILL_PLAYER_ATTR __attribute__((noinline, noclone, regparm(2)))
+#else
+#define TERRAIN_KILL_PLAYER_ATTR __attribute__((noinline, noclone))
+#endif
+
+DECOMP_ASSERT(sizeof(TERRAIN_DEBUG_RECORD) == 100, "Terrain debug record ABI");
+
+i32 TerrainBlockOnBlock(WORLDINFO_s *world, pushblock_s *block, nuvec_s *points, float *heights);
+
+namespace {
+
+    // Target NewScanRot 0x378fb0 uses 0.1f on both horizontal axes when
+    // selecting the terrain shapes that can contain the cast point.
+
+} // namespace
+
+void NewScanRot(nuvec_s *position, i32 terrain_mask);
+
+namespace {
+
+} // namespace
+
+extern "C" i32 EShadowInfo(void);
+
+extern "C" void NewTerrPlatformsOff(void);
+
+extern "C" i32 ShadowInfo(void);
+
+// Original 0x378fb0: the optimized rotating scan shares the terrain engine state.
+
+namespace {
+
+} // namespace
+
+namespace {
+
+} // namespace
+
+// ==== functions in original address order ====
+
+static void *PushBlocks_ReserveBufferSpace(void *world_ptr) {
+    WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
+    world->push_blocks = NULL;
+    world->push_block_count = 0;
+    if (world->current_level->max_push_blocks != 0) {
+        world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 4);
+        world->push_blocks = static_cast<pushblock_s *>(world->giz_buffer.void_ptr);
+        world->giz_buffer.addr += world->current_level->max_push_blocks * sizeof(pushblock_s);
+    }
+    return world->push_blocks;
+}
+
+static i32 Push_GetMaxGizmos(void *world_ptr) {
+    WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
+    return world != NULL ? world->current_level->max_push_blocks : 0;
+}
+
+static char *GizPush_GetGizmoName(GIZMO *gizmo) {
+    if (gizmo == NULL) {
+        return NULL;
+    }
+    return static_cast<pushblock_s *>(gizmo->object)->name;
+}
+
+i32 GizPush_GetNumOutputs(GIZMO *gizmo) {
+    return static_cast<pushblock_s *>(gizmo->object)->output_count;
+}
+
+static void Push_ClearProgress(void *, void *progress_ptr) {
+    PUSHPROGRESS *progress = static_cast<PUSHPROGRESS *>(progress_ptr);
+    if (progress != NULL) {
+        progress->state_mask[0] = 0;
+        progress->visible_mask[0] = ~0u;
+        progress->position_mask[0] = 0;
+        NuMemSet128(progress->positions, 0, 0);
+    }
+}
+
+static void *Push_AllocateProgressData(VARIPTR *buffer, VARIPTR *buffer_end) {
+    return GizmoBufferAlloc(buffer, buffer_end, 0x24c);
+}
+
+static void Push_SetVisibility(GIZMO *gizmo, i32 visible) {
+    pushblock_s *push_block = static_cast<pushblock_s *>(gizmo->object);
+    push_block->push_visible = visible != 0;
+    NuSpecialSetVisibility(&push_block->special, visible);
+    for (i32 index = 0; index < push_block->end_position_count; ++index) {
+        NuSpecialSetVisibility(&push_block->end_position_specials[index], push_block->push_visible);
+    }
+}
+
+static void Push_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *world_ptr, void *) {
+    WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
+    for (i32 index = 0; index < world->push_block_count; ++index) {
+        if (NuStrLen(world->push_blocks[index].name) != 0) {
+            AddGizmo(gizmo_sys, type_id, NULL, &world->push_blocks[index]);
+        }
+    }
+}
+
+static i32 edpush_Load(void *world_ptr, void *) {
+    static i32 version = -1;
+
+    WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
+    if (world->push_block_count != 0) {
+        return 0;
+    }
+
+    version = EdFileReadInt();
+    world->push_block_count = EdFileReadInt();
+    i32 valid_count = 0;
+    char special_name[256];
+    for (i32 file_index = 0; file_index < world->push_block_count; ++file_index) {
+        pushblock_s *push_block = &world->push_blocks[valid_count];
+        memset(special_name, 0, sizeof(special_name));
+        EdFileRead(special_name, EdFileReadChar());
+
+        i32 special_missing = 1;
+        if (Gizmo_FindNuSpecial(world->current_gscn, &push_block->special, special_name, 1, world->gizmo_sys,
+                                const_cast<char *>("PushBlock"), push_block->name) != 0) {
+            NuStrCpy(push_block->name, NuSpecialGetName(&push_block->special));
+            special_missing = 0;
+        }
+
+        push_block->snap_distance = EdFileReadFloat();
+        push_block->flags_0cb &= ~0x04;
+        if (EdFileReadChar() != 0) {
+            push_block->flags_0cb |= 0x04;
+        }
+        push_block->flags_0cb &= ~0x08;
+        if (EdFileReadChar() != 0) {
+            push_block->flags_0cb |= 0x08;
+        }
+        push_block->flags_0ca &= ~0x10;
+        if (EdFileReadChar() != 0) {
+            push_block->flags_0ca |= 0x10;
+        }
+        push_block->flags_0ca &= ~0x20;
+        if (EdFileReadChar() != 0) {
+            push_block->flags_0ca |= 0x20;
+        }
+
+        if (version > 3) {
+            push_block->flags_0cb &= ~0x20;
+            if (EdFileReadChar() != 0) {
+                push_block->flags_0cb |= 0x20;
+            }
+            push_block->flags_0cb &= ~0x40;
+            if (EdFileReadChar() != 0) {
+                push_block->flags_0cb |= 0x40;
+            }
+        }
+        if (version > 4) {
+            push_block->flags_0ca &= ~0x40;
+            if (EdFileReadChar() != 0) {
+                push_block->flags_0ca |= 0x40;
+            }
+            push_block->flags_0ca &= ~0x80;
+            if (EdFileReadChar() != 0) {
+                push_block->flags_0ca |= 0x80;
+            }
+        }
+
+        push_block->end_position_count = 0;
+        if (version > 2) {
+            const u8 end_position_count = static_cast<u8>(EdFileReadChar());
+            push_block->end_position_count = end_position_count;
+            for (i32 end_index = 0; end_index < end_position_count; ++end_index) {
+                memset(special_name, 0, sizeof(special_name));
+                EdFileRead(special_name, EdFileReadChar());
+                special_name[16] = '\0';
+                if (Gizmo_FindNuSpecial(world->current_gscn, &push_block->end_position_specials[end_index],
+                                        special_name, 1, world->gizmo_sys, const_cast<char *>("PushBlockLinkObject"),
+                                        push_block->name) == 0) {
+                    --push_block->end_position_count;
+                }
+            }
+        }
+        if (special_missing == 0) {
+            ++valid_count;
+        }
+    }
+    world->push_block_count = valid_count;
+    return 1;
+}
+
+char *GizPush_GetOutputName(GIZMO *gizmo, i32 output_index) {
+
+    pushblock_s *push_block = static_cast<pushblock_s *>(gizmo->object);
+    if (output_index < 0 || output_index > push_block->output_count) {
+        return NULL;
+    }
+    if (output_index == 0) {
+        return const_cast<char *>("Any Complete");
+    }
+    NuIToA(output_index, outputName, 10);
+    NuStrCat(outputName, " Complete");
+    return outputName;
+}
+
+static void Push_StoreProgress(void *world_ptr, void *, void *progress_ptr) {
+    WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
+    PUSHPROGRESS *progress = static_cast<PUSHPROGRESS *>(progress_ptr);
+    if (progress == NULL) {
+        return;
+    }
+
+    Push_ClearProgress(NULL, progress);
+    if (world == NULL || world->push_blocks == NULL || world->push_block_count <= 0) {
+        return;
+    }
+
+    pushblock_s *push_block = world->push_blocks;
+    for (i32 index = 0; index < world->push_block_count; ++index, ++push_block) {
+        if (index == 16) {
+            break;
+        }
+        const i32 mask_index = index >> 5;
+        const u32 mask = 1u << (index & 31);
+        if ((push_block->flags_0ca & PUSHBLOCK_FLAG_VISIBLE) == 0) {
+            progress->visible_mask[mask_index] &= ~mask;
+        }
+        if ((push_block->flags_0cb & PUSHBLOCK_FLAG_STATE) != 0) {
+            progress->state_mask[mask_index] |= mask;
+        }
+
+        if (NuSpecialExistsFn(&push_block->special) != 0) {
+            progress->positions[index] = *NUMTX_GET_ROW_VEC(NuSpecialGetInstanceMtx(&push_block->special), 3);
+        } else {
+            progress->positions[index] = v000;
+        }
+
+        for (i32 end_index = 0; end_index < push_block->end_position_count; ++end_index) {
+            nuhspecial_s *special = &push_block->end_position_specials[end_index];
+            if (NuSpecialExistsFn(special) != 0) {
+                progress->end_positions[end_index][index] = *NUMTX_GET_ROW_VEC(NuSpecialGetInstanceMtx(special), 3);
+            } else {
+                progress->end_positions[end_index][index] = v000;
+            }
+        }
+        progress->position_mask[mask_index] |= mask;
+    }
+}
+
 void KnockPushBlock(pushblock_s *block, nuvec_s *direction) {
     if (block != NULL) {
         block->velocity.x = -direction->x;
@@ -52,101 +3547,40 @@ void KnockPushBlock(pushblock_s *block, nuvec_s *direction) {
     }
 }
 
-i32 NewBlockAction(GameObject_s *object) {
-    i32 actions[3];
-    i32 count = 0;
-    for (i32 action = 0; action < apicharsys->model_id_capacity && count < 3; ++action) {
-        if ((ActionInfo[action].flags & 8) != 0 && object->apiobj.character_model->model_data_b[action] != NULL) {
-            actions[count++] = action;
+static i32 Pushblocks_BoltHitPlat(void *world_ptr, void *push_blocks_ptr, BOLT *bolt, unsigned char *) {
+    WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
+    pushblock_s *push_block = static_cast<pushblock_s *>(push_blocks_ptr);
+    if (push_block != NULL) {
+        for (i32 index = 0; index < world->push_block_count; ++index, ++push_block) {
+            if ((push_block->flags_0ca & PUSHBLOCK_FLAG_VISIBLE) == 0 || (push_block->flags_0cb & 1) == 0 ||
+                (push_block->flags_0cb & PUSHBLOCK_FLAG_STATE) != 0) {
+                continue;
+            }
+            const i32 platform = FindPlatInst(NuSpecialGetInstanceix(&push_block->special));
+            if (!(platform == -1 || platform != bolt->hit_platform)) {
+                if (bolt->owner != NULL) {
+                    NUVEC direction;
+                    NuVecSub(&direction, &bolt->owner->apiobj.collision_position, push_block->position);
+                    if (direction.x == direction.z) {
+                        if (direction.x < 0.0f) {
+                            direction.x = -QRAND_FLOAT();
+                            direction.z = -QRAND_FLOAT();
+                        } else {
+                            direction.x = QRAND_FLOAT();
+                            direction.z = QRAND_FLOAT();
+                        }
+                    }
+                    if (NuFabs(direction.x) > NuFabs(direction.z)) {
+                        direction.z = 0.0f;
+                    } else {
+                        direction.x = 0.0f;
+                    }
+                    NuVecNorm(&direction, &direction);
+                    KnockPushBlock(push_block, &direction);
+                }
+                return 1;
+            }
         }
-    }
-    if (count == 0)
-        return 0;
-    i32 action = actions[0];
-    if (count != 1) {
-        do {
-            action = actions[qrand() / (0xffff / count + 1)];
-        } while (action == object->previous_block_animation);
-    }
-    object->previous_block_animation = action;
-    object->context_animation = action;
-    return 1;
-}
-
-pushblock_s *NearestPushBlock(WORLDINFO_s *world, nuvec_s *position, float range) {
-    if (position == NULL || world == NULL)
-        return NULL;
-    const NUVEC minimum = {position->x - range, position->y - range, position->z - range};
-    const NUVEC maximum = {position->x + range, position->y + range, position->z + range};
-    pushblock_s *nearest = NULL;
-    f32 nearest_distance = 1000000000.0f;
-    pushblock_s *block = world->push_blocks;
-    for (i32 i = 0; i < world->push_block_count; ++i, ++block) {
-        if ((block->packed_state_flags & 0x1040100) != 0x1040000)
-            continue;
-        NUVEC *candidate = block->position;
-        if (candidate->x < minimum.x || candidate->x > maximum.x || candidate->z < minimum.z ||
-            candidate->z > maximum.z || candidate->y < minimum.y || candidate->y > maximum.y)
-            continue;
-        const f32 distance = NuVecDistSqr(position, candidate, NULL);
-        if (distance < nearest_distance) {
-            nearest = block;
-            nearest_distance = distance;
-        }
-    }
-    return nearest;
-}
-
-i32 Push_UpdateHints(HINT_s *) {
-    if (LEGOACT_PUSH == -1)
-        return 0;
-    for (i32 i = 0; i < 8; ++i) {
-        GameObject_s *object = Player[i];
-        if (object != NULL && object->apiobj.player_controlled &&
-            object->apiobj.character_model->model_data_b[LEGOACT_PUSH] != NULL &&
-            NearestPushBlock(WORLD, &object->apiobj.collision_position, 2.0f) != NULL)
-            return 1;
-    }
-    return 0;
-}
-
-extern "C" f32 NuFmax(f32, f32);
-void NewBuzz(nupad_s *, f32, i32);
-void PushSeekComplete(pushblock_s *block, i32 index) {
-    block->completed_outputs |= 1 << index;
-    block->runtime_flags_0c9 &= ~2;
-    if (!(block->flags_0cb & 0x20)) {
-        block->flags_0cb |= 2;
-        block->runtime_flags_0c9 |= 1;
-    }
-    if (block->pushing_object)
-        NewBuzz(block->pushing_object->pad_gamepad->pad, 0.1f, 0);
-}
-
-i32 OtherBlockInRange(WORLDINFO_s *world, pushblock_s *block, nuvec_s *position, i32 excluded) {
-    NUVEC centre;
-    f32 radius;
-    NuSpecialGetRadius(&block->special, &centre, &radius);
-    radius *= radius;
-    for (i32 i = 0; i < world->push_block_count; ++i) {
-        if (i == excluded)
-            continue;
-        pushblock_s *other = &world->push_blocks[i];
-        if ((other->packed_state_flags & 0x01040000) != 0x01040000 || (other->flags_0cb & 4))
-            continue;
-        if (!NuSpecialGetVisibilityFn(&other->special))
-            continue;
-        NUVEC minimum, maximum;
-        NuSpecialGetBounds(&other->special, &minimum, &maximum);
-        NuFmax(fabsf(minimum.x), maximum.x);
-        NuFmax(fabsf(minimum.z), maximum.z);
-        f32 other_radius;
-        NuSpecialGetRadius(&other->special, &centre, &other_radius);
-        centre = *other->position;
-        f32 x = centre.x - position->x, z = centre.z - position->z;
-        f32 distance = (x * x + z * z) - other_radius * other_radius;
-        if (radius >= distance || 0.0f >= distance)
-            return 1;
     }
     return 0;
 }
@@ -174,6 +3608,87 @@ void ResetSinglePushBlock(WORLDINFO_s *, pushblock_s *block, i32) {
     if ((block->runtime_flags_0c9 & 0x70) != 0 && runoutofpostabspace == 0) {
         *block->position = block->snap_positions[0];
     }
+}
+
+static void Push_Activate(GIZMO *gizmo, i32 active) {
+    if (gizmo != NULL) {
+        pushblock_s *push_block = static_cast<pushblock_s *>(gizmo->object);
+        if (active != 0) {
+            push_block->flags_0cb |= 1;
+            WORLDINFO *world = WORLD;
+            pushblock_s *candidate = world->push_blocks;
+            for (i32 index = 0; index < world->push_block_count; ++index, ++candidate) {
+                if (candidate == push_block) {
+                    ResetSinglePushBlock(world, push_block, index);
+                    break;
+                }
+            }
+            push_block->flags_0ca |= PUSHBLOCK_FLAG_VISIBLE;
+        } else {
+            push_block->flags_0cb &= ~1;
+        }
+    }
+}
+
+void ResetPushProgress(WORLDINFO_s *world, void *progress_data) {
+    pushblock_s *block = world->push_blocks;
+    if (block == NULL || world->push_block_count <= 0) {
+        return;
+    }
+
+    PUSHPROGRESS *progress = static_cast<PUSHPROGRESS *>(progress_data);
+    for (i32 index = 0; index < world->push_block_count; ++index, ++block) {
+        if (index < 16 && progress != NULL) {
+            const u32 bit = 1u << index;
+            block->flags_0cb = (block->flags_0cb & ~2u) | (((progress->state_mask[0] & bit) != 0) << 1);
+            block->push_visible = (progress->visible_mask[0] & bit) != 0;
+            if (!block->push_visible) {
+                NuSpecialSetVisibility(&block->special, 0);
+                block->push_visible = 0;
+                for (i32 output = 0; output < block->end_position_count; ++output) {
+                    NuSpecialSetVisibility(&block->end_position_specials[output], 0);
+                }
+            }
+
+            if ((progress->position_mask[0] & bit) == 0) {
+                continue;
+            }
+            nuinstanim_s *animation = NuSpecialGetInstAnim(&block->special);
+            if (block->push_visible || animation == NULL) {
+                NUMTX *matrix = NuSpecialGetInstanceMtx(&block->special);
+                *NUMTX_GET_ROW_VEC(matrix, 3) = progress->positions[index];
+                NuSpecialUpdate(&block->special);
+                if (block->end_position_count != 0) {
+                    i32 output = 0;
+                    do {
+                        matrix = NuSpecialGetInstanceMtx(&block->end_position_specials[output]);
+                        *NUMTX_GET_ROW_VEC(matrix, 3) = progress->end_positions[output][index];
+                        NuSpecialUpdate(&block->end_position_specials[output]);
+                    } while (block->end_position_count > ++output);
+                }
+            } else {
+                NUMTX evaluated;
+                NUMTX *matrix = NuSpecialGetInstanceMtx(&block->special);
+                EvalAnim(&block->special, 1.0f, &evaluated, 0);
+                *NUMTX_GET_ROW_VEC(matrix, 3) = *NUMTX_GET_ROW_VEC(&evaluated, 3);
+                NuSpecialUpdate(&block->special);
+                if (block->end_position_count != 0) {
+                    i32 output = 0;
+                    do {
+                        nuhspecial_s *special = &block->end_position_specials[output];
+                        matrix = NuSpecialGetInstanceMtx(special);
+                        EvalAnim(special, 1.0f, &evaluated, 0);
+                        *NUMTX_GET_ROW_VEC(matrix, 3) = *NUMTX_GET_ROW_VEC(&evaluated, 3);
+                        NuSpecialUpdate(special);
+                    } while (block->end_position_count > ++output);
+                }
+            }
+        }
+    }
+}
+
+static void Push_Reset(void *world, void *, void *progress) {
+    ResetPushProgress(static_cast<WORLDINFO_s *>(world), progress);
 }
 
 pushblock_s *NearestFacingPushBlock(WORLDINFO_s *world, GameObject_s *object, float range) {
@@ -369,6 +3884,162 @@ pushblock_s *NearestFacingPushBlock(WORLDINFO_s *world, GameObject_s *object, fl
     }
     return nearest;
 }
+
+i32 PushBlock(GameObject_s *object) {
+    pushblock_s *block = NearestFacingPushBlock(WORLD, object, 2.0f);
+    if (block != NULL) {
+        block->pushing_object = object;
+        block->runtime_flags_0c8 |= 1;
+        AlertSurroundingCreatures(object, &object->apiobj.collision_position);
+        return 1;
+    }
+    object->character_context = -1;
+    return 0;
+}
+
+pushblock_s *BlockInBlock(WORLDINFO_s *world, pushblock_s *block, i32 excluded, pushblock_s **support) {
+    NUVEC *position = block->position;
+    if (support)
+        *support = NULL;
+    for (i32 i = 0; i < world->push_block_count; ++i) {
+        if (i == excluded)
+            continue;
+        pushblock_s *other = &world->push_blocks[i];
+        if (other->flags_0cb & 2)
+            continue;
+        if (!NuSpecialGetVisibilityFn(&other->special))
+            continue;
+        f32 x = position->x - other->position->x, y = position->y - other->position->y,
+            z = position->z - other->position->z;
+        bool overlapx = x > (other->bounds_min.x - block->bounds_max.x) + 0.01f &&
+                        x < (other->bounds_max.x - block->bounds_min.x) - 0.01f;
+        f32 ymax = other->bounds_max.y - block->bounds_min.y;
+        bool overlapz = z > (other->bounds_min.z - block->bounds_max.z) + 0.01f &&
+                        z < (other->bounds_max.z - block->bounds_min.z) - 0.01f;
+        bool overlapy = y > other->bounds_min.y - block->bounds_max.y && y < ymax;
+        if (support && overlapz && overlapx && y - ymax > 0.0f) {
+            if (!*support)
+                *support = other;
+            else if ((position->y - (*support)->position->y) - ((*support)->bounds_max.y - block->bounds_min.y) >
+                     y - ymax) {
+                other->supporting_block = *support;
+                *support = other;
+            }
+        }
+        if (overlapx && overlapy && overlapz)
+            return other;
+    }
+    return NULL;
+}
+
+void ResetSinglePushBlockHeight(WORLDINFO_s *world, pushblock_s *block, i32 index) {
+    BlockInBlock(world, block, index, &block->block_below);
+
+    const f32 epsilon = 0.01f;
+    f32 support_height;
+    if (block->block_below != NULL) {
+        pushblock_s *support = block->block_below;
+        support_height = support->bounds_max.y + support->position->y + epsilon;
+        block->support_height = support_height;
+    } else {
+        support_height = block->support_height;
+    }
+
+    NUVEC *position = block->position;
+    f32 position_y = position->y;
+    f32 penetration = block->bounds_min.y + position_y - support_height;
+    block->vertical_penetration = penetration;
+    if (penetration > epsilon) {
+        position->y = position_y - penetration;
+        block->vertical_penetration = 0.0f;
+    }
+}
+
+void MoveBlocksOverBlock(WORLDINFO_s *world, pushblock_s *block, i32 excluded, nuvec_s *velocity) {
+    if (block->runtime_flags_0c9 & 4)
+        return;
+    f32 xmin = block->bounds_min.x + block->position->x, xmax = block->position->x + block->bounds_max.x;
+    f32 zmin = block->bounds_min.z + block->position->z, zmax = block->position->z + block->bounds_max.z;
+    for (i32 i = 0; i < world->push_block_count; ++i) {
+        if (i == excluded)
+            continue;
+        pushblock_s *other = &world->push_blocks[i];
+        if ((other->flags_0cb & 4) || !(other->flags_0ca & 4))
+            continue;
+        NUVEC *position = other->position;
+        if (block->position->y >= position->y)
+            continue;
+        if (!(position->x >= (xmin - other->bounds_max.x) + 0.01f &&
+              position->x <= (xmax - other->bounds_min.x) - 0.01f &&
+              position->z >= (zmin - other->bounds_max.z) + 0.01f &&
+              position->z <= (zmax - other->bounds_min.z) - 0.01f))
+            continue;
+        other->snap_origin = *position;
+        position->x += velocity->x;
+        position->y -= velocity->y;
+        other->ground_offset -= velocity->y;
+        position->z += velocity->z;
+        other->runtime_flags_0c8 |= 4;
+        if (BlockInBlock(world, other, i, &other->supporting_block))
+            other->runtime_flags_0c9 |= 4;
+        NuSpecialUpdate(&other->special);
+    }
+}
+
+void MoveBlocks(WORLDINFO_s *world, pushblock_s *block, i32 index, nuvec_s *velocity) {
+    NUVEC delta = {velocity->x, 0.0f, velocity->z};
+    block->position->x += delta.x;
+    block->position->z += delta.z;
+    NuSpecialUpdate(&block->special);
+    for (i32 i = 0; i < block->end_position_count; ++i) {
+        NUMTX *matrix = NuSpecialGetInstanceMtx(&block->end_position_specials[i]);
+        matrix->m30 = block->position->x;
+        matrix->m32 = block->position->z;
+        NuSpecialUpdate(&block->end_position_specials[i]);
+    }
+    if (BlockInBlock(world, block, index, &block->supporting_block))
+        block->runtime_flags_0c9 |= 4;
+    else {
+        MoveBlocksOverBlock(world, block, index, &delta);
+        if (block->pushing_object && (fabsf(delta.x) > 0.001f || fabsf(delta.z) > 0.001f) &&
+            NuFmod(GameTimer.time_elapsed, 0.25f) < 0.1f)
+            NewRumble(block->pushing_object->pad_gamepad->pad, ((f32)qrand() * 1.5259022e-5f) * 0.05f, 0);
+    }
+    if (block->runtime_flags_0c8 & 8) {
+        delta.y = velocity->y;
+        delta.x = delta.z = 0;
+        block->position->y -= delta.y;
+        block->ground_offset -= delta.y;
+        pushblock_s *hit = BlockInBlock(world, block, index, &block->supporting_block);
+        if (hit) {
+            block->settled_height = hit->position->y + hit->bounds_max.y;
+            block->runtime_flags_0c9 |= 8;
+        } else
+            MoveBlocksOverBlock(world, block, index, &delta);
+        NuSpecialUpdate(&block->special);
+    }
+}
+
+i32 TerrainBlockOnBlock(WORLDINFO_s *world, pushblock_s *block, nuvec_s *points, float *heights) {
+    if (!heights || !points)
+        return 0;
+    heights[0] = heights[1] = heights[2] = heights[3] = -10000.0f;
+    for (i32 i = 0; i < world->push_block_count; ++i) {
+        pushblock_s *other = &world->push_blocks[i];
+        if (other == block)
+            continue;
+        f32 xmin = other->position->x - fabsf(other->bounds_min.x),
+            xmax = other->position->x + fabsf(other->bounds_max.x);
+        f32 zmin = other->position->z - fabsf(other->bounds_min.z),
+            zmax = other->position->z + fabsf(other->bounds_max.z);
+        f32 height = fabsf(other->bounds_max.y) + other->position->y;
+        for (i32 j = 0; j < 4; ++j)
+            if (points[j].x > xmin && points[j].x < xmax && points[j].z > zmin && points[j].z < zmax)
+                heights[j] = height;
+    }
+    return 1;
+}
+
 void GizmoPushBlockInitAndReset(WORLDINFO_s *world, void *progress) {
     world->push_block_position_count = 0;
     runoutofpostabspace = 0;
@@ -476,27 +4147,378 @@ void GizmoPushBlockInitAndReset(WORLDINFO_s *world, void *progress) {
     }
 }
 
-void ResetSinglePushBlockHeight(WORLDINFO_s *world, pushblock_s *block, i32 index) {
-    BlockInBlock(world, block, index, &block->block_below);
-
-    const f32 epsilon = 0.01f;
-    f32 support_height;
-    if (block->block_below != NULL) {
-        pushblock_s *support = block->block_below;
-        support_height = support->bounds_max.y + support->position->y + epsilon;
-        block->support_height = support_height;
-    } else {
-        support_height = block->support_height;
+i32 OtherBlockInRange(WORLDINFO_s *world, pushblock_s *block, nuvec_s *position, i32 excluded) {
+    NUVEC centre;
+    f32 radius;
+    NuSpecialGetRadius(&block->special, &centre, &radius);
+    radius *= radius;
+    for (i32 i = 0; i < world->push_block_count; ++i) {
+        if (i == excluded)
+            continue;
+        pushblock_s *other = &world->push_blocks[i];
+        if ((other->packed_state_flags & 0x01040000) != 0x01040000 || (other->flags_0cb & 4))
+            continue;
+        if (!NuSpecialGetVisibilityFn(&other->special))
+            continue;
+        NUVEC minimum, maximum;
+        NuSpecialGetBounds(&other->special, &minimum, &maximum);
+        NuFmax(fabsf(minimum.x), maximum.x);
+        NuFmax(fabsf(minimum.z), maximum.z);
+        f32 other_radius;
+        NuSpecialGetRadius(&other->special, &centre, &other_radius);
+        centre = *other->position;
+        f32 x = centre.x - position->x, z = centre.z - position->z;
+        f32 distance = (x * x + z * z) - other_radius * other_radius;
+        if (radius >= distance || 0.0f >= distance)
+            return 1;
     }
+    return 0;
+}
 
-    NUVEC *position = block->position;
-    f32 position_y = position->y;
-    f32 penetration = block->bounds_min.y + position_y - support_height;
-    block->vertical_penetration = penetration;
-    if (penetration > epsilon) {
-        position->y = position_y - penetration;
-        block->vertical_penetration = 0.0f;
+i32 SnapPosTaken(WORLDINFO_s *world, pushblock_s *, nuvec_s *position, i32 excluded_index) {
+    for (i32 i = 0; i < world->push_block_count; ++i) {
+        if (i == excluded_index) {
+            continue;
+        }
+        pushblock_s *block = &world->push_blocks[i];
+        if ((block->packed_state_flags & 0x02000300) == 0) {
+            continue;
+        }
+        const f32 dx = block->position->x - position->x;
+        const f32 dy = block->position->y - position->y;
+        const f32 dz = block->position->z - position->z;
+        if (dx * dx + dy * dy + dz * dz <= 0.05f * 0.05f) {
+            return 1;
+        }
     }
+    return 0;
+}
+
+void PushSeekComplete(pushblock_s *block, i32 index) {
+    block->completed_outputs |= 1 << index;
+    block->runtime_flags_0c9 &= ~2;
+    if (!(block->flags_0cb & 0x20)) {
+        block->flags_0cb |= 2;
+        block->runtime_flags_0c9 |= 1;
+    }
+    if (block->pushing_object)
+        NewBuzz(block->pushing_object->pad_gamepad->pad, 0.1f, 0);
+}
+
+void UpdatePushBlocks(void *world_ptr, void *, float) {
+    static f32 snap_time = 0.25f;
+    WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
+    if (!world || !world->push_block_count || !world->push_blocks)
+        return;
+    snap_time = 0.25f;
+    i32 target_seen = 0;
+    for (i32 index = 0; index < world->push_block_count; ++index) {
+        pushblock_s *p = &world->push_blocks[index];
+        i32 visible = NuSpecialGetVisibilityFn(&p->special) & 1;
+        p->flags_0ca = (p->flags_0ca & ~4) | (visible << 2);
+        if (!visible)
+            continue;
+        GizObstacles_AddTrigger(p->position);
+        if ((p->runtime_flags_0c8 & 0x81) == 0x81)
+            p->runtime_flags_0c8 &= 0x3f;
+        if ((i8)p->runtime_flags_0c8 < 0)
+            p->runtime_flags_0c8 |= 0x40;
+        if ((p->runtime_flags_0c9 & 1) || (p->flags_0cb & 2))
+            continue;
+        if (__builtin_expect(!!(p->snap_positions), 1)) {
+            if (p->runtime_flags_0c9 & 2) {
+                if (p->snap_timer <= snap_time) {
+                    f32 fraction = NU_SIN_LUT((i32)((p->snap_timer / snap_time) * 16384.0f + 49152.0f + 16384.0f));
+                    i32 ix = (p->packed_state_flags >> 15) & 7;
+                    p->position->x = p->snap_origin.x + (p->snap_positions[ix].x - p->snap_origin.x) * fraction;
+                    p->position->y = p->snap_origin.y + (p->snap_positions[ix].y - p->snap_origin.y) * fraction;
+                    p->position->z = p->snap_origin.z + (p->snap_positions[ix].z - p->snap_origin.z) * fraction;
+                    NuSpecialUpdate(&p->special);
+                    for (i32 i = 0; i < p->end_position_count; ++i) {
+                        NUMTX *m = NuSpecialGetInstanceMtx(&p->end_position_specials[i]);
+                        NUVEC *target = &p->snap_positions[(p->packed_state_flags >> 15) & 7];
+                        m->m32 = p->end_position_origins[i].z + (target->z - p->end_position_origins[i].z) * fraction;
+                        m->m30 = p->end_position_origins[i].x + (target->x - p->end_position_origins[i].x) * fraction;
+                        NuSpecialUpdate(&p->end_position_specials[i]);
+                    }
+                    p->snap_timer += FRAMETIME;
+                    continue;
+                }
+                PushSeekComplete(p, (p->packed_state_flags >> 15) & 7);
+            } else {
+                for (i32 i = 1; i < ((p->runtime_flags_0c9 >> 4) & 7); ++i) {
+                    NUVEC *target = &p->snap_positions[i];
+                    NUVEC delta = {target->x - p->position->x, target->y - p->position->y, target->z - p->position->z};
+                    f32 radius = p->snap_distance;
+                    if (world->current_level == HOTHESCAPEB_LDATA &&
+                        NuVecXZDistSqr(target, &hothbtestpos, NULL) < 0.0625f)
+                        radius *= 2.5f;
+                    else
+                        radius += radius;
+                    if (!(radius * radius > (delta.y * delta.y + delta.x * delta.x) + delta.z * delta.z))
+                        continue;
+                    if (SnapPosTaken(world, p, target, index))
+                        continue;
+                    if ((p->flags_0cb & 0x10) || OtherBlockInRange(world, p, &p->snap_positions[i], index)) {
+                        target_seen = 1;
+                        continue;
+                    }
+                    p->runtime_flags_0c9 |= 2;
+                    if (p->flags_0cb & 0x20)
+                        p->flags_0cb |= 0x10;
+                    p->snap_origin.x = p->position->x;
+                    p->snap_origin.z = p->position->z;
+                    for (i32 j = 0; j < p->end_position_count; ++j)
+                        p->end_position_origins[j] = *NuSpecialGetDrawPos(&p->end_position_specials[j]);
+                    p->packed_state_flags = (p->packed_state_flags & 0xfffc7fff) | ((i & 7) << 15);
+                    p->snap_timer = FRAMETIME;
+                    target_seen = 1;
+                    break;
+                }
+                if (!target_seen) {
+                    if (p->flags_0cb & 0x20) {
+                        p->flags_0cb &= ~0x10;
+                        p->packed_state_flags &= 0xfffc7fff;
+                    }
+                    if (!(p->flags_0cb & 0x40))
+                        p->completion_flags &= 0xf807;
+                }
+            }
+        }
+        if (!(p->runtime_flags_0c8 & 0x40) && ((p->runtime_flags_0c8 & 3) == 2 || p->snap_origin.x != p->position->x ||
+                                               p->snap_origin.z != p->position->z)) {
+            p->target_velocity.z = p->target_velocity.x = p->velocity.z = p->velocity.x = 0;
+        }
+        if (!(p->runtime_flags_0c8 & 0x49))
+            continue;
+        if (p->runtime_flags_0c8 & 0x41) {
+            i32 surface = p->terrain_info[0];
+            bool same = p->terrain_info[1] == surface && p->terrain_info[2] == surface && p->terrain_info[3] == surface;
+            if (__builtin_expect(!!(same), 1)) {
+                if ((u32)surface <= 31 && (TerSurface[surface].flags & 0x20000))
+                    p->runtime_flags_0c8 |= 0x40;
+                else
+                    p->runtime_flags_0c8 &= ~0x40;
+            }
+            if (__builtin_expect(!!(p->pushing_object), 1)) {
+                if (!(p->runtime_flags_0c8 & 0x40))
+                    p->target_velocity.z = p->target_velocity.x = 0;
+                f32 x = p->pushing_object->target_velocity.x, z = p->pushing_object->target_velocity.z;
+                if (!(fabsf(x) > fabsf(z))) {
+                    p->velocity.x = p->target_velocity.x = 0;
+                    p->target_velocity.z = z * FRAMETIME;
+                } else {
+                    p->velocity.z = p->target_velocity.z = 0;
+                    p->target_velocity.x = x * FRAMETIME;
+                }
+            } else if (same) {
+                p->target_velocity.x *= TerSurface[surface].movement_scale;
+                p->target_velocity.z *= TerSurface[surface].movement_scale;
+            } else
+                p->target_velocity.x = p->velocity.x = p->target_velocity.z = p->velocity.z = 0;
+            p->velocity.x = SeekValF(p->velocity.x, p->target_velocity.x, 1.0f);
+            p->velocity.z = SeekValF(p->velocity.z, p->target_velocity.z, 1.0f);
+            if (p->velocity.x == 0) {
+                if (fabsf(p->velocity.z) <= 0.0001f) {
+                    p->runtime_flags_0c8 &= 0x3f;
+                    p->velocity.z = p->target_velocity.z = 0;
+                }
+            } else {
+                if (__builtin_expect(fabsf(p->velocity.x) <= 0.0001f, 0)) {
+                    p->runtime_flags_0c8 &= 0x3f;
+                    p->velocity.x = p->target_velocity.x = 0;
+                }
+            }
+        }
+        if (p->runtime_flags_0c8 & 8) {
+            p->target_velocity.y = 10.0f * FRAMETIME;
+            p->target_velocity.x = p->target_velocity.z = p->velocity.x = 0;
+            p->velocity.y = SeekValF(p->velocity.y, p->target_velocity.y, 1.0f);
+            p->velocity.z = 0;
+        } else
+            p->target_velocity.y = 0;
+    }
+    for (i32 index = 0; index < world->push_block_count; ++index) {
+        pushblock_s *p = &world->push_blocks[index];
+        if (__builtin_expect((p->flags_0ca & 4) && !(p->packed_state_flags & 0x04000100) && !(p->flags_0cb & 2) &&
+            (p->runtime_flags_0c8 & 0x69), 0))
+            MoveBlocks(world, p, index, &p->velocity);
+    }
+    for (i32 index = 0; index < world->push_block_count; ++index) {
+        pushblock_s *p = &world->push_blocks[index];
+        if (!(p->flags_0ca & 4) || (p->flags_0cb & 2))
+            continue;
+        if (!NuSpecialGetVisibilityFn(&p->special) || !(p->runtime_flags_0c8 & 0x4d))
+            continue;
+        f32 left = fabsf(p->bounds_min.x) - 0.006f, right = fabsf(p->bounds_max.x) - 0.006f;
+        f32 back = fabsf(p->bounds_min.z) - 0.006f, front = fabsf(p->bounds_max.z) - 0.006f;
+        NUVEC *position = p->position;
+        f32 y = (position->y - fabsf(p->bounds_min.y) + 0.001f) + 0.025f;
+        if (__builtin_expect(p->ground_height > y, 0))
+            y = p->ground_height + 0.25f;
+        NUVEC corners[4] = {
+            {position->x - left, y, position->z - back},
+            {position->x + right, y, position->z - back},
+            {position->x + right, y, position->z + front},
+            {position->x - left, y, position->z + front},
+        };
+        PlatOnOff(p->platform_id, 0);
+        bool platforms_off = p->supporting_block || p->previous_supporting_block;
+        f32 heights[4];
+        for (i32 i = 0; i < 4; ++i) {
+            if (platforms_off)
+                NewTerrPlatformsOff();
+            heights[i] = GameShadow(NULL, &corners[i], 0.1f, -1);
+            p->terrain_info[i] = ShadowInfo();
+            p->extra_terrain_info[i] = EShadowInfo();
+        }
+        PlatOnOff(p->platform_id, 1);
+        BlockInBlock(world, p, index, &p->supporting_block);
+        if (p->supporting_block || p->previous_supporting_block) {
+            p->previous_supporting_block = p->supporting_block;
+            f32 support[4];
+            TerrainBlockOnBlock(world, p, corners, support);
+            for (i32 i = 0; i < 4; ++i)
+                if (support[i] != -10000.0f)
+                    heights[i] = support[i];
+        }
+        f32 low = p->ground_height - 0.01f, high = p->ground_height + 0.01f;
+        if ((low > heights[0] && low > heights[1] && low > heights[2] && low > heights[3]) ||
+            (heights[0] > high && heights[1] > high && heights[2] > high && heights[3] > high)) {
+            p->runtime_flags_0c8 |= 8;
+            p->ground_height = ((heights[0] + heights[1]) + heights[2] + heights[3]) * 0.25f + 0.01f;
+            p->ground_offset = (p->position->y + p->bounds_min.y) - p->ground_height;
+        }
+        if (p->supporting_block) {
+            p->ground_height = p->position->y + p->supporting_block->bounds_max.y;
+            p->ground_offset = (p->position->y + p->bounds_min.y) - p->ground_height;
+        }
+        if (p->ground_offset > 0.01f)
+            p->runtime_flags_0c8 |= 8;
+        else if (p->runtime_flags_0c8 & 8) {
+            p->runtime_flags_0c9 |= 8;
+            p->settled_height = p->ground_height;
+            p->runtime_flags_0c8 &= ~8;
+        }
+        i32 safe = 0;
+        for (i32 i = 0; i < 4; ++i)
+            if (p->extra_terrain_info[i] == 8 || p->terrain_info[i] == 14)
+                ++safe;
+        bool reset = safe != 4;
+        if (world->current_level == HOTHESCAPEB_LDATA && NuVecXZDistSqr(p->position, &hothbtestpos, NULL) < 1.0f) {
+            if (!(corners[0].z < 13.2f && !(corners[1].z >= 13.2f) && !(corners[2].z >= 13.2f) &&
+                  !(corners[3].z >= 13.2f)))
+                reset = true;
+        }
+        if (reset)
+            p->runtime_flags_0c9 |= 4;
+    }
+    for (i32 index = 0; index < world->push_block_count; ++index) {
+        pushblock_s *p = &world->push_blocks[index];
+        if (!(p->flags_0ca & 4) || (p->runtime_flags_0c9 & 1) || (p->flags_0cb & 2))
+            continue;
+        if (!(p->runtime_flags_0c9 & 4) && (p->runtime_flags_0c8 & 1))
+            GameAudio_PlaySfx(72, p->position, GameAudio_GetPlrSfxBits(p->pushing_object), 0);
+        if (p->runtime_flags_0c9 & 0xc) {
+            if (p->runtime_flags_0c9 & 4) {
+                p->position->x = p->snap_origin.x;
+                p->position->z = p->snap_origin.z;
+                p->target_velocity.x = p->target_velocity.z = p->velocity.x = p->velocity.z = 0;
+                memcpy(p->extra_terrain_info, &p->previous_extra_terrain_info, 4);
+                p->runtime_flags_0c8 &= 0x3f;
+                NuSpecialUpdate(&p->special);
+                for (i32 i = 0; i < p->end_position_count; ++i)
+                    if (NuSpecialExistsFn(&p->end_position_specials[i])) {
+                        NUMTX *m = NuSpecialGetInstanceMtx(&p->end_position_specials[i]);
+                        if ((usize)m != 0xffffffd0u) {
+                            m->m30 = p->snap_origin.x;
+                            m->m32 = p->snap_origin.z;
+                            NuSpecialUpdate(&p->end_position_specials[i]);
+                        }
+                    }
+                p->runtime_flags_0c8 &= ~1;
+                p->runtime_flags_0c9 &= ~4;
+            }
+            if (p->runtime_flags_0c9 & 8) {
+                p->ground_height = p->settled_height;
+                p->position->y = p->settled_height - p->bounds_min.y;
+                p->target_velocity.y = p->velocity.y = 0;
+                p->runtime_flags_0c8 &= ~8;
+                p->runtime_flags_0c9 &= ~8;
+                p->ground_offset = (p->position->y + p->bounds_min.y) - p->settled_height;
+                NuSpecialUpdate(&p->special);
+            }
+        } else if (p->runtime_flags_0c8 & 1) {
+            if ((p->runtime_flags_0c8 & 3) == 1 && p->pushing_object)
+                GameAudio_PlaySfx(71, &p->pushing_object->apiobj.collision_position,
+                                  GameAudio_GetPlrSfxBits(p->pushing_object), 0);
+            if (LEGOHINT_PUSHBLOCKS != -1 && p->pushing_object &&
+                (p->pushing_object->apiobj.object_flags & 0x81) == 0x81)
+                Hint_SetComplete(LEGOHINT_PUSHBLOCKS);
+        }
+    }
+    for (i32 index = 0; index < world->push_block_count; ++index) {
+        pushblock_s *p = &world->push_blocks[index];
+        if (!(p->flags_0ca & 4))
+            continue;
+        if (p->pushing_object) {
+            if (p->platform_id != -1 && (p->runtime_flags_0c8 & 9)) {
+                p->pushing_object->field_0xefc |= 1;
+                AddShoveObject(&p->special, (i16)p->platform_id);
+            } else
+                p->pushing_object->field_0xefc &= ~1;
+        }
+        if (!(p->packed_state_flags & 0x220)) {
+            i32 safe = 0;
+            for (i32 i = 0; i < 4; ++i)
+                if (__builtin_expect(p->extra_terrain_info[i] == 8 || p->terrain_info[i] == 14, 0))
+                    ++safe;
+            if (safe == 4) {
+                memcpy(&p->previous_extra_terrain_info, p->extra_terrain_info, 4);
+                p->snap_origin = *p->position;
+            }
+        }
+        p->pushing_object = NULL;
+        p->runtime_flags_0c8 = (p->runtime_flags_0c8 & ~2) | ((p->runtime_flags_0c8 & 1) << 1);
+        p->runtime_flags_0c8 = (p->runtime_flags_0c8 & 0xea) | ((p->runtime_flags_0c8 << 1) & 0x10);
+    }
+}
+
+pushblock_s *NearestPushBlock(WORLDINFO_s *world, nuvec_s *position, float range) {
+    if (position == NULL || world == NULL)
+        return NULL;
+    const NUVEC minimum = {position->x - range, position->y - range, position->z - range};
+    const NUVEC maximum = {position->x + range, position->y + range, position->z + range};
+    pushblock_s *nearest = NULL;
+    f32 nearest_distance = 1000000000.0f;
+    pushblock_s *block = world->push_blocks;
+    for (i32 i = 0; i < world->push_block_count; ++i, ++block) {
+        if ((block->packed_state_flags & 0x1040100) != 0x1040000)
+            continue;
+        NUVEC *candidate = block->position;
+        if (candidate->x < minimum.x || candidate->x > maximum.x || candidate->z < minimum.z ||
+            candidate->z > maximum.z || candidate->y < minimum.y || candidate->y > maximum.y)
+            continue;
+        const f32 distance = NuVecDistSqr(position, candidate, NULL);
+        if (distance < nearest_distance) {
+            nearest = block;
+            nearest_distance = distance;
+        }
+    }
+    return nearest;
+}
+
+i32 Push_UpdateHints(HINT_s *) {
+    if (LEGOACT_PUSH == -1)
+        return 0;
+    for (i32 i = 0; i < 8; ++i) {
+        GameObject_s *object = Player[i];
+        if (object != NULL && object->apiobj.player_controlled &&
+            object->apiobj.character_model->model_data_b[LEGOACT_PUSH] != NULL &&
+            NearestPushBlock(WORLD, &object->apiobj.collision_position, 2.0f) != NULL)
+            return 1;
+    }
+    return 0;
 }
 
 i32 GizPushBlock_EndFrameCompleted(pushblock_s *push_block, i32 output_index) {
@@ -511,14 +4533,49 @@ i32 GizPushBlock_EndFrameCompleted(pushblock_s *push_block, i32 output_index) {
     return (push_block->completion_flags & PUSH_BLOCK_ANY_OUTPUT_MASK) != 0;
 }
 
-i32 PushBlock(GameObject_s *object) {
-    pushblock_s *block = NearestFacingPushBlock(WORLD, object, 2.0f);
-    if (block != NULL) {
-        block->pushing_object = object;
-        block->runtime_flags_0c8 |= 1;
-        AlertSurroundingCreatures(object, &object->apiobj.collision_position);
-        return 1;
+i32 GizPush_GetOutput(GIZMO *gizmo, i32 output_index, i32) {
+    pushblock_s *push_block = static_cast<pushblock_s *>(gizmo->object);
+    if (push_block == NULL) {
+        return 0;
     }
-    object->character_context = -1;
-    return 0;
+    return GizPushBlock_EndFrameCompleted(push_block, output_index) != 0;
 }
+
+ADDGIZMOTYPE *Push_RegisterGizmo(i32 type_id) {
+    static ADDGIZMOTYPE addtype;
+
+    addtype = Default_ADDGIZMOTYPE;
+    addtype.name = "PushBlocks";
+    addtype.prefix = "";
+    addtype.fns.unknown1 = 0x24c;
+    addtype.fns.get_max_gizmos_fn = Push_GetMaxGizmos;
+    addtype.fns.add_gizmos_fn = Push_AddGizmos;
+    addtype.fns.early_update_fn = NULL;
+    addtype.fns.late_update_fn = UpdatePushBlocks;
+    addtype.fns.draw_fn = NULL;
+    addtype.fns.panel_draw_fn = NULL;
+    addtype.fns.get_gizmo_name_fn = GizPush_GetGizmoName;
+    addtype.fns.get_output_fn = GizPush_GetOutput;
+    addtype.fns.get_output_name_fn = GizPush_GetOutputName;
+    addtype.fns.get_num_outputs_fn = GizPush_GetNumOutputs;
+    addtype.fns.activate_fn = Push_Activate;
+    addtype.fns.set_visibility_fn = Push_SetVisibility;
+    addtype.fns.get_visibility_fn = NULL;
+    addtype.fns.get_pos_fn = NULL;
+    addtype.fns.using_special_fn = NULL;
+    addtype.fns.bolt_hit_plat_fn = Pushblocks_BoltHitPlat;
+    addtype.fns.get_best_bolt_target_fn = NULL;
+    addtype.fns.bolt_hit_fn = NULL;
+    addtype.fns.allocate_progress_data_fn = Push_AllocateProgressData;
+    addtype.fns.clear_progress_fn = Push_ClearProgress;
+    addtype.fns.store_progress_fn = Push_StoreProgress;
+    addtype.fns.reset_fn = Push_Reset;
+    addtype.fns.reserve_buffer_space_fn = PushBlocks_ReserveBufferSpace;
+    addtype.fns.load_fn = edpush_Load;
+    addtype.fns.post_load_fn = NULL;
+    addtype.fns.add_level_sfx_fn = NULL;
+    pushblock_gizmotype_id = type_id;
+
+    return &addtype;
+}
+

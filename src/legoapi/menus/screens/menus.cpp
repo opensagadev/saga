@@ -51,8 +51,6 @@ eduimenu_s *GetMenuActiveChild(eduimenu_s *menu) {
         return GetMenuActiveChild(menu->child);
     return menu;
 }
-void ResizePauseScreenTexture(i32, i32) {
-    STUBBED();
-}
+void ResizePauseScreenTexture(i32, i32);
 
 extern "C" void NewMenu(i32 menu_id, i32 menu_y, i32 param3);

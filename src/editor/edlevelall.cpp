@@ -3131,30 +3131,7 @@ i32 ClassObjectList::IsInList(void *object, EdRef *reference) {
     return false;
 }
 
-void DumpAreaData(i32 mode, i32) {
-    if (big_icon_scene != NULL) {
-        NuGScnRemove(big_icon_scene);
-    }
-    big_icon_scene = NULL;
-    if (area_scene != NULL) {
-        NuGScnRemove(area_scene);
-    }
-    area_scene = NULL;
-    if (vehicle_scene != NULL) {
-        NuGScnRemove(vehicle_scene);
-    }
-    vehicle_scene = NULL;
-    if (Customiser_AccessoriesLoaded == 2) {
-        Customiser_RestoreModelTextureIDs(Game_Customiser);
-    } else if (Customiser_AccessoriesLoaded == 1) {
-        Customiser_DumpAccessories(Game_Customiser);
-    }
-    Customiser_AccessoriesLoaded = 0;
-    IconScenes_Dump();
-    CharScenes_AreaDump();
-    APIDumpCharacterModels(mode);
-    Particles_DumpAreaPage();
-}
+void DumpAreaData(i32 mode, i32);
 
 void cbEdLevelSave(eduimenu_s *parent, eduiitem_s *item, u32) {
     theLevelEditor.Save();
@@ -3230,16 +3207,7 @@ void cbCEDeleteConfirmed(eduimenu_s *menu, eduiitem_s *item, u32 buttons) {
     cbEdLevelDestroyOnSelect(menu, item, buttons);
 }
 
-void LightEverythingInEditor(void *light_set) {
-    rtlProcessLights(light_set, FRAMETIME);
-    GameObject_s *object = Obj;
-    for (i32 index = 0; index < HIGHGAMEOBJECT; ++index, ++object) {
-        if ((object->apiobj.field_0x1f8 & 0x1001) == 0x1001) {
-            object->field_0xefc |= 0x80;
-            LightGameObject(object, light_set);
-        }
-    }
-}
+void LightEverythingInEditor(void *light_set);
 
 void cbEdLevelDestroyOnSelect(eduimenu_s *menu, eduiitem_s *, u32) {
     eduiMenuDetach(menu);

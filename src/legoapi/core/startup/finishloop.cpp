@@ -25,49 +25,7 @@ extern "C" {
 
 void BackDrop_Draw(f32 alpha, i32 flags);
 
-void FinishLoop(i32 frames) {
-    if (!FinishLoop_On) {
-        return;
-    }
-
-    if (finishloop_backdroponly != 0) {
-        pNuCam->mtx = numtx_identity;
-        NuCameraSet(pNuCam);
-
-        do {
-            NuFrameBegin();
-            NuRndrBeginScene(-1);
-            NuRndrClear(0xb00, 0, 1.0f);
-            BackDrop_Draw(1.0f, 1);
-            NuRndrEndScene();
-            edGraEnableTerrainSwap();
-            NuFrameEnd();
-            edGraDisableTerrainSwap();
-        } while (--frames > 0);
-        finishloop_backdroponly = 0;
-        return;
-    }
-
-    if (FadeSys.pending_type == FADE_TYPE_NONE) {
-        do {
-            NuFrameBegin();
-            NuRndrBeginScene(-1);
-            NuRndrClear(0xb00, 0, 1.0f);
-            NuRndrEndScene();
-            edGraEnableTerrainSwap();
-            NuFrameEnd();
-            edGraDisableTerrainSwap();
-        } while (--frames > 0);
-    } else {
-        do {
-            NuFrameBegin();
-            FadeSys.Draw();
-            edGraEnableTerrainSwap();
-            NuFrameEnd();
-            edGraDisableTerrainSwap();
-        } while (--frames > 0);
-    }
-}
+void FinishLoop(i32 frames);
 
 void bgSuspendMain(i32) {
 }

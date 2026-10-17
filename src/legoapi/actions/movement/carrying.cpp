@@ -1,3 +1,6 @@
+// Original translation unit reconstructed from the reference address map.
+// Functions are defined in original address order.
+
 #include "decomp.h"
 #include "globals.h"
 #include "legoapi/actions/character/speederchase.h"
@@ -40,6 +43,41 @@ u32 (*CanSuperCarryFn)(GameObject_s *) = NULL;
 i32 SuperCarry_UseActionButton = 0;
 i32 SuperCarry_PutDownDrop = 1;
 f32 SUPERCARRY_JUMPSPEED = 1.4f;
+static void SuperCarry_PartImpact(PART_s *part);
+
+static __used__ i32 SuperCarry_TurnBlowupBackOn(GIZMOBLOWUP_s *blowup, NUVEC *position, u16 angle, i32 keep_matrix);
+
+static void SuperCarry_PartKill(PART_s *part, i32);
+
+void SuperCarry_GetObjectPos(GameObject_s *object, NUVEC *position, NUVEC *secondary_position);
+
+void SuperCarry_Throw(GameObject_s *object, i32 mode);
+
+i32 SuperCarry_Possible(GameObject_s *object, i32 require_grounded);
+
+void SuperCarry_Start(GameObject_s *object, GIZMOBLOWUP_s *blowup, i32 immediate);
+
+i32 SuperCarry_Carrying(GameObject_s *object);
+
+i32 ObjLandReady(GameObject_s *object);
+
+// ==== src/legoapi/gizmo/object/takeoverobjects.cpp: all remaining content ====
+#include "legoapi/ai/game/creature.h"
+#include "legoapi/characters/core/players.h"
+#include "legoapi/gizmo/object/takeoverobjects.h"
+#include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/props/doors/door.h"
+#include "legoapi/world/area.h"
+#include "legoapi/world/level.h"
+#include "nu2api/nucore/nustring.h"
+
+#include <string.h>
+
+TAKEOVEROBJECT_s takeoverobjects[8];
+i32 num_takeoverobjects;
+
+// ==== functions in original address order ====
+
 // Original 0x4fab00, 184 bytes.
 static void SuperCarry_PartImpact(PART_s *part) {
     f32 intensity = NuVecMag(&part->velocity);
@@ -256,14 +294,6 @@ i32 SuperCarry_Possible(GameObject_s *object, i32 require_grounded) {
     if (require_grounded != 0 && (object->apiobj.field_0x27d == 0 || ObjLandReady(object) == 0))
         return 0;
     return 1;
-}
-
-// Original 0x4fd530, 75 bytes.
-void SuperCarry_Release(GameObject_s *object) {
-    if (SuperCarry_Carrying(object) != 0) {
-        SuperCarry_Throw(object, 1);
-        object->character_context = -1;
-    }
 }
 
 // Original 0x4fbae0, 1204 bytes.
@@ -735,27 +765,137 @@ i32 SuperCarry_Carrying(GameObject_s *object) {
     return 0;
 }
 
-i32 ObjLandReady(GameObject_s *object) {
-    if (object == NULL) {
-        return 0;
+// Original 0x4fd530, 75 bytes.
+void SuperCarry_Release(GameObject_s *object) {
+    if (SuperCarry_Carrying(object) != 0) {
+        SuperCarry_Throw(object, 1);
+        object->character_context = -1;
     }
-    if ((CInfo[object->character_context].flags & 0x1004) != 0 &&
-        (LEGOCONTEXT_LAND_COMBATROLL == -1 || LEGOCONTEXT_LAND_COMBATROLL != object->character_context ||
-         object->field_0x7a3 != 0)) {
-        if (LEGOCONTEXT_WALLSHUFFLE != -1 && LEGOCONTEXT_WALLSHUFFLE == object->character_context) {
-            return 0;
+}
+
+void ClearTakeOverObjectSys() {
+    memset(takeoverobjects, 0, sizeof(takeoverobjects));
+    num_takeoverobjects = 0;
+}
+
+void RegisterTakeOverObject(GameObject_s *object) {
+    if ((object->apiobj.character_data->game_character->flags_090 & 0x80) != 0 ||
+        (object->apiobj.field_0x1f4 & 0x4000) == 0 || (WORLD->current_level->flags & LEVEL_FORGET_TAKEOVERS) != 0) {
+        return;
+    }
+    u8 level = static_cast<u8>(WORLD->current_level->area_level_index);
+    if (num_takeoverobjects > 7 || (object->apiobj.field_0x1f4 & 0x400) == 0) {
+        return;
+    }
+    i32 index;
+    for (index = 0; index < num_takeoverobjects; ++index) {
+        if (takeoverobjects[index].object == object) {
+            return;
         }
-        return 1;
     }
-    return 0;
+    takeoverobjects[index].object = object;
+    AISCRIPT *script = object->ai.script_process.script;
+    if (script != NULL && script->name != NULL) {
+        NuStrNCpy(takeoverobjects[index].script_name, script->name, 0x10);
+    }
+    takeoverobjects[index].character_id = object->id;
+    takeoverobjects[index].registered_level = level;
+    takeoverobjects[index].current_level = level;
+    takeoverobjects[index].source_creature = object->ai.field_0x134;
+    ++num_takeoverobjects;
 }
 
-i32 MovingBackwards(GameObject_s *object) {
-    GAMEPAD_s *pad = object->pad_gamepad;
-    if (pad->operator_data == NULL || pad->input_magnitude == 0.0f) {
-        return 0;
+void StoreStatusTakeOverObjectSys() {
+    if (netclient != 0) {
+        return;
     }
-
-    const i32 difference = RotDiff(static_cast<u16>(pad->input_angle + GameCam->input_yaw), object->apiobj.field_0x276);
-    return static_cast<u32>(difference + 0x4000) > 0x8000;
+    u8 level = static_cast<u8>(WORLD->current_level->area_level_index);
+    TAKEOVEROBJECT_s *record = takeoverobjects;
+    for (i32 index = 0; index < num_takeoverobjects; ++index, ++record) {
+        GameObject_s *object = record->object;
+        if (object == NULL) {
+            continue;
+        }
+        record->last_safe_position = object->apiobj.last_safe_position;
+        record->heading = object->apiobj.field_0x276;
+        u8 contact = 0xff;
+        if (object->field_0xcc0 != NULL && LEGOCONTEXT_BEENTAKENOVER != -1 &&
+            object->field_0xcc0->character_context == LEGOCONTEXT_BEENTAKENOVER &&
+            static_cast<u8>(object->apiobj.field_0x27c) != 0xff && Door_Last != NULL &&
+            Door_Last->takeover_character_mask != 0) {
+            if (Door_Last->takeover_character_mask == ~static_cast<u64>(0)) {
+                contact = static_cast<u8>(object->apiobj.field_0x27c);
+            } else {
+                u8 character_index = static_cast<u8>(Area_CharIDInCurrentList(object->id));
+                if (character_index < 63 && ((Door_Last->takeover_character_mask >> character_index) & 1) != 0) {
+                    contact = static_cast<u8>(record->object->apiobj.field_0x27c);
+                }
+            }
+        }
+        record->contact_index = contact;
+        object = record->object;
+        record->hitpoints = object->current_hp;
+        if (record->hitpoints == 0 && object->hitpoints != 0) {
+            record->hitpoints = object->hitpoints;
+        }
+        record->current_level = level;
+    }
 }
+
+void ReStoreStatusTakeOverObjectSys(i32 restore_progress) {
+    if (netclient != 0) {
+        return;
+    }
+    i32 level = static_cast<i8>(WORLD->current_level->area_level_index);
+    for (i32 index = 0; index < num_takeoverobjects; ++index) {
+        TAKEOVEROBJECT_s *record = &takeoverobjects[index];
+        if (restore_progress != 0 || record->current_level != level) {
+            record->object = NULL;
+        }
+        if (record->contact_index != 0xff) {
+            record->current_level = static_cast<u8>(level);
+        }
+        if (record->registered_level == level) {
+            if (record->object == NULL) {
+                if (record->source_creature != 0xff) {
+                    for (i32 object_index = 0; object_index < HIGHGAMEOBJECT; ++object_index) {
+                        if (Obj[object_index].ai.field_0x134 == record->source_creature) {
+                            record->object = &Obj[object_index];
+                            break;
+                        }
+                    }
+                } else if (record->current_level == level) {
+                    record->object =
+                        AddDynamicCreature(record->character_id, &record->last_safe_position, record->heading,
+                                           record->script_name, NULL, NULL, 1, NULL, NULL, 0, 0);
+                }
+            }
+            if (record->object != NULL && record->current_level != level) {
+                KillGameObject(record->object, 5, 0);
+                record->object = NULL;
+                continue;
+            }
+        } else if (record->current_level == level && record->object == NULL) {
+            record->object = AddDynamicCreature(record->character_id, &record->last_safe_position, record->heading,
+                                                record->script_name, NULL, NULL, 1, NULL, NULL, 0, 0);
+        }
+        GameObject_s *object = record->object;
+        if (object != NULL) {
+            object->current_hp = record->hitpoints;
+            GameObject_s *controller;
+            if (!(!(!(record->contact_index != 0xff && (controller = Player[record->contact_index]) != NULL)))) {
+                SnapCreaturePos(record->object, &record->last_safe_position, record->heading, NULL, 1);
+            } else {
+                object->apiobj.flags_high |= 0x10;
+                object->apiobj.flags_low |= 1;
+                object->apiobj.field_0x287 = 0;
+                object->ai.reset_mode = 2;
+                SnapCreaturePos(object, &controller->apiobj.position, controller->apiobj.field_0x276,
+                                &controller->ai.path_info, 1);
+                InitPlayerAI(controller);
+                TakeOverGameObject(controller, record->object, 0, 1);
+            }
+        }
+    }
+}
+

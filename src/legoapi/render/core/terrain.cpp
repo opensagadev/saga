@@ -269,7 +269,7 @@ char *debris_name[400] = {
     "BULLET2",        "BULLET_HIT",    "POD_SPARK",
 };
 extern "C" {
-i32 Grass_Available;
+extern i32 Grass_Available;
 }
 
 extern "C" void TerrainSetImpactData(void *impact_data, i32 *impact_count, i32 maximum_impacts);
@@ -283,78 +283,10 @@ extern "C" void TerrainSetImpactData(void *impact_data, i32 *impact_count, i32 m
 
 extern "C" void *TerrainInitEx(i32 level_num, void *buf, void *buf_end, i32 options, char *path, void *gscn,
                                i32 scene_id, u32 max_group_indices, u32 max_groups, u32 max_platforms);
-void LoadTerrainFile(WORLDINFO *world) {
-    char path[256];
-    world->terrain = NULL;
-    if ((world->current_level->flags & LEVEL_TERRAIN) != 0) {
-        NuStrCpy(path, world->config_file);
-        LEVELDATA *level = world->current_level;
-        if (level == (LEVELDATA *)PLATFORM_LDATA) {
-            NuStrCpy(path, "levels\\episode_v\\cloudcityescape\\cloudcityescape_b\\cloudcityescape_b");
-            level = world->current_level;
-        }
-        world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 4);
-        void *terrain = TerrainInitEx(world->level_idx, &world->giz_buffer, world->unknown_0108.void_ptr, 0, path,
-                                      world->current_gscn, 0, (u32)(u16)level->max_ter_groups,
-                                      (u32)(u16)level->max_ter_groups, (u32)(u16)level->max_ter_platforms);
-        world->terrain = terrain;
-    }
-}
-void LoadGrassFile(WORLDINFO *world) {
-    char path[256];
-    world->page_grass = -1;
-    Grass_Available = 1;
-    char *config = world->config_file;
-
-    if (g_isLowEndDevice != 0) {
-        char *found = NuStrIStr(config, "Gungan");
-        if (found == NULL)
-            found = NuStrIStr(config, "SpeederChase");
-        if (found == NULL)
-            found = NuStrIStr(config, "EndorBattle");
-        if (found == NULL)
-            found = NuStrIStr(config, "Retake");
-
-        if (found != NULL) {
-            Grass_Available = 0;
-        } else {
-            Grass_Available = 1;
-        }
-    }
-
-    if (NuStrIStr(config, "SpeederChase") != NULL) {
-        Grass_Available = 0;
-    }
-
-    if (NuDeviceSpecs::ms_instance->specs < 3 && NuStrIStr(config, "GunGan_A") != NULL) {
-        Grass_Available = 0;
-        return;
-    }
-
-    if (__builtin_expect(Grass_Available != 0, 1)) {
-        sprintf(path, "%s.gra", config);
-        if (NuFileExists(path)) {
-            i32 page = edgraLoadPage(path, world->current_gscn, *(i32 *)&world->terrain, &world->giz_buffer,
-                                     &world->unknown_0108);
-            world->page_grass = page;
-        }
-    }
-}
-void LoadBridgeFile(WORLDINFO *world) {
-    char path[256];
-    world->page_bridge = -1;
-    sprintf(path, "%s.bri", world->config_file);
-    if (NuFileExists(path)) {
-        i32 page = edbriLoadPage(path, world->current_gscn);
-        world->page_bridge = page;
-    }
-}
-i32 UnderWater(GameObject_s *object) {
-    if ((object->apiobj.field_0x27f & static_cast<u8>(~8u)) == 1) {
-        return object->apiobj.water_height >= object->apiobj.pos_y;
-    }
-    return 0;
-}
+void LoadTerrainFile(WORLDINFO *world);
+void LoadGrassFile(WORLDINFO *world);
+void LoadBridgeFile(WORLDINFO *world);
+i32 UnderWater(GameObject_s *object);
 i32 CheckCylinder(i32 first_vertex, i32 second_vertex, i32 *vertex_mask, i32 remaining_vertex_mask);
 
 i32 CheckSphere(i32 vertex_index);
@@ -388,52 +320,9 @@ namespace {
 #define TERRAIN_KILL_PLAYER_ATTR __attribute__((noinline, noclone))
 #endif
 
-static inline void MakePlayCorner(GAMECAMERA_s *camera, f32 screen_x, f32 screen_y, NUVEC *near_corner,
-                                  NUVEC *far_corner) {
-    NUVEC ray = {screen_x, screen_y, 1.0f};
-    NuVecMtxRotate(&ray, &ray, &camera->target_mtx);
-    NuVecAdd(near_corner, &ray, &camera->pos);
-    NuVecNorm(&ray, &ray);
-    far_corner->y = near_corner->y + ray.y * 5.0f;
-    far_corner->z = near_corner->z + ray.z * 5.0f;
-    far_corner->x = near_corner->x + ray.x * 5.0f;
-}
 
-static inline void SetPlayPlane(PLAYPLANE_s *plane, NUVEC *a, NUVEC *b, NUVEC *c, NUVEC *d, NUVEC *edge_a0,
-                                NUVEC *edge_a1, NUVEC *edge_b0, NUVEC *edge_b1) {
-    plane->point.x = (a->x + b->x + c->x + d->x) * 0.25f;
-    plane->point.y = (a->y + b->y + c->y + d->y) * 0.25f;
-    plane->point.z = (a->z + b->z + c->z + d->z) * 0.25f;
-    NUVEC second_edge;
-    NUVEC first_edge;
-    NuVecSub(&first_edge, edge_a0, edge_a1);
-    NuVecSub(&second_edge, edge_b0, edge_b1);
-    NuVecCross(&plane->normal, &first_edge, &second_edge);
-    NuVecNorm(&plane->normal, &plane->normal);
-}
 
-void MakePlayPlanes(GAMECAMERA_s *camera) {
-    NUVEC far_corner[4];
-    NUVEC near_corner[4];
-    MakePlayCorner(camera, -0.85f * PANEL3DMULX, 0.85f * PANEL3DMULY, &near_corner[0], &far_corner[0]);
-    MakePlayCorner(camera, 0.85f * PANEL3DMULX, 0.85f * PANEL3DMULY, &near_corner[1], &far_corner[1]);
-    MakePlayCorner(camera, -0.85f * PANEL3DMULX, -0.85f * PANEL3DMULY, &near_corner[2], &far_corner[2]);
-    MakePlayCorner(camera, 0.85f * PANEL3DMULX, -0.85f * PANEL3DMULY, &near_corner[3], &far_corner[3]);
-
-    // Plane order is near, left, right, top, bottom, far.
-    SetPlayPlane(&PlayPlane[1], &near_corner[0], &far_corner[0], &far_corner[2], &near_corner[2], &far_corner[0],
-                 &near_corner[0], &far_corner[2], &near_corner[0]);
-    SetPlayPlane(&PlayPlane[2], &far_corner[1], &near_corner[1], &near_corner[3], &far_corner[3], &near_corner[1],
-                 &far_corner[1], &near_corner[3], &far_corner[1]);
-    SetPlayPlane(&PlayPlane[3], &near_corner[0], &near_corner[1], &far_corner[1], &far_corner[0], &near_corner[1],
-                 &near_corner[0], &far_corner[1], &near_corner[0]);
-    SetPlayPlane(&PlayPlane[4], &near_corner[2], &far_corner[2], &far_corner[3], &near_corner[3], &far_corner[2],
-                 &near_corner[2], &far_corner[3], &near_corner[2]);
-    SetPlayPlane(&PlayPlane[0], &near_corner[0], &near_corner[2], &near_corner[3], &near_corner[1], &near_corner[2],
-                 &near_corner[0], &near_corner[3], &near_corner[0]);
-    SetPlayPlane(&PlayPlane[5], &far_corner[0], &far_corner[1], &far_corner[3], &far_corner[2], &far_corner[1],
-                 &far_corner[0], &far_corner[3], &far_corner[0]);
-}
+void MakePlayPlanes(GAMECAMERA_s *camera);
 
 DECOMP_ASSERT(sizeof(TERRAIN_DEBUG_RECORD) == 100, "Terrain debug record ABI");
 
@@ -445,25 +334,7 @@ extern "C" i32 NewRayCastPlatForm(NUVEC *position, NUVEC *movement, f32 radius, 
 extern "C" void *NuScratchAlloc32(i32 size);
 extern "C" void NuScratchRelease();
 
-i32 TerrainBlockOnBlock(WORLDINFO_s *world, pushblock_s *block, nuvec_s *points, float *heights) {
-    if (!heights || !points)
-        return 0;
-    heights[0] = heights[1] = heights[2] = heights[3] = -10000.0f;
-    for (i32 i = 0; i < world->push_block_count; ++i) {
-        pushblock_s *other = &world->push_blocks[i];
-        if (other == block)
-            continue;
-        f32 xmin = other->position->x - fabsf(other->bounds_min.x),
-            xmax = other->position->x + fabsf(other->bounds_max.x);
-        f32 zmin = other->position->z - fabsf(other->bounds_min.z),
-            zmax = other->position->z + fabsf(other->bounds_max.z);
-        f32 height = fabsf(other->bounds_max.y) + other->position->y;
-        for (i32 j = 0; j < 4; ++j)
-            if (points[j].x > xmin && points[j].x < xmax && points[j].z > zmin && points[j].z < zmax)
-                heights[j] = height;
-    }
-    return 1;
-}
+i32 TerrainBlockOnBlock(WORLDINFO_s *world, pushblock_s *block, nuvec_s *points, float *heights);
 
 #undef TERRAIN_GET_SCAN_BOUNDS
 

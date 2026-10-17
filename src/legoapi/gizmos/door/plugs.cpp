@@ -1,3 +1,6 @@
+// Original translation unit reconstructed from the reference address map.
+// Functions are defined in original address order.
+
 #include "legoapi/gizmos/door/plugs.h"
 
 #include "decomp.h"
@@ -15,53 +18,89 @@ struct PLUGPROGRESS {
 
 i32 plug_gizmotype_id = -1;
 
-// Original 0x5000f0, 342 bytes; part of the optimized plug module.
-PLUG *Plug_FindNearest(PLUGSYS *system, NUVEC *position, f32 *distance_squared, i32 only_unplugged) {
-    PLUG *nearest = NULL;
-    f32 nearest_distance = 1000000000.0f;
-    if (system != NULL) {
-        PLUG *plug = system->plugs;
-        for (i32 index = 0; index < system->count; ++index, ++plug) {
-            if (!(only_unplugged == 0 || (plug->flags & PLUG_FLAG_PLUGGED) == 0))
-                continue;
-            const f32 distance = NuVecDistSqr(position, &plug->position, NULL);
-            if (!(distance < nearest_distance))
-                continue;
-            nearest_distance = distance;
-            nearest = plug;
-        }
+static i32 Plugs_GetMaxGizmos(void *world_ptr);
+
+static void Plugs_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *world_ptr, void *);
+
+static void Plugs_Update(void *, void *, float);
+
+static void Plugs_Draw(void *, void *, float);
+
+static char *Plug_GetGizmoName(GIZMO *gizmo);
+
+static i32 Plug_GetOutput(GIZMO *gizmo, i32, i32);
+
+static char *Plug_GetOutputName(GIZMO *, i32);
+
+static i32 Plug_GetNumOutputs(GIZMO *);
+
+static void Plug_Activate(GIZMO *gizmo, i32 active);
+
+static void Plug_SetVisibility(GIZMO *gizmo, i32 visible);
+
+static NUVEC *Plug_GetPos(GIZMO *gizmo);
+
+static void *Plugs_AllocateProgressData(VARIPTR *buffer, VARIPTR *buffer_end);
+
+static void Plugs_ClearProgress(void *, void *progress_ptr);
+
+static void Plugs_StoreProgress(void *world_ptr, void *, void *progress_ptr);
+
+static void Plugs_Reset(void *world_ptr, void *, void *progress_ptr);
+
+static void *Plugs_ReserveBufferSpace(void *world_ptr);
+
+static i32 Plugs_Load(void *world_ptr, void *);
+
+// ==== src/legoapi/ai/core/ai_sys.cpp: declarations ====
+#include "legoapi/world/world_shared.h"
+#include "legoapi/items/base/apiobject.h"
+#include "gameapi/ai/aisys/aisys.h"
+#include "gameapi/ai/aisys/aiscript_types.h"
+#include "nu2api/numath/nuvec.h"
+#include "nu2api/numath/nutrig.h"
+
+#include <string.h>
+
+// ==== functions in original address order ====
+
+static void Plug_Activate(GIZMO *gizmo, i32 active) {
+    if (gizmo == NULL) {
+        return;
     }
-    if (distance_squared != NULL) {
-        *distance_squared = nearest_distance;
-    }
-    return nearest;
+    PLUG *plug = static_cast<PLUG *>(gizmo->object);
+    plug->active = active != 0;
 }
 
-// Original 0x500250, 115 bytes.
-void Plug_MakeDrawMtx(PLUG *plug, NUMTX *matrix) {
-    NuMtxSetRotationY(matrix, plug->y_rotation);
-    NuMtxRotateZ(matrix, plug->z_rotation);
-    NuMtxRotateX(matrix, plug->x_rotation);
-    NuMtxTranslate(matrix, &plug->position);
+static void Plug_SetVisibility(GIZMO *gizmo, i32 visible) {
+    if (gizmo == NULL) {
+        return;
+    }
+    PLUG *plug = static_cast<PLUG *>(gizmo->object);
+    plug->visible = visible != 0;
 }
 
-static i32 Plugs_GetMaxGizmos(void *world_ptr) {
+static void Plugs_Reset(void *world_ptr, void *, void *progress_ptr) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
-    if (world == NULL) {
-        return 0;
-    }
-    return world->current_level->max_plugs;
-}
-
-static void Plugs_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *world_ptr, void *) {
-    WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
-    if (world == NULL || world->plug_sys == NULL) {
+    PLUGPROGRESS *progress = static_cast<PLUGPROGRESS *>(progress_ptr);
+    if (world == NULL || world->plug_sys == NULL || world->plug_sys->plugs == NULL) {
         return;
     }
 
-    for (i32 index = 0; index < world->plug_sys->count; ++index) {
-        if (NuStrLen(world->plug_sys->plugs[index].name) != 0) {
-            AddGizmo(gizmo_sys, type_id, NULL, &world->plug_sys->plugs[index]);
+    PLUG *plug_ptr = world->plug_sys->plugs;
+    for (i32 index = 0; index < world->plug_sys->count; ++index, ++plug_ptr) {
+        PLUG &plug = *plug_ptr;
+        plug.flags = static_cast<u8>((plug.flags | PLUG_FLAG_ACTIVE | PLUG_FLAG_VISIBLE) & ~PLUG_FLAG_PLUGGED);
+        if (progress != NULL && !(index > 31)) {
+
+            const u32 bit = 1u << index;
+            plug.flags = static_cast<u8>((plug.flags & ~(PLUG_FLAG_VISIBLE | PLUG_FLAG_PLUGGED)) |
+                                         ((progress->visible_mask[0] & bit) != 0 ? PLUG_FLAG_VISIBLE : 0));
+            plug.flags = static_cast<u8>((plug.flags & ~PLUG_FLAG_ACTIVE) |
+                                         ((progress->active_mask[0] & bit) != 0 ? PLUG_FLAG_ACTIVE : 0));
+            if ((progress->plugged_mask[0] & bit) != 0) {
+                plug.flags |= PLUG_FLAG_PLUGGED;
+            }
         }
     }
 }
@@ -70,6 +109,14 @@ static void Plugs_Update(void *, void *, float) {
 }
 
 static void Plugs_Draw(void *, void *, float) {
+}
+
+static i32 Plugs_GetMaxGizmos(void *world_ptr) {
+    WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
+    if (world == NULL) {
+        return 0;
+    }
+    return world->current_level->max_plugs;
 }
 
 static char *Plug_GetGizmoName(GIZMO *gizmo) {
@@ -90,28 +137,25 @@ static i32 Plug_GetNumOutputs(GIZMO *) {
     return 1;
 }
 
-static void Plug_Activate(GIZMO *gizmo, i32 active) {
-    if (gizmo == NULL) {
-        return;
-    }
-    PLUG *plug = static_cast<PLUG *>(gizmo->object);
-    plug->active = active != 0;
-}
-
-static void Plug_SetVisibility(GIZMO *gizmo, i32 visible) {
-    if (gizmo == NULL) {
-        return;
-    }
-    PLUG *plug = static_cast<PLUG *>(gizmo->object);
-    plug->visible = visible != 0;
-}
-
 static NUVEC *Plug_GetPos(GIZMO *gizmo) {
     return gizmo != NULL ? &static_cast<PLUG *>(gizmo->object)->position : NULL;
 }
 
-static void *Plugs_AllocateProgressData(VARIPTR *buffer, VARIPTR *buffer_end) {
-    return GizmoBufferAlloc(buffer, buffer_end, sizeof(PLUGPROGRESS));
+static void *Plugs_ReserveBufferSpace(void *world_ptr) {
+    WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
+    world->plug_sys = NULL;
+    if (world->current_level->max_plugs == 0) {
+        return NULL;
+    }
+
+    world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 4);
+    PLUG *plugs = static_cast<PLUG *>(world->giz_buffer.void_ptr);
+    world->giz_buffer.addr += world->current_level->max_plugs * sizeof(PLUG);
+    world->plug_sys = static_cast<PLUGSYS *>(world->giz_buffer.void_ptr);
+    world->giz_buffer.addr += sizeof(PLUGSYS);
+    world->plug_sys->plugs = plugs;
+    world->plug_sys->count = 0;
+    return world->plug_sys;
 }
 
 static void Plugs_ClearProgress(void *, void *progress_ptr) {
@@ -122,6 +166,44 @@ static void Plugs_ClearProgress(void *, void *progress_ptr) {
     progress->visible_mask[0] = -1;
     progress->active_mask[0] = -1;
     progress->plugged_mask[0] = 0;
+}
+
+static void *Plugs_AllocateProgressData(VARIPTR *buffer, VARIPTR *buffer_end) {
+    return GizmoBufferAlloc(buffer, buffer_end, sizeof(PLUGPROGRESS));
+}
+
+static void Plugs_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *world_ptr, void *) {
+    WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
+    if (world == NULL || world->plug_sys == NULL) {
+        return;
+    }
+
+    for (i32 index = 0; index < world->plug_sys->count; ++index) {
+        if (NuStrLen(world->plug_sys->plugs[index].name) != 0) {
+            AddGizmo(gizmo_sys, type_id, NULL, &world->plug_sys->plugs[index]);
+        }
+    }
+}
+
+static i32 Plugs_Load(void *world_ptr, void *) {
+    WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
+    if (world == NULL || world->plug_sys == NULL || world->plug_sys->count != 0) {
+        return 0;
+    }
+
+    const i32 version = EdFileReadInt();
+    world->plug_sys->count = EdFileReadInt();
+    PLUG *plug_ptr = world->plug_sys->plugs;
+    for (i32 index = 0; index < world->plug_sys->count; ++index, ++plug_ptr) {
+        PLUG &plug = *plug_ptr;
+        EdFileRead(plug.name, sizeof(plug.name));
+        EdFileReadNuVec(&plug.position);
+        plug.x_rotation = EdFileReadUnsignedShort();
+        plug.y_rotation = EdFileReadUnsignedShort();
+        plug.enabled = EdFileReadUnsignedChar();
+        plug.z_rotation = version <= 1 ? 0 : EdFileReadUnsignedShort();
+    }
+    return 1;
 }
 
 static void Plugs_StoreProgress(void *world_ptr, void *, void *progress_ptr) {
@@ -156,67 +238,34 @@ static void Plugs_StoreProgress(void *world_ptr, void *, void *progress_ptr) {
     }
 }
 
-static void Plugs_Reset(void *world_ptr, void *, void *progress_ptr) {
-    WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
-    PLUGPROGRESS *progress = static_cast<PLUGPROGRESS *>(progress_ptr);
-    if (world == NULL || world->plug_sys == NULL || world->plug_sys->plugs == NULL) {
-        return;
-    }
-
-    PLUG *plug_ptr = world->plug_sys->plugs;
-    for (i32 index = 0; index < world->plug_sys->count; ++index, ++plug_ptr) {
-        PLUG &plug = *plug_ptr;
-        plug.flags = static_cast<u8>((plug.flags | PLUG_FLAG_ACTIVE | PLUG_FLAG_VISIBLE) & ~PLUG_FLAG_PLUGGED);
-        if (progress != NULL && !(index > 31)) {
-
-            const u32 bit = 1u << index;
-            plug.flags = static_cast<u8>((plug.flags & ~(PLUG_FLAG_VISIBLE | PLUG_FLAG_PLUGGED)) |
-                                         ((progress->visible_mask[0] & bit) != 0 ? PLUG_FLAG_VISIBLE : 0));
-            plug.flags = static_cast<u8>((plug.flags & ~PLUG_FLAG_ACTIVE) |
-                                         ((progress->active_mask[0] & bit) != 0 ? PLUG_FLAG_ACTIVE : 0));
-            if ((progress->plugged_mask[0] & bit) != 0) {
-                plug.flags |= PLUG_FLAG_PLUGGED;
-            }
+// Original 0x5000f0, 342 bytes; part of the optimized plug module.
+PLUG *Plug_FindNearest(PLUGSYS *system, NUVEC *position, f32 *distance_squared, i32 only_unplugged) {
+    PLUG *nearest = NULL;
+    f32 nearest_distance = 1000000000.0f;
+    if (system != NULL) {
+        PLUG *plug = system->plugs;
+        for (i32 index = 0; index < system->count; ++index, ++plug) {
+            if (!(only_unplugged == 0 || (plug->flags & PLUG_FLAG_PLUGGED) == 0))
+                continue;
+            const f32 distance = NuVecDistSqr(position, &plug->position, NULL);
+            if (!(distance < nearest_distance))
+                continue;
+            nearest_distance = distance;
+            nearest = plug;
         }
     }
+    if (distance_squared != NULL) {
+        *distance_squared = nearest_distance;
+    }
+    return nearest;
 }
 
-static void *Plugs_ReserveBufferSpace(void *world_ptr) {
-    WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
-    world->plug_sys = NULL;
-    if (world->current_level->max_plugs == 0) {
-        return NULL;
-    }
-
-    world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 4);
-    PLUG *plugs = static_cast<PLUG *>(world->giz_buffer.void_ptr);
-    world->giz_buffer.addr += world->current_level->max_plugs * sizeof(PLUG);
-    world->plug_sys = static_cast<PLUGSYS *>(world->giz_buffer.void_ptr);
-    world->giz_buffer.addr += sizeof(PLUGSYS);
-    world->plug_sys->plugs = plugs;
-    world->plug_sys->count = 0;
-    return world->plug_sys;
-}
-
-static i32 Plugs_Load(void *world_ptr, void *) {
-    WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
-    if (world == NULL || world->plug_sys == NULL || world->plug_sys->count != 0) {
-        return 0;
-    }
-
-    const i32 version = EdFileReadInt();
-    world->plug_sys->count = EdFileReadInt();
-    PLUG *plug_ptr = world->plug_sys->plugs;
-    for (i32 index = 0; index < world->plug_sys->count; ++index, ++plug_ptr) {
-        PLUG &plug = *plug_ptr;
-        EdFileRead(plug.name, sizeof(plug.name));
-        EdFileReadNuVec(&plug.position);
-        plug.x_rotation = EdFileReadUnsignedShort();
-        plug.y_rotation = EdFileReadUnsignedShort();
-        plug.enabled = EdFileReadUnsignedChar();
-        plug.z_rotation = version <= 1 ? 0 : EdFileReadUnsignedShort();
-    }
-    return 1;
+// Original 0x500250, 115 bytes.
+void Plug_MakeDrawMtx(PLUG *plug, NUMTX *matrix) {
+    NuMtxSetRotationY(matrix, plug->y_rotation);
+    NuMtxRotateZ(matrix, plug->z_rotation);
+    NuMtxRotateX(matrix, plug->x_rotation);
+    NuMtxTranslate(matrix, &plug->position);
 }
 
 ADDGIZMOTYPE *Plugs_RegisterGizmo(i32 type_id) {
@@ -257,3 +306,20 @@ ADDGIZMOTYPE *Plugs_RegisterGizmo(i32 type_id) {
 
     return &addtype;
 }
+
+void *AIPathCnxHelperSysCreate(VARIPTR *buf, VARIPTR *buf_end, i32 count) {
+    if (count == 0) {
+        return NULL;
+    }
+    AIPATHCNXHELPERSYS_s *system =
+        static_cast<AIPATHCNXHELPERSYS_s *>(AISysBufferAlloc(buf, buf_end, sizeof(AIPATHCNXHELPERSYS_s)));
+    if (system != NULL) {
+        system->helpers = static_cast<AIPATHCNXHELPER_s *>(
+            AISysBufferAlloc(buf, buf_end, static_cast<u32>(count) * sizeof(AIPATHCNXHELPER_s)));
+        if (system->helpers != NULL) {
+            system->field_0x00 = static_cast<i16>(count);
+        }
+    }
+    return system;
+}
+

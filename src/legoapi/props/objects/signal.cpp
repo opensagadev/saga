@@ -478,6 +478,4 @@ void Signal_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
     }
 }
 
-void SetTexAnimSignals() {
-    NuTexAnimSetSignals(texanimbits);
-}
+void SetTexAnimSignals();

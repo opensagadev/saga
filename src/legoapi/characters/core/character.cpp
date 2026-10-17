@@ -2,13 +2,7 @@
 #include "globals.h"
 #include "legoapi/characters/core/character.h"
 
-i32 CanPullLevers(i32 character_id) {
-    u32 flags = CDataList[character_id].model_flags;
-    if ((flags & 0x01000010) == 0x01000010) {
-        return 0;
-    }
-    return (flags & 0x00040088) != 0;
-}
+i32 CanPullLevers(i32 character_id);
 
 #include "legoapi/characters/core/CharacterObjectInterface.h"
 #include "legoapi/characters/core/players.h"
@@ -480,7 +474,7 @@ extern i16 id_CHEWBACCA;
 }
 
 i32 CHARCOUNT = 0;
-CHARACTERDATA *CDataList = NULL;
+extern CHARACTERDATA * CDataList;
 GAMECHARACTERDATA *GCDataList = NULL;
 // Original 0x120-byte data record @0x00666960. FixUpCharacters copies this
 // canonical prefix into every character before character-specific overrides.
@@ -568,40 +562,13 @@ GAMECHARACTERDATA GCDATA_DEFAULT = {
 
 i32 g_loadingCharacterInHub;
 
-CharacterObjectInterface::CharacterObjectInterface(GameObject_s &value) : object(&value) {
-    object->mech_object_interface = this;
-}
 
-f32 CharacterObjectInterface::GetHeight() const {
-    return object->apiobj.scaled_height;
-}
 
-void CharacterObjectInterface::GetPos(VuVec &position, i32) const {
-    position = VuVec(object->apiobj.collision_position.x, object->apiobj.collision_position.y,
-                     object->apiobj.collision_position.z, 1.0f);
-}
 
-f32 CharacterObjectInterface::GetRadius() const {
-    return object->field_0x1008;
-}
 
-const char *CharacterObjectInterface::GetTargetName() const {
-    return "Character";
-}
 
-bool CharacterObjectInterface::IsDead() {
-    if ((object->apiobj.field_0x1f8 & 0x1001) != 0x1001)
-        return 1;
-    return object->apiobj.field_0x287 != 0;
-}
 
-void CharacterObjectInterface::TargetedFlash() {
-    object->targeted_flash = 1.0f;
-}
 
-CharacterObjectInterface::~CharacterObjectInterface() {
-    object->mech_object_interface = NULL;
-}
 
 static __used__ void ExtraDieSfx_LSW(GameObject_s *object);
 

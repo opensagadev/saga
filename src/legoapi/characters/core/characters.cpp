@@ -1,3 +1,6 @@
+// Original translation unit reconstructed from the reference address map.
+// Functions are defined in original address order.
+
 #include "nu2api/nu3d/nuportal.h"
 #include "decomp.h"
 #include "legoapi/actions/character/suit.h"
@@ -54,7 +57,6 @@
 #include "legoapi/world/areas.h"
 #include "legoapi/world/world.h"
 #include "legoapi/world/mission.h"
-#include "gameapi/ai/aisys/aisys.h"
 #include "gameapi/edtools/edstubs.h"
 #include "nu2api/nucore/bgproc.h"
 #include "nu2api/nu3d/nudlist.h"
@@ -82,25 +84,10 @@ extern "C" {
 
 }
 
-struct AISYS_s;
-void AIScriptLoadAll(char *path, VARIPTR *buf, VARIPTR *buf_end, AISYS_s *sys);
-
 // The original table at 0x006281a0.  These are the material animation
 // scripts made available before the permanent things scene is loaded.
 
-struct AIROW_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
-
-extern i32 InCollectList_Index(i32 id, COLLECTID *list, i32 count);
-extern i32 Collection_Got(i32 id);
-extern CUSTOMISER *CharacterCustomiser;
 extern "C" VARIPTR characterbuffer_ptr;
-extern f32 WaitingForCharacterTime;
-
-extern "C" {
-extern i32 hub_character_ready;
-}
 
 #include "legoapi/characters/core/characters_types.h"
 
@@ -503,17 +490,1291 @@ void HeadMovement(GameObject_s *object) {
 
 nuhspecial_s *CharScene_FindHSpecial(WORLDINFO_s *world, i32 character_id);
 
-void CharScene_Draw(WORLDINFO_s *world, i32 character_id, numtx_s *matrix, numtx_s *reflection_matrix) {
-    nuhspecial_s *special = CharScene_FindHSpecial(world, character_id);
-    if (special != NULL) {
-        if (matrix != NULL) {
-            NuSpecialDrawAt(special, matrix);
-        }
-        if (reflection_matrix != NULL) {
-            NuSpecialDrawAt(special, reflection_matrix);
-        }
+// Retail keeps only the IPA-SRA clone, which receives &*layers.
+#if defined(__i386__)
+#define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone, regparm(1)))
+#else
+#define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone))
+#endif
+
+extern "C" VARIPTR characterbuffer_base;
+extern i32 CHARACTERBUFFERSIZE;
+extern i32 Area;
+extern i32 last_area;
+
+void ResetCharacterBuffer(i32 force_reset) {
+    if (force_reset == 0 && Area != -1 && Area == last_area) {
+        return;
     }
+
+    characterbuffer_ptr = characterbuffer_base;
+    memset(characterbuffer_base.void_ptr, 0, CHARACTERBUFFERSIZE);
+    apicharsys->loaded_model_count = apicharsys->permanent_model_count;
+    apicharsys->animation_load_attempts = apicharsys->area_animation_count;
+    apicharsys->loaded_animation_count = apicharsys->area_animation_count;
 }
+
+void LoadPerm1();
+
+// ==== src/legoapi/menus/screens/gamemenuall.cpp: declarations ====
+
+#include "gameapi/edtools/edui.h"
+#include "MechInputTouch/MechInputTouch_types.h"
+#include "gameapi/gui/apimenu_internal.h"
+#include "gameframework/saveload.h"
+#include "legoapi/core/config/cheat.h"
+#include "legoapi/core/config/fileselect.h"
+#include "legoapi/menus/screens/gamemenuall.h"
+#include "legoapi/world/area.h"
+#include "legoapi/audio/sfx.h"
+#include "legoapi/render/core/render.h"
+#include "legoapi/menus/core/panel.h"
+#include "nu2api/nu3d/nugscn.h"
+#include "nu2api/nu3d/nuqfnt.h"
+#include "nu2api/nu3d/nuprim.h"
+#include "nu2api/nufile/nufile.h"
+#include "nu2api/numath/nufloat.h"
+
+extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
+
+// Retail clears these "fast repeat" latches but never sets them.
+
+static NUGSCN **IconScene;
+static char IconPath[0x40] = "stuff\\icons\\";
+
+NUGSCN *IconScene_FindById(i32 character_id);
+
+// ==== src/legoapi/menus/screens/menus.cpp: declarations ====
+#include "batman.h"
+#include "gamelib/crc/crc.h"
+
+#include "gameapi/gui/apimenu.h"
+#include "legoapi/render/light/fade.h"
+#include "legoapi/cutscenes/cutscenes.h"
+
+// ==== src/legoapi/render/core/render.cpp: declarations ====
+#include "gameapi/edtools/edbri_internal.h"
+#include "legoapi/items/collect/torpedo.h"
+#include "legoapi/actions/character/transform.h"
+#include "legoapi/actions/movement/carrying.h"
+#include "legoapi/actions/character/snake.h"
+#include "legoapi/menus/core/gamehint.h"
+#include "gamelib/util/gamelib_util_types.h"
+#include "legoapi/menus/core/gamemessages.h"
+#include "legoapi/menus/screens/arcade.h"
+#include "legoapi/render/light/fade_material.h"
+#include "legoapi/render/fx/edsplines.h"
+#include "legoapi/world/levels/levels.h"
+#include "nu2api/nu3d/nurndrstat.h"
+#include "nu2api/nuandroid/ios_graphics.h"
+#include "nu2api/nu3d/android/nuportal_android.h"
+#include "nu2api/nu3d/nuvport.h"
+#include "nu2api/nucore/nuvuvec.hpp"
+
+#include "nu2api/nu3d/nurndr.h"
+
+#include "legoapi/characters/motion/animlist.h"
+#include "legoapi/core/input/timer.h"
+#include "legoapi/world/levels/episode.h"
+#include "nu2api/nu3d/nutexanm.h"
+
+#include "legoapi/render/core/SwipeDecalRenderer.h"
+#include "nu2api/nu3d/nuprim_internal.h"
+#include "nu2api/nu3d/NuRenderDevice.h"
+#include "nu2api/nu3d/android/nurndr_android.h"
+#include "nu2api/nu3d/android/nugscn_android.h"
+#include "nu2api/nucore/nuapi.h"
+#include "nu2api/nucore/nuanim3.h"
+#include "nu2api/nucore/nugcutscene.h"
+#include "nu2api/nucore/nuhgobj.h"
+#include "nu2api/nucore/nuptrblock.h"
+#include "nu2api/nucore/nuthread.h"
+#include "nu2api/numath/numath.h"
+#include "nu2api/numath/numtx.h"
+#include "nu2api/numath/nuvec.h"
+
+struct nuhspecial_s;
+
+// Camera zoom state
+
+// Graphics loading flags
+
+// --- NuGScn graphics-data reader ---
+// NuReadGraphicsData is a C++ static function in the original (GCC clones it,
+// hence the `.isra.NNN` suffix in the ROM symbol table).
+
+// Retail only keeps the IPA-SRA clone, which drops the unused fourth argument.
+#if defined(__i386__)
+#define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone, regparm(2)))
+#else
+#define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone))
+#endif
+
+// --- Extern "C": NuGScn functions have C linkage in original ---
+extern "C" {
+
+NUGSCN *NuGScnRead(VARIPTR *buf, VARIPTR buf_end, char *path);
+} // extern "C"
+
+#include "nu2api/nu3d/nupostparams.h"
+
+#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
+    do {                                                                                                               \
+        direction.x = (vx);                                                                                            \
+        direction.y = -(vy) * camera.aspect;                                                                           \
+        direction.z = adjacent;                                                                                        \
+        NuVecNorm(&direction, &direction);                                                                             \
+        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
+        NuVecNorm(&direction, &direction);                                                                             \
+        brightness = direction.y * 0.5f + 0.5f;                                                                        \
+        if (brightness <= near_angle)                                                                                  \
+            brightness = near_scale * parameters->intensity;                                                           \
+        else if (brightness >= far_angle)                                                                              \
+            brightness = far_scale * parameters->intensity;                                                            \
+        else                                                                                                           \
+            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
+        if (parameters->directional) {                                                                                 \
+            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
+            if (angle < parameters->direction_near_angle) {                                                            \
+                brightness += 128.0f * parameters->direction_far_scale;                                                \
+            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
+                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
+                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
+                                      parameters->direction_bias);                                                     \
+                brightness +=                                                                                          \
+                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
+                              parameters->direction_near_scale);                                                       \
+            }                                                                                                          \
+        }                                                                                                              \
+        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
+                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
+                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
+                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
+        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
+            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
+                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
+        else                                                                                                           \
+            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
+        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
+    } while (0)
+
+// DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
+// red-brick positions come from the Game init values in legogame/game.cpp.
+
+i32 DrawPanel3DObject(float x, float y, float z, float scale_x, float scale_y, float scale_z, u16 rotate_x,
+                      u16 rotate_y, u16 rotate_z, nuhspecial_s *special, i32 rotate_order, float alpha);
+
+#define SWIPE_PRIM_UV(U, V)                                                                                            \
+    do {                                                                                                               \
+        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
+        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
+            vertex->float_uv[0] = (U);                                                                                 \
+            vertex->float_uv[1] = (V);                                                                                 \
+        } else {                                                                                                       \
+            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
+            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
+        }                                                                                                              \
+    } while (false)
+
+extern i32 qrand(void);
+
+// ==== src/gameapi/gui/apimenu.cpp: all remaining content ====
+
+#include "legoapi/core/startup/main.h"
+#include "legoapi/menus/screens/movies.h"
+#include "nu2api/nucore/nupad.h"
+#include "nu2api/nucore/nuvideo.h"
+
+// ==== src/legoapi/core/input/gamepads.cpp: declarations ====
+#include "legoapi/misc/androidbatman.h"
+#include "legoapi/items/collect/spacelevel.h"
+#include "legoapi/props/system/socksys.h"
+#include "nu2api/nucore/NuInputDevice.h"
+
+// Original bss @0x127a500: 64 pads x 0x60 bytes.
+// Original bss @0x127a4e0.
+
+// Two frames of direction history for each local player.  MovePlayer shifts
+// these before accepting the new input; GamePad_Rotate then reports a stable
+// angular velocity only when both consecutive turns agree.
+
+f32 GamePad_Rotate(GameObject_s *object);
+
+extern "C" f32 NuFsqrt(f32);
+
+// ==== src/gameframework/savesystem.cpp: all remaining content ====
+
+#include "nu2api/nucore/numemory.h"
+
+// ==== src/legoapi/core/config/saveload.cpp: declarations ====
+
+#include "gameapi/edtools/gameapi_edtools_types.h"
+#include "nu2api/nucore/nutime.h"
+
+extern u8 FS_Active;
+
+// Retail keeps the whole body of RenderFileSel3 as the split-out .part clone;
+// the exported function only tests FS_Active.
+
+void RenderFileSel3(i32 draw_title);
+
+// ==== src/legoapi/menus/core/text.cpp: declarations ====
+#include "nu2api/nu3d/nushader_plain.h"
+#include "nu2api/nufile/nufpar.h"
+
+// Original .data @0x667ce0; the names are filled in by the static initializer.
+
+// ==== src/legoapi/items/objects/objectsall.cpp: declarations ====
+
+#include "legoapi/actions/movement/jumping.h"
+#include "legoapi/items/objects/objectsall.h"
+#include "legoapi/render/fx/parts.h"
+#include "legoapi/gizmo/object/gizmoblowups.h"
+
+// ==== src/gameapi/edtools/edpartall.cpp: all remaining content ====
+#include "gameapi/edtools/edpart_internal.h"
+#include "gameapi/edtools/edcam.h"
+#include "gameapi/edtools/edfile.h"
+#include "nu2api/numusic/sfx.h"
+
+extern "C" {
+    void eduiMenuRender(eduimenu_s *menu);
+}
+
+// Retail only keeps the IPA-SRA clone, which takes just the parent menu.
+
+// ==== src/legoapi/render/core/terrain_stubs.cpp: declarations ====
+#include "legoapi/render/core/terrain_internal.h"
+#include "legoapi/render/core/gameliball.h"
+#include "legoapi/render/fx/game_deb.h"
+#include "gameapi/edtools/edpp_internal.h"
+#include "nu2api/numath/numtx_inline.h"
+#include "nu2api/numath/nurand.h"
+#include "nu2api/nu3d/android/nutimebar_plain.h"
+#include "nu2api/nu3d/android/nurain_android.h"
+#include "nu2api/nu3d/android/nuptl_android.h"
+
+#include <stddef.h>
+
+// Runtime-selected groups appended after the fixed terrain allocation.
+#include "legoapi/render/core/terrain_stubs_types.h"
+
+// NuFileExists @nufile (nucore_plain.cpp).
+extern "C" i32 NuFileExists(char *name);
+
+// ==== src/legoapi/render/fx/parts.cpp: declarations ====
+#include "legoapi/actions/combat/hits.h"
+#include "legoapi/render/core/rtl.h"
+#include "legoapi/gizmo/object/gizmopickup.h"
+#include "legoapi/gizmo/object/giztorpedo.h"
+
+#include <float.h>
+
+extern "C" {
+    // Shared suspend flag consulted by all timed debris emitters.
+
+    void SetSfxBit_On(i32);
+    void PlaySfxById(i32, NUVEC *);
+
+}
+
+// Forward declarations for local (static) part/gizmo helper stubs.
+
+// Local (static) part (PART_s), pickup (GIZMOPICKUP_s), gizmo flow
+// (GIZFLOW_s/FLOWBOX_s), power-up and space/starfighter helpers. Stubbed as
+// local `t` symbols matching res/libTTapp.so.
+
+WORLDINFO_s *WorldInfo_CurrentlyActive();
+extern f32 FRAMETIME;
+
+// The original repeats the per-sound emitter checks for each of the four sound slots.
+#define PART_EMIT_SOUND_ON(slot)                                                                                       \
+    if (type->sounds[slot] != -1) {                                                                                    \
+        SetSfxBit_On(type->sounds[slot]);                                                                              \
+        if (type->sound_modes[slot] == 4)                                                                              \
+            PlaySfxById(type->sounds[slot], &emitter->position);                                                       \
+    }
+#define PART_EMIT_SOUND(slot, mode)                                                                                    \
+    if (type->sounds[slot] != -1 && type->sound_modes[slot] == (mode))                                                 \
+        PlaySfxById(type->sounds[slot], &emitter->position);
+
+// ==== src/gameapi/edtools/edtoolsall_plain.cpp: all remaining content ====
+#include "gameapi/edtools/edanim_internal.h"
+#include "gameapi/edtools/edgra.h"
+#include "gameapi/edtools/edui_colour.h"
+#include "nu2api/nucore/numouse.h"
+#include "nu2api/nucore/nukeyboard.h"
+#include "gameapi/edtools/edrender.h"
+#include "gameapi/edtools/edgra_internal.h"
+#include "nu2api/nu3d/android/nuobject_android.h"
+
+// Retail keeps an unreferenced partial-inlining clone of the old HSV2RGB
+// helper (the non-grey path) in this unit.
+#if defined(__i386__)
+#define HSV2RGB_BODY_ATTR __attribute__((used, noinline, noclone, regparm(2), sseregparm))
+#else
+#define HSV2RGB_BODY_ATTR __attribute__((used, noinline, noclone))
+#endif
+
+#include <stdlib.h>
+
+// The original animation editor callbacks and lifecycle share file-local state.
+// ---- begin src/gameapi/edtools/edanimall.cpp ----
+
+// Animation editor subsystem stubs (static, internal linkage).
+
+static __attribute__((used)) void edanimcbCubeMap(eduimenu_s *, eduiitem_s *, u32);
+static __attribute__((used)) void edanimcbFileLoad(eduimenu_s *menu, eduiitem_s *, u32);
+static __attribute__((used)) void edanimcbFileSave(eduimenu_s *menu, eduiitem_s *, u32);
+static __attribute__((used)) void edanimcbMCTBMenu(eduimenu_s *, eduiitem_s *, u32);
+static __attribute__((used)) void edanimcbSoundMenu(eduimenu_s *, eduiitem_s *, u32);
+static __attribute__((used)) void edanimcbBouncyMenu(eduimenu_s *, eduiitem_s *, u32);
+static __attribute__((used)) void edanimcbSwitchMenu(eduimenu_s *, eduiitem_s *, u32);
+static __attribute__((used)) void edanimcbSetSwitchId(eduimenu_s *, eduiitem_s *item, u32);
+static __attribute__((used)) void edanimcbMCTBCardType(eduimenu_s *menu, eduiitem_s *, u32);
+static __attribute__((used)) void edanimcbParticleMenu(eduimenu_s *, eduiitem_s *, u32);
+static __attribute__((used)) void edanimcbSetSoundType(eduimenu_s *menu, eduiitem_s *item, u32);
+static __attribute__((used)) void edanimcbSetSwitchVar(eduimenu_s *, eduiitem_s *item, u32);
+static __attribute__((used)) void edanimcbCancelOptMenu(eduimenu_s *, eduimenu_s *);
+static __attribute__((used)) void edanimcbSetSwitchType(eduimenu_s *menu, eduiitem_s *item, u32);
+static __attribute__((used)) void edanimcbSoundTypeMenu(eduimenu_s *, eduiitem_s *, u32);
+static __attribute__((used)) void edanimcbCancelMCTBMenu(eduimenu_s *, eduimenu_s *);
+static __attribute__((used)) void edanimcbLocalSoundMenu(eduimenu_s *, eduiitem_s *, u32);
+static __attribute__((used)) void edanimcbMCTBCardFormat(eduimenu_s *menu, eduiitem_s *, u32);
+static __attribute__((used)) void edanimcbSetSoundTiming(eduimenu_s *, eduiitem_s *item, u32);
+static __attribute__((used)) void edanimcbSetSwitchDelay(eduimenu_s *, eduiitem_s *item, u32);
+static __attribute__((used)) void edanimcbSwitchTypeMenu(eduimenu_s *, eduiitem_s *, u32);
+
+// Remaining animation-editor UI/menu callbacks.
+
+static __attribute__((used)) void edanimcbCancelSoundMenu(eduimenu_s *, eduimenu_s *);
+
+static __attribute__((used)) void edanimcbMCTBCardPresent(eduimenu_s *menu, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbSetParticleRate(eduimenu_s *, eduiitem_s *item, u32);
+
+static __attribute__((used)) void edanimcbSetParticleType(eduimenu_s *menu, eduiitem_s *item, u32);
+
+static __attribute__((used)) void edanimcbToggleSoundType(eduimenu_s *menu, eduiitem_s *item, u32);
+
+static __attribute__((used)) void edanimcbCancelBouncyMenu(eduimenu_s *, eduimenu_s *);
+
+static __attribute__((used)) void edanimcbCancelSwitchMenu(eduimenu_s *, eduimenu_s *);
+
+static __attribute__((used)) void edanimcbMCTBCardLoadSlot(eduimenu_s *menu, eduiitem_s *item, u32);
+
+static __attribute__((used)) void edanimcbMCTBCardSaveSlot(eduimenu_s *menu, eduiitem_s *item, u32);
+
+static __attribute__((used)) void edanimcbMCTBCardUnFormat(eduimenu_s *menu, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbParticleTypeMenu(eduimenu_s *, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbSetBouncyDamping(eduimenu_s *, eduiitem_s *item, u32);
+
+static __attribute__((used)) void edanimcbSetBouncyTension(eduimenu_s *, eduiitem_s *item, u32);
+
+static __attribute__((used)) void edanimcbLocalParticleMenu(eduimenu_s *, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbMCTBCardFreeSpace(eduimenu_s *menu, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbMCTBCardSlotsUsed(eduimenu_s *menu, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbSetLocalSoundType(eduimenu_s *menu, eduiitem_s *item, u32);
+
+static __attribute__((used)) void edanimcbCancelParticleMenu(eduimenu_s *, eduimenu_s *);
+
+static __attribute__((used)) void edanimcbLocalSoundTypeMenu(eduimenu_s *, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbMCTBCardDeleteSlot(eduimenu_s *menu, eduiitem_s *item, u32);
+
+static __attribute__((used)) void edanimcbCancelSoundTypeMenu(eduimenu_s *, eduimenu_s *);
+
+static __attribute__((used)) void edanimcbMCTBCardCheckFormat(eduimenu_s *menu, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbSetBouncyPlayerGrav(eduimenu_s *, eduiitem_s *item, u32);
+
+static __attribute__((used)) void edanimcbCancelLocalSoundMenu(eduimenu_s *, eduimenu_s *);
+
+static __attribute__((used)) void edanimcbCancelSwitchTypeMenu(eduimenu_s *, eduimenu_s *);
+
+static __attribute__((used)) void edanimcbMCTBCardCheckKeyCard(eduimenu_s *menu, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbMCTBCardWriteKeyCard(eduimenu_s *menu, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbSetLocalParticleType(eduimenu_s *menu, eduiitem_s *item, u32);
+
+static __attribute__((used)) void edanimcbToggleParticleSwitch(eduimenu_s *, eduiitem_s *item, u32);
+
+static __attribute__((used)) void edanimcbLocalParticleTypeMenu(eduimenu_s *, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbCancelParticleTypeMenu(eduimenu_s *, eduimenu_s *);
+
+static __attribute__((used)) void edanimcbCancelLocalParticleMenu(eduimenu_s *, eduimenu_s *);
+
+static __attribute__((used)) void edanimcbCancelLocalSoundTypeMenu(eduimenu_s *, eduimenu_s *);
+
+static __attribute__((used)) void edanimcbCancelLocalParticleTypeMenu(eduimenu_s *, eduimenu_s *);
+
+static __attribute__((used)) void edanimcbBouncyMenu(eduimenu_s *parent, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbSoundMenu(eduimenu_s *parent, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbParticleMenu(eduimenu_s *parent, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbSwitchMenu(eduimenu_s *parent, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbLocalParticleMenu(eduimenu_s *parent, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbSoundTypeMenu(eduimenu_s *parent, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbLocalSoundTypeMenu(eduimenu_s *parent, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbLocalParticleTypeMenu(eduimenu_s *parent, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbParticleTypeMenu(eduimenu_s *parent, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbSwitchTypeMenu(eduimenu_s *parent, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbMCTBMenu(eduimenu_s *parent, eduiitem_s *, u32);
+
+static __attribute__((used)) void edanimcbLocalSoundMenu(eduimenu_s *parent, eduiitem_s *, u32);
+
+// ---- end src/gameapi/edtools/edanimall.cpp ----
+// ---- begin src/gameapi/edtools/edmenucallbacks.cpp ----
+#include <cstdio>
+
+// Editor UI callbacks retained in the original editor's menu code.
+#pragma GCC push_options
+#pragma GCC optimize("O2", "omit-frame-pointer")
+
+extern "C" {
+
+static __used__ void cbGradChange(void);
+
+static __used__ void cbSel(eduimenu_s *, eduiitem_s *item);
+
+static __used__ void cbSubMenu(eduimenu_s *menu, eduiitem_s *item);
+
+static __used__ void cbgpcfgAdd(eduimenu_s *menu, eduiitem_s *item, u32 value);
+
+static __used__ void cbgpcfgCPPress(eduimenu_s *menu, eduiitem_s *item, u32 value);
+
+static __used__ void cbgpcfgCopy(eduimenu_s *menu, eduiitem_s *item, u32 value);
+
+static __used__ void cbgpcfgDel(eduimenu_s *menu, eduiitem_s *item, u32 value);
+
+static __used__ void cbgpcfgPaste(eduimenu_s *menu, eduiitem_s *item, u32 value);
+
+} // extern "C"
+
+#pragma GCC pop_options
+
+// ---- end src/gameapi/edtools/edmenucallbacks.cpp ----
+
+// ---- begin src/gameapi/edtools/edptlall.cpp ----
+
+// The original particle editor's private callbacks and menu state share this TU.
+// ---- begin src/gameapi/edtools/edptlcallbacks.cpp ----
+#if defined(__SSE__)
+#include <xmmintrin.h>
+#endif
+
+// Particle-list editor UI/menu callbacks.
+
+// Particle editor UI/menu callbacks.
+
+// ---- end src/gameapi/edtools/edptlcallbacks.cpp ----
+
+// Particle list editor subsystem stubs (static, internal linkage).
+
+// ---- end src/gameapi/edtools/edptlall.cpp ----
+
+// The original local font helpers read the same private draw state as the
+// editor callbacks, so they belong to this translation unit.
+static __used__ __attribute__((noclone)) void eduiFntPrintExGeneric(void *font, int x, int y,
+                                                                                int alignment, char *format, ...)
+    __asm__("_ZL14eduiFntPrintExPviiiPcz");
+static __used__ void eduiFntPrintExGeneric(void *font, int x, int y, int alignment, char *format, ...);
+
+// Left-aligned (16) specialisation of the integer print helper.
+static __attribute__((noclone)) void eduiFntPrintExLeft(void *font, int x, int y, int alignment,
+                                                                  char *format, ...)
+    __asm__("_ZL14eduiFntPrintExPviiiPcz.constprop.67");
+
+// Centred (64) specialisation of the integer print helper.
+static __attribute__((noclone)) void eduiFntPrintExCentre(void *font, int x, int y, int alignment,
+                                                                    char *format, ...)
+    __asm__("_ZL14eduiFntPrintExPviiiPcz.constprop.68");
+
+#if defined(__clang__)
+// Clang has no __builtin_va_arg_pack; format here and print the result. The
+// generic helper already owns this overload's mangled name, so rename it.
+static void eduiFntPrintEx(void *font, int x, int y, int alignment, char *format, ...)
+    __asm__("eduiFntPrintExFormatted");
+#else
+static inline __attribute__((always_inline)) void eduiFntPrintEx(void *font, int x, int y, int alignment,
+                                                                 char *format, ...) {
+    if (__builtin_constant_p(alignment) && alignment == 16)
+        eduiFntPrintExLeft(font, x, y, alignment, format, __builtin_va_arg_pack());
+    else if (__builtin_constant_p(alignment) && alignment == 64)
+        eduiFntPrintExCentre(font, x, y, alignment, format, __builtin_va_arg_pack());
+    else
+        eduiFntPrintExGeneric(font, x, y, alignment, format, __builtin_va_arg_pack());
+}
+#endif
+
+// Only caller prints the property edit buffer left-aligned.
+
+static __used__ void eduiFntPrintClipEx(void *font, float x, float y, int alignment, float clip_x, float clip_width,
+                                        char *format, ...);
+// Only eduiMenuRender calls the integer clip helper, always left-aligned.
+
+#include "gameapi/edtools/edtools_types.h"
+
+extern "C" {
+
+    // Shared editor font; edmainInit receives and stores the font handle.
+
+void edmainInit(void *font, char *configuration_file);
+
+void eduiMenuRender(eduimenu_s *menu);
+
+    // The editor UI callbacks share this translation unit with their cursor,
+    // menu, and interaction state in the original binary.
+
+static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
+
+static __used__ i32 cbInteractMenuCancelChild(edui_interact_s *interact);
+
+static __used__ void cbMMReturnToApp(eduimenu_s *, eduiitem_s *, u32);
+
+static __used__ void cbmcfgCameraSpeed(eduimenu_s *, eduiitem_s *item, u32);
+
+static __used__ void cbmcfgCancel(eduimenu_s *menu, eduimenu_s *);
+
+static __used__ void cbMMRegSel(eduimenu_s *, eduiitem_s *selected, u32);
+static __used__ void cbMMEditorConfig(eduimenu_s *menu, eduiitem_s *, u32);
+
+static __used__ void eduicbDestroyDirectoryList(eduimenu_s *menu, eduimenu_s *);
+
+static __used__ i32 eduicbInteractColourPick(edui_interact_s *interact);
+static __used__ i32 eduicbInteractExpander(edui_interact_s *interact);
+static __used__ i32 eduicbInteractProp(struct edui_interact_s *interact);
+static __used__ i32 eduicbInteractFilter(struct edui_interact_s *interact);
+static __used__ i32 eduicbInteractSel(edui_interact_s *interact);
+static __used__ void eduicbItemDestroyExpander(eduimenu_s *menu, eduiitem_s *item);
+static __used__ void eduicbItemDestroyFilter(eduimenu_s *menu, eduiitem_s *item);
+static __used__ void eduicbItemFilePickDestroy(eduimenu_s *menu, eduiitem_s *item);
+static __used__ void eduicbItemGradPickDestroy(eduimenu_s *, eduiitem_s *item);
+static __used__ void eduicbItemSliderDestroy(eduimenu_s *menu, eduiitem_s *item);
+static __used__ void eduicbItemTextPickDestroy(eduimenu_s *menu, eduiitem_s *item);
+static __used__ void eduicbPickCFGCancel(eduimenu_s *menu, eduimenu_s *);
+
+static __used__ i32 eduicbProcessColourPick(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
+static __used__ i32 eduicbProcessColourSlider(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
+static __used__ i32 eduicbProcessExpander(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
+static __used__ i32 eduicbProcessFilePick(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
+static __used__ i32 eduicbProcessFilter(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
+static __used__ i32 eduicbProcessGradPick(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
+static __used__ i32 eduicbProcessGraph(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
+static __used__ i32 eduicbProcessGreyPick(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
+static __used__ i32 eduicbProcessProp(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
+static __used__ i32 eduicbProcessSel(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
+static __used__ i32 eduicbProcessSeparator(eduimenu_s *, eduiitem_s *, f32, nupad_s *);
+static __used__ i32 eduicbProcessSlider(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
+static __used__ i32 eduicbProcessTextPick(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
+static __used__ i32 eduicbProcessTexturePick(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
+__attribute__((force_align_arg_pointer)) static __used__ i32 eduicbRenderCheck(eduimenu_s *, eduiitem_s *item,
+                                                                                   i32 x, i32 y, i32 width, i32);
+    // Retail keeps this as the constant-propagated clone of the generic four-step
+    // gradient helper; only the hue/value colour picker band reaches it.
+static __used__ i32 eduicbRenderColourPick(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderColourSlider(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderExpander(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderFilePick(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderGradPick(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderGraph(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32 selected);
+static __used__ i32 eduicbRenderGreyPick(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderNumber(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderProp(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderFilter(struct eduimenu_s *menu, struct eduiitem_s *item, i32 x, i32 y, i32 scale,
+                                           i32 selected);
+static __used__ i32 eduicbRenderSel(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderSelWithClipColour(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width,
+                                                      i32);
+static __used__ i32 eduicbRenderSeparator(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderSlider(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderSliderInt(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderTextPick(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderTextSelector(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderTexturePick(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ void eduicbSelectDirectoryEntry(eduimenu_s *menu, eduiitem_s *item, u32 value);
+static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u32);
+}
+
+static void eduiFntPrintExLeft(void *font, int x, int y, int, char *format, ...);
+
+static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ...);
+
+// Text-picker commit callbacks. Retail keeps them unmangled and local.
+
+// ==== src/gameapi/edtools/edtoolsall.cpp: declarations ====
+
+#include "legoapi/misc/utilities.h"
+#include "nu2api/nucore/NuDynamicLight.h"
+#include "nu2api/nu3d/nuspline.h"
+#include <new>
+
+extern EdInputContext * Input;
+extern MemoryManager theMemoryManager;
+extern "C" void PlaySfxById(i32, nuvec_s *);
+
+DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
+
+inline EdMatrixControl::~EdMatrixControl() {
+    Destroy();
+}
+
+inline void EdMatrixControl::operator delete(void *memory) {
+    theMemoryManager.FreePool(memory, sizeof(EdMatrixControl));
+}
+
+inline void EdStringControl::operator delete(void *memory) {
+    theMemoryManager.FreePool(memory, sizeof(EdStringControl));
+}
+
+template <> inline void EdValueControl<f32>::operator delete(void *memory) {
+    theMemoryManager.FreePool(memory, sizeof(EdValueControl<f32>));
+}
+
+inline void EdFloatControl::operator delete(void *memory) {
+    theMemoryManager.FreePool(memory, sizeof(EdFloatControl));
+}
+
+inline EdVectorControl::~EdVectorControl() {
+    Destroy();
+}
+
+inline void EdVectorControl::operator delete(void *memory) {
+    theMemoryManager.FreePool(memory, sizeof(EdVectorControl));
+}
+
+inline EdClassObjectNameControl::~EdClassObjectNameControl() {
+}
+
+inline void EdClassObjectNameControl::operator delete(void *memory) {
+    theMemoryManager.FreePool(memory, sizeof(EdClassObjectNameControl));
+}
+
+inline EdSubSystem::~EdSubSystem() {
+}
+
+inline void EdControl::operator delete(void *memory) {
+    theMemoryManager.FreePool(memory, sizeof(EdControl));
+}
+
+// Match each control's allocation type, rather than inheriting the base size.
+inline void EdEnumControl::operator delete(void *memory) {
+    theMemoryManager.FreePool(memory, sizeof(EdEnumControl));
+}
+
+inline void EdBitControl::operator delete(void *memory) {
+    theMemoryManager.FreePool(memory, sizeof(EdBitControl));
+}
+
+// ---- begin src/gameapi/edtools/edmenucallbacks.cpp ----
+#include <cstdio>
+
+#pragma GCC push_options
+#pragma GCC optimize("O2", "omit-frame-pointer")
+
+extern "C" {
+
+static __used__ void cbGradChange(void);
+
+static __used__ void cbSel(eduimenu_s *, eduiitem_s *item);
+
+static __used__ void cbSubMenu(eduimenu_s *menu, eduiitem_s *item);
+
+static __used__ void cbgpcfgAdd(eduimenu_s *menu, eduiitem_s *item, u32 value);
+
+static __used__ void cbgpcfgCPPress(eduimenu_s *menu, eduiitem_s *item, u32 value);
+
+static __used__ void cbgpcfgCopy(eduimenu_s *menu, eduiitem_s *item, u32 value);
+
+static __used__ void cbgpcfgDel(eduimenu_s *menu, eduiitem_s *item, u32 value);
+
+static __used__ void cbgpcfgPaste(eduimenu_s *menu, eduiitem_s *item, u32 value);
+
+} // extern "C"
+
+#pragma GCC pop_options
+
+// ---- end src/gameapi/edtools/edmenucallbacks.cpp ----
+
+extern "C" {
+
+void edmainInit(void *font, char *configuration_file);
+
+void eduiMenuRender(eduimenu_s *menu);
+
+static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *);
+
+static __used__ i32 cbInteractMenuCancelChild(edui_interact_s *interact);
+
+static __used__ void cbMMReturnToApp(eduimenu_s *, eduiitem_s *, u32);
+
+static __used__ void cbmcfgCameraSpeed(eduimenu_s *, eduiitem_s *item, u32);
+
+static __used__ void cbmcfgCancel(eduimenu_s *menu, eduimenu_s *);
+
+static __used__ void cbMMRegSel(eduimenu_s *, eduiitem_s *selected, u32);
+static __used__ void cbMMEditorConfig(eduimenu_s *menu, eduiitem_s *, u32);
+
+static __used__ void eduicbDestroyDirectoryList(eduimenu_s *menu, eduimenu_s *);
+
+static __used__ i32 eduicbInteractColourPick(edui_interact_s *interact);
+static __used__ i32 eduicbInteractExpander(edui_interact_s *interact);
+static __used__ i32 eduicbInteractProp(struct edui_interact_s *interact);
+static __used__ i32 eduicbInteractFilter(struct edui_interact_s *interact);
+static __used__ i32 eduicbInteractSel(edui_interact_s *interact);
+static __used__ void eduicbItemDestroyExpander(eduimenu_s *menu, eduiitem_s *item);
+static __used__ void eduicbItemDestroyFilter(eduimenu_s *menu, eduiitem_s *item);
+static __used__ void eduicbItemFilePickDestroy(eduimenu_s *menu, eduiitem_s *item);
+static __used__ void eduicbItemGradPickDestroy(eduimenu_s *, eduiitem_s *item);
+static __used__ void eduicbItemSliderDestroy(eduimenu_s *menu, eduiitem_s *item);
+static __used__ void eduicbItemTextPickDestroy(eduimenu_s *menu, eduiitem_s *item);
+static __used__ void eduicbPickCFGCancel(eduimenu_s *menu, eduimenu_s *);
+
+static __used__ i32 eduicbProcessColourPick(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
+static __used__ i32 eduicbProcessColourSlider(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
+static __used__ i32 eduicbProcessExpander(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
+static __used__ i32 eduicbProcessFilePick(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
+static __used__ i32 eduicbProcessFilter(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
+static __used__ i32 eduicbProcessGradPick(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
+static __used__ i32 eduicbProcessGraph(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
+static __used__ i32 eduicbProcessGreyPick(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
+static __used__ i32 eduicbProcessProp(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad);
+static __used__ i32 eduicbProcessSel(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
+static __used__ i32 eduicbProcessSeparator(eduimenu_s *, eduiitem_s *, f32, nupad_s *);
+static __used__ i32 eduicbProcessSlider(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
+static __used__ i32 eduicbProcessTextPick(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
+static __used__ i32 eduicbProcessTexturePick(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad);
+__attribute__((force_align_arg_pointer)) static __used__ i32 eduicbRenderCheck(eduimenu_s *, eduiitem_s *item,
+                                                                                   i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderColourPick(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderColourSlider(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderExpander(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderFilePick(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderGradPick(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderGraph(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32 selected);
+static __used__ i32 eduicbRenderGreyPick(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderNumber(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderProp(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderFilter(struct eduimenu_s *menu, struct eduiitem_s *item, i32 x, i32 y, i32 scale,
+                                           i32 selected);
+static __used__ i32 eduicbRenderSel(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderSelWithClipColour(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width,
+                                                      i32);
+static __used__ i32 eduicbRenderSeparator(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderSlider(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderSliderInt(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderTextPick(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderTextSelector(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ i32 eduicbRenderTexturePick(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32);
+static __used__ void eduicbSelectDirectoryEntry(eduimenu_s *menu, eduiitem_s *item, u32 value);
+static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u32);
+}
+
+// ==== src/nu2api/nucore/nucore_plain.cpp: declarations ====
+// Temporary C-linkage compatibility surface for unresolved engine owners.
+#include "nu2api/numath/nuvec4.h"
+#include "nu2api/nucore/nuonline.h"
+//
+// This file collects functions whose original TU has not yet been
+// reconstructed. Domain families move to their evidenced owner as complete
+// groups; this file is not itself evidence of one original nucore TU.
+
+#include <stdarg.h>
+#include <GLES2/gl2.h>
+#include "nu2api/nucore/numem.h"
+#include "nu2api/nu3d/android/nutex_ios_ex.h"
+
+#include "java/android.h"
+#include "java/java.h"
+#include "nu2api/nucore/common.h"
+#include "nu2api/nucore/NuInputManager.h"
+#include "nu2api/nu3d/nuspecial_internal.h"
+#include "nu2api/nu3d/nupostresources.h"
+#include "nu2api/nu3d/nuocclusion.h"
+#include "nu2api/nu3d/nurendercontext.h"
+#include "nu2api/nu3d/nuscreen.hpp"
+#include "nu2api/numath/nuquat.h"
+
+// C++-linkage helpers defined in sibling TUs.
+
+extern "C" {
+
+    // ---------------------------------------------------------------------------
+    // Display-list bootstrap (original nucore TU file-statics)
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // Redirected symbols — real bodies live elsewhere (kept as comments)
+    // ---------------------------------------------------------------------------
+
+    // Nu360_dxClear(u32,u32) is implemented in ios_graphics.cpp (original 0x317070).
+    // NuDisplayListSwapBuffersBeginFrame / EndFrame are transcribed in full
+    // in nudlist.cpp (originals 0x2eb5d0 / 0x2eaef0).
+    // NuHtmlBegin(void*) is transcribed in legoapi/misc/supportall.cpp (original 0x2d5ca0).
+    // NuIOS_SetVertexFormat is transcribed in nuiosdl_gl.cpp (original 0x29c070).
+    // NuIOS_WaitForRenderThreadCompletion is transcribed in ios_graphics.cpp (original 0xe34b0).
+    // NuIOS_WakeRenderThread is transcribed in ios_graphics.cpp (original 0xe3590).
+    // NuRenderContextSetZFunc is transcribed below (original 0x2a3860).
+
+    // ---------------------------------------------------------------------------
+    // Camera (thin wrappers; full matrix work is in NuCameraSetEx)
+    // ---------------------------------------------------------------------------
+
+    DECOMP_ASSERT(sizeof(NuCameraReflect) == 0x84, "camera reflection state size");
+    DECOMP_ASSERT(__builtin_offsetof(NuCameraReflect, mtx) == 4, "camera reflection matrix offset");
+
+void NuCameraSetEx(NUCAMERA *cam, i32 fast);
+
+    // ---------------------------------------------------------------------------
+    // Display list — faithful helpers + pending stubs
+    // ---------------------------------------------------------------------------
+
+} // extern "C"
+
+// Local helpers matching original static display-list setters (t local symbols)
+
+extern "C" {
+
+    extern "C++" {
+        // Original local helper cloned as DisplayListProcessSkin.isra.36 by GCC.
+        // It appends the world transform, skin palette, and geometry calls as one
+        // contiguous run in the material display list.
+        static __attribute__((noinline, noclone)) void
+        DisplayListProcessSkin(NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry, NUDISPLAYLISTITEM **first_and_last,
+                               NUMTX *world_matrix, void **transform_packet, NUMTX *skin_matrices,
+                               DEFORMERWEIGHTSARRAY *deformer_weights, i32 shadow_caster)
+            __asm__("_ZL22DisplayListProcessSkinP7numtl_sP15nudisplaylist_sP19nudisplaylistitem_sPS4_P7numtx_"
+                    "sPPvS7_P22deformerweightsarray_si.isra.36");
+
+        // Original local helper cloned as DisplayListProcessLightmapped.isra.34.
+        // Lightmapped geometry carries an AE/AF/B0 setup command two entries before
+        // its geometry command. Keep that setup command adjacent to the dynamic
+        // transform and geometry entries when the special is submitted.
+        static __attribute__((noinline, noclone)) void
+        DisplayListProcessLightmapped(NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry,
+                                      NUDISPLAYLISTITEM **first_and_last, NUMTX *world_matrix, void **transform_packet,
+                                      f32 alpha)
+            __asm__("_ZL29DisplayListProcessLightmappedP7numtl_sP15nudisplaylist_sP19nudisplaylistitem_sPS4_P7numtx_"
+                    "sPPvf.isra.34");
+    }
+
+    // ---------------------------------------------------------------------------
+    // Scene / render-scene
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // Frame lifecycle (NuFrameEnd is faithful; neighbours are stubs)
+    // ---------------------------------------------------------------------------
+
+    // Per-frame animation/pad update hooks (originals take the frame time).
+
+    // Frame-end callbacks (original bss @0x6bdaec/0x6bdaf0/0x6bdad0).
+
+    // Faithful transcription of the original frame-end pump. Waits for the
+    // target frame interval, ticks material/tex/wind anims, swaps screens
+    // via NuRndrSwapScreenEx, then advances nuapi clocks and pad state.
+
+    // ---------------------------------------------------------------------------
+    // iOS / platform
+    // ---------------------------------------------------------------------------
+
+    // Locale string is owned by the Android/JNI TU; cache only its index here.
+
+    // ---------------------------------------------------------------------------
+    // Animation / curves / data
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // Bridge / file / heap / memory
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // Math / geometry
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // Quick-font platform rendering (the generic font run lives in nuqfnt.cpp)
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // Rendering / materials / effects (host has GL paths elsewhere)
+    // ---------------------------------------------------------------------------
+
+i32 NuSpecialDrawAt(void *special, NUMTX *mtx);
+
+    // ---------------------------------------------------------------------------
+    // Light / wind / particles / debris
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // Gobj / hierarchy / scene graph
+    // ---------------------------------------------------------------------------
+
+#include "nu2api/nucore/nucore_plain_types.h"
+
+    // ---------------------------------------------------------------------------
+    // Input / pad / key / mouse
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // Culling / visibility / portals / occlusion
+    // ---------------------------------------------------------------------------
+
+    DECOMP_ASSERT(sizeof(NuInstanceTreeNode) == 0x0c, "instance tree node stride");
+    DECOMP_ASSERT(sizeof(NuInstanceTreeBounds) == 0x20, "instance tree bounds stride");
+    DECOMP_ASSERT(sizeof(NuInstanceTree_s) == 0x28, "instance tree size");
+    DECOMP_ASSERT(offsetof(NuInstanceTree_s, nodes) == 0x14, "instance tree nodes offset");
+    DECOMP_ASSERT(offsetof(NuInstanceTree_s, roots) == 0x20, "instance tree roots offset");
+    DECOMP_ASSERT(offsetof(NuInstanceTree_s, far_clips) == 0x24, "instance tree far clips offset");
+
+    // ---------------------------------------------------------------------------
+    // Viewport
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // Strings / conversion / Unicode
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // Containers / lists / params
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // Debug / error / profiling
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // Thread / misc OS
+    // ---------------------------------------------------------------------------
+
+#ifndef ANDROID
+    void NuGetCurrentThreadId(void) {
+        STUBBED();
+    }
+#endif
+#ifndef ANDROID
+    void NuThreadCreate(void) {
+        STUBBED();
+    }
+#endif
+    // ---------------------------------------------------------------------------
+    // Spline / online / net / other gameplay support
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // Rendering extras
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // PS2 / Xbox legacy shims
+    // ---------------------------------------------------------------------------
+
+} // extern "C"
+
+struct nupad_s;
+union variptr_u;
+
+// ==== src/gameapi/edtools/edui.cpp: all remaining content ====
+
+// ==== src/legoapi/actions/character/speederchase.cpp: declarations ====
+#include "legogame/game.h"
+#include "legoapi/actions/character/speederchase.h"
+#include "legoapi/gizmo/base/GizBlowupObjectInterface.h"
+
+// This alignment affects PodRaceAUpdate codegen even though the linked address is 32-byte aligned.
+
+#include "legoapi/actions/character/speederchase_types.h"
+
+extern SPEEDERCHASEVALUES speedervals[4];
+DECOMP_ASSERT(sizeof(SPEEDERCHASEVALUES) == 0x1c, "Speeder chase tuning stride");
+DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
+
+// ==== src/legoapi/characters/motion/camera.cpp: declarations ====
+#include "legoapi/render/fx/spline_position.h"
+#include "nu2api/numath/nuang.h"
+#include "legoapi/cutscenes/minicamcut.h"
+
+#include "legoapi/characters/motion/camera_types.h"
+// Original data symbol testmovef is float0.005 at 0x617cb0.
+
+DECOMP_ASSERT(sizeof(VIEWCAM_s) == 0x28, "ViewCam size");
+DECOMP_ASSERT(offsetof(VIEWCAM_s, pitch) == 0x10, "ViewCam pitch offset");
+DECOMP_ASSERT(offsetof(VIEWCAM_s, gamepad) == 0x24, "ViewCam gamepad offset");
+
+DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, path) == 0x40, "Camera context path offset");
+DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context flags offset");
+
+// ==== src/gameapi/edtools/edfile.cpp: all remaining content ====
+
+#include "nu2api/nufile/nufilepak.h"
+
+// ==== src/legoapi/render/core/render.cpp: declarations ====
+
+extern "C" {
+
+NUGSCN *NuGScnRead(VARIPTR *buf, VARIPTR buf_end, char *path);
+} // extern "C"
+
+#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
+    do {                                                                                                               \
+        direction.x = (vx);                                                                                            \
+        direction.y = -(vy) * camera.aspect;                                                                           \
+        direction.z = adjacent;                                                                                        \
+        NuVecNorm(&direction, &direction);                                                                             \
+        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
+        NuVecNorm(&direction, &direction);                                                                             \
+        brightness = direction.y * 0.5f + 0.5f;                                                                        \
+        if (brightness <= near_angle)                                                                                  \
+            brightness = near_scale * parameters->intensity;                                                           \
+        else if (brightness >= far_angle)                                                                              \
+            brightness = far_scale * parameters->intensity;                                                            \
+        else                                                                                                           \
+            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
+        if (parameters->directional) {                                                                                 \
+            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
+            if (angle < parameters->direction_near_angle) {                                                            \
+                brightness += 128.0f * parameters->direction_far_scale;                                                \
+            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
+                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
+                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
+                                      parameters->direction_bias);                                                     \
+                brightness +=                                                                                          \
+                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
+                              parameters->direction_near_scale);                                                       \
+            }                                                                                                          \
+        }                                                                                                              \
+        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
+                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
+                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
+                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
+        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
+            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
+                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
+        else                                                                                                           \
+            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
+        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
+    } while (0)
+
+#define SWIPE_PRIM_UV(U, V)                                                                                            \
+    do {                                                                                                               \
+        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
+        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
+            vertex->float_uv[0] = (U);                                                                                 \
+            vertex->float_uv[1] = (V);                                                                                 \
+        } else {                                                                                                       \
+            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
+            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
+        }                                                                                                              \
+    } while (false)
+
+// ==== functions in original address order ====
+
+extern "C" {
+
+void eduiMenuRender(eduimenu_s *menu);
+
+}
+
+extern "C" {
+
+void edmainInit(void *font, char *configuration_file);
+
+}
+
+// ==== src/nu2api/nucore/nucore_plain.cpp: declarations ====
+//
+
+extern "C" {
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+void NuCameraSetEx(NUCAMERA *cam, i32 fast);
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+} // extern "C"
+
+extern "C" {
+
+    extern "C++" {
+        static __attribute__((noinline, noclone)) void
+        DisplayListProcessSkin(NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry, NUDISPLAYLISTITEM **first_and_last,
+                               NUMTX *world_matrix, void **transform_packet, NUMTX *skin_matrices,
+                               DEFORMERWEIGHTSARRAY *deformer_weights, i32 shadow_caster)
+            __asm__("_ZL22DisplayListProcessSkinP7numtl_sP15nudisplaylist_sP19nudisplaylistitem_sPS4_P7numtx_"
+                    "sPPvS7_P22deformerweightsarray_si.isra.36");
+
+        static __attribute__((noinline, noclone)) void
+        DisplayListProcessLightmapped(NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry,
+                                      NUDISPLAYLISTITEM **first_and_last, NUMTX *world_matrix, void **transform_packet,
+                                      f32 alpha)
+            __asm__("_ZL29DisplayListProcessLightmappedP7numtl_sP15nudisplaylist_sP19nudisplaylistitem_sPS4_P7numtx_"
+                    "sPPvf.isra.34");
+    }
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+i32 NuSpecialDrawAt(void *special, NUMTX *mtx);
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // Viewport
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+    // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+
+} // extern "C"
+
+// ==== functions in original address order ====
+
+// ==== functions in original address order ====
+
+// ==== src/legoapi/render/core/render.cpp: declarations ====
+
+static NU_READ_GRAPHICS_DATA_ATTR NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIPTR *buf_end, char *path,
+                                                             char *scene_data)
+    __asm__("_ZL18NuReadGraphicsDataP9variptr_uS0_PcS1_S1_.isra.104");
+
+extern "C" {
+
+NUGSCN *NuGScnRead(VARIPTR *buf, VARIPTR buf_end, char *path);
+} // extern "C"
+
+#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
+    do {                                                                                                               \
+        direction.x = (vx);                                                                                            \
+        direction.y = -(vy) * camera.aspect;                                                                           \
+        direction.z = adjacent;                                                                                        \
+        NuVecNorm(&direction, &direction);                                                                             \
+        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
+        NuVecNorm(&direction, &direction);                                                                             \
+        brightness = direction.y * 0.5f + 0.5f;                                                                        \
+        if (brightness <= near_angle)                                                                                  \
+            brightness = near_scale * parameters->intensity;                                                           \
+        else if (brightness >= far_angle)                                                                              \
+            brightness = far_scale * parameters->intensity;                                                            \
+        else                                                                                                           \
+            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
+        if (parameters->directional) {                                                                                 \
+            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
+            if (angle < parameters->direction_near_angle) {                                                            \
+                brightness += 128.0f * parameters->direction_far_scale;                                                \
+            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
+                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
+                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
+                                      parameters->direction_bias);                                                     \
+                brightness +=                                                                                          \
+                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
+                              parameters->direction_near_scale);                                                       \
+            }                                                                                                          \
+        }                                                                                                              \
+        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
+                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
+                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
+                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
+        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
+            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
+                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
+        else                                                                                                           \
+            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
+        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
+    } while (0)
+
+#define SWIPE_PRIM_UV(U, V)                                                                                            \
+    do {                                                                                                               \
+        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
+        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
+            vertex->float_uv[0] = (U);                                                                                 \
+            vertex->float_uv[1] = (V);                                                                                 \
+        } else {                                                                                                       \
+            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
+            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
+        }                                                                                                              \
+    } while (false)
+
+static __used__ i32 PauseRenderOff();
+
+static __used__ i32 MatrixReflection_CanOverride();
+
+static __used__ void BackDrop_Alpha(float *alpha);
+
+// ==== functions in original address order ====
 
 i32 CharIDFromName(char *name) {
     for (i32 i = 0; i < CHARCOUNT; i++) {
@@ -589,42 +1850,6 @@ void CharScenes_LevelLoad(WORLDINFO *world) {
     }
 }
 
-extern i16 tUNKNOWN;
-
-void PostAnimate_FETT(GameObject_s *object);
-
-void LightGameObject(GameObject_s *, void *);
-void InitSurfaceInfo(GameObject_s *);
-i32 SetObjOnSurface(GameObject_s *, i32);
-extern "C" NUVEC plr_lastpos;
-
-void FinishWeirdoNames(i32 which);
-
-GameObject_s *ActivateCharacter(char *name, nuvec_s *position, i32 angle);
-
-extern void GameObjectOrigin(GameObject_s *obj);
-extern void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *data);
-
-// Retail keeps only the IPA-SRA clone, which receives &*layers.
-#if defined(__i386__)
-#define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone, regparm(1)))
-#else
-#define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone))
-#endif
-
-i32 InitCreature(GameObject_s *obj, i32 id, i32 param);
-
-void InitPlayerAI(GameObject_s *);
-void InitSurfaceInfo(GameObject_s *);
-i32 SetObjOnSurface(GameObject_s *, i32);
-i32 StartSlide(GameObject_s *, i32);
-
-i32 NewPlayerCharacter(GameObject_s *object, i32 id, i32 old_id, i32);
-
-i32 GetDefaultIdle(GameObject_s *obj);
-
-void UpdateCharacterIDs();
-
 void CharScenes_AreaLoad(APICHARACTERMODELLIST_s *list, variptr_u *buf, variptr_u buf_end) {
     char path[128];
     if (CharScene_Area == NULL) {
@@ -649,76 +1874,6 @@ void CharScenes_AreaLoad(APICHARACTERMODELLIST_s *list, variptr_u *buf, variptr_
     }
 }
 
-void CharScenes_AreaDump() {
-    if (CharScene_Area == NULL) {
-        return;
-    }
-    for (i32 i = 0; i < CHARCOUNT; ++i) {
-        CHARSCENE_s &entry = CharScene_Area[i];
-        if (entry.scene != NULL) {
-            NuGScnRemove(entry.scene);
-        }
-        entry.scene = NULL;
-    }
-}
-
-// Original characters.cpp cluster: SetMoveAndAnimateFunctions (ELF 0x460dc0)
-// follows the scene/category helpers and precedes character model loading.
-void SetMoveAndAnimateFunctions(u32 model_flag_mask, u32 model_flag_value, u32 game_flag_mask, u32 game_flag_value,
-                                i32 movement_type, void *move_function, void *animate_function, void *draw_function) {
-    for (i32 i = 0; i < CHARCOUNT; ++i) {
-        if (model_flag_mask != 0 && (CDataList[i].model_flags & model_flag_mask) != model_flag_value)
-            continue;
-        if (game_flag_mask != 0 && (GCDataList[i].flags_090 & game_flag_mask) != game_flag_value)
-            continue;
-        if (movement_type != -1 && static_cast<i8>(GCDataList[i].uses_weapon_action) != movement_type)
-            continue;
-        if (move_function != NULL)
-            CDataList[i].move_fn = reinterpret_cast<CHARACTERUPDATEFN>(move_function);
-        if (animate_function != NULL)
-            CDataList[i].animate_fn = reinterpret_cast<CHARACTERUPDATEFN>(animate_function);
-        if (draw_function != NULL)
-            CDataList[i].draw_fn = reinterpret_cast<CHARACTERUPDATEFN>(draw_function);
-    }
-}
-
-void DeactivateCharacter(char *name);
-
-void LoadSingleCharacter(bgprocinfo_s *);
-
-void CharScenes_LevelDump(WORLDINFO_s *world) {
-    CHARSCENE_s *scenes = world->minikit.character_scenes;
-    if (scenes != NULL) {
-        for (i32 i = 0; i < CHARCOUNT; ++i) {
-            if (world->minikit.character_scenes[i].scene != NULL) {
-                NuGScnRemove(world->minikit.character_scenes[i].scene);
-            }
-            world->minikit.character_scenes[i].scene = NULL;
-        }
-    }
-}
-
-void UpdateCharacterLoad();
-
-extern "C" VARIPTR characterbuffer_base;
-extern i32 CHARACTERBUFFERSIZE;
-extern i32 Area;
-extern i32 last_area;
-
-void ResetCharacterBuffer(i32 force_reset) {
-    if (force_reset == 0 && Area != -1 && Area == last_area) {
-        return;
-    }
-
-    characterbuffer_ptr = characterbuffer_base;
-    memset(characterbuffer_base.void_ptr, 0, CHARACTERBUFFERSIZE);
-    apicharsys->loaded_model_count = apicharsys->permanent_model_count;
-    apicharsys->animation_load_attempts = apicharsys->area_animation_count;
-    apicharsys->loaded_animation_count = apicharsys->area_animation_count;
-}
-
-void GameAudio_PlaySfx(i32, nuvec_s *, i32, i32);
-
 nuhspecial_s *CharScene_FindHSpecial(WORLDINFO_s *world, i32 character_id) {
     nuhspecial_s *special;
     if (__builtin_expect(CharScene_Area != NULL && CharScene_Area[character_id].scene != NULL, 1)) {
@@ -734,7 +1889,159 @@ nuhspecial_s *CharScene_FindHSpecial(WORLDINFO_s *world, i32 character_id) {
     return special;
 }
 
-void PostAnimate_ASTROMECH(GameObject_s *object);
+void CharScene_Draw(WORLDINFO_s *world, i32 character_id, numtx_s *matrix, numtx_s *reflection_matrix) {
+    nuhspecial_s *special = CharScene_FindHSpecial(world, character_id);
+    if (special != NULL) {
+        if (matrix != NULL) {
+            NuSpecialDrawAt(special, matrix);
+        }
+        if (reflection_matrix != NULL) {
+            NuSpecialDrawAt(special, reflection_matrix);
+        }
+    }
+}
 
-void LoadPerm1();
+void CharScenes_LevelDump(WORLDINFO_s *world) {
+    CHARSCENE_s *scenes = world->minikit.character_scenes;
+    if (scenes != NULL) {
+        for (i32 i = 0; i < CHARCOUNT; ++i) {
+            if (world->minikit.character_scenes[i].scene != NULL) {
+                NuGScnRemove(world->minikit.character_scenes[i].scene);
+            }
+            world->minikit.character_scenes[i].scene = NULL;
+        }
+    }
+}
+
+void CharScenes_AreaDump() {
+    if (CharScene_Area == NULL) {
+        return;
+    }
+    for (i32 i = 0; i < CHARCOUNT; ++i) {
+        CHARSCENE_s &entry = CharScene_Area[i];
+        if (entry.scene != NULL) {
+            NuGScnRemove(entry.scene);
+        }
+        entry.scene = NULL;
+    }
+}
+
+void IconScenes_Init(char *path, variptr_u *buf, variptr_u *) {
+    const usize table_size = static_cast<usize>(CHARCOUNT) * sizeof(*IconScene);
+    IconScene = reinterpret_cast<NUGSCN **>(ALIGN(buf->addr, 4));
+    buf->addr = reinterpret_cast<usize>(IconScene) + table_size;
+    memset(IconScene, 0, table_size);
+
+    if (path != NULL && NuStrLen(path) <= 0x3f) {
+        NuStrCpy(IconPath, path);
+    }
+}
+
+NUGSCN *IconScene_FindById(i32 character_id) {
+    if (character_id < 0 || character_id >= CHARCOUNT) {
+        return NULL;
+    }
+    return IconScene[character_id];
+}
+
+void IconScenes_Load(APICHARACTERMODELLIST_s *list, i32, variptr_u *buf, variptr_u *buf_end) {
+    if (list == NULL || IconScene == NULL) {
+        return;
+    }
+
+    for (; list->model_id != -1; ++list) {
+        const i32 character_id = list->model_id;
+        if (IconScene[character_id] != NULL || list->count == 0) {
+            continue;
+        }
+
+        const i32 object_index = CDataList[character_id].field20_0x42;
+        if (object_index == -1) {
+            continue;
+        }
+
+        char path[0x100];
+        NuStrCpy(path, IconPath);
+        NuStrCat(path, LevelObject_FindNameFromIndex(object_index));
+        NuStrCat(path, ".gsc");
+        IconScene[character_id] = NuGScnRead(buf, *buf_end, path);
+        if (IconScene[character_id] != NULL && IconScene[character_id]->display_list != NULL) {
+            IconScene[character_id]->display_list->flags |= NU_DISPLAYSCENE_FLAG_NEEDS_BUILD;
+        }
+    }
+}
+
+void IconScenes_Dump() {
+    if (IconScene == NULL) {
+        return;
+    }
+
+    for (i32 i = 0; i < CHARCOUNT; ++i) {
+        if (IconScene[i] != NULL) {
+            NuGScnRemove(IconScene[i]);
+            IconScene[i] = NULL;
+        }
+    }
+}
+
+void DrawCharIcon(i32 character_id, float x, float y, float z, float scale, i32 frame_object_id, float character_alpha,
+                  float frame_alpha, i32 draw_character, nuhspecial_s *override_special) {
+    WORLDINFO *world = WorldInfo_CurrentlyActive();
+    const u16 character_spin = static_cast<u16>(drawcharicon_hspecial_spin);
+    drawcharicon_hspecial_spin = 0;
+
+    if (ObjTabList == NULL || world == NULL) {
+        return;
+    }
+
+    nuhspecial_s special;
+    if (drawcharicon_find != 0) {
+        NuSpecialFind(things_scene, &special, ObjTabList[frame_object_id].name, 1);
+    } else {
+        special = world->lev_objs[frame_object_id].special;
+    }
+
+    if (NuSpecialExistsFn(&special) != 0) {
+        DrawPanel3DObject(x, y, z + 1.0f, scale, scale, scale, 0, 0, 0, &special, 0, frame_alpha);
+    }
+
+    if (draw_character != 0) {
+        if (override_special != NULL && NuSpecialExistsFn(override_special) != 0) {
+            const f32 special_scale = scale * drawcharicon_hspecial_scale;
+            DrawPanel3DObject(x, y, z + 1.0f + drawcharicon_hspecial_dz, special_scale, special_scale, special_scale, 0,
+                              character_spin, 0, override_special, 0, character_alpha);
+        } else {
+            i32 icon_object_id;
+            if (character_id == -1) {
+                icon_object_id = LEGOOBJ_ICON_QUESTION;
+            } else {
+                icon_object_id = CDataList[character_id].field20_0x42;
+                if (icon_object_id != -1 && GCDataList[character_id].field275_0x116 == 0 &&
+                    icon_object_id != LEGOOBJ_ICON_WEIRDO) {
+                    ++icon_object_id;
+                }
+            }
+
+            if (icon_object_id != -1) {
+                if (drawcharicon_find != 0) {
+                    NUGSCN *icon_scene = character_id == -1 ? NULL : IconScene_FindById(character_id);
+                    if (icon_scene != NULL) {
+                        NuSpecialFind(icon_scene, &special, ObjTabList[icon_object_id].name, 1);
+                    } else {
+                        NuSpecialFind(things_scene, &special, ObjTabList[icon_object_id].name, 1);
+                    }
+                } else {
+                    special = world->lev_objs[icon_object_id].special;
+                }
+
+                if (NuSpecialExistsFn(&special) != 0) {
+                    DrawPanel3DObject(x, y, z + 1.0f, scale, scale, scale, 0, 0, 0, &special, 0, character_alpha);
+                }
+            }
+        }
+    }
+
+    drawcharicon_find = 0;
+    drawcharicon_i_panel = -1;
+}
 

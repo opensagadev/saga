@@ -121,8 +121,6 @@ i32 edGetPadDisabled() {
     return pad_disabled;
 }
 
-static NUGSPLINE *splineStore;
-static i32 numSplinesLoaded;
 NUMTL *EdDrawMtl[2];
 static i32 NewPrim;
 static i32 NewMtl;
@@ -130,7 +128,7 @@ static const VuMtx *NewMtx;
 void EdDrawPolyArrow(VuVec const &, VuVec const &, i32, i32, float, float, float, float);
 void EdDrawPolyCylinder(VuMtx const &, float, float, float, i32, i32, i32, i32);
 void EdDrawMtx(VuMtx const *);
-char *EDSPLINE_FILECHECK = const_cast<char *>("EDSPLINE v. ");
+extern char * EDSPLINE_FILECHECK;
 
 extern "C" {
     char edgra_filter_string[16] = "GRASS";
@@ -656,152 +654,15 @@ void edanimParamDestroy(i32 index);
 
 
 
-i32 edSpline_FindAllBeg(NUGSCN *scene, char *prefix, NUGSPLINE **results, i32 capacity) {
-    i32 count = 0;
-    if (capacity <= 0)
-        return 0;
-    if (splineStore != NULL) {
-        NUGSPLINE *spline = splineStore;
-        for (i32 i = 0; i < numSplinesLoaded; ++spline, ++i) {
-            if (NuStrNICmp(prefix, spline->name, -1) == 0) {
-                results[count++] = spline;
-                if (count >= capacity)
-                    return count;
-            }
-        }
-    }
-    if (scene != NULL) {
-        NUGSPLINE *spline = scene->splines;
-        for (i32 i = 0; i < scene->numsplines; ++spline, ++i) {
-            if (NuStrNICmp(prefix, spline->name, -1) == 0) {
-                results[count++] = spline;
-                if (count >= capacity)
-                    return count;
-            }
-        }
-    }
-    return count;
-}
+i32 edSpline_FindAllBeg(NUGSCN *scene, char *prefix, NUGSPLINE **results, i32 capacity);
 
-i32 LoadEditorSplines(char *path, VARIPTR *buf, VARIPTR *buf_end) {
-    NUGSPLINE *store = reinterpret_cast<NUGSPLINE *>(buf->void_ptr);
-    splineStore = store;
-    buf->addr = (buf->addr + 3) & ~static_cast<usize>(3);
+i32 LoadEditorSplines(char *path, VARIPTR *buf, VARIPTR *buf_end);
 
-    EdFileSetMedia(1);
-    if (EdFileOpen(path, NUFILE_READ) == 0) {
-        splineStore = NULL;
-        return 0;
-    }
+i32 edSpline_FindAllSub(NUGSCN *scene, char *name, NUGSPLINE **results, i32 capacity);
 
-    const i32 file_check_length = NuStrLen(EDSPLINE_FILECHECK);
-    for (i32 i = 0; i < file_check_length; ++i) {
-        if (EDSPLINE_FILECHECK[i] != EdFileReadChar()) {
-            EdFileClose();
-            splineStore = NULL;
-            return 0;
-        }
-    }
+NUGSPLINE *edSpline_SplineFind(NUGSCN *scene, char *name);
 
-    EdFileReadInt();
-    i32 spline_count = EdFileReadInt();
-    i32 point_count = EdFileReadInt();
-    i32 string_bytes = EdFileReadInt();
-
-    char *name_cursor = reinterpret_cast<char *>(store + spline_count);
-    char *name_end = name_cursor + string_bytes;
-    NUVEC *point_cursor = reinterpret_cast<NUVEC *>((reinterpret_cast<usize>(name_end) + 3) & ~static_cast<usize>(3));
-    NUVEC *data_end = point_cursor + point_count;
-    if (reinterpret_cast<usize>(data_end) > buf_end->addr) {
-        EdFileClose();
-        splineStore = NULL;
-        return 0;
-    }
-
-    for (i32 i = 0; i < spline_count; ++i) {
-        EdFileReadChar();
-        i32 name_length = EdFileReadInt();
-        splineStore[i].name = name_cursor;
-        splineStore[i].pt_size = sizeof(NUVEC);
-        splineStore[i].length = static_cast<i16>(EdFileReadInt());
-        splineStore[i].pts = point_cursor;
-
-        for (i32 j = 0; j < name_length; ++j) {
-            splineStore[i].name[j] = EdFileReadChar();
-        }
-        name_cursor += name_length;
-        if (name_cursor > name_end) {
-            EdFileClose();
-            splineStore = NULL;
-            EdFileClose();
-            numSplinesLoaded = spline_count;
-            buf->void_ptr = data_end;
-            return 0;
-        }
-
-        for (i32 j = 0; j < splineStore[i].length; ++j) {
-            NUVEC *point = &splineStore[i].pts[j];
-            point->x = EdFileReadFloat();
-            point->y = EdFileReadFloat();
-            point->z = EdFileReadFloat();
-        }
-        point_cursor += splineStore[i].length;
-        if (point_cursor > data_end) {
-            EdFileClose();
-            splineStore = NULL;
-            EdFileClose();
-            numSplinesLoaded = spline_count;
-            buf->void_ptr = data_end;
-            return 0;
-        }
-    }
-
-    EdFileClose();
-    numSplinesLoaded = spline_count;
-    buf->void_ptr = data_end;
-    return spline_count;
-}
-
-i32 edSpline_FindAllSub(NUGSCN *scene, char *name, NUGSPLINE **results, i32 capacity) {
-    i32 count = 0;
-    if (capacity <= 0)
-        return 0;
-    if (splineStore != NULL) {
-        NUGSPLINE *spline = splineStore;
-        for (i32 i = 0; i < numSplinesLoaded; ++spline, ++i) {
-            if (NuStrIStr(spline->name, name) != NULL) {
-                results[count++] = spline;
-                if (count >= capacity)
-                    return count;
-            }
-        }
-    }
-    if (scene != NULL) {
-        NUGSPLINE *spline = scene->splines;
-        for (i32 i = 0; i < scene->numsplines; ++spline, ++i) {
-            if (NuStrIStr(spline->name, name) != NULL) {
-                results[count++] = spline;
-                if (count >= capacity)
-                    return count;
-            }
-        }
-    }
-    return count;
-}
-
-NUGSPLINE *edSpline_SplineFind(NUGSCN *scene, char *name) {
-    if (splineStore != NULL) {
-        for (i32 i = 0; i < numSplinesLoaded; ++i) {
-            if (NuStrICmp(splineStore[i].name, name) == 0) {
-                return &splineStore[i];
-            }
-        }
-    }
-    return NuSplineFind(scene, name);
-}
-
-void edSpline_SplineList(nugscn_s *) {
-}
+void edSpline_SplineList(nugscn_s *);
 
 void edanimParticlePlace(i32 index, NUVEC *position);
 

@@ -29,16 +29,13 @@
 
 DECOMP_ASSERT(sizeof(RepeatSfx) == 0x10, "RepeatSfx size");
 
-static i32 repsfxcount;
-static RepeatSfx repsfxtab[32];
-static i32 ticktock;
 
 extern "C" {
 extern u16 GlobalSfxBits[100];
 extern u16 SfxBits[100];
     SoundTable CurrentSFXTAB;
-    void (*ExtraDieSfxFn)(GameObject_s *);
-    void (*ExtraHurtSfxFn)(GameObject_s *);
+extern void (*ExtraDieSfxFn)(GameObject_s *);
+extern void (*ExtraHurtSfxFn)(GameObject_s *);
     i32 CruiserD_LiftChase;
 }
 
@@ -74,8 +71,6 @@ extern i16 id_WICKET;
 extern "C" f32 chattersfxwait;
 extern "C" i32 DoubleScore;
 
-static GAMEAUDIO GameAudio_Default;
-static GAMEAUDIO *GameAudio = &GameAudio_Default;
 extern "C" void MenuRegisterSoundFX(i32, i32, i32, i32);
 i32 GameAudio_GetSfxId(i32);
 
@@ -90,51 +85,10 @@ extern "C" {
 extern "C" void ResetSounds(void);
 
 void SetLevelSfxBits(WORLDINFO *world);
-void ResetLevSfx(WORLDINFO *world) {
-    for (i32 i = 0; i < 0x40; i++) {
-        world->level_sfx[i].id = -1;
-    }
-    world->level_sfx_count = 0;
-}
+void ResetLevSfx(WORLDINFO *world);
 
-bool InitSpecialSfx(WORLDINFO *world) {
-    bool result = false;
-    if (world != NULL) {
-        world->special_sfx_count = 0;
-        world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 4);
-        world->special_sfx = reinterpret_cast<specialsfx_s *>(world->giz_buffer.void_ptr);
-        world->giz_buffer.addr += 0xf00;
-        memset(world->special_sfx, 0, 0xf00);
-
-        world->special_sfx_event_count = 0;
-        world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 0x10);
-        world->special_sfx_events = reinterpret_cast<SPECIALSFXEVENT_s *>(world->giz_buffer.void_ptr);
-        world->giz_buffer.addr += 0xc00;
-        memset(world->special_sfx_events, 0, 0xc00);
-        result = true;
-    }
-    return result;
-}
-void LoadSpecialSfxFile(WORLDINFO *world) {
-    char path[268];
-    sprintf(path, "%s.sfx", world->config_file);
-    if (NuFileExists(path) != 0 && SpecialSfxLoad(path, world) != 0) {
-        i32 count = world->special_sfx_count;
-        specialsfx_s *entry = world->special_sfx;
-        if (count > 0) {
-            i32 i = 0;
-            do {
-                const i32 flags = entry->flags & 0xf;
-                if (flags == 1) {
-                    SetupBlowupSfx(world, entry);
-                }
-                ++i;
-                count = world->special_sfx_count;
-                ++entry;
-            } while (i < count);
-        }
-    }
-}
+bool InitSpecialSfx(WORLDINFO *world);
+void LoadSpecialSfxFile(WORLDINFO *world);
 
 extern "C" {
 
@@ -168,170 +122,15 @@ void SfxBitsStore(SoundTable *table);
 
 } // extern "C"
 
-void PlayDieSfx(GameObject_s *object) {
-    CHARACTERDATA *character = object->apiobj.character_data;
-    GAMECHARACTERDATA_s *config = character->game_character;
-    i32 sfx;
-    {
-        const i16 configured_sfx = config->sfx_die;
-        if (configured_sfx != -1) {
-            sfx = configured_sfx;
-            goto play;
-        }
-    }
-    {
-        sfx = -1;
-        if ((config->flags_090 & 0x800) != 0) {
-            sfx = GameAudio->sfx_ids[0x18];
-        } else {
-            const u32 flags = character->model_flags;
-            if ((flags & 0x2000) != 0) {
-                sfx = GameAudio->sfx_ids[0x18];
-            } else if ((flags & 0x04000000) != 0) {
-                sfx = GameAudio->sfx_ids[0x19];
-            } else if ((flags & 0x10) != 0) {
-                sfx = GameAudio->sfx_ids[0x1a];
-            } else if ((flags & 0x40000000) == 0) {
-                if ((object->field_0xf01 & 8) != 0) {
-                    sfx = GameAudio->sfx_ids[0x1b];
-                } else {
-                    sfx = GameAudio->sfx_ids[0x1c];
-                }
-            }
-        }
-        if (sfx == -1) {
-            goto extra;
-        }
-    }
-play:
-    GameAudio_PlaySfxById(sfx, &object->apiobj.collision_position, 0, 0);
-extra:
-    auto extra_sfx = ExtraDieSfxFn;
-    if (extra_sfx != NULL) {
-        extra_sfx(object);
-    }
-}
+void PlayDieSfx(GameObject_s *object);
 
-void PlayHurtSfx(GameObject_s *object) {
-    CHARACTERDATA *character = object->apiobj.character_data;
-    i32 sfx;
-    {
-        const i16 configured_sfx = character->game_character->sfx_hurt;
-        if (configured_sfx != -1) {
-            sfx = configured_sfx;
-            goto selected;
-        }
-    }
-    if ((character->model_flags & 0x44002010) != 0) {
-        goto extra;
-    }
-    if ((object->field_0xf01 & 8) != 0) {
-        sfx = GameAudio->sfx_ids[0x16];
-    } else {
-        sfx = GameAudio->sfx_ids[0x17];
-    }
-selected:
-    if (sfx == -1) {
-        goto extra;
-    }
-    GameAudio_PlaySfxById(sfx, &object->apiobj.collision_position, 0, 0);
-extra:
-    auto extra_sfx = ExtraHurtSfxFn;
-    if (extra_sfx != NULL) {
-        extra_sfx(object);
-    }
-}
+void PlayHurtSfx(GameObject_s *object);
 
-void PlayJumpSfx(GameObject_s *object, i32 type) {
-    i32 sfx;
-    const u32 flags = object->apiobj.character_data->model_flags;
-    if ((flags & 0x40) != 0) {
-        sfx = GameAudio->sfx_ids[1];
-    } else if ((flags & 8) != 0) {
-        switch (type) {
-            case 0:
-                sfx = GameAudio->sfx_ids[2];
-                break;
-            case 1:
-                sfx = GameAudio->sfx_ids[3];
-                break;
-            case 2:
-                sfx = GameAudio->sfx_ids[6];
-                break;
-            case 3:
-                sfx = GameAudio->sfx_ids[4];
-                break;
-            case 4:
-                sfx = GameAudio->sfx_ids[5];
-                break;
-            default:
-                return;
-        }
-    } else {
-        sfx = GameAudio->sfx_ids[0];
-    }
-    if (sfx != -1) {
-        if (!object->apiobj.player_controlled && (object->field_0xefb & 8) == 0) {
-            PlaySfxByIdAndSetVolume(sfx, &object->apiobj.lower_position, 0.5f);
-        } else {
-            GameAudio_PlaySfxById(sfx, &object->apiobj.lower_position, 0, 1);
-        }
-    }
-}
+void PlayJumpSfx(GameObject_s *object, i32 type);
 
-void PlayLandSfx(GameObject_s *object, i32 type, i32) {
-    i32 sfx;
-    if (type == 1) {
-        if ((object->apiobj.character_data->model_flags & 8) == 0) {
-            return;
-        }
-        sfx = GameAudio->sfx_ids[0xb];
-    } else if (type == 2) {
-        sfx = GameAudio->sfx_ids[0xc];
-    } else if (type == 3) {
-        sfx = GameAudio->sfx_ids[0xd];
-    } else if (type == 4) {
-        sfx = GameAudio->sfx_ids[0xe];
-    } else {
-        if (object->apiobj.is_underwater != 0 || object->apiobj.intersects_water != 0) {
-            return;
-        }
-        const i32 alternate = WorldInfo_CurrentlyActive()->current_level->flags & 0x1000;
-        if ((object->apiobj.character_data->model_flags & 0x10) == 0) {
-            if (type != 0) {
-                return;
-            }
-            if (alternate != 0) {
-                sfx = GameAudio->sfx_ids[8];
-            } else {
-                sfx = GameAudio->sfx_ids[7];
-            }
-        } else {
-            if (alternate != 0) {
-                sfx = GameAudio->sfx_ids[10];
-            } else {
-                sfx = GameAudio->sfx_ids[9];
-            }
-        }
-    }
-    if (sfx != -1) {
-        if (static_cast<i8>(object->apiobj.flags_low) < 0 || (object->field_0xefb & 8) != 0) {
-            GameAudio_PlaySfxById(sfx, &object->apiobj.lower_position, 0, 1);
-        } else {
-            PlaySfxByIdAndSetVolume(sfx, &object->apiobj.lower_position, 0.5f);
-        }
-    }
-}
+void PlayLandSfx(GameObject_s *object, i32 type, i32);
 
-void TickTockSfx() {
-    if (ticktock != 0) {
-        GameAudio_PlaySfx(0x1d, NULL, 0, 0);
-        ticktock = 0;
-    } else {
-        GameAudio_PlaySfx(0x1e, NULL, 0, 0);
-        ticktock = 1;
-    }
-}
+void TickTockSfx();
 
 void AddFootSteps(GameObject_s *object) {
     ANIMPACKET_s &packet = object->apiobj.anim_packet;
@@ -386,375 +185,47 @@ void AddFootSteps(GameObject_s *object) {
         PlayFootStepSfx(object);
 }
 
-void PlayGruntSfx(GameObject_s *object) {
-    CHARACTERDATA *character = object->apiobj.character_data;
-    const i16 configured_sfx = character->game_character->sfx_grunt;
-    i32 sfx = configured_sfx;
-    if (configured_sfx == -1) {
-        if ((character->model_flags & 0x44002010) != 0) {
-            return;
-        }
-        if ((object->field_0xf01 & 8) != 0) {
-            sfx = GameAudio->sfx_ids[0x14];
-        } else {
-            sfx = GameAudio->sfx_ids[0x15];
-        }
-    }
-    if (sfx != -1) {
-        GameAudio_PlaySfxById(sfx, &object->apiobj.collision_position, 0, 0);
-    }
-}
+void PlayGruntSfx(GameObject_s *object);
 
-void PlaySabreSfx(char *name, GameObject_s *object, nuvec_s *position, i32) {
-    const u8 player = static_cast<u8>(object->apiobj.field_0x27c);
-    if (player == 0xff && WORLD->rooms_visible_ptr[object->room_id] == 0) {
-        return;
-    }
-    u32 player_bits = 0;
-    if (object->apiobj.player_controlled) {
-        player_bits = 1u << (player & 0x1f);
-    }
-    if (name == NULL) {
-        const i16 sfx = object->apiobj.character_data->game_character->sfx_sabre;
-        if (sfx == -1) {
-            GameAudio_PlaySfx(0x40, &object->apiobj.collision_position, 0, 1);
-        } else {
-            GameAudio_PlaySfxById(sfx, &object->apiobj.collision_position, player_bits, 1);
-        }
-    } else {
-        const i32 named_sfx = GetSfxId(name);
-        if (position == NULL) {
-            position = &object->apiobj.collision_position;
-        }
-        GameAudio_PlaySfxById(named_sfx, position, 0, 1);
-    }
-}
+void PlaySabreSfx(char *name, GameObject_s *object, nuvec_s *position, i32);
 
-void LevChatterSfx(char *name, nuvec_s *position) {
-    if (chattersfxwait <= 0.0f && qrand() < 0x400) {
-        PlaySfx(name, position);
-        const i32 random = qrand();
-        chattersfxwait = static_cast<f32>(random) * (1.0f / 65535.0f) * 2.0f + 3.0f;
-    }
-}
+void LevChatterSfx(char *name, nuvec_s *position);
 
-void PlayRepeatSfx(char *name, i32 sfx_id, f32 initial_delay, char play_count, f32 interval, nuvec_s *position) {
-    if (play_count == 1 && initial_delay == 0.0f) {
-        if (sfx_id == -1) {
-            PlaySfx(name, position);
-        } else {
-            GameAudio_PlaySfxById(sfx_id, position, 0, 0);
-        }
-        return;
-    }
+void PlayRepeatSfx(char *name, i32 sfx_id, f32 initial_delay, char play_count, f32 interval, nuvec_s *position);
 
-    const i32 sound_slot = repsfxcount;
-    repsfxtab[sound_slot].state = REPEAT_SFX_PLAY;
-    if (initial_delay > 0.0f) {
-        repsfxtab[sound_slot].state = REPEAT_SFX_INITIAL_DELAY;
-    }
+void ResetRepeatSfx();
 
-    if (sfx_id == -1)
-        sfx_id = GetSfxId(name);
+void UpdateLevelSfx(WORLDINFO_s *world, i32 paused);
 
-    repsfxtab[sound_slot].sfx_id = static_cast<i16>(sfx_id);
-    RepeatSfx &repeat = repsfxtab[repsfxcount];
-    repsfxcount = (repsfxcount + 1) & 31;
-    repeat.timer = initial_delay;
-    repeat.plays_remaining = play_count;
-    repeat.interval = interval;
-    repeat.position = position;
-}
+void PlayFootStepSfx(GameObject_s *object);
 
-void ResetRepeatSfx() {
-    repsfxcount = 0;
-    memset(repsfxtab, 0, sizeof(repsfxtab));
-    repsfxtab[0].sfx_id = -1;
-}
+void UpdateRepeatSfx();
 
-void UpdateLevelSfx(WORLDINFO_s *world, i32 paused) {
-    SfxBitsRestore(&CurrentSFXTAB);
+void AddLevelSfxFromId(i32 sfx_id, i32 *sfx_ids, i32 *sfx_count, i32 max_sfx);
 
-    if (paused != 0) {
-        goto disable_reverb_and_return;
-    }
-    if (GameAudio->check_reverb_fn != NULL && GameAudio->check_reverb_fn() != 0) {
-        goto enable_reverb;
-    }
-    NuSound3SetReverb(0);
+void SfxCheckMusicOnOff(OPTIONSSAVE_s *);
 
-update_ambient:
-    if (CUTSTOPGAME == 0 && world->current_level->unknown_0a2 != -1) {
-        GameAudio_PlaySfxById(world->current_level->unknown_0a2, NULL, 0, 0);
-    }
-    return;
+void AddLevelSfxFromName(char *sfx_name, i32 *sfx_ids, i32 *sfx_count, i32 max_sfx_count);
 
-disable_reverb_and_return:
-    NuSound3SetReverb(0);
-    return;
+void AddLevelSfxGizmoSys(GIZMOSYS_s *gizmo_sys, void *world_info, i32 *sfx_ids, i32 *sfx_count, i32 max_sfx_count);
 
-enable_reverb:
-    NuSound3SetReverb(1);
-    goto update_ambient;
-}
+void BlockSfx(GameObject_s *object);
 
-void PlayFootStepSfx(GameObject_s *object) {
-    i32 on_platform = 1;
-    if (object->field_0x1078 == -1 && object->apiobj.supporting_platform_id == -1) {
-        const i8 surface = static_cast<i8>(object->apiobj.field_0x281);
-        if (surface == -1 || (TerSurface[surface].flags & 2) == 0) {
-            on_platform = 0;
-        }
-    }
+void AddLevSfx(WORLDINFO_s *world, nuvec_s *position, char *name, i32 sfx);
 
-    i32 sfx = object->apiobj.character_data->game_character->sfx_footstep;
-    if (sfx == -1) {
-        if (GameAudio->override_footstep_fn != NULL) {
-            sfx = GameAudio->override_footstep_fn(object, on_platform);
-        }
-        if (sfx == -1) {
-            if (object->apiobj.is_underwater == 0 && object->apiobj.intersects_water == 0) {
-                const i32 alternate = WorldInfo_CurrentlyActive()->current_level->flags & 0x1000;
-                if ((object->apiobj.character_data->model_flags & 0x10) != 0) {
-                    if (alternate != 0) {
-                        sfx = GameAudio->sfx_ids[0x12];
-                    } else {
-                        sfx = GameAudio->sfx_ids[0x11];
-                    }
-                } else {
-                    if (alternate != 0) {
-                        sfx = GameAudio->sfx_ids[0x10];
-                    } else {
-                        sfx = GameAudio->sfx_ids[0xf];
-                    }
-                }
-            } else {
-                sfx = GameAudio->sfx_ids[0x13];
-            }
-        }
-    }
+i32 GameAudio_GetPlrSfxBits(void *object_ptr);
 
-    if (sfx != -1) {
-        if (object->apiobj.player_controlled || (object->field_0xefb & 8) != 0) {
-            GameAudio_PlaySfxById(sfx, &object->apiobj.lower_position, 0, 0);
-        } else {
-            PlaySfxByIdAndSetVolume(sfx, &object->apiobj.lower_position, 0.5f);
-        }
-    }
+void GameAudio_Reset();
 
-    ANIMPACKET_s &packet = object->apiobj.anim_packet;
-    if (packet.blending != 0 || packet.animation_index == -1)
-        return;
-    CHARACTERANIM_s *config =
-        static_cast<CHARACTERANIM_s *>(object->apiobj.character_model->model_data_a[packet.animation_index]);
-    if (config == NULL)
-        return;
-    if ((config->flags & 0x20000) != 0) {
-        GameCam_Judder(GameCam, -0.25f, 0, &object->apiobj.collision_position);
-        NewRumbleAllPlayers(0.6f, 0.0f, 0, 0);
-    } else if ((config->flags & 0x40000) != 0 && VehicleArea == 0) {
-        GameCam_NewShake(GameCam, 0.5f, 0.5f, 1.0f);
-        NewRumbleAllPlayers(0.5f, 0.0f, 0, 0);
-    }
-}
+void GameAudio_PlaySfxById(i32 sfx_id, nuvec_s *position, i32 flags, i32);
 
-void UpdateRepeatSfx() {
-    for (RepeatSfx &repeat : repsfxtab) {
-        switch (repeat.state) {
-            case REPEAT_SFX_INITIAL_DELAY:
-                if (repeat.timer > 0.0f) {
-                    repeat.timer -= FRAMETIME;
-                } else {
-                    repeat.state = REPEAT_SFX_PLAY;
-                }
-                break;
+void GameAudio_PlaySfx(i32 sfx, nuvec_s *position, i32 flags, i32 volume);
 
-            case REPEAT_SFX_PLAY:
-                GameAudio_PlaySfxById(repeat.sfx_id, repeat.position, 0, 0);
-                --repeat.plays_remaining;
-                if (repeat.plays_remaining > 0) {
-                    repeat.timer = repeat.interval;
-                    repeat.state = REPEAT_SFX_INTERVAL;
-                } else {
-                    memset(&repeat, 0, sizeof(repeat));
-                }
-                break;
+void GameAudio_Init(GAMEAUDIO *audio);
 
-            case REPEAT_SFX_INTERVAL:
-                if (repeat.timer > 0.0f) {
-                    repeat.timer -= FRAMETIME;
-                } else {
-                    repeat.state = REPEAT_SFX_PLAY;
-                }
-                break;
+i32 GameAudio_GetSfxId(i32 sfx);
 
-            default:
-                break;
-        }
-    }
-}
-
-void AddLevelSfxFromId(i32 sfx_id, i32 *sfx_ids, i32 *sfx_count, i32 max_sfx) {
-    if (sfx_count == NULL || sfx_ids == NULL || *sfx_count >= max_sfx || sfx_id == -1) {
-        return;
-    }
-    for (i32 index = 0; index < *sfx_count; ++index) {
-        if (sfx_ids[index] == sfx_id) {
-            return;
-        }
-    }
-    sfx_ids[*sfx_count] = sfx_id;
-    ++*sfx_count;
-}
-
-void SfxCheckMusicOnOff(OPTIONSSAVE_s *) {
-    // Platform placeholder in the Android build.
-}
-
-void AddLevelSfxFromName(char *sfx_name, i32 *sfx_ids, i32 *sfx_count, i32 max_sfx_count) {
-    if (sfx_count == NULL || sfx_ids == NULL || *sfx_count >= max_sfx_count) {
-        return;
-    }
-
-    i32 sfx_id = GetSfxId(sfx_name);
-    if (sfx_id == -1) {
-        return;
-    }
-
-    for (i32 i = 0; i < *sfx_count; i++) {
-        if (sfx_ids[i] == sfx_id) {
-            return;
-        }
-    }
-
-    sfx_ids[*sfx_count] = sfx_id;
-    ++*sfx_count;
-}
-
-void AddLevelSfxGizmoSys(GIZMOSYS_s *gizmo_sys, void *world_info, i32 *sfx_ids, i32 *sfx_count, i32 max_sfx_count) {
-    if (gizmotypes == NULL || gizmo_sys == NULL) {
-        return;
-    }
-
-    GIZMOSET *set = gizmo_sys->sets;
-    GIZMOTYPE *type = gizmotypes->types;
-    i32 i = 0;
-    while (i < gizmotypes->count) {
-        if (type->fns.add_level_sfx_fn != NULL) {
-            type->fns.add_level_sfx_fn(world_info, set->unknown, sfx_ids, sfx_count, max_sfx_count);
-        }
-        ++i;
-        ++set;
-        ++type;
-    }
-}
-
-void BlockSfx(GameObject_s *object) {
-    GameObject_s *target = object->force_target;
-    if (target != NULL) {
-        const u32 context_flags = CInfo[target->character_context].flags;
-        if ((context_flags & 0x4000000) != 0 || ((context_flags & 0x8000000) != 0 && (target->jump_flags & 2) != 0)) {
-            const i32 sfx_bits = GameAudio_GetPlrSfxBits(target);
-            GameAudio_PlaySfx(0x3f, &object->apiobj.collision_position, sfx_bits, 0);
-        }
-    }
-}
-
-void AddLevSfx(WORLDINFO_s *world, nuvec_s *position, char *name, i32 sfx) {
-    if (sfx == -1 && name != NULL) {
-        sfx = GetSfxId(name);
-    }
-    if (sfx == -1) {
-        return;
-    }
-
-    const i32 count = world->level_sfx_count;
-    i32 index;
-    LEVELSFXENTRY_s *entry = world->level_sfx;
-    for (index = 0; index < count; ++index, ++entry) {
-        if (entry->id == sfx)
-            break;
-    }
-    if (index == count) {
-        if (index >= 64) {
-            return;
-        }
-        if (position != NULL) {
-            world->level_sfx[index].position = *position;
-        } else {
-            world->level_sfx[index].position = nuvec_zero;
-        }
-        world->level_sfx[index].id = static_cast<i16>(sfx);
-        world->level_sfx[index].references = 1;
-        world->level_sfx_count = index + 1;
-    } else if (world->level_sfx[index].references != -1) {
-        ++world->level_sfx[index].references;
-    }
-}
-
-i32 GameAudio_GetPlrSfxBits(void *object_ptr) {
-    APIOBJECT *object = static_cast<APIOBJECT *>(object_ptr);
-    i32 sfx_bits = 0;
-    if (object != NULL && static_cast<i8>(object->flags_low) < 0) {
-        sfx_bits = 1 << object->field_0x27c;
-    }
-    return sfx_bits;
-}
-
-void GameAudio_Reset() {
-    memset(&GameAudio_Default, 0, sizeof(GameAudio_Default));
-    GameAudio = &GameAudio_Default;
-    memset(GameAudio_Default.sfx_names, 0, sizeof(GameAudio_Default.sfx_names));
-    for (i32 i = 0; i < 0x55; ++i) {
-        GameAudio_Default.sfx_ids[i] = -1;
-    }
-}
-
-void GameAudio_PlaySfxById(i32 sfx_id, nuvec_s *position, i32 flags, i32) {
-    if (flags == 0) {
-        PlaySfxById(sfx_id, position);
-        return;
-    }
-    if ((flags & ~2) == 1) {
-        nusound_special_positions[1] = *position;
-        PlaySfxById(sfx_id, &nusound_special_positions[1]);
-    }
-    flags -= 2;
-    if (static_cast<u32>(flags) <= 1) {
-        nusound_special_positions[2] = *position;
-        PlaySfxById(sfx_id, &nusound_special_positions[2]);
-    }
-}
-
-void GameAudio_PlaySfx(i32 sfx, nuvec_s *position, i32 flags, i32 volume) {
-    if ((u32)sfx < 0x55) {
-        GameAudio_PlaySfxById(GameAudio->sfx_ids[sfx], position, flags, volume);
-    }
-}
-
-void GameAudio_Init(GAMEAUDIO *audio) {
-    GameAudio = audio;
-    for (i32 i = 0; i < 0x55; ++i) {
-        GAMEAUDIO *current_audio = GameAudio;
-        current_audio->sfx_ids[i] = static_cast<i16>(GetSfxId(current_audio->sfx_names[i]));
-    }
-
-    MenuRegisterSoundFX(GameAudio_GetSfxId(0x2f), GameAudio_GetSfxId(0x30), GameAudio_GetSfxId(0x31),
-                        GameAudio_GetSfxId(0x32));
-}
-
-i32 GameAudio_GetSfxId(i32 sfx) {
-    if (static_cast<u32>(sfx) <= 0x54) {
-        return GameAudio->sfx_ids[sfx];
-    }
-    return -1;
-}
-
-void GameAudio_PlaySfxAndSetVolume(i32 sfx, nuvec_s *position, f32 volume) {
-    if (static_cast<u32>(sfx) < 0x55) {
-        PlaySfxByIdAndSetVolume(GameAudio->sfx_ids[sfx], position, volume);
-    }
-}
+void GameAudio_PlaySfxAndSetVolume(i32 sfx, nuvec_s *position, f32 volume);
 
 extern "C" void SoundUpdate(float frame_time);
 

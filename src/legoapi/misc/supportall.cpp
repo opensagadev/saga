@@ -89,116 +89,17 @@ struct AIROW_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-static i32 TBGAMECOUNT;
-static i32 TBDRAWCOUNT;
-static i32 TBPLAYERCOUNT;
-static i32 TBAICOUNT;
 
 DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");
 
-static TIMINGBAR_LABEL GameTB[12];
-static TIMINGBAR_LABEL PlayerTB[12];
-static TIMINGBAR_LABEL AITB[12];
-static TIMINGBAR_LABEL DrawTB[12];
 extern i32 app_tbgameset;
 extern i32 app_tbplayerset;
 extern i32 app_tbaiset;
 extern i32 app_tbdrawset;
 
-static inline void TBSTART(i32 slot, i32 type) {
-    i32 set;
-    switch (type) {
-        case 2:
-            set = app_tbgameset;
-            break;
-        case 3:
-            set = app_tbplayerset;
-            break;
-        case 4:
-            set = app_tbaiset;
-            break;
-        case 5:
-            set = app_tbdrawset;
-            break;
-        default:
-            return;
-    }
-    _NuTimeBarSlotBegin(set, slot, NULL);
-}
 
-static inline void TBEND(i32 slot, i32 type) {
-    i32 set;
-    switch (type) {
-        case 2:
-            set = app_tbgameset;
-            break;
-        case 3:
-            set = app_tbplayerset;
-            break;
-        case 4:
-            set = app_tbaiset;
-            break;
-        case 5:
-            set = app_tbdrawset;
-            break;
-        default:
-            return;
-    }
-    _NuTimeBarSlotEnd(set, slot);
-}
 
-static inline void TexQuadSubmit(NUVEC const &point, i32 colour, i32 u, i32 v) {
-    TexQuadVertex *vertex = static_cast<TexQuadVertex *>(g_NuPrim_StreamBufferPtr->void_ptr);
-    if (g_NuPrim_NeedsOverbrightening)
-        vertex->colour = colour;
-    else
-        vertex->colour = ((colour >> 1) & 0x7f7f7f) | (colour & 0xff000000);
-    if (g_NuPrim_NeedsHalfUVs) {
-        vertex->half_uv[0] = u ? 0x3c00 : 0;
-        vertex->half_uv[1] = v ? 0x3c00 : 0;
-    } else {
-        vertex->uv[0] = static_cast<f32>(u);
-        vertex->uv[1] = static_cast<f32>(v);
-    }
-    NuPrim2DAddXYZ(static_cast<f32>(PS2_VREZ_W) * point.x, static_cast<f32>(PS2_VREZ_H) * point.y, 0.0f);
-}
-void RndrTexQuad(f32 x, f32 y, f32 width, f32 height, i32 colour, numtl_s *material, i32 angle) {
-    NUVEC points[4] = {};
-    points[0].x = -0.5f;
-    points[0].y = -0.5f;
-    points[1].x = 0.5f;
-    points[1].y = -0.5f;
-    points[2].x = -0.5f;
-    points[2].y = 0.5f;
-    points[3].x = 0.5f;
-    points[3].y = 0.5f;
-    NuVecRotateZ(&points[0], &points[0], angle);
-    NuVecRotateZ(&points[1], &points[1], angle);
-    NuVecRotateZ(&points[2], &points[2], angle);
-    NuVecRotateZ(&points[3], &points[3], angle);
-    points[0].x *= width;
-    points[0].y *= height;
-    points[1].x *= width;
-    points[1].y *= height;
-    points[2].x *= width;
-    points[2].y *= height;
-    points[3].x *= width;
-    points[3].y *= height;
-    points[0].x += x;
-    points[0].y += y;
-    points[1].x += x;
-    points[1].y += y;
-    points[2].x += x;
-    points[2].y += y;
-    points[3].x += x;
-    points[3].y += y;
-    NuPrim2DBegin(1, 7, material);
-    TexQuadSubmit(points[0], colour, 0, 0);
-    TexQuadSubmit(points[1], colour, 1, 0);
-    TexQuadSubmit(points[2], colour, 0, 1);
-    TexQuadSubmit(points[3], colour, 1, 1);
-    NuPrim2DEnd();
-}
+void RndrTexQuad(f32 x, f32 y, f32 width, f32 height, i32 colour, numtl_s *material, i32 angle);
 
 i32 SuperWeirdo(GameObject_s *object);
 
@@ -278,36 +179,8 @@ apply_weights:
     object->field_0x1089 = current_index + 1;
 }
 
-static inline void TexQuadSubmit3D(f32 x, f32 y, i32 colour, i32 u, i32 v) {
-    VARIPTR *stream = g_NuPrim_StreamBufferPtr;
-    TexQuadVertex *vertex = static_cast<TexQuadVertex *>(stream->void_ptr);
-    if (g_NuPrim_NeedsOverbrightening == 0) {
-        vertex->colour = ((colour >> 1) & 0x7f7f7f) | (colour & 0xff000000);
-    } else {
-        vertex->colour = colour;
-    }
-    if (g_NuPrim_NeedsHalfUVs == 0) {
-        vertex->uv[0] = static_cast<f32>(u);
-        vertex->uv[1] = static_cast<f32>(v);
-    } else {
-        vertex->half_uv[0] = u != 0 ? 0x3c00 : 0;
-        vertex->half_uv[1] = v != 0 ? 0x3c00 : 0;
-    }
-    vertex->x = x;
-    vertex->y = y;
-    vertex->z = 0.0f;
-    stream->u8_ptr += sizeof(TexQuadVertex);
-    ++g_NuPrim_VertexCount;
-}
 
-void RndrTexQuad3D(VuMtx const &matrix, i32 colour, numtl_s *material) {
-    NuPrim3DBegin(1, 7, material, reinterpret_cast<NUMTX *>(const_cast<VuMtx *>(&matrix)));
-    TexQuadSubmit3D(-0.5f, -0.5f, colour, 0, 0);
-    TexQuadSubmit3D(0.5f, -0.5f, colour, 1, 0);
-    TexQuadSubmit3D(-0.5f, 0.5f, colour, 0, 1);
-    TexQuadSubmit3D(0.5f, 0.5f, colour, 1, 1);
-    NuPrim3DEnd();
-}
+void RndrTexQuad3D(VuMtx const &matrix, i32 colour, numtl_s *material);
 
 void bgProcAbortAll() {
 }
@@ -583,59 +456,9 @@ extern "C" {
     extern debinftype **debtab;
 }
 
-void TBRESET() {
-    TBGAMECOUNT = 0;
-    TBDRAWCOUNT = 0;
-    TBPLAYERCOUNT = 0;
-    TBAICOUNT = 0;
-}
+void TBRESET();
 
-void TBOPENFN(char *name, i32 type) {
-    TIMINGBAR_LABEL *labels;
-    i32 *count;
-    switch (type) {
-        case 2:
-            labels = GameTB;
-            count = &TBGAMECOUNT;
-            break;
-        case 3:
-            labels = PlayerTB;
-            count = &TBPLAYERCOUNT;
-            break;
-        case 4:
-            labels = AITB;
-            count = &TBAICOUNT;
-            break;
-        case 5:
-            labels = DrawTB;
-            count = &TBDRAWCOUNT;
-            break;
-        default:
-            return;
-    }
-    const i32 existing_count = *count;
-    for (i32 index = 0; index < existing_count; ++index) {
-        if (NuStrCmp(name, labels[index].name) == 0) {
-            TBSTART(index, type);
-            return;
-        }
-    }
-    if (!(*count < 12)) {
-        return;
-    }
-    char label[256];
-    NuStrCpy(label, name);
-    i32 length = NuStrLen(label);
-    if (!(length > 0)) {
-        return;
-    }
-    if (length > 10)
-        label[10] = '\0';
-    NuStrCpy(labels[*count].name, label);
-    labels[*count].type = static_cast<u8>(type);
-    TBSTART(*count, type);
-    ++*count;
-}
+void TBOPENFN(char *name, i32 type);
 
 void RndrArrow(float x, float y, float scale, i32 angle, i32 colour) {
     NUVEC points[4] = {};
@@ -682,47 +505,7 @@ void RndrArrow(float x, float y, float scale, i32 angle, i32 colour) {
     NuPrim2DEnd();
 }
 
-void TBCLOSEFN(char *name, i32 type) {
-    TIMINGBAR_LABEL *label;
-    switch (type) {
-        case 2:
-            label = GameTB;
-            for (i32 index = 0, count = TBGAMECOUNT; index < count; ++index, ++label) {
-                if (NuStrCmp(name, label->name) == 0) {
-                    TBEND(index, type);
-                    return;
-                }
-            }
-            break;
-        case 3:
-            label = PlayerTB;
-            for (i32 index = 0, count = TBPLAYERCOUNT; index < count; ++index, ++label) {
-                if (NuStrCmp(name, label->name) == 0) {
-                    TBEND(index, type);
-                    return;
-                }
-            }
-            break;
-        case 4:
-            label = AITB;
-            for (i32 index = 0, count = TBAICOUNT; index < count; ++index, ++label) {
-                if (NuStrCmp(name, label->name) == 0) {
-                    TBEND(index, type);
-                    return;
-                }
-            }
-            break;
-        case 5:
-            label = DrawTB;
-            for (i32 index = 0, count = TBDRAWCOUNT; index < count; ++index, ++label) {
-                if (NuStrCmp(name, label->name) == 0) {
-                    TBEND(index, type);
-                    return;
-                }
-            }
-            break;
-    }
-}
+void TBCLOSEFN(char *name, i32 type);
 
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 #include "legoapi/items/objects/gameobjects.h"

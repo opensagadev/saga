@@ -1,3 +1,6 @@
+// Original translation unit reconstructed from the reference address map.
+// Functions are defined in original address order.
+
 #include "decomp.h"
 #include "globals.h"
 #include "gamelib/util/gamelib_util_types.h"
@@ -20,11 +23,6 @@
 
 #include <stdio.h>
 
-struct AIROW_s;
-struct nuqthdr_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
-
 extern "C" {
     NULIGHTINGSTATE NuRndrLightingStateCurrent = {};
 }
@@ -46,6 +44,310 @@ i32 Lighting_FlashRedOnLastHeart;
 extern f32 GhostLightMul;
 
 void SetLights(NUCOLOUR3 *colour0, NUVEC *direction0, NUCOLOUR3 *colour1, NUVEC *direction1, NUCOLOUR3 *colour2,
+               NUVEC *direction2, NUVEC *ambient);
+
+void SetLights_RTLDATA(rtldata_s *data, float scale);
+
+void SetZeroLights();
+
+void LightGameObject(GameObject_s *object, void *set);
+
+// ==== src/legoapi/render/core/rtl.c: declarations ====
+// Original RTL TU basename is rtl.c; the source is compiled as C++.
+#include "gameapi/edtools/edui.h"
+#include "gameapi/edtools/edfile.h"
+#include "gameapi/edtools/edcam.h"
+#include "gameapi/edtools/gameapi_edtools_types.h"
+#include "legoapi/render/core/render.h"
+#include "nu2api/nu3d/nuqfnt.h"
+#include "nu2api/nu3d/numtl.h"
+#include "nu2api/nu3d/android/nutimebar_plain.h"
+#include "nu2api/nu3d/nupostparams.h"
+#include "nu2api/nufile/nufile.h"
+#include "nu2api/nucore/nulst.h"
+#include "nu2api/nucore/numemory.h"
+#include "nu2api/nucore/nupad.h"
+#include "nu2api/numath/nurand.h"
+
+#include <math.h>
+#include <float.h>
+#include <string.h>
+
+#include "legoapi/render/core/rtl_types.h"
+DECOMP_ASSERT(sizeof(rtlindex_s) == 0x28, "RTL index size");
+
+extern "C" {
+
+i32 rtlDynamicAlloc(void);
+
+void rtlDynamicFree(i32 id);
+
+i32 rtlDynamicSetType(i32 id, i32 type);
+
+bool rtlDynamicEnable(i32 id, i32 enabled);
+
+i32 rtlDynamicMasterEnable(i32 enabled);
+
+}
+
+extern "C" {
+
+rtlset *rtlLoadSet(char *path, VARIPTR *buffer, i32 buffer_end);
+
+void rtlResetEx(rtldata_s *data, i32 reset_cached);
+
+}
+
+extern "C" {
+
+void rtlSetLights(rtldata_s *data);
+
+void rtlSetSpecularLight(rtldata_s *data);
+}
+
+extern "C" {
+f32 rtlSpecularValue(rtldata_s *data);
+
+void rtlSetSpecularValue(rtldata_s *data, f32 value);
+}
+
+extern "C" {
+void rtlApplySetScale(void *set, rtldata_s *data, NUVEC *position, NUMTX *rotation, i32 identity, f32 scale);
+
+} // extern "C"
+
+extern "C" {
+
+void rtlProcessLights(void *set, f32 frame_time);
+
+} // extern "C"
+
+// RTL editor state and callbacks from the same original rtl.c text/data run.
+
+// RTL editor callbacks from the same original text run.
+
+// Burnset persistence and editing state from the same original RTL editor run.
+
+extern "C" burnset_s *edrtlBurnoutLoad(char *filename, VARIPTR *buffer, i32);
+
+// RTL editor subsystem stubs (static, internal linkage).
+
+// The original editor keeps a separate help-text start line, initialized to 190.
+
+// ==== src/editor/edlevelall.cpp: declarations ====
+#include "MechInputTouch/MechInputTouch_types.h"
+#include "legoapi/characters/core/customiser.h"
+#include "legoapi/items/base/apiobject.h"
+#include "legoapi/render/fx/particles.h"
+#include "nu2api/nucore/nustring.h"
+#include "nu2api/nucore/nukeyboard.h"
+#include "nu2api/nu3d/nugscn.h"
+#include "nu2api/nucore/NuDynamicLight.h"
+#if defined(__i386__) && defined(__SSE__)
+#include <xmmintrin.h>
+#endif
+#if defined(__i386__) && defined(__SSE2__)
+#include <emmintrin.h>
+#endif
+#include <new>
+
+extern eduiiattr_s EdLevelAttr;
+
+#define EDLEVEL_ADD_ACTIVE_SCENE(menu, scene_index)                                                                    \
+    do {                                                                                                               \
+        LevelEditorScene *scene = theLevelEditor.GetEdScene(scene_index);                                              \
+        if (scene != NULL && scene->active)                                                                            \
+            eduiMenuAddItem(menu, eduiItemToggleCreate((scene_index) << 6, &EdLevelAttr, scene->editable, 1,           \
+                                                       ClassEditor::cbEdFilterLED, scene->name));                      \
+    } while (0)
+
+DECOMP_ASSERT(offsetof(EdClass, flags) == 0x04, "EdClass flags offset");
+DECOMP_ASSERT(offsetof(EdClass, members) == 0x08, "EdClass members offset");
+DECOMP_ASSERT(offsetof(EdClass, last_member) == 0x0c, "EdClass last member offset");
+DECOMP_ASSERT(offsetof(EdClass, member_count) == 0x10, "EdClass member count offset");
+DECOMP_ASSERT(offsetof(EdClass, interface) == 0x14, "EdClass interface offset");
+DECOMP_ASSERT(sizeof(EdMember) == 0x08, "EdMember size");
+DECOMP_ASSERT(offsetof(EdMember, reference) == 0x04, "EdMember reference offset");
+
+extern LevelEditor theLevelEditor;
+
+// ==== src/legoapi/characters/motion/camera.cpp: declarations ====
+
+#include "legoapi/world/area.h"
+#include "legoapi/menus/screens/shop.h"
+#include "legoapi/props/system/socksys.h"
+#include "legoapi/render/fx/spline_position.h"
+#include "nu2api/numath/nuang.h"
+#include "nu2api/nuandroid/ios_graphics.h"
+#include "legoapi/menus/screens/gamemenuall.h"
+#include "legoapi/world/levels/levels.h"
+#include "legoapi/gizmos/object/newblowup.h"
+#include <stdlib.h>
+#include "legoapi/characters/core/players.h"
+#include "legoapi/cutscenes/minicamcut.h"
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/props/objects/techno.h"
+#include "nu2api/nucore/numouse.h"
+#include "nu2api/numath/numtx.h"
+#include "nu2api/numath/nuvec.h"
+
+#include "legoapi/characters/motion/camera_types.h"
+extern VIEWCAM_s ViewCam;
+// Original data symbol testmovef is float0.005 at 0x617cb0.
+extern f32 testmovef;
+
+DECOMP_ASSERT(sizeof(VIEWCAM_s) == 0x28, "ViewCam size");
+DECOMP_ASSERT(offsetof(VIEWCAM_s, pitch) == 0x10, "ViewCam pitch offset");
+DECOMP_ASSERT(offsetof(VIEWCAM_s, gamepad) == 0x24, "ViewCam gamepad offset");
+
+DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, path) == 0x40, "Camera context path offset");
+DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context flags offset");
+
+// ==== src/legoapi/render/core/render.cpp: declarations ====
+#include "gameapi/edtools/edbri_internal.h"
+#include "gameapi/edtools/edstubs.h"
+#include "legoapi/items/collect/torpedo.h"
+#include "legoapi/actions/character/transform.h"
+#include "legoapi/actions/movement/carrying.h"
+#include "legoapi/actions/character/snake.h"
+#include "legoapi/gizmos/object/gizbuildits.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/gizmos/door/zipups.h"
+#include "legoapi/menus/core/text.h"
+#include "legoapi/menus/core/gamehint.h"
+#include "legoapi/menus/core/panel.h"
+#include "legoapi/menus/core/gamemessages.h"
+#include "legoapi/menus/screens/arcade.h"
+#include "legoapi/render/light/fade_material.h"
+#include "legoapi/render/fx/edsplines.h"
+#include "legoapi/render/fx.h"
+#include "legoapi/world/level.h"
+#include "nu2api/nu3d/nuspecial.h"
+#include "nu2api/nu3d/android/nuportal_android.h"
+#include "nu2api/nu3d/nuvport.h"
+#include "nu2api/nucore/nuvuvec.hpp"
+#include "legoapi/cutscenes/cutscenes.h"
+
+#include "gameapi/gui/apimenu.h"
+#include "gameframework/saveload.h"
+#include "legoapi/characters/motion/gameanim.h"
+#include "legoapi/characters/motion/animlist.h"
+#include "legoapi/gizmo/base/gizmo.h"
+#include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/items/base/collection.h"
+#include "legoapi/world/levels/episode.h"
+#include "legoapi/world/mission.h"
+#include "legoapi/world/world_shared.h"
+#include "nu2api/nu3d/nutexanm.h"
+struct rtlidata_s;
+
+#include "legoapi/render/core/SwipeDecalRenderer.h"
+#include "nu2api/nu3d/nuprim_internal.h"
+#include "nu2api/nu3d/nudlist.h"
+#include "nu2api/nu3d/NuRenderDevice.h"
+#include "nu2api/nu3d/android/nurndr_android.h"
+#include "nu2api/nu3d/android/nugscn_android.h"
+#include "nu2api/nucore/bgproc.h"
+#include "nu2api/nucore/nuapi.h"
+#include "nu2api/nucore/nuanim3.h"
+#include "nu2api/nucore/nugcutscene.h"
+#include "nu2api/nucore/nuhgobj.h"
+#include "nu2api/nucore/nuptrblock.h"
+#include "nu2api/nucore/nuthread.h"
+#include "nu2api/numath/numath.h"
+
+// Camera zoom state
+
+// Graphics loading flags
+
+// --- NuGScn graphics-data reader ---
+// NuReadGraphicsData is a C++ static function in the original (GCC clones it,
+// hence the `.isra.NNN` suffix in the ROM symbol table).
+
+// Retail only keeps the IPA-SRA clone, which drops the unused fourth argument.
+#if defined(__i386__)
+#define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone, regparm(2)))
+#else
+#define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone))
+#endif
+
+// --- Extern "C": NuGScn functions have C linkage in original ---
+
+#include "nu2api/nu3d/nuprim.h"
+
+#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
+    do {                                                                                                               \
+        direction.x = (vx);                                                                                            \
+        direction.y = -(vy) * camera.aspect;                                                                           \
+        direction.z = adjacent;                                                                                        \
+        NuVecNorm(&direction, &direction);                                                                             \
+        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
+        NuVecNorm(&direction, &direction);                                                                             \
+        brightness = direction.y * 0.5f + 0.5f;                                                                        \
+        if (brightness <= near_angle)                                                                                  \
+            brightness = near_scale * parameters->intensity;                                                           \
+        else if (brightness >= far_angle)                                                                              \
+            brightness = far_scale * parameters->intensity;                                                            \
+        else                                                                                                           \
+            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
+        if (parameters->directional) {                                                                                 \
+            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
+            if (angle < parameters->direction_near_angle) {                                                            \
+                brightness += 128.0f * parameters->direction_far_scale;                                                \
+            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
+                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
+                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
+                                      parameters->direction_bias);                                                     \
+                brightness +=                                                                                          \
+                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
+                              parameters->direction_near_scale);                                                       \
+            }                                                                                                          \
+        }                                                                                                              \
+        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
+                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
+                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
+                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
+        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
+            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
+                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
+        else                                                                                                           \
+            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
+        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
+    } while (0)
+
+// DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
+// red-brick positions come from the Game init values in legogame/game.cpp.
+
+#define SWIPE_PRIM_UV(U, V)                                                                                            \
+    do {                                                                                                               \
+        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
+        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
+            vertex->float_uv[0] = (U);                                                                                 \
+            vertex->float_uv[1] = (V);                                                                                 \
+        } else {                                                                                                       \
+            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
+            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
+        }                                                                                                              \
+    } while (false)
+
+extern i32 qrand(void);
+extern f32 SeekLinearF(f32, f32, f32);
+
+// ==== functions in original address order ====
+
+// ==== src/legoapi/render/light/shadow.cpp: declarations ====
+
+#include "legoapi/render/light/shadow.h"
+
+void ResetShadowMapRendering();
+
+void EnableShadowMapRendering(i32);
+
+// ==== functions in original address order ====
+
+// ==== functions in original address order ====
+
+void SetLights(NUCOLOUR3 *colour0, NUVEC *direction0, NUCOLOUR3 *colour1, NUVEC *direction1, NUCOLOUR3 *colour2,
                NUVEC *direction2, NUVEC *ambient) {
     NuRndrLightingStateCurrent.direction[0] = *direction0;
     NuRndrLightingStateCurrent.direction[1] = *direction1;
@@ -55,22 +357,6 @@ void SetLights(NUCOLOUR3 *colour0, NUVEC *direction0, NUCOLOUR3 *colour1, NUVEC 
     NuRndrLightingStateCurrent.intensity[2] = *colour2;
     NuRndrSetDirectionalLightsPS(direction0, colour0, direction1, colour1, direction2, colour2);
 
-    NUCOLOUR3 *ambient_colour = reinterpret_cast<NUCOLOUR3 *>(ambient);
-    NuRndrLightingStateCurrent.ambient = *ambient_colour;
-    NuRndrSetAmbientLightPS(ambient_colour);
-}
-
-static inline __attribute__((always_inline)) void SetPanelLightsInline(NUCOLOUR3 *colour0, NUVEC *direction0,
-                                                                       NUCOLOUR3 *colour1, NUVEC *direction1,
-                                                                       NUCOLOUR3 *colour2, NUVEC *direction2,
-                                                                       NUVEC *ambient) {
-    NuRndrLightingStateCurrent.direction[0] = *direction0;
-    NuRndrLightingStateCurrent.direction[1] = *direction1;
-    NuRndrLightingStateCurrent.direction[2] = *direction2;
-    NuRndrLightingStateCurrent.intensity[0] = *colour0;
-    NuRndrLightingStateCurrent.intensity[1] = *colour1;
-    NuRndrLightingStateCurrent.intensity[2] = *colour2;
-    NuRndrSetDirectionalLightsPS(direction0, colour0, direction1, colour1, direction2, colour2);
     NUCOLOUR3 *ambient_colour = reinterpret_cast<NUCOLOUR3 *>(ambient);
     NuRndrLightingStateCurrent.ambient = *ambient_colour;
     NuRndrSetAmbientLightPS(ambient_colour);
@@ -163,6 +449,21 @@ void ResetLights(nuvec_s *position, rtldata_s *data, void *set) {
     }
 }
 
+extern "C" {
+    char *rtlGetEnvPath(void) {
+        return const_cast<char *>("_new");
+    }
+
+    char *rtlGetEnvSceneName(void) {
+        return WORLD->config_file;
+    }
+
+    rtlset *rtlGetEnvSet(void) {
+        return WORLD->rtl_set;
+    }
+
+}
+
 void SetZeroLights() {
     const NUCOLOUR3 black = {0.0f, 0.0f, 0.0f};
 
@@ -177,6 +478,51 @@ void SetZeroLights() {
     NUCOLOUR3 *ambient = reinterpret_cast<NUCOLOUR3 *>(&nuvec_zero);
     NuRndrLightingStateCurrent.ambient = *ambient;
     NuRndrSetAmbientLightPS(ambient);
+}
+
+void FindAndSetLights(nuvec_s *position, float scale, void *set) {
+    rtldata_s lights;
+    rtlResetEx(&lights, 1);
+    rtlDynamicMasterEnable(0);
+    rtlApplySetScale(set, &lights, position, NULL, -1, scale);
+    rtlDynamicMasterEnable(1);
+    rtlSetLights(&lights);
+}
+
+void LoadLights(WORLDINFO_s *world, char *path) {
+    char filename[268];
+    sprintf(filename, "%s.rtl", path);
+    world->rtl_set = rtlLoadSet(filename, &world->giz_buffer, world->unknown_0108.addr);
+    sprintf(filename, "%s.bur", path);
+    world->burnset = edrtlBurnoutLoad(filename, &world->giz_buffer, world->unknown_0108.addr);
+}
+
+void InitGameObjectLights(void) {
+    GameObject_s *object = Obj;
+    for (i32 i = 0; i < 64; ++i)
+        object[i].dynamic_light_id = -1;
+    for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++object) {
+        if ((object->apiobj.field_0x1f8 & 0x1001) != 0x1001)
+            continue;
+        object->dynamic_light_id = rtlDynamicAlloc();
+        if (object->dynamic_light_id == -1)
+            continue;
+        rtlDynamicSetType(object->dynamic_light_id, 2);
+        rtlDynamicEnable(object->dynamic_light_id, 0);
+    }
+}
+
+void FreeGameObjectLights() {
+    i32 i = 0;
+    GameObject_s *object = Obj;
+    for (; i < HIGHGAMEOBJECT; ++i, ++object) {
+        if ((object->apiobj.field_0x1f8 & 0x1001) != 0x1001)
+            continue;
+        if (object->dynamic_light_id == -1)
+            continue;
+        rtlDynamicFree(object->dynamic_light_id);
+        object->dynamic_light_id = -1;
+    }
 }
 
 void LightGameObject(GameObject_s *object, void *set) {
@@ -260,17 +606,15 @@ void LightGameObject(GameObject_s *object, void *set) {
     object->field_0xefc &= 0x7f;
 }
 
-void FindAndSetLights(nuvec_s *position, float scale, void *set) {
-    rtldata_s lights;
-    rtlResetEx(&lights, 1);
-    rtlDynamicMasterEnable(0);
-    rtlApplySetScale(set, &lights, position, NULL, -1, scale);
-    rtlDynamicMasterEnable(1);
-    rtlSetLights(&lights);
-}
-
-void SetSpotLightMode() {
-    NuLightSpotFadeSet(kNeutralSpotLightFade);
+void LightEverythingInEditor(void *light_set) {
+    rtlProcessLights(light_set, FRAMETIME);
+    GameObject_s *object = Obj;
+    for (i32 index = 0; index < HIGHGAMEOBJECT; ++index, ++object) {
+        if ((object->apiobj.field_0x1f8 & 0x1001) == 0x1001) {
+            object->field_0xefc |= 0x80;
+            LightGameObject(object, light_set);
+        }
+    }
 }
 
 __attribute__((force_align_arg_pointer)) void SetCreatureLights(APIOBJECT_s *object) {
@@ -392,38 +736,34 @@ __attribute__((force_align_arg_pointer)) void SetCreatureLights(APIOBJECT_s *obj
     }
 }
 
-void FreeGameObjectLights() {
-    i32 i = 0;
-    GameObject_s *object = Obj;
-    for (; i < HIGHGAMEOBJECT; ++i, ++object) {
-        if ((object->apiobj.field_0x1f8 & 0x1001) != 0x1001)
-            continue;
-        if (object->dynamic_light_id == -1)
-            continue;
-        rtlDynamicFree(object->dynamic_light_id);
-        object->dynamic_light_id = -1;
-    }
+void SetDepthOfField() {
 }
 
-void LoadLights(WORLDINFO_s *world, char *path) {
-    char filename[268];
-    sprintf(filename, "%s.rtl", path);
-    world->rtl_set = rtlLoadSet(filename, &world->giz_buffer, world->unknown_0108.addr);
-    sprintf(filename, "%s.bur", path);
-    world->burnset = edrtlBurnoutLoad(filename, &world->giz_buffer, world->unknown_0108.addr);
+void InitShadowLights() {
 }
 
-void InitGameObjectLights(void) {
-    GameObject_s *object = Obj;
-    for (i32 i = 0; i < 64; ++i)
-        object[i].dynamic_light_id = -1;
-    for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++object) {
-        if ((object->apiobj.field_0x1f8 & 0x1001) != 0x1001)
-            continue;
-        object->dynamic_light_id = rtlDynamicAlloc();
-        if (object->dynamic_light_id == -1)
-            continue;
-        rtlDynamicSetType(object->dynamic_light_id, 2);
-        rtlDynamicEnable(object->dynamic_light_id, 0);
-    }
+void SetShadowLight() {
+    STUBBED();
 }
+
+void RenderShadowLights(i32) {
+}
+
+void EnableShadowMapRendering(i32) {
+}
+
+void ResetShadowMapRendering() {
+}
+
+void SetSpotLightMode() {
+    NuLightSpotFadeSet(kNeutralSpotLightFade);
+}
+
+void ResetShadowMapRenderingFn() {
+    ResetShadowMapRendering();
+}
+
+void EnableShadowMapRenderingFn() {
+    EnableShadowMapRendering(0);
+}
+

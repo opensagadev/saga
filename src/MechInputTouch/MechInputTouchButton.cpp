@@ -213,16 +213,7 @@ void MechInputTouchButtonFaker::Update(NuInputTouchData const *data) {
     }
 }
 
-MechInputTouchMainDummyStick::MechInputTouchMainDummyStick(MechInputTouchMainController &main_controller,
-                                                           NuTouchInputElement::TYPE type)
-    : NuTouchInputElement(type, colourPurple, 0), controller(&main_controller) {
-}
 
-MechInputTouchMainDummyButton::MechInputTouchMainDummyButton(MechInputTouchMainController &main_controller, u32 id,
-                                                             MechInputTouchMainController::eButtonTypes type)
-    : NuTouchInputElement(TYPE_BUTTON, colourPurple, id, 0.0f, 0.0f, 0.0f, 0.0f), controller(&main_controller),
-      button_type(static_cast<u32>(type)) {
-}
 
 MechInputTouchButtonControlled::MechInputTouchButtonControlled(MechInputTouchMainController &, i32 index)
     : MechInputTouchButton(NuTouchInputElement::TYPE(), 2, 0), controller_index(index) {

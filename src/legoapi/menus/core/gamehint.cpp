@@ -26,15 +26,15 @@
 
 LSW_HINTCONDITIONS_s LSW_HintConditions;
 HINTSYS_s hintsys = {};
-HINTUIBUTTON_s *hintUIButton = NULL;
+extern HINTUIBUTTON_s * hintUIButton;
 extern f32 AlphaBlendTime;
 extern f32 ICONX;
 extern f32 ICONXPOS_TOUCHYFEELY;
 extern f32 ICONYPOS_TOUCHYFEELY;
 extern f32 ICONXPOS_VIRTUALS;
 extern f32 ICONYPOS_VIRTUALS;
-f32 (*Hint_AlphaTargetFn)();
-i32 (*Hub_PanelBusyFn)();
+extern f32 (*Hint_AlphaTargetFn)();
+extern i32 (*Hub_PanelBusyFn)();
 extern i32 only_process_this_hint_id;
 f32 SeekLinearF(f32, f32, f32);
 void Hint_SetHint(HINT_s *, i32, i32);
@@ -49,78 +49,9 @@ DECOMP_ASSERT(sizeof(MechHintUIButton) == 0xa8, "MechHintUIButton size");
 DECOMP_ASSERT(offsetof(MechHintUIButton, pending_hint) == 0x7c, "Pending touch hint offset");
 DECOMP_ASSERT(offsetof(MechHintUIButton, display_elapsed) == 0x80, "Touch hint display timer offset");
 
-void MechHintUIButton_OnClick_Callback(MechTouchUIElement &element, TouchHolder &) {
-    MechHintUIButton &button = static_cast<MechHintUIButton &>(element);
-    hintsys.active_hint = button.active_hint;
-    if (button.active_hint != NULL) {
-        if (button.active_hint->on_display != NULL)
-            button.active_hint->on_display(button.active_hint);
-        if (button.active_hint != NULL) {
-            const f32 blend = AlphaBlendTime;
-            button.pending_hint = NULL;
-            button.slide_from = *button.slide_target;
-            button.slide_to = -1.5f;
-            button.slide_elapsed = 0.0f;
-            button.slide_delay = 0.0f;
-            button.active_hint = NULL;
-            button.slide_duration = blend;
-            button.alpha_from = *button.alpha_target;
-            button.pulse_active = 0;
-            button.alpha_to = 0.0f;
-            button.alpha_elapsed = 0.0f;
-            button.alpha_delay = 0.0f;
-            button.alpha_duration = blend;
-        }
-    }
-    const f32 x = button.slide;
-    const f32 y = button.position.y;
-    hintIconPos.from = VuVec(x, y, 1.0f, 1.0f);
-    hintIconPos.to = VuVec(-ICONX, -0.7f, 1.0f, 1.0f);
-    hintIconPos.duration = 0.5f;
-    hintIconPos.delay = 0.0f;
-    hintIconPos.elapsed = 0.0f;
-    hintIconPos.target->z = 1.0f;
-    hintIconPos.target->w = 1.0f;
-    hintIconPos.target->x = x;
-    hintIconPos.target->y = y;
-    const f32 scale = button.scale;
-    hintIconScale.from = scale;
-    hintIconScale.to = 0.5f;
-    hintIconScale.elapsed = 0.0f;
-    hintIconScale.duration = 0.5f;
-    hintIconScale.delay = 0.0f;
-    *hintIconScale.target = scale;
-    hintYPop.value = 0.0f;
-    hintYPop.from = 0.0f;
-    hintYPop.to = 32768.0f;
-    hintYPop.elapsed = 0.0f;
-    hintYPop.duration = 0.4f;
-    hintYPop.delay = 0.0f;
-    *hintYPop.target = 0.0f;
-    *button.slide_target = button.slide_to;
-    button.slide = -1.5f;
-    button.slide_to = -1.5f;
-    button.slide_elapsed = button.slide_duration;
-    GameAudio_PlaySfx(0x30, NULL, 0, 0);
-}
+void MechHintUIButton_OnClick_Callback(MechTouchUIElement &element, TouchHolder &);
 
-void initHintSys() {
-    hintsys.current_hint = 0;
-    hintsys.state = 2;
-    hintsys.active_hint = NULL;
-    MechHintUIButton *button = new MechHintUIButton();
-    button->UpdateTexture(MechInputTouchVirtualConsoleController::s_textures[3]);
-    button->alpha = 0.0f;
-    button->alpha_to = 0.0f;
-    button->slide = -1.5f;
-    button->visible = 0;
-    button->slide_to = -1.5f;
-    button->pulse_active = 0;
-    button->slide_elapsed = button->slide_duration;
-    hintUIButton = reinterpret_cast<HINTUIBUTTON_s *>(button);
-    button->alpha_elapsed = button->alpha_duration;
-    MechSystems::Get()->TouchUI().AddUIElement(*button);
-}
+void initHintSys();
 
 void MechHintUIButton::Render() {
     if (NewMode != 0 || NewLData != NULL)
@@ -224,512 +155,49 @@ i32 HINT_COMPLETE(i32 hint_id);
 void SET_HINT_COMPLETE(i32 hint_id);
 void Hint_SaveGameState(HINT_s *hint);
 void initHintSys();
-void Hint_Reset() {
-    HINT_s *hint = hintsys.hints;
-    if (hint == NULL) {
-        return;
-    }
+void Hint_Reset();
 
-    while (hint->control_mode_ids[0] != -1) {
-        hint->field_0x20 = 0;
-        hint++;
-    }
+void Hint_Process(float elapsed);
 
-    hintsys.state = 2;
-    hintsys.current_hint = 0;
+void Hint_SetHint(HINT_s *hint, i32 force, i32 allow_completed);
 
-    HINTUIBUTTON_s *button = hintUIButton;
-    if (button->field_0x78 != NULL) {
-        f32 alpha_blend_time = AlphaBlendTime;
-        button->field_0x7c = 0;
-        f32 field_0x84 = *button->field_0x84;
-        f32 *field_0x40 = button->field_0x40;
-        button->field_0x8c = -1.5f;
-        button->field_0x90 = 0.0f;
-        button->field_0x98 = 0.0f;
-        button->field_0x88 = field_0x84;
-        button->field_0x78 = NULL;
-        button->field_0x94 = alpha_blend_time;
-        f32 field_0x40_value = *field_0x40;
-        button->field_0xa0 = 0;
-        button->field_0x48 = 0.0f;
-        button->field_0x4c = 0.0f;
-        button->field_0x54 = 0.0f;
-        button->field_0x44 = field_0x40_value;
-        button->field_0x50 = alpha_blend_time;
-    }
+HINT_s *Hint_FindHint(i32 hint_id);
 
-    hintsys.field_0x1c = 0;
-}
+void Hint_SaveBits(i32 hint_id, i32 complete);
 
-void Hint_Process(float elapsed) {
-    WORLDINFO *world = WorldInfo_CurrentlyActive();
-    const i32 only_hint = only_process_this_hint_id;
-    only_process_this_hint_id = -1;
-    hintIconPos.Update(elapsed);
-    hintIconScale.Update(elapsed);
-    hintYPop.Update(elapsed);
-    if (hintsys.hints == NULL)
-        return;
+i32 Hint_CurrentId();
 
-    i32 available =
-        HINTS_ON != 0 && CUTSTOPGAME == 0 && MiniCutCam != 1 && MiniCutCam != 2 && MiniCutCam != 3 && SuperStory == 0 &&
-        BonusArea == 0 && (world->current_level->flags & 0x200) == 0 &&
-        (world->area == NULL || (world->area->flags & 0x124) == 0) && GetMenuID() == -1 && FadeSys.fade == 0.0f &&
-        (world->area == NULL || world->area != HUB_ADATA || Hub_PanelBusyFn == NULL || Hub_PanelBusyFn() == 0);
-    if (ChallengeMode != 0)
-        available = false;
-    else if (Mission_Active(NULL) != NULL)
-        available = false;
-    if (hintUIButton->field_0x78 != NULL || hintUIButton->field_0x7c != NULL)
-        available = false;
+void Hint_ResetHint(i32 hint_id, i32 reset_completed);
 
-    for (HINT_s *hint = hintsys.hints; hint->control_mode_ids[0] != -1; ++hint) {
-        if (hintsys.active_hint != hint && hint->field_0x20 > 0.0f)
-            hint->field_0x20 -= elapsed;
-        if (only_hint != -1 && hint->control_mode_ids[0] != only_hint)
-            continue;
-        const i32 control_mode = MechInputTouchSystem::s_baseControlMode;
-        const i32 id = hint->control_mode_ids[control_mode];
-        if (id == -1 || TTab[id] == NULL || !available || hintUIButton->field_0x78 != NULL ||
-            hintUIButton->field_0x7c != NULL || hintsys.active_hint != NULL ||
-            hint->completion_flags[control_mode] != 0 || hint->availability_fn == NULL)
-            continue;
-        if (hint->availability_fn(hint) == 0 || hint->field_0x20 > 0.0f ||
-            hint->completion_flags[MechInputTouchSystem::s_baseControlMode] == 1)
-            continue;
-        Hint_SetHint(hint, 0, 0);
-    }
+i32 Hint_isComplete(HINT_s *hint);
 
-    const f32 target = Hint_AlphaTargetFn != NULL ? Hint_AlphaTargetFn() : 1.0f;
-    hintsys.alpha = SeekLinearF(hintsys.alpha, target, 3.0f * FRAMETIME);
-    HINT_s *hint = hintsys.active_hint;
-    if (hint != NULL) {
-        hintsys.display_elapsed += elapsed;
-        if ((hint->display_duration > 0.0f && hintsys.display_elapsed >= hint->display_duration) ||
-            MechSystems::Get()->PlayerButton().selector != NULL)
-            hintsys.active_hint = NULL;
-    }
-}
+i32 Hint_isComplete(i32 hint_id);
 
-void Hint_SetHint(HINT_s *hint, i32 force, i32 allow_completed) {
-    if (hintsys.active_hint != NULL && hintsys.active_hint == hint)
-        return;
-    HINTUIBUTTON_s *button = hintUIButton;
-    if (button->field_0x78 != NULL && button->field_0x78 == hint)
-        return;
-    if (hint == NULL) {
-        hintsys.active_hint = NULL;
-        if (button->field_0x78 != NULL) {
-            const f32 blend_time = AlphaBlendTime;
-            button->field_0x7c = NULL;
-            const f32 position = *button->field_0x84;
-            f32 *alpha = button->field_0x40;
-            button->field_0x8c = -1.5f;
-            button->field_0x90 = 0.0f;
-            button->field_0x98 = 0.0f;
-            button->field_0x88 = position;
-            button->field_0x78 = NULL;
-            button->field_0x94 = blend_time;
-            const f32 alpha_value = *alpha;
-            button->field_0xa0 = 0;
-            button->field_0x48 = 0.0f;
-            button->field_0x4c = 0.0f;
-            button->field_0x54 = 0.0f;
-            button->field_0x50 = blend_time;
-            button->field_0x44 = alpha_value;
-        }
-        return;
-    }
-    if (force == 0) {
-        if (hint->completion_flags[MechInputTouchSystem::s_baseControlMode] != 0 && allow_completed == 0)
-            return;
-        if (hint->field_0x20 > 0.0f)
-            return;
-    }
-    if ((hint->flags & 8) == 0) {
-        if (button->field_0x78 != hint) {
-            const f32 blend_time = AlphaBlendTime;
-            button->field_0x7c = hint;
-            const f32 position = *button->field_0x84;
-            f32 *alpha = button->field_0x40;
-            button->field_0x8c = -1.5f;
-            button->field_0x90 = 0.0f;
-            button->field_0x98 = 0.0f;
-            button->field_0x88 = position;
-            button->field_0x94 = blend_time;
-            const f32 alpha_value = *alpha;
-            button->field_0xa0 = 0;
-            button->field_0x48 = 0.0f;
-            button->field_0x4c = 0.0f;
-            button->field_0x54 = 0.0f;
-            button->field_0x44 = alpha_value;
-            button->field_0x50 = blend_time;
-        }
-    } else {
-        if (button->field_0x78 != NULL) {
-            const f32 blend_time = AlphaBlendTime;
-            button->field_0x7c = NULL;
-            const f32 position = *button->field_0x84;
-            f32 *alpha = button->field_0x40;
-            button->field_0x8c = -1.5f;
-            button->field_0x90 = 0.0f;
-            button->field_0x98 = 0.0f;
-            button->field_0x88 = position;
-            button->field_0x78 = NULL;
-            button->field_0x94 = blend_time;
-            const f32 alpha_value = *alpha;
-            button->field_0xa0 = 0;
-            button->field_0x48 = 0.0f;
-            button->field_0x4c = 0.0f;
-            button->field_0x54 = 0.0f;
-            button->field_0x44 = alpha_value;
-            button->field_0x50 = blend_time;
-        }
-        hintsys.active_hint = hint;
-        if (hint->on_display != NULL)
-            hint->on_display(hint);
-    }
-    hintsys.current_hint = 0;
-    hintsys.field_0x1c = 0;
-    if (force == 0 && (hint->flags & 1) != 0) {
-        hint->completion_flags[MechInputTouchSystem::s_baseControlMode] = 1;
-        Hint_SaveGameState(hint);
-    }
-    i32 state;
-    do {
-        state = qrand() / 16384;
-    } while (state == hintsys.state);
-    hintsys.state = static_cast<u8>(state);
-    hint->field_0x20 = hint->repeat_delay;
-    hintsys.field_0x1c = 0;
-}
+void Hint_SetComplete(HINT_s *hint);
 
-HINT_s *Hint_FindHint(i32 hint_id) {
-    HINT_s *hint = hintsys.hints;
-    if (hint == NULL) {
-        return NULL;
-    }
+void Hint_SetComplete(i32 hint_id);
 
-    while (hint->control_mode_ids[0] != -1) {
-        if (hint->control_mode_ids[0] == hint_id || hint->control_mode_ids[1] == hint_id) {
-            return hint;
-        }
-        ++hint;
-    }
-    return NULL;
-}
+i32 Hint_isAvailable(i32 hint_id);
 
-void Hint_SaveBits(i32 hint_id, i32 complete) {
-    if (complete != 0) {
-        SET_HINT_COMPLETE(hint_id);
-        return;
-    }
-    CLEAR_HINT_COMPLETE(hint_id);
-}
+void Hint_CancelCurrent();
 
-i32 Hint_CurrentId() {
-    HINT_s *hint = hintsys.active_hint;
-    if (hint == NULL) {
-        return -1;
-    }
-    return hint->control_mode_ids[MechInputTouchSystem::s_baseControlMode];
-}
+void Hint_ExpandButtons(char *input, char *output);
 
-void Hint_ResetHint(i32 hint_id, i32 reset_completed) {
-    HINT_s *hint = hintsys.hints;
-    if (hint == NULL || hint->control_mode_ids[0] == -1) {
-        return;
-    }
+void Hint_SaveGameState(HINT_s *hint);
 
-    i32 control_mode = MechInputTouchSystem::s_baseControlMode;
-    while (hint->control_mode_ids[control_mode] != hint_id) {
-        hint++;
-        if (hint->control_mode_ids[0] == -1) {
-            return;
-        }
-    }
+void Hint_SetHintFromId(i32 hint_id, i32 force, i32 allow_completed);
 
-    if (reset_completed == 1) {
-        hint->completion_flags[control_mode] = 0;
-    }
-    hintsys.current_hint = 0;
-}
+void Hint_SaveAllGameState();
 
-i32 Hint_isComplete(HINT_s *hint) {
-    return hint->completion_flags[MechInputTouchSystem::s_baseControlMode];
-}
+void Hint_LoadAllGameState();
 
-i32 Hint_isComplete(i32 hint_id) {
-    HINT_s *hint = hintsys.hints;
-    if (hint == NULL) {
-        return 0;
-    }
+void Hint_ClearHintsAndDoneFlags();
 
-    hint = Hint_FindHint(hint_id);
-    if (hint == NULL) {
-        return 0;
-    }
-    return hint->completion_flags[MechInputTouchSystem::s_baseControlMode];
-}
-
-void Hint_SetComplete(HINT_s *hint) {
-    if (hint == NULL) {
-        return;
-    }
-
-    const i32 control_mode = MechInputTouchSystem::s_baseControlMode;
-    if (hint->completion_flags[control_mode] == 0) {
-        hint->completion_flags[control_mode] = 1;
-        Hint_SaveGameState(hint);
-    }
-}
-
-void Hint_SetComplete(i32 hint_id) {
-    if (hint_id == -1) {
-        return;
-    }
-
-    HINT_s *hint = Hint_FindHint(hint_id);
-    if (hint == NULL || (hint->flags & 0x40) == 0) {
-        return;
-    }
-
-    const i32 control_mode = MechInputTouchSystem::s_baseControlMode;
-    if (hint->completion_flags[control_mode] == 0) {
-        hint->completion_flags[control_mode] = 1;
-        Hint_SaveGameState(hint);
-    }
-}
-
-i32 Hint_isAvailable(i32 hint_id) {
-    HINT_s *active_hint = hintsys.active_hint;
-    if (active_hint != NULL && active_hint->control_mode_ids[MechInputTouchSystem::s_baseControlMode] == hint_id) {
-        return 0;
-    }
-    if (hint_id < 0 || TTab[hint_id] == NULL) {
-        return 0;
-    }
-
-    HINT_s *hint = Hint_FindHint(hint_id);
-    if (hint == NULL || hint->completion_flags[MechInputTouchSystem::s_baseControlMode] != 0) {
-        return 0;
-    }
-    return !(hint->field_0x20 > 0.0f);
-}
-
-void Hint_CancelCurrent() {
-    HINT_s *hint = hintsys.active_hint;
-    if (hint != NULL) {
-        if (hint->display_duration != 0.0f && hint->display_duration - 0.5f > hintsys.display_elapsed)
-            hintsys.display_elapsed = hint->display_duration - 0.5f;
-        hint->field_0x20 = 0.0f;
-    }
-    HINTUIBUTTON_s *button = hintUIButton;
-    if (button->field_0x78 != NULL) {
-        const f32 blend_time = AlphaBlendTime;
-        button->field_0x7c = NULL;
-        const f32 position = *button->field_0x84;
-        f32 *alpha = button->field_0x40;
-        button->field_0x8c = -1.5f;
-        button->field_0x90 = 0.0f;
-        button->field_0x98 = 0.0f;
-        button->field_0x88 = position;
-        button->field_0x78 = NULL;
-        button->field_0x94 = blend_time;
-        const f32 alpha_value = *alpha;
-        button->field_0xa0 = 0;
-        button->field_0x48 = 0.0f;
-        button->field_0x4c = 0.0f;
-        button->field_0x54 = 0.0f;
-        button->field_0x44 = alpha_value;
-        button->field_0x50 = blend_time;
-    }
-}
-
-void Hint_ExpandButtons(char *input, char *output) {
-    char token[256];
-    char expanded[64];
-
-    *output = '\0';
-    while (*input != '\0') {
-        if (*input != '[') {
-            *output = *input;
-            output[1] = '\0';
-            ++input;
-            ++output;
-            continue;
-        }
-
-        token[0] = '[';
-        i32 token_length = 1;
-        while (input[token_length] != ']' && input[token_length] != '\0') {
-            token[token_length] = input[token_length];
-            ++token_length;
-        }
-
-        char literal = '[';
-        if (input[token_length] != '\0') {
-            token[token_length] = ']';
-            token[token_length + 1] = '\0';
-            token_length = NuStrLen(token);
-            if (token_length > 0 && Text_ExpandButtonString(token, expanded) != 0) {
-                char *character = expanded;
-                while (*character != '\0') {
-                    *output = *character;
-                    output[1] = '\0';
-                    ++character;
-                    ++output;
-                }
-                NuStrCat(output, expanded);
-                input += token_length;
-                continue;
-            }
-            literal = *input;
-        }
-
-        *output = literal;
-        output[1] = '\0';
-        ++input;
-        ++output;
-    }
-    *output = '\0';
-}
-
-void Hint_SaveGameState(HINT_s *hint) {
-    HINT_s *candidate = hintsys.hints;
-    if (candidate == NULL) {
-        return;
-    }
-    if (hintsys.save_bits == NULL) {
-        return;
-    }
-    if (candidate->control_mode_ids[0] == -1) {
-        return;
-    }
-
-    const u16 hint_id = static_cast<u16>(hint->control_mode_ids[0]);
-    i32 index = 0;
-    u16 candidate_id = static_cast<u16>(candidate->control_mode_ids[0]);
-    if (candidate_id == hint_id) {
-        goto found;
-    }
-    do {
-        ++candidate;
-        ++index;
-        candidate_id = static_cast<u16>(candidate->control_mode_ids[0]);
-        if (candidate_id == 0xffff) {
-            return;
-        }
-    } while (candidate_id != hint_id);
-
-found:
-    Hint_SaveBits(index, 1);
-}
-
-void Hint_SetHintFromId(i32 hint_id, i32 force, i32 allow_completed) {
-    if (hintsys.active_hint != NULL &&
-        hintsys.active_hint->control_mode_ids[MechInputTouchSystem::s_baseControlMode] == hint_id)
-        return;
-    if (hint_id < 0 || TTab[hint_id] == NULL) {
-        HINTUIBUTTON_s *button = hintUIButton;
-        if (button->field_0x78 != NULL) {
-            const f32 blend_time = AlphaBlendTime;
-            button->field_0x7c = NULL;
-            const f32 position = *button->field_0x84;
-            f32 *alpha = button->field_0x40;
-            button->field_0x8c = -1.5f;
-            button->field_0x90 = 0.0f;
-            button->field_0x98 = 0.0f;
-            button->field_0x88 = position;
-            button->field_0x78 = NULL;
-            button->field_0x94 = blend_time;
-            const f32 alpha_value = *alpha;
-            button->field_0xa0 = 0;
-            button->field_0x48 = 0.0f;
-            button->field_0x4c = 0.0f;
-            button->field_0x54 = 0.0f;
-            button->field_0x44 = alpha_value;
-            button->field_0x50 = blend_time;
-        }
-        return;
-    }
-    HINT_s *hint = Hint_FindHint(hint_id);
-    if (hint != NULL)
-        Hint_SetHint(hint, force, allow_completed);
-}
-
-void Hint_SaveAllGameState() {
-    HINT_s *hint = hintsys.hints;
-    if (hint == NULL) {
-        return;
-    }
-    u32 *save_bits = hintsys.save_bits;
-    if (save_bits == NULL || hint->control_mode_ids[0] == -1) {
-        return;
-    }
-
-    i32 index = 0;
-    const i32 control_mode = MechInputTouchSystem::s_baseControlMode;
-    do {
-        if (hint->completion_flags[control_mode] != 0) {
-            Hint_SaveBits(index, 1);
-        } else {
-            Hint_SaveBits(index, 0);
-        }
-        ++hint;
-        ++index;
-    } while (hint->control_mode_ids[0] != -1);
-}
-
-void Hint_LoadAllGameState() {
-    HINTSYS_s *system = &hintsys;
-    HINT_s *hint = system->hints;
-    if (hint == NULL || system->save_bits == NULL || hint->control_mode_ids[0] == -1) {
-        return;
-    }
-
-    for (i32 index = 0; (index >> 5) < system->save_bit_count; ++index) {
-        if (HINT_COMPLETE(index) == 0) {
-            hint->completion_flags[MechInputTouchSystem::s_baseControlMode] = 0;
-        } else {
-            hint->completion_flags[MechInputTouchSystem::s_baseControlMode] = 1;
-        }
-        ++hint;
-        if (hint->control_mode_ids[0] == -1) {
-            return;
-        }
-    }
-}
-
-void Hint_ClearHintsAndDoneFlags() {
-    HINT_s *hint = hintsys.hints;
-    if (hint == NULL || hint->control_mode_ids[0] == -1) {
-        return;
-    }
-
-    i32 control_mode = MechInputTouchSystem::s_baseControlMode;
-    do {
-        hint->completion_flags[control_mode] = 0;
-        hint->flags &= ~0x42;
-        hint++;
-    } while (hint->control_mode_ids[0] != -1);
-}
-
-void Hint_Draw(i32 viewport) {
-    if (hintsys.active_hint != NULL && hintsys.update_fn != NULL)
-        hintsys.update_fn(hintsys.active_hint, viewport);
-}
+void Hint_Draw(i32 viewport);
 
 // Static game message and hint helpers. Stubbed to satisfy the symbol baseline.
 
-void RegisterWithHintSys(void (*update_fn)(HINT_s *, i32), HINT_s *hints, u32 *save_bits, i32 save_bit_count) {
-    hintsys.update_fn = update_fn;
-    hintsys.hints = hints;
-    hintsys.save_bits = save_bits;
-    hintsys.save_bit_count = save_bit_count;
-    initHintSys();
-}
+void RegisterWithHintSys(void (*update_fn)(HINT_s *, i32), HINT_s *hints, u32 *save_bits, i32 save_bit_count);
 
 // ==== src/legoapi/menus/core/hint.cpp: declarations ====
 #include "decomp.h"

@@ -1,5 +1,8 @@
+// Original translation unit reconstructed from the reference address map.
+// Functions are defined in original address order.
+
 #include "decomp.h"
-#include "MechInputTouch_types.h"
+#include "MechInputTouch/MechInputTouch_types.h"
 
 #include "gameapi/ai/aisys/aisys.h"
 #include "legoapi/ai/core/legoai.h"
@@ -43,6 +46,919 @@ namespace {
     };
     DECOMP_ASSERT(sizeof(AutoJumpStreakLink) == 0x40, "AutoJumpStreakLink size");
 } // namespace
+
+// ==== src/legoapi/ai/core/aisysall.cpp: declarations ====
+
+#include "legoapi/items/base/apiobject.h"
+#include "legoapi/ai/core/ai_sys_stubs.h"
+#include "legoapi/legoapi_types.h"
+#include "nu2api/nu3d/nutex.h"
+#include "nu2api/numath/nurand.h"
+#include "nu2api/numath/nufloat.h"
+#include "nu2api/numath/nuvec.h"
+#include <string.h>
+
+#include <float.h>
+#include <math.h>
+
+// ---- begin src/legoapi/ai/core/aipathbuild.cpp ----
+#include "editor/edpath.h"
+#include "nu2api/nu3d/nuspecial.h"
+
+static __used__ f32 **pathEditorCalculateDistanceTable(AIPATH_s *path, i32 route_mask, variptr_u *cursor,
+                                                       variptr_u *end);
+
+// The route records use a dense route index, while the editor keeps sixteen
+// independently switchable slots.  The original helper first marks both ends
+// of every route connection, then builds the compact node lookup and matrix.
+#if defined(__i386__)
+#define AIPATHBUILD_CLONE_ATTR2 __attribute__((noinline, noclone, regparm(2)))
+#else
+#define AIPATHBUILD_CLONE_ATTR2 __attribute__((noinline, noclone))
+#endif
+// Retail keeps only the IPA-SRA clone, without the unused path index.
+
+// ---- end src/legoapi/ai/core/aipathbuild.cpp ----
+
+// Retail keeps several static helpers here only as GCC clones; these attributes
+// reproduce the clone names and register conventions.
+#if defined(__i386__)
+#define AISYSALL_CLONE_ATTR1 __attribute__((noinline, noclone, regparm(1)))
+#define AISYSALL_CLONE_ATTR2 __attribute__((noinline, noclone, regparm(2)))
+#define AISYSALL_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
+#else
+#define AISYSALL_CLONE_ATTR1 __attribute__((noinline, noclone))
+#define AISYSALL_CLONE_ATTR2 __attribute__((noinline, noclone))
+#define AISYSALL_CLONE_ATTR2_SSE __attribute__((noinline, noclone))
+#endif
+
+// IPA-SRA keeps only the fields this helper reads: values for those read before any call,
+// addresses for those read after one.
+
+#include "legoapi/ai/core/ai_pathgeometry.h"
+
+// IPA-SRA hands this clone the address of system->path_sys rather than the system.
+
+bool AISysNodeCanReachThisJumpConnection(GameObject_s &, AIPATH_s &path, unsigned char node_index,
+                                         AIPATHCNX_s &jump_connection, i32 jump_direction);
+
+bool AISysCharacterCanReachThisJumpConnection(GameObject_s &object, AIPATH_s &path, AIPATHCNX_s &jump_connection,
+                                              i32 jump_direction);
+
+u32 DoSomeChecks(GameObject_s &object, AIPATH_s &path, AIPATHCNX_s &connection, i32 direction);
+
+// ---- begin src/gameapi/ai/aisys/aisys.cpp ----
+
+#include "legoapi/actions/combat/hits.h"
+
+#include "legoapi/actions/character/speederchase.h"
+
+#include "batman.h"
+
+#include <stdio.h>
+
+#include "legoapi/characters/core/character.h"
+
+#include "legoapi/characters/core/charconfig.h"
+
+#include "legoapi/characters/core/players.h"
+
+#include "legoapi/characters/motion/gameanim.h"
+
+#include "legoapi/audio/sfx.h"
+
+#include "legoapi/items/objects/gameobjects.h"
+
+#include "legoapi/menus/core/panel.h"
+
+#include "legoapi/core/input/gamepads.h"
+
+#include "legoapi/core/input/qrand.h"
+
+#include "legoapi/gizmo/base/gizmo.h"
+
+#include "legoapi/gizmo/base/gizactions.h"
+
+#include "legoapi/gizmos/traps/gizturrets.h"
+
+#include "legoapi/gizmos/object/gizobstacles.h"
+
+#include "legoapi/gizmos/object/gizbuildits.h"
+
+#include "legoapi/gizmo/object/takeoverobjects.h"
+
+#include "legoapi/gizmo/object/gizmoblowups.h"
+
+#include "legoapi/gizmos/fx/gizmopickups.h"
+
+#include "legoapi/gizmo/object/gizmopickup.h"
+
+#include "legoapi/gizmos/object/newblowup.h"
+
+#include "legoapi/gizmos/traps/gizforce.h"
+
+#include "legoapi/gizmos/trigger/gizspecial.h"
+
+#include "legoapi/gizmos/transport/grapples.h"
+
+#include "legoapi/gizmos/door/zipups.h"
+
+#include "legoapi/props/system/socksys.h"
+
+#include "legoapi/render/fx.h"
+
+#include "legoapi/world/level.h"
+
+#include "legoapi/world/area.h"
+
+#include "legoapi/world/world_shared.h"
+
+#include "nu2api/nucore/nustring.h"
+
+#include "nu2api/nu3d/nuspline.h"
+
+#include "nu2api/nu3d/nulgtlaser.h"
+
+#include "nu2api/numath/nuang.h"
+
+// Game-specific AI actions and conditions (registered via
+// RegisterAIScriptActions / RegisterAIScriptConditions). These are stubbed to
+// satisfy the symbol baseline; the action/condition logic itself is not
+// decompiled. Each stub matches the mangled symbol of the original binary.
+
+#include "legoapi/props/objects/techno.h"
+
+static __used__ i32 Action_IgnoreWallSplines(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params,
+                                             i32 param_count, i32 first_time, f32);
+
+static __used__ i32 Action_OverrideAnimation(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,
+                                             i32 param_count, i32 first_time, f32);
+
+static __used__ i32 Action_NotifyStateChange(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s *, char **params,
+                                             i32 param_count, i32, f32);
+
+extern AIACTIONDEF api_aiactiondefs[55];
+
+extern AICONDITIONDEF api_aiconditiondefs[50];
+
+DECOMP_ASSERT(sizeof(api_aiactiondefs) == 0x294, "API action registry size");
+
+DECOMP_ASSERT(sizeof(api_aiconditiondefs) == 0x258, "API condition registry size");
+
+// ---- end src/gameapi/ai/aisys/aisys.cpp ----
+
+// ==== src/gameapi/ai/aisys/aiscript.cpp: all remaining content ====
+
+#include "nu2api/nucore/common.h"
+#include "nu2api/nucore/nulist.h"
+#include "nu2api/nucore/nurdp.h"
+#include "nu2api/nufile/nufile.h"
+#include "nu2api/nufile/nufilepak.h"
+#include "nu2api/nufile/nufpar.h"
+
+#if defined(__i386__)
+#define AISCRIPT_CLONE_ATTR2 __attribute__((noinline, noclone, regparm(2)))
+#else
+#define AISCRIPT_CLONE_ATTR2 __attribute__((noinline, noclone))
+#endif
+
+// Retail inlines the "goto" test into each caller; this is the remaining partial clone.
+
+// Retail inlines the system test into its callers; this is the remaining partial clone.
+
+#include "legoapi/ai/core/aisysall_types.h"
+
+void RegisterAIScriptActions(AIACTIONDEF *action_defs);
+
+void RegisterAIScriptConditions(AICONDITIONDEF *cond_defs);
+
+// ==== src/legoapi/ai/core/ai_sys_stubs.cpp: declarations ====
+#include "editor/aieditor_state.h"
+#include "editor/antinode_editor_private.h"
+#include "gameapi/edtools/edfile.h"
+#include "nu2api/nu3d/nurndr.h"
+#include "nu2api/numath/nuplane.h"
+
+static __used__ i32 RowMoveWander(AIGROUP *group, AIROW *row, AIROW *previous, APIOBJECT *leader);
+
+static __used__ i32 RowMoveTowards(AIGROUP *group, AIROW *row, AIROW *previous, APIOBJECT *leader);
+
+extern "C" {
+
+#include "legoapi/ai/core/ai_sys_stubs_types.h"
+    DECOMP_ASSERT(sizeof(RebuildEditorCreature) == 0xac, "editor creature rebuild stride");
+    DECOMP_ASSERT(offsetof(RebuildEditorCreature, path_check) == 0x38, "editor creature path offset");
+    DECOMP_ASSERT(offsetof(RebuildEditorCreature, activation_area) == 0x6c, "editor creature area offset");
+    DECOMP_ASSERT(offsetof(RebuildEditorCreature, activation) == 0x8f, "editor creature activation offset");
+
+} // extern "C"
+
+#if defined(__i386__)
+#define AI_SYS_STUBS_CLONE_ATTR2 __attribute__((noinline, noclone, regparm(2)))
+#else
+#define AI_SYS_STUBS_CLONE_ATTR2 __attribute__((noinline, noclone))
+#endif
+
+// Retail keeps only the IPA-SRA clone, without the unused object and elapsed time.
+
+extern "C" {
+
+extern AIEDITOR_RENDER_STATE * aieditor;
+
+} // extern "C"
+
+// ==== src/editor/area_editor.cpp: all remaining content ====
+#include "editor/aieditor_settings.h"
+#include "gameapi/edtools/edcam.h"
+#include "gameapi/edtools/edui.h"
+#include "nu2api/nucore/nupad.h"
+#include "nu2api/nu3d/nuqfnt.h"
+
+DECOMP_ASSERT(sizeof(EDAIAREA_s) == 0x44, "area editor record size");
+
+// Item colours shared by the AI editors.
+
+static __used__ void areaEditor_cbDeleteArea(eduimenu_s *menu, eduiitem_s *, unsigned int);
+
+static __used__ void areaEditor_cbRenameArea(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+static __used__ void areaEditor_cbCancelRenameMenu(eduimenu_s *menu, eduimenu_s *);
+
+static __used__ void areaEditor_cbRenameAreaMenu(eduimenu_s *parent, eduiitem_s *, unsigned int);
+
+static __used__ void areaEditor_cbAreaCylinderToggle(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+// ==== src/editor/edpath.cpp: all remaining content ====
+#include "editor/path_connections.h"
+#include <stdint.h>
+
+DECOMP_ASSERT(sizeof(AIPATHCNXTYPE_s) == 0x4c, "editor path connection type size");
+DECOMP_ASSERT(offsetof(AIPATHCNXTYPE_s, flags) == 0x48, "editor path connection options offset");
+
+// Retail splits the null checks into each caller and keeps the body as a
+// partial-inlining clone; its connection searches are fully peeled.
+
+struct EDAISHAREDPATHNODE_s;
+struct AIPATH_s;
+struct eduimenu_s;
+struct eduiitem_s;
+struct nuvec_s;
+
+DECOMP_ASSERT(offsetof(EdUiNameInputItem, name) == 0x4c, "editor name input offset");
+DECOMP_ASSERT(offsetof(EdUiNameInputItem, max_name_length) == 0x15a, "editor name input limit offset");
+
+static __used__ void pathEditor_cbCreatePath(eduimenu_s *, eduiitem_s *, u32);
+
+static __used__ void pathEditor_cbDeletePath(eduimenu_s *parent, eduiitem_s *item, u32);
+
+static __used__ void pathEditor_cbRenameNode(eduimenu_s *, eduiitem_s *item, u32);
+
+static __used__ void pathEditor_cbRenamePath(eduimenu_s *, eduiitem_s *item, u32);
+
+static __used__ void pathEditor_cbCancelRenamePathMenu(eduimenu_s *, eduimenu_s *);
+static __used__ void pathEditor_cbCancelRenameNodeMenu(eduimenu_s *, eduimenu_s *);
+static __used__ void pathEditor_cbCancelSelectMenu(eduimenu_s *, eduimenu_s *);
+static __used__ void pathEditor_cbSetCurrentPath(eduimenu_s *, eduiitem_s *, u32);
+static __used__ void pathEditor_cbSetShareNode(eduimenu_s *, eduiitem_s *item, u32);
+
+static __used__ void pathEditor_cbShareNodeMenu(eduimenu_s *parent, eduiitem_s *, u32);
+
+static __used__ void pathEditor_cbCnxFlagsToggle(eduimenu_s *, eduiitem_s *item, u32);
+
+static __used__ void pathEditor_cbDeletePathNode(eduimenu_s *, eduiitem_s *item, u32);
+
+static __used__ void pathEditor_cbRenameNodeMenu(eduimenu_s *parent, eduiitem_s *, u32);
+
+static __used__ void pathEditor_cbRenamePathMenu(eduimenu_s *parent, eduiitem_s *, u32);
+
+static __used__ void pathEditor_cbSelectPathMenu(eduimenu_s *parent, eduiitem_s *, u32);
+
+static __used__ void pathEditor_cbSetCurrentPath(eduimenu_s *, eduiitem_s *item, u32);
+
+static __used__ void pathEditor_cbNodeFlagsToggle(eduimenu_s *, eduiitem_s *item, u32);
+
+static __used__ void pathEditor_cbCancelSelectMenu(eduimenu_s *menu, eduimenu_s *);
+
+static __used__ void pathEditor_cbDisconnectPathNode(eduimenu_s *, eduiitem_s *item, u32);
+
+static __used__ void pathEditor_cbCancelDeleteAreaMenu(eduimenu_s *, eduimenu_s *);
+
+static __used__ void pathEditor_cbCancelDeleteNodeMenu(eduimenu_s *, eduimenu_s *);
+
+static __used__ void pathEditor_cbCancelRenameNodeMenu(eduimenu_s *menu, eduimenu_s *);
+
+static __used__ void pathEditor_cbCancelRenamePathMenu(eduimenu_s *menu, eduimenu_s *);
+
+static __used__ void pathEditor_cbDrawWallsplinesToggle(eduimenu_s *, eduiitem_s *item, u32);
+
+static __used__ void pathEditor_cbCancelDisconnectNodeMenu(eduimenu_s *, eduimenu_s *);
+
+static __used__ void routeEditor_cbCancelRouteUsers(eduimenu_s *, eduimenu_s *);
+static __used__ void routeEditor_cbSetRouteUsers(eduimenu_s *, eduiitem_s *, u32);
+
+static __used__ void routeEditor_cbRouteUsers(eduimenu_s *parent, eduiitem_s *, u32);
+
+static __used__ void routeEditor_cbCreateRoute(eduimenu_s *, eduiitem_s *, u32);
+
+static __used__ void routeEditor_cbDeleteRoute(eduimenu_s *parent, eduiitem_s *item, u32);
+
+static __used__ __attribute__((optimize("peel-loops"))) void routeEditor_cbRenameRoute(eduimenu_s *, eduiitem_s *item, u32);
+
+static __used__ void routeEditor_cbCancelRenameRouteMenu(eduimenu_s *, eduimenu_s *);
+
+static __used__ void routeEditor_cbSetRouteUsers(eduimenu_s *, eduiitem_s *item, u32);
+
+static __used__ void routeEditor_cbRenameRouteMenu(eduimenu_s *parent, eduiitem_s *, u32);
+
+static __used__ void routeEditor_cbCancelRouteUsers(eduimenu_s *menu, eduimenu_s *);
+
+static __used__ void routeEditor_cbCancelRenameRouteMenu(eduimenu_s *menu, eduimenu_s *);
+
+static __used__ i32 routeEditor_AddToRoute(EDAIPATHNODE_s *node, EDAIPATHNODE_s *other) __asm__(
+    "_ZL22routeEditor_AddToRouteP14EDAIPATHNODE_sS0_.part.7");
+
+static __used__ i32 routeEditor_AddToRoute(EDAIPATHNODE_s *node, EDAIPATHNODE_s *other);
+
+static __used__ void pathEditor_DestroySharedNode(EDAISHAREDPATHNODE_s *shared);
+
+// Retail keeps an unreferenced partial-inlining clone of pathEditorSetCamPos:
+// it moves the editor camera to a position at the cursor's height.
+#if defined(__i386__)
+#define PATHEDITOR_SETCAMPOS_BODY_ATTR __attribute__((used, noinline, noclone, regparm(1)))
+#else
+#define PATHEDITOR_SETCAMPOS_BODY_ATTR __attribute__((used, noinline, noclone))
+#endif
+
+// ==== src/editor/aieditor.cpp: all remaining content ====
+
+#include "gameapi/edtools/edrender.h"
+#include "legoapi/render/core/terrain.h"
+#include "legoapi/render/core/terrain_internal.h"
+#include "nu2api/nu3d/numtl.h"
+
+#if defined(__i386__)
+#define EDANTINODE_REGPARM1 __attribute__((regparm(1)))
+#else
+#define EDANTINODE_REGPARM1
+#endif
+
+static __used__ void aieditor_cbSetEditorMode(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+static __used__ void aieditor_cbCancelSelectEditorMode(eduimenu_s *menu, eduimenu_s *);
+
+static __used__ void aieditor_cbCancelSaveMenu(eduimenu_s *, eduiitem_s *, unsigned int);
+
+// ==== src/editor/creature_editor.cpp: all remaining content ====
+
+#include "editor/edpath_types.h"
+#pragma GCC optimize("O2", "omit-frame-pointer")
+struct EDCREATURE_s;
+
+DECOMP_ASSERT(offsetof(CreatureEditorRecord, valid_positions) == 0x54, "creature valid position mask offset");
+DECOMP_ASSERT(offsetof(CreatureEditorRecord, position) == 0x28, "creature position offset");
+DECOMP_ASSERT(offsetof(CreatureEditorRecord, script_name) == 0x18, "creature script name offset");
+DECOMP_ASSERT(offsetof(CreatureEditorRecord, script_params) == 0x70, "creature script params offset");
+DECOMP_ASSERT(offsetof(CreatureEditorRecord, angle) == 0x34, "creature angle offset");
+DECOMP_ASSERT(offsetof(CreatureEditorRecord, character_type) == 0x58, "creature character type offset");
+DECOMP_ASSERT(offsetof(CreatureEditorRecord, path) == 0x3c, "creature path offset");
+DECOMP_ASSERT(offsetof(CreatureEditorRecord, set) == 0x5a, "creature set offset");
+DECOMP_ASSERT(offsetof(CreatureEditorRecord, flags) == 0x68, "creature flags offset");
+DECOMP_ASSERT(offsetof(CreatureEditorRecord, activation_area) == 0x6c, "creature activation area offset");
+DECOMP_ASSERT(offsetof(CreatureEditorRecord, trigger_area) == 0x80, "creature trigger area offset");
+DECOMP_ASSERT(offsetof(CreatureEditorRecord, activation) == 0x8f, "creature activation offset");
+DECOMP_ASSERT(offsetof(CreatureEditorRecord, view_distance) == 0x9c, "creature view distance offset");
+DECOMP_ASSERT(offsetof(CreatureEditorRecord, negative_min_view_height) == 0xa8, "creature min view height offset");
+DECOMP_ASSERT(sizeof(CreatureEditorRecord) == 0xac, "editor creature record size");
+
+#if defined(__i386__)
+#define CREATURE_EDITOR_REGPARM2 __attribute__((regparm(2)))
+#else
+#define CREATURE_EDITOR_REGPARM2
+#endif
+static __used__ CREATURE_EDITOR_REGPARM2 void *CreateCreature(i32 type, nuvec_s *position, i32 angle);
+
+#if defined(__i386__)
+#define CREATURE_EDITOR_REGPARM1 __attribute__((regparm(1)))
+#else
+#define CREATURE_EDITOR_REGPARM1
+#endif
+static __used__
+    __attribute__((always_inline)) CREATURE_EDITOR_REGPARM1 void creatureEditor_Updated(EDCREATURE_s *creature);
+
+static __used__ void creatureEditor_cbActivationMenu(eduimenu_s *parent, eduiitem_s *, unsigned int);
+
+static __used__ void creatureEditor_cbCancelMenu(eduimenu_s *menu, eduimenu_s *);
+
+static __used__ void pathEditor_cbCancelDeleteCreatureMenu(eduimenu_s *, eduimenu_s *);
+
+static __used__ void creatureEditor_cbDeleteCreature(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+static __used__ void creatureEditor_cbFlagsToggle(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+static __used__ void creatureEditor_cbGroupMenu(eduimenu_s *parent, eduiitem_s *, unsigned int);
+
+static __used__ void creatureEditor_cbRenameCreature(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+static __used__ void creatureEditor_cbRenameCreatureMenu(eduimenu_s *parent, eduiitem_s *, unsigned int);
+
+static __used__ __attribute__((force_align_arg_pointer)) void creatureEditor_cbResetParams(eduimenu_s *menu,
+                                                                                           eduiitem_s *, unsigned int);
+
+static __used__ void creatureEditor_cbRespawnMenu(eduimenu_s *parent, eduiitem_s *, unsigned int);
+
+static __used__ __attribute__((force_align_arg_pointer)) void creatureEditor_cbVisionMenu(eduimenu_s *parent,
+                                                                                          eduiitem_s *, unsigned int);
+
+static __used__ void creatureEditor_cbScriptParams(eduimenu_s *parent, eduiitem_s *, unsigned int);
+
+static __used__ void creatureEditor_cbSelectScript(eduimenu_s *parent, eduiitem_s *, unsigned int);
+
+static __used__ __attribute__((force_align_arg_pointer)) void creatureEditor_cbSetScript(eduimenu_s *, eduiitem_s *item,
+                                                                                         unsigned int);
+
+static __used__ void creatureEditor_cbSetScriptParam(eduimenu_s *menu, eduiitem_s *item, unsigned int);
+
+static __used__ void creatureEditor_cbSelectType(eduimenu_s *parent, eduiitem_s *, unsigned int);
+
+static __used__ void creatureEditor_cbSetActivation(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+static __used__ void creatureEditor_cbSetType(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+static __used__ void creatureEditor_cbSetAreaActivation(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+static __used__ void creatureEditor_cbSetLocator(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+static __used__ void creatureEditor_cbSelectRespawnLocator(eduimenu_s *parent, eduiitem_s *, unsigned int);
+
+static __used__ void creatureEditor_cbSelectLocator(eduimenu_s *parent, eduiitem_s *, unsigned int);
+
+static __used__ void creatureEditor_cbSelectTriggerArea(eduimenu_s *parent, eduiitem_s *, unsigned int);
+
+static __used__ void creatureEditor_cbSetRespawnLocator(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+static __used__ void creatureEditor_cb_assigntoset(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+static __used__ void creatureEditor_cbSetTriggerArea(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+static __used__ void creatureEditor_cb_ngroup(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+static __used__ void creatureEditor_cb_nacross(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+static __used__ void creatureEditor_cb_xspacing(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+static __used__ void creatureEditor_cb_zspacing(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+static __used__ void creatureEditor_cb_difficulty(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+static __used__ void creatureEditor_cb_heardistance(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+static __used__ void creatureEditor_cb_viewdistance(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+static __used__ void creatureEditor_cb_minviewheight(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+static __used__ void creatureEditor_cb_maxviewheight(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+static __used__ void creatureEditor_cb_min_n_respawns(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+static __used__ void creatureEditor_cb_max_n_respawns(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+static __used__ void creatureEditor_cb_min_t_respawn(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+static __used__ void creatureEditor_cb_max_t_respawn(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+static __used__ void creatureEditor_cb_stagger_start(eduimenu_s *, eduiitem_s *item, unsigned int);
+
+// ==== src/editor/locator_editor.cpp: all remaining content ====
+
+extern "C" {
+    struct EDCREATURE_s;
+}
+
+#if defined(__i386__)
+static void __attribute__((regparm(1))) DestroyLocator(EDLOCATOR_s *);
+static unsigned int __attribute__((regparm(2))) AddLocatorToSet(EDLOCATORSET_s *, EDLOCATOR_s *, EDLOCATOR_s *);
+#else
+static void DestroyLocator(EDLOCATOR_s *);
+static unsigned int AddLocatorToSet(EDLOCATORSET_s *, EDLOCATOR_s *, EDLOCATOR_s *);
+#endif
+static __used__ void locatorEditor_cbAddLocatorsByNameYesNo(eduimenu_s *, eduiitem_s *, u32);
+
+static __used__ void locatorEditor_cbDeleteLocator(eduimenu_s *, eduiitem_s *item, u32);
+static __used__ void locatorEditor_cbSetLocatorSet(eduimenu_s *, eduiitem_s *item, u32);
+static __used__ void locatorEditor_cbRenameLocator(eduimenu_s *, eduiitem_s *item, u32);
+static __used__ void locatorEditor_cbEmptyLocatorSet(eduimenu_s *parent, eduiitem_s *item, u32);
+static __used__ void locatorEditor_cbCreateLocatorSet(eduimenu_s *, eduiitem_s *, u32);
+static __used__ void locatorEditor_cbDeleteLocatorSet(eduimenu_s *parent, eduiitem_s *item, u32);
+static __used__ void locatorEditor_cbRenameLocatorSet(eduimenu_s *, eduiitem_s *item, u32);
+static __used__ void locatorEditor_cbSelectLocatorSet(eduimenu_s *parent, eduiitem_s *, u32);
+static __used__ void locatorEditor_cbAddLocatorsByName(eduimenu_s *, eduiitem_s *item, u32);
+static __used__ void locatorEditor_cbRenameLocatorMenu(eduimenu_s *parent, eduiitem_s *, u32);
+static __used__ void locatorEditor_cbRenameLocatorSetMenu(eduimenu_s *parent, eduiitem_s *, u32);
+static __used__ void locatorEditor_cbAddLocatorsByNameMenu(eduimenu_s *parent, eduiitem_s *, u32);
+static __used__ __attribute__((optimize("no-tree-vectorize"))) void
+locatorEditor_cbAddLocatorsByNameYesNo(eduimenu_s *, eduiitem_s *item, u32);
+static __used__ void locatorEditor_cbCancelRenameMenu(eduimenu_s *menu, eduimenu_s *);
+static __used__ void locatorEditor_cbCancelSelectLocatorSet(eduimenu_s *menu, eduimenu_s *);
+static __used__ void locatorEditor_cbCancelDeleteLocatorMenu(eduimenu_s *, eduimenu_s *);
+static __used__ void locatorEditor_cbCancelRenameLocatorSetMenu(eduimenu_s *, eduimenu_s *);
+
+static __used__ __attribute__((optimize("no-tree-vectorize"))) void DestroyLocator(EDLOCATOR_s *locator);
+
+#if defined(__i386__)
+#define LOCATOR_SET_BODY_ATTR __attribute__((noinline, optimize("no-tree-vectorize"), regparm(2)))
+#else
+#define LOCATOR_SET_BODY_ATTR __attribute__((noinline, optimize("no-tree-vectorize")))
+#endif
+
+static __used__ unsigned int AddLocatorToSet(EDLOCATORSET_s *set, EDLOCATOR_s *locator, EDLOCATOR_s *before);
+
+#if defined(__i386__)
+static __attribute__((noinline, optimize("no-tree-vectorize"), regparm(2))) unsigned int
+#else
+static __attribute__((noinline, optimize("no-tree-vectorize"))) unsigned int
+#endif
+AddLocatorToSetAtEnd(EDLOCATORSET_s *set, EDLOCATOR_s *locator) __asm__(
+    "_ZL15AddLocatorToSetP14EDLOCATORSET_sP11EDLOCATOR_sS2_.constprop.131");
+
+// ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
+#include "legoapi/items/objects/objectsall.h"
+#include "legoapi/items/collect/torpedo.h"
+#include "legoapi/actions/movement/carrying.h"
+#include "legoapi/render/core/render.h"
+#include "legoapi/render/core/rtl.h"
+#include "legoapi/audio/audio.h"
+#include "legoapi/gizmos/transport/gizportal.h"
+#include "legoapi/menus/screens/arcade.h"
+#include "gameapi/gui/apimenu.h"
+#include "legoapi/world/mission.h"
+#include "legoapi/cutscenes/cutscenes.h"
+#include "legoapi/core/config/cheat.h"
+#include "legoapi/render/light/lighting.h"
+#include "legoapi/render/light/shadow.h"
+#include "legoapi/render/fx/parts.h"
+#include "legoapi/render/fx/spline_position.h"
+#include "legoapi/characters/core/CharacterObjectInterface.h"
+#include "legoapi/menus/core/gamehint.h"
+#include "legoapi/menus/core/gamemessages.h"
+#include "legoapi/gizmos/door/spinner.h"
+#include "legoapi/menus/screens/shop.h"
+#include "legoapi/menus/screens/store.h"
+#include "legoapi/props/doors/door.h"
+#include "legoapi/core/input/timing.h"
+#include "nu2api/numusic/sfx.h"
+#include "nu2api/nucore/numemory.h"
+#include "nu2api/nu3d/nuportal.h"
+#include "nu2api/nu3d/android/nutimebar_plain.h"
+#include "nu2api/nuandroid/ios_graphics.h"
+#include "nu2api/nucore/nugcutscene.h"
+#include "nu2api/nucore/nuhgobj.h"
+
+// Written by ThingManager's ctor (original global @0x124f2e0, .bss).
+
+#include "legoapi/items/objects/gameobjects_types.h"
+
+// Enabled in the target data image.  Ordinary background characters are
+// staggered across frames; special movement states opt back into full-rate
+// processing through the forced-update path.
+
+extern "C" {
+extern AICONDITIONDEF lego_aiconditiondefs[178];
+
+    static_assert(sizeof(lego_aiconditiondefs) / sizeof(lego_aiconditiondefs[0]) == 178,
+                  "complete game AI condition registry");
+
+}
+
+// The special-route list reserves the first ten ids for suit characters.  The
+// remaining ids enumerate the current story list while omitting variants that
+// are represented by those dedicated routes.
+
+#if defined(__i386__)
+#define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
+#else
+#define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone))
+#endif
+
+// Retail keeps only the IPA-SRA clone, which takes the other object's x and z by address.
+
+i32 RotDiff(u16, u16);
+
+// ==== src/gameapi/ai/aisys/aistate.cpp: all remaining content ====
+
+// ==== src/legoapi/gizmo/gizmos/gizmos_gizactions.cpp: declarations ====
+#include "legoapi/gizmos/object/lever.h"
+#include "legoapi/gizmos/object/gizpanel.h"
+
+i32 Action_ReleaseLocator(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
+                          i32 first_time, float);
+
+i32 Action_GetLocatorFromSet(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,
+                             i32 param_count, i32 first_time, float);
+
+i32 Action_AssignLocatorInSet(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
+                              i32 first_time, float);
+
+namespace {
+#include "legoapi/gizmo/gizmos/gizmos_gizactions_types.h"
+
+} // namespace
+
+// ==== src/legoapi/actions/combat/fighting.cpp: declarations ====
+#include "legoapi/actions/combat/fighting.h"
+#include "legoapi/gizmo/base/GizBlowupObjectInterface.h"
+#include "legoapi/characters/motion/animlist.h"
+#include "legoapi/characters/motion/action_info.h"
+#include "legoapi/characters/motion/contexts.h"
+#include "legoapi/characters/core/playeritems.h"
+#include "legoapi/misc/utilities.h"
+
+#include <stdlib.h>
+
+i32 qrand();
+
+DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e4) == 0x7e4, "Quick shoot record offset");
+DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e8) == 0x7e8, "Quick shoot record count offset");
+DECOMP_ASSERT(offsetof(GameObject_s, quick_shoot_flags) == 0xe2f, "Quick shoot flags offset");
+DECOMP_ASSERT(offsetof(GameObject_s, quick_shoot_bolt_id) == 0xe3e, "Quick shoot bolt ID offset");
+
+// ==== src/legoapi/ai/game/aipathcnxhelper.cpp: declarations ====
+#include "nu2api/nucore/nuanim3.h"
+
+// ==== src/legoapi/ai/core/ai_sys.cpp: declarations ====
+#include "gameapi/ai/aisys/aiscript_types.h"
+
+// ==== src/legoapi/ai/game/gameantinode.cpp: declarations ====
+#include "legoapi/ai/game/gameantinode.h"
+#include "nu2api/nucore/nuvuvec.hpp"
+
+// ==== src/legoapi/render/core/render.cpp: declarations ====
+#include "gameapi/edtools/edbri_internal.h"
+#include "gameapi/edtools/edstubs.h"
+#include "legoapi/actions/character/transform.h"
+#include "legoapi/actions/character/snake.h"
+#include "legoapi/menus/core/text.h"
+#include "legoapi/menus/screens/gamemenuall.h"
+#include "legoapi/render/light/fade_material.h"
+#include "legoapi/render/fx/edsplines.h"
+#include "legoapi/world/levels/levels.h"
+#include "nu2api/nu3d/nurndrstat.h"
+#include "nu2api/nu3d/android/nuportal_android.h"
+#include "nu2api/nu3d/nuvport.h"
+
+#include "gameframework/saveload.h"
+#include "legoapi/items/base/collection.h"
+#include "legoapi/world/levels/episode.h"
+#include "nu2api/nu3d/nutexanm.h"
+
+#include "legoapi/render/core/SwipeDecalRenderer.h"
+#include "nu2api/nu3d/nuprim_internal.h"
+#include "nu2api/nu3d/nudlist.h"
+#include "nu2api/nu3d/NuRenderDevice.h"
+#include "nu2api/nu3d/android/nurndr_android.h"
+#include "nu2api/nu3d/android/nugscn_android.h"
+#include "nu2api/nucore/bgproc.h"
+#include "nu2api/nucore/nuapi.h"
+#include "nu2api/nucore/nuptrblock.h"
+#include "nu2api/nucore/nuthread.h"
+#include "nu2api/numath/numath.h"
+
+// Camera zoom state
+
+// Graphics loading flags
+
+// --- NuGScn graphics-data reader ---
+// NuReadGraphicsData is a C++ static function in the original (GCC clones it,
+// hence the `.isra.NNN` suffix in the ROM symbol table).
+
+// Retail only keeps the IPA-SRA clone, which drops the unused fourth argument.
+#if defined(__i386__)
+#define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone, regparm(2)))
+#else
+#define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone))
+#endif
+
+// --- Extern "C": NuGScn functions have C linkage in original ---
+
+#include "nu2api/nu3d/nuprim.h"
+#include "nu2api/nu3d/nupostparams.h"
+
+#define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
+    do {                                                                                                               \
+        direction.x = (vx);                                                                                            \
+        direction.y = -(vy) * camera.aspect;                                                                           \
+        direction.z = adjacent;                                                                                        \
+        NuVecNorm(&direction, &direction);                                                                             \
+        NuVecMtxTransform(&direction, &direction, &camera.mtx);                                                        \
+        NuVecNorm(&direction, &direction);                                                                             \
+        brightness = direction.y * 0.5f + 0.5f;                                                                        \
+        if (brightness <= near_angle)                                                                                  \
+            brightness = near_scale * parameters->intensity;                                                           \
+        else if (brightness >= far_angle)                                                                              \
+            brightness = far_scale * parameters->intensity;                                                            \
+        else                                                                                                           \
+            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
+        if (parameters->directional) {                                                                                 \
+            f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
+            if (angle < parameters->direction_near_angle) {                                                            \
+                brightness += 128.0f * parameters->direction_far_scale;                                                \
+            } else if (!(angle > parameters->direction_far_angle)) {                                                   \
+                f32 blend = NuPowFast((angle - parameters->direction_near_angle) /                                     \
+                                          (parameters->direction_far_angle - parameters->direction_near_angle),        \
+                                      parameters->direction_bias);                                                     \
+                brightness +=                                                                                          \
+                    128.0f * ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +  \
+                              parameters->direction_near_scale);                                                       \
+            }                                                                                                          \
+        }                                                                                                              \
+        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
+                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
+                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
+                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
+        if (!g_NuPrim_NeedsOverbrightening)                                                                            \
+            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
+                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
+        else                                                                                                           \
+            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
+        NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
+    } while (0)
+
+// DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
+// red-brick positions come from the Game init values in legogame/game.cpp.
+
+#define SWIPE_PRIM_UV(U, V)                                                                                            \
+    do {                                                                                                               \
+        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
+        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
+            vertex->float_uv[0] = (U);                                                                                 \
+            vertex->float_uv[1] = (V);                                                                                 \
+        } else {                                                                                                       \
+            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
+            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
+        }                                                                                                              \
+    } while (false)
+
+extern i32 qrand(void);
+extern f32 SeekLinearF(f32, f32, f32);
+
+// ==== src/legoapi/actions/character/starwars.cpp: all remaining content ====
+
+struct AIPACKET_s;
+struct AISYS_s;
+
+// ==== src/editor/antinode_editor.cpp: all remaining content ====
+
+// ==== src/editor/edtoolsall.cpp: declarations ====
+
+#include "editor/edtoolsall_types.h"
+
+// ==== src/legoapi/render/core/terrain_stubs.cpp: declarations ====
+#include "legoapi/render/core/gameliball.h"
+#include "legoapi/render/fx/game_deb.h"
+#include "gameapi/edtools/edpp_internal.h"
+#include "nu2api/numath/numtx_inline.h"
+#include "nu2api/nu3d/android/nurain_android.h"
+#include "nu2api/nu3d/android/nuptl_android.h"
+
+#include <stddef.h>
+
+// Runtime-selected groups appended after the fixed terrain allocation.
+#include "legoapi/render/core/terrain_stubs_types.h"
+
+// NuFileExists @nufile (nucore_plain.cpp).
+extern "C" i32 NuFileExists(char *name);
+
+// ==== functions in original address order ====
+
+// ==== src/MechInputTouch/MechInputTouch.cpp: declarations ====
+
+#include "legoapi/gizmo/base/TeleportObjectInterface.h"
+#include "legoapi/gizmo/base/GizForceObjectInterface.h"
+#include "nu2api/nucore/NuVirtualTouchDevice.h"
+#include <new>
+
+// ==== functions in original address order ====
+
+// ==== functions in original address order ====
+
+MechAutoJumpManager::MechAutoJumpManager(AISYS_s *ai_system) {
+    if (ai_system != nullptr) {
+        streak_time = 0.0f;
+        ai_sys = ai_system;
+        streaks.head = nullptr;
+        streaks.tail = nullptr;
+        jump_connections.head = nullptr;
+        jump_connections.tail = nullptr;
+    }
+}
+
+void MechAutoJumpManager::Init() {
+}
+
+void MechAutoJumpManager::DeleteJumpConnection(MechAutoJumpConnection *connection) {
+    if (connection != NULL) {
+        AutoJumpStreakLink *streak = reinterpret_cast<AutoJumpStreakLink *>(NuLinkedListGetHead(&streaks));
+        while (streak != NULL) {
+            if (streak->connection == connection) {
+                streak->connection = NULL;
+            }
+            streak = reinterpret_cast<AutoJumpStreakLink *>(
+                NuLinkedListGetNext(&streaks, reinterpret_cast<NULISTLNK *>(streak)));
+        }
+
+        NuLinkedListRemove(&jump_connections, reinterpret_cast<NULISTLNK *>(connection));
+        delete connection;
+    }
+}
+
+void MechAutoJumpManager::DeleteJumpConnectionsAndStreaks() {
+    AutoJumpStreakLink *streak;
+    while ((streak = reinterpret_cast<AutoJumpStreakLink *>(NuLinkedListGetHead(&streaks))) != NULL) {
+        NuLinkedListRemove(&streaks, reinterpret_cast<NULISTLNK *>(streak));
+        delete streak;
+    }
+
+    MechAutoJumpConnection *connection =
+        reinterpret_cast<MechAutoJumpConnection *>(NuLinkedListGetHead(&jump_connections));
+    while (connection != NULL) {
+        DeleteJumpConnection(connection);
+        connection = reinterpret_cast<MechAutoJumpConnection *>(NuLinkedListGetHead(&jump_connections));
+    }
+}
+
+MechAutoJumpManager::~MechAutoJumpManager() {
+    DeleteJumpConnectionsAndStreaks();
+}
+
+bool AISysNodeCanReachThisJumpConnection(GameObject_s &, AIPATH_s &path, unsigned char node_index,
+                                         AIPATHCNX_s &jump_connection, i32 jump_direction) {
+    u8 from_node = jump_connection.node_indices[jump_direction];
+    u8 to_node = jump_connection.node_indices[jump_direction == 0];
+    while (node_index != from_node) {
+        if (node_index == to_node) {
+            return 0;
+        }
+        u8 connection_index = path.route_matrix[node_index][from_node];
+        if (connection_index == 0xff) {
+            return 0;
+        }
+        AIPATHCNX *connection = path.nodes[node_index].connections[connection_index];
+        if (connection == NULL) {
+            return 0;
+        }
+        u8 direction = node_index == connection->node_indices[1];
+        if ((connection->traversal_flags[direction] & mechAutoJumpCantReachFlags) != 0) {
+            return 0;
+        }
+        node_index = connection->node_indices[direction ^ 1];
+    }
+    return 1;
+}
+
+bool AISysCharacterCanReachThisJumpConnection(GameObject_s &object, AIPATH_s &path, AIPATHCNX_s &jump_connection,
+                                              i32 jump_direction) {
+    if (object.ai.path_info.path != &path || object.ai.path_info.connection == NULL) {
+        return 0;
+    }
+    u8 node_index = object.ai.path_info.dist < 0.5f ? object.ai.path_info.connection->node_indices[0]
+                                                    : object.ai.path_info.connection->node_indices[1];
+    return AISysNodeCanReachThisJumpConnection(object, path, node_index, jump_connection, jump_direction);
+}
+
+u32 DoSomeChecks(GameObject_s &object, AIPATH_s &path, AIPATHCNX_s &connection, i32 direction) {
+    AIPATHNODE *node = &path.nodes[connection.node_indices[direction]];
+    if (!(object.ai.terrain_origin.y > node->min_height && object.ai.terrain_origin.y < node->max_height)) {
+        return 0;
+    }
+    WORLDINFO *world = WorldInfo_CurrentlyActive();
+    if (world != NULL && world->current_level == E1CHARACTERBONUSA_LDATA) {
+        AIPATHNODE *other_node = &path.nodes[connection.node_indices[direction == 0]];
+        if (node->position.y - other_node->position.y > 0.5f) {
+            return 0;
+        }
+    }
+    f32 distance = NuVecXZDistSqr(&object.ai.terrain_origin, &node->position, NULL);
+    u32 result = 0;
+    if (distance >= node->radius_squared) {
+        if (distance < testAutoJumpXZCanUseRangeSqr) {
+            result |= 1;
+        }
+        if (distance < testAutoJumpXZCanDisplayRangeSqr) {
+            result |= 2;
+        }
+    } else if (distance < node->radius_squared) {
+        result = 1;
+        if (distance < testAutoJumpXZCanDisplayRangeSqr) {
+            result |= 2;
+        }
+    }
+    if (result == 0 || !AISysCharacterCanReachThisJumpConnection(object, path, connection, direction)) {
+        return 0;
+    }
+    if ((connection.traversal_flags[direction] & object.ai.capabilities & mechAutoJumpFlags) != 0) {
+        result |= 4;
+    }
+    return result;
+}
 
 MechAutoJumpConnection *MechAutoJumpManager::AddAutoJumpConnection(AIPATH_s *path, AIPATHCNX_s *connection,
                                                                    i32 direction, bool use_path_direction, i32 colour,
@@ -90,51 +1006,6 @@ MechAutoJumpConnection *MechAutoJumpManager::AddAutoJumpConnection(AIPATH_s *pat
     return NULL;
 }
 
-void MechAutoJumpManager::DeleteJumpConnection(MechAutoJumpConnection *connection) {
-    if (connection != NULL) {
-        AutoJumpStreakLink *streak = reinterpret_cast<AutoJumpStreakLink *>(NuLinkedListGetHead(&streaks));
-        while (streak != NULL) {
-            if (streak->connection == connection) {
-                streak->connection = NULL;
-            }
-            streak = reinterpret_cast<AutoJumpStreakLink *>(
-                NuLinkedListGetNext(&streaks, reinterpret_cast<NULISTLNK *>(streak)));
-        }
-
-        NuLinkedListRemove(&jump_connections, reinterpret_cast<NULISTLNK *>(connection));
-        delete connection;
-    }
-}
-
-void MechAutoJumpManager::DeleteJumpConnectionsAndStreaks() {
-    AutoJumpStreakLink *streak;
-    while ((streak = reinterpret_cast<AutoJumpStreakLink *>(NuLinkedListGetHead(&streaks))) != NULL) {
-        NuLinkedListRemove(&streaks, reinterpret_cast<NULISTLNK *>(streak));
-        delete streak;
-    }
-
-    MechAutoJumpConnection *connection =
-        reinterpret_cast<MechAutoJumpConnection *>(NuLinkedListGetHead(&jump_connections));
-    while (connection != NULL) {
-        DeleteJumpConnection(connection);
-        connection = reinterpret_cast<MechAutoJumpConnection *>(NuLinkedListGetHead(&jump_connections));
-    }
-}
-
-void MechAutoJumpManager::Init() {
-}
-
-MechAutoJumpManager::MechAutoJumpManager(AISYS_s *ai_system) {
-    if (ai_system != nullptr) {
-        streak_time = 0.0f;
-        ai_sys = ai_system;
-        streaks.head = nullptr;
-        streaks.tail = nullptr;
-        jump_connections.head = nullptr;
-        jump_connections.tail = nullptr;
-    }
-}
-
 void MechAutoJumpManager::PreProcessJumpConnections() {
     MechAutoJumpConnection *jump = reinterpret_cast<MechAutoJumpConnection *>(NuLinkedListGetHead(&jump_connections));
     while (jump != NULL) {
@@ -166,6 +1037,36 @@ void MechAutoJumpManager::PreProcessJumpConnections() {
         }
         jump = reinterpret_cast<MechAutoJumpConnection *>(
             NuLinkedListGetNext(&jump_connections, reinterpret_cast<NULISTLNK *>(jump)));
+    }
+}
+
+void MechAutoJumpManager::ProcessJumpConnections() {
+    MechAutoJumpConnection *jump = reinterpret_cast<MechAutoJumpConnection *>(NuLinkedListGetHead(&jump_connections));
+    while (jump != NULL) {
+        MechAutoJumpConnection *next = reinterpret_cast<MechAutoJumpConnection *>(
+            NuLinkedListGetNext(&jump_connections, reinterpret_cast<NULISTLNK *>(jump)));
+        if (jump->active == 0 && jump->is_using == 0 && !(jump->cooldown > 0.0f)) {
+            DeleteJumpConnection(jump);
+        } else {
+            const u32 colour = jump->colour;
+            if (colour != jump->base_colour) {
+                jump->base_colour_components.x = SeekLinearF(
+                    jump->base_colour_components.x, static_cast<f32>(colour & 0xff), FRAMETIME * testColourSecF);
+                jump->base_colour_components.y = SeekLinearF(
+                    jump->base_colour_components.y, static_cast<f32>((colour >> 8) & 0xff), FRAMETIME * testColourSecF);
+                jump->base_colour_components.z =
+                    SeekLinearF(jump->base_colour_components.z, static_cast<f32>((colour >> 16) & 0xff),
+                                FRAMETIME * testColourSecF);
+                jump->streak_alpha = SeekLinearF(jump->streak_alpha, static_cast<f32>(static_cast<i32>(colour >> 24)),
+                                                 FRAMETIME * testColourSecF);
+                jump->base_colour =
+                    (static_cast<u32>(static_cast<i32>(jump->base_colour_components.x)) & 0xff) |
+                    ((static_cast<u32>(static_cast<i32>(jump->base_colour_components.y)) << 8) & 0xffff) |
+                    ((static_cast<u32>(static_cast<i32>(jump->base_colour_components.z)) & 0xff) << 16) |
+                    (static_cast<u32>(static_cast<i32>(jump->streak_alpha)) << 24);
+            }
+        }
+        jump = next;
     }
 }
 
@@ -284,36 +1185,6 @@ void MechAutoJumpManager::Process() {
     ProcessJumpConnections();
 }
 
-void MechAutoJumpManager::ProcessJumpConnections() {
-    MechAutoJumpConnection *jump = reinterpret_cast<MechAutoJumpConnection *>(NuLinkedListGetHead(&jump_connections));
-    while (jump != NULL) {
-        MechAutoJumpConnection *next = reinterpret_cast<MechAutoJumpConnection *>(
-            NuLinkedListGetNext(&jump_connections, reinterpret_cast<NULISTLNK *>(jump)));
-        if (jump->active == 0 && jump->is_using == 0 && !(jump->cooldown > 0.0f)) {
-            DeleteJumpConnection(jump);
-        } else {
-            const u32 colour = jump->colour;
-            if (colour != jump->base_colour) {
-                jump->base_colour_components.x = SeekLinearF(
-                    jump->base_colour_components.x, static_cast<f32>(colour & 0xff), FRAMETIME * testColourSecF);
-                jump->base_colour_components.y = SeekLinearF(
-                    jump->base_colour_components.y, static_cast<f32>((colour >> 8) & 0xff), FRAMETIME * testColourSecF);
-                jump->base_colour_components.z =
-                    SeekLinearF(jump->base_colour_components.z, static_cast<f32>((colour >> 16) & 0xff),
-                                FRAMETIME * testColourSecF);
-                jump->streak_alpha = SeekLinearF(jump->streak_alpha, static_cast<f32>(static_cast<i32>(colour >> 24)),
-                                                 FRAMETIME * testColourSecF);
-                jump->base_colour =
-                    (static_cast<u32>(static_cast<i32>(jump->base_colour_components.x)) & 0xff) |
-                    ((static_cast<u32>(static_cast<i32>(jump->base_colour_components.y)) << 8) & 0xffff) |
-                    ((static_cast<u32>(static_cast<i32>(jump->base_colour_components.z)) & 0xff) << 16) |
-                    (static_cast<u32>(static_cast<i32>(jump->streak_alpha)) << 24);
-            }
-        }
-        jump = next;
-    }
-}
-
 void MechAutoJumpManager::Render() {
     if (!TouchHacks::TouchControlsActive) {
         return;
@@ -344,6 +1215,81 @@ void MechAutoJumpManager::Render() {
     }
 }
 
-MechAutoJumpManager::~MechAutoJumpManager() {
-    DeleteJumpConnectionsAndStreaks();
+MechAutoJumpConnection *MechAutoJumpGetBest(JumpTriggerPacket const &packet, i32 heading) {
+    if (!TouchHacks::TouchControlsActive || WORLD == NULL || WORLD->mech_auto_jump_manager == NULL) {
+        return NULL;
+    }
+
+    MechAutoJumpConnection *current = reinterpret_cast<MechAutoJumpConnection *>(
+        NuLinkedListGetHead(&WORLD->mech_auto_jump_manager->jump_connections));
+    MechAutoJumpConnection *best = NULL;
+
+    if (packet.type == 3) {
+        i32 desired = NuAtan2D(packet.end.x - packet.start.x, packet.end.y - packet.start.y);
+        if (current == NULL) {
+            return NULL;
+        }
+        i32 best_difference = 0x4000;
+        do {
+            if (current->allow_streak && current->use_path_direction) {
+                AIPATHNODE *nodes = current->path->nodes;
+                AIPATHCNX *connection = current->connection;
+                i32 direction = current->direction;
+                NUVEC *to_position = &nodes[connection->node_indices[direction == 0]].position;
+                NUVEC *from_position = &nodes[connection->node_indices[direction]].position;
+                NUVEC from_screen;
+                NUVEC to_screen;
+                NuCameraTransformScreenClip(&from_screen, from_position, 1, NULL);
+                NuCameraTransformScreenClip(&to_screen, to_position, 1, NULL);
+                i32 angle = NuAtan2D(to_screen.x - from_screen.x, to_screen.y - from_screen.y);
+                i32 difference = RotDiff(static_cast<u16>(angle), static_cast<u16>(desired));
+                difference = difference < 0 ? -difference : difference;
+                if (difference < best_difference) {
+                    best_difference = difference;
+                    best = current;
+                }
+            }
+            current = reinterpret_cast<MechAutoJumpConnection *>(NuLinkedListGetNext(
+                &WORLD->mech_auto_jump_manager->jump_connections, reinterpret_cast<NULISTLNK *>(current)));
+        } while (current != NULL);
+        return best;
+    }
+
+    i32 best_difference = 0x2aab;
+    while (current != NULL) {
+        if (current->allow_streak && current->use_path_direction) {
+            i32 angle = current->connection->rotation;
+            if (current->direction != 0) {
+                angle = NuAngAdd(0x8000, angle);
+            }
+            i32 difference = RotDiff(static_cast<u16>(heading), static_cast<u16>(angle));
+            difference = difference < 0 ? -difference : difference;
+            if (difference < best_difference) {
+                best_difference = difference;
+                best = current;
+            }
+        }
+        current = reinterpret_cast<MechAutoJumpConnection *>(NuLinkedListGetNext(
+            &WORLD->mech_auto_jump_manager->jump_connections, reinterpret_cast<NULISTLNK *>(current)));
+    }
+    return best;
 }
+
+void MechAutoJumpSetIsUsing(GameObject_s &object, MechAutoJumpConnection &connection) {
+    object.ai.path_info.connection = connection.connection;
+    object.ai.path_info.direction = connection.direction;
+
+    WORLDINFO *world = WorldInfo_CurrentlyActive();
+    if (world != NULL && world->mech_auto_jump_manager != NULL) {
+        for (MechAutoJumpConnection *current = reinterpret_cast<MechAutoJumpConnection *>(
+                 NuLinkedListGetHead(&world->mech_auto_jump_manager->jump_connections));
+             current != NULL;
+             current = reinterpret_cast<MechAutoJumpConnection *>(NuLinkedListGetNext(
+                 &world->mech_auto_jump_manager->jump_connections, reinterpret_cast<NULISTLNK *>(current)))) {
+            current->is_using = 0;
+            current->cooldown = 0.0f;
+        }
+    }
+    connection.is_using = 1;
+}
+

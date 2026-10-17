@@ -121,17 +121,7 @@ void CharPlatforms_Configure(WORLDINFO_s *world, char *config) {
     }
 }
 
-f32 FindReflectionNoPlatforms(nuvec_s *position) {
-    NewTerrPlatformsOff();
-    f32 height = GameShadow(NULL, position, 5.0f, -1);
-    if (height != 2000000.0f) {
-        u32 surface = static_cast<u32>(ShadowInfo());
-        if (surface < 32 && (TerSurface[surface].flags & 2) != 0) {
-            return height;
-        }
-    }
-    return 2000000.0f;
-}
+f32 FindReflectionNoPlatforms(nuvec_s *position);
 
 GameObject_s *CharPlatform_FindObjFromPlatID(CHARPLATFORMSYS_s *system, i32 platform_id) {
     if (system == NULL) {

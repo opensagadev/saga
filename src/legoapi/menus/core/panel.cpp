@@ -54,18 +54,10 @@ f32 TimerAlpha = 0.0f;
 f32 TimerScale = 1.0f;
 
 namespace {
-    enum PANEL_BLOCKING_MENU {
-        PANEL_MENU_EPISODE_I = 20,
-        PANEL_MENU_EPISODE_II = 21,
-        PANEL_MENU_EPISODE_III = 22,
-        PANEL_MENU_EPISODE_IV = 23,
-        PANEL_MENU_SAVE = 25,
-        PANEL_MENU_LOAD = 26,
-    };
+#include "legoapi/menus/core/panel_types.h"
 
 } // namespace
 
-enum COIN_TOTAL_SOURCE { COIN_TOTAL_SAVED_GAME, COIN_TOTAL_SUPER_STORY, COIN_TOTAL_BONUS };
 static f32 DrawCoinTotalY = 2000000.0f;
 static void DrawCoinTotal(i32 source, i32 hide_super_story_target) {
     if (FadeSys.fade != 0.0f || (WORLD->current_level->flags & LEVEL_GAMEPLAY) == 0) {
@@ -1388,12 +1380,4 @@ void PanelRender(WORLDINFO_s *) {
     }
 }
 
-i32 CoinsGoToMainTotal() {
-    WORLDINFO_s *world = WorldInfo_CurrentlyActive();
-    if ((HUB_ADATA != NULL && HUB_ADATA == world->area) || SuperStory != 0 ||
-        (world->area != NULL && (world->area->flags & (AREAFLAG_SUPER_BONUS_AREA & ~AREAFLAG_BONUS_AREA)) != 0) ||
-        (world->current_level != NULL && (world->current_level->flags & LEVEL_STATUS) != 0)) {
-        return 1;
-    }
-    return 0;
-}
+i32 CoinsGoToMainTotal();
