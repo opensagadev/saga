@@ -20,105 +20,11 @@ extern "C" void NewTerrPlatformsOff(void);
 extern TERRSET *CurTerr;
 f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
 
-i32 SkinFlipTab[8] = {0, 1, 2, 3, 0, 2, 1, 3};
+extern i32 SkinFlipTab[8];
 f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
 extern "C" void NewTerrPlatformsOff();
 
-void SkinPlatform(terrsitu_s *terrain_group, unsigned char *buffer, PLATSKININFO *info) {
-    TERRAIN_GROUP *group = reinterpret_cast<TERRAIN_GROUP *>(terrain_group);
-    if (CurTerr == NULL || static_cast<u32>(group->chunk_type) > 1)
-        return;
-    TERRAIN_SHAPE_BATCH *input = static_cast<TERRAIN_SHAPE_BATCH *>(group->data);
-    TERRAIN_SHAPE_BATCH *output = reinterpret_cast<TERRAIN_SHAPE_BATCH *>(buffer);
-    while (input->marker >= 0) {
-        output->shape_count = input->shape_count;
-        output->marker = input->marker;
-        TERRAIN_SHAPE *destination = reinterpret_cast<TERRAIN_SHAPE *>(output + 1);
-        TERRAIN_SHAPE *source = reinterpret_cast<TERRAIN_SHAPE *>(input + 1);
-        f32 min_x = 123456792.0f, min_z = 123456792.0f;
-        f32 max_x = -123456792.0f, max_z = -123456792.0f;
-        TERRAIN_SHAPE *const first_shape = source;
-        const i32 shape_count = input->shape_count;
-        TERRAIN_SHAPE *const end_shape = shape_count > 0 ? source + shape_count : source;
-        for (; source != end_shape; ++source, ++destination) {
-            i32 last_vertex = source->normals[1].y > 65535.0f ? 2 : 3;
-            *destination = *source;
-            f32 shape_min_x = 123456792.0f, shape_min_y = 123456792.0f, shape_min_z = 123456792.0f;
-            f32 shape_max_x = -123456792.0f, shape_max_y = -123456792.0f, shape_max_z = -123456792.0f;
-            for (i32 vertex = last_vertex; vertex >= 0; --vertex) {
-                i32 source_vertex = SkinFlipTab[vertex + info->mirrored * 4];
-                NUVEC &v = destination->vectors[vertex];
-                v = TerrainSkin(info, &source->vectors[source_vertex], -1.0f, info->flags);
-                v.x -= info->matrix->m30;
-                v.y -= info->matrix->m31;
-                v.z -= info->matrix->m32;
-                min_x = MIN(v.x, min_x);
-                max_x = MAX(v.x, max_x);
-                min_z = MIN(v.z, min_z);
-                max_z = MAX(v.z, max_z);
-                shape_min_x = MIN(v.x, shape_min_x);
-                shape_min_y = MIN(v.y, shape_min_y);
-                shape_min_z = MIN(v.z, shape_min_z);
-                shape_max_x = MAX(v.x, shape_max_x);
-                shape_max_y = MAX(v.y, shape_max_y);
-                shape_max_z = MAX(v.z, shape_max_z);
-            }
-            destination->min_x = shape_min_x - 0.05f;
-            destination->min_y = shape_min_y - 0.05f;
-            destination->min_z = shape_min_z - 0.05f;
-            destination->max_x = shape_max_x + 0.05f;
-            destination->max_z = shape_max_z + 0.05f;
-            destination->max_y = shape_max_y + 0.05f;
-            if (source->normals[1].y < 65535.0f) {
-                NUVEC a, b;
-                a.x = destination->vectors[1].x - destination->vectors[3].x;
-                a.y = destination->vectors[1].y - destination->vectors[3].y;
-                a.z = destination->vectors[1].z - destination->vectors[3].z;
-                b.x = destination->vectors[2].x - destination->vectors[3].x;
-                b.y = destination->vectors[2].y - destination->vectors[3].y;
-                b.z = destination->vectors[2].z - destination->vectors[3].z;
-                NUVEC &n = destination->normals[1];
-                n = TerCrossProduct(&a, &b);
-                f32 length = NuFsqrt((n.x * n.x + n.y * n.y) + n.z * n.z);
-                f32 inverse = length == 0.0f ? 0.0f : 1.0f / length;
-                n.x *= inverse;
-                n.y *= inverse;
-                n.z = inverse * n.z;
-            }
-            {
-                NUVEC a, b;
-                a.x = destination->vectors[2].x - destination->vectors[0].x;
-                a.y = destination->vectors[2].y - destination->vectors[0].y;
-                a.z = destination->vectors[2].z - destination->vectors[0].z;
-                b.x = destination->vectors[1].x - destination->vectors[0].x;
-                b.y = destination->vectors[1].y - destination->vectors[0].y;
-                b.z = destination->vectors[1].z - destination->vectors[0].z;
-                NUVEC &n = destination->normals[0];
-                n = TerCrossProduct(&a, &b);
-                f32 length = NuFsqrt((n.x * n.x + n.y * n.y) + n.z * n.z);
-                f32 inverse = length == 0.0f ? 0.0f : 1.0f / length;
-                n.x *= inverse;
-                n.y *= inverse;
-                n.z = inverse * n.z;
-            }
-        }
-        if (source != first_shape) {
-            min_z -= 0.05f;
-            min_x -= 0.05f;
-            max_x += 0.05f;
-            max_z += 0.05f;
-        }
-        output->min_x = min_x;
-        output->max_x = max_x;
-        output->min_z = min_z;
-        output->max_z = max_z;
-        input = reinterpret_cast<TERRAIN_SHAPE_BATCH *>(source);
-        output = reinterpret_cast<TERRAIN_SHAPE_BATCH *>(destination);
-    }
-    output->marker = -1;
-    output->shape_count = -1;
-    group->data = buffer;
-}
+void SkinPlatform(terrsitu_s *terrain_group, unsigned char *buffer, PLATSKININFO *info);
 
 void CharPlatforms_Reset(CHARPLATFORMSYS_s *system) {
     if (system == NULL) {

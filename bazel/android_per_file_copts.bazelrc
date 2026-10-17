@@ -140,7 +140,6 @@ build:target --per_file_copt=^src/legoapi/render/fx/inflate\.cpp$@-O3
 # The HTML plotting helpers keep their original optimized codegen after
 # moving out of the mixed spline source.
 build:target --per_file_copt=^src/nu2api/nucore/nuhtml\.cpp$@-O3
-build:target --per_file_copt=^src/gamelib/crc/crc\.cpp$@-O2
 build:target --per_file_copt=^src/gamelib/nuwind/nuwind\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/world/area\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmo/base/gizmo\.cpp$@-O3
@@ -275,9 +274,6 @@ build:target --per_file_copt=^src/legoapi/characters/motion/camera\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/characters/motion/camera\.cpp$@-ftree-vectorize
 build:target --per_file_copt=^src/gameapi/edtools/edtoolsall_plain\.cpp$@-O2
 build:target --per_file_copt=^src/gameapi/edtools/edtoolsall_plain\.cpp$@-ftree-vectorize
-build:target --per_file_copt=^src/gameapi/edtools/edgraall\.cpp$@-O3
-build:target --per_file_copt=^src/gameapi/edtools/edbriall\.cpp$@-O3
-build:target --per_file_copt=^src/gameapi/edtools/edgra\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/characters/motion/charplatforms\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/cutscenes/gcutscn\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/cutscenes/cutscene_stubs\.cpp$@-O2
@@ -398,7 +394,6 @@ build:target --per_file_copt=^src/nu2api/nufile/nufilebase\.cpp$@-ftree-vectoriz
 build:target --per_file_copt=^src/nu2api/nufile/tmclient\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nufile/android/nufile_android\.cpp$@-O2
 build:target --per_file_copt=^src/nu2api/numusic/numusic\.cpp$@-O2
-build:target --per_file_copt=^src/nu2api/numusic/sfx\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/audio/sfx\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/audio/audio\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/audio/specialsfx\.cpp$@-O3
@@ -418,7 +413,6 @@ build:target --per_file_copt=^src/nu2api/nusound/nusound_decoder_ogg\.cpp$@-ftre
 build:target --per_file_copt=^src/nu2api/nusound/nusound3_include\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nusound/nusound_plain\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nusound/nu2api_nusound_plain\.cpp$@-O3
-build:target --per_file_copt=^src/nu2api/nusound/nu2api_nusound_misc\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nusound/nusound_buffer\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nusound/nusound_streamer\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nusound/nusound_memorymanager\.cpp$@-O3
@@ -532,14 +526,8 @@ build:target --per_file_copt=^src/MechInputTouch/MechInputTouchContextTasks\.cpp
 build:target --per_file_copt=^src/MechInputTouch/MechInputTouchContextTasks\.cpp$@-ftree-vectorize
 build:target --per_file_copt=^src/gamelib/util/TouchHacks\.cpp$@-O3
 
-# Particle engine: original DebrisSetup2 (0x34be60, 2413 bytes) inlines matrix
-# rotation and unrolls setup loops; its game_deb initializer also matches -O3.
-# The unoptimized game API wrappers live in apiobject.c.
-build:target --per_file_copt=^src/legoapi/render/fx/game_deb\.cpp$@-O3
-
 build:target --per_file_copt=^src/nu2api/nuandroid/NuPhoneOSMessage\.cpp$@-O2
 build:target --per_file_copt=^src/gameapi/edtools/edui\.cpp$@-O3
-build:target --per_file_copt=^src/gameapi/edtools/edrender\.cpp$@-O3
 
 # Traffic animation parsing and runtime loops use the optimized Android code shape.
 build:target --per_file_copt=^src/legoapi/items/objects/traffic\.cpp$@-O3

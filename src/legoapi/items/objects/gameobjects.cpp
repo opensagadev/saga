@@ -212,35 +212,12 @@ static f32 GameFogTime;
 static GAMEFOG_STATE GameFogOld;
 static GAMEFOG_STATE GameFogNew;
 
-enum AI_ACTION_SPEED_MODE : u8 {
-    AI_ACTION_SPEED_RUN = 0,
-    AI_ACTION_SPEED_WALK = 1,
-    AI_ACTION_SPEED_TIPTOE = 2,
-};
+#include "legoapi/items/objects/gameobjects_types.h"
 
-enum SCRIPT_ERROR_LEVEL : u32 {
-    SCRIPT_ERROR_LEVEL_NONE = 0,
-    SCRIPT_ERROR_LEVEL_WARNING = 1,
-    SCRIPT_ERROR_LEVEL_STRICT = 2,
-    SCRIPT_ERROR_LEVEL_COUNT = 3,
-};
 
-enum AI_DEFAULTS : u8 {
-    AI_DEFAULT_ACTIVATE_DIFFICULTY = 1,
-};
 
-enum AI_OBJECT_ROUTE_STATE : u8 {
-    AI_OBJECT_ROUTE_STATE_SCRIPT_VISIBLE = 3,
-};
 
-enum CHARACTER_AI_MODEL_FLAGS : u32 {
-    CHARACTER_AI_MODEL_FLAG_SNAP_ON_BIG_JUMP = 0x00200000,
-    CHARACTER_AI_MODEL_FLAG_DISABLE_RESPAWN = 0x00400000,
-};
 
-enum AI_GAME_OBJECT_TYPE : u8 {
-    AI_GAME_OBJECT_TYPE_VEHICLE = 0x2b,
-};
 
 // Enabled in the target data image.  Ordinary background characters are
 // staggered across frames; special movement states opt back into full-rate
@@ -6265,63 +6242,12 @@ extern "C" {
     extern i32 freechunkcontrolsptr;
 }
 void RemoveChunkControlFromStack(debris_chunk_control_s *, debris_chunk_control_s **);
-void RemoveAnyChunkControls(i32 *chunk) {
-    for (i32 i = 0; i < 2; ++i) {
-        for (debris_chunk_control_s *control = debris_chunk_control_stack[i]; control != NULL;) {
-            debris_chunk_control_s *next = control->next;
-            if (control->particle_chunk == reinterpret_cast<dma_particle_chunk_s *>(chunk)) {
-                RemoveChunkControlFromStack(control, &debris_chunk_control_stack[i]);
-                freechunkcontrols[--freechunkcontrolsptr] = control;
-                control->particle_chunk = NULL;
-            }
-            control = next;
-        }
-    }
-}
+void RemoveAnyChunkControls(i32 *chunk);
 
-void RemoveChunkFromRenderStack(particlechunkrendertype_s *chunk, particlechunkrendertype_s **stack) {
-    if (*stack == chunk) {
-        particlechunkrendertype_s *next = chunk->next;
-        *stack = next;
-        if (next != NULL) {
-            next->previous = NULL;
-        }
-    } else if (chunk->previous != NULL) {
-        chunk->previous->next = chunk->next;
-        if (chunk->next != NULL) {
-            chunk->next->previous = chunk->previous;
-        }
-    }
-    chunk->previous = NULL;
-    chunk->next = NULL;
-}
+void RemoveChunkFromRenderStack(particlechunkrendertype_s *chunk, particlechunkrendertype_s **stack);
 
-void RemoveChunkControlFromStack(debris_chunk_control_s *control, debris_chunk_control_s **stack) {
-    debris_chunk_control_s **link = stack;
-    while (*link != NULL) {
-        if (*link == control) {
-            *link = control->next;
-            break;
-        }
-        link = &(*link)->next;
-    }
-    control->next = NULL;
-}
+void RemoveChunkControlFromStack(debris_chunk_control_s *control, debris_chunk_control_s **stack);
 
 extern "C" debkeydatatype_s *debris_keystack;
 
-void RemoveDebrisEffectFromStack(debkeydatatype_s *key) {
-    if (key->next == NULL) {
-        debris_keystack = key->previous;
-        if (debris_keystack != NULL) {
-            debris_keystack->next = NULL;
-        }
-    } else {
-        key->next->previous = key->previous;
-        if (key->previous != NULL) {
-            key->previous->next = key->next;
-        }
-    }
-    key->next = NULL;
-    key->previous = NULL;
-}
+void RemoveDebrisEffectFromStack(debkeydatatype_s *key);

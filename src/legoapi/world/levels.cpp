@@ -70,5 +70,4 @@ i32 GetCounterLocator(i32) {
     return 0;
 }
 
-void OffPlat(i32) {
-}
+void OffPlat(i32);

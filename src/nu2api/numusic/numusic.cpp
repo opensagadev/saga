@@ -1581,17 +1581,4 @@ void NuMusic::TrackParseErrorFn(nufpar_s *param_1) {
     STUBBED();
 }
 
-void RegisterMusic(NUSOUND_FILENAME_INFO *files) {
-    LOG_DEBUG("files=%p", files);
-
-    g_music = files;
-    SFX_MUSIC_COUNT = 0;
-
-    if (files != NULL) {
-        for (; files->filename != NULL; files = files + 1) {
-            NuStrLen(files->filename);
-            LOG_DEBUG("Registered music file: %s", files->filename);
-            SFX_MUSIC_COUNT++;
-        }
-    }
-}
+void RegisterMusic(NUSOUND_FILENAME_INFO *files);

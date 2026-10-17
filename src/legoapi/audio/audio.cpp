@@ -39,17 +39,7 @@ NuMusic music_man;
 extern "C" void PlaySfxByIdAndSetVolume(i32 sfx_id, nuvec_s *position, f32 volume);
 extern "C" void SetPreSeekStartPoint(f32 start_point);
 
-void PlayAMusic(i32 a, i32 b, i32 c, i32 d) {
-    if (NOSOUND != 0 || NOMUSIC != 0) {
-        return;
-    }
-
-    NuSound3StopStereoStream(a);
-    NuSound3PlayStereoV(NUSOUNDPLAYTOK_STEREOSTREAM, a, NUSOUNDPLAYTOK_SAMPLE, b, NUSOUNDPLAYTOK_VOL, c,
-                        d != 0 ? NUSOUNDPLAYTOK_ONESHOT : static_cast<NUSOUNDPLAYTOK>(0), NUSOUNDPLAYTOK_END);
-    Music.secondary_stream = static_cast<i16>(a);
-    Music.transition_frames = 0;
-}
+void PlayAMusic(i32 a, i32 b, i32 c, i32 d);
 i16 GetMusicIndex(char *name, nusound_filename_info_s *table, i32 def) {
     (void)name;
     (void)table;
@@ -83,9 +73,7 @@ void SpaceAudioPoint() {
 void legoSetCutVolume(float v) {
     music_man.SetClassVolume(TRACK_CLASS_CUTSCENE, v);
 }
-f32 GetAudioFadeLevel() {
-    return AUDIOFADELEVEL;
-}
+f32 GetAudioFadeLevel();
 void SetBackgroundMusic(i32 track) {
     // libTTapp.so 0x4df8b0: platform stub (eight NOPs and ret).
     // Title music is selected and started later by GamePlayMusic.
@@ -175,117 +163,19 @@ i32 CheckMusicSwapInstant() {
 void UpdateBackgroundMusic() {
 }
 extern "C" {
-    i32 fake_seeking;
+extern i32 fake_seeking;
 
-    i32 GetCurPreSeek(void) {
-        return Music.requested_track;
-    }
-    i32 GetCurrentMusicId(void) {
-        return Music.current_track;
-    }
-    i32 GetOppMusicId(void) {
-        return Music.queued_track;
-    }
+i32 GetCurPreSeek(void);
+i32 GetCurrentMusicId(void);
+i32 GetOppMusicId(void);
 
-    void MusicPreSeek(i32 track) {
-        if (NOSOUND != 0 || NOMUSIC != 0 || track < 0 || track >= SFX_MUSIC_COUNT) {
-            return;
-        }
+void MusicPreSeek(i32 track);
 
-        const auto play_stream = [track](i32 stream, f32 seek_offset) {
-            NuSound3StopStereoStream(stream);
-            NuSound3PlayStereoV(NUSOUNDPLAYTOK_STEREOSTREAM, stream, NUSOUNDPLAYTOK_SAMPLE, track, NUSOUNDPLAYTOK_VOL,
-                                0, NUSOUNDPLAYTOK_STARTOFFSET, static_cast<f64>(seek_offset), NUSOUNDPLAYTOK_ONESHOT,
-                                NUSOUNDPLAYTOK_END);
-        };
-        const MusicPlaybackState state = Music.state;
-        if ((state & ~MUSIC_PLAYBACK_ACTIVE) == MUSIC_PLAYBACK_STOPPED &&
-            (track != Music.requested_track || Music.pause_requested)) {
-            const i16 transition_frames = Music.transition_frames;
-            const i32 primary_stream = Music.primary_stream;
-            Music.resume_track = static_cast<i16>(track);
-            Music.queued_track = static_cast<i16>(track);
-            Music.requested_track = static_cast<i16>(track);
-            reinterpret_cast<u8 *>(&Music)[primary_stream + 0x12] = 0;
-            if (transition_frames < 64) {
-                if (state == MUSIC_PLAYBACK_STOPPED)
-                    goto first_play;
-                Music.pause_requested = true;
-            } else {
-            first_play:
-                Music.pause_requested = false;
-                const f32 seek_offset = Music.seek_offset;
-                const i32 stream = 1 - primary_stream;
-                play_stream(stream, seek_offset);
-                Music.secondary_stream = static_cast<i16>(stream);
-                Music.transition_frames = 0;
-                Music.seek_offset = 0.0f;
-                if (track >= SFX_MUSIC_COUNT) {
-                    return;
-                }
-            }
-        }
+void MusicPreSeekNow(i32 track);
 
-        if (static_cast<u16>(Music.state - MUSIC_PLAYBACK_DUAL_STREAM) < 3 &&
-            (track != Music.current_track || Music.pause_requested)) {
-            const i32 primary_stream = Music.primary_stream;
-            const i16 transition_frames = Music.transition_frames;
-            Music.current_track = static_cast<i16>(track);
-            Music.queued_track = static_cast<i16>(track);
-            Music.requested_track = static_cast<i16>(track);
-            Music.state = MUSIC_PLAYBACK_DUAL_STREAM;
-            reinterpret_cast<u8 *>(&Music)[primary_stream + 0x12] = 0;
-            if (transition_frames < 64) {
-                Music.pause_requested = true;
-            } else {
-                Music.pause_requested = false;
-                const f32 seek_offset = Music.seek_offset;
-                if (NOSOUND == 0 && NOMUSIC == 0) {
-                    play_stream(primary_stream, seek_offset);
-                    Music.secondary_stream = static_cast<i16>(primary_stream);
-                }
-                Music.transition_frames = 0;
-                Music.seek_offset = 0.0f;
-            }
-        }
-    }
+i32 MusicSeeking(void);
 
-    void MusicPreSeekNow(i32 track) {
-        if (track < 0 || track >= SFX_MUSIC_COUNT) {
-            return;
-        }
-
-        const f32 seek_offset = Music.seek_offset;
-        const i32 primary_stream = Music.primary_stream;
-        Music.queued_track = static_cast<i16>(track);
-        Music.requested_track = static_cast<i16>(track);
-        Music.pause_requested = false;
-        Music.stream_status_delay[primary_stream] = 0;
-        if (NOSOUND == 0 && NOMUSIC == 0) {
-            const i32 stream = 1 - primary_stream;
-            NuSound3StopStereoStream(stream);
-            NuSound3PlayStereoV(NUSOUNDPLAYTOK_STEREOSTREAM, stream, NUSOUNDPLAYTOK_SAMPLE, track, NUSOUNDPLAYTOK_VOL,
-                                0, NUSOUNDPLAYTOK_STARTOFFSET, static_cast<f64>(seek_offset), NUSOUNDPLAYTOK_ONESHOT,
-                                NUSOUNDPLAYTOK_END);
-            Music.secondary_stream = static_cast<i16>(stream);
-            Music.transition_frames = 0;
-        }
-        Music.seek_offset = 0.0f;
-    }
-
-    i32 MusicSeeking(void) {
-        if (fake_seeking != 0 || Music.pause_requested) {
-            return 1;
-        }
-        if (NuSound3GetStereoStreamStatus(0) == NUSOUND_STEREO_STREAM_FINISHED) {
-            return 1;
-        }
-        return NuSound3GetStereoStreamStatus(1) == NUSOUND_STEREO_STREAM_FINISHED;
-    }
-
-    i32 MusicState(void) {
-        return Music.state;
-    }
+i32 MusicState(void);
 }
 
 extern "C" void SetSoundVolume(f32);

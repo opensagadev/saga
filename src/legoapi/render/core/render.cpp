@@ -39,12 +39,7 @@
 
 void DrawSubItems();
 
-extern "C" void edbriStartAllPages(void) {
-    for (i32 page = 0; page < 8; ++page) {
-        if (edbri_page_used[page])
-            edbriStartPage(page);
-    }
-}
+extern "C" void edbriStartAllPages(void);
 
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/nucamera.h"

@@ -22,33 +22,18 @@
 #include <stdio.h>
 #include <string.h>
 
-enum RepeatSfxState : u8 {
-    REPEAT_SFX_INACTIVE = 0,
-    REPEAT_SFX_INITIAL_DELAY = 1,
-    REPEAT_SFX_PLAY = 2,
-    REPEAT_SFX_INTERVAL = 3,
-};
+#include "legoapi/audio/sfx_types.h"
 
-struct RepeatSfx {
-    i16 sfx_id;
-    RepeatSfxState state;
-    i8 plays_remaining;
-    f32 timer;
-    f32 interval;
-    nuvec_s *position;
-};
 
 DECOMP_ASSERT(sizeof(RepeatSfx) == 0x10, "RepeatSfx size");
 
 static i32 repsfxcount;
 static RepeatSfx repsfxtab[32];
 static i32 ticktock;
-static f32 MusicVolume = 1.0f;
-static f32 CutVolume = 0.8f;
 
 extern "C" {
-    u16 GlobalSfxBits[100];
-    u16 SfxBits[100];
+extern u16 GlobalSfxBits[100];
+extern u16 SfxBits[100];
     SoundTable CurrentSFXTAB;
     void (*ExtraDieSfxFn)(GameObject_s *);
     void (*ExtraHurtSfxFn)(GameObject_s *);
@@ -116,21 +101,11 @@ extern "C" {
     i32 NuSound3SetReverb(i32 mode);
 }
 
-extern "C" void ResetSounds(void) {
-    memcpy(SfxBits, GlobalSfxBits, sizeof(SfxBits));
-}
+extern "C" void ResetSounds(void);
 
-extern "C" void PrepareSounds(const u16 *sounds) {
-    for (i32 i = 0; i < 100; ++i) {
-        SfxBits[i] |= sounds[i];
-    }
-}
+extern "C" void PrepareSounds(const u16 *sounds);
 
-extern "C" void MaskSounds(const u16 *mask) {
-    for (i32 i = 0; i < 100; ++i) {
-        SfxBits[i] &= mask[i];
-    }
-}
+extern "C" void MaskSounds(const u16 *mask);
 
 void SetLevelSfxBits(WORLDINFO *world) {
     i32 sfx_ids[1024];
@@ -756,422 +731,91 @@ extern "C" {
 
     f32 sfx_wait;
 
-    i32 GetSfxIdN(char *name, i32 length) {
-        for (i32 index = 0; index < 1600; ++index) {
-            if (NuStrNICmp(name, g_soundInfo[index].sfx_name, length) == 0) {
-                return index;
-            }
-        }
-        return -1;
-    }
+i32 GetSfxIdN(char *name, i32 length);
 
-    char *GetSfxName(i32 sfx_id) {
-        return sfx_id < 0 ? NULL : const_cast<char *>(g_soundInfo[sfx_id].sfx_name);
-    }
+char *GetSfxName(i32 sfx_id);
 
-    i32 IsSfxLooping(i32 sfx_id) {
-        return sfx_id == -1 ? -1 : g_soundInfo[sfx_id].loop;
-    }
+i32 IsSfxLooping(i32 sfx_id);
 
-    void PauseGameAudio(i32) {
-        if (NOSOUND == 0) {
-            NuSound3StopSFX();
-            NuSound3SetSFXPitch(0);
-        }
-    }
+void PauseGameAudio(i32);
 
-    void PauseGameMusic(void) {
-        if (NOMUSIC == 0 && NOSOUND == 0 && NUSOUND_STREAM_3 != -1 && static_cast<u16>(Music.state - 11) > 2) {
-            NuSound3CancelCheckStereo();
-            NuSound3PauseStereoStream(Music.primary_stream);
-            if (static_cast<u16>(Music.state - 5) < 6) {
-                NuSound3PauseStereoStream(1 - Music.primary_stream);
-            }
-        }
-        Music.restore_requested = false;
-    }
+void PauseGameMusic(void);
 
-    void PauseGameSfx(void) {
-        NuSound3StopSFX();
-        NuSound3FlushLoops();
-        NuSound3SetSFXPitch(0);
-    }
+void PauseGameSfx(void);
 
-    void PlayAltGameMusic(i32 track) {
-        Music.update_delay = 1;
-        if (Music.requested_track == track && !Music.pause_requested) {
-            i32 stream = 1 - Music.primary_stream;
-            NuSound3ResumeStereoStream(stream);
-            NuSound3SetStereoStreamVolume(stream, static_cast<i32>(g_music[track].index * MusicVolume));
-            Music.resume_track = -1;
-        } else {
-            PlayAMusic(1 - Music.primary_stream, track, static_cast<i32>(g_music[track].index * MusicVolume), 0);
-        }
-    }
+void PlayAltGameMusic(i32 track);
 
-    i32 PlayCutMusic(i32 track, i32 state, void *context) {
-        if (NOSOUND != 0 || NOMUSIC != 0 || track < 0 || track >= SFX_MUSIC_COUNT) {
-            return 0;
-        }
+i32 PlayCutMusic(i32 track, i32 state, void *context);
 
-        Music.queued_track = static_cast<i16>(track);
-        Music.transition_frames = 0;
+void PlayMusic(i32 track, i32 mode);
 
-        Music.stream_status_delay[1 - Music.primary_stream] = 6;
-        NuSound3CancelCheckStereo();
-        NuSound3PauseStereoStream(Music.primary_stream);
+void PlaySfx(char *name, struct nuvec_s *position);
 
-        NuSound3SetStereoStreamVolume(Music.primary_stream,
-                                      static_cast<i32>(static_cast<f32>(g_music[track].index) * CutVolume));
+void PlaySfxAndSetPitch(char *name, nuvec_s *position, f32 pitch);
 
-        i32 started = 0;
-        if (Music.requested_track != track || Music.pause_requested ||
-            NuSound3GetStereoStreamStatus(1 - Music.primary_stream) == NUSOUND_STEREO_STREAM_FINISHED) {
-            PlayAMusic(1 - Music.primary_stream, track,
-                       static_cast<i32>(static_cast<f32>(g_music[track].index) * CutVolume), 0);
-            started = 1;
-        } else {
-            NuSound3ResumeStereoStream(1 - Music.primary_stream);
-            NuSound3SetStereoStreamVolume(1 - Music.primary_stream,
-                                          static_cast<i32>(static_cast<f32>(g_music[track].index) * CutVolume));
-        }
+void PlaySfxAndSetVolume(char *name, nuvec_s *position, f32 volume);
 
-        NuGCutSetCutAudioStream(1 - Music.primary_stream);
-        Music.requested_track = -1;
-        Music.pause_requested = false;
-        Music.transition = 1.0f;
-        switch (state) {
-            case MUSIC_PLAYBACK_DUAL_STREAM_PENDING:
-                Music.state = MUSIC_PLAYBACK_DUAL_STREAM_PENDING;
-                break;
-            case 12:
-                Music.state = static_cast<MusicPlaybackState>(12);
-                break;
-            default:
-                Music.state = static_cast<u16>(Music.state) < 1 ? static_cast<MusicPlaybackState>(12)
-                                                                : MUSIC_PLAYBACK_DUAL_STREAM;
-                break;
-        }
-        Music.track_data = context;
-        return started;
-    }
+void PlaySfxAndSetVolumeAndPitch(char *name, nuvec_s *position, f32 volume, f32 pitch);
 
-    void PlayMusic(i32 track, i32 mode) {
-        if (NOSOUND != 0 || NOMUSIC != 0) {
-            return;
-        }
+void PlaySfxById(i32 sfx_id, nuvec_s *position);
 
-        if (track < 0 || track >= SFX_MUSIC_COUNT) {
-            Music.primary_stream = 1 - Music.primary_stream;
-            Music.restore_requested = false;
-            Music.state = static_cast<MusicPlaybackState>((mode == 3) * 2 + 7);
-            Music.queued_track = Music.current_track;
-            Music.current_track = static_cast<i16>(track);
-            Music.transition = 0.0f;
-            return;
-        }
+void PlaySfxByIdAndSetPitch(i32 sfx_id, nuvec_s *position, f32 pitch);
 
-        Music.transition_frames = 0;
-        Music.queued_track = Music.current_track;
-        Music.current_track = static_cast<i16>(track);
+void PlaySfxByIdAndSetVolume(i32 sfx_id, nuvec_s *position, f32 volume);
 
-        i32 requested;
-        i32 stream;
-        i16 primary_stream;
-        if (Music.state == MUSIC_PLAYBACK_STOPPED) {
-            requested = Music.requested_track;
-            primary_stream = Music.primary_stream;
-            stream = primary_stream;
-            Music.stream_status_delay[stream] = 0;
-            if (requested == track)
-                goto flip_primary_stream;
-            goto start_primary_music;
-        } else if (mode != 1 && NUSOUND_STREAM_3 != -1) {
-            requested = Music.requested_track;
-            Music.primary_stream = 1 - Music.primary_stream;
-            stream = Music.primary_stream;
-            Music.stream_status_delay[stream] = 0;
-            if (requested == track && !Music.pause_requested) {
-                Music.state = static_cast<MusicPlaybackState>((mode == 3) * 2 + 7);
-                NuSound3ResumeStereoStream(stream);
-                NuSound3SetStereoStreamVolume(Music.primary_stream, 0);
-            } else {
-                Music.state = static_cast<MusicPlaybackState>((mode == 3) * 2 + 8);
-                PlayAMusic(stream, track, 0, 0);
-            }
-            Music.transition = 0.0f;
-            goto clear_music_flags;
-        } else {
-            requested = Music.requested_track;
-            primary_stream = Music.primary_stream;
-            stream = primary_stream;
-            Music.stream_status_delay[stream] = 0;
-            if (requested != track || Music.state == MUSIC_PLAYBACK_DUAL_STREAM)
-                goto start_primary_music;
-        }
+void PlaySfxByIdAndSetVolumeAndPitch(i32 sfx_id, nuvec_s *position, f32 volume, f32 pitch);
 
-    flip_primary_stream:
-        Music.primary_stream = 1 - primary_stream;
-        stream = Music.primary_stream;
-    start_primary_music:
-        NuSound3StopStereoStream(1 - stream);
-        if (Music.requested_track == track && !Music.pause_requested &&
-            NuSound3GetStereoStreamStatus(Music.primary_stream) != NUSOUND_STEREO_STREAM_FINISHED) {
-            NuSound3ResumeStereoStream(Music.primary_stream);
-            NuSound3SetStereoStreamVolume(Music.primary_stream, static_cast<i32>(g_music[track].index * MusicVolume));
-        } else {
-            PlayAMusic(Music.primary_stream, track, static_cast<i32>(g_music[track].index * MusicVolume), 0);
-        }
-        Music.transition = 1.0f;
-        Music.state = MUSIC_PLAYBACK_ACTIVE;
-    clear_music_flags:
-        Music.requested_track = -1;
-        Music.pause_requested = false;
-        Music.restore_requested = false;
-    }
+i32 PlayingCutMusic(void);
 
-    void PlaySfx(char *name, struct nuvec_s *position) {
-        i32 sfx_id = GetSfxId(name);
-        if (sfx_id != -1) {
-            PlaySfxById(sfx_id, position);
-        }
-    }
+void ClearLinkedCutSceneMusic(void *context);
 
-    void PlaySfxAndSetPitch(char *name, nuvec_s *position, f32 pitch) {
-        i32 sfx_id = GetSfxId(name);
-        if (sfx_id != -1) {
-            PlaySfxByIdEx(sfx_id, position, 1.0f, pitch);
-        }
-    }
+void PrepareAllSounds(void);
 
-    void PlaySfxAndSetVolume(char *name, nuvec_s *position, f32 volume) {
-        i32 id = GetSfxId(name);
-        if (id != -1) {
-            PlaySfxByIdEx(id, position, volume, 1.0f);
-        }
-    }
+void RegisterSounds(SoundTable *table);
 
-    void PlaySfxAndSetVolumeAndPitch(char *name, nuvec_s *position, f32 volume, f32 pitch) {
-        i32 sfx_id = GetSfxId(name);
-        if (sfx_id != -1) {
-            PlaySfxByIdEx(sfx_id, position, volume, pitch);
-        }
-    }
+void ResetPreSeek(void);
 
-    void PlaySfxById(i32 sfx_id, nuvec_s *position) {
-        PlaySfxByIdEx(sfx_id, position, 1.0f, 1.0f);
-    }
+void RestoreGameMusic(void);
 
-    void PlaySfxByIdAndSetPitch(i32 sfx_id, nuvec_s *position, f32 pitch) {
-        PlaySfxByIdEx(sfx_id, position, 1.0f, pitch);
-    }
-
-    void PlaySfxByIdAndSetVolume(i32 sfx_id, nuvec_s *position, f32 volume) {
-        PlaySfxByIdEx(sfx_id, position, volume, 1.0f);
-    }
-
-    void PlaySfxByIdAndSetVolumeAndPitch(i32 sfx_id, nuvec_s *position, f32 volume, f32 pitch) {
-        PlaySfxByIdEx(sfx_id, position, volume, pitch);
-    }
-
-    i32 PlayingCutMusic(void) {
-        const i32 stream = 1 - Music.primary_stream;
-        u8 &delay = Music.stream_status_delay[stream];
-        if (delay != 0) {
-            --delay;
-            return 0;
-        }
-        if (NOSOUND != 0 || NOMUSIC != 0) {
-            return 0;
-        }
-        return NuSound3GetStereoStreamStatus(stream) != NUSOUND_STEREO_STREAM_FINISHED;
-    }
-
-    void ClearLinkedCutSceneMusic(void *context) {
-        if (context == NULL || Music.track_data == context) {
-            Music.track_data = NULL;
-        }
-    }
-
-    void PrepareAllSounds(void) {
-        for (i32 i = 0; i < 100; ++i) {
-            SfxBits[i] = 0xffff;
-        }
-    }
-
-    void RegisterSounds(SoundTable *table) {
-        const char **names = table->names;
-        memset(table->bits, 0, sizeof(table->bits));
-        if (names == NULL) {
-            return;
-        }
-        for (const char **name = names; *name != NULL; ++name) {
-            i32 id = GetSfxId(*name);
-            table->bits[id >> 4] |= static_cast<u16>(1 << (id & 0xf));
-        }
-    }
-
-    void ResetPreSeek(void) {
-        if (Music.state == MUSIC_PLAYBACK_DUAL_STREAM) {
-            Music.current_track = -1;
-        } else {
-            Music.queued_track = -1;
-            Music.requested_track = -1;
-            Music.pause_requested = false;
-        }
-        Music.seek_offset = 0.0f;
-    }
-
-    void RestoreGameMusic(void) {
-        if ((NOMUSIC == 0 || NOSOUND == 0) && NUSOUND_STREAM_3 != -1) {
-            if (Music.transition_frames < 25) {
-                Music.restore_requested = true;
-                return;
-            }
-            if (static_cast<u16>(Music.state - 11) > 2) {
-                NuSound3ResumeStereoStream(Music.primary_stream);
-                if (static_cast<u16>(Music.state - 5) < 6) {
-                    NuSound3ResumeStereoStream(1 - Music.primary_stream);
-                }
-            }
-        }
-    }
-
-    void ResumeGameAudio(void) {
-        // Platform placeholder in the Android build.
-    }
+void ResumeGameAudio(void);
 
     void SOUND_SFXRequest_Table(void) {
         // Platform placeholder in the Android build.
     }
 
-    void SetAudioFadeLevel(f32 level) {
-        AUDIOFADELEVEL = level;
-    }
+void SetAudioFadeLevel(f32 level);
 
-    void SetCutVolume(f32 volume) {
-        CutVolume = volume;
-    }
+void SetCutVolume(f32 volume);
 
-    void SetLinkedCutSceneMusic(void *context, i32 state) {
-        Music.track_data = context;
-        if (static_cast<u16>(Music.state - MUSIC_PLAYBACK_DUAL_STREAM) <= 2) {
-            Music.state = state == MUSIC_PLAYBACK_DUAL_STREAM_PENDING ? MUSIC_PLAYBACK_DUAL_STREAM_PENDING
-                                                                      : MUSIC_PLAYBACK_DUAL_STREAM;
-        }
-    }
+void SetLinkedCutSceneMusic(void *context, i32 state);
 
-    void SetMusicVolume(f32 volume) {
-        if (NOSOUND != 0 || NOMUSIC != 0) {
-            return;
-        }
-        MusicVolume = volume;
-        if (Music.state == MUSIC_PLAYBACK_ACTIVE) {
-            NuSound3SetStereoStreamVolume(
-                Music.primary_stream, static_cast<i32>(static_cast<f32>(g_music[Music.current_track].index) * volume));
-        }
-    }
+void SetMusicVolume(f32 volume);
 
-    void SetPreSeekStartPoint(f32 start_point) {
-        Music.seek_offset = start_point;
-    }
+void SetPreSeekStartPoint(f32 start_point);
 
-    void SetSfxBitTab_Off(SoundTable *table, i32 sound) {
-        if (sound >= 0) {
-            SetSfxBitTab_OffEx(table, g_soundInfo[sound].index);
-        }
-    }
+void SetSfxBitTab_Off(SoundTable *table, i32 sound);
 
-    void SetSfxBitTab_On(SoundTable *table, i32 sound) {
-        if (sound >= 0) {
-            SetSfxBitTab_OnEx(table, g_soundInfo[sound].index);
-        }
-    }
+void SetSfxBitTab_On(SoundTable *table, i32 sound);
 
-    void SetSfxBit_Off(i32 sound) {
-        if (sound >= 0) {
-            SetSfxBit_OffEx(g_soundInfo[sound].index);
-        }
-    }
+void SetSfxBit_Off(i32 sound);
 
-    void SetSfxBit_On(i32 sound) {
-        if (sound >= 0)
-            SetSfxBit_OnEx(g_soundInfo[sound].index);
-    }
+void SetSfxBit_On(i32 sound);
 
-    i32 SfxBit(i32 sound) {
-        if (sound < 0) {
-            return 0;
-        }
-        return SfxBitEx(g_soundInfo[sound].index);
-    }
+i32 SfxBit(i32 sound);
 
-    void SfxBitMaskTable(u16 *bits, const u16 *mask) {
-        for (i32 i = 0; i < 100; i++) {
-            bits[i] &= mask[i];
-        }
-    }
+void SfxBitMaskTable(u16 *bits, const u16 *mask);
 
-    i32 SfxBitTab(const SoundTable *table, i32 sound) {
-        if (sound < 0) {
-            return 0;
-        }
-        return SfxBitTabEx(table, g_soundInfo[sound].index);
-    }
+i32 SfxBitTab(const SoundTable *table, i32 sound);
 
-    void SfxBitsRestore(SoundTable *table) {
-        memmove(SfxBits, table->bits, sizeof(SfxBits));
-    }
+void SfxBitsRestore(SoundTable *table);
 
-    void SfxBitsSetAll(u16 *bits) {
-        memset(bits, 0xff, sizeof(SfxBits));
-    }
+void SfxBitsSetAll(u16 *bits);
 
-    void SfxBitsStore(SoundTable *table) {
-        memmove(table->bits, SfxBits, sizeof(SfxBits));
-    }
+void SfxBitsStore(SoundTable *table);
 
-    void StopAltGameMusic(void) {
-        NuSound3CancelCheckStereo();
-        NuSound3PauseStereoStream(1 - Music.primary_stream);
-        Music.update_delay = 0;
-        Music.queued_track = -1;
-        Music.requested_track = -1;
-        if (Music.resume_track >= 0) {
-            MusicPreSeek(Music.resume_track);
-        }
-    }
+void StopAltGameMusic(void);
 
-    void SwapMusic(i32 mode) {
-        if (NOSOUND != 0 || NOMUSIC != 0) {
-            return;
-        }
-
-        i16 previous_track = Music.current_track;
-        i16 queued_track = Music.queued_track;
-        Music.primary_stream = 1 - Music.primary_stream;
-        Music.current_track = queued_track;
-        Music.queued_track = previous_track;
-        NuSound3ResumeStereoStream(Music.primary_stream);
-
-        if (mode == 1) {
-            NuSound3SetStereoStreamVolume(Music.primary_stream,
-                                          static_cast<i32>(g_music[queued_track].index * MusicVolume));
-            NuSound3PauseStereoStream(1 - Music.primary_stream);
-            NuSound3SetStereoStreamVolume(1 - Music.primary_stream, 0);
-            Music.state = MUSIC_PLAYBACK_ACTIVE;
-            Music.transition = 1.0f;
-        } else {
-            f32 transition = 0.0f;
-            if (static_cast<u16>(Music.state - 5) < 2) {
-                transition = 1.0f - Music.transition;
-            }
-            Music.transition = transition;
-            NuSound3SetStereoStreamVolume(Music.primary_stream,
-                                          static_cast<i32>(g_music[queued_track].index * transition));
-            Music.state = static_cast<MusicPlaybackState>((mode == 3) + 5);
-        }
-    }
+void SwapMusic(i32 mode);
 
 } // extern "C"
 
@@ -1330,13 +974,7 @@ void PlayLandSfx(GameObject_s *object, i32 type, i32) {
     }
 }
 
-i32 SfxBitTabEx(SoundTable const *table, i32 sound) {
-    if (static_cast<u32>(sound) >= 1600) {
-        return -1;
-    }
-    const u16 mask = static_cast<u16>(1u << (sound & 15));
-    return (table->bits[sound >> 4] & mask) != 0;
-}
+i32 SfxBitTabEx(SoundTable const *table, i32 sound);
 
 void TickTockSfx() {
     if (ticktock != 0) {
@@ -1487,11 +1125,7 @@ void ResetRepeatSfx() {
     repsfxtab[0].sfx_id = -1;
 }
 
-void SetSfxBit_OnEx(i32 sound) {
-    if (static_cast<u32>(sound) < 1600) {
-        SfxBits[sound >> 4] |= 1 << (sound & 15);
-    }
-}
+void SetSfxBit_OnEx(i32 sound);
 
 void UpdateLevelSfx(WORLDINFO_s *world, i32 paused) {
     SfxBitsRestore(&CurrentSFXTAB);
@@ -1579,11 +1213,7 @@ void PlayFootStepSfx(GameObject_s *object) {
     }
 }
 
-void SetSfxBit_OffEx(i32 sound) {
-    if (static_cast<u32>(sound) < 1600) {
-        SfxBits[sound >> 4] &= ~(1 << (sound & 15));
-    }
-}
+void SetSfxBit_OffEx(i32 sound);
 
 void UpdateRepeatSfx() {
     for (RepeatSfx &repeat : repsfxtab) {
@@ -1634,17 +1264,9 @@ void AddLevelSfxFromId(i32 sfx_id, i32 *sfx_ids, i32 *sfx_count, i32 max_sfx) {
     ++*sfx_count;
 }
 
-void SetSfxBitTab_OnEx(SoundTable *table, i32 sound) {
-    if (static_cast<u32>(sound) < 1600) {
-        table->bits[sound >> 4] |= 1 << (sound & 15);
-    }
-}
+void SetSfxBitTab_OnEx(SoundTable *table, i32 sound);
 
-void SetSfxBitTab_OffEx(SoundTable *table, i32 sound) {
-    if (static_cast<u32>(sound) < 1600) {
-        table->bits[sound >> 4] &= ~(1 << (sound & 15));
-    }
-}
+void SetSfxBitTab_OffEx(SoundTable *table, i32 sound);
 
 void SfxCheckMusicOnOff(OPTIONSSAVE_s *) {
     // Platform placeholder in the Android build.
@@ -1699,13 +1321,7 @@ void BlockSfx(GameObject_s *object) {
     }
 }
 
-i32 SfxBitEx(i32 sound) {
-    if (static_cast<u32>(sound) >= 1600) {
-        return -1;
-    }
-    const u16 mask = static_cast<u16>(1u << (sound & 15));
-    return (SfxBits[sound >> 4] & mask) != 0;
-}
+i32 SfxBitEx(i32 sound);
 
 void AddLevSfx(WORLDINFO_s *world, nuvec_s *position, char *name, i32 sfx) {
     if (sfx == -1 && name != NULL) {
@@ -1803,185 +1419,8 @@ void GameAudio_PlaySfxAndSetVolume(i32 sfx, nuvec_s *position, f32 volume) {
     }
 }
 
-extern "C" void MusicSeekOffset(i32 track, f32 seek_offset) {
-    struct VolumeSnapshot {
-        i32 index;
-        f32 volume;
-    };
-    if (seek_offset < 0.0f) {
-        seek_offset = Music.seek_offset;
-    }
-    if (track < 0 || track >= SFX_MUSIC_COUNT) {
-        return;
-    }
+extern "C" void MusicSeekOffset(i32 track, f32 seek_offset);
 
-    if (static_cast<u16>(Music.state - MUSIC_PLAYBACK_DUAL_STREAM) < 3) {
-        if (Music.current_track == track && !Music.pause_requested) {
-            return;
-        }
-        const i16 primary_stream = Music.primary_stream;
-        const i32 stream = primary_stream;
-        Music.current_track = static_cast<i16>(track);
-        Music.queued_track = static_cast<i16>(track);
-        Music.requested_track = -1;
-        Music.state = MUSIC_PLAYBACK_DUAL_STREAM;
-        Music.stream_status_delay[stream] = 0;
-        if (Music.transition_frames < 64) {
-            Music.pause_requested = true;
-        } else {
-            Music.pause_requested = false;
-            const VolumeSnapshot volume_snapshot = {g_music[track].index, MusicVolume};
-            if (NOSOUND == 0 && NOMUSIC == 0) {
-                NuSound3StopStereoStream(stream);
-                NuSound3PlayStereoV(NUSOUNDPLAYTOK_STEREOSTREAM, stream, NUSOUNDPLAYTOK_SAMPLE, track,
-                                    NUSOUNDPLAYTOK_VOL,
-                                    static_cast<i32>(static_cast<f32>(volume_snapshot.index) * volume_snapshot.volume),
-                                    NUSOUNDPLAYTOK_STARTOFFSET, static_cast<f64>(seek_offset), NUSOUNDPLAYTOK_ONESHOT,
-                                    NUSOUNDPLAYTOK_END);
-                Music.secondary_stream = primary_stream;
-            }
-            Music.transition_frames = 0;
-            Music.seek_offset = 0.0f;
-        }
-        return;
-    }
 
-    const i16 primary_stream = Music.primary_stream;
-    const i32 stream = primary_stream;
-    Music.pause_requested = false;
-    Music.stream_status_delay[stream] = 0;
-    Music.current_track = static_cast<i16>(track);
-    Music.queued_track = static_cast<i16>(track);
-    Music.requested_track = static_cast<i16>(track);
-    Music.state = MUSIC_PLAYBACK_ACTIVE;
-    Music.transition_frames = 0;
-    const VolumeSnapshot volume_snapshot = {g_music[track].index, MusicVolume};
-    if (NOSOUND == 0 && NOMUSIC == 0) {
-        NuSound3StopStereoStream(stream);
-        NuSound3PlayStereoV(NUSOUNDPLAYTOK_STEREOSTREAM, stream, NUSOUNDPLAYTOK_SAMPLE, track, NUSOUNDPLAYTOK_VOL,
-                            static_cast<i32>(static_cast<f32>(volume_snapshot.index) * volume_snapshot.volume),
-                            NUSOUNDPLAYTOK_STARTOFFSET, static_cast<f64>(seek_offset), NUSOUNDPLAYTOK_ONESHOT,
-                            NUSOUNDPLAYTOK_END);
-        Music.transition_frames = 0;
-        Music.secondary_stream = primary_stream;
-    }
-}
 
-struct SoundTrackData {
-    u8 reserved_00[0x88];
-    u8 flags_88;
-};
-
-static inline bool UpdateSecondaryMusicStream() {
-    if (NuSound3GetStereoStreamStatus(Music.secondary_stream) == NUSOUND_STEREO_STREAM_FINISHED)
-        return false;
-    if (Music.transition_frames <= 0x7f)
-        ++Music.transition_frames;
-    if (Music.transition_frames > 0x40 && Music.pause_requested)
-        MusicPreSeek(Music.requested_track);
-    return true;
-}
-
-extern "C" void SoundUpdate(float frame_time) {
-    if (Music.update_delay != 0 || frame_time == 0.0f) {
-        return;
-    }
-
-    // Playback states 4 through 13 form the active update range.
-    switch (static_cast<u16>(Music.state - MUSIC_PLAYBACK_ACTIVE)) {
-        case 4:
-        case 6:
-            if (NuSound3GetStereoStreamStatus(Music.primary_stream) != NUSOUND_STEREO_STREAM_FINISHED)
-                Music.state = static_cast<MusicPlaybackState>(7);
-            return;
-        case 1:
-        case 2:
-        case 3:
-        case 5: {
-            if (Music.state == 9 || Music.state == 6) {
-                Music.transition = (frame_time + frame_time) + Music.transition;
-            } else {
-                Music.transition = frame_time * 0.2f + Music.transition;
-            }
-            if (Music.transition >= 1.0f) {
-                Music.transition = 1.0f;
-                if (static_cast<u16>(Music.state - 5) <= 1) {
-                    NuSound3PauseStereoStream(1 - Music.primary_stream);
-                } else {
-                    NuSound3StopStereoStream(1 - Music.primary_stream);
-                }
-                Music.state = MUSIC_PLAYBACK_ACTIVE;
-                Music.transition_frames = 0;
-            }
-
-            if (Music.current_track != -1) {
-                NuSound3SetStereoStreamVolume(Music.primary_stream,
-                                              static_cast<i32>(static_cast<f32>(g_music[Music.current_track].index) *
-                                                               Music.transition * MusicVolume));
-            }
-            if (Music.queued_track != -1) {
-                NuSound3SetStereoStreamVolume(
-                    1 - Music.primary_stream,
-                    static_cast<i32>((1.0f - Music.transition) * static_cast<f32>(g_music[Music.queued_track].index) *
-                                     MusicVolume));
-            }
-            return;
-        }
-        case 0: {
-            if (!UpdateSecondaryMusicStream())
-                return;
-            if (Music.transition_frames <= 0x18) {
-                return;
-            }
-            if (Music.restore_requested) {
-                RestoreGameMusic();
-                Music.restore_requested = false;
-            }
-            return;
-        }
-        case 7:
-        case 8:
-        case 9: {
-            SoundTrackData *track_data = static_cast<SoundTrackData *>(Music.track_data);
-            if (track_data != NULL && (track_data->flags_88 & 2) != 0) {
-                Music.resume_frames = 0;
-            } else {
-                if (NuSound3GetStereoStreamStatus(1 - Music.primary_stream) == NUSOUND_STEREO_STREAM_FINISHED) {
-                    Music.resume_frames = 0;
-                } else {
-                    if (Music.resume_frames <= 0x3f) {
-                        ++Music.resume_frames;
-                        if (Music.resume_frames <= 8) {
-                            goto update_secondary_stream;
-                        }
-                    }
-                    if (Music.current_track != -1 && Music.state != MUSIC_PLAYBACK_DUAL_STREAM_PENDING &&
-                        NuSound3GetStereoStreamStatus(Music.primary_stream) != NUSOUND_STEREO_STREAM_FINISHED &&
-                        !Music.pause_requested) {
-                        if (Music.state == 12) {
-                            Music.state = MUSIC_PLAYBACK_STOPPED;
-                            NuSound3StopStereoStream(1 - Music.primary_stream);
-                            NuSound3StopStereoStream(Music.primary_stream);
-                        } else {
-                            Music.state = MUSIC_PLAYBACK_ACTIVE;
-                            NuSound3StopStereoStream(1 - Music.primary_stream);
-                            NuSound3ResumeStereoStream(Music.primary_stream);
-                        }
-                        Music.transition = 1.0f;
-                        NuSound3SetStereoStreamVolume(
-                            Music.primary_stream,
-                            static_cast<i32>(static_cast<f32>(g_music[Music.current_track].index) * MusicVolume));
-                        Music.transition_frames = 0;
-                        Music.requested_track = -1;
-                    }
-                }
-            }
-
-        update_secondary_stream:
-            UpdateSecondaryMusicStream();
-            return;
-        }
-        default:
-            return;
-    }
-}
+extern "C" void SoundUpdate(float frame_time);

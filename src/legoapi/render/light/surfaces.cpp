@@ -43,31 +43,7 @@ extern "C" i32 ShadowRoofInfo();
 
 void (*SurfaceInfo_ExtraReflectFn)(GameObject_s *object);
 
-NUMTL *CreateCopyMat(NUMTL *source, i32 enable_uv_mode, i32 alpha_mode, i32 depth_mode, i32 filter_mode) {
-    if (source == NULL) {
-        return NULL;
-    }
-
-    NUMTL *material = NuMtlCreate3D(1);
-    material->diffuse_color.r = 1.0f;
-    material->diffuse_color.g = 1.0f;
-    material->diffuse_color.b = 1.0f;
-    material->attribs.cull_mode = 2;
-    material->attribs.z_mode = static_cast<u32>(depth_mode) & 3;
-    material->attribs.filter_mode = static_cast<u32>(filter_mode) & 3;
-    material->attribs.alpha_mode = static_cast<u32>(alpha_mode) & 0xf;
-    material->opacity = 0.999f;
-    if (enable_uv_mode != 0) {
-        material->attribs.uv_mode = 1;
-    }
-    material->attribs.unknown_1_1_2 = 1;
-    material->attribs.unknown_1_4_8 = 1;
-    material->tex_id = source->tex_id;
-    material->sort_pri = source->sort_pri;
-    material->attribs.alpha_fail = 1;
-    NuMtlUpdate(material);
-    return material;
-}
+NUMTL *CreateCopyMat(NUMTL *source, i32 enable_uv_mode, i32 alpha_mode, i32 depth_mode, i32 filter_mode);
 
 void SurfaceMaskOn(u32 *surface_mask) {
     *surface_mask = 0x20;
@@ -214,11 +190,7 @@ void InitSurfaceInfo(GameObject_s *object) {
     }
 }
 
-enum SurfaceDeflectMode : i32 {
-    SURFACE_DEFLECT_SLIDE = 0,
-    SURFACE_DEFLECT_PUSH_OUT_SLOW = 1,
-    SURFACE_DEFLECT_PUSH_OUT_FAST = 2,
-};
+#include "legoapi/render/light/surfaces_types.h"
 
 void Surface_Deflect(nuvec_s *normal, nuvec_s *movement, nuvec_s *result, i32 mode) {
     const f32 movement_x = movement->x;

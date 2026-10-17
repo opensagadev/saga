@@ -82,13 +82,7 @@ void oneAtOnce_SetNumAttackers(i32);
 void EffectOffProgress_Reset(LEVEL_PROGRESS_s *);
 // The reference defines these with dynamic initialization in this unit.
 MemoryManager theMemoryManager;
-struct BIGBUFFER_s {
-    void *start;
-    void *end;
-    u32 field_0x8[2];
-    BIGBUFFER_s() : start(NULL), end(NULL) {
-    }
-};
+#include "legoapi/misc/supportall_types.h"
 BIGBUFFER_s BigBuffer;
 void *theThingManager = NULL;
 
@@ -178,10 +172,6 @@ static i32 TBDRAWCOUNT;
 static i32 TBPLAYERCOUNT;
 static i32 TBAICOUNT;
 
-struct TIMINGBAR_LABEL {
-    char name[11];
-    u8 type;
-};
 DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");
 
 static TIMINGBAR_LABEL GameTB[12];
@@ -290,14 +280,6 @@ void CatchUpCode(GameObject_s *object, f32 divisor, f32 maximum, i32 mode) {
     }
 }
 
-struct TexQuadVertex {
-    f32 x, y, z;
-    u32 colour;
-    union {
-        f32 uv[2];
-        u16 half_uv[4];
-    };
-};
 static inline void TexQuadSubmit(NUVEC const &point, i32 colour, i32 u, i32 v) {
     TexQuadVertex *vertex = static_cast<TexQuadVertex *>(g_NuPrim_StreamBufferPtr->void_ptr);
     if (g_NuPrim_NeedsOverbrightening)
@@ -889,10 +871,7 @@ void AddSurfaceDebris(GameObject_s *object) {
 }
 
 extern "C" void DebFree(i32 *);
-void DebFreeWithoutKey(debkeydatatype_s *key) {
-    i32 handle = key->allocation_index;
-    DebFree(&handle);
-}
+void DebFreeWithoutKey(debkeydatatype_s *key);
 
 i32 CannotKill(GameObject_s *object);
 extern "C" i32 DebrisPreCheckCollisions(NUVEC *position, f32 radius);
@@ -981,27 +960,7 @@ i32 RndrUnfilledCircle(f32 x, f32 y, f32 radius, f32 border_width, f32 aspect, i
     return 1;
 }
 
-void DebrisProcessSpheres(uv1deb *data, float time, debinftype *effect, debkeydatatype_s *key, i32 finite) {
-    if (!(time >= key->sphere_next_time))
-        return;
-    if (key->sphere_skip_count > 0) {
-        --key->sphere_skip_count;
-        return;
-    }
-    dma_particle_s *particle = reinterpret_cast<dma_particle_s *>(data);
-    i32 index = key->field_2c8;
-    key->process_spheres[index].position.x = particle->position.x + key->position.x;
-    key->process_spheres[index].position.y = particle->position.y + key->position.y;
-    key->process_spheres[index].position.z = particle->position.z + key->position.z;
-    key->process_spheres[index].time = time;
-    key->process_spheres[index].momentum = particle->momentum;
-    if (++key->field_2c8 >= static_cast<i8>(effect->process_spheres))
-        key->field_2c8 = 0;
-    if (finite != 0)
-        key->sphere_skip_count = key->field_2c8;
-    key->sphere_next_time =
-        time + effect->particle_lifetime / static_cast<f32>(static_cast<i8>(effect->process_spheres));
-}
+void DebrisProcessSpheres(uv1deb *data, float time, debinftype *effect, debkeydatatype_s *key, i32 finite);
 
 // Debug-capture output helpers consumed by NuDisplayListCaptureSortPriority.
 // Transcribed from the original C-linkage symbols:
@@ -1123,62 +1082,13 @@ void NuHtmlGraphArray(char **strings) {
     }
 }
 
-void AddChunkToRenderStack(particlechunkrendertype_s *chunk, particlechunkrendertype_s **stack) {
-    chunk->next = NULL;
-    chunk->previous = NULL;
+void AddChunkToRenderStack(particlechunkrendertype_s *chunk, particlechunkrendertype_s **stack);
 
-    particlechunkrendertype_s *current = *stack;
-    if (current != NULL) {
-        const u16 priority = static_cast<u16>(chunk->render_priority);
-        const u16 current_priority = static_cast<u16>(current->render_priority);
-        if (priority <= current_priority &&
-            (priority != current_priority || chunk->effect->particle_type > current->effect->particle_type)) {
-            particlechunkrendertype_s *next = current->next;
-            while (next != NULL) {
-                const u16 next_priority = static_cast<u16>(next->render_priority);
-                if (next_priority <= priority &&
-                    (priority != next_priority || chunk->effect->particle_type <= next->effect->particle_type)) {
-                    break;
-                }
-                current = next;
-                next = next->next;
-            }
-            current->next = chunk;
-            chunk->previous = current;
-            chunk->next = next;
-            if (next != NULL) {
-                next->previous = chunk;
-            }
-            return;
-        }
-        chunk->next = current;
-        current->previous = chunk;
-    }
-    *stack = chunk;
-}
-
-void AddChunkControlToStack(debris_chunk_control_s *control, debris_chunk_control_s **stack) {
-    debris_chunk_control_s *current = *stack;
-    while (current != NULL && current->expiry_time < control->expiry_time) {
-        stack = &current->next;
-        current = current->next;
-    }
-    control->next = current;
-    *stack = control;
-}
+void AddChunkControlToStack(debris_chunk_control_s *control, debris_chunk_control_s **stack);
 
 extern "C" debkeydatatype_s *debris_keystack;
 
-void AddDebrisEffectToStack(debkeydatatype_s *key) {
-    if (key == NULL) {
-        return;
-    }
-    if (debris_keystack != NULL) {
-        debris_keystack->next = key;
-    }
-    key->previous = debris_keystack;
-    debris_keystack = key;
-}
+void AddDebrisEffectToStack(debkeydatatype_s *key);
 
 extern "C" {
     extern debkeydatatype_s *debkeydata;
@@ -1198,62 +1108,7 @@ void DebrisReleaseControlStackLock(void);
 void RemoveAnyChunkControls(i32 *);
 void RemoveChunkFromRenderStack(particlechunkrendertype_s *, particlechunkrendertype_s **);
 
-void DebFreeChunksInstantly(i32 *handle) {
-    const i16 effect_index = debkeydata[*handle].effect_index;
-    if (effect_index == 0)
-        return;
-    debinftype *effect = debtab[effect_index];
-    if (debkeydata[*handle].allocated_chunk_count == 0)
-        return;
-
-    DebrisGetControlStackLock();
-    for (i32 i = 0; i < debkeydata[*handle].allocated_chunk_count; ++i) {
-        RemoveAnyChunkControls(reinterpret_cast<i32 *>(debkeydata[*handle].particle_chunks[i]));
-        freechunkcontrols[freechunkcontrolsptr]->particle_chunk = debkeydata[*handle].particle_chunks[i];
-        if (effect->particle_type != 7)
-            freechunkcontrols[freechunkcontrolsptr]->active = 2;
-        else
-            freechunkcontrols[freechunkcontrolsptr]->active = 9;
-        freechunkcontrols[freechunkcontrolsptr]->owner = NULL;
-        i32 stack;
-        if (effect->time_group == 4) {
-            freechunkcontrols[freechunkcontrolsptr]->expiry_time = panelglobaltime;
-            stack = 1;
-        } else {
-            freechunkcontrols[freechunkcontrolsptr]->expiry_time = globaltime;
-            stack = 0;
-        }
-        AddChunkControlToStack(freechunkcontrols[freechunkcontrolsptr], &debris_chunk_control_stack[stack]);
-        ++freechunkcontrolsptr;
-    }
-    DebrisReleaseControlStackLock();
-
-    i32 render_chunk_count = debrischunks + debrischunksglass;
-    for (i32 i = 0; i < render_chunk_count; ++i) {
-        particlechunkrendertype_s *render_chunk = &ParticleChunkToRender[i];
-        if (render_chunk->particle_chunk == debkeydata[*handle].particle_chunks[0]) {
-            if (debkeydata[*handle].field_2f6 != 0) {
-                RemoveChunkFromRenderStack(render_chunk, &ParticleChunkRenderStack[effect->time_group]);
-                render_chunk = &ParticleChunkToRender[i];
-                render_chunk_count = debrischunks + debrischunksglass;
-            }
-            render_chunk->particle_chunk = NULL;
-            render_chunk->effect = NULL;
-        }
-    }
-
-    // Retail clears the chunk slots as pointer-sized integers, so *handle is re-read
-    // after each store.
-    for (i32 i = 0; i < debkeydata[*handle].allocated_chunk_count; ++i) {
-        *reinterpret_cast<isize *>(&debkeydata[*handle].particle_chunks[i]) = 0;
-    }
-    debkeydata[*handle].particle_count = 0;
-    debkeydata[*handle].allocated_chunk_count = 0;
-    debkeydata[*handle].previous_particle_count = 0;
-    debkeydata[*handle].previous_allocated_chunk_count = 0;
-    debkeydata[*handle].controlled_chunk_count = 0;
-    debkeydata[*handle].field_18a = 0;
-}
+void DebFreeChunksInstantly(i32 *handle);
 
 extern "C" {
     extern debkeydatatype_s *debkeydata;
@@ -1283,343 +1138,26 @@ extern "C" void DebReAlloc(debkeydatatype_s *, i32);
 void RemoveChunkFromRenderStack(particlechunkrendertype_s *, particlechunkrendertype_s **);
 void DebrisReleaseControlStackLock(void);
 
-void DebrisProcessAllocation() {
-    for (debkeydatatype_s *key = debris_keystack; key != NULL; key = key->previous) {
-        if (key->previous_particle_count != key->particle_count) {
-            DebReAlloc2(key);
-        }
-    }
-}
+void DebrisProcessAllocation();
 
 VARIPTR *DisplayListRenderBuffer() {
     return &rndrstream_free;
 }
 
-static i32 control_stack_lock;
 
-void DebrisGetControlStackLock() {
-    while (control_stack_lock != 0) {
-        NuThreadSleep(1);
-    }
-    control_stack_lock = 1;
-}
+void DebrisGetControlStackLock();
 
-static particlechunkrendertype_s *FindParticleRenderChunk(dma_particle_chunk_s *particle_chunk) {
-    const i32 count = debrischunks + debrischunksglass;
-    for (i32 i = 0; i < count; ++i) {
-        if (ParticleChunkToRender[i].particle_chunk == particle_chunk) {
-            return &ParticleChunkToRender[i];
-        }
-    }
-    return NULL;
-}
 
-static void ReleaseChunkControl(debris_chunk_control_s *control) {
-    --freechunkcontrolsptr;
-    freechunkcontrols[freechunkcontrolsptr] = control;
-    control->particle_chunk = NULL;
-}
 
 i32 SolveQuadratic(f32, f32, f32, f32 *, f32 *);
-void DebrisProcessControlChunks(i32 panel_time) {
-    const f32 now = panel_time == 1 ? panelglobaltime : globaltime;
-
-    debris_chunk_control_s *control = debris_chunk_control_stack[panel_time];
-    DebrisGetControlStackLock();
-    for (; control != NULL && control->expiry_time <= now; control = debris_chunk_control_stack[panel_time]) {
-        debris_chunk_control_stack[panel_time] = control->next;
-        control->next = NULL;
-
-        if (control->active == 5) {
-            debinftype *effect = debtab[control->effect_index];
-            dma_particle_s *particle = &control->particle_chunk->particles[control->particle_index];
-            const f32 time = control->collision_time;
-            const f32 old_y = particle->momentum.y;
-            const f32 gravity_velocity = 2.0f * (time * effect->field_0a0);
-            const f32 new_y = -control->restitution * (gravity_velocity + old_y) - gravity_velocity;
-            particle->momentum.y = new_y;
-            particle->position.y -= time * new_y - time * old_y;
-            f32 first, second;
-            if (SolveQuadratic(effect->field_0a0, new_y, particle->position.y - control->collision_plane, &first,
-                               &second) != 0) {
-                const f32 next_time = first > second ? first : second;
-                if (effect->particle_lifetime > next_time) {
-                    const f32 interval = next_time - control->collision_time;
-                    control->collision_time = next_time;
-                    if (interval > 0.02f) {
-                        control->expiry_time += interval;
-                        AddChunkControlToStack(control, &debris_chunk_control_stack[panel_time]);
-                        continue;
-                    }
-                }
-            }
-            ReleaseChunkControl(control);
-            continue;
-        }
-
-        if (control->active == 6) {
-            NUVEC normal = {1.0f, 0.0f, 0.0f};
-            dma_particle_s *particle = &control->particle_chunk->particles[control->particle_index];
-            NuVecRotateY(&normal, &normal, control->rotation_y);
-            const f32 old_x = particle->momentum.x;
-            const f32 old_z = particle->momentum.z;
-            const f32 impulse = -(1.0f + control->restitution) * (old_x * normal.x + old_z * normal.z);
-            const f32 new_x = impulse * normal.x + old_x;
-            const f32 new_z = impulse * normal.z + old_z;
-            particle->momentum.x = new_x;
-            particle->momentum.z = new_z;
-            particle->position.x -= new_x * control->collision_time - old_x * control->collision_time;
-            particle->position.z -= new_z * control->collision_time - old_z * control->collision_time;
-            ReleaseChunkControl(control);
-            continue;
-        }
-
-        if (control->active == 3) {
-            --freedebchkptr;
-            freedebchunks[freedebchkptr] = control->particle_chunk;
-            for (i32 i = 0; i < 32; ++i) {
-                control->particle_chunk->particles[i].start_time = 10000000000.0f;
-                control->particle_chunk->particles[i].inverse_lifetime = 128.0f;
-            }
-            ReleaseChunkControl(control);
-            continue;
-        }
-
-        if (control->active == 8) {
-            --freedebchkptrg;
-            freedebchunksglass[freedebchkptrg] = control->particle_chunk;
-            control->particle_chunk->particles[0].start_time = 10000000000.0f;
-            control->particle_chunk->particles[0].inverse_lifetime = 128.0f;
-            control->particle_chunk->particles[1].start_time = 10000000000.0f;
-            control->particle_chunk->particles[1].inverse_lifetime = 128.0f;
-            control->particle_chunk->particles[2].start_time = 10000000000.0f;
-            control->particle_chunk->particles[2].inverse_lifetime = 128.0f;
-            control->particle_chunk->particles[3].start_time = 10000000000.0f;
-            control->particle_chunk->particles[3].inverse_lifetime = 128.0f;
-            control->particle_chunk->particles[4].start_time = 10000000000.0f;
-            control->particle_chunk->particles[4].inverse_lifetime = 128.0f;
-            control->particle_chunk->particles[5].start_time = 10000000000.0f;
-            control->particle_chunk->particles[5].inverse_lifetime = 128.0f;
-            control->particle_chunk->particles[6].start_time = 10000000000.0f;
-            control->particle_chunk->particles[6].inverse_lifetime = 128.0f;
-            control->particle_chunk->particles[7].start_time = 10000000000.0f;
-            control->particle_chunk->particles[7].inverse_lifetime = 128.0f;
-            control->particle_chunk->particles[8].start_time = 10000000000.0f;
-            control->particle_chunk->particles[8].inverse_lifetime = 128.0f;
-            control->particle_chunk->particles[9].start_time = 10000000000.0f;
-            control->particle_chunk->particles[9].inverse_lifetime = 128.0f;
-            control->particle_chunk->particles[10].start_time = 10000000000.0f;
-            control->particle_chunk->particles[10].inverse_lifetime = 128.0f;
-            control->particle_chunk->particles[11].start_time = 10000000000.0f;
-            control->particle_chunk->particles[11].inverse_lifetime = 128.0f;
-            ReleaseChunkControl(control);
-            continue;
-        }
-
-        if (control->active == 2) {
-            LinkDmaParticalSets(&control->particle_chunk, 1);
-            control->active = 3;
-            control->expiry_time += 0.1f;
-            AddChunkControlToStack(control, &debris_chunk_control_stack[panel_time]);
-            continue;
-        }
-
-        if (control->active == 9) {
-            LinkDmaParticalSets(&control->particle_chunk, 1);
-            control->active = 8;
-            control->expiry_time += 0.1f;
-            AddChunkControlToStack(control, &debris_chunk_control_stack[panel_time]);
-            continue;
-        }
-
-        if (control->active == 0 || control->active == 7) {
-            particlechunkrendertype_s *render = FindParticleRenderChunk(control->particle_chunk);
-            if (render != NULL) {
-                const i32 render_index = render - ParticleChunkToRender;
-                RemoveChunkFromRenderStack(render, &ParticleChunkRenderStack[render->effect->time_group]);
-                render = &ParticleChunkToRender[render_index];
-                render->particle_chunk = NULL;
-                render->effect = NULL;
-                render->key = NULL;
-            }
-            control->expiry_time += 0.1f;
-            if (control->active == 0)
-                control->active = 2;
-            else if (control->active == 7)
-                control->active = 9;
-            AddChunkControlToStack(control, &debris_chunk_control_stack[panel_time]);
-            continue;
-        }
-
-        if (control->active == 1) {
-            debinftype *effect = debtab[control->owner->effect_index];
-            i32 chunk_index = 0;
-            for (i32 i = 0; i < control->owner->allocated_chunk_count; ++i) {
-                if (control->owner->particle_chunks[i] == control->particle_chunk) {
-                    chunk_index = i;
-                    break;
-                }
-            }
-
-            const i32 old_chunk_count = control->owner->allocated_chunk_count;
-            for (i32 i = chunk_index; i + 1 < old_chunk_count; ++i) {
-                control->owner->particle_chunks[i] = control->owner->particle_chunks[i + 1];
-            }
-            control->owner->particle_chunks[old_chunk_count - 1] = NULL;
-            --control->owner->previous_allocated_chunk_count;
-            --control->owner->controlled_chunk_count;
-            --control->owner->allocated_chunk_count;
-
-            if (!(control->owner->allocated_chunk_count <= 0)) {
-                if (effect->particle_type == 7) {
-                    control->owner->particle_count -= 12;
-                    control->owner->previous_particle_count -= 12;
-                    if (control->owner->field_18a > (chunk_index + 1) * 12) {
-                        control->owner->field_18a -= 12;
-                    }
-                } else {
-                    control->owner->particle_count -= 32;
-                    control->owner->previous_particle_count -= 32;
-                    if (control->owner->field_18a > (chunk_index + 1) * 32) {
-                        control->owner->field_18a -= 32;
-                    }
-                }
-                LinkDmaParticalSets(control->owner->particle_chunks, control->owner->allocated_chunk_count);
-            } else {
-                control->owner->particle_count = 0;
-                control->owner->previous_particle_count = 0;
-                {
-                    const i16 key_index = effect->particle_keys[0];
-                    if (key_index != -1 && &debkeydata[key_index] == control->owner) {
-                        control->owner->effect_index = 0;
-                        control->owner->allocation_index = -1;
-                        --freedebkeyptr;
-                        freedebkeys[freedebkeyptr] = key_index;
-                        effect->particle_keys[0] = -1;
-                    }
-                }
-                {
-                    const i16 key_index = effect->particle_keys[1];
-                    if (key_index != -1 && &debkeydata[key_index] == control->owner) {
-                        control->owner->effect_index = 0;
-                        control->owner->allocation_index = -1;
-                        --freedebkeyptr;
-                        freedebkeys[freedebkeyptr] = key_index;
-                        effect->particle_keys[1] = -1;
-                    }
-                }
-                {
-                    const i16 key_index = effect->particle_keys[2];
-                    if (key_index != -1 && &debkeydata[key_index] == control->owner) {
-                        control->owner->effect_index = 0;
-                        control->owner->allocation_index = -1;
-                        --freedebkeyptr;
-                        freedebkeys[freedebkeyptr] = key_index;
-                        effect->particle_keys[2] = -1;
-                    }
-                }
-                {
-                    const i16 key_index = effect->particle_keys[3];
-                    if (key_index != -1 && &debkeydata[key_index] == control->owner) {
-                        control->owner->effect_index = 0;
-                        control->owner->allocation_index = -1;
-                        --freedebkeyptr;
-                        freedebkeys[freedebkeyptr] = key_index;
-                        effect->particle_keys[3] = -1;
-                    }
-                }
-                {
-                    const i16 key_index = effect->particle_keys[4];
-                    if (key_index != -1 && &debkeydata[key_index] == control->owner) {
-                        control->owner->effect_index = 0;
-                        control->owner->allocation_index = -1;
-                        --freedebkeyptr;
-                        freedebkeys[freedebkeyptr] = key_index;
-                        effect->particle_keys[4] = -1;
-                    }
-                }
-                {
-                    const i16 key_index = effect->particle_keys[5];
-                    if (key_index != -1 && &debkeydata[key_index] == control->owner) {
-                        control->owner->effect_index = 0;
-                        control->owner->allocation_index = -1;
-                        --freedebkeyptr;
-                        freedebkeys[freedebkeyptr] = key_index;
-                        effect->particle_keys[5] = -1;
-                    }
-                }
-                {
-                    const i16 key_index = effect->particle_keys[6];
-                    if (key_index != -1 && &debkeydata[key_index] == control->owner) {
-                        control->owner->effect_index = 0;
-                        control->owner->allocation_index = -1;
-                        --freedebkeyptr;
-                        freedebkeys[freedebkeyptr] = key_index;
-                        effect->particle_keys[6] = -1;
-                    }
-                }
-                {
-                    const i16 key_index = effect->particle_keys[7];
-                    if (key_index != -1 && &debkeydata[key_index] == control->owner) {
-                        control->owner->effect_index = 0;
-                        control->owner->allocation_index = -1;
-                        --freedebkeyptr;
-                        freedebkeys[freedebkeyptr] = key_index;
-                        effect->particle_keys[7] = -1;
-                    }
-                }
-                control->owner->particle_chunks[0] = NULL;
-            }
-
-            if (chunk_index == 0) {
-                particlechunkrendertype_s *render_chunk = FindParticleRenderChunk(control->particle_chunk);
-                if (render_chunk != NULL) {
-                    render_chunk->particle_chunk = control->owner->particle_chunks[0];
-                    if (control->owner->allocated_chunk_count == 0) {
-                        const i32 render_index = render_chunk - ParticleChunkToRender;
-                        RemoveChunkFromRenderStack(render_chunk, &ParticleChunkRenderStack[effect->time_group]);
-                        render_chunk = &ParticleChunkToRender[render_index];
-                        render_chunk->effect = NULL;
-                        render_chunk->key = NULL;
-                    }
-                }
-            }
-
-            control->expiry_time += 0.1f;
-            control->active = effect->particle_type == 7 ? 9 : 2;
-            AddChunkControlToStack(control, &debris_chunk_control_stack[panel_time]);
-            continue;
-        }
-
-        // Unrecognized control states are removed from the active stack in the original.
-    }
-    DebrisReleaseControlStackLock();
-}
+void DebrisProcessControlChunks(i32 panel_time);
 
 extern "C" {
     extern i32 EDPP_MAX_TYPES;
     void edppDeleteEffect(i32);
 }
 
-void DebrisCleanUpDmaDebTypeTables() {
-    static i32 count1;
-    static i32 count2 = 1;
-    if (++count1 > 5) {
-        count1 = 0;
-        debinftype *effect = debtab[count2];
-        if (effect != NULL && effect->native_data != NULL) {
-            f32 now = effect->time_group == 4 ? panelglobaltime : globaltime;
-            if (now > effect->last_render_time + 5.0f) {
-                DmaDebTypes[--freeDmaDebType] = effect->native_data;
-                debtab[count2]->native_data = NULL;
-                if (debtab[count2]->scale != 1.0f)
-                    edppDeleteEffect(count2);
-            }
-        }
-        if (++count2 >= EDPP_MAX_TYPES)
-            count2 = 1;
-    }
-}
+void DebrisCleanUpDmaDebTypeTables();
 
 void xxxNuDisplayListUpdateSpecial(nuhspecial_s *special) {
     NUDLDLISTSCENE *scene = special->scene->display_list;
@@ -1684,9 +1222,7 @@ void xxxNuDisplayListUpdateSpecial(nuhspecial_s *special) {
     DisplayListUpdateSpecialTransformPS(special, &matrix);
 }
 
-void DebrisReleaseControlStackLock() {
-    control_stack_lock = 0;
-}
+void DebrisReleaseControlStackLock();
 
 extern "C" {
     extern debkeydatatype_s *debkeydata;
@@ -1695,129 +1231,9 @@ extern "C" {
     extern NUVEC debris_collide_pt;
 }
 
-i32 DebrisSingleCollisionCheckScaleYFlag(i32 key_index, NUVEC *position, f32 radius, f32 y_scale, u8 flags) {
-    debkeydatatype_s *key = &debkeydata[key_index];
-    const i32 effect_index = key->effect_index;
-    if (static_cast<u16>(effect_index + 1) <= 1)
-        return 0;
-    debinftype *effect = debtab[effect_index];
-    if (effect == NULL || (effect->field_2f2 & flags) == 0)
-        return 0;
-    const i32 sphere_count = static_cast<i8>(effect->process_spheres);
-    if (sphere_count == 0 || sphere_count < 0)
-        return 0;
+i32 DebrisSingleCollisionCheckScaleYFlag(i32 key_index, NUVEC *position, f32 radius, f32 y_scale, u8 flags);
 
-    debris_process_sphere_s *sphere = key->process_spheres;
-    i32 index = 1;
-    do {
-        {
-            f32 age = globaltime - sphere->time;
-            if (!(age >= 0.0f && age <= effect->particle_lifetime))
-                goto next_sphere;
-
-            const f32 x = sphere->momentum.x * age + sphere->position.x;
-            const f32 y = sphere->momentum.y * age + age * age * effect->field_0a0 + sphere->position.y;
-            const f32 z = sphere->momentum.z * age + sphere->position.z;
-            debris_collide_pt.x = x;
-            debris_collide_pt.y = y;
-            debris_collide_pt.z = z;
-
-            const f32 time = age / effect->particle_lifetime;
-            f32 effect_radius = 0.0f;
-            for (i32 first = 0; first < 7; ++first) {
-                if (time >= effect->collision_keys[first].time && time <= effect->collision_keys[first + 1].time) {
-                    effect_radius = effect->collision_keys[first].value +
-                                    ((time - effect->collision_keys[first].time) /
-                                     (effect->collision_keys[first + 1].time - effect->collision_keys[first].time)) *
-                                        (effect->collision_keys[first + 1].value - effect->collision_keys[first].value);
-                    break;
-                }
-            }
-            if (effect_radius <= 0.0f)
-                goto next_sphere;
-
-            f32 dx = position->x - x;
-            f32 dy = position->y - y;
-            f32 dz = position->z - z;
-            f32 combined_radius = radius + effect_radius;
-            if (y_scale != 1.0f)
-                dy *= combined_radius / (radius * y_scale + effect_radius);
-            if (combined_radius * combined_radius > dx * dx + dy * dy + dz * dz)
-                return 1;
-        }
-    next_sphere:
-        ++sphere;
-        ++index;
-    } while (index != sphere_count + 1);
-    return 0;
-}
-
-i32 DebrisSingleTorusCollisionCheckScaleYFlag(i32 key_index, NUVEC *position, f32 radius, f32 y_scale, u8 flags) {
-    debkeydatatype_s *key = &debkeydata[key_index];
-    const i32 effect_index = key->effect_index;
-    if (static_cast<u16>(effect_index + 1) <= 1)
-        return 0;
-    debinftype *effect = debtab[effect_index];
-    if (effect == NULL || (effect->field_2f2 & flags) == 0 || effect->torus_lifetime == 0.0f)
-        return 0;
-
-    f32 age =
-        globaltime > key->emission_time ? globaltime - key->emission_time : globaltime - key->previous_emission_time;
-    if (!(age > 0.0f && age < effect->torus_lifetime))
-        return 0;
-    f32 normalised_time = age / effect->torus_lifetime;
-    f32 ring_radius = 0.0f;
-    for (i32 first = 0; first < 7; ++first) {
-        if (normalised_time >= effect->torus_keys1[first].time && normalised_time <= effect->torus_keys1[first + 1].time) {
-            ring_radius = effect->torus_keys1[first].value +
-                    ((normalised_time - effect->torus_keys1[first].time) /
-                     (effect->torus_keys1[first + 1].time - effect->torus_keys1[first].time)) *
-                        (effect->torus_keys1[first + 1].value - effect->torus_keys1[first].value);
-            break;
-        }
-    }
-    ring_radius *= effect->torus_radius1;
-    f32 horizontal_radius = 0.0f;
-    for (i32 first = 0; first < 7; ++first) {
-        if (normalised_time >= effect->torus_keys2[first].time && normalised_time <= effect->torus_keys2[first + 1].time) {
-            horizontal_radius = effect->torus_keys2[first].value +
-                    ((normalised_time - effect->torus_keys2[first].time) /
-                     (effect->torus_keys2[first + 1].time - effect->torus_keys2[first].time)) *
-                        (effect->torus_keys2[first + 1].value - effect->torus_keys2[first].value);
-            break;
-        }
-    }
-    horizontal_radius *= effect->torus_radius2;
-    f32 vertical_radius = 0.0f;
-    for (i32 first = 0; first < 7; ++first) {
-        if (normalised_time >= effect->torus_keys3[first].time && normalised_time <= effect->torus_keys3[first + 1].time) {
-            vertical_radius = effect->torus_keys3[first].value +
-                    ((normalised_time - effect->torus_keys3[first].time) /
-                     (effect->torus_keys3[first + 1].time - effect->torus_keys3[first].time)) *
-                        (effect->torus_keys3[first + 1].value - effect->torus_keys3[first].value);
-            break;
-        }
-    }
-    vertical_radius *= effect->torus_radius2;
-
-    debris_collide_pt.x = position->x - key->position.x;
-    debris_collide_pt.y = 0.0f;
-    debris_collide_pt.z = position->z - key->position.z;
-    NuVecNorm(&debris_collide_pt, &debris_collide_pt);
-    NuVecScale(&debris_collide_pt, &debris_collide_pt, ring_radius);
-    key = &debkeydata[key_index];
-    debris_collide_pt.x += key->position.x;
-    debris_collide_pt.y += key->position.y;
-    debris_collide_pt.z += key->position.z;
-
-    f32 dx = position->x - debris_collide_pt.x;
-    f32 dy = position->y - debris_collide_pt.y;
-    f32 dz = position->z - debris_collide_pt.z;
-    f32 combined_radius = radius + horizontal_radius;
-    if (horizontal_radius != vertical_radius || y_scale != 1.0f)
-        dy *= combined_radius / (radius * y_scale + vertical_radius);
-    return combined_radius * combined_radius > dx * dx + dy * dy + dz * dz;
-}
+i32 DebrisSingleTorusCollisionCheckScaleYFlag(i32 key_index, NUVEC *position, f32 radius, f32 y_scale, u8 flags);
 
 void TBRESET() {
     TBGAMECOUNT = 0;

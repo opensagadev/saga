@@ -108,11 +108,6 @@ extern "C" void edgraClumpsReset(void);
 extern "C" void edbitsDrawCircleTilted(NUVEC *centre, f32 radius, i32 colour, NUMTL *material, i32 rotation_z,
                                        i32 rotation_y);
 extern "C" i32 NuRndrDoingScreenGrab;
-static i32 edbits_cubecount;
-static i32 edgra_clumpthin = 1;
-static i32 edgra_elementthin = 1;
-static VARIPTR gra_ptr;
-static VARIPTR gra_end;
 static i32 editor_return;
 static i32 bShowCursor = 1;
 static NUQFNT *edui_font;
@@ -133,38 +128,10 @@ static char eduiPropTextStore[256];
 static char *textrow[4];
 static char TextPickCopyBuffer[0x40];
 static i32 cursor_flash;
-static char *edpp_save_names[6];
-static i32 edptl_count;
-static NUVEC entry_position;
 
-static inline i32 edppCurveSegment(const debris_float_key_s *keys, f32 time) {
-    if (time >= keys[0].time && time <= keys[1].time)
-        return 0;
-    if (time >= keys[1].time && time <= keys[2].time)
-        return 1;
-    if (time >= keys[2].time && time <= keys[3].time)
-        return 2;
-    if (time >= keys[3].time && time <= keys[4].time)
-        return 3;
-    if (time >= keys[4].time && time <= keys[5].time)
-        return 4;
-    if (time >= keys[5].time && time <= keys[6].time)
-        return 5;
-    if (time >= keys[6].time && time <= keys[7].time)
-        return 6;
-    return 7;
-}
 
 #include "gameapi/edtools/edptlall.cpp"
 
-static inline f32 edppInterpolateTorusCurve(const debris_float_key_s *keys, f32 time) {
-    i32 index = edppCurveSegment(keys, time);
-    if (index == 7)
-        return 0.0f;
-    return ((time - keys[index].time) / (keys[index + 1].time - keys[index].time)) *
-               (keys[index + 1].value - keys[index].value) +
-           keys[index].value;
-}
 
 void edppDoInput(nupad_s *pad);
 void edppDetermineNearest(f32 distance);
@@ -419,10 +386,7 @@ extern "C" i32 nugraphDeletePoint(nugraph_s *graph, i32 index);
 extern "C" i32 nugraphCalcCurve(nugraph_s *graph, i32 point_count);
 extern "C" f32 nugraphGetYatX(nugraph_s *graph, f32 x, i32 mode);
 
-struct EDBITS_GAME_SOUND {
-    char name[16];
-    i32 id;
-};
+#include "gameapi/edtools/edtoolsall_plain_types.h"
 
 static void edgraInit();
 static void edgraClose();
@@ -524,33 +488,26 @@ extern "C" {
     eduiiattr_s ed_attr = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
     i32 eduiPropTextPos = -1;
     i32 edmain_render_interacts;
-    ed_module_s edbridesc = {NULL, NULL, "Bridge Editor", edbriInit, edbriClose,  edbriEnter, NULL, NULL,
-                             NULL, NULL, 0x64697262,      edbriProc, edbriRender, NULL};
-    ed_module_s edanimdesc = {NULL, NULL, "Anim Editor", edanimInit, edanimClose, edanimEnter,  NULL,
-                              NULL, NULL, NULL,          0x6d696e61, edanimProc,  edanimRender, NULL};
-    ed_module_s edptldesc = {NULL,       NULL,       "Particle Positioner",
-                             edppInit,   edppClose,  edppEnter,
-                             NULL,       edppApply,  NULL,
-                             NULL,       0x706c7470, edppProc,
-                             edppRender, NULL};
-    ed_module_s edgradesc = {NULL, NULL, "Grass Editor", edgraInit,  edgraClose, edgraEnter,  NULL,
-                             NULL, NULL, NULL,           0x73617267, edgraProc,  edgraRender, NULL};
-    i32 edpp_create_type = -1;
+extern ed_module_s edbridesc;
+extern ed_module_s edanimdesc;
+extern ed_module_s edptldesc;
+extern ed_module_s edgradesc;
+extern i32 edpp_create_type;
     f32 edpp_copy_size = 0.2f;
-    f32 edpp_scale_factor = 1.0f;
-    i32 edptl_repeatboxxzlock = 1;
-    i32 edptl_clipboard_entry = -1;
+extern f32 edpp_scale_factor;
+extern i32 edptl_repeatboxxzlock;
+extern i32 edptl_clipboard_entry;
 
     eduimenu_s *edui_messagemenu;
-    u32 edblack[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
-    u32 edgrey[4] = {0x80303030, 0x80303030, 0x80808080, 0x80808080};
-    u32 eddarkred[4] = {0x80000050, 0x80ff0000, 0x80808080, 0x80404040};
+extern u32 edblack[4];
+extern u32 edgrey[4];
+extern u32 eddarkred[4];
     NUMTL *uimtls[5];
     i32 ui_bgmtl;
     i32 ui_outmtl;
 
-    eduimenu_s *edgra_active_menu;
-    eduimenu_s *edgra_options_menu;
+extern eduimenu_s * edgra_active_menu;
+extern eduimenu_s * edgra_options_menu;
     eduimenu_s *edgra_instance_menu;
     eduimenu_s *edgra_changeinstance_menu;
     eduimenu_s *edgra_clumpproperties_menu;
@@ -564,129 +521,129 @@ extern "C" {
     eduimenu_s *edgra_sscale_menu;
     eduimenu_s *edgra_globals_menu;
     i32 edgra_filter;
-    struct numtl_s *edgra_mtl;
-    NUMTL *edgra_mtl_zoff;
+extern struct numtl_s * edgra_mtl;
+extern NUMTL * edgra_mtl_zoff;
     NUVEC edgra_cam_pos;
     f32 edgra_cam_dist;
     i32 edgra_cam_ax;
     i32 edgra_cam_ay;
-    f32 edgra_size;
-    i32 edgra_nearest;
-    i32 edgra_nearest_instance;
-    i32 edgra_instance_type;
+extern f32 edgra_size;
+extern i32 edgra_nearest;
+extern i32 edgra_nearest_instance;
+extern i32 edgra_instance_type;
     i32 edgra_fadeunits_used;
-    i32 edgra_clumps_used;
+extern i32 edgra_clumps_used;
     i32 edgra_fadeclumps_used;
-    i32 edgra_clump_size;
+extern i32 edgra_clump_size;
     i32 edgra_pageid;
     i32 edgra_rotz;
     i32 edgra_roty;
     i32 edgra_dpadmode;
-    i32 edgra_editormode;
-    void *edgra_free_vecbuffer;
-    NUMTX *edgra_mtxbuffer;
-    NUVEC *edgra_vecbuffer;
-    NUGSCN *edgra_page_scene[8];
-    void *edgra_page_terrain[8];
-    NUMTX *edgra_page_matrix_stack[8];
-    i32 EDGRA_MAX_CLUMPS;
-    i32 EDGRA_MAX_INDIVIDUAL_CLUMPS;
-    i32 EDGRA_MAX_UNITS_PER_INDIVIDUAL_CLUMP;
-    edgra_clump_s *GrassClumps;
-    edgra_individual_s *IndGrassClumps;
-    i32 *IndGrassClumpsUsed;
-    i32 edgra_ind_clumps_used;
+extern i32 edgra_editormode;
+extern void * edgra_free_vecbuffer;
+extern NUMTX * edgra_mtxbuffer;
+extern NUVEC * edgra_vecbuffer;
+extern NUGSCN * edgra_page_scene[8];
+extern void * edgra_page_terrain[8];
+extern NUMTX * edgra_page_matrix_stack[8];
+extern i32 EDGRA_MAX_CLUMPS;
+extern i32 EDGRA_MAX_INDIVIDUAL_CLUMPS;
+extern i32 EDGRA_MAX_UNITS_PER_INDIVIDUAL_CLUMP;
+extern edgra_clump_s * GrassClumps;
+extern edgra_individual_s * IndGrassClumps;
+extern i32 * IndGrassClumpsUsed;
+extern i32 edgra_ind_clumps_used;
 
-    i32 edpp_page_used[8];
-    i32 edpp_page_on[8];
-    usize edpp_page_scene[8];
-    i32 edpp_types_used;
+extern i32 edpp_page_used[8];
+extern i32 edpp_page_on[8];
+extern usize edpp_page_scene[8];
+extern i32 edpp_types_used;
     i32 edpp_copy_source[8];
-    i32 edpp_usememcard;
-    edpp_particle_s edpp_ptls[512];
+extern i32 edpp_usememcard;
+extern edpp_particle_s edpp_ptls[512];
     NUVEC edpp_cam_pos;
     f32 edpp_cam_dist;
     i32 edpp_cam_ax;
     i32 edpp_cam_ay;
-    i32 edpp_first_time_this_level;
+extern i32 edpp_first_time_this_level;
     i32 edpp_numparticles;
-    NUMTL *edpp_mtl;
-    NUMTL *edpp_boxmtl;
-    i32 edpp_nearest;
-    i32 edpp_curr;
-    i32 edpp_snap_enabled;
-    u8 edpp_effect_list;
-    i32 edpp_instances_used;
+extern NUMTL * edpp_mtl;
+extern NUMTL * edpp_boxmtl;
+extern i32 edpp_nearest;
+extern i32 edpp_curr;
+extern i32 edpp_snap_enabled;
+extern u8 edpp_effect_list;
+extern i32 edpp_instances_used;
     i32 edpp_copy_mode;
     i32 edpp_copy_enclosed;
     i32 edpp_copy_source_count;
     NUVEC edpp_copy_source_vec;
-    i32 edpp_num_orphans;
-    i32 edpp_showAllPlaced;
-    i32 edpp_dpad_mode;
-    i32 edpp_readout;
-    eduimenu_s *edpp_active_menu;
-    eduimenu_s *ptltypemenu;
-    eduimenu_s *ptloptmenu;
-    eduimenu_s *ptlgsortmenu;
-    eduimenu_s *ptlgcodemenu;
-    eduimenu_s *ptlemitmenu;
-    eduimenu_s *ptlsizemenu;
-    eduimenu_s *ptlrotmenu;
-    eduimenu_s *ptljibmenu;
-    eduimenu_s *ptlcolmenu;
-    eduimenu_s *ptlemitvelmenu;
-    eduimenu_s *ptlgravmenu;
-    eduimenu_s *ptlvaremitmenu;
-    eduimenu_s *ptlvarstartmenu;
-    eduimenu_s *ptlstartvelmenu;
-    eduimenu_s *ptlcutoffmenu;
-    eduimenu_s *ptldatamenu;
-    eduimenu_s *ptlreadoutmenu;
+extern i32 edpp_num_orphans;
+extern i32 edpp_showAllPlaced;
+extern i32 edpp_dpad_mode;
+extern i32 edpp_readout;
+extern eduimenu_s * edpp_active_menu;
+extern eduimenu_s * ptltypemenu;
+extern eduimenu_s * ptloptmenu;
+extern eduimenu_s * ptlgsortmenu;
+extern eduimenu_s * ptlgcodemenu;
+extern eduimenu_s * ptlemitmenu;
+extern eduimenu_s * ptlsizemenu;
+extern eduimenu_s * ptlrotmenu;
+extern eduimenu_s * ptljibmenu;
+extern eduimenu_s * ptlcolmenu;
+extern eduimenu_s * ptlemitvelmenu;
+extern eduimenu_s * ptlgravmenu;
+extern eduimenu_s * ptlvaremitmenu;
+extern eduimenu_s * ptlvarstartmenu;
+extern eduimenu_s * ptlstartvelmenu;
+extern eduimenu_s * ptlcutoffmenu;
+extern eduimenu_s * ptldatamenu;
+extern eduimenu_s * ptlreadoutmenu;
     eduimenu_s *memcardmenu;
-    eduimenu_s *messagemenu;
+extern eduimenu_s * messagemenu;
     eduimenu_s *loadeffectsmenu;
     eduimenu_s *mergeeffectsmenu;
     eduimenu_s *deleteeffectsmenu;
     eduimenu_s *filenamemenu;
-    eduimenu_s *namemenu;
+extern eduimenu_s * namemenu;
     eduimenu_s *confirmmenu;
-    eduimenu_s *changegenratemenu;
+extern eduimenu_s * changegenratemenu;
     eduimenu_s *totalptlsmenu;
-    eduimenu_s *etimemenu;
-    eduimenu_s *emittimemenu;
-    eduimenu_s *sscalemenu;
-    eduimenu_s *texturemenu;
-    eduimenu_s *textureselectmenu;
-    eduimenu_s *collmenu;
-    eduimenu_s *effectlistmenu;
-    eduimenu_s *ptlclipmenu;
-    eduimenu_s *dpadmodemenu;
-    eduimenu_s *edptl_switch_menu;
-    eduimenu_s *edptl_switchtype_menu;
-    eduimenu_s *edptl_sounds_menu;
-    eduimenu_s *edptl_soundx_menu;
-    eduimenu_s *edptl_soundid_menu;
-    eduimenu_s *edptl_soundcontrol_menu;
-    eduimenu_s *edptl_bounce_menu;
-    eduimenu_s *edptl_group_menu;
-    eduimenu_s *edptl_ghost_menu;
-    eduimenu_s *edptl_star_menu;
-    eduimenu_s *edptl_page_menu;
-    eduimenu_s *edptl_drawflag_menu;
-    eduimenu_s *edptl_scaleeffect_menu;
-    eduimenu_s *edptl_orphanlist_menu;
-    eduimenu_s *edptl_instancesettings_menu;
-    eduimenu_s *edptl_torus_menu;
-    eduimenu_s *edptl_damage_menu;
-    eduimenu_s *edptl_damageflag_menu;
-    eduimenu_s *edptl_repeatbox_menu;
-    eduimenu_s *edptl_quickdel_menu;
-    eduimenu_s *edptl_detail_menu;
-    eduimenu_s *edptl_testdetail_menu;
-    i32 edpp_emitrotz;
-    i32 edpp_emitroty;
-    i32 edpp_emitrotx;
+extern eduimenu_s * etimemenu;
+extern eduimenu_s * emittimemenu;
+extern eduimenu_s * sscalemenu;
+extern eduimenu_s * texturemenu;
+extern eduimenu_s * textureselectmenu;
+extern eduimenu_s * collmenu;
+extern eduimenu_s * effectlistmenu;
+extern eduimenu_s * ptlclipmenu;
+extern eduimenu_s * dpadmodemenu;
+extern eduimenu_s * edptl_switch_menu;
+extern eduimenu_s * edptl_switchtype_menu;
+extern eduimenu_s * edptl_sounds_menu;
+extern eduimenu_s * edptl_soundx_menu;
+extern eduimenu_s * edptl_soundid_menu;
+extern eduimenu_s * edptl_soundcontrol_menu;
+extern eduimenu_s * edptl_bounce_menu;
+extern eduimenu_s * edptl_group_menu;
+extern eduimenu_s * edptl_ghost_menu;
+extern eduimenu_s * edptl_star_menu;
+extern eduimenu_s * edptl_page_menu;
+extern eduimenu_s * edptl_drawflag_menu;
+extern eduimenu_s * edptl_scaleeffect_menu;
+extern eduimenu_s * edptl_orphanlist_menu;
+extern eduimenu_s * edptl_instancesettings_menu;
+extern eduimenu_s * edptl_torus_menu;
+extern eduimenu_s * edptl_damage_menu;
+extern eduimenu_s * edptl_damageflag_menu;
+extern eduimenu_s * edptl_repeatbox_menu;
+extern eduimenu_s * edptl_quickdel_menu;
+extern eduimenu_s * edptl_detail_menu;
+extern eduimenu_s * edptl_testdetail_menu;
+extern i32 edpp_emitrotz;
+extern i32 edpp_emitroty;
+extern i32 edpp_emitrotx;
     i32 edpp_rotz;
     i32 edpp_roty;
     f32 edpp_offset;
@@ -694,223 +651,33 @@ extern "C" {
     i32 edpp_refroty;
     i32 edpp_copyrotz;
     i32 edpp_copyroty;
-    i32 edpp_facrotx;
-    i32 edpp_facroty;
+extern i32 edpp_facrotx;
+extern i32 edpp_facroty;
 
     void edgraInitAllClumps(void);
 }
 
-static void edgraInit() {
-    edgraClumpsReset();
+static void edgraInit();
 
-    edgra_mtl = NuMtlCreate3D(1);
-    edgra_mtl->diffuse_color = {0.5f, 0.5f, 0.5f};
-    edgra_mtl->opacity = 1.0f;
-    auto *material_attributes = reinterpret_cast<u8 *>(&edgra_mtl->attribs);
-    material_attributes[0] &= 0xf0;
-    material_attributes[1] = (material_attributes[1] & 0x0f) | 0x20;
-    NuMtlUpdate(edgra_mtl);
+static void edgraClose();
 
-    edgra_mtl_zoff = NuMtlCreate(1);
-    edgra_mtl_zoff->diffuse_color = {0.5f, 0.5f, 0.5f};
-    edgra_mtl_zoff->opacity = 1.0f;
-    material_attributes = reinterpret_cast<u8 *>(&edgra_mtl_zoff->attribs);
-    material_attributes[0] &= 0xf0;
-    material_attributes[1] = (material_attributes[1] & 0xcf) | 0xe0;
-    NuMtlUpdate(edgra_mtl_zoff);
+static void edgraEnter();
 
-    if (gra_ptr.addr == 0) {
-        edgra_mtxbuffer = static_cast<NUMTX *>(NU_ALLOC(0xc0080, 4, 1, "", 0));
-        edgra_vecbuffer = static_cast<NUVEC *>(NU_ALLOC(0x24000, 4, 1, "", 0));
-    } else {
-        usize aligned = (gra_ptr.addr + 15) & ~usize(15);
-        edgra_vecbuffer = reinterpret_cast<NUVEC *>(aligned + 0xc0080);
-        edgra_mtxbuffer = reinterpret_cast<NUMTX *>(aligned);
-        gra_ptr.addr = aligned + 0xe4080;
-    }
-    for (i32 index = 0; index < EDGRA_MAX_CLUMPS; ++index)
-        GrassClumps[index].vector_buffer = NULL;
-    edgra_free_vecbuffer = edgra_vecbuffer;
-    edgra_instance_type = -1;
-}
+static i32 edgraProc(f32 delta_time, nupad_s *pad);
 
-static void edgraClose() {
-    if (edgra_options_menu) {
-        eduiMenuDestroy(edgra_options_menu);
-        edgra_options_menu = NULL;
-    }
-}
+static void edgraRender();
 
-static void edgraEnter() {
-    edgra_nearest = -1;
-    edgra_size = 0.5f;
-    edgra_clump_size = 64;
-}
+static void edppInit();
 
-static i32 edgraProc(f32 delta_time, nupad_s *pad) {
-    if (edgra_active_menu) {
-        eduiMenuProcess(edgra_active_menu, delta_time, pad);
-        return 0;
-    }
-    edgraDoInput(pad);
-    if (edgra_editormode == 1)
-        edgraDetermineNearestInstance(1.0f);
-    else
-        edgraDetermineNearestClump(1.0f);
-    return (pad->digital_buttons_pressed >> 11) & 1;
-}
+static void edppClose();
 
-static void edgraRender() {
-    edcamSet();
-    edgraDrawCursor();
-    if (edgra_nearest != -1) {
-        if (GrassClumps[edgra_nearest].kind == 3) {
-            if (edgra_editormode == 1) {
-                edbitsDrawDiagonalCross(GrassClumps[edgra_nearest].position.x, GrassClumps[edgra_nearest].position.y, GrassClumps[edgra_nearest].position.z, 0.125f, 0xffff0000,
-                                        edgra_mtl);
-                if (edgra_nearest_instance != -1) {
-                    edbitsDrawCross(
-                        GrassClumps[edgra_nearest].position.x + GetIndGrassClump(GrassClumps[edgra_nearest].individual_index, edgra_nearest_instance)->position.x,
-                        GrassClumps[edgra_nearest].position.y + GetIndGrassClump(GrassClumps[edgra_nearest].individual_index, edgra_nearest_instance)->position.y,
-                        GrassClumps[edgra_nearest].position.z + GetIndGrassClump(GrassClumps[edgra_nearest].individual_index, edgra_nearest_instance)->position.z,
-                        0.125f, 0xff80ffff, edgra_mtl);
-                }
-            } else {
-                edbitsDrawDiagonalCross(GrassClumps[edgra_nearest].position.x, GrassClumps[edgra_nearest].position.y, GrassClumps[edgra_nearest].position.z, 0.125f, 0xff80ffff,
-                                        edgra_mtl);
-            }
-        } else {
-            edbitsDrawDiagonalCross(GrassClumps[edgra_nearest].position.x, GrassClumps[edgra_nearest].position.y, GrassClumps[edgra_nearest].position.z, 0.125f, 0xff80ffff,
-                                    edgra_mtl);
-            if (static_cast<u8>(GrassClumps[edgra_nearest].unknown_25 - 3) < 2) {
-                edbitsDrawCube(GrassClumps[edgra_nearest].position.x, GrassClumps[edgra_nearest].position.y, GrassClumps[edgra_nearest].position.z, GrassClumps[edgra_nearest].size, 0.0f, GrassClumps[edgra_nearest].size, 0, 0,
-                               0, GrassClumps[edgra_nearest].rotation_z, GrassClumps[edgra_nearest].rotation_y, 0xff80ffff, edgra_mtl);
-            } else {
-                edbitsDrawCircleTilted(&GrassClumps[edgra_nearest].position, GrassClumps[edgra_nearest].size, 0xff80ffff, edgra_mtl, GrassClumps[edgra_nearest].rotation_z,
-                                       GrassClumps[edgra_nearest].rotation_y);
-            }
-        }
-    }
-    if (edgra_active_menu)
-        eduiMenuRender(edgra_active_menu);
-}
+static void edppEnter();
 
-static void edppInit() {
-    u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
-    edpp_first_time_this_level = 1;
+static void edppApply();
 
-    edpp_mtl = NuMtlCreate3D(1);
-    edpp_mtl->diffuse_color = {0.5f, 0.5f, 0.5f};
-    edpp_mtl->opacity = 1.0f;
-    u8 *attributes = reinterpret_cast<u8 *>(&edpp_mtl->attribs);
-    attributes[0] &= 0xf0;
-    attributes[1] = (attributes[1] & 0x0f) | 0x20;
-    NuMtlUpdate(edpp_mtl);
+static i32 edppProc(f32 delta_time, nupad_s *pad);
 
-    edpp_boxmtl = NuMtlCreate(1);
-    edpp_boxmtl->diffuse_color = {0.5f, 0.5f, 0.5f};
-    edpp_boxmtl->opacity = 1.0f;
-    attributes = reinterpret_cast<u8 *>(&edpp_boxmtl->attribs);
-    attributes[0] &= 0xf0;
-    attributes[1] = (attributes[1] & 0xcf) | 0xe0;
-    NuMtlUpdate(edpp_boxmtl);
-
-    edpp_nearest = -1;
-    edpp_curr = -1;
-    edpp_create_type = -1;
-    edpp_effect_list = 0;
-    edpp_emitrotz = 0;
-    edpp_emitroty = 0;
-    edpp_emitrotx = 0;
-
-    ptlgcodemenu = eduiMenuCreate(70, 70, 180, 250, ed_fnt, NULL, "GenCode Type");
-    if (ptlgcodemenu != NULL) {
-        eduiMenuAddItem(ptlgcodemenu, eduiItemCheckCreate(1, colours, 0, 1, cbPtlSelGCode, "None"));
-        eduiMenuAddItem(ptlgcodemenu, eduiItemCheckCreate(2, colours, 0, 1, cbPtlSelGCode, "Pos"));
-        eduiMenuAddItem(ptlgcodemenu, eduiItemCheckCreate(3, colours, 0, 1, cbPtlSelGCode, "PosRev"));
-        eduiMenuAddItem(ptlgcodemenu, eduiItemCheckCreate(4, colours, 0, 1, cbPtlSelGCode, "Splash"));
-        eduiMenuAddItem(ptlgcodemenu, eduiItemCheckCreate(5, colours, 0, 1, cbPtlSelGCode, "AshRock"));
-        eduiMenuAddItem(ptlgcodemenu, eduiItemCheckCreate(6, colours, 0, 1, cbPtlSelGCode, "PosRevTree"));
-        eduiMenuAddItem(ptlgcodemenu, eduiItemCheckCreate(7, colours, 0, 1, cbPtlSelGCode, "PosAll"));
-    }
-
-    ptloptmenu = eduiMenuCreate(70, 70, 250, 300, ed_fnt, cbPtlCancel, "Options");
-    if (ptloptmenu == NULL)
-        return;
-    eduiMenuAddItem(ptloptmenu, eduiItemSelCreate(1, colours, 0, 0, cbEffectListMenu, "Effect List..."));
-    eduiMenuAddItem(ptloptmenu, eduiItemSelCreate(1, colours, 0, 0, cbPtlTypeMenu, "Particle Type..."));
-    eduiMenuAddItem(ptloptmenu, eduiItemSelCreate(1, colours, 0, 0, cbPtlDataMenu, "Data Menu..."));
-    eduiMenuAddItem(ptloptmenu, eduiItemSelCreate(1, colours, 0, 0, cbPtlGSortMenu, "GenSort Type..."));
-    eduiMenuAddItem(ptloptmenu, eduiItemSelCreate(1, colours, 0, 0, cbPtlColMenu, "Particle Colour..."));
-    eduiMenuAddItem(ptloptmenu, eduiItemSelCreate(1, colours, 0, 0, cbPtlTextureMenu, "Particle Texture..."));
-    eduiMenuAddItem(ptloptmenu, eduiItemSelCreate(1, colours, 0, 0, cbPtlEmitMenu, "Emitter Settings..."));
-    eduiMenuAddItem(ptloptmenu, eduiItemSelCreate(1, colours, 0, 0, cbPtlSizeMenu, "Particle Size..."));
-    eduiMenuAddItem(ptloptmenu, eduiItemSelCreate(1, colours, 0, 0, cbPtlRotMenu, "Particle Rotation..."));
-    eduiMenuAddItem(ptloptmenu, eduiItemSelCreate(1, colours, 0, 0, cbPtlJibMenu, "Particle Jibber..."));
-    eduiMenuAddItem(ptloptmenu, eduiItemSelCreate(1, colours, 0, 0, edptlcbBounceMenu, "Particle Bounces..."));
-    eduiMenuAddItem(ptloptmenu, eduiItemSelCreate(1, colours, 0, 0, edptlcbSoundsMenu, "Attached Sounds..."));
-    eduiMenuAddItem(ptloptmenu, eduiItemSelCreate(1, colours, 0, 0, cbPtlDamageMenu, "Particle Damage..."));
-    eduiMenuAddItem(ptloptmenu, eduiItemSelCreate(1, colours, 0, 0, cbPtlInstanceSettingsMenu, "Instance Settings..."));
-    eduiMenuAddItem(ptloptmenu, eduiItemSelCreate(1, colours, 0, 0, cbPtlSScaleMenu, "Super Scale..."));
-    eduiMenuAddItem(ptloptmenu, eduiItemSelCreate(1, colours, 0, 0, edptlcbDpadModeMenu, "Dpad Mode..."));
-    eduiMenuAddItem(ptloptmenu, eduiItemSelCreate(1, colours, 0, 0, edptlcbSwitchMenu, "Switch Menu..."));
-    eduiMenuAddItem(ptloptmenu, eduiItemSelCreate(1, colours, 0, 0, edptlcbGroupMenu, "Render Settings..."));
-    eduiMenuAddItem(ptloptmenu, eduiItemSelCreate(1, colours, 0, 0, edptlcbDetailMenu, "Detail Level Settings..."));
-    eduiMenuAddItem(ptloptmenu, eduiItemSelCreate(1, colours, 0, 0, edptlcbPageMenu, "Test Page Menu..."));
-    eduiMenuAddItem(ptloptmenu, eduiItemSelCreate(1, colours, 0, 0, edptlcbResetParticles, "Reset Particles"));
-    eduiMenuAddItem(ptloptmenu, eduiItemToggleCreate(1, colours, 0, 1, cbPtlSnapToggle, "Snap"));
-    eduiMenuAddItem(ptloptmenu,
-                    eduiItemSelCreate(1, colours, 0, 0, edptlcbJumpToGameLocation, "Jump To Game Location"));
-}
-
-static void edppClose() {
-    eduiMenuDestroy(ptloptmenu);
-    eduiMenuDestroy(ptlgcodemenu);
-}
-
-static void edppEnter() {
-    NUVEC origin = {0.0f, 0.0f, 0.0f};
-    if (edmainQueryLocVec() != NULL) {
-        entry_position = *edmainQueryLocVec();
-    } else {
-        entry_position.x = global_camera.mtx.m30;
-        entry_position.y = global_camera.mtx.m31;
-        entry_position.z = global_camera.mtx.m32;
-    }
-    if (edpp_first_time_this_level != 0) {
-        if (edmainQueryLocVec() != NULL)
-            edcamSetPosAng(edmainQueryLocVec(), 0, 0);
-        else
-            edcamSetPosAng(&origin, 0, 0);
-        edpp_first_time_this_level = 0;
-    }
-    edpp_nearest = -1;
-    edpp_create_type = -1;
-}
-
-static void edppApply() {
-}
-
-static i32 edppProc(f32 delta_time, nupad_s *pad) {
-    edptl_count += 5;
-    if (edpp_active_menu != NULL) {
-        eduiMenuProcess(edpp_active_menu, delta_time, pad);
-        return 0;
-    }
-    edppDoInput(pad);
-    edppDetermineNearest(1.0f);
-    if (edpp_nearest != -1)
-        DebrisStatusNormal(&edpp_ptls[edpp_nearest].instance_id);
-    return (pad->digital_buttons_pressed >> 11) & 1;
-}
-
-static void edppRender() {
-    edcamSet();
-    edppDrawCursor();
-    edppHighlightNearest();
-    if (edpp_active_menu != NULL)
-        eduiMenuRender(edpp_active_menu);
-}
+static void edppRender();
 
 void edbriDoInput(nupad_s *);
 void edbriDetermineNearest(f32);
@@ -922,178 +689,27 @@ extern "C" {
     void edbriBridgesReset(void);
 }
 
-static void edbriInit() {
-    edbriBridgesReset();
-    edbri_mtl = NuMtlCreate3D(1);
-    edbri_mtl->diffuse_color = {0.5f, 0.5f, 0.5f};
-    edbri_mtl->opacity = 1.0f;
-    u8 *attributes = reinterpret_cast<u8 *>(&edbri_mtl->attribs);
-    attributes[0] &= 0xf0;
-    attributes[1] = (attributes[1] & 0x0f) | 0x20;
-    NuMtlUpdate(edbri_mtl);
-    edbri_mtl_zoff = NuMtlCreate(1);
-    edbri_mtl_zoff->diffuse_color = {0.5f, 0.5f, 0.5f};
-    edbri_mtl_zoff->opacity = 1.0f;
-    attributes = reinterpret_cast<u8 *>(&edbri_mtl_zoff->attribs);
-    attributes[0] &= 0xf0;
-    attributes[1] = (attributes[1] & 0xcf) | 0xe0;
-    NuMtlUpdate(edbri_mtl_zoff);
-    edbri_plank_instance_type = -1;
-    edbri_post_instance_type = -1;
-}
+static void edbriInit();
 
-static void edbriClose() {
-    if (edbri_options_menu) {
-        eduiMenuDestroy(edbri_options_menu);
-        edbri_options_menu = NULL;
-    }
-}
+static void edbriClose();
 
-static i32 edbriProc(f32 delta_time, nupad_s *pad) {
-    if (edbri_active_menu) {
-        eduiMenuProcess(edbri_active_menu, delta_time, pad);
-        return 0;
-    }
-    edbriDoInput(pad);
-    edbriDetermineNearest(1.0f);
-    return (pad->digital_buttons_pressed >> 11) & 1;
-}
+static i32 edbriProc(f32 delta_time, nupad_s *pad);
 
-static void edbriRender() {
-    edcamSet();
-    edbriDrawCursor();
-    if (edbri_nearest != -1) {
-        const NUVEC &position = edBridges[edbri_nearest].position;
-        edbitsDrawDiagonalCross(position.x, position.y, position.z, 0.125f, 0xff80ffff, edbri_mtl_zoff);
-    }
-    if (edbri_active_menu)
-        eduiMenuRender(edbri_active_menu);
-}
+static void edbriRender();
 
-static void edanimInit() {
-    u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
-    edanimParamReset();
+static void edanimInit();
 
-    edanim_mtl = NuMtlCreate3D(1);
-    edanim_mtl->diffuse_color = {0.5f, 0.5f, 0.5f};
-    edanim_mtl->opacity = 1.0f;
-    edanim_mtl->attribs.alpha_mode = 0;
-    edanim_mtl->attribs.cull_mode = 2;
-    edanim_mtl->attribs.z_mode = 0;
-    NuMtlUpdate(edanim_mtl);
+static void edanimClose();
 
-    edanim_mtl_zoff = NuMtlCreate(1);
-    edanim_mtl_zoff->diffuse_color = {0.5f, 0.5f, 0.5f};
-    edanim_mtl_zoff->opacity = 1.0f;
-    edanim_mtl_zoff->attribs.alpha_mode = 0;
-    edanim_mtl_zoff->attribs.cull_mode = 2;
-    edanim_mtl_zoff->attribs.z_mode = 3;
-    NuMtlUpdate(edanim_mtl_zoff);
+static i32 edanimProc(f32 delta_time, nupad_s *pad);
 
-    edanim_options_menu =
-        eduiMenuCreate(70, 70, 220, 300, ed_fnt, edanimcbCancelOptMenu, const_cast<char *>("Options"));
-    if (!edanim_options_menu) {
-        return;
-    }
+static void edanimRender();
 
-    eduiMenuAddItem(edanim_options_menu, eduiItemSelCreate(1, colours, 0, 0, edanimcbParticleMenu,
-                                                           const_cast<char *>("Attached Particles...")));
-    eduiMenuAddItem(edanim_options_menu,
-                    eduiItemSelCreate(1, colours, 0, 0, edanimcbSoundMenu, const_cast<char *>("Attached Sounds...")));
-    eduiMenuAddItem(edanim_options_menu,
-                    eduiItemSelCreate(1, colours, 0, 0, edanimcbBouncyMenu, const_cast<char *>("Bounciness...")));
-    eduiMenuAddItem(edanim_options_menu, eduiItemSelCreate(1, colours, 0, 0, edanimcbSwitchMenu,
-                                                           const_cast<char *>("Switch Properties...")));
-    eduiMenuAddItem(edanim_options_menu,
-                    eduiItemSelCreate(1, colours, 0, 0, edanimcbFileSave, const_cast<char *>("Save Params")));
-    eduiMenuAddItem(edanim_options_menu,
-                    eduiItemSelCreate(1, colours, 0, 0, edanimcbFileLoad, const_cast<char *>("Load Params")));
-    eduiMenuAddItem(edanim_options_menu,
-                    eduiItemSelCreate(1, colours, 0, 0, edanimcbCubeMap, const_cast<char *>("Dump Cube Map")));
-    eduiMenuAddItem(edanim_options_menu, eduiItemSelCreate(1, colours, 0, 0, edanimcbMCTBMenu,
-                                                           const_cast<char *>("Memory Card Test Bed...")));
-}
+void edgraClumpReseed(i32 index);
 
-static void edanimClose() {
-    eduiMenuDestroy(edanim_options_menu);
-}
+edgra_individual_s *GetIndGrassClump(i32 clump, i32 element);
 
-static i32 edanimProc(f32 delta_time, nupad_s *pad) {
-    if (edanim_active_menu) {
-        eduiMenuProcess(edanim_active_menu, delta_time, pad);
-        return 0;
-    }
-
-    edanimDoInput(pad);
-    if (edanim_particle_mode) {
-        edanimDetermineNearestParticle(1.0f);
-    } else if (edanim_sound_mode) {
-        edanimDetermineNearestSound(1.0f);
-    } else {
-        edanimDetermineNearestAnim(1.0f);
-    }
-
-    if (pad->digital_buttons_pressed & 0x800) {
-        edanim_particle_mode = 0;
-        return 1;
-    }
-    return 0;
-}
-
-static void edanimRender() {
-    if (edbitsProcessCubemapDump()) {
-        return;
-    }
-    edcamSet();
-    edanimDrawCursor();
-
-    if (edanim_nearest != -1) {
-        i32 colour = 0xffff0000;
-        if (edanim_particle_mode) {
-            colour = 0xff00ff00;
-        } else if (!edanim_sound_mode) {
-            colour = edanim_nearest_param_id == -1 ? 0xff808080 : 0xffffffff;
-        }
-
-        nuhspecial_s special;
-        NuGScnGetSpecial(&special, edbits_base_scene, edanim_nearest);
-        NUVEC *position = NuSpecialGetPos(&special);
-        edbitsDrawCube(position->x, position->y, position->z, 0.5f, 0.5f, 0.5f, 0, 0, 0, 0, 0, colour, edanim_mtl);
-
-        if (edanim_particle_mode) {
-            edanimRenderParticleEmitters(edanim_nearest_param_id);
-        } else if (edanim_sound_mode) {
-            edanimRenderSoundEmitters(edanim_nearest_param_id);
-        }
-    }
-
-    if (edanim_active_menu) {
-        eduiMenuRender(edanim_active_menu);
-    }
-}
-
-void edgraClumpReseed(i32 index) {
-    edgra_clump_s *clump = &GrassClumps[index];
-    clump->seed = NuRand(NULL);
-    edgraInitAllClumps();
-}
-
-edgra_individual_s *GetIndGrassClump(i32 clump, i32 element) {
-    return &IndGrassClumps[clump * EDGRA_MAX_UNITS_PER_INDIVIDUAL_CLUMP + element];
-}
-
-void edgraClumpDestroy(i32 index) {
-    edgra_clump_s *clump = &GrassClumps[index];
-    clump->element_count = 0;
-    edgra_free_vecbuffer = clump->vector_buffer;
-    clump->vector_buffer = NULL;
-    --edgra_clumps_used;
-    if (clump->kind == 3) {
-        IndGrassClumpsUsed[clump->individual_index] = 0;
-        --edgra_ind_clumps_used;
-    }
-    edgraInitAllClumps();
-}
+void edgraClumpDestroy(i32 index);
 void edbitsDoSingleDump(i32 face);
 void edbriBridgeUpdate(i32 bridge, NUGSCN *scene);
 
@@ -1122,116 +738,107 @@ extern "C" {
     i32 part_page_on[8];
     i32 part_page_used[8];
     i32 edpart_instances_used;
-    edanim_param_s AnimParams[64];
-    eduimenu_s *edanim_active_menu;
-    eduimenu_s *edanim_options_menu;
-    eduimenu_s *edanim_particle_menu;
-    eduimenu_s *edanim_particletype_menu;
-    eduimenu_s *edanim_localparticletype_menu;
-    eduimenu_s *edanim_localparticle_menu;
-    eduimenu_s *edanim_switch_menu;
-    eduimenu_s *edanim_switchtype_menu;
-    eduimenu_s *edanim_sound_menu;
-    eduimenu_s *edanim_soundtype_menu;
-    eduimenu_s *edanim_localsoundtype_menu;
-    eduimenu_s *edanim_localsound_menu;
-    eduimenu_s *edanim_bouncy_menu;
-    eduimenu_s *edanim_mctb_menu;
-    NUGSCN *edanim_page_scene[8];
-    i32 edanim_page_used[8];
-    i32 edanim_page_on[8];
-    NUMTL *edanim_mtl;
-    NUMTL *edanim_mtl_zoff;
+extern edanim_param_s AnimParams[64];
+extern eduimenu_s * edanim_active_menu;
+extern eduimenu_s * edanim_options_menu;
+extern eduimenu_s * edanim_particle_menu;
+extern eduimenu_s * edanim_particletype_menu;
+extern eduimenu_s * edanim_localparticletype_menu;
+extern eduimenu_s * edanim_localparticle_menu;
+extern eduimenu_s * edanim_switch_menu;
+extern eduimenu_s * edanim_switchtype_menu;
+extern eduimenu_s * edanim_sound_menu;
+extern eduimenu_s * edanim_soundtype_menu;
+extern eduimenu_s * edanim_localsoundtype_menu;
+extern eduimenu_s * edanim_localsound_menu;
+extern eduimenu_s * edanim_bouncy_menu;
+extern eduimenu_s * edanim_mctb_menu;
+extern NUGSCN * edanim_page_scene[8];
+extern i32 edanim_page_used[8];
+extern i32 edanim_page_on[8];
+extern NUMTL * edanim_mtl;
+extern NUMTL * edanim_mtl_zoff;
     NUVEC edanim_cam_pos;
     f32 edanim_cam_dist;
     i32 edanim_cam_ax;
     i32 edanim_cam_ay;
-    i32 edanim_nearest;
-    i32 edanim_nearest_param_id;
-    i32 edanim_nearest_particle;
-    i32 edanim_nearest_sound;
-    i32 edanim_next_param;
-    i32 edanim_particle_mode;
-    i32 edanim_particle_type;
-    i32 edanim_sound_mode;
-    i32 edanim_sound_type;
-    i32 edanim_params_used;
+extern i32 edanim_nearest;
+extern i32 edanim_nearest_param_id;
+extern i32 edanim_nearest_particle;
+extern i32 edanim_nearest_sound;
+extern i32 edanim_next_param;
+extern i32 edanim_particle_mode;
+extern i32 edanim_particle_type;
+extern i32 edanim_sound_mode;
+extern i32 edanim_sound_type;
+extern i32 edanim_params_used;
     i32 edanim_emitrotz;
     i32 edanim_emitroty;
 }
 
-u8 object_switches[0x80];
+extern u8 object_switches[128];
 
 extern "C" {
-    u8 edbits_what_game;
-    char edbits_level_filename[256];
-    char edbits_general_save_directory[256];
-    char edbits_general_save_name[256];
-    char edbits_general_save_extension[256];
-    char edbits_level_save_directory[256];
-    char edbits_level_save_name[256];
-    char edbits_level_save_extension[256];
-    char edbits_datapath[256];
-    i32 edSfxAllCount;
-    NUGSCN *edbits_base_scene;
-    NUGSCN *edbits_things_scene;
-    void *edbits_base_terrain;
-    i32 edbits_particle_general_page;
-    i32 edbits_anim_page;
-    i32 edbits_editmode;
+extern u8 edbits_what_game;
+extern char edbits_level_filename[256];
+extern char edbits_general_save_directory[256];
+extern char edbits_general_save_name[256];
+extern char edbits_general_save_extension[256];
+extern char edbits_level_save_directory[256];
+extern char edbits_level_save_name[256];
+extern char edbits_level_save_extension[256];
+extern char edbits_datapath[256];
+extern i32 edSfxAllCount;
+extern NUGSCN * edbits_base_scene;
+extern NUGSCN * edbits_things_scene;
+extern void * edbits_base_terrain;
+extern i32 edbits_particle_general_page;
+extern i32 edbits_anim_page;
+extern i32 edbits_editmode;
     i32 edbits_part_general_page;
-    NUCAMERA *cubemapcam;
-    i32 edbits_types_error;
+extern NUCAMERA * cubemapcam;
+extern i32 edbits_types_error;
     i32 edbits_duplicates_error;
-    EDBITS_GAME_SOUND edbitsGameSound[320];
-    i32 edbits_numsounds;
-    EDBITSPLAYSOUNDCALLBACK edbitsPlaySound;
-    EDBITSREQUESTSOUNDCALLBACK edbitsRequestSound;
-    i32 edbits_override_backups;
-    eduimenu_s *edbri_active_menu;
-    eduimenu_s *edbri_options_menu;
+extern EDBITS_GAME_SOUND edbitsGameSound[320];
+extern i32 edbits_numsounds;
+extern EDBITSPLAYSOUNDCALLBACK edbitsPlaySound;
+extern EDBITSREQUESTSOUNDCALLBACK edbitsRequestSound;
+extern i32 edbits_override_backups;
+extern eduimenu_s * edbri_active_menu;
+extern eduimenu_s * edbri_options_menu;
     eduimenu_s *edbri_dpadmode_menu;
     eduimenu_s *edbri_plankinstance_menu;
     eduimenu_s *edbri_postinstance_menu;
     eduimenu_s *edbri_plankcount_menu;
     eduimenu_s *edbri_bridgeproperties_menu;
     eduimenu_s *edbri_ropecolour_menu;
-    NUMTL *edbri_mtl;
-    NUMTL *edbri_mtl_zoff;
+extern NUMTL * edbri_mtl;
+extern NUMTL * edbri_mtl_zoff;
     NUVEC edbri_cam_pos;
     f32 edbri_cam_dist;
     i32 edbri_cam_ax;
     i32 edbri_cam_ay;
-    i32 edbri_nearest;
-    i32 edbri_plank_instance_type;
-    i32 edbri_post_instance_type;
-    i32 edbri_bridges_used;
-    i32 edbri_page_used[8];
-    i32 edbri_page_on[8];
-    i32 edbri_pageid;
-    i32 edbri_rotz;
-    i32 edbri_roty;
+extern i32 edbri_nearest;
+extern i32 edbri_plank_instance_type;
+extern i32 edbri_post_instance_type;
+extern i32 edbri_bridges_used;
+extern i32 edbri_page_used[8];
+extern i32 edbri_page_on[8];
+extern i32 edbri_pageid;
+extern i32 edbri_rotz;
+extern i32 edbri_roty;
     i32 edbri_mode;
-    NUGSCN *edbri_page_scene[8];
-    edbridge_s edBridges[64];
-    f32 edbri_length = 1.0f;
-    f32 edbri_width = 0.5f;
-    i32 edbri_planks = 11;
-    i32 edbri_post_interval = 5;
+extern NUGSCN * edbri_page_scene[8];
+extern edbridge_s edBridges[64];
+extern f32 edbri_length;
+extern f32 edbri_width;
+extern i32 edbri_planks;
+extern i32 edbri_post_interval;
 }
 
-static void edbriEnter() {
-    edbri_nearest = -1;
-}
+static void edbriEnter();
 
-static void edanimEnter() {
-    edanim_nearest = -1;
-    edanim_nearest_param_id = -1;
-    edanim_nearest_particle = -1;
-    edanim_particle_mode = 0;
-    edanim_particle_type = -1;
-    edanim_sound_type = -1;
-}
+static void edanimEnter();
 
 void FileLoadSingleEffectType(debinftype *, i32, char);
 extern "C" void NuBridgeInit(void);
@@ -1239,77 +846,13 @@ extern "C" void NuBridgeRemove(i32 bridge);
 extern "C" i32 NuBridgeCreate(NUGSCN *, nuhspecial_s *, nuhspecial_s *, NUVEC *, NUVEC *, f32, i16, f32, f32, f32, f32,
                               i32, f32, f32, i32, u32);
 
-void edbriBridgeUpdate(i32 index, NUGSCN *scene) {
-    if (edBridges[index].instance_id != -1) {
-        NuBridgeRemove(edBridges[index].instance_id);
-        edBridges[index].instance_id = -1;
-    }
-    NUVEC end;
-    NUVEC delta;
-    delta.x = edBridges[index].length;
-    delta.y = 0.0f;
-    delta.z = 0.0f;
-    NuVecRotateZ(&delta, &delta, edBridges[index].rotation_z);
-    NuVecRotateY(&delta, &delta, edBridges[index].rotation_y);
-    NuVecAdd(&end, &edBridges[index].position, &delta);
-    nuhspecial_s first = {};
-    u32 colour = edBridges[index].red + ((edBridges[index].green << 8) + (edBridges[index].blue << 16) + 0x80000000u);
-    if (edBridges[index].special_20 != -1)
-        NuGScnGetSpecial(&first, edbits_base_scene, edBridges[index].special_20);
-    nuhspecial_s second = {};
-    if (edBridges[index].special_24 != -1)
-        NuGScnGetSpecial(&second, edbits_base_scene, edBridges[index].special_24);
-    edBridges[index].instance_id =
-        NuBridgeCreate(scene, &first, &second, &edBridges[index].position, &end, edBridges[index].field_3c,
-                       edBridges[index].rotation_y, edBridges[index].field_28, edBridges[index].field_2c,
-                       edBridges[index].field_30, edBridges[index].field_34, edBridges[index].field_1d,
-                       edBridges[index].field_14, edBridges[index].field_38, edBridges[index].field_1e, colour);
-}
+void edbriBridgeUpdate(i32 index, NUGSCN *scene);
 
-void edbriBridgePlace(i32 index, NUVEC *position) {
-    edBridges[index].position = *position;
-    edBridges[index].rotation_z = edbri_rotz;
-    edBridges[index].rotation_y = edbri_roty;
-    edBridges[index].length = edbri_length;
-    edBridges[index].field_14 = edbri_width;
-    edBridges[index].field_1d = edbri_planks;
-    edBridges[index].field_1e = edbri_post_interval;
-    edBridges[index].special_20 = edbri_plank_instance_type;
-    edBridges[index].special_24 = edbri_post_instance_type;
-    edbriBridgeUpdate(index, edbits_base_scene);
-}
+void edbriBridgePlace(i32 index, NUVEC *position);
 
-i32 edbriBridgeCreate(NUVEC *position) {
-    if (edbri_bridges_used == 64)
-        return -1;
-    i32 index = 0;
-    while (edBridges[index].connection_index != 0xff)
-        ++index;
-    edBridges[index].connection_index = edbri_pageid;
-    ++edbri_bridges_used;
-    edBridges[index].field_28 = 0.18f;
-    edBridges[index].field_30 = -0.01f;
-    edBridges[index].field_34 = 4.0f;
-    edBridges[index].field_2c = 0.1f;
-    edBridges[index].field_38 = 0.5f;
-    edBridges[index].field_3c = 0.5f;
-    edBridges[index].red = 0x50;
-    edBridges[index].green = 0x50;
-    edBridges[index].blue = 0x30;
-    edBridges[index].field_43 = 0x80;
-    edbri_page_used[edbri_pageid] = 1;
-    edbri_page_scene[edbri_pageid] = edbits_base_scene;
-    edbriBridgePlace(index, position);
-    return index;
-}
+i32 edbriBridgeCreate(NUVEC *position);
 
-void edbriBridgeDestroy(i32 index) {
-    edbridge_s *bridge = &edBridges[index];
-    NuBridgeRemove(bridge->instance_id);
-    bridge->connection_index = 0xff;
-    bridge->instance_id = -1;
-    --edbri_bridges_used;
-}
+void edbriBridgeDestroy(i32 index);
 
 void edanimDetermineNearestAnim(f32);
 void edppDetermineNearest(float);
@@ -1415,577 +958,55 @@ extern "C" {
     eduimenu_s *edGetMainMenu(void) {
         return ed_main_menu;
     }
-    void edGraDisableTerrainSwap(void) {
-    }
-    void edGraEnableTerrainSwap(void) {
-    }
-    void edGraInitTerrainSwapProtection(void) {
-    }
-    i32 edanimLoadPage(char *path, NUGSCN *scene) {
-        i32 page;
-        for (page = 0; page < 8; ++page) {
-            if (edanim_page_used[page] == 0)
-                break;
-        }
-        if (page == 8)
-            return -1;
-        EdFileSetMedia(1);
-        if (EdFileOpen(path, NUFILE_READ) == 0)
-            return -1;
-        EdFileSetReadWrongEndianess(1);
-        i32 version = EdFileReadInt();
-        if (version > 6) {
-            EdFileSetReadWrongEndianess(0);
-            EdFileClose();
-            return -1;
-        }
-        i32 count = EdFileReadInt();
-        if (count + edanim_params_used > 64)
-            count = 64 - edanim_params_used;
-        i32 slot = 0;
-        for (i32 index = 0; index < count; ++index) {
-            while (AnimParams[slot].instance_id != -1 && slot < 64)
-                ++slot;
-            if (slot >= 64)
-                continue;
-            char name[20];
-            EdFileRead(name, 20);
-            AnimParams[slot].instance_id = edanimLookupSpecial(name, scene);
-            AnimParams[slot].effect_count = EdFileReadInt();
-            if (__builtin_expect(version > 1, 0)) {
-                AnimParams[slot].sound_count = EdFileReadInt();
-            } else {
-                AnimParams[slot].sound_count = 0;
-            }
-            AnimParams[slot].field_00c = EdFileReadInt();
-            AnimParams[slot].field_010 = EdFileReadInt();
-            AnimParams[slot].field_014 = EdFileReadFloat();
-            AnimParams[slot].field_018 = EdFileReadFloat();
-            if (AnimParams[slot].effect_count > 8)
-                AnimParams[slot].effect_count = 8;
-            for (i32 effect = 0; effect < AnimParams[slot].effect_count; ++effect) {
-                EdFileRead(AnimParams[slot].effect_names[effect], 16);
-                AnimParams[slot].effect_ids[effect] = -1;
-                if (version > 4) {
-                    if (version == 5) {
-                        AnimParams[slot].effect_intervals[effect] = static_cast<i32>(EdFileReadFloat());
-                    } else {
-                        AnimParams[slot].effect_intervals[effect] = EdFileReadInt();
-                    }
-                } else {
-                    i32 interval = EdFileReadInt();
-                    AnimParams[slot].effect_intervals[effect] = interval > 0    ? interval * 60
-                                                                : interval == 0 ? 0
-                                                                                : -60 / interval;
-                }
-                AnimParams[slot].effect_flags[effect] = EdFileReadInt();
-                EdFileReadNuVec(reinterpret_cast<NUVEC *>(AnimParams[slot].effect_positions[effect]));
-                if (version > 2) {
-                    AnimParams[slot].effect_angles[effect] = EdFileReadShort();
-                    AnimParams[slot].effect_angle_ranges[effect] = EdFileReadShort();
-                } else {
-                    AnimParams[slot].effect_angles[effect] = 0;
-                    AnimParams[slot].effect_angle_ranges[effect] = 0;
-                }
-            }
-            AnimParams[slot].field_17c = 0.99f;
-            if (__builtin_expect(version > 1, 1)) {
-                if (AnimParams[slot].sound_count > 8)
-                    AnimParams[slot].sound_count = 8;
-                for (i32 sound = 0; sound < AnimParams[slot].sound_count; ++sound) {
-                    EdFileRead(AnimParams[slot].sound_names[sound], 16);
-                    AnimParams[slot].sound_ids[sound] = -1;
-                    AnimParams[slot].sound_flags[sound] = EdFileReadInt();
-                    AnimParams[slot].sound_values[sound] = EdFileReadFloat();
-                    EdFileReadNuVec(reinterpret_cast<NUVEC *>(AnimParams[slot].sound_positions[sound]));
-                }
-            }
-            nuhspecial_s special;
-            NuGScnGetSpecial(&special, scene, AnimParams[slot].instance_id);
-            AnimParams[slot].platform_id = FindPlatInst(NuSpecialGetInstanceix(&special));
-            if (version > 3) {
-                AnimParams[slot].bounce_impulse = EdFileReadFloat();
-                AnimParams[slot].bounce_spring = EdFileReadFloat();
-                AnimParams[slot].bounce_damping = EdFileReadFloat();
-            } else {
-                AnimParams[slot].bounce_impulse = 0.0f;
-                AnimParams[slot].bounce_spring = 0.0f;
-                AnimParams[slot].bounce_damping = 0.0f;
-            }
-            if (AnimParams[slot].platform_id != -1)
-                PlatInstBounce(AnimParams[slot].platform_id, AnimParams[slot].bounce_impulse,
-                               AnimParams[slot].bounce_spring, AnimParams[slot].bounce_damping);
-            AnimParams[slot].page = static_cast<i8>(page);
-            ++edanim_params_used;
-        }
-        EdFileSetReadWrongEndianess(0);
-        EdFileClose();
-        edanim_page_used[page] = 1;
-        edanim_page_scene[page] = scene;
-        edanim_next_param = count;
-        edbits_anim_page = page;
-        edanim_particle_mode = 0;
-        edanim_nearest = -1;
-        edanim_nearest_param_id = -1;
-        edanimDetermineNearestAnim(1.0f);
-        return page;
-    }
+void edGraDisableTerrainSwap(void);
+void edGraEnableTerrainSwap(void);
+void edGraInitTerrainSwapProtection(void);
+i32 edanimLoadPage(char *path, NUGSCN *scene);
 
-    void edanimClearPage(i32 page) {
-        if (edanim_page_on[page] != 0)
-            edanimStopPage(page);
-        for (i32 index = 0; index < 64; ++index) {
-            if (AnimParams[index].page == page) {
-                AnimParams[index].instance_id = -1;
-                --edanim_params_used;
-            }
-        }
-        edanim_page_used[page] = 0;
-        edanim_page_scene[page] = NULL;
-    }
-    i32 edanimLookupSpecial(char *name, NUGSCN *scene) {
-        if (scene != NULL) {
-            nuhspecial_s special;
-            for (i32 index = 0; index < NuGScnNumSpecials(scene); ++index) {
-                NuGScnGetSpecial(&special, scene, index);
-                if (NuStrNICmp(NuSpecialGetName(&special), name, 19) == 0)
-                    return index;
-            }
-        }
-        return -1;
-    }
-    void edanimParamReset(void) {
-        for (i32 i = 0; i < 64; ++i) {
-            AnimParams[i].instance_id = -1;
-        }
-        edanim_next_param = 0;
-        edanim_params_used = 0;
-        memset(edanim_page_used, 0, sizeof(edanim_page_used));
-        memset(edanim_page_on, 0, sizeof(edanim_page_on));
-    }
-    void edanimParticleDestroy(i32 parameter_index, i32 particle_index) {
-        for (i32 index = particle_index; index < AnimParams[parameter_index].effect_count - 1; ++index) {
-            AnimParams[parameter_index].effect_ids[index] = AnimParams[parameter_index].effect_ids[index + 1];
-            AnimParams[parameter_index].effect_intervals[index] =
-                AnimParams[parameter_index].effect_intervals[index + 1];
-            AnimParams[parameter_index].effect_flags[index] = AnimParams[parameter_index].effect_flags[index + 1];
-            memcpy(AnimParams[parameter_index].effect_positions[index],
-                   AnimParams[parameter_index].effect_positions[index + 1], sizeof(NUVEC));
-            strcpy(AnimParams[parameter_index].effect_names[index],
-                   AnimParams[parameter_index].effect_names[index + 1]);
-        }
-        --AnimParams[parameter_index].effect_count;
-    }
-    void edanimRegisterCubeDumpInfo(void) {
-    }
-    void edanimStartPage(i32 page) {
-        if (edanim_page_used[page] != 0 && edanim_page_scene[page] != NULL && edanim_page_on[page] == 0)
-            edanim_page_on[page] = 1;
-    }
-    void edanimStopPage(i32 page) {
-        edanim_page_on[page] = 0;
-    }
-    void edanimUpdateObjects(float elapsed) {
-        NUMTX matrix;
-        NUVEC position;
-        static i32 localframecount;
-        float seconds;
-        if (__builtin_expect(NuVideoGetMode() == 3, 1))
-            seconds = elapsed / 50.0f;
-        else
-            seconds = elapsed / 60.0f;
-        for (i32 index = 0; index < 64; ++index) {
-            if (AnimParams[index].instance_id == -1 || edanim_page_on[AnimParams[index].page] == 0)
-                continue;
-            nuhspecial_s special;
-            nuinstanim_s *animation = NULL;
-            if (edanim_page_scene[AnimParams[index].page] != NULL) {
-                NuGScnGetSpecial(&special, edanim_page_scene[AnimParams[index].page], AnimParams[index].instance_id);
-                animation = NuSpecialGetInstAnim(&special);
-                NuSpecialGetInstanceix(&special);
-            }
-            if (animation != NULL) {
-                switch (AnimParams[index].field_00c) {
-                    case 1:
-                        animation->playing = 0;
-                        if (AnimParams[index].field_010 != -1 && object_switches[AnimParams[index].field_010] != 0)
-                            animation->playing = 1;
-                        break;
-                    case 2:
-                        animation->repeating = 0;
-                        if (AnimParams[index].field_010 != -1 && object_switches[AnimParams[index].field_010] != 0 &&
-                            !animation->playing) {
-                            animation->ltime = 1.0f;
-                            animation->playing = 1;
-                            animation->backwards = 0;
-                            animation->waiting = 0;
-                        }
-                        break;
-                    case 3:
-                        animation->repeating = 1;
-                        if (AnimParams[index].field_010 != -1 && object_switches[AnimParams[index].field_010] != 0)
-                            animation->playing = 1;
-                        break;
-                    case 4: {
-                        const f32 distance = edanimPlayerAnimDistance(index);
-                        animation->playing = AnimParams[index].field_014 > distance;
-                        break;
-                    }
-                    case 5: {
-                        animation->repeating = 0;
-                        const f32 distance = edanimPlayerAnimDistance(index);
-                        if (AnimParams[index].field_014 > distance && !animation->playing) {
-                            animation->playing = 1;
-                            animation->backwards = 0;
-                            animation->ltime = 1.0f;
-                            animation->waiting = 0;
-                        }
-                        break;
-                    }
-                    case 6: {
-                        animation->repeating = 1;
-                        const f32 distance = edanimPlayerAnimDistance(index);
-                        if (__builtin_expect(AnimParams[index].field_014 > distance, 1))
-                            animation->playing = 1;
-                        break;
-                    }
-                    case 10:
-                        animation->ltime = 1.0f;
-                        animation->playing = 0;
-                        break;
-                    case 11:
-                        animation->playing = 1;
-                        break;
-                    case 12:
-                        animation->playing = 1;
-                        animation->repeating = 1;
-                        break;
-                }
-                if (index == edanim_nearest_param_id && (edanim_particle_mode != 0 || edanim_sound_mode != 0))
-                    animation->ltime = 1.0f;
-            }
-            if (__builtin_expect(NuSpecialGetVisibilityFn(&special) != NULL, 1)) {
-                i32 particle_index = 0;
-                while (particle_index < AnimParams[index].effect_count) {
-                    i32 effect = AnimParams[index].effect_ids[particle_index];
-                    if (__builtin_expect(effect != -1 && debtab[effect] != NULL, 0)) {
-                        if (__builtin_expect(AnimParams[index].effect_flags[particle_index] == 0 ||
-                            (animation != NULL && animation->playing), 0)) {
-                            NUMTX matrix;
-                            NuMtxInvRSS(&matrix, NuSpecialGetMtx(&special));
-                            NuMtxMul(&matrix, &matrix, NuSpecialGetDrawMtx(&special));
-                            position = *reinterpret_cast<NUVEC *>(AnimParams[index].effect_positions[particle_index]);
-                            NuVecMtxTransform(&position, &position, &matrix);
-                            NUMTX orientation = numtx_identity;
-                            NuMtxRotateZ(&orientation, AnimParams[index].effect_angles[particle_index]);
-                            NuMtxRotateY(&orientation, AnimParams[index].effect_angle_ranges[particle_index]);
-                            NuMtxMul(&matrix, &orientation, &matrix);
-                            AddVariableShotDebrisEffectTimed3(
-                                AnimParams[index].effect_ids[particle_index], &position, &nuvec_zero,
-                                AnimParams[index].effect_intervals[particle_index], seconds, &matrix, &numtx_identity);
-                        }
-                    } else if (AnimParams[index].effect_names[particle_index][0] != 0) {
-                        AnimParams[index].effect_ids[particle_index] =
-                            LookupDebrisEffect(AnimParams[index].effect_names[particle_index]);
-                        if (AnimParams[index].effect_ids[particle_index] == -1) {
-                            edanimParticleDestroy(index, particle_index);
-                            continue;
-                        }
-                    }
-                    ++particle_index;
-                }
-                for (i32 sound_index = 0; sound_index < AnimParams[index].sound_count; ++sound_index) {
-                    i32 sound = AnimParams[index].sound_ids[sound_index];
-                    if (sound == -1) {
-                        if (AnimParams[index].sound_names[sound_index][0] != 0) {
-                            AnimParams[index].sound_ids[sound_index] =
-                                edbitsLookupSoundFX(AnimParams[index].sound_names[sound_index]);
-                            if (AnimParams[index].sound_ids[sound_index] == -1) {
-                                edanimSoundDestroy(index, sound_index);
-                                --sound_index;
-                            }
-                        }
-                        continue;
-                    }
-                    i32 play = -1;
-                    if (AnimParams[index].sound_flags[sound_index] == 1) {
-                        i32 interval = static_cast<i32>(AnimParams[index].sound_values[sound_index]);
-                        if (static_cast<i32>(static_cast<float>(localframecount) + elapsed) / interval >
-                            localframecount / interval)
-                            play = sound;
-                    } else if (animation != NULL) {
-                        float frame = AnimParams[index].sound_values[sound_index];
-                        if (animation->ltime >= frame && frame > AnimParams[index].field_17c)
-                            play = sound;
-                        if (animation->oscillate && frame >= animation->ltime &&
-                            fabsf(AnimParams[index].field_17c) > frame)
-                            play = sound;
-                    }
-                    if (play != -1) {
-
-                        NuMtxInvRSS(&matrix, NuSpecialGetMtx(&special));
-                        NuMtxMul(&matrix, &matrix, NuSpecialGetDrawMtx(&special));
-                        // The original uses the completed particle-loop index here (0x35d332).
-                        position = *reinterpret_cast<NUVEC *>(AnimParams[index].sound_positions[particle_index]);
-                        NuVecMtxTransform(&position, &position, &matrix);
-                        edbitsSoundPlay(&position, play);
-                    }
-                }
-            }
-            if (animation != NULL)
-                AnimParams[index].field_17c = animation->oscillate ? -animation->ltime : animation->ltime;
-        }
-        localframecount += static_cast<i32>(elapsed);
-    }
-    void edbitsDrawBBox(NUVEC *minimum, NUVEC *maximum, i32 colour, numtl_s *material) {
-        edbitsDrawCube((minimum->x + maximum->x) * 0.5f, (minimum->y + maximum->y) * 0.5f,
-                       (minimum->z + maximum->z) * 0.5f, (maximum->x - minimum->x) * 0.5f,
-                       (maximum->y - minimum->y) * 0.5f, (maximum->z - minimum->z) * 0.5f, 0, 0, 0, 0, 0, colour,
-                       material);
-    }
+void edanimClearPage(i32 page);
+i32 edanimLookupSpecial(char *name, NUGSCN *scene);
+void edanimParamReset(void);
+void edanimParticleDestroy(i32 parameter_index, i32 particle_index);
+void edanimRegisterCubeDumpInfo(void);
+void edanimStartPage(i32 page);
+void edanimStopPage(i32 page);
+void edanimUpdateObjects(float elapsed);
+void edbitsDrawBBox(NUVEC *minimum, NUVEC *maximum, i32 colour, numtl_s *material);
     void edbitsDrawOvalXY(NUVEC *, f32, f32, i32, NUMTL *);
-    void edbitsDrawCircleTilted(NUVEC *centre, f32 radius, i32 colour, NUMTL *material, i32 rotation_z,
-                                i32 rotation_y) {
-        edbitsDrawOvalTilted(centre, radius, radius, colour, material, rotation_z, rotation_y);
-    }
-    void edbitsDrawCircleXY(NUVEC *centre, f32 radius, i32 colour, NUMTL *material) {
-        edbitsDrawOvalXY(centre, radius, radius, colour, material);
-    }
-    void edbitsDrawOvalXY(NUVEC *centre, f32 radius_x, f32 radius_z, i32 colour, NUMTL *material) {
-        edbitsDrawOvalTilted(centre, radius_x, radius_z, colour, material, 0, 0);
-    }
-    void edbitsDrawSphere(NUVEC *centre, f32 radius, i32 colour, NUMTL *material) {
-        edbitsDrawCircleXY(centre, radius, colour, material);
-        edbitsDrawCircleTilted(centre, radius, colour, material, 0x2000, 0);
-        edbitsDrawCircleTilted(centre, radius, colour, material, 0x4000, 0);
-        edbitsDrawCircleTilted(centre, radius, colour, material, 0x6000, 0);
-        edbitsDrawCircleTilted(centre, radius, colour, material, 0x4000, 0x2000);
-        edbitsDrawCircleTilted(centre, radius, colour, material, 0x4000, 0x4000);
-        edbitsDrawCircleTilted(centre, radius, colour, material, 0x4000, 0x6000);
-    }
-    char *edbitsGetSoundName(i32) {
-        return NULL;
-    }
-    i32 edbitsLookupInstance(char *name, NUGSCN *scene) {
-        if (scene) {
-            nuhspecial_s special;
-            for (i32 index = 0; index < NuGScnNumSpecials(scene); ++index) {
-                NuGScnGetSpecial(&special, scene, index);
-                if (NuStrNICmp(NuSpecialGetName(&special), name, 19) == 0) {
-                    return index;
-                }
-            }
-        }
-        return -1;
-    }
-    i32 edbitsLookupSound(char *name) {
-        for (i32 index = 0; index < edbits_numsounds; ++index) {
-            if (NuStrNICmp(edbitsGameSound[index].name, name, 15) == 0) {
-                return index;
-            }
-        }
-        return -1;
-    }
-    i32 edbitsLookupSoundFX(char *) {
-        return -1;
-    }
-    i32 edbitsProcessCubemapDump(void) {
-        if (edbits_cubecount == 0)
-            return 0;
-        if (cubemapcam == NULL)
-            cubemapcam = NuCameraCreate();
-        cubemapcam->fov = 1.5708f;
-        cubemapcam->aspect = 1.0f;
-        switch (edbits_cubecount) {
-            case 60:
-                edmainExtCamera(cubemapcam);
-                edcamSetDist(0.0f);
-                edcamSetAng(0, 0x4000);
-                edcamSet();
-                break;
-            case 55:
-                edbitsDoSingleDump(0);
-                break;
-            case 50:
-                edcamSetAng(0, 0xc000);
-                edcamSet();
-                break;
-            case 45:
-                edbitsDoSingleDump(1);
-                break;
-            case 40:
-                edcamSetAng(-0x4000, 0);
-                edcamSet();
-                break;
-            case 35:
-                edbitsDoSingleDump(2);
-                break;
-            case 30:
-                edcamSetAng(0x4000, 0);
-                edcamSet();
-                break;
-            case 25:
-                edbitsDoSingleDump(3);
-                break;
-            case 20:
-                edcamSetAng(0, 0);
-                edcamSet();
-                break;
-            case 15:
-                edbitsDoSingleDump(4);
-                break;
-            case 10:
-                edcamSetAng(0, 0x8000);
-                edcamSet();
-                break;
-            case 5:
-                edbitsDoSingleDump(5);
-                break;
-            case 1:
-                edmainExtCamera(NULL);
-                NuRndrDoingScreenGrab = 0;
-                break;
-        }
-        return --edbits_cubecount;
-    }
-    void edbitsRegisterDataPath(char *path) {
-        if (path) {
-            NuStrCpy(edbits_datapath, path);
-        } else {
-            edbits_datapath[0] = '\0';
-        }
-    }
-    void edbitsRegisterBaseScene(NUGSCN *scene) {
-        edbits_base_scene = scene;
-    }
-    static i32 edbits_local_editor_enabled;
-    i32 *edbits_editor_enabled = &edbits_local_editor_enabled;
+void edbitsDrawCircleTilted(NUVEC *centre, f32 radius, i32 colour, NUMTL *material, i32 rotation_z,
+                                i32 rotation_y);
+void edbitsDrawCircleXY(NUVEC *centre, f32 radius, i32 colour, NUMTL *material);
+void edbitsDrawOvalXY(NUVEC *centre, f32 radius_x, f32 radius_z, i32 colour, NUMTL *material);
+void edbitsDrawSphere(NUVEC *centre, f32 radius, i32 colour, NUMTL *material);
+char *edbitsGetSoundName(i32);
+i32 edbitsLookupInstance(char *name, NUGSCN *scene);
+i32 edbitsLookupSound(char *name);
+i32 edbitsLookupSoundFX(char *);
+i32 edbitsProcessCubemapDump(void);
+void edbitsRegisterDataPath(char *path);
+void edbitsRegisterBaseScene(NUGSCN *scene);
+extern i32 * edbits_editor_enabled;
 
-    void edbitsRegisterEditMode(i32 mode) {
-        edbits_editmode = mode;
-    }
-    void edbitsRegisterEditorEnabledFlag(i32 *enabled) {
-        edbits_editor_enabled = enabled;
-    }
-    void edbitsRegisterLevel(char *filename, i32 game) {
-        if (filename) {
-            NuStrCpy(edbits_level_filename, filename);
-        } else {
-            edbits_level_filename[0] = '\0';
-        }
-        edbits_what_game = game;
-    }
-    void edbitsRegisterPlaySound(EDBITSPLAYSOUNDCALLBACK callback) {
-        edbitsPlaySound = callback;
-    }
-    void edbitsRegisterRequestSound(EDBITSREQUESTSOUNDCALLBACK callback) {
-        edbitsRequestSound = callback;
-    }
-    void edbitsRegisterSaveFormat(char *general_save_directory, char *general_save_name, char *general_save_extension,
-                                  char *level_save_directory, char *level_save_name, char *level_save_extension) {
-        if (general_save_directory) {
-            NuStrCpy(edbits_general_save_directory, general_save_directory);
-        } else {
-            edbits_general_save_directory[0] = '\0';
-        }
-        if (general_save_name) {
-            NuStrCpy(edbits_general_save_name, general_save_name);
-        } else {
-            edbits_general_save_name[0] = '\0';
-        }
-        if (general_save_extension) {
-            NuStrCpy(edbits_general_save_extension, general_save_extension);
-        } else {
-            edbits_general_save_extension[0] = '\0';
-        }
-        if (level_save_directory) {
-            NuStrCpy(edbits_level_save_directory, level_save_directory);
-        } else {
-            edbits_level_save_directory[0] = '\0';
-        }
-        if (level_save_name) {
-            NuStrCpy(edbits_level_save_name, level_save_name);
-        } else {
-            edbits_level_save_name[0] = '\0';
-        }
-        if (level_save_extension) {
-            NuStrCpy(edbits_level_save_extension, level_save_extension);
-        } else {
-            edbits_level_save_extension[0] = '\0';
-        }
-    }
-    void edbitsRegisterSoundEffect(char *name, i32 id) {
-        i32 index = edbits_numsounds;
-        strncpy(edbitsGameSound[index].name, name, 16);
-        edbitsGameSound[index].name[15] = '\0';
-        edbitsGameSound[index].id = id;
-        edbits_numsounds = index + 1;
-    }
-    void edbitsRegisterThingsScene(NUGSCN *scene) {
-        edbits_things_scene = scene;
-    }
-    void edbitsRegisterBaseTerrain(void *terrain) {
-        edbits_base_terrain = terrain;
-    }
-    i32 edbitsSfxVol = 100;
-    void edbitsSetSoundFxVolume(i32 volume) {
-        edbitsSfxVol = volume;
-    }
-    i32 edbitsStartCubemapDump(void) {
-        if (edbits_cubecount != 0)
-            return 0;
-        edbits_cubecount = 65;
-        NuRndrDoingScreenGrab = 1;
-        return 1;
-    }
-    void edbitsVector2YZRot(i16 *rotation_y, i16 *rotation_z, f32 x, f32 y, f32 z) {
-        *rotation_y = -NuAtan2DA(z, x);
-        *rotation_z = NuAtan2DA(y, NuFsqrt(x * x + z * z));
-    }
-    void edbriBridgesReset(void) {
-        NuBridgeInit();
-        for (i32 i = 0; i < 64; ++i) {
-            edBridges[i].instance_id = -1;
-            edBridges[i].connection_index = 0xff;
-        }
-        memset(edbri_page_used, 0, sizeof(edbri_page_used));
-        memset(edbri_page_scene, 0, sizeof(edbri_page_scene));
-        memset(edbri_page_on, 0, sizeof(edbri_page_on));
-        edbri_bridges_used = 0;
-    }
+void edbitsRegisterEditMode(i32 mode);
+void edbitsRegisterEditorEnabledFlag(i32 *enabled);
+void edbitsRegisterLevel(char *filename, i32 game);
+void edbitsRegisterPlaySound(EDBITSPLAYSOUNDCALLBACK callback);
+void edbitsRegisterRequestSound(EDBITSREQUESTSOUNDCALLBACK callback);
+void edbitsRegisterSaveFormat(char *general_save_directory, char *general_save_name, char *general_save_extension,
+                                  char *level_save_directory, char *level_save_name, char *level_save_extension);
+void edbitsRegisterSoundEffect(char *name, i32 id);
+void edbitsRegisterThingsScene(NUGSCN *scene);
+void edbitsRegisterBaseTerrain(void *terrain);
+extern i32 edbitsSfxVol;
+void edbitsSetSoundFxVolume(i32 volume);
+i32 edbitsStartCubemapDump(void);
+void edbitsVector2YZRot(i16 *rotation_y, i16 *rotation_z, f32 x, f32 y, f32 z);
+void edbriBridgesReset(void);
     void edbriStopPage(i8 page);
     void NuBridgeRemove(i32 bridge);
-    void edbriClearPage(i8 page) {
-        edbriStopPage(page);
-        for (i32 i = 0; i < 64; ++i) {
-            if (edBridges[i].connection_index == static_cast<u8>(page)) {
-                edBridges[i].connection_index = 0xff;
-                --edbri_bridges_used;
-            }
-        }
-        edbri_page_used[page] = 0;
-        edbri_page_scene[page] = 0;
-    }
-    void edbriStartPage(i32 page_number) {
-        i8 page = static_cast<i8>(page_number);
-        if (edbri_page_used[page] && edbri_page_scene[page]) {
-            for (i32 i = 0; i < 64; ++i) {
-                if (edBridges[i].connection_index == static_cast<u8>(page)) {
-                    edbriBridgeUpdate(i, edbri_page_scene[page]);
-                }
-            }
-        }
-    }
-    void edbriStopPage(i8 page) {
-        if (edbri_page_used[page]) {
-            for (i32 i = 0; i < 64; ++i) {
-                if (edBridges[i].connection_index == static_cast<u8>(page) && edBridges[i].instance_id != -1) {
-                    NuBridgeRemove(edBridges[i].instance_id);
-                    edBridges[i].instance_id = -1;
-                }
-            }
-        }
-    }
+void edbriClearPage(i8 page);
+void edbriStartPage(i32 page_number);
+void edbriStopPage(i8 page);
     f32 edcamGetDist(void) {
         return gp_cam.distance;
     }
@@ -2102,286 +1123,14 @@ extern "C" {
     void edcamSetSpeedPos(f32 position_x, f32 position_y, f32 position_z) {
         gp_cam.position_speed = {position_x, position_y, position_z};
     }
-    i32 edgraBufferUsage(void) {
-        i32 count = 0;
-        for (i32 i = 0; i < EDGRA_MAX_CLUMPS; ++i)
-            count += GrassClumps[i].element_count;
-        return count * 0x4c + 0x10;
-    }
-    i32 edgraLoadPage(char *path, void *gscn, i32 terrain, void *buf, void *buf_end) {
-        i32 page = -1;
-        for (i32 index = 0; index < 8; ++index) {
-            if (__builtin_expect(edgra_page_used[index] != 0, 1)) {
-                continue;
-            }
-            page = index;
-            break;
-        }
-        if (page == -1) {
-            return -1;
-        }
-
-        VARIPTR *buffer = static_cast<VARIPTR *>(buf);
-        usize matrix_base;
-        if (__builtin_expect(edbits_editmode == 1 && edgra_mtxbuffer != NULL, 0)) {
-            matrix_base = reinterpret_cast<usize>(edgra_mtxbuffer);
-        } else {
-            matrix_base = ALIGN(buffer->addr, 16);
-        }
-        edgra_page_matrix_stack[page] = reinterpret_cast<NUMTX *>(matrix_base);
-
-        EdFileSetMedia(1);
-        if (EdFileOpen(path, NUFILE_READ) == 0) {
-            return -1;
-        }
-        EdFileSetReadWrongEndianess(1);
-        const i32 version = EdFileReadInt();
-        if (__builtin_expect(version < 1 || version > 9, 0)) {
-            EdFileSetReadWrongEndianess(0);
-            EdFileClose();
-            return -1;
-        }
-
-        if (version == 9) {
-            edgra_global_fadein = EdFileReadFloat();
-            edgra_global_fadeout = EdFileReadFloat();
-        } else {
-            edgra_global_fadein = 15.0f;
-            edgra_global_fadeout = 25.0f;
-        }
-
-        const i32 file_clump_count = EdFileReadInt();
-        const i32 available = EDGRA_MAX_CLUMPS - edgra_clumps_used;
-        const i32 clump_count = MIN(file_clump_count, available);
-        const i32 matrix_count = version >= 8 ? EdFileReadInt() : 0x3000;
-        usize vector_cursor = matrix_base + static_cast<usize>(matrix_count) * sizeof(NUMTX);
-        if (edbits_editmode == 1 && edgra_vecbuffer != NULL) {
-            vector_cursor = reinterpret_cast<usize>(edgra_vecbuffer);
-        }
-
-        i32 slot = 0;
-        for (i32 file_index = 0; file_index < clump_count; ++file_index) {
-            while (slot < EDGRA_MAX_CLUMPS && GrassClumps[slot].element_count != 0) {
-                ++slot;
-            }
-            if (slot == EDGRA_MAX_CLUMPS) {
-                break;
-            }
-
-            edgra_clump_s *clump = &GrassClumps[slot];
-            char instance_name[20];
-            EdFileRead(instance_name, sizeof(instance_name));
-            clump->special_index = edbitsLookupInstance(instance_name, static_cast<NUGSCN *>(gscn));
-            clump->element_count = EdFileReadInt();
-            clump->position.x = EdFileReadFloat();
-            clump->position.y = EdFileReadFloat();
-            clump->position.z = EdFileReadFloat();
-            clump->size = EdFileReadFloat();
-            clump->field_18 = EdFileReadFloat();
-
-            clump->flags = version == 1 ? 1 : EdFileReadInt();
-            clump->field_20 = version <= 2 ? 1.0f : EdFileReadFloat();
-            clump->page = static_cast<u8>(page);
-            if (version < 5) {
-                clump->unknown_25 = 1;
-                clump->unknown_26 = 1;
-                clump->kind = 1;
-            } else {
-                clump->unknown_25 = EdFileReadChar();
-                clump->unknown_26 = EdFileReadChar();
-                if (__builtin_expect(version == 5, 0)) {
-                    clump->kind = 1;
-                } else {
-                    clump->kind = EdFileReadChar();
-                }
-            }
-
-            if (version < 4) {
-                clump->seed = 0;
-                clump->field_2c = 0.2f;
-                clump->field_30 = 1.7625f;
-            } else {
-                clump->seed = EdFileReadInt();
-                clump->field_2c = EdFileReadFloat();
-                clump->field_30 = EdFileReadFloat();
-            }
-
-            if (__builtin_expect(version < 5, 0)) {
-                clump->rotation_z = 0;
-                clump->rotation_y = 0;
-            } else {
-                clump->rotation_z = EdFileReadShort();
-                clump->rotation_y = EdFileReadShort();
-            }
-            if (version < 6) {
-                clump->near_distance = 15.0f;
-                clump->far_distance = 25.0f;
-            } else {
-                clump->near_distance = EdFileReadFloat();
-                clump->far_distance = EdFileReadFloat();
-            }
-            if (version < 7) {
-                if (clump->kind == 1) {
-                    clump->field_42 = 0;
-                    clump->field_43 = 0;
-                    clump->field_44 = 0.0f;
-                    clump->near_distance = 20.0f;
-                    clump->far_distance = 20.0f;
-                } else if (clump->kind == 2) {
-                    clump->field_42 = 1;
-                    clump->field_43 = 1;
-                    clump->field_44 = 0.05f;
-                } else {
-                    clump->field_42 = 0;
-                    clump->field_43 = 0;
-                    clump->field_44 = 0.0f;
-                }
-            } else {
-                clump->field_42 = EdFileReadChar();
-                clump->field_43 = EdFileReadChar();
-                clump->field_44 = EdFileReadFloat();
-            }
-
-            i32 skipped_individuals = 0;
-            if (clump->kind == 3) {
-                if (edgra_ind_clumps_used != EDGRA_MAX_INDIVIDUAL_CLUMPS) {
-                    i32 individual = 0;
-                    while (IndGrassClumpsUsed[individual] != 0) {
-                        ++individual;
-                    }
-                    clump->individual_index = static_cast<i16>(individual);
-                    IndGrassClumpsUsed[individual] = 1;
-                    if (clump->element_count > EDGRA_MAX_UNITS_PER_INDIVIDUAL_CLUMP) {
-                        skipped_individuals = clump->element_count - EDGRA_MAX_UNITS_PER_INDIVIDUAL_CLUMP;
-                        clump->element_count = EDGRA_MAX_UNITS_PER_INDIVIDUAL_CLUMP;
-                    }
-                    for (i32 element = 0; element < clump->element_count; ++element) {
-                        GetIndGrassClump(individual, element)->position.x = EdFileReadFloat();
-                        GetIndGrassClump(individual, element)->position.y = EdFileReadFloat();
-                        GetIndGrassClump(individual, element)->position.z = EdFileReadFloat();
-                        GetIndGrassClump(individual, element)->field_0c = EdFileReadFloat();
-                        GetIndGrassClump(individual, element)->field_10 = EdFileReadShort();
-                        GetIndGrassClump(individual, element)->field_12 = EdFileReadShort();
-                    }
-                } else {
-                    skipped_individuals = clump->element_count;
-                    clump->element_count = 0;
-                }
-                for (i32 element = 0; element < skipped_individuals; ++element) {
-                    EdFileReadFloat();
-                    EdFileReadFloat();
-                    EdFileReadFloat();
-                    EdFileReadFloat();
-                    EdFileReadShort();
-                    EdFileReadShort();
-                }
-            }
-
-            clump->vector_buffer = reinterpret_cast<void *>(vector_cursor);
-            edgra_page_vectors_valid[page] = version >= 8;
-            if (version >= 8) {
-                NUVEC *vectors = static_cast<NUVEC *>(clump->vector_buffer);
-                for (i32 element = 0; element < clump->element_count; ++element) {
-                    vectors[element].x = EdFileReadFloat();
-                    vectors[element].y = EdFileReadFloat();
-                    vectors[element].z = EdFileReadFloat();
-                }
-            }
-            if (clump->element_count < 4) {
-                clump->element_count = 4;
-            }
-
-            if (clump->special_index == -1) {
-                clump->element_count = 0;
-            }
-            if (file_index % edgra_clumpthin != 0 && edbits_editmode == 0) {
-                clump->element_count = 0;
-            } else if (edgra_elementthin != 1 && edbits_editmode == 0) {
-                clump->element_count = (clump->element_count + edgra_elementthin - 1) / edgra_elementthin;
-            }
-
-            if (clump->element_count > 0) {
-                vector_cursor += static_cast<usize>(clump->element_count) * sizeof(NUVEC);
-                ++edgra_clumps_used;
-                edgra_free_vecbuffer = reinterpret_cast<void *>(vector_cursor);
-                edgra_last_clump_in_buffer = slot;
-            }
-            ++slot;
-        }
-
-        EdFileSetReadWrongEndianess(0);
-        EdFileClose();
-        edgra_nearest = -1;
-        edgraDetermineNearestClump(1.0f);
-        edgra_page_used[page] = 1;
-        edgra_page_scene[page] = static_cast<NUGSCN *>(gscn);
-        edgra_page_terrain[page] = reinterpret_cast<void *>(static_cast<usize>(static_cast<u32>(terrain)));
-        if (edbits_editmode != 1 || edgra_vecbuffer == NULL) {
-            buffer->addr = vector_cursor;
-        }
-        (void)buf_end;
-        return page;
-    }
-    void edgraClearPage(i8 page) {
-        edgraStopPage(page);
-        for (i32 i = 0; i < EDGRA_MAX_CLUMPS; ++i) {
-            edgra_clump_s *clump = &GrassClumps[i];
-            if (clump->element_count && clump->page == static_cast<u8>(page)) {
-                if (clump->kind == 3) {
-                    IndGrassClumpsUsed[clump->individual_index] = 0;
-                    --edgra_ind_clumps_used;
-                }
-                clump->element_count = 0;
-                --edgra_clumps_used;
-            }
-        }
-        edgra_page_used[page] = 0;
-        edgra_page_scene[page] = NULL;
-        edgra_page_matrix_stack[page] = NULL;
-        edgra_page_vectors_valid[page] = 0;
-        edgra_page_calculate_done[page] = 0;
-    }
-    void edgraClumpsReset(void) {
-        for (i32 i = 0; i < EDGRA_MAX_CLUMPS; ++i)
-            GrassClumps[i].element_count = 0;
-        memset(edgra_page_used, 0, sizeof(edgra_page_used));
-        memset(edgra_page_scene, 0, sizeof(edgra_page_scene));
-        memset(edgra_page_on, 0, sizeof(edgra_page_on));
-        edgra_clumps_used = 0;
-        for (i32 i = 0; i < EDGRA_MAX_INDIVIDUAL_CLUMPS; ++i)
-            IndGrassClumpsUsed[i] = 0;
-        edgra_ind_clumps_used = 0;
-    }
-    void edgraSetMemoryBuffer(VARIPTR start, VARIPTR end) {
-        gra_ptr = start;
-        gra_end = end;
-    }
-    void edgraSetThinning(i32 clumps, i32 elements) {
-        edgra_clumpthin = clumps;
-        edgra_elementthin = elements;
-        if (edgra_clumpthin <= 0)
-            edgra_clumpthin = 1;
-        if (edgra_elementthin <= 0)
-            edgra_elementthin = 1;
-    }
+i32 edgraBufferUsage(void);
+i32 edgraLoadPage(char *path, void *gscn, i32 terrain, void *buf, void *buf_end);
+void edgraClearPage(i8 page);
+void edgraClumpsReset(void);
+void edgraSetMemoryBuffer(VARIPTR start, VARIPTR end);
+void edgraSetThinning(i32 clumps, i32 elements);
     void NuWindSetup(VARIPTR *, VARIPTR, i32, i32);
-    void edgraSetup(VARIPTR *buffer, VARIPTR end, i32 clumps, i32 individual_clumps, i32 units_per_clump) {
-        EDGRA_MAX_CLUMPS = clumps;
-        EDGRA_MAX_INDIVIDUAL_CLUMPS = individual_clumps;
-        EDGRA_MAX_UNITS_PER_INDIVIDUAL_CLUMP = units_per_clump;
-        if (units_per_clump == 0)
-            EDGRA_MAX_INDIVIDUAL_CLUMPS = 0;
-        buffer->addr = (buffer->addr + 15) & ~static_cast<usize>(15);
-        GrassClumps = static_cast<edgra_clump_s *>(buffer->void_ptr);
-        buffer->char_ptr += EDGRA_MAX_CLUMPS * sizeof(edgra_clump_s);
-        IndGrassClumps = static_cast<edgra_individual_s *>(buffer->void_ptr);
-        buffer->char_ptr +=
-            EDGRA_MAX_INDIVIDUAL_CLUMPS * EDGRA_MAX_UNITS_PER_INDIVIDUAL_CLUMP * sizeof(edgra_individual_s);
-        IndGrassClumpsUsed = static_cast<i32 *>(buffer->void_ptr);
-        buffer->char_ptr += EDGRA_MAX_INDIVIDUAL_CLUMPS * sizeof(i32);
-        NuWindSetup(buffer, end, 0x3000, clumps);
-        NuFadeObjSetup(buffer, end, 0x3000, clumps);
-    }
+void edgraSetup(VARIPTR *buffer, VARIPTR end, i32 clumps, i32 individual_clumps, i32 units_per_clump);
     i32 edmainActivate(ed_module_s *module, i32 notify) {
         if (module) {
             for (ed_module_s *entry = ed_list; entry; entry = entry->next) {
@@ -2659,418 +1408,22 @@ extern "C" {
     void edpartRegisterPointerToGameCharLocation(NUVEC *position) {
         edmainRegisterLocVec(position);
     }
-    void edppClearPage(i8 page) {
-        edpp_page_on[page] = 0;
-        edpp_page_used[page] = 0;
-        for (i32 index = 0; index < 512; ++index) {
-            if (edpp_ptls[index].page == page)
-                edppPtlDestroy(index);
-        }
-        for (i32 index = 1; index < EDPP_MAX_TYPES; ++index) {
-            if (debtab[index] == NULL || debtab[index]->page != static_cast<u8>(page))
-                continue;
-            debtab[index]->disabled = 1;
-            for (i32 key = 0; key < maxdebkeys; ++key) {
-                if (debkeydata[key].effect_index != index) {
-                    continue;
-                }
-                i32 handle = key;
-                DebFreeInstantly(&handle);
-            }
-            DebFreeOrphansInstantly(debtab[index]);
-            if (debtab[index]->native_data != NULL) {
-                DmaDebTypes[--freeDmaDebType] = debtab[index]->native_data;
-                debtab[index]->native_data = NULL;
-            }
-            debtab[index] = NULL;
-            --edpp_types_used;
-        }
-    }
-    void edppDeleteEffect(i32 index) {
-        if (edpp_ptls[edpp_nearest].effect_index == index)
-            edpp_nearest = -1;
-        DebFreeOrphansInstantly(debtab[index]);
-        i32 replacement = LookupDebrisEffectPageIgnore(debtab[index]->name, 1, index);
-        if (replacement != -1) {
-            for (i32 i = 0; i < 512; ++i) {
-                if (edpp_ptls[i].effect_index == index) {
-                    i32 handle = edpp_ptls[i].instance_id;
-                    if (handle != -1 && handle != 99999)
-                        debkeydata[handle].effect_index = replacement;
-                    edpp_ptls[i].effect_index = replacement;
-                }
-            }
-            for (i32 i = 0; i < maxdebkeys; ++i)
-                if (debkeydata[i].effect_index == index)
-                    debkeydata[i].effect_index = replacement;
-        } else {
-            for (i32 i = 0; i < 512; ++i)
-                if (edpp_ptls[i].effect_index == index)
-                    edppPtlDestroy(i);
-            for (i32 i = 0; i < maxdebkeys; ++i) {
-                if (debkeydata[i].effect_index == index) {
-                    i32 handle = i;
-                    DebFreeInstantly(&handle);
-                }
-            }
-        }
-        debtab[index] = NULL;
-        --edpp_types_used;
-        edppDetermineNearest(1.0f);
-    }
-    void edppDestroyAllEffects(void) {
-        for (i32 index = 1; index < EDPP_MAX_TYPES; ++index)
-            debtab[index] = NULL;
-        edpp_types_used = 1;
-    }
-    void edppDestroyAllParticles(void) {
-        for (i32 index = 0; index < 512; ++index)
-            edppPtlDestroy(index);
-    }
+void edppClearPage(i8 page);
+void edppDeleteEffect(i32 index);
+void edppDestroyAllEffects(void);
+void edppDestroyAllParticles(void);
     extern f32 globaltime;
 
-    void edppDrawSpheres(debinftype *effect, i32 key_index) {
-        if (effect->process_spheres == 0)
-            return;
-        for (i32 sphere_index = 0; sphere_index < static_cast<i8>(effect->process_spheres); ++sphere_index) {
-            debris_process_sphere_s *sphere = &debkeydata[key_index].process_spheres[sphere_index];
-            f32 time = globaltime - sphere->time;
-            if (time >= 0.0f && time <= effect->particle_lifetime) {
-
-                NUVEC position = {sphere->momentum.x * time + sphere->position.x,
-                                  sphere->momentum.y * time + time * time * effect->field_0a0 + sphere->position.y,
-                                  sphere->momentum.z * time + sphere->position.z};
-                time /= effect->particle_lifetime;
-                i32 first, next;
-                if (time >= effect->collision_keys[0].time && time <= effect->collision_keys[1].time) {
-                    first = 0;
-                    next = 1;
-                } else if (time >= effect->collision_keys[1].time && time <= effect->collision_keys[2].time) {
-                    first = 1;
-                    next = 2;
-                } else if (__builtin_expect(time >= effect->collision_keys[2].time && time <= effect->collision_keys[3].time, 1)) {
-                    first = 2;
-                    next = 3;
-                } else if (time >= effect->collision_keys[3].time && time <= effect->collision_keys[4].time) {
-                    first = 3;
-                    next = 4;
-                } else if (time >= effect->collision_keys[4].time && time <= effect->collision_keys[5].time) {
-                    first = 4;
-                    next = 5;
-                } else if (time >= effect->collision_keys[5].time && time <= effect->collision_keys[6].time) {
-                    first = 5;
-                    next = 6;
-                } else if (__builtin_expect(time >= effect->collision_keys[6].time && time <= effect->collision_keys[7].time, 0)) {
-                    first = 6;
-                    next = 7;
-                } else {
-                    first = 7;
-                    next = 8;
-                }
-                f32 radius = ((time - effect->collision_keys[first].time) /
-                              (effect->collision_keys[next].time - effect->collision_keys[first].time)) *
-                                 (effect->collision_keys[next].value - effect->collision_keys[first].value) +
-                             effect->collision_keys[first].value;
-                edbitsDrawSphere(&position, radius, 0xffff0000, edpp_mtl);
-            }
-        }
-    }
-    void edppDrawTorus(debinftype *effect, i32 key_index) {
-        if (effect->torus_lifetime == 0.0f)
-            return;
-        debkeydatatype_s *key = &debkeydata[key_index];
-        f32 time;
-        if (globaltime > key->emission_time)
-            time = globaltime - key->emission_time;
-        else
-            time = globaltime - key->previous_emission_time;
-        if (!(time > 0.0f && time < effect->torus_lifetime)) {
-            return;
-        }
-        time /= effect->torus_lifetime;
-        f32 radius = edppInterpolateTorusCurve(effect->torus_keys1, time);
-        f32 radial_extent = edppInterpolateTorusCurve(effect->torus_keys2, time);
-        f32 vertical_extent = edppInterpolateTorusCurve(effect->torus_keys3, time);
-        f32 scaled_radius = radius * effect->torus_radius1;
-        f32 scaled_vertical_extent = vertical_extent * effect->torus_radius2;
-        f32 scaled_radial_extent = radial_extent * effect->torus_radius2;
-        NUVEC position;
-        position.x = key->position.x;
-        position.y = key->position.y;
-        position.z = key->position.z;
-        edbitsDrawTorus(&position, scaled_radius, scaled_radial_extent, scaled_vertical_extent, 0xffff0000, edpp_mtl);
-    }
-    i32 edppFindAllSounds(i32 page, NUVEC *positions, i32 (*sounds)[4], i32 capacity, i32 skip) {
-        i32 count = 0;
-        for (i32 index = 0; index < 512; ++index) {
-            if (page != -1 && edpp_ptls[index].page != page)
-                continue;
-            if (edpp_ptls[index].instance_id == -1 || edpp_ptls[index].instance_id == 99999)
-                continue;
-            debkeydatatype_s *key = &debkeydata[edpp_ptls[index].instance_id];
-            if (key->process_collision_sound == 0)
-                continue;
-            debinftype *effect = debtab[key->effect_index];
-            i32 output_index = count - skip;
-            if (output_index < capacity && output_index >= 0) {
-                if (positions != NULL) {
-                    positions[output_index].x = key->position.x;
-                    positions[output_index].y = key->position.y;
-                    positions[output_index].z = key->position.z;
-                }
-                if (sounds != NULL) {
-                    (*sounds)[output_index * 4 + 0] = effect->sound_data[0];
-                    (*sounds)[output_index * 4 + 1] = effect->sound_data[3];
-                    (*sounds)[output_index * 4 + 2] = effect->sound_data[6];
-                    (*sounds)[output_index * 4 + 3] = effect->sound_data[9];
-                }
-            }
-            ++count;
-        }
-        return count - skip;
-    }
-    // Parts-page loader (edppLoadPage @0x36c630).
-    i32 edppLoadPage(char *path, i32 flag, usize scene) {
-        const i8 page_type = static_cast<i8>(flag);
-        const i8 category = page_type == 6 ? 1 : page_type;
-        i32 page_index;
-        if (page_type == 0) {
-            page_index = 0;
-        } else if (page_type == 5) {
-            page_index = 1;
-        } else {
-            for (page_index = 2; page_index < 8; ++page_index) {
-                if (edpp_page_used[page_index] == 0)
-                    break;
-            }
-            if (page_index == 8)
-                return -1;
-        }
-
-        if (edpp_usememcard == 0)
-            EdFileSetMedia(1);
-        else
-            EdFileSetMedia(2);
-        if (EdFileOpen(path, NUFILE_READ) == 0) {
-            return -1;
-        }
-        EdFileSetReadWrongEndianess(1);
-
-        i32 version = EdFileReadInt();
-        if (version < 5 || version > 41) {
-            EdFileSetReadWrongEndianess(0);
-            EdFileClose();
-            return -1;
-        }
-
-        edpp_page_used[page_index] = 1;
-        edpp_page_scene[page_index] = scene;
-
-        i32 requested = EdFileReadInt();
-        i32 skipped = 0;
-        if (requested + edpp_types_used > EDPP_MAX_TYPES) {
-            skipped = requested + edpp_types_used - EDPP_MAX_TYPES;
-            requested = EDPP_MAX_TYPES - edpp_types_used;
-            edbits_types_error = 300;
-        }
-
-        // The request was clamped to the free slot count above, so the
-        // original scans for the next free slot without a bound.
-        i32 index = 1;
-        for (i32 n = 0; n < requested; n++) {
-            while (debtab[index] != NULL) {
-                index++;
-            }
-
-            FileLoadSingleEffectType(&effecttypes[index], version, static_cast<char>(category));
-            effecttypes[index].last_render_time = 0.0f;
-            effecttypes[index].page = static_cast<u8>(page_index);
-            effecttypes[index].native_data = NULL;
-            debtab[index] = &effecttypes[index];
-            UpdateTotalPtls(debtab[index]);
-            edpp_types_used++;
-        }
-
-        debinftype discarded;
-        for (i32 n = 0; n < skipped; ++n)
-            FileLoadSingleEffectType(&discarded, version, category);
-
-        if (page_type == 1 || page_type == 2) {
-            i32 instances = EdFileReadInt();
-            if (instances + edpp_instances_used > 512)
-                instances = 512 - edpp_instances_used;
-            edpp_num_orphans = 0;
-            i32 slot = 0;
-            for (i32 n = 0; n < instances; ++n) {
-                // Clamped to the free instance count above, so the scan is unbounded.
-                while (edpp_ptls[slot].instance_id != -1)
-                    ++slot;
-                edpp_ptls[slot].page = static_cast<i8>(page_index);
-                edpp_ptls[slot].position.x = EdFileReadFloat();
-                edpp_ptls[slot].position.y = EdFileReadFloat();
-                edpp_ptls[slot].position.z = EdFileReadFloat();
-                if (version <= 6) {
-                    edpp_ptls[slot].rotation_z = 0;
-                    edpp_ptls[slot].rotation_y = 0;
-                    edpp_ptls[slot].emitter_rotation_z = static_cast<i16>(EdFileReadInt());
-                    edpp_ptls[slot].emitter_rotation_y = static_cast<i16>(EdFileReadInt());
-                } else {
-                    edpp_ptls[slot].rotation_z = EdFileReadShort();
-                    edpp_ptls[slot].rotation_y = EdFileReadShort();
-                    edpp_ptls[slot].emitter_rotation_z = EdFileReadShort();
-                    edpp_ptls[slot].emitter_rotation_y = EdFileReadShort();
-                }
-                edpp_ptls[slot].emitter_rotation_x = version > 21 ? EdFileReadShort() : 0;
-                if (version > 33)
-                    edpp_ptls[slot].start_offset = EdFileReadFloat();
-                else if (version > 7)
-                    edpp_ptls[slot].start_offset = static_cast<f32>(EdFileReadInt()) / 60.0f;
-                else
-                    edpp_ptls[slot].start_offset = 0.0f;
-                EdFileRead(edpp_ptls[slot].name, 16);
-                edpp_ptls[slot].instance_id = 99999;
-                edpp_ptls[slot].effect_index =
-                    LookupDebrisEffectPageOnly(edpp_ptls[slot].name, static_cast<char>(page_index));
-                if (edpp_ptls[slot].effect_index == -1)
-                    ++edpp_num_orphans;
-
-                if (version > 8) {
-                    edpp_ptls[slot].switch_type = EdFileReadInt();
-                    edpp_ptls[slot].switch_id = EdFileReadInt();
-                    edpp_ptls[slot].switch_variable = EdFileReadFloat();
-                } else {
-                    edpp_ptls[slot].switch_type = 0;
-                    edpp_ptls[slot].switch_id = -1;
-                    edpp_ptls[slot].switch_variable = 0.0f;
-                }
-                if (version > 11) {
-                    edpp_ptls[slot].reflection_rotation_z = EdFileReadShort();
-                    edpp_ptls[slot].reflection_rotation_y = EdFileReadShort();
-                    edpp_ptls[slot].reflection_offset = EdFileReadFloat();
-                } else {
-                    edpp_ptls[slot].reflection_offset = 0.0f;
-                    edpp_ptls[slot].reflection_rotation_z = 0;
-                    edpp_ptls[slot].reflection_rotation_y = 0;
-                }
-                if (version > 12)
-                    edpp_ptls[slot].reflection_bounce = EdFileReadFloat();
-                else
-                    edpp_ptls[slot].reflection_bounce = 0.9f;
-                edpp_ptls[slot].render_group = version > 14 ? EdFileReadShort() : 0;
-                if (version > 26) {
-                    edpp_ptls[slot].render_priority = EdFileReadUnsignedShort();
-                } else {
-                    edpp_ptls[slot].render_priority = 20000;
-                    if (edpp_ptls[slot].effect_index != -1) {
-                        u8 particle_type = debtab[edpp_ptls[slot].effect_index]->particle_type;
-                        if (particle_type == 2)
-                            edpp_ptls[slot].render_priority = 40000;
-                        else if (particle_type == 3)
-                            edpp_ptls[slot].render_priority = 30000;
-                        else if (particle_type == 0)
-                            edpp_ptls[slot].render_priority = 20000;
-                        else if (particle_type == 7)
-                            edpp_ptls[slot].render_priority = 10000;
-                    }
-                }
-                edpp_ptls[slot].dynamic_priority = version > 26 ? EdFileReadChar() : 0;
-                edpp_ptls[slot].detail_levels = version > 35 ? EdFileReadChar() : 7;
-                if (version > 37) {
-                    edpp_ptls[slot].facing_mode = EdFileReadChar();
-                    edpp_ptls[slot].facing_rotation_x = EdFileReadShort();
-                    edpp_ptls[slot].facing_rotation_y = EdFileReadShort();
-                } else {
-                    edpp_ptls[slot].facing_mode = 0;
-                    edpp_ptls[slot].facing_rotation_x = 0;
-                    edpp_ptls[slot].facing_rotation_y = 0;
-                }
-                ++edpp_instances_used;
-            }
-        }
-
-        EdFileSetReadWrongEndianess(0);
-        EdFileClose();
-        edppDetermineNearest(1.0f);
-
-        if (page_type == 0) {
-            edbits_particle_general_page = page_index;
-        } else if (page_type == 5) {
-            edbits_particle_char_page = page_index;
-        } else if (page_type == 1) {
-            edbits_particle_level_page = page_index;
-        }
-        return page_index;
-    }
-    void edppRegisterPointerToGameCharLocation(NUVEC *position) {
-        edmainRegisterLocVec(position);
-    }
-    void edppRestartAllEffectsInLevel(void) {
-        for (i32 index = 0; index < 512; ++index) {
-            if (edpp_ptls[index].instance_id == -1)
-                continue;
-            edpp_ptls[index].instance_id = -1;
-            edpp_ptls[index].effect_index = LookupDebrisEffect(edpp_ptls[index].name);
-            AddDebrisEffect(&edpp_ptls[index].instance_id, edpp_ptls[index].effect_index, edpp_ptls[index].position.x,
-                            edpp_ptls[index].position.y, edpp_ptls[index].position.z);
-            if (edpp_ptls[index].instance_id != -1) {
-                debkeydata[edpp_ptls[index].instance_id].field_2f9 = 0;
-                DebrisOrientation(edpp_ptls[index].instance_id, edpp_ptls[index].rotation_z,
-                                  edpp_ptls[index].rotation_y);
-                DebrisEmitterOrientation(edpp_ptls[index].instance_id, edpp_ptls[index].emitter_rotation_z,
-                                         edpp_ptls[index].emitter_rotation_y, edpp_ptls[index].emitter_rotation_x);
-                DebrisStartOffset(edpp_ptls[index].instance_id, edpp_ptls[index].start_offset);
-                DebrisSetTrigger(edpp_ptls[index].instance_id, edpp_ptls[index].switch_type, edpp_ptls[index].switch_id,
-                                 edpp_ptls[index].switch_variable);
-                DebrisReflectionOrientation(edpp_ptls[index].instance_id, edpp_ptls[index].reflection_rotation_z,
-                                            edpp_ptls[index].reflection_rotation_y, edpp_ptls[index].reflection_offset,
-                                            edpp_ptls[index].reflection_bounce);
-                DebrisSetFacing(edpp_ptls[index].instance_id, edpp_ptls[index].facing_mode,
-                                edpp_ptls[index].facing_rotation_x, edpp_ptls[index].facing_rotation_y);
-                DebrisSetGroupID(edpp_ptls[index].instance_id, edpp_ptls[index].render_group);
-                DebrisSetRoomID(edpp_ptls[index].instance_id,
-                                reinterpret_cast<nugscn_s *>(edpp_page_scene[edpp_ptls[index].page]));
-            } else {
-                edpp_ptls[index].instance_id = 99999;
-            }
-            edpp_page_on[edpp_ptls[index].page] = 1;
-        }
-        edpp_create_type = -1;
-        edppDetermineNearest(1.0f);
-    }
-    void edppSetSaveName(u32 page, char *name) {
-        if (page < 6)
-            edpp_save_names[page] = name;
-    }
-    void edppStopPage(i32 page_id) {
-        i8 page = page_id;
-        edpp_page_on[page] = 0;
-        for (i32 index = 0; index < 512; ++index) {
-            if (edpp_ptls[index].instance_id == -1 || edpp_ptls[index].instance_id == 99999)
-                continue;
-            if (edpp_ptls[index].page == page) {
-                edppPtlShelve(index);
-            } else if (edpp_ptls[index].effect_index > 0 && debtab[edpp_ptls[index].effect_index] != NULL &&
-                       debtab[edpp_ptls[index].effect_index]->page == static_cast<u8>(page)) {
-                edppPtlDestroy(index);
-            }
-        }
-        for (i32 index = 1; index < EDPP_MAX_TYPES; ++index) {
-            if (debtab[index] != NULL && debtab[index]->page == static_cast<u8>(page)) {
-                for (i32 key = 0; key < maxdebkeys; ++key) {
-                    if (debkeydata[key].effect_index != index) {
-                        continue;
-                    }
-                    i32 handle = key;
-                    DebFreeInstantly(&handle);
-                }
-                DebFreeOrphansInstantly(debtab[index]);
-            }
-        }
-    }
-    i32 edqseed = 12345;
-    void edqrand(void) {
-        edqseed = (edqseed * 0x24cd + 1) & 0xffff;
-    }
+void edppDrawSpheres(debinftype *effect, i32 key_index);
+void edppDrawTorus(debinftype *effect, i32 key_index);
+i32 edppFindAllSounds(i32 page, NUVEC *positions, i32 (*sounds)[4], i32 capacity, i32 skip);
+i32 edppLoadPage(char *path, i32 flag, usize scene);
+void edppRegisterPointerToGameCharLocation(NUVEC *position);
+void edppRestartAllEffectsInLevel(void);
+void edppSetSaveName(u32 page, char *name);
+void edppStopPage(i32 page_id);
+extern i32 edqseed;
+void edqrand(void);
     edui_textpicker_s *eduiAddTextPickEntEx(eduimenu_s *menu, eduiitem_s *source, EdUiItemCallback callback) {
         static eduimenu_s *tpent;
         tpent =

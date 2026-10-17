@@ -140,26 +140,7 @@ void VecRotateAxis(nuvec_s *vector, u16 angle, nuvec_s *axis) {
     vector->z = ((xz - sy) * source.x + 0.0f) + (sx + yz) * source.y + (tz * z + cosine) * source.z;
 }
 
-i32 SolveQuadratic(f32 a, f32 b, f32 c, f32 *first, f32 *second) {
-    if (a == 0.0f) {
-        if (b == 0.0f)
-            return 0;
-        *first = *second = -c / b;
-        return 1;
-    }
-    const f32 four_ac = 4.0f * a * c;
-    const f32 b_squared = b * b;
-    if (four_ac > b_squared)
-        return 0;
-    if (four_ac == b_squared) {
-        *first = *second = -b / (a + a);
-        return 1;
-    }
-    const f32 root = NuFsqrt(b_squared - four_ac);
-    *first = (-b - root) / (a + a);
-    *second = (root - b) / (a + a);
-    return 1;
-}
+i32 SolveQuadratic(f32 a, f32 b, f32 c, f32 *first, f32 *second);
 
 f32 XZLinesClosest(nuvec_s *a, nuvec_s *b, nuvec_s *c, nuvec_s *d, f32 *first, f32 *second) {
     NUVEC ac __attribute__((aligned(16)));

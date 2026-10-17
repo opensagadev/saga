@@ -61,9 +61,7 @@ void ClearScreen() {
     NuPrimSetCoordinateSystem(NuPrimCoordSystemStack[NuPrimCSPos]);
 }
 
-void RenderQuads(i16 *) {
-    STUBBED();
-}
+void RenderQuads(i16 *);
 
 void InitAlphaList() {
     char name[16];
