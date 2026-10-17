@@ -208,7 +208,6 @@ build:target --per_file_copt=^src/legoapi/world/worldinfo\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/world/levelconfig\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/world/levels\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/world/areas\.cpp$@-O3
-build:target --per_file_copt=^src/legoapi/world/boss\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/world/leveldata\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/world/levelobjects\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/world/levelstreaming\.cpp$@-O2

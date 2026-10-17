@@ -1623,45 +1623,7 @@ CUTINFO *NewCutScene(CUTINFO *cut, CUTSYS *system, char *name, i32) {
     return NULL;
 }
 
-void ResetScene(nugscn_s *scene, SCENEPROGRESS_s *progress) {
-    if (progress == NULL || scene == NULL)
-        return;
-    i32 count = NuSpecialGetNumSpecials(scene);
-    if (count == 0)
-        return;
-    nuhspecial_s special;
-    for (i32 i = 0; i < count; ++i) {
-        if (i != 0)
-            NuSpecialGetNext(&special);
-        else
-            NuSpecialGetFirst(scene, &special, 1);
-        NuSpecialSetVisibility(&special, progress->specials[i].visible);
-        NUMTX *base = NuSpecialGetMtx(&special);
-        NuSpecialSetDrawMtx(&special, base);
-        NuSpecialUpdate(&special);
-        if (scene->instance_animation_data == NULL)
-            continue;
-        nuinstanim_s *animation = NuSpecialGetInstAnim(&special);
-        if (animation == NULL)
-            continue;
-        nuanimdata_s *data = scene->instance_animation_data[animation->anim_ix];
-        if (data == NULL)
-            continue;
-        animation->ltime = static_cast<f32>(static_cast<u32>(progress->specials[i].frame));
-        animation->playing = progress->specials[i].playing;
-        animation->waiting = progress->specials[i].waiting;
-        animation->repeating = progress->specials[i].repeating;
-        animation->tfactor = progress->specials[i].tfactor;
-        animation->prev_eval_time = animation->ltime;
-        NuAnimData2CalcMatrix(data, 0, animation->ltime, &animation->mtx);
-        scene->instance_animation_matrices[animation - scene->instance_animations] = animation->mtx;
-        NUVEC *translation = NUMTX_GET_ROW_VEC(&animation->mtx, 3);
-        NUVEC *base_translation = NUMTX_GET_ROW_VEC(base, 3);
-        translation->x += base_translation->x;
-        translation->y += base_translation->y;
-        translation->z += base_translation->z;
-    }
-}
+void ResetScene(nugscn_s *scene, SCENEPROGRESS_s *progress);
 
 void NextStatusStage(STATUSPACKET_s *);
 void FinishStatusPacket(i32);

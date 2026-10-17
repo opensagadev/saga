@@ -102,20 +102,11 @@ void AIScriptLoadAll(char *path, VARIPTR *buf, VARIPTR *buf_end, AISYS_s *sys);
 void InitTexAnimScripts(char **names);
 void BackDrop_Init(char *path, VARIPTR *buf, VARIPTR *buf_end);
 
-i32 PARTPAGE_GENERAL = -1;
+extern i32 PARTPAGE_GENERAL;
 
 // The original table at 0x006281a0.  These are the material animation
 // scripts made available before the permanent things scene is loaded.
-char *TexAnimList_LSW[32] = {
-    (char *)"arrow",          (char *)"blink_01",      (char *)"blink_02",    (char *)"blink_03",
-    (char *)"coin",           (char *)"coin_pause",    (char *)"control",     (char *)"ds_esc_intro_1",
-    (char *)"ds_esc_intro_2", (char *)"ds_1",          (char *)"helpmeobi",   (char *)"lightening1",
-    (char *)"plasma",         (char *)"screen",        (char *)"Dso_screen",  (char *)"anakinbows",
-    (char *)"anakinkilling",  (char *)"anakinspod",    (char *)"boost1",      (char *)"boost2",
-    (char *)"boost3",         (char *)"boost4",        (char *)"gasganospod", (char *)"helpobi",
-    (char *)"hologram1",      (char *)"hologramnoise", (char *)"play8",       (char *)"quidie",
-    (char *)"sebulbaspod",    (char *)"sidious",       (char *)"crowd",       NULL,
-};
+extern char * TexAnimList_LSW[32];
 
 void InitRipples(ripple_set_s **, VARIPTR *, VARIPTR *, i32);
 void CreateFadeMaterials();
@@ -146,7 +137,7 @@ extern "C" {
 extern i32 hub_character_ready;
 }
 
-APICHARACTERMODELLIST_s PermModelList[] = {{-1, 0}};
+extern APICHARACTERMODELLIST_s PermModelList[1];
 
 #include "legoapi/characters/core/characters_types.h"
 
@@ -1137,155 +1128,11 @@ void SetProtocolDroidDeactivatedAction(GameObject_s *object) {
         object->context_animation = 0x44;
 }
 
-NUMTL *lightningmat;
+extern NUMTL * lightningmat;
 extern NUMTL *DebMat[10];
 extern "C" void NuWaterInit(void);
 extern "C" void NuBridgeInit(void);
 
-void LoadPerm1() {
-    char buf[0x100];
+void LoadPerm1();
 
-    rtlInitDynamic(&permbuffer_ptr, superbuffer_end, 0x40);
-    permbuffer_ptr.addr = (permbuffer_ptr.addr + 3) & ~3u;
-    DebrisSetup(&permbuffer_ptr, permbuffer_end, (char *)"stuff\\particle", 0x100, 0x200, 0x200);
-    DebrisRegisterCutoffCameraVec(reinterpret_cast<NUVEC *>(&global_camera.mtx.m30));
-    if (Grass_Available != 0) {
-        edgraSetup(&permbuffer_ptr, permbuffer_end, 0x200, 0x20, 0x40);
-    }
-    lightningmat = NuMtlCreateEx(1, 10);
-    lightningmat->diffuse_color.b = 1.0f;
-    lightningmat->diffuse_color.g = 1.0f;
-    lightningmat->diffuse_color.r = 1.0f;
-    lightningmat->attribs.alpha_mode = 2;
-    lightningmat->attribs.filter_mode = 1;
-    lightningmat->attribs.unknown_1_1_2 = 1;
-    lightningmat->attribs.unknown_1_4_8 = 1;
-    lightningmat->attribs.cull_mode = 2;
-    lightningmat->attribs.z_mode = 1;
-    lightningmat->opacity = 0.999f;
-    lightningmat->tex_id = DebMat[5]->tex_id;
-    lightningmat->attribs.alpha_fail = 1;
-    NuMtlUpdate(lightningmat);
-    NuLgtSetArcMat(lightningmat, 0.0f, 0.50390625f, 0.25f, 0.5625f);
-    NuWaterInit();
-    NuBridgeInit();
-    InitParts(0x40, &permbuffer_ptr, &permbuffer_end);
-    ParticleReset();
-
-    NuStrCpy(buf, (char *)"stuff\\general.ptl");
-    if (NuFileExists(buf) != 0) {
-        DEBPAGE_GENERAL = edppLoadPage(buf, 0, 0);
-    }
-    NuStrCpy(buf, (char *)"stuff\\char.ptl");
-    if (NuFileExists(buf) != 0) {
-        DEBPAGE_CHARACTER = edppLoadPage(buf, 5, 0);
-    }
-    perm_debrissys = InitGameDebris(&permbuffer_ptr, &permbuffer_end, 0x190, 0x93, debris_name, 0);
-
-    permbuffer_ptr.addr = (permbuffer_ptr.addr + 3) & ~3u;
-    InitStreaks(&permbuffer_ptr, permbuffer_end, (char *)"stuff\\streak.pnt");
-    permbuffer_ptr.addr = (permbuffer_ptr.addr + 3) & ~3u;
-    InitRopeMtl((char *)"rope", &permbuffer_ptr, &permbuffer_end);
-    InitRipples(&ripples, &permbuffer_ptr, &permbuffer_end, 0x40);
-    permbuffer_ptr.addr = (permbuffer_ptr.addr + 0xff) & ~0xffu;
-
-    ShadowMat = NuMtlCreate3D(1);
-    ShadowMat->diffuse_color.r = 1.0f;
-    ShadowMat->diffuse_color.g = 1.0f;
-    ShadowMat->diffuse_color.b = 1.0f;
-    ShadowMat->sort_pri = 0xff;
-    ShadowMat->opacity = 0.999f;
-    u8 *attributes = reinterpret_cast<u8 *>(&ShadowMat->attribs);
-    attributes[1] = (attributes[1] & 0x0f) | 0x60;
-    attributes[0] = (attributes[0] & 0xf0) | 1;
-    attributes[2] = (attributes[2] & 0x8c) | 0x12;
-    ShadowMat->tex_id = static_cast<i16>(NuTexRead((char *)"stuff\\gradient", &permbuffer_ptr, permbuffer_end));
-    NuMtlUpdate(ShadowMat);
-
-    u8 shadow_random[0x800];
-    for (i32 i = 0; i < 0x800; ++i) {
-        shadow_random[i] = static_cast<u8>(qrand() >> 8);
-    }
-    NuRndrShadowInit(shadow_random);
-    CreateFadeMaterials();
-    CreateUsefulMaterials();
-
-    edgraClumpsReset();
-    edanimParamReset();
-    NuTexAnimProgSysInit();
-    InitTexAnimScripts(TexAnimList_LSW);
-
-    permbuffer_ptr.addr = (permbuffer_ptr.addr + 3) & ~3u;
-    things_scene = NuGScnRead(&permbuffer_ptr, permbuffer_end, (char *)"stuff\\things.gsc");
-    NUGSCN *terrain_scene = NULL;
-    if (things_scene != NULL) {
-        edbitsRegisterThingsScene(things_scene);
-        terrain_scene = things_scene;
-        if (things_scene->display_list != NULL) {
-            things_scene->display_list->flags |= NU_DISPLAYSCENE_FLAG_NEEDS_BUILD;
-        }
-    }
-
-    things_scene_terrain = TerrainInitEx(-1, &permbuffer_ptr, permbuffer_end.void_ptr, 0, (char *)"stuff\\things",
-                                         terrain_scene, 0, 0x14, 0x14, 0x14);
-    terrainpickupinit((char *)"stuff\\things", &things_scene_terrain);
-    BackDrop_Init((char *)"stuff\\starfield.gsc", &permbuffer_ptr, &permbuffer_end);
-
-    NuMtlSetCurrentRenderPlane(0xf);
-    edpartSetParticlePage(DEBPAGE_GENERAL);
-    NuStrCpy(buf, (char *)"stuff\\general.par");
-    if (NuFileExists(buf) != 0) {
-        PARTPAGE_GENERAL = edpartLoadPage(buf, 0, things_scene);
-    }
-    NuMtlSetCurrentRenderPlane(0);
-    AIScriptLoadAll((char *)"scripts", &permbuffer_ptr, &permbuffer_end, NULL);
-}
-
-void LoadPerm2() {
-    extern i16 CustomiserActionList_Game[];
-    extern i16 tALL;
-    extern i16 tJEDI;
-    extern i16 tBLASTER;
-    extern i16 tBOUNTYHUNTERCHARACTERS;
-
-    CharConfig_ConfigureAll(1, ConfigChar_GameKeywords);
-    ExtraCharacterFixUpAfterConfig();
-    apiloadcharactermodels_nopakfile = CHARPAK == 0;
-    APILoadCharacterModels(PermModelList, 1, &permbuffer_ptr, permbuffer_end, 1);
-
-    Collection_CreateMaster(const_cast<char *>("All"), NULL, &MasterCollection, 15, COLLECTION_DEFAULTSCALE);
-    Collection_CreateCustom(const_cast<char *>("Characters"), &tALL, &CharacterCollection, 0, 0x04002000, 0, 0, 16,
-                            &permbuffer_ptr, &permbuffer_end, 0, 0.725f);
-    Collection_CreateCustom(const_cast<char *>("Vehicles"), NULL, &VehicleCollection, 0x2000, 0x04000000, 0, 0, 7,
-                            &permbuffer_ptr, &permbuffer_end, 0, 1.0f);
-    Collection_CreateCustom(const_cast<char *>("Minikits"), NULL, &MiniKitCollection, 0x04000000, 0, 0, 0, 12,
-                            &permbuffer_ptr, &permbuffer_end, 0, COLLECTION_DEFAULTSCALE);
-    Collection_CreateCustom(const_cast<char *>("Shop"), NULL, &ShopCollection, 0, 0, 0, 1, 10, &permbuffer_ptr,
-                            &permbuffer_end, 0, COLLECTION_DEFAULTSCALE);
-    Collection_CreateCustom(const_cast<char *>("Jedi"), &tJEDI, &JediCollection, 8, 0, 0, 0, 7, &permbuffer_ptr,
-                            &permbuffer_end, 0, COLLECTION_DEFAULTSCALE);
-    Collection_CreateCustom(const_cast<char *>("BlasterZipUps"), &tBLASTER, &BlasterCollection, 0x100080, 0x01000000, 0,
-                            0, 11, &permbuffer_ptr, &permbuffer_end, 0, COLLECTION_DEFAULTSCALE);
-    Collection_CreateCustom(const_cast<char *>("BountyHunters"), &tBOUNTYHUNTERCHARACTERS, &BountyHunterCollection,
-                            0x01000000, 0, 0, 0, 4, &permbuffer_ptr, &permbuffer_end, 0, COLLECTION_DEFAULTSCALE);
-    Areas_ConfigureResidents(&permbuffer_ptr, &permbuffer_end);
-    CharacterCustomiser =
-        Customiser_Configure(const_cast<char *>("chars\\customiser.txt"), &permbuffer_ptr, &permbuffer_end, id_WEIRDO1,
-                             id_WEIRDO2, Customiser_PieceAvailable, Customiser_PieceConfig,
-                             LevelObject_FindIndexFromName, Game.customizer, CustomiserActionList_Game);
-    SpecialMoves_Configure(const_cast<char *>("chars\\specialmoves.txt"), &permbuffer_ptr, &permbuffer_end);
-
-    // Every status-screen level plays the status screen music in all three track slots.
-    for (i32 i = 0; i < LEVELCOUNT; ++i) {
-        if ((LDataList[i].flags & LEVEL_STATUS) != 0) {
-            LDataList[i].music_index = GetMusicIndex(const_cast<char *>("statusscreen"), MusicInfo, -1);
-            LDataList[i].music_tracks[0][0] = LDataList[i].music_tracks[0][1] =
-                music_man.GetTrackHandle(TRACK_CLASS_QUIET, "statusscreen");
-            LDataList[i].music_tracks[1][0] = LDataList[i].music_tracks[1][1] =
-                music_man.GetTrackHandle(TRACK_CLASS_ACTION, "statusscreen");
-            LDataList[i].music_tracks[2][0] = LDataList[i].music_tracks[2][1] =
-                music_man.GetTrackHandle(TRACK_CLASS_NOMUSIC, "statusscreen");
-        }
-    }
-    Store_RestorePurchases();
-}
+void LoadPerm2();

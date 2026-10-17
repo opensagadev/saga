@@ -123,7 +123,4 @@ void LevelStreaming_DoorOverride(WORLDINFO_s *world, LEVELDATA_s *level, f32 rad
     }
 }
 
-void LevelProgress_ReserveBufferSpace(variptr_u *buf, variptr_u) {
-    LevelProgressData = (void *)ALIGN(buf->addr, 0x10);
-    buf->addr = (usize)LevelProgressData + 0x229b0;
-}
+void LevelProgress_ReserveBufferSpace(variptr_u *buf, variptr_u);

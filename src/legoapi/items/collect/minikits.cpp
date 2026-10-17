@@ -681,14 +681,7 @@ void MiniKit_GameMsg_Update(GAMEMESSAGE_s *message) {
 
 void SetEffectVisibility(char *, i32);
 
-void EffectOffProgress_Reset(LEVEL_PROGRESS_s *progress) {
-    if (progress == NULL)
-        return;
-    for (i32 i = 0; i < 12; ++i) {
-        if (progress->disabled_effect_names[i][0] != '\0')
-            SetEffectVisibility(progress->disabled_effect_names[i], 0);
-    }
-}
+void EffectOffProgress_Reset(LEVEL_PROGRESS_s *progress);
 
 static inline void IncrementMinikitCounterFor(WORLDINFO_s *world, NUVEC *average, i32 gizmo_index, u8 *counter,
                                               f32 camera_distance, u16 camera_pitch, u16 camera_yaw) {
@@ -726,27 +719,4 @@ void IncrementMinikitCounter(GameObject_s *) {
     }
 }
 
-i32 EffectOffProgress_Update(LEVEL_PROGRESS_s *progress, char *name, i32 visible) {
-    if (name == NULL || progress == NULL || NuStrLen(name) > 15)
-        return 0;
-    for (i32 i = 0; i < 12; ++i) {
-        if (NuStrICmp(progress->disabled_effect_names[i], name) != 0) {
-            continue;
-        }
-        if (visible != 0) {
-            progress->disabled_effect_names[i][0] = '\0';
-            return 2;
-        }
-        return 3;
-    }
-    if (visible != 0)
-        return 0;
-    for (i32 i = 0; i < 12; ++i) {
-        if (progress->disabled_effect_names[i][0] != '\0') {
-            continue;
-        }
-        NuStrCpy(progress->disabled_effect_names[i], name);
-        break;
-    }
-    return 1;
-}
+i32 EffectOffProgress_Update(LEVEL_PROGRESS_s *progress, char *name, i32 visible);

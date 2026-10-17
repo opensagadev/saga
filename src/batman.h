@@ -306,7 +306,7 @@ extern "C" {
     extern GAMEPAD_s GamePad[64];
     extern MENUFNINFO MenuInfo[100];
     extern OPTIONSSAVE TempOptions;
-    extern volatile i32 abort_load;
+    extern "C++" volatile i32 abort_load;
     extern f32 AddCoinDelay[2];
     extern i32 adaptivedifficulty[3];
     extern i32 back_rgba[2];

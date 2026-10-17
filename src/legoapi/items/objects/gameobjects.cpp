@@ -1546,13 +1546,7 @@ void GameLoadCharacterModels(APICHARACTERMODELLIST_s *list, i32 append, VARIPTR 
     APILoadCharacterModels(list, append, buf, *buf_end, area_models);
 }
 
-void Game_WorldInfo_InitMenu(WORLDINFO_s *world, i32 *menu_id, i32 *) {
-    if (world->current_level == TITLES_LDATA) {
-        *menu_id = 0;
-    } else if (world->current_level == CREDITS_LDATA) {
-        *menu_id = 30;
-    }
-}
+void Game_WorldInfo_InitMenu(WORLDINFO_s *world, i32 *menu_id, i32 *);
 
 extern GameObject_s *alert_obj;
 extern NUVEC alert_pos;

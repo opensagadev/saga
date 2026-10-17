@@ -311,23 +311,7 @@ void FindGameCutScenes() {
     game_cutscenes.podsprint_sebulba = CutScene_Find(WORLD->cutscene_sys, "ep1_podsprint_sebulba");
 }
 
-SCENESPECIALPROGRESS_s *FindSceneStateObj(nugscn_s *scene, SCENEPROGRESS_s *progress, nuhspecial_s *target) {
-    if (progress == NULL || scene == NULL || target == NULL)
-        return NULL;
-    i32 count = NuSpecialGetNumSpecials(scene);
-    if (count == 0)
-        return NULL;
-    nuhspecial_s special;
-    for (i32 i = 0; i < count; ++i) {
-        if (i != 0)
-            NuSpecialGetNext(&special);
-        else
-            NuSpecialGetFirst(scene, &special, 1);
-        if (NuSpecialCompare(&special, target))
-            return &progress->specials[i];
-    }
-    return NULL;
-}
+SCENESPECIALPROGRESS_s *FindSceneStateObj(nugscn_s *scene, SCENEPROGRESS_s *progress, nuhspecial_s *target);
 
 i32 FindMtlInHGObj(nugscn_s *scene, i32 material_type);
 

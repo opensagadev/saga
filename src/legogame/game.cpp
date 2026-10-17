@@ -454,28 +454,13 @@ void CompleteLevel(WORLDINFO *world) {
     }
 }
 
-void StoreLevelProgress(WORLDINFO *world) {
-    if (world != NULL) {
-        StoreLevelProgressFn(world, world->level_progress, 0);
-    }
-}
+void StoreLevelProgress(WORLDINFO *world);
 
 void NewAreaMusicChanges(void) {
     BeenAttacked = 0;
 }
 
-void Game_WorldInfo_InitLast(WORLDINFO *world) {
-    GizSpinners_InitTerrain(world);
-    Signals_InitTerrain(world);
-    Attractos_InitTerrain(world);
-    SecurityDoors_InitTerrain(world);
-    Levers_InitTerrain(world);
-    GizPanel_InitTerrain(world);
-    HatMachines_InitTerrain(world);
-    GizmoBlowupsFinalSetup(world);
-    InitClimbObjectSys(world);
-    GizmoPushBlockInitAndReset(world, NULL);
-}
+void Game_WorldInfo_InitLast(WORLDINFO *world);
 
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 #include "legoapi/items/objects/gameobjects.h"

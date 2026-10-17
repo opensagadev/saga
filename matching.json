@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 82.92295,
+    "fuzzy_match_percent": 82.923416,
     "total_code": "4722419",
-    "matched_code": "651705",
-    "matched_code_percent": 13.800237,
+    "matched_code": "651372",
+    "matched_code_percent": 13.793185,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 7035,
-    "matched_functions_percent": 52.26986,
+    "matched_functions": 7033,
+    "matched_functions_percent": 52.254997,
     "total_units": 1
   },
   "text": {
@@ -40660,22 +40660,6 @@
           "match_percent": 99.35294
         },
         {
-          "name": "_Z9LoadPerm1v",
-          "demangled_name": "LoadPerm1()",
-          "address": 1210736,
-          "offset": 320768,
-          "size": 1363,
-          "match_percent": 98.54248
-        },
-        {
-          "name": "_Z9LoadPerm2v",
-          "demangled_name": "LoadPerm2()",
-          "address": 1212112,
-          "offset": 322144,
-          "size": 1310,
-          "match_percent": 89.609375
-        },
-        {
           "name": "_Z16PostAnimate_FETTP12GameObject_s",
           "demangled_name": "PostAnimate_FETT(GameObject_s*)",
           "address": 1487968,
@@ -47427,14 +47411,6 @@
           "match_percent": 93.83648
         },
         {
-          "name": "_Z10ResetSceneP8nugscn_sP15SCENEPROGRESS_s",
-          "demangled_name": "ResetScene(nugscn_s*, SCENEPROGRESS_s*)",
-          "address": 1220864,
-          "offset": 330896,
-          "size": 587,
-          "match_percent": 99.71951
-        },
-        {
           "name": "_Z22LevelComplete_LSW_SkipP14STATUS_STAGE_sP14STATUSPACKET_s",
           "demangled_name": "LevelComplete_LSW_Skip(STATUS_STAGE_s*, STATUSPACKET_s*)",
           "address": 2020112,
@@ -47744,14 +47720,6 @@
           "offset": 297648,
           "size": 338,
           "match_percent": 99.60919
-        },
-        {
-          "name": "_Z17FindSceneStateObjP8nugscn_sP15SCENEPROGRESS_sP12nuhspecial_s",
-          "demangled_name": "FindSceneStateObj(nugscn_s*, SCENEPROGRESS_s*, nuhspecial_s*)",
-          "address": 1221456,
-          "offset": 331488,
-          "size": 195,
-          "match_percent": 100.0
         },
         {
           "name": "_Z23CutScenePlayer_DrawGridP12COLLECTION_sPsffif",
@@ -59486,22 +59454,6 @@
           "match_percent": 99.35294
         },
         {
-          "name": "_Z24EffectOffProgress_UpdateP16LEVEL_PROGRESS_sPci",
-          "demangled_name": "EffectOffProgress_Update(LEVEL_PROGRESS_s*, char*, int)",
-          "address": 1206848,
-          "offset": 316880,
-          "size": 804,
-          "match_percent": 52.779903
-        },
-        {
-          "name": "_Z23EffectOffProgress_ResetP16LEVEL_PROGRESS_s",
-          "demangled_name": "EffectOffProgress_Reset(LEVEL_PROGRESS_s*)",
-          "address": 1207664,
-          "offset": 317696,
-          "size": 606,
-          "match_percent": 100.0
-        },
-        {
           "name": "_Z14CollectMinikitP7nuvec_sPci",
           "demangled_name": "CollectMinikit(nuvec_s*, char*, int)",
           "address": 1985920,
@@ -60731,14 +60683,6 @@
           "offset": 300048,
           "size": 352,
           "match_percent": 99.60227
-        },
-        {
-          "name": "_Z23Game_WorldInfo_InitMenuP11WORLDINFO_sPiS1_",
-          "demangled_name": "Game_WorldInfo_InitMenu(WORLDINFO_s*, int*, int*)",
-          "address": 1234704,
-          "offset": 344736,
-          "size": 75,
-          "match_percent": 100.0
         },
         {
           "name": "_ZL20LightSabreStreakCodeP12GameObject_sii",
@@ -82631,30 +82575,6 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/area.o",
       "functions": [
         {
-          "name": "_ZL12LoadAreaDataP12bgprocinfo_s",
-          "demangled_name": "LoadAreaData(bgprocinfo_s*)",
-          "address": 1204608,
-          "offset": 314640,
-          "size": 1778,
-          "match_percent": 83.24249
-        },
-        {
-          "name": "_Z18LoadAreaCharactersv",
-          "demangled_name": "LoadAreaCharacters()",
-          "address": 1213776,
-          "offset": 323808,
-          "size": 5414,
-          "match_percent": 54.2658
-        },
-        {
-          "name": "_Z10FixUpAreasv",
-          "demangled_name": "FixUpAreas()",
-          "address": 1234656,
-          "offset": 344688,
-          "size": 36,
-          "match_percent": 100.0
-        },
-        {
           "name": "_Z17AreaFromMiniKitIDi",
           "demangled_name": "AreaFromMiniKitID(int)",
           "address": 4689424,
@@ -82692,30 +82612,6 @@
           "offset": 295952,
           "size": 612,
           "match_percent": 96.698715
-        },
-        {
-          "name": "_Z17ClearAreaProgressii",
-          "demangled_name": "ClearAreaProgress(int, int)",
-          "address": 1208496,
-          "offset": 318528,
-          "size": 577,
-          "match_percent": 97.34884
-        },
-        {
-          "name": "_Z7NewAreav",
-          "demangled_name": "NewArea()",
-          "address": 1209360,
-          "offset": 319392,
-          "size": 842,
-          "match_percent": 85.492226
-        },
-        {
-          "name": "_Z15ClearUpAreaDatav",
-          "demangled_name": "ClearUpAreaData()",
-          "address": 1213424,
-          "offset": 323456,
-          "size": 346,
-          "match_percent": 98.947365
         },
         {
           "name": "_ZL14AddToModelListP23APICHARACTERMODELLIST_sPiiiiP10EXTRAMODEL",
@@ -82848,45 +82744,6 @@
       ]
     },
     {
-      "name": "legoapi/world/boss.cpp.o",
-      "source": "src/legoapi/world/boss.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/boss.o",
-      "functions": [
-        {
-          "name": "_Z8KillBossiif",
-          "demangled_name": "KillBoss(int, int, float)",
-          "address": 1206400,
-          "offset": 316432,
-          "size": 146,
-          "match_percent": 67.90476
-        },
-        {
-          "name": "_Z21KillBossCompleteLeveliif",
-          "demangled_name": "KillBossCompleteLevel(int, int, float)",
-          "address": 1206560,
-          "offset": 316592,
-          "size": 74,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z16KillBossNewLeveliifi",
-          "demangled_name": "KillBossNewLevel(int, int, float, int)",
-          "address": 1206640,
-          "offset": 316672,
-          "size": 70,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z20KillBossPlayCutSceneiifPc",
-          "demangled_name": "KillBossPlayCutScene(int, int, float, char*)",
-          "address": 1206720,
-          "offset": 316752,
-          "size": 113,
-          "match_percent": 100.0
-        }
-      ]
-    },
-    {
       "name": "legoapi/world/level.cpp.o",
       "source": "src/legoapi/world/level.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/level.o",
@@ -82948,12 +82805,92 @@
           "match_percent": 99.83929
         },
         {
+          "name": "_Z21MakeFreePlayModelListiiiii",
+          "demangled_name": "MakeFreePlayModelList(int, int, int, int, int)",
+          "address": 1201040,
+          "offset": 311072,
+          "size": 3556,
+          "match_percent": 45.445435
+        },
+        {
+          "name": "_ZL12LoadAreaDataP12bgprocinfo_s",
+          "demangled_name": "LoadAreaData(bgprocinfo_s*)",
+          "address": 1204608,
+          "offset": 314640,
+          "size": 1778,
+          "match_percent": 77.61201
+        },
+        {
+          "name": "_Z8KillBossiif",
+          "demangled_name": "KillBoss(int, int, float)",
+          "address": 1206400,
+          "offset": 316432,
+          "size": 146,
+          "match_percent": 67.90476
+        },
+        {
+          "name": "_Z21KillBossCompleteLeveliif",
+          "demangled_name": "KillBossCompleteLevel(int, int, float)",
+          "address": 1206560,
+          "offset": 316592,
+          "size": 74,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z16KillBossNewLeveliifi",
+          "demangled_name": "KillBossNewLevel(int, int, float, int)",
+          "address": 1206640,
+          "offset": 316672,
+          "size": 70,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z20KillBossPlayCutSceneiifPc",
+          "demangled_name": "KillBossPlayCutScene(int, int, float, char*)",
+          "address": 1206720,
+          "offset": 316752,
+          "size": 113,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z24EffectOffProgress_UpdateP16LEVEL_PROGRESS_sPci",
+          "demangled_name": "EffectOffProgress_Update(LEVEL_PROGRESS_s*, char*, int)",
+          "address": 1206848,
+          "offset": 316880,
+          "size": 804,
+          "match_percent": 52.779903
+        },
+        {
+          "name": "_Z23EffectOffProgress_ResetP16LEVEL_PROGRESS_s",
+          "demangled_name": "EffectOffProgress_Reset(LEVEL_PROGRESS_s*)",
+          "address": 1207664,
+          "offset": 317696,
+          "size": 606,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z32LevelProgress_ReserveBufferSpaceP9variptr_uS_",
+          "demangled_name": "LevelProgress_ReserveBufferSpace(variptr_u*, variptr_u)",
+          "address": 1208272,
+          "offset": 318304,
+          "size": 41,
+          "match_percent": 100.0
+        },
+        {
           "name": "_Z18ClearLevelProgressiP11WORLDINFO_s",
           "demangled_name": "ClearLevelProgress(int, WORLDINFO_s*)",
           "address": 1208320,
           "offset": 318352,
           "size": 176,
-          "match_percent": 100.0
+          "match_percent": 94.756096
+        },
+        {
+          "name": "_Z17ClearAreaProgressii",
+          "demangled_name": "ClearAreaProgress(int, int)",
+          "address": 1208496,
+          "offset": 318528,
+          "size": 577,
+          "match_percent": 99.88372
         },
         {
           "name": "_Z26LevelScriptReStoreProgressP11WORLDINFO_sP20LEVELSCRIPTPROCESS_s",
@@ -82962,6 +82899,110 @@
           "offset": 319120,
           "size": 262,
           "match_percent": 99.66292
+        },
+        {
+          "name": "_Z7NewAreav",
+          "demangled_name": "NewArea()",
+          "address": 1209360,
+          "offset": 319392,
+          "size": 842,
+          "match_percent": 85.492226
+        },
+        {
+          "name": "_Z12ClearLevDatav",
+          "demangled_name": "ClearLevData()",
+          "address": 1210208,
+          "offset": 320240,
+          "size": 526,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z9LoadPerm1v",
+          "demangled_name": "LoadPerm1()",
+          "address": 1210736,
+          "offset": 320768,
+          "size": 1363,
+          "match_percent": 98.59151
+        },
+        {
+          "name": "_Z9LoadPerm2v",
+          "demangled_name": "LoadPerm2()",
+          "address": 1212112,
+          "offset": 322144,
+          "size": 1310,
+          "match_percent": 99.765625
+        },
+        {
+          "name": "_Z15ClearUpAreaDatav",
+          "demangled_name": "ClearUpAreaData()",
+          "address": 1213424,
+          "offset": 323456,
+          "size": 346,
+          "match_percent": 98.789474
+        },
+        {
+          "name": "_Z18LoadAreaCharactersv",
+          "demangled_name": "LoadAreaCharacters()",
+          "address": 1213776,
+          "offset": 323808,
+          "size": 5414,
+          "match_percent": 54.312267
+        },
+        {
+          "name": "_Z18StoreSceneProgressP8nugscn_sP15SCENEPROGRESS_si",
+          "demangled_name": "StoreSceneProgress(nugscn_s*, SCENEPROGRESS_s*, int)",
+          "address": 1219200,
+          "offset": 329232,
+          "size": 817,
+          "match_percent": 99.97285
+        },
+        {
+          "name": "_Z20StoreLevelProgressFnP11WORLDINFO_sP16LEVEL_PROGRESS_si",
+          "demangled_name": "StoreLevelProgressFn(WORLDINFO_s*, LEVEL_PROGRESS_s*, int)",
+          "address": 1220032,
+          "offset": 330064,
+          "size": 754,
+          "match_percent": 50.48205
+        },
+        {
+          "name": "_Z18StoreLevelProgressP11WORLDINFO_s",
+          "demangled_name": "StoreLevelProgress(WORLDINFO_s*)",
+          "address": 1220800,
+          "offset": 330832,
+          "size": 56,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z10ResetSceneP8nugscn_sP15SCENEPROGRESS_s",
+          "demangled_name": "ResetScene(nugscn_s*, SCENEPROGRESS_s*)",
+          "address": 1220864,
+          "offset": 330896,
+          "size": 587,
+          "match_percent": 99.71951
+        },
+        {
+          "name": "_Z17FindSceneStateObjP8nugscn_sP15SCENEPROGRESS_sP12nuhspecial_s",
+          "demangled_name": "FindSceneStateObj(nugscn_s*, SCENEPROGRESS_s*, nuhspecial_s*)",
+          "address": 1221456,
+          "offset": 331488,
+          "size": 195,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z18CalculateWorldSizeP11WORLDINFO_s",
+          "demangled_name": "CalculateWorldSize(WORLDINFO_s*)",
+          "address": 1221664,
+          "offset": 331696,
+          "size": 798,
+          "match_percent": 43.44382
+        },
+        {
+          "name": "_Z14WorldInfo_LoadP11WORLDINFO_s",
+          "demangled_name": "WorldInfo_Load(WORLDINFO_s*)",
+          "address": 1222464,
+          "offset": 332496,
+          "size": 3109,
+          "match_percent": 80.052246
         },
         {
           "name": "_Z11FixUpLevelsP10LEVELFIXUP",
@@ -82978,6 +83019,30 @@
           "offset": 344384,
           "size": 294,
           "match_percent": 99.977776
+        },
+        {
+          "name": "_Z10FixUpAreasv",
+          "demangled_name": "FixUpAreas()",
+          "address": 1234656,
+          "offset": 344688,
+          "size": 36,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z23Game_WorldInfo_InitMenuP11WORLDINFO_sPiS1_",
+          "demangled_name": "Game_WorldInfo_InitMenu(WORLDINFO_s*, int*, int*)",
+          "address": 1234704,
+          "offset": 344736,
+          "size": 75,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z23Game_WorldInfo_InitLastP11WORLDINFO_s",
+          "demangled_name": "Game_WorldInfo_InitLast(WORLDINFO_s*)",
+          "address": 1234784,
+          "offset": 344816,
+          "size": 116,
+          "match_percent": 100.0
         },
         {
           "name": "_Z32Level_RegisterGameConfigKeywordsP12nufpcomjmp_sS0_",
@@ -83001,7 +83066,7 @@
           "address": 4672912,
           "offset": 3782944,
           "size": 157,
-          "match_percent": 100.0
+          "match_percent": 99.210526
         },
         {
           "name": "_Z12Levels_FixUpP10LEVELFIXUP",
@@ -83937,14 +84002,6 @@
       "source": "src/legoapi/world/leveldata.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/leveldata.o",
       "functions": [
-        {
-          "name": "_Z12ClearLevDatav",
-          "demangled_name": "ClearLevData()",
-          "address": 1210208,
-          "offset": 320240,
-          "size": 526,
-          "match_percent": 100.0
-        },
         {
           "name": "_Z10ResetLevelP11WORLDINFO_sPci",
           "demangled_name": "ResetLevel(WORLDINFO_s*, char*, int)",
@@ -87453,14 +87510,6 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/levelstreaming.o",
       "functions": [
         {
-          "name": "_Z32LevelProgress_ReserveBufferSpaceP9variptr_uS_",
-          "demangled_name": "LevelProgress_ReserveBufferSpace(variptr_u*, variptr_u)",
-          "address": 1208272,
-          "offset": 318304,
-          "size": 41,
-          "match_percent": 100.0
-        },
-        {
           "name": "_Z21LevelStreaming_UpdateP11WORLDINFO_s",
           "demangled_name": "LevelStreaming_Update(WORLDINFO_s*)",
           "address": 4662256,
@@ -87561,46 +87610,6 @@
       "source": "src/legoapi/world/world.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/world.o",
       "functions": [
-        {
-          "name": "_Z21MakeFreePlayModelListiiiii",
-          "demangled_name": "MakeFreePlayModelList(int, int, int, int, int)",
-          "address": 1201040,
-          "offset": 311072,
-          "size": 3556,
-          "match_percent": 45.985523
-        },
-        {
-          "name": "_Z18StoreSceneProgressP8nugscn_sP15SCENEPROGRESS_si",
-          "demangled_name": "StoreSceneProgress(nugscn_s*, SCENEPROGRESS_s*, int)",
-          "address": 1219200,
-          "offset": 329232,
-          "size": 817,
-          "match_percent": 99.97285
-        },
-        {
-          "name": "_Z20StoreLevelProgressFnP11WORLDINFO_sP16LEVEL_PROGRESS_si",
-          "demangled_name": "StoreLevelProgressFn(WORLDINFO_s*, LEVEL_PROGRESS_s*, int)",
-          "address": 1220032,
-          "offset": 330064,
-          "size": 754,
-          "match_percent": 50.48205
-        },
-        {
-          "name": "_Z18CalculateWorldSizeP11WORLDINFO_s",
-          "demangled_name": "CalculateWorldSize(WORLDINFO_s*)",
-          "address": 1221664,
-          "offset": 331696,
-          "size": 798,
-          "match_percent": 43.44382
-        },
-        {
-          "name": "_Z14WorldInfo_LoadP11WORLDINFO_s",
-          "demangled_name": "WorldInfo_Load(WORLDINFO_s*)",
-          "address": 1222464,
-          "offset": 332496,
-          "size": 3109,
-          "match_percent": 80.008705
-        },
         {
           "name": "_Z27SaveSceneObjectAnimTFactorsP8nugscn_s",
           "demangled_name": "SaveSceneObjectAnimTFactors(nugscn_s*)",
@@ -88286,22 +88295,6 @@
           "offset": 285456,
           "size": 989,
           "match_percent": 99.87234
-        },
-        {
-          "name": "_Z18StoreLevelProgressP11WORLDINFO_s",
-          "demangled_name": "StoreLevelProgress(WORLDINFO_s*)",
-          "address": 1220800,
-          "offset": 330832,
-          "size": 56,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z23Game_WorldInfo_InitLastP11WORLDINFO_s",
-          "demangled_name": "Game_WorldInfo_InitLast(WORLDINFO_s*)",
-          "address": 1234784,
-          "offset": 344816,
-          "size": 116,
-          "match_percent": 100.0
         },
         {
           "name": "_ZL25GameAudio_CheckReverb_LSWv",
@@ -126072,6 +126065,7 @@
         "legoapi/render/core/gameliball.cpp.o",
         "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o",
+        "legoapi/world/level.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -126089,6 +126083,7 @@
         "legoapi/render/core/gameliball.cpp.o",
         "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o",
+        "legoapi/world/level.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -126106,6 +126101,7 @@
         "legoapi/render/core/gameliball.cpp.o",
         "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o",
+        "legoapi/world/level.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -126123,6 +126119,7 @@
         "legoapi/render/core/gameliball.cpp.o",
         "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o",
+        "legoapi/world/level.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -126140,6 +126137,7 @@
         "legoapi/render/core/gameliball.cpp.o",
         "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o",
+        "legoapi/world/level.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -126157,6 +126155,7 @@
         "legoapi/render/core/gameliball.cpp.o",
         "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o",
+        "legoapi/world/level.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -126174,6 +126173,7 @@
         "legoapi/render/core/gameliball.cpp.o",
         "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o",
+        "legoapi/world/level.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -126191,6 +126191,7 @@
         "legoapi/render/core/gameliball.cpp.o",
         "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o",
+        "legoapi/world/level.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -126208,6 +126209,7 @@
         "legoapi/render/core/gameliball.cpp.o",
         "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o",
+        "legoapi/world/level.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -126225,6 +126227,7 @@
         "legoapi/render/core/gameliball.cpp.o",
         "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o",
+        "legoapi/world/level.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -126242,6 +126245,7 @@
         "legoapi/render/core/gameliball.cpp.o",
         "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o",
+        "legoapi/world/level.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -126259,6 +126263,7 @@
         "legoapi/render/core/gameliball.cpp.o",
         "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o",
+        "legoapi/world/level.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -126276,6 +126281,7 @@
         "legoapi/render/core/gameliball.cpp.o",
         "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o",
+        "legoapi/world/level.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -126293,6 +126299,7 @@
         "legoapi/render/core/gameliball.cpp.o",
         "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o",
+        "legoapi/world/level.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -126310,6 +126317,7 @@
         "legoapi/render/core/gameliball.cpp.o",
         "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o",
+        "legoapi/world/level.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -126327,6 +126335,7 @@
         "legoapi/render/core/gameliball.cpp.o",
         "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o",
+        "legoapi/world/level.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -126344,6 +126353,7 @@
         "legoapi/render/core/gameliball.cpp.o",
         "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o",
+        "legoapi/world/level.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -126361,6 +126371,7 @@
         "legoapi/render/core/gameliball.cpp.o",
         "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o",
+        "legoapi/world/level.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -126378,6 +126389,7 @@
         "legoapi/render/core/gameliball.cpp.o",
         "legoapi/render/core/screen.cpp.o",
         "legoapi/render/light/fade.cpp.o",
+        "legoapi/world/level.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -126963,6 +126975,7 @@
         "gameapi/edtools/edtoolsall.cpp.o",
         "legoapi/items/objects/objectsall.cpp.o",
         "legoapi/menus/screens/gamemenuall.cpp.o",
+        "legoapi/world/level.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -126977,6 +126990,7 @@
         "gameapi/edtools/edtoolsall.cpp.o",
         "legoapi/items/objects/objectsall.cpp.o",
         "legoapi/menus/screens/gamemenuall.cpp.o",
+        "legoapi/world/level.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -126991,6 +127005,7 @@
         "gameapi/edtools/edtoolsall.cpp.o",
         "legoapi/items/objects/objectsall.cpp.o",
         "legoapi/menus/screens/gamemenuall.cpp.o",
+        "legoapi/world/level.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -127018,6 +127033,7 @@
         "gameapi/edtools/edtoolsall.cpp.o",
         "legoapi/items/objects/objectsall.cpp.o",
         "legoapi/menus/screens/gamemenuall.cpp.o",
+        "legoapi/world/level.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -127032,6 +127048,7 @@
         "gameapi/edtools/edtoolsall.cpp.o",
         "legoapi/items/objects/objectsall.cpp.o",
         "legoapi/menus/screens/gamemenuall.cpp.o",
+        "legoapi/world/level.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -127046,6 +127063,7 @@
         "gameapi/edtools/edtoolsall.cpp.o",
         "legoapi/items/objects/objectsall.cpp.o",
         "legoapi/menus/screens/gamemenuall.cpp.o",
+        "legoapi/world/level.cpp.o",
         "legogame/game.cpp.o"
       ]
     },
@@ -129706,7 +129724,7 @@
     }
   ],
   "summary": {
-    "bazel_units": 464,
+    "bazel_units": 463,
     "functions": 13454,
     "assigned_functions": 12841,
     "ambiguous_functions": 286,
