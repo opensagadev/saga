@@ -3268,30 +3268,6 @@ static __attribute__((used)) void edanimcbLocalSoundMenu(eduimenu_s *parent, edu
 #include <cstdio>
 
 // Editor UI callbacks retained in the original editor's menu code.
-#pragma GCC push_options
-#pragma GCC optimize("O2", "omit-frame-pointer")
-
-extern "C" {
-
-static __used__ void cbGradChange(void);
-
-static __used__ void cbSel(eduimenu_s *, eduiitem_s *item);
-
-static __used__ void cbSubMenu(eduimenu_s *menu, eduiitem_s *item);
-
-static __used__ void cbgpcfgAdd(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgCPPress(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgCopy(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgDel(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgPaste(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-} // extern "C"
-
-#pragma GCC pop_options
 
 // ---- end src/gameapi/edtools/edmenucallbacks.cpp ----
 
@@ -3502,30 +3478,6 @@ inline void EdBitControl::operator delete(void *memory) {
 // ---- begin src/gameapi/edtools/edmenucallbacks.cpp ----
 #include <cstdio>
 
-#pragma GCC push_options
-#pragma GCC optimize("O2", "omit-frame-pointer")
-
-extern "C" {
-
-static __used__ void cbGradChange(void);
-
-static __used__ void cbSel(eduimenu_s *, eduiitem_s *item);
-
-static __used__ void cbSubMenu(eduimenu_s *menu, eduiitem_s *item);
-
-static __used__ void cbgpcfgAdd(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgCPPress(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgCopy(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgDel(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgPaste(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-} // extern "C"
-
-#pragma GCC pop_options
 
 // ---- end src/gameapi/edtools/edmenucallbacks.cpp ----
 
@@ -4860,30 +4812,6 @@ PART_s *AddPart(ADDPART_s *params);
 // ---- begin src/gameapi/edtools/edmenucallbacks.cpp ----
 #include <cstdio>
 
-#pragma GCC push_options
-#pragma GCC optimize("O2", "omit-frame-pointer")
-
-extern "C" {
-
-static __used__ void cbGradChange(void);
-
-static __used__ void cbSel(eduimenu_s *, eduiitem_s *item);
-
-static __used__ void cbSubMenu(eduimenu_s *menu, eduiitem_s *item);
-
-static __used__ void cbgpcfgAdd(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgCPPress(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgCopy(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgDel(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgPaste(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-} // extern "C"
-
-#pragma GCC pop_options
 
 // ---- end src/gameapi/edtools/edmenucallbacks.cpp ----
 
@@ -4968,30 +4896,6 @@ static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u
 // ---- begin src/gameapi/edtools/edmenucallbacks.cpp ----
 #include <cstdio>
 
-#pragma GCC push_options
-#pragma GCC optimize("O2", "omit-frame-pointer")
-
-extern "C" {
-
-static __used__ void cbGradChange(void);
-
-static __used__ void cbSel(eduimenu_s *, eduiitem_s *item);
-
-static __used__ void cbSubMenu(eduimenu_s *menu, eduiitem_s *item);
-
-static __used__ void cbgpcfgAdd(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgCPPress(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgCopy(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgDel(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgPaste(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-} // extern "C"
-
-#pragma GCC pop_options
 
 // ---- end src/gameapi/edtools/edmenucallbacks.cpp ----
 
@@ -5474,30 +5378,6 @@ PART_s *AddPart(ADDPART_s *params);
 // ---- begin src/gameapi/edtools/edmenucallbacks.cpp ----
 #include <cstdio>
 
-#pragma GCC push_options
-#pragma GCC optimize("O2", "omit-frame-pointer")
-
-extern "C" {
-
-static __used__ void cbGradChange(void);
-
-static __used__ void cbSel(eduimenu_s *, eduiitem_s *item);
-
-static __used__ void cbSubMenu(eduimenu_s *menu, eduiitem_s *item);
-
-static __used__ void cbgpcfgAdd(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgCPPress(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgCopy(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgDel(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgPaste(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-} // extern "C"
-
-#pragma GCC pop_options
 
 // ---- end src/gameapi/edtools/edmenucallbacks.cpp ----
 
@@ -5582,30 +5462,6 @@ static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u
 // ---- begin src/gameapi/edtools/edmenucallbacks.cpp ----
 #include <cstdio>
 
-#pragma GCC push_options
-#pragma GCC optimize("O2", "omit-frame-pointer")
-
-extern "C" {
-
-static __used__ void cbGradChange(void);
-
-static __used__ void cbSel(eduimenu_s *, eduiitem_s *item);
-
-static __used__ void cbSubMenu(eduimenu_s *menu, eduiitem_s *item);
-
-static __used__ void cbgpcfgAdd(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgCPPress(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgCopy(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgDel(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgPaste(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-} // extern "C"
-
-#pragma GCC pop_options
 
 // ---- end src/gameapi/edtools/edmenucallbacks.cpp ----
 
@@ -6368,30 +6224,6 @@ PART_s *AddPart(ADDPART_s *params);
 // ---- begin src/gameapi/edtools/edmenucallbacks.cpp ----
 #include <cstdio>
 
-#pragma GCC push_options
-#pragma GCC optimize("O2", "omit-frame-pointer")
-
-extern "C" {
-
-static __used__ void cbGradChange(void);
-
-static __used__ void cbSel(eduimenu_s *, eduiitem_s *item);
-
-static __used__ void cbSubMenu(eduimenu_s *menu, eduiitem_s *item);
-
-static __used__ void cbgpcfgAdd(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgCPPress(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgCopy(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgDel(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgPaste(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-} // extern "C"
-
-#pragma GCC pop_options
 
 // ---- end src/gameapi/edtools/edmenucallbacks.cpp ----
 
@@ -6476,30 +6308,6 @@ static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u
 // ---- begin src/gameapi/edtools/edmenucallbacks.cpp ----
 #include <cstdio>
 
-#pragma GCC push_options
-#pragma GCC optimize("O2", "omit-frame-pointer")
-
-extern "C" {
-
-static __used__ void cbGradChange(void);
-
-static __used__ void cbSel(eduimenu_s *, eduiitem_s *item);
-
-static __used__ void cbSubMenu(eduimenu_s *menu, eduiitem_s *item);
-
-static __used__ void cbgpcfgAdd(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgCPPress(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgCopy(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgDel(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgPaste(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-} // extern "C"
-
-#pragma GCC pop_options
 
 // ---- end src/gameapi/edtools/edmenucallbacks.cpp ----
 
@@ -8270,30 +8078,6 @@ PART_s *AddPart(ADDPART_s *params);
 
 extern "C" i32 PS2_REZ_H;
 
-#pragma GCC push_options
-#pragma GCC optimize("O2", "omit-frame-pointer")
-
-extern "C" {
-
-static __used__ void cbGradChange(void);
-
-static __used__ void cbSel(eduimenu_s *, eduiitem_s *item);
-
-static __used__ void cbSubMenu(eduimenu_s *menu, eduiitem_s *item);
-
-static __used__ void cbgpcfgAdd(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgCPPress(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgCopy(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgDel(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgPaste(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-} // extern "C"
-
-#pragma GCC pop_options
 
 // ---- end src/gameapi/edtools/edmenucallbacks.cpp ----
 
@@ -8414,30 +8198,6 @@ extern "C" {
 // ---- begin src/gameapi/edtools/edmenucallbacks.cpp ----
 #include <cstdio>
 
-#pragma GCC push_options
-#pragma GCC optimize("O2", "omit-frame-pointer")
-
-extern "C" {
-
-static __used__ void cbGradChange(void);
-
-static __used__ void cbSel(eduimenu_s *, eduiitem_s *item);
-
-static __used__ void cbSubMenu(eduimenu_s *menu, eduiitem_s *item);
-
-static __used__ void cbgpcfgAdd(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgCPPress(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgCopy(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgDel(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgPaste(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-} // extern "C"
-
-#pragma GCC pop_options
 
 // ---- end src/gameapi/edtools/edmenucallbacks.cpp ----
 
@@ -9234,30 +8994,6 @@ PART_s *AddPart(ADDPART_s *params);
 // ---- begin src/gameapi/edtools/edmenucallbacks.cpp ----
 #include <cstdio>
 
-#pragma GCC push_options
-#pragma GCC optimize("O2", "omit-frame-pointer")
-
-extern "C" {
-
-static __used__ void cbGradChange(void);
-
-static __used__ void cbSel(eduimenu_s *, eduiitem_s *item);
-
-static __used__ void cbSubMenu(eduimenu_s *menu, eduiitem_s *item);
-
-static __used__ void cbgpcfgAdd(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgCPPress(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgCopy(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgDel(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgPaste(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-} // extern "C"
-
-#pragma GCC pop_options
 
 // ---- end src/gameapi/edtools/edmenucallbacks.cpp ----
 
@@ -9342,30 +9078,6 @@ static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u
 // ---- begin src/gameapi/edtools/edmenucallbacks.cpp ----
 #include <cstdio>
 
-#pragma GCC push_options
-#pragma GCC optimize("O2", "omit-frame-pointer")
-
-extern "C" {
-
-static __used__ void cbGradChange(void);
-
-static __used__ void cbSel(eduimenu_s *, eduiitem_s *item);
-
-static __used__ void cbSubMenu(eduimenu_s *menu, eduiitem_s *item);
-
-static __used__ void cbgpcfgAdd(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgCPPress(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgCopy(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgDel(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgPaste(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-} // extern "C"
-
-#pragma GCC pop_options
 
 // ---- end src/gameapi/edtools/edmenucallbacks.cpp ----
 
@@ -11524,30 +11236,6 @@ extern "C" {
 // ---- begin src/gameapi/edtools/edmenucallbacks.cpp ----
 #include <cstdio>
 
-#pragma GCC push_options
-#pragma GCC optimize("O2", "omit-frame-pointer")
-
-extern "C" {
-
-static __used__ void cbGradChange(void);
-
-static __used__ void cbSel(eduimenu_s *, eduiitem_s *item);
-
-static __used__ void cbSubMenu(eduimenu_s *menu, eduiitem_s *item);
-
-static __used__ void cbgpcfgAdd(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgCPPress(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgCopy(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgDel(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgPaste(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-} // extern "C"
-
-#pragma GCC pop_options
 
 // ---- end src/gameapi/edtools/edmenucallbacks.cpp ----
 
@@ -11632,30 +11320,6 @@ static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u
 // ---- begin src/gameapi/edtools/edmenucallbacks.cpp ----
 #include <cstdio>
 
-#pragma GCC push_options
-#pragma GCC optimize("O2", "omit-frame-pointer")
-
-extern "C" {
-
-static __used__ void cbGradChange(void);
-
-static __used__ void cbSel(eduimenu_s *, eduiitem_s *item);
-
-static __used__ void cbSubMenu(eduimenu_s *menu, eduiitem_s *item);
-
-static __used__ void cbgpcfgAdd(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgCPPress(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgCopy(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgDel(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgPaste(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-} // extern "C"
-
-#pragma GCC pop_options
 
 // ---- end src/gameapi/edtools/edmenucallbacks.cpp ----
 
@@ -12274,30 +11938,6 @@ PART_s *AddPart(ADDPART_s *params);
 // ---- begin src/gameapi/edtools/edmenucallbacks.cpp ----
 #include <cstdio>
 
-#pragma GCC push_options
-#pragma GCC optimize("O2", "omit-frame-pointer")
-
-extern "C" {
-
-static __used__ void cbGradChange(void);
-
-static __used__ void cbSel(eduimenu_s *, eduiitem_s *item);
-
-static __used__ void cbSubMenu(eduimenu_s *menu, eduiitem_s *item);
-
-static __used__ void cbgpcfgAdd(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgCPPress(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgCopy(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgDel(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgPaste(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-} // extern "C"
-
-#pragma GCC pop_options
 
 // ---- end src/gameapi/edtools/edmenucallbacks.cpp ----
 
@@ -12382,30 +12022,6 @@ static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u
 // ---- begin src/gameapi/edtools/edmenucallbacks.cpp ----
 #include <cstdio>
 
-#pragma GCC push_options
-#pragma GCC optimize("O2", "omit-frame-pointer")
-
-extern "C" {
-
-static __used__ void cbGradChange(void);
-
-static __used__ void cbSel(eduimenu_s *, eduiitem_s *item);
-
-static __used__ void cbSubMenu(eduimenu_s *menu, eduiitem_s *item);
-
-static __used__ void cbgpcfgAdd(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgCPPress(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgCopy(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgDel(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-static __used__ void cbgpcfgPaste(eduimenu_s *menu, eduiitem_s *item, u32 value);
-
-} // extern "C"
-
-#pragma GCC pop_options
 
 // ---- end src/gameapi/edtools/edmenucallbacks.cpp ----
 
