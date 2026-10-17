@@ -49,9 +49,9 @@
 #include "nu2api/numath/nuvec4.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/nucore/nuvuvectype.hpp"
-extern "C" void DisplaySceneRndrSpecials(NUDLDLISTSCENE *, i32, void *);
+#include "nu2api/nu3d/android/nurenderthread.h"
+#include "nu2api/nu3d/nu3d_includes.h"
 
-extern const f32 nuvec4_one[4];
 extern "C" void NuShaderManagerSetfv(i32, const f32 *);
 
 

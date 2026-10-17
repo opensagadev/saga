@@ -28,6 +28,7 @@
 #include <math.h>
 #include <stddef.h>
 #include "legoapi/render/core/terrain_stubs_types.h"
+#include "legoapi/items/objects/objectsall.h"
 
 i16 TerrImpact;
 i32 terrhitflags;
@@ -50,18 +51,15 @@ extern "C" {
 
 
 
-void ScanTerrain(i32 scan_type, i32 terrain_mask, i32 scan_flags);
 
 extern "C" {
     extern "C++" void DebrisProcessSpheres(uv1deb *, f32, debinftype *, debkeydatatype_s *, i32);
 }
 
 
-extern "C" i32 edppLoadPage(char *path, i32 flag, usize scene);
 // NuFileExists @nufile (nucore_plain.cpp).
 
 
-extern "C" part_type_s part_types[128];
 
 
 extern "C" {

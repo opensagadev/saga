@@ -249,6 +249,33 @@
 #include <limits.h>
 #include "legoapi/gizmo/base/gizflow.h"
 #include "legoapi/misc/supportall_types.h"
+#include "MechInputTouch/MechInputTouchGestureBasedController.h"
+#include "MechInputTouch/MechTouchUIElements.h"
+#include "gameapi/ai/aisys/gameaiscript.h"
+#include "legoapi/actions/character/legoapi_tag.h"
+#include "legoapi/actions/character/tagging.h"
+#include "legoapi/actions/movement/climbing.h"
+#include "legoapi/actions/movement/dropinout.h"
+#include "legoapi/actions/movement/pushing.h"
+#include "legoapi/ai/core/gameai.h"
+#include "legoapi/characters/core/characters.h"
+#include "legoapi/characters/motion/camera.h"
+#include "legoapi/characters/motion/move.h"
+#include "legoapi/gizmos/transport/ledge.h"
+#include "legoapi/items/collect/detonator.h"
+#include "legoapi/items/collect/thermaldetonators.h"
+#include "legoapi/items/objects/cable.h"
+#include "legoapi/items/objects/game_obj.h"
+#include "legoapi/lib/camera.h"
+#include "legoapi/props/objects/zipup.h"
+#include "legoapi/world/levels/episodeI.h"
+#include "legoapi/world/levels/episodeII.h"
+#include "legoapi/world/levels/episodeIII.h"
+#include "legoapi/world/levels/episodeIV.h"
+#include "legoapi/world/levels/episodeV.h"
+#include "legoapi/world/levels/episodeVI.h"
+#include "legoapi/world/levels/hub.h"
+#include "nu2api/nu3d/nu3d_includes.h"
 
 static GameObject_s *ForceBackObj = NULL;
 static NUVEC *ForceBackPos = NULL;
@@ -263,7 +290,6 @@ MechWeakPtr<MechObjectInterface, 4> forceNextAttackOpponent;
 MechWeakPtr<MechObjectInterface, 4> lungeTarget(NULL);
 MechWeakPtr<MechObjectInterface, 4> BobaRocketTarget(NULL);
 
-extern "C" i16 id_R2Q5;
 
 // Original action/context lookup data, with its arrays and pointers in one owner.
 static CHARACTER_CONTEXT_INFO_s _CInfoTab[] = {
@@ -645,94 +671,20 @@ EXTRAACTIONDATA_s ExtraActionData[] = {
     {NULL, 0},
 };
 
-extern AREADATA_s *ANAKINSFLIGHT_ADATA;
-extern AREADATA_s *DEATHSTARBATTLE_ADATA;
 
 float SLAMGRAVITY = -15.0f;
 float TURNTIME = 1.0f;
 static float applygravity_extrahoveroffset;
 
-i32 CanStepBack(GameObject_s *object);
-i32 StepBackFromTarget(GameObject_s *object);
-i32 ForcePushed_SetTargetMom(GameObject_s *object, f32 *seek_rate);
-i32 ForcePushed_YRotation(GameObject_s *object);
-i32 MovePlayer_TWIST(GameObject_s *object);
-i32 CircleLevel(LEVELDATA_s *level);
-f32 ForceTowardsMid(GameObject_s *object);
-void MoveInactiveVehicle(GameObject_s *object, i32 mode, GameObject_s **vehicle);
-i32 UnderPlayerControl(GameObject_s *object);
-void StartTurn(GameObject_s *object);
-void KeepVehicleOnScreen(GameObject_s *object, i32 sides, i32 top, i32 bottom);
-void ApplyGravity(GameObject_s *object, float *gravity, float hover_height, float seek_rate, float *ground_height);
-float GetVehicleHoverHeight(GameObject_s *object, float *separation_offset);
-float FindGunshipHoverHeight(GameObject_s *object);
-void TurnCode(GameObject_s *object, i32 mode, GAMEPAD_s *pad);
-float VehicleTurnOrLoopOffset(GameObject_s *object);
-void ComboHitFrame(GameObject_s *object, i32 damage);
-i32 GizmoBlowupCheckProximity(WORLDINFO_s *world, GameObject_s *object);
-void KeepWeaponOut(GameObject_s *object);
-void DropInOutCode(GameObject_s *object);
-void TakeHitCode(GameObject_s *object);
-void FloatCode(GameObject_s *object);
-void SlideCode(GameObject_s *object);
-void FlattenCode(GameObject_s *object);
-void Hang_MoveCode(GameObject_s *object);
-void Ledge_MoveCode(WORLDINFO_s *world, GameObject_s *object);
-void LedgeTerrain_MoveCode(GameObject_s *object);
-void Climb_MoveCode(GameObject_s *object);
-void ForcedBackCode(GameObject_s *object);
-void PushCode(GameObject_s *object, i32 allow_grab);
-void BackFlipCode(GameObject_s *object);
-void TakeOverCode(GameObject_s *object, i32 tag_pressed);
-void Glide_MoveCode(GameObject_s *object);
 void JumpCode(GameObject_s *object, i32 jump_pressed, i32 jump_held, u32 animation_set, i32 action_pressed,
               i32 action_held, i32 special_animation);
-void GizPanel_MoveCode(WORLDINFO_s *world, GameObject_s *object, i32 special_pressed);
-void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed);
-i32 ThermalDetonator_MoveCode(GameObject_s *object);
-void Detonator_MoveCode(GameObject_s *object);
-void ComboRotateCode(GameObject_s *object, i32 action_held);
-void WeaponOutCode(GameObject_s *object);
-void WeaponInCode(GameObject_s *object);
-void WeaponScalingCode(GameObject_s *object);
-void HoldCode(GameObject_s *object);
-void SetWeaponOut(GameObject_s *object);
-void SetWeaponIn(GameObject_s *object);
-void SlowWeaponIn(GameObject_s *object);
-void FastWeaponIn(GameObject_s *object, i32 sound);
-void SlowWeaponOut(GameObject_s *object);
-void FastWeaponOut(GameObject_s *object, i32 sound);
-void StartHold(GameObject_s *object);
-void BlockSfx(GameObject_s *object);
-i32 NewBlockAction(GameObject_s *object);
-void MakeJumpReachHeight(GameObject_s *, f32, i32);
-void PlayJumpSfx(GameObject_s *, i32);
 i32 GrappleSwingMode = 1;
-extern i32 (*CanStartHoldFn)(GameObject_s *);
-void PlaySabreSfx(char *, GameObject_s *, NUVEC *, i32);
-void HeadMovement(GameObject_s *object);
-void CloakMovement(GameObject_s *object);
-void HairMovement(GameObject_s *object);
-i32 AnakinGreenSabre(GameObject_s *object);
 extern i16 id_GAMORREANGUARD;
 extern i16 id_CAPTAINTARPALS;
 extern "C" i16 id_BAT;
 extern i16 id_WATTO;
-BOLT_s *FindIncomingBolt(GameObject_s *, i32, i32);
 PART_s *FindIncomingPart(void *, NUVEC *, f32, u32, f32);
-void Punch_Hit(GameObject_s *, GameObject_s *, f32, f32);
-void HitRumble(GameObject_s *);
-void TakeHitRumble(GameObject_s *, f32);
-i32 SpecialMove_Check(GameObject_s *, GameObject_s *);
 u32 SpecialMove_GetFlags(i32, u32);
-i32 SpecialMove_GetAttackerAction(i32);
-i32 SpecialMove_GetVictimAction(i32);
-void StartQuickShoot(GameObject_s *, i32);
-void ConstantRumble(GameObject_s *object, f32 strength, f32 duration);
-extern "C" void PlaySfxAndSetVolume(char *name, NUVEC *position, f32 volume);
-void AlertSurroundingCreatures(GameObject_s *, NUVEC *);
-void EndForce(GameObject_s *, i32);
-void ResetForceGlow(PLAYERPACKET_s *);
 f32 FORCEGLOWTIME = 0.1f;
 f32 ForceThrowGravity = -2.5f;
 f32 ForceThrowSpeed = 5.0f;
@@ -740,21 +692,12 @@ f32 MaulF_ForceThrowSpeed = 1.0f;
 f32 MaulF_ForceThrowGravity = -0.5f;
 f32 DookuC_ForceThrowSpeed = 2.5f;
 f32 DookuC_ForceThrowGravity = -2.5f;
-PART_s *Part_FindFromHSpecial(nuhspecial_s *);
 f32 DEACTIVATEDTIME = 8.0f;
 i32 ForcePush_SuperMindTrick;
 i32 ForcePush_SuperPush;
 i32 ForcePush_Waft;
-i32 ZapTarget(GameObject_s *);
-NUVEC *GetZapOrigin(GameObject_s *);
-i32 CannotKill(GameObject_s *);
-i32 FaceOpponent(GameObject_s *object, NUVEC *position);
-void SetProtocolDroidDeactivatedAction(GameObject_s *);
 i16 *objhitobj_killparts_yrot;
 i32 objhitobj_noimpactsfx;
-void Player_ClearContext(GameObject_s *, i32);
-void Player_ResetContexts(PLAYERPACKET_s *);
-void PlayDieSfx(GameObject_s *);
 // Retail keeps several of this file's static helpers only as GCC clones; these
 // declarations pin the clone names and register conventions.
 #if defined(__i386__)
@@ -769,54 +712,17 @@ static MOVE_CLONE_ATTR2 void CommunicateCode(GameObject_s *, i32)
     __asm__("_ZL15CommunicateCodeP12GameObject_sii.constprop.74");
 static MOVE_CLONE_ATTR1 void AwkwardShapeCode(GameObject_s *)
     __asm__("_ZL16AwkwardShapeCodeP12GameObject_si.constprop.78");
-f32 FindGunshipHoverHeight(GameObject_s *);
-void CableCode(GameObject_s *, i32, f32);
-extern "C" i16 id_BASKETCANNON;
 // Retail keeps only the IPA-SRA clone of this function.
 static MOVE_CLONE_ATTR2 void ForceCode(GameObject_s *, i32, i32) __asm__("_ZL9ForceCodeP12GameObject_siii.isra.29");
-void JetPackCode(GameObject_s *, i32, i32, i32);
-void KeepWeaponIn(GameObject_s *);
-void BigJumpCode(GameObject_s *);
-void InstantKillParts(GameObject_s *, i32, f32);
-EXPLOSION *Detonate(NUVEC *, u16);
 extern i16 tCHEAT_SELFDESTRUCT;
 extern i16 id_BUZZDROID;
 extern i16 id_NAFFDROID1, id_NAFFDROID2, id_NAFFDROID4, id_MOUSEDROID;
-void Grapple_MoveCode(GameObject_s *);
-void SpecialMove_VictimCode(GameObject_s *);
-void Tag_Check(GameObject_s *);
-i32 ObjInNarrowSock(GameObject_s *, SOCKSYS *, i32);
-i32 PodLevel(AREADATA_s *);
-void KeepOnScreen(GameObject_s *);
-void UpdateSnakeBody(GameObject_s *);
-void TractorBeamCode(GameObject_s *);
-void LoopCode(GameObject_s *, i32, i32, GAMEPAD_s *, i32);
-void CableCode(GameObject_s *, i32, float);
-extern f32 max_cable_length;
-void EngineNoiseCode(GameObject_s *, i32);
-void Buck_MoveCode(GameObject_s *, i32);
 static i32 getvehiclehoverheight_hothbattlehack;
-void CatchUpCode(GameObject_s *, f32, f32, i32);
-GRAPPLE *Grapple_AddDynamic(void *, i32);
-void AddSurfaceRipples(GameObject_s *);
 extern "C" i16 id_SNAKE;
-extern "C" i16 id_DODGEM;
 extern "C" i16 id_MINIATST, id_MINIATTE;
-void Batarang_MoveCode(GameObject_s *);
-bool FireBountyHunterRocket(GameObject_s *);
 f32 DIEAIRSPEED = 1.5f;
 f32 DIEAIRJUMPSPEED = 2.0f;
-void SetObjAsHeadTarget(GameObject_s *, GameObject_s *, i8, f32, f32, f32);
-void KillRumble(GameObject_s *);
-void PlayHurtSfx(GameObject_s *);
 extern i16 id_PKDROID, id_PITDROID;
-void FindForcePushTarget(GameObject_s *, i32, i32);
-void ReleaseForce(GameObject_s *, i32);
-void BobaRocket_Move(PART_s *, f32);
-void Boulder_Move(PART_s *, f32);
-void Boulder_Kill(PART_s *, i32);
-extern "C" void NewPartRotation(PART_s *);
-void PlayGruntSfx(GameObject_s *);
 
 // Multiplies the ordinary camera's per-frame position blend.  The original
 // keeps this as writable camera state (default 1.0), rather than folding it
@@ -856,19 +762,15 @@ static inline void CheckFallLand(GameObject_s *object) {
 
 
 
-i32 PodLevel(AREADATA_s *area);
-f32 ForceAlongSock(GameObject_s *object);
 extern "C" {
 }
 
 
 
-i32 TwistLevel(LEVELDATA_s *level);
 extern f32 CurrentSpeed;
 
 f32 speeder_smoke_rate = 5.0f;
 f32 speeder_offset_speed = 2.0f;
-extern f32 GetVehicleSpeedMul(GameObject_s *, f32);
 
 
 
@@ -887,14 +789,11 @@ static inline void SelfDestructCode(GameObject_s *object, i32 pressed) {
 
 
 
-void GunShip_DragBombSeekBlowUp(GameObject_s *object);
 
 
 void MoveBlocksOverBlock(WORLDINFO_s *world, pushblock_s *block, i32 excluded, nuvec_s *velocity);
 
-void MoveInactiveVehicle(GameObject_s *object, i32, GameObject_s **followed_object);
 
-i32 GunshipInLevel(LEVELDATA_s *level);
 extern i32 LevFlag[4];
 // Original exported level control, initialized to 2 at 0x623d00.
 i32 GUNSHIPAHACK = 2;
@@ -902,30 +801,17 @@ i32 GUNSHIPAHACK = 2;
 
 
 extern "C" i16 id_LANDSPEEDER;
-extern AREADATA_s *SPEEDERCHASE_ADATA;
-extern GameObject_s *GetOtherActivePlayer(GameObject_s *);
-extern GameObject_s *CarWashHack;
-extern i32 IDLESPEEDINNARROWSOCKSONLY;
-extern i32 GoingForwardsAlongNarrowSock(GameObject_s *);
-extern f32 PodSprint_InStartCountdown(WORLDINFO_s *);
-extern f32 DeathStar2BattleFire_GetSlowDownMul(GameObject_s *);
-extern void VehicleCollisionCode(GameObject_s *);
 
-i32 NeedsPretendAnim(GameObject_s *object);
 
 
 
 i32 PODSPRINTDEB = 117;
 
-void PodCollisionCode(GameObject_s *object);
 
 // These pod tuning values are zero-initialized in the original image.
 f32 PosSeekPitch[2];
 f32 PODBOOSTHEIGHT;
 
-f32 FindPodHoverHeight(GameObject_s *object);
-extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
-extern "C" void PlaySfxByIdAndSetPitch(i32 sfx_id, nuvec_s *position, f32 pitch);
 
 
 f32 zam_smoke_rate = 10.0f;
@@ -944,8 +830,6 @@ static bool JediHasAction(const GameObject_s *object, JEDI_ACTION action) {
 static i32 ComboOpponent_Behind;
 static f32 ComboOpponent_Range2;
 static f32 PlayerOpponent_Range2;
-extern i32 test_ai_combo;
-extern i32 CanPunchGirls;
 
 
 static u8 SetComboOpponent(GameObject_s *object, f32 range, i32 update_heading, i32 mode);
@@ -1035,14 +919,11 @@ static MOVE_CLONE_ATTR2 void ForceGlowCode(GameObject_s *object, i32 model)
     __asm__("_ZL13ForceGlowCodeP12GameObject_si.part.34");
 
 
-void CableCode(GameObject_s *object, i32 special_pressed, f32);
 
 
 
-i32 ForcePushed_SetTargetMom(GameObject_s *object, float *seek_rate);
 
 
-i32 ZapTarget(GameObject_s *object);
 
 
 
@@ -1089,9 +970,7 @@ static MOVE_CLONE_ATTR2 void ForceDeflectCode(GameObject_s *object, i32 pressed,
 
 i32 show_autojump_hint;
 
-i32 Slam_Start(GameObject_s *object, f32 speed);
 
-void StartLunge(GameObject_s *object, f32 speed, f32 height);
 
 extern "C" {
     extern i16 id_MINIATST, id_MINIATTE;
@@ -1099,12 +978,8 @@ extern "C" {
 
 
 
-i32 CanStepBack(GameObject_s *object);
 
-i32 Glide_Start(GameObject_s *object);
 
-void StartJetPackFall(GameObject_s *object, i32 fall);
-void PlayLandSfx(GameObject_s *object, i32 type, i32 surface);
 
 // Fires the jet pack: plays the jump sound, applies the character's jump
 // speed and readies a jet-pack weapon.
@@ -1118,7 +993,6 @@ static inline void JetPackLaunch(GameObject_s *object) {
     object->jump_variant_timer = 0.0f;
 }
 
-void JetPackCode(GameObject_s *object, i32 jump_pressed, i32 fall, i32);
 
 
 
@@ -1137,9 +1011,7 @@ static i32 IsAFallAnim(i32 animation) {
 
 i32 SnapPosTaken(WORLDINFO_s *world, pushblock_s *, nuvec_s *position, i32 excluded_index);
 
-void Hang_MoveCode(GameObject_s *object);
 
-void HoldCode_Copy(GameObject_s *object);
 
 void SetHeadTarget(GameObject_s *object, NUVEC *position, i8 priority, f32 time, f32 minimum_delay, f32 maximum_delay) {
     if (position != NULL) {
@@ -1162,26 +1034,17 @@ void SetHeadTarget(GameObject_s *object, NUVEC *position, i8 priority, f32 time,
     }
 }
 
-extern i32 DoubleJump_JediSlam;
-extern f32 SLAMJUMPSPEED;
-void PlayLandSfx(GameObject_s *, i32, i32);
-void AddWaterSplash(GameObject_s *, NUVEC *);
-
-i32 StartBackFlip(GameObject_s *object);
 
 
 
-void FindSlamOrigin(GameObject_s *object, NUVEC *start, NUVEC *end);
+
 
 void JumpCode(GameObject_s *object, i32 jump_pressed, i32 jump_held, u32 animation_set, i32 action_pressed,
               i32 action_held, i32 hit_effect);
 
-i32 MosEisleyC_PastBarrier(GameObject_s *object);
 
 
-void TurnCodeCamSafe(GameObject_s *object, numtx_s *matrix);
 
-void RotateGameMatrix(numtx_s *matrix, i32 order, u16 x, u16 y, u16 z);
 
 
 
@@ -1196,20 +1059,15 @@ void SetObjAsHeadTarget(GameObject_s *object, GameObject_s *target, signed char,
 }
 
 
-i32 StepBackFromTarget(GameObject_s *object);
-
-void VehicleCollisionCode(GameObject_s *object);
 
 
 
 
 
-void HoldCode(GameObject_s *object);
 
 
-void FloatCode(GameObject_s *);
 
-void StartHold(GameObject_s *object);
+
 
 // Retail splits the context test off as an inline head; the rest is this partial clone.
 static MOVE_CLONE_ATTR1 void GrabCodeBody(GameObject_s *object) __asm__("_ZL8GrabCodeP12GameObject_s.part.15");
@@ -1235,15 +1093,11 @@ static AWKWARDSHAPESPHERE_s AwkwardShapeSphere[] = {
 
 
 
-i32 PlayerItem_GotAmmo(PLAYERITEM_s *);
-extern "C" f32 animduration_blendouttime;
 extern i16 id_MINIATST, id_MINIATTE;
-void SetWeaponIn(GameObject_s *);
 
 
 
 extern i16 id_SKELETON;
-void StartJetPackFall(GameObject_s *, i32);
 
 static NUVEC poopos[2];
 
@@ -1252,18 +1106,12 @@ static NUVEC poopos[2];
 // ==== src/legoapi/characters/motion/gameanim.cpp: declarations ====
 
 
-i32 UseFallAnim(GameObject_s *object);
-i32 SetProtocolDroidFallAnim(GameObject_s *object);
 // Retail uses translation-unit-local helpers with compiler-inferred private
 // calling conventions; keep their shared animation-mode call sites intact.
-void UpdateCharacterIdle(GameObject_s *object);
-f32 PodSprint_InStartCountdown(WORLDINFO_s *world);
-extern "C" void PlaySfxByIdAndSetVolume(i32 sfx_id, NUVEC *position, f32 volume);
 
 extern i16 id_JUMBOHOMINGDROID;
 extern i16 id_GAMORREANGUARD, id_PRINCESSLEIASLAVE, id_LAMASU, id_TAUNWE;
 extern i16 id_PENGUIN, id_UMBRELLA, id_GLIDEPACK;
-extern f32 hub_jabbaawake;
 
 
 
@@ -1284,7 +1132,6 @@ static inline i16 JediWeaponIdle(GameObject_s *object) {
 
 
 
-extern i32 NeedsPretendAnim(GameObject_s *object);
 
 
 
@@ -1350,7 +1197,6 @@ i32 GizmoFileReadGameAnimSet(GAMEANIMSET_s *set, void *world_ptr,
 
 
 extern MechWeakPtr<MechObjectInterface, 4> BobaRocketTarget;
-extern AILOCATOR_s * locator;
 extern "C" void *AIPAthFindPathCnx(AISYS_s *, AIPATH_s *, char *, char *, i32 *);
 
 struct AIROW_s;
@@ -1359,7 +1205,6 @@ struct nunativegscene_s;
 struct SHOPINPUT;
 
 extern "C" {
-extern HOTHBATTLE_MELEE_s melee;
 }
 DECOMP_ASSERT(sizeof(HOTHBATTLEE_NETPACKET_s) == 0x58, "Hoth panel packet size");
 DECOMP_ASSERT(offsetof(HOTHBATTLEE_NETPACKET_s, alpha) == 0x24, "Hoth panel packet alpha offset");
@@ -1373,9 +1218,6 @@ DECOMP_ASSERT(offsetof(HOTHBATTLEE_NETPACKET_s, count) == 0x54, "Hoth panel pack
 
 f32 rocket_speed = 1.2f;
 
-void BobaRocket_Kill(PART_s *part, i32);
-
-void BobaRocket_Move(PART_s *part, f32 elapsed);
 
 
 
@@ -1396,7 +1238,7 @@ void BobaRocket_Move(PART_s *part, f32 elapsed);
 
 
 
-void BobaRocket_Deflect(PART_s *part);
+
 
 
 
@@ -1454,7 +1296,6 @@ struct rtlset;
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -1468,9 +1309,7 @@ struct quickboltinfo;
 // local `t` symbols matching res/libTTapp.so.
 
 extern f32 ForceThrowSpeed, ForceThrowGravity;
-void DeflectPart(PART_s *, GameObject_s *, f32, f32, i32, i32);
 
-extern "C" void PlaySfxAndSetVolume(char *, NUVEC *, f32);
 
 
 
@@ -1481,7 +1320,6 @@ extern "C" {
 
 
 
-    void NewPartRotation(PART_s *);
 
 
 
@@ -1498,7 +1336,6 @@ extern "C" {
 
 
 
-void NewPartRotation(PART_s *part);
 
 
 
@@ -1540,30 +1377,17 @@ extern "C" {
 
 PART_s *FindIncomingPart(void *owner, NUVEC *position, f32 radius, u32 flags, f32 range);
 
-extern "C" void PlaySfxByIdAndSetVolume(i32, NUVEC *, f32);
 
 
 
 
 
-void PartImpact_Basketball(PART_s *part);
 
-void PartUpdate_Basketball(PART_s *part);
 
-PART_s *Part_FindFromHSpecial(nuhspecial_s *special);
 
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 
 
-void Bolt_Shoot(GameObject_s *, i32, i32);
-void PartUpdate_Basketball(PART_s *);
-void PartImpact_Basketball(PART_s *);
-void AddSlamDebris(GameObject_s *);
-void Batarang_Release(GameObject_s *, i32);
-void ThermalDetonator_Throw(GameObject_s *);
-void BobaRocket_Kill(PART_s *, i32);
-void BobaRocket_Deflect(PART_s *);
-extern f32 rocket_speed;
 i32 testlaser_type;
 f32 testlaser_endw = 0.1f;
 f32 testlaser_sizewab = 0.01f;
@@ -1575,17 +1399,12 @@ extern i16 id_MOUSEDROID;
 extern "C" {
     extern i16 id_BAT;
     extern i16 id_SNAKE;
-    extern i16 id_BASKETCANNON;
-    extern i16 id_R2Q5;
     extern i16 id_LANDSPEEDER;
     extern i32 FalconDebKey[2];
 }
 
 // Written by ThingManager's ctor (original global @0x124f2e0, .bss).
 
-void KeepOnScreen(GameObject_s *object);
-void Player_ClearContext(GameObject_s *object, i32 mode);
-void Player_ResetContexts(PLAYERPACKET_s *packet);
 
 
 
@@ -1668,7 +1487,6 @@ extern "C" {
 
 
 
-f32 GetVehicleHoverHeight(GameObject_s *, f32 *);
 extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER;
 
 
@@ -1678,7 +1496,6 @@ extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER;
 
 
 
-i32 CannotKill(GameObject_s *object);
 GIZMOBLOWUP_s *GizmoBlowUp_Hit(GameObject_s *, NUVEC *, i32, f32, NUVEC *, NUVEC *, BOLT_s *, u32, u8 *);
 
 
@@ -1695,15 +1512,12 @@ extern "C" {
 
 
 
-void ConstantRumble(GameObject_s *object, f32 strength, f32 phase);
 
 
 
 
 extern i16 id_PKDROID;
-GameObject_s *GetOtherActivePlayer(GameObject_s *);
 
-extern GameObject_s * CarWashHack;
 
 
 
@@ -1718,23 +1532,17 @@ GameObject_s *FindNearestGameObject(NUVEC *position, GameObject_s *exclude, u32 
 // ==== src/legoapi/actions/combat/fighting.cpp: declarations ====
 
 
-i32 NewBlockAction(GameObject_s *);
 
 
-void DeflectPart(PART_s *part, GameObject_s *object, float speed, float gravity, i32 deflect, i32 debris);
 
-bool IsDownSwipe(NuVec2 const &start, NuVec2 const &end);
 
-void SetWeaponOut(GameObject_s *);
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e4) == 0x7e4, "Quick shoot record offset");
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e8) == 0x7e8, "Quick shoot record count offset");
 DECOMP_ASSERT(offsetof(GameObject_s, quick_shoot_flags) == 0xe2f, "Quick shoot flags offset");
 DECOMP_ASSERT(offsetof(GameObject_s, quick_shoot_bolt_id) == 0xe3e, "Quick shoot bolt ID offset");
-void StartQuickShoot(GameObject_s *object, i32 action);
 
 
 
-void Punch_Hit(GameObject_s *attacker, GameObject_s *target, float, float gap);
 
 // ==== src/legoapi/characters/core/players.cpp: declarations ====
 struct HINT_s;
@@ -1749,11 +1557,6 @@ struct SOCKPOSITION_s;
 struct TouchHolder;
 
 
-extern f32 FindGunshipHoverHeight(GameObject_s *obj);
-extern f32 GetVehicleSpeedMul(GameObject_s *obj, f32 input);
-extern i32 ObjInNarrowSock(GameObject_s *obj, SOCKSYS *socks, i32 level);
-extern AREADATA *BATTLEOVERCORUSCANT_ADATA;
-f32 VehicleTurnOrLoopOffset(GameObject_s *object);
 
 
 // --- Helpers moved from world.cpp ---
@@ -1786,7 +1589,6 @@ static f32 sPreResetMulG = 0.035f;
 
 
 
-i32 PlayerItem_GotAmmo(PLAYERITEM_s *item);
 
 
 
@@ -1806,12 +1608,10 @@ namespace {
 
 
 
-void ResetPlayerPacket(PLAYERPACKET_s *, CHARACTERDATA_s *);
 
 
 
 
-GameObject_s *GetOtherActivePlayer(GameObject_s *object);
 
 DECOMP_ASSERT(sizeof(SPECIAL_LAYER_s) == 0xc, "SPECIAL_LAYER_s size");
 
@@ -1825,25 +1625,15 @@ DECOMP_ASSERT(sizeof(SPECIAL_LAYER_s) == 0xc, "SPECIAL_LAYER_s size");
 // ==== src/legoapi/actions/movement/pushing.cpp: declarations ====
 
 
-void FastWeaponIn(GameObject_s *, i32);
-i32 FaceOpponent(GameObject_s *, NUVEC *);
-extern AREADATA *EMPERORFIGHT_ADATA;
-
-void FindForcePushTarget(GameObject_s *object, i32 activate, i32 target_filter);
 
 
 
 
-void PlayLandSfx(GameObject_s *object, i32 variant, i32 force);
-void AlertSurroundingCreatures(GameObject_s *object, NUVEC *position);
 
-void PushCode(GameObject_s *object, i32 allow_push);
+
 
 // ==== src/legoapi/characters/motion/camera.cpp: declarations ====
 
-i32 OnOrInsidePlane(NUVEC *point, NUVEC *plane_point, NUVEC *plane_normal, NUVEC *corrected_point, f32 normal_offset,
-                    f32 *distance_out);
-extern AREADATA_s *BATTLEOVERCORUSCANT_ADATA;
 
 // Original data symbol testmovef is float0.005 at 0x617cb0.
 
@@ -1864,7 +1654,6 @@ extern "C" {
 
 extern "C" i16 id_LANDSPEEDER;
 extern i32 CUTCAMONLY, GUNSHIPAHACK, netcamera, complexsockposition_forcesock, movegamecamera_forcesock;
-f32 PodSprint_InStartCountdown(WORLDINFO_s *);
 GameObject_s *FindNearestGameObject(NUVEC *, GameObject_s *, u32, f32, f32, i32, i32, i32, f32 *, i32,
                                     i32 (*)(GameObject_s *), bool);
 
@@ -1882,20 +1671,15 @@ DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context fl
 
 
 
-i32 GoingForwardsAlongNarrowSock(GameObject_s *object);
 
 // ==== src/legoapi/audio/specialsfx.cpp: declarations ====
 
-void LetGoOfBalloon(GameObject_s *object);
 
 static u8 disorientAxis = 7;
 
-void Disorientate(GameObject_s *object, nuvec_s *);
 
 
-void EngineNoiseCode(GameObject_s *object, i32 silent);
 
-void StartTurn(GameObject_s *);
 
 
 
@@ -1910,10 +1694,8 @@ DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 
 
 
-extern i32 ObjInNarrowSock(GameObject_s *, SOCKSYS *, i32);
 i32 IDLESPEEDINNARROWSOCKSONLY = 0;
 
-f32 GetVehicleSpeedMul(GameObject_s *object, f32 speed);
 
 
 
@@ -1973,9 +1755,7 @@ extern "C" {
     extern "C++" FadeSystem FadeSys;
 }
 
-extern i32 TwistLevel(LEVELDATA_s *level);
 
-void ConstantRumble(GameObject_s *object, float strength, float phase);
 
 
 
@@ -2008,7 +1788,6 @@ extern "C" {
     // Random jitter applied to each grid point.
     // Only grid points between these radii from the arena centre are used.
     // Seed the arena's own random stream starts from, so a level lays out the same way each time.
-extern JEDIBNETPACKET_s * jedib_netpacket;
 }
 
 // --- File-local statics (original _ZL... symbols; not renamed) ---------------
@@ -2019,7 +1798,6 @@ DECOMP_ASSERT(sizeof(DOOKU_C_s) == 20, "Dooku C state ABI");
 
 DECOMP_ASSERT(sizeof(KAMINO_E_s) == 120, "Kamino E state ABI");
 
-i32 OnOrInsidePlane(NUVEC *, NUVEC *, NUVEC *, NUVEC *, f32, f32 *);
 
 // Episode 2 level handlers, in the game's Episode_II progression:
 // kamino / factory (geonosis droid factory) / jedi / gunship / bonus gunship /
@@ -2031,7 +1809,6 @@ i32 OnOrInsidePlane(NUVEC *, NUVEC *, NUVEC *, NUVEC *, f32, f32 *);
 // ===========================================================================
 
 
-extern i32 last;
 
 
 
@@ -2198,7 +1975,6 @@ extern "C" {
 // Pod sprint (Sebulba events)
 // ===========================================================================
 
-float PodSprint_InStartCountdown(WORLDINFO_s *world);
 
 
 
@@ -2250,19 +2026,11 @@ float PodSprint_InStartCountdown(WORLDINFO_s *world);
 
 
 
-extern void Player_ClearContext(GameObject_s *, i32);
-extern void Player_ResetContexts(PLAYERPACKET_s *);
-extern f32 LOOPTIME;
-extern void StartTurn(GameObject_s *object);
-extern GameObject_s *GetOtherActivePlayer(GameObject_s *object);
-extern i32 GoingForwardsAlongNarrowSock(GameObject_s *object);
 
-void LoopCode(GameObject_s *object, i32 jump_pressed, i32, GAMEPAD_s *pad, i32 allow_loop);
 
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 
 
-extern i32 testlaser_type;
 extern f32 testlaser_endw;
 extern f32 testlaser_sizewab;
 extern f32 testlaser_sizel;
@@ -2271,8 +2039,6 @@ extern f32 testlaser_sizew;
 extern "C" {
     extern i16 id_BAT;
     extern i16 id_SNAKE;
-    extern i16 id_BASKETCANNON;
-    extern i16 id_R2Q5;
     extern i16 id_LANDSPEEDER;
     extern i32 FalconDebKey[2];
 }
@@ -2341,15 +2107,10 @@ extern "C" {
 extern "C" {
 }
 
-void Player_ClearContext(GameObject_s *object, i32 context);
 
 
-extern "C" HOTHBATTLE_MELEE_s melee;
-i32 OnOrInsidePlane(NUVEC *point, NUVEC *plane_point, NUVEC *plane_normal, NUVEC *corrected_point, f32 normal_offset,
-                    f32 *distance);
 
 
-void AlertSurroundingCreatures(GameObject_s *object, nuvec_s *position);
 
 // ==== src/legoapi/ai/game/aipathcnxhelper.cpp: declarations ====
 
@@ -2369,7 +2130,6 @@ struct nuvec_s;
 
 // ==== src/legoapi/actions/character/simpletons.cpp: declarations ====
 
-i32 ObjInNarrowSock(GameObject_s *object, SOCKSYS *system, i32 level_index);
 
 
 
@@ -2486,15 +2246,11 @@ extern "C" {
 
 
 
-extern void Player_ClearContext(GameObject_s *object, i32 mode);
-
-extern void Player_ResetContexts(PLAYERPACKET_s *packet);
-
-extern EXPLOSION *Detonate(NUVEC *position, u16 flags);
 
 
 
-extern void FindForcePushTarget(GameObject_s *object, i32 held, i32 mode);
+
+
 
 
 
@@ -2834,8 +2590,6 @@ AddLocatorToSetAtEnd(EDLOCATORSET_s *set, EDLOCATOR_s *locator) __asm__(
 extern "C" {
     extern i16 id_BAT;
     extern i16 id_SNAKE;
-    extern i16 id_BASKETCANNON;
-    extern i16 id_R2Q5;
     extern i16 id_LANDSPEEDER;
     extern i32 FalconDebKey[2];
 }
@@ -2906,16 +2660,10 @@ extern "C" {
 
 
 
-i32 Action_ReleaseLocator(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
-                          i32 first_time, float);
 
 struct GIZSPINNER_s;
 
-i32 Action_GetLocatorFromSet(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,
-                             i32 param_count, i32 first_time, float);
 
-i32 Action_AssignLocatorInSet(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
-                              i32 first_time, float);
 
 namespace {
 #include "legoapi/gizmo/gizmos/gizmos_gizactions_types.h"
@@ -2959,7 +2707,6 @@ struct rtlidata_s;
 
 
 
-extern f32 FORCEGLOWTIME;
 
 
 struct GAMEMESSAGE_s;
@@ -2978,7 +2725,6 @@ struct VuVec;
 // Graphics loading flags
 
 extern "C" {
-    void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 }
 
 
@@ -3343,10 +3089,7 @@ extern "C" {
 // ==== src/legoapi/actions/character/transform.cpp: declarations ====
 
 
-extern "C" i16 id_MINISLAVE1;
 
-void TurnCodeCamSafe(GameObject_s *object, NUMTX *matrix);
-void ResetForceGlow(PLAYERPACKET_s *packet);
 
 
 
@@ -3381,7 +3124,6 @@ struct APICHARACTERMODELLIST_s;
 
 
 
-void UpdateSnakeBody(GameObject_s *object);
 
 
 #define ADD_SNAKE_SEGMENT_DEBRIS(index)                                                                                \
@@ -3425,24 +3167,16 @@ void UpdateSnakeBody(GameObject_s *object);
 
 // ==== src/legoapi/actions/movement/jumping.cpp: declarations ====
 
-void StartLunge(GameObject_s *, f32, f32);
-i32 Slam_Start(GameObject_s *, f32);
-void StartHold(GameObject_s *);
-void ComboHitFrame(GameObject_s *, i32);
 extern i32 (*Slam_GetDebrisFn)(GameObject_s *, i32);
 
 
-void PlayJumpSfx(GameObject_s *object, i32 variant);
-
-void FindSlamOrigin(GameObject_s *, NUVEC *, NUVEC *);
 
 
 
-void BigJumpCode(GameObject_s *object);
 
 
 
-void MakeJumpReachHeight(GameObject_s *object, float height, i32 force);
+
 
 
 // ==== src/legoapi/actions/movement/carrying.cpp: declarations ====
@@ -3487,8 +3221,6 @@ void MakeJumpReachHeight(GameObject_s *object, float height, i32 force);
 
 
 
-i32 OnOrInsidePlane(nuvec_s *point, nuvec_s *plane_point, nuvec_s *plane_normal, nuvec_s *corrected_point,
-                    float normal_offset, float *distance_out);
 
 
 
@@ -3507,14 +3239,11 @@ i32 OnOrInsidePlane(nuvec_s *point, nuvec_s *plane_point, nuvec_s *plane_normal,
 
 // ==== src/legoapi/gizmo/object/gizforce.cpp: all remaining content ====
 
-NUVEC *GetZapOrigin(GameObject_s *object);
 
 extern f32 ForceThrowGravity;
 
-void ReleaseForce(GameObject_s *object, i32 mode);
 
 
-void EndForce(GameObject_s *object, i32);
 
 // ==== src/legoapi/render/core/render.cpp: declarations ====
 
@@ -3527,7 +3256,6 @@ void EndForce(GameObject_s *object, i32);
 // Graphics loading flags
 
 extern "C" {
-    void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 }
 
 // --- NuGScn graphics-data reader ---
@@ -3653,7 +3381,6 @@ DECOMP_ASSERT(offsetof(TROOPERCANNON_s, rebuilding) == 0x2c, "Trooper cannon reb
 // ===========================================================================
 
 
-bool FireBountyHunterRocket(GameObject_s *object);
 
 
 
@@ -3662,12 +3389,10 @@ bool FireBountyHunterRocket(GameObject_s *object);
 extern BATARANG_s Batarang[8];
 
 
-void Batarang_Release(GameObject_s *object, i32 mode);
 
 
 
 
-void Batarang_MoveCode(GameObject_s *object);
 
 // ==== src/legoapi/gizmo/object/gizmoblowups.cpp: declarations ====
 
@@ -3721,7 +3446,6 @@ GIZMOBLOWUP_s *GizmoBlowUp_Hit(GameObject_s *object, NUVEC *points, i32 point_co
 // individual subsystem TUs intentionally expose their original plain names.
 extern "C" {
 
-    extern f32 animduration_blendouttime;
 }
 
 
@@ -3740,15 +3464,12 @@ extern "C" {
 
 
 extern "C" {
-    extern i16 id_R2Q5;
-    void PlaySfxAndSetVolume(char *, nuvec_s *, f32);
 }
 
 
 
 
 
-extern void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *data);
 
 // Retail keeps only the IPA-SRA clone, which receives &*layers.
 #if defined(__i386__)
@@ -3771,12 +3492,10 @@ extern void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *data);
 
 
 
-void SetProtocolDroidDeactivatedAction(GameObject_s *object);
 
 // ==== src/legoapi/props/objects/tubes.cpp: all remaining content ====
 
 
-void TractorBeamCode(GameObject_s *object);
 
 // ==== src/legoapi/misc/supportall.cpp: declarations ====
 // Original translation unit reconstructed from the reference address map.
@@ -3797,14 +3516,11 @@ extern i32 FalconDebKey[2];
 
 DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");
 
-void CatchUpCode(GameObject_s *object, f32 divisor, f32 maximum, i32 mode);
 
 
 
-void AddSlamDebris(GameObject_s *object);
 
 
-void RndrTexQuad3D(VuMtx const &matrix, i32 colour, numtl_s *material);
 
 extern "C" i16 id_LANDSPEEDER;
 
@@ -3817,7 +3533,6 @@ extern "C" i16 id_LANDSPEEDER;
 //   NuHtmlBegin    0x2d5ca0   NuHtmlFlush   0x2d5c30
 //   NuHtmlWrite    0x2d5cd0   NuHtmlHeading1 0x2d5d40
 extern "C" {
-extern char unknown[8];
 }
 
 
@@ -3841,8 +3556,6 @@ extern "C" {
 extern "C" {
     extern i16 id_BAT;
     extern i16 id_SNAKE;
-    extern i16 id_BASKETCANNON;
-    extern i16 id_R2Q5;
     extern i16 id_LANDSPEEDER;
     extern i32 FalconDebKey[2];
 }

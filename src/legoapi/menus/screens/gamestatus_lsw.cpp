@@ -137,6 +137,10 @@
 #include "nu2api/nu3d/nugscn.h"
 #include "legoapi/items/collect/minikits.h"
 #include "legoapi/misc/utilities.h"
+#include "legoapi/ai/game/creature.h"
+#include "legoapi/core/startup/text.h"
+#include "legoapi/misc/legoapi_status.h"
+#include "nu2api/nu3d/nu3d_includes.h"
 
 struct AIROW_s;
 struct nunativegscene_s;
@@ -145,75 +149,16 @@ struct SHOPINPUT;
 extern "C" STATUSPACKET_s StatusPacket;
 
 void IncreaseScore(u32 *, u64, i32);
-void FinishStatusPacket(i32);
-void Text_FillInExtendedSaveInfo();
-void DrawStatusBG_LSW(STATUSPACKET_s *);
-i32 InitStatusScreen_LSW(WORLDINFO_s *, STATUSPACKET_s *);
-i32 FinishStatusPacket_LSW(WORLDINFO_s *, STATUSPACKET_s *, i32);
-void ResetStatusPacket_LSW(STATUSPACKET_s *);
-void RegisterStatusScreen(STATUS_STAGE_s *, i32 *, REGISTERSTATUSPACKET_s *);
 
 extern i16 tCOINTOTAL;
 extern i16 tSELECT;
 extern i16 tSELECTING;
-void Status_DrawPromptMenu(STATUSPACKET_s *, i32, f32);
-f32 getFinishedStatusAlpha(STATUSPACKET_s *);
 f32 STATUS_TITLE_Y = 0.5f;
 
 f32 iconalphaoverride;
 f32 icon_y;
 i32 draw_player_icons;
 i32 status_prompt;
-void RedBrick_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32);
-void RedBrick_LSW_Update(STATUS_STAGE_s *, STATUSPACKET_s *, f32);
-void RedBrick_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *);
-void CollectCharcters_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32);
-void CollectCharcters_Update(STATUS_STAGE_s *, STATUSPACKET_s *, f32);
-void CollectCharcters_Skip(STATUS_STAGE_s *, STATUSPACKET_s *);
-void CollectCharactersOff_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32);
-void CollectCharactersOff_Update(STATUS_STAGE_s *, STATUSPACKET_s *, f32);
-void CollectCharactersOff_Skip(STATUS_STAGE_s *, STATUSPACKET_s *);
-void Coins_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32);
-void Coins_LSW_Update(STATUS_STAGE_s *, STATUSPACKET_s *, f32);
-void Coins_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *);
-void TrueHero_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32);
-void TrueHero_LSW_Update(STATUS_STAGE_s *, STATUSPACKET_s *, f32);
-void TrueHero_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *);
-void MiniKit_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32);
-void MiniKit_LSW_Update(STATUS_STAGE_s *, STATUSPACKET_s *, f32);
-void MiniKit_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *);
-void AllMiniKits_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32);
-void AllMiniKits_LSW_Update(STATUS_STAGE_s *, STATUSPACKET_s *, f32);
-void AllMiniKits_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *);
-void GoldBrick_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32);
-void GoldBrick_LSW_Update(STATUS_STAGE_s *, STATUSPACKET_s *, f32);
-void GoldBrick_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *);
-void LevelComplete_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32);
-void LevelComplete_LSW_Update(STATUS_STAGE_s *, STATUSPACKET_s *, f32);
-void LevelComplete_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *);
-void BonusTime_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32);
-void BonusTime_LSW_Update(STATUS_STAGE_s *, STATUSPACKET_s *, f32);
-void BonusTime_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *);
-void ChallangeCash_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32);
-void ChallangeCash_Update(STATUS_STAGE_s *, STATUSPACKET_s *, f32);
-void ChallangeCash_Skip(STATUS_STAGE_s *, STATUSPACKET_s *);
-void SuperStoryTime_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32);
-void SuperStoryTime_LSW_Update(STATUS_STAGE_s *, STATUSPACKET_s *, f32);
-void SuperStoryTime_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *);
-void SuperStoryScore_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32);
-void SuperStoryScore_LSW_Update(STATUS_STAGE_s *, STATUSPACKET_s *, f32);
-void SuperStoryScore_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *);
-void BonusComplete_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32);
-void BonusComplete_LSW_Update(STATUS_STAGE_s *, STATUSPACKET_s *, f32);
-void BonusComplete_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *);
-void BonusWin_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32);
-void BonusWin_LSW_Update(STATUS_STAGE_s *, STATUSPACKET_s *, f32);
-void BonusWin_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *);
-void Prompt_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32);
-void Prompt_LSW_Update(STATUS_STAGE_s *, STATUSPACKET_s *, f32);
-void Exit_LSW_Update(STATUS_STAGE_s *, STATUSPACKET_s *, f32);
-void Save_LSW_Update(STATUS_STAGE_s *, STATUSPACKET_s *, f32);
-void Fade_LSW_Update(STATUS_STAGE_s *, STATUSPACKET_s *, f32);
 
 STATUSPACKET_LSW_s StatusPacket_LSW;
 STATUS_STAGE_s StatusStages_LSW[] = {
@@ -255,63 +200,44 @@ STATUS_STAGE_s StatusStages_LSW[] = {
 };
 
 
-void NextStatusStage(STATUSPACKET_s *packet);
-
-void Prompt_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active);
 
 
-void Save_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+
 
 extern i16 tSUPERSTORYCOMPLETE, tNEWBESTTIME, tLEVELCOMPLETE, tMISSIONCOMPLETE;
 extern i16 tNONEWBESTTIME;
 extern i16 tNEWHIGHSCORE, tNONEWHIGHSCORE;
 extern i16 tCHALLENGECOMPLETE, tMINIKIT;
-i32 AddToCollection(i32);
 i32 newminikitcount;
 i32 currentminikit;
 
 
-void SetDrawGoldBrick(STATUSPACKET_s *packet, i32);
-
-void NewStatusRumbleBuzz(i32 player, float amount, float buzz, i32 priority);
-
-f32 StatusIconsOnOff(f32 progress);
 
 
-void Prompt_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+
+
 
 extern i32 STATUS_R, STATUS_G, STATUS_B;
 extern i16 tUNLOCKED;
-void RedBrick_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active);
 
-void RedBrick_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet);
 
 extern i16 tTRUEJEDI, tSTORY, tFREEPLAY;
 
-void TrueHero_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active);
-
-void TrueHero_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet);
 
 
 
 
-void FinishStatusPacket(i32 choice);
 
-void RedBrick_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+
 
 static f32 nextsoundpercent = 5.0f;
-void TrueHero_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
 
-void RegisterStatusScreen(STATUS_STAGE_s *stages, i32 *, REGISTERSTATUSPACKET_s *registration);
 
-void ResetStatusPacket_LSW(STATUSPACKET_s *packet);
 
 extern "C" {
 }
 
-f32 getFinishedStatusAlpha(STATUSPACKET_s *packet);
 
-void Status_DrawPromptMenu(STATUSPACKET_s *packet, i32 selected, float alpha);
 
 // Retail keeps this body as GCC's split-out clone; the inline head stays in
 // the caller.
@@ -319,9 +245,7 @@ static __attribute__((noinline, noclone)) void SuperStoryTime_LSW_DrawBody(STATU
     __asm__("_Z23SuperStoryTime_LSW_DrawP14STATUS_STAGE_sP14STATUSPACKET_si.part.12");
 
 
-void SuperStoryTime_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current);
 
-void SuperStoryTime_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet);
 
 // Retail keeps this body as GCC's split-out clone; the inline head stays in
 // the caller.
@@ -329,13 +253,9 @@ static __attribute__((noinline, noclone)) void SuperStoryScore_LSW_DrawBody(STAT
     __asm__("_Z24SuperStoryScore_LSW_DrawP14STATUS_STAGE_sP14STATUSPACKET_si.part.8");
 
 
-void SuperStoryScore_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current);
 
-void SuperStoryScore_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet);
 
-void SuperStoryTime_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
 
-void SuperStoryScore_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
 
 extern i16 tFREEPLAYUNLOCKED, tEPISODEVUNLOCKED, tEPISODEVIUNLOCKED, tBONUSUNLOCKED;
 extern i16 tOUTOFTIME, tYOUDIDNTCOLLECTALL10CANISTERS, tSTORYCLIPSUNLOCKED;
@@ -349,29 +269,14 @@ static __attribute__((noinline, noclone)) void LevelComplete_LSW_DrawActive(STAT
     __asm__("_Z22LevelComplete_LSW_DrawP14STATUS_STAGE_sP14STATUSPACKET_si.part.27");
 
 
-void LevelComplete_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active);
 
-void Coins_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active);
-void Coins_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet);
-void Coins_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
 extern i16 tWINNER;
-void DrawBonusTime(STATUSPACKET_s *, f32, i32);
 
-void BonusWin_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current);
-void BonusTime_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current);
-void ChallangeCash_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 draw);
-void BonusWin_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
-void BonusTime_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
-void ChallangeCash_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
-void BonusComplete_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current);
-void BonusComplete_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet);
-void BonusComplete_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
 
 // ==== src/legoapi/core/net/netplay.cpp: declarations ====
 
 
 
-void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *);
 
 // ==== src/legoapi/render/core/render.cpp: declarations ====
 
@@ -411,7 +316,6 @@ struct VuVec;
 
 
 extern "C" {
-    void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 }
 
 
@@ -478,7 +382,6 @@ extern "C" {
 
 extern i16 tNONEWBESTTIME, tNEWBESTTIME;
 
-void DrawBonusTime(STATUSPACKET_s *packet, float position, i32 alpha);
 
 
 
@@ -491,15 +394,11 @@ void DrawBonusTime(STATUSPACKET_s *packet, float position, i32 alpha);
 // red-brick positions come from the Game init values in legogame/game.cpp.
 
 
-void DrawStatusBG_LSW(STATUSPACKET_s *status);
 
 
 
 extern i32 currentminikit;
-extern f32 slideseek;
 
-void DrawStatusMiniKit(float x, float y, float z, float built_scale, float new_scale, i32 count, STATUSPACKET_s *packet,
-                       float slide);
 
 extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
 
@@ -563,7 +462,6 @@ extern "C" {
 
 
 
-extern void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *data);
 
 // Retail keeps only the IPA-SRA clone, which receives &*layers.
 #if defined(__i386__)
@@ -583,24 +481,15 @@ extern void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *data);
 
 
 
-void NextStatusStage(STATUSPACKET_s *);
-void NewStatusRumbleBuzz(i32, f32, f32, i32);
-void Collection_Draw(COLLECTION_s *, f32, f32, f32, APICHARACTERMODELLIST_s *, f32, i32);
-void Collection_GetPos(COLLECTION_s *, i32, f32 *, f32 *);
 f32 COLLECTION_Y_STATUS = -0.3f;
 static i32 playedappearsfx;
 static i32 playedmovesfx;
 
-void CollectCharcters_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active);
-
-void CollectCharcters_Skip(STATUS_STAGE_s *stage, STATUSPACKET_s *packet);
 
 
-void CollectCharcters_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
 
-void CollectCharactersOff_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active);
 
-void CollectCharactersOff_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+
 
 // ==== src/legoapi/cutscenes/cutscenes.cpp: declarations ====
 
@@ -630,33 +519,22 @@ extern "C" {
 
 
 
-f32 StatusIconsOnOff(f32);
-extern f32 icon_y;
 
-void Exit_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
 
-void Fade_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
 
 
 extern i32 STATUS_R;
 extern i32 STATUS_G;
 extern i32 STATUS_B;
-extern f32 iconalphaoverride;
 extern i16 tLEVELCOMPLETE, tFREEPLAYUNLOCKED, tSUPERSTORYCOMPLETE, tBONUSUNLOCKED;
 extern i16 tEPISODEVUNLOCKED, tEPISODEVIUNLOCKED, tCHALLENGECOMPLETE, tOUTOFTIME;
 extern i16 tYOUDIDNTCOLLECTALL10CANISTERS, tMISSIONCOMPLETE, tSTORYCLIPSUNLOCKED;
 
-void GoldBrick_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active);
 
-void GoldBrick_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet);
 
-void GoldBrick_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
 
-void LevelComplete_LSW_Skip(STATUS_STAGE_s *stage, STATUSPACKET_s *packet);
 
-void SetDrawGoldBrick(STATUSPACKET_s *, i32);
 
-void LevelComplete_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
 
 // ==== src/legoapi/items/collect/minikits.cpp: declarations ====
 
@@ -667,30 +545,19 @@ void LevelComplete_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, flo
 
 
 extern i32 currentminikit, newminikitcount;
-extern f32 jibberlen;
-void AddStatusMiniKitParts();
-void DrawStatusMiniKit(f32, f32, f32, f32, f32, i32, STATUSPACKET_s *, f32);
-extern f32 STATUS_TITLE_Y;
 extern i16 tMINIKIT;
 
-void MiniKit_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current);
-
-void MiniKit_LSW_Skip(STATUS_STAGE_s *stage, STATUSPACKET_s *packet);
 
 
-i32 UpdateNewMiniKits(STATUSPACKET_s *, STATUS_STAGE_s *stage);
 
-void MiniKit_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
+
 
 
 
 extern i16 tALLMINIKITSBUILT;
 
-void AllMiniKits_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current);
 
-void AllMiniKits_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet);
 
-void AllMiniKits_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed);
 
 
 

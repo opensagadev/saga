@@ -37,24 +37,20 @@
 #include "legoapi/menus/core/text.h"
 #include "legoapi/render/core/render.h"
 #include "legoapi/world/levels/levels.h"
+#include "legoapi/ai/core/gameai.h"
+#include "legoapi/items/collect/thermaldetonators.h"
+#include "legoapi/props/objects/zipup.h"
 
 struct AIROW_s;
 struct nunativegscene_s;
 
 MechWeakPtr<MechObjectInterface, 4> NextThermalTarget;
 
-void AlertSurroundingCreatures(GameObject_s *, NUVEC *);
-EXPLOSION *Detonate(nuvec_s *position, u16 flags);
 i32 MatrixReflection(NUMTX *matrix, i32 axis, f32 plane, f32 height, NUMTX *result);
 i32 SuperWeirdo(GameObject_s *object);
-void PartUpdate_ThermalDetonator(PART_s *part);
-void PartImpact_ThermalDetonator(PART_s *part);
-void PartKill_ThermalDetonator(PART_s *part, i32 reason);
-i32 PartDraw_ThermalDetonator(PART_s *part);
 extern i32 TERRAINMASK_NONWEAPON;
 extern "C" f32 brickimpactwait;
 
-void PartKill_ThermalDetonator(PART_s *part, i32);
 
 // ==== src/legoapi/menus/core/hint.cpp: declarations ====
 
@@ -67,7 +63,6 @@ void PartKill_ThermalDetonator(PART_s *part, i32);
 
 // Original local callbacks referenced by Hints_LSW.
 
-extern AREADATA *JABBASPALACE_ADATA;
 
 
 // Each control mode retains its own requested and interpolated hint row.

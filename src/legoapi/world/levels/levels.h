@@ -443,3 +443,26 @@ void Hub_DrawMiniKits(struct WORLDINFO_s *);
 void Hub_InitMiniKits(struct WORLDINFO_s *);
 void Hub_LockUnlockDoors(struct WORLDINFO_s *);
 void Hub_UpdateMiniKits(struct WORLDINFO_s *);
+
+// Declared here for the other units that use them.
+struct APICHARACTERMODELLIST_s;
+struct LEVEL_PROGRESS_s;
+struct SCENEPROGRESS_s;
+struct WORLDINFO_s;
+struct nufpcomjmp_s;
+struct nugscn_s;
+struct numtl_s;
+extern APICHARACTERMODELLIST_s PermModelList[1];
+extern char * TexAnimList_LSW[32];
+extern i32 PARTPAGE_GENERAL;
+extern nufpcomjmp_s LevelConfigKeywords_AfterLoad;
+extern numtl_s * lightningmat;
+extern void MakeFreePlayModelList(i32 first_model, i32 second_model, i32 area, i32 level, i32 include_bonus);
+i32 EffectOffProgress_Update(LEVEL_PROGRESS_s *progress, char *name, i32 visible);
+void CalculateWorldSize(WORLDINFO_s *world);
+void EffectOffProgress_Reset(LEVEL_PROGRESS_s *);
+void LevelProgress_ReserveBufferSpace(VARIPTR *buf, VARIPTR buf_end);
+void LoadPerm1();
+void LoadPerm2(void);
+void ResetScene(nugscn_s *, SCENEPROGRESS_s *);
+void StoreSceneProgress(nugscn_s *gscn, SCENEPROGRESS_s *progress, i32 param);

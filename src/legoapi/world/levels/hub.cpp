@@ -211,36 +211,17 @@
 #include "legoapi/cutscenes/minicamcut.h"
 #include "legoapi/props/objects/techno.h"
 #include "legoapi/characters/motion/camera_types.h"
+#include "editor/edlevelall.h"
+#include "gameapi/ai/aisys/gameaiscript.h"
+#include "legoapi/characters/motion/move.h"
+#include "legoapi/gizmos/transport/tubes.h"
+#include "legoapi/menus/core/hint.h"
+#include "legoapi/menus/screens/customise.h"
+#include "legoapi/world/levels/episodes.h"
+#include "legoapi/world/levels/hub.h"
+#include "legoapi/world/missions.h"
+#include "nu2api/nu3d/nu3d_includes.h"
 
-extern void Customiser_LoadAll(CUSTOMISER *, WORLDINFO_s *);
-extern void Customiser_Init(CUSTOMISER *);
-extern void Customiser_Reset(CUSTOMISER *);
-extern void Customiser_Draw3D(CUSTOMISER *);
-extern void Customiser_Update(CUSTOMISER *, WORLDINFO_s *);
-void Hub_ResetPanel();
-extern void DrawShop3D(WORLDINFO_s *);
-extern void CutScenePlayer_Reset();
-extern GAMESAVE_s TempGame;
-extern i32 shop_save_done;
-extern i32 only_process_this_hint_id;
-extern u8 show_unlock_shop_hint;
-extern void *GetHintFromUIButton();
-bool HubShopUnlocked();
-bool HubCustomiserUnlocked();
-extern i32 Customiser_MenuAvailable(CUSTOMISER *);
-extern GAMESAVE_s OldCustomiseGame;
-extern i32 customiser_save_done;
-extern i32 customiser_changed;
-extern u8 show_unlock_customiser_hint;
-extern i32 Missions_PartyAvailable(MISSIONSYS_s *);
-extern AREADATA *E1VEHICLE_ADATA;
-extern u8 show_unlock_minikitviewer_hint;
-bool HubMinikitViewerUnlocked();
-void Hub_ActivateDoorMenu(LEVELDATA_s **);
-AILOCATOR_s *LocalGetNearestLocator(AILOCATOR_s **, i32, f32, NUVEC *, f32, i32, f32, f32);
-extern i32 Episode_CountOpenAreas(i32, i32, AREASAVE_s *);
-extern void ResetForceBack();
-extern void MakeFreePlayModelList(i32 first_model, i32 second_model, i32 area, i32 level, i32 include_bonus);
 extern i16 tPLAY;
 
 // These two arrays are generic level-loader state rather than hub-owned state.
@@ -325,7 +306,6 @@ static i8 i_selectminikitepisode = 0;
 static i32 hub_minikitviewer_area = 0;
 static f32 hub_minikitviewer_alpha = 0.0f;
 extern f32 Hub_PadSpeed[2];
-extern u16 Hub_PadAngle[2];
 f32 hub_minikitviewer_movewait;
 f32 hub_minikitviewer_move;
 static NUVEC hub_minikitviewer_pos = {-27.0f, 0.1f, -22.125f};
@@ -346,10 +326,6 @@ extern i16 tBOUNTYHUNTERMISSIONS, tBOUNTYHUNTERMISSIONS2, tSTORYCLIPS2;
 extern i32 EpMiniKitCount, EpMiniKitTotal, EpCharKitCount, EpCharKitTotal, EpBuildUpCount, EpBuildUpTotal;
 extern i32 EpStoryBuildUpCount, EpStoryBuildUpTotal, EpFreePlayBuildUpCount, EpFreePlayBuildUpTotal;
 extern i32 EpRedBrickCount, EpRedBrickTotal, EpGoldBrickCount, EpGoldBrickTotal, EpCompleteCount;
-void DrawShopPanel();
-i32 Missions_NumCompleted(MISSIONSYS *, MISSIONSAVE *, i32);
-void Hub_DrawAreaStats(f32, i32, i32);
-void Collection_Draw(COLLECTION_s *, f32, f32, f32, APICHARACTERMODELLIST_s *, f32, i32);
 
 // Retail only has the IPA-SRA clone (the unused fourth argument dropped).
 static __attribute__((noinline, noclone)) void
@@ -380,9 +356,6 @@ static inline void Hub_SetStatsTextMtx(NUMTX *mtx, i32 angle) {
     mtx->m33 = 1.0f;
 }
 
-void Hub_ClearStats();
-void Hub_InitFreePlaySelect(i32, i32, i32);
-void WipeBackToHub();
 
 
 #if UINTPTR_MAX == 0xffffffff
@@ -583,12 +556,10 @@ static inline HUBAREAINFO_s *Hub_FindAreaInfoByIndex(i32 area) {
 
 
 
-void Hub_DrawAreaStats(f32 phase, i32 area_index, i32 mode);
 
 
 
 
-void Hub_ActivateDoorMenu(LEVELDATA_s **level);
 
 // All recovered callers use player zero and full opacity. Keeping this private
 // allows the compiler to specialize those constant arguments naturally.
@@ -600,12 +571,9 @@ Hub_DrawIconCursors(COLLECTION_s *collection,
 
 extern i16 tSELECT, tSELECTED, tSELECTING, tCONFIRMED, tYES, tNO;
 
-void Hub_DrawFreePlaySelect();
 
 
-void Hub_InitFreePlaySelect(i32 area, i32 first_model, i32 second_model);
 
-void Hub_UpdateFreePlaySelect();
 
 static void Hub_FindSpecial(WORLDINFO_s *world, nuhspecial_s *special, const char *name) {
     NuSpecialFind(world->current_gscn, special, const_cast<char *>(name), 1);
@@ -617,7 +585,6 @@ static void Hub_FindSpecial(WORLDINFO_s *world, nuhspecial_s *special, const cha
 // Private hub menu and drawing helpers.
 
 extern i16 tARCADE_NAME, tARCADE_NEEDTWOPLAYERS;
-extern ARCADE_LEVEL_s ArcadeLevel[12];
 
 
 
@@ -654,7 +621,6 @@ f32 BlipR[2] = {};
 f32 BlipU[2] = {};
 f32 BlipD[2] = {};
 
-void Hint_SetHintFromId(i32, i32, i32);
 extern i16 tCHALLENGE, tLOCKED;
 
 extern i16 tBESTTIME;
@@ -694,8 +660,6 @@ struct APICHARACTERMODELLIST_s;
 
 
 
-void Collection_Draw(COLLECTION_s *collection, float x, float y, float scale, APICHARACTERMODELLIST_s *models,
-                     float alpha, i32 hide_selected);
 
 
 
@@ -703,8 +667,6 @@ void Collection_Draw(COLLECTION_s *collection, float x, float y, float scale, AP
 
 
 
-extern i32 freeplaymode;
-extern i32 freeplay_selected[2];
 
 
 
@@ -728,7 +690,6 @@ extern i16 tSELECTING;
 u16 hub_iconang[4] = {};
 static f32 hub_icontime[4] = {};
 static i32 hub_icondang[4] = {};
-void LevelComplete_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32);
 
 
 
@@ -766,7 +727,6 @@ extern "C" {
 // Retail keeps the active-stage drawing as the split-out .part clone of
 // LevelComplete_LSW_Draw; the inline head only tests `active`.
 
-void LevelComplete_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active);
 
 // ==== src/legoapi/gizmo/base/gizmo_sys.cpp: declarations ====
 
@@ -776,18 +736,14 @@ struct FLOWBOX_s;
 
 // ==== src/legoapi/menus/core/gamehint.cpp: declarations ====
 
-extern f32 ICONXPOS_TOUCHYFEELY;
-extern f32 ICONYPOS_TOUCHYFEELY;
 static NUVEC PercentHint_TriggerPos = {-28.421f, 0.0f, -52.462f};
 
-void MechHintUIButton_OnClick_Callback(MechTouchUIElement &, TouchHolder &);
 
 #include "legoapi/menus/core/gamehint_types.h"
 DECOMP_ASSERT(sizeof(MechHintUIButton) == 0xa8, "MechHintUIButton size");
 DECOMP_ASSERT(offsetof(MechHintUIButton, pending_hint) == 0x7c, "Pending touch hint offset");
 DECOMP_ASSERT(offsetof(MechHintUIButton, display_elapsed) == 0x80, "Touch hint display timer offset");
 
-void MechHintUIButton_OnClick_Callback(MechTouchUIElement &element, TouchHolder &);
 
 
 
@@ -799,7 +755,6 @@ void MechHintUIButton_OnClick_Callback(MechTouchUIElement &element, TouchHolder 
 
 
 
-void Hint_SetHintFromId(i32 hint_id, i32 force, i32 allow_completed);
 
 
 // Static game message and hint helpers. Stubbed to satisfy the symbol baseline.
@@ -815,7 +770,6 @@ void Hint_SetHintFromId(i32 hint_id, i32 force, i32 allow_completed);
 
 // Original local callbacks referenced by Hints_LSW.
 
-void *GetHintFromUIButton();
 
 
 
@@ -834,7 +788,6 @@ extern i16 tCHAPTER;
 
 
 
-void CutScenePlayer_Reset();
 
 
 
@@ -1109,7 +1062,6 @@ extern "C" {
 
 
 
-void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
     DECOMP_ASSERT(sizeof(NuInstanceTreeNode) == 0x0c, "instance tree node stride");
     DECOMP_ASSERT(sizeof(NuInstanceTreeBounds) == 0x20, "instance tree bounds stride");
     DECOMP_ASSERT(sizeof(NuInstanceTree_s) == 0x28, "instance tree size");
@@ -1184,7 +1136,6 @@ union variptr_u;
 // calling conventions; keep their shared animation-mode call sites intact.
 
 extern i16 id_GAMORREANGUARD, id_PRINCESSLEIASLAVE, id_LAMASU, id_TAUNWE;
-extern f32 hub_jabbaawake;
 
 
 
@@ -1366,7 +1317,6 @@ extern "C" {
 
 
 extern "C" {
-    void PlaySfxById(i32 sfx_id, nuvec_s *position);
 }
 
 // Retail only keeps the split-out body of the IPA-SRA clone (the unused
@@ -1465,7 +1415,6 @@ void NuSetCutSceneDestroyCharactersFn(void (*callback)(NUGCUTSCENE_s *));
 
 extern f32 HUB_EPISODETITLEY;
 extern i16 tSELECT, tSELECTED, tSELECTING;
-extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 extern i16 tBACK;
 extern i16 tSTORY;
 extern i16 tFREEPLAY;
@@ -1477,10 +1426,6 @@ extern i16 tLOCKED;
 extern void (*drawslotinfofn)(f32, f32, i32, i32);
 extern void (*drawslotsfn)(MENU *, f32);
 
-extern i32 hub_new_level;
-extern i32 hub_selectmode;
-extern f32 selectmodetime;
-extern i32 selectmodemode;
 
 
 
@@ -1566,7 +1511,6 @@ struct VuVec;
 
 
 extern "C" {
-    void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 }
 
 
@@ -1767,7 +1711,6 @@ void SaveSystemInitialise(i32 slots, void *makeSaveHash, void *save, i32 saveSiz
 
 extern void (*FS_Callback)(char *, char *);
 
-void SerialiseString(EdStream &stream, void *data, i32 count);
 
 // Retail keeps the whole body of RenderFileSel3 as the split-out .part clone;
 // the exported function only tests FS_Active.
@@ -1782,7 +1725,6 @@ extern "C" void StartFileSel(char *title, char *path, char *filter, char *filter
                              void (*callback)(char *, char *));
 
 
-i32 LoadState(i32, variptr_u *, variptr_u *, variptr_u *, variptr_u *, variptr_u *, variptr_u *);
 
 extern "C" {
 
@@ -1833,7 +1775,6 @@ void TextRegisterPulseTimerFn(f32 (*fn)(f32));
 
 
 extern "C" {
-    extern i32 edbits_part_level_page;
 }
 
 extern "C" {
@@ -1908,7 +1849,6 @@ struct rtlset;
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -2323,15 +2263,12 @@ static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ..
 #endif
 
 extern EdInputContext * Input;
-extern "C" void PlaySfxById(i32, nuvec_s *);
 
-void SerialiseString(EdStream &, void *, i32);
 
 extern f32 Scale;
 DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
 
 extern "C" {
-    extern i32 edpp_readout;
 }
 
 
@@ -2777,7 +2714,6 @@ extern "C" {
 
 
 
-void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
     DECOMP_ASSERT(sizeof(NuInstanceTreeNode) == 0x0c, "instance tree node stride");
     DECOMP_ASSERT(sizeof(NuInstanceTreeBounds) == 0x20, "instance tree bounds stride");
     DECOMP_ASSERT(sizeof(NuInstanceTree_s) == 0x28, "instance tree size");
@@ -2874,7 +2810,6 @@ extern "C" {
 extern "C" i16 id_LANDSPEEDER;
 extern f32 newgamecamtime, cutscenecam_focalLength, CamStopBlend, EMPERORFIGHTA_CAMDYHACK;
 extern i32 CUTCAMONLY, GUNSHIPAHACK, netcamera, complexsockposition_forcesock, movegamecamera_forcesock;
-extern NUGSPLINE *hub_minikitviewer_camspl;
 GameObject_s *FindNearestGameObject(NUVEC *, GameObject_s *, u32, f32, f32, i32, i32, i32, f32 *, i32,
                                     i32 (*)(GameObject_s *), bool);
 
@@ -2947,7 +2882,6 @@ extern "C" {
 // Graphics loading flags
 
 extern "C" {
-    void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 }
 
 // --- NuGScn graphics-data reader ---
@@ -3381,7 +3315,6 @@ extern "C" {
 
 
 
-void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
     DECOMP_ASSERT(sizeof(NuInstanceTreeNode) == 0x0c, "instance tree node stride");
     DECOMP_ASSERT(sizeof(NuInstanceTreeBounds) == 0x20, "instance tree bounds stride");
     DECOMP_ASSERT(sizeof(NuInstanceTree_s) == 0x28, "instance tree size");

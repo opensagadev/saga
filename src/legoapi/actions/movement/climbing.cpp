@@ -294,17 +294,18 @@
 #include <cfloat>
 #include "legoapi/characters/motion/chris.h"
 #include "legoapi/actions/combat/shovesys.h"
+#include "gameapi/ai/aisys/gameaiscript.h"
+#include "legoapi/actions/movement/climbing.h"
+#include "legoapi/characters/motion/move.h"
+#include "legoapi/menus/core/hint.h"
+#include "legoapi/world/levels/episodeV.h"
 struct CLIMBOBJECT_s;
 
-void Climb_SetMagnetAction(GameObject_s *);
-void Climb_SetMagnetDrawOffsetTarget(GameObject_s *, NUVEC *);
 
 f32 MAGNETOFFSET;
 
 
-void Climb_SetMagnetAction(GameObject_s *object);
 
-void Climb_SetMagnetDrawOffsetTarget(GameObject_s *object, nuvec_s *offset);
 
 
 static __used__ void ClimbObject_FindNormal(CLIMBOBJECT_s *object);
@@ -325,12 +326,6 @@ i32 LedgeTerrain_CheckAnims = 1;
 // Original action/context lookup data, with its arrays and pointers in one owner.
 
 
-void SetWeaponOut(GameObject_s *object);
-void SetWeaponIn(GameObject_s *object);
-void SlowWeaponIn(GameObject_s *object);
-void FastWeaponIn(GameObject_s *object, i32 sound);
-void SlowWeaponOut(GameObject_s *object);
-void FastWeaponOut(GameObject_s *object, i32 sound);
 // Retail keeps several of this file's static helpers only as GCC clones; these
 // declarations pin the clone names and register conventions.
 #if defined(__i386__)
@@ -342,8 +337,6 @@ void FastWeaponOut(GameObject_s *object, i32 sound);
 #endif
 
 // Retail keeps only the IPA-SRA clone of this function.
-i32 PodLevel(AREADATA_s *);
-extern "C" i16 id_DODGEM;
 
 // Multiplies the ordinary camera's per-frame position blend.  The original
 // keeps this as writable camera state (default 1.0), rather than folding it
@@ -353,7 +346,6 @@ extern "C" {
 }
 
 
-i32 PodLevel(AREADATA_s *area);
 
 // Retail splits the guard off as an inline head; the rest is this partial clone.
 
@@ -364,7 +356,6 @@ extern "C" i16 id_LANDSPEEDER;
 
 // These pod tuning values are zero-initialized in the original image.
 
-extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 
 // Retail re-tests the three block animations at each use instead of caching a flag.
 #define HAS_BLOCK_ANIMS(animations)                                                                                    \
@@ -384,7 +375,6 @@ DECOMP_ASSERT(sizeof(AWKWARDSHAPESPHERE_s) == 12, "Awkward shape sphere size");
 DECOMP_ASSERT(offsetof(AWKWARDSHAPESPHERE_s, radius) == 8, "Awkward shape sphere radius offset");
 
 extern i16 id_MINIATST, id_MINIATTE;
-void SetWeaponIn(GameObject_s *);
 
 // ==== src/legoapi/characters/motion/gameanim.cpp: declarations ====
 
@@ -397,7 +387,6 @@ void SetWeaponIn(GameObject_s *);
 // ==== src/legoapi/world/levels/episodeV.cpp: declarations ====
 
 
-extern AILOCATOR_s * locator;
 
 DECOMP_ASSERT(sizeof(HOTHBATTLEE_NETPACKET_s) == 0x58, "Hoth panel packet size");
 DECOMP_ASSERT(offsetof(HOTHBATTLEE_NETPACKET_s, alpha) == 0x24, "Hoth panel packet alpha offset");
@@ -421,7 +410,6 @@ DECOMP_ASSERT(sizeof(ASTEROIDCNETPACKET_s) == 8, "asteroid C network packet size
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -505,7 +493,6 @@ inline void ThingManager::operator delete(void *thing, usize size) {
 // ==== src/legoapi/actions/combat/fighting.cpp: declarations ====
 
 
-void SetWeaponOut(GameObject_s *);
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e4) == 0x7e4, "Quick shoot record offset");
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e8) == 0x7e8, "Quick shoot record count offset");
 DECOMP_ASSERT(offsetof(GameObject_s, quick_shoot_flags) == 0xe2f, "Quick shoot flags offset");
@@ -534,7 +521,6 @@ DECOMP_ASSERT(sizeof(SPECIAL_LAYER_s) == 0xc, "SPECIAL_LAYER_s size");
 
 // ==== src/legoapi/actions/movement/pushing.cpp: declarations ====
 
-void FastWeaponIn(GameObject_s *, i32);
 
 
 // ==== src/legoapi/characters/motion/camera.cpp: declarations ====
@@ -1019,15 +1005,9 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 // ==== src/legoapi/gizmo/gizmos/gizmos_gizactions.cpp: declarations ====
 
-i32 Action_ReleaseLocator(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
-                          i32 first_time, float);
 
 
-i32 Action_GetLocatorFromSet(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,
-                             i32 param_count, i32 first_time, float);
 
-i32 Action_AssignLocatorInSet(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
-                              i32 first_time, float);
 
 namespace {
 #include "legoapi/gizmo/gizmos/gizmos_gizactions_types.h"
@@ -1389,7 +1369,6 @@ extern "C" {
 
 // ==== src/legoapi/characters/core/playeritems.cpp: declarations ====
 
-void ResetCharacterIdle(GameObject_s *object, i32 mode, i32 animation);
 i32 (*Fighting_WeaponInActionFn)(GameObject_s *) = NULL;
 i32 (*Fighting_WeaponOutActionFn)(GameObject_s *) = NULL;
 
@@ -1413,7 +1392,6 @@ static inline void FastWeaponInSfx(GameObject_s *object) {
     }
 }
 
-void FastWeaponIn(GameObject_s *object, i32 force_sound);
 
 static inline void FastWeaponOutSfx(GameObject_s *object) {
     if (object->weapon_scale_state == WEAPON_SCALE_EXTENDING)
@@ -1435,7 +1413,6 @@ static inline void FastWeaponOutSfx(GameObject_s *object) {
     }
 }
 
-void FastWeaponOut(GameObject_s *object, i32 force_sound);
 
 // ---- Player start spawn entries ----
 
@@ -1484,7 +1461,6 @@ extern "C" {
 
 }
 
-void LoadPerm1();
 
 // ==== src/legoapi/menus/screens/gamemenuall.cpp: declarations ====
 
@@ -1608,7 +1584,6 @@ extern "C" {
 
 extern "C" {
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -1921,7 +1896,6 @@ static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ..
 
 
 extern EdInputContext * Input;
-extern "C" void PlaySfxById(i32, nuvec_s *);
 
 DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
 
@@ -2547,7 +2521,6 @@ extern "C" {
 
 extern "C" {
 
-void PlaySfxById(i32 sfx_id, nuvec_s *position);
 
 
 } // extern "C"
@@ -2630,17 +2603,13 @@ extern "C" {
 
 // ==== src/legoapi/menus/core/gamehint.cpp: declarations ====
 
-extern f32 ICONXPOS_TOUCHYFEELY;
-extern f32 ICONYPOS_TOUCHYFEELY;
 
-void MechHintUIButton_OnClick_Callback(MechTouchUIElement &, TouchHolder &);
 
 #include "legoapi/menus/core/gamehint_types.h"
 DECOMP_ASSERT(sizeof(MechHintUIButton) == 0xa8, "MechHintUIButton size");
 DECOMP_ASSERT(offsetof(MechHintUIButton, pending_hint) == 0x7c, "Pending touch hint offset");
 DECOMP_ASSERT(offsetof(MechHintUIButton, display_elapsed) == 0x80, "Touch hint display timer offset");
 
-void MechHintUIButton_OnClick_Callback(MechTouchUIElement &element, TouchHolder &);
 
 // Static game message and hint helpers. Stubbed to satisfy the symbol baseline.
 
@@ -2850,7 +2819,6 @@ extern "C" {
 
 extern "C" {
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -3453,7 +3421,6 @@ extern "C" {
 
 extern "C" {
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -3966,12 +3933,10 @@ extern "C" {
 // ==== src/legoapi/menus/screens/gamestatus_lsw.cpp: declarations ====
 
 
-void LevelComplete_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32);
 
 // Retail keeps the active-stage drawing as the split-out .part clone of
 // LevelComplete_LSW_Draw; the inline head only tests `active`.
 
-void LevelComplete_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active);
 
 // ==== src/legoapi/menus/screens/shop.cpp: declarations ====
 
@@ -4006,7 +3971,6 @@ extern "C" {
 
 extern "C" {
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -4196,7 +4160,6 @@ extern "C" {
 // ==== src/legoapi/cutscenes/cutscenes.cpp: declarations ====
 
 extern "C" {
-    void PlaySfxById(i32 sfx_id, nuvec_s *position);
 }
 
 // Retail only keeps the split-out body of the IPA-SRA clone (the unused
@@ -4215,7 +4178,6 @@ extern "C" {
 // ==== src/legoapi/cutscenes/cutscenes.cpp: declarations ====
 
 extern "C" {
-    void PlaySfxById(i32 sfx_id, nuvec_s *position);
 }
 
 // ==== src/legoapi/items/collect/bolts.cpp: declarations ====

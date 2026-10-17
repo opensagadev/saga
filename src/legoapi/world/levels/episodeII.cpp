@@ -144,10 +144,14 @@
 #include "legoapi/props/objects/signal.h"
 #include "legoapi/props/objects/tightrope.h"
 #include "gameapi/edtools/edfile.h"
+#include "legoapi/ai/game/creature.h"
+#include "legoapi/cutscenes/gcutscn.h"
+#include "legoapi/gizmos/traps/gizturret.h"
+#include "legoapi/misc/utilities.h"
+#include "legoapi/world/levels/episodeII.h"
+#include "nu2api/nu3d/nu3d_includes.h"
 
 struct instNUGCUTSCENE_s;
-extern "C" i32 instNuGCutSceneIsFinished(instNUGCUTSCENE_s *);
-GIZMO *GizmoFindByData(GIZMOSYS *, i32, void *);
 extern f32 TimerScale, TimerAlpha;
 extern nuhspecial_s disco_on_spin[3], walllights_disco[2], walllights[2], striplights[2], discolights[2],
     discorm_wall_off, discorm_wall_on;
@@ -162,7 +166,6 @@ extern "C" {
     void *AIPAthFindPathCnx(AISYS_s *, AIPATH_s *, char *, char *, i32 *); // legoapi/ai pathfinding
 }
 
-void ClearAICreatures();
 // Defined in gameapi/edtools/edtoolsall.cpp, which has no header yet.
 
 struct JEDIBNETPACKET_s;
@@ -208,7 +211,6 @@ static DOOKU_C_s dooku_c;
 DECOMP_ASSERT(sizeof(KAMINO_E_s) == 120, "Kamino E state ABI");
 static KAMINO_E_s kamino_e;
 
-i32 OnOrInsidePlane(NUVEC *, NUVEC *, NUVEC *, NUVEC *, f32, f32 *);
 
 // Episode 2 level handlers, in the game's Episode_II progression:
 // kamino / factory (geonosis droid factory) / jedi / gunship / bonus gunship /
@@ -220,7 +222,6 @@ i32 OnOrInsidePlane(NUVEC *, NUVEC *, NUVEC *, NUVEC *, f32, f32 *);
 // ===========================================================================
 
 
-GIZTURRET_s *GizTurret_FindByName(GIZTURRETSYS_s *, char *);
 nuhspecial_s walllights[2], walllights_disco[2], striplights[2], discolights[2];
 nuhspecial_s discorm_wall_on, discorm_wall_off;
 GIZMO *gizTurrets[2];
@@ -406,7 +407,6 @@ struct VuVec;
 // Graphics loading flags
 
 extern "C" {
-    void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 }
 
 
@@ -475,9 +475,6 @@ extern "C" {
 
 
 
-extern nuhspecial_s green_light;
-extern nuhspecial_s painttargetcolour[3];
-extern nuhspecial_s paintlights[3];
 
 
 
@@ -554,7 +551,6 @@ DECOMP_ASSERT(offsetof(GIZMOTYPES, types) == 8, "Gizmo type-table pointer offset
 
 
 
-GIZMO *GizmoFindByData(GIZMOSYS *gizmo_sys, i32 type_id, void *data);
 
 i32 PAINTPUZZLESTAGE;
 i32 played_sound;

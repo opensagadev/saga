@@ -33,6 +33,8 @@
 #include "legoapi/render/fx.h"
 #include "nu2api/nucore/nuhgobj.h"
 #include "nu2api/nu3d/nurndr.h"
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/items/fx/explosions.h"
 
 GRABBER_s *Grab_grabber;
 
@@ -65,7 +67,6 @@ extern "C" {
 
 extern ADDPART_s Default_ADDPART;
 extern "C" PART_s *AddPart(ADDPART_s *);
-void PartKill_Grabber(PART_s *, i32);
 // Retail only has the IPA-SRA clone of this function.
 static __attribute__((noinline, noclone)) void Grabber_Drop(GRABBER_s *grabber, NUVEC *previous_position)
     __asm__("_ZL12Grabber_DropP9GRABBER_sP7nuvec_s.isra.4");
@@ -81,15 +82,12 @@ u16 GamePad_InputAngle(GameObject_s *, GAMEPAD_s *);
 f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
 void FindAnglesZX(NUVEC *, u16 *, u16 *);
 i32 qrand();
-void ConstantRumble(GameObject_s *, f32, f32);
 void NewRumbleAllPlayers(f32, f32, i32, i32);
 void Hint_SetComplete(i32);
 GIZMOBLOWUP_s *FindNearestGizmoBlowUp(WORLDINFO_s *, NUVEC *, f32);
 
 extern i32 obstacle_gizmotype_id;
 
-EXPLOSION *AddExplosion(NUVEC *, f32, f32, GameObject_s *, i32, i32);
-void PartKill_Grabber(PART_s *part, i32);
 
 void EnableShadowMapRendering(i32);
 void ResetShadowMapRendering();

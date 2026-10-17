@@ -29,6 +29,9 @@
 #include <stdio.h>
 #include <string.h>
 #include "legoapi/render/core/rtl_types.h"
+#include "gameapi/edtools/edtoolsall.h"
+#include "legoapi/render/light/lighting.h"
+#include "nu2api/nu3d/nu3d_includes.h"
 
 struct nuqtdim_s;
 struct nuqthdr_s;
@@ -53,7 +56,6 @@ f32 edrtl_text_scale = 1.0f;
 static f32 default_modifiers = 1.0f;
 f32 *modifiers = &default_modifiers;
 i32 modifier_cnt = 1;
-extern char **modifier_names;
 static i32 curFogLoc = -1;
 f32 rtltimer1adv = 2500.0f;
 static i32 numsegs = 16;
@@ -186,8 +188,6 @@ void edrtlInitBurnset(burnset_s *set) {
 }
 
 extern "C" {
-    void rtlSetAssocName(i32 index, char *name);
-    void rtlSetUserIdName(i32 index, char *name);
 
     i32 rtlFindByUserId(usize rtl_set, i32 user_id) {
         if (rtl_set != 0) {
@@ -1195,11 +1195,8 @@ static __used__ void rtlProcessLight(rtl_s *light, f32 elapsed) {
 
 extern "C" {
 
-char *rtlGetEnvPath(void);
 
-char *rtlGetEnvSceneName(void);
 
-rtlset *rtlGetEnvSet(void);
 
     void rtlProcessLights(void *set, f32 frame_time) {
         rtl_s *light;
@@ -1448,7 +1445,6 @@ typedef rtlfog_s EDRTLFOG_s;
 rtlfog_s *curr_fog;
 rtl_s clipboard_light;
 rtlfog_s clipboard_fog;
-extern f32 *modifiers;
 static f32 game_nearclip;
 static f32 game_farclip;
 static i32 rtl_zoff;
@@ -1457,13 +1453,7 @@ static rtl_s menu_undo;
 i32 delete_menu_active;
 
 extern "C" {
-    void AddColourPick(eduimenu_s *, eduiitem_s *, f32 *, f32 *, f32 *, u32 *);
-    void CreateColourPicker();
-    void cbCancelSubMenu(eduimenu_s *, eduimenu_s *);
-    void cbCancelSubMenuFromItem(eduimenu_s *, eduiitem_s *, u32);
-    void cbTriggerSubMenu(eduimenu_s *, eduiitem_s *, u32);
     void cbModifierAdjust(eduimenu_s *, eduiitem_s *, u32);
-    void cbNearClipAtCursor(eduimenu_s *, eduiitem_s *, u32);
 }
 
 static char *default_modifier_names[] = {"default"};
@@ -2337,7 +2327,6 @@ i32 edrtlBurnoutSave(char *filename, burnset_s *set) {
     }
     return 0;
 }
-void edrtlDetermineNearestBurn(float distance, burnset_s *set);
 
 i32 edrtlBurnoutLoadSet(char *filename, burnset_s *set) {
     i32 max_version = 5;
@@ -3637,7 +3626,6 @@ extern "C" void edrtlCalculateBurnoutEx(burnset_s *set, NuBloomParameters *param
                           camera_position, frame_time);
 }
 
-extern "C" void NuRndrRect2di(i32, i32, i32, i32, i32, numtl_s *);
 
 static void edrtlRndrLine3d(nuvtx_tc1_s *vertices, numtl_s *, numtx_s *matrix) {
     NUMTX *transform;
@@ -3706,7 +3694,6 @@ static void edrtlDrawCursor() {
     edrtlRndrLine3d(line, mtls[0], NULL);
 }
 
-extern "C" void edrtlDrawLightEx(i32, i32);
 
 extern "C" void edrtlDrawLight(i32 index) {
     edrtlDrawLightEx(index, 0);

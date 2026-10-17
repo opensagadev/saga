@@ -54,3 +54,11 @@ i32 AllMiniKitsDone(AREASAVE_s *save);
 i32 Collection_GetIDList(COLLECTION_s *collection, u32 model_flag_mask, u32 required_model_flags, i16 *ids,
                          i32 *first_id, i32 *second_id, i32 unused);
 COLLECTION_s *GetFreePlayCollection(i32 area);
+
+// Declared here for the other units that use them.
+struct APICHARACTERMODELLIST_s;
+struct COLLECTION_s;
+extern void (*Collection_GetSelectingPlayerIDsFn)(i16 *);
+i32 AddToCollection(i32 id);
+void Collection_Draw(COLLECTION_s *, f32, f32, f32, APICHARACTERMODELLIST_s *, f32, i32);
+void Collection_GetPos(COLLECTION_s *, i32, f32 *, f32 *);

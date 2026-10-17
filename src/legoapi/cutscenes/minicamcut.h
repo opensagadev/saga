@@ -78,3 +78,9 @@ void Minicam_ResetForNextCommand();
 void MiniCam_ChangeMode(i32 mode);
 void Minicam_InitSystem();
 void Minicam_AddCommand(i32 type, f32 duration, i32 argument, void *target, nuvec_s position);
+
+// Declared here for the other units that use them.
+struct nugspline_s;
+extern i32 ObstacleCamTargetGuid;
+extern nugspline_s ObstacleCamCutSpline;
+void GameCameraMakeMiniCut(nugspline_s *spline, f32 start, f32 end, f32 blend_in, f32 blend_out, i32 borders, i32 hold_until_players_move);

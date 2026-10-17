@@ -73,3 +73,20 @@ void CutScene_DrawSubtitles();
 extern "C" void instNuGCutSceneEnd(instNUGCUTSCENE_s *instance);
 
 #endif
+
+// Declared here for the other units that use them.
+struct CUTINFO;
+struct CUTSCENESYS;
+struct CUTSYS;
+struct WORLDINFO_s;
+extern CUTSYS *CS_cutsys;
+extern i32 ACTIVECUTCOUNT;
+extern i32 CutInstEndCount;
+extern u8 cutskip_dontplaylevelintro;
+extern void *CutScene_FindInst(CUTSYS *, char *);
+extern void CutScenePlayer_Reset();
+void CutScenePlayer_SetObjects(CUTINFO *);
+void CutScene_StartAudio();
+void CutScenes_Destroy(CUTSYS *system);
+void CutScenes_InitSystem(CUTSCENESYS *);
+void CutScenes_Reset(WORLDINFO_s *);

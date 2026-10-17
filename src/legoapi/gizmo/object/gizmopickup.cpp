@@ -124,6 +124,10 @@
 #include "batman.h"
 #include "legoapi/ai/core/gameai.h"
 #include "legoapi/characters/core/playeritems.h"
+#include "legoapi/lib/camera.h"
+#include "legoapi/menus/core/hint.h"
+#include "legoapi/render/core/gameliball.h"
+#include "legogame/game.h"
 
 static void Pup_CollectCharKit(WORLDINFO_s *, GIZMOPICKUP_s *pickup, i32, GameObject_s *object, i32);
 
@@ -291,7 +295,6 @@ extern "C" {
 
 
 
-void ConstantRumble(GameObject_s *object, f32 strength, f32 phase);
 
 
 
@@ -361,7 +364,6 @@ struct rtlset;
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -373,10 +375,7 @@ struct spacelevel_s;
 // (GIZFLOW_s/FLOWBOX_s), power-up and space/starfighter helpers. Stubbed as
 // local `t` symbols matching res/libTTapp.so.
 
-void SetCoinType(i32 model, GIZMOPICKUP_s *pickup);
-u16 GameCam_GetAdjustedYRot(GAMECAMERA_s *camera);
 
-extern "C" void PlaySfxAndSetVolume(char *, NUVEC *, f32);
 
 static __used__ void PartImpact_Coin(PART_s *part);
 
@@ -451,25 +450,16 @@ extern "C" {
 
 
 
-void PartCollide_2D(PART_s *);
-void PartUpdate_Heart(PART_s *);
-
-void AddTorpedoAsPart(nuvec_s *position, nuvec_s *velocity, float scale, float lifetime);
-
-void AddHeartAsPart(GameObject_s *recipient, nuvec_s *position, nuvec_s *velocity, float scale, float lifetime);
-
-void PowerUp_AddPart(NUVEC *position, NUVEC *velocity, f32 scale, f32 lifetime);
 
 
 
-void MakePartVector(NUVEC *velocity, NUVEC *direction, f32 scale);
-
-void PartCollide_2D(PART_s *part);
 
 
-void PartStop_Coin(PART_s *part);
 
-void AddCoinsAsParts(i32 type_id, nuvec_s *position, nuvec_s *velocity, float lifetime, float scale);
+
+
+
+
 
 // The original repeats the per-sound emitter checks for each of the four sound slots.
 #define PART_EMIT_SOUND_ON(slot)                                                                                       \
@@ -484,7 +474,6 @@ void AddCoinsAsParts(i32 type_id, nuvec_s *position, nuvec_s *velocity, float li
 
 
 
-void PartUpdate_Heart(PART_s *part);
 
 
 
@@ -499,8 +488,6 @@ struct nunativegscene_s;
 struct SHOPINPUT;
 
 extern void IncreaseScore(u32 *, u64, i32);
-extern void PlayRepeatSfx(char *, i32, f32, char, f32, nuvec_s *);
-void ResetGameMessages();
 
 
 static_assert(sizeof(GAME_MESSAGE_DATA) == sizeof(GAMEMESSAGE_s), "game message backing layout");
@@ -523,7 +510,6 @@ static_assert(offsetof(GAME_MESSAGE_DATA, tick_fn) == offsetof(GAMEMESSAGE_s, ti
 
 
 
-void Hint_SetHintFromId(i32, i32, i32);
 
 
 
@@ -574,11 +560,6 @@ u32 GizmoBlowups_TotalScore(void *);
 
 // ==== src/legoapi/gizmo/object/gizmopickups.cpp: all remaining content ====
 
-void MakePartVector(NUVEC *, NUVEC *, f32);
-void AddCoinsAsParts(i32, NUVEC *, NUVEC *, f32, f32);
-void AddHeartAsPart(GameObject_s *, NUVEC *, NUVEC *, f32, f32);
-void AddTorpedoAsPart(NUVEC *, NUVEC *, f32, f32);
-void PowerUp_AddPart(NUVEC *, NUVEC *, f32, f32);
 
 
 

@@ -285,8 +285,12 @@
 #include <limits.h>
 #include "legoapi/gizmo/base/gizflow.h"
 #include "legoapi/misc/supportall_types.h"
+#include "gameapi/ai/aisys/gameaiscript.h"
+#include "legoapi/characters/motion/camera.h"
+#include "legoapi/characters/motion/move.h"
+#include "legoapi/world/levels/episodeV.h"
+#include "nu2api/nu3d/nu3d_includes.h"
 
-void ClearScreen();
 
 
 // The fade system and the four fade effects handed to FadeSystem::AddFade()
@@ -307,7 +311,6 @@ NUMTL *FadeMtl;
 static u8 ScreenGrabNeeded;
 static i32 pause_rt;
 static NUMTL *pause_rndr_mtl;
-extern f32 pause_fade;
 static i32 old_pause_state;
 i32 (*PauseRenderOffFn)(void);
 i32 cut_waiting_for_new_level;
@@ -315,9 +318,7 @@ i32 cut_waiting_for_new_level;
 extern "C" {
 }
 
-extern "C" void NuBackbufferCopy(i32);
 
-extern f32 CameraZoom;
 
 
 
@@ -334,8 +335,6 @@ nuhspecial_s FadeLoop_ObjHSpecial;
 
 struct nuhspecial_s;
 
-extern "C" void NuRndrGradRect2di(i32, i32, i32, i32, i32 *, numtl_s *);
-extern "C" void NuRndrRect2di(i32, i32, i32, i32, i32, numtl_s *);
 
 // Camera zoom state
 
@@ -442,7 +441,6 @@ i32 backdrop_black = 0;
 
 void (*BackDrop_AlphaFn)(float *) = nullptr;
 
-void BackDrop_UpdateColours(i32 instant);
 
 
 // ==== src/legoapi/core/startup/finishloop.cpp: declarations ====
@@ -489,14 +487,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 // remaining ids enumerate the current story list while omitting variants that
 // are represented by those dedicated routes.
 
-extern f32 backdrop_top_r;
-extern f32 backdrop_top_g;
-extern f32 backdrop_top_b;
-extern f32 backdrop_bot_r;
-extern f32 backdrop_bot_g;
-extern f32 backdrop_bot_b;
-extern void (*BackDrop_AlphaFn)(f32 *alpha);
-extern void BackDrop_UpdateColours(i32 instant);
 
 #if defined(__i386__)
 #define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
@@ -519,9 +509,7 @@ struct WORLDINFO_s;
 
 
 
-extern VIEWCAM_s ViewCam;
 // Original data symbol testmovef is float0.005 at 0x617cb0.
-extern f32 testmovef;
 
 DECOMP_ASSERT(sizeof(VIEWCAM_s) == 0x28, "ViewCam size");
 DECOMP_ASSERT(offsetof(VIEWCAM_s, pitch) == 0x10, "ViewCam pitch offset");
@@ -666,12 +654,10 @@ struct AISYS_s;
 #define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone))
 #endif
 
-void LoadPerm1();
 
 // ==== src/legoapi/menus/screens/gamemenuall.cpp: declarations ====
 
 
-extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 
 // Retail clears these "fast repeat" latches but never sets them.
 
@@ -799,7 +785,6 @@ extern "C" {
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -1116,7 +1101,6 @@ static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ..
 
 
 extern EdInputContext * Input;
-extern "C" void PlaySfxById(i32, nuvec_s *);
 
 DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
 
@@ -1747,14 +1731,12 @@ inline void ThingManager::operator delete(void *thing, usize size) {
 #endif
 
 // Retail keeps only the IPA-SRA clone of this function.
-i32 PodLevel(AREADATA_s *);
 
 // Multiplies the ordinary camera's per-frame position blend.  The original
 // keeps this as writable camera state (default 1.0), rather than folding it
 // into the socket seek rate.
 
 
-i32 PodLevel(AREADATA_s *area);
 
 // Retail splits the guard off as an inline head; the rest is this partial clone.
 
@@ -1782,7 +1764,6 @@ DECOMP_ASSERT(offsetof(AWKWARDSHAPESPHERE_s, radius) == 8, "Awkward shape sphere
 
 // ==== src/legoapi/world/levels/episodeV.cpp: declarations ====
 
-extern AILOCATOR_s * locator;
 
 DECOMP_ASSERT(sizeof(HOTHBATTLEE_NETPACKET_s) == 0x58, "Hoth panel packet size");
 DECOMP_ASSERT(offsetof(HOTHBATTLEE_NETPACKET_s, alpha) == 0x24, "Hoth panel packet alpha offset");
@@ -1804,7 +1785,6 @@ DECOMP_ASSERT(sizeof(ASTEROIDCNETPACKET_s) == 8, "asteroid C network packet size
 
 extern "C" {
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -2286,14 +2266,8 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 // ==== src/legoapi/gizmo/gizmos/gizmos_gizactions.cpp: declarations ====
 
-i32 Action_ReleaseLocator(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
-                          i32 first_time, float);
 
-i32 Action_GetLocatorFromSet(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,
-                             i32 param_count, i32 first_time, float);
 
-i32 Action_AssignLocatorInSet(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
-                              i32 first_time, float);
 
 namespace {
 #include "legoapi/gizmo/gizmos/gizmos_gizactions_types.h"

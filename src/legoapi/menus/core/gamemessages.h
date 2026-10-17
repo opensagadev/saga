@@ -15,3 +15,11 @@ i32 FindGameMsgsWithID(i32 id, i32 remove, i32 player, GAMEMESSAGE_s *exclude);
 void GameMsg_DrawAdjustNewPos_CoinToTotal(GAMEMESSAGE_s *message);
 void TransformGameMessages(nuvec_s *position, nuvec_s *right, nuvec_s *direction);
 void DrawGameMessages();
+
+// Declared here for the other units that use them.
+struct GAMEMESSAGE_s;
+struct nuhspecial_s;
+extern nuhspecial_s *(*GameMsg_GetExtraObjFn)(GAMEMESSAGE_s *);
+void AddFancyMessageRGB(char *, float, float, float, float, i32, unsigned char, unsigned char, unsigned char);
+void ResetGameMessages();
+void UpdateGameMessages();

@@ -256,11 +256,14 @@
 #include <limits.h>
 #include "legoapi/gizmo/base/gizflow.h"
 #include "legoapi/misc/supportall_types.h"
+#include "MechInputTouch/MechSystems.h"
+#include "MechInputTouch/MechTouchUIElements.h"
+#include "gameapi/ai/aisys/gameaiscript.h"
+#include "legoapi/characters/motion/move.h"
+#include "legoapi/world/levels/episodeV.h"
 
 extern void (*preRenderFlashingHack)(void);
 extern void (*postRenderFlashingHack)(void);
-void PreRenderFlashHack();
-void PostRenderFlashHack();
 
 u8 MechSystems::SkipTextScroll = 0;
 
@@ -282,21 +285,18 @@ i32 MechInputTouchMenuController::PackButtonID = -1;
 // are screen.cpp globals in the original: its static initializer registers
 // their destructors (original bss @0x127bf20 / 0x127bf08 / 0x127bf00 /
 // 0x127bef8 / 0x127bef0).
-extern Fade fade;
 
 // Material handles used by the original 2-D fade paths.
 
 u32 animSetVisibilityHack[6];
 i32 specVisibilityFlashHack;
 
-void GameAnimSet_Draw(GAMEANIMSET_s &set);
 extern f32 hackFlashTimer;
 extern GAMEANIMSET_s *hackFlashingGameAnimSet;
 extern nuhspecial_s *hackFlashingSpecial;
 
 
 // ==== src/legoapi/menus/core/hud.cpp: all remaining content ====
-void RndrTexQuad(f32, f32, f32, f32, i32, numtl_s *, i32);
 
 
 namespace {
@@ -411,14 +411,12 @@ f32 SwipeDecalRenderer_MinWidth = 0.2f;
 #endif
 
 // Retail keeps only the IPA-SRA clone of this function.
-i32 PodLevel(AREADATA_s *);
 
 // Multiplies the ordinary camera's per-frame position blend.  The original
 // keeps this as writable camera state (default 1.0), rather than folding it
 // into the socket seek rate.
 
 
-i32 PodLevel(AREADATA_s *area);
 
 // Retail splits the guard off as an inline head; the rest is this partial clone.
 
@@ -427,7 +425,6 @@ extern i32 LevFlag[4];
 
 // These pod tuning values are zero-initialized in the original image.
 
-extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 
 // Retail re-tests the three block animations at each use instead of caching a flag.
 #define HAS_BLOCK_ANIMS(animations)                                                                                    \
@@ -449,7 +446,6 @@ DECOMP_ASSERT(offsetof(AWKWARDSHAPESPHERE_s, radius) == 8, "Awkward shape sphere
 
 // ==== src/legoapi/world/levels/episodeV.cpp: declarations ====
 
-extern AILOCATOR_s * locator;
 
 DECOMP_ASSERT(sizeof(HOTHBATTLEE_NETPACKET_s) == 0x58, "Hoth panel packet size");
 DECOMP_ASSERT(offsetof(HOTHBATTLEE_NETPACKET_s, alpha) == 0x24, "Hoth panel packet alpha offset");
@@ -473,7 +469,6 @@ DECOMP_ASSERT(sizeof(ASTEROIDCNETPACKET_s) == 8, "asteroid C network packet size
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -1031,14 +1026,8 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 // ==== src/legoapi/gizmo/gizmos/gizmos_gizactions.cpp: declarations ====
 
-i32 Action_ReleaseLocator(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
-                          i32 first_time, float);
 
-i32 Action_GetLocatorFromSet(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,
-                             i32 param_count, i32 first_time, float);
 
-i32 Action_AssignLocatorInSet(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
-                              i32 first_time, float);
 
 namespace {
 #include "legoapi/gizmo/gizmos/gizmos_gizactions_types.h"
@@ -1317,7 +1306,6 @@ extern "C" {
 
 DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");
 
-void RndrTexQuad3D(VuMtx const &matrix, i32 colour, numtl_s *material);
 
 // Debug-capture output helpers consumed by NuDisplayListCaptureSortPriority.
 // Transcribed from the original C-linkage symbols:

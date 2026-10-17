@@ -31,3 +31,15 @@ i32 GameAudio_GetPlrSfxBits(void *object);
 void AddLevelSfxFromId(i32 sfx_id, i32 *sfx_ids, i32 *sfx_count, i32 max_sfx);
 
 #endif
+
+// Declared here for the other units that use them.
+struct GAMEAUDIO;
+struct GameObject_s;
+struct SoundTable;
+extern GAMEAUDIO GameAudio_LSW;
+void AddFootSteps(GameObject_s *object);
+extern "C" {
+    extern SoundTable CurrentSFXTAB;
+    extern f32 sfx_wait;
+    extern i32 CruiserD_LiftChase;
+}

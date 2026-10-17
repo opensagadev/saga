@@ -87,6 +87,9 @@
 #include "legoapi/actions/character/specialmoves.h"
 #include "nu2api/numusic/numusic.h"
 #include "legoapi/characters/core/characters_types.h"
+#include "legoapi/core/startup/text.h"
+#include "legoapi/menus/screens/customise.h"
+#include "legoapi/world/levels/hub.h"
 
 f32 CustomiseMenuTime[2];
 GAMESAVE_s OldCustomiseGame = {};
@@ -127,9 +130,6 @@ static NUVEC CustomiseScreenPos[2];
 static i32 CustomiseMenuY[2], CustomiseNameX[2], CustomiseNameY[2];
 static const char CustomiseLetter[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ- 0123456789";
 u16 CustomiseRotY[2], CustomiseTiltX[2], CustomiseTiltZ[2];
-void Customiser_SetNameAndIcon(CUSTOMISER *, i32);
-void Hub_ClearStats();
-void Text_FillInExtendedSaveInfo();
 extern i16 tPLAYER1, tPLAYER2;
 
 
@@ -241,7 +241,6 @@ static i32 Customise_FindLetter(char character) {
 
 
 
-void Customiser_SetNameAndIcon(CUSTOMISER *customiser, i32 index);
 
 // ==== src/legoapi/characters/core/characters.cpp: declarations ====
 

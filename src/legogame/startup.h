@@ -15,3 +15,6 @@
 void StartPerm(void);
 void LoadPerm(void);
 void EndPerm(void);
+
+// Declared here for the other units that use them.
+void CheckForPlayersTurnedOff();

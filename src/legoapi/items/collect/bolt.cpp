@@ -51,14 +51,15 @@
 #include "nu2api/nucore/numemory.h"
 #include "nu2api/nucore/nupad.h"
 #include "nu2api/nufile/nufile.h"
+#include "editor/edlevelall.h"
+#include "legoapi/items/fx/explosions.h"
+#include "legoapi/misc/utilities.h"
+#include "legoapi/props/objects/zipup.h"
 
 struct AIROW_s;
 struct nunativegscene_s;
 
-i32 LineIntersectSphere(NUVEC *, NUVEC *, NUVEC *, f32, f32 *);
-bool LineIntersectCircle(NUVEC *, NUVEC *, NUVEC *, f32);
 
-BOLT_s *FindIncomingBolt(GameObject_s *object, i32 exclude_players, i32 mark_direct_hit);
 
 
 
@@ -84,8 +85,6 @@ extern "C" {
 
 
 extern "C" void PlaySfx(char *, NUVEC *);
-i32 Player_HasDoubleBoltDamage_FromBolt(BOLT_s *);
-EXPLOSION *AddExplosion(NUVEC *, f32, f32, GameObject_s *, i32, i32);
 
 
 
@@ -109,7 +108,6 @@ static __attribute__((noinline, noclone)) i32 Bolt_HitPlat(BOLT_s *bolt, u8 *hit
 static __used__ void UpdateBolt_Geonosian(BOLT_s *bolt);
 
 
-EXPLOSION *Detonate(NUVEC *, u16);
 static __used__ void EndBolt_EwokTorpedo(BOLT_s *bolt);
 
 
@@ -122,7 +120,6 @@ extern "C" {
 
 extern void (*FS_Callback)(char *, char *);
 
-void SerialiseString(EdStream &stream, void *data, i32 count);
 
 // Retail keeps the whole body of RenderFileSel3 as the split-out .part clone;
 // the exported function only tests FS_Active.
@@ -137,7 +134,6 @@ extern "C" void StartFileSel(char *title, char *path, char *filter, char *filter
                              void (*callback)(char *, char *));
 
 
-i32 LoadState(i32, variptr_u *, variptr_u *, variptr_u *, variptr_u *, variptr_u *, variptr_u *);
 
 extern "C" {
 

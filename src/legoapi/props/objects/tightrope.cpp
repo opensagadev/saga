@@ -28,7 +28,6 @@
 DECOMP_ASSERT(offsetof(WORLDINFO, tightropes) == 0x505c, "World tightrope array offset");
 DECOMP_ASSERT(offsetof(WORLDINFO, tightrope_count) == 0x5060, "World tightrope count offset");
 
-extern NUMTL *SolidMtl3D;
 
 struct TIGHTROPEPROGRESS {
     i32 state[2];

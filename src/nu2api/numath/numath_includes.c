@@ -28,6 +28,7 @@
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/numath/nuang.h"
+#include "nu2api/numath/numath_includes.h"
 
 static f32 fetol = 0.01f;
 
@@ -220,52 +221,28 @@ struct legacy_nugraph_s {
 };
 DECOMP_ASSERT(sizeof(legacy_nugraph_s) == 0x154, "Legacy graph ABI");
 
-extern "C" void nugraphFreeTempCurveData();
-extern "C" f32 nugraphGetXatT(nugraph_s *graph, f32 parameter);
-extern "C" f32 nugraphGetYatT(nugraph_s *graph, f32 parameter);
-extern "C" i32 nugraphGenerateLookupTable(nugraph_s *graph, f32 *table, i32 table_count);
 extern "C" i32 nugraphFileLoadGraphOnlyToFile(nugraph_s *graph, NUFILE file);
 extern "C" i32 nugraphFileSaveGraphOnlyToFile(nugraph_s *graph, NUFILE file);
 
-f32 nugraph_blend(i32 interval, i32 degree, i32 *knots, f32 parameter);
-void nugraph_compute_point(i32 *knots, i32 segment_count, i32 degree, f32 parameter, nuvec_s *control_points,
-                           nuvec_s *point);
-void nugraph_compute_catmull_point(i32 segment, f32 parameter, nuvec_s *control_points, nuvec_s *point);
-void nugraph_compute_linear_point(i32 segment, f32 parameter, nuvec_s *control_points, nuvec_s *point);
-void nugraph_compute_intervals(i32 *knots, i32 segment_count, i32 degree);
-void nugraph_bspline(i32 segment_count, i32 degree, nuvec_s *control_points, nuvec_s *curve_points, i32 curve_count);
-void nugraph_catmullrom(i32 segment_count, nuvec_s *control_points, nuvec_s *curve_points, i32 curve_count);
-void nugraph_linear(i32 segment_count, nuvec_s *control_points, nuvec_s *curve_points, i32 curve_count);
 
 extern "C" {
 
-i32 nugraphCalcCurve(nugraph_s *graph, i32 point_count);
 
 i32 nugraphFileLoadGraphOnlyToFile(nugraph_s *graph, NUFILE file);
 
 i32 nugraphFileSaveGraphOnlyToFile(nugraph_s *graph, NUFILE file);
 
-void nugraphFreeTempCurveData();
 
-i32 nugraphGenerateLookupTable(nugraph_s *graph, f32 *table, i32 table_count);
 
-f32 nugraphGetXatT(nugraph_s *, f32 t);
 
-f32 nugraphGetYatT(nugraph_s *, f32 t);
 
-f32 nugraphGetYatX(nugraph_s *graph, f32 x, i32 iterations);
 
 } // extern "C"
 
-void nugraph_compute_catmull_point(i32 segment_count, f32 parameter, nuvec_s *control_points, nuvec_s *point);
 
-void nugraph_compute_linear_point(i32 segment_count, f32 parameter, nuvec_s *control_points, nuvec_s *point);
 
-void nugraph_bspline(i32 segment_count, i32 degree, nuvec_s *control_points, nuvec_s *output, i32 output_count);
 
-void nugraph_catmullrom(i32 segment_count, nuvec_s *control_points, nuvec_s *output, i32 output_count);
 
-void nugraph_linear(i32 segment_count, nuvec_s *control_points, nuvec_s *output, i32 output_count);
 
 // ==== src/nu2api/numath/nutrig.cpp: all remaining content ====
 

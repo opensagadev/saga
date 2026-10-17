@@ -11,3 +11,8 @@ void DynamicAddGizmoToFlow(GIZFLOW_s *system, GIZMO_s *gizmo);
 void ResetGizFlowPointers(GIZFLOW_s *system);
 void ResetGizFlow(GIZFLOW_s *system, GIZFLOWPROGRESS_s *progress);
 void GizFlowStoreProgress(GIZFLOW_s *system, GIZFLOWPROGRESS_s *progress);
+
+// Declared here for the other units that use them.
+struct FLOWBOX_s;
+struct GIZFLOW_s;
+extern FLOWBOX_s *FlowBoxFindByName(GIZFLOW_s *, char *);

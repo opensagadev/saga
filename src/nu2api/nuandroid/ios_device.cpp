@@ -65,6 +65,7 @@
 #include "nu2api/nucore/NuDynamicLight.h"
 #include "nu2api/numath/numtx.h"
 #include "globals.h"
+#include "nu2api/nuandroid/ios_device.h"
 
 // ---------------------------------------------------------------------------
 // ios_graphics — iOS/Android GLES2 platform glue
@@ -98,7 +99,6 @@ char g_internalPath[256];
 // Native diagnostics supply a strong host-configured documents-path override.
 
 i32 g_bgloadAsFastAsPossibleHack;
-extern "C" i32 NuIOS_IsMidRangeDevice(void);
 
 // ---------------------------------------------------------------------------
 // Render-thread handoff
@@ -127,7 +127,6 @@ static i32 g_renderThreadDoneThread;
 // NuIOS_WaitForRenderThreadCompletion for 60 Hz pacing.
 i64 g_renderStartTime;
 
-extern "C" i64 getCurrentTime(void);
 
 
 
@@ -232,7 +231,6 @@ static void DisplayListProcessLightmapped(NUDISPLAYLIST *list, NUDISPLAYLISTITEM
     // Locale string is owned by the Android/JNI TU; cache only its index here.
     i32 g_languageIndex = -1; // original .data @0x616b80
 
-i32 NuIOS_IsMidRangeDevice(void);
 
     // ---------------------------------------------------------------------------
     // Animation / curves / data

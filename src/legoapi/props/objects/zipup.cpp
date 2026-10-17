@@ -56,6 +56,9 @@
 #include "legoapi/menus/core/text.h"
 #include "legoapi/render/core/render.h"
 #include "legoapi/world/levels/levels.h"
+#include "legoapi/actions/movement/climbing.h"
+#include "legoapi/items/fx/explosions.h"
+#include "legoapi/props/objects/zipup.h"
 
 struct ZIPUPPROGRESS {
     // One bit per zip-up; 32 zip-ups fit in a single word.
@@ -81,7 +84,6 @@ static NUVEC ZipUpHookOffset = {0.0f, -0.1143f, -0.0859f};
 
 
 
-void ZipUps_Reset(void *world_ptr, void *, void *progress_ptr);
 
 
 
@@ -92,9 +94,6 @@ struct nunativegscene_s;
 struct SHOPINPUT;
 
 i32 SuperWeirdo(GameObject_s *);
-void SetWeaponIn(GameObject_s *);
-void FastWeaponOut(GameObject_s *, i32);
-void PlayJumpSfx(GameObject_s *, i32);
 
 
 numtl_s *ropemtl;
@@ -201,7 +200,6 @@ static inline void SetRopeVertex(NURND_VERTEX3D *vertex, f32 x, f32 y, f32 z, f3
 // Functions are defined in original address order.
 
 
-EXPLOSION *AddExplosion(nuvec_s *, f32, f32, GameObject_s *, i32, i32);
 i32 SuperWeirdo(GameObject_s *object);
 
 // ==== src/legoapi/menus/core/hint.cpp: declarations ====

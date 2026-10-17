@@ -16,11 +16,12 @@
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nutrig.h"
+#include "legoapi/characters/motion/move.h"
+#include "legoapi/misc/utilities.h"
 
 struct AIROW_s;
 struct nunativegscene_s;
 
-void ResetForceGlow(PLAYERPACKET_s *packet);
 
 void Transform_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
     ResetForceGlow(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));
@@ -208,5 +209,4 @@ void GizmoBlowup_TransformDraw_Game(GIZMOBLOWUP_s *blowup) {
     Transform_DrawTarget(&blowup->mid_position, 1.4f * blowup->target_scale, 0.4f);
 }
 
-void InterpolateRotationMatrix(numtx_s *result, numtx_s *first, numtx_s *second, float fraction);
 

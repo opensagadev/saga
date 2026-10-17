@@ -65,6 +65,9 @@
 #include "gameapi/edtools/edui.h"
 #include "nu2api/nucore/nuanim3.h"
 #include "legoapi/actions/character/speederchase_types.h"
+#include "legoapi/ai/core/gameai.h"
+#include "legoapi/characters/motion/chris.h"
+#include "legoapi/world/levels/episodeI.h"
 static_assert(sizeof(struct LEVFLAGBYTES_s) == 16, "LevFlag must be 16 bytes");
 extern struct LEVFLAGBYTES_s LevFlag;
 
@@ -86,7 +89,6 @@ extern "C" {
     i32 mine_max_tile = 0x2000;
 }
 
-i32 CheckPosAIArea(AIAREA_s *area, NUVEC *position, float radius);
 
 // --- Cross-file entry points (C++ linkage) ---------------------------------
 
@@ -117,7 +119,6 @@ extern "C" {
 }
 extern f32 CurrentSpeed;
 void UpdatePodRaceLapDisplay(float); // defined below
-void CalcSplinePointFromDist(flightspline_s *, _vuv_s *, float);
 
 // --- File-local layout types -----------------------------------------------
 
@@ -185,7 +186,6 @@ static __used__ void PodRaceSnipersReset(void);
 
 
 
-void Mine_Kill(PART_s *part, i32);
 
 // PodSprint_InitAISpline is partially inlined into PodSprintA_Init: the
 // clear, lookup and spline checks are inlined and the crossing scan is the
@@ -249,7 +249,6 @@ static __used__ void UpdatePodRaceMines(void);
 
 void ResetPodStuff();
 
-void PodRaceUpdate(WORLDINFO_s *world, float dt);
 
 
 void UpdatePodRaceLapDisplay(float arg);
@@ -258,12 +257,9 @@ void UpdatePodRaceLapDisplay(float arg);
 
 
 
-i32 Action_MushroomCollapse(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
-                            i32 first_time, float);
 
 
 
-void PodRaceReset();
 
 
 

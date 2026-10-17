@@ -146,3 +146,13 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
+
+// Declared here for the other units that use them.
+struct GAMEANIMOBJ_s;
+struct GAMEANIMSET_s;
+struct GAMEANIMSYS_s;
+void GameAnimSet_Draw(GAMEANIMSET_s &set);
+void GameAnimSet_RemoveObject(GAMEANIMSET_s *set, GAMEANIMOBJ_s *object);
+void GameAnimSys_AllocateLevelProgressData(VARIPTR *buf, VARIPTR *buf_end, i32 a3, i32 a4);
+void GameAnimSys_ClearProgress(i32 idx);
+void GameAnimSys_ReStoreProgress(GAMEANIMSYS_s *system, i32 progress_index);

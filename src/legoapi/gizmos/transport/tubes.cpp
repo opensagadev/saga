@@ -39,6 +39,7 @@
 #include "legoapi/characters/core/players.h"
 #include "gameapi/gui/apimenu.h"
 #include "legoapi/world/levels/levels.h"
+#include "legoapi/menus/core/hint.h"
 
 static const i32 TUBE_AUDIO_EVENT = 0x2e;
 static const u32 CHARACTER_MODEL_FLAG_TUBE_USER = 0x10;
@@ -78,18 +79,13 @@ static void Tubes_Update(void *world_ptr, void *progress_ptr, float frame_time);
 // ==== src/legoapi/menus/core/gamehint.cpp: declarations ====
 
 
-extern f32 AlphaBlendTime;
-extern f32 ICONXPOS_TOUCHYFEELY;
-extern f32 ICONYPOS_TOUCHYFEELY;
 
-void MechHintUIButton_OnClick_Callback(MechTouchUIElement &, TouchHolder &);
 
 #include "legoapi/menus/core/gamehint_types.h"
 DECOMP_ASSERT(sizeof(MechHintUIButton) == 0xa8, "MechHintUIButton size");
 DECOMP_ASSERT(offsetof(MechHintUIButton, pending_hint) == 0x7c, "Pending touch hint offset");
 DECOMP_ASSERT(offsetof(MechHintUIButton, display_elapsed) == 0x80, "Touch hint display timer offset");
 
-void MechHintUIButton_OnClick_Callback(MechTouchUIElement &element, TouchHolder &);
 
 // Static game message and hint helpers. Stubbed to satisfy the symbol baseline.
 
@@ -102,7 +98,6 @@ void MechHintUIButton_OnClick_Callback(MechTouchUIElement &element, TouchHolder 
 
 // Original local callbacks referenced by Hints_LSW.
 
-extern HINT_s Hints_LSW[55];
 
 // Each control mode retains its own requested and interpolated hint row.
 

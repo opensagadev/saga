@@ -282,6 +282,11 @@
 #include <limits.h>
 #include "legoapi/gizmo/base/gizflow.h"
 #include "legoapi/misc/supportall_types.h"
+#include "gameapi/ai/aisys/gameaiscript.h"
+#include "legoapi/characters/motion/camera.h"
+#include "legoapi/characters/motion/move.h"
+#include "legoapi/menus/core/hint.h"
+#include "legoapi/world/levels/episodeV.h"
 
 i32 only_process_this_hint_id = -1;
 f32 ICONXPOS_VIRTUALS = -0.61500001f;
@@ -304,9 +309,7 @@ i32 Tilt_UpdateHint(HINT_s *) {
 
 // Original local callbacks referenced by Hints_LSW.
 
-extern HINTUIBUTTON_s *hintUIButton;
 
-extern HINT_s Hints_LSW[55];
 
 // Each control mode retains its own requested and interpolated hint row.
 
@@ -314,31 +317,18 @@ extern HINT_s Hints_LSW[55];
 
 
 HINTUIBUTTON_s *hintUIButton = NULL;
-extern f32 AlphaBlendTime;
-extern f32 ICONXPOS_TOUCHYFEELY;
-extern f32 ICONYPOS_TOUCHYFEELY;
 f32 (*Hint_AlphaTargetFn)();
 i32 (*Hub_PanelBusyFn)();
-extern i32 only_process_this_hint_id;
-void Hint_SetHint(HINT_s *, i32, i32);
 
-void MechHintUIButton_OnClick_Callback(MechTouchUIElement &, TouchHolder &);
 
 #include "legoapi/menus/core/gamehint_types.h"
 DECOMP_ASSERT(sizeof(MechHintUIButton) == 0xa8, "MechHintUIButton size");
 DECOMP_ASSERT(offsetof(MechHintUIButton, pending_hint) == 0x7c, "Pending touch hint offset");
 DECOMP_ASSERT(offsetof(MechHintUIButton, display_elapsed) == 0x80, "Touch hint display timer offset");
 
-void MechHintUIButton_OnClick_Callback(MechTouchUIElement &element, TouchHolder &);
 
-void initHintSys();
 
-void CLEAR_HINT_COMPLETE(i32 hint_id);
-i32 HINT_COMPLETE(i32 hint_id);
-void SET_HINT_COMPLETE(i32 hint_id);
-void Hint_SaveGameState(HINT_s *hint);
 
-void Hint_SetHint(HINT_s *hint, i32 force, i32 allow_completed);
 
 
 
@@ -393,9 +383,7 @@ struct WORLDINFO_s;
 
 
 
-extern VIEWCAM_s ViewCam;
 // Original data symbol testmovef is float0.005 at 0x617cb0.
-extern f32 testmovef;
 
 DECOMP_ASSERT(sizeof(VIEWCAM_s) == 0x28, "ViewCam size");
 DECOMP_ASSERT(offsetof(VIEWCAM_s, pitch) == 0x10, "ViewCam pitch offset");
@@ -565,13 +553,11 @@ struct AISYS_s;
 #define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone))
 #endif
 
-void LoadPerm1();
 
 // ==== src/legoapi/menus/screens/gamemenuall.cpp: declarations ====
 
 
 extern f32 HUB_EPISODETITLEY;
-extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 
 // Retail clears these "fast repeat" latches but never sets them.
 
@@ -689,7 +675,6 @@ extern "C" {
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -1005,7 +990,6 @@ static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ..
 
 
 extern EdInputContext * Input;
-extern "C" void PlaySfxById(i32, nuvec_s *);
 
 DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
 
@@ -1616,14 +1600,12 @@ inline void ThingManager::operator delete(void *thing, usize size) {
 #endif
 
 // Retail keeps only the IPA-SRA clone of this function.
-i32 PodLevel(AREADATA_s *);
 
 // Multiplies the ordinary camera's per-frame position blend.  The original
 // keeps this as writable camera state (default 1.0), rather than folding it
 // into the socket seek rate.
 
 
-i32 PodLevel(AREADATA_s *area);
 
 // Retail splits the guard off as an inline head; the rest is this partial clone.
 
@@ -1651,7 +1633,6 @@ DECOMP_ASSERT(offsetof(AWKWARDSHAPESPHERE_s, radius) == 8, "Awkward shape sphere
 
 // ==== src/legoapi/world/levels/episodeV.cpp: declarations ====
 
-extern AILOCATOR_s * locator;
 
 DECOMP_ASSERT(sizeof(HOTHBATTLEE_NETPACKET_s) == 0x58, "Hoth panel packet size");
 DECOMP_ASSERT(offsetof(HOTHBATTLEE_NETPACKET_s, alpha) == 0x24, "Hoth panel packet alpha offset");
@@ -1673,7 +1654,6 @@ DECOMP_ASSERT(sizeof(ASTEROIDCNETPACKET_s) == 8, "asteroid C network packet size
 
 extern "C" {
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -2155,14 +2135,8 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 // ==== src/legoapi/gizmo/gizmos/gizmos_gizactions.cpp: declarations ====
 
-i32 Action_ReleaseLocator(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
-                          i32 first_time, float);
 
-i32 Action_GetLocatorFromSet(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,
-                             i32 param_count, i32 first_time, float);
 
-i32 Action_AssignLocatorInSet(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
-                              i32 first_time, float);
 
 namespace {
 #include "legoapi/gizmo/gizmos/gizmos_gizactions_types.h"

@@ -7,8 +7,8 @@
 #include "nu2api/nucore/nupad.h"
 #include "nu2api/numath/nufloat.h"
 #include <string.h>
+#include "gamelib/util/Refpack.h"
 
-void refpack_init();
 
 static inline void CloneMessageData(NetMessage &message) {
     NetMessage::MessageData *new_data = NULL;

@@ -16,6 +16,7 @@
 #include "nu2api/nusound/nusound.h"
 #include "gamelib/util/gamelib_util_types.h"
 #include "legoapi/menus/core/lsw_text_data.inc"
+#include "legoapi/menus/screens/gamemenuall.h"
 
 struct CUSTOMISER;
 struct GIZAIMESSAGESYS_s;
@@ -1327,7 +1328,6 @@ i32 PauseMenus_Align;
 u8 MENUEXITR = 0xff;
 u8 MENUEXITG = 0xbf;
 u8 MENUEXITB;
-extern i32 from_save_and_exit;
 u8 MENULOSTR1 = 0xbf;
 u8 MENULOSTG1 = 0x5f;
 u8 MENULOSTB1;

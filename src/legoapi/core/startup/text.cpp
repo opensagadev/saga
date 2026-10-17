@@ -178,6 +178,8 @@
 #include "nu2api/nu3d/android/nugscn_android.h"
 #include "nu2api/numath/numath.h"
 #include "nu2api/nu3d/nupostparams.h"
+#include "legoapi/core/startup/text.h"
+#include "legoapi/lib/text.h"
 
 extern "C" {
     extern char *apitxt_ENGLISH, *apitxt_FRENCH, *apitxt_GERMAN, *apitxt_ITALIAN, *apitxt_SPANISH, *apitxt_DANISH;
@@ -208,11 +210,7 @@ char *apitxt_SPANISH = const_cast<char *>("Espa\xc3\xb1"
 char *apitxt_DANISH = const_cast<char *>("Dansk");
 
 // Original .data @0x667ce0; the names are filled in by the static initializer.
-void Text_LoadAndFixUpStrings(unsigned char *filename, unsigned char **buffer, char **table, i32 count);
-void IntroText_SetTextID(i32 id);
-void Text_DecodeButtons(char *source, char *destination);
 
-f32 TextPulseTimer(f32 delay);
 
 extern i16 tALONGTIMEAGO;
 
@@ -258,7 +256,6 @@ extern "C" {
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -565,7 +562,6 @@ static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ..
 
 
 extern EdInputContext * Input;
-extern "C" void PlaySfxById(i32, nuvec_s *);
 
 DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
 
@@ -700,7 +696,6 @@ static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u
 // ==== src/legoapi/menus/screens/gamemenuall.cpp: declarations ====
 
 extern f32 HUB_EPISODETITLEY;
-extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 
 // Retail clears these "fast repeat" latches but never sets them.
 

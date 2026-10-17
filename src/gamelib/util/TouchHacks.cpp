@@ -25,11 +25,13 @@
 #include "nu2api/nucore/nuvuvec.hpp"
 #include "legoapi/render/core/terrain.h"
 #include "legoapi/world/area.h"
+#include "legoapi/characters/motion/move.h"
+#include "legoapi/items/fx/explosions.h"
+#include "legoapi/items/objects/cable.h"
+#include "legoapi/render/core/gameliball.h"
 
 i32 SuperWeirdo(GameObject_s *);
 i32 GizForce_StoodOnForce(GIZFORCE_s *, GameObject_s *);
-EXPLOSION *AddExplosion(NUVEC *, f32, f32, GameObject_s *, i32, i32);
-extern "C" void PlaySfxAndSetVolume(char *, NUVEC *, f32);
 
 i32 TouchHacks::GetLoseStudsDieValue() {
     return BonusArea != 0 ? 10000 : 1000;
@@ -324,7 +326,6 @@ bool TouchHacks::CanToggleTo(GameObject_s &object, i32 id) {
     return true;
 }
 
-void Move_CHARACTER(GameObject_s *);
 extern i16 id_SKELETON;
 
 bool TouchHacks::CanTagVehicle(GameObject_s &object, GameObject_s &vehicle) {
@@ -486,7 +487,6 @@ nucolour3_s *TouchHacks::GetFlashColour() {
     return &flashCol;
 }
 
-CABLE_s *GameObjIsCableTied(GameObject_s *);
 i32 TouchHacks::ShouldDeflectBolt(GameObject_s &object, BOLT_s &bolt) {
     if (!TouchControlsActive || VehicleArea == 0)
         return 0;

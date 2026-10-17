@@ -88,16 +88,16 @@
 #include "nu2api/numath/nuvec.h"
 #include "nu2api/nu3d/nuprim.h"
 #include "nu2api/nu3d/nupostparams.h"
+#include "legoapi/items/fx/ripples.h"
+#include "legoapi/render/fx/game_deb.h"
 
 static RIPPLEEFFECT_s *RE_rippleeffect;
 static WORLDINFO_s *RE_worldinfo;
 static ripple_node_s **eraselist;
 static i32 erasecount;
 
-void InitRippleMtl(char *name, numtl_s **result, variptr_u *buffer, variptr_u *buffer_end);
 
 
-i32 LookupRippleEffectIndex(char *name);
 
 static void RE_end_radius(NUFPAR *parser);
 static void RE_start_radius(NUFPAR *parser);
@@ -143,7 +143,6 @@ static NU_READ_GRAPHICS_DATA_ATTR NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIP
 
 // --- Extern "C": NuGScn functions have C linkage in original ---
 
-void DrawRipple(ripple_node_s *node);
 
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \

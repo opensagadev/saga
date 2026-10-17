@@ -39,3 +39,16 @@ extern "C" {
     void DebrisSetCutSceneMode(i32 enabled);
     void DebReAlloc(debkeydatatype_s *key, i32 particle_count);
 }
+
+// Declared here for the other units that use them.
+struct GameObject_s;
+struct numtl_s;
+struct numtx_s;
+struct nuvec_s;
+union variptr_u;
+void AddSlamDebris(GameObject_s *);
+void AddSurfaceDebris(GameObject_s *);
+void AddSurfaceRipples(GameObject_s *);
+void AddWaterSplash(GameObject_s *, nuvec_s *);
+void BuildRippleMtx(numtx_s *matrix, nuvec_s *normal, nuvec_s *position, u16, u16);
+void InitRippleMtl(char *name, numtl_s **result, variptr_u *buffer, variptr_u *buffer_end);

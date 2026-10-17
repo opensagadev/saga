@@ -97,3 +97,25 @@ i32 SelectShopItem(shopitem_s *items, i32 index);
 void SelectSubItem();
 i32 MoveSubItemsLeft(i32 *ids, NUVEC *positions, i32 count);
 i32 MoveSubItemsRight(i32 *ids, NUVEC *positions, i32 count);
+
+// Declared here for the other units that use them.
+struct MENU_s;
+struct WORLDINFO_s;
+struct nuhspecial_s;
+struct nuvec_s;
+extern i16 HintTab[24];
+extern i32 ItemMenu(MENU_s *menu);
+extern i32 POINTS_PER_HINT;
+extern void DrawCodeMenu(void);
+extern void DrawCodeMenu3D(void);
+extern void DrawItemMenu2D();
+extern void DrawShop3D(WORLDINFO_s *);
+extern void DrawSubItemMenu2D(void);
+extern void DrawSubItemMenu3D(void);
+extern void InitAlphaList();
+extern void InitExtraList();
+i32 CodeMenu(MENU_s *);
+void DrawItem(nuhspecial_s *, nuvec_s *, float, float, float, u16, u16, u16);
+void DrawShopPanel();
+void DrawShopPrompts();
+void DrawSubItems();

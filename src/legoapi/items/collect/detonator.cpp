@@ -18,15 +18,14 @@
 
 #include <string.h>
 #include "legoapi/items/collect/detonator_types.h"
+#include "legoapi/actions/movement/climbing.h"
+#include "legoapi/items/collect/batarang.h"
+#include "legoapi/items/collect/detonator.h"
+#include "legoapi/props/objects/zipup.h"
 
 struct AIROW_s;
 struct nunativegscene_s;
 
-void Batarangs_CheckLostData(void *);
-EXPLOSION *Detonate(nuvec_s *, u16);
-void Detonator_Detonate(DETONATOR_s *);
-DETONATOR_s *Detonator_FindNearest(nuvec_s *, float, GameObject_s *);
-void FastWeaponIn(GameObject_s *, i32);
 
 
 void Detonators_Draw() {
@@ -334,4 +333,3 @@ void Detonator_MoveCode(GameObject_s *object) {
         }                                                                                                              \
     }
 
-DETONATOR_s *Detonator_FindNearest(nuvec_s *position, float radius, GameObject_s *owner);

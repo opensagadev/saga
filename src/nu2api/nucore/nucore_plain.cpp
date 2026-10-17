@@ -53,6 +53,14 @@
 #include "nu2api/nucore/nuvuvec.hpp"
 #include "nu2api/numath/numtx.h"
 #include "globals.h"
+#include "nu2api/nu3d/android/nudlist_android.h"
+#include "nu2api/nu3d/nu3d_includes.h"
+#include "nu2api/nuandroid/ios_device.h"
+#include "nu2api/nuandroid/ios_graphics.h"
+#include "nu2api/nucore/android/stubs_android.h"
+#include "nu2api/nucore/nupad_interface.h"
+#include "nu2api/numath/numath_includes.h"
+#include "nu2api/nusound/nusound3_include.h"
 extern "C" {
 }
 //
@@ -63,15 +71,12 @@ extern "C" {
 
 
 
-extern NuInputManager *inputManager;
-extern bool used_touch_IDs[10];
 
 struct ani3_animheader_s;
 struct nuanimdatachunk_s;
 
 extern "C" {
 
-extern u8 CutSceneBoundingBoxTrackRoot;
 extern GLuint g_colorRenderbuffer;
 extern GLuint g_depthRenderbuffer;
 }
@@ -113,38 +118,22 @@ extern "C" {
     // Camera (thin wrappers; full matrix work is in NuCameraSetEx)
     // ---------------------------------------------------------------------------
 
-extern i32 prev_lock;
-extern NUCAMERA locked_camera;
-extern NUCAMERA cam_copy;
-extern NuCameraReflect global_reflect;
     DECOMP_ASSERT(sizeof(NuCameraReflect) == 0x84, "camera reflection state size");
     DECOMP_ASSERT(__builtin_offsetof(NuCameraReflect, mtx) == 4, "camera reflection matrix offset");
 
-void NuCameraLock(i32 lock);
     extern nurenderscene_s currentScene;
-extern i32 motionBlurAccumActiveThisFrame;
 
-void NuCameraRelock(void);
-extern i32 PS2_SREZ_W;
-extern i32 PS2_SREZ_H;
-void NuCameraSetReflect(NUCAMERA *camera, NuCameraReflect *reflect);
-void NuCameraUnlock(void);
 
     // ---------------------------------------------------------------------------
     // Display list — faithful helpers + pending stubs
     // ---------------------------------------------------------------------------
 
 
-void NuDisplayListAnimateMtls(f32 frame_time);
-void NuDisplayListClipSpecials(i32 enabled);
-    void DisplayListCreateFxItemPS(void *item, i32 type);
-    void DisplayListDestroyFxItemPS(void *item);
 } // extern "C"
 
 // Local helpers matching original static display-list setters (t local symbols)
 
 extern "C" {
-    void *DisplayListCreateFaceonTransformPS(VARIPTR *buffer, NUMTX *transform, NUMTL *mtl, void *faceon);
 
     extern "C++" {
         // Original local helper cloned as DisplayListProcessSkin.isra.36 by GCC.
@@ -176,16 +165,12 @@ static void DisplayListProcessLightmapped(NUDISPLAYLIST *list, NUDISPLAYLISTITEM
                                                   void **transform_packet, f32 alpha);
     }
 
-    i32 NuDynamicLightGetActiveRenderSetCount(NuDynamicLight *light);
-    NUDISPLAYLIST *NuDynamicLightGetDList(NuDynamicLight *light, i32 render_set, NUMTL *material);
 
-    void DisplayListSetFxItemParamPS(void *item, i32 parameter, f32 value, i32 mode);
 
     // ---------------------------------------------------------------------------
     // Scene / render-scene
     // ---------------------------------------------------------------------------
 
-void NuDisplaySceneDebug(NUDLDLISTSCENE *scene, i32 flags, i32 depth, i32 *state);
 
     // ---------------------------------------------------------------------------
     // Frame lifecycle (NuFrameEnd is faithful; neighbours are stubs)
@@ -207,18 +192,9 @@ void NuDisplaySceneDebug(NUDLDLISTSCENE *scene, i32 flags, i32 depth, i32 *state
     void NuIOS_AwardAchievement(void) {
         // Retail no-op.
     }
-void NuIOS_CheckCurrentFramebuffer(void);
-    void NuIOS_DeallocateSystemRenderbuffer(GLuint renderbuffer);
 void NuIOS_DeallocateSystemFramebuffers(void);
-void NuIOS_DeallocateSystemRenderbuffer(GLuint);
     // Locale string is owned by the Android/JNI TU; cache only its index here.
-extern i32 g_languageIndex;
 
-i32 NuIOS_GetDeviceLanguage(void);
-i32 NuIOS_HardwareSupportsRetina(void);
-i32 NuIOS_IsLowestEndDevice(void);
-i32 NuIOS_IsMidRangeDevice(void);
-i32 NuIOS_IsSmallScreen(void);
 void NuIOS_RecordFlurryEvent(char *event_name);
     void NuIOS_ShowAchievements(void) {
         // Retail no-op.
@@ -228,17 +204,8 @@ void NuIOS_RecordFlurryEvent(char *event_name);
     // Animation / curves / data
     // ---------------------------------------------------------------------------
 
-void NuAnimBuffCreateScratch(nuanimbuff_s *buffer);
-void NuAnimBuffDestroyScratch(nuanimbuff_s *buffer);
-void *NuAnimCurveCreate(void);
-void NuAnimCurveDestroy(void *curve);
-void NuAnimData2CalcTime(nuanimdata2_s *anim, f32 frame, nuanimtime_s *time);
-void NuAnimDataCalcTime(void *animation, f32 frame, nuanimtime_s *time);
     extern "C++" void NuAnimDataChunkDestroy(nuanimdatachunk_s *chunk);
 
-void NuAnimDataDestroy(void *animation);
-i32 NuAnimDataFindVersion(char *path);
-void *NuAnimDataLoadBuff(char *path, VARIPTR *buf, VARIPTR *buf_end);
 
     // ---------------------------------------------------------------------------
     // Bridge / file / heap / memory
@@ -271,7 +238,6 @@ void *NuAnimDataLoadBuff(char *path, VARIPTR *buf, VARIPTR *buf_end);
     // Quick-font platform rendering (the generic font run lives in nuqfnt.cpp)
     // ---------------------------------------------------------------------------
 
-void NuQFntDestroy(VUFNT *font);
 void NuQFntPrint2dW(NUQFNT *font, u16 *text);
 void NuQFntPrint3DU(NUQFNT *font, char *text);
 void NuQFntPrint3DW(NUQFNT *font, u16 *text);
@@ -282,73 +248,27 @@ void NuQFntPrintV(NUQFNT *font, const char *format, va_list arguments);
     // ---------------------------------------------------------------------------
 
     extern nurenderscene_s currentScene;
-void NuBackbufferCopy(i32 texture_id);
-void NuDeferredShadingRender(void);
-void NuDeferredShadingSetParameterf(i32 parameter, f32 value);
-extern i32 speedblur_enabled;
-extern f32 NuLightsx;
-extern f32 NuLightsy;
-void NuLightSpeedBlur(i32 reuse_camera, f32 scale);
-void NuLightSpeedBlurOldCameraPos(const NUMTX *camera);
-void NuLightSpeedBlurScale(f32 x, f32 y);
     i32 NuLgtArcLaserOldCnt;
 
 
-i32 NuSpecialDrawSmoothSkin(void *special, NUMTX *skin_matrices, NUMTX *world_matrix);
-i32 NuSpecialDrawSmoothSkinDwa(void *special, NUMTX *skin_matrices, NUMTX *world_matrix,
-                                   DEFORMERWEIGHTSARRAY *blend_values);
-i32 NuSpecialDrawWith(void *special, NUMTX *mtx);
 
     // ---------------------------------------------------------------------------
     // Light / wind / particles / debris
     // ---------------------------------------------------------------------------
 
-void NuDynamicLightBeginCapture(NuDynamicLight *light, i32 render_set);
-void NuDynamicLightEndCapture(void);
-i32 NuDynamicLightGetActiveRenderSetCount(NuDynamicLight *light);
-NUDISPLAYLIST *NuDynamicLightGetDList(NuDynamicLight *light, i32 render_set, NUMTL *material);
-f32 NuDynamicLightGetParameterf(NuDynamicLight *light, i32 parameter);
-i32 NuDynamicLightGetParameteri(NuDynamicLight *light, i32 parameter);
-NUMTX *NuDynamicLightGetProjection(NuDynamicLight *light);
-NUMTX *NuDynamicLightGetView(NuDynamicLight *light);
-i32 NuDynamicLightIsUsedOnSpecials(NuDynamicLight *light);
-void NuDynamicLightLookAt(NuDynamicLight *light, NUVEC *eye, NUVEC *target, NUVEC *up);
-void NuDynamicLightSetDirectional(NuDynamicLight *light, f32 left, f32 right, f32 bottom, f32 top, f32 near_plane,
-                                      f32 far_plane);
-void NuDynamicLightSetEnabled(NuDynamicLight *light, i32 enabled);
-void NuDynamicLightSetParameterf(NuDynamicLight *light, i32 parameter, f32 value);
-void NuDynamicLightSetParameteri(NuDynamicLight *light, i32 parameter, i32 value);
-void NuDynamicLightSetUsedOnSpecials(NuDynamicLight *light, i32 enabled);
-i32 NuDynamicLightTestShadowExtrusionExtent(NuDynamicLight *light, const NUVEC *center, const NUVEC *extent,
-                                                i32 render_set);
-void NuDynamicLightTestShadowExtrusions(NuDynamicLight *light, const VuVec *first, const VuVec *second);
-void NuDynamicLightTestShadowExtrusionsExtent(NuDynamicLight *light, const NUVEC *center, const NUVEC *extent);
 
-i32 NuWindLoad(NUWIND *wind, i32 index, char *name, VARIPTR *buffer, VARIPTR buffer_end);
 
-void NuWindSetCurrent(NUWIND *wind, i32 index);
 
-void NuWindUnload(NUWIND *wind, i32 index);
 
     // ---------------------------------------------------------------------------
     // Gobj / hierarchy / scene graph
     // ---------------------------------------------------------------------------
 
-void NuHGobjEvalAnim(void);
-extern i32 ddmaxjoints;
 
 #include "nu2api/nucore/nucore_plain_types.h"
-void **NuHGobjEvalDwa(i32 render_count, i16 *render_indices, void *animation, f32 frame);
 void NuHGobjFromVideoMem(NUHGOBJVIDEOMEMFN callback);
-void NuHGobjJointMtx(nuhgobj_s *object, u8 index, NUMTX *world_matrix, NUMTX *joint_matrices, NUMTX *result);
-    u32 NuWindRand(void);
-void NuHGobjSetClippingRootTrackerOverride(i32 enabled);
 void NuHGobjToVideoMem(NUHGOBJVIDEOMEMFN callback);
 #undef NUGCUT_CURVE_VALUE
-    void NuTexAnimRemoveList(void *texture_anims);
-    void NuGHGPreRelocateFixupPS(NUGSCN *scene);
-    void NuGHGPostRelocateFixupPS(NUGSCN *scene, i32 delta);
-NUGSCN *NuGHGRelocate(NUGSCN *scene, VARIPTR *destination);
 
     // ---------------------------------------------------------------------------
     // Input / pad / key / mouse
@@ -359,27 +279,14 @@ NUGSCN *NuGHGRelocate(NUGSCN *scene, VARIPTR *destination);
     // ---------------------------------------------------------------------------
 
 
-extern i32 VisiSysCameraLock;
-extern i32 LoadedOcclusionData;
-extern i32 UsingOcclusionData;
-extern i32 CurrentViewBox;
-extern u8 OcclusionBitArray[800];
-extern i32 do_InstTree;
-extern i32 do_occlusion;
-extern i32 do_visibility;
-extern i32 do_octree;
 
-    void NuVisiInstTree(void *, NUGSCN *);
-    void NuVisiOcclusion(NuVisibilityResult *);
 
-void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
     DECOMP_ASSERT(sizeof(NuInstanceTreeNode) == 0x0c, "instance tree node stride");
     DECOMP_ASSERT(sizeof(NuInstanceTreeBounds) == 0x20, "instance tree bounds stride");
     DECOMP_ASSERT(sizeof(NuInstanceTree_s) == 0x28, "instance tree size");
     DECOMP_ASSERT(offsetof(NuInstanceTree_s, nodes) == 0x14, "instance tree nodes offset");
     DECOMP_ASSERT(offsetof(NuInstanceTree_s, roots) == 0x20, "instance tree roots offset");
     DECOMP_ASSERT(offsetof(NuInstanceTree_s, far_clips) == 0x24, "instance tree far clips offset");
-extern NuVisibilityResult * myvisi;
     extern "C++" {
         // Retail only has the IPA-SRA clone (the unused scene and bits arguments dropped).
         static __attribute__((noinline, noclone)) void
@@ -387,17 +294,8 @@ extern NuVisibilityResult * myvisi;
                      i32 tree_index) __asm__("_ZL12ClipInstTreeP16NuInstanceTree_siP16nudisplayscene_sPc.isra.92");
 static void ClipInstTree(NuInstanceTree_s *tree, i32 tree_index);
     }
-void NuVisiInstTree(void *visibility_result, NUGSCN *scene);
 
-void NuVisiOcclusion(NuVisibilityResult *result);
     extern "C++" void OctreeRndr(u8 *visibility, nuoctreenode_s *root, i32 enabled);
-void NuVisiOctree(NuVisibilityResult *result);
-void NuOcclusionManagerAddOccluderOBB(const NUVEC *minimum, const NUVEC *maximum, const NUMTX *matrix);
-void NuOcclusionManagerAddOccluderQuad(const NUVEC *a, const NUVEC *b, const NUVEC *c, const NUVEC *d);
-void NuOcclusionManagerAddOccluderSphere(const NUVEC *center, f32 radius);
-i32 NuOcclusionManagerIsOccludedOBB(const NUVEC *minimum, const NUVEC *maximum, const NUMTX *matrix);
-i32 NuOcclusionManagerIsOccludedSphere(const NUVEC *center, f32 radius);
-void NuOcclusionManagerRenderStats(void);
     // ---------------------------------------------------------------------------
     // Viewport
     // ---------------------------------------------------------------------------
@@ -428,12 +326,10 @@ void NuOcclusionManagerRenderStats(void);
         STUBBED();
     }
 #endif
-void NuPause(i32 paused);
     // ---------------------------------------------------------------------------
     // Spline / online / net / other gameplay support
     // ---------------------------------------------------------------------------
 
-void NuSplineList(void);
     extern void (*nuapi_endframe_callbackfn)(void);
 void NuRegisterEndFrameCallBackFn(void (*callback)(void));
 
@@ -441,7 +337,6 @@ void NuRegisterEndFrameCallBackFn(void (*callback)(void));
     // Rendering extras
     // ---------------------------------------------------------------------------
 
-i32 NuStreamInit(void);
 
     // ---------------------------------------------------------------------------
     // PS2 / Xbox legacy shims

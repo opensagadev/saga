@@ -26,3 +26,7 @@ extern "C" {
 
 i32 NuFadeSetFxCodeMtls(nugeom_s *geometry, u8 *material_codes);
 #endif
+
+// Declared here for the other units that use them.
+struct nuvec_s;
+nuvec_s NuFadeObjGetAngleTerrainValues(nuvec_s *);

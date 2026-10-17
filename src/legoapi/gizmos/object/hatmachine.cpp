@@ -34,16 +34,13 @@
 #include "nu2api/numath/nuvec.h"
 
 #include <string.h>
+#include "legoapi/actions/movement/climbing.h"
+#include "legoapi/ai/core/gameai.h"
+#include "legoapi/items/objects/game_obj.h"
 
 static const NUVEC HatMachine_HatOffset = {0.0f, 0.3f, 0.0f};
 
-extern u8 show_hatmachine_hint;
 extern "C" i32 editor_active;
-extern "C" i16 id_PRINCESSLEIABOUSHH;
-void LoseHelmet(GameObject_s *, i32, i32);
-void FastWeaponIn(GameObject_s *, i32);
-void AlertSurroundingCreatures(GameObject_s *, NUVEC *);
-void MakeBaddiesForgetAboutParty(i32);
 
 enum HATMACHINE_ANIMATION_STATE {
     HATMACHINE_ANIMATION_IDLE = 0,

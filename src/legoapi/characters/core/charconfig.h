@@ -91,3 +91,13 @@ struct CHARCATEGORY;
 // original ELF name without adding a synthetic accessor function.
 void CharCategories_Init(CHARCATEGORY *categories);
 i32 CharCategory_FindByName(char *name);
+
+// Declared here for the other units that use them.
+struct APICHARACTERMODELLIST_s;
+struct nufpcomjmp_s;
+union variptr_u;
+extern void GameLoadCharacterModels(APICHARACTERMODELLIST_s *, i32, variptr_u *, variptr_u *, i32, i32);
+void CharConfig_ConfigureAll(i32 permanent, nufpcomjmp_s *game_keywords);
+extern "C" {
+    extern i32 aisys_maxnumcreaturesets;
+}

@@ -30,3 +30,26 @@ void UpdateMidPos(GIZMOBLOWUP_s *blowup);
 void PlayAnim(nuinstanim_s *animation, float *playback, float speed, i32 backwards);
 i32 GizmoBlowupGetNameTableId(char *name);
 i32 GizmoBlowupGetTypeFromNameTableId(WORLDINFO_s *world, i32 name_table_id);
+
+// Declared here for the other units that use them.
+struct GIZMOBLOWUP_s;
+struct GIZMO_s;
+struct GameObject_s;
+struct WORLDINFO_s;
+struct numtx_s;
+i32 Blowup_GetVisibility(GIZMO_s *gizmo);
+i32 GizBlowup_InitSingleTerrain(GIZMOBLOWUP_s *blowup);
+i32 GizmoBlowupCheckProximity(WORLDINFO_s *world, GameObject_s *object);
+i32 gizmoblowup_Load(void *world_ptr, void *);
+void *gizmoblowup_reservebuffers(void *world_ptr);
+void GizBlowup_DeleteSingleTerrain(GIZMOBLOWUP_s *blowup);
+void GizBlowup_DeleteTerrain();
+void GizBlowup_InitTerrain();
+void GizmoBlowupBurstDraw(void *world_ptr, void *, float);
+void GizmoBlowupEarlyUpdate(void *world_ptr, void *, float);
+void GizmoBlowupGenDecalMatrix(GIZMOBLOWUP_s *, numtx_s *, i32);
+void GizmoBlowupGenShadowMatrix(GIZMOBLOWUP_s *, numtx_s *);
+void GizmoBlowupLateUpdate(void *world_ptr, void *, float);
+void GizmoBlowupUpdateMatrix(GIZMOBLOWUP_s *blowup);
+void GizmoBlowupVisibilityOverrides(WORLDINFO_s *);
+void GizmoBlowupsFinalSetup(WORLDINFO_s *world);

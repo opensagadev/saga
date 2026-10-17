@@ -89,6 +89,18 @@
 #include "legoapi/characters/motion/action_info.h"
 #include "legoapi/menus/screens/gamestructure.h"
 #include "nu2api/nucore/nupad.h"
+#include "legoapi/actions/character/legoapi_tag.h"
+#include "legoapi/ai/core/gameai.h"
+#include "legoapi/ai/game/creature.h"
+#include "legoapi/characters/core/characters.h"
+#include "legoapi/core/startup/text.h"
+#include "legoapi/items/objects/things.h"
+#include "legoapi/lib/text.h"
+#include "legoapi/menus/core/gamehint.h"
+#include "legoapi/menus/screens/gamestatus_lsw.h"
+#include "legoapi/world/levels.h"
+#include "nu2api/nu3d/nu3d_includes.h"
+#include "nu2api/nuandroid/ios_device.h"
 
 // ---------------------------------------------------------------------------
 // Engine symbols defined in other TUs (declared here to avoid pulling large
@@ -99,13 +111,11 @@
 
 extern "C" {
     // nucore / nurndr plain stubs and editor helpers (extern "C" TUs).
-    i32 NuIOS_GetDeviceLanguage(void);
     void NuLanguageSet(i32 language);
     void NuFrameBegin(void);
     f32 NuFrameEnd(void);
     void edGraEnableTerrainSwap(void);
     void edGraDisableTerrainSwap(void);
-    void SetProceduralAnimationFn(void *fn);
     void DrawMenu(i32 menu_id);
 }
 
@@ -113,21 +123,7 @@ extern "C" {
 void InitMemCard(void);                                         // saveload.cpp
 void Text_LoadFont(char *path, VARIPTR *buf, VARIPTR *buf_end); // text.cpp
 void *Text_IsFontLoaded(void);                                  // text.cpp
-void Text_InitStringTable(i32, VARIPTR *, VARIPTR *);
-void Text_InitTable(TEXTENTRY *, i32, i32);
-void Text_LoadStrings(VARIPTR *, VARIPTR *);
-void Text_InitDefaultStrings(void);
-void LevelProgress_ReserveBufferSpace(VARIPTR *buf, VARIPTR buf_end);
-void LevelObjects_InitForGame(LEVELOBJECT *tab, VARIPTR *buf, VARIPTR *buf_end, i32 a4, i32 a5);
-void LevelSplines_InitForGame(LEVELSPLINE *tab);
-void CreateThingManager(void);
-void GameAnimSys_AllocateLevelProgressData(VARIPTR *buf, VARIPTR *buf_end, i32 a3, i32 a4);
-void LSW_registerStatusScreen(void);
-void initGameHintSys_LSW(void);
 void Movies_ConfigureList(char *path, VARIPTR *buf, VARIPTR *buf_end);
-void CharScenes_Init(VARIPTR *buf, VARIPTR *buf_end);
-void FixUpCharacters(CHARFIXUP *fixup);
-void NewGame(void);
 GIZAIMESSAGESYS_s *CreateGizAIMessageSys(VARIPTR *buf, VARIPTR *buf_end, i32 size);
 
 // buffer globals owned by the batman TU (batman.h declares them extern "C")
@@ -136,39 +132,19 @@ extern "C" {
     extern VARIPTR characterbuffer_base;
     extern VARIPTR characterbuffer_end;
 }
-void BackDrop_Init(char *path, VARIPTR *buf, VARIPTR *buf_end);
-void LoadPerm1(void);
-void LoadPerm2(void);
-void RegisterHelpers(void);
 void UpdateGameMenu(GAMEPAD_s *pad, i32 a2);
-void SetBackgroundMusic(i32 track);
-void IntroText_Draw(f32 alpha);
 
 // Globals / objects declared elsewhere.
-extern i16 id_DEFAULTCHARACTER[2];
 extern i16 id_OBIWANKENOBI;
 extern "C" GAMEPAD_s GamePad[64]; // gamepads.cpp, bss @0x127a500
-extern i32 readpads_always;
 extern u8 RAP_WARNING_R, RAP_WARNING_G, RAP_WARNING_B;
 
-extern Fade fade;
-extern FadeWipe fadeWipe;
-extern FadeStillWipe fadeStillWipe;
-extern FadeStill fadeStill;
 
 void *GameBufferAlloc(VARIPTR *buf, VARIPTR *buf_end, i32 size); // gameobjects.cpp
 struct CHARFIXUP;
 extern CHARFIXUP CharFixUp[222]; // characters.cpp
 
 // LSW gameplay hooks wired by LoadPermData.
-i32 CutScene_StartFn_LSW(CUTINFO *);
-void CutScene_PreUpdateFn_LSW(CUTINFO *);
-void CutScene_PostUpdateFn_LSW(void);
-i32 CutScene_ReplaceCharacterModelFn_LSW(CUTINFO *, NUGCUTCHAR_s *);
-i32 InitBolt_AddMomentumType_LSW(BOLT_s *, GameObject_s *, nuvec_s *);
-i32 Bolt_HitPlatFn_LSW(BOLT_s *);
-i32 Bolt_HitCustomFn_LSW(BOLT_s *, nuvec_s *);
-void GameBlowUpBlownUpFn_LSW(GIZMOBLOWUP_s *);
 void GizObstacle_SetDefaultSFXFn_LSW(void *, GIZOBSTACLE_s *);
 
 // ---------------------------------------------------------------------------
@@ -276,13 +252,8 @@ struct PLAYERPACKET_s;
 struct SOCKPOSITION_s;
 struct TouchHolder;
 
-void CheckForPlayersTurnedOff();
 
 
-void ResetPlayerMoves(GameObject_s *obj);
-i32 TagCharacter(GameObject_s *source, GameObject_s *target, i32 mode);
-void Player_ClearContext(GameObject_s *object, i32 mode);
-void Player_ResetContexts(PLAYERPACKET_s *packet);
 
 
 // --- Helpers moved from world.cpp ---
@@ -326,9 +297,7 @@ namespace {
 
 
 
-void ResetPlayerPacket(PLAYERPACKET_s *, CHARACTERDATA_s *);
 
-void ResetPlayerMoves(GameObject_s *object);
 
 
 
@@ -348,10 +317,7 @@ struct AIROW_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-extern i32 drop_in_teleport;
-extern i32 teleport_all_freeplay_modes;
 
-void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *data);
 
 // ==== functions in original address order ====
 

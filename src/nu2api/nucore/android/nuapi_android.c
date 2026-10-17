@@ -14,9 +14,9 @@
 
 // The original unit constructs its six homogeneous vectors.
 #include "nu2api/nucore/nuvuvec.hpp"
+#include "nu2api/nu3d/android/numtl_android.h"
 
 extern "C" void NuInitDebrisRenderer(VARIPTR *buffer, VARIPTR buffer_end);
-extern "C" void NuIOSMtlInit(void);
 
 extern "C" NUPADREC *PadRecPtr(void) {
     STUBBED();

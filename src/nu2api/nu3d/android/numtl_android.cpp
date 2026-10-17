@@ -48,6 +48,7 @@
 #include "nu2api/nuandroid/ios_graphics.h"
 #include "nu2api/nu3d/android/nuptl_android.h"
 #include "nu2api/nu3d/nurndr_plain_types.h"
+#include "nu2api/nu3d/nu3d_includes.h"
 
 u8 DebrisGlassIOS_Tex[] = {
     0x50, 0x56, 0x52, 0x03, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -259,7 +260,6 @@ extern "C" {
 
 // Material
 
-extern "C" void NuDisplayListAnimateMtls(f32 frame_time);
 
 // Debug / visualisation geometry
 

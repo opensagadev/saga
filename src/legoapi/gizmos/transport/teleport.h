@@ -19,3 +19,7 @@ void Teleports_UpdateAfterGameObjects(WORLDINFO_s *world);
 void Teleport_MoveCode(GameObject_s *object, i32 special_pressed);
 void Teleport_NetMoveCode(GameObject_s *object);
 i32 Teleport_UpdateHints(HINT_s *hint);
+
+// Declared here for the other units that use them.
+struct GIZMO_s;
+char *Teleport_GetOutputName(GIZMO_s *, i32);

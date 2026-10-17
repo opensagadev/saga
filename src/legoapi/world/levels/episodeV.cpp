@@ -215,22 +215,17 @@
 #include "legoapi/gizmo/base/gizflow.h"
 #include "legoapi/render/fx/game_deb.h"
 #include "legoapi/misc/supportall_types.h"
+#include "gameapi/ai/aisys/gameaiscript.h"
+#include "legoapi/actions/character/speederchase.h"
+#include "legoapi/gizmo/object/gizbuildit.h"
+#include "legoapi/world/levels/episodeV.h"
+#include "nu2api/nu3d/nu3d_includes.h"
 
 extern i32 LevFlag[4];
 #define LEV_FLAG_U8 (reinterpret_cast<u8 *>(LevFlag))
 GIZPANEL_s *LevGizPanel;
 AILOCATOR_s *locator;
 GameObject_s *gameobj;
-extern u8 troopercannons_beenReset;
-void Asteroid_PartKill(PART_s *, i32);
-void GizmoBlowupUpdateMatrix(GIZMOBLOWUP_s *);
-void ResetTrooperCannons(WORLDINFO_s *, i32);
-void InitTrooperCannons(WORLDINFO_s *);
-void HothBattleE_UpdateWave();
-void HothBattle_Melee_init(HOTHBATTLE_MELEE_s *);
-i32 HothBattle_StartNewWave();
-void HothBattle_ManageBackgroundCreatures();
-void UpdateTrooperCannons(WORLDINFO_s *);
 extern "C" void *AIPAthFindPathCnx(AISYS_s *, AIPATH_s *, char *, char *, i32 *);
 extern i16 BoltType_FindIDByNameWide(char *, WORLDINFO_s *) asm("_Z21BoltType_FindIDByNamePcP11WORLDINFO_s");
 
@@ -298,7 +293,6 @@ static f32 alpha[16];
 
 
 
-void HothBattle_Melee_init(HOTHBATTLE_MELEE_s *melee);
 
 
 
@@ -393,7 +387,6 @@ struct rtlset;
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -475,7 +468,6 @@ extern "C" {
 
 
 
-void Asteroid_PartKill(PART_s *part, i32 reason);
 
 
 
@@ -491,8 +483,6 @@ DECOMP_ASSERT(offsetof(TROOPERCANNON_s, rebuilding) == 0x2c, "Trooper cannon reb
 
 TROOPERCANNON_s troopercannons[4];
 
-extern i32 GizBuildIt_AtEnd(GIZBUILDIT_s *buildit);
-extern GIZMO *GizmoFindByData(GIZMOSYS *system, i32 type_id, void *data);
 
 
 
@@ -520,7 +510,6 @@ extern GIZMO *GizmoFindByData(GIZMOSYS *system, i32 type_id, void *data);
 
 static __used__ void KilledTrooperCannon(GameObject_s *object);
 
-void ResetTrooperCannons(WORLDINFO_s *world, i32 trooper_id);
 
 
 
@@ -557,7 +546,6 @@ extern "C" {
 
 
 
-extern void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *data);
 
 // Retail keeps only the IPA-SRA clone, which receives &*layers.
 #if defined(__i386__)
@@ -580,8 +568,6 @@ extern void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *data);
 
 
 
-AILOCATOR_s *LocalGetRandomLocator(AILOCATOR_s **locators, i32 count, f32 clip_radius, NUVEC *position,
-                                   f32 max_distance, i32 outside_camera, f32 max_delta_y, f32 min_delta_y);
 
 // ==== src/legoapi/items/collect/minikits.cpp: declarations ====
 
@@ -642,9 +628,6 @@ extern "C" {
 
 
 
-extern "C" HOTHBATTLE_MELEE_s melee;
-i32 OnOrInsidePlane(NUVEC *point, NUVEC *plane_point, NUVEC *plane_normal, NUVEC *corrected_point, f32 normal_offset,
-                    f32 *distance);
 
 
 // ==== src/legoapi/render/core/render.cpp: declarations ====
@@ -685,7 +668,6 @@ struct VuVec;
 
 
 extern "C" {
-    void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 }
 
 
@@ -1160,7 +1142,6 @@ namespace {
 
 
 
-void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *);
 
 // ==== src/legoapi/characters/core/players.cpp: declarations ====
 
@@ -1214,7 +1195,6 @@ namespace {
 
 
 
-void ResetPlayerPacket(PLAYERPACKET_s *, CHARACTERDATA_s *);
 
 
 
@@ -1358,8 +1338,6 @@ GameObject_s *FindNearestGameObject(NUVEC *position, GameObject_s *exclude, u32 
 
 // ==== src/legoapi/characters/motion/camera.cpp: declarations ====
 
-i32 OnOrInsidePlane(NUVEC *point, NUVEC *plane_point, NUVEC *plane_normal, NUVEC *corrected_point, f32 normal_offset,
-                    f32 *distance_out);
 
 // Original data symbol testmovef is float0.005 at 0x617cb0.
 
@@ -1422,9 +1400,7 @@ extern EXTRAACTIONDATA_s ExtraActionData[33];
 
 // Retail keeps only the IPA-SRA clone of this function.
 extern i16 id_BUZZDROID;
-extern "C" i16 id_DODGEM;
 extern "C" i16 id_MINIATST, id_MINIATTE;
-void KillRumble(GameObject_s *);
 extern i16 id_PKDROID, id_PITDROID;
 
 // Multiplies the ordinary camera's per-frame position blend.  The original
@@ -1464,7 +1440,6 @@ extern "C" i16 id_LANDSPEEDER;
 
 // These pod tuning values are zero-initialized in the original image.
 
-extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 
 
 
@@ -1754,7 +1729,6 @@ DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");
 //   NuHtmlBegin    0x2d5ca0   NuHtmlFlush   0x2d5c30
 //   NuHtmlWrite    0x2d5cd0   NuHtmlHeading1 0x2d5d40
 extern "C" {
-extern char unknown[8];
 }
 
 

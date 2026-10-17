@@ -178,6 +178,19 @@
 #include "nu2api/nu3d/android/nuptl_android.h"
 #include <stddef.h>
 #include "legoapi/render/core/terrain_stubs_types.h"
+#include "MechInputTouch/MechInputTouchGestureBasedController.h"
+#include "gameapi/ai/aisys/gameaiscript.h"
+#include "legoapi/ai/core/aisysall.h"
+#include "legoapi/ai/core/gameai.h"
+#include "legoapi/ai/game/aipathcnxhelper.h"
+#include "legoapi/ai/game/aitrigger.h"
+#include "legoapi/ai/game/starwars_gameai.h"
+#include "legoapi/characters/motion/move.h"
+#include "legoapi/gizmo/base/gizflow.h"
+#include "legoapi/gizmos/traps/gizturret.h"
+#include "legoapi/world/levels.h"
+#include "legoapi/world/levels/hub.h"
+#include "nu2api/nu3d/nu3d_includes.h"
 
 struct AIROW_s;
 struct nuqthdr_s;
@@ -190,42 +203,22 @@ i8 adtabentries[9][4] = {{-1, -1, -1, -1}, {-1, -1, -1, 0}, {-1, -1, 0, 0}, {-1,
                          {1, 0, 0, 0},     {1, 1, 0, 0},    {1, 1, 1, 0},   {1, 1, 1, 1}};
 i8 (*adtab)[4] = &adtabentries[4];
 
-extern void Player_ClearContext(GameObject_s *, i32);
-extern void Player_ResetContexts(PLAYERPACKET_s *);
 
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 
 
-void SetObjAsHeadTarget(GameObject_s *, GameObject_s *, i8, f32, f32, f32);
-void SetBallooningHeight(GameObject_s *, f32);
-void GameObjectSetCanUse(GameObject_s *, void *, u8, u8, f32);
 i32 Suit_GetIndex(SUIT_s *);
 extern i16 id_GAMORREANGUARD;
 f32 DEFENDTIME = 4.0f;
-extern f32 jump_stuck_time;
 i32 teleport_all_freeplay_modes = 1;
 i32 drop_in_teleport = 3;
 
 extern "C" {
-    void AddToAIGroup(AIGROUP_s *group, APIOBJECT_s *object);
     extern i16 id_LANDSPEEDER;
 }
 
 // Written by ThingManager's ctor (original global @0x124f2e0, .bss).
-extern void oneAtOnce_MaintainArray();
 
-void ResetPlayerMoves(GameObject_s *object);
-void GetTopBot(GameObject_s *object);
-void ResetRumble(RUMBLEPACKET *packet);
-void Player_ClearContext(GameObject_s *object, i32 mode);
-void Player_ResetContexts(PLAYERPACKET_s *packet);
-void StarWars_GameAISysInit();
-void ClearAICreatures();
-i32 EquivalentObject_Find(WORLDINFO_s *world, nuhspecial_s *special);
-void AIPathCnxControlSysReset(AIPATHCNXCONTROLSYS_s *system);
-void AIPathCnxHelperSysReset(WORLDINFO_s *world, AIPATHCNXHELPERSYS_s *system);
-void InitAICreatures(AISYS_s *system);
-void ResetAICreatures(AISYS_s *system);
 
 
 
@@ -243,7 +236,6 @@ extern "C" {
 extern i32 nbaddies_can_see_players;
 }
 
-i32 CanFightLikeAJedi(GameObject_s *object);
 
 extern "C" {
     f32 default_path_heighttol = 0.2f;
@@ -291,18 +283,12 @@ struct CUTSCENEPLAYERCLIP;
 
 
 f32 draw_attention_distance = 2.0f;
-extern f32 party_follow_offsets[8];
 extern "C" i32 party_under_cover;
-extern GameObject_s *alert_obj;
-void AITriggerSetSysProcess(AITRIGGERSETSYS_s *system);
-i32 Hub_InMenu();
 i32 test_new_interaction;
 i32 debug_ignore_players;
 i32 WALKSTEALTH;
 i32 active_goody_count;
 f32 timetogetlos;
-void GameCreatureOpponentSelection(AISYS_s *, i32, APIOBJECT **, i32, APIOBJECT **, i32, APIOBJECT **, u64, f32);
-void GizTurrets_OpponentSelection(GIZTURRETSYS_s *, i32, APIOBJECT **, i32, APIOBJECT **);
 
 #if defined(__i386__)
 #define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
@@ -372,7 +358,6 @@ void SetScriptErrorLevel(SCRIPT_ERROR_LEVEL level);
 
 
 
-extern f32 alert_timer;
 
 
 
@@ -390,21 +375,14 @@ extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER;
 
 
 
-void GameObjectSetCanUse(GameObject_s *object, void *target, unsigned char action, unsigned char, float parameter);
 
 
-void GameObjectDimensions(GameObject_s *object);
 
 
-extern NUVEC alert_pos;
 extern "C" {
     i32 party_under_cover;
 }
-i32 ZapTarget(GameObject_s *object);
 
-void GameCreatureOpponentSelection(AISYS_s *system, i32 count, APIOBJECT_s **objects, i32 goody_count,
-                                   APIOBJECT_s **goodies, i32 baddy_count, APIOBJECT_s **baddies, u64 awareness,
-                                   float);
 
 
 
@@ -443,10 +421,8 @@ GameObject_s *FindNearestGameObject(NUVEC *position, GameObject_s *exclude, u32 
 
 
 
-char *AI_GetOutputName(GIZMO *, i32);
 
 
-void AI_Activate(GIZMO *gizmo, i32 active);
 
 
 // ==== src/legoapi/ai/game/creature.cpp: declarations ====
@@ -454,10 +430,8 @@ void AI_Activate(GIZMO *gizmo, i32 active);
 
 
 extern "C" {
-    void AddToAIGroup(AIGROUP *group, APIOBJECT *object);
 }
 
-void Player_ClearContext(GameObject_s *object, i32 context);
 
 
 
@@ -470,8 +444,6 @@ f32 alert_time = 10.0f;
 
 
 extern "C" void *AIPAthFindPathCnx(AISYS_s *, AIPATH_s *, char *, char *, i32 *);
-extern void *CutScene_FindInst(CUTSYS *, char *);
-extern FLOWBOX_s *FlowBoxFindByName(GIZFLOW_s *, char *);
 extern "C" {
 }
 
@@ -495,7 +467,6 @@ static f32 AtOnce_InitialRowDist = 0.75f;
 static f32 AtOnce_RowDist = 0.75f;
 static i32 AtOnce_maxAttackers = 1;
 
-void oneAtOnce_MaintainArray();
 
 // ==== src/legoapi/ai/core/aisysall.cpp: declarations ====
 // Original translation unit reconstructed from the reference address map.
@@ -610,9 +581,7 @@ extern "C" {
 
 
 
-extern void Player_ClearContext(GameObject_s *object, i32 mode);
 
-extern void Player_ResetContexts(PLAYERPACKET_s *packet);
 
 
 
@@ -652,7 +621,6 @@ DECOMP_ASSERT(sizeof(api_aiconditiondefs) == 0x258, "API condition registry size
 
 
 
-extern "C" f32 default_path_heighttol;
 
 
 
@@ -709,12 +677,6 @@ extern "C" f32 default_path_heighttol;
 
 extern "C" {
 extern void (*checkantinodefns[3])(APIOBJECT *, AIANTINODE *, NUVEC *, f32);
-    extern f32 default_path_heighttol;
-    extern u8 default_activate_difficulty;
-    extern u8 default_min_n_respawns;
-    extern u8 default_max_n_respawns;
-    extern f32 default_min_t_respawn;
-    extern f32 default_max_t_respawn;
     extern void (*checkantinodefns[3])(APIOBJECT_s *, AIANTINODE_s *, NUVEC *, f32);
 }
 
@@ -769,7 +731,6 @@ extern "C" {
 
 
 
-void AddToAIGroup(AIGROUP *group, APIOBJECT *object);
 
 
 
@@ -797,7 +758,6 @@ DECOMP_ASSERT(sizeof(EDAIAREA_s) == 0x44, "area editor record size");
 // ==== src/editor/edpath.cpp: all remaining content ====
 
 extern "C" {
-    extern f32 default_path_heighttol;
 }
 DECOMP_ASSERT(sizeof(AIPATHCNXTYPE_s) == 0x4c, "editor path connection type size");
 DECOMP_ASSERT(offsetof(AIPATHCNXTYPE_s, flags) == 0x48, "editor path connection options offset");
@@ -900,11 +860,6 @@ DECOMP_ASSERT(offsetof(CreatureEditorRecord, view_distance) == 0x9c, "creature v
 DECOMP_ASSERT(offsetof(CreatureEditorRecord, negative_min_view_height) == 0xa8, "creature min view height offset");
 DECOMP_ASSERT(sizeof(CreatureEditorRecord) == 0xac, "editor creature record size");
 
-extern "C" u8 default_activate_difficulty;
-extern "C" u8 default_min_n_respawns;
-extern "C" u8 default_max_n_respawns;
-extern "C" f32 default_min_t_respawn;
-extern "C" f32 default_max_t_respawn;
 
 #if defined(__i386__)
 #define CREATURE_EDITOR_REGPARM2 __attribute__((regparm(2)))
@@ -933,11 +888,6 @@ static __used__ __attribute__((force_align_arg_pointer)) void creatureEditor_cbS
 
 extern "C" {
     struct EDCREATURE_s;
-    extern u8 default_activate_difficulty;
-    extern u8 default_min_n_respawns;
-    extern u8 default_max_n_respawns;
-    extern f32 default_min_t_respawn;
-    extern f32 default_max_t_respawn;
 }
 
 #if defined(__i386__)
@@ -973,11 +923,8 @@ AddLocatorToSetAtEnd(EDLOCATORSET_s *set, EDLOCATOR_s *locator) __asm__(
 
 
 extern f32 DEFENDTIME;
-extern i32 teleport_all_freeplay_modes;
-extern i32 drop_in_teleport;
 
 extern "C" {
-    void AddToAIGroup(AIGROUP_s *group, APIOBJECT_s *object);
     extern i16 id_LANDSPEEDER;
 }
 
@@ -998,12 +945,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
     static_assert(sizeof(lego_aiconditiondefs) / sizeof(lego_aiconditiondefs[0]) == 178,
                   "complete game AI condition registry");
 
-extern f32 default_path_heighttol;
-extern u8 default_activate_difficulty;
-extern u8 default_min_n_respawns;
-extern u8 default_max_n_respawns;
-extern f32 default_min_t_respawn;
-extern f32 default_max_t_respawn;
 
 
 }
@@ -1012,12 +953,6 @@ extern f32 default_max_t_respawn;
 // remaining ids enumerate the current story list while omitting variants that
 // are represented by those dedicated routes.
 
-extern f32 draw_attention_distance;
-extern i32 test_new_interaction;
-extern i32 debug_ignore_players;
-extern i32 WALKSTEALTH;
-extern i32 active_goody_count;
-extern f32 timetogetlos;
 
 #if defined(__i386__)
 #define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
@@ -1071,16 +1006,10 @@ extern "C" {
 
 
 
-i32 Action_ReleaseLocator(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
-                          i32 first_time, float);
 
 struct GIZSPINNER_s;
 
-i32 Action_GetLocatorFromSet(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,
-                             i32 param_count, i32 first_time, float);
 
-i32 Action_AssignLocatorInSet(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
-                              i32 first_time, float);
 
 namespace {
 #include "legoapi/gizmo/gizmos/gizmos_gizactions_types.h"
@@ -1090,11 +1019,8 @@ namespace {
 // ==== src/legoapi/actions/combat/fighting.cpp: declarations ====
 
 
-void Player_ClearContext(GameObject_s *, i32);
-void Player_ResetContexts(PLAYERPACKET_s *);
 
 
-bool IsDownSwipe(NuVec2 const &start, NuVec2 const &end);
 
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e4) == 0x7e4, "Quick shoot record offset");
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e8) == 0x7e8, "Quick shoot record count offset");
@@ -1115,7 +1041,6 @@ extern "C" {
 // ==== src/legoapi/ai/game/gameantinode.cpp: declarations ====
 
 extern "C" {
-    extern f32 default_path_heighttol;
 }
 
 
@@ -1158,7 +1083,6 @@ struct VuVec;
 // Graphics loading flags
 
 extern "C" {
-    void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 }
 
 
@@ -1403,7 +1327,6 @@ extern "C" {
 
 extern "C" {
 
-void AddToAIGroup(AIGROUP *group, APIOBJECT *object);
 
 
 

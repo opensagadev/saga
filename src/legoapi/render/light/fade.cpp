@@ -17,14 +17,11 @@
 #include "nu2api/nucore/nuapi.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nutrig.h"
+#include "nu2api/nu3d/nu3d_includes.h"
 // The file is built with -ftree-vectorize for the VuVec initializers; the
 // functions below were compiled without it.
 #define SCALAR_FN __attribute__((optimize("omit-frame-pointer", "no-tree-vectorize")))
-extern i32 wait_till_next_frame;
-extern void DrawFadeScreenWipe(void);
-extern "C" void NuRndrRect2di(i32, i32, i32, i32, i32, numtl_s *);
 
-extern NUMTL *ScreenFadeMtl;
 
 static u32 FRAMES_TO_WAIT = 1;
 

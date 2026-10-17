@@ -43,6 +43,9 @@
 
 #include <string.h>
 #include "legoapi/gizmo/object/gizmoblowups_types.h"
+#include "legoapi/items/collect/bolts.h"
+#include "legoapi/items/fx/explosions.h"
+#include "legoapi/render/fx/edsplines.h"
 
 struct AIROW_s;
 struct nuqthdr_s;
@@ -59,14 +62,7 @@ f32 GizmoBlowUpOpponent_Range2;
 i32 GizmoBlowUpOpponent_Behind;
 i32 (*GizmoBlowUp_NoTargetFn)(WORLDINFO_s *, GameObject_s *) = NULL;
 
-void GizBlowup_DeleteTerrain();
-void GizmoBlowupUpdateMatrix(GIZMOBLOWUP_s *blowup);
-void GameAntiNodeData_Init(GAMEANTINODEDATA_s *data, nuhspecial_s *special);
-i32 GizBlowup_InitSingleTerrain(GIZMOBLOWUP_s *blowup);
-void GizBlowup_DeleteSingleTerrain(GIZMOBLOWUP_s *blowup);
 
-void GizmoBlowupGenDecalMatrix(GIZMOBLOWUP_s *, NUMTX *, i32);
-void GizmoBlowupGenShadowMatrix(GIZMOBLOWUP_s *, NUMTX *);
 
 i32 MAXBLOWUPRANDSPANG = 60;
 extern ADDPART_s Default_ADDPART;
@@ -74,19 +70,11 @@ extern "C" PART_s *AddPart(ADDPART_s *);
 i32 PartDraw_Flickerer(PART_s *);
 void PartStop_Flickerer(PART_s *);
 i32 ReleaseHearts();
-EXPLOSION *AddExplosion(NUVEC *, f32, f32, GameObject_s *, i32, i32);
 
 void Bolt_AddDeflectedBolt(BOLT_s *, nuvec_s *, nuvec_s *, unsigned char *);
 void Bolt_End(BOLT_s *, i32);
-void Bolt_PlayHitSfx(BOLT_s *);
 
-void GizmoBlowupEarlyUpdate(void *world_ptr, void *, float);
-void GizmoBlowupLateUpdate(void *world_ptr, void *, float);
-void GizmoBlowupBurstDraw(void *world_ptr, void *, float);
-i32 Blowup_GetVisibility(GIZMO *gizmo);
 static void Blowups_Reset(void *world_ptr, void *, void *progress_ptr);
-void *gizmoblowup_reservebuffers(void *world_ptr);
-i32 gizmoblowup_Load(void *world_ptr, void *);
 
 static i32 gizmoblowupnametable_numids;
 static char gizmoblowupnametable[32][32];
@@ -106,8 +94,6 @@ extern "C" {
 
 // Definitions from the original gizmoblowups translation unit.
 
-void GameAntiNodeData_Init(GAMEANTINODEDATA_s *data, nuhspecial_s *special);
-void GameAntiNodeData_Read(GAMEANTINODEDATA_s *data);
 
 
 static char *Blowup_OutputName[] = {"Blownup", "Punched", "Plugging"};
@@ -116,10 +102,6 @@ i32 blowup_gizmotype_id = -1;
 
 DECOMP_ASSERT(sizeof(BLOWUPPROGRESS_s) == 0x100, "BLOWUPPROGRESS_s ABI");
 
-void GizBlowup_DeleteTerrain();
-void GizBlowup_InitTerrain();
-void GizBlowup_DeleteSingleTerrain(GIZMOBLOWUP_s *blowup);
-i32 GizBlowup_InitSingleTerrain(GIZMOBLOWUP_s *blowup);
 
 extern u16 TargetDeg_Near, TargetDeg_Mid, TargetDeg_Far;
 extern f32 TargetDist_Near2, TargetDist_Mid2;

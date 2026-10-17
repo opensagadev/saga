@@ -86,20 +86,16 @@
 #include "nu2api/numath/nuvec.h"
 #include "nu2api/nu3d/nuprim.h"
 #include "nu2api/nu3d/nupostparams.h"
+#include "legoapi/items/collect/bolts.h"
+#include "legoapi/items/fx/explosions.h"
+#include "legoapi/items/objects/game_obj.h"
 
-extern EXPLOSION Explosion[8];
-extern i32 i_explosion;
 
-void UpdateExplosion_Generic(EXPLOSION *);
 
 i32 SphereSphereOverlapScaleY(NUVEC *, f32, f32, NUVEC *, f32, f32);
-PART_s *Bolt_HitParts(BOLT_s *, NUVEC *, NUVEC *, NUVEC *, f32, i32);
-i32 CannotKill(GameObject_s *);
-void ObjHitShield(GameObject_s *, GameObject_s *, i32, BOLT_s *);
 void GameCam_HitJudder();
 GIZMOBLOWUP_s *GizmoBlowUp_Hit(GameObject_s *, NUVEC *, i32, f32, NUVEC *, NUVEC *, BOLT_s *, u32, u8 *);
 
-void UpdateExplosion_Generic(EXPLOSION *explosion);
 
 // ==== src/legoapi/render/core/render.cpp: declarations ====
 

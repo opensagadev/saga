@@ -4,14 +4,14 @@
 #include "MechInputTouch_types.h"
 #include "nu2api/nucore/NuInputDevice.h"
 #include "nu2api/nu3d/nurndr.h"
+#include "MechInputTouch/MechInputTouchMainController.h"
+#include "nu2api/nu3d/nu3d_includes.h"
 
-extern u32 colourPurple;
 u32 colourWhite = 0xffffffff;
 u32 colourBlack = 0xff000000;
 u32 colourRed = 0xff0000ff;
 struct numtl_s *g_nuMtlHandleNull;
 
-extern "C" void NuRndrRect(f32, f32, f32, f32, f32, f32, f32, f32, f32, i32, struct numtl_s *);
 
 void MechInputTouchButton::ClearTouchLocked(bool force) {
     if (!force) {

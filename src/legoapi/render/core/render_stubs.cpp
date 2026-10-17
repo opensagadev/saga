@@ -16,6 +16,8 @@
 #include "globals.h"
 
 #include <string.h>
+#include "legoapi/props/system/socksysall.h"
+#include "nu2api/nu3d/nu3d_includes.h"
 
 struct numtl_s;
 typedef struct numtl_s NUMTL;
@@ -24,10 +26,8 @@ extern "C" {
 
     extern nurenderscene_s currentScene;
 
-    void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 
 
 
-void PerspectMidPoint(NUVEC *result, NUVEC *first, NUVEC *second, NUVEC *camera_position);
 
 } // extern "C"

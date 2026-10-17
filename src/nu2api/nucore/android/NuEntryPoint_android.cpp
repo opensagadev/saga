@@ -24,6 +24,7 @@
 #include "nu2api/nucore/numemory.h"
 #include "nu2api/nuplatform/nudevicespecs.hpp"
 #include "nu2api/nuplatform/nuplatform.h"
+#include "nu2api/nucore/android/NuEntryPoint_android.h"
 
 // These zero-initialized JNI/platform globals form the original Android state run.
 // Definition order is reversed here to reproduce their linked BSS order.
@@ -56,7 +57,6 @@ static bool g_validSurface;
 static i32 android_argc;
 static char *android_argv[32];
 
-void *AndroidMain(void *);
 
 static inline void UpdateApplicationStatus() {
     NuApplicationState *state = NuCore::GetApplicationState();

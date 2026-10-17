@@ -39,3 +39,15 @@ void InitSplinePosition(SPLINEPOS_s *, NUGSPLINE *, f32, i32);
 void MoveSplinePosition(SPLINEPOS_s *, f32);
 void GetNearestSplinePos(NUVEC *, SPLINEPOS_s *, NUGSPLINE *, i32, i16, i16);
 i32 OutSideSplineArea(NUVEC *position, NUGSPLINE *spline, NUVEC *edge_end, NUVEC *edge_start, i32 inside);
+
+// Declared here for the other units that use them.
+struct GAMEANTINODEDATA_s;
+struct nugscn_s;
+struct nugspline_s;
+struct nuhspecial_s;
+extern char * EDSPLINE_FILECHECK;
+i32 edSpline_FindAllBeg(nugscn_s *scene, char *prefix, nugspline_s **results, i32 capacity);
+i32 edSpline_FindAllSub(nugscn_s *scene, char *name, nugspline_s **results, i32 capacity);
+void GameAntiNodeData_Init(GAMEANTINODEDATA_s *data, nuhspecial_s *special);
+void GameAntiNodeData_Read(GAMEANTINODEDATA_s *data);
+void edSpline_SplineList(nugscn_s *);

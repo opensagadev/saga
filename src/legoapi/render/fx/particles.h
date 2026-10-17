@@ -9,3 +9,6 @@ void Particles_Start(WORLDINFO_s *world);
 void Particles_Stop(WORLDINFO_s *world);
 void Particles_DumpAreaPage(void);
 void Particles_LoadAreaPage(char *name);
+
+// Declared here for the other units that use them.
+void SetEffectVisibility(char *name, i32 visible);

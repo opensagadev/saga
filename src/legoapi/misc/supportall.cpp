@@ -113,6 +113,11 @@
 #include "nu2api/nucore/nugcutscene.h"
 #include "nu2api/nucore/nuhgobj.h"
 #include "legoapi/items/objects/gameobjects_types.h"
+#include "MechInputTouch/MechTouchUIElements.h"
+#include "legoapi/lib/hub.h"
+#include "legoapi/misc/androidbatman.h"
+#include "nu2api/nu3d/nu3d_includes.h"
+#include "nu2api/nucore/android/bgproc_android.h"
 
 // The reference defines these with dynamic initialization in this unit.
 MemoryManager theMemoryManager;
@@ -127,21 +132,15 @@ struct SHOPINPUT;
 
 DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");
 
-extern i32 app_tbgameset;
-extern i32 app_tbplayerset;
-extern i32 app_tbaiset;
-extern i32 app_tbdrawset;
 
 
 
-void RndrTexQuad(f32 x, f32 y, f32 width, f32 height, i32 colour, numtl_s *material, i32 angle);
 
 
 void bgProcClose() {
 }
 
 
-void bgprocFreeze();
 
 void CloakMovement(GameObject_s *object) {
     const u8 index = object->field_0x1089;
@@ -211,14 +210,10 @@ apply_weights:
 }
 
 
-void RndrTexQuad3D(VuMtx const &matrix, i32 colour, numtl_s *material);
-
-void bgProcAbortAll();
-
-void bgprocUnFreeze();
 
 
-i32 bgprocIsFreezing();
+
+
 
 
 
@@ -229,28 +224,18 @@ i32 bgprocIsFreezing();
 //   NuHtmlWrite    0x2d5cd0   NuHtmlHeading1 0x2d5d40
 extern "C" {
 extern NUFILE hfh;
-extern char unknown[8];
 }
 
-void NuHtmlFlush(i32 force);
-
-extern "C" void NuHtmlBegin(void *file);
 
 
 
-extern "C" void NuHtmlBanner(void);
 
-extern "C" void NuHtmlHeading2(const char *fmt, ...);
 
-extern "C" void NuHtmlHeading3(const char *fmt, ...);
 
-extern "C" void NuHtmlEnd(void);
 
-void NuHtmlTitle(char *title);
 
-extern "C" void NuHtmlBitmap(char *filename, i32 width, i32 height, char *caption, char *source);
 
-void NuHtmlGraphArray(char **strings);
+
 
 extern "C" {
 }
@@ -259,14 +244,11 @@ extern "C" {
 }
 
 
-VARIPTR *DisplayListRenderBuffer();
 
-void xxxNuDisplayListUpdateSpecial(nuhspecial_s *special);
 
 extern "C" {
 }
 
-void TBRESET();
 
 
 

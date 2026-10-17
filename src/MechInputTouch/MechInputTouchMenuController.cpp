@@ -56,9 +56,9 @@
 #include "legoapi/world/levels/levels.h"
 #include "legoapi/world/mission.h"
 #include "nu2api/nusound/nusound.h"
+#include "MechInputTouch/MechTouchUIElements.h"
+#include "legoapi/world/levels/hub.h"
 
-void PerformPauseButtonStuff();
-extern i32 hub_freeplay_area;
 bool backButtonPressedLastFrame = false;
 
 f32 MechInputTouchMenuController::PackButtonW = 0.0f;

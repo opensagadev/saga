@@ -66,6 +66,13 @@
 #include "nu2api/numath/numtx.h"
 #include "legoapi/audio/sfx.h"
 #include "nu2api/nufile/nufpar.h"
+#include "legoapi/actions/movement/jumping.h"
+#include "legoapi/items/fx/explosions.h"
+#include "legoapi/items/fx/ripples.h"
+#include "legoapi/misc/utilities.h"
+#include "legoapi/render/core/gameliball.h"
+#include "legoapi/world/levels/episodeI.h"
+#include "nu2api/nu3d/nu3d_includes.h"
 
 // The reference defines these with dynamic initialization in this unit.
 
@@ -78,17 +85,10 @@ DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");
 
 
 
-void FindSlamOrigin(GameObject_s *, NUVEC *, NUVEC *);
-EXPLOSION *AddExplosion(NUVEC *, f32, f32, GameObject_s *, i32, i32);
 
 extern "C" i16 id_LANDSPEEDER;
-void PodDust(WORLDINFO_s *, GameObject_s *);
 
 
-i32 CannotKill(GameObject_s *object);
-extern "C" i32 DebrisPreCheckCollisions(NUVEC *position, f32 radius);
-extern "C" i32 DebrisCollisionCheckScaleY(NUVEC *position, f32 radius, f32 y_scale);
-extern "C" i32 DebrisTorusCollisionCheckScaleY(NUVEC *position, f32 radius, f32 y_scale);
 
 
 
@@ -97,7 +97,6 @@ extern "C" i32 DebrisTorusCollisionCheckScaleY(NUVEC *position, f32 radius, f32 
 //   NuHtmlBegin    0x2d5ca0   NuHtmlFlush   0x2d5c30
 //   NuHtmlWrite    0x2d5cd0   NuHtmlHeading1 0x2d5d40
 extern "C" {
-extern char unknown[8];
 }
 
 
@@ -123,14 +122,9 @@ void NewBuzzFrames(nupad_s *pad, i32 frames, i32 mode);
 
 void FindAnglesXY(NUVEC *, u16 *, u16 *);
 
-void BuildRippleMtx(numtx_s *matrix, nuvec_s *normal, nuvec_s *position, u16, u16);
-
-void VecRotateAxis(NUVEC *, u16, NUVEC *);
-void AddRipple(ripple_set_s *, NUMTX *, float, float, float, float, RGBA, RGBA, i32, numtl_s *, NUVEC *);
 
 
-void AddRipple(ripple_set_s *set, numtx_s *matrix, float size, float growth, float lifetime, float delay,
-               RGBA start_color, RGBA end_color, i32 flags, numtl_s *material, nuvec_s *velocity);
+
 
 // ==== functions in original address order ====
 

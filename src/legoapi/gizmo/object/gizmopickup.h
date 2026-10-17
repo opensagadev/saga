@@ -23,3 +23,16 @@ void AddMiscPickups(nuvec_s *position, i32 player_id, i32 coins, i32 torpedoes);
 i32 IsACoinType(i32 type);
 i32 LoseCoins(GameObject_s *object, i32 cause);
 void GizmoPickups_SetOnOff(void);
+
+// Declared here for the other units that use them.
+struct GIZMOPICKUP_s;
+struct GameObject_s;
+struct PART_s;
+struct nuvec_s;
+void AddCoinsAsParts(i32 type_id, nuvec_s *position, nuvec_s *velocity, float lifetime, float scale);
+void AddHeartAsPart(GameObject_s *recipient, nuvec_s *position, nuvec_s *velocity, float scale, float lifetime);
+void AddTorpedoAsPart(nuvec_s *position, nuvec_s *velocity, float scale, float lifetime);
+void PartStop_Coin(PART_s *part);
+void PowerUp_AddPart(nuvec_s *position, nuvec_s *velocity, f32 scale, f32 lifetime);
+void PowerUp_Update(GameObject_s *);
+void SetCoinType(i32 model, GIZMOPICKUP_s *pickup);

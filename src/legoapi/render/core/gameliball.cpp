@@ -198,6 +198,12 @@
 #include "nu2api/nu3d/android/nutex_ios_ex.h"
 #include "legoapi/core/startup/main.h"
 #include <GLES2/gl2.h>
+#include "editor/edlevelall.h"
+#include "gameapi/edtools/edtoolsall.h"
+#include "legoapi/actions/character/legoapi_tag.h"
+#include "legoapi/cutscenes/gcutscn.h"
+#include "nu2api/nu3d/android/nubridge_android.h"
+#include "nu2api/nu3d/nu3d_includes.h"
 
 struct AIROW_s;
 struct nuqthdr_s;
@@ -274,10 +280,7 @@ f32 debris_thinning_level = 1.0f;
 i32 debris_detail_level = 4;
 i32 forced_debris_thinning;
 
-NUMTL *CreateCopyMat(NUMTL *, i32, i32, i32, i32);
-uv1deb *GenDebIndex(debkeydatatype_s *, debinftype *, float);
 
-uv1deb *GenDebDummy(debkeydatatype_s *key, debinftype *effect, float time);
 
 extern "C" {
 
@@ -291,47 +294,26 @@ static dma_particle_s *DebrisParticleAt(debkeydatatype_s *key, i16 index, u8 par
     return &key->particle_chunks[index / 32]->particles[index % 32];
 }
 
-uv1deb *GenDebIndexRadial(debkeydatatype_s *key, debinftype *effect, float time);
 
-uv1deb *GenDebIndex(debkeydatatype_s *key, debinftype *effect, float time);
 
-i32 SolveQuadratic(f32, f32, f32, f32 *, f32 *);
-void DebrisGetControlStackLock();
-void DebrisReleaseControlStackLock();
-void AddChunkControlToStack(debris_chunk_control_s *, debris_chunk_control_s **);
 extern "C" {
     extern i32 debrischunks, debrischunksglass, freechunkcontrolsptr;
-    extern debris_chunk_control_s **freechunkcontrols;
-    extern debris_chunk_control_s *debris_chunk_control_stack[2];
 }
 
-uv1deb *GenDebIndexBounceY(debkeydatatype_s *key, debinftype *effect, float time);
 
-uv1deb *GenDebIndexBounceXZ(debkeydatatype_s *key, debinftype *effect, float time);
 
-uv1deb *GenDebIndexSpheroid(debkeydatatype_s *key, debinftype *effect, float time);
 
-void GenDebMomAdjFromPos(debkeydatatype_s *, debinftype *, uv1deb *data);
 
-uv1deb *GenDebIndexRadialStar(debkeydatatype_s *key, debinftype *effect, float time);
 
-uv1deb *GenDebIndexRadialRotor(debkeydatatype_s *key, debinftype *effect, float time);
 
-void GenDebMomAdjFromPosAll(debkeydatatype_s *, debinftype *, uv1deb *data);
 
-void GenDebMomAdjFromPosRev(debkeydatatype_s *, debinftype *, uv1deb *data);
 
-void GenDebMomAdjFromSplash(debkeydatatype_s *, debinftype *, uv1deb *data);
 
-void GenDebMomAdjFromAshRock(debkeydatatype_s *, debinftype *, uv1deb *data);
 
-uv1deb *GenDebIndexImprovedRadial(debkeydatatype_s *key, debinftype *effect, float time);
 
-void GenDebMomAdjFromPosRevTree(debkeydatatype_s *, debinftype *effect, uv1deb *data);
 
 typedef f32 ClipBoxVec4 __attribute__((vector_size(16), aligned(4)));
 
-void DebrisDrawCalculateClipBoxes(debinftype *effect, debkeydatatype_s *key);
 
 extern "C" {
 
@@ -501,17 +483,10 @@ extern "C" {
         0,                                        // unscaled_effect_index
     };
     void NuRegisterEndFrameCallBackFn(void (*callback)(void));
-    void DebrisProcessTimeSlip(void);
-    extern i32 debris_suspended;
 
-    void DebrisTrashableSetup(VARIPTR *, VARIPTR *);
 
-    void DebrisSetup2(VARIPTR *, VARIPTR, VARIPTR *, VARIPTR, char *, i32, i32, i32, i32);
 
-void DebrisSetup2(VARIPTR *buffer, VARIPTR buffer_end, VARIPTR *trash_buffer, VARIPTR trash_end, char *texture_name,
-                      i32 chunk_count, i32 glass_chunk_count, i32 key_count, i32 effect_count);
 
-void DebrisSetup(VARIPTR *p1, VARIPTR p2, char *p3, i32 p4, i32 p5, i32 p6);
 
 
 
@@ -562,7 +537,6 @@ extern "C" {
 // The original animation editor callbacks and lifecycle share file-local state.
 // ---- begin src/gameapi/edtools/edanimall.cpp ----
 
-extern "C" i32 edSfxAllCount;
 
 // Animation editor subsystem stubs (static, internal linkage).
 
@@ -685,7 +659,6 @@ static __attribute__((used)) void edanimcbLocalSoundMenu(eduimenu_s *parent, edu
 // ---- end src/gameapi/edtools/edanimall.cpp ----
 // ---- begin src/gameapi/edtools/edmenucallbacks.cpp ----
 
-extern "C" void eduiItemColourPickSetRGB(edui_colour_pick_s *, f32, f32, f32);
 extern "C" eduiitem_s *eduiItemColourPickCreate(usize, const void *, EdUiItemCallback, char *);
 
 // Editor UI callbacks retained in the original editor's menu code.
@@ -696,12 +669,6 @@ extern "C" eduiitem_s *eduiItemColourPickCreate(usize, const void *, EdUiItemCal
 
 // ---- end src/gameapi/edtools/edmenucallbacks.cpp ----
 
-float edanimPlayerAnimDistance(i32 parameter_index);
-void edgraDoInput(nupad_s *pad);
-void edgraDetermineNearestInstance(f32 distance);
-void edgraDrawCursor();
-extern "C" void edbitsDrawCircleTilted(NUVEC *centre, f32 radius, i32 colour, NUMTL *material, i32 rotation_z,
-                                       i32 rotation_y);
 static i32 edbits_cubecount;
 static i32 edgra_clumpthin = 1;
 static i32 edgra_elementthin = 1;
@@ -716,30 +683,13 @@ static NUVEC entry_position;
 // ---- begin src/gameapi/edtools/edptlall.cpp ----
 
 extern "C" {
-    extern debkeydatatype_s *debkeydata;
-    extern debinftype *effecttypes;
     extern u32 edblack[4];
-    extern eduimenu_s *edptl_repeatbox_menu;
-    extern i32 edpp_usememcard;
-    extern i32 edbits_override_backups;
-    extern i32 edbits_particle_general_page;
-    extern i32 edbits_particle_level_page;
     i32 edbits_particle_char_page = 1;
-    extern char edbits_datapath[256];
     extern char edbits_general_save_directory[256];
     extern char edbits_general_save_name[256];
     extern char edbits_general_save_extension[256];
-    void DebrisSetDetailLevels(i32 handle, i32 detail_levels);
-    void edppDeleteEffect(i32 index);
-    i32 edppLoadPage(char *path, i32 flag, usize scene);
-    void DebrisReScale(i32 effect_index, f32 scale);
-    void edppRestartAllEffectsInLevel(void);
 }
 
-void edppStartSingleEffect(i32 index);
-void edppPtlDestroy(i32 index);
-void edppDestroyAllPages();
-i32 edppSaveEffects(char *filename, char page);
 void cbFileSaveEffects(eduimenu_s *, eduiitem_s *, u32);
 static void edptlcbClipboardMenu(eduimenu_s *, eduiitem_s *, u32);
 static void edptlcbOrphanListMenu(eduimenu_s *, eduiitem_s *, u32);
@@ -773,17 +723,8 @@ static void UpdateTotalPtls(debinftype *effect);
 #endif
 
 extern "C" {
-    extern debkeydatatype_s *debkeydata;
     extern u32 edblack[4];
     extern NUMTL *DebMat[];
-    extern i32 edpp_readout;
-    extern eduimenu_s *sscalemenu;
-    extern eduimenu_s *ptlgravmenu;
-    extern eduimenu_s *ptlemitvelmenu;
-    extern eduimenu_s *ptlreadoutmenu;
-    extern eduimenu_s *edptl_damage_menu;
-    extern eduimenu_s *edptl_damageflag_menu;
-    extern eduimenu_s *namemenu;
 }
 
 static void cbPtlCancelSScaleMenu(eduimenu_s *, eduimenu_s *);
@@ -807,69 +748,13 @@ static void cbPtlChangeTextureSelect(eduimenu_s *, eduiitem_s *, u32);
 static i32 edptl_superscale = 1;
 
 extern "C" {
-    extern eduimenu_s *edpp_active_menu;
-    extern eduimenu_s *edptl_testdetail_menu;
-    extern eduimenu_s *edptl_detail_menu;
-    extern eduimenu_s *edptl_drawflag_menu;
-    extern eduimenu_s *edptl_group_menu;
-    extern eduimenu_s *edptl_switch_menu;
-    extern eduimenu_s *dpadmodemenu;
-    extern eduimenu_s *sscalemenu;
-    extern eduimenu_s *edptl_scaleeffect_menu;
-    extern eduimenu_s *edptl_instancesettings_menu;
-    extern eduimenu_s *edptl_torus_menu;
-    extern eduimenu_s *collmenu;
-    extern eduimenu_s *edptl_damageflag_menu;
-    extern eduimenu_s *edptl_damage_menu;
-    extern eduimenu_s *edptl_soundcontrol_menu;
-    extern eduimenu_s *edptl_soundx_menu;
-    extern eduimenu_s *edptl_sounds_menu;
-    extern eduimenu_s *edptl_bounce_menu;
-    extern eduimenu_s *ptljibmenu;
-    extern eduimenu_s *ptlrotmenu;
-    extern eduimenu_s *ptlsizemenu;
-    extern eduimenu_s *edptl_ghost_menu;
-    extern eduimenu_s *ptlcutoffmenu;
-    extern eduimenu_s *emittimemenu;
-    extern eduimenu_s *etimemenu;
-    extern eduimenu_s *changegenratemenu;
-    extern eduimenu_s *ptlvaremitmenu;
-    extern eduimenu_s *ptlstartvelmenu;
-    extern eduimenu_s *ptlvarstartmenu;
-    extern eduimenu_s *ptlgravmenu;
-    extern eduimenu_s *ptlemitvelmenu;
-    extern eduimenu_s *ptlemitmenu;
-    extern eduimenu_s *textureselectmenu;
-    extern eduimenu_s *texturemenu;
-    extern eduimenu_s *ptlcolmenu;
-    extern eduimenu_s *ptlgsortmenu;
-    extern eduimenu_s *ptlreadoutmenu;
-    extern eduimenu_s *edptl_quickdel_menu;
-    extern eduimenu_s *edptl_orphanlist_menu;
-    extern eduimenu_s *ptlclipmenu;
-    extern eduimenu_s *messagemenu;
-    extern eduimenu_s *ptldatamenu;
-    extern eduimenu_s *ptltypemenu;
-    extern eduimenu_s *effectlistmenu;
     extern u32 edblack[4];
     extern u32 edgrey[4];
     extern u32 eddarkred[4];
-    extern i32 edbits_particle_level_page;
-    extern debkeydatatype_s *debkeydata;
     extern DEBRISGENERATOR gensorttab[13];
     extern DEBRISMOMENTUMADJUSTER gencodetab[7];
-    void edppDeleteEffect(i32 index);
-    void DebrisOrientation(i32 handle, i16 z, i16 y);
-    void DebrisEmitterOrientation(i32 handle, i16 z, i16 y, i16 x);
-    void DebrisStartOffset(i32 handle, f32 offset);
-    void DebrisSetTrigger(i32 handle, i32 type, i32 id, f32 value);
-    void DebrisReflectionOrientation(i32 handle, i16 z, i16 y, f32 offset, f32 bounce);
-    void DebrisSetFacing(i32 handle, u8 enabled, i16 x, i16 y);
-    void DebrisSetGroupID(i32 handle, i16 group);
-    void DebrisSetRoomID(i32 handle, nugscn_s *scene);
 }
 
-void edppPtlShelve(i32 index);
 
 static eduiitem_s *torus_env1_item;
 static eduiitem_s *torus_env2_item;
@@ -890,13 +775,6 @@ static eduiitem_s *grad_item;
 static eduiitem_s *grad_alpha_item;
 
 extern "C" {
-    extern debkeydatatype_s *debkeydata;
-    extern i32 edpp_readout;
-    extern i32 edpp_showAllPlaced;
-    extern i32 edpp_snap_enabled;
-    extern eduimenu_s *ptlvaremitmenu;
-    extern eduimenu_s *ptlvarstartmenu;
-    extern eduimenu_s *ptlstartvelmenu;
 }
 static void cbPtlCancelGSortMenu(eduimenu_s *, eduimenu_s *);
 static void cbPtlCancelTextureMenu(eduimenu_s *, eduimenu_s *);
@@ -1248,15 +1126,8 @@ static inline f32 edppInterpolateTorusCurve(const debris_float_key_s *keys, f32 
     return 0.0f;
 }
 
-void edppDoInput(nupad_s *pad);
-void edppDetermineNearest(f32 distance);
-void edppDrawCursor();
-void edppHighlightNearest();
-extern "C" void DebrisStatusNormal(i32 *handle);
 
 extern "C" {
-    void NuRndrRect2di(i32 x, i32 y, i32 width, i32 height, i32 colour, numtl_s *material);
-    void NuRndrLine2di(i32 x0, i32 y0, i32 x1, i32 y1, i32 colour, numtl_s *material);
 }
 
 // The original local font helpers read the same private draw state as the
@@ -1375,11 +1246,8 @@ extern "C" {
     i32 edpp_page_on[8];
     usize edpp_page_scene[8];
     i32 edpp_types_used;
-extern i32 edpp_copy_source[8];
     i32 edpp_usememcard;
     edpp_particle_s edpp_ptls[512];
-extern i32 edpp_cam_ax;
-extern i32 edpp_cam_ay;
     i32 edpp_first_time_this_level;
     NUMTL *edpp_mtl;
     NUMTL *edpp_boxmtl;
@@ -1391,7 +1259,6 @@ extern i32 edpp_cam_ay;
 extern i32 edpp_copy_mode;
 extern i32 edpp_copy_enclosed;
 extern i32 edpp_copy_source_count;
-extern NUVEC edpp_copy_source_vec;
     i32 edpp_num_orphans;
     i32 edpp_showAllPlaced;
     i32 edpp_dpad_mode;
@@ -1451,37 +1318,23 @@ extern NUVEC edpp_copy_source_vec;
     i32 edpp_emitrotz;
     i32 edpp_emitroty;
     i32 edpp_emitrotx;
-extern f32 edpp_offset;
 extern i32 edpp_copyrotz;
 extern i32 edpp_copyroty;
     i32 edpp_facrotx;
     i32 edpp_facroty;
 
-    void edgraInitAllClumps(void);
 }
 
-void edbriDoInput(nupad_s *);
-void edbriDetermineNearest(f32);
-void edbriDrawCursor();
 extern "C" {
     extern NUMTL *edbri_mtl, *edbri_mtl_zoff;
     extern eduimenu_s *edbri_options_menu, *edbri_active_menu;
     extern i32 edbri_nearest, edbri_plank_instance_type, edbri_post_instance_type;
-    void edbriBridgesReset(void);
 }
 
-void edgraClumpReseed(i32 index);
 
 
-void edgraClumpDestroy(i32 index);
-void edbitsDoSingleDump(i32 face);
-void edbriBridgeUpdate(i32 bridge, NUGSCN *scene);
 
 extern "C" {
-    extern debinftype *effecttypes;
-    i32 edbitsLookupSoundFX(char *name);
-    void edbitsSoundPlay(NUVEC *position, i32 sound);
-    void AddVariableShotDebrisEffectTimed3(i32, NUVEC *, NUVEC *, i32, f32, NUMTX *, NUMTX *);
     edanim_param_s AnimParams[64];
     eduimenu_s *edanim_active_menu;
     eduimenu_s *edanim_options_menu;
@@ -1550,7 +1403,6 @@ extern eduimenu_s * edbri_bridgeproperties_menu;
 extern eduimenu_s * edbri_ropecolour_menu;
     NUMTL *edbri_mtl;
     NUMTL *edbri_mtl_zoff;
-extern NUVEC edbri_cam_pos;
 extern i32 edbri_cam_ax;
 extern i32 edbri_cam_ay;
     i32 edbri_nearest;
@@ -1571,35 +1423,12 @@ extern i32 edbri_mode;
     i32 edbri_post_interval = 5;
 }
 
-void FileLoadSingleEffectType(debinftype *, i32, char);
-extern "C" void NuBridgeInit(void);
-extern "C" void NuBridgeRemove(i32 bridge);
-extern "C" i32 NuBridgeCreate(NUGSCN *, nuhspecial_s *, nuhspecial_s *, NUVEC *, NUVEC *, f32, i16, f32, f32, f32, f32,
-                              i32, f32, f32, i32, u32);
 
-void edbriBridgeUpdate(i32 index, NUGSCN *scene);
 
-void edbriBridgePlace(i32 index, NUVEC *position);
 
-i32 edbriBridgeCreate(NUVEC *position);
 
-void edbriBridgeDestroy(i32 index);
 
-void edppDetermineNearest(float);
-void edppPtlDestroy(i32);
-void edppPtlShelve(i32);
 extern "C" {
-    extern debkeydatatype_s *debkeydata;
-    extern i32 maxdebkeys;
-    void DebFreeOrphansInstantly(debinftype *);
-    void DebrisOrientation(i32, i16, i16);
-    void DebrisEmitterOrientation(i32, i16, i16, i16);
-    void DebrisStartOffset(i32, f32);
-    void DebrisSetTrigger(i32, i32, i32, f32);
-    void DebrisReflectionOrientation(i32, i16, i16, f32, f32);
-    void DebrisSetFacing(i32, u8, i16, i16);
-    void DebrisSetGroupID(i32, i16);
-    void DebrisSetRoomID(i32, nugscn_s *);
 }
 
 
@@ -1607,34 +1436,16 @@ extern "C" {
 extern "C" {
 
 
-    void edbitsDrawOvalXY(NUVEC *, f32, f32, i32, NUMTL *);
-void edbitsDrawCircleTilted(NUVEC *centre, f32 radius, i32 colour, NUMTL *material, i32 rotation_z,
-                                i32 rotation_y);
-void edbitsDrawOvalXY(NUVEC *centre, f32 radius_x, f32 radius_z, i32 colour, NUMTL *material);
-void edbitsDrawSphere(NUVEC *centre, f32 radius, i32 colour, NUMTL *material);
-i32 edbitsLookupInstance(char *name, NUGSCN *scene);
-i32 edbitsLookupSoundFX(char *);
     static i32 edbits_local_editor_enabled;
     i32 *edbits_editor_enabled = &edbits_local_editor_enabled;
 
     i32 edbitsSfxVol = 100;
-void edbriBridgesReset(void);
-    void edbriStopPage(i8 page);
-    void NuBridgeRemove(i32 bridge);
-void edbriStopPage(i8 page);
-    void NuWindSetup(VARIPTR *, VARIPTR, i32, i32);
     // Shared editor font; edmainInit receives and stores the font handle.
 
-void edppDeleteEffect(i32 index);
     extern f32 globaltime;
 
-void edppDrawSpheres(debinftype *effect, i32 key_index);
-void edppDrawTorus(debinftype *effect, i32 key_index);
-i32 edppLoadPage(char *path, i32 flag, usize scene);
-void edppRestartAllEffectsInLevel(void);
     i32 edqseed = 12345;
 eduiitem_s *eduiItemColourPickCreate(usize data, const void *colours, EdUiItemCallback callback, char *text);
-void eduiItemColourPickSetRGB(edui_colour_pick_s *item, f32 red, f32 green, f32 blue);
 
     // The editor UI callbacks share this translation unit with their cursor,
     // menu, and interaction state in the original binary.
@@ -1651,22 +1462,12 @@ extern "C" {
     extern eduimenu_s *edbri_plankcount_menu, *edbri_bridgeproperties_menu, *edbri_ropecolour_menu;
     extern i32 edbri_mode, edbri_nearest, edbri_plank_instance_type, edbri_post_instance_type;
     extern i32 edbri_planks, edbri_post_interval, edbri_bridges_used;
-    extern NUGSCN *edbri_page_scene[8];
     extern u32 edblack[4];
     extern u32 edgrey[4];
-    extern NUVEC edbri_cam_pos;
     extern i32 edbri_cam_ax, edbri_cam_ay, edbri_rotz, edbri_roty;
     extern f32 edbri_length, edbri_width;
-    i32 edbitsLookupInstance(char *, NUGSCN *);
-    void edbriBridgesReset(void);
     eduiitem_s *eduiItemColourPickCreate(usize, const void *, EdUiItemCallback, char *);
-    void eduiItemColourPickSetRGB(edui_colour_pick_s *, f32, f32, f32);
 }
-void edbriBridgeUpdate(i32, NUGSCN *);
-void edbriBridgePlace(i32, NUVEC *);
-void edbriBridgeDestroy(i32);
-i32 edbriBridgeCreate(NUVEC *);
-i32 edbriFileSave(char *);
 
 static void edbricbCancelOptMenu(eduimenu_s *, eduimenu_s *);
 static void edbricbCancelDpadModeMenu(eduimenu_s *, eduimenu_s *);
@@ -1741,23 +1542,12 @@ static void edbriMakePath(char *path) {
 static void edbricbFileSave(eduimenu_s *menu, eduiitem_s *, u32);
 static void edbricbFileLoad(eduimenu_s *menu, eduiitem_s *, u32);
 
-void edbriDoInput(nupad_s *pad);
 
 
 // ==== src/gameapi/edtools/edgraall.cpp: all remaining content ====
 
-extern "C" void edgraInitAllClumps(void);
 extern "C" u32 edblack[4];
 extern "C" u32 edgrey[4];
-extern "C" i32 edgra_mode;
-extern "C" i32 edgra_copy_source;
-i32 edgraFileSave(char *path);
-void edgraInstanceDestroy(i32 index);
-void edgraClumpPlace(i32 index, NUVEC *position);
-void edgraInstancePlace(i32 index, NUVEC *position);
-i32 edgraClumpCreate(NUVEC *position);
-void edgraInstanceCreate(NUVEC *position);
-void edgraSortVectorBuffer(i32 index);
 
 static void edgraAttachMenu(eduimenu_s *parent, eduimenu_s *child) {
     eduiMenuAttach(parent, child);
@@ -1947,7 +1737,6 @@ static i32 sfx_refcount[1601] = {0};
 
 static char cfgfile_name[256] = "Audio/audio.cfg";
 
-void InitSoundInfo(i32 index);
 
 static void fnAudioAudio(nufpar_s *fpar);
 
@@ -1962,7 +1751,6 @@ static NUFPCOMJMP audioCom[] = {
     {NULL, NULL},
 };
 
-void LoadSfx(const char *file, variptr_u *buffer_start, variptr_u buffer_end);
 
 
 
@@ -1974,7 +1762,6 @@ void LoadSfx(const char *file, variptr_u *buffer_start, variptr_u buffer_end);
 
 
 
-bool HandleGroupLimit(i32 group_id);
 
 
 
@@ -2012,22 +1799,12 @@ extern "C" {
     u16 SfxBits[100];
 }
 
-void PlayAMusic(i32 stream, i32 track, i32 volume, i32 one_shot);
 
-extern "C" void NuGCutSetCutAudioStream(i32 stream);
 
-extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
-void SetSfxBit_OnEx(i32);
-void SetSfxBit_OffEx(i32);
-void SetSfxBitTab_OnEx(SoundTable *, i32);
-void SetSfxBitTab_OffEx(SoundTable *, i32);
-i32 SfxBitEx(i32);
-i32 SfxBitTabEx(const SoundTable *, i32);
 
 
 
 extern "C" {
-    void MusicPreSeek(i32 track);
 }
 
 
@@ -2035,37 +1812,28 @@ extern "C" {
 
 extern "C" {
 
-i32 GetSfxIdN(char *name, i32 length);
 
 
 
 
 
-void PlaySfxById(i32 sfx_id, nuvec_s *position);
 
 
-void RestoreGameMusic(void);
 
 
 
 } // extern "C"
 
-i32 SfxBitTabEx(SoundTable const *table, i32 sound);
 
 
 
-void SetSfxBit_OnEx(i32 sound);
-
-
-void SetSfxBit_OffEx(i32 sound);
 
 
 
-void SetSfxBitTab_OnEx(SoundTable *table, i32 sound);
 
-void SetSfxBitTab_OffEx(SoundTable *table, i32 sound);
 
-i32 SfxBitEx(i32 sound);
+
+
 
 
 
@@ -2089,8 +1857,6 @@ static inline bool UpdateSecondaryMusicStream() {
 
 typedef void (*SoundBitCallback)(i32 sound_id);
 
-extern "C" void MusicPreSeek(i32 track);
-extern "C" void RestoreGameMusic(void);
 
 extern "C" {
     f32 MASTERVOLUME = 1.0f;
@@ -2099,23 +1865,18 @@ extern "C" {
         MUSIC_PLAYBACK_STOPPED, -1, 0, -1, 0, -1, 0, 0, false, false, {0, 0}, 0.0f, 0.0f, 0, -1, NULL,
     };
 
-    void SoundStopMusic(void);
 
-void SoundStopMusic(void);
 
-void edbitsSoundPlay(NUVEC *, i32);
 }
 
 // ==== src/legoapi/audio/audio.cpp: declarations ====
 
 // The reference constructs the music manager in this unit's static constructor.
 
-void PlayAMusic(i32 a, i32 b, i32 c, i32 d);
 
 extern "C" {
     i32 fake_seeking;
 
-void MusicPreSeek(i32 track);
 
 }
 
@@ -2164,11 +1925,8 @@ extern NUFPCOMJMPCTX track_jmp_tab[15];
 
 extern "C" {
 extern void *(*DefragCreateInstFn)(void *, NUGCUTSCENE_s *, VARIPTR *);
-    extern f32 timeincrement;
 
 
-    void DebrisEmitterPos(i32, f32, f32, f32);
-    void DebrisEmitterOrientationMtx(i32, NUMTX *);
 }
 
 extern "C" {
@@ -2201,7 +1959,6 @@ extern "C" {
 
 
 
-i32 SolveQuadratic(f32 a, f32 b, f32 c, f32 *first, f32 *second);
 
 
 
@@ -2237,10 +1994,7 @@ DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");
 
 
 
-extern "C" void DebFree(i32 *);
 
-extern "C" i32 DebrisCollisionCheckScaleY(NUVEC *position, f32 radius, f32 y_scale);
-extern "C" i32 DebrisTorusCollisionCheckScaleY(NUVEC *position, f32 radius, f32 y_scale);
 
 
 
@@ -2250,59 +2004,33 @@ extern "C" i32 DebrisTorusCollisionCheckScaleY(NUVEC *position, f32 radius, f32 
 //   NuHtmlBegin    0x2d5ca0   NuHtmlFlush   0x2d5c30
 //   NuHtmlWrite    0x2d5cd0   NuHtmlHeading1 0x2d5d40
 extern "C" {
-extern char unknown[8];
 }
 
 
 
 void AddChunkToRenderStack(particlechunkrendertype_s *chunk, particlechunkrendertype_s **stack);
 
-void AddChunkControlToStack(debris_chunk_control_s *control, debris_chunk_control_s **stack);
 
-extern "C" debkeydatatype_s *debris_keystack;
 
-void AddDebrisEffectToStack(debkeydatatype_s *key);
 
 extern "C" {
-    extern debkeydatatype_s *debkeydata;
-    extern debris_chunk_control_s **freechunkcontrols;
     extern i32 freechunkcontrolsptr;
-    extern debris_chunk_control_s *debris_chunk_control_stack[2];
-    extern particlechunkrendertype_s *ParticleChunkToRender;
-    extern particlechunkrendertype_s *ParticleChunkRenderStack[5];
     extern i32 debrischunks;
     extern i32 debrischunksglass;
     extern f32 globaltime;
     extern f32 panelglobaltime;
 }
-void DebrisGetControlStackLock(void);
-void DebrisReleaseControlStackLock(void);
-void RemoveAnyChunkControls(i32 *);
 void RemoveChunkFromRenderStack(particlechunkrendertype_s *, particlechunkrendertype_s **);
 
-void DebFreeChunksInstantly(i32 *handle);
 
 extern "C" {
-    extern debkeydatatype_s *debkeydata;
-    extern i16 *freedebkeys;
-    extern i32 freedebkeyptr;
-    extern dma_particle_chunk_s **freedebchunks;
-    extern dma_particle_chunk_s **freedebchunksglass;
-    extern i32 freedebchkptr;
-    extern i32 freedebchkptrg;
     extern i32 debrischunks;
     extern i32 debrischunksglass;
-    extern debris_chunk_control_s **freechunkcontrols;
     extern i32 freechunkcontrolsptr;
-    extern debris_chunk_control_s *debris_chunk_control_stack[2];
-    extern particlechunkrendertype_s *ParticleChunkToRender;
-    extern particlechunkrendertype_s *ParticleChunkRenderStack[5];
     extern f32 globaltime;
     extern f32 panelglobaltime;
-    extern f32 timeincrement;
 }
 
-extern "C" void DebReAlloc2(debkeydatatype_s *);
 
 void DebrisProcessAllocation();
 
@@ -2327,20 +2055,15 @@ static void ReleaseChunkControl(debris_chunk_control_s *control) {
 void DebrisProcessControlChunks(i32 panel_time);
 
 extern "C" {
-    void edppDeleteEffect(i32);
 }
 
 void DebrisCleanUpDmaDebTypeTables();
 
 extern "C" {
-    extern debkeydatatype_s *debkeydata;
     extern f32 globaltime;
-    extern NUVEC debris_collide_pt;
 }
 
-i32 DebrisSingleCollisionCheckScaleYFlag(i32 key_index, NUVEC *position, f32 radius, f32 y_scale, u8 flags);
 
-i32 DebrisSingleTorusCollisionCheckScaleYFlag(i32 key_index, NUVEC *position, f32 radius, f32 y_scale, u8 flags);
 
 
 
@@ -2352,7 +2075,6 @@ extern "C" {
 
 
 
-NUMTL *CreateCopyMat(NUMTL *source, i32 enable_uv_mode, i32 alpha_mode, i32 depth_mode, i32 filter_mode);
 
 
 
@@ -2381,69 +2103,23 @@ f32 TerrPlatScanDist = 10.0f;
 i32 cntrots;
 static i32 PlatCodeCallback;
 static TERRAIN_PLATFORM_CALLBACK PlatCallback[8];
-void ScanTerrIDRemovePlat(i32 platform_index);
 
 
 
 extern "C" {
 }
 
-TERRAIN_TRACK_SLOT *ScanTerrId(void *hit_flags);
-void ScanTerrain(i32 scan_type, i32 terrain_mask, i32 scan_flags);
-i32 PlatformChecks(i32 count, NUVEC *movement);
-void TerrainImpactNorm(void);
-void StorePlatImpact(void);
-i32 TerrainPlatformEmbedded(NUVEC *movement);
-i32 TerrShapeSideStep(NUVEC *position, NUVEC *movement, u8 *hit_flags);
-void TerrainImpact(NUVEC *position, NUVEC *movement, u8 *hit_flags);
-void TerrFlush(void);
-void NewScanRot(NUVEC *position, i32 terrain_mask);
-f32 NewCast(NUVEC *position, f32 height_above, f32 height_below);
-void TerrDrawPlat(tertype *terrain, i16 index);
-void RemoveChunkControlFromStack(debris_chunk_control_s *, debris_chunk_control_s **);
-i32 DebrisSingleCollisionCheckScaleYFlag(i32, NUVEC *, f32, f32, u8);
-i32 DebrisSingleTorusCollisionCheckScaleYFlag(i32, NUVEC *, f32, f32, u8);
 
 extern "C" {
-    i32 DebrisCollisionCheckScaleYFlag(NUVEC *, f32, f32, u8);
-    i32 DebrisCollisionCheckScaleY(NUVEC *, f32, f32);
-    i32 DebrisTorusCollisionCheckScaleYFlag(NUVEC *, f32, f32, u8);
-    i32 DebrisTorusCollisionCheckScaleY(NUVEC *, f32, f32);
-    extern debkeydatatype_s *debkeydata;
-    extern i32 maxdebkeys;
-    extern i32 EDPP_SCALE_TYPES;
-    extern debinftype *effecttypes;
-    extern debscale_s *debscale;
     extern f32 panelglobaltime;
     extern f32 globaltime;
-    extern f32 renderpanelglobaltime;
-    extern f32 renderglobaltime;
-    extern f32 timeincrement;
-    extern i32 globalframes;
-    extern i32 update_debris_enabled;
-    extern i32 debris_setup_called;
     extern void *debris_trash_space;
-    extern usize debris_trash_size;
     extern i32 debrischunks;
     extern i32 debrischunksglass;
-    extern i32 freedebchkptr;
-    extern i32 freedebchkptrg;
-    extern debris_chunk_control_s *debris_chunk_controls;
-    extern debris_chunk_control_s **freechunkcontrols;
     extern i32 freechunkcontrolsptr;
-    extern dma_particle_chunk_s **freedebchunks;
-    extern dma_particle_chunk_s **freedebchunksglass;
-    extern particlechunkrendertype_s *ParticleChunkToRender;
-    extern particlechunkrendertype_s *ParticleChunkRenderStack[5];
-    extern debris_chunk_control_s *debris_chunk_control_stack[2];
-    extern debkeydatatype_s *debris_keystack;
     extern u32 *spherecolldata;
     extern u32 *toruscolldata;
-    extern i32 numspherecolldata;
-    extern i32 numtoruscolldata;
     extern NUMTL *DebMat[10];
-    extern i32 debris_suspended;
-    void DebrisReScale(i32, f32);
     extern "C++" void DebrisProcessSpheres(uv1deb *, f32, debinftype *, debkeydatatype_s *, i32);
     extern "C++" {
         void AddChunkToRenderStack(particlechunkrendertype_s *, particlechunkrendertype_s **);
@@ -2455,7 +2131,6 @@ extern "C" {
 }
 
 
-extern "C" i32 edppLoadPage(char *path, i32 flag, usize scene);
 // NuFileExists @nufile (nucore_plain.cpp).
 
 
@@ -2469,68 +2144,36 @@ extern "C" {
         return ratio > 1.0f ? ratio - 1.0f : 1.0f - ratio;
     }
 
-i32 CreateScaledEffect(i32 effect_index, f32 requested_scale);
 
 
-i32 DebrisCollisionCheckScaleY(NUVEC *position, f32 radius, f32 y_scale);
 
-i32 DebrisCollisionCheckScaleYFlag(NUVEC *position, f32 radius, f32 y_scale, u8 flags);
 
 } // extern "C"
 
-void DebrisTimeSlip(i32 group);
 
 static const char *errstr[] = {"ERR_UNKNOWN", "ERR_NOTERR",      "ERR_MAXTERLIST", "ERR_MAXTERR",
                                "ERR_INOUT",   "ERR_PLATSKINMAX", "ERR_NOINSTANCE"};
 
 extern "C" {
 
-void DebrisEmitterMomentum(i32 handle, f32 x, f32 y, f32 z);
-
-void DebrisEmitterOrientation(i32 handle, i16 z, i16 y, i16 x);
-
-void DebrisEmitterOrientationMtx(i32 handle, NUMTX *source);
-
-void DebrisEmitterPos(i32 handle, f32 x, f32 y, f32 z);
-
-void DebrisOrientation(i32 handle, i16 z, i16 y);
-
-void DebrisParticleMomentum(i32 handle, f32 x, f32 y, f32 z);
 
 
-void DebrisProcessTimeSlip(void);
 
-void DebrisReScale(i32 effect_index, f32 scale);
 
-void DebrisReflectionOrientation(i32 handle, i16 x, i16 y, f32 plane, f32 scale);
+
+
+
+
+
 
     NUVEC *CutoffCameraVec = NULL;
 
-void DebrisSetDetailLevels(i32 handle, i32 detail_levels);
 
-void DebrisSetFacing(i32 handle, u8 enabled, i16 x_angle, i16 y_angle);
 
-void DebrisSetGroupID(i32 handle, i16 group);
 
-void DebrisSetPriority(i32 handle, u16 priority, u8 automatic);
 
     i32 debris_render_group;
 
-void DebrisSetRoomID(i32 handle, nugscn_s *scene);
-
-void DebrisSetTrigger(i32 handle, i32 first, i32 second, f32 third);
-
-void DebrisSetUserData(i32 handle, void *user_data);
-
-void DebrisStartOffset(i32 handle, f32 offset);
-
-void DebrisStatusNormal(i32 *handle);
-
-i32 DebrisTorusCollisionCheckScaleY(NUVEC *position, f32 radius, f32 y_scale);
-
-i32 DebrisTorusCollisionCheckScaleYFlag(NUVEC *position, f32 radius, f32 y_scale, u8 flags);
-
-void DebrisTrashableSetup(VARIPTR *buffer, VARIPTR *);
 
 
 
@@ -2542,16 +2185,17 @@ void DebrisTrashableSetup(VARIPTR *buffer, VARIPTR *);
 
 
 
-    void NewTerrainScaleY(NUVEC *position, NUVEC *movement, u8 *hit_flags, i32 object_index, f32 radius,
-                          f32 collision_radius, f32 object_scale, i32 embedded_retry, i32 scan_flags);
-
-void NewTerrainScaleY(NUVEC *position, NUVEC *movement, u8 *hit_flags, i32 object_index, f32 radius,
-                          f32 collision_radius, f32 object_scale, i32 embedded_retry, i32 scan_flags);
 
 
 
-i32 PlatInstSkinRegisterEx(NUMTX *matrix, void *skin_data, void *matrix_data, f32 scale, i32 instance, i32 flags,
-                               TERRSET *source);
+
+
+
+
+
+
+
+
 
 
 
@@ -2688,57 +2332,33 @@ GameObject_s *FindNearestGameObject(NUVEC *position, GameObject_s *exclude, u32 
 
 
 extern "C" {
-    extern debris_chunk_control_s *debris_chunk_control_stack[2];
-    extern debris_chunk_control_s **freechunkcontrols;
     extern i32 freechunkcontrolsptr;
 }
-void RemoveAnyChunkControls(i32 *chunk);
 
 void RemoveChunkFromRenderStack(particlechunkrendertype_s *chunk, particlechunkrendertype_s **stack);
 
-void RemoveChunkControlFromStack(debris_chunk_control_s *control, debris_chunk_control_s **stack);
 
-void RemoveDebrisEffectFromStack(debkeydatatype_s *key);
 
 // ==== src/legoapi/misc/memory.cpp: declarations ====
 
 
-void DebFreeChunksInstantly(i32 *);
-void RemoveDebrisEffectFromStack(debkeydatatype_s *);
 
 extern "C" {
 
-    extern debkeydatatype_s *debkeydata;
-    extern i16 *freedebkeys;
-    extern i32 freedebkeyptr;
-    extern i32 maxdebkeys;
     extern i32 debrischunks;
     extern i32 debrischunksglass;
-    extern i32 freedebchkptr;
-    extern i32 freedebchkptrg;
-    extern dma_particle_chunk_s **freedebchunks;
-    extern dma_particle_chunk_s **freedebchunksglass;
-    extern particlechunkrendertype_s *ParticleChunkToRender;
-    extern particlechunkrendertype_s *ParticleChunkRenderStack[5];
 
-i32 DebAlloc(void);
 
-    extern debris_chunk_control_s **freechunkcontrols;
     extern i32 freechunkcontrolsptr;
-    extern debris_chunk_control_s *debris_chunk_control_stack[2];
     extern f32 globaltime, panelglobaltime;
 
-void DebFree(i32 *handle);
 
 
-void DebFreeOrphansInstantly(debinftype *effect);
 
-    void DebReAlloc2(debkeydatatype_s *key);
 
 
     extern "C++" void AddChunkToRenderStack(particlechunkrendertype_s *, particlechunkrendertype_s **);
 
-void DebReAlloc2(debkeydatatype_s *key);
 
 } // extern "C"
 
@@ -2752,44 +2372,16 @@ extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
     i32 debris_suspended = 0;
 
-    extern debkeydatatype_s *debkeydata;
     extern DEBRISGENERATOR gensorttab[13];
     extern DEBRISMOMENTUMADJUSTER gencodetab[7];
     extern f32 globaltime;
     extern f32 panelglobaltime;
-    extern f32 timeincrement;
-    void PlaySfxById(i32, NUVEC *);
-    void DebrisEmitterMomentum(i32, f32, f32, f32);
-    void DebrisParticleMomentum(i32, f32, f32, f32);
-    void DebrisSetUserData(i32, void *);
-    extern i32 debris_suspended;
-    extern i32 freedebkeyptr;
-    extern i32 maxdebkeys;
     extern i32 debrischunks;
     extern i32 debrischunksglass;
-    extern i32 freedebchkptr;
-    extern i32 freedebchkptrg;
-    extern dma_particle_chunk_s **freedebchunks;
-    extern dma_particle_chunk_s **freedebchunksglass;
-    extern particlechunkrendertype_s *ParticleChunkToRender;
-    extern particlechunkrendertype_s *ParticleChunkRenderStack[5];
-    extern debris_chunk_control_s **freechunkcontrols;
     extern i32 freechunkcontrolsptr;
-    extern debris_chunk_control_s *debris_chunk_control_stack[2];
 
-    i32 DebAlloc(void);
-    void DebrisStartOffset(i32, f32);
-    void DebrisEmitterPos(i32, f32, f32, f32);
-    void DebrisEmitterOrientation(i32, i16, i16, i16);
-    void DebrisOrientation(i32, i16, i16);
-    void DebrisReflectionOrientation(i32, i16, i16, f32, f32);
-    void DebrisSetTrigger(i32, i32, i32, f32);
-    void DebrisEmitterOrientationMtx(i32, NUMTX *);
-    i32 CreateScaledEffect(i32, f32);
-    void AddVariableShotDebrisEffectTimed3(i32, NUVEC *, NUVEC *, i32, f32, NUMTX *, NUMTX *);
 }
 
-void AddDebrisEffectToStack(debkeydatatype_s *);
 void AddChunkToRenderStack(particlechunkrendertype_s *, particlechunkrendertype_s **);
 
 // Forward declarations for local (static) part/gizmo helper stubs.
@@ -2814,19 +2406,13 @@ extern "C" {
 
 
 
-    void AddVariableShotDebrisEffectMtx(i32, NUVEC *, i32, i16, i16, NUMTX *);
-
-
-void AddVariableShotDebrisEffectMtx(i32 effect, NUVEC *position, i32 count, i16 z_rotation, i16 y_rotation,
-                                        NUMTX *particle_orientation);
 
 
 
-    void AddVariableShotDebrisEffectTimed3(i32, NUVEC *, NUVEC *, i32, f32, NUMTX *, NUMTX *);
 
 
-void AddVariableShotDebrisEffectTimed3(i32 effect_index, NUVEC *position, NUVEC *momentum, i32 count, f32 time,
-                                           NUMTX *emitter_orientation, NUMTX *particle_orientation);
+
+
 
 
 
@@ -2847,7 +2433,6 @@ void AddVariableShotDebrisEffectTimed3(i32 effect_index, NUVEC *position, NUVEC 
 } // extern "C"
 
 
-extern "C" i32 GetSfxIdN(char *, i32);
 
 extern "C" {
 }
@@ -2899,7 +2484,6 @@ DECOMP_ASSERT(offsetof(VIEWCAM_s, gamepad) == 0x24, "ViewCam gamepad offset");
 
 extern "C" {
 
-    extern NUVEC *CutoffCameraVec;
 
 
 } // extern "C"
@@ -2931,66 +2515,29 @@ DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context fl
 
 extern EdInputContext * Input;
 extern "C" i32 edbri_nearest;
-extern "C" NUVEC edbri_cam_pos;
 extern "C" NUMTL *edbri_mtl, *edbri_mtl_zoff;
 extern "C" f32 edbri_length, edbri_width;
 extern "C" i32 edbri_rotz, edbri_roty, edbri_planks, edbri_post_interval;
 extern "C" i32 edbri_plank_instance_type, edbri_post_instance_type, edbri_bridges_used;
-extern "C" void NuRndrRect2di(i32, i32, i32, i32, i32, NUMTL *);
-extern "C" void NuRndrLine2di(i32, i32, i32, i32, i32, NUMTL *);
-extern "C" void edbitsDrawCircleTilted(NUVEC *, f32, i32, NUMTL *, i32, i32);
-NUVEC NuFadeObjGetAngleTerrainValues(NUVEC *);
-extern "C" void PlaySfxById(i32, nuvec_s *);
 
-void SerialiseString(EdStream &, void *, i32);
 
 extern f32 Scale;
 DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
 
 extern "C" {
     i32 edgra_mode = 1;
-    extern NUGSCN *edbits_things_scene;
     i32 edgra_last_clump_in_buffer = -1;
     i32 edgra_copy_source = -1;
     f32 edgra_global_fadein = 15.0f, edgra_global_fadeout = 25.0f;
-    void edgraInitAllClumps(void);
-    void DebrisEmitterPos(i32, f32, f32, f32);
-    void DebrisOrientation(i32, i16, i16);
-    void DebrisEmitterOrientation(i32, i16, i16, i16);
-    void DebrisReflectionOrientation(i32, i16, i16, f32, f32);
-    void DebrisSetFacing(i32, u8, i16, i16);
-    void DebrisStartOffset(i32, f32);
-    void DebrisSetGroupID(i32, i16);
-    void DebrisSetPriority(i32, u16, u8);
-    void DebrisSetRoomID(i32, NUGSCN *);
-    void DebrisSetDetailLevels(i32, i32);
-    void DebrisSetTrigger(i32, i32, i32, f32);
-    extern debkeydatatype_s *debkeydata;
-    extern debinftype *effecttypes;
-    extern i32 edpp_usememcard;
     extern i32 edpp_copy_mode, edpp_copyrotz, edpp_copyroty, edpp_copy_source_count, edpp_copy_enclosed;
-    extern i32 edpp_readout;
-    extern i32 globalframes;
     extern NUMTL *edpp_mtl, *edpp_boxmtl;
-    void edppDrawSpheres(debinftype *, i32);
-    void edppDrawTorus(debinftype *, i32);
-    extern f32 edpp_offset;
     i32 edbits_particle_level_page;
 }
 
-void edppDetermineNearest(f32);
-void edppMultipleCopyPaste();
-void edppMultipleCopyCopy();
-void edppMultipleCopyClear();
-i32 edppPtlCreate(NUVEC *, i32);
-i32 edppPtlPlace(i32, NUVEC *);
-
-i32 edppPtlPlace(i32 index, NUVEC *position);
 
 
-i32 edbriFileSave(char *path);
 
-i32 edppPtlCreate(NUVEC *position, i32 effect_index);
+
 
 
 
@@ -3002,19 +2549,15 @@ extern "C" {
 
 
 
-i32 edppPtlCreateCopy(NUVEC *position, i32 source_index);
-
-
-void edgraCalculatePage(char page, i32 calculate_vectors);
 
 
 
 
 
 
-void edppDetermineNearest(float max_distance_squared);
 
-void edbriDetermineNearest(float distance);
+
+
 
 
 
@@ -3075,7 +2618,6 @@ struct ripple_node_s;
 struct ripple_set_s;
 struct VuVec;
 
-extern "C" void NuRndrRect2di(i32, i32, i32, i32, i32, numtl_s *);
 
 // Camera zoom state
 
@@ -3083,7 +2625,6 @@ extern "C" void NuRndrRect2di(i32, i32, i32, i32, i32, numtl_s *);
 
 
 extern "C" {
-    void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 }
 
 
@@ -3207,7 +2748,6 @@ extern i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
 
 
 
-void FileLoadSingleEffectType(debinftype *effect, i32 version, char category);
 
 // ==== src/legoapi/render/core/terrain.cpp: declarations ====
 
@@ -3278,7 +2818,6 @@ static i32 platinrange;
 static TERRAIN_SHAPE *ShadPoly;
 static TERRAIN_SHAPE *TerrPoly;
 
-extern "C" void SphereDrawEx(NUVEC *centre, f32 radius, f32 vertical_scale, i32 colour);
 
 static u8 TerrWallInfo;
 static u8 TerrWallTab[4];
@@ -3289,14 +2828,8 @@ static NUVEC PlatImpactNorm;
 static i32 TerrPolyObj;
 static TERRAIN_SHAPE TerrPolyInfo;
 
-i16 InsidePolLines(f32 point_x, f32 point_y, f32 point_z, f32 edge_a_x, f32 edge_a_y, f32 edge_a_z, f32 edge_b_x,
-                   f32 edge_b_y, f32 edge_b_z, NUVEC *normal);
 
-void ScanWallSplineTerrain(i32 scan_type, i32 terrain_mask, i32 scan_flags);
-void TerrainMoveImpactData();
-void TerrainImpactNorm();
 
-void StorePlatImpact();
 
 namespace {
 
@@ -3491,16 +3024,13 @@ extern "C" {
 }
 
 
-void TerrFlush();
 
 // Constructs the fixed terrain header and its variable-sized group, index and
 // platform arrays in the caller's arena. The four bounds arrays and the cell
 // assignment array are temporary storage carved backwards from buf_end.
 #define IS_SNAN(x) (*(u32 *)&(x) == 0xffc00000)
 
-void NuVecCheckForSNANs(NUVEC *v);
 
-TERRAIN_TRACK_SLOT *ScanTerrId(void *id);
 
 
 
@@ -3566,38 +3096,27 @@ static inline void ResolveRayCast(NUVEC *movement) {
     }
 }
 
-void ScanTerrainPlatform(i32 group_index, i32 terrain_mask);
 
 
-void TerrDraw(tertype *terrain, i16 index);
 
-i32 HitWallSpline();
 
-void ScanWallSplineTerrain(i32, i32 terrain_mask, i32);
 
-i32 TerrainImpactPlatform(unsigned char *hit_flags);
 
 
 static NUMTX tertempmat;
 static NUVEC4 tertempvec4;
 
-i32 TerrainPlatformMoveCheck(nuvec_s *, nuvec_s *, i32, i32, i32);
 static f32 TerrWallDeflectYScale;
 
 
 
-i32 FullDeflectTest(nuvec_s *normal, nuvec_s *movement, nuvec_s *result);
 
 
 static f32 TerConTol = 0.1f;
 
 
 
-i32 PlatformChecks(i32 count, nuvec_s *movement);
 
-i32 TerrainPlatformEmbedded(nuvec_s *movement_delta);
-i32 TerrainPlatformMoveCheck(nuvec_s *position, nuvec_s *normal, i32 platform_index, i32 resolve_impact,
-                             i32 keep_embedded_disabled);
 
 
 
@@ -3628,20 +3147,16 @@ namespace {
 } // namespace
 
 
-void NewScanRot(nuvec_s *position, i32 terrain_mask);
 
-i16 InsideLineF(f32, f32, f32, f32, f32, f32);
 
 namespace {
 
 } // namespace
 
-f32 NewCast(nuvec_s *position, f32 height_above, f32 roof_range);
 
 
 
 
-extern "C" void AddPickupTerr(i32 type, NUVEC *position);
 
 static inline TERRAIN_PLATFORM *FindFreeTerrainPlatform(TERRSET *terrain, i32 *index) {
     TERRAIN_PLATFORM *platform = NULL;
@@ -3701,9 +3216,6 @@ static inline i32 InstallExtraTerrainPlatform(TERRSET *terrain, TERRAIN_GROUP *s
     return index;
 }
 
-void TerrainSideClamp(NUVEC *axis, NUVEC *position);
-
-i32 TerrShapeSideStep(NUVEC *, NUVEC *, u8 *);
 
 
 
@@ -3717,7 +3229,7 @@ i32 TerrShapeSideStep(NUVEC *, NUVEC *, u8 *);
 
 
 
-extern "C" void NewTerrAxisFreedom(TERRAIN_AXIS_FREEDOM_SHAPE *shape, NUVEC *position);
+
 
 
 
@@ -3816,12 +3328,10 @@ extern "C" {
     i32 edgra_page_on[8];
     i32 edgra_page_calculate_done[8];
     i32 edgra_page_vectors_valid[8];
-    void NuWindInit(void);
     NuWindGType *NuWindCreateMtx(u32 *, NUMTX *, i16, f32, f32, i32, f32, f32);
 
 
 
-void edgraInitAllClumps(void);
 }
 
 // ==== src/legoapi/characters/motion/charplatforms.cpp: declarations ====
@@ -3834,10 +3344,8 @@ i32 SkinFlipTab[8] = {0, 1, 2, 3, 0, 2, 1, 3};
 // ==== src/legoapi/actions/combat/hits.cpp: declarations ====
 
 
-extern i32 players_cannot_exit_speeder;
 
 
-i16 InsideLineF(f32 point_u, f32 point_v, f32 line_start_u, f32 line_start_v, f32 line_end_u, f32 line_end_v);
 
 
 // ==== src/legoapi/world/levels.cpp: declarations ====
@@ -3851,7 +3359,6 @@ i16 InsideLineF(f32 point_u, f32 point_v, f32 line_start_u, f32 line_start_v, f3
 // are screen.cpp globals in the original: its static initializer registers
 // their destructors (original bss @0x127bf20 / 0x127bf08 / 0x127bf00 /
 // 0x127bef8 / 0x127bef0).
-extern Fade fade;
 
 // Material handles used by the original 2-D fade paths.
 

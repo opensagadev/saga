@@ -280,6 +280,9 @@
 #include "legoapi/characters/motion/chris.h"
 #include "legoapi/actions/combat/shovesys.h"
 #include "legoapi/gizmo/base/gizflow_types.h"
+#include "gameapi/ai/aisys/gameaiscript.h"
+#include "legoapi/menus/core/hint.h"
+#include "nu2api/nu3d/nu3d_includes.h"
 struct FLOWBOX_s;
 
 DECOMP_ASSERT(sizeof(GIZMOTYPES) == 0xc, "Gizmo type-table header ABI");
@@ -369,14 +372,12 @@ i32 gizmoerrorlogsize = 0x800;
 
 DECOMP_ASSERT(sizeof(RepeatSfx) == 0x10, "RepeatSfx size");
 
-extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 
 extern "C" {
 }
 
 extern "C" {
 
-void PlaySfxById(i32 sfx_id, nuvec_s *position);
 
 
 } // extern "C"
@@ -503,17 +504,13 @@ struct nuhspecial_s;
 
 // ==== src/legoapi/menus/core/gamehint.cpp: declarations ====
 
-extern f32 ICONXPOS_TOUCHYFEELY;
-extern f32 ICONYPOS_TOUCHYFEELY;
 
-void MechHintUIButton_OnClick_Callback(MechTouchUIElement &, TouchHolder &);
 
 #include "legoapi/menus/core/gamehint_types.h"
 DECOMP_ASSERT(sizeof(MechHintUIButton) == 0xa8, "MechHintUIButton size");
 DECOMP_ASSERT(offsetof(MechHintUIButton, pending_hint) == 0x7c, "Pending touch hint offset");
 DECOMP_ASSERT(offsetof(MechHintUIButton, display_elapsed) == 0x80, "Touch hint display timer offset");
 
-void MechHintUIButton_OnClick_Callback(MechTouchUIElement &element, TouchHolder &);
 
 // Static game message and hint helpers. Stubbed to satisfy the symbol baseline.
 
@@ -852,14 +849,8 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 // ==== src/legoapi/gizmo/gizmos/gizmos_gizactions.cpp: declarations ====
 
-i32 Action_ReleaseLocator(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
-                          i32 first_time, float);
 
-i32 Action_GetLocatorFromSet(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,
-                             i32 param_count, i32 first_time, float);
 
-i32 Action_AssignLocatorInSet(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
-                              i32 first_time, float);
 
 namespace {
 #include "legoapi/gizmo/gizmos/gizmos_gizactions_types.h"
@@ -966,7 +957,6 @@ extern "C" {
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -1272,7 +1262,6 @@ static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ..
 
 
 extern EdInputContext * Input;
-extern "C" void PlaySfxById(i32, nuvec_s *);
 
 DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
 
@@ -1908,7 +1897,6 @@ extern "C" {
 
 extern "C" {
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -2362,7 +2350,6 @@ extern "C" {
 // ==== src/legoapi/menus/screens/gamestatus_lsw.cpp: declarations ====
 
 
-void LevelComplete_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32);
 
 
 // Retail keeps this body as GCC's split-out clone; the inline head stays in
@@ -2371,7 +2358,6 @@ void LevelComplete_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32);
 // Retail keeps the active-stage drawing as the split-out .part clone of
 // LevelComplete_LSW_Draw; the inline head only tests `active`.
 
-void LevelComplete_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active);
 
 // ==== src/legoapi/menus/screens/shop.cpp: declarations ====
 
@@ -2391,7 +2377,6 @@ DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");
 //   NuHtmlBegin    0x2d5ca0   NuHtmlFlush   0x2d5c30
 //   NuHtmlWrite    0x2d5cd0   NuHtmlHeading1 0x2d5d40
 extern "C" {
-extern char unknown[8];
 }
 
 
@@ -2419,7 +2404,6 @@ inline void ThingManager::operator delete(void *thing, usize size) {
 
 extern "C" {
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -2614,7 +2598,6 @@ extern "C" {
 // ==== src/legoapi/cutscenes/cutscenes.cpp: declarations ====
 
 extern "C" {
-    void PlaySfxById(i32 sfx_id, nuvec_s *position);
 }
 
 // Retail only keeps the split-out body of the IPA-SRA clone (the unused
@@ -2633,7 +2616,6 @@ extern "C" {
 // ==== src/legoapi/cutscenes/cutscenes.cpp: declarations ====
 
 extern "C" {
-    void PlaySfxById(i32 sfx_id, nuvec_s *position);
 }
 
 // ==== src/legoapi/items/collect/bolts.cpp: declarations ====

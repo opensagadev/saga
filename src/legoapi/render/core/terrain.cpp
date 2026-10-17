@@ -39,6 +39,7 @@
 #include <limits.h>
 #include <math.h>
 #include <string.h>
+#include "legoapi/lib/camera.h"
 
 struct tertype;
 struct terrsitu_s;
@@ -268,12 +269,10 @@ extern i32 Grass_Available;
 
 #undef IS_SNAN
 
-i32 UnderWater(GameObject_s *object);
 
 
 
 
-void ScanTerrain(i32 scan_type, i32 terrain_mask, i32 scan_flags);
 #undef TERRAIN_SCALE_SCAN_SHAPE
 
 
@@ -295,7 +294,6 @@ namespace {
 
 
 
-void MakePlayPlanes(GAMECAMERA_s *camera);
 
 DECOMP_ASSERT(sizeof(TERRAIN_DEBUG_RECORD) == 100, "Terrain debug record ABI");
 
@@ -324,7 +322,6 @@ namespace {
 } // namespace
 
 
-void NewScanRot(nuvec_s *position, i32 terrain_mask);
 
 namespace {
 
@@ -347,7 +344,6 @@ namespace {
 
 
 
-extern "C" void NewTerrAxisFreedom(TERRAIN_AXIS_FREEDOM_SHAPE *shape, NUVEC *position);
 
 
 

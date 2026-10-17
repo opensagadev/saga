@@ -48,6 +48,9 @@
 #include "nu2api/nuandroid/ios_graphics.h"
 #include "nu2api/nu3d/android/nuptl_android.h"
 #include "nu2api/nu3d/nurndr_plain_types.h"
+#include "nu2api/nu3d/android/numtl_android.h"
+#include "nu2api/nu3d/android/nurenderthread.h"
+#include "nu2api/nu3d/nu3d_includes.h"
 
 // ---------------------------------------------------------------------------
 // Scene state — mirrors original BSS layout
@@ -62,8 +65,6 @@ extern struct nurenderscene_s currentScene;
     // Deferred ring: NuRndrEndScene copies the completed scene here; the render
     // thread drains it.  Stride is 0x218, 16 slots (0x2180 bytes total) in the
     // original.
-extern i32 sceneParametersCount;
-extern struct nurenderscene_s sceneParameters[16];
 
 } // extern "C"
 
@@ -81,7 +82,6 @@ volatile bool g_isBlockedInSwapScreen = false;
 // ---------------------------------------------------------------------------
 
 extern "C" {
-    i32 NuDynamicLightIsEnabled(void *);
     void NuDynamicLightAddRenderScene(struct NuDynamicLight *, i32, i32);
 }
 
@@ -116,7 +116,6 @@ extern NUGSCNVIDEOMEMFN video_mem_to_gscene;
 extern "C" void NuGScnFromVideoMem(NUGSCNVIDEOMEMFN callback);
 class NuDynamicLight;
 extern "C" {
-    void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 
 
 
@@ -124,8 +123,6 @@ extern "C" {
 
 
     extern nurenderscene_s currentScene;
-    i32 NuDynamicLightTestShadowExtrusionExtent(NuDynamicLight *light, const NUVEC *center, const NUVEC *extent,
-                                                i32 render_set);
 
     // Retail partially inlines the clipping test into NuDisplaySceneRndr and
     // keeps the body as its stack-argument .part clone.
@@ -145,9 +142,7 @@ extern "C" void NuGScnToVideoMem(NUGSCNVIDEOMEMFN callback);
 
 // Material
 
-extern "C" void NuDisplayListAnimateMtls(f32 frame_time);
 
-extern "C" void NuMtlAnimate(f32 frame_time);
 extern "C" void NuMtlAnimateSetMask(i32 mask);
 extern "C" void NuMtlAnimateSetSpeedScale(f32 speed_scale);
 static void NuMtlCreate3D(void) {
@@ -173,7 +168,6 @@ static inline void NuRndrPrimUV(f32 u, f32 v);
 extern "C" __attribute__((force_align_arg_pointer)) i32 NuRndrCircle(f32 x, f32 y, f32 radius, f32 aspect, i32 count, f32 u0, f32 v0, f32 u1, f32 v1, i32 colour,
                             numtl_s *material);
 
-extern i32 global_frame_count;
 extern "C" void NuRndrGlobalFrameCountPause(i32 paused);
 
 // NuRndrRect2di and NuRndrGradRect2di write the attributes for the current
@@ -187,19 +181,9 @@ static inline u32 NuRndrPrimColour(u32 colour) {
     return (colour & 0xff000000u) | ((colour >> 1) & 0x007f7f7fu);
 }
 
-extern "C" void NuRndrGradRect2di(i32 x, i32 y, i32 w, i32 h, i32 *colour, numtl_s *mtl);
 
 
-extern "C" i32 NuRndrLine2d(NuLineVertex2D *vertices, NUMTL *material);
-extern "C" void NuRndrLine2di(i32 x0, i32 y0, i32 x1, i32 y1, i32 colour, NUMTL *material);
-extern "C" i32 NuRndrLineStrip2d(NuLineVertex2D *vertices, NUMTL *material, i32 count);
-extern "C" void NuRndrLineStrip2di(i32 *positions, f32 *uvs, i32 count, i32 colour, NUMTL *material);
 
-extern "C" void NuRndrRect(f32 x, f32 y, f32 z, f32 width, f32 height, f32 u0, f32 v0, f32 u1, f32 v1, i32 colour,
-                           NUMTL *material);
-extern "C" void NuRndrRect2d(f32 x, f32 y, f32 z, f32 width, f32 height, i32 colour, NUMTL *material);
-extern "C" void NuRndrRect2di(i32 x, i32 y, i32 w, i32 h, i32 colour, numtl_s *mtl);
-extern "C" void NuRndrSetCullDebug(void);
 extern "C" {
 }
 
@@ -209,15 +193,8 @@ extern "C" {
 
 
 
-extern "C" void NuRndrGrid(NUVEC *centre, NUVEC *size, i32 columns, i32 rows);
 
-extern "C" void NuRndrSphere(NUVEC *centre, f32 radius, i32 colour, f32 vertical_scale);
-extern "C" void NuRndrSphereEx(NUVEC *centre, f32 radius, i32 colour, f32 vertical_scale, i32 angle_step);
-extern "C" void NuRndrSphereMtx(NUMTX *matrix, i32 colour, i32 segments, NUMTL *material);
-extern "C" void NuRndrSphereTRS(NUVEC *translation, NUANGVEC *rotation, NUVEC *scale, i32 colour, i32 segments,
-                                NUMTL *material);
 
-extern "C" void NuRndrTriStrip2di(i32 *positions, f32 *uvs, i32 count, i32 colour, NUMTL *material);
 
 // Shader / texture / vertex state
 extern "C" {

@@ -40,6 +40,9 @@
 #include "nu2api/nu3d/nutex.h"
 #include <string.h>
 #include "legoapi/actions/character/speederchase_types.h"
+#include "legoapi/actions/character/legoapi_tag.h"
+#include "legoapi/characters/motion/camera.h"
+#include "legoapi/world/levels/episodeV.h"
 
 struct AIROW_s;
 struct nunativegscene_s;
@@ -53,7 +56,6 @@ SPEEDERCHASEANETPACKET_s *speederchasea_netpacket;
 
 u8 troopercannons_beenReset = 0;
 i32 players_going_forward = 1;
-extern i32 players_cannot_exit_speeder;
 
 f32 zoom_ahead_extra = 3.0f;
 f32 zoom_ahead_extra_time = 5.0f;
@@ -81,14 +83,9 @@ extern i16 id_STORMTROOPER;
 
 
 
-i32 SpeederBlowupHack(GIZMOBLOWUP_s *blowup, i32);
 
 
 void SetLevelExBlowupFunc(i32 (*callback)(GIZMOBLOWUP_s *, i32));
-void InitTrooperCannons(WORLDINFO_s *world);
-void ResetTrooperCannons(WORLDINFO_s *world, i32 trooper_id);
-void UpdateTrooperCannons(WORLDINFO_s *world);
-i32 GoingForwardsAlongNarrowSock(GameObject_s *object);
 
 
 

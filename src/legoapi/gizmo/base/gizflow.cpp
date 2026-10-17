@@ -505,7 +505,6 @@ void GizFlowStoreProgress(GIZFLOW_s *system, GIZFLOWPROGRESS_s *progress) {
     }
 }
 
-i32 GizmoTypeGetProgress(GIZMOSYS_s *system, void *, i32 progress_index, i32 type_id, char *name, void **result);
 
 void PerformActionFlowBox(GIZFLOW_s *system, FLOWBOX_s *box) {
     if (box != NULL && box->type == 2) {
@@ -518,7 +517,6 @@ void PerformActionFlowBox(GIZFLOW_s *system, FLOWBOX_s *box) {
 }
 
 
-void GizmoTypeStoreProgress(GIZMOSYS_s *system, void *world, i32 progress_index, i32 type_id, char *name);
 
 static void CheckIfParentsFinished(GIZFLOW_s *system, FLOWBOX_s *box) {
     for (i32 i = 0; i < box->parent_count; ++i) {

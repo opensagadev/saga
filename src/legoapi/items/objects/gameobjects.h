@@ -81,3 +81,19 @@ enum GAME_OBJECT_AI_UPDATE_FLAGS : u8 {
 };
 
 #endif
+
+// Declared here for the other units that use them.
+struct GameObject_s;
+extern GameObject_s *CarWashHack;
+extern f32 default_mover_extra;
+extern f32 player_tag_timer;
+extern i32 addcreature_override_id_check;
+extern i32 do_player_tag;
+extern i32 timebase_updates;
+extern u16 Hub_PadAngle[2];
+i32 UnderPlayerControl(GameObject_s *object);
+void GameObjectDimensions(GameObject_s *object);
+void GameObjectSetCanUse(GameObject_s *, void *, u8, u8, f32);
+void GetTopBot(GameObject_s *object);
+void ScaleGameObject(GameObject_s *object);
+void SetToLastSafePos(GameObject_s *);

@@ -88,6 +88,9 @@
 #include "nu2api/numath/nuvec.h"
 #include "nu2api/nu3d/nuprim.h"
 #include "nu2api/nu3d/nupostparams.h"
+#include "legoapi/ai/game/lsw_hub_ai.h"
+#include "legoapi/ai/game/starwars_gameai.h"
+#include "nu2api/nu3d/nu3d_includes.h"
 
 struct AIROW_s;
 struct AISYS_s;
@@ -105,9 +108,6 @@ extern HUBCALLBACK Hub_InitAIFn;
 extern HUBCALLBACK Hub_ResetAIFn;
 extern HUBCALLBACK Hub_UpdateAIFn;
 
-extern void LSW_Hub_InitAI(WORLDINFO_s *);
-extern void LSW_Hub_ResetAI(WORLDINFO_s *);
-extern void LSW_Hub_UpdateAI(WORLDINFO_s *);
 extern "C" i16 id_SNAKE;
 
 enum STARWARS_AI_CAPABILITY : u32 {
@@ -137,12 +137,9 @@ static __used__ i32 StarWars_PrepareHoverTube(AIPACKET_s *packet, APIOBJECT_s *a
 
 static i32 StarWars_PrepareBigJump(AIPACKET_s *packet, APIOBJECT_s *object, i32);
 
-extern void GameObjectSetCanUse(GameObject_s *, void *, u8, u8, f32);
 
 static i32 StarWars_PrepareHatch(AIPACKET_s *packet, APIOBJECT_s *object, i32);
 
-i32 StarWars_PrepareJump(AIPACKET_s *, APIOBJECT_s *, i32);
-i32 StarWars_PrepareR2D2Glide(AIPACKET_s *, APIOBJECT_s *, i32);
 
 struct STARWARS_PREPARE_SPECIAL_MOVE {
     u32 capabilities;
@@ -179,10 +176,8 @@ MIDSPECIALMOVEFN starwars_midspecialmovefns[] = {
 
 f32 jump_stuck_time = 0.1f;
 
-i32 StarWars_PrepareJump(AIPACKET_s *packet, APIOBJECT_s *object, i32 checks);
 
 
-i32 StarWars_PrepareR2D2Glide(AIPACKET_s *packet, APIOBJECT_s *object, i32);
 
 // ==== src/legoapi/render/core/render.cpp: declarations ====
 
@@ -220,7 +215,6 @@ struct VuVec;
 // Graphics loading flags
 
 extern "C" {
-    void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 }
 
 

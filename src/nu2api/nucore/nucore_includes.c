@@ -81,6 +81,11 @@
 #include "nu2api/nu3d/android/nudlist_callbacks.h"
 #include "nu2api/nucore/NuMemoryManager.h"
 #include "nu2api/nucore/nuvideo.h"
+#include "nu2api/nu3d/android/numtl_android.h"
+#include "nu2api/nu3d/nu3d_includes.h"
+#include "nu2api/nucore/android/bgproc_android.h"
+#include "nu2api/nucore/android/nuerror_android.h"
+#include "nu2api/nucore/nucore_includes.h"
 
 static i32 gExplodeInitialised = 1;
 
@@ -381,7 +386,6 @@ static void NuFileExtInit(void);
 
 // ==== src/nu2api/nufile/nufile_plain.cpp: all remaining content ====
 
-extern i32 nufile_buffering_enabled;
 char *iop_image_name = "ioprp300.img";
 
 struct NuFileAddress {
@@ -436,7 +440,6 @@ extern "C" {
 // ==== src/nu2api/nufile/nudatfile.cpp: all remaining content ====
 
 
-isize BinarySearch(u32 element, u32 *array, usize length);
 
 
 i32 datsys_offset = 0;
@@ -643,22 +646,14 @@ static char **argv;
 
 
 // ==== src/nu2api/nucore/nucore_frame.cpp: all remaining content ====
-void bgSuspendMain(i32);
 
 extern "C" {
-    i32 NuHasError();
-    void NuClearError();
-    void NuErrorSleep();
-    char *NuGetErrN(i32);
-    void NuMtlAnimate(f32);
-    void NuTexAnimProcess(f32);
     extern void (*preRenderFlashingHack)();
     extern void (*postRenderFlashingHack)();
     extern void (*nuapi_endframe_callbackfn)();
     static i32 min_delay = 20;
 f32 NuFrameEnd(void);
 
-void NuErrorSleep(void);
 }
 
 // ==== src/nu2api/nucore/nucore_plain.cpp: declarations ====
@@ -976,9 +971,6 @@ static i32 i_expr(RDPICTXT *ctx);
 
 
 // ==== src/nu2api/nucore/nuerror.cpp: all remaining content ====
-void NuErrorPrint(char *);
-void NuDebugMsgPrint(char *);
-void NuWarningPrint(char *);
 extern "C" {
     typedef void (*NuErrorFunctionPtr)(char *, ...);
     typedef void (*NuDebugTTYFunctionPtr)(i32, char *, ...);
@@ -996,7 +988,6 @@ extern "C" {
     void (*nuwarning_handler)(char *);
     i32 DisableDebugMsg;
 
-void NuErrorCheck(void);
 
     extern "C++" {
 
@@ -1004,9 +995,6 @@ void NuErrorCheck(void);
 
     }
 
-void NuClearError(void);
-i32 NuHasError(void);
-char *NuGetErrN(i32 entry);
     // Bound to sprintf by symbol so the one-space caption stays a real call, as in the original.
     int NuErrorSprintf(char *buffer, const char *format, ...) __asm__("sprintf");
 

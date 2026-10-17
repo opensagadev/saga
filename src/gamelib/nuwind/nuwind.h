@@ -53,3 +53,9 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
+
+// Declared here for the other units that use them.
+extern "C" {
+    void NuWindInit(void);
+    void NuWindSetup(VARIPTR *, VARIPTR, i32, i32);
+}

@@ -178,19 +178,16 @@
 #include "nu2api/nu3d/android/nugscn_android.h"
 #include "nu2api/numath/numath.h"
 #include "nu2api/nu3d/nupostparams.h"
+#include "legoapi/core/startup/text.h"
 DECOMP_ASSERT(sizeof(TAGTRANSFER_s) == 0x38, "tag transfer size");
 static TAGTRANSFER_s Tag_Transfer[2];
 
 static const f32 Tag_TransferResetTimer = 0.5f;
 
-extern i32 (*Tag_NoHiddenIconFn)(GameObject_s *);
-extern char * LEGOASCII_UP;
 
 // The original keeps this search out of line and passes the object in EAX.
 
-void Tag_DrawIcon_LSW(GameObject_s *object);
 
-void Tag_DrawIcon_Batman(GameObject_s *object);
 
 
 // ==== src/legoapi/items/objects/objectsall.cpp: declarations ====
@@ -222,7 +219,6 @@ extern "C" {
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -538,7 +534,6 @@ static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ..
 
 
 extern EdInputContext * Input;
-extern "C" void PlaySfxById(i32, nuvec_s *);
 
 DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
 
@@ -673,7 +668,6 @@ static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u
 // ==== src/legoapi/menus/screens/gamemenuall.cpp: declarations ====
 
 extern f32 HUB_EPISODETITLEY;
-extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 
 // Retail clears these "fast repeat" latches but never sets them.
 

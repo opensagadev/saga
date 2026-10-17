@@ -15,6 +15,8 @@
 #include "legoapi/characters/core/charconfig.h"
 
 #include <string.h>
+#include "legoapi/ai/core/gameai.h"
+#include "legoapi/ai/game/aitrigger.h"
 
 struct AIROW_s;
 struct nuqthdr_s;
@@ -60,8 +62,6 @@ AITRIGGERSET_s *AITriggerSetCreate(AITRIGGERSETSYS_s *system, FLOWBOX_s *box) {
     return NULL;
 }
 
-i32 AITriggerSetAddTrigger(AISYS_s *, AITRIGGERSET_s *, GIZMO_s *);
-void AISysGetPathPos2(AISYS_s *, nuvec_s *, AIPATHINFO_s *, nuvec_s *, AIPATH_s *, i32);
 
 void AITriggerSysAutoSetUp(WORLDINFO_s *world, AITRIGGERSETSYS_s *system) {
     AITRIGGERSET_s *groups[32] = {};
@@ -179,7 +179,6 @@ i32 GameObjectUsingLever(GameObject_s *object, LEVER_s *lever) {
     return 0;
 }
 
-GameObject_s *Grapple_Occupied(GRAPPLE_s *, GameObject_s *, AIPATHCNX_s *);
 
 void AITriggerSetSysProcess(AITRIGGERSETSYS_s *system) {
     if (system == NULL || player == NULL)

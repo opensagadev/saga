@@ -36,3 +36,8 @@ SNAKEBODY_s *CreateSnakeBody(GameObject_s *object, i32 segment_count);
 void DestroySnakeBody(GameObject_s *object);
 void BlowUpSnakeBody(GameObject_s *object);
 void DrawSnakeBody(GameObject_s *object);
+
+// Declared here for the other units that use them.
+struct GameObject_s;
+void SnakeBeenHit(GameObject_s *);
+void UpdateSnakeBody(GameObject_s *);

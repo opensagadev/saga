@@ -208,6 +208,7 @@
 #include "legoapi/cutscenes/minicamcut.h"
 #include "legoapi/characters/motion/camera_types.h"
 #include "nu2api/nufile/nufilepak.h"
+#include "legoapi/characters/core/characters.h"
 
 static CHARSCENE_s *CharScene_Area;
 
@@ -620,7 +621,6 @@ void HeadMovement(GameObject_s *object) {
     }
 }
 
-nuhspecial_s *CharScene_FindHSpecial(WORLDINFO_s *world, i32 character_id);
 
 // Retail keeps only the IPA-SRA clone, which receives &*layers.
 #if defined(__i386__)
@@ -642,12 +642,10 @@ void ResetCharacterBuffer(i32 force_reset) {
     apicharsys->loaded_animation_count = apicharsys->area_animation_count;
 }
 
-void LoadPerm1();
 
 // ==== src/legoapi/menus/screens/gamemenuall.cpp: declarations ====
 
 
-extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 
 // Retail clears these "fast repeat" latches but never sets them.
 
@@ -795,7 +793,6 @@ extern "C" {
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -1102,7 +1099,6 @@ static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ..
 
 
 extern EdInputContext * Input;
-extern "C" void PlaySfxById(i32, nuvec_s *);
 
 DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
 

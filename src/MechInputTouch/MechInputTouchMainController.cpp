@@ -9,6 +9,7 @@
 #include <string.h>
 #include <stddef.h>
 #include "nu2api/nu3d/nurndr.h"
+#include "MechInputTouch/MechInputTouchMainController.h"
 
 u32 colourPurple = 0xffff00ff;
 f32 s_mechTouchTapFrequency = 0.4f;
@@ -18,7 +19,6 @@ f32 s_mechTouchTapFrequency = 0.4f;
 // ==== src/MechInputTouch/MechInputTouchButton.cpp: declarations ====
 
 
-extern u32 colourPurple;
 
 // ==== functions in original address order ====
 

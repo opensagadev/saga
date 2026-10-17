@@ -9,21 +9,19 @@
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/numath/nufloat.h"
+#include "legoapi/render/light/lighting.h"
 
 struct AIROW_s;
 struct nunativegscene_s;
 
 
-void SetShadowLight();
 
 
 void RenderShadowLights(i32);
 
 
 
-void ResetShadowMapRenderingFn();
 
-void EnableShadowMapRenderingFn();
 
 // ==== functions in original address order ====
 

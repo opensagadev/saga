@@ -289,8 +289,13 @@
 #include "nu2api/nusound/nusound.h"
 #include "nu2api/nu3d/glutils.h"
 #include "legoapi/render/light/surfaces_types.h"
+#include "gameapi/ai/aisys/gameaiscript.h"
+#include "legoapi/characters/motion/camera.h"
+#include "legoapi/characters/motion/move.h"
+#include "legoapi/world/levels/episodeI.h"
+#include "legoapi/world/levels/episodeII.h"
+#include "legoapi/world/levels/episodeV.h"
 
-extern numtl_s *SolidMtl3D;
 
 // ==== src/legoapi/misc/utilities.cpp: declarations ====
 
@@ -341,8 +346,6 @@ static __used__ i32 sort32a(void const *left, void const *right);
 #endif
 
 // Retail keeps only the IPA-SRA clone of this function.
-i32 PodLevel(AREADATA_s *);
-extern "C" i16 id_DODGEM;
 
 // Multiplies the ordinary camera's per-frame position blend.  The original
 // keeps this as writable camera state (default 1.0), rather than folding it
@@ -352,7 +355,6 @@ extern "C" {
 }
 
 
-i32 PodLevel(AREADATA_s *area);
 
 // Retail splits the guard off as an inline head; the rest is this partial clone.
 
@@ -363,7 +365,6 @@ extern "C" i16 id_LANDSPEEDER;
 
 // These pod tuning values are zero-initialized in the original image.
 
-extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 
 // Retail re-tests the three block animations at each use instead of caching a flag.
 #define HAS_BLOCK_ANIMS(animations)                                                                                    \
@@ -393,7 +394,6 @@ extern i16 id_MINIATST, id_MINIATTE;
 
 // ==== src/legoapi/world/levels/episodeV.cpp: declarations ====
 
-extern AILOCATOR_s * locator;
 
 DECOMP_ASSERT(sizeof(HOTHBATTLEE_NETPACKET_s) == 0x58, "Hoth panel packet size");
 DECOMP_ASSERT(offsetof(HOTHBATTLEE_NETPACKET_s, alpha) == 0x24, "Hoth panel packet alpha offset");
@@ -418,7 +418,6 @@ DECOMP_ASSERT(sizeof(ASTEROIDCNETPACKET_s) == 8, "asteroid C network packet size
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -587,7 +586,6 @@ DECOMP_ASSERT(sizeof(KAMINO_E_s) == 120, "Kamino E state ABI");
 // Kamino
 // ===========================================================================
 
-extern i32 last;
 
 // ===========================================================================
 // Geonosis — droid factory (Factory_B / Factory_G)
@@ -1001,14 +999,8 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 // ==== src/legoapi/gizmo/gizmos/gizmos_gizactions.cpp: declarations ====
 
-i32 Action_ReleaseLocator(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
-                          i32 first_time, float);
 
-i32 Action_GetLocatorFromSet(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,
-                             i32 param_count, i32 first_time, float);
 
-i32 Action_AssignLocatorInSet(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
-                              i32 first_time, float);
 
 namespace {
 #include "legoapi/gizmo/gizmos/gizmos_gizactions_types.h"
@@ -1379,8 +1371,6 @@ extern "C" {
 
 // ==== src/legoapi/characters/motion/camera.cpp: declarations ====
 
-extern VIEWCAM_s ViewCam;
-extern f32 testmovef;
 
 // ==== src/legoapi/render/core/render.cpp: declarations ====
 
@@ -1488,7 +1478,6 @@ extern "C" {
 
 }
 
-void LoadPerm1();
 
 // ==== src/legoapi/menus/screens/gamemenuall.cpp: declarations ====
 
@@ -1603,7 +1592,6 @@ extern "C" {
 
 extern "C" {
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -1916,7 +1904,6 @@ static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ..
 
 
 extern EdInputContext * Input;
-extern "C" void PlaySfxById(i32, nuvec_s *);
 
 DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
 
@@ -2538,7 +2525,6 @@ extern "C" {
 
 extern "C" {
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -2987,7 +2973,6 @@ inline void SplinePointBlock::operator delete(void *memory) {
 
 // ==== src/legoapi/characters/motion/gameanim.cpp: declarations ====
 
-void SetPodMergeAnims(ANIMPACKET_s *packet, i32 index);
 
 // ==== src/nu2api/nu3d/nuspecial.cpp: declarations ====
 
@@ -3074,7 +3059,6 @@ extern "C" {
 
 // ==== src/legoapi/render/light/surfaces.cpp: declarations ====
 
-extern NUMTL * SolidMtl3D;
 
 
 // ==== src/legoapi/core/startup/game.cpp: declarations ====

@@ -51,6 +51,8 @@
 #include "nu2api/nu3d/nuqfnt.h"
 
 #include <stdio.h>
+#include "gamelib/util/Refpack.h"
+#include "nu2api/nucore/unref.h"
 
 // Network condition emulator (retail nunetemu.cpp): packet batching,
 // splitting and stats for the emulated link.
@@ -74,8 +76,6 @@ static inline i32 NuNetSessionRecvFrom(void *data, i32 size, nunetaddr_s *addres
     return reinterpret_cast<NuNetSessionRecvFromFn>(vtable[23])(theSession, data, size, address);
 }
 
-extern i32 unref(unsigned char *, unsigned char *);
-extern i32 refpack(unsigned char *, abi_long, unsigned char *);
 
 struct NuNetEmuSegment {
     u16 offset;

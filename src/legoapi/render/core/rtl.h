@@ -135,3 +135,14 @@ extern "C" {
     rtlfog_s *edrtlGetFogSet(void);
     void edrtlCalculateBurnoutEx(burnset_s *, NuBloomParameters *, NUVEC *, f32);
 }
+
+// Declared here for the other units that use them.
+struct burnset_s;
+extern char **modifier_names;
+extern f32 *modifiers;
+void edrtlDetermineNearestBurn(float distance, burnset_s *set);
+extern "C" {
+    void edrtlDrawLightEx(i32, i32);
+    void rtlSetAssocName(i32 index, char *name);
+    void rtlSetUserIdName(i32 index, char *name);
+}

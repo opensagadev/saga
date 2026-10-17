@@ -30,3 +30,10 @@ void PartKill_ForceThrow(PART_s *part, i32 reason);
 void PowerUp_Particles(WORLDINFO_s *world, NUVEC *position);
 void CollectPowerUp(GameObject_s *object, NUVEC *position, u16 rotation, i32 flags);
 void CollectHitPoint(GameObject_s *object, NUVEC *position, i32 flags);
+
+// Declared here for the other units that use them.
+struct PART_s;
+struct nuhspecial_s;
+struct nuvec_s;
+PART_s *Part_FindFromHSpecial(nuhspecial_s *);
+void MakePartVector(nuvec_s *velocity, nuvec_s *direction, f32 scale);

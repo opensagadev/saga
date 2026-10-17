@@ -23,6 +23,8 @@
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nuandroid/ios_graphics.h"
 #include "nu2api/nucore/nuthread.h"
+#include "nu2api/nu3d/nu3d_includes.h"
+#include "nu2api/nucore/nucore_includes.h"
 
 // iOS/GLES shader manager (retail nushadermanagerios.cpp): material
 // adaptation for the mobile uber-shader, redirect-table lookups and program
@@ -31,9 +33,6 @@
 using nu2api::HashRedirect;
 using nu2api::LoadedUniqueShaderRecord;
 
-extern i32 file_criticalsection;
-extern i32 RemoveNormalMaps;
-extern i32 RemoveDirectionalMaps;
 
 // Redirect / preloaded tables (nudlist_tables_gen.inc, built into
 // nushadermanager_gen.cpp).

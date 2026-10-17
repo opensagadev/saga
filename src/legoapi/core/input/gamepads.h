@@ -55,3 +55,13 @@ extern f32 PadOldSpeed2[2];
 extern f32 PadOldSpeed[2];
 extern u16 PadOldAngle2[2];
 extern u16 PadOldAngle[2];
+
+// Declared here for the other units that use them.
+struct GameObject_s;
+struct RUMBLEPACKET;
+extern i32 readpads_always;
+void ConstantRumble(GameObject_s *object, f32 strength, f32 duration);
+void HitRumble(GameObject_s *);
+void KillRumble(GameObject_s *);
+void ResetRumble(RUMBLEPACKET *packet);
+void TakeHitRumble(GameObject_s *object, float strength);

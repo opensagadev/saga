@@ -183,6 +183,9 @@
 #include "legoapi/props/objects/techno.h"
 #include "legoapi/characters/motion/camera_types.h"
 #include "nu2api/nufile/nufilepak.h"
+#include "editor/edlevelall.h"
+#include "legoapi/lib/text.h"
+#include "nu2api/nu3d/nu3d_includes.h"
 
 struct AIROW_s;
 struct nuqthdr_s;
@@ -192,49 +195,7 @@ struct SHOPINPUT;
 MENUPACKET_s MenuPacket = {};
 extern f32 HUB_EPISODETITLEY;
 extern i16 tSELECT, tSELECTED, tSELECTING;
-extern "C" void BackupMenuNoFn(void);
-extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
-extern "C" void DrawMenuButtonPrompts(i32 confirm_prompt, i32 cancel_prompt, i32 enabled, u8 red, u8 green, u8 blue,
-                                      u8 alpha);
-extern "C" void DrawMenuButtonPromptsEx(i32 confirm_prompt, i32 cancel_prompt, i32 flags, i32 enabled, u8 red, u8 green,
-                                        u8 blue, u8 alpha);
-extern i32 MenuSFX;
-extern i32 MENUSFX_MENUSELECT;
-extern i32 MENUSFX_MENUBACK;
-extern i32 MENUSFX_MENUNOENTRY;
-extern i32 MENUSFX_MENUMOVE;
-extern char *apitxt_LOADGAME;
-extern char *apitxt_SAVEGAME;
-extern char *apitxt_CONFIRMSAVE;
-extern char *apitxt_CONFIRMOVERWRITE;
-extern char *apitxt_CONFIRMLOAD;
-extern char *apitxt_DOYOUWANTTOABORT;
-extern char *apitxt_DOYOUWANTTOABORTLOAD;
-extern char *apitxt_DOYOUWANTTOABORTFORMAT;
-extern char *apitxt_CONFIRMDELETE;
-extern char *apitxt_RETRY;
-extern char *apitxt_SLOT;
-extern char *apitxt_NEWSAVE;
-extern char *apitxt_CANCEL;
-extern char *apitxt_NODATAAVAILABLE;
-extern char *apitxt_NOTENOUGHSPACE;
-extern char *apitxt_DELETEGAME;
-extern char *apitxt_DELETING;
-extern char *apitxt_DELETECOMPLETE;
-extern char *apitxt_FORMATTING;
-extern char *apitxt_FORMATTINGCOMPLETE;
-extern char *apiGameName;
-extern char *apitxt_YES;
-extern char *apitxt_NO;
-extern "C" f32 sfx_wait;
 extern "C" f32 MENUBOTY;
-void Draw_NODATAAVAILABLE();
-void Draw_NOMEMORYCARD();
-extern "C" void Draw_NOTENOUGHSPACE(void);
-extern "C" void Draw_SPACENEEDED(void);
-extern "C" void Draw_CHECKINGMEMORYCARD(void);
-extern "C" void Draw_DONOTREMOVEMEMORYCARD(void);
-void Draw_OK(MENU_s *menu);
 
 i32 memcard_cardchanged;
 i32 MenuASCancelFinished;
@@ -301,88 +262,49 @@ static inline i32 MenuSlotColourLerp(u32 first, u32 second, f32 amount) {
 }
 
 
-void MenuDrawLoad(MENU_s *menu);
-
-void MenuDrawSave(MENU_s *menu);
-
-void MenuExitLoad(MENU_s *);
-
-void MenuExitSave(MENU_s *);
-
-void MenuEnterLoad(MENU_s *menu);
-
-void MenuEnterSave(MENU_s *menu);
-
-void MenuStartLoad();
-
-void MenuStartSave();
-
-void MenuDrawNoData(MENU_s *menu);
-
-void MenuDrawSaving(MENU_s *);
-
-void MenuUpdateLoad(MENU_s *menu);
-
-void MenuUpdateSave(MENU_s *menu);
 
 
 
 
 
-void MenuDrawLoading(MENU_s *);
-
-void MenuDrawDeleting(MENU_s *);
-
-void MenuUpdateNoData(MENU_s *menu);
-
-void MenuUpdateLoading(MENU_s *);
-
-void MenuUpdateSaving(MENU_s *);
 
 
-void MenuDrawFormatting(MENU_s *);
 
-void MenuDrawInsertCard(MENU_s *);
 
-void MenuDrawLoadCancel(MENU_s *menu);
 
-void MenuDrawSaveCancel(MENU_s *menu);
 
-void MenuUpdateDeleting(MENU_s *);
 
-void MenuDrawCardWarning(MENU_s *);
 
-void MenuDrawFileCorrupt(MENU_s *);
 
-void MenuDrawLoadConfirm(MENU_s *menu);
 
-void MenuDrawSaveConfirm(MENU_s *menu);
 
-void MenuEnterHeaderSave(MENU_s *);
 
-void MenuEnterInsertCard(MENU_s *);
 
-void MenuExitCardWarning(MENU_s *);
 
-void MenuDrawFormatCancel(MENU_s *menu);
 
-void MenuDrawNoMemoryCard(MENU_s *menu);
 
-void MenuEnterCardWarning(MENU_s *);
 
-void MenuEnterSaveConfirm(MENU_s *);
 
-void MenuUpdateFormatting(MENU_s *);
 
-void MenuUpdateLoadCancel(MENU_s *menu);
 
-void MenuUpdateSaveCancel(MENU_s *menu);
 
-void MenuUpdateInsertCard(MENU_s *menu);
 
-void MenuDrawDeleteConfirm(MENU_s *menu);
 
-void MenuDrawFormatConfirm(MENU_s *);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 void MenuInitialiseEx(MENUFNINFO *menu_info, i32 menu_id_count, i32 language_count,
                       void (*draw_save_slots_info_fn)(f32, f32, i32, i32), i32 is_fade_enabled, i32 is_shadow_enabled);
@@ -390,46 +312,25 @@ void MenuInitialiseEx(MENUFNINFO *menu_info, i32 menu_id_count, i32 language_cou
 void MenuInitialise(MENUFNINFO *menu_info, i32 menu_id_count, i32 language_count,
                     void (*draw_save_slots_fn)(MENU *, f32), i32 is_fade_enabled, i32 is_shadow_enabled);
 
-void MenuEnterNoMemoryCard(MENU_s *);
 
-void MenuEnterStartNewGame(MENU_s *);
 
-void MenuUpdateCardWarning(MENU_s *menu);
 
-void MenuUpdateFileCorrupt(MENU_s *menu);
 
-void MenuUpdateLoadConfirm(MENU_s *menu);
 
-void MenuUpdateSaveConfirm(MENU_s *menu);
 
-void MenuDrawAutoSaveCancel(MENU_s *menu);
 
-void MenuDrawNotEnoughSpace(MENU_s *);
 
-void MenuUpdateFormatCancel(MENU_s *menu);
 
-void MenuUpdateNoMemoryCard(MENU_s *menu);
 
-void MenuDrawAutoSaveWarning(MENU_s *menu);
 
-void MenuDrawDoNotRemoveCard(MENU_s *);
 
-void MenuEnterAutoSaveCancel(MENU_s *menu);
 
-void MenuUpdateDeleteConfirm(MENU_s *menu);
 
-void MenuUpdateFormatConfirm(MENU_s *menu);
 
-void MenuEnterAutoSaveWarning(MENU_s *);
 
-extern f32 memcard_autosavecanceldelay;
-void MenuUpdateAutoSaveCancel(MENU_s *menu);
 
-void MenuUpdateNotEnoughSpace(MENU_s *menu);
 
-void MenuUpdateAutoSaveWarning(MENU_s *menu);
 
-void MenuUpdateDoNotRemoveCard(MENU_s *menu);
 
 extern "C" {
 
@@ -475,25 +376,6 @@ extern "C" {
 
 
 
-void BackupMenuNoFn(void);
-
-
-void DrawMenuButtonPrompts(i32 confirm_prompt, i32 cancel_prompt, i32 enabled, u8 red, u8 green, u8 blue,
-                               u8 alpha);
-
-void DrawMenuButtonPromptsEx(i32, i32, i32, i32, u8, u8, u8, u8);
-
-
-
-
-
-void Draw_CHECKINGMEMORYCARD(void);
-
-void Draw_DONOTREMOVEMEMORYCARD(void);
-
-void Draw_NOTENOUGHSPACE(void);
-
-void Draw_SPACENEEDED(void);
 
 
 
@@ -504,7 +386,17 @@ void Draw_SPACENEEDED(void);
 
 
 
-void RemapAddr(void *new_base, void *old_base, void **address);
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -551,19 +443,9 @@ struct ripple_node_s;
 struct ripple_set_s;
 struct VuVec;
 
-extern "C" void NuRndrRect2di(i32, i32, i32, i32, i32, numtl_s *);
-extern char *apitxt_EMPTY;
-extern char *apitxt_PRESENT;
 extern char *apitxt_LOADING;
 extern char *apitxt_SAVING;
-extern char *apitxt_OK;
-extern char *apitxt_GAMELOADED;
-extern char *apitxt_GAMELOADING;
-extern char *apitxt_FAILEDTOLOAD;
-extern char *apitxt_CORRUPTLOAD;
 extern f32 MENUBOTY;
-extern f32 memcard_loadmessage_delay;
-extern f32 memcard_loadresult_delay;
 
 // Camera zoom state
 
@@ -571,7 +453,6 @@ extern f32 memcard_loadresult_delay;
 
 
 extern "C" {
-    void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 }
 
 
@@ -693,63 +574,6 @@ extern i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
 
 
 
-void MenuDrawLoad(MENU *menu);
-void MenuDrawLoading(MENU *menu);
-void MenuDrawAutoSaveCancel(MENU *menu);
-void MenuDrawAutoSaveWarning(MENU *menu);
-void MenuDrawCardWarning(MENU *menu);
-void MenuDrawDeleteConfirm(MENU *menu);
-void MenuDrawDeleting(MENU *menu);
-void MenuDrawDoNotRemoveCard(MENU *menu);
-void MenuDrawFileCorrupt(MENU *menu);
-void MenuDrawFormatCancel(MENU *menu);
-void MenuDrawFormatConfirm(MENU *menu);
-void MenuDrawFormatting(MENU *menu);
-void MenuDrawInsertCard(MENU *menu);
-void MenuDrawLoadCancel(MENU *menu);
-void MenuDrawLoadConfirm(MENU *menu);
-void MenuDrawNoData(MENU *menu);
-void MenuDrawNoMemoryCard(MENU *menu);
-void MenuDrawNotEnoughSpace(MENU *menu);
-void MenuDrawSave(MENU *menu);
-void MenuDrawSaveCancel(MENU *menu);
-void MenuDrawSaveConfirm(MENU *menu);
-void MenuDrawSaving(MENU *menu);
-void MenuEnterAutoSaveCancel(MENU *menu);
-void MenuEnterAutoSaveWarning(MENU *menu);
-void MenuEnterCardWarning(MENU *menu);
-void MenuEnterHeaderSave(MENU *menu);
-void MenuEnterInsertCard(MENU *menu);
-void MenuEnterLoad(MENU *menu);
-void MenuEnterNoMemoryCard(MENU *menu);
-void MenuEnterSave(MENU *menu);
-void MenuEnterSaveConfirm(MENU *menu);
-void MenuEnterStartNewGame(MENU *menu);
-void MenuExitCardWarning(MENU *menu);
-void MenuExitLoad(MENU *menu);
-void MenuExitSave(MENU *menu);
-void MenuUpdateAutoSaveCancel(MENU *menu);
-void MenuUpdateAutoSaveWarning(MENU *menu);
-void MenuUpdateCardWarning(MENU *menu);
-void MenuUpdateDeleteConfirm(MENU *menu);
-void MenuUpdateDeleting(MENU *menu);
-void MenuUpdateDoNotRemoveCard(MENU *menu);
-void MenuUpdateFileCorrupt(MENU *menu);
-void MenuUpdateFormatCancel(MENU *menu);
-void MenuUpdateFormatConfirm(MENU *menu);
-void MenuUpdateFormatting(MENU *menu);
-void MenuUpdateInsertCard(MENU *menu);
-void MenuUpdateLoad(MENU *menu);
-void MenuUpdateLoadCancel(MENU *menu);
-void MenuUpdateLoadConfirm(MENU *menu);
-void MenuUpdateLoading(MENU *menu);
-void MenuUpdateNoData(MENU *menu);
-void MenuUpdateNoMemoryCard(MENU *menu);
-void MenuUpdateNotEnoughSpace(MENU *menu);
-void MenuUpdateSave(MENU *menu);
-void MenuUpdateSaveCancel(MENU *menu);
-void MenuUpdateSaveConfirm(MENU *menu);
-void MenuUpdateSaving(MENU *menu);
 struct CUTSCENEPLAYERCLIP;
 
 
@@ -967,36 +791,19 @@ void SaveSystemInitialise(i32 slots, void *makeSaveHash, void *save, i32 saveSiz
 // ==== src/legoapi/core/config/saveload.cpp: declarations ====
 
 
-extern i32 MenuLoadStarted;
-extern i32 memcard_slot;
-extern i32 memcard_cardchanged;
-extern i32 memcard_slotsused;
-extern i32 memcard_savestarted;
-extern i32 memcard_savefailed;
-extern i32 memcard_loadstarted;
-extern i32 memcard_loadfailed;
-extern i32 memcard_loadcorrupt;
-extern f32 memcard_savemessage_delay;
-extern f32 memcard_saveresult_delay;
 extern i32 memcard_deleteneeded, memcard_deletestarted, memcard_deletefailed;
 extern i32 memcard_formatme, memcard_formatting, memcard_formatfailed;
-extern i16 (*memcard_hashfn)(void);
 
 extern void (*FS_Callback)(char *, char *);
 
 f32 memcard_autosavecanceldelay = 1.5f;
-extern f32 memcard_formatmessage_delay;
-extern f32 memcard_formatresult_delay;
 f32 memcard_createmessage_delay;
 f32 memcard_createresult_delay;
-extern f32 memcard_deletemessage_delay;
-extern f32 memcard_deleteresult_delay;
 f32 memcard_message_delay;
 f32 memcard_result_delay;
 i32 memcard_justformatted;
 i32 saveload_autosavedisabled;
 
-void SerialiseString(EdStream &stream, void *data, i32 count);
 
 // Retail keeps the whole body of RenderFileSel3 as the split-out .part clone;
 // the exported function only tests FS_Active.
@@ -1011,7 +818,6 @@ extern "C" void StartFileSel(char *title, char *path, char *filter, char *filter
                              void (*callback)(char *, char *));
 
 
-i32 LoadState(i32, variptr_u *, variptr_u *, variptr_u *, variptr_u *, variptr_u *, variptr_u *);
 
 extern "C" {
     void (*savesuccessfn)(void);
@@ -1019,14 +825,11 @@ extern "C" {
     i32 memcard_headerdatasize;
     void *memcard_headerdatabuffer;
 
-void UpdateSaveSlots(void);
 
 
 } // extern "C"
 
 // ==== src/legoapi/menus/core/text.cpp: declarations ====
-i32 FindNextBreak(unsigned char *, i32);
-i32 FindNearestBreak(unsigned char *, i32);
 extern char *apitxt_AUTOSAVE_WARNING, *apitxt_LOADING, *apitxt_SAVING;
 
 // Original .data @0x667ce0; the names are filled in by the static initializer.
@@ -1036,24 +839,15 @@ void (*buttonmapfn)(char *, char *);
 f32 (*pulsetimerfn)(f32);
 extern "C" {
     i32 smarttextex_drawmessagebox = 0;
-    void NuQFntDestroy(VUFNT *font);
-    void NuRndrRect2di(i32 x, i32 y, i32 width, i32 height, i32 colour, numtl_s *material);
 }
 extern "C" {
 }
 extern "C" {
 }
-void Text3DStringEncodeFont(unsigned char *src, u16 *dst, void *font);
-void MatrixTextStringEncode(void *font, unsigned char *source, u16 *destination);
-i32 SplitTextFindNextWS(unsigned char *text, i32 position);
-extern "C" void TextDecode(char *source, unsigned char *dest);
-
-extern f32 APITEXTSCALEX;
-extern f32 APITEXTSCALEY;
 
 
 
-void TextDecodeCodeword(char *source, char *destination);
+
 static f32 QFONTSCALEX = 1.0f;
 static f32 QFONTSCALEY = 1.0f;
 static f32 STCOORDSCALE = 1.0f;
@@ -1066,10 +860,7 @@ i32 apitext_half_rgb;
 u8 text_preset_b[10] = {128, 0, 0, 128, 128, 128, 0, 0, 0, 0};
 u8 text_preset_g[10] = {128, 0, 128, 0, 128, 0, 128, 96, 0, 0};
 u8 text_preset_r[10] = {128, 128, 0, 0, 0, 128, 128, 128, 0, 0};
-extern i32 ButtonScaleMode;
 
-f32 TextPrintSubstring(unsigned char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, i32 colour,
-                       i32 button_font);
 
 NUMTL *MessageMtl;
 i32 MessageMtlInit;
@@ -1078,9 +869,7 @@ i32 MessageMtlInit;
 
 
 extern "C" {
-void FixUpButtonsInFont(VUFNT *game_font, VUFNT *button_font);
 
-void TextDecode(char *source, unsigned char *dest);
 void TextRegisterButtonMapFn(void (*fn)(char *, char *));
 void TextRegisterPulseTimerFn(f32 (*fn)(f32));
 }
@@ -1097,7 +886,6 @@ void TextRegisterPulseTimerFn(f32 (*fn)(f32));
 
 
 
-i32 FindNextBreak(unsigned char *text, i32 index);
 
 static i32 IsTextBreak(unsigned char *text, i32 index) {
     const u8 ch = text[index];
@@ -1120,7 +908,6 @@ static i32 IsTextBreak(unsigned char *text, i32 index) {
     return 0;
 }
 
-i32 FindNearestBreak(unsigned char *text, i32 index);
 
 
 
@@ -1130,7 +917,6 @@ i32 FindNearestBreak(unsigned char *text, i32 index);
 
 
 extern "C" {
-    extern i32 edbits_part_level_page;
 }
 
 extern "C" {
@@ -1205,7 +991,6 @@ struct rtlset;
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -1461,7 +1246,6 @@ extern "C" {
 // ---- end src/gameapi/edtools/edptlall.cpp ----
 
 extern "C" {
-    void NuRndrRect2di(i32 x, i32 y, i32 width, i32 height, i32 colour, numtl_s *material);
 }
 
 // The original local font helpers read the same private draw state as the
@@ -1622,16 +1406,12 @@ static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ..
 #endif
 
 extern EdInputContext * Input;
-extern "C" void NuRndrRect2di(i32, i32, i32, i32, i32, NUMTL *);
-extern "C" void PlaySfxById(i32, nuvec_s *);
 
-void SerialiseString(EdStream &, void *, i32);
 
 extern f32 Scale;
 DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
 
 extern "C" {
-    extern i32 edpp_readout;
 }
 
 
@@ -1769,7 +1549,6 @@ extern "C" {
 // ---- end src/gameapi/edtools/edptlall.cpp ----
 
 extern "C" {
-    void NuRndrRect2di(i32 x, i32 y, i32 width, i32 height, i32 colour, numtl_s *material);
 }
 
 // The original local font helpers read the same private draw state as the
@@ -1889,29 +1668,17 @@ static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u
 // ==== src/legoapi/menus/screens/gamemenuall.cpp: declarations ====
 
 
-extern i32 MenuASCancelFinished;
-extern i32 MenuCardWarningState;
-extern i32 Menu_InLoadFlow;
-extern i32 Menu_InWarningFlow;
-extern i32 Menu_LastFlow;
-extern i32 Menu_InSaveFlow;
-extern i32 Menu_DisableCancel;
-extern i32 Menu_InHeaderSave;
-extern i32 Menu_Overwriteflag;
 extern i32 memcard_deleteneeded;
 extern i32 memcard_deletestarted;
 extern i32 memcard_deletefailed;
 extern i32 memcard_formatting;
 extern i32 memcard_formatme;
 extern i32 memcard_formatfailed;
-extern i32 SAVESIZE;
 
 // Retail clears these "fast repeat" latches but never sets them.
 extern void (*drawslotinfofn)(f32, f32, i32, i32);
 extern void (*drawslotsfn)(MENU *, f32);
 
-extern char * extrasavetext;
-extern f32 extrasavealpha;
 extern u8 RAP_WARNING_B;
 extern u8 RAP_WARNING_G;
 extern u8 RAP_WARNING_R;
@@ -1924,30 +1691,20 @@ extern "C" {
 
 extern f32 MENUBOTY;
 extern f32 MENUENTRYEXWIDTH;
-extern void (*headerdrawfn)();
-extern void (*predrawfn)(MENU *);
-
-
-
-void BackupMenuNoFn(void);
-
-
-void DrawMenuButtonPrompts(i32 confirm_prompt, i32 cancel_prompt, i32 enabled, u8 red, u8 green, u8 blue,
-                               u8 alpha);
-
-void DrawMenuButtonPromptsEx(i32, i32, i32, i32, u8, u8, u8, u8);
 
 
 
 
 
-void Draw_CHECKINGMEMORYCARD(void);
 
-void Draw_DONOTREMOVEMEMORYCARD(void);
 
-void Draw_NOTENOUGHSPACE(void);
 
-void Draw_SPACENEEDED(void);
+
+
+
+
+
+
 
 
 
@@ -2099,7 +1856,6 @@ extern "C" {
     // Quick-font platform rendering (the generic font run lives in nuqfnt.cpp)
     // ---------------------------------------------------------------------------
 
-void NuQFntDestroy(VUFNT *font);
 
     // ---------------------------------------------------------------------------
     // Rendering / materials / effects (host has GL paths elsewhere)
@@ -2131,7 +1887,6 @@ void NuQFntDestroy(VUFNT *font);
 
 
 
-void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
     DECOMP_ASSERT(sizeof(NuInstanceTreeNode) == 0x0c, "instance tree node stride");
     DECOMP_ASSERT(sizeof(NuInstanceTreeBounds) == 0x20, "instance tree bounds stride");
     DECOMP_ASSERT(sizeof(NuInstanceTree_s) == 0x28, "instance tree size");
@@ -2298,23 +2053,12 @@ DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context fl
 // ==== src/legoapi/core/config/saveload.cpp: declarations ====
 
 
-extern f32 memcard_createmessage_delay;
-extern f32 memcard_createresult_delay;
-extern f32 memcard_message_delay;
-extern f32 memcard_result_delay;
-extern i32 memcard_justformatted;
-extern i32 saveload_autosavedisabled;
 
 // Retail keeps the whole body of RenderFileSel3 as the split-out .part clone;
 // the exported function only tests FS_Active.
 
 extern "C" {
-extern void (*savesuccessfn)();
-extern void * memcard_headerdata;
-extern i32 memcard_headerdatasize;
-extern void * memcard_headerdatabuffer;
 
-void UpdateSaveSlots(void);
 
 
 } // extern "C"
@@ -2330,7 +2074,6 @@ void UpdateSaveSlots(void);
 // Graphics loading flags
 
 extern "C" {
-    void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 }
 
 // --- NuGScn graphics-data reader ---
@@ -2733,7 +2476,6 @@ extern "C" {
     // Quick-font platform rendering (the generic font run lives in nuqfnt.cpp)
     // ---------------------------------------------------------------------------
 
-void NuQFntDestroy(VUFNT *font);
 
     // ---------------------------------------------------------------------------
     // Rendering / materials / effects (host has GL paths elsewhere)
@@ -2765,7 +2507,6 @@ void NuQFntDestroy(VUFNT *font);
 
 
 
-void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
     DECOMP_ASSERT(sizeof(NuInstanceTreeNode) == 0x0c, "instance tree node stride");
     DECOMP_ASSERT(sizeof(NuInstanceTreeBounds) == 0x20, "instance tree bounds stride");
     DECOMP_ASSERT(sizeof(NuInstanceTree_s) == 0x28, "instance tree size");

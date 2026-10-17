@@ -34,6 +34,10 @@
 #include "legoapi/world/mission.h"
 #include "nu2api/numusic/sfx.h"
 #include "legoapi/gizmo/base/GizPanelObjectInterface.h"
+#include "legoapi/actions/movement/climbing.h"
+#include "legoapi/ai/core/gameai.h"
+#include "legoapi/characters/motion/move.h"
+#include "legoapi/render/core/gameliball.h"
 
 struct GIZPANELPROGRESS {
     i32 state;
@@ -70,25 +74,17 @@ void FindAnglesXY(NUVEC *direction, u16 *x_rotation, u16 *y_rotation);
 
 // ==== src/legoapi/gizmo/gizmos/gizmos_gizpanel.cpp: all remaining content ====
 
-extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
-void FastWeaponIn(GameObject_s *, i32);
-void MakeBaddiesForgetAboutParty(i32);
-void SetProtocolDroidInterfaceAction(GameObject_s *);
-void GizPanel_PlaySfx(char *, nuvec_s *, i32);
 static __used__ u8 storm_panel_active;
 static __used__ u8 droid_panel_active;
 static __used__ u8 bountyhunter_panel_active;
 
-extern "C" f32 GIZPANEL_PLAYERPOSLIFT;
 
 void FindAnglesZX(NUVEC *normal, u16 *x_rotation, u16 *z_rotation);
 i32 SuperWeirdo(GameObject_s *object);
 extern i16 id_GRANDMOFFTARKIN, id_IMPERIALOFFICER, id_IMPERIALSHUTTLEPILOT;
 
-void GizPanel_Use(GameObject_s &object, GIZPANEL_s &panel);
 
 
-void GizPanel_PlaySfx(char *name, nuvec_s *position, i32 player_bits);
 
 
 

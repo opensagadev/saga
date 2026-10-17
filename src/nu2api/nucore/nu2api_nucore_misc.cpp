@@ -32,6 +32,8 @@
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
+#include "legoapi/cutscenes/gcutscn.h"
+#include "nu2api/nu3d/nu3d_includes.h"
 
 struct TERRSET;
 extern TERRSET *CurTerr;
@@ -50,12 +52,8 @@ extern MemoryManager theMemoryManager;
 extern "C" void *MemoryManagerAllocPool(MemoryManager *, u32, i32) asm("_ZN13MemoryManager9AllocPoolEji");
 extern "C" void MemoryManagerFreePool(MemoryManager *, void *, u32) asm("_ZN13MemoryManager8FreePoolEPvj");
 
-extern "C" void NuAnimData2CalcTime(nuanimdata2_s *, f32, nuanimtime_s *);
-void NuGCutRigidCalcMtx_3(NUGCUTRIGID_s *, f32, numtx_s *);
 
 
-extern "C" void NuAnimBuffCreateScratch(nuanimbuff_s *buffer);
-extern "C" void NuAnimBuffDestroyScratch(nuanimbuff_s *buffer);
 extern nurenderscene_s currentScene;
 extern HashRedirect g_shaderProgramRedirects[417];
 
@@ -63,7 +61,6 @@ extern HashRedirect g_shaderProgramRedirects[417];
 
 
 
-extern "C" u8 CutSceneBoundingBoxTrackRoot;
 
 
 // NuIOS_SetCullMode is transcribed in android/nuiosdl_gl.cpp (original 0x29c110).

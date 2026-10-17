@@ -55,7 +55,10 @@
 #include "legoapi/world/levels/levels.h"
 #include "legoapi/world/mission.h"
 #include "nu2api/nusound/nusound.h"
-extern "C" i32 NuIOS_IsSmallScreen(void);
+#include "MechInputTouch/MechInputTouchMenuController.h"
+#include "MechInputTouch/MechInputTouchVirtualConsoleController.h"
+#include "MechInputTouch/MechTouchUIElements.h"
+#include "nu2api/nuandroid/ios_device.h"
 i16 MechInputTouchVirtualConsoleController::s_textures[9];
 // Seconds without input before the console fades out; the original set the
 // timer from a helper at static-init time rather than as constant data.
@@ -80,13 +83,7 @@ float MechInputTouchVirtualConsoleController::s_defaultButtonsPosY_SmallScreen =
 
 // ==== src/legoapi/core/startup/virtual.cpp: declarations ====
 
-extern "C" i32 NuIOS_IsSmallScreen();
-void RndrTexQuad(f32, f32, f32, f32, i32, numtl_s *, i32);
 
-void VirtualControlButton_OnDown_Callback(MechTouchUIElement &, TouchHolder &);
-void VirtualControlButtonMover_OnDown_Callback(MechTouchUIElement &, TouchHolder &);
-void VirtualControlDPad_OnDown_Callback(MechTouchUIElement &, TouchHolder &);
-void VirtualControlDPad_LockButton_OnClick_Callback(MechTouchUIElement &, TouchHolder &);
 
 // ==== src/legoapi/core/input/gamepads.cpp: declarations ====
 
@@ -104,11 +101,8 @@ extern "C" {
 // angular velocity only when both consecutive turns agree.
 
 
-void VirtualControlDPad_OnDown_Callback(MechTouchUIElement &element, TouchHolder &touch);
 
-void VirtualControlButtonMover_OnDown_Callback(MechTouchUIElement &element, TouchHolder &touch);
 
-void VirtualControlDPad_LockButton_OnClick_Callback(MechTouchUIElement &element, TouchHolder &);
 
 // ==== src/legoapi/misc/legoapi_misc.cpp: declarations ====
 

@@ -174,16 +174,9 @@
 #include "nu2api/nu3d/android/nugscn_android.h"
 #include "nu2api/numath/numath.h"
 #include "nu2api/nu3d/nupostparams.h"
+#include "nu2api/nu3d/nu3d_includes.h"
 
-extern i32 draw_octree;
 extern "C" {
-    extern i32 DEBPAGE_AREA;
-    extern i32 DEBPAGE_CHARACTER;
-    extern i32 DEBPAGE_GENERAL;
-    void DebFreeAllCreatedEffects(void);
-    void DebrisSetRenderGroup(i32 group);
-    i32 edppLoadPage(char *path, i32 flag, usize scene);
-    i32 edppLoadPage(char *path, i32 flag, usize scene);
 }
 
 void OctreeRndr(u8 *visibility, nuoctreenode_s *root, i32 enabled);
@@ -193,7 +186,6 @@ void OctreeRndr(u8 *visibility, nuoctreenode_s *root, i32 enabled);
 
 // Runtime-selected groups appended after the fixed terrain allocation.
 
-extern "C" i32 edppLoadPage(char *path, i32 flag, usize scene);
 // NuFileExists @nufile (nucore_plain.cpp).
 
 
@@ -227,7 +219,6 @@ extern "C" {
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -545,7 +536,6 @@ static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ..
 
 
 extern EdInputContext * Input;
-extern "C" void PlaySfxById(i32, nuvec_s *);
 
 DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
 
@@ -680,7 +670,6 @@ static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u
 
 // ==== src/legoapi/menus/screens/gamemenuall.cpp: declarations ====
 
-extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 
 // Retail clears these "fast repeat" latches but never sets them.
 

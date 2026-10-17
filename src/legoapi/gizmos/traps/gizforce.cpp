@@ -35,6 +35,7 @@
 #include "nu2api/numusic/sfx.h"
 #include "nu2api/nufile/nufpar.h"
 #include <string.h>
+#include "legoapi/characters/core/players.h"
 
 u32 GizForce_TotalScore(void *world) {
     GIZFORCESYS_s *system = static_cast<WORLDINFO_s *>(world)->giz_force_sys;
@@ -803,7 +804,6 @@ static NUVEC *GizmoForce_GetPos(GIZMO *gizmo) {
 }
 
 void Bolt_AddDeflectedBolt(BOLT_s *, nuvec_s *, nuvec_s *, unsigned char *);
-i32 Player_HasDoubleBoltDamage_FromBolt(BOLT_s *);
 
 // Retail keeps this body as GCC's split-out clone; the inline head stays in
 // the caller.

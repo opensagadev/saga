@@ -250,6 +250,11 @@
 #include "legoapi/gizmo/base/gizflow.h"
 #include "legoapi/misc/supportall_types.h"
 #include "legoapi/actions/character/specialmoves_types.h"
+#include "gameapi/ai/aisys/gameaiscript.h"
+#include "legoapi/actions/movement/climbing.h"
+#include "legoapi/characters/motion/move.h"
+#include "legoapi/items/fx/explosions.h"
+#include "legoapi/world/levels/episodeV.h"
 
 i32 DoubleJump_JediSlam = 0;
 f32 SLAMJUMPSPEED = 3.0f;
@@ -264,12 +269,8 @@ i32 (*Slam_GetDebrisFn)(GameObject_s *, i32) = NULL;
 static const f32 PLAYER_JUMP_MINIMUM_AIR_TIME = 0.1f;
 static const f32 PLAYER_JUMP_REENTRY_DELAY = 0.2f;
 
-void PlayJumpSfx(GameObject_s *object, i32 variant);
-void PlayLandSfx(GameObject_s *object, i32 variant, i32 force);
 
 void (*BigJump_EndOfLandFn)(GameObject_s *) = NULL;
-void FindSlamOrigin(GameObject_s *, NUVEC *, NUVEC *);
-EXPLOSION *AddExplosion(NUVEC *, f32, f32, GameObject_s *, i32, i32);
 
 static i32 BigJump_JumpAction_Default(GameObject_s *object);
 i32 (*BigJump_JumpActionFn)(GameObject_s *) = BigJump_JumpAction_Default;
@@ -277,12 +278,9 @@ i32 (*BigJump_JumpActionFn)(GameObject_s *) = BigJump_JumpAction_Default;
 static i32 BigJump_LandAction_Default(GameObject_s *object);
 i32 (*BigJump_LandActionFn)(GameObject_s *) = BigJump_LandAction_Default;
 
-void Player_ClearContext(GameObject_s *, i32);
-void Player_ResetContexts(PLAYERPACKET_s *);
 
 
 
-void MakeJumpReachHeight(GameObject_s *object, float height, i32 force);
 
 // ==== src/legoapi/characters/motion/move.cpp: declarations ====
 
@@ -293,16 +291,6 @@ void MakeJumpReachHeight(GameObject_s *object, float height, i32 force);
 // Original action/context lookup data, with its arrays and pointers in one owner.
 
 
-void ComboHitFrame(GameObject_s *object, i32 damage);
-void SetWeaponOut(GameObject_s *object);
-void FastWeaponIn(GameObject_s *object, i32 sound);
-void FastWeaponOut(GameObject_s *object, i32 sound);
-void StartHold(GameObject_s *object);
-void MakeJumpReachHeight(GameObject_s *, f32, i32);
-void PlayJumpSfx(GameObject_s *, i32);
-void PlaySabreSfx(char *, GameObject_s *, NUVEC *, i32);
-void Punch_Hit(GameObject_s *, GameObject_s *, f32, f32);
-void StartQuickShoot(GameObject_s *, i32);
 i32 (*FindSlamOrigin_UseCPosFn)(GameObject_s *) = NULL;
 void (*Jump_EndOfLandContextFn)(GameObject_s *) = NULL;
 // Retail keeps several of this file's static helpers only as GCC clones; these
@@ -316,14 +304,12 @@ void (*Jump_EndOfLandContextFn)(GameObject_s *) = NULL;
 #endif
 
 // Retail keeps only the IPA-SRA clone of this function.
-i32 PodLevel(AREADATA_s *);
 
 // Multiplies the ordinary camera's per-frame position blend.  The original
 // keeps this as writable camera state (default 1.0), rather than folding it
 // into the socket seek rate.
 
 
-i32 PodLevel(AREADATA_s *area);
 
 // Retail splits the guard off as an inline head; the rest is this partial clone.
 
@@ -332,7 +318,6 @@ extern i32 LevFlag[4];
 
 // These pod tuning values are zero-initialized in the original image.
 
-extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 
 // Retail re-tests the three block animations at each use instead of caching a flag.
 #define HAS_BLOCK_ANIMS(animations)                                                                                    \
@@ -342,23 +327,13 @@ extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 
 // Retail splits the context test off as an inline head; the rest is this partial clone.
 
-i32 Slam_Start(GameObject_s *object, f32 speed);
-
-void StartLunge(GameObject_s *object, f32 speed, f32 height);
-
-i32 Glide_Start(GameObject_s *object);
-
-void PlayLandSfx(GameObject_s *object, i32 type, i32 surface);
-
-extern i32 DoubleJump_JediSlam;
-extern f32 SLAMJUMPSPEED;
-void PlayLandSfx(GameObject_s *, i32, i32);
-void AddWaterSplash(GameObject_s *, NUVEC *);
-
-i32 StartBackFlip(GameObject_s *object);
 
 
-void FindSlamOrigin(GameObject_s *object, NUVEC *start, NUVEC *end);
+
+
+
+
+
 
 DECOMP_ASSERT(sizeof(AWKWARDSHAPESPHERE_s) == 12, "Awkward shape sphere size");
 DECOMP_ASSERT(offsetof(AWKWARDSHAPESPHERE_s, radius) == 8, "Awkward shape sphere radius offset");
@@ -373,7 +348,6 @@ DECOMP_ASSERT(offsetof(AWKWARDSHAPESPHERE_s, radius) == 8, "Awkward shape sphere
 // ==== src/legoapi/world/levels/episodeV.cpp: declarations ====
 
 
-extern AILOCATOR_s * locator;
 
 DECOMP_ASSERT(sizeof(HOTHBATTLEE_NETPACKET_s) == 0x58, "Hoth panel packet size");
 DECOMP_ASSERT(offsetof(HOTHBATTLEE_NETPACKET_s, alpha) == 0x24, "Hoth panel packet alpha offset");
@@ -398,7 +372,6 @@ DECOMP_ASSERT(sizeof(ASTEROIDCNETPACKET_s) == 8, "asteroid C network packet size
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -437,8 +410,6 @@ extern i16 id_GAMORREANGUARD;
 
 // Written by ThingManager's ctor (original global @0x124f2e0, .bss).
 
-void Player_ClearContext(GameObject_s *object, i32 mode);
-void Player_ResetContexts(PLAYERPACKET_s *packet);
 
 
 // Enabled in the target data image.  Ordinary background characters are
@@ -475,14 +446,11 @@ inline void ThingManager::operator delete(void *thing, usize size) {
 // ==== src/legoapi/actions/combat/fighting.cpp: declarations ====
 
 
-void SetWeaponOut(GameObject_s *);
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e4) == 0x7e4, "Quick shoot record offset");
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e8) == 0x7e8, "Quick shoot record count offset");
 DECOMP_ASSERT(offsetof(GameObject_s, quick_shoot_flags) == 0xe2f, "Quick shoot flags offset");
 DECOMP_ASSERT(offsetof(GameObject_s, quick_shoot_bolt_id) == 0xe3e, "Quick shoot bolt ID offset");
-void StartQuickShoot(GameObject_s *object, i32 action);
 
-void Punch_Hit(GameObject_s *attacker, GameObject_s *target, float, float gap);
 
 // ==== src/legoapi/characters/core/players.cpp: declarations ====
 
@@ -505,7 +473,6 @@ DECOMP_ASSERT(sizeof(SPECIAL_LAYER_s) == 0xc, "SPECIAL_LAYER_s size");
 
 // ==== src/legoapi/actions/movement/pushing.cpp: declarations ====
 
-void FastWeaponIn(GameObject_s *, i32);
 
 
 // ==== src/legoapi/characters/motion/camera.cpp: declarations ====
@@ -699,8 +666,6 @@ static_assert(sizeof(struct LEVFLAGBYTES_s) == 16, "LevFlag must be 16 bytes");
 // ==== src/legoapi/ai/core/gameai.cpp: declarations ====
 
 
-extern void Player_ClearContext(GameObject_s *, i32);
-extern void Player_ResetContexts(PLAYERPACKET_s *);
 
 // ==== src/legoapi/gizmos/trigger/ai.cpp: all remaining content ====
 
@@ -709,7 +674,6 @@ extern void Player_ResetContexts(PLAYERPACKET_s *);
 extern "C" {
 }
 
-void Player_ClearContext(GameObject_s *object, i32 context);
 
 // ==== src/legoapi/ai/game/aipathcnxhelper.cpp: declarations ====
 
@@ -758,9 +722,7 @@ struct nuvec_s;
 
 
 
-extern void Player_ClearContext(GameObject_s *object, i32 mode);
 
-extern void Player_ResetContexts(PLAYERPACKET_s *packet);
 
 
 
@@ -984,15 +946,9 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 // ==== src/legoapi/gizmo/gizmos/gizmos_gizactions.cpp: declarations ====
 
-i32 Action_ReleaseLocator(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
-                          i32 first_time, float);
 
 
-i32 Action_GetLocatorFromSet(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,
-                             i32 param_count, i32 first_time, float);
 
-i32 Action_AssignLocatorInSet(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
-                              i32 first_time, float);
 
 namespace {
 #include "legoapi/gizmo/gizmos/gizmos_gizactions_types.h"
@@ -1150,10 +1106,6 @@ struct PART_s;
 
 // ==== src/legoapi/actions/movement/jumping.cpp: declarations ====
 
-void StartLunge(GameObject_s *, f32, f32);
-i32 Slam_Start(GameObject_s *, f32);
-void StartHold(GameObject_s *);
-void ComboHitFrame(GameObject_s *, i32);
 extern i32 (*Slam_GetDebrisFn)(GameObject_s *, i32);
 
 

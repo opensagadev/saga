@@ -13,11 +13,10 @@
 #include "nu2api/numath/nuvec4.h"
 #include "legoapi/render/core/terrain.h"
 #include <stdio.h>
+#include "legoapi/render/core/gameliball.h"
+#include "nu2api/nu3d/android/nubridge_android.h"
 
-i32 NuBridgeAlloc(void);
-void ropesegment(numtl_s *, NUVEC *, i32, i32);
 
-void NuBrdigeDrawRope(numtl_s *material, NUVEC *first, NUVEC *second, i32, i32 *boundaries, i32 colour);
 
 extern "C" {
     struct NUBRIDGE {
@@ -47,10 +46,8 @@ extern "C" {
     DECOMP_ASSERT(sizeof(NUBRIDGE) == 0xb0c, "NUBRIDGE size");
     NUBRIDGE Bridges[8];
     i32 NuBridgeProc;
-void NuBridgeOn(i32 enabled);
 }
 
-extern "C" i32 PlatInstGetHit(i32 index);
 
 // ==== functions in original address order ====
 

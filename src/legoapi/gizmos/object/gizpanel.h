@@ -25,3 +25,18 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
+
+// Declared here for the other units that use them.
+struct GIZPANEL_s;
+struct GameObject_s;
+struct HINT_s;
+struct WORLDINFO_s;
+struct nuvec_s;
+i32 GizPanel_UpdateHint(HINT_s *);
+void GizPanel_InitTerrain(WORLDINFO_s *world);
+void GizPanel_MoveCode(WORLDINFO_s *world, GameObject_s *object, i32 special_pressed);
+void GizPanel_PlaySfx(char *, nuvec_s *, i32);
+void GizPanel_Use(GameObject_s &, GIZPANEL_s &);
+extern "C" {
+    extern f32 GIZPANEL_PLAYERPOSLIFT;
+}

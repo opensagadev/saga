@@ -68,11 +68,12 @@
 #include "nu2api/nu3d/nurndr.h"
 #include <stddef.h>
 #include "legoapi/render/core/terrain_stubs_types.h"
+#include "legoapi/items/objects/objectsall.h"
+#include "legoapi/misc/utilities.h"
 
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -117,10 +118,8 @@ static char **PDebNameList;
     if (type->sounds[slot] != -1 && type->sound_modes[slot] == (mode))                                                 \
         PlaySfxById(type->sounds[slot], &emitter->position);
 
-i32 LineIntersectSphere(NUVEC *, NUVEC *, NUVEC *, f32, f32 *);
 
 extern "C" f32 brickimpactwait;
-extern "C" void PlaySfxByIdAndSetVolume(i32, NUVEC *, f32);
 
 // ==== src/legoapi/render/core/terrain_stubs.cpp: declarations ====
 
@@ -129,7 +128,6 @@ extern "C" void PlaySfxByIdAndSetVolume(i32, NUVEC *, f32);
 
 // NuFileExists @nufile (nucore_plain.cpp).
 
-extern "C" part_type_s part_types[128];
 
 // ==== src/legoapi/render/fx/parts_control.cpp: all remaining content ====
 

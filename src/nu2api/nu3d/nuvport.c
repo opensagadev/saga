@@ -8,10 +8,8 @@
 #include "nu2api/nu3d/nuvport.h"
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/nucamera.h"
+#include "nu2api/nu3d/nu3d_includes.h"
 
-extern NUVIEWPORT vpCurrent;
-extern i32 vport_inval;
-extern NUMTX vp_smtx;
 i32 PS2_VCNTR_X = 640;
 i32 PS2_VCNTR_Y = 360;
 i32 PS2_VREZ_W = 640;

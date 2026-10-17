@@ -111,6 +111,7 @@
 #include "nu2api/nu3d/android/nurain_android.h"
 #include <stddef.h>
 #include "legoapi/render/core/terrain_stubs_types.h"
+#include "legoapi/core/startup/text.h"
 
 f32 COINMAGNETSCALE = 3.0f;
 f32 COINMSGTIME = 1.0f;
@@ -123,9 +124,7 @@ static GIZMOPICKUPSYS_s *GizmoPickupSys = &GizmoPickupSys_Game;
 extern "C" {
 }
 
-extern u8 CharClipToBlobShadows;
 
-void SetAreaPickupGravity(i32 area, i32 level);
 
 namespace {
 
@@ -181,9 +180,7 @@ namespace {
 
 } // namespace
 
-extern char *LEGOASCII_UP;
 
-extern char *LEGOASCII_BIGARROW;
 
 
 // Retail keeps this body as GCC's split-out clone; the inline head stays in
@@ -224,7 +221,6 @@ static void GizmoPickups_Update(void *world_ptr, void *, float);
 
 
 
-void GizmoPickups_PostLoad(void *, void *);
 
 // ==== src/legoapi/world/world.cpp: declarations ====
 
@@ -275,7 +271,6 @@ static __attribute__((noinline, noclone, hot, section(".text"))) void DrawHitPoi
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 

@@ -97,8 +97,14 @@
 #include "nu2api/numath/numath.h"
 #include "nu2api/nu3d/nuprim.h"
 #include "nu2api/nu3d/nupostparams.h"
+#include "legoapi/actions/character/speederchase.h"
+#include "legoapi/characters/motion/camera.h"
+#include "legoapi/cutscenes/gcutscn.h"
+#include "legoapi/lib/camera.h"
+#include "legoapi/world/levels/episodeI.h"
+#include "legoapi/world/levels/hub.h"
+#include "nu2api/nu3d/nu3d_includes.h"
 
-void GameCam_ResetLookRot(GAMECAMERA_s *camera);
 void Hint_CancelCurrent(void);
 
 VIEWCAM_s ViewCam = {0, {1000000000.0f, 0.0f, 0.0f}, -8192, -29500, 2.66f, 0.0f, 120.0f, 200.0f, NULL};
@@ -116,18 +122,10 @@ void GameCam_HitRoll();
 
 
 
-void GameCam_UpdateShake(GAMECAMERA_s *camera, float ambient_amount);
 
-void GameCam_ResetLookRot(GAMECAMERA_s *camera);
 
-void GameCam_UpdateLookRot(GAMECAMERA_s *camera);
 
-void GameCameraMakeMiniCut(nugspline_s *spline, f32 start, f32 end, f32 blend_in, f32 blend_out, i32 borders,
-                           i32 hold_until_players_move);
 
-extern nugspline_s ObstacleCamCutSpline;
-extern i32 ObstacleCamTargetGuid;
-extern NUVEC ObstacleCamCutPts[2];
 
 
 void GameCameraMakeMiniCut3(u32 flags, float distance, i32 pitch, i32 yaw, i32 roll, void *focus, i32 target_guid,
@@ -135,7 +133,6 @@ void GameCameraMakeMiniCut3(u32 flags, float distance, i32 pitch, i32 yaw, i32 r
                             float blend_out_time, float blend_time, float hold_time, float max_time, i32 borders,
                             nugspline_s *spline, char mode, char easing);
 
-u16 GameCam_GetAdjustedYRot(GAMECAMERA_s *camera);
 
 extern "C" {
 
@@ -148,30 +145,21 @@ extern f32 newgamecamtime, cutscenecam_focalLength, CamStopBlend, EMPERORFIGHTA_
 extern i32 CUTCAMONLY, GUNSHIPAHACK, netcamera, complexsockposition_forcesock, movegamecamera_forcesock;
 extern i32 LevFlag[4];
 extern NUMTX cutscenecammtx, CutCamMtx;
-extern u8 set_cutscenecammtx;
-extern NUGSPLINE *hub_minikitviewer_camspl;
-f32 getPodRoll(i32);
-f32 PodSprint_InStartCountdown(WORLDINFO_s *);
 GameObject_s *FindNearestGameObject(NUVEC *, GameObject_s *, u32, f32, f32, i32, i32, i32, f32 *, i32,
                                     i32 (*)(GameObject_s *), bool);
 void Customiser_GetActiveWeirdoIndex(i32 *, i32 *);
-i32 ObjInNarrowSock(GameObject_s *, SOCKSYS *, i32);
-void MakePlayPlanes(GAMECAMERA_s *);
 
 static NUVEC GunshipAOffset = {12.0f, 22.5f, -12.0f};
 NUVEC CustomisePos[2];
 f32 HUB_MINIKITVIEWER_CAMDY = 0.3f;
 f32 PodCamDist = 0.0f;
 NUVEC ObstacleCamCutPts[2];
-extern nugspline_s ObstacleCamCutSpline;
-extern i32 ObstacleCamTargetGuid;
 f32 EMPERORFIGHTA_CAMDYHACK = 0.35f;
 i32 movegamecamera_forcesock = -1;
 NUMTX CutCamMtx;
 DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, path) == 0x40, "Camera context path offset");
 DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context flags offset");
 i32 Grapple_LookAtPos(GameObject_s *, NUVEC *);
-void CentreTwoPlayerCamera(NUVEC *, NUVEC *, NUVEC *, NUVEC *);
 
 
 void MoveGameCamera(GAMECAMERA_s *camera);
@@ -185,9 +173,7 @@ void SetDepthOfField();
 void SetCameraMatrices();
 
 
-void CentreTwoPlayerCamera(nuvec_s *center, nuvec_s *player_a, nuvec_s *player_b, nuvec_s *reference);
 
-void GetTopBot(GameObject_s *object);
 
 // ==== src/legoapi/render/core/render.cpp: declarations ====
 
@@ -225,7 +211,6 @@ struct VuVec;
 // Graphics loading flags
 
 extern "C" {
-    void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 }
 
 

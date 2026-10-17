@@ -40,8 +40,9 @@
 #include "legoapi/core/input/timer.h"
 #include "legoapi/items/base/collection.h"
 #include "legoapi/world/world_shared.h"
+#include "legoapi/menus/core/gamemessages.h"
+#include "legoapi/menus/screens/missions.h"
 
-void InitMission(MISSIONSYS *, i32);
 extern f32 HUB_EPISODETITLEY;
 extern i16 tSELECT, tSELECTED, tSELECTING;
 void Hub_DrawImportantBrick(i32, f32, f32, f32, i32, i32);
@@ -50,7 +51,6 @@ extern "C" void SmartText(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_sc
 extern i16 tOUTOFTIME;
 extern "C" TIMER BonusTimer;
 extern void SetBonusWinner(i32);
-extern void ResetGameMessages(void);
 extern GameObject_s *FindGameObject(i32, u32, i32, i32, i32);
 
 static f32 MissionsAlpha;
@@ -59,9 +59,7 @@ static f32 MissionIconScale[20];
 static f32 MissionIconTargetX[20];
 static f32 MissionIconX[20];
 
-void EndMissionsMenu();
 
-void InitMission(MISSIONSYS *ms, i32 idx);
 
 
 

@@ -92,7 +92,6 @@
 #include "nu2api/nu3d/nuprim.h"
 #include "nu2api/nu3d/nupostparams.h"
 
-void AddFancyMessageRGB(char *, float, float, float, float, i32, unsigned char, unsigned char, unsigned char);
 
 GAMEMESSAGE_s GameMessage[128] = {};
 
@@ -112,8 +111,6 @@ ADDGAMEMSG AddGameMsg_Default = {
 void *AddGameMessage(char *text, nuvec_s *position, float scale, nuvec_s *target_position, float target_scale,
                      unsigned char red, unsigned char green, unsigned char blue, u32 flags, float duration);
 
-void AddFancyMessageRGB(char *text, float x, float y, float scale, float duration, i32 message_id, unsigned char red,
-                        unsigned char green, unsigned char blue);
 
 // ==== src/legoapi/render/core/render.cpp: declarations ====
 

@@ -190,6 +190,11 @@
 #include "legoapi/gizmo/base/gizactions.h"
 #include "legoapi/gizmos/transport/grapples.h"
 #include "legoapi/gizmos/object/lever.h"
+#include "editor/edlevelall.h"
+#include "gameapi/ai/aisys/gameaiscript.h"
+#include "legoapi/characters/motion/move.h"
+#include "legoapi/lib/camera.h"
+#include "nu2api/nu3d/nu3d_includes.h"
 
 struct AIROW_s;
 struct nunativegscene_s;
@@ -198,15 +203,11 @@ struct SHOPINPUT;
 extern "C" void *AIPAthFindPathCnx(AISYS_s *, AIPATH_s *, char *, char *, i32 *);
 extern "C" AIPATHNODE_s *AIPathFindNode(AISYS_s *, AIPATH_s *, char *);
 extern "C" void AIPathNodeUpdatePos(AISYS_s *, AIPATH_s *, AIPATHNODE_s *);
-extern "C" void PlaySfxByIdAndSetVolume(i32, NUVEC *, f32);
 void TrenchMove(GameObject_s *) asm("_ZL10TrenchMoveP12GameObject_s") __attribute__((visibility("hidden")));
 void TrenchKilledCallback(GameObject_s *) asm("_ZL20TrenchKilledCallbackP12GameObject_s")
     __attribute__((visibility("hidden")));
-i32 GizBlowup_InitSingleTerrain(GIZMOBLOWUP_s *);
-i32 ObjInNarrowSock(GameObject_s *, SOCKSYS *, i32);
 extern "C" {
     extern i16 id_STORMTROOPER;
-    extern i16 id_BEACHTROOPER;
     extern i16 id_IMPERIALSHUTTLEPILOT;
 }
 
@@ -308,8 +309,6 @@ struct WORLDINFO_s;
 struct BOLT_s;
 struct debinftype;
 
-extern f32 VehicleTurnOrLoopOffset(GameObject_s *object);
-extern void StartTurn(GameObject_s *object);
 
 extern "C" {
 }
@@ -319,7 +318,6 @@ f32 trench_roll_f = 5000.0f;
 f32 trench_seek_z = 0.5f;
 f32 trench_seek_y = 0.5f;
 f32 trench_seek_x = 4.0f;
-extern f32 TURNTIME;
 f32 LOOPTIME = 1.5f;
 
 
@@ -437,7 +435,6 @@ extern speedup_s DogFightSpeedList[9];
 
 
 extern "C" {
-    extern i32 edbits_part_level_page;
 }
 
 extern "C" {
@@ -511,7 +508,6 @@ struct rtlset;
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -924,15 +920,12 @@ static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ..
 #endif
 
 extern EdInputContext * Input;
-extern "C" void PlaySfxById(i32, nuvec_s *);
 
-void SerialiseString(EdStream &, void *, i32);
 
 extern f32 Scale;
 DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
 
 extern "C" {
-    extern i32 edpp_readout;
 }
 
 
@@ -1190,7 +1183,6 @@ static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u
 
 extern f32 HUB_EPISODETITLEY;
 extern i16 tSELECT, tSELECTED, tSELECTING;
-extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 
 
 // Retail clears these "fast repeat" latches but never sets them.
@@ -1397,7 +1389,6 @@ extern "C" {
 
 
 
-void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
     DECOMP_ASSERT(sizeof(NuInstanceTreeNode) == 0x0c, "instance tree node stride");
     DECOMP_ASSERT(sizeof(NuInstanceTreeBounds) == 0x20, "instance tree bounds stride");
     DECOMP_ASSERT(sizeof(NuInstanceTree_s) == 0x28, "instance tree size");
@@ -1480,7 +1471,6 @@ extern i16 id_STORMTROOPER;
 
 
 
-extern i32 ObjInNarrowSock(GameObject_s *, SOCKSYS *, i32);
 
 
 
@@ -1563,7 +1553,6 @@ DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context fl
 
 extern void (*FS_Callback)(char *, char *);
 
-void SerialiseString(EdStream &stream, void *data, i32 count);
 
 // Retail keeps the whole body of RenderFileSel3 as the split-out .part clone;
 // the exported function only tests FS_Active.
@@ -1578,7 +1567,6 @@ extern "C" void StartFileSel(char *title, char *path, char *filter, char *filter
                              void (*callback)(char *, char *));
 
 
-i32 LoadState(i32, variptr_u *, variptr_u *, variptr_u *, variptr_u *, variptr_u *, variptr_u *);
 
 extern "C" {
 
@@ -1622,7 +1610,6 @@ struct VuVec;
 
 
 extern "C" {
-    void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 }
 
 
@@ -2083,7 +2070,6 @@ extern "C" {
 
 
 
-void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
     DECOMP_ASSERT(sizeof(NuInstanceTreeNode) == 0x0c, "instance tree node stride");
     DECOMP_ASSERT(sizeof(NuInstanceTreeBounds) == 0x20, "instance tree bounds stride");
     DECOMP_ASSERT(sizeof(NuInstanceTree_s) == 0x28, "instance tree size");
@@ -2169,17 +2155,11 @@ extern "C" {
 
 
 
-i32 Action_ReleaseLocator(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
-                          i32 first_time, float);
 
 
 struct GIZSPINNER_s;
 
-i32 Action_GetLocatorFromSet(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,
-                             i32 param_count, i32 first_time, float);
 
-i32 Action_AssignLocatorInSet(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
-                              i32 first_time, float);
 
 namespace {
 #include "legoapi/gizmo/gizmos/gizmos_gizactions_types.h"

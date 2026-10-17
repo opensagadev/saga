@@ -21,6 +21,7 @@
 #include "nu2api/numusic/numusic.h"
 
 #include <stdio.h>
+#include "legoapi/items/objects/things.h"
 
 struct AIROW_s;
 struct nunativegscene_s;
@@ -32,5 +33,4 @@ namespace {
 
 void IncreaseScore(u32 *total, u64 amount, i32 apply_multiplier);
 
-void RegisterHelpers();
 

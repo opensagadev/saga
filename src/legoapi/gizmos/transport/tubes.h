@@ -54,3 +54,8 @@ void Tube_MoveCode(GameObject_s *object, WORLDINFO_s *world);
 ADDGIZMOTYPE *Tubes_RegisterGizmo(i32 type_id);
 
 #endif
+
+// Declared here for the other units that use them.
+struct MechTouchUIElement;
+struct TouchHolder;
+void MechHintUIButton_OnClick_Callback(MechTouchUIElement &, TouchHolder &);

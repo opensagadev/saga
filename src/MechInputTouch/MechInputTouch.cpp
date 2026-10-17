@@ -44,12 +44,11 @@
 #include "legoapi/render/core/terrain.h"
 #include "legoapi/audio/sfx.h"
 #include <stdio.h>
+#include "MechInputTouch/MechInputTouch.h"
+#include "legoapi/actions/character/legoapi_tag.h"
+#include "nu2api/nucore/nupad_interface.h"
 
 extern i16 id_ANAKINJEDI;
-bool CalculateRayBoxIntersection(VuVec const &, VuVec const &, VuVec const &, VuVec const &, f32, f32 &);
-f32 CalcCapsuleIntersectDistance(VuVec const &, VuVec const &, f32, VuVec const &, f32);
-extern NuVirtualTouchDevice *inputTouchDevice;
-extern i32 players_cannot_exit_speeder;
 
 i32 MechInputTouchSystem::s_baseControlMode = 1;
 i32 MechInputTouchSystem::s_actualTouchMode = 2;
@@ -83,14 +82,9 @@ static inline void AppendMainControls(NuButtonLayout &layout, MechInputTouchMain
 // ==== src/legoapi/actions/combat/hits.cpp: declarations ====
 
 
-extern i32 players_cannot_exit_speeder;
 
 
-bool CalculateRayBoxIntersection(VuVec const &minimum, VuVec const &maximum, VuVec const &start, VuVec const &direction,
-                                 float maximum_distance, float &distance);
 
-f32 CalcCapsuleIntersectDistance(VuVec const &start, VuVec const &direction, f32 maximum_distance, VuVec const &centre,
-                                 f32 radius);
 
 // ==== functions in original address order ====
 

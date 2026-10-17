@@ -83,37 +83,30 @@
 #include "nu2api/nucore/nuhgobj.h"
 #include <stdio.h>
 #include <string.h>
+#include "legoapi/actions/character/legoapi_tag.h"
+#include "legoapi/actions/character/speederchase.h"
+#include "legoapi/actions/character/tagging.h"
+#include "legoapi/actions/movement/climbing.h"
+#include "legoapi/actions/movement/pushing.h"
+#include "legoapi/ai/game/creature.h"
+#include "legoapi/characters/motion/move.h"
+#include "nu2api/nucore/nu2api_nucore_misc.h"
 
 // Character takeover and tag swapping (original legoapi_tag.cpp translation unit).
 
-void GetTakeOverPos(GameObject_s *, NUVEC *);
 void RegisterTakeOverObject(GameObject_s *object);
-void TakeOverGameObject2(GameObject_s *, GameObject_s *, i32);
-void TakeOver2GetIn(GameObject_s *, GameObject_s *);
-void PlayLandSfx(GameObject_s *, i32, i32);
-f32 SpeederChaseATATInOutMul(NUVEC *, NUVEC *);
 i32 players_cannot_exit_speeder;
 
-void AICreatureResumeScript(GameObject_s *);
 
 static NUVEC SpeederChaseATATExitLandPos = {-159.0f, 6.869999885559082f, -17.600000381469727f};
 
 extern i16 id_BUGGY, id_GYROCOPTER, id_BOMARRMONK;
 extern i16 id_LANDSPEEDER;
 extern i16 id_HEAVYREPEATINGCANNON, id_TROOPERCANNON;
-void PlayJumpSfx(GameObject_s *, i32);
-void ReleaseForce(GameObject_s *, i32);
-void ReleasePush(GameObject_s *);
-void Player_ResetContexts(PLAYERPACKET_s *);
-void SetWeaponIn(GameObject_s *);
 
-void ResetForceGlow(PLAYERPACKET_s *);
-extern i32 CUTSKIPLOCK;
 
 extern GameObject_s *player_tag_to;
 extern GameObject_s *player_tag_from;
-extern f32 player_tag_timer;
-extern i32 do_player_tag;
 static i32 Tag_Mode = 2;
 void (*Tag_DrawIconFn)(GameObject_s *);
 
@@ -135,11 +128,9 @@ i32 InCollectList_Index(i32, COLLECTID *, i32);
 i32 NuIOS_AreInAppPurchasesAvailable();
 i32 NuIOS_CanMakeInAppPurchases();
 struct NuIOS_InAppProduct;
-i32 NuIOS_GetInAppProductByID(char *, NuIOS_InAppProduct *);
 extern i16 tBUNDLESAVINGSAVAILABLE;
 extern f32 text3d_height;
 void GameCam_HitRoll();
-void Tag_NewTransfer(GameObject_s *, GameObject_s *);
 
 
 
@@ -172,17 +163,12 @@ static __attribute__((noinline)) GameObject_s *Tag_FindGameObject_TRANSFER(GameO
     return nearest;
 }
 
-i32 TagCode(GameObject_s *source, GameObject_s *destination, i32 takeover, i32 blend_camera, i32);
-
-void GetTakeOverPos(GameObject_s *object, nuvec_s *position);
 
 
 
-i32 TakeOverYoda(GameObject_s *rider, GameObject_s *vehicle, i32 blend_camera, i32);
 
-void TakeOverGameObject2(GameObject_s *rider, GameObject_s *vehicle, i32 blend_camera);
 
-void TakeOver2GetIn(GameObject_s *rider, GameObject_s *vehicle);
+
 
 static i32 Tag_FindNextPlayer(GameObject_s *object) {
     i16 index = object->apiobj.field_0x289;

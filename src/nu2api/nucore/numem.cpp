@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "nu2api/nucore/numem_types.h"
+#include "nu2api/nucore/nucore_includes.h"
 
 // The original Android implementation does not change page protection.
 extern "C" i32 NuPhysicalProtect(void) {
@@ -19,7 +20,6 @@ extern "C" i32 NuPhysicalProtect(void) {
 
 
 extern "C" {
-extern void * NuMem_Heap;
     extern i32 highallocaddr;
 }
 

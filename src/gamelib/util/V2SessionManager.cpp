@@ -5,10 +5,9 @@
 
 #include <stdarg.h>
 #include <stdio.h>
+#include "gamelib/util/Network.h"
+#include "nu2api/nucore/android/stubs_android.h"
 
-extern "C" void NuDisableVBlankE(void);
-extern "C" void NuEnableVBlankE(void);
-extern TTNetwork theNetwork;
 
 i32 V2SessionManager::mLogHandle;
 char V2SessionManager::mLogFilename[32];

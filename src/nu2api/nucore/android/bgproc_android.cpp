@@ -118,6 +118,7 @@
 #include "nu2api/nucore/nugcutscene.h"
 #include "nu2api/nucore/nuhgobj.h"
 #include "legoapi/items/objects/gameobjects_types.h"
+#include "nu2api/nu3d/nu3d_includes.h"
 
 NuThreadBase *g_bgProcThread;
 i32 bgproc_frozen;
@@ -158,9 +159,7 @@ DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");
 //   NuHtmlBegin    0x2d5ca0   NuHtmlFlush   0x2d5c30
 //   NuHtmlWrite    0x2d5cd0   NuHtmlHeading1 0x2d5d40
 
-void NuHtmlFlush(i32 force);
 
-extern "C" void NuHtmlBegin(void *file);
 
 
 

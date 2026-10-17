@@ -177,6 +177,8 @@
 #include "legoapi/gizmo/base/GizForceObjectInterface.h"
 #include "nu2api/nucore/NuVirtualTouchDevice.h"
 #include <new>
+#include "gameapi/ai/aisys/gameaiscript.h"
+#include "legoapi/characters/motion/move.h"
 
 i32 testStreakAlpha = 32;
 f32 testColourSecF = 256.0f;
@@ -188,9 +190,6 @@ f32 testStreakMinDist = 1.0f;
 f32 testStreakSpeed = 1.0f;
 f32 testStreakCrossSize = 0.1f;
 f32 testStreakClipTestRadius = 0.2f;
-extern i32 show_autojump_hint;
-extern i32 id_HINT_LSW_AUTOJUMP;
-extern i32 id_HINT_LSW_AUTOJUMP_FAIL;
 
 namespace {
     struct AutoJumpStreakLink {
@@ -524,14 +523,8 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 // ==== src/legoapi/gizmo/gizmos/gizmos_gizactions.cpp: declarations ====
 
-i32 Action_ReleaseLocator(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
-                          i32 first_time, float);
 
-i32 Action_GetLocatorFromSet(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,
-                             i32 param_count, i32 first_time, float);
 
-i32 Action_AssignLocatorInSet(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
-                              i32 first_time, float);
 
 namespace {
 #include "legoapi/gizmo/gizmos/gizmos_gizactions_types.h"

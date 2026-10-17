@@ -1840,3 +1840,8 @@ DECOMP_ASSERT(offsetof(GameObject_s, run_speed_override) == 0xee0, "GameObject r
 DECOMP_ASSERT(offsetof(GameObject_s, walk_speed_override) == 0xee4, "GameObject walk speed override offset");
 
 DECOMP_ASSERT(offsetof(GameObject_s, carried_object_drop_position) == 0x75c, "GameObject carry drop position offset");
+
+// Declared here for the other units that use them.
+extern "C" {
+    extern f32 animduration_blendouttime;
+}

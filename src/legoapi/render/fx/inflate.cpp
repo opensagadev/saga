@@ -14,6 +14,7 @@
 #include "nu2api/nucore/deflate.h"
 
 #include <string.h>
+#include "legoapi/render/fx/inflate.h"
 
 DECOMP_ASSERT(sizeof(DEFHUFFMAN) == 0x7e4, "DEFHUFFMAN size");
 DECOMP_ASSERT(offsetof(DEFHUFFMAN, base_code) == 0x420, "DEFHUFFMAN threshold table offset");
@@ -135,9 +136,7 @@ static i32 DistanceBase[32] = {1,    2,    3,    4,    5,    7,     9,     13,  
 static i32 DistanceExtraBits[32] = {0, 0, 0, 0, 1, 1, 2,  2,  3,  3,  4,  4,  5,  5,  6, 6,
                                     7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13, 0, 0};
 
-i32 DecodeDeflatedBlock(DEFLATECONTEXT *ctx);
 
-i32 DecodeUncompressedBlock(DEFLATECONTEXT *ctx);
 
 enum {
     BLOCK_DYNAMIC_HUFFMAN = 0,

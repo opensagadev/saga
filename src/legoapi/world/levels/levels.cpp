@@ -260,6 +260,19 @@
 #include "legoapi/menus/core/gamemessage.h"
 #include <cfloat>
 #include "legoapi/characters/motion/gameanim_types.h"
+#include "MechInputTouch/MechInputTouchGestureBasedController.h"
+#include "editor/edlevelall.h"
+#include "gameapi/ai/aisys/gameaiscript.h"
+#include "legoapi/actions/movement/climbing.h"
+#include "legoapi/actions/movement/pushblocks.h"
+#include "legoapi/characters/core/characters.h"
+#include "legoapi/gizmos/door/gizspinner.h"
+#include "legoapi/items/fx/ripples.h"
+#include "legoapi/lib/text.h"
+#include "legoapi/menus/core/hint.h"
+#include "nu2api/nu3d/android/nubridge_android.h"
+#include "nu2api/nu3d/nu3d_includes.h"
+#include "nu2api/nucore/android/stubs_android.h"
 
 extern "C" char ConfigBuffer[0x10000];
 
@@ -275,8 +288,6 @@ extern "C" {
 static i32 Pictures_NumLevels;
 
 
-extern void NewGame(void);
-extern i16 id_DEFAULTCHARACTER[2];
 
 static NUVEC titlesstartpos;
 
@@ -306,7 +317,6 @@ void Credits_Load(WORLDINFO_s *, variptr_u *, variptr_u *);
 
 
 
-void GameAnimSys_ClearProgress(i32 idx);
 
 
 
@@ -346,12 +356,8 @@ extern u32 BackUpPlayers[2162];
 
 // --- World-module helpers (kept with the WorldInfo API) ---
 
-void SetAreaPickupGravity(i32 area, i32 level);
-void StoreSceneProgress(NUGSCN *gscn, SCENEPROGRESS_s *progress, i32 param);
 
 
-void SaveSceneObjectAnimTFactors(NUGSCN *gscn);
-void CalculateWorldSize(WORLDINFO *world);
 
 extern WORLDINFO WorldInfo[2];
 WORLDINFO *WORLD = &WorldInfo[0];
@@ -388,7 +394,6 @@ static inline __attribute__((always_inline)) bool World_FreePlayImperial(i32 mod
            model == id_GRANDMOFFTARKIN || model == id_IMPERIALOFFICER || model == id_IMPERIALSHUTTLEPILOT;
 }
 
-void MakeFreePlayModelList(i32 model1, i32 model2, i32 area, i32 level, i32 param5);
 
 // ==== src/legoapi/world/area.cpp: declarations ====
 
@@ -404,71 +409,13 @@ extern "C" i16 id_ANAKINJEDISCARRED;
 extern "C" i16 id_HANINCARBONITE;
 extern APICHARACTERMODELLIST_s FreePlayModelList[52];
 extern APICHARACTERMODELLIST_s Hub_ModelList[6];
-extern AREADATA *ANEWHOPE_ADATA;
-extern AREADATA *NEGOTIATIONS_ADATA;
-extern AREADATA *GUNGAN_ADATA;
-extern AREADATA *RESCUE_ADATA;
-extern AREADATA *RETAKE_ADATA;
-extern AREADATA *MAUL_ADATA;
-extern AREADATA *FACTORY_ADATA;
-extern AREADATA *BATTLEOVERCORUSCANT_ADATA;
-extern AREADATA *CRUISER_ADATA;
-extern AREADATA *GRIEVOUS_ADATA;
-extern AREADATA *KASHYYYK_ADATA;
-extern AREADATA *TEMPLE_ADATA;
-extern AREADATA *BLOCKADERUNNER_ADATA;
-extern AREADATA *TATOOINE_ADATA;
-extern AREADATA *MOSEISLEY_ADATA;
-extern AREADATA *DEATHSTARRESCUE_ADATA;
-extern AREADATA *DEATHSTARESCAPE_ADATA;
-extern AREADATA *DEATHSTARBATTLE_ADATA;
-extern AREADATA *HOTHESCAPE_ADATA;
-extern AREADATA *ASTEROIDCHASE_ADATA;
-extern AREADATA *DAGOBAH_ADATA;
-extern AREADATA *CLOUDCITYTRAP_ADATA;
-extern AREADATA *CLOUDCITYESCAPE_ADATA;
-extern AREADATA *JABBASPALACE_ADATA;
-extern AREADATA *SARLACCPIT_ADATA;
-extern AREADATA *SPEEDERCHASE_ADATA;
-extern AREADATA *ENDORBATTLE_ADATA;
-extern AREADATA *DEATHSTARBATTLE2_ADATA;
-extern AREADATA *EMPERORFIGHT_ADATA;
 extern AREADATA *E1CHARACTER_ADATA;
 extern AREADATA *E2CHARACTER_ADATA;
 extern AREADATA *E3CHARACTER_ADATA;
 extern AREADATA *E4CHARACTER_ADATA;
 extern AREADATA *E5CHARACTER_ADATA;
 extern AREADATA *E6CHARACTER_ADATA;
-extern AREADATA *E1VEHICLE_ADATA;
-extern AREADATA *E2VEHICLE_ADATA;
-extern AREADATA *E3VEHICLE_ADATA;
-extern AREADATA *E4VEHICLE_ADATA;
-extern AREADATA *E5VEHICLE_ADATA;
-extern AREADATA *E6VEHICLE_ADATA;
-extern AREADATA *ANAKINSFLIGHT_ADATA;
-extern AREADATA *LEGOCITY_ADATA;
-extern AREADATA *NEWTOWN_ADATA;
-extern AREADATA *JIMTEST_ADATA;
-extern i32 CHARPAK;
-extern i32 CharacterDataLoad;
-extern i32 loadareadata_loadlevel;
-extern i32 AreaDataLoaded;
-extern i32 textcrawlactive;
-extern i32 readpads_always;
-extern f32 backdrop_top_r;
-extern f32 backdrop_top_g;
-extern f32 backdrop_top_b;
-extern f32 backdrop_bot_r;
-extern f32 backdrop_bot_g;
-extern f32 backdrop_bot_b;
 
-extern void MakeFreePlayModelList(i32, i32, i32, i32, i32);
-extern void Customiser_SetAnimsToLoad(CUSTOMISER *, i32);
-extern void GameLoadCharacterModels(APICHARACTERMODELLIST_s *, i32, variptr_u *, variptr_u *, i32, i32);
-extern void CharScenes_AreaLoad(APICHARACTERMODELLIST_s *, variptr_u *, variptr_u);
-extern void Area_Configure(i32, i32, EXTRAMODEL *, i16 *);
-extern void SetBackgroundMusic(i32);
-extern void BackDrop_UpdateColours(i32);
 extern i16 tTOUCHTOSTART;
 extern "C" {
 }
@@ -587,7 +534,6 @@ struct SHOPINPUT;
 extern i16 tALLMINIKITSBUILT;
 
 
-void SetEffectVisibility(char *, i32);
 
 
 // ==== src/legoapi/world/levelstreaming.cpp: declarations ====
@@ -613,7 +559,6 @@ void SetEffectVisibility(char *, i32);
 
 
 
-void Area_Configure(i32 area, i32 param, EXTRAMODEL *models, i16 *s);
 
 
 
@@ -634,24 +579,10 @@ extern i32 LevFlag[4]; // shared per-level 16-byte state scratch
 // otherwise C-linkage engine subsystems.  Keep these declarations local: the
 // individual subsystem TUs intentionally expose their original plain names.
 extern "C" {
-    void DebrisSetup(VARIPTR *, VARIPTR, char *, i32, i32, i32);
-    void DebrisRegisterCutoffCameraVec(void *);
-    void edgraSetup(VARIPTR *, VARIPTR, i32, i32, i32);
-    void InitParts(i32, VARIPTR *, VARIPTR *);
-    void ParticleReset(void);
-    i32 edppLoadPage(char *, i32, usize);
-    void NuRndrShadowInit(u8 *);
-    void NuTexAnimProgSysInit(void);
-    void terrainpickupinit(char *, void **);
 
-    extern i32 DEBPAGE_GENERAL;
-    extern i32 DEBPAGE_CHARACTER;
-    extern void *perm_debrissys;
 }
 
 struct AISYS_s;
-void InitTexAnimScripts(char **names);
-void BackDrop_Init(char *path, VARIPTR *buf, VARIPTR *buf_end);
 
 i32 PARTPAGE_GENERAL = -1;
 
@@ -668,12 +599,7 @@ char *TexAnimList_LSW[32] = {
     (char *)"sebulbaspod",    (char *)"sidious",       (char *)"crowd",       NULL,
 };
 
-void InitRipples(ripple_set_s **, VARIPTR *, VARIPTR *, i32);
-void CreateFadeMaterials();
-void CreateUsefulMaterials();
 
-void CharConfig_ConfigureAll(i32 permanent, nufpcomjmp_s *game_keywords);
-void ExtraCharacterFixUpAfterConfig();
 
 
 extern "C" {
@@ -707,7 +633,6 @@ extern "C" {
 
 
 
-void CharScenes_AreaLoad(APICHARACTERMODELLIST_s *list, variptr_u *buf, variptr_u buf_end);
 
 
 
@@ -721,10 +646,7 @@ void CharScenes_AreaLoad(APICHARACTERMODELLIST_s *list, variptr_u *buf, variptr_
 
 NUMTL *lightningmat;
 extern "C" NUMTL *DebMat[10];
-extern "C" void NuWaterInit(void);
-extern "C" void NuBridgeInit(void);
 
-void LoadPerm1();
 
 // ==== src/legogame/game.cpp: declarations ====
 // Original translation unit reconstructed from the reference address map.
@@ -739,14 +661,7 @@ extern "C" {
 
 
 
-extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
-void GizSpinners_InitTerrain(WORLDINFO_s *world);
 void SecurityDoors_InitTerrain(WORLDINFO_s *world);
-void GizPanel_InitTerrain(WORLDINFO_s *world);
-void GizmoBlowupsFinalSetup(WORLDINFO_s *world);
-void InitClimbObjectSys(WORLDINFO_s *world);
-void GizmoPushBlockInitAndReset(WORLDINFO_s *world, void *progress);
-extern NUFPCOMJMP LevelConfigKeywords_AfterLoad;
 
 
 
@@ -796,7 +711,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 
 
-extern void BackDrop_UpdateColours(i32 instant);
 struct CUTSCENEPLAYERCLIP;
 
 
@@ -862,8 +776,6 @@ extern "C" i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER;
 
 
 
-void GameLoadCharacterModels(APICHARACTERMODELLIST_s *list, i32 append, VARIPTR *buf, VARIPTR *buf_end, i32 area_models,
-                             i32 area);
 
 
 
@@ -934,7 +846,6 @@ struct VuVec;
 
 
 extern "C" {
-    void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 }
 
 
@@ -1050,11 +961,9 @@ extern "C" i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
 
 
 
-void BackDrop_Init(char *path, variptr_u *buf, variptr_u *buf_end);
 
 
 
-void BackDrop_UpdateColours(i32 instant);
 
 
 // ==== src/legoapi/gizmo/gizmos/gizmos_gizmopickups.cpp: declarations ====
@@ -1063,17 +972,13 @@ void BackDrop_UpdateColours(i32 instant);
 
 // ==== src/legoapi/menus/core/gamehint.cpp: declarations ====
 
-extern f32 ICONXPOS_TOUCHYFEELY;
-extern f32 ICONYPOS_TOUCHYFEELY;
 
-void MechHintUIButton_OnClick_Callback(MechTouchUIElement &, TouchHolder &);
 
 #include "legoapi/menus/core/gamehint_types.h"
 DECOMP_ASSERT(sizeof(MechHintUIButton) == 0xa8, "MechHintUIButton size");
 DECOMP_ASSERT(offsetof(MechHintUIButton, pending_hint) == 0x7c, "Pending touch hint offset");
 DECOMP_ASSERT(offsetof(MechHintUIButton, display_elapsed) == 0x80, "Touch hint display timer offset");
 
-void MechHintUIButton_OnClick_Callback(MechTouchUIElement &element, TouchHolder &);
 
 
 
@@ -1423,7 +1328,6 @@ extern "C" {
 
 
 
-extern "C" void *perm_debrissys;
 
 
 
@@ -1839,16 +1743,10 @@ extern "C" {
 
 
 
-i32 Action_ReleaseLocator(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
-                          i32 first_time, float);
 
 struct GIZSPINNER_s;
 
-i32 Action_GetLocatorFromSet(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,
-                             i32 param_count, i32 first_time, float);
 
-i32 Action_AssignLocatorInSet(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
-                              i32 first_time, float);
 
 namespace {
 #include "legoapi/gizmo/gizmos/gizmos_gizactions_types.h"
@@ -1860,7 +1758,6 @@ namespace {
 
 
 
-bool IsDownSwipe(NuVec2 const &start, NuVec2 const &end);
 
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e4) == 0x7e4, "Quick shoot record offset");
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e8) == 0x7e8, "Quick shoot record count offset");
@@ -1898,7 +1795,6 @@ extern "C" {
 // Graphics loading flags
 
 extern "C" {
-    void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 }
 
 // --- NuGScn graphics-data reader ---
@@ -2016,7 +1912,6 @@ extern "C" {
 }
 
 
-extern "C" i32 edppLoadPage(char *path, i32 flag, usize scene);
 // NuFileExists @nufile (nucore_plain.cpp).
 
 
@@ -2030,7 +1925,6 @@ extern "C" {
 extern "C" {
 
 
-void DebrisRegisterCutoffCameraVec(void *position);
 
 
 
@@ -2243,7 +2137,6 @@ extern "C" {
 
 
 
-void SetEffectVisibility(char *name, i32 visible);
 
 
 
@@ -2252,7 +2145,6 @@ void SetEffectVisibility(char *name, i32 visible);
 
 
 extern "C" {
-    extern i32 edbits_part_level_page;
 }
 
 extern "C" {
@@ -2290,7 +2182,6 @@ extern "C" {
 extern "C" {
 
 
-void DebrisRegisterCutoffCameraVec(void *position);
 
 
 
@@ -2323,7 +2214,6 @@ struct rtlset;
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -2363,7 +2253,6 @@ extern "C" {
 
     // The editor loader clears these page IDs with aligned vector stores.
 
-void InitParts(i32 count, VARIPTR *buffer, VARIPTR *);
 
 
 
@@ -2372,7 +2261,6 @@ void InitParts(i32 count, VARIPTR *buffer, VARIPTR *);
 
 
 
-void ParticleReset(void);
 
 
 
@@ -2557,7 +2445,6 @@ static __attribute__((used)) void edanimcbLocalSoundMenu(eduimenu_s *parent, edu
 // ---- begin src/gameapi/edtools/edptlall.cpp ----
 
 extern "C" {
-    i32 edppLoadPage(char *path, i32 flag, usize scene);
 }
 
 // The original particle editor's private callbacks and menu state share this TU.
@@ -2638,8 +2525,6 @@ extern "C" {
 
 
 extern "C" {
-    extern i32 DEBPAGE_GENERAL;
-    extern i32 DEBPAGE_CHARACTER;
 }
 
 
@@ -2655,11 +2540,9 @@ extern "C" {
 
 
 
-void edgraSetup(VARIPTR *buffer, VARIPTR end, i32 clumps, i32 individual_clumps, i32 units_per_clump);
     // Shared editor font; edmainInit receives and stores the font handle.
 
 
-i32 edppLoadPage(char *path, i32 flag, usize scene);
 
     // The editor UI callbacks share this translation unit with their cursor,
     // menu, and interaction state in the original binary.
@@ -2749,15 +2632,12 @@ static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ..
 #endif
 
 extern EdInputContext * Input;
-extern "C" void PlaySfxById(i32, nuvec_s *);
 
-void SerialiseString(EdStream &, void *, i32);
 
 extern f32 Scale;
 DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
 
 extern "C" {
-    extern i32 edpp_readout;
 }
 
 
@@ -2870,7 +2750,6 @@ inline void EdBitControl::operator delete(void *memory) {
 // ---- begin src/gameapi/edtools/edptlall.cpp ----
 
 extern "C" {
-    i32 edppLoadPage(char *path, i32 flag, usize scene);
 }
 
 // The original particle editor's private callbacks and menu state share this TU.
@@ -2922,8 +2801,6 @@ extern "C" {
 }
 
 extern "C" {
-    extern i32 DEBPAGE_GENERAL;
-    extern i32 DEBPAGE_CHARACTER;
 }
 
 extern "C" {
@@ -2936,11 +2813,9 @@ extern "C" {
 
 
 
-void edgraSetup(VARIPTR *buffer, VARIPTR end, i32 clumps, i32 individual_clumps, i32 units_per_clump);
     // Shared editor font; edmainInit receives and stores the font handle.
 
 
-i32 edppLoadPage(char *path, i32 flag, usize scene);
 
     // The editor UI callbacks share this translation unit with their cursor,
     // menu, and interaction state in the original binary.
@@ -3021,7 +2896,6 @@ static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u
 
 extern f32 HUB_EPISODETITLEY;
 extern i16 tSELECT, tSELECTED, tSELECTING;
-void NewGame(void);
 
 
 // Retail clears these "fast repeat" latches but never sets them.
@@ -3231,7 +3105,6 @@ extern "C" {
 
 
 
-void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
     DECOMP_ASSERT(sizeof(NuInstanceTreeNode) == 0x0c, "instance tree node stride");
     DECOMP_ASSERT(sizeof(NuInstanceTreeBounds) == 0x20, "instance tree bounds stride");
     DECOMP_ASSERT(sizeof(NuInstanceTree_s) == 0x28, "instance tree size");
@@ -3323,7 +3196,6 @@ DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 
 // ==== src/legoapi/characters/motion/camera.cpp: declarations ====
 
-extern AREADATA_s *BATTLEOVERCORUSCANT_ADATA;
 
 // Original data symbol testmovef is float0.005 at 0x617cb0.
 
@@ -3397,7 +3269,6 @@ DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context fl
 
 extern void (*FS_Callback)(char *, char *);
 
-void SerialiseString(EdStream &stream, void *data, i32 count);
 
 // Retail keeps the whole body of RenderFileSel3 as the split-out .part clone;
 // the exported function only tests FS_Active.
@@ -3412,7 +3283,6 @@ extern "C" void StartFileSel(char *title, char *path, char *filter, char *filter
                              void (*callback)(char *, char *));
 
 
-i32 LoadState(i32, variptr_u *, variptr_u *, variptr_u *, variptr_u *, variptr_u *, variptr_u *);
 
 extern "C" {
 
@@ -3430,7 +3300,6 @@ extern "C" {
 // Graphics loading flags
 
 extern "C" {
-    void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 }
 
 // --- NuGScn graphics-data reader ---
@@ -3864,7 +3733,6 @@ extern "C" {
 
 
 
-void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
     DECOMP_ASSERT(sizeof(NuInstanceTreeNode) == 0x0c, "instance tree node stride");
     DECOMP_ASSERT(sizeof(NuInstanceTreeBounds) == 0x20, "instance tree bounds stride");
     DECOMP_ASSERT(sizeof(NuInstanceTree_s) == 0x28, "instance tree size");
@@ -3918,7 +3786,6 @@ extern "C" {
 extern "C" {
 
 
-void InitParts(i32 count, VARIPTR *buffer, VARIPTR *);
 
 }
 
@@ -3956,31 +3823,16 @@ extern "C" {
 // otherwise C-linkage engine subsystems.  Keep these declarations local: the
 // individual subsystem TUs intentionally expose their original plain names.
 extern "C" {
-    void DebrisSetup(VARIPTR *, VARIPTR, char *, i32, i32, i32);
-    void DebrisRegisterCutoffCameraVec(void *);
-    void edgraSetup(VARIPTR *, VARIPTR, i32, i32, i32);
-    void InitParts(i32, VARIPTR *, VARIPTR *);
-    void ParticleReset(void);
-    i32 edppLoadPage(char *, i32, usize);
-    void NuRndrShadowInit(u8 *);
-    void NuTexAnimProgSysInit(void);
-    void terrainpickupinit(char *, void **);
 
-    extern i32 DEBPAGE_GENERAL;
-    extern i32 DEBPAGE_CHARACTER;
-    extern void *perm_debrissys;
 }
 
-extern i32 PARTPAGE_GENERAL;
 
 // The original table at 0x006281a0.  These are the material animation
 // scripts made available before the permanent things scene is loaded.
-extern char * TexAnimList_LSW[32];
 
 extern "C" {
 }
 
-extern APICHARACTERMODELLIST_s PermModelList[1];
 
 
 extern "C" {
@@ -3993,7 +3845,6 @@ extern "C" {
 #define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone))
 #endif
 
-extern NUMTL * lightningmat;
 extern NUMTL *DebMat[10];
 
 // ==== src/legoapi/core/startup/game.cpp: declarations ====
@@ -4006,7 +3857,6 @@ namespace {
 
 } // namespace
 
-void NewGame();
 
 // ==== src/legoapi/world/missions.cpp: declarations ====
 
@@ -4069,7 +3919,6 @@ extern "C" {
 // Graphics loading flags
 
 extern "C" {
-    void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 }
 
 // --- NuGScn graphics-data reader ---
@@ -4268,7 +4117,6 @@ void TextRegisterPulseTimerFn(f32 (*fn)(f32));
 
 
 extern "C" {
-    extern i32 edbits_part_level_page;
 }
 
 extern "C" {
@@ -4306,7 +4154,6 @@ extern "C" {
 extern "C" {
 
 
-void DebrisRegisterCutoffCameraVec(void *position);
 
 
 
@@ -4336,7 +4183,6 @@ extern "C++" TERRAIN_TRACK_SLOT *AllocTerrId();
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -4367,7 +4213,6 @@ extern "C" {
 
     // The editor loader clears these page IDs with aligned vector stores.
 
-void InitParts(i32 count, VARIPTR *buffer, VARIPTR *);
 
 
 
@@ -4376,7 +4221,6 @@ void InitParts(i32 count, VARIPTR *buffer, VARIPTR *);
 
 
 
-void ParticleReset(void);
 
 
 
@@ -4426,7 +4270,6 @@ extern "C" {
 // ---- begin src/gameapi/edtools/edptlall.cpp ----
 
 extern "C" {
-    i32 edppLoadPage(char *path, i32 flag, usize scene);
 }
 
 // The original particle editor's private callbacks and menu state share this TU.
@@ -4478,8 +4321,6 @@ extern "C" {
 }
 
 extern "C" {
-    extern i32 DEBPAGE_GENERAL;
-    extern i32 DEBPAGE_CHARACTER;
 }
 
 extern "C" {
@@ -4492,11 +4333,9 @@ extern "C" {
 
 
 
-void edgraSetup(VARIPTR *buffer, VARIPTR end, i32 clumps, i32 individual_clumps, i32 units_per_clump);
     // Shared editor font; edmainInit receives and stores the font handle.
 
 
-i32 edppLoadPage(char *path, i32 flag, usize scene);
 
     // The editor UI callbacks share this translation unit with their cursor,
     // menu, and interaction state in the original binary.
@@ -4582,7 +4421,6 @@ static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u
 #endif
 
 extern "C" {
-    extern i32 edpp_readout;
 }
 
 extern "C" {
@@ -4616,7 +4454,6 @@ extern "C" {
 // ---- begin src/gameapi/edtools/edptlall.cpp ----
 
 extern "C" {
-    i32 edppLoadPage(char *path, i32 flag, usize scene);
 }
 
 // The original particle editor's private callbacks and menu state share this TU.
@@ -4668,8 +4505,6 @@ extern "C" {
 }
 
 extern "C" {
-    extern i32 DEBPAGE_GENERAL;
-    extern i32 DEBPAGE_CHARACTER;
 }
 
 extern "C" {
@@ -4682,11 +4517,9 @@ extern "C" {
 
 
 
-void edgraSetup(VARIPTR *buffer, VARIPTR end, i32 clumps, i32 individual_clumps, i32 units_per_clump);
     // Shared editor font; edmainInit receives and stores the font handle.
 
 
-i32 edppLoadPage(char *path, i32 flag, usize scene);
 
     // The editor UI callbacks share this translation unit with their cursor,
     // menu, and interaction state in the original binary.
@@ -4955,7 +4788,6 @@ extern "C" {
 
 
 
-void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
     DECOMP_ASSERT(sizeof(NuInstanceTreeNode) == 0x0c, "instance tree node stride");
     DECOMP_ASSERT(sizeof(NuInstanceTreeBounds) == 0x20, "instance tree bounds stride");
     DECOMP_ASSERT(sizeof(NuInstanceTree_s) == 0x28, "instance tree size");
@@ -5047,7 +4879,6 @@ extern "C" {
 // Graphics loading flags
 
 extern "C" {
-    void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 }
 
 // --- NuGScn graphics-data reader ---
@@ -5481,7 +5312,6 @@ extern "C" {
 
 
 
-void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
     DECOMP_ASSERT(sizeof(NuInstanceTreeNode) == 0x0c, "instance tree node stride");
     DECOMP_ASSERT(sizeof(NuInstanceTreeBounds) == 0x20, "instance tree bounds stride");
     DECOMP_ASSERT(sizeof(NuInstanceTree_s) == 0x28, "instance tree size");
@@ -5535,7 +5365,6 @@ extern "C" {
 extern "C" {
 
 
-void InitParts(i32 count, VARIPTR *buffer, VARIPTR *);
 
 }
 
@@ -5662,7 +5491,6 @@ extern "C" {
 
 
 
-void LevelComplete_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32);
 
 
 
@@ -5688,7 +5516,6 @@ extern "C" {
 // Retail keeps the active-stage drawing as the split-out .part clone of
 // LevelComplete_LSW_Draw; the inline head only tests `active`.
 
-void LevelComplete_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active);
 
 // ==== src/legoapi/menus/screens/shop.cpp: declarations ====
 
@@ -5732,7 +5559,6 @@ extern "C" {
 
 
 extern "C" {
-    void PlaySfxById(i32 sfx_id, nuvec_s *position);
 }
 
 // Retail only keeps the split-out body of the IPA-SRA clone (the unused
@@ -6018,7 +5844,6 @@ extern "C" {
 
 
 
-void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
     DECOMP_ASSERT(sizeof(NuInstanceTreeNode) == 0x0c, "instance tree node stride");
     DECOMP_ASSERT(sizeof(NuInstanceTreeBounds) == 0x20, "instance tree bounds stride");
     DECOMP_ASSERT(sizeof(NuInstanceTree_s) == 0x28, "instance tree size");
@@ -6249,7 +6074,6 @@ extern "C" {
 }
 
 extern "C" {
-    void PlaySfxById(i32 sfx_id, nuvec_s *position);
 }
 
 // Retail only keeps the split-out body of the IPA-SRA clone (the unused

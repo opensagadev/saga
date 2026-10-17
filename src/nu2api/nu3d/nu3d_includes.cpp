@@ -354,6 +354,18 @@
 #include "nu2api/nucore/nulst.h"
 #include "nu2api/nufile/nu2api_nufile_types.h"
 #include "nu2api/nu3d/numtl_types.h"
+#include "gameapi/ai/aisys/gameaiscript.h"
+#include "legoapi/characters/motion/camera.h"
+#include "legoapi/characters/motion/move.h"
+#include "legoapi/menus/core/hint.h"
+#include "legoapi/world/levels/episodeI.h"
+#include "legoapi/world/levels/episodeII.h"
+#include "legoapi/world/levels/episodeV.h"
+#include "nu2api/nu3d/android/nudlist_android.h"
+#include "nu2api/nu3d/nu3d_includes.h"
+#include "nu2api/nucore/android/stubs_android.h"
+#include "nu2api/nucore/nucore_includes.h"
+#include "nu2api/numath/numath_includes.h"
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Post-effect globals
@@ -434,7 +446,6 @@ static inline void FilterEnd(NuPostFilterGen *filter) {
 
 
 
-extern "C" i32 motionBlurAccumActiveThisFrame;
 
 // ---- end src/nu2api/nu3d/android/nupostfilter.cpp ----
 
@@ -506,8 +517,6 @@ NuCriticalSection criticalSection("Texture");
 // ---- begin src/nu2api/nu3d/nudynamiclight.cpp ----
 
 
-extern "C" void DisplaySceneRndrSpecials(NUDLDLISTSCENE *, i32, void *);
-extern const f32 nuvec4_one[4];
 
 static inline void PostBlurSetVertexParam(nushaderprogram_s *, u32, const f32 *, i32);
 
@@ -842,11 +851,9 @@ static NUFPCOMJMP nutexanimcomtab[] = {
 };
 
 
-void NuTexAnimResetList(nutexanim_s *anim);
 
 
 NURAND texanim_rand;
-extern "C" void NuSevereWarning(const char *, ...);
 
 static bool TextureCondition(i32 condition, i32 texture, i32 value) {
     switch (condition) {
@@ -875,7 +882,6 @@ static bool TextureCondition(i32 condition, i32 texture, i32 value) {
 
 
 
-extern "C" void NuTexAnimRemoveList(void *anim);
 
 
 // ==== src/nu2api/nu3d/nuportal.cpp: all remaining content ====
@@ -892,8 +898,6 @@ static i16 camera_roomid;
 static NUFRUSTRUM **frustra;
 static i32 *nfrustra;
 static i32 draw_portals;
-extern "C" void NuCameraUnlock(void);
-extern "C" void NuCameraRelock(void);
 
 NUPLANE cam_plane;
 i16 rooms_visited[18];
@@ -1006,7 +1010,6 @@ static NUPLANE near_clip_plane;
 
 
 
-extern i32 numtl_renderplane;
 
 // Constants
 
@@ -1038,9 +1041,6 @@ extern "C" {
     i32 do_capture;
     i32 capture_fh;
     i32 nudlist_debug_level = 2;
-    void NuHtmlBegin(void *file);
-    void NuHtmlBanner(void);
-    void NuHtmlEnd(void);
 }
 
 // The original retains reads of this local BSS control despite having no
@@ -1149,8 +1149,6 @@ template <typename T> static T *CloneSceneAllocate(VARIPTR *buffer, usize count,
 
 // Dynamic material display lists
 
-nudisplaylistitem_s *NuDisplayListCreateMtlDlist(nudisplaylistitem_s * /*item*/, NUMTL *mtl, VARIPTR *buff,
-                                                 VARIPTR /*buff_end*/);
 
 // Dynamic material link / unlink
 
@@ -1176,7 +1174,6 @@ static inline i32 DynMtlFind(const NUMTL *mtl) {
 
 
 
-extern "C" void *DisplayListCreateFaceonTransformPS(VARIPTR *, NUMTX *, NUMTL *, void *);
 
 
 
@@ -1251,12 +1248,10 @@ extern "C" {
     DECOMP_ASSERT(sizeof(NuCameraReflect) == 0x84, "camera reflection state size");
     DECOMP_ASSERT(__builtin_offsetof(NuCameraReflect, mtx) == 4, "camera reflection matrix offset");
 
-void NuCameraLock(i32 lock);
     extern nurenderscene_s currentScene;
     i32 NuRndrDoingScreenGrab;
     i32 motionBlurAccumActiveThisFrame;
 
-void NuCameraRelock(void);
     i32 PS2_SREZ_W = 4096;
     i32 PS2_SREZ_H = 4096;
     static i32 current_clip_scissor_to_viewport;
@@ -1280,21 +1275,17 @@ void NuCameraRelock(void);
         projection->m22 = (far_clip + near_clip) / (far_clip - near_clip);
         projection->m32 = (far_clip * -2.0f * near_clip) / (far_clip - near_clip);
     }
-void NuCameraUnlock(void);
 
     // ---------------------------------------------------------------------------
     // Display list — faithful helpers + pending stubs
     // ---------------------------------------------------------------------------
 
 
-    void DisplayListCreateFxItemPS(void *item, i32 type);
-    void DisplayListDestroyFxItemPS(void *item);
 } // extern "C"
 
 // Local helpers matching original static display-list setters (t local symbols)
 
 extern "C" {
-    void *DisplayListCreateFaceonTransformPS(VARIPTR *buffer, NUMTX *transform, NUMTL *mtl, void *faceon);
 
     extern "C++" {
         // Original local helper cloned as DisplayListProcessSkin.isra.36 by GCC.
@@ -1319,10 +1310,7 @@ extern "C" {
                     "sPPvf.isra.34");
     }
 
-    i32 NuDynamicLightGetActiveRenderSetCount(NuDynamicLight *light);
-    NUDISPLAYLIST *NuDynamicLightGetDList(NuDynamicLight *light, i32 render_set, NUMTL *material);
 
-    void DisplayListSetFxItemParamPS(void *item, i32 parameter, f32 value, i32 mode);
 
     // ---------------------------------------------------------------------------
     // Scene / render-scene
@@ -1350,11 +1338,6 @@ extern "C" {
     // Animation / curves / data
     // ---------------------------------------------------------------------------
 
-void NuAnimBuffCreateScratch(nuanimbuff_s *buffer);
-void NuAnimBuffDestroyScratch(nuanimbuff_s *buffer);
-void NuAnimCurveDestroy(void *curve);
-void NuAnimData2CalcTime(nuanimdata2_s *anim, f32 frame, nuanimtime_s *time);
-void NuAnimDataCalcTime(void *animation, f32 frame, nuanimtime_s *time);
     extern "C++" void NuAnimDataChunkDestroy(nuanimdatachunk_s *chunk);
 
 
@@ -1413,17 +1396,11 @@ void NuAnimDataCalcTime(void *animation, f32 frame, nuanimtime_s *time);
         NuPrim2DAddXYZ(position->x, -position->y, position->z * 0.91f);
     }
 
-i32 NuSpecialDrawSmoothSkinDwa(void *special, NUMTX *skin_matrices, NUMTX *world_matrix,
-                                   DEFORMERWEIGHTSARRAY *blend_values);
 
     // ---------------------------------------------------------------------------
     // Light / wind / particles / debris
     // ---------------------------------------------------------------------------
 
-i32 NuDynamicLightGetActiveRenderSetCount(NuDynamicLight *light);
-NUDISPLAYLIST *NuDynamicLightGetDList(NuDynamicLight *light, i32 render_set, NUMTL *material);
-i32 NuDynamicLightTestShadowExtrusionExtent(NuDynamicLight *light, const NUVEC *center, const NUVEC *extent,
-                                                i32 render_set);
 
     // ---------------------------------------------------------------------------
     // Gobj / hierarchy / scene graph
@@ -1436,11 +1413,7 @@ i32 NuDynamicLightTestShadowExtrusionExtent(NuDynamicLight *light, const NUVEC *
         NuLegacyDwaChunk **chunks = *reinterpret_cast<NuLegacyDwaChunk ***>(static_cast<u8 *>(animation) + 0xc);
         return chunks[index];
     }
-    u32 NuWindRand(void);
 #undef NUGCUT_CURVE_VALUE
-    void NuTexAnimRemoveList(void *texture_anims);
-    void NuGHGPreRelocateFixupPS(NUGSCN *scene);
-    void NuGHGPostRelocateFixupPS(NUGSCN *scene, i32 delta);
 
     // ---------------------------------------------------------------------------
     // Input / pad / key / mouse
@@ -1461,10 +1434,7 @@ i32 NuDynamicLightTestShadowExtrusionExtent(NuDynamicLight *light, const NUVEC *
     i32 do_visibility = 1;
     i32 do_octree;
 
-    void NuVisiInstTree(void *, NUGSCN *);
-    void NuVisiOcclusion(NuVisibilityResult *);
 
-void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
     DECOMP_ASSERT(sizeof(NuInstanceTreeNode) == 0x0c, "instance tree node stride");
     DECOMP_ASSERT(sizeof(NuInstanceTreeBounds) == 0x20, "instance tree bounds stride");
     DECOMP_ASSERT(sizeof(NuInstanceTree_s) == 0x28, "instance tree size");
@@ -1478,9 +1448,7 @@ void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
         ClipInstTree(NuInstanceTree_s *tree,
                      i32 tree_index) __asm__("_ZL12ClipInstTreeP16NuInstanceTree_siP16nudisplayscene_sPc.isra.92");
     }
-void NuVisiInstTree(void *visibility_result, NUGSCN *scene);
 
-void NuVisiOcclusion(NuVisibilityResult *result);
     extern "C++" void OctreeRndr(u8 *visibility, nuoctreenode_s *root, i32 enabled);
     // ---------------------------------------------------------------------------
     // Viewport
@@ -1605,7 +1573,6 @@ extern "C" __attribute__((optimize("no-optimize-sibling-calls"))) i32 NuTimeBarC
 
 
 
-extern "C" void NuRndrRect2di(i32 x, i32 y, i32 width, i32 height, i32 colour, NUMTL *material);
 
 static f32 timebar_unsigned_float(u32 value) {
     // Preserve the retail conversion for values whose sign bit is set.
@@ -1630,12 +1597,8 @@ static f32 timebar_unsigned_float(u32 value) {
 
 // Game-thread scene-parameter queue (defined in nurndr_plain.cpp).
 extern "C" {
-    extern struct nurenderscene_s sceneParameters[16];
-    extern i32 sceneParametersCount;
 }
 
-extern "C" i32 NuDynamicLightIsEnabled(void *light);
-extern i32 global_frame_count;
 
 
 
@@ -1700,14 +1663,12 @@ i32 findrange(nugscn_s *scene, i32 first_joint);
 #endif
 
 // Retail keeps only the IPA-SRA clone of this function.
-i32 PodLevel(AREADATA_s *);
 
 // Multiplies the ordinary camera's per-frame position blend.  The original
 // keeps this as writable camera state (default 1.0), rather than folding it
 // into the socket seek rate.
 
 
-i32 PodLevel(AREADATA_s *area);
 
 // Retail splits the guard off as an inline head; the rest is this partial clone.
 
@@ -1716,7 +1677,6 @@ extern i32 LevFlag[4];
 
 // These pod tuning values are zero-initialized in the original image.
 
-extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 
 // Retail re-tests the three block animations at each use instead of caching a flag.
 #define HAS_BLOCK_ANIMS(animations)                                                                                    \
@@ -1737,7 +1697,6 @@ DECOMP_ASSERT(offsetof(AWKWARDSHAPESPHERE_s, radius) == 8, "Awkward shape sphere
 
 // ==== src/legoapi/world/levels/episodeV.cpp: declarations ====
 
-extern AILOCATOR_s * locator;
 
 DECOMP_ASSERT(sizeof(HOTHBATTLEE_NETPACKET_s) == 0x58, "Hoth panel packet size");
 DECOMP_ASSERT(offsetof(HOTHBATTLEE_NETPACKET_s, alpha) == 0x24, "Hoth panel packet alpha offset");
@@ -1761,7 +1720,6 @@ DECOMP_ASSERT(sizeof(ASTEROIDCNETPACKET_s) == 8, "asteroid C network packet size
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -1914,7 +1872,6 @@ DECOMP_ASSERT(sizeof(KAMINO_E_s) == 120, "Kamino E state ABI");
 // Kamino
 // ===========================================================================
 
-extern i32 last;
 
 // ===========================================================================
 // Geonosis — droid factory (Factory_B / Factory_G)
@@ -2313,14 +2270,8 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 // ==== src/legoapi/gizmo/gizmos/gizmos_gizactions.cpp: declarations ====
 
-i32 Action_ReleaseLocator(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
-                          i32 first_time, float);
 
-i32 Action_GetLocatorFromSet(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,
-                             i32 param_count, i32 first_time, float);
 
-i32 Action_AssignLocatorInSet(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
-                              i32 first_time, float);
 
 namespace {
 #include "legoapi/gizmo/gizmos/gizmos_gizactions_types.h"
@@ -2661,8 +2612,6 @@ struct WORLDINFO_s;
 
 // ==== src/legoapi/characters/motion/camera.cpp: declarations ====
 
-extern VIEWCAM_s ViewCam;
-extern f32 testmovef;
 
 // ==== src/legoapi/render/core/render.cpp: declarations ====
 
@@ -2765,7 +2714,6 @@ extern "C" {
 
 }
 
-void LoadPerm1();
 
 // ==== src/legoapi/menus/screens/gamemenuall.cpp: declarations ====
 
@@ -2870,7 +2818,6 @@ extern "C" {
 
 extern "C" {
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -3168,7 +3115,6 @@ static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ..
 
 
 extern EdInputContext * Input;
-extern "C" void PlaySfxById(i32, nuvec_s *);
 
 DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
 
@@ -3673,7 +3619,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 extern "C" {
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -4072,7 +4017,6 @@ inline void SplinePointBlock::operator delete(void *memory) {
 
 // ==== src/legoapi/characters/motion/gameanim.cpp: declarations ====
 
-void SetPodMergeAnims(ANIMPACKET_s *packet, i32 index);
 
 // ==== src/nu2api/nu3d/nuspecial.cpp: declarations ====
 
@@ -4103,7 +4047,6 @@ extern WORLDINFO WorldInfo[2];
 
 // ==== src/legoapi/render/core/render.cpp: declarations ====
 
-extern "C" void NuRndrRect2di(i32, i32, i32, i32, i32, numtl_s *);
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
     do {                                                                                                               \
@@ -4171,9 +4114,7 @@ namespace {
 // ==== src/nu2api/nucore/nuanim.cpp: all remaining content ====
 
 
-void NuAnimBuffInit(i32 max_joints, variptr_u *buf, variptr_u buf_end);
 
-nuanimdatachunk_s *NuAnimDataChunkCreate(i32 curve_set_count);
 
 void NuAnimDataChunkDestroy(nuanimdatachunk_s *chunk);
 
@@ -4208,7 +4149,6 @@ extern "C" {
 
     NUJOINTPROCANIMFN JointProcAnimFn;
 
-i32 StateAnimEvaluate2(StateAnim *state, u8 *index, char *value, f32 frame);
 
 } // extern "C"
 
@@ -4310,17 +4250,13 @@ struct TouchHolder;
 
 // ==== src/legoapi/menus/core/gamehint.cpp: declarations ====
 
-extern f32 ICONXPOS_TOUCHYFEELY;
-extern f32 ICONYPOS_TOUCHYFEELY;
 
-void MechHintUIButton_OnClick_Callback(MechTouchUIElement &, TouchHolder &);
 
 #include "legoapi/menus/core/gamehint_types.h"
 DECOMP_ASSERT(sizeof(MechHintUIButton) == 0xa8, "MechHintUIButton size");
 DECOMP_ASSERT(offsetof(MechHintUIButton, pending_hint) == 0x7c, "Pending touch hint offset");
 DECOMP_ASSERT(offsetof(MechHintUIButton, display_elapsed) == 0x80, "Touch hint display timer offset");
 
-void MechHintUIButton_OnClick_Callback(MechTouchUIElement &element, TouchHolder &);
 
 // Static game message and hint helpers. Stubbed to satisfy the symbol baseline.
 
@@ -4475,7 +4411,6 @@ extern "C" {
 
 extern "C" {
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -5018,7 +4953,6 @@ extern "C" {
 
 extern "C" {
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -5483,12 +5417,10 @@ extern "C" {
 
 // ==== src/legoapi/menus/screens/gamestatus_lsw.cpp: declarations ====
 
-void LevelComplete_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32);
 
 // Retail keeps the active-stage drawing as the split-out .part clone of
 // LevelComplete_LSW_Draw; the inline head only tests `active`.
 
-void LevelComplete_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active);
 
 // ==== src/legoapi/menus/screens/shop.cpp: declarations ====
 
@@ -5499,7 +5431,6 @@ void LevelComplete_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 a
 // ==== src/legoapi/cutscenes/cutscenes.cpp: declarations ====
 
 extern "C" {
-    void PlaySfxById(i32 sfx_id, nuvec_s *position);
 }
 
 // Retail only keeps the split-out body of the IPA-SRA clone (the unused
@@ -5659,7 +5590,6 @@ extern "C" {
 // ==== src/legoapi/cutscenes/cutscenes.cpp: declarations ====
 
 extern "C" {
-    void PlaySfxById(i32 sfx_id, nuvec_s *position);
 }
 
 // ==== functions in original address order ====
@@ -5836,7 +5766,6 @@ extern "C" {
 
 extern "C" {
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -6390,7 +6319,6 @@ extern "C" {
 
 extern "C" {
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -6943,20 +6871,11 @@ static void DecodeAni4EulerPair(const ani3_animheader_s *anim, i32 key_stride, c
     }
 }
 
-extern "C" i32 ANI_SimpleAni3PlayerV4Joint_EulerQuat(ani3_animheader_s *anim, f32 frame, nuanimbuff_s *buffer,
-                                                     i32 joint_count, i32 first_joint);
-
-i32 ANI_SimpleAni3PlayerV4Joint_Blend_Quat3(ani3_animheader_s *anim, f32 frame, nuanimbuff_s *buffer, f32 blend,
-                                            i32 joint_count, i32 first_joint, NUVEC *root_translation);
 
 
-extern "C" i32 ANI_SimpleAni3PlayerV4Joint_Blend_EulerQuat(ani3_animheader_s *anim, f32 frame, nuanimbuff_s *buffer,
-                                                           f32 blend, i32 joint_count, i32 first_joint,
-                                                           NUVEC *root_translation);
 
 
-i32 ANI_SimpleAni3PlayerV4Joint_Blend_Quat3W(ani3_animheader_s *anim, f32 frame, nuanimbuff_s *buffer, f32 blend,
-                                             i32 joint_count, i32 first_joint, NUVEC *root_translation);
+
 
 
 // ==== src/nu2api/nu3d/nuspecial.cpp: all remaining content ====
@@ -7445,10 +7364,7 @@ DECOMP_ASSERT(sizeof(VUFNT_ANDROID) == 0x58, "VUFNT_ANDROID size");
 DECOMP_ASSERT(offsetof(VUFNT_ANDROID, x_scale) == 0x50, "VUFNT_ANDROID x scale offset");
 DECOMP_ASSERT(offsetof(VUFNT_ANDROID, y_scale) == 0x54, "VUFNT_ANDROID y scale offset");
 
-extern "C" void RemapAddr(void *new_base, void *old_base, void **address);
 
-f32 NuQFntPrintJustifiedRSW(RNDRSTREAM *stream, void *font, u16 *text, f32 x, f32 y, f32 z, f32 sx, f32 sy, f32 width,
-                            f32 line_spacing, u32 colour, NUMTX *mtx);
 
 
 
@@ -7465,8 +7381,6 @@ i32 NuQFntModeStackIndex;
 
 
 
-f32 NuQFntPrintJustifiedRSW(RNDRSTREAM *stream, void *font_ptr, u16 *text, f32 x, f32 y, f32 z, f32 sx, f32 sy,
-                            f32 width, f32 line_spacing, u32 colour, NUMTX *mtx);
 
 
 
@@ -7491,7 +7405,6 @@ f32 NuQFntPrintJustifiedRSW(RNDRSTREAM *stream, void *font_ptr, u16 *text, f32 x
 
 extern "C" {
 
-void RemapAddr(void *new_base, void *old_base, void **address);
 
 } // extern "C"
 
@@ -7502,7 +7415,6 @@ struct _vuv_s;
 
 
 extern "C" {
-    void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 }
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
@@ -7564,7 +7476,6 @@ extern "C" {
 // ==== src/legoapi/menus/core/text.cpp: declarations ====
 
 extern "C" {
-    void NuRndrRect2di(i32 x, i32 y, i32 width, i32 height, i32 colour, numtl_s *material);
 }
 extern "C" {
 }
@@ -7591,7 +7502,6 @@ extern "C" {
 
 extern "C" {
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -7635,7 +7545,6 @@ extern "C" {
 // ---- end src/gameapi/edtools/edptlall.cpp ----
 
 extern "C" {
-    void NuRndrRect2di(i32 x, i32 y, i32 width, i32 height, i32 colour, numtl_s *material);
 }
 
 extern "C" {
@@ -7716,7 +7625,6 @@ static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u
 // ==== src/gameapi/edtools/edtoolsall.cpp: declarations ====
 
 
-extern "C" void NuRndrRect2di(i32, i32, i32, i32, i32, NUMTL *);
 
 extern "C" {
 }
@@ -7744,7 +7652,6 @@ extern "C" {
 // ---- end src/gameapi/edtools/edptlall.cpp ----
 
 extern "C" {
-    void NuRndrRect2di(i32 x, i32 y, i32 width, i32 height, i32 colour, numtl_s *material);
 }
 
 extern "C" {
@@ -7921,7 +7828,6 @@ extern "C" {
 
 
 
-void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 
     // ---------------------------------------------------------------------------
     // Viewport
@@ -7957,7 +7863,6 @@ void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 // ==== src/legoapi/render/core/render.cpp: declarations ====
 
 extern "C" {
-    void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 }
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
@@ -8123,7 +8028,6 @@ extern "C" {
 
 
 
-void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 
     // ---------------------------------------------------------------------------
     // Viewport
@@ -8315,7 +8219,6 @@ extern "C" {
 
 extern "C" {
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -8856,7 +8759,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 extern "C" {
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -9253,7 +9155,6 @@ extern "C" {
 // ---------------------------------------------------------------------------
 
 extern "C" {
-    i32 NuDynamicLightIsEnabled(void *);
 }
 
 // ---------------------------------------------------------------------------
@@ -9282,7 +9183,6 @@ NUGSCNVIDEOMEMFN video_mem_to_gscene;
 
 class NuDynamicLight;
 extern "C" {
-    void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
     static void DisplaySceneSetClipResult(NUDLDLISTSCENE *scene, i32 clip_index, i32 clip_result) {
         for (i32 i = 0; i < scene->clip_objects[clip_index].nmaterials; ++i) {
             const u32 material = scene->clip_objects[clip_index].material_ids[i];
@@ -9358,8 +9258,6 @@ extern "C" {
     }
 
     extern nurenderscene_s currentScene;
-    i32 NuDynamicLightTestShadowExtrusionExtent(NuDynamicLight *light, const NUVEC *center, const NUVEC *extent,
-                                                i32 render_set);
 
     // Retail partially inlines the clipping test into NuDisplaySceneRndr and
     // keeps the body as its stack-argument .part clone.
@@ -9397,9 +9295,7 @@ f32 circle_scale_radius = 0.5f;
 
 static i32 dump_state = -1;
 
-extern "C" i32 NuRndrLineStrip2d(NuLineVertex2D *vertices, NUMTL *material, i32 count);
 
-extern "C" void NuRndrRect2di(i32 x, i32 y, i32 w, i32 h, i32 colour, numtl_s *mtl);
 extern "C" {
     i32 NuRndrStopUpdate;
     NUVEC NuRndrDebBase;
@@ -9416,7 +9312,6 @@ f32 global_windspeed = 1.0f;
 f32 global_windscale = 1.0f;
 
 
-extern "C" void NuRndrSphereMtx(NUMTX *matrix, i32 colour, i32 segments, NUMTL *material);
 
 i32 global_GobjWasDrawnUnreflected;
 
@@ -9424,7 +9319,6 @@ i32 global_GobjWasDrawnUnreflected;
 
 // ==== src/nu2api/nu3d/nurndr.cpp: all remaining content ====
 
-extern "C" u32 NuWindRand(void);
 
 struct nuvec4_s;
 
@@ -9546,13 +9440,9 @@ extern "C" {
     char unknown[8] = "unknown";
 }
 
-void NuHtmlFlush(i32 force);
 
-extern "C" void NuHtmlBegin(void *file);
 
-extern "C" void NuHtmlBanner(void);
 
-extern "C" void NuHtmlEnd(void);
 
 extern "C" {
 }
@@ -9621,7 +9511,6 @@ namespace {
 } // namespace
 
 
-extern "C" void NuTexAnimRemoveList(void *texture_anims);
 
 
 
@@ -9643,7 +9532,6 @@ extern "C" {
     // These are the original registry globals.  `effecttypes` is the
     // contiguous record arena and `debtab` is the separately allocated table
     // of pointers into it.  Slot zero is reserved by the loader.
-extern debinftype * effecttypes;
 
     // InitGameDebris @0x3ca2d0. Carves a typed debris system and its entries
     // from the world's particle bump buffer. Pointer-sized fields and sizeof
@@ -9658,7 +9546,6 @@ extern debinftype * effecttypes;
 // ---- begin src/gameapi/edtools/edptlall.cpp ----
 
 extern "C" {
-    extern debinftype *effecttypes;
 }
 
 // ---- begin src/gameapi/edtools/edptlcallbacks.cpp ----
@@ -9674,11 +9561,9 @@ extern "C" {
 // ---- end src/gameapi/edtools/edptlall.cpp ----
 
 extern "C" {
-    void NuRndrRect2di(i32 x, i32 y, i32 width, i32 height, i32 colour, numtl_s *material);
 }
 
 extern "C" {
-    extern debinftype *effecttypes;
 }
 
 extern "C" {
@@ -9784,7 +9669,6 @@ extern "C" {
 
 extern "C" {
 
-void PlaySfxById(i32 sfx_id, nuvec_s *position);
 
 
 } // extern "C"
@@ -9832,7 +9716,6 @@ extern "C" {
 // ==== src/legoapi/misc/supportall.cpp: declarations ====
 
 extern "C" {
-extern char unknown[8];
 }
 
 extern "C" {
@@ -9852,10 +9735,8 @@ extern "C" {
 extern "C" {
 }
 
-void NewScanRot(NUVEC *position, i32 terrain_mask);
 
 extern "C" {
-    extern debinftype *effecttypes;
 }
 
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
@@ -9879,7 +9760,6 @@ extern "C" {
 
 extern "C" {
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -9899,7 +9779,6 @@ extern "C" {
 // ==== src/gameapi/edtools/edtoolsall.cpp: declarations ====
 
 extern "C" {
-    extern debinftype *effecttypes;
 }
 
 // ==== src/gameapi/edtools/edrender.cpp: all remaining content ====
@@ -9907,7 +9786,6 @@ extern "C" {
 // ==== src/legoapi/render/core/render.cpp: declarations ====
 
 extern "C" {
-    void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 }
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
@@ -10176,7 +10054,6 @@ namespace {
 
 } // namespace
 
-void NewScanRot(nuvec_s *position, i32 terrain_mask);
 
 namespace {
 
@@ -10204,7 +10081,6 @@ namespace {
 // are screen.cpp globals in the original: its static initializer registers
 // their destructors (original bss @0x127bf20 / 0x127bf08 / 0x127bf00 /
 // 0x127bef8 / 0x127bef0).
-extern Fade fade;
 
 // Material handles used by the original 2-D fade paths.
 
@@ -10216,13 +10092,11 @@ extern "C" {
 
 extern "C" {
 
-void PlaySfxById(i32 sfx_id, nuvec_s *position);
 
 }
 
 // ==== src/legoapi/render/core/render.cpp: all remaining content ====
 
-extern "C" i32 StateAnimEvaluate2(StateAnim *state, u8 *index, char *value, f32 frame);
 
 i32 RemoveDirectionalMaps = 0;
 i32 RemoveNormalMaps = 0;
@@ -10230,10 +10104,8 @@ i32 RemoveNormalMaps = 0;
 NUVIDEORESHEADER g_VideoResHeader;
 
 extern "C" {
-    void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 }
 
-extern "C" void NuSevereWarning(const char *format, ...);
 
 
 extern "C" {
@@ -10286,7 +10158,6 @@ extern const u8 HintRGB[5][3] = {
 
 static u8 cacheValues[256];
 
-void ClearScreen();
 
 static inline u16 AlphaImageFloatToHalf(f32 value) {
     u32 bits;
@@ -10343,7 +10214,6 @@ i32 ShowPlayerCoordinate = 0;
 
 extern "C" {
     extern nurenderscene_s currentScene;
-void DisplaySceneRndrSpecials(NUDLDLISTSCENE *scene, i32, void *visibility_context);
 }
 
 // ==== src/nu2api/nu3d/nutex.cpp: all remaining content ====
@@ -10371,7 +10241,6 @@ static i32 gTextureLoadCount;
 
 
 
-i32 NuTexGetUnresolvedTextureTIDPS();
 
 // ==== src/nu2api/nucore/nuhgobj.cpp: all remaining content ====
 
@@ -10415,7 +10284,6 @@ extern "C" {
 
 extern "C" {
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -11085,7 +10953,6 @@ extern "C" {
 
 extern "C" {
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -11628,7 +11495,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 extern "C" {
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 

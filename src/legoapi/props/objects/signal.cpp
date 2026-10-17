@@ -25,8 +25,8 @@
 #include "nu2api/numath/nuvec.h"
 
 #include <string.h>
+#include "nu2api/nu3d/nu3d_includes.h"
 
-extern "C" void NuTexAnimSetSignals(u32 signals);
 void FindAnglesZX(NUVEC *normal, u16 *x_rotation, u16 *z_rotation);
 
 static void Signal_SetVisibility(SIGNAL *signal, i32 visible);

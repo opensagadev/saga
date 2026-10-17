@@ -181,3 +181,11 @@ void UpdatePaintPuzzle(WORLDINFO_s *world);
 GIZAIMESSAGE_s *CheckGizAIMessage(GIZAIMESSAGESYS_s *, char const *, GIZAIMESSAGE_s *);
 GIZAIMESSAGE_s *SetGizAIMessage(GIZAIMESSAGESYS_s *, char const *, float, GIZAIMESSAGE_s *);
 char *GizAIMessage_GetName(GIZAIMESSAGE_s *);
+
+// Declared here for the other units that use them.
+struct GIZMOSYS_s;
+struct GIZMO_s;
+GIZMO_s *GizmoFindByData(GIZMOSYS_s *, i32, void *);
+i32 GizmoTypeGetProgress(GIZMOSYS_s *system, void *, i32 progress_index, i32 type_id, char *name, void **result);
+void AddLevelSfxGizmoSys(GIZMOSYS_s *gizmo_sys, void *world_info, i32 *sfx_ids, i32 *sfx_count, i32 max_sfx_count);
+void GizmoTypeStoreProgress(GIZMOSYS_s *system, void *world, i32 progress_index, i32 type_id, char *name);

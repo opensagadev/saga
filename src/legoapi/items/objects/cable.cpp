@@ -124,14 +124,16 @@
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/nu3d/nuprim.h"
 #include "nu2api/nu3d/nupostparams.h"
+#include "legoapi/characters/motion/move.h"
+#include "legoapi/items/objects/cable.h"
+#include "legoapi/misc/utilities.h"
+#include "nu2api/nu3d/nu3d_includes.h"
 
-extern CABLE_s cables[8];
 f32 cable_ground_damping = 20.0f;
 f32 cable_damping = 2.0f;
 f32 cable_gravity = 3.0f;
 f32 cable_speed = 20.0f;
 i32 atat_locators[4] = {0, 1, 2, 3};
-i32 FaceOpponent(GameObject_s *, NUVEC *);
 extern i32 TERRAINMASK_NONDROID;
 i32 XZLinesIntersect(NUVEC *, NUVEC *, NUVEC *, NUVEC *, f32 *, f32 *);
 f32 default_targetmomf = 4.0f;
@@ -144,8 +146,6 @@ f32 default_tow_length = 6.0f;
 f32 tow_length = 6.0f;
 
 
-void DestroyCable(CABLE_s *cable);
-void ReleaseCable(CABLE_s *cable, i32 snapped);
 
 
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
@@ -312,7 +312,6 @@ struct VuVec;
 // Graphics loading flags
 
 extern "C" {
-    void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 }
 
 
@@ -338,8 +337,6 @@ i32 nsegments_drawn;
 f32 slack_factor = 1.0f;
 f32 cable_slack = 1.0f;
 f32 nsegments_per_unit = 6.0f;
-extern f32 tow_length;
-extern NUMTL *SolidMtl3D;
 
 
 

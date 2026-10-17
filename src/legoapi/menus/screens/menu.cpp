@@ -76,18 +76,20 @@
 #include "gamelib/crc/crc.h"
 #include "legoapi/render/light/fade.h"
 #include "legoapi/core/input/qrand.h"
+#include "globals.h"
+#include "legoapi/actions/movement/dropinout.h"
+#include "legoapi/core/startup/text.h"
+#include "legoapi/cutscenes/cutscenes.h"
+#include "legoapi/lib/text.h"
+#include "legoapi/menus/core/hint.h"
+#include "legoapi/menus/screens/customise.h"
+#include "legoapi/menus/screens/menu.h"
+#include "legoapi/menus/screens/missions.h"
+#include "legoapi/world/levels.h"
+#include "legoapi/world/levels/hub.h"
+#include "legogame/game.h"
+#include "nu2api/nucore/nu2api_nucore_misc.h"
 
-extern u8 cutskip_dontplaylevelintro;
-void Hint_LoadAllGameState(void);
-void NuIOS_RestoreInAppPurchases(void);
-void NewGame(void);
-void Hub_UpdateKit(void);
-void MenuDrawNewGame(MENU *menu);
-void MenuUpdateNewGame(MENU *menu);
-void GameDrawMenuEntry(MENU *menu, char *text);
-void DropOut(i32 player, i32 show_effect, i32 silent, i32 force);
-void NewLevelFromMenu(LEVELDATA_s *level, i32 menu_id, i32 menu_y, i32 remember_hub);
-extern i32 from_save_and_exit;
 extern u8 MENULOSTR1, MENULOSTG1, MENULOSTB1, MENULOSTA1;
 extern u8 MENULOSTR2, MENULOSTG2, MENULOSTB2, MENULOSTA2;
 extern i16 tALLLEVELPROGRESSWILLBELOST, tALLSUPERSTORYPROGRESSWILLBELOST;
@@ -119,37 +121,7 @@ extern i16 tOFF;
 extern i16 tALLSTUDSCOLLECTED;
 extern i16 tSELECTING;
 extern i16 tCONTROLLER;
-extern f32 PauseMenus_X;
-extern i32 PauseMenus_Align;
-extern u8 MENUEXITR;
-extern u8 MENUEXITG;
-extern u8 MENUEXITB;
 void Credits_UpdateMenu(MENU *menu);
-void CustomiserMenu_Draw(MENU *menu);
-void CustomiserMenu_Update(MENU *menu);
-void MenuDrawClips(MENU *menu);
-void MenuDrawEndChallenge(MENU *menu);
-void MenuDrawEndMission(MENU *menu);
-void MenuDrawExtras(MENU *menu);
-void MenuDrawFreePlay(MENU *menu);
-void MenuDrawMissions(MENU *menu);
-void MenuDrawOptions(MENU *menu);
-void MenuDrawRestoreNewGame(MENU *menu);
-void MenuDrawSelectControls(MENU *menu);
-void MenuEnterOptions(MENU *menu);
-void MenuExitOptions(MENU *menu);
-void MenuInitClips(MENU *menu);
-void MenuInitFreePlay(MENU *menu);
-void MenuInitMissions(MENU *menu);
-void MenuUpdateClips(MENU *menu);
-void MenuUpdateEndChallenge(MENU *menu);
-void MenuUpdateEndMission(MENU *menu);
-void MenuUpdateExtras(MENU *menu);
-void MenuUpdateFreePlay(MENU *menu);
-void MenuUpdateMissions(MENU *menu);
-void MenuUpdateOptions(MENU *menu);
-void MenuUpdateRestoreNewGame(MENU *menu);
-void MenuUpdateSelectControls(MENU *menu);
 extern i16 tTOUCHTOSTART;
 extern i16 tNEWGAME;
 extern i16 tLOADGAME;
@@ -159,14 +131,8 @@ extern i16 tTOUCH;
 extern i16 tCONSOLE;
 extern "C" void SmartText(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
                           u8 green, u8 blue, f32 max_width, i32 max_lines);
-extern i32 hub_forceshopsave;
-void Hub_ClearStats();
-void Text_FillInExtendedSaveInfo();
-void DrawShopPrompts();
 extern f32 HUB_EPISODETITLEY;
 extern i16 tSELECT, tSELECTED, tSELECTING;
-extern "C" void BackupMenuNoFn(void);
-extern i32 MenuSFX;
 extern i16 tSELECTCONTROLS;
 extern i16 tCONTROLSCANBECHANGED;
 extern i16 tCLASSIC;
@@ -180,10 +146,6 @@ extern i16 tCONTINUE;
 extern i16 tLOCKED;
 extern i16 tAVAILABLETOBUY;
 extern i16 tPOWERBRICK;
-i32 GetParentMenuID(void);
-void SfxCheckMusicOnOff(OPTIONSSAVE *options);
-extern i32 startnewgame;
-extern i32 startnewgame_initiated;
 extern f32 newgamecamtime;
 struct MENU_s;
 extern i16 tCURRENTGAME;
@@ -192,13 +154,7 @@ extern i16 tGAME;
 extern i16 tNOSPACE;
 extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
 extern "C" void PlaySfx(char *, NUVEC *);
-extern "C" void loadsaveCallEachFrame(void);
-extern i32 readpads_always;
 
-extern i32 pausecut_skip_to_level;
-extern u8 pausecut_skip_to_gameplay;
-extern i32 shop_save_done;
-extern GAMESAVE_s TempGame;
 static f32 newgamewait;
 static u32 buttons_store[15];
 // Initialised by the unit's static constructor; nothing in the retail binary reads it.

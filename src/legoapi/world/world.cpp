@@ -52,6 +52,7 @@
 #include "nu2api/nusound/nusound.h"
 #include "MechInputTouch/MechInputTouch_types.h"
 #include "gameapi/edtools/edgra.h"
+#include "legoapi/misc/utilities.h"
 
 // Globals shared across world loading — defined here until moved to globals.cpp
 TIMER LevelTimer;
@@ -90,11 +91,8 @@ u32 LEGOOBJ_DEFAULTLASTCOIN = -1;
 
 // --- World-module helpers (kept with the WorldInfo API) ---
 
-void SetAreaPickupGravity(i32 area, i32 level);
 
 
-void SaveSceneObjectAnimTFactors(NUGSCN *gscn);
-void CalculateWorldSize(WORLDINFO *world);
 
 WORLDINFO WorldInfo[2];
 

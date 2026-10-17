@@ -51,12 +51,18 @@
 #include "nu2api/nucore/numemory.h"
 #include "nu2api/nucore/nupad.h"
 #include "nu2api/nufile/nufile.h"
+#include "legoapi/actions/combat/hits.h"
+#include "legoapi/actions/movement/climbing.h"
+#include "legoapi/characters/motion/move.h"
+#include "legoapi/gizmo/base/gizgame.h"
+#include "legoapi/items/objects/game_obj.h"
+#include "legoapi/misc/utilities.h"
+#include "legoapi/render/core/gameliball.h"
 
 
 static void Bolt_Debris_Default(BOLT_s *, NUVEC *, i32, NUVEC *, i32);
 static void Bolt_GetShootOrigin_Default(GameObject_s *, NUVEC *);
 static i32 Bolt_GetShootDirection_Default(GameObject_s *, NUVEC *);
-void BoltTypes_Reset(WORLDINFO_s *);
 
 BOLTTYPE_s GlobalBoltType_Default = {"null", 4.0f, 2.0f, 0.0f, 0.125f, 1.0f, 0.1f, -1,   -1,   -1,   0, -1, 0,  1,
                                      255,    0,    0,    NULL, NULL,   NULL, NULL, NULL, NULL, NULL, 0, -1, -1, {}};
@@ -128,10 +134,7 @@ static NUFPCOMJMP BoltType_ConfigKeywords[] = {
     {NULL, NULL},
 };
 
-BOLT_s *Bolt_Alloc();
 
-extern i32 addbolt_newsfx;
-extern NUVEC addbolt_newpos;
 f32 BOLT_SHOOTFLASHTIME = 0.1f;
 void FindAnglesXY(NUVEC *, u16 *, u16 *);
 void CalculateInterceptVector(NUVEC *, NUVEC *, NUVEC *, f32, NUVEC *, NUVEC *);
@@ -139,41 +142,26 @@ void GameAudio_PlaySfxById(i32, NUVEC *, i32, i32);
 
 i32 MatrixReflectionVU0_AXISY(NUMTX *, f32, f32, NUMTX *);
 
-void Bolt_Reflect(nuvec_s *normal, nuvec_s *incoming, nuvec_s *out);
 
 extern "C" {
 }
 i32 SphereSphereOverlapScaleY(NUVEC *, f32, f32, NUVEC *, f32, f32);
 void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 
-void Bolt_PlayHitSfx(BOLT_s *bolt);
-
-PART_s *Bolt_HitParts(BOLT_s *bolt, NUVEC *points, NUVEC *minimum, NUVEC *maximum, f32 radius, i32 reason);
-
-void BoltTypes_Reset(WORLDINFO_s *world);
-
-i32 Player_HasDoubleBoltDamage_FromBolt(BOLT_s *);
-
-i32 Bolt_HitPartMode(BOLT_s *bolt);
 
 
-void Bolt_HitGameObjectRC(NetMessage &);
-i32 Bolt_HitGameObject(BOLT_s *bolt, GameObject_s *object, NUVEC *points, NUVEC *, NUVEC *, f32 radius, u8 *);
+
+
+
+
 
 
 i32 addbolt_nosfx;
 BOLT_s *objhitobj_bolt;
-extern i32 i_temp_xrot;
-extern f32 DEACTIVATEDTIME;
-i32 Player_HasDeflectBolts(GameObject_s *);
-i32 CannotKill(GameObject_s *);
-i32 NewBlockAction(GameObject_s *);
-void ObjHitShield(GameObject_s *, GameObject_s *, i32, BOLT_s *);
 i32 ObjHitObj(GameObject_s *, GameObject_s *, i32, u16, i32, i32);
 
 __attribute__((force_align_arg_pointer)) void Bolt_AddDeflectedBolt(BOLT_s *bolt, nuvec_s *direction, nuvec_s *normal,
                                                                     unsigned char *processed);
-void Bolt_HitGameObjectRC(NetMessage &message);
 
 // Retail only has the IPA-SRA clone of Bolt_HitPlat(BOLT_s *, u8 *, WORLDINFO_s *), which drops the
 // unused world argument.
@@ -182,10 +170,8 @@ static __attribute__((noinline, noclone)) i32 Bolt_HitPlat(BOLT_s *bolt, u8 *hit
 
 
 
-void Bolt_Init(void *, NetMessage &);
 
 
-i32 GizmoSys_BoltHit(GIZMOSYS_s *, void *, BOLT_s *, NUVEC *, NUVEC *, NUVEC *, f32, u8 *);
 GIZMOBLOWUP_s *GizmoBlowUp_Hit(GameObject_s *, NUVEC *, i32, f32, NUVEC *, NUVEC *, BOLT_s *, u32, u8 *);
 // The original caller appears to treat this u16-returning function as i32;
 // correcting this declaration lowers its match.
@@ -193,7 +179,6 @@ i32 ObjHitObj_Flags(GameObject_s *);
 i32 addbolt_noobjmom, addbolt_newsfx;
 NUVEC addbolt_newpos;
 i32 (*BoltInitSfxFn)(GameObject_s *);
-void Bolt_Init(void *storage, NetMessage &message);
 
 
 
@@ -205,10 +190,7 @@ static __used__ i32 Bolt_GetShootDirection_Default(GameObject_s *object, nuvec_s
 
 
 extern "C" {
-    void NewTerrHitInfo(u8 *);
-    i32 NewShadowOnPlatform();
 }
-f32 FindReflectionNoPlatforms(NUVEC *);
 void FindAnglesZX(NUVEC *, u16 *, u16 *);
 
 static inline i32 Bolt_HitScenery(BOLT_s *bolt, NUVEC *points, u8 *processed, WORLDINFO_s *world) {
@@ -231,8 +213,6 @@ static inline i32 Bolt_HitScenery(BOLT_s *bolt, NUVEC *points, u8 *processed, WO
 // ==== src/legoapi/items/collect/bolt.cpp: declarations ====
 
 
-i32 LineIntersectSphere(NUVEC *, NUVEC *, NUVEC *, f32, f32 *);
-bool LineIntersectCircle(NUVEC *, NUVEC *, NUVEC *, f32);
 
 // ==== src/legoapi/items/collect/bolts.cpp: declarations ====
 

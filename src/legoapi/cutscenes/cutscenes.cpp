@@ -232,36 +232,18 @@
 #include "nu2api/nucore/nulist.h"
 #include "editor/edtoolsall_types.h"
 #include "legoapi/items/base/animpacket.h"
+#include "legoapi/characters/core/characters.h"
+#include "legoapi/cutscenes/gcutscn.h"
+#include "legoapi/world/levels.h"
+#include "nu2api/nu3d/nu3d_includes.h"
 
-extern i32 ACTIVECUTCOUNT;
 extern i32 CUTCAMONLY;
-extern i32 cut_waiting_for_new_level;
-extern CUTSYS *CS_cutsys;
 CUTSCENESYS *CutSceneSys;
 
 
 extern "C" {
-    i32 instNuGCutSceneIsFinished(instNUGCUTSCENE_s *instance);
-    void instNuGCutScenePause(instNUGCUTSCENE_s *, u8);
-    void instNuGCutSceneReset(instNUGCUTSCENE_s *);
-    void instNuGCutSceneStart(instNUGCUTSCENE_s *);
-    void instNuGCutSceneStop(instNUGCUTSCENE_s *);
-    void instNuGCutSceneDestroy(instNUGCUTSCENE_s *);
-    void NuGCutSceneSysRender(i32);
-    void NuGCutSceneSysUpdate(i32, i32, f32);
 }
 
-void NewLevelFromMenu(LEVELDATA_s *, i32, i32, i32);
-void FindAndSetLights(NUVEC *, f32, void *);
-void SetZeroLights(void);
-void GameFog_Reset(void);
-f32 FindReflectionNoPlatforms(NUVEC *);
-extern "C" i32 NewShadowOnPlatform(void);
-void CharScene_Draw(WORLDINFO_s *, i32, NUMTX *, NUMTX *);
-extern "C" void instNuGCutLocatorUpdate(instNUGCUTSCENE_s *, NUGCUTLOCATORSYS_s *, instNUGCUTLOCATOR_s *,
-                                        NUGCUTLOCATOR_s *, f32, NUMTX *, i32);
-void CutScenePlayer_SetObjects(CUTINFO *);
-extern "C" void DebrisSetRenderGroup(i32);
 
 static u8 CutBlobShadowAlpha;
 static f32 CutBlobShadowFadeNear;
@@ -282,17 +264,11 @@ i32 NewCutInfoCount;
 static CUTINFO *NewCutInfo[8];
 u8 cutskip_dontplaylevelintro;
 i32 CUTNOFOG;
-extern i32 CUTSKIPLOCK;
 f32 LevelNameMul;
 f32 LevelNameTime;
 
 
 extern "C" {
-    void PauseGameCut(void);
-    void PlaySfxById(i32 sfx_id, nuvec_s *position);
-    extern instNUGCUTSCENE_s *cutscene_load_instance;
-    void instNuGCutSceneServiceLoad(void);
-    void NuGCutSceneSysPostBackgroundLoad(void);
 }
 
 
@@ -312,7 +288,6 @@ static inline i32 CutScene_Start(WORLDINFO_s *world, CUTINFO *cut, i32) {
 }
 
 
-extern "C" void NuAnimData2CalcTime(nuanimdata2_s *, f32, nuanimtime_s *);
 
 static __used__ void LocatorFunction_Blaster(instNUGCUTSCENE_s *, NUGCUTLOCATORSYS_s *, instNUGCUTLOCATOR_s *,
                                              NUGCUTLOCATOR_s *locator, float frame, numtx_s *parent_mtx, int);
@@ -322,12 +297,6 @@ static NUGCUTLOCATORFNENTRY_s cutscene_locatorfns[] = {
     {NULL, 0, 0, 0, NULL},
 };
 
-extern i32 dco_id;
-extern i32 dco_reflectaxis;
-extern i32 dco_wearinghat;
-extern f32 dco_reflectcoord;
-extern GAMECHARACTERDATA_s *dco_gcdata;
-extern CHARACTERMODEL_s *dco_cmodel;
 
 
 
@@ -640,16 +609,13 @@ extern i16 tCHAPTER;
 CUTSCENEPLAYER_s *CutScenePlayer = NULL;
 
 
-void CutScenePlayer_SetObjects(CUTINFO *cut);
 
 // ==== src/legoapi/cutscenes/cutscene.cpp: declarations ====
 
-extern "C" void instNuGCutSceneDestroy(instNUGCUTSCENE_s *);
 
 extern void (*CutScene_OverrideConfigFileNameFn)(char *, i32, i32);
 
 extern "C" {
-extern instNUGCUTSCENE_s * cutscene_load_instance;
 
 }
 
@@ -661,9 +627,7 @@ extern "C" {
 
 
 
-void instNuGCutSceneStart(instNUGCUTSCENE_s *instance);
 
-void instNuGCutSceneDestroy(instNUGCUTSCENE_s *instance);
 
 } // extern "C"
 
@@ -672,8 +636,6 @@ void instNuGCutSceneDestroy(instNUGCUTSCENE_s *instance);
 
 extern "C" {
 
-    void NuAnimData2CalcTime(nuanimdata2_s *, f32, nuanimtime_s *);
-    void instNuGCutSceneStart(instNUGCUTSCENE_s *);
 
 }
 
@@ -690,9 +652,6 @@ extern "C" {
 extern "C" {
     // Aligned four-float row used for retail's movaps matrix copies.
 
-void instNuGCutLocatorUpdate(instNUGCUTSCENE_s *instance, NUGCUTLOCATORSYS_s *system,
-                                 instNUGCUTLOCATOR_s *inst_locator, NUGCUTLOCATOR_s *locator, f32 frame,
-                                 NUMTX *parent_mtx, i32 paused);
 
 } // extern "C"
 
@@ -797,7 +756,6 @@ extern "C" {
     // Animation / curves / data
     // ---------------------------------------------------------------------------
 
-void NuAnimData2CalcTime(nuanimdata2_s *anim, f32 frame, nuanimtime_s *time);
 
     // ---------------------------------------------------------------------------
     // Bridge / file / heap / memory
@@ -937,12 +895,9 @@ extern "C" {
 
 
 extern "C" {
-    void instNuGCutSceneStart(instNUGCUTSCENE_s *);
-    void instNuGCutSceneDestroy(instNUGCUTSCENE_s *);
 }
 
 extern "C" {
-    extern instNUGCUTSCENE_s *cutscene_load_instance;
 }
 
 // ==== functions in original address order ====
@@ -960,7 +915,6 @@ extern "C" {
 
 
 
-void instNuGCutSceneStart(instNUGCUTSCENE_s *instance);
 
 }
 
@@ -974,7 +928,6 @@ extern "C" {
 
 extern "C" {
 
-void instNuGCutSceneDestroy(instNUGCUTSCENE_s *instance);
 
 }
 
@@ -983,9 +936,6 @@ extern "C" {
 }
 
 extern "C" {
-void instNuGCutLocatorUpdate(instNUGCUTSCENE_s *instance, NUGCUTLOCATORSYS_s *system,
-                                 instNUGCUTLOCATOR_s *inst_locator, NUGCUTLOCATOR_s *locator, f32 frame,
-                                 NUMTX *parent_mtx, i32 paused);
 
 }
 
@@ -1012,23 +962,16 @@ extern "C" {
 
 
 
-void NuGCutSceneSysPostBackgroundLoad(void);
 
 
-void instNuGCutSceneStop(instNUGCUTSCENE_s *instance);
 
-i32 instNuGCutSceneIsFinished(instNUGCUTSCENE_s *instance);
 
-void instNuGCutSceneReset(instNUGCUTSCENE_s *instance);
 
-void instNuGCutSceneStart(instNUGCUTSCENE_s *instance);
 
-void instNuGCutScenePause(instNUGCUTSCENE_s *instance, u8 paused);
 
 }
 
 extern "C" {
-void instNuGCutSceneServiceLoad(void);
 
 }
 
@@ -1051,7 +994,6 @@ extern "C" {
 }
 
 extern "C" {
-void instNuGCutSceneDestroy(instNUGCUTSCENE_s *instance);
 
 }
 
@@ -1060,17 +1002,12 @@ extern "C" {
 }
 
 extern "C" {
-void instNuGCutLocatorUpdate(instNUGCUTSCENE_s *instance, NUGCUTLOCATORSYS_s *system,
-                                 instNUGCUTLOCATOR_s *inst_locator, NUGCUTLOCATOR_s *locator, f32 frame,
-                                 NUMTX *parent_mtx, i32 paused);
 
 }
 
 extern "C" {
 extern "C" {
-extern "C" void NuGCutSceneSysUpdate(i32 paused, i32 skip, f32 elapsed);
 
-extern "C" void NuGCutSceneSysRender(i32 paused);
 
 }
 }
@@ -1160,12 +1097,10 @@ extern "C" {
 #define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone))
 #endif
 
-void LoadPerm1();
 
 // ==== src/legoapi/menus/screens/gamemenuall.cpp: declarations ====
 
 
-extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 
 // Retail clears these "fast repeat" latches but never sets them.
 
@@ -1323,7 +1258,6 @@ extern "C" {
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -1633,7 +1567,6 @@ static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ..
 
 
 extern EdInputContext * Input;
-extern "C" void PlaySfxById(i32, nuvec_s *);
 
 DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
 

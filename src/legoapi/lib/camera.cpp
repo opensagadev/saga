@@ -115,12 +115,11 @@
 #include "nu2api/numath/nuvec4.h"
 #include <limits.h>
 #include "legoapi/actions/character/simpletons_types.h"
+#include "legoapi/characters/motion/camera.h"
+#include "legoapi/lib/camera.h"
 
-void GameCam_ResetLookRot(GAMECAMERA_s *camera);
 
-extern VIEWCAM_s ViewCam;
 // Original data symbol testmovef is float0.005 at 0x617cb0.
-extern f32 testmovef;
 
 DECOMP_ASSERT(sizeof(VIEWCAM_s) == 0x28, "ViewCam size");
 DECOMP_ASSERT(offsetof(VIEWCAM_s, pitch) == 0x10, "ViewCam pitch offset");
@@ -450,7 +449,6 @@ namespace {
 
 } // namespace
 
-void NewScanRot(nuvec_s *position, i32 terrain_mask);
 
 namespace {
 

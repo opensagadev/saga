@@ -24,17 +24,14 @@
 #include "nu2api/nucore/nustring.h"
 #include <math.h>
 #include <string.h>
+#include "legoapi/items/collect/detonator.h"
+#include "legoapi/items/objects/game_obj.h"
 
 extern BATARANG_s Batarang[8];
 extern i16 id_CATWOMAN;
 
-i32 StunGameObject(GameObject_s *, GameObject_s *, f32, i32);
-void Detonator_Detonate(DETONATOR_s *);
 i32 GizmoBlowupBlowup(GIZMOBLOWUP_s *, i32, i32, i32, GameObject_s *, i32);
 
-i32 Batarang_SeekToTarget(BATARANG_s *);
-i32 Batarang_StartTargetting(GameObject_s *);
-i32 Batarang_GetObjectFromCharID(i32);
 
 static unsigned int Batarang_GetTargetPos(BATARANG_s *batarang, int index, nuvec_s *position) {
     if (batarang->field_0x7d != 0 && batarang->active != 0 && batarang->active == index) {

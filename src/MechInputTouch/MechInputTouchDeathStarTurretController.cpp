@@ -9,9 +9,9 @@
 #include "legoapi/world/world.h"
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/numath/nutrig.h"
+#include "legoapi/gizmos/traps/gizturret.h"
 
 i32 GetMenuID();
-GIZTURRET_s *GizTurret_FindByController(GIZTURRETSYS_s *, GameObject_s &);
 
 void MechInputTouchDeathStarTurretController::Activate() {
     if (active) {

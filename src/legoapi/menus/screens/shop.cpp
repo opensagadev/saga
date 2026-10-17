@@ -154,13 +154,12 @@
 #include "legoapi/characters/core/customiser.h"
 #include "nu2api/numusic/numusic.h"
 #include "legoapi/characters/core/characters_types.h"
-void DrawItem(nuhspecial_s *, nuvec_s *, float, float, float, u16, u16, u16);
+#include "legoapi/menus/core/hint.h"
+#include "legoapi/world/levels/hub.h"
+#include "nu2api/nu3d/nu3d_includes.h"
 void *AddGameMessage(char *, NUVEC *, f32, NUVEC *, f32, u8, u8, u8, u32, f32);
 extern f32 HUB_EPISODETITLEY;
 extern f32 HUB_EPISODESUBTITLEY;
-i32 AddToCollection(i32);
-extern GAMESAVE_s TempGame;
-extern i32 hub_forceshopsave;
 i32 POINTS_PER_HINT;
 // Shop state is file-local, matching the original _ZL symbols.
 static f32 pickedbing;
@@ -289,10 +288,6 @@ static i32 easesubin = 0;
 static f32 inoutscale = 0.0f;
 static char *cheatname = NULL;
 
-extern i32 ItemMenu(MENU_s *menu);
-extern void DrawItemMenu2D();
-extern void InitAlphaList();
-extern void InitExtraList();
 
 
 
@@ -307,15 +302,8 @@ static NUVEC HubShopPos = {-26.3f, 0.0f, -49.5f};
 
 
 
-i32 CodeMenu(MENU_s *);
 
-extern void DrawSubItemMenu2D(void);
-extern void DrawSubItemMenu3D(void);
-extern void DrawCodeMenu(void);
-extern void DrawCodeMenu3D(void);
 static i32 SubItemMenu(MENU_s *);
-extern void Hint_ResetHint(i32, i32);
-extern void Hint_SetHintFromId(i32, i32, i32);
 
 static f32 ShopClamp01(f32 value) {
     return NuFmax(0.0f, NuFmin(value, 1.0f));
@@ -328,20 +316,13 @@ static f32 ShopSinePhase(f32 phase) {
 
 
 
-i32 ItemMenu(MENU_s *menu);
 extern i16 tSELECT, tBACK, tBUY, tPLAY, tSELECTING;
 
 
-void DrawCodeMenu();
 
-void DrawItem(nuhspecial_s *special, nuvec_s *position, float scale_value, float, float y_push, u16 x_rot, u16 y_rot,
-              u16 z_rot);
 
-void DrawCodeMenu3D();
 
-extern AREADATA *ANEWHOPE_ADATA;
 
-void DrawSubItems();
 
 
 // ==== src/legoapi/render/core/render.cpp: declarations ====
@@ -391,7 +372,6 @@ struct VuVec;
 
 
 extern "C" {
-    void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 }
 
 
@@ -417,8 +397,6 @@ extern "C" {
 
 
 
-void DrawItem(nuhspecial_s *special, nuvec_s *position, float scale_value, float unused, float y_push, u16 x_rot,
-              u16 y_rot, u16 z_rot);
 
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
@@ -466,7 +444,6 @@ void DrawItem(nuhspecial_s *special, nuvec_s *position, float scale_value, float
 
 
 
-void DrawItemMenu2D();
 
 
 
@@ -483,9 +460,7 @@ void DrawItemMenu2D();
 
 extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
 
-void DrawSubItemMenu2D();
 
-void DrawSubItemMenu3D();
 
 
 
@@ -633,7 +608,6 @@ extern "C" {
 
 
 
-void InitExtraList();
 
 
 
@@ -653,13 +627,11 @@ GameObject_s *FindNearestGameObject(NUVEC *position, GameObject_s *exclude, u32 
 // ==== src/legoapi/render/core/screen.cpp: declarations ====
 
 
-void InitAlphaList();
 
 // The fade system and the four fade effects handed to FadeSystem::AddFade()
 // are screen.cpp globals in the original: its static initializer registers
 // their destructors (original bss @0x127bf20 / 0x127bf08 / 0x127bf00 /
 // 0x127bef8 / 0x127bef0).
-extern Fade fade;
 
 // Material handles used by the original 2-D fade paths.
 

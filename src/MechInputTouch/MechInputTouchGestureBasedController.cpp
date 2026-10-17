@@ -252,22 +252,16 @@
 #include <limits.h>
 #include "legoapi/gizmo/base/gizflow.h"
 #include "legoapi/misc/supportall_types.h"
+#include "MechInputTouch/MechAutoJumpManager.h"
+#include "MechInputTouch/MechInputTouchGestureBasedController.h"
+#include "gameapi/ai/aisys/gameaiscript.h"
+#include "legoapi/actions/movement/climbing.h"
+#include "legoapi/characters/motion/move.h"
+#include "legoapi/items/objects/cable.h"
+#include "legoapi/world/levels/episodeV.h"
 
-void ReleaseCable(CABLE_s *, i32);
 extern "C" i16 id_WATTO;
-extern AREADATA *DAGOBAH_ADATA;
-void ForceNextLungeTarget(MechObjectInterface *);
-bool FireBountyHunterRocket(GameObject_s *);
-void SlowWeaponOut(GameObject_s *);
-extern i32 id_HINT_LSW_AUTOJUMP;
-extern i32 id_HINT_LSW_AUTOJUMP_FAIL;
-MechAutoJumpConnection *MechAutoJumpGetBest(JumpTriggerPacket const &, i32);
-void MechAutoJumpSetIsUsing(GameObject_s &, MechAutoJumpConnection &);
 bool isBucking;
-i32 DoBuckStart(GameObject_s *);
-void StartJetPackFall(GameObject_s *, i32);
-void SetForcedAttackOpponent(MechObjectInterface *);
-bool IsDownSwipe(NuVec2 const &, NuVec2 const &);
 
 // Retail clears the four stick values with one unaligned vector store.
 typedef f32 StickValuesVec4 __attribute__((vector_size(16), aligned(4)));
@@ -276,7 +270,6 @@ typedef f32 StickValuesVec4 __attribute__((vector_size(16), aligned(4)));
 
 
 
-bool IsDownSwipe(NuVec2 const &start, NuVec2 const &end);
 
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e4) == 0x7e4, "Quick shoot record offset");
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e8) == 0x7e8, "Quick shoot record count offset");
@@ -302,14 +295,12 @@ DECOMP_ASSERT(offsetof(GameObject_s, quick_shoot_bolt_id) == 0xe3e, "Quick shoot
 #endif
 
 // Retail keeps only the IPA-SRA clone of this function.
-i32 PodLevel(AREADATA_s *);
 
 // Multiplies the ordinary camera's per-frame position blend.  The original
 // keeps this as writable camera state (default 1.0), rather than folding it
 // into the socket seek rate.
 
 
-i32 PodLevel(AREADATA_s *area);
 
 // Retail splits the guard off as an inline head; the rest is this partial clone.
 
@@ -318,7 +309,6 @@ extern i32 LevFlag[4];
 
 // These pod tuning values are zero-initialized in the original image.
 
-extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 
 // Retail re-tests the three block animations at each use instead of caching a flag.
 #define HAS_BLOCK_ANIMS(animations)                                                                                    \
@@ -341,7 +331,6 @@ DECOMP_ASSERT(offsetof(AWKWARDSHAPESPHERE_s, radius) == 8, "Awkward shape sphere
 // ==== src/legoapi/world/levels/episodeV.cpp: declarations ====
 
 
-extern AILOCATOR_s * locator;
 
 DECOMP_ASSERT(sizeof(HOTHBATTLEE_NETPACKET_s) == 0x58, "Hoth panel packet size");
 DECOMP_ASSERT(offsetof(HOTHBATTLEE_NETPACKET_s, alpha) == 0x24, "Hoth panel packet alpha offset");
@@ -366,7 +355,6 @@ DECOMP_ASSERT(sizeof(ASTEROIDCNETPACKET_s) == 8, "asteroid C network packet size
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -916,14 +904,8 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 // ==== src/legoapi/gizmo/gizmos/gizmos_gizactions.cpp: declarations ====
 
-i32 Action_ReleaseLocator(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
-                          i32 first_time, float);
 
-i32 Action_GetLocatorFromSet(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,
-                             i32 param_count, i32 first_time, float);
 
-i32 Action_AssignLocatorInSet(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
-                              i32 first_time, float);
 
 namespace {
 #include "legoapi/gizmo/gizmos/gizmos_gizactions_types.h"

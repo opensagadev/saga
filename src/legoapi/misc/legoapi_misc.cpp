@@ -33,7 +33,6 @@ extern "C" {
 }
 
 
-void ConstantRumble(GameObject_s *object, float strength, float phase);
 
 void CatIToX(char *output, i32 value) {
     while (*output != '\0')

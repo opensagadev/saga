@@ -117,18 +117,16 @@
 #include "legoapi/render/core/screen.h"
 #include "nu2api/nuandroid/ios_graphics.h"
 #include "legoapi/world/mission.h"
+#include "legoapi/cutscenes/gcutscn.h"
+#include "legoapi/render/core/gameliball.h"
+#include "nu2api/nu3d/nu3d_includes.h"
 
 
 
-i32 FindTexAnimFromMtl(nugscn_s *, numtl_s *);
 
-void instGetLookAtLocatorInfo(instNUGCUTSCENE_s *instance, instNUGCUTLOOKAT_s *opaque_state);
 
-i32 instNuGCutSceneSwapBuffers(instNUGCUTSCENE_s *instance, i32 force);
 
-void instNuGCutSceneResetCamLock(instNUGCUTSCENE_s *instance);
 
-void instNuGCutSceneEndButNotSystems(instNUGCUTSCENE_s *instance);
 
 // ==== src/legoapi/cutscenes/cutscene.cpp: declarations ====
 
@@ -138,10 +136,6 @@ struct NUGCUTCHAR_s;
 struct NUGCUTRIGID_s;
 struct instNUGCUTRIGID_s;
 
-void NewCopyAnims(instNUGCUTSCENE_s *);
-i32 instNuGCutSceneSwapBuffers(instNUGCUTSCENE_s *, i32);
-NUGCUTSCENE_s *RelocateCutScene(NUGCUTSCENE_s *, VARIPTR *);
-extern "C" void instNuGCutSceneDestroy(instNUGCUTSCENE_s *);
 
 NUMTX cutscenecammtx = {};
 i32 cutscenecamchange = 0;
@@ -154,13 +148,8 @@ i32 CameraDOFHack = 0;
 u8 set_cutscenecammtx = 0;
 
 // --- Extern "C" block: functions with confirmed C linkage in original libTTapp.so ---
-extern "C" StateAnim *StateAnimFixPtrs(StateAnim *, isize);
-extern "C" i32 StateAnimEvaluate(StateAnim *, u8 *, u8 *, f32);
 extern "C" {
-    extern i32 NuGCutDebFixUp_SearchAllPages;
-    extern NUGCUTLOCATORFNENTRY_s *locatorfns;
 }
-void NuGCutRigidCalcMtx(NUGCUTRIGID_s *, f32, numtx_s *);
 
 DECOMP_ASSERT(sizeof(CutSceneTriggerNameEntry) == 0x34, "cutscene trigger name entry stride");
 DECOMP_ASSERT(offsetof(CutSceneTriggerNameTable, entries) == 0x0c, "cutscene trigger name table entries offset");
@@ -349,9 +338,7 @@ extern "C" {
     NUGCUTLOOKUPLOCATORVFXFN LookupLocatorVfxFn = NULL;
 
 
-void instNuGCutSceneStart(instNUGCUTSCENE_s *instance);
 
-void instNuGCutSceneDestroy(instNUGCUTSCENE_s *instance);
 
 } // extern "C"
 
@@ -360,9 +347,6 @@ struct NUGCUTLOCATORSYS_s;
 struct instNUGCUTLOCATOR_s;
 struct NUGCUTLOCATOR_s;
 struct numtx_s;
-extern "C" void NuAnimData2CalcTime(nuanimdata2_s *, f32, nuanimtime_s *);
-extern "C" void instNuGCutLocatorUpdate(instNUGCUTSCENE_s *, NUGCUTLOCATORSYS_s *, instNUGCUTLOCATOR_s *,
-                                        NUGCUTLOCATOR_s *, f32, NUMTX *, i32);
 
 
 
@@ -376,7 +360,6 @@ static INST_LOCATOR_SYS_END_ATTR void instNuGCutLocatorSysEnd(instNUGCUTLOCATORS
                                                               NUGCUTLOCATORSYS_s *system)
     __asm__("_ZL23instNuGCutLocatorSysEndP22instNUGCUTLOCATORSYS_sP18NUGCUTLOCATORSYS_sf.isra.8");
 
-void instNuGCutSceneEndFirstFrame(instNUGCUTSCENE_s *instance);
 
 
 
@@ -396,13 +379,11 @@ static inline NUGCUTSCENE_s *instNuGCutSceneCurrentStreamBuffer(instNUGCUTSCENE_
 
 static __used__ void instNuGCutTriggerSysUpdate(instNUGCUTSCENE_s *instance, float frame);
 
-void NewCopyAnims(instNUGCUTSCENE_s *instance);
 
 
 // ==== src/legoapi/cutscenes/cutscene_stubs.cpp: declarations ====
 
 
-void instNuGCutSceneResetCamLock(instNUGCUTSCENE_s *);
 
 extern "C" {
     CutSceneCleanUpEntry *DefragCutSceneList;
@@ -415,23 +396,10 @@ extern "C" {
     void *(*DefragCreateInstFn)(void *, NUGCUTSCENE_s *, VARIPTR *);
     void (*DefragInstDestroyedFn)(void *);
     i32 DefragCutSceneListSize;
-    extern NUGCUTLOCATORFNENTRY_s *locatorfns;
-    extern f32 timeincrement;
-    extern i32 processdeb;
-    extern f32 glyntestha;
 
-    void NuAnimData2CalcTime(nuanimdata2_s *, f32, nuanimtime_s *);
-    void instNuGCutSceneStart(instNUGCUTSCENE_s *);
 
-    i32 AddScaledVariableShotDebrisEffect2(i32, NUVEC *, i32, f32, NUMTX *, NUMTX *, f32);
-    void DebrisPopulateInstance(i32, f32);
-    void DebrisEmitterPos(i32, f32, f32, f32);
-    void DebrisOrientationMtx(i32, NUMTX *);
-    void AddScaledFiniteShotDebrisEffect(i32 *, i32, NUVEC *, NUVEC *, NUVEC *, i32, f32);
-    void DebrisEmitterOrientationMtx(i32, NUMTX *);
 }
 
-void instGetLookAtLocatorInfo(instNUGCUTSCENE_s *instance, instNUGCUTLOOKAT_s *state);
 
 // Steers a cutscene character's eyes towards a look-at locator and blinks its eyelids.
 // Only version-3 locator animations carry the look and blink channels.
@@ -452,9 +420,6 @@ extern "C" {
     // Aligned four-float row used for retail's movaps matrix copies.
     typedef f32 LocatorMtxRow __attribute__((vector_size(16)));
 
-void instNuGCutLocatorUpdate(instNUGCUTSCENE_s *instance, NUGCUTLOCATORSYS_s *system,
-                                 instNUGCUTLOCATOR_s *inst_locator, NUGCUTLOCATOR_s *locator, f32 frame,
-                                 NUMTX *parent_mtx, i32 paused);
 
 } // extern "C"
 
@@ -572,7 +537,6 @@ extern "C" {
     // Animation / curves / data
     // ---------------------------------------------------------------------------
 
-void NuAnimData2CalcTime(nuanimdata2_s *anim, f32 frame, nuanimtime_s *time);
 
 
     // ---------------------------------------------------------------------------
@@ -686,13 +650,10 @@ extern "C" {
     // four-samples-per-word curve stream. Only groups enabled by the node's
     // translation/rotation/scale flags occupy space in that stream.
 
-i32 StateAnimEvaluate(StateAnim *state, u8 *index, u8 *value, f32 frame);
 
-StateAnim *StateAnimFixPtrs(StateAnim *state, isize delta);
 
 } // extern "C"
 
-i32 FindTexAnimFromMtl(nugscn_s *scene, numtl_s *material);
 
 // ==== src/legoapi/ai/core/ai_sys_stubs.cpp: all remaining content ====
 
@@ -742,13 +703,10 @@ extern "C" {
 
 
 extern "C" {
-    void instNuGCutSceneStart(instNUGCUTSCENE_s *);
-    void instNuGCutSceneDestroy(instNUGCUTSCENE_s *);
 }
 
 
 extern "C" {
-    extern instNUGCUTSCENE_s *cutscene_load_instance;
 }
 
 // Retail only keeps the split-out body of the IPA-SRA clone (the unused
@@ -762,7 +720,6 @@ extern "C" {
 // The loop re-reads the active cut through CutStopInfo after each SmartTextEx call.
 #define CUT_STOP static_cast<CUTINFO *>(CutStopInfo)
 
-NUGCUTSCENE_s *RelocateCutScene(NUGCUTSCENE_s *source, variptr_u *buffer);
 
 // ==== functions in original address order ====
 
@@ -773,7 +730,6 @@ static __attribute__((noinline)) void instNuGCutSceneClipTest(instNUGCUTSCENE_s 
 extern "C" {
 
 
-void instNuGCutSceneStart(instNUGCUTSCENE_s *instance);
 
 }
 
@@ -787,7 +743,6 @@ extern "C" {
 
 extern "C" {
 
-void instNuGCutSceneDestroy(instNUGCUTSCENE_s *instance);
 
 }
 
@@ -796,9 +751,6 @@ extern "C" {
 }
 
 extern "C" {
-void instNuGCutLocatorUpdate(instNUGCUTSCENE_s *instance, NUGCUTLOCATORSYS_s *system,
-                                 instNUGCUTLOCATOR_s *inst_locator, NUGCUTLOCATOR_s *locator, f32 frame,
-                                 NUMTX *parent_mtx, i32 paused);
 
 }
 

@@ -32,31 +32,24 @@
 #include "legoapi/characters/core/players.h"
 #include "gameapi/gui/apimenu.h"
 #include "legoapi/world/levels/levels.h"
+#include "legoapi/characters/motion/move.h"
+#include "legoapi/gizmos/object/gizpanel.h"
+#include "legoapi/gizmos/transport/tubes.h"
+#include "legoapi/items/collect/thermaldetonators.h"
+#include "legoapi/menus/core/hint.h"
+#include "legoapi/props/objects/zipup.h"
 
 LSW_HINTCONDITIONS_s LSW_HintConditions;
 HINTSYS_s hintsys = {};
-extern HINTUIBUTTON_s * hintUIButton;
-extern f32 AlphaBlendTime;
-extern f32 ICONXPOS_TOUCHYFEELY;
-extern f32 ICONYPOS_TOUCHYFEELY;
-extern f32 ICONXPOS_VIRTUALS;
-extern f32 ICONYPOS_VIRTUALS;
-extern f32 (*Hint_AlphaTargetFn)();
-extern i32 (*Hub_PanelBusyFn)();
-extern i32 only_process_this_hint_id;
-void Hint_SetHint(HINT_s *, i32, i32);
 
 extern "C" i32 editor_active, CutSceneWaiting, PANELOFF;
-void MechHintUIButton_OnClick_Callback(MechTouchUIElement &, TouchHolder &);
 
 #include "legoapi/menus/core/gamehint_types.h"
 DECOMP_ASSERT(sizeof(MechHintUIButton) == 0xa8, "MechHintUIButton size");
 DECOMP_ASSERT(offsetof(MechHintUIButton, pending_hint) == 0x7c, "Pending touch hint offset");
 DECOMP_ASSERT(offsetof(MechHintUIButton, display_elapsed) == 0x80, "Touch hint display timer offset");
 
-void MechHintUIButton_OnClick_Callback(MechTouchUIElement &element, TouchHolder &);
 
-void initHintSys();
 
 void MechHintUIButton::Render() {
     if (NewMode != 0 || NewLData != NULL)
@@ -155,21 +148,13 @@ void MechHintUIButton::Process(float elapsed) {
         StartPulse();
 }
 
-void CLEAR_HINT_COMPLETE(i32 hint_id);
-i32 HINT_COMPLETE(i32 hint_id);
-void SET_HINT_COMPLETE(i32 hint_id);
-void Hint_SaveGameState(HINT_s *hint);
-void initHintSys();
-void Hint_Reset();
 
 void Hint_Process(float elapsed);
 
-void Hint_SetHint(HINT_s *hint, i32 force, i32 allow_completed);
 
 
 
 
-void Hint_ResetHint(i32 hint_id, i32 reset_completed);
 
 
 
@@ -178,17 +163,11 @@ void Hint_ResetHint(i32 hint_id, i32 reset_completed);
 
 void Hint_CancelCurrent();
 
-void Hint_ExpandButtons(char *input, char *output);
 
-void Hint_SaveGameState(HINT_s *hint);
 
-void Hint_SetHintFromId(i32 hint_id, i32 force, i32 allow_completed);
 
-void Hint_SaveAllGameState();
 
-void Hint_LoadAllGameState();
 
-void Hint_ClearHintsAndDoneFlags();
 
 
 // Static game message and hint helpers. Stubbed to satisfy the symbol baseline.
@@ -215,15 +194,11 @@ static __attribute__((noinline, noclone)) void DrawHint_LSWBody(HINT_s *hint, i3
     __asm__("_Z12DrawHint_LSWP6HINT_si.part.19");
 
 
-void DrawHint_LSW(HINT_s *hint, i32 max_lines);
 
-i32 Dodge_UpdateHint(HINT_s *hint);
 
-i32 DragBomb_UpdateHint(HINT_s *hint);
 
 // Original local callbacks referenced by Hints_LSW.
 extern u8 show_lever_hint;
-extern i32 show_autojump_hint;
 
 static __used__ i32 Jump_UpdateHint(HINT_s *hint);
 
@@ -241,16 +216,12 @@ u8 show_hatmachine_hint;
 
 static __used__ i32 HatMachine_UpdateHint(HINT_s *hint);
 
-extern HINTUIBUTTON_s *hintUIButton;
 
-extern HINT_s Hints_LSW[55];
 void RegisterWithHintSys(void (*)(HINT_s *, i32), HINT_s *, u32 *, i32);
 i32 id_HINT_LSW_AUTOJUMP = -1;
 i32 id_HINT_LSW_AUTOJUMP_FAIL = -1;
 
-i32 SmartBomb_UpdateHint(HINT_s *);
 
-i32 ShinyMetal_UpdateHint(HINT_s *hint);
 
 
 static __used__ i32 Sith_UpdateHint(HINT_s *);
@@ -262,9 +233,7 @@ static __used__ i32 UnlockHubStuff_UpdateHint(HINT_s *hint);
 static __used__ i32 PlayerButton_UpdateHint(HINT_s *hint);
 
 i32 GizForce_UpdateHint(HINT_s *);
-i32 ZipUps_UpdateHint(HINT_s *);
 i32 Push_UpdateHints(HINT_s *);
-i32 GizPanel_UpdateHint(HINT_s *);
 i32 Shop_UpdateHint(HINT_s *);
 HINT_s Hints_LSW[55] = {
     {{356, 356}, 12, {255, 0, 0}, 0, 6.0f, 2.0f, {NULL}, NULL, {0, 0, 0, 0}, 0.0f},

@@ -73,3 +73,12 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
+
+// Declared here for the other units that use them.
+struct AIPATHCNX_s;
+struct GRAPPLE_s;
+struct GameObject_s;
+GRAPPLE_s *Grapple_AddDynamic(void *, i32);
+GameObject_s *Grapple_Occupied(GRAPPLE_s *, GameObject_s *, AIPATHCNX_s *);
+void Grapple_MoveCode(GameObject_s *);
+void Grapple_RemoveDynamic(void *);

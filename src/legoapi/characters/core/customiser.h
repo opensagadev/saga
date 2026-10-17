@@ -31,3 +31,16 @@ CUSTOMISER *Customiser_Configure(char *filename, VARIPTR *buffer, VARIPTR *end, 
 CUSTOMPIECE *Customiser_FindPieceByName(CUSTOMISER *customiser, char *name, i32 *category, i32 *index);
 void Customiser_AddPartAccessories(CUSTOMISER *customiser, GameObject_s *object, i32 animation, i32 mode, float scale);
 extern i32 customiser_quit;
+
+// Declared here for the other units that use them.
+struct CHARACTERMODEL_s;
+struct CUSTOMISER;
+struct GameObject_s;
+struct WORLDINFO_s;
+struct numtx_s;
+extern void Customiser_LoadAll(CUSTOMISER *, WORLDINFO_s *);
+extern void Customiser_SaveModelTextureIDs(CUSTOMISER *customiser, CHARACTERMODEL_s *model);
+extern void Customiser_Set100PercentPieces(CUSTOMISER *);
+extern void Customiser_SetAnimsToLoad(CUSTOMISER *, i32);
+void Customiser_DrawAccessories(CUSTOMISER *, GameObject_s *, numtx_s *);
+void Customiser_DumpAll(CUSTOMISER *, WORLDINFO_s *);

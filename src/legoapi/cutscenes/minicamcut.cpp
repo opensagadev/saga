@@ -98,6 +98,7 @@
 #include "nu2api/numath/numath.h"
 #include "nu2api/nu3d/nuprim.h"
 #include "nu2api/nu3d/nupostparams.h"
+#include "legoapi/characters/motion/camera.h"
 
 void FindAnglesXY(nuvec_s *, u16 *, u16 *);
 MINICAM_s MiniCam = {};
@@ -114,20 +115,13 @@ MINICAM_s MiniCam = {};
 
 void Hint_CancelCurrent(void);
 
-extern VIEWCAM_s ViewCam;
 // Original data symbol testmovef is float0.005 at 0x617cb0.
-extern f32 testmovef;
 
 DECOMP_ASSERT(sizeof(VIEWCAM_s) == 0x28, "ViewCam size");
 DECOMP_ASSERT(offsetof(VIEWCAM_s, pitch) == 0x10, "ViewCam pitch offset");
 DECOMP_ASSERT(offsetof(VIEWCAM_s, gamepad) == 0x24, "ViewCam gamepad offset");
 
-void GameCameraMakeMiniCut(nugspline_s *spline, f32 start, f32 end, f32 blend_in, f32 blend_out, i32 borders,
-                           i32 hold_until_players_move);
 
-extern nugspline_s ObstacleCamCutSpline;
-extern i32 ObstacleCamTargetGuid;
-extern NUVEC ObstacleCamCutPts[2];
 
 
 nugspline_s ObstacleCamCutSpline;

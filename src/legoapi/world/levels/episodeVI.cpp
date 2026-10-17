@@ -44,7 +44,11 @@
 #include "nu2api/nu3d/nudlist.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nutex.h"
-extern i32 testlaser_type;
+#include "legoapi/audio/radio.h"
+#include "legoapi/characters/motion/move.h"
+#include "legoapi/gizmo/object/gizbuildit.h"
+#include "legoapi/render/core/gameliball.h"
+#include "legoapi/world/levels/episodeVI.h"
 extern f32 testlaser_sizew, testlaser_sizel, testlaser_sizewab, testlaser_endw;
 
 struct AIROW_s;
@@ -107,9 +111,6 @@ f32 disco_base_offset = -0.12f;
 f32 sarlaccdiscotime = 40.0f;
 f32 discoheightseek = 2.0f;
 f32 discoheight = 1.27f;
-void PlayRadio(char *, char *, i32);
-i32 GizBuildIt_AtEnd(GIZBUILDIT_s *);
-void SarlaccPitB_SpecialUpdate(WORLDINFO_s *);
 GIZMO *obstMirrorBall;
 GIZMO *forceMirrorBall;
 nuhspecial_s LevSpecial[7];
@@ -234,11 +235,7 @@ f32 runningTotalPos;
 f32 fireSpeedScale;
 f32 fireDeltaPos;
 i32 fire_clip_dist = 1000;
-extern void (*LEGO_SET_SLOWDOWNFN)(GameObject_s *);
-void DeathStar2BattleFire_SetSlowDownMul(GameObject_s *object);
-void DeathStar2BattleFire_UpdateSlowDownMul(f32 dt);
 extern i32 objhitobj_nohurtsfx, objhitobj_noimpactsfx;
-extern "C" void AddVariableShotDebrisEffectTimed3(i32, NUVEC *, NUVEC *, i32, f32, NUMTX *, NUMTX *);
 
 
 

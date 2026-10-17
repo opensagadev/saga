@@ -3,14 +3,12 @@
 #include "gamelib/util/gamelib_util_types.h"
 #include "legoapi/items/base/apiobject.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/characters/core/character.h"
 
 extern "C" {
-    extern i16 id_BASKETCANNON;
     extern i16 id_STAP;
     extern i16 id_STAP2;
     extern i16 id_TROOPERCANNON;
-    extern i16 id_CANNON;
-    extern i16 id_MOSCANNON;
     extern i16 id_ATST;
     extern i16 id_BIGGUN;
 }

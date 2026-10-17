@@ -55,10 +55,11 @@
 #include "legoapi/world/levels/levels.h"
 #include "legoapi/world/mission.h"
 #include "nu2api/nusound/nusound.h"
+#include "MechInputTouch/MechInputTouchMenuController.h"
+#include "MechInputTouch/MechInputTouchVirtualConsoleController.h"
+#include "nu2api/nusound/nusound3_include.h"
 
-extern "C" void NuSound3AddRumble(nupad_s *, f32, i32, i32, f32);
 extern i32 (*GamePads_IgnoreInputFn)(void);
-extern NUPAD *pActivePad;
 extern "C" {
     extern "C++" FadeSystem FadeSys;
     extern i32 CutSceneWaiting;
@@ -102,13 +103,9 @@ static i32 RotationDistance(i32 difference) {
 
 
 
-void VirtualControlDPad_OnDown_Callback(MechTouchUIElement &element, TouchHolder &touch);
 
-void VirtualControlButton_OnDown_Callback(MechTouchUIElement &, TouchHolder &);
 
-void VirtualControlButtonMover_OnDown_Callback(MechTouchUIElement &element, TouchHolder &touch);
 
-void VirtualControlDPad_LockButton_OnClick_Callback(MechTouchUIElement &element, TouchHolder &);
 
 
 

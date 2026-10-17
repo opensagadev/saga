@@ -155,8 +155,12 @@
 #include "nu2api/nu3d/nuportal.h"
 #include "nu2api/nu3d/nulgtlaser.h"
 #include "legoapi/items/objects/gameobjects_types.h"
+#include "MechInputTouch/MechTouchUIElements.h"
+#include "legoapi/actions/character/legoapi_tag.h"
+#include "legoapi/actions/character/tagging.h"
+#include "nu2api/nu3d/nu3d_includes.h"
+#include "nu2api/nuandroid/ios_device.h"
 
-void RndrTexQuad(f32, f32, f32, f32, i32, numtl_s *, i32);
 
 extern "C" i32 CutSceneWaiting;
 extern "C" i32 editor_active;
@@ -169,15 +173,6 @@ extern "C" {
     i32 procActive;
 }
 
-void PlayerButton_OnClick_Callback_NextButton(MechTouchUIElement &, TouchHolder &);
-void PlayerButton_OnHold_Callback(MechTouchUIElement &, TouchHolder &);
-void PlayerButton_OnLeave_Callback(MechTouchUIElement &, TouchHolder &);
-void MechTouchUIPauseButton_OnClick_Callback(MechTouchUIElement &, TouchHolder &);
-void MechTouchUIPartySelector_OnRelease_Callback(MechTouchUIElement &, TouchHolder &);
-void MechTouchUITagButton_OnClick_Callback(MechTouchUIElement &, TouchHolder &);
-extern "C" i32 NuIOS_IsSmallScreen(void);
-i32 TagCode(GameObject_s *, GameObject_s *, i32, i32, i32);
-void Tag_NewTransfer(GameObject_s *, GameObject_s *);
 
 bool MechInputTouchGestureTracker::OnDown(GameObject_s &, TouchHolder &) {
     return false;
@@ -212,14 +207,9 @@ void MechTouchUIElement::Render() {
 // ==== src/MechInputTouch/MechInputTouch.cpp: declarations ====
 
 
-void PerformPauseButtonStuff();
-void TakeOver2GetIn(GameObject_s *, GameObject_s *);
 
-void MechTouchUITagButton_OnClick_Callback(MechTouchUIElement &element, TouchHolder &);
 
-void MechTouchUIPauseButton_OnClick_Callback(MechTouchUIElement &element, TouchHolder &);
 
-void MechTouchUIPartySelector_OnRelease_Callback(MechTouchUIElement &element, TouchHolder &);
 
 // ==== src/legoapi/actions/combat/hits.cpp: declarations ====
 
@@ -240,11 +230,8 @@ struct TouchHolder;
 // ---- Misc player/gameobject helpers relocated from doorstubs.cpp ----
 
 
-void PlayerButton_OnHold_Callback(MechTouchUIElement &element, TouchHolder &);
 
-void PlayerButton_OnLeave_Callback(MechTouchUIElement &element, TouchHolder &holder);
 
-void PlayerButton_OnClick_Callback_NextButton(MechTouchUIElement &element, TouchHolder &);
 
 namespace {
 
@@ -389,7 +376,6 @@ static inline void TexQuadSubmit(NUVEC const &point, i32 colour, i32 u, i32 v) {
     }
     NuPrim2DAddXYZ(static_cast<f32>(PS2_VREZ_W) * point.x, static_cast<f32>(PS2_VREZ_H) * point.y, 0.0f);
 }
-void RndrTexQuad(f32 x, f32 y, f32 width, f32 height, i32 colour, numtl_s *material, i32 angle);
 
 static inline void TexQuadSubmit3D(f32 x, f32 y, i32 colour, i32 u, i32 v) {
     VARIPTR *stream = g_NuPrim_StreamBufferPtr;
@@ -419,9 +405,7 @@ static inline void TexQuadSubmit3D(f32 x, f32 y, i32 colour, i32 u, i32 v) {
 //   NuHtmlBegin    0x2d5ca0   NuHtmlFlush   0x2d5c30
 //   NuHtmlWrite    0x2d5cd0   NuHtmlHeading1 0x2d5d40
 
-void NuHtmlFlush(i32 force);
 
-extern "C" void NuHtmlBegin(void *file);
 
 
 

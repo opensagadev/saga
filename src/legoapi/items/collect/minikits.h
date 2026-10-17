@@ -20,3 +20,9 @@ void ResetMinikitCounter(void);
 void IncrementMinikitCounter(GameObject_s *object);
 void MiniKit_GameMsg_Update(GAMEMESSAGE_s *message);
 void MiniKit_GameMsg_End(GAMEMESSAGE_s *message);
+
+// Declared here for the other units that use them.
+struct numtx_s;
+extern char *LEGOASCII_BIGARROW;
+extern f32 KITPOS2X;
+void CharMiniKit_Draw(i32, numtx_s *, i32, f32, f32);

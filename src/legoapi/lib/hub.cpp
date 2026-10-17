@@ -112,6 +112,8 @@
 #include "nu2api/nucore/nugcutscene.h"
 #include "nu2api/nucore/nuhgobj.h"
 #include "legoapi/items/objects/gameobjects_types.h"
+#include "legoapi/misc/androidbatman.h"
+#include "nu2api/nu3d/nu3d_includes.h"
 
 // Original bss @0x127a164.
 TIMER GlobalTimer;
@@ -136,10 +138,6 @@ static TIMINGBAR_LABEL GameTB[12];
 static TIMINGBAR_LABEL PlayerTB[12];
 static TIMINGBAR_LABEL AITB[12];
 static TIMINGBAR_LABEL DrawTB[12];
-extern i32 app_tbgameset;
-extern i32 app_tbplayerset;
-extern i32 app_tbaiset;
-extern i32 app_tbdrawset;
 
 static inline void TBSTART(i32 slot, i32 type) {
     i32 set;
@@ -188,9 +186,7 @@ static inline void TBEND(i32 slot, i32 type) {
 //   NuHtmlBegin    0x2d5ca0   NuHtmlFlush   0x2d5c30
 //   NuHtmlWrite    0x2d5cd0   NuHtmlHeading1 0x2d5d40
 
-void NuHtmlFlush(i32 force);
 
-extern "C" void NuHtmlBegin(void *file);
 
 
 

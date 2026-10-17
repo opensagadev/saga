@@ -51,3 +51,7 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
+
+// Declared here for the other units that use them.
+struct GameObject_s;
+void ReleaseLever(GameObject_s *);

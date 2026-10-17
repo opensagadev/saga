@@ -16,13 +16,12 @@
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nucore/nupad.h"
 #include "nu2api/numath/nutrig.h"
+#include "legoapi/ai/game/creature.h"
+#include "legoapi/characters/motion/move.h"
 
 struct AIROW_s;
 struct nunativegscene_s;
 
-void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *data);
-void ReleaseEat(GameObject_s *object);
-void AICreatureResumeScript(GameObject_s *object);
 
 void StartDropIn(GameObject_s *object) {
     if (WORLD->current_level == PODSPRINTA_LDATA || (PODRACE_ADATA != NULL && PODRACE_ADATA == WORLD->area)) {

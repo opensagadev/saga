@@ -29,3 +29,16 @@ i32 GizmoPickup_NumberOfType(WORLDINFO_s *world, i32 type_index, char type_code)
 u32 GizmoPickups_TotalScore(void *world);
 
 #endif
+
+// Declared here for the other units that use them.
+struct COINPACKET_s;
+struct GIZMOPICKUP_s;
+struct GameObject_s;
+struct PART_s;
+struct WORLDINFO_s;
+GIZMOPICKUP_s *GizmoPickups_Collide(WORLDINFO_s *, GameObject_s *, i32);
+void GizmoPickup_TurnOnPickup(GIZMOPICKUP_s *pickup);
+void GizmoPickups_PostLoad(void *, void *);
+void PartUpdate_Heart(PART_s *);
+void ResetCoinPacket(COINPACKET_s *);
+void SetAreaPickupGravity(i32 area, i32 level);

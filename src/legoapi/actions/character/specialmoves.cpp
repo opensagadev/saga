@@ -13,13 +13,13 @@
 #include <string.h>
 
 #include "legoapi/actions/character/specialmoves_types.h"
+#include "legoapi/actions/movement/jumping.h"
 DECOMP_ASSERT(sizeof(SPECIALMOVE_s) == 0x10, "SPECIALMOVE size");
 DECOMP_ASSERT(offsetof(SPECIALMOVE_s, victim_animation) == 8, "SPECIALMOVE victim animation offset");
 DECOMP_ASSERT(offsetof(SPECIALMOVE_s, flags) == 10, "SPECIALMOVE flags offset");
 static SPECIALMOVE_s *SpecialMove;
 static i32 SpecialMoveCount;
 
-i32 StartBackFlip(GameObject_s *object);
 extern i32 objhitobj_throwkillpartsup;
 
 i32 SpecialMove_Check(GameObject_s *attacker, GameObject_s *victim) {
@@ -226,4 +226,3 @@ void SpecialMove_Attacker_SetTargetMom(GameObject_s *object) {
     object->apiobj.velocity.x = object->target_velocity.x;
 }
 
-void BackFlipCode(GameObject_s *object);

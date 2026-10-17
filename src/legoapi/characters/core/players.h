@@ -176,3 +176,16 @@ extern "C" void ComplexSockPosition(SOCKSYS *sock_sys, NUVEC *position, i32 prio
 void *CutScenePlayer_Available(void);
 
 i32 KillPlayer(GameObject_s *player, i32 cause, i32 unknown, struct nuvec_s *);
+
+// Declared here for the other units that use them.
+struct BOLT_s;
+struct GameObject_s;
+struct PLAYERPACKET_s;
+extern i32 LIFTPLAYER;
+extern void Player_ClearContext(GameObject_s *object, i32 mode);
+extern void Player_ResetContexts(PLAYERPACKET_s *packet);
+extern void SetPlayer();
+i32 CanWearHatsInFreePlay(i32 character_id);
+i32 Player_HasDeflectBolts(GameObject_s *);
+i32 Player_HasDoubleBoltDamage(GameObject_s *object);
+i32 Player_HasDoubleBoltDamage_FromBolt(BOLT_s *);

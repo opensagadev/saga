@@ -18,6 +18,7 @@
 #include "nu2api/nu3d/nuocclusion.h"
 #include "nu2api/nu3d/android/nutimebar_plain.h"
 #include "nu2api/nucore/nuonline.h"
+#include "nu2api/nucore/nucore_includes.h"
 
 extern "C" i32 Nu360GetCommandLine(char **arguments, i32 capacity) {
     i32 i;
@@ -81,8 +82,6 @@ void (*preRenderFlashingHack)(void) = NULL;
 void (*postRenderFlashingHack)(void) = NULL;
 void (*nuapi_endframe_callbackfn)(void) = NULL;
 
-extern float nuapi_forced_frame_time;
-extern i32 nuapi_max_fps;
 
 // The Android command-line provider is empty. These are still the original
 // private cursors consumed by ParseCommandLine, not host process arguments.

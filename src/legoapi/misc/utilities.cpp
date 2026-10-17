@@ -290,24 +290,27 @@
 #include "nu2api/nusound/nusound.h"
 #include "nu2api/nu3d/glutils.h"
 #include "legoapi/render/light/surfaces_types.h"
+#include "editor/edlevelall.h"
+#include "gameapi/ai/aisys/gameaiscript.h"
+#include "gamelib/util/Refpack.h"
+#include "legoapi/characters/motion/camera.h"
+#include "legoapi/characters/motion/move.h"
+#include "legoapi/world/levels/episodeI.h"
+#include "legoapi/world/levels/episodeII.h"
+#include "legoapi/world/levels/episodeV.h"
+#include "nu2api/nu2api2013_stubs.h"
+#include "nu2api/nu3d/nu3d_includes.h"
 
-extern i32 qseed;
-extern "C" void NuPartSetSeed(i32);
 
 
-u32 HashString(unsigned char *string);
 
 i32 i_temp_xrot;
 
-i32 getNumDigits(i32 value);
 
 
-i32 LineIntersectXY(nuvec_s *a, nuvec_s *b, nuvec_s *c, nuvec_s *d, nuvec_s *first, nuvec_s *second);
-
-f32 DistanceToLineXZ(NUVEC *position, NUVEC *first, NUVEC *second);
 
 
-f32 LineToPlaneDistance(VuVec &origin, VuVec &direction, VuVec &plane);
+
 
 
 
@@ -469,7 +472,6 @@ i64 XToI64(char *input) {
 // Retail copies a fully inside end point as one unaligned vector.
 typedef f32 RawClipVec4 __attribute__((vector_size(16), aligned(4)));
 
-i32 rawClip(VuVec const *input, VuVec *output, i32, VuVec const &plane);
 
 i32 findrange(nugscn_s *scene, i32 first_joint);
 
@@ -496,7 +498,6 @@ static inline void SplinePointAngles(NUGSPLINE *spline, i32 index, i32 looping, 
     SplinePointAnglesBody(&spline->length, &spline->pts, index, looping, pitch, angle);
 }
 
-i32 LineIntersectXY(NUVEC *, NUVEC *, NUVEC *, NUVEC *, NUVEC *, NUVEC *);
 
 // ==== src/legoapi/core/input/qrand.cpp: all remaining content ====
 
@@ -522,8 +523,6 @@ i32 qseed = 0x3039;
 #endif
 
 // Retail keeps only the IPA-SRA clone of this function.
-i32 PodLevel(AREADATA_s *);
-extern "C" i16 id_DODGEM;
 
 // Multiplies the ordinary camera's per-frame position blend.  The original
 // keeps this as writable camera state (default 1.0), rather than folding it
@@ -533,7 +532,6 @@ extern "C" {
 }
 
 
-i32 PodLevel(AREADATA_s *area);
 
 // Retail splits the guard off as an inline head; the rest is this partial clone.
 
@@ -545,7 +543,6 @@ extern "C" i16 id_LANDSPEEDER;
 
 // These pod tuning values are zero-initialized in the original image.
 
-extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 
 // Retail re-tests the three block animations at each use instead of caching a flag.
 #define HAS_BLOCK_ANIMS(animations)                                                                                    \
@@ -559,7 +556,6 @@ extern "C" {
     extern i16 id_MINIATST, id_MINIATTE;
 }
 
-void RotateGameMatrix(numtx_s *matrix, i32 order, u16 x, u16 y, u16 z);
 
 
 DECOMP_ASSERT(sizeof(AWKWARDSHAPESPHERE_s) == 12, "Awkward shape sphere size");
@@ -577,7 +573,6 @@ extern i16 id_MINIATST, id_MINIATTE;
 
 // ==== src/legoapi/world/levels/episodeV.cpp: declarations ====
 
-extern AILOCATOR_s * locator;
 
 DECOMP_ASSERT(sizeof(HOTHBATTLEE_NETPACKET_s) == 0x58, "Hoth panel packet size");
 DECOMP_ASSERT(offsetof(HOTHBATTLEE_NETPACKET_s, alpha) == 0x24, "Hoth panel packet alpha offset");
@@ -602,7 +597,6 @@ DECOMP_ASSERT(sizeof(ASTEROIDCNETPACKET_s) == 8, "asteroid C network packet size
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -777,7 +771,6 @@ DECOMP_ASSERT(sizeof(KAMINO_E_s) == 120, "Kamino E state ABI");
 // Kamino
 // ===========================================================================
 
-extern i32 last;
 
 // ===========================================================================
 // Geonosis — droid factory (Factory_B / Factory_G)
@@ -1191,14 +1184,8 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 // ==== src/legoapi/gizmo/gizmos/gizmos_gizactions.cpp: declarations ====
 
-i32 Action_ReleaseLocator(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
-                          i32 first_time, float);
 
-i32 Action_GetLocatorFromSet(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,
-                             i32 param_count, i32 first_time, float);
 
-i32 Action_AssignLocatorInSet(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
-                              i32 first_time, float);
 
 namespace {
 #include "legoapi/gizmo/gizmos/gizmos_gizactions_types.h"
@@ -1582,8 +1569,6 @@ extern "C" {
 
 // ==== src/legoapi/characters/motion/camera.cpp: declarations ====
 
-extern VIEWCAM_s ViewCam;
-extern f32 testmovef;
 
 // ==== src/legoapi/render/core/render.cpp: declarations ====
 
@@ -1693,7 +1678,6 @@ extern "C" {
 
 }
 
-void LoadPerm1();
 
 // ==== src/legoapi/menus/screens/gamemenuall.cpp: declarations ====
 
@@ -1813,7 +1797,6 @@ extern "C" {
 
 extern "C" {
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -2126,7 +2109,6 @@ static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ..
 
 
 extern EdInputContext * Input;
-extern "C" void PlaySfxById(i32, nuvec_s *);
 
 DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
 
@@ -2754,7 +2736,6 @@ extern "C" {
 
 extern "C" {
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -3209,7 +3190,6 @@ inline void SplinePointBlock::operator delete(void *memory) {
 
 // ==== src/legoapi/characters/motion/gameanim.cpp: declarations ====
 
-void SetPodMergeAnims(ANIMPACKET_s *packet, i32 index);
 
 static char **TexAnimList;
 
@@ -3245,8 +3225,6 @@ extern WORLDINFO WorldInfo[2];
 
 // ==== src/legoapi/render/core/render.cpp: declarations ====
 
-extern "C" void NuRndrRect2di(i32, i32, i32, i32, i32, numtl_s *);
-extern void RotateGameMatrix(numtx_s *matrix, i32 order, u16 x, u16 y, u16 z);
 
 f32 CameraZoom = 1.0f;
 
@@ -3317,7 +3295,6 @@ extern "C" {
 
 // ==== src/legoapi/props/objects/signal.cpp: declarations ====
 
-extern "C" void NuTexAnimSetSignals(u32 signals);
 
 // ==== src/legoapi/render/light/surfaces.cpp: declarations ====
 

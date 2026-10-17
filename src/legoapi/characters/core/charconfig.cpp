@@ -219,10 +219,9 @@
 #include "editor/antinode_editor_private.h"
 #include "nu2api/nucore/nulist.h"
 #include "editor/edtoolsall_types.h"
+#include "legoapi/render/light/surfaces.h"
 
 extern "C" {
-    extern void *perm_debrissys;
-    extern u16 SURFACEBITS_DUST;
 }
 
 static void CC_CharClipToBlobShadows(NUFPAR *parser);
@@ -908,7 +907,6 @@ static i32 CHARVARIANTCOUNT;
 
 
 
-i32 CanWearHatsInFreePlay(i32 character_id);
 
 
 CHARCONFIG_s charconfig;
@@ -917,7 +915,6 @@ i32 configureallcharacters_perm;
 f32 vehicle_timebase_dist[4] = {50.0f, 25.0f, 0.0f, 0.0f};
 i32 vehicle_timebase_nframes[4] = {4, 2, 0, 0};
 char MiniBuffer[0x4000];
-extern i32 CHARPAK;
 extern "C" char ConfigBuffer[0x10000];
 
 // Retail only keeps the clone with strip_comments fixed to 1 (regparm text, filename).
@@ -955,12 +952,10 @@ extern "C" {
 #endif
 
 
-void LoadPerm1();
 
 // ==== src/legoapi/menus/screens/gamemenuall.cpp: declarations ====
 
 
-extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 
 // Retail clears these "fast repeat" latches but never sets them.
 
@@ -1099,7 +1094,6 @@ extern "C" {
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -1405,7 +1399,6 @@ static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ..
 
 
 extern EdInputContext * Input;
-extern "C" void PlaySfxById(i32, nuvec_s *);
 
 DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
 
@@ -2013,7 +2006,6 @@ inline void ThingManager::operator delete(void *thing, usize size) {
 
 // ==== src/editor/edtoolsall.cpp: all remaining content ====
 
-i32 CanWearHatsInFreePlay(i32);
 
 extern "C" {
     i32 aisys_maxnumcreaturesets = 32;

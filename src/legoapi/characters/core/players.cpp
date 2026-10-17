@@ -224,6 +224,7 @@
 #include "editor/edtoolsall_types.h"
 #include "legoapi/items/base/animpacket.h"
 #include "legoapi/render/light/surfaces.h"
+#include "legoapi/actions/combat/whip.h"
 
 struct PLAYERPACKET_s;
 struct SOCKPOSITION_s;
@@ -241,8 +242,6 @@ PLAYERSTARTENTRY PlayerStart[8];
 
 
 void (*Player_ClearContextFn)(GameObject_s *, i32);
-void Whip_Release(GameObject_s *);
-i32 SpecialMove_ReleaseVictim(GameObject_s *);
 
 i32 FULLDEBUGTOGGLE;
 i32 LIFTPLAYER;
@@ -250,7 +249,6 @@ f32 TOGGLEREPEATTIME = 0.25f;
 i32 (*Player_ToggleSubCharacterFn)(GameObject_s *, i32, i32);
 void (*Player_ToggledCharacterFn)(GameObject_s *, i32);
 
-i32 Player_HasDoubleBoltDamage(GameObject_s *object);
 
 u32 (*CanPushObstaclesFn)(GameObject_s *) = NULL;
 
@@ -326,12 +324,10 @@ extern "C" {
 
 
 
-void LoadPerm1();
 
 // ==== src/legoapi/menus/screens/gamemenuall.cpp: declarations ====
 
 
-extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 
 // Retail clears these "fast repeat" latches but never sets them.
 
@@ -476,7 +472,6 @@ extern "C" {
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -783,7 +778,6 @@ static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ..
 
 
 extern EdInputContext * Input;
-extern "C" void PlaySfxById(i32, nuvec_s *);
 
 DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
 

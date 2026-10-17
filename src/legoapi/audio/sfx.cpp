@@ -267,38 +267,30 @@
 #include "legoapi/characters/motion/chris.h"
 #include "legoapi/actions/combat/shovesys.h"
 #include "legoapi/gizmo/base/GizObstacleObjectInterface.h"
+#include "MechInputTouch/MechInputTouchGestureBasedController.h"
+#include "editor/edlevelall.h"
+#include "gameapi/ai/aisys/gameaiscript.h"
+#include "legoapi/actions/movement/climbing.h"
+#include "legoapi/audio/specialsfx.h"
+#include "legoapi/items/fx/pulses.h"
+#include "legoapi/menus/core/hint.h"
+#include "nu2api/nu3d/nu3d_includes.h"
+#include "nu2api/nusound/nusound3_include.h"
 
 DECOMP_ASSERT(sizeof(RepeatSfx) == 0x10, "RepeatSfx size");
 
 
 extern "C" {
     SoundTable CurrentSFXTAB;
-extern void (*ExtraDieSfxFn)(GameObject_s *);
-extern void (*ExtraHurtSfxFn)(GameObject_s *);
     i32 CruiserD_LiftChase;
 }
 
-extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
-void AddLevelSfxFromName(char *sfx_name, i32 *sfx_ids, i32 *sfx_count, i32 max_sfx_count);
-void AddLevelSfxGizmoSys(GIZMOSYS_s *gizmo_sys, void *world_info, i32 *sfx_ids, i32 *sfx_count, i32 max_sfx_count);
-void SetSpecialSfxBits(i32 *sfx_ids, i32 *sfx_count, WORLDINFO_s *world);
-int SpecialSfxLoad(char *path, WORLDINFO_s *world);
-void SetupBlowupSfx(WORLDINFO_s *world, specialsfx_s *special_sfx);
-void Pulses_AddSfx(PULSESYS_s *system, i32 *sfx_ids, i32 *sfx_count, i32 max_sfx_count);
-void PlayFootStepSfx(GameObject_s *object);
 
-extern AREADATA *DAGOBAH_ADATA;
-extern AREADATA *HOTHESCAPE_ADATA;
-extern AREADATA *JABBASPALACE_ADATA;
-extern AREADATA *NEWTOWN_ADATA;
-extern AREADATA *SPEEDERCHASE_ADATA;
 extern "C" i16 id_GAMORREANGUARD;
 
-extern "C" void MenuRegisterSoundFX(i32, i32, i32, i32);
 
 extern "C" {
     void SetSoundBitsById(const i32 *sound_ids, void (*set_bit)(i32));
-    void SfxBitsStore(SoundTable *table);
 }
 
 
@@ -312,28 +304,19 @@ extern "C" {
 
 
 
-void PlaySfxById(i32 sfx_id, nuvec_s *position);
-
-void PlaySfxByIdAndSetVolume(i32 sfx_id, nuvec_s *position, f32 volume);
-
-
-void SOUND_SFXRequest_Table(void);
 
 
 
-void SfxBitsRestore(SoundTable *table);
 
-void SfxBitsStore(SoundTable *table);
+
+
+
 
 } // extern "C"
 
-void PlayDieSfx(GameObject_s *object);
 
-void PlayHurtSfx(GameObject_s *object);
 
-void PlayJumpSfx(GameObject_s *object, i32 type);
 
-void PlayLandSfx(GameObject_s *object, i32 type, i32);
 
 
 void AddFootSteps(GameObject_s *object) {
@@ -389,29 +372,19 @@ void AddFootSteps(GameObject_s *object) {
         PlayFootStepSfx(object);
 }
 
-void PlayGruntSfx(GameObject_s *object);
-
-void PlaySabreSfx(char *name, GameObject_s *object, nuvec_s *position, i32);
-
-
-void PlayRepeatSfx(char *name, i32 sfx_id, f32 initial_delay, char play_count, f32 interval, nuvec_s *position);
-
-void ResetRepeatSfx();
-
-
-void PlayFootStepSfx(GameObject_s *object);
 
 
 
-void SfxCheckMusicOnOff(OPTIONSSAVE_s *);
 
-void AddLevelSfxFromName(char *sfx_name, i32 *sfx_ids, i32 *sfx_count, i32 max_sfx_count);
 
-void AddLevelSfxGizmoSys(GIZMOSYS_s *gizmo_sys, void *world_info, i32 *sfx_ids, i32 *sfx_count, i32 max_sfx_count);
 
-void BlockSfx(GameObject_s *object);
 
-void AddLevSfx(WORLDINFO_s *world, nuvec_s *position, char *name, i32 sfx);
+
+
+
+
+
+
 
 
 
@@ -437,11 +410,9 @@ extern "C" {
 
 
 
-extern AREADATA *DEATHSTARESCAPE_ADATA;
 
 
 
-extern AREADATA *DEATHSTARRESCUE_ADATA;
 
 static i32 GameAudio_CheckReverb_LSW();
 
@@ -632,7 +603,6 @@ extern "C" {
 
 
 
-extern "C" void MenuRegisterSoundFX(i32 move, i32 select, i32 back, i32 no_entry);
 
 
 
@@ -715,7 +685,6 @@ struct VuVec;
 
 
 extern "C" {
-    void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 }
 
 
@@ -841,17 +810,13 @@ extern "C" i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
 
 // ==== src/legoapi/menus/core/gamehint.cpp: declarations ====
 
-extern f32 ICONXPOS_TOUCHYFEELY;
-extern f32 ICONYPOS_TOUCHYFEELY;
 
-void MechHintUIButton_OnClick_Callback(MechTouchUIElement &, TouchHolder &);
 
 #include "legoapi/menus/core/gamehint_types.h"
 DECOMP_ASSERT(sizeof(MechHintUIButton) == 0xa8, "MechHintUIButton size");
 DECOMP_ASSERT(offsetof(MechHintUIButton, pending_hint) == 0x7c, "Pending touch hint offset");
 DECOMP_ASSERT(offsetof(MechHintUIButton, display_elapsed) == 0x80, "Touch hint display timer offset");
 
-void MechHintUIButton_OnClick_Callback(MechTouchUIElement &element, TouchHolder &);
 
 
 
@@ -1617,16 +1582,10 @@ extern "C" {
 
 
 
-i32 Action_ReleaseLocator(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
-                          i32 first_time, float);
 
 struct GIZSPINNER_s;
 
-i32 Action_GetLocatorFromSet(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,
-                             i32 param_count, i32 first_time, float);
 
-i32 Action_AssignLocatorInSet(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
-                              i32 first_time, float);
 
 namespace {
 #include "legoapi/gizmo/gizmos/gizmos_gizactions_types.h"
@@ -1638,7 +1597,6 @@ namespace {
 
 
 
-bool IsDownSwipe(NuVec2 const &start, NuVec2 const &end);
 
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e4) == 0x7e4, "Quick shoot record offset");
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e8) == 0x7e8, "Quick shoot record count offset");
@@ -1676,7 +1634,6 @@ extern "C" {
 // Graphics loading flags
 
 extern "C" {
-    void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 }
 
 // --- NuGScn graphics-data reader ---
@@ -2022,7 +1979,6 @@ extern "C" {
 
 
 extern "C" {
-    extern i32 edbits_part_level_page;
 }
 
 extern "C" {
@@ -2090,7 +2046,6 @@ struct rtlset;
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -2170,7 +2125,6 @@ extern "C" {
     if (type->sounds[slot] != -1 && type->sound_modes[slot] == (mode))                                                 \
         PlaySfxById(type->sounds[slot], &emitter->position);
 
-extern "C" void PlaySfxByIdAndSetVolume(i32, NUVEC *, f32);
 
 
 
@@ -2507,15 +2461,12 @@ static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ..
 #endif
 
 extern EdInputContext * Input;
-extern "C" void PlaySfxById(i32, nuvec_s *);
 
-void SerialiseString(EdStream &, void *, i32);
 
 extern f32 Scale;
 DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
 
 extern "C" {
-    extern i32 edpp_readout;
 }
 
 
@@ -2808,7 +2759,6 @@ extern "C" {
 
 
 
-void MenuRegisterSoundFX(i32 move, i32 select, i32 back, i32 no_entry);
 
 
 
@@ -2984,7 +2934,6 @@ extern "C" {
 
 
 
-void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
     DECOMP_ASSERT(sizeof(NuInstanceTreeNode) == 0x0c, "instance tree node stride");
     DECOMP_ASSERT(sizeof(NuInstanceTreeBounds) == 0x20, "instance tree bounds stride");
     DECOMP_ASSERT(sizeof(NuInstanceTree_s) == 0x28, "instance tree size");
@@ -3151,7 +3100,6 @@ DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context fl
 
 extern void (*FS_Callback)(char *, char *);
 
-void SerialiseString(EdStream &stream, void *data, i32 count);
 
 // Retail keeps the whole body of RenderFileSel3 as the split-out .part clone;
 // the exported function only tests FS_Active.
@@ -3166,7 +3114,6 @@ extern "C" void StartFileSel(char *title, char *path, char *filter, char *filter
                              void (*callback)(char *, char *));
 
 
-i32 LoadState(i32, variptr_u *, variptr_u *, variptr_u *, variptr_u *, variptr_u *, variptr_u *);
 
 extern "C" {
 
@@ -3184,7 +3131,6 @@ extern "C" {
 // Graphics loading flags
 
 extern "C" {
-    void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 }
 
 // --- NuGScn graphics-data reader ---
@@ -3618,7 +3564,6 @@ extern "C" {
 
 
 
-void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
     DECOMP_ASSERT(sizeof(NuInstanceTreeNode) == 0x0c, "instance tree node stride");
     DECOMP_ASSERT(sizeof(NuInstanceTreeBounds) == 0x20, "instance tree bounds stride");
     DECOMP_ASSERT(sizeof(NuInstanceTree_s) == 0x28, "instance tree size");
@@ -3799,7 +3744,6 @@ extern "C" {
 
 
 
-void MenuRegisterSoundFX(i32 move, i32 select, i32 back, i32 no_entry);
 
 
 
@@ -3828,7 +3772,6 @@ void MenuRegisterSoundFX(i32 move, i32 select, i32 back, i32 no_entry);
 // Graphics loading flags
 
 extern "C" {
-    void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 }
 
 // --- NuGScn graphics-data reader ---
@@ -4028,7 +3971,6 @@ void TextRegisterPulseTimerFn(f32 (*fn)(f32));
 
 
 extern "C" {
-    extern i32 edbits_part_level_page;
 }
 
 extern "C" {
@@ -4093,7 +4035,6 @@ extern "C++" TERRAIN_TRACK_SLOT *AllocTerrId();
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -4329,7 +4270,6 @@ static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u
 #endif
 
 extern "C" {
-    extern i32 edpp_readout;
 }
 
 extern "C" {
@@ -4525,7 +4465,6 @@ extern "C" {
 
 
 
-void MenuRegisterSoundFX(i32 move, i32 select, i32 back, i32 no_entry);
 
 
 
@@ -4698,7 +4637,6 @@ extern "C" {
 
 
 
-void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
     DECOMP_ASSERT(sizeof(NuInstanceTreeNode) == 0x0c, "instance tree node stride");
     DECOMP_ASSERT(sizeof(NuInstanceTreeBounds) == 0x20, "instance tree bounds stride");
     DECOMP_ASSERT(sizeof(NuInstanceTree_s) == 0x28, "instance tree size");
@@ -4790,7 +4728,6 @@ extern "C" {
 // Graphics loading flags
 
 extern "C" {
-    void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 }
 
 // --- NuGScn graphics-data reader ---
@@ -5224,7 +5161,6 @@ extern "C" {
 
 
 
-void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
     DECOMP_ASSERT(sizeof(NuInstanceTreeNode) == 0x0c, "instance tree node stride");
     DECOMP_ASSERT(sizeof(NuInstanceTreeBounds) == 0x20, "instance tree bounds stride");
     DECOMP_ASSERT(sizeof(NuInstanceTree_s) == 0x28, "instance tree size");
@@ -5314,7 +5250,6 @@ extern "C" {
 extern "C" {
 
 
-void MenuRegisterSoundFX(i32 move, i32 select, i32 back, i32 no_entry);
 
 
 
@@ -5405,7 +5340,6 @@ extern "C" {
 
 
 
-void LevelComplete_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32);
 
 
 
@@ -5431,7 +5365,6 @@ extern "C" {
 // Retail keeps the active-stage drawing as the split-out .part clone of
 // LevelComplete_LSW_Draw; the inline head only tests `active`.
 
-void LevelComplete_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active);
 
 // ==== src/legoapi/menus/screens/shop.cpp: declarations ====
 
@@ -5494,7 +5427,6 @@ DECOMP_ASSERT(sizeof(TIMINGBAR_LABEL) == 12, "Timing-bar label size");
 //   NuHtmlBegin    0x2d5ca0   NuHtmlFlush   0x2d5c30
 //   NuHtmlWrite    0x2d5cd0   NuHtmlHeading1 0x2d5d40
 extern "C" {
-extern char unknown[8];
 }
 
 
@@ -5605,7 +5537,6 @@ extern "C" {
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -6039,7 +5970,6 @@ extern "C" {
 
 
 
-void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
     DECOMP_ASSERT(sizeof(NuInstanceTreeNode) == 0x0c, "instance tree node stride");
     DECOMP_ASSERT(sizeof(NuInstanceTreeBounds) == 0x20, "instance tree bounds stride");
     DECOMP_ASSERT(sizeof(NuInstanceTree_s) == 0x28, "instance tree size");
@@ -6095,7 +6025,6 @@ void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 
 // Retail uses translation-unit-local helpers with compiler-inferred private
 // calling conventions; keep their shared animation-mode call sites intact.
-extern "C" void PlaySfxByIdAndSetVolume(i32 sfx_id, NUVEC *position, f32 volume);
 
 extern i16 id_GAMORREANGUARD, id_PRINCESSLEIASLAVE, id_LAMASU, id_TAUNWE;
 
@@ -6275,7 +6204,6 @@ extern "C" {
 
 
 extern "C" {
-    void PlaySfxById(i32 sfx_id, nuvec_s *position);
 }
 
 // Retail only keeps the split-out body of the IPA-SRA clone (the unused
@@ -6374,7 +6302,6 @@ extern "C" {
 }
 
 extern "C" {
-    void PlaySfxById(i32 sfx_id, nuvec_s *position);
 }
 
 // Retail only keeps the split-out body of the IPA-SRA clone (the unused
@@ -6498,7 +6425,6 @@ extern "C" {
 // Graphics loading flags
 
 extern "C" {
-    void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 }
 
 // --- NuGScn graphics-data reader ---

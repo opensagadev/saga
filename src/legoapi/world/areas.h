@@ -22,3 +22,7 @@ void SuperCounter_ActivateGizmoPickup(GIZMO_s *, GIZMOPICKUP_s *);
 SUPERCOUNTER *SuperCounter_FindFromNameAndLevel(char *, WORLDINFO_s *, SUPERCOUNTERPICKUP **);
 
 extern i32 openlevels;
+
+// Declared here for the other units that use them.
+struct EXTRAMODEL;
+extern void Area_Configure(i32, i32, EXTRAMODEL *, i16 *);

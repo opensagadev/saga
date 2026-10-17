@@ -174,23 +174,23 @@
 #include "nu2api/nu3d/android/nugscn_android.h"
 #include "nu2api/numath/numath.h"
 #include "nu2api/nu3d/nupostparams.h"
+#include "editor/edlevelall.h"
+#include "legoapi/actions/character/tagging.h"
+#include "legoapi/render/fx/particles.h"
+#include "nu2api/nu3d/nu3d_includes.h"
 
 struct AIROW_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-extern f32 BUCK_RIDERJUMPCLEARANCE;
-extern void (*BuckStartExtraFn)(GameObject_s *);
 
 
 
 pushblock_s *BlockInBlock(WORLDINFO_s *world, pushblock_s *block, i32 excluded, pushblock_s **support);
 
 
-void Buck_MoveCode(GameObject_s *object, i32 start);
 
 
-void SetEffectVisibility(char *name, i32 visible);
 
 
 
@@ -198,18 +198,6 @@ void SetEffectVisibility(char *name, i32 visible);
 // ==== src/gameapi/edtools/edpartall.cpp: all remaining content ====
 
 
-void edpartDoInput(nupad_s *pad);
-void edpartDetermineNearest(f32 distance);
-void edpartDrawCursor();
-void edpartHighlightNearest();
-void edpartScaleType(i32 type, f32 scale);
-void edpartInitType(i32 type);
-void edpartDestroy(i32 index);
-void edpartPlace(i32 index, nuvec_s *position);
-void edpartCreate(nuvec_s *position, i32 type);
-void edpartMultipleCopyCopy();
-void edpartMultipleCopyClear();
-i32 edpartSaveEffects(char *path, char page);
 
 extern "C" {
     i32 edpart_set_part = 5;
@@ -241,31 +229,12 @@ extern "C" {
     i32 edpart_refrotz;
     i32 edpart_cam_ax;
     i32 edpart_cam_ay;
-    extern NUVEC edpart_cam_pos;
     i32 edpart_num_orphans;
     i32 edpart_readout;
     f32 edpart_scale_factor = 1.0f;
     NUMTL *edpart_mtl;
     NUMTL *edpart_boxmtl;
-    extern i32 edpart_nearest;
-    extern part_emit_s *edpart_nearest_emit;
-    extern part_type_s part_types[128];
-    extern part_emit_s part_emits[40];
-    extern i32 part_types_used;
-    extern i32 part_emits_used;
-    extern i32 part_platimpactcnt;
-    extern i32 part_page_on[8];
-    extern i32 part_page_used[8];
-    extern NUGSCN *part_scene[32];
-    extern i32 part_scene_pageid[32];
-    extern NUGSCN *edbits_things_scene;
     extern char edbits_general_save_directory[256], edbits_general_save_name[256], edbits_general_save_extension[256];
-    extern i32 edbits_part_level_page;
-    extern i32 edbits_override_backups;
-    void ResetParts(void);
-    extern eduimenu_s *edpart_active_menu;
-    extern eduimenu_s *edpart_opt_menu;
-    extern eduimenu_s *edpart_type_menu;
     eduimenu_s *edpart_active_menu;
     eduimenu_s *edpart_opt_menu;
     eduimenu_s *edpart_sscale_menu;
@@ -381,18 +350,6 @@ static NUVEC edpart_entry_position;
 extern "C" {
     extern u32 edblack[4];
     extern u32 edgrey[4];
-    extern eduimenu_s *edpart_sscale_menu;
-    extern eduimenu_s *edpart_cutoff_menu;
-    extern eduimenu_s *edpart_emittime_menu;
-    extern eduimenu_s *edpart_scaletype_menu;
-    extern eduimenu_s *edpart_debrisscale_menu;
-    extern eduimenu_s *edpart_instancescale_menu;
-    extern eduimenu_s *edpart_changegenrate_menu;
-    extern eduimenu_s *edpart_name_menu;
-    extern i32 edpart_nearest;
-    extern i32 edpart_create_type;
-    extern f32 edpart_scale_factor;
-    extern part_typedesc_s part_types[128];
 }
 
 static void edpartApplyScaleType(eduimenu_s *, eduiitem_s *, u32);
@@ -573,17 +530,11 @@ extern "C" {
 // NuFileExists @nufile (nucore_plain.cpp).
 
 
-extern "C" part_type_s part_types[128];
-extern "C" i32 part_types_used;
-extern "C" f32 partglobaltime;
-void edpartScaleType(i32 index, f32 scale);
 
 
 extern "C" {
 
-i32 CreateScaledEffect(i32 effect_index, f32 requested_scale);
 
-i32 CreateScaledPARTEffect(i32 effect_index, f32 requested_scale);
 
 void Debris(i32 update_panel_time);
 
@@ -591,15 +542,11 @@ void Debris(i32 update_panel_time);
 
 extern "C" {
 
-void DebrisEmitterPos(i32 handle, f32 x, f32 y, f32 z);
-
-void DebrisOrientationMtx(i32 handle, NUMTX *source);
-
-void DebrisPopulateInstance(i32 handle, f32 duration);
 
 
 
-void DebrisStatusAlwaysOff(i32 *handle);
+
+
 
 
 
@@ -627,35 +574,16 @@ extern "C++" TERRAIN_TRACK_SLOT *AllocTerrId();
 struct rtlset;
 rtlset *PartRTL = NULL;
 f32 PARTSCALEUPTIME = 0.5f;
-void NewPartOrderedRotation(PART_s *);
-void PartTimeSlip();
-void PartCleanupTypes();
-void UpdatePartEmits(f32);
 static i32 part_raycasts_enabled = 1;
 static NUVEC PartNorm;
 
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    extern f32 partglobaltime;
-    void PlaySfxById(i32, NUVEC *);
-    i32 CreateScaledPARTEffect(i32, f32);
     extern u32 partseed;
-    extern NUGSCN *part_scene[32];
 
-    extern part_type_s part_types[128];
-    extern NUGSCN *part_scene[32];
-    extern part_emit_s part_emits[40];
-    extern i32 part_emits_used;
-    void CheckPartCount();
-    i32 AddPARTEffect(i32, NUVEC *);
-    void PARTStartOffset(i32, f32);
 
-    void ResetParts(void);
 
-    void DebrisEmitterPos(i32, f32, f32, f32);
-    void DebrisOrientationMtx(i32, NUMTX *);
-    i32 CreateScaledEffect(i32, f32);
 }
 
 
@@ -680,18 +608,6 @@ extern "C" {
 
 
 
-i32 AddPARTEffect(i32 effect, NUVEC *position);
-
-    void NewPartRotation(PART_s *);
-    void DebrisPopulateInstance(i32, f32);
-
-
-void AddScaledFiniteShotDebrisEffect(i32 *key, i32 effect, NUVEC *position, NUVEC *orientation, NUVEC *momentum,
-                                         i32 count, f32 scale);
-
-
-i32 AddScaledVariableShotDebrisEffect1(i32 effect, NUVEC *position, i32 count, f32 time, i16 z_rotation,
-                                           i16 y_rotation, NUMTX *orientation, f32 scale);
 
 
 
@@ -699,20 +615,18 @@ i32 AddScaledVariableShotDebrisEffect1(i32 effect, NUVEC *position, i32 count, f
 
 
 
-i32 PartRayCast(NUVEC *position, NUVEC *movement, f32 radius, i32 flags);
 
-i32 PartPlatId();
 
-void CastPart(PART_s *part, f32 time);
 
-void CheckPartCount(void);
+
+
+
+
+
 
 
 
     part_type_s part_types[128];
-    extern part_emit_s part_emits[40];
-    extern i32 part_page_on[8];
-    extern i32 part_page_used[8];
     i32 part_types_used;
     i32 part_emits_used;
     NUGSCN *part_scene[32];
@@ -720,13 +634,10 @@ void CheckPartCount(void);
     i32 part_scene_pageid[32] __attribute__((aligned(16)));
     i32 part_platimpactcnt;
     i16 part_platimpactlist[4];
-    void ResetParts(void);
 
 
 
-void KillPartsByScene(NUGSCN *scene);
 
-void NewPartRotation(PART_s *part);
 
 
     i32 edpart_load_particle_page = -1;
@@ -735,22 +646,14 @@ void NewPartRotation(PART_s *part);
 
 
 
-void PARTStartOffset(i32 index, f32 offset);
 
-void RemovePARTEffect(i32 index);
 
-void ResetParts(void);
 
-    void DebrisStatusAlwaysOff(i32 *);
 
 } // extern "C"
 
 
-i32 edpartLookupObjectInScene(char *name, nugscn_s *scene);
-i32 edpartLookupDebrisEffect(char *name);
-extern "C" i32 GetSfxIdN(char *, i32);
 
-void edpartLoadSingleType(part_typedesc_s *type, i32 version, i32 page);
 
 extern "C" {
     i32 edpart_nearest;
@@ -762,7 +665,6 @@ extern "C" {
 extern "C" {
     i32 edbits_part_level_page = 1;
 
-i32 edpartLoadPageEx(char *path, i8 mode, nugscn_s **scenes, i32 scene_count);
 
 }
 
@@ -786,7 +688,6 @@ i32 edpartLoadPageEx(char *path, i8 mode, nugscn_s **scenes, i32 scene_count);
     if (type->sounds[slot] != -1 && type->sound_modes[slot] == (mode))                                                 \
         PlaySfxById(type->sounds[slot], &emitter->position);
 
-void UpdatePartEmits(f32 time);
 
 
 
@@ -794,7 +695,6 @@ void UpdatePartEmits(f32 time);
 
 
 
-void NewPartOrderedRotation(PART_s *part);
 
 // ==== src/gameapi/edtools/edtoolsall_plain.cpp: all remaining content ====
 
@@ -941,7 +841,6 @@ static __attribute__((used)) void edanimcbLocalSoundMenu(eduimenu_s *parent, edu
 
 extern "C" {
     extern u32 edblack[4];
-    extern i32 edbits_override_backups;
     extern char edbits_general_save_directory[256];
     extern char edbits_general_save_name[256];
     extern char edbits_general_save_extension[256];
@@ -974,8 +873,6 @@ extern "C" {
 // ---- end src/gameapi/edtools/edptlall.cpp ----
 
 extern "C" {
-    void NuRndrRect2di(i32 x, i32 y, i32 width, i32 height, i32 colour, numtl_s *material);
-    void NuRndrLine2di(i32 x0, i32 y0, i32 x1, i32 y1, i32 colour, numtl_s *material);
 }
 
 // The original local font helpers read the same private draw state as the
@@ -1080,13 +977,6 @@ extern u32 edgrey[4];
 
 
 extern "C" {
-    extern part_type_s part_types[128];
-    extern i32 part_types_used;
-    extern i32 part_emits_used;
-    extern NUGSCN *part_scene[32];
-    extern i32 part_scene_pageid[32];
-    void CheckPartCount(void);
-    void KillPartsByScene(NUGSCN *);
     part_emit_s part_emits[40];
     i32 part_page_on[8];
     i32 part_page_used[8];
@@ -1104,10 +994,8 @@ extern "C" {
 extern char edbits_general_save_directory[256];
 extern char edbits_general_save_name[256];
 extern char edbits_general_save_extension[256];
-extern NUGSCN * edbits_things_scene;
     i32 edbits_part_general_page;
     i32 edbits_duplicates_error;
-extern i32 edbits_override_backups;
     eduimenu_s *edbri_dpadmode_menu;
     eduimenu_s *edbri_plankinstance_menu;
     eduimenu_s *edbri_postinstance_menu;
@@ -1222,46 +1110,30 @@ static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ..
 #endif
 
 extern EdInputContext * Input;
-extern "C" void NuRndrRect2di(i32, i32, i32, i32, i32, NUMTL *);
-extern "C" void NuRndrLine2di(i32, i32, i32, i32, i32, NUMTL *);
-extern "C" void PlaySfxById(i32, nuvec_s *);
 
-void SerialiseString(EdStream &, void *, i32);
 
 extern f32 Scale;
 DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
 
 extern "C" {
-    extern NUGSCN *edbits_things_scene;
-    extern part_type_s part_types[128];
-    extern part_emit_s part_emits[40];
     extern i32 edpart_emitrotx, edpart_emitroty, edpart_emitrotz;
-    void DebrisEmitterPos(i32, f32, f32, f32);
-    i32 AddPARTEffect(i32, NUVEC *);
-    extern i32 edpp_readout;
-    extern i32 part_page_used[8];
 }
 
-i32 edpartLookupObjectInScene(char *, NUGSCN *);
 
 
 
 
-void edpartInitType(i32 index);
 
 extern "C" {
 }
 
 
 
-void edpartScaleType(i32 index, float scale);
-
-
-extern "C" i32 part_emits_used;
 
 
 
-i32 edpartSaveEffects(char *filename, char page);
+
+
 
 
 
@@ -1363,7 +1235,6 @@ inline void EdBitControl::operator delete(void *memory) {
 
 extern "C" {
     extern u32 edblack[4];
-    extern i32 edbits_override_backups;
     extern char edbits_general_save_directory[256];
     extern char edbits_general_save_name[256];
     extern char edbits_general_save_extension[256];
@@ -1395,8 +1266,6 @@ extern "C" {
 // ---- end src/gameapi/edtools/edptlall.cpp ----
 
 extern "C" {
-    void NuRndrRect2di(i32 x, i32 y, i32 width, i32 height, i32 colour, numtl_s *material);
-    void NuRndrLine2di(i32 x0, i32 y0, i32 x1, i32 y1, i32 colour, numtl_s *material);
 }
 
 // The original local font helpers read the same private draw state as the
@@ -1425,25 +1294,12 @@ extern u32 edgrey[4];
 }
 
 extern "C" {
-    extern part_type_s part_types[128];
-    extern i32 part_types_used;
-    extern i32 part_emits_used;
-    extern NUGSCN *part_scene[32];
-    extern i32 part_scene_pageid[32];
-    void CheckPartCount(void);
-    void KillPartsByScene(NUGSCN *);
-extern part_emit_s part_emits[40];
-extern i32 part_page_on[8];
-extern i32 part_page_used[8];
-extern i32 edpart_instances_used;
 }
 
 extern "C" {
 extern char edbits_general_save_directory[256];
 extern char edbits_general_save_name[256];
 extern char edbits_general_save_extension[256];
-extern NUGSCN * edbits_things_scene;
-extern i32 edbits_override_backups;
 }
 
 extern "C" {
@@ -1536,7 +1392,6 @@ static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u
 
 extern f32 HUB_EPISODETITLEY;
 extern i16 tSELECT, tSELECTED, tSELECTING;
-extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 
 
 // Retail clears these "fast repeat" latches but never sets them.
@@ -1726,7 +1581,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
 
 
-    extern "C" f32 partglobaltime;
     // ---------------------------------------------------------------------------
     // Gobj / hierarchy / scene graph
     // ---------------------------------------------------------------------------
@@ -1744,7 +1598,6 @@ extern "C" {
 
 
 
-void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
     DECOMP_ASSERT(sizeof(NuInstanceTreeNode) == 0x0c, "instance tree node stride");
     DECOMP_ASSERT(sizeof(NuInstanceTreeBounds) == 0x20, "instance tree bounds stride");
     DECOMP_ASSERT(sizeof(NuInstanceTree_s) == 0x28, "instance tree size");
@@ -1906,7 +1759,6 @@ DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context fl
 
 extern void (*FS_Callback)(char *, char *);
 
-void SerialiseString(EdStream &stream, void *data, i32 count);
 
 // Retail keeps the whole body of RenderFileSel3 as the split-out .part clone;
 // the exported function only tests FS_Active.
@@ -1921,7 +1773,6 @@ extern "C" void StartFileSel(char *title, char *path, char *filter, char *filter
                              void (*callback)(char *, char *));
 
 
-i32 LoadState(i32, variptr_u *, variptr_u *, variptr_u *, variptr_u *, variptr_u *, variptr_u *);
 
 extern "C" {
 
@@ -1958,7 +1809,6 @@ struct ripple_node_s;
 struct ripple_set_s;
 struct VuVec;
 
-extern "C" void NuRndrRect2di(i32, i32, i32, i32, i32, numtl_s *);
 
 // Camera zoom state
 
@@ -1966,7 +1816,6 @@ extern "C" void NuRndrRect2di(i32, i32, i32, i32, i32, numtl_s *);
 
 
 extern "C" {
-    void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 }
 
 
@@ -2410,7 +2259,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
 
 
-    extern "C" f32 partglobaltime;
     // ---------------------------------------------------------------------------
     // Gobj / hierarchy / scene graph
     // ---------------------------------------------------------------------------
@@ -2428,7 +2276,6 @@ extern "C" {
 
 
 
-void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
     DECOMP_ASSERT(sizeof(NuInstanceTreeNode) == 0x0c, "instance tree node stride");
     DECOMP_ASSERT(sizeof(NuInstanceTreeBounds) == 0x20, "instance tree bounds stride");
     DECOMP_ASSERT(sizeof(NuInstanceTree_s) == 0x28, "instance tree size");

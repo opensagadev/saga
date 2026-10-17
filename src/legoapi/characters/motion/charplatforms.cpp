@@ -10,6 +10,7 @@
 #include "nu2api/nufile/nufpar.h"
 #include "nu2api/numath/nufloat.h"
 #include <string.h>
+#include "legoapi/misc/utilities.h"
 
 struct AIROW_s;
 struct nunativegscene_s;
@@ -115,7 +116,6 @@ void CharPlatforms_Configure(WORLDINFO_s *world, char *config) {
     }
 }
 
-f32 FindReflectionNoPlatforms(nuvec_s *position);
 
 GameObject_s *CharPlatform_FindObjFromPlatID(CHARPLATFORMSYS_s *system, i32 platform_id) {
     if (system == NULL) {

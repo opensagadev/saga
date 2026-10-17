@@ -26,6 +26,9 @@
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nutrig.h"
 #include "legoapi/gizmo/base/TeleportObjectInterface.h"
+#include "legoapi/ai/core/gameai.h"
+#include "legoapi/audio/audio.h"
+#include "legoapi/render/light/surfaces.h"
 
 i32 teleport_gizmotype_id = -1;
 
@@ -55,7 +58,6 @@ static NUFPCOMJMP Teleport_ConfigKeywords[] = {
 
 
 
-char *Teleport_GetOutputName(GIZMO *, i32);
 
 
 
@@ -63,9 +65,6 @@ char *Teleport_GetOutputName(GIZMO *, i32);
 
 static i32 FindTeleport_Direction;
 
-void GetSurfaceInfo(GameObject_s *object, i32 update_surface, f32 shadow_height);
-void PlayJumpSfx(GameObject_s *object, i32 type);
-void AlertSurroundingCreatures(GameObject_s *object, NUVEC *position);
 
 static inline void Teleport_GetSegment(GameObject_s *object, TELEPORT_s *teleport, i32 *start, i32 *end) {
     const bool forwards = (object->context_variant_flags & 4) != 0;

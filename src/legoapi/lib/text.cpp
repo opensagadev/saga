@@ -293,6 +293,14 @@
 #include "legoapi/misc/supportall.h"
 #include <limits.h>
 #include "legoapi/misc/supportall_types.h"
+#include "gameapi/ai/aisys/gameaiscript.h"
+#include "legoapi/characters/motion/camera.h"
+#include "legoapi/characters/motion/move.h"
+#include "legoapi/lib/text.h"
+#include "legoapi/menus/core/hint.h"
+#include "legoapi/world/levels/episodeII.h"
+#include "legoapi/world/levels/episodeV.h"
+#include "nu2api/nuandroid/ios_device.h"
 char *ASCII_UP = "\xc2\xac";
 extern char * apitxt_ENGLISH;
 extern char * apitxt_FRENCH;
@@ -307,12 +315,8 @@ static LANGUAGEDATA Text_LanguageList_Default[7] = {{1, apitxt_ENGLISH}, {2, api
                                                     {-1, NULL}};
 LANGUAGEDATA *Text_LanguageList = Text_LanguageList_Default;
 extern "C" {
-    VUFNT *LoadGameFont(char *, char *, variptr_u *, variptr_u *, i32);
-    VUFNT *LoadButtonFont(char *, char *, variptr_u *, variptr_u *, i32);
 }
 void (*Text_GameSetLanguageFn)(i32);
-void Text_InsertCommasIntoNumber(char *number, char *text, i32 length);
-void GameDrawMenuEntry(MENU *menu, char *text);
 extern "C" {
 }
 static VUFNT *app_fnt;
@@ -327,7 +331,6 @@ f32 APITEXTSCALEY = 1.0f;
 i32 textcrawlactive = 0;
 i32 Arcade_TextCrawlID = 0x1f1;
 i32 Arcade_TextCrawlParagraphs = 2;
-extern i32 g_bgloadAsFastAsPossibleHack;
 
 static char **TTab_Original;
 static i32 Text_MaxStrings_Overall;
@@ -346,9 +349,7 @@ char *txtpath_ENGLISH = const_cast<char *>("english");
 
 extern "C" {
 
-VUFNT *LoadButtonFont(char *path, char *name, variptr_u *buf, variptr_u *buf_end, i32 render_plane);
 
-VUFNT *LoadGameFont(char *path, char *name, variptr_u *buf, variptr_u *buf_end, i32 render_plane);
 }
 
 static inline u8 Text_MenuColourLerp(u8 first, u8 second, f32 amount) {
@@ -426,14 +427,12 @@ struct AISYS_s;
 #define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone))
 #endif
 
-void LoadPerm1();
 
 // ==== src/legogame/game.cpp: declarations ====
 
 
 
 
-extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 
 // Retail data @0x617200: common animations shared by the old and new characters.
 
@@ -558,17 +557,13 @@ struct nuhspecial_s;
 
 // ==== src/legoapi/menus/core/gamehint.cpp: declarations ====
 
-extern f32 ICONXPOS_TOUCHYFEELY;
-extern f32 ICONYPOS_TOUCHYFEELY;
 
-void MechHintUIButton_OnClick_Callback(MechTouchUIElement &, TouchHolder &);
 
 #include "legoapi/menus/core/gamehint_types.h"
 DECOMP_ASSERT(sizeof(MechHintUIButton) == 0xa8, "MechHintUIButton size");
 DECOMP_ASSERT(offsetof(MechHintUIButton, pending_hint) == 0x7c, "Pending touch hint offset");
 DECOMP_ASSERT(offsetof(MechHintUIButton, display_elapsed) == 0x80, "Touch hint display timer offset");
 
-void MechHintUIButton_OnClick_Callback(MechTouchUIElement &element, TouchHolder &);
 
 // Static game message and hint helpers. Stubbed to satisfy the symbol baseline.
 
@@ -905,14 +900,8 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 // ==== src/legoapi/gizmo/gizmos/gizmos_gizactions.cpp: declarations ====
 
-i32 Action_ReleaseLocator(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
-                          i32 first_time, float);
 
-i32 Action_GetLocatorFromSet(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,
-                             i32 param_count, i32 first_time, float);
 
-i32 Action_AssignLocatorInSet(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
-                              i32 first_time, float);
 
 namespace {
 #include "legoapi/gizmo/gizmos/gizmos_gizactions_types.h"
@@ -1019,7 +1008,6 @@ extern "C" {
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -1336,7 +1324,6 @@ static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ..
 
 
 extern EdInputContext * Input;
-extern "C" void PlaySfxById(i32, nuvec_s *);
 
 DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
 
@@ -2002,7 +1989,6 @@ extern "C" {
 
 extern "C" {
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -2497,7 +2483,6 @@ extern "C" {
 
 
 
-void LevelComplete_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32);
 
 
 
@@ -2510,7 +2495,6 @@ extern "C" {
 // Retail keeps the active-stage drawing as the split-out .part clone of
 // LevelComplete_LSW_Draw; the inline head only tests `active`.
 
-void LevelComplete_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active);
 
 // ==== src/legoapi/menus/screens/shop.cpp: declarations ====
 
@@ -2522,7 +2506,6 @@ void LevelComplete_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 a
 
 
 extern "C" {
-    void PlaySfxById(i32 sfx_id, nuvec_s *position);
 }
 
 // Retail only keeps the split-out body of the IPA-SRA clone (the unused
@@ -2685,7 +2668,6 @@ extern "C" {
 // ==== src/legoapi/cutscenes/cutscenes.cpp: declarations ====
 
 extern "C" {
-    void PlaySfxById(i32 sfx_id, nuvec_s *position);
 }
 
 // ==== functions in original address order ====
@@ -2712,18 +2694,13 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 }
 
-extern f32 PauseMenus_X;
-extern i32 PauseMenus_Align;
 
-void GameDrawMenuEntry(MENU_s *menu, char *text);
 
 // ==== src/legoapi/items/base/game_object.cpp: all remaining content ====
 
 
 // ==== src/legoapi/characters/motion/camera.cpp: declarations ====
 
-extern VIEWCAM_s ViewCam;
-extern f32 testmovef;
 
 // ==== src/legoapi/render/core/render.cpp: declarations ====
 
@@ -2927,7 +2904,6 @@ extern "C" {
 
 extern "C" {
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -3518,14 +3494,12 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 #endif
 
 // Retail keeps only the IPA-SRA clone of this function.
-i32 PodLevel(AREADATA_s *);
 
 // Multiplies the ordinary camera's per-frame position blend.  The original
 // keeps this as writable camera state (default 1.0), rather than folding it
 // into the socket seek rate.
 
 
-i32 PodLevel(AREADATA_s *area);
 
 // Retail splits the guard off as an inline head; the rest is this partial clone.
 
@@ -3546,7 +3520,6 @@ DECOMP_ASSERT(offsetof(AWKWARDSHAPESPHERE_s, radius) == 8, "Awkward shape sphere
 
 // ==== src/legoapi/world/levels/episodeV.cpp: declarations ====
 
-extern AILOCATOR_s * locator;
 
 DECOMP_ASSERT(sizeof(HOTHBATTLEE_NETPACKET_s) == 0x58, "Hoth panel packet size");
 DECOMP_ASSERT(offsetof(HOTHBATTLEE_NETPACKET_s, alpha) == 0x24, "Hoth panel packet alpha offset");
@@ -3568,7 +3541,6 @@ DECOMP_ASSERT(sizeof(ASTEROIDCNETPACKET_s) == 8, "asteroid C network packet size
 
 extern "C" {
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -3647,7 +3619,6 @@ DECOMP_ASSERT(sizeof(KAMINO_E_s) == 120, "Kamino E state ABI");
 // Kamino
 // ===========================================================================
 
-extern i32 last;
 
 // ===========================================================================
 // Geonosis — droid factory (Factory_B / Factory_G)

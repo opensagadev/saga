@@ -249,21 +249,19 @@
 #include <limits.h>
 #include "legoapi/gizmo/base/gizflow.h"
 #include "legoapi/misc/supportall_types.h"
+#include "gameapi/ai/aisys/gameaiscript.h"
+#include "legoapi/actions/movement/climbing.h"
+#include "legoapi/ai/core/gameai.h"
+#include "legoapi/characters/motion/move.h"
+#include "legoapi/gizmos/door/gizspinner.h"
+#include "legoapi/world/levels/episodeV.h"
 
 
-void FastWeaponIn(GameObject_s *, i32);
-void PlayGruntSfx(GameObject_s *);
 
 
 
 extern u32 (*CanPushObstaclesFn)(GameObject_s *);
-extern GIZSPINNER_s *GizSpinner_Find(WORLDINFO_s *world, nuvec_s *position, i32 alternate);
-extern i32 GizSpinner_Push(GIZSPINNER_s *spinner, i32 context);
-extern void GizSpinner_PushFail(GameObject_s *object, GIZSPINNER_s *spinner);
 i32 PushBlock(GameObject_s *object);
-void StartLunge(GameObject_s *object, f32 speed, f32 height);
-void PlayLandSfx(GameObject_s *object, i32 variant, i32 force);
-void AlertSurroundingCreatures(GameObject_s *object, NUVEC *position);
 
 // ==== src/legoapi/characters/motion/move.cpp: declarations ====
 
@@ -274,8 +272,6 @@ void AlertSurroundingCreatures(GameObject_s *object, NUVEC *position);
 // Original action/context lookup data, with its arrays and pointers in one owner.
 
 
-void FastWeaponIn(GameObject_s *object, i32 sound);
-void AlertSurroundingCreatures(GameObject_s *, NUVEC *);
 // Retail keeps several of this file's static helpers only as GCC clones; these
 // declarations pin the clone names and register conventions.
 #if defined(__i386__)
@@ -287,14 +283,12 @@ void AlertSurroundingCreatures(GameObject_s *, NUVEC *);
 #endif
 
 // Retail keeps only the IPA-SRA clone of this function.
-i32 PodLevel(AREADATA_s *);
 
 // Multiplies the ordinary camera's per-frame position blend.  The original
 // keeps this as writable camera state (default 1.0), rather than folding it
 // into the socket seek rate.
 
 
-i32 PodLevel(AREADATA_s *area);
 
 // Retail splits the guard off as an inline head; the rest is this partial clone.
 
@@ -303,7 +297,6 @@ extern i32 LevFlag[4];
 
 // These pod tuning values are zero-initialized in the original image.
 
-extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 
 // Retail re-tests the three block animations at each use instead of caching a flag.
 #define HAS_BLOCK_ANIMS(animations)                                                                                    \
@@ -313,9 +306,7 @@ extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 
 // Retail splits the context test off as an inline head; the rest is this partial clone.
 
-void PlayLandSfx(GameObject_s *object, i32 type, i32 surface);
 
-void PlayLandSfx(GameObject_s *, i32, i32);
 
 DECOMP_ASSERT(sizeof(AWKWARDSHAPESPHERE_s) == 12, "Awkward shape sphere size");
 DECOMP_ASSERT(offsetof(AWKWARDSHAPESPHERE_s, radius) == 8, "Awkward shape sphere radius offset");
@@ -330,7 +321,6 @@ DECOMP_ASSERT(offsetof(AWKWARDSHAPESPHERE_s, radius) == 8, "Awkward shape sphere
 // ==== src/legoapi/world/levels/episodeV.cpp: declarations ====
 
 
-extern AILOCATOR_s * locator;
 
 DECOMP_ASSERT(sizeof(HOTHBATTLEE_NETPACKET_s) == 0x58, "Hoth panel packet size");
 DECOMP_ASSERT(offsetof(HOTHBATTLEE_NETPACKET_s, alpha) == 0x24, "Hoth panel packet alpha offset");
@@ -354,7 +344,6 @@ DECOMP_ASSERT(sizeof(ASTEROIDCNETPACKET_s) == 8, "asteroid C network packet size
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -647,7 +636,6 @@ extern "C" {
 }
 
 
-void AlertSurroundingCreatures(GameObject_s *object, nuvec_s *position);
 
 // ==== src/legoapi/ai/game/aipathcnxhelper.cpp: declarations ====
 
@@ -917,16 +905,10 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 // ==== src/legoapi/gizmo/gizmos/gizmos_gizactions.cpp: declarations ====
 
-i32 Action_ReleaseLocator(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
-                          i32 first_time, float);
 
 struct GIZSPINNER_s;
 
-i32 Action_GetLocatorFromSet(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,
-                             i32 param_count, i32 first_time, float);
 
-i32 Action_AssignLocatorInSet(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
-                              i32 first_time, float);
 
 namespace {
 #include "legoapi/gizmo/gizmos/gizmos_gizactions_types.h"
@@ -1080,7 +1062,6 @@ struct PART_s;
 
 // ==== src/legoapi/actions/movement/jumping.cpp: declarations ====
 
-void StartLunge(GameObject_s *, f32, f32);
 
 
 

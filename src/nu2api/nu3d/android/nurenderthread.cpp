@@ -31,6 +31,7 @@
 
 // The original unit constructs its six homogeneous vectors.
 #include "nu2api/nucore/nuvuvec.hpp"
+#include "nu2api/nu3d/nu3d_includes.h"
 
 static volatile i32 renderThreadCS;
 static i32 renderThreadIsLocked;
@@ -45,17 +46,13 @@ static i32 dynamicLightsCount_safe;
 
 // Game-thread scene-parameter queue (defined in nurndr_plain.cpp).
 extern "C" {
-    extern struct nurenderscene_s sceneParameters[16];
-    extern i32 sceneParametersCount;
 }
 static VARIPTR nuspecial_vertex_offsets_safe;
 static i32 nuspecial_vertex_noffsets_safe;
 
 extern const f32 nuvec4_one[4] = {1.0f, 1.0f, 1.0f, 1.0f};
 
-extern "C" i32 NuDynamicLightIsEnabled(void *light);
 extern "C" void NuShaderManagerSetfv(i32 id, const f32 *values);
-extern "C" i32 NuDynamicLightIsEnabled(void *light);
 i32 global_frame_count = 0;
 i32 global_frame_count_paused = 0;
 

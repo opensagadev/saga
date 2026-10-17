@@ -138,6 +138,12 @@
 #include "legoapi/misc/utilities.h"
 #include "legoapi/core/startup/main.h"
 #include "nu2api/nucore/android/NuThread_android.h"
+#include "legoapi/ai/game/creature.h"
+#include "legoapi/menus/core/hint.h"
+#include "legoapi/menus/screens/missions.h"
+#include "legoapi/misc/legoapi_status.h"
+#include "legogame/game.h"
+#include "nu2api/nu3d/nu3d_includes.h"
 
 struct AIROW_s;
 struct nunativegscene_s;
@@ -167,44 +173,26 @@ extern "C" {
 
 
 extern "C" STATUSPACKET_s StatusPacket;
-extern AREADATA *NEGOTIATIONS_ADATA;
 
-void ResetRumble(RUMBLEPACKET *packet);
-void StatusStage_Reset(STATUS_STAGE_s *stage);
 void IncreaseScore(u32 *, u64, i32);
-void FinishStatusPacket(i32);
-void EndOfDemo(i32);
 static i32 gamedemo_option;
 static i32 goldbrickmsgcount;
 
-i32 AddGoldBrickMessage(STATUSPACKET_s *packet, i16 brick);
 
 STATUS_STAGE_s *StatusStages;
-extern f32 iconalphaoverride;
-extern f32 icon_y;
-extern i32 draw_player_icons;
-extern i32 status_prompt;
 static i32 DrawGoldBrick_Stage;
 static i32 DrawGoldBrick_Phase;
-void LevelComplete_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32);
-
-void AddStatusStage(STATUSPACKET_s *packet, i32 type, i32 gold_brick_enabled);
 
 
-STATUS_STAGE_s *FindStatusStage(i32 type);
-
-void NextStatusStage(STATUSPACKET_s *packet);
 
 
-extern i32 from_save_and_exit;
+
+
 extern "C" TIMER BonusTimer;
 extern i16 tSUPERSTORYCOMPLETE, tNEWBESTTIME, tLEVELCOMPLETE, tMISSIONCOMPLETE;
 extern i16 tNONEWBESTTIME;
 extern i16 tCHALLENGECOMPLETE, tMINIKIT;
 extern "C" void NuIOS_RecordFlurryEvent(char *);
-i32 AddToCollection(i32);
-i32 newCharactersCollected(STATUSPACKET_s *);
-void StatusPacketReset(STATUSPACKET_s *);
 extern i32 newminikitcount;
 extern i32 currentminikit;
 static u32 collect_suit_bits;
@@ -215,25 +203,20 @@ static inline bool StatusRumbleTargetsPlayer(i32 player, i32 index) {
     return player == index || player == -1;
 }
 
-void NewStatusRumbleBuzz(i32 player, float amount, float buzz, i32 priority);
 
 
 
-void StatusPacketReset(STATUSPACKET_s *packet);
 
 extern i16 tTRUEJEDI, tSTORY, tFREEPLAY;
 
 
 
 extern "C" i32 reset_area;
-void InitMission(MISSIONSYS_s *, i32);
 
-void FinishStatusPacket(i32 choice);
 
 extern i16 tMAP, tRESTART, tFINISHSTORY, tCONTINUESTORY, tFINALCHAPTERLOCKED, tNEXTCHAPTERLOCKED;
 extern "C" {
 }
-void Hint_SetHintFromId(i32, i32, i32);
 
 // Retail keeps this body as GCC's split-out clone; the inline head stays in
 // the caller.
@@ -244,13 +227,11 @@ void Hint_SetHintFromId(i32, i32, i32);
 // Retail keeps the active-stage drawing as the split-out .part clone of
 // LevelComplete_LSW_Draw; the inline head only tests `active`.
 
-void LevelComplete_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active);
 
 // ==== src/legoapi/core/net/netplay.cpp: declarations ====
 
 
 
-void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *);
 
 // ==== src/legoapi/render/core/render.cpp: declarations ====
 
@@ -290,7 +271,6 @@ struct VuVec;
 
 
 extern "C" {
-    void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 }
 
 
@@ -370,9 +350,7 @@ extern i16 tNONEWBESTTIME, tNEWBESTTIME;
 
 
 
-extern f32 slideseek;
 
-i32 DrawPanel3DObjectMtxNoAlpha(nuhspecial_s *special, numtx_s *matrix);
 
 extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
 
@@ -436,7 +414,6 @@ extern "C" {
 
 
 
-extern void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *data);
 
 // Retail keeps only the IPA-SRA clone, which receives &*layers.
 #if defined(__i386__)
@@ -456,8 +433,6 @@ extern void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *data);
 
 
 
-void NextStatusStage(STATUSPACKET_s *);
-void NewStatusRumbleBuzz(i32, f32, f32, i32);
 
 
 // ==== src/legoapi/cutscenes/cutscenes.cpp: declarations ====
@@ -502,9 +477,6 @@ extern i16 tYOUDIDNTCOLLECTALL10CANISTERS, tMISSIONCOMPLETE, tSTORYCLIPSUNLOCKED
 
 
 extern i32 currentminikit, newminikitcount;
-extern f32 pop_timer;
-extern f32 jibberlen;
-extern f32 slidetime;
 extern i16 tMINIKIT;
 
 
@@ -512,9 +484,7 @@ extern i16 tMINIKIT;
 
 extern i16 tALLMINIKITSBUILT;
 
-extern rtldata_s KitPartRTL;
 extern NUCOLOUR3 panelcol[3], panelamb;
-extern NUVEC paneldir[3];
 
 
 
@@ -531,7 +501,6 @@ extern NUVEC paneldir[3];
 // Graphics loading flags
 
 extern "C" {
-    void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 }
 
 // --- NuGScn graphics-data reader ---
@@ -644,7 +613,6 @@ extern "C" {
 extern "C" {
 }
 
-void NewGame(void);
 
 
 // ==== src/legoapi/items/collect/minikits.cpp: declarations ====

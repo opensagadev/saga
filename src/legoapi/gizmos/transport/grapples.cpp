@@ -26,21 +26,21 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "legoapi/actions/movement/climbing.h"
+#include "legoapi/characters/motion/move.h"
+#include "legoapi/misc/utilities.h"
 
 extern "C" void NewTerrPlatformsOff(void);
 f32 GameShadow(GameObject_s *object, NUVEC *position, f32 probe_height, i32 terrain_mask);
 void FindAnglesZX(NUVEC *normal, u16 *x_rotation, u16 *z_rotation);
 void EnableShadowMapRendering(i32 enabled);
 void ResetShadowMapRendering();
-void SetWeaponIn(GameObject_s *object);
 
 extern "C" i32 editor_active;
-extern NUMTL *SolidMtl3D;
 
 i32 grapple_gizmotype_id = -1;
 i32 Grapple_RopeSwingsAvailable;
 i16 Grapple_RopeSwingRotate = 0x5555;
-extern i32 GrappleSwingMode;
 
 struct GRAPPLEPROGRESS {
     // One bit per grapple; 32 grapples fit in a single word.

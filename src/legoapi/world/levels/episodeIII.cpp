@@ -187,6 +187,9 @@
 #include "legoapi/gizmos/transport/grapples.h"
 #include "legoapi/gizmos/traps/gizforce.h"
 #include "legoapi/gizmos/object/lever.h"
+#include "editor/edlevelall.h"
+#include "legoapi/world/levels/episodeIII.h"
+#include "nu2api/nu3d/nu3d_includes.h"
 
 extern i32 LevFlag[4];
 
@@ -206,8 +209,6 @@ static i32 i_boulder;
 PART_s *boulder_part[2];
 i32 boulder_blowup_type = -1;
 
-void Boulder_Move(PART_s *, f32);
-void Boulder_Kill(PART_s *, i32);
 DECOMP_ASSERT(sizeof(VADERA_s) == 0x30, "VADERA_s size");
 DECOMP_ASSERT(offsetof(VADERA_s, big_jump_locator) == 0x24, "VADERA_s locator offset");
 
@@ -227,7 +228,6 @@ DECOMP_ASSERT(sizeof(CRUISERDNETPACKET_s) == 12, "Cruiser D packet size");
 
 extern "C" {
     CRUISERDNETPACKET_s *cruiserd_netpacket;
-    extern i32 CruiserD_LiftChase;
 }
 static i32 CruiserE_ix;
 static nuhspecial_s CruiserD_Lift;
@@ -336,13 +336,9 @@ struct SHOPINPUT;
 
 
 
-extern PART_s *boulder_part[2];
-extern i32 boulder_blowup_type;
 NUVEC boulder_oldpos[2];
 
-void Boulder_Kill(PART_s *part, i32);
 
-void Boulder_Move(PART_s *part, float);
 
 
 
@@ -352,7 +348,6 @@ void Boulder_Move(PART_s *part, float);
 
 
 extern "C" {
-    extern i32 edbits_part_level_page;
 }
 
 extern "C" {
@@ -426,7 +421,6 @@ struct rtlset;
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -840,15 +834,12 @@ static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ..
 #endif
 
 extern EdInputContext * Input;
-extern "C" void PlaySfxById(i32, nuvec_s *);
 
-void SerialiseString(EdStream &, void *, i32);
 
 extern f32 Scale;
 DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
 
 extern "C" {
-    extern i32 edpp_readout;
 }
 
 
@@ -1106,7 +1097,6 @@ static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u
 
 extern f32 HUB_EPISODETITLEY;
 extern i16 tSELECT, tSELECTED, tSELECTING;
-extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 
 
 // Retail clears these "fast repeat" latches but never sets them.
@@ -1313,7 +1303,6 @@ extern "C" {
 
 
 
-void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
     DECOMP_ASSERT(sizeof(NuInstanceTreeNode) == 0x0c, "instance tree node stride");
     DECOMP_ASSERT(sizeof(NuInstanceTreeBounds) == 0x20, "instance tree bounds stride");
     DECOMP_ASSERT(sizeof(NuInstanceTree_s) == 0x28, "instance tree size");
@@ -1476,7 +1465,6 @@ DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context fl
 
 extern void (*FS_Callback)(char *, char *);
 
-void SerialiseString(EdStream &stream, void *data, i32 count);
 
 // Retail keeps the whole body of RenderFileSel3 as the split-out .part clone;
 // the exported function only tests FS_Active.
@@ -1491,7 +1479,6 @@ extern "C" void StartFileSel(char *title, char *path, char *filter, char *filter
                              void (*callback)(char *, char *));
 
 
-i32 LoadState(i32, variptr_u *, variptr_u *, variptr_u *, variptr_u *, variptr_u *, variptr_u *);
 
 extern "C" {
 
@@ -1535,7 +1522,6 @@ struct VuVec;
 
 
 extern "C" {
-    void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 }
 
 
@@ -1996,7 +1982,6 @@ extern "C" {
 
 
 
-void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
     DECOMP_ASSERT(sizeof(NuInstanceTreeNode) == 0x0c, "instance tree node stride");
     DECOMP_ASSERT(sizeof(NuInstanceTreeBounds) == 0x20, "instance tree bounds stride");
     DECOMP_ASSERT(sizeof(NuInstanceTree_s) == 0x28, "instance tree size");

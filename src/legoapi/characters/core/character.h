@@ -806,3 +806,16 @@ extern "C" {
 void LoadSingleCharacter(bgprocinfo_s *info);
 void UpdateCharacterLoad(void);
 i32 NewPlayerCharacter(GameObject_s *object, i32 new_id, i32 old_id, i32 mode);
+
+// Declared here for the other units that use them.
+extern "C" {
+    extern i16 id_ANAKINSPODGREEN;
+    extern i16 id_BASKETCANNON;
+    extern i16 id_BEACHTROOPER;
+    extern i16 id_CANNON;
+    extern i16 id_DODGEM;
+    extern i16 id_MINISLAVE1;
+    extern i16 id_MOSCANNON;
+    extern i16 id_PRINCESSLEIABOUSHH;
+    extern i16 id_R2Q5;
+}

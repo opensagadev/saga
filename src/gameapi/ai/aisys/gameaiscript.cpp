@@ -127,74 +127,67 @@
 #include "legoapi/characters/core/customiser.h"
 #include "nu2api/numusic/numusic.h"
 #include "legoapi/characters/core/characters_types.h"
-
-extern i32 Hub_GetRandomCharType();
-
-extern "C" void *perm_debrissys;
-
-
-void AddLevSfx(WORLDINFO_s *world, nuvec_s *position, char *name, i32 sfx);
-
-void ResetForceBack();
-
-void AlertSurroundingCreatures(GameObject_s *object, NUVEC *position);
-
-void LetGoOfBalloon(GameObject_s *object);
-
-void GizmoPickup_TurnOnPickup(GIZMOPICKUP_s *pickup);
-
-void SetForceBack(GameObject_s *object, NUVEC *position, f32 radius, i32 type);
-
-
-extern void CurrentStart(GameObject_s *object, i32 mode, i32 start);
-
-
-extern void oneAtOnce_SetInitDistPerRow(f32 distance);
-
-extern i32 oneAtOnce_CanAttack(GameObject_s *object, GameObject_s *opponent);
-
-extern f32 oneAtOnce_GetHoldRange(GameObject_s *object);
-
-
-extern i32 TagCharacter(GameObject_s *source, GameObject_s *target, i32 mode);
-
-extern void SetPlayer();
-
-extern void PlayRepeatSfx(char *name, i32 sfx_id, f32 initial_delay, char play_count, f32 interval, nuvec_s *position);
-
-extern void ResetAICreature(GameObject_s *object, AISYS_s *system);
-
-extern void DeactivateGameObject(GameObject_s *object);
-
-extern void Player_ClearContext(GameObject_s *object, i32 mode);
-
-extern void Player_ResetContexts(PLAYERPACKET_s *packet);
-
-extern EXPLOSION *Detonate(NUVEC *position, u16 flags);
-
-extern void EatVictim(GameObject_s *object);
-
-extern void GrabVictim(GameObject_s *object, GameObject_s *victim);
-
-extern void ReleaseEat(GameObject_s *object);
+#include "gameapi/ai/aisys/gameaiscript.h"
+#include "legoapi/actions/character/legoapi_tag.h"
+#include "legoapi/actions/movement/climbing.h"
+#include "legoapi/ai/core/aisysall.h"
+#include "legoapi/ai/core/gameai.h"
+#include "legoapi/ai/game/aipathcnxhelper.h"
+#include "legoapi/ai/game/creature.h"
+#include "legoapi/ai/game/lsw_hub_ai.h"
+#include "legoapi/ai/game/starwars_gameai.h"
+#include "legoapi/characters/motion/move.h"
+#include "legoapi/cutscenes/gcutscn.h"
+#include "legoapi/gizmo/base/gizflow.h"
+#include "legoapi/gizmos/door/gizspinner.h"
+#include "legoapi/items/objects/game_obj.h"
+#include "legoapi/misc/utilities.h"
+#include "legoapi/props/objects/zipup.h"
+#include "legoapi/render/core/gameliball.h"
+#include "legoapi/render/core/screen.h"
+#include "legoapi/world/levels/episodeI.h"
+#include "legoapi/world/levels/episodeV.h"
+#include "legoapi/world/levels/hub.h"
+#include "legogame/game.h"
+#include "nu2api/nu3d/nu3d_includes.h"
+#include "nu2api/nucore/android/stubs_android.h"
 
 
 
-extern void FindForcePushTarget(GameObject_s *object, i32 held, i32 mode);
 
 
 
-extern u32 StarWars_ParseAIPathCnxFlag(char *name);
-
-extern AIPATHCNXCONTROLLER_s *AIPathCnxControllerCreate(AIPATHCNXCONTROLSYS_s *control_system, AISYS_s *ai_system,
-                                                        AIPATH_s *path, char *from, char *to, i32 target_type,
-                                                        char *target_name, i32 fake_animation_id, i32 gizmo_output);
-
-extern void AIPathCnxControllerSetOnRange(AIPATHCNXCONTROLLER_s *controller, i32 start_frame, i32 end_frame);
 
 
-extern AIPATHCNXHELPER_s *AIPathCnxHelperSys_AddHelper(AIPATHCNXHELPERSYS_s *system, AIPATHCNX_s *connection,
-                                                       u8 direction, void *target, u8 type);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 extern "C" void *AIPAthFindPathCnx(AISYS_s *system, AIPATH_s *path, char *from, char *to, i32 *direction);
 
@@ -207,19 +200,12 @@ void MakeThrowVector(NUVEC *, NUVEC *, NUVEC *, NUVEC *, f32, f32);
 
 static i32 Action_SetCurrentSpeed(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **, i32, i32, f32);
 
-i32 Action_SetState(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **, i32, i32, f32);
 
-i32 Action_FollowPlayer(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **, i32, i32, f32);
 
-i32 Action_UsePanel(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **, i32, i32, f32);
 
-i32 Action_PullLever(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **, i32, i32, f32);
 
-i32 Action_UseTechno(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **, i32, i32, f32);
 
-i32 Action_HelpWithTriggers(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **, i32, i32, f32);
 
-i32 Action_UseTriggerSet(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **, i32, i32, f32);
 
 static i32 Action_GoToOriginalPath(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **, i32, i32, f32);
 
@@ -241,7 +227,6 @@ static i32 Action_ShootAtOpponent(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char *
 
 static i32 Action_SetInvulnerable(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **, i32, i32, f32);
 
-i32 Action_SetVisibility(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **, i32, i32, f32);
 
 static i32 Action_PressJumpButton(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **, i32, i32, f32);
 
@@ -268,54 +253,36 @@ union AI_CONDITION_LEVEL_ARGUMENT {
 };
 
 
-extern void oneAtOnce_SetDistPerRow(f32);
 
-extern void oneAtOnce_SetNumAttackers(i32);
 
-extern void oneAtOnce_SetAttackersPerRow(i32);
 
 static i32 Action_EngageOpponent(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **, i32, i32, f32);
 
 
-AILOCATOR *LocalGetRandomLocator(AILOCATOR **, i32, f32, NUVEC *, f32, i32, f32, f32);
-
-AILOCATOR *LocalGetNearestLocator(AILOCATOR **, i32, f32, NUVEC *, f32, i32, f32, f32);
-
-i16 GetGenericGoon(i32);
-
-extern "C" AIGROUP *CreateAIGroup(AISYS *, i32, f32, f32, f32);
-
-void PlayJumpSfx(GameObject_s *, i32);
-
-void SetWeaponOut(GameObject_s *);
-
-void StartBallooning(GameObject_s *, i32);
-
-void SetBallooningHeight(GameObject_s *, f32);
-
-void SpawnCreatureFromCrate(GameObject_s *, f32, f32);
 
 
-extern i32 LineIntersectSphere(NUVEC *, NUVEC *, NUVEC *, f32, f32 *);
+
+
+
+
+
+
+
+
 
 extern TERRSET *CurTerr;
 
 extern "C" i32 party_under_cover;
 
-extern FLOWBOX_s *FlowBoxFindByName(GIZFLOW_s *, char *);
 
 
 
 
-extern "C" f32 default_path_heighttol;
-
-extern "C" i32 instNuGCutSceneIsFinished(instNUGCUTSCENE_s *cutscene);
 
 
-extern u8 hub_custodians_finished_loading;
 
 
-extern void PodSprint_GetIAlongVals(nugspline_s *spline, i16 *first_point, i16 *last_point);
+
 
 
 
@@ -326,7 +293,6 @@ enum AI_CREATURE_SET : isize {
     AI_CREATURE_SET_LAST = 16,
 };
 
-i32 Action_GameFollowPlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, f32);
 
 static isize AIConditionArgumentValue(void *argument) {
     AI_CONDITION_LEVEL_ARGUMENT condition_argument = {};
@@ -613,8 +579,6 @@ __used__ static i32 Action_AnimTimeRandom(AISYS *sys, AISCRIPTPROCESS *processor
                                           i32 param_4, i32 param_5, f32 param_6);
 __used__ static i32 Action_SetAnimation(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                         i32 param_4, i32 param_5, f32 param_6);
-i32 Action_MoveForward(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params, i32 param_count,
-                       i32 first_time, f32);
 static i32 Action_SnapToSockPosition(AISYS *, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                      i32 param_count, i32 first_time, f32);
 __used__ static i32 Action_GoToOriginalPath(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
@@ -855,12 +819,6 @@ extern "C" {
     extern i16 id_BATTLEDROIDCOMMANDER, id_CLONEEP3, id_CLONEEP3SAND;
 }
 
-i32 Action_ReleaseLocator(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
-                          i32 first_time, float);
-i32 Action_GetLocatorFromSet(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,
-                             i32 param_count, i32 first_time, float);
-i32 Action_AssignLocatorInSet(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
-                              i32 first_time, float);
 
 extern "C" {
     // Keep this registry in the exact order used by the shipped script parser.
@@ -1680,34 +1638,22 @@ __used__ static i32 Action_DontPush(AISYS *sys, AISCRIPTPROCESS *processor, AIPA
 // ==== src/legoapi/items/objects/gameobjects.cpp: declarations ====
 
 
-void GameObjectSetCanUse(GameObject_s *, void *, u8, u8, f32);
 extern i16 id_GAMORREANGUARD;
 extern i32 TERRAINMASK_NONWEAPON, TERRAINMASK_NONDROID;
 
 
 extern "C" {
-    void AddToAIGroup(AIGROUP_s *group, APIOBJECT_s *object);
     extern i16 id_BAT;
     extern i16 id_SNAKE;
-    extern i16 id_BASKETCANNON;
-    extern i16 id_R2Q5;
     extern i16 id_LANDSPEEDER;
     extern i32 FalconDebKey[2];
 }
 
 // Written by ThingManager's ctor (original global @0x124f2e0, .bss).
-extern void oneAtOnce_MaintainArray();
 
-void SetPlayer();
-void ResetPlayerMoves(GameObject_s *object);
-void GetTopBot(GameObject_s *object);
-void Player_ClearContext(GameObject_s *object, i32 mode);
-void Player_ResetContexts(PLAYERPACKET_s *packet);
 extern GameObject_s *player_tag_from;
 extern GameObject_s *player_tag_to;
 
-f32 Condition_InHubArea(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *);
-void *Condition_InHubAreaInit(AISYS_s *, char *, AISCRIPT_s *);
 
 
 
@@ -1948,7 +1894,6 @@ static f32 Condition_GotLocatorInSet(AISYS_s *system, AISCRIPTPROCESS_s *process
 
 static void *Condition_GotLocatorInSetInit(AISYS_s *system, char *name, AISCRIPT_s *);
 
-i32 CanFightLikeAJedi(GameObject_s *object);
 
 static f32 Condition_CanFightLikeAJedi(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *);
 
@@ -2229,12 +2174,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
     static_assert(sizeof(lego_aiconditiondefs) / sizeof(lego_aiconditiondefs[0]) == 178,
                   "complete game AI condition registry");
 
-extern f32 default_path_heighttol;
-extern u8 default_activate_difficulty;
-extern u8 default_min_n_respawns;
-extern u8 default_max_n_respawns;
-extern f32 default_min_t_respawn;
-extern f32 default_max_t_respawn;
 
 
     AIGETNAMEDAPIOBJECT *GetNamedAPIObjectFn;
@@ -2268,7 +2207,6 @@ extern f32 default_max_t_respawn;
 
 
 
-extern void (*BackDrop_AlphaFn)(f32 *alpha);
 struct CUTSCENEPLAYERCLIP;
 
 extern f32 LevelNameTime, LevelNameMul;
@@ -2276,8 +2214,6 @@ extern f32 LevelNameTime, LevelNameMul;
 
 
 
-extern f32 party_follow_offsets[8];
-void GameCreatureOpponentSelection(AISYS_s *, i32, APIOBJECT **, i32, APIOBJECT **, i32, APIOBJECT **, u64, f32);
 
 #if defined(__i386__)
 #define GAMEOBJECTS_CLONE_ATTR2_SSE __attribute__((noinline, noclone, regparm(2), sseregparm))
@@ -2322,7 +2258,6 @@ void SetScriptErrorLevel(SCRIPT_ERROR_LEVEL level);
 
 
 
-void Game_KillPart(PART_s *part, i32 reason);
 
 
 
@@ -2347,11 +2282,9 @@ extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER;
 
 
 
-void GameObjectSetCanUse(GameObject_s *object, void *target, unsigned char action, unsigned char, float parameter);
 
 
 
-void GameObjectDimensions(GameObject_s *object);
 
 
 
@@ -2365,12 +2298,8 @@ extern "C" {
 extern i32 party_under_cover;
 }
 
-void GameCreatureOpponentSelection(AISYS_s *system, i32 count, APIOBJECT_s **objects, i32 goody_count,
-                                   APIOBJECT_s **goodies, i32 baddy_count, APIOBJECT_s **baddies, u64 awareness,
-                                   float);
 
 
-void AlertSurroundingCreatures(GameObject_s *, NUVEC *);
 
 
 
@@ -2452,18 +2381,15 @@ extern "C" {
 
 
 void DestroySnakeBody(GameObject_s *);
-void ReleaseEat(GameObject_s *);
 
 
 
 
 extern GameObject_s * player_tag_to;
 extern GameObject_s * player_tag_from;
-i32 TakeOverYodaSeekDistanceHack(GameObject_s *, GameObject_s *, NUVEC *);
 
 
 
-void ScaleGameObject(GameObject_s *object);
 
 void DestroySnakeBody(GameObject_s *obj);
 
@@ -2471,7 +2397,6 @@ void DestroySnakeBody(GameObject_s *obj);
 extern u16 TargetDeg_Near, TargetDeg_Mid, TargetDeg_Far;
 extern f32 TargetDist_Near2, TargetDist_Mid2;
 
-void ResetAICreature(GameObject_s *, AISYS_s *);
 
 extern i8 (*adtab)[4];
 
@@ -2482,7 +2407,6 @@ extern i8 (*adtab)[4];
 
 
 
-void DeactivateGameObject(GameObject_s *object);
 
 
 GameObject_s *FindNearestGameObject(NUVEC *position, GameObject_s *exclude, u32 required_flags, f32 radius,
@@ -2493,46 +2417,26 @@ GameObject_s *FindNearestGameObject(NUVEC *position, GameObject_s *exclude, u32 
 
 
 extern "C" {
-    extern debris_chunk_control_s *debris_chunk_control_stack[2];
-    extern debris_chunk_control_s **freechunkcontrols;
     extern i32 freechunkcontrolsptr;
 }
-void RemoveChunkControlFromStack(debris_chunk_control_s *, debris_chunk_control_s **);
 
 
-void RemoveChunkControlFromStack(debris_chunk_control_s *control, debris_chunk_control_s **stack);
 
 
 
 // ==== src/legoapi/gizmo/gizmos/gizmos_gizactions.cpp: declarations ====
 
-i32 Action_SetState(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s *, char **params, i32 param_count,
-                    i32 is_first_time, float);
-
-void AISysGetPathPos2(AISYS_s *, NUVEC *, AIPATHINFO_s *, NUVEC *, AIPATH_s *, i32);
 
 
-i32 Action_UsePanel(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params, i32 param_count,
-                    i32 first_time, f32 elapsed);
-
-i32 Action_UseTechno(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params, i32 param_count,
-                     i32 first_time, f32 elapsed);
 
 
-i32 Action_PullLever(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params, i32 param_count,
-                     i32 first_time, f32 elapsed);
 
 
-i32 Action_FollowPlayer(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params, i32 param_count,
-                        i32 first_time, float);
 
-i32 Action_SetVisibility(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **params, i32 param_count, i32 first_time,
-                         float);
 
-i32 Action_HelpWithTriggers(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float);
 
-i32 Action_UseTriggerSet(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,
-                         i32 param_count, i32 first_time, f32 elapsed);
+
+
 
 
 
@@ -2540,19 +2444,12 @@ i32 Action_UseTriggerSet(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKET
 void GameCameraMakeMiniCut3(u32, float, i32, i32, i32, void *, i32, NUVEC *, float, float, float, float, float, float,
                             float, i32, nugspline_s *, char, char);
 
-i32 Action_DynamicCameraCut(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,
-                            i32 param_count, i32 first_time, float);
 
 f32 party_follow_offsets[8];
 
-i32 Action_GameFollowPlayer(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,
-                            i32 param_count, i32 first_time, float);
 
 struct GIZSPINNER_s;
-f32 GizSpinner_GetNearestTargetPoint(GIZSPINNER_s *, NUVEC *, NUVEC *, NUVEC *, i32);
 
-i32 Action_HelpWithTriggers(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **, i32, i32,
-                            f32 elapsed);
 
 
 
@@ -2568,12 +2465,6 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-i32 LineIntersectSphere(NUVEC *, NUVEC *, NUVEC *, f32, f32 *);
-extern "C" void NewPartRotation(PART_s *part);
-extern f32 guided_life;
-extern f32 guided_start_time;
-extern i32 guided_rotate_speed;
-extern f32 guided_speed;
 
 
 
@@ -2589,7 +2480,6 @@ extern "C" {
     extern i16 id_RIDDLER_GOON, id_RIDDLER_GOON_GUN;
 }
 
-i16 GetGenericGoon(i32 armed);
 
 
 
@@ -2597,20 +2487,13 @@ i16 GetGenericGoon(i32 armed);
 
 
 
-i32 oneAtOnce_CanAttack(GameObject_s *object, GameObject_s *opponent);
-
-f32 oneAtOnce_GetHoldRange(GameObject_s *object);
-
-void oneAtOnce_MaintainArray();
-
-void oneAtOnce_SetDistPerRow(float distance);
 
 
-void oneAtOnce_SetNumAttackers(i32 attackers);
 
-void oneAtOnce_SetInitDistPerRow(float distance);
 
-void oneAtOnce_SetAttackersPerRow(i32 attackers);
+
+
+
 
 // ==== src/legoapi/characters/core/characters.cpp: declarations ====
 
@@ -2620,20 +2503,7 @@ void oneAtOnce_SetAttackersPerRow(i32 attackers);
 // otherwise C-linkage engine subsystems.  Keep these declarations local: the
 // individual subsystem TUs intentionally expose their original plain names.
 extern "C" {
-    void DebrisSetup(VARIPTR *, VARIPTR, char *, i32, i32, i32);
-    void DebrisRegisterCutoffCameraVec(void *);
-    void edgraSetup(VARIPTR *, VARIPTR, i32, i32, i32);
-    void InitParts(i32, VARIPTR *, VARIPTR *);
-    void ParticleReset(void);
-    i32 edppLoadPage(char *, i32, usize);
-    void NuRndrShadowInit(u8 *);
-    void NuTexAnimProgSysInit(void);
-    void terrainpickupinit(char *, void **);
 
-    extern f32 animduration_blendouttime;
-    extern i32 DEBPAGE_GENERAL;
-    extern i32 DEBPAGE_CHARACTER;
-    extern void *perm_debrissys;
 }
 
 struct AISYS_s;
@@ -2662,8 +2532,6 @@ extern "C" {
 
 
 extern "C" {
-    extern i16 id_R2Q5;
-    void PlaySfxAndSetVolume(char *, nuvec_s *, f32);
 }
 
 
@@ -2672,10 +2540,6 @@ extern "C" {
 
 
 
-extern void SetGameObjectCharacterData(GameObject_s *obj);
-extern void GetTopBot(GameObject_s *obj);
-extern void GameObjectDimensions(GameObject_s *obj);
-extern void ResetCharacterIdle(GameObject_s *obj, i32 mode, i32 idle);
 
 
 
@@ -2687,14 +2551,6 @@ extern void ResetCharacterIdle(GameObject_s *obj, i32 mode, i32 idle);
 #endif
 
 
-void Player_ClearContext(GameObject_s *, i32);
-void ResetPlayerMoves(GameObject_s *);
-void Player_ResetContexts(PLAYERPACKET_s *);
-
-
-
-
-void ResetCharacterIdle(GameObject_s *object, i32 mode, i32 animation);
 
 
 
@@ -2702,7 +2558,10 @@ void ResetCharacterIdle(GameObject_s *object, i32 mode, i32 animation);
 
 
 
-void DeactivateGameObject(GameObject_s *);
+
+
+
+
 
 
 
@@ -2716,24 +2575,17 @@ extern i32 STATUS_R, STATUS_G, STATUS_B;
 
 
 
-AILOCATOR_s *LocalGetRandomLocator(AILOCATOR_s **locators, i32 count, f32 clip_radius, NUVEC *position,
-                                   f32 max_distance, i32 outside_camera, f32 max_delta_y, f32 min_delta_y);
-
-AILOCATOR_s *LocalGetNearestLocator(AILOCATOR_s **locators, i32 count, f32 clip_radius, NUVEC *position,
-                                    f32 max_distance, i32 outside_camera, f32 max_delta_y, f32 min_delta_y);
 
 
 
 
 
 
-void ScaleGameObject(GameObject_s *obj);
-
-void SetGameObjectCharacterData(GameObject_s *obj);
 
 
 
-i32 TakeOverYodaSeekDistanceHack(GameObject_s *object, GameObject_s *luke, nuvec_s *offset);
+
+
 
 
 

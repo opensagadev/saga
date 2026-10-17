@@ -288,6 +288,15 @@
 #include "nu2api/nusound/nusound.h"
 #include "nu2api/nu3d/glutils.h"
 #include "legoapi/render/light/surfaces_types.h"
+#include "editor/edlevelall.h"
+#include "gameapi/ai/aisys/gameaiscript.h"
+#include "gameapi/edtools/edtoolsall.h"
+#include "legoapi/characters/motion/camera.h"
+#include "legoapi/characters/motion/move.h"
+#include "legoapi/world/levels/episodeI.h"
+#include "legoapi/world/levels/episodeII.h"
+#include "legoapi/world/levels/episodeV.h"
+#include "nu2api/nu3d/nu3d_includes.h"
 #if defined(__i386__) && defined(__SSE__)
 #include <xmmintrin.h>
 #endif
@@ -296,16 +305,6 @@
 #endif
 
 
-void EdDrawBegin(i32);
-void EdDrawEnd();
-void EdDrawLineSphere(VuVec const &, float, float, i32);
-void EdDrawPolyArrow(VuVec const &, VuVec const &, i32, i32, float, float, float, float);
-i32 EdTerrRay(VuVec &, VuVec &);
-extern eduiiattr_s EdLevelAttr;
-void cbEdLevelDestroy(eduimenu_s *, eduimenu_s *);
-void cbEdLevelSave(eduimenu_s *, eduiitem_s *, u32);
-void cbEdLevelSetSliderFloat(eduimenu_s *, eduiitem_s *, u32);
-void cbEdLevelDestroyOnSelect(eduimenu_s *, eduiitem_s *, u32);
 static void cbEdLevelSettingsMenu(eduimenu_s *, eduiitem_s *, u32);
 
 #define EDLEVEL_ADD_ACTIVE_SCENE(menu, scene_index)                                                                    \
@@ -330,9 +329,6 @@ static inline i32 get_class_object_attribute(EdClass *ed_class, void *object, Ed
     return 0;
 }
 
-extern ClassEditor theClassEditor;
-extern eduimenu_s *edLevelNextMenu;
-void eduiSetPinnedMenu(eduimenu_s *);
 
 DECOMP_ASSERT(offsetof(EdClass, flags) == 0x04, "EdClass flags offset");
 DECOMP_ASSERT(offsetof(EdClass, members) == 0x08, "EdClass members offset");
@@ -349,18 +345,12 @@ static i32 class_editor_create_pending = -1;
 i32 BaseEditor::blockDepth;
 i32 BaseEditor::blockStart[8];
 eduimenu_s *edLevelActiveMenu;
-extern eduimenu_s *edLevelPinnedMenu;
 i32 edLevelDestroyActiveMenu;
 eduimenu_s *edLevelDestroyThisMenu;
 eduimenu_s *edLevelDestroyThisMenu2;
 i32 edlevel_mouseandkeyboard;
 LevelEditor theLevelEditor;
 
-extern "C" void eduiSetCameraEnabled(i32);
-eduimenu_s *GetMenuActiveChild(eduimenu_s *);
-extern "C" void NuRndrRect2di(i32, i32, i32, i32, i32, NUMTL *);
-extern "C" void eduiSetCursorColour(u32);
-extern "C" void eduiSetFontScale(f32, f32);
 
 EdManipulator theDefaultManipulator;
 EdManMove theMoveManipulator;
@@ -392,17 +382,12 @@ template <typename T> T *CreateObject(MemoryBuffer *buffer) {
 
 
 
-void cbEdLevelSave(eduimenu_s *parent, eduiitem_s *item, u32);
 
-void cbEdLevelDestroy(eduimenu_s *menu, eduimenu_s *);
 
-void cbEdLevelToggleInt(eduimenu_s *, eduiitem_s *item, u32);
 
-void cbEdLevelDestroyOnSelect(eduimenu_s *menu, eduiitem_s *, u32);
 
 eduimenu_s *edLevelNextMenu;
 
-void cbEdLevelSetSliderFloat(eduimenu_s *, eduiitem_s *item, u32);
 
 // ==== src/gameapi/edtools/edtoolsall.cpp: declarations ====
 
@@ -415,13 +400,7 @@ extern "C" VuVec SpherePos2;
 VuVec SpherePos1;
 VuVec SpherePos2;
 extern EdInputContext * Input;
-extern PropertyTool thePropertyTool;
-extern i32 EdLevelFnt;
-extern "C" void eduiAddPropTextPickEnt(eduimenu_s *, eduiitem_s *);
-extern "C" char *GetSfxName(i32);
-extern "C" void PlaySfxById(i32, nuvec_s *);
 extern "C" eduiitem_s *eduiItemColourPickCreate(usize, const void *, EdUiItemCallback, char *);
-extern "C" void eduiItemColourPickSetRGB(edui_colour_pick_s *, f32, f32, f32);
 i32 EdType_Char;
 i32 EdType_Short;
 i32 EdType_Int;
@@ -435,47 +414,25 @@ i32 EdType_NuHSpecial;
 i32 EdType_NuVec;
 i32 EdType_NuMtx;
 
-void SerialiseChar(EdStream &, void *, i32);
-void SerialiseShort(EdStream &, void *, i32);
-void SerialiseInt(EdStream &, void *, i32);
-void SerialiseFloat(EdStream &, void *, i32);
-void SerialiseVuVec(EdStream &, void *, i32);
-void SerialiseVuMtx(EdStream &, void *, i32);
-void SerialiseString(EdStream &, void *, i32);
-void SerialiseColour3(EdStream &, void *, i32);
-void SerialiseNuHSpecial(EdStream &, void *, i32);
-void SerialiseNuVec(EdStream &, void *, i32);
-void SerialiseNuMtx(EdStream &, void *, i32);
 
 f32 EdManipulator::Scale = 2.0f;
 DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
 i32 pad_disabled;
 eduimenu_s *edLevelPinnedMenu;
 
-void eduiSetPinnedMenu(eduimenu_s *menu);
 
-i32 edGetPadDisabled();
 
 NUMTL *EdDrawMtl[2];
 static i32 NewPrim;
 static i32 NewMtl;
 static const VuMtx *NewMtx;
-void EdDrawPolyCylinder(VuMtx const &, float, float, float, i32, i32, i32, i32);
-void EdDrawMtx(VuMtx const *);
-
-void EdDrawBegin(i32 material);
-
-void EdDrawPolyTri(VuVec const &a, VuVec const &b, VuVec const &c, i32 colour);
 
 
 
-void EdDrawPolyArrow(VuVec const &start, VuVec const &end, i32 sides, i32 colour, float radius, float limit,
-                     float radius_factor, float radius_offset);
 
-void EdDrawLineSphere(VuVec const &center, float radius, float scale, i32 colour);
 
-void EdDrawPolySector(VuVec const &center, float radius, i32 axis, i32 first_angle, i32 last_angle, i32 colour,
-                      i32 segments);
+
+
 
 template <i32 Axis> static inline void EdDrawCircle(VuVec const &centre, float radius, i32 colour, i32 segments) {
     VuVec base(0.0f, Axis == 2 ? radius : 0.0f, Axis == 2 ? 0.0f : radius, 0.0f);
@@ -495,21 +452,15 @@ template <i32 Axis> static inline void EdDrawCircle(VuVec const &centre, float r
     }
 }
 
-void EdDrawLineCircleX(VuVec const &centre, float radius, i32 colour, i32 segments);
-
-void EdDrawLineCircleZ(VuVec const &centre, float radius, i32 colour, i32 segments);
-
-void EdDrawLineCircleY(VuVec const &centre, float radius, i32 colour, i32 segments);
 
 
-void EdDrawPolyCylinder(VuMtx const &transform, float half_length, float radius, float end_radius, i32 sides,
-                        i32 colour, i32 cap_start, i32 cap_end);
+
+
 
 __attribute__((force_align_arg_pointer)) void EdDrawPolyCylinder(VuVec const &start, VuVec const &end, i32 sides,
                                                                  i32 colour, i32 cap_colour, float radius, float limit,
                                                                  float offset);
 
-void EdDrawMtx(VuMtx const *matrix);
 
 static i32 rotation_axis = 1;
 
@@ -574,8 +525,6 @@ static i32 SpecialObjectFilter(void *object) {
 }
 
 static EdClassObjectNameControl *edClassObjectNameControl;
-extern eduimenu_s *edLevelDestroyThisMenu;
-extern eduimenu_s *edLevelDestroyThisMenu2;
 
 inline EdClassObjectNameControl::~EdClassObjectNameControl() {
 }
@@ -775,7 +724,6 @@ static __attribute__((used)) void edanimcbLocalSoundMenu(eduimenu_s *parent, edu
 // ---- end src/gameapi/edtools/edptlall.cpp ----
 
 extern "C" {
-    void NuRndrRect2di(i32 x, i32 y, i32 width, i32 height, i32 colour, numtl_s *material);
 }
 
 // The original local font helpers read the same private draw state as the
@@ -843,12 +791,7 @@ extern "C" {
     // Shared editor font; edmainInit receives and stores the font handle.
 
 
-void eduiAddPropTextPickEnt(eduimenu_s *menu, eduiitem_s *source);
 eduiitem_s *eduiItemColourPickCreate(usize data, const void *colours, EdUiItemCallback callback, char *text);
-void eduiItemColourPickSetRGB(edui_colour_pick_s *item, f32 red, f32 green, f32 blue);
-void eduiSetCameraEnabled(i32 enabled);
-void eduiSetCursorColour(u32 colour);
-void eduiSetFontScale(f32 x, f32 y);
 
     // The editor UI callbacks share this translation unit with their cursor,
     // menu, and interaction state in the original binary.
@@ -933,7 +876,6 @@ static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ..
 
 // ==== src/legoapi/menus/screens/gamemenuall.cpp: declarations ====
 
-extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 
 // Retail clears these "fast repeat" latches but never sets them.
 
@@ -1166,25 +1108,15 @@ DECOMP_ASSERT(offsetof(CAMERA_CONTEXT_PATH_s, flags) == 0x4c, "Camera context fl
 
 
 
-void SerialiseInt(EdStream &stream, void *data, i32);
 
-void SerialiseChar(EdStream &stream, void *data, i32);
 
-void SerialiseFloat(EdStream &stream, void *data, i32);
 
-void SerialiseNuMtx(EdStream &stream, void *data, i32);
 
-void SerialiseNuVec(EdStream &stream, void *data, i32);
 
-void SerialiseShort(EdStream &stream, void *data, i32);
 
-void SerialiseVuMtx(EdStream &stream, void *data, i32);
 
-void SerialiseVuVec(EdStream &stream, void *data, i32);
 
-void SerialiseString(EdStream &stream, void *data, i32 count);
 
-void SerialiseColour3(EdStream &stream, void *data, i32);
 
 // Retail keeps the whole body of RenderFileSel3 as the split-out .part clone;
 // the exported function only tests FS_Active.
@@ -1192,7 +1124,6 @@ static __attribute__((noinline, noclone)) void RenderFileSel3Body(i32 draw_title
     __asm__("_Z14RenderFileSel3i.part.38");
 
 
-void SerialiseNuHSpecial(EdStream &stream, void *data, i32);
 
 // ==== src/legoapi/render/core/render.cpp: declarations ====
 
@@ -1201,7 +1132,6 @@ void SerialiseNuHSpecial(EdStream &stream, void *data, i32);
 struct nuhspecial_s;
 struct VuVec;
 
-extern "C" void NuRndrRect2di(i32, i32, i32, i32, i32, numtl_s *);
 
 // Camera zoom state
 
@@ -1297,7 +1227,6 @@ extern "C" {
 
 
 
-void eduiItemColourPickSetRGB(edui_colour_pick_s *item, f32 red, f32 green, f32 blue);
 
 }
 
@@ -1307,7 +1236,6 @@ eduiitem_s *eduiItemColourPickCreate(usize data, const void *colours, EdUiItemCa
 
 
 
-void eduiSetCameraEnabled(i32 enabled);
 
 
 
@@ -1322,7 +1250,6 @@ void eduiSetCameraEnabled(i32 enabled);
 
 
 
-void eduiAddPropTextPickEnt(eduimenu_s *menu, eduiitem_s *source);
 
 
 
@@ -1340,11 +1267,9 @@ extern "C" {
 
 
 
-void eduiSetCursorColour(u32 colour);
 
 
 
-void eduiSetFontScale(f32 x, f32 y);
 
 }
 
@@ -1426,8 +1351,6 @@ struct WORLDINFO_s;
 
 // ==== src/legoapi/characters/motion/camera.cpp: declarations ====
 
-extern VIEWCAM_s ViewCam;
-extern f32 testmovef;
 
 extern i32 LevFlag[4];
 
@@ -1558,7 +1481,6 @@ struct AISYS_s;
 #define MOSEISLEY_LAYERS_ATTR __attribute__((noinline, noclone))
 #endif
 
-void LoadPerm1();
 
 // ==== src/legoapi/menus/screens/menus.cpp: declarations ====
 
@@ -1661,7 +1583,6 @@ extern "C" {
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -2243,14 +2164,12 @@ inline void ThingManager::operator delete(void *thing, usize size) {
 #endif
 
 // Retail keeps only the IPA-SRA clone of this function.
-i32 PodLevel(AREADATA_s *);
 
 // Multiplies the ordinary camera's per-frame position blend.  The original
 // keeps this as writable camera state (default 1.0), rather than folding it
 // into the socket seek rate.
 
 
-i32 PodLevel(AREADATA_s *area);
 
 // Retail splits the guard off as an inline head; the rest is this partial clone.
 
@@ -2277,7 +2196,6 @@ DECOMP_ASSERT(offsetof(AWKWARDSHAPESPHERE_s, radius) == 8, "Awkward shape sphere
 
 // ==== src/legoapi/world/levels/episodeV.cpp: declarations ====
 
-extern AILOCATOR_s * locator;
 
 DECOMP_ASSERT(sizeof(HOTHBATTLEE_NETPACKET_s) == 0x58, "Hoth panel packet size");
 DECOMP_ASSERT(offsetof(HOTHBATTLEE_NETPACKET_s, alpha) == 0x24, "Hoth panel packet alpha offset");
@@ -2299,7 +2217,6 @@ DECOMP_ASSERT(sizeof(ASTEROIDCNETPACKET_s) == 8, "asteroid C network packet size
 
 extern "C" {
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -2776,14 +2693,8 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 // ==== src/legoapi/gizmo/gizmos/gizmos_gizactions.cpp: declarations ====
 
-i32 Action_ReleaseLocator(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
-                          i32 first_time, float);
 
-i32 Action_GetLocatorFromSet(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,
-                             i32 param_count, i32 first_time, float);
 
-i32 Action_AssignLocatorInSet(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
-                              i32 first_time, float);
 
 namespace {
 #include "legoapi/gizmo/gizmos/gizmos_gizactions_types.h"
@@ -3408,11 +3319,6 @@ void knotHelperDeletingDestructor(KnotHelper *object) {
     ::operator delete(object);
 }
 
-extern numtl_s *edLevel3dMtl;
-void EdDrawLineCircleY(VuVec const &, f32, i32, i32);
-void DrawBezierLine(VuVec &, VuVec &, VuVec &, VuVec &, numtl_s *, i32);
-f32 BezierLineLength(VuVec &, VuVec &, VuVec &, VuVec &);
-i32 BezierLinePos(VuVec &, VuVec &, VuVec &, VuVec &, VuVec &, f32);
 
 template <typename Ref>
 static Ref *make_spline_reference(EdClass *object_class, char *type, char *name, i32 offset, i32 size, i32 attributes,
@@ -3496,7 +3402,6 @@ inline void SplinePointBlock::operator delete(void *memory) {
 
 // ==== src/legoapi/menus/screens/menus.cpp: all remaining content ====
 
-eduimenu_s *GetMenuActiveChild(eduimenu_s *menu);
 
 // ==== src/legoapi/render/fx/edsplines.cpp: declarations ====
 
@@ -3508,11 +3413,8 @@ static i32 bezierline_depth asm("bezierline_depth");
 typedef f32 BezierVec4 __attribute__((vector_size(16)));
 typedef f32 BezierVec4Unaligned __attribute__((vector_size(16), aligned(4)));
 
-i32 BezierLinePos(VuVec &result, VuVec &start, VuVec &first_control, VuVec &end, VuVec &second_control, f32 distance);
 
-f32 BezierLineLength(VuVec &start, VuVec &first_control, VuVec &end, VuVec &second_control);
 
-f32 BezierLineLength(VuVec &start, VuVec &first_control, VuVec &end, VuVec &second_control, f32 t);
 
 // Retail only keeps the split-out body of the IPA-SRA clone, which takes
 // &spline->length and &spline->pts in place of the spline.
@@ -3672,7 +3574,6 @@ extern "C" {
 
 extern "C" {
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -4213,7 +4114,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 extern "C" {
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -4256,7 +4156,6 @@ namespace {
 // Kamino
 // ===========================================================================
 
-extern i32 last;
 
 // ===========================================================================
 // ===========================================================================
@@ -4848,7 +4747,6 @@ extern "C" {
         NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
     } while (0)
 
-void DrawBezierLine(VuVec &start, VuVec &start_control, VuVec &end, VuVec &end_control, numtl_s *material, i32 colour);
 
 #define SWIPE_PRIM_UV(U, V)                                                                                            \
     do {                                                                                                               \
@@ -4883,7 +4781,6 @@ void DrawBezierLine(VuVec &start, VuVec &start_control, VuVec &end, VuVec &end_c
 
 extern "C" {
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -5377,7 +5274,6 @@ extern "C" {
 
 extern "C" {
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -5920,7 +5816,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 extern "C" {
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -6260,7 +6155,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 // ==== src/legoapi/characters/motion/gameanim.cpp: declarations ====
 
-void SetPodMergeAnims(ANIMPACKET_s *packet, i32 index);
 
 // ==== src/nu2api/nu3d/nuspecial.cpp: declarations ====
 

@@ -13,3 +13,10 @@ void GameAntinode_UnregisterAntiNode(GAMEANTINODESYS_s *system, GAMEANTINODE_s *
 
 GAMEANTINODE_s *GameAntinode_RegisterAntiNodeUsingData(GAMEANTINODESYS_s *system, nuvec_s *position, u16 angle,
                                                        GAMEANTINODEDATA_s *data, float duration, i32 disabled);
+
+// Declared here for the other units that use them.
+struct GAMEANTINODESYS_s;
+void GameAntinode_Update(GAMEANTINODESYS_s *);
+extern "C" {
+    extern u64 GameAntinode_grid[64];
+}

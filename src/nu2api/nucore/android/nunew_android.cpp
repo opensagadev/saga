@@ -9,28 +9,23 @@
 
 #include "nu2api/nucore/NuMemoryManager.h"
 #include "nu2api/nucore/numemory.h"
+#include "nu2api/nucore/android/nunew_android.h"
 
-void *operator new(std::size_t size);
 
-void *operator new(std::size_t size, u32 alignment);
 
 void *operator new(std::size_t size, const std::nothrow_t &) noexcept;
 
 void *operator new(std::size_t size, u32 alignment, const std::nothrow_t &) noexcept;
 
-void *operator new[](std::size_t size);
 
-void *operator new[](std::size_t size, u32 alignment);
 
 void *operator new[](std::size_t size, const std::nothrow_t &) noexcept;
 
 void *operator new[](std::size_t size, u32 alignment, const std::nothrow_t &) noexcept;
 
-void operator delete(void *ptr) noexcept;
 
 void operator delete(void *ptr, const std::nothrow_t &) noexcept;
 
-void operator delete[](void *ptr) noexcept;
 
 void operator delete[](void *ptr, const std::nothrow_t &) noexcept;
 

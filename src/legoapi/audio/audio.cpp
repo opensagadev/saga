@@ -303,6 +303,11 @@
 #include "nu2api/nusound/nusound_voice.hpp"
 #include "nu2api/nusound/nusound_decoder.hpp"
 #include "nu2api/nusound/nusound3_include_types.h"
+#include "gameapi/ai/aisys/gameaiscript.h"
+#include "legoapi/characters/motion/camera.h"
+#include "legoapi/characters/motion/move.h"
+#include "legoapi/menus/core/hint.h"
+#include "legoapi/world/levels/episodeV.h"
 
 i32 (*GameAudio_ActionMusicFn)(void) = NULL;
 static f32 sticky_attack_timeout[2] = {1.0f, 6.0f};
@@ -323,9 +328,7 @@ static i32 MusicPlrsHoldAttack;
 // The reference constructs the music manager in this unit's static constructor.
 NuMusic music_man;
 
-void legoSetCutVolume(float v);
 
-extern "C" void SetSoundVolume(f32);
 
 
 
@@ -341,17 +344,14 @@ static RepeatSfx repsfxtab[32];
 static i32 ticktock;
 
 extern "C" {
-extern SoundTable CurrentSFXTAB;
     void (*ExtraDieSfxFn)(GameObject_s *);
     void (*ExtraHurtSfxFn)(GameObject_s *);
 }
 
-extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 
 
 static GAMEAUDIO GameAudio_Default;
 static GAMEAUDIO *GameAudio = &GameAudio_Default;
-extern "C" void MenuRegisterSoundFX(i32, i32, i32, i32);
 
 extern "C" {
 }
@@ -359,12 +359,9 @@ extern "C" {
 extern "C" {
 
 
-void PlaySfxById(i32 sfx_id, nuvec_s *position);
-
-void PlaySfxByIdAndSetVolume(i32 sfx_id, nuvec_s *position, f32 volume);
 
 
-void SfxBitsRestore(SoundTable *table);
+
 
 } // extern "C"
 
@@ -411,7 +408,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 // Retail keeps only the IPA-SRA clone, which takes the other object's x and z by address.
 
-extern "C" void MenuRegisterSoundFX(i32 move, i32 select, i32 back, i32 no_entry);
 
 
 
@@ -502,17 +498,13 @@ struct nuhspecial_s;
 
 // ==== src/legoapi/menus/core/gamehint.cpp: declarations ====
 
-extern f32 ICONXPOS_TOUCHYFEELY;
-extern f32 ICONYPOS_TOUCHYFEELY;
 
-void MechHintUIButton_OnClick_Callback(MechTouchUIElement &, TouchHolder &);
 
 #include "legoapi/menus/core/gamehint_types.h"
 DECOMP_ASSERT(sizeof(MechHintUIButton) == 0xa8, "MechHintUIButton size");
 DECOMP_ASSERT(offsetof(MechHintUIButton, pending_hint) == 0x7c, "Pending touch hint offset");
 DECOMP_ASSERT(offsetof(MechHintUIButton, display_elapsed) == 0x80, "Touch hint display timer offset");
 
-void MechHintUIButton_OnClick_Callback(MechTouchUIElement &element, TouchHolder &);
 
 // Static game message and hint helpers. Stubbed to satisfy the symbol baseline.
 
@@ -855,14 +847,8 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 // ==== src/legoapi/gizmo/gizmos/gizmos_gizactions.cpp: declarations ====
 
-i32 Action_ReleaseLocator(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
-                          i32 first_time, float);
 
-i32 Action_GetLocatorFromSet(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,
-                             i32 param_count, i32 first_time, float);
 
-i32 Action_AssignLocatorInSet(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
-                              i32 first_time, float);
 
 namespace {
 #include "legoapi/gizmo/gizmos/gizmos_gizactions_types.h"
@@ -971,7 +957,6 @@ extern "C" {
 extern "C" {
     // Shared suspend flag consulted by all timed debris emitters.
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -1001,7 +986,6 @@ extern "C" {
     if (type->sounds[slot] != -1 && type->sound_modes[slot] == (mode))                                                 \
         PlaySfxById(type->sounds[slot], &emitter->position);
 
-extern "C" void PlaySfxByIdAndSetVolume(i32, NUVEC *, f32);
 
 
 
@@ -1291,7 +1275,6 @@ static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ..
 
 
 extern EdInputContext * Input;
-extern "C" void PlaySfxById(i32, nuvec_s *);
 
 DECOMP_ASSERT(sizeof(EdManipulator) == 0x6c, "EdManipulator ABI");
 
@@ -1430,7 +1413,6 @@ static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u
 
 extern "C" {
 
-void MenuRegisterSoundFX(i32 move, i32 select, i32 back, i32 no_entry);
 
 } // extern "C"
 
@@ -1860,7 +1842,6 @@ namespace {
 
 extern "C" {
 
-void MenuRegisterSoundFX(i32 move, i32 select, i32 back, i32 no_entry);
 
 } // extern "C"
 
@@ -1959,7 +1940,6 @@ extern "C" {
 
 extern "C" {
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -2139,7 +2119,6 @@ static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u
 
 extern "C" {
 
-void MenuRegisterSoundFX(i32 move, i32 select, i32 back, i32 no_entry);
 
 } // extern "C"
 
@@ -2426,7 +2405,6 @@ extern "C" {
 
 extern "C" {
 
-void MenuRegisterSoundFX(i32 move, i32 select, i32 back, i32 no_entry);
 
 }
 
@@ -2437,7 +2415,6 @@ extern "C" {
 // ==== src/legoapi/menus/screens/gamestatus_lsw.cpp: declarations ====
 
 
-void LevelComplete_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32);
 
 // Retail keeps this body as GCC's split-out clone; the inline head stays in
 // the caller.
@@ -2445,7 +2422,6 @@ void LevelComplete_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32);
 // Retail keeps the active-stage drawing as the split-out .part clone of
 // LevelComplete_LSW_Draw; the inline head only tests `active`.
 
-void LevelComplete_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active);
 
 // ==== src/legoapi/menus/screens/shop.cpp: declarations ====
 
@@ -2494,7 +2470,6 @@ inline void ThingManager::operator delete(void *thing, usize size) {
 
 extern "C" {
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -2672,7 +2647,6 @@ extern "C" {
 
 // Retail uses translation-unit-local helpers with compiler-inferred private
 // calling conventions; keep their shared animation-mode call sites intact.
-extern "C" void PlaySfxByIdAndSetVolume(i32 sfx_id, NUVEC *position, f32 volume);
 
 
 // ==== src/legoapi/ai/core/ai_sys_stubs.cpp: all remaining content ====
@@ -2690,7 +2664,6 @@ extern "C" {
 // ==== src/legoapi/cutscenes/cutscenes.cpp: declarations ====
 
 extern "C" {
-    void PlaySfxById(i32 sfx_id, nuvec_s *position);
 }
 
 // Retail only keeps the split-out body of the IPA-SRA clone (the unused
@@ -2709,7 +2682,6 @@ extern "C" {
 // ==== src/legoapi/cutscenes/cutscenes.cpp: declarations ====
 
 extern "C" {
-    void PlaySfxById(i32 sfx_id, nuvec_s *position);
 }
 
 // ==== src/legoapi/items/collect/bolts.cpp: declarations ====
@@ -2830,8 +2802,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 // ==== src/legoapi/characters/motion/camera.cpp: declarations ====
 
-extern VIEWCAM_s ViewCam;
-extern f32 testmovef;
 
 extern i32 LevFlag[4];
 
@@ -2938,7 +2908,6 @@ extern "C" {
 
 }
 
-void LoadPerm1();
 
 // ==== src/legoapi/render/core/render.cpp: declarations ====
 
@@ -3018,7 +2987,6 @@ extern "C" {
 
 extern "C" {
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -3580,14 +3548,12 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 #endif
 
 // Retail keeps only the IPA-SRA clone of this function.
-i32 PodLevel(AREADATA_s *);
 
 // Multiplies the ordinary camera's per-frame position blend.  The original
 // keeps this as writable camera state (default 1.0), rather than folding it
 // into the socket seek rate.
 
 
-i32 PodLevel(AREADATA_s *area);
 
 // Retail splits the guard off as an inline head; the rest is this partial clone.
 
@@ -3609,7 +3575,6 @@ DECOMP_ASSERT(offsetof(AWKWARDSHAPESPHERE_s, radius) == 8, "Awkward shape sphere
 
 // ==== src/legoapi/world/levels/episodeV.cpp: declarations ====
 
-extern AILOCATOR_s * locator;
 
 DECOMP_ASSERT(sizeof(HOTHBATTLEE_NETPACKET_s) == 0x58, "Hoth panel packet size");
 DECOMP_ASSERT(offsetof(HOTHBATTLEE_NETPACKET_s, alpha) == 0x24, "Hoth panel packet alpha offset");
@@ -3631,7 +3596,6 @@ DECOMP_ASSERT(sizeof(ASTEROIDCNETPACKET_s) == 8, "asteroid C network packet size
 
 extern "C" {
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -4210,7 +4174,6 @@ extern "C" {
 
 extern "C" {
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -4745,7 +4708,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 // ==== src/legoapi/audio/specialsfx.cpp: declarations ====
 
-extern "C" void PlaySfxByIdAndSetVolumeAndPitch(i32 sfx_id, nuvec_s *position, f32 volume, f32 pitch);
 
 // ==== src/legoapi/audio/sfx.cpp: declarations ====
 
@@ -4755,7 +4717,6 @@ extern "C" {
 extern "C" {
 
 
-void PlaySfxById(i32 sfx_id, nuvec_s *position);
 
 
 } // extern "C"
@@ -4947,7 +4908,6 @@ extern "C" {
 
 extern "C" {
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -5495,7 +5455,6 @@ extern "C" {
 
 extern "C" {
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -5981,7 +5940,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 extern "C" {
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -6142,7 +6100,6 @@ extern "C" {
 // ==== src/legoapi/cutscenes/cutscenes.cpp: declarations ====
 
 extern "C" {
-    void PlaySfxById(i32 sfx_id, nuvec_s *position);
 }
 
 // ==== functions in original address order ====
@@ -6150,7 +6107,6 @@ extern "C" {
 // ==== src/legoapi/cutscenes/cutscenes.cpp: declarations ====
 
 extern "C" {
-    void PlaySfxById(i32 sfx_id, nuvec_s *position);
 }
 
 // ==== src/legoapi/gizmos/object/gizobstacle.cpp: declarations ====
@@ -6423,7 +6379,6 @@ extern "C" {
 
 extern "C" {
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -6971,7 +6926,6 @@ extern "C" {
 
 extern "C" {
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -7457,7 +7411,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 extern "C" {
 
-    void PlaySfxById(i32, NUVEC *);
 
 }
 
@@ -7618,7 +7571,6 @@ extern "C" {
 // ==== src/legoapi/cutscenes/cutscenes.cpp: declarations ====
 
 extern "C" {
-    void PlaySfxById(i32 sfx_id, nuvec_s *position);
 }
 
 // ==== functions in original address order ====
@@ -7626,7 +7578,6 @@ extern "C" {
 // ==== src/legoapi/cutscenes/cutscenes.cpp: declarations ====
 
 extern "C" {
-    void PlaySfxById(i32 sfx_id, nuvec_s *position);
 }
 
 // ==== src/legoapi/gizmos/object/gizobstacle.cpp: declarations ====

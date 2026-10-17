@@ -66,6 +66,7 @@
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/nusound/nusound.h"
 #include "legoapi/world/world.h"
+#include "editor/edlevelall.h"
 
 i32 openlevels = 0;
 
@@ -81,7 +82,6 @@ i32 openlevels = 0;
 #endif
 
 
-extern eduiiattr_s EdLevelAttr;
 
 #define EDLEVEL_ADD_ACTIVE_SCENE(menu, scene_index)                                                                    \
     do {                                                                                                               \

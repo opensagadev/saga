@@ -117,6 +117,9 @@
 #include "nu2api/numath/numath.h"
 #include "nu2api/nu3d/nuprim.h"
 #include "legoapi/render/light/shadow.h"
+#include "editor/edlevelall.h"
+#include "legoapi/characters/motion/camera.h"
+#include "nu2api/nucore/android/stubs_android.h"
 
 extern "C" {
     NULIGHTINGSTATE NuRndrLightingStateCurrent = {};
@@ -128,7 +131,6 @@ NUVEC paneldir[3] = {{-1.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 1.0f}, {0.0f, 0.0f, -1.0f
 NUCOLOUR3 panelcol[3] = {{1.0f, 0.5f, 0.5f}, {0.5f, 1.0f, 0.5f}, {0.5f, 0.5f, 1.0f}};
 
 extern "C" {
-    void NuLightSpotFadeSet(u32);
 }
 
 static constexpr u32 kNeutralSpotLightFade = 0x80808080u;
@@ -138,11 +140,8 @@ i32 (*Lighting_BlueFlickerFn)(GameObject_s *);
 i32 Lighting_FlashRedOnLastHeart;
 extern f32 GhostLightMul;
 
-void SetLights(NUCOLOUR3 *colour0, NUVEC *direction0, NUCOLOUR3 *colour1, NUVEC *direction1, NUCOLOUR3 *colour2,
-               NUVEC *direction2, NUVEC *ambient);
 
 
-void SetZeroLights();
 
 
 // ==== src/legoapi/render/core/rtl.c: declarations ====
@@ -203,7 +202,6 @@ extern "C" {
 #include <emmintrin.h>
 #endif
 
-extern eduiiattr_s EdLevelAttr;
 
 #define EDLEVEL_ADD_ACTIVE_SCENE(menu, scene_index)                                                                    \
     do {                                                                                                               \
@@ -225,9 +223,7 @@ DECOMP_ASSERT(offsetof(EdMember, reference) == 0x04, "EdMember reference offset"
 // ==== src/legoapi/characters/motion/camera.cpp: declarations ====
 
 
-extern VIEWCAM_s ViewCam;
 // Original data symbol testmovef is float0.005 at 0x617cb0.
-extern f32 testmovef;
 
 DECOMP_ASSERT(sizeof(VIEWCAM_s) == 0x28, "ViewCam size");
 DECOMP_ASSERT(offsetof(VIEWCAM_s, pitch) == 0x10, "ViewCam pitch offset");

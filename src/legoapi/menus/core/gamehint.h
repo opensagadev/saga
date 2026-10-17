@@ -67,3 +67,18 @@ void Hint_SetComplete(i32 hint_id);
 i32 Hint_isAvailable(i32 hint_id);
 
 #endif
+
+// Declared here for the other units that use them.
+struct HINT_s;
+extern HINT_s Hints_LSW[55];
+extern i32 id_HINT_LSW_AUTOJUMP;
+extern i32 id_HINT_LSW_AUTOJUMP_FAIL;
+extern u8 show_hatmachine_hint;
+extern u8 show_unlock_customiser_hint;
+extern u8 show_unlock_minikitviewer_hint;
+extern u8 show_unlock_shop_hint;
+i32 HINT_COMPLETE(i32 hint_id);
+void CLEAR_HINT_COMPLETE(i32 hint_id);
+void DrawHint_LSW(HINT_s *hint, i32 max_lines);
+void SET_HINT_COMPLETE(i32 hint_id);
+void initGameHintSys_LSW(void);

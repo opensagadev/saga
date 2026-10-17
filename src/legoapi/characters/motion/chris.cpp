@@ -119,22 +119,27 @@
 #include "gameapi/edtools/edcam.h"
 #include "gameapi/edtools/edui.h"
 #include "legoapi/actions/character/speederchase_types.h"
+#include "editor/edlevelall.h"
+#include "gameapi/edtools/edtoolsall.h"
+#include "legoapi/ai/core/aisysall.h"
+#include "legoapi/ai/game/creature.h"
+#include "legoapi/render/core/gameliball.h"
+#include "legoapi/render/core/screen.h"
+#include "legoapi/world/levels/episodeI.h"
+#include "nu2api/nu3d/nu3d_includes.h"
 
 struct AIROW_s;
 struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-extern f32 SpaceRumbleTimer;
 extern i32 LevFlag[4];
 // The original keeps this scale in an aligned vector slot and copies it with movaps.
 static spacelevel_scale_s STARFIGHTERDRAWSCALE __attribute__((aligned(16)));
 NUVEC Jetpos = {0.15f, 0.08f, 0.32f};
-void DrawCross_Now(_vuv_s *position, f32 size, i32 colour, i32 mode);
 // Four debug door keys start enabled and are restored by each restart.
 i32 DogDebKey[4] __attribute__((aligned(16))) = {-1, -1, -1, -1};
 struct quickboltinfo;
-void ChrisAnakinCReset();
 static NUVEC4 RadialMoveCentre;
 static __used__ f32 RadialPlayerRadius[2];
 static __used__ f32 MaxRadialCamY;
@@ -146,7 +151,6 @@ static NUVEC4 PlayerPos, PlayerVel;
 
 
 
-void ChrisAnakinAUpdate(WORLDINFO_s *);
 
 
 anakin_door_setup_s DoorSetupList[15] = {
@@ -168,7 +172,6 @@ anakin_door_setup_s DoorSetupList[15] = {
     {"", NULL, 0.0f, 0.0f, 0, {}, {0.0f, 0.0f, 0.0f}, 0.0f, 0.0f},
 };
 
-void DrawLine_Now(_vuv_s *, _vuv_s *, i32, i32);
 
 #if defined(__i386__)
 #define CHRIS_REGPARM1 __attribute__((regparm(1)))
@@ -250,49 +253,30 @@ static inline void DrawSpaceJet(i32 player_index, i32 key_index, bool left) {
 }
 
 
-void ChrisAnakinADraw();
-
-void ChrisAnakinDDraw();
 
 
 
-void ChrisRadialCam(nuvec_s *position, nuvec_s *target);
-
-void ChrisAnakinAInit(WORLDINFO_s *world);
-
-void ChrisAnakinBDraw();
-
-void ChrisAnakinBInit();
-
-void ChrisAnakinCInit();
-
-void ChrisAnakinDInit(WORLDINFO_s *world);
-
-void DogFightARestart();
-
-
-void ChrisDogFightAPanel(WORLDINFO_s *);
-
-void ChrisAnakinAPanel(WORLDINFO_s *);
-
-void ChrisAnakinAReset(WORLDINFO_s *world);
-
-void ChrisAnakinBReset();
-
-
-void ChrisAnakinDReset(WORLDINFO_s *world);
-
-void ChrisAnakinBUpdate();
-
-void ChrisAnakinCUpdate();
-
-void ChrisAnakinDUpdate(WORLDINFO_s *);
-
-void ChrisAfterBurnerCam(nuvec_s *, nuvec_s *camera);
 
 
 
-i32 DidBoltHitChrisJobby(WORLDINFO_s *, BOLT_s *);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -320,7 +304,6 @@ struct rtlidata_s;
 
 
 
-void DrawGameObjectsDraw(i32 pass);
 
 struct GAMEMESSAGE_s;
 struct HINT_s;
@@ -335,7 +318,6 @@ struct ripple_node_s;
 struct ripple_set_s;
 struct VuVec;
 
-extern nuhspecial_s *(*GameMsg_GetExtraObjFn)(GAMEMESSAGE_s *);
 
 
 // Camera zoom state
@@ -344,7 +326,6 @@ extern nuhspecial_s *(*GameMsg_GetExtraObjFn)(GAMEMESSAGE_s *);
 
 
 extern "C" {
-    void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 }
 
 
@@ -370,12 +351,8 @@ extern "C" {
 
 
 
-void DrawBox_Now(_vuv_s *, _vuv_s *, i32, i32);
 
 extern "C" {
-extern f32 aiEditor_DrawYOffset;
-extern f32 aiEditor_LocatorWidth;
-    void AiRndrLine3d(NURND_VERTEX3D *, NUMTL *, NUMTX *);
 }
 
 
@@ -432,12 +409,10 @@ extern f32 aiEditor_LocatorWidth;
     } while (0)
 
 
-void DrawArrow_Now(_vum_s *, float, i32, i32);
 
 extern i16 tNONEWBESTTIME, tNEWBESTTIME;
 
 
-void DrawCross_Now(_vuv_s *, float, i32, i32);
 
 
 
@@ -449,7 +424,6 @@ void DrawCross_Now(_vuv_s *, float, i32, i32);
 
 
 
-void DrawBoxMtx_Now(_vum_s *, _vuv_s *, i32, i32);
 
 
 
@@ -485,7 +459,6 @@ extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
 
 
 
-void DrawGameObjectsDraw(i32);
 
 
 
@@ -539,7 +512,6 @@ extern i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
 
 
 
-extern void (*BackDrop_AlphaFn)(float *);
 
 
 
@@ -550,7 +522,6 @@ extern void (*BackDrop_AlphaFn)(float *);
 
 extern "C" {
     extern nurenderscene_s currentScene;
-void DisplaySceneRndrSpecials(NUDLDLISTSCENE *scene, i32, void *visibility_context);
 }
 
 // ==== src/legoapi/render/fx/edsplines.cpp: declarations ====
@@ -561,10 +532,8 @@ void DisplaySceneRndrSpecials(NUDLDLISTSCENE *scene, i32, void *visibility_conte
 
 extern "C" {
     char *FSP_Extension = ".FSP";
-    extern f32 PODRACE_SPLINEINC;
 }
 
-f32 BezierLineLength(VuVec &, VuVec &, VuVec &, VuVec &);
 
 // The original copies the aligned spline point to the caller's vector as
 // one unaligned 4-float vector store.
@@ -574,9 +543,7 @@ typedef f32 BezierVec4Unaligned __attribute__((vector_size(16), aligned(4)));
 
 
 
-f32 BezierLineLength(VuVec &start, VuVec &first_control, VuVec &end, VuVec &second_control);
 
-f32 BezierLineLength(VuVec &start, VuVec &first_control, VuVec &end, VuVec &second_control, f32 t);
 
 // Retail only keeps the split-out body of the IPA-SRA clone, which takes
 // &spline->length and &spline->pts in place of the spline.
@@ -593,7 +560,6 @@ f32 BezierLineLength(VuVec &start, VuVec &first_control, VuVec &end, VuVec &seco
 
 
 
-void CalcSplinePointFromDist(flightspline_s *spline, _vuv_s *result, float distance);
 
 
 
@@ -604,24 +570,14 @@ void CalcSplinePointFromDist(flightspline_s *spline, _vuv_s *result, float dista
 
 // The reference constructs the music manager in this unit's static constructor.
 
-extern "C" void SetPreSeekStartPoint(f32 start_point);
 
 
-void SpaceAudioPoint();
 extern "C" {
-extern i32 fake_seeking;
 
-i32 GetCurPreSeek(void);
-i32 GetCurrentMusicId(void);
-i32 GetOppMusicId(void);
 
-void MusicPreSeek(i32 track);
 
-void MusicPreSeekNow(i32 track);
 
-i32 MusicSeeking(void);
 
-i32 MusicState(void);
 }
 
 
@@ -664,7 +620,6 @@ extern "C" {
 
 
 
-void TakeHitRumble(GameObject_s *object, float strength);
 
 
 f32 MulDist = 0.5f;
@@ -700,7 +655,6 @@ DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 
 
 
-void TakeHitRumble(GameObject_s *, f32);
 
 
 
@@ -722,9 +676,7 @@ void SetLevelExBlowupFunc(i32 (*callback)(GIZMOBLOWUP_s *, i32));
 
 extern "C" {
 
-extern i32 edmain_auto_speed;
 
-void cbSetAutoSpeed(eduimenu_s *, eduiitem_s *item, u32);
 
 } // extern "C"
 
@@ -736,7 +688,6 @@ void cbSetAutoSpeed(eduimenu_s *, eduiitem_s *item, u32);
 
 anakin_door_s *volatile AnakinC = NULL;
 
-void ChrisUnallocLevelStuff(WORLDINFO_s *world);
 
 // ==== functions in original address order ====
 

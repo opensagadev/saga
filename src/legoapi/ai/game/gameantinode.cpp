@@ -18,10 +18,10 @@
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include <string.h>
+#include "legoapi/ai/core/gameai.h"
 
 extern "C" {
     u64 GameAntinode_grid[64];
-    extern f32 default_path_heighttol;
 }
 i32 ViewCamGetMode();
 NUVEC *ViewCamGetTgt();

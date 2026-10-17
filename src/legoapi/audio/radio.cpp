@@ -16,6 +16,7 @@
 #include "nu2api/nucore/nustring.h"
 
 #include <string.h>
+#include "legoapi/gizmo/object/gizmoblowups.h"
 
 struct AIROW_s;
 struct nunativegscene_s;
@@ -34,7 +35,6 @@ DECOMP_ASSERT(sizeof(RadioEntry) == 0x14, "RadioEntry size");
 
 static RadioEntry radios[8];
 
-void GizmoBlowupUpdateMatrix(GIZMOBLOWUP_s *blowup);
 
 // ==== functions in original address order ====
 
