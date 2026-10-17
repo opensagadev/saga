@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 82.923416,
+    "fuzzy_match_percent": 82.92344,
     "total_code": "4722419",
     "matched_code": "651372",
     "matched_code_percent": 13.793185,
@@ -51321,85 +51321,6 @@
       ]
     },
     {
-      "name": "legoapi/gizmo/gizmos/gizmos_teleport.cpp.o",
-      "source": "src/legoapi/gizmo/gizmos/gizmos_teleport.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/gizmos_teleport.o",
-      "functions": [
-        {
-          "name": "_ZN10TELEPORT_s22GetMechObjectInterfaceEv",
-          "demangled_name": "TELEPORT_s::GetMechObjectInterface()",
-          "address": 1236592,
-          "offset": 346624,
-          "size": 107,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN10TELEPORT_s24ClearMechObjectInterfaceEv",
-          "demangled_name": "TELEPORT_s::ClearMechObjectInterface()",
-          "address": 1236704,
-          "offset": 346736,
-          "size": 31,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z13Teleport_FindP12GameObject_sfP5VuVec",
-          "demangled_name": "Teleport_Find(GameObject_s*, float, VuVec*)",
-          "address": 1237408,
-          "offset": 347440,
-          "size": 790,
-          "match_percent": 87.98529
-        },
-        {
-          "name": "_Z15Teleports_ResetP11WORLDINFO_s",
-          "demangled_name": "Teleports_Reset(WORLDINFO_s*)",
-          "address": 1238208,
-          "offset": 348240,
-          "size": 99,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z33Teleports_UpdateBeforeGameObjectsP11WORLDINFO_s",
-          "demangled_name": "Teleports_UpdateBeforeGameObjects(WORLDINFO_s*)",
-          "address": 1238320,
-          "offset": 348352,
-          "size": 75,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z32Teleports_UpdateAfterGameObjectsP11WORLDINFO_s",
-          "demangled_name": "Teleports_UpdateAfterGameObjects(WORLDINFO_s*)",
-          "address": 1238400,
-          "offset": 348432,
-          "size": 673,
-          "match_percent": 84.52287
-        },
-        {
-          "name": "_Z20Teleport_NetMoveCodeP12GameObject_s",
-          "demangled_name": "Teleport_NetMoveCode(GameObject_s*)",
-          "address": 1239088,
-          "offset": 349120,
-          "size": 432,
-          "match_percent": 71.958336
-        },
-        {
-          "name": "_Z17Teleport_MoveCodeP12GameObject_si",
-          "demangled_name": "Teleport_MoveCode(GameObject_s*, int)",
-          "address": 1239520,
-          "offset": 349552,
-          "size": 3358,
-          "match_percent": 64.48153
-        },
-        {
-          "name": "_Z20Teleport_UpdateHintsP6HINT_s",
-          "demangled_name": "Teleport_UpdateHints(HINT_s*)",
-          "address": 1242880,
-          "offset": 352912,
-          "size": 349,
-          "match_percent": 51.03896
-        }
-      ]
-    },
-    {
       "name": "legoapi/gizmo/object/gizbuildit.cpp.o",
       "source": "src/legoapi/gizmo/object/gizbuildit.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/gizbuildit.o",
@@ -55641,12 +55562,84 @@
           "match_percent": 92.91781
         },
         {
+          "name": "_ZN10TELEPORT_s22GetMechObjectInterfaceEv",
+          "demangled_name": "TELEPORT_s::GetMechObjectInterface()",
+          "address": 1236592,
+          "offset": 346624,
+          "size": 107,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN10TELEPORT_s24ClearMechObjectInterfaceEv",
+          "demangled_name": "TELEPORT_s::ClearMechObjectInterface()",
+          "address": 1236704,
+          "offset": 346736,
+          "size": 31,
+          "match_percent": 100.0
+        },
+        {
           "name": "_Z19Teleports_ConfigureP11WORLDINFO_sPc",
           "demangled_name": "Teleports_Configure(WORLDINFO_s*, char*)",
           "address": 1236736,
           "offset": 346768,
           "size": 669,
           "match_percent": 98.66892
+        },
+        {
+          "name": "_Z13Teleport_FindP12GameObject_sfP5VuVec",
+          "demangled_name": "Teleport_Find(GameObject_s*, float, VuVec*)",
+          "address": 1237408,
+          "offset": 347440,
+          "size": 790,
+          "match_percent": 88.20588
+        },
+        {
+          "name": "_Z15Teleports_ResetP11WORLDINFO_s",
+          "demangled_name": "Teleports_Reset(WORLDINFO_s*)",
+          "address": 1238208,
+          "offset": 348240,
+          "size": 99,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z33Teleports_UpdateBeforeGameObjectsP11WORLDINFO_s",
+          "demangled_name": "Teleports_UpdateBeforeGameObjects(WORLDINFO_s*)",
+          "address": 1238320,
+          "offset": 348352,
+          "size": 75,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z32Teleports_UpdateAfterGameObjectsP11WORLDINFO_s",
+          "demangled_name": "Teleports_UpdateAfterGameObjects(WORLDINFO_s*)",
+          "address": 1238400,
+          "offset": 348432,
+          "size": 673,
+          "match_percent": 84.52287
+        },
+        {
+          "name": "_Z20Teleport_NetMoveCodeP12GameObject_s",
+          "demangled_name": "Teleport_NetMoveCode(GameObject_s*)",
+          "address": 1239088,
+          "offset": 349120,
+          "size": 432,
+          "match_percent": 71.958336
+        },
+        {
+          "name": "_Z17Teleport_MoveCodeP12GameObject_si",
+          "demangled_name": "Teleport_MoveCode(GameObject_s*, int)",
+          "address": 1239520,
+          "offset": 349552,
+          "size": 3358,
+          "match_percent": 64.48153
+        },
+        {
+          "name": "_Z20Teleport_UpdateHintsP6HINT_s",
+          "demangled_name": "Teleport_UpdateHints(HINT_s*)",
+          "address": 1242880,
+          "offset": 352912,
+          "size": 349,
+          "match_percent": 51.03896
         },
         {
           "name": "_Z22Teleport_RegisterGizmoi",
@@ -129724,7 +129717,7 @@
     }
   ],
   "summary": {
-    "bazel_units": 463,
+    "bazel_units": 462,
     "functions": 13454,
     "assigned_functions": 12841,
     "ambiguous_functions": 286,
