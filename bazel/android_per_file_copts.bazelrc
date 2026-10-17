@@ -357,7 +357,6 @@ build:target --per_file_copt=^src/nu2api/nucore/numemory\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nucore/nupad_interface\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nucore/nunew\.cpp$@-O2
 build:target --per_file_copt=^src/nu2api/nucore/nustring_c\.cpp$@-O3
-build:target --per_file_copt=^src/nu2api/nucore/nuios_metrics\.cpp$@-O2
 # Recovered ClassInitPS and UpdateAllPS require the original vectorization and
 # ten-touch loop unrolling: -O3 reproduces both bodies above 99%.
 build:target --per_file_copt=^src/nu2api/nucore/android/NuInputDevice_android\.cpp$@-O3

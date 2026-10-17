@@ -1,3 +1,6 @@
+// Original translation unit reconstructed from the reference address map.
+// Functions are defined in original address order.
+
 #include "decomp.h"
 
 #include "batman.h"
@@ -52,6 +55,37 @@ char *Trailer[3] = {"demointro", reinterpret_cast<char *>(&tINTRO), NULL};
 
 // Object name the save icon is drawn from.
 char *lsw_memcard_objname = "mem_card";
+
+extern "C" i32 NuMain(i32 argc, char **argv);
+
+static void NuSoundAppTerminate(void);
+
+// ==== src/nu2api/nucore/nuios_metrics.cpp: all remaining content ====
+#include "nu2api/nuandroid/ios_graphics.h"
+#include "nu2api/nu3d/nurndr.h"
+
+extern "C" {
+
+f32 NuIOS_GetAspectRatio(void);
+
+i32 NuIOS_IsWidescreen(void);
+
+} // extern "C"
+
+// ==== functions in original address order ====
+
+static void NuSoundAppTerminate(void) {
+    NuSound.Shutdown();
+}
+
+extern "C" {
+    f32 NuIOS_GetAspectRatio(void) {
+        return static_cast<f32>(nurndr_pixel_width) / static_cast<f32>(nurndr_pixel_height);
+    }
+
+    i32 NuIOS_IsWidescreen(void) {
+        return NuIOS_GetAspectRatio() > 1.5f;
+    }
 
 extern "C" i32 NuMain(i32 argc, char **argv) {
     static i32 frameCount = 0;
@@ -1393,6 +1427,4 @@ after_status:
     goto restart_level;
 }
 
-static void NuSoundAppTerminate(void) {
-    NuSound.Shutdown();
 }

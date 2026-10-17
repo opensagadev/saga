@@ -18985,12 +18985,28 @@
           "match_percent": 100.0
         },
         {
+          "name": "NuIOS_GetAspectRatio",
+          "demangled_name": "NuIOS_GetAspectRatio",
+          "address": 1015328,
+          "offset": 125360,
+          "size": 52,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuIOS_IsWidescreen",
+          "demangled_name": "NuIOS_IsWidescreen",
+          "address": 1015392,
+          "offset": 125424,
+          "size": 49,
+          "match_percent": 99.92308
+        },
+        {
           "name": "NuMain",
           "demangled_name": "NuMain",
           "address": 1015456,
           "offset": 125488,
           "size": 13465,
-          "match_percent": 82.55552
+          "match_percent": 82.55422
         }
       ]
     },
@@ -103570,29 +103586,6 @@
       ]
     },
     {
-      "name": "nu2api/nucore/nuios_metrics.cpp.o",
-      "source": "src/nu2api/nucore/nuios_metrics.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nuios_metrics.o",
-      "functions": [
-        {
-          "name": "NuIOS_GetAspectRatio",
-          "demangled_name": "NuIOS_GetAspectRatio",
-          "address": 1015328,
-          "offset": 125360,
-          "size": 52,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuIOS_IsWidescreen",
-          "demangled_name": "NuIOS_IsWidescreen",
-          "address": 1015392,
-          "offset": 125424,
-          "size": 49,
-          "match_percent": 99.92308
-        }
-      ]
-    },
-    {
       "name": "nu2api/nucore/nukeyboard.cpp.o",
       "source": "src/nu2api/nucore/nukeyboard.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nukeyboard.o",
@@ -129713,7 +129706,7 @@
     }
   ],
   "summary": {
-    "bazel_units": 465,
+    "bazel_units": 464,
     "functions": 13454,
     "assigned_functions": 12841,
     "ambiguous_functions": 286,
