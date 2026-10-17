@@ -90,18 +90,7 @@ void PodKeyReset() {
 
 void TakeHitRumble(GameObject_s *, f32);
 
-void PodLoseSpeed(GameObject_s *object, i32 hit, i32 rumble) {
-    if (hit != 0) {
-        ObjHitObj(NULL, object, 1, 0, 0, 1);
-    }
-    if (hit != 0 || rumble != 0) {
-        TakeHitRumble(object, 0.7f);
-    }
-    object->current_speed_mul *= 0.5f;
-    if (object->current_speed_mul < 0.333f) {
-        object->current_speed_mul = 0.333f;
-    }
-}
+void PodLoseSpeed(GameObject_s *object, i32 hit, i32 rumble);
 
 i32 SpeederBlowupHack(GIZMOBLOWUP_s *blowup, i32) {
     if (blowup == NULL) {
@@ -111,36 +100,10 @@ i32 SpeederBlowupHack(GIZMOBLOWUP_s *blowup, i32) {
            NuStrCmp(blowup->name, "thermocrate_031") != 0 && NuStrCmp(blowup->name, "minikit101") != 0;
 }
 
-f32 FindPodHoverHeight(GameObject_s *object) {
-    static NUVEC podsprintlifthackpos[3] = {
-        {-395.26f, -5.48f, -165.08f},
-        {-375.38f, -5.04f, -286.5f},
-        {-354.91f, -4.85f, -299.32f},
-    };
-
-    f32 height = 0.15f;
-    if (object == Player[1] && Player[0]->apiobj.player_controlled) {
-        f32 distance_squared = NuVecDistSqr(&Player[0]->apiobj.position, &object->apiobj.position, NULL);
-        if (distance_squared < 4.0f) {
-            f32 distance = NuFsqrt(distance_squared);
-            i32 angle = static_cast<i32>((1.0f - distance * 0.5f) * 16384.0f);
-            height += NuTrigTable[(angle >> 1) & 0x7fff] * 0.5f;
-        }
-    }
-
-    if (PODSPRINT_ADATA != NULL && WORLD->area == PODSPRINT_ADATA && object->apiobj.player_controlled) {
-        for (i32 i = 0; i < 3; ++i) {
-            if (NuVecXZDistSqr(&object->apiobj.position, &podsprintlifthackpos[i], NULL) < 2.0f) {
-                height += 1.5f;
-                break;
-            }
-        }
-    }
-    return height;
-}
+f32 FindPodHoverHeight(GameObject_s *object);
 
 extern i32 ObjInNarrowSock(GameObject_s *, SOCKSYS *, i32);
-i32 IDLESPEEDINNARROWSOCKSONLY = 0;
+extern i32 IDLESPEEDINNARROWSOCKSONLY;
 
 i32 ObjIsTargetSpeeder(GameObject_s *object) {
     if (object->id != id_SPEEDERBIKE) {
@@ -151,29 +114,7 @@ i32 ObjIsTargetSpeeder(GameObject_s *object) {
     }
     return object->apiobj.field_0x27c == -1;
 }
-f32 GetVehicleSpeedMul(GameObject_s *object, f32 speed) {
-    f32 effective;
-    if (object->character_context == 0x36 || object->character_context == 0x2a || object->character_context == 0x3a)
-        effective = ((GAMECHARACTERDATA_s *)object->apiobj.character_data->field11_0x24)->run_speed;
-    else if ((object->apiobj.flags_low & 0x80) != 0 && WORLD->current_level == DEATHSTARBATTLED_LDATA &&
-             ObjInNarrowSock(object, WORLD->sock_sys, WORLD->level_idx)) {
-        GAMECHARACTERDATA_s *data = (GAMECHARACTERDATA_s *)object->apiobj.character_data->field11_0x24;
-        f32 fraction = (speed - data->field_0x10) / (data->run_speed - data->field_0x10);
-        if (fraction < 0.0f)
-            fraction = 0.0f;
-        effective = (0.5f + fraction * 0.5f) * data->run_speed;
-    } else if ((object->apiobj.flags_low & 0x80) != 0 && (!IDLESPEEDINNARROWSOCKSONLY || object->in_narrow_socket) &&
-               (object->field_0xf03 & 2) == 0) {
-        f32 idle = ((GAMECHARACTERDATA_s *)object->apiobj.character_data->field11_0x24)->field_0x10;
-        effective = idle > speed ? idle : speed;
-    } else {
-        GAMECHARACTERDATA_s *data = (GAMECHARACTERDATA_s *)object->apiobj.character_data->field11_0x24;
-        effective = (speed - data->field_0x10) / (data->run_speed - data->field_0x10) * data->run_speed;
-    }
-    if (effective < 0.0f)
-        effective = 0.0f;
-    return effective / ((GAMECHARACTERDATA_s *)object->apiobj.character_data->field11_0x24)->run_speed;
-}
+f32 GetVehicleSpeedMul(GameObject_s *object, f32 speed);
 
 void SetLevelExBlowupFunc(i32 (*callback)(GIZMOBLOWUP_s *, i32));
 void InitTrooperCannons(WORLDINFO_s *world);
@@ -629,29 +570,7 @@ f32 SpeederChaseATATInOutMul(nuvec_s *start, nuvec_s *end) {
     return MAX(0.1f, distance);
 }
 
-f32 GetVehicleAreaRememberSpeed() {
-    if (VehicleArea == 0) {
-        return 0.0f;
-    }
-
-    f32 speed = 0.0f;
-    f32 player_count = 0.0f;
-    if (Player[0] != NULL && Player[0]->apiobj.player_controlled) {
-        speed += Player[0]->field_0xdc8;
-        player_count = 1.0f;
-    }
-    if (Player[1] != NULL && Player[1]->apiobj.player_controlled) {
-        speed += Player[1]->field_0xdc8;
-        player_count += 1.0f;
-    }
-    if (player_count > 1.0f) {
-        speed /= player_count;
-    }
-    if (speed < 0.25f) {
-        speed = 0.25f;
-    }
-    return speed;
-}
+f32 GetVehicleAreaRememberSpeed();
 
 i32 SpeederChase_ObjIsAGroundTroop(GameObject_s *object) {
     if (object == NULL) {

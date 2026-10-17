@@ -127,55 +127,18 @@ extern "C" {
 void GameAntiNodeData_Init(GAMEANTINODEDATA_s *data, nuhspecial_s *special);
 void GameAntiNodeData_Read(GAMEANTINODEDATA_s *data);
 
-enum GIZMOBLOWUP_OUTPUT_FLAGS : u8 {
-    GIZMOBLOWUP_OUTPUT_BLOWN_UP = 1 << 0,
-    GIZMOBLOWUP_OUTPUT_PUNCHED = 1 << 1,
-};
+#include "legoapi/gizmo/object/gizmoblowups_types.h"
 
-enum GIZMOBLOWUP_VISIBILITY_FLAGS : u8 {
-    GIZMOBLOWUP_VISIBLE = 1 << 6,
-    GIZMOBLOWUP_DRAWN = 1 << 7,
-};
 
-enum GIZMOBLOWUP_STATE_FLAGS : u8 {
-    GIZMOBLOWUP_STATE_ACTIVE = 1 << 0,
-    GIZMOBLOWUP_STATE_DELAY_ACTIVE = 1 << 1,
-    GIZMOBLOWUP_STATE_REPEAT_ANIMATION = 1 << 3,
-    GIZMOBLOWUP_STATE_ANIMATION_PLAYING = 1 << 4,
-    GIZMOBLOWUP_STATE_REPEATING = 1 << 6,
-    GIZMOBLOWUP_STATE_ACTIVATED = 1 << 7,
-};
 
-enum GIZMOBLOWUPTYPE_RUNTIME_FLAGS : u8 {
-    GIZMOBLOWUPTYPE_ANIMATION_UPDATED = 1 << 0,
-};
 
-enum GIZMOBLOWUPTYPE_ANIMATION_FLAGS : u8 {
-    GIZMOBLOWUPTYPE_ANIMATION_INCLUDES_INSTANCE_TRANSFORM = 1 << 5,
-};
 
-enum GIZMOBLOWUP_DRAW_FLAGS : u32 {
-    GIZMOBLOWUP_DRAW_CUSTOM_TRANSFORM = 0x00000010,
-    GIZMOBLOWUP_DRAW_HIDE_DECAL = 0x00000400,
-    GIZMOBLOWUP_DRAW_RESET_SHADOW_MAP = 0x00020000,
-    GIZMOBLOWUP_DRAW_PROJECT_ONLY = 0x00800000,
-    GIZMOBLOWUP_DRAW_REFLECTION = 0x40000000,
-};
 
-enum GIZMOBLOWUP_DRAW_STATUS_FLAGS : u32 {
-    GIZMOBLOWUP_DRAW_STATUS_TRANSFORM_READY = 0x00808000,
-};
 
 static char *Blowup_OutputName[] = {"Blownup", "Punched", "Plugging"};
 
 i32 blowup_gizmotype_id = -1;
 
-struct BLOWUPPROGRESS_s {
-    u32 blown_up[16];
-    u32 activated[16];
-    u32 visible[16];
-    u32 secondary_output[16];
-};
 DECOMP_ASSERT(sizeof(BLOWUPPROGRESS_s) == 0x100, "BLOWUPPROGRESS_s ABI");
 
 void GizBlowup_DeleteTerrain();
@@ -1152,13 +1115,7 @@ i32 GizBlowup_InitSingleTerrain(GIZMOBLOWUP_s *blowup) {
     return 1;
 }
 
-i32 SetGizmoBlowUpTarget(GameObject_s *object, GIZMOBLOWUP_s *blowup) {
-    object->attack_target_position = blowup->mid_position;
-    object->attack_target_velocity = v000;
-    object->attack_blowup_target = VehicleArea != 0 ? NULL : blowup;
-    object->field_0xe21 |= 8;
-    return 1;
-}
+i32 SetGizmoBlowUpTarget(GameObject_s *object, GIZMOBLOWUP_s *blowup);
 
 void GizBlowup_InitTerrain() {
     if (WORLD->gizmo_blowups != NULL) {

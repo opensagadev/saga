@@ -36,38 +36,13 @@ i32 (*CanGlideFn)(GameObject_s *) = NULL;
 i32 DoubleJump_AlwaysReachJump2Height = 0;
 i32 (*Slam_GetDebrisFn)(GameObject_s *, i32) = NULL;
 
-enum PLAYER_JUMP_RUNTIME_FLAGS : u8 {
-    PLAYER_JUMP_RUNTIME_BUTTON_HELD = 0x10,
-};
+#include "legoapi/actions/movement/jumping_types.h"
 
-enum PLAYER_JUMP_INPUT_FLAGS : u8 {
-    PLAYER_JUMP_INPUT_BUFFERED = 0x10,
-};
 
-enum PLAYER_JUMP_FLAGS : u8 {
-    PLAYER_JUMP_FLAG_SPECIAL_TAKEOFF = 0x01,
-};
 
-enum PLAYER_JUMP_CONTEXT_FLAGS : u32 {
-    PLAYER_JUMP_CONTEXT_ALLOW_START = 0x00001000,
-};
 
-enum PLAYER_JUMP_VARIANT_FLAGS : u8 {
-    PLAYER_JUMP_VARIANT_BUTTON_RELEASED = 0x10,
-    PLAYER_JUMP_VARIANT_SECOND_JUMP = 0x40,
-    PLAYER_JUMP_VARIANT_FALLING = 0x80,
-    PLAYER_JUMP_VARIANT_START_CLEAR = 0x90,
-    PLAYER_JUMP_VARIANT_END_CLEAR = 0x50,
-};
 
-enum PLAYER_MOVEMENT_RUNTIME_FLAGS : u8 {
-    PLAYER_MOVEMENT_RUNTIME_DISABLE_JUMP_CODE = 0x10,
-};
 
-enum PLAYER_JUMP_ANIMATION_FLAGS : u32 {
-    PLAYER_JUMP_ANIMATION_ALLOW_DOUBLE_JUMP = 0x0008,
-    PLAYER_JUMP_ANIMATION_USE_THIRD_JUMP = 0x0010,
-};
 
 static const f32 PLAYER_JUMP_MINIMUM_AIR_TIME = 0.1f;
 static const f32 PLAYER_JUMP_REENTRY_DELAY = 0.2f;
@@ -377,39 +352,9 @@ void StartEndOfJump(GameObject_s *object) {
     object->airborne_collision_target = NULL;
 }
 
-void StartBallooning(GameObject_s *object, i32 movement_state) {
-    object->field_0x7a3 = movement_state;
-    object->character_context = 0x5d;
-    object->context_animation = object->apiobj.character_model->model_data_b[0xb1] != NULL ? 0xb1 : 1;
-    object->field_0x768 = 1000000000.0f;
-}
+void StartBallooning(GameObject_s *object, i32 movement_state);
 
-void StartJetPackFall(GameObject_s *object, i32 fall) {
-    object->context_animation_timer = 0.0f;
-    const u8 context_variant_flags = object->context_variant_flags;
-    object->jump_flags &= ~PLAYER_JUMP_FLAG_SPECIAL_TAKEOFF;
-    object->field_0xe31 = 0;
-    object->character_context = 0;
-    object->context_variant_flags = context_variant_flags & ~PLAYER_JUMP_VARIANT_END_CLEAR;
-    object->action_movement_state = 0;
-    object->context_animation = 6;
-    object->jump_sequence = 2;
-    object->airborne_collision_target = NULL;
-
-    if (fall == 0 && object->apiobj.character_model->model_data_b[0x49] != NULL) {
-        object->context_variant_flags = context_variant_flags & 0x2f;
-        object->apiobj.velocity.y =
-            static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->jump_speed;
-        object->context_animation = 0x49;
-        PlayJumpSfx(object, 0);
-    } else {
-        object->character_context = -1;
-    }
-
-    if (static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->uses_weapon_action == 2) {
-        PlayJumpSfx(object, 1);
-    }
-}
+void StartJetPackFall(GameObject_s *object, i32 fall);
 
 void MakeJumpReachHeight(GameObject_s *object, float height, i32 force) {
     const f32 current_height = object->apiobj.collision_min.y - object->jump_start_height;
@@ -426,10 +371,7 @@ void MakeJumpReachHeight(GameObject_s *object, float height, i32 force) {
     }
 }
 
-void SetBallooningHeight(GameObject_s *object, float height) {
-    if (object->character_context == 0x5d)
-        object->field_0x768 = height;
-}
+void SetBallooningHeight(GameObject_s *object, float height);
 
 void StartJump(GameObject_s *object, i32 movement_state) {
     if (LEGOCONTEXT_JUMP != -1) {

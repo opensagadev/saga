@@ -957,13 +957,7 @@ void AddPartDebris(PARTDEBSYS_s *system, i32 index, nuvec_s *position) {
     }
 }
 
-i32 SetPartTarget(GameObject_s *object, PART_s *target) {
-    object->attack_target_position = target->position;
-    object->attack_target_velocity = target->velocity;
-    object->field_0xe21 |= 8;
-    object->attack_part_target = VehicleArea != 0 ? NULL : target;
-    return 1;
-}
+i32 SetPartTarget(GameObject_s *object, PART_s *target);
 
 WORLDINFO_s *WorldInfo_CurrentlyActive();
 extern f32 FRAMETIME;
@@ -1324,27 +1318,9 @@ void PartKill_ForceThrow(PART_s *part, i32) {
     PlaySfx("Explode1", &part->position);
 }
 
-void PartImpact_Basketball(PART_s *part) {
-    f32 speed = NuVecMag(&part->velocity);
-    f32 volume = 0.0f;
-    if (speed >= 2.5f)
-        volume = 1.0f;
-    else if (speed >= 0.1f)
-        volume = (speed - 0.1f) / 2.4f;
-    if (volume > 0.0f)
-        PlaySfxAndSetVolume("BBounce", &part->position, volume);
-}
+void PartImpact_Basketball(PART_s *part);
 
-void PartUpdate_Basketball(PART_s *part) {
-    if (LevGizmo[0] != NULL) {
-        GIZMOBLOWUP_s *blowup = static_cast<GIZMOBLOWUP_s *>(LevGizmo[0]->object);
-        if ((blowup->status_flags & 0x800001) == 0 &&
-            NuVecDistSqr(&blowup->position, &part->position, NULL) < 0.1f * 0.1f) {
-            GizmoActivate(WORLD->gizmo_sys, LevGizmo[0], 1, 0);
-            GizmoBlowupBlowup(blowup, 1, -1, -1, NULL, 1);
-        }
-    }
-}
+void PartUpdate_Basketball(PART_s *part);
 
 PART_s *Part_FindFromHSpecial(nuhspecial_s *special) {
     if (special != NULL) {

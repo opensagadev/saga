@@ -639,34 +639,7 @@ void Animate_CHARACTER(GameObject_s *);
 
 void FixUpCharacters(CHARFIXUP *fixup);
 
-void PostAnimate_FETT(GameObject_s *object) {
-    if (object->apiobj.field_0x287 != 0) {
-        return;
-    }
-
-    const i8 context = object->character_context;
-    if (context != -1 && !((context == 0x15 && object->context_animation == 62) ||
-                           (context == 0x14 && object->context_animation == 77) ||
-                           (context == 0x2e && object->context_animation == 111) ||
-                           (context == 0x0a && object->context_animation == 60))) {
-        return;
-    }
-    if (object->field_0xe31 != 1 || object->apiobj.field_0x288 == 0) {
-        return;
-    }
-
-    const i32 count = ParticlesPerSecond(100.0f, FRAMETIME);
-    const i32 first_joint = object->id == id_BOBAFETT ? 10 : 7;
-    if (object->apiobj.character_model->points_of_interest[first_joint] != NULL) {
-        AddGameDebrisRot(WORLD->debris_sys, 27, NUMTX_GET_ROW_VEC(&object->joint_matrices[first_joint], 3), count, 0,
-                         object->apiobj.facing_angle);
-    }
-    if (object->apiobj.character_model->points_of_interest[8] != NULL) {
-        AddGameDebrisRot(WORLD->debris_sys, 27, NUMTX_GET_ROW_VEC(&object->joint_matrices[8], 3), count, 0,
-                         object->apiobj.facing_angle);
-    }
-    PlaySfx(const_cast<char *>("JgThrust"), &object->apiobj.collision_position);
-}
+void PostAnimate_FETT(GameObject_s *object);
 
 void ResetAICreature(GameObject_s *, AISYS_s *);
 void LightGameObject(GameObject_s *, void *);
@@ -946,51 +919,7 @@ nuhspecial_s *CharScene_FindHSpecial(WORLDINFO_s *world, i32 character_id) {
     return special;
 }
 
-void PostAnimate_ASTROMECH(GameObject_s *object) {
-    const i8 context = object->character_context;
-    if (object->apiobj.field_0x287 == 0 && context == 0 && object->apiobj.model_draw_result != 0 &&
-        object->apiobj.field_0x288 != 0) {
-        if (object->field_0xe31 != 3 || (object->pad_gamepad->buttons_held & GAMEPAD_JUMP) != 0) {
-            const i32 count = ParticlesPerFrame(object->field_0xe31 == 3 ? 0.25f : 1.0f, FRAMETIME);
-            if (count > 0) {
-                const i32 effect = object->id == id_R2Q5 ? 12 : 11;
-                if (object->apiobj.character_model->points_of_interest[2] != NULL) {
-                    AddGameDebrisRot(WORLD->debris_sys, effect, NUMTX_GET_ROW_VEC(&object->joint_matrices[2], 3), count,
-                                     0x71c7, object->apiobj.facing_angle);
-                }
-                if (object->apiobj.character_model->points_of_interest[3] != NULL) {
-                    AddGameDebrisRot(WORLD->debris_sys, effect, NUMTX_GET_ROW_VEC(&object->joint_matrices[3], 3), count,
-                                     0x8e38, object->apiobj.facing_angle);
-                }
-            }
-            PlaySfxAndSetVolume(const_cast<char *>("R2Thrust"), &object->apiobj.collision_position,
-                                object->field_0xe31 == 3 ? 0.5f : 1.0f);
-        }
-    } else if (context == -1 && object->pad_gamepad->input_magnitude > 0.0f) {
-        if (object->communicate_blend > 0.0f) {
-            PlaySfx(const_cast<char *>("drd_r2_mvt_water_lp"), &object->apiobj.upper_position);
-        } else if (object->apiobj.field_0x27d != 0) {
-            PlaySfx(const_cast<char *>("R2Move"), &object->apiobj.collision_position);
-        }
-    }
-
-    if (object->communicate_blend > 0.0f && object->communicate_blend < 1.0f) {
-        const i32 effect = WORLD->debris_sys->entries[object->id == id_R2Q5 ? 1 : 3].effect;
-        if (effect != -1) {
-            const i32 count = ParticlesPerSecond(100.0f, FRAMETIME);
-            if (count > 0) {
-                const i32 locator = object->apiobj.character_data->game_character->thingy_locator;
-                if (locator != -1) {
-                    NUVEC_ALIGNED16 position = *NUMTX_GET_ROW_VEC(&object->joint_matrices[locator], 3);
-                    if (object->apiobj.field_0x27f == 9 && object->apiobj.water_height > position.y) {
-                        position.y = object->apiobj.water_height;
-                    }
-                    AddVariableShotDebrisEffect(effect, &position, count, 0, 0);
-                }
-            }
-        }
-    }
-}
+void PostAnimate_ASTROMECH(GameObject_s *object);
 
 AILOCATOR_s *LocalGetRandomLocator(AILOCATOR_s **locators, i32 count, f32 clip_radius, NUVEC *position,
                                    f32 max_distance, i32 outside_camera, f32 max_delta_y, f32 min_delta_y);
@@ -1053,18 +982,7 @@ void CollectCharcters_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, floa
     }
 }
 
-i32 SetProtocolDroidFallAnim(GameObject_s *object) {
-    switch (object->field_0xe38) {
-        case 1:
-            return 76;
-        case 2:
-            return 75;
-        case 3:
-            return 40;
-        default:
-            return 5;
-    }
-}
+i32 SetProtocolDroidFallAnim(GameObject_s *object);
 
 void CollectCharactersOff_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active) {
     COLLECTION_s *collection = packet->vehicle_area ? &VehicleCollection : &CharacterCollection;
@@ -1110,23 +1028,9 @@ i32 TakeOverYodaSeekDistanceHack(GameObject_s *object, GameObject_s *luke, nuvec
     return offset->z > 0.0f;
 }
 
-void SetProtocolDroidInterfaceAction(GameObject_s *object) {
-    if (object->field_0xe38 == 3)
-        object->context_animation = 0x45;
-    else if (object->field_0xe38 == 2)
-        object->context_animation = 0x46;
-    else if (object->field_0xe38 == 1)
-        object->context_animation = 0x47;
-}
+void SetProtocolDroidInterfaceAction(GameObject_s *object);
 
-void SetProtocolDroidDeactivatedAction(GameObject_s *object) {
-    if (object->field_0xe38 == 3)
-        object->context_animation = 0x42;
-    else if (object->field_0xe38 == 2)
-        object->context_animation = 0x43;
-    else if (object->field_0xe38 == 1)
-        object->context_animation = 0x44;
-}
+void SetProtocolDroidDeactivatedAction(GameObject_s *object);
 
 extern NUMTL * lightningmat;
 extern NUMTL *DebMat[10];

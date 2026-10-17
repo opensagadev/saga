@@ -1773,52 +1773,7 @@ void CentreTwoPlayerCamera(nuvec_s *center, nuvec_s *player_a, nuvec_s *player_b
     center->z = player_a->z + (player_b->z - player_a->z) * blend;
 }
 
-// Original: 784 bytes.
-void KeepVehicleOnScreen(GameObject_s *object, i32 sides, i32 top, i32 bottom) {
-    object->field_0xf03 |= 0x10;
-    if (GamePlayTimer.time_elapsed < 1.0f)
-        return;
-    f32 margin = WORLD->area == BATTLEOVERCORUSCANT_ADATA ? 0.5f : 1.0f;
-    f32 distance;
-    if (sides != 0) {
-        OnOrInsidePlane(&object->apiobj.collision_position, &PlayPlane[1].point, &PlayPlane[1].normal, NULL, 0.0f,
-                        &distance);
-        if (distance < margin) {
-            f32 correction = -((distance - margin) / margin);
-            f32 speed = object->apiobj.character_data->game_character->run_speed;
-            object->target_velocity.x += (speed + speed) * (correction + correction);
-        } else {
-            OnOrInsidePlane(&object->apiobj.collision_position, &PlayPlane[2].point, &PlayPlane[2].normal, NULL, 0.0f,
-                            &distance);
-            if (distance < margin) {
-                f32 correction = -((distance - margin) / margin);
-                f32 speed = -object->apiobj.character_data->game_character->run_speed;
-                object->target_velocity.x += (speed + speed) * (correction + correction);
-            }
-        }
-    }
-    if (top != 0) {
-        OnOrInsidePlane(&object->apiobj.collision_position, &PlayPlane[3].point, &PlayPlane[3].normal, NULL, 0.0f,
-                        &distance);
-    } else {
-        distance = 1000000000.0f;
-    }
-    if (distance != 1000000000.0f && distance < margin) {
-        f32 correction = -((distance - margin) / margin);
-        f32 speed = -object->apiobj.character_data->game_character->run_speed;
-        object->target_velocity.y += (speed + speed) * (correction + correction);
-        return;
-    }
-    if (bottom != 0) {
-        OnOrInsidePlane(&object->apiobj.collision_position, &PlayPlane[4].point, &PlayPlane[4].normal, NULL, 0.0f,
-                        &distance);
-        if (distance < margin) {
-            f32 correction = -((distance - margin) / margin);
-            f32 speed = object->apiobj.character_data->game_character->run_speed;
-            object->target_velocity.y += (speed + speed) * (correction + correction);
-        }
-    }
-}
+void KeepVehicleOnScreen(GameObject_s *object, i32 sides, i32 top, i32 bottom);
 
 void do_Pad_flymode_camera(edcam_s *camera, float delta_time, nupad_s *pad);
 

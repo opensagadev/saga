@@ -27,29 +27,7 @@ extern "C" i16 id_MINISLAVE1;
 void TurnCodeCamSafe(GameObject_s *object, NUMTX *matrix);
 void ResetForceGlow(PLAYERPACKET_s *packet);
 
-void ApplyExtraRotation(GameObject_s *object, numtx_s *matrix) {
-    switch (object->character_context) {
-        case 42:
-            TurnCodeCamSafe(object, matrix);
-            break;
-        case 58: {
-            const f32 phase = 1.0f - object->context_animation_timer / object->airborne_action_duration;
-            const f32 wave = NuTrigTable[(static_cast<i32>(32768.0f * phase + 16384.0f) >> 1) & 0x7fff];
-            const i32 rotation = static_cast<i32>((1.0f - (wave + 1.0f) * 0.5f) * 65536.0f);
-            if (object->field_0x7a3 == 0) {
-                NuMtxPreRotateZ(matrix, rotation);
-            } else {
-                NuMtxPreRotateZ(matrix, -rotation);
-            }
-            break;
-        }
-    }
-
-    if (object->id == id_MINISLAVE1) {
-        NuMtxPreRotateX(matrix, -16384);
-        NuMtxPreRotateY(matrix, 32768);
-    }
-}
+void ApplyExtraRotation(GameObject_s *object, numtx_s *matrix);
 
 void Transform_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
     ResetForceGlow(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));

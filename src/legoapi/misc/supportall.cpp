@@ -239,49 +239,7 @@ void MakeBaddiesForgetAboutParty(i32);
 extern i32 nbaddies_can_see_players;
 i32 reset_reimport;
 
-void CatchUpCode(GameObject_s *object, f32 divisor, f32 maximum, i32 mode) {
-    if (static_cast<u8>(object->apiobj.field_0x27c) == 0xff) {
-        return;
-    }
-
-    const i32 socket_index = static_cast<i8>(object->field_0x661);
-    object->field_0xc38 = 0.0f;
-    if (socket_index == -1 || WORLD->sock_sys == NULL) {
-        return;
-    }
-    if (mode != 0 && !object->apiobj.player_controlled) {
-        return;
-    }
-
-    const bool looping = WORLD->sock_sys->sock[socket_index].looping != 0;
-    GameObject_s *other;
-    if (Player[0] == object) {
-        other = Player[1];
-    } else if (Player[1] == object) {
-        other = Player[0];
-    } else {
-        return;
-    }
-
-    if (other != NULL && (!object->apiobj.player_controlled || other->apiobj.player_controlled) &&
-        static_cast<i8>(other->field_0x661) == socket_index && (mode == 0 || other->apiobj.player_controlled)) {
-        f32 distance = object->sock_position.normalized_distance - other->sock_position.normalized_distance;
-        if (looping) {
-            if (!(distance >= 0.5f)) {
-                if (-0.5f >= distance) {
-                    distance += 1.0f;
-                }
-            } else {
-                distance -= 1.0f;
-            }
-        }
-        if (distance < 0.0f) {
-            const f32 catchup = -distance / divisor;
-            maximum = MIN(maximum, catchup);
-            object->field_0xc38 = maximum;
-        }
-    }
-}
+void CatchUpCode(GameObject_s *object, f32 divisor, f32 maximum, i32 mode);
 
 static inline void TexQuadSubmit(NUVEC const &point, i32 colour, i32 u, i32 v) {
     TexQuadVertex *vertex = static_cast<TexQuadVertex *>(g_NuPrim_StreamBufferPtr->void_ptr);

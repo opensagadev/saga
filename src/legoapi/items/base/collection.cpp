@@ -496,20 +496,7 @@ extern i32 freeplaymode;
 extern i32 freeplay_selected[2];
 static __used__ void Collection_GetSelectingPlayerIDs(i16 *ids);
 
-void ReleaseEat(GameObject_s *object) {
-    u8 flags = object->field_0xe24;
-    GameObject_s *eaten = static_cast<GameObject_s *>(object->field_0x780);
-    if (eaten != NULL && (flags & 1) != 0) {
-        KillGameObject(eaten, 2, 0);
-        flags = object->field_0xe24;
-        object->field_0x780 = NULL;
-    }
-    if (static_cast<u8>(object->field_0x7a5 - 0x38) <= 1) {
-        object->field_0x780 = NULL;
-        object->field_0x7a5 = 0xff;
-    }
-    object->field_0xe24 = flags & ~1;
-}
+void ReleaseEat(GameObject_s *object);
 
 i32 AddToCollection(i32 id) {
     if (id > 0 && id < CHARCOUNT && InCollectList_Index(id, NULL, 0) != -1 && Collection_Got(id) == 0) {

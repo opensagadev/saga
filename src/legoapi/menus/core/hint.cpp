@@ -172,41 +172,7 @@ void DrawHint_LSW(HINT_s *hint, i32 max_lines) {
     DrawHint_LSWBody(hint, max_lines);
 }
 
-i32 Dodge_UpdateHint(HINT_s *hint) {
-    if (WORLD->area != NULL && WORLD->area == HUB_ADATA)
-        return 0;
-#define CHECK_DODGE_HINT_PLAYER(index)                                                                                 \
-    do {                                                                                                               \
-        GameObject *object = Player[index];                                                                            \
-        if (object == NULL) {                                                                                          \
-            break;                                                                                                     \
-        }                                                                                                              \
-        const u32 flags = object->apiobj.character_data->model_flags;                                                  \
-        if ((flags & 0x2000) != 0) {                                                                                   \
-            return 0;                                                                                                  \
-        }                                                                                                              \
-        if (object->apiobj.player_controlled && object->incoming_bolt != NULL) {                                       \
-            if (hint->control_mode_ids[0] == 0x265) {                                                                  \
-                if ((flags & 8) == 0 && (object->apiobj.character_model->model_data_b[0x4f] != NULL ||                 \
-                                         object->apiobj.character_model->model_data_b[0x26] != NULL)) {                \
-                    return 1;                                                                                          \
-                }                                                                                                      \
-            } else if (hint->control_mode_ids[0] == 0x5dd && (flags & 8) != 0) {                                       \
-                return 1;                                                                                              \
-            }                                                                                                          \
-        }                                                                                                              \
-    } while (0)
-    CHECK_DODGE_HINT_PLAYER(0);
-    CHECK_DODGE_HINT_PLAYER(1);
-    CHECK_DODGE_HINT_PLAYER(2);
-    CHECK_DODGE_HINT_PLAYER(3);
-    CHECK_DODGE_HINT_PLAYER(4);
-    CHECK_DODGE_HINT_PLAYER(5);
-    CHECK_DODGE_HINT_PLAYER(6);
-    CHECK_DODGE_HINT_PLAYER(7);
-#undef CHECK_DODGE_HINT_PLAYER
-    return 0;
-}
+i32 Dodge_UpdateHint(HINT_s *hint);
 
 void SET_HINT_COMPLETE(i32 hint_id) {
     if (hint_id < 0) {
@@ -238,24 +204,7 @@ void CLEAR_HINT_COMPLETE(i32 hint_id) {
     Game.hint_completion_bits[word] &= ~(1U << (hint_id & 0x1f));
 }
 
-i32 DragBomb_UpdateHint(HINT_s *hint) {
-    if (VehicleArea == 0 || player == NULL)
-        return 0;
-    if ((player->apiobj.character_data->player_config->flags_090 & 0x400) == 0 ||
-        player->force_glow_candidate_kind == 0 || player->force_glow_candidate == NULL || !(player->field_0xd80 > 0.0f))
-        return 0;
-    const i32 id = static_cast<GameObject_s *>(player->force_glow_candidate)->id;
-    if (hint->control_mode_ids[0] != 0x5ee) {
-        if (hint->control_mode_ids[0] == 0x28e) {
-            if (id != id_DRAGBOMB)
-                return 1;
-        }
-    } else {
-        if (id == id_DRAGBOMB)
-            return 1;
-    }
-    return 0;
-}
+i32 DragBomb_UpdateHint(HINT_s *hint);
 
 // Original local callbacks referenced by Hints_LSW.
 extern u8 show_lever_hint;
@@ -378,15 +327,7 @@ void initGameHintSys_LSW() {
     id_HINT_LSW_AUTOJUMP_FAIL = 0x621;
 }
 
-i32 SmartBomb_UpdateHint(HINT_s *) {
-    if (VehicleArea == 0 || BonusArea != 0)
-        return 0;
-    if (!Cheat_IsOn(0x14))
-        return 0;
-    if (player == NULL)
-        return 0;
-    return player->field_0x7a5 == 0xff;
-}
+i32 SmartBomb_UpdateHint(HINT_s *);
 
 extern AREADATA *JABBASPALACE_ADATA;
 

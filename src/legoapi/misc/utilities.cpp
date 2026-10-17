@@ -259,32 +259,7 @@ i32 LineIntersectXY(nuvec_s *a, nuvec_s *b, nuvec_s *c, nuvec_s *d, nuvec_s *fir
     return t >= 0.0f && t <= 1.0f && u >= 0.0f && u <= 1.0f;
 }
 
-void MakeThrowVector(NUVEC *result, NUVEC *origin, NUVEC *target, NUVEC *target_velocity, f32 speed, f32 gravity) {
-    NUVEC predicted = *target;
-    NUVEC delta;
-    NUVEC horizontal_origin;
-    horizontal_origin.x = origin->x;
-    horizontal_origin.y = 0.0f;
-    horizontal_origin.z = origin->z;
-    NuVecSub(&delta, &predicted, &horizontal_origin);
-    NuVecAddScale(&predicted, target, target_velocity, NuVecMag(&delta) / speed);
-    horizontal_origin.x = origin->x;
-    horizontal_origin.y = 0.0f;
-    horizontal_origin.z = origin->z;
-    NuVecSub(&delta, &predicted, &horizontal_origin);
-    NuVecAddScale(&predicted, target, target_velocity, NuVecMag(&delta) / speed);
-    horizontal_origin.x = origin->x;
-    horizontal_origin.y = 0.0f;
-    horizontal_origin.z = origin->z;
-    NuVecSub(&delta, &predicted, &horizontal_origin);
-    NuVecAddScale(&predicted, target, target_velocity, NuVecMag(&delta) / speed);
-    const f32 time = NuVecXZDist(&predicted, origin, NULL) / speed;
-    const f32 vertical_speed = (predicted.y - origin->y) / (FRAMETIME + time) - (gravity * 0.5f) * time;
-    const u16 angle = NuAtan2D(predicted.x - origin->x, predicted.z - origin->z);
-    result->x = speed * NU_SIN_LUT(angle);
-    result->y = vertical_speed;
-    result->z = speed * NU_COS_LUT(angle);
-}
+void MakeThrowVector(NUVEC *result, NUVEC *origin, NUVEC *target, NUVEC *target_velocity, f32 speed, f32 gravity);
 
 i32 OnOrInsidePlane(nuvec_s *point, nuvec_s *plane_point, nuvec_s *plane_normal, nuvec_s *corrected_point,
                     float normal_offset, float *distance_out) {

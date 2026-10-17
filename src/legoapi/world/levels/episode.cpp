@@ -44,14 +44,7 @@ extern u8 troopercannons_beenReset;
 
 i16 GetGenericGoon(i32);
 
-struct TROOPERCANNON_s {
-    GIZMO *base;
-    GIZBUILDIT_s *buildit;
-    GameObject_s *object;
-    char character_name[32];
-    u8 rebuilding;
-    u8 reserved_0x2d[3];
-};
+#include "legoapi/world/levels/episode_types.h"
 DECOMP_ASSERT(sizeof(TROOPERCANNON_s) == 0x30, "Trooper cannon state size");
 DECOMP_ASSERT(offsetof(TROOPERCANNON_s, character_name) == 0x0c, "Trooper cannon name offset");
 DECOMP_ASSERT(offsetof(TROOPERCANNON_s, rebuilding) == 0x2c, "Trooper cannon rebuilding offset");
@@ -508,38 +501,9 @@ void InitMiniSnowTroopers(WORLDINFO_s *world, i32 team_count, i32 trooper_count,
 
 extern MechWeakPtr<MechObjectInterface, 4> BobaRocketTarget;
 
-void SetBobaRocketTarget(MechObjectInterface *target) {
-    BobaRocketTarget = target;
-}
+void SetBobaRocketTarget(MechObjectInterface *target);
 
-bool FireBountyHunterRocket(GameObject_s *object) {
-    if (object->character_context != -1)
-        return false;
-    characterdata_s *data = object->apiobj.character_data;
-    if ((data->model_flags & 0x01000000) == 0 && object->field_0x108e != 6)
-        return false;
-    i32 locator = data->game_character->rocket_locator;
-    if (locator == -1 || object->apiobj.character_model->points_of_interest[locator] == NULL)
-        return false;
-    if (object->apiobj.field_0x27c != -1) {
-        if (!object->apiobj.player_controlled)
-            return false;
-        if (!Cheat_IsOn(39))
-            return false;
-    }
-    if (object->timer_d5c == 2.0f) {
-        object->timer_d5c = 0.0f;
-        FindGameMsgsWithID(2, 1, -1, NULL);
-    }
-    const i32 animation = object->apiobj.field_0x27d == 0 ? 77 : 2;
-    object->context_animation = object->apiobj.field_0x27d == 0 ? 77 : 2;
-    object->context_animation_timer = AnimDuration(object->id, animation, 0.0f, 0.0f, 1);
-    object->field_0xe22 &= ~4;
-    if (object->context_animation_timer > 0.0f) {
-        object->character_context = 20;
-    }
-    return object->character_context == 20;
-}
+bool FireBountyHunterRocket(GameObject_s *object);
 
 static __used__ void KilledTrooperCannon(GameObject_s *object) {
     if (netclient != 0)

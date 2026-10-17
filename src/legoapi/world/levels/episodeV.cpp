@@ -87,12 +87,7 @@ extern "C" {
     HOTHBATTLE_MELEE_s melee;
     u8 dagobahA_nodesNeedUpdating = 1;
 }
-struct HOTHBATTLEE_NETPACKET_s {
-    i16 targets[12];
-    char defeated[12];
-    f32 alpha[12];
-    i32 count;
-};
+#include "legoapi/world/levels/episodeV_types.h"
 DECOMP_ASSERT(sizeof(HOTHBATTLEE_NETPACKET_s) == 0x58, "Hoth panel packet size");
 DECOMP_ASSERT(offsetof(HOTHBATTLEE_NETPACKET_s, alpha) == 0x24, "Hoth panel packet alpha offset");
 DECOMP_ASSERT(offsetof(HOTHBATTLEE_NETPACKET_s, count) == 0x54, "Hoth panel packet count offset");
@@ -178,100 +173,11 @@ void DagobahC_Panel(WORLDINFO_s *) {
     }
 }
 
-f32 rocket_speed = 1.2f;
+extern f32 rocket_speed;
 
-void BobaRocket_Kill(PART_s *part, i32) {
-    EXPLOSION *explosion = Detonate(&part->position, 0);
-    if (explosion != NULL && Arcade != 0 && part->owner != NULL &&
-        (Player[0] == part->owner || Player[1] == part->owner) &&
-        (part->owner->apiobj.field_0x1f8 & 0x1001) == 0x1001 && static_cast<u8>(part->owner->apiobj.field_0x27c) <= 1) {
-        explosion->field_0x24 |= 0x10000;
-        explosion->object = part->owner;
-    }
-}
+void BobaRocket_Kill(PART_s *part, i32);
 
-void BobaRocket_Move(PART_s *part, f32 elapsed) {
-    NUVEC delta;
-    NUVEC next;
-    NUVEC scale;
-    GameObject_s *recipient = part->recipient;
-    i32 spin;
-    if (static_cast<i8>(part->active) < 0) {
-        NuVecSub(&delta, reinterpret_cast<NUVEC *>(part->pad_0bc), &part->position);
-        i32 yaw = NuAtan2D(delta.x, delta.z);
-        NuVecRotateY(&delta, &delta, -yaw);
-        i32 pitch = -NuAtan2D(delta.y, delta.z);
-        part->rotation_x = SeekRot(part->rotation_x, pitch, 8.0f);
-        part->rotation_y = SeekRot(part->rotation_y, yaw, 8.0f);
-        spin = static_cast<i32>(SeekValF(static_cast<f32>(part->field_124[3]), 0.0f, 1.0f));
-        part->field_124[3] = spin;
-    } else {
-        VuVec target;
-        bool has_target = false;
-        if (recipient != NULL) {
-            target.w = 1.0f;
-            f32 target_z = recipient->apiobj.collision_position.z;
-            f32 target_y = recipient->apiobj.collision_position.y;
-            f32 target_x = recipient->apiobj.collision_position.x;
-            target.x = target_x;
-            target.y = target_y;
-            target.z = target_z;
-            has_target = true;
-        } else if (BobaRocketTarget.Get() != NULL) {
-            BobaRocketTarget.Get()->GetPos(target, -1);
-            has_target = true;
-        }
-        if (has_target) {
-            NuVecSub(&delta, &target.xyz, &part->position);
-            f32 horizontal_squared = delta.x * delta.x + delta.z * delta.z;
-            i32 yaw = NuAtan2D(delta.x, delta.z);
-            NuVecRotateY(&delta, &delta, -yaw);
-            delta.y = target.y + 0.5f - part->position.y;
-            i32 pitch = -NuAtan2D(delta.y, delta.z);
-            part->rotation_x = SeekRot(part->rotation_x, pitch, 1.0f);
-            part->rotation_y = SeekRot(part->rotation_y, yaw, 4.0f);
-            if (horizontal_squared < 1.0f) {
-                part->active |= 0x80;
-                NuVecSub(&delta, &target.xyz, &part->position);
-                NuVecScale(&delta, &delta, 5.0f);
-                NuVecAdd(reinterpret_cast<NUVEC *>(part->pad_0bc), &part->position, &delta);
-                part->recipient = NULL;
-                BobaRocketTarget = NULL;
-                part->field_100 = NuFsqrt(horizontal_squared + delta.y * delta.y) / rocket_speed;
-            }
-        }
-        spin = 60000;
-        part->field_124[3] = spin;
-    }
-
-    part->velocity.x = 0.0f;
-    part->velocity.y = 0.0f;
-    part->velocity.z = rocket_speed;
-    part->field_13c += static_cast<i32>(static_cast<f32>(spin) * FRAMETIME);
-    NuVecRotateX(&part->velocity, &part->velocity, part->rotation_x);
-    NuVecRotateY(&part->velocity, &part->velocity, part->rotation_y);
-    next.x = part->position.x + part->velocity.x * elapsed;
-    next.y = part->position.y + part->velocity.y * elapsed + part->gravity * elapsed;
-    next.z = part->position.z + part->velocity.z * elapsed;
-    NuMtxSetRotationX(&part->transform, NuAngAdd(part->rotation_x, 0x4000));
-    NuMtxRotateY(&part->transform, part->rotation_y);
-    NuMtxPreRotateY(&part->transform, part->field_13c);
-    NuMtxTranslate(&part->transform, &next);
-    if (part->scale_time < 0.2f) {
-        f32 factor = part->scale_time / 0.2f;
-        scale.x = factor;
-        scale.y = factor;
-        scale.z = factor;
-        NuMtxPreScale(&part->transform, &scale);
-    }
-    if (static_cast<i8>(part->active) < 0) {
-        i32 count = ParticlesPerFrame(1.0f, FRAMETIME);
-        delta.x = -part->velocity.x;
-        delta.y = -part->velocity.y;
-        delta.z = -part->velocity.z;
-        AddGameDebrisMom(WORLD->debris_sys, 11, &next, count, &delta);
-    }
-}
+void BobaRocket_Move(PART_s *part, f32 elapsed);
 
 void DagobahA_Update(WORLDINFO_s *world) {
     GIZFORCE_s **forces = LevGizForce;
@@ -701,11 +607,7 @@ void HothEscapeC_Reset(WORLDINFO_s *) {
 void HothEscapeD_Reset(WORLDINFO_s *) {
 }
 
-void BobaRocket_Deflect(PART_s *part) {
-    part->flags &= ~0x4000u;
-    part->flags |= 0x80;
-    NewPartRotation(part);
-}
+void BobaRocket_Deflect(PART_s *part);
 
 void HothBattleA_Update(WORLDINFO_s *world) {
     UpdateMiniSnowTroopers(world);
@@ -1233,38 +1135,12 @@ void HothBattle_ManageBackgroundCreatures() {
 // Asteroid chase (AsteroidChase_A / B / C / D)
 // ===========================================================================
 
-struct ASTEROID_s {
-    nuhspecial_s special;
-    GIZMOBLOWUP_s *blowup;
-    i16 rotation_speed_x;
-    i16 rotation_speed_y;
-    i16 rotation_speed_z;
-    u8 activated;
-    u8 reserved_17;
-};
 DECOMP_ASSERT(sizeof(ASTEROID_s) == 0x18, "ASTEROID_s size");
 
-struct FINALASTEROID_s {
-    nuhspecial_s special;
-    GIZMOBLOWUP_s *blowups[8];
-    i16 blowup_count;
-    i16 rotation_speed_x;
-    i16 rotation_speed_y;
-    i16 rotation_speed_z;
-    i16 rotation_x;
-    i16 rotation_y;
-    i16 rotation_z;
-};
 DECOMP_ASSERT(sizeof(FINALASTEROID_s) == 0x3c, "final asteroid size");
 DECOMP_ASSERT(offsetof(FINALASTEROID_s, blowup_count) == 0x2c, "final asteroid blowup count offset");
 DECOMP_ASSERT(offsetof(FINALASTEROID_s, rotation_x) == 0x34, "final asteroid rotation offset");
 
-struct ASTEROIDCNETPACKET_s {
-    u16 rotation_x;
-    u16 rotation_y;
-    u16 rotation_z;
-    u16 reserved;
-};
 DECOMP_ASSERT(sizeof(ASTEROIDCNETPACKET_s) == 8, "asteroid C network packet size");
 
 i32 nasteroids;

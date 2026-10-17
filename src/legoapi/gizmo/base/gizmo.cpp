@@ -822,10 +822,7 @@ GizObstacleObjectInterface::~GizObstacleObjectInterface() {
     obstacle.mech_object_interface = NULL;
 }
 
-// Original: 43 bytes.
-i32 TwistLevel(LEVELDATA_s *level) {
-    return DOGFIGHTA_LDATA != NULL && level == DOGFIGHTA_LDATA;
-}
+i32 TwistLevel(LEVELDATA_s *level);
 
 NUVEC *GizmoGetPos(GIZMOSYS_s *, GIZMO_s *gizmo) {
     if (gizmotypes != NULL && gizmo != NULL) {

@@ -43,34 +43,7 @@ i32 Batarang_StartTargetting(GameObject_s *);
 i32 Batarang_GetObjectFromCharID(i32);
 static i32 Batarang_FindTarget(WORLDINFO_s *world, GameObject_s *object, i32 automatic);
 
-u16 GetShootDirection_Batman(GameObject_s *object, nuvec_s *direction) {
-    NUVEC temporary;
-    if (direction == NULL) {
-        direction = &temporary;
-    }
-    u16 angle;
-    if (object->field_0x1086 == 4) {
-        NUMTX matrix = object->apiobj.field_0xb8;
-        NuMtxPreRotateY(&matrix, 0x8000);
-        NuVecMtxRotate(direction, &v001, &matrix);
-        angle = object->apiobj.facing_angle;
-    } else {
-        if ((object->apiobj.character_data->model_flags & 0x2000) == 0 &&
-            (object->apiobj.character_data->game_character->flags_090 & 0x80) == 0) {
-            angle = object->apiobj.movement_facing_angle;
-        } else {
-            angle = object->apiobj.facing_angle;
-            if (object->character_context == 0x2a &&
-                0.25f <= 1.0f - object->context_animation_timer / object->airborne_action_duration) {
-                angle -= 0x8000;
-            }
-        }
-        direction->x = NU_SIN_LUT(angle);
-        direction->y = 0.0f;
-        direction->z = NU_COS_LUT(angle);
-    }
-    return angle;
-}
+u16 GetShootDirection_Batman(GameObject_s *object, nuvec_s *direction);
 
 static unsigned int Batarang_GetTargetPos(BATARANG_s *batarang, int index, nuvec_s *position) {
     if (batarang->field_0x7d != 0 && batarang->active != 0 && batarang->active == index) {

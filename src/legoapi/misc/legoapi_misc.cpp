@@ -38,38 +38,11 @@ extern "C" {
     extern FadeSystem FadeSys;
 }
 
-// Original: 43 bytes.
-i32 CircleLevel(LEVELDATA_s *level) {
-    return BONUS_GUNSHIPB_LDATA != NULL && level == BONUS_GUNSHIPB_LDATA;
-}
+i32 CircleLevel(LEVELDATA_s *level);
 
 extern i32 TwistLevel(LEVELDATA_s *level);
 
-void CurrentStart(GameObject_s *object, i32 require_twist_level, i32 use_socket_rotation) {
-    WORLDINFO_s *world = WorldInfo_CurrentlyActive();
-    *reinterpret_cast<f32 *>(&object->field_0xc3c) = 0.0f;
-    if (object->field_0x661 == 0xff || world->sock_sys == NULL)
-        return;
-
-    if (world->sock_sys->sock[static_cast<i8>(object->field_0x661)].current_speed == 0.0f ||
-        (require_twist_level == 0 && TwistLevel(world->current_level) == 0))
-        return;
-
-    SOCK &socket = world->sock_sys->sock[static_cast<i8>(object->field_0x661)];
-    NUVEC current = {0.0f, 0.0f, socket.current_speed};
-    *reinterpret_cast<f32 *>(&object->field_0xc3c) = socket.current_speed;
-    const f32 multiplier =
-        (object->field_0xf02 & 0x20) == 0 ? object->current_speed_mul : object->current_speed_multiplier;
-    current.z *= multiplier;
-    if (use_socket_rotation != 0) {
-        NuVecRotateX(&object->apiobj.velocity, &current, object->sock_position.midpoint_rotation.x);
-        NuVecRotateY(&object->apiobj.velocity, &object->apiobj.velocity, object->sock_position.midpoint_rotation.y);
-    } else {
-        NuVecRotateY(&object->apiobj.velocity, &object->apiobj.velocity, object->apiobj.field_0x276);
-    }
-    reinterpret_cast<u8 *>(object)[0x4a6] &= static_cast<u8>(~4u);
-    object->target_velocity = object->apiobj.velocity;
-}
+void CurrentStart(GameObject_s *object, i32 require_twist_level, i32 use_socket_rotation);
 
 void NewRumbleAllPlayers(f32, f32, i32, i32);
 

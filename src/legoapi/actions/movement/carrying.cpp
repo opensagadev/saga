@@ -750,42 +750,7 @@ i32 ObjLandReady(GameObject_s *object) {
     return 0;
 }
 
-void LetGoOfBalloon(GameObject_s *object) {
-    if (object->character_context != 0x5d) {
-        return;
-    }
-    object->character_context = -1;
-    if (WORLD->lev_objs[0xf7].active == 0) {
-        return;
-    }
-    const i32 hand = object->apiobj.character_data->game_character->hand_locators[0];
-    if (hand == -1 || object->apiobj.character_model->points_of_interest[hand] == NULL) {
-        return;
-    }
-
-    NUMTX_ALIGNED16 matrix;
-    NuMtxSetTranslation(&matrix, NUMTX_GET_ROW_VEC(&object->joint_matrices[hand], 3));
-    NUVEC velocity = {0.0f, 0.0f, 0.2f};
-    NuVecMtxRotate(&velocity, &velocity, &matrix);
-    ADDPART_s params = Default_ADDPART;
-    params.matrix = &matrix;
-    params.velocity = &velocity;
-    NUVEC centre;
-    NuSpecialGetRadius(&WORLD->lev_objs[0xf7].special, &centre, &params.field_14);
-    params.owner = object;
-    params.field_18 = params.field_14;
-    params.field_28 = 0xf7;
-    params.flags = 0x08000200;
-    params.gravity = 0.5f;
-    params.special = &WORLD->lev_objs[0xf7].special;
-    params.field_90 = object->apiobj.field_0x289;
-    params.field_40 = PartCollide_3D;
-    params.time_step = FRAMETIME;
-    PART_s *part = AddPart(&params);
-    if (part != NULL) {
-        part->force_flags = ObjHitObj_Flags(object) & 0xffff;
-    }
-}
+void LetGoOfBalloon(GameObject_s *object);
 
 i32 MovingBackwards(GameObject_s *object) {
     GAMEPAD_s *pad = object->pad_gamepad;

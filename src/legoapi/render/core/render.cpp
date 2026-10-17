@@ -2094,66 +2094,8 @@ void DrawFadeScreenWipe() {
     NuRndrEndScene();
 }
 
-static inline void RotateForceGlowMatrix(NUMTX *matrix, i32 angle) {
-    const f32 cosine = NU_COS_LUT(angle);
-    const f32 sine = NU_SIN_LUT(angle);
-    const f32 x0 = matrix->m00;
-    const f32 x1 = matrix->m10;
-    const f32 x2 = matrix->m20;
-    const f32 x3 = matrix->m30;
-    matrix->m00 = x0 * cosine - matrix->m01 * sine;
-    matrix->m01 = x0 * sine + matrix->m01 * cosine;
-    matrix->m10 = x1 * cosine - matrix->m11 * sine;
-    matrix->m11 = x1 * sine + matrix->m11 * cosine;
-    matrix->m20 = x2 * cosine - matrix->m21 * sine;
-    matrix->m21 = x2 * sine + matrix->m21 * cosine;
-    matrix->m30 = x3 * cosine - matrix->m31 * sine;
-    matrix->m31 = x3 * sine + matrix->m31 * cosine;
-}
 
-void DrawForceGlowSprite(nuvec_s *position, float radius, i32 model, float alpha, GameObject_s *) {
-    WORLDINFO_s *world = WorldInfo_CurrentlyActive();
-    if (model == -1 || world->lev_objs[model].active == 0) {
-        return;
-    }
-    ResetShadowMapRendering();
-    NUVEC_ALIGNED16 scale;
-    NUVEC direction;
-    NUVEC draw_position;
-    NuVecSub(&direction, position, reinterpret_cast<NUVEC *>(&pNuCam->mtx.m30));
-    const f32 distance = NuFsqrt(direction.x * direction.x + direction.y * direction.y + direction.z * direction.z);
-    NuVecNorm(&direction, &direction);
-    f32 offset = radius;
-    if (radius < distance - 0.2f || (offset = distance - 0.2f, !(distance < 0.2f))) {
-        NuVecScale(&direction, &direction, offset);
-        NuVecSub(&draw_position, position, &direction);
-        if (offset != 0.0f) {
-            scale.x = scale.y = scale.z = radius * (distance - offset) / distance;
-            goto draw_glow;
-        }
-    } else {
-        NuVecScale(&direction, &direction, 0.0f);
-        NuVecSub(&draw_position, position, &direction);
-    }
-    scale.x = scale.y = scale.z = radius;
-draw_glow:
-    NUMTX_ALIGNED16 matrix;
-    NuMtxSetScale(&matrix, &scale);
-    u16 angle = static_cast<i32>(NuFmod(GameTimer.time_elapsed, 20.0f) / 20.0f * 65536.0f);
-    RotateForceGlowMatrix(&matrix, -angle);
-    NuMtxMulR(&matrix, &matrix, &GameCam->render_mtx);
-    NuMtxTranslate(&matrix, &draw_position);
-    NuSpecialDrawAtAlpha(&WORLD->lev_objs[model].special, &matrix, alpha);
-    if (WORLD->lev_objs[model + 1].active != 0) {
-        NuMtxSetScale(&matrix, &scale);
-        angle = static_cast<i32>(NuFmod(GameTimer.time_elapsed, 16.777f) / 16.777f * 65536.0f);
-        RotateForceGlowMatrix(&matrix, angle);
-        NuMtxMulR(&matrix, &matrix, &GameCam->render_mtx);
-        NuMtxTranslate(&matrix, &draw_position);
-        NuSpecialDrawAtAlpha(&WORLD->lev_objs[model + 1].special, &matrix, alpha);
-    }
-    EnableShadowMapRendering(0);
-}
+void DrawForceGlowSprite(nuvec_s *position, float radius, i32 model, float alpha, GameObject_s *);
 
 void DrawGameObjectsDraw(i32);
 

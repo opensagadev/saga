@@ -21,65 +21,10 @@ void LetGoOfBalloon(GameObject_s *object);
 i32 qrand(void);
 extern "C" void PlaySfxByIdAndSetVolumeAndPitch(i32 sfx_id, nuvec_s *position, f32 volume, f32 pitch);
 
-void PopBalloon(GameObject_s *object) {
-    LetGoOfBalloon(object);
-}
+void PopBalloon(GameObject_s *object);
 
-static u8 disorientAxis = 7;
 
-void Disorientate(GameObject_s *object, nuvec_s *) {
-    const i32 elapsed_seconds = static_cast<i32>(object->context_animation_timer);
-    if ((elapsed_seconds & 1) == 0 && static_cast<f32>(elapsed_seconds) != object->field_0x770) {
-        object->field_0x770 = static_cast<f32>(elapsed_seconds);
-        disorientAxis = 0;
-        while ((disorientAxis & 5) == 0) {
-            if (NuFloatRand(reinterpret_cast<NURAND *>(&GAMERAND)) < 0.5f) {
-                disorientAxis |= 1;
-            }
-            if (NuFloatRand(reinterpret_cast<NURAND *>(&GAMERAND)) < 0.5f) {
-                disorientAxis |= 2;
-            }
-            if (NuFloatRand(reinterpret_cast<NURAND *>(&GAMERAND)) < 0.5f) {
-                disorientAxis |= 4;
-            }
-        }
-    }
-
-    if ((disorientAxis & 1) != 0) {
-        object->apiobj.pitch_angle =
-            SeekRot(object->apiobj.pitch_angle, static_cast<u16>(object->apiobj.pitch_angle + 0x4000), 3.0f);
-    }
-    if ((disorientAxis & 2) != 0) {
-        object->apiobj.field_0x276 =
-            SeekRot(object->apiobj.field_0x276, static_cast<u16>(object->apiobj.field_0x276 + 0x4000), 3.0f);
-    }
-    if ((disorientAxis & 4) != 0) {
-        object->apiobj.roll_angle =
-            SeekRot(object->apiobj.roll_angle, static_cast<u16>(object->apiobj.roll_angle + 0x4000), 3.0f);
-    }
-
-    NUVEC delta;
-    const f32 distance_squared =
-        NuVecDistSqr(&object->apiobj.collision_position, &object->disorientation_destination, &delta);
-    const f32 speed = 75.0f / (distance_squared / 6.0f + 1.0f);
-    const f32 fraction = 1.0f / ((delta.x + 0.01f) / (0.01f + delta.z));
-    f32 x_velocity = (1.0f - fraction) * speed;
-    f32 z_velocity = fraction * speed;
-    if (x_velocity > 100.0f) {
-        x_velocity = 100.0f;
-    } else {
-        z_velocity = MIN(100.0f, z_velocity);
-    }
-    if ((delta.x < 0.0f && x_velocity > 0.0f) || (delta.x > 0.0f && x_velocity < 0.0f)) {
-        x_velocity = -x_velocity;
-    }
-    if ((delta.z < 0.0f && z_velocity > 0.0f) || (delta.z > 0.0f && z_velocity < 0.0f)) {
-        z_velocity = -z_velocity;
-    }
-    object->apiobj.field_0x1fc = x_velocity;
-    object->apiobj.field_0x200 = 0.0f;
-    object->apiobj.field_0x204 = z_velocity;
-}
+void Disorientate(GameObject_s *object, nuvec_s *);
 
 extern "C" i32 GetSfxId(const char *name);
 extern "C" void NuGScnGetSpecial(nuhspecial_s *special, NUGSCN *scene, i32 index);
@@ -224,42 +169,11 @@ void EngineNoiseCode(GameObject_s *object, i32 silent) {
     PlaySfxByIdAndSetVolumeAndPitch(sfx_id, &object->apiobj.collision_position, volume, pitch);
 }
 
-void NewSeekHalfLife(i32 &current, i32 target, float fraction) {
-    current = static_cast<i16>(static_cast<i16>(current) +
-                               static_cast<i16>(static_cast<f32>(static_cast<i16>(target - current)) * fraction));
-}
+void NewSeekHalfLife(i32 &current, i32 target, float fraction);
 
 void StartTurn(GameObject_s *);
 
-void DisorientateCode(GameObject_s *object, nuvec_s *target, f32 distance) {
-    if (target == NULL) {
-        goto continue_disorientation;
-    }
-    if (object->character_context != 0x40) {
-        object->context_animation_timer = 0.0f;
-    }
-    object->character_context = 0x40;
-    object->disorientation_destination = *target;
-
-disorientate:
-    Disorientate(object, &object->disorientation_destination);
-    object->context_animation_timer += FRAMETIME;
-    if (NuVecDistSqr(&object->apiobj.collision_position, &object->disorientation_destination, NULL) > distance * 1.5f &&
-        __builtin_expect(object->context_animation_timer > 3.0f, false)) {
-        goto start_turn;
-    }
-    return;
-
-continue_disorientation:
-    if (object->character_context != 0x40) {
-        return;
-    }
-    goto disorientate;
-
-start_turn:
-    object->character_context = -1;
-    StartTurn(object);
-}
+void DisorientateCode(GameObject_s *object, nuvec_s *target, f32 distance);
 
 void UpdateSpecialSfx(WORLDINFO_s *world) {
     for (i32 i = 0; i < world->special_sfx_count; i++) {
