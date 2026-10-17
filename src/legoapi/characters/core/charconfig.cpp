@@ -237,13 +237,13 @@ static void CC_air_gravity(NUFPAR *parser);
 
 #if defined(__i386__)
 #define CC_SET_ANIM_FLAGS_ATTR __attribute__((noinline, noclone, regparm(2)))
-// The u32 clone keeps retail's push-based prologue only when size-optimized.
-#define CC_SET_ANIM_FLAGS_OS_ATTR __attribute__((noinline, noclone, optimize("Os"), regparm(2)))
+// Retail places the u32 clone in .text.unlikely with a push-based prologue.
+#define CC_SET_ANIM_FLAGS_COLD_ATTR __attribute__((noinline, noclone, cold, regparm(2)))
 #else
 #define CC_SET_ANIM_FLAGS_ATTR __attribute__((noinline, noclone))
-#define CC_SET_ANIM_FLAGS_OS_ATTR __attribute__((noinline, noclone))
+#define CC_SET_ANIM_FLAGS_COLD_ATTR __attribute__((noinline, noclone, cold))
 #endif
-static CC_SET_ANIM_FLAGS_OS_ATTR void CC_SetAnimFlagsField(NUFPAR *parser, u32 *field, u32 flags)
+static CC_SET_ANIM_FLAGS_COLD_ATTR void CC_SetAnimFlagsField(NUFPAR *parser, u32 *field, u32 flags)
     __asm__("_ZL15CC_SetAnimFlagsP8nufpar_sP10ANIMLIST_sj.isra.4");
 static void CC_SetAnimFlagsField(NUFPAR *parser, u32 *field, u32 flags) {
     *field |= flags;
@@ -1522,7 +1522,9 @@ static void CC_anim_start(NUFPAR *parser) {
         CHARACTERANIM_s animation;
         memset(&animation, 0, sizeof(animation));
         animation.action_id = -1;
-        animation.flags = (charconfig.flags & 1) != 0 ? 14 : 6;
+        animation.flags = 6;
+        if ((charconfig.flags & 1) != 0)
+            animation.flags |= 8;
         animation.blend_in_time = 0.2f;
         animation.blend_out_time = 0.2f;
         animation.playback_rate = 30.0f;

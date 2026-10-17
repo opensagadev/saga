@@ -1013,15 +1013,19 @@ void InitStillRender(variptr_u *, variptr_u) {
     pause_rndr_mtl->sort_pri = 0x7fff;
     pause_rndr_mtl->shader_desc.flags = 0x1000;
     pause_rndr_mtl->opacity = 1.0f;
-    u8 *attrib = reinterpret_cast<u8 *>(&pause_rndr_mtl->attribs);
-    attrib[1] = static_cast<u8>((attrib[1] & 0x30) | 0xc5);
-    attrib[2] = static_cast<u8>((attrib[2] & 0xfc) | 6);
-    attrib[0] = static_cast<u8>((attrib[0] & 0xc0) | 0x11);
-    attrib[1] = 0xe5;
+    pause_rndr_mtl->attribs.unknown_1_1_2 = 1;
+    pause_rndr_mtl->attribs.unknown_1_4_8 = 1;
+    pause_rndr_mtl->attribs.z_mode = 3;
+    pause_rndr_mtl->attribs.unknown_2_1_2 = 2;
+    pause_rndr_mtl->attribs.unknown_2_4 = 1;
+    pause_rndr_mtl->attribs.alpha_mode = 1;
+    pause_rndr_mtl->attribs.filter_mode = 1;
+    pause_rndr_mtl->attribs.cull_mode = 2;
     pause_rndr_mtl->tex_id = static_cast<i16>(pause_rt);
     pause_rndr_mtl->shader_desc.diffuse_color[0] = -1;
     pause_rndr_mtl->shader_desc.unknown_a8 = 1;
-    pause_rndr_mtl->shader_desc.vtx_desc.flags = (pause_rndr_mtl->shader_desc.vtx_desc.flags & ~0x3800u) | 0x40800u;
+    pause_rndr_mtl->shader_desc.vtx_desc.tex_coord_mode = 1;
+    pause_rndr_mtl->shader_desc.vtx_desc.has_no_transform = 1;
     NuMtlUpdate(pause_rndr_mtl);
     pause_rndr_on = 0;
 }
@@ -1039,8 +1043,8 @@ void DrawPauseScreenWipe() {
     i32 height = 0xe00;
     f32 u0 = 0.0f;
     f32 u1 = 1.0f;
-    f32 v1 = 0.0f;
-    f32 v0 = 1.0f;
+    f32 top = 0.0f;
+    f32 bottom = 1.0f;
     u32 colours[4];
 
     if ((FadeSys.direction & 3) != 0) {
@@ -1076,7 +1080,7 @@ void DrawPauseScreenWipe() {
             colours[3] = 0x80808080u;
             NuRndrGradRectUV2di(0, y - 0x166, 0x2800, 0x166, 0.0f, 1.0f - (edge - 0.1f), 1.0f, 1.0f - edge, colours,
                                 pause_rndr_mtl);
-            v0 = 1.0f - edge;
+            top = edge;
         } else {
             const f32 fade = FadeSys.fade;
             height = static_cast<i32>(fade * 3584.0f);
@@ -1086,11 +1090,11 @@ void DrawPauseScreenWipe() {
             colours[3] = 0x00808080u;
             NuRndrGradRectUV2di(0, height, 0x2800, 0x166, 0.0f, 1.0f - fade, 1.0f, 1.0f - (fade + 0.1f), colours,
                                 pause_rndr_mtl);
-            v1 = 1.0f - fade;
+            bottom = fade;
         }
     }
 
-    NuRndrRectUV2di(x, y, width, height, u0, v0, u1, v1, 0x80808080u, pause_rndr_mtl);
+    NuRndrRectUV2di(x, y, width, height, u0, 1.0f - top, u1, 1.0f - bottom, 0x80808080u, pause_rndr_mtl);
     NuRndrEndScene();
 }
 
@@ -1136,20 +1140,16 @@ void DrawPauseFade() {
     if (editor_active != 0 || screendump != 0)
         return;
 
-    f32 step = FRAMETIME * 2.0f;
-    i32 fade;
+    f32 current = pause_fade;
     if (Paused == 0 && NetPaused == 0) {
-        fade = static_cast<i32>(pause_fade - step);
+        i32 fade = static_cast<i32>(current - FRAMETIME * 2.0f);
         if (fade < 0)
             fade = 0;
+        pause_fade = static_cast<f32>(fade);
     } else {
-        fade = static_cast<i32>(pause_fade + step);
-        if (fade > 0) {
-            pause_fade = 1.0f;
-            return;
-        }
+        i32 fade = static_cast<i32>(current + FRAMETIME * 2.0f);
+        pause_fade = fade > 0 ? 1.0f : static_cast<f32>(fade);
     }
-    pause_fade = static_cast<f32>(fade);
 }
 
 void ClearStill() {

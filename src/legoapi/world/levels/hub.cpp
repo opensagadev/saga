@@ -1936,25 +1936,28 @@ void Hub_LoadAndFixUpMiniKits(WORLDINFO *world, VARIPTR *buf, VARIPTR *buf_end) 
     world->hub_minikits = reinterpret_cast<HUBMINIKIT_s *>(buf->addr);
     buf->addr = ALIGN(buf->addr + static_cast<usize>(AREACOUNT) * sizeof(HUBMINIKIT_s), 4);
     world->minikit_pieces_buf = reinterpret_cast<HUBMINIKITPIECES_s **>(buf->addr);
-    memset(world->minikit_pieces_buf, 0, static_cast<usize>(AREACOUNT) * sizeof(*world->minikit_pieces_buf));
-    buf->addr += static_cast<usize>(AREACOUNT) * sizeof(*world->minikit_pieces_buf);
+    const usize pieces_size = static_cast<usize>(AREACOUNT) * sizeof(*world->minikit_pieces_buf);
+    memset(world->minikit_pieces_buf, 0, pieces_size);
+    buf->addr += pieces_size;
 
     for (i32 i = 0; i < AREACOUNT; ++i) {
         world->minikit_pieces_buf[i] = NULL;
-        if ((ADataList[i].flags & AREAFLAG_MINIKIT) == 0 || ADataList[i].minikit_id == -1) {
+        if ((ADataList[i].flags & AREAFLAG_MINIKIT) == 0) {
+            continue;
+        }
+        const i32 minikit_id = ADataList[i].minikit_id;
+        if (minikit_id == -1) {
             continue;
         }
         world->minikit_pieces_buf[i] = reinterpret_cast<HUBMINIKITPIECES_s *>(buf->addr);
         buf->addr += 0x18;
-        MiniKit_Load(reinterpret_cast<MINIKIT *>(world->minikit_pieces_buf[i]), ADataList[i].minikit_id, buf, buf_end,
-                     NULL);
-        MINIKIT *minikit = reinterpret_cast<MINIKIT *>(world->minikit_pieces_buf[i]);
-        if (minikit->gscn == NULL) {
+        MiniKit_Load(reinterpret_cast<MINIKIT *>(world->minikit_pieces_buf[i]), minikit_id, buf, buf_end, NULL);
+        if (reinterpret_cast<MINIKIT *>(world->minikit_pieces_buf[i])->gscn == NULL) {
             world->minikit_pieces_buf[i] = NULL;
             buf->addr -= 0x18;
         } else {
-            MiniKit_InitPieces(minikit, 10, buf, buf_end);
-            minikit->field_0x9 = static_cast<i8>(i);
+            MiniKit_InitPieces(reinterpret_cast<MINIKIT *>(world->minikit_pieces_buf[i]), 10, buf, buf_end);
+            reinterpret_cast<MINIKIT *>(world->minikit_pieces_buf[i])->field_0x9 = static_cast<i8>(i);
         }
     }
 }

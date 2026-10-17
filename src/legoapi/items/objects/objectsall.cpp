@@ -831,18 +831,10 @@ static void edpartSetInstanceType(eduimenu_s *, eduiitem_s *item, u32) {
     if (edpart_nearest_type == NULL)
         return;
     if (item->data == 9999) {
-#define EDPART_CLEAR_INSTANCE(index)                                                                                   \
-    edpart_nearest_type->effect_ids[index] = -1;                                                                       \
-    edpart_nearest_type->effect_pages[index] = 1;
-        EDPART_CLEAR_INSTANCE(0)
-        EDPART_CLEAR_INSTANCE(1)
-        EDPART_CLEAR_INSTANCE(2)
-        EDPART_CLEAR_INSTANCE(3)
-        EDPART_CLEAR_INSTANCE(4)
-        EDPART_CLEAR_INSTANCE(5)
-        EDPART_CLEAR_INSTANCE(6)
-        EDPART_CLEAR_INSTANCE(7)
-#undef EDPART_CLEAR_INSTANCE
+        for (i32 index = 0; index < 8; ++index) {
+            edpart_nearest_type->effect_ids[index] = -1;
+            edpart_nearest_type->effect_pages[index] = 1;
+        }
         if (item->highlighted)
             edpart_nearest_type->effect_ids[0] = 9999;
         edpart_nearest_type->flags |= 0x10;
@@ -860,30 +852,18 @@ static void edpartSetInstanceType(eduimenu_s *, eduiitem_s *item, u32) {
             item->highlighted = 0;
         }
     } else {
-        i32 index;
-#define EDPART_FIND_INSTANCE(slot)                                                                                     \
-    if (edpart_nearest_type->effect_ids[slot] == item->data) {                                                         \
-        index = slot;                                                                                                  \
-        goto remove_instance;                                                                                          \
-    }
-        EDPART_FIND_INSTANCE(0)
-        EDPART_FIND_INSTANCE(1)
-        EDPART_FIND_INSTANCE(2)
-        EDPART_FIND_INSTANCE(3)
-        EDPART_FIND_INSTANCE(4)
-        EDPART_FIND_INSTANCE(5)
-        EDPART_FIND_INSTANCE(6)
-        EDPART_FIND_INSTANCE(7)
-#undef EDPART_FIND_INSTANCE
-        return;
-    remove_instance:
-        for (i32 next = index + 1; next < 8; ++next) {
-            edpart_nearest_type->effect_ids[next - 1] = edpart_nearest_type->effect_ids[next];
-            edpart_nearest_type->effect_pages[next - 1] = edpart_nearest_type->effect_pages[next];
+        for (i32 index = 0; index < 8; ++index) {
+            if (edpart_nearest_type->effect_ids[index] == item->data) {
+                for (i32 slot = index; slot < 7; ++slot) {
+                    edpart_nearest_type->effect_ids[slot] = edpart_nearest_type->effect_ids[slot + 1];
+                    edpart_nearest_type->effect_pages[slot] = edpart_nearest_type->effect_pages[slot + 1];
+                }
+                edpart_nearest_type->effect_ids[7] = -1;
+                edpart_nearest_type->effect_pages[7] = -1;
+                --edpart_nearest_type->variant_count;
+                return;
+            }
         }
-        edpart_nearest_type->effect_ids[7] = -1;
-        edpart_nearest_type->effect_pages[7] = -1;
-        --edpart_nearest_type->variant_count;
     }
 }
 
@@ -3213,8 +3193,8 @@ static void edpartFileSaveEffectsLevel(eduimenu_s *parent, eduiitem_s *, u32) {
         if (edpart_message_menu != NULL) {
             eduiMenuAddItem(edpart_message_menu, eduiItemSelCreate(1, colours, 0, 0, NULL, "Save Failed"));
             eduiMenuAttach(parent, edpart_message_menu);
-            edpart_message_menu->y = parent->y + 40;
             edpart_message_menu->x = parent->x + 10;
+            edpart_message_menu->y = parent->y + 40;
         }
     } else if (!backed_up) {
         u32 colours[4] = {0x800000c0u, 0x80ff0000, 0x80808080, 0x80404040};
@@ -3248,8 +3228,8 @@ static void edpartFileSaveEffectsGeneral(eduimenu_s *parent, eduiitem_s *, u32) 
         if (edpart_message_menu != NULL) {
             eduiMenuAddItem(edpart_message_menu, eduiItemSelCreate(1, colours, 0, 0, NULL, "Save Failed"));
             eduiMenuAttach(parent, edpart_message_menu);
-            edpart_message_menu->y = parent->y + 40;
             edpart_message_menu->x = parent->x + 10;
+            edpart_message_menu->y = parent->y + 40;
         }
     } else if (!backed_up) {
         u32 colours[4] = {0x800000c0u, 0x80ff0000, 0x80808080, 0x80404040};

@@ -2084,11 +2084,12 @@ static f32 Condition_NumForceObjects(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s 
 
 static f32 Condition_BeenToLevel(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char *, void *void_arg) {
     const isize area_level = AIConditionArgumentValue(void_arg);
-    if (area_level == -1) {
-        return 0.0f;
+    f32 result = 0.0f;
+    if (area_level != -1) {
+        const u8 *progress = static_cast<const u8 *>(LevelProgressData) + area_level * LEVEL_PROGRESS_STRIDE;
+        result = static_cast<u32>(progress[LEVEL_PROGRESS_COMPLETION_FLAGS_OFFSET] & LEVEL_PROGRESS_STORY_COMPLETE);
     }
-    const u8 *progress = static_cast<const u8 *>(LevelProgressData) + area_level * LEVEL_PROGRESS_STRIDE;
-    return (progress[LEVEL_PROGRESS_COMPLETION_FLAGS_OFFSET] & LEVEL_PROGRESS_STORY_COMPLETE) != 0 ? 1.0f : 0.0f;
+    return result;
 }
 
 static f32 Condition_LastLevel(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
@@ -3194,12 +3195,15 @@ __used__ static i32 Action_UseBigJumpToJump(AISYS *sys, AISCRIPTPROCESS *process
     (void)processor;
     (void)param_5;
     (void)param_6;
-    if (packet != NULL && packet->owner != NULL && packet->owner->apiobj.objptr != NULL) {
-        packet->owner->apiobj.objptr->field_0xf03 |= 0x40;
-        if (param_4 != 0) {
-            for (i32 index = 0; index < param_4; ++index) {
-                if (NuStrICmp(params[index], "FALSE") == 0) {
-                    packet->owner->apiobj.objptr->field_0xf03 &= ~0x40;
+    if (packet != NULL && packet->owner != NULL) {
+        GameObject_s *object = packet->owner->apiobj.objptr;
+        if (object != NULL) {
+            object->field_0xf03 |= 0x40;
+            if (param_4 != 0) {
+                for (i32 index = 0; index < param_4; ++index) {
+                    if (NuStrICmp(params[index], "FALSE") == 0) {
+                        object->field_0xf03 &= ~0x40;
+                    }
                 }
             }
         }
@@ -6546,11 +6550,12 @@ __used__ static i32 Action_CircleLocator(AISYS *sys, AISCRIPTPROCESS *processor,
         }
     }
     AILOCATOR *locator = static_cast<AILOCATOR *>(processor->action_data_3);
-    if (locator != NULL) {
-        AIMoveInstruction(packet, &locator->position, packet->movement_instruction_parameter, &locator->path_info,
-                          AIPACKET_MOVEMENT_CIRCLE, packet->movement_instruction_parameter);
+    if (locator == NULL) {
+        return 1;
     }
-    return locator == NULL;
+    AIMoveInstruction(packet, &locator->position, packet->movement_instruction_parameter, &locator->path_info,
+                      AIPACKET_MOVEMENT_CIRCLE, packet->movement_instruction_parameter);
+    return 0;
 }
 
 i32 Action_PlayCutScene(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **params, i32 param_count, i32 first_time,
@@ -6833,13 +6838,13 @@ __used__ static i32 Action_AddGameMsgCount(AISYS *sys, AISCRIPTPROCESS *processo
                         position = &object->apiobj.collision_position;
                     }
                 } else {
-                    char *value = NuStrIStr(params[index], "count=");
+                    char *value = NuStrIStr(params[index], "total=");
                     if (value != NULL) {
-                        count = static_cast<i32>(AIParamToFloat(processor, value + 6));
+                        total = static_cast<i32>(AIParamToFloat(processor, value + 6));
                     } else {
-                        value = NuStrIStr(params[index], "total=");
+                        value = NuStrIStr(params[index], "count=");
                         if (value != NULL) {
-                            total = static_cast<i32>(AIParamToFloat(processor, value + 6));
+                            count = static_cast<i32>(AIParamToFloat(processor, value + 6));
                         } else {
                             value = NuStrIStr(params[index], "messageval=");
                             if (value != NULL) {
@@ -6867,10 +6872,10 @@ __used__ static i32 Action_AddGameMsgCount(AISYS *sys, AISCRIPTPROCESS *processo
                     }
                 }
             }
-            if (total > count) {
+            if (count > total) {
                 return 1;
             }
-            if (total == 0) {
+            if (count == 0) {
                 return 1;
             }
             AddGameMsgCount(position, count, total, red, green, blue, 0.75f);
@@ -7464,8 +7469,8 @@ static i32 Action_SelectRandomSpline(AISYS *, AISCRIPTPROCESS *, AIPACKET *, cha
         }
         if (count != 0) {
             if (unused) {
-                for (i32 index = 0; index < HIGHGAMEOBJECT; ++index) {
-                    GameObject_s *object = &Obj[index];
+                GameObject_s *object = Obj;
+                for (i32 index = 0; index < HIGHGAMEOBJECT; ++index, ++object) {
                     if ((object->apiobj.field_0x1f8 & 0x1001) == 0x1001 && object->apiobj.field_0x287 == 0 &&
                         object->movement_spline != NULL)
                         object->movement_spline->length |= 0x8000;
@@ -7475,8 +7480,8 @@ static i32 Action_SelectRandomSpline(AISYS *, AISCRIPTPROCESS *, AIPACKET *, cha
                     if (splines[index]->length >= 0)
                         unused_splines[unused_count++] = splines[index];
                 }
-                for (i32 index = 0; index < HIGHGAMEOBJECT; ++index) {
-                    GameObject_s *object = &Obj[index];
+                object = Obj;
+                for (i32 index = 0; index < HIGHGAMEOBJECT; ++index, ++object) {
                     if ((object->apiobj.field_0x1f8 & 0x1001) == 0x1001 && object->apiobj.field_0x287 == 0 &&
                         object->movement_spline != NULL)
                         object->movement_spline->length &= 0x7fff;
@@ -10774,34 +10779,37 @@ i32 Action_AssignLocatorInSet(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *pac
         return 1;
     }
 
-    GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
+    GameObject_s *object = NULL;
     AILOCATOR *locator = NULL;
     AILOCATORSET *locator_set = NULL;
-    u8 assignment = object != NULL ? object->apiobj.field_0x289 : 0xff;
+    i32 assignment = 0xff;
+    if (packet != NULL && packet->owner != NULL) {
+        object = packet->owner->apiobj.objptr;
+        assignment = object->apiobj.field_0x289;
+    }
 
     for (i32 index = 0; index < param_count; ++index) {
-        char *param = params[index];
-        if (NuStrICmp(param, "locator=mylocator") == 0) {
+        if (NuStrICmp(params[index], "locator=mylocator") == 0) {
             locator = object != NULL ? object->ai.locator : NULL;
             continue;
         }
-        char *value = NuStrIStr(param, "locator");
+        char *value = NuStrIStr(params[index], "locator");
         if (value != NULL) {
             locator = AIPathFindLocator(sys, value + NuStrLen("locator") + 1);
             continue;
         }
-        value = NuStrIStr(param, "character");
+        value = NuStrIStr(params[index], "character");
         if (value != NULL) {
             object = GetNamedGameObject(sys, value + NuStrLen("character") + 1);
             assignment = object != NULL ? object->apiobj.field_0x289 : 0xff;
             continue;
         }
-        value = NuStrIStr(param, "set");
+        value = NuStrIStr(params[index], "set");
         if (value != NULL) {
             locator_set = AIPathFindLocatorSet(sys, value + NuStrLen("set") + 1);
             continue;
         }
-        if (NuStrICmp(param, "reserve") == 0) {
+        if (NuStrICmp(params[index], "reserve") == 0) {
             assignment = 0x80;
         }
     }
@@ -10809,13 +10817,11 @@ i32 Action_AssignLocatorInSet(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *pac
     if (locator == NULL || locator_set == NULL) {
         return 1;
     }
-    const i32 locator_index = locator - sys->locators;
     for (i32 index = 0; index < locator_set->locator_count; ++index) {
-        if (locator_set->locator_entries[index] != locator_index) {
-            continue;
+        if (&sys->locators[locator_set->locator_entries[index]] == locator) {
+            locator_set->assigned[index] = assignment;
+            break;
         }
-        locator_set->assigned[index] = assignment;
-        break;
     }
     return 1;
 }

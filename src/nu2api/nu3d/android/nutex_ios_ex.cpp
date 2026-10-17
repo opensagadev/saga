@@ -847,7 +847,7 @@ i32 GetMipOffset(i32 width, i32 height, NUTEXFORMAT format, i32 depth, bool isCu
         targetMip = mips;
     }
 
-    bool isCompressed;
+    u8 isCompressed;
     i32 bytesPerBlockOrPixel;
     i32 blockWidth;
     i32 minBlocks;

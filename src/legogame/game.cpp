@@ -387,7 +387,7 @@ struct GIZMOPICKUP_s;
 struct PART_s;
 
 static __used__ void Collection_GetSelectingPlayerIDs(i16 *ids);
-static i32 CompletionPointInfo_ReCalculate[7];
+static u32 CompletionPointInfo_ReCalculate[7];
 
 struct NUGCUTCHAR_s;
 
@@ -2318,8 +2318,8 @@ void LSW_SetIndy(i32) {
 }
 
 void ReCalculateCompletionPoints() {
-    Game.gold_bricks = 0;
     Game.completion = 0;
+    Game.gold_bricks = 0;
     memset(CompletionPointInfo_ReCalculate, 0, sizeof(CompletionPointInfo_ReCalculate));
 
     for (i32 index = 0; index < MasterCollection.count_y; ++index) {

@@ -1413,14 +1413,14 @@ void AIPathCnxControlSysReset(AIPATHCNXCONTROLSYS_s *system) {
         return;
     }
 
-    system->available_controllers.head = NULL;
-    system->available_controllers.tail = NULL;
+    NULISTHDR *available = &system->available_controllers;
+    available->head = NULL;
+    available->tail = NULL;
     system->active_controllers.head = NULL;
     system->active_controllers.tail = NULL;
     memset(system->controllers, 0, system->controller_count * sizeof(*system->controllers));
-    auto system_controller_count = system->controller_count;
-    for (i32 i = 0; i < system_controller_count; ++i) {
-        NuLinkedListAppend(&system->available_controllers, &system->controllers[i].links);
+    for (i32 i = 0; i < system->controller_count; ++i) {
+        NuLinkedListAppend(available, &system->controllers[i].links);
     }
 }
 
@@ -1631,10 +1631,18 @@ void AIPathCnxControllerSetOnRange(AIPATHCNXCONTROLLER_s *controller, i32 start_
         animation_end = 1024;
     }
 
-    i32 first = start_frame == -1 ? animation_end : start_frame == -2 ? animation_end - 1 : start_frame;
-    i32 last = end_frame == -1 ? animation_end : end_frame == -2 ? animation_end - 1 : end_frame;
-    first = first > 0 ? first - 1 : 0;
-    last = last < animation_end ? last : animation_end;
+    if (start_frame == -1) {
+        start_frame = animation_end;
+    } else if (start_frame == -2) {
+        start_frame = animation_end - 1;
+    }
+    if (end_frame == -1) {
+        end_frame = animation_end;
+    } else if (end_frame == -2) {
+        end_frame = animation_end - 1;
+    }
+    i32 first = start_frame > 0 ? start_frame - 1 : 0;
+    i32 last = end_frame <= animation_end ? end_frame : animation_end;
     for (i32 frame = first; frame < last; ++frame) {
         controller->on_frames[frame >> 5] |= 1u << (frame & 31);
     }
@@ -1807,8 +1815,7 @@ f32 oneAtOnce_GetHoldRange(GameObject_s *object) {
 
 void oneAtOnce_SetNumAttackers(i32 attackers) {
     if (attackers < 0) {
-        AtOnce_maxAttackers = 0;
-        return;
+        attackers = 0;
     }
     if (attackers >= 5) {
         attackers = 4;
@@ -1841,9 +1848,9 @@ void oneAtOnce_MaintainArray() {
             continue;
         }
 
-        const u8 old_player = object->one_at_once_player;
-        if (__builtin_expect(old_player != 0xff, 1)) {
-            previous_attackers[old_player][previous_count[old_player]++] = object;
+        if (__builtin_expect(object->one_at_once_player != 0xff, 1)) {
+            previous_attackers[object->one_at_once_player][previous_count[object->one_at_once_player]] = object;
+            ++previous_count[object->one_at_once_player];
         }
         object->one_at_once_player = 0xff;
 
@@ -1879,21 +1886,17 @@ void oneAtOnce_MaintainArray() {
             continue;
         }
         const i32 count = attacker_count[player];
-        for (i32 slot = 0; slot < count && AtOnce_attackingPlayer[player][slot].object != NULL; ++slot) {
-            if (previous_count[player] > 0 &&
-                AtOnce_attackingPlayer[player][slot].object == previous_attackers[player][0]) {
+        for (i32 slot = 0; AtOnce_attackingPlayer[player][slot].object != NULL; ++slot) {
+            if (AtOnce_attackingPlayer[player][slot].object == previous_attackers[player][0]) {
                 AtOnce_attackingPlayer[player][slot].distance *= 0.75f;
             }
-            if (previous_count[player] > 1 &&
-                AtOnce_attackingPlayer[player][slot].object == previous_attackers[player][1]) {
+            if (AtOnce_attackingPlayer[player][slot].object == previous_attackers[player][1]) {
                 AtOnce_attackingPlayer[player][slot].distance *= 0.75f;
             }
-            if (previous_count[player] > 2 &&
-                AtOnce_attackingPlayer[player][slot].object == previous_attackers[player][2]) {
+            if (AtOnce_attackingPlayer[player][slot].object == previous_attackers[player][2]) {
                 AtOnce_attackingPlayer[player][slot].distance *= 0.75f;
             }
-            if (previous_count[player] > 3 &&
-                AtOnce_attackingPlayer[player][slot].object == previous_attackers[player][3]) {
+            if (AtOnce_attackingPlayer[player][slot].object == previous_attackers[player][3]) {
                 AtOnce_attackingPlayer[player][slot].distance *= 0.75f;
             }
             for (i32 adjacent = 1; adjacent <= count - slot; ++adjacent) {
@@ -1911,11 +1914,8 @@ void oneAtOnce_MaintainArray() {
             }
         }
 
-        if (Player[player] != NULL) {
-            const i32 attack_limit = AtOnce_maxAttackers < count ? AtOnce_maxAttackers : count;
-            for (i32 slot = 0; slot < attack_limit && AtOnce_attackingPlayer[player][slot].object != NULL; ++slot) {
-                AtOnce_attackingPlayer[player][slot].object->one_at_once_player = static_cast<u8>(player);
-            }
+        for (i32 slot = 0; slot < AtOnce_maxAttackers && AtOnce_attackingPlayer[player][slot].object != NULL; ++slot) {
+            AtOnce_attackingPlayer[player][slot].object->one_at_once_player = static_cast<u8>(player);
         }
     }
 }
@@ -2721,7 +2721,7 @@ GameObject_s *AddDynamicCreature(i32 model, nuvec_s *position, i32 angle, char *
             offset.x = ((object->ai.group_column + 1) / 2) * group->x_spacing;
             if (object->ai.group_column & 1)
                 offset.x = -offset.x;
-            offset.z = -group->z_spacing * object->ai.group_member;
+            offset.z = -group->z_spacing * static_cast<u32>(object->ai.group_member);
             offset.y = 0.0f;
             NuVecRotateY(&offset, &offset, angle);
             NuVecAdd(&object->apiobj.position, &object->apiobj.position, &offset);

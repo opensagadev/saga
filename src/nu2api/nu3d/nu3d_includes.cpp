@@ -6518,9 +6518,8 @@ extern "C" {
 
         for (i32 chunk_index = 0; chunk_index < *reinterpret_cast<i32 *>(animation + 8); ++chunk_index) {
             const i32 curve_set_count = NuFileReadInt(file);
-            u8 *chunk = reinterpret_cast<u8 *>(NuAnimDataChunkCreate(curve_set_count));
             void **chunk_slot = *reinterpret_cast<void ***>(animation + 0xc) + chunk_index;
-            *chunk_slot = chunk;
+            u8 *chunk = reinterpret_cast<u8 *>(*chunk_slot = NuAnimDataChunkCreate(curve_set_count));
             *reinterpret_cast<i32 *>(chunk) = curve_set_count;
 
             u8 *curve_data = NULL;
@@ -12430,7 +12429,7 @@ void NuMtxCalcFaceY(NUMTX *m, NUVEC *v) {
     NuVecSub(&forward, &camera_position, v);
     NuVecCross(&right, &world_up, &forward);
     NuVecNorm(&right, &right);
-    NuVecCross(&up, &forward, &right);
+    NuVecCross(&up, &world_up, &right);
     NuVecNorm(&up, &up);
 
     m->m00 = right.x;
@@ -12445,10 +12444,10 @@ void NuMtxCalcFaceY(NUMTX *m, NUVEC *v) {
     m->m33 = 1.0f;
     m->m23 = 0.0f;
     m->m13 = 0.0f;
+    m->m03 = 0.0f;
     m->m30 = v->x;
     m->m31 = v->y;
     m->m32 = v->z;
-    m->m03 = 0.0f;
 }
 
 NUMTX *NuCameraGetViewMtx(void) {

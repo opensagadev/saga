@@ -596,19 +596,19 @@ void instNuGCutSceneResetCamLock(instNUGCUTSCENE_s *instance) {
 }
 
 void NuGCutSceneRemapFocusIdToLocaterNum(NUGCUTSCENE_s *cutscene, VARIPTR *buffer) {
-    if (cutscene->version <= 4 || cutscene->camera_system == NULL ||
+    if ((cutscene->version & 0xff) <= 4 || cutscene->camera_system == NULL ||
         cutscene->camera_system->focus_state_animation == NULL || cutscene->locator_system == NULL) {
         return;
     }
 
+    NUGCUTLOCATOR_s *locator = cutscene->locator_system->locators;
     buffer->addr = ALIGN(buffer->addr, 2);
     cutscene->focus_camera_indices = reinterpret_cast<u16 *>(buffer->void_ptr);
-    NUGCUTLOCATORSYS_s *system = cutscene->locator_system;
-    for (u32 i = 0; i < system->locator_count; ++i) {
-        NUGCUTLOCATOR_s *locator = &system->locators[i];
-        if ((system->types[locator->type_index].flags & 8) != 0) {
-            *reinterpret_cast<u16 *>(buffer->void_ptr) = static_cast<u16>(i);
-            buffer->void_ptr = reinterpret_cast<u16 *>(buffer->void_ptr) + 1;
+    for (i32 i = 0; i < cutscene->locator_system->locator_count; ++i, ++locator) {
+        if ((cutscene->locator_system->types[locator->type_index].flags & 8) != 0) {
+            u16 *index = reinterpret_cast<u16 *>(buffer->void_ptr);
+            buffer->void_ptr = index + 1;
+            *index = static_cast<u16>(i);
         }
     }
 }
@@ -619,36 +619,38 @@ extern "C" {
         usize available = buf_end->addr - buf->addr;
         strcpy(path, name);
         buf->addr = ALIGN(buf->addr, 0x10);
-        NUGCUTSCENE_s *cutscene = reinterpret_cast<NUGCUTSCENE_s *>(buf->void_ptr);
-        i32 bytes = NuFileLoadBuffer(path, cutscene, static_cast<i32>(available));
+        i32 bytes = NuFileLoadBuffer(path, buf->void_ptr, static_cast<i32>(available));
         if (__builtin_expect(bytes == 0, 0)) {
             return NULL;
         }
+        NUGCUTSCENE_s *cutscene = reinterpret_cast<NUGCUTSCENE_s *>(buf->void_ptr);
 
         if (cutscene->version > 9) {
             isize anim_delta = reinterpret_cast<isize>(cutscene) - cutscene->relocation_delta;
             cutscene->string_delta = reinterpret_cast<isize>(cutscene) - cutscene->string_delta;
             cutscene->loaded_size = bytes;
             cutscene->relocation_delta = anim_delta;
-            if (__builtin_expect((cutscene->flags & 8) == 0, 1)) {
-                NuGCutSceneFixPtrsAnims(cutscene, anim_delta);
-            } else {
+            if (__builtin_expect((cutscene->flags & 8) != 0, 0)) {
                 NuGCutSceneFixPtrsNoAnims(cutscene);
+                buf->addr += bytes;
+                NuGCutSceneRemapFocusIdToLocaterNum(cutscene, buf);
+                return cutscene;
             }
+            NuGCutSceneFixPtrsAnims(cutscene, anim_delta);
             if ((cutscene->flags & 1) != 0 && flags == 0) {
-                usize stream_buffer = ALIGN(buf->addr + cutscene->field_4c, 0x10);
+                usize stream_buffer = ALIGN(cutscene->field_4c + buf->addr, 0x10);
                 cutscene->stream_buffer_0 = reinterpret_cast<NUGCUTSCENE_s *>(stream_buffer);
                 stream_buffer += cutscene->stream_buffer_size;
-                if (NumCommonStreamingBuffers != 0) {
-                    stream_buffer += 0x400;
-                } else {
+                if (NumCommonStreamingBuffers == 0) {
                     stream_buffer = ALIGN(stream_buffer + 0x400, 0x10);
                     cutscene->stream_buffer_1 = reinterpret_cast<NUGCUTSCENE_s *>(stream_buffer);
-                    stream_buffer += cutscene->stream_buffer_size + 0x400;
+                    stream_buffer += cutscene->stream_buffer_size;
                 }
+                stream_buffer += 0x400;
                 buf->addr = stream_buffer;
+                const i32 length = NuStrLen(name);
                 char *filename = reinterpret_cast<char *>(buf->void_ptr);
-                buf->addr += NuStrLen(name) + 4;
+                buf->addr += length + 4;
                 NuStrCpy(filename, name);
                 cutscene->filename = filename;
             } else {
@@ -663,12 +665,13 @@ extern "C" {
         if (cutscene->version > 1) {
             anim_delta = reinterpret_cast<isize>(cutscene) - cutscene->relocation_delta;
             cutscene->relocation_delta = anim_delta;
+            if ((cutscene->flags & 8) != 0) {
+                NuGCutSceneFixPtrsNoAnims(cutscene);
+                buf->addr += bytes;
+                return cutscene;
+            }
         }
-        if ((cutscene->flags & 8) == 0) {
-            NuGCutSceneFixPtrsAnims(cutscene, anim_delta);
-        } else {
-            NuGCutSceneFixPtrsNoAnims(cutscene);
-        }
+        NuGCutSceneFixPtrsAnims(cutscene, anim_delta);
         if (cutscene->version > 1 && (cutscene->flags & 1) != 0 && flags == 0) {
             usize stream_buffer;
             if (cutscene->camera_system != NULL && cutscene->camera_system->animation != NULL) {
@@ -690,16 +693,16 @@ extern "C" {
             stream_buffer = ALIGN(stream_buffer, 0x10);
             cutscene->stream_buffer_0 = reinterpret_cast<NUGCUTSCENE_s *>(stream_buffer);
             stream_buffer += cutscene->stream_buffer_size;
-            if (NumCommonStreamingBuffers != 0) {
-                stream_buffer += 0x400;
-            } else {
+            if (NumCommonStreamingBuffers == 0) {
                 stream_buffer = ALIGN(stream_buffer + 0x400, 0x10);
                 cutscene->stream_buffer_1 = reinterpret_cast<NUGCUTSCENE_s *>(stream_buffer);
-                stream_buffer += cutscene->stream_buffer_size + 0x400;
+                stream_buffer += cutscene->stream_buffer_size;
             }
+            stream_buffer += 0x400;
             buf->addr = stream_buffer;
+            const i32 length = NuStrLen(name);
             char *filename = reinterpret_cast<char *>(buf->void_ptr);
-            buf->addr += NuStrLen(name) + 4;
+            buf->addr += length + 4;
             NuStrCpy(filename, name);
             cutscene->filename = filename;
             return cutscene;

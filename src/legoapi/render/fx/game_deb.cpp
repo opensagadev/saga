@@ -95,7 +95,7 @@ void AddSurfaceDebris(GameObject_s *object) {
     WORLDINFO_s *world = WorldInfo_CurrentlyActive();
     if (object->field_0x7a5 == 0x2b)
         return;
-    i32 layer = static_cast<i8>(object->apiobj.field_0x27f);
+    i8 layer = object->apiobj.field_0x27f;
     if (layer != -1 && (TerLayer[layer].flags & 1) != 0)
         return;
     f32 surface_y = object->apiobj.field_0x218;

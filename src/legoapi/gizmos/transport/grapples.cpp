@@ -440,8 +440,8 @@ static void Grapples_ClearProgress(void *, void *progress_ptr) {
 }
 
 static void Grapples_StoreProgress(void *world_ptr, void *, void *progress_ptr) {
-    WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
     GRAPPLEPROGRESS *progress = static_cast<GRAPPLEPROGRESS *>(progress_ptr);
+    WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
 
     if (progress == NULL) {
         return;
@@ -453,14 +453,16 @@ static void Grapples_StoreProgress(void *world_ptr, void *, void *progress_ptr) 
         return;
     }
 
-    auto world_grapple_count = world->grapple_count;
-    for (i32 index = 0; index < world_grapple_count && index != 32; ++index) {
+    GRAPPLE *grapple = world->grapples;
+    for (i32 index = 0; index < world->grapple_count; ++index, ++grapple) {
+        if (index == 32)
+            break;
         const i32 word = index >> 5;
         const u32 mask = 1u << (index & 31);
-        if ((world->grapples[index].flags & GRAPPLE_FLAG_VISIBLE) == 0) {
+        if ((grapple->flags & GRAPPLE_FLAG_VISIBLE) == 0) {
             progress->visible_mask[word] &= ~mask;
         }
-        if ((world->grapples[index].flags & GRAPPLE_FLAG_ACTIVE) == 0) {
+        if ((grapple->flags & GRAPPLE_FLAG_ACTIVE) == 0) {
             progress->active_mask[word] &= ~mask;
         }
     }
@@ -761,14 +763,16 @@ GRAPPLE *Grapple_AddDynamic(void *attached_object, i32 retain_attachment) {
 }
 
 void Grapple_RemoveDynamic(void *attached_object) {
-    for (i32 index = 0; index < 4; ++index) {
-        GRAPPLE *grapple = &DynamicGrapple[index];
-        if (grapple->attached_object == attached_object) {
-            grapple->attached_object = NULL;
-            grapple->flags &= ~GRAPPLE_FLAG_VISIBLE;
-            return;
-        }
+    i32 index;
+    for (index = 0; index < 4; ++index) {
+        if (DynamicGrapple[index].attached_object == attached_object)
+            break;
     }
+    if (index == 4)
+        return;
+
+    DynamicGrapple[index].attached_object = NULL;
+    DynamicGrapple[index].flags &= ~GRAPPLE_FLAG_VISIBLE;
 }
 
 void Grapple_MoveCode(GameObject_s *object) {

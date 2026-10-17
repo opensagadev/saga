@@ -2725,13 +2725,16 @@ extern "C" {
             eduiSetFontColour(edui_font, item->colours[item->highlighted]);
         }
         eduiFntPrintEx(edui_font, (x * 2 + width) << 3, (y << 3) + baseline, 64, item->text);
-        f32 green = clipg;
-        f32 red = clipg;
-        f32 blue = clipg;
-        if (item->type == 7)
+        f32 red, green, blue;
+        if (item->type == 7) {
             eduiHSVToRGB(cliph, clips, clipv, red, green, blue);
-        u32 colour = 0x80000000u | (static_cast<i32>(blue * 255.0f) << 16) | (static_cast<i32>(green * 255.0f) << 8) |
-                     static_cast<i32>(red * 255.0f);
+        } else {
+            red = clipg;
+            green = clipg;
+            blue = clipg;
+        }
+        u32 colour = (static_cast<i32>(blue * 255.0f) << 16) + (static_cast<i32>(green * 255.0f) << 8) +
+                     static_cast<i32>(red * 255.0f) + 0x80000000u;
         i32 colours[4] = {static_cast<i32>(colour), static_cast<i32>(colour), static_cast<i32>(colour),
                           static_cast<i32>(colour)};
         eduiDrawGradRect((x + width - 45) << 4, y << 3, 40 << 4, height << 3, colours, uimtls[ui_bgmtl]);
@@ -7623,19 +7626,18 @@ extern "C" void CreateColourPicker(void) {
 
     initialised = 1;
     colourmenu = eduiMenuCreate(200, 70, 180, 250, nullptr, cbCancelSubMenu, const_cast<char *>("Pick Colour"));
-    if (colourmenu == nullptr)
-        return;
-
-    cp_item = static_cast<edui_colour_pick_s *>(
-        eduiMenuAddItem(colourmenu, eduiItemColourPickCreate(0, colours, cbColourPickSel, const_cast<char *>(""))));
-    cp_process = cp_item->process;
-    cp_item->process = cbProcessColourPick;
-    cp_info = eduiMenuAddItem(
-        colourmenu, eduiItemSelCreate(1, colours, 0, 0, cbToggleIndicatorMode, const_cast<char *>("R:?? G:?? B:??")));
-    cp_copy = eduiMenuAddItem(colourmenu,
-                              eduiItemSelCreate(1, colours, 0, 0, cbCopy, const_cast<char *>("Copy To Clipboard")));
-    cp_paste = eduiMenuAddItem(
-        colourmenu, eduiItemSelCreate(1, colours, 0, 0, cbPaste, const_cast<char *>("Paste From Clipboard")));
+    if (colourmenu != nullptr) {
+        cp_item = static_cast<edui_colour_pick_s *>(
+            eduiMenuAddItem(colourmenu, eduiItemColourPickCreate(0, colours, cbColourPickSel, const_cast<char *>(""))));
+        cp_process = cp_item->process;
+        cp_item->process = cbProcessColourPick;
+        cp_info = eduiMenuAddItem(colourmenu, eduiItemSelCreate(1, colours, 0, 0, cbToggleIndicatorMode,
+                                                                const_cast<char *>("R:?? G:?? B:??")));
+        cp_copy = eduiMenuAddItem(colourmenu,
+                                  eduiItemSelCreate(1, colours, 0, 0, cbCopy, const_cast<char *>("Copy To Clipboard")));
+        cp_paste = eduiMenuAddItem(
+            colourmenu, eduiItemSelCreate(1, colours, 0, 0, cbPaste, const_cast<char *>("Paste From Clipboard")));
+    }
 }
 
 extern "C" void RndrOSphere(NUVEC *centre, f32 radius, i32 colour, i32 segments, i32) {

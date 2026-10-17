@@ -1183,8 +1183,7 @@ static AIPATHSYS *AISysLoadPaths(AISYS *system, i32 version, NUGSCN *scene, char
             AIPATHSPECIALROUTE *route = &path_system->special_routes[i];
             route->path_count = static_cast<u8>(EdFileReadChar());
             route->paths = static_cast<AIPATH **>(AISysLoadAlloc(system, route->path_count * sizeof(AIPATH *)));
-            auto route_path_count = route->path_count;
-            for (i32 path_index = 0; path_index < route_path_count; ++path_index) {
+            for (i32 path_index = 0; path_index < route->path_count; ++path_index) {
                 const i32 read_path_index = EdFileReadChar();
                 route->paths[path_index] = path_system->paths[read_path_index];
             }
@@ -1194,8 +1193,7 @@ static AIPATHSYS *AISysLoadPaths(AISYS *system, i32 version, NUGSCN *scene, char
 }
 
 static AIAREA *AISysLoadFindArea(AISYS *system, char *name) {
-    auto system_area_count = system->area_count;
-    for (i32 index = 0; index < system_area_count; ++index) {
+    for (i32 index = 0; index < system->area_count; ++index) {
         AIAREA *area = &system->areas[index];
         if (NuStrICmp(name, area->name) == 0) {
             return area;
@@ -1228,8 +1226,7 @@ static void AISysResetPathSearchConnectionChecks(AIPATH *path) {
 }
 
 static AILOCATOR *AISysLoadFindLocator(AISYS *system, char *name) {
-    auto system_locator_count = system->locator_count;
-    for (i32 index = 0; index < system_locator_count; ++index) {
+    for (i32 index = 0; index < system->locator_count; ++index) {
         AILOCATOR *locator = &system->locators[index];
         if (NuStrICmp(name, locator->name) == 0) {
             return locator;
@@ -2041,16 +2038,6 @@ static inline __attribute__((always_inline)) NULISTHDR *creatureEditor_AreaList(
 
 static inline __attribute__((always_inline)) NULISTHDR *creatureEditor_LocatorList() {
     return &aieditor->locators;
-}
-
-static inline __attribute__((always_inline)) NULISTLNK *creatureEditor_ListItem(NULISTHDR *list, i32 index) {
-    if (index < 0)
-        return nullptr;
-    NULISTLNK *entry = NuLinkedListGetHead(list);
-    for (i32 i = 0; entry != nullptr && i < index; ++i) {
-        entry = NuLinkedListGetNext(list, entry);
-    }
-    return entry;
 }
 
 static inline __attribute__((always_inline)) CreatureEditorRecord *creatureEditor_Current() {
@@ -3202,8 +3189,8 @@ static __used__ void pathEditor_cbCnxFlagsToggle(eduimenu_s *, eduiitem_s *item,
     if (path == nullptr) {
         return;
     }
-    EDAIPATHNODE_s *other = path->other_node;
     EDAIPATHNODE_s *node = path->current_node;
+    EDAIPATHNODE_s *other = path->other_node;
     if (other == nullptr || node == nullptr) {
         return;
     }
@@ -3671,19 +3658,28 @@ static __used__ void creatureEditor_cbSetRespawnLocator(eduimenu_s *, eduiitem_s
         creature->locator = nullptr;
         return;
     }
-    NULISTLNK *locator = creatureEditor_ListItem(creatureEditor_LocatorList(), item->data);
-    if (locator != nullptr)
-        creatureEditor_Current()->respawn_locator = locator;
+    i32 index = 0;
+    for (NULISTLNK *locator = NuLinkedListGetHead(creatureEditor_LocatorList()); locator != nullptr;
+         locator = NuLinkedListGetNext(creatureEditor_LocatorList(), locator), ++index) {
+        if (index == item->data) {
+            creatureEditor_Current()->respawn_locator = locator;
+            return;
+        }
+    }
 }
 
 static __used__ void creatureEditor_cbSetAreaActivation(eduimenu_s *, eduiitem_s *item, unsigned int) {
     if (__builtin_expect(item == nullptr || creatureEditor_Current() == nullptr, 0))
         return;
-    NULISTLNK *area = creatureEditor_ListItem(creatureEditor_AreaList(), item->data);
-    if (area != nullptr) {
-        CreatureEditorRecord *creature = creatureEditor_Current();
-        creature->activation_area = area;
-        creature->activation = 1;
+    i32 index = 0;
+    for (NULISTLNK *area = NuLinkedListGetHead(creatureEditor_AreaList()); area != nullptr;
+         area = NuLinkedListGetNext(creatureEditor_AreaList(), area), ++index) {
+        if (index == item->data) {
+            CreatureEditorRecord *creature = creatureEditor_Current();
+            creature->activation_area = area;
+            creature->activation = 1;
+            return;
+        }
     }
 }
 
@@ -3697,13 +3693,13 @@ static __used__ void creatureEditor_cbSetLocator(eduimenu_s *, eduiitem_s *item,
         creature->locator = nullptr;
         return;
     }
-    NULISTHDR *list = creatureEditor_LocatorList();
     i32 index = 0;
-    for (NULISTLNK *locator = NuLinkedListGetHead(list); locator != nullptr;
-         locator = NuLinkedListGetNext(list, locator)) {
-        if (*reinterpret_cast<void **>(reinterpret_cast<u8 *>(locator) + 0x2c) == creatureEditor_Current()->path) {
+    for (NULISTLNK *locator = NuLinkedListGetHead(creatureEditor_LocatorList()); locator != nullptr;
+         locator = NuLinkedListGetNext(creatureEditor_LocatorList(), locator)) {
+        creature = creatureEditor_Current();
+        if (creature->path == *reinterpret_cast<void **>(reinterpret_cast<u8 *>(locator) + 0x2c)) {
             if (index == item->data) {
-                creatureEditor_Current()->locator = locator;
+                creature->locator = locator;
                 return;
             }
             ++index;
@@ -3721,9 +3717,14 @@ static __used__ void creatureEditor_cbSetTriggerArea(eduimenu_s *, eduiitem_s *i
         creature->trigger_area = nullptr;
         return;
     }
-    NULISTLNK *area = creatureEditor_ListItem(creatureEditor_AreaList(), item->data);
-    if (area != nullptr)
-        creatureEditor_Current()->trigger_area = area;
+    i32 index = 0;
+    for (NULISTLNK *area = NuLinkedListGetHead(creatureEditor_AreaList()); area != nullptr;
+         area = NuLinkedListGetNext(creatureEditor_AreaList(), area), ++index) {
+        if (index == item->data) {
+            creatureEditor_Current()->trigger_area = area;
+            return;
+        }
+    }
 }
 
 static __used__ void pathEditor_cbRenameNode(eduimenu_s *, eduiitem_s *item, u32) {
@@ -4061,27 +4062,27 @@ static __used__ void creatureEditor_cb_min_t_respawn(eduimenu_s *, eduiitem_s *i
 }
 
 static __used__ void creatureEditor_cb_max_n_respawns(eduimenu_s *, eduiitem_s *item, unsigned int) {
-    CreatureEditorRecord *creature = creatureEditor_Current();
-    if (creature != nullptr) {
-        edui_slider_s *slider = reinterpret_cast<edui_slider_s *>(item);
-        creature->max_respawns = static_cast<i32>(slider->value);
-        if (static_cast<i8>(creature->max_respawns) < creature->min_respawns) {
+    edui_slider_s *slider = reinterpret_cast<edui_slider_s *>(item);
+    if (creatureEditor_Current() != nullptr) {
+        creatureEditor_Current()->max_respawns = static_cast<i32>(slider->value);
+        CreatureEditorRecord *creature = creatureEditor_Current();
+        if (static_cast<i8>(creature->max_respawns) < static_cast<i8>(creature->min_respawns)) {
             creature->max_respawns = creature->min_respawns;
-            eduiItemSliderSetVal(slider, static_cast<i8>(creature->max_respawns));
         }
     }
+    eduiItemSliderSetVal(slider, static_cast<i8>(creatureEditor_Current()->max_respawns));
 }
 
 static __used__ void creatureEditor_cb_min_n_respawns(eduimenu_s *, eduiitem_s *item, unsigned int) {
-    CreatureEditorRecord *creature = creatureEditor_Current();
-    if (creature != nullptr) {
-        edui_slider_s *slider = reinterpret_cast<edui_slider_s *>(item);
-        creature->min_respawns = static_cast<i32>(slider->value);
-        if (static_cast<i8>(creature->min_respawns) > creature->max_respawns) {
+    edui_slider_s *slider = reinterpret_cast<edui_slider_s *>(item);
+    if (creatureEditor_Current() != nullptr) {
+        creatureEditor_Current()->min_respawns = static_cast<i32>(slider->value);
+        CreatureEditorRecord *creature = creatureEditor_Current();
+        if (static_cast<i8>(creature->min_respawns) > static_cast<i8>(creature->max_respawns)) {
             creature->min_respawns = creature->max_respawns;
-            eduiItemSliderSetVal(slider, static_cast<i8>(creature->min_respawns));
         }
     }
+    eduiItemSliderSetVal(slider, static_cast<i8>(creatureEditor_Current()->min_respawns));
 }
 
 static __used__ void creatureEditor_cbCancelMenu(eduimenu_s *menu, eduimenu_s *) {
@@ -5142,10 +5143,9 @@ static i32 Action_FlatTerrain(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char
                               i32 first_time, f32) {
     if (packet != NULL && packet->owner != NULL && first_time != 0) {
         packet->owner->apiobj.flags_low |= 0x10;
-        auto packet_owner = packet->owner;
         for (i32 i = 0; i < param_count; i++) {
             if (NuStrICmp(params[i], "false") == 0) {
-                packet_owner->apiobj.flags_low &= ~0x10;
+                packet->owner->apiobj.flags_low &= ~0x10;
             }
         }
     }
@@ -5665,17 +5665,16 @@ static __used__ __attribute__((optimize("peel-loops"))) void routeEditor_cbRenam
 }
 
 static __used__ void creatureEditor_cbRenameCreature(eduimenu_s *, eduiitem_s *item, unsigned int) {
-    CreatureEditorRecord *creature = creatureEditor_Current();
     const char *name = reinterpret_cast<edui_textpicker_s *>(item)->value;
-    if (__builtin_expect(creature == nullptr || name[0] == '\0', 0))
+    if (__builtin_expect(creatureEditor_Current() == nullptr || name[0] == '\0', 0))
         return;
-    NULISTHDR *list = &aieditor->creatures;
-    for (NULISTLNK *link = NuLinkedListGetHead(list); link != nullptr; link = NuLinkedListGetNext(list, link)) {
+    for (NULISTLNK *link = NuLinkedListGetHead(&aieditor->creatures); link != nullptr;
+         link = NuLinkedListGetNext(&aieditor->creatures, link)) {
         CreatureEditorRecord *other = reinterpret_cast<CreatureEditorRecord *>(link);
         if (__builtin_expect(NuStrICmp(other->name, name) == 0, 0))
             return;
     }
-    strcpy(creature->name, name);
+    strcpy(creatureEditor_Current()->name, name);
 }
 
 static __used__ void pathEditor_cbRenamePath(eduimenu_s *, eduiitem_s *item, u32) {
@@ -10395,26 +10394,30 @@ void AIPathCnxSetTemporaryBlock(AIPATH_s *path, char *from_name, char *to_name, 
     }
     AIPATHNODE *from = AIPathFindNode(NULL, path, from_name);
     AIPATHNODE *to = AIPathFindNode(NULL, path, to_name);
-    if (to == NULL || from == NULL) {
+    if (from == NULL || to == NULL) {
         return;
     }
     const i32 to_index = to - path->nodes;
+    AIPATHCNX *connection;
+    i32 direction;
     for (i32 index = 0; index < from->connection_count; ++index) {
-        AIPATHCNX *connection = from->connections[index];
-        i32 direction;
+        connection = from->connections[index];
         if (connection->node_indices[0] == to_index) {
             direction = 1;
-        } else if (connection->node_indices[1] == to_index) {
+            goto found;
+        }
+        if (connection->node_indices[1] == to_index) {
             direction = 0;
-        } else {
-            continue;
+            goto found;
         }
-        if (blocked != 0) {
-            connection->traversal_flags[direction] |= 0x80000000u;
-        } else {
-            connection->traversal_flags[direction] &= 0x7fffffffu;
-        }
-        return;
+    }
+    return;
+
+found:
+    if (blocked != 0) {
+        connection->traversal_flags[direction] |= 0x80000000u;
+    } else {
+        connection->traversal_flags[direction] &= 0x7fffffffu;
     }
 }
 
@@ -13181,14 +13184,13 @@ void AIWander(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *object, i32 chec
         u8 node_index = packet->path_info.connection->node_indices[packet->path_info.direction == 0];
         AIPATHNODE *node = &packet->path_info.path->nodes[node_index];
         i32 start = NuRandInt() % node->connection_count;
-        auto node_route_boundary_mask = node->route_boundary_mask;
         for (i32 index = 0; index < node->connection_count; ++index) {
             packet->movement_target = node->connections[(index + start) % node->connection_count];
             AIPATHCNX *target = packet->movement_target;
             if (target != packet->path_info.connection) {
                 if (packet->current_route == 0xff ||
                     ((static_cast<u64>(target->route_mask) >> packet->current_route) & 1) != 0 ||
-                    ((static_cast<u64>(node_route_boundary_mask) >> packet->current_route) & 1) != 0) {
+                    ((static_cast<u64>(node->route_boundary_mask) >> packet->current_route) & 1) != 0) {
                     packet->movement_target_direction = node_index != target->node_indices[0];
                     if (target->traversal_flags[packet->movement_target_direction] == 0) {
                         break;
@@ -13557,8 +13559,7 @@ extern "C" void ResetAIMessageSys(AIMESSAGESYS_s *sys) {
         sys->active_list.head = NULL;
         sys->active_list.tail = NULL;
         memset(sys->messages, 0, sys->count * sizeof(AIMESSAGE_s));
-        auto sys_count = sys->count;
-        for (i32 index = 0; index < sys_count; ++index) {
+        for (i32 index = 0; index < sys->count; ++index) {
             NuLinkedListAppend(free_list, &sys->messages[index].links);
         }
     }
@@ -16575,8 +16576,7 @@ static __used__ void pathEditor_cbSetCurrentPath(eduimenu_s *, eduiitem_s *item,
     if (item != nullptr) {
         EDAIPATH_s *path = (EDAIPATH_s *)NuLinkedListGetHead(&aieditor->paths);
         i32 index = 0;
-        auto item_data = item->data;
-        while (path != nullptr && index != item_data) {
+        while (path != nullptr && index != item->data) {
             path = (EDAIPATH_s *)NuLinkedListGetNext(&aieditor->paths, &path->link);
             ++index;
         }
@@ -17663,11 +17663,13 @@ static __used__ __attribute__((force_align_arg_pointer)) void creatureEditor_cbS
     if (name == nullptr)
         return;
     aieditor_SetCurrentScript(name, nullptr);
-    CreatureEditorRecord *creature = creatureEditor_Current();
-    if (NuStrICmp(aieditorsettings.current_script_name, creature->script_name) != 0) {
-        strcpy(creature->script_name, aieditorsettings.current_script_name);
-        memcpy(creature->script_params, aieditorsettings.current_script_params, sizeof(creature->script_params));
-        creature->flags = (creature->flags & ~0x1e) | aieditorsettings.current_script_flags;
+    if (NuStrICmp(aieditorsettings.current_script_name, creatureEditor_Current()->script_name) != 0) {
+        strcpy(creatureEditor_Current()->script_name, aieditorsettings.current_script_name);
+        for (i32 index = 0; index < 4; ++index) {
+            creatureEditor_Current()->script_params[index] = aieditorsettings.current_script_params[index];
+        }
+        creatureEditor_Current()->flags =
+            (creatureEditor_Current()->flags & ~0x1e) | aieditorsettings.current_script_flags;
     }
 }
 
