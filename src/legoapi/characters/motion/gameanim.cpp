@@ -108,181 +108,25 @@ void GameAnimSet_RemoveFromSystemList(GAMEANIMSET_s *set);
 
 extern "C" {
 
-    void ANI_FixUpAddrs(ani3_animheader_s *anim, isize delta, i32) {
-        if (anim->magic != 0x414e4934) {
-            return;
-        }
-        while (true) {
-            if (anim->constants != NULL) {
-                anim->constants = reinterpret_cast<i16 *>(reinterpret_cast<usize>(anim->constants) + (usize)delta);
-            }
-            if (anim->scale_min != NULL) {
-                anim->scale_min =
-                    reinterpret_cast<ani3_scalemin_s *>(reinterpret_cast<usize>(anim->scale_min) + (usize)delta);
-            }
-            if (anim->keys != NULL) {
-                anim->keys = reinterpret_cast<u8 *>(reinterpret_cast<usize>(anim->keys) + (usize)delta);
-            }
-            if (anim->curve_types != NULL) {
-                anim->curve_types = reinterpret_cast<u16 *>(reinterpret_cast<usize>(anim->curve_types) + (usize)delta);
-            }
-            if (anim->node_flags != NULL) {
-                anim->node_flags = reinterpret_cast<u8 *>(reinterpret_cast<usize>(anim->node_flags) + (usize)delta);
-            }
-            if (anim->field_38 != NULL) {
-                anim->field_38 = reinterpret_cast<void *>(reinterpret_cast<usize>(anim->field_38) + (usize)delta);
-            }
-            u16 next = anim->next_block;
-            if (next == 0) {
-                break;
-            }
-            delta += next;
-            anim = reinterpret_cast<ani3_animheader_s *>(reinterpret_cast<usize>(anim) + next);
-        }
-    }
+void ANI_FixUpAddrs(ani3_animheader_s *anim, isize delta, i32);
 
     // Original @0x2c17d0. The non-quaternion ANI4 player uses a compact
     // four-samples-per-word curve stream. Only groups enabled by the node's
     // translation/rotation/scale flags occupy space in that stream.
 
-    f32 GetInstAnimEndFrame(nugscn_s *scene, nuinstanim_s *instance_animation) {
-        if (instance_animation == NULL) {
-            return 0.0f;
-        }
+f32 GetInstAnimEndFrame(nugscn_s *scene, nuinstanim_s *instance_animation);
 
-        void *animation = scene->instance_animation_data[instance_animation->anim_ix];
-        if (animation != NULL) {
-            return NuAnimEndFrameOld(animation);
-        }
-        if ((instance_animation->end_frame_lookup_bits & NUINSTANIM_END_FRAME_LOOKUP_MASK) == 0 ||
-            scene->animation_end_frames == NULL) {
-            return 0.0f;
-        }
+extern NUJOINTPROCANIMFN JointProcAnimFn;
 
-        return static_cast<f32>(scene->animation_end_frames[instance_animation->end_frame_lookup_index - 1].end_frame);
-    }
+void SetProceduralAnimationFn(void *function);
 
-    NUJOINTPROCANIMFN JointProcAnimFn;
+i32 StateAnimEvaluate(StateAnim *state, u8 *index, u8 *value, f32 frame);
 
-    void SetProceduralAnimationFn(void *function) {
-        JointProcAnimFn = reinterpret_cast<NUJOINTPROCANIMFN>(function);
-    }
+i32 StateAnimEvaluate2(StateAnim *state, u8 *index, char *value, f32 frame);
 
-    i32 StateAnimEvaluate(StateAnim *state, u8 *index, u8 *value, f32 frame) {
-        u8 next = *index;
-        if (next < state->count) {
-            i32 changed = 0;
-            do {
-                if (!(frame >= state->times[next])) {
-                    if (changed) {
-                        return 1;
-                    }
-                    break;
-                }
-                changed = 1;
-                *value = state->values[next];
-                next = static_cast<u8>(*index + 1);
-                *index = next;
-            } while (next < state->count);
-            if (next >= state->count) {
-                return 1;
-            }
-        }
+void NuSpecialSetInstAnimTime(nuhspecial_s *special, f32 frame);
 
-        i32 changed = 0;
-        if (next == 0) {
-            return 0;
-        }
-        do {
-            if (!(state->times[next - 1] > frame)) {
-                return changed;
-            }
-            next--;
-            *index = next;
-            *value = next == 0 ? state->values[0] : state->values[next - 1];
-            changed = 1;
-            next = *index;
-        } while (next != 0);
-        return 1;
-    }
-
-    i32 StateAnimEvaluate2(StateAnim *state, u8 *index, char *value, f32 frame) {
-        i32 current = *index;
-        i32 count = state->count;
-        if (current >= count) {
-            current = count - 1;
-        }
-        if (current < 0) {
-            current = 0;
-        }
-        char old_value = state->values[current];
-        if (!(frame >= state->times[current])) {
-            if (current != 0) {
-                i32 previous = current - 1;
-                current = previous;
-                while (!(frame >= state->times[previous])) {
-                    if (previous == 0) {
-                        break;
-                    }
-                    --previous;
-                    current = previous;
-                }
-            }
-        } else {
-            while (true) {
-                if (current >= count - 1) {
-                    break;
-                }
-                const i32 next = current + 1;
-                if (state->times[next] > frame) {
-                    break;
-                }
-                current = next;
-            }
-        }
-        char new_value = state->values[current];
-        *value = new_value;
-        *index = static_cast<u8>(current);
-        return old_value != new_value;
-    }
-
-    void NuSpecialSetInstAnimTime(nuhspecial_s *special, f32 frame) {
-        NUGSCN *scene = special->scene;
-        if (scene == NULL) {
-            return;
-        }
-        nuinstanim_s *animation = NuSpecialGetInstAnim(special);
-        if (animation != NULL) {
-            animation->ltime = frame;
-            if (!((animation->end_frame_lookup_bits & NUINSTANIM_END_FRAME_LOOKUP_MASK) != 0 &&
-                  scene->animation_end_frames != NULL)) {
-                return;
-            }
-            StateAnim *state =
-                reinterpret_cast<StateAnim *>(&scene->animation_end_frames[animation->end_frame_lookup_index - 1]);
-            char value;
-            u8 index = static_cast<u8>(static_cast<u32>(animation->flags) >> NUINSTANIM_STATE_INDEX_SHIFT);
-            StateAnimEvaluate2(state, &index, &value, frame);
-            animation->flags =
-                static_cast<NUINSTANIM_FLAGS>((static_cast<u32>(animation->flags) & ~NUINSTANIM_STATE_INDEX_MASK) |
-                                              (static_cast<u32>(index) << NUINSTANIM_STATE_INDEX_SHIFT));
-        }
-    }
-
-    StateAnim *StateAnimFixPtrs(StateAnim *state, isize delta) {
-        if (state == NULL) {
-            return NULL;
-        }
-        state = reinterpret_cast<StateAnim *>(reinterpret_cast<usize>(state) + delta);
-        if (state == NULL) {
-            return NULL;
-        }
-        state->times =
-            state->times != NULL ? reinterpret_cast<f32 *>(reinterpret_cast<usize>(state->times) + delta) : NULL;
-        state->values =
-            state->values != NULL ? reinterpret_cast<u8 *>(reinterpret_cast<usize>(state->values) + delta) : NULL;
-        return state;
-    }
+StateAnim *StateAnimFixPtrs(StateAnim *state, isize delta);
 
 } // extern "C"
 

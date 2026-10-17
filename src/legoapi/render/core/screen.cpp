@@ -37,26 +37,7 @@
 #include <stdio.h>
 #include <string.h>
 
-void ClearScreen() {
-    ++NuPrimCSPos;
-    NuPrimSetCoordinateSystem(NUPRIM_SCALEMODE_NORMALISED);
-    NuPrim2DBegin(1, 7, NULL);
-    NuRndrPrimSetColour(0x80000000);
-    NuRndrPrimUV(0.0f, 0.0f);
-    NuPrim2DAddXYZ(-1.0f, -1.0f, 0.0f);
-    NuRndrPrimSetColour(0x80000000);
-    NuRndrPrimUV(1.0f, 0.0f);
-    NuPrim2DAddXYZ(1.0f, -1.0f, 0.0f);
-    NuRndrPrimSetColour(0x80000000);
-    NuRndrPrimUV(0.0f, 1.0f);
-    NuPrim2DAddXYZ(-1.0f, 1.0f, 0.0f);
-    NuRndrPrimSetColour(0x80000000);
-    NuRndrPrimUV(1.0f, 1.0f);
-    NuPrim2DAddXYZ(1.0f, 1.0f, 0.0f);
-    NuPrim2DEnd();
-    --NuPrimCSPos;
-    NuPrimSetCoordinateSystem(NuPrimCoordSystemStack[NuPrimCSPos]);
-}
+void ClearScreen();
 
 f32 GetAspectRatio();
 

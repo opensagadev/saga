@@ -35,9 +35,7 @@ i32 objhitobj_noattackerrumble;
 i32 objhitobj_throwkillpartsup;
 f32 SHIELDFLICKERTIME = 0.1f;
 
-i32 CheckCol(nutex_s *, i32, i32, i32, i32) {
-    return true;
-}
+i32 CheckCol(nutex_s *, i32, i32, i32, i32);
 
 // ==== src/legoapi/characters/core/playeritems.cpp: declarations ====
 #include "legoapi/characters/motion.h"

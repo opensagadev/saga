@@ -407,9 +407,7 @@ void MenuRepeat(i32 *held, i32 *repeat, f32 *repeat_time, u8 *repeat_count, f32 
 
 void MenuReset(void);
 
-    void RemapAddr(void *new_base, void *old_base, void **address) {
-        *address = static_cast<u8 *>(new_base) + (static_cast<u8 *>(*address) - static_cast<u8 *>(old_base));
-    }
+void RemapAddr(void *new_base, void *old_base, void **address);
 
 void SetButtonScaleMode(i32 mode);
 

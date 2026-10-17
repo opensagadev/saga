@@ -203,121 +203,32 @@ void DebrisProcessSpheres(uv1deb *data, float time, debinftype *effect, debkeyda
 // Transcribed from the original C-linkage symbols:
 //   NuHtmlBegin    0x2d5ca0   NuHtmlFlush   0x2d5c30
 //   NuHtmlWrite    0x2d5cd0   NuHtmlHeading1 0x2d5d40
-static char buffer[0x1000]; // flush threshold leaves room for formatted output
-static char *txt;           // original @0xb9d720-rel
-static char *flush;         // original @0xb9d730-rel
 extern "C" {
-    NUFILE hfh;
-    char unknown[8] = "unknown";
+extern NUFILE hfh;
+extern char unknown[8];
 }
 
-void NuHtmlFlush(i32 force) {
-    if ((txt > flush) | force) {
-        NuFileWriteString(hfh, buffer);
-        txt = buffer;
-        flush = buffer + 0xc00;
-    }
-}
+void NuHtmlFlush(i32 force);
 
-extern "C" void NuHtmlBegin(void *file) {
-    hfh = static_cast<NUFILE>(reinterpret_cast<usize>(file));
-    txt = buffer;
-    flush = buffer + 0xc00;
-}
+extern "C" void NuHtmlBegin(void *file);
 
-extern "C" void NuHtmlWrite(const char *text, ...) {
-    if (text == NULL || text[0] == '\0') {
-        text = unknown;
-    }
-    va_list ap;
-    va_start(ap, text);
-    vsprintf(txt, text, ap);
-    va_end(ap);
-    txt += NuStrLen(txt);
-    NuHtmlFlush(0);
-}
+extern "C" void NuHtmlWrite(const char *text, ...);
 
-extern "C" void NuHtmlHeading1(const char *fmt, ...) {
-    if (fmt == NULL || fmt[0] == '\0') {
-        fmt = unknown;
-    }
-    NuHtmlWrite("<table width=100%c bgcolor=#CFCFE5><tr><td><font face=arial size=+3> ", '%');
-    va_list ap;
-    va_start(ap, fmt);
-    vsprintf(txt, fmt, ap);
-    va_end(ap);
-    txt += NuStrLen(txt);
-    NuHtmlWrite("</font></table>\n");
-}
+extern "C" void NuHtmlHeading1(const char *fmt, ...);
 
-extern "C" void NuHtmlBanner(void) {
-    NuHtmlWrite("<table   width=100%c height=20 bgcolor=#FF0000><tr><td><font face=arial size=+2></font></table>", '%');
-}
+extern "C" void NuHtmlBanner(void);
 
-extern "C" void NuHtmlHeading2(const char *fmt, ...) {
-    if (fmt == NULL || fmt[0] == '\0') {
-        fmt = unknown;
-    }
-    NuHtmlWrite("<table width=100%c bgcolor=#DFDFE5><tr><td><font face=arial size=+2> ", '%');
-    va_list ap;
-    va_start(ap, fmt);
-    vsprintf(txt, fmt, ap);
-    va_end(ap);
-    txt += NuStrLen(txt);
-    NuHtmlWrite("</font></table>\n");
-}
+extern "C" void NuHtmlHeading2(const char *fmt, ...);
 
-extern "C" void NuHtmlHeading3(const char *fmt, ...) {
-    if (fmt == NULL || fmt[0] == '\0') {
-        fmt = unknown;
-    }
-    NuHtmlWrite("<table width=100%c bgcolor=#FFDFE5><tr><td><font face=arial size=+0> ", '%');
-    va_list ap;
-    va_start(ap, fmt);
-    vsprintf(txt, fmt, ap);
-    va_end(ap);
-    txt += NuStrLen(txt);
-    NuHtmlWrite("</font></table>\n");
-}
+extern "C" void NuHtmlHeading3(const char *fmt, ...);
 
-extern "C" void NuHtmlEnd(void) {
-    NuHtmlFlush(1);
-    hfh = 0;
-}
+extern "C" void NuHtmlEnd(void);
 
-void NuHtmlTitle(char *title) {
-    NuHtmlWrite("<HR><Center><B>");
-    NuHtmlWrite(title);
-    NuHtmlWrite("</B></Center><HR>");
-    NuHtmlWrite("<P><P>");
-}
+void NuHtmlTitle(char *title);
 
-extern "C" void NuHtmlBitmap(char *filename, i32 width, i32 height, char *caption, char *source) {
-    char tag[256];
-    NuHtmlWrite("<P>");
-    if (height != 0 && width != 0) {
-        sprintf(tag, "<IMG ALIGN=\"left\" HEIGHT=\"%d\" WIDTH=\"%d\" SRC=\"%s\">", height, width, filename);
-    } else {
-        sprintf(tag, "<IMG ALIGN=\"left\" SRC=\"%s\">", filename);
-    }
-    NuHtmlWrite(tag);
-    if (caption != NULL) {
-        NuHtmlWrite(caption);
-    }
-    NuHtmlWrite("<BR CLEAR=\"all\"> <P>&nbsp;<P>");
-    if (!(source != NULL && NuStrCmp(filename, source) != 0)) {
-        return;
-    }
-    NuFileCopy(filename, source);
-}
+extern "C" void NuHtmlBitmap(char *filename, i32 width, i32 height, char *caption, char *source);
 
-void NuHtmlGraphArray(char **strings) {
-    char *text = *strings++;
-    while (text != NULL) {
-        NuHtmlWrite(text);
-        text = *strings++;
-    }
-}
+void NuHtmlGraphArray(char **strings);
 
 extern "C" {
     extern debinftype **debtab;
@@ -331,72 +242,9 @@ extern "C" {
 
 extern "C" void DebReAlloc(debkeydatatype_s *, i32);
 
-VARIPTR *DisplayListRenderBuffer() {
-    return &rndrstream_free;
-}
+VARIPTR *DisplayListRenderBuffer();
 
-void xxxNuDisplayListUpdateSpecial(nuhspecial_s *special) {
-    NUDLDLISTSCENE *scene = special->scene->display_list;
-    NUDISPLAYSPECIAL *display = special->display_special;
-    NUMTX_ALIGNED16 matrix = *NuSpecialGetDrawMtx(special);
-    NUVEC corners[8] = {
-        {display->bounds_min.x, display->bounds_min.y, display->bounds_min.z},
-        {display->bounds_max.x, display->bounds_max.y, display->bounds_max.z},
-        {display->bounds_min.x, display->bounds_min.y, display->bounds_max.z},
-        {display->bounds_max.x, display->bounds_max.y, display->bounds_min.z},
-        {display->bounds_min.x, display->bounds_max.y, display->bounds_min.z},
-        {display->bounds_min.x, display->bounds_max.y, display->bounds_max.z},
-        {display->bounds_max.x, display->bounds_min.y, display->bounds_min.z},
-        {display->bounds_max.x, display->bounds_min.y, display->bounds_max.z},
-    };
-    NuVecMtxTransform(&corners[0], &corners[0], &matrix);
-    NuVecMtxTransform(&corners[1], &corners[1], &matrix);
-    NuVecMtxTransform(&corners[2], &corners[2], &matrix);
-    NuVecMtxTransform(&corners[3], &corners[3], &matrix);
-    NuVecMtxTransform(&corners[4], &corners[4], &matrix);
-    NuVecMtxTransform(&corners[5], &corners[5], &matrix);
-    NuVecMtxTransform(&corners[6], &corners[6], &matrix);
-    NuVecMtxTransform(&corners[7], &corners[7], &matrix);
-
-    NUVEC minimum;
-    NUVEC maximum;
-    NuVecMin(&minimum, &corners[0], &corners[1]);
-    NuVecMin(&minimum, &minimum, &corners[2]);
-    NuVecMin(&minimum, &minimum, &corners[3]);
-    NuVecMin(&minimum, &minimum, &corners[4]);
-    NuVecMin(&minimum, &minimum, &corners[5]);
-    NuVecMin(&minimum, &minimum, &corners[6]);
-    NuVecMin(&minimum, &minimum, &corners[7]);
-    NuVecMax(&maximum, &corners[0], &corners[1]);
-    NuVecMax(&maximum, &maximum, &corners[2]);
-    NuVecMax(&maximum, &maximum, &corners[3]);
-    NuVecMax(&maximum, &maximum, &corners[4]);
-    NuVecMax(&maximum, &maximum, &corners[5]);
-    NuVecMax(&maximum, &maximum, &corners[6]);
-    NuVecMax(&maximum, &maximum, &corners[7]);
-
-    if ((scene->render_buffer & NUDL_SCENE_RENDER_FLAG_CENTER_EXTENT_BOUNDS) != 0) {
-        NUVEC extent;
-        extent.y = (maximum.y - minimum.y) * 0.5f;
-        extent.x = (maximum.x - minimum.x) * 0.5f;
-        extent.z = (maximum.z - minimum.z) * 0.5f;
-        const f32 radius = NuFsqrt(extent.x + extent.y + extent.z);
-        NUCLIPBOUNDS *bounds = &scene->clip_bounds[display->instance_ix];
-        bounds->center.x = (maximum.x + minimum.x) * 0.5f;
-        bounds->center.y = (maximum.y + minimum.y) * 0.5f;
-        bounds->center.z = (maximum.z + minimum.z) * 0.5f;
-        bounds->center_w = radius;
-        bounds->extent = extent;
-    } else {
-        NUCLIPBOUNDS *bounds = &scene->clip_bounds[display->instance_ix];
-        bounds->center = minimum;
-        bounds->extent = maximum;
-        // Retail copies uninitialized local W components in min/max mode.
-        // They are not clipping coordinates; retain the destination padding,
-        // as the active NuDisplayListUpdateSpecial implementation does.
-    }
-    DisplayListUpdateSpecialTransformPS(special, &matrix);
-}
+void xxxNuDisplayListUpdateSpecial(nuhspecial_s *special);
 
 extern "C" {
     extern debinftype **debtab;

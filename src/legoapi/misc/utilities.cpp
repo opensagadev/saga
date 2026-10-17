@@ -205,65 +205,13 @@ i64 XToI64(char *input) {
 
 i32 RotDiff(u16 current, u16 target);
 
-static const i32 cubeEdgeIndices[12][2] = {
-    {0, 1}, {1, 2}, {2, 3}, {3, 0}, {4, 5}, {5, 6}, {6, 7}, {7, 4}, {0, 4}, {1, 5}, {2, 6}, {3, 7},
-};
 
 // Retail copies a fully inside end point as one unaligned vector.
 typedef f32 RawClipVec4 __attribute__((vector_size(16), aligned(4)));
 
-i32 rawClip(VuVec const *input, VuVec *output, i32, VuVec const &plane) {
-    i32 count = 0;
-    for (i32 edge = 0; edge < 12; ++edge) {
-        VuVec const &a = input[cubeEdgeIndices[edge][0]];
-        VuVec const &b = input[cubeEdgeIndices[edge][1]];
-        f32 da = plane.x * a.x + plane.y * a.y + plane.z * a.z + plane.w;
-        f32 db = plane.x * b.x + plane.y * b.y + plane.z * b.z + plane.w;
-        if (da > 0.0f) {
-            output[count].x = a.x;
-            output[count].y = a.y;
-            output[count].z = a.z;
-            output[count].w = a.w;
-            if (db > 0.0f) {
-                *reinterpret_cast<RawClipVec4 *>(&output[count + 1]) = *reinterpret_cast<const RawClipVec4 *>(&b);
-                count += 2;
-            } else {
-                count += 2;
-                f32 t = da / (da - db);
-                output[count - 1].w = 0.0f;
-                output[count - 1].y = a.y + (b.y - a.y) * t;
-                output[count - 1].z = a.z + (b.z - a.z) * t;
-                output[count - 1].x = a.x + (b.x - a.x) * t;
-            }
-        } else if (db > 0.0f) {
-            output[count].x = b.x;
-            output[count].y = b.y;
-            output[count].z = b.z;
-            output[count].w = b.w;
-            count += 2;
-            f32 t = -da / (db - da);
-            output[count - 1].w = 0.0f;
-            output[count - 1].y = a.y + (b.y - a.y) * t;
-            output[count - 1].z = a.z + (b.z - a.z) * t;
-            output[count - 1].x = a.x + (b.x - a.x) * t;
-        }
-    }
-    return count;
-}
+i32 rawClip(VuVec const *input, VuVec *output, i32, VuVec const &plane);
 
-i32 findrange(nugscn_s *scene, i32 first_joint) {
-    // This helper's original C++ ABI names nugscn_s, but animation callers
-    // pass the hierarchy object whose joint table starts at the same offsets.
-    nuhgobj_s *object = reinterpret_cast<nuhgobj_s *>(scene);
-    const i32 joint_count = object->joint_count;
-    nuhgobjjoint_s *joints = object->joints;
-    const i32 parent_index = joints[first_joint].parent_index;
-    i32 end_joint = first_joint + 1;
-    while (end_joint < joint_count && joints[end_joint].parent_index != parent_index) {
-        ++end_joint;
-    }
-    return end_joint - 1;
-}
+i32 findrange(nugscn_s *scene, i32 first_joint);
 
 static __used__ int icomp(const void *left, const void *right);
 

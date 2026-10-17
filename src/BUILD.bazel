@@ -43,11 +43,6 @@ _ENGINE_ROOT_SRCS = [
 _ENGINE_SRCS = _ENGINE_ROOT_SRCS + glob(
     [directory + "/**/*.c" for directory in _ENGINE_DIRS] +
     [directory + "/**/*.cpp" for directory in _ENGINE_DIRS],
-    exclude = [
-        "nu2api/nu3d/android/nupostfilter.cpp",
-        "nu2api/nu3d/nudynamiclight.cpp",
-        "nu2api/nu3d/nupostfilter_generic.cpp",
-    ],
     allow_empty = True,
 )
 
@@ -118,9 +113,6 @@ _PUBLIC_HEADERS = glob(
 )
 
 _TEXTUAL_HEADERS = [
-    "nu2api/nu3d/nudynamiclight.cpp",
-    "nu2api/nu3d/nupostfilter_generic.cpp",
-    "nu2api/nu3d/android/nupostfilter.cpp",
     "legoapi/items/collect/bolttypes_lsw.inc",
     "legoapi/menus/core/lsw_text_data.inc",
     "nu2api/nu3d/android/nuios_shader_sources.inc",

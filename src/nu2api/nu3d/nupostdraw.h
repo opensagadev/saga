@@ -29,7 +29,7 @@ static void PostDrawQuad(bool grid = false) {
 }
 
 // Original generic blur inlines these immediate GL operations.
-extern void (*g_glConstantSetterTable[4])(u32, i32, const void *);
+extern "C" void (*g_glConstantSetterTable[4])(u32, i32, const void *);
 
 struct PostBlurVertexAttribute {
     u32 type, size, normalized, reserved, offset, stride;

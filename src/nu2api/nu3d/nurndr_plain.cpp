@@ -55,20 +55,19 @@
 // Scene state — mirrors original BSS layout
 // ---------------------------------------------------------------------------
 
-static constexpr i32 kSceneRingCapacity = 16;
 
 extern "C" {
-    i32 PS2_REZ_W = 1280;
-    i32 PS2_REZ_H = 720;
+extern i32 PS2_REZ_W;
+extern i32 PS2_REZ_H;
     // Scene currently being built.  Size is 0x218 bytes; original lives in BSS
     // and is referenced as a plain object by all render/present code.
-    struct nurenderscene_s currentScene = {0};
+extern struct nurenderscene_s currentScene;
 
     // Deferred ring: NuRndrEndScene copies the completed scene here; the render
     // thread drains it.  Stride is 0x218, 16 slots (0x2180 bytes total) in the
     // original.
-    i32 sceneParametersCount = 0;
-    struct nurenderscene_s sceneParameters[kSceneRingCapacity] = {0};
+extern i32 sceneParametersCount;
+extern struct nurenderscene_s sceneParameters[16];
 
 } // extern "C"
 
@@ -102,80 +101,17 @@ extern "C" {
 // Scene lifecycle
 // ---------------------------------------------------------------------------
 
-extern "C" i32 NuRndrBeginScene(i32 /*begin_flags*/) {
-    // Clear the in-flight scene to a known baseline.  Field names below
-    // still use the original unknown_* tags because the 0x218-byte layout
-    // has not been fully recovered; values match the PS2 initial defaults.
-    currentScene.unknown_4c = 0;
-    currentScene.render_scene_id = 0xffffffff;
-    currentScene.clear_flags = 0;
-    currentScene.state_ptr = nullptr;
-    currentScene.z_pre_pass = 0;
-    currentScene.unknown_28 = 0;
-    currentScene.unknown_58 = 0;
-    currentScene.unknown_38 = 0;
-    currentScene.unknown_3c = 0;
-    currentScene.unknown_40 = 0xffffffff;
-    currentScene.unknown_48 = 0;
-    currentScene.unknown_ac = 0;
-    currentScene.texture_blend_enabled = 0;
-    currentScene.unknown_e4 = 0;
-    currentScene.unknown_e0 = 0;
-    currentScene.unknown_178 = 0;
-    currentScene.unknown_174 = 0;
-    currentScene.unknown_188 = 0;
-    currentScene.unknown_214 = 0;
-    return 1;
-}
+extern "C" i32 NuRndrBeginScene(i32 /*begin_flags*/);
 
-extern "C" i32 NuRndrBeginSceneEx(i32 begin_flags, i32, i32) {
-    return NuRndrBeginScene(begin_flags);
-}
+extern "C" i32 NuRndrBeginSceneEx(i32 begin_flags, i32, i32);
 
-void NuMarkSceneAsZPrePass() {
-    currentScene.z_pre_pass = 1;
-}
+void NuMarkSceneAsZPrePass();
 
-extern "C" void NuRndrClear(i32 clear_flags, i32 bg_colour, f32 alpha) {
-    auto *scene = &currentScene;
+extern "C" void NuRndrClear(i32 clear_flags, i32 bg_colour, f32 alpha);
 
-    if (NuIOS_IsLowEndDevice() && g_BackgroundUsedFogColour) {
-        bg_colour = g_BackgroundColour;
-    }
+extern "C" void NuRndrEndScene(void);
 
-    scene->clear_alpha = alpha;
-    scene->clear_flags |= clear_flags;
-    scene->bg_colour = bg_colour;
-    NuVpGetPosition2(&scene->vp_x, &scene->vp_y);
-    NuVpGetSize2(&scene->vp_w, &scene->vp_h);
-}
-
-extern "C" void NuRndrEndScene(void) {
-    auto *scn = &currentScene;
-
-    scn->render_scene_id = NuDisplayListAddRenderScene();
-    i32 has_dynamic_light = scn->unknown_38;
-
-    // If a dynamic light was attached to this scene, hand it to the light
-    // manager now that the render-scene id is known.
-    if (has_dynamic_light != 0 && scn->render_scene_id != -1) {
-        if (NuDynamicLightIsEnabled(scn->unknown_3c)) {
-            NuDynamicLightAddRenderScene(static_cast<NuDynamicLight *>(scn->unknown_3c), scn->unknown_40,
-                                         scn->render_scene_id);
-        } else {
-            scn->unknown_38 = 0;
-        }
-        scn->render_scene_id = -1;
-    }
-
-    // Queue this scene for the render thread. processRenderScenes drains the
-    // array and resets the count at the end of the frame.
-    sceneParameters[sceneParametersCount++] = *scn;
-}
-
-extern "C" void NuRndrEndSceneEx(i32) {
-    NuRndrEndScene();
-}
+extern "C" void NuRndrEndSceneEx(i32);
 
 // ---------------------------------------------------------------------------
 // Link stubs — retained for compatibility, not yet implemented
@@ -188,88 +124,18 @@ extern "C" void NuRndrEndSceneEx(i32) {
 // Scene / GScn
 using NUGSCNVIDEOMEMFN = void (*)(NUGSCN *);
 
-NUGSCNVIDEOMEMFN gscene_to_video_mem;
-NUGSCNVIDEOMEMFN video_mem_to_gscene;
+extern NUGSCNVIDEOMEMFN gscene_to_video_mem;
+extern NUGSCNVIDEOMEMFN video_mem_to_gscene;
 
-extern "C" void NuGScnFromVideoMem(NUGSCNVIDEOMEMFN callback) {
-    video_mem_to_gscene = callback;
-}
+extern "C" void NuGScnFromVideoMem(NUGSCNVIDEOMEMFN callback);
 class NuDynamicLight;
 extern "C" {
     void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
-    static void DisplaySceneSetClipResult(NUDLDLISTSCENE *scene, i32 clip_index, i32 clip_result) {
-        for (i32 i = 0; i < scene->clip_objects[clip_index].nmaterials; ++i) {
-            const u32 material = scene->clip_objects[clip_index].material_ids[i];
-            scene->mtl_used[NuDisplaySceneCurrentBuffer(scene)][material >> 3] |= static_cast<u8>(1U << (material & 7));
-        }
-        scene->clip_used[NuDisplaySceneCurrentBuffer(scene)][clip_index >> 2] |=
-            static_cast<u8>(clip_result << ((clip_index & 3) * 2));
-    }
 
-    static f32 DisplaySceneDistanceSqrToCamera(const NUCLIPBOUNDS &bounds) {
-        const f32 x = global_camera.mtx.m30 - bounds.center.x;
-        const f32 y = global_camera.mtx.m31 - bounds.center.y;
-        const f32 z = global_camera.mtx.m32 - bounds.center.z;
-        return x * x + y * y + z * z;
-    }
 
-    // A scene has one bound/visibility record per instance, but one or more
-    // clip-object records per instance.  lod_ranges terminates every instance
-    // group with zero; preceding values select progressively nearer LODs.
-    static i32 DisplaySceneSelectLod(const NUDLDLISTSCENE *scene, i32 first_clip, f32 distance_sqr) {
-        i32 selected_clip = first_clip;
-        if (scene->lod_ranges[selected_clip] != 0.0f && distance_sqr < scene->lod_ranges[selected_clip]) {
-            do {
-                ++selected_clip;
-            } while (distance_sqr < scene->lod_ranges[selected_clip]);
-        }
-        return selected_clip;
-    }
 
-    static i32 DisplaySceneNextInstance(const NUDLDLISTSCENE *scene, i32 clip_index) {
-        while (scene->lod_ranges[clip_index] != 0.0f) {
-            ++clip_index;
-        }
-        return clip_index + 1;
-    }
 
-    static f32 DisplaySceneFarClip(const NUDLDLISTSCENE *scene, i32 instance_index, i32 clip_index) {
-        f32 far_clip = scene->far_clip_ranges[clip_index];
-        if (scene->fade_ranges == NULL ||
-            (scene->visibility_flags[instance_index] & NUDL_INSTANCE_FLAG_DISTANCE_FADE) == 0) {
-            return far_clip;
-        }
 
-        const f32 fade_start = scene->fade_ranges[instance_index * 2];
-        const f32 fade_end = scene->fade_ranges[instance_index * 2 + 1];
-        if (fade_end > fade_start) {
-            return fade_end;
-        }
-        return far_clip;
-    }
-
-    static f32 DisplaySceneDistanceFade(const NUDLDLISTSCENE *scene, i32 instance_index, f32 distance_sqr) {
-        if (scene->fade_ranges == NULL ||
-            (scene->visibility_flags[instance_index] & NUDL_INSTANCE_FLAG_DISTANCE_FADE) == 0) {
-            return 1.0f;
-        }
-
-        const f32 fade_start = scene->fade_ranges[instance_index * 2];
-        const f32 fade_end = scene->fade_ranges[instance_index * 2 + 1];
-        if (fade_end <= fade_start) {
-            if (fade_end * fade_end < distance_sqr) {
-                const f32 alpha = (NuFsqrt(distance_sqr) - fade_end) / (fade_start - fade_end);
-                return alpha < 1.0f ? alpha : 1.0f;
-            }
-            return 0.0f;
-        }
-
-        if (fade_start * fade_start < distance_sqr) {
-            const f32 alpha = (fade_end - NuFsqrt(distance_sqr)) / (fade_end - fade_start);
-            return alpha > 0.0f ? alpha : 0.0f;
-        }
-        return 1.0f;
-    }
 
     extern nurenderscene_s currentScene;
     i32 NuDynamicLightTestShadowExtrusionExtent(NuDynamicLight *light, const NUVEC *center, const NUVEC *extent,
@@ -285,407 +151,63 @@ extern "C" {
     static NUDISPLAYSCENERNDR_BODY_ATTR void NuDisplaySceneRndrBody(NUDLDLISTSCENE *scene)
         __asm__("NuDisplaySceneRndr.part.101");
 
-    void NuDisplaySceneRndr(void *display_scene) {
-        NUDLDLISTSCENE *scene = static_cast<NUDLDLISTSCENE *>(display_scene);
-        if ((scene->flags & NUDL_SCENE_FLAG_CLIPPING) != 0)
-            return;
-        NuDisplaySceneRndrBody(scene);
-    }
+void NuDisplaySceneRndr(void *display_scene);
 
-    static void NuDisplaySceneRndrBody(NUDLDLISTSCENE *scene) {
-
-        u8 visibility_context[0x2800];
-        RndrStateCopyGlobalState(scene->local_state);
-        NuVisibilityResult *visibility =
-            static_cast<NuVisibilityResult *>(NuVisiEvaluate(scene->gscene, visibility_context));
-        if (visibility == NULL || (visibility->state & 1) == 0) {
-            if (currentScene.unknown_3c != NULL) {
-                i32 instance = 0;
-                for (i32 clip = 0; clip < scene->nclip_objects; ++instance) {
-                    if ((scene->visibility_flags[instance] & NUDL_INSTANCE_FLAG_CASTS_SHADOW) != 0) {
-                        NUCLIPBOUNDS &bounds = scene->clip_bounds[instance];
-                        if (scene->lod_ranges[clip] != 0.0f)
-                            clip = DisplaySceneSelectLod(scene, clip, DisplaySceneDistanceSqrToCamera(bounds));
-                        const i32 result = NuDynamicLightTestShadowExtrusionExtent(
-                            static_cast<NuDynamicLight *>(currentScene.unknown_3c), &bounds.center, &bounds.extent,
-                            currentScene.unknown_40);
-                        if (result != 0)
-                            DisplaySceneSetClipResult(scene, clip, result);
-                    }
-                    clip = DisplaySceneNextInstance(scene, clip);
-                }
-            } else {
-                scene->alpha_values = NULL;
-                if (scene->fade_ranges != NULL) {
-                    VARIPTR *buffer = NuDisplayListGetBuffer();
-                    scene->alpha_values = buffer->f32_ptr;
-                    buffer->addr += static_cast<usize>(scene->nclip_objects) * sizeof(f32);
-                }
-                i32 instance = 0;
-                for (i32 clip = 0; clip < scene->nclip_objects; ++instance) {
-                    const u8 flags = scene->visibility_flags[instance];
-                    bool visible = visibility == NULL || visibility->instance_tree_bits == NULL ||
-                                   (visibility->instance_tree_bits[instance >> 3] & (1U << (instance & 7))) != 0;
-                    if (visibility != NULL && visibility->portal_marker != NULL && portals_enabled != 0) {
-                        visible = (flags & NUDL_INSTANCE_FLAG_NO_VISIBILITY_TEST) != 0 ||
-                                  (visibility->portal_bits[instance >> 3] & (1U << (instance & 7))) != 0;
-                    }
-                    if (visible && (flags & NUDL_INSTANCE_FLAG_VISIBLE) != 0) {
-                        NUCLIPBOUNDS &bounds = scene->clip_bounds[instance];
-                        const f32 distance_sqr = DisplaySceneDistanceSqrToCamera(bounds);
-                        clip = DisplaySceneSelectLod(scene, clip, distance_sqr);
-                        const f32 far_clip = DisplaySceneFarClip(scene, instance, clip);
-                        const i32 result = NuCameraClipTestExtentsAxisAligned(&bounds.center, &bounds.extent, far_clip);
-                        if (result != 0) {
-                            if (scene->alpha_values != NULL)
-                                scene->alpha_values[clip] = DisplaySceneDistanceFade(scene, instance, distance_sqr);
-                            DisplaySceneSetClipResult(scene, clip, result);
-                        }
-                    }
-                    clip = DisplaySceneNextInstance(scene, clip);
-                }
-            }
-        }
-        if (scene->nclip_objects != 0)
-            scene->flags |= NUDL_SCENE_FLAG_CLIPPING;
-        DisplayListGenerateTransforms(scene);
-
-        NUGSCN temporary_scene;
-        NUGSCN *gscene = scene->gscene;
-        if (gscene == NULL) {
-            temporary_scene.display_list = scene;
-            gscene = &temporary_scene;
-        }
-        const bool portal_filter = visibility != NULL && portal_special_objects != 0 &&
-                                   visibility->portal_marker != NULL && portals_enabled != 0;
-        if ((scene->instance_visibility_enabled & NUDL_SCENE_INSTANCE_VISIBILITY_ENABLED) == 0 &&
-            noscenespecials == 0) {
-            nuhspecial_s handle = {gscene, NULL, NULL};
-            for (i32 index = 0; index < scene->nspecials; ++index) {
-                NUDISPLAYSPECIAL *special = &static_cast<NUDISPLAYSPECIAL *>(scene->specials)[index];
-                if ((special->flags & NUDISPLAYSPECIAL_FLAG_VISIBLE) == 0)
-                    continue;
-                handle.display_special = special;
-                const i32 instance = special->instance_ix;
-                if (portal_filter && (scene->visibility_flags[instance] & NUDL_INSTANCE_FLAG_NO_VISIBILITY_TEST) == 0 &&
-                    (visibility->portal_bits[instance >> 3] & (1U << (instance & 7))) == 0)
-                    continue;
-                NUMTX *draw_mtx = special->draw_mtx_ptr;
-                if (draw_mtx == NULL || draw_mtx == reinterpret_cast<NUMTX *>(-1))
-                    draw_mtx = &special->draw_mtx;
-                NuDisplayListRndrSpecial(&handle, draw_mtx, 0, NULL, NULL);
-            }
-        }
-    }
+static void NuDisplaySceneRndrBody(NUDLDLISTSCENE *scene);
 }
 
-extern "C" void NuGScnRndr(NUGSCN *scene) {
-    if (scene->additional_scenes != NULL && scene->rendered_additional_scene_count > 0) {
-        NuDisplaySceneRndr(scene->additional_scenes[scene->rendered_additional_scene_count - 1]->display_list);
-    } else {
-        NuDisplaySceneRndr(scene->display_list);
-    }
-    ++scene->rendered_additional_scene_count;
-}
-extern "C" void NuGScnToVideoMem(NUGSCNVIDEOMEMFN callback) {
-    gscene_to_video_mem = callback;
-}
+extern "C" void NuGScnRndr(NUGSCN *scene);
+extern "C" void NuGScnToVideoMem(NUGSCNVIDEOMEMFN callback);
 
 // Material
-static u32 mtl_animation_mask = 0x00ffffff;
 
 extern "C" void NuDisplayListAnimateMtls(f32 frame_time);
 
 extern "C" void NuMtlAnimate(f32 frame_time);
-extern "C" void NuMtlAnimateSetMask(i32 mask) {
-    mtl_animation_mask = mask;
-}
-extern "C" void NuMtlAnimateSetSpeedScale(f32 speed_scale) {
-    mtl_animation_speed_scale = speed_scale;
-}
+extern "C" void NuMtlAnimateSetMask(i32 mask);
+extern "C" void NuMtlAnimateSetSpeedScale(f32 speed_scale);
 extern "C" void NuMtlAnimateShaderMtlTextures(f32 frame_time);
 static void NuMtlCreate3D(void) {
     STUBBED();
 }
-static inline NUMTL *NuMtlAllocateBuff(VARIPTR *buffer) {
-    NUMTL *material = reinterpret_cast<NUMTL *>(ALIGN(buffer->addr, 16));
-    buffer->addr = reinterpret_cast<usize>(material + 1);
-    memset(material, 0, sizeof(*material));
-    DefaultMtl(material);
-    material->unknown_0_4 = false;
-    return material;
-}
-extern "C" NUMTL *NuMtlCreateBuff(i32, VARIPTR *buffer) {
-    NUMTL *material = NuMtlAllocateBuff(buffer);
-    material->attribs.unknown_6_128 = true;
-    NuMtlCreatePS(material, 0);
-    return material;
-}
-extern "C" NUMTL *NuMtlCreateBuff3D(i32, VARIPTR *buffer) {
-    NUMTL *material = NuMtlAllocateBuff(buffer);
-    NuDisplayListCreateMtl(material);
-    NuMtlCreatePS(material, 1);
-    return material;
-}
+extern "C" NUMTL *NuMtlCreateBuff(i32, VARIPTR *buffer);
+extern "C" NUMTL *NuMtlCreateBuff3D(i32, VARIPTR *buffer);
 
 static void NuMtlSetRenderStatesPS(void) {
     STUBBED();
 }
-extern "C" i32 NuMtlSpecialSetUV(nuhspecial_s *special, f32 u, f32 v) {
-    if (special->scene == NULL) {
-        return 0;
-    }
-    NUDLDLISTSCENE *scene = special->scene->display_list;
-    NUCLIPOBJECT *object = special->display_special->clip_objects;
-    for (i32 i = 0; i < object->nmaterials; ++i) {
-        NUMTL *material = scene->mtls[object->material_ids[i]];
-        if (material == NULL) {
-            break;
-        }
-        do {
-            NuMtlSetUVOffsetPS(material, 0, u, v);
-            material = material->next;
-        } while (material != NULL);
-    }
-    return 0;
-}
+extern "C" i32 NuMtlSpecialSetUV(nuhspecial_s *special, f32 u, f32 v);
 
 // Debug / visualisation geometry
 static inline void NuRndrPrimSetColour(i32 colour);
 static inline void NuRndrPrimUV(f32 u, f32 v);
-extern "C" void NuRndr3dLine(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, i32 colour) {
-    NuPrim3DBegin(2, 5, NULL, &numtx_identity);
-    NuRndrPrimSetColour(colour);
-    NuRndrPrimUV(0.0f, 0.0f);
-    NuRndrPrimPosition(x0, y0, z0);
-    NuRndrPrimSetColour(colour);
-    NuRndrPrimUV(1.0f, 1.0f);
-    NuRndrPrimPosition(x1, y1, z1);
-    NuPrim3DEnd();
-}
-extern "C" void NuRndrAnglesZX(NUVEC *direction, NUVEC *angles) {
-    NUVEC rotated;
-    angles->x = (f32)NuAtan2D(direction->z, direction->y);
-    NuVecRotateX(&rotated, direction, -(i32)angles->x);
-    angles->z = -(f32)NuAtan2D(rotated.x, rotated.y);
-}
+extern "C" void NuRndr3dLine(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, i32 colour);
+extern "C" void NuRndrAnglesZX(NUVEC *direction, NUVEC *angles);
 
-void NuLightBurnoutEffect(i32, f32 threshold, f32 intensity, f32 flare) {
-    currentScene.unknown_28 = 1;
-    currentScene.burnout_intensity = intensity <= 2.0f ? (i32)(127.0f * intensity) : 255;
-    currentScene.burnout_flare = flare;
-    currentScene.burnout_threshold = threshold;
-    currentScene.bloom.enabled = 1;
-    currentScene.bloom.directional = 0;
-    currentScene.bloom.unknown_18 = 0.0f;
-    currentScene.bloom.near_angle = 0.0f;
-    currentScene.bloom.near_scale = 0.0f;
-    currentScene.bloom.far_angle = 180.0f;
-    currentScene.bloom.far_scale = intensity;
-    currentScene.bloom.intensity = 1.0f;
-    currentScene.bloom.blur_iterations = flare;
-    currentScene.bloom.blend = 0.0f;
-    currentScene.bloom.threshold = threshold;
-}
-extern "C" void NuRndrAxes(NUMTX *matrix, f32 length) {
-    NuRndrAxisBright(matrix, length, 255);
-}
+void NuLightBurnoutEffect(i32, f32 threshold, f32 intensity, f32 flare);
+extern "C" void NuRndrAxes(NUMTX *matrix, f32 length);
 static inline void NuRndrPrimSetColour(i32 colour);
-extern "C" void NuRndrAxisArrowsMtx(NUMTX *matrix, f32 length, NUMTL *material) {
-    f32 base = length * 0.8f;
-    f32 width = length * 0.1f;
-    NuPrim3DBegin(2, 5, material, matrix);
-    NuRndrPrimSetColour(0xff0000ff);
-    NuRndrPrimPosition(0, 0, 0);
-    NuRndrPrimSetColour(0xff0000ff);
-    NuRndrPrimPosition(length, 0, 0);
-    NuRndrPrimSetColour(0xff00ff00);
-    NuRndrPrimPosition(0, 0, 0);
-    NuRndrPrimSetColour(0xff00ff00);
-    NuRndrPrimPosition(0, length, 0);
-    NuRndrPrimSetColour(0xffff0000);
-    NuRndrPrimPosition(0, 0, 0);
-    NuRndrPrimSetColour(0xffff0000);
-    NuRndrPrimPosition(0, 0, length);
-    NuPrim3DEnd();
-    NuPrim3DBegin(3, 5, material, matrix);
-    NuRndrPrimSetColour(0xff0000ff);
-    NuRndrPrimPosition(base, -width, 0);
-    NuRndrPrimSetColour(0xff0000ff);
-    NuRndrPrimPosition(length, 0, 0);
-    NuRndrPrimSetColour(0xff0000ff);
-    NuRndrPrimPosition(base, width, 0);
-    NuPrim3DEnd();
-    NuPrim3DBegin(3, 5, material, matrix);
-    NuRndrPrimSetColour(0xff00ff00);
-    NuRndrPrimPosition(0, base, width);
-    NuRndrPrimSetColour(0xff00ff00);
-    NuRndrPrimPosition(0, length, 0);
-    NuRndrPrimSetColour(0xff00ff00);
-    NuRndrPrimPosition(0, base, -width);
-    NuPrim3DEnd();
-    NuPrim3DBegin(3, 5, material, matrix);
-    NuRndrPrimSetColour(0xffff0000);
-    NuRndrPrimPosition(0, width, base);
-    NuRndrPrimSetColour(0xffff0000);
-    NuRndrPrimPosition(0, 0, length);
-    NuRndrPrimSetColour(0xffff0000);
-    NuRndrPrimPosition(0, -width, base);
-    NuPrim3DEnd();
-}
-extern "C" void NuRndrAxisArrows(NUVEC *position, void *, f32 length, NUMTL *material) {
-    NUMTX matrix;
-    NuMtxSetIdentity(&matrix);
-    NuMtxTranslate(&matrix, position);
-    NuRndrAxisArrowsMtx(&matrix, length, material);
-}
+extern "C" void NuRndrAxisArrowsMtx(NUMTX *matrix, f32 length, NUMTL *material);
+extern "C" void NuRndrAxisArrows(NUVEC *position, void *, f32 length, NUMTL *material);
 
 static inline void NuRndrPrimSetColour(i32 colour);
-extern "C" void NuRndrAxisBright(NUMTX *matrix, f32 length, i32 brightness) {
-    f32 base = length * 0.8f;
-    f32 width = length * 0.1f;
-    i32 red = 0xff000000u | (brightness & 255);
-    i32 green = 0xff000000u | ((static_cast<u32>(brightness) << 8) & 0xffff);
-    i32 blue = 0xff000000u | ((brightness & 255) << 16);
-    NuPrim3DBegin(2, 5, NULL, matrix);
-    NuRndrPrimSetColour(red);
-    NuRndrPrimPosition(0, 0, 0);
-    NuRndrPrimSetColour(red);
-    NuRndrPrimPosition(length, 0, 0);
-    NuRndrPrimSetColour(green);
-    NuRndrPrimPosition(0, 0, 0);
-    NuRndrPrimSetColour(green);
-    NuRndrPrimPosition(0, length, 0);
-    NuRndrPrimSetColour(blue);
-    NuRndrPrimPosition(0, 0, 0);
-    NuRndrPrimSetColour(blue);
-    NuRndrPrimPosition(0, 0, length);
-    NuPrim3DEnd();
-    NuPrim3DBegin(3, 5, NULL, matrix);
-    NuRndrPrimSetColour(red);
-    NuRndrPrimPosition(base, -width, 0);
-    NuRndrPrimSetColour(red);
-    NuRndrPrimPosition(length, 0, 0);
-    NuRndrPrimSetColour(red);
-    NuRndrPrimPosition(base, width, 0);
-    NuPrim3DEnd();
-    NuPrim3DBegin(3, 5, NULL, matrix);
-    NuRndrPrimSetColour(green);
-    NuRndrPrimPosition(0, base, width);
-    NuRndrPrimSetColour(green);
-    NuRndrPrimPosition(0, length, 0);
-    NuRndrPrimSetColour(green);
-    NuRndrPrimPosition(0, base, -width);
-    NuPrim3DEnd();
-    NuPrim3DBegin(3, 5, NULL, matrix);
-    NuRndrPrimSetColour(blue);
-    NuRndrPrimPosition(0, width, base);
-    NuRndrPrimSetColour(blue);
-    NuRndrPrimPosition(0, 0, length);
-    NuRndrPrimSetColour(blue);
-    NuRndrPrimPosition(0, -width, base);
-    NuPrim3DEnd();
-}
+extern "C" void NuRndrAxisBright(NUMTX *matrix, f32 length, i32 brightness);
 
 static inline void NuRndrPrimSetColour(i32 colour);
 
-extern "C" void NuRndrBoundingBox(NUVEC *minimum, NUVEC *maximum, NUMTX *matrix, i32 colour) {
-    NuPrim3DBegin(3, 5, NULL, matrix);
-    NuRndrPrimSetColour(colour);
-    NuRndrPrimPosition(minimum->x, minimum->y, minimum->z);
-    NuRndrPrimSetColour(colour);
-    NuRndrPrimPosition(minimum->x, maximum->y, minimum->z);
-    NuRndrPrimSetColour(colour);
-    NuRndrPrimPosition(maximum->x, maximum->y, minimum->z);
-    NuRndrPrimSetColour(colour);
-    NuRndrPrimPosition(maximum->x, minimum->y, minimum->z);
-    NuRndrPrimSetColour(colour);
-    NuRndrPrimPosition(minimum->x, minimum->y, minimum->z);
-    NuRndrPrimSetColour(colour);
-    NuRndrPrimPosition(minimum->x, minimum->y, maximum->z);
-    NuRndrPrimSetColour(colour);
-    NuRndrPrimPosition(minimum->x, maximum->y, maximum->z);
-    NuRndrPrimSetColour(colour);
-    NuRndrPrimPosition(maximum->x, maximum->y, maximum->z);
-    NuRndrPrimSetColour(colour);
-    NuRndrPrimPosition(maximum->x, minimum->y, maximum->z);
-    NuRndrPrimSetColour(colour);
-    NuRndrPrimPosition(minimum->x, minimum->y, maximum->z);
-    NuPrim3DEnd();
-    NuPrim3DBegin(2, 5, NULL, matrix);
-    NuRndrPrimSetColour(colour);
-    NuRndrPrimPosition(minimum->x, maximum->y, minimum->z);
-    NuRndrPrimSetColour(colour);
-    NuRndrPrimPosition(minimum->x, maximum->y, maximum->z);
-    NuRndrPrimSetColour(colour);
-    NuRndrPrimPosition(maximum->x, maximum->y, minimum->z);
-    NuRndrPrimSetColour(colour);
-    NuRndrPrimPosition(maximum->x, maximum->y, maximum->z);
-    NuRndrPrimSetColour(colour);
-    NuRndrPrimPosition(maximum->x, minimum->y, minimum->z);
-    NuRndrPrimSetColour(colour);
-    NuRndrPrimPosition(maximum->x, minimum->y, maximum->z);
-    NuPrim3DEnd();
-}
-f32 circle_scale_radius = 0.5f;
+extern "C" void NuRndrBoundingBox(NUVEC *minimum, NUVEC *maximum, NUMTX *matrix, i32 colour);
+extern f32 circle_scale_radius;
 static inline void NuRndrPrimSetColour(i32 colour);
 static inline void NuRndrPrimUV(f32 u, f32 v);
 extern "C" __attribute__((force_align_arg_pointer)) i32 NuRndrCircle(f32 x, f32 y, f32 radius, f32 aspect, i32 count, f32 u0, f32 v0, f32 u1, f32 v1, i32 colour,
-                            numtl_s *material) {
-    NuPrim2DBegin(0, 7, material);
-    radius *= circle_scale_radius;
-    u1 -= u0;
-    v1 -= v0;
-    f32 previous_y = radius + y;
-    f32 previous_x = radius * 0.0f * aspect + x;
-    f32 previous_u = 0.0f + u0;
-    f32 previous_v = v1 + v0;
-    f32 step = 6.284f / static_cast<f32>(count - 1);
-    for (i32 i = 0; i < count; ++i) {
-        f32 angle = static_cast<f32>(i) * step;
-        f32 sine = NuSinf(angle);
-        f32 cosine = NuCosf(angle);
-        f32 half_cosine = 0.5f * cosine;
-        f32 half_sine = 0.5f * sine;
-        f32 next_y = cosine * radius + y;
-        f32 next_x = sine * radius * aspect + x;
-        f32 next_v = v1 * (0.5f - half_cosine) + v0;
-        f32 next_u = (half_sine + 0.5f) * u1 + u0;
-        NuRndrPrimSetColour(colour);
-        NuRndrPrimUV(0.5f * u1 + u0, 0.5f * v1 + v0);
-        NuPrim2DAddXYZ(static_cast<f32>(PS2_VREZ_W) * x, static_cast<f32>(PS2_VREZ_H) * y, 0.0f);
-        NuRndrPrimSetColour(colour);
-        NuRndrPrimUV(previous_u, previous_v);
-        NuPrim2DAddXYZ(static_cast<f32>(PS2_VREZ_W) * previous_x, static_cast<f32>(PS2_VREZ_H) * previous_y, 0.0f);
-        NuRndrPrimSetColour(colour);
-        NuRndrPrimUV(next_u, next_v);
-        NuPrim2DAddXYZ(static_cast<f32>(PS2_VREZ_W) * next_x, static_cast<f32>(PS2_VREZ_H) * next_y, 0.0f);
-        previous_x = next_x;
-        previous_y = next_y;
-        previous_u = next_u;
-        previous_v = next_v;
-    }
-    NuPrim2DEnd();
-    return 1;
-}
+                            numtl_s *material);
 
-extern "C" void NuRndrEndReflectionRender(void) {
-    NuSpecialReflection(0);
-}
-extern "C" void NuRndrEndShadowReceiveRender(void) {
-    global_GobjIsShadowReceive = 0;
-}
-extern "C" i32 NuRndrGetCullDebug(void) {
-    STUBBED();
-    return 0;
-}
+extern "C" void NuRndrEndReflectionRender(void);
+extern "C" void NuRndrEndShadowReceiveRender(void);
+extern "C" i32 NuRndrGetCullDebug(void);
 extern i32 global_frame_count;
-extern "C" i32 NuRndrGlobalFrameCount(void) {
-    return global_frame_count;
-}
-extern "C" void NuRndrGlobalFrameCountPause(i32 paused) {
-    global_frame_count_paused = paused;
-}
+extern "C" i32 NuRndrGlobalFrameCount(void);
+extern "C" void NuRndrGlobalFrameCountPause(i32 paused);
 
 // NuRndrRect2di and NuRndrGradRect2di write the attributes for the current
 // vertex before handing its position to NuPrim2DAddXYZ.  The latter advances
@@ -698,52 +220,9 @@ static inline u32 NuRndrPrimColour(u32 colour) {
     return (colour & 0xff000000u) | ((colour >> 1) & 0x007f7f7fu);
 }
 
-extern "C" void NuRndrGradRect2di(i32 x, i32 y, i32 w, i32 h, i32 *colour, numtl_s *mtl) {
-    const f32 sx = static_cast<f32>(x) * 0.0625f;
-    const f32 sy = static_cast<f32>(y) * 0.0625f;
-    const f32 sw = static_cast<f32>(w) * 0.0625f;
-    const f32 sh = static_cast<f32>(h) * 0.0625f;
-
-    NuPrim2DBegin(1, 7, mtl);
-    NuRndrPrimSetColour(colour[0]);
-    NuRndrPrimUV(0.0f, 0.0f);
-    NuPrim2DAddXYZ(sx, sy, 0.0f);
-    NuRndrPrimSetColour(colour[1]);
-    NuRndrPrimUV(1.0f, 0.0f);
-    NuPrim2DAddXYZ(sx + sw, sy, 0.0f);
-    NuRndrPrimSetColour(colour[2]);
-    NuRndrPrimUV(0.0f, 1.0f);
-    NuPrim2DAddXYZ(sx, sy + sh, 0.0f);
-    NuRndrPrimSetColour(colour[3]);
-    NuRndrPrimUV(1.0f, 1.0f);
-    NuPrim2DAddXYZ(sx + sw, sy + sh, 0.0f);
-    NuPrim2DEnd();
-}
+extern "C" void NuRndrGradRect2di(i32 x, i32 y, i32 w, i32 h, i32 *colour, numtl_s *mtl);
 extern "C" void NuRndrGradRectUV2di(i32 x, i32 y, i32 w, i32 h, f32 u0, f32 v0, f32 u1, f32 v1, u32 *colours,
-                                    numtl_s *mtl) {
-    const f32 sx = static_cast<f32>(x) * 0.0625f;
-    const f32 sy = static_cast<f32>(y) * 0.0625f;
-    const f32 width = static_cast<f32>(w) * 0.0625f;
-    const f32 height = static_cast<f32>(h) * 0.0625f;
-
-    NuPrim2DBegin(1, 7, mtl);
-    NuRndrPrimSetColour(colours[0]);
-    NuRndrPrimUV(u0, v0);
-    NuPrim2DAddXYZ(sx, sy, 0.0f);
-    NuRndrPrimSetColour(colours[1]);
-    NuRndrPrimUV(u1, v0);
-    const f32 ex = sx + width;
-    NuPrim2DAddXYZ(ex, sy, 0.0f);
-    NuRndrPrimSetColour(colours[2]);
-    NuRndrPrimUV(u0, v1);
-    const f32 ey = sy + height;
-    NuPrim2DAddXYZ(sx, ey, 0.0f);
-    NuRndrPrimSetColour(colours[3]);
-    NuRndrPrimUV(u1, v1);
-    NuPrim2DAddXYZ(ex, ey, 0.0f);
-    NuPrim2DEnd();
-}
-static i32 dump_state = -1;
+                                    numtl_s *mtl);
 #include "nu2api/nu3d/nurndr_plain_types.h"
 extern "C" void NuRndrScreenGrabTileInit(void *, i32, f32, f32, f32);
 extern "C" void NuRndrScreenGrabTileDeInit(void *);
@@ -751,780 +230,64 @@ extern "C" void NuRndrScreenGrabTileBegin(void **);
 extern "C" void NuRndrScreenGrabTileEnd(void **);
 extern "C" i32 NuRndrDoingScreenGrab;
 extern "C" void NuVpResetRegions();
-extern "C" i32 NuRndrHighResScreenGrab(char *prefix, f32 scale, f32 a, f32 b, f32 c, i32 number) {
-    char path[256];
-    static f32 yTiles, xTiles, yPos, xPos;
-    static ScreenGrabTileParams params;
-    static NUFILE fh;
-    static i32 header_size, delay, xOffsetHack;
-    void *tile = NULL;
-    f32 remainder = NuFmod(scale, 0.5f);
-    scale -= remainder;
-    if (remainder > 0.25f)
-        scale += 0.5f;
-    f32 tiles;
-    if (scale < 0.5f) {
-        scale = 0.5f;
-        tiles = 1.0f;
-    } else if (scale > 4.0f) {
-        scale = 4.0f;
-        tiles = 6.0f;
-    } else {
-        f32 n = scale / 0.75f;
-        tiles = static_cast<f32>(static_cast<i32>(n));
-        if (n > tiles)
-            tiles += 1.0f;
-    }
-    yTiles = tiles;
-    xTiles = tiles;
-    if (dump_state == -1) {
-        NuRndrDoingScreenGrab = 1;
-        NuRndrScreenGrabTileInit(&params, static_cast<i32>(tiles * tiles), b, a, c);
-
-        if (number >= 0)
-            sprintf(path, "%s%d.bmp", prefix, number);
-        else {
-            sprintf(path, "%s.bmp", prefix);
-            i32 index = 0;
-            while (NuFileSize(path) > 0)
-                sprintf(path, "%s%03d.bmp", prefix, index++);
-        }
-        struct __attribute__((packed)) BitmapHeader {
-            u16 type;
-            u32 file_size;
-            u16 reserved1, reserved2;
-            u32 offset;
-            u32 info_size, width, height;
-            u16 planes, bits;
-            u32 compression, image_size, xppm, yppm, colours, important;
-        } header;
-        header.type = 0x4d42;
-        header.file_size = PS2_REZ_W * 12 * PS2_REZ_H + 56;
-        header.reserved1 = header.reserved2 = 0;
-        header.offset = 56;
-        header.info_size = 40;
-        header.width = static_cast<u32>(static_cast<f32>(PS2_REZ_W) * scale);
-        header.height = static_cast<u32>(static_cast<f32>(PS2_REZ_H) * scale);
-        header.planes = 1;
-        header.bits = 24;
-        header.compression = 0;
-        header.image_size = header.width * header.height * 3;
-        header.xppm = header.yppm = 1;
-        header.colours = header.important = 0;
-        fh = NuFileOpen(path, static_cast<NUFILEMODE>(1));
-        if (fh == 0) {
-            NuRndrScreenGrabTileDeInit(&params);
-            dump_state = -1;
-            yPos = xPos = yTiles = xTiles = 0.0f;
-            NuVpResetRegions();
-            return 0;
-        }
-        NuFileWrite(fh, &header, 16);
-        NuFileWrite(fh, &header.info_size, 40);
-        NuFileSeek(fh, static_cast<u32>(header.image_size - 1), static_cast<NUFILESEEK>(1));
-        u8 padding = 0;
-        NuFileWrite(fh, &padding, 1);
-        dump_state = 0;
-        header_size = header.offset;
-        delay = 3;
-        xOffsetHack = 0;
-        xPos = yPos = 0.0f;
-        f32 w = static_cast<f32>(PS2_VREZ_W), h = static_cast<f32>(PS2_VREZ_H);
-        f32 sx = w * 0.0f * 0.75f, sy = h * 0.0f * 0.75f;
-        NuVpSetRegions((sx + -0.125f * w) / scale, (sy + -0.125f * h) / scale, (w + sx + -0.125f * w) / scale,
-                       (h + sy + -0.125f * h) / scale, 0, 0, w, h);
-        return 1;
-    }
-    if (delay != 0) {
-        --delay;
-        return 1;
-    }
-    NuRndrScreenGrabTileBegin(&tile);
-    if (tile == NULL) {
-        NuRndrScreenGrabTileDeInit(&params);
-        dump_state = -1;
-        NuFileClose(fh);
-        yPos = xPos = yTiles = xTiles = 0.0f;
-        NuVpResetRegions();
-        return 0;
-    }
-    u8 *pixels = static_cast<u8 *>(tile);
-    i32 bytes = params.channels[3] == -1 ? 3 : 4;
-    if (!(bytes == 3 && params.channels[0] == 0 && params.channels[1] == 1 && params.channels[2] == 2)) {
-        u8 *out = pixels;
-        for (i32 y = 0; y < PS2_REZ_H; ++y) {
-            for (i32 x = 0; x < bytes * PS2_REZ_W; x += bytes) {
-                u8 rgba[4];
-                u8 *in = static_cast<u8 *>(tile) + params.width * y * bytes + x;
-                rgba[0] = in[0];
-                rgba[1] = in[1];
-                rgba[2] = in[2];
-                rgba[3] = in[3];
-                out[0] = rgba[params.channels[0]];
-                out[1] = rgba[params.channels[1]];
-                out[2] = rgba[params.channels[2]];
-                out += 3;
-            }
-        }
-    }
-    f32 w = static_cast<f32>(PS2_REZ_W), h = static_cast<f32>(PS2_REZ_H);
-    i32 width = static_cast<i32>(xPos == xTiles - 1.0f ? scale * w - ((xTiles - 1.0f) * 0.75f) * w : 0.75f * w);
-    f32 full_height = scale * h;
-    i32 height = static_cast<i32>(yPos == yTiles - 1.0f ? full_height - ((yTiles - 1.0f) * 0.75f) * h : 0.75f * h);
-    u8 *data = pixels + static_cast<u32>(((static_cast<f32>(static_cast<i32>(params.width)) * 3.0f) * 0.125f) * h) +
-               static_cast<u32>((0.125f * w) * 3.0f) +
-               static_cast<u32>(((static_cast<f32>(xOffsetHack * 3) * w) / static_cast<f32>(PS2_VREZ_W)) * scale);
-    if (yPos == yTiles - 1.0f)
-        data += static_cast<u32>(((0.75f * h - static_cast<f32>(height)) * w) * 3.0f);
-    i64 offset = static_cast<i64>(header_size) +
-                 static_cast<i32>((((full_height - (0.75f * yPos) * h) * w) * scale) * 3.0f) +
-                 static_cast<i32>(((0.75f * xPos) * w) * 3.0f) -
-                 static_cast<i32>((static_cast<f32>(height * PS2_REZ_W) * scale) * 3.0f);
-    if (height > 0) {
-        i32 y = 0;
-        do {
-            NuFileSeek(fh, offset, static_cast<NUFILESEEK>(0));
-            offset += static_cast<i32>((static_cast<f32>(PS2_REZ_W) * scale) * 3.0f);
-            NuFileWrite(fh, data, width * 3);
-            data += params.width * 3;
-        } while (++y != height);
-    }
-    NuRndrScreenGrabTileEnd(&tile);
-    ++dump_state;
-    if (!(static_cast<f32>(dump_state) < yTiles * xTiles)) {
-        NuRndrScreenGrabTileDeInit(&params);
-        dump_state = -1;
-        NuFileClose(fh);
-        yPos = xPos = yTiles = xTiles = 0.0f;
-        NuVpResetRegions();
-        NuRndrDoingScreenGrab = 0;
-        return 0;
-    }
-    xPos += 1.0f;
-    if (xPos >= xTiles) {
-        xPos = 0.0f;
-        yPos += 1.0f;
-    }
-    w = static_cast<f32>(PS2_VREZ_W);
-    h = static_cast<f32>(PS2_VREZ_H);
-    f32 x = (xPos * w) * 0.75f;
-    f32 left = (-0.125f * w + x) / scale;
-    f32 right = (x + w + -0.125f * w) / scale;
-    xOffsetHack = 0;
-    if (right > w) {
-        xOffsetHack = static_cast<i32>(right - w);
-        left -= static_cast<f32>(xOffsetHack);
-        right = w;
-    }
-    f32 y = (yPos * h) * 0.75f;
-    NuVpSetRegions(left, (y + -0.125f * h) / scale, right, (h + y + -0.125f * h) / scale, 0, 0, w, h);
-    delay = 3;
-    return 1;
-}
+extern "C" i32 NuRndrHighResScreenGrab(char *prefix, f32 scale, f32 a, f32 b, f32 c, i32 number);
 
 
-extern "C" i32 NuRndrLine2d(NuLineVertex2D *vertices, NUMTL *material) {
-    NuPrim2DBegin(2, 7, material);
-    NuRndrPrimSetColour(vertices[0].colour);
-    NuRndrPrimUV(vertices[0].u, vertices[0].v);
-    NuPrim2DAddXYZ(vertices[0].x, vertices[0].y, 0.0f);
-    NuRndrPrimSetColour(vertices[1].colour);
-    NuRndrPrimUV(vertices[1].u, vertices[1].v);
-    NuPrim2DAddXYZ(vertices[1].x, vertices[1].y, 0.0f);
-    NuPrim2DEnd();
-    return 1;
-}
-extern "C" void NuRndrLine2di(i32 x0, i32 y0, i32 x1, i32 y1, i32 colour, NUMTL *material) {
-    const f32 sx = static_cast<f32>(x0) * 0.0625f;
-    const f32 sy = static_cast<f32>(y0) * 0.0625f;
-    const f32 ex = static_cast<f32>(x1) * 0.0625f;
-    const f32 ey = static_cast<f32>(y1) * 0.0625f;
-    NuPrim2DBegin(2, 7, material);
-    NuRndrPrimSetColour(colour);
-    NuRndrPrimUV(0.0f, 0.0f);
-    NuPrim2DAddXYZ(sx, sy, 0.0f);
-    NuRndrPrimSetColour(colour);
-    NuRndrPrimUV(1.0f, 1.0f);
-    NuPrim2DAddXYZ(ex, ey, 0.0f);
-    NuPrim2DEnd();
-}
-extern "C" i32 NuRndrLine3d(NURND_VERTEX3D *vertices, NUMTL *material, NUMTX *matrix) {
-    NuPrim3DBegin(2, 7, material, matrix);
-    {
-        NuRndrPrimSetColour(vertices[0].colour);
-        NuRndrPrimUV(vertices[0].u, vertices[0].v);
-        f32 x = vertices[0].position.x;
-        f32 y = vertices[0].position.y;
-        f32 z = vertices[0].position.z;
-        PrimVertexRaw *vertex = (PrimVertexRaw *)g_NuPrim_StreamBufferPtr->void_ptr;
-        vertex->x = x;
-        vertex->y = y;
-        vertex->z = z;
-        g_NuPrim_StreamBufferPtr->u8_ptr += sizeof(PrimVertexRaw);
-        ++g_NuPrim_VertexCount;
-    }
-    {
-        NuRndrPrimSetColour(vertices[1].colour);
-        NuRndrPrimUV(vertices[1].u, vertices[1].v);
-        f32 x = vertices[1].position.x;
-        f32 y = vertices[1].position.y;
-        f32 z = vertices[1].position.z;
-        PrimVertexRaw *vertex = (PrimVertexRaw *)g_NuPrim_StreamBufferPtr->void_ptr;
-        vertex->x = x;
-        vertex->y = y;
-        vertex->z = z;
-        g_NuPrim_StreamBufferPtr->u8_ptr += sizeof(PrimVertexRaw);
-        ++g_NuPrim_VertexCount;
-    }
-    NuPrim3DEnd();
-    return 1;
-}
-extern "C" void NuRndrLine3dDbg(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, i32 colour) {
-    NuPrim3DBegin(2, 5, nullptr, &numtx_identity);
-    if (!g_NuPrim_NeedsOverbrightening)
-        ((PrimVertexRaw *)g_NuPrim_StreamBufferPtr->void_ptr)->color =
-            ((colour >> 1) & 0x007f7f7f) | (colour & 0xff000000);
-    else
-        ((PrimVertexRaw *)g_NuPrim_StreamBufferPtr->void_ptr)->color = colour;
-    PrimVertexRaw *vertex = (PrimVertexRaw *)g_NuPrim_StreamBufferPtr->void_ptr;
-    vertex->x = x0;
-    vertex->y = y0;
-    vertex->z = z0;
-    g_NuPrim_StreamBufferPtr->u8_ptr += sizeof(PrimVertexRaw);
-    ++g_NuPrim_VertexCount;
-    if (!g_NuPrim_NeedsOverbrightening)
-        ((PrimVertexRaw *)g_NuPrim_StreamBufferPtr->void_ptr)->color =
-            ((colour >> 1) & 0x007f7f7f) | (colour & 0xff000000);
-    else
-        ((PrimVertexRaw *)g_NuPrim_StreamBufferPtr->void_ptr)->color = colour;
-    vertex = (PrimVertexRaw *)g_NuPrim_StreamBufferPtr->void_ptr;
-    vertex->x = x1;
-    vertex->y = y1;
-    vertex->z = z1;
-    g_NuPrim_StreamBufferPtr->u8_ptr += sizeof(PrimVertexRaw);
-    ++g_NuPrim_VertexCount;
-    NuPrim3DEnd();
-}
-extern "C" void NuRndrLineRect2di(i32 x, i32 y, i32 width, i32 height, i32 colour, NUMTL *material) {
-    f32 sx = (f32)x * 0.0625f;
-    f32 sy = (f32)y * 0.0625f;
-    f32 sw = (f32)width * 0.0625f;
-    f32 sh = (f32)height * 0.0625f;
-    NuPrim2DBegin(3, 7, material);
-    NuRndrPrimSetColour(colour);
-    NuRndrPrimUV(0.0f, 0.0f);
-    NuPrim2DAddXYZ(sx, sy, 0.0f);
-    NuRndrPrimSetColour(colour);
-    NuRndrPrimUV(1.0f, 0.0f);
-    f32 ex = sx + sw;
-    NuPrim2DAddXYZ(ex, sy, 0.0f);
-    NuRndrPrimSetColour(colour);
-    NuRndrPrimUV(1.0f, 1.0f);
-    f32 ey = sy + sh;
-    NuPrim2DAddXYZ(ex, ey, 0.0f);
-    NuRndrPrimSetColour(colour);
-    NuRndrPrimUV(0.0f, 1.0f);
-    NuPrim2DAddXYZ(sx, ey, 0.0f);
-    NuRndrPrimSetColour(colour);
-    NuRndrPrimUV(0.0f, 0.0f);
-    NuPrim2DAddXYZ(sx, sy, 0.0f);
-    NuPrim2DEnd();
-}
-extern "C" i32 NuRndrLineStrip2d(NuLineVertex2D *vertices, NUMTL *material, i32 count) {
-    NuPrim2DBegin(2, 7, material);
-    for (i32 i = 0; i < count; ++i) {
-        if (!g_NuPrim_NeedsOverbrightening)
-            ((PrimVertexRaw *)g_NuPrim_StreamBufferPtr->void_ptr)->color = 0xff7f7f7f;
-        else
-            ((PrimVertexRaw *)g_NuPrim_StreamBufferPtr->void_ptr)->color = 0xffffffff;
-        u8 *vertex = g_NuPrim_StreamBufferPtr->u8_ptr;
-        if (!g_NuPrim_NeedsHalfUVs) {
-            *(f32 *)(vertex + 0x10) = 0.0f;
-            *(f32 *)(vertex + 0x14) = 0.0f;
-        } else {
-            *(u16 *)(vertex + 0x10) = 0;
-            *(u16 *)(vertex + 0x12) = 0;
-        }
-        NuPrim2DAddXYZ(vertices[i].x * 0.0625f, vertices[i].y * 0.0625f, 0.0f);
-    }
-    NuPrim2DEnd();
-    return 1;
-}
-extern "C" void NuRndrLineStrip2di(i32 *positions, f32 *uvs, i32 count, i32 colour, NUMTL *material) {
-    NuPrim2DBegin(2, 7, material);
-    if (count > 0) {
-        const i32 end = count * 2;
-        for (i32 i = 0; i != end; i += 2) {
-            NuRndrPrimSetColour(colour);
-            if (uvs) {
-                NuRndrPrimUV(uvs[i], uvs[i + 1]);
-            }
-            NuPrim2DAddXYZ((f32)positions[i] * 0.0625f, (f32)positions[i + 1] * 0.0625f, 0.0f);
-        }
-    }
-    NuPrim2DEnd();
-}
+extern "C" i32 NuRndrLine2d(NuLineVertex2D *vertices, NUMTL *material);
+extern "C" void NuRndrLine2di(i32 x0, i32 y0, i32 x1, i32 y1, i32 colour, NUMTL *material);
+extern "C" i32 NuRndrLine3d(NURND_VERTEX3D *vertices, NUMTL *material, NUMTX *matrix);
+extern "C" void NuRndrLine3dDbg(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, i32 colour);
+extern "C" void NuRndrLineRect2di(i32 x, i32 y, i32 width, i32 height, i32 colour, NUMTL *material);
+extern "C" i32 NuRndrLineStrip2d(NuLineVertex2D *vertices, NUMTL *material, i32 count);
+extern "C" void NuRndrLineStrip2di(i32 *positions, f32 *uvs, i32 count, i32 colour, NUMTL *material);
 
 extern "C" void NuRndrRect(f32 x, f32 y, f32 z, f32 width, f32 height, f32 u0, f32 v0, f32 u1, f32 v1, i32 colour,
-                           NUMTL *material) {
-    NuPrim2DBegin(4, 7, material);
-    u8 *vertex;
-    if (!g_NuPrim_NeedsHalfUVs) {
-        vertex = g_NuPrim_StreamBufferPtr->u8_ptr;
-        *(f32 *)(vertex + 0x10) = u0;
-        *(f32 *)(vertex + 0x14) = v0;
-    } else {
-        vertex = g_NuPrim_StreamBufferPtr->u8_ptr;
-        *(u16 *)(vertex + 0x10) = NuRndrFloatToHalf(u0);
-        *(u16 *)(vertex + 0x12) = NuRndrFloatToHalf(v0);
-    }
-    i32 adjusted_colour = colour;
-    if (!g_NuPrim_NeedsOverbrightening)
-        adjusted_colour = ((colour >> 1) & 0x007f7f7f) | (colour & 0xff000000);
-    *(i32 *)(vertex + 0x0c) = adjusted_colour;
-    NuPrim2DAddXYZ(x, y, z);
-    if (!g_NuPrim_NeedsHalfUVs) {
-        vertex = g_NuPrim_StreamBufferPtr->u8_ptr;
-        *(f32 *)(vertex + 0x10) = u1;
-        *(f32 *)(vertex + 0x14) = v1;
-    } else {
-        vertex = g_NuPrim_StreamBufferPtr->u8_ptr;
-        *(u16 *)(vertex + 0x10) = NuRndrFloatToHalf(u1);
-        *(u16 *)(vertex + 0x12) = NuRndrFloatToHalf(v1);
-    }
-    adjusted_colour = colour;
-    if (!g_NuPrim_NeedsOverbrightening)
-        adjusted_colour = ((colour >> 1) & 0x007f7f7f) | (colour & 0xff000000);
-    *(i32 *)(vertex + 0x0c) = adjusted_colour;
-    NuPrim2DAddXYZ(x + width, y + height, z);
-    NuPrim2DEnd();
-}
-extern "C" void NuRndrRect2d(f32 x, f32 y, f32 z, f32 width, f32 height, i32 colour, NUMTL *material) {
-    NuPrim2DBegin(4, 7, material);
-    NuRndrPrimSetColour(colour);
-    NuRndrPrimUV(0.0f, 0.0f);
-    NuPrim2DAddXYZ(x, y, z);
-    NuRndrPrimSetColour(colour);
-    NuRndrPrimUV(1.0f, 1.0f);
-    NuPrim2DAddXYZ(x + width, y + height, z);
-    NuPrim2DEnd();
-}
-extern "C" void NuRndrRect2di(i32 x, i32 y, i32 w, i32 h, i32 colour, numtl_s *mtl) {
-    const f32 sx = static_cast<f32>(x) * 0.0625f;
-    const f32 sy = static_cast<f32>(y) * 0.0625f;
-    const f32 sw = static_cast<f32>(w) * 0.0625f;
-    const f32 sh = static_cast<f32>(h) * 0.0625f;
-
-    NuPrim2DBegin(4, 7, mtl);
-    NuRndrPrimSetColour(colour);
-    NuRndrPrimUV(0.0f, 0.0f);
-    NuPrim2DAddXYZ(sx, sy, 0.0f);
-    NuRndrPrimSetColour(colour);
-    NuRndrPrimUV(1.0f, 1.0f);
-    NuPrim2DAddXYZ(sx + sw, sy + sh, 0.0f);
-    NuPrim2DEnd();
-}
-extern "C" void NuRndrRectUV2di(i32 x, i32 y, i32 w, i32 h, f32 u0, f32 v0, f32 u1, f32 v1, i32 colour, numtl_s *mtl) {
-    const f32 sx = static_cast<f32>(x) * 0.0625f;
-    const f32 sy = static_cast<f32>(y) * 0.0625f;
-    const f32 sw = static_cast<f32>(w) * 0.0625f;
-    const f32 sh = static_cast<f32>(h) * 0.0625f;
-
-    NuPrim2DBegin(4, 7, mtl);
-    u8 *vertex;
-    if (!g_NuPrim_NeedsHalfUVs) {
-        vertex = g_NuPrim_StreamBufferPtr->u8_ptr;
-        *reinterpret_cast<f32 *>(vertex + 0x10) = u0;
-        *reinterpret_cast<f32 *>(vertex + 0x14) = v0;
-    } else {
-        vertex = g_NuPrim_StreamBufferPtr->u8_ptr;
-        *reinterpret_cast<u16 *>(vertex + 0x10) = NuRndrFloatToHalf(u0);
-        *reinterpret_cast<u16 *>(vertex + 0x12) = NuRndrFloatToHalf(v0);
-    }
-    const char *needs_overbrightening = &g_NuPrim_NeedsOverbrightening;
-    i32 adjusted_colour = colour;
-    if (!*needs_overbrightening) {
-        adjusted_colour = ((colour >> 1) & 0x007f7f7f) | (colour & 0xff000000);
-    }
-    *reinterpret_cast<u32 *>(vertex + 0x0c) = adjusted_colour;
-    NuPrim2DAddXYZ(sx, sy, 0.0f);
-
-    if (!g_NuPrim_NeedsHalfUVs) {
-        vertex = g_NuPrim_StreamBufferPtr->u8_ptr;
-        *reinterpret_cast<f32 *>(vertex + 0x10) = u1;
-        *reinterpret_cast<f32 *>(vertex + 0x14) = v1;
-    } else {
-        vertex = g_NuPrim_StreamBufferPtr->u8_ptr;
-        *reinterpret_cast<u16 *>(vertex + 0x10) = NuRndrFloatToHalf(u1);
-        *reinterpret_cast<u16 *>(vertex + 0x12) = NuRndrFloatToHalf(v1);
-    }
-    adjusted_colour = colour;
-    if (!*needs_overbrightening) {
-        adjusted_colour = ((colour >> 1) & 0x007f7f7f) | (colour & 0xff000000);
-    }
-    *reinterpret_cast<u32 *>(vertex + 0x0c) = adjusted_colour;
-    NuPrim2DAddXYZ(sx + sw, sy + sh, 0.0f);
-    NuPrim2DEnd();
-}
-extern "C" void NuRndrSetCullDebug(void) {
-    STUBBED();
-}
+                           NUMTL *material);
+extern "C" void NuRndrRect2d(f32 x, f32 y, f32 z, f32 width, f32 height, i32 colour, NUMTL *material);
+extern "C" void NuRndrRect2di(i32 x, i32 y, i32 w, i32 h, i32 colour, numtl_s *mtl);
+extern "C" void NuRndrRectUV2di(i32 x, i32 y, i32 w, i32 h, f32 u0, f32 v0, f32 u1, f32 v1, i32 colour, numtl_s *mtl);
+extern "C" void NuRndrSetCullDebug(void);
 extern "C" {
-    i32 NuRndrStopUpdate;
-    NUVEC NuRndrDebBase;
-    NUVEC NuRndrDebRange;
-    NUVEC NuRndrDebRangeInv;
+extern i32 NuRndrStopUpdate;
+extern NUVEC NuRndrDebBase;
+extern NUVEC NuRndrDebRange;
+extern NUVEC NuRndrDebRangeInv;
 }
 
-extern "C" void NuRndrSetDebBaseRange(NUVEC *base, NUVEC *range) {
-    NuRndrDebBase = *base;
-    NuRndrDebRange = *range;
-    NuRndrDebRangeInv.x = 1.0f / NuRndrDebRange.x;
-    NuRndrDebRangeInv.y = 1.0f / NuRndrDebRange.y;
-    NuRndrDebRangeInv.z = 1.0f / NuRndrDebRange.z;
-}
+extern "C" void NuRndrSetDebBaseRange(NUVEC *base, NUVEC *range);
 
-extern "C" void NuRndrSetDebBox(NUVEC *range) {
-    static NUMTX cammtx;
-    if (NuRndrStopUpdate == 0) {
-        cammtx = global_camera.mtx;
-    }
-    const NUVEC size = *range;
-    // The original uses a narrow near rectangle and a wider far rectangle,
-    // transformed by the cached camera before finding their world bounds.
-    NUVEC corner0 = {
-        (((size.x * cammtx.m00) * -0.2f + cammtx.m30) + (size.y * cammtx.m10) * -0.2f) + (size.z * cammtx.m20) * -0.05f,
-        (((size.x * cammtx.m01) * -0.2f + cammtx.m31) + (size.y * cammtx.m11) * -0.2f) + (size.z * cammtx.m21) * -0.05f,
-        (((size.x * cammtx.m02) * -0.2f + cammtx.m32) + (size.y * cammtx.m12) * -0.2f) +
-            (size.z * cammtx.m22) * -0.05f};
-    NUVEC minimum = corner0;
-    NUVEC maximum = corner0;
-    NUVEC corner1 = {
-        (((size.x * cammtx.m00) * 0.2f + cammtx.m30) + (size.y * cammtx.m10) * -0.2f) + (size.z * cammtx.m20) * -0.05f,
-        (((size.x * cammtx.m01) * 0.2f + cammtx.m31) + (size.y * cammtx.m11) * -0.2f) + (size.z * cammtx.m21) * -0.05f,
-        (((size.x * cammtx.m02) * 0.2f + cammtx.m32) + (size.y * cammtx.m12) * -0.2f) + (size.z * cammtx.m22) * -0.05f};
-    minimum.x = corner1.x < minimum.x ? corner1.x : minimum.x;
-    minimum.y = corner1.y < minimum.y ? corner1.y : minimum.y;
-    minimum.z = corner1.z < minimum.z ? corner1.z : minimum.z;
-    maximum.y = corner1.y > maximum.y ? corner1.y : maximum.y;
-    maximum.x = corner1.x > maximum.x ? corner1.x : maximum.x;
-    maximum.z = corner1.z > maximum.z ? corner1.z : maximum.z;
-    NUVEC corner2 = {
-        (((size.x * cammtx.m00) * -0.2f + cammtx.m30) + (size.y * cammtx.m10) * 0.2f) + (size.z * cammtx.m20) * -0.05f,
-        (((size.x * cammtx.m01) * -0.2f + cammtx.m31) + (size.y * cammtx.m11) * 0.2f) + (size.z * cammtx.m21) * -0.05f,
-        (((size.x * cammtx.m02) * -0.2f + cammtx.m32) + (size.y * cammtx.m12) * 0.2f) + (size.z * cammtx.m22) * -0.05f};
-    minimum.y = corner2.y < minimum.y ? corner2.y : minimum.y;
-    minimum.x = corner2.x < minimum.x ? corner2.x : minimum.x;
-    minimum.z = corner2.z < minimum.z ? corner2.z : minimum.z;
-    maximum.x = corner2.x > maximum.x ? corner2.x : maximum.x;
-    maximum.y = corner2.y > maximum.y ? corner2.y : maximum.y;
-    maximum.z = corner2.z > maximum.z ? corner2.z : maximum.z;
-    NUVEC corner3 = {
-        (((size.x * cammtx.m00) * 0.2f + cammtx.m30) + (size.y * cammtx.m10) * 0.2f) + (size.z * cammtx.m20) * -0.05f,
-        (((size.x * cammtx.m01) * 0.2f + cammtx.m31) + (size.y * cammtx.m11) * 0.2f) + (size.z * cammtx.m21) * -0.05f,
-        (((size.x * cammtx.m02) * 0.2f + cammtx.m32) + (size.y * cammtx.m12) * 0.2f) + (size.z * cammtx.m22) * -0.05f};
-    minimum.x = corner3.x < minimum.x ? corner3.x : minimum.x;
-    minimum.y = corner3.y < minimum.y ? corner3.y : minimum.y;
-    minimum.z = corner3.z < minimum.z ? corner3.z : minimum.z;
-    maximum.x = corner3.x > maximum.x ? corner3.x : maximum.x;
-    maximum.y = corner3.y > maximum.y ? corner3.y : maximum.y;
-    maximum.z = corner3.z > maximum.z ? corner3.z : maximum.z;
-    NUVEC corner4 = {
-        (((size.x * cammtx.m00) * -0.5f + cammtx.m30) + (size.y * cammtx.m10) * -0.5f) + (size.z * cammtx.m20) * 0.8f,
-        (((size.x * cammtx.m01) * -0.5f + cammtx.m31) + (size.y * cammtx.m11) * -0.5f) + (size.z * cammtx.m21) * 0.8f,
-        (((size.x * cammtx.m02) * -0.5f + cammtx.m32) + (size.y * cammtx.m12) * -0.5f) + (size.z * cammtx.m22) * 0.8f};
-    minimum.x = corner4.x < minimum.x ? corner4.x : minimum.x;
-    minimum.y = corner4.y < minimum.y ? corner4.y : minimum.y;
-    minimum.z = corner4.z < minimum.z ? corner4.z : minimum.z;
-    maximum.x = corner4.x > maximum.x ? corner4.x : maximum.x;
-    maximum.y = corner4.y > maximum.y ? corner4.y : maximum.y;
-    maximum.z = corner4.z > maximum.z ? corner4.z : maximum.z;
-    NUVEC corner5 = {
-        (((size.x * cammtx.m00) * 0.5f + cammtx.m30) + (size.y * cammtx.m10) * -0.5f) + (size.z * cammtx.m20) * 0.8f,
-        (((size.x * cammtx.m01) * 0.5f + cammtx.m31) + (size.y * cammtx.m11) * -0.5f) + (size.z * cammtx.m21) * 0.8f,
-        (((size.x * cammtx.m02) * 0.5f + cammtx.m32) + (size.y * cammtx.m12) * -0.5f) + (size.z * cammtx.m22) * 0.8f};
-    minimum.y = corner5.y < minimum.y ? corner5.y : minimum.y;
-    minimum.x = corner5.x < minimum.x ? corner5.x : minimum.x;
-    minimum.z = corner5.z < minimum.z ? corner5.z : minimum.z;
-    maximum.x = corner5.x > maximum.x ? corner5.x : maximum.x;
-    maximum.y = corner5.y > maximum.y ? corner5.y : maximum.y;
-    maximum.z = corner5.z > maximum.z ? corner5.z : maximum.z;
-    NUVEC corner6 = {
-        (((size.x * cammtx.m00) * -0.5f + cammtx.m30) + (size.y * cammtx.m10) * 0.5f) + (size.z * cammtx.m20) * 0.8f,
-        (((size.x * cammtx.m01) * -0.5f + cammtx.m31) + (size.y * cammtx.m11) * 0.5f) + (size.z * cammtx.m21) * 0.8f,
-        (((size.x * cammtx.m02) * -0.5f + cammtx.m32) + (size.y * cammtx.m12) * 0.5f) + (size.z * cammtx.m22) * 0.8f};
-    minimum.x = corner6.x < minimum.x ? corner6.x : minimum.x;
-    minimum.z = corner6.z < minimum.z ? corner6.z : minimum.z;
-    minimum.y = corner6.y < minimum.y ? corner6.y : minimum.y;
-    maximum.x = corner6.x > maximum.x ? corner6.x : maximum.x;
-    maximum.y = corner6.y > maximum.y ? corner6.y : maximum.y;
-    maximum.z = corner6.z > maximum.z ? corner6.z : maximum.z;
-    NUVEC corner7 = {
-        (((size.x * cammtx.m00) * 0.5f + cammtx.m30) + (size.y * cammtx.m10) * 0.5f) + (size.z * cammtx.m20) * 0.8f,
-        (((size.x * cammtx.m01) * 0.5f + cammtx.m31) + (size.y * cammtx.m11) * 0.5f) + (size.z * cammtx.m21) * 0.8f,
-        (((size.x * cammtx.m02) * 0.5f + cammtx.m32) + (size.y * cammtx.m12) * 0.5f) + (size.z * cammtx.m22) * 0.8f};
-    minimum.x = corner7.x < minimum.x ? corner7.x : minimum.x;
-    minimum.y = corner7.y < minimum.y ? corner7.y : minimum.y;
-    minimum.z = corner7.z < minimum.z ? corner7.z : minimum.z;
-    maximum.x = corner7.x > maximum.x ? corner7.x : maximum.x;
-    maximum.y = corner7.y > maximum.y ? corner7.y : maximum.y;
-    maximum.z = corner7.z > maximum.z ? corner7.z : maximum.z;
-    NuRndrDebBase.x = (maximum.x + minimum.x) * 0.5f - size.x * 0.5f;
-    NuRndrDebBase.z = (maximum.z + minimum.z) * 0.5f - size.z * 0.5f;
-    NuRndrDebBase.y = (maximum.y + minimum.y) * 0.5f - size.y * 0.5f;
-    NuRndrDebRange = size;
-    NuRndrDebRangeInv.x = 1.0f / size.x;
-    NuRndrDebRangeInv.y = 1.0f / size.y;
-    NuRndrDebRangeInv.z = 1.0f / size.z;
-}
+extern "C" void NuRndrSetDebBox(NUVEC *range);
 extern "C" {
-    i32 g_minmiplevel = 13;
-    f32 g_mipmapbias;
+extern i32 g_minmiplevel;
+extern f32 g_mipmapbias;
 }
 
-extern "C" void NuRndrSetGlobalMinMipLevel(i32 level) {
-    g_minmiplevel = level;
-}
-extern "C" void NuRndrSetGlobalMipMapBias(f32 bias) {
-    g_mipmapbias = bias;
-}
-f32 global_windspeed = 1.0f;
-f32 global_windscale = 1.0f;
-extern "C" void NuRndrSetWind(f32 speed, f32 scale) {
-    global_windspeed = speed;
-    global_windscale = scale;
-}
+extern "C" void NuRndrSetGlobalMinMipLevel(i32 level);
+extern "C" void NuRndrSetGlobalMipMapBias(f32 bias);
+extern f32 global_windspeed;
+extern f32 global_windscale;
+extern "C" void NuRndrSetWind(f32 speed, f32 scale);
 
-extern "C" void WindShear(NUMTX *output, NUMTX *input, i32 wind_scale, i32 wind_speed) {
-    u32 seed = static_cast<u32>(wind_speed);
-    const f32 amplitude = (static_cast<f32>(wind_scale) / 65535.0f) * global_windscale;
-    const f32 speed = (static_cast<f32>(wind_speed) / 65535.0f) * global_windspeed;
-    const f32 random = NuRandFloatSeeded(&seed);
-    const u32 frame = static_cast<u32>(NuRndrGlobalFrameCount());
-    const f32 phase = random * 3.142f + random * 3.142f + static_cast<f32>(frame) * speed;
-    const f32 shear_x =
-        (NU_SIN_LUT(4.2f * phase * 10430.3779296875f) * 0.25f +
-         (NU_SIN_LUT(2.1f * phase * 10430.3779296875f) * 0.5f + NU_SIN_LUT(phase * 10430.3779296875f))) *
-        amplitude;
-    const f32 shear_z =
-        (0.25f * NU_COS_LUT(4.4f * phase * 10430.3779296875f) +
-         (0.5f * NU_COS_LUT(2.3f * phase * 10430.3779296875f) + NU_COS_LUT(phase * 1.1f * 10430.3779296875f))) *
-        amplitude;
-    *output = *input;
-    output->m10 = input->m00 * shear_x + input->m10 + input->m20 * shear_z;
-    output->m11 = input->m01 * shear_x + input->m11 + input->m21 * shear_z;
-    output->m12 = input->m02 * shear_x + input->m12 + input->m22 * shear_z;
-    output->m13 = shear_x * input->m03 + input->m13 + shear_z * input->m23;
-}
+extern "C" void WindShear(NUMTX *output, NUMTX *input, i32 wind_scale, i32 wind_speed);
 
-extern "C" void NuRndrGrid(NUVEC *centre, NUVEC *size, i32 columns, i32 rows) {
-    NUMTX matrix = numtx_identity;
-    matrix.m30 = centre->x;
-    matrix.m31 = 0.0f;
-    matrix.m32 = centre->z;
-    matrix.m00 = size->x * 0.5f;
-    matrix.m11 = 1.0f;
-    matrix.m22 = size->z * 0.5f;
-    f32 dx = 2.0f / (f32)columns;
-    f32 dz = 2.0f / (f32)rows;
-    NuPrim3DBegin(2, 5, NULL, &matrix);
-    f32 x = -1.0f;
-    for (i32 i = 0; i <= columns; ++i, x += dx) {
-        NuRndrPrimSetColour(0xff00ff00);
-        NuRndrPrimPosition(x, 0.0f, -1.0f);
-        NuRndrPrimSetColour(0xff00ff00);
-        NuRndrPrimPosition(x, 0.0f, 1.0f);
-    }
-    f32 z = -1.0f;
-    for (i32 i = 0; i <= rows; ++i, z += dz) {
-        NuRndrPrimSetColour(0xff00ff00);
-        NuRndrPrimPosition(-1.0f, 0.0f, z);
-        NuRndrPrimSetColour(0xff00ff00);
-        NuRndrPrimPosition(1.0f, 0.0f, z);
-    }
-    NuPrim3DEnd();
-}
+extern "C" void NuRndrGrid(NUVEC *centre, NUVEC *size, i32 columns, i32 rows);
 
-extern "C" void NuRndrSolidTri(NUVEC *a, NUVEC *b, NUVEC *c, i32 colour) {
-    NuPrim3DBegin(0, 5, NULL, NULL);
-    NuRndrPrimSetColour(colour);
-    NuRndrPrimPosition(a->x, a->y, a->z);
-    NuRndrPrimSetColour(colour);
-    NuRndrPrimPosition(b->x, b->y, b->z);
-    NuRndrPrimSetColour(colour);
-    NuRndrPrimPosition(c->x, c->y, c->z);
-    NuPrim3DEnd();
-}
-extern "C" void NuRndrSphere(NUVEC *centre, f32 radius, i32 colour, f32 vertical_scale) {
-    f32 radius_squared = radius * radius;
-    for (i32 band = 0; band < 8; ++band) {
-        f32 lower_radius = radius * NU_SIN_LUT((band < 4 ? band : 8 - band) * 4096);
-        f32 upper_radius = radius * NU_SIN_LUT((band < 3 ? band + 1 : 7 - band) * 4096);
-        f32 lower_y = NuFsqrt(radius_squared - lower_radius * lower_radius) * vertical_scale;
-        f32 upper_y = NuFsqrt(radius_squared - upper_radius * upper_radius) * vertical_scale;
-        if (__builtin_expect(band > 4, 0))
-            lower_y = -lower_y;
-        if (__builtin_expect(band > 3, 0))
-            upper_y = -upper_y;
-        lower_y += centre->y;
-        upper_y += centre->y;
-        for (i32 angle = 0; angle < 65536; angle += 2048) {
-            NuRndrLine3dDbg(centre->x + lower_radius * NU_COS_LUT(angle), lower_y,
-                            centre->z + lower_radius * NU_SIN_LUT(angle), centre->x + upper_radius * NU_COS_LUT(angle),
-                            upper_y, centre->z + upper_radius * NU_SIN_LUT(angle), colour);
-            NuRndrLine3dDbg(centre->x + lower_radius * NU_COS_LUT(angle), lower_y,
-                            centre->z + lower_radius * NU_SIN_LUT(angle),
-                            centre->x + lower_radius * NU_COS_LUT(angle + 2048), lower_y,
-                            centre->z + lower_radius * NU_SIN_LUT(angle + 2048), colour);
-        }
-    }
-}
-extern "C" void NuRndrSphereEx(NUVEC *centre, f32 radius, i32 colour, f32 vertical_scale, i32 angle_step) {
-    f32 radius_squared = radius * radius;
-    for (i32 band = 0; band < 8; ++band) {
-        f32 lower_radius = radius * NU_SIN_LUT((band < 4 ? band : 8 - band) * 4096);
-        f32 upper_radius = radius * NU_SIN_LUT((band < 3 ? band + 1 : 7 - band) * 4096);
-        f32 lower_y = NuFsqrt(radius_squared - lower_radius * lower_radius) * vertical_scale;
-        f32 upper_y = NuFsqrt(radius_squared - upper_radius * upper_radius) * vertical_scale;
-        if (band > 4)
-            lower_y = -lower_y;
-        if (band > 3)
-            upper_y = -upper_y;
-        lower_y += centre->y;
-        upper_y += centre->y;
-        for (i32 angle = 0; angle < 65536; angle += angle_step) {
-            NuRndrLine3dDbg(centre->x + lower_radius * NU_COS_LUT(angle), lower_y,
-                            centre->z + lower_radius * NU_SIN_LUT(angle), centre->x + upper_radius * NU_COS_LUT(angle),
-                            upper_y, centre->z + upper_radius * NU_SIN_LUT(angle), colour);
-            NuRndrLine3dDbg(centre->x + lower_radius * NU_COS_LUT(angle), lower_y,
-                            centre->z + lower_radius * NU_SIN_LUT(angle),
-                            centre->x + lower_radius * NU_COS_LUT(angle + angle_step), lower_y,
-                            centre->z + lower_radius * NU_SIN_LUT(angle + angle_step), colour);
-        }
-    }
-}
-extern "C" void NuRndrSphereMtx(NUMTX *matrix, i32 colour, i32 segments, NUMTL *material) {
-    f32 step = 65536.0f / (f32)segments;
-    NuPrim3DBegin(3, 5, material, matrix);
-    f32 longitude = 0.0f;
-    for (i32 ring = 0; ring < segments / 2; ++ring, longitude += step) {
-        f32 sin_longitude = NU_SIN_LUT(longitude);
-        f32 cos_longitude = NU_SIN_LUT(longitude + 16384.0f);
-        f32 angle = 0.0f;
-        for (i32 i = 0; i <= segments; ++i, angle += step) {
-            f32 radius = NU_SIN_LUT(angle);
-            NuRndrPrimSetColour(colour);
-            NuRndrPrimPosition(radius * sin_longitude, NU_SIN_LUT(angle + 16384.0f), radius * cos_longitude);
-        }
-    }
-    NuPrim3DEnd();
-    f32 latitude = step;
-    for (i32 ring = 1; ring < segments / 2; ++ring, latitude += step) {
-        f32 radius = NU_SIN_LUT(latitude);
-        f32 y = NU_SIN_LUT(latitude + 16384.0f);
-        NuPrim3DBegin(3, 5, material, matrix);
-        f32 angle = 0.0f;
-        for (i32 i = 0; i <= segments; ++i, angle += step) {
-            NuRndrPrimSetColour(colour);
-            NuRndrPrimPosition(NU_SIN_LUT(angle) * radius, y, NU_SIN_LUT(angle + 16384.0f) * radius);
-        }
-        NuPrim3DEnd();
-    }
-}
+extern "C" void NuRndrSolidTri(NUVEC *a, NUVEC *b, NUVEC *c, i32 colour);
+extern "C" void NuRndrSphere(NUVEC *centre, f32 radius, i32 colour, f32 vertical_scale);
+extern "C" void NuRndrSphereEx(NUVEC *centre, f32 radius, i32 colour, f32 vertical_scale, i32 angle_step);
+extern "C" void NuRndrSphereMtx(NUMTX *matrix, i32 colour, i32 segments, NUMTL *material);
 extern "C" void NuRndrSphereTRS(NUVEC *translation, NUANGVEC *rotation, NUVEC *scale, i32 colour, i32 segments,
-                                NUMTL *material) {
-    NUMTX matrix;
-    if (rotation)
-        NuMtxSetRotateXYZ(&matrix, rotation);
-    else
-        matrix = numtx_identity;
-    if (translation)
-        NuMtxTranslate(&matrix, translation);
-    if (scale)
-        NuMtxPreScale(&matrix, scale);
-    NuRndrSphereMtx(&matrix, colour, segments, material);
-}
-extern "C" void NuRndrStartReflectionRender(i32) {
-    NuSpecialReflection(1);
-}
-extern "C" void NuRndrStartShadowReceiveRender(void) {
-    global_GobjIsShadowReceive = 1;
-}
+                                NUMTL *material);
+extern "C" void NuRndrStartReflectionRender(i32);
+extern "C" void NuRndrStartShadowReceiveRender(void);
 
-extern "C" i32 NuRndrStrip3d(NURND_VERTEX3D *vertices, numtl_s *material, NUMTX *matrix, i32 count) {
-    if (count == 0)
-        return 1;
-    NuPrim3DBegin(1, 7, material, matrix);
-    for (i32 i = 0; i < count; ++i) {
-        NURND_VERTEX3D *source = &vertices[i];
-        NuRndrPrimSetColour(source->colour);
-        NuRndrPrimUV(source->u, source->v);
-        f32 z = source->position.z;
-        f32 y = source->position.y;
-        f32 x = source->position.x;
-        PrimVertexRaw *vertex = (PrimVertexRaw *)g_NuPrim_StreamBufferPtr->void_ptr;
-        vertex->x = x;
-        vertex->y = y;
-        vertex->z = z;
-        g_NuPrim_StreamBufferPtr->u8_ptr += sizeof(PrimVertexRaw);
-        ++g_NuPrim_VertexCount;
-    }
-    NuPrim3DEnd();
-    return 1;
-}
-extern "C" void NuRndrTriStrip2di(i32 *positions, f32 *uvs, i32 count, i32 colour, NUMTL *material) {
-    NuPrim2DBegin(1, 7, material);
-    if (count > 0) {
-        const i32 end = count * 2;
-        for (i32 i = 0; i != end; i += 2) {
-            NuRndrPrimSetColour(colour);
-            if (uvs) {
-                NuRndrPrimUV(uvs[i], uvs[i + 1]);
-            }
-            NuPrim2DAddXYZ((f32)positions[i] * 0.0625f, (f32)positions[i + 1] * 0.0625f, 0.0f);
-        }
-    }
-    NuPrim2DEnd();
-}
-extern "C" i32 NuRndrTri3dClip(NURND_VERTEX3D *vertices, i32 count, NUMTX *matrix, numtl_s *material) {
-    if (count == 0)
-        return 1;
-    NuPrim3DBegin(0, 7, material, matrix);
-    for (i32 i = 0; i < count; ++i) {
-        NuRndrPrimSetColour(vertices[i].colour);
-        NuRndrPrimUV(vertices[i].u, vertices[i].v);
-        f32 z = vertices[i].position.z;
-        f32 y = vertices[i].position.y;
-        f32 x = vertices[i].position.x;
-        PrimVertexRaw *vertex = (PrimVertexRaw *)g_NuPrim_StreamBufferPtr->void_ptr;
-        vertex->x = x;
-        vertex->y = y;
-        vertex->z = z;
-        g_NuPrim_StreamBufferPtr->u8_ptr += sizeof(PrimVertexRaw);
-        ++g_NuPrim_VertexCount;
-    }
-    NuPrim3DEnd();
-    return 1;
-}
-extern "C" i32 NuRndrTriStrip3dClip(NURND_VERTEX3D *vertices, i32 count, NUMTX *matrix, numtl_s *material) {
-    return NuRndrStrip3d(vertices, material, matrix, count);
-}
-i32 global_GobjWasDrawnUnreflected;
-extern "C" i32 NuRndrWasDrawnUnreflectedGobj(void) {
-    return global_GobjWasDrawnUnreflected;
-}
-extern "C" void NuRndrWireTri(NUVEC *a, NUVEC *b, NUVEC *c, i32 colour) {
-    NuPrim3DBegin(3, 5, NULL, NULL);
-    NuRndrPrimSetColour(colour);
-    NuRndrPrimPosition(a->x, a->y, a->z);
-    NuRndrPrimSetColour(colour);
-    NuRndrPrimPosition(b->x, b->y, b->z);
-    NuRndrPrimSetColour(colour);
-    NuRndrPrimPosition(c->x, c->y, c->z);
-    NuRndrPrimSetColour(colour);
-    NuRndrPrimPosition(a->x, a->y, a->z);
-    NuPrim3DEnd();
-}
+extern "C" i32 NuRndrStrip3d(NURND_VERTEX3D *vertices, numtl_s *material, NUMTX *matrix, i32 count);
+extern "C" void NuRndrTriStrip2di(i32 *positions, f32 *uvs, i32 count, i32 colour, NUMTL *material);
+extern "C" i32 NuRndrTri3dClip(NURND_VERTEX3D *vertices, i32 count, NUMTX *matrix, numtl_s *material);
+extern "C" i32 NuRndrTriStrip3dClip(NURND_VERTEX3D *vertices, i32 count, NUMTX *matrix, numtl_s *material);
+extern i32 global_GobjWasDrawnUnreflected;
+extern "C" i32 NuRndrWasDrawnUnreflectedGobj(void);
+extern "C" void NuRndrWireTri(NUVEC *a, NUVEC *b, NUVEC *c, i32 colour);
 
 // Shader / texture / vertex state
 extern "C" {
@@ -1556,9 +319,4 @@ extern "C" void NuShaderGetDirtyMask(NUSHADERUSAGEMASK *mask, NUSHADEROBJECT *sh
         shader->last_camera_packet = camera_packet;
     }
 }
-extern "C" void NuTextureBlendEffect(i32 arg0, i32 arg1, NUVEC4 *parameters) {
-    currentScene.texture_blend_arg0 = arg0;
-    currentScene.texture_blend_arg1 = arg1;
-    currentScene.texture_blend_enabled = 1;
-    currentScene.texture_blend_parameters = *parameters;
-}
+extern "C" void NuTextureBlendEffect(i32 arg0, i32 arg1, NUVEC4 *parameters);

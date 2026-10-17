@@ -17,20 +17,10 @@ struct SHOPINPUT;
 
 static u8 *crashdata;
 
+#include "legoapi/render/core/gameliball_types.h"
+
 namespace {
 
-    struct TERRAIN_FILE_CHUNK {
-        i16 chunk_count; // only meaningful in the first descriptor
-        u16 version;
-        u32 data_word_count;
-        NUVEC origin;
-        i16 chunk_type;
-        u16 field_0x16;
-        u8 pad_0x18[0x14];
-        u32 field_0x2c;
-        u16 field_0x30;
-        u16 field_0x32;
-    };
     DECOMP_ASSERT(sizeof(TERRAIN_FILE_CHUNK) == 0x34, "TERRAIN_FILE_CHUNK ABI");
 
     inline void BuildTerrainSpatialBounds(TERRAIN_SPATIAL_NODE *node) {
@@ -86,11 +76,7 @@ i32 ReadTerrain(unsigned char *base_path, i32 first_group, i16 **buffer, TERRSET
 
 extern "C" u8 *CrashDataPtr(void);
 
-void ReadInstanceIDs(i32 file, nugscn_s *scene) {
-    scene->num_instance_ids = NuFileReadInt(file);
-    NuFileReadInt(file);
-    scene->instance_ids = NuMemFileAddr(file);
-}
+void ReadInstanceIDs(i32 file, nugscn_s *scene);
 
 i32 ReadTerrainPickup(unsigned char *base_path, i16 **buffer, TERRPICKUPSET *terrain);
 
@@ -2193,12 +2179,6 @@ static void edgracbCancelChangeInstanceMenu(eduimenu_s *, eduimenu_s *);
 static float g_audioVersion;
 static u32 seed = 0x20558057;
 
-struct SoundGroup {
-    i16 first_sample;
-    i16 sample_count;
-    i16 field_0x4;
-    i16 field_0x6;
-};
 
 i32 g_numGroups;
 SoundGroup g_groups[128];

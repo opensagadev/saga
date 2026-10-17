@@ -8,8 +8,9 @@ cc_test(
     size = "small",
     srcs = [
         "pak_loader_test.cpp",
+        "//src:gamelib/util/VirtualStackAllocator.cpp",
         "//src:legoapi/characters/motion/gameanim.cpp",
-        "//src:nu2api/nucore/nuanim.cpp",
+        "//src:nu2api/nu3d/nu3d_includes.cpp",
         "//src:nu2api/nucore/nuptrblock.cpp",
     ],
     additional_compiler_inputs = ["//src:all_source_files"],
