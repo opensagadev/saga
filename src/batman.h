@@ -44,7 +44,7 @@
 #include "legoapi/world/levels/levels.h"
 
 // ----------------------------------------------------------------------
-// Main game loop (module batman.cpp).
+// Main game loop (module main.cpp).
 //
 // NuMain is the TCS application entry point installed from the platform
 // layer: it owns the full main loop (area setup, per-frame update/draw of

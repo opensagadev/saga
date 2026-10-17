@@ -115,7 +115,7 @@ static inline void Ledge_UpdateUnattached(WORLDINFO_s *world, GameObject_s *obje
 
 void Ledge_MoveCode(WORLDINFO_s *world, GameObject_s *object);
 
-// ==== src/legoapi/props/objects/ledge.cpp: declarations ====
+// ==== src/legoapi/props/objects/ledgeterrain.cpp: declarations ====
 #include "decomp.h"
 #include "legoapi/actions/movement/jumping.h"
 #include "globals.h"

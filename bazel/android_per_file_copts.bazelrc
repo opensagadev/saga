@@ -10,7 +10,7 @@
 # their VuVec static initializers use SLP-merged movaps stores, and their
 # loops and adjacent float stores keep the vectorizer's instruction shapes.
 
-build:target --per_file_copt=^src/batman\.cpp$@-O2
+build:target --per_file_copt=^src/main\.cpp$@-O2
 # The original numaths.c has C++ linkage and constructs per-TU VuVec constants.
 build --per_file_copt=^src/nu2api/numath/numaths\.c$@-x,c++,-std=gnu++11
 build --per_file_copt=^src/nu2api/numath/nufloat_android\.c$@-x,c++,-std=gnu++11
@@ -73,7 +73,7 @@ build:target --per_file_copt=^src/legoapi/menus/screens/shop\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/menus/screens/gamestructure\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/core/startup/game\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/core/startup/text\.cpp$@-O3
-build:target --per_file_copt=^src/legoapi/core/startup/main\.cpp$@-O3
+build:target --per_file_copt=^src/legoapi/core/startup/finishloop\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/core/startup/virtual\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/cutscenes/cutscenes\.cpp$@-O3
 build:target --per_file_copt=^src/legogame/startup\.cpp$@-O3
@@ -134,7 +134,7 @@ build:target --per_file_copt=^src/legoapi/gizmo/base/gizmessage\.cpp$@-O3
 # The flow-box initializer and remap helpers match the target better at -O3.
 build:target --per_file_copt=^src/legoapi/gizmo/base/gizflow\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmo/base/gizmo_sys\.cpp$@-O3
-build:target --per_file_copt=^src/legoapi/world/level\.cpp$@-O3
+build:target --per_file_copt=^src/legoapi/world/levels/levels\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/core/input/qrand\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/characters/core/players\.cpp$@-O3
 # FinishWeirdoNames uses GCC's -O3 vectorized variable-length fill in the original.
@@ -233,7 +233,7 @@ build:target --per_file_copt=^src/legoapi/gizmos/fx/guidelines\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmos/object/hatmachine\.cpp$@-O3
 # Ledge progress, loading, and attachment code use the target's compact O2
 # lowering; this also preserves the unit's already-exact registration leaves.
-build:target --per_file_copt=^src/legoapi/gizmos/transport/ledges\.cpp$@-O3
+build:target --per_file_copt=^src/legoapi/gizmos/transport/ledge\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmos/object/lever\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmos/trigger/gizminicut\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmos/door/plugs\.cpp$@-O3
@@ -482,7 +482,7 @@ build:target --per_file_copt=^src/legoapi/characters/core/charconfig\.cpp$@-fno-
 build:target --per_file_copt=^src/legoapi/core/config/config\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/core/config/config\.cpp$@-ftree-vectorize
 build:target --per_file_copt=^src/legoapi/characters/motion/move\.cpp$@-O3
-build:target --per_file_copt=^src/legoapi/props/objects/ledge\.cpp$@-O3
+build:target --per_file_copt=^src/legoapi/props/objects/ledgeterrain\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/props/objects/techno\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/props/objects/zipup\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/actions/movement/pushing\.cpp$@-O3
