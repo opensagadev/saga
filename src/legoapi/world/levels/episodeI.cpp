@@ -916,10 +916,16 @@ void PodRaceUpdate(WORLDINFO_s *world, float dt) {
                     float distance_sq = NuVecDistSqr(&player->apiobj.collision_position,
                                                      &object->apiobj.collision_position, &difference);
                     if (distance_sq > 36.0f) {
-                        NUVEC target = {3.0f - NuRandFloat() * 3.0f, 0.0f, 3.0f};
+                        NUVEC target;
+                        target.x = 3.0f - NuRandFloat() * 3.0f;
+                        target.y = 0.0f;
+                        target.z = 3.0f;
                         NuVecRotateY(&target, &target, player->yrot);
                         NuVecAdd(&target, &target, &player->apiobj.collision_position);
-                        NUVEC target_velocity = {0.0f, 0.0f, CurrentSpeed};
+                        NUVEC target_velocity;
+                        target_velocity.x = 0.0f;
+                        target_velocity.y = 0.0f;
+                        target_velocity.z = CurrentSpeed;
                         NuVecRotateY(&target_velocity, &target_velocity, player->yrot);
                         MakeThrowVector(&velocity, &origin, &target, &target_velocity, 20.0f, -10.0f);
                         if (distance_sq > 100.0f) {

@@ -5848,10 +5848,11 @@ uv1deb *GenDebIndexRadialStar(debkeydatatype_s *key, debinftype *effect, float t
     i32 segment_angle = 0x10000 / static_cast<i8>(effect->radial_segments);
     i32 phase = static_cast<i32>(static_cast<f32>((angle_y + 0x10000) % segment_angle) /
                                  static_cast<f32>(segment_angle) * 32768.0f);
-    NUVEC vector = {
-        0.0f,
-        ((1.0f - effect->radial_floor) * (1.0f - NuTrigTable[(phase >> 1) & 0x7fff]) + effect->radial_floor) * radius,
-        0.0f};
+    NUVEC vector;
+    vector.x = 0.0f;
+    vector.y =
+        ((1.0f - effect->radial_floor) * (1.0f - NuTrigTable[(phase >> 1) & 0x7fff]) + effect->radial_floor) * radius;
+    vector.z = 0.0f;
     NuVecRotateZ(&vector, &vector, angle_z);
     NuVecRotateY(&vector, &vector, angle_y);
     NuVecMtxTransformVU0(&vector, &vector, &key->emitter_orientation);
@@ -5876,9 +5877,8 @@ uv1deb *GenDebIndexRadialStar(debkeydatatype_s *key, debinftype *effect, float t
     particle->momentum.x += key->momentum.x;
     particle->momentum.y += key->momentum.y;
     particle->momentum.z += key->momentum.z;
-    auto key_particle_count = key->particle_count;
     for (i32 trail = 0; trail < static_cast<i8>(effect->trail_count); ++trail) {
-        if (key->field_18a >= key_particle_count)
+        if (key->field_18a >= key->particle_count)
             key->field_18a = 0;
         dma_particle_s *copy = DebrisParticleAt(key, key->field_18a++, 0);
         *copy = particle_chunk->particles[particle_offset];
@@ -5930,7 +5930,10 @@ uv1deb *GenDebIndexImprovedRadial(debkeydatatype_s *key, debinftype *effect, flo
     i16 angle_z = static_cast<i16>(static_cast<i32>(radians * 10430.4f));
     i32 angle_y = static_cast<i32>(displacement.y) +
                   static_cast<i32>(static_cast<f32>(random_angle) * effect->field_050 * 0.000030517578125f);
-    NUVEC vector = {displacement.x, 0.0f, 0.0f};
+    NUVEC vector;
+    vector.x = displacement.x;
+    vector.y = 0.0f;
+    vector.z = 0.0f;
     NuVecRotateZ(&vector, &vector, angle_z);
     NuVecRotateY(&vector, &vector, angle_y);
     NuVecMtxTransformVU0(&vector, &vector, &key->emitter_orientation);
@@ -5984,7 +5987,10 @@ uv1deb *GenDebIndexRadialRotor(debkeydatatype_s *key, debinftype *effect, float 
     NuVecAdd(&displacement, &displacement, reinterpret_cast<NUVEC *>(&effect->field_058));
     i32 angle_y = static_cast<i32>(static_cast<f32>(key->emitter_rotation_x) + displacement.y);
     i32 angle_z = static_cast<i32>(static_cast<f32>(key->emitter_rotation_y) + displacement.z);
-    NUVEC vector = {0.0f, displacement.x, 0.0f};
+    NUVEC vector;
+    vector.x = 0.0f;
+    vector.y = displacement.x;
+    vector.z = 0.0f;
     NuVecRotateZ(&vector, &vector, angle_z);
     NuVecRotateY(&vector, &vector, angle_y);
     NuVecMtxTransformVU0(&vector, &vector, &key->emitter_orientation);
@@ -6050,7 +6056,10 @@ uv1deb *GenDebIndexRadial(debkeydatatype_s *key, debinftype *effect, float time)
         radius = (globaltime - key->last_update_time) / effect->scale_in_time * effect->field_058;
     else
         radius = effect->field_058;
-    NUVEC vector = {0.0f, radius, 0.0f};
+    NUVEC vector;
+    vector.x = 0.0f;
+    vector.y = radius;
+    vector.z = 0.0f;
     NuVecRotateZ(&vector, &vector, angle_z);
     NuVecRotateY(&vector, &vector, angle_y);
     NuVecMtxTransformVU0(&vector, &vector, &key->emitter_orientation);
@@ -6386,20 +6395,25 @@ static __attribute__((used)) void edanimcbMCTBCardPresent(eduimenu_s *menu, edui
 }
 
 uv1deb *GenDebIndexSpheroid(debkeydatatype_s *key, debinftype *effect, float time) {
-    i16 particle_index = key->field_18a;
-    if (particle_index < key->particle_count) {
-        ++key->field_18a;
+    u16 particle_index = key->field_18a;
+    u16 next_particle_index;
+    if (static_cast<i16>(particle_index) < key->particle_count) {
+        next_particle_index = particle_index + 1;
     } else {
         particle_index = 0;
-        key->field_18a = 1;
+        next_particle_index = 1;
     }
 
     dma_particle_s *particle = DebrisParticleAt(key, particle_index, effect->particle_type);
+    key->field_18a = next_particle_index;
     particle->start_time = time;
     key->emission_epoch = time;
     particle->inverse_lifetime = 64.0f / effect->particle_lifetime;
 
-    NUVEC vector = {NuFsqrt(NuRandFloatSeeded(&debrisseed)), 0.0f, 0.0f};
+    NUVEC vector;
+    vector.x = NuFsqrt(NuRandFloatSeeded(&debrisseed));
+    vector.y = 0.0f;
+    vector.z = 0.0f;
     i32 angle_y = static_cast<i32>(NuRandFloatSeeded(&debrisseed) * 65536.0f);
     f32 random = NuRandFloatSeeded(&debrisseed);
     f32 sine = random + random - 1.0f;
@@ -6437,14 +6451,16 @@ uv1deb *GenDebIndexSpheroid(debkeydatatype_s *key, debinftype *effect, float tim
     particle->momentum.z += key->momentum.z;
 
     for (i32 trail = 0; trail < static_cast<i8>(effect->trail_count); ++trail) {
-        i16 trail_index = key->field_18a;
-        if (trail_index < key->particle_count) {
-            ++key->field_18a;
+        u16 trail_index = key->field_18a;
+        u16 next_trail_index;
+        if (static_cast<i16>(trail_index) < key->particle_count) {
+            next_trail_index = trail_index + 1;
         } else {
             trail_index = 0;
-            key->field_18a = 1;
+            next_trail_index = 1;
         }
         dma_particle_s *trail_particle = DebrisParticleAt(key, trail_index, effect->particle_type);
+        key->field_18a = next_trail_index;
         *trail_particle = *particle;
         trail_particle->start_time += static_cast<f32>(trail + 1) * effect->trail_time;
     }
@@ -9021,8 +9037,10 @@ uv1deb *GenDebIndexBounceXZ(debkeydatatype_s *key, debinftype *effect, float tim
     NuVecRotateY(&normal, &normal, key->reflection_y);
     NUVEC plane_position;
     NuVecScale(&plane_position, &normal, key->collision_plane);
-    NUVEC end_position = {particle->momentum.x * effect->particle_lifetime + particle->position.x, 0.0f,
-                          effect->particle_lifetime * particle->momentum.z + particle->position.z};
+    NUVEC end_position;
+    end_position.x = particle->momentum.x * effect->particle_lifetime + particle->position.x;
+    end_position.y = 0.0f;
+    end_position.z = effect->particle_lifetime * particle->momentum.z + particle->position.z;
     NUVEC start_delta, end_delta;
     NuVecSub(&start_delta, &plane_position, &particle->position);
     NuVecSub(&end_delta, &plane_position, &end_position);
@@ -9098,27 +9116,26 @@ uv1deb *GenDebIndexBounceY(debkeydatatype_s *key, debinftype *effect, float time
 
     f32 first, second;
     if (SolveQuadratic(effect->field_0a0, particle->momentum.y, particle->position.y - key->collision_plane, &first,
-                       &second)) {
-        if ((first > second ? first : second) > 0.0f && effect->particle_lifetime > (first > second ? first : second)) {
-            DebrisGetControlStackLock();
-            if (freechunkcontrolsptr < debrischunks + debrischunksglass) {
-                const f32 collision_time = first > second ? first : second;
-                freechunkcontrols[freechunkcontrolsptr]->particle_chunk = chunk;
-                freechunkcontrols[freechunkcontrolsptr]->active = 5;
-                freechunkcontrols[freechunkcontrolsptr]->owner = NULL;
-                freechunkcontrols[freechunkcontrolsptr]->effect_index = key->effect_index;
-                freechunkcontrols[freechunkcontrolsptr]->expiry_time = time + collision_time;
-                freechunkcontrols[freechunkcontrolsptr]->collision_plane = key->collision_plane;
-                freechunkcontrols[freechunkcontrolsptr]->rotation_y = 0;
-                freechunkcontrols[freechunkcontrolsptr]->field_01e = 0;
-                freechunkcontrols[freechunkcontrolsptr]->restitution = key->reflection_scale;
-                freechunkcontrols[freechunkcontrolsptr]->collision_time = collision_time;
-                freechunkcontrols[freechunkcontrolsptr]->particle_index = key->field_18a % 32;
-                AddChunkControlToStack(freechunkcontrols[freechunkcontrolsptr], &debris_chunk_control_stack[0]);
-                ++freechunkcontrolsptr;
-            }
-            DebrisReleaseControlStackLock();
+                       &second) &&
+        (first > second ? first : second) > 0.0f && effect->particle_lifetime > (first > second ? first : second)) {
+        DebrisGetControlStackLock();
+        if (freechunkcontrolsptr < debrischunks + debrischunksglass) {
+            const f32 collision_time = first > second ? first : second;
+            freechunkcontrols[freechunkcontrolsptr]->particle_chunk = chunk;
+            freechunkcontrols[freechunkcontrolsptr]->active = 5;
+            freechunkcontrols[freechunkcontrolsptr]->owner = NULL;
+            freechunkcontrols[freechunkcontrolsptr]->effect_index = key->effect_index;
+            freechunkcontrols[freechunkcontrolsptr]->expiry_time = time + collision_time;
+            freechunkcontrols[freechunkcontrolsptr]->collision_plane = key->collision_plane;
+            freechunkcontrols[freechunkcontrolsptr]->rotation_y = 0;
+            freechunkcontrols[freechunkcontrolsptr]->field_01e = 0;
+            freechunkcontrols[freechunkcontrolsptr]->restitution = key->reflection_scale;
+            freechunkcontrols[freechunkcontrolsptr]->collision_time = collision_time;
+            freechunkcontrols[freechunkcontrolsptr]->particle_index = key->field_18a % 32;
+            AddChunkControlToStack(freechunkcontrols[freechunkcontrolsptr], &debris_chunk_control_stack[0]);
+            ++freechunkcontrolsptr;
         }
+        DebrisReleaseControlStackLock();
     }
     if (key->momentum_adjuster != NULL)
         key->momentum_adjuster(key, effect, reinterpret_cast<uv1deb *>(particle));
@@ -15542,36 +15559,35 @@ void cbFileSaveEffects(eduimenu_s *parent, eduiitem_s *, u32) {
     i32 backup_succeeded = 1;
     if (edpp_usememcard == 0 && edbits_override_backups == 0 && valid_page)
         backup_succeeded = EdFileBackup(filename, backup);
-    const char *message;
-    u32 colours[4];
-    // Each outcome builds its own message menu in the original.
-    if (!valid_page || !edppSaveEffects(filename, edpp_effect_list)) {
-        colours[0] = 0x800000c0;
-        colours[1] = 0x80ff0000;
-        colours[2] = 0x80808080;
-        colours[3] = 0x80404040;
-        messagemenu = eduiMenuCreate(70, 70, 180, 250, ed_fnt, cbCancelMessageMenu, "Message");
-        message = "File Save Error";
-    } else if (backup_succeeded != 0) {
-        colours[0] = 0x8000c000;
-        colours[1] = 0x80ff0000;
-        colours[2] = 0x80808080;
-        colours[3] = 0x80404040;
-        messagemenu = eduiMenuCreate(70, 70, 180, 250, ed_fnt, cbCancelMessageMenu, "Message");
-        message = "Saved OK";
+    if (valid_page && edppSaveEffects(filename, edpp_effect_list)) {
+        if (backup_succeeded != 0) {
+            u32 colours[4] = {0x8000c000, 0x80ff0000, 0x80808080, 0x80404040};
+            messagemenu = eduiMenuCreate(70, 70, 180, 250, ed_fnt, cbCancelMessageMenu, "Message");
+            if (messagemenu != NULL) {
+                eduiMenuAddItem(messagemenu, eduiItemSelCreate(1, colours, 0, 0, NULL, "Saved OK"));
+                eduiMenuAttach(parent, messagemenu);
+                messagemenu->x = parent->x + 10;
+                messagemenu->y = parent->y + 40;
+            }
+        } else {
+            u32 colours[4] = {0x8000c000, 0x80ff0000, 0x80808080, 0x80404040};
+            messagemenu = eduiMenuCreate(70, 70, 180, 250, ed_fnt, cbCancelMessageMenu, "Message");
+            if (messagemenu != NULL) {
+                eduiMenuAddItem(messagemenu, eduiItemSelCreate(1, colours, 0, 0, NULL, "Saved OK - Backup Failed"));
+                eduiMenuAttach(parent, messagemenu);
+                messagemenu->x = parent->x + 10;
+                messagemenu->y = parent->y + 40;
+            }
+        }
     } else {
-        colours[0] = 0x8000c000;
-        colours[1] = 0x80ff0000;
-        colours[2] = 0x80808080;
-        colours[3] = 0x80404040;
+        u32 colours[4] = {0x800000c0, 0x80ff0000, 0x80808080, 0x80404040};
         messagemenu = eduiMenuCreate(70, 70, 180, 250, ed_fnt, cbCancelMessageMenu, "Message");
-        message = "Saved OK - Backup Failed";
-    }
-    if (messagemenu != NULL) {
-        eduiMenuAddItem(messagemenu, eduiItemSelCreate(1, colours, 0, 0, NULL, const_cast<char *>(message)));
-        eduiMenuAttach(parent, messagemenu);
-        messagemenu->x = parent->x + 10;
-        messagemenu->y = parent->y + 40;
+        if (messagemenu != NULL) {
+            eduiMenuAddItem(messagemenu, eduiItemSelCreate(1, colours, 0, 0, NULL, "File Save Error"));
+            eduiMenuAttach(parent, messagemenu);
+            messagemenu->x = parent->x + 10;
+            messagemenu->y = parent->y + 40;
+        }
     }
     if (original_directory[0] != '\0')
         NuFileSetCurrentDirectory(original_directory);
@@ -17394,11 +17410,10 @@ extern "C" {
     i32 edgraLoadPage(char *path, void *gscn, i32 terrain, void *buf, void *buf_end) {
         i32 page = -1;
         for (i32 index = 0; index < 8; ++index) {
-            if (__builtin_expect(edgra_page_used[index] != 0, 1)) {
-                continue;
+            if (edgra_page_used[index] == 0) {
+                page = index;
+                break;
             }
-            page = index;
-            break;
         }
         if (page == -1) {
             return -1;
@@ -17406,7 +17421,7 @@ extern "C" {
 
         VARIPTR *buffer = static_cast<VARIPTR *>(buf);
         usize matrix_base;
-        if (__builtin_expect(edbits_editmode == 1 && edgra_mtxbuffer != NULL, 0)) {
+        if (edbits_editmode == 1 && edgra_mtxbuffer != NULL) {
             matrix_base = reinterpret_cast<usize>(edgra_mtxbuffer);
         } else {
             matrix_base = ALIGN(buffer->addr, 16);
@@ -17419,7 +17434,7 @@ extern "C" {
         }
         EdFileSetReadWrongEndianess(1);
         const i32 version = EdFileReadInt();
-        if (__builtin_expect(version < 1 || version > 9, 0)) {
+        if (version < 1 || version > 9) {
             EdFileSetReadWrongEndianess(0);
             EdFileClose();
             return -1;
@@ -17433,22 +17448,22 @@ extern "C" {
             edgra_global_fadeout = 25.0f;
         }
 
-        const i32 file_clump_count = EdFileReadInt();
-        const i32 available = EDGRA_MAX_CLUMPS - edgra_clumps_used;
-        const i32 clump_count = MIN(file_clump_count, available);
+        i32 clump_count = EdFileReadInt();
+        if (clump_count + edgra_clumps_used > EDGRA_MAX_CLUMPS) {
+            clump_count = EDGRA_MAX_CLUMPS - edgra_clumps_used;
+        }
         const i32 matrix_count = version >= 8 ? EdFileReadInt() : 0x3000;
-        usize vector_cursor = matrix_base + static_cast<usize>(matrix_count) * sizeof(NUMTX);
+        usize vector_cursor;
         if (edbits_editmode == 1 && edgra_vecbuffer != NULL) {
             vector_cursor = reinterpret_cast<usize>(edgra_vecbuffer);
+        } else {
+            vector_cursor = matrix_base + static_cast<usize>(matrix_count) * sizeof(NUMTX);
         }
 
         i32 slot = 0;
         for (i32 file_index = 0; file_index < clump_count; ++file_index) {
-            while (slot < EDGRA_MAX_CLUMPS && GrassClumps[slot].element_count != 0) {
+            while (GrassClumps[slot].element_count != 0 && slot < EDGRA_MAX_CLUMPS) {
                 ++slot;
-            }
-            if (slot == EDGRA_MAX_CLUMPS) {
-                break;
             }
 
             edgra_clump_s *clump = &GrassClumps[slot];
@@ -17489,7 +17504,7 @@ extern "C" {
                 clump->field_30 = EdFileReadFloat();
             }
 
-            if (__builtin_expect(version < 5, 0)) {
+            if (version < 5) {
                 clump->rotation_z = 0;
                 clump->rotation_y = 0;
             } else {
@@ -17560,15 +17575,16 @@ extern "C" {
                 }
             }
 
-            edgra_page_vectors_valid[page] = version >= 8;
             clump->vector_buffer = reinterpret_cast<void *>(vector_cursor);
             if (version >= 8) {
-                NUVEC *vectors = static_cast<NUVEC *>(clump->vector_buffer);
+                edgra_page_vectors_valid[page] = 1;
                 for (i32 element = 0; element < clump->element_count; ++element) {
-                    vectors[element].x = EdFileReadFloat();
-                    vectors[element].y = EdFileReadFloat();
-                    vectors[element].z = EdFileReadFloat();
+                    static_cast<NUVEC *>(clump->vector_buffer)[element].x = EdFileReadFloat();
+                    static_cast<NUVEC *>(clump->vector_buffer)[element].y = EdFileReadFloat();
+                    static_cast<NUVEC *>(clump->vector_buffer)[element].z = EdFileReadFloat();
                 }
+            } else {
+                edgra_page_vectors_valid[page] = 0;
             }
             if (clump->element_count < 4) {
                 clump->element_count = 4;
@@ -17599,7 +17615,7 @@ extern "C" {
         edgra_page_used[page] = 1;
         edgra_page_scene[page] = static_cast<NUGSCN *>(gscn);
         edgra_page_terrain[page] = reinterpret_cast<void *>(static_cast<usize>(static_cast<u32>(terrain)));
-        if (edgra_vecbuffer == NULL || edbits_editmode != 1) {
+        if (edbits_editmode != 1 || edgra_vecbuffer == NULL) {
             buffer->addr = vector_cursor;
         }
         (void)buf_end;
@@ -19674,11 +19690,10 @@ i32 CheckCylinder(i32 first_vertex, i32 second_vertex, i32 *vertex_mask, i32 rem
             return 0;
         }
 
-        NUVEC local_normal = {
-            -query->transformed_vertices[second_vertex].x,
-            -query->transformed_vertices[second_vertex].y,
-            0.0f,
-        };
+        NUVEC local_normal;
+        local_normal.x = -query->transformed_vertices[second_vertex].x;
+        local_normal.y = -query->transformed_vertices[second_vertex].y;
+        local_normal.z = 0.0f;
         RotateVec(&local_normal, &local_normal);
         const NUVEC &surface_normal = query->working_surface->normals[0];
         if (local_normal.x * surface_normal.x + local_normal.y * surface_normal.y + local_normal.z * surface_normal.z <=
@@ -20217,7 +20232,10 @@ i32 HitWallSpline() {
         const f32 distance_sq = dx * dx + dz * dz;
         if (!(64.0f > fabsf(dx) && 64.0f > fabsf(dz) && reach * reach > distance_sq))
             continue;
-        NUVEC direction = {mx, 0.0f, mz};
+        NUVEC direction;
+        direction.x = mx;
+        direction.y = 0.0f;
+        direction.z = mz;
         NuVecNorm(&direction, &direction);
         const f32 along = direction.x * dx + direction.z * dz;
         const f32 padded_radius = radius + 0.0005f;
@@ -22582,7 +22600,10 @@ extern "C" void TerrainWallSideSlide(NUVEC *movement, void *id, f32 speed, f32 u
     if (CurTrackInfo == NULL || CurTrackInfo->wall_contact_state == 0)
         return;
     if (speed != 0.0f) {
-        NUVEC slide = {0.0f, 0.0f, speed};
+        NUVEC slide;
+        slide.x = 0.0f;
+        slide.y = 0.0f;
+        slide.z = speed;
         NuVecRotateY(&slide, &slide, angle);
         FullDeflect(&CurTrackInfo->impact_normal, &slide, &slide);
         slide.x += (speed * CurTrackInfo->impact_normal.x) * 0.4f;

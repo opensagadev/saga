@@ -1056,7 +1056,7 @@ void GameCreatureOpponentSelection(AISYS_s *system, i32 count, APIOBJECT_s **obj
             AIPACKET *packet = object->ai;
             packet->opponent_metric = packet->pending_opponent_metric;
             packet->opponent_object = packet->pending_opponent;
-            packet->field_0x1e5 = (packet->field_0x1e5 & ~8) | ((packet->field_0x1e5 >> 1) & 8);
+            packet->opponent_is_threat = packet->field_0x1e5_bit4;
             packet = object->ai;
             packet->nearest_opponent_metric = packet->pending_nearest_metric;
             packet->nearest_opponent_object = packet->pending_nearest_opponent;
@@ -2648,7 +2648,7 @@ GameObject_s *AddDynamicCreature(i32 model, nuvec_s *position, i32 angle, char *
     const u32 model_flags = character->model_flags;
     if ((model_flags & 0x200) != 0) {
         object->apiobj.field_0x1f4 |= 0x404;
-    } else if ((model_flags & 0x400) != 0) {
+    } else if ((model_flags & 4) != 0) {
         object->apiobj.field_0x1f4 |= 0x401;
     }
     if ((model_flags & 0x1000) == 0)
@@ -2690,11 +2690,11 @@ GameObject_s *AddDynamicCreature(i32 model, nuvec_s *position, i32 angle, char *
         object->apiobj.pitch_angle = static_cast<u16>(-pitch);
 
         if (spline_offset != NULL) {
-            NUVEC *stored_offset = &object->movement_spline_offset;
-            *stored_offset = *spline_offset;
-            if (spline_offset->x != 0.0f || spline_offset->y != 0.0f || spline_offset->z != 0.0f) {
-                NuVecRotateX(&offset, spline_offset, static_cast<u16>(-pitch));
-                NuVecRotateY(&offset, &offset, yaw);
+            object->movement_spline_offset = *spline_offset;
+            if (object->movement_spline_offset.x != 0.0f || object->movement_spline_offset.y != 0.0f ||
+                object->movement_spline_offset.z != 0.0f) {
+                NuVecRotateX(&offset, &object->movement_spline_offset, static_cast<u16>(-pitch));
+                NuVecRotateY(&offset, &offset, object->apiobj.field_0x276);
                 NuVecAdd(&spline_point, &spline_point, &offset);
             }
         }

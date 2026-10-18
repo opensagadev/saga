@@ -497,10 +497,10 @@ i32 TightRope_SnapTo(GameObject_s *object, NUVEC *position) {
     } else {
         object->apiobj.position.y = object->tightrope_position.y - object->field_0x1000 * object->apiobj.field_0xa8;
     }
-    u8 origin_flag = (object->field_0xe24 >> 3) & 1;
-    object->field_0xe24 &= ~8;
+    u8 origin_flag = object->locators_updated;
+    object->locators_updated = 0;
     GameObjectOrigin(object);
-    object->field_0xe24 = (object->field_0xe24 & ~8) | (origin_flag << 3);
+    object->locators_updated = origin_flag;
     return 1;
 }
 

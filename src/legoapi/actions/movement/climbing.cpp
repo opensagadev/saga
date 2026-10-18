@@ -764,7 +764,10 @@ void LedgeTerrain_MoveCode(GameObject_s *object) {
         if (speed < 0.0f)
             travelled = -travelled;
         f32 distance = speed * FRAMETIME + travelled;
-        NUVEC offset = {NU_SIN_LUT(sideways) * distance, 0.0f, NU_COS_LUT(sideways) * distance};
+        NUVEC offset;
+        offset.x = NU_SIN_LUT(sideways) * distance;
+        offset.y = 0.0f;
+        offset.z = NU_COS_LUT(sideways) * distance;
         NuVecAdd(&object->external_force, &object->external_force, &offset);
         NuVecAdd(&object->launch_origin, &object->launch_origin, &offset);
         return;

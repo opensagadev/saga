@@ -1542,7 +1542,7 @@ void BuildIt_MoveCode(GameObject_s *player) {
             player->field_0x788 = buildit;
             player->build_context = LEGOCONTEXT_BUILDIT;
             player->context_animation = LEGOACT_BUILD;
-            player->field_0xe21 &= ~0x40;
+            player->idle_phase_odd = 0;
             GizBuildIt_SetStepTime(buildit, player);
             GameCam_Blend(GameCam, 0.5f, 0.0f, 1);
             Hint_SetComplete(LEGOHINT_BUILD);

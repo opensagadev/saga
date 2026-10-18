@@ -371,10 +371,11 @@ void HudRadarPulse::Process(float delta) {
 }
 
 u8 HudRadarPulse::IsFinished() {
-    if (pulses[0].delay_finished && pulses[0].finished && pulses[1].delay_finished && pulses[1].finished &&
-        pulses[2].delay_finished)
-        return pulses[2].finished;
-    return 0;
+    for (i32 i = 0; i < 3; ++i) {
+        if (!pulses[i].delay_finished || !pulses[i].finished)
+            return 0;
+    }
+    return 1;
 }
 
 SwipeDecalRenderer::SwipeDecalRenderer(TouchHolder &holder, i32 index, SwipeDecalRenderer::Style style) {
@@ -716,35 +717,17 @@ MechSystems *MechSystems::Get() {
 
 void HudRadarPulse::Render() {
     if (active) {
-        if (pulses[0].delay_finished && !pulses[0].finished) {
-            f32 x = position.x + 1.0f;
-            f32 y = 1.0f - position.y;
-            numtl_s *material = MechSystems::Get()->radar_pulse_material;
-            i32 alpha = static_cast<i32>(90.0f * NU_SIN_LUT(pulses[0].angle));
-            f32 radius = pulses[0].radius;
-            f32 width = GetAspectRatio() * radius;
-            RndrTexQuad(x * 0.5f, y * 0.5f, width, radius, static_cast<i32>((static_cast<u32>(alpha) << 24) | 0x808080),
-                        material, 0);
-        }
-        if (pulses[1].delay_finished && !pulses[1].finished) {
-            f32 x = position.x + 1.0f;
-            f32 y = 1.0f - position.y;
-            numtl_s *material = MechSystems::Get()->radar_pulse_material;
-            i32 alpha = static_cast<i32>(90.0f * NU_SIN_LUT(pulses[1].angle));
-            f32 radius = pulses[1].radius;
-            f32 width = GetAspectRatio() * radius;
-            RndrTexQuad(x * 0.5f, y * 0.5f, width, radius, static_cast<i32>((static_cast<u32>(alpha) << 24) | 0x808080),
-                        material, 0);
-        }
-        if (pulses[2].delay_finished && !pulses[2].finished) {
-            f32 x = position.x + 1.0f;
-            f32 y = 1.0f - position.y;
-            numtl_s *material = MechSystems::Get()->radar_pulse_material;
-            i32 alpha = static_cast<i32>(90.0f * NU_SIN_LUT(pulses[2].angle));
-            f32 radius = pulses[2].radius;
-            f32 width = GetAspectRatio() * radius;
-            RndrTexQuad(x * 0.5f, y * 0.5f, width, radius, static_cast<i32>((static_cast<u32>(alpha) << 24) | 0x808080),
-                        material, 0);
+        for (i32 i = 0; i < 3; ++i) {
+            if (pulses[i].delay_finished && !pulses[i].finished) {
+                f32 x = position.x + 1.0f;
+                f32 y = 1.0f - position.y;
+                numtl_s *material = MechSystems::Get()->radar_pulse_material;
+                i32 alpha = static_cast<i32>(90.0f * NU_SIN_LUT(pulses[i].angle));
+                f32 radius = pulses[i].radius;
+                f32 width = GetAspectRatio() * radius;
+                RndrTexQuad(x * 0.5f, y * 0.5f, width, radius,
+                            static_cast<i32>((static_cast<u32>(alpha) << 24) | 0x808080), material, 0);
+            }
         }
     }
 }
@@ -903,40 +886,24 @@ MoveToMarker *MechSystems::FindMoveToMarkerAtPos(VuVec const &position, bool act
 }
 
 void MechSystems::NewSwipeMarker(TouchHolder &holder, i32 direction, SwipeDecalRenderer::Style style) {
-    i32 slot;
-    if (swipe_markers[0] != NULL) {
-        if (swipe_markers[1] == NULL) {
-            slot = 1;
-        } else if (swipe_markers[2] == NULL) {
-            slot = 2;
-        } else if (swipe_markers[3] == NULL) {
-            slot = 3;
-        } else {
+    for (i32 slot = 0; slot < 4; slot++) {
+        if (swipe_markers[slot] == NULL) {
+            swipe_markers[slot] = new SwipeDecalRenderer(holder, direction, style);
             return;
         }
-    } else {
-        slot = 0;
     }
-    swipe_markers[slot] = new SwipeDecalRenderer(holder, direction, style);
 }
 
 void MechSystems::NewRadarPulse(VuVec const &position, bool paused) {
-    i32 slot;
-    if (radar_pulses[0] == NULL) {
-        slot = 0;
-    } else if (radar_pulses[1] == NULL) {
-        slot = 1;
-    } else if (radar_pulses[2] == NULL) {
-        slot = 2;
-    } else if (radar_pulses[3] == NULL) {
-        slot = 3;
-    } else {
-        return;
-    }
-    HudRadarPulse *pulse = new HudRadarPulse(position);
-    radar_pulses[slot] = pulse;
-    if (paused) {
-        pulse->paused = 1;
+    for (i32 slot = 0; slot < 4; slot++) {
+        if (radar_pulses[slot] == NULL) {
+            HudRadarPulse *pulse = new HudRadarPulse(position);
+            radar_pulses[slot] = pulse;
+            if (paused) {
+                pulse->paused = 1;
+            }
+            return;
+        }
     }
 }
 

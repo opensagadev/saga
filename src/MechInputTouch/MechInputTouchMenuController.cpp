@@ -297,7 +297,10 @@ bool MechInputTouchMenuController::OnDown(GameObject_s &, TouchHolder &holder) {
     if (!PackButtonActive) {
         return false;
     }
-    NUVEC delta = {touch_x - PackButtonX, touch_y - PackButtonY, 0.0f};
+    NUVEC delta;
+    delta.x = touch_x - PackButtonX;
+    delta.y = touch_y - PackButtonY;
+    delta.z = 0.0f;
     delta.x /= GetAspectRatio();
     return NuVecMag(&delta) < PackButtonW;
 }

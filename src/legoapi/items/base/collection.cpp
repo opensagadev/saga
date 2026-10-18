@@ -133,16 +133,15 @@ nuhspecial_s *collection_draw_hspecial;
 i32 (*collection_draw_IsValidFn)(COLLECTION_s *, i32);
 void (*Collection_GetSelectingPlayerIDsFn)(i16 *);
 
-static inline u32 Collection_NeighbourFlags(i32 col, i32 row, i32 sx, i32 sy) {
+static inline void Collection_AddNeighbourFlags(u32 *flags, i32 col, i32 row, i32 sx, i32 sy) {
     if (sx == -1 || sy == -1)
-        return 0;
+        return;
     if ((col == sx && (row == sy - 1 || row == sy + 1)) || (row == sy && (col == sx - 1 || col == sx + 1)))
-        return 1;
-    if ((col == sx - 1 || col == sx + 1) && (row == sy - 1 || row == sy + 1))
-        return 2;
-    if ((col == sx && (row == sy - 2 || row == sy + 2)) || (row == sy && (col == sx - 2 || col == sx + 2)))
-        return 4;
-    return 0;
+        *flags |= 1;
+    else if ((col == sx - 1 || col == sx + 1) && (row == sy - 1 || row == sy + 1))
+        *flags |= 2;
+    else if ((col == sx && (row == sy - 2 || row == sy + 2)) || (row == sy && (col == sx - 2 || col == sx + 2)))
+        *flags |= 4;
 }
 
 extern "C" {
@@ -672,25 +671,30 @@ i32 Collection_Got(i32 id) {
     return 1;
 }
 
+static inline f32 Collection_SelectedOpacity(void) {
+    return NuTrigTable[(static_cast<i32>(GlobalTimer.time_elapsed_mod_seconds * 65536.0f) >> 1) & 0x7fff] * 0.125f +
+           0.375f;
+}
+
 void Collection_Draw(COLLECTION_s *collection, float x, float y, float scale, APICHARACTERMODELLIST_s *models,
                      float alpha, i32 hide_selected) {
     const f32 base_dx = COLLECTION_DX;
     const f32 base_dy = COLLECTION_DY;
     const f32 base_size = COLLECTION_ICONSIZE;
     nuhspecial_s *special = collection_draw_hspecial;
+    collection_draw_hspecial = NULL;
     i32 (*valid)(COLLECTION_s *, i32) = collection_draw_IsValidFn;
     collection_draw_IsValidFn = NULL;
-    collection_draw_hspecial = NULL;
     if (collection->list == NULL || FadeSys.fade > 0.0f)
         return;
+    const i32 count = collection->count_y;
     const i32 columns = collection->count_x;
-    const u16 count = collection->count_y;
-    if (count == 0 || columns == 0)
+    if (columns == 0 || count == 0)
         return;
     f32 dx = base_dx * scale;
     f32 size = base_size * scale;
-    const i32 rows = count / columns + (count % columns != 0);
-    if (Game_OptionsSave != NULL && Game_OptionsSave->field11_0xb != 0) {
+    const i32 rows = count % columns != 0 ? count / columns + 1 : count / columns;
+    if (Game_OptionsSave != NULL && __builtin_expect(Game_OptionsSave->field11_0xb != 0, 0)) {
         dx *= 0.75f;
         size *= 0.875f;
     }
@@ -737,24 +741,27 @@ void Collection_Draw(COLLECTION_s *collection, float x, float y, float scale, AP
                 if (hide_selected != 0)
                     continue;
                 opacity = 0.25f;
-                if (__builtin_expect(model_index == 0 || model_index == 1, 1)) {
-                    opacity =
-                        NuTrigTable[(static_cast<i32>(GlobalTimer.time_elapsed_mod_seconds * 65536.0f) >> 1) & 0x7fff] *
-                            0.125f +
-                        0.375f;
-                    frame = model_index == 0 ? LEGOOBJ_ICON_FRAME_BLUE : LEGOOBJ_ICON_FRAME_GREEN;
+                if (model_index == 0) {
+                    frame = LEGOOBJ_ICON_FRAME_BLUE;
+                    opacity = Collection_SelectedOpacity();
+                } else if (model_index == 1) {
+                    frame = LEGOOBJ_ICON_FRAME_GREEN;
+                    opacity = Collection_SelectedOpacity();
                 }
             }
-            const i32 unlocked = valid != NULL ? valid(collection, index) : Collection_Got(id);
-            if (__builtin_expect(unlocked == 0, 0)) {
+            const i32 got = valid != NULL ? valid(collection, index) : Collection_Got(id);
+            i32 unlocked = 1;
+            if (got == 0) {
                 opacity *= 0.25f;
+                unlocked = 0;
                 id = -1;
             }
             opacity *= alpha;
             if (!(opacity > 0.0f))
                 continue;
-            const u32 neighbours = Collection_NeighbourFlags(col, row, selected_x[0], selected_y[0]) |
-                                   Collection_NeighbourFlags(col, row, selected_x[1], selected_y[1]);
+            u32 neighbours = 0;
+            Collection_AddNeighbourFlags(&neighbours, col, row, selected_x[0], selected_y[0]);
+            Collection_AddNeighbourFlags(&neighbours, col, row, selected_x[1], selected_y[1]);
             if (__builtin_expect((neighbours & 1) != 0, 0))
                 opacity *= 0.333f;
             else if ((neighbours & 2) != 0)

@@ -99,10 +99,8 @@ void MechInputTouchMainController::UpdateButtons() {
 
 void MechInputTouchMainController::RemoveUnpressedButtons(NuInputTouchData &output, NuInputTouchData const &input) {
     output.touch_count = 0;
-    for (i32 i = 0; i < static_cast<i32>(input.touch_count); ++i) {
-        output.touch_events[i] = input.touch_events[i];
-        output.touch_count = i + 1;
-    }
+    for (i32 i = 0; i < input.touch_count; ++i)
+        output.touch_events[output.touch_count++] = input.touch_events[i];
 }
 
 void MechInputTouchMainController::Update(NuInputTouchData const *input) {

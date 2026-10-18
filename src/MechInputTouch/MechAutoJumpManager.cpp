@@ -516,7 +516,10 @@ void MechAutoJumpManager::Render() {
     while (jump != NULL) {
         if (jump->cooldown <= 0.0f) {
             AIPATHNODE *node = &jump->path->nodes[jump->connection->node_indices[jump->direction]];
-            NUVEC cross = {testStreakCrossSize2, 0.0f, 0.0f};
+            NUVEC cross;
+            cross.x = testStreakCrossSize2;
+            cross.y = 0.0f;
+            cross.z = 0.0f;
             NuVecRotateY(&cross, &cross, static_cast<u16>(LevelTimer.time_elapsed * testStreakRotateSpeed));
             NUVEC first;
             NUVEC second;

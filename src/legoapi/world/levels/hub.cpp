@@ -4565,29 +4565,11 @@ void Hub_Update(WORLDINFO_s *world) {
         }
     }
     i32 completed_areas;
-    Episode_IsComplete(HubEpisodeInfo[0].data, &completed_areas);
-    if (completed_areas == 6) {
-        HubAreaInfo[6].force_open = 1;
-    }
-    Episode_IsComplete(HubEpisodeInfo[1].data, &completed_areas);
-    if (completed_areas == 6) {
-        HubAreaInfo[13].force_open = 1;
-    }
-    Episode_IsComplete(HubEpisodeInfo[2].data, &completed_areas);
-    if (completed_areas == 6) {
-        HubAreaInfo[20].force_open = 1;
-    }
-    Episode_IsComplete(HubEpisodeInfo[3].data, &completed_areas);
-    if (completed_areas == 6) {
-        HubAreaInfo[27].force_open = 1;
-    }
-    Episode_IsComplete(HubEpisodeInfo[4].data, &completed_areas);
-    if (completed_areas == 6) {
-        HubAreaInfo[34].force_open = 1;
-    }
-    Episode_IsComplete(HubEpisodeInfo[5].data, &completed_areas);
-    if (completed_areas == 6) {
-        HubAreaInfo[41].force_open = 1;
+    for (i32 i = 0; i < 6; ++i) {
+        Episode_IsComplete(HubEpisodeInfo[i].data, &completed_areas);
+        if (completed_areas == 6) {
+            HubAreaInfo[i * 7 + 6].force_open = 1;
+        }
     }
     i32 selected_area = -1;
     for (i32 i = 0; HubAreaInfo[i].area_name != NULL; ++i) {

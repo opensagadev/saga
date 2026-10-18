@@ -4458,6 +4458,7 @@ static __used__ i32 RowMoveWander(AIGROUP *group, AIROW *row, AIROW *previous, A
     if (connection == NULL)
         return 0;
     i32 node_index = connection->node_indices[row->path_info.direction == 0];
+    AIPATHNODE *node = &row->path_info.path->nodes[node_index];
     if (row->next_connection == NULL) {
         if (previous != NULL) {
             row->next_connection = previous->path_info.connection == connection ? previous->next_connection
@@ -4465,7 +4466,6 @@ static __used__ i32 RowMoveWander(AIGROUP *group, AIROW *row, AIROW *previous, A
             if (row->next_connection == NULL)
                 return 0;
         } else {
-            AIPATHNODE *node = &row->path_info.path->nodes[node_index];
             i32 first = NuRandInt() % node->connection_count;
             connection = row->path_info.connection;
             for (i32 i = 0; i < node->connection_count; ++i) {
@@ -4515,10 +4515,10 @@ static __used__ i32 RowMoveWander(AIGROUP *group, AIROW *row, AIROW *previous, A
             if (group->radius * group->radius >= distance)
                 row->is_turning = 1;
         } else {
-            AIPATHNODE *node =
+            AIPATHNODE *end =
                 &row->path_info.path->nodes[row->path_info.connection->node_indices[row->path_info.direction == 0]];
-            f32 distance = NuVecXZDistSqr(&row->pos, &node->position, &rotated);
-            if (node->radius_squared > distance) {
+            f32 distance = NuVecXZDistSqr(&row->pos, &end->position, &rotated);
+            if (end->radius_squared > distance) {
                 for (i32 i = 0; i < group->row_count; ++i) {
                     group->rows[i].next_connection = NULL;
                     group->rows[i].y_rot = NuAngAdd(group->rows[i].y_rot, 0x8000);
@@ -6168,16 +6168,28 @@ static u32 CalculateRightIntersection(f32 object_radius, f32 first_distance, f32
     if (after_radius < 0.0f) {
         after_radius = 0.0f;
     }
-    NUVEC first_start = {before_radius, 0.0f, 0.0f};
-    NUVEC first_end = {before_radius, 0.0f, first_distance};
+    NUVEC first_start;
+    first_start.x = before_radius;
+    first_start.y = 0.0f;
+    first_start.z = 0.0f;
+    NUVEC first_end;
+    first_end.x = before_radius;
+    first_end.y = 0.0f;
+    first_end.z = first_distance;
     NUANG angle = NuAngAdd(first_angle, NuASin((shared_clear - before_radius) / first_distance));
     NuVecRotateY(&first_start, &first_start, angle);
     NuVecRotateY(&first_end, &first_end, angle);
     NuVecAdd(&first_start, &first_start, &before->position);
     NuVecAdd(&first_end, &first_end, &before->position);
 
-    NUVEC second_start = {-after_radius, 0.0f, 0.0f};
-    NUVEC second_end = {-after_radius, 0.0f, *second_distance};
+    NUVEC second_start;
+    second_start.x = -after_radius;
+    second_start.y = 0.0f;
+    second_start.z = 0.0f;
+    NUVEC second_end;
+    second_end.x = -after_radius;
+    second_end.y = 0.0f;
+    second_end.z = *second_distance;
     angle = NuAngSub(second_angle, NuASin((shared_clear - after_radius) / *second_distance));
     NuVecRotateY(&second_start, &second_start, angle);
     NuVecRotateY(&second_end, &second_end, angle);
@@ -10642,10 +10654,10 @@ extern "C" i32 WithinConnection(AISYS *system, NUVEC *position, AIPATH *path, AI
         narrow = 1;
 
     if (first->has_special != 0 &&
-        (path->updated_node_bits[connection->node_indices[0] >> 3] & (1 << (connection->node_indices[0] & 7))) == 0)
+        (path->updated_node_bits[connection->node_indices[0] / 8] & (1 << (connection->node_indices[0] % 8))) == 0)
         AIPathNodeUpdatePos(system, path, first);
     if (second->has_special != 0 &&
-        (path->updated_node_bits[connection->node_indices[1] >> 3] & (1 << (connection->node_indices[1] & 7))) == 0)
+        (path->updated_node_bits[connection->node_indices[1] / 8] & (1 << (connection->node_indices[1] % 8))) == 0)
         AIPathNodeUpdatePos(system, path, second);
 
     NUVEC delta;
@@ -10708,8 +10720,9 @@ extern "C" i32 WithinConnection(AISYS *system, NUVEC *position, AIPATH *path, AI
         }
     }
     if (path_info != NULL) {
+        path_info->on_path = 1;
+        path_info->narrow_path = narrow;
         path_info->direction = 0;
-        path_info->flags = ((path_info->flags | 1) & ~8) | (narrow << 3);
         path_info->connection = connection;
         path_info->dist = local.z / connection->horizontal_distance;
         path_info->width = local.x;
@@ -11001,11 +11014,11 @@ static u32 AISysCharacterTestPathCnx(AISYS *system, APIOBJECT *object, AIPACKET 
         narrow = true;
     }
     if (first->has_special != 0 &&
-        (path->updated_node_bits[connection->node_indices[0] >> 3] & (1 << (connection->node_indices[0] & 7))) == 0) {
+        (path->updated_node_bits[connection->node_indices[0] / 8] & (1 << (connection->node_indices[0] % 8))) == 0) {
         AIPathNodeUpdatePos(system, path, first);
     }
     if (second->has_special != 0 &&
-        (path->updated_node_bits[connection->node_indices[1] >> 3] & (1 << (connection->node_indices[1] & 7))) == 0) {
+        (path->updated_node_bits[connection->node_indices[1] / 8] & (1 << (connection->node_indices[1] % 8))) == 0) {
         AIPathNodeUpdatePos(system, path, second);
     }
     NUVEC delta;
@@ -11026,7 +11039,8 @@ static u32 AISysCharacterTestPathCnx(AISYS *system, APIOBJECT *object, AIPACKET 
             clearance = distance - first_radius;
             clearance = height_distance > clearance ? height_distance : clearance;
         } else if (first_radius >= distance) {
-            packet->path_info.flags = ((packet->path_info.flags | 1) & ~8) | (narrow << 3);
+            packet->path_info.on_path = 1;
+            packet->path_info.narrow_path = narrow;
             AISysCharacterSetPathCnx(packet, &object->position, connection, direction);
             packet->last_path_position = object->position;
             packet->path_info.dist = local.z / connection->horizontal_distance;
@@ -11076,13 +11090,14 @@ static u32 AISysCharacterTestPathCnx(AISYS *system, APIOBJECT *object, AIPACKET 
             clearance = distance - first_radius;
             clearance = height_distance > clearance ? height_distance : clearance;
         } else if (first_radius >= distance) {
-            packet->path_info.flags = ((packet->path_info.flags | 1) & ~8) | (narrow << 3);
+            packet->path_info.on_path = 1;
+            packet->path_info.narrow_path = narrow;
             AISysCharacterSetPathCnx(packet, &object->position, connection, direction);
             packet->last_path_position = object->position;
             packet->path_info.dist = local.z / connection->horizontal_distance;
             packet->path_info.width = local.x;
             u8 node_index = connection->node_indices[0];
-            path->inside_node_bits[node_index >> 3] |= 1 << (node_index & 7);
+            path->inside_node_bits[node_index / 8] |= 1 << (node_index % 8);
             packet->inside_path_node = connection->node_indices[0];
             return 1;
         } else {
@@ -11112,13 +11127,14 @@ static u32 AISysCharacterTestPathCnx(AISYS *system, APIOBJECT *object, AIPACKET 
             clearance = distance - second_radius;
             clearance = height_distance > clearance ? height_distance : clearance;
         } else if (second_radius >= distance) {
-            packet->path_info.flags = ((packet->path_info.flags | 1) & ~8) | (narrow << 3);
+            packet->path_info.on_path = 1;
+            packet->path_info.narrow_path = narrow;
             AISysCharacterSetPathCnx(packet, &object->position, connection, direction);
             packet->last_path_position = object->position;
             packet->path_info.dist = local.z / connection->horizontal_distance;
             packet->path_info.width = local.x;
             u8 node_index = connection->node_indices[1];
-            path->inside_node_bits[node_index >> 3] |= 1 << (node_index & 7);
+            path->inside_node_bits[node_index / 8] |= 1 << (node_index % 8);
             packet->inside_path_node = connection->node_indices[1];
             return 1;
         } else {
@@ -11168,7 +11184,8 @@ static u32 AISysCharacterTestPathCnx(AISYS *system, APIOBJECT *object, AIPACKET 
             clearance = wall.x - first_radius;
             clearance = height_distance > clearance ? height_distance : clearance;
         } else if (first_radius > wall.x) {
-            packet->path_info.flags = ((packet->path_info.flags | 1) & ~8) | (narrow << 3);
+            packet->path_info.on_path = 1;
+            packet->path_info.narrow_path = narrow;
             AISysCharacterSetPathCnx(packet, &object->position, connection, direction);
             packet->path_info.dist = local.z / connection->horizontal_distance;
             packet->path_info.width = local.x;
@@ -11177,13 +11194,13 @@ static u32 AISysCharacterTestPathCnx(AISYS *system, APIOBJECT *object, AIPACKET 
             if (first_radius > local.z) {
                 if (NuVecXZDistSqr(&object->position, &first->position, &radial) <= first_radius * first_radius) {
                     u8 node_index = connection->node_indices[0];
-                    path->inside_node_bits[node_index >> 3] |= 1 << (node_index & 7);
+                    path->inside_node_bits[node_index / 8] |= 1 << (node_index % 8);
                     packet->inside_path_node = connection->node_indices[0];
                 }
             } else if (local.z > length - second_radius) {
                 if (NuVecXZDistSqr(&object->position, &second->position, &radial) <= second_radius * second_radius) {
                     u8 node_index = connection->node_indices[1];
-                    path->inside_node_bits[node_index >> 3] |= 1 << (node_index & 7);
+                    path->inside_node_bits[node_index / 8] |= 1 << (node_index % 8);
                     packet->inside_path_node = connection->node_indices[1];
                 }
             }
@@ -13344,11 +13361,10 @@ extern "C" {
                                 if (distance_squared > release_radius * release_radius) {
                                     packet->field_0x1e7 = current_source_flags | AIPACKET_MOVEMENT_SOURCE_ACTIVE;
                                 } else {
-                                    NUVEC movement_delta = {
-                                        packet->movement_destination.x - object->position.x,
-                                        0.0f,
-                                        packet->movement_destination.z - object->position.z,
-                                    };
+                                    NUVEC movement_delta;
+                                    movement_delta.x = packet->movement_destination.x - object->position.x;
+                                    movement_delta.y = 0.0f;
+                                    movement_delta.z = packet->movement_destination.z - object->position.z;
                                     if (NuVecDot(&movement_delta, &source_delta) < 0.0f) {
                                         packet->movement_destination = object->position;
                                         packet->movement_stopping_distance = 0.0f;
@@ -13453,7 +13469,10 @@ extern "C" void LocaledbitsDrawSolidEllipseXY(NUVEC *centre, f32 radius_x, f32 r
         first.position = second.position;
         i32 angle = (i * 65536) / segments;
         second.position = *centre;
-        NUVEC offset = {radius_x * NU_SIN_LUT(angle), 0.0f, radius_z * NU_COS_LUT(angle)};
+        NUVEC offset;
+        offset.x = radius_x * NU_SIN_LUT(angle);
+        offset.y = 0.0f;
+        offset.z = radius_z * NU_COS_LUT(angle);
         NuVecRotateY(&offset, &offset, rotation);
         NuVecAdd(&second.position, centre, &offset);
         first.position.y = lower_y;
@@ -14338,7 +14357,10 @@ void DrawLocator(nuvec_s *position, float radius, i32 rotation, i32 colour) {
     vertices[1].colour = colour;
     NUVEC centre = *position;
     centre.y += aiEditor_DrawYOffset;
-    NUVEC axis = {radius, 0.0f, 0.0f};
+    NUVEC axis;
+    axis.x = radius;
+    axis.y = 0.0f;
+    axis.z = 0.0f;
     NuVecRotateY(&axis, &axis, rotation);
     NuVecAdd(&vertices[0].position, &centre, &axis);
     NuVecSub(&vertices[1].position, &centre, &axis);
@@ -14357,7 +14379,10 @@ void DrawLocator(nuvec_s *position, float radius, i32 rotation, i32 colour) {
     NuVecAdd(&vertices[0].position, &centre, &axis);
     NuVecSub(&vertices[1].position, &centre, &axis);
     AiRndrLine3d(vertices, NULL, NULL);
-    NUVEC arrow = {-axis.z * 0.2f, 0.0f, axis.x * 0.2f};
+    NUVEC arrow;
+    arrow.x = -axis.z * 0.2f;
+    arrow.y = 0.0f;
+    arrow.z = axis.x * 0.2f;
     NuVecAdd(&vertices[1].position, &centre, &arrow);
     AiRndrLine3d(vertices, NULL, NULL);
     NuVecSub(&vertices[1].position, &centre, &arrow);
@@ -14568,40 +14593,40 @@ void pathEditorDrawConnectionInfo(nuvec_s *position, float radius, nuvec_s *othe
             NuVecScale(&vertices[0].position, &direction, radius * 0.5f);
             vertices[0].position.y = 0.0f;
             NuVecAdd(&vertices[0].position, &vertices[0].position, &start);
-            vertices[1].position.y = vertices[0].position.y;
-            vertices[1].position.x = vertices[0].position.x - radius * direction.z * 0.5f;
-            vertices[1].position.z = vertices[0].position.z + radius * direction.x * 0.5f;
+            vertices[1].position = vertices[0].position;
             vertices[0].position.x += radius * direction.z * 0.5f;
             vertices[0].position.z -= radius * direction.x * 0.5f;
+            vertices[1].position.x -= radius * direction.z * 0.5f;
+            vertices[1].position.z += radius * direction.x * 0.5f;
             AiRndrLine3d(vertices, nullptr, nullptr);
         } else if (flags & 0x80000000) {
             NUVEC centre = vertices[0].position;
             vertices[0].colour = colour / 2;
             vertices[1].colour = colour / 2;
-            vertices[1].position.x = centre.x + radius * direction.z * 0.25f;
-            vertices[1].position.y = centre.y;
-            vertices[1].position.z = centre.z - radius * direction.x * 0.25f;
+            vertices[1].position = centre;
+            vertices[1].position.x += radius * direction.z * 0.25f;
+            vertices[1].position.z -= radius * direction.x * 0.25f;
             AiRndrLine3d(vertices, nullptr, nullptr);
-            vertices[1].position.x = centre.x - radius * direction.z * 0.25f;
-            vertices[1].position.y = centre.y;
-            vertices[1].position.z = centre.z + radius * direction.x * 0.25f;
+            vertices[1].position = centre;
+            vertices[1].position.x -= radius * direction.z * 0.25f;
+            vertices[1].position.z += radius * direction.x * 0.25f;
             AiRndrLine3d(vertices, nullptr, nullptr);
         } else if (flags & 0x20000000) {
             NUVEC centre = vertices[0].position;
             NuVecScale(&vertices[0].position, &direction, radius);
             vertices[0].position.y = 0.0f;
             NuVecAdd(&vertices[0].position, &vertices[0].position, position);
-            vertices[1].position.x = centre.x + radius * direction.z * 0.15f;
-            vertices[1].position.y = centre.y;
-            vertices[1].position.z = centre.z - radius * direction.x * 0.15f;
+            vertices[1].position = centre;
+            vertices[1].position.x += radius * direction.z * 0.15f;
+            vertices[1].position.z -= radius * direction.x * 0.15f;
             AiRndrLine3d(vertices, nullptr, nullptr);
-            vertices[1].position.x = centre.x - radius * direction.z * 0.25f;
-            vertices[1].position.y = centre.y;
-            vertices[1].position.z = centre.z + radius * direction.x * 0.25f;
+            vertices[1].position = centre;
+            vertices[1].position.x -= radius * direction.z * 0.25f;
+            vertices[1].position.z += radius * direction.x * 0.25f;
             AiRndrLine3d(vertices, nullptr, nullptr);
-            vertices[1].position.x = centre.x - radius * direction.z * 0.35f;
-            vertices[1].position.y = centre.y;
-            vertices[1].position.z = centre.z + radius * direction.x * 0.35f;
+            vertices[1].position = centre;
+            vertices[1].position.x -= radius * direction.z * 0.35f;
+            vertices[1].position.z += radius * direction.x * 0.35f;
             AiRndrLine3d(vertices, nullptr, nullptr);
         }
     }
@@ -16250,47 +16275,34 @@ static __used__ void routeEditor_cbDeleteRoute(eduimenu_s *parent, eduiitem_s *i
 static __used__ void routeEditor_cbCreateRoute(eduimenu_s *, eduiitem_s *, u32) {
     EDAIPATH_s *path = aieditor->current_path;
     i32 index = path->current_route != nullptr ? path->current_route - path->routes + 1 : 1;
-    u8 flags;
+    EDAIPATHROUTE_s *route;
     for (i32 attempt = 0; attempt < 16; ++attempt) {
         if (index >= 16) {
             index = 0;
         }
-        flags = path->routes[index].flags;
-        if (!(flags & 1)) {
+        route = &path->routes[index];
+        if (!(route->flags & 1)) {
             goto route_found;
         }
         ++index;
     }
     return;
 route_found:
-    EDAIPATHROUTE_s *route = &path->routes[index];
-    route->flags = flags | 1;
+    route->flags |= 1;
     route->user_mask = 0;
     aieditor->current_path->current_route = route;
     char name[16];
     i32 number = 0;
-next_name:
-    sprintf(name, "route%d", ++number);
-#define ROUTE_EDITOR_CHECK_NAME(N)                                                                                     \
-    if ((aieditor->current_path->routes[N].flags & 1) && NuStrICmp(name, aieditor->current_path->routes[N].name) == 0) \
-    goto next_name
-    ROUTE_EDITOR_CHECK_NAME(0);
-    ROUTE_EDITOR_CHECK_NAME(1);
-    ROUTE_EDITOR_CHECK_NAME(2);
-    ROUTE_EDITOR_CHECK_NAME(3);
-    ROUTE_EDITOR_CHECK_NAME(4);
-    ROUTE_EDITOR_CHECK_NAME(5);
-    ROUTE_EDITOR_CHECK_NAME(6);
-    ROUTE_EDITOR_CHECK_NAME(7);
-    ROUTE_EDITOR_CHECK_NAME(8);
-    ROUTE_EDITOR_CHECK_NAME(9);
-    ROUTE_EDITOR_CHECK_NAME(10);
-    ROUTE_EDITOR_CHECK_NAME(11);
-    ROUTE_EDITOR_CHECK_NAME(12);
-    ROUTE_EDITOR_CHECK_NAME(13);
-    ROUTE_EDITOR_CHECK_NAME(14);
-    ROUTE_EDITOR_CHECK_NAME(15);
-#undef ROUTE_EDITOR_CHECK_NAME
+    i32 i;
+    do {
+        sprintf(name, "route%d", ++number);
+        for (i = 0; i < 16; ++i) {
+            if ((aieditor->current_path->routes[i].flags & 1) &&
+                NuStrICmp(name, aieditor->current_path->routes[i].name) == 0) {
+                break;
+            }
+        }
+    } while (i < 16);
     strcpy(route->name, name);
     aieditor_ClearMainMenu();
 }
@@ -16299,8 +16311,7 @@ static __used__ void pathEditor_cbSetShareNode(eduimenu_s *, eduiitem_s *item, u
     if (aieditor->current_path == nullptr || aieditor->current_path->current_node == nullptr) {
         return;
     }
-    EDAIPATHNODE_s *current = aieditor->current_path->current_node;
-    EDAISHAREDPATHNODE_s *shared = current->shared_node;
+    EDAISHAREDPATHNODE_s *shared = aieditor->current_path->current_node->shared_node;
     EDAIPATHNODE_s *matches[16];
     i32 path_number = 1;
     i32 match_count = 0;
@@ -16317,15 +16328,22 @@ static __used__ void pathEditor_cbSetShareNode(eduimenu_s *, eduiitem_s *item, u
         f32 nearest_distance = FLT_MAX;
         for (EDAIPATHNODE_s *node = (EDAIPATHNODE_s *)NuLinkedListGetHead(&path->nodes); node != nullptr;
              node = (EDAIPATHNODE_s *)NuLinkedListGetNext(&path->nodes, &node->link)) {
-            f32 dx = node->position.x - current->position.x;
-            f32 dz = node->position.z - current->position.z;
+            f32 dx = node->position.x - aieditor->current_path->current_node->position.x;
+            f32 dz = node->position.z - aieditor->current_path->current_node->position.z;
             f32 distance = NuFsqrt(dx * dx + dz * dz);
-            if (distance < node->radius + current->radius &&
-                current->position.y + current->lower_height <= node->position.y + node->upper_height &&
-                node->position.y + node->lower_height <= current->position.y + current->upper_height &&
-                distance < nearest_distance) {
-                nearest_distance = distance;
-                nearest = node;
+            if (distance < node->radius + aieditor->current_path->current_node->radius) {
+                f32 current_bottom = aieditor->current_path->current_node->position.y +
+                                     aieditor->current_path->current_node->lower_height;
+                f32 current_top = aieditor->current_path->current_node->position.y +
+                                  aieditor->current_path->current_node->upper_height;
+                f32 node_bottom = node->position.y + node->lower_height;
+                f32 node_top = node->position.y + node->upper_height;
+                if (current_bottom > node_top || node_bottom > current_top)
+                    continue;
+                if (distance < nearest_distance) {
+                    nearest_distance = distance;
+                    nearest = node;
+                }
             }
         }
         if (nearest != nullptr && match_count < 16) {
@@ -16343,16 +16361,15 @@ static __used__ void pathEditor_cbSetShareNode(eduimenu_s *, eduiitem_s *item, u
         return;
     }
     if (item->data != 0 && !(item->flags & EDUI_ITEM_HIGHLIGHTED)) {
-        if (current->shared_node == nullptr) {
+        if (aieditor->current_path->current_node->shared_node == nullptr) {
             return;
         }
         for (i32 i = 0; i < match_count; ++i) {
             EDAIPATHNODE_s *node = matches[i];
-            if (node->shared_node == current->shared_node) {
-                EDAISHAREDPATHNODE_s *old_shared = node->shared_node;
-                --old_shared->reference_count;
-                if (old_shared->reference_count <= 1) {
-                    pathEditor_DestroySharedNode(old_shared);
+            if (node->shared_node == aieditor->current_path->current_node->shared_node) {
+                --node->shared_node->reference_count;
+                if (node->shared_node->reference_count <= 1) {
+                    pathEditor_DestroySharedNode(node->shared_node);
                 }
                 node->shared_node = nullptr;
             }
@@ -16370,18 +16387,17 @@ static __used__ void pathEditor_cbSetShareNode(eduimenu_s *, eduiitem_s *item, u
         NuLinkedListRemove(&aieditor->free_shared_path_nodes, &shared->link);
         NuLinkedListAppend(&aieditor->shared_path_nodes, &shared->link);
     }
-    if (current->shared_node == nullptr) {
-        current->shared_node = shared;
+    if (aieditor->current_path->current_node->shared_node == nullptr) {
+        aieditor->current_path->current_node->shared_node = shared;
         ++shared->reference_count;
     }
     for (i32 i = 0; i < match_count; ++i) {
         EDAIPATHNODE_s *node = matches[i];
-        if (__builtin_expect(node->shared_node != shared, 1)) {
+        if (node->shared_node != shared) {
             if (node->shared_node != nullptr) {
-                EDAISHAREDPATHNODE_s *old_shared = node->shared_node;
-                --old_shared->reference_count;
-                if (old_shared->reference_count <= 1) {
-                    pathEditor_DestroySharedNode(old_shared);
+                --node->shared_node->reference_count;
+                if (node->shared_node->reference_count <= 1) {
+                    pathEditor_DestroySharedNode(node->shared_node);
                 }
             }
             node->shared_node = shared;
@@ -18726,54 +18742,52 @@ void routeEditor_Render(i32 x, i32 y, float xscale, float yscale) {
 void pathEditor_Render(i32 x, i32 y, float x_scale, float y_scale) {
     EDAIPATH_s *path = aieditor->current_path;
     if (path != nullptr) {
-        i32 screen_x = (x + 10) * 16;
-        i32 screen_y = y * 8;
         if (aieditorsettings.unknown_060_bit0) {
-            NuQFntPrintEx(system_qfont, screen_x, screen_y - 40, 16, "Show Routes : \"%s\"", path->name);
+            NuQFntPrintEx(system_qfont, (x + 10) * 16, y * 8 - 40, 16, "Show Routes : \"%s\"", path->name);
             NuQFntSetColour(system_qfont, 0x80000000);
             NuQFntSetScale(system_qfont, x_scale, y_scale);
             path = aieditor->current_path;
-            NuQFntPrintEx(system_qfont, screen_x, screen_y + 120, 16, "\"%s\"", path->name);
-            NuQFntPrintEx(system_qfont, screen_x, screen_y + 240, 16, "SQR - Sub menu");
-            NuQFntPrintEx(system_qfont, screen_x, screen_y + 360, 16, "SELECT - Goto nearest");
+            NuQFntPrintEx(system_qfont, (x + 10) * 16, (y + 15) * 8, 16, "\"%s\"", path->name);
+            NuQFntPrintEx(system_qfont, (x + 10) * 16, (y + 30) * 8, 16, "SQR - Sub menu");
+            NuQFntPrintEx(system_qfont, (x + 10) * 16, (y + 45) * 8, 16, "SELECT - Goto nearest");
             path = aieditor->current_path;
             if (path->runtime_nearest >= 0) {
-                NuQFntPrintEx(system_qfont, screen_x, screen_y + 480, 16, "TRI - Set as start of route");
-                NuQFntPrintEx(system_qfont, screen_x, screen_y + 600, 16, "X - Set as end of route");
+                NuQFntPrintEx(system_qfont, (x + 10) * 16, (y + 60) * 8, 16, "TRI - Set as start of route");
+                NuQFntPrintEx(system_qfont, (x + 10) * 16, (y + 75) * 8, 16, "X - Set as end of route");
             }
         } else {
-            NuQFntPrintEx(system_qfont, screen_x, screen_y - 40, 16, "AI Path Editor: \"%s\"", path->name);
+            NuQFntPrintEx(system_qfont, (x + 10) * 16, y * 8 - 40, 16, "AI Path Editor: \"%s\"", path->name);
             NuQFntSetColour(system_qfont, 0x80000000);
             NuQFntSetScale(system_qfont, x_scale, y_scale);
             path = aieditor->current_path;
             if (path->current_node != nullptr) {
                 if (path->current_node->name[0] == '\0') {
-                    NuQFntPrintEx(system_qfont, screen_x, screen_y + 120, 16, "ix=%d, %d nodes",
+                    NuQFntPrintEx(system_qfont, (x + 10) * 16, (y + 15) * 8, 16, "ix=%d, %d nodes",
                                   path->current_node->index, path->node_count);
                 } else {
-                    NuQFntPrintEx(system_qfont, screen_x, screen_y + 120, 16, "\"%s\" %d nodes",
+                    NuQFntPrintEx(system_qfont, (x + 10) * 16, (y + 15) * 8, 16, "\"%s\" %d nodes",
                                   path->current_node->name, path->node_count);
                 }
             } else {
-                NuQFntPrintEx(system_qfont, screen_x, screen_y + 120, 16, "%d nodes", path->node_count);
+                NuQFntPrintEx(system_qfont, (x + 10) * 16, (y + 15) * 8, 16, "%d nodes", path->node_count);
             }
-            NuQFntPrintEx(system_qfont, screen_x, screen_y + 240, 16, "SQR - Sub menu");
-            NuQFntPrintEx(system_qfont, screen_x, screen_y + 360, 16, "SELECT - Select nearest");
+            NuQFntPrintEx(system_qfont, (x + 10) * 16, (y + 30) * 8, 16, "SQR - Sub menu");
+            NuQFntPrintEx(system_qfont, (x + 10) * 16, (y + 45) * 8, 16, "SELECT - Select nearest");
             path = aieditor->current_path;
             if (aieditor->flags & 1) {
-                NuQFntPrintEx(system_qfont, screen_x, screen_y + 480, 16, "X - Move selected");
-                NuQFntPrintEx(system_qfont, screen_x, screen_y + 600, 16, "TRI - Delete selected");
+                NuQFntPrintEx(system_qfont, (x + 10) * 16, (y + 60) * 8, 16, "X - Move selected");
+                NuQFntPrintEx(system_qfont, (x + 10) * 16, (y + 75) * 8, 16, "TRI - Delete selected");
                 path = aieditor->current_path;
                 if (path != nullptr && path->current_node != nullptr) {
-                    NuQFntPrintEx(system_qfont, screen_x, screen_y + 840, 16, "LRIGHT - Increase radius, %.2f",
+                    NuQFntPrintEx(system_qfont, (x + 10) * 16, (y + 105) * 8, 16, "LRIGHT - Increase radius, %.2f",
                                   path->current_node->radius);
                 } else {
-                    NuQFntPrintEx(system_qfont, screen_x, screen_y + 840, 16, "LRIGHT - Increase radius");
+                    NuQFntPrintEx(system_qfont, (x + 10) * 16, (y + 105) * 8, 16, "LRIGHT - Increase radius");
                 }
-                NuQFntPrintEx(system_qfont, screen_x, screen_y + 960, 16, "LLEFT - Decrease radius");
+                NuQFntPrintEx(system_qfont, (x + 10) * 16, (y + 120) * 8, 16, "LLEFT - Decrease radius");
             } else if (path->nearest_node != nullptr) {
-                NuQFntPrintEx(system_qfont, screen_x, screen_y + 480, 16, "X - Select");
-                NuQFntPrintEx(system_qfont, screen_x, screen_y + 720, 16, "O - Link/unlink to selected");
+                NuQFntPrintEx(system_qfont, (x + 10) * 16, (y + 60) * 8, 16, "X - Select");
+                NuQFntPrintEx(system_qfont, (x + 10) * 16, (y + 90) * 8, 16, "O - Link/unlink to selected");
                 if (EdGetCnxFlagNames != nullptr) {
                     path = aieditor->current_path;
                     if (path->nearest_node != nullptr && path->current_node != nullptr) {
@@ -18795,7 +18809,7 @@ void pathEditor_Render(i32 x, i32 y, float x_scale, float y_scale) {
                     }
                 }
             } else {
-                NuQFntPrintEx(system_qfont, screen_x, screen_y + 480, 16, "X - Create");
+                NuQFntPrintEx(system_qfont, (x + 10) * 16, (y + 60) * 8, 16, "X - Create");
             }
         }
     }
@@ -18805,8 +18819,9 @@ void pathEditor_Render(i32 x, i32 y, float x_scale, float y_scale) {
         if (runtime_path != nullptr) {
             i32 current = aieditor->current_path->runtime_start;
             i32 end = aieditor->current_path->runtime_end;
-            if (__builtin_expect(current >= 0 && current < runtime_path->node_count && end >= 0 && end < runtime_path->node_count &&
-                current != end, 1)) {
+            if (__builtin_expect(current >= 0 && current < runtime_path->node_count && end >= 0 &&
+                                     end < runtime_path->node_count && current != end,
+                                 1)) {
                 AIPATHNODE_s *node = &runtime_path->nodes[current];
                 u8 edge = runtime_path->route_matrix[current][end];
                 while (edge != 0xff) {
@@ -18885,15 +18900,19 @@ void locatorEditor_Render(i32 x, i32 y, float x_scale, float y_scale) {
     if (aieditorsettings.show_creatures_display) {
         creatureEditor_RenderAllCreatures();
     }
-    EDLOCATORSET_s *set = aieditor->current_locator_set;
-    if (set != nullptr && set->locators[0] != nullptr) {
-        NUVEC previous = set->locators[0]->position;
-        for (i32 index = 1; index <= 64 && set->locators[index - 1] != nullptr; ++index) {
-            NUVEC current = set->locators[index - 1]->position;
-            if (index != 1) {
-                NURND_VERTEX3D vertices[2] __attribute__((aligned(16))) = {};
-                vertices[0].colour = 0x32323232;
-                vertices[1].colour = 0x32323232;
+    if (aieditor->current_locator_set != nullptr) {
+        NURND_VERTEX3D vertices[2];
+        vertices[0].colour = 0x32323232;
+        vertices[1].colour = 0x32323232;
+        NUVEC current, previous;
+        if (aieditor->current_locator_set->locators[0] != nullptr)
+            current = aieditor->current_locator_set->locators[0]->position;
+        for (i32 index = 0; index < 64; ++index) {
+            if (aieditor->current_locator_set->locators[index] == nullptr)
+                break;
+            previous = current;
+            current = aieditor->current_locator_set->locators[index]->position;
+            if (index != 0) {
                 vertices[0].position = current;
                 vertices[1].position = previous;
                 AiRndrLine3d(vertices, nullptr, nullptr);
@@ -18901,20 +18920,20 @@ void locatorEditor_Render(i32 x, i32 y, float x_scale, float y_scale) {
                 NuVecSub(&direction, &previous, &current);
                 NuVecNorm(&direction, &direction);
                 NuVecScale(&direction, &direction, 0.05f);
-                NUVEC midpoint;
-                NuVecAdd(&midpoint, &current, &previous);
+                NUVEC midpoint = current;
+                NuVecAdd(&midpoint, &midpoint, &previous);
                 NuVecScale(&midpoint, &midpoint, 0.5f);
-                NUVEC tip = {midpoint.x - direction.x * 0.5f, midpoint.y - direction.y * 0.5f,
-                             midpoint.z - direction.z * 0.5f};
-                vertices[0].position = tip;
+                vertices[0].position = midpoint;
+                vertices[0].position.x -= direction.x * 0.5f;
+                vertices[0].position.y -= direction.y * 0.5f;
+                vertices[0].position.z -= direction.z * 0.5f;
                 NuVecRotateY(&vertices[1].position, &direction, 0xe39);
-                NuVecAdd(&vertices[1].position, &vertices[1].position, &tip);
+                NuVecAdd(&vertices[1].position, &vertices[1].position, &vertices[0].position);
                 AiRndrLine3d(vertices, nullptr, nullptr);
                 NuVecRotateY(&vertices[1].position, &direction, -0xe39);
-                NuVecAdd(&vertices[1].position, &vertices[1].position, &tip);
+                NuVecAdd(&vertices[1].position, &vertices[1].position, &vertices[0].position);
                 AiRndrLine3d(vertices, nullptr, nullptr);
             }
-            previous = current;
         }
     }
 }

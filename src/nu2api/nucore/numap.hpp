@@ -22,8 +22,8 @@ template <typename K, typename V> class NuMap {
     }
 
     static Node *RotateSingle(Node *root, i32 direction) {
-        Node *save = root->links[direction ^ 1];
-        root->links[direction ^ 1] = save->links[direction];
+        Node *save = root->links[!direction];
+        root->links[!direction] = save->links[direction];
         save->links[direction] = root;
         root->red = true;
         save->red = false;
@@ -31,7 +31,7 @@ template <typename K, typename V> class NuMap {
     }
 
     static Node *RotateDouble(Node *root, i32 direction) {
-        root->links[direction ^ 1] = RotateSingle(root->links[direction ^ 1], direction ^ 1);
+        root->links[!direction] = RotateSingle(root->links[!direction], !direction);
         return RotateSingle(root, direction);
     }
 
@@ -40,9 +40,8 @@ template <typename K, typename V> class NuMap {
             NuMemoryGet()->GetThreadMem()->_BlockAlloc(sizeof(Node), 4, 1, "", NUMEMORY_CATEGORY_NONE));
         if (node != NULL) {
             node->key = key;
-            node->links[0] = NULL;
-            node->links[1] = NULL;
             node->red = true;
+            node->links[0] = node->links[1] = NULL;
         }
         return node;
     }
@@ -106,9 +105,9 @@ template <typename K, typename V> class NuMap {
                 if (IsRed(current) && IsRed(parent)) {
                     i32 great_direction = great_grandparent->links[1] == grandparent;
                     if (current == parent->links[last_direction]) {
-                        great_grandparent->links[great_direction] = RotateSingle(grandparent, last_direction ^ 1);
+                        great_grandparent->links[great_direction] = RotateSingle(grandparent, !last_direction);
                     } else {
-                        great_grandparent->links[great_direction] = RotateDouble(grandparent, last_direction ^ 1);
+                        great_grandparent->links[great_direction] = RotateDouble(grandparent, !last_direction);
                     }
                 }
 
@@ -161,26 +160,25 @@ template <typename K, typename V> class NuMap {
             }
 
             if (!IsRed(current) && !IsRed(current->links[direction])) {
-                if (IsRed(current->links[direction ^ 1])) {
+                if (IsRed(current->links[!direction])) {
                     parent->links[last_direction] = RotateSingle(current, direction);
                     parent = parent->links[last_direction];
-                } else {
-                    Node *sibling = parent->links[last_direction ^ 1];
+                } else if (!IsRed(current->links[!direction])) {
+                    Node *sibling = parent->links[!last_direction];
                     if (sibling != NULL) {
-                        if (!IsRed(sibling->links[0]) && !IsRed(sibling->links[1])) {
+                        if (!IsRed(sibling->links[!last_direction]) && !IsRed(sibling->links[last_direction])) {
                             parent->red = false;
-                            current->red = true;
                             sibling->red = true;
+                            current->red = true;
                         } else {
                             i32 grand_direction = grandparent->links[1] == parent;
                             if (IsRed(sibling->links[last_direction])) {
                                 grandparent->links[grand_direction] = RotateDouble(parent, last_direction);
-                            } else if (IsRed(sibling->links[last_direction ^ 1])) {
+                            } else if (IsRed(sibling->links[!last_direction])) {
                                 grandparent->links[grand_direction] = RotateSingle(parent, last_direction);
                             }
 
-                            current->red = true;
-                            grandparent->links[grand_direction]->red = true;
+                            current->red = grandparent->links[grand_direction]->red = true;
                             grandparent->links[grand_direction]->links[0]->red = false;
                             grandparent->links[grand_direction]->links[1]->red = false;
                         }

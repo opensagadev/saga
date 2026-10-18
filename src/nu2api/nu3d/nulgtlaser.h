@@ -14,7 +14,7 @@ struct NULGTLASER {
     u8 type;
     u8 arc;
     u8 padding[2];
-    u32 colour;
+    i32 colour;
     i32 seed;
 };
 DECOMP_ASSERT(sizeof(NULGTLASER) == 0x38, "Lightning record size");

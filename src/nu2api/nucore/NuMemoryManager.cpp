@@ -431,10 +431,10 @@ void NuMemoryManager::BlockFree(void *ptr, u32 flags) {
         end_tag = END_TAG(header, BLOCK_SIZE(header->value));
 
         tag_value = *end_tag >> 0x1b;
-        if (tag_value == 0x1f) {
-            manager_idx = end_tag[-1];
-        } else {
+        if (tag_value != 0x1f) {
             manager_idx = tag_value - 1;
+        } else {
+            manager_idx = end_tag[-1];
         }
 
         if (manager->idx != manager_idx) {
@@ -496,10 +496,6 @@ void *NuMemoryManager::_BlockReAlloc(void *ptr, u32 size, u32 alignment, u32 fla
     if (__builtin_expect(ptr == NULL, 0)) {
         return _BlockAlloc(size, alignment, flags, name, category);
     }
-    if (size == 0) {
-        BlockFree(ptr, flags);
-        return NULL;
-    }
 
     ValidateAddress(ptr, __FUNCTION__);
     Header *header = (Header *)((usize)ptr - m_headerSize);
@@ -518,17 +514,16 @@ void *NuMemoryManager::_BlockReAlloc(void *ptr, u32 size, u32 alignment, u32 fla
     }
 
     const u32 calculated_size = CalculateBlockSize(size);
-    const u32 footer_size = this->idx < 30 ? 4 : 8;
-    const u32 new_size = calculated_size - m_headerSize - footer_size;
+    const u32 new_size = calculated_size - m_headerSize - (this->idx < 30 ? 4 : 8);
     const u32 header_value = header->value;
-    const u32 old_size = BLOCK_SIZE(header_value) - m_headerSize - footer_size;
+    const u32 old_size = BLOCK_SIZE(header_value) - m_headerSize - (this->idx < 30 ? 4 : 8);
     if (new_size == old_size) {
         return ptr;
     }
 
     const u32 old_alignment = 2U << ((header_value & ALLOC_MASK) >> 27);
     void *replacement = _BlockAlloc(new_size, old_alignment, flags, name, category);
-    if (__builtin_expect(replacement != NULL && (flags & 0x40) == 0, 0)) {
+    if ((flags & 0x40) == 0) {
         memcpy(replacement, ptr, MIN(old_size, new_size));
         BlockFree(ptr, flags);
     }
@@ -915,10 +910,10 @@ bool NuMemoryManager::PopContext(NuMemoryManager::PopDebugMode debug_mode) {
             this->error_handler->HandleError(this, MEM_ERROR_LEAK_DETECTED, this->error_msg);
             pthread_mutex_unlock(&this->error_mutex);
         }
+    }
 
-        if (debug_mode == POP_DEBUG_MODE_FREE_STRANDED_BLOCKS) {
-            FreeStrandedBlocks();
-        }
+    if (debug_mode == POP_DEBUG_MODE_FREE_STRANDED_BLOCKS) {
+        FreeStrandedBlocks();
     }
 
     return stranded_block_count == 0;
@@ -1306,13 +1301,15 @@ u16 NuMemoryManager::DumpBlock(u32 dump_id, NuSymbolQuery *, Header *header, u32
     char line[512] __attribute__((aligned(16)));
     char size_text[14];
     char address_text[19];
+    u32 data_bytes = total_bytes - (m_headerSize - 4) * count;
     u32 block_size = BLOCK_SIZE(header->value);
     usize *end_tag = END_TAG(header, block_size);
     u32 encoded_index = *end_tag >> 27;
     u32 manager_index = encoded_index == 31 ? *(end_tag - 1) : encoded_index - 1;
+    if (manager_index >= 30)
+        data_bytes -= 4;
 
-    NuStrFormatSize(size_text, sizeof(size_text),
-                    total_bytes - (m_headerSize - 4) * count - (manager_index >= 30 ? 4 : 0), false);
+    NuStrFormatSize(size_text, sizeof(size_text), data_bytes, false);
     NuStrFormatAddress(address_text, sizeof(address_text), reinterpret_cast<u8 *>(header) + m_headerSize);
 
     u16 category = 0;

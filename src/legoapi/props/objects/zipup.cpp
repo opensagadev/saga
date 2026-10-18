@@ -542,6 +542,18 @@ static void ZipUps_Draw(void *world_ptr, void *, float) {
     }
 }
 
+static bool ZipUp_CanUse(ZIPUP *zipup, GameObject_s *object) {
+    if ((zipup->flags & 0xc0) != 0xc0)
+        return false;
+    if ((zipup->flags & 0x20) != 0)
+        return (object->apiobj.character_data->game_character->flags_094[3] & 0x20) != 0;
+    if ((object->apiobj.character_data->game_character->flags_094[3] & 0x20) != 0)
+        return false;
+    if ((zipup->flags & 2) == 0 && object->apiobj.field_0x27c != -1)
+        return false;
+    return true;
+}
+
 ZIPUP *ZipUp_FindNearest(WORLDINFO_s *world, nuvec_s *position, float radius, float *distance, i32 *endpoint,
                          GameObject_s *object, bool touch) {
     if (world == NULL || object == NULL || object->apiobj.character_data == NULL ||
@@ -555,19 +567,8 @@ ZIPUP *ZipUp_FindNearest(WORLDINFO_s *world, nuvec_s *position, float radius, fl
     ZIPUP *nearest = NULL;
     ZIPUP *zipup = world->zipups;
     for (i32 i = 0; i < world->zipup_count; ++i, ++zipup) {
-        if (zipup != NULL) {
-            if ((zipup->flags & 0xc0) != 0xc0)
-                continue;
-            if ((zipup->flags & 0x20) != 0) {
-                if ((object->apiobj.character_data->game_character->flags_094[3] & 0x20) == 0)
-                    continue;
-            } else {
-                if ((object->apiobj.character_data->game_character->flags_094[3] & 0x20) != 0)
-                    continue;
-                if ((zipup->flags & 2) == 0 && object->apiobj.field_0x27c != -1)
-                    continue;
-            }
-        }
+        if (zipup != NULL && !ZipUp_CanUse(zipup, object))
+            continue;
         float candidate = NuVecDistSqr(position, &zipup->lower_position, NULL);
         if (candidate < nearest_distance) {
             nearest = zipup;
@@ -596,9 +597,7 @@ void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
         if (object->action_movement_state == 1) {
             void *info = api.character_model->model_data_b[object->context_animation];
             f32 *playing = NULL;
-            if (info != NULL)
-                playing = AnimPlaying(&api.anim_packet, object->context_animation, 1, 0);
-            if (__builtin_expect(info == NULL || playing != NULL, 1)) {
+            if (info == NULL || (playing = AnimPlaying(&api.anim_packet, object->context_animation, 1, 0)) != NULL) {
                 object->context_animation_timer += FRAMETIME;
                 if (object->context_animation_timer >= object->airborne_action_duration)
                     object->context_animation_timer = object->airborne_action_duration;
@@ -703,47 +702,47 @@ void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
             PlaySfx("GrapWindLp", &api.collision_position);
             return;
         }
-        if (object->context_animation_timer >= 1.5f) {
-            object->context_animation_timer = 0.0f;
-            object->character_context = -1;
-            zipup->occupant = NULL;
-            object->context_flags &= ~0x20;
-            object->fall_animation_timer = 0.2f;
-            static_cast<ZIPUP *>(object->field_0x788)->runtime_flags &= ~1;
-            api.velocity.x = object->target_velocity.x = v000.x;
-            api.velocity.y = object->target_velocity.y = -1.0f;
-            api.velocity.z = object->target_velocity.z = v000.z;
-            object->field_0x788 = NULL;
-            object->magnet_surface_angle = 0;
-            PlaySfx("GrapDetach", &api.collision_position);
-            if ((api.flags_low & 0x80) != 0)
-                Hint_SetComplete(0x262);
+        if (object->context_animation_timer < 1.5f) {
+            zipup->runtime_flags |= 2;
+            u16 start_angle = NuAtan2D(zipup->rider_start_offset.x, zipup->rider_start_offset.z);
+            NUVEC end_offset;
+            NuVecSub(&end_offset, destination, hook);
+            end_offset.y += 0.5f;
+            u16 end_angle = NuAtan2D(end_offset.x, end_offset.z);
+            i32 difference = 0x8000 - static_cast<u16>(RotDiff(start_angle, end_angle));
+            if (difference < 0)
+                difference = -difference;
+            i32 half = static_cast<i32>(difference * 0.5f);
+            NUVEC offset = zipup->rider_start_offset;
+            u16 axis = start_angle > 0x8000 ? start_angle + half : start_angle - half;
+            NuVecRotateY(&offset, &offset, static_cast<u16>(-axis));
+            f32 phase = object->context_animation_timer / 1.5f * 32768.0f;
+            i32 pitch = static_cast<i32>((1.0f - (NU_SIN_LUT(static_cast<i32>(16384.0f + phase)) + 1.0f) * 0.5f) *
+                                         zipup->pitch_adjustment);
+            NuVecRotateX(&zipup->rider_target_position, &offset, pitch);
+            NuVecRotateY(&zipup->rider_target_position, &zipup->rider_target_position, axis);
+            zipup->rider_target_position.y *= 1.0f - (1.0f - NuTrigTable[0x1000]) * NU_SIN_LUT(static_cast<i32>(phase));
+            NuVecAdd(&zipup->rider_target_position, hook, &zipup->rider_target_position);
+            f32 old_time = object->context_animation_timer;
+            object->context_animation_timer += FRAMETIME;
+            if (old_time < 0.55f && object->context_animation_timer >= 0.55f)
+                PlaySfx("GrapSwing", &api.collision_position);
             return;
         }
-        zipup->runtime_flags |= 2;
-        u16 start_angle = NuAtan2D(zipup->rider_start_offset.x, zipup->rider_start_offset.z);
-        NUVEC end_offset;
-        NuVecSub(&end_offset, destination, hook);
-        end_offset.y += 0.5f;
-        u16 end_angle = NuAtan2D(end_offset.x, end_offset.z);
-        i32 difference = 0x8000 - static_cast<u16>(RotDiff(start_angle, end_angle));
-        if (difference < 0)
-            difference = -difference;
-        i32 half = static_cast<i32>(difference * 0.5f);
-        NUVEC offset = zipup->rider_start_offset;
-        u16 axis = start_angle > 0x8000 ? start_angle + half : start_angle - half;
-        NuVecRotateY(&offset, &offset, static_cast<u16>(-axis));
-        f32 phase = object->context_animation_timer / 1.5f * 32768.0f;
-        i32 pitch = static_cast<i32>((1.0f - (NU_SIN_LUT(static_cast<i32>(16384.0f + phase)) + 1.0f) * 0.5f) *
-                                     zipup->pitch_adjustment);
-        NuVecRotateX(&zipup->rider_target_position, &offset, pitch);
-        NuVecRotateY(&zipup->rider_target_position, &zipup->rider_target_position, axis);
-        zipup->rider_target_position.y *= 1.0f - (1.0f - NuTrigTable[0x1000]) * NU_SIN_LUT(static_cast<i32>(phase));
-        NuVecAdd(&zipup->rider_target_position, hook, &zipup->rider_target_position);
-        f32 old_time = object->context_animation_timer;
-        object->context_animation_timer += FRAMETIME;
-        if (old_time < 0.55f && object->context_animation_timer >= 0.55f)
-            PlaySfx("GrapSwing", &api.collision_position);
+        object->context_animation_timer = 0.0f;
+        object->character_context = -1;
+        zipup->occupant = NULL;
+        object->context_flags &= ~0x20;
+        object->fall_animation_timer = 0.2f;
+        static_cast<ZIPUP *>(object->field_0x788)->runtime_flags &= ~1;
+        api.velocity.x = object->target_velocity.x = v000.x;
+        api.velocity.y = object->target_velocity.y = -1.0f;
+        api.velocity.z = object->target_velocity.z = v000.z;
+        object->field_0x788 = NULL;
+        object->magnet_surface_angle = 0;
+        PlaySfx("GrapDetach", &api.collision_position);
+        if ((api.flags_low & 0x80) != 0)
+            Hint_SetComplete(0x262);
         return;
     }
     if (!ObjLandReady(object) && !objInNetWaitContext(object, 0x47))

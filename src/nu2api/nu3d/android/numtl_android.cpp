@@ -207,12 +207,8 @@ void NuMtlUpdatePS(numtl_s *mtl) {
         mtl->shader_desc.unknown_a8 = count;
 
         // Vtx-desc tex-unit nibble: at least one unit.
-        u8 b = ((u8 *)&mtl->shader_desc.vtx_desc)[1];
-        u8 units = (b >> 3) & 7;
-        if (units == 0) {
-            units = 1;
-        }
-        ((u8 *)&mtl->shader_desc.vtx_desc)[1] = (b & 199) | (units << 3);
+        u32 units = mtl->shader_desc.vtx_desc.tex_coord_mode;
+        mtl->shader_desc.vtx_desc.tex_coord_mode = units != 0 ? units : 1;
     }
 
     if ((((u8 *)&mtl->shader_desc.vtx_desc)[3] & 4) != 0) {
@@ -232,7 +228,7 @@ void NuMtlUpdatePS(numtl_s *mtl) {
             void *shader = NuShaderManagerRetrieveShaderVariant(&mtl->shader_desc, mtl, 0x10);
             if (shader != NULL) {
                 mtl->shader_desc.shader_variant_id = -1;
-                mtl->shader_desc.shader_id = *(i16 *)shader;
+                mtl->shader_desc.shader_id = *(i32 *)shader;
             }
         }
     } else {
@@ -240,7 +236,7 @@ void NuMtlUpdatePS(numtl_s *mtl) {
             ((u8 *)&mtl->shader_desc.vtx_desc)[2] |= 4;
             void *shader = NuShaderManagerRetrieveShader(&mtl->shader_desc, mtl);
             if (shader != NULL) {
-                mtl->shader_desc.shader_id = *(i16 *)shader;
+                mtl->shader_desc.shader_id = *(i32 *)shader;
             }
         }
     }
@@ -248,9 +244,10 @@ void NuMtlUpdatePS(numtl_s *mtl) {
     mtl->vertex_decl = NuGetVertexDeclaration(mtl->shader_desc.vtx_desc);
 
     if (mtl->tex_id == 0) {
-        i32 packed = ((i32)(mtl->diffuse_color.r * 255.0f) & 0xff) | 0xff000000 |
-                     (((i32)(mtl->diffuse_color.g * 255.0f) & 0xff) << 8) |
-                     (((i32)(mtl->diffuse_color.b * 255.0f) & 0xff) << 16);
+        u8 r = mtl->diffuse_color.r * 255.0f;
+        u8 g = mtl->diffuse_color.g * 255.0f;
+        u8 b = mtl->diffuse_color.b * 255.0f;
+        u32 packed = r | 0xff000000 | (g << 8) | (b << 16);
         mtl->shader_desc.diffuse_color[0] = (NUCOLOUR32)packed;
     }
 }

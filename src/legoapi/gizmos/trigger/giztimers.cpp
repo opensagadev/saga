@@ -80,7 +80,7 @@ void GizTimer_Activate(GIZMO *gizmo, i32 unknown) {
         timer->time_remaining = timer->start_time;
     }
 
-    timer->flags = (timer->flags & ~1) | (unknown != 0);
+    timer->active = unknown != 0;
 }
 
 void *GizTimer_ReserveBufferSpace(void *world_info) {

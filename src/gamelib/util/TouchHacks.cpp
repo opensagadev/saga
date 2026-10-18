@@ -538,9 +538,9 @@ VuVec TouchHacks::CalculateXZVelForArcToHitPoint(VuVec const &position, VuVec co
     return velocity;
 }
 
-i32 TouchHacks::CanBlowupBeBlownUp(GIZMOBLOWUP_s &blowup, i32 hit_type) {
+bool TouchHacks::CanBlowupBeBlownUp(GIZMOBLOWUP_s &blowup, i32 hit_type) {
     if (hit_type != 1) {
-        return 1;
+        return true;
     }
     return (blowup.draw_flags >> 7) & 1;
 }

@@ -204,20 +204,16 @@ void PartImpact_ThermalDetonator(PART_s *part) {
 void ThermalDetonator_Throw(GameObject_s *object) {
     NUVEC movement;
     ADDPART_s params = Default_ADDPART;
-    if (!(object == NULL || WORLD == NULL || WORLD->lev_objs == NULL || WORLD->lev_objs[0xe9].active == 0)) {
+    if (WORLD->lev_objs[0xe9].active != 0) {
         if (object->apiobj.player_controlled) {
             Hint_SetComplete(0x2b8);
             Hint_SetComplete(0x283);
             Hint_SetComplete(0x61d);
         }
         NUMTX matrix;
-        bool blocked = false;
-        const i32 locator =
-            object->apiobj.character_data != NULL && object->apiobj.character_data->game_character != NULL
-                ? object->apiobj.character_data->game_character->throw_locator
-                : -1;
-        if (locator < 0 || locator >= 16 || object->apiobj.character_model == NULL ||
-            object->apiobj.character_model->points_of_interest[locator] == NULL) {
+        i32 blocked = 0;
+        const i32 locator = object->apiobj.character_data->game_character->throw_locator;
+        if (locator == -1 || object->apiobj.character_model->points_of_interest[locator] == NULL) {
             NuMtxSetTranslation(&matrix, &object->apiobj.collision_position);
         } else {
             if (object->id == id_JANGOFETT && object->context_animation == 0x6e) {
@@ -239,7 +235,7 @@ void ThermalDetonator_Throw(GameObject_s *object) {
             };
 
             NuVecSub(&movement, NUMTX_GET_ROW_VEC(&matrix, 3), &origin);
-            blocked = GameRayCast(&origin, &movement, 0.0f, TERRAINMASK_NONWEAPON | 0x1f) != 0;
+            blocked = GameRayCast(&origin, &movement, 0.0f, TERRAINMASK_NONWEAPON | 0x1f);
         }
         NUVEC velocity;
         if (NextThermalTarget.Get() == NULL) {
@@ -304,16 +300,12 @@ void ThermalDetonator_Throw(GameObject_s *object) {
 void ThermalDetonator_ThrowMom(GameObject_s *object, nuvec_s *velocity) {
     NUVEC movement;
     ADDPART_s params = Default_ADDPART;
-    if (!(object == NULL || WORLD == NULL || WORLD->lev_objs == NULL || WORLD->lev_objs[0xe9].active == 0)) {
+    if (WORLD->lev_objs[0xe9].active != 0) {
         // This entry point creates the thrown part with supplied momentum; it
         // does not calculate or modify the caller's vector.
         NUMTX matrix;
-        const i32 locator =
-            object->apiobj.character_data != NULL && object->apiobj.character_data->game_character != NULL
-                ? object->apiobj.character_data->game_character->throw_locator
-                : -1;
-        if (locator < 0 || locator >= 16 || object->apiobj.character_model == NULL ||
-            object->apiobj.character_model->points_of_interest[locator] == NULL) {
+        const i32 locator = object->apiobj.character_data->game_character->throw_locator;
+        if (locator == -1 || object->apiobj.character_model->points_of_interest[locator] == NULL) {
             NuMtxSetTranslation(&matrix, &object->apiobj.collision_position);
         } else {
             if (object->id == id_JANGOFETT && object->context_animation == 0x6e) {

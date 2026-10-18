@@ -15,7 +15,7 @@ void HostSetMsaaEnabled(bool enabled) {
     host_msaa_enabled = enabled;
 }
 
-void NuRenderInspectEGLConfig(EGLDisplay display, EGLConfig config) {
+extern "C" void NuRenderInspectEGLConfig(EGLDisplay display, EGLConfig config) {
     EGLint red = 0;
     EGLint green = 0;
     EGLint blue = 0;

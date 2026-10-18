@@ -45,10 +45,10 @@ static inline void NuRndrPrimSetColour(i32 colour) {
 }
 
 static inline void NuRndrPrimPosition(f32 x, f32 y, f32 z) {
-    PrimVertexRaw *vertex = (PrimVertexRaw *)g_NuPrim_StreamBufferPtr->void_ptr;
-    vertex->x = x;
-    vertex->y = y;
-    vertex->z = z;
+    NUVEC *position = (NUVEC *)g_NuPrim_StreamBufferPtr->void_ptr;
+    position->x = x;
+    position->y = y;
+    position->z = z;
     g_NuPrim_StreamBufferPtr->u8_ptr += sizeof(PrimVertexRaw);
     ++g_NuPrim_VertexCount;
 }

@@ -178,7 +178,10 @@ void Pulses_Update(PULSESYS_s *pulse_sys) {
             return;
         }
 
-        NUVEC hit_direction = {pulse_sys->hit_direction_line, 0.0f, pulse_sys->hit_direction_radius_origin};
+        NUVEC hit_direction;
+        hit_direction.x = pulse_sys->hit_direction_line;
+        hit_direction.y = 0.0f;
+        hit_direction.z = pulse_sys->hit_direction_radius_origin;
         NuVecRotateY(&hit_direction, &hit_direction, 0x4000);
 
         auto pulse_sys_radial_hit_direction = pulse_sys->radial_hit_direction;
@@ -271,7 +274,7 @@ void Pulses_Update(PULSESYS_s *pulse_sys) {
                 TakeHitRumble(player, 0.7f);
                 player->apiobj.velocity.x = 0.0f;
                 player->apiobj.velocity.z = 0.0f;
-                player->flicker_flags = (player->flicker_flags & ~7) | (distance >= 0.0f ? 4 : 3);
+                player->flicker_kind = distance >= 0.0f ? 4 : 3;
 
                 i32 debris_handle = -1;
                 AddFiniteShotDebrisEffect(&debris_handle,

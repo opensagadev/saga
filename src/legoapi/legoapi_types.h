@@ -1194,14 +1194,17 @@ struct FLOWBOX_s {
             u8 state_flags_high;
         };
         struct {
-            u8 state_low_bits : 2;
+            u8 active : 1;
+            u8 completed : 1;
             u8 start_invisible : 1;
             u8 finished_invisible : 1;
             u8 finished_deactive : 1;
             u8 state_low_bit5 : 1;
             u8 reverse : 1;
             u8 reverse_invisible : 1;
-            u8 state_high_bits : 4;
+            u8 state_high_bits : 2;
+            u8 output_state : 1;
+            u8 state_high_bit3 : 1;
             u8 output_only : 1;
             u8 freeplay : 1;
             u8 story_mode : 1;
@@ -1590,7 +1593,14 @@ struct GAMEPAD_s {
     RUMBLEPACKET rumble_packet; // 0x40
     void *operator_data;        // 0x54
     u16 previous_input_angle;
-    u8 allocated_5a; // allocation and input-state flags
+    union {
+        u8 allocated_5a; // allocation and input-state flags
+        struct {
+            u8 : 3;
+            u8 waggled : 1;
+            u8 : 4;
+        };
+    };
     char pad_5b[0x60 - 0x5b];
 };
 enum GAMEPAD_RUNTIME_FLAGS : u8 {
@@ -2515,7 +2525,8 @@ struct STATUSPACKET_s {
     union {
         u8 field_0xb0;
         struct {
-            u8 : 2;
+            u8 field_0xb0_0 : 1;
+            u8 : 1;
             u8 true_hero_complete : 1;
             u8 next_area_unlocked : 1;
             u8 new_minikit_complete : 1;
@@ -3456,7 +3467,8 @@ struct minisnowtrooper_s {
             u8 state_low_bits : 2;
             u8 step_frame : 2;
             u8 slot : 2;
-            u8 state_high_bits : 2;
+            u8 stopped : 1;
+            u8 aligned : 1;
         };
     };
     u8 reserved_002;
@@ -3725,30 +3737,37 @@ struct pushblock_s {
         struct {
             u8 runtime_flags_0c8;
             u8 runtime_flags_0c9;
-            union {
-                u8 flags_0ca;
-                struct {
-                    u8 fields_0ca_0_1 : 2;
-                    u8 push_visible : 1;
-                    u8 fields_0ca_3 : 1;
-                    u8 config_0ca_4 : 1;
-                    u8 config_0ca_5 : 1;
-                    u8 config_0ca_6 : 1;
-                    u8 config_0ca_7 : 1;
-                };
-            };
-            union {
-                u8 flags_0cb;
-                struct {
-                    u8 fields_0cb_0_1 : 2;
-                    u8 config_0cb_2 : 1;
-                    u8 config_0cb_3 : 1;
-                    u8 field_0cb_4 : 1;
-                    u8 config_0cb_5 : 1;
-                    u8 config_0cb_6 : 1;
-                    u8 field_0cb_7 : 1;
-                };
-            };
+            u8 flags_0ca;
+            u8 flags_0cb;
+        };
+        struct {
+            u32 pushed : 1;     // 0xc8
+            u32 was_pushed : 1;
+            u32 flag_0c8_2 : 1;
+            u32 moving : 1;
+            u32 was_moving : 1;
+            u32 flag_0c8_5 : 1;
+            u32 flag_0c8_6 : 1;
+            u32 knocked : 1;
+            u32 flag_0c9_0 : 1; // 0xc9
+            u32 seeking : 1;
+            u32 flag_0c9_2 : 1;
+            u32 flag_0c9_3 : 1;
+            u32 snap_position_count : 3;
+            u32 snap_index : 3; // 0xc9 bit 7 and 0xca bits 0-1
+            u32 push_visible : 1;
+            u32 fields_0ca_3 : 1;
+            u32 config_0ca_4 : 1;
+            u32 config_0ca_5 : 1;
+            u32 config_0ca_6 : 1;
+            u32 config_0ca_7 : 1;
+            u32 fields_0cb_0_1 : 2; // 0xcb
+            u32 config_0cb_2 : 1;
+            u32 config_0cb_3 : 1;
+            u32 field_0cb_4 : 1;
+            u32 config_0cb_5 : 1;
+            u32 config_0cb_6 : 1;
+            u32 field_0cb_7 : 1;
         };
         u8 state_flags[4];
         u32 packed_state_flags;
@@ -5478,7 +5497,15 @@ struct PART_s {
     }; // 0x13e
     u16 field_140;
     u8 rotation_axis_1, rotation_axis_2;
-    u8 active;
+    union {
+        u8 active;
+        struct {
+            u8 : 4;
+            u8 active_bit4 : 1;
+            u8 radius_state : 2;
+            u8 : 1;
+        };
+    };
     u8 render_flags;
     u8 reflection_flags;
     u8 pad_147;

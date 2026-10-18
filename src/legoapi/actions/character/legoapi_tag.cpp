@@ -524,8 +524,8 @@ void ReleaseTakeOver(GameObject_s *object, i32) {
         Buck_Start(object, rider);
     }
     object->field_0xcc0 = NULL;
-    rider->field_0xe23 &= 0x7f;
-    object->field_0xe23 &= 0x7f;
+    rider->tag_highlighted = 0;
+    object->tag_highlighted = 0;
     rider->ai.path_info.flags &= ~1;
     object->saved_position = object->apiobj.position;
     if (rider->apiobj.field_0x27c != -1 || object->apiobj.field_0x27c != -1) {
@@ -953,7 +953,7 @@ __attribute__((force_align_arg_pointer)) void TakeOverCode(GameObject_s *object,
             TakeOver2GetIn(object, nearest);
         } else {
             object->tag_flags |= 1;
-            nearest->field_0xe23 |= 0x80;
+            nearest->tag_highlighted = 1;
         }
     }
 }

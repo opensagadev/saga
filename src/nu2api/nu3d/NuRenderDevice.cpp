@@ -80,16 +80,6 @@ NuRenderDevice::NuRenderDevice() : NuRenderDeviceGen() {
 // Optional GLES2 extensions (loaded via eglGetProcAddress)
 // ---------------------------------------------------------------------------
 
-__attribute__((weak)) void NuRenderInspectEGLConfig(EGLDisplay display, EGLConfig config) {
-    EGLint config_attribs[6] = {};
-    eglGetConfigAttrib(display, config, EGL_RED_SIZE, &config_attribs[0]);
-    eglGetConfigAttrib(display, config, EGL_BLUE_SIZE, &config_attribs[1]);
-    eglGetConfigAttrib(display, config, EGL_GREEN_SIZE, &config_attribs[2]);
-    eglGetConfigAttrib(display, config, EGL_ALPHA_SIZE, &config_attribs[3]);
-    eglGetConfigAttrib(display, config, EGL_DEPTH_SIZE, &config_attribs[4]);
-    eglGetConfigAttrib(display, config, EGL_STENCIL_SIZE, &config_attribs[5]);
-}
-
 // ---------------------------------------------------------------------------
 // Extension string helpers
 // ---------------------------------------------------------------------------

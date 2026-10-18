@@ -696,10 +696,12 @@ void GizmoBlowUp_AddEffects(nuvec_s *position, GIZMOBLOWUP_s *blowup, i32 offset
 
 i32 GizmoBlowupBlowup(GIZMOBLOWUP_s *blowup, i32 effects, i32 hit_type, i32 damage, GameObject_s *object,
                       i32 hit_context) {
-    if (blowup == NULL || (blowup->state_flags & 0x80) == 0 || ((blowup->draw_flags & 0x20) && ShadowMode == 0) ||
-        !TouchHacks::CanBlowupBeBlownUp(*blowup, hit_type)) {
+    if (blowup == NULL || (blowup->state_flags & 0x80) == 0)
         return 0;
-    }
+    if ((blowup->draw_flags & 0x20) && ShadowMode == 0)
+        return 0;
+    if (!TouchHacks::CanBlowupBeBlownUp(*blowup, hit_type))
+        return 0;
     nuinstanim_s *animation = NuSpecialGetInstAnim(&blowup->type->animated_special);
     GIZMOBLOWUPTYPE_s *type = blowup->type;
     if (animation != NULL && type->animation_start_frame != type->animation_end_frame) {

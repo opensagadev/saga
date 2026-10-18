@@ -312,7 +312,10 @@ void DeathStar2BattleD_Update(WORLDINFO_s *) {
                 NuFloatRand(reinterpret_cast<NURAND *>(&GAMERAND)) < 0.5f) {
                 i32 angle = qrand();
                 NUVEC position = shield->mid_position;
-                NUVEC direction = {NU_COS_LUT(angle), 0.0f, NU_SIN_LUT(angle)};
+                NUVEC direction;
+                direction.x = NU_COS_LUT(angle);
+                direction.y = 0.0f;
+                direction.z = NU_SIN_LUT(angle);
                 f32 radius = NuFloatRand(reinterpret_cast<NURAND *>(&GAMERAND)) * 15.0f + 10.0f;
                 AddPickups(0, 0, 1, 0, &position, &direction, 3.0f, -1, radius, 2000000.0f, NULL, 1, 0, true);
             }

@@ -1550,7 +1550,7 @@ static void LightSabreStreakCode(GameObject_s *object, i32 blade, i32 effect) {
     }
     if (object->id == id_IMPERIALGUARD)
         object->sabre_flags &= ~3;
-    if (object->sabre_flags == 0 || object->apiobj.field_0x288 == 0 || (object->field_0xe23 & 8) == 0)
+    if (object->sabre_flags == 0 || object->apiobj.field_0x288 == 0 || !object->drawn_last_frame)
         return;
     GAMECHARACTERDATA *data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
     const i32 joint_a = data->streak_joints[blade][0];
@@ -1574,7 +1574,7 @@ static void LightSabreStreakCode(GameObject_s *object, i32 blade, i32 effect) {
             colour = 3;
         else if (object->id == id_GRIEVOUS && (blade == 3 || blade == 0))
             colour = 2;
-        else if (AnakinGreenSabre(object) || (object->id == id_BOB && (object->field_0xefd & 2) != 0))
+        else if (AnakinGreenSabre(object) || (object->id == id_BOB && object->random_layer_variant))
             colour = 1;
         else
             colour = static_cast<i8>(GCDataList[object->id].field_0x117);
@@ -1801,7 +1801,7 @@ static void JediLightCode(GameObject_s *object) {
             return;
         i32 point_count = 0;
         for (i32 blade = 0; blade < 4; ++blade) {
-            if ((object->field_0xe23 & 8) != 0) {
+            if (object->drawn_last_frame) {
                 GAMECHARACTERDATA *data = GetGameCharacterData(object);
                 i32 first = data->streak_joints[blade][0];
                 if (first != -1 && object->apiobj.character_model->points_of_interest[first] != NULL) {
@@ -1965,7 +1965,7 @@ static __attribute__((noinline)) void ForcePushed_MoveCode(GameObject_s *object)
     if (object->character_context != 0x1c)
         return;
     GameObject_s *source = object->force_target;
-    if (__builtin_expect(source == NULL || source->character_context != 0x1b || (source->field_0xe21 & 1) != 0 ||
+    if (__builtin_expect(source == NULL || source->character_context != 0x1b || source->force_choke_target ||
                              (object->action_flags & 0x280) != 0,
                          1))
         return;
@@ -2230,7 +2230,7 @@ i32 ObjZappedBlue(GameObject_s *object) {
         return 1;
     if (object->field_0x7a5 == 0x1c) {
         GameObject_s *holder = static_cast<GameObject_s *>(object->field_0x780);
-        if (holder != NULL && (holder->field_0xe21 & 1) != 0)
+        if (holder != NULL && holder->force_choke_target)
             return 1;
     }
     return 0;
@@ -2406,8 +2406,8 @@ void ApplyGravity(GameObject_s *object, float *gravity, float hover_height, floa
             if (target->field_0x7a3 == 1) {
                 return;
             }
-            if ((target->field_0xe21 & 4) == 0 &&
-                ((target->field_0xe21 & 1) == 0 ||
+            if (!target->force_highlighted &&
+                (!target->force_choke_target ||
                  (static_cast<GAMECHARACTERDATA *>(character->field11_0x24)->flags_090 & 0x4000) == 0)) {
                 float target_ground_height;
                 target_ground_height = target->apiobj.lower_position.y;
@@ -2667,9 +2667,9 @@ void PreResetCode(GameObject_s *obj) {
         obj->incoming_special = NULL;
         obj->incoming_part = NULL;
         if (obj->field_0x7a5 != 0xa) {
-            obj->field_0xe21 &= 0xf7;
+            obj->has_attack_target = 0;
         }
-        obj->field_0xe21 &= 0xdf;
+        obj->field_0xe21_bit5 = 0;
         obj->sabre_flags = 0x01;
         obj->field_0xe22 &= 0xfd;
         obj->blade_states[3] = 0xff;
@@ -2685,7 +2685,7 @@ void PreResetCode(GameObject_s *obj) {
 
         {
             i32 e04 = obj->dynamic_light_id;
-            obj->field_0xe23 &= 0x7f;
+            obj->tag_highlighted = 0;
             if (e04 != -1) {
                 rtlDynamicEnable(e04, 0);
             }
@@ -3120,7 +3120,7 @@ f32 GetVehicleSpeedMul(GameObject_s *object, f32 speed) {
             fraction = 0.0f;
         effective = (0.5f + fraction * 0.5f) * data->run_speed;
     } else if ((object->apiobj.flags_low & 0x80) != 0 && (!IDLESPEEDINNARROWSOCKSONLY || object->in_narrow_socket) &&
-               (object->field_0xf03 & 2) == 0) {
+               !object->no_idle_speed) {
         f32 idle = ((GAMECHARACTERDATA_s *)object->apiobj.character_data->field11_0x24)->field_0x10;
         effective = idle > speed ? idle : speed;
     } else {
@@ -3156,7 +3156,7 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
     }
     if (object->id == id_WOOKIEFLYER && object->character_context == 0x17)
         ApplyGravity(object, NULL, 0.0f, 10.0f, NULL);
-    object->field_0xe23 &= ~0x10;
+    object->has_movement_input = 0;
     object->in_narrow_socket = ObjInNarrowSock(object, WORLD->sock_sys, WORLD->level_idx);
     u16 narrow_yaw = object->in_narrow_socket ? object->yrot : 0;
     if (object->character_context != 0x2a) {
@@ -3204,7 +3204,7 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
         if (object->field_0xddc > 0.0f)
             object->field_0xddc -= FRAMETIME;
         f32 turn_multiplier = 0.0f;
-        if ((object->field_0xefd & 4) != 0) {
+        if (object->snap_facing) {
             api.movement_facing_angle = input_yaw;
             api.facing_angle = api.movement_facing_angle;
             api.field_0x276 = api.facing_angle;
@@ -3344,7 +3344,7 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
             seek_rate = 5.0f;
         i32 special_lean = 0;
         if (api.movement_direction.x != 0.0f || api.movement_direction.z != 0.0f) {
-            object->field_0xe23 |= 0x10;
+            object->has_movement_input = 1;
             object->target_velocity.x = api.movement_direction.x;
             object->target_velocity.z = api.movement_direction.z;
             api.movement_direction.x = api.movement_direction.z = 0.0f;
@@ -3437,7 +3437,7 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
                 else if (player_vehicle != 0 && (PODSPRINT_ADATA != NULL && WORLD->area == PODSPRINT_ADATA))
                     desired = 25.0f;
                 else if ((!IDLESPEEDINNARROWSOCKSONLY || object->in_narrow_socket) && player_vehicle != 0 &&
-                         (object->field_0xf03 & 2) == 0)
+                         !object->no_idle_speed)
                     desired =
                         api.character_data->game_character->field_0x10 / api.character_data->game_character->run_speed;
                 else
@@ -3616,7 +3616,10 @@ f32 ForceAlongSock(GameObject_s *object) {
     if (object->sock_position.location.sock == -1 || CurrentSpeed == 0.0f)
         return 0.0f;
     f32 speed = (1.0f + object->field_0xc38) * (CurrentSpeed * avg_currentspeed_mul);
-    NUVEC force = {0.0f, 0.0f, speed};
+    NUVEC force;
+    force.x = 0.0f;
+    force.y = 0.0f;
+    force.z = speed;
     NuVecRotateX(&force, &force, object->sock_position.midpoint_rotation.x);
     NuVecRotateY(&force, &force, object->sock_position.midpoint_rotation.y);
     NuVecAdd(&object->target_velocity, &object->target_velocity, &force);
@@ -3690,7 +3693,10 @@ void CurrentStart(GameObject_s *object, i32 require_twist_level, i32 use_socket_
         (require_twist_level == 0 && TwistLevel(world->current_level) == 0))
         return;
 
-    NUVEC current = {0.0f, 0.0f, world->sock_sys->sock[static_cast<i8>(object->field_0x661)].current_speed};
+    NUVEC current;
+    current.x = 0.0f;
+    current.y = 0.0f;
+    current.z = world->sock_sys->sock[static_cast<i8>(object->field_0x661)].current_speed;
     *reinterpret_cast<f32 *>(&object->field_0xc3c) =
         world->sock_sys->sock[static_cast<i8>(object->field_0x661)].current_speed;
     const f32 multiplier =
@@ -3888,9 +3894,9 @@ void MovePlayer_ROLLING(GameObject_s *object) {
         NUVEC velocity;
         NUMTX matrix;
     } local __attribute__((aligned(16)));
-    object->field_0xe23 &= ~0x10;
+    object->has_movement_input = 0;
     object->target_velocity.y = ObjInTube(object) ? 1.25f : 0.0f;
-    f32 seek_rate = object->id == id_DRAGBOMB && (object->field_0xf01 & 2)
+    f32 seek_rate = object->id == id_DRAGBOMB && object->being_towed
                         ? 1.0f
                         : object->apiobj.character_data->game_character->velocity_seek_rate;
     object->target_velocity.x = 0.0f;
@@ -4731,7 +4737,7 @@ GameObject_s *ObjOpponent(GameObject_s *object, f32 range, f32 extra_radius, i32
                         if (((object_flags ^ target_flags) & 1) == 0 &&
                             (object->ai.action_target_ref != NULL || target->ai.action_target_ref != NULL))
                             continue;
-                        if (CanPunchGirls == 0 && (object->field_0xf01 & 8) == 0 && (target->field_0xf01 & 8) != 0 &&
+                        if (CanPunchGirls == 0 && !object->is_female && target->is_female &&
                             object->id != id_GAMORREANGUARD) {
                             i32 move = SpecialMove_Check(object, target);
                             if (move == -1 || SpecialMove_GetFlags(move, 1) == 0)
@@ -4821,7 +4827,7 @@ static void PunchCode(GameObject_s *object, i32 pressed, i32 held, i32 require_t
 
     if (object->character_context == 0x26) {
         if (object->field_0x7a7 != -1 && object->force_target == NULL) {
-            if ((object->field_0xe23 & 0x40) != 0) {
+            if (object->weapon_out) {
                 FastWeaponOut(object, 1);
             }
             object->character_context = -1;
@@ -4966,7 +4972,7 @@ static void PunchCode(GameObject_s *object, i32 pressed, i32 held, i32 require_t
         if (object->character_context != -1) {
             return;
         }
-        if ((object->field_0xe23 & 0x40) != 0) {
+        if (object->weapon_out) {
             FastWeaponOut(object, 1);
         }
         if (cooldown != 0.0f) {
@@ -5091,10 +5097,10 @@ start_attack:
             if ((object->field_0xe22 & 1) == 0) {
                 weapon_out = object->field_0xe32 == 1;
             }
-            object->field_0xe23 = (object->field_0xe23 & ~0x40) | (weapon_out << 6);
+            object->weapon_out = weapon_out;
             SetWeaponIn(object);
         } else {
-            object->field_0xe23 |= 0x40;
+            object->weapon_out = 1;
             SetWeaponOut(object);
         }
 
@@ -5227,7 +5233,7 @@ static void BlockCode(GameObject_s *object, i32 pressed, i32 held, i32 jump_pres
                 return;
             if (object->block_latch == 0 && object->blocked_attack_stage != 0) {
                 if ((attacker->apiobj.field_0x1f8 & 0x1000) != 0 && attacker->apiobj.field_0x287 == 0) {
-                    if ((object->field_0xe23 & 0x20) != 0) {
+                    if (object->blocked_special) {
                         if (attacker->character_context == 0x26 &&
                             attacker->context_animation == object->blocked_attack_stage &&
                             (attacker->id != id_GAMORREANGUARD || attacker->context_animation != 0x56 ||
@@ -5310,7 +5316,7 @@ static void BlockCode(GameObject_s *object, i32 pressed, i32 held, i32 jump_pres
             if (object->incoming_special != NULL) {
                 object->block_attacker = object->incoming_special;
                 object->blocked_attack_stage = object->incoming_special->context_animation;
-                object->field_0xe23 |= 0x20;
+                object->blocked_special = 1;
             } else {
                 object->block_attacker = object->incoming_melee;
                 object->blocked_attack_stage = object->incoming_melee->combo_stage + 1;
@@ -6170,7 +6176,7 @@ static void ForceCode(GameObject_s *object, i32 pressed, i32 held) {
         return;
     }
     if ((static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->flags_094[1] & 0x80) != 0 ||
-        (object->field_0xe23 & 1) != 0 || object->character_context == 0x12)
+        object->field_0xe23_bit0 || object->character_context == 0x12)
         return;
     bool start = false;
     if (object->apiobj.field_0x27d != 0 &&
@@ -6229,7 +6235,7 @@ static void ForceCode(GameObject_s *object, i32 pressed, i32 held) {
             object->apiobj.movement_facing_angle =
                 GizForces_AngleToForce(&object->apiobj.collision_position, object->gizforce_target);
         }
-        object->field_0xe23 |= 1;
+        object->field_0xe23_bit0 = 1;
         GameCam_HitRoll();
     }
 }
@@ -6472,14 +6478,14 @@ static void ForcePushCodeBody(GameObject_s *object, i32 held) {
     if (target != NULL) {
         SetObjAsHeadTarget(object, target, 2, 1.0f, 0.0f, 0.0f);
         SetObjAsHeadTarget(target, object, 2, 1.0f, 0.0f, 0.0f);
-        if (__builtin_expect((object->field_0xe21 & 4) != 0, 0)) {
+        if (__builtin_expect(object->force_highlighted, 0)) {
             object->force_glow_candidate = target;
             object->force_glow_candidate_kind = 2;
-            if ((object->field_0xe21 & 1) != 0)
+            if (object->force_choke_target)
                 DrawLightningBolts(object, target, 0);
         } else {
             NewRumble(target->pad_gamepad->pad, qrand() * 1.5259022e-05f * 0.4f, 0);
-            if ((object->field_0xe21 & 1) != 0)
+            if (object->force_choke_target)
                 DrawLightningBolts(object, target, 1);
             object->force_glow_candidate = target;
             object->force_glow_candidate_kind = 2;
@@ -6488,16 +6494,16 @@ static void ForcePushCodeBody(GameObject_s *object, i32 held) {
                 CurrentAnim(&target->apiobj.anim_packet) == target->context_animation)
                 object->context_animation_timer += FRAMETIME;
             NewRumble(object->pad_gamepad->pad, qrand() * 1.5259022e-05f * 0.4f, 0);
-            f32 duration = (object->field_0xe21 & 2) != 0                                          ? 0.4f
-                           : ((object->field_0xe20 & 0x80) != 0 || (object->field_0xe21 & 1) != 0) ? 1.2f
-                                                                                                   : 0.8f;
+            f32 duration = object->force_direct_target                                         ? 0.4f
+                           : ((object->field_0xe20 & 0x80) != 0 || object->force_choke_target) ? 1.2f
+                                                                                               : 0.8f;
             object->field_0x7a3 = 0;
             bool throw_target = false;
             if ((object->apiobj.flags_low & 0x80) != 0 && (object->apiobj.field_0x1f4 & 0x40000) == 0 &&
                 ForcePush_Waft && (target->apiobj.flags_low & 0x80) == 0 && object->context_animation_timer >= 0.2f &&
                 object->pad_gamepad->input_magnitude > 0.0f &&
-                ((object->field_0xe21 & 1) == 0 || (GetGameCharacterData(target)->flags_090 & 0x4000) == 0) &&
-                ((object->field_0xe20 & 0x80) != 0 || (object->field_0xe21 & 1) != 0)) {
+                (!object->force_choke_target || (GetGameCharacterData(target)->flags_090 & 0x4000) == 0) &&
+                ((object->field_0xe20 & 0x80) != 0 || object->force_choke_target)) {
                 object->field_0x7a3 = 1;
                 object->external_force.x = NU_SIN_LUT(object->apiobj.facing_angle) * 0.5f + object->apiobj.position.x;
                 object->external_force.y = (object->apiobj.collision_max.y - object->apiobj.collision_min.y) * 0.75f +
@@ -6547,7 +6553,7 @@ static void ForcePushCodeBody(GameObject_s *object, i32 held) {
                     SetFlicker(target, 0.4f);
                 } else {
                     bool deactivate = true;
-                    if ((object->field_0xe21 & 2) != 0) {
+                    if (object->force_direct_target) {
                         if (DeactivatePlayer(target, 5.0f, NULL)) {
                             target->action_movement_state = 1;
                             target->field_0x768 = qrand() * 1.5259022e-05f * 0.3f + 0.2f;
@@ -6558,7 +6564,7 @@ static void ForcePushCodeBody(GameObject_s *object, i32 held) {
                                ((target->apiobj.character_data->model_flags & 0x10) != 0 && target->hitpoints >= 2))
                         DeactivatePlayer(target, DEACTIVATEDTIME, NULL);
                     else {
-                        bool immune = FreePlay != 0 && (object->field_0xe21 & 1) != 0 &&
+                        bool immune = FreePlay != 0 && object->force_choke_target &&
                                       (GetGameCharacterData(target)->flags_090 & 0x4000) != 0;
                         i32 damage = immune                             ? 0
                                      : target->apiobj.field_0x27c == -1 ? static_cast<i8>(target->current_hp)
@@ -7335,7 +7341,7 @@ i32 SetObjTarget(GameObject_s *object, GameObject_s *target) {
     if ((object->apiobj.character_data->model_flags & 0x2000) == 0 && (object->apiobj.field_0x1f4 & 1) != 0)
         object->attack_target_position.y += Bolt_ObjTargetPosYAdjust(target);
     object->attack_target_velocity = v000;
-    object->field_0xe21 |= 8;
+    object->has_attack_target = 1;
     object->collision_target = VehicleArea != 0 ? NULL : target;
     return 1;
 }
@@ -7344,14 +7350,14 @@ i32 SetGizmoBlowUpTarget(GameObject_s *object, GIZMOBLOWUP_s *blowup) {
     object->attack_target_position = blowup->mid_position;
     object->attack_target_velocity = v000;
     object->attack_blowup_target = VehicleArea != 0 ? NULL : blowup;
-    object->field_0xe21 |= 8;
+    object->has_attack_target = 1;
     return 1;
 }
 
 i32 SetPartTarget(GameObject_s *object, PART_s *target) {
     object->attack_target_position = target->position;
     object->attack_target_velocity = target->velocity;
-    object->field_0xe21 |= 8;
+    object->has_attack_target = 1;
     object->attack_part_target = VehicleArea != 0 ? NULL : target;
     return 1;
 }
@@ -7439,7 +7445,7 @@ static void FireCode(GameObject_s *object, i32 pressed, i32 held, f32 fire_delay
                 NuVecRotateY(&offset, &offset, object->apiobj.movement_facing_angle);
                 NuVecAdd(&object->attack_target_position, &origin, &offset);
                 object->attack_target_velocity = v000;
-                object->field_0xe21 |= 8;
+                object->has_attack_target = 1;
             }
         } else {
             if ((bolt_type->field_60 & 0x800) == 0 && (area == NULL || area != DOGFIGHT_ADATA)) {
@@ -7487,7 +7493,7 @@ static void FireCode(GameObject_s *object, i32 pressed, i32 held, f32 fire_delay
                             }
                             object->attack_target_position.z =
                                 direction.z * range + origin.z + object->apiobj.velocity.z * bolt_type->field_14;
-                            object->field_0xe21 |= 8;
+                            object->has_attack_target = 1;
                             object->attack_target_velocity = v000;
                         }
                     }
@@ -7510,7 +7516,7 @@ static void FireCode(GameObject_s *object, i32 pressed, i32 held, f32 fire_delay
 }
 
 void StartQuickShoot(GameObject_s *object, i32 action) {
-    object->field_0xe21 &= ~8;
+    object->has_attack_target = 0;
     i32 bolt_id = BoltType_FindIDByCreature(object, 0);
     NUVEC direction;
     BoltSys->shoot_direction(object, &direction);
@@ -7625,7 +7631,7 @@ static void DodgeCode(GameObject_s *object, i32 action_pressed, i32 jump_pressed
             NUVEC dodge_direction = bolt->field_0xac;
             NuVecRotateY(&dodge_direction, &dodge_direction, 0x4000);
 
-            if ((object->field_0xe21 & 0x20) != 0) {
+            if (object->field_0xe21_bit5) {
                 if (object->field_0xe12 == 0x26)
                     object->context_animation = 0x4f;
                 else
@@ -7679,7 +7685,7 @@ static i32 ShootCode(GameObject_s *object, i32 pressed, i32 special_pressed, i32
         }
     }
     const i32 bolt_id =
-        object->id == id_GEONOSIAN && (object->field_0xefd & 2) != 0 ? 0x13 : BoltType_FindIDByCreature(object, 0);
+        object->id == id_GEONOSIAN && object->random_layer_variant ? 0x13 : BoltType_FindIDByCreature(object, 0);
     if (object->quick_shoot_timer > 0.0f)
         object->quick_shoot_timer -= FRAMETIME;
     if (object->character_context == 0x0a) {
@@ -7709,7 +7715,7 @@ static i32 ShootCode(GameObject_s *object, i32 pressed, i32 special_pressed, i32
                     if (frame >= event_frame) {
                         if (ammunition) {
                             ShootThisFrame(object, bolt_id, 1);
-                            object->field_0xe21 |= 8;
+                            object->has_attack_target = 1;
                         }
                         object->field_0xe22 |= 4;
                     }
@@ -7731,7 +7737,7 @@ static i32 ShootCode(GameObject_s *object, i32 pressed, i32 special_pressed, i32
         object->context_animation_timer -= FRAMETIME;
         if (!(object->context_animation_timer <= 0.0f))
             return 0;
-        object->field_0xe21 &= ~8;
+        object->has_attack_target = 0;
         object->character_context = -1;
         if (static_cast<u16>(object->context_animation - 0x5a) <= 2 && (object->field_0xe22 & 4) == 0 && ammunition)
             ShootThisFrame(object, bolt_id, 1);
@@ -8023,8 +8029,10 @@ void GameObjectStuffAfterAnimation() {
                         matrix = object->apiobj.field_0xb8;
                         *NUMTX_GET_ROW_VEC(&matrix, 3) = object->apiobj.collision_position;
                     }
-                    NUVEC velocity = {0.0f, 2.0f * (static_cast<f32>(qrand()) * (1.0f / 65535.0f)),
-                                      -(3.0f + 2.0f * (static_cast<f32>(qrand()) * (1.0f / 65535.0f)))};
+                    NUVEC velocity;
+                    velocity.x = 0.0f;
+                    velocity.y = 2.0f * (static_cast<f32>(qrand()) * (1.0f / 65535.0f));
+                    velocity.z = -(3.0f + 2.0f * (static_cast<f32>(qrand()) * (1.0f / 65535.0f)));
                     NuVecMtxRotate(&velocity, &velocity, &matrix);
                     part = Default_ADDPART;
                     part.matrix = &matrix;
@@ -8206,7 +8214,7 @@ void GameObjectStuffAfterAnimation() {
         }
         if (drawn && (object->apiobj.character_data->model_flags & 8) != 0 && object->weapon_scale == 1.0f) {
             for (i32 blade = 0; blade < 4; ++blade) {
-                if (object->apiobj.field_0x288 == 0 || (object->field_0xe23 & 8) == 0)
+                if (object->apiobj.field_0x288 == 0 || !object->drawn_last_frame)
                     continue;
                 GAMECHARACTERDATA *blade_data =
                     static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
@@ -8343,7 +8351,7 @@ void GameObjectStuffAfterAnimation() {
         }
         if (VehicleArea != 0 && static_cast<u8>(object->apiobj.field_0x27c) <= 1) {
             if (object->id == id_MILLENNIUMFALCON && object->apiobj.player_controlled &&
-                (object->field_0xe24 & 8) != 0 && object->apiobj.character_model->points_of_interest[2] != NULL &&
+                object->locators_updated && object->apiobj.character_model->points_of_interest[2] != NULL &&
                 object->apiobj.field_0xa8 == 1.0f) {
                 if (FalconDebKey[static_cast<u8>(object->apiobj.field_0x27c)] == -1)
                     AddDebrisEffect(&FalconDebKey[static_cast<u8>(object->apiobj.field_0x27c)],
@@ -8835,10 +8843,7 @@ i32 Slide_SetTargetMom(GameObject_s *object, u16 input_angle, float input_speed)
     object->target_velocity.x = NU_SIN_LUT(direction) * 1.2f;
     object->target_velocity.z = NU_COS_LUT(direction) * 1.2f;
     if (object->apiobj.field_0x27d != 0 && input_speed > 0.0f) {
-        NUVEC lateral;
-        lateral.x = NU_SIN_LUT(input_angle) * input_speed;
-        lateral.y = 0.0f;
-        lateral.z = NU_COS_LUT(input_angle) * input_speed;
+        NUVEC lateral = {NU_SIN_LUT(input_angle) * input_speed, 0.0f, NU_COS_LUT(input_angle) * input_speed};
         NuVecRotateY(&lateral, &lateral, -static_cast<i32>(direction));
         lateral.z = 0.0f;
         NuVecRotateY(&lateral, &lateral, direction);
@@ -10880,7 +10885,7 @@ void Move_JEDI(GameObject_s *object) {
     i32 hit_effect;
     i32 glow_model;
     if (object->id == id_BOB) {
-        if ((object->field_0xefd & 2) != 0) {
+        if (object->random_layer_variant) {
             glow_model = 0xdd;
             hit_effect = 2;
         } else {

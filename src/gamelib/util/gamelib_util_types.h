@@ -710,7 +710,7 @@ struct TouchHacks {
     static VuVec CalculateJumpVelToHitPoint(GameObject_s &, VuVec const &);
     static VuVec CalculateJumpVelToHitPointDblJump(GameObject_s &, VuVec const &);
     static VuVec CalculateXZVelForArcToHitPoint(VuVec const &, VuVec const &, float, float);
-    static i32 CanBlowupBeBlownUp(GIZMOBLOWUP_s &, i32);
+    static bool CanBlowupBeBlownUp(GIZMOBLOWUP_s &, i32);
     static bool CanForceTargetObj(GameObject_s &, GameObject_s &);
     static bool CanJump(GameObject_s &);
     static bool CanJumpToPoint(GameObject_s &, AIPATHNODE_s const &);

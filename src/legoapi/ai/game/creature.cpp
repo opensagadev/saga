@@ -773,7 +773,7 @@ void InitPlayerAI(GameObject_s *object) {
     StarWars_AutoSetAICapabilities(object);
     u8 *b = reinterpret_cast<u8 *>(object);
     i32 can_pull_levers = CanPullLevers(object->id);
-    b[0xefe] = (b[0xefe] & 0x7f) | (can_pull_levers << 7);
+    object->can_pull_levers = can_pull_levers;
     b[0x4a6] &= 0xfe;
     object->ai.character_type_mask_low = 0;
     object->ai.character_type_mask_high = 0;
@@ -900,7 +900,7 @@ void InitPlayerAI(GameObject_s *object) {
     *reinterpret_cast<u32 *>(b + 0x29c) = 0;
     bool special = (object->apiobj.character_data->model_flags & 0x4000) &&
                    (b[0x27c] == 0xff || *reinterpret_cast<void **>(b + 0xcc0));
-    b[0x1f8] = (b[0x1f8] & 0xfd) | (special << 1);
+    object->apiobj.flags_low_bit1 = special;
     u8 *config = reinterpret_cast<u8 *>(object->apiobj.character_data->player_config);
     b[0x1f9] &= 0xf7;
     b[0x1fa] &= 0xe7;
@@ -1390,7 +1390,6 @@ void InitAICreatures(AISYS_s *system) {
 
 void Players_Init(void) {
     memset(Player, 0, 8 * sizeof(Player[0]));
-    GameObject_s **p = Player;
 
     if (netclient != 0) {
         return;
@@ -1434,10 +1433,10 @@ void Players_Init(void) {
 
                 pi = PLAYERCOUNT;
                 g->oldpos = &OldPlrSPos[PLAYERCOUNT];
-                p[PLAYERCOUNT] = g;
-                p[pi]->batarang = &Batarang[pi];
+                Player[PLAYERCOUNT] = g;
+                Player[pi]->batarang = &Batarang[pi];
                 g->apiobj.field_0x27c = (char)pi;
-                p[pi]->torpedo = GetTorpedoPacket();
+                Player[pi]->torpedo = GetTorpedoPacket();
 
                 g->field_0x1050 |= 1;
                 g->field_0x108e = 0;
@@ -1468,7 +1467,7 @@ void Players_Init(void) {
                     }
                 } else {
                     slot = g->apiobj.field_0x289;
-                    *(u8 *)&g->apiobj.field_0x1f8 = (u8)((*(u8 *)&g->apiobj.field_0x1f8 & 0x7f) | ((slot == 0) << 7));
+                    g->apiobj.is_player = slot == 0;
                     PlayerProgress[slot].hitpoints = g->current_hp;
                     g->field_0x106e = 0;
                 }
@@ -1512,32 +1511,32 @@ void Players_Init(void) {
 
     UsePlayerList = 0;
 
-    if (p[0] != NULL) {
-        COINPACKET *cp = p[0]->coinpacket = CoinPacket;
-        cp->lastcoin = LEGOOBJ_DEFAULTLASTCOIN;
-        u32 coins = 0;
+    if (Player[0] != NULL) {
+        Player[0]->coinpacket = CoinPacket;
+        Player[0]->coinpacket->lastcoin = LEGOOBJ_DEFAULTLASTCOIN;
         if (Area == last_area) {
-            coins = PlayerProgress[0].coins;
+            Player[0]->coinpacket->coins = PlayerProgress[0].coins;
+        } else {
+            Player[0]->coinpacket->coins = 0;
         }
-        cp->coins = coins;
-        p[0]->gizforce_los_info = GizForceLOSInfo;
-        memcpy(BackUpPlayers, p[0], 0x439 * 4);
+        Player[0]->gizforce_los_info = GizForceLOSInfo;
+        memcpy(BackUpPlayers, Player[0], 0x439 * 4);
     }
 
-    if (p[1] != NULL) {
-        COINPACKET *cp = p[1]->coinpacket = CoinPacket + 1;
-        cp->lastcoin = LEGOOBJ_DEFAULTLASTCOIN;
-        u32 coins = 0;
+    if (Player[1] != NULL) {
+        Player[1]->coinpacket = CoinPacket + 1;
+        Player[1]->coinpacket->lastcoin = LEGOOBJ_DEFAULTLASTCOIN;
         if (Area == last_area) {
-            coins = PlayerProgress[1].coins;
+            Player[1]->coinpacket->coins = PlayerProgress[1].coins;
+        } else {
+            Player[1]->coinpacket->coins = 0;
         }
-        cp->coins = coins;
-        p[1]->gizforce_los_info = &GizForceLOSInfo[1];
-        memcpy(BackUpPlayers + 0x439, p[1], 0x439 * 4);
+        Player[1]->gizforce_los_info = &GizForceLOSInfo[1];
+        memcpy(BackUpPlayers + 0x439, Player[1], 0x439 * 4);
     }
 
-    i32 id0 = (p[0] != NULL) ? p[0]->id : -1;
-    i32 id1 = (p[1] != NULL) ? p[1]->id : -1;
+    i32 id0 = (Player[0] != NULL) ? Player[0]->id : -1;
+    i32 id1 = (Player[1] != NULL) ? Player[1]->id : -1;
     RememberPlayerIDs(0, id0, id1);
 }
 
@@ -1599,15 +1598,13 @@ void ResetAICreature(GameObject_s *object, AISYS_s *system) {
     object->apiobj.minviewheight = creature.min_view_height;
     object->apiobj.viewdistance = creature.view_distance;
 
-    const u8 column = object->ai.group_column;
-    const u8 row = object->ai.group_row;
     NUVEC offset;
-    offset.x = static_cast<f32>((column + 1) / 2) * creature.x_spacing;
-    if ((column & 1) != 0) {
+    offset.x = static_cast<f32>((object->ai.group_column + 1) / 2) * creature.x_spacing;
+    if ((object->ai.group_column & 1) != 0) {
         offset.x = -offset.x;
     }
     offset.y = 0.0f;
-    offset.z = -creature.z_spacing * static_cast<f32>(row);
+    offset.z = -creature.z_spacing * static_cast<f32>(object->ai.group_row);
 
     i32 angle;
     AIPATHINFO *path_info;
@@ -1814,13 +1811,13 @@ i32 NewPlayerCharacter(GameObject_s *object, i32 id, i32 old_id, i32) {
     object->suit = Suit_GetDefault(id);
     u32 saved_f14 = object->field_0xf14;
     u32 saved_f20 = object->field_0xf20;
-    u8 saved_efe = (object->field_0xefe >> 5) & 1;
+    u8 saved_efe = object->field_0xefe_bit5;
     u8 route = object->ai.current_route;
     u8 next_route = object->ai.next_route;
     AIPATHINFO path = object->ai.path_info;
     u32 frame_state = object->ai.frame_state;
     InitPlayerAI(object);
-    object->field_0xefe = (object->field_0xefe & ~0x20) | (saved_efe << 5);
+    object->field_0xefe_bit5 = saved_efe;
     object->field_0xf20 = saved_f20;
     object->ai.next_route = next_route;
     object->ai.path_info = path;
@@ -1845,12 +1842,12 @@ i32 NewPlayerCharacter(GameObject_s *object, i32 id, i32 old_id, i32) {
     InitSurfaceInfo(object);
     i32 on_surface = SetObjOnSurface(object, 1);
     GizForce_ResetLOS(object);
-    object->field_0xefe &= ~8;
+    object->camera_ray_blocked = 0;
     object->current_hp = health;
     object->hitpoints = hitpoints;
     object->field_0xef0 = 0;
     object->pause_context_state = 0;
-    object->apiobj.flags_high = (object->apiobj.flags_high & ~0x20) | (saved_flags << 5);
+    object->apiobj.respawn_enabled = saved_flags;
     ResetMiniAnimPacket(&object->mini_animation, -1);
     object->weapon_scale = (object->field_0xe22 & 1) != 0 ? 1.0f : 0.0f;
     object->field_0xe32 = 0;
@@ -1876,7 +1873,7 @@ i32 NewPlayerCharacter(GameObject_s *object, i32 id, i32 old_id, i32) {
     object->apiobj.heardistance = heardistance;
     object->apiobj.maxviewheight = maxviewheight;
     object->apiobj.minviewheight = data->minviewheight;
-    object->field_0xf01 = (object->field_0xf01 & ~8) | (flags_090_bit17 << 3);
+    object->is_female = flags_090_bit17;
     if (object->id == id_MOSEISLEYCITIZEN) {
         SetLayers_MOSEISLEYCITIZEN(&object->field_0x1054);
     } else if (object->id == id_CANTINAALIEN) {
@@ -1895,7 +1892,7 @@ i32 NewPlayerCharacter(GameObject_s *object, i32 id, i32 old_id, i32) {
         object->field_0x1054 |= LayerBit(head_layer[qrand() / 0x5556]);
         object->field_0x1054 |= LayerBit(body_layer[qrand() / 0x5556]);
         object->field_0x1054 |= LayerBit(legs_layer[qrand() / 0x5556]);
-        object->field_0xf01 = (object->field_0xf01 & ~8) | (((object->field_0x1054 >> 7) & 1) << 3);
+        object->is_female = (object->field_0x1054 >> 7) & 1;
     } else if (object->id == id_BOB) {
         SetLayers_BOB(object);
     } else if (object->id == id_GEONOSIAN) {
@@ -1935,7 +1932,7 @@ void ResetPlayer(GameObject_s *obj, i32 reset_moves, nuvec_s *position, i32 snap
 
         GetTopBot(obj);
         GameObjectDimensions(obj);
-        obj->field_0xe23 &= static_cast<u8>(~8u);
+        obj->drawn_last_frame = 0;
         obj->use_model_origin = 0;
         obj->apiobj.field_0x288 = 0;
         GameObjectOrigin(obj);
@@ -2000,7 +1997,7 @@ void ResetPlayer(GameObject_s *obj, i32 reset_moves, nuvec_s *position, i32 snap
         obj->field_0xc34 = 0x3f800000;
         obj->field_0xc38 = 0.0f;
         CurrentStart(obj, 0, 1);
-        obj->field_0xe23 &= static_cast<u8>(~8u);
+        obj->drawn_last_frame = 0;
         obj->field_0xefe &= static_cast<u8>(~4u);
         obj->touched_ground = 0;
         obj->apiobj.model_draw_result = 1;
@@ -2373,9 +2370,9 @@ void MovePlayerSpline(GameObject_s *object) {
 void MovePlayer(GameObject_s *object) {
     GAMEPAD_s *pad = object->pad_gamepad;
     APIOBJECT &api = object->apiobj;
+    object->field_0xe22 &= ~GAMEOBJECT_E22_FLAG_INPUT_ANGLE_VALID;
     const i32 analog_y = pad->pad != NULL ? pad->pad->analog_left_y : 0;
     const i32 analog_x = pad->pad != NULL ? pad->pad->analog_left_x : 0;
-    object->field_0xe22 &= ~GAMEOBJECT_E22_FLAG_INPUT_ANGLE_VALID;
     if (pad->input_magnitude != pad->previous_input_magnitude)
         pad->allocated_5a |= GAMEPAD_RUNTIME_MAGNITUDE_CHANGED;
     api.field_0x214 = api.field_0x218;
@@ -2515,8 +2512,7 @@ void MovePlayer(GameObject_s *object) {
                 if (pad->input_magnitude > 0.0f)
                     pad->input_angle = NuAtan2D(input.x, input.z);
                 i32 waggle = GamePad_Waggle(object->pad_gamepad);
-                pad->allocated_5a =
-                    static_cast<u8>((pad->allocated_5a & ~GAMEPAD_RUNTIME_WAGGLED) | ((waggle & 1) << 3));
+                pad->waggled = waggle;
                 if ((Player[0] == object || Player[1] == object)) {
                     pad->waggle_magnitude = GamePad_Rotate(object);
                 } else {
@@ -2859,7 +2855,7 @@ void TerrainPlayer(GameObject_s *object) {
                 }
                 TerrainSetImpactData(impact_records, &impact_count, 8);
                 f32 movement_scale = 1.0f;
-                if ((object->field_0xefd & 4) != 0) {
+                if (object->snap_facing) {
                     GAMECHARACTERDATA *character = api.character_data->game_character;
                     if (object->id == id_SPEEDERBIKE) {
                         if (object->ai.goal_speed_mode == 1) {
@@ -2925,7 +2921,7 @@ void TerrainPlayer(GameObject_s *object) {
                 for (i32 i = 0; i < excluded_count; ++i) {
                     PlatOnOff(excluded_platforms[i], 1);
                 }
-                if ((object->field_0xefd & 4) != 0) {
+                if (object->snap_facing) {
                     movement.x /= movement_scale;
                     movement.z /= movement_scale;
                 }
@@ -3205,7 +3201,7 @@ void TerrainPlayer(GameObject_s *object) {
                         }
                     } else {
                         if (object->doomed_escape_locator != NULL && static_cast<i8>(api.flags_low) >= 0) {
-                            if ((object->field_0xefd & 8) != 0 || TouchHacks::AiPlayerTakeDamageOnKillRescue(*object)) {
+                            if (object->doomed_escape_take_damage || TouchHacks::AiPlayerTakeDamageOnKillRescue(*object)) {
                                 ObjHitObj(NULL, object, 1, 0, 0, 1);
                             }
                             if (api.field_0x287 == 0) {
@@ -3377,7 +3373,7 @@ void AnimatePlayer(GameObject_s *object) {
             1.0f;
         if (NuAnimEndFrame(current_model->model_data_b[0x5f]) > start)
             *time = start;
-        object->field_0xe21 = (object->field_0xe21 & ~0x40) | ((phase & 1) << 6);
+        object->idle_phase_odd = phase;
     }
     AutoWeaponOnOff(object);
     AddFootSteps(object);
@@ -3391,8 +3387,8 @@ i32 DrawGameObjectsProcess() {
             continue;
         const u8 previous_draw_pending = object->apiobj.field_0x288 & 1;
         object->apiobj.field_0x288 = 0;
-        object->field_0xe23 = (object->field_0xe23 & ~8) | (previous_draw_pending << 3);
-        object->field_0xe24 &= ~8;
+        object->drawn_last_frame = previous_draw_pending;
+        object->locators_updated = 0;
         if (object->apiobj.field_0x287 != 0 && (object->field_0x101c > 0.0f || object->field_0x1018 == 0.0f))
             continue;
         if ((object->field_0xe20 & 0x20) != 0 && object->character_context != 0x23 && object->character_context != 0x24)
@@ -3415,7 +3411,7 @@ i32 DrawGameObjectsProcess() {
                 position.y += object->character_bottom * object->apiobj.field_0xa8;
             position.z = object->apiobj.position.z;
             NuVecAdd(&position, &position, &object->render_offset);
-            object->field_0xf01 = (object->field_0xf01 & ~1) | (object->apiobj.model_draw_result & 1);
+            object->model_drawn_last_frame = object->apiobj.model_draw_result;
             object->apiobj.model_draw_result = 1;
             scale.x = object->apiobj.field_0xa8;
             const f32 drop_scale = DropInOutScale(object);
@@ -3507,13 +3503,13 @@ i32 DrawGameObjectsProcess() {
                 (object->id == id_ATST || object->id == id_ATST_LOWRES || object->id == id_ATAT))
                 matrix.m31 += object->character_bottom * object->apiobj.field_0xa8;
             object->apiobj.field_0xb8 = matrix;
-            if (((object->field_0xefa & 0x40) != 0 && WORLD->rooms_visible_ptr[object->room_id] == 0) ||
+            if ((object->portal_enabled && WORLD->rooms_visible_ptr[object->room_id] == 0) ||
                 (scale.x == 0.0f && scale.y == 0.0f && scale.z == 0.0f)) {
                 object->apiobj.model_draw_result = 0;
                 continue;
             }
             object->apiobj.field_0x1f4 ^= 0x800;
-            object->field_0xefe &= ~2;
+            object->has_shadow_matrix = 0;
             object->field_0x1088 = 0;
             if (object->field_0x1087 != 0 && object->field_0x1020 != 2000000.0f &&
                 static_cast<u32>(static_cast<u8>(WORLD->current_level->reflection_range)) >
@@ -3535,7 +3531,7 @@ i32 DrawGameObjectsProcess() {
                 shadow.m31 = object->apiobj.field_0x218 + 0.005f;
                 shadow.m32 = object->apiobj.position.z;
                 object->apiobj.field_0xf8 = shadow;
-                object->field_0xefe |= 2;
+                object->has_shadow_matrix = 1;
             }
         }
     }
@@ -3970,7 +3966,7 @@ u32 AdjustLayerBits(u32 mask, GameObject_s *object) {
         if (object->current_hp <= 1)
             mask &= ~0x10u;
     } else if (object->id == id_GEONOSIAN) {
-        if ((object->field_0xefd & 2) != 0)
+        if (object->random_layer_variant)
             mask |= 0x20;
         else
             mask |= 0x40;
@@ -4686,7 +4682,7 @@ void DrawGameObjectsDraw(i32) {
         }
 
         NUMTX *tertiary_matrix = object->field_0x1088 != 0 ? &object->apiobj.field_0x138 : NULL;
-        NUMTX *secondary_matrix = (object->field_0xefe & 2) != 0 ? &object->apiobj.field_0xf8 : NULL;
+        NUMTX *secondary_matrix = object->has_shadow_matrix ? &object->apiobj.field_0xf8 : NULL;
         const u8 drawn = static_cast<u8>(GameDrawCharacterModel(
             object->apiobj.character_model, &object->apiobj.anim_packet, &object->apiobj.field_0xb8, secondary_matrix,
             tertiary_matrix, &object->field_0x7f4, object, object->field_0x1054));
@@ -4697,7 +4693,7 @@ void DrawGameObjectsDraw(i32) {
 
         if (drawn != 0) {
             DrawParaphernalia(object);
-        } else if (((object->field_0xe21 & 4) != 0 || object->character_context == 8) && object->field_0xd80 > 0.0f &&
+        } else if ((object->force_highlighted || object->character_context == 8) && object->field_0xd80 > 0.0f &&
                    object->field_0xd8c > 0.0f && WORLD->lev_objs[object->field_0xe1e].active != 0 &&
                    (object->apiobj.character_data->game_character->flags_090 & 0x400) == 0) {
             DrawForceGlowSprite(&object->force_glow_position, object->field_0xd8c, object->field_0xe1e,

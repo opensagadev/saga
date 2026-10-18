@@ -245,25 +245,11 @@ static void MakeWingFormation(_vuv_s *start, _vuv_s *target, f32 duration, i32 m
     spacelevel_s *space = WORLD->space_level;
     if (space == NULL)
         return;
-    i32 index;
-    if (space->flight_groups[0].active == 0)
-        index = 0;
-    else if (__builtin_expect(space->flight_groups[1].active == 0, 0))
-        index = 1;
-    else if (__builtin_expect(space->flight_groups[2].active == 0, 0))
-        index = 2;
-    else if (__builtin_expect(space->flight_groups[3].active == 0, 0))
-        index = 3;
-    else if (__builtin_expect(space->flight_groups[4].active == 0, 0))
-        index = 4;
-    else if (space->flight_groups[5].active == 0)
-        index = 5;
-    else if (__builtin_expect(space->flight_groups[6].active == 0, 1))
-        index = 6;
-    else if (__builtin_expect(space->flight_groups[7].active == 0, 0))
-        index = 7;
-    else
-        return;
+    i32 index = 0;
+    while (space->flight_groups[index].active != 0) {
+        if (++index == 8)
+            return;
+    }
     spacelevel_flight_group_s *group = &space->flight_groups[index];
     group->active = 1;
     group->draw_target = 0;
@@ -1995,19 +1981,17 @@ i32 ChrisExtraBoltCollision(BOLT_s *bolt, nuvec_s *points) {
     NUVEC4_ALIGNED16 position;
     *reinterpret_cast<NUVEC *>(&position) = points[1];
     *reinterpret_cast<NUVEC *>(&velocity) = bolt->velocity;
-#define COLLIDE_SPACE_FIGHTER(group_index, fighter_index)                                                              \
-    if (__builtin_expect(space->flight_groups[group_index].fighters[fighter_index].active != 0 &&                                       \
-        CollideBoltStarFighter(bolt, &space->flight_groups[group_index].fighters[fighter_index],                       \
-                               reinterpret_cast<_vuv_s *>(&position), reinterpret_cast<_vuv_s *>(&velocity)) != 0, 0))     \
-    return 1
 #define COLLIDE_SPACE_GROUP(group_index)                                                                               \
     do {                                                                                                               \
         if (space->flight_groups[group_index].active != 0) {                                                           \
-            COLLIDE_SPACE_FIGHTER(group_index, 0);                                                                     \
-            COLLIDE_SPACE_FIGHTER(group_index, 1);                                                                     \
-            COLLIDE_SPACE_FIGHTER(group_index, 2);                                                                     \
-            COLLIDE_SPACE_FIGHTER(group_index, 3);                                                                     \
-            COLLIDE_SPACE_FIGHTER(group_index, 4);                                                                     \
+            for (i32 j = 0; j < 5; ++j) {                                                                              \
+                if (__builtin_expect(space->flight_groups[group_index].fighters[j].active != 0 &&                      \
+                                         CollideBoltStarFighter(bolt, &space->flight_groups[group_index].fighters[j],  \
+                                                                reinterpret_cast<_vuv_s *>(&position),                 \
+                                                                reinterpret_cast<_vuv_s *>(&velocity)) != 0,           \
+                                     0))                                                                               \
+                    return 1;                                                                                          \
+            }                                                                                                          \
         }                                                                                                              \
     } while (0)
     COLLIDE_SPACE_GROUP(0);
@@ -2019,7 +2003,6 @@ i32 ChrisExtraBoltCollision(BOLT_s *bolt, nuvec_s *points) {
     COLLIDE_SPACE_GROUP(6);
     COLLIDE_SPACE_GROUP(7);
 #undef COLLIDE_SPACE_GROUP
-#undef COLLIDE_SPACE_FIGHTER
     for (i32 i = 0; i != 96; ++i) {
         if (space->queued_fighters[i].active != 0 &&
             CollideBoltStarFighter(bolt, &space->queued_fighters[i], reinterpret_cast<_vuv_s *>(&position),

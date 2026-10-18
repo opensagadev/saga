@@ -1379,14 +1379,10 @@ void FactoryG_Init(WORLDINFO_s *world) {
 void FactoryG_Update(WORLDINFO_s *world) {
     if (netclient == 0) {
         i32 complete = 0;
-        if (GizForce_Complete(force_array[0]))
-            complete++;
-        if (GizForce_Complete(force_array[1]))
-            complete++;
-        if (GizForce_Complete(force_array[2]))
-            complete++;
-        if (GizForce_Complete(force_array[3]))
-            complete++;
+        for (i32 i = 0; i < 4; i++) {
+            if (GizForce_Complete(force_array[i]))
+                complete++;
+        }
         if (ObiWan != NULL) {
             if (complete == 4) {
                 if (FreePlay == 0) {

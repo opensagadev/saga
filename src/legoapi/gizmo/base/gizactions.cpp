@@ -66,7 +66,7 @@ static void GizAction_TurnOnFlowBox(GIZFLOW_s *flow, FLOWBOX_s *, char **params,
     if (name != NULL && flow != NULL) {
         for (i32 index = 0; index < flow->flowbox_count; ++index) {
             if (flow->flowboxes[index].name != NULL && NuStrICmp(flow->flowboxes[index].name, name) == 0)
-                flow->flowboxes[index].state_flags_low = (flow->flowboxes[index].state_flags_low & ~1) | (enabled & 1);
+                flow->flowboxes[index].active = enabled;
         }
     }
 }

@@ -355,7 +355,7 @@ i32 StartBigJump(GameObject_s *object, NUVEC *destination, i32 mode, f32 height,
     object->apiobj.facing_angle = angle;
     object->apiobj.field_0x276 = angle;
     object->apiobj.movement_facing_angle = angle;
-    object->field_0xefd = (object->field_0xefd & ~0x20) | ((mode & 1) << 5);
+    object->jump_mode = mode;
     PlayJumpSfx(object, 2);
     object->ai.movement_event_flags |= 2;
     object->ai.field_0x180 = NULL;

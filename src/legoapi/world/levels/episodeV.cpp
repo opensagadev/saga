@@ -336,7 +336,10 @@ static void Asteroid_AddParts(GIZMOBLOWUP_s *blowup) {
         NuMtxSetRotateXYZVU0(&matrix, &rotation);
         NuMtxTranslate(&matrix, &blowup->position);
 
-        NUVEC velocity = {0.0f, 0.0f, static_cast<f32>(qrand()) * (1.0f / 65535.0f) * 3.0f + 2.0f};
+        NUVEC velocity;
+        velocity.x = 0.0f;
+        velocity.y = 0.0f;
+        velocity.z = static_cast<f32>(qrand()) * (1.0f / 65535.0f) * 3.0f + 2.0f;
         NuVecRotateY(&velocity, &velocity, qrand());
 
         ADDPART_ALIGNED16 params = Default_ADDPART;

@@ -586,91 +586,15 @@ bool Store_IsPackAvailable(i32, char *reason) {
 }
 
 i32 Store_FindPack(i32 id, char *name) {
-    if (id == -1) {
-        if (name == NULL) {
-            return -1;
+    for (i32 i = 0; i < 11; ++i) {
+        if (id != -1 && StorePack[i].id != NULL && *StorePack[i].id == id) {
+            return i;
         }
-
-        if (NuStrCmp(StorePack[0].name, name) == 0) {
-            return 0;
-        } else if (NuStrCmp(StorePack[1].name, name) == 0) {
-            return 1;
-        } else if (NuStrCmp(StorePack[2].name, name) == 0) {
-            return 2;
-        } else if (NuStrCmp(StorePack[3].name, name) == 0) {
-            return 3;
-        } else if (NuStrCmp(StorePack[4].name, name) == 0) {
-            return 4;
-        } else if (NuStrCmp(StorePack[5].name, name) == 0) {
-            return 5;
-        } else if (NuStrCmp(StorePack[6].name, name) == 0) {
-            return 6;
-        } else if (NuStrCmp(StorePack[7].name, name) == 0) {
-            return 7;
-        } else if (NuStrCmp(StorePack[8].name, name) == 0) {
-            return 8;
-        } else if (NuStrCmp(StorePack[9].name, name) == 0) {
-            return 9;
-        } else if (NuStrCmp(StorePack[10].name, name) == 0) {
-            return 10;
-        } else {
-            return -1;
+        if (name != NULL && NuStrCmp(StorePack[i].name, name) == 0) {
+            return i;
         }
     }
-
-    if (name == NULL) {
-        if (StorePack[0].id != NULL && *StorePack[0].id == id) {
-            return 0;
-        } else if (StorePack[1].id != NULL && *StorePack[1].id == id) {
-            return 1;
-        } else if (StorePack[2].id != NULL && *StorePack[2].id == id) {
-            return 2;
-        } else if (StorePack[3].id != NULL && *StorePack[3].id == id) {
-            return 3;
-        } else if (StorePack[4].id != NULL && *StorePack[4].id == id) {
-            return 4;
-        } else if (StorePack[5].id != NULL && *StorePack[5].id == id) {
-            return 5;
-        } else if (StorePack[6].id != NULL && *StorePack[6].id == id) {
-            return 6;
-        } else if (StorePack[7].id != NULL && *StorePack[7].id == id) {
-            return 7;
-        } else if (StorePack[8].id != NULL && *StorePack[8].id == id) {
-            return 8;
-        } else if (StorePack[9].id != NULL && *StorePack[9].id == id) {
-            return 9;
-        } else if (StorePack[10].id != NULL && *StorePack[10].id == id) {
-            return 10;
-        } else {
-            return -1;
-        }
-    }
-
-    if ((StorePack[0].id != NULL && *StorePack[0].id == id) || NuStrCmp(StorePack[0].name, name) == 0) {
-        return 0;
-    } else if ((StorePack[1].id != NULL && *StorePack[1].id == id) || NuStrCmp(StorePack[1].name, name) == 0) {
-        return 1;
-    } else if ((StorePack[2].id != NULL && *StorePack[2].id == id) || NuStrCmp(StorePack[2].name, name) == 0) {
-        return 2;
-    } else if ((StorePack[3].id != NULL && *StorePack[3].id == id) || NuStrCmp(StorePack[3].name, name) == 0) {
-        return 3;
-    } else if ((StorePack[4].id != NULL && *StorePack[4].id == id) || NuStrCmp(StorePack[4].name, name) == 0) {
-        return 4;
-    } else if ((StorePack[5].id != NULL && *StorePack[5].id == id) || NuStrCmp(StorePack[5].name, name) == 0) {
-        return 5;
-    } else if ((StorePack[6].id != NULL && *StorePack[6].id == id) || NuStrCmp(StorePack[6].name, name) == 0) {
-        return 6;
-    } else if ((StorePack[7].id != NULL && *StorePack[7].id == id) || NuStrCmp(StorePack[7].name, name) == 0) {
-        return 7;
-    } else if ((StorePack[8].id != NULL && *StorePack[8].id == id) || NuStrCmp(StorePack[8].name, name) == 0) {
-        return 8;
-    } else if ((StorePack[9].id != NULL && *StorePack[9].id == id) || NuStrCmp(StorePack[9].name, name) == 0) {
-        return 9;
-    } else if ((StorePack[10].id != NULL && *StorePack[10].id == id) || NuStrCmp(StorePack[10].name, name) == 0) {
-        return 10;
-    } else {
-        return -1;
-    }
+    return -1;
 }
 
 void Store_HubInitFloorTargets(WORLDINFO_s *world) {
@@ -888,20 +812,13 @@ void MenuDrawStore(MENU_s *) {
         return;
     }
 
-#define DRAW_STORE_PANEL(INDEX)                                                                                        \
-    if (StoreIAP[INDEX].text[0] != 0) {                                                                                \
-        const i32 alpha = ((MenuA * 7) / 8) << 24;                                                                     \
-        DrawRectRGBA(0.0f, StoreIAP[INDEX].title_y, 2.1f, StoreIAP[INDEX].title_y - StoreIAP[INDEX].bottom_y + 0.02f,  \
-                     static_cast<u32>(alpha), FadeMtl2, 1, 1.0f);                                                      \
+    for (i32 i = 0; i < 3; ++i) {
+        if (StoreIAP[i].text[0] == 0)
+            break;
+        const i32 alpha = ((MenuA * 7) / 8) << 24;
+        DrawRectRGBA(0.0f, StoreIAP[i].title_y, 2.1f, StoreIAP[i].title_y - StoreIAP[i].bottom_y + 0.02f,
+                     static_cast<u32>(alpha), FadeMtl2, 1, 1.0f);
     }
-    if (StoreIAP[0].text[0] != 0) {
-        DRAW_STORE_PANEL(0);
-        if (StoreIAP[1].text[0] != 0) {
-            DRAW_STORE_PANEL(1);
-            DRAW_STORE_PANEL(2);
-        }
-    }
-#undef DRAW_STORE_PANEL
 
     const f32 icon_alpha = (pulse * 0.2f + 0.8f) * menu_alpha;
     DrawCharIcon(selected_id, 0.0f, 0.65f, 0.0f, ICONSIZE, 0xa5, icon_alpha, icon_alpha, 1, NULL);
@@ -934,7 +851,7 @@ void MenuDrawStore(MENU_s *) {
 
     i32 slot = 1;
     for (i32 bundle_index = 0; bundle_index < 3; ++bundle_index) {
-        if ((StoreBundle[bundle_index].pack_mask & (1u << menu_i_pack)) == 0) {
+        if ((StoreBundle[bundle_index].pack_mask & (1 << menu_i_pack)) == 0) {
             continue;
         }
         if (NuIOS_IsProductPurchased(StoreBundle[bundle_index].name) != 0 ||
@@ -952,34 +869,23 @@ void MenuDrawStore(MENU_s *) {
         i32 character_ids[11];
         i32 already_owned[11];
         i32 count = 0;
-#define ADD_BUNDLE_PACK(INDEX)                                                                                         \
-    if ((StoreBundle[bundle_index].pack_mask & (1u << INDEX)) != 0) {                                                  \
-        character_ids[count] = *StorePack[INDEX].id;                                                                   \
-        if (Store_IsPackUnlocked(INDEX)) {                                                                             \
-            already_owned[count] = 1;                                                                                  \
-        } else {                                                                                                       \
-            already_owned[count] = 0;                                                                                  \
-            STORE_PRODUCT_s pack_product;                                                                              \
-            char *pack_product_id = *reinterpret_cast<char **>(&StorePack[INDEX].field1_0x4);                          \
-            if (NuIOS_GetInAppProductByID(pack_product_id, reinterpret_cast<NuIOS_InAppProduct *>(&pack_product)) !=   \
-                0) {                                                                                                   \
-                separate_price += pack_product.price;                                                                  \
-            }                                                                                                          \
-        }                                                                                                              \
-        ++count;                                                                                                       \
-    }
-        ADD_BUNDLE_PACK(0);
-        ADD_BUNDLE_PACK(1);
-        ADD_BUNDLE_PACK(2);
-        ADD_BUNDLE_PACK(3);
-        ADD_BUNDLE_PACK(4);
-        ADD_BUNDLE_PACK(5);
-        ADD_BUNDLE_PACK(6);
-        ADD_BUNDLE_PACK(7);
-        ADD_BUNDLE_PACK(8);
-        ADD_BUNDLE_PACK(9);
-        ADD_BUNDLE_PACK(10);
-#undef ADD_BUNDLE_PACK
+        for (i32 pack = 0; pack < 11; ++pack) {
+            if ((StoreBundle[bundle_index].pack_mask & (1 << pack)) == 0)
+                continue;
+            character_ids[count] = *StorePack[pack].id;
+            if (Store_IsPackUnlocked(pack)) {
+                already_owned[count] = 1;
+            } else {
+                already_owned[count] = 0;
+                STORE_PRODUCT_s pack_product;
+                char *pack_product_id = *reinterpret_cast<char **>(&StorePack[pack].field1_0x4);
+                if (NuIOS_GetInAppProductByID(pack_product_id, reinterpret_cast<NuIOS_InAppProduct *>(&pack_product)) !=
+                    0) {
+                    separate_price += pack_product.price;
+                }
+            }
+            ++count;
+        }
 
         if (!(bundle_price < separate_price)) {
             continue;
@@ -1047,52 +953,30 @@ void MenuUpdateStore(MENU_s *menu) {
 
     const f32 time = NuFmod(menu->menu_time, 12.0f);
     i32 hit;
-#define CHECK_STORE_TOUCH_POINT(INDEX)                                                                                 \
-    if (MenuAlpha >= 1.0f && MechInputTouchMenuController::AnyTouchesThisFrame > 0) {                                  \
-        const f32 dx = StoreTouchLastPos.x - entry_x;                                                                  \
-        const f32 dy = StoreTouchLastPos.y - entry_y;                                                                  \
-        if (__builtin_expect(dx * dx + dy * dy < 0.01f, 0)) {                                                          \
-            hit = INDEX;                                                                                               \
-            goto store_touch_selected;                                                                                 \
-        }                                                                                                              \
+    for (hit = 0; hit < 3; ++hit) {
+        STOREIAP_s &entry = StoreIAP[hit];
+        if (entry.text[0] == 0) {
+            return;
+        }
+        VuVec position __attribute__((aligned(16)));
+        position.x = entry.x;
+        position.y = entry.y;
+        if (time < 8.0f) {
+            const f32 trigger = 8.0f - (position.y + 1.0f) * 4.0f;
+            if (time >= trigger && time - FRAMETIME < trigger) {
+                position.z = 1.0f;
+                position.w = 1.0f;
+                MechSystems::Get()->NewRadarPulse(position, false);
+            }
+        }
+        if (MenuAlpha >= 1.0f && MechInputTouchMenuController::AnyTouchesThisFrame > 0) {
+            const f32 dx = StoreTouchLastPos.x - position.x;
+            const f32 dy = StoreTouchLastPos.y - position.y;
+            if (__builtin_expect(dx * dx + dy * dy < 0.01f, 0)) {
+                goto store_touch_selected;
+            }
+        }
     }
-#define CHECK_STORE_TOUCH(INDEX)                                                                                       \
-    do {                                                                                                               \
-        STOREIAP_s &entry = StoreIAP[INDEX];                                                                           \
-        if (entry.text[0] == 0) {                                                                                      \
-            return;                                                                                                    \
-        }                                                                                                              \
-        const f32 entry_x = entry.x;                                                                                   \
-        const f32 entry_y = entry.y;                                                                                   \
-        CHECK_STORE_TOUCH_POINT(INDEX);                                                                                \
-    } while (0)
-#define CHECK_STORE_PULSE(INDEX)                                                                                       \
-    do {                                                                                                               \
-        STOREIAP_s &entry = StoreIAP[INDEX];                                                                           \
-        if (entry.text[0] == 0) {                                                                                      \
-            return;                                                                                                    \
-        }                                                                                                              \
-        const f32 entry_x = entry.x;                                                                                   \
-        const f32 entry_y = entry.y;                                                                                   \
-        const f32 trigger = 8.0f - (entry_y + 1.0f) * 4.0f;                                                            \
-        if (time >= trigger && time - FRAMETIME < trigger) {                                                           \
-            VuVec pulse __attribute__((aligned(16))) = VuVec(entry_x, entry_y, 1.0f, 1.0f);                            \
-            MechSystems::Get()->NewRadarPulse(pulse, false);                                                           \
-        }                                                                                                              \
-        CHECK_STORE_TOUCH_POINT(INDEX);                                                                                \
-    } while (0)
-    if (time < 8.0f) {
-        CHECK_STORE_PULSE(0);
-        CHECK_STORE_PULSE(1);
-        CHECK_STORE_PULSE(2);
-    } else {
-        CHECK_STORE_TOUCH(0);
-        CHECK_STORE_TOUCH(1);
-        CHECK_STORE_TOUCH(2);
-    }
-#undef CHECK_STORE_PULSE
-#undef CHECK_STORE_TOUCH
-#undef CHECK_STORE_TOUCH_POINT
     return;
 
 store_touch_selected:
@@ -1232,25 +1116,11 @@ void MenuDrawStoreRestoring(MENU_s *menu) {
 }
 
 void MenuExitStoreRestoring(MENU_s *) {
-    u8 pack_count = restoring_pack_count;
-    if (pack_count != 0) {
-        u8 *item = restoring_pack_list;
-        u8 *end = item + pack_count;
-        i32 flags = SuperOptions.store_pack_flags;
-        do {
-            flags |= 1u << *item++;
-        } while (item != end);
-        SuperOptions.store_pack_flags = flags;
+    for (i32 i = 0; i < restoring_pack_count; ++i) {
+        SuperOptions.store_pack_flags |= 1 << restoring_pack_list[i];
     }
-    u8 bundle_count = restoring_bundle_count;
-    if (bundle_count != 0) {
-        u8 *item = restoring_bundle_list;
-        u8 *end = item + bundle_count;
-        i32 flags = SuperOptions.store_bundle_flags;
-        do {
-            flags |= 1u << *item++;
-        } while (item != end);
-        SuperOptions.store_bundle_flags = flags;
+    for (i32 i = 0; i < restoring_bundle_count; ++i) {
+        SuperOptions.store_bundle_flags |= 1 << restoring_bundle_list[i];
     }
     Store_RestorePurchases();
 }
@@ -1271,7 +1141,7 @@ void Store_RootPackCustodian(i32, GameObject_s *custodian) {
     u8 flags = custodian->field_0xefc;
     custodian->apiobj.flags_low |= 2;
     flags |= 0x12;
-    custodian->field_0xefe |= 0x40;
+    custodian->invulnerable = 1;
     custodian->field_0xefc = flags;
     u32 object_flags = custodian->apiobj.field_0x1f4;
     object_flags &= ~1u;
@@ -1284,7 +1154,7 @@ void Store_UprootPackCustodian(i32, GameObject_s *custodian) {
     u8 flags = custodian->field_0xefc;
     custodian->apiobj.flags_low_bit1 = 0;
     flags &= ~0x12u;
-    custodian->field_0xefe &= ~0x40u;
+    custodian->invulnerable = 0;
     custodian->field_0xefc = flags;
 
     CHARACTERDATA *characters = *character_list;
@@ -1304,22 +1174,11 @@ void MenuUpdateStorePurchase(MENU_s *) {
         GameAudio_PlaySfx(0x26, NULL, 0, 0);
         if (menu_i_bundle != -1) {
             SuperOptions.store_bundle_flags |= 1u << menu_i_bundle;
-#define UNLOCK_BUNDLE_PACK(INDEX)                                                                                      \
-    if ((StoreBundle[menu_i_bundle].pack_mask & (1u << INDEX)) != 0) {                                                 \
-        Store_UnlockPack(INDEX, false);                                                                                \
-    }
-            UNLOCK_BUNDLE_PACK(0);
-            UNLOCK_BUNDLE_PACK(1);
-            UNLOCK_BUNDLE_PACK(2);
-            UNLOCK_BUNDLE_PACK(3);
-            UNLOCK_BUNDLE_PACK(4);
-            UNLOCK_BUNDLE_PACK(5);
-            UNLOCK_BUNDLE_PACK(6);
-            UNLOCK_BUNDLE_PACK(7);
-            UNLOCK_BUNDLE_PACK(8);
-            UNLOCK_BUNDLE_PACK(9);
-            UNLOCK_BUNDLE_PACK(10);
-#undef UNLOCK_BUNDLE_PACK
+            for (i32 i = 0; i < 11; ++i) {
+                if ((StoreBundle[menu_i_bundle].pack_mask & (1 << i)) != 0) {
+                    Store_UnlockPack(i, false);
+                }
+            }
         } else {
             Store_UnlockPack(menu_i_pack, false);
         }

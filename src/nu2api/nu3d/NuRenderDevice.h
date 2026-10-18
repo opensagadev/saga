@@ -110,7 +110,6 @@ class NuRenderDevice : NuRenderDeviceGen {
 extern NuRenderDevice g_renderDevice;
 extern thread_local i32 gt_glContextIndex;
 extern i32 g_nextGLContextIndex;
-void NuRenderInspectEGLConfig(EGLDisplay display, EGLConfig config);
 i32 _NuCheckGLErrors(const char *file);
 
 extern "C" {

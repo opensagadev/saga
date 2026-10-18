@@ -842,14 +842,14 @@ void GameObjectOrigin(GameObject_s *object) {
 
 void PortalGameObject(GameObject_s *object, i32 enabled, i32 update_room, i16 room, nugscn_s *scene) {
     if (enabled != 0) {
-        object->field_0xefa |= 0x40;
-        object->field_0xefa = (object->field_0xefa & 0x7f) | ((update_room & 1) << 7);
+        object->portal_enabled = 1;
+        object->portal_update_room = update_room;
         if (room != -1)
             object->room_id = room;
         else
             object->room_id = scene != NULL ? NuPortalWhichRoom(scene, &object->apiobj.position) : -1;
     } else {
-        object->field_0xefa &= ~0x40;
+        object->portal_enabled = 0;
     }
 }
 
@@ -965,7 +965,7 @@ void UpdateLastSafePosition(GameObject_s *object) {
         }
     }
 safe_position_done:
-    if ((object->field_0xf03 & 1) == 0 && !api.player_controlled &&
+    if (!object->ignore_last_safe_path_pos && !api.player_controlled &&
         (LEGOCONTEXT_EATEN == -1 || object->character_context != LEGOCONTEXT_EATEN) && (api.flags_high & 0x20) != 0) {
         if ((object->ai.path_info.flags & 1) != 0)
             ClearLastSafeTakeoverSource(object);

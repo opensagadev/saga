@@ -259,7 +259,10 @@ static LEDGE *Ledge_AttachPoint(WORLDINFO_s *world, NUVEC *position, NUVEC *boun
             bounds_min->y > ledge->bounds_max.y || ledge->bounds_min.y > bounds_max->y)
             continue;
         LEDGEPIECE *piece = &LedgePiece[ledge->type_index];
-        NUVEC local = {position->x - ledge->position.x, 0.0f, position->z - ledge->position.z};
+        NUVEC local;
+        local.x = position->x - ledge->position.x;
+        local.y = 0.0f;
+        local.z = position->z - ledge->position.z;
         NuVecRotateY(&local, &local, -ledge->y_rotation);
         bool check_end = false;
         if (piece->field_0x3 != 0) {
@@ -284,8 +287,10 @@ static LEDGE *Ledge_AttachPoint(WORLDINFO_s *world, NUVEC *position, NUVEC *boun
             u16 local_angle = NuAtan2D(local.x - piece->start.x, local.z - piece->end.z);
             if (static_cast<u32>(RotDiff(piece->field_0x1e, local_angle) + 0x2000) <= 0x4000) {
                 f32 radius = fabsf(piece->start.x);
-                NUVEC point = {radius * NU_SIN_LUT(local_angle) + piece->start.x, 0.0f,
-                               radius * NU_COS_LUT(local_angle) + piece->end.z};
+                NUVEC point;
+                point.x = radius * NU_SIN_LUT(local_angle) + piece->start.x;
+                point.y = 0.0f;
+                point.z = radius * NU_COS_LUT(local_angle) + piece->end.z;
                 f32 distance = NuVecDist(&local, &point, NULL);
                 if (distance < segment_distance) {
                     NuVecRotateY(&local, &point, ledge->y_rotation);
@@ -505,7 +510,10 @@ void Ledge_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
     NUVEC minimum = {object->apiobj.collision_position.x - radius, object->apiobj.collision_position.y,
                      object->apiobj.collision_position.z - radius};
     f32 distance = speed * FRAMETIME;
-    NUVEC offset = {NU_SIN_LUT(angle) * distance, 0.0f, NU_COS_LUT(angle) * distance};
+    NUVEC offset;
+    offset.x = NU_SIN_LUT(angle) * distance;
+    offset.y = 0.0f;
+    offset.z = NU_COS_LUT(angle) * distance;
     NUVEC position;
     NuVecAdd(&position, &object->external_force, &offset);
     if (Ledge_AttachPoint(world, &position, &minimum, &maximum, &angle) == NULL) {

@@ -850,7 +850,10 @@ void MechInputTouchGestureBasedController::ProcessAutoJumpWhenStuck(GameObject_s
         field_98 = 0.0f;
         return;
     }
-    NUVEC movement = {object.apiobj.velocity.x, 0.0f, object.apiobj.velocity.z};
+    NUVEC movement;
+    movement.x = object.apiobj.velocity.x;
+    movement.y = 0.0f;
+    movement.z = object.apiobj.velocity.z;
     const f32 movement_sq = NuVecMagSqr(&movement);
     const f32 intended_speed = object.pad_gamepad->input_magnitude * 0.5f;
     if (!(movement_sq < intended_speed * intended_speed)) {

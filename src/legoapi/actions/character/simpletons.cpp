@@ -192,7 +192,7 @@ static void TrooperTeamSetStateCode(minitrooperteam_s *team) {
     GenerateTrooperTeamShape(team, 0);
     minisnowtrooper_s *trooper = team->troopers;
     for (i32 i = 0; i < team->trooper_count; ++i, ++trooper) {
-        trooper->state_flags &= ~0x40;
+        trooper->stopped = 0;
         if (droid_hack != 0) {
             trooper->state_flags = (trooper->state_flags & 0x8f) | 0x20;
         } else {
@@ -249,9 +249,8 @@ void InitMiniSnowTroopers(WORLDINFO_s *world, i32 team_count, i32 trooper_count,
             team->reserved_02c = 2000000.0f;
             team->trooper_count = static_cast<u8>(trooper_count);
 
-            const u8 side = trooper_side[team_index] & 1;
-            team->team_side = side;
-            team->bolt_type = trooper_boltid[side];
+            team->team_side = trooper_side[team_index];
+            team->bolt_type = trooper_boltid[team->team_side];
             team->debris_timer = static_cast<f32>(qrand()) * (10.0f / 65535.0f) + 4.0f;
 
             char group_name[16];
@@ -431,7 +430,7 @@ void UpdateMiniSnowTroopers(WORLDINFO_s *world) {
         NUVEC total = v000;
         i32 shoot_due = 0;
         teams[team_index].fire_timer -= FRAMETIME;
-        if (__builtin_expect(teams[team_index].fire_timer <= 0.0f, 1)) {
+        if (__builtin_expect(teams[team_index].fire_timer <= 0.0f, 0)) {
             shoot_due = teams[team_index].state_flags & 1;
             teams[team_index].fire_timer = (teams[team_index].team_flags & 2) != 0 ? 0.5f : 1.0f;
         }
@@ -447,8 +446,7 @@ void UpdateMiniSnowTroopers(WORLDINFO_s *world) {
             teams[team_index].state_flags |= 1;
 
         const u8 state = teams[team_index].formation_state >> 4;
-        const u8 changed = (teams[team_index].route_state & 0xf) != state;
-        teams[team_index].route_state = (teams[team_index].route_state & ~0x10) | (changed << 4);
+        teams[team_index].mode_changed = state != teams[team_index].previous_mode;
 
         u8 mode = state;
         if (droid_hack != 0) {
@@ -507,7 +505,7 @@ void UpdateMiniSnowTroopers(WORLDINFO_s *world) {
                     if (i == selected && shoot_due != 0)
                         shot = TrooperShoot(world, &teams[team_index], trooper, &shot_angle, team_index);
 
-                    if ((trooper->state_flags & 0x40) != 0) {
+                    if (trooper->stopped != 0) {
                         ++stopped_count;
                         trooper->rotation =
                             SeekRot(trooper->rotation, trooper->target_rotation, MiniTrooperTurnSpeed());
@@ -524,7 +522,7 @@ void UpdateMiniSnowTroopers(WORLDINFO_s *world) {
                             ++stopped_count;
                         }
                     }
-                    if (__builtin_expect((trooper->state_flags & 0x40) == 0, 1)) {
+                    if (__builtin_expect(trooper->stopped == 0, 1)) {
                         const minisnowtrooper_s *slot = &teams[team_index].troopers[trooper->formation_index];
                         const f32 target_z = teams[team_index].origin_z + slot->formation_z;
                         const f32 target_x = teams[team_index].origin_x + slot->formation_x;
@@ -532,7 +530,7 @@ void UpdateMiniSnowTroopers(WORLDINFO_s *world) {
                             NuAtan2D(target_x - trooper->shot_position.x, target_z - trooper->shot_position.z);
                         trooper->rotation =
                             SeekRot(trooper->rotation, trooper->target_rotation, MiniTrooperTurnSpeed());
-                        if (__builtin_expect((trooper->state_flags & 0x40) == 0, 1))
+                        if (__builtin_expect(trooper->stopped == 0, 1))
                             MiniTrooperMove(trooper);
                     }
                     total.x += trooper->shot_position.x;
@@ -566,7 +564,7 @@ void UpdateMiniSnowTroopers(WORLDINFO_s *world) {
                     if (i == selected && shoot_due != 0)
                         shot = TrooperShoot(world, &teams[team_index], trooper, &shot_angle, team_index);
 
-                    if (__builtin_expect((trooper->state_flags & 0x40) != 0, 1)) {
+                    if (__builtin_expect(trooper->stopped != 0, 1)) {
                         ++stopped_count;
                         trooper->rotation =
                             SeekRot(trooper->rotation, trooper->target_rotation, MiniTrooperTurnSpeed());
@@ -579,12 +577,12 @@ void UpdateMiniSnowTroopers(WORLDINFO_s *world) {
                         const f32 dx = trooper->shot_position.x - target_x;
                         const f32 dz = trooper->shot_position.z - target_z;
                         if (dx * dx + dz * dz <= 0.2f * 0.2f) {
-                            trooper->state_flags |= 0x40;
+                            trooper->stopped = 1;
                             ++stopped_count;
                         }
                     }
 
-                    if ((trooper->state_flags & 0x40) == 0) {
+                    if (trooper->stopped == 0) {
                         const minisnowtrooper_s *slot = &teams[team_index].troopers[trooper->formation_index];
                         const f32 target_z = teams[team_index].origin_z + slot->formation_z;
                         const f32 target_x = teams[team_index].origin_x + slot->formation_x;
@@ -594,19 +592,19 @@ void UpdateMiniSnowTroopers(WORLDINFO_s *world) {
                             SeekRot(trooper->rotation, trooper->target_rotation, MiniTrooperTurnSpeed());
                     }
 
-                    if ((trooper->state_flags & 0x80) != 0) {
+                    if (trooper->aligned != 0) {
                         ++aligned_count;
-                    } else if ((trooper->state_flags & 0x40) != 0) {
+                    } else if (trooper->stopped != 0) {
                         i32 difference = static_cast<i16>(trooper->rotation - teams[team_index].facing_angle);
                         if (difference < 0)
                             difference = -difference;
                         if (difference <= 0x16c) {
-                            trooper->state_flags |= 0x80;
+                            trooper->aligned = 1;
                             ++aligned_count;
                         }
                     }
 
-                    if (__builtin_expect((trooper->state_flags & 0x40) == 0, 0))
+                    if (__builtin_expect(trooper->stopped == 0, 0))
                         MiniTrooperMove(trooper);
                     total.x += trooper->shot_position.x;
                     total.z += trooper->shot_position.z;
@@ -639,7 +637,7 @@ void UpdateMiniSnowTroopers(WORLDINFO_s *world) {
                     trooper->target_rotation =
                         NuAtan2D(target_x - trooper->shot_position.x, target_z - trooper->shot_position.z);
                     trooper->rotation = SeekRot(trooper->rotation, trooper->target_rotation, MiniTrooperTurnSpeed());
-                    if ((trooper->state_flags & 0x40) == 0) {
+                    if (trooper->stopped == 0) {
                         MiniTrooperMove(trooper);
                     } else {
                         trooper->rotation =

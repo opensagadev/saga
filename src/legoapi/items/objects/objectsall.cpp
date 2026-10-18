@@ -2513,7 +2513,7 @@ extern "C" {
             f32 radius = (part->time_step - time) / PARTSCALEUPTIME * part->target_radius;
             if (!(radius > 0.0f))
                 return;
-            part->active = (part->active & ~0x60) | 0x40;
+            part->radius_state = 2;
             cast_movement = movement;
             if (PartRayCast(&part->position, &cast_movement, radius, 0) == 0) {
                 part->field_209 = -1;
@@ -2526,7 +2526,7 @@ extern "C" {
     impact:
         part->active |= 4;
         part->field_200 = PartPlatId();
-        part->active = (part->active & ~0x10) | (part->field_200 != static_cast<u32>(-1) ? 0x10 : 0);
+        part->active_bit4 = part->field_200 != static_cast<u32>(-1);
         part->elapsed *= NewRayCastGetTOFI();
         part->impact_normal = PartNorm;
         part->impact_position.x = part->position.x + cast_movement.x;
@@ -4847,7 +4847,7 @@ extern "C" {
                 f32 movement_time = time;
                 if ((part->flags & 0x400) == 0) {
                     if (time >= part->elapsed) {
-                        part->active = (part->active & ~0x60) | (part->target_radius > part->radius ? 0x20 : 0);
+                        part->radius_state = part->target_radius > part->radius ? 1 : 0;
                         if ((part->active & 4) != 0) {
                             if ((part->flags & 0x80000) != 0 && (part->active & 0x10) != 0 && part_platimpactcnt < 4) {
                                 part_platimpactlist[part_platimpactcnt++] = part->field_200;

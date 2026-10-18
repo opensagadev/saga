@@ -435,7 +435,7 @@ void InitStatusScreen(WORLDINFO_s *world) {
     icon_y = STATSPOSY;
     newminikitcount = 0;
     currentminikit = 0;
-    p.field_0xb0 &= 0xfe;
+    p.field_0xb0_0 = 0;
     ResetRumble(&p.rumble[0]);
     ResetRumble(&p.rumble[1]);
     CoinTotalScale = 1.0f;
@@ -719,7 +719,7 @@ void InitStatusScreen(WORLDINFO_s *world) {
     p.coins_collected[1] = p.coins_remaining[1];
     draw_player_icons = 0;
     if (area != -1) {
-        if ((p.field_0xb0 & 0x40) == 0 && p.episode != NULL && p.chapter < p.episode->regular_areas) {
+        if (!p.free_play && p.episode != NULL && p.chapter < p.episode->regular_areas) {
             p.next_area = p.episode->area_ids[p.chapter + 1];
             if (p.chapter < p.episode->regular_areas - 1)
                 p.field_0xb0 |= 8;
@@ -735,7 +735,7 @@ void InitStatusScreen(WORLDINFO_s *world) {
         }
         i32 gold;
         i32 completed_episode;
-        if ((p.field_0xb0 & 0x40) == 0 && Game.area_save[area].area_complete == 0 && (p.area->flags & 0x26) == 0) {
+        if (!p.free_play && Game.area_save[area].area_complete == 0 && (p.area->flags & 0x26) == 0) {
             Game.area_save[area].area_complete = 1;
             p.newly_completed = 1;
             AddToCompletionPoints(POINTS_PER_STORY);
@@ -794,7 +794,7 @@ void InitStatusScreen(WORLDINFO_s *world) {
     }
     if (area != -1 && ((p.area->flags & 0x136) == 0x10 || (p.area->flags & 0x4000) != 0)) {
         if (BOTHTRUEJEDIGOLDBRICKS != 0) {
-            u8 &complete = Game.area_save[area].true_hero_complete[(p.field_0xb0 >> 6) & 1];
+            u8 &complete = Game.area_save[area].true_hero_complete[p.free_play];
             if (complete == 0) {
                 if ((p.field_0xb0 & 4) != 0) {
                     complete = 1;
@@ -1051,7 +1051,10 @@ void DrawStatusMiniKit(float x, float y, float z, float built_scale, float new_s
 }
 
 void AddStatusMiniKitParts() {
-    NUVEC target_position = {0.0f, STATSPOSY, 1.0f};
+    NUVEC target_position;
+    target_position.x = 0.0f;
+    target_position.y = STATSPOSY;
+    target_position.z = 1.0f;
     for (i32 i = 0; i < 3; ++i) {
         KitPartRTL.intensity[i] = panelcol[i];
         KitPartRTL.direction[i] = paneldir[i];
@@ -1065,7 +1068,10 @@ void AddStatusMiniKitParts() {
         if (KitPart[i].enabled == 0) {
             continue;
         }
-        NUVEC velocity = {0.0f, (static_cast<f32>(qrand()) * (1.0f / 65535.0f)) * 0.25f + 0.25f, 0.0f};
+        NUVEC velocity;
+        velocity.x = 0.0f;
+        velocity.y = (static_cast<f32>(qrand()) * (1.0f / 65535.0f)) * 0.25f + 0.25f;
+        velocity.z = 0.0f;
         NuVecRotateZ(&velocity, &velocity, qrand());
         ADDPART_s part = Default_ADDPART;
         part.matrix = &KitPart[i].matrix;
@@ -1078,7 +1084,10 @@ void AddStatusMiniKitParts() {
         AddPart(&part);
 
         for (i32 coin = 0; coin < 5; ++coin) {
-            NUVEC position = {0.0f, (static_cast<f32>(qrand()) * (1.0f / 65535.0f)) * 0.1f, 1.0f};
+            NUVEC position;
+            position.x = 0.0f;
+            position.y = (static_cast<f32>(qrand()) * (1.0f / 65535.0f)) * 0.1f;
+            position.z = 1.0f;
             NuVecRotateZ(&position, &position, qrand());
             ADDGAMEMSG_ALIGNED16 message = AddGameMsg_Default;
             message.position = &position;

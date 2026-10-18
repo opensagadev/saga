@@ -304,7 +304,10 @@ void ChallangeCash_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float e
             if (previous < 1.0f && stage->field_0x18 >= 1.0f) {
                 f32 delay = 0.0f;
                 for (i32 i = 0; i < 50; ++i) {
-                    NUVEC position = {0.0f, QRAND_FLOAT() * 0.1f, 1.0f};
+                    NUVEC position;
+                    position.x = 0.0f;
+                    position.y = QRAND_FLOAT() * 0.1f;
+                    position.z = 1.0f;
                     NuVecRotateZ(&position, &position, qrand());
                     ADDGAMEMSG_ALIGNED16 message = AddGameMsg_Default;
                     message.position = &position;
@@ -1463,13 +1466,20 @@ static void LevelComplete_LSW_DrawActive(STATUS_STAGE_s *stage, STATUSPACKET_s *
                             complete ? 255 : STATUS_R, complete ? 255 : STATUS_G, complete ? 255 : STATUS_B, 1.7f, 1,
                             NULL, 0, opacity);
             } else {
-                const i16 &label = stage->type == 29   ? tEPISODEICOMPLETE
-                                   : stage->type == 30 ? tEPISODEIICOMPLETE
-                                   : stage->type == 31 ? tEPISODEIIICOMPLETE
-                                   : stage->type == 32 ? tEPISODEIVCOMPLETE
-                                   : stage->type == 33 ? tEPISODEVCOMPLETE
-                                                       : tEPISODEVICOMPLETE;
-                SmartTextEx(TTab[label], 0.0f, 0.1f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G, STATUS_B, 1.7f,
+                const i16 *label;
+                if (stage->type == 29)
+                    label = &tEPISODEICOMPLETE;
+                else if (stage->type == 30)
+                    label = &tEPISODEIICOMPLETE;
+                else if (stage->type == 31)
+                    label = &tEPISODEIIICOMPLETE;
+                else if (stage->type == 32)
+                    label = &tEPISODEIVCOMPLETE;
+                else if (stage->type == 33)
+                    label = &tEPISODEVCOMPLETE;
+                else
+                    label = &tEPISODEVICOMPLETE;
+                SmartTextEx(TTab[*label], 0.0f, 0.1f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G, STATUS_B, 1.7f,
                             1, NULL, 0, opacity);
                 SmartTextEx(TTab[tSTORYCLIPSUNLOCKED], 0.0f, -0.1f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,
                             STATUS_B, 1.7f, 1, NULL, 0, opacity);
@@ -1487,8 +1497,9 @@ static void LevelComplete_LSW_DrawActive(STATUS_STAGE_s *stage, STATUSPACKET_s *
             return;
         if (packet->previous_gold_bricks < Game.field_0x7c26[0])
             iconalphaoverride = 0.0f;
-    } else if (packet->challenge_state != 2)
+    } else if (stage->type != 23 || packet->challenge_state != 2) {
         return;
+    }
     f32 progress, slide;
     if (stage->field_0x18 < 0.75f) {
         progress = 0.0f;
@@ -1773,18 +1784,19 @@ void MiniKit_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current
         if (stage->field_0x12 == 0)
             return;
         const f32 alpha = getFinishedStatusAlpha(packet);
+        const f32 spin = NuTrigTable[(static_cast<i32>(alpha * 16384.0f) >> 1) & 0x7fff];
         const i32 opacity = static_cast<i32>(alpha * 128.0f);
         i32 angle = 0x2000;
         if (!(GameTimer.time_elapsed_mod_seconds > 0.25f)) {
             angle = (static_cast<i32>(GameTimer.time_elapsed_mod_seconds * 32768.0f + 16384.0f) >> 1) & 0x7fff;
         }
+        const f32 pulse = NuTrigTable[angle];
         if (Game.area_save[packet->area->index].field_0x5[0] == 0) {
-            const f32 size = ((1.0f - fabsf(NuTrigTable[angle])) + 1.0f) * 1.2f;
+            const f32 size = ((1.0f - fabsf(pulse)) + 1.0f) * 1.2f;
             Text3DEx("?", -0.6f, -0.6f, 1.1f, size, size, size, 0, 255, 255, 255, static_cast<u8>(opacity));
         } else if (alpha > 0.0f) {
-            DrawStatusMiniKit(-0.6f, -0.5f, 1.1f,
-                              NuTrigTable[(static_cast<i32>(alpha * 16384.0f) >> 1) & 0x7fff] * 0.15f, 1.0f,
-                              Game.area_save[packet->area->index].field_0x5[0], packet, 0.0f);
+            DrawStatusMiniKit(-0.6f, -0.5f, 1.1f, spin * 0.15f, 1.0f, Game.area_save[packet->area->index].field_0x5[0],
+                              packet, 0.0f);
         }
         if (packet->minikit_max == Game.area_save[packet->area->index].field_0x5[0]) {
             Text3DEx("$", -0.6f, -0.7f, 1.0f, 0.8f, 0.8f, 0.8f, 0, 255, 0, 127, static_cast<u8>(opacity));
@@ -1872,7 +1884,7 @@ void MiniKit_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current
                 i32 angle = 0x2000;
                 if (stage->field_0x18 < 1.0f)
                     angle = (static_cast<i32>(title_alpha * 32768.0f + 16384.0f) >> 1) & 0x7fff;
-                if (__builtin_expect(stage->field_0x18 < stage->field_0x1c, 1)) {
+                if (__builtin_expect(stage->field_0x18 < stage->field_0x1c, 0)) {
                     DrawMiniKitCount(1.0f - (NuTrigTable[angle] + 1.0f) * 0.5f, 1.0f,
                                      Game.area_save[packet->area->index].field_0x5[0], packet->minikit_max);
                     DrawStatusMiniKit(0.0f, 0.0f, 1.1f, 0.333f, 1.0f, Game.area_save[packet->area->index].field_0x5[0],

@@ -431,6 +431,18 @@ void Doors_SetLastDoor(DOOR_s *door) {
     }
 }
 
+static void Door_SetNewLevel(i32 level) {
+    NewLData = &LDataList[level];
+    if (FreePlay != 0 && (NewLData->flags & LEVEL_OUTRO) != 0) {
+        NewLData = Area_FindStatusLevel(WORLD->area, NULL);
+        if (NewLData == NULL) {
+            NewLData = &LDataList[level];
+        } else if (ChallengeMode != 0) {
+            ChallengeMode = 4;
+        }
+    }
+}
+
 void Door_GoThrough(WORLDINFO_s *world, DOOR_s *door, i32 player_triggered) {
     (void)player_triggered;
 
@@ -452,8 +464,11 @@ void Door_GoThrough(WORLDINFO_s *world, DOOR_s *door, i32 player_triggered) {
     NuStrCpy(Door_ExitName, door->name);
     if (door->cutscene == NULL || CutScene_HasPlayed(static_cast<CUTINFO *>(door->cutscene))) {
         door_cutscenesnap = 0;
-        const i32 destination_level = InStory() != 0 ? door->level : door->freeplay_level;
-        if (destination_level == world->level_idx) {
+        if (InStory() != 0 && door->level != world->level_idx) {
+            Door_SetNewLevel(door->level);
+        } else if (InStory() == 0 && door->freeplay_level != world->level_idx) {
+            Door_SetNewLevel(door->freeplay_level);
+        } else {
             StartDoorPositions();
             NewGameMode();
             for (i32 index = 0; index < 8; ++index) {
@@ -466,17 +481,6 @@ void Door_GoThrough(WORLDINFO_s *world, DOOR_s *door, i32 player_triggered) {
                     current_player->apiobj.field_0x287 == 0 ? current_player->field_0xe38 : 4;
             }
             gone_through_door_to_new_mode = 1;
-        } else {
-            NewLData = &LDataList[destination_level];
-            if (FreePlay != 0 && (NewLData->flags & LEVEL_OUTRO) != 0) {
-                LEVELDATA_s *status_level = Area_FindStatusLevel(WORLD->area, NULL);
-                if (status_level != NULL) {
-                    NewLData = status_level;
-                    if (ChallengeMode != 0) {
-                        ChallengeMode = 4;
-                    }
-                }
-            }
         }
     } else {
         CUTINFO *cutscene = static_cast<CUTINFO *>(door->cutscene);

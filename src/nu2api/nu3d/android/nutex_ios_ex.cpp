@@ -45,7 +45,7 @@ SAGA_HOST_HOOK void NuIOS_UploadCompressedTexture(GLenum target, GLint level, GL
     glCompressedTexImage2D(target, level, internal_format, width, height, border, image_size, data);
 }
 
-__attribute__((weak)) bool NuIOS_TextureFormatSupported(i32 format) {
+SAGA_HOST_HOOK bool NuIOS_TextureFormatSupported(i32 format) {
     return g_renderDevice.enabled_extensions[format];
 }
 

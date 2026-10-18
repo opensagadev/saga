@@ -7207,7 +7207,9 @@ PropertyMenu *PropertyTool::RetrievePropertyMenu(ClassObject *object, PropertyMe
 }
 
 i32 PropertyTool::ProcessMenu(EdInputContext &input) {
-    PropertyMenuList rebuilt = {};
+    PropertyMenu *first = NULL;
+    PropertyMenu *last = NULL;
+    i32 count = 0;
     i32 order = 0;
     for (PropertyMenu *menu = active_menu; menu != NULL; menu = menu->next) {
         menu->order = order++;
@@ -7231,7 +7233,7 @@ i32 PropertyTool::ProcessMenu(EdInputContext &input) {
             menu->previous = NULL;
             --menu_count;
         } else {
-            menu = FindItemMenu(rebuilt.first, reinterpret_cast<ClassItem *>(entry));
+            menu = FindItemMenu(first, reinterpret_cast<ClassItem *>(entry));
             if (menu != NULL) {
                 menu->AddObject(*reinterpret_cast<ClassObject *>(&entry->ed_class));
                 continue;
@@ -7245,9 +7247,10 @@ i32 PropertyTool::ProcessMenu(EdInputContext &input) {
             menu->order = -1;
         }
 
-        PropertyMenu *position = rebuilt.first;
-        while (position != NULL && position->order <= menu->order) {
-            position = position->next;
+        PropertyMenu *position;
+        for (position = first; position != NULL; position = position->next) {
+            if (position->order > menu->order)
+                break;
         }
         if (position != NULL) {
             menu->next = position;
@@ -7255,21 +7258,21 @@ i32 PropertyTool::ProcessMenu(EdInputContext &input) {
             if (position->previous != NULL) {
                 position->previous->next = menu;
             } else {
-                rebuilt.first = menu;
+                first = menu;
             }
             position->previous = menu;
-            ++rebuilt.count;
+            ++count;
             continue;
         }
-        menu->next = NULL;
-        menu->previous = rebuilt.last;
-        if (rebuilt.last != NULL) {
-            rebuilt.last->next = menu;
-        } else {
-            rebuilt.first = menu;
+        menu->previous = last;
+        if (last != NULL) {
+            last->next = menu;
         }
-        rebuilt.last = menu;
-        ++rebuilt.count;
+        if (first == NULL) {
+            first = menu;
+        }
+        last = menu;
+        ++count;
     }
     while (active_menu != NULL) {
         PropertyMenu *menu = active_menu;
@@ -7290,9 +7293,9 @@ i32 PropertyTool::ProcessMenu(EdInputContext &input) {
         menu->Destroy();
         theMemoryManager.FreePool(menu, sizeof(PropertyMenu));
     }
-    active_menu = rebuilt.first;
-    last_menu = rebuilt.last;
-    menu_count = rebuilt.count;
+    active_menu = first;
+    last_menu = last;
+    menu_count = count;
     if (edLevelActiveMenu != NULL) {
         return 0;
     }
@@ -8031,16 +8034,36 @@ void EdSpecialObjectControl::AddMenuItem(eduimenu_s *parent, EdRef *member, void
 }
 
 f32 BezierLineLength(VuVec &start, VuVec &first_control, VuVec &end, VuVec &second_control) {
-    VuVec first{(start.x + first_control.x) * 0.5f, (start.y + first_control.y) * 0.5f,
-                (start.z + first_control.z) * 0.5f, 0.0f};
-    VuVec middle{(first_control.x + second_control.x) * 0.5f, (first_control.y + second_control.y) * 0.5f,
-                 (first_control.z + second_control.z) * 0.5f, 0.0f};
-    VuVec last{(second_control.x + end.x) * 0.5f, (second_control.y + end.y) * 0.5f, (second_control.z + end.z) * 0.5f,
-               0.0f};
-    VuVec first_middle{(first.x + middle.x) * 0.5f, (first.y + middle.y) * 0.5f, (first.z + middle.z) * 0.5f, 0.0f};
-    VuVec middle_last{(middle.x + last.x) * 0.5f, (middle.y + last.y) * 0.5f, (middle.z + last.z) * 0.5f, 0.0f};
-    VuVec midpoint{(first_middle.x + middle_last.x) * 0.5f, (first_middle.y + middle_last.y) * 0.5f,
-                   (first_middle.z + middle_last.z) * 0.5f, 0.0f};
+    VuVec first;
+    first.x = (start.x + first_control.x) * 0.5f;
+    first.y = (start.y + first_control.y) * 0.5f;
+    first.z = (start.z + first_control.z) * 0.5f;
+    first.w = 0.0f;
+    VuVec middle;
+    middle.x = (first_control.x + second_control.x) * 0.5f;
+    middle.y = (first_control.y + second_control.y) * 0.5f;
+    middle.z = (first_control.z + second_control.z) * 0.5f;
+    middle.w = 0.0f;
+    VuVec last;
+    last.x = (second_control.x + end.x) * 0.5f;
+    last.y = (second_control.y + end.y) * 0.5f;
+    last.z = (second_control.z + end.z) * 0.5f;
+    last.w = 0.0f;
+    VuVec first_middle;
+    first_middle.x = (first.x + middle.x) * 0.5f;
+    first_middle.y = (first.y + middle.y) * 0.5f;
+    first_middle.z = (first.z + middle.z) * 0.5f;
+    first_middle.w = 0.0f;
+    VuVec middle_last;
+    middle_last.x = (middle.x + last.x) * 0.5f;
+    middle_last.y = (middle.y + last.y) * 0.5f;
+    middle_last.z = (middle.z + last.z) * 0.5f;
+    middle_last.w = 0.0f;
+    VuVec midpoint;
+    midpoint.x = (first_middle.x + middle_last.x) * 0.5f;
+    midpoint.y = (first_middle.y + middle_last.y) * 0.5f;
+    midpoint.z = (first_middle.z + middle_last.z) * 0.5f;
+    midpoint.w = 0.0f;
     NUVEC error{(start.x + end.x) * 0.5f - midpoint.x, (start.y + end.y) * 0.5f - midpoint.y,
                 (start.z + end.z) * 0.5f - midpoint.z};
     if (!(NuVecMag(&error) < 0.01f) && bezierline_depth < 2) {
@@ -8341,48 +8364,32 @@ __attribute__((force_align_arg_pointer)) i32 SplineKnotList::GetPoint(i32 index,
 }
 
 void SplineObject::ReverseKnots() {
-    SplineKnot *old_first = knots.first;
-    SplineKnot *knot = knots.last;
+    SplineKnotList old = knots;
     knots.last = NULL;
     knots.first = NULL;
     knots.count = 0;
-    i32 next_count = 1;
-    if (knot != NULL) {
-        while (true) {
-            SplineKnot *prior = knot->previous;
-            SplineKnot *next = knot->next;
-            if (__builtin_expect(next != NULL, 1))
-                next->previous = prior;
-            if (prior != NULL)
-                prior->next = next;
-            else
-                old_first = next;
-            knot->next = NULL;
-            knot->previous = knots.last;
-            if (knots.last != NULL)
-                knots.last->next = knot;
-            bool had_first = knots.first != NULL;
-            knots.last = knot;
-            if (!had_first)
-                knots.first = knot;
-            i32 count = next_count++;
-            if (prior == NULL) {
-                knots.count = count;
-                break;
-            }
-            knot = prior;
-        }
-    }
-    while (old_first != NULL) {
-        SplineKnot *next = old_first->next;
-        if (next != NULL)
-            next->previous = old_first->previous;
-        if (__builtin_expect(old_first->previous != NULL, 0))
-            old_first->previous->next = next;
-        old_first->next = NULL;
-        old_first->previous = NULL;
-        theMemoryManager.FreePool(old_first, sizeof(SplineKnot));
-        old_first = next;
+    while (old.last != NULL) {
+        SplineKnot *knot = old.last;
+        if (knot->next != NULL)
+            knot->next->previous = knot->previous;
+        else
+            old.last = knot->previous;
+        if (knot->previous != NULL)
+            knot->previous->next = knot->next;
+        else
+            old.first = knot->next;
+        knot->next = NULL;
+        knot->previous = NULL;
+        --old.count;
+
+        knot->next = NULL;
+        knot->previous = knots.last;
+        if (knots.last != NULL)
+            knots.last->next = knot;
+        knots.last = knot;
+        if (knots.first == NULL)
+            knots.first = knot;
+        ++knots.count;
     }
 }
 
@@ -8425,25 +8432,22 @@ void SplineHelper::Initialise() {
 
     EdClass *knot_class = theRegistry.RegisterClass(const_cast<char *>("Knot"),
                                                     reinterpret_cast<EdClassInterface *>(&theKnotHelper), 0x18400000);
-    EdRef *position =
+    theKnotHelper.position_ref =
         make_spline_reference<EdRefKnot>(knot_class, const_cast<char *>("VuVec"), const_cast<char *>("Pos"),
                                          static_cast<i32>(0x80000003), 0, 8, make_spline_vector_control(), false);
-    EdRef *in_tangent =
+    theKnotHelper.in_tangent_ref =
         make_spline_reference<EdRefKnot>(knot_class, const_cast<char *>("VuVec"), const_cast<char *>("In"),
                                          static_cast<i32>(0x80000004), 0, 8, make_spline_vector_control(), false);
-    EdRef *out_tangent =
+    theKnotHelper.out_tangent_ref =
         make_spline_reference<EdRefKnot>(knot_class, const_cast<char *>("VuVec"), const_cast<char *>("Out"),
                                          static_cast<i32>(0x80000005), 0, 8, make_spline_vector_control(), false);
-    theKnotHelper.position_ref = position;
-    theKnotHelper.in_tangent_ref = in_tangent;
-    theKnotHelper.out_tangent_ref = out_tangent;
     make_spline_reference<EdRefKnot>(knot_class, const_cast<char *>("String"), const_cast<char *>("Spline"),
                                      static_cast<i32>(0x80000001), 0x20, 0x10000002, make_spline_string_control());
     make_spline_reference<EdRef>(knot_class, const_cast<char *>("Short"), const_cast<char *>("LEDFile"), 0x44, 0,
                                  0x10000100, NULL);
-    knot_class->AddType(position);
-    knot_class->AddType(in_tangent);
-    knot_class->AddType(out_tangent);
+    knot_class->AddType(theKnotHelper.position_ref);
+    knot_class->AddType(theKnotHelper.in_tangent_ref);
+    knot_class->AddType(theKnotHelper.out_tangent_ref);
     make_spline_reference<EdRefKnot>(knot_class, const_cast<char *>("Float"), const_cast<char *>("Radius"),
                                      static_cast<i32>(0x80000002), 0, 0x10000040, NULL);
 }
@@ -9332,14 +9336,21 @@ i32 EdManipulator::Process(EdInputContext &input, ClassObjectList &selected) {
     f32 distance = 0.0f;
     VuVec *ray_origin = reinterpret_cast<VuVec *>(input.reserved_00 + 0x20);
     if (selected.GetAveragePosition(average) != 0) {
-        VuVec displacement = {average.x - ray_origin->x, average.y - ray_origin->y, average.z - ray_origin->z, 0.0f};
+        VuVec displacement;
+        displacement.x = average.x - ray_origin->x;
+        displacement.y = average.y - ray_origin->y;
+        displacement.z = average.z - ray_origin->z;
+        displacement.w = 0.0f;
         distance = NuVecMag(reinterpret_cast<NUVEC *>(&displacement));
     }
     VuVec direction = *reinterpret_cast<VuVec *>(input.reserved_00 + 0x30);
     NuVecNorm(reinterpret_cast<NUVEC *>(&direction), reinterpret_cast<NUVEC *>(&direction));
     VuVec *last_point = reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(this) + 0x30);
-    VuVec point = {ray_origin->x + direction.x * distance, ray_origin->y + direction.y * distance,
-                   ray_origin->z + direction.z * distance, 0.0f};
+    VuVec point;
+    point.x = ray_origin->x + direction.x * distance;
+    point.y = ray_origin->y + direction.y * distance;
+    point.z = ray_origin->z + direction.z * distance;
+    point.w = 0.0f;
     VuVec *delta = reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(this) + 0x40);
     VuVec *cursor = reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(this) + 0x50);
     if (input.GetPress(3) != 0.0f) {

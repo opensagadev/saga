@@ -97,6 +97,16 @@ void NuRenderDevice::ResizeDevice(i32 w, i32 h, i32, bool, bool, bool, bool) {
                                       0x452);
 }
 
+SAGA_HOST_HOOK void NuRenderInspectEGLConfig(EGLDisplay display, EGLConfig config) {
+    EGLint config_attribs[6] = {};
+    eglGetConfigAttrib(display, config, EGL_RED_SIZE, &config_attribs[0]);
+    eglGetConfigAttrib(display, config, EGL_BLUE_SIZE, &config_attribs[1]);
+    eglGetConfigAttrib(display, config, EGL_GREEN_SIZE, &config_attribs[2]);
+    eglGetConfigAttrib(display, config, EGL_ALPHA_SIZE, &config_attribs[3]);
+    eglGetConfigAttrib(display, config, EGL_DEPTH_SIZE, &config_attribs[4]);
+    eglGetConfigAttrib(display, config, EGL_STENCIL_SIZE, &config_attribs[5]);
+}
+
 void NuRenderDevice::Initialize() {
     // Wait for the EGL display / window surface to become valid. On
     // Android this is signalled from the Java activity thread via

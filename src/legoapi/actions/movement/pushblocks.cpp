@@ -1175,7 +1175,10 @@ __attribute__((optimize("O2", "tree-vectorize"))) void MoveBlocksOverBlock(WORLD
 }
 
 void MoveBlocks(WORLDINFO_s *world, pushblock_s *block, i32 index, nuvec_s *velocity) {
-    NUVEC delta = {velocity->x, 0.0f, velocity->z};
+    NUVEC delta;
+    delta.x = velocity->x;
+    delta.y = 0.0f;
+    delta.z = velocity->z;
     block->position->x += delta.x;
     block->position->z += delta.z;
     NuSpecialUpdate(&block->special);
@@ -1458,7 +1461,7 @@ void UpdatePushBlocks(void *world_ptr, void *, float) {
                     p->snap_origin.z = p->position->z;
                     for (i32 j = 0; j < p->end_position_count; ++j)
                         p->end_position_origins[j] = *NuSpecialGetDrawPos(&p->end_position_specials[j]);
-                    p->packed_state_flags = (p->packed_state_flags & 0xfffc7fff) | ((i & 7) << 15);
+                    p->snap_index = i;
                     p->snap_timer = FRAMETIME;
                     target_seen = 1;
                     break;
@@ -1667,7 +1670,7 @@ void UpdatePushBlocks(void *world_ptr, void *, float) {
             }
         }
         p->pushing_object = NULL;
-        p->runtime_flags_0c8 = (p->runtime_flags_0c8 & ~2) | ((p->runtime_flags_0c8 & 1) << 1);
+        p->was_pushed = p->pushed;
         p->runtime_flags_0c8 = (p->runtime_flags_0c8 & 0xea) | ((p->runtime_flags_0c8 << 1) & 0x10);
     }
 }

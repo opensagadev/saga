@@ -952,13 +952,15 @@ extern "C" void NuShaderObjectGLSLSetupMaterial(NUSHADEROBJECT *shader, struct n
         // looking up a hand-picked set of generated GLSL names.
         auto nextSemantic = [usage](u32 start) {
             u32 word = start >> 5;
-            u32 bits = usage->semantics[word] >> (start & 31);
+            u32 shift = start & 31;
+            u32 bits = usage->semantics[word] >> shift;
             while (!bits) {
-                if (++word >= 3) {
+                bits = usage->semantics[++word];
+                start += 32 - shift;
+                shift = 0;
+                if (word == 3) {
                     return 128u;
                 }
-                start = word * 32;
-                bits = usage->semantics[word];
             }
             return start + static_cast<u32>(__builtin_ctz(bits));
         };
@@ -970,7 +972,7 @@ extern "C" void NuShaderObjectGLSLSetupMaterial(NUSHADEROBJECT *shader, struct n
             const f32 *values = reinterpret_cast<const f32 *>(uniform.data.values);
             const i32 count = static_cast<i32>(uniform.data.metadata[0]);
 
-            switch (parameter.type_and_flags & 0x0f) {
+            switch (parameter.parameter_type) {
                 case 1:
                     g_glConstantSetterTable[parameter.element_count_and_setter & 3](parameter.location, count, values);
                     break;

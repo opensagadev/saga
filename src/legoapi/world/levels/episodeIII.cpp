@@ -980,33 +980,14 @@ void VaderA_Update(WORLDINFO_s *) {
         vader_a.timer -= FRAMETIME;
 
         if (static_cast<i16>(vader_a.count) <= 2) {
-            if (vader_a.forces[0] != NULL && GizForce_Complete(vader_a.forces[0])) {
-                vader_a.timer += 20.0f;
-                if (TouchHacks::TouchControlsActive)
-                    vader_a.timer += 10.0f;
-                vader_a.subtitle = 1;
-                vader_a.forces[0] = NULL;
-            }
-            if (vader_a.forces[1] != NULL && GizForce_Complete(vader_a.forces[1])) {
-                vader_a.timer += 20.0f;
-                if (TouchHacks::TouchControlsActive)
-                    vader_a.timer += 10.0f;
-                vader_a.subtitle = 1;
-                vader_a.forces[1] = NULL;
-            }
-            if (vader_a.forces[2] != NULL && GizForce_Complete(vader_a.forces[2])) {
-                vader_a.timer += 20.0f;
-                if (TouchHacks::TouchControlsActive)
-                    vader_a.timer += 10.0f;
-                vader_a.subtitle = 1;
-                vader_a.forces[2] = NULL;
-            }
-            if (vader_a.forces[3] != NULL && GizForce_Complete(vader_a.forces[3])) {
-                vader_a.timer += 20.0f;
-                if (TouchHacks::TouchControlsActive)
-                    vader_a.timer += 10.0f;
-                vader_a.subtitle = 1;
-                vader_a.forces[3] = NULL;
+            for (i32 i = 0; i < 4; ++i) {
+                if (vader_a.forces[i] != NULL && GizForce_Complete(vader_a.forces[i])) {
+                    vader_a.timer += 20.0f;
+                    if (TouchHacks::TouchControlsActive)
+                        vader_a.timer += 10.0f;
+                    vader_a.subtitle = 1;
+                    vader_a.forces[i] = NULL;
+                }
             }
 
             static const f32 time_limits[3] = {30.0f, 15.0f, 0.0f};

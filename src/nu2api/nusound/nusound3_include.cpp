@@ -2256,7 +2256,7 @@ i32 NuSound3PlayStereoV(NUSOUNDPLAYTOK token, ...) {
     i32 sample_index = 0;
     i32 volume_bits = 0;
     f32 start_offset = 0.0f;
-    i32 voice_loop = 0;
+    bool voice_loop = false;
     bool start_voice = true;
 
     while (token != NUSOUNDPLAYTOK_END) {
@@ -2282,7 +2282,7 @@ i32 NuSound3PlayStereoV(NUSOUNDPLAYTOK token, ...) {
                 break;
             }
             case NUSOUNDPLAYTOK_LOOPTYPE: {
-                voice_loop = va_arg(args, i32);
+                voice_loop = va_arg(args, i32) != 0;
                 break;
             }
             case NUSOUNDPLAYTOK_ONESHOT: {
@@ -2301,14 +2301,12 @@ i32 NuSound3PlayStereoV(NUSOUNDPLAYTOK token, ...) {
     if (streaming_sample->GetThreadQueueCount() < 1) {
         NuSoundStream *stream_ptr = g_NuSoundStreams[stream_index];
         if (stream_ptr != NULL) {
-            NuSoundStreamingSample *stream = stream_ptr->stream;
-            if (stream != streaming_sample) {
+            if (stream_ptr->stream != streaming_sample) {
                 NuSound3StopStereoStream(stream_index);
-                stream = stream_ptr->stream;
             }
 
-            NuSoundSample::LoadState load_state = stream->GetLoadState();
-            if ((load_state == NuSoundSample::LoadState::NOT_LOADED) && stream->GetResourceCount() == 0) {
+            NuSoundSample::LoadState load_state = stream_ptr->stream->GetLoadState();
+            if ((load_state == NuSoundSample::LoadState::NOT_LOADED) && stream_ptr->stream->GetResourceCount() == 0) {
                 delete stream_ptr;
                 g_NuSoundStreams[stream_index] = NULL;
             } else if (g_NuSoundStreams[stream_index] != NULL) {
@@ -2317,20 +2315,20 @@ i32 NuSound3PlayStereoV(NUSOUNDPLAYTOK token, ...) {
         }
 
         if (streaming_sample != NULL && streaming_sample->GetResourceCount() == 0) {
-            NuSoundStream *node = new NuSoundStream();
+            NuSoundStream *node = new NuSoundStream;
 
-            node->field_0xc = (u8)(voice_loop != 0);
-            node->ps2volume = volume_bits;
-            node->pending_start = start_voice;
             node->field_0xd = 0;
             g_NuSoundStreams[stream_index] = node;
+            node->field_0xc = voice_loop;
             node->stream = streaming_sample;
+            node->ps2volume = volume_bits;
+            node->pending_start = start_voice;
 
             streaming_sample->sound_buffer1 = &g_NuSoundStreamBuffers[stream_index * 2];
             streaming_sample->sound_buffer2 = &g_NuSoundStreamBuffers[stream_index * 2 + 1];
 
             streaming_sample->Reference();
-            g_NuSoundStreamer->RequestCue(streaming_sample, node->field_0xc != 0, start_offset, false);
+            g_NuSoundStreamer->RequestCue(streaming_sample, voice_loop, start_offset, false);
 
             return 1;
         }

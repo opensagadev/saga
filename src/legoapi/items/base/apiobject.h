@@ -1163,18 +1163,54 @@ typedef struct GameObject_s {
     union {
         struct {
             u8 field_0xe20;
-            u8 field_0xe21;
+            union {
+                u8 field_0xe21;
+                struct {
+                    u8 force_choke_target : 1;
+                    u8 force_direct_target : 1;
+                    u8 force_highlighted : 1;
+                    u8 has_attack_target : 1;
+                    u8 : 1;
+                    u8 field_0xe21_bit5 : 1;
+                    u8 idle_phase_odd : 1;
+                    u8 field_0xe21_bit7 : 1;
+                };
+            };
         };
         u16 action_flags; // 0x0e20
     };
-    u8 field_0xe22;            // 0x0e22
-    u8 field_0xe23;            // 0x0e23
-    u8 field_0xe24;            // 0x0e24
+    u8 field_0xe22; // 0x0e22
+    union {
+        u8 field_0xe23; // 0x0e23
+        struct {
+            u8 field_0xe23_bit0 : 1;
+            u8 : 2;
+            u8 drawn_last_frame : 1;
+            u8 has_movement_input : 1;
+            u8 blocked_special : 1;
+            u8 weapon_out : 1;
+            u8 tag_highlighted : 1;
+        };
+    };
+    union {
+        u8 field_0xe24; // 0x0e24
+        struct {
+            u8 : 3;
+            u8 locators_updated : 1;
+            u8 : 4;
+        };
+    };
     u8 movement_runtime_flags; // 0x0e25
     union {
         u8 pad_e26[0xe2b - 0xe26];
         struct {
-            u8 flicker_flags;
+            union {
+                u8 flicker_flags;
+                struct {
+                    u8 flicker_kind : 3;
+                    u8 : 5;
+                };
+            };
             u8 reserved_e27[4];
         };
     };
@@ -1314,7 +1350,8 @@ typedef struct GameObject_s {
             u8 : 4;
             u8 respawnable : 1;
             u8 respawn_at_origin : 1;
-            u8 : 2;
+            u8 portal_enabled : 1;
+            u8 portal_update_room : 1;
         };
     };
     union {
@@ -1352,12 +1389,25 @@ typedef struct GameObject_s {
                     u8 : 1;
                     u8 random_layer_variant : 1;
                     u8 snap_facing : 1;
-                    u8 : 1;
+                    u8 doomed_escape_take_damage : 1;
                     u8 still_take_hit : 1;
-                    u8 : 3;
+                    u8 jump_mode : 1;
+                    u8 : 2;
                 };
             }; // 0x0efd
-            u8 field_0xefe; // 0x0efe
+            union {
+                u8 field_0xefe; // 0x0efe
+                struct {
+                    u8 head_turn_restricted : 1;
+                    u8 has_shadow_matrix : 1;
+                    u8 has_been_drawn : 1;
+                    u8 camera_ray_blocked : 1;
+                    u8 camera_ray_blocked_settled : 1;
+                    u8 field_0xefe_bit5 : 1;
+                    u8 invulnerable : 1;
+                    u8 can_pull_levers : 1;
+                };
+            };
             union {
                 u8 field_0xeff; // 0x0eff
                 struct {
@@ -1387,12 +1437,14 @@ typedef struct GameObject_s {
     union {
         u8 field_0xf01; // 0x0f01
         struct {
-            u8 : 2;
+            u8 model_drawn_last_frame : 1;
+            u8 being_towed : 1;
             u8 ignore_slide_terrain : 1;
             u8 is_female : 1;
             u8 spline_follow_terrain : 1;
             u8 use_one_at_once : 1;
-            u8 : 2;
+            u8 field_0xf01_bit6 : 1;
+            u8 field_0xf01_bit7 : 1;
         };
     };
     union {
@@ -1406,7 +1458,7 @@ typedef struct GameObject_s {
     union {
         u8 field_0xf03; // GAMEOBJECT_F03_FLAGS
         struct {
-            u8 : 1;
+            u8 ignore_last_safe_path_pos : 1;
             u8 no_idle_speed : 1;
             u8 : 6;
         };

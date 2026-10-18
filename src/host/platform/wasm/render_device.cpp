@@ -51,7 +51,7 @@ void HostSetMsaaEnabled(bool enabled) {
     host_msaa_enabled = enabled;
 }
 
-void NuRenderInspectEGLConfig(EGLDisplay, EGLConfig) {
+extern "C" void NuRenderInspectEGLConfig(EGLDisplay, EGLConfig) {
     STUBBED();
 }
 

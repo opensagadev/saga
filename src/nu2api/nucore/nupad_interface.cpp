@@ -551,7 +551,7 @@ extern "C" {
             i32 selected = 10;
             for (i32 i = 0; i < 10; ++i) {
                 NuInputTouch *touch = &data->touch_events[i];
-                if ((touch->unknown_00 || touch->unknown_02) &&
+                if ((touch->unknown_02 || touch->unknown_00) &&
                     ((touch->unknown_04 == old_x && touch->unknown_08 == old_y) ||
                      (touch->unknown_0c == old_x && touch->unknown_10 == old_y))) {
                     selected = i;
@@ -580,12 +580,11 @@ extern "C" {
             i32 selected = 10;
             for (i32 i = 0; i < 10; ++i) {
                 NuInputTouch *touch = &data->touch_events[i];
-                if (!((touch->unknown_00 || touch->unknown_02) && touch->unknown_04 == old_x &&
-                      touch->unknown_08 == old_y)) {
-                    continue;
+                if ((touch->unknown_02 || touch->unknown_00) && touch->unknown_04 == old_x &&
+                    touch->unknown_08 == old_y) {
+                    selected = i;
+                    break;
                 }
-                selected = i;
-                break;
             }
             NuInputTouch *touch = &data->touch_events[selected];
             touch->unknown_00 = 1;

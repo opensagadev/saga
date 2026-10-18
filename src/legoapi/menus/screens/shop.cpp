@@ -863,8 +863,10 @@ void DrawSubItemMenu2D() {
         if (!(ShopNameAlpha > 0.0f))
             return;
         if (show_name) {
+            f32 y = HUB_EPISODETITLEY;
             f32 scale = buyable ? 0.6f : 0.8f;
-            f32 y = buyable ? HUB_EPISODETITLEY : (HUB_EPISODETITLEY + HUB_EPISODESUBTITLEY) * 0.5f;
+            if (!buyable)
+                y = (y + HUB_EPISODESUBTITLEY) * 0.5f;
             SmartTextEx(name, 0.0f, y, 1.0f, scale, scale, scale, 0, 255, 255, 255, 1.7f, 1, NULL, 0,
                         static_cast<i32>(128.0f * ShopNameAlpha));
         }
@@ -1665,7 +1667,7 @@ static inline i32 SubItemMenu(MENU_s *menu) {
         movesfxlock = 0;
 
     i32 cancel = 0, confirm = 0;
-    if (__builtin_expect(slidetimer < 0.0f, 0)) {
+    if (slidetimer < 0.0f) {
         easesubin = 0;
         if (input.left_held)
             left = 1;
@@ -1702,32 +1704,46 @@ static inline i32 SubItemMenu(MENU_s *menu) {
         moveitems = -static_cast<i32>(menu->horizontal_scroll_distance / 0.15f);
         left = 1;
     }
-    if (__builtin_expect(menu->right_pressed && subitemselected == 0, 0)) {
+    if (menu->right_pressed && subitemselected == 0) {
         moveitems = static_cast<i32>(menu->horizontal_scroll_distance / 0.15f);
         right = 1;
     }
 
     i32 scrolling = 0;
     if (!ExitMenu) {
-        if (left || right) {
-            if (left) {
-                scaleoverride[0] = 0.0f;
-            } else {
-                scaleoverride[0] = 1.0f;
-            }
+        if (left) {
+            scaleoverride[0] = 0.0f;
             scaleoverride[1] = 0.4f;
             scaleoverride[2] = 0.8f;
             scaleoverride[4] = 0.8f;
             scaleoverride[5] = 0.4f;
-            scaleoverride[6] = left ? 1.0f : 0.0f;
-            NUVEC pos = SubShelfPos[left ? 0 : 6];
+            scaleoverride[6] = 1.0f;
+            NUVEC pos = SubShelfPos[0];
             pos.y += ypush;
             AddGameDebris(WORLD->debris_sys, qrand() / 10923 + 76, &pos);
-            pos = SubShelfPos[left ? 6 : 0];
+            pos = SubShelfPos[6];
             pos.y += ypush;
             AddGameDebris(WORLD->debris_sys, qrand() / 10923 + 76, &pos);
             if (moveitems == 0)
-                moveitems = left ? -1 : 1;
+                moveitems = -1;
+            slidetimer = 0.125f;
+            hintdrawwait = 0.2f;
+            scrolling = 1;
+        } else if (right) {
+            scaleoverride[0] = 1.0f;
+            scaleoverride[1] = 0.4f;
+            scaleoverride[2] = 0.8f;
+            scaleoverride[4] = 0.8f;
+            scaleoverride[5] = 0.4f;
+            scaleoverride[6] = 0.0f;
+            NUVEC pos = SubShelfPos[6];
+            pos.y += ypush;
+            AddGameDebris(WORLD->debris_sys, qrand() / 10923 + 76, &pos);
+            pos = SubShelfPos[0];
+            pos.y += ypush;
+            AddGameDebris(WORLD->debris_sys, qrand() / 10923 + 76, &pos);
+            if (moveitems == 0)
+                moveitems = 1;
             slidetimer = 0.125f;
             hintdrawwait = 0.2f;
             scrolling = 1;

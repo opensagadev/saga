@@ -1524,15 +1524,17 @@ static __used__ void eduiFntPrintClipEx(void *font, float x, float y, int alignm
 extern "C" {
     static __used__ i32 eduicbProcessGraph(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad) {
         edui_graph_s *graph_item = static_cast<edui_graph_s *>(item);
+        i32 stick_x = pad->analog_left_x;
+        i32 stick_y = pad->analog_left_y;
         show_y_scale_help = show_y_scale_help > 1 ? show_y_scale_help - 1 : 0;
         show_x_scale_help = show_x_scale_help > 1 ? show_x_scale_help - 1 : 0;
-        f32 x = eduiPickerDeadZone32(pad->analog_left_x) * (1.0f / 8192.0f);
-        f32 y = -eduiPickerDeadZone32(pad->analog_left_y) * (1.0f / 8192.0f);
+        f32 x = eduiPickerDeadZone32(stick_x) * (1.0f / 8192.0f);
+        f32 y = -eduiPickerDeadZone32(stick_y) * (1.0f / 8192.0f);
         x += graph_item->cursor_x;
         y += graph_item->cursor_y;
         x = MIN(1.0f, (MAX(0.0f, x)));
-        y = MIN(1.0f, (MAX(0.0f, y)));
         graph_item->cursor_x = x;
+        y = MIN(1.0f, (MAX(0.0f, y)));
         graph_item->cursor_y = y;
 
         u32 left = pad->analog_l2;
@@ -4784,18 +4786,11 @@ extern "C" void eduiMenuDestroyItems(eduimenu_s *menu) {
 
             while (item) {
                 menu->field_10 = item;
-                i32 is_selected;
-                if (__builtin_expect(item != menu->selected, 0)) {
-                    is_selected = 0;
-                } else {
+                if (item == menu->selected)
                     find_selected = 0;
-                    if (menu->child)
-                        is_selected = 0;
-                    else
-                        is_selected = 1;
-                }
 
-                const i32 item_height = eduiItemRender(item, menu, x, y, menu->width, is_selected);
+                const i32 item_height =
+                    eduiItemRender(item, menu, x, y, menu->width, item == menu->selected && !menu->child);
                 if (item_height > max_item_height)
                     max_item_height = item_height;
 
@@ -5215,9 +5210,7 @@ extern "C" {
         const bool over_button = edui_cursor_x >= expander->button_x && edui_cursor_y >= expander->button_y * 0.5f &&
                                  edui_cursor_x < expander->button_x + expander->button_size &&
                                  edui_cursor_y < (expander->button_y + expander->button_size) * 0.5f;
-        // The original updates only the byte containing open and hover at offset 0x54.
-        u8 *hover_flags = reinterpret_cast<u8 *>(expander) + 0x54;
-        *hover_flags = (*hover_flags & ~2u) | static_cast<u8>(over_button) << 1;
+        expander->hover = over_button;
 
         {
             eduiDrawFontSet(edui_font);
@@ -5233,33 +5226,32 @@ extern "C" {
                 break;
             }
         }
-        const f32 button_size = row_height - 2.0f;
         for (i32 depth = 0; depth < expander->depth; ++depth) {
             if (__builtin_expect(!edui_donotdraw, 1)) {
-                const i32 guide_x = static_cast<i32>((item_x + (static_cast<f32>(depth) + 0.5f) * button_size) * 16.0f);
+                const i32 guide_x =
+                    static_cast<i32>((item_x + (static_cast<f32>(depth) + 0.5f) * (row_height - 2.0f)) * 16.0f);
                 NuRndrLine2di(guide_x, static_cast<i32>(item_y * 8.0f), guide_x,
                               static_cast<i32>((item_y + row_height) * 8.0f), 0xff000000, uimtls[0]);
             }
         }
-        expander->button_size = button_size;
-        expander->button_x = item_x + static_cast<f32>(expander->depth) * button_size + 1.0f;
+        expander->button_size = row_height - 2.0f;
+        expander->button_x = item_x + static_cast<f32>(expander->depth) * expander->button_size + 1.0f;
         expander->button_y = item_y + 1.0f;
         if (expander->first_child) {
             eduiDrawLineRect(static_cast<i32>(expander->button_x * 16.0f), static_cast<i32>(expander->button_y * 8.0f),
                              static_cast<i32>(expander->button_size * 16.0f),
                              static_cast<i32>(expander->button_size * 8.0f), 0xff000000, uimtls[ui_outmtl]);
-            const u8 button_flags = *hover_flags;
             eduiDrawLine(static_cast<i32>((expander->button_x + 2.0f) * 16.0f),
                          static_cast<i32>((expander->button_y + expander->button_size * 0.5f) * 8.0f),
                          static_cast<i32>((expander->button_x + expander->button_size - 2.0f) * 16.0f),
                          static_cast<i32>((expander->button_y + expander->button_size * 0.5f) * 8.0f),
-                         button_colours[(button_flags >> 1) & 1], uimtls[0]);
-            if ((button_flags & 1) == 0 && !edui_donotdraw)
+                         button_colours[expander->hover], uimtls[0]);
+            if (!expander->open && !edui_donotdraw)
                 NuRndrLine2di(static_cast<i32>((expander->button_x + expander->button_size * 0.5f) * 16.0f),
                               static_cast<i32>((expander->button_y + 2.0f) * 8.0f),
                               static_cast<i32>((expander->button_x + expander->button_size * 0.5f) * 16.0f),
                               static_cast<i32>((expander->button_y + expander->button_size - 2.0f) * 8.0f),
-                              button_colours[(button_flags >> 1) & 1], uimtls[0]);
+                              button_colours[expander->hover], uimtls[0]);
         }
         const f32 text_x = expander->button_x + expander->button_size + 2.0f;
         eduiFntPrintClipEx(edui_font, text_x, item_y + baseline, 16, text_x,
@@ -6333,7 +6325,10 @@ extern "C" {
     }
 
     void edcamMtx(NUMTX *matrix) {
-        NUVEC distance = {0.0f, 0.0f, gp_cam.distance};
+        NUVEC distance;
+        distance.x = 0.0f;
+        distance.y = 0.0f;
+        distance.z = gp_cam.distance;
         NuMtxSetTranslation(matrix, &distance);
         NuMtxRotateX(matrix, gp_cam.pitch);
         NuMtxRotateY(matrix, gp_cam.yaw);

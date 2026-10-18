@@ -1615,7 +1615,10 @@ i32 OutSideSplineArea(nuvec_s *position, nugspline_s *spline, nuvec_s *edge_end,
     if (__builtin_expect(spline == NULL || position == NULL, 0))
         return 0;
     NUVEC ray_start = {position->x, -position->z, position->y};
-    NUVEC ray_end = {position->x, 100000.0f, position->y};
+    NUVEC ray_end;
+    ray_end.x = position->x;
+    ray_end.y = 100000.0f;
+    ray_end.z = position->y;
     NUVEC end = spline->pts[0];
     f32 end_y = end.y;
     end.y = -end.z;

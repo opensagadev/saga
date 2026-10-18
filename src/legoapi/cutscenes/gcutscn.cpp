@@ -2782,7 +2782,11 @@ static void instNuGCutLookAtLocatorUpdate(i32 *effect_handle, NUGCUTLOCATOR_s *l
             NUMTX head;
             NuMtxMulVU0(&head, &joint_matrix, &joints[state->joint_override_index - 1]);
             NuMtxMulVU0(&head, &head, &character_matrix);
-            NUVEC4 direction = {head.m30 - position_x, head.m31 - position_y, head.m32 - position_z, 0.0f};
+            NUVEC4 direction;
+            direction.x = head.m30 - position_x;
+            direction.y = head.m31 - position_y;
+            direction.z = head.m32 - position_z;
+            direction.w = 0.0f;
             NUMTX inverse;
             NuMtxTranspose(&inverse, &head);
             NUVEC4 local;

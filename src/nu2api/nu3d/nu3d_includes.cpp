@@ -4330,7 +4330,7 @@ void NuMainFilterGen::render() {
         preprocessBlurTextures(color_texture, normal_texture);
     if (dof_enabled || motion_blur_enabled)
         preprocessDofMotionBlur(depth_texture);
-    i32 selection = (dof_enabled ? 4 : 0) | (bloom_enabled ? (bloom->directional ? 1 : 2) : 0);
+    i32 selection = (bloom_enabled ? (bloom->directional ? 1 : 2) : 0) | (dof_enabled ? 4 : 0);
     nushaderprogram_s *program = NULL;
     switch (selection) {
         case 1:
@@ -4795,11 +4795,12 @@ bool OccluderSet::IsOccludedOBB(nuvec_s const *minimum, nuvec_s const *maximum, 
     for (u32 i = 0; i < 8; ++i) {
         NUVEC4 &v = corners[i];
         NuVec4MtxTransform(&v, reinterpret_cast<NUVEC *>(&v), &transform);
-        if (v.w <= 0.0f)
+        float w = v.w;
+        if (w <= 0.0f)
             return false;
-        v.x /= v.w;
-        v.y /= v.w;
-        v.z /= v.w;
+        v.x /= w;
+        v.y /= w;
+        v.z /= w;
         min_x = v.x < min_x ? v.x : min_x;
         min_y = v.y < min_y ? v.y : min_y;
         max_x = v.x > max_x ? v.x : max_x;
@@ -4856,41 +4857,41 @@ void OccluderSet::RenderOccluders(bool depth_only) const {
             if (record.min_depth < 0.0f || record.depth < 0.0f)
                 continue;
             i32 colour = static_cast<u32>(record.vertices[0].x * record.vertices[0].z) | 0xff000000u;
-            if (g_NuPrim_NeedsOverbrightening)
-                *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) = colour;
-            else
+            if (!g_NuPrim_NeedsOverbrightening)
                 *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) =
                     ((colour >> 1) & 0x007f7f7f) | 0xff000000u;
+            else
+                *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) = colour;
             NuPrim2DAddXYZ(record.transformed[0].x, -record.transformed[0].y, record.transformed[0].z);
-            if (g_NuPrim_NeedsOverbrightening)
-                *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) = colour;
-            else
+            if (!g_NuPrim_NeedsOverbrightening)
                 *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) =
                     ((colour >> 1) & 0x007f7f7f) | 0xff000000u;
+            else
+                *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) = colour;
             NuPrim2DAddXYZ(record.transformed[1].x, -record.transformed[1].y, record.transformed[1].z);
-            if (g_NuPrim_NeedsOverbrightening)
-                *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) = colour;
-            else
+            if (!g_NuPrim_NeedsOverbrightening)
                 *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) =
                     ((colour >> 1) & 0x007f7f7f) | 0xff000000u;
+            else
+                *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) = colour;
             NuPrim2DAddXYZ(record.transformed[2].x, -record.transformed[2].y, record.transformed[2].z);
-            if (g_NuPrim_NeedsOverbrightening)
-                *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) = colour;
-            else
+            if (!g_NuPrim_NeedsOverbrightening)
                 *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) =
                     ((colour >> 1) & 0x007f7f7f) | 0xff000000u;
+            else
+                *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) = colour;
             NuPrim2DAddXYZ(record.transformed[2].x, -record.transformed[2].y, record.transformed[2].z);
-            if (g_NuPrim_NeedsOverbrightening)
-                *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) = colour;
-            else
+            if (!g_NuPrim_NeedsOverbrightening)
                 *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) =
                     ((colour >> 1) & 0x007f7f7f) | 0xff000000u;
+            else
+                *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) = colour;
             NuPrim2DAddXYZ(record.transformed[3].x, -record.transformed[3].y, record.transformed[3].z);
-            if (g_NuPrim_NeedsOverbrightening)
-                *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) = colour;
-            else
+            if (!g_NuPrim_NeedsOverbrightening)
                 *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) =
                     ((colour >> 1) & 0x007f7f7f) | 0xff000000u;
+            else
+                *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) = colour;
             NuPrim2DAddXYZ(record.transformed[0].x, -record.transformed[0].y, record.transformed[0].z);
         }
         NuPrim2DEnd();
@@ -4904,56 +4905,56 @@ void OccluderSet::RenderOccluders(bool depth_only) const {
             const OccluderRecord *record = occluders;
             for (u32 i = 0; i != total; ++i, ++record) {
                 i32 colour = static_cast<u32>(record->vertices[0].x * record->vertices[0].z) | 0xff000000u;
-                if (g_NuPrim_NeedsOverbrightening)
-                    *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) = colour;
-                else
+                if (!g_NuPrim_NeedsOverbrightening)
                     *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) =
                         ((colour >> 1) & 0x007f7f7f) | 0xff000000u;
+                else
+                    *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) = colour;
                 reinterpret_cast<NUVEC *>(g_NuPrim_StreamBufferPtr->addr)->x = record->vertices[0].x;
                 reinterpret_cast<NUVEC *>(g_NuPrim_StreamBufferPtr->addr)->y = record->vertices[0].y;
                 reinterpret_cast<NUVEC *>(g_NuPrim_StreamBufferPtr->addr)->z = record->vertices[0].z;
                 g_NuPrim_StreamBufferPtr->addr += 24;
-                if (g_NuPrim_NeedsOverbrightening)
-                    *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) = colour;
-                else
+                if (!g_NuPrim_NeedsOverbrightening)
                     *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) =
                         ((colour >> 1) & 0x007f7f7f) | 0xff000000u;
+                else
+                    *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) = colour;
                 reinterpret_cast<NUVEC *>(g_NuPrim_StreamBufferPtr->addr)->x = record->vertices[1].x;
                 reinterpret_cast<NUVEC *>(g_NuPrim_StreamBufferPtr->addr)->y = record->vertices[1].y;
                 reinterpret_cast<NUVEC *>(g_NuPrim_StreamBufferPtr->addr)->z = record->vertices[1].z;
                 g_NuPrim_StreamBufferPtr->addr += 24;
-                if (g_NuPrim_NeedsOverbrightening)
-                    *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) = colour;
-                else
+                if (!g_NuPrim_NeedsOverbrightening)
                     *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) =
                         ((colour >> 1) & 0x007f7f7f) | 0xff000000u;
+                else
+                    *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) = colour;
                 reinterpret_cast<NUVEC *>(g_NuPrim_StreamBufferPtr->addr)->x = record->vertices[2].x;
                 reinterpret_cast<NUVEC *>(g_NuPrim_StreamBufferPtr->addr)->y = record->vertices[2].y;
                 reinterpret_cast<NUVEC *>(g_NuPrim_StreamBufferPtr->addr)->z = record->vertices[2].z;
                 g_NuPrim_StreamBufferPtr->addr += 24;
-                if (g_NuPrim_NeedsOverbrightening)
-                    *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) = colour;
-                else
+                if (!g_NuPrim_NeedsOverbrightening)
                     *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) =
                         ((colour >> 1) & 0x007f7f7f) | 0xff000000u;
+                else
+                    *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) = colour;
                 reinterpret_cast<NUVEC *>(g_NuPrim_StreamBufferPtr->addr)->x = record->vertices[2].x;
                 reinterpret_cast<NUVEC *>(g_NuPrim_StreamBufferPtr->addr)->y = record->vertices[2].y;
                 reinterpret_cast<NUVEC *>(g_NuPrim_StreamBufferPtr->addr)->z = record->vertices[2].z;
                 g_NuPrim_StreamBufferPtr->addr += 24;
-                if (g_NuPrim_NeedsOverbrightening)
-                    *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) = colour;
-                else
+                if (!g_NuPrim_NeedsOverbrightening)
                     *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) =
                         ((colour >> 1) & 0x007f7f7f) | 0xff000000u;
+                else
+                    *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) = colour;
                 reinterpret_cast<NUVEC *>(g_NuPrim_StreamBufferPtr->addr)->x = record->vertices[3].x;
                 reinterpret_cast<NUVEC *>(g_NuPrim_StreamBufferPtr->addr)->y = record->vertices[3].y;
                 reinterpret_cast<NUVEC *>(g_NuPrim_StreamBufferPtr->addr)->z = record->vertices[3].z;
                 g_NuPrim_StreamBufferPtr->addr += 24;
-                if (g_NuPrim_NeedsOverbrightening)
-                    *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) = colour;
-                else
+                if (!g_NuPrim_NeedsOverbrightening)
                     *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) =
                         ((colour >> 1) & 0x007f7f7f) | 0xff000000u;
+                else
+                    *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) = colour;
                 reinterpret_cast<NUVEC *>(g_NuPrim_StreamBufferPtr->addr)->x = record->vertices[0].x;
                 reinterpret_cast<NUVEC *>(g_NuPrim_StreamBufferPtr->addr)->y = record->vertices[0].y;
                 reinterpret_cast<NUVEC *>(g_NuPrim_StreamBufferPtr->addr)->z = record->vertices[0].z;
@@ -5454,14 +5455,14 @@ void NuDynamicLight::computeWarpEffect(NuDynamicLight::RenderSet &set) {
     NuMtxInvH(&inverse_view_projection, &render_view_projection);
     NuMtxInv(&inverse_render_view, &render_view);
     NuMtxInv(&inverse_camera_view, &camera_view);
-    NUVEC light_forward = {inverse_render_view.m20, inverse_render_view.m21, inverse_render_view.m22};
-    NUVEC camera_forward = {inverse_camera_view.m20, inverse_camera_view.m21, inverse_camera_view.m22};
+    NUVEC light_forward = *NUMTX_GET_ROW_VEC(&inverse_render_view, 2);
+    NUVEC camera_forward = *NUMTX_GET_ROW_VEC(&inverse_camera_view, 2);
     NUMTX light_space, inverse_light_space;
     computeLightSpace(&light_forward, &camera_forward, &light_space, &inverse_light_space);
     VuVec points[10];
     const NUVEC4 *source = set.corners;
     VuVec *destination = points;
-    const NUVEC4 *end = set.corners + 8;
+    const NUVEC4 *end = source + 8;
     while (source < end) {
         *destination++ = VuVec(source->x, source->y, source->z, source->w);
         ++source;
@@ -12155,7 +12156,7 @@ extern "C" {
         NUVEC corners[8];
         NUVEC view[8];
         u8 results[8];
-        if (__builtin_expect(far_clip == 0.0f, 1))
+        if (far_clip == 0.0f)
             far_clip = global_camera.far_clip;
         if (__builtin_expect(world_mtx == NULL || world_mtx == &numtx_identity, 0))
             transform = vmtx;
@@ -12188,10 +12189,11 @@ extern "C" {
         for (i32 i = 0; i < 8; ++i)
             NuVecMtxTransform(&view[i], &corners[i], &transform);
         *min_depth = 3.4028234663852886e+38f;
-        for (i32 i = 0; i < 8; ++i) {
+        for (i32 i = 0; i < 8; ++i)
             results[i] = 0;
+        for (i32 i = 0; i < 8; ++i) {
             *min_depth = view[i].z < *min_depth ? view[i].z : *min_depth;
-            if ((flags & NUCAMERA_EXTENTS_SKIP_NEAR) == 0 && view[i].z < global_camera.near_clip)
+            if (view[i].z < global_camera.near_clip && (flags & NUCAMERA_EXTENTS_SKIP_NEAR) == 0)
                 results[i] |= NUCAMERA_OUT_NEAR;
             if (view[i].z > far_clip)
                 results[i] |= NUCAMERA_OUT_FAR;
@@ -12212,9 +12214,10 @@ extern "C" {
             return 1;
         if ((flags & NUCAMERA_EXTENTS_SKIP_SCISSOR) != 0)
             return 2;
-        for (i32 i = 0; i < 8; ++i) {
+        for (i32 i = 0; i < 8; ++i)
             results[i] = 0;
-            if ((flags & NUCAMERA_EXTENTS_SKIP_NEAR) == 0 && view[i].z < global_camera.near_clip)
+        for (i32 i = 0; i < 8; ++i) {
+            if (view[i].z < global_camera.near_clip && (flags & NUCAMERA_EXTENTS_SKIP_NEAR) == 0)
                 results[i] |= NUCAMERA_OUT_NEAR;
             if (view[i].z > far_clip)
                 results[i] |= NUCAMERA_OUT_FAR;
@@ -14682,8 +14685,8 @@ extern "C" {
         }
 
         if (camfx == 0) {
-            NuMtxInv(&vmtx, &global_camera.mtx);
-            NuMtxScale(&vmtx, &global_camera.scale);
+            NuMtxInvVU0(&vmtx, &global_camera.mtx);
+            NuMtxScaleVU0(&vmtx, &global_camera.scale);
         } else {
             NUMTX camera_inverse;
             NUMTX reflect_inverse;
@@ -14961,8 +14964,8 @@ extern "C" i32 NuRndrHighResScreenGrab(char *prefix, f32 scale, f32 a, f32 b, f3
     }
     f32 w = static_cast<f32>(PS2_REZ_W), h = static_cast<f32>(PS2_REZ_H);
     f32 full_height = scale * h;
-    i32 width = static_cast<i32>(xPos == xTiles - 1.0f ? scale * w - ((xTiles - 1.0f) * 0.75f) * w : 0.75f * w);
-    i32 height = static_cast<i32>(yPos == yTiles - 1.0f ? full_height - ((yTiles - 1.0f) * 0.75f) * h : 0.75f * h);
+    i32 width = static_cast<i32>(xPos != xTiles - 1.0f ? 0.75f * w : scale * w - ((xTiles - 1.0f) * 0.75f) * w);
+    i32 height = static_cast<i32>(yPos != yTiles - 1.0f ? 0.75f * h : full_height - ((yTiles - 1.0f) * 0.75f) * h);
     u8 *data = pixels + static_cast<u32>(((static_cast<f32>(static_cast<i32>(params.width)) * 3.0f) * 0.125f) * h) +
                static_cast<u32>((0.125f * w) * 3.0f) +
                static_cast<u32>(((static_cast<f32>(xOffsetHack * 3) * w) / static_cast<f32>(PS2_VREZ_W)) * scale);
@@ -16431,28 +16434,35 @@ extern "C" {
             NuVec4MtxTransformVU0(&vertices[5], &vertices[5], &clip_matrix);
             if (!(vertices[4].w >= 0.5f) && !(vertices[5].w >= 0.5f))
                 continue;
-            i32 green = (laser->colour >> 8) & 0xff;
-            i32 blue = (laser->colour >> 16) & 0xff;
-            i32 red = laser->colour & 0xff;
-            i32 alpha = laser->colour >> 24;
+            i32 red, green, blue, alpha;
             if (vertices[4].w < 0.5f) {
                 f32 numerator = vertices[5].w - 0.5f;
                 f32 denominator = vertices[5].w - vertices[4].w;
-                if (laser->arc) {
-                    red = (i32)((f32)red * numerator / denominator);
-                    green = (i32)((f32)green * numerator / denominator);
-                    blue = (i32)((f32)blue * numerator / denominator);
-                    alpha = (i32)((f32)alpha * numerator / denominator);
+                if (!laser->arc) {
+                    green = (laser->colour >> 8) & 0xff;
+                    blue = (laser->colour >> 16) & 0xff;
+                    red = laser->colour & 0xff;
+                    alpha = (laser->colour >> 24) & 0xff;
+                } else {
+                    red = (i32)((f32)(laser->colour & 0xff) * numerator / denominator);
+                    green = (i32)((f32)((laser->colour >> 8) & 0xff) * numerator / denominator);
+                    blue = (i32)((f32)((laser->colour >> 16) & 0xff) * numerator / denominator);
+                    alpha = (i32)((f32)((laser->colour >> 24) & 0xff) * numerator / denominator);
                 }
                 vertices[6].x = (laser->start.x - laser->end.x) * numerator / denominator + laser->end.x;
                 vertices[6].y = (laser->start.y - laser->end.y) * numerator / denominator + laser->end.y;
                 vertices[6].z = (laser->start.z - laser->end.z) * numerator / denominator + laser->end.z;
+                vertices[6].w = 1.0f;
             } else {
+                green = (laser->colour >> 8) & 0xff;
+                blue = (laser->colour >> 16) & 0xff;
+                red = laser->colour & 0xff;
+                alpha = (laser->colour >> 24) & 0xff;
                 vertices[6].x = laser->start.x;
                 vertices[6].y = laser->start.y;
                 vertices[6].z = laser->start.z;
+                vertices[6].w = 1.0f;
             }
-            vertices[6].w = 1.0f;
             f32 dx = vertices[6].x - laser->end.x;
             f32 dy = vertices[6].y - laser->end.y;
             f32 dz = vertices[6].z - laser->end.z;
@@ -16463,12 +16473,13 @@ extern "C" {
                 vertices[7].x = (laser->end.x - laser->start.x) * numerator / denominator + laser->start.x;
                 vertices[7].y = (laser->end.y - laser->start.y) * numerator / denominator + laser->start.y;
                 vertices[7].z = (laser->end.z - laser->start.z) * numerator / denominator + laser->start.z;
+                vertices[7].w = 1.0f;
             } else {
                 vertices[7].x = laser->end.x;
                 vertices[7].y = laser->end.y;
                 vertices[7].z = laser->end.z;
+                vertices[7].w = 1.0f;
             }
-            vertices[7].w = 1.0f;
             NuVec4MtxTransformVU0(&vertices[4], &vertices[6], &clip_matrix);
             NuVec4ScaleXYZVU0(&vertices[4], &vertices[4], 1.0f / vertices[4].w);
             NuVec4MtxTransformVU0(&vertices[5], &vertices[7], &clip_matrix);
@@ -19148,21 +19159,27 @@ extern "C" NUDLDLISTSCENE *NuDisplaySceneClone(NUDLDLISTSCENE *source, VARIPTR *
     const usize clip_base = (buffer->addr + 15) & ~static_cast<usize>(15);
     scene->clip_used[0] = reinterpret_cast<u8 *>(clip_base);
     scene->clip_used[1] = reinterpret_cast<u8 *>(clip_base + static_cast<usize>(clip_bytes));
-    buffer->addr = clip_base + static_cast<usize>(clip_bytes) * 2;
-    memset(scene->clip_used[0], 0, clip_bytes);
+    buffer->addr = reinterpret_cast<usize>(scene->clip_used[1]) + clip_bytes;
+    memset(reinterpret_cast<void *>(clip_base), 0, clip_bytes);
     memset(scene->clip_used[1], 0, clip_bytes);
     u32 mtl_bytes = (((source->nmtls + 7) >> 7) + 1) * 16;
-    scene->mtl_used[0] = CloneSceneAllocate<u8>(buffer, mtl_bytes, 16);
-    scene->mtl_used[1] = CloneSceneAllocate<u8>(buffer, mtl_bytes, 1);
-    memset(scene->mtl_used[0], 0, mtl_bytes);
+    const usize mtl_base = (buffer->addr + 15) & ~static_cast<usize>(15);
+    scene->mtl_used[0] = reinterpret_cast<u8 *>(mtl_base);
+    scene->mtl_used[1] = reinterpret_cast<u8 *>(mtl_base + mtl_bytes);
+    buffer->addr = reinterpret_cast<usize>(scene->mtl_used[1]) + mtl_bytes;
+    memset(reinterpret_cast<void *>(mtl_base), 0, mtl_bytes);
     memset(scene->mtl_used[1], 0, mtl_bytes);
-    NUDISPLAYLIST *lists = CloneSceneAllocate<NUDISPLAYLIST>(buffer, source->nmtls);
+    NUDISPLAYLIST *lists = reinterpret_cast<NUDISPLAYLIST *>((buffer->addr + 3) & ~static_cast<usize>(3));
     NUDISPLAYLIST *first_list = lists;
-    scene->dlist_mtls = CloneSceneAllocate<NUDISPLAYLIST *>(buffer, source->nmtls);
-    NURNDRSTATE *states = CloneSceneAllocate<NURNDRSTATE>(buffer, source->nmtls);
-    memset(states, 0, sizeof(NURNDRSTATE) * source->nmtls);
-    NUDISPLAYLISTITEM *heads = CloneSceneAllocate<NUDISPLAYLISTITEM>(buffer, source->nmtls);
-    memset(heads, 0, sizeof(NUDISPLAYLISTITEM) * source->nmtls);
+    scene->dlist_mtls = reinterpret_cast<NUDISPLAYLIST **>(lists + source->nmtls);
+    NURNDRSTATE *states = reinterpret_cast<NURNDRSTATE *>(scene->dlist_mtls + source->nmtls);
+    const usize states_size = sizeof(NURNDRSTATE) * source->nmtls;
+    buffer->addr = reinterpret_cast<usize>(states) + states_size;
+    memset(states, 0, states_size);
+    const usize heads_size = sizeof(NUDISPLAYLISTITEM) * source->nmtls;
+    NUDISPLAYLISTITEM *heads = reinterpret_cast<NUDISPLAYLISTITEM *>((buffer->addr + 3) & ~static_cast<usize>(3));
+    buffer->addr = reinterpret_cast<usize>(heads) + heads_size;
+    memset(heads, 0, heads_size);
     for (i32 i = 0; i < static_cast<i32>(source->nmtls); ++i, ++lists, ++states, ++heads) {
         scene->dlist_mtls[i] = lists;
         memcpy(scene->dlist_mtls[i], source->dlist_mtls[i], sizeof(NUDISPLAYLIST));
@@ -20206,11 +20223,11 @@ void NuDynamicLight::addShadowCasterScene(nugscn_s *scene) {
     i32 instance = 0;
     for (i32 lod = 0; lod < dl->nclip_objects; ++instance, ++lod) {
         if ((dl->visibility_flags[instance] & 0x21) == 0x21) {
+            f32 dx = global_camera.mtx.m30 - dl->clip_bounds[instance].center.x;
+            f32 dy = global_camera.mtx.m31 - dl->clip_bounds[instance].center.y;
+            f32 dz = global_camera.mtx.m32 - dl->clip_bounds[instance].center.z;
+            f32 distance = dx * dx + dy * dy + dz * dz;
             if (dl->lod_ranges[lod] != 0.0f) {
-                f32 dx = global_camera.mtx.m30 - dl->clip_bounds[instance].center.x;
-                f32 dy = global_camera.mtx.m31 - dl->clip_bounds[instance].center.y;
-                f32 dz = global_camera.mtx.m32 - dl->clip_bounds[instance].center.z;
-                f32 distance = dx * dx + dy * dy + dz * dz;
                 while (dl->lod_ranges[lod] > distance)
                     ++lod;
             }
@@ -20245,7 +20262,9 @@ void NuDynamicLight::addShadowCasterScene(nugscn_s *scene) {
                 }
                 for (i32 j = 0; j < object->nmaterials; ++j) {
                     NUMTL *material = scene->mtls[object->material_ids[j]];
-                    i32 channel = material->shader_desc.unknown_1b4 != 0;
+                    NUDISPLAYLIST *list =
+                        material->shader_desc.unknown_1b4 ? &set.display_lists[1] : &set.display_lists[0];
+                    i32 channel = list - set.display_lists;
                     if ((usize)set.scene_cursor[channel] >= (usize)set.scene_end[channel]) {
                         NUDISPLAYLISTITEM *cursor =
                             (NUDISPLAYLISTITEM *)((display_list_buffer->addr + 15) & ~(usize)15);
@@ -21170,18 +21189,20 @@ extern "C" void NuTimeBarSetRender(i32 set) {
                         value = 9999;
                     text_y += static_cast<i32>(NuQFntHeight(system_qfont)) * (value > 999 ? 5 : 4);
                     const f32 column = static_cast<f32>(text_width) * 0.025f;
-                    const i32 text_x =
-                        (static_cast<i32>(column) * (column_index * 3) + static_cast<i32>(column * 0.5f)) * 16;
                     // Retail stacks three digits bottom-up, plus a fourth for
                     // values >= 1000; the final height query occurs either way.
                     for (i32 digit = 0; digit < 3; ++digit) {
                         text_y -= static_cast<i32>(NuQFntHeight(system_qfont));
+                        const i32 text_x =
+                            (static_cast<i32>(column) * (column_index * 3) + static_cast<i32>(column * 0.5f)) * 16;
                         NuQFntPrintEx(system_qfont, text_x, text_y, 0x40, "%d", value % 10);
                         value /= 10;
                     }
                     const f32 last_height = NuQFntHeight(system_qfont);
                     if (value != 0) {
                         text_y -= static_cast<i32>(last_height);
+                        const i32 text_x =
+                            (static_cast<i32>(column) * (column_index * 3) + static_cast<i32>(column * 0.5f)) * 16;
                         NuQFntPrintEx(system_qfont, text_x, text_y, 0x40, "%d", value % 10);
                     }
                 }

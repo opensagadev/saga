@@ -108,7 +108,7 @@ extern "C" void NuIOS_UploadCompressedTexture(GLenum target, GLint level, GLenum
     }
 }
 
-bool NuIOS_TextureFormatSupported(i32 format) {
+extern "C" bool NuIOS_TextureFormatSupported(i32 format) {
     return format == NUTEX_ETC1 || g_renderDevice.enabled_extensions[format];
 }
 

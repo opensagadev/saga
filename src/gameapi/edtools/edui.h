@@ -184,7 +184,8 @@ struct edui_expander_s : eduiitem_s {
     eduiitem_s *first_child;
     eduiitem_s *last_child;
     u32 open : 1;
-    u32 unknown_flags : 31;
+    u32 hover : 1;
+    u32 unknown_flags : 30;
     f32 button_size;
     f32 button_x;
     f32 button_y;
