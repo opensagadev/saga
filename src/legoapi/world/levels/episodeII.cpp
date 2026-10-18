@@ -1592,21 +1592,23 @@ void KaminoC_Update(WORLDINFO_s *world) {
             if (old_state != kaminodisco.tile_state[kaminodisco.second_tile] &&
                 kaminodisco.tile_state[kaminodisco.second_tile] == 2)
                 kaminoc_netpacket->sound_mask |= 1u << (kaminodisco.second_tile & 31);
-            if (first_occupied && second_occupied) {
-                kaminodisco.timer = 0.0f;
-                kaminodisco.tile_state[kaminodisco.first_tile] = 3;
-                kaminodisco.tile_state[kaminodisco.second_tile] = 3;
-                kaminodisco.first_tile = KaminoDiscoChooseTile(-1, 0);
-                kaminodisco.second_tile = KaminoDiscoChooseTile(kaminodisco.first_tile, 0);
-                if (!(kaminodisco.first_tile != -1 && kaminodisco.second_tile != -1)) {
-                    kaminodisco.phase = 2;
-                    for (i32 i = 0; i < kaminodisco.tile_count; ++i)
-                        kaminodisco.tile_state[i] = 0;
-                } else {
-                    kaminodisco.tile_state[kaminodisco.first_tile] = 1;
-                    kaminodisco.tile_state[kaminodisco.second_tile] = 1;
+            if (first_occupied) {
+                if (second_occupied) {
+                    kaminodisco.timer = 0.0f;
+                    kaminodisco.tile_state[kaminodisco.first_tile] = 3;
+                    kaminodisco.tile_state[kaminodisco.second_tile] = 3;
+                    kaminodisco.first_tile = KaminoDiscoChooseTile(-1, 0);
+                    kaminodisco.second_tile = KaminoDiscoChooseTile(kaminodisco.first_tile, 0);
+                    if (!(kaminodisco.first_tile != -1 && kaminodisco.second_tile != -1)) {
+                        kaminodisco.phase = 2;
+                        for (i32 i = 0; i < kaminodisco.tile_count; ++i)
+                            kaminodisco.tile_state[i] = 0;
+                    } else {
+                        kaminodisco.tile_state[kaminodisco.first_tile] = 1;
+                        kaminodisco.tile_state[kaminodisco.second_tile] = 1;
+                    }
+                    break;
                 }
-                break;
             }
             kaminodisco.timer += FRAMETIME;
             if (__builtin_expect(kaminodisco.timer > 2.5f, 1)) {

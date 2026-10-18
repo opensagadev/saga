@@ -1347,12 +1347,12 @@ after_sound:
             goto after_status;
         }
     } else {
-        PlayerList[0] = StatusPacket.player0_model;
-        PlayerProgress[0].active = StatusPacket.player0_active;
+        PlayerList[0] = StatusPacket.player_model[0];
+        PlayerProgress[0].active = StatusPacket.player_active[0];
         PlayerProgress[0].field_0x7 = 0;
         PlayerProgress[0].coins = 0;
-        PlayerList[1] = StatusPacket.player1_model;
-        PlayerProgress[1].active = StatusPacket.player1_active;
+        PlayerList[1] = StatusPacket.player_model[1];
+        PlayerProgress[1].active = StatusPacket.player_active[1];
         PlayerProgress[1].field_0x7 = 0;
         PlayerProgress[1].coins = 0;
         PlayerList[2] = -1;
@@ -1389,7 +1389,7 @@ after_sound:
 
     if ((i == (u32)(byte)afterArea->index) && (i != last_area)) {
         if ((CREDITS_LDATA != NULL) && ((CREDITS_LDATA == LastLData) && (c != 0))) {
-            RememberPlayerIDs(1, (i32)(i16)StatusPacket.player0_model, (i32)(i16)StatusPacket.player1_model);
+            RememberPlayerIDs(1, (i32)(i16)StatusPacket.player_model[0], (i32)(i16)StatusPacket.player_model[1]);
         }
         Hub_MakeModelList();
     }

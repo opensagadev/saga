@@ -1984,7 +1984,7 @@ void GameAIProcess() {
         party_follow_offsets[index] = 0.5f;
     }
     party_under_cover = cover_result;
-    if ((VADER_ADATA == NULL || WORLD->area != VADER_ADATA) && __builtin_expect(all_under_cover != 0, 0) &&
+    if ((VADER_ADATA == NULL || WORLD->area != VADER_ADATA) && (all_under_cover != 0) &&
         party_cant_be_under_cover == 0) {
         party_under_cover = 1;
     }
@@ -2230,14 +2230,14 @@ void GameAIProcess() {
                 object->ai_jump_timer = 0.0f;
             }
         }
-        if (__builtin_expect(object->ai.action_target_ref != NULL, 0))
+        if (__builtin_expect(object->ai.action_target_ref != NULL, 1))
             SetObjAsHeadTarget(object, *object->ai.action_target_ref, 2, 1.0f, 0.0f, 0.0f);
         goto interaction;
     ai_precombat:
         if (__builtin_expect(!object->apiobj.player_controlled, 1)) {
             if (object->character_context == 0x5d)
                 SetBallooningHeight(object, object->ai.movement_destination.y);
-            if (__builtin_expect(WORLD->current_level == JEDI_B_LDATA, 0) && object->id == id_JANGOFETT &&
+            if ((WORLD->current_level == JEDI_B_LDATA) && object->id == id_JANGOFETT &&
                 object->is_boss && object->hover_height_override != 1.0e9f && object->field_0xe31 == 0)
                 object->field_0xe31 = 1;
             if (object->apiobj.field_0x27c != -1 && object->field_0xe31 != 0 &&
@@ -2649,10 +2649,10 @@ GameObject_s *AddDynamicCreature(i32 model, nuvec_s *position, i32 angle, char *
     } else if ((model_flags & 0x400) != 0) {
         object->apiobj.field_0x1f4 |= 0x401;
     }
-    if ((model_flags & 0x1000) != 0)
-        object->field_0x1050 |= 5;
-    else
+    if ((model_flags & 0x1000) == 0)
         object->field_0x1050 |= 1;
+    else
+        object->field_0x1050 |= 5;
 
     GAMECHARACTERDATA &game_character = *(GAMECHARACTERDATA *)character->field11_0x24;
     object->apiobj.viewdistance = game_character.viewdistance;
@@ -2747,11 +2747,10 @@ GameObject_s *AddDynamicCreature(i32 model, nuvec_s *position, i32 angle, char *
     }
     PortalGameObject(object, 1, 1, -1, WORLD->current_gscn);
     if (reset_restart != 0) {
-        GAMECHARACTERDATA *config = (GAMECHARACTERDATA *)object->apiobj.character_data->field11_0x24;
-        object->hitpoints = config->hitpoints;
+        CHARACTERDATA *character = object->apiobj.character_data;
+        object->current_hp = object->hitpoints = ((GAMECHARACTERDATA *)character->field11_0x24)->hitpoints;
+        object->field_0xe37 = ((GAMECHARACTERDATA *)character->field11_0x24)->field_0xf5;
         object->field_0xe38 = 4;
-        object->current_hp = config->hitpoints;
-        object->field_0xe37 = config->field_0xf5;
     }
 
     object->apiobj.field_0x1f4 &= ~0x100u;

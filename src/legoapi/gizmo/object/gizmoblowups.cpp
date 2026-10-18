@@ -399,10 +399,10 @@ void GizBlowup_Respawn(GIZMOBLOWUP_s *blowup) {
         i32 handle = -1;
         AddFiniteShotDebrisEffect(&handle, blowup->type->particle_types[2], &blowup->mid_position, 1);
     }
+    i32 handle = -1;
     if (blowup->type->particle_types[3] == -1) {
         return;
     }
-    i32 handle = -1;
     AddFiniteShotDebrisEffect(&handle, blowup->type->particle_types[3], &blowup->mid_position, 1);
 }
 
@@ -489,9 +489,11 @@ GIZMOBLOWUPTYPE_s *GizmoBlowupTypeAdd(WORLDINFO_s *world, nuhspecial_s *special,
 
     GIZMOBLOWUPTYPE_s *type = &world->gizmo_blowup_types[world->gizmo_blowup_type_count];
     nuhspecial_s *animated_special = &type->animated_special;
-    if (special != NULL && NuSpecialExistsFn(special)) {
-        *animated_special = *special;
-        NuStrCpy(type->name, NuSpecialGetName(animated_special));
+    if (special != NULL) {
+        if (NuSpecialExistsFn(special)) {
+            *animated_special = *special;
+            NuStrCpy(type->name, NuSpecialGetName(animated_special));
+        }
     }
     type->animation_start_frame = 1.0f;
     type->particle_types[0] = -1;
@@ -813,9 +815,11 @@ i32 GizmoBlowupBlowup(GIZMOBLOWUP_s *blowup, i32 effects, i32 hit_type, i32 dama
                 NuSpecialSetVisibility(&type->animated_special, 0);
             }
         }
-        if ((blowup->draw_flags & 0x400) == 0 && NuSpecialExistsFn(&blowup->type->decal_special)) {
-            blowup->animation_time = 0.1f;
-            blowup->state_flags |= 2;
+        if ((blowup->draw_flags & 0x400) == 0) {
+            if (NuSpecialExistsFn(&blowup->type->decal_special)) {
+                blowup->animation_time = 0.1f;
+                blowup->state_flags |= 2;
+            }
         }
         if (blowup->draw_flags & 0x800) {
             GizmoBlowupCreateStuff(blowup);
@@ -1619,8 +1623,8 @@ i32 gizmoblowup_Load(void *world_ptr, void *) {
             reinterpret_cast<char *>(&blowup.platform_id)[0] = '\0';
         }
         GIZMOBLOWUPTYPE_s *type = GizmoBlowup_FindType(text, world);
-        GIZMOBLOWUP_s *destination = NULL;
         i32 skip;
+        GIZMOBLOWUP_s *destination = NULL;
         if (type == NULL) {
             skip = 1;
         } else {

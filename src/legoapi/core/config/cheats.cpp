@@ -693,11 +693,11 @@ void Cheat_StartPowerUp(nuvec_s *position, GameObject_s *object) {
 i32 Cheat_PowerUpActive(i32 index) {
     if (ONEPLAYERPOWERUPS != 0) {
         if (static_cast<u32>(index) <= 1) {
-            if (Player[0] != NULL && Player[0]->field_0xdec > 0.0009765625f && Player[0]->apiobj.field_0x27c == index) {
-                return 1;
-            }
-            if (Player[1] != NULL && Player[1]->field_0xdec > 0.0009765625f && Player[1]->apiobj.field_0x27c == index) {
-                return 1;
+            for (i32 i = 0; i < 2; ++i) {
+                if (Player[i] != NULL && Player[i]->field_0xdec > 0.0009765625f &&
+                    Player[i]->apiobj.field_0x27c == index) {
+                    return 1;
+                }
             }
         }
         return 0;

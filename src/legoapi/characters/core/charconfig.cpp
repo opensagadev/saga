@@ -3016,17 +3016,19 @@ static i32 CharConfig(i32 character_id, char *directory, char *filename, VARIPTR
             SecondCharConfigure = 0;
             return 0;
         }
-        if (redirect != 0 && (redirected = RedirectTextFile(MiniBuffer, redirected_name)) != 0) {
-            NuStrCpy(path, directory);
-            NuStrCat(path, redirected_name);
-            NuStrCat(path, ".txt");
-            size = NuFileLoadBuffer(path, MiniBuffer, sizeof(MiniBuffer));
-            if (size < 1) {
-                SecondCharConfigure = 0;
-                return 0;
+        if (redirect != 0) {
+            if ((redirected = RedirectTextFile(MiniBuffer, redirected_name)) != 0) {
+                NuStrCpy(path, directory);
+                NuStrCat(path, redirected_name);
+                NuStrCat(path, ".txt");
+                size = NuFileLoadBuffer(path, MiniBuffer, sizeof(MiniBuffer));
+                if (size < 1) {
+                    SecondCharConfigure = 0;
+                    return 0;
+                }
+                MiniBuffer[size] = 0;
+                text_length = Text_StripComments(MiniBuffer, MiniBuffer, 1);
             }
-            MiniBuffer[size] = 0;
-            text_length = Text_StripComments(MiniBuffer, MiniBuffer, 1);
         }
         text = MiniBuffer;
     }

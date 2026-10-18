@@ -2456,7 +2456,11 @@ void CutScenes_Update(WORLDINFO_s *world, i32 paused) {
                 NewLevelFromMenu(HUB_LDATA, -1, -1, 1);
                 hub_from_cutsceneplayer = 1;
             } else if (WORLD->area != NULL && (WORLD->area->flags & 2) != 0) {
-                NewLData = SuperStory == 0 ? CREDITS_LDATA : STATUS_LDATA;
+                if (SuperStory == 0) {
+                    NewLData = CREDITS_LDATA;
+                } else {
+                    NewLData = STATUS_LDATA;
+                }
             }
         } else if (CutScenePlayer_Active() != 0 &&
                    ((NewLData->flags & (LEVEL_OUTRO | LEVEL_MIDTRO | LEVEL_INTRO)) == 0 &&

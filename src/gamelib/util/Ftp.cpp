@@ -13,47 +13,21 @@ i32 NetFtpManager::Abort(char const *, NetAddress const &, i32, i32) {
 }
 
 FtpFile *NetFtpManager::FindTransfer(char const *name, NetAddress const &address, i32 direction) {
-    FtpFile *file = files;
-    FtpFile *end = files + 32;
-    if (direction != 0) {
-        do {
-            if (file->transfer != NULL && memcmp(&address, &file->address, sizeof(NetAddress)) == 0 &&
-                NuStrICmp(file->name, name) == 0 && file->direction == direction) {
-                return file;
-            }
-            ++file;
-        } while (file != end);
-    } else {
-        do {
-            if (file->transfer != NULL && memcmp(&address, &file->address, sizeof(NetAddress)) == 0 &&
-                NuStrICmp(file->name, name) == 0) {
-                return file;
-            }
-            ++file;
-        } while (file != end);
+    for (FtpFile *file = files; file != files + 32; ++file) {
+        if (file->transfer != NULL && memcmp(&address, &file->address, sizeof(NetAddress)) == 0 &&
+            NuStrICmp(file->name, name) == 0 && (direction == 0 || file->direction == direction)) {
+            return file;
+        }
     }
     return NULL;
 }
 
 FtpFile const *NetFtpManager::FindTransfer(char const *name, NetAddress const &address, i32 direction) const {
-    FtpFile const *file = files;
-    FtpFile const *end = files + 32;
-    if (direction != 0) {
-        do {
-            if (file->transfer != NULL && memcmp(&address, &file->address, sizeof(NetAddress)) == 0 &&
-                NuStrICmp(file->name, name) == 0 && file->direction == direction) {
-                return file;
-            }
-            ++file;
-        } while (file != end);
-    } else {
-        do {
-            if (file->transfer != NULL && memcmp(&address, &file->address, sizeof(NetAddress)) == 0 &&
-                NuStrICmp(file->name, name) == 0) {
-                return file;
-            }
-            ++file;
-        } while (file != end);
+    for (FtpFile const *file = files; file != files + 32; ++file) {
+        if (file->transfer != NULL && memcmp(&address, &file->address, sizeof(NetAddress)) == 0 &&
+            NuStrICmp(file->name, name) == 0 && (direction == 0 || file->direction == direction)) {
+            return file;
+        }
     }
     return NULL;
 }
@@ -96,24 +70,22 @@ void NetFtpManager::Receive(NetMessage, unsigned char, NetAddress const &) {
 }
 
 void NetFtpManager::Reset() {
-    FtpFile *file = files;
-    FtpFile *end = file + 32;
     NetTransporter *network = &theNetwork;
-    do {
-        if (file->transfer != NULL) {
-            network->FtpComplete(file, static_cast<i32>(0xa0200001));
-            file->Term();
-            if (file->transfer != NULL && file->message_data != NULL) {
-                if (file->message_data->reference_count > 1) {
-                    --file->message_data->reference_count;
-                } else {
-                    file->message_data->reference_count = 0;
-                }
-            }
-            file->transfer = NULL;
+    for (FtpFile *file = files; file != files + 32; ++file) {
+        if (file->transfer == NULL) {
+            continue;
         }
-        ++file;
-    } while (file != end);
+        network->FtpComplete(file, static_cast<i32>(0xa0200001));
+        file->Term();
+        if (file->transfer != NULL && file->message_data != NULL) {
+            if (__builtin_expect(file->message_data->reference_count > 1, 1)) {
+                --file->message_data->reference_count;
+            } else {
+                file->message_data->reference_count = 0;
+            }
+        }
+        file->transfer = NULL;
+    }
 }
 
 i32 NetFtpManager::Send(char const *, void const *, i32, NetAddress const &) {
@@ -129,11 +101,10 @@ void NetFtpManager::Update() {
 }
 
 NetFtpManager::~NetFtpManager() {
-    for (i32 i = 0; i < 32; ++i) {
-        FtpFile *file = &files[i];
+    for (FtpFile *file = files; file != files + 32; ++file) {
         if (file->transfer != NULL) {
             if (file->message_data != NULL) {
-                if (file->message_data->reference_count > 1) {
+                if (__builtin_expect(file->message_data->reference_count > 1, 1)) {
                     --file->message_data->reference_count;
                 } else {
                     file->message_data->reference_count = 0;
@@ -210,7 +181,7 @@ void FtpFile::Update() {
     {
         NetMessage fresh;
         NetMessage::MessageData *old = reinterpret_cast<NetMessage::MessageData *>(message_data);
-        if (old->references > 1) {
+        if (__builtin_expect(old->references > 1, 1)) {
             --old->references;
         } else {
             old->references = 0;

@@ -784,7 +784,7 @@ void Text_ExpandAllButtonStrings(char *input, char *output) {
 
         token[0] = '[';
         i32 token_length = 1;
-        while (input[token_length] != ']' && input[token_length] != '\0') {
+        while (input[token_length] != '\0' && input[token_length] != ']') {
             token[token_length] = input[token_length];
             ++token_length;
         }
@@ -818,27 +818,21 @@ void Text_ExpandAllButtonStrings(char *input, char *output) {
 }
 
 i32 Text_StripComments(char *text, char *dest, i32 param) {
-    char *start = text;
     char *end = text + NuStrLen(text);
     char *out = dest;
     while (text <= end) {
         char c = *text;
-        if (c == '#' || c == ';' || (c == '/' && text[1] == '/')) {
-            if (c == '/') {
-                text++;
-            }
-            while (c != '\r' && c != '\n' && c != '\0') {
+        if (c == '#' || c == ';' || (c == '/' && (c = *++text) == '/')) {
+            c = *++text;
+            while (c != '\r' && c != '\0' && c != '\n') {
                 c = *++text;
             }
-            *out++ = c;
-            text++;
-        } else {
-            if (param != 0 && (c == ',' || c == '=')) {
-                c = ' ';
-            }
-            *out++ = c;
-            text++;
         }
+        if (param != 0 && (c == ',' || c == '=')) {
+            c = ' ';
+        }
+        *out++ = c;
+        text++;
     }
     *out = '\0';
     return (i32)(out - dest);

@@ -966,10 +966,12 @@ __attribute__((optimize("O2", "tree-vectorize"))) void LevelStreaming_Update(WOR
                         }
                     }
 
-                    if (other_level != -1 && InStory() == 0 && (LDataList[other_level].flags & LEVEL_OUTRO) != 0) {
-                        LEVELDATA_s *status_level = Area_FindStatusLevel(world->area, NULL);
-                        if (status_level != NULL) {
-                            other_level = status_level->idx;
+                    if (other_level != -1) {
+                        if (InStory() == 0 && (LDataList[other_level].flags & LEVEL_OUTRO) != 0) {
+                            LEVELDATA_s *status_level = Area_FindStatusLevel(world->area, NULL);
+                            if (status_level != NULL) {
+                                other_level = status_level->idx;
+                            }
                         }
                     }
                     if (other_level != -1 && InStory() == 0 &&
@@ -2109,13 +2111,9 @@ void LevObj_FixUpPlatIDs(WORLDINFO_s *world) {
     for (i = 0; i < LEVELOBJECTCOUNT; i++) {
         obj = &world->lev_objs[i];
         obj->platform_id = -1;
-        if (world->terrain != NULL) {
-            if (NuSpecialExistsFn(&obj->special)) {
-                if (ObjTabList[i].kind == 1) {
-                    obj = &world->lev_objs[i];
-                    obj->platform_id = FindPlatInst(NuSpecialGetInstanceix(&obj->special));
-                }
-            }
+        if (world->terrain != NULL && NuSpecialExistsFn(&obj->special) && ObjTabList[i].kind == 1) {
+            obj = &world->lev_objs[i];
+            obj->platform_id = FindPlatInst(NuSpecialGetInstanceix(&obj->special));
         }
     }
 }

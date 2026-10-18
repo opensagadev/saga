@@ -682,8 +682,10 @@ void GizBuildItPushAwayFromEnd(GameObject_s *player) {
 }
 
 f32 GizBuildItMul(GameObject_s *player) {
-    if (player->apiobj.player_controlled && Player_HasFastBuild(player)) {
-        return 3.0f;
+    if (player->apiobj.player_controlled) {
+        if (Player_HasFastBuild(player)) {
+            return 3.0f;
+        }
     }
 
     GIZBUILDIT_s *buildit = static_cast<GIZBUILDIT_s *>(player->field_0x788);
@@ -1239,11 +1241,15 @@ static i32 GizBuildIts_Load(void *world_ptr, void *data) {
 
         if (version <= 3) {
             buildit->state_flags = static_cast<i16>(static_cast<i8>(EdFileReadChar()));
-            if (version > 1 && EdFileReadChar() != 0) {
-                buildit->state_flags |= GIZBUILDIT_STATE_AUTO_BUILD_STATIC_OBJECTS;
+            if (version > 1) {
+                if (EdFileReadChar() != 0) {
+                    buildit->state_flags |= GIZBUILDIT_STATE_AUTO_BUILD_STATIC_OBJECTS;
+                }
             }
-            if (version == 3 && EdFileReadChar() != 0) {
-                buildit->state_flags |= 0x80;
+            if (version == 3) {
+                if (EdFileReadChar() != 0) {
+                    buildit->state_flags |= 0x80;
+                }
             }
         } else {
             buildit->state_flags = static_cast<u16>(EdFileReadShort());

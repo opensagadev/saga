@@ -445,7 +445,7 @@ void GameTiming(WORLDINFO_s *world, float *game_time) {
         if (CUTSTOPGAME != 0) {
             DoubleScoreTime = 0.0f;
         } else {
-            if (world != NULL && world->current_level != NULL && (world->current_level->flags & LEVEL_GAMEPLAY) != 0 &&
+            if (world->current_level != NULL && (world->current_level->flags & LEVEL_GAMEPLAY) != 0 &&
                 pause_rndr_on == 0 && (Player[0] != NULL || Player[1] != NULL)) {
                 UpdateTimer(&GamePlayTimer);
                 UpdateTimer(&OverallGamePlayTimer);
@@ -459,11 +459,11 @@ void GameTiming(WORLDINFO_s *world, float *game_time) {
                 if (world->area != NULL && (world->area->flags & 0x10) != 0) {
                     if (ChallengeMode == 1) {
                         UpdateTimer(&ChallengeTimer);
-                        if (Game_AreaSave != NULL && world->level_sub_id >= 0 &&
+                        if (Game_AreaSave != NULL &&
                             !(ChallengeTimer.time_elapsed < Game_AreaSave[world->level_sub_id].challenge_trial_time))
                             EndChallenge(3, 1);
                     } else {
-                        if (Mission_CurrentState(NULL) == 1 && MissionSys != NULL && MissionSys->mission != NULL) {
+                        if (Mission_CurrentState(NULL) == 1) {
                             const f32 time_limit = static_cast<f32>(MissionSys->mission->time);
                             UpdateTimer(&MissionSys->timer);
                             if (time_limit <= MissionSys->timer.time_elapsed && netclient == 0)
@@ -473,11 +473,8 @@ void GameTiming(WORLDINFO_s *world, float *game_time) {
                 }
             }
             UpdateGameMessages();
-            f32 score_step = FRAMETIME;
-            f32 target = 0.0f;
-            if (DoubleScore != 0 && GetMenuID() == -1)
-                target = 1.0f;
-            DoubleScoreTime = SeekLinearF(DoubleScoreTime, target, score_step);
+            DoubleScoreTime =
+                SeekLinearF(DoubleScoreTime, (DoubleScore != 0 && GetMenuID() == -1) ? 1.0f : 0.0f, FRAMETIME);
         }
     }
     UpdateTimer(&GlobalTimer);

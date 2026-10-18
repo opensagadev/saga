@@ -52,10 +52,10 @@ static inline f32 MiniTrooperTurnSpeed() {
 }
 
 static inline void MiniTrooperSetWanderTarget(minisnowtrooper_s *trooper, i32 shot, u16 *shot_angle) {
-    if (shot == 0)
-        trooper->target_rotation = static_cast<u16>(qrand());
-    else
+    if (shot != 0)
         trooper->target_rotation = static_cast<u16>(qrand() / 73 + *shot_angle);
+    else
+        trooper->target_rotation = static_cast<u16>(qrand());
 }
 
 static const f32 trooperspeedtab[4] = {0.3f, 0.4f, 0.5f, 0.6f};
@@ -636,8 +636,8 @@ void UpdateMiniSnowTroopers(WORLDINFO_s *world) {
                         trooper->state_flags =
                             (trooper->state_flags & ~0x30) | (((qrand() / (0xffff / 3 + 1) + 1) & 3) << 4);
                         slot = &teams[team_index].troopers[trooper->formation_index];
-                        target_z = teams[team_index].origin_z + slot->formation_z;
                         target_x = teams[team_index].origin_x + slot->formation_x;
+                        target_z = teams[team_index].origin_z + slot->formation_z;
                     }
 
                     trooper->target_rotation =

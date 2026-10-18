@@ -10,7 +10,7 @@
 #include <new>
 NetSession *theSession;
 NetworkObjectManager *theNos;
-i16 NetReplicator::smNextId = 1;
+i32 NetReplicator::smNextId = 1;
 i16 NetChangedReplicator::mTableInited;
 i16 NetChangedReplicator::mCrc32Table[256];
 static i32 ForceDummySerialise;
@@ -76,7 +76,7 @@ void NetRotator2::PredictValue(EdClass const *, void *, NetPredictor::PredictorT
     }
 }
 
-i32 NetPredictor::AllowPush(EdClass const *object_class, void const *object, ReplicatorData &data, i32 force, i32) {
+bool NetPredictor::AllowPush(EdClass const *object_class, void const *object, ReplicatorData &data, i32 force, i32) {
     u32 *last_push = reinterpret_cast<u32 *>((reinterpret_cast<uintptr_t>(data.cursor) + 3) & ~uintptr_t(3));
     data.cursor = reinterpret_cast<u8 *>(last_push + 1);
     u32 *failed_predictions = reinterpret_cast<u32 *>((reinterpret_cast<uintptr_t>(data.cursor) + 3) & ~uintptr_t(3));
@@ -414,7 +414,7 @@ void NetworkObject::Initialise(i32 guid, void *new_object, EdClass *new_class, N
     }
 }
 
-i32 NetSimpleReplicator::AllowPush(EdClass const *, void const *, ReplicatorData &data, i32 force, i32) {
+bool NetSimpleReplicator::AllowPush(EdClass const *, void const *, ReplicatorData &data, i32 force, i32) {
     u32 *last_push = reinterpret_cast<u32 *>((reinterpret_cast<uintptr_t>(data.cursor) + 3) & ~3u);
     data.cursor = reinterpret_cast<u8 *>(last_push + 1);
 
@@ -426,7 +426,7 @@ i32 NetSimpleReplicator::AllowPush(EdClass const *, void const *, ReplicatorData
     return false;
 }
 
-i32 NetConstReplicator::AllowPush(EdClass const *, void const *, ReplicatorData &data, i32 force, i32) {
+bool NetConstReplicator::AllowPush(EdClass const *, void const *, ReplicatorData &data, i32 force, i32) {
     u32 *last_push = reinterpret_cast<u32 *>((reinterpret_cast<uintptr_t>(data.cursor) + 3) & ~3u);
     data.cursor = reinterpret_cast<u8 *>(last_push + 1);
 
@@ -438,7 +438,7 @@ i32 NetConstReplicator::AllowPush(EdClass const *, void const *, ReplicatorData 
     return true;
 }
 
-i32 NetChangedReplicator::AllowPush(EdClass const *object_class, void const *object, ReplicatorData &data, i32 force,
+bool NetChangedReplicator::AllowPush(EdClass const *object_class, void const *object, ReplicatorData &data, i32 force,
                                     i32 skip_checksum) {
     u32 checksum = 0xffffffffu;
     u32 *last_push = reinterpret_cast<u32 *>((reinterpret_cast<uintptr_t>(data.cursor) + 3) & ~3u);
@@ -448,34 +448,25 @@ i32 NetChangedReplicator::AllowPush(EdClass const *object_class, void const *obj
 
     u32 now = UtilGetFrameStartTime();
     u32 elapsed = now - *last_push;
-    if (force != 0) {
+    bool push = force != 0 || (maximum_interval != 0 && elapsed > maximum_interval);
+    if (!push && elapsed > minimum_interval && skip_checksum == 0) {
+        CheckSumObject(object_class, object, checksum);
+        if (*last_checksum != checksum) {
+            *last_checksum = checksum;
+            push = true;
+        }
+    }
+    if (push) {
         *last_push = now;
-        return true;
     }
-    if (maximum_interval != 0 && elapsed > maximum_interval) {
-        *last_push = now;
-        return true;
-    }
-    if (elapsed <= minimum_interval || skip_checksum != 0) {
-        return false;
-    }
-
-    CheckSumObject(object_class, object, checksum);
-    if (*last_checksum == checksum) {
-        return false;
-    }
-    *last_checksum = checksum;
-    *last_push = now;
-    return true;
+    return push;
 }
 
 void NetChangedReplicator::CheckSum(unsigned char const *bytes, u32 size, u32 &checksum) const {
-    u32 value = checksum;
     for (u32 i = 0; i < size; i++) {
-        value = static_cast<i32>(mCrc32Table[static_cast<u8>(value ^ bytes[i])]) ^ (value >> 8);
-        checksum = value;
+        checksum = (checksum >> 8) ^ mCrc32Table[(checksum ^ bytes[i]) & 0xff];
     }
-    checksum = ~value;
+    checksum = ~checksum;
 }
 
 void NetChangedReplicator::CheckSumObject(EdClass const *object_class, void const *object, u32 &checksum) const {
@@ -565,19 +556,13 @@ i32 NetworkObjectManager::Acquire(i32 id) {
 
 void NetworkObjectManager::AddToLocalObjectList(NetworkObject *object) {
     NetworkObject **slot = local_objects;
-    if (local_object_count <= 0) {
-        local_object_count = 1;
-    } else if (*slot != NULL) {
-        i32 index = 0;
-        do {
-            index++;
-            slot++;
-            if (index == local_object_count) {
-                local_object_count = static_cast<i32>(slot - local_objects) + 1;
-                break;
-            }
-        } while (*slot != NULL);
+    for (i32 index = 0; index < local_object_count; ++index, ++slot) {
+        if (*slot == NULL) {
+            *slot = object;
+            return;
+        }
     }
+    local_object_count = static_cast<i32>(slot - local_objects) + 1;
     *slot = object;
 }
 
@@ -820,19 +805,7 @@ i32 NetworkObjectManager::IsPeerStarted(NetPeer const &peer) const {
     return 0;
 }
 
-NetworkObjectManager::NetworkObjectManager() {
-    context.words[0] = 0;
-    context.words[1] = 0;
-    context.words[2] = 0;
-    context.words[3] = 0;
-    ReplicatorList *replicator = replicators;
-    ReplicatorList *end = replicators + 64;
-    do {
-        replicator->head = NULL;
-        replicator->tail = NULL;
-        replicator->count = 0;
-        ++replicator;
-    } while (replicator != end);
+NetworkObjectManager::NetworkObjectManager() : context() {
     active = 0;
     guid_group = -1;
     next_guid = -1;

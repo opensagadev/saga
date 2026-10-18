@@ -396,7 +396,7 @@ const NuInputDevice *NuInputManager::GetDevice(u32 port) const {
 NuInputDevice::~NuInputDevice() {
 }
 
-__attribute__((optimize("O2"))) void NuInputDevice::SetDisconnected(void) {
+void NuInputDevice::SetDisconnected(void) {
     this->motor_1 = 0.0f;
     this->motor_2 = 0.0f;
 
@@ -416,7 +416,7 @@ __attribute__((optimize("O2"))) void NuInputDevice::SetDisconnected(void) {
     this->volume = 0.0f;
 }
 
-__attribute__((optimize("O2"))) void NuInputDevice::Clear(void) {
+void NuInputDevice::Clear(void) {
     i32 i;
 
     this->button_states = 0;
@@ -430,7 +430,7 @@ __attribute__((optimize("O2"))) void NuInputDevice::Clear(void) {
     memset(&this->mouse_data, 0, sizeof(NuInputMouseData));
 }
 
-__attribute__((optimize("O2"))) NuInputDevice::NuInputDevice(u32 port) {
+NuInputDevice::NuInputDevice(u32 port) {
     this->port = port;
     this->is_rumble_killed = false;
 
@@ -468,7 +468,7 @@ NuInputManager::NuInputManager() {
     }
 }
 
-__attribute__((optimize("O2"))) void NuInputDevice::DeadZone(NUPADANALOGVALUE input, f32 dead_zone) {
+void NuInputDevice::DeadZone(NUPADANALOGVALUE input, f32 dead_zone) {
     f32 value;
     f32 new_value;
 
@@ -485,12 +485,12 @@ __attribute__((optimize("O2"))) void NuInputDevice::DeadZone(NUPADANALOGVALUE in
     this->analog_values[input] = new_value;
 }
 
-__attribute__((optimize("O2"))) void NuInputDevice::AddTranslator(NuInputDeviceTranslator *translator) {
+void NuInputDevice::AddTranslator(NuInputDeviceTranslator *translator) {
     this->translators[this->translator_count] = translator;
     this->translator_count++;
 }
 
-__attribute__((optimize("O2"))) void NuInputDevice::ProcessTouchData() {
+void NuInputDevice::ProcessTouchData() {
     if (!(caps & 0x400))
         return;
 
@@ -532,7 +532,7 @@ __attribute__((optimize("O2"))) void NuInputDevice::ProcessTouchData() {
     touch_data.touch_count = count + added;
 }
 
-__attribute__((optimize("O2"))) void NuInputDevice::SetIndexByType(u32 idx_by_type) {
+void NuInputDevice::SetIndexByType(u32 idx_by_type) {
     this->idx_by_type = idx_by_type;
     this->prev_valid_idx_by_type = idx_by_type;
 }
@@ -541,7 +541,7 @@ u32 NuInputDevice::GetPort() const {
     return port;
 }
 
-__attribute__((optimize("O2"))) NUPADTYPE NuInputDevice::GetType(void) const {
+NUPADTYPE NuInputDevice::GetType(void) const {
     return this->type;
 }
 
@@ -577,11 +577,11 @@ u32 NuInputDevice::GetLastValidIndexByType() const {
     return prev_valid_idx_by_type;
 }
 
-__attribute__((optimize("O2"))) NUPADATTACHMENTTYPE NuInputDevice::GetAttachmentType() const {
+NUPADATTACHMENTTYPE NuInputDevice::GetAttachmentType() const {
     return attch_type;
 }
 
-__attribute__((optimize("O2"))) u32 NuInputDevice::GetCaps() const {
+u32 NuInputDevice::GetCaps() const {
     return caps;
 }
 
@@ -589,7 +589,7 @@ bool NuInputDevice::SupportsCaps(u32 mask) const {
     return (GetCaps() & mask) != 0;
 }
 
-__attribute__((optimize("O2"))) bool NuInputDevice::IsConnected(void) const {
+bool NuInputDevice::IsConnected(void) const {
     return this->is_connected;
 }
 
@@ -607,7 +607,7 @@ bool NuInputDevice::IsButtonPressed(u32 buttons) const {
     return IsConnected() && (button_states & buttons) != 0;
 }
 
-__attribute__((optimize("O2"))) u32 NuInputDevice::GetButtons(void) const {
+u32 NuInputDevice::GetButtons(void) const {
     if (IsConnected()) {
         return this->button_states;
     }
@@ -615,7 +615,7 @@ __attribute__((optimize("O2"))) u32 NuInputDevice::GetButtons(void) const {
     return 0;
 }
 
-__attribute__((optimize("O2"))) f32 NuInputDevice::GetAnalogValue(NUPADANALOGVALUE input) const {
+f32 NuInputDevice::GetAnalogValue(NUPADANALOGVALUE input) const {
     if (IsConnected()) {
         return this->analog_values[input];
     }

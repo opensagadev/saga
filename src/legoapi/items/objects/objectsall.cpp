@@ -3163,9 +3163,11 @@ static void edpartFileSaveEffects(eduimenu_s *parent, eduiitem_s *, u32) {
         edpartSaveMessage(parent, "Level Save Failed", false);
         return;
     }
-    if (!general_backup && !level_backup) {
-        edpartSaveMessage(parent, "Saved OK - Both Backups Failed", false);
-        return;
+    if (!general_backup) {
+        if (!level_backup) {
+            edpartSaveMessage(parent, "Saved OK - Both Backups Failed", false);
+            return;
+        }
     }
     if (!general_backup) {
         edpartSaveMessage(parent, "Saved OK - General Backup Failed", false);
@@ -3646,9 +3648,9 @@ extern "C" PART_s *HitParts(GameObject_s *owner, NUVEC *positions, i32 count, f3
     PART_s *FindPart(NUVEC *position, i32 player, GameObject_s *owner) {
         if (Part == NULL)
             return NULL;
-        PART_s *result = NULL;
         PART_s *part = Part;
         f32 nearest = 1000000.0f;
+        PART_s *result = NULL;
         for (i32 i = 0; i < MAXPARTS; ++i, ++part) {
             if ((part->active & 1) != 0 && (player == -1 || part->force_player_mask == player) &&
                 (owner == NULL || part->owner == owner)) {
@@ -4646,9 +4648,11 @@ void UpdatePartEmits(f32 time) {
                         PART_EMIT_SOUND(2, 1);
                         PART_EMIT_SOUND(3, 1);
                     }
-                    if (emitter->shots_remaining != 0 && --emitter->shots_remaining == 0) {
-                        RemovePARTEffect(i);
-                        emission_time = partglobaltime + 99999.9f;
+                    if (emitter->shots_remaining != 0) {
+                        if (--emitter->shots_remaining == 0) {
+                            RemovePARTEffect(i);
+                            emission_time = partglobaltime + 99999.9f;
+                        }
                     }
                 } else {
                     f32 pause = type->emission_pause;

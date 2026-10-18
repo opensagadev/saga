@@ -1193,7 +1193,7 @@ void Prompt_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active) 
             draw_player_icons = 1;
         } else {
             Status_DrawPromptMenu(packet, 1, 1.0f);
-            DrawPlayerIconPrompts(packet->player0_active, tSELECT, 1.0f, -1, -1, -1, tSELECTING, packet->player1_active,
+            DrawPlayerIconPrompts(packet->player_active[0], tSELECT, 1.0f, -1, -1, -1, tSELECTING, packet->player_active[1],
                                   tSELECT, 1.0f, -1, -1, -1, tSELECTING);
         }
     }
@@ -1594,14 +1594,14 @@ void BonusWin_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 curren
                 SmartTextEx(TTab[tWINNER], left ? -0.675f : 0.675f, STATSPOSY, 1.0f, 0.7f, 0.7f, 0.7f, left ? 2 : 8, 0,
                             255, 0, 0.35f, 1, NULL, 0, static_cast<i32>(iconalphaoverride * 128.0f));
             }
-            DrawBonusScore(STATSPOSY, StatusPacket.player0_active, StatusPacket.player1_active, iconalphaoverride,
+            DrawBonusScore(STATSPOSY, StatusPacket.player_active[0], StatusPacket.player_active[1], iconalphaoverride,
                            BonusScore);
         }
     } else {
         if (stage->field_0x12 != 0) {
             const f32 alpha = getFinishedStatusAlpha(packet);
             if (packet->stage->type != 25) {
-                DrawBonusScore(STATSPOSY, StatusPacket.player0_active, StatusPacket.player1_active, alpha, BonusScore);
+                DrawBonusScore(STATSPOSY, StatusPacket.player_active[0], StatusPacket.player_active[1], alpha, BonusScore);
             }
         }
     }
@@ -1692,7 +1692,7 @@ void Coins_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active) {
             }
         }
         if (stage->field_0x14 >= 1) {
-            const f32 player_alpha = packet->player0_active == 0 ? DROPINALPHA : 1.0f;
+            const f32 player_alpha = packet->player_active[0] == 0 ? DROPINALPHA : 1.0f;
             const u32 coins = packet->coins_remaining[0];
             const f32 score_x = -PANEL_SCOREX;
             const i32 object_index = coins > 999 ? 0xc3 : coins > 99 ? 0xbb : 0xb3;

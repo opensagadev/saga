@@ -146,16 +146,28 @@ DECOMP_ASSERT(sizeof(LEVELSFXENTRY_s) == 0x10, "LEVELSFXENTRY_s size");
 
 struct SPECIALSFXEVENT_s {
     f32 previous_frame;
-    u8 flags;
+    union {
+        u8 flags;
+        struct {
+            u8 triggered : 1;
+            u8 looping : 1;
+            u8 forward : 1; // plays while the animation runs forwards
+            u8 reverse : 1; // plays while the animation runs backwards
+            u8 : 4;
+        };
+    };
     u8 reserved_05;
     i16 sfx_id;
     f32 trigger_frame;
     SPECIALSFXEVENT_s *next;
 };
 DECOMP_ASSERT(sizeof(SPECIALSFXEVENT_s) == 0x10, "SPECIALSFXEVENT_s size");
+DECOMP_ASSERT(offsetof(SPECIALSFXEVENT_s, sfx_id) == 0x06, "SPECIALSFXEVENT_s sfx id offset");
+DECOMP_ASSERT(offsetof(SPECIALSFXEVENT_s, next) == 0x0c, "SPECIALSFXEVENT_s next offset");
 
 struct specialsfx_s {
-    u8 flags;
+    u8 type : 4; // 1: blow-up sounds (SetupBlowupSfx)
+    u8 : 4;
     u8 reserved_01;
     i8 event_count;
     i8 animation_playing;
@@ -163,6 +175,8 @@ struct specialsfx_s {
     SPECIALSFXEVENT_s *events;
 };
 DECOMP_ASSERT(sizeof(specialsfx_s) == 0x14, "specialsfx_s size");
+DECOMP_ASSERT(offsetof(specialsfx_s, event_count) == 0x02, "specialsfx_s event count offset");
+DECOMP_ASSERT(offsetof(specialsfx_s, events) == 0x10, "specialsfx_s events offset");
 
 // A portal-position spline stores camera/player points as position/target
 // pairs (six floats per point).  MoveGameCamera uses portal_places[2] for

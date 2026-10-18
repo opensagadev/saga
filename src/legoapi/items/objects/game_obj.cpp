@@ -2694,7 +2694,7 @@ i32 ObjHitObj(GameObject_s *attacker, GameObject_s *target, i32 damage, u16 flag
         if (target->character_context == 13 || target->character_context == 14)
             return 0;
     }
-    if (CInfo[target->character_context].parameter & 4)
+    if (CInfo[target->character_context].flags & (4ull << 32))
         return 0;
     if (attacker && !(attacker->apiobj.flags_low & 1))
         attacker = NULL;

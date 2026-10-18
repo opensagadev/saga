@@ -786,10 +786,12 @@ i32 Collection_GotAnyOfType(i32 type, u32 flags) {
 }
 
 i32 AddToCollection(i32 id) {
-    if (id > 0 && id < CHARCOUNT && InCollectList_Index(id, NULL, 0) != -1 && Collection_Got(id) == 0) {
-        if (Game_CharacterSave != NULL)
-            Game_CharacterSave[id] |= SAVE_CHARACTER_AVAILABLE | SAVE_CHARACTER_UNLOCKED;
-        return 1;
+    if (id > 0 && id < CHARCOUNT && InCollectList_Index(id, NULL, 0) != -1) {
+        if (Collection_Got(id) == 0) {
+            if (Game_CharacterSave != NULL)
+                Game_CharacterSave[id] |= SAVE_CHARACTER_AVAILABLE | SAVE_CHARACTER_UNLOCKED;
+            return 1;
+        }
     }
     return 0;
 }

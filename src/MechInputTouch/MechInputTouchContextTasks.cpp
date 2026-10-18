@@ -232,14 +232,8 @@ MechTouchTaskJump::MechTouchTaskJump(MechInputTouchGestureBasedController &owner
             stick.x *= speed;
             stick.y *= speed;
             stick.x = -stick.x;
-            if (stick.x < 1.0f)
-                stick.x = MAX(-1.0f, stick.x);
-            else
-                stick.x = MIN(stick.x, 1.0f);
-            if (stick.y < 1.0f)
-                stick.y = MAX(-1.0f, stick.y);
-            else
-                stick.y = MIN(stick.y, 1.0f);
+            stick.x = stick.x < 1.0f ? MAX(-1.0f, stick.x) : MIN(stick.x, 1.0f);
+            stick.y = stick.y < 1.0f ? MAX(-1.0f, stick.y) : MIN(stick.y, 1.0f);
         }
     }
     flags |= 10;

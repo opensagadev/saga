@@ -2000,9 +2000,9 @@ void Hub_InitMiniKits(WORLDINFO_s *world) {
 
 void Hub_UpdateMiniKits(WORLDINFO_s *world) {
     i32 count[72];
-    i32 viewer = 0;
     f32 speed = 0.0f;
     u16 angle = 0;
+    i32 viewer = 0;
     if (GetMenuID() == 14) {
         viewer = 1;
         MENU *menu = &GameMenu[GameMenuLevel];
@@ -2517,8 +2517,8 @@ void Hub_DrawFreePlaySelect() {
             if (freeplaytime < freeplayduration - 0.1f)
                 fade = 1.0f - freeplaytime / (freeplayduration - 0.1f);
         }
-        f32 opacity = (MenuPacket.active_player[0] ? 1.0f : DROPINALPHA) * fade;
         i32 model = FreePlayModelList[0].model_id;
+        f32 opacity = (MenuPacket.active_player[0] ? 1.0f : DROPINALPHA) * fade;
         if (freeplay_time[0] > 0.0f) {
             f32 progress = freeplay_time[0] / 0.75f;
             if (__builtin_expect(freeplay_selected[0] == 0, 0))
@@ -2550,8 +2550,8 @@ void Hub_DrawFreePlaySelect() {
                     eased =
                         1.0f - (NU_SIN_LUT(static_cast<i32>((1.0f - progress) * 32768.0f + 16384.0f)) + 1.0f) * 0.5f;
                 }
-                size = (COLLECTION_ICONSIZE - base_size) * eased + base_size;
                 x = (-ICONX - base_x) * eased + base_x;
+                size = (COLLECTION_ICONSIZE - base_size) * eased + base_size;
                 y = (STATSPOSY - 0.7f) * eased + 0.7f;
                 if (opacity > 0.0f) {
                     if (freeplay_time[0] > 0.0f || opacity != 1.0f) {
@@ -3489,6 +3489,7 @@ void CutScenePlayer_DrawGrid(COLLECTION_s *collection, i16 *ids, float x, float 
             menu->item_y[i] = y;
             menu->item_width[i] = scale * 0.5f;
             menu->item_height[i] = 0.0f;
+            const f32 text_scale = scale * 3.5f;
             char text[32];
             sprintf(text, "%i", i + 1);
             i32 area = LDataList[player->clips[ids[i]].level_id].area_index;
@@ -3497,7 +3498,6 @@ void CutScenePlayer_DrawGrid(COLLECTION_s *collection, i16 *ids, float x, float 
                 if (++colour > 7)
                     colour = 7;
             }
-            const f32 text_scale = scale * 3.5f;
             Text3DEx(text, x, y, 1.0f, text_scale * 0.925f, text_scale, text_scale, 0, colours[colour][0],
                      colours[colour][1], colours[colour][2], static_cast<u8>(static_cast<i32>(opacity * 128.0f)));
         }
@@ -3760,11 +3760,7 @@ void MenuUpdateEpisodes(MENU_s *) {
                                 column -= 7;
                             const i32 row = previous / 7 * 7;
                             const i32 next = row + column;
-                            if (next < count) {
-                                i_clip[i_episodes] = next;
-                            } else {
-                                i_clip[i_episodes] = row;
-                            }
+                            i_clip[i_episodes] = next < count ? next : row;
                         }
                     } else {
                         i32 next = previous - 7;

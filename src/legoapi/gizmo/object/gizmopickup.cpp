@@ -1358,11 +1358,11 @@ void AddPickups(i32 coins, i32 hearts, i32 torpedoes, i32 powerups, nuvec_s *pos
         AddTorpedoAsPart(position, &velocity, scale, lifetime);
     }
     if ((world->current_level->flags & LEVEL_PICKUPS_TO_PANEL) != 0) {
-        return;
-    }
-    for (i32 i = 0; i < powerups; ++i) {
-        MakePartVector(&velocity, direction, speed);
-        PowerUp_AddPart(position, &velocity, scale, lifetime);
+    } else {
+        for (i32 i = 0; i < powerups; ++i) {
+            MakePartVector(&velocity, direction, speed);
+            PowerUp_AddPart(position, &velocity, scale, lifetime);
+        }
     }
 }
 

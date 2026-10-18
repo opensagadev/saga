@@ -985,9 +985,11 @@ static void Titles_Draw(WORLDINFO *) {
             alpha = 1.0f - (time - 24.833332f);
         else
             alpha = 0.0f;
-        if (alpha > 0.0f && NuSpecialExistsFn(&LevHSpecial[14]) != 0) {
-            draw_mtx.m31 = -0.15f;
-            NuSpecialDrawAtAlpha(&LevHSpecial[14], &draw_mtx, newgamealpha * 0.5f * alpha * LevTime[0]);
+        if (alpha > 0.0f) {
+            if (NuSpecialExistsFn(&LevHSpecial[14]) != 0) {
+                draw_mtx.m31 = -0.15f;
+                NuSpecialDrawAtAlpha(&LevHSpecial[14], &draw_mtx, newgamealpha * 0.5f * alpha * LevTime[0]);
+            }
         }
     }
     if (time > 24.833332f) {

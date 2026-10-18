@@ -40,7 +40,7 @@ struct nuhspecial_s;
 struct numtl_s;
 struct numtx_s;
 struct nuvec_s;
-bool LineIntersectCircle(nuvec_s *, nuvec_s *, nuvec_s *, f32);
+i32 LineIntersectCircle(nuvec_s *, nuvec_s *, nuvec_s *, f32);
 extern CHARACTERMODEL_s *dco_cmodel;
 extern GAMECHARACTERDATA_s *dco_gcdata;
 extern f32 CameraZoom;

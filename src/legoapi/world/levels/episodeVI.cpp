@@ -262,8 +262,8 @@ GIZMOBLOWUP_s *DeathStar2BattleD_InZapRange(GameObject_s *object) {
     if (object == NULL || !object->apiobj.player_controlled || object->apiobj.field_0x287 != 0)
         return NULL;
 
-    GIZMOBLOWUP_s *nearest;
     f32 nearest_distance = 225.0f;
+    GIZMOBLOWUP_s *nearest;
     GIZMO *first_gizmo = LevGizmo[1];
     if (first_gizmo != NULL) {
         nearest = static_cast<GIZMOBLOWUP_s *>(first_gizmo->object);
@@ -1419,20 +1419,12 @@ void SarlaccPitB_Update(WORLDINFO_s *world) {
                     for (i32 index = 0; index < sarlaccdisco.count; ++index)
                         if (sarlaccdisco.panel_state[index] == 0)
                             candidates[count++] = index;
-                    if (count != 0) {
-                        sarlaccdisco.first_panel = candidates[NuRand(NULL) % count];
-                    } else {
-                        sarlaccdisco.first_panel = -1;
-                    }
+                    sarlaccdisco.first_panel = count != 0 ? candidates[NuRand(NULL) % count] : -1;
                     count = 0;
                     for (i32 index = 0; index < sarlaccdisco.count; ++index)
                         if (index != sarlaccdisco.first_panel && sarlaccdisco.panel_state[index] == 0)
                             candidates[count++] = index;
-                    if (count != 0) {
-                        sarlaccdisco.second_panel = candidates[NuRand(NULL) % count];
-                    } else {
-                        sarlaccdisco.second_panel = -1;
-                    }
+                    sarlaccdisco.second_panel = count != 0 ? candidates[NuRand(NULL) % count] : -1;
                     if (sarlaccdisco.first_panel != -1 && sarlaccdisco.second_panel != -1) {
                         sarlaccdisco.panel_state[sarlaccdisco.first_panel] = 1;
                         sarlaccdisco.panel_state[sarlaccdisco.second_panel] = 1;

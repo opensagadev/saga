@@ -2234,8 +2234,8 @@ void DrawSubItems() {
                         rotation = static_cast<i32>(NuFmod(GameTimer.time_elapsed, 4.0f) * 0.25f * 65536.0f);
                     rotation += static_cast<u16>(items[shelf_ids[slot]].item_id * 0x1249) - 0x2000;
                 }
-                const u16 angle = shelfang + (item->unlocked == 1 ? rotation : 0);
                 nuhspecial_s *special = &items[shelf_ids[slot]].special;
+                const u16 angle = shelfang + (item->unlocked == 1 ? rotation : 0);
                 if (NuSpecialExistsFn(special) != 0) {
                     NUMTX_ALIGNED16 matrix;
                     NUVEC size = {scale, scale, scale};

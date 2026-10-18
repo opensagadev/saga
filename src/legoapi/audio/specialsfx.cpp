@@ -409,8 +409,7 @@ i32 SpecialSfxLoad(char *path, WORLDINFO_s *world) {
         NuSpecialFind(world->current_gscn, &entry->special, name, 1);
         entry->event_count = EdFileReadChar();
         if (version >= 2) {
-            const i32 flags = EdFileReadChar();
-            entry->flags = (entry->flags & 0xf0) | (flags & 0xf);
+            entry->type = EdFileReadChar();
         }
         world->special_sfx_count++;
     }
@@ -424,8 +423,7 @@ i32 SpecialSfxLoad(char *path, WORLDINFO_s *world) {
             name[length] = '\0';
             event->sfx_id = static_cast<i16>(GetSfxId(name));
             event->flags = static_cast<u8>(EdFileReadChar());
-            const i32 looping = IsSfxLooping(event->sfx_id);
-            event->flags = (event->flags & ~2u) | ((looping & 1) << 1);
+            event->looping = IsSfxLooping(event->sfx_id);
             event->trigger_frame = EdFileReadFloat();
             event->previous_frame = EdFileReadFloat();
             world->special_sfx_event_count++;
@@ -476,8 +474,7 @@ void LoadSpecialSfxFile(WORLDINFO *world) {
         if (count > 0) {
             i32 i = 0;
             do {
-                const i32 flags = entry->flags & 0xf;
-                if (flags == 1) {
+                if (entry->type == 1) {
                     SetupBlowupSfx(world, entry);
                 }
                 ++i;
@@ -494,7 +491,7 @@ i32 SpecialSfxAdd(i32 special_index) {
         NuGScnGetSpecial(&special, WORLD->current_gscn, special_index);
         if (NuSpecialExistsFn(&special) != 0) {
             specialsfx_s *entry = &WORLD->special_sfx[WORLD->special_sfx_count];
-            entry->flags &= 0xf0;
+            entry->type = 0;
             entry->special = special;
             entry->events = NULL;
             entry->event_count = 0;
@@ -526,8 +523,8 @@ void UpdateSpecialSfx(WORLDINFO_s *world) {
         if ((animation->flags & NUINSTANIM_FLAG_PLAYING) == 0 && entry->animation_playing == 0) {
             for (i32 j = 0; j < entry->event_count; j++) {
                 if (event != NULL) {
-                    event->flags &= ~1u;
-                    if (frame < end_frame && (event->flags & 2) == 0) {
+                    event->triggered = 0;
+                    if (frame < end_frame && !event->looping) {
                         event->previous_frame = 0.0f;
                     }
                 }
@@ -542,26 +539,26 @@ void UpdateSpecialSfx(WORLDINFO_s *world) {
         for (i32 j = 0; j < entry->event_count; j++) {
             if (event != NULL) {
                 bool play = false;
-                if ((event->flags & 2) != 0) {
-                    if ((direction == 0 && (event->flags & 4) != 0) || (event->flags & 0xc) == 0xc) {
+                if (event->looping) {
+                    if ((direction == 0 && event->forward) || (event->forward && event->reverse)) {
                         if (event->trigger_frame <= frame && frame <= event->previous_frame) {
                             play = true;
                         }
-                    } else if (direction == 1 && (event->flags & 8) != 0 && frame <= event->trigger_frame &&
+                    } else if (direction == 1 && event->reverse && frame <= event->trigger_frame &&
                                frame >= event->previous_frame) {
                         play = true;
                     }
-                } else if ((event->flags & 0xc) == 0xc) {
+                } else if (event->forward && event->reverse) {
                     if ((event->previous_frame < event->trigger_frame && event->trigger_frame <= frame) ||
                         (event->trigger_frame < event->previous_frame && frame <= event->trigger_frame)) {
                         play = true;
                     }
-                } else if ((event->flags & 4) != 0) {
+                } else if (event->forward) {
                     if ((event->previous_frame < event->trigger_frame && event->trigger_frame <= frame) ||
                         (event->previous_frame == 0.0f && event->trigger_frame == 1.0f)) {
                         play = true;
                     }
-                } else if ((event->flags & 8) != 0) {
+                } else if (event->reverse) {
                     if ((event->trigger_frame < event->previous_frame && frame <= event->trigger_frame) ||
                         (end_frame == event->previous_frame && end_frame == event->trigger_frame)) {
                         play = true;
@@ -571,7 +568,7 @@ void UpdateSpecialSfx(WORLDINFO_s *world) {
                 if (play) {
                     GameAudio_PlaySfxById(event->sfx_id, position, 0, 0);
                 }
-                if ((event->flags & 2) == 0) {
+                if (!event->looping) {
                     event->previous_frame = frame;
                 }
             }
@@ -589,7 +586,8 @@ void SetSpecialSfxBits(i32 *sfx_ids, i32 *sfx_count, WORLDINFO_s *world) {
     for (i32 i = 0; i < world->special_sfx_event_count; ++i) {
         i32 id = world->special_sfx_events[i].sfx_id;
         if (id != -1) {
-            sfx_ids[(*sfx_count)++] = id;
+            sfx_ids[*sfx_count] = id;
+            ++*sfx_count;
         }
     }
 }

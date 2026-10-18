@@ -352,8 +352,8 @@ void DrawStreaks() {
     for (STREAKHDR_s *header = streakhdrs_used; header != NULL; header = header->next) {
         NURND_VERTEX3D vertices[256];
         i32 vertex_count = 0;
-        const u32 endpoint_colour = header->colour;
         STREAK_s *streak = header->streaks;
+        const u32 endpoint_colour = header->colour;
 
         while (streak != NULL && vertex_count < 254) {
             const f32 fade = streak->remaining_time < 0.0f ? 0.0f : streak->remaining_time;

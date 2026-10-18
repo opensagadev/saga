@@ -403,8 +403,8 @@ mode_selected:
     right_x = NuFabs(right_x) < 34.0f ? 0.0f : right_x / 127.5f;
     i32 pitch_override = -1, yaw_override = -1, roll_override = 0;
     u16 roll_hint = 0;
-    i32 roll_hint_valid = 0;
     f32 roll_seek_override = 0.0f, stop_blend_rate = 0.1f;
+    i32 roll_hint_valid = 0;
     switch (camera->mode) {
         i32 index;
 

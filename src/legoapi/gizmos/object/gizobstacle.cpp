@@ -710,10 +710,12 @@ static void GizObstacles_Reset(void *world_ptr, void *data, void *progress_ptr) 
             for (GAMEANIMOBJ_s *object = obstacle.anim_set->objects; object != NULL; object = object->next) {
                 i16 *object_data = static_cast<i16 *>(object->object_data);
                 object_data[1] = -1;
-                if (world->terrain != NULL && (object_data[0] & 1) == 0 && NuSpecialExistsFn(&object->special) != 0) {
-                    object_data[1] = FindPlatInst(NuSpecialGetInstanceix(&object->special));
-                    if (object_data[1] != -1) {
-                        obstacle.runtime_has_platform = 1;
+                if (world->terrain != NULL && (object_data[0] & 1) == 0) {
+                    if (NuSpecialExistsFn(&object->special) != 0) {
+                        object_data[1] = FindPlatInst(NuSpecialGetInstanceix(&object->special));
+                        if (object_data[1] != -1) {
+                            obstacle.runtime_has_platform = 1;
+                        }
                     }
                 }
                 if ((object_data[0] & 2) != 0) {
@@ -915,6 +917,7 @@ static void GizObstacles_PostLoad(void *world_ptr, void *data) {
 }
 
 static void GizObstacles_AddLevelSfx(void *, void *data, i32 *sfx_ids, i32 *sfx_count, i32 max_sfx) {
+    i32 index = 0;
     GIZOBSTACLESYS_s *obstacle_sys = static_cast<GIZOBSTACLESYS_s *>(data);
     if (obstacle_sys == NULL) {
         return;
@@ -923,7 +926,6 @@ static void GizObstacles_AddLevelSfx(void *, void *data, i32 *sfx_ids, i32 *sfx_
     if (obstacle_sys->count == 0) {
         return;
     }
-    i32 index = 0;
     do {
         if (obstacle->start_sfx_id != -1) {
             AddLevelSfxFromId(obstacle->start_sfx_id, sfx_ids, sfx_count, max_sfx);

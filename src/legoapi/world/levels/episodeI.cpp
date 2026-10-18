@@ -370,9 +370,9 @@ static void *CreatePodRaceMine(nuvec_s *pos) {
     entry->grow_alpha = 0.0f;
     if (mine_max_tile != 0)
         entry->rotx = (u16)((u32)NuRandInt() % (u32)mine_max_tile);
+    i32 bit = (i32)(1u << slot);
     entry->roty = (u16)NuRandInt();
     mine_count++;
-    i32 bit = (i32)(1u << slot);
     pod_mines_bitfield[0] |= bit;
     pod_mines_bitfield[1] |= bit >> 31;
     i32 clear = ~bit;

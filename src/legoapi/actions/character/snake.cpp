@@ -100,8 +100,8 @@ void UpdateSnakeBody(GameObject_s *object) {
         f32 absolute = __builtin_fabsf(vertical);
         f32 curved = SnakeMin(NuFsqrt(1.0f - vertical * vertical), absolute);
         f32 side = (absolute - 0.7071067690849304f) * 3.402820018375656e+38f;
-        side = SnakeMax(SnakeMin(side, 1.0f), 0.0f);
         f32 sign = vertical * 3.402820018375656e+38f;
+        side = SnakeMax(SnakeMin(side, 1.0f), 0.0f);
         sign = SnakeMax(SnakeMin(sign, 1.0f), 0.0f);
         f32 t = curved * side;
         f32 t2 = t * t;

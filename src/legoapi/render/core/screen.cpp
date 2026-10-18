@@ -770,12 +770,12 @@ void GameFog_Update(WORLDINFO_s *world) {
         }
     }
 
-    if (GameFogSet != NULL) {
+    if (GameFogSet == NULL) {
+        dof_fstop = 22.0f;
+    } else {
         dof_fstop = static_cast<f32>(static_cast<u32>(GameFogSet->depth_of_field_fstop)) / 10.0f;
         if (dof_fstop == 0.0f)
             dof_fstop = 22.0f;
-    } else {
-        dof_fstop = 22.0f;
     }
 
     if (NuIOS_IsLowEndDevice() && world->current_level != NULL) {
@@ -1141,14 +1141,14 @@ void DrawPauseFade() {
         return;
 
     f32 current = pause_fade;
-    if (Paused == 0 && NetPaused == 0) {
+    if (Paused != 0 || NetPaused != 0) {
+        i32 fade = static_cast<i32>(current + FRAMETIME * 2.0f);
+        pause_fade = fade > 0 ? 1.0f : static_cast<f32>(fade);
+    } else {
         i32 fade = static_cast<i32>(current - FRAMETIME * 2.0f);
         if (fade < 0)
             fade = 0;
         pause_fade = static_cast<f32>(fade);
-    } else {
-        i32 fade = static_cast<i32>(current + FRAMETIME * 2.0f);
-        pause_fade = fade > 0 ? 1.0f : static_cast<f32>(fade);
     }
 }
 

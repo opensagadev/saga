@@ -94,19 +94,12 @@ void TouchHacks::PlaySmartBombBuildupEffects(GameObject_s &, float elapsed, floa
 }
 
 bool TouchHacks::CanThrowBountyBomb(GameObject_s &object) {
-    if (WORLD->lev_objs[0xe9].active == 0 || !object.apiobj.player_controlled) {
-        return false;
-    }
-    if ((object.apiobj.character_data->model_flags & 0x01000000) == 0 && object.field_0x108e != 6 &&
-        SuperWeirdo(&object) == 0) {
-        return false;
-    }
-    if (object.apiobj.field_0x27d == 0 && object.field_0xe31 != 1) {
-        return false;
-    }
-
-    const i8 context = object.character_context;
-    return context == 6 || context == -1 || context == 7 || (CInfo[context].flags & 4) != 0;
+    return WORLD->lev_objs[0xe9].active != 0 && object.apiobj.player_controlled &&
+           ((object.apiobj.character_data->model_flags & 0x01000000) != 0 || object.field_0x108e == 6 ||
+            SuperWeirdo(&object) != 0) &&
+           (object.apiobj.field_0x27d != 0 || object.field_0xe31 == 1) &&
+           (object.character_context == 6 || object.character_context == -1 || object.character_context == 7 ||
+            (CInfo[object.character_context].flags & 4) != 0);
 }
 
 // The original advances the probe position with one packed vector store.

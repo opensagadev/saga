@@ -48,9 +48,11 @@ DECOMP_ASSERT(sizeof(LEDGEPIECE) == 0x20, "LEDGEPIECE ABI");
 static LEDGE *Ledge_AttachPoint(WORLDINFO_s *world, NUVEC *position, NUVEC *bounds_min, NUVEC *bounds_max, u16 *angle);
 
 static inline void Ledge_TryAttach(WORLDINFO_s *world, GameObject_s *object) {
-    if (object->character_context != 0x43 && object->character_context != -1) {
-        if (object->character_context != 0 || !(object->context_animation_timer >= 0.1f))
-            return;
+    if (object->character_context != 0x43) {
+        if (object->character_context != -1) {
+            if (object->character_context != 0 || !(object->context_animation_timer >= 0.1f))
+                return;
+        }
     }
     if (!(!object->apiobj.player_controlled && !(object->field_0xf01 & 0x80))) {
         f32 radius = 3.0f * object->apiobj.field_0x1dc;

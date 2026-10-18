@@ -5,9 +5,10 @@
 struct CHARACTER_CONTEXT_INFO_s {
     const char *name;
     i32 action;
-    u32 flags;
-    i32 parameter;
+    u64 flags; // 64 bits wide; retail reads the upper bits through one 64-bit load
 };
+DECOMP_ASSERT(sizeof(CHARACTER_CONTEXT_INFO_s) == 0x10, "CHARACTER_CONTEXT_INFO_s size");
+DECOMP_ASSERT(offsetof(CHARACTER_CONTEXT_INFO_s, flags) == 0x08, "CHARACTER_CONTEXT_INFO_s flags offset");
 
 enum CHARACTER_CONTEXT_INFO_FLAGS : u32 {
     CHARACTER_CONTEXT_INFO_FLAG_USE_FALL_ANIMATION = 0x00000008,

@@ -139,16 +139,18 @@ i32 i_temp_xrot;
 
 char *IToX(char *output, i32 value) {
     char hex[] = "0123456789abcdef";
-    output[0] = hex[(static_cast<u32>(value) >> 28) & 15];
-    output[1] = hex[(value >> 24) & 15];
-    i32 shifted = static_cast<u32>(value) << 8;
-    output[2] = hex[(static_cast<u32>(shifted) >> 28) & 15];
-    output[3] = hex[(shifted >> 24) & 15];
-    i8 byte = static_cast<i8>(value >> 8);
+    i8 byte = static_cast<i8>(value >> 24);
+    output[0] = hex[(byte >> 4) & 15];
+    output[1] = hex[byte & 15];
+    byte = static_cast<i8>(value >> 16);
+    output[2] = hex[(byte >> 4) & 15];
+    output[3] = hex[byte & 15];
+    byte = static_cast<i8>(value >> 8);
     output[4] = hex[(byte >> 4) & 15];
     output[5] = hex[byte & 15];
-    output[6] = hex[(static_cast<u32>(value) >> 4) & 15];
-    output[7] = hex[value & 15];
+    byte = static_cast<i8>(value);
+    output[6] = hex[(byte >> 4) & 15];
+    output[7] = hex[byte & 15];
     return output + 8;
 }
 
@@ -196,28 +198,32 @@ char *I64ToX(char *output, i64 value) {
     i32 high;
     __builtin_memcpy(&high, reinterpret_cast<const char *>(&value) + 4, sizeof(high));
     char hex[] = "0123456789abcdef";
-    output[0] = hex[(static_cast<u32>(high) >> 28) & 15];
-    output[1] = hex[(high >> 24) & 15];
-    i32 shifted_high = static_cast<u32>(high) << 8;
-    output[2] = hex[(static_cast<u32>(shifted_high) >> 28) & 15];
-    output[3] = hex[(shifted_high >> 24) & 15];
-    i8 byte_high = static_cast<i8>(high >> 8);
-    output[4] = hex[(byte_high >> 4) & 15];
-    output[5] = hex[byte_high & 15];
-    output[6] = hex[(static_cast<u32>(high) >> 4) & 15];
-    output[7] = hex[high & 15];
+    i8 byte = static_cast<i8>(high >> 24);
+    output[0] = hex[(byte >> 4) & 15];
+    output[1] = hex[byte & 15];
+    byte = static_cast<i8>(high >> 16);
+    output[2] = hex[(byte >> 4) & 15];
+    output[3] = hex[byte & 15];
+    byte = static_cast<i8>(high >> 8);
+    output[4] = hex[(byte >> 4) & 15];
+    output[5] = hex[byte & 15];
+    byte = static_cast<i8>(high);
+    output[6] = hex[(byte >> 4) & 15];
+    output[7] = hex[byte & 15];
     i32 low;
     __builtin_memcpy(&low, &value, sizeof(low));
-    output[8] = hex[(static_cast<u32>(low) >> 28) & 15];
-    output[9] = hex[(low >> 24) & 15];
-    i32 shifted_low = static_cast<u32>(low) << 8;
-    output[10] = hex[(static_cast<u32>(shifted_low) >> 28) & 15];
-    output[11] = hex[(shifted_low >> 24) & 15];
-    i8 byte_low = static_cast<i8>(low >> 8);
-    output[12] = hex[(byte_low >> 4) & 15];
-    output[13] = hex[byte_low & 15];
-    output[14] = hex[(static_cast<u32>(low) >> 4) & 15];
-    output[15] = hex[low & 15];
+    byte = static_cast<i8>(low >> 24);
+    output[8] = hex[(byte >> 4) & 15];
+    output[9] = hex[byte & 15];
+    byte = static_cast<i8>(low >> 16);
+    output[10] = hex[(byte >> 4) & 15];
+    output[11] = hex[byte & 15];
+    byte = static_cast<i8>(low >> 8);
+    output[12] = hex[(byte >> 4) & 15];
+    output[13] = hex[byte & 15];
+    byte = static_cast<i8>(low);
+    output[14] = hex[(byte >> 4) & 15];
+    output[15] = hex[byte & 15];
     return output + 16;
 }
 
@@ -615,38 +621,10 @@ inline SplineObject::SplineObject()
 }
 
 inline SplineObject::~SplineObject() {
-    SplinePointList *point_list = &points;
-    while (point_list->first != NULL) {
-        SplinePointBlock *block = point_list->first;
-        if (block->next != NULL)
-            block->next->previous = block->previous;
-        else
-            point_list->last = block->previous;
-        if (block->previous != NULL)
-            block->previous->next = block->next;
-        else
-            point_list->first = block->next;
-        block->next = NULL;
-        block->previous = NULL;
-        --point_list->block_count;
-        delete block;
-    }
-    SplineKnotList *knot_list = &knots;
-    while (knot_list->first != NULL) {
-        SplineKnot *knot = knot_list->first;
-        if (knot->next != NULL)
-            knot->next->previous = knot->previous;
-        else
-            knot_list->last = knot->previous;
-        if (knot->previous != NULL)
-            knot->previous->next = knot->next;
-        else
-            knot_list->first = knot->next;
-        knot->next = NULL;
-        knot->previous = NULL;
-        --knot_list->count;
-        theMemoryManager.FreePool(knot, sizeof(SplineKnot));
-    }
+}
+
+inline void SplineKnot::operator delete(void *memory) {
+    theMemoryManager.FreePool(memory, sizeof(SplineKnot));
 }
 
 inline void SplineObject::operator delete(void *memory) {
@@ -810,7 +788,7 @@ i32 OnOrInsidePlane(nuvec_s *point, nuvec_s *plane_point, nuvec_s *plane_normal,
     }
 
     if (corrected_point != NULL) {
-        NuVecScale(corrected_point, plane_normal, 0.5f - distance);
+        NuVecScale(corrected_point, plane_normal, -(distance - 0.5f));
         NuVecAdd(corrected_point, corrected_point, point);
     }
     return 1;
@@ -852,8 +830,8 @@ void FindAnglesXY(nuvec_s *direction, u16 *x_rotation, u16 *y_rotation) {
 void GetRotationAngles(nuvec_s *direction, u16 *x_rotation, u16 *y_rotation) {
     NUVEC rotated;
     NUVEC copy = *direction;
-    i32 y_angle = -NuAtan2D(copy.z, copy.x);
-    NuVecRotateY(&rotated, &copy, -static_cast<i32>(static_cast<u16>(y_angle)));
+    u16 y_angle = -NuAtan2D(copy.z, copy.x);
+    NuVecRotateY(&rotated, &copy, -y_angle);
     *x_rotation = -NuAtan2D(rotated.x, rotated.y);
     *y_rotation = y_angle;
 }
@@ -1157,7 +1135,7 @@ void PointAlongSpline(NUGSPLINE *spline, f32 along, NUVEC *position, u16 *angle,
         *pitch = 0;
     if (__builtin_expect(spline == NULL, 0))
         return;
-    if (__builtin_expect(along > 1.0f, 1))
+    if (along > 1.0f)
         along = 1.0f;
     else if (along < 0.0f)
         along = 0.0f;
@@ -1166,7 +1144,7 @@ void PointAlongSpline(NUGSPLINE *spline, f32 along, NUVEC *position, u16 *angle,
     i32 index = fixed >> 16;
     NUVEC *current = &spline->pts[index];
     *position = *current;
-    if (__builtin_expect(pitch != NULL || angle != NULL, 1))
+    if (__builtin_expect(angle != NULL, 1) || pitch != NULL)
         SplinePointAngles(spline, index, looping, pitch, angle);
     index++;
     if (index >= spline->length) {
@@ -1218,22 +1196,16 @@ i16 InsideLineXZ(f32 point_u, f32 point_v, f32 line_start_u, f32 line_start_v, f
 }
 
 i32 LineCrossedXZ(f32 ax, f32 az, f32 bx, f32 bz, f32 cx, f32 cz, f32 dx, f32 dz) {
-    f32 first = (bx - cx) * (dz - cz) + (bz - cz) * (cx - dx);
-    if (first >= 0.0f)
-        return 0;
-    f32 second = (ax - cx) * (dz - cz) + (az - cz) * (cx - dx);
-    if (!(second >= 0.0f))
-        return 0;
-    f32 third = (bx - ax) * (cz - az) + (bz - az) * (ax - cx);
-    if (!(third >= 0.0f))
-        return 1;
-    f32 az_to_dz = az;
-    i32 result = 2;
-    az_to_dz -= dz;
-    f32 fourth = (bx - dx) * az_to_dz + (bz - dz) * (dx - ax);
-    if (fourth >= 0.0f)
-        return result;
-    return 1;
+    i32 result = 0;
+    if (!((bx - cx) * (dz - cz) + (bz - cz) * (cx - dx) >= 0.0f) &&
+        (ax - cx) * (dz - cz) + (az - cz) * (cx - dx) >= 0.0f) {
+        result = 1;
+        if ((bx - ax) * (cz - az) + (bz - az) * (ax - cx) >= 0.0f &&
+            (bx - dx) * (az - dz) + (bz - dz) * (dx - ax) >= 0.0f) {
+            result = 2;
+        }
+    }
+    return result;
 }
 
 f32 RatioAlongLineXZ(nuvec_s *point, nuvec_s *start, nuvec_s *end) {
@@ -1420,20 +1392,21 @@ i32 LineIntersectSphere(NUVEC *origin, NUVEC *direction, NUVEC *center, f32 radi
     if (projection < 0.0f)
         return 0;
     f32 distance = x * x + y * y + z * z - projection * projection;
-    if (radius_squared < distance)
-        return 0;
-    if (distance_squared != NULL)
-        *distance_squared = distance;
-    return 1;
+    if (distance <= radius_squared) {
+        if (distance_squared != NULL)
+            *distance_squared = distance;
+        return 1;
+    }
+    return 0;
 }
 
-bool LineIntersectCircle(NUVEC *origin, NUVEC *direction, NUVEC *center, f32 radius_squared) {
+i32 LineIntersectCircle(NUVEC *origin, NUVEC *direction, NUVEC *center, f32 radius_squared) {
     f32 x = center->x - origin->x;
     f32 z = center->z - origin->z;
     f32 projection = direction->x * x + direction->z * z;
-    if (projection >= 0.0f)
-        return x * x + z * z - projection * projection <= radius_squared;
-    return false;
+    if (projection < 0.0f)
+        return 0;
+    return x * x + z * z - projection * projection <= radius_squared;
 }
 
 void MoveSplinePosition(SPLINEPOS_s *position, f32 distance) {
@@ -1636,7 +1609,7 @@ void EvaluateSplineXZIntersection(nugspline_s *first, i32 first_looping, SPLINEP
     }
 }
 
-__attribute__((optimize("O3"))) i32 OutSideSplineArea(nuvec_s *position, nugspline_s *spline, nuvec_s *edge_end, nuvec_s *edge_start, i32 inside) {
+i32 OutSideSplineArea(nuvec_s *position, nugspline_s *spline, nuvec_s *edge_end, nuvec_s *edge_start, i32 inside) {
     if (__builtin_expect(spline == NULL || position == NULL, 0))
         return 0;
     NUVEC ray_start = {position->x, -position->z, position->y};
@@ -1843,17 +1816,14 @@ void SaveSceneObjectAnimTFactors(NUGSCN *gscn) {
     }
     count = *(i32 *)((char *)gscn + 0x1c);
     p = *(char **)((char *)gscn + 0x20) + count * 0x50;
-    if (count == 0) {
-        return;
-    }
-    do {
+    while (count != 0) {
         p -= 0x50;
         obj = *(void **)(p + 0x48);
         if (obj != NULL) {
             *(f32 *)((char *)obj + 0x54) = *(f32 *)((char *)obj + 0x40);
         }
         count--;
-    } while (count != 0);
+    }
 }
 
 void DrawRectRGBA(float x, float y, float width, float height, u32 colour, numtl_s *material, i32 alignment,

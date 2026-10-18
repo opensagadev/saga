@@ -705,7 +705,7 @@ void Tag_Check(GameObject_s *object) {
                     } else if (Arcade == 0) {
                         if (Tag_Mode == 3) {
                             if (object->character_context == 0x17 || object->character_context == -1 ||
-                                (CInfo[object->character_context].parameter & 0x10) != 0 ||
+                                (CInfo[object->character_context].flags & (0x10ull << 32)) != 0 ||
                                 (CInfo[object->character_context].flags & 4) != 0) {
                                 target = Tag_FindGameObject_TRANSFER(object);
                             }
@@ -740,7 +740,7 @@ void Tag_Check(GameObject_s *object) {
                         } else {
                             if (Tag_Mode == 1) {
                                 if (object->character_context == 0x17 || object->character_context == -1 ||
-                                    (CInfo[object->character_context].parameter & 0x10) != 0 ||
+                                    (CInfo[object->character_context].flags & (0x10ull << 32)) != 0 ||
                                     (CInfo[object->character_context].flags & 4) != 0) {
                                     GameObject_s *found = Tag_FindGameObject_TRANSFER(object);
                                     if (found != NULL && found->apiobj.field_0x27c != -1)

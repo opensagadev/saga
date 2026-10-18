@@ -50,13 +50,11 @@ i32 app_tbdrawset;
 static u8 s_SystemPausedTracks[2];
 
 static void SystemDidBecomeActiveCallback(const NuPhoneOSMessageData *) {
-    if (s_SystemPausedTracks[0] != 0) {
-        NuSound3ResumeStereoStream(0);
-        s_SystemPausedTracks[0] = 0;
-    }
-    if (s_SystemPausedTracks[1] != 0) {
-        NuSound3ResumeStereoStream(1);
-        s_SystemPausedTracks[1] = 0;
+    for (i32 track = 0; track < 2; ++track) {
+        if (s_SystemPausedTracks[track] != 0) {
+            NuSound3ResumeStereoStream(track);
+            s_SystemPausedTracks[track] = 0;
+        }
     }
     NuPad_Interface_ResetAllTouches();
 }
@@ -96,13 +94,11 @@ static void SystemPauseCallback(const NuPhoneOSMessageData *) {
         PauseGame(pause_player->pad_gamepad - GamePad);
     }
 
-    if (NuSound3GetStereoStreamStatus(0) == NUSOUND_STEREO_STREAM_PLAYING) {
-        s_SystemPausedTracks[0] = 1;
-        NuSound3PauseStereoStream(0);
-    }
-    if (NuSound3GetStereoStreamStatus(1) == NUSOUND_STEREO_STREAM_PLAYING) {
-        s_SystemPausedTracks[1] = 1;
-        NuSound3PauseStereoStream(1);
+    for (i32 track = 0; track < 2; ++track) {
+        if (NuSound3GetStereoStreamStatus(track) == NUSOUND_STEREO_STREAM_PLAYING) {
+            s_SystemPausedTracks[track] = 1;
+            NuSound3PauseStereoStream(track);
+        }
     }
 }
 

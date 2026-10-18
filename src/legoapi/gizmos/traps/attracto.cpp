@@ -221,12 +221,14 @@ static void Attractos_Reset(void *context, void *, void *data) {
         attracto->drawn = 0;
         NuMtxSetRotationY(&attracto->transform, attracto->angle);
         NuMtxTranslate(&attracto->transform, &attracto->position);
-        if (i < 32 && progress != NULL) {
-            u32 mask = 1u << i;
-            attracto->collected_count = progress->counts[i];
-            attracto->visible = (progress->visible & mask) != 0;
-            attracto->active = (progress->active & mask) != 0;
-            attracto->filled = (progress->filled & mask) != 0;
+        if (i < 32) {
+            if (progress != NULL) {
+                u32 mask = 1u << i;
+                attracto->collected_count = progress->counts[i];
+                attracto->visible = (progress->visible & mask) != 0;
+                attracto->active = (progress->active & mask) != 0;
+                attracto->filled = (progress->filled & mask) != 0;
+            }
         }
     }
 }

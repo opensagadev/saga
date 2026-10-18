@@ -341,8 +341,10 @@ static GIZMOPICKUP_s *GizmoPickups_CollideList(GameObject_s *object, GIZMOPICKUP
         if ((pickup->state_flags & GIZMOPICKUP_STATE_ALTERNATE_TYPE) != 0 && GizmoPickupSys->alternate_type != -1) {
             type = &GizmoPickupSys->types[GizmoPickupSys->alternate_type];
         }
-        if (type->field_0x0f != 0 && pickups != WorldInfo_CurrentlyActive()->gizmo_pickup_sys->temporary_pickups) {
-            continue;
+        if (type->field_0x0f != 0) {
+            if (pickups != WorldInfo_CurrentlyActive()->gizmo_pickup_sys->temporary_pickups) {
+                continue;
+            }
         }
         if ((pickup->config_flags & 4) != 0) {
             return pickup;

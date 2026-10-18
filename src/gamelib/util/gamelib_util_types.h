@@ -202,7 +202,7 @@ DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(FtpFile, name) == 0xc, "FtpFile na
 DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(FtpFile, message_data) == 0xa0, "FtpFile message data 32-bit offset");
 DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(FtpFile, transfer) == 0xac, "FtpFile transfer 32-bit offset");
 struct NetReplicator {
-    static i16 smNextId;
+    static i32 smNextId;
 
     NetReplicator *next;
     NetReplicator *previous;
@@ -215,7 +215,7 @@ struct NetReplicator {
 
     NetReplicator(i32, float, float);
     // PushObject tests the full EAX return value at retail 0x532847.
-    virtual i32 AllowPush(EdClass const *, void const *, ReplicatorData &, i32, i32) = 0;
+    virtual bool AllowPush(EdClass const *, void const *, ReplicatorData &, i32, i32) = 0;
     virtual i32 SerialiseObject(EdStream &, NetPeer *, EdClass const *, void *, ReplicatorData &, i16 *);
     virtual i32 DoPrediction(EdClass const *, void *, ReplicatorData &, i32);
 };
@@ -223,13 +223,13 @@ struct NetChangedReplicator : NetReplicator {
     static i16 mTableInited;
     static i16 mCrc32Table[256];
 
-    i32 AllowPush(EdClass const *, void const *, ReplicatorData &, i32, i32) override;
+    bool AllowPush(EdClass const *, void const *, ReplicatorData &, i32, i32) override;
     void CheckSum(unsigned char const *, u32, u32 &) const;
     void CheckSumObject(EdClass const *, void const *, u32 &) const;
     void InitTable();
 };
 struct NetConstReplicator : NetReplicator {
-    i32 AllowPush(EdClass const *, void const *, ReplicatorData &, i32, i32) override;
+    bool AllowPush(EdClass const *, void const *, ReplicatorData &, i32, i32) override;
 };
 template <u32 SIZE> struct TData {
     u8 bytes[SIZE];
@@ -239,6 +239,16 @@ template <u32 SIZE> struct TData {
 };
 template <typename T, u32 COUNT> struct TPool {
     T items[COUNT];
+
+    T *Alloc() {
+        for (T *entry = items; entry != items + COUNT; ++entry) {
+            if (entry->references == 0) {
+                entry->references = 1;
+                return entry;
+            }
+        }
+        return NULL;
+    }
 
     ~TPool() {
         for (T *entry = items; entry != items + COUNT; ++entry) {
@@ -256,14 +266,7 @@ struct __attribute__((aligned(16))) NetMessage {
     u32 read_offset;
     u32 write_offset;
 
-    NetMessage() : swap_endianness(1), data(NULL), read_offset(0x20), write_offset(0x20) {
-        for (MessageData *entry = sm_poolMessageData.items; entry != sm_poolMessageData.items + 512; ++entry) {
-            if (entry->references == 0) {
-                data = entry;
-                entry->references = 1;
-                break;
-            }
-        }
+    NetMessage() : swap_endianness(1), data(sm_poolMessageData.Alloc()), read_offset(0x20), write_offset(0x20) {
     }
     NetMessage(NetMessage const &other) {
         data = other.data;
@@ -433,7 +436,7 @@ struct NetPredictor : NetReplicator {
     f32 minimum_value;
     f32 maximum_value;
 
-    i32 AllowPush(EdClass const *, void const *, ReplicatorData &, i32, i32) override;
+    bool AllowPush(EdClass const *, void const *, ReplicatorData &, i32, i32) override;
     virtual i32 CheckPredictionError(EdClass const *, void *, float *, float *, i32);
     i32 DoPrediction(EdClass const *, void *, ReplicatorData &, NetPredictor::PredictorTime *, i32);
     i32 DoPrediction(EdClass const *, void *, ReplicatorData &, i32) override;
@@ -465,7 +468,7 @@ DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(NetPredictor) == 0x28, "NetPredictor
 DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(NetPeer, time_offset) == 0x29c, "NetPeer::time_offset 32-bit offset");
 DECOMP_ASSERT(offsetof(NetPeer, stats) == 0x10, "NetPeer stats offset");
 struct NetSimpleReplicator : NetReplicator {
-    i32 AllowPush(EdClass const *, void const *, ReplicatorData &, i32, i32) override;
+    bool AllowPush(EdClass const *, void const *, ReplicatorData &, i32, i32) override;
 };
 DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(NetReplicator) == 0x18, "NetReplicator 32-bit size");
 DECOMP_ASSERT(offsetof(NetReplicator, next) == 4, "NetReplicator next offset");
@@ -643,6 +646,8 @@ struct NetworkObjectManager : NetListenerInterface, EdObjectNotifier {
         NetReplicator *head;
         NetReplicator *tail;
         i32 count;
+
+        ReplicatorList() : head(NULL), tail(NULL), count(0) {}
     } replicators[64];
     i32 replicator_data_sizes[64];
     NOSFilter *filters[64];

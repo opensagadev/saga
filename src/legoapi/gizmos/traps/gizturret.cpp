@@ -610,8 +610,8 @@ static i32 *GizTurrets_GetBestBoltTarget(GIZMOSET *set, float *result_distance, 
     NUVEC aim = *direction;
     const float min_z = position->z - radius;
     const float max_x = position->x + radius;
-    const float min_x = position->x - radius;
     const float max_z = position->z + radius;
+    const float min_x = position->x - radius;
     if (directional != 0 && (bolt_type->field_60 & 0x20000) != 0) {
         aim.y = 0.0f;
         NuVecNorm(&aim, &aim);
@@ -961,7 +961,11 @@ static void GizTurret_Init(GIZTURRET_s *turret) {
     turret->field_0x130 = 1;
     turret->blowup_type = -1;
     turret->bolt_type_id = -1;
-    turret->field_0x120 = (WORLD->area != NULL && (WORLD->area->flags & 1) != 0) ? 12.0f : 1.75f;
+    if (WORLD->area != NULL && (WORLD->area->flags & 1) != 0) {
+        turret->field_0x120 = 12.0f;
+    } else {
+        turret->field_0x120 = 1.75f;
+    }
 }
 
 static i32 GizTurrets_Load(void *world_ptr, void *system_ptr) {
@@ -1324,8 +1328,8 @@ void GizTurrets_OpponentSelection(GIZTURRETSYS_s *system, i32 goody_count, APIOB
             return;
         }
 
-        APIOBJECT_s **candidates = baddies;
         i32 candidate_count = baddy_count;
+        APIOBJECT_s **candidates = baddies;
         if ((turret->behavior_flags & 4) == 0) {
             candidates = goodies;
             candidate_count = goody_count;

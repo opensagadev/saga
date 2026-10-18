@@ -1510,17 +1510,21 @@ static void Jump_EndOfLandContext(GameObject_s *object) {
 }
 
 static __used__ void Collection_GetSelectingPlayerIDs(i16 *ids) {
-    if (WORLD->area != NULL && WORLD->area == HUB_ADATA && GetMenuID() == 17 && static_cast<u32>(freeplaymode) <= 3) {
-        i32 offset = 0;
-        if (MenuPacket.active_player[0] != 0 && freeplay_selected[0] <= 2) {
-            ids[0] = MenuPacket.player_model[0];
-            offset = 2;
+    if (WORLD->area != NULL && WORLD->area == HUB_ADATA) {
+        if (GetMenuID() == 17) {
+            if (static_cast<u32>(freeplaymode) <= 3) {
+                i32 offset = 0;
+                if (MenuPacket.active_player[0] != 0 && freeplay_selected[0] <= 2) {
+                    ids[0] = MenuPacket.player_model[0];
+                    offset = 2;
+                }
+                if (MenuPacket.active_player[1] == 0)
+                    return;
+                if (freeplay_selected[1] > 2)
+                    return;
+                *reinterpret_cast<i16 *>(reinterpret_cast<u8 *>(ids) + offset) = MenuPacket.player_model[1];
+            }
         }
-        if (MenuPacket.active_player[1] == 0)
-            return;
-        if (freeplay_selected[1] > 2)
-            return;
-        *reinterpret_cast<i16 *>(reinterpret_cast<u8 *>(ids) + offset) = MenuPacket.player_model[1];
     }
 }
 
@@ -1738,10 +1742,8 @@ void InitGameBeforeConfig(void) {
     GameSetMusicVolume(&Game.options_save);
     Text_GameSetLanguageFn = Text_SetLanguage_Game;
 
-    if (Text_Language != 13) {
-        if (Text_Language != 0 && PAL != 0) {
-            Text_SetLanguage(NuLanguageGet());
-        }
+    if (Text_Language != 0 && Text_Language != 13 && PAL != 0) {
+        Text_SetLanguage(NuLanguageGet());
     }
 
     GameRegisterGizActions();
@@ -1831,52 +1833,54 @@ void InitGameAfterConfig(void) {
             i32 episode = Episode_ContainsArea(areaId, &areaIndex);
             area->episode_index = episode;
             area->area_index = (byte)areaIndex;
-            if ((area != HUB_ADATA) && (areaFlags = area->flags, (areaFlags & 0x2022) == 0)) {
-                if ((areaFlags & 0x100) == 0) {
-                    if ((areaFlags & 4) != 0) {
-                        COMPLETIONPOINTS = COMPLETIONPOINTS + POINTS_PER_TIMETRIAL;
-                        CompletionPointInfo[1] = CompletionPointInfo[1] + POINTS_PER_TIMETRIAL;
-                        goto LAB_0012ca5f;
-                    }
-                    COMPLETIONPOINTS = POINTS_PER_STORY + COMPLETIONPOINTS;
-                    CompletionPointInfo[1] = POINTS_PER_STORY + CompletionPointInfo[1];
-                    if ((areaFlags & AREAFLAG_NO_GOLDBRICK) == 0) {
-                        GOLDBRICKPOINTS = GOLDBRICKPOINTS + 1;
-                    }
-
-                    if ((areaFlags & 0x10) != 0) {
-                        i32 local_24 = COMPLETIONPOINTS + POINTS_PER_MINIKIT + POINTS_PER_TRUEJEDI;
-                        i32 iVar4 = GOLDBRICKPOINTS + 2;
-                        i32 local_28 = POINTS_PER_MINIKIT + POINTS_PER_TRUEJEDI + CompletionPointInfo[1];
-                        if (BOTHTRUEJEDIGOLDBRICKS != 0) {
-                            local_24 = local_24 + POINTS_PER_TRUEJEDI;
-                            local_28 = local_28 + POINTS_PER_TRUEJEDI;
-                            iVar4 = GOLDBRICKPOINTS + 3;
+            if (area != HUB_ADATA) {
+                if ((areaFlags = area->flags, (areaFlags & 0x2022) == 0)) {
+                    if ((areaFlags & 0x100) == 0) {
+                        if ((areaFlags & 4) != 0) {
+                            COMPLETIONPOINTS = COMPLETIONPOINTS + POINTS_PER_TIMETRIAL;
+                            CompletionPointInfo[1] = CompletionPointInfo[1] + POINTS_PER_TIMETRIAL;
+                            goto LAB_0012ca5f;
                         }
-                        COMPLETIONPOINTS = POINTS_PER_REDBRICK + local_24 + POINTS_PER_CHALLENGE;
-                        GOLDBRICKPOINTS = iVar4;
-                        CompletionPointInfo[1] = POINTS_PER_REDBRICK + POINTS_PER_CHALLENGE + local_28;
-                        if (GOLDBRICKFORCHALLENGE != 0) {
+                        COMPLETIONPOINTS = POINTS_PER_STORY + COMPLETIONPOINTS;
+                        CompletionPointInfo[1] = POINTS_PER_STORY + CompletionPointInfo[1];
+                        if ((areaFlags & AREAFLAG_NO_GOLDBRICK) == 0) {
                             GOLDBRICKPOINTS = GOLDBRICKPOINTS + 1;
+                        }
+
+                        if ((areaFlags & 0x10) != 0) {
+                            i32 local_24 = COMPLETIONPOINTS + POINTS_PER_MINIKIT + POINTS_PER_TRUEJEDI;
+                            i32 iVar4 = GOLDBRICKPOINTS + 2;
+                            i32 local_28 = POINTS_PER_MINIKIT + POINTS_PER_TRUEJEDI + CompletionPointInfo[1];
+                            if (BOTHTRUEJEDIGOLDBRICKS != 0) {
+                                local_24 = local_24 + POINTS_PER_TRUEJEDI;
+                                local_28 = local_28 + POINTS_PER_TRUEJEDI;
+                                iVar4 = GOLDBRICKPOINTS + 3;
+                            }
+                            COMPLETIONPOINTS = POINTS_PER_REDBRICK + local_24 + POINTS_PER_CHALLENGE;
+                            GOLDBRICKPOINTS = iVar4;
+                            CompletionPointInfo[1] = POINTS_PER_REDBRICK + POINTS_PER_CHALLENGE + local_28;
+                            if (GOLDBRICKFORCHALLENGE != 0) {
+                                GOLDBRICKPOINTS = GOLDBRICKPOINTS + 1;
+                            }
+                        } else {
+                            if ((areaFlags & 0x4000) != 0) {
+                                COMPLETIONPOINTS = COMPLETIONPOINTS + POINTS_PER_TRUEJEDI;
+                                CompletionPointInfo[1] = POINTS_PER_TRUEJEDI + CompletionPointInfo[1];
+                                GOLDBRICKPOINTS = GOLDBRICKPOINTS + 1;
+                            }
                         }
                     } else {
-                        if ((areaFlags & 0x4000) != 0) {
-                            COMPLETIONPOINTS = COMPLETIONPOINTS + POINTS_PER_TRUEJEDI;
-                            CompletionPointInfo[1] = POINTS_PER_TRUEJEDI + CompletionPointInfo[1];
-                            GOLDBRICKPOINTS = GOLDBRICKPOINTS + 1;
-                        }
+                        COMPLETIONPOINTS = COMPLETIONPOINTS + POINTS_PER_SUPERBONUSCOMPLETE;
+                        CompletionPointInfo[1] = CompletionPointInfo[1] + POINTS_PER_SUPERBONUSCOMPLETE;
+                        if (GOLDBRICKFORSUPERBONUS == 0)
+                            goto LAB_0012ca68;
+                    LAB_0012ca5f:
+                        GOLDBRICKPOINTS = GOLDBRICKPOINTS + 1;
                     }
-                } else {
-                    COMPLETIONPOINTS = COMPLETIONPOINTS + POINTS_PER_SUPERBONUSCOMPLETE;
-                    CompletionPointInfo[1] = CompletionPointInfo[1] + POINTS_PER_SUPERBONUSCOMPLETE;
-                    if (GOLDBRICKFORSUPERBONUS == 0)
-                        goto LAB_0012ca68;
-                LAB_0012ca5f:
-                    GOLDBRICKPOINTS = GOLDBRICKPOINTS + 1;
-                }
-            LAB_0012ca68:
-                if (area->cheat != 0xff) {
-                    Cheat_SetArea((i32)(char)area->cheat, areaId);
+                LAB_0012ca68:
+                    if (area->cheat != 0xff) {
+                        Cheat_SetArea((i32)(char)area->cheat, areaId);
+                    }
                 }
             }
             areaId = areaId + 1;
@@ -3027,7 +3031,11 @@ void CheckResetBits() {
     bonusmodearcade = 0;
     if (WORLD->area != NULL && (WORLD->area->flags & 0x10) != 0) {
         if (AreaGlobals.values.field_0x14 < AreaGlobals.values.field_0x0c) {
-            AreaGlobals.values.field_0x14 = AreaGlobals.values.field_0x0c > 10 ? 10 : AreaGlobals.values.field_0x0c;
+            if (AreaGlobals.values.field_0x0c > 10) {
+                AreaGlobals.values.field_0x14 = 10;
+            } else {
+                AreaGlobals.values.field_0x14 = AreaGlobals.values.field_0x0c;
+            }
         }
     }
     arcade_placed_stud_total = (GizmoPickups_TotalScore(WORLD) * 85u) / 100u;

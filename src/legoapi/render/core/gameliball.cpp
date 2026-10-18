@@ -3947,8 +3947,8 @@ static void edptlcbBounceMenu(eduimenu_s *parent, eduiitem_s *, u32) {
         edptl_bounce_menu = eduiMenuCreate(70, 70, 200, 300, ed_fnt, edptlcbCancelBounceMenu, "Particle Bounce");
         if (edptl_bounce_menu != NULL) {
             eduiMenuAddItem(edptl_bounce_menu,
-                            eduiItemSliderCreate(0, colours, 0, edptlcbApplyBounceOffset, -10.0f * edptl_superscale,
-                                                 10.0f * edptl_superscale, key->collision_plane, "Plane Offset"));
+                            eduiItemSliderCreate(0, colours, 0, edptlcbApplyBounceOffset, -2.0f * edptl_superscale,
+                                                 4.0f * edptl_superscale, key->collision_plane, "Plane Offset"));
             eduiMenuAddItem(edptl_bounce_menu, eduiItemSliderCreate(0, colours, 0, edptlcbApplyBounceFactor, 0.0f, 2.0f,
                                                                     key->reflection_scale, "Bounce Factor"));
             eduiMenuAttach(parent, edptl_bounce_menu);
@@ -4502,17 +4502,9 @@ static void edptlcbSetSoundID(eduimenu_s *menu, eduiitem_s *item, u32) {
         }
 
         debkeydata[instance_id].process_collision_sound = 0;
-        if (debtab[debkeydata[instance_id].effect_index]->sound_data[0] != -1) {
-            debkeydata[instance_id].process_collision_sound = 1;
-        }
-        if (debtab[debkeydata[instance_id].effect_index]->sound_data[3] != -1) {
-            debkeydata[instance_id].process_collision_sound = 1;
-        }
-        if (debtab[debkeydata[instance_id].effect_index]->sound_data[6] != -1) {
-            debkeydata[instance_id].process_collision_sound = 1;
-        }
-        if (debtab[debkeydata[instance_id].effect_index]->sound_data[9] != -1) {
-            debkeydata[instance_id].process_collision_sound = 1;
+        for (i32 slot = 0; slot < 4; ++slot) {
+            if (debtab[debkeydata[instance_id].effect_index]->sound_data[slot * 3] != -1)
+                debkeydata[instance_id].process_collision_sound = 1;
         }
     }
 
@@ -6023,14 +6015,14 @@ uv1deb *GenDebIndexRadialRotor(debkeydatatype_s *key, debinftype *effect, float 
     }
     if (effect->native_data == NULL)
         GenericDebinfoDmaTypeUpdate(effect);
-    if (effect->field_050 != 0.0f)
-        key->emitter_rotation_x += static_cast<i16>(static_cast<i32>(effect->field_050));
-    else
+    if (effect->field_050 == 0.0f)
         key->emitter_rotation_x = 0;
-    if (effect->field_054 != 0.0f)
-        key->emitter_rotation_y += static_cast<i16>(static_cast<i32>(effect->field_054));
     else
+        key->emitter_rotation_x += static_cast<i16>(static_cast<i32>(effect->field_050));
+    if (effect->field_054 == 0.0f)
         key->emitter_rotation_y = 0;
+    else
+        key->emitter_rotation_y += static_cast<i16>(static_cast<i32>(effect->field_054));
     return reinterpret_cast<uv1deb *>(particle);
 }
 
@@ -7581,9 +7573,7 @@ extern "C" {
             Music.queued_track = static_cast<i16>(track);
             Music.requested_track = static_cast<i16>(track);
             reinterpret_cast<u8 *>(&Music)[primary_stream + 0x12] = 0;
-            if (transition_frames < 64 && state != MUSIC_PLAYBACK_STOPPED) {
-                Music.pause_requested = true;
-            } else {
+            if (transition_frames >= 64 || state == MUSIC_PLAYBACK_STOPPED) {
                 Music.pause_requested = false;
                 const f32 seek_offset = Music.seek_offset;
                 const i32 stream = 1 - primary_stream;
@@ -7594,6 +7584,8 @@ extern "C" {
                 if (track >= SFX_MUSIC_COUNT) {
                     return;
                 }
+            } else {
+                Music.pause_requested = true;
             }
         }
 
@@ -11046,14 +11038,10 @@ void DebrisProcessGeneration() {
             volume = (sound_range - key->cutoff_distance) / sound_range;
         }
         if (key->process_collision_sound != 0 && key->field_184 != 0 && sound_range > key->cutoff_distance) {
-            if (effect->sound_data[0] != -1 && effect->sound_data[1] == 4)
-                PlaySfxByIdEx(effect->sound_data[0], &key->position, volume, 1.0f);
-            if (effect->sound_data[3] != -1 && effect->sound_data[4] == 4)
-                PlaySfxByIdEx(effect->sound_data[3], &key->position, volume, 1.0f);
-            if (effect->sound_data[6] != -1 && effect->sound_data[7] == 4)
-                PlaySfxByIdEx(effect->sound_data[6], &key->position, volume, 1.0f);
-            if (effect->sound_data[9] != -1 && effect->sound_data[10] == 4)
-                PlaySfxByIdEx(effect->sound_data[9], &key->position, volume, 1.0f);
+            for (i32 i = 0; i < 4; i++) {
+                if (effect->sound_data[i * 3] != -1 && effect->sound_data[i * 3 + 1] == 4)
+                    PlaySfxByIdEx(effect->sound_data[i * 3], &key->position, volume, 1.0f);
+            }
         }
         if (effect->status == 0)
             key->field_184 = 0;
@@ -11110,14 +11098,10 @@ void DebrisProcessGeneration() {
                         }
                         if (key->process_collision_sound != 0 && key->field_184 != 0 &&
                             sound_range > key->cutoff_distance) {
-                            if (effect->sound_data[0] != -1 && effect->sound_data[1] == 1)
-                                PlaySfxByIdEx(effect->sound_data[0], &key->position, volume, 1.0f);
-                            if (effect->sound_data[3] != -1 && effect->sound_data[4] == 1)
-                                PlaySfxByIdEx(effect->sound_data[3], &key->position, volume, 1.0f);
-                            if (effect->sound_data[6] != -1 && effect->sound_data[7] == 1)
-                                PlaySfxByIdEx(effect->sound_data[6], &key->position, volume, 1.0f);
-                            if (effect->sound_data[9] != -1 && effect->sound_data[10] == 1)
-                                PlaySfxByIdEx(effect->sound_data[9], &key->position, volume, 1.0f);
+                            for (i32 i = 0; i < 4; i++) {
+                                if (effect->sound_data[i * 3] != -1 && effect->sound_data[i * 3 + 1] == 1)
+                                    PlaySfxByIdEx(effect->sound_data[i * 3], &key->position, volume, 1.0f);
+                            }
                         }
                         pause = 0.0f;
                     } else {
@@ -11129,14 +11113,10 @@ void DebrisProcessGeneration() {
                             key->field_184 = 0;
                         if (key->process_collision_sound != 0 && key->field_184 != 0 &&
                             sound_range > key->cutoff_distance) {
-                            if (effect->sound_data[0] != -1 && effect->sound_data[1] == 2)
-                                PlaySfxByIdEx(effect->sound_data[0], &key->position, volume, 1.0f);
-                            if (effect->sound_data[3] != -1 && effect->sound_data[4] == 2)
-                                PlaySfxByIdEx(effect->sound_data[3], &key->position, volume, 1.0f);
-                            if (effect->sound_data[6] != -1 && effect->sound_data[7] == 2)
-                                PlaySfxByIdEx(effect->sound_data[6], &key->position, volume, 1.0f);
-                            if (effect->sound_data[9] != -1 && effect->sound_data[10] == 2)
-                                PlaySfxByIdEx(effect->sound_data[9], &key->position, volume, 1.0f);
+                            for (i32 i = 0; i < 4; i++) {
+                                if (effect->sound_data[i * 3] != -1 && effect->sound_data[i * 3 + 1] == 2)
+                                    PlaySfxByIdEx(effect->sound_data[i * 3], &key->position, volume, 1.0f);
+                            }
                         }
                     }
                 }
@@ -11147,14 +11127,10 @@ void DebrisProcessGeneration() {
                     if (effect->process_spheres != 0 && particle != NULL && emission == 1)
                         DebrisProcessSpheres(particle, emission_time, effect, key, 0);
                     if (key->process_collision_sound != 0 && sound_range > key->cutoff_distance) {
-                        if (effect->sound_data[0] != -1 && effect->sound_data[1] == 3)
-                            PlaySfxByIdEx(effect->sound_data[0], &key->position, volume, 1.0f);
-                        if (effect->sound_data[3] != -1 && effect->sound_data[4] == 3)
-                            PlaySfxByIdEx(effect->sound_data[3], &key->position, volume, 1.0f);
-                        if (effect->sound_data[6] != -1 && effect->sound_data[7] == 3)
-                            PlaySfxByIdEx(effect->sound_data[6], &key->position, volume, 1.0f);
-                        if (effect->sound_data[9] != -1 && effect->sound_data[10] == 3)
-                            PlaySfxByIdEx(effect->sound_data[9], &key->position, volume, 1.0f);
+                        for (i32 i = 0; i < 4; i++) {
+                            if (effect->sound_data[i * 3] != -1 && effect->sound_data[i * 3 + 1] == 3)
+                                PlaySfxByIdEx(effect->sound_data[i * 3], &key->position, volume, 1.0f);
+                        }
                     }
                 }
                 key->emission_epoch = emission_time;
@@ -11223,25 +11199,17 @@ void DebrisProcessTriggers() {
                             range = effect->clip_extent;
                         f32 volume = 0.0f;
                         if (range > key->cutoff_distance) {
-                            if (effect->sound_data[0] != -1)
-                                SetSfxBit_On(effect->sound_data[0]);
-                            if (effect->sound_data[3] != -1)
-                                SetSfxBit_On(effect->sound_data[3]);
-                            if (effect->sound_data[6] != -1)
-                                SetSfxBit_On(effect->sound_data[6]);
-                            if (effect->sound_data[9] != -1)
-                                SetSfxBit_On(effect->sound_data[9]);
+                            for (i32 i = 0; i < 4; i++) {
+                                if (effect->sound_data[i * 3] != -1)
+                                    SetSfxBit_On(effect->sound_data[i * 3]);
+                            }
                             volume = (range - key->cutoff_distance) / range;
                         }
                         if (range > key->cutoff_distance) {
-                            if (effect->sound_data[0] != -1 && effect->sound_data[1] == 1)
-                                PlaySfxByIdEx(effect->sound_data[0], &key->position, volume, 1.0f);
-                            if (effect->sound_data[3] != -1 && effect->sound_data[4] == 1)
-                                PlaySfxByIdEx(effect->sound_data[3], &key->position, volume, 1.0f);
-                            if (effect->sound_data[6] != -1 && effect->sound_data[7] == 1)
-                                PlaySfxByIdEx(effect->sound_data[6], &key->position, volume, 1.0f);
-                            if (effect->sound_data[9] != -1 && effect->sound_data[10] == 1)
-                                PlaySfxByIdEx(effect->sound_data[9], &key->position, volume, 1.0f);
+                            for (i32 i = 0; i < 4; i++) {
+                                if (effect->sound_data[i * 3] != -1 && effect->sound_data[i * 3 + 1] == 1)
+                                    PlaySfxByIdEx(effect->sound_data[i * 3], &key->position, volume, 1.0f);
+                            }
                         }
                     }
                     break;
@@ -11322,13 +11290,13 @@ extern "C" {
             }
             NuMtxTranslate(&matrix, &position);
             f32 render_time;
-            if (pass == 4) {
+            if (pass != 4) {
+                render_time = renderglobaltime;
+                effect->last_render_time = globaltime;
+            } else {
                 NuMtxMulVU0(&matrix, &matrix, NuCameraGetMtx());
                 render_time = renderpanelglobaltime;
                 effect->last_render_time = panelglobaltime;
-            } else {
-                render_time = renderglobaltime;
-                effect->last_render_time = globaltime;
             }
             if (key != NULL && key->field_2fa != 0)
                 NuRndrSetParticleRotation(&key->particle_orientation);
@@ -11380,25 +11348,17 @@ extern "C" {
                 range = debtab[effect]->clip_extent;
             f32 volume = 0.0f;
             if (debkeydata[*handle].cutoff_distance < range) {
-                if (debtab[effect]->sound_data[0] != -1)
-                    SetSfxBit_On(debtab[effect]->sound_data[0]);
-                if (debtab[effect]->sound_data[3] != -1)
-                    SetSfxBit_On(debtab[effect]->sound_data[3]);
-                if (debtab[effect]->sound_data[6] != -1)
-                    SetSfxBit_On(debtab[effect]->sound_data[6]);
-                if (debtab[effect]->sound_data[9] != -1)
-                    SetSfxBit_On(debtab[effect]->sound_data[9]);
+                for (i32 i = 0; i < 4; i++) {
+                    if (debtab[effect]->sound_data[i * 3] != -1)
+                        SetSfxBit_On(debtab[effect]->sound_data[i * 3]);
+                }
                 volume = (range - debkeydata[*handle].cutoff_distance) / range;
             }
             if (debkeydata[*handle].cutoff_distance < range) {
-                if (debtab[effect]->sound_data[0] != -1 && debtab[effect]->sound_data[1] == 1)
-                    PlaySfxByIdEx(debtab[effect]->sound_data[0], position, volume, 1.0f);
-                if (debtab[effect]->sound_data[3] != -1 && debtab[effect]->sound_data[4] == 1)
-                    PlaySfxByIdEx(debtab[effect]->sound_data[3], position, volume, 1.0f);
-                if (debtab[effect]->sound_data[6] != -1 && debtab[effect]->sound_data[7] == 1)
-                    PlaySfxByIdEx(debtab[effect]->sound_data[6], position, volume, 1.0f);
-                if (debtab[effect]->sound_data[9] != -1 && debtab[effect]->sound_data[10] == 1)
-                    PlaySfxByIdEx(debtab[effect]->sound_data[9], position, volume, 1.0f);
+                for (i32 i = 0; i < 4; i++) {
+                    if (debtab[effect]->sound_data[i * 3] != -1 && debtab[effect]->sound_data[i * 3 + 1] == 1)
+                        PlaySfxByIdEx(debtab[effect]->sound_data[i * 3], position, volume, 1.0f);
+                }
             }
         }
         if (emitter_momentum != NULL) {
@@ -11766,10 +11726,10 @@ extern "C" {
             return;
         i32 reserved = NuTexReserve(NuTexGetReqSize(debris_rt, 0));
         DebrisGlassParticlesActive();
-        if (flicker == 0)
-            NuRndrBeginSceneEx(-1, -2, 1);
-        else
+        if (flicker != 0)
             NuRndrFlickerBeginScene();
+        else
+            NuRndrBeginSceneEx(-1, -2, 1);
         if (DebrisGlassParticlesActive() != 0)
             DebrisDraw(0, 2);
         NuRainDraw(reserved);
@@ -12438,7 +12398,7 @@ extern "C" void edbitsDrawCross(f32 x, f32 y, f32 z, f32 radius, i32 colour, num
         NUVEC position;
         static i32 localframecount;
         float seconds;
-        if (__builtin_expect(NuVideoGetMode() == 3, 1))
+        if (__builtin_expect(NuVideoGetMode() == 3, 0))
             seconds = elapsed / 50.0f;
         else
             seconds = elapsed / 60.0f;
@@ -12512,7 +12472,7 @@ extern "C" void edbitsDrawCross(f32 x, f32 y, f32 z, f32 radius, i32 colour, num
                 if (index == edanim_nearest_param_id && (edanim_particle_mode != 0 || edanim_sound_mode != 0))
                     animation->ltime = 1.0f;
             }
-            if (__builtin_expect(NuSpecialGetVisibilityFn(&special) != NULL, 1)) {
+            if (NuSpecialGetVisibilityFn(&special) != NULL) {
                 i32 particle_index = 0;
                 while (particle_index < AnimParams[index].effect_count) {
                     i32 effect = AnimParams[index].effect_ids[particle_index];
@@ -13189,15 +13149,15 @@ extern "C" i32 edbriLoadPage(char *path, void *gscn) {
         edBridges[index].field_1e = EdFileReadChar();
         char name[20];
         EdFileRead(name, 20);
-        if (name[0])
-            edBridges[index].special_20 = edbitsLookupInstance(name, static_cast<NUGSCN *>(gscn));
-        else
+        if (!name[0])
             edBridges[index].special_20 = -1;
+        else
+            edBridges[index].special_20 = edbitsLookupInstance(name, static_cast<NUGSCN *>(gscn));
         EdFileRead(name, 20);
-        if (name[0]) {
-            edBridges[index].special_24 = edbitsLookupInstance(name, static_cast<NUGSCN *>(gscn));
-        } else {
+        if (!name[0]) {
             edBridges[index].special_24 = -1;
+        } else {
+            edBridges[index].special_24 = edbitsLookupInstance(name, static_cast<NUGSCN *>(gscn));
         }
         edBridges[index].field_28 = EdFileReadFloat();
         edBridges[index].field_2c = EdFileReadFloat();
@@ -14938,9 +14898,9 @@ void edppDoInput(nupad_s *pad) {
                 edpp_refrotz = -0x8000;
         } else if (edpp_dpad_mode == 2) {
             if (pad->analog_left_pad_up == 255 || (pad->digital_buttons_pressed & 0x1000))
-                edpp_offset += 1.25f;
+                edpp_offset += 0.01f;
             if (pad->analog_left_pad_down == 255 || (pad->digital_buttons_pressed & 0x4000))
-                edpp_offset -= 1.25f;
+                edpp_offset -= 0.01f;
             if (edpp_offset < 0.0f)
                 edpp_offset = 0.0f;
         } else if (edpp_dpad_mode == 4) {
@@ -15660,10 +15620,10 @@ void FileLoadSingleEffectType(debinftype *effect, i32 version, char category) {
         effect->cut_on = 0.0f;
         effect->clip_extent = 25.0f;
     }
-    if (version >= 10)
-        effect->sound_range = EdFileReadFloat();
-    else
+    if (version < 10)
         effect->sound_range = 0.0f;
+    else
+        effect->sound_range = EdFileReadFloat();
     if (version >= 23)
         effect->sound_range_override = EdFileReadFloat();
     else
@@ -16679,20 +16639,20 @@ extern "C" void *TerrainInitEx(i32 level_num, void *buf, void *buf_end, i32 opti
         }
 
         group.radius = NuFsqrt(radius_squared);
-        if (group.chunk_type == TERRAIN_CHUNK_GROUP_SECONDARY) {
-            group.bounds_min.x = min_x;
-            group.bounds_min.y = min_y;
-            group.bounds_min.z = min_z;
-            group.bounds_max.x = max_x;
-            group.bounds_max.y = max_y;
-            group.bounds_max.z = max_z;
-        } else {
+        if (group.chunk_type != TERRAIN_CHUNK_GROUP_SECONDARY) {
             group.bounds_min.x = group.origin.x + min_x;
             group.bounds_min.y = group.origin.y + min_y;
             group.bounds_min.z = group.origin.z + min_z;
             group.bounds_max.y = group.origin.y + max_y;
             group.bounds_max.x = group.origin.x + max_x;
             group.bounds_max.z = group.origin.z + max_z;
+        } else {
+            group.bounds_min.x = min_x;
+            group.bounds_min.y = min_y;
+            group.bounds_min.z = min_z;
+            group.bounds_max.x = max_x;
+            group.bounds_max.y = max_y;
+            group.bounds_max.z = max_z;
         }
         ++terraincnt;
     }
@@ -17552,7 +17512,10 @@ extern "C" {
 
             i32 skipped_individuals = 0;
             if (clump->kind == 3) {
-                if (edgra_ind_clumps_used != EDGRA_MAX_INDIVIDUAL_CLUMPS) {
+                if (edgra_ind_clumps_used == EDGRA_MAX_INDIVIDUAL_CLUMPS) {
+                    skipped_individuals = clump->element_count;
+                    clump->element_count = 0;
+                } else {
                     i32 individual = 0;
                     while (IndGrassClumpsUsed[individual] != 0) {
                         ++individual;
@@ -17571,9 +17534,6 @@ extern "C" {
                         GetIndGrassClump(individual, element)->field_10 = EdFileReadShort();
                         GetIndGrassClump(individual, element)->field_12 = EdFileReadShort();
                     }
-                } else {
-                    skipped_individuals = clump->element_count;
-                    clump->element_count = 0;
                 }
                 for (i32 element = 0; element < skipped_individuals; ++element) {
                     EdFileReadFloat();
@@ -19850,7 +19810,7 @@ i32 CheckCylinder(i32 first_vertex, i32 second_vertex, i32 *vertex_mask, i32 rem
     };
     const f32 distance_sq =
         edge_direction.x * edge_direction.x + edge_direction.y * edge_direction.y + edge_direction.z * edge_direction.z;
-    if (__builtin_expect(distance_sq >= query->collision_radius_sq, 0)) {
+    if (__builtin_expect(distance_sq >= query->collision_radius_sq, 1)) {
         return 0;
     }
 
@@ -21400,7 +21360,22 @@ void TerrainImpact(NUVEC *position, NUVEC *movement, u8 *hit_flags) {
             TerI->movement.y -= travelled.y;
             TerI->movement.z -= travelled.z;
 
-            if (walkable_normal_y > TerI->impact_normal.y) {
+            if (!(walkable_normal_y > TerI->impact_normal.y)) {
+                FullDeflect(&TerI->movement_normal, &TerI->movement, &TerI->movement);
+                FullDeflect(&TerI->impact_normal, movement, movement);
+
+                terrhitflags |= TERRAIN_IMPACT_RESULT_GROUND;
+                hit_flags[0] = 1;
+                hit_flags[1] = 1;
+                TerI->position.y += TerI->movement_normal.y * 0.0003f;
+
+                if (TerI->terrain_group_index != -1) {
+                    group = &CurTerr->groups[TerI->terrain_group_index];
+                    if (group->chunk_type == TERRAIN_CHUNK_GROUP_SECONDARY) {
+                        CurTerr->platforms[group->scene_index].flags |= TERRAIN_PLATFORM_FLAG_COLLIDED;
+                    }
+                }
+            } else {
                 hit_flags[0] = 0;
                 terrhitflags |= TERRAIN_IMPACT_RESULT_WALL;
                 if (TerI->terrain_group_index == -1 ||
@@ -21428,21 +21403,6 @@ void TerrainImpact(NUVEC *position, NUVEC *movement, u8 *hit_flags) {
                 CurTrackInfo->wall_contact_state = TERRAIN_TRACK_CONTACT_ACTIVE;
                 CurTrackInfo->impact_normal = TerI->impact_normal;
                 TerrWallNorm = TerI->impact_normal;
-            } else {
-                FullDeflect(&TerI->movement_normal, &TerI->movement, &TerI->movement);
-                FullDeflect(&TerI->impact_normal, movement, movement);
-
-                terrhitflags |= TERRAIN_IMPACT_RESULT_GROUND;
-                hit_flags[0] = 1;
-                hit_flags[1] = 1;
-                TerI->position.y += TerI->movement_normal.y * 0.0003f;
-
-                if (TerI->terrain_group_index != -1) {
-                    group = &CurTerr->groups[TerI->terrain_group_index];
-                    if (group->chunk_type == TERRAIN_CHUNK_GROUP_SECONDARY) {
-                        CurTerr->platforms[group->scene_index].flags |= TERRAIN_PLATFORM_FLAG_COLLIDED;
-                    }
-                }
             }
 
             TerI->flags &= static_cast<u8>(~TERRAIN_QUERY_FLAG_PREVIOUS_NORMAL);
@@ -21698,13 +21658,13 @@ i32 TerrainPlatformEmbedded(nuvec_s *movement_delta) {
     query->radius = old_query->radius;
     query->object_scale = old_query->object_scale;
     query->movement.x = (previous->m30 - matrix->m30) * 1.73f;
-    query->movement.z = (previous->m32 - matrix->m32) * 1.73f;
     query->movement.y = ((previous->m31 - matrix->m31) * 1.73f) * query->inverse_object_scale;
+    query->movement.z = (previous->m32 - matrix->m32) * 1.73f;
     if (CurTerr->platforms[platform_index].flags & 1) {
         NuMtxInvRSS(&tertempmat, previous);
         tertempvec4.z = old_query->position.z - previous->m32;
-        tertempvec4.y = (old_query->position.y - query->collision_radius) * query->object_scale - previous->m31;
         tertempvec4.x = old_query->position.x - previous->m30;
+        tertempvec4.y = (old_query->position.y - query->collision_radius) * query->object_scale - previous->m31;
         tertempvec4.w = 1.0f;
         NuVec4MtxTransformVU0(&tertempvec4, &tertempvec4, &tertempmat);
         NuVec4MtxTransformVU0(&tertempvec4, &tertempvec4, matrix);
@@ -21861,9 +21821,7 @@ i32 TerrainPlatformEmbedded(nuvec_s *movement_delta) {
                             CurTerr->platforms[CurTerr->groups[old_query->terrain_group_index].scene_index]
                                 .scene_object));
                     bool quad = source->normals[1].y < 65535.0f;
-                    if (!quad) {
-                        vertices[3] = vertices[2];
-                    } else {
+                    if (quad) {
                         vertices[3].x = source->vectors[3].x;
                         vertices[3].y = source->vectors[3].y;
                         vertices[3].z = source->vectors[3].z;
@@ -21873,6 +21831,8 @@ i32 TerrainPlatformEmbedded(nuvec_s *movement_delta) {
                             static_cast<NUMTX *>(
                                 CurTerr->platforms[CurTerr->groups[old_query->terrain_group_index].scene_index]
                                     .scene_object));
+                    } else {
+                        vertices[3] = vertices[2];
                     }
                     TERRAIN_SHAPE *surface = &ScaleTerrain[transformed_count];
                     memcpy(surface->material, source->material, 4);
@@ -23124,8 +23084,8 @@ extern "C" u8 *CrashDataPtr(void) {
             platform.scene_transform = NULL;
             platform.flags = (platform.flags & ~1) | (original->flags & 1);
             terrain->group_indices[group_index_count] = group_index;
-            terrain->group_index_count = group_index_count + 1;
             platform.scene_object_index = instance;
+            terrain->group_index_count = group_index_count + 1;
             platform.bounce_impulse = 0.0f;
             platform.bounce_offset = 0.0f;
             platform.bounce_velocity = 0.0f;
@@ -23368,7 +23328,7 @@ extern "C" {
             EdFileRead(name, 20);
             AnimParams[slot].instance_id = edanimLookupSpecial(name, scene);
             AnimParams[slot].effect_count = EdFileReadInt();
-            if (__builtin_expect(version > 1, 0)) {
+            if (__builtin_expect(version > 1, 1)) {
                 AnimParams[slot].sound_count = EdFileReadInt();
             } else {
                 AnimParams[slot].sound_count = 0;
@@ -23473,10 +23433,10 @@ static __attribute__((used)) void edanimcbFileLoad(eduimenu_s *menu, eduiitem_s 
         page = edanimLoadPage(path, edbits_base_scene);
     }
     edanimStartAllPages();
-    if (page < 0)
-        eduiCreateMessageMenu(menu, const_cast<char *>("File Load Error"), 0);
-    else
+    if (page >= 0)
         eduiCreateMessageMenu(menu, const_cast<char *>("Loaded OK"), 1);
+    else
+        eduiCreateMessageMenu(menu, const_cast<char *>("File Load Error"), 0);
 }
 
 i32 edanimParamCreate(i32 instance_id) {
@@ -24205,7 +24165,7 @@ i16 *NewScanHandelSubset(i16 *subset, nuvec_s *position, nuvec_s *movement, f32 
                 local.min_y = (matrix->m31 - platform->previous_matrix.m31) * 1.5f + bounds.min_y - group.origin.y;
                 local.max_y = bounds.max_y - group.origin.y;
             }
-            if (__builtin_expect(matrix->m32 > platform->previous_matrix.m32, 0)) {
+            if (__builtin_expect(matrix->m32 > platform->previous_matrix.m32, 1)) {
                 local.max_z = (matrix->m32 - platform->previous_matrix.m32) * 1.5f + bounds.max_z - group.origin.z;
                 local.min_z = bounds.min_z - group.origin.z;
             } else {
@@ -24352,8 +24312,8 @@ void ScanTerrainHandel(i32 terrain_mask, i16 *handle) {
         bounds.max_y = TerI->position.y + vertical_reach;
         bounds.max_z = TerI->position.z + reach;
         bounds.min_z = TerI->position.z - reach;
-        bounds.min_x = TerI->position.x - reach;
         scan_radius_sq = reach + 1.0f;
+        bounds.min_x = TerI->position.x - reach;
     }
     f32 scan_radius = NuFsqrt(scan_radius_sq);
     TerrainQuery_s *query = TerI;
@@ -24372,22 +24332,22 @@ void ScanTerrainHandel(i32 terrain_mask, i16 *handle) {
                 local.max_x = (matrix->m30 - platform->previous_matrix.m30) * 1.5f + bounds.max_x - group.origin.x;
                 local.min_x = bounds.min_x - group.origin.x;
             } else {
-                local.min_x = (matrix->m30 - platform->previous_matrix.m30) * 1.5f + bounds.min_x - group.origin.x;
                 local.max_x = bounds.max_x - group.origin.x;
+                local.min_x = (matrix->m30 - platform->previous_matrix.m30) * 1.5f + bounds.min_x - group.origin.x;
             }
             if (matrix->m31 > platform->previous_matrix.m31) {
                 local.min_y = bounds.min_y - group.origin.y;
                 local.max_y = (matrix->m31 - platform->previous_matrix.m31) * 1.5f + bounds.max_y - group.origin.y;
             } else {
-                local.min_y = (matrix->m31 - platform->previous_matrix.m31) * 1.5f + bounds.min_y - group.origin.y;
                 local.max_y = bounds.max_y - group.origin.y;
+                local.min_y = (matrix->m31 - platform->previous_matrix.m31) * 1.5f + bounds.min_y - group.origin.y;
             }
-            if (matrix->m32 > platform->previous_matrix.m32) {
-                local.min_z = bounds.min_z - group.origin.z;
-                local.max_z = (matrix->m32 - platform->previous_matrix.m32) * 1.5f + bounds.max_z - group.origin.z;
-            } else {
+            if (!(matrix->m32 > platform->previous_matrix.m32)) {
                 local.min_z = (matrix->m32 - platform->previous_matrix.m32) * 1.5f + bounds.min_z - group.origin.z;
                 local.max_z = bounds.max_z - group.origin.z;
+            } else {
+                local.min_z = bounds.min_z - group.origin.z;
+                local.max_z = (matrix->m32 - platform->previous_matrix.m32) * 1.5f + bounds.max_z - group.origin.z;
             }
             if (__builtin_expect(group.scene_index == TerrPlatDis, 0))
                 continue;
@@ -24655,15 +24615,15 @@ void ScanTerrainPlatform(i32 group_index, i32 terrain_mask) {
     TERRAIN_PLATFORM *platform = &CurTerr->platforms[group->scene_index];
     NUMTX *matrix = static_cast<NUMTX *>(platform->scene_object);
     TerrainScanBounds local = bounds;
-    if (__builtin_expect(matrix != NULL, 1)) {
+    if (__builtin_expect(matrix != NULL, 0)) {
         if (platform->previous_matrix.m30 < matrix->m30)
             local.max_x += (matrix->m30 - platform->previous_matrix.m30) * 1.5f;
         else
             local.min_x += (matrix->m30 - platform->previous_matrix.m30) * 1.5f;
-        if (platform->previous_matrix.m31 < matrix->m31)
-            local.max_y += (matrix->m31 - platform->previous_matrix.m31) * 1.5f;
-        else
+        if (!(platform->previous_matrix.m31 < matrix->m31))
             local.min_y += (matrix->m31 - platform->previous_matrix.m31) * 1.5f;
+        else
+            local.max_y += (matrix->m31 - platform->previous_matrix.m31) * 1.5f;
         if (__builtin_expect(!(matrix->m32 > platform->previous_matrix.m32), 0))
             local.min_z += (matrix->m32 - platform->previous_matrix.m32) * 1.5f;
         else
@@ -24673,8 +24633,8 @@ void ScanTerrainPlatform(i32 group_index, i32 terrain_mask) {
     local.max_x -= group->origin.x;
     local.min_y -= group->origin.y;
     local.max_y -= group->origin.y;
-    local.min_z -= group->origin.z;
     local.max_z -= group->origin.z;
+    local.min_z -= group->origin.z;
     i32 count = 0;
     i32 scaled_count = 0;
     if ((platform->flags & TERRAIN_PLATFORM_FLAG_ROTATING) == 0) {
@@ -24786,7 +24746,7 @@ void ScanTerrainPlatform(i32 group_index, i32 terrain_mask) {
                     vertices[2].z = source->vectors[2].z;
                     NuVec4MtxTransformVU0x3(vertices, vertices,
                                             static_cast<NUMTX *>(CurTerr->platforms[group->scene_index].scene_object));
-                    if (__builtin_expect(source->normals[1].y < 65535.0f, 1)) {
+                    if (source->normals[1].y < 65535.0f) {
                         vertices[3].x = source->vectors[3].x;
                         vertices[3].y = source->vectors[3].y;
                         vertices[3].z = source->vectors[3].z;

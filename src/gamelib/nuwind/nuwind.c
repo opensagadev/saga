@@ -122,9 +122,9 @@ extern "C" {
         NUVEC wind;
         i32 nearby[8];
         group = NuWindGroup;
-        NuWindWave = (i32)((u32)NuWindWave + 501);
-        NuWindDir = (i32)((u32)NuWindDir + 133);
-        NuWindDir2 = (i32)((u32)NuWindDir2 + 377);
+        NuWindWave += 501;
+        NuWindDir += 133;
+        NuWindDir2 += 377;
         wind.x = NU_SIN_LUT((i32)(16384.0f + NU_SIN_LUT(NuWindDir) * 8192.0f)) * 0.75f +
                  NU_SIN_LUT((i32)((u32)NuWindDir2 + 0x4000)) * 0.15f;
         wind.z = NU_SIN_LUT((i32)(NU_SIN_LUT(NuWindDir) * 8192.0f)) * 0.75f - NU_SIN_LUT(NuWindDir2) * 0.15f;

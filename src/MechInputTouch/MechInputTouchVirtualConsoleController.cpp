@@ -606,10 +606,10 @@ void MechInputTouchVirtualConsoleController::Update(NuInputTouchData const *) {
     if (hasDoneLoadPerm != 0 && buttons[0] == NULL) {
         const f32 radius = NuIOS_IsSmallScreen() ? 0.20f : 0.14f;
         const f32 aspect = GetAspectRatio();
-        const f32 aspect_radius = aspect * radius;
         const NuVec2 left_position = {SuperOptions.left_control_x, SuperOptions.left_control_y};
         dpad = reinterpret_cast<MechTouchUIElement *>(new VirtualControlDPad(left_position, 0.25f, *this));
 
+        const f32 aspect_radius = aspect * radius;
         const f32 zero_x = 0.0f * aspect_radius;
         const f32 x = SuperOptions.right_control_x;
         const f32 y = SuperOptions.right_control_y;

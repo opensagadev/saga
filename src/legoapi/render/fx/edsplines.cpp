@@ -431,8 +431,8 @@ i32 LoadEditorSplines(char *path, VARIPTR *buf, VARIPTR *buf_end) {
     for (i32 i = 0; i < spline_count; ++i) {
         EdFileReadChar();
         i32 name_length = EdFileReadInt();
-        splineStore[i].name = name_cursor;
         splineStore[i].pt_size = sizeof(NUVEC);
+        splineStore[i].name = name_cursor;
         splineStore[i].length = static_cast<i16>(EdFileReadInt());
         splineStore[i].pts = point_cursor;
 

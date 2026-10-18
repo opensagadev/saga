@@ -873,12 +873,14 @@ struct SplineKnot {
     u16 reserved_3e;
 
     void Smooth();
+    static void operator delete(void *);
 };
 struct SplineKnotList {
     SplineKnot *first;
     SplineKnot *last;
     i32 count;
 
+    ~SplineKnotList();
     i32 GetPoint(i32, VuVec &);
 };
 struct SplinePointBlock {
@@ -899,12 +901,47 @@ struct SplinePointList {
     SplinePointBlock *last;
     i32 block_count;
 
+    ~SplinePointList();
     void AddPoint(VuVec &);
     void Clear();
     void Draw();
     i32 GetNumPoints();
     i32 GetPoint(i32, VuVec &);
 };
+inline SplineKnotList::~SplineKnotList() {
+    while (first != NULL) {
+        SplineKnot *knot = first;
+        if (knot->next != NULL)
+            knot->next->previous = knot->previous;
+        else
+            last = knot->previous;
+        if (knot->previous != NULL)
+            knot->previous->next = knot->next;
+        else
+            first = knot->next;
+        knot->next = NULL;
+        knot->previous = NULL;
+        --count;
+        delete knot;
+    }
+}
+inline SplinePointList::~SplinePointList() {
+    while (first != NULL) {
+        SplinePointBlock *block = first;
+        if (block->next != NULL)
+            block->next->previous = block->previous;
+        else
+            last = block->previous;
+        if (block->previous != NULL)
+            block->previous->next = block->next;
+        else
+            first = block->next;
+        block->next = NULL;
+        block->previous = NULL;
+        --block_count;
+        delete block;
+    }
+}
 struct SplineObject {
     virtual ~SplineObject();
     SplineObject *next;
@@ -935,6 +972,7 @@ DECOMP_ASSERT(offsetof(SplineKnot, in_tangent) == 0x18, "SplineKnot incoming tan
 DECOMP_ASSERT(offsetof(SplineKnot, out_tangent) == 0x28, "SplineKnot outgoing tangent offset");
 DECOMP_ASSERT(offsetof(SplineKnot, spline) == 0x38, "SplineKnot owning spline offset");
 DECOMP_ASSERT(sizeof(SplineObject) == 0x58, "SplineObject size");
+DECOMP_ASSERT(offsetof(SplineObject, knots) == 0x2c, "SplineObject knots offset");
 DECOMP_ASSERT(offsetof(SplineObject, points) == 0x38, "SplineObject points offset");
 DECOMP_ASSERT(offsetof(SplineObject, step) == 0x48, "SplineObject step offset");
 DECOMP_ASSERT(offsetof(SplineHelper, auto_generate_points) == 0x14, "SplineHelper automatic generation offset");

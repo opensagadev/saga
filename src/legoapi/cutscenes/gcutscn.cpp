@@ -941,7 +941,7 @@ extern "C" {
                 rigid_instance->rigids = reinterpret_cast<instNUGCUTRIGID_s *>(buf->void_ptr);
                 buf->void_ptr = rigid_instance->rigids + rigid_system->count;
                 memset(rigid_instance->rigids, 0, rigid_system->count * sizeof(instNUGCUTRIGID_s));
-                for (i32 i = 0; i < rigid_system->count; ++i) {
+                for (u32 i = 0; i < rigid_system->count; ++i) {
                     NUGCUTRIGID_s *rigid = &rigid_system->rigids[i];
                     instNUGCUTRIGID_s *inst_rigid = &rigid_instance->rigids[i];
                     if (scene == NULL || scene == rigid->scene) {

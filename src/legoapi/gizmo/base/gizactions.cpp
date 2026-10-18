@@ -405,6 +405,7 @@ static void GizAction_SetAIState(GIZFLOW_s *, FLOWBOX_s *, char **params, int co
         origin = named_object->apiobj.collision_position;
     }
     for (i32 object_index = 0; object_index < HIGHGAMEOBJECT; ++object_index) {
+        i32 matching_type = type_count == 0;
         GameObject_s *object = &Obj[object_index];
         if ((object->apiobj.field_0x1f8 & (APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER)) !=
                 (APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER) ||
@@ -414,7 +415,6 @@ static void GizAction_SetAIState(GIZFLOW_s *, FLOWBOX_s *, char **params, int co
         NUVEC difference;
         NuVecSub(&difference, &origin, &object->apiobj.position);
         f32 distance_squared = difference.x * difference.x + difference.y * difference.y + difference.z * difference.z;
-        i32 matching_type = type_count == 0;
         for (i32 type_index = 0; type_index < type_count; ++type_index) {
             if (object->id == types[type_index]) {
                 matching_type = 1;

@@ -81,8 +81,10 @@ void SpecialMove_VictimCode(GameObject_s *object) {
             }
             GameObject_s *victim = static_cast<GameObject_s *>(object->field_0x780);
             i32 damage = -1;
-            if (victim->apiobj.player_controlled && Player_HasInvincibility(victim) != 0) {
-                damage = 1;
+            if (victim->apiobj.player_controlled) {
+                if (Player_HasInvincibility(victim) != 0) {
+                    damage = 1;
+                }
             }
             victim = static_cast<GameObject_s *>(object->field_0x780);
             ObjHitObj(victim, object, damage, 0x1000, 0, 1);
@@ -181,8 +183,10 @@ i32 SpecialMove_ReleaseVictim(GameObject_s *object) {
         }
         GameObject_s *target = static_cast<GameObject_s *>(victim->field_0x780);
         i32 damage = -1;
-        if (target->apiobj.player_controlled && Player_HasInvincibility(target) != 0) {
-            damage = 1;
+        if (target->apiobj.player_controlled) {
+            if (Player_HasInvincibility(target) != 0) {
+                damage = 1;
+            }
         }
         target = static_cast<GameObject_s *>(victim->field_0x780);
         ObjHitObj(target, victim, damage, 0x1000, 0, 1);

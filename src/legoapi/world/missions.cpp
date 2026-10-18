@@ -232,9 +232,6 @@ i32 Missions_PickupsOff(MISSIONSYS *ms) {
     if (ms->field8_0x1d == 0) {
         return 0;
     }
-    if (ms->mission == NULL) {
-        return 0;
-    }
-    return (ms->flags ^ 1) & 1;
+    return ms->mission == NULL ? 0 : (ms->flags ^ 1) & 1;
 }
 

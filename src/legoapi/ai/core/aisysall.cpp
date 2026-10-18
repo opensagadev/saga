@@ -1765,7 +1765,7 @@ static i32 naipathcnxtypes;
 
 // Retail splits the null checks into each caller and keeps the body as a
 // partial-inlining clone; its connection searches are fully peeled.
-static __attribute__((noinline, noclone, optimize("peel-loops"))) void DestroyAIPathNodeBody(EDAIPATHNODE_s *,
+static __attribute__((noinline, noclone)) void DestroyAIPathNodeBody(EDAIPATHNODE_s *,
                                                                                             EDAIPATH_s *)
     __asm__("_ZL17DestroyAIPathNodeP14EDAIPATHNODE_sP10EDAIPATH_s.part.42");
 static inline void DestroyAIPathNode(EDAIPATHNODE_s *node, EDAIPATH_s *path) {
@@ -1835,7 +1835,7 @@ static __used__ void routeEditor_cbSetRouteUsers(eduimenu_s *, eduiitem_s *, u32
 static __used__ void routeEditor_cbRouteUsers(eduimenu_s *parent, eduiitem_s *, u32);
 static __used__ void routeEditor_cbCreateRoute(eduimenu_s *, eduiitem_s *, u32);
 static __used__ void routeEditor_cbDeleteRoute(eduimenu_s *parent, eduiitem_s *item, u32);
-static __used__ __attribute__((optimize("peel-loops"))) void routeEditor_cbRenameRoute(eduimenu_s *, eduiitem_s *item, u32);
+static __used__ void routeEditor_cbRenameRoute(eduimenu_s *, eduiitem_s *item, u32);
 static __used__ void routeEditor_cbCancelRenameRouteMenu(eduimenu_s *, eduimenu_s *);
 static __used__ void routeEditor_cbSetRouteUsers(eduimenu_s *, eduiitem_s *item, u32);
 static __used__ void routeEditor_cbRenameRouteMenu(eduimenu_s *parent, eduiitem_s *, u32);
@@ -1849,22 +1849,10 @@ static __used__ i32 routeEditor_AddToRoute(EDAIPATHNODE_s *node, EDAIPATHNODE_s 
 static __used__ void pathEditor_DestroySharedNode(EDAISHAREDPATHNODE_s *shared);
 
 static inline i32 pathEditor_FirstFreeConnection(EDAIPATHNODE_s *node) {
-    if (node->connections[0].node == NULL)
-        return 0;
-    if (node->connections[1].node == NULL)
-        return 1;
-    if (node->connections[2].node == NULL)
-        return 2;
-    if (node->connections[3].node == NULL)
-        return 3;
-    if (node->connections[4].node == NULL)
-        return 4;
-    if (node->connections[5].node == NULL)
-        return 5;
-    if (node->connections[6].node == NULL)
-        return 6;
-    if (node->connections[7].node == NULL)
-        return 7;
+    for (i32 slot = 0; slot < 8; ++slot) {
+        if (node->connections[slot].node == NULL)
+            return slot;
+    }
     return -1;
 }
 
@@ -2070,7 +2058,7 @@ static void creatureEditor_cb_max_t_respawn(eduimenu_s *, eduiitem_s *, u32);
 #endif
 static __used__ CREATURE_EDITOR_REGPARM2 void *CreateCreature(i32 type, nuvec_s *position, i32 angle);
 
-static __attribute__((always_inline, optimize("O3"))) inline void *FindCreatureArea(const char *name) {
+static __attribute__((always_inline)) inline void *FindCreatureArea(const char *name) {
     if (name == nullptr)
         return nullptr;
     NULISTHDR *areas = reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x37a40);
@@ -2083,7 +2071,7 @@ static __attribute__((always_inline, optimize("O3"))) inline void *FindCreatureA
     return nullptr;
 }
 
-static __attribute__((always_inline, optimize("O3"))) inline EDLOCATOR_s *FindCreatureLocator(const char *name) {
+static __attribute__((always_inline)) inline EDLOCATOR_s *FindCreatureLocator(const char *name) {
     if (name == nullptr)
         return nullptr;
     EDLOCATOR_s *locator = (EDLOCATOR_s *)NuLinkedListGetHead(&aieditor->locators);
@@ -2095,7 +2083,7 @@ static __attribute__((always_inline, optimize("O3"))) inline EDLOCATOR_s *FindCr
     return nullptr;
 }
 
-__attribute__((optimize("O3"))) void creatureEditor_Enter();
+void creatureEditor_Enter();
 
 #if defined(__i386__)
 #define CREATURE_EDITOR_REGPARM1 __attribute__((regparm(1)))
@@ -2158,18 +2146,18 @@ static __used__ void creatureEditor_cb_stagger_start(eduimenu_s *, eduiitem_s *i
 extern "C" {
     f32 aieditor_y_tolerance = 0.1f;
 
-__attribute__((optimize("O2", "omit-frame-pointer"))) void creatureEditorSaveData(AIPATHSYS_s *system);
+void creatureEditorSaveData(AIPATHSYS_s *system);
 
-__attribute__((optimize("O2", "omit-frame-pointer"))) EDCREATURE_s *creatureEditor_GetNearest(i32 use_radius);
+EDCREATURE_s *creatureEditor_GetNearest(i32 use_radius);
 
-__attribute__((optimize("O2", "omit-frame-pointer"))) void creatureEditor_PathDeleted(EDAIPATH_s *path);
+void creatureEditor_PathDeleted(EDAIPATH_s *path);
 
-__attribute__((optimize("O2", "omit-frame-pointer"))) void creatureEditor_PathNodeDeleted(EDAIPATHNODE_s *node);
+void creatureEditor_PathNodeDeleted(EDAIPATHNODE_s *node);
 
-__attribute__((optimize("O2", "omit-frame-pointer"), force_align_arg_pointer)) void
+__attribute__((force_align_arg_pointer)) void
     creatureEditor_PathNodeMoved(EDAIPATHNODE_s *node);
 
-__attribute__((optimize("O2", "omit-frame-pointer"), force_align_arg_pointer)) void
+__attribute__((force_align_arg_pointer)) void
     creatureEditor_RenderAllCreatures(void);
 } // extern "C"
 
@@ -2233,7 +2221,7 @@ static __used__ void locatorEditor_cbAddLocatorsByName(eduimenu_s *, eduiitem_s 
 static __used__ void locatorEditor_cbRenameLocatorMenu(eduimenu_s *parent, eduiitem_s *, u32);
 static __used__ void locatorEditor_cbRenameLocatorSetMenu(eduimenu_s *parent, eduiitem_s *, u32);
 static __used__ void locatorEditor_cbAddLocatorsByNameMenu(eduimenu_s *parent, eduiitem_s *, u32);
-static __used__ __attribute__((optimize("no-tree-vectorize"))) void
+static __used__ void
 locatorEditor_cbAddLocatorsByNameYesNo(eduimenu_s *, eduiitem_s *item, u32);
 static __used__ void locatorEditor_cbCancelRenameMenu(eduimenu_s *menu, eduimenu_s *);
 static __used__ void locatorEditor_cbCancelSelectLocatorSet(eduimenu_s *menu, eduimenu_s *);
@@ -2242,9 +2230,9 @@ static __used__ void locatorEditor_cbCancelRenameLocatorSetMenu(eduimenu_s *, ed
 static __used__ __attribute__((optimize("no-tree-vectorize"))) void DestroyLocator(EDLOCATOR_s *locator);
 
 #if defined(__i386__)
-#define LOCATOR_SET_BODY_ATTR __attribute__((noinline, optimize("no-tree-vectorize"), regparm(2)))
+#define LOCATOR_SET_BODY_ATTR __attribute__((noinline, regparm(2)))
 #else
-#define LOCATOR_SET_BODY_ATTR __attribute__((noinline, optimize("no-tree-vectorize")))
+#define LOCATOR_SET_BODY_ATTR __attribute__((noinline))
 #endif
 static LOCATOR_SET_BODY_ATTR unsigned int
 AddLocatorToSetBody(EDLOCATORSET_s *set, EDLOCATOR_s *locator,
@@ -3194,24 +3182,14 @@ static __used__ void pathEditor_cbCnxFlagsToggle(eduimenu_s *, eduiitem_s *item,
         return;
     }
     i32 i;
-    if (node->connections[0].node == other)
-        i = 0;
-    else if (node->connections[1].node == other)
-        i = 1;
-    else if (node->connections[2].node == other)
-        i = 2;
-    else if (node->connections[3].node == other)
-        i = 3;
-    else if (node->connections[4].node == other)
-        i = 4;
-    else if (node->connections[5].node == other)
-        i = 5;
-    else if (node->connections[6].node == other)
-        i = 6;
-    else if (node->connections[7].node == other)
-        i = 7;
-    else
+    for (i = 0; i < 8; ++i) {
+        if (node->connections[i].node == other) {
+            break;
+        }
+    }
+    if (i == 8) {
         return;
+    }
     AIPATHCNXTYPE_s *type = &aipathcnxtypes[type_index];
     EDAIPATHCNX_s *connection = &node->connections[i];
     u32 flags = connection->flags;
@@ -3222,24 +3200,14 @@ static __used__ void pathEditor_cbCnxFlagsToggle(eduimenu_s *, eduiitem_s *item,
     connection->flags = updated_flags;
     if (type->flags != 0) {
         i32 j;
-        if (other->connections[0].node == node)
-            j = 0;
-        else if (other->connections[1].node == node)
-            j = 1;
-        else if (other->connections[2].node == node)
-            j = 2;
-        else if (other->connections[3].node == node)
-            j = 3;
-        else if (other->connections[4].node == node)
-            j = 4;
-        else if (other->connections[5].node == node)
-            j = 5;
-        else if (other->connections[6].node == node)
-            j = 6;
-        else if (other->connections[7].node == node)
-            j = 7;
-        else
+        for (j = 0; j < 8; ++j) {
+            if (other->connections[j].node == node) {
+                break;
+            }
+        }
+        if (j == 8) {
             return;
+        }
         if (!(connection->flags & mask)) {
             other->connections[j].flags &= ~mask;
         } else {
@@ -5239,7 +5207,7 @@ static void AIMoveFindDivertNode(AIPATH *path, AIPACKET *packet, NUVEC *destinat
     if (path->special_route_count != 0 &&
         (packet->navigation_flags & AIPACKET_NAVIGATION_FLAG_USE_SPECIAL_ROUTES) != 0) {
         AIPATHNODELINK *links = path->special_routes;
-        if (__builtin_expect(packet->divert_node_index >= path->node_count, 0)) {
+        if (__builtin_expect(packet->divert_node_index >= path->node_count, 1)) {
             packet->divert_node_index = 0xff;
         }
         if (packet->divert_search_index >= path->special_route_count) {
@@ -5635,7 +5603,7 @@ static void *Condition_AlwaysTrueInit(AISYS *sys, char *arg, AISCRIPT *script) {
     return *(void **)&value;
 }
 
-static __used__ __attribute__((optimize("peel-loops"))) void routeEditor_cbRenameRoute(eduimenu_s *, eduiitem_s *item, u32) {
+static __used__ void routeEditor_cbRenameRoute(eduimenu_s *, eduiitem_s *item, u32) {
     EDAIPATH_s *path = aieditor->current_path;
     if (path == nullptr || path->current_route == nullptr) {
         return;
@@ -6828,58 +6796,13 @@ static __used__ void creatureEditor_cbScriptParams(eduimenu_s *parent, eduiitem_
             eduiMenuAddItem(menu, eduiItemSelCreate(1, attr, 0, 0, creatureEditor_cbSelectLocator, label));
         }
         AISCRIPT *script = AIScriptFind(aieditor->ai_system, creatureEditor_Current()->script_name, 1, 1, 1);
-        if (script == nullptr) {
-            sprintf(label, "Param%d", 0);
-            eduiMenuAddItem(menu, eduiItemSliderCreate(0, attr, 0, creatureEditor_cbSetScriptParam, 0.0f, 100.0f,
-                                                       aieditorsettings.current_script_params[0], label));
-            eduiItemSliderSetGranularity(reinterpret_cast<edui_slider_s *>(edui_last_item), 0.1f);
-            sprintf(label, "Param%d", 1);
-            eduiMenuAddItem(menu, eduiItemSliderCreate(1, attr, 0, creatureEditor_cbSetScriptParam, 0.0f, 100.0f,
-                                                       aieditorsettings.current_script_params[1], label));
-            eduiItemSliderSetGranularity(reinterpret_cast<edui_slider_s *>(edui_last_item), 0.1f);
-            sprintf(label, "Param%d", 2);
-            eduiMenuAddItem(menu, eduiItemSliderCreate(2, attr, 0, creatureEditor_cbSetScriptParam, 0.0f, 100.0f,
-                                                       aieditorsettings.current_script_params[2], label));
-            eduiItemSliderSetGranularity(reinterpret_cast<edui_slider_s *>(edui_last_item), 0.1f);
-            sprintf(label, "Param%d", 3);
-            eduiMenuAddItem(menu, eduiItemSliderCreate(3, attr, 0, creatureEditor_cbSetScriptParam, 0.0f, 100.0f,
-                                                       aieditorsettings.current_script_params[3], label));
-            eduiItemSliderSetGranularity(reinterpret_cast<edui_slider_s *>(edui_last_item), 0.1f);
-        } else {
-            const char *param_name = script->params[0].name;
-            if (param_name != nullptr)
-                sprintf(label, param_name);
+        for (i32 index = 0; index < 4; ++index) {
+            if (script != nullptr && script->params[index].name != nullptr)
+                sprintf(label, script->params[index].name);
             else
-                sprintf(label, "Param%d", 0);
-            eduiMenuAddItem(menu, eduiItemSliderCreate(0, attr, 0, creatureEditor_cbSetScriptParam, 0.0f, 100.0f,
-                                                       aieditorsettings.current_script_params[0], label));
-            eduiItemSliderSetGranularity(reinterpret_cast<edui_slider_s *>(edui_last_item), 0.1f);
-
-            param_name = script != nullptr ? script->params[1].name : nullptr;
-            if (param_name != nullptr)
-                sprintf(label, param_name);
-            else
-                sprintf(label, "Param%d", 1);
-            eduiMenuAddItem(menu, eduiItemSliderCreate(1, attr, 0, creatureEditor_cbSetScriptParam, 0.0f, 100.0f,
-                                                       aieditorsettings.current_script_params[1], label));
-            eduiItemSliderSetGranularity(reinterpret_cast<edui_slider_s *>(edui_last_item), 0.1f);
-
-            param_name = script != nullptr ? script->params[2].name : nullptr;
-            if (param_name != nullptr)
-                sprintf(label, param_name);
-            else
-                sprintf(label, "Param%d", 2);
-            eduiMenuAddItem(menu, eduiItemSliderCreate(2, attr, 0, creatureEditor_cbSetScriptParam, 0.0f, 100.0f,
-                                                       aieditorsettings.current_script_params[2], label));
-            eduiItemSliderSetGranularity(reinterpret_cast<edui_slider_s *>(edui_last_item), 0.1f);
-
-            param_name = script != nullptr ? script->params[3].name : nullptr;
-            if (param_name != nullptr)
-                sprintf(label, param_name);
-            else
-                sprintf(label, "Param%d", 3);
-            eduiMenuAddItem(menu, eduiItemSliderCreate(3, attr, 0, creatureEditor_cbSetScriptParam, 0.0f, 100.0f,
-                                                       aieditorsettings.current_script_params[3], label));
+                sprintf(label, "Param%d", index);
+            eduiMenuAddItem(menu, eduiItemSliderCreate(index, attr, 0, creatureEditor_cbSetScriptParam, 0.0f, 100.0f,
+                                                       aieditorsettings.current_script_params[index], label));
             eduiItemSliderSetGranularity(reinterpret_cast<edui_slider_s *>(edui_last_item), 0.1f);
         }
         reset_params_option = nullptr;
@@ -15059,35 +14982,29 @@ extern "C" {
         EDAIPATHNODE_s *node = (EDAIPATHNODE_s *)NuLinkedListGetHead(&path->nodes);
         while (node != nullptr) {
             const i32 node_index = node->index;
-#define CHECK_PATH_CONNECTION(slot)                                                                                    \
-    {                                                                                                                  \
-        EDAIPATHNODE_s *other = node->connections[slot].node;                                                          \
-        if (other != nullptr && !((checked[node_index][other->index / 8] >> (other->index % 8)) & 1)) {                \
-            checked[node_index][other->index / 8] |= 1 << (other->index % 8);                                          \
-            checked[other->index][node_index / 8] |= 1 << (node_index % 8);                                            \
-            f32 fraction;                                                                                              \
-            f32 width;                                                                                                 \
-            i32 angle;                                                                                                 \
-            if (TestPointPathCheck(point, node, other, &fraction, &width, &angle, tolerance)) {                        \
-                result->fraction = fraction;                                                                           \
-                result->angle = angle;                                                                                 \
-                result->on_path = 1;                                                                                   \
-                result->path = path;                                                                                   \
-                result->first = node;                                                                                  \
-                result->second = node->connections[slot].node;                                                         \
-                result->width = width;                                                                                 \
-            }                                                                                                          \
-        }                                                                                                              \
-    }
-            CHECK_PATH_CONNECTION(0);
-            CHECK_PATH_CONNECTION(1);
-            CHECK_PATH_CONNECTION(2);
-            CHECK_PATH_CONNECTION(3);
-            CHECK_PATH_CONNECTION(4);
-            CHECK_PATH_CONNECTION(5);
-            CHECK_PATH_CONNECTION(6);
-            CHECK_PATH_CONNECTION(7);
-#undef CHECK_PATH_CONNECTION
+            for (i32 slot = 0; slot < 8; ++slot) {
+                EDAIPATHNODE_s *other = node->connections[slot].node;
+                if (other == nullptr) {
+                    continue;
+                }
+                const i32 other_index = other->index;
+                if (!((checked[node_index][other_index / 8] >> (other_index % 8)) & 1)) {
+                    checked[node_index][other_index / 8] |= 1 << (other_index % 8);
+                    checked[other_index][node_index / 8] |= 1 << (node_index % 8);
+                    f32 fraction;
+                    f32 width;
+                    i32 angle;
+                    if (TestPointPathCheck(point, node, other, &fraction, &width, &angle, tolerance)) {
+                        result->fraction = fraction;
+                        result->angle = angle;
+                        result->on_path = 1;
+                        result->path = path;
+                        result->width = width;
+                        result->first = node;
+                        result->second = node->connections[slot].node;
+                    }
+                }
+            }
             node = (EDAIPATHNODE_s *)NuLinkedListGetNext(&path->nodes, &node->link);
         }
     }
@@ -15225,7 +15142,7 @@ void pathEditor_Enter(void) {
                     }
                     if (__builtin_expect(shared != nullptr, 0)) {
                         if (node->shared_node != shared) {
-                            if (__builtin_expect(node->shared_node != nullptr, 0)) {
+                            if (node->shared_node != nullptr) {
                                 EDAISHAREDPATHNODE_s *previous = node->shared_node;
                                 --previous->reference_count;
                                 if (previous->reference_count <= 1) {
@@ -15249,67 +15166,17 @@ void pathEditor_Enter(void) {
                     if (node != nullptr && other != nullptr) {
                         i32 connection_slot = find_connection(node, other);
                         if (connection_slot == 8) {
-                            i32 free_node_slot = -1;
-                            i32 free_other_slot = -1;
-#define FIND_FREE_OTHER(source_slot)                                                                                   \
-    if (__builtin_expect(other->connections[0].node == nullptr, 0)) {                                                                       \
-        free_node_slot = source_slot;                                                                                  \
-        free_other_slot = 0;                                                                                           \
-        goto free_slots_found;                                                                                         \
-    } else if (__builtin_expect(other->connections[1].node == nullptr, 0)) {                                                                \
-        free_node_slot = source_slot;                                                                                  \
-        free_other_slot = 1;                                                                                           \
-        goto free_slots_found;                                                                                         \
-    } else if (other->connections[2].node == nullptr) {                                                                \
-        free_node_slot = source_slot;                                                                                  \
-        free_other_slot = 2;                                                                                           \
-        goto free_slots_found;                                                                                         \
-    } else if (other->connections[3].node == nullptr) {                                                                \
-        free_node_slot = source_slot;                                                                                  \
-        free_other_slot = 3;                                                                                           \
-        goto free_slots_found;                                                                                         \
-    } else if (other->connections[4].node == nullptr) {                                                                \
-        free_node_slot = source_slot;                                                                                  \
-        free_other_slot = 4;                                                                                           \
-        goto free_slots_found;                                                                                         \
-    } else if (other->connections[5].node == nullptr) {                                                                \
-        free_node_slot = source_slot;                                                                                  \
-        free_other_slot = 5;                                                                                           \
-        goto free_slots_found;                                                                                         \
-    } else if (other->connections[6].node == nullptr) {                                                                \
-        free_node_slot = source_slot;                                                                                  \
-        free_other_slot = 6;                                                                                           \
-        goto free_slots_found;                                                                                         \
-    } else if (other->connections[7].node == nullptr) {                                                                \
-        free_node_slot = source_slot;                                                                                  \
-        free_other_slot = 7;                                                                                           \
-        goto free_slots_found;                                                                                         \
-    }
-                            if (node->connections[0].node == nullptr) {
-                                FIND_FREE_OTHER(0)
+                            i32 free_node_slot;
+                            i32 free_other_slot;
+                            for (free_node_slot = 0; free_node_slot < 8; ++free_node_slot) {
+                                if (node->connections[free_node_slot].node == nullptr) {
+                                    for (free_other_slot = 0; free_other_slot < 8; ++free_other_slot) {
+                                        if (other->connections[free_other_slot].node == nullptr) {
+                                            goto free_slots_found;
+                                        }
+                                    }
+                                }
                             }
-                            if (node->connections[1].node == nullptr) {
-                                FIND_FREE_OTHER(1)
-                            }
-                            if (node->connections[2].node == nullptr) {
-                                FIND_FREE_OTHER(2)
-                            }
-                            if (node->connections[3].node == nullptr) {
-                                FIND_FREE_OTHER(3)
-                            }
-                            if (node->connections[4].node == nullptr) {
-                                FIND_FREE_OTHER(4)
-                            }
-                            if (node->connections[5].node == nullptr) {
-                                FIND_FREE_OTHER(5)
-                            }
-                            if (node->connections[6].node == nullptr) {
-                                FIND_FREE_OTHER(6)
-                            }
-                            if (node->connections[7].node == nullptr) {
-                                FIND_FREE_OTHER(7)
-                            }
-#undef FIND_FREE_OTHER
                             continue;
                         free_slots_found:
                             EDAIPATHCNX_s *reciprocal = &other->connections[free_other_slot];
@@ -16296,7 +16163,7 @@ static __used__ void aieditor_cbSetEditorMode(eduimenu_s *, eduiitem_s *item, un
 }
 
 static __used__ void routeEditor_cbDeleteRoute(eduimenu_s *parent, eduiitem_s *item, u32) {
-    if (__builtin_expect(item == nullptr, 1)) {
+    if (item == nullptr) {
         return;
     }
     switch (static_cast<u32>(item->data)) {
@@ -16313,52 +16180,32 @@ static __used__ void routeEditor_cbDeleteRoute(eduimenu_s *parent, eduiitem_s *i
             eduiMenuDestroy(parent);
             break;
         case 1: {
-            EDAIPATH_s *path = aieditor->current_path;
-            EDAIPATHROUTE_s *route = path->current_route;
-            if (__builtin_expect(route == nullptr, 0)) {
+            EDAIPATHROUTE_s *route = aieditor->current_path->current_route;
+            if (route == nullptr) {
                 return;
             }
-            i32 index = route - path->routes;
+            i32 index = route - aieditor->current_path->routes;
             route->flags &= ~u8(1);
             aieditor->current_path->current_route = nullptr;
-            u64 mask = ~(1ULL << index);
-            for (EDAIPATHNODE_s *node = (EDAIPATHNODE_s *)NuLinkedListGetHead(&path->nodes); node != nullptr;
+            for (EDAIPATHNODE_s *node = (EDAIPATHNODE_s *)NuLinkedListGetHead(&aieditor->current_path->nodes);
+                 node != nullptr;
                  node = (EDAIPATHNODE_s *)NuLinkedListGetNext(&aieditor->current_path->nodes, &node->link)) {
-#define CLEAR_CONNECTION_ROUTE(N) node->connections[N].route_mask &= mask
-                CLEAR_CONNECTION_ROUTE(0);
-                CLEAR_CONNECTION_ROUTE(1);
-                CLEAR_CONNECTION_ROUTE(2);
-                CLEAR_CONNECTION_ROUTE(3);
-                CLEAR_CONNECTION_ROUTE(4);
-                CLEAR_CONNECTION_ROUTE(5);
-                CLEAR_CONNECTION_ROUTE(6);
-                CLEAR_CONNECTION_ROUTE(7);
-#undef CLEAR_CONNECTION_ROUTE
-                node->route_mask &= mask;
+                for (i32 i = 0; i < 8; ++i) {
+                    node->connections[i].route_mask &= ~(1ULL << index);
+                }
+                node->route_mask &= ~(1ULL << index);
             }
-            i32 next_index = index;
-#define TRY_NEXT_ROUTE()                                                                                               \
-    ++next_index;                                                                                                      \
-    next_index = next_index >= 16 ? 0 : next_index;                                                                    \
-    if (path->routes[next_index].flags & 1)                                                                            \
-    path->current_route = &path->routes[next_index]
-            TRY_NEXT_ROUTE();
-            TRY_NEXT_ROUTE();
-            TRY_NEXT_ROUTE();
-            TRY_NEXT_ROUTE();
-            TRY_NEXT_ROUTE();
-            TRY_NEXT_ROUTE();
-            TRY_NEXT_ROUTE();
-            TRY_NEXT_ROUTE();
-            TRY_NEXT_ROUTE();
-            TRY_NEXT_ROUTE();
-            TRY_NEXT_ROUTE();
-            TRY_NEXT_ROUTE();
-            TRY_NEXT_ROUTE();
-            TRY_NEXT_ROUTE();
-            TRY_NEXT_ROUTE();
-            TRY_NEXT_ROUTE();
-#undef TRY_NEXT_ROUTE
+            EDAIPATH_s *path = aieditor->current_path;
+            for (i32 i = 0; i < 16; ++i) {
+                ++index;
+                if (index >= 16) {
+                    index = 0;
+                }
+                EDAIPATHROUTE_s *next = &path->routes[index];
+                if (next->flags & 1) {
+                    path->current_route = next;
+                }
+            }
             aieditor_ClearMainMenu();
             break;
         }
@@ -16369,31 +16216,16 @@ static __used__ void routeEditor_cbCreateRoute(eduimenu_s *, eduiitem_s *, u32) 
     EDAIPATH_s *path = aieditor->current_path;
     i32 index = path->current_route != nullptr ? path->current_route - path->routes + 1 : 1;
     u8 flags;
-    // The original checks each of the fixed 16 slots in sequence.
-#define ROUTE_EDITOR_TRY_FREE()                                                                                        \
-    if (index >= 16)                                                                                                   \
-        index = 0;                                                                                                     \
-    flags = path->routes[index].flags;                                                                                 \
-    if (!(flags & 1))                                                                                                  \
-        goto route_found;                                                                                              \
-    ++index
-    ROUTE_EDITOR_TRY_FREE();
-    ROUTE_EDITOR_TRY_FREE();
-    ROUTE_EDITOR_TRY_FREE();
-    ROUTE_EDITOR_TRY_FREE();
-    ROUTE_EDITOR_TRY_FREE();
-    ROUTE_EDITOR_TRY_FREE();
-    ROUTE_EDITOR_TRY_FREE();
-    ROUTE_EDITOR_TRY_FREE();
-    ROUTE_EDITOR_TRY_FREE();
-    ROUTE_EDITOR_TRY_FREE();
-    ROUTE_EDITOR_TRY_FREE();
-    ROUTE_EDITOR_TRY_FREE();
-    ROUTE_EDITOR_TRY_FREE();
-    ROUTE_EDITOR_TRY_FREE();
-    ROUTE_EDITOR_TRY_FREE();
-    ROUTE_EDITOR_TRY_FREE();
-#undef ROUTE_EDITOR_TRY_FREE
+    for (i32 attempt = 0; attempt < 16; ++attempt) {
+        if (index >= 16) {
+            index = 0;
+        }
+        flags = path->routes[index].flags;
+        if (!(flags & 1)) {
+            goto route_found;
+        }
+        ++index;
+    }
     return;
 route_found:
     EDAIPATHROUTE_s *route = &path->routes[index];
@@ -16442,7 +16274,7 @@ static __used__ void pathEditor_cbSetShareNode(eduimenu_s *, eduiitem_s *item, u
         if (path == aieditor->current_path) {
             continue;
         }
-        if (__builtin_expect(item->data != 0 && path_number != item->data, 0)) {
+        if (item->data != 0 && path_number != item->data) {
             ++path_number;
             continue;
         }
@@ -16743,7 +16575,7 @@ static __used__ void locatorEditor_cbCancelDeleteLocatorMenu(eduimenu_s *, eduim
     aieditor_ClearMainMenu();
 }
 
-static __used__ __attribute__((optimize("no-tree-vectorize"))) void
+static __used__ void
 locatorEditor_cbAddLocatorsByNameYesNo(eduimenu_s *, eduiitem_s *item, u32) {
     if (item != nullptr && item->data != 0 && NuStrLen(aieditor->pending_locator_name) != 0 &&
         aieditor->current_locator_set != nullptr) {
@@ -16840,7 +16672,7 @@ extern "C" {
         }
     }
 
-    __attribute__((optimize("O2"))) void antinodeEditorDrawAntinodes(void) {
+    void antinodeEditorDrawAntinodes(void) {
         i32 solid = aieditorsettings.solid_antinode_display;
         NULISTHDR *list = reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x42e94);
         for (EDANTINODE_s *node = reinterpret_cast<EDANTINODE_s *>(NuLinkedListGetHead(list)); node != nullptr;
@@ -16952,7 +16784,7 @@ extern "C" {
         }
     }
 
-    __attribute__((optimize("O2", "omit-frame-pointer"))) void creatureEditorSaveData(AIPATHSYS_s *system) {
+    void creatureEditorSaveData(AIPATHSYS_s *system) {
         if (GlobalCharacterNameFn == nullptr) {
             EdFileWriteInt(0);
             return;
@@ -17030,10 +16862,9 @@ extern "C" {
             EdFileWriteChar(direction);
             EdFileWriteShort(connection_index);
 
-            EdFileWriteFloat(creature->script_params[0]);
-            EdFileWriteFloat(creature->script_params[1]);
-            EdFileWriteFloat(creature->script_params[2]);
-            EdFileWriteFloat(creature->script_params[3]);
+            for (i32 index = 0; index < 4; ++index) {
+                EdFileWriteFloat(creature->script_params[index]);
+            }
             if (creature->trigger_area != nullptr) {
                 EdFileWriteInt(1);
                 EdFileWrite(reinterpret_cast<char *>(creature->trigger_area) + 8, 0x10);
@@ -17175,7 +17006,7 @@ i32 creatureEditor_IsSelectable(EDCREATURE_s *creature) {
 }
 
 extern "C" {
-    __attribute__((optimize("O2", "omit-frame-pointer"))) EDCREATURE_s *creatureEditor_GetNearest(i32 use_radius) {
+    EDCREATURE_s *creatureEditor_GetNearest(i32 use_radius) {
         if (GlobalCharacterHGobjFn == nullptr)
             return nullptr;
 
@@ -17525,10 +17356,9 @@ extern "C" {
         }
         AISCRIPT *script = AIScriptFind(aieditor->ai_system, aieditorsettings.current_script_name, 1, 1, 1);
         if (script != nullptr) {
-            aieditorsettings.current_script_params[0] = script->params[0].default_val;
-            aieditorsettings.current_script_params[1] = script->params[1].default_val;
-            aieditorsettings.current_script_params[2] = script->params[2].default_val;
-            aieditorsettings.current_script_params[3] = script->params[3].default_val;
+            for (i32 index = 0; index < 4; ++index) {
+                aieditorsettings.current_script_params[index] = script->params[index].default_val;
+            }
         } else {
             memset(aieditorsettings.current_script_params, 0, sizeof(aieditorsettings.current_script_params));
         }
@@ -17537,7 +17367,7 @@ extern "C" {
 
 }
 
-__attribute__((optimize("O3"))) void creatureEditor_Enter() {
+void creatureEditor_Enter() {
     aieditor->creatures.head = nullptr;
     aieditor->creatures.tail = nullptr;
     for (i32 i = 0; i < 128; ++i) {
@@ -17669,7 +17499,7 @@ extern "C" {
         aieditor_SetCurrentScript((char *)"default", 0);
     }
 
-    __attribute__((optimize("O2", "omit-frame-pointer"), force_align_arg_pointer)) void
+    __attribute__((force_align_arg_pointer)) void
     creatureEditor_PathNodeMoved(EDAIPATHNODE_s *node) {
         NULISTHDR *list = &aieditor->creatures;
         for (NULISTLNK *link = NuLinkedListGetHead(list); link != nullptr;
@@ -17746,7 +17576,7 @@ static void pathEditor_PathNodeMoved(EDAIPATHNODE_s *node) {
     }
 }
 
-__attribute__((optimize("O2", "tree-vectorize"))) eduimenu_s *pathEditor_Process(nupad_s *pad) {
+eduimenu_s *pathEditor_Process(nupad_s *pad) {
     if (pad->digital_buttons_pressed & 0x80) {
         eduimenu_s *menu = eduiMenuCreate(200, 70, 240, 270, ed_fnt, aieditor_cbCancelMainMenu, "Options");
         if (__builtin_expect(menu == NULL, 0))
@@ -18127,7 +17957,7 @@ __attribute__((optimize("O2", "tree-vectorize"))) eduimenu_s *pathEditor_Process
 }
 
 extern "C" {
-    __attribute__((optimize("O2", "omit-frame-pointer"))) void creatureEditor_PathNodeDeleted(EDAIPATHNODE_s *node) {
+    void creatureEditor_PathNodeDeleted(EDAIPATHNODE_s *node) {
         for (NULISTLNK *link = NuLinkedListGetHead(&aieditor->creatures); link != nullptr;) {
             NULISTLNK *next = NuLinkedListGetNext(&aieditor->creatures, link);
             CreatureEditorRecord *record = reinterpret_cast<CreatureEditorRecord *>(link);
@@ -18156,38 +17986,22 @@ static __used__ void pathEditor_cbDisconnectPathNode(eduimenu_s *, eduiitem_s *i
         if (node != nullptr && other != nullptr && node != other) {
             i32 i;
             i32 j;
-#define DISCONNECT_OTHER(J)                                                                                            \
-    if (__builtin_expect(other->connections[J].node == node, 0)) {                                                                          \
-        j = J;                                                                                                         \
-        goto disconnect_found;                                                                                         \
-    }
-#define DISCONNECT_NODE(I)                                                                                             \
-    if (node->connections[I].node == other) {                                                                          \
-        i = I;                                                                                                         \
-        DISCONNECT_OTHER(0)                                                                                            \
-        DISCONNECT_OTHER(1)                                                                                            \
-        DISCONNECT_OTHER(2)                                                                                            \
-        DISCONNECT_OTHER(3)                                                                                            \
-        DISCONNECT_OTHER(4)                                                                                            \
-        DISCONNECT_OTHER(5)                                                                                            \
-        DISCONNECT_OTHER(6)                                                                                            \
-        DISCONNECT_OTHER(7)                                                                                            \
-    }
-            DISCONNECT_NODE(0)
-            DISCONNECT_NODE(1)
-            DISCONNECT_NODE(2)
-            DISCONNECT_NODE(3)
-            DISCONNECT_NODE(4)
-            DISCONNECT_NODE(5)
-            DISCONNECT_NODE(6)
-            DISCONNECT_NODE(7)
-#undef DISCONNECT_NODE
-#undef DISCONNECT_OTHER
-            goto disconnected;
-        disconnect_found:
-            memset(&node->connections[i], 0, sizeof(EDAIPATHCNX_s));
-            memset(&other->connections[j], 0, sizeof(EDAIPATHCNX_s));
-        disconnected:
+            for (i = 0; i < 8; ++i) {
+                if (node->connections[i].node == other) {
+                    for (j = 0; j < 8; ++j) {
+                        if (other->connections[j].node == node) {
+                            break;
+                        }
+                    }
+                    if (j < 8) {
+                        break;
+                    }
+                }
+            }
+            if (i < 8) {
+                memset(&node->connections[i], 0, sizeof(EDAIPATHCNX_s));
+                memset(&other->connections[j], 0, sizeof(EDAIPATHCNX_s));
+            }
             creatureEditor_PathNodeDeleted(aieditor->current_path->current_node);
             locatorEditor_PathNodeDeleted(aieditor->current_path->current_node);
             if (AIPathNodeMovedFn != nullptr) {
@@ -18201,8 +18015,8 @@ static __used__ void pathEditor_cbDisconnectPathNode(eduimenu_s *, eduiitem_s *i
 static __used__ void pathEditor_cbDeletePathNode(eduimenu_s *, eduiitem_s *item, u32) {
     if (item != nullptr && item->data != 0) {
         EDAIPATH_s *path = aieditor->current_path;
-        EDAIPATHNODE_s *node = path->current_node;
-        if (node != nullptr && node == path->other_node) {
+        if (path->current_node != nullptr && path->current_node == path->other_node) {
+            EDAIPATHNODE_s *node = path->current_node;
             DestroyAIPathNode(node, path);
             creatureEditor_PathNodeDeleted(node);
             locatorEditor_PathNodeDeleted(node);
@@ -18218,7 +18032,7 @@ static __used__ void pathEditor_cbDeletePathNode(eduimenu_s *, eduiitem_s *item,
 }
 
 extern "C" {
-    __attribute__((optimize("O2", "omit-frame-pointer"))) void creatureEditor_PathDeleted(EDAIPATH_s *path) {
+    void creatureEditor_PathDeleted(EDAIPATH_s *path) {
         for (NULISTLNK *link = NuLinkedListGetHead(&aieditor->creatures); link != nullptr;) {
             NULISTLNK *next = NuLinkedListGetNext(&aieditor->creatures, link);
             CreatureEditorRecord *record = reinterpret_cast<CreatureEditorRecord *>(link);
@@ -18240,7 +18054,7 @@ static __used__ void pathEditor_cbDeletePath(eduimenu_s *parent, eduiitem_s *ite
     if (item == nullptr) {
         return;
     }
-    switch (item->data) {
+    switch (static_cast<u32>(item->data)) {
         case 0: {
             eduimenu_s *menu = eduiMenuCreate(240, 90, 240, 250, ed_fnt, nullptr, "Delete current path??");
             if (menu != nullptr) {
@@ -18261,8 +18075,8 @@ static __used__ void pathEditor_cbDeletePath(eduimenu_s *parent, eduiitem_s *ite
             }
             EDAIPATH_s *path = aieditor->current_path;
             if (path != nullptr) {
-                EDAIPATHNODE_s *node;
-                while ((node = (EDAIPATHNODE_s *)NuLinkedListGetHead(&path->nodes)) != nullptr) {
+                for (EDAIPATHNODE_s *node = (EDAIPATHNODE_s *)NuLinkedListGetHead(&path->nodes); node != nullptr;
+                     node = (EDAIPATHNODE_s *)NuLinkedListGetHead(&path->nodes)) {
                     DestroyAIPathNode(node, path);
                 }
                 NuLinkedListRemove(&aieditor->paths, &path->link);
@@ -18546,7 +18360,7 @@ __attribute__((force_align_arg_pointer)) eduimenu_s *creatureEditor_Process(nupa
             CreatureEditorRecord *selected = creatureEditor_Current();
             EDLOCATOR_s *locator = aieditor->nearest_locator;
             if (selected != nullptr && locator != nullptr) {
-                if (__builtin_expect(selected->locator == locator, 1))
+                if (selected->locator == locator)
                     selected->locator = nullptr;
                 else if (selected->path == locator->path)
                     selected->locator = locator;
@@ -18732,7 +18546,7 @@ __attribute__((force_align_arg_pointer)) eduimenu_s *creatureEditor_Process(nupa
 }
 
 extern "C" {
-    __attribute__((optimize("O2", "omit-frame-pointer"), force_align_arg_pointer)) void
+    __attribute__((force_align_arg_pointer)) void
     creatureEditor_RenderAllCreatures(void) {
         if (GlobalCharacterRenderFn == nullptr)
             return;
@@ -18926,24 +18740,12 @@ void pathEditor_Render(i32 x, i32 y, float x_scale, float y_scale) {
                     if (path->nearest_node != nullptr && path->current_node != nullptr) {
                         EDAIPATHNODE_s *nearest = path->nearest_node;
                         EDAIPATHNODE_s *current = path->current_node;
-                        i32 index = -1;
-                        if (current->connections[0].node == nearest)
-                            index = 0;
-                        else if (current->connections[1].node == nearest)
-                            index = 1;
-                        else if (current->connections[2].node == nearest)
-                            index = 2;
-                        else if (current->connections[3].node == nearest)
-                            index = 3;
-                        else if (current->connections[4].node == nearest)
-                            index = 4;
-                        else if (current->connections[5].node == nearest)
-                            index = 5;
-                        else if (__builtin_expect(current->connections[6].node == nearest, 1))
-                            index = 6;
-                        else if (current->connections[7].node == nearest)
-                            index = 7;
-                        if (index >= 0) {
+                        i32 index;
+                        for (index = 0; index < 8; ++index) {
+                            if (current->connections[index].node == nearest)
+                                break;
+                        }
+                        if (index < 8) {
                             char *names = EdGetCnxFlagNames(current->connections[index].flags);
                             if (names != nullptr && NuStrLen(names) != 0) {
                                 NuQFntSetColour(system_qfont, 0x80808080);

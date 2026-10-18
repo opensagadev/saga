@@ -335,21 +335,6 @@ NuCriticalSection criticalSection("Texture");
 
 static inline void PostBlurSetVertexParam(nushaderprogram_s *, u32, const f32 *, i32);
 
-static inline void LightBoundsPoint(const VuVec &point, NUVEC &minimum, NUVEC &maximum) {
-    if (point.x < minimum.x)
-        minimum.x = point.x;
-    else if (point.x > maximum.x)
-        maximum.x = point.x;
-    if (point.y < minimum.y)
-        minimum.y = point.y;
-    else if (point.y > maximum.y)
-        maximum.y = point.y;
-    if (point.z < minimum.z)
-        minimum.z = point.z;
-    else if (point.z > maximum.z)
-        maximum.z = point.z;
-}
-
 static inline VuVec LightClipTransform(const VuVec &point, const NUMTX &matrix) {
     VuVec result;
     result.x = point.x * matrix.m00;
@@ -394,18 +379,6 @@ static inline NUVEC ShadowCross(const VuVec &a, const VuVec &b, const VuVec &ori
     normal.z = second.x * first.y - first.x * second.y;
     normal.x = second.y * first.z - second.z * first.y;
     return normal;
-}
-
-static inline void CapsuleAdd(VuVec &sum, const VuVec &point) {
-    sum.x += point.x;
-    sum.y += point.y;
-    sum.z += point.z;
-}
-static inline float CapsuleDistance(const VuVec &center, const VuVec &point, float &radius) {
-    float x = center.x - point.x, y = center.y - point.y, z = center.z - point.z;
-    float distance = x * x + y * y + z * z;
-    radius = distance > radius ? distance : radius;
-    return distance;
 }
 
 static inline VuVec WarpTransformPoint(const VuVec &point, const NUMTX &matrix) {
@@ -1396,38 +1369,10 @@ inline SplineObject::SplineObject()
 }
 
 inline SplineObject::~SplineObject() {
-    SplinePointList *point_list = &points;
-    while (point_list->first != NULL) {
-        SplinePointBlock *block = point_list->first;
-        if (block->next != NULL)
-            block->next->previous = block->previous;
-        else
-            point_list->last = block->previous;
-        if (block->previous != NULL)
-            block->previous->next = block->next;
-        else
-            point_list->first = block->next;
-        block->next = NULL;
-        block->previous = NULL;
-        --point_list->block_count;
-        delete block;
-    }
-    SplineKnotList *knot_list = &knots;
-    while (knot_list->first != NULL) {
-        SplineKnot *knot = knot_list->first;
-        if (knot->next != NULL)
-            knot->next->previous = knot->previous;
-        else
-            knot_list->last = knot->previous;
-        if (knot->previous != NULL)
-            knot->previous->next = knot->next;
-        else
-            knot_list->first = knot->next;
-        knot->next = NULL;
-        knot->previous = NULL;
-        --knot_list->count;
-        theMemoryManager.FreePool(knot, sizeof(SplineKnot));
-    }
+}
+
+inline void SplineKnot::operator delete(void *memory) {
+    theMemoryManager.FreePool(memory, sizeof(SplineKnot));
 }
 
 inline void SplineObject::operator delete(void *memory) {
@@ -5598,14 +5543,21 @@ void NuDynamicLight::refreshShadowTransform(RenderSet &set) {
 void NuDynamicLight::computeBoundingSpace(const VuVec *points, VuMtx *matrix) {
     NUVEC minimum = {FLT_MAX, FLT_MAX, FLT_MAX};
     NUVEC maximum = {-FLT_MAX, -FLT_MAX, -FLT_MAX};
-    LightBoundsPoint(points[0], minimum, maximum);
-    LightBoundsPoint(points[1], minimum, maximum);
-    LightBoundsPoint(points[2], minimum, maximum);
-    LightBoundsPoint(points[3], minimum, maximum);
-    LightBoundsPoint(points[4], minimum, maximum);
-    LightBoundsPoint(points[5], minimum, maximum);
-    LightBoundsPoint(points[6], minimum, maximum);
-    LightBoundsPoint(points[7], minimum, maximum);
+    for (i32 i = 0; i < 8; i++) {
+        const VuVec &point = points[i];
+        if (point.x < minimum.x)
+            minimum.x = point.x;
+        else if (point.x > maximum.x)
+            maximum.x = point.x;
+        if (point.y < minimum.y)
+            minimum.y = point.y;
+        else if (point.y > maximum.y)
+            maximum.y = point.y;
+        if (point.z < minimum.z)
+            minimum.z = point.z;
+        else if (point.z > maximum.z)
+            maximum.z = point.z;
+    }
     NuMtxSetOrthoBlend(&matrix->matrix, minimum.x, maximum.x, minimum.y, maximum.y, minimum.z, maximum.z);
 }
 
@@ -5806,25 +5758,21 @@ void NuDynamicLight::computeShadowFrustrumCapsule(const VuVec &direction, const 
     center.y = corners[0].y;
     center.z = corners[0].z;
     center.w = corners[0].w;
-    CapsuleAdd(center, corners[1]);
-    CapsuleAdd(center, corners[2]);
-    CapsuleAdd(center, corners[3]);
-    CapsuleAdd(center, corners[4]);
-    CapsuleAdd(center, corners[5]);
-    CapsuleAdd(center, corners[6]);
-    CapsuleAdd(center, corners[7]);
+    for (i32 i = 1; i < 8; i++) {
+        center.x += corners[i].x;
+        center.y += corners[i].y;
+        center.z += corners[i].z;
+    }
     center.x *= 0.125f;
     center.y *= 0.125f;
     center.z *= 0.125f;
     radius = 0.0f;
-    CapsuleDistance(center, corners[0], radius);
-    CapsuleDistance(center, corners[1], radius);
-    CapsuleDistance(center, corners[2], radius);
-    CapsuleDistance(center, corners[3], radius);
-    CapsuleDistance(center, corners[4], radius);
-    CapsuleDistance(center, corners[5], radius);
-    CapsuleDistance(center, corners[6], radius);
-    float distance = CapsuleDistance(center, corners[7], radius);
+    float distance;
+    for (i32 i = 0; i < 8; i++) {
+        float x = center.x - corners[i].x, y = center.y - corners[i].y, z = center.z - corners[i].z;
+        distance = x * x + y * y + z * z;
+        radius = distance > radius ? distance : radius;
+    }
     // The original takes the final corner distance here, after the maximum stores.
     radius = NuFsqrt(distance);
     VuVec result = {center.x - direction.x * 100.0f, center.y - direction.y * 100.0f, center.z - direction.z * 100.0f,
@@ -7561,7 +7509,7 @@ __attribute__((optimize("O2"))) i32 ANI_SimpleAni3PlayerV4Joint_Quat3W(ani3_anim
 }
 
 extern "C" {
-extern "C" __attribute__((optimize("O2"))) i32 ANI_SimpleAni3PlayerV4Joint_EulerQuat(ani3_animheader_s *anim, f32 frame, nuanimbuff_s *buffer,
+extern "C" i32 ANI_SimpleAni3PlayerV4Joint_EulerQuat(ani3_animheader_s *anim, f32 frame, nuanimbuff_s *buffer,
                                                      i32 joint_count, i32 first_joint) {
     const u8 *node_flags = anim->node_flags;
     buffer->use_quaternions = 1;

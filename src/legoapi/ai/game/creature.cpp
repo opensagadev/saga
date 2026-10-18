@@ -679,7 +679,7 @@ void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *) {
     Player_ResetContexts(packet);
 
     GAMEPAD_s *gamepad = packet->gamepad;
-    gamepad->rumble_packet.field_0x00 = 0;
+    gamepad->rumble_packet.amount = 0.0f;
     gamepad->allocated_5a &= static_cast<u8>(~GAMEPAD_RUNTIME_SUPPRESS_MOVEMENT);
     gamepad->buttons_held = 0;
     gamepad->buttons_pressed = 0;
@@ -689,9 +689,9 @@ void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *) {
     gamepad->right_directions = 0;
     gamepad->previous_right_directions = 0;
     gamepad->unknown_20 = 0;
-    gamepad->rumble_packet.rumble_amount = 0.0f;
-    gamepad->rumble_packet.field_0x08 = 0;
-    gamepad->rumble_packet.rumble_time = 0.0f;
+    gamepad->rumble_packet.time = 0.0f;
+    gamepad->rumble_packet.duration = 0.0f;
+    gamepad->rumble_packet.buzz_time = 0.0f;
     packet->gamepad->allocated_5a &= static_cast<u8>(~0x04);
     packet->gamepad->allocated_5a &= static_cast<u8>(~0x10);
     packet->gamepad->operator_data = NULL;
@@ -1156,7 +1156,7 @@ static void NewCharacterIdle(GameObject_s *object, i32 default_idle) {
         }
     }
 
-    if (__builtin_expect(candidate_count == 0, 0)) {
+    if (__builtin_expect(candidate_count == 0, 1)) {
         ResetCharacterIdle(object, 0, default_idle);
         return;
     }
@@ -2145,20 +2145,12 @@ void KeepOnScreen(GameObject_s *object) {
     if (newgamecam != 0 || (object->field_0xf03 & 0x10) != 0)
         return;
     i32 controlled = 0;
-    // The original checks all eight player slots in straight-line code.
-#define KEEPONSCREEN_CHECK_CONTROLLER(index)                                                                      \
-    if (Player[index] != NULL && Player[index]->character_context == 0x51 && Player[index]->field_0x788 != NULL && \
-        static_cast<TECHNO *>(Player[index]->field_0x788)->controlled_object == object)                           \
-        controlled = 1;
-    KEEPONSCREEN_CHECK_CONTROLLER(0)
-    KEEPONSCREEN_CHECK_CONTROLLER(1)
-    KEEPONSCREEN_CHECK_CONTROLLER(2)
-    KEEPONSCREEN_CHECK_CONTROLLER(3)
-    KEEPONSCREEN_CHECK_CONTROLLER(4)
-    KEEPONSCREEN_CHECK_CONTROLLER(5)
-    KEEPONSCREEN_CHECK_CONTROLLER(6)
-    KEEPONSCREEN_CHECK_CONTROLLER(7)
-#undef KEEPONSCREEN_CHECK_CONTROLLER
+    for (i32 index = 0; index < 8; ++index) {
+        GameObject_s *player = Player[index];
+        if (player != NULL && player->character_context == 0x51 && player->field_0x788 != NULL &&
+            static_cast<TECHNO *>(player->field_0x788)->controlled_object == object)
+            controlled = 1;
+    }
     if (__builtin_expect(static_cast<i8>(object->apiobj.flags_low) >= 0, 0)) {
         if (controlled == 0)
             return;
@@ -2264,7 +2256,7 @@ void KeepOnScreen(GameObject_s *object) {
         }
     }
 
-    if (__builtin_expect(!!(constrained), 0)) {
+    if (constrained) {
         object->apiobj.movement_direction.x = constrained_movement.x;
         object->apiobj.movement_direction.z = constrained_movement.z;
         object->field_0xda8 = previous_keep_time + FRAMETIME;
@@ -2489,7 +2481,7 @@ void MovePlayer(GameObject_s *object) {
                         z = -z;
                     if (__builtin_expect(x * x + z * z < 1806.25f, 0)) {
                         x = z = 0.0f;
-                    } else if (__builtin_expect(x != 0.0f || z != 0.0f, 1)) {
+                    } else if (x != 0.0f || z != 0.0f) {
                         pad->input_mode = 2;
                     }
                 }
@@ -2577,7 +2569,7 @@ void MovePlayer(GameObject_s *object) {
         lift->apiobj.velocity.y = 0.0f;
         lift->apiobj.field_0x27d = 0;
         lift->field_0x105c = 0;
-        if (__builtin_expect(lift->character_context == 0x33, 1))
+        if (lift->character_context == 0x33)
             lift->character_context = -1;
     }
     api.field_0x1fa |= 1;
@@ -2676,7 +2668,7 @@ void TerrainPlayer(GameObject_s *object) {
              (player_edge_probe && object->character_context == -1 && object->field_0xe31 != 1))) {
             const bool walkable_floor = api.field_0x218 != 2000000.0f && object->surface_normal.y > NuTrigTable[0x238e];
             const bool probe_edge = walkable_floor ? (player_edge_probe || requested_edge_stop ||
-                                                      (CInfo[object->character_context].parameter & 1) != 0)
+                                                      (CInfo[object->character_context].flags & (1ull << 32)) != 0)
                                                    : requested_edge_stop;
             if (probe_edge && api.movement_direction.x == 0.0f && api.movement_direction.z == 0.0f &&
                 (api.velocity.x != 0.0f || api.velocity.z != 0.0f)) {

@@ -356,68 +356,68 @@ void Tag_UpdateTransfers(i32 effect0, i32 effect1, i32 count) {
 second_player:
     if (__builtin_expect(Player[1] == NULL, 0)) {
         Tag_Transfer[1].time = Tag_TransferResetTimer;
-        return;
-    }
-    if (!(Tag_Transfer[1].time < Tag_TransferResetTimer))
-        return;
-    Tag_Transfer[1].time += FRAMETIME;
-    if (Tag_Transfer[1].time > Tag_TransferResetTimer) {
-        Tag_Transfer[1].time = Tag_TransferResetTimer;
-        return;
-    }
-    {
-        f32 phase = Tag_Transfer[1].time + Tag_Transfer[1].time;
-        {
-            GameObject_s *source = Tag_Transfer[1].source;
-            GameObject_s *target = Player[1];
-            const f32 height = Tag_Transfer[1].height[0];
-            NUVEC from = source->apiobj.collision_position;
-            NUVEC to = target->apiobj.collision_position;
-            from.y = (source->apiobj.collision_max.y - source->apiobj.collision_min.y) * height +
-                     source->apiobj.collision_min.y;
-            to.y = (target->apiobj.collision_max.y - target->apiobj.collision_min.y) * height +
-                   target->apiobj.collision_min.y;
-            position.x = (to.x - from.x) * phase + from.x;
-            position.y = (to.y - from.y) * phase + from.y;
-            position.z = (to.z - from.z) * phase + from.z;
-            AddVariableShotDebrisEffectTimed1(effect1, &position, count, FRAMETIME, 0, 0, NULL);
-            Tag_Transfer[1].position[0] = position;
+    } else {
+        if (!(Tag_Transfer[1].time < Tag_TransferResetTimer))
+            return;
+        Tag_Transfer[1].time += FRAMETIME;
+        if (Tag_Transfer[1].time > Tag_TransferResetTimer) {
+            Tag_Transfer[1].time = Tag_TransferResetTimer;
+            return;
         }
         {
-            phase = NU_SIN_LUT(static_cast<i32>(phase * 16384.0f));
-            GameObject_s *source = Tag_Transfer[1].source;
-            GameObject_s *target = Player[1];
-            const f32 height = Tag_Transfer[1].height[1];
-            NUVEC from = source->apiobj.collision_position;
-            NUVEC to = target->apiobj.collision_position;
-            from.y = (source->apiobj.collision_max.y - source->apiobj.collision_min.y) * height +
-                     source->apiobj.collision_min.y;
-            to.y = (target->apiobj.collision_max.y - target->apiobj.collision_min.y) * height +
-                   target->apiobj.collision_min.y;
-            position.x = (to.x - from.x) * phase + from.x;
-            position.y = (to.y - from.y) * phase + from.y;
-            position.z = (to.z - from.z) * phase + from.z;
-            position.y += 0.005f * NU_SIN_LUT(static_cast<i32>(phase * 65536.0f));
-            AddVariableShotDebrisEffectTimed1(effect1, &position, count, FRAMETIME, 0, 0, NULL);
-            Tag_Transfer[1].position[1] = position;
-        }
-        {
-            phase = 1.0f - NU_SIN_LUT(static_cast<i32>(phase * 16384.0f + 16384.0f));
-            GameObject_s *target = Player[1];
-            GameObject_s *source = Tag_Transfer[1].source;
-            const f32 height = Tag_Transfer[1].height[2];
-            NUVEC from = source->apiobj.collision_position;
-            NUVEC to = target->apiobj.collision_position;
-            from.y = (source->apiobj.collision_max.y - source->apiobj.collision_min.y) * height +
-                     source->apiobj.collision_min.y;
-            to.y = (target->apiobj.collision_max.y - target->apiobj.collision_min.y) * height +
-                   target->apiobj.collision_min.y;
-            position.x = (to.x - from.x) * phase + from.x;
-            position.y = (to.y - from.y) * phase + from.y;
-            position.z = (to.z - from.z) * phase + from.z;
-            position.y += 0.01f * NU_SIN_LUT(static_cast<i32>(phase * 32768.0f + 16384.0f));
-            AddVariableShotDebrisEffectTimed1(effect1, &position, count, FRAMETIME, 0, 0, NULL);
-            Tag_Transfer[1].position[2] = position;
+            f32 phase = Tag_Transfer[1].time + Tag_Transfer[1].time;
+            {
+                GameObject_s *source = Tag_Transfer[1].source;
+                GameObject_s *target = Player[1];
+                const f32 height = Tag_Transfer[1].height[0];
+                NUVEC from = source->apiobj.collision_position;
+                NUVEC to = target->apiobj.collision_position;
+                from.y = (source->apiobj.collision_max.y - source->apiobj.collision_min.y) * height +
+                         source->apiobj.collision_min.y;
+                to.y = (target->apiobj.collision_max.y - target->apiobj.collision_min.y) * height +
+                       target->apiobj.collision_min.y;
+                position.x = (to.x - from.x) * phase + from.x;
+                position.y = (to.y - from.y) * phase + from.y;
+                position.z = (to.z - from.z) * phase + from.z;
+                AddVariableShotDebrisEffectTimed1(effect1, &position, count, FRAMETIME, 0, 0, NULL);
+                Tag_Transfer[1].position[0] = position;
+            }
+            {
+                phase = NU_SIN_LUT(static_cast<i32>(phase * 16384.0f));
+                GameObject_s *source = Tag_Transfer[1].source;
+                GameObject_s *target = Player[1];
+                const f32 height = Tag_Transfer[1].height[1];
+                NUVEC from = source->apiobj.collision_position;
+                NUVEC to = target->apiobj.collision_position;
+                from.y = (source->apiobj.collision_max.y - source->apiobj.collision_min.y) * height +
+                         source->apiobj.collision_min.y;
+                to.y = (target->apiobj.collision_max.y - target->apiobj.collision_min.y) * height +
+                       target->apiobj.collision_min.y;
+                position.x = (to.x - from.x) * phase + from.x;
+                position.y = (to.y - from.y) * phase + from.y;
+                position.z = (to.z - from.z) * phase + from.z;
+                position.y += 0.005f * NU_SIN_LUT(static_cast<i32>(phase * 65536.0f));
+                AddVariableShotDebrisEffectTimed1(effect1, &position, count, FRAMETIME, 0, 0, NULL);
+                Tag_Transfer[1].position[1] = position;
+            }
+            {
+                phase = 1.0f - NU_SIN_LUT(static_cast<i32>(phase * 16384.0f + 16384.0f));
+                GameObject_s *target = Player[1];
+                GameObject_s *source = Tag_Transfer[1].source;
+                const f32 height = Tag_Transfer[1].height[2];
+                NUVEC from = source->apiobj.collision_position;
+                NUVEC to = target->apiobj.collision_position;
+                from.y = (source->apiobj.collision_max.y - source->apiobj.collision_min.y) * height +
+                         source->apiobj.collision_min.y;
+                to.y = (target->apiobj.collision_max.y - target->apiobj.collision_min.y) * height +
+                       target->apiobj.collision_min.y;
+                position.x = (to.x - from.x) * phase + from.x;
+                position.y = (to.y - from.y) * phase + from.y;
+                position.z = (to.z - from.z) * phase + from.z;
+                position.y += 0.01f * NU_SIN_LUT(static_cast<i32>(phase * 32768.0f + 16384.0f));
+                AddVariableShotDebrisEffectTimed1(effect1, &position, count, FRAMETIME, 0, 0, NULL);
+                Tag_Transfer[1].position[2] = position;
+            }
         }
     }
 }

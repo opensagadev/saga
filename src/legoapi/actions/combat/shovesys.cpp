@@ -398,16 +398,14 @@ void ShoveObjectSysReset() {
 }
 
 void AddShoveObject(nuhspecial_s *special, i16 character_id) {
-    if (NuSpecialExistsFn(special) != 0) {
-        if (shovesys.count < 16) {
-            shovesys.objects[shovesys.count].special = special;
-            shovesys.objects[shovesys.count].character_id = character_id;
-            NuSpecialGetRadius(special, &shovesys.objects[shovesys.count].position,
-                               &shovesys.objects[shovesys.count].radius);
-            NuVecMtxTransform(&shovesys.objects[shovesys.count].position, &shovesys.objects[shovesys.count].position,
-                              NuSpecialGetDrawMtx(special));
-            shovesys.count++;
-        }
+    if (NuSpecialExistsFn(special) != 0 && shovesys.count < 16) {
+        shovesys.objects[shovesys.count].special = special;
+        shovesys.objects[shovesys.count].character_id = character_id;
+        NuSpecialGetRadius(special, &shovesys.objects[shovesys.count].position,
+                           &shovesys.objects[shovesys.count].radius);
+        NuVecMtxTransform(&shovesys.objects[shovesys.count].position, &shovesys.objects[shovesys.count].position,
+                          NuSpecialGetDrawMtx(special));
+        shovesys.count++;
     }
 }
 
@@ -441,11 +439,13 @@ void ShoveSystemCheckGameObject(GameObject_s *object) {
         }
         f32 dx = point.x - shove->position.x;
         f32 dz = point.z - shove->position.z;
-        if (dx == 0.0f && dz == 0.0f) {
-            object->apiobj.movement_direction.x = 2.0f;
-            object->apiobj.movement_direction.z = 0.0f;
-            object->field_0x107a = shove->character_id;
-            return;
+        if (dx == 0.0f) {
+            if (dz == 0.0f) {
+                object->apiobj.movement_direction.x = 2.0f;
+                object->apiobj.movement_direction.z = 0.0f;
+                object->field_0x107a = shove->character_id;
+                return;
+            }
         }
         f32 distance = NuFsqrt(dx * dx + dz * dz);
         f32 penetration = (shove->radius + 0.1f) - distance;

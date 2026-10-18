@@ -289,7 +289,7 @@ NuSoundMemoryBuffer *NuSoundMemoryManager::Alloc(u32 size) {
             buf = buf->GetNext();
         }
 
-        if (best == NULL && (this->flags & 2) != 0) {
+        if ((this->flags & 2) != 0 && best == NULL) {
             best = this->Defragment(alloc_size);
         }
 

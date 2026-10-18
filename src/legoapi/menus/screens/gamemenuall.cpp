@@ -1251,7 +1251,7 @@ void MenuUpdateLoading(MENU_s *) {
     if (memcard_loadneeded != 0) {
         memcard_loadmessage_delay = 1.0f;
         memcard_loadresult_delay = 1.0f;
-        if (memcard_cardchanged != 0 || saveload_cardtype == -1) {
+        if (saveload_cardtype == -1 || memcard_cardchanged != 0) {
             memcard_loadneeded = 0;
             memcard_loadfailed = 1;
         }
@@ -3239,9 +3239,11 @@ extern "C" {
             bool constrained = false;
             if (max_lines > 8)
                 max_lines = 8;
-            if (max_lines > 0 && max_lines <= last_line) {
-                last_line = max_lines - 1;
-                constrained = true;
+            if (max_lines > 0) {
+                if (max_lines <= last_line) {
+                    last_line = max_lines - 1;
+                    constrained = true;
+                }
             }
             const i32 characters = NuStrLenU(decoded);
             const i32 bytes = NuStrLen(reinterpret_cast<char *>(decoded));

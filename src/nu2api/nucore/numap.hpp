@@ -39,10 +39,10 @@ template <typename K, typename V> class NuMap {
         Node *node = static_cast<Node *>(
             NuMemoryGet()->GetThreadMem()->_BlockAlloc(sizeof(Node), 4, 1, "", NUMEMORY_CATEGORY_NONE));
         if (node != NULL) {
-            node->red = true;
             node->key = key;
             node->links[0] = NULL;
             node->links[1] = NULL;
+            node->red = true;
         }
         return node;
     }
@@ -87,6 +87,7 @@ template <typename K, typename V> class NuMap {
 
             inserted = NULL;
             head.red = false;
+            head.links[0] = NULL;
             head.links[1] = root;
             current = root;
 
@@ -145,6 +146,7 @@ template <typename K, typename V> class NuMap {
         i32 direction = 1;
 
         head.red = false;
+        head.links[0] = NULL;
         head.links[1] = root;
 
         while (current->links[direction] != NULL) {

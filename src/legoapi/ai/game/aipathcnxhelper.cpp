@@ -34,18 +34,13 @@ AIPATHCNXHELPER_s *AIPathCnxHelperSys_Find(AIPATHCNXHELPERSYS_s *system, GameObj
         connection = object->ai.path_info.connection;
         direction = object->ai.path_info.direction;
     }
-    if (connection == NULL) {
-        return NULL;
-    }
-    if (system == NULL) {
-        return NULL;
-    }
-
-    AIPATHCNXHELPER_s *helper = system->helpers;
-    for (i32 index = 0; index < system->helper_count; ++index, ++helper) {
-        if (helper->connection == connection && (helper->direction == 0xff || helper->direction == direction) &&
-            helper->type == type && (filter == NULL || filter(helper, object, connection, direction, type) == 0)) {
-            return helper;
+    if (connection != NULL && system != NULL) {
+        AIPATHCNXHELPER_s *helper = system->helpers;
+        for (i32 index = 0; index < system->helper_count; ++index, ++helper) {
+            if (helper->connection == connection && (helper->direction == 0xff || helper->direction == direction) &&
+                helper->type == type && (filter == NULL || filter(helper, object, connection, direction, type) == 0)) {
+                return helper;
+            }
         }
     }
     return NULL;

@@ -602,38 +602,10 @@ inline SplineObject::SplineObject()
 }
 
 inline SplineObject::~SplineObject() {
-    SplinePointList *point_list = &points;
-    while (point_list->first != NULL) {
-        SplinePointBlock *block = point_list->first;
-        if (block->next != NULL)
-            block->next->previous = block->previous;
-        else
-            point_list->last = block->previous;
-        if (block->previous != NULL)
-            block->previous->next = block->next;
-        else
-            point_list->first = block->next;
-        block->next = NULL;
-        block->previous = NULL;
-        --point_list->block_count;
-        delete block;
-    }
-    SplineKnotList *knot_list = &knots;
-    while (knot_list->first != NULL) {
-        SplineKnot *knot = knot_list->first;
-        if (knot->next != NULL)
-            knot->next->previous = knot->previous;
-        else
-            knot_list->last = knot->previous;
-        if (knot->previous != NULL)
-            knot->previous->next = knot->next;
-        else
-            knot_list->first = knot->next;
-        knot->next = NULL;
-        knot->previous = NULL;
-        --knot_list->count;
-        theMemoryManager.FreePool(knot, sizeof(SplineKnot));
-    }
+}
+
+inline void SplineKnot::operator delete(void *memory) {
+    theMemoryManager.FreePool(memory, sizeof(SplineKnot));
 }
 
 inline void SplineObject::operator delete(void *memory) {

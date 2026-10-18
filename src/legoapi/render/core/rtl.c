@@ -3001,10 +3001,10 @@ void SelectPrevRTL() {
         i32 count = 0;
         light = curr_rtl;
         while (count < 128) {
-            if (light == curr_set->lights)
-                light = &curr_set->lights[127];
-            else
+            if (light != curr_set->lights)
                 --light;
+            else
+                light = &curr_set->lights[127];
             if (light->type != 0 && light->field_7a == -1)
                 break;
             ++count;

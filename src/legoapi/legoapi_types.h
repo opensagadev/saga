@@ -1521,18 +1521,21 @@ DECOMP_ASSERT(offsetof(GAMEMESSAGE_s, tick_fn) == 0x104, "game message runtime t
 // Rumble state packet embedded in GAMEPAD_s (20 bytes; floats driven by
 // NuSound3UpdateRumble / UpdateRumble).
 struct RUMBLEPACKET {
-    u32 field_0x00;
-    f32 rumble_amount; // 0x04
-    u32 field_0x08;
-    f32 rumble_time; // 0x0c
+    f32 amount;    // 0x00
+    f32 time;      // 0x04, counts down each frame
+    f32 duration;  // 0x08
+    f32 buzz_time; // 0x0c, counts down each frame
     union {
         u32 field_0x10;
         struct {
-            u8 active;
+            u8 priority; // counts down each frame
             u8 pad_0x11[3];
         };
     };
 };
+DECOMP_ASSERT(sizeof(RUMBLEPACKET) == 0x14, "RUMBLEPACKET size");
+DECOMP_ASSERT(offsetof(RUMBLEPACKET, buzz_time) == 0x0c, "RUMBLEPACKET buzz time offset");
+DECOMP_ASSERT(offsetof(RUMBLEPACKET, priority) == 0x10, "RUMBLEPACKET priority offset");
 struct GAMEPAD_s {
     nupad_s *pad; // 0x00  the bound input pad (fields 0x00..0x1f)
     union {
@@ -2481,18 +2484,7 @@ struct STATUSPACKET_s {
     EPISODEDATA *episode;                                         // 0x18
     u32 *score;                                                   // 0x1c
     struct MISSIONDATA_s *mission;                                // 0x20
-    f32 player0_rumble_amount;                                    // 0x24
-    f32 player0_rumble_time;                                      // 0x28
-    f32 player0_rumble_duration;                                  // 0x2c
-    f32 player0_buzz_amount;                                      // 0x30
-    u8 player0_rumble_priority;                                   // 0x34
-    undefined field_0x35[0x38 - 0x35];
-    f32 player1_rumble_amount;   // 0x38
-    f32 player1_rumble_time;     // 0x3c
-    f32 player1_rumble_duration; // 0x40
-    f32 player1_buzz_amount;     // 0x44
-    u8 player1_rumble_priority;  // 0x48
-    u8 field_0x49[3];
+    RUMBLEPACKET rumble[2];                                       // 0x24
     f32 area_time;          // 0x4c
     f32 collected_score;    // 0x50
     f32 true_hero_target;   // 0x54
@@ -2511,18 +2503,11 @@ struct STATUSPACKET_s {
     u32 coins_collected[2];  // 0x8c
     i32 new_minikits;        // 0x94
     u32 field_0x98;
-    u16 player0_model; // 0x9c
-    u16 player1_model; // 0x9e
+    u16 player_model[2]; // 0x9c
     i16 area_id;       // 0xa0
     i8 episode_id;     // 0xa2
     u8 field_0xa3;
-    union {
-        u8 player_active[2];
-        struct {
-            u8 player0_active;
-            u8 player1_active;
-        };
-    };
+    u8 player_active[2];  // 0xa4
     u8 challenge_state;   // 0xa6
     u8 mission_state;     // 0xa7
     f32 superstory_time;  // 0xa8
@@ -2579,8 +2564,10 @@ DECOMP_ASSERT(sizeof(STATUSPACKET_s) == 0x14c, "STATUSPACKET_s size");
 DECOMP_ASSERT(offsetof(STATUSPACKET_s, field_0xb0) == 0xb0, "STATUSPACKET state flags offset");
 DECOMP_ASSERT(offsetof(STATUSPACKET_s, mode_flags) == 0xb1, "STATUSPACKET mode flags offset");
 DECOMP_ASSERT(offsetof(STATUSPACKET_s, player_active) == 0xa4, "STATUSPACKET active-player array offset");
-DECOMP_ASSERT(offsetof(STATUSPACKET_s, player0_active) == 0xa4, "STATUSPACKET player 0 activity offset");
-DECOMP_ASSERT(offsetof(STATUSPACKET_s, player1_active) == 0xa5, "STATUSPACKET player 1 activity offset");
+DECOMP_ASSERT(offsetof(STATUSPACKET_s, rumble) == 0x24, "STATUSPACKET rumble packets offset");
+DECOMP_ASSERT(offsetof(STATUSPACKET_s, area_time) == 0x4c, "STATUSPACKET area time offset");
+DECOMP_ASSERT(offsetof(STATUSPACKET_s, player_model) == 0x9c, "STATUSPACKET player models offset");
+DECOMP_ASSERT(offsetof(STATUSPACKET_s, area_id) == 0xa0, "STATUSPACKET area id offset");
 DECOMP_ASSERT(sizeof(((STATUSPACKET_s *)0)->player_active) == 2, "STATUSPACKET active-player array extent");
 struct STATUSPACKET_LSW_s {
     i32 field_0x00;

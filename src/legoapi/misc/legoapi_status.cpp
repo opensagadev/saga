@@ -297,56 +297,20 @@ void StatusStage_Reset(STATUS_STAGE_s *stage) {
 }
 
 void NewStatusRumbleBuzz(i32 player, float amount, float buzz, i32 priority) {
-    if (amount > 0.0f) {
-        if (StatusPacket.player0_active != 0 && StatusRumbleTargetsPlayer(player, 0)) {
-            if (__builtin_expect(StatusPacket.player0_rumble_time <= 0.0f, 0) ||
-                __builtin_expect(amount > StatusPacket.player0_rumble_time /
-                                              StatusPacket.player0_rumble_duration *
-                                              StatusPacket.player0_rumble_amount,
-                                 0)) {
-                StatusPacket.player0_rumble_amount = amount;
-                StatusPacket.player0_rumble_duration = amount;
-                StatusPacket.player0_rumble_time = amount;
+    for (i32 i = 0; i < 2; ++i) {
+        if (StatusPacket.player_active[i] != 0 && StatusRumbleTargetsPlayer(player, i)) {
+            RUMBLEPACKET *rumble = &StatusPacket.rumble[i];
+            if (amount > 0.0f && (__builtin_expect(rumble->time <= 0.0f, 0) ||
+                                  __builtin_expect(amount > rumble->time / rumble->duration * rumble->amount, 0))) {
+                rumble->amount = amount;
+                rumble->duration = amount;
+                rumble->time = amount;
             }
-            if (buzz > StatusPacket.player0_buzz_amount) {
-                StatusPacket.player0_buzz_amount = buzz;
+            if (buzz > rumble->buzz_time) {
+                rumble->buzz_time = buzz;
             }
-            if (priority > 0 && ++priority > StatusPacket.player0_rumble_priority) {
-                StatusPacket.player0_rumble_priority = static_cast<u8>(priority);
-            }
-        }
-        if (StatusPacket.player1_active != 0 && StatusRumbleTargetsPlayer(player, 1)) {
-            if (__builtin_expect(StatusPacket.player1_rumble_time <= 0.0f, 0) ||
-                __builtin_expect(amount > StatusPacket.player1_rumble_time /
-                                              StatusPacket.player1_rumble_duration *
-                                              StatusPacket.player1_rumble_amount,
-                                 0)) {
-                StatusPacket.player1_rumble_amount = amount;
-                StatusPacket.player1_rumble_duration = amount;
-                StatusPacket.player1_rumble_time = amount;
-            }
-            if (buzz > StatusPacket.player1_buzz_amount) {
-                StatusPacket.player1_buzz_amount = buzz;
-            }
-            if (priority > 0 && ++priority > StatusPacket.player1_rumble_priority) {
-                StatusPacket.player1_rumble_priority = static_cast<u8>(priority);
-            }
-        }
-    } else {
-        if (StatusPacket.player0_active != 0 && StatusRumbleTargetsPlayer(player, 0)) {
-            if (buzz > StatusPacket.player0_buzz_amount) {
-                StatusPacket.player0_buzz_amount = buzz;
-            }
-            if (priority > 0 && ++priority > StatusPacket.player0_rumble_priority) {
-                StatusPacket.player0_rumble_priority = static_cast<u8>(priority);
-            }
-        }
-        if (StatusPacket.player1_active != 0 && StatusRumbleTargetsPlayer(player, 1)) {
-            if (buzz > StatusPacket.player1_buzz_amount) {
-                StatusPacket.player1_buzz_amount = buzz;
-            }
-            if (priority > 0 && ++priority > StatusPacket.player1_rumble_priority) {
-                StatusPacket.player1_rumble_priority = static_cast<u8>(priority);
+            if (priority > 0 && ++priority > rumble->priority) {
+                rumble->priority = static_cast<u8>(priority);
             }
         }
     }
@@ -387,8 +351,8 @@ void NextStatusStage(STATUSPACKET_s *packet) {
     status_prompt = 0;
 
     if ((packet->stage != NULL && packet->stage->type == 11) || packet->stage->type == 10) {
-        ResetRumble(reinterpret_cast<RUMBLEPACKET *>(&packet->player0_rumble_amount));
-        ResetRumble(reinterpret_cast<RUMBLEPACKET *>(&packet->player1_rumble_amount));
+        ResetRumble(&packet->rumble[0]);
+        ResetRumble(&packet->rumble[1]);
     }
     if (packet->stage != NULL && packet->stage->type == 11) {
         ReCalculateCompletionPoints();
@@ -421,7 +385,7 @@ i32 newCharactersCollected(STATUSPACKET_s *) {
             ++previous;
         }
         if (previous == count) {
-            if (__builtin_expect(Game_CharacterSave != NULL && (Game_CharacterSave[id] & 1) != 0, 1)) {
+            if (__builtin_expect(Game_CharacterSave != NULL && (Game_CharacterSave[id] & 1) != 0, 0)) {
                 continue;
             }
             const i32 index = InCollectList_Index(id, MasterCollection.list, MasterCollection.count_y);
@@ -470,26 +434,20 @@ void InitStatusScreen(WORLDINFO_s *world) {
     newminikitcount = 0;
     currentminikit = 0;
     p.field_0xb0 &= 0xfe;
-    ResetRumble(reinterpret_cast<RUMBLEPACKET *>(&p.player0_rumble_amount));
-    ResetRumble(reinterpret_cast<RUMBLEPACKET *>(&p.player1_rumble_amount));
+    ResetRumble(&p.rumble[0]);
+    ResetRumble(&p.rumble[1]);
     CoinTotalScale = 1.0f;
     goldbrickmsgcount = 0;
     if (netclient == 0) {
-        if (Player[0] == NULL) {
-            p.player0_model = 0xffff;
-        } else {
-            p.player0_model = Player[0]->id;
-            p.player0_active = Player[0]->apiobj.player_controlled;
-            p.coins_remaining[0] = Player[0]->coinpacket == NULL ? 0 : Player[0]->coinpacket->coins;
-            ++p.status_flags;
-        }
-        if (Player[1] == NULL) {
-            p.player1_model = 0xffff;
-        } else {
-            p.player1_model = Player[1]->id;
-            p.player1_active = Player[1]->apiobj.player_controlled;
-            p.coins_remaining[1] = Player[1]->coinpacket == NULL ? 0 : Player[1]->coinpacket->coins;
-            ++p.status_flags;
+        for (i32 i = 0; i < 2; ++i) {
+            if (Player[i] == NULL) {
+                p.player_model[i] = 0xffff;
+            } else {
+                p.player_model[i] = Player[i]->id;
+                p.player_active[i] = Player[i]->apiobj.player_controlled;
+                p.coins_remaining[i] = Player[i]->coinpacket == NULL ? 0 : Player[i]->coinpacket->coins;
+                ++p.status_flags;
+            }
         }
     }
     if (p.status_flags == 0) {
@@ -830,7 +788,7 @@ void InitStatusScreen(WORLDINFO_s *world) {
     if (p.newly_completed != 0 && newCharactersCollected(&p) > 0) {
         AddStatusStage(&p, 35, 0);
         AddStatusStage(&p, 36, 0);
-        RememberPlayerIDs(1, static_cast<i16>(p.player0_model), static_cast<i16>(p.player1_model));
+        RememberPlayerIDs(1, static_cast<i16>(p.player_model[0]), static_cast<i16>(p.player_model[1]));
     }
     if (area != -1 && ((p.area->flags & 0x136) == 0x10 || (p.area->flags & 0x4000) != 0)) {
         if (BOTHTRUEJEDIGOLDBRICKS != 0) {
@@ -902,9 +860,9 @@ void EndOfDemo(i32) {
 
 void DrawStatusIcons(STATUSPACKET_s *status, float y, float alpha) {
     const f32 x = ICONX;
-    const f32 icon_alpha = (status->player0_active == 0 ? 0.25f : 1.0f) * alpha;
+    const f32 icon_alpha = (status->player_active[0] == 0 ? 0.25f : 1.0f) * alpha;
     const f32 size = ICONSIZE;
-    DrawCharIcon(static_cast<i16>(status->player0_model), -x, y, 0.0f, size, 0xa5, icon_alpha, icon_alpha, 1, NULL);
+    DrawCharIcon(static_cast<i16>(status->player_model[0]), -x, y, 0.0f, size, 0xa5, icon_alpha, icon_alpha, 1, NULL);
 }
 
 f32 StatusIconsOnOff(f32 progress) {
@@ -1408,7 +1366,7 @@ void DrawStatusScreen(WORLDINFO_s *) {
 void FinishStatusPacket(i32 choice) {
     LOG_INFO("level results choice=%d flags=%x challenge=%d mission=%d", choice, StatusPacket.mode_flags,
              StatusPacket.challenge_state, StatusPacket.mission_state);
-    RememberPlayerIDs(1, static_cast<i16>(StatusPacket.player0_model), static_cast<i16>(StatusPacket.player1_model));
+    RememberPlayerIDs(1, static_cast<i16>(StatusPacket.player_model[0]), static_cast<i16>(StatusPacket.player_model[1]));
     if (StatusPacket.finish_callback(WORLD, &StatusPacket, choice) != 0) {
         return;
     }
@@ -1471,7 +1429,7 @@ void UpdateStatusScreen(WORLDINFO_s *) {
                 return;
             }
             for (i32 player = 0; player < 2; ++player) {
-                if (__builtin_expect((player == 0 ? StatusPacket.player0_active : StatusPacket.player1_active) == 0, 1)) {
+                if (__builtin_expect(StatusPacket.player_active[player] == 0, 1)) {
                     continue;
                 }
                 if ((GamePad[player].buttons_pressed & GAMEPAD_MENUSELECT) != 0) {
@@ -1519,8 +1477,8 @@ void UpdateStatusScreen(WORLDINFO_s *) {
             MechInputTouchMenuController::AnyTouchesThisFrame = 0;
         } else {
             const u32 button = __builtin_expect(Text_Language != 0, 0) ? GAMEPAD_JUMP : GAMEPAD_MENUSELECT;
-            skip = (StatusPacket.player0_active != 0 && (GamePad[0].buttons_pressed & button) != 0) ||
-                   (StatusPacket.player1_active != 0 && (GamePad[1].buttons_pressed & button) != 0);
+            skip = (StatusPacket.player_active[0] != 0 && (GamePad[0].buttons_pressed & button) != 0) ||
+                   (StatusPacket.player_active[1] != 0 && (GamePad[1].buttons_pressed & button) != 0);
         }
         if (skip) {
             if (StatusPacket.stage == NULL) {

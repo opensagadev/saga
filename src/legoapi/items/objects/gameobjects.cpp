@@ -909,7 +909,7 @@ void UpdateLastSafePosition(GameObject_s *object) {
             if ((object->field_0xf00 & 4) != 0)
                 break;
             const i8 context = object->character_context;
-            if ((CInfo[context].parameter & 8) != 0)
+            if ((CInfo[context].flags & (8ull << 32)) != 0)
                 break;
             if (api.field_0x27d == 0 &&
                 (context == -1 || (context != LEGOCONTEXT_BEENTAKENOVER && context != LEGOCONTEXT_EATEN &&

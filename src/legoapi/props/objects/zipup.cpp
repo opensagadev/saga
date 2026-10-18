@@ -144,15 +144,6 @@ static inline void SetRopeVertex(NURND_VERTEX3D *vertex, f32 x, f32 y, f32 z, f3
     vertex->colour = colour;
 }
 
-#define DETONATOR_CONSIDER_NEAREST(index, owner_test)                                                                  \
-    if (Detonator[index].active != 0 && (owner_test)) {                                                                \
-        const f32 distance = NuVecDistSqr(position, &Detonator[index].position, NULL);                                 \
-        if (distance < nearest_distance) {                                                                             \
-            nearest_distance = distance;                                                                               \
-            nearest = &Detonator[index];                                                                               \
-        }                                                                                                              \
-    }
-
 i32 SuperWeirdo(GameObject_s *object);
 
 // Each control mode retains its own requested and interpolated hint row.
@@ -1055,30 +1046,17 @@ void Detonators_Reset() {
 DETONATOR_s *Detonator_FindNearest(nuvec_s *position, float radius, GameObject_s *owner) {
     f32 nearest_distance = radius == 0.0f ? 1000000000.0f : radius * radius;
     DETONATOR_s *nearest = NULL;
-    if (owner != NULL) {
-        DETONATOR_CONSIDER_NEAREST(0, Detonator[0].object == owner)
-        DETONATOR_CONSIDER_NEAREST(1, Detonator[1].object == owner)
-        DETONATOR_CONSIDER_NEAREST(2, Detonator[2].object == owner)
-        DETONATOR_CONSIDER_NEAREST(3, Detonator[3].object == owner)
-        DETONATOR_CONSIDER_NEAREST(4, Detonator[4].object == owner)
-        DETONATOR_CONSIDER_NEAREST(5, Detonator[5].object == owner)
-        DETONATOR_CONSIDER_NEAREST(6, Detonator[6].object == owner)
-        DETONATOR_CONSIDER_NEAREST(7, Detonator[7].object == owner)
-        DETONATOR_CONSIDER_NEAREST(8, Detonator[8].object == owner)
-        DETONATOR_CONSIDER_NEAREST(9, Detonator[9].object == owner)
-    } else {
-        DETONATOR_CONSIDER_NEAREST(0, true)
-        DETONATOR_CONSIDER_NEAREST(1, true)
-        DETONATOR_CONSIDER_NEAREST(2, true)
-        DETONATOR_CONSIDER_NEAREST(3, true)
-        DETONATOR_CONSIDER_NEAREST(4, true)
-        DETONATOR_CONSIDER_NEAREST(5, true)
-        DETONATOR_CONSIDER_NEAREST(6, true)
-        DETONATOR_CONSIDER_NEAREST(7, true)
-        DETONATOR_CONSIDER_NEAREST(8, true)
-        DETONATOR_CONSIDER_NEAREST(9, true)
+    for (i32 i = 0; i < 10; i++) {
+        if (Detonator[i].active == 0)
+            continue;
+        if (owner != NULL && Detonator[i].object != owner)
+            continue;
+        const f32 distance = NuVecDistSqr(position, &Detonator[i].position, NULL);
+        if (distance < nearest_distance) {
+            nearest_distance = distance;
+            nearest = &Detonator[i];
+        }
     }
-#undef DETONATOR_CONSIDER_NEAREST
     return nearest;
 }
 

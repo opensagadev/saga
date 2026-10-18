@@ -69,7 +69,7 @@ void InitPartTable(char **names) {
 
 void *InitPartDebris(VARIPTR *buf, VARIPTR *, i32 capacity, i32 named_count, char **names, i32 page) {
     PARTDEBSYS_s *system = static_cast<PARTDEBSYS_s *>(BUFFER_ALLOC(buf, sizeof(PARTDEBSYS_s), 16));
-    if (__builtin_expect(system == NULL, 0))
+    if (system == NULL)
         return system;
     system->entries = NULL;
     system->capacity = capacity;

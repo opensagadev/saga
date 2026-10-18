@@ -973,38 +973,10 @@ inline SplineObject::SplineObject()
 }
 
 inline SplineObject::~SplineObject() {
-    SplinePointList *point_list = &points;
-    while (point_list->first != NULL) {
-        SplinePointBlock *block = point_list->first;
-        if (block->next != NULL)
-            block->next->previous = block->previous;
-        else
-            point_list->last = block->previous;
-        if (block->previous != NULL)
-            block->previous->next = block->next;
-        else
-            point_list->first = block->next;
-        block->next = NULL;
-        block->previous = NULL;
-        --point_list->block_count;
-        delete block;
-    }
-    SplineKnotList *knot_list = &knots;
-    while (knot_list->first != NULL) {
-        SplineKnot *knot = knot_list->first;
-        if (knot->next != NULL)
-            knot->next->previous = knot->previous;
-        else
-            knot_list->last = knot->previous;
-        if (knot->previous != NULL)
-            knot->previous->next = knot->next;
-        else
-            knot_list->first = knot->next;
-        knot->next = NULL;
-        knot->previous = NULL;
-        --knot_list->count;
-        theMemoryManager.FreePool(knot, sizeof(SplineKnot));
-    }
+}
+
+inline void SplineKnot::operator delete(void *memory) {
+    theMemoryManager.FreePool(memory, sizeof(SplineKnot));
 }
 
 inline void SplineObject::operator delete(void *memory) {
@@ -1313,10 +1285,10 @@ use_unselected:
 
 void EdMatrixControl::SetMenuItemAttr(i32 mask, eduiitem_s *menu_item, eduiiattr_s *selected, eduiiattr_s *unselected) {
     if (menu_item == components[0] || menu_item == components[1] || menu_item == components[2]) {
-        if (mask & 8)
-            memcpy(menu_item->colours, unselected, sizeof(*selected));
-        else
+        if (!(mask & 8))
             memcpy(menu_item->colours, selected, sizeof(*selected));
+        else
+            memcpy(menu_item->colours, unselected, sizeof(*selected));
     }
     if (menu_item == components[3] || menu_item == components[4] || menu_item == components[5]) {
         if (mask && (mask & 0x10))
@@ -1488,31 +1460,13 @@ void SceneObjectHelper::ClearLevel(i32 level) {
             class_interface.vtable->destroy_object(&class_interface, object, 0);
         object = next_object;
     }
-    i32 scene_index;
-    if (level == 0)
-        scene_index = 0;
-    else if (level == 1)
-        scene_index = 1;
-    else if (level == 2)
-        scene_index = 2;
-    else if (level == 3)
-        scene_index = 3;
-    else if (level == 4)
-        scene_index = 4;
-    else if (level == 5)
-        scene_index = 5;
-    else if (level == 6)
-        scene_index = 6;
-    else if (level == 7)
-        scene_index = 7;
-    else if (level == 8)
-        scene_index = 8;
-    else if (level == 9)
-        scene_index = 9;
-    else
-        return;
-    scenes[scene_index] = NULL;
-    scene_counts[scene_index] = 0;
+    for (i32 scene_index = 0; scene_index < 10; scene_index++) {
+        if (level == scene_index) {
+            scenes[scene_index] = NULL;
+            scene_counts[scene_index] = 0;
+            return;
+        }
+    }
 }
 
 void SceneObjectHelper::Flush() {
@@ -3841,26 +3795,11 @@ i32 LevelEditor::AddScene(char *name, nugscn_s *scene, i32 active) {
 }
 
 i32 LevelEditor::FindSceneId(char *name) {
-    if (__builtin_expect(NuStrICmp(scenes[0].name, name) == 0, 0))
-        return 0;
-    if (__builtin_expect(NuStrICmp(scenes[1].name, name) == 0, 0))
-        return 1;
-    if (__builtin_expect(NuStrICmp(scenes[2].name, name) == 0, 0))
-        return 2;
-    if (__builtin_expect(NuStrICmp(scenes[3].name, name) == 0, 0))
-        return 3;
-    if (NuStrICmp(scenes[4].name, name) == 0)
-        return 4;
-    if (__builtin_expect(NuStrICmp(scenes[5].name, name) == 0, 0))
-        return 5;
-    if (__builtin_expect(NuStrICmp(scenes[6].name, name) == 0, 0))
-        return 6;
-    if (__builtin_expect(NuStrICmp(scenes[7].name, name) == 0, 0))
-        return 7;
-    if (__builtin_expect(NuStrICmp(scenes[8].name, name) == 0, 0))
-        return 8;
-    // The original's unsigned carry test accepts only an exact match here.
-    return (NuStrICmp(scenes[9].name, name) == 0) * 10 - 1;
+    for (i32 i = 0; i < 10; ++i) {
+        if (NuStrICmp(scenes[i].name, name) == 0)
+            return i;
+    }
+    return -1;
 }
 
 nugscn_s *LevelEditor::GetScene(char *name) {
@@ -6166,13 +6105,13 @@ void EdClass::Serialise(EdStream &stream, i32 *class_mapping) {
         }
         stream.SerialiseBuffer(&count, sizeof(count), 1);
         for (EdRef *member = members; member != NULL; member = member->next) {
-            if ((stream.flags & 0x400000) != 0) {
-                if ((member->attributes & 0x400000) != 0) {
+            if ((stream.flags & 0x400000) == 0) {
+                if ((class_mapping != NULL && member->attributes < 0 && class_mapping[member->type_id] == -1) ||
+                    (member->attributes & 0x10000000) != 0) {
                     continue;
                 }
             } else {
-                if ((class_mapping != NULL && member->attributes < 0 && class_mapping[member->type_id] == -1) ||
-                    (member->attributes & 0x10000000) != 0) {
+                if ((member->attributes & 0x400000) != 0) {
                     continue;
                 }
             }
@@ -6290,14 +6229,14 @@ void EdRegistry::Serialise(EdStream &stream) {
 
 EdRef *EdClass::FindTypeRef(char *member_name, i32 recursive) {
     for (EdRef *member = members; member != NULL; member = member->next) {
-        if (recursive == 0 || member->attributes >= 0) {
-            if (__builtin_expect(NuStrICmp(member->name, member_name) == 0, 0)) {
-                return member;
-            }
-        } else {
+        if (recursive != 0 && member->attributes < 0) {
             EdRef *reference = theRegistry.GetClass(member->type_id)->FindTypeRef(member_name, 1);
             if (reference != NULL) {
                 return reference;
+            }
+        } else {
+            if (__builtin_expect(NuStrICmp(member->name, member_name) == 0, 0)) {
+                return member;
             }
         }
     }
@@ -6374,13 +6313,13 @@ EdRef *EdClass::FindTypeRef(i32 attributes, i32 recursive) {
         return NULL;
     }
     do {
-        if (member->attributes >= 0) {
-            if ((member->attributes & attributes) != 0)
-                return member;
-        } else {
+        if (member->attributes < 0) {
             EdRef *reference = theRegistry.GetClass(member->type_id)->FindTypeRef(attributes, 1);
             if (reference != NULL)
                 return reference;
+        } else {
+            if ((member->attributes & attributes) != 0)
+                return member;
         }
         member = member->next;
     } while (member != NULL);
@@ -6869,7 +6808,7 @@ i32 ClassEditor::FindNearestObject(VuVec &origin, VuVec &direction, ClassObject 
             }
         }
     }
-    if (filter != 0 && nearest_distance > 0.1f) {
+    if (filter != 0 && nearest_distance > 0.0f) {
         nearest_class = NULL;
         nearest_object = NULL;
     }
@@ -7236,7 +7175,8 @@ PropertyMenu *PropertyTool::CreatePropertyMenu(ClassObject &object) {
 
     i32 name_type = EdType_String;
     if (__builtin_expect(object.reference == NULL ||
-        !object.reference->GetAttributeData(object.object, 2, name_type, name, sizeof(name)), 0)) {
+                             !object.reference->GetAttributeData(object.object, 2, name_type, name, sizeof(name)),
+                         1)) {
         EdMember member;
         if (!object.ed_class->FindMember(&member, object.object, 2, 1) ||
             !member.reference->GetAttributeData(member.object, 2, name_type, name, sizeof(name)))
@@ -7626,12 +7566,12 @@ void ClassEditor::Render() {
     if (current_object.object != NULL && !IsSelectedObject(current_object))
         DrawObjectSphere(current_object, field_3c);
     if (selected_objects.count > 0) {
-        if (manipulator != NULL) {
-            manipulator->Render(selected_objects);
-        } else {
+        if (manipulator == NULL) {
             for (ClassObjectListEntry *entry = selected_objects.first; entry != NULL; entry = entry->next) {
                 DrawObjectSphere(*reinterpret_cast<ClassObject *>(&entry->ed_class), 0xff800000);
             }
+        } else {
+            manipulator->Render(selected_objects);
         }
         for (ClassObjectListEntry *entry = selected_objects.first; entry != NULL; entry = entry->next)
             theRegistry.ClassIFaceRender(entry->ed_class, entry->object, 1);
@@ -9374,10 +9314,10 @@ i32 EdManipulator::Process(EdInputContext &input, ClassObjectList &selected) {
     if (input.GetHold(14) != 0.0f)
         Scale += step * input.delta_time;
     if (input.GetHold(15) != 0.0f) {
-        if (Scale <= 0.1f)
-            Scale = 0.1f;
-        else
+        if (!(Scale <= 0.1f))
             Scale -= step * input.delta_time;
+        else
+            Scale = 0.1f;
     }
 
     // The original keeps this vector in a 16-byte aligned slot of a realigned frame.

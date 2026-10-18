@@ -70,11 +70,13 @@ i32 AREA_DEFAULTCHALLENGETIME = 600;
 
 static void AddToModelList(APICHARACTERMODELLIST_s *list, i32 *count, i32 capacity, i32 character_id, i32 load_model,
                            EXTRAMODEL *extra_models) {
-    if (*count < capacity && InModelList(list, character_id, NULL) == 0) {
-        list[*count].count = static_cast<i16>(load_model);
-        list[*count].model_id = static_cast<i16>(character_id);
-        ++*count;
-        list[*count].model_id = -1;
+    if (*count < capacity) {
+        if (InModelList(list, character_id, NULL) == 0) {
+            list[*count].count = static_cast<i16>(load_model);
+            list[*count].model_id = static_cast<i16>(character_id);
+            ++*count;
+            list[*count].model_id = -1;
+        }
     }
 
     if (extra_models != NULL && list != reinterpret_cast<APICHARACTERMODELLIST_s *>(Area_PlayerModelList) &&
@@ -605,7 +607,7 @@ void Area_Configure(i32 area, i32 param, EXTRAMODEL *models, i16 *s) {
 
     if (Mission_Active(MissionSys) != NULL && MissionSys->character_count != 0) {
 
-        const i32 count = MissionSys->character_count;
+        const u8 count = MissionSys->character_count;
         memmove(mission_characters, MissionSys->character_ids, count * sizeof(i16));
         if (count > 2) {
             for (i32 swap = 0; swap < count * 3; ++swap) {
@@ -662,8 +664,8 @@ void Area_Configure(i32 area, i32 param, EXTRAMODEL *models, i16 *s) {
 
     SUPERCOUNTER counters[10];
     SUPERCOUNTER *counter = NULL;
-    bool in_counter = false;
     i32 counter_count = 0;
+    bool in_counter = false;
     while (NuFParGetLine(fp) != 0) {
         NuFParGetWord(fp);
         if (fp->word_buf[0] != '\0') {
@@ -687,14 +689,18 @@ void Area_Configure(i32 area, i32 param, EXTRAMODEL *models, i16 *s) {
                             if (NuFParGetWord(fp) != 0 && Level_FindByName(fp->word_buf, &level_index) != NULL)
                                 pickup->level_index = static_cast<i16>(level_index);
                         } else if (NuStrICmp(fp->word_buf, "draw_at_gizmo") == 0) {
-                            if (NuFParGetWord(fp) != 0 && NuStrLen(fp->word_buf) < 16) {
-                                NuStrCpy(pickup->position_name, fp->word_buf);
-                                pickup->use_special = 0;
+                            if (NuFParGetWord(fp) != 0) {
+                                if (NuStrLen(fp->word_buf) < 16) {
+                                    NuStrCpy(pickup->position_name, fp->word_buf);
+                                    pickup->use_special = 0;
+                                }
                             }
                         } else if (NuStrICmp(fp->word_buf, "draw_at_obj") == 0) {
-                            if (NuFParGetWord(fp) != 0 && NuStrLen(fp->word_buf) < 16) {
-                                NuStrCpy(pickup->position_name, fp->word_buf);
-                                pickup->use_special = 1;
+                            if (NuFParGetWord(fp) != 0) {
+                                if (NuStrLen(fp->word_buf) < 16) {
+                                    NuStrCpy(pickup->position_name, fp->word_buf);
+                                    pickup->use_special = 1;
+                                }
                             }
                         }
                     }
@@ -838,10 +844,12 @@ void Area_Configure(i32 area, i32 param, EXTRAMODEL *models, i16 *s) {
                                 char *output = NuStrIStr(fp->word_buf, "output");
                                 if (output != NULL) {
                                     i32 index = NuAToI(output + 6);
-                                    if (NuFParGetWord(fp) != 0 && static_cast<u32>(index) < 8) {
-                                        message->output_values[index] = static_cast<i8>(NuAToI(fp->word_buf));
-                                        if (index >= message->output_count)
-                                            message->output_count = static_cast<i8>(index + 1);
+                                    if (NuFParGetWord(fp) != 0) {
+                                        if (static_cast<u32>(index) < 8) {
+                                            message->output_values[index] = static_cast<i8>(NuAToI(fp->word_buf));
+                                            if (index >= message->output_count)
+                                                message->output_count = static_cast<i8>(index + 1);
+                                        }
                                     }
                                 }
                             }
@@ -881,14 +889,16 @@ void Area_Configure(i32 area, i32 param, EXTRAMODEL *models, i16 *s) {
         Area_PlayerIDList[i] = player_models[i].model_id;
     }
     Area_PlayerIDList[Area_PlayerModelCount] = -1;
-    if (counter_count != 0 && area != -1) {
-        const usize destination = ALIGN(characterbuffer_ptr.addr, alignof(SUPERCOUNTER));
-        const usize bytes = counter_count * sizeof(SUPERCOUNTER);
-        if (destination <= characterbuffer_end.addr && bytes <= characterbuffer_end.addr - destination) {
-            ADataList[area].super_counters = reinterpret_cast<SUPERCOUNTER *>(destination);
-            memmove(ADataList[area].super_counters, counters, bytes);
-            characterbuffer_ptr.addr = destination + bytes;
-            ADataList[area].super_counter_count = static_cast<u8>(counter_count);
+    if (counter_count != 0) {
+        if (area != -1) {
+            const usize destination = ALIGN(characterbuffer_ptr.addr, alignof(SUPERCOUNTER));
+            const usize bytes = counter_count * sizeof(SUPERCOUNTER);
+            if (destination <= characterbuffer_end.addr && bytes <= characterbuffer_end.addr - destination) {
+                ADataList[area].super_counters = reinterpret_cast<SUPERCOUNTER *>(destination);
+                memmove(ADataList[area].super_counters, counters, bytes);
+                characterbuffer_ptr.addr = destination + bytes;
+                ADataList[area].super_counter_count = static_cast<u8>(counter_count);
+            }
         }
     }
 }

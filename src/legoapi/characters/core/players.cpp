@@ -767,7 +767,7 @@ void Player_ToggleCharacter(GameObject_s *object, i32 direction, i32 sound) {
         right = pad->buttons_pressed & right_mask;
         left = pad->buttons_pressed & left_mask;
         if ((right != 0 && left != 0) || (left | right) == 0) {
-            if ((object->apiobj.flags_low & 0x80) == 0) {
+            if (!object->apiobj.player_controlled) {
                 return;
             }
             right = pad->buttons_held & right_mask;
@@ -784,8 +784,10 @@ void Player_ToggleCharacter(GameObject_s *object, i32 direction, i32 sound) {
         }
         hold_time = object->input_toggle_hold_time;
     }
-    if (Player_ToggleSubCharacterFn != NULL && Player_ToggleSubCharacterFn(object, left, sound) != 0) {
-        return;
+    if (Player_ToggleSubCharacterFn != NULL) {
+        if (Player_ToggleSubCharacterFn(object, left, sound) != 0) {
+            return;
+        }
     }
     i32 index = 0;
     while (index < apicharsys->loaded_model_count && object->id != apicharsys->models[index].model_id) {

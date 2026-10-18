@@ -199,107 +199,107 @@ MechWeakPtr<MechObjectInterface, 4> BobaRocketTarget(NULL);
 
 // Original action/context lookup data, with its arrays and pointers in one owner.
 static CHARACTER_CONTEXT_INFO_s _CInfoTab[] = {
-    {"NoContext", -1, 0x00001000, 0},
-    {"Jump", -1, 0x01000000, 0},
-    {"LandJump", -1, 0x00000015, 0},
-    {"LandJump2", -1, 0x00000015, 0},
-    {"LandFlip", -1, 0x00000015, 0},
-    {"LandComboJump", -1, 0x00000015, 0},
-    {"Combo", -1, 0x00800010, 1},
-    {"WeaponIn", -1, 0x00001013, 0},
-    {"WeaponOut", -1, 0x00001013, 0},
-    {"Force", -1, 0x00000222, 0},
-    {"ComboRotate", -1, 0x00000011, 0},
-    {"Shoot", -1, 0x00000011, 0},
-    {"Interface", -1, 0x00000033, 0},
-    {"Block", -1, 0x04000010, 0},
-    {"LandLunge", -1, 0x00800011, 0},
-    {"LandSlam", -1, 0x00800011, 0},
-    {"Teleport", -1, 0x000001b3, 12},
-    {"Swipe", -1, 0x00800010, 0},
-    {"Tube", -1, 0x00000408, 0},
-    {"ForceThrow", -1, 0x00000012, 0},
-    {"HoverUp", -1, 0x00000030, 0},
-    {"Rocket", -1, 0x00000011, 0},
-    {"TakeHit", -1, 0x10000031, 0},
-    {"Zap", -1, 0x00000010, 0},
-    {"Deactivated", -1, 0x10200031, 0},
-    {"Hold", -1, 0x04000010, 0},
-    {"LandSpecial", -1, 0x00000015, 0},
-    {"Communicate", -1, 0x00000033, 0},
-    {"ForcePush", -1, 0x00000002, 0},
-    {"ForcePushed", -1, 0x00000231, 0},
-    {"ForceDeflect", -1, 0x00000002, 0},
-    {"ForceFrozen", -1, 0x0000000b, 0},
-    {"BigJump", -1, 0x02400111, 0},
-    {"BackFlip", -1, 0x00000091, 0},
-    {"Recoil", -1, 0x00000009, 0},
-    {"ForcedBack", -1, 0x00000008, 0},
-    {"DropIn", -1, 0x00040113, 0},
-    {"DropOut", -1, 0x00040113, 0},
-    {"Dodge", -1, 0x00000092, 1},
-    {"Punch", -1, 0x00010032, 1},
-    {"Push", -1, 0x00002030, 0},
-    {"PushSpinner", -1, 0x00003010, 0},
-    {"LandCombatRoll", -1, 0x000000b4, 0},
-    {"Turn", -1, 0x00000190, 0},
-    {"Doomed", -1, 0x00400110, 0},
-    {"Launch", -1, 0x00000000, 0},
-    {"BuildIt", -1, 0x00000010, 0},
-    {"ThrowDetonator", -1, 0x00000033, 0},
-    {"Grabbed", -1, 0x00000013, 0},
-    {"SpecialMoveVictim", -1, 0x00000033, 0},
-    {"Roll", -1, 0x00000010, 16},
-    {"UnRoll", -1, 0x00000013, 16},
-    {"Slide", -1, 0x40000030, 0},
-    {"BeenDragged", -1, 0x00000000, 0},
-    {"ZipDown", -1, 0x00000030, 0},
-    {"Loop", -1, 0x00000190, 0},
-    {"Poo", -1, 0x00000033, 0},
-    {"Grab", -1, 0x00000033, 0},
-    {"Eaten", -1, 0x60020933, 0},
-    {"BarrelRoll", -1, 0x00000190, 0},
-    {"BeenTakenOver", -1, 0x600209b0, 0},
-    {"GetIn", -1, 0x60400130, 0},
-    {"Flatten", -1, 0x00000033, 0},
-    {"Buck", -1, 0x00000033, 0},
-    {"Eat", -1, 0x00000033, 0},
-    {"Disorientate", -1, 0x00000100, 0},
-    {"Activate", -1, 0x00200033, 0},
-    {"ZappedByFloor", -1, 0x00000031, 0},
-    {"Climb", -1, 0x00000431, 0},
-    {"Tightrope", -1, 0x00080431, 0},
-    {"WallShuffle", -1, 0x00003031, 0},
-    {"Grapple", -1, 0x40000430, 0},
-    {"ZipUp", -1, 0x40000430, 0},
-    {"PlaceDetonator", -1, 0x00000033, 0},
-    {"PickUpDetonator", -1, 0x00000031, 0},
-    {"PullLever", -1, 0x00000031, 0},
-    {"Float", -1, 0x00000030, 2},
-    {"Signal", -1, 0x04000433, 0},
-    {"Batarang", -1, 0x08000033, 0},
-    {"Hang", -1, 0x00000430, 0},
-    {"Glide", -1, 0x00000430, 0},
-    {"Catch", -1, 0x00000013, 0},
-    {"Techno", -1, 0x84000031, 0},
-    {"AttractoTarget", -1, 0x04000033, 0},
-    {"AttractoDeposit", -1, 0x00000033, 0},
-    {"Sonar", -1, 0x00000033, 0},
-    {"LedgeTerrain", -1, 0x00000431, 0},
-    {"Transform", -1, 0x00000033, 0},
-    {"WallJumpWait", -1, 0x00002431, 0},
-    {"SuperCarry", -1, 0x00000033, 0},
-    {"PushObstacle", -1, 0x00003010, 0},
-    {"Stunned", -1, 0x10000031, 0},
-    {"Ledge", -1, 0x00000431, 0},
-    {"Security", -1, 0x00000033, 0},
-    {"Ballooning", -1, 0x00100010, 0},
-    {"ThrowQuick", -1, 0x00000033, 0},
-    {"DieAir", -1, 0x000080b1, 0},
-    {"DieGround", -1, 0x000080b1, 0},
-    {"HatMachine", -1, 0x00000033, 0},
-    {"Whip", -1, 0x00000033, 1},
-    {"NetWait", -1, 0x00000023, 0},
+    {"NoContext", -1, 0x00001000},
+    {"Jump", -1, 0x01000000},
+    {"LandJump", -1, 0x00000015},
+    {"LandJump2", -1, 0x00000015},
+    {"LandFlip", -1, 0x00000015},
+    {"LandComboJump", -1, 0x00000015},
+    {"Combo", -1, 0x0000000100800010ull},
+    {"WeaponIn", -1, 0x00001013},
+    {"WeaponOut", -1, 0x00001013},
+    {"Force", -1, 0x00000222},
+    {"ComboRotate", -1, 0x00000011},
+    {"Shoot", -1, 0x00000011},
+    {"Interface", -1, 0x00000033},
+    {"Block", -1, 0x04000010},
+    {"LandLunge", -1, 0x00800011},
+    {"LandSlam", -1, 0x00800011},
+    {"Teleport", -1, 0x0000000c000001b3ull},
+    {"Swipe", -1, 0x00800010},
+    {"Tube", -1, 0x00000408},
+    {"ForceThrow", -1, 0x00000012},
+    {"HoverUp", -1, 0x00000030},
+    {"Rocket", -1, 0x00000011},
+    {"TakeHit", -1, 0x10000031},
+    {"Zap", -1, 0x00000010},
+    {"Deactivated", -1, 0x10200031},
+    {"Hold", -1, 0x04000010},
+    {"LandSpecial", -1, 0x00000015},
+    {"Communicate", -1, 0x00000033},
+    {"ForcePush", -1, 0x00000002},
+    {"ForcePushed", -1, 0x00000231},
+    {"ForceDeflect", -1, 0x00000002},
+    {"ForceFrozen", -1, 0x0000000b},
+    {"BigJump", -1, 0x02400111},
+    {"BackFlip", -1, 0x00000091},
+    {"Recoil", -1, 0x00000009},
+    {"ForcedBack", -1, 0x00000008},
+    {"DropIn", -1, 0x00040113},
+    {"DropOut", -1, 0x00040113},
+    {"Dodge", -1, 0x0000000100000092ull},
+    {"Punch", -1, 0x0000000100010032ull},
+    {"Push", -1, 0x00002030},
+    {"PushSpinner", -1, 0x00003010},
+    {"LandCombatRoll", -1, 0x000000b4},
+    {"Turn", -1, 0x00000190},
+    {"Doomed", -1, 0x00400110},
+    {"Launch", -1, 0x00000000},
+    {"BuildIt", -1, 0x00000010},
+    {"ThrowDetonator", -1, 0x00000033},
+    {"Grabbed", -1, 0x00000013},
+    {"SpecialMoveVictim", -1, 0x00000033},
+    {"Roll", -1, 0x0000001000000010ull},
+    {"UnRoll", -1, 0x0000001000000013ull},
+    {"Slide", -1, 0x40000030},
+    {"BeenDragged", -1, 0x00000000},
+    {"ZipDown", -1, 0x00000030},
+    {"Loop", -1, 0x00000190},
+    {"Poo", -1, 0x00000033},
+    {"Grab", -1, 0x00000033},
+    {"Eaten", -1, 0x60020933},
+    {"BarrelRoll", -1, 0x00000190},
+    {"BeenTakenOver", -1, 0x600209b0},
+    {"GetIn", -1, 0x60400130},
+    {"Flatten", -1, 0x00000033},
+    {"Buck", -1, 0x00000033},
+    {"Eat", -1, 0x00000033},
+    {"Disorientate", -1, 0x00000100},
+    {"Activate", -1, 0x00200033},
+    {"ZappedByFloor", -1, 0x00000031},
+    {"Climb", -1, 0x00000431},
+    {"Tightrope", -1, 0x00080431},
+    {"WallShuffle", -1, 0x00003031},
+    {"Grapple", -1, 0x40000430},
+    {"ZipUp", -1, 0x40000430},
+    {"PlaceDetonator", -1, 0x00000033},
+    {"PickUpDetonator", -1, 0x00000031},
+    {"PullLever", -1, 0x00000031},
+    {"Float", -1, 0x0000000200000030ull},
+    {"Signal", -1, 0x04000433},
+    {"Batarang", -1, 0x08000033},
+    {"Hang", -1, 0x00000430},
+    {"Glide", -1, 0x00000430},
+    {"Catch", -1, 0x00000013},
+    {"Techno", -1, 0x84000031},
+    {"AttractoTarget", -1, 0x04000033},
+    {"AttractoDeposit", -1, 0x00000033},
+    {"Sonar", -1, 0x00000033},
+    {"LedgeTerrain", -1, 0x00000431},
+    {"Transform", -1, 0x00000033},
+    {"WallJumpWait", -1, 0x00002431},
+    {"SuperCarry", -1, 0x00000033},
+    {"PushObstacle", -1, 0x00003010},
+    {"Stunned", -1, 0x10000031},
+    {"Ledge", -1, 0x00000431},
+    {"Security", -1, 0x00000033},
+    {"Ballooning", -1, 0x00100010},
+    {"ThrowQuick", -1, 0x00000033},
+    {"DieAir", -1, 0x000080b1},
+    {"DieGround", -1, 0x000080b1},
+    {"HatMachine", -1, 0x00000033},
+    {"Whip", -1, 0x0000000100000033ull},
+    {"NetWait", -1, 0x00000023},
 };
 
 static ACTIONINFO_s ActionInfoList[] = {
@@ -1731,7 +1731,11 @@ static void LightSabreStreakCode(GameObject_s *object, i32 blade, i32 effect) {
             if (!CannotKill(nearest)) {
                 i32 damage = object->sabre_damage;
                 if (damage != 0 && nearest->apiobj.player_controlled) {
-                    damage = object->apiobj.player_controlled && Player_HasDoubleWeaponDamage(object) ? 2 : 1;
+                    if (object->apiobj.player_controlled && Player_HasDoubleWeaponDamage(object)) {
+                        damage = 2;
+                    } else {
+                        damage = 1;
+                    }
                 }
                 ObjHitObj(object, nearest, damage, ObjHitObj_Flags(object) | 0x100, 0, 1);
             } else {
@@ -3539,12 +3543,10 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
             if (object->character_context != 0x36 && object->character_context != 0x2a &&
                 object->character_context != 0x3a) {
                 angular_speed = (i32)(RotDiff(object->previous_movement_angle, api.field_0x276) / FRAMETIME);
-                if (WORLD->current_level == PLATFORM_LDATA) {
-                    if (NeedsPretendAnim(object)) {
-                        u16 phase = (i32)(NuFmod(GameTimer.time_elapsed, 2.1f) / 2.1f * 65536.0f);
-                        angular_speed =
-                            (i32)(angular_speed + 4551.0f * NuTrigTable[((phase - 0x2000) >> 1) & 0x7fff]);
-                    }
+                if (WORLD->current_level == PLATFORM_LDATA && NeedsPretendAnim(object)) {
+                    u16 phase = (i32)(NuFmod(GameTimer.time_elapsed, 2.1f) / 2.1f * 65536.0f);
+                    angular_speed =
+                        (i32)(angular_speed + 4551.0f * NuTrigTable[((phase - 0x2000) >> 1) & 0x7fff]);
                 }
             }
             f32 rate = 8.0f;
@@ -4213,8 +4215,10 @@ void TurnCode(GameObject_s *object, i32 mode, GAMEPAD_s *pad) {
         }
 
         if ((object->field_0xe24 & 2) == 0 && (mode == 0 || object->character_context != -1)) {
-            if (!object->can_turn && UnderPlayerControl(object) == 0) {
-                return;
+            if (!object->can_turn) {
+                if (UnderPlayerControl(object) == 0) {
+                    return;
+                }
             }
             if (!(pad->input_magnitude > 0.0f)) {
                 return;
@@ -6065,10 +6069,10 @@ i32 LightSabre_ColourFromObj(i32 model, i32 *glow_model) {
 }
 
 void LightSabreDebris(GameObject_s *object) {
+    i32 blade_count = 4;
     i32 hit_effect = -1;
     if (object->blade_index != -1)
         hit_effect = BladeTab[object->blade_index].hit_effect;
-    i32 blade_count = 4;
     if (object->id != id_GRIEVOUS)
         blade_count = object->id == id_DARTHMAUL ? 2 : 1;
     auto object_id = object->id;
@@ -6300,18 +6304,20 @@ static void DrawLightningBolts(GameObject_s *object, GameObject_s *target, i32 l
                lightning_endw[lightning_index], distance);
     PlaySfx("ForceLightningLp", &target->apiobj.collision_position);
 
-    if (object->field_0x1088 != 0 && object->field_0x1087 == 2 && NuIOS_IsLowEndDevice() == 0 && lightning_type != 0) {
-        NUVEC reflected_origin = secondary;
-        NUVEC reflected_target = target_position;
-        f32 plane = WORLD->current_level->unknown_0cc;
-        if (plane == 2000000.0f)
-            plane = object->field_0x1020;
-        reflected_origin.y = plane - (reflected_origin.y - plane);
-        reflected_target.y = plane - (reflected_target.y - plane);
-        distance = NuVecDist(&reflected_target, &reflected_origin, &delta);
-        NuLgtLaser(lightning_type, lightning_sizew[lightning_index], lightning_sizel[lightning_index],
-                   lightning_sizewab[lightning_index], &reflected_origin, &delta, lightning_col[lightning_index],
-                   lightning_endw[lightning_index], distance);
+    if (object->field_0x1088 != 0 && object->field_0x1087 == 2 && NuIOS_IsLowEndDevice() == 0) {
+        if (lightning_type != 0) {
+            NUVEC reflected_origin = secondary;
+            NUVEC reflected_target = target_position;
+            f32 plane = WORLD->current_level->unknown_0cc;
+            if (plane == 2000000.0f)
+                plane = object->field_0x1020;
+            reflected_origin.y = plane - (reflected_origin.y - plane);
+            reflected_target.y = plane - (reflected_target.y - plane);
+            distance = NuVecDist(&reflected_target, &reflected_origin, &delta);
+            NuLgtLaser(lightning_type, lightning_sizew[lightning_index], lightning_sizel[lightning_index],
+                       lightning_sizewab[lightning_index], &reflected_origin, &delta, lightning_col[lightning_index],
+                       lightning_endw[lightning_index], distance);
+        }
     }
 }
 
@@ -6847,8 +6853,10 @@ void FindForcePushTarget(GameObject_s *object, i32 activate, i32 target_filter) 
                                                   ? 0x2b
                                                   : (best->apiobj.character_model->model_data_b[5] != NULL ? 5 : 0x2b);
                     best->action_movement_state = 0;
-                    if (object->apiobj.player_controlled && Cheat_IsOn(0x13)) {
-                        best->action_movement_state = 4;
+                    if (object->apiobj.player_controlled) {
+                        if (Cheat_IsOn(0x13)) {
+                            best->action_movement_state = 4;
+                        }
                     }
                 }
                 best->force_target = object;
@@ -7626,10 +7634,7 @@ static void DodgeCode(GameObject_s *object, i32 action_pressed, i32 jump_pressed
             } else {
                 const f32 side = (object->apiobj.collision_position.x - bolt->position.x) * dodge_direction.x +
                                  (object->apiobj.collision_position.z - bolt->position.z) * dodge_direction.z;
-                if (side < 0.0f)
-                    object->context_animation = 0x4f;
-                else
-                    object->context_animation = 0x26;
+                object->context_animation = side < 0.0f ? 0x4f : 0x26;
             }
             object->field_0xe12 = object->context_animation;
 
@@ -7665,10 +7670,14 @@ static i32 ShootCode(GameObject_s *object, i32 pressed, i32 special_pressed, i32
                      i32 fire_mode) {
     GameObject_s *target = NULL;
     GIZMOBLOWUP_s *blowup = NULL;
-    if (object == Player[0] && nextShootTarget.Get() != NULL && pressed != 0) {
-        target = nextShootTarget->GetCharacterObject();
-        if (object == Player[0] && nextShootTarget.Get() != NULL)
-            blowup = nextShootTarget->GetGizBlowup();
+    if (object == Player[0]) {
+        if (nextShootTarget.Get() != NULL) {
+            if (pressed != 0) {
+                target = nextShootTarget->GetCharacterObject();
+                if (object == Player[0] && nextShootTarget.Get() != NULL)
+                    blowup = nextShootTarget->GetGizBlowup();
+            }
+        }
     }
     const i32 bolt_id =
         object->id == id_GEONOSIAN && (object->field_0xefd & 2) != 0 ? 0x13 : BoltType_FindIDByCreature(object, 0);
@@ -8162,11 +8171,7 @@ void GameObjectStuffAfterAnimation() {
             part.special = &WORLD->lev_objs[232].special;
             part.field_28 = 232;
             const bool player = object->apiobj.player_controlled;
-            if (player) {
-                part.flags = 0xc11b;
-            } else {
-                part.flags = 0xc31b;
-            }
+            part.flags = player ? 0xc11b : 0xc31b;
             part.owner = object;
             part.field_90 = static_cast<u8>(object->apiobj.field_0x289);
             part.field_44 = BobaRocket_Kill;
@@ -8209,12 +8214,12 @@ void GameObjectStuffAfterAnimation() {
                 i32 joint_a = blade_data->streak_joints[blade][0];
                 if (joint_a == -1 || object->apiobj.character_model->points_of_interest[joint_a] == NULL)
                     continue;
-                i32 joint_b = blade_data->streak_joints[blade][1];
+                i8 joint_b = blade_data->streak_joints[blade][1];
                 if (joint_b == -1 || object->apiobj.character_model->points_of_interest[joint_b] == NULL)
                     continue;
                 points[0] = *NUMTX_GET_ROW_VEC(&object->joint_matrices[joint_a], 3);
                 points[1] = *NUMTX_GET_ROW_VEC(&object->joint_matrices[joint_b], 3);
-                i32 colour = object->blade_states[blade];
+                i8 colour = object->blade_states[blade];
                 if (colour != -1 && object->character_context == 5 && (object->context_flags & 0x1c) == 0 &&
                     (static_cast<u8>(object->combo_branch) & 0xfb) == 2) {
                     i32 index = object->combo_branch == 6 ? BladeTab[colour].hit_effect : BladeTab[colour].effect_6;
@@ -9195,7 +9200,7 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
             api.facing_angle = api.movement_facing_angle;
             api.field_0x276 = api.movement_facing_angle;
         } else if (direct_turn == 0 &&
-                   (turn_override != 0.0f || (CInfo[object->character_context].parameter & 2) != 0 ||
+                   (turn_override != 0.0f || (CInfo[object->character_context].flags & (2ull << 32)) != 0 ||
                     (api.character_data->game_character->flags_090 & 0x100) != 0 || SuperCarry_Carrying(object))) {
             if (object->character_context == 0x4b && (api.character_data->game_character->flags_090 & 0x100) == 0)
                 turn_rate *= 0.333f;
@@ -9627,7 +9632,7 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
                                 if (!stopped) {
                                     const u16 angle =
                                         direct_turn == 0 &&
-                                                ((CInfo[object->character_context].parameter & 2) != 0 ||
+                                                ((CInfo[object->character_context].flags & (2ull << 32)) != 0 ||
                                                  (api.character_data->game_character->flags_090 & 0x100) != 0)
                                             ? api.facing_angle
                                             : api.movement_facing_angle;
@@ -9743,7 +9748,7 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
                     if ((object->field_0xefd & GAMEOBJECT_MOVEMENT_FLAG_BACKWARDS) != 0)
                         walking_speed *= api.character_data->game_character->backwards_speed_multiplier;
                     u16 walking_angle = input_angle;
-                    if (direct_turn == 0 && ((CInfo[object->character_context].parameter & 2) != 0 ||
+                    if (direct_turn == 0 && ((CInfo[object->character_context].flags & (2ull << 32)) != 0 ||
                                              (api.character_data->game_character->flags_090 & 0x100) != 0))
                         walking_angle = api.facing_angle;
                     if (WORLD->current_level == VADERA_LDATA && !api.player_controlled &&
@@ -11577,7 +11582,7 @@ void Animate_BATTLEDROID(GameObject_s *object) {
         packet.requested_animation = object->context_animation;
     }
 
-    const i16 animation = packet.requested_animation;
+    const i32 animation = packet.requested_animation;
     if (animation != CHARACTER_ANIMATION_FALL &&
         !((object->apiobj.character_data->model_flags & CHARACTER_MODEL_FLAG_HIGH_JUMP) != 0 &&
           (animation == CHARACTER_ANIMATION_FALL_VARIANT_75 || animation == CHARACTER_ANIMATION_FALL_VARIANT_40 ||
@@ -12933,7 +12938,7 @@ void MovePlayer_NETWORK(GameObject_s *object) {
         api.facing_angle = api.movement_facing_angle;
         api.field_0x276 = api.movement_facing_angle;
     } else if (direct_turn == 0 &&
-               (turn_override != 0.0f || (CInfo[object->character_context].parameter & 2) != 0 ||
+               (turn_override != 0.0f || (CInfo[object->character_context].flags & (2ull << 32)) != 0 ||
                 (static_cast<GAMECHARACTERDATA *>(api.character_data->field11_0x24)->flags_090 & 0x100) != 0 ||
                 SuperCarry_Carrying(object))) {
         if (object->character_context == 0x4b &&

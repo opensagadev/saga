@@ -102,13 +102,8 @@ void V2SessionManager::Update() {
     stats.Update();
 }
 
-V2SessionManager::V2SessionManager(char *new_name) : stats("SessionAll") {
-    field_88 = 0;
-    field_8c = 0;
-    field_90 = 0;
-    first_peer = NULL;
-    last_peer = NULL;
-    peer_count = 0;
+V2SessionManager::V2SessionManager(char *new_name)
+    : field_88(0), field_8c(0), field_90(0), first_peer(NULL), last_peer(NULL), peer_count(0), stats("SessionAll") {
     field_7c = 0;
     field_40 = 2;
     num_local_players = 0;

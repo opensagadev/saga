@@ -379,11 +379,13 @@ bool MechInputTouchGestureBasedController::OnHold(GameObject_s &object, TouchHol
     VuVec position __attribute__((aligned(16)))(holder.down_position.x, holder.down_position.y, 0.0f, 1.0f);
     if (holder.target_object->GetObjectType() == 12) {
         void *force_target = object.force_glow_object;
-        if (force_target != NULL && holder.target_object->GetPart() == force_target) {
-            target = holder.target_object.Get();
-            StartNewTask(new MechTouchTaskUseForce(*this, target, position), holder, true, true);
-            holder.consumed = 1;
-            return true;
+        if (force_target != NULL) {
+            if (holder.target_object->GetPart() == force_target) {
+                target = holder.target_object.Get();
+                StartNewTask(new MechTouchTaskUseForce(*this, target, position), holder, true, true);
+                holder.consumed = 1;
+                return true;
+            }
         }
     }
     const i32 type = holder.target_object->GetObjectType();
@@ -629,10 +631,12 @@ bool MechInputTouchGestureBasedController::OnSwipe(GameObject_s &object, TouchHo
         MechSystems::Get()->NewSwipeMarker(holder, index, static_cast<SwipeDecalRenderer::Style>(0));
         return true;
     }
-    if (object.id == id_GRABCONTROL && IsDownSwipe(holder.swipe_samples[index].position, holder.touch_position)) {
-        button_was_pressed[0] = 1;
-        MechSystems::Get()->NewSwipeMarker(holder, index, static_cast<SwipeDecalRenderer::Style>(0));
-        return true;
+    if (object.id == id_GRABCONTROL) {
+        if (IsDownSwipe(holder.swipe_samples[index].position, holder.touch_position)) {
+            button_was_pressed[0] = 1;
+            MechSystems::Get()->NewSwipeMarker(holder, index, static_cast<SwipeDecalRenderer::Style>(0));
+            return true;
+        }
     }
     if (WORLD->current_level == HOTHESCAPEB_LDATA && object.id == id_SNOWMOB && DoBuckStart(&object)) {
         return true;

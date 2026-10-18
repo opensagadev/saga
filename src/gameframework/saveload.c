@@ -297,7 +297,8 @@ extern "C" {
     i32 saveloadCheckSlotsUsed(void) {
         i32 used = 0;
         for (i32 slot = 0; slot <= 5; ++slot) {
-            FILE *file = fopen(fullslotname(slot), "rb");
+            char *name = fullslotname(slot);
+            FILE *file = fopen(name, "rb");
             if (file) {
                 ++used;
                 fclose(file);
@@ -307,7 +308,8 @@ extern "C" {
     }
 
     i32 saveloadDeleteSlot(i32 slot) {
-        remove(slotname(slot));
+        char *name = slotname(slot);
+        remove(name);
         return 1;
     }
 

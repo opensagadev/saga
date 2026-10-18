@@ -599,12 +599,16 @@ void MechTouchUIPlayerButton::TriggerTagNext() {
         if (target_ids[index] >= 0) {
             for (i32 slot = 0; slot < 8; ++slot) {
                 GameObject_s *target = Player[slot];
-                if (target != NULL && target->id == target_ids[index] && !(!TouchHacks::CanTagTo(*player, *target))) {
-                    if (TagCode(player, target, 0, 0, 1) == 1) {
-                        GameAudio_PlaySfx(0x21, NULL, 0, 0);
-                        Tag_NewTransfer(source, target);
+                if (target != NULL) {
+                    if (target->id == target_ids[index]) {
+                        if (!(!TouchHacks::CanTagTo(*player, *target))) {
+                            if (TagCode(player, target, 0, 0, 1) == 1) {
+                                GameAudio_PlaySfx(0x21, NULL, 0, 0);
+                                Tag_NewTransfer(source, target);
+                            }
+                            return;
+                        }
                     }
-                    return;
                 }
             }
         }
@@ -687,8 +691,10 @@ void MechTouchUIPlayerButton::SetupTargetIds() {
 
                 if (BonusArea == 0 || VehicleArea == 0) {
                     if (!(static_cast<i32>(GCDataList[id].flags_090) < 0)) {
-                        if ((GCDataList[id].flags_094[3] & 1) == 0 && (collected == -1 || Collection_Got(id) == 0)) {
-                            continue;
+                        if ((GCDataList[id].flags_094[3] & 1) == 0) {
+                            if (collected == -1 || Collection_Got(id) == 0) {
+                                continue;
+                            }
                         }
                     } else {
                         if (Cheats_CheckFlags(0x100) == 0) {
@@ -968,10 +974,12 @@ void MechTouchUIPlayerButton::Process(float) {
         }
         for (i32 slot = 0; slot < 8; ++slot) {
             GameObject_s *target = Player[slot];
-            if (target != NULL && target->id == target_ids[target_index] && TouchHacks::CanTagTo(*player, *target)) {
-                field_0x144[target_index] = 1;
-                MechSystems::Get()->NewRadarPulse(position, false);
-                break;
+            if (target != NULL && target->id == target_ids[target_index]) {
+                if (TouchHacks::CanTagTo(*player, *target)) {
+                    field_0x144[target_index] = 1;
+                    MechSystems::Get()->NewRadarPulse(position, false);
+                    break;
+                }
             }
         }
     }

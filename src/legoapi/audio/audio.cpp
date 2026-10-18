@@ -1145,8 +1145,11 @@ void PlayFootStepSfx(GameObject_s *object) {
         }
     }
 
-    i32 sfx = object->apiobj.character_data->game_character->sfx_footstep;
-    if (sfx == -1) {
+    i32 sfx;
+    if (object->apiobj.character_data->game_character->sfx_footstep != -1) {
+        sfx = object->apiobj.character_data->game_character->sfx_footstep;
+    } else {
+        sfx = -1;
         if (GameAudio->override_footstep_fn != NULL) {
             sfx = GameAudio->override_footstep_fn(object, on_platform);
         }

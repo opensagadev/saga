@@ -1220,7 +1220,7 @@ extern "C" {
         pick->uv_y[corner] = y;
         i32 left = pad->analog_l1 ? pad->analog_l1 : pad->analog_l2;
         i32 right = pad->analog_r1 ? pad->analog_r1 : pad->analog_r2;
-        if (__builtin_expect(!!(left), 0)) {
+        if (left) {
             f32 zoom = pick->zoom - left / 4192.0f;
             if (!(zoom < 1.0f)) {
                 pick->zoom = zoom;
@@ -1810,14 +1810,8 @@ extern "C" {
         colours.top_left = *reinterpret_cast<i32 *>(colours.bottom_left);                                              \
         colours.top_right = *reinterpret_cast<i32 *>(colours.bottom_right);                                            \
     }
-        EDUI_DRAW_VALUE_STRIP(0);
-        EDUI_DRAW_VALUE_STRIP(1);
-        EDUI_DRAW_VALUE_STRIP(2);
-        EDUI_DRAW_VALUE_STRIP(3);
-        EDUI_DRAW_VALUE_STRIP(4);
-        EDUI_DRAW_VALUE_STRIP(5);
-        EDUI_DRAW_VALUE_STRIP(6);
-        EDUI_DRAW_VALUE_STRIP(7);
+        for (i32 strip = 0; strip < edui_grad_steps; ++strip)
+            EDUI_DRAW_VALUE_STRIP(strip);
 #undef EDUI_DRAW_VALUE_STRIP
     }
 
@@ -1919,7 +1913,7 @@ extern "C" {
         return height * 2;
     }
 
-    __attribute__((optimize("O2", "tree-vectorize"))) static __used__ i32 eduicbRenderTexturePick(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32) {
+    static __used__ i32 eduicbRenderTexturePick(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32) {
         u32 colours[2] = {0x807f7f7f, 0x807f7f7f};
         (void)menu;
         edui_texture_pick_s *picker = static_cast<edui_texture_pick_s *>(item);
@@ -1938,44 +1932,38 @@ extern "C" {
             origin_v = maximum < 0.0f ? maximum : 0.0f;
         else if (maximum < origin_v)
             origin_v = maximum;
-        f32 point_u[2] = {
-            (picker->uv_x[0] - origin_u) / uv_span,
-            (picker->uv_x[1] - origin_u) / uv_span,
-        };
-        f32 point_v[2] = {
-            (picker->uv_y[0] - origin_v) / uv_span,
-            (picker->uv_y[1] - origin_v) / uv_span,
-        };
+        f32 point_u[2];
+        f32 point_v[2];
         for (i32 corner = 0; corner < 2; ++corner) {
+            point_u[corner] = (picker->uv_x[corner] - origin_u) / uv_span;
             if (point_u[corner] < 0.0f)
                 point_u[corner] = 0.0f;
             else if (point_u[corner] > 1.0f)
                 point_u[corner] = 1.0f;
+            point_v[corner] = (picker->uv_y[corner] - origin_v) / uv_span;
             if (point_v[corner] < 0.0f)
                 point_v[corner] = 0.0f;
             else if (point_v[corner] > 1.0f)
                 point_v[corner] = 1.0f;
         }
         colours[picker->selected_corner] = 0x80ffffff;
-        if (!edui_donotdraw) {
+        if (!edui_donotdraw)
             NuRndrRectUV2di(x << 4, y << 3, width << 4, width << 3, origin_u, origin_v, origin_u + uv_span,
                             origin_v + uv_span, 0x80808080, picker->material);
-            for (i32 corner = 0; corner < 2; ++corner) {
-                i32 vertical = static_cast<i32>(x + size * point_u[corner]) << 4;
-                i32 horizontal = static_cast<i32>(y + size * point_v[corner]) << 3;
-                NuRndrLine2di(x << 4, horizontal, (x + width - 1) << 4, horizontal, colours[corner], uimtls[0]);
-                NuRndrLine2di(vertical, y << 3, vertical, (y + width) * 8 - 8, colours[corner], uimtls[0]);
-            }
+        for (i32 corner = 0; corner < 2; ++corner) {
+            eduiDrawLine(x << 4, static_cast<i32>(y + size * point_v[corner]) << 3, (x + width - 1) << 4,
+                         static_cast<i32>(y + size * point_v[corner]) << 3, colours[corner], uimtls[0]);
+            eduiDrawLine(static_cast<i32>(x + size * point_u[corner]) << 4, y << 3,
+                         static_cast<i32>(x + size * point_u[corner]) << 4, (y + width) * 8 - 8, colours[corner],
+                         uimtls[0]);
         }
         i32 label_y = y + width;
         i32 height = static_cast<i32>(NuQFntHeight(edui_font) * 1.25f) >> 3;
         i32 baseline = static_cast<i32>(NuQFntHeight(edui_font) * 0.125f + NuQFntBaseline(edui_font));
-        if (!edui_donotdraw) {
-            NuRndrRect2di(x << 4, label_y << 3, width << 4, height << 3, item->colours[2 + item->highlighted],
-                          uimtls[ui_bgmtl]);
-            NuQFntSet(edui_font);
-            NuQFntSetColour(edui_font, item->colours[item->highlighted]);
-        }
+        eduiDrawRect(x << 4, label_y << 3, width << 4, height << 3, item->colours[2 + item->highlighted],
+                     uimtls[ui_bgmtl]);
+        eduiDrawFontSet(edui_font);
+        eduiSetFontColour(edui_font, item->colours[item->highlighted]);
         eduiFntPrintEx(edui_font, (x * 2 + width) << 3, (label_y << 3) + baseline, 64, "%1.03f,%1.03f",
                        picker->uv_x[picker->selected_corner] * 256.0f, picker->uv_y[picker->selected_corner] * 256.0f);
         return width + height;
@@ -2014,7 +2002,7 @@ extern "C" {
         return height;
     }
 
-    __attribute__((optimize("O2", "tree-vectorize"))) static __used__ i32 eduicbRenderGraph(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32 selected) {
+    static __used__ i32 eduicbRenderGraph(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32 selected) {
         (void)menu;
         edui_graph_s *picker = static_cast<edui_graph_s *>(item);
         f32 cursor_y = picker->cursor_y;
@@ -2035,7 +2023,7 @@ extern "C" {
             eduiFntPrintEx(edui_font, (x + total_width) << 3, (y + total_height) << 2, 64, "Invalid Graph Pointer");
             return total_height;
         }
-        eduiDrawFontSetLikely(edui_font);
+        eduiDrawFontSet(edui_font);
         eduiSetFontColour(edui_font, 0x80808080);
         if (picker->x_scale > 0.0f) {
             f32 tick_count = picker->graph->x_extent * picker->graph->x_scale / picker->x_scale;
@@ -2099,22 +2087,10 @@ extern "C" {
                 closest = distance;
             }
         }
-        if (picker->onion_skins[0])
-            eduiRenderGraphLine(picker->onion_skins[0], plot_x, plot_y, graph_width, graph_height, 0x80402000);
-        if (picker->onion_skins[1])
-            eduiRenderGraphLine(picker->onion_skins[1], plot_x, plot_y, graph_width, graph_height, 0x80402000);
-        if (picker->onion_skins[2])
-            eduiRenderGraphLine(picker->onion_skins[2], plot_x, plot_y, graph_width, graph_height, 0x80402000);
-        if (picker->onion_skins[3])
-            eduiRenderGraphLine(picker->onion_skins[3], plot_x, plot_y, graph_width, graph_height, 0x80402000);
-        if (picker->onion_skins[4])
-            eduiRenderGraphLine(picker->onion_skins[4], plot_x, plot_y, graph_width, graph_height, 0x80402000);
-        if (picker->onion_skins[5])
-            eduiRenderGraphLine(picker->onion_skins[5], plot_x, plot_y, graph_width, graph_height, 0x80402000);
-        if (picker->onion_skins[6])
-            eduiRenderGraphLine(picker->onion_skins[6], plot_x, plot_y, graph_width, graph_height, 0x80402000);
-        if (picker->onion_skins[7])
-            eduiRenderGraphLine(picker->onion_skins[7], plot_x, plot_y, graph_width, graph_height, 0x80402000);
+        for (i32 skin = 0; skin < 8; ++skin) {
+            if (picker->onion_skins[skin])
+                eduiRenderGraphLine(picker->onion_skins[skin], plot_x, plot_y, graph_width, graph_height, 0x80402000);
+        }
         eduiRenderGraphLine(picker->graph, plot_x, plot_y, graph_width, graph_height, 0x80800000);
         if (picker->selected_point >= 0 && !edui_donotdraw) {
             i32 point = picker->selected_point;
@@ -2724,12 +2700,12 @@ extern "C" {
         }
         eduiFntPrintEx(edui_font, (x * 2 + width) << 3, (y << 3) + baseline, 64, item->text);
         f32 red, green, blue;
-        if (item->type == 7) {
-            eduiHSVToRGB(cliph, clips, clipv, red, green, blue);
-        } else {
+        if (item->type != 7) {
             red = clipg;
             green = clipg;
             blue = clipg;
+        } else {
+            eduiHSVToRGB(cliph, clips, clipv, red, green, blue);
         }
         u32 colour = (static_cast<i32>(blue * 255.0f) << 16) + (static_cast<i32>(green * 255.0f) << 8) +
                      static_cast<i32>(red * 255.0f) + 0x80000000u;
@@ -3882,8 +3858,8 @@ extern "C" {
         u8 *property_flags = reinterpret_cast<u8 *>(property) + 0x4c;
         if (__builtin_expect(!!(*property_flags & 2), 1)) {
             property->label_width = edui_cursor_x - static_cast<f32>(item->x);
-            if (property->label_width < 1.0f)
-                property->label_width = 1.0f;
+            if (property->label_width < 5.0f)
+                property->label_width = 5.0f;
             for (eduiitem_s *other = menu->first; other; other = other->next) {
                 if (other->type == 17 && other != item)
                     static_cast<edui_prop_s *>(other)->label_width = property->label_width;
@@ -4588,7 +4564,7 @@ extern "C" void eduiMenuDestroyItems(eduimenu_s *menu) {
         NuStrLen(picker->value);
 
         auto delete_previous = [&]() {
-            if (__builtin_expect(picker->cursor == 0, 0))
+            if (picker->cursor == 0)
                 return;
             if (picker->value[picker->cursor]) {
                 --picker->cursor;
@@ -4671,7 +4647,7 @@ extern "C" void eduiMenuDestroyItems(eduimenu_s *menu) {
             next_row();
         if (__builtin_expect(!!(pad->digital_buttons_pressed & 0x1000), 0))
             previous_row();
-        if (__builtin_expect(!!(pad->digital_buttons_pressed & 0x8000), 1))
+        if (pad->digital_buttons_pressed & 0x8000)
             previous_column();
         if (pad->digital_buttons_pressed & 0x2000)
             next_column();
@@ -4822,10 +4798,10 @@ extern "C" void eduiMenuDestroyItems(eduimenu_s *menu) {
                              0x40, 0);
 
                 item = item->next;
-                if (!(menu->flags & 2))
-                    y += item_height;
-                else
+                if (menu->flags & 2)
                     x += menu->width;
+                else
+                    y += item_height;
 
                 if (!item)
                     break;
@@ -6952,7 +6928,7 @@ void FS_MoveCursorDown(i32 steps) {
 }
 
 i32 FS_PrevNameLen(char *name) {
-    if (__builtin_expect(name == FS_FileList, 0)) {
+    if (__builtin_expect(name == FS_FileList, 1)) {
         return 0;
     }
     char *previous = name - 2;
@@ -7072,73 +7048,37 @@ i32 FS_FileNameFilter(char *name) {
     }
 
     for (i32 i = 0; i < numfilterblocks; ++i) {
-        const char *block = filterblocks[i];
         char *scan = lower;
         do {
             char *match;
-            if (block[0] != '\0') {
-                match = strstr(scan, block);
-                if (match == NULL) {
-                    break;
-                }
-                scan = match + 1;
-            } else {
+            if (filterblocks[i][0] == '\0') {
                 match = scan;
                 scan = NULL;
-                goto eligible_filter;
+            } else {
+                match = strstr(scan, filterblocks[i]);
+                if (match == NULL)
+                    break;
+                scan = match + 1;
+                i32 slot;
+                for (slot = 1; slot < 6; ++slot) {
+                    if (filterblocks[i][slot * 12] == '\0')
+                        break;
+                    match = strstr(match, filterblocks[i] + slot * 12);
+                    if (match == NULL)
+                        break;
+                }
+                if (match == NULL || (slot == 6 && filterblocks[i][72] != '\0'))
+                    continue;
             }
-
-            if (block[12] == '\0') {
-                goto eligible_filter;
-            }
-            match = strstr(match, block + 12);
-            if (match == NULL) {
-                continue;
-            }
-            if (block[24] == '\0') {
-                goto eligible_filter;
-            }
-            match = strstr(match, block + 24);
-            if (match == NULL) {
-                continue;
-            }
-            if (block[36] == '\0') {
-                goto eligible_filter;
-            }
-            match = strstr(match, block + 36);
-            if (match == NULL) {
-                continue;
-            }
-            if (block[48] == '\0') {
-                goto eligible_filter;
-            }
-            match = strstr(match, block + 48);
-            if (match == NULL) {
-                continue;
-            }
-            if (block[60] == '\0') {
-                goto eligible_filter;
-            }
-            match = strstr(match, block + 60);
-            if (match == NULL) {
-                continue;
-            }
-            if (block[72] != '\0') {
-                continue;
-            }
-
-        eligible_filter:
             i32 dots = 0;
             for (char *p = match; *p != '\0'; ++p) {
                 if (*p == '.') {
-                    if (++dots > 1) {
+                    if (++dots > 1)
                         break;
-                    }
                 }
             }
-            if (dots < 2) {
+            if (dots < 2)
                 return 1;
-            }
         } while (scan != NULL);
     }
     return 0;

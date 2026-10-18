@@ -327,9 +327,11 @@ static void Grapples_DrawList(WORLDINFO *world, GRAPPLE *grapples, i32 grapple_c
         }
 
         const u8 occupancy_flags = grapple->flags & (GRAPPLE_FLAG_DISABLED | GRAPPLE_FLAG_REVERSED);
-        if (occupancy_flags == GRAPPLE_FLAG_DISABLED && Grapple_Occupied(grapple, NULL, NULL) == NULL) {
-            rope_start = grapple->hook_position;
-            DrawRopeCurved(&rope_start, grapple->rope_points, 6, 0, NULL);
+        if (occupancy_flags == GRAPPLE_FLAG_DISABLED) {
+            if (Grapple_Occupied(grapple, NULL, NULL) == NULL) {
+                rope_start = grapple->hook_position;
+                DrawRopeCurved(&rope_start, grapple->rope_points, 6, 0, NULL);
+            }
         }
 
         if ((grapple->flags & GRAPPLE_FLAG_DISABLED) == 0 || editor_active != 0) {
