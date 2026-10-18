@@ -1915,7 +1915,7 @@ void ClearUpAreaData() {
 }
 
 void LoadAreaCharacters() {
-    if (Area == -1 || Area != last_area) {
+    if (Area != last_area || Area == -1) {
         Area_Configure(Area, Level, ExtraModelList, id_DEFAULTCHARACTER);
     }
 

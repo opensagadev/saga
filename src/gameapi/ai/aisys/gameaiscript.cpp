@@ -4135,11 +4135,14 @@ __used__ static i32 Action_CreateRider(AISYS *sys, AISCRIPTPROCESS *processor, A
             }
 
             if (model != -1 && vehicle->field_0xcc0 == NULL) {
-                if (script == NULL) {
-                    script = const_cast<char *>("default");
+                GameObject_s *rider;
+                if (script != NULL) {
+                    rider = AddDynamicCreature(model, &vehicle->apiobj.collision_position, 0, script, NULL, NULL, 0,
+                                               NULL, NULL, 0, 0);
+                } else {
+                    rider = AddDynamicCreature(model, &vehicle->apiobj.collision_position, 0,
+                                               const_cast<char *>("default"), NULL, NULL, 0, NULL, NULL, 0, 0);
                 }
-                GameObject_s *rider = AddDynamicCreature(model, &vehicle->apiobj.collision_position, 0, script, NULL,
-                                                         NULL, 0, NULL, NULL, 0, 0);
                 if (rider != NULL) {
                     TakeOverGameObject(rider, vehicle, 0, 1);
                 }
@@ -5314,13 +5317,12 @@ __used__ static i32 Action_GoToOriginalPath(AISYS *sys, AISCRIPTPROCESS *process
 
         AIPATHCNX *connection = &sys->path_sys->active_path->connections[static_cast<u16>(node->path_flags)];
         AIPATHINFO &move_path = processor->path_info;
-        AIPATHNODE *target_node = &move_path.path->nodes[connection->node_indices[0]];
         move_path.connection = connection;
         move_path.flags |= AIPATHINFO_FLAG_ON_PATH;
         move_path.direction = 0;
 
-        difference.x = node->position.x - target_node->position.x;
-        difference.z = node->position.z - target_node->position.z;
+        difference.x = node->position.x - move_path.path->nodes[connection->node_indices[0]].position.x;
+        difference.z = node->position.z - move_path.path->nodes[connection->node_indices[0]].position.z;
         NuVecRotateY(&difference, &difference, -connection->rotation);
         move_path.dist = difference.z / connection->max_horizontal_distance;
         move_path.width = difference.x;
@@ -6817,12 +6819,17 @@ __used__ static i32 Action_SetMessage(AISYS *, AISCRIPTPROCESS *processor, AIPAC
         if (name != NULL) {
             GIZAIMESSAGE_s *message = CheckGizAIMessage(gizaimessagesys, name, NULL);
             if (message != NULL) {
-                if (operation == 0)
-                    message->value = amount;
-                else if (operation == 1)
-                    message->value = amount + message->value;
-                else if (operation == -1)
-                    message->value -= amount;
+                switch (operation) {
+                    case 0:
+                        message->value = amount;
+                        break;
+                    case 1:
+                        message->value = amount + message->value;
+                        break;
+                    case -1:
+                        message->value -= amount;
+                        break;
+                }
             }
         }
     }
@@ -7017,8 +7024,8 @@ __used__ static i32 Action_PlayGizObstacle(AISYS *sys, AISCRIPTPROCESS *processo
         } else {
             GizObstacle_PlayForwards(obstacle);
         }
-        obstacle->runtime_ai_active = stay_open;
         obstacle->runtime_blocked = stay_shut;
+        obstacle->runtime_ai_active = stay_open;
     }
     return 1;
 }
@@ -7161,27 +7168,36 @@ __used__ static i32 Action_CnxController(AISYS *sys, AISCRIPTPROCESS *processor,
         }
 
         match = NuStrIStr(params[index], "on_flag");
-        if (match != NULL) {
-            char *value = match + 8;
-            if (NuStrIStr(params[index], "OBSTACLE_OPEN") != NULL) {
-                on_obstacle_open = 1;
-            } else if (NuStrIStr(params[index], "OBSTACLE_CLOSED") != NULL) {
-                on_obstacle_open = 0;
-            } else {
-                on_flags |= ParseAIPathCnxFlag(value);
-            }
-            continue;
+        if (match == NULL) {
+            match = NuStrIStr(params[index], "off_flag");
         }
-        match = NuStrIStr(params[index], "off_flag");
         if (match != NULL) {
-            char *value = match + 9;
-            if (NuStrIStr(params[index], "OBSTACLE_OPEN") != NULL) {
-                off_obstacle_open = 1;
-            } else if (NuStrIStr(params[index], "OBSTACLE_CLOSED") != NULL) {
-                off_obstacle_open = 0;
+            char *value;
+            u32 *flags;
+            if (NuStrIStr(params[index], "on_flag") != NULL) {
+                value = match + 8;
+                flags = &on_flags;
+                if (NuStrIStr(params[index], "OBSTACLE_OPEN") != NULL) {
+                    on_obstacle_open = 1;
+                    continue;
+                }
+                if (NuStrIStr(params[index], "OBSTACLE_CLOSED") != NULL) {
+                    on_obstacle_open = 0;
+                    continue;
+                }
             } else {
-                off_flags |= ParseAIPathCnxFlag(value);
+                value = match + 9;
+                flags = &off_flags;
+                if (NuStrIStr(params[index], "OBSTACLE_OPEN") != NULL) {
+                    off_obstacle_open = 1;
+                    continue;
+                }
+                if (NuStrIStr(params[index], "OBSTACLE_CLOSED") != NULL) {
+                    off_obstacle_open = 0;
+                    continue;
+                }
             }
+            *flags |= ParseAIPathCnxFlag(value);
             continue;
         }
 

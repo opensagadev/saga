@@ -636,8 +636,8 @@ void CollectPowerUp(GameObject_s *object, NUVEC *position, u16 rotation, i32) {
         message = AddGameMsg_Default;
         message.icon = 0xd0;
         message.extra_position = reinterpret_cast<NUVEC *>(&WORLD->lev_objs[0xd0]);
-        message.position = position;
         message.field_0x4d = 1;
+        message.position = position;
         message.scale = AreaPickupScale;
         message.target_position = &target_position;
         message.flags = 0x2112d;

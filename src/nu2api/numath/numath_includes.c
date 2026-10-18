@@ -74,6 +74,8 @@ NUVEC v111 = {1.0f, 1.0f, 1.0f};
 NUVEC nuvec_one = {1.0f, 1.0f, 1.0f};
 NUVEC nuvec_minus_one = {-1.0f, -1.0f, -1.0f};
 
+NUVEC4 nuvec4_zero = {0};
+
 NUMTX numtx_zero = {0};
 
 // clang-format off

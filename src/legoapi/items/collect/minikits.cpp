@@ -193,7 +193,7 @@ void CharacterMiniKits_Load(COLLECTION_s *collection, WORLDINFO *world, VARIPTR 
     memset(world->minikit_pieces_buf, 0, static_cast<usize>(CHARCOUNT) * sizeof(*world->minikit_pieces_buf));
     buf->addr += static_cast<usize>(CHARCOUNT) * sizeof(*world->minikit_pieces_buf);
 
-    for (i32 index = 0; index < collection->count_y; ++index) {
+    for (u32 index = 0; index < collection->count_y; ++index) {
         const i32 character_id = collection->list[index].id;
         if ((GCDataList[character_id].flags_094[1] & 4) != 0 || APICharacterLoaded(character_id) == NULL)
             continue;

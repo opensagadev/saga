@@ -168,8 +168,8 @@ void SpeederChaseA_Update(WORLDINFO_s *world) {
     }
 
     WORLDINFO_s *current_world = WORLD;
-    const i16 bike_id = id_SPEEDERBIKE;
     LEVELDATA *chase_level = SPEEDERCHASEA_LDATA;
+    const i16 bike_id = id_SPEEDERBIKE;
     if (disable_narrow_socks != 0) {
         if (Player[0] != NULL) {
             Player[0]->field_0xf03 &= ~1;
@@ -355,12 +355,11 @@ i32 Action_SpeederBeingChased(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_
         speed = values->behind_speed * ratio + (1.0f - ratio);
         seek = values->behind_seek;
     } else {
-        SPEEDERCHASEVALUES *values = &speedervals[processor->action_data_1];
-        ratio = error / values->ahead_range;
+        ratio = error / speedervals[processor->action_data_1].ahead_range;
         if (ratio > 1.0f)
             ratio = 1.0f;
-        speed = values->ahead_speed * ratio + (1.0f - ratio);
-        seek = values->ahead_seek;
+        speed = speedervals[processor->action_data_1].ahead_speed * ratio + (1.0f - ratio);
+        seek = speedervals[processor->action_data_1].ahead_seek;
     }
     object->run_speed_override = SeekValF(object->run_speed_override, speed * base_speed, seek);
     if (processor->speeder_ahead_latched != 0)

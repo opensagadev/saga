@@ -34,7 +34,10 @@ AIPATHCNXHELPER_s *AIPathCnxHelperSys_Find(AIPATHCNXHELPERSYS_s *system, GameObj
         connection = object->ai.path_info.connection;
         direction = object->ai.path_info.direction;
     }
-    if (connection == NULL || system == NULL) {
+    if (connection == NULL) {
+        return NULL;
+    }
+    if (system == NULL) {
         return NULL;
     }
 

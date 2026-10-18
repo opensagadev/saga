@@ -475,9 +475,8 @@ void GizmoBlowupLateUpdate(void *world_ptr, void *, float) {
 
 GIZMOBLOWUPTYPE_s *GizmoBlowupTypeAdd(WORLDINFO_s *world, nuhspecial_s *special, i32 flags, i32 *result) {
     for (i32 index = 0; index < world->gizmo_blowup_type_count; ++index) {
-        GIZMOBLOWUPTYPE_s *existing = &world->gizmo_blowup_types[index];
-        if (!(NuSpecialCompare(&existing->animated_special, special) != 0 &&
-              (flags != 0 || (existing->animation_flags & 0x20) != 0))) {
+        if (!(NuSpecialCompare(&world->gizmo_blowup_types[index].animated_special, special) != 0 &&
+              (flags != 0 || (world->gizmo_blowup_types[index].animation_flags & 0x20) != 0))) {
             continue;
         }
         *result = 0;
@@ -1845,7 +1844,7 @@ void GizmoBlowupsFinalSetup(WORLDINFO_s *world) {
 
 GIZMOBLOWUP_s *GizmoBlowUpOpponent(GameObject_s *object, f32 range, f32 extra_radius, f32 minimum_radius, i32 mode,
                                    u32 mask, u32 value, u32 secondary_mask) {
-    if (forceNextAttackOpponent.Get() != NULL && (object->apiobj.flags_low & 0x80) != 0) {
+    if (forceNextAttackOpponent.Get() != NULL && object->apiobj.player_controlled) {
         return forceNextAttackOpponent->GetGizBlowup();
     }
     GIZMOBLOWUP_s *target = WORLD->gizmo_blowups;

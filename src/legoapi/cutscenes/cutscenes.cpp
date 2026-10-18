@@ -740,7 +740,7 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
 
     GameObject_s *scene_object = NULL;
     CHARACTERMODEL_s *model = NULL;
-    if (cut != NULL && CutScene_ReplaceCharacterModelFn != NULL) {
+    if (CutScene_ReplaceCharacterModelFn != NULL && cut != NULL) {
         i32 replacement_id = CutScene_ReplaceCharacterModelFn(cut, character);
         if (replacement_id != -1 && apicharsys->playermodelids[replacement_id] != -1) {
             model = &apicharsys->models[apicharsys->playermodelids[replacement_id]];
@@ -2594,7 +2594,7 @@ void CutScenes_Reset(WORLDINFO_s *world) {
                 continue;
             NUGCUTCHARSYS_s *characters = static_cast<NUGCUTSCENE_s *>(cut->scene)->character_system;
             instNUGCUTCHARSYS_s *runtime = instance->character_instance;
-            if (runtime == NULL || characters == NULL)
+            if (characters == NULL || runtime == NULL)
                 continue;
             for (i32 j = 0; j < characters->character_count; ++j) {
                 instNUGCUTCHAR_s *character = &runtime->characters[j];

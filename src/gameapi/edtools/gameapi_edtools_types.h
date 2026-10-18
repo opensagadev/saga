@@ -75,6 +75,9 @@ struct ClassObject {
     void *object;
     EdRef *reference;
 
+    ClassObject() : ed_class(NULL), object(NULL), reference(NULL) {}
+    ClassObject(EdClass *ed_class, void *object, EdRef *reference)
+        : ed_class(ed_class), object(object), reference(reference) {}
     void GetName(char *, i32);
     void Set(char *);
 };

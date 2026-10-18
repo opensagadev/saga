@@ -56,8 +56,8 @@ extern "C" {
     void NuDepthOfFieldEffect2(f32 near_distance, f32 far_distance, f32 strength);
     void NuCameraMotionBlurParams(const NUMTX *);
     void NuCameraMotionBlurEffect(const NUMTX *, const NUMTX *, f32, f32, f32);
-    void NuAccumulationMotionBlurParams(i32, f32, i32);
-    void NuAccumulationMotionBlurEffect(i32, f32, i32);
+    void NuAccumulationMotionBlurParams(i32, f32, f32);
+    void NuAccumulationMotionBlurEffect(i32, f32, f32);
 #ifdef __cplusplus
 }
 #endif

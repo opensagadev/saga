@@ -973,8 +973,8 @@ pushblock_s *NearestFacingPushBlock(WORLDINFO_s *world, GameObject_s *object, fl
                 continue;
         }
         f32 dx = pos->x - object->apiobj.collision_position.x;
-        f32 dy = pos->y - object->apiobj.collision_position.y;
         f32 dz = pos->z - object->apiobj.collision_position.z;
+        f32 dy = pos->y - object->apiobj.collision_position.y;
         NUVEC delta;
         delta.x = dx;
         delta.y = dy;

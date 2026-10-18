@@ -621,7 +621,7 @@ static void GizmoPickups_DrawList(WORLDINFO *world, GIZMOPICKUP_s *pickups, i32 
                 matrix.m33 = 1.0f;
                 NuMtxTranslate(&matrix, &pickup.position);
             } else if ((type->flags & GIZMOPICKUP_TYPE_DRAW_Y_ROTATION) != 0) {
-                const u16 y_rotation = pickup.draw_rotation;
+                const i32 y_rotation = pickup.draw_rotation;
                 matrix.m01 = 0.0f;
                 matrix.m03 = 0.0f;
                 matrix.m10 = 0.0f;
@@ -1384,7 +1384,6 @@ void SpecialMiniKits_Draw(WORLDINFO_s *world) {
             if ((pickup->state_flags & GIZMOPICKUP_STATE_ALTERNATE_TYPE) != 0 && GizmoPickupSys->alternate_type != -1) {
                 type_index = GizmoPickupSys->alternate_type;
             }
-            GIZMO_PICKUP_TYPE *type = &GizmoPickupSys->types[type_index];
 
             if ((item->flags & 0x10) == 0) {
                 NuMtxSetScale(&matrix, &scale);
@@ -1392,7 +1391,8 @@ void SpecialMiniKits_Draw(WORLDINFO_s *world) {
                 NuMtxRotateX(&matrix, x_rotation);
                 NuMtxTranslate(&matrix, position);
             }
-            NuSpecialDrawAt(&world->lev_objs[static_cast<i16>(type->first_model_id)].special, &matrix);
+            NuSpecialDrawAt(
+                &world->lev_objs[static_cast<i16>(GizmoPickupSys->types[type_index].first_model_id)].special, &matrix);
         }
     }
 }

@@ -1393,7 +1393,7 @@ void UpdateGameMenu(GAMEPAD_s *pad, i32 a2) {
             (previous_item != menu->selected_item || previous_column != menu->selected_item_column) &&
             GetMenuID() == menu_id)
             GameAudio_PlaySfx(0x2f, NULL, 0, 0);
-        if (result == 1 && Paused != 0)
+        if (Paused != 0 && result == 1)
             ResumeGame(1, 1);
     }
     if (previous_menu != -1 && NewLData != NULL && menu_id != 0x1b && gone_through_door_to_new_level == 0)

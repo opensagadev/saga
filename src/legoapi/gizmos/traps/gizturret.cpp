@@ -608,8 +608,8 @@ static i32 *GizTurrets_GetBestBoltTarget(GIZMOSET *set, float *result_distance, 
     }
 
     NUVEC aim = *direction;
-    const float max_x = position->x + radius;
     const float min_z = position->z - radius;
+    const float max_x = position->x + radius;
     const float min_x = position->x - radius;
     const float max_z = position->z + radius;
     if (directional != 0 && (bolt_type->field_60 & 0x20000) != 0) {
@@ -1285,7 +1285,7 @@ i32 GizTurrets_UpdateHint(HINT_s *) {
 GIZTURRET_s *GizTurret_FindByController(GIZTURRETSYS_s *system, GameObject_s &controller) {
     if (system != NULL) {
         GIZTURRET_s *turret = system->turrets;
-        const i32 count = system->count;
+        const u16 count = system->count;
         for (i32 i = 0; i < count; ++i, ++turret) {
             if (turret->controller == &controller) {
                 return turret;
@@ -1330,7 +1330,7 @@ void GizTurrets_OpponentSelection(GIZTURRETSYS_s *system, i32 goody_count, APIOB
             candidates = goodies;
             candidate_count = goody_count;
         }
-        if (candidates == NULL || candidate_count == 0) {
+        if (candidate_count == 0 || candidates == NULL) {
             return;
         }
         if (candidate_count <= 0) {

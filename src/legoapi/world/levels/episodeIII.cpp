@@ -673,10 +673,10 @@ void GrievousA_Update(WORLDINFO_s *world) {
     if (Grievous_obj->current_hp > 0)
         return;
 
-    if (FreePlay == 0)
-        KillBossPlayCutScene((i32)(i16)id_GRIEVOUS, 0, 0.0f, "ep3_GeneralGrievous_Outro");
-    else
+    if (FreePlay != 0)
         KillBossCompleteLevel((i32)(i16)id_GRIEVOUS, 0, 0.0f);
+    else
+        KillBossPlayCutScene((i32)(i16)id_GRIEVOUS, 0, 0.0f, "ep3_GeneralGrievous_Outro");
 }
 
 // ===========================================================================
@@ -1167,13 +1167,13 @@ void VaderC_Update(WORLDINFO_s *world) {
     if (vader_c.field_0x95 == 0) {
         GameObject_s *second_player = Player[1];
         GameObject_s *first_player = Player[0];
-        if (((first_player != NULL && (first_player->apiobj.field_0x1f8 & 0x80) != 0 &&
+        if (((first_player != NULL && first_player->apiobj.player_controlled &&
               first_player->apiobj.field_0x287 != 0 && (first_player->apiobj.field_0x1f4 & 0x40000) == 0) ||
              (second_player != NULL && (second_player->apiobj.field_0x1f8 & 0x80) != 0 &&
               second_player->apiobj.field_0x287 != 0 && (second_player->apiobj.field_0x1f4 & 0x40000) == 0)) &&
             (static_cast<u8 *>(vaderc_netpacket)[0] == 0 || first_player == NULL ||
              (first_player->apiobj.field_0x1f8 & 0x80) == 0 || second_player == NULL ||
-             (second_player->apiobj.field_0x1f8 & 0x80) == 0) &&
+             !second_player->apiobj.player_controlled) &&
             (ChallengeMode == 0 || AreaGlobals.values.field_0x1c <= 9)) {
             vader_c.field_0x95 = 1;
             if (__builtin_expect(vader_c.final_fight_message->value == 0.0f, 1))
@@ -1191,10 +1191,10 @@ void VaderC_Update(WORLDINFO_s *world) {
                 factor = (object->end_frame - anim->ltime) / (object->end_frame - 200.0f);
                 factor *= factor;
             }
-            if (anim->fparam1 == 0.0f)
-                anim->tfactor = factor;
-            else
+            if (anim->fparam1 != 0.0f)
                 anim->tfactor = factor * anim->fparam1;
+            else
+                anim->tfactor = factor;
         }
     }
 }

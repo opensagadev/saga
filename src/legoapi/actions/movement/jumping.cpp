@@ -1114,7 +1114,7 @@ void JumpCode(GameObject_s *object, i32 jump_pressed, i32 jump_held, u32 animati
                                 StartFallLand(object, -1);
                             } else {
                                 object->character_context = LEGOCONTEXT_LAND_JUMP2;
-                                if ((object->context_variant_flags & 0x40) != 0 && LEGOACT_LAND3 != -1 &&
+                                if (object->jump_second_jump && LEGOACT_LAND3 != -1 &&
                                     object->apiobj.character_model->model_data_b[LEGOACT_LAND3] != NULL)
                                     object->context_animation = LEGOACT_LAND3;
                                 else if (UsingExtraActionsFn != NULL && UsingExtraActionsFn(object) &&
@@ -1200,8 +1200,8 @@ void JumpCode(GameObject_s *object, i32 jump_pressed, i32 jump_held, u32 animati
                     PlayLandSfx(object, 0, 0);
                 } else {
                     NewRumble(object->pad_gamepad->pad, 0.6f, 0);
-                    object->context_animation = LEGOACT_LUNGELAND;
                     object->character_context = LEGOCONTEXT_LAND_LUNGE;
+                    object->context_animation = LEGOACT_LUNGELAND;
                     object->context_animation_timer = AnimDuration(object->id, LEGOACT_LUNGELAND, 0.0f, 0.0f, 1);
                     object->context_flags &= ~0x40;
                     object->jump_reentry_timer = 0.0f;

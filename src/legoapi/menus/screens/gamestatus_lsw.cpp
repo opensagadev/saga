@@ -352,7 +352,7 @@ void Coins_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet) {
 
 void MiniKit_LSW_Skip(STATUS_STAGE_s *stage, STATUSPACKET_s *packet) {
     currentminikit += newminikitcount;
-    if ((packet->field_0xb0 & 0x10) != 0 && (stage->field_0x14 != 6 || stage->field_0x18 < stage->field_0x1c))
+    if (packet->new_minikit_complete && (stage->field_0x14 != 6 || stage->field_0x18 < stage->field_0x1c))
         IncreaseScore(packet->score, 50000, 0);
     NextStatusStage(packet);
 }

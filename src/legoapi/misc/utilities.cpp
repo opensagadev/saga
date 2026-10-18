@@ -1659,10 +1659,9 @@ __attribute__((optimize("O3"))) i32 OutSideSplineArea(nuvec_s *position, nugspli
     i32 closest_index = 0;
     NUVEC closest = spline->pts[0];
     f32 best = 1000000000.0f;
-    auto position_z = position->z;
     for (i32 i = 0; i < spline->length - 1; ++i) {
         f32 dx = spline->pts[i].x - position->x;
-        f32 dz = spline->pts[i].z - position_z;
+        f32 dz = spline->pts[i].z - position->z;
         f32 distance = dx * dx + dz * dz;
         if (__builtin_expect(distance < best, 1))
             closest_index = i;
@@ -1673,22 +1672,20 @@ __attribute__((optimize("O3"))) i32 OutSideSplineArea(nuvec_s *position, nugspli
     }
     i32 previous = closest_index == 0 ? spline->length - 2 : closest_index - 1;
     i32 next = closest_index == spline->length - 2 ? 0 : closest_index + 1;
-    NUVEC before = spline->pts[previous];
-    NUVEC after = spline->pts[next];
-    f32 ax = after.x - position->x;
-    f32 bx = before.x - position->x;
-    f32 az = after.z - position->z;
-    f32 bz = before.z - position->z;
+    f32 ax = spline->pts[next].x - position->x;
+    f32 bx = spline->pts[previous].x - position->x;
+    f32 az = spline->pts[next].z - position->z;
+    f32 bz = spline->pts[previous].z - position->z;
     if (bx * bx + bz * bz > ax * ax + az * az) {
         if (edge_end != NULL)
-            *edge_end = after;
+            *edge_end = spline->pts[next];
         if (edge_start != NULL)
             *edge_start = closest;
     } else {
         if (edge_end != NULL)
             *edge_end = closest;
         if (edge_start != NULL)
-            *edge_start = before;
+            *edge_start = spline->pts[previous];
     }
     return 1;
 }

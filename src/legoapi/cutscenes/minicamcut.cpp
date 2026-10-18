@@ -436,8 +436,8 @@ dispatch_command: {
             goto execute_command;
         case 6: {
             MiniCam_ChangeMode(command->argument);
+            i32 old_yaw = MiniCam.target_yaw;
             u16 target_pitch = pitch_rate != 0 ? (i32)(pitch_rate * 0.0f) : pitch;
-            u16 old_yaw = MiniCam.target_yaw;
             f32 old_distance = MiniCam.target_distance;
             u16 old_roll = MiniCam.target_roll;
             MiniCam.target_pitch = target_pitch;

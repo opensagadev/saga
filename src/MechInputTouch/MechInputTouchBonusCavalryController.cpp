@@ -88,8 +88,8 @@ void MechInputTouchBonusCavalryController::Update(NuInputTouchData const *) {
     VuVec projected;
     NuCameraTransformScreenClip(&projected.xyz, &world_target.xyz, 1, NULL);
     GameObject_s *screen_object = player;
-    const f32 forward_y = projected.y - screen_object->camera_screen_position.y;
     const f32 forward_x = projected.x - screen_object->camera_screen_position.x;
+    const f32 forward_y = projected.y - screen_object->camera_screen_position.y;
     const f32 forward_length = NuFsqrt(forward_x * forward_x + forward_y * forward_y);
     const f32 inverse_forward_length = forward_length == 0.0f ? 0.0f : 1.0f / forward_length;
     const f32 normalized_forward_y = forward_y * inverse_forward_length;

@@ -1128,8 +1128,8 @@ fire: {
         }
     }
     const i32 type = fighter->model_id == -300;
-    quickbolt_s *end = info->bolts + info->count;
     quickbolt_s *bolt = info->bolts + info->used;
+    quickbolt_s *end = info->bolts + info->count;
     quickbolt_s *slot = bolt;
     for (; slot < end; ++slot) {
         if (slot->duration == 0.0f)
@@ -1628,8 +1628,8 @@ static void ProcessSpaceLevel(spacelevel_s *space) {
                     fighter->model_id = -300;
                 else
                     fighter->model_id = spline->id;
-                fighter->scale = 1.0f;
                 fighter->draw_flags = 1;
+                fighter->scale = 1.0f;
                 fighter->object_id = spline->field_0x520;
                 fighter->target_id = spline->field_0x51c;
                 fighter->missile_count = 1;

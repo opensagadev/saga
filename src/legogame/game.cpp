@@ -1846,8 +1846,8 @@ void InitGameAfterConfig(void) {
 
                     if ((areaFlags & 0x10) != 0) {
                         i32 local_24 = COMPLETIONPOINTS + POINTS_PER_MINIKIT + POINTS_PER_TRUEJEDI;
-                        i32 local_28 = POINTS_PER_MINIKIT + POINTS_PER_TRUEJEDI + CompletionPointInfo[1];
                         i32 iVar4 = GOLDBRICKPOINTS + 2;
+                        i32 local_28 = POINTS_PER_MINIKIT + POINTS_PER_TRUEJEDI + CompletionPointInfo[1];
                         if (BOTHTRUEJEDIGOLDBRICKS != 0) {
                             local_24 = local_24 + POINTS_PER_TRUEJEDI;
                             local_28 = local_28 + POINTS_PER_TRUEJEDI;
@@ -1954,8 +1954,8 @@ void InitGameAfterConfig(void) {
                 } while (areaIndex != iVar3);
             }
         LAB_0012cb40:
-            i = i + 1;
             level = level + 1;
+            i = i + 1;
         } while (i < areaId);
     }
 

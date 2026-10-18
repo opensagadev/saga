@@ -447,8 +447,7 @@ static void Asteroids_Reset(WORLDINFO_s *world) {
 
     for (i32 blowup_index = 0; blowup_index < world->gizmo_blowup_count; ++blowup_index) {
         ASTEROID_s *asteroid = &asteroids[nasteroids];
-        GIZMOBLOWUP_s *blowup = &world->gizmo_blowups[blowup_index];
-        char *name = blowup->name;
+        char *name = world->gizmo_blowups[blowup_index].name;
         i32 asteroid_type;
         if (name == NULL || NuStrIStr(name, "asteroid_a") != NULL || NuStrIStr(name, "asteroid_pop") != NULL) {
             asteroid_type = 0;
@@ -458,7 +457,7 @@ static void Asteroids_Reset(WORLDINFO_s *world) {
             continue;
         }
 
-        asteroid->blowup = blowup;
+        asteroid->blowup = &world->gizmo_blowups[blowup_index];
         i32 max_speed = maxrotspd[asteroid_type];
         asteroid->rotation_speed_x = static_cast<i16>(qrand() / ~(0xffff / (max_speed * 2)) + max_speed);
         asteroid->rotation_speed_y = static_cast<i16>(qrand() / ~(0xffff / (max_speed * 2)) + max_speed);
@@ -1837,8 +1836,8 @@ void HothBattle_ManageBackgroundCreatures() {
             wave_types |= 8;
         }
     }
-    i32 probe_count = g_lowEndLevelBehaviour != 0 ? 2 : 5;
     i32 atst_count = g_lowEndLevelBehaviour != 0 ? 2 : 6;
+    i32 probe_count = g_lowEndLevelBehaviour != 0 ? 2 : 5;
     f32 radius = apicharsys->char_data[id_PROBEDROID].collision_radius;
     while (probe_count > aicreature_sets_alive[0] && (wave_types & 1) == 0) {
         AILOCATOR_s *spawn = getSpawnLocator(radius, "spawn");

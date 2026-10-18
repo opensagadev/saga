@@ -582,7 +582,7 @@ void Customiser_Draw3D(CUSTOMISER *customiser) {
             }
         }
         if (customiser->piece_counts[2] > 0) {
-            const i32 hand = runtime->weapon_joints[0];
+            const i8 hand = runtime->weapon_joints[0];
             if (hand == -1 || model->points_of_interest[hand] == NULL)
                 continue;
             CUSTOMPIECE *weapon = &customiser->piece_sets[2][selection[2]];
@@ -634,10 +634,10 @@ void Customiser_Update(CUSTOMISER *customiser, WORLDINFO_s *world) {
             CUSTOMPIECE *torso = &customiser->piece_sets[1][static_cast<u16>(selection[1])];
             f32 no_hat = 0.0f;
             if ((torso->availability_flags & 1) != 0) {
-                if ((torso->availability_flags & 4) != 0)
-                    no_hat = (head->availability_flags & 8) != 0 ? 0.21f : 0.168f;
-                else
+                if ((torso->availability_flags & 4) == 0)
                     no_hat = (head->availability_flags & 8) != 0 ? 0.168f : 0.126f;
+                else
+                    no_hat = (head->availability_flags & 8) != 0 ? 0.21f : 0.168f;
             }
             NoHatPos[side].y = SeekValF(NoHatPos[side].y, no_hat, 10.0f);
             CustomiseMenuTime[side] += FRAMETIME;
@@ -676,8 +676,9 @@ void Customiser_Update(CUSTOMISER *customiser, WORLDINFO_s *world) {
                 if (selected == category && GetMenuID() == 12 && customiser_quit == 0 &&
                     (active_count == 2 || side == preview_side) && control_side != -1 && locator != -1 &&
                     model->points_of_interest[locator] != NULL) {
-                    const NUMTX &joint = customiser->joint_matrices[side][locator];
-                    NUVEC position = {joint.m30, joint.m31, joint.m32};
+                    NUVEC position = {customiser->joint_matrices[side][locator].m30,
+                                      customiser->joint_matrices[side][locator].m31,
+                                      customiser->joint_matrices[side][locator].m32};
                     const f32 offset = customiser->locator_x_offsets[category];
                     if (offset != 0.0f) {
                         position.x += offset * NU_SIN_LUT(angle);
@@ -1023,7 +1024,7 @@ void CustomiserMenu_Update(MENU_s *) {
                     up = down = 0;
                 if (left != 0 && right != 0)
                     left = right = 0;
-                if (up_held != 0 && down_held != 0)
+                if (down_held != 0 && up_held != 0)
                     up_held = down_held = 0;
                 if (left_held != 0 && right_held != 0)
                     left_held = right_held = 0;

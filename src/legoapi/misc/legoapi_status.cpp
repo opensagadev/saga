@@ -144,7 +144,7 @@ extern i16 tMINIKIT;
 extern i16 tALLMINIKITSBUILT;
 extern NUCOLOUR3 panelcol[3], panelamb;
 
-STATUSMINIKITPART_s KitPart[10];
+static STATUSMINIKITPART_s KitPart[10];
 
 f32 slideseek;
 f32 pop_timer;
@@ -413,8 +413,8 @@ void AddStatusStage(STATUSPACKET_s *packet, i32 type, i32 gold_brick_enabled) {
 
 i32 newCharactersCollected(STATUSPACKET_s *) {
     i32 count = 0;
-    for (i16 *player_id = Area_PlayerIDList; *player_id != -1 && count < 7; ++player_id) {
-        const i16 player = *player_id;
+    for (i32 i = 0; Area_PlayerIDList[i] != -1 && count < 7; ++i) {
+        const i16 player = Area_PlayerIDList[i];
         const i32 id = player;
         i32 previous = 0;
         while (previous < count && StatusCollectList.ids[previous] != id) {

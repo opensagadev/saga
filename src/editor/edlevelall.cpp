@@ -5043,7 +5043,9 @@ update_property_selection:
 void KnotHelper::Process(void *object, EdInputContext &) {
     SplineKnot *knot = static_cast<SplineKnot *>(object);
     if (!theClassEditor.IsSelectedObject(knot->spline, NULL)) {
-        ClassObject spline_object = {theSplineHelper.object_class, knot->spline, NULL};
+        ClassObject spline_object;
+        spline_object.ed_class = theSplineHelper.object_class;
+        spline_object.object = knot->spline;
         theClassEditor.SelectObject(spline_object, 1);
     }
 }
@@ -6053,14 +6055,16 @@ void SplineHelper::SerialiseObject(EdStream &stream, void *object) {
     if (stream.mode == 1) {
         stream.SerialiseBuffer(&knot_count, sizeof(knot_count), 1);
         for (i32 index = 0; index < knot_count; ++index) {
-            SplineKnot *knot = static_cast<SplineKnot *>(theMemoryManager.AllocPool(sizeof(SplineKnot), 1));
-            knot->previous = NULL;
-            knot->next = NULL;
+            SplineKnot *knot = new (theMemoryManager.AllocPool(sizeof(SplineKnot), 1)) SplineKnot;
+            if (knot != NULL) {
+                knot->next = NULL;
+                knot->previous = NULL;
+            }
             knot->led_file = Placeable::CurrentLedFile;
             theKnotHelper.object_class->SerialiseObject(stream, knot);
             knot->spline = spline;
-            knot->previous = spline->knots.last;
             knot->next = NULL;
+            knot->previous = spline->knots.last;
             if (spline->knots.last != NULL)
                 spline->knots.last->next = knot;
             const bool had_first = spline->knots.first != NULL;
@@ -6313,8 +6317,11 @@ void EdClass::SerialiseObject(EdStream &stream, void *object, EdClass *schema, E
                     if (stream.mode != 2) {
                         continue;
                     }
-                    if ((stream.flags & 0x400000) != 0 ? (member->attributes & 0x400000) != 0
-                                                       : (member->attributes & 0x10000000) != 0) {
+                    if ((stream.flags & 0x400000) != 0) {
+                        if ((member->attributes & 0x400000) != 0) {
+                            continue;
+                        }
+                    } else if ((member->attributes & 0x10000000) != 0) {
                         continue;
                     }
                 }
@@ -6338,12 +6345,12 @@ void EdClass::SerialiseObject(EdStream &stream, void *object, EdClass *schema, E
                 EdType *type = registry->GetType(source->type_id);
                 if (source->size <= 0) {
                     stream.Eat(type->size, 1);
-                } else if (NuStrICmp(type->name, "String") != 0) {
-                    stream.Eat(source->size, 1);
-                } else {
+                } else if (NuStrICmp(type->name, "String") == 0) {
                     i32 length;
                     stream.SerialiseBuffer(&length, sizeof(length), 1);
                     stream.Eat(length, 1);
+                } else {
+                    stream.Eat(source->size, 1);
                 }
             }
         }
@@ -6639,8 +6646,7 @@ void ClassEditor::cbFileSelected(eduimenu_s *, eduiitem_s *item, u32) {
         theClassEditor.CreateObject(class_editor_create_pending);
     } else if (theClassEditor.selected_objects.first != NULL) {
         ClassObjectListEntry *entry = theClassEditor.selected_objects.first;
-        ClassObject object = {entry->ed_class, entry->object, entry->reference};
-        theClassEditor.CreateObject(object);
+        theClassEditor.CreateObject(*reinterpret_cast<ClassObject *>(&entry->ed_class));
     }
     theLevelEditor.CloseMenu();
 }
@@ -6816,7 +6822,7 @@ i32 ClassEditor::FindNearestObject(VuVec &origin, VuVec &direction, ClassObject 
              object = ed_class->interface->vtable->get_next_object(ed_class->interface, object)) {
             if (!Editable(object, ed_class, -1))
                 continue;
-            EdRef *reference = NULL;
+            EdRef *reference;
             f32 distance = ed_class->interface->vtable->distance_to_ray(ed_class->interface, origin, direction, object,
                                                                         &reference);
             if (distance < 0.01f && candidate_count < 16)
@@ -6825,17 +6831,16 @@ i32 ClassEditor::FindNearestObject(VuVec &origin, VuVec &direction, ClassObject 
     }
     if (candidate_count == 0)
         return 0;
-    i32 choice = 0;
-    if (after.object != NULL) {
-        for (i32 index = 0; index < candidate_count; ++index) {
-            if (candidates[index].object != after.object) {
-                continue;
+    for (i32 index = 0; index <= candidate_count; ++index) {
+        if (candidates[index].object == after.object) {
+            if (index < candidate_count - 1) {
+                result = candidates[index + 1];
+                return 1;
             }
-            choice = (index + 1) % candidate_count;
             break;
         }
     }
-    result = candidates[choice];
+    result = candidates[0];
     return 1;
 }
 
@@ -6853,7 +6858,7 @@ i32 ClassEditor::FindNearestObject(VuVec &origin, VuVec &direction, ClassObject 
             if (!Editable(object, ed_class, -1))
                 continue;
             // The original keeps the hit reference in a 16-byte aligned slot.
-            EdRef *reference __attribute__((aligned(16))) = NULL;
+            EdRef *reference __attribute__((aligned(16)));
             f32 distance = ed_class->interface->vtable->distance_to_ray(ed_class->interface, origin, direction, object,
                                                                         &reference);
             if (distance < nearest_distance) {
@@ -6947,8 +6952,7 @@ i32 ClassEditor::FindNearestObject(VuVec &point, ClassObject &result, ClassObjec
     i32 candidate_count = 0;
     for (i32 class_index = 0; class_index < theRegistry.class_count; ++class_index) {
         EdClass *ed_class = &theRegistry.classes[class_index];
-        if (!Editable(NULL, ed_class, class_index) || ed_class->interface == NULL || (ed_class->flags & 8) == 0 ||
-            ed_class->interface->vtable->get_next_object == NULL)
+        if (!Editable(NULL, ed_class, class_index) || (ed_class->flags & 8) == 0)
             continue;
         for (void *object = ed_class->interface->vtable->get_next_object(ed_class->interface, NULL); object != NULL;
              object = ed_class->interface->vtable->get_next_object(ed_class->interface, object)) {
@@ -6968,25 +6972,26 @@ i32 ClassEditor::FindNearestObject(VuVec &point, ClassObject &result, ClassObjec
             if (ed_class->FindMember(&member, object, 0x40, 1))
                 member.reference->GetAttributeData(member.object, 0x40, EdType_Float, &radius, 0);
             if (distance_squared < radius * radius && candidate_count < 16) {
-                candidate_classes[candidate_count] = ed_class;
                 candidate_objects[candidate_count] = object;
+                candidate_classes[candidate_count] = ed_class;
                 ++candidate_count;
             }
         }
     }
-    if (candidate_count == 0)
+    if (candidate_objects[0] == NULL)
         return 0;
-    i32 choice = 0;
-    if (after.object != NULL) {
-        for (i32 index = 0; index < candidate_count; ++index) {
-            if (candidate_objects[index] == after.object) {
-                choice = (index + 1) % candidate_count;
-                break;
+    for (i32 index = 0; index <= candidate_count; ++index) {
+        if (candidate_objects[index] == after.object) {
+            if (index < candidate_count - 1) {
+                result.object = candidate_objects[index + 1];
+                result.ed_class = candidate_classes[index + 1];
+                return 1;
             }
+            break;
         }
     }
-    result.ed_class = candidate_classes[choice];
-    result.object = candidate_objects[choice];
+    result.ed_class = candidate_classes[0];
+    result.object = candidate_objects[0];
     return 1;
 }
 
@@ -7614,6 +7619,7 @@ void EdManMove::Render(ClassObjectList &selected) {
 }
 
 void ClassEditor::Render() {
+    ClassObject selected;
     thePropertyTool.Render();
     if (active_tool != NULL)
         active_tool->Render();
@@ -7641,7 +7647,8 @@ void ClassEditor::Render() {
             if (!Editable(object, ed_class, -1))
                 continue;
 
-            ClassObject selected = {ed_class, object, NULL};
+            selected.ed_class = ed_class;
+            selected.object = object;
             if ((ed_class->flags & 0x08000000) != 0 && selected_objects.IsInList(selected) == 0)
                 theRegistry.ClassIFaceRender(ed_class, object, 0);
             if ((ed_class->flags & 0x80) != 0 && selected_objects.IsInList(selected) != 0 &&
@@ -8254,27 +8261,21 @@ i32 SplinePointList::GetNumPoints() {
 }
 
 __attribute__((force_align_arg_pointer)) i32 SplinePointList::GetPoint(i32 index, VuVec &point) {
-    SplinePointBlock *block = first;
-    if (block == NULL)
-        return false;
-    if (index >= block->point_count) {
-        do {
-            block = block->next;
-            if (block == NULL)
-                return false;
-        } while (index >= block->point_count);
-    }
-
+    for (SplinePointBlock *block = first; block != NULL; block = block->next) {
+        if (index < block->point_count) {
 #if defined(__i386__) && defined(__SSE__)
-    const VuVec &source = block->points[index];
-    __m128 lanes = _mm_loadl_pi(_mm_setzero_ps(), reinterpret_cast<const __m64 *>(&source));
-    lanes = _mm_loadh_pi(lanes, reinterpret_cast<const __m64 *>(&source.z));
-    _mm_storel_pi(reinterpret_cast<__m64 *>(&point), lanes);
-    _mm_storeh_pi(reinterpret_cast<__m64 *>(&point.z), lanes);
+            const VuVec &source = block->points[index];
+            __m128 lanes = _mm_loadl_pi(_mm_setzero_ps(), reinterpret_cast<const __m64 *>(&source));
+            lanes = _mm_loadh_pi(lanes, reinterpret_cast<const __m64 *>(&source.z));
+            _mm_storel_pi(reinterpret_cast<__m64 *>(&point), lanes);
+            _mm_storeh_pi(reinterpret_cast<__m64 *>(&point.z), lanes);
 #else
-    point = block->points[index];
+            point = block->points[index];
 #endif
-    return true;
+            return true;
+        }
+    }
+    return false;
 }
 
 void SplinePointList::AddPoint(VuVec &point) {
@@ -9296,8 +9297,8 @@ void ClassEditor::SnapPoint(VuVec &point) {
     VuVec candidate = point;
     VuVec ray = snap_ray;
     NuVecNorm(reinterpret_cast<NUVEC *>(&ray), reinterpret_cast<NUVEC *>(&ray));
-    ray.y *= -snap_distance;
     ray.x *= -snap_distance;
+    ray.y *= -snap_distance;
     ray.z = -snap_distance * ray.z;
     candidate.w = 0.0f;
     candidate.x = ray.x + point.x;
@@ -9408,8 +9409,8 @@ i32 EdManipulator::Process(EdInputContext &input, ClassObjectList &selected) {
         last_point->w = 0.0f;
         delta->x = point.x - last_point->x;
         delta->y = point.y - last_point->y;
-        delta->z = point.z - last_point->z;
         last_point->x = point.x;
+        delta->z = point.z - last_point->z;
         last_point->y = point.y;
         last_point->z = point.z;
     }
@@ -9493,8 +9494,8 @@ __attribute__((force_align_arg_pointer)) i32 EdManipulator::SelectAxis(EdInputCo
     VuVec locators[8];
     first_axis.y = 0.0f;
     first_axis.z = 0.0f;
-    first_axis.w = 1.0f;
     first_axis.x = 0.0f;
+    first_axis.w = 1.0f;
     second_axis.x = 0.0f;
     second_axis.y = 0.0f;
     second_axis.w = 1.0f;
@@ -9677,8 +9678,8 @@ __attribute__((force_align_arg_pointer)) i32 EdManScale::Process(EdInputContext 
                     NuVecNorm(reinterpret_cast<NUVEC *>(&first_axis), reinterpret_cast<NUVEC *>(&first_axis));
                     f32 change = (scaled_magnitude + movement) / scaled_magnitude - 1.0f;
                     scale_y = first_axis.y * change + second_axis.y * change + 1.0f;
-                    scale_z = first_axis.z * change + second_axis.z * change + 1.0f;
                     scale_x = first_axis.x * change + second_axis.x * change + 1.0f;
+                    scale_z = first_axis.z * change + second_axis.z * change + 1.0f;
                     break;
                 }
                 case 7: {
@@ -9698,8 +9699,8 @@ __attribute__((force_align_arg_pointer)) i32 EdManScale::Process(EdInputContext 
             matrix.m02 = scale_x * original.m02 + zero * original.m12 + zero * original.m22;
             matrix.m00 = scale_x * original.m00 + zero * original.m10 + zero * original.m20;
             matrix.m10 = zero * original.m00 + scale_y * original.m10 + zero * original.m20;
-            matrix.m01 = scale_x * original.m01 + zero * original.m11 + zero * original.m21;
             matrix.m11 = zero * original.m01 + scale_y * original.m11 + zero * original.m21;
+            matrix.m01 = scale_x * original.m01 + zero * original.m11 + zero * original.m21;
             matrix.m12 = zero * original.m02 + scale_y * original.m12 + zero * original.m22;
             matrix.m20 = zero * original.m00 + zero * original.m10 + scale_z * original.m20;
             matrix.m21 = zero * original.m01 + zero * original.m11 + scale_z * original.m21;

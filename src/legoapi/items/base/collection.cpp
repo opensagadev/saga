@@ -684,7 +684,7 @@ void Collection_Draw(COLLECTION_s *collection, float x, float y, float scale, AP
     if (collection->list == NULL || FadeSys.fade > 0.0f)
         return;
     const i32 columns = collection->count_x;
-    const i32 count = collection->count_y;
+    const u16 count = collection->count_y;
     if (count == 0 || columns == 0)
         return;
     f32 dx = base_dx * scale;

@@ -482,7 +482,9 @@ void DrawRopeCurved(nuvec_s *start, nuvec_s *points, i32 count, i32, numtl_s *) 
         middle.z = (next->z - points[i].z) * 0.5f + points[i].z;
         middle.y = (next->y - points[i].y) * 0.5f + points[i].y;
 
-        vertices[0].position = vertices[1].position;
+        vertices[0].position.x = vertices[1].position.x;
+        vertices[0].position.y = vertices[1].position.y;
+        vertices[0].position.z = vertices[1].position.z;
         vertices[1].position.x =
             (0.4444443881511688f * px + 0.444444477558136f * points[i].x) + 0.11111113429069519f * middle.x;
         vertices[1].position.y =

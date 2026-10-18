@@ -139,7 +139,7 @@ struct _vuv_s;
 struct ani3_animheader_s;
 struct d3dsamplerstate_u {};
 struct nuanimbuff_s;
-struct nuanimdatachunk_s {};
+struct nuanimdatachunk_s;
 struct nucamera_s;
 struct nudisplaylistitem_s;
 struct nurenderscene_s;

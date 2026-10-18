@@ -56,7 +56,6 @@ struct STATUSMINIKITPART_s {
     nuhspecial_s *special;
     i32 enabled;
 };
-extern STATUSMINIKITPART_s KitPart[10];
 void DrawTouchPrompt(char *, char *, bool, bool);
 void DrawCharIcon(i32, float, float, float, float, i32, float, float, i32, nuhspecial_s *);
 void DrawPauseFade(void);

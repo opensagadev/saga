@@ -265,7 +265,7 @@ void Batarang_Release(GameObject_s *object, i32 mode) {
         }
         batarang = static_cast<BATARANG_s *>(object->batarang);
         if (batarang->active == 0) {
-            const u16 angle = object->apiobj.movement_facing_angle;
+            const i32 angle = object->apiobj.movement_facing_angle;
             const f32 x = NU_SIN_LUT(angle);
             const f32 z = NU_COS_LUT(angle);
             batarang->targets[0].fallback_position = {
@@ -526,8 +526,8 @@ void Batarangs_Update() {
         }
 
         BATARANG_TARGET_s *target = &batarang->targets[batarang->current_target];
-        const u8 type = target->type;
         void *object = target->object;
+        const u8 type = target->type;
         if (type != 3) {
             NewRumble(batarang->owner->pad_gamepad->pad, 0.5f, 0);
             NewBuzzFrames(batarang->owner->pad_gamepad->pad, 1, 0);

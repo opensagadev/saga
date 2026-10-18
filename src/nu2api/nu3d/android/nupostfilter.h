@@ -21,7 +21,7 @@ extern "C" void NuPostEffectBloom(const NuBloomParameters *);
 extern "C" void NuPostEffectDepthOfField(const NuDepthOfFieldParameters *);
 extern "C" void NuPostEffectDeferredShading(const f32 *);
 extern "C" void NuPostEffectMotionBlur(const NUMTX *, const NUMTX *, f32, f32, f32);
-extern "C" void NuPostEffectAccumulationMotionBlur(i32, f32, i32);
+extern "C" void NuPostEffectAccumulationMotionBlur(i32, f32, f32);
 extern "C" void NuPostEffectSpeedBlur(const NuSpeedBlurParameters *);
 extern "C" i32 NuPostEffectGetActiveDynamicLightCount();
 extern "C" nueffecttex_s *NuPostEffectGetBackBuffer(i32 frame);

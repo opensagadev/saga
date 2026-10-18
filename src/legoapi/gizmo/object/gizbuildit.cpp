@@ -1076,8 +1076,12 @@ void GizBuildit_Reset(GIZBUILDIT_s *buildit, void *world_ptr) {
     buildit->field_0x83 &= static_cast<u8>(~GIZBUILDIT_RUNTIME_REWARD_RELEASED);
     buildit->availability_flags |= GIZBUILDIT_AVAILABILITY_ACTIVE | GIZBUILDIT_AVAILABILITY_VISIBLE;
 
-    buildit->start_position = buildit->file_position;
-    buildit->position = buildit->file_position;
+    buildit->start_position.x = buildit->file_position.x;
+    buildit->start_position.y = buildit->file_position.y;
+    buildit->start_position.z = buildit->file_position.z;
+    buildit->position.x = buildit->file_position.x;
+    buildit->position.y = buildit->file_position.y;
+    buildit->position.z = buildit->file_position.z;
     buildit->bounds_radius = NuTrigTable[0x3000];
 
     if (buildit->anim_set != NULL && buildit->anim_set->objects != NULL) {

@@ -56,9 +56,8 @@ static u8 DefaultDistances[32] = {0};
 static void FillBits(DEFLATECONTEXT *ctx) {
     u32 byte;
 
-    auto ctx_read_buffer_end = ctx->read_buffer_end;
     do {
-        if (ctx->read_buffer < ctx_read_buffer_end) {
+        if (ctx->read_buffer < ctx->read_buffer_end) {
             byte = *ctx->read_buffer++;
         } else {
             byte = 0;

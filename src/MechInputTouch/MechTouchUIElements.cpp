@@ -153,10 +153,10 @@ struct VuVec;
 
 static inline void TexQuadSubmit(NUVEC const &point, i32 colour, i32 u, i32 v) {
     TexQuadVertex *vertex = static_cast<TexQuadVertex *>(g_NuPrim_StreamBufferPtr->void_ptr);
-    if (g_NuPrim_NeedsOverbrightening)
-        vertex->colour = colour;
-    else
+    if (!g_NuPrim_NeedsOverbrightening)
         vertex->colour = ((colour >> 1) & 0x7f7f7f) | (colour & 0xff000000);
+    else
+        vertex->colour = colour;
     if (g_NuPrim_NeedsHalfUVs) {
         vertex->half_uv[0] = u ? 0x3c00 : 0;
         vertex->half_uv[1] = v ? 0x3c00 : 0;
@@ -291,8 +291,8 @@ void MechTouchUI::Render() {
 }
 
 MechTouchUIElement *MechTouchUI::PickElement(NuVec2 &point) {
-    MechTouchUIElement *picked = NULL;
     float picked_depth = -1000000000.0f;
+    MechTouchUIElement *picked = NULL;
     for (i32 i = 0; i < 32; ++i) {
         MechTouchUIElement *element = elements[i];
         if (element == NULL || (element->visible == 0 && PANELOFF == 0) || element->disabled != 0) {
@@ -405,7 +405,7 @@ void MechTouchUITagButton_OnClick_Callback(MechTouchUIElement &element, TouchHol
     Hint_SetComplete(0x5f6);
     player->pause_input_state = 0;
     bool tagged = false;
-    if ((target->field_0xf00 & 2) != 0) {
+    if (target->can_be_carried) {
         TakeOver2GetIn(target, player);
         tagged = true;
     } else if (TagCode(player, target, 0, 0, 1) == 1) {

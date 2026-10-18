@@ -418,7 +418,9 @@ void Players_InitPositions(WORLDINFO *world) {
             Door_UseCutCam = 0;
         } else {
             Door_CutCamPos1 = spl->pts[1];
-            Door_CutCamPos0 = spl->pts[0];
+            Door_CutCamPos0.x = spl->pts[0].x;
+            Door_CutCamPos0.y = spl->pts[0].y;
+            Door_CutCamPos0.z = spl->pts[0].z;
         }
     }
     Door_ExitCameraSplineName[0] = 0;

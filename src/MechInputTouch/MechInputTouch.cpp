@@ -399,7 +399,7 @@ void MechInputTouchSystem::FindTargetForce(WORLDINFO_s *world, GameObject_s &obj
         return;
     }
 
-    for (i32 index = 0; index < force_system->visible_force_count; ++index) {
+    for (u32 index = 0; index < force_system->visible_force_count; ++index) {
         GIZFORCE_s *force = force_system->visible_forces[index];
         if (force == NULL || !TouchHacks::CanUseGizForce(object, *force)) {
             continue;
@@ -692,7 +692,7 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
                          ((candidate->field_0xefb & 8) && candidate->id != id_RANCOR) ||
                          WORLD->current_level == MAULA_LDATA;
             if (WORLD->current_level == VADERC_LDATA && candidate->id == id_ANAKINJEDI &&
-                !(candidate->apiobj.object_flags & 0x80) && vader_c.final_fight_message->value > 0.0f)
+                !candidate->apiobj.player_controlled && vader_c.final_fight_message->value > 0.0f)
                 large = true;
             const NUVEC *collision_position = reinterpret_cast<const NUVEC *>(collision_z - offsetof(NUVEC, z));
             VuVec center(collision_position->x, collision_position->y, collision_position->z, 1.0f);

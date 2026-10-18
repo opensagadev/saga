@@ -324,7 +324,9 @@ static __used__ void PodRaceSnipersReset(void) {
             do {
                 SNIPER_s *dst = &PodRace_snipers[PodRace_nsnipers];
                 dst->prev = spline->pts[npts];
-                dst->pos = spline->pts[npts + 1];
+                dst->pos.x = spline->pts[npts + 1].x;
+                dst->pos.y = spline->pts[npts + 1].y;
+                dst->pos.z = spline->pts[npts + 1].z;
                 dst->fire_timer = NuRandFloat() * PodRace_sniper_fire_time + half_time;
                 PodRace_snipers[PodRace_nsnipers++].state = 0.0f;
                 npts += 2;
@@ -556,20 +558,19 @@ static __used__ void UpdatePodRaceMines(void) {
                 ((client->exploded_words[0] & mask) | (client->exploded_words[1] & high_mask)) != 0)
                 continue;
             float radius = mines->mine_radius;
-            NUVEC *mine_pos = &client->positions[idx];
             for (i32 i = 0; i < minecount; i++) {
                 GameObject_s *obj = minesarr[i];
                 if (obj == NULL)
                     continue;
-                delta.x = obj->apiobj.pos_x - mine_pos->x;
-                delta.z = obj->apiobj.pos_z - mine_pos->z;
+                delta.x = obj->apiobj.pos_x - client->positions[idx].x;
+                delta.z = obj->apiobj.pos_z - client->positions[idx].z;
                 float rr = obj->apiobj.field_0x1dc + radius;
                 if (!(rr * rr > delta.x * delta.x + delta.z * delta.z))
                     continue;
                 if (mines->mine_debris != -1)
-                    AddGameDebris(WORLD->debris_sys, mines->mine_debris, mine_pos);
+                    AddGameDebris(WORLD->debris_sys, mines->mine_debris, &client->positions[idx]);
                 if (mines->mine_part != -1)
-                    AddFiniteShotPART(mines->mine_part, mine_pos, 1);
+                    AddFiniteShotPART(mines->mine_part, &client->positions[idx], 1);
                 GameCam_HitJudder();
                 GameCam_NewShake(NULL, 0.75f, 1.0f, 1.0f);
                 PlaySfx("Explode1", &obj->apiobj.collision_position);
@@ -975,10 +976,10 @@ void PodRaceUpdate(WORLDINFO_s *world, float dt) {
 }
 
 void PodRacePanel(WORLDINFO_s *world) {
-    if (netclient == 0)
-        podrace_netpacket->countdown = podlapalpha;
-    else
+    if (netclient != 0)
         podlapalpha = podrace_netpacket->countdown;
+    else
+        podrace_netpacket->countdown = podlapalpha;
     if (podlapalpha > 0.0f) {
         LEVEL_OBJECT_RUNTIME_s *entry = &world->lev_objs[Lap + 0x135];
         if (entry->active != 0)
@@ -1961,10 +1962,14 @@ speed_section:
                 }
             }
             if (Player[0] != NULL) {
-                pod_old_pos[0] = Player[0]->apiobj.position;
+                pod_old_pos[0].x = Player[0]->apiobj.position.x;
+                pod_old_pos[0].y = Player[0]->apiobj.position.y;
+                pod_old_pos[0].z = Player[0]->apiobj.position.z;
             }
             if (Player[1] != NULL) {
-                pod_old_pos[1] = Player[1]->apiobj.position;
+                pod_old_pos[1].x = Player[1]->apiobj.position.x;
+                pod_old_pos[1].y = Player[1]->apiobj.position.y;
+                pod_old_pos[1].z = Player[1]->apiobj.position.z;
             }
             ps->lap_msg->value = (float)(i8)ps->ai_state;
             PodRaceSnipersUpdate();

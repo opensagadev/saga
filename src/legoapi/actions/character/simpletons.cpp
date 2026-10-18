@@ -52,19 +52,17 @@ static inline f32 MiniTrooperTurnSpeed() {
 }
 
 static inline void MiniTrooperSetWanderTarget(minisnowtrooper_s *trooper, i32 shot, u16 *shot_angle) {
-    if (shot != 0)
-        trooper->target_rotation = static_cast<u16>(qrand() / 73 + *shot_angle);
-    else
+    if (shot == 0)
         trooper->target_rotation = static_cast<u16>(qrand());
+    else
+        trooper->target_rotation = static_cast<u16>(qrand() / 73 + *shot_angle);
 }
 
 static const f32 trooperspeedtab[4] = {0.3f, 0.4f, 0.5f, 0.6f};
 
 static inline void MiniTrooperMove(minisnowtrooper_s *trooper) {
     NUVEC movement;
-    movement.x = v001.x;
-    movement.y = v001.y;
-    movement.z = v001.z;
+    movement = v001;
     const u8 speed = trooper->state_flags >> 4;
     movement.z = movement.z * FRAMETIME * trooperspeedtab[speed & 3];
     NuVecRotateY(&movement, &movement, trooper->rotation);
@@ -306,7 +304,7 @@ void InitMiniSnowTroopers(WORLDINFO_s *world, i32 team_count, i32 trooper_count,
 
             shadow_position.y = team->reserved_02c;
             minisnowtrooper_s *troopers = team->troopers;
-            for (i32 i = 0; i < team->trooper_count; ++i) {
+            for (u32 i = 0; i < team->trooper_count; ++i) {
                 const i32 random_state = qrand() / (0xffff / 3 + 1) + 1;
                 troopers[i].state_flags = (troopers[i].state_flags & 0xcf) | ((random_state & 3) << 4);
                 team->troopers[i].state_flags &= ~0xc;
@@ -337,10 +335,9 @@ void InitMiniSnowTroopers(WORLDINFO_s *world, i32 team_count, i32 trooper_count,
             for (i32 i = 0; i < team->trooper_count; ++i, ++trooper) {
                 trooper->formation_index = static_cast<u8>(i);
                 minisnowtrooper_s *rotation_destination = team->troopers;
-                const minisnowtrooper_s *slot = &rotation_destination[i];
                 rotation_destination->target_rotation =
-                    NuAtan2D(trooper->shot_position.x - (team->route_point->x + slot->formation_x),
-                             trooper->shot_position.z - (team->route_point->z + slot->formation_z));
+                    NuAtan2D(trooper->shot_position.x - (team->route_point->x + rotation_destination[i].formation_x),
+                             trooper->shot_position.z - (team->route_point->z + rotation_destination[i].formation_z));
             }
         }
 
@@ -639,8 +636,8 @@ void UpdateMiniSnowTroopers(WORLDINFO_s *world) {
                         trooper->state_flags =
                             (trooper->state_flags & ~0x30) | (((qrand() / (0xffff / 3 + 1) + 1) & 3) << 4);
                         slot = &teams[team_index].troopers[trooper->formation_index];
-                        target_x = teams[team_index].origin_x + slot->formation_x;
                         target_z = teams[team_index].origin_z + slot->formation_z;
+                        target_x = teams[team_index].origin_x + slot->formation_x;
                     }
 
                     trooper->target_rotation =

@@ -571,7 +571,7 @@ void RemoveGameObject(GameObject_s *obj, i32) {
 
     i32 object_count = 0;
     for (i32 i = 0; i < 64; i++) {
-        if ((Obj[i].apiobj.field_0x1f8 & 1) != 0) {
+        if (Obj[i].apiobj.in_use) {
             object_count = i + 1;
         }
     }
@@ -812,8 +812,8 @@ void GameObjectOrigin(GameObject_s *object) {
     api.collision_origin.z = origin_z;
     api.upper_position.x = origin_x;
     api.upper_position.z = origin_z;
-    api.lower_position.x = origin_x;
     api.lower_position.z = origin_z;
+    api.lower_position.x = origin_x;
     api.collision_min.x = api.collision_position.x - radius;
     api.collision_max.x = api.collision_position.x + radius;
     api.collision_min.z = api.collision_position.z - radius;
@@ -940,7 +940,7 @@ void UpdateLastSafePosition(GameObject_s *object) {
                                                           object->ai.path_info.connection->traversal_flags[0]) == 0) {
                 ClearLastSafeTakeoverSource(object);
                 api.respawn_position = api.last_safe_position;
-                api.flags_high |= 0x20;
+                api.respawn_enabled = 1;
             }
             if (static_cast<u8>(api.field_0x27c) < 2 && object->field_0xda8 <= 0.0f &&
                 GameCam->blend_time >= GameCam->blend_duration && object->sock_position.location.sock != -1) {

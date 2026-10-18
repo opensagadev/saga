@@ -441,8 +441,8 @@ mode_selected:
                 if (PODRACE_ADATA != NULL && WORLD->area == PODRACE_ADATA) {
                     player_focus[player_count] = Player[i]->apiobj.collision_position;
                     NUVEC &pod_offset = mode_scratch;
-                    pod_offset.x = 0.0f;
                     pod_offset.y = 0.0f;
+                    pod_offset.x = 0.0f;
                     pod_offset.z = 2.0f;
                     NuVecRotateY(
                         &pod_offset, &pod_offset,

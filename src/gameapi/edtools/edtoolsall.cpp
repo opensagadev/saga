@@ -1558,8 +1558,8 @@ extern "C" {
         right = pad->analog_r1;
         if (left) {
             if (__builtin_expect(!!(right), 0)) {
-                show_y_scale_help = 60;
                 graph_item->graph->y_scale = 1.0f;
+                show_y_scale_help = 60;
                 return 1;
             }
             if (__builtin_expect(!!(left), 0)) {
@@ -2446,8 +2446,8 @@ extern "C" {
                 if (__builtin_expect(property_flags & 1, 0)) {
                     if (edui_cursor_x >= interact->x + property->label_width + 1.0f && edui_cursor_y >= interact->y &&
                         edui_cursor_x < property->button_x && edui_cursor_y < interact->y + interact->height) {
-                        property_flags |= 1;
                         eduiPropTextPos = -1;
+                        property_flags |= 1;
                         handled = true;
                     }
                 } else {
@@ -2578,8 +2578,8 @@ extern "C" {
                 f32 value = slider->normalized_value + static_cast<u32>(pad->analog_r2) * scale;
                 if (value > 1.0f)
                     value = 1.0f;
-                slider->normalized_value = value;
                 slider->value = value * slider->range + slider->minimum;
+                slider->normalized_value = value;
                 slider->change_timer = 60;
                 if (slider->changed)
                     slider->changed(menu, item, pad->digital_buttons);
@@ -2836,8 +2836,8 @@ extern "C" {
         uimtls[1]->attribs.alpha_mode = 3;
         NuMtlUpdate(uimtls[1]);
         uimtls[2] = NuMtlCreate(1);
-        uimtls[2]->opacity = 0.999f;
         uimtls[2]->diffuse_color.r = 0.2f;
+        uimtls[2]->opacity = 0.999f;
         uimtls[2]->diffuse_color.g = 0.2f;
         uimtls[2]->diffuse_color.b = 0.2f;
         uimtls[2]->attribs.cull_mode = 2;
@@ -2845,8 +2845,8 @@ extern "C" {
         uimtls[2]->attribs.alpha_mode = 2;
         NuMtlUpdate(uimtls[2]);
         uimtls[3] = NuMtlCreate(1);
-        uimtls[3]->opacity = 0.999f;
         uimtls[3]->diffuse_color.r = 0.2f;
+        uimtls[3]->opacity = 0.999f;
         uimtls[3]->diffuse_color.g = 0.2f;
         uimtls[3]->diffuse_color.b = 0.2f;
         uimtls[3]->attribs.cull_mode = 2;
@@ -2885,8 +2885,8 @@ extern "C" {
         item->previous = NULL;
         menu->first = item;
         menu->field_10 = 0;
-        menu->field_0c = item;
         edui_last_item = item;
+        menu->field_0c = item;
     }
 
     void eduiMenuAddItemLast(eduimenu_s *menu, eduiitem_s *item) {
@@ -2898,8 +2898,8 @@ extern "C" {
         item->next = NULL;
         menu->field_10 = 0;
         menu->last = item;
-        menu->field_0c = item;
         edui_last_item = item;
+        menu->field_0c = item;
     }
 
     void eduiMenuAddItemAfter(eduimenu_s *menu, eduiitem_s *item, eduiitem_s *after) {
@@ -3749,8 +3749,8 @@ extern "C" {
         item->type = 6;
         item->data = data;
         memcpy(item->colours, colours, sizeof(item->colours));
-        item->process = eduicbProcessSlider;
         item->interact = eduicbInteractSlider;
+        item->process = eduicbProcessSlider;
         item->render = eduicbRenderTextSelector;
         item->destroy = eduicbItemSliderDestroy;
         item->selection_group = group;
@@ -3940,7 +3940,7 @@ extern "C" {
     }
 
     eduiitem_s *eduiItemSeparatorCreate(usize data, const void *colours) {
-        eduiitem_s *item = static_cast<eduiitem_s *>(NU_ALLOC(sizeof(eduiitem_s), 4, 1, "", 0));
+        edui_separator_s *item = static_cast<edui_separator_s *>(NU_ALLOC(sizeof(edui_separator_s), 4, 1, "", 0));
         if (item) {
             memset(item, 0, sizeof(*item));
             item->type = 18;
@@ -3949,9 +3949,10 @@ extern "C" {
             item->process = eduicbProcessSeparator;
             item->render = eduicbRenderSeparator;
             item->text_alignment = 0x40;
+            item->selection_group = 0;
             item->highlighted = 0;
             item->destroy = eduicbItemDestroy;
-            item->selection_group = 0;
+            item->interact = NULL;
         }
         return item;
     }
@@ -4962,8 +4963,8 @@ extern "C" void eduiMenuDestroyItems(eduimenu_s *menu) {
                               static_cast<i32>(caret_x * 16.0f), static_cast<i32>((draw_y + height) * 8.0f), 0xff000000,
                               uimtls[0]);
         } else {
-            property->button_size = indent_width;
             property->button_y = draw_y + 1.0f;
+            property->button_size = indent_width;
             property->button_x = draw_x + draw_width - (1.0f + indent_width);
             for (eduimenu_s *descendant = menu; descendant; descendant = descendant->child) {
                 if (descendant == eduiGetActiveMenu()) {

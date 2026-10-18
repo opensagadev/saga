@@ -863,8 +863,8 @@ void DrawSubItemMenu2D() {
         if (!(ShopNameAlpha > 0.0f))
             return;
         if (show_name) {
-            f32 y = buyable ? HUB_EPISODETITLEY : (HUB_EPISODETITLEY + HUB_EPISODESUBTITLEY) * 0.5f;
             f32 scale = buyable ? 0.6f : 0.8f;
+            f32 y = buyable ? HUB_EPISODETITLEY : (HUB_EPISODETITLEY + HUB_EPISODESUBTITLEY) * 0.5f;
             SmartTextEx(name, 0.0f, y, 1.0f, scale, scale, scale, 0, 255, 255, 255, 1.7f, 1, NULL, 0,
                         static_cast<i32>(128.0f * ShopNameAlpha));
         }
@@ -1588,8 +1588,8 @@ static inline i32 SubItemMenu(MENU_s *menu) {
 
     shopitem_s *items = NULL;
     i32 *ids = NULL, *count = NULL;
-    f32 ypush = 0.0f;
     NUVEC *positions = NULL;
+    f32 ypush = 0.0f;
     if (picked == 0) {
         items = HintItems;
         ids = HintShelfIds;
@@ -1991,9 +1991,7 @@ void DrawTopShelf(i32) {
         }
 
         NUVEC world_position;
-        world_position.x = ShelfPos[shelf_index].x;
-        world_position.y = ShelfPos[shelf_index].y;
-        world_position.z = ShelfPos[shelf_index].z;
+        world_position = ShelfPos[shelf_index];
         world_position.y += toppush[shelf_index];
         const f32 size = topscale[shelf_index] / TopShelfScale[shelf_index] * 0.15f;
         const f32 aspect_ratio = GetAspectRatio();
@@ -2125,7 +2123,7 @@ void DrawSubItems() {
             scale *= alpha;
         shopitem_s *item = &items[shelf_ids[slot]];
         NUVEC position = positions[slot];
-        if (subitemselected == 2 && slot == 3) {
+        if (slot == 3 && subitemselected == 2) {
             NuVecAdd(&position, &position, &selectedoff);
             scale *= 1.25f;
         }

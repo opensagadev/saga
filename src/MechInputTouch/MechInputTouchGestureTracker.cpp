@@ -16,10 +16,9 @@ TouchHolder *MechInputTouchGestureTrackingSystem::GetTouch(NuInputTouch const &t
         }
     }
     for (i32 index = 0; index < 10; ++index) {
-        TouchHolder *holder = &holders[index];
-        if (holder->touch_id == -1) {
-            holder->touch_id = touch.unknown_14;
-            return holder;
+        if (holders[index].touch_id == -1) {
+            holders[index].touch_id = touch.unknown_14;
+            return &holders[index];
         }
     }
     return holders;
@@ -170,10 +169,10 @@ void MechInputTouchGestureTrackingSystem::ReadData(GameObject_s &object, NuInput
     }
 
     for (u32 index = 0; index < data.touch_count; ++index) {
-        NuInputTouch const &touch = data.touch_events[index];
         f32 x, y;
-        MechInputTouchSystem::ConvertToScreenCoords(touch.unknown_04, touch.unknown_08, x, y);
-        TouchHolder *holder = GetTouch(touch);
+        MechInputTouchSystem::ConvertToScreenCoords(data.touch_events[index].unknown_04,
+                                                    data.touch_events[index].unknown_08, x, y);
+        TouchHolder *holder = GetTouch(data.touch_events[index]);
         if (!holder->field_0x6) {
             holder->click_candidate = 0;
             holder->down_position.x = x;

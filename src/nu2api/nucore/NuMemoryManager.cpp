@@ -565,8 +565,9 @@ inline void NuMemoryManager::MergeBlocks(Header *left, Header *right, const char
 }
 
 void NuMemoryManager::AddPage(void *ptr, u32 size, bool _unknown) {
-    Page *page = (Page *)ALIGN((usize)ptr, 4);
     const usize allocation_end = ((usize)ptr + size) & ~(usize)3;
+    Page *page = (Page *)ALIGN((usize)ptr, 4);
+    Header *left_fence = (Header *)((usize)page + sizeof(Page));
     memset(page, 0, sizeof(Page));
 
     page->original_ptr = ptr;
@@ -576,23 +577,20 @@ void NuMemoryManager::AddPage(void *ptr, u32 size, bool _unknown) {
     page->is_external = _unknown;
 
     // Fence flags prevent coalescing beyond the page while preserving the other bits.
-    Header *left_fence = (Header *)((usize)page + sizeof(Page));
     left_fence->value = (left_fence->value & BLOCK_SIZE_MASK) | 0x08000000;
     Header *right_fence = (Header *)(allocation_end - 4);
     right_fence->value = (right_fence->value & BLOCK_SIZE_MASK) | 0x08000000;
 
     FreeHeader *free_block = (FreeHeader *)page->first_header;
-    const u32 free_size = (usize)right_fence - (usize)free_block;
+    const u32 free_size = (usize)right_fence - sizeof(Header) - (usize)left_fence;
     free_block->block_header.value = free_size / 4;
-    free_block->next = NULL;
-    free_block->prev = NULL;
     u32 value = free_block->block_header.value;
     u32 manager_index = this->idx;
     u32 *end_tag = (u32 *)END_TAG(free_block, BLOCK_SIZE(value));
     if ((value & 0x38000000) != 0) {
         if (!(manager_index <= 29)) {
             *end_tag = value | HEADER_MGR_HI_MASK;
-            *(end_tag - 1) = manager_index;
+            *END_TAG_HI(free_block, BLOCK_SIZE(free_block->block_header.value)) = manager_index;
         } else {
             *end_tag = ((manager_index + 1) << 27) | (value & BLOCK_SIZE_MASK);
         }
@@ -600,6 +598,8 @@ void NuMemoryManager::AddPage(void *ptr, u32 size, bool _unknown) {
         *end_tag = value & BLOCK_SIZE_MASK;
     }
 
+    free_block->next = NULL;
+    free_block->prev = NULL;
     this->stats.unknown_00 += BLOCK_SIZE(free_block->block_header.value);
 
     pthread_mutex_lock(&this->mutex);

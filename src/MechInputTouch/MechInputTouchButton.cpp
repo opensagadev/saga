@@ -190,7 +190,7 @@ void MechInputTouchButtonFaker::Update(NuInputTouchData const *data) {
             f32 touch_x = touch.unknown_04;
             f32 touch_y = touch.unknown_08;
             if (touch.unknown_02 != 0 && touch_locked_by == 0xff) {
-                if (touch_x >= x && touch_y >= y && touch_x <= x + width && touch_y <= y + height) {
+                if (touch_y >= y && touch_x >= x && touch_x <= x + width && touch_y <= y + height) {
                     SetTouchLocked(id, false);
                 }
             }
@@ -200,7 +200,7 @@ void MechInputTouchButtonFaker::Update(NuInputTouchData const *data) {
             }
         }
     }
-    if (touch_locked_by != 0xff && !found_locked_touch) {
+    if (!found_locked_touch && touch_locked_by != 0xff) {
         ClearTouchLocked(false);
     }
 }

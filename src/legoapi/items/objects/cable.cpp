@@ -322,8 +322,8 @@ void UpdateCables() {
             NUVEC *last_position = NUMTX_GET_ROW_VEC(&target->joint_matrices[atat_locators[last]], 3);
             if (!(cable->wrap_count > 1)) {
                 f32 along0, along1;
-                i32 next = (last + 1) & 3;
                 i32 previous = (last + 3) & 3;
+                i32 next = (last + 1) & 3;
                 // Preserve the reverse-edge locators across the first intersection callback.
                 i32 previous_locator = atat_locators[previous];
                 i32 opposite_locator = atat_locators[(previous + 3) & 3];
@@ -340,8 +340,8 @@ void UpdateCables() {
                     cable->wrap_indices[cable->wrap_count++] = static_cast<u8>(next);
                 }
             } else {
-                i32 previous = cable->wrap_indices[cable->wrap_count - 2];
                 i32 next = (last + 1) & 3;
+                i32 previous = cable->wrap_indices[cable->wrap_count - 2];
                 i32 direction = 1;
                 if (next == previous) {
                     next = (last + 3) & 3;
@@ -534,10 +534,10 @@ void UpdateCables() {
         }
         if (cable->source != NULL && cable->target != NULL) {
             for (i32 i = 0; i < cable->point_count; ++i)
-                if (i == 0)
-                    cable->velocities[i] = cable->source->apiobj.velocity;
-                else
+                if (i != 0)
                     cable->velocities[i] = cable->target->apiobj.velocity;
+                else
+                    cable->velocities[i] = cable->source->apiobj.velocity;
         }
     }
 }
@@ -600,7 +600,9 @@ void DrawCables() {
             }
             for (i32 segment = 0; segment < cable.point_count - 1; ++segment) {
                 NUVEC previous = endpoint;
-                endpoint = cable.points[segment + 1];
+                endpoint.x = cable.points[segment + 1].x;
+                endpoint.y = cable.points[segment + 1].y;
+                endpoint.z = cable.points[segment + 1].z;
                 endpoint.y = NuFdiv(distance_along + cable.segment_lengths[segment], cable.total_length) * y_span +
                              cable.points[0].y;
                 f32 ground_end = GameShadow(NULL, &endpoint, 5.0f, -1);

@@ -7585,12 +7585,9 @@ extern "C" {
             Music.queued_track = static_cast<i16>(track);
             Music.requested_track = static_cast<i16>(track);
             reinterpret_cast<u8 *>(&Music)[primary_stream + 0x12] = 0;
-            if (transition_frames < 64) {
-                if (state == MUSIC_PLAYBACK_STOPPED)
-                    goto first_play;
+            if (transition_frames < 64 && state != MUSIC_PLAYBACK_STOPPED) {
                 Music.pause_requested = true;
             } else {
-            first_play:
                 Music.pause_requested = false;
                 const f32 seek_offset = Music.seek_offset;
                 const i32 stream = 1 - primary_stream;
@@ -7613,9 +7610,7 @@ extern "C" {
             Music.requested_track = static_cast<i16>(track);
             Music.state = MUSIC_PLAYBACK_DUAL_STREAM;
             reinterpret_cast<u8 *>(&Music)[primary_stream + 0x12] = 0;
-            if (transition_frames < 64) {
-                Music.pause_requested = true;
-            } else {
+            if (transition_frames >= 64) {
                 Music.pause_requested = false;
                 const f32 seek_offset = Music.seek_offset;
                 if (NOSOUND == 0 && NOMUSIC == 0) {
@@ -7624,6 +7619,8 @@ extern "C" {
                 Music.secondary_stream = static_cast<i16>(primary_stream);
                 Music.transition_frames = 0;
                 Music.seek_offset = 0.0f;
+            } else {
+                Music.pause_requested = true;
             }
         }
     }
@@ -13472,8 +13469,8 @@ static void edbriRender() {
     edcamSet();
     edbriDrawCursor();
     if (edbri_nearest != -1) {
-        const NUVEC &position = edBridges[edbri_nearest].position;
-        edbitsDrawDiagonalCross(position.x, position.y, position.z, 0.125f, 0xff80ffff, edbri_mtl_zoff);
+        edbitsDrawDiagonalCross(edBridges[edbri_nearest].position.x, edBridges[edbri_nearest].position.y,
+                                edBridges[edbri_nearest].position.z, 0.125f, 0xff80ffff, edbri_mtl_zoff);
     }
     if (edbri_active_menu)
         eduiMenuRender(edbri_active_menu);
@@ -14461,13 +14458,16 @@ extern "C" {
         if (effect->process_spheres == 0)
             return;
         for (i32 sphere_index = 0; sphere_index < static_cast<i8>(effect->process_spheres); ++sphere_index) {
-            debris_process_sphere_s *sphere = &debkeydata[key_index].process_spheres[sphere_index];
-            f32 time = globaltime - sphere->time;
+            f32 time = globaltime - debkeydata[key_index].process_spheres[sphere_index].time;
             if (time >= 0.0f && time <= effect->particle_lifetime) {
 
-                NUVEC position = {sphere->momentum.x * time + sphere->position.x,
-                                  sphere->momentum.y * time + time * time * effect->field_0a0 + sphere->position.y,
-                                  sphere->momentum.z * time + sphere->position.z};
+                NUVEC position = {debkeydata[key_index].process_spheres[sphere_index].momentum.x * time +
+                                      debkeydata[key_index].process_spheres[sphere_index].position.x,
+                                  debkeydata[key_index].process_spheres[sphere_index].momentum.y * time +
+                                      time * time * effect->field_0a0 +
+                                      debkeydata[key_index].process_spheres[sphere_index].position.y,
+                                  debkeydata[key_index].process_spheres[sphere_index].momentum.z * time +
+                                      debkeydata[key_index].process_spheres[sphere_index].position.z};
                 time /= effect->particle_lifetime;
                 i32 first;
                 for (first = 0; first < 7; ++first) {
@@ -15004,8 +15004,8 @@ void edppHighlightNearest() {
         }
     } else {
         if (edpp_nearest != -1) {
-            const NUVEC &position = edpp_ptls[edpp_nearest].position;
-            edbitsDrawCube(position.x, position.y, position.z, 0.5f, 0.5f, 0.5f, 0, 0, 0, 0, 0, 0xffffffff, edpp_mtl);
+            edbitsDrawCube(edpp_ptls[edpp_nearest].position.x, edpp_ptls[edpp_nearest].position.y,
+                           edpp_ptls[edpp_nearest].position.z, 0.5f, 0.5f, 0.5f, 0, 0, 0, 0, 0, 0xffffffff, edpp_mtl);
         }
         if (edpp_showAllPlaced != 0) {
             for (i32 index = 0; index < 512; ++index) {
@@ -16076,12 +16076,16 @@ extern "C" {
         EdFileClose();
         edppDetermineNearest(1.0f);
 
-        if (page_type == 0) {
-            edbits_particle_general_page = page_index;
-        } else if (page_type == 5) {
-            edbits_particle_char_page = page_index;
-        } else if (page_type == 1) {
-            edbits_particle_level_page = page_index;
+        switch (page_type) {
+            case 0:
+                edbits_particle_general_page = page_index;
+                break;
+            case 1:
+                edbits_particle_level_page = page_index;
+                break;
+            case 5:
+                edbits_particle_char_page = page_index;
+                break;
         }
         return page_index;
     }
@@ -21665,13 +21669,12 @@ i32 TerrainPlatformMoveCheck(nuvec_s *position, nuvec_s *normal, i32 platform_in
 i32 TerrainPlatformEmbedded(nuvec_s *movement_delta) {
     TerrainQuery_s *old_query = TerI;
     i32 platform_index = CurTerr->groups[old_query->terrain_group_index].scene_index;
-    TERRAIN_PLATFORM *platform = &CurTerr->platforms[platform_index];
-    NUMTX *matrix = static_cast<NUMTX *>(platform->scene_object);
+    NUMTX *matrix = static_cast<NUMTX *>(CurTerr->platforms[platform_index].scene_object);
     if (__builtin_expect(matrix == NULL, 0))
         return 1;
-    NUMTX *previous = &platform->previous_matrix;
+    NUMTX *previous = &CurTerr->platforms[platform_index].previous_matrix;
     if (previous->m30 == matrix->m30 && previous->m31 == matrix->m31 && previous->m32 == matrix->m32) {
-        if (!(platform->flags & 1))
+        if (!(CurTerr->platforms[platform_index].flags & 1))
             return 1;
         if (__builtin_expect(previous->m00 == matrix->m00 && previous->m01 == matrix->m01 && previous->m02 == matrix->m02 &&
             previous->m10 == matrix->m10 && previous->m11 == matrix->m11 && previous->m12 == matrix->m12 &&
@@ -21701,7 +21704,7 @@ i32 TerrainPlatformEmbedded(nuvec_s *movement_delta) {
     query->movement.x = (previous->m30 - matrix->m30) * 1.73f;
     query->movement.y = ((previous->m31 - matrix->m31) * 1.73f) * query->inverse_object_scale;
     query->movement.z = (previous->m32 - matrix->m32) * 1.73f;
-    if (platform->flags & 1) {
+    if (CurTerr->platforms[platform_index].flags & 1) {
         NuMtxInvRSS(&tertempmat, previous);
         tertempvec4.y = (old_query->position.y - query->collision_radius) * query->object_scale - previous->m31;
         tertempvec4.z = old_query->position.z - previous->m32;
@@ -21721,13 +21724,13 @@ i32 TerrainPlatformEmbedded(nuvec_s *movement_delta) {
     query->position.z = old_query->position.z - query->movement.z * 0.91f;
     query->position.y = old_query->position.y - query->movement.y * 0.91f;
 
-    TERRAIN_GROUP *group = &CurTerr->groups[old_query->terrain_group_index];
     TERRAIN_SHAPE **cursor = reinterpret_cast<TERRAIN_SHAPE **>(query->scan_list_storage + 4);
     i32 count = 0;
     i32 transformed_count = 0;
-    TERRAIN_SHAPE_BATCH *batch = static_cast<TERRAIN_SHAPE_BATCH *>(group->data);
+    TERRAIN_SHAPE_BATCH *batch =
+        static_cast<TERRAIN_SHAPE_BATCH *>(CurTerr->groups[old_query->terrain_group_index].data);
     if (query->object_scale == 1.0f) {
-        if (platform->flags & 1) {
+        if (CurTerr->platforms[platform_index].flags & 1) {
             while (batch->marker >= 0) {
                 i32 shape_count = batch->shape_count;
                 TERRAIN_SHAPE *source = reinterpret_cast<TERRAIN_SHAPE *>(batch + 1);
@@ -21746,8 +21749,11 @@ i32 TerrainPlatformEmbedded(nuvec_s *movement_delta) {
                     vertices[2].y = source->vectors[2].y;
                     vertices[2].z = source->vectors[2].z;
                     vertices[2].w = 0.0f;
-                    NuVec4MtxTransformVU0x3(vertices, vertices,
-                                            static_cast<NUMTX *>(CurTerr->platforms[group->scene_index].scene_object));
+                    NuVec4MtxTransformVU0x3(
+                        vertices, vertices,
+                        static_cast<NUMTX *>(
+                            CurTerr->platforms[CurTerr->groups[old_query->terrain_group_index].scene_index]
+                                .scene_object));
                     bool quad = source->normals[1].y < 65535.0f;
                     if (!quad) {
                         vertices[3] = vertices[2];
@@ -21758,7 +21764,9 @@ i32 TerrainPlatformEmbedded(nuvec_s *movement_delta) {
                         vertices[3].w = 0.0f;
                         NuVec4MtxTransformVU0(
                             &vertices[3], &vertices[3],
-                            static_cast<NUMTX *>(CurTerr->platforms[group->scene_index].scene_object));
+                            static_cast<NUMTX *>(
+                                CurTerr->platforms[CurTerr->groups[old_query->terrain_group_index].scene_index]
+                                    .scene_object));
                     }
                     TERRAIN_SHAPE *surface = &ScaleTerrain[transformed_count];
                     memcpy(surface->material, source->material, 4);
@@ -21832,7 +21840,7 @@ i32 TerrainPlatformEmbedded(nuvec_s *movement_delta) {
             }
         }
     } else {
-        if (platform->flags & 1) {
+        if (CurTerr->platforms[platform_index].flags & 1) {
             while (batch->marker >= 0) {
                 i32 shape_count = batch->shape_count;
                 TERRAIN_SHAPE *source = reinterpret_cast<TERRAIN_SHAPE *>(batch + 1);
@@ -21851,8 +21859,11 @@ i32 TerrainPlatformEmbedded(nuvec_s *movement_delta) {
                     vertices[2].y = source->vectors[2].y;
                     vertices[2].z = source->vectors[2].z;
                     vertices[2].w = 0.0f;
-                    NuVec4MtxTransformVU0x3(vertices, vertices,
-                                            static_cast<NUMTX *>(CurTerr->platforms[group->scene_index].scene_object));
+                    NuVec4MtxTransformVU0x3(
+                        vertices, vertices,
+                        static_cast<NUMTX *>(
+                            CurTerr->platforms[CurTerr->groups[old_query->terrain_group_index].scene_index]
+                                .scene_object));
                     bool quad = source->normals[1].y < 65535.0f;
                     if (!quad) {
                         vertices[3] = vertices[2];
@@ -21863,26 +21874,33 @@ i32 TerrainPlatformEmbedded(nuvec_s *movement_delta) {
                         vertices[3].w = 0.0f;
                         NuVec4MtxTransformVU0(
                             &vertices[3], &vertices[3],
-                            static_cast<NUMTX *>(CurTerr->platforms[group->scene_index].scene_object));
+                            static_cast<NUMTX *>(
+                                CurTerr->platforms[CurTerr->groups[old_query->terrain_group_index].scene_index]
+                                    .scene_object));
                     }
                     TERRAIN_SHAPE *surface = &ScaleTerrain[transformed_count];
                     memcpy(surface->material, source->material, 4);
                     surface->vectors[0].x = vertices[0].x;
-                    surface->vectors[0].y =
-                        (vertices[0].y + group->origin.y) * query->inverse_object_scale - group->origin.y;
+                    surface->vectors[0].y = (vertices[0].y + CurTerr->groups[old_query->terrain_group_index].origin.y) *
+                                                query->inverse_object_scale -
+                                            CurTerr->groups[old_query->terrain_group_index].origin.y;
                     surface->vectors[0].z = vertices[0].z;
                     surface->vectors[1].x = vertices[1].x;
-                    surface->vectors[1].y =
-                        (vertices[1].y + group->origin.y) * query->inverse_object_scale - group->origin.y;
+                    surface->vectors[1].y = (vertices[1].y + CurTerr->groups[old_query->terrain_group_index].origin.y) *
+                                                query->inverse_object_scale -
+                                            CurTerr->groups[old_query->terrain_group_index].origin.y;
                     surface->vectors[1].z = vertices[1].z;
                     surface->vectors[2].x = vertices[2].x;
-                    surface->vectors[2].y =
-                        (vertices[2].y + group->origin.y) * query->inverse_object_scale - group->origin.y;
+                    surface->vectors[2].y = (vertices[2].y + CurTerr->groups[old_query->terrain_group_index].origin.y) *
+                                                query->inverse_object_scale -
+                                            CurTerr->groups[old_query->terrain_group_index].origin.y;
                     surface->vectors[2].z = vertices[2].z;
                     if (quad) {
                         surface->vectors[3].x = vertices[3].x;
                         surface->vectors[3].y =
-                            (vertices[3].y + group->origin.y) * query->inverse_object_scale - group->origin.y;
+                            (vertices[3].y + CurTerr->groups[old_query->terrain_group_index].origin.y) *
+                                query->inverse_object_scale -
+                            CurTerr->groups[old_query->terrain_group_index].origin.y;
                         surface->vectors[3].z = vertices[3].z;
                     }
                     if (__builtin_expect(!quad, 1)) {
@@ -21940,20 +21958,28 @@ i32 TerrainPlatformEmbedded(nuvec_s *movement_delta) {
                     memcpy(surface->material, source->material, 4);
                     surface->vectors[0].x = source->vectors[0].x;
                     surface->vectors[0].y =
-                        (source->vectors[0].y + group->origin.y) * query->inverse_object_scale - group->origin.y;
+                        (source->vectors[0].y + CurTerr->groups[old_query->terrain_group_index].origin.y) *
+                            query->inverse_object_scale -
+                        CurTerr->groups[old_query->terrain_group_index].origin.y;
                     surface->vectors[0].z = source->vectors[0].z;
                     surface->vectors[1].x = source->vectors[1].x;
                     surface->vectors[1].y =
-                        (source->vectors[1].y + group->origin.y) * query->inverse_object_scale - group->origin.y;
+                        (source->vectors[1].y + CurTerr->groups[old_query->terrain_group_index].origin.y) *
+                            query->inverse_object_scale -
+                        CurTerr->groups[old_query->terrain_group_index].origin.y;
                     surface->vectors[1].z = source->vectors[1].z;
                     surface->vectors[2].x = source->vectors[2].x;
                     surface->vectors[2].y =
-                        (source->vectors[2].y + group->origin.y) * query->inverse_object_scale - group->origin.y;
+                        (source->vectors[2].y + CurTerr->groups[old_query->terrain_group_index].origin.y) *
+                            query->inverse_object_scale -
+                        CurTerr->groups[old_query->terrain_group_index].origin.y;
                     surface->vectors[2].z = source->vectors[2].z;
                     if (quad) {
                         surface->vectors[3].x = source->vectors[3].x;
                         surface->vectors[3].y =
-                            (source->vectors[3].y + group->origin.y) * query->inverse_object_scale - group->origin.y;
+                            (source->vectors[3].y + CurTerr->groups[old_query->terrain_group_index].origin.y) *
+                                query->inverse_object_scale -
+                            CurTerr->groups[old_query->terrain_group_index].origin.y;
                         surface->vectors[3].z = source->vectors[3].z;
                     }
                     if (__builtin_expect(!!(quad), 0)) {
@@ -21968,14 +21994,14 @@ i32 TerrainPlatformEmbedded(nuvec_s *movement_delta) {
                     } else {
                         surface->normals[1].y = 65536.0f;
                     }
-                    NUVEC *normal = &source->normals[0];
-                    f32 length = NuFsqrt(normal->x * normal->x + (normal->y * normal->y) * query->object_scale_sq +
-                                         normal->z * normal->z);
+                    f32 length = NuFsqrt(source->normals[0].x * source->normals[0].x +
+                                         (source->normals[0].y * source->normals[0].y) * query->object_scale_sq +
+                                         source->normals[0].z * source->normals[0].z);
                     f32 inverse = length == 0.0f ? 0.0f : 1.0f / length;
                     surface = &ScaleTerrain[transformed_count];
-                    surface->normals[0].x = normal->x * inverse;
-                    surface->normals[0].y = (normal->y * query_object_scale) * inverse;
-                    surface->normals[0].z = normal->z * inverse;
+                    surface->normals[0].x = source->normals[0].x * inverse;
+                    surface->normals[0].y = (source->normals[0].y * query_object_scale) * inverse;
+                    surface->normals[0].z = source->normals[0].z * inverse;
                     *cursor++ = surface;
                     ++count;
                     ++transformed_count;
@@ -22724,10 +22750,9 @@ extern "C" void NewTerrainScaleYMask(NUVEC *position, NUVEC *movement, u8 *hit_f
                             TerI->movement_normal.z * TerI->surface->normals[0].z;
                 }
 
-                TERRAIN_GROUP *group = &CurTerr->groups[group_index];
                 const u8 hit_class = hit_type & TERRAIN_HIT_TYPE_CLASS_MASK;
                 f32 wall_limit;
-                if (group->chunk_type == TERRAIN_CHUNK_GROUP_SECONDARY) {
+                if (CurTerr->groups[group_index].chunk_type == TERRAIN_CHUNK_GROUP_SECONDARY) {
                     wall_limit = 0.707f;
                     if (hit_class > TERRAIN_HIT_TYPE_FACE && 0.95f > slope) {
                         wall_limit = 0.98f;
@@ -22752,8 +22777,10 @@ extern "C" void NewTerrainScaleYMask(NUVEC *position, NUVEC *movement, u8 *hit_f
                     wall_limit = 1.1f;
                 }
 
-                if (TerI->impact_normal.y >= wall_limit && group->chunk_type == TERRAIN_CHUNK_GROUP_SECONDARY) {
-                    CurTerr->platforms[group->scene_index].flags |= TERRAIN_PLATFORM_FLAG_COLLIDED;
+                if (TerI->impact_normal.y >= wall_limit &&
+                    CurTerr->groups[group_index].chunk_type == TERRAIN_CHUNK_GROUP_SECONDARY) {
+                    CurTerr->platforms[CurTerr->groups[group_index].scene_index].flags |=
+                        TERRAIN_PLATFORM_FLAG_COLLIDED;
                 }
             }
         }
@@ -23701,12 +23728,11 @@ extern "C" {
 
     void PlatOnOff(i32 index, i32 enabled) {
         if (CurTerr != NULL && index >= 0 && index < CurTerr->max_platforms) {
-            TERRAIN_GROUP &group = CurTerr->groups[CurTerr->platforms[index].terrain_group_index];
             if (enabled != 0) {
-                group.chunk_type = 1;
+                CurTerr->groups[CurTerr->platforms[index].terrain_group_index].chunk_type = 1;
                 return;
             }
-            group.chunk_type = -1;
+            CurTerr->groups[CurTerr->platforms[index].terrain_group_index].chunk_type = -1;
         }
     }
 

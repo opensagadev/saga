@@ -882,9 +882,9 @@ i32 ZipUps_UpdateHint(HINT_s *hint) {
     if (world == NULL || world->zipups == NULL)
         return 0;
     for (i32 i = 0; i < world->zipup_count; ++i) {
-        ZIPUP *zipup = &world->zipups[i];
         if (hint->completion_flags[MechInputTouchSystem::s_baseControlMode] == 0 && CanDrawZipUpSwirls != 0 &&
-            (zipup->flags & ZIPUP_FLAG_ACTIVE) != 0 && ActivePlayerInRange(&zipup->lower_position, 2.0f, NULL))
+            (world->zipups[i].flags & ZIPUP_FLAG_ACTIVE) != 0 &&
+            ActivePlayerInRange(&world->zipups[i].lower_position, 2.0f, NULL))
             return 1;
     }
     return 0;

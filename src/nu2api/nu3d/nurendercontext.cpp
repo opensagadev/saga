@@ -9,6 +9,7 @@
 #include "nu2api/nu3d/nushader_plain.h"
 #include "nu2api/nu3d/nuvport.h"
 #include "nu2api/numath/nuvec.h"
+#include "nu2api/numath/nuvec4.h"
 
 // The original unit constructs its six homogeneous vectors.
 #include "nu2api/nucore/nuvuvec.hpp"
@@ -21,8 +22,10 @@ extern "C" {
     f32 g_renderContect_worldView[16];
     f32 g_renderContext_viewProj[16];
     f32 g_renderContext_viewProjInverse[16];
+    f32 g_renderContext_preViewProj[16];
     f32 g_renderContext_position[4];
     f32 g_renderContext_kTint[4];
+    i32 g_renderContext_eventStack[8];
 }
 numtl_s *g_renderContext_materialInUse = nullptr;
 extern "C" {
@@ -31,6 +34,7 @@ extern "C" {
     f32 g_renderContext_postEffectTime;
 }
 i32 g_renderContext_zFunc = 3;
+i32 g_renderContext_currentShaderGPR = 0x40;
 
 extern "C" {
 
@@ -40,12 +44,12 @@ extern "C" {
         memcpy(g_renderContect_worldView, &numtx_identity, sizeof(numtx_identity));
         memcpy(g_renderContext_viewProj, &numtx_identity, sizeof(numtx_identity));
         memcpy(g_renderContext_viewProjInverse, &numtx_identity, sizeof(numtx_identity));
-        g_renderContext_position[0] = 0.0f;
-        g_renderContext_position[1] = 0.0f;
-        g_renderContext_position[2] = 0.0f;
-        g_renderContext_position[3] = 0.0f;
+        memcpy(g_renderContext_preViewProj, &numtx_identity, sizeof(numtx_identity));
+        memcpy(g_renderContext_position, &nuvec4_zero, sizeof(nuvec4_zero));
         g_renderContext_3dTime = 0.0f;
         g_renderContext_postEffectTime = 0.0f;
+        g_renderContext_eventStack[0] = 0;
+        g_renderContext_currentShaderGPR = 0x40;
     }
 
     // Original 0x2a33d0, 9 bytes: this platform deliberately does nothing.
@@ -126,31 +130,29 @@ void NuRenderContextForceSamplerStatePS(i32, const d3dsamplerstate_u *) {
 
 extern "C" {
     void NuRenderContextSetZFunc(i32 zfunc) {
-        if (zfunc == g_renderContext_zFunc) {
-            return;
-        }
-
-        switch (zfunc) {
-            case 0: // depth test + write, LEQUAL
-                glEnable(GL_DEPTH_TEST);
-                glDepthMask(GL_TRUE);
-                glDepthFunc(GL_LEQUAL);
-                break;
-            case 1: // depth test, no write (decal / transparent)
-                glEnable(GL_DEPTH_TEST);
-                glDepthMask(GL_FALSE);
-                glDepthFunc(GL_LEQUAL);
-                break;
-            case 2: // no depth test, write enabled
-                glDisable(GL_DEPTH_TEST);
-                glDepthMask(GL_TRUE);
-                break;
-            case 3: // no depth test, no write (UI / 2D)
-                glDisable(GL_DEPTH_TEST);
-                glDepthMask(GL_FALSE);
-                break;
-            default:
-                break;
+        if (zfunc != g_renderContext_zFunc) {
+            switch (zfunc) {
+                case 0: // depth test + write, LEQUAL
+                    glEnable(GL_DEPTH_TEST);
+                    glDepthMask(GL_TRUE);
+                    glDepthFunc(GL_LEQUAL);
+                    break;
+                case 1: // depth test, no write (decal / transparent)
+                    glEnable(GL_DEPTH_TEST);
+                    glDepthMask(GL_FALSE);
+                    glDepthFunc(GL_LEQUAL);
+                    break;
+                case 2: // no depth test, write enabled
+                    glDisable(GL_DEPTH_TEST);
+                    glDepthMask(GL_TRUE);
+                    break;
+                case 3: // no depth test, no write (UI / 2D)
+                    glDisable(GL_DEPTH_TEST);
+                    glDepthMask(GL_FALSE);
+                    break;
+                default:
+                    break;
+            }
         }
         g_renderContext_zFunc = zfunc;
     }

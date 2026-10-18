@@ -843,7 +843,6 @@ static void Hub_DrawBonusModeMenu(int selected, float alpha) {
     if (__builtin_expect(bonusmodearcade, 0)) {
         const i32 full_opacity = static_cast<i32>(alpha * 128.0f);
         f32 y = 0.3062499761581421f;
-        MENU *menu = &GameMenu[GameMenuLevel];
         AREADATA *area;
         for (i32 i = 0; i < 3; ++i) {
             i16 *label;
@@ -912,12 +911,12 @@ static void Hub_DrawBonusModeMenu(int selected, float alpha) {
             smarttextex_drawmessagebox = 1;
             SmartTextEx(text[0], 0.0f, y, 1.0f, 0.7f, 0.7f, 0.7f, 0, static_cast<u8>(red), static_cast<u8>(green),
                         static_cast<u8>(blue), 1.7f, 1, 0, 0, opacity);
-            menu->item_x[i] = 0.0f;
-            menu->item_y[i] = y;
-            menu->item_width[i] = text3d_width;
-            menu->item_height[i] = text3d_height;
-            menu->item_column[i] = 0;
-            menu->item_row[i] = i;
+            GameMenu[GameMenuLevel].item_x[i] = 0.0f;
+            GameMenu[GameMenuLevel].item_y[i] = y;
+            GameMenu[GameMenuLevel].item_width[i] = text3d_width;
+            GameMenu[GameMenuLevel].item_height[i] = text3d_height;
+            GameMenu[GameMenuLevel].item_column[i] = 0;
+            GameMenu[GameMenuLevel].item_row[i] = i;
 
             y -= 0.175f;
         }
@@ -954,7 +953,6 @@ static void Hub_DrawBonusModeMenu(int selected, float alpha) {
     }
     f32 y = (count - 1) * 0.1f + 0.125f;
     const i32 full_opacity = static_cast<i32>(alpha * 128.0f);
-    MENU *menu = &GameMenu[menu_level];
     for (i32 i = 0; i < count; ++i) {
         i32 red, green, blue;
         if (selected && i == hub_bonusmode && TestForController()) {
@@ -989,12 +987,12 @@ static void Hub_DrawBonusModeMenu(int selected, float alpha) {
         smarttextex_drawmessagebox = 1;
         SmartTextEx(text[i], 0.0f, y, 1.0f, 0.7f, 0.7f, 0.7f, 0, static_cast<u8>(red), static_cast<u8>(green),
                     static_cast<u8>(blue), 1.7f, 1, 0, 0, opacity);
-        menu->item_x[i] = 0.0f;
-        menu->item_y[i] = y;
-        menu->item_width[i] = text3d_width;
-        menu->item_height[i] = text3d_height;
-        menu->item_column[i] = 0;
-        menu->item_row[i] = i;
+        GameMenu[menu_level].item_x[i] = 0.0f;
+        GameMenu[menu_level].item_y[i] = y;
+        GameMenu[menu_level].item_width[i] = text3d_width;
+        GameMenu[menu_level].item_height[i] = text3d_height;
+        GameMenu[menu_level].item_column[i] = 0;
+        GameMenu[menu_level].item_row[i] = i;
 
         y -= 0.2f;
     }
@@ -1719,8 +1717,8 @@ void Hub_UpdateFreePlaySelect() {
                     } else if ((GamePad[player].pad->digital_buttons_pressed & GAMEPAD_MENUCANCEL) != 0) {
                         cancel = 1;
                     } else if (__builtin_expect(freeplay_selected[player] == 0, 0)) {
-                        const u32 pressed = GamePad[player].buttons_pressed | GamePad[player].left_directions;
                         const u32 held = GamePad[player].buttons_held | GamePad[player].buttons_released;
+                        const u32 pressed = GamePad[player].buttons_pressed | GamePad[player].left_directions;
                         i32 up = pressed & GAMEPAD_DUP, down = pressed & GAMEPAD_DDOWN;
                         i32 left = pressed & GAMEPAD_DLEFT, right = pressed & GAMEPAD_DRIGHT;
                         i32 up_held = held & GAMEPAD_DUP, down_held = held & GAMEPAD_DDOWN;
@@ -1779,7 +1777,7 @@ void Hub_UpdateFreePlaySelect() {
                                     index = count - 1;
                             } while (collection->list[index].id == MenuPacket.player_model[other]);
                         } else if (right) {
-                            const i32 columns = collection_count_x;
+                            const u16 columns = collection_count_x;
                             const i32 count = collection->count_y;
                             index = previous;
                             do {
@@ -2395,16 +2393,15 @@ void Hub_DrawAreaStats(f32 phase, i32 area_index, i32 mode) {
     SmartTextEx(TTab[area->name_id], 0.0f, HUB_EPISODESUBTITLEY, 1.0f, HUB_EPISODESUBTITLESIZE, HUB_EPISODESUBTITLESIZE,
                 HUB_EPISODESUBTITLESIZE, 0, HUB_EPISODER, HUB_EPISODEG, HUB_EPISODEB, 1.7f, 1, NULL, 0, alpha);
 
-    AREASAVE_s *save = &Game.area_save[area_index];
     const u16 flags = area->flags;
     if ((flags & 0x10) != 0) {
-        if (save->area_complete != 0 && (flags & 4) == 0) {
+        if (Game.area_save[area_index].area_complete != 0 && (flags & 4) == 0) {
             Episode_CountOpenAreas(static_cast<i8>(area->episode_index), area_index, Game.area_save);
 
             if (BOTHTRUEJEDIGOLDBRICKS != 0) {
                 DrawBuildUpBar(HUB_AREAPANELX[1], HUB_EPISODETITLEY + PANEL_MINIKITY - PANEL_MINIKITCOUNTY, 100, 100,
                                NU_SIN_LUT(static_cast<i32>(16384.0f * phase)), 1.0f, 1.0f, 0);
-                NuStrCpy(text, save->true_hero_complete[0] ? "$" : "X");
+                NuStrCpy(text, Game.area_save[area_index].true_hero_complete[0] ? "$" : "X");
                 Text3DEx(text, HUB_AREAPANELX[1], HUB_EPISODETITLEY, 1.0f, PANEL_MINIKITCOUNTSCALE,
                          PANEL_MINIKITCOUNTSCALE, PANEL_MINIKITCOUNTSCALE, 0, 255, 0, 127, static_cast<u8>(alpha));
                 SmartTextEx(TTab[tSTORY], HUB_AREAPANELX[1], HUB_EPISODETITLEY + 0.235f, 1.0f, 0.45f, 0.45f, 0.45f, 0,
@@ -2412,7 +2409,7 @@ void Hub_DrawAreaStats(f32 phase, i32 area_index, i32 mode) {
 
                 DrawBuildUpBar(HUB_AREAPANELX[4], HUB_EPISODETITLEY + PANEL_MINIKITY - PANEL_MINIKITCOUNTY, 100, 100,
                                NU_SIN_LUT(static_cast<i32>(16384.0f * phase)), 1.0f, 1.0f, 0);
-                NuStrCpy(text, save->true_hero_complete[1] ? "$" : "X");
+                NuStrCpy(text, Game.area_save[area_index].true_hero_complete[1] ? "$" : "X");
                 Text3DEx(text, HUB_AREAPANELX[4], HUB_EPISODETITLEY, 1.0f, PANEL_MINIKITCOUNTSCALE,
                          PANEL_MINIKITCOUNTSCALE, PANEL_MINIKITCOUNTSCALE, 0, 255, 0, 127, static_cast<u8>(alpha));
                 SmartTextEx(TTab[tFREEPLAY], HUB_AREAPANELX[4], HUB_EPISODETITLEY + 0.235f, 1.0f, 0.45f, 0.45f, 0.45f,
@@ -2420,15 +2417,20 @@ void Hub_DrawAreaStats(f32 phase, i32 area_index, i32 mode) {
             } else {
                 DrawBuildUpBar(HUB_AREAPANELX[1], HUB_EPISODETITLEY + PANEL_MINIKITY - PANEL_MINIKITCOUNTY, 100, 100,
                                NU_SIN_LUT(static_cast<i32>(16384.0f * phase)), 1.0f, 1.0f, 0);
-                NuStrCpy(text, (save->true_hero_complete[0] || save->true_hero_complete[1]) ? "$" : "X");
+                NuStrCpy(text, (Game.area_save[area_index].true_hero_complete[0] ||
+                                Game.area_save[area_index].true_hero_complete[1])
+                                   ? "$"
+                                   : "X");
                 Text3DEx(text, HUB_AREAPANELX[1], HUB_EPISODETITLEY, 1.0f, PANEL_MINIKITCOUNTSCALE,
                          PANEL_MINIKITCOUNTSCALE, PANEL_MINIKITCOUNTSCALE, 0, 255, 0, 127, static_cast<u8>(alpha));
             }
 
             if ((area->flags & 0x10) != 0) {
-                Hub_DrawMiniKitCount(HUB_AREAPANELX[0], HUB_EPISODETITLEY, save->minikit_count, 10, phase);
+                Hub_DrawMiniKitCount(HUB_AREAPANELX[0], HUB_EPISODETITLEY, Game.area_save[area_index].minikit_count, 10,
+                                     phase);
             }
-            Hub_DrawImportantBrick(210, HUB_AREAPANELX[2], HUB_EPISODETITLEY, phase, save->red_brick_collected, 1);
+            Hub_DrawImportantBrick(210, HUB_AREAPANELX[2], HUB_EPISODETITLEY, phase,
+                                   Game.area_save[area_index].red_brick_collected, 1);
             Hub_DrawImportantBrick(211, HUB_AREAPANELX[3], HUB_EPISODETITLEY, phase, EpGoldBrickCount,
                                    EpGoldBrickTotal);
             if (Store_IsPackUnlocked(8)) {
@@ -2446,7 +2448,7 @@ void Hub_DrawAreaStats(f32 phase, i32 area_index, i32 mode) {
         return;
     }
 
-    if (__builtin_expect(save->area_complete == 0, 1)) {
+    if (__builtin_expect(Game.area_save[area_index].area_complete == 0, 1)) {
         return;
     }
 
@@ -2456,7 +2458,8 @@ void Hub_DrawAreaStats(f32 phase, i32 area_index, i32 mode) {
     if ((flags & 0x800) != 0) {
         Hub_DrawImportantBrick(251, build_x, HUB_EPISODESUBTITLEY - 0.05f, phase, -1, -1);
     } else if ((flags & 0x4000) != 0) {
-        const i32 gold_count = 1 + (save->true_hero_complete[0] || save->true_hero_complete[1]);
+        const i32 gold_count =
+            1 + (Game.area_save[area_index].true_hero_complete[0] || Game.area_save[area_index].true_hero_complete[1]);
         Hub_DrawImportantBrick(211, -0.20100002f, HUB_EPISODETITLEY, phase, gold_count, 2);
     } else {
         Hub_DrawImportantBrick(211, -0.0f, HUB_EPISODESUBTITLEY + 0.05f, phase, -1, -1);
@@ -2466,7 +2469,10 @@ void Hub_DrawAreaStats(f32 phase, i32 area_index, i32 mode) {
     }
     DrawBuildUpBar(build_x, HUB_EPISODETITLEY + PANEL_MINIKITY - PANEL_MINIKITCOUNTY, 100, 100,
                    NU_SIN_LUT(static_cast<i32>(16384.0f * phase)), 1.0f, 1.0f, 0);
-    NuStrCpy(text, (save->true_hero_complete[0] || save->true_hero_complete[1]) ? "$" : "X");
+    NuStrCpy(text,
+             (Game.area_save[area_index].true_hero_complete[0] || Game.area_save[area_index].true_hero_complete[1])
+                 ? "$"
+                 : "X");
     Text3DEx(text, build_x, HUB_EPISODETITLEY, 1.0f, PANEL_MINIKITCOUNTSCALE, PANEL_MINIKITCOUNTSCALE,
              PANEL_MINIKITCOUNTSCALE, 0, 255, 0, 127, static_cast<u8>(alpha));
 }
@@ -2511,8 +2517,8 @@ void Hub_DrawFreePlaySelect() {
             if (freeplaytime < freeplayduration - 0.1f)
                 fade = 1.0f - freeplaytime / (freeplayduration - 0.1f);
         }
-        i32 model = FreePlayModelList[0].model_id;
         f32 opacity = (MenuPacket.active_player[0] ? 1.0f : DROPINALPHA) * fade;
+        i32 model = FreePlayModelList[0].model_id;
         if (freeplay_time[0] > 0.0f) {
             f32 progress = freeplay_time[0] / 0.75f;
             if (__builtin_expect(freeplay_selected[0] == 0, 0))
@@ -2524,7 +2530,7 @@ void Hub_DrawFreePlaySelect() {
         if (opacity > 0.0f)
             DrawCharIcon(model, -ICONX, STATSPOSY, 0.0f, ICONSIZE, 0xa6, opacity, opacity, 1, NULL);
         if (__builtin_expect(freeplaymode == 1 && MenuPacket.active_player[0] != 0, 0)) {
-            const i32 selected = MenuPacket.player_model[0];
+            const i16 selected = MenuPacket.player_model[0];
             model = Collection_Got(selected) ? selected : -1;
             opacity = MenuPacket.active_player[0] ? 1.0f : DROPINALPHA;
             if (freeplay_time[0] <= 0.0f)
@@ -2544,8 +2550,8 @@ void Hub_DrawFreePlaySelect() {
                     eased =
                         1.0f - (NU_SIN_LUT(static_cast<i32>((1.0f - progress) * 32768.0f + 16384.0f)) + 1.0f) * 0.5f;
                 }
-                x = (-ICONX - base_x) * eased + base_x;
                 size = (COLLECTION_ICONSIZE - base_size) * eased + base_size;
+                x = (-ICONX - base_x) * eased + base_x;
                 y = (STATSPOSY - 0.7f) * eased + 0.7f;
                 if (opacity > 0.0f) {
                     if (freeplay_time[0] > 0.0f || opacity != 1.0f) {
@@ -2864,7 +2870,7 @@ __attribute__((optimize("O2", "tree-vectorize"))) i32 Percent_UpdateHint(HINT_s 
         if (NuVecXZDistSqr(&object->apiobj.position, &PercentHint_TriggerPos, NULL) < 4.0f)
             nearby_players++;
     }
-    if (active_players != nearby_players || active_players <= 0)
+    if (active_players <= 0 || active_players != nearby_players)
         return 0;
     hint->pad_0x05[0] = 4;
     return 1;
@@ -3714,8 +3720,8 @@ void MenuUpdateEpisodes(MENU_s *) {
                 } else if (GamePad[0].pad->digital_buttons_pressed & GAMEPAD_MENUCANCEL) {
                     cancel = true;
                 } else {
-                    const u32 held = GamePad[0].buttons_held | GamePad[0].buttons_released;
                     const u32 pressed = GamePad[0].buttons_pressed | GamePad[0].left_directions;
+                    const u32 held = GamePad[0].buttons_held | GamePad[0].buttons_released;
                     i32 up = pressed & GAMEPAD_DUP, down = pressed & GAMEPAD_DDOWN;
                     i32 left = pressed & GAMEPAD_DLEFT, right = pressed & GAMEPAD_DRIGHT;
                     i32 up_held = held & GAMEPAD_DUP, down_held = held & GAMEPAD_DDOWN;
@@ -4479,10 +4485,9 @@ void Hub_Update(WORLDINFO_s *world) {
     } else {
         i32 selected_episode = -1;
         for (i32 i = 0; static_cast<u16>(HubEpisodeInfo[i].episode) <= 8; ++i) {
-            HUBEPISODEINFO_s &episode = HubEpisodeInfo[i];
-            if (episode.door != NULL &&
-                GizmoGetOutput(world->gizmo_sys, episode.door, static_cast<u16>(episode.flags), 0) != 0) {
-                selected_episode = episode.episode;
+            if (HubEpisodeInfo[i].door != NULL && GizmoGetOutput(world->gizmo_sys, HubEpisodeInfo[i].door,
+                                                                 static_cast<u16>(HubEpisodeInfo[i].flags), 0) != 0) {
+                selected_episode = HubEpisodeInfo[i].episode;
                 break;
             }
         }
@@ -4586,31 +4591,31 @@ void Hub_Update(WORLDINFO_s *world) {
     }
     i32 selected_area = -1;
     for (i32 i = 0; HubAreaInfo[i].area_name != NULL; ++i) {
-        HUBAREAINFO_s &area = HubAreaInfo[i];
-        if (area.area != NULL && area.door != NULL && GizmoGetOutput(world->gizmo_sys, area.door, 1, 0) != 0) {
-            selected_area = area.area->index;
+        if (HubAreaInfo[i].area != NULL && HubAreaInfo[i].door != NULL &&
+            GizmoGetOutput(world->gizmo_sys, HubAreaInfo[i].door, 1, 0) != 0) {
+            selected_area = HubAreaInfo[i].area->index;
             break;
         }
     }
     if (selected_area != -1) {
         for (i32 i = 0; HubAreaInfo[i].area_name != NULL; ++i) {
-            HUBAREAINFO_s &area = HubAreaInfo[i];
-            if (area.door != NULL && area.area != NULL && area.area->index != selected_area) {
-                static_cast<GIZOBSTACLE_s *>(area.door->object)->runtime_flags |= 8;
+            if (HubAreaInfo[i].door != NULL && HubAreaInfo[i].area != NULL &&
+                HubAreaInfo[i].area->index != selected_area) {
+                static_cast<GIZOBSTACLE_s *>(HubAreaInfo[i].door->object)->runtime_flags |= 8;
             }
         }
     } else {
         for (i32 i = 0; HubAreaInfo[i].area_name != NULL; ++i) {
-            HUBAREAINFO_s &area = HubAreaInfo[i];
-            if (area.door == NULL) {
+            if (HubAreaInfo[i].door == NULL) {
                 continue;
             }
-            if (Episode_CountOpenAreas(static_cast<i8>(area.area->episode_index), area.area->index, Game_AreaSave) !=
-                    0 ||
-                (area.bonus_gizmo != NULL && GizmoGetOutput(world->gizmo_sys, area.bonus_gizmo, 0, 0) != 0) ||
-                area.force_open == 1) {
-                static_cast<GIZOBSTACLE_s *>(area.door->object)->runtime_flags &= static_cast<u8>(~8);
-                NuSpecialSetVisibility(&area.lock, 1);
+            if (Episode_CountOpenAreas(static_cast<i8>(HubAreaInfo[i].area->episode_index), HubAreaInfo[i].area->index,
+                                       Game_AreaSave) != 0 ||
+                (HubAreaInfo[i].bonus_gizmo != NULL &&
+                 GizmoGetOutput(world->gizmo_sys, HubAreaInfo[i].bonus_gizmo, 0, 0) != 0) ||
+                HubAreaInfo[i].force_open == 1) {
+                static_cast<GIZOBSTACLE_s *>(HubAreaInfo[i].door->object)->runtime_flags &= static_cast<u8>(~8);
+                NuSpecialSetVisibility(&HubAreaInfo[i].lock, 1);
             }
         }
         static NUVEC minikit_hubpos = {-27.0f, 0.0f, -24.6f};
@@ -4647,12 +4652,11 @@ void Hub_Update(WORLDINFO_s *world) {
         Hub_ResetPanel();
     }
     for (i32 i = 0; HubAreaInfo[i].area_name != NULL; ++i) {
-        HUBAREAINFO_s &area = HubAreaInfo[i];
-        if (area.area == NULL || area.bonus_gizmo_2 == NULL ||
-            GizmoGetOutput(world->gizmo_sys, area.bonus_gizmo_2, 1, 0) == 0) {
+        if (HubAreaInfo[i].area == NULL || HubAreaInfo[i].bonus_gizmo_2 == NULL ||
+            GizmoGetOutput(world->gizmo_sys, HubAreaInfo[i].bonus_gizmo_2, 1, 0) == 0) {
             continue;
         }
-        NUVEC *position = GizmoGetPos(world->gizmo_sys, area.bonus_gizmo_2);
+        NUVEC *position = GizmoGetPos(world->gizmo_sys, HubAreaInfo[i].bonus_gizmo_2);
         if (position == NULL) {
             continue;
         }

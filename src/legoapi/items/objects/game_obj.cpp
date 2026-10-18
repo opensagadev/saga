@@ -341,7 +341,7 @@ static __used__ void SpeederPart_Update(PART_s *part) {
         if ((bike->rider->apiobj.field_0x1f8 & 0x1001) == 0x1001) {
             bike->rider->field_0xefe |= 0x40;
             bike->rider->apiobj.flags_low |= 0x20;
-            bike->rider->field_0xf00 |= 0x20;
+            bike->rider->time_based_update_disabled = 1;
             bike->rider_position.x = SeekLinearF(bike->rider_position.x, camera->mtx.m30, FRAMETIME);
             bike->rider_position.y = SeekLinearF(bike->rider_position.y, camera->mtx.m31 - 2.0f, FRAMETIME * 1.5f);
             bike->rider_position.z = SeekLinearF(bike->rider_position.z, camera->mtx.m32, FRAMETIME);
@@ -834,7 +834,7 @@ void CollideGameObjects(WORLDINFO_s *world) {
             continue;
         }
 
-        const i8 context = object->character_context;
+        const i32 context = object->character_context;
         if ((CInfo[context].flags & 0x8000) != 0 || context == 0x3b || context == 0x3c || context == 0x0f ||
             context == 0x39) {
             continue;
@@ -952,8 +952,8 @@ void GameObjectRotation(GameObject_s *object, i32 mode) {
                 } else {
                     const f32 upper = api.lower_position.y + 3.0f * api.field_0x1dc;
                     if (object->suspension[i].height > upper) {
-                        object->suspension[i].height = upper;
                         object->suspension[i].velocity = vertical_speed;
+                        object->suspension[i].height = upper;
                     }
                 }
             }
@@ -1000,8 +1000,8 @@ void GameObjectRotation(GameObject_s *object, i32 mode) {
     temp_xrot = x;
     temp_zrot = z;
     const bool sliding = (flags & 0x200) != 0 && object->character_context == 0x33;
-    const bool magnet = !sliding && (flags & 0x10000000) != 0 && object->character_context == 0x44;
     const bool grapple = !sliding && object->character_context == 0x46 && object->field_0x7a3 == 0;
+    const bool magnet = !sliding && (flags & 0x10000000) != 0 && object->character_context == 0x44;
     i32 alignment = 0;
     if (object->field_0x1086 == 2 &&
         ((api.character_data->model_flags & 0x100) != 0 || (flags & 0x200000) != 0 || sliding)) {
@@ -1868,7 +1868,9 @@ void UpdateGameObjects(WORLDINFO_s *world) {
             NuVecMtxRotate(&position, &position, &object->vehicle_orientation);
             NuVecAdd(&position, &position, &object->apiobj.position);
         } else {
-            position = object->apiobj.collision_position;
+            position.x = object->apiobj.collision_position.x;
+            position.y = object->apiobj.collision_position.y;
+            position.z = object->apiobj.collision_position.z;
             position.y += 1.5f * object->apiobj.field_0x1e0;
         }
         message = AddGameMsg_Default;
@@ -2939,7 +2941,7 @@ impact:
         DrawBuildUpTime = 1.0f;
         builduptime = 1.0f;
     }
-    if (hearts || coins > 0)
+    if (coins > 0 || hearts)
         AddPickups(coins, hearts, 0, 0, &target->apiobj.collision_position, NULL, 2.0f, -1, 1.0f, 2000000.0f, attacker,
                    !BonusArea && coins < 2500, BonusArea ? 1 : 0, false);
     if (target->torpedo && WORLD->area != SPEEDERCHASE_ADATA && (!WORLD->area || !(WORLD->area->flags & 4)))

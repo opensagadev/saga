@@ -1877,7 +1877,7 @@ extern "C" {
     i32 special_debug;
     i32 nuspecial_const_alpha_enabled;
     i32 nuspecial_const_tint_enabled;
-    i32 nuspecial_draw_state;
+    volatile i32 nuspecial_draw_state;
     i32 nuspecial_vertex_noffsets;
     VARIPTR nuspecial_vertex_offsets;
     NUSPECIALVERTEXSTATES *nuspecial_vertex_states;
@@ -2626,13 +2626,14 @@ i32 global_GobjIsReflectedGeometry;
 i32 global_GobjIsShadowReceive;
 
 u32 rndrstream_nbuffers = 2;
+u32 rndrstream_last_used;
 i32 nurndr_maxstreamsize;
 VARIPTR rndrstream_end;
 VARIPTR rndrstream_free;
 static VARIPTR rndrstream[NURNDR_STREAM_MAX_BUFFERS];
 static i32 rndrstream_buffid;
-static i32 rndrstream_used;     // _ZL15rndrstream_used @0x11b8380
-static i32 rndrstream_max_used; // _ZL19rndrstream_max_used @0x11b8390
+static u32 rndrstream_used;     // _ZL15rndrstream_used @0x11b8380
+static u32 rndrstream_max_used; // _ZL19rndrstream_max_used @0x11b8390
 
 static NUMTL *pZClearMaterial;
 static NUMTL *pAlphaMask;
@@ -3668,9 +3669,7 @@ void NuMotionAccumFilterGen::render() {
     nueffecttex_s *destination = NuFramebufferGetAttachedTex(output, 0, NULL, NULL);
     f32 weights[256], sum = 0.0f;
     for (i32 i = 0; i < frames; ++i) {
-        f32 exponent;
-        memcpy(&exponent, &mode, sizeof(exponent));
-        weights[i] = NuPow(static_cast<f32>(i + 1) / frames, exponent);
+        weights[i] = NuPow(static_cast<f32>(i + 1) / frames, mode);
         sum += weights[i];
     }
     if (frames > 0) {
@@ -3963,12 +3962,12 @@ extern "C" void NuPostEffectMotionBlur(const NUMTX *previous, const NUMTX *curre
     motionFilter->falloff = falloff;
 }
 
-extern "C" void NuPostEffectAccumulationMotionBlur(i32 frames, f32 blend, i32 mode) {
-    if (mainFilter == NULL)
-        return;
-    mainFilter->accumulation_frames = frames;
-    mainFilter->accumulation_blend = blend;
-    mainFilter->accumulation_mode = mode;
+extern "C" void NuPostEffectAccumulationMotionBlur(i32 frames, f32 blend, f32 mode) {
+    if (mainFilter != NULL) {
+        mainFilter->accumulation_frames = frames;
+        mainFilter->accumulation_blend = blend;
+        mainFilter->accumulation_mode = mode;
+    }
     if (motionAccumFilter != NULL) {
         motionAccumFilter->frames = frames;
         motionAccumFilter->blend = blend;
@@ -5983,37 +5982,33 @@ extern "C" {
 
         if (isBitCountTable == 0)
             buildBitCountTable();
-        animation = NuLegacyRelocatePointer(animation, delta);
-        u8 *data = static_cast<u8 *>(animation);
-        void *&name = *reinterpret_cast<void **>(data + 4);
-        name = NuLegacyRelocatePointer(name, delta);
-        void **&chunks = *reinterpret_cast<void ***>(data + 0xc);
-        chunks = static_cast<void **>(NuLegacyRelocatePointer(chunks, delta));
-        if (chunks != NULL) {
-            i32 chunk_count = *reinterpret_cast<i32 *>(data + 8);
-            for (i32 i = 0; i < chunk_count; ++i) {
-                chunks[i] = NuLegacyRelocatePointer(chunks[i], delta);
-                u8 *chunk = static_cast<u8 *>(chunks[i]);
+        nuanimdata_s *data = static_cast<nuanimdata_s *>(NuLegacyRelocatePointer(animation, delta));
+        data->node_name = static_cast<char *>(NuLegacyRelocatePointer(data->node_name, delta));
+        data->chunks = static_cast<nuanimdatachunk_s **>(NuLegacyRelocatePointer(data->chunks, delta));
+        if (data->chunks != NULL) {
+            for (i32 i = 0; i < data->chunk_count; ++i) {
+                data->chunks[i] = static_cast<nuanimdatachunk_s *>(NuLegacyRelocatePointer(data->chunks[i], delta));
+                nuanimdatachunk_s *chunk = data->chunks[i];
                 if (chunk != NULL) {
-                    void **&sets = *reinterpret_cast<void ***>(chunk + 8);
-                    sets = static_cast<void **>(NuLegacyRelocatePointer(sets, delta));
-                    if (sets != NULL) {
-                        i32 set_count = *reinterpret_cast<i32 *>(chunk);
-                        for (i32 j = 0; j < set_count; ++j) {
-                            sets[j] = NuLegacyRelocatePointer(sets[j], delta);
-                            u8 *set = static_cast<u8 *>(sets[j]);
+                    chunk->curve_sets =
+                        static_cast<nuanimcurveset_s **>(NuLegacyRelocatePointer(chunk->curve_sets, delta));
+                    if (chunk->curve_sets != NULL) {
+                        for (i32 j = 0; j < chunk->node_count; ++j) {
+                            chunk->curve_sets[j] =
+                                static_cast<nuanimcurveset_s *>(NuLegacyRelocatePointer(chunk->curve_sets[j], delta));
+                            nuanimcurveset_s *set = chunk->curve_sets[j];
                             if (set != NULL) {
-                                void *&constants = *reinterpret_cast<void **>(set + 4);
-                                constants = NuLegacyRelocatePointer(constants, delta);
-                                void **&curves = *reinterpret_cast<void ***>(set + 8);
-                                curves = static_cast<void **>(NuLegacyRelocatePointer(curves, delta));
-                                if (curves != NULL) {
-                                    for (i32 k = 0; k < *reinterpret_cast<i8 *>(set + 0xc); ++k) {
-                                        curves[k] = NuLegacyRelocatePointer(curves[k], delta);
-                                        u8 *curve = static_cast<u8 *>(curves[k]);
+                                set->constants = static_cast<f32 *>(NuLegacyRelocatePointer(set->constants, delta));
+                                set->curves =
+                                    static_cast<nuanimcurve_s **>(NuLegacyRelocatePointer(set->curves, delta));
+                                if (set->curves != NULL) {
+                                    for (i32 k = 0; k < set->curve_count; ++k) {
+                                        void *relocated = NuLegacyRelocatePointer(set->curves[k], delta);
+                                        set->curves[k] = static_cast<nuanimcurve_s *>(relocated);
+                                        nuanimcurve_s *curve = set->curves[k];
                                         if (curve != NULL) {
-                                            void *&keys = *reinterpret_cast<void **>(curve + 4);
-                                            keys = NuLegacyRelocatePointer(keys, delta);
+                                            curve->keys =
+                                                static_cast<nuanimkey_s *>(NuLegacyRelocatePointer(curve->keys, delta));
                                         }
                                     }
                                 }
@@ -6023,14 +6018,14 @@ extern "C" {
                 }
             }
         }
-        return animation;
+        return data;
     }
 
     void *NuAnimDataLoadBuff(char *path, VARIPTR *buf, VARIPTR *buf_end) {
         buf->addr = ALIGN(buf->addr, 16);
+        const i32 file_size = NuFileLoadBuffer(path, buf->void_ptr, static_cast<i32>(buf_end->addr - buf->addr));
         u8 *file_data = static_cast<u8 *>(buf->void_ptr);
-        const i32 file_size = NuFileLoadBuffer(path, file_data, static_cast<i32>(buf_end->addr - buf->addr));
-        buf->addr += static_cast<usize>(file_size);
+        buf->addr = reinterpret_cast<usize>(file_data) + file_size;
 
         const isize delta = reinterpret_cast<isize>(file_data) - *reinterpret_cast<isize *>(file_data + 4);
         *reinterpret_cast<isize *>(file_data + 4) = delta;
@@ -6425,19 +6420,18 @@ extern "C" {
 }
 
 nuanimdatachunk_s *NuAnimDataChunkCreate(i32 curve_set_count) {
-    NuMemoryManager *memory = NuMemoryGet()->GetThreadMem();
-    u8 *data = static_cast<u8 *>(memory->_BlockAlloc(0x14, 4, 1, "", 0));
-    *reinterpret_cast<i32 *>(data) = curve_set_count;
-    *reinterpret_cast<void **>(data + 4) = NULL;
-    *reinterpret_cast<void **>(data + 8) = NULL;
-    *reinterpret_cast<void **>(data + 0xc) = NULL;
-    *reinterpret_cast<void **>(data + 0x10) = NULL;
+    nuanimdatachunk_s *chunk = static_cast<nuanimdatachunk_s *>(
+        NuMemoryGet()->GetThreadMem()->_BlockAlloc(sizeof(nuanimdatachunk_s), 4, 1, "", 0));
+    chunk->node_count = curve_set_count;
+    chunk->valid_curve_set_count = 0;
+    chunk->curve_sets = NULL;
+    chunk->keys = NULL;
+    chunk->curves = NULL;
 
-    const u32 array_size = static_cast<u32>(curve_set_count) * sizeof(void *);
-    void **curve_sets = static_cast<void **>(memory->_BlockAlloc(array_size, 4, 1, "", 0));
-    *reinterpret_cast<void ***>(data + 8) = curve_sets;
-    memset(curve_sets, 0, array_size);
-    return reinterpret_cast<nuanimdatachunk_s *>(data);
+    chunk->curve_sets = static_cast<nuanimcurveset_s **>(NuMemoryGet()->GetThreadMem()->_BlockAlloc(
+        curve_set_count * sizeof(nuanimcurveset_s *), 4, 1, "", 0));
+    memset(chunk->curve_sets, 0, curve_set_count * sizeof(nuanimcurveset_s *));
+    return chunk;
 }
 
 extern "C" {
@@ -6578,23 +6572,20 @@ extern "C" {
             return;
         }
 
-        u8 *set = static_cast<u8 *>(curve_set);
-        void **curves = *reinterpret_cast<void ***>(set + 8);
-        if (curves != NULL) {
+        nuanimcurveset_s *set = static_cast<nuanimcurveset_s *>(curve_set);
+        if (set->curves != NULL) {
             if (destroy_curves != 0) {
-                const i32 count = *reinterpret_cast<i8 *>(set + 0xc);
-                for (i32 index = 0; index < count; ++index) {
-                    if (curves[index] != NULL) {
-                        NuAnimCurveDestroy(curves[index]);
+                for (i32 index = 0; index < set->curve_count; ++index) {
+                    if (set->curves[index] != NULL) {
+                        NuAnimCurveDestroy(set->curves[index]);
                     }
                 }
             }
-            NU_FREE(curves);
+            NU_FREE(set->curves);
         }
 
-        void *curve_flags = *reinterpret_cast<void **>(set + 4);
-        if (curve_flags != NULL) {
-            NU_FREE(curve_flags);
+        if (set->constants != NULL) {
+            NU_FREE(set->constants);
         }
         NU_FREE(curve_set);
     }
@@ -6602,43 +6593,35 @@ extern "C" {
 }
 
 void NuAnimDataChunkDestroy(nuanimdatachunk_s *chunk) {
-    u8 *data = reinterpret_cast<u8 *>(chunk);
-    const i32 curve_set_count = *reinterpret_cast<i32 *>(data);
-    void **curve_sets = *reinterpret_cast<void ***>(data + 8);
-    const i32 destroy_curves = *reinterpret_cast<void **>(data + 0x10) == NULL;
+    const i32 destroy_curves = chunk->curves == NULL;
 
-    for (i32 index = 0; index < curve_set_count; ++index) {
-        if (curve_sets[index] != NULL) {
-            NuAnimCurveSetDestroy(curve_sets[index], destroy_curves);
+    for (i32 index = 0; index < chunk->node_count; ++index) {
+        if (chunk->curve_sets[index] != NULL) {
+            NuAnimCurveSetDestroy(chunk->curve_sets[index], destroy_curves);
         }
     }
 
-    void *curve_data = *reinterpret_cast<void **>(data + 0xc);
-    if (curve_data != NULL) {
-        NuMemoryGet()->GetThreadMem()->BlockFree(curve_data, 0);
+    if (chunk->keys != NULL) {
+        NuMemoryGet()->GetThreadMem()->BlockFree(chunk->keys, 0);
     }
-    void *shared_data = *reinterpret_cast<void **>(data + 0x10);
-    if (shared_data != NULL) {
-        NuMemoryGet()->GetThreadMem()->BlockFree(shared_data, 0);
+    if (chunk->curves != NULL) {
+        NuMemoryGet()->GetThreadMem()->BlockFree(chunk->curves, 0);
     }
-    if (curve_sets != NULL) {
-        NuMemoryGet()->GetThreadMem()->BlockFree(curve_sets, 0);
+    if (chunk->curve_sets != NULL) {
+        NuMemoryGet()->GetThreadMem()->BlockFree(chunk->curve_sets, 0);
     }
     NuMemoryGet()->GetThreadMem()->BlockFree(chunk, 0);
 }
 
 extern "C" {
     void NuAnimDataDestroy(void *animation) {
-        u8 *data = static_cast<u8 *>(animation);
-        const i32 chunk_count = *reinterpret_cast<i32 *>(data + 8);
-        nuanimdatachunk_s **chunks = *reinterpret_cast<nuanimdatachunk_s ***>(data + 0xc);
-        for (i32 index = 0; index < chunk_count; ++index) {
-            NuAnimDataChunkDestroy(chunks[index]);
+        nuanimdata_s *data = static_cast<nuanimdata_s *>(animation);
+        for (i32 index = 0; index < data->chunk_count; ++index) {
+            NuAnimDataChunkDestroy(data->chunks[index]);
         }
 
-        void *name = *reinterpret_cast<void **>(data + 4);
-        if (name != NULL) {
-            NU_FREE(name);
+        if (data->node_name != NULL) {
+            NU_FREE(data->node_name);
         }
         NU_FREE(animation);
     }
@@ -6908,9 +6891,9 @@ extern "C" void *NuAnimData2LoadBuffEx(char *path, VARIPTR *buf, VARIPTR *buf_en
     if (static_cast<i32>(static_cast<u32 *>(data)[1]) > static_cast<i32>(0x414e4934)) {
         data = NuPtrBlockFix(data);
         buf->void_ptr = data;
-        buf->addr += static_cast<usize>(file_size);
         *result = data;
-        return data;
+        buf->addr += static_cast<usize>(file_size);
+        return *result;
     }
     *result = data;
     buf->addr += static_cast<usize>(file_size);
@@ -6973,13 +6956,16 @@ extern "C" void *NuAnimData2LoadBuffFromPAK(void *data, i32 file_size) {
         }
 
         u8 *lod_animation = static_cast<u8 *>(animation);
-        while (lod-- != 0) {
-            const u16 next_lod = *reinterpret_cast<u16 *>(lod_animation + 0x14);
+        if (lod == 0) {
+            return lod_animation;
+        }
+        do {
+            const i32 next_lod = *reinterpret_cast<u16 *>(lod_animation + 0x14);
             if (next_lod == 0) {
                 return NULL;
             }
             lod_animation += next_lod;
-        }
+        } while (--lod != 0);
         return lod_animation;
     }
 
@@ -9072,8 +9058,8 @@ extern "C" i32 NuSpecialExistsFn(void *special_ptr) {
 
 extern "C" void NuSpecialMtlMap(i32 count, NUMTL **materials) {
     if (count == 0) {
-        nurndr_forced_mtl_table = NULL;
         nuspecial_draw_state &= ~NUSPECIAL_DRAW_MATERIAL_MAP;
+        nurndr_forced_mtl_table = NULL;
         return;
     } else {
         nurndr_nforced_mtls = count;
@@ -10969,7 +10955,8 @@ extern "C" void NuTexAnimRemoveList(void *anim) {
                 ntal_first = node->next;
             node->next = ntal_free;
             ntal_free = node;
-            break;
+            NuThreadCriticalSectionEnd(g_texAnimCriticalSection);
+            return;
         }
     }
     NuThreadCriticalSectionEnd(g_texAnimCriticalSection);
@@ -11019,15 +11006,15 @@ extern "C" nutexanim_s *NuTexAnimCreate(VARIPTR *buffer, nutexanimprog_s *progra
     nutexanim_s *animation;
     if (buffer != NULL) {
         animation = reinterpret_cast<nutexanim_s *>(ALIGN(buffer->addr, 4));
-        buffer->addr = reinterpret_cast<usize>(animation) + sizeof(nutexanim_s) + texture_count * sizeof(u16);
+        buffer->addr = reinterpret_cast<usize>(reinterpret_cast<u16 *>(animation + 1) + texture_count);
     } else {
         animation =
             static_cast<nutexanim_s *>(NU_ALLOC(sizeof(nutexanim_s) + texture_count * sizeof(u16), 4, 1, "", 0));
     }
     animation->texture_count = texture_count;
     animation->material = material;
-    animation->next = NULL;
     animation->previous = NULL;
+    animation->next = NULL;
     animation->name = NULL;
     animation->texture_ids = reinterpret_cast<u16 *>(animation + 1);
     memcpy(animation->texture_ids, texture_ids, texture_count * sizeof(u16));
@@ -11951,7 +11938,7 @@ extern "C" void NuTextureBlendEffect(i32 arg0, i32 arg1, NUVEC4 *parameters) {
         currentScene.motion_falloff = falloff;
     }
 
-    void NuAccumulationMotionBlurParams(i32 frames, f32 blend, i32 mode) {
+    void NuAccumulationMotionBlurParams(i32 frames, f32 blend, f32 mode) {
         currentScene.accumulation_blend = blend;
         currentScene.unknown_174 = 1;
         currentScene.accumulation_frames = frames;
@@ -11962,7 +11949,7 @@ extern "C" void NuTextureBlendEffect(i32 arg0, i32 arg1, NUVEC4 *parameters) {
     // Rendering / materials / effects (host has GL paths elsewhere)
     // ---------------------------------------------------------------------------
 
-    void NuAccumulationMotionBlurEffect(i32 frames, f32 blend, i32 mode) {
+    void NuAccumulationMotionBlurEffect(i32 frames, f32 blend, f32 mode) {
         currentScene.accumulation_blend = blend;
         currentScene.unknown_174 = 1;
         currentScene.unknown_178 = 1;
@@ -13550,7 +13537,8 @@ extern "C" void NuTimeBarSlotSetEx(i32 set, i32 slot, i32 value, const char *nam
 }
 
 extern "C" i32 NuTimeBarSlotLastValue(i32 set, i32 slot) {
-    u32 elapsed = static_cast<u32>(NuTimeBarSlotLastValueMicroseconds(set, slot));
+    TimeBarSet *timebar = NuTimeBar_SetList[set + 1];
+    u32 elapsed = static_cast<u32>(timebar->accumulators[timebar->toggle_flags[slot]][slot]);
     return static_cast<i32>((static_cast<f32>(elapsed) * 60.0f / 1000000.0f) * 262.5f);
 }
 
@@ -13994,9 +13982,6 @@ extern "C" i32 NuPortalClipTestBox(NUVEC *center, NUVEC *extent, NUFRUSTRUM *fru
         if (scene == NULL || scene->max_portals == 0) {
             return 1;
         }
-        if (scene->num_portal_frusta <= 0) {
-            return 0;
-        }
         for (i32 i = 0; i < scene->num_portal_frusta; ++i) {
             if (scene->portal_frusta[i]->room_id == room_id) {
                 return 1;
@@ -14022,13 +14007,17 @@ extern "C" i32 NuPortalClipTestBox(NUVEC *center, NUVEC *extent, NUFRUSTRUM *fru
     }
 
     i32 NuPortalClipTest(NUGSCN *scene, NUVEC *position, f32 radius, i16 room_id) {
-        if (scene->max_portals == 0 || scene->camera_room == room_id) {
+        if (scene->max_portals == 0 || room_id == scene->camera_room) {
             return 1;
         }
         for (i32 i = 0; i < scene->num_portal_frusta; ++i) {
             NUFRUSTRUM *frustum = scene->portal_frusta[i];
             if (frustum != NULL && frustum->room_id == room_id) {
-                NUPORTALSPHERE sphere = {*position, radius};
+                NUPORTALSPHERE sphere;
+                sphere.center.x = position->x;
+                sphere.center.y = position->y;
+                sphere.center.z = position->z;
+                sphere.radius = radius;
                 i32 result = clipTestSphere(&sphere, frustum);
                 if (result != 0) {
                     return result;
@@ -16386,13 +16375,15 @@ extern "C" {
 // original 0x2e6e90 — rotate to the next stream buffer, recording the high
 // watermark. The infinite-loop tail is the original's buffer-overflow trap.
 extern "C" void NuRndrSwapStreamBuffers(void) {
-    i32 last_used;
+    u32 last_used;
 
-    last_used = (i32)((i64)rndrstream_free.addr - (i64)rndrstream[rndrstream_buffid].addr);
-    if (rndrstream_max_used < last_used) {
+    last_used = rndrstream_free.addr - rndrstream[rndrstream_buffid].addr;
+    rndrstream_used = last_used;
+    rndrstream_last_used = last_used;
+    if (last_used > rndrstream_max_used) {
         rndrstream_max_used = last_used;
     }
-    if (last_used > nurndr_maxstreamsize) {
+    if (static_cast<u32>(nurndr_maxstreamsize) < last_used) {
         for (;;) {
         }
     }
@@ -16402,7 +16393,6 @@ extern "C" void NuRndrSwapStreamBuffers(void) {
     }
     rndrstream_free.addr = ALIGN(rndrstream[rndrstream_buffid].addr, 16);
     rndrstream_end.addr = rndrstream[rndrstream_buffid].addr + nurndr_maxstreamsize;
-    rndrstream_used = last_used;
 }
 
 }
@@ -17686,15 +17676,13 @@ extern "C" void NuSpecialSetDrawPos(nuhspecial_s *special, NUVEC *pos) {
         }
         NuSpecialLegacyRuntimeLayout *legacy = static_cast<NuSpecialLegacyRuntimeLayout *>(handle->special);
         if (legacy != NULL) {
-            if (legacy->instance != NULL) {
-                *reinterpret_cast<NUMTX *>(legacy->instance) = *mtx;
-            }
+            *reinterpret_cast<NUMTX *>(legacy->instance) = *mtx;
             return;
         }
-        NuSpecialBoundsDisplayLayout *display = static_cast<NuSpecialBoundsDisplayLayout *>(handle->display_special);
-        if (display != NULL) {
-            display->draw_mtx = *mtx;
-            display->flags |= 0x400;
+        static_cast<NuSpecialBoundsDisplayLayout *>(handle->display_special)->draw_mtx = *mtx;
+        if ((handle->scene->display_list->instance_visibility_enabled & 1) != 0) {
+            NuDisplayListUpdateSpecial(static_cast<nuhspecial_s *>(special));
+            static_cast<NuSpecialBoundsDisplayLayout *>(handle->display_special)->flags |= 0x400;
         }
     }
 
@@ -19863,12 +19851,27 @@ extern "C" void NuMtlRegisterForOverride(NUMTL *original, NUVERTEXDESCRIPTOR *de
 }
 
 extern "C" NUMTL *NuMtlFindVariantMtl(NUMTL *source, NUMTL *original) {
-    NUMTL *material = FindOverrideMaterial(original, source->shader_desc.vtx_desc);
-    if (material != NULL) {
-        return material;
+    NULNKHDR *node;
+    MTL_OVERRIDE_RECORD *entry;
+
+    for (node = NuLstGetNext(g_overrideList, NULL); node != NULL; node = NuLstGetNext(g_overrideList, node)) {
+        entry = reinterpret_cast<MTL_OVERRIDE_RECORD *>(node);
+        if (original == entry->original &&
+            entry->material->shader_desc.vtx_desc.flags == source->shader_desc.vtx_desc.flags) {
+            return entry->material;
+        }
     }
+
     NuMtlRegisterForOverride(original, &source->shader_desc.vtx_desc, 1);
-    return FindOverrideMaterial(original, source->shader_desc.vtx_desc);
+
+    const NUVERTEXDESCRIPTOR descriptor = source->shader_desc.vtx_desc;
+    for (node = NuLstGetNext(g_overrideList, NULL); node != NULL; node = NuLstGetNext(g_overrideList, node)) {
+        entry = reinterpret_cast<MTL_OVERRIDE_RECORD *>(node);
+        if (entry->original == original && entry->material->shader_desc.vtx_desc.flags == descriptor.flags) {
+            return entry->material;
+        }
+    }
+    return NULL;
 }
 
     i32 NuDisplayListRndrSpecial(nuhspecial_s *special_handle, NUMTX *mtx, i32 skinned, NUMTX *skin_matrices,
@@ -21649,16 +21652,16 @@ extern "C" i32 NuTexResolveReference(NUGSCN *scene, i32 tex_id) {
     }
 
     const i32 reference_index = tex_id & 0x3fff;
-    NUNATIVETEX *reference = scene->textures[reference_index];
     i32 newest_texture_id = 0;
     i32 newest_texture_order = 0;
 
-    for (i32 index = 0; index < max_textures; ++index) {
+    for (u32 index = 0; index < static_cast<u32>(max_textures); ++index) {
         NUNATIVETEX *texture = texture_list[index];
         if (texture == NULL || texture->ref_count < 0) {
             continue;
         }
 
+        NUNATIVETEX *reference = scene->textures[reference_index];
         bool checksum_matches = true;
         for (i32 byte = 0; byte < 16; ++byte) {
             if (texture->checksum[byte] != reference->checksum[byte]) {
@@ -21964,8 +21967,8 @@ extern "C" void NuGScnRemove(nugscn_s *scene) {
     }
 
     if (scene->additional_scenes != nullptr) {
-        for (NUGSCN **additional = scene->additional_scenes; *additional != nullptr; ++additional) {
-            NuDisplaySceneDestroy((*additional)->display_list);
+        for (i32 i = 0; scene->additional_scenes[i] != nullptr; ++i) {
+            NuDisplaySceneDestroy(scene->additional_scenes[i]->display_list);
         }
     }
     NuDisplaySceneDestroy(scene->display_list);

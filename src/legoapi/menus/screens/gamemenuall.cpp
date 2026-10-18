@@ -1287,7 +1287,7 @@ void MenuUpdateSaving(MENU_s *) {
     if (memcard_saveneeded != 0) {
         memcard_savemessage_delay = 1.0f;
         memcard_saveresult_delay = 1.0f;
-        if (memcard_cardchanged != 0 || saveload_cardtype == -1) {
+        if (saveload_cardtype == -1 || memcard_cardchanged != 0) {
             memcard_saveneeded = 0;
             memcard_savefailed = 1;
         }
@@ -2337,7 +2337,7 @@ extern "C" {
         } else {
             if (saveload_status == 1 && saveload_cardtype == 2 && saveload_cardformatted != 0) {
                 memcard_savemessage_delay = 1.5f;
-                if (memcard_savedatabuffer == NULL || memcard_savedata == NULL || memcard_savedatasize <= 0) {
+                if (memcard_savedatasize <= 0 || memcard_savedatabuffer == NULL || memcard_savedata == NULL) {
                     memcard_saveneeded = 0;
                     memcard_savestarted = 0;
                     memcard_savefailed = 1;
@@ -2388,10 +2388,10 @@ extern "C" {
             }
         } else if (memcard_formatting != 0 && saveload_status == 3) {
             memcard_formatting = 0;
-            if (saveload_error == 0)
-                memcard_justformatted = 1;
-            else
+            if (saveload_error != 0)
                 memcard_formatfailed = 1;
+            else
+                memcard_justformatted = 1;
         }
     }
 
@@ -2661,7 +2661,7 @@ f32 TextPrintSubstring(unsigned char *text, f32 x, f32 y, f32 z, f32 x_scale, f3
     VUFNT *font;
     f32 relative_scale;
     f32 pulse;
-    if (button_font == 0 || QFont2DButtons == nullptr) {
+    if (QFont2DButtons == nullptr || button_font == 0) {
         font = base_font;
         pulse = 1.0f;
         relative_scale = 1.0f;
@@ -2818,7 +2818,7 @@ extern "C" {
             }
             const bool next_button = decoded[i] == 0xd4 && decoded[i + 1] >= 0xb1 && decoded[i + 1] <= 0xbf;
             if (next_button) {
-                if (!button_font && count != 0) {
+                if (count != 0 && !button_font) {
                     fragment[count] = 0;
                     x += TextPrintSubstring(fragment, x, draw_y, z, draw_x_scale, draw_y_scale, current_rgba, 0);
                     count = 0;

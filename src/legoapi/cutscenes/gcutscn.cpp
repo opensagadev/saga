@@ -161,7 +161,7 @@ static inline __attribute__((always_inline)) void NuGCutSceneFixPtrs_Title(NUGCU
         if (system->rigids != NULL) {
             // Retail unswitches this loop on anim_delta.
             if (__builtin_expect(anim_delta != 0, 1)) {
-                for (i32 i = 0; i < system->count; ++i) {
+                for (u32 i = 0; i < system->count; ++i) {
                     NUGCUTRIGID_s *rigid = &system->rigids[i];
                     if (rigid->name != NULL) {
                         rigid->name = reinterpret_cast<char *>(reinterpret_cast<isize>(rigid->name) +
@@ -199,7 +199,7 @@ static inline __attribute__((always_inline)) void NuGCutSceneFixPtrs_Title(NUGCU
                     }
                 }
             } else {
-                for (i32 i = 0; i < system->character_count; ++i) {
+                for (u32 i = 0; i < system->character_count; ++i) {
                     NUGCUTCHAR_s *character = &system->characters[i];
                     if (character->name != NULL) {
                         character->name = reinterpret_cast<char *>(reinterpret_cast<isize>(character->name) +
@@ -223,7 +223,7 @@ static inline __attribute__((always_inline)) void NuGCutSceneFixPtrs_Title(NUGCU
         if (cutscene->version > 3) {
             NUGCUT_RELOCATE(cutscene->character_animations, cutscene->string_delta);
             if (system->characters != NULL && cutscene->character_animations != NULL) {
-                for (i32 i = 0; i < system->character_count; ++i) {
+                for (u32 i = 0; i < system->character_count; ++i) {
                     NUGCUTCHARANIM_s *animation = &cutscene->character_animations[i];
                     if (animation->animation != NULL) {
                         animation->animation =
@@ -819,12 +819,13 @@ extern "C" {
             const CutSceneTriggerNameTable *table =
                 reinterpret_cast<const CutSceneTriggerNameTable *>(static_cast<usize>(flags));
             for (i32 i = 0; i < trigger_system->event_count; ++i) {
-                NUGCUTTRIGGEREVENT_s *event = &trigger_system->events[i];
-                // The event's target index is the low 16 bits of field_00 (read back as i16 elsewhere).
-                u16 *target_index = reinterpret_cast<u16 *>(&event->field_00);
+                // The &trigger_system->events[i]'s target index is the low 16 bits of field_00 (read back as i16
+                // elsewhere).
+                u16 *target_index = reinterpret_cast<u16 *>(&trigger_system->events[i].field_00);
                 for (i32 j = 0; j < table->count; ++j) {
                     *target_index = 0xffff;
-                    if (NuStrICmp(static_cast<char *>(event->field_04), table->entries[j].name) == 0) {
+                    if (NuStrICmp(static_cast<char *>(trigger_system->events[i].field_04), table->entries[j].name) ==
+                        0) {
                         *target_index = static_cast<u16>(j);
                         break;
                     }
@@ -989,8 +990,8 @@ extern "C" {
                 buf->void_ptr = character_instance->characters + character_system->character_count;
                 memset(character_instance->characters, 0, character_system->character_count * sizeof(instNUGCUTCHAR_s));
                 for (i32 i = 0; i < character_system->character_count; ++i) {
-                    NUGCUTCHAR_s *character = &character_system->characters[i];
                     instNUGCUTCHAR_s *inst_character = &character_instance->characters[i];
+                    NUGCUTCHAR_s *character = &character_system->characters[i];
                     inst_character->field_16 = 0xff;
                     inst_character->field_15 = 0xff;
                     if ((character->flags & 2) != 0) {
@@ -1019,18 +1020,17 @@ extern "C" {
                 for (i32 i = 0; i < locator_system->locator_count; ++i) {
                     NUGCUTLOCATOR_s *locator = &locator_system->locators[i];
                     NUGCUTLOCATORTYPE_s *type = &locator_system->types[locator->type_index];
-                    instNUGCUTLOCATOR_s *inst_locator = &locator_instance->locators[i];
                     if ((type->flags & 1) != 0) {
                         if ((locator->flags & 0x20) != 0) {
-                            inst_locator->effect_handle = -1;
+                            locator_instance->locators[i].effect_handle = -1;
                         }
                     } else if ((type->flags & 2) != 0) {
                     } else if ((type->flags & 0x10) != 0) {
-                        inst_locator->effect_handle = -1;
+                        locator_instance->locators[i].effect_handle = -1;
                     } else if ((type->flags & 8) != 0) {
                         buf->addr = ALIGN(buf->addr, 4);
                         void *effect = buf->void_ptr;
-                        inst_locator->effect_handle = static_cast<i32>(reinterpret_cast<usize>(effect));
+                        locator_instance->locators[i].effect_handle = static_cast<i32>(reinterpret_cast<usize>(effect));
                         buf->addr += 0x18;
                         memset(effect, 0, 0x18);
                         if (locator->field_5b != 0) {
@@ -1039,7 +1039,7 @@ extern "C" {
                     } else if ((type->flags & 4) != 0) {
                         buf->addr = ALIGN(buf->addr, 0x10);
                         void *effect = buf->void_ptr;
-                        inst_locator->effect_handle = static_cast<i32>(reinterpret_cast<usize>(effect));
+                        locator_instance->locators[i].effect_handle = static_cast<i32>(reinterpret_cast<usize>(effect));
                         buf->addr += 0x10;
                         memset(effect, 0, 0x10);
                     }
@@ -1092,7 +1092,7 @@ extern "C" {
 
     void instNuGCutSceneStop(instNUGCUTSCENE_s *instance) {
         instance->flags_88 &= ~6;
-        instance->flags_89 &= ~0x10;
+        instance->finished = 0;
         if ((instance->flags_8a & 4) != 0) {
             instNUGCUTCHARSYS_s *runtime = instance->character_instance;
             if (runtime != NULL) {
@@ -1547,7 +1547,7 @@ void NewCopyAnims(instNUGCUTSCENE_s *instance) {
     NUGCUTCHARSYS_s *destination_characters = destination->character_system;
     NUGCUTCHARSYS_s *source_characters = source->character_system;
     if (destination_characters != NULL && destination_characters->character_count != 0) {
-        for (i32 i = 0; i < destination_characters->character_count; ++i) {
+        for (u32 i = 0; i < destination_characters->character_count; ++i) {
             nuanimdata2_s *animation = destination_characters->characters[i].animation;
             nuanimdata2_s *face_animation = destination_characters->characters[i].face_animation;
             nuanimdata2_s *extra_animation = destination_characters->characters[i].extra_animation;
@@ -1819,20 +1819,20 @@ static void instNuGCutCamSysUpdate(instNUGCUTSCENE_s *instance, float frame) {
     }
 
     CameraDOFHack = 2;
-    NUGCUTCAMERA_s *camera = &system->cameras[camera_index];
     instNUGCUTCAMSTATE_s *camera_state = &camera_instance->camera_states[camera_index];
     CutSceneCameraCTRL = 1;
-    if ((camera->flags & 1) == 0 || camera->animation_node >= NuAnimNumNodes(system->animation)) {
-        cutscenecammtx = camera->base_matrix;
+    if ((system->cameras[camera_index].flags & 1) == 0 ||
+        system->cameras[camera_index].animation_node >= NuAnimNumNodes(system->animation)) {
+        cutscenecammtx = system->cameras[camera_index].base_matrix;
     } else {
         if (static_cast<u8>(instance->cutscene->version) > 4 && system->focus_animation != NULL &&
             *reinterpret_cast<u32 *>(system->focus_animation) - ANI3_MAGIC_VERSION_4 < 2) {
-            f32 *values =
-                NuAnimCurveExtractAllNodeCurves_3(reinterpret_cast<ani3_animheader_s *>(system->focus_animation),
-                                                  camera->animation_node, instance->render_frame, NULL);
+            f32 *values = NuAnimCurveExtractAllNodeCurves_3(
+                reinterpret_cast<ani3_animheader_s *>(system->focus_animation),
+                system->cameras[camera_index].animation_node, instance->render_frame, NULL);
             cutscenecam_fstop = values[2];
             cutscenecam_focalLength = values[0] * 1.3f;
-            if ((camera->field_43 & 2) != 0) {
+            if ((system->cameras[camera_index].field_43 & 2) != 0) {
                 cutscenecam_focusDistance = values[1];
             } else {
                 if (system->focus_state_animation != NULL && camera_instance->focus_index >= 0) {
@@ -1856,7 +1856,8 @@ static void instNuGCutCamSysUpdate(instNUGCUTSCENE_s *instance, float frame) {
         const u32 animation_magic = *reinterpret_cast<u32 *>(system->animation);
         if (animation_magic - ANI3_MAGIC_VERSION_4 < 2) {
             NuAnimCurve2SetApplyToMatrix_3(reinterpret_cast<ani3_animheader_s *>(system->animation),
-                                           camera->animation_node, instance->render_frame, &cutscenecammtx);
+                                           system->cameras[camera_index].animation_node, instance->render_frame,
+                                           &cutscenecammtx);
         }
     }
 
@@ -2969,7 +2970,7 @@ static void instNuGCutRigidSysRender(instNUGCUTSCENE_s *instance, float frame, i
     NUGCUTRIGIDSYS_s *system = cutscene->rigid_system;
     instNUGCUTRIGIDSYS_s *rigid_instance = instance->rigid_instance;
     u8 visible;
-    const u16 count = system->count;
+    const i32 count = system->count;
 
     for (i32 i = 0; i < count; ++i) {
         NUGCUTRIGID_s *rigid = &system->rigids[i];
@@ -3553,9 +3554,8 @@ extern "C" {
         }
         f32 count = 0.0f;
         for (i32 i = 0; i < instance->cutscene->rigid_system->count; ++i) {
-            instNUGCUTRIGID_s *rigid = &instance->rigid_instance->rigids[i];
-            if (NuSpecialExistsFn(rigid) != 0) {
-                NUVEC *position = NuSpecialGetPos(rigid);
+            if (NuSpecialExistsFn(&instance->rigid_instance->rigids[i]) != 0) {
+                NUVEC *position = NuSpecialGetPos(&instance->rigid_instance->rigids[i]);
                 out->x += position->x;
                 out->y += position->y;
                 out->z += position->z;
@@ -3615,8 +3615,8 @@ NUGCUTSCENE_s *RelocateCutScene(NUGCUTSCENE_s *source, variptr_u *buffer) {
                 ? reinterpret_cast<char *>(reinterpret_cast<isize>(cutscene->strings) + cutscene->string_delta)
                 : NULL;
         if (cutscene->camera_system != NULL) {
-            isize data_delta = cutscene->string_delta;
             const i32 version = cutscene->version & 0xff;
+            isize data_delta = cutscene->string_delta;
             cutscene->camera_system =
                 reinterpret_cast<NUGCUTCAMERASYS_s *>(reinterpret_cast<isize>(cutscene->camera_system) + data_delta);
             NUGCUTCAMERASYS_s *system = cutscene->camera_system;

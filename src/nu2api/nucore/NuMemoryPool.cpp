@@ -477,12 +477,11 @@ NuMemoryPool::~NuMemoryPool() {
     if (m_firstPool == this) {
         m_firstPool = next;
     } else {
-        NuMemoryPool *previous = m_firstPool;
-        while (previous != NULL && previous->next != this) {
-            previous = previous->next;
-        }
-        if (previous != NULL) {
-            previous->next = next;
+        for (NuMemoryPool *previous = m_firstPool; previous != NULL; previous = previous->next) {
+            if (previous->next == this) {
+                previous->next = next;
+                break;
+            }
         }
     }
     m_globalCriticalSection.Unlock();

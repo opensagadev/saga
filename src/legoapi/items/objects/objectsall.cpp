@@ -327,10 +327,10 @@ static inline void edpartSavePath(char *path, char *backup, bool level) {
         __builtin_memcpy(name, "part", 5);
     else
         strcpy(name, save_name);
-    if (!save_extension[0])
-        __builtin_memcpy(extension, "par", 4);
-    else
+    if (save_extension[0])
         strcpy(extension, save_extension);
+    else
+        __builtin_memcpy(extension, "par", 4);
     sprintf(path, "%s\\%s.%s", directory, name, extension);
     sprintf(backup, "%s\\%s.%s.bak", directory, name, extension);
 }
@@ -2332,13 +2332,12 @@ static void edpartPartIndexMenu(eduimenu_s *menu) {
     eduiMenuAddItem(edpart_partindex_menu, eduiItemCheckCreate(static_cast<usize>(-1), edblack, selected == -1, 1,
                                                                edpartChangePartIndex, "None"));
     for (i32 index = 0; index < 128; ++index) {
-        part_type_s *type = &part_types[index];
-        if (__builtin_expect(type->name[0] == '\0' || type->field_b3 != edpart_part_list, 0))
+        if (__builtin_expect(part_types[index].name[0] == '\0' || part_types[index].field_b3 != edpart_part_list, 0))
             continue;
         bool current_type = index == edpart_nearest_emit->effect_id;
-        eduiitem_s *item =
-            eduiItemCheckCreate(index, current_type ? edgrey : edblack, !current_type && index == selected,
-                                current_type ? 0 : 1, current_type ? NULL : edpartChangePartIndex, type->name);
+        eduiitem_s *item = eduiItemCheckCreate(index, current_type ? edgrey : edblack,
+                                               !current_type && index == selected, current_type ? 0 : 1,
+                                               current_type ? NULL : edpartChangePartIndex, part_types[index].name);
         eduiMenuAddItem(edpart_partindex_menu, item);
         if (index == selected)
             edpart_partindex_menu->selected = edui_last_item;
@@ -2877,8 +2876,8 @@ void edpartHighlightNearest() {
             edbitsDrawDiagonalCross(destination.x, destination.y, destination.z, 0.05f, 0xff808080, edpart_mtl);
         }
     } else if (edpart_nearest != -1) {
-        const NUVEC &position = part_emits[edpart_nearest].position;
-        edbitsDrawCube(position.x, position.y, position.z, 0.5f, 0.5f, 0.5f, 0, 0, 0, 0, 0, 0xffffffff, edpart_mtl);
+        edbitsDrawCube(part_emits[edpart_nearest].position.x, part_emits[edpart_nearest].position.y,
+                       part_emits[edpart_nearest].position.z, 0.5f, 0.5f, 0.5f, 0, 0, 0, 0, 0, 0xffffffff, edpart_mtl);
     }
 }
 
@@ -4451,7 +4450,7 @@ void edpartDoInput(nupad_s *pad) {
                 edpartPlace(edpart_nearest, &edpart_cam_pos);
         }
         if (pad->digital_buttons & 0x400) {
-            if (!edpart_copy_mode && edpart_nearest != -1)
+            if (edpart_nearest != -1 && !edpart_copy_mode)
                 edpartPlace(edpart_nearest, &edpart_cam_pos);
         }
         if (pad->digital_buttons_pressed & 0x10) {

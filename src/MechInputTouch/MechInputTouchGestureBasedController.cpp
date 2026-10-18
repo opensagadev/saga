@@ -871,9 +871,9 @@ void MechInputTouchGestureBasedController::ProcessAutoJumpWhenStuck(GameObject_s
     if (!(GameShadow(player, &probe, 2.0f, -1) > player->apiobj.position.y + 0.1f)) {
         return;
     }
-    NUVEC previous_velocity = player->apiobj.velocity;
     f32 speed = *reinterpret_cast<f32 *>(reinterpret_cast<u8 *>(player->apiobj.character_data->player_config) + 0x18);
     NUVEC velocity = {intended.x * speed, intended.y * speed, intended.z * speed};
+    NUVEC previous_velocity = player->apiobj.velocity;
     NUVEC previous_target_velocity = player->target_velocity;
     player->apiobj.velocity = velocity;
     player->target_velocity = velocity;

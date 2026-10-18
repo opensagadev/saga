@@ -1669,11 +1669,10 @@ void ResetAICreature(GameObject_s *object, AISYS_s *system) {
     object->ai.reset_mode = AI_CREATURE_RESET_ACTIVE;
 
     if (object->ai.group != NULL) {
-        AIGROUP *group = object->ai.group;
-        group->member_is_alive |= static_cast<u32>(object->ai.group_member_index < 32)
-                                  << object->ai.group_member_index;
+        object->ai.group->member_is_alive |= static_cast<u32>(object->ai.group_member_index < 32)
+                                             << object->ai.group_member_index;
 
-        AIROW &group_row = group->rows[object->ai.group_row];
+        AIROW &group_row = object->ai.group->rows[object->ai.group_row];
         const u8 member_column = object->ai.group_member_index - creature.count_across * object->ai.group_row;
         group_row.is_alive |= static_cast<u8>(static_cast<u32>(member_column < 8) << member_column);
         if (object->ai.group_column == 0) {
@@ -1878,12 +1877,11 @@ i32 NewPlayerCharacter(GameObject_s *object, i32 id, i32 old_id, i32) {
     const f32 viewdistance = data->viewdistance;
     const f32 heardistance = data->heardistance;
     const f32 maxviewheight = data->maxviewheight;
-    const f32 minviewheight = data->minviewheight;
     const u32 flags_090_bit17 = (object->apiobj.character_data->game_character->flags_090 >> 17) & 1;
     object->apiobj.viewdistance = viewdistance;
     object->apiobj.heardistance = heardistance;
     object->apiobj.maxviewheight = maxviewheight;
-    object->apiobj.minviewheight = minviewheight;
+    object->apiobj.minviewheight = data->minviewheight;
     object->field_0xf01 = (object->field_0xf01 & ~8) | (flags_090_bit17 << 3);
     if (object->id == id_MOSEISLEYCITIZEN) {
         SetLayers_MOSEISLEYCITIZEN(&object->field_0x1054);
@@ -2513,16 +2511,15 @@ void MovePlayer(GameObject_s *object) {
                 if (0.2f > magnitude) {
                     pad->input_magnitude = 0.0f;
                 } else {
-                    GAMECHARACTERDATA *data = api.character_data->game_character;
                     if ((api.character_data->model_flags & 0x20) != 0 &&
                         (api.field_0x27c == -1 ? object->current_hp <= 2 : object->field_0xe38 <= 2)) {
-                        pad->input_magnitude = data->walk_speed;
-                    } else if (magnitude < 0.5f && (data->flags_090 & 8) == 0) {
-                        pad->input_magnitude = data->tiptoe_speed;
+                        pad->input_magnitude = api.character_data->game_character->walk_speed;
+                    } else if (magnitude < 0.5f && (api.character_data->game_character->flags_090 & 8) == 0) {
+                        pad->input_magnitude = api.character_data->game_character->tiptoe_speed;
                     } else if (magnitude < 0.8f) {
-                        pad->input_magnitude = data->walk_speed;
+                        pad->input_magnitude = api.character_data->game_character->walk_speed;
                     } else {
-                        pad->input_magnitude = data->run_speed;
+                        pad->input_magnitude = api.character_data->game_character->run_speed;
                     }
                 }
                 // The original player path writes X to +0x2c and Z to +0x30;
@@ -4225,9 +4222,10 @@ static void DrawParaphernalia(GameObject_s *object) {
           (object->apiobj.character_data->game_character->flags_098[0] & 0x40) == 0)) {
         if ((object->field_0xe24 & 1) && object->field_0x780 != NULL) {
             GameObject_s *passenger = static_cast<GameObject_s *>(object->field_0x780);
-            i32 locator = object->apiobj.character_data->game_character->weapon_joints[0];
-            if (locator != -1 && object->apiobj.character_model->points_of_interest[locator] != NULL) {
-                matrix = object->joint_matrices[locator];
+            if (object->apiobj.character_data->game_character->weapon_joints[0] != -1 &&
+                object->apiobj.character_model
+                        ->points_of_interest[object->apiobj.character_data->game_character->weapon_joints[0]] != NULL) {
+                matrix = object->joint_matrices[object->apiobj.character_data->game_character->weapon_joints[0]];
             } else {
                 rotation.x = -0x4000;
                 rotation.y = object->apiobj.field_0x276;
@@ -4271,9 +4269,9 @@ static void DrawParaphernalia(GameObject_s *object) {
             MatrixReflection(&matrix, carried->field_0x1087, carried->field_0x1020, WORLD->current_level->unknown_0cc,
                              &reflected))
             reflection = &reflected;
-        GAMECHARACTERDATA_s *carried_config = carried->apiobj.character_data->game_character;
-        u32 layers = carried->id == id_ANAKINJEDISCARRED ? carried_config->layer_mask_special
-                                                         : carried_config->layer_mask_medium;
+        u32 layers = carried->id == id_ANAKINJEDISCARRED
+                         ? carried->apiobj.character_data->game_character->layer_mask_special
+                         : carried->apiobj.character_data->game_character->layer_mask_medium;
         layers = AdjustLayerBits(layers, carried);
         if (GameDrawCharacterModel(carried->apiobj.character_model, &carried->apiobj.anim_packet, &matrix, NULL,
                                    reflection, attachment_matrices, NULL, layers)) {
@@ -4299,10 +4297,10 @@ static void DrawParaphernalia(GameObject_s *object) {
         }
     } else {
         if (object->apiobj.character_data->flags & 1) {
-            i32 locator = config->thingy_locator;
-            matrix = locator != -1 && object->apiobj.character_model->points_of_interest[locator] != NULL &&
+            matrix = config->thingy_locator != -1 &&
+                             object->apiobj.character_model->points_of_interest[config->thingy_locator] != NULL &&
                              object->apiobj.model_draw_result
-                         ? joints[locator]
+                         ? joints[config->thingy_locator]
                          : object->apiobj.field_0xb8;
             reflected = object->apiobj.field_0x138;
             CharScene_Draw(WORLD, object->id, &matrix, object->field_0x1088 ? &reflected : NULL);

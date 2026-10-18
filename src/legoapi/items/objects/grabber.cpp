@@ -714,8 +714,8 @@ void Grabber_Update(WORLDINFO_s *world) {
         g->victim->apiobj.field_0x27d = 0;
     }
     if (g->character_id == id_GRABMACHINE) {
-        i32 mask = 0;
         bool found = false;
+        i32 mask = 0;
         for (i32 i = 0; i < HIGHGAMEOBJECT; ++i) {
             GameObject_s *object = &Obj[i];
             if (__builtin_expect((object->apiobj.object_flags & 0x1001) != 0x1001, 0))

@@ -1029,7 +1029,7 @@ void JediB_Update(WORLDINFO_s *world) {
                         if (baddie->two_row_hp == 0) {
                             object->field_0xefd &= static_cast<u8>(~2);
                         } else {
-                            object->field_0xefd |= 2;
+                            object->random_layer_variant = 1;
                         }
                         object = baddie->object;
                     }

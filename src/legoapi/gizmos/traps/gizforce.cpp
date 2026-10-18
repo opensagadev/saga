@@ -862,7 +862,8 @@ static i32 GizForces_BoltHitPlat(void *world_ptr, void *data, BOLT *bolt, unsign
     if (count == 0) {
         return 0;
     }
-    for (i32 index = 0; index < count; ++index) {
+    i32 index = 0;
+    do {
         GIZFORCE_s *force = static_cast<GIZFORCE_s *>(force_sys->hit_test_gizmos[index]->object);
         if ((force->progress_flags & GIZFORCE_PROGRESS_VISIBLE) != 0 && force->progress_enabled &&
             (force->runtime_flags & GIZFORCE_RUNTIME_HAS_PLATFORM) != 0 &&
@@ -877,7 +878,7 @@ static i32 GizForces_BoltHitPlat(void *world_ptr, void *data, BOLT *bolt, unsign
                 }
             }
         }
-    }
+    } while (++index < count);
     return 0;
 }
 
@@ -1000,7 +1001,8 @@ static i32 GizForces_BoltHit(void *world_ptr, void *data, void *object_ptr, NUVE
     GameObject_s *object = static_cast<GameObject_s *>(object_ptr);
     GIZFORCE_s *nearest = NULL;
     f32 nearest_distance = 1000000000.0f;
-    for (i32 index = 0; index < count; ++index) {
+    i32 index = 0;
+    do {
         GIZFORCE_s *force = static_cast<GIZFORCE_s *>(force_sys->hit_test_gizmos[index]->object);
         if ((force->progress_flags & GIZFORCE_PROGRESS_VISIBLE) == 0)
             continue;
@@ -1027,7 +1029,7 @@ static i32 GizForces_BoltHit(void *world_ptr, void *data, void *object_ptr, NUVE
             }
             break;
         }
-    }
+    } while (++index < count);
     if (nearest == NULL) {
         return 0;
     }

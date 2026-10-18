@@ -93,10 +93,10 @@ static void DrawCoinTotal(i32 source, i32 hide_super_story_target) {
         total = static_cast<i32>(Game.coins);
     }
 
-    if (target_met)
-        CoinTotal_Draw(total, y, CoinTotalScale, 1, 1.0f, 63, 255, 31);
-    else
+    if (!target_met)
         CoinTotal_Draw(total, y, CoinTotalScale, 1, 1.0f, 255, 191, 0);
+    else
+        CoinTotal_Draw(total, y, CoinTotalScale, 1, 1.0f, 63, 255, 31);
 }
 
 i32 Tag_UpdateHint(HINT_s *hint) {
@@ -454,11 +454,11 @@ void UpdateStats() {
             builduptime = SeekLinearF(builduptime, target, FRAMETIME);
             const i32 freeplay = GAMEDEMO != 0 ? 0 : FreePlay;
             if (WORLD->area != NULL && (WORLD->area->flags & 0x4010) != 0) {
-                AREASAVE_s &save = Game.area_save[WORLD->level_sub_id];
                 if (BOTHTRUEJEDIGOLDBRICKS == 0) {
-                    if (save.true_hero_complete[0] != 0 || save.true_hero_complete[1] != 0)
+                    if (Game.area_save[WORLD->level_sub_id].true_hero_complete[0] != 0 ||
+                        Game.area_save[WORLD->level_sub_id].true_hero_complete[1] != 0)
                         goto buildup_finished;
-                } else if (save.true_hero_complete[freeplay] != 0) {
+                } else if (Game.area_save[WORLD->level_sub_id].true_hero_complete[freeplay] != 0) {
                     goto buildup_finished;
                 }
                 {
@@ -1124,9 +1124,9 @@ void DrawPanel() {
                                     NU_SIN_LUT(static_cast<i32>(builduptime * 16384.0f)) * (STATSPOSY - STATSPOS2Y) +
                                     STATSPOS2Y;
                                 f32 y = status_y + PANEL_COINY;
-                                AREASAVE_s *save = &Game.area_save[WORLD->level_sub_id];
                                 i32 amount;
-                                if (save->true_hero_complete[0] || save->true_hero_complete[1])
+                                if (Game.area_save[WORLD->level_sub_id].true_hero_complete[0] ||
+                                    Game.area_save[WORLD->level_sub_id].true_hero_complete[1])
                                     maximum = amount = BuildUpTotal;
                                 else
                                     amount = BuildUpDone ? maximum : BuildUpTotal;

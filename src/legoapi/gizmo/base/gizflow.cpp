@@ -908,7 +908,7 @@ static u8 getNextLoopChecksum() {
 static i32 Loop_CountLoopingInputs(FLOWBOX_s *box) {
     u8 checksum = getNextLoopChecksum();
     i32 count = 0;
-    for (i32 child = 0; child < box->child_count; ++child) {
+    for (u32 child = 0; child < box->child_count; ++child) {
         count = Loop_CountLoopingInputsEx(box, box->children[child], count, checksum);
     }
     return count;

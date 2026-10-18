@@ -282,8 +282,7 @@ bool MechInputTouchMenuController::OnDown(GameObject_s &, TouchHolder &holder) {
         COLLECTION_s *collection = GetFreePlayCollection(hub_freeplay_area);
         const f32 radius = fabsf(0.5f * collection->field_14);
         for (i32 index = 0; index < collection->count_y; ++index) {
-            const COLLECTID &item = collection->list[index];
-            NUVEC delta = {touch_x - item.grid_x, touch_y - item.grid_y, 0.0f};
+            NUVEC delta = {touch_x - collection->list[index].grid_x, touch_y - collection->list[index].grid_y, 0.0f};
             delta.x /= GetAspectRatio();
             if (NuVecMag(&delta) < radius) {
                 menu.queued_item = index;

@@ -24,6 +24,8 @@ NUVEC4 *makenuvec4(f32 x, f32 y, f32 z, f32 w);
 f32 NuBez3EvaluateX(NUVEC4 *control, f32 t);
 extern "C" {
 #endif
+    extern NUVEC4 nuvec4_zero;
+
     void NuVec4MtxTransform(NUVEC4 *v, NUVEC *v0, NUMTX *m0);
     void NuVec4ToNuHalfVec4(NUVEC4 *v, NUHALFVEC4 *out);
     void NuHalfVec4ToNuVec4(NUHALFVEC4 *v, NUVEC4 *out);

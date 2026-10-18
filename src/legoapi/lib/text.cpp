@@ -165,9 +165,8 @@ char *txtpath_GERMAN = const_cast<char *>("german");
 char *txtpath_FRENCH = const_cast<char *>("french");
 char *txtpath_ENGLISH = const_cast<char *>("english");
 
-static inline u8 Text_MenuColourLerp(u8 first, u8 second, f32 amount) {
-    return static_cast<u8>(
-        static_cast<i32>(static_cast<f32>(first) * amount + static_cast<f32>(second) * (1.0f - amount)));
+static inline i32 Text_MenuColourLerp(u8 first, u8 second, f32 amount) {
+    return static_cast<i32>(static_cast<f32>(first) * amount + static_cast<f32>(second) * (1.0f - amount));
 }
 
 extern WORLDINFO WorldInfo[2];
@@ -715,11 +714,13 @@ void Text_MakeScore(u32 score, char *text) {
     char *end = &digits[79];
     *end = '\0';
 
-    char *first = end;
-    do {
+    char *first = end - 1;
+    *first = static_cast<char>('0' + score % 10);
+    score /= 10;
+    while (score != 0) {
         *--first = static_cast<char>('0' + score % 10);
         score /= 10;
-    } while (score != 0);
+    }
 
     Text_InsertCommasIntoNumber(first, text, static_cast<i32>(end - first));
 }

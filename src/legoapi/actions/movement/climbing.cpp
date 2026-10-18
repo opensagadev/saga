@@ -588,8 +588,9 @@ extern "C" {
 
 static __used__ void ClimbObject_FindNormal(CLIMBOBJECT_s *object) {
     AIPATHNODE *second = &object->path->nodes[object->connection->node_indices[1]];
-    AIPATHNODE *first = &object->path->nodes[object->connection->node_indices[0]];
-    AIPATHNODE *node = second->position.y > first->position.y ? first : second;
+    AIPATHNODE *node = second->position.y > object->path->nodes[object->connection->node_indices[0]].position.y
+                           ? &object->path->nodes[object->connection->node_indices[0]]
+                           : second;
     NUVEC displacement, origin;
 #define PROBE_CLIMB_NORMAL(angle)                                                                                      \
     do {                                                                                                               \

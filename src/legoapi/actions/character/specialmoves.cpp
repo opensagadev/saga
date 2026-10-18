@@ -210,7 +210,7 @@ i32 SpecialMove_GetAttackerAction(i32 index) {
 // Original 0x498410, 198 bytes.
 void SpecialMove_Attacker_SetTargetMom(GameObject_s *object) {
     f32 distance = SpecialMove_GetDistanceApart(object->field_0x7a7);
-    u16 angle = object->apiobj.movement_facing_angle;
+    i32 angle = object->apiobj.movement_facing_angle;
     f32 z = object->force_target->apiobj.position.z - NU_COS_LUT(angle) * distance;
     f32 x = object->force_target->apiobj.position.x - NU_SIN_LUT(angle) * distance;
     object->target_velocity.z = (z - object->apiobj.position.z) * 10.0f;

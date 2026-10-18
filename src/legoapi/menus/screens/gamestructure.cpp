@@ -1222,7 +1222,7 @@ void MenuDrawStoreRestoring(MENU_s *menu) {
             y += text3d_height;
         }
     }
-    for (i32 i = 0; i < restoring_bundle_count; ++i) {
+    for (u32 i = 0; i < restoring_bundle_count; ++i) {
         if (NuIOS_GetInAppProductByID(StoreBundle[restoring_bundle_list[i]].name,
                                       reinterpret_cast<NuIOS_InAppProduct *>(&product)) != 0) {
             SmartTextEx(product.name, 0.0f, y, 1.0f, 0.3f, 0.3f, 0.3f, 0, 255, 255, 255, 1.9f, 1, NULL, 0, MenuA);
@@ -1282,7 +1282,7 @@ void Store_RootPackCustodian(i32, GameObject_s *custodian) {
 void Store_UprootPackCustodian(i32, GameObject_s *custodian) {
     CHARACTERDATA **character_list = &CDataList;
     u8 flags = custodian->field_0xefc;
-    custodian->apiobj.flags_low &= ~2u;
+    custodian->apiobj.flags_low_bit1 = 0;
     flags &= ~0x12u;
     custodian->field_0xefe &= ~0x40u;
     custodian->field_0xefc = flags;
