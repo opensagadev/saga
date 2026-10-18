@@ -3158,8 +3158,8 @@ void CharConfig_ConfigureAll(i32 permanent, NUFPCOMJMP *game_keywords) {
         NuStrCat(filename, ".txt");
         NuStrCpy(original_path, path);
         if (pak == NULL) {
-            VARIPTR *arena = permanent != 0 ? &permbuffer_ptr : NULL;
             VARIPTR *end = permanent != 0 ? &permbuffer_end : NULL;
+            VARIPTR *arena = permanent != 0 ? &permbuffer_ptr : NULL;
             if (CharConfig(id, directory, filename, arena, end, permanent != 0, NULL, 0, 1, game_keywords) == 2) {
                 SecondCharConfigure = 1;
                 CharConfig(id, directory, filename, arena, end, permanent != 0, NULL, 0, 0, game_keywords);
@@ -3179,7 +3179,7 @@ void CharConfig_ConfigureAll(i32 permanent, NUFPCOMJMP *game_keywords) {
         if (length < 1)
             continue;
         i32 redirected = RedirectTextFile(text, filename);
-        if (__builtin_expect(redirected != 0, 0)) {
+        if (__builtin_expect(redirected != 0, 1)) {
             NuStrCat(filename, ".txt");
             NuStrCpy(path, directory);
             NuStrCat(path, filename);
@@ -3208,7 +3208,7 @@ void CharConfig_ConfigureAll(i32 permanent, NUFPCOMJMP *game_keywords) {
             text[size] = 0;
             length = Text_StripComments(text, ConfigBuffer, 1);
             text[size] = saved;
-            if (__builtin_expect(length > 0, 0)) {
+            if (__builtin_expect(length > 0, 1)) {
                 SecondCharConfigure = 1;
                 CharConfig(id, NULL, NULL, &permbuffer_ptr, &permbuffer_end, 0, ConfigBuffer, length, 0, game_keywords);
             }

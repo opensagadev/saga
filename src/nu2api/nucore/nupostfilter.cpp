@@ -41,8 +41,8 @@ void NuPostFilter::initSharedResources(i32, i32) {
     glGenBuffers(1, &m_fullscreenGridVertexBuffer);
     glGenBuffers(1, &m_fullscreenGridIndexBuffer);
     i32 rows = static_cast<i32>((static_cast<f32>(nurndr_pixel_height) / nurndr_pixel_width) * 16.0f);
-    i32 triangle_count = rows * 16 * 2;
     i32 vertex_count = (rows + 1) * 17;
+    i32 triangle_count = rows * 16 * 2;
     i32 size = vertex_count * 3 * sizeof(f32);
     f32 *grid = static_cast<f32 *>(NU_ALLOC(size, 4, 1, "", NUMEMORY_CATEGORY_NONE));
     f32 *position = grid;

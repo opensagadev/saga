@@ -426,9 +426,9 @@ i32 TagCharacter(GameObject_s *source, GameObject_s *target, i32 mode) {
             target = Player[2];
         else if (available(Player[3]))
             target = Player[3];
-        else if (__builtin_expect(!!(available(Player[4])), 1))
+        else if (__builtin_expect(!!(available(Player[4])), 0))
             target = Player[4];
-        else if (__builtin_expect(!!(available(Player[5])), 1))
+        else if (__builtin_expect(!!(available(Player[5])), 0))
             target = Player[5];
         else if (available(Player[6]))
             target = Player[6];
@@ -800,7 +800,7 @@ void Tag_Check(GameObject_s *object) {
         else
             GameCam_Reset(GameCam);
         RememberPlayerIDs(0, Player[0] != NULL ? Player[0]->id : -1, Player[1] != NULL ? Player[1]->id : -1);
-        if (__builtin_expect((Tag_Mode & ~2) == 1, 0))
+        if (__builtin_expect((Tag_Mode & ~2) == 1, 1))
             Tag_NewTransfer(object, target);
         if (static_cast<u8>(object->apiobj.field_0x27c) < 2 && static_cast<u8>(target->apiobj.field_0x27c) < 2)
             ResetTimer(&JoinInTimer, 0.0f);

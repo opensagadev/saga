@@ -773,9 +773,9 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
         use_low_detail = (cut->flags & 0x10000) != 0 && g_isLowEndDevice != 0;
         NuGCutCharAnimProcess(character, frame, &world_matrix, &visible, &animation_index, &animation_rate, &blend_time,
                               &animation_start_frame, &layer_mask);
-        if (__builtin_expect(cut->low_end_distance > 0.0f && g_isLowEndDevice != 0 &&
+        if (cut->low_end_distance > 0.0f && g_isLowEndDevice != 0 &&
             NuVecDistSqr(reinterpret_cast<NUVEC *>(&world_matrix.m30), reinterpret_cast<NUVEC *>(&pNuCam->mtx.m30),
-                         NULL) > cut->low_end_distance * cut->low_end_distance, 1)) {
+                         NULL) > cut->low_end_distance * cut->low_end_distance) {
             return;
         }
     } else {
@@ -837,8 +837,8 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
                     instance->field_16 = instance->field_15;
                     animation_index = instance->field_15;
                 } else {
-                    instance->field_16 = requested_animation;
                     instance->animation_frame_a = frame;
+                    instance->field_16 = requested_animation;
                 }
             } else {
                 instance->field_16 = instance->field_17;
@@ -938,7 +938,7 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
             if (instance->animation_frame_b > end_frame) {
                 CHARACTERANIM_s *animation_info =
                     static_cast<CHARACTERANIM_s *>(model->model_data_a[current_animation]);
-                if (__builtin_expect((animation_info->flags & 2) == 0, 0)) {
+                if (__builtin_expect((animation_info->flags & 2) == 0, 1)) {
                     instance->animation_frame_b = end_frame;
                 } else {
                     instance->animation_frame_b = instance->animation_frame_b - end_frame + 1.0f;

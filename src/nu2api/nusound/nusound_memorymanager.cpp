@@ -457,12 +457,16 @@ bool NuSoundMemoryManager::CheckList() {
             return false;
         }
         NuSoundMemoryBuffer *prev = buffer->GetPrev();
-        if (prev != NULL && prev->GetNext() != buffer) {
-            return false;
+        if (prev != NULL) {
+            if (prev->GetNext() != buffer) {
+                return false;
+            }
         }
         NuSoundMemoryBuffer *next = buffer->GetNext();
-        if (next != NULL && next->GetPrev() != buffer) {
-            return false;
+        if (next != NULL) {
+            if (next->GetPrev() != buffer) {
+                return false;
+            }
         }
         expected_address += buffer->GetSize();
         buffer = buffer->GetNext();
@@ -519,7 +523,7 @@ NuSoundMemoryBuffer *NuSoundMemoryManager::MoveLargestTrailingBufferIntoBuffer(N
     while (tail->GetNext() != NULL) {
         tail = tail->GetNext();
     }
-    if (tail == NULL || tail == buffer) {
+    if (tail == buffer || tail == NULL) {
         return buffer;
     }
 
@@ -613,8 +617,8 @@ NuSoundMemoryBuffer *NuSoundMemoryManager::SwapOrMergeAdjacentBuffers(NuSoundMem
         memmove(buffer_address, next_address, next_size);
     } else {
         i32 remaining = next_size;
-        char *source = next_address;
         char *dest = buffer_address;
+        char *source = next_address;
         while (remaining != 0) {
             i32 amount = remaining < (i32)buffer_size ? remaining : (i32)buffer_size;
             memmove(dest, source, amount);

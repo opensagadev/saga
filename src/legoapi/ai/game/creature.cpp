@@ -1176,7 +1176,7 @@ static void NewCharacterIdle(GameObject_s *object, i32 default_idle) {
         repetitions = 1;
     } else {
         const i32 maximum = static_cast<u8>(info->maximum_repetitions);
-        if (maximum != 0 && maximum > repetitions) {
+        if (maximum > repetitions && maximum != 0) {
             repetitions += qrand() / (0xffff / (maximum - repetitions) + 1);
         }
     }
@@ -1536,8 +1536,8 @@ void Players_Init(void) {
         memcpy(BackUpPlayers + 0x439, p[1], 0x439 * 4);
     }
 
-    i32 id1 = (p[1] != NULL) ? p[1]->id : -1;
     i32 id0 = (p[0] != NULL) ? p[0]->id : -1;
+    i32 id1 = (p[1] != NULL) ? p[1]->id : -1;
     RememberPlayerIDs(0, id0, id1);
 }
 
@@ -1854,10 +1854,10 @@ i32 NewPlayerCharacter(GameObject_s *object, i32 id, i32 old_id, i32) {
     ResetMiniAnimPacket(&object->mini_animation, -1);
     object->weapon_scale = (object->field_0xe22 & 1) != 0 ? 1.0f : 0.0f;
     object->field_0xe32 = 0;
-    if (!on_surface)
-        object->apiobj.velocity.y = velocity.y;
-    else
+    if (on_surface)
         object->ground_contact_grace_timer = 0.2f;
+    else
+        object->apiobj.velocity.y = velocity.y;
     if (context == 0x33 && StartSlide(object, 0)) {
         object->apiobj.velocity.x = velocity.x;
         object->apiobj.velocity.z = velocity.z;
@@ -2551,10 +2551,10 @@ void MovePlayer(GameObject_s *object) {
         MovePlayer_ROLLING(object);
     } else if (__builtin_expect(MovePlayer_TWIST(object) == 0, 1) && __builtin_expect(MovePlayer_CIRCLE(object) == 0, 1) &&
                __builtin_expect(MovePlayer_GUNSHIPIN(object) == 0, 1) && __builtin_expect(MovePlayer_POD(object) == 0, 1)) {
-        if ((api.character_data->model_flags & 0x2000) == 0)
-            MovePlayer_DIRECTIONAL(object);
-        else
+        if ((api.character_data->model_flags & 0x2000) != 0)
             MovePlayer_VEHICLEDIRECTIONAL(object);
+        else
+            MovePlayer_DIRECTIONAL(object);
     }
     if (LIFTPLAYER != 0 && __builtin_expect(menu_id == -1, 1) && api.field_0x287 == 0 && object->character_context != 0x2b &&
         (api.character_data->game_character->flags_090 & 0x80) == 0 && api.player_controlled &&
@@ -3635,33 +3635,35 @@ i32 GameDrawCharacterModel(CHARACTERMODEL_s *model, ANIMPACKET_s *animation, NUM
                (object->apiobj.character_data->model_flags & 0x10000) == 0, 0)) {
         draw_shadow = 1;
     }
-    if (g_lowEndLevelBehaviour != 0 && object != NULL && (object->apiobj.flags_low & 0x80) == 0)
+    if (g_lowEndLevelBehaviour != 0 && object != NULL && !object->apiobj.player_controlled)
         draw_shadow = 0;
 
-    if (draw_shadow && object != NULL && secondary_matrix != NULL) {
-        i32 level_alpha = static_cast<u8>(WORLD->current_level->blob_shadow_alpha);
-        if (level_alpha != 0 && object->shadow_opacity > 0.0f && object->surface_normal.y > 0.0f &&
-            (object->apiobj.water_height == -1.0f ||
-             (TerLayer[static_cast<i8>(object->apiobj.field_0x27f)].flags & 1) == 0)) {
-            if (object->id == id_MOUSEDROID && WORLD->lev_objs[0xa2].active) {
-                special_matrix = *secondary_matrix;
-                NuSpecialDrawAtAlpha(&WORLD->lev_objs[0xa2].special, &special_matrix,
-                                     object->shadow_opacity * object->surface_normal.y);
-            } else if (__builtin_expect(!!(CHARSHADOWS_ON), 1)) {
-                PLAYERCHARACTERCONFIG_s *config = object->apiobj.character_data->player_config;
-                i32 alpha = config->blob_shadow_alpha;
-                if (alpha == 0xff)
-                    alpha = level_alpha;
-                if (alpha > 0) {
-                    f32 radius = config->shadow_radius;
-                    if (!(radius < 99.0f))
-                        radius = object->apiobj.character_data->collision_radius;
-                    if (radius > 0.0f) {
-                        f32 drop_scale = DropInOutScale(object);
-                        NuRndrAddShadow(NUMTX_GET_ROW_VEC(secondary_matrix, 3),
-                                        drop_scale * radius * object->apiobj.field_0xa8,
-                                        static_cast<i32>(alpha * object->shadow_opacity * object->surface_normal.y),
-                                        object->field_0x105e, 0, object->field_0x1060);
+    if (draw_shadow) {
+        if (object != NULL && secondary_matrix != NULL) {
+            i32 level_alpha = static_cast<u8>(WORLD->current_level->blob_shadow_alpha);
+            if (level_alpha != 0 && object->shadow_opacity > 0.0f && object->surface_normal.y > 0.0f &&
+                (object->apiobj.water_height == -1.0f ||
+                 (TerLayer[static_cast<i8>(object->apiobj.field_0x27f)].flags & 1) == 0)) {
+                if (object->id == id_MOUSEDROID && WORLD->lev_objs[0xa2].active) {
+                    special_matrix = *secondary_matrix;
+                    NuSpecialDrawAtAlpha(&WORLD->lev_objs[0xa2].special, &special_matrix,
+                                         object->shadow_opacity * object->surface_normal.y);
+                } else if (__builtin_expect(!!(CHARSHADOWS_ON), 1)) {
+                    PLAYERCHARACTERCONFIG_s *config = object->apiobj.character_data->player_config;
+                    i32 alpha = config->blob_shadow_alpha;
+                    if (alpha == 0xff)
+                        alpha = level_alpha;
+                    if (alpha > 0) {
+                        f32 radius = config->shadow_radius;
+                        if (!(radius < 99.0f))
+                            radius = object->apiobj.character_data->collision_radius;
+                        if (radius > 0.0f) {
+                            f32 drop_scale = DropInOutScale(object);
+                            NuRndrAddShadow(NUMTX_GET_ROW_VEC(secondary_matrix, 3),
+                                            drop_scale * radius * object->apiobj.field_0xa8,
+                                            static_cast<i32>(alpha * object->shadow_opacity * object->surface_normal.y),
+                                            object->field_0x105e, 0, object->field_0x1060);
+                        }
                     }
                 }
             }
@@ -4573,7 +4575,7 @@ static void DrawParaphernalia(GameObject_s *object) {
     if (object->field_0xe22 & 0x40) {
         dco_prerotatez = 0x4000;
         const u32 layers = object->field_0x1054;
-        const u8 render_reflection = object->field_0x1088;
+        const i32 render_reflection = object->field_0x1088;
         const i32 locator = object->apiobj.character_data->game_character->throw_locator;
         const i32 model_id = Batarang_GetObjectFromCharID(object->id);
         DrawObjectOnCharacter(WORLD, object, model_id, NULL, locator, -1, joints, render_reflection, layers, NULL, NULL,
@@ -4629,7 +4631,7 @@ static void DrawParaphernalia(GameObject_s *object) {
         } else {
             f32 distance = 1.0f;
             i32 chosen = -1;
-            for (i32 i = 10; i < 18; ++i) {
+            for (u32 i = 10; i < 18; ++i) {
                 if (NuSpecialExistsFn(&LevHSpecial[i])) {
                     f32 next =
                         NuVecDistSqr(&object->apiobj.collision_position, NuSpecialGetDrawPos(&LevHSpecial[i]), NULL);
@@ -4647,7 +4649,7 @@ static void DrawParaphernalia(GameObject_s *object) {
         if (start >= 1.0f) {
             f32 finish = AnimListFrame(object->apiobj.character_model, 1, 1);
             f32 frame = *special_time;
-            if (finish >= start && frame > start && frame < finish) {
+            if (finish >= start && frame < finish && frame > start) {
                 f32 fraction = (frame - start) / (finish - start);
                 f32 scale;
                 if (fraction < 0.1f)

@@ -157,7 +157,7 @@ namespace {
     void StreamListRemove(NuEList<NuSound3Voice> *list, NuSound3Voice *voice) {
         NuSound3Voice *previous = voice->intrusive_prev;
         NuSound3Voice *next = voice->intrusive_next;
-        if (next == NULL && previous == NULL) {
+        if (previous == NULL && next == NULL) {
             return;
         }
         list->length--;
@@ -869,8 +869,10 @@ int NuMusic::GetStatus(u32 clazz, i32 *class_status) {
             }
         }
         i32 class_index = ClassToIX(track->clazz);
-        if (class_status != NULL && class_index != -1) {
-            class_status[class_index] |= result;
+        if (class_status != NULL) {
+            if (class_index != -1) {
+                class_status[class_index] |= result;
+            }
         }
     }
 
@@ -1092,13 +1094,15 @@ void NuMusic::ParseTrack(u32 category, nufpar_s *fpar) {
     }
 
     NuFParPushComCTX(fpar, track_jmp_tab);
-    if (*fpar->word_buf != '\0' && *fpar->word_buf != ';') {
-        do {
-            NuFParGetWord(fpar);
-            NuFParInterpretWordCTX(fpar, this);
-            if (*fpar->word_buf == ';')
-                break;
-        } while (*fpar->word_buf != '\0');
+    if (*fpar->word_buf != '\0') {
+        if (*fpar->word_buf != ';') {
+            do {
+                NuFParGetWord(fpar);
+                NuFParInterpretWordCTX(fpar, this);
+                if (*fpar->word_buf == ';')
+                    break;
+            } while (*fpar->word_buf != '\0');
+        }
     }
     NuFParPopCom(fpar);
 
@@ -1255,8 +1259,8 @@ void NuMusic::InitData(const char *file, VARIPTR *buffer_start, VARIPTR buffer_e
     i32 count = this->album_count;
     if (count == 0 || (track_count = this->track_count, track_count == 0)) {
         *buffer_start = buffer_original;
-        this->album_count = 0;
         this->albums = NULL;
+        this->album_count = 0;
         this->tracks = NULL;
         this->track_count = 0;
         return;
@@ -2585,8 +2589,8 @@ void NuMusic::Process(f32 delta) {
             }
         }
         f32 duck = this->duck_current;
-        f32 attenuation = 1.0f;
         f32 class_volume = 1.0f;
+        f32 attenuation = 1.0f;
         if (track != NULL) {
             if (((track->flags & 1) != 0) || track->duck_volume != 1.0f) {
                 duck = 1.0f;

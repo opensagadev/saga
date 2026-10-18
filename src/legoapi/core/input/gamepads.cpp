@@ -290,8 +290,10 @@ void PadOutPause(i32 port, WORLDINFO_s *world) {
         (world->current_level->flags & (LEVEL_INTRO | LEVEL_MIDTRO | LEVEL_OUTRO)) != 0 || GetMenuID() != -1) {
         return;
     }
-    if (CUTSTOPGAME != 0 && !CutScene_IsSkippable(static_cast<CUTINFO *>(CutStopInfo))) {
-        return;
+    if (CUTSTOPGAME != 0) {
+        if (!CutScene_IsSkippable(static_cast<CUTINFO *>(CutStopInfo))) {
+            return;
+        }
     }
     if (CutSceneWaiting == 0) {
         PauseGame(port);
@@ -406,8 +408,10 @@ void DoInput(WORLDINFO_s *world) {
     for (i32 player_index = 0; player_index < 2; ++player_index) {
         nupad_s *pad = GamePad[player_index].pad;
         GameObject_s *player = Player[player_index];
-        if (GamePads_IgnoreInputFn != NULL && GamePads_IgnoreInputFn() != 0) {
-            continue;
+        if (GamePads_IgnoreInputFn != NULL) {
+            if (GamePads_IgnoreInputFn() != 0) {
+                continue;
+            }
         }
         if (static_cast<u32>(input_result[player_index]) <= 1) {
             if (player != NULL && player->apiobj.player_controlled && pad != NULL && MiniCutCam == 0 && world != NULL &&

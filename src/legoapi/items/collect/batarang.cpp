@@ -102,7 +102,7 @@ static i32 Batarang_FindTarget(WORLDINFO_s *world, GameObject_s *object, i32 aut
             if (!(delta.x * forward.x + delta.z * forward.z > 0.0f)) {
                 continue;
             }
-            if (__builtin_expect(distance < nearest_distance, 0)) {
+            if (__builtin_expect(distance < nearest_distance, 1)) {
                 nearest_distance = distance;
                 nearest_object = candidate;
             }
@@ -639,8 +639,8 @@ void Batarang_MoveCode(GameObject_s *object) {
                 object->character_context = -1;
             }
         } else {
-            if (__builtin_expect(object->apiobj.character_model->model_data_b[object->context_animation] == NULL ||
-                AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0) != NULL, 1)) {
+            if (object->apiobj.character_model->model_data_b[object->context_animation] == NULL ||
+                AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0) != NULL) {
                 GAMEPAD_s *pad = object->pad_gamepad;
                 object->context_animation_timer += FRAMETIME;
                 f32 x = pad->input_direction_z * 1.25f;
@@ -660,8 +660,10 @@ void Batarang_MoveCode(GameObject_s *object) {
             }
             batarang = static_cast<BATARANG_s *>(object->batarang);
             KeepPointOnScreen(&batarang->sight_position, &batarang->sight_velocity);
-            if (WORLD != NULL && Batarang_FindTarget(WORLD, object, 0) != 0) {
-                NewBuzzFrames(object->pad_gamepad->pad, 1, 0);
+            if (WORLD != NULL) {
+                if (Batarang_FindTarget(WORLD, object, 0) != 0) {
+                    NewBuzzFrames(object->pad_gamepad->pad, 1, 0);
+                }
             }
 
             char text[32];

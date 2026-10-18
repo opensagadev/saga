@@ -1687,7 +1687,7 @@ void Hub_UpdateFreePlaySelect() {
                     freeplay_i[0] = 0;
                 freeplay_selected[0] = 0;
                 freeplay_i[1] = InCollectList_Index(MenuPacket.player_model[1], collection->list, collection->count_y);
-                if (__builtin_expect(freeplay_i[1] == -1, 1))
+                if (__builtin_expect(freeplay_i[1] == -1, 0))
                     freeplay_i[1] = freeplay_i[0] == 1 ? 0 : 1;
                 freeplay_selected[1] = 0;
             }
@@ -1704,7 +1704,7 @@ void Hub_UpdateFreePlaySelect() {
                 bool select = false, cancel = false;
                 if (__builtin_expect(menu_input_activity != 0 && player == 0, 1)) {
                     if (menu->confirm_pressed != 0) {
-                        if (__builtin_expect(menu->selected_item == 9999, 0))
+                        if (__builtin_expect(menu->selected_item == 9999, 1))
                             select = 1;
                         else
                             index = menu->selected_item;
@@ -3046,7 +3046,7 @@ void Hub_DrawPanel(WORLDINFO_s *) {
                 buildup_count += EpBuildUpCount;
                 buildup_total += EpBuildUpTotal;
                 both_true_jedi_bricks = BOTHTRUEJEDIGOLDBRICKS;
-                if (__builtin_expect(!!(both_true_jedi_bricks), 1)) {
+                if (both_true_jedi_bricks) {
                     story_total += EpStoryBuildUpTotal;
                     story_count += EpStoryBuildUpCount;
                     free_count += EpFreePlayBuildUpCount;
@@ -3182,7 +3182,7 @@ void Hub_DrawPanel(WORLDINFO_s *) {
                                        EpRedBrickTotal);
                 Hub_DrawImportantBrick(211, HUB_AREAPANELX[3], HUB_EPISODETITLEY, phase, EpGoldBrickCount,
                                        EpGoldBrickTotal);
-                if (__builtin_expect(!!(Store_IsPackUnlocked(8)), 0)) {
+                if (__builtin_expect(!!(Store_IsPackUnlocked(8)), 1)) {
                     hub_drawminikitcount_charkit = 1;
                     Hub_DrawMiniKitCount(HUB_AREAPANELX[5], HUB_EPISODETITLEY, EpCharKitCount, EpCharKitTotal, phase);
                 }
@@ -3191,7 +3191,7 @@ void Hub_DrawPanel(WORLDINFO_s *) {
                             HUB_EPISODETITLESIZE, HUB_EPISODETITLESIZE, 0, HUB_EPISODER, HUB_EPISODEG, HUB_EPISODEB,
                             1.7f, 1, NULL, 0, alpha);
             }
-            if (__builtin_expect(episode->text_id != -1, 0))
+            if (__builtin_expect(episode->text_id != -1, 1))
                 SmartTextEx(TTab[episode->text_id], 0.0f, HUB_EPISODESUBTITLEY, 1.0f, HUB_EPISODESUBTITLESIZE,
                             HUB_EPISODESUBTITLESIZE, HUB_EPISODESUBTITLESIZE, 0, HUB_EPISODER, HUB_EPISODEG,
                             HUB_EPISODEB, 1.7f, 1, NULL, 0, alpha);
@@ -3297,7 +3297,11 @@ void Hub_DrawPanel(WORLDINFO_s *) {
                         } else {
                             red = menu_flash ? MENUFLASH0R : MENUFLASH1R;
                             green = menu_flash ? MENUFLASH0G : MENUFLASH1G;
-                            blue = menu_flash ? MENUFLASH0B : MENUFLASH1B;
+                            if (menu_flash) {
+                                blue = MENUFLASH0B;
+                            } else {
+                                blue = MENUFLASH1B;
+                            }
                         }
                         goto hub_episode_colour_ready;
                     }
@@ -4277,7 +4281,7 @@ void Hub_Update(WORLDINFO_s *world) {
                     continue;
                 }
                 const i32 id = *store_pack.id;
-                if (__builtin_expect(id == -1, 0)) {
+                if (id == -1) {
                     continue;
                 }
                 ++required;
@@ -4310,7 +4314,7 @@ void Hub_Update(WORLDINFO_s *world) {
                             locators[count++] = &world->ai_sys->locators[locator_set->locator_entries[i]];
                         }
                     }
-                    if (__builtin_expect(count != 0, 0)) {
+                    if (__builtin_expect(count != 0, 1)) {
                         AILOCATOR *locator = LocalGetNearestLocator(locators, count, 0.0f, &player->apiobj.position,
                                                                     1000000000.0f, 0, 1000000000.0f, 1000000000.0f);
                         if (locator != NULL) {
@@ -4516,7 +4520,7 @@ void Hub_Update(WORLDINFO_s *world) {
             gizmo = HubAreaInfo[i].bonus_gizmo;
             if (__builtin_expect(output == 0, 0)) {
                 GIZBUILDIT_s *buildit = static_cast<GIZBUILDIT_s *>(gizmo->object);
-                if (__builtin_expect(!(gold_bricks < buildit->anim_object_count), 0)) {
+                if (__builtin_expect(!(gold_bricks < buildit->anim_object_count), 1)) {
                     if ((buildit->availability_flags & GIZBUILDIT_AVAILABILITY_ACTIVE) == 0) {
                         GizmoActivate(world->gizmo_sys, gizmo, 1, 0);
                     }
@@ -4526,7 +4530,7 @@ void Hub_Update(WORLDINFO_s *world) {
                         buildit = buildit->linked_buildit;
                     }
                     for (i32 piece = 0; piece < buildit->anim_object_count; ++piece) {
-                        if (__builtin_expect(buildit->anim_objects[piece] != NULL, 0)) {
+                        if (__builtin_expect(buildit->anim_objects[piece] != NULL, 1)) {
                             if (piece < gold_bricks)
                                 NuSpecialSetVisibility(&buildit->anim_objects[piece]->special, 1);
                             else

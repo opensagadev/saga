@@ -92,7 +92,7 @@ void MechHintUIButton::Process(float elapsed) {
     scale_elapsed = scale_duration;
     if (__builtin_expect(!(slide_duration < 0.0f) && !(slide_elapsed >= slide_duration + slide_delay), 0)) {
         slide_elapsed += elapsed;
-        if (__builtin_expect(slide_elapsed > slide_duration + slide_delay, 1))
+        if (__builtin_expect(slide_elapsed > slide_duration + slide_delay, 0))
             slide_elapsed = slide_duration + slide_delay;
         if (slide_elapsed >= slide_delay)
             *slide_target = ((slide_elapsed - slide_delay) / slide_duration) * (slide_to - slide_from) + slide_from;

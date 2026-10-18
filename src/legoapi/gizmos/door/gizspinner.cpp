@@ -961,7 +961,7 @@ void GizSpinners_Update(void *world_ptr, void *, float) {
             angle += arm_angle;
             arm_count = spinner->type < 8 ? spinner->type : 8;
         }
-        if (__builtin_expect(GameAnimSet_GetVisibility(spinner->anim_set) == GAMEANIMSET_VISIBILITY_NONE, 1))
+        if (__builtin_expect(GameAnimSet_GetVisibility(spinner->anim_set) == GAMEANIMSET_VISIBILITY_NONE, 0))
             spinner->flags |= SPINNER_RUNTIME_ANIMATION_HIDDEN;
         else if ((spinner->flags & SPINNER_RUNTIME_ANIMATION_HIDDEN) != 0)
             spinner->flags &= static_cast<u8>(~SPINNER_RUNTIME_ANIMATION_HIDDEN);
@@ -1021,7 +1021,7 @@ void GizSpinners_Update(void *world_ptr, void *, float) {
             output = candidate;
             break;
         }
-        if (__builtin_expect(output == -1 && frame < length + margin && length - margin < frame, 0))
+        if (output == -1 && frame < length + margin && length - margin < frame)
             output = last;
         if (output == -1) {
             spinner->flags &= static_cast<u8>(~SPINNER_RUNTIME_AT_OUTPUT);

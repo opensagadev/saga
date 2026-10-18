@@ -664,7 +664,7 @@ static void SplinePointAnglesBody(const i16 *length, NUVEC *const *pts, i32 inde
     NUVEC *current = &(*pts)[index];
     i32 previous_index = index - 1;
     NUVEC *previous = NULL;
-    if (looping && previous_index < 0)
+    if (previous_index < 0 && looping)
         previous = &(*pts)[*length - 1];
     else if (previous_index >= 0)
         previous = &(*pts)[previous_index];
@@ -1307,10 +1307,12 @@ f32 XZLinesClosest(nuvec_s *a, nuvec_s *b, nuvec_s *c, nuvec_s *d, f32 *first, f
     NuVecSub(&bc, b, c);
     NuVecRotateY(&bc, &bc, -angle);
 
-    if (NuFsign(ca.x) != NuFsign(da.x) && NuFsign(ac.x) != NuFsign(bc.x)) {
-        *first = NuFabs(ac.x) / (NuFabs(ac.x) + NuFabs(bc.x));
-        *second = NuFabs(ca.x) / (NuFabs(ca.x) + NuFabs(da.x));
-        return 0.0f;
+    if (NuFsign(ca.x) != NuFsign(da.x)) {
+        if (NuFsign(ac.x) != NuFsign(bc.x)) {
+            *first = NuFabs(ac.x) / (NuFabs(ac.x) + NuFabs(bc.x));
+            *second = NuFabs(ca.x) / (NuFabs(ca.x) + NuFabs(da.x));
+            return 0.0f;
+        }
     }
 
     f32 ab_length = NuVecXZDist(b, a, NULL);
@@ -1528,7 +1530,7 @@ void GetNearestSplinePos(NUVEC *origin, SPLINEPOS_s *result, NUGSPLINE *spline, 
     if (!(spline == NULL || origin == NULL || spline->length <= 1)) {
         result->spline = spline;
         result->looping = (i8)looping;
-        i32 point_count = spline->length;
+        i16 point_count = spline->length;
         i32 logical_count = result->looping != 0 ? point_count + 1 : point_count;
         i32 index = first_point;
         if (index < 0)
@@ -1645,8 +1647,8 @@ i32 OutSideSplineArea(nuvec_s *position, nugspline_s *spline, nuvec_s *edge_end,
     }
     i32 previous = closest_index == 0 ? spline->length - 2 : closest_index - 1;
     i32 next = closest_index == spline->length - 2 ? 0 : closest_index + 1;
-    f32 ax = spline->pts[next].x - position->x;
     f32 bx = spline->pts[previous].x - position->x;
+    f32 ax = spline->pts[next].x - position->x;
     f32 az = spline->pts[next].z - position->z;
     f32 bz = spline->pts[previous].z - position->z;
     if (bx * bx + bz * bz > ax * ax + az * az) {
@@ -1665,14 +1667,14 @@ i32 OutSideSplineArea(nuvec_s *position, nugspline_s *spline, nuvec_s *edge_end,
 
 void VecRotateAxis(nuvec_s *vector, u16 angle, nuvec_s *axis) {
     NuVecNorm(axis, axis);
-    const f32 sine = NuTrigTable[static_cast<u16>(angle / 2)];
     const f32 cosine = NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff];
+    const f32 sine = NuTrigTable[static_cast<u16>(angle / 2)];
     const f32 complement = 1.0f - cosine;
     const f32 x = axis->x;
     const f32 y = axis->y;
-    const NUVEC source = *vector;
     const f32 z = axis->z;
     const f32 ty = complement * y;
+    const NUVEC source = *vector;
     const f32 tx = complement * x;
     const f32 tz = complement * z;
     const f32 xy = tx * y;

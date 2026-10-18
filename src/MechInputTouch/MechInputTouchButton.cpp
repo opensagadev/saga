@@ -23,25 +23,11 @@ bool MechInputTouchButton::CouldTouchBeLockedBy(u32 touch_id) {
 }
 
 i32 MechInputTouchButton::FindPossibleTriggeringIndexFromID(u32 touch_id) {
-    if (possible_triggering_touch_ids[0] == touch_id)
-        return 0;
-    if (possible_triggering_touch_ids[1] == touch_id)
-        return 1;
-    if (possible_triggering_touch_ids[2] == touch_id)
-        return 2;
-    if (possible_triggering_touch_ids[3] == touch_id)
-        return 3;
-    if (possible_triggering_touch_ids[4] == touch_id)
-        return 4;
-    if (possible_triggering_touch_ids[5] == touch_id)
-        return 5;
-    if (possible_triggering_touch_ids[6] == touch_id)
-        return 6;
-    if (possible_triggering_touch_ids[7] == touch_id)
-        return 7;
-    if (possible_triggering_touch_ids[8] == touch_id)
-        return 8;
-    return possible_triggering_touch_ids[9] == touch_id ? 9 : -1;
+    for (i32 i = 0; i < 10; i++) {
+        if (possible_triggering_touch_ids[i] == touch_id)
+            return i;
+    }
+    return -1;
 }
 
 MechInputTouchButton::MechInputTouchButton(NuTouchInputElement::TYPE type, i32 index, i32 id)

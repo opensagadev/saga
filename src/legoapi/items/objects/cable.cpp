@@ -295,7 +295,7 @@ void UpdateCables() {
             continue;
         }
         if (target->id != id_ATAT) {
-            if (__builtin_expect(target->id == id_DRAGBOMB, 0)) {
+            if (target->id == id_DRAGBOMB) {
                 target->character_context = 0x34;
                 cable->target->context_animation_timer = 0.0f;
             }
@@ -322,8 +322,8 @@ void UpdateCables() {
             NUVEC *last_position = NUMTX_GET_ROW_VEC(&target->joint_matrices[atat_locators[last]], 3);
             if (!(cable->wrap_count > 1)) {
                 f32 along0, along1;
-                i32 previous = (last + 3) & 3;
                 i32 next = (last + 1) & 3;
+                i32 previous = (last + 3) & 3;
                 // Preserve the reverse-edge locators across the first intersection callback.
                 i32 previous_locator = atat_locators[previous];
                 i32 opposite_locator = atat_locators[(previous + 3) & 3];

@@ -65,7 +65,7 @@ static inline __attribute__((always_inline)) i32 GetHLSLRegisterIndexImpl(const 
     const char *constants = strstr(source, "//NU2API CONSTANTS :");
     const char *match = strstr(source, search_name);
     const char *attributes = strstr(source, "//NU2API ATTRIBS :");
-    if (constants == NULL || match == NULL || (attributes != NULL && match >= attributes)) {
+    if (match == NULL || constants == NULL || (attributes != NULL && match >= attributes)) {
         return -1;
     }
     const char *number = match + NuStrLen(search_name);
@@ -90,7 +90,7 @@ static inline __attribute__((always_inline)) i32 GetHLSLRegisterIndexImpl(const 
 #endif
     i32 index = NuAToI(const_cast<char *>(number));
     const char *declaration = strstr(number, uniform_name + 1);
-    if (declaration == NULL || declaration <= number) {
+    if (declaration <= number || declaration == NULL) {
         return -1;
     }
     for (const char *cursor = declaration - 1; *cursor != '\n'; --cursor) {

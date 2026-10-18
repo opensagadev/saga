@@ -917,7 +917,7 @@ void Grapple_MoveCode(GameObject_s *object) {
                 object->airborne_action_duration = 0.0f;
             else {
                 object->airborne_action_duration += FRAMETIME;
-                if (__builtin_expect(object->airborne_action_duration >= 0.5f, 0)) {
+                if (__builtin_expect(object->airborne_action_duration >= 0.5f, 1)) {
                     i16 animation = LEGOACT_GRAPPLE_HANG;
                     if (animation == -1 || object->apiobj.character_model->model_data_b[animation] == NULL)
                         animation = LEGOACT_LEDGE_IDLE;

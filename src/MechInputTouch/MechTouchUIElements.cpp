@@ -521,7 +521,7 @@ void MechTouchUIPartySelector_OnRelease_Callback(MechTouchUIElement &element, To
 
 void MechTouchUITexButton::Process(float) {
     f32 frame_time = FRAMETIME;
-    if (!(scale_duration < 0.0f) && __builtin_expect(!(scale_elapsed >= scale_duration + scale_delay), 0)) {
+    if (!(scale_duration < 0.0f) && !(scale_elapsed >= scale_duration + scale_delay)) {
         f32 elapsed = scale_elapsed + frame_time;
         if (elapsed > scale_duration + scale_delay) {
             elapsed = scale_duration + scale_delay;
@@ -782,7 +782,7 @@ void MechTouchUICharIcon::Process(float) {
     const u8 was_disabled = disabled;
     SetupDisabled();
     if (field_0x45 == 0 && was_disabled != disabled) {
-        if (__builtin_expect(alpha_duration < 0.0f || alpha_elapsed >= alpha_duration + alpha_delay, 0)) {
+        if (alpha_duration < 0.0f || alpha_elapsed >= alpha_duration + alpha_delay) {
             const f32 destination = disabled != 0 ? 0.3f : 1.0f;
             const f32 start = *alpha_target;
             alpha_elapsed = 0.0f;

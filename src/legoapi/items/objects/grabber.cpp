@@ -435,7 +435,7 @@ void Grabber_Update(WORLDINFO_s *world) {
                      g->direction_switches[0]->anim_set->state == 2;
         bool plus = g->direction_switches[1] && (g->direction_switches[1]->progress_flags & 2) &&
                     g->direction_switches[1]->anim_set->state == 2;
-        if (__builtin_expect(minus && !plus, 1))
+        if (minus && !plus)
             g->target_velocity.x = -g->speed;
         else if (plus && !minus)
             g->target_velocity.x = g->speed;
@@ -445,7 +445,7 @@ void Grabber_Update(WORLDINFO_s *world) {
                 g->direction_switches[3]->anim_set->state == 2;
         if (plus && !minus)
             g->target_velocity.z = g->speed;
-        else if (__builtin_expect(minus && !plus, 0))
+        else if (minus && !plus)
             g->target_velocity.z = -g->speed;
         if (!NuSpecialGetVisibilityFn(&g->special))
             g->target_velocity.z = g->target_velocity.x = 0.0f;
@@ -525,7 +525,7 @@ void Grabber_Update(WORLDINFO_s *world) {
     if (g->flags_559 & 8)
         g->yaw = SeekRot(g->yaw, g->target_yaw, 3.0f);
     matrix = g->matrix;
-    if (__builtin_expect(!!(g->flags_559 & 8), 0))
+    if (__builtin_expect(!!(g->flags_559 & 8), 1))
         NuMtxPreRotateY(&matrix, g->yaw);
     if (__builtin_expect(g->scale != 1.0f, 0)) {
         NUVEC scale = {g->scale, g->scale, g->scale};
@@ -585,7 +585,7 @@ void Grabber_Update(WORLDINFO_s *world) {
             break;
         case 1: {
             f32 *frame = AnimPlaying(&g->animation, 102, 1, 0);
-            if (__builtin_expect(!frame, 1))
+            if (__builtin_expect(!frame, 0))
                 break;
             g->animation_timer -= FRAMETIME;
             if (g->animation_timer <= 0) {

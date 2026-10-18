@@ -285,9 +285,11 @@ void *NuMemoryManager::_TryBlockAlloc(u32 size, u32 alignment, u32 flags, const 
         BinLink(fragment, true);
     }
 
-    if (suffix_size != 0 && suffix_size < minimum_fragment_size) {
-        allocated_size += suffix_size;
-        suffix_size = 0;
+    if (suffix_size < minimum_fragment_size) {
+        if (suffix_size != 0) {
+            allocated_size += suffix_size;
+            suffix_size = 0;
+        }
     }
     if (__builtin_expect(suffix_size != 0, 0)) {
         FreeHeader *suffix = (FreeHeader *)(allocated_begin + allocated_size);
@@ -477,7 +479,7 @@ void NuMemoryManager::BlockFree(void *ptr, u32 flags) {
             manager->BinLink(final, false);
 
             if (manager->stranded_blocks != NULL) {
-                for (i32 i = 0; i < manager->stranded_block_count; i++) {
+                for (u32 i = 0; i < manager->stranded_block_count; i++) {
                     if (ptr == manager->stranded_blocks[i]) {
                         manager->stranded_blocks[i] = NULL;
                     }

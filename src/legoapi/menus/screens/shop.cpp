@@ -564,7 +564,7 @@ i32 CodeMenu(MENU_s *) {
         else if (input.right_held)
             right = 1;
         else if (input.down_held) {
-            if (__builtin_expect(timer <= 0.0f, 0))
+            if (__builtin_expect(timer <= 0.0f, 1))
                 down = 1;
             else if (__builtin_expect(!!(input.down_pressed), 0))
                 down = 1;
@@ -605,7 +605,7 @@ i32 CodeMenu(MENU_s *) {
                 codechar = 0;
             else
                 for (i32 i = 0; i < 36; ++i) {
-                    if (__builtin_expect(usercode[col] != codechars[i], 1)) {
+                    if (usercode[col] != codechars[i]) {
                         continue;
                     }
                     codechar = i;

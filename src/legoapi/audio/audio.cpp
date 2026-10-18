@@ -1302,7 +1302,7 @@ void PlaySabreSfx(char *name, GameObject_s *object, nuvec_s *position, i32) {
         player_bits = 1u << (player & 0x1f);
     }
     if (name == NULL) {
-        const i16 sfx = object->apiobj.character_data->game_character->sfx_sabre;
+        const i32 sfx = object->apiobj.character_data->game_character->sfx_sabre;
         if (sfx == -1) {
             GameAudio_PlaySfx(0x40, &object->apiobj.collision_position, 0, 1);
         } else {
@@ -1356,8 +1356,10 @@ void UpdateLevelSfx(WORLDINFO_s *world, i32 paused) {
     if (paused != 0) {
         goto disable_reverb_and_return;
     }
-    if (GameAudio->check_reverb_fn != NULL && GameAudio->check_reverb_fn() != 0) {
-        goto enable_reverb;
+    if (GameAudio->check_reverb_fn != NULL) {
+        if (GameAudio->check_reverb_fn() != 0) {
+            goto enable_reverb;
+        }
     }
     NuSound3SetReverb(0);
 

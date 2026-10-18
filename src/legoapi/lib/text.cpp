@@ -794,17 +794,19 @@ void Text_ExpandAllButtonStrings(char *input, char *output) {
             token[token_length] = ']';
             token[token_length + 1] = '\0';
             token_length = NuStrLen(token);
-            if (token_length > 0 && Text_ExpandButtonString(token, expanded) != 0) {
-                char *character = expanded;
-                while (*character != '\0') {
-                    *output = *character;
-                    output[1] = '\0';
-                    ++character;
-                    ++output;
+            if (token_length > 0) {
+                if (Text_ExpandButtonString(token, expanded) != 0) {
+                    char *character = expanded;
+                    while (*character != '\0') {
+                        *output = *character;
+                        output[1] = '\0';
+                        ++character;
+                        ++output;
+                    }
+                    NuStrCat(output, expanded);
+                    input += token_length;
+                    continue;
                 }
-                NuStrCat(output, expanded);
-                input += token_length;
-                continue;
             }
             literal = *input;
         }

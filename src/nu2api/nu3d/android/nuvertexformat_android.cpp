@@ -46,9 +46,9 @@ NuVertexFormatPS *NuGetVertexDeclaration(NUVERTEXDESCRIPTOR vtx_desc) {
         half_texture_mode = vtx_desc.tex_coord_mode;
         texture_mode = 0;
     }
-    const i32 weights = (descriptor & 0x8000) ? 2 : (descriptor >> 14) & 1;
-    const i32 colour2 = (descriptor & 0x20000) ? 2 : (descriptor >> 16) & 1;
     const bool skinned = (descriptor & 0x4000000) != 0;
+    const i32 colour2 = (descriptor & 0x20000) ? 2 : (descriptor >> 16) & 1;
+    const i32 weights = (descriptor & 0x8000) ? 2 : (descriptor >> 14) & 1;
     const bool instanced = (descriptor >> 22) & 1;
     i16 offset = 0;
 #define VERTEX_ATTRIBUTE(slot, gl_type, components, normalize, bytes)                                                  \

@@ -213,9 +213,9 @@ void UpdateExplosion_Generic(EXPLOSION *explosion) {
             hit_character = 1;
         }
     }
-    if (__builtin_expect(!hit_character && (explosion->field_0x24 & 2) != 0, 1)) {
+    if (!hit_character && (explosion->field_0x24 & 2) != 0) {
         u32 hit_type;
-        if (__builtin_expect((explosion->field_0x24 & 0x10) != 0, 0))
+        if (__builtin_expect((explosion->field_0x24 & 0x10) != 0, 1))
             hit_type = 3;
         else if ((explosion->field_0x24 & 0x100) != 0)
             hit_type = 7;

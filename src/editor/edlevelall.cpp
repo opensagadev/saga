@@ -1817,7 +1817,10 @@ void *SceneObjectHelper::GetNextObject(void *item) {
         return NULL;
 
 owned_objects:
-    return static_cast<SceneObject *>(item)->editor_owned != 0 ? static_cast<SceneInstance *>(item)->next : owned_first;
+    if (static_cast<SceneObject *>(item)->editor_owned != 0) {
+        return static_cast<SceneInstance *>(item)->next;
+    }
+    return owned_first;
 }
 
 char const *SpecialObject::GetName() const {
@@ -7530,8 +7533,8 @@ __attribute__((force_align_arg_pointer)) void EdManScale::Render(ClassObjectList
     VuVec average;
     if (selected.GetAveragePosition(average) != 0) {
         VuMtx transform;
-        ClassObjectListEntry *entry = selected.first;
         const i32 type = EdType_VuMtx;
+        ClassObjectListEntry *entry = selected.first;
         if (entry->reference == NULL ||
             entry->reference->GetAttributeData(entry->object, 0x20, type, &transform, 0) == 0) {
             EdMember member;
@@ -8745,21 +8748,25 @@ void LevelEditor::ProcessEvenWhenPaused(ThingProcessData *data) {
     if (edmainGetCursorEnabled()) {
         eduiProcessCursor(0.0f, pad);
     }
-    if (field_0x28 != 0 && eduiGetCameraEnabled()) {
-        if (edlevel_mouseandkeyboard == 0) {
-            edcamMove(pad);
-        } else {
-            edcamMove(NULL);
+    if (field_0x28 != 0) {
+        if (eduiGetCameraEnabled()) {
+            if (edlevel_mouseandkeyboard == 0) {
+                edcamMove(pad);
+            } else {
+                edcamMove(NULL);
+            }
+            edcamGetPosAng(reinterpret_cast<NUVEC *>(background_colour), &field_0x20, &field_0x24);
         }
-        edcamGetPosAng(reinterpret_cast<NUVEC *>(background_colour), &field_0x20, &field_0x24);
     }
     if (input.GetPress(17) != 0.0f) {
         overlay_alpha += 0.1f;
         eduiSetFontScale(overlay_alpha, overlay_alpha);
     }
-    if (input.GetPress(18) != 0.0f && static_cast<f32>(EdLevelFntScale) > 0.1f) {
-        overlay_alpha -= 0.1f;
-        eduiSetFontScale(overlay_alpha, overlay_alpha);
+    if (input.GetPress(18) != 0.0f) {
+        if (static_cast<f32>(EdLevelFntScale) > 0.1f) {
+            overlay_alpha -= 0.1f;
+            eduiSetFontScale(overlay_alpha, overlay_alpha);
+        }
     }
     if (edLevelActiveMenu != NULL) {
         NuFntSet(EdLevelFnt);

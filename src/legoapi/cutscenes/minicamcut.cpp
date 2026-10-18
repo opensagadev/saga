@@ -382,7 +382,7 @@ execute_command:
             else
                 MiniCam.target_yaw = yaw;
             MiniCam.start_yaw = MiniCam.yaw;
-            if (__builtin_expect(roll_rate != 0, 1))
+            if (__builtin_expect(roll_rate != 0, 0))
                 MiniCam.target_roll = (i32)(roll_rate * command_duration);
             else
                 MiniCam.target_roll = roll;

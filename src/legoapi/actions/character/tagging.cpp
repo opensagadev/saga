@@ -279,7 +279,7 @@ void Tag_NewTransfer(GameObject_s *source, GameObject_s *target) {
     }
     if (Tag_DoneFirst == 0) {
         Tag_DoneFirst = 1;
-    } else if (__builtin_expect(Tag_DoneFirst == 1, 0)) {
+    } else if (Tag_DoneFirst == 1) {
         Tag_DoneFirst = 2;
     }
     Tag_DoneAny = 1;

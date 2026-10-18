@@ -1245,7 +1245,7 @@ void DagobahA_Update(WORLDINFO_s *world) {
         return;
 
     GIZFORCEGROUP_s *group = first->group;
-    if (__builtin_expect(group != NULL && (group->field_0x24 & 2) != 0, 1)) {
+    if (group != NULL && (group->field_0x24 & 2) != 0) {
         if (dagobahA_nodesNeedUpdating != 0)
             return;
         dagobahA_nodesNeedUpdating = 1;

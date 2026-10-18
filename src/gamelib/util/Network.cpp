@@ -449,11 +449,13 @@ bool NetChangedReplicator::AllowPush(EdClass const *object_class, void const *ob
     u32 now = UtilGetFrameStartTime();
     u32 elapsed = now - *last_push;
     bool push = force != 0 || (maximum_interval != 0 && elapsed > maximum_interval);
-    if (!push && elapsed > minimum_interval && skip_checksum == 0) {
-        CheckSumObject(object_class, object, checksum);
-        if (*last_checksum != checksum) {
-            *last_checksum = checksum;
-            push = true;
+    if (elapsed > minimum_interval && !push) {
+        if (skip_checksum == 0) {
+            CheckSumObject(object_class, object, checksum);
+            if (*last_checksum != checksum) {
+                *last_checksum = checksum;
+                push = true;
+            }
         }
     }
     if (push) {
@@ -1619,8 +1621,8 @@ void NetworkObjectManager::Update() {
             continue;
         }
         if (push->stage == 1 || push->stage == 2) {
-            i32 object_index = push->field_10;
             i32 object_count = local_object_count;
+            i32 object_index = push->field_10;
             message_limit = theNuNetEmu.field_1c;
             if (theNuNetEmu.packet_stats.pack_ratio > 0.0f) {
                 message_limit = static_cast<i32>(message_limit * theNuNetEmu.packet_stats.pack_ratio);

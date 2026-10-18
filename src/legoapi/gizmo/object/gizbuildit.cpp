@@ -837,7 +837,7 @@ static void GizBuildIts_LateUpdate(void *world_ptr, void *data, float) {
             for (i32 piece_index = 0; piece_index < buildit.anim_object_count; ++piece_index) {
                 GAMEANIMOBJ_s *piece = buildit.anim_objects[piece_index];
                 GIZBUILDITANIMDATA_s *piece_data = static_cast<GIZBUILDITANIMDATA_s *>(piece->object_data);
-                if (__builtin_expect(buildit.linked_buildit != NULL, 0)) {
+                if (buildit.linked_buildit != NULL) {
                     finish_position.x = piece_data->end_mtx.m30;
                     finish_position.y = piece_data->end_mtx.m31;
                     finish_position.z = piece_data->end_mtx.m32;

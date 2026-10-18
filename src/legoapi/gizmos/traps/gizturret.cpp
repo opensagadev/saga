@@ -140,7 +140,7 @@ static void GizTurrets_Update(void *context, void *system_ptr, float frame_time)
                                 base_yaw = static_cast<i16>(home_yaw);
                             }
                             turret->fire_cooldown -= frame_time;
-                            if (__builtin_expect(turret->fire_cooldown < 0.0f, 0))
+                            if (turret->fire_cooldown < 0.0f)
                                 turret->fire_cooldown = 0.0f;
                             i32 desired_pitch = 0, desired_yaw = base_yaw;
                             should_fire = false;
@@ -244,8 +244,8 @@ static void GizTurrets_Update(void *context, void *system_ptr, float frame_time)
                                             goto autonomous_apply;
                                     }
                                     should_fire = bolt_type != NULL;
-                                    if (__builtin_expect((turret->behavior_flags & 0x200) && target_velocity != NULL &&
-                                        bolt_type != NULL, 0)) {
+                                    if ((turret->behavior_flags & 0x200) && target_velocity != NULL &&
+                                        bolt_type != NULL) {
                                         GizTurret_CalculateInterceptVector(
                                             reinterpret_cast<NUVEC *>(&reference->m30), primary_draw, target_position,
                                             target_velocity, bolt_type->field_10, &world_direction, NULL,
@@ -388,7 +388,7 @@ static void GizTurrets_Update(void *context, void *system_ptr, float frame_time)
                                     if (turret->behavior_flags & 0x40)
                                         NuMtxPreRotateX(&direction_matrix, turret->pitch);
                                     NuMtxPreRotateY(&direction_matrix, 0x8000);
-                                    if (__builtin_expect(bolt_type->field_40 != 0, 1)) {
+                                    if (bolt_type->field_40 != 0) {
                                         NuMtxPreRotateX(&direction_matrix, scatter_pitch);
                                         NuMtxPreRotateY(&direction_matrix, scatter_yaw);
                                     }

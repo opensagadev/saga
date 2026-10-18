@@ -268,7 +268,7 @@ void PushCode(GameObject_s *object, i32 allow_push) {
              (LEGOACT_PUSH != -1 && object->apiobj.character_model->model_data_b[LEGOACT_PUSH] != NULL))) {
             if (!(object->field_0xdc4 >= 0.25f))
                 goto maintain;
-            if (__builtin_expect((static_cast<u32>(surface) - 30) < 2 || (object->field_0xf02 & 2) != 0, 0)) {
+            if (__builtin_expect((static_cast<u32>(surface) - 30) < 2 || (object->field_0xf02 & 2) != 0, 1)) {
                 GIZSPINNER_s *spinner = NULL;
                 if (__builtin_expect(LEGOCONTEXT_PUSHSPINNER != -1, 0))
                     spinner = GizSpinner_Find(WORLD, &object->apiobj.collision_position, 1);
@@ -482,7 +482,7 @@ finalize:
             PlayLandSfx(object, 0, 0);
         else
             PlayGruntSfx(object);
-        if (__builtin_expect(!!(pushing), 0))
+        if (__builtin_expect(!!(pushing), 1))
             object->takeover_start_angle = wall_angle;
     }
 }

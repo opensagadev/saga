@@ -1222,7 +1222,7 @@ void Bolt_HitGameObjectRC(NetMessage &message) {
     }
     if (message.data != NULL) {
         memmove(&object_index, message.data->bytes + message.read_offset, 2);
-        if (__builtin_expect(message.swap_endianness, 1))
+        if (message.swap_endianness)
             EdFileSwapEndianess16(&object_index);
         message.read_offset += 2;
     }

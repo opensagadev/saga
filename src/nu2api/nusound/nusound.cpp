@@ -533,7 +533,7 @@ NuSoundDecoder *NuSoundSystem::CreateDecoder(NuSoundSource *source) {
     const char *name = source->GetName();
     if (name != NULL) {
         const u16 length = static_cast<u16>(strlen(name) + 1);
-        if (length > name_capacity || decoded_name == theEmptyString) {
+        if (decoded_name == theEmptyString || length > name_capacity) {
             name_capacity = static_cast<u16>((length + 3) & 0xfffc);
             if (decoded_name == theEmptyString) {
                 decoded_name = static_cast<char *>(

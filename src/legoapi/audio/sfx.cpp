@@ -1274,7 +1274,7 @@ void SetLevelSfxBits(WORLDINFO *world) {
                 }
             }
             {
-                const i16 configured_sfx = game_character->sfx_grunt;
+                const i32 configured_sfx = game_character->sfx_grunt;
                 if (configured_sfx != -1) {
                     sfx_ids[sfx_count++] = configured_sfx;
                 } else if ((character->model_flags & 0x44002010) == 0) {

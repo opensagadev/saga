@@ -298,19 +298,21 @@ void StatusStage_Reset(STATUS_STAGE_s *stage) {
 
 void NewStatusRumbleBuzz(i32 player, float amount, float buzz, i32 priority) {
     for (i32 i = 0; i < 2; ++i) {
-        if (StatusPacket.player_active[i] != 0 && StatusRumbleTargetsPlayer(player, i)) {
-            RUMBLEPACKET *rumble = &StatusPacket.rumble[i];
-            if (amount > 0.0f && (__builtin_expect(rumble->time <= 0.0f, 0) ||
-                                  __builtin_expect(amount > rumble->time / rumble->duration * rumble->amount, 0))) {
-                rumble->amount = amount;
-                rumble->duration = amount;
-                rumble->time = amount;
-            }
-            if (buzz > rumble->buzz_time) {
-                rumble->buzz_time = buzz;
-            }
-            if (priority > 0 && ++priority > rumble->priority) {
-                rumble->priority = static_cast<u8>(priority);
+        if (StatusPacket.player_active[i] != 0) {
+            if (StatusRumbleTargetsPlayer(player, i)) {
+                RUMBLEPACKET *rumble = &StatusPacket.rumble[i];
+                if (amount > 0.0f && (__builtin_expect(rumble->time <= 0.0f, 0) ||
+                                      __builtin_expect(amount > rumble->time / rumble->duration * rumble->amount, 0))) {
+                    rumble->amount = amount;
+                    rumble->duration = amount;
+                    rumble->time = amount;
+                }
+                if (buzz > rumble->buzz_time) {
+                    rumble->buzz_time = buzz;
+                }
+                if (priority > 0 && ++priority > rumble->priority) {
+                    rumble->priority = static_cast<u8>(priority);
+                }
             }
         }
     }
@@ -505,7 +507,7 @@ void InitStatusScreen(WORLDINFO_s *world) {
     if (p.init_callback(world, &p) != 0) {
         return;
     }
-    if ((p.mode_flags & 4) != 0) {
+    if (p.super_story_mode) {
         if (NewLData == STATUS_LDATA || WORLD->current_level == STATUS_LDATA) {
             const u32 previous_score = Game.episode_save[episode].superstory_score_target;
             p.previous_best_score = previous_score;

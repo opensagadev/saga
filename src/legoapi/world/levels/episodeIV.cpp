@@ -566,7 +566,7 @@ void TatooineA_Update(WORLDINFO_s *world) {
         return;
 
     GIZFORCEGROUP_s *group = first->group;
-    if (__builtin_expect(group != NULL && (group->field_0x24 & 2) != 0, 0)) {
+    if (group != NULL && (group->field_0x24 & 2) != 0) {
         if (tatooineA_nodesNeedUpdating != 0)
             return;
         tatooineA_nodesNeedUpdating = 1;
@@ -1399,7 +1399,7 @@ void DeathStarBattleDUpdate(WORLDINFO_s *world) {
         if (__builtin_expect(trenchrun.position.x < -500.0f, 1)) {
             trenchrun.position.y = trench_spawn_height - 10.5f;
             i32 &midtro = *reinterpret_cast<i32 *>(&trenchrun.reserved_0x18[0]);
-            if (__builtin_expect(FreePlay == 0 && midtro == 0, 1)) {
+            if (__builtin_expect(FreePlay == 0 && midtro == 0, 0)) {
                 if (trenchrun.objects[0] != NULL) {
                     KillGameObject(trenchrun.objects[0], 4, 0);
                     trenchrun.objects[0] = NULL;
@@ -1420,7 +1420,7 @@ void DeathStarBattleDUpdate(WORLDINFO_s *world) {
         trenchrun.position.z = player->apiobj.collision_position.z;
         f32 lower = trenchrun.objects[0] != NULL ? 62.0f : 60.0f;
         f32 upper = trenchrun.objects[2] != NULL ? 70.0f : 72.0f;
-        if (__builtin_expect(trenchrun.position.z < lower, 1))
+        if (trenchrun.position.z < lower)
             trenchrun.position.z = lower;
         else if (trenchrun.position.z > upper)
             trenchrun.position.z = upper;

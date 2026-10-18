@@ -3192,7 +3192,7 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
             object->movement_lean_angle = 0;
             object->secondary_lean_angle = 0;
         }
-        if (__builtin_expect(WORLD->current_level == PLATFORM_LDATA, 0))
+        if (__builtin_expect(WORLD->current_level == PLATFORM_LDATA, 1))
             return;
         goto vehicle_collision;
     }
@@ -3275,9 +3275,8 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
                     }
                 }
             } else if (object->in_narrow_socket &&
-                       __builtin_expect(requested_speed == 0.0f || object->character_context == 0x2a ||
-                                            object->character_context == 0x36 || object->character_context == 0x3a,
-                                        1)) {
+                       (requested_speed == 0.0f || object->character_context == 0x2a ||
+                        object->character_context == 0x36 || object->character_context == 0x3a)) {
                 u16 desired = narrow_yaw;
                 if (abs(RotDiff(narrow_yaw, api.movement_facing_angle)) > 0x4000)
                     desired += 0x8000;
@@ -3292,10 +3291,8 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
             u8 boundary_player = api.flags_low & 0x80;
             if (!(object->character_context == -1 && object->field_0x1084 &&
                   fabsf(object->contact_normal.y) < NuTrigTable[0x3aaa])) {
-                if (__builtin_expect(boundary_player != 0 &&
-                                         (api.character_data->game_character->flags_090 & 0x10000) == 0 &&
-                                         (i8)object->field_0xf03 >= 0,
-                                     0)) {
+                if (boundary_player != 0 && (api.character_data->game_character->flags_090 & 0x10000) == 0 &&
+                    (i8)object->field_0xf03 >= 0) {
                     i32 outside = OutSideSplineArea(&api.collision_position, WORLD->camera_splines[16], &a, &b, 0);
                     i32 inside = 0;
                     if (!outside)
@@ -5173,8 +5170,8 @@ static u8 SetComboOpponent(GameObject_s *object, f32 range, i32 update_heading, 
         if (object->pad_gamepad->input_magnitude > 0.0f) {
             NuVecRotateY(&forward, &v001, GamePad_InputAngle(object, object->pad_gamepad));
         }
-        f32 nearest_distance = 1.0e8f;
         GameObject_s *nearest = NULL;
+        f32 nearest_distance = 1.0e8f;
         GameObject_s *target = Obj;
         for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++target) {
             if (target == object || (target->apiobj.field_0x1f8 & 0x1001) != 0x1001 ||
@@ -5208,7 +5205,7 @@ static u8 SetComboOpponent(GameObject_s *object, f32 range, i32 update_heading, 
         }
     }
     result = 0;
-    if (__builtin_expect(!searched, 0)) {
+    if (__builtin_expect(!searched, 1)) {
         object->force_target = ObjOpponent(object, range, 0.0f, 0, 0, 1);
         result = object->force_target != NULL;
     }
@@ -5537,7 +5534,7 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
             if (can_queue)
                 object->field_0xe22 |= 8;
         }
-        if (__builtin_expect(action_pressed != 0 && object->combo_input_latched == 0, 0)) {
+        if (action_pressed != 0 && object->combo_input_latched == 0) {
             if (!can_queue)
                 object->field_0xe20 &= ~0x40;
             else
@@ -5548,7 +5545,7 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
     }
 
     {
-        const i8 context = object->character_context;
+        const i32 context = object->character_context;
         if (__builtin_expect(action_pressed == 0, 0) || (!player_active && cooldown > 0.0f) || context == 0x15 ||
             context == 0x5a || context == 0x13 || context == 0x2e ||
             (!player_active && static_cast<u8>(context - 6) < 2) || context == 8 || context == 0x1b ||
@@ -5647,9 +5644,11 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
 
         JEDI_ACTION action = JEDI_ACTION_COMBO_1_1;
         u8 alternate = 0;
-        if (JediHasAction(object, JEDI_ACTION_COMBO_2_1) && object->combo_alternate == 0) {
-            action = JEDI_ACTION_COMBO_2_1;
-            alternate = 1;
+        if (JediHasAction(object, JEDI_ACTION_COMBO_2_1)) {
+            if (object->combo_alternate == 0) {
+                action = JEDI_ACTION_COMBO_2_1;
+                alternate = 1;
+            }
         }
         object->queued_context_animation = action;
         object->context_animation = action;
@@ -6204,7 +6203,7 @@ static void ForceCode(GameObject_s *object, i32 pressed, i32 held) {
     if (force != NULL && __builtin_expect(static_cast<signed char>(object->apiobj.flags_low) < 0, 1) &&
         __builtin_expect((object->field_0xe22 & 2) == 0, 1) && __builtin_expect(object->apiobj.field_0x27d != 0, 1)) {
         object->field_0xe22 |= 2;
-        if (__builtin_expect(object->gizforce_target_object == NULL, 0)) {
+        if (__builtin_expect(object->gizforce_target_object == NULL, 1)) {
             object->force_glow_candidate = force;
             object->force_glow_candidate_kind = 0;
             SetHeadTarget(object, &force->file_position, 1, 2.0f, 5.0f, 10.0f);
@@ -6429,7 +6428,7 @@ static void ForceDeflectCode(GameObject_s *object, i32 pressed, i32 held) {
         object->force_glow_candidate_kind = 3;
         SetHeadTarget(object, &object->force_part->position, 2, 1.0f, 0.0f, 0.0f);
         part = object->force_part;
-        if (__builtin_expect(part->move_callback == BobaRocket_Move, 0)) {
+        if (part->move_callback == BobaRocket_Move) {
             part->move_callback = NULL;
             part->update_callback = NULL;
             part->flags = (part->flags & ~0x4000) | 0x80;
@@ -8880,7 +8879,7 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
     object->field_0xe23 &= ~0x10;
     if (MovingBackwards(object) != 0) {
         object->field_0xefd |= GAMEOBJECT_MOVEMENT_FLAG_BACKWARDS;
-    } else if (__builtin_expect(static_cast<i8>(object->field_0xefd) < 0, 1)) {
+    } else if (static_cast<i8>(object->field_0xefd) < 0) {
         object->field_0xefd |= GAMEOBJECT_MOVEMENT_FLAG_BACKWARDS;
     }
     if (object->character_context == 0x35) {
@@ -9154,7 +9153,7 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
             heading_handled = SuperCarry_YRotation(object, input_angle);
             break;
         directional_heading_0x1b:
-            if (__builtin_expect(object->field_0x7a3 == 1, 0))
+            if (object->field_0x7a3 == 1)
                 api.movement_facing_angle = input_angle;
             else
                 FaceOpponent(object, NULL);
@@ -9389,7 +9388,7 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
                         }
                         if (object->character_context == 0x5a) {
                             if (object->field_0x7a3 == 0 && (api.field_0x1f8 & 2) == 0) {
-                                const u16 angle = api.movement_facing_angle;
+                                const i32 angle = api.movement_facing_angle;
                                 object->target_velocity.x = -NU_SIN_LUT(angle) * object->external_force.z;
                                 object->target_velocity.z =
                                     -NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff] * object->external_force.z;

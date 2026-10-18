@@ -1172,11 +1172,11 @@ void VaderC_Update(WORLDINFO_s *world) {
              (second_player != NULL && (second_player->apiobj.field_0x1f8 & 0x80) != 0 &&
               second_player->apiobj.field_0x287 != 0 && (second_player->apiobj.field_0x1f4 & 0x40000) == 0)) &&
             (static_cast<u8 *>(vaderc_netpacket)[0] == 0 || first_player == NULL ||
-             (first_player->apiobj.field_0x1f8 & 0x80) == 0 || second_player == NULL ||
+             !first_player->apiobj.player_controlled || second_player == NULL ||
              !second_player->apiobj.player_controlled) &&
             (ChallengeMode == 0 || AreaGlobals.values.field_0x1c <= 9)) {
             vader_c.field_0x95 = 1;
-            if (__builtin_expect(vader_c.final_fight_message->value == 0.0f, 1))
+            if (vader_c.final_fight_message->value == 0.0f)
                 ResetLevel(NULL, NULL, 1);
         }
     }

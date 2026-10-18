@@ -2705,7 +2705,7 @@ extern "C" {
             NuQFntPushPrintMode(2);
         unsigned char decoded[512];
         TextDecode(text, decoded);
-        if (__builtin_expect(followon_line == 0, 1))
+        if (followon_line == 0)
             NuQFntSet(SmartTextFont != NULL ? SmartTextFont : QFont2D);
         draw_x_scale *= x_scale;
         draw_y_scale *= y_scale;
@@ -2818,7 +2818,7 @@ extern "C" {
             }
             const bool next_button = decoded[i] == 0xd4 && decoded[i + 1] >= 0xb1 && decoded[i + 1] <= 0xbf;
             if (next_button) {
-                if (count != 0 && !button_font) {
+                if (!button_font && count != 0) {
                     fragment[count] = 0;
                     x += TextPrintSubstring(fragment, x, draw_y, z, draw_x_scale, draw_y_scale, current_rgba, 0);
                     count = 0;

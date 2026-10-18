@@ -2773,15 +2773,17 @@ static i32 Action_UseTimeBasedUpdate(AISYS *, AISCRIPTPROCESS *, AIPACKET *packe
     if (packet != NULL && packet->owner != NULL) {
         GameObject *object = packet->owner->apiobj.objptr;
         i32 disabled = 1;
-        if (first_time != 0 && param_count > 0) {
-            i32 enabled = 0;
-            for (i32 index = 0; index != param_count; ++index) {
-                if (NuStrICmp(params[index], "TRUE") == 0)
-                    enabled = 1;
-                else if (NuStrICmp(params[index], "FALSE") == 0)
-                    enabled = 0;
+        if (first_time != 0) {
+            if (param_count > 0) {
+                i32 enabled = 0;
+                for (i32 index = 0; index != param_count; ++index) {
+                    if (NuStrICmp(params[index], "TRUE") == 0)
+                        enabled = 1;
+                    else if (NuStrICmp(params[index], "FALSE") == 0)
+                        enabled = 0;
+                }
+                disabled = enabled ^ 1;
             }
-            disabled = enabled ^ 1;
         }
         object->time_based_update_disabled = disabled;
     }
@@ -3679,8 +3681,8 @@ __used__ static i32 Action_GoToNewLevel(AISYS *sys, AISCRIPTPROCESS *processor, 
     (void)param_6;
 
     if (param_5 != 0 && param_4 > 0) {
-        LEVELDATA *level = NULL;
         i32 param_index = 0;
+        LEVELDATA *level = NULL;
 
         char *cutscene_name = NULL;
         do {
@@ -3754,10 +3756,10 @@ __used__ static i32 Action_SetScaleOverride(AISYS *sys, AISCRIPTPROCESS *process
     f32 scale;
     GameObject_s *object = packet->owner->apiobj.objptr;
     if (param_5 != 0) {
+        f32 min = 1000000000.0f;
         scale = 1000000000.0f;
         f32 time = 0.0f;
         f32 zero = 0.0f;
-        f32 min = 1000000000.0f;
         f32 max = 1000000000.0f;
 
         if (param_4 <= 0) {
@@ -4103,8 +4105,8 @@ __used__ static i32 Action_AddTorpedoPacket(AISYS *sys, AISCRIPTPROCESS *process
             object->torpedo->field_0x1 |= flags;
             for (i32 index = 0; index < torpedo_count; ++index) {
                 object->torpedo->pickup_positions[index] = object->apiobj.collision_position;
-                object->torpedo->field_03 = 0;
                 object->torpedo->field_08 = 0.8f;
+                object->torpedo->field_03 = 0;
             }
         }
     }
@@ -4770,6 +4772,7 @@ __used__ static i32 Action_UseForce(AISYS *, AISCRIPTPROCESS *processor, AIPACKE
     GIZFORCE_s *force;
 
     if (first_time != 0) {
+        i32 index = 0;
         processor->action_data_3 = NULL;
         if (param_count <= 0) {
             return 1;
@@ -4777,7 +4780,7 @@ __used__ static i32 Action_UseForce(AISYS *, AISCRIPTPROCESS *processor, AIPACKE
 
         GIZFORCE_s *candidates[16];
         i32 candidate_count = 0;
-        for (i32 index = 0; index < param_count; ++index) {
+        do {
             if (NuStrICmp(params[index], "throwable") != 0) {
                 if (NuStrICmp(params[index], "inrange") == 0) {
                     processor->action_data_2 = 1;
@@ -4806,7 +4809,7 @@ __used__ static i32 Action_UseForce(AISYS *, AISCRIPTPROCESS *processor, AIPACKE
             } else {
                 processor->action_data_1 = 1;
             }
-        }
+        } while (++index < param_count);
 
         if (candidate_count != 0) {
             const i32 random_index = qrand() / (0xffff / candidate_count + 1);
@@ -6209,12 +6212,10 @@ static void *Condition_OpponentIsAInit(AISYS *sys, char *arg, AISCRIPT *) {
 }
 
 static void *Condition_IAmAInit(AISYS *sys, char *arg, AISCRIPT *) {
-    if (arg != NULL) {
-        if (sys != NULL) {
-            for (i32 index = 0; index < CHARCOUNT; ++index) {
-                if (NuStrICmp(CDataList[index].file, arg) == 0)
-                    return reinterpret_cast<void *>(static_cast<isize>(index));
-            }
+    if (arg != NULL && sys != NULL) {
+        for (i32 index = 0; index < CHARCOUNT; ++index) {
+            if (NuStrICmp(CDataList[index].file, arg) == 0)
+                return reinterpret_cast<void *>(static_cast<isize>(index));
         }
     }
     return reinterpret_cast<void *>(static_cast<isize>(-1));
@@ -6606,8 +6607,10 @@ __used__ static i32 Action_CompleteLevel(AISYS *sys, AISCRIPTPROCESS *processor,
             }
         }
         if (FreePlay == 0) {
-            if (cutscene != NULL && NewCutScene(NULL, WORLD->cutscene_sys, cutscene, 0) != NULL) {
-                return 1;
+            if (cutscene != NULL) {
+                if (NewCutScene(NULL, WORLD->cutscene_sys, cutscene, 0) != NULL) {
+                    return 1;
+                }
             }
         }
         if (FreePlay != 0 && level != NULL && (level->flags & (LEVEL_INTRO | LEVEL_MIDTRO | LEVEL_OUTRO)) != 0) {
@@ -6788,7 +6791,7 @@ __used__ static i32 Action_CopyMessage(AISYS *, AISCRIPTPROCESS *, AIPACKET *, c
         if (to != NULL && from != NULL) {
             GIZAIMESSAGE_s *source = CheckGizAIMessage(gizaimessagesys, from, NULL);
             GIZAIMESSAGE_s *destination = CheckGizAIMessage(gizaimessagesys, to, NULL);
-            if (destination != NULL && source != NULL)
+            if (source != NULL && destination != NULL)
                 destination->value = source->value;
         }
     }
@@ -8596,7 +8599,8 @@ __used__ static i32 Action_PlaySfx(AISYS *sys, AISCRIPTPROCESS *processor, AIPAC
     f32 repeat_delay = 0.0f;
     f32 start_delay = 0.0f;
 
-    for (i32 index = 0; index < param_4; ++index) {
+    i32 index = 0;
+    do {
         char *value = NuStrIStr(params[index], const_cast<char *>("name="));
         if (value != NULL) {
             name = value + 5;
@@ -8637,7 +8641,7 @@ __used__ static i32 Action_PlaySfx(AISYS *sys, AISCRIPTPROCESS *processor, AIPAC
             GameObject_s *object = GetNamedGameObject(sys, value + 14);
             position_ptr = &object->apiobj.collision_position;
         }
-    }
+    } while (++index < param_4);
 
     if (position_ptr == NULL && position.x != 1.0e9f && position.y != 1.0e9f && position.z != 1.0e9f) {
         position_ptr = &position;
@@ -9244,10 +9248,10 @@ __used__ static i32 Action_Kill(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET
                 candidate->respawn_at_origin = respawn_at_origin;
                 if (parts_on)
                     KillParts(candidate, -1, -1, 1, 0.0f, 0, NULL);
-                if (debris)
-                    KillGameObject(candidate, 2, 0);
-                else
+                if (!debris)
                     KillGameObject(candidate, 4, 0);
+                else
+                    KillGameObject(candidate, 2, 0);
             }
         }
         return 1;
@@ -9697,7 +9701,7 @@ __used__ static i32 Action_SetOpponent(AISYS *sys, AISCRIPTPROCESS *processor, A
             opponent = static_cast<GameObject_s *>(object->last_attacker);
         } else if ((value = NuStrIStr(params[index], "opponentType")) != NULL) {
             i32 type = 0xff;
-            if (LevelCharacterTypeIDFn != NULL && LevelCharacterGlobalIDFn != NULL) {
+            if (LevelCharacterGlobalIDFn != NULL && LevelCharacterTypeIDFn != NULL) {
                 const u8 local_type = static_cast<u8>(LevelCharacterTypeIDFn(value + 13));
                 if (local_type != 0xff)
                     type = LevelCharacterGlobalIDFn(local_type);
@@ -10869,8 +10873,6 @@ i32 Action_DynamicCameraCut(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPAC
     NUVEC camera_position = {1000000000.0f, 1000000000.0f, 1000000000.0f};
     NUVEC camera_offset = {0.0f, 0.0f, 0.0f};
     if (first_time != 0) {
-        u32 flags = 0;
-        f32 range = 1.0f;
         i32 rotation_x = 0, rotation_y = 0, rotation_z = 0;
         f32 start_time = 0.0f, blend_in_time = 0.0f, end_time = 1000000000.0f;
         f32 blend_out_time = 0.0f, blend_time = 0.0f, hold_time = 0.0f, max_time = 0.0f;
@@ -10878,6 +10880,8 @@ i32 Action_DynamicCameraCut(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPAC
         char mode = -1, interpolation = -1;
         NUGSPLINE *spline = NULL;
         char *target_locator = NULL, *target_character = NULL, *target_object = NULL, *camera_locator = NULL;
+        f32 range = 1.0f;
+        u32 flags = 0;
         for (i32 index = 0; index < param_count; ++index) {
             char *value;
             if (NuStrICmp("use_current_campos", params[index]) == 0) {
@@ -11055,8 +11059,8 @@ i32 Action_CameraCut(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKET_s *
     if (first_time == 0 || param_count <= 0)
         return 1;
 
-    f32 range = 1.0f;
     i32 rotation_x = 0;
+    f32 range = 1.0f;
     i32 rotation_y = 0;
     char *target_locator = NULL;
     char *target_character = NULL;
@@ -11488,7 +11492,7 @@ __used__ static i32 Action_CreateCreatures(AISYS *sys, AISCRIPTPROCESS *processo
     f32 delay = 0.0f;
     i32 offset_applied = 0;
     while (count != 0) {
-        if ((locator_count | zipup_count) == 0 && rider == NULL && start_locator == 0)
+        if ((locator_count | zipup_count) == 0 && start_locator == 0 && rider == NULL)
             break;
         if (model_count == 0)
             break;

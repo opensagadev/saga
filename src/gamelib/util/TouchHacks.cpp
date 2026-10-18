@@ -108,9 +108,9 @@ typedef f32 LandingProbeVec4 __attribute__((vector_size(16)));
 bool TouchHacks::CheckJumpForLandingSpot(GameObject_s &object, float maximum_drop) {
     VuVec position __attribute__((aligned(16)))(object.apiobj.position.x, object.apiobj.position.y,
                                                 object.apiobj.position.z, 1.0f);
+    const f32 step_x = object.apiobj.velocity.x * 0.2f;
     const f32 minimum_height = object.apiobj.position.y - maximum_drop;
     const GAMECHARACTERDATA *character = object.apiobj.character_data->game_character;
-    const f32 step_x = object.apiobj.velocity.x * 0.2f;
     const f32 step_z = object.apiobj.velocity.z * 0.2f;
     f32 vertical_velocity = character->jump_speed + object.apiobj.velocity.y;
 
@@ -120,10 +120,12 @@ bool TouchHacks::CheckJumpForLandingSpot(GameObject_s &object, float maximum_dro
         if (GameRayCast(&position.xyz, &displacement.xyz, 0.0f, 0) != 0) {
             VuVec normal = VuVec_Zero;
             NewRayCastGetImpactNormal(&normal.xyz);
-            if (!(normal.y <= 0.8f) && GameShadow(&object, &position.xyz, 5.0f, -1) != 2000000.0f) {
-                const u32 layer = EShadowInfo();
-                if (layer <= 16 && (TerLayer[layer].flags & 1) == 0) {
-                    return true;
+            if (!(normal.y <= 0.8f)) {
+                if (GameShadow(&object, &position.xyz, 5.0f, -1) != 2000000.0f) {
+                    const u32 layer = EShadowInfo();
+                    if (layer <= 16 && (TerLayer[layer].flags & 1) == 0) {
+                        return true;
+                    }
                 }
             }
         }

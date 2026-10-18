@@ -342,10 +342,10 @@ static void GizPanel_Update(void *world_ptr, void *, float delta_time) {
                 }
             }
             if (previous_x_rotation <= 0x4000) {
-                if (__builtin_expect(target_x_rotation > 0x4000 && target_x_rotation < 0xc000, 0)) {
+                if (__builtin_expect(target_x_rotation > 0x4000 && target_x_rotation < 0xc000, 1)) {
                     target_x_rotation = static_cast<u16>(panel.y_rotation + 0x4000);
                 }
-            } else if (target_x_rotation < 0xc000 && previous_x_rotation > 0xbfff && target_x_rotation > 0x4000) {
+            } else if (previous_x_rotation > 0xbfff && target_x_rotation < 0xc000 && target_x_rotation > 0x4000) {
                 target_x_rotation = 0xc000;
             }
 

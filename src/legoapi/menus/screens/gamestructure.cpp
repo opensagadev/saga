@@ -1329,8 +1329,7 @@ void MenuUpdateStorePurchase(MENU_s *) {
             if (static_cast<i32>(custodian->apiobj.field_0x1f4) < 0) {
                 Store_UprootPackCustodian(menu_i_pack, custodian);
             }
-            if (__builtin_expect(NuVecXZDistSqr(&player->apiobj.position, &custodian->apiobj.position, NULL) < 4.0f,
-                                 0)) {
+            if (NuVecXZDistSqr(&player->apiobj.position, &custodian->apiobj.position, NULL) < 4.0f) {
                 TagCharacter(player, custodian, 1);
             }
         }

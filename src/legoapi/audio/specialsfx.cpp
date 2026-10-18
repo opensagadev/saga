@@ -468,19 +468,21 @@ i32 SpecialSfxLoad(char *path, WORLDINFO_s *world) {
 void LoadSpecialSfxFile(WORLDINFO *world) {
     char path[268];
     sprintf(path, "%s.sfx", world->config_file);
-    if (NuFileExists(path) != 0 && SpecialSfxLoad(path, world) != 0) {
-        i32 count = world->special_sfx_count;
-        specialsfx_s *entry = world->special_sfx;
-        if (count > 0) {
-            i32 i = 0;
-            do {
-                if (entry->type == 1) {
-                    SetupBlowupSfx(world, entry);
-                }
-                ++i;
-                count = world->special_sfx_count;
-                ++entry;
-            } while (i < count);
+    if (NuFileExists(path) != 0) {
+        if (SpecialSfxLoad(path, world) != 0) {
+            i32 count = world->special_sfx_count;
+            specialsfx_s *entry = world->special_sfx;
+            if (count > 0) {
+                i32 i = 0;
+                do {
+                    if (entry->type == 1) {
+                        SetupBlowupSfx(world, entry);
+                    }
+                    ++i;
+                    count = world->special_sfx_count;
+                    ++entry;
+                } while (i < count);
+            }
         }
     }
 }

@@ -271,7 +271,7 @@ void NuNetEmu::Update() {
         u32 budget = bandwidth / 30;
         u32 sent = 0;
         EmuPacket *packet = field_04;
-        while (sent < budget && packet != NULL) {
+        while (packet != NULL && sent < budget) {
             if (now >= packet->send_time && (now >= packet->flush_time || packet->payload_size >= field_38)) {
                 EmuPacket *next = packet->next;
                 raw_stats.total.values[0] += packet->payload_size;

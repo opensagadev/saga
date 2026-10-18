@@ -2332,7 +2332,7 @@ static void edpartPartIndexMenu(eduimenu_s *menu) {
     eduiMenuAddItem(edpart_partindex_menu, eduiItemCheckCreate(static_cast<usize>(-1), edblack, selected == -1, 1,
                                                                edpartChangePartIndex, "None"));
     for (i32 index = 0; index < 128; ++index) {
-        if (__builtin_expect(part_types[index].name[0] == '\0' || part_types[index].field_b3 != edpart_part_list, 0))
+        if (__builtin_expect(part_types[index].name[0] == '\0' || part_types[index].field_b3 != edpart_part_list, 1))
             continue;
         bool current_type = index == edpart_nearest_emit->effect_id;
         eduiitem_s *item = eduiItemCheckCreate(index, current_type ? edgrey : edblack,
@@ -3629,7 +3629,7 @@ extern "C" PART_s *HitParts(GameObject_s *owner, NUVEC *positions, i32 count, f3
             part->lighting_template = params->lighting_template;
             *params->lighting_template = rtlDynamicAllocTemplate(PartRTL, params->field_84);
         }
-        if (__builtin_expect(++i_part == MAXPARTS, 1))
+        if (++i_part == MAXPARTS)
             i_part = 0;
         return part;
     }
@@ -4051,7 +4051,7 @@ extern "C" {
 
     i32 edpartLoadPageEx(char *path, i8 mode, nugscn_s **scenes, i32 scene_count) {
         i32 page = 0;
-        if (__builtin_expect(mode != 0, 1)) {
+        if (mode != 0) {
             for (page = 1; page < 8; ++page) {
                 if (part_page_used[page] == 0)
                     break;

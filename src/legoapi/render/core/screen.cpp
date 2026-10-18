@@ -1043,8 +1043,8 @@ void DrawPauseScreenWipe() {
     i32 height = 0xe00;
     f32 u0 = 0.0f;
     f32 top = 0.0f;
-    f32 u1 = 1.0f;
     f32 bottom = 1.0f;
+    f32 u1 = 1.0f;
     u32 colours[4];
 
     if ((FadeSys.direction & 3) != 0) {
@@ -1143,7 +1143,11 @@ void DrawPauseFade() {
     f32 current = pause_fade;
     if (Paused != 0 || NetPaused != 0) {
         i32 fade = static_cast<i32>(current + FRAMETIME * 2.0f);
-        pause_fade = fade > 0 ? 1.0f : static_cast<f32>(fade);
+        if (fade > 0) {
+            pause_fade = 1.0f;
+        } else {
+            pause_fade = static_cast<f32>(fade);
+        }
     } else {
         i32 fade = static_cast<i32>(current - FRAMETIME * 2.0f);
         if (fade < 0)

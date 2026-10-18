@@ -1368,7 +1368,7 @@ void SpecialMiniKits_Draw(WORLDINFO_s *world) {
             if (!draw && (item->flags & 4) != 0 && (animation->flags & NUINSTANIM_FLAG_PLAYING) != 0) {
                 draw = true;
             }
-            if (__builtin_expect(!draw, 0)) {
+            if (!draw) {
                 continue;
             }
 

@@ -155,9 +155,9 @@ static inline i32 DetonatorPlacementSlot(GameObject_s *object) {
 void Detonator_MoveCode(GameObject_s *object) {
     f32 oldest_time;
     if (__builtin_expect(object->character_context != 0x48 && object->character_context != 0x49, 1)) {
-        if (__builtin_expect(WORLD->lev_objs[0xec].active == 0 || static_cast<i8>(object->apiobj.flags_low) >= 0 ||
+        if (WORLD->lev_objs[0xec].active == 0 || static_cast<i8>(object->apiobj.flags_low) >= 0 ||
             (object->apiobj.field_0x27d == 0 && object->field_0xe31 != 1) ||
-            (ObjLandReady(object) == 0 && (CInfo[object->character_context].flags & 0x2000) == 0), 0)) {
+            (ObjLandReady(object) == 0 && (CInfo[object->character_context].flags & 0x2000) == 0)) {
             object->field_0xde0 = 0.0f;
             object->field_0xe21 |= 0x80;
             return;
@@ -270,7 +270,7 @@ void Detonator_MoveCode(GameObject_s *object) {
         if (object->field_0x7a3 != 0) {
             return;
         }
-        if (__builtin_expect(object->apiobj.character_model->model_data_b[object->context_animation] != NULL, 0)) {
+        if (__builtin_expect(object->apiobj.character_model->model_data_b[object->context_animation] != NULL, 1)) {
             const f32 marker = AnimListFrame(object->apiobj.character_model, object->context_animation,
                                              object->character_context == 0x49 ? 0 : 2);
             if (frame == NULL || !(*frame > 0.0f) || !(*frame >= marker)) {

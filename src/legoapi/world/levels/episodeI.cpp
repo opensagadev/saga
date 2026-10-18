@@ -1021,7 +1021,7 @@ void UpdatePodRaceLapDisplay(float arg) {
         podstartracealpha = 0.0f;
     }
     i32 oldhurry = podhurry_i;
-    if (__builtin_expect(Paused == 0 && PodRace != NULL && PodRace->lap_display < 10.0f, 1)) {
+    if (Paused == 0 && PodRace != NULL && PodRace->lap_display < 10.0f) {
         podhurry_i = (i32)PodRace->lap_display;
         if (podhurryalpha < 1.0f) {
             podhurryalpha += arg + arg;

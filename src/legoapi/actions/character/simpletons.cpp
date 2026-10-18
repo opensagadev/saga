@@ -431,13 +431,9 @@ void UpdateMiniSnowTroopers(WORLDINFO_s *world) {
         NUVEC total = v000;
         i32 shoot_due = 0;
         teams[team_index].fire_timer -= FRAMETIME;
-        if (__builtin_expect(teams[team_index].fire_timer <= 0.0f, 0)) {
+        if (__builtin_expect(teams[team_index].fire_timer <= 0.0f, 1)) {
             shoot_due = teams[team_index].state_flags & 1;
-            if ((teams[team_index].team_flags & 2) != 0) {
-                teams[team_index].fire_timer = 0.5f;
-            } else {
-                teams[team_index].fire_timer = 1.0f;
-            }
+            teams[team_index].fire_timer = (teams[team_index].team_flags & 2) != 0 ? 0.5f : 1.0f;
         }
 
         teams[team_index].origin_x = teams[team_index].route_point->x;
@@ -456,7 +452,7 @@ void UpdateMiniSnowTroopers(WORLDINFO_s *world) {
 
         u8 mode = state;
         if (droid_hack != 0) {
-            if (__builtin_expect((teams[team_index].formation_state & 0xe0) == 0x20, 0))
+            if (__builtin_expect((teams[team_index].formation_state & 0xe0) == 0x20, 1))
                 teams[team_index].formation_state = (teams[team_index].formation_state & 0xf) | 0x10;
 
             if (player != NULL) {
@@ -598,7 +594,7 @@ void UpdateMiniSnowTroopers(WORLDINFO_s *world) {
                             SeekRot(trooper->rotation, trooper->target_rotation, MiniTrooperTurnSpeed());
                     }
 
-                    if (__builtin_expect((trooper->state_flags & 0x80) != 0, 0)) {
+                    if ((trooper->state_flags & 0x80) != 0) {
                         ++aligned_count;
                     } else if ((trooper->state_flags & 0x40) != 0) {
                         i32 difference = static_cast<i16>(trooper->rotation - teams[team_index].facing_angle);

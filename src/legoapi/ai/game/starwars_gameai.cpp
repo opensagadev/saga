@@ -627,10 +627,10 @@ i32 StarWars_PrepareJump(AIPACKET_s *packet, APIOBJECT_s *object, i32 checks) {
                 if (((destination->runtime_flags | source->runtime_flags) & 2) == 0 ||
                     distance - destination->radius > jump_distance) {
                     packet->path_connection_state = 3;
-                    if ((destination->runtime_flags & 2) != 0)
-                        owner->jump_destination_distance = 0.0f;
-                    else
+                    if ((destination->runtime_flags & 2) == 0)
                         owner->jump_destination_distance = distance;
+                    else
+                        owner->jump_destination_distance = 0.0f;
                 }
             }
             break;

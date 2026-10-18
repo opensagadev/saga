@@ -6700,8 +6700,8 @@ i32 NuStringTableLoadCSV(char *filepath, VARIPTR *buf, VARIPTR buf_end, char *la
 i32 NuStringTableLoadTXT(char *filepath, VARIPTR *buf, VARIPTR buf_end) {
     i32 i;
     i32 max_strings;
-    NUSTRING *strings = NULL;
     NUSTRINGBANK *bank = &StringBank[CurrentStringBank];
+    NUSTRING *strings = NULL;
     char *tmp_buf = NULL;
     void *mem_buf;
     i32 bytes_read;

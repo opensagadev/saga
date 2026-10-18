@@ -64,7 +64,7 @@ void bgProcClose() {
 }
 
 void CloakMovement(GameObject_s *object) {
-    const u8 index = object->field_0x1089;
+    const i32 index = object->field_0x1089;
     if (index > 2) {
         return;
     }

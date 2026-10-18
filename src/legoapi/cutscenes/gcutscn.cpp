@@ -746,25 +746,27 @@ extern "C" {
             cutscene->extra_scene = reinterpret_cast<void *>(static_cast<usize>(flags));
         }
         NUGCUTRIGIDSYS_s *rigid_system = cutscene->rigid_system;
-        if (rigid_system != NULL && scene != NULL) {
-            NUGCUTLOCATORSYS_s *locator_system = cutscene->locator_system;
-            for (i32 i = 0; i < rigid_system->count; ++i) {
-                NUGCUTRIGID_s *rigid = &rigid_system->rigids[i];
-                nuhspecial_s special __attribute__((aligned(16)));
-                if (__builtin_expect(NuSpecialFind(scene, &special, rigid->name, 1) != 0, 1)) {
-                    rigid->flags |= 4;
-                    rigid->scene = special.scene;
-                    if (special.display_special != NULL) {
-                        rigid->special_object = special.display_special;
-                    } else {
-                        rigid->special_object = special.special;
+        if (rigid_system != NULL) {
+            if (scene != NULL) {
+                NUGCUTLOCATORSYS_s *locator_system = cutscene->locator_system;
+                for (i32 i = 0; i < rigid_system->count; ++i) {
+                    NUGCUTRIGID_s *rigid = &rigid_system->rigids[i];
+                    nuhspecial_s special __attribute__((aligned(16)));
+                    if (NuSpecialFind(scene, &special, rigid->name, 1) != 0) {
+                        rigid->flags |= 4;
+                        rigid->scene = special.scene;
+                        if (special.display_special != NULL) {
+                            rigid->special_object = special.display_special;
+                        } else {
+                            rigid->special_object = special.special;
+                        }
                     }
-                }
-                if (rigid->locator_count != 0 && static_cast<i32>(rigid->locator) < 0xff) {
-                    rigid->locator_index = static_cast<u8>(rigid->locator);
-                    rigid->locator = reinterpret_cast<usize>(&locator_system->locators[rigid->locator]);
-                } else {
-                    rigid->locator_index = 0xff;
+                    if (rigid->locator_count != 0 && static_cast<i32>(rigid->locator) < 0xff) {
+                        rigid->locator_index = static_cast<u8>(rigid->locator);
+                        rigid->locator = reinterpret_cast<usize>(&locator_system->locators[rigid->locator]);
+                    } else {
+                        rigid->locator_index = 0xff;
+                    }
                 }
             }
         }
@@ -3361,7 +3363,7 @@ static void instNuGCutSceneUpdate(instNUGCUTSCENE_s *instance, int paused, int s
 extern "C" {
 extern "C" {
 extern "C" void NuGCutSceneSysUpdate(i32 paused, i32 skip, f32 elapsed) {
-    if (__builtin_expect(cutscene_synchro_counter + 1 > 0xff, 0)) {
+    if (__builtin_expect(cutscene_synchro_counter + 1 > 0xff, 1)) {
         cutscene_synchro_counter = 1;
     } else {
         cutscene_synchro_counter++;

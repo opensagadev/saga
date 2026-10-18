@@ -396,7 +396,7 @@ i32 Action_SpeederBeingChased(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_
             if (distance > speedervals[0].distance * 0.8f || processor->action_timer > 0.0f) {
                 if (speeder_hitpoints_lost <= 1) {
                     processor->action_timer += elapsed;
-                    if (__builtin_expect(!(processor->action_timer > speeder_ahead_time), 0))
+                    if (__builtin_expect(!(processor->action_timer > speeder_ahead_time), 1))
                         break;
                 }
                 set_speedermode = 1;

@@ -571,10 +571,10 @@ static void GameAILoad(AISYS *system, i32 version, NUGSCN *, VARIPTR *, VARIPTR 
     if (__builtin_expect(version < 12 && system->path_sys != NULL && system->path_sys->path_count != 0, 1)) {
         AIPATHSYS *path_system = system->path_sys;
         AIPATH **paths = path_system->paths;
-        for (i32 path_index = 0; path_index < path_system->path_count; ++path_index) {
+        for (u32 path_index = 0; path_index < path_system->path_count; ++path_index) {
             AIPATH *path = paths[path_index];
-            const i32 connection_count = path->connection_count;
             AIPATHCNX *entries = path->connections;
+            const i32 connection_count = path->connection_count;
             for (i32 connection = 0; connection < connection_count; ++connection) {
                 entries[connection].traversal_flags[0] = 0;
                 entries[connection].original_traversal_flags[0] = 0;
@@ -925,7 +925,7 @@ void GameCreatureOpponentSelection(AISYS_s *system, i32 count, APIOBJECT_s **obj
                         distance = NuVecDist(&baddy->position, &goody->position, &difference);
                     GameObject_s *baddy_object = baddy->objptr;
                     i16 baddy_id = baddy_object->id;
-                    if (baddy_id != id_JAWA && baddy_id != id_UGNAUGHT) {
+                    if (baddy_id != id_UGNAUGHT && baddy_id != id_JAWA) {
                         if (!(goody->character_data->model_flags & 0x80000)) {
                             if (baddy_object->only_attack_players && goody->objptr != player &&
                                 goody->objptr != player2) {
@@ -1092,13 +1092,13 @@ void GameCreatureOpponentSelection(AISYS_s *system, i32 count, APIOBJECT_s **obj
 void MakeBaddiesForgetAboutParty(i32 check_hostility) {
     GameObject_s *baddies[64];
     GameObject_s *party[64];
-    i32 baddie_count = 0;
     i32 party_count = 0;
     GameObject_s *objects = Obj;
     i32 count = HIGHGAMEOBJECT;
     GameObject_s **next_baddie = baddies;
     GameObject_s **next_party = party;
     GameObject_s *object = objects;
+    i32 baddie_count = 0;
     for (i32 i = 0; i < count; ++i, ++object) {
         if ((object->apiobj.field_0x1f8 & 0x1001) != 0x1001 || object->apiobj.field_0x287 != 0)
             continue;
@@ -1210,7 +1210,7 @@ void GameAISysStartFrame(AISYS_s *system) {
         // shared endpoint is transformed only once this frame.
         for (i32 path_index = 0; path_index < system->path_sys->path_count; ++path_index) {
             AIPATH *path = system->path_sys->paths[path_index];
-            for (i32 connection_index = 0; connection_index < path->connection_count; ++connection_index) {
+            for (u32 connection_index = 0; connection_index < path->connection_count; ++connection_index) {
                 AIPATHCNX *connection = &path->connections[connection_index];
                 AIPATHNODE *node = &path->nodes[connection->direction_a];
                 if (node->has_special != 0) {
@@ -1501,82 +1501,84 @@ AIPATHCNXCONTROLLER_s *AIPathCnxControllerCreate(AIPATHCNXCONTROLSYS_s *control_
                                                  char *target_name, i32 fake_animation_id, i32 gizmo_output) {
     AIPATHCNXCONTROLLER_s *controller = NULL;
     nuhspecial_s special = {};
-    if (from != NULL && control_system != NULL && to != NULL) {
-        i32 direction;
-        AIPATHCNX *connection = static_cast<AIPATHCNX *>(AIPAthFindPathCnx(ai_system, path, from, to, &direction));
-        void *target = NULL;
-        if (connection != NULL) {
-            i32 gizmo_type;
-            switch (target_type) {
-                case 0:
-                    if (target_name != NULL) {
-                        NuSpecialFind(ai_system->scene, &special, target_name, 1);
-                    }
-                    break;
-                case 1:
-                    target = CutScene_FindInst(WORLD->cutscene_sys, target_name);
-                    break;
-                case 2:
-                    target = GizBuildIt_Find(WORLD, target_name);
-                    break;
-                case 3:
-                    target = GizmoFindByName(WORLD->gizmo_sys, -1, target_name);
-                    break;
-                case 4:
-                    gizmo_type = blowup_gizmotype_id;
-                    goto find_typed_gizmo;
-                case 7:
-                    gizmo_type = force_gizmotype_id;
-                    goto find_typed_gizmo;
-                case 8:
-                    gizmo_type = obstacle_gizmotype_id;
-                    goto find_typed_gizmo;
-                case 9: {
-                    gizmo_type = zipup_gizmotype_id;
-                find_typed_gizmo:
-                    GIZMO *gizmo = GizmoFindByName(WORLD->gizmo_sys, gizmo_type, target_name);
-                    target = gizmo != NULL ? gizmo->object : NULL;
-                    break;
-                }
-                case 5:
-                    if (fake_animation_id != 0) {
-                        return NULL;
-                    }
-                    break;
-                case 6:
-                    target = FlowBoxFindByName(WORLD->giz_flow, target_name);
-                    break;
-                default:
-                    break;
-            }
-        }
-        if (target != NULL || NuSpecialExistsFn(&special) != 0 || target_type == 5) {
-            NULISTLNK *node = NuLinkedListGetHead(&control_system->available_controllers);
-            if (node != NULL) {
-                NuLinkedListRemove(&control_system->available_controllers, node);
-                NuLinkedListAppend(&control_system->active_controllers, node);
-
-                controller = reinterpret_cast<AIPATHCNXCONTROLLER_s *>(node);
-                AIPATHSYS *path_system = ai_system->path_sys;
-                const u8 path_count = path_system->path_count;
-                AIPATH **path_cursor = path_system->paths;
-                for (u8 index = 0; index < path_count; ++index, ++path_cursor) {
-                    if (*path_cursor == path) {
-                        controller->path_index = index;
+    if (from != NULL) {
+        if (control_system != NULL && to != NULL) {
+            i32 direction;
+            AIPATHCNX *connection = static_cast<AIPATHCNX *>(AIPAthFindPathCnx(ai_system, path, from, to, &direction));
+            void *target = NULL;
+            if (connection != NULL) {
+                i32 gizmo_type;
+                switch (target_type) {
+                    case 0:
+                        if (target_name != NULL) {
+                            NuSpecialFind(ai_system->scene, &special, target_name, 1);
+                        }
+                        break;
+                    case 1:
+                        target = CutScene_FindInst(WORLD->cutscene_sys, target_name);
+                        break;
+                    case 2:
+                        target = GizBuildIt_Find(WORLD, target_name);
+                        break;
+                    case 3:
+                        target = GizmoFindByName(WORLD->gizmo_sys, -1, target_name);
+                        break;
+                    case 4:
+                        gizmo_type = blowup_gizmotype_id;
+                        goto find_typed_gizmo;
+                    case 7:
+                        gizmo_type = force_gizmotype_id;
+                        goto find_typed_gizmo;
+                    case 8:
+                        gizmo_type = obstacle_gizmotype_id;
+                        goto find_typed_gizmo;
+                    case 9: {
+                        gizmo_type = zipup_gizmotype_id;
+                    find_typed_gizmo:
+                        GIZMO *gizmo = GizmoFindByName(WORLD->gizmo_sys, gizmo_type, target_name);
+                        target = gizmo != NULL ? gizmo->object : NULL;
                         break;
                     }
+                    case 5:
+                        if (fake_animation_id != 0) {
+                            return NULL;
+                        }
+                        break;
+                    case 6:
+                        target = FlowBoxFindByName(WORLD->giz_flow, target_name);
+                        break;
+                    default:
+                        break;
                 }
-                controller->flags = static_cast<u8>((controller->flags & ~1) | (direction & 1));
-                controller->connection = connection;
-                controller->gizmo_output = gizmo_output;
-                if (target != NULL) {
-                    controller->target = target;
-                } else if (NuSpecialExistsFn(&special) != 0) {
-                    controller->special = special;
-                } else {
-                    controller->fake_animation_id = fake_animation_id;
+            }
+            if (target != NULL || NuSpecialExistsFn(&special) != 0 || target_type == 5) {
+                NULISTLNK *node = NuLinkedListGetHead(&control_system->available_controllers);
+                if (node != NULL) {
+                    NuLinkedListRemove(&control_system->available_controllers, node);
+                    NuLinkedListAppend(&control_system->active_controllers, node);
+
+                    controller = reinterpret_cast<AIPATHCNXCONTROLLER_s *>(node);
+                    AIPATHSYS *path_system = ai_system->path_sys;
+                    const i32 path_count = path_system->path_count;
+                    AIPATH **path_cursor = path_system->paths;
+                    for (u8 index = 0; index < path_count; ++index, ++path_cursor) {
+                        if (*path_cursor == path) {
+                            controller->path_index = index;
+                            break;
+                        }
+                    }
+                    controller->flags = static_cast<u8>((controller->flags & ~1) | (direction & 1));
+                    controller->connection = connection;
+                    controller->gizmo_output = gizmo_output;
+                    if (target != NULL) {
+                        controller->target = target;
+                    } else if (NuSpecialExistsFn(&special) != 0) {
+                        controller->special = special;
+                    } else {
+                        controller->fake_animation_id = fake_animation_id;
+                    }
+                    controller->target_type = static_cast<u8>(target_type);
                 }
-                controller->target_type = static_cast<u8>(target_type);
             }
         }
     }
@@ -1681,8 +1683,8 @@ void AIPathCnxControlSysUpdate(AIPATHCNXCONTROLSYS_s *system) {
             }
             case 1: {
                 const u8 *instance = static_cast<const u8 *>(controller->target);
-                float end = *reinterpret_cast<f32 *>(*reinterpret_cast<u8 *const *>(instance + 0x58) + 8);
                 i32 frame = static_cast<i32>(*reinterpret_cast<const f32 *>(instance + 0x90));
+                float end = *reinterpret_cast<f32 *>(*reinterpret_cast<u8 *const *>(instance + 0x58) + 8);
                 if (frame > 0) {
                     i32 end_frame = static_cast<i32>(end);
                     frame = frame < end_frame ? frame : end_frame;

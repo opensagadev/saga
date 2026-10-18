@@ -949,7 +949,7 @@ static i32 ProcessStarFighter(starfighter_s *fighter, quickboltinfo *info) {
         fighter->active = 0;
     } else {
         const f32 distance = NuFsqrt(distance_squared);
-        if (__builtin_expect(distance != 0.0f, 1)) {
+        if (distance != 0.0f) {
             const f32 speed = fighter->speed / distance;
             fighter->velocity.x = direction.x * speed;
             fighter->velocity.y = direction.y * speed;
@@ -1477,7 +1477,7 @@ static void ProcessSpaceLevel(spacelevel_s *space) {
         }
         if (space->unknown_337c == 0) {
             space->action_timer -= FRAMETIME;
-            if (__builtin_expect(space->action_timer <= 0.0f, 0))
+            if (__builtin_expect(space->action_timer <= 0.0f, 1))
                 space->unknown_337c = 4;
         }
     }

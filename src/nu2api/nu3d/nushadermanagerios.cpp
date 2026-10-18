@@ -59,6 +59,7 @@ void ShaderManagerOpenGL::adaptShaderMaterialForShaderVersion(NUSHADERMTLDESC *d
     desc->byte4 = mobile_flags1;
     desc->flagsbits_1ba = original_flags2 & 0x7f;
 
+    const u8 mobile_flags2 = original_flags2 & 0x48;
     const u32 packed_mobile_flags = *reinterpret_cast<u32 *>(&desc->flagsbits_1b8);
     u8 mobile_flags0 = desc->flagsbits_1b8;
     if ((packed_mobile_flags & 0x04001011) == 0x04001001 && desc->unknown_a8 > 2) {
@@ -98,7 +99,6 @@ void ShaderManagerOpenGL::adaptShaderMaterialForShaderVersion(NUSHADERMTLDESC *d
     desc->byte4 = mobile_flags1 & 0x9b;
 
     desc->flagsbits_1b8 = mobile_flags0 & 0xfb;
-    const u8 mobile_flags2 = original_flags2 & 0x48;
     desc->flagsbits_1ba = mobile_flags2;
     desc->flagsbits_1bb = mobile_flags3 & 0x27;
     desc->flags = desc->flags & 0xf916fffb;
