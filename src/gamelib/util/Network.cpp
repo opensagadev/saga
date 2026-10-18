@@ -831,12 +831,12 @@ static inline void PrependObjectCallHeader(NetMessage &outgoing, i16 object_id, 
     if (outgoing.data != NULL) {
         outgoing.read_offset -= 2;
         memcpy(outgoing.data->bytes + outgoing.read_offset, &class_id, sizeof(class_id));
-        if (outgoing.swap_endianness != 0) {
+        if (__builtin_expect(outgoing.swap_endianness != 0, 1)) {
             EdFileSwapEndianess16(outgoing.data->bytes + outgoing.read_offset);
         }
         outgoing.read_offset -= 2;
         memcpy(outgoing.data->bytes + outgoing.read_offset, &object_id, sizeof(object_id));
-        if (outgoing.swap_endianness != 0) {
+        if (__builtin_expect(outgoing.swap_endianness != 0, 1)) {
             EdFileSwapEndianess16(outgoing.data->bytes + outgoing.read_offset);
         }
         outgoing.data->bytes[--outgoing.read_offset] = static_cast<u8>(call_id);
@@ -896,7 +896,7 @@ i32 NetworkObjectManager::ObjectOwnerCall(void *instance, i32 call_id, NetMessag
     i16 object_id = object->id;
     NetMessage outgoing(message);
     PrependObjectCallHeader(outgoing, object_id, class_id, call_id);
-    theNetwork.ReliableSend(outgoing, 3, *const_cast<NetPeer *>(object->owner), NULL, 0);
+    theNetwork.ReliableSend(outgoing, 3, *reinterpret_cast<NetPeer *>(&object->owner), NULL, 0);
     return 1;
 }
 

@@ -4570,30 +4570,27 @@ __used__ static i32 Action_SetRunSpeed(AISYS *, AISCRIPTPROCESS *processor, AIPA
         minimum = fabsf(minimum);
         maximum = fabsf(maximum);
         if (processor->action_data_4 == 0.0f) {
-            if (!multiply) {
+            if (multiply) {
+                if (object->run_speed_override == 1000000000.0f)
+                    object->run_speed_override =
+                        ((GAMECHARACTERDATA *)object->apiobj.character_data->field11_0x24)->run_speed;
+                object->run_speed_override *= multiplier;
+                if (object->run_speed_override < 0.0f) {
+                    if (object->run_speed_override < -maximum)
+                        object->run_speed_override = -maximum;
+                    else if (maximum > minimum && object->run_speed_override > -minimum)
+                        object->run_speed_override = -minimum;
+                } else {
+                    if (object->run_speed_override > maximum)
+                        object->run_speed_override = maximum;
+                    else if (maximum > minimum && object->run_speed_override < minimum)
+                        object->run_speed_override = minimum;
+                }
+            } else
                 object->run_speed_override = speed;
-                return 1;
-            }
-            if (object->run_speed_override == 1000000000.0f)
-                object->run_speed_override =
-                    ((GAMECHARACTERDATA *)object->apiobj.character_data->field11_0x24)->run_speed;
-            object->run_speed_override *= multiplier;
-            if (object->run_speed_override < 0.0f) {
-                if (object->run_speed_override < -maximum)
-                    object->run_speed_override = -maximum;
-                else if (maximum > minimum && object->run_speed_override > -minimum)
-                    object->run_speed_override = -minimum;
-            } else {
-                if (object->run_speed_override > maximum)
-                    object->run_speed_override = maximum;
-                else if (maximum > minimum && object->run_speed_override < minimum)
-                    object->run_speed_override = minimum;
-            }
             return 1;
         }
-        if (!multiply)
-            processor->action_data_5 = speed;
-        else {
+        if (multiply) {
             if (object->run_speed_override == 1000000000.0f)
                 processor->action_data_5 =
                     ((GAMECHARACTERDATA *)object->apiobj.character_data->field11_0x24)->run_speed;
@@ -4609,7 +4606,8 @@ __used__ static i32 Action_SetRunSpeed(AISYS *, AISCRIPTPROCESS *processor, AIPA
                 else if (maximum > minimum && processor->action_data_5 < minimum)
                     processor->action_data_5 = minimum;
             }
-        }
+        } else
+            processor->action_data_5 = speed;
     }
     if (processor->action_data_4 > 0.0f && object->run_speed_override < 1000000000.0f) {
         object->run_speed_override =
@@ -5640,18 +5638,19 @@ static f32 Condition_EitherPlayerLocatorRangeXZ(AISYS *, AISCRIPTPROCESS *proces
         AILOCATOR *locator = static_cast<AILOCATOR *>(argument);
         if (locator == NULL) {
             locator = processor->locator;
-        }
-        if (locator != NULL) {
-            f32 first_distance = 1.0e9f;
-            f32 second_distance = 1.0e9f;
-            if (player != NULL) {
-                first_distance = NuVecXZDist(&player->apiobj.position, &locator->position, &difference);
+            if (locator == NULL) {
+                return 1.0e9f;
             }
-            if (player2 != NULL) {
-                second_distance = NuVecXZDist(&player2->apiobj.position, &locator->position, &difference);
-            }
-            return NuFmin(first_distance, second_distance);
         }
+        f32 first_distance = 1.0e9f;
+        f32 second_distance = 1.0e9f;
+        if (player != NULL) {
+            first_distance = NuVecXZDist(&player->apiobj.position, &locator->position, &difference);
+        }
+        if (player2 != NULL) {
+            second_distance = NuVecXZDist(&player2->apiobj.position, &locator->position, &difference);
+        }
+        return NuFmin(first_distance, second_distance);
     }
     return 1.0e9f;
 }

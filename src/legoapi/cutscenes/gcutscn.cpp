@@ -1772,7 +1772,7 @@ static void instNuGCutCamSysUpdate(instNUGCUTSCENE_s *instance, float frame) {
     NUGCUTCAMERASYS_s *system = instance->cutscene->camera_system;
     u8 focus_index;
     u8 next_camera_index;
-    if (static_cast<u8>(instance->cutscene->version) > 4 && system->focus_state_animation != NULL) {
+    if ((instance->cutscene->version & 0xff) > 4 && system->focus_state_animation != NULL) {
         if (StateAnimEvaluate(system->focus_state_animation, &camera_instance->focus_state_index, &focus_index,
                               frame) != 0) {
             if (focus_index == 0xff) {
@@ -1805,7 +1805,7 @@ static void instNuGCutCamSysUpdate(instNUGCUTSCENE_s *instance, float frame) {
         }
     }
 
-    while (camera_instance->next_target_index < camera_instance->target_count &&
+    while (camera_instance->target_count > camera_instance->next_target_index &&
            frame >= camera_instance->targets[camera_instance->next_target_index].start_frame) {
         const i8 mapped_camera =
             system->target_camera_map[camera_instance->targets[camera_instance->next_target_index].target_index];
@@ -1837,7 +1837,7 @@ static void instNuGCutCamSysUpdate(instNUGCUTSCENE_s *instance, float frame) {
         system->cameras[camera_index].animation_node >= NuAnimNumNodes(system->animation)) {
         cutscenecammtx = system->cameras[camera_index].base_matrix;
     } else {
-        if (static_cast<u8>(instance->cutscene->version) > 4 && system->focus_animation != NULL &&
+        if ((instance->cutscene->version & 0xff) > 4 && system->focus_animation != NULL &&
             *reinterpret_cast<u32 *>(system->focus_animation) - ANI3_MAGIC_VERSION_4 < 2) {
             f32 *values = NuAnimCurveExtractAllNodeCurves_3(
                 reinterpret_cast<ani3_animheader_s *>(system->focus_animation),

@@ -172,14 +172,19 @@ extern "C" void NuShaderObjectKeyGenerate4(u32 *key, i32 flags, i32 selector) {
     block[0x11] = uberShader2_md5[5];
     block[0x12] = uberShader2_md5[6];
     block[0x13] = uberShader2_md5[7];
-    block[0x04] = static_cast<u8>(flags);
-    block[0x05] = static_cast<u8>(flags >> 8);
-    block[0x06] = static_cast<u8>(flags >> 16);
-    block[0x07] = static_cast<u8>(flags >> 24);
-    block[0x08] = static_cast<u8>(selector & 0xf);
-    block[0x09] = block[0x04];
-    block[0x0a] = block[0x05];
-    block[0x0b] = block[0x06];
+    i32 byte0 = flags;
+    i32 byte1 = (flags << 16) >> 24;
+    i32 byte2 = (flags << 8) >> 24;
+    i32 byte3 = flags >> 24;
+    i32 index = selector & 0xf;
+    block[0x04] = static_cast<u8>(byte0);
+    block[0x05] = static_cast<u8>(byte1);
+    block[0x06] = static_cast<u8>(byte2);
+    block[0x07] = static_cast<u8>(byte3);
+    block[0x08] = static_cast<u8>(index);
+    block[0x09] = static_cast<u8>(byte0);
+    block[0x0a] = static_cast<u8>(byte1);
+    block[0x0b] = static_cast<u8>(byte2);
     *key = CRC16::hashInverse(block, sizeof(block)) << 16;
     *key |= CRC16::hash(block, sizeof(block)) & 0xffff;
 }

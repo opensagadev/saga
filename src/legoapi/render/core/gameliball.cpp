@@ -5913,7 +5913,7 @@ uv1deb *GenDebIndexImprovedRadial(debkeydatatype_s *key, debinftype *effect, flo
     f32 root = NuFsqrt(1.0f - sine * sine);
     f32 small = root < absolute ? root : absolute;
     f32 region = (absolute - 0.70710677f) * 3.40282e+38f;
-    region = region < 1.0f ? (region > -1.0f ? region : -1.0f) : 1.0f;
+    region = MAX(MIN(region, 1.0f), -1.0f);
     f32 sign = sine * 3.40282e+38f;
     sign = sign < 1.0f ? (sign > -1.0f ? sign : -1.0f) : 1.0f;
     f32 quadrant = region * sign;
@@ -10938,19 +10938,17 @@ extern "C" {
             return -1;
         }
 
-        i32 limit = EDPP_MAX_TYPES;
         if (static_cast<u8>(page) < 8 && edpp_page_used[page] != 0) {
-            for (i32 i = 1; i < limit; ++i) {
+            for (i32 i = 1; i < EDPP_MAX_TYPES; ++i) {
                 debinftype *effect = debtab[i];
                 if (effect != NULL && effect->page == static_cast<u8>(page)) {
                     if (NuStrICmp(effect->name, name) == 0)
                         return i;
-                    limit = EDPP_MAX_TYPES;
                 }
             }
         }
 
-        for (i32 i = 1; i < limit; ++i) {
+        for (i32 i = 1; i < EDPP_MAX_TYPES; ++i) {
             debinftype *effect = debtab[i];
             if (!(effect != NULL &&
                   ((effect->page == 0 && edpp_page_used[0] != 0) || (effect->page == 1 && edpp_page_used[1] != 0)))) {
@@ -10958,7 +10956,6 @@ extern "C" {
             }
             if (NuStrICmp(effect->name, name) == 0)
                 return i;
-            limit = EDPP_MAX_TYPES;
         }
         return -1;
     }
@@ -12312,16 +12309,16 @@ void edanimRenderSoundEmitters(i32 parameter_index) {
     nuhspecial_s special;
     NuGScnGetSpecial(&special, edbits_base_scene, AnimParams[parameter_index].instance_id);
     const NUVEC *base_position = NuSpecialGetPos(&special);
-    const auto *offset_cursor = AnimParams[parameter_index].sound_positions;
-    for (i32 sound = 0; sound < AnimParams[parameter_index].sound_count; ++sound, ++offset_cursor) {
+    for (i32 sound = 0; sound < AnimParams[parameter_index].sound_count; ++sound) {
         // The original skips sounds by their flags slot rather than the sound id.
         if (AnimParams[parameter_index].sound_flags[sound] == -1) {
             continue;
         }
         const i32 colour = edanim_sound_mode && edanim_nearest_sound == sound ? 0xffff0000 : 0xffffffff;
-        const auto &offset = *offset_cursor;
-        edbitsDrawDiagonalCross(base_position->x + offset[0], base_position->y + offset[1],
-                                base_position->z + offset[2], 0.25f, colour, edanim_mtl);
+        edbitsDrawDiagonalCross(base_position->x + AnimParams[parameter_index].sound_positions[sound][0],
+                                base_position->y + AnimParams[parameter_index].sound_positions[sound][1],
+                                base_position->z + AnimParams[parameter_index].sound_positions[sound][2], 0.25f,
+                                colour, edanim_mtl);
     }
 }
 
@@ -15114,8 +15111,7 @@ i32 edppSaveEffects(char *filename, char page) {
     EdFileWriteInt(0x29);
     EdFileWriteInt(effect_count);
 
-    i32 writer_limit = EDPP_MAX_TYPES;
-    for (i32 index = 1; index < writer_limit; ++index) {
+    for (i32 index = 1; index < EDPP_MAX_TYPES; ++index) {
         if (debtab[index] == NULL)
             continue;
         if (category != 2) {
@@ -15399,7 +15395,6 @@ i32 edppSaveEffects(char *filename, char page) {
         EdFileWriteChar(effecttypes[index].radial_segments);
         EdFileWriteFloat(effecttypes[index].radial_floor);
         EdFileWriteFloat(effecttypes[index].scale_in_time);
-        writer_limit = EDPP_MAX_TYPES;
     }
 
     if (page == 1 || page == 2) {
@@ -19836,9 +19831,10 @@ i32 CheckSphere(i32 vertex_index) {
 
     f32 radial_extent = NuFsqrt(TerI->collision_radius_sq - radial_distance_sq);
     f32 hit_distance = TerI->transformed_vertices[vertex_index].z - radial_extent;
-    if (0.0f <= hit_distance && TerI->movement_length >= hit_distance) {
+    // The original rejection tests are ordered comparisons, so NaN distances fall through.
+    if (!(hit_distance < 0.0f) && !(hit_distance > TerI->movement_length)) {
         f32 hit_time = hit_distance / TerI->movement_length;
-        if (TerI->hit_time <= hit_time) {
+        if (!(TerI->hit_time > hit_time)) {
             return 0;
         }
 
@@ -19852,13 +19848,13 @@ i32 CheckSphere(i32 vertex_index) {
 
     f32 distance_sq =
         radial_distance_sq + TerI->transformed_vertices[vertex_index].z * TerI->transformed_vertices[vertex_index].z;
-    if (TerI->collision_radius_sq <= distance_sq) {
+    if (!(TerI->collision_radius_sq > distance_sq)) {
         return 0;
     }
 
     f32 distance = NuFsqrt(distance_sq);
     f32 overlap_time = distance - TerI->collision_radius;
-    if (TerI->hit_time <= overlap_time) {
+    if (!(TerI->hit_time > overlap_time)) {
         return 0;
     }
 
@@ -19866,7 +19862,7 @@ i32 CheckSphere(i32 vertex_index) {
     f32 primary_distance = (TerI->local_start.x - surface->vectors[vertex_index].x) * surface->normals[0].x +
                            (TerI->local_start.y - surface->vectors[vertex_index].y) * surface->normals[0].y +
                            (TerI->local_start.z - surface->vectors[vertex_index].z) * surface->normals[0].z;
-    if (0.0f >= primary_distance) {
+    if (!(primary_distance > 0.0f)) {
         return 0;
     }
 
@@ -19884,9 +19880,9 @@ i32 CheckSphere(i32 vertex_index) {
 
 i32 CheckSphereTer(NUVEC *position, f32 radius) {
     const f32 terrain_radius = TerI->collision_radius;
-    const f32 combined_radius = radius + terrain_radius;
+    const f32 combined_radius = terrain_radius + radius;
 
-    if (position->z < -combined_radius || position->z > TerI->movement_length + combined_radius) {
+    if (position->z < -terrain_radius - radius || position->z > TerI->movement_length + combined_radius) {
         return 0;
     }
 
@@ -19898,9 +19894,10 @@ i32 CheckSphereTer(NUVEC *position, f32 radius) {
 
     const f32 radial_extent = NuFsqrt(combined_radius_sq - radial_distance_sq);
     const f32 hit_distance = position->z - radial_extent;
-    if (hit_distance >= 0.0f && hit_distance <= TerI->movement_length) {
+    // The original rejection tests are ordered comparisons, so NaN distances fall through.
+    if (!(hit_distance < 0.0f) && !(hit_distance > TerI->movement_length)) {
         const f32 hit_time = hit_distance / TerI->movement_length;
-        if (hit_time >= TerI->hit_time) {
+        if (!(TerI->hit_time > hit_time)) {
             return 0;
         }
 
@@ -19913,7 +19910,7 @@ i32 CheckSphereTer(NUVEC *position, f32 radius) {
     }
 
     const f32 distance_sq = radial_distance_sq + position->z * position->z;
-    if (distance_sq >= combined_radius_sq) {
+    if (!(combined_radius_sq > distance_sq)) {
         return 0;
     }
 

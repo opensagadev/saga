@@ -87,7 +87,7 @@ void MenuDrawMissions(MENU_s *menu) {
         char time[64], text[64];
         Text_MakeTime(Game.mission_save.best_times[hub_mission], 0, 1, 1, time);
         sprintf(text, "~0(~2%s~0)", time);
-        Text3DEx(text, 0.15f, -0.365f, 1.0f, 0.5f, 0.5f, 0.5f, 0, 0, 255, 0, static_cast<u8>(opacity * 255.0f));
+        Text3DEx(text, 0.15f, -0.365f, 1.0f, 0.5f, 0.5f, 0.5f, 0, 0, 255, 0, static_cast<u8>(static_cast<i32>(opacity * 255.0f)));
     }
     for (i32 i = 0; i < MissionSys->count; ++i) {
         f32 size = MissionIconScale[i] * 0.075f + 0.125f;

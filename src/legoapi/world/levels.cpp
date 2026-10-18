@@ -141,7 +141,7 @@
 #include "legoapi/render/fx/particles.h"
 #include <cfloat>
 
-extern i16 InsideLineXZ(f32, f32, f32, f32, f32, f32);
+#include "legoapi/misc/utilities.h"
 
 #if defined(__SSE__)
 #include <xmmintrin.h>
@@ -953,16 +953,18 @@ __attribute__((optimize("O2", "tree-vectorize"))) void LevelStreaming_Update(WOR
                     if (i < LevelLoadCount) {
                         const i16 first_level = load->first_level;
                         const i16 second_level = load->second_level;
-                        if (first_level == second_level) {
-                            other_level = first_level;
-                        } else if (LEGOSPL_SPLIT != -1 && world->camera_splines[LEGOSPL_SPLIT] != NULL) {
-                            NUVEC *points = world->camera_splines[LEGOSPL_SPLIT]->pts;
-                            if (InsideLineXZ(position.x, position.z, points[0].x, points[0].z, points[1].x,
-                                             points[1].z) == 0) {
-                                other_level = second_level;
-                            } else {
-                                other_level = first_level;
+                        if (first_level != second_level) {
+                            if (LEGOSPL_SPLIT != -1 && world->camera_splines[LEGOSPL_SPLIT] != NULL) {
+                                NUVEC *points = world->camera_splines[LEGOSPL_SPLIT]->pts;
+                                if (InsideLineXZ(position.x, position.z, points[0].x, points[0].z, points[1].x,
+                                                 points[1].z) == 0) {
+                                    other_level = second_level;
+                                } else {
+                                    other_level = first_level;
+                                }
                             }
+                        } else {
+                            other_level = first_level;
                         }
                     }
 

@@ -145,15 +145,16 @@ static void cbEdLevelSettingsMenu(eduimenu_s *, eduiitem_s *, u32);
                                                        ClassEditor::cbEdFilterLED, scene->name));                      \
     } while (0)
 
-static inline i32 get_class_object_attribute(EdClass *ed_class, void *object, EdRef *reference, i32 attribute, i32 type,
-                                             void *data, i32 size) {
-    if (reference != NULL) {
-        if (reference->GetAttributeData(object, attribute, type, data, size)) {
+// Reads an attribute of an object through its reference, falling back to the class member lookup.
+template <typename Object>
+static inline i32 get_class_object_attribute(Object &object, i32 attribute, i32 type, void *data, i32 size) {
+    if (object.reference != NULL) {
+        if (object.reference->GetAttributeData(object.object, attribute, type, data, size)) {
             return 1;
         }
     }
     EdMember member;
-    if (ed_class->FindMember(&member, object, attribute, 1)) {
+    if (object.ed_class->FindMember(&member, object.object, attribute, 1)) {
         return member.reference->GetAttributeData(member.object, attribute, type, data, size) != 0;
     }
     return 0;
@@ -6553,11 +6554,8 @@ i32 ClassEditor::CreateObject(ClassObject &source) {
     }
     Placeable::CurrentLedFile = theLevelEditor.current_led_file;
     EdClassInterface *interface;
-    if (created.ed_class->flags & 0x04000000) {
-        created.object = theRegistry.CreateObject(created.ed_class->interface, source.object, 4, 0, 2);
-    } else {
-        created.object = theRegistry.CreateObject(created.ed_class->interface, NULL, 4, 0, 2);
-    }
+    created.object = theRegistry.CreateObject(created.ed_class->interface,
+                                              created.ed_class->flags & 0x04000000 ? source.object : NULL, 4, 0, 2);
     if (created.object == NULL)
         return 0;
 
@@ -6645,8 +6643,7 @@ i32 ClassObjectList::GetAveragePosition(VuVec &average) {
         // The original's local vector is 16-byte aligned.
         VuVec position __attribute__((aligned(16)));
         i32 position_type = EdType_VuVec;
-        if (get_class_object_attribute(entry->ed_class, entry->object, entry->reference, 8, position_type, &position,
-                                       0)) {
+        if (get_class_object_attribute(*entry, 8, position_type, &position, 0)) {
             average.x += position.x;
             average.y += position.y;
             average.z += position.z;
@@ -6682,15 +6679,13 @@ i32 ClassObjectList::GetAveragePosition(VuVec &average, float &radius) {
     for (ClassObjectListEntry *entry = first; entry != NULL && position_count < 64; entry = entry->next) {
         VuVec &position = positions[position_count];
         i32 position_type = EdType_VuVec;
-        if (get_class_object_attribute(entry->ed_class, entry->object, entry->reference, 8, position_type, &position,
-                                       0)) {
+        if (get_class_object_attribute(*entry, 8, position_type, &position, 0)) {
             average.x += position.x;
             average.y += position.y;
             average.z += position.z;
             radii[position_count] = 1.0f;
             i32 radius_type = EdType_Float;
-            get_class_object_attribute(entry->ed_class, entry->object, entry->reference, 64, radius_type,
-                                       &radii[position_count], 0);
+            get_class_object_attribute(*entry, 64, radius_type, &radii[position_count], 0);
             ++position_count;
         }
     }
@@ -7043,8 +7038,7 @@ i32 CursorTool::Process(EdInputContext &input) {
         }
         char text[128] __attribute__((aligned(16)));
         char name[128] __attribute__((aligned(16)));
-        if (!get_class_object_attribute(hover.ed_class, hover.object, hover.reference, 2, EdType_String, name,
-                                        sizeof(name))) {
+        if (!get_class_object_attribute(hover, 2, EdType_String, name, sizeof(name))) {
             theLevelEditor.AddInfoText(const_cast<char *>("object : no name"));
         } else {
             sprintf(text, "object : %s", name);
@@ -7078,11 +7072,8 @@ __attribute__((force_align_arg_pointer)) void ClassObject::GetName(char *destina
     }
 
     char name[128];
-    EdMember member;
     i32 string_type = EdType_String;
-    if ((reference == NULL || !reference->GetAttributeData(object, 2, string_type, name, sizeof(name))) &&
-        (!ed_class->FindMember(&member, object, 2, 1) ||
-         !member.reference->GetAttributeData(member.object, 2, string_type, name, sizeof(name)))) {
+    if (!get_class_object_attribute(*this, 2, string_type, name, sizeof(name))) {
         NuStrCpy(name, "NoName");
     }
     sprintf(destination, "%s.%s", ed_class->name, name);
@@ -7139,7 +7130,7 @@ void PropertyTool::RenderMenu(PropertyMenu *property_menu) {
                     (static_cast<f32>(menu->y) + static_cast<f32>(menu->height) * 0.125f) / 448.0f, &start.xyz,
                     &end.xyz, NULL);
     ClassObject &object = property_menu->objects[0];
-    get_class_object_attribute(object.ed_class, object.object, object.reference, 8, EdType_VuVec, &end, 0);
+    get_class_object_attribute(object, 8, EdType_VuVec, &end, 0);
     EdDrawBegin(0);
     EdDrawLineSegment(start, end, static_cast<i32>(reinterpret_cast<usize>(&selected_attr)));
     EdDrawEnd();
@@ -7177,14 +7168,8 @@ PropertyMenu *PropertyTool::CreatePropertyMenu(ClassObject &object) {
     char title[128];
 
     i32 name_type = EdType_String;
-    if (__builtin_expect(object.reference == NULL ||
-                             !object.reference->GetAttributeData(object.object, 2, name_type, name, sizeof(name)),
-                         1)) {
-        EdMember member;
-        if (!object.ed_class->FindMember(&member, object.object, 2, 1) ||
-            !member.reference->GetAttributeData(member.object, 2, name_type, name, sizeof(name)))
-            NuStrCpy(name, const_cast<char *>("no name"));
-    }
+    if (!get_class_object_attribute(object, 2, name_type, name, sizeof(name)))
+        NuStrCpy(name, const_cast<char *>("no name"));
     sprintf(title, "%s - %s", object.ed_class->name, name);
     eduimenu_s *menu = eduiMenuCreate(metrics.x, metrics.y, metrics.width, metrics.height,
                                       reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)), NULL, title);

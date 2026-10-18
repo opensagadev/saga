@@ -230,7 +230,7 @@ GAMEANTINODE_s *GameAntinode_UpdateAntiNodeUsingData(GAMEANTINODESYS_s *system, 
             const f32 base_radius = data->radius;
             const f32 extent_x = data->extent_x;
             const f32 extent_z = data->extent_z;
-            const u16 node_angle = data->flags + angle;
+            const i32 node_angle = data->flags + angle;
             node->max_y = max_y;
             node->min_y = min_y;
             node->radius = base_radius;

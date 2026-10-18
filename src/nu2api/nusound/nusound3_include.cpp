@@ -1234,12 +1234,16 @@ void NuMusic::BuildSoundTable(variptr_u *buffer_start, variptr_u buffer_end) {
 void NuMusic::InitData(const char *file, VARIPTR *buffer_start, VARIPTR buffer_end) {
     VARIPTR buffer_original = *buffer_start;
 
-    this->string_pool_start = BUFFER_ALLOC_ARRAY(buffer_start, 0x10000, char);
+    this->string_pool_start = buffer_start->char_ptr;
     this->string_pool_end = this->string_pool_start;
+    buffer_start->addr += 0x10000;
 
-    this->albums = BUFFER_ALLOC_ARRAY(buffer_start, 512, Album);
-    this->tracks = BUFFER_ALLOC_ARRAY(buffer_start, 2048, Track);
-    this->indexes = BUFFER_ALLOC_ARRAY(buffer_start, 2048, f32);
+    this->albums = reinterpret_cast<Album *>(ALIGN(buffer_start->addr, 4));
+    buffer_start->addr = ALIGN(buffer_start->addr, 4) + 512 * sizeof(Album);
+    this->tracks = reinterpret_cast<Track *>(ALIGN(buffer_start->addr, 4));
+    buffer_start->addr = ALIGN(buffer_start->addr, 4) + 2048 * sizeof(Track);
+    this->indexes = reinterpret_cast<f32 *>(ALIGN(buffer_start->addr, 4));
+    buffer_start->addr = ALIGN(buffer_start->addr, 4) + 2048 * sizeof(f32);
     this->album_count = 0;
     this->track_count = 0;
     this->index_count = 0;

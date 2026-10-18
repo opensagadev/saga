@@ -612,9 +612,9 @@ void NuTouchInputButton::Update(NuInputTouchData const *data) {
     u32 count = data->touch_count;
     pressed = false;
     for (u32 i = 0; i < count; ++i) {
-        u8 active = data->touch_events[i].unknown_00;
-        u8 released = data->touch_events[i].unknown_01;
-        u8 started = data->touch_events[i].unknown_02;
+        bool active = data->touch_events[i].unknown_00;
+        bool released = data->touch_events[i].unknown_01;
+        bool started = data->touch_events[i].unknown_02;
         float ty = data->touch_events[i].unknown_08;
         float tx = data->touch_events[i].unknown_04;
         u32 touch_id = data->touch_events[i].unknown_14;

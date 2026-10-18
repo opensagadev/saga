@@ -49,13 +49,17 @@ static const GLSLTypeInfo typeInfoTable[] = {
 };
 
 NUSHADERUSAGEMASK *GetUsageMask(NUSHADERUSAGEMASK *mask) {
-    for (u32 i = 0; i < static_cast<u32>(g_semanticMaskCount); ++i) {
+    u32 i;
+    for (i = 0; i < static_cast<u32>(g_semanticMaskCount); ++i) {
         if (g_semanticMasks[i].semantics[0] == mask->semantics[0] &&
             g_semanticMasks[i].semantics[1] == mask->semantics[1] &&
             g_semanticMasks[i].semantics[2] == mask->semantics[2] &&
             g_semanticMasks[i].semantics[3] == mask->semantics[3]) {
-            return &g_semanticMasks[i];
+            break;
         }
+    }
+    if (i < static_cast<u32>(g_semanticMaskCount)) {
+        return &g_semanticMasks[i];
     }
     NUSHADERUSAGEMASK *result = &g_semanticMasks[g_semanticMaskCount++];
     memmove(result, mask, sizeof(*mask));

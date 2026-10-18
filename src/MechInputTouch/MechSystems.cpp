@@ -825,9 +825,9 @@ void MoveToMarker::Render() {
         NuQFntSet(QFont3DZ);
         NuQFntSetMtx(QFont3DZ, &text_matrix);
         NuQFntSetCoordinateSystem(NUQFNT_CSMODE_ABSOLUTE);
-        const i32 colour = static_cast<u8>(static_cast<i32>(this->colour.value.x)) |
-                           (static_cast<u8>(static_cast<i32>(this->colour.value.y)) << 8) |
-                           (static_cast<u8>(static_cast<i32>(this->colour.value.z)) << 16) |
+        const i32 colour = static_cast<u8>(this->colour.value.x) |
+                           (static_cast<u8>(this->colour.value.y) << 8) |
+                           (static_cast<u8>(this->colour.value.z) << 16) |
                            (static_cast<i32>(scale.value * 255.0f) << 24);
         NuQFntSetColour(QFont3DZ, colour);
         NuQFntSetScale(QFont3DZ, 0.0375f, 0.05f);

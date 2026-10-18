@@ -252,8 +252,8 @@ void WorldInfo_Init(WORLDINFO *world) {
 
     // Level progress copy
     LEVEL_PROGRESS_s *progress = (LEVEL_PROGRESS_s *)world->level_progress;
-    if (NOSOUND == 0 && progress != NULL && (progress->flags & 1) == 0) {
-        progress->flags |= 1;
+    if (NOSOUND == 0 && progress != NULL && (progress->flags_low & 1) == 0) {
+        progress->flags_low |= 1;
         progress->data = world->progress_data;
     }
 

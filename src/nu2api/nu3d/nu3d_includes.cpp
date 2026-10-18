@@ -552,8 +552,9 @@ i32 nutexanim_usepakfile = 1;
 static i32 NuTexAnimLabelIndex(char *name, char (*table)[21], i32 *count) {
     if (strlen(name) > 20)
         name[20] = '\0';
+    char *labels = &table[0][0];
     for (i32 i = 0; i < *count; ++i) {
-        if (NuStrICmp(table[i], name) == 0)
+        if (NuStrICmp(labels + i * 21, name) == 0)
             return i;
     }
     NuStrCpy(table[(*count)++], name);
@@ -7920,7 +7921,7 @@ __attribute__((optimize("O2"))) i32 ANI_SimpleAni3PlayerV4Joint_Blend_Quat3W(ani
     u8 *keys = anim->keys + (whole / 4) * key_stride;
     const u16 *constants = reinterpret_cast<const u16 *>(anim->constants);
     const i32 count = joint_count < anim->node_count ? joint_count : anim->node_count;
-    if (__builtin_expect(first_joint != 0, 1))
+    if (first_joint != 0)
         root_translation = NULL;
     const u8 *first_flags = node_flags + first_joint;
     for (const u8 *skip_flags = node_flags; skip_flags < first_flags; ++skip_flags) {
@@ -10439,6 +10440,9 @@ extern "C" void NuTexAnimProgAssembleEnd(nutexanimprog_s *program) {
                 index += 3;
                 break;
             case 9:
+                program->instructions[index + 1] = nta_labels[program->instructions[index + 1]];
+                index += 2;
+                break;
             case 10:
                 program->instructions[index + 1] = nta_labels[program->instructions[index + 1]];
                 index += 2;
@@ -12160,7 +12164,7 @@ extern "C" {
         u8 results[8];
         if (far_clip == 0.0f)
             far_clip = global_camera.far_clip;
-        if (__builtin_expect(world_mtx == NULL || world_mtx == &numtx_identity, 0))
+        if (world_mtx == NULL || world_mtx == &numtx_identity)
             transform = vmtx;
         else
             NuMtxMul(&transform, world_mtx, &vmtx);
@@ -13801,7 +13805,7 @@ extern "C" {
             NUPLANE *plane = room->planes;
             for (i32 plane_index = 0; plane_index < room->plane_count; ++plane_index, ++plane) {
                 plane_distance = plane->a * position->x + plane->b * position->y + plane->c * position->z + plane->d;
-                if (__builtin_expect(plane_distance > 0.0f, 0)) {
+                if (plane_distance > 0.0f) {
                     break;
                 }
             }
@@ -17083,7 +17087,7 @@ void DisplayListLinkDynamicMtls(void) {
                     prev = cur;
                     cur = cur->sys_next;
                 }
-                if (__builtin_expect(prev == nullptr, 0)) {
+                if (prev == nullptr) {
                     sp->sys_next = mgr->sort_list;
                     mgr->sort_list = sp;
                 } else {
@@ -21000,9 +21004,9 @@ extern "C" {
         vsprintf(text, format, arguments);
         va_end(arguments);
         i32 width = static_cast<i32>(NuQFntPrintLenU(font, text));
-        if (__builtin_expect(alignment == 0x20, 1)) {
+        if (alignment == 0x20) {
             x -= width;
-        } else if (alignment == 0x40) {
+        } else if (__builtin_expect(alignment == 0x40, 1)) {
             x -= width / 2;
         }
         NuQFntMove(font, static_cast<f32>(x), static_cast<f32>(y), 0.0f);

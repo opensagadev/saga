@@ -84,30 +84,24 @@ void UpdateRadios() {
 void PlayRadio(char *special_name, char *blowup_name, i32 play) {
     if (!(special_name == NULL && blowup_name == NULL)) {
         if (play != 0) {
-            RadioEntry *radio = NULL;
             for (i32 i = 0; i < 8; i++) {
-                if (radios[i].time <= 0.0f) {
-                    radio = &radios[i];
-                    break;
-                }
-            }
-            if (radio == NULL) {
-                return;
-            }
-
-            if (blowup_name == NULL) {
-                if (special_name == NULL || NuSpecialFind(WORLD->current_gscn, &radio->special, special_name, 1) == 0) {
+                RadioEntry *radio = &radios[i];
+                if (radio->time <= 0.0f) {
+                    if (blowup_name != NULL) {
+                        GIZMO *gizmo = GizmoFindByName(WORLD->gizmo_sys, blowup_gizmotype_id, blowup_name);
+                        if (gizmo == NULL) {
+                            return;
+                        }
+                        radio->blowup = static_cast<GIZMOBLOWUP_s *>(gizmo->object);
+                    } else if (special_name == NULL ||
+                               NuSpecialFind(WORLD->current_gscn, &radio->special, special_name, 1) == 0) {
+                        return;
+                    }
+                    radio->time = 20.0f;
+                    radios_playing = 1;
                     return;
                 }
-            } else {
-                GIZMO *gizmo = GizmoFindByName(WORLD->gizmo_sys, blowup_gizmotype_id, blowup_name);
-                if (gizmo == NULL) {
-                    return;
-                }
-                radio->blowup = static_cast<GIZMOBLOWUP_s *>(gizmo->object);
             }
-            radio->time = 20.0f;
-            radios_playing = 1;
             return;
         }
 

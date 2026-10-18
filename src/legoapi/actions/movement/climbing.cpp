@@ -1266,9 +1266,8 @@ void WeaponOutCode(GameObject_s *object) {
             if (object->weapon_scale_state == WEAPON_SCALE_IDLE && object->apiobj.field_0x27d != 0 &&
                 object->pad_gamepad->input_magnitude == 0.0f) {
                 i32 action = 17;
-                if (object->apiobj.character_data->game_character->field275_0x116 == 0 &&
-                    (object->apiobj.character_data->model_flags & 0x80) != 0)
-                    action = 127;
+                if (object->apiobj.character_data->game_character->field275_0x116 == 0)
+                    action = (object->apiobj.character_data->model_flags & 0x80) != 0 ? 127 : 17;
                 if (object->apiobj.character_model->model_data_b[action] != NULL &&
                     (object->character_context == -1 || (CInfo[object->character_context].flags & 4) != 0)) {
                     SlowWeaponOut(object);

@@ -514,6 +514,7 @@ static void GizAction_ChangeTechnoTgt(GIZFLOW_s *, FLOWBOX_s *, char **params, i
         char old_name[16];
         NuStrCpy(old_name, techno->target_name);
         i32 old_complete = (techno->flags & TECHNO_FLAG_COMPLETE) != 0;
+        void *old_controlled = techno->controlled_object;
         techno->controlled_object = NULL;
         NuStrNCpy(techno->target_name, target_name, 16);
         techno->target_mode = static_cast<u8>(target_kind);
@@ -523,7 +524,7 @@ static void GizAction_ChangeTechnoTgt(GIZFLOW_s *, FLOWBOX_s *, char **params, i
             techno->target_mode = 0;
             if (Technos_FindTgt(techno) == NULL) {
                 NuStrCpy(techno->target_name, old_name);
-                techno->controlled_object = techno->controlled_object;
+                techno->controlled_object = old_controlled;
                 techno->target_mode = static_cast<u8>(target_kind);
                 techno->flags = (techno->flags & ~TECHNO_FLAG_COMPLETE) | (old_complete << 3);
             }

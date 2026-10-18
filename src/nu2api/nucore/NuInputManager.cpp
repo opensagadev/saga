@@ -501,7 +501,7 @@ void NuInputDevice::ProcessTouchData() {
     }
     u32 previous_count = unknown_touch_data.touch_count;
     for (u32 i = 0; i < count; ++i) {
-        u32 previous = 0xff;
+        i32 previous = 0xff;
         for (u32 j = 0; j < previous_count; ++j) {
             if (unknown_touch_data.touch_events[j].unknown_14 == touch_data.touch_events[i].unknown_14) {
                 previous = j;
@@ -515,7 +515,7 @@ void NuInputDevice::ProcessTouchData() {
     for (u32 i = 0; i < previous_count; ++i) {
         if (unknown_touch_data.touch_events[i].unknown_01)
             continue;
-        u32 current = 0xff;
+        i32 current = 0xff;
         for (u32 j = 0; j < count; ++j) {
             if (touch_data.touch_events[j].unknown_14 == unknown_touch_data.touch_events[i].unknown_14) {
                 current = j;
@@ -666,23 +666,23 @@ void NuInputDevice::ConvertToEmulatedTouchFromMouse(void) {
     touch_data.touch_count = 0;
     if (mouse_data.buttons[0].active != 0) {
         NuInputTouch &touch = touch_data.touch_events[0];
+        touch.unknown_04 = mouse_data.x;
         touch.unknown_01 = mouse_data.buttons[0].released;
         touch.unknown_00 = 1;
-        touch.unknown_02 = mouse_data.buttons[0].pressed;
-        touch.unknown_04 = mouse_data.x;
         touch.unknown_08 = mouse_data.y;
+        touch.unknown_02 = mouse_data.buttons[0].pressed;
         touch.unknown_14 = 0;
         touch_data.touch_count = 1;
     }
     if (mouse_data.buttons[1].active != 0) {
-        NuInputTouch &touch = touch_data.touch_events[touch_data.touch_count];
-        touch.unknown_01 = mouse_data.buttons[1].released;
-        touch.unknown_00 = 1;
-        touch.unknown_02 = mouse_data.buttons[1].pressed;
-        touch.unknown_04 = mouse_data.x;
-        touch.unknown_08 = mouse_data.y;
-        touch.unknown_14 = 1;
-        ++touch_data.touch_count;
+        u32 index = touch_data.touch_count;
+        touch_data.touch_events[index].unknown_04 = mouse_data.x;
+        touch_data.touch_events[index].unknown_01 = mouse_data.buttons[1].released;
+        touch_data.touch_events[index].unknown_00 = 1;
+        touch_data.touch_events[index].unknown_08 = mouse_data.y;
+        touch_data.touch_events[index].unknown_02 = mouse_data.buttons[1].pressed;
+        touch_data.touch_events[index].unknown_14 = 1;
+        touch_data.touch_count = index + 1;
     }
     memset(&mouse_data, 0, sizeof(mouse_data));
     caps = 0x400;

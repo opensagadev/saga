@@ -1513,7 +1513,7 @@ static __used__ void eduiFntPrintClipEx(void *font, float x, float y, int alignm
             do {
                 *end-- = '\0';
                 width = static_cast<i32>(NuQFntPrintLenU(font, text));
-            } while (width > screen_clip_width && end != text);
+            } while (width > screen_clip_width && end > text);
         }
         NuQFntMove(font, screen_x, screen_y, 0.0f);
         NuQFntPrintU(font, text);
@@ -1738,7 +1738,7 @@ static void eduiFntPrintClipEx(void *font, i32 x, i32 y, i32, i32 clip_x, i32 cl
                 do {
                     *end-- = '\0';
                     width = static_cast<i32>(NuQFntPrintLenU(font, text));
-                } while (width > clip_width && end != text);
+                } while (width > clip_width && end > text);
             }
         }
         NuQFntMove(font, x, y, 0.0f);
@@ -1880,12 +1880,17 @@ extern "C" {
         eduiDrawRect(x << 4, y << 3, width << 4, height << 3, item->colours[2 + item->highlighted], uimtls[ui_bgmtl]);
         eduiDrawFontSetLikely(edui_font);
         eduiSetFontColour(edui_font, item->colours[item->highlighted]);
-        if (item->text_alignment == 16)
+        switch (item->text_alignment) {
+        case 16:
             eduiFntPrintExGeneric(edui_font, x << 4, (y << 3) + baseline, 16, item->text);
-        else if (item->text_alignment == 32)
+            break;
+        case 32:
             eduiFntPrintExGeneric(edui_font, (x + width) << 4, (y << 3) + baseline, 32, item->text);
-        else
+            break;
+        default:
             eduiFntPrintExGeneric(edui_font, (x * 2 + width) << 3, (y << 3) + baseline, item->text_alignment, item->text);
+            break;
+        }
         return height;
     }
 
@@ -1926,27 +1931,13 @@ extern "C" {
         f32 origin_u = picker->uv_x[picker->selected_corner] - 0.5f / picker->zoom;
         f32 origin_v = picker->uv_y[picker->selected_corner] - 0.5f / picker->zoom;
         f32 maximum = 1.0f - uv_span;
-        if (origin_u < 0.0f)
-            origin_u = maximum < 0.0f ? maximum : 0.0f;
-        else if (maximum < origin_u)
-            origin_u = maximum;
-        if (origin_v < 0.0f)
-            origin_v = maximum < 0.0f ? maximum : 0.0f;
-        else if (maximum < origin_v)
-            origin_v = maximum;
+        origin_u = MIN(maximum, MAX(0.0f, origin_u));
+        origin_v = MIN(maximum, MAX(0.0f, origin_v));
         f32 point_u[2];
         f32 point_v[2];
         for (i32 corner = 0; corner < 2; ++corner) {
-            point_u[corner] = (picker->uv_x[corner] - origin_u) / uv_span;
-            if (point_u[corner] < 0.0f)
-                point_u[corner] = 0.0f;
-            else if (point_u[corner] > 1.0f)
-                point_u[corner] = 1.0f;
-            point_v[corner] = (picker->uv_y[corner] - origin_v) / uv_span;
-            if (point_v[corner] < 0.0f)
-                point_v[corner] = 0.0f;
-            else if (point_v[corner] > 1.0f)
-                point_v[corner] = 1.0f;
+            point_u[corner] = MIN(1.0f, MAX(0.0f, (picker->uv_x[corner] - origin_u) / uv_span));
+            point_v[corner] = MIN(1.0f, MAX(0.0f, (picker->uv_y[corner] - origin_v) / uv_span));
         }
         colours[picker->selected_corner] = 0x80ffffff;
         if (!edui_donotdraw)
@@ -3339,10 +3330,11 @@ extern "C" {
             return NULL;
         memset(stage, 0, sizeof(*stage));
         edui_gradient_node_s *previous = NULL;
-        edui_gradient_node_s *next = item->first_stage;
-        while (next && !(next->time > time)) {
+        edui_gradient_node_s *next;
+        for (next = item->first_stage; next; next = next->next) {
+            if (next->time > time)
+                break;
             previous = next;
-            next = next->next;
         }
         if (previous)
             previous->next = stage;
@@ -5768,24 +5760,22 @@ extern "C" {
 
         if (configuration_file) {
             NuStrCpy(ed_levelfile, configuration_file);
-            if (ed_levelfile[0]) {
-                i32 file = NuFileOpen(ed_levelfile, NUFILE_READ);
-                if (file) {
-                    NuFileBeginBlkRead(file, 0x3032554e);
-                    i32 block;
-                    while ((block = NuFileBeginBlkRead(file, 0)) != 0) {
-                        for (ed_module_s *module = ed_list; module; module = module->next) {
-                            if (module->block_id == static_cast<u32>(block)) {
-                                if (module->read)
-                                    module->read(file);
-                                break;
-                            }
+            i32 file;
+            if (ed_levelfile[0] && (file = NuFileOpen(ed_levelfile, NUFILE_READ)) != 0) {
+                NuFileBeginBlkRead(file, 0x3032554e);
+                i32 block;
+                while ((block = NuFileBeginBlkRead(file, 0)) != 0) {
+                    for (ed_module_s *module = ed_list; module; module = module->next) {
+                        if (module->block_id == static_cast<u32>(block)) {
+                            if (module->read)
+                                module->read(file);
+                            break;
                         }
-                        NuFileEndBlkRead(file);
                     }
                     NuFileEndBlkRead(file);
-                    NuFileClose(file);
                 }
+                NuFileEndBlkRead(file);
+                NuFileClose(file);
             }
         } else {
             ed_levelfile[0] = '\0';

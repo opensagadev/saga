@@ -990,12 +990,13 @@ void DrawRopeSingle(nuvec_s *start, nuvec_s *end, float amount, numtl_s *materia
     f32 step = spacing * ROPELEN;
     u16 rotation = 0;
     while (position.y < length) {
-        f32 magnitude = scale;
         if (grow_time >= time) {
             i32 angle = (i32)((1.0f / grow_time * time) * 16384.0f + 32768.0f + 16384.0f);
-            magnitude = (1.0f + NuTrigTable[(angle >> 1) & 0x7fff]) * scale;
+            f32 magnitude = (1.0f + NuTrigTable[(angle >> 1) & 0x7fff]) * scale;
+            size.x = size.y = size.z = magnitude;
+        } else {
+            size.x = size.y = size.z = scale;
         }
-        size.x = size.y = size.z = magnitude;
         rotation = (u16)(rotation + 0x5555);
         NuMtxSetScale(&matrix, &size);
         NuMtxTranslate(&matrix, &position);

@@ -619,33 +619,28 @@ void DrawTorpedoTargetSprite(void *, unsigned char, float) {
 }
 
 void DrawTorpedos(GameObject_s *object) {
-    TORPEDOPACKET *packet = object->torpedo;
-    if (packet == NULL)
+    if (object->torpedo == NULL)
         return;
-    if (packet->target != NULL && static_cast<i8>(object->apiobj.flags_low) < 0)
-        DrawTorpedoTargetSprite(packet->target, packet->target_type, 4.0f * object->torpedo_target_timer);
-    packet = object->torpedo;
-    if (packet->count == 0)
-        return;
+    if (object->torpedo->target != NULL && static_cast<i8>(object->apiobj.flags_low) < 0)
+        DrawTorpedoTargetSprite(object->torpedo->target, object->torpedo->target_type,
+                                4.0f * object->torpedo_target_timer);
 
-    for (i32 index = 0; index < packet->count; ++index) {
-        u16 x_rotation = static_cast<u16>(-NUANG_90DEG - packet->pickup_flags[index]);
-        if (packet->field_08 < 0.8f && index == packet->count - 1) {
+    for (i32 index = 0; index < object->torpedo->count; ++index) {
+        u16 x_rotation = static_cast<u16>(-NUANG_90DEG - object->torpedo->pickup_flags[index]);
+        if (object->torpedo->field_08 < 0.8f && index == object->torpedo->count - 1) {
             x_rotation = static_cast<u16>(
-                static_cast<i32>(RotDiff(0, x_rotation) * NU_SIN_LUT(packet->field_08 / 0.8f * 16384.0f)));
+                static_cast<i32>(RotDiff(0, x_rotation) * NU_SIN_LUT(object->torpedo->field_08 / 0.8f * 16384.0f)));
         }
 
         NUMTX_ALIGNED16 matrix;
         NuMtxSetIdentity(&matrix);
         NuMtxPreRotateX(&matrix, x_rotation);
-        packet = object->torpedo;
-        Torpedo_RotateY(&matrix, static_cast<i32>(packet->pickup_data[index]));
-        NuMtxTranslate(&matrix, &packet->pickup_positions[index]);
+        Torpedo_RotateY(&matrix, static_cast<i32>(object->torpedo->pickup_data[index]));
+        NuMtxTranslate(&matrix, &object->torpedo->pickup_positions[index]);
 
-        packet = object->torpedo;
         f32 blend = 1.0f;
-        if (packet->field_03 == 0 && index == packet->count - 1) {
-            blend = 1.0f - (NU_SIN_LUT(packet->field_08 / 0.8f * 32768.0f + 16384.0f) + 1.0f) * 0.5f;
+        if (object->torpedo->field_03 == 0 && index + 1 == object->torpedo->count) {
+            blend = 1.0f - (NU_SIN_LUT(object->torpedo->field_08 / 0.8f * 32768.0f + 16384.0f) + 1.0f) * 0.5f;
         }
         const f32 machine_scale = 4.0f * WORLD->giz_torp_machine_sys->scale;
         const f32 scale = (2.0f * object->apiobj.field_0x1dc - machine_scale) * blend + machine_scale;
@@ -655,7 +650,6 @@ void DrawTorpedos(GameObject_s *object) {
             NuSpecialDrawAt(&WORLD->lev_objs[0x79].special, &matrix);
         if (WORLD->lev_objs[0x7a].active != 0)
             NuSpecialDrawAt(&WORLD->lev_objs[0x7a].special, &matrix);
-        packet = object->torpedo;
     }
 }
 

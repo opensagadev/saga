@@ -3574,6 +3574,12 @@ extern "C" PART_s *HitParts(GameObject_s *owner, NUVEC *positions, i32 count, f3
         else
             memset(&part->special, 0, sizeof(part->special));
         part->active &= ~0x14;
+        part->bounds_min.x = part->position.x - part->target_radius;
+        part->bounds_max.x = part->position.x + part->target_radius;
+        part->bounds_min.y = part->position.y - part->target_radius;
+        part->bounds_max.y = part->position.y + part->target_radius;
+        part->bounds_min.z = part->position.z - part->target_radius;
+        part->bounds_max.z = part->position.z + part->target_radius;
         part->field_1ac = params->field_30;
         part->move_callback = params->move_fn;
         part->update_callback = params->update_fn;
@@ -3584,12 +3590,6 @@ extern "C" PART_s *HitParts(GameObject_s *owner, NUVEC *positions, i32 count, f3
         part->stop_callback = params->stop_fn;
         part->replace_callback = params->replace_fn;
         part->draw_callback = params->draw_fn;
-        part->bounds_min.x = part->position.x - part->target_radius;
-        part->bounds_min.y = part->position.y - part->target_radius;
-        part->bounds_min.z = part->position.z - part->target_radius;
-        part->bounds_max.x = part->position.x + part->target_radius;
-        part->bounds_max.y = part->position.y + part->target_radius;
-        part->bounds_max.z = part->position.z + part->target_radius;
         part->elapsed = 0.0f;
         memcpy(part->field_10c, params->field_a8, sizeof(part->field_10c));
         for (i32 i = 0; i < 5; ++i)

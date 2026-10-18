@@ -85,14 +85,14 @@ void Credits_Load(WORLDINFO_s *, VARIPTR *buffer, VARIPTR *buffer_end) {
     NuStrCpy(filename, "stuff\\text\\");
     NuStrCat(filename, "english");
     NuStrCat(filename, "_credits.txt");
-    CreditList = static_cast<CREDIT_s *>(GameBufferAlloc(buffer, buffer_end, 1000 * sizeof(CREDIT_s)));
+    CREDIT_s *credit = static_cast<CREDIT_s *>(GameBufferAlloc(buffer, buffer_end, 1000 * sizeof(CREDIT_s)));
+    CreditList = credit;
     CreditCount = 0;
-    if (CreditList != NULL) {
+    if (credit != NULL) {
         NUFPAR *parser = NuFParCreate(filename);
         if (parser == NULL) {
             return;
         }
-        CREDIT_s *credit = CreditList;
         f32 y = 0.2f;
         while (NuFParGetLine(parser)) {
             if (NuFParGetWord(parser)) {
@@ -137,8 +137,9 @@ void Credits_Load(WORLDINFO_s *, VARIPTR *buffer, VARIPTR *buffer_end) {
                             }
                         }
                         if (CreditCount < 1000) {
-                            credit->type = type->type;
-                            switch (type->type) {
+                            const u8 kind = type->type;
+                            credit->type = kind;
+                            switch (kind) {
                                 case 0:
                                     InitCredit(credit, text, 0.0f, y, type->scale, type->colour[0], type->colour[1],
                                                type->colour[2], type->colour[3], 0, buffer, buffer_end);

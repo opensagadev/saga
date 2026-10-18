@@ -479,11 +479,12 @@ i32 ShinyMetal_UpdateHint(HINT_s *hint) {
         if ((blowup->draw_flags & 2) == 0 || (blowup->status_flags & 0x804001) != 0x804000)
             continue;
         if (NuVecDistSqr(&player->apiobj.position, &blowup->mid_position, NULL) < 4.0f) {
-            if ((player->apiobj.character_data->model_flags & 0x1000000) != 0 || player->field_0x108e == 6)
-                return hint->control_mode_ids[0] == 0x2b8;
-            if (AvailableToPlayer(0x1000000, -1, FreePlay == 0 ? 6 : 0, 1) != 0)
-                return hint->control_mode_ids[0] == 0x283;
-            return hint->control_mode_ids[0] == 0x61d;
+            if ((player->apiobj.character_data->model_flags & 0x1000000) == 0 && player->field_0x108e != 6) {
+                if (AvailableToPlayer(0x1000000, -1, FreePlay == 0 ? 6 : 0, 1) != 0)
+                    return hint->control_mode_ids[0] == 0x283;
+                return hint->control_mode_ids[0] == 0x61d;
+            }
+            return hint->control_mode_ids[0] == 0x2b8;
         }
         count = WORLD->gizmo_blowup_count;
     }

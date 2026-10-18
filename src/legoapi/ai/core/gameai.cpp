@@ -585,7 +585,7 @@ static void GameAILoad(AISYS *system, i32 version, NUGSCN *, VARIPTR *, VARIPTR 
     }
 
     i32 tag_length = static_cast<i8>(EdFileReadChar());
-    if (__builtin_expect(tag_length <= 8 && tag_length != 0, 0)) {
+    if (__builtin_expect(tag_length != 0 && tag_length <= 8, 0)) {
         char tag[16];
         EdFileRead(tag, tag_length);
         if (NuStrICmp(tag, "LEGO") == 0) {

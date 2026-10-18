@@ -568,7 +568,7 @@ void NuMtlInitExPS(VARIPTR *buf) {
     tex->image_data = DebrisGlassIOS_Tex;
     g_DebrisGlassDistortTID = NuTexCreateNative(tex, true);
 
-    vtx_desc.flags = 0;
+    memset(&vtx_desc, 0, sizeof(vtx_desc));
     vtx_desc.has_position = true;
 
     g_nuFullscreenVertexFormat = NuGetVertexDeclaration(vtx_desc);

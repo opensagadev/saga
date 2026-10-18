@@ -3083,8 +3083,7 @@ GameObject_s *TargetGameObject(GameObject_s *object, nuvec_s *position, nuvec_s 
     GameObject_s *target = Obj;
     GameObject_s *best = NULL, *previous = NULL;
     f32 nearest_distance = range_squared;
-    i32 count = HIGHGAMEOBJECT;
-    for (i32 i = 0; i < count; ++i, ++target) {
+    for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++target) {
         if (__builtin_expect(target == object || (target->apiobj.flags_high & 0x10) == 0 || target->apiobj.field_0x287 != 0 ||
             (require_drawn != 0 && target->apiobj.model_draw_result == 0) || (target->field_0xf00 & 1) != 0, 1))
             continue;
@@ -3133,7 +3132,6 @@ GameObject_s *TargetGameObject(GameObject_s *object, nuvec_s *position, nuvec_s 
                 }
             }
         }
-        count = HIGHGAMEOBJECT;
     }
     return best != NULL ? best : previous;
 }

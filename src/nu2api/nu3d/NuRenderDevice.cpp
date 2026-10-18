@@ -85,37 +85,30 @@ NuRenderDevice::NuRenderDevice() : NuRenderDeviceGen() {
 // ---------------------------------------------------------------------------
 
 bool NuRenderDevice::IsExtensionSupported(const char *wanted) {
-    // Reject malformed queries: empty string or embedded space would
-    // otherwise match substrings incorrectly.
-    if (wanted[0] == '\0' || strchr(wanted, ' ') != nullptr) {
+    // Extension names cannot contain spaces or be empty.
+    const char *where = strchr(wanted, ' ');
+    if (where != nullptr || *wanted == '\0') {
         return false;
     }
 
-    const usize wanted_len = strlen(wanted);
-    const char *cursor = this->extensions;
-
+    // Search for a whole-word match, skipping occurrences that are only a
+    // prefix or suffix of another extension name.
+    const char *start = this->extensions;
     while (true) {
-        const char *found = strstr(cursor, wanted);
-        if (found == nullptr) {
-            return false;
+        where = strstr(start, wanted);
+        if (where == nullptr) {
+            break;
         }
 
-        const bool at_start = (found == cursor);
-        const char terminator = found[wanted_len];
-        const bool preceded_by_space = at_start || found[-1] == ' ';
-        // Terminator is either end-of-string ('\0'), space, or other
-        // whitespace — the original uses a case-insensitive space check
-        // via (c & 0xDF) != 0 which effectively treats '\0' as
-        // terminator and space as boundary.
-        const bool followed_by_boundary = (terminator == '\0' || terminator == ' ');
-
-        if (preceded_by_space && followed_by_boundary) {
+        const char *terminator = where + strlen(wanted);
+        if ((where == start || where[-1] == ' ') && (*terminator == ' ' || *terminator == '\0')) {
             return true;
         }
 
-        // Whole-word match failed — continue searching past this occurrence.
-        cursor = found + wanted_len;
+        start = terminator;
     }
+
+    return false;
 }
 
 // ---------------------------------------------------------------------------

@@ -189,17 +189,17 @@ void CharacterMiniKits_Load(COLLECTION_s *collection, WORLDINFO *world, VARIPTR 
         Char_MiniKit[i] = NULL;
 
     buf->addr = ALIGN(buf->addr, 4);
+    const usize table_size = static_cast<usize>(CHARCOUNT) * sizeof(*world->minikit_pieces_buf);
     world->minikit_pieces_buf = reinterpret_cast<HUBMINIKITPIECES_s **>(buf->addr);
-    memset(world->minikit_pieces_buf, 0, static_cast<usize>(CHARCOUNT) * sizeof(*world->minikit_pieces_buf));
-    buf->addr += static_cast<usize>(CHARCOUNT) * sizeof(*world->minikit_pieces_buf);
+    memset(world->minikit_pieces_buf, 0, table_size);
+    buf->addr += table_size;
 
-    for (u32 index = 0; index < collection->count_y; ++index) {
+    for (i32 index = 0; index < collection->count_y; ++index) {
         const i32 character_id = collection->list[index].id;
         if ((GCDataList[character_id].flags_094[1] & 4) != 0 || APICharacterLoaded(character_id) == NULL)
             continue;
 
-        HUBMINIKITPIECES_s *minikit = reinterpret_cast<HUBMINIKITPIECES_s *>(buf->addr);
-        world->minikit_pieces_buf[character_id] = minikit;
+        world->minikit_pieces_buf[character_id] = reinterpret_cast<HUBMINIKITPIECES_s *>(buf->addr);
         buf->addr += 0x18;
 
         char path[256];
@@ -210,21 +210,21 @@ void CharacterMiniKits_Load(COLLECTION_s *collection, WORLDINFO *world, VARIPTR 
         NuStrCat(path, const_cast<char *>(".gsc"));
 
         buf->addr = ALIGN(buf->addr, 4);
-        if (index <= 17)
-            minikit->scene = NuGScnRead(buf, *buf_end, path);
+        if (index > 17)
+            world->minikit_pieces_buf[character_id]->scene =
+                NuGScnRead(&characterbuffer_ptr, characterbuffer_end, path);
         else
-            minikit->scene = NuGScnRead(&characterbuffer_ptr, characterbuffer_end, path);
+            world->minikit_pieces_buf[character_id]->scene = NuGScnRead(buf, *buf_end, path);
 
-        MINIKIT *runtime = reinterpret_cast<MINIKIT *>(minikit);
-        runtime->id = static_cast<i16>(character_id);
-        if (minikit->scene == NULL) {
+        reinterpret_cast<MINIKIT *>(world->minikit_pieces_buf[character_id])->id = static_cast<i16>(character_id);
+        if (world->minikit_pieces_buf[character_id]->scene == NULL) {
             world->minikit_pieces_buf[character_id] = NULL;
             buf->addr -= 0x18;
             continue;
         }
 
-        MiniKit_InitPieces(runtime, 10, buf, buf_end);
-        Char_MiniKit[character_id] = minikit;
+        MiniKit_InitPieces(reinterpret_cast<MINIKIT *>(world->minikit_pieces_buf[character_id]), 10, buf, buf_end);
+        Char_MiniKit[character_id] = world->minikit_pieces_buf[character_id];
     }
 }
 

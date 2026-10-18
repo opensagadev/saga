@@ -1368,7 +1368,7 @@ void TrueHero_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active
             DrawBuildUpBar(0.0f, 0.7f, packet->true_hero_percent, 100, 1.0f, 1.75f, 1.0f, 0);
             sprintf(text, "%i%%", static_cast<i32>(packet->true_hero_percent));
             Text3DEx(text, 0.0f, 0.3f, 1.0f, 0.8f, 0.8f, 0.8f, 0, 255, 191, 0,
-                     static_cast<u8>(static_cast<i32>((1.0f - blend) * 128.0f)));
+                     static_cast<u8>((1.0f - blend) * 128.0f));
             break;
         }
         case 3: {
@@ -1393,7 +1393,7 @@ void TrueHero_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active
             if (stage->type == 2 && alpha > 0.0f) {
                 sprintf(text, "%i%%", static_cast<i32>(packet->true_hero_percent));
                 Text3DEx(text, 0.0f, 0.3f, 1.0f, 0.8f, 0.8f, 0.8f, 0, 255, 191, 0,
-                         static_cast<u8>(static_cast<i32>(alpha * 128.0f)));
+                         static_cast<u8>(alpha * 128.0f));
             }
             const f32 ratio = stage->field_0x18 < 1.0f ? 1.0f - stage->field_0x18 : 0.0f;
             const f32 blend =
@@ -1750,7 +1750,7 @@ void AllMiniKits_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 cur
         }
         if (title_alpha > 0.0f) {
             Text3DEx(TTab[tALLMINIKITSBUILT], 0.0f, 0.225f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G, STATUS_B,
-                     static_cast<u8>(static_cast<i32>(title_alpha * 128.0f)));
+                     static_cast<u8>(title_alpha * 128.0f));
         }
         return;
     }
@@ -1899,7 +1899,7 @@ void MiniKit_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current
         }
         title_alpha = title_alpha < 0.0f ? 0.0f : title_alpha > 1.0f ? 1.0f : title_alpha;
         Text3DEx(TTab[tMINIKIT], 0.0f, STATUS_TITLE_Y, 1.0f, 0.5f, 0.5f, 0.5f, 0, 255, 255, 255,
-                 static_cast<u8>(static_cast<i32>(title_alpha * 128.0f)));
+                 static_cast<u8>(title_alpha * 128.0f));
     }
 }
 

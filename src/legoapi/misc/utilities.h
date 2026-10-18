@@ -41,6 +41,7 @@ struct numtl_s;
 struct numtx_s;
 struct nuvec_s;
 i32 LineIntersectCircle(nuvec_s *, nuvec_s *, nuvec_s *, f32);
+i32 InsideLineXZ(f32, f32, f32, f32, f32, f32);
 extern CHARACTERMODEL_s *dco_cmodel;
 extern GAMECHARACTERDATA_s *dco_gcdata;
 extern f32 CameraZoom;

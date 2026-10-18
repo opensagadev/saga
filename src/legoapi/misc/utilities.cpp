@@ -1189,7 +1189,7 @@ f32 SplineLength(nugspline_s *spline, i32 closed) {
     return length;
 }
 
-i16 InsideLineXZ(f32 point_u, f32 point_v, f32 line_start_u, f32 line_start_v, f32 line_end_u, f32 line_end_v) {
+i32 InsideLineXZ(f32 point_u, f32 point_v, f32 line_start_u, f32 line_start_v, f32 line_end_u, f32 line_end_v) {
     const f32 side =
         (point_u - line_start_u) * (line_end_v - line_start_v) + (point_v - line_start_v) * (line_start_u - line_end_u);
     return side >= 0.0f;

@@ -1303,9 +1303,10 @@ i32 Action_CreatePod(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **
         } else if ((value = NuStrIStr(*params, "type=")) != NULL) {
             if (LevelCharacterTypeIDFn != NULL && LevelCharacterGlobalIDFn != NULL) {
                 u8 type = LevelCharacterTypeIDFn(value + 5);
-                model_id = type;
                 if (type != 0xff)
                     model_id = LevelCharacterGlobalIDFn(type);
+                else
+                    model_id = type;
             }
         } else if ((value = NuStrIStr(*params, "spline_start=")) != NULL) {
             start = AIParamToFloat((AISCRIPTPROCESS *)packet, value + 13);

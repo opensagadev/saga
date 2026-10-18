@@ -640,7 +640,7 @@ void MenuUpdateDebugStore(MENU_s *menu) {
 
 void Store_HubDrawFloorTargets(WORLDINFO_s *world) {
     (void)NuFmod(GameTimer.time_elapsed, 4.0f);
-    const u16 alpha_angle = static_cast<u16>(NuFmod(GameTimer.time_elapsed_mod_seconds, 0.5f) * 2.0f * 65536.0f);
+    const i32 alpha_angle = static_cast<i32>(NuFmod(GameTimer.time_elapsed_mod_seconds, 0.5f) * 2.0f * 65536.0f);
     const f32 frame_alpha = NU_SIN_LUT(alpha_angle) * 0.2f + 0.8f;
 
     for (i32 i = 0; i < 11; ++i) {
@@ -648,7 +648,7 @@ void Store_HubDrawFloorTargets(WORLDINFO_s *world) {
             continue;
         }
         if (Store_IsPackUnlocked(i) ||
-            (StorePack[i].field44_0x32 != 0xff && StorePack[i].field44_0x32 != GameCam->sock_position.location.sock)) {
+            (StorePack[i].field44_0x32 != 0xff && StorePack[i].field44_0x32 != static_cast<u8>(GameCam->sock_position.location.sock))) {
             continue;
         }
 
@@ -656,7 +656,7 @@ void Store_HubDrawFloorTargets(WORLDINFO_s *world) {
         Draw3DObjectAlpha(world, LEGOOBJ_ICON_FRAME_GREEN, &StorePack[i].custodian_position, 0x4000, frame_rotation, 0,
                           0.9f, 0.9f, 0.9f, 0, frame_alpha);
 
-        if (g_lowEndLevelBehaviour == 0 || Hub_LowEnd_IconsInsteadOfModels == 0 || StorePack[i].id == NULL ||
+        if (g_lowEndLevelBehaviour == 0 || Hub_LowEnd_IconsInsteadOfModels == 0 ||
             APICharacterLoaded(*StorePack[i].id) != NULL || big_icon_scene == NULL) {
             continue;
         }
@@ -985,19 +985,13 @@ store_touch_selected:
         menu_i_bundle = StoreBundle_FindByName(menu_storepurchase_iap_name);
         NewMenu(LEGOMENU_STORE_PURCHASE, -1, -1);
 
-        const char *format;
-        char *item_name;
         if (menu_i_bundle != -1) {
-            format = "bundle_%s_bought";
-            item_name = StoreBundle[menu_i_bundle].name;
+            sprintf(event, "bundle_%s_bought", StoreBundle[menu_i_bundle].name);
+            NuIOS_RecordFlurryEvent(event);
         } else if (menu_i_pack != -1) {
-            format = "pack_%s_bought";
-            item_name = *reinterpret_cast<char **>(&StorePack[menu_i_pack].field1_0x4);
-        } else {
-            return;
+            sprintf(event, "pack_%s_bought", *reinterpret_cast<char **>(&StorePack[menu_i_pack].field1_0x4));
+            NuIOS_RecordFlurryEvent(event);
         }
-        sprintf(event, format, item_name);
-        NuIOS_RecordFlurryEvent(event);
         return;
     }
     if (TTab[0x60f] != NULL) {

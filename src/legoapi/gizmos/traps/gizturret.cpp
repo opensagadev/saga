@@ -603,7 +603,7 @@ static i32 *GizTurrets_GetBestBoltTarget(GIZMOSET *set, float *result_distance, 
     const u16 target_deg_far = TargetDeg_Far;
     const f32 target_dist_near2 = TargetDist_Near2;
     const f32 target_dist_mid2 = TargetDist_Mid2;
-    if (set == NULL || bolt_type == NULL) {
+    if (bolt_type == NULL || set == NULL) {
         return NULL;
     }
 
@@ -642,8 +642,8 @@ static i32 *GizTurrets_GetBestBoltTarget(GIZMOSET *set, float *result_distance, 
         }
 
         NUVEC delta;
-        float distance = planar != 0 ? NuVecXZDistSqr(target_position, position, &delta)
-                                     : NuVecDistSqr(target_position, position, &delta);
+        float distance = planar == 0 ? NuVecDistSqr(target_position, position, &delta)
+                                     : NuVecXZDistSqr(target_position, position, &delta);
         if (!(range_squared > distance)) {
             continue;
         }
@@ -676,21 +676,21 @@ static i32 *GizTurrets_GetBestBoltTarget(GIZMOSET *set, float *result_distance, 
         }
     }
 
-    GIZMO *result = best;
-    NUVEC *target_position = best_position;
-    if (result == NULL) {
-        result = previous;
-        target_position = previous_position;
-        nearest_distance = 1000000000.0f;
-    }
-    if (result != NULL) {
+    if (best != NULL) {
+        *result_position = *best_position;
         *result_distance = nearest_distance;
-        *result_position = *target_position;
         result_velocity->x = 0.0f;
         result_velocity->y = 0.0f;
         result_velocity->z = 0.0f;
+    } else if (previous != NULL) {
+        *result_position = *previous_position;
+        *result_distance = 1000000000.0f;
+        result_velocity->x = 0.0f;
+        result_velocity->y = 0.0f;
+        result_velocity->z = 0.0f;
+        best = previous;
     }
-    return reinterpret_cast<i32 *>(result);
+    return reinterpret_cast<i32 *>(best);
 }
 
 static i32 GizTurrets_BoltHit(void *world, void *system_ptr, void *object_ptr, NUVEC *points, i32 point_count,

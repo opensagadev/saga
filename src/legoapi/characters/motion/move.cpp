@@ -3288,7 +3288,7 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
                     rate *= 0.25f;
                 api.movement_facing_angle = TurnRot(api.movement_facing_angle, desired, (i32)(rate * 65536.0f), NULL);
             }
-            u8 boundary_player = api.flags_low & 0x80;
+            u8 boundary_player = api.is_player;
             if (!(object->character_context == -1 && object->field_0x1084 &&
                   fabsf(object->contact_normal.y) < NuTrigTable[0x3aaa])) {
                 if (boundary_player != 0 && (api.character_data->game_character->flags_090 & 0x10000) == 0 &&
@@ -4489,14 +4489,12 @@ void TakeHitCode(GameObject_s *object) {
     if (context == 0x5a)
         goto context_5a;
     if (context != 0x5f) {
-        if (context != 0x15 || animation_active == 0)
-            return;
-        timer = object->context_animation_timer;
-        frame_time = FRAMETIME;
-        object->context_animation_timer = timer - frame_time;
-        if (0.0f < timer - frame_time)
-            return;
-        goto finish_context;
+        if (context == 0x15 && animation_active != 0) {
+            object->context_animation_timer -= FRAMETIME;
+            if (object->context_animation_timer <= 0.0f)
+                object->character_context = -1;
+        }
+        return;
     }
 
     if (animation_active == 0)
@@ -6181,7 +6179,7 @@ static void ForceCode(GameObject_s *object, i32 pressed, i32 held) {
     bool start = false;
     if (object->apiobj.field_0x27d != 0 &&
         (object->character_context == -1 || (CInfo[object->character_context].flags & 4) != 0)) {
-        if (((object->apiobj.flags_low & 0x80) != 0 && pressed) || (object->pad_gamepad->allocated_5a & 4) != 0 ||
+        if ((object->apiobj.is_player && pressed) || (object->pad_gamepad->allocated_5a & 4) != 0 ||
             (held && previous_force))
             start = true;
     }
@@ -6203,7 +6201,7 @@ static void ForceCode(GameObject_s *object, i32 pressed, i32 held) {
                 LSW_HintConditions.force_used = 1;
             }
         }
-    } else if ((object->apiobj.flags_low & 0x80) != 0)
+    } else if (object->apiobj.is_player)
         GizForce_FindBestForceTarget(WORLD->giz_force_sys, object);
     GIZFORCE_s *force = object->gizforce_target;
     if (force != NULL && __builtin_expect(static_cast<signed char>(object->apiobj.flags_low) < 0, 1) &&
@@ -10414,14 +10412,13 @@ __attribute__((optimize("O2", "tree-vectorize"))) void Animate_WEIRDO(GameObject
 
     const u16 weapon = static_cast<u16>(object->apiobj.character_data->game_character->weapon_model) & ~2u;
     if ((weapon == 101 || weapon == 105) && object->id != id_IMPERIALGUARD && object->weapon_scale > 0.0f) {
-        const char *loop_sfx;
+        i32 sound;
         if (object->id == id_BODYGUARD)
-            loop_sfx = "Grv_GuardWeaponLp";
+            sound = GetSfxId("Grv_GuardWeaponLp");
         else if ((object->apiobj.character_data->model_flags & CHARACTER_MODEL_FLAG_JEDI_BADDIE) != 0)
-            loop_sfx = "SaberLoopB";
+            sound = GetSfxId("SaberLoopB");
         else
-            loop_sfx = "SaberLoopJ";
-        const i32 sound = GetSfxId(loop_sfx);
+            sound = GetSfxId("SaberLoopJ");
         PlaySfxByIdAndSetVolume(sound, &object->apiobj.collision_position, object->weapon_scale);
     }
 }
@@ -10561,15 +10558,15 @@ void Animate_JEDI(GameObject_s *object) {
         return;
     }
 
-    const char *loop_sfx;
+    i32 sound;
     if (object->id == id_BODYGUARD) {
-        loop_sfx = "Grv_GuardWeaponLp";
+        sound = GetSfxId("Grv_GuardWeaponLp");
     } else if ((object->apiobj.character_data->model_flags & CHARACTER_MODEL_FLAG_JEDI_BADDIE) != 0) {
-        loop_sfx = "SaberLoopB";
+        sound = GetSfxId("SaberLoopB");
     } else {
-        loop_sfx = "SaberLoopJ";
+        sound = GetSfxId("SaberLoopJ");
     }
-    PlaySfxByIdAndSetVolume(GetSfxId(loop_sfx), &object->apiobj.collision_position, object->weapon_scale);
+    PlaySfxByIdAndSetVolume(sound, &object->apiobj.collision_position, object->weapon_scale);
 }
 
 __attribute__((optimize("O2", "tree-vectorize"))) void Animate_ASTROMECH(GameObject_s *object) {
@@ -12510,8 +12507,7 @@ void Move_POD(GameObject_s *object) {
 
     ApplyGravity(object, NULL, FindPodHoverHeight(object), 8.0f, NULL);
 
-    GAMECHARACTERDATA *vehicle = object->apiobj.character_data->game_character;
-    if (PODSPRINT_ADATA != NULL && WORLD->area == PODSPRINT_ADATA && vehicle->field_0x28 > 0.0f &&
+    if (PODSPRINT_ADATA != NULL && WORLD->area == PODSPRINT_ADATA && object->apiobj.character_data->game_character->field_0x28 > 0.0f &&
         PodSprint_InStartCountdown(WORLD) <= 0.0f) {
         LoopCode(object, object->pad_gamepad->buttons_pressed & GAMEPAD_JUMP,
                  object->pad_gamepad->buttons_held & GAMEPAD_JUMP, object->pad_gamepad, 0);
@@ -12562,7 +12558,7 @@ void Move_POD(GameObject_s *object) {
     }
 
     if (FreePlay != 0 && (object->apiobj.character_data->model_flags & 0x10000000) != 0 &&
-        (vehicle->flags_094[0] & 8) == 0) {
+        (object->apiobj.character_data->game_character->flags_094[0] & 8) == 0) {
         FireCode(object, object->pad_gamepad->buttons_pressed & GAMEPAD_ACTION,
                  object->pad_gamepad->buttons_held & GAMEPAD_ACTION, 0.15f, 0);
     }
@@ -12572,30 +12568,31 @@ void Move_POD(GameObject_s *object) {
         ForceCode(object, 0, 0);
     PodCollisionCode(object);
 
-    i32 sound = vehicle->sfx_engine;
-    if (vehicle->uses_weapon_action != 0x14) {
+    i32 sound = object->apiobj.character_data->game_character->sfx_engine;
+    if (object->apiobj.character_data->game_character->uses_weapon_action != 0x14) {
         f32 camera_facing = (object->apiobj.collision_position.x - global_camera.mtx.m30) * global_camera.mtx.m20 +
                             (object->apiobj.collision_position.y - global_camera.mtx.m31) * global_camera.mtx.m21 +
                             (object->apiobj.collision_position.z - global_camera.mtx.m32) * global_camera.mtx.m22;
-        if (camera_facing < 0.0f)
-            PlaySfxByIdAndSetPitch(sound, &object->apiobj.collision_position, 0.7f);
-        else
+        if (camera_facing >= 0.0f)
             PlaySfxById(sound, &object->apiobj.collision_position);
+        else
+            PlaySfxByIdAndSetPitch(sound, &object->apiobj.collision_position, 0.7f);
     } else {
         if (static_cast<i8>(object->apiobj.flags_low) < 0) {
-            i32 player_index = object == Player[0] ? 0 : 1;
-            if (WORLD->area == PODRACE_ADATA) {
-                f32 steering = -fabsf(NuTrigTable[object->pad_gamepad->input_angle >> 1]) *
+            if (WORLD->area != NULL && WORLD->area == PODRACE_ADATA) {
+                f32 steering = -fabsf(NuTrigTable[static_cast<u16>(object->pad_gamepad->input_angle / 2)]) *
                                (object->pad_gamepad->input_magnitude - 6.0f) / 96.0f;
                 f32 speed = avg_currentspeed_mul < 1.1f ? avg_currentspeed_mul + 1.0f + steering : 2.0f + steering;
                 f32 pitch = speed * 0.5f;
+                i32 player_index = object == Player[0] ? 0 : 1;
                 f32 previous = PosSeekPitch[player_index];
                 PosSeekPitch[player_index] = previous + (pitch - previous) * FRAMETIME * 1.5f;
                 PlaySfxByIdAndSetPitch(sound, &object->apiobj.collision_position, PosSeekPitch[player_index]);
             } else {
+                i32 player_index = object == Player[0] ? 0 : 1;
                 PosSeekPitch[player_index] =
                     SeekLinearF(PosSeekPitch[player_index],
-                                object->apiobj.velocity_magnitude / vehicle->run_speed * 0.35f + 0.65f, FRAMETIME);
+                                object->apiobj.velocity_magnitude / object->apiobj.character_data->game_character->run_speed * 0.35f + 0.65f, FRAMETIME);
                 PlaySfxByIdAndSetPitch(sound, &object->apiobj.collision_position, PosSeekPitch[player_index]);
             }
         }

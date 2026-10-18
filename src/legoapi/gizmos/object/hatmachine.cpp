@@ -758,64 +758,69 @@ void HatMachine_MoveCode(WORLDINFO_s *world, GameObject_s *object, i32 special_p
     if (object->apiobj.character_model->model_data_b[object->context_animation] == NULL ||
         AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0) != NULL) {
         const f32 progress = object->field_0x768 + FRAMETIME;
-        object->field_0x768 = progress > 1.0f ? 1.0f : progress;
+        object->field_0x768 = progress >= 1.0f ? 1.0f : progress;
         object->context_animation_timer -= FRAMETIME;
 
-        if (object->field_0x7a3 == 1) {
-            if (machine->animation_state != 4) {
-                return;
-            }
-            if ((object->apiobj.character_data->game_character->flags_090 & 0x10) == 0 &&
-                (object->id != id_PRINCESSLEIABOUSHH || FreePlay == 0)) {
-                PlaySfx(const_cast<char *>("HatOn"), &object->apiobj.upper_position);
-                object->field_0x108e = static_cast<HATMACHINE_s *>(object->field_0x788)->current_hat;
-                if (object->field_0x108e == 5) {
-                    MakeBaddiesForgetAboutParty(1);
+        switch (object->field_0x7a3) {
+            case 0: {
+                if (!(object->context_animation_timer <= 0.0f)) {
+                    return;
                 }
-                if (object->apiobj.player_controlled) {
-                    if (static_cast<HATMACHINE_s *>(object->field_0x788)->current_hat == 5) {
-                        Hint_SetComplete(0x627);
-                    } else if (static_cast<HATMACHINE_s *>(object->field_0x788)->current_hat == 6) {
-                        Hint_SetComplete(0x628);
-                    }
-                }
-            }
-            machine->current_hat = 0;
-            object->field_0x7a3 = 2;
-            machine->animation_state = 6;
-        } else if (object->field_0x7a3 == 0) {
-            if (!(object->context_animation_timer <= 0.0f)) {
-                return;
-            }
-            const bool disguise_blocked = (object->apiobj.character_data->game_character->flags_090 & 0x10) == 0 &&
-                                          (object->id != id_PRINCESSLEIABOUSHH || FreePlay == 0);
-            if (object->apiobj.character_model->model_data_b[0x6d] == NULL || disguise_blocked) {
-                if (object->apiobj.character_model->model_data_b[0x5e] == NULL) {
-                    if (machine->animation_state != 2) {
+                const bool disguise_blocked = (object->apiobj.character_data->game_character->flags_090 & 0x10) == 0 &&
+                                              (object->id != id_PRINCESSLEIABOUSHH || FreePlay == 0);
+                if (object->apiobj.character_model->model_data_b[0x6d] == NULL || disguise_blocked) {
+                    if (object->apiobj.character_model->model_data_b[0x5e] == NULL) {
+                        if (machine->animation_state != 2) {
+                            return;
+                        }
+                        object->context_animation = 1;
+                        object->field_0x7a3 = 1;
+                        machine->animation_duration = 0.2f;
                         return;
                     }
-                    object->context_animation = 1;
+                    if (machine->animation_state == 2) {
+                        object->context_animation = 0x5e;
+                        object->field_0x7a3 = 1;
+                        object->context_animation_timer = AnimDuration(object->id, 0x5e, 0.0f, 0.0f, 1);
+                        return;
+                    }
+                } else if (machine->animation_state == 2) {
+                    object->context_animation = 0x6d;
                     object->field_0x7a3 = 1;
-                    machine->animation_duration = 0.2f;
+                    object->context_animation_timer = AnimDuration(object->id, 0x6d, 0.0f, 0.0f, 1);
+                    machine->animation_duration = object->context_animation_timer * 0.35f;
                     return;
                 }
-                if (machine->animation_state == 2) {
-                    object->context_animation = 0x5e;
-                    object->field_0x7a3 = 1;
-                    object->context_animation_timer = AnimDuration(object->id, 0x5e, 0.0f, 0.0f, 1);
-                    return;
-                }
-            } else if (machine->animation_state == 2) {
-                object->context_animation = 0x6d;
-                object->field_0x7a3 = 1;
-                object->context_animation_timer = AnimDuration(object->id, 0x6d, 0.0f, 0.0f, 1);
-                machine->animation_duration = object->context_animation_timer * 0.35f;
+                object->context_animation = 1;
                 return;
             }
-            object->context_animation = 1;
-            return;
-        } else if (object->field_0x7a3 != 2) {
-            return;
+            case 1:
+                if (machine->animation_state != 4) {
+                    return;
+                }
+                if ((object->apiobj.character_data->game_character->flags_090 & 0x10) == 0 &&
+                    (object->id != id_PRINCESSLEIABOUSHH || FreePlay == 0)) {
+                    PlaySfx(const_cast<char *>("HatOn"), &object->apiobj.upper_position);
+                    object->field_0x108e = static_cast<HATMACHINE_s *>(object->field_0x788)->current_hat;
+                    if (object->field_0x108e == 5) {
+                        MakeBaddiesForgetAboutParty(1);
+                    }
+                    if (object->apiobj.player_controlled) {
+                        if (static_cast<HATMACHINE_s *>(object->field_0x788)->current_hat == 5) {
+                            Hint_SetComplete(0x627);
+                        } else if (static_cast<HATMACHINE_s *>(object->field_0x788)->current_hat == 6) {
+                            Hint_SetComplete(0x628);
+                        }
+                    }
+                }
+                machine->current_hat = 0;
+                object->field_0x7a3 = 2;
+                machine->animation_state = 6;
+                break;
+            case 2:
+                break;
+            default:
+                return;
         }
 
         if (!(object->context_animation_timer <= 0.0f)) {

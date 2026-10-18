@@ -2249,7 +2249,10 @@ AddLocatorToSetBody(EDLOCATORSET_s *set, EDLOCATOR_s *locator,
                     EDLOCATOR_s *before) __asm__("_ZL15AddLocatorToSetP14EDLOCATORSET_sP11EDLOCATOR_sS2_.part.5");
 
 static inline i32 LocatorSetContains(EDLOCATORSET_s *set, EDLOCATOR_s *locator) {
-    for (i32 index = 0; index < 64 && set->locators[index] != nullptr; ++index) {
+    for (i32 index = 0; index < 64; ++index) {
+        if (set->locators[index] == nullptr) {
+            break;
+        }
         if (set->locators[index] == locator) {
             return 1;
         }
@@ -2847,12 +2850,12 @@ static f32 Condition_AlwaysTrue(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET
 }
 
 static f32 Condition_LocatorRangeY(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *, void *void_arg) {
+    AILOCATOR *locator = static_cast<AILOCATOR *>(void_arg);
     if (packet != NULL && packet->owner != NULL) {
-        if (void_arg == NULL) {
-            void_arg = processor->unknown_a4;
+        if (locator == NULL) {
+            locator = processor->unknown_a4;
         }
-        if (void_arg != NULL) {
-            AILOCATOR *locator = static_cast<AILOCATOR *>(void_arg);
+        if (locator != NULL) {
             return packet->owner->apiobj.position.y - locator->position.y;
         }
     }
@@ -3482,12 +3485,12 @@ static f32 Condition_NearestPlayerRange(AISYS_s *sys, AISCRIPTPROCESS_s *process
 static f32 Condition_OpponentToLocator(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *,
                                        void *void_arg) {
     NUVEC difference;
+    AILOCATOR *locator = static_cast<AILOCATOR *>(void_arg);
     if (packet != NULL && packet->opponent_object != NULL) {
-        if (void_arg == NULL) {
-            void_arg = processor->unknown_a4;
+        if (locator == NULL) {
+            locator = processor->unknown_a4;
         }
-        if (void_arg != NULL) {
-            AILOCATOR *locator = static_cast<AILOCATOR *>(void_arg);
+        if (locator != NULL) {
             return NuVecDist(&packet->opponent_object->position, &locator->position, &difference);
         }
     }
@@ -3614,7 +3617,8 @@ static __used__ void pathEditor_cbNodeFlagsToggle(eduimenu_s *, eduiitem_s *item
             flags |= mask;
         }
         node->flags = flags;
-        if ((i8)aieditor->current_path->current_node->flags < 0) {
+        node = aieditor->current_path->current_node;
+        if ((i8)node->flags < 0) {
             node->platform.scene = nullptr;
             node->platform.special = nullptr;
             node->platform.display_special = nullptr;
@@ -4042,9 +4046,9 @@ static __used__ void creatureEditor_cb_max_n_respawns(eduimenu_s *, eduiitem_s *
         CreatureEditorRecord *creature = creatureEditor_Current();
         if (creature->max_respawns < creature->min_respawns) {
             creature->max_respawns = creature->min_respawns;
+            eduiItemSliderSetVal(slider, creatureEditor_Current()->max_respawns);
         }
     }
-    eduiItemSliderSetVal(slider, creatureEditor_Current()->max_respawns);
 }
 
 static __used__ void creatureEditor_cb_min_n_respawns(eduimenu_s *, eduiitem_s *item, unsigned int) {
@@ -4054,9 +4058,9 @@ static __used__ void creatureEditor_cb_min_n_respawns(eduimenu_s *, eduiitem_s *
         CreatureEditorRecord *creature = creatureEditor_Current();
         if (creature->min_respawns > creature->max_respawns) {
             creature->min_respawns = creature->max_respawns;
+            eduiItemSliderSetVal(slider, creatureEditor_Current()->min_respawns);
         }
     }
-    eduiItemSliderSetVal(slider, creatureEditor_Current()->min_respawns);
 }
 
 static __used__ void creatureEditor_cbCancelMenu(eduimenu_s *menu, eduimenu_s *) {
@@ -5279,21 +5283,22 @@ static f32 Condition_NearestPlayerToLocator(AISYS_s *sys, AISCRIPTPROCESS_s *pro
         AILOCATOR *locator = static_cast<AILOCATOR *>(void_arg);
         if (locator == NULL) {
             locator = processor->unknown_a4;
+            if (locator == NULL) {
+                return 3.402823466e+38f;
+            }
         }
-        if (locator != NULL) {
-            distance = 3.402823466e+38f;
-            if (sys->player_1 != NULL) {
-                distance = NuVecDistSqr(&sys->player_1->position, &locator->position, &difference);
-            }
-            if (sys->player_2 != NULL) {
-                f32 second = NuVecDistSqr(&sys->player_2->position, &locator->position, &difference);
-                distance = second < distance ? second : distance;
-            }
-            if (distance != 3.402823466e+38f) {
-                distance = NuFsqrt(distance);
-            }
-            return distance;
+        distance = 3.402823466e+38f;
+        if (sys->player_1 != NULL) {
+            distance = NuVecDistSqr(&sys->player_1->position, &locator->position, &difference);
         }
+        if (sys->player_2 != NULL) {
+            f32 second = NuVecDistSqr(&sys->player_2->position, &locator->position, &difference);
+            distance = second < distance ? second : distance;
+        }
+        if (distance != 3.402823466e+38f) {
+            distance = NuFsqrt(distance);
+        }
+        return distance;
     }
     return 3.402823466e+38f;
 }
@@ -14320,8 +14325,8 @@ extern "C" void areaEditorDrawAreas() {
                 if (use_width != 0) {
                     NuVecRotateY(&delta, &delta, -locator->direction);
                     if (delta.x < aiEditor_LocatorWidth && delta.y < aiEditor_LocatorWidth &&
-                        delta.z < aiEditor_LocatorWidth && -delta.x < aiEditor_LocatorWidth &&
-                        -delta.y < aiEditor_LocatorWidth && -delta.z < aiEditor_LocatorWidth) {
+                        delta.z < aiEditor_LocatorWidth && delta.x > -aiEditor_LocatorWidth &&
+                        delta.y > -aiEditor_LocatorWidth && delta.z > -aiEditor_LocatorWidth) {
                         nearest = locator;
                         nearest_distance = distance;
                     }
@@ -17110,21 +17115,20 @@ extern "C" {
             f32 distance = NuVecXZDistSqr(&aieditor->camera_position, &record->position, &delta);
             if (!(distance < nearest_distance))
                 continue;
-            if (use_radius == 0) {
-                nearest = creature;
-                nearest_distance = distance;
-                continue;
-            }
-            f32 lower = record->position.y + min_height;
-            if (lower > record->position.y) {
-                height += min_height;
-                lower = record->position.y;
-            }
-            if (!(distance < radius * radius))
-                continue;
-            if (aieditor->camera_position.y < lower - aieditor_y_tolerance)
-                continue;
-            if (aieditor->camera_position.y <= lower + height + aieditor_y_tolerance) {
+            if (use_radius != 0) {
+                f32 lower = record->position.y + min_height;
+                if (lower > record->position.y) {
+                    height += lower - record->position.y;
+                    lower = record->position.y;
+                }
+                if (!(distance < radius * radius))
+                    continue;
+                if (aieditor->camera_position.y >= lower - aieditor_y_tolerance &&
+                    aieditor->camera_position.y <= lower + height + aieditor_y_tolerance) {
+                    nearest = creature;
+                    nearest_distance = distance;
+                }
+            } else {
                 nearest = creature;
                 nearest_distance = distance;
             }
@@ -17544,7 +17548,8 @@ static __used__ __attribute__((force_align_arg_pointer)) void creatureEditor_cbR
     CreatureEditorRecord *creature = creatureEditor_Current();
     if (creature != nullptr) {
         creature->flags &= ~0x1e;
-        memcpy(creature->script_params, aieditorsettings.current_script_params, sizeof(creature->script_params));
+        for (i32 index = 0; index < 4; index++)
+            creature->script_params[index] = aieditorsettings.current_script_params[index];
     }
     eduiMenuDetach(menu);
     eduiMenuDestroy(menu);
@@ -18319,7 +18324,7 @@ static __used__
     for (i32 i = 1; i < record->group_count; ++i) {
         nuvec_s position;
         if (creatureEditor_CalculatePos(creature, i, &position, 1)) {
-            record->valid_positions |= ((i & 0x20) == 0) << i;
+            record->valid_positions |= static_cast<u32>(1ULL << i);
         }
     }
 }
@@ -18352,7 +18357,7 @@ static __used__ void creatureEditor_cb_ngroup(eduimenu_s *, eduiitem_s *item, un
     CreatureEditorRecord *creature = creatureEditor_Current();
     if (creature != nullptr) {
         creature->group_count = static_cast<i32>(reinterpret_cast<edui_slider_s *>(item)->value);
-        creatureEditor_Updated(reinterpret_cast<EDCREATURE_s *>(creature));
+        creatureEditor_Updated(reinterpret_cast<EDCREATURE_s *>(creatureEditor_Current()));
     }
 }
 

@@ -232,14 +232,14 @@ static i32 *GizSpinner_GetBestBoltTarget(GIZMOSET *, float *, NUVEC *result_posi
         return NULL;
     }
 
-    GIZMOSET *set = &world->gizmo_sys->sets[spinner_gizmotype_id];
-    if (set->count < 1) {
-        return NULL;
-    }
     const float min_x = position->x - radius;
     const float min_z = position->z - radius;
     const float max_x = position->x + radius;
     const float max_z = position->z + radius;
+    GIZMOSET *set = &world->gizmo_sys->sets[spinner_gizmotype_id];
+    if (set->count < 1) {
+        return NULL;
+    }
     float best_alignment = 0.0f;
     GIZMO *result = NULL;
 
@@ -1348,30 +1348,32 @@ static i32 GizSpinner_BoltHitPlat(void *, void *spinner_ptr, BOLT *bolt, unsigne
 }
 
 i32 GizSpinner_GetTargetPoints(GIZSPINNER_s *spinner, nuvec_s *positions, nuvec_s *directions) {
-    if (spinner == NULL || spinner->type == 0)
+    if (spinner == NULL)
         return 0;
     u32 flags = spinner->state_flags & 6;
-    u16 step = static_cast<u16>(65536 / spinner->type);
-    f32 y = spinner->position.y + spinner->field_0x098;
-    u16 base = spinner->rotation + spinner->initial_rotation + spinner->field_0x08c;
-    u16 direction_angle = base + ((flags == 0 || flags == 6) ? -0x4000 : 0x4000);
-    u16 position_angle = base - 0x8000;
     i32 count = 0;
-    for (; count < spinner->type; ++count) {
-        if (directions != NULL) {
-            directions[count].x = NuTrigTable[static_cast<u16>(direction_angle / 2)];
-            directions[count].y = 0.0f;
-            directions[count].z = NuTrigTable[((direction_angle + 0x4000) >> 1) & 0x7fff];
+    if (spinner->type != 0) {
+        u16 step = static_cast<u16>(65536 / spinner->type);
+        f32 y = spinner->position.y + spinner->field_0x098;
+        u16 base = spinner->rotation + spinner->initial_rotation + spinner->field_0x08c;
+        u16 direction_angle = base + ((flags == 6 || flags == 0) ? -0x4000 : 0x4000);
+        u16 position_angle = base - 0x8000;
+        for (; count < spinner->type; ++count) {
+            if (directions != NULL) {
+                directions[count].x = NuTrigTable[static_cast<u16>(direction_angle / 2)];
+                directions[count].y = 0.0f;
+                directions[count].z = NuTrigTable[((direction_angle + 0x4000) >> 1) & 0x7fff];
+            }
+            if (positions != NULL) {
+                positions[count].x =
+                    spinner->field_0x094 * NuTrigTable[static_cast<u16>(position_angle / 2)] + spinner->position.x;
+                positions[count].y = y;
+                positions[count].z = spinner->field_0x094 * NuTrigTable[((position_angle + 0x4000) >> 1) & 0x7fff] +
+                                     spinner->position.z;
+            }
+            direction_angle += step;
+            position_angle += step;
         }
-        if (positions != NULL) {
-            positions[count].x =
-                spinner->field_0x094 * NuTrigTable[static_cast<u16>(position_angle / 2)] + spinner->position.x;
-            positions[count].y = y;
-            positions[count].z =
-                spinner->field_0x094 * NuTrigTable[((position_angle + 0x4000) >> 1) & 0x7fff] + spinner->position.z;
-        }
-        direction_angle += step;
-        position_angle += step;
     }
     return count;
 }
