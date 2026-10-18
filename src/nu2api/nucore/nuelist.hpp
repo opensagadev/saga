@@ -83,27 +83,28 @@ template <typename T, typename D = DefaultElist> class NuEList {
         if (next != nullptr) {
             GetLinks(next)->prev = previous;
         }
-        length--;
         entry_links->next = nullptr;
         entry_links->prev = nullptr;
+        length--;
         return entry;
     }
 
     void Remove(T *entry) {
         Links *entry_links = GetLinks(entry);
+        if (entry_links->next == nullptr && entry_links->prev == nullptr) {
+            return;
+        }
         T *previous = entry_links->prev;
         T *next = entry_links->next;
-        if (next != nullptr || previous != nullptr) {
-            length--;
-            if (previous != nullptr) {
-                GetLinks(previous)->next = next;
-            }
-            if (next != nullptr) {
-                GetLinks(next)->prev = previous;
-            }
-            entry_links->next = nullptr;
-            entry_links->prev = nullptr;
+        length--;
+        if (previous != nullptr) {
+            GetLinks(previous)->next = next;
         }
+        if (next != nullptr) {
+            GetLinks(next)->prev = previous;
+        }
+        entry_links->next = nullptr;
+        entry_links->prev = nullptr;
     }
 };
 
@@ -149,6 +150,11 @@ template <typename T, usize Offset> class NuEListOffset {
         return entry != nullptr ? GetLinks(entry) : nullptr;
     }
 
+    // EntryOf done as address arithmetic.
+    static T *AddressEntryOf(Link *link) {
+        return reinterpret_cast<T *>(reinterpret_cast<usize>(link) - Offset);
+    }
+
     static T *EntryOf(Link *link) {
         return reinterpret_cast<T *>(reinterpret_cast<u8 *>(link) - Offset);
     }
@@ -171,14 +177,14 @@ template <typename T, usize Offset> class NuEListOffset {
     }
 
     NuEListOffset() {
-        T *begin_entry = BeginSentinel();
-        T *end_entry = EndSentinel();
         begin_sentinel.prev = nullptr;
-        begin_sentinel.next = end_entry;
-        end_sentinel.prev = begin_entry;
+        begin_sentinel.next = nullptr;
+        end_sentinel.prev = nullptr;
         end_sentinel.next = nullptr;
-        begin = begin_entry;
-        end = end_entry;
+        begin = BeginSentinel();
+        end = EndSentinel();
+        begin_sentinel.next = end;
+        end_sentinel.prev = begin;
         length = 0;
     }
 
@@ -208,19 +214,50 @@ template <typename T, usize Offset> class NuEListOffset {
         Link *previous_link = LinkOf(end_link->prev);
         end_link->prev = CheckedEntryOf(entry_link);
         entry_link->prev = CheckedEntryOf(previous_link);
-        previous_link->next = EntryOf(entry_link);
-        entry_link->next = EntryOf(end_link);
+        previous_link->next = AddressEntryOf(entry_link);
+        entry_link->next = AddressEntryOf(end_link);
         length++;
         return true;
+    }
+
+    // Unlinks the first entry without the membership check Remove performs.
+    T *PopFront() {
+        T *entry = Front();
+        Links *entry_links = GetLinks(entry);
+        T *next = entry_links->next;
+        if (next != nullptr) {
+            T *previous = entry_links->prev;
+            Link *next_links = LinkOf(next);
+            if (previous != nullptr) {
+                if (next_links != nullptr) {
+                    GetLinks(previous)->next = next;
+                    next_links->prev = previous;
+                } else {
+                    GetLinks(previous)->next = nullptr;
+                }
+            } else if (next_links != nullptr) {
+                next_links->prev = nullptr;
+            }
+        } else {
+            T *previous = entry_links->prev;
+            if (previous != nullptr) {
+                GetLinks(previous)->next = nullptr;
+            }
+        }
+        length--;
+        entry_links->next = nullptr;
+        entry_links->prev = nullptr;
+        return entry;
     }
 
     void Remove(T *entry) {
         Links *entry_links = GetLinks(entry);
         T *next = entry_links->next;
         if (next != nullptr) {
+            // Address arithmetic, so the converted pointer is still checked below.
+            Links *next_links = reinterpret_cast<Links *>(reinterpret_cast<usize>(next) + Offset);
             T *previous = entry_links->prev;
             length--;
-            Links *next_links = GetLinks(next);
             if (previous != nullptr) {
                 if (next_links != nullptr) {
                     GetLinks(previous)->next = next;

@@ -1084,7 +1084,7 @@ void PlayJumpSfx(GameObject_s *object, i32 type) {
         sfx = GameAudio->sfx_ids[0];
     }
     if (sfx != -1) {
-        if (!object->apiobj.player_controlled && (object->field_0xefb & 8) == 0) {
+        if (!object->apiobj.player_controlled && !object->is_boss) {
             PlaySfxByIdAndSetVolume(sfx, &object->apiobj.lower_position, 0.5f);
         } else {
             GameAudio_PlaySfxById(sfx, &object->apiobj.lower_position, 0, 1);
@@ -1128,7 +1128,7 @@ void PlayLandSfx(GameObject_s *object, i32 type, i32) {
         }
     }
     if (sfx != -1) {
-        if (static_cast<i8>(object->apiobj.flags_low) < 0 || (object->field_0xefb & 8) != 0) {
+        if (static_cast<i8>(object->apiobj.flags_low) < 0 || object->is_boss) {
             GameAudio_PlaySfxById(sfx, &object->apiobj.lower_position, 0, 1);
         } else {
             PlaySfxByIdAndSetVolume(sfx, &object->apiobj.lower_position, 0.5f);
@@ -1173,7 +1173,7 @@ void PlayFootStepSfx(GameObject_s *object) {
     }
 
     if (sfx != -1) {
-        if (object->apiobj.player_controlled || (object->field_0xefb & 8) != 0) {
+        if (object->apiobj.player_controlled || object->is_boss) {
             GameAudio_PlaySfxById(sfx, &object->apiobj.lower_position, 0, 0);
         } else {
             PlaySfxByIdAndSetVolume(sfx, &object->apiobj.lower_position, 0.5f);

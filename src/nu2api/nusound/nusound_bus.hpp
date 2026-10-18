@@ -1,6 +1,7 @@
 #pragma once
 
 #include "nu2api/nucore/common.h"
+#include "nu2api/nusound/nulist.hpp"
 
 #include "decomp.h"
 
@@ -11,13 +12,7 @@ class NuSoundBus {
     NuSoundBus *intrusive_next;
     f32 output_mix[8];
     NuSoundBus *parent_bus;
-    void *effect_begin_prev;
-    void *effect_begin_next;
-    void *effect_end_prev;
-    void *effect_end_next;
-    void *effect_begin;
-    void *effect_end;
-    i32 effect_count;
+    NuList<NuSoundEffect *> effects;
     char name[128];
 
   public:

@@ -69,7 +69,7 @@ u64 NuSoundHeaderOGG::GetDecodedLengthBytes() const {
     return decoded_length_bytes;
 }
 
-u16 NuSoundHeaderOGG::GetInterleaveSize() const {
+u32 NuSoundHeaderOGG::GetInterleaveSize() const {
     return bits_per_channel / 8;
 }
 
@@ -122,16 +122,16 @@ NuSoundStreamDesc *NuSoundLoaderOGG::CreateHeader() {
 }
 
 bool NuSoundLoaderOGG::SeekTime(f64 seconds) {
-    NuIOS_IsLowEndDevice();
     NuSoundHeaderOGG *header = (NuSoundHeaderOGG *)desc;
+    NuIOS_IsLowEndDevice();
     i32 iVar2 = ov_time_seek(&header->ogg_file, seconds);
     return iVar2 == 0;
 }
 
 bool NuSoundLoaderOGG::SeekPCMSample(u64 index) {
+    NuSoundHeaderOGG *header = (NuSoundHeaderOGG *)desc;
     NuIOS_IsLowEndDevice();
 
-    NuSoundHeaderOGG *header = (NuSoundHeaderOGG *)desc;
     i32 ret = ov_pcm_seek(&header->ogg_file, index);
     return ret == 0;
 }

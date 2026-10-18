@@ -608,14 +608,14 @@ NuMusic *NuMusic::GetPlayer() {
 // GamePlayMusic consults this option byte (original: SuperOptions field 0x14).
 // Non-zero selects the quiet/action attack tracks instead of the plain theme.
 NuMusic::NuMusic() {
-    for (i32 i = 0; i < 6; i++) {
-        this->class_volumes[i] = 1.0f;
-    }
     this->albums = NULL;
     this->album_count = 0;
     this->fileinfo = NULL;
     this->file_count = 0;
     this->track_index = 0;
+    for (i32 i = 0; i < 6; i++) {
+        this->class_volumes[i] = 1.0f;
+    }
 }
 
 NuMusic::~NuMusic() {

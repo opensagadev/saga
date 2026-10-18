@@ -193,7 +193,7 @@ extern "C" NUSHADERPROGRAM *NuShaderProgramCreateIOS(const char *vertex_source, 
     glCompileShader(vertex_shader);
     GLint compiled = 0;
     glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &compiled);
-    if (__builtin_expect(compiled == 0, 0)) {
+    if (compiled == 0) {
         glDeleteShader(vertex_shader);
     }
 

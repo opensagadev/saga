@@ -81,7 +81,7 @@ void ShaderManagerOpenGL::adaptShaderMaterialForShaderVersion(NUSHADERMTLDESC *d
     desc->byte4 = mobile_flags1 & 0x9f;
 
     if ((original_shader_flags & 0x10000) == 0) {
-        if (__builtin_expect((original_shader_flags & 0x20) != 0, 0)) {
+        if ((original_shader_flags & 0x20) != 0) {
             mobile_flags0 &= 0xf4;
             desc->flags = original_shader_flags & 0xffff9ff4;
             desc->flagsbits_1b8 = mobile_flags0;

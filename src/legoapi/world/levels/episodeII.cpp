@@ -796,7 +796,7 @@ void JediB_Update(WORLDINFO_s *world) {
                             }
                             GameObject_s *object = jedi_b.goodies[jedi_b.goody_count].object;
                             jedi_b.goodies[jedi_b.goody_count].id = *entry->id;
-                            object->field_0xefb |= 1;
+                            object->only_attack_players = 1;
                             object->ai.locator = locator;
                             object->field_0xeb4 = JediBKilledCallback;
                             jedi_b.goody_count = static_cast<i16>(jedi_b.goody_count + 1);

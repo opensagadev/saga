@@ -463,7 +463,8 @@ NuInputManager::NuInputManager() {
     for (i = 0; i < this->max_devices; i++) {
         this->devices[i] = (NuInputDevice *)NU_ALLOC_T(NuInputDevice, NuMemoryManager::MEM_ALLOC_SET_TO_ZERO, "",
                                                        NUMEMORY_CATEGORY_NONE);
-        new (this->devices[i]) NuInputDevice(i, 0);
+        NuInputDevice::InitSlot(this->devices[i], i);
+        this->devices[i]->Clear();
     }
 }
 
@@ -657,10 +658,10 @@ f32 NuInputDevice::GetVolume() const {
     return volume;
 }
 
-__attribute__((optimize("O2"))) void NuInputDevice::ConvertToEmulatedTouchFromMouse(void) {
+void NuInputDevice::ConvertToEmulatedTouchFromMouse(void) {
     type = NUPADTYPE_TOUCH;
-    prev_valid_type = NUPADTYPE_TOUCH;
     idx_by_type = 0;
+    prev_valid_type = NUPADTYPE_TOUCH;
     prev_valid_idx_by_type = 0;
     touch_data.touch_count = 0;
     if (mouse_data.buttons[0].active != 0) {

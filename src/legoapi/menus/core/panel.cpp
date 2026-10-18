@@ -271,7 +271,7 @@ static void DrawHitPoints(GameObject_s *object, float x, float y, float scale, f
     i32 two_rows = 0;
     if (SuperStory != 0 && WORLD->current_level == VADERC_LDATA && object->hitpoints == 10) {
         two_rows = 1;
-    } else if ((object->field_0xefb & 8) != 0) {
+    } else if (object->is_boss) {
         two_rows = drawbosshitpoints_2rows != 0;
         drawbosshitpoints_2rows = 0;
     }

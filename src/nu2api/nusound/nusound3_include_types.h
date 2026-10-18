@@ -68,11 +68,17 @@ template <> class NuEList<NuSound3Voice, DefaultElist> {
     ~NuEList() {
         while (length != 0) {
             NuSound3Voice *voice = begin->intrusive_next;
-            voice->intrusive_prev->intrusive_next = voice->intrusive_next;
-            voice->intrusive_next->intrusive_prev = voice->intrusive_prev;
+            NuSound3Voice *previous = voice->intrusive_prev;
+            NuSound3Voice *next = voice->intrusive_next;
+            if (previous != NULL) {
+                previous->intrusive_next = next;
+            }
+            if (next != NULL) {
+                next->intrusive_prev = previous;
+            }
             length--;
-            voice->intrusive_prev = NULL;
             voice->intrusive_next = NULL;
+            voice->intrusive_prev = NULL;
             delete voice;
         }
     }

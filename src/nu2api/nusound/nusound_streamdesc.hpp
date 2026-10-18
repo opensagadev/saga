@@ -40,7 +40,7 @@ class NuSoundStreamDesc {
     virtual bool DecodeStreamOnOpen() const;
     virtual i32 GetLoopStart() const;
     virtual i32 GetLoopEnd() const;
-    virtual u16 GetInterleaveSize() const {
+    virtual u32 GetInterleaveSize() const {
         return 0;
     }
     virtual u16 GetFormatID() const {

@@ -515,7 +515,8 @@ typedef struct APIOBJECT_s {
                     u8 : 1;
                     // Objects with this bit are not pushed apart by 2D collision resolution.
                     u8 flags_low_bit1 : 1;
-                    u8 : 6;
+                    u8 : 5;
+                    u8 is_player : 1;
                 };
             };
             union {
@@ -1317,12 +1318,16 @@ typedef struct GameObject_s {
         };
     };
     union {
-        u8 field_0xefb; // 0x0efb, bit 3 requests the two-row hit-point layout
+        u8 field_0xefb; // 0x0efb
         struct {
-            u8 : 1;
+            u8 only_attack_players : 1;
             u8 catch_up_forbidden : 1;
             u8 cannot_drop_in : 1;
-            u8 : 5;
+            u8 is_boss : 1; // also requests the two-row hit-point layout
+            u8 can_shoot_obstructions : 1;
+            u8 use_weapon : 1;
+            u8 prefers_players : 1;
+            u8 no_gravity : 1;
         };
     };
     union {
@@ -1331,10 +1336,14 @@ typedef struct GameObject_s {
             union {
                 u8 field_0xefc; // 0x0efc
                 struct {
-                    u8 : 4;
+                    u8 ignore_shove_system : 1;
+                    u8 cannot_be_seen : 1;
+                    u8 : 1;
+                    u8 bolts_dont_get_deflected_back : 1;
                     u8 dont_move : 1;
                     u8 dont_set_stopped_flag : 1;
-                    u8 : 2;
+                    u8 : 1;
+                    u8 reset_lighting : 1;
                 };
             };
             union {
@@ -1353,7 +1362,13 @@ typedef struct GameObject_s {
                 u8 field_0xeff; // 0x0eff
                 struct {
                     u8 not_with_party : 1;
-                    u8 : 7;
+                    u8 touched_ground : 1;
+                    u8 hide_shadow : 1;
+                    u8 ignore_players : 1;
+                    u8 cannot_be_forced_back : 1;
+                    u8 can_turn : 1;
+                    u8 can_take_over : 1;
+                    u8 high_collision_priority : 1;
                 };
             };
         };
@@ -1610,6 +1625,9 @@ DECOMP_ASSERT(offsetof(GameObject_s, movement_spline) == 0xe70, "GameObject move
 DECOMP_ASSERT(offsetof(GameObject_s, movement_spline_position) == 0xe70, "GameObject spline position offset");
 DECOMP_ASSERT(offsetof(GameObject_s, takeover_target) == 0xeb0, "GameObject reciprocal takeover target offset");
 DECOMP_ASSERT(sizeof(GameObject_s) == 0x10e4, "GameObject size");
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(GameObject_s, field_0xefb) == 0xefb, "GameObject 0xefb flags offset");
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(GameObject_s, field_0xefc) == 0xefc, "GameObject 0xefc flags offset");
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(GameObject_s, field_0xeff) == 0xeff, "GameObject 0xeff flags offset");
 DECOMP_ASSERT(offsetof(GameObject_s, turn_braking) == 0xd98, "GameObject turn braking offset");
 DECOMP_ASSERT(offsetof(GameObject_s, field_0xdb0) == 0xdb0, "GameObject protocol-droid movement field offset");
 DECOMP_ASSERT(sizeof(AIPACKET) == 0x208, "AIPACKET size");

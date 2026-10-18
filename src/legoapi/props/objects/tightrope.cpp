@@ -106,8 +106,8 @@ static i32 TightRope_MoveUpdate(GameObject_s *object, i32 jumping) {
             speed = 0.6f;
         } else {
             rope = static_cast<TIGHTROPE *>(object->field_0x788);
-            object->context_animation = 0x89;
             object->apiobj.movement_facing_angle = rope->rotation;
+            object->context_animation = 0x89;
             speed = AnimSpeed(object->apiobj.character_model, 0x89);
         }
         direction = 1.0f;
@@ -116,8 +116,8 @@ static i32 TightRope_MoveUpdate(GameObject_s *object, i32 jumping) {
             speed = 0.6f;
         } else {
             rope = static_cast<TIGHTROPE *>(object->field_0x788);
-            object->context_animation = 0x89;
             object->apiobj.movement_facing_angle = rope->rotation + 0x8000;
+            object->context_animation = 0x89;
             speed = AnimSpeed(object->apiobj.character_model, 0x89);
         }
         direction = -1.0f;

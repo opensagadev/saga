@@ -38,6 +38,6 @@ void NuSoundClock::RemoveCallback(NuSoundClock::Callback *callback) {
 
 NuSoundClock::~NuSoundClock() {
     while (callbacks.length != 0) {
-        callbacks.Remove(callbacks.Front());
+        callbacks.PopFront();
     }
 }

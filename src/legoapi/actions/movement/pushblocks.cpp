@@ -1651,10 +1651,10 @@ void UpdatePushBlocks(void *world_ptr, void *, float) {
             continue;
         if (p->pushing_object) {
             if (p->platform_id != -1 && (p->runtime_flags_0c8 & 9)) {
-                p->pushing_object->field_0xefc |= 1;
+                p->pushing_object->ignore_shove_system = 1;
                 AddShoveObject(&p->special, (i16)p->platform_id);
             } else
-                p->pushing_object->field_0xefc &= ~1;
+                p->pushing_object->ignore_shove_system = 0;
         }
         if (!(p->packed_state_flags & 0x220)) {
             i32 safe = 0;

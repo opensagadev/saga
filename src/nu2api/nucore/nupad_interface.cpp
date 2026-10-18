@@ -619,15 +619,15 @@ void NuTouchInputButton::Update(NuInputTouchData const *data) {
         float ty = data->touch_events[i].unknown_08;
         float tx = data->touch_events[i].unknown_04;
         u32 touch_id = data->touch_events[i].unknown_14;
-        if (__builtin_expect(!released && !started && !active, 0))
+        if (!released && !started && !active)
             continue;
+        float dy = ty - y;
+        float ry = height * 0.5f;
+        float rx = width * 0.5f;
+        float dx = tx - x;
         if (!touch_captured) {
             if (started) {
-                float dy = ty - y;
-                float ry = height * 0.5f;
-                float rx = width * 0.5f;
-                float dx = tx - x;
-                if (__builtin_expect(dx * dx / (rx * rx) + dy * dy / (ry * ry) <= 1.0f, 0)) {
+                if (dx * dx / (rx * rx) + dy * dy / (ry * ry) <= 1.0f) {
                     captured_touch_id = touch_id;
                     touch_captured = true;
                     pressed = true;
@@ -665,9 +665,9 @@ void NuTouchInputStick::Update(NuInputTouchData const *data) {
         float dy = ty - y;
         float dx2 = dx * dx;
         float dy2 = dy * dy;
+        float rx = width * 0.5f;
+        float ry = height * 0.5f;
         if (!unknown_3c && started) {
-            float rx = width * 0.5f;
-            float ry = height * 0.5f;
             if (dx2 / (rx * rx) + dy2 / (ry * ry) <= 1.0f) {
                 unknown_38 = touch_id;
                 unknown_3c = true;
@@ -703,20 +703,24 @@ i32 RndrUnfilledCircle(f32 x, f32 y, f32 radius, f32 border_width, f32 aspect, i
 
     radius *= 0.5f;
     const f32 inner_radius = radius - border_width * 0.5f;
+    const f32 outer_top = y - radius;
+    const f32 inner_top = y - inner_radius;
 
     NuRndrPrimSetColour(colour);
     NuRndrPrimUV(0.0f, 1.0f);
-    NuPrim2DAddXYZ(static_cast<f32>(PS2_VREZ_W) * x, static_cast<f32>(PS2_VREZ_H) * (y - radius), z);
+    NuPrim2DAddXYZ(static_cast<f32>(PS2_VREZ_W) * x, static_cast<f32>(PS2_VREZ_H) * outer_top, z);
 
     NuRndrPrimSetColour(colour);
     NuRndrPrimUV(0.0f, 0.0f);
-    NuPrim2DAddXYZ(static_cast<f32>(PS2_VREZ_W) * x, static_cast<f32>(PS2_VREZ_H) * (y - inner_radius), z);
+    NuPrim2DAddXYZ(static_cast<f32>(PS2_VREZ_W) * x, static_cast<f32>(PS2_VREZ_H) * inner_top, z);
 
     const f32 segments = progress * 360.0f;
     // Retail CVTTSS2SI returns integer-indefinite for unordered/out-of-range
     // inputs. The touch widgets actually pass packed colours as progress;
-    // the intrinsic keeps that no-segment result well defined.
-#if defined(__SSE__)
+    // off target the intrinsic keeps that no-segment result well defined.
+#if defined(__ANDROID__) && defined(__i386__)
+    const i32 segment_count = static_cast<i32>(segments);
+#elif defined(__SSE__)
     const i32 segment_count = _mm_cvtt_ss2si(_mm_set_ss(segments));
 #else
     const i32 segment_count =

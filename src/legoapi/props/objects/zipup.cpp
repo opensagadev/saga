@@ -717,8 +717,8 @@ void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
             object->character_context = -1;
             zipup->occupant = NULL;
             object->context_flags &= ~0x20;
-            static_cast<ZIPUP *>(object->field_0x788)->runtime_flags &= ~1;
             object->fall_animation_timer = 0.2f;
+            static_cast<ZIPUP *>(object->field_0x788)->runtime_flags &= ~1;
             api.velocity.x = object->target_velocity.x = v000.x;
             api.velocity.y = object->target_velocity.y = -1.0f;
             api.velocity.z = object->target_velocity.z = v000.z;
@@ -739,8 +739,8 @@ void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
         if (difference < 0)
             difference = -difference;
         i32 half = static_cast<i32>(difference * 0.5f);
-        u16 axis = start_angle > 0x8000 ? start_angle + half : start_angle - half;
         NUVEC offset = zipup->rider_start_offset;
+        u16 axis = start_angle > 0x8000 ? start_angle + half : start_angle - half;
         NuVecRotateY(&offset, &offset, static_cast<u16>(-axis));
         f32 phase = object->context_animation_timer / 1.5f * 32768.0f;
         i32 pitch = static_cast<i32>((1.0f - (NU_SIN_LUT(static_cast<i32>(16384.0f + phase)) + 1.0f) * 0.5f) *
@@ -844,8 +844,8 @@ void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
     object->context_animation_timer = 0.0f;
     PlaySfx("GrapAttach", &api.upper_position);
     FastWeaponOut(object, 0);
-    object->field_0xe31 = 0;
     f32 dx = hook->x - start->x, dz = hook->z - start->z;
+    object->field_0xe31 = 0;
     i32 angle = NuAtan2D(hook->y - start->y, NuFsqrt(dx * dx + dz * dz));
     i32 pitch = 0x4000 - (angle < 0 ? -angle : angle);
     object->magnet_surface_angle = angle < 0 ? -pitch : pitch;
@@ -858,9 +858,9 @@ void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
     end_offset.y += 0.5f;
     zipup = static_cast<ZIPUP *>(object->field_0x788);
     f32 rider_height = 0.5f * api.scaled_height;
-    zipup->rider_start_offset.x *= 0.9f;
     zipup->rider_start_offset.y *= 0.9f;
     zipup->rider_start_offset.y = rider_height + zipup->rider_start_offset.y;
+    zipup->rider_start_offset.x *= 0.9f;
     zipup->rider_start_offset.z *= 0.9f;
     i32 yaw = -static_cast<u16>(NuAtan2D(zipup->rider_start_offset.x, zipup->rider_start_offset.z));
     zipup = static_cast<ZIPUP *>(object->field_0x788);

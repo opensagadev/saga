@@ -3787,24 +3787,24 @@ static __used__ CREATURE_EDITOR_REGPARM2 void *CreateCreature(i32 type, nuvec_s 
 static __attribute__((noinline,
                       force_align_arg_pointer)) EDANTINODE_REGPARM1 EDANTINODE_s *CreateAntinode(nuvec_s *position) {
     EDANTINODE_s *node = reinterpret_cast<EDANTINODE_s *>(NuLinkedListGetHead(antinode_free_list()));
-    if (node == nullptr)
-        return nullptr;
-    NuLinkedListRemove(antinode_free_list(), &node->link);
-    NuLinkedListAppend(antinode_list(), &node->link);
-    node->position = *position;
-    EDANTINODE_s *selected = antinode_selected();
-    if (selected != nullptr) {
-        node->radius = selected->radius;
-        node->lower_height = selected->lower_height;
-        node->upper_height = selected->upper_height;
-        node->type = selected->type;
-        selected = antinode_selected();
-        node->base_radius = selected->base_radius;
-        node->base_height = selected->base_height;
-    } else {
-        node->radius = 0.25f;
-        node->lower_height = -default_path_heighttol;
-        node->upper_height = default_path_heighttol;
+    if (node != nullptr) {
+        NuLinkedListRemove(antinode_free_list(), &node->link);
+        NuLinkedListAppend(antinode_list(), &node->link);
+        node->position = *position;
+        EDANTINODE_s *selected = antinode_selected();
+        if (selected != nullptr) {
+            node->radius = selected->radius;
+            node->lower_height = selected->lower_height;
+            node->upper_height = selected->upper_height;
+            node->type = selected->type;
+            selected = antinode_selected();
+            node->base_radius = selected->base_radius;
+            node->base_height = selected->base_height;
+        } else {
+            node->radius = 0.25f;
+            node->lower_height = -default_path_heighttol;
+            node->upper_height = default_path_heighttol;
+        }
     }
     return node;
 }
@@ -3916,10 +3916,10 @@ static __used__ void creatureEditor_cbRespawnMenu(eduimenu_s *parent, eduiitem_s
         eduiMenuAddItem(menu, eduiItemSelCreate(1, attr, 0, 0, creatureEditor_cbSelectRespawnLocator, label));
     }
     eduiMenuAddItem(menu, eduiItemSliderCreateInt(1, attr, 0, creatureEditor_cb_min_n_respawns, -1, 33,
-                                                  static_cast<i8>(creatureEditor_Current()->min_respawns),
+                                                  creatureEditor_Current()->min_respawns,
                                                   "Min Num Respawns"));
     eduiMenuAddItem(menu, eduiItemSliderCreateInt(1, attr, 0, creatureEditor_cb_max_n_respawns, -1, 33,
-                                                  static_cast<i8>(creatureEditor_Current()->max_respawns),
+                                                  creatureEditor_Current()->max_respawns,
                                                   "Max Num Respawns"));
     eduiMenuAddItem(menu, eduiItemSliderCreate(1, attr, 0, creatureEditor_cb_min_t_respawn, 0.0f, 60.0f,
                                                creatureEditor_Current()->min_respawn_time, "Min Respawn Time"));
@@ -4065,11 +4065,11 @@ static __used__ void creatureEditor_cb_max_n_respawns(eduimenu_s *, eduiitem_s *
     if (creatureEditor_Current() != nullptr) {
         creatureEditor_Current()->max_respawns = static_cast<i32>(slider->value);
         CreatureEditorRecord *creature = creatureEditor_Current();
-        if (static_cast<i8>(creature->max_respawns) < static_cast<i8>(creature->min_respawns)) {
+        if (creature->max_respawns < creature->min_respawns) {
             creature->max_respawns = creature->min_respawns;
         }
     }
-    eduiItemSliderSetVal(slider, static_cast<i8>(creatureEditor_Current()->max_respawns));
+    eduiItemSliderSetVal(slider, creatureEditor_Current()->max_respawns);
 }
 
 static __used__ void creatureEditor_cb_min_n_respawns(eduimenu_s *, eduiitem_s *item, unsigned int) {
@@ -4077,11 +4077,11 @@ static __used__ void creatureEditor_cb_min_n_respawns(eduimenu_s *, eduiitem_s *
     if (creatureEditor_Current() != nullptr) {
         creatureEditor_Current()->min_respawns = static_cast<i32>(slider->value);
         CreatureEditorRecord *creature = creatureEditor_Current();
-        if (static_cast<i8>(creature->min_respawns) > static_cast<i8>(creature->max_respawns)) {
+        if (creature->min_respawns > creature->max_respawns) {
             creature->min_respawns = creature->max_respawns;
         }
     }
-    eduiItemSliderSetVal(slider, static_cast<i8>(creatureEditor_Current()->min_respawns));
+    eduiItemSliderSetVal(slider, creatureEditor_Current()->min_respawns);
 }
 
 static __used__ void creatureEditor_cbCancelMenu(eduimenu_s *menu, eduimenu_s *) {
@@ -5246,7 +5246,7 @@ static void AIMoveFindDivertNode(AIPATH *path, AIPACKET *packet, NUVEC *destinat
             packet->divert_search_index = 0;
         }
         f32 nearest = FLT_MAX;
-        if (__builtin_expect(packet->divert_node_index < path->node_count, 0)) {
+        if (packet->divert_node_index < path->node_count) {
             nearest = NuVecDistSqr(&path->nodes[packet->divert_node_index].position, destination, NULL);
         }
         u8 initial_index = packet->divert_search_index;
@@ -6313,7 +6313,7 @@ eduimenu_s *routeEditor_Process(nupad_s *pad) {
     if (pressed & 0x80) {
         eduimenu_s *menu =
             eduiMenuCreate(200, 70, 240, 270, ed_fnt, aieditor_cbCancelMainMenu, const_cast<char *>("Options"));
-        if (__builtin_expect(menu == nullptr, 1))
+        if (menu == nullptr)
             return nullptr;
         eduiMenuAddItem(menu, eduiItemSelCreate(AIEDITOR_ROUTES, attr, 0, 0, aieditor_cvSelectEditorMode,
                                                 const_cast<char *>("Select Editor Mode")));
@@ -14729,7 +14729,7 @@ static void pathEditorDrawPath(EDAIPATH_s *path, i32 path_index) {
                 }
                 i32 second_index = other->index;
                 u32 connection_colour = colour;
-                if (__builtin_expect(node == path->current_node && other == path->other_node, 0)) {
+                if (node == path->current_node && other == path->other_node) {
                     connection_colour = 0xff00ffff;
                 }
                 pathEditorDrawConnectionInfo(&node->position, node->radius, &other->position,
@@ -16228,14 +16228,15 @@ extern "C" {
 }
 
 static __used__ void creatureEditor_cbDeleteCreature(eduimenu_s *, eduiitem_s *item, unsigned int) {
-    CreatureEditorRecord *creature = creatureEditor_Current();
-    CreatureEditorRecord *nearest = *reinterpret_cast<CreatureEditorRecord **>(aieditor->unknown_3692c);
-    if (item != nullptr && item->data != 0 && creature != nullptr && creature == nearest) {
-        NuLinkedListRemove(&aieditor->creatures, &creature->link);
-        memset(creature, 0, sizeof(*creature));
-        NULISTHDR *free_list = reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x3691c);
-        NuLinkedListAppend(free_list, &creature->link);
-        aieditor->mode_selection_36930 = nullptr;
+    if (item != nullptr && item->data != 0) {
+        CreatureEditorRecord *creature = creatureEditor_Current();
+        if (creature != nullptr && creature == *reinterpret_cast<CreatureEditorRecord **>(aieditor->unknown_3692c)) {
+            NuLinkedListRemove(&aieditor->creatures, &creature->link);
+            memset(creature, 0, sizeof(*creature));
+            NULISTHDR *free_list = reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x3691c);
+            NuLinkedListAppend(free_list, &creature->link);
+            aieditor->mode_selection_36930 = nullptr;
+        }
     }
     aieditor_ClearMainMenu();
 }
@@ -16609,36 +16610,31 @@ static __used__ void locatorEditor_cbEmptyLocatorSet(eduimenu_s *parent, eduiite
     if (item == nullptr) {
         return;
     }
-    u32 data = (u32)item->data;
-    if (__builtin_expect(data == 1, 0)) {
-        goto empty_set;
-    }
-    if (__builtin_expect(data >= 1, 0)) {
-        goto maybe_cancel;
-    }
-    {
-        eduimenu_s *menu =
-            eduiMenuCreate(0xf0, 0x5a, 0xf0, 0xfa, ed_fnt, nullptr, (char *)"Empty current locator set?");
-        if (menu != nullptr) {
-            eduiMenuAddItem(menu, eduiItemSelCreate(2, attr, 0, 0, locatorEditor_cbEmptyLocatorSet, (char *)"No"));
-            eduiMenuAddItem(menu, eduiItemSelCreate(1, attr, 0, 0, locatorEditor_cbEmptyLocatorSet, (char *)"Yes"));
-            eduiMenuAttach(parent, menu);
+    switch ((u32)item->data) {
+        case 0: {
+            eduimenu_s *menu =
+                eduiMenuCreate(0xf0, 0x5a, 0xf0, 0xfa, ed_fnt, nullptr, (char *)"Empty current locator set?");
+            if (menu != nullptr) {
+                eduiMenuAddItem(menu, eduiItemSelCreate(2, attr, 0, 0, locatorEditor_cbEmptyLocatorSet, (char *)"No"));
+                eduiMenuAddItem(menu, eduiItemSelCreate(1, attr, 0, 0, locatorEditor_cbEmptyLocatorSet, (char *)"Yes"));
+                eduiMenuAttach(parent, menu);
+            }
+            break;
         }
-        return;
-    }
-maybe_cancel:
-    if (data == 2) {
-        aieditor_ClearMainMenu();
-    }
-    return;
-empty_set:
-    EDLOCATORSET_s *set = aieditor->current_locator_set;
-    if (set != nullptr) {
-        for (i32 index = 0; index < 64; ++index) {
-            set->locators[index] = nullptr;
+        case 1: {
+            EDLOCATORSET_s *set = aieditor->current_locator_set;
+            if (set != nullptr) {
+                for (i32 index = 0; index < 64; ++index) {
+                    set->locators[index] = nullptr;
+                }
+            }
+            aieditor_ClearMainMenu();
+            break;
         }
+        case 2:
+            aieditor_ClearMainMenu();
+            break;
     }
-    aieditor_ClearMainMenu();
 }
 
 static __used__ void locatorEditor_cbCancelRenameLocatorSetMenu(eduimenu_s *, eduimenu_s *) {
@@ -16649,36 +16645,32 @@ static __used__ void locatorEditor_cbDeleteLocatorSet(eduimenu_s *parent, eduiit
     if (item == nullptr) {
         return;
     }
-    u32 data = (u32)item->data;
-    if (__builtin_expect(data == 1, 0)) {
-        goto delete_set;
-    }
-    if (__builtin_expect(data >= 1, 0)) {
-        goto maybe_cancel;
-    }
-    {
-        eduimenu_s *menu =
-            eduiMenuCreate(0xf0, 0x5a, 0xf0, 0xfa, ed_fnt, nullptr, (char *)"Delete current locator set?");
-        if (menu != nullptr) {
-            eduiMenuAddItem(menu, eduiItemSelCreate(2, attr, 0, 0, locatorEditor_cbDeleteLocatorSet, (char *)"No"));
-            eduiMenuAddItem(menu, eduiItemSelCreate(1, attr, 0, 0, locatorEditor_cbDeleteLocatorSet, (char *)"Yes"));
-            eduiMenuAttach(parent, menu);
+    switch ((u32)item->data) {
+        case 0: {
+            eduimenu_s *menu =
+                eduiMenuCreate(0xf0, 0x5a, 0xf0, 0xfa, ed_fnt, nullptr, (char *)"Delete current locator set?");
+            if (menu != nullptr) {
+                eduiMenuAddItem(menu, eduiItemSelCreate(2, attr, 0, 0, locatorEditor_cbDeleteLocatorSet, (char *)"No"));
+                eduiMenuAddItem(menu,
+                                eduiItemSelCreate(1, attr, 0, 0, locatorEditor_cbDeleteLocatorSet, (char *)"Yes"));
+                eduiMenuAttach(parent, menu);
+            }
+            break;
         }
-        return;
-    }
-maybe_cancel:
-    if (data == 2) {
-        aieditor_ClearMainMenu();
-    }
-    return;
-delete_set:
-    EDLOCATORSET_s *set = aieditor->current_locator_set;
-    if (set != nullptr) {
-        NuLinkedListRemove(&aieditor->locator_sets, &set->link);
-        memset(set, 0, sizeof(*set));
-        NuLinkedListAppend(&aieditor->free_locator_sets, &set->link);
-        aieditor->current_locator_set = nullptr;
-        aieditor_ClearMainMenu();
+        case 1: {
+            EDLOCATORSET_s *set = aieditor->current_locator_set;
+            if (set != nullptr) {
+                NuLinkedListRemove(&aieditor->locator_sets, &set->link);
+                memset(set, 0, sizeof(*set));
+                NuLinkedListAppend(&aieditor->free_locator_sets, &set->link);
+                aieditor->current_locator_set = nullptr;
+                aieditor_ClearMainMenu();
+            }
+            break;
+        }
+        case 2:
+            aieditor_ClearMainMenu();
+            break;
     }
 }
 
@@ -17652,7 +17644,7 @@ static __used__ __attribute__((force_align_arg_pointer)) void creatureEditor_cbR
 
 static __used__ __attribute__((force_align_arg_pointer)) void creatureEditor_cbSetScript(eduimenu_s *, eduiitem_s *item,
                                                                                          unsigned int) {
-    if (__builtin_expect(item == nullptr || creatureEditor_Current() == nullptr, 1))
+    if (item == nullptr || creatureEditor_Current() == nullptr)
         return;
     char *name = AIScriptNameFromIx(aieditor->ai_system, item->data);
     if (name == nullptr)
@@ -18929,7 +18921,7 @@ void pathEditor_Render(i32 x, i32 y, float x_scale, float y_scale) {
             } else if (path->nearest_node != nullptr) {
                 NuQFntPrintEx(system_qfont, screen_x, screen_y + 480, 16, "X - Select");
                 NuQFntPrintEx(system_qfont, screen_x, screen_y + 720, 16, "O - Link/unlink to selected");
-                if (__builtin_expect(EdGetCnxFlagNames != nullptr, 0)) {
+                if (EdGetCnxFlagNames != nullptr) {
                     path = aieditor->current_path;
                     if (path->nearest_node != nullptr && path->current_node != nullptr) {
                         EDAIPATHNODE_s *nearest = path->nearest_node;
@@ -18945,7 +18937,7 @@ void pathEditor_Render(i32 x, i32 y, float x_scale, float y_scale) {
                             index = 3;
                         else if (current->connections[4].node == nearest)
                             index = 4;
-                        else if (__builtin_expect(current->connections[5].node == nearest, 1))
+                        else if (current->connections[5].node == nearest)
                             index = 5;
                         else if (__builtin_expect(current->connections[6].node == nearest, 1))
                             index = 6;

@@ -443,7 +443,7 @@ void BigJumpCode(GameObject_s *object) {
             f32 duration = AnimDuration(object->id, object->context_animation, 0.0f, 0.0f, 1);
             object->airborne_action_duration = duration == 0.0f ? 1.0f : duration;
             object->context_animation_timer = 0.0f;
-            if ((object->field_0xefb & 8) != 0 || (object->field_0xefd & 0x20) != 0) {
+            if (object->is_boss || (object->field_0xefd & 0x20) != 0) {
                 GameCam_Judder(GameCam, -0.3f, 0, &object->apiobj.collision_position);
                 PlayLandSfx(object, 3, 0);
                 NewRumbleAllPlayers(0.6f, 0.0f, 0, 0);

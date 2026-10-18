@@ -147,7 +147,7 @@ class NuSoundHeaderWAV : public NuSoundFileStreamDesc<FileHeaderWAV, 18> {
     u32 GetBlockSize() const override {
         return this->block_size;
     }
-    u16 GetInterleaveSize() const override {
+    u32 GetInterleaveSize() const override {
         return 0;
     }
     u16 GetFormatID() const override {

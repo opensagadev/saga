@@ -1089,8 +1089,8 @@ i32 GetDefaultIdle(GameObject_s *obj) {
     }
 
     void **animations = obj->apiobj.character_model->model_data_b;
-    if ((animations[1] == NULL || (obj->field_0xe22 & 1) != 0 || obj->field_0xe32 == 1) &&
-        animations[animation] != NULL) {
+    void *idle = animations[animation];
+    if ((animations[1] == NULL || (obj->field_0xe22 & 1) != 0 || obj->field_0xe32 == 1) && idle != NULL) {
         return animation;
     }
     return 1;
@@ -1147,7 +1147,7 @@ static void NewCharacterIdle(GameObject_s *object, i32 default_idle) {
         if ((info->flags & 0x10) == 0) {
             continue;
         }
-        if (__builtin_expect(alternate_idle == default_idle, 0)) {
+        if (alternate_idle == default_idle) {
             if ((info->flags & 0x800) != 0) {
                 candidates[candidate_count++] = animation;
             }
@@ -1548,7 +1548,7 @@ void ResetPlayerMoves(GameObject_s *object) {
     object->pause_input_state = 0;
     object->apiobj.movement_direction = v000;
     object->input_toggle_hold_time = TOGGLEHOLDTIME;
-    object->field_0xefc |= 0x80;
+    object->reset_lighting = 1;
     ResetCharacterIdle(object, 2, GetDefaultIdle(object));
     if (object->apiobj.character_model->model_data_b[1] != NULL) {
         ResetAnimPacket(&object->apiobj.anim_packet, 1);
@@ -1625,9 +1625,7 @@ void ResetAICreature(GameObject_s *object, AISYS_s *system) {
         path_info = &locator->path_info;
     }
 
-    object->apiobj.pos_x = object->apiobj.position.x;
-    object->apiobj.pos_y = object->apiobj.position.y;
-    object->apiobj.pos_z = object->apiobj.position.z;
+    object->apiobj.collision_position = object->apiobj.position;
     object->apiobj.start_position = object->apiobj.position;
     object->apiobj.initial_position = object->apiobj.position;
     plr_lastpos = object->apiobj.position;
@@ -1684,12 +1682,8 @@ void ResetAICreature(GameObject_s *object, AISYS_s *system) {
         }
     }
 
-    object->apiobj.previous_position[0] = object->apiobj.position.x;
-    object->apiobj.previous_position[1] = object->apiobj.position.y;
-    object->apiobj.previous_position[2] = object->apiobj.position.z;
-    object->field_0x10c8 = object->apiobj.position.x;
-    object->field_0x10cc = object->apiobj.position.y;
-    object->field_0x10d0 = object->apiobj.position.z;
+    object->apiobj.last_safe_position = object->apiobj.position;
+    object->ai_update_position = object->apiobj.position;
     if ((object->apiobj.character_data->model_flags & 0x20000000) != 0 &&
         object->apiobj.character_model->model_data_b[0x41] != NULL) {
         object->context_animation_timer = 1000000000.0f;
@@ -1847,7 +1841,7 @@ i32 NewPlayerCharacter(GameObject_s *object, i32 id, i32 old_id, i32) {
     GameObjectDimensions(object);
     object->hud_icon_timer = 2.0f;
     object->input_toggle_hold_time = TOGGLEHOLDTIME;
-    object->field_0xefc |= 0x80;
+    object->reset_lighting = 1;
     InitSurfaceInfo(object);
     i32 on_surface = SetObjOnSurface(object, 1);
     GizForce_ResetLOS(object);
@@ -1925,7 +1919,7 @@ void ResetPlayer(GameObject_s *obj, i32 reset_moves, nuvec_s *position, i32 snap
         if (position == NULL) {
             position = Player_StartPos(obj);
         }
-        if (__builtin_expect(position != NULL, 0)) {
+        if (position != NULL) {
             obj->apiobj.position = *position;
         }
 
@@ -2008,7 +2002,7 @@ void ResetPlayer(GameObject_s *obj, i32 reset_moves, nuvec_s *position, i32 snap
         CurrentStart(obj, 0, 1);
         obj->field_0xe23 &= static_cast<u8>(~8u);
         obj->field_0xefe &= static_cast<u8>(~4u);
-        obj->field_0xeff &= static_cast<u8>(~2u);
+        obj->touched_ground = 0;
         obj->apiobj.model_draw_result = 1;
         obj->use_model_origin = 0;
         obj->apiobj.field_0x288 = 0;
@@ -2077,7 +2071,7 @@ void ResetPlayer(GameObject_s *obj, i32 reset_moves, nuvec_s *position, i32 snap
     obj->apiobj.field_0x1f8 &= 0xfa83;
     obj->apiobj.field_0x1fa &= static_cast<u8>(~2u);
     obj->apiobj.field_0x1f4 &= ~0x100u;
-    obj->field_0xefc |= 0x80;
+    obj->reset_lighting = 1;
     obj->field_0xe21 |= 0x80;
 }
 
@@ -2208,7 +2202,7 @@ void KeepOnScreen(GameObject_s *object) {
         return;
     }
 
-    if (__builtin_expect(VehicleArea == 0, 0)) {
+    if (__builtin_expect(VehicleArea == 0, 1)) {
         GameObject_s *other_player = object == Player[0] ? Player[1] : object == Player[1] ? Player[0] : NULL;
         if (other_player != NULL &&
             (static_cast<i8>(other_player->apiobj.flags_low) >= 0 || other_player->character_context == 0x2b))
@@ -2401,7 +2395,7 @@ void MovePlayer(GameObject_s *object) {
     object->field_0xefd &= ~GAMEOBJECT_MOVEMENT_FLAG_BACKWARDS;
     object->previous_movement_angle = api.field_0x276;
     object->field_0xf1c = api.model_draw_result == 0 ? object->field_0xf1c + FRAMETIME : 0.0f;
-    if (__builtin_expect(object->character_context == 0x2b, 0))
+    if (object->character_context == 0x2b)
         object->turn_braking += FRAMETIME;
     if (__builtin_expect(!!(object->field_0xf03 & 4), 0)) {
         APIObjectVelocities(object);
@@ -2416,7 +2410,7 @@ void MovePlayer(GameObject_s *object) {
     object->field_0xefd &= ~GAMEOBJECT_MOVEMENT_FLAG_FACE_REVERSED;
     const i32 menu_id = GetMenuID();
     if (__builtin_expect((api.field_0x1f8 & APIOBJECT_FLAG_AI_PLAYER_MASK) != APIOBJECT_FLAG_PLAYER_ACTIVE, 0)) {
-        if (object->field_0xefc & 0x10) {
+        if (object->dont_move) {
             pad->input_magnitude = 0.0f;
             object->pad_gamepad->buttons_held = 0;
             object->pad_gamepad->buttons_pressed = 0;
@@ -2467,7 +2461,7 @@ void MovePlayer(GameObject_s *object) {
                 else if (object->ai.goal_speed_mode == 2 && pad->input_magnitude > data->tiptoe_speed)
                     pad->input_magnitude = data->tiptoe_speed;
             }
-            if ((api.field_0x1f4 & 0x400) == 0 && (object->field_0xefb & 2) == 0 &&
+            if ((api.field_0x1f4 & 0x400) == 0 && !object->catch_up_forbidden &&
                 (object->field_0xf1c >= OFFSCREEN_CATCHUP_TIME ||
                  (api.model_draw_result == 0 && (object->tag_flags & 2) == 0 && drop_back_in_timer > 0.0f)) &&
                 (pad->input_magnitude + 0.001f >= walk_speed || object->id == id_SPEEDERBIKE)) {
@@ -2713,7 +2707,7 @@ void TerrainPlayer(GameObject_s *object) {
         const f32 speed_squared =
             (api.velocity.x * api.velocity.x + api.velocity.y * api.velocity.y) + api.velocity.z * api.velocity.z;
         const bool perform_motion =
-            !((object->field_0xefc & 0x20) == 0 && (object->field_0xf02 & 0x40) != 0 && !special_path_endpoints &&
+            !(!object->dont_set_stopped_flag && (object->field_0xf02 & 0x40) != 0 && !special_path_endpoints &&
               object->ai.field_0x180 == NULL && static_cast<i8>(api.flags_low) >= 0 &&
               (object->field_0xe23 & 0x10) == 0 && object->field_0xe31 == 0 && object->character_context != 0 &&
               object->character_context != 0x1c && api.field_0x281 != 8 &&
@@ -3052,7 +3046,7 @@ void TerrainPlayer(GameObject_s *object) {
                 api.field_0x27d |= APIOBJECT_TERRAIN_CONTACT_NEAR_FLOOR;
             }
             if (api.field_0x27d != 0) {
-                object->field_0xeff |= 2;
+                object->touched_ground = 1;
             }
         }
 
@@ -3417,7 +3411,7 @@ i32 DrawGameObjectsProcess() {
         if (object->character_context != 0x39 && object->character_context != 0x3b) {
             if (CharClipToBlobShadows != 0 && WORLD->area != KAMINO_ADATA && WORLD->area != HOTHBATTLE_ADATA &&
                 WORLD->area != DEATHSTARBATTLE2_ADATA && static_cast<i8>(object->field_0xf04) < 0 &&
-                object->apiobj.field_0x27c == -1 && (object->field_0xefb & 8) == 0 &&
+                object->apiobj.field_0x27c == -1 && !object->is_boss &&
                 object->ai_update_distance > static_cast<u8>(WORLD->current_level->blob_shadow_fade_far))
                 continue;
 
@@ -3645,7 +3639,7 @@ i32 GameDrawCharacterModel(CHARACTERMODEL_s *model, ANIMPACKET_s *animation, NUM
                 }
             }
         }
-    } else if (__builtin_expect(result != 0 && object != NULL && (object->field_0xeff & 4) == 0 &&
+    } else if (__builtin_expect(result != 0 && object != NULL && !object->hide_shadow &&
                (object->apiobj.character_data->model_flags & 0x10000) == 0, 0)) {
         draw_shadow = 1;
     }
@@ -4029,7 +4023,7 @@ i32 ObjLookingWithLeftStick(GameObject_s *object) {
 }
 
 i32 SuperWeirdo(GameObject_s *object) {
-    if ((object->apiobj.flags_low & 0x80) != 0 && (Game.field_0x7c26[1] & 1) != 0 && CharacterCustomiser != NULL &&
+    if (object->apiobj.is_player && (Game.field_0x7c26[1] & 1) != 0 && CharacterCustomiser != NULL &&
         (object->id == CharacterCustomiser->character_ids[0] || object->id == CharacterCustomiser->character_ids[1])) {
         return 1;
     }

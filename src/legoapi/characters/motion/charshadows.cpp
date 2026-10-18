@@ -35,7 +35,7 @@ void CharShadows_Draw() {
                   0)) {
             if ((object->apiobj.character_data->model_flags & CHARACTER_MODEL_FLAG_DISABLE_BLOB_SHADOW) != 0 ||
                 !(object->shadow_opacity > 0.0f) || object->apiobj.model_draw_result == 0 ||
-                object->shadow_joint_mask == 0 || (object->field_0xeff & 4) != 0 ||
+                object->shadow_joint_mask == 0 || object->hide_shadow ||
                 (CInfo[object->character_context].flags & CHARACTER_CONTEXT_INFO_FLAG_DISABLE_BLOB_SHADOW) != 0) {
                 continue;
             }

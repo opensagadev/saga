@@ -750,8 +750,8 @@ static f32 BestSockPosition(SOCKSYS *sock_sys, NUVEC *point, SOCKPOSITION *resul
     i32 segment = 0, next = 0, initial_segment = 0;
     i32 ascending_segment = 0, descending_segment = 0;
     i32 direction = 0, exhausted_directions = 0, segment_count = 0;
-    f32 distance_squared = 0.0f;
     SOCK *sock = NULL;
+    f32 distance_squared = 0.0f;
     SOCKSEGMENT *segment_data = NULL;
     sock = &sock_sys->sock[sock_index];
     result->location.sock = -1;

@@ -55,6 +55,25 @@ static inline u32 CountLeadingZeros(u32 value) {
 
 NuMemoryManager *NuMemoryManager::m_memoryManagers[0x100];
 
+// Writes the tag at the end of a block, which mirrors the header's size and
+// alignment bits and records the owning manager.
+inline void NuMemoryManager::SetEndTag(FreeHeader *header) {
+    u32 value = header->block_header.value;
+    u32 manager_index = this->idx;
+    usize *end_tag = END_TAG(header, BLOCK_SIZE(value));
+
+    if ((value & ALLOC_MASK) != 0) {
+        if (manager_index > 29) {
+            *end_tag = value | HEADER_MGR_HI_MASK;
+            *END_TAG_HI(header, BLOCK_SIZE(header->block_header.value)) = manager_index;
+        } else {
+            *end_tag = ((manager_index + 1) << 27) | (value & BLOCK_SIZE_MASK);
+        }
+    } else {
+        *end_tag = value & BLOCK_SIZE_MASK;
+    }
+}
+
 NuMemoryManager::NuMemoryManager(IEventHandler *event_handler, IErrorHandler *error_handler, const char *name,
                                  const char **category_names, u32 category_count) {
     pthread_mutexattr_t attrs;
@@ -286,31 +305,12 @@ void *NuMemoryManager::_TryBlockAlloc(u32 size, u32 alignment, u32 flags, const 
 }
 
 void NuMemoryManager::ConvertToUsedBlock(FreeHeader *header, u32 alignment, u32 flags, const char *name, u16 category) {
-    u32 align_mask;
-    u32 header_value;
-    u32 aligned;
-    usize *end_tag;
-    u32 manager_idx;
+    u32 align_mask = -(CountLeadingZeros(alignment >> 2) << 0x1b);
 
-    align_mask = -(CountLeadingZeros(alignment >> 2) << 0x1b);
-    header_value = header->block_header.value & BLOCK_SIZE_MASK;
+    header->block_header.value = (header->block_header.value & BLOCK_SIZE_MASK) | align_mask;
 
-    aligned = header_value | align_mask;
-    manager_idx = this->idx;
-
-    header->block_header.value = aligned;
-
-    // Set the end tag of the block. This is used for detecting corruption and
-    // clearing the block.
-    end_tag = END_TAG(header, header_value * 4);
-    if (__builtin_expect((align_mask & ALLOC_MASK) == 0, 0)) {
-        *end_tag = aligned & BLOCK_SIZE_MASK;
-    } else if (__builtin_expect(manager_idx > 0x1d, 0)) {
-        *end_tag = aligned | HEADER_MGR_HI_MASK;
-        *(u32 *)((usize)header + BLOCK_SIZE(header->block_header.value) - 8) = manager_idx;
-    } else {
-        *end_tag = ((manager_idx + 1) << 0x1b) | aligned & BLOCK_SIZE_MASK;
-    }
+    // The end tag is used for detecting corruption and clearing the block.
+    SetEndTag(header);
 
     this->stats.used_block_count++;
     this->stats.min_free_bytes = MIN(this->stats.min_free_bytes, this->stats.free_frag_bytes);
@@ -584,19 +584,7 @@ void NuMemoryManager::AddPage(void *ptr, u32 size, bool _unknown) {
     FreeHeader *free_block = (FreeHeader *)page->first_header;
     const u32 free_size = (usize)right_fence - sizeof(Header) - (usize)left_fence;
     free_block->block_header.value = free_size / 4;
-    u32 value = free_block->block_header.value;
-    u32 manager_index = this->idx;
-    u32 *end_tag = (u32 *)END_TAG(free_block, BLOCK_SIZE(value));
-    if ((value & 0x38000000) != 0) {
-        if (!(manager_index <= 29)) {
-            *end_tag = value | HEADER_MGR_HI_MASK;
-            *END_TAG_HI(free_block, BLOCK_SIZE(free_block->block_header.value)) = manager_index;
-        } else {
-            *end_tag = ((manager_index + 1) << 27) | (value & BLOCK_SIZE_MASK);
-        }
-    } else {
-        *end_tag = value & BLOCK_SIZE_MASK;
-    }
+    SetEndTag(free_block);
 
     free_block->next = NULL;
     free_block->prev = NULL;
@@ -1349,7 +1337,7 @@ u16 NuMemoryManager::DumpBlock(u32 dump_id, NuSymbolQuery *, Header *header, u32
         const bool flag_s = (debug->flags.alloc_flags & 4) != 0;
         const bool flag_c = (debug->flags.alloc_flags & 8) != 0;
 
-        if (__builtin_expect(count > 1 && (flags & 2) == 0, 0)) {
+        if (count > 1 && (flags & 2) == 0) {
             snprintf(line, sizeof(line), "| %s | %10u | %s | %c%c%c | %s | %s\r\n", address_text, count, size_text,
                      flag_a ? 'X' : '-', flag_s ? 'X' : '-', flag_c ? 'X' : '-', category_text, debug_name);
         } else if (__builtin_expect((debug->flags.alloc_flags & 4) != 0, 1)) {
@@ -1839,7 +1827,7 @@ void NuMemoryManager::ValidateBlockDeferredContent(NuMemoryManager::Header *head
     u8 *data = reinterpret_cast<u8 *>(header) + m_headerSize;
     u32 *end_tag = reinterpret_cast<u32 *>(reinterpret_cast<u8 *>(header) + block_size - 4);
     u32 tag = *end_tag >> 27;
-    if (__builtin_expect(tag == 31, 1))
+    if (__builtin_expect(tag == 31, 0))
         tag = *(end_tag - 1);
     else
         --tag;

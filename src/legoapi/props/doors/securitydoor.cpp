@@ -72,8 +72,8 @@ void SecurityDoor_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
         object->airborne_action_duration = 1.0f;
     }
     object->context_flags |= 0x20;
-    object->apiobj.movement_facing_angle = static_cast<SECURITYDOOR *>(object->field_0x788)->yaw + 0x8000;
     static_cast<SECURITYDOOR *>(object->field_0x788)->state = 1;
+    object->apiobj.movement_facing_angle = static_cast<SECURITYDOOR *>(object->field_0x788)->yaw + 0x8000;
 }
 
 SECURITYDOOR *SecurityDoor_FindNearest(WORLDINFO_s *world, nuvec_s *position, GameObject_s *object, float *distance) {

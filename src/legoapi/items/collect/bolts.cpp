@@ -914,7 +914,7 @@ void Bolt_Init(void *storage, NetMessage &message) {
                                                                      bolt->collision_radius, NULL)) {
                 bool hit = false;
                 if ((bolt->flags & 0x13) != 0 ||
-                    (bolt->owner != NULL && ((bolt->owner->field_0xefb & 0x10) != 0 || bolt->owner->use_action == 5))) {
+                    (bolt->owner != NULL && (bolt->owner->can_shoot_obstructions || bolt->owner->use_action == 5))) {
                     hit = bolt->hit_platform != -1 && Bolt_HitPlat(bolt, NULL);
                     if (!hit)
                         hit = GizmoSys_BoltHit(world->gizmo_sys, world, bolt, points, &bolt->bounds_min,
@@ -993,7 +993,7 @@ void Bolt_Shoot(GameObject_s *object, i32 type_id, i32 fire_flags) {
         else if (object->apiobj.field_0x27c == 1)
             flags |= 2;
     }
-    if ((object->field_0xefc & 8) != 0)
+    if (object->bolts_dont_get_deflected_back)
         flags |= 0x40;
     NUVEC aimed_position = object->attack_target_position;
     NUVEC adjusted_position;
@@ -1579,7 +1579,7 @@ void Bolts_Update(WORLDINFO_s *world) {
                 0)
                 continue;
             i32 handled = 0;
-            if ((bolt->flags & 0x13) != 0 || (bolt->owner != NULL && ((bolt->owner->field_0xefb & 0x10) != 0 ||
+            if ((bolt->flags & 0x13) != 0 || (bolt->owner != NULL && (bolt->owner->can_shoot_obstructions ||
                                                                       static_cast<u8>(bolt->owner->use_action) == 5))) {
                 if (bolt->hit_platform != -1) {
                     if (Bolt_HitPlatFn == NULL || !Bolt_HitPlatFn(bolt))
@@ -1662,7 +1662,7 @@ void Bolts_Update(WORLDINFO_s *world) {
                 continue;
             bool interact = (bolt->flags & 0x13) != 0 ||
                             (bolt->owner != NULL &&
-                             ((bolt->owner->field_0xefb & 0x10) != 0 || static_cast<u8>(bolt->owner->use_action) == 5));
+                             (bolt->owner->can_shoot_obstructions || static_cast<u8>(bolt->owner->use_action) == 5));
             if (interact) {
                 Bolt_HitScenery(bolt, points, processed, world);
             }

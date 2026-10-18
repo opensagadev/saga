@@ -273,7 +273,7 @@ static void Grabber_SetVictimPos(GRABBER_s *grabber) {
         } else {
             victim->apiobj.position = position;
         }
-        victim->field_0xeff &= ~2;
+        victim->touched_ground = 0;
         grabber->victim->saved_position = grabber->victim->apiobj.position;
     }
 }

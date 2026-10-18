@@ -53,17 +53,16 @@ NuVoiceAndroid::NuVoiceAndroid(NuSoundSource *sound_source, bool loop) : NuSound
     this->field4_0x158 = NULL;
     this->volume_interface = NULL;
 
-    NuSoundMutexInit(&this->mutex);
+    NuSoundMutexInitRecursive(&this->mutex);
 
-    this->field7_0x164 = 0;
-    this->field8_0x168 = 0;
-    this->field9_0x16c = 0;
-    this->field10_0x170 = 0;
-    this->field11_0x174 = 0;
-    this->field12_0x178 = 0;
+    this->block_position = 0;
+    this->block_wraps = 0;
+    this->playback_samples = 0;
 
-    this->last_volume_level = -0x8000; // muted until the first mix arrives
-    this->hardware_flags = 0;
+    this->hardware_state.start = 0;
+    this->hardware_state.stop = 0;
+    this->hardware_state.request_buffer = 0;
+    this->hardware_state.queue_ran_ahead = 0;
 
     // libTTapp.so ctor tail (0x32c1ae): the platform voice builds its OpenSL
     // player immediately, before any Play.
@@ -172,6 +171,7 @@ bool NuVoiceAndroid::CreateHardwareVoice() {
 
     // Output mix sink.
     data.mix_locator.locator_type = 4;
+    data.mix_locator.output_mix = NULL; // cleared before the engine lookup, as the original does
     data.mix_locator.output_mix = NuSoundSystem::Get()->output_mix;
     data.audio_sink.locator = &data.mix_locator;
     data.audio_sink.format = NULL;
@@ -196,9 +196,6 @@ bool NuVoiceAndroid::CreateHardwareVoice() {
 }
 
 bool NuVoiceAndroid::RealiseObject() {
-    if (this->player_object == NULL || *(void **)this->player_object == NULL) {
-        return false;
-    }
     u32 error = SL_SLOT(this->player_object, ObjectRealizeFn, 0)(this->player_object, 0);
     return NuSoundAndroid::ReportErrorCode(error, "Realize player object") == 0;
 }
@@ -240,12 +237,9 @@ void NuVoiceAndroid::StartHardwareVoice() {
     // libTTapp.so 0x32b6d4: starting a hardware voice resets all of the
     // platform play-position tracking before arming the deferred start.
     this->last_volume_level = -1;
-    this->field7_0x164 = 0;
-    this->field8_0x168 = 0;
-    this->field9_0x16c = 0;
-    this->field10_0x170 = 0;
-    this->field11_0x174 = 0;
-    this->field12_0x178 = 0;
+    this->block_position = 0;
+    this->block_wraps = 0;
+    this->playback_samples = 0;
     this->hardware_flags |= 1;
 }
 
@@ -313,45 +307,43 @@ bool NuVoiceAndroid::UpdateState() {
         return false;
     }
 
-    if (state != 1) {
-        if (state != 3) {
+    switch (state) {
+        case 1: {
+            // Realized: a looping voice re-realizes and restarts per the voice state;
+            // a non-looping voice is finished.
+            if ((this->flags2 & 8) == 0 || this->RealiseObject() == false) {
+                return false;
+            }
+            // This apparently inverted test is what the original executes
+            // (libTTapp.so 0x32c2a4: test al; jne 0x32c250). GetInterfaces returns
+            // true on success, so the priming Update performed by Play returns
+            // false here. Since the logical voice is still STOPPED, the caller's
+            // Stop(true) is a no-op and the initial queued buffers remain intact.
+            if (this->GetInterfaces()) {
+                return false;
+            }
+
+            switch (this->GetState()) {
+                case PLAYSTATE_STOPPED:
+                    this->StopHardwareVoice();
+                    break;
+                case PLAYSTATE_PAUSED:
+                    this->StartHardwareVoice();
+                    this->PauseHardwareVoice();
+                    break;
+                default:
+                    this->StartHardwareVoice();
+                    break;
+            }
             return true;
         }
-        // 0x32c260: object vtable slot 0x4 (SLObjectItf::Resume).
-        error = SL_SLOT(this->player_object, ObjectResumeFn, 4)(this->player_object, 0);
-        return NuSoundAndroid::ReportErrorCode(error, "resume on suspended") == 0;
+        case 3:
+            // 0x32c260: object vtable slot 0x4 (SLObjectItf::Resume).
+            error = SL_SLOT(this->player_object, ObjectResumeFn, 4)(this->player_object, 0);
+            return NuSoundAndroid::ReportErrorCode(error, "resume on suspended") == 0;
+        default:
+            return true;
     }
-
-    // Realized: a looping voice re-realizes and restarts per the voice state;
-    // a non-looping voice is finished.
-    if ((this->flags2 & 8) != 0) {
-        if (this->RealiseObject() == false) {
-            return false;
-        }
-        // This apparently inverted test is what the original executes
-        // (libTTapp.so 0x32c2a4: test al; jne 0x32c250). GetInterfaces returns
-        // true on success, so the priming Update performed by Play returns
-        // false here. Since the logical voice is still STOPPED, the caller's
-        // Stop(true) is a no-op and the initial queued buffers remain intact.
-        if (this->GetInterfaces()) {
-            return false;
-        }
-
-        NuSoundVoice::PlayState voice_state = this->GetState();
-        if (voice_state == PLAYSTATE_STOPPED) {
-            this->StopHardwareVoice();
-            return true;
-        }
-        if (voice_state == PLAYSTATE_PAUSED) {
-            this->StartHardwareVoice();
-            this->PauseHardwareVoice();
-            return true;
-        }
-        this->StartHardwareVoice();
-        return true;
-    }
-
-    return false;
 }
 
 bool NuVoiceAndroid::UpdateQueue() {
@@ -508,7 +500,7 @@ void NuVoiceAndroid::UpdateSamplePlaybackCount() {
         return;
     }
 
-    u32 millisec = 0;
+    u32 millisec;
     u32 error = SL_SLOT(this->play_interface, PlayGetPositionFn, 0xc)(this->play_interface, &millisec);
     if (NuSoundAndroid::ReportErrorCode(error, "Player GetPosition") != 0) {
         return;
@@ -519,8 +511,7 @@ void NuVoiceAndroid::UpdateSamplePlaybackCount() {
     u32 position = (u32)(rate / 1000) * millisec;
 
     if (this->sound_source->feed_type != NuSoundSource::FeedType::STREAMING) {
-        this->field11_0x174 = position;
-        this->field12_0x178 = 0;
+        this->playback_samples = position;
         return;
     }
 
@@ -529,17 +520,12 @@ void NuVoiceAndroid::UpdateSamplePlaybackCount() {
     u64 block_samples = max_buffer_size / block_size;
     u64 relative_position = (u64)(u32)position % block_samples;
 
-    u64 previous_position = ((u64)(u32)this->field8_0x168 << 32) | (u32)this->field7_0x164;
-    u64 wraps = ((u64)(u32)this->field10_0x170 << 32) | (u32)this->field9_0x16c;
-    if (relative_position < previous_position) {
-        wraps++;
-        this->field9_0x16c = (i32)wraps;
-        this->field10_0x170 = (i32)(wraps >> 32);
+    if (relative_position < this->block_position) {
+        this->block_wraps++;
     }
+    this->block_position = relative_position;
 
-    this->field7_0x164 = (i32)relative_position;
-    this->field8_0x168 = (i32)(relative_position >> 32);
-
+    u64 wraps = this->block_wraps;
     u64 wrapped_position = block_samples * wraps;
     u64 estimated_position = relative_position + wrapped_position;
     bool player_position = true;
@@ -549,8 +535,7 @@ void NuVoiceAndroid::UpdateSamplePlaybackCount() {
         samples = estimated_position;
     }
 
-    this->field11_0x174 = (i32)samples;
-    this->field12_0x178 = (i32)(samples >> 32);
+    this->playback_samples = samples;
 
     char debug[256] = {};
     strcat(debug, "Position ");
@@ -564,6 +549,6 @@ void NuVoiceAndroid::UpdateSamplePlaybackCount() {
 }
 
 u64 NuVoiceAndroid::GetPlaybackPositionSamples() {
-    return *reinterpret_cast<u64 *>(&this->field11_0x174);
+    return this->playback_samples;
 }
 

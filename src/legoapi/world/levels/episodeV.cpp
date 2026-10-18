@@ -1849,7 +1849,7 @@ void HothBattle_ManageBackgroundCreatures() {
         if (object == NULL) {
             break;
         }
-        object->field_0xefb |= 0x10;
+        object->can_shoot_obstructions = 1;
         HothBattle_AssignSpawnLocator(object, spawn, set);
     }
 
@@ -1885,7 +1885,7 @@ void HothBattle_ManageBackgroundCreatures() {
         if (object == NULL) {
             return;
         }
-        object->field_0xefb |= 0x10;
+        object->can_shoot_obstructions = 1;
         HothBattle_AssignSpawnLocator(object, spawn, set);
     }
 }

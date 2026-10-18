@@ -250,6 +250,7 @@ class NuMemoryManager {
 
     void ConvertToUsedBlock(FreeHeader *header, u32 alignment, u32 flags, const char *name, u16 category);
     void *ClearUsedBlock(Header *header, u32 flags);
+    void SetEndTag(FreeHeader *header);
 
     void ____WE_HAVE_RUN_OUT_OF_MEMORY_____(u32 size, const char *name);
     void SetZombie();

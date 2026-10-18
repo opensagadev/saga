@@ -135,29 +135,21 @@ void *NuSoundSystem::ReAllocMemory(NuSoundSystem::MemoryDiscipline encoded_addre
 // pool manager; SCRATCH goes through NuMemoryManager::BlockFree and accounts
 // the queried block size.
 u32 NuSoundSystem::FreeMemory(MemoryDiscipline disc, usize address, u32 size) {
-    u32 freed = size;
-
     switch (disc) {
-        case MemoryDiscipline::SAMPLE:
-            if (s_mmSample != NULL) {
-                s_mmSample->Free((NuSoundMemoryBuffer *)address);
-            }
-            break;
-        case MemoryDiscipline::DECODER:
-            if (s_mmDecoder != NULL) {
-                s_mmDecoder->Free((NuSoundMemoryBuffer *)address);
-            }
-            break;
         case MemoryDiscipline::SCRATCH:
-            freed = sScratchMemMgr->GetBlockSize((void *)address);
+            size = sScratchMemMgr->GetBlockSize((void *)address);
             sScratchMemMgr->BlockFree((void *)address, 0);
             break;
-        default:
-            return 0;
+        case MemoryDiscipline::SAMPLE:
+            s_mmSample->Free((NuSoundMemoryBuffer *)address);
+            break;
+        case MemoryDiscipline::DECODER:
+            s_mmDecoder->Free((NuSoundMemoryBuffer *)address);
+            break;
     }
 
-    sAllocdMemory[(i32)disc] = sAllocdMemory[(i32)disc] - freed;
-    return freed;
+    sAllocdMemory[(i32)disc] -= size;
+    return size;
 }
 
 void NuSoundSystem::ReleaseBus(NuSoundBus *bus) {
@@ -190,31 +182,28 @@ u32 NuSoundSystem::GetFreeMemory(MemoryDiscipline disc) {
 }
 
 void *NuSoundSystem::_AllocMemory(MemoryDiscipline disc, u32 size, u32 align, const char *name) {
-    u32 uVar1 = GetFreeMemory(disc);
-
-    void *pvVar2 = NULL;
-
-    if (size <= uVar1) {
-        switch (disc) {
-            case MemoryDiscipline::SAMPLE:
-                pvVar2 = s_mmSample->Alloc(size);
-                break;
-            case MemoryDiscipline::DECODER:
-                pvVar2 = s_mmDecoder->Alloc(size);
-                break;
-            case MemoryDiscipline::SCRATCH:
-                pvVar2 = sScratchMemMgr->_TryBlockAlloc(size, align, 1, name, 0);
-                break;
-            default:
-                return NULL;
-        }
-
-        if (pvVar2 != NULL) {
-            sAllocdMemory[(i32)disc] = sAllocdMemory[(i32)disc] + size;
-        }
+    if (GetFreeMemory(disc) < size) {
+        return NULL;
     }
 
-    return pvVar2;
+    void *ptr = NULL;
+    switch (disc) {
+        case MemoryDiscipline::SAMPLE:
+            ptr = s_mmSample->Alloc(size);
+            break;
+        case MemoryDiscipline::DECODER:
+            ptr = s_mmDecoder->Alloc(size);
+            break;
+        case MemoryDiscipline::SCRATCH:
+            ptr = sScratchMemMgr->_TryBlockAlloc(size, align, 1, name, 0);
+            break;
+    }
+
+    if (ptr != NULL) {
+        sAllocdMemory[(i32)disc] += size;
+    }
+
+    return ptr;
 }
 
 bool NuSoundSystem::Initialise(i32 size) {
@@ -897,7 +886,17 @@ void NuSoundSystem::Update(f32 frametime) {
 
 NuSoundVoice *NuSoundSystem::CreateVoice(NuSoundSource *source, bool loop) {
     NuSoundVoice *voice;
-    if (SourceRequiresDecoder(source)) {
+    if (!SourceRequiresDecoder(source)) {
+        if (!source->IsStreamOpen()) {
+            return NULL;
+        }
+        NuSoundStreamDesc *desc = source->GetStreamDesc();
+        NuSoundVoiceFactory *factory = factory_list.GetFactory(desc->GetDecodedDataFormat());
+        voice = factory->CreateVoice(source, loop);
+        if (voice == NULL) {
+            return NULL;
+        }
+    } else {
         NuSoundDecoder *decoder = CreateDecoder(source);
         decoder->OpenStream(loop);
         if (!decoder->IsStreamOpen()) {
@@ -910,16 +909,6 @@ NuSoundVoice *NuSoundSystem::CreateVoice(NuSoundSource *source, bool loop) {
         if (voice == NULL) {
             decoder->CloseStream();
             ReleaseDecoder(decoder);
-            return NULL;
-        }
-    } else {
-        if (!source->IsStreamOpen()) {
-            return NULL;
-        }
-        NuSoundStreamDesc *desc = source->GetStreamDesc();
-        NuSoundVoiceFactory *factory = factory_list.GetFactory(desc->GetDecodedDataFormat());
-        voice = factory->CreateVoice(source, loop);
-        if (voice == NULL) {
             return NULL;
         }
     }
@@ -1010,10 +999,14 @@ i32 NuSoundSystem::GetOutputChannelConfig() {
 
 i32 NuSoundSystem::GetClosestSupportedConfig(i32 config) {
     // libTTapp.so 0x31bcb0: config > 7 -> 8, config >= 6 -> 6, else 2.
-    if (config > 7) {
-        return 8;
+    i32 result = 8;
+    if (config <= 7) {
+        result = 2;
+        if (config >= 6) {
+            result = 6;
+        }
     }
-    return (config >= 6) ? 6 : 2;
+    return result;
 }
 
 i32 NuSoundSystem::GetNumAvailableOutputDevices() {

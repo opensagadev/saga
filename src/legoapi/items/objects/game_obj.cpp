@@ -585,7 +585,7 @@ void ManageGameObjects() {
                     object->current_hp = object->hitpoints;
                     object->field_0xe38 = 4;
                     object->field_0xe37 = object->apiobj.character_data->game_character->field_0xf5;
-                    object->field_0xefc |= 0x80;
+                    object->reset_lighting = 1;
                     object->field_0x7a5 = 0xff;
                     if (object->apiobj.field_0x27c != -1)
                         object->spawn_protection_timer = 2.5f;
@@ -1110,7 +1110,7 @@ void PlayerTakeHit(GameObject_s *object, GameObject_s *attacker) {
     const u8 state = object->field_0xe31;
     const i32 animation = state == 1 ? 0x3e : 0x3d;
     if (object->apiobj.character_model->model_data_b[animation] == NULL) {
-        if ((object->field_0xefb & 8) != 0) {
+        if (object->is_boss) {
             ResetAnimPacket(&object->apiobj.anim_packet, -1);
             Player_ClearContext(object, 1);
             Player_ResetContexts(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));
@@ -1376,7 +1376,7 @@ void UpdateGameObjects(WORLDINFO_s *world) {
 
         const bool force_update =
             timebase_updates == 0 || (object->apiobj.field_0x1f4 & APIOBJECT_MOTION_FLAG_AI_CONTROLLED) == 0 ||
-            (object->field_0xefb & 8) != 0 || (object->field_0xf00 & GAME_OBJECT_AI_UPDATE_SPECIAL_STATE) != 0 ||
+            object->is_boss || (object->field_0xf00 & GAME_OBJECT_AI_UPDATE_SPECIAL_STATE) != 0 ||
             (CInfo[object->character_context].flags & 0x200) != 0 || object->apiobj.supporting_platform_id != -1 ||
             (object->field_0xcc0 != NULL && object->character_context == CHARACTER_CONTEXT_LINKED_OBJECT) ||
             Technos_FindControllingTechno(object) != NULL ||
@@ -2743,7 +2743,7 @@ i32 ObjHitObj(GameObject_s *attacker, GameObject_s *target, i32 damage, u16 flag
     }
     if (flags == 0)
         flags = ObjHitObj_Flags(attacker);
-    if ((target->field_0xefb & 8) || WORLD->current_level == VADERC_LDATA) {
+    if (target->is_boss || WORLD->current_level == VADERC_LDATA) {
         if (static_cast<u32>(hit) >= 2)
             hit = 1;
     } else if (attacker && (flags & 0x100) && attacker->character_context == 5 && attacker->combo_branch == 6 &&
@@ -2857,7 +2857,7 @@ impact:
             PlayerTakeHit(target, attacker);
         goto finish;
     }
-    if (target->character_context == 21 && (target->field_0xefb & 8)) {
+    if (target->character_context == 21 && target->is_boss) {
         target->spawn_protection_timer = 2.5f;
         result = 0;
         goto finish;
@@ -2912,7 +2912,7 @@ impact:
     }
     if (target->apiobj.character_data->model_flags & 0x40000000)
         goto refill;
-    if ((target->field_0xefb & 8) && (!FreePlay || WORLD->current_level != CRUISERC_LDATA))
+    if (target->is_boss && (!FreePlay || WORLD->current_level != CRUISERC_LDATA))
         goto surviving_hit;
     if (probe) {
         result = 2;

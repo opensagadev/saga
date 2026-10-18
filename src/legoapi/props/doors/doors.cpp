@@ -529,8 +529,8 @@ void Doors_Check(WORLDINFO_s *world, GameObject_s *object) {
         NUVEC current_position;
         current_position.x = object->apiobj.position.x;
         current_position.y = object->apiobj.position.y;
-        current_position.z = object->apiobj.position.z;
         current_position.y += centre_height;
+        current_position.z = object->apiobj.position.z;
 
         for (i32 index = 0; index < door_count; ++index, ++door) {
             if ((door->flags & DOOR_FLAG_DO_NOT_USE) == 0 && door->active == 0) {

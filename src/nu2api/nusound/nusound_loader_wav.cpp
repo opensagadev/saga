@@ -148,8 +148,7 @@ i32 NuSoundLoaderWAV::ReadHeader(NuSoundStreamDesc *desc) {
         return 3;
     }
 
-    ChunkReadRequest requests[2];
-    memset(requests, 0, sizeof(requests));
+    ChunkReadRequest requests[2] = {};
     requests[0].chunk_id = formatId;
     requests[0].state = 3;
     requests[0].reader = &NuSoundLoaderWAV::ReadRIFFHeaderChunk;

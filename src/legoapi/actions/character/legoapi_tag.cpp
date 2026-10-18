@@ -325,11 +325,11 @@ i32 TagCode(GameObject_s *source, GameObject_s *destination, i32 takeover, i32 b
         source->field_0xef0 = 0;
         source->pause_context_state = 0;
         source->input_toggle_hold_time = TOGGLEHOLDTIME;
-        source->field_0xefc |= 0x80;
+        source->reset_lighting = 1;
         source->field_0xefe &= ~0x18;
         destination->hud_icon_timer = 2.0f;
         destination->input_toggle_hold_time = TOGGLEHOLDTIME;
-        destination->field_0xefc |= 0x80;
+        destination->reset_lighting = 1;
         NewBuzzFrames(destination->pad_gamepad->pad, 2, 0);
         if (static_cast<i8>(source->apiobj.field_0x27c) != -1) {
             Player[static_cast<i8>(source->apiobj.field_0x27c)] = source;

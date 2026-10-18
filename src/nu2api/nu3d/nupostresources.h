@@ -62,7 +62,7 @@ bool NuFramebuffer360HasZPass(void);
 i32 NuFramebuffer360GetTileCount(nuframebuffer_s *);
 
 inline void NuPostResolve(NuProxyBuffer *proxy) {
-    if (!proxy->resolved) {
+    if (__builtin_expect(!proxy->resolved, 0)) {
         NuFramebufferResolve(proxy->kind, proxy->enabled);
         proxy->resolved = true;
     }

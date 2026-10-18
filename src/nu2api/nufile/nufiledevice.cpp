@@ -92,7 +92,7 @@ i32 NuFileDevice::FormatName(char *output, i32 size, char const *path) const {
         normalized = output + 3;
     } else {
         const char *colon = path;
-        for (i32 i = 0; *colon != ':' && *colon && i < 8; ++i)
+        for (i32 i = 0; *colon && *colon != ':' && i < 8; ++i)
             ++colon;
         const char *relative_path = *colon == ':' ? colon + 1 : path;
         if (*mount_name > 0) {
@@ -123,9 +123,9 @@ i32 NuFileDevice::FormatName(char *output, i32 size, char const *path) const {
     while (*source) {
         if (*source == '/' || *source == '\\') {
             *normalized++ = *separator;
-            do {
+            ++source;
+            while (*source == '/' || *source == '\\')
                 ++source;
-            } while (*source == '/' || *source == '\\');
         } else {
             *normalized++ = *source++;
         }

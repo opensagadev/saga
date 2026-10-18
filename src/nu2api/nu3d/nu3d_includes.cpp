@@ -232,6 +232,15 @@ static NuDataPort<NuProxyAttachment *> portMotionVelocityBuffer;
 static NuProxyBuffer proxyMotionVelocityBuffer;
 static VirtualStackAllocator filterAllocator(filterMem, sizeof(filterMem));
 
+template <typename T> static void DestroyPostFilter(T *&slot) {
+    NuPostFilterGen *filter = slot;
+    if (filter != NULL) {
+        filter->destroyTextureResources();
+        filter->destroyResources();
+        slot = NULL;
+    }
+}
+
 template <typename T> static T *AllocatePostFilter() {
     T *filter = reinterpret_cast<T *>(filterAllocator.cursor);
     filterAllocator.cursor += sizeof(T);
@@ -805,7 +814,7 @@ static inline __attribute__((always_inline)) void ResetSceneBeforeFrame(nudispla
         return;
     }
 
-    if (gated ? __builtin_expect(scene->nmtls != 0, 0) : scene->nmtls != 0) {
+    if (scene->nmtls != 0) {
         NuMemSet128(scene->mtl_used[NuDisplaySceneCurrentBuffer(scene)], 0, ((scene->nmtls + 7) >> 7) + 1);
     }
 
@@ -4004,7 +4013,10 @@ extern "C" nueffecttex_s *NuPostEffectGetDepthBuffer(i32 frame) {
             NuFramebufferResolve(4, false);
             texture = NuFramebufferGetAttachedTex(NuFramebufferGetBound(), 4, NULL, NULL);
         } else {
-            NuPostResolve(&proxyDepthBuffer);
+            if (!proxyDepthBuffer.resolved) {
+                NuFramebufferResolve(proxyDepthBuffer.kind, proxyDepthBuffer.enabled);
+                proxyDepthBuffer.resolved = true;
+            }
             texture = proxyDepthBuffer.texture;
         }
         depthBufferCopy = texture;
@@ -4092,42 +4104,12 @@ void NuPostFilterGen::destroySharedResources() {
 
 extern "C" {
 extern "C" void NuPostEffectDestroy() {
-    NuPostFilterGen *filter = mainFilter;
-    if (filter != NULL) {
-        filter->destroyTextureResources();
-        filter->destroyResources();
-        mainFilter = NULL;
-    }
-    filter = motionFilter;
-    if (filter != NULL) {
-        filter->destroyTextureResources();
-        filter->destroyResources();
-        motionFilter = NULL;
-    }
-    filter = motionAccumFilter;
-    if (filter != NULL) {
-        filter->destroyTextureResources();
-        filter->destroyResources();
-        motionAccumFilter = NULL;
-    }
-    filter = speedBlurFilter;
-    if (filter != NULL) {
-        filter->destroyTextureResources();
-        filter->destroyResources();
-        speedBlurFilter = NULL;
-    }
-    filter = deferredFilter;
-    if (filter != NULL) {
-        filter->destroyTextureResources();
-        filter->destroyResources();
-        deferredFilter = NULL;
-    }
-    filter = copyFilter;
-    if (filter != NULL) {
-        filter->destroyTextureResources();
-        filter->destroyResources();
-        copyFilter = NULL;
-    }
+    DestroyPostFilter(mainFilter);
+    DestroyPostFilter(motionFilter);
+    DestroyPostFilter(motionAccumFilter);
+    DestroyPostFilter(speedBlurFilter);
+    DestroyPostFilter(deferredFilter);
+    DestroyPostFilter(copyFilter);
     NuPostFilterGen::destroySharedTextureResources();
     NuPostFilterGen::destroySharedResources();
     filterAllocator.cursor = filterMem;
@@ -7278,7 +7260,7 @@ extern "C" {
 
 }
 
-__attribute__((optimize("O2"))) void CalcValue1648Get2Values(char *data, i32 quarter, i32 stride, ani3_scalemin_s *scale_min, float *first,
+void CalcValue1648Get2Values(char *data, i32 quarter, i32 stride, ani3_scalemin_s *scale_min, float *first,
                              float *second) {
     u16 *next = reinterpret_cast<u16 *>(data + stride);
     u16 *keys = reinterpret_cast<u16 *>(data);
@@ -7337,7 +7319,7 @@ __attribute__((optimize("O2"))) void CalcValue1648Get2Values(char *data, i32 qua
     }
 }
 
-__attribute__((optimize("O2"))) float CalcValue1648(char *data, i32 quarter, i32 stride, float fraction, ani3_scalemin_s *scale_min) {
+float CalcValue1648(char *data, i32 quarter, i32 stride, float fraction, ani3_scalemin_s *scale_min) {
     u16 *next = reinterpret_cast<u16 *>(data + stride);
     u16 *keys = reinterpret_cast<u16 *>(data);
 
@@ -7866,7 +7848,7 @@ __attribute__((optimize("O2"))) i32 ANI_SimpleAni3PlayerV4Joint_Blend_Quat3(ani3
             SkipAni4V4Curve(curve_types[1], keys, scale_min);
             SkipAni4V4Curve(curve_types[2], keys, scale_min);
         }
-        if (__builtin_expect(!!(*node_flags & 1), 1)) {
+        if (*node_flags & 1) {
             SkipAni4V4Curve(curve_types[3], keys, scale_min);
             SkipAni4V4Curve(curve_types[4], keys, scale_min);
             SkipAni4V4Curve(curve_types[5], keys, scale_min);
@@ -8033,7 +8015,7 @@ __attribute__((optimize("O2"))) i32 ANI_SimpleAni3PlayerV4Joint_Blend_Quat3W(ani
                 f32 sampled = DecodeAni4Quat3Scalar(anim, key_stride, constants, curve_types[0], quarter, fraction,
                                                     keys, scale_min);
                 f32 delta_x = sampled - output[0];
-                if (__builtin_expect(!!(root_translation), 0))
+                if (__builtin_expect(!!(root_translation), 1))
                     root_translation->x = sampled;
                 output[0] += delta_x * blend;
                 sampled = DecodeAni4Quat3Scalar(anim, key_stride, constants, curve_types[1], quarter, fraction, keys,
@@ -8102,7 +8084,7 @@ extern "C" __attribute__((optimize("O2"))) i32 ANI_SimpleAni3PlayerV4Joint_Blend
     const u16 *curve_types = anim->curve_types;
     const u8 *first_flags = node_flags + first_joint;
     for (const u8 *skip_flags = node_flags; skip_flags < first_flags; ++skip_flags) {
-        if (__builtin_expect(!!(*skip_flags & 2), 1)) {
+        if (*skip_flags & 2) {
             SkipAni4V4Curve(curve_types[0], keys, scale_min);
             SkipAni4V4Curve(curve_types[1], keys, scale_min);
             SkipAni4V4Curve(curve_types[2], keys, scale_min);
@@ -8112,7 +8094,7 @@ extern "C" __attribute__((optimize("O2"))) i32 ANI_SimpleAni3PlayerV4Joint_Blend
             SkipAni4V4Curve(curve_types[4], keys, scale_min);
             SkipAni4V4Curve(curve_types[5], keys, scale_min);
         }
-        if (__builtin_expect(!!(*skip_flags & 8), 1)) {
+        if (*skip_flags & 8) {
             SkipAni4V4Curve(curve_types[6], keys, scale_min);
             SkipAni4V4Curve(curve_types[7], keys, scale_min);
             SkipAni4V4Curve(curve_types[8], keys, scale_min);
@@ -8215,10 +8197,10 @@ extern "C" __attribute__((optimize("O2"))) i32 ANI_SimpleAni3PlayerV4Joint_Blend
     return 0;
 }
 
-extern "C" __attribute__((optimize("O2"))) i32 ANI_SimpleAni3PlayerV4Joint_Blend(ani3_animheader_s *anim, f32 frame, nuanimbuff_s *buffer, f32 blend,
+extern "C" i32 ANI_SimpleAni3PlayerV4Joint_Blend(ani3_animheader_s *anim, f32 frame, nuanimbuff_s *buffer, f32 blend,
                                                  i32 joint_count, i32 first_joint, NUVEC *root_translation) {
     if ((anim->format_flags & ANI3_FORMAT_QUATERNION_ROTATION) != 0) {
-        if (__builtin_expect((anim->format_flags & ANI3_FORMAT_QUATERNION_STORES_W) != 0, 0)) {
+        if ((anim->format_flags & ANI3_FORMAT_QUATERNION_STORES_W) != 0) {
             return ANI_SimpleAni3PlayerV4Joint_Blend_Quat3W(anim, frame, buffer, blend, joint_count, first_joint,
                                                             root_translation);
         } else {
@@ -8458,7 +8440,7 @@ extern "C" __attribute__((optimize("O2"))) void ANI_Ani3ExtractAllNodeCurves(ani
             }
             continue;
         }
-        if (__builtin_expect(curve_mask != NULL, 0)) {
+        if (curve_mask != NULL) {
             ++curve_mask;
         }
 
@@ -12217,7 +12199,7 @@ extern "C" {
         NUVEC corners[8];
         NUVEC view[8];
         u8 results[8];
-        if (__builtin_expect(far_clip == 0.0f, 0))
+        if (__builtin_expect(far_clip == 0.0f, 1))
             far_clip = global_camera.far_clip;
         if (__builtin_expect(world_mtx == NULL || world_mtx == &numtx_identity, 0))
             transform = vmtx;
@@ -13869,7 +13851,7 @@ extern "C" {
             NUROOM &first = scene->rooms[candidates[0]];
             NUROOM &second = scene->rooms[candidates[1]];
             if (candidate_count == 2) {
-                if (__builtin_expect(!(first.priority < second.priority), 1)) {
+                if (!(first.priority < second.priority)) {
                     candidates[1] = static_cast<i16>(room_index);
                 } else {
                     candidates[0] = static_cast<i16>(room_index);
@@ -14433,7 +14415,9 @@ extern "C" {
 i32 NuCameraClipHGobj(nugscn_s *scene, numtx_s *world_matrix, numtx_s *root_matrix) {
     nuhgobj_s *object = reinterpret_cast<nuhgobj_s *>(scene);
     if (CutSceneBoundingBoxTrackRoot == 0) {
-        return NuCameraClipTestExtents(&object->bounds_min, &object->bounds_max, world_matrix, 0.0f, 0);
+        NUVEC min = object->bounds_min;
+        NUVEC max = object->bounds_max;
+        return NuCameraClipTestExtents(&min, &max, world_matrix, 0.0f, 0);
     }
 
     NUVEC half_extents;
@@ -16730,7 +16714,7 @@ extern "C" {
 
 }
 
-__attribute__((optimize("O2"))) void NuDisplayListSetInstSurfGeom(void *) {
+void NuDisplayListSetInstSurfGeom(void *) {
     STUBBED();
 }
 
@@ -17095,7 +17079,7 @@ void DisplayListLinkDynamicMtls(void) {
         // Insertion position — before first used material with key >= ours.
         i32 insert = pos;
         for (i32 j = 0; j < static_cast<i32>(mgr->dyn_mtl_dlist.nmtls); ++j) {
-            if (__builtin_expect(mgr->material_used[j] != 0 && key <= MtlSortKey(mgr->dyn_mtl_dlist.mtls[j]), 1)) {
+            if (mgr->material_used[j] != 0 && key <= MtlSortKey(mgr->dyn_mtl_dlist.mtls[j])) {
                 insert = j;
                 break;
             }
@@ -17793,7 +17777,7 @@ extern "C" void NuDisplayListSwapBuffersEndFrame(void) {
     nuglobalrndrstate_s *last_local = nullptr;
 
     auto linkSceneGeometry = [](NUDISPLAYLIST *dl) {
-        if (__builtin_expect(dl->scene_first[dl->scene_buffer] != dl->scene_next, 0)) {
+        if (dl->scene_first[dl->scene_buffer] != dl->scene_next) {
             dl->dyn_geom->next = dl->scene_first[dl->scene_buffer];
             dl->scene_next->type = kItemType_Link;
             dl->scene_next->next = dl->dyn_geom + 1;
@@ -18680,7 +18664,7 @@ static inline void NuLgtArcVertex(NUVEC4 *position, i32 colour, f32 u, f32 v) {
     NuPrim2DAddXYZ(position->x, position->y, position->z);
 }
 
-__attribute__((optimize("O2", "tree-vectorize"))) void NuLgtArcLaserDraw(i32 paused) {
+void NuLgtArcLaserDraw(i32 paused) {
     f32 v0 = NuLgtArcMtl[0].v0, v1 = NuLgtArcMtl[0].v1;
     if (paused)
         NuLgtArcLaserCnt = NuLgtArcLaserOldCnt;
@@ -20264,7 +20248,7 @@ void NuDynamicLight::addShadowCasterScene(nugscn_s *scene) {
     i32 instance = 0;
     for (i32 lod = 0; lod < dl->nclip_objects; ++instance, ++lod) {
         if ((dl->visibility_flags[instance] & 0x21) == 0x21) {
-            if (__builtin_expect(dl->lod_ranges[lod] != 0.0f, 1)) {
+            if (dl->lod_ranges[lod] != 0.0f) {
                 f32 dx = global_camera.mtx.m30 - dl->clip_bounds[instance].center.x;
                 f32 dy = global_camera.mtx.m31 - dl->clip_bounds[instance].center.y;
                 f32 dz = global_camera.mtx.m32 - dl->clip_bounds[instance].center.z;

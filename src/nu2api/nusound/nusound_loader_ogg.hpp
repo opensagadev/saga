@@ -34,7 +34,7 @@ class NuSoundHeaderOGG : public NuSoundFileStreamDesc<FileHeaderOGG, 744> {
     u32 GetBlockSize() const;
     DataFormat GetEncodedDataFormat() const;
     u64 GetDecodedLengthBytes() const;
-    u16 GetInterleaveSize() const;
+    u32 GetInterleaveSize() const;
     u16 GetFormatID() const;
     u16 GetExtendedDataSize() const;
     void *GetExtendedData() const;

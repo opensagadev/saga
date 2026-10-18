@@ -541,7 +541,7 @@ void Batarangs_Update() {
             if (victim->id == id_CATWOMAN && victim->apiobj.field_0x27c == -1) {
                 victim->field_0xef8 |= 1;
                 StunGameObject(victim, batarang->owner, catwoman_stun_time, 0);
-            } else if ((victim->field_0xefb & 8) == 0) {
+            } else if (!victim->is_boss) {
                 ObjHitObj(batarang->owner, victim, 1, 0, 0, 1);
             }
         } else if (type == 1) {

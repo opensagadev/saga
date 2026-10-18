@@ -369,7 +369,7 @@ i32 NoLayerKill(GameObject_s *object) {
 GameObject_s *BossKilled(i32 character_id) {
     GameObject_s *object = FindGameObject(character_id, 1, 1, 1, 0);
     if (object != NULL) {
-        if ((object->field_0xefb & 8) != 0) {
+        if (object->is_boss) {
             if (object->apiobj.field_0x287 == 0 && object->current_hp != 0) {
                 object = NULL;
             }

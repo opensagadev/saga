@@ -2377,8 +2377,8 @@ extern "C" {
         NuStrCat(format, slider->format);
         eduiFntPrintEx(edui_font, (x * 2 + width) << 3, (y << 3) + baseline, 64, format, slider->value);
         if (slider->normalized_value >= 0.0f && slider->normalized_value <= 1.0f) {
-            i32 top = (y + height) << 3;
             i32 bottom = (y + height + height - 1) << 3;
+            i32 top = (y + height) << 3;
             f32 span = width - 2;
             i32 marker_x = static_cast<i32>(x + 1 + slider->normalized_value * span) << 4;
             eduiDrawLine(marker_x, top, marker_x, bottom, item->colours[item->highlighted], uimtls[0]);
@@ -2537,8 +2537,8 @@ extern "C" {
             else
                 rep_timer = 0;
             if (!rep_timer || (pad->digital_buttons_pressed & 0x08)) {
-                f32 value = slider->value + slider->granularity;
                 f32 maximum = slider->minimum + slider->range;
+                f32 value = slider->value + slider->granularity;
                 value = maximum < value ? maximum : value;
                 f32 rounded = value > 0.0f ? value + slider->granularity * 0.5f : value - slider->granularity * 0.5f;
                 slider->value = static_cast<i32>(rounded / slider->granularity) * slider->granularity;
@@ -2579,8 +2579,8 @@ extern "C" {
                 if (value > 1.0f)
                     value = 1.0f;
                 slider->value = value * slider->range + slider->minimum;
-                slider->normalized_value = value;
                 slider->change_timer = 60;
+                slider->normalized_value = value;
                 if (slider->changed)
                     slider->changed(menu, item, pad->digital_buttons);
             } else {
@@ -2625,8 +2625,8 @@ extern "C" {
               edui_cursor_y < interact->y + interact->height * 0.75f) ||
              pick->dragging_colour) &&
             !pick->dragging_saturation) {
-            pick->cursor_y = (edui_cursor_y - interact->y) / (interact->height * 0.75f);
             pick->cursor_x = (edui_cursor_x - interact->x) / interact->width;
+            pick->cursor_y = (edui_cursor_y - interact->y) / (interact->height * 0.75f);
             pick->dragging_colour = (edui_cursor_buttons & EDUI_CURSOR_PRIMARY) != 0;
         }
         if (((edui_cursor_x >= interact->x && edui_cursor_y >= interact->y + interact->height * 0.75f &&
@@ -2870,9 +2870,9 @@ extern "C" {
         item->previous = menu->last;
         item->next = NULL;
         menu->field_0c = menu->first;
-        menu->field_10 = 0;
         menu->last = item;
         edui_last_item = item;
+        menu->field_10 = 0;
         return item;
     }
 
@@ -2884,9 +2884,9 @@ extern "C" {
         item->next = menu->first;
         item->previous = NULL;
         menu->first = item;
-        menu->field_10 = 0;
         edui_last_item = item;
         menu->field_0c = item;
+        menu->field_10 = 0;
     }
 
     void eduiMenuAddItemLast(eduimenu_s *menu, eduiitem_s *item) {
@@ -3415,9 +3415,9 @@ extern "C" {
         for (; node; node = node->next, ++count) {
             if (count < capacity) {
                 edui_gradient_stage_s *stage = &stages[count];
-                stage->time = node->time;
                 stage->hue = node->hue;
                 stage->value = node->value;
+                stage->time = node->time;
                 stage->saturation = node->saturation;
                 eduiHSVToRGB(node->hue, node->saturation, node->value, red, green, blue);
                 stage->red = red;
@@ -4748,8 +4748,8 @@ extern "C" void eduiMenuDestroyItems(eduimenu_s *menu) {
                 entry->menu = menu;
                 entry->item = item;
                 entry->callback = callback;
-                entry->buttons = buttons;
                 entry->y = static_cast<f32>(y) * 0.5f;
+                entry->buttons = buttons;
                 entry->width = static_cast<f32>(width);
                 entry->height = static_cast<f32>(height) * 0.5f;
                 entry->field_20 = field_20;
@@ -4791,9 +4791,9 @@ extern "C" void eduiMenuDestroyItems(eduimenu_s *menu) {
                 if (!menu->child)
                     interact(x, y, menu->width, scroll_height, menu, NULL, cbInteractMenuScrollUp, 0x40, 0);
                 rect(x << 4, y << 3, menu->width << 4, scroll_height << 3, 0x80000000, uimtls[ui_bgmtl]);
+                i32 centre = (x * 2 + menu->width) << 3;
                 const i32 top = (y << 3) + 8;
                 const i32 bottom = ((y + scroll_height) << 3) - 16;
-                i32 centre = (x * 2 + menu->width) << 3;
                 line(centre, top, centre - ((scroll_height - 2) << 4), bottom, 0x80ffffff, uimtls[0]);
                 centre = (x * 2 + menu->width) << 3;
                 line(centre, top, centre + ((scroll_height - 2) << 4), bottom, 0x80ffffff, uimtls[0]);
@@ -5012,9 +5012,9 @@ extern "C" void eduiMenuDestroyItems(eduimenu_s *menu) {
                 points[1] = static_cast<i32>((property->button_y + property->button_size * 0.1f) * 8.0f);
                 points[2] = static_cast<i32>((property->button_x + property->button_size * 0.9f) * 16.0f);
                 points[3] = static_cast<i32>((property->button_y + property->button_size * 0.5f) * 8.0f);
+                u32 colour = button_colours[(property->unknown_property_flags >> 4) & 1];
                 points[4] = static_cast<i32>((property->button_x + property->button_size * 0.1f) * 16.0f);
                 points[5] = static_cast<i32>((property->button_y + property->button_size * 0.9f) * 8.0f);
-                u32 colour = button_colours[(property->unknown_property_flags >> 4) & 1];
                 if (!edui_donotdraw)
                     NuRndrTriStrip2di(points, NULL, 3, colour, uimtls[0]);
             }
@@ -7601,9 +7601,9 @@ extern "C" void AddColourPick(eduimenu_s *parent, eduiitem_s *item, f32 *red, f3
         cp_g = &cpt_g;
         cp_b = &cpt_b;
     } else {
-        cp_r = red;
         cp_g = green;
         cp_b = blue;
+        cp_r = red;
         red_value = *red;
         green_value = *green;
         blue_value = *blue;

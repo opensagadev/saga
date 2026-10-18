@@ -3622,8 +3622,8 @@ void eduiSetPinnedMenu(eduimenu_s *menu) {
 }
 
 void ClassEditor::cbEdClassSetPinned(eduimenu_s *menu, eduiitem_s *item, u32) {
-    menu->flags ^= 4;
     item->highlighted = !item->highlighted;
+    menu->flags ^= 4;
     if (__builtin_expect(!!(menu->flags & 4), 0)) {
         eduiMenuDetach(menu);
         eduiSetPinnedMenu(menu);
@@ -4613,9 +4613,9 @@ PlaceableHelper::PlaceableHelper() {
 
 void PlaceableHelper::RegisterObjectType(char *name, PlaceableInterface *interface) {
     i32 index = object_type_count++;
-    object_types[index].name = name;
     object_types[index].interface = interface;
     *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(interface) + 8) = object_type_count;
+    object_types[index].name = name;
 }
 
 Placeable *PlaceableHelper::FindObject(char *name) {
@@ -6067,8 +6067,8 @@ void SplineHelper::SerialiseObject(EdStream &stream, void *object) {
             knot->previous = spline->knots.last;
             if (spline->knots.last != NULL)
                 spline->knots.last->next = knot;
-            const bool had_first = spline->knots.first != NULL;
             spline->knots.last = knot;
+            const bool had_first = spline->knots.first != NULL;
             if (__builtin_expect(!had_first, 1))
                 spline->knots.first = knot;
             ++spline->knots.count;
@@ -8175,7 +8175,7 @@ void BezierLineEval(VuVec &result, VuVec &start, VuVec &first_control, VuVec &en
     const f32 start_weight = complement_squared * complement;
     const f32 first_weight = (along * 3.0f) * complement_squared;
     const f32 second_weight = (3.0f * squared) * complement;
-    const f32 end_weight = along * squared;
+    const f32 end_weight = squared * along;
     const f32 z = end.z * end_weight +
                   ((first_control.z * first_weight + start.z * start_weight) + second_control.z * second_weight);
     const f32 y = end.y * end_weight +
@@ -8558,8 +8558,8 @@ void EdFileInputStream::Open(i32 handle, i32) {
 i32 LevelEditor::LoadState(variptr_u *buffer, variptr_u *buffer_end, variptr_u *scratch_begin, variptr_u *scratch_end,
                            variptr_u *file_begin, variptr_u *file_end) {
     reserved_0x298 = 1;
-    MemoryBuffer source = {buffer, buffer_end, 0, 0};
     MemoryBuffer scratch = {scratch_begin, scratch_end, 0, static_cast<u32>(scratch_end->addr - scratch_begin->addr)};
+    MemoryBuffer source = {buffer, buffer_end, 0, 0};
     if (!multi_load_active) {
         theClassEditor.PreLoadInitialisation(&source, &scratch);
     }
@@ -9301,8 +9301,8 @@ void ClassEditor::SnapPoint(VuVec &point) {
     ray.y *= -snap_distance;
     ray.z = -snap_distance * ray.z;
     candidate.w = 0.0f;
-    candidate.x = ray.x + point.x;
     candidate.y = ray.y + point.y;
+    candidate.x = ray.x + point.x;
     candidate.z = ray.z + point.z;
     if (EdTerrRay(candidate, snap_ray))
         point = candidate;
@@ -9957,8 +9957,8 @@ i32 EdManipulator::SelectRotator(EdInputContext &input, VuVec &center, VuVec &pl
         *secondary_plane = VuVec_Zero;
         return axis;
     }
-    i32 axis = *selected_axis;
     plane.x = selected_plane->x;
+    i32 axis = *selected_axis;
     plane.y = selected_plane->y;
     plane.z = selected_plane->z;
     plane.w = selected_plane->w;
@@ -9984,8 +9984,8 @@ i32 EdManipulator::SelectRotator(EdInputContext &input, VuVec &center, VuVec &pl
             break;
     }
     i32 delta = *last_angle - angle;
-    *last_angle = angle;
     delta &= 0xffff;
+    *last_angle = angle;
     if (delta >= 0x8000)
         delta -= 0x10000;
     *angle_delta = delta;

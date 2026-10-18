@@ -54,7 +54,6 @@ i32 NuPSFileWrite(NUPSFILE index, const void *src, i32 len) {
 }
 
 NUPSFILE NuPSFileOpen(char *filepath, NUFILEMODE mode) {
-    char path[0x400];
     NUPSFILE ps_file;
     FILE *file;
 
@@ -62,7 +61,7 @@ NUPSFILE NuPSFileOpen(char *filepath, NUFILEMODE mode) {
         return -1;
     }
 
-    memset(path, 0, sizeof(path));
+    char path[0x400] = {0};
     NuStrCpy(path, filepath);
 
     for (char *cursor = path; *cursor != '\0'; cursor++) {

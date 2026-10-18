@@ -302,8 +302,8 @@ static void Signals_StoreProgress(void *world_info, void *, void *progress_data)
     }
     SIGNAL *signal = world->signals;
     for (i32 index = 0; index < world->signal_count && index < 32; ++signal, ++index) {
-        u32 mask = 1u << index;
         progress->suit_letters[index] = world->signals[index].suit->letter;
+        u32 mask = 1u << index;
         if (!signal->visible) {
             progress->visible_mask &= ~mask;
         }

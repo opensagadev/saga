@@ -86,9 +86,8 @@ void NuSoundAndroid::UpdateAudioDevice() {
 void NuSoundAndroid::AndroidNuSoundClockThread(void *) {
     // 5 ms tick driving the audio clock callbacks (the callback list is
     // empty in practice on the title screen).
-    NuSoundAndroid *system = &NuSound;
     while (NuSoundAndroid::m_workerThreadCount != 0) {
-        system->clock.HandleCallbacks();
+        NuSoundSystem::Get()->clock.HandleCallbacks();
         NuThreadSleep(5);
     }
 }
@@ -132,7 +131,10 @@ bool NuSoundAndroid::IsValidSampleRate(u32 rate_millis) {
 }
 
 bool NuSoundAndroid::IsValidBitRate(u32 bits) {
-    return !(bits != 16 && bits != 8);
+    if (bits != 16 && bits != 8) {
+        return false;
+    }
+    return true;
 }
 
 u32 NuSoundAndroid::ReportErrorCode(u32 error, const char *message) {
@@ -158,27 +160,30 @@ bool NuSoundAndroid::InitAudioDevice() {
         return false;
     }
 
-    void *capabilities = NULL;
+    void *capabilities;
     error = SL_SLOT(this->engine_object, ObjectGetInterfaceFn, 0xc)(this->engine_object, SL_IID_ENGINECAPABILITIES,
                                                                     &capabilities);
     if (ReportErrorCode(error, "Get engine capabilities interface") == 0) {
         u16 profiles = 0;
         error = SL_SLOT(capabilities, QuerySupportedProfilesFn, 0)(capabilities, &profiles);
-        i16 max_voices = 0;
-        u32 absolute_max = 0;
-        i16 free_voices = 0;
         if (ReportErrorCode(error, "QuerySupportedProfiles") == 0 && (profiles & 4) != 0) {
+            i16 max_voices = 0;
+            u32 absolute_max = 0;
+            i16 free_voices = 0;
             error = SL_SLOT(capabilities, QueryAvailableVoicesFn, 4)(capabilities, 1, &max_voices, &absolute_max,
                                                                      &free_voices);
             ReportErrorCode(error, "QueryAvailableVoices(SL_VOICETYPE_2D_AUDIO)");
 
-            max_voices = 0;
-            absolute_max = 0;
-            free_voices = 0;
-            error = SL_SLOT(capabilities, QueryAvailableVoicesFn, 4)(capabilities, 4, &max_voices, &absolute_max,
-                                                                     &free_voices);
+            i16 max_voices_3d = 0;
+            u32 absolute_max_3d = 0;
+            i16 free_voices_3d = 0;
+            error = SL_SLOT(capabilities, QueryAvailableVoicesFn, 4)(capabilities, 4, &max_voices_3d,
+                                                                     &absolute_max_3d, &free_voices_3d);
             ReportErrorCode(error, "QueryAvailableVoices(SL_VOICETYPE_3D_AUDIO)");
         } else {
+            i16 max_voices = 0;
+            u32 absolute_max = 0;
+            i16 free_voices = 0;
             error = SL_SLOT(capabilities, QueryAvailableVoicesFn, 4)(capabilities, 1, &max_voices, &absolute_max,
                                                                      &free_voices);
             ReportErrorCode(error, "QueryAvailableVoices(SL_VOICETYPE_2D_AUDIO)");
@@ -191,7 +196,9 @@ bool NuSoundAndroid::InitAudioDevice() {
         return false;
     }
 
-    const void *mix_iids[2] = {SL_IID_VOLUME, SL_IID_ENVIRONMENTALREVERB};
+    const void *volume_iid = SL_IID_VOLUME;
+    const void *reverb_iid = SL_IID_ENVIRONMENTALREVERB;
+    const void *mix_iids[2] = {volume_iid, reverb_iid};
     const u32 mix_required[2] = {0, 0};
     error = SL_SLOT(this->audio_engine, EngineCreateOutputMixFn, 0x1c)(this->audio_engine, &this->output_mix, 2,
                                                                        mix_iids, mix_required);
@@ -204,12 +211,12 @@ bool NuSoundAndroid::InitAudioDevice() {
         return false;
     }
 
-    error = SL_SLOT(this->output_mix, ObjectGetInterfaceFn, 0xc)(this->output_mix, SL_IID_VOLUME, &this->mix_volume);
+    error = SL_SLOT(this->output_mix, ObjectGetInterfaceFn, 0xc)(this->output_mix, volume_iid, &this->mix_volume);
     if (ReportErrorCode(error, "Get output volume interface") == 0) {
         SL_SLOT(this->mix_volume, VolumeSetVolumeLevelFn, 0xc)(this->mix_volume, 0);
     }
 
-    error = SL_SLOT(this->output_mix, ObjectGetInterfaceFn, 0xc)(this->output_mix, SL_IID_ENVIRONMENTALREVERB,
+    error = SL_SLOT(this->output_mix, ObjectGetInterfaceFn, 0xc)(this->output_mix, reverb_iid,
                                                                  &this->mix_reverb);
     if (ReportErrorCode(error, "Get output environmental reverb interface") == 0) {
         SL_SLOT(this->mix_reverb, EnvironmentalReverbSetPropertiesFn, 0x50)(this->mix_reverb, this->reverb_properties);

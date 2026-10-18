@@ -181,7 +181,7 @@ void UpdateExplosion_Generic(EXPLOSION *explosion) {
                 damage = 0;
             else if ((explosion->field_0x24 & 0x800) != 0 && (target->field_0xefb & 8) == 0)
                 damage = -1;
-            else if ((explosion->field_0x24 & 0x20) != 0 && (target->field_0xefb & 8) == 0 &&
+            else if ((explosion->field_0x24 & 0x20) != 0 && !target->is_boss &&
                      static_cast<i8>(target->current_hp) > 0)
                 damage = -1;
             else

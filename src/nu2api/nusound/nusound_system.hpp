@@ -37,6 +37,9 @@ struct NuSoundVoiceListenerLink {
     NuSoundVoiceListenerLink *previous;
     NuSoundVoiceListenerLink *next;
 
+    NuSoundVoiceListenerLink() : listener(NULL), previous(NULL), next(NULL) {
+    }
+
     ~NuSoundVoiceListenerLink() {
         Detach();
     }
@@ -466,7 +469,7 @@ class NuSoundSystem {
         NU_FREE(allocation);
     }
 
-    enum class MemoryDiscipline : u32 {
+    enum class MemoryDiscipline : i32 {
         SCRATCH = 0,
         SAMPLE = 1,
         DECODER = 2,
@@ -559,7 +562,7 @@ class NuSoundSystem {
     void ReleaseVoice(NuSoundVoice *voice);
     static bool SourceRequiresDecoder(NuSoundSource *source);
     static i32 GetNumAvailableOutputDevices();
-    NuSoundRoutingTable *GetDefaultRoutingTable();
+    static NuSoundRoutingTable *GetDefaultRoutingTable();
     void Update(f32 frametime);
 
   public:
@@ -584,7 +587,7 @@ class NuSoundSystem {
 
     NuSoundSample *GetSample(const char *path);
 
-    i32 GenerateHash(const char *str);
+    static i32 GenerateHash(const char *str);
 
     virtual ~NuSoundSystem();
     virtual NuSoundEffect *CreateEffect(NuSoundEffect::EffectType);
@@ -709,6 +712,15 @@ class NuSoundRoutingTable {
   public:
     NuSoundRoutingTable(const char *name);
     NuSoundRoutingTable(const char *name, const NuSoundRoutingTable *parent);
+
+    // The name lives in the inline storage, so tearing it down only empties
+    // the string.
+    ~NuSoundRoutingTable() {
+        this->name[0] = '\0';
+        this->name_capacity = 0;
+        this->name_length = 0;
+        this->name = NULL;
+    }
 
     void SetMatrix(NuSoundSystem::ChannelConfig from, NuSoundSystem::ChannelConfig to, NuSoundMixMatrix *matrix);
     NuSoundMixMatrix *GetMatrix(NuSoundSystem::ChannelConfig from, NuSoundSystem::ChannelConfig to) const;

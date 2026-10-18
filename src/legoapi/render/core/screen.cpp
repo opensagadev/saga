@@ -709,7 +709,7 @@ void DrawParallax(nuhspecial_s *special) {
         return;
     }
 
-    const f32 uniform_scale = pNuCam->far_clip * 0.05f;
+    const f32 uniform_scale = pNuCam->far_clip * 0.1f * 0.5f;
     NUVEC scale = {uniform_scale, uniform_scale, uniform_scale};
     NUMTX_ALIGNED16 matrix;
     NuMtxSetScale(&matrix, &scale);
@@ -770,13 +770,13 @@ void GameFog_Update(WORLDINFO_s *world) {
         }
     }
 
-    f32 fstop = 22.0f;
     if (GameFogSet != NULL) {
-        fstop = static_cast<f32>(static_cast<u32>(GameFogSet->depth_of_field_fstop)) / 10.0f;
-        if (fstop == 0.0f)
-            fstop = 22.0f;
+        dof_fstop = static_cast<f32>(static_cast<u32>(GameFogSet->depth_of_field_fstop)) / 10.0f;
+        if (dof_fstop == 0.0f)
+            dof_fstop = 22.0f;
+    } else {
+        dof_fstop = 22.0f;
     }
-    dof_fstop = fstop;
 
     if (NuIOS_IsLowEndDevice() && world->current_level != NULL) {
         GameFogNew.low_quality_end = world->current_level->data_display.far_clip;
@@ -863,7 +863,7 @@ void GameDisplaySettings(LEVELDATADISPLAY *display, i32 *background_colours) {
 
     LEVELDATA *level = WORLD->current_level;
     const bool use_backdrop = level == TITLES_LDATA || (level->flags & LEVEL_STATUS) != 0 || level == STATUS_LDATA ||
-                              level == CREDITS_LDATA || MainRenderTime < 0.0f;
+                              level == CREDITS_LDATA || MainRenderTime < 1.0f;
     if (!use_backdrop) {
         background_colours[0] =
             0x80000000u | static_cast<u8>(display->bg_red_top) |
@@ -886,7 +886,7 @@ void GameDisplaySettings(LEVELDATADISPLAY *display, i32 *background_colours) {
     f32 alpha = 1.0f;
     if (BackDrop_AlphaFn != NULL) {
         BackDrop_AlphaFn(&alpha);
-        if (alpha != 0.0f) {
+        if (alpha != 1.0f) {
             top_r = static_cast<i32>(static_cast<f32>(top_r) * alpha);
             top_b = static_cast<i32>(static_cast<f32>(top_b) * alpha);
             top_g = static_cast<i32>(static_cast<f32>(top_g) * alpha);
@@ -1017,11 +1017,11 @@ void InitStillRender(variptr_u *, variptr_u) {
     pause_rndr_mtl->attribs.unknown_1_4_8 = 1;
     pause_rndr_mtl->attribs.z_mode = 3;
     pause_rndr_mtl->attribs.unknown_2_1_2 = 2;
-    pause_rndr_mtl->attribs.unknown_2_4 = 1;
     pause_rndr_mtl->attribs.alpha_mode = 1;
+    pause_rndr_mtl->attribs.unknown_2_4 = 1;
     pause_rndr_mtl->attribs.filter_mode = 1;
-    pause_rndr_mtl->attribs.cull_mode = 2;
     pause_rndr_mtl->tex_id = static_cast<i16>(pause_rt);
+    pause_rndr_mtl->attribs.cull_mode = 2;
     pause_rndr_mtl->shader_desc.diffuse_color[0] = -1;
     pause_rndr_mtl->shader_desc.unknown_a8 = 1;
     pause_rndr_mtl->shader_desc.vtx_desc.tex_coord_mode = 1;
@@ -1038,12 +1038,12 @@ void DrawPauseScreenWipe() {
     NuRndrBeginScene(-1);
 
     i32 x = 0;
-    i32 width = 0x2800;
     i32 y = 0;
+    i32 width = 0x2800;
     i32 height = 0xe00;
     f32 u0 = 0.0f;
-    f32 u1 = 1.0f;
     f32 top = 0.0f;
+    f32 u1 = 1.0f;
     f32 bottom = 1.0f;
     u32 colours[4];
 

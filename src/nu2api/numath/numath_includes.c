@@ -3755,18 +3755,18 @@ f32 nugraph_blend(i32 interval, i32 degree, i32 *knots, f32 parameter) {
         if (knots[interval + degree - 1] == knots[interval] && knots[interval + degree] == knots[interval + 1]) {
             result = 0.0f;
         } else if (knots[interval + degree - 1] == knots[interval]) {
-            f32 weight =
-                ((f32)knots[interval + degree] - parameter) / (f32)(knots[interval + degree] - knots[interval + 1]);
-            result = weight * nugraph_blend(interval + 1, degree - 1, knots, parameter);
+            result = ((f32)knots[interval + degree] - parameter) /
+                     (f32)(knots[interval + degree] - knots[interval + 1]) *
+                     nugraph_blend(interval + 1, degree - 1, knots, parameter);
         } else if (knots[interval + degree] == knots[interval + 1]) {
-            f32 weight = (parameter - (f32)knots[interval]) / (f32)(knots[interval + degree - 1] - knots[interval]);
-            result = weight * nugraph_blend(interval, degree - 1, knots, parameter);
+            result = (parameter - (f32)knots[interval]) / (f32)(knots[interval + degree - 1] - knots[interval]) *
+                     nugraph_blend(interval, degree - 1, knots, parameter);
         } else {
-            f32 weight_a = (parameter - (f32)knots[interval]) / (f32)(knots[interval + degree - 1] - knots[interval]);
-            f32 blend_a = weight_a * nugraph_blend(interval, degree - 1, knots, parameter);
-            f32 weight_b =
-                ((f32)knots[interval + degree] - parameter) / (f32)(knots[interval + degree] - knots[interval + 1]);
-            result = blend_a + weight_b * nugraph_blend(interval + 1, degree - 1, knots, parameter);
+            result = (parameter - (f32)knots[interval]) / (f32)(knots[interval + degree - 1] - knots[interval]) *
+                         nugraph_blend(interval, degree - 1, knots, parameter) +
+                     ((f32)knots[interval + degree] - parameter) /
+                         (f32)(knots[interval + degree] - knots[interval + 1]) *
+                         nugraph_blend(interval + 1, degree - 1, knots, parameter);
         }
     }
     return result;

@@ -413,7 +413,7 @@ void AddShoveObject(nuhspecial_s *special, i16 character_id) {
 
 // Original: 831 bytes.
 void ShoveSystemCheckGameObject(GameObject_s *object) {
-    if (object->field_0xefc & 1)
+    if (object->ignore_shove_system)
         return;
     f32 best_penetration = 0.0f;
     ShoveObject *shove = shovesys.objects;

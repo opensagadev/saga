@@ -13,20 +13,15 @@
 
 // libTTapp.so 0x32e630: the OGG decoder extends the base decoder with the
 // streaming reader subobject and a 0x2b000-byte ring buffer size.
-NuSoundDecoderOGG::NuSoundDecoderOGG(char const *name, NuSoundSource *wrapped) : NuSoundDecoder(name, wrapped) {
-    this->field_0x108 = 0;
-
-    new (&this->read_callbacks) OGGReadCallbacksDecoder();
-
+NuSoundDecoderOGG::NuSoundDecoderOGG(char const *name, NuSoundSource *wrapped)
+    : NuSoundDecoder(name, wrapped), field_0x108(0) {
     this->ring_write_pos = 0;
     this->ring_read_pos = 0;
-    for (u32 i = 0; i < 4; i++) {
-        this->encoded_buffers[i] = NULL;
-    }
-    this->locked_buffer = NULL;
-    this->ogg_loop = false;
 
     this->read_callbacks.SetDecoder(this);
+
+    this->locked_buffer = NULL;
+    this->ogg_loop = false;
 
     this->buffer_size = 0x2b000;
 }
@@ -176,12 +171,11 @@ u64 NuSoundDecoderOGG::Decode(NuSoundSource &source, NuSoundBuffer &buffer, bool
 
     u64 total = desc->GetDecodedLengthBytes();
 
-    i32 chunk = rounded;
-    if (loop == false) {
-        i32 remaining = (i32)total - (i32)this->decoded_bytes;
-        if (remaining < chunk) {
-            chunk = remaining;
-        }
+    u64 decoded = this->decoded_bytes;
+    i64 chunk = rounded;
+    if (!loop) {
+        i32 remaining = total - decoded;
+        chunk = remaining < rounded ? remaining : rounded;
     }
 
     u32 got = this->DecodeOggChunk(dest, (u32)chunk);
@@ -222,33 +216,20 @@ u32 NuSoundDecoderOGG::DecodeOggChunk(char *dest, unsigned int size) {
     u32 decoded = 0;
     u32 block_size = desc->GetBlockSize();
 
-    if (size != 0 && block_size < size && ogg->ready_state != 0) {
-        i32 rounded_bits = bits_per_sample + 7;
-        if (bits_per_sample >= 0) {
-            rounded_bits = bits_per_sample;
-        }
-        i32 bytes_per_sample = rounded_bits >> 3;
-
-        do {
-            NuIOS_IsLowEndDevice();
-            int ret = ov_read(ogg, dest + decoded, (int)(size - decoded), 0, bytes_per_sample, 1, &bitstream);
-
-            if (ret < 1) {
-                if (ret == 0) {
-                    if (!this->ogg_loop) {
-                        break;
-                    }
-                    NuIOS_IsLowEndDevice();
-                    ov_raw_seek(ogg, 0);
+    while (decoded < size && size - decoded > block_size && ogg->ready_state != 0) {
+        NuIOS_IsLowEndDevice();
+        int ret = ov_read(ogg, dest + decoded, (int)(size - decoded), 0, bits_per_sample / 8, 1, &bitstream);
+        if (ret < 1) {
+            if (ret == 0) {
+                if (!this->ogg_loop) {
+                    break;
                 }
-            } else {
-                decoded += ret;
+                NuIOS_IsLowEndDevice();
+                ov_raw_seek(ogg, 0);
             }
-
-            if (size <= decoded || size - decoded <= block_size || ogg->ready_state == 0) {
-                break;
-            }
-        } while (true);
+        } else {
+            decoded += ret;
+        }
     }
 
     ogg->datasource = saved_datasource;

@@ -55,12 +55,6 @@ namespace {
 NuSoundVoice::NuSoundVoice(NuSoundSource *sound_source, bool loop) {
     this->field_0x24 = NULL;
     this->field_0x28 = NULL;
-    this->real_listener_link.listener = NULL;
-    this->real_listener_link.previous = NULL;
-    this->real_listener_link.next = NULL;
-    this->focus_listener_link.listener = NULL;
-    this->focus_listener_link.previous = NULL;
-    this->focus_listener_link.next = NULL;
     this->queued_buffers = 0;
 
     // The source is locked for the lifetime of the voice and keeps the stream
@@ -70,39 +64,42 @@ NuSoundVoice::NuSoundVoice(NuSoundSource *sound_source, bool loop) {
     sound_source->VoiceReference();
     this->sound_source = sound_source;
 
+    this->field67_0xa8 = 1.0f; // final mix scalar
+    this->field68_0xac = 1.0f; // pitch scale
+    this->field65_0xa0 = 1.0f; // falloff attenuation
     this->field63_0x98 = 0.0f;
     this->field64_0x9c = 0.0f;
-    this->field65_0xa0 = 1.0f; // falloff attenuation
-    this->field67_0xa8 = 1.0f;
-    this->field66_0xa4 = 0.0f; // final mix scalar
-    this->field68_0xac = 1.0f; // pitch scale
-    this->pitch = 1.0f;
+    this->field66_0xa4 = 0.0f;
     this->volume = 1.0f;
+    this->pitch = 1.0f;
     this->falloff_a = 1.0f;
     this->falloff_b = 6.0f;
+    this->source_flags.auto_delete = false;
+    this->source_flags.looping = loop;
+    this->listeners = NULL; // 2D omni
+    this->queued_buffers = 0;
+    this->controller_bits = 0;
+    this->falloff_type = 0;
+    this->downmixer_type = 0;
+    this->output_devices = 1;
+    this->surround_mode = 2;
+    this->output_bus = NuSoundSystem::sMasterBus;
+    this->routing_table = NuSoundSystem::GetDefaultRoutingTable();
+    this->field113_0x10c = 1.0f;
     this->field69_0xb0 = 20.0f;
     this->field70_0xb4 = 180.0f;
     this->field71_0xb8 = 70.0f;
     this->field72_0xbc = 0.0f;
-    this->field74_0xc4 = 1.0f;
     this->field73_0xc0 = 0.0f;
-    this->falloff_type = 0;
-    this->start_offset = 0.0f; // LFE gain
-    this->field113_0x10c = 1.0f;
-    this->output_devices = 1;
-    this->controller_bits = 0;
-    this->output_bus = NuSoundSystem::sMasterBus;
-    this->downmixer_type = 0;
-    this->routing_table = NuSoundSystem::sDefaultRoutingTable;
-    this->listeners = NULL; // 2D omni
-    this->surround_mode = 2;
     this->field130_0x144 = 1.0f;
-    this->field131_0x148 = -1;
-    this->flags2 = (u8)(this->flags2 & 0xf6 | loop << 3);
-
-    this->flags2 &= 0xf9;
+    this->field74_0xc4 = 1.0f;
+    this->start_offset = 0.0f; // LFE gain
+    this->source_flags.last_buffer_queued = false;
+    this->source_flags.stop_effects_running = false;
     this->custom_surround_mix = NULL;
-    this->flags = (u8)(this->flags & 0xf0 | 0x10); // mix update on the first Update
+    this->field131_0x148 = -1;
+    this->playback_flags.pause_count = 0;
+    this->playback_flags.mix_update = true; // mix update on the first Update
 
     this->SetState(PLAYSTATE_STOPPED); // libTTapp.so ctor tail (0x3275b9)
     memset(this->mix_gains, 0, sizeof(this->mix_gains));

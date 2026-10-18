@@ -689,7 +689,7 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
             if (candidate->id == id_RANCOR && best != NULL)
                 continue;
             bool large = (VehicleArea && best == NULL) ||
-                         ((candidate->field_0xefb & 8) && candidate->id != id_RANCOR) ||
+                         (candidate->is_boss && candidate->id != id_RANCOR) ||
                          WORLD->current_level == MAULA_LDATA;
             if (WORLD->current_level == VADERC_LDATA && candidate->id == id_ANAKINJEDI &&
                 !candidate->apiobj.player_controlled && vader_c.final_fight_message->value > 0.0f)

@@ -691,7 +691,7 @@ void CheckForPlayersTurnedOff() {
         if (source != NULL && (source->apiobj.flags_high & APIOBJECT_HIGH_FLAG_CHARACTER) == 0) {
             for (i32 target_index = 2; target_index < 8; ++target_index) {
                 GameObject_s *target = Player[target_index];
-                if (target == NULL || (target->tag_flags & 2) != 0 || (target->field_0xefb & 4) != 0 ||
+                if (target == NULL || (target->tag_flags & 2) != 0 || target->cannot_drop_in ||
                     target->character_context == 0x24 || target->character_context == 0x1f) {
                     continue;
                 }

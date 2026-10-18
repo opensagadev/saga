@@ -492,9 +492,9 @@ static void BlockadeRunnerD_EjectCreature(i32 eject_index) {
             if (LevGameObject[i] != NULL) {
                 LevGameObject[i]->ai.animation_override_from = 0xe9;
                 LevGameObject[i]->ai.animation_override_to = 5;
-                LevGameObject[i]->field_0xefc |= 0x10;
+                LevGameObject[i]->dont_move = 1;
                 LevGameObject[i]->field_0xf00 = (LevGameObject[i]->field_0xf00 & ~0x20) | ((test_tb & 1) << 5);
-                LevGameObject[i]->field_0xeff |= 4;
+                LevGameObject[i]->hide_shadow = 1;
 
                 ADDPART_s params = Default_ADDPART;
                 params.matrix = &matrix;

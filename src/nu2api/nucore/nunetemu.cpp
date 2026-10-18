@@ -164,7 +164,7 @@ NuNetEmu::EmuPacket *NuNetEmu::FindPacket(nunetaddr_s *, i32 size) {
 }
 
 i32 NuNetEmu::RecvFrom(void *data, i32 size, nunetaddr_s &address) {
-    if (__builtin_expect(field_10 == 0, 0)) {
+    if (field_10 == 0) {
         return NuNetSessionRecvFrom(data, size, &address);
     }
 

@@ -106,16 +106,13 @@ template <typename T> class NuList {
         }
         NuListNodeBase *last = tail->GetPrev();
         NuListNodeBase *node = Head();
-        if (value == static_cast<NuListNode<T> *>(node)->value) {
-            return true;
-        }
-        while (node != last) {
-            node = node->GetNext();
-            if (value == static_cast<NuListNode<T> *>(node)->value) {
-                return true;
+        while (value != static_cast<NuListNode<T> *>(node)->value) {
+            if (node == last) {
+                return false;
             }
+            node = node->GetNext();
         }
-        return false;
+        return true;
     }
 
     void Remove(NuListNodeBase *node) {

@@ -350,8 +350,8 @@ void SurfaceMaskOff(u32 *surface_mask) {
 }
 
 void Surfaces_Reset() {
-    LAYER_HOVERIGNORE = 0x10;
     SURFACEBITS_DUST = 0;
+    LAYER_HOVERIGNORE = 0x10;
     u16 no_dust = 0;
     for (i32 i = 0; i < 32; ++i) {
         if ((TerSurface[i].flags & 4) != 0) {

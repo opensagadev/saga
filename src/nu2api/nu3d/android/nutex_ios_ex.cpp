@@ -517,7 +517,7 @@ GLuint NuIOS_CreateGLTexFromPVRInMemory(void *data, i32 *out_width, i32 *out_hei
     i32 bits_per_pixel = 0;
     bool compressed = false;
 
-    if (__builtin_expect(channel_bits == 0, 0)) {
+    if (__builtin_expect(channel_bits == 0, 1)) {
         static const GLenum compressed_formats[6] = {
             0x8c01, // GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG
             0x8c03, // GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG

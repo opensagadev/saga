@@ -64,8 +64,8 @@ struct CreatureEditorRecord {
     void *locator;
     void *respawn_locator;
     u8 difficulty;
-    u8 min_respawns;
-    u8 max_respawns;
+    i8 min_respawns;
+    i8 max_respawns;
     u8 activation;
     f32 min_respawn_time;
     f32 max_respawn_time;

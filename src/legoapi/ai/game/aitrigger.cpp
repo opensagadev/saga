@@ -317,7 +317,7 @@ void AITriggerSetSysProcess(AITRIGGERSETSYS_s *system) {
                     for (i32 object_index = 0; object_index < HIGHGAMEOBJECT; ++object_index, ++object) {
                         if (system->field_0x42c0[object_index] != -1 ||
                             (object->apiobj.field_0x1f8 & 0x1001) != 0x1001 || object->apiobj.field_0x287 != 0 ||
-                            (object->apiobj.flags_low & 0x80) || (object->field_0xeff & 1) ||
+                            (object->apiobj.flags_low & 0x80) || object->not_with_party ||
                             (character_mask && !(character_mask & object->ai.character_type_mask)) ||
                             !(object->field_0xf02 & 4) || (!f0x20e && object->trigger_set != set))
                             continue;

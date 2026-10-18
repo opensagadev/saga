@@ -42,7 +42,7 @@ static_assert(offsetof(NuInputTouch, unknown_14) == 0x14, "Touch ID offset");
 
 struct NuInputTouchData {
     // Type uncertain.
-    u32 touch_count;
+    i32 touch_count;
 
     NuInputTouch touch_events[10];
 };
@@ -93,23 +93,20 @@ class NuInputDevice {
   public:
     NuInputDevice(u32 port);
 
-    // This constructor is theorized based on the inlining of a constructor
-    // without initialization of touch data in the `NuInputManager` ctor. Its
-    // signature and exact nature are unknown.
-    NuInputDevice(u32 port, u32 unknown) {
-        this->port = port;
-        this->translators[0] = NULL;
-        this->is_rumble_killed = false;
-
-        this->prev_valid_type = NUPADTYPE_UNKNOWN_7;
-        this->prev_valid_idx_by_type = 7;
-
-        this->translators[1] = NULL;
-
-        this->translator_count = 0;
-
-        SetDisconnected();
-        Clear();
+    // Initialises a freshly allocated device in place. The original
+    // NuInputManager ctor reaches every field through the device array slot
+    // (reloading it after each pointer store), so this takes the slot rather
+    // than the device. Touch data is left as allocated; the caller clears the
+    // device afterwards.
+    static void InitSlot(NuInputDevice *&slot, u32 port) {
+        slot->port = port;
+        slot->translators[0] = NULL;
+        slot->is_rumble_killed = false;
+        slot->prev_valid_type = NUPADTYPE_UNKNOWN_7;
+        slot->prev_valid_idx_by_type = 7;
+        slot->translators[1] = NULL;
+        slot->translator_count = 0;
+        slot->SetDisconnected();
     }
 
     void Update(f32 delta_time, bool emulate_touch);

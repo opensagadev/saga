@@ -1981,7 +1981,7 @@ static __attribute__((noinline)) void ForcePushed_MoveCode(GameObject_s *object)
         for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++target) {
             if ((target->apiobj.field_0x1f8 & 0x1001) != 0x1001 || target->apiobj.field_0x287 != 0 ||
                 target == source || target == object || target->apiobj.field_0x27c != -1 ||
-                (target->field_0xefb & 8) != 0 || CannotKill(target) ||
+                target->is_boss || CannotKill(target) ||
                 (target->apiobj.character_data->model_flags & 0x4002010) != 0x10 ||
                 (static_cast<GAMECHARACTERDATA *>(target->apiobj.character_data->field11_0x24)->flags_090 & 0x40) !=
                     0 ||
@@ -4213,7 +4213,7 @@ void TurnCode(GameObject_s *object, i32 mode, GAMEPAD_s *pad) {
         }
 
         if ((object->field_0xe24 & 2) == 0 && (mode == 0 || object->character_context != -1)) {
-            if ((object->field_0xeff & 0x20) == 0 && UnderPlayerControl(object) == 0) {
+            if (!object->can_turn && UnderPlayerControl(object) == 0) {
                 return;
             }
             if (!(pad->input_magnitude > 0.0f)) {
@@ -5500,7 +5500,7 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
                     NewRumble(object->pad_gamepad->pad, object->combo_branch == 6 ? 0.7f : 0.35f, 0);
                 }
                 if ((object->apiobj.flags_low & 0x80) == 0 &&
-                    ((object->field_0xefb & 8) != 0 || WORLD->current_level == VADERC_LDATA)) {
+                    (object->is_boss || WORLD->current_level == VADERC_LDATA)) {
                     object->ai_combo_cooldown = 3.0f;
                 }
                 goto combo_finished;
@@ -6706,7 +6706,7 @@ void FindForcePushTarget(GameObject_s *object, i32 activate, i32 target_filter) 
             }
             if (TouchHacks::CanForceTargetObj(*object, *candidate) &&
                 !(WORLD->area != NULL && WORLD->area == EMPERORFIGHT_ADATA &&
-                  ((candidate->field_0xefb & 8) != 0 || candidate->apiobj.field_0x27c != -1)) &&
+                  (candidate->is_boss || candidate->apiobj.field_0x27c != -1)) &&
                 candidate->id != id_BODYGUARD) {
                 if (target_filter == 1) {
                     if (candidate->apiobj.field_0x27c != -1) {
@@ -6722,7 +6722,7 @@ void FindForcePushTarget(GameObject_s *object, i32 activate, i32 target_filter) 
                 } else if (target_filter == 2 && candidate->apiobj.field_0x27c == -1) {
                     goto reload_object_count;
                 }
-                if ((candidate->field_0xefb & 8) != 0) {
+                if (candidate->is_boss) {
                     goto reload_object_count;
                 }
 
@@ -6905,7 +6905,7 @@ i32 ForcePushed_SetTargetMom(GameObject_s *object, float *seek_rate) {
         for (i32 index = 0; index < loop_limit; ++index, ++candidate) {
             if ((candidate->apiobj.field_0x1f8 & 0x1001) != 0x1001 || candidate->apiobj.field_0x287 != 0 ||
                 candidate == source || candidate == object || candidate->apiobj.field_0x27c != -1 ||
-                (candidate->field_0xefb & 8) != 0) {
+                candidate->is_boss) {
                 continue;
             }
             if (CannotKill(candidate) != 0) {
@@ -6976,7 +6976,7 @@ i32 ForcePushed_SuperPush_Occurring(GameObject_s *first, GameObject_s *second) {
         if (source == NULL || source->character_context != 0x1b || (source->action_flags & 0x380) != 0 ||
             second->id == id_GONKDROID || (second->apiobj.field_0x1f8 & 0x1001) != 0x1001 ||
             second->apiobj.field_0x287 != 0 || source == second || first == second ||
-            second->apiobj.field_0x27c != -1 || (second->field_0xefb & 8) != 0 || CannotKill(second) != 0) {
+            second->apiobj.field_0x27c != -1 || second->is_boss || CannotKill(second) != 0) {
             return 0;
         }
         CHARACTERDATA *character = second->apiobj.character_data;
@@ -6995,7 +6995,7 @@ i32 ForcePushed_SuperPush_Occurring(GameObject_s *first, GameObject_s *second) {
     GameObject_s *source = second->force_target;
     if (source == NULL || source->character_context != 0x1b || (source->action_flags & 0x380) != 0 ||
         first->id == id_GONKDROID || (first->apiobj.field_0x1f8 & 0x1001) != 0x1001 || first->apiobj.field_0x287 != 0 ||
-        first == second || first == source || first->apiobj.field_0x27c != -1 || (first->field_0xefb & 8) != 0 ||
+        first == second || first == source || first->apiobj.field_0x27c != -1 || first->is_boss ||
         CannotKill(first) != 0) {
         return 0;
     }
@@ -7047,7 +7047,7 @@ void DrawForceBackEffect(nuhspecial_s *special) {
 
 void ForcedBackCode(GameObject_s *object) {
     f32 distance = 1000000.0f;
-    if (ForceBackPos != NULL && (object->field_0xeff & 0x10) == 0)
+    if (ForceBackPos != NULL && !object->cannot_be_forced_back)
         distance = NuVecDistSqr(&object->apiobj.collision_position, ForceBackPos, NULL);
     if (object->character_context == 0x22) {
         if (MosEisleyC_PastBarrier(object))
@@ -7061,7 +7061,7 @@ void ForcedBackCode(GameObject_s *object) {
         if (ForceBackPos == NULL || distance > (ForceBackRadius + 0.2f) * (ForceBackRadius + 0.2f)) {
             if (object->context_animation_timer <= 0.0f) {
                 object->character_context = -1;
-                object->field_0xeff &= ~2;
+                object->touched_ground = 0;
                 object->ground_contact_grace_timer = 0.0f;
                 object->movement_runtime_flags |= 4;
             }
@@ -8625,7 +8625,7 @@ static void CommunicateCode(GameObject_s *object, i32 pressed) {
             GameObject_s *target = Obj;
             for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++target) {
                 if (ZapTarget(target) && object != target && target->apiobj.field_0x27c == -1 &&
-                    (target->field_0xefb & 8) == 0 && !CannotKill(target)) {
+                    !target->is_boss && !CannotKill(target)) {
                     u32 flags =
                         static_cast<GAMECHARACTERDATA *>(target->apiobj.character_data->field11_0x24)->flags_090;
                     if ((flags & 0x40) != 0)
@@ -8976,7 +8976,7 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
                object->character_context != 0x47 &&
                (object->character_context != 0x29 || api.character_model->model_data_b[0x57] != NULL ||
                 (api.character_data->game_character->flags_094[2] & 0x10) != 0) &&
-               ((object->field_0xeff & 2) != 0 || CurrentAnim(&api.anim_packet) != 5) &&
+               (object->touched_ground || CurrentAnim(&api.anim_packet) != 5) &&
                object->character_context != 0x35) {
         // Retail uses ordered context tests here. The labels also retain the
         // ordinary opponent-facing fallthrough from context 0x1b to 0x16.
@@ -9673,7 +9673,7 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
                         }
                     }
                     f32 walking_speed = desired_speed;
-                    if ((object->field_0xeff & 2) == 0 && IsAFallAnim(CurrentAnim(&api.anim_packet)) != 0) {
+                    if (!object->touched_ground && IsAFallAnim(CurrentAnim(&api.anim_packet)) != 0) {
                         walking_speed = 0.0f;
                     } else if (object->id == id_YODA || object->id == id_YODAGHOST) {
                         if (object->character_context == 0 && object->action_movement_state == 0) {
@@ -10184,7 +10184,7 @@ void TractorBeamCode(GameObject_s *object) {
         GameObject_s *candidate = &Obj[index];
         if (candidate == NULL || (candidate->apiobj.field_0x1f8 & 0x1001) != 0x1001 ||
             (candidate->apiobj.character_data->model_flags & 4) == 0 || (candidate->field_0xf04 & 4) != 0 ||
-            (candidate->field_0xefb & 8) != 0 || candidate->apiobj.field_0x27c != -1 ||
+            candidate->is_boss || candidate->apiobj.field_0x27c != -1 ||
             candidate->apiobj.field_0x27d != 0) {
             continue;
         }
@@ -10762,7 +10762,7 @@ static void DeactivatedCode(GameObject_s *object) {
         GameObject_s *target = candidate;
         if (kind != 1) {
             if (!ZapTarget(target) || target == object || target->apiobj.field_0x27c != -1 ||
-                (target->field_0xefb & 8) != 0 || CannotKill(target) ||
+                target->is_boss || CannotKill(target) ||
                 (static_cast<GAMECHARACTERDATA *>(target->apiobj.character_data->field11_0x24)->flags_090 & 0x8040) !=
                     0 ||
                 target->character_context == 0x0f || target->character_context == 0x3c ||
@@ -10771,7 +10771,7 @@ static void DeactivatedCode(GameObject_s *object) {
         } else {
             if ((target->apiobj.field_0x1f8 & 0x1001) != 0x1001 || target->apiobj.field_0x287 != 0 ||
                 target->apiobj.field_0x27d == 0 || target == object || target->apiobj.field_0x27c != -1 ||
-                (target->field_0xefb & 8) != 0 || CannotKill(target) ||
+                target->is_boss || CannotKill(target) ||
                 target->apiobj.character_model->model_data_b[0x41] == NULL)
                 continue;
             i32 context = target->character_context;

@@ -2666,35 +2666,35 @@ void InitGameMode() {
     }
 
     GameObject_s *player = Player[0];
-    if (player != NULL && (player->field_0xeff & 1) == 0) {
+    if (player != NULL && !player->not_with_party) {
         ResetPlayer(player, 1, NULL, 1);
     }
     player = Player[1];
-    if (player != NULL && (player->field_0xeff & 1) == 0) {
+    if (player != NULL && !player->not_with_party) {
         ResetPlayer(player, 1, NULL, 1);
     }
     player = Player[2];
-    if (player != NULL && (player->field_0xeff & 1) == 0) {
+    if (player != NULL && !player->not_with_party) {
         ResetPlayer(player, 1, NULL, 1);
     }
     player = Player[3];
-    if (player != NULL && (player->field_0xeff & 1) == 0) {
+    if (player != NULL && !player->not_with_party) {
         ResetPlayer(player, 1, NULL, 1);
     }
     player = Player[4];
-    if (player != NULL && (player->field_0xeff & 1) == 0) {
+    if (player != NULL && !player->not_with_party) {
         ResetPlayer(player, 1, NULL, 1);
     }
     player = Player[5];
-    if (player != NULL && (player->field_0xeff & 1) == 0) {
+    if (player != NULL && !player->not_with_party) {
         ResetPlayer(player, 1, NULL, 1);
     }
     player = Player[6];
-    if (player != NULL && (player->field_0xeff & 1) == 0) {
+    if (player != NULL && !player->not_with_party) {
         ResetPlayer(player, 1, NULL, 1);
     }
     player = Player[7];
-    if (player != NULL && (player->field_0xeff & 1) == 0) {
+    if (player != NULL && !player->not_with_party) {
         ResetPlayer(player, 1, NULL, 1);
     }
 
@@ -2731,7 +2731,7 @@ void InitGameMode() {
     const u16 player_object_flags = APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_PLAYER_CHARACTER;
     for (i32 object_index = 0; object_index < HIGHGAMEOBJECT; ++object_index, ++object) {
         if ((object->apiobj.field_0x1f8 & player_object_flags) == player_object_flags) {
-            object->field_0xefc |= 0x80;
+            object->reset_lighting = 1;
         }
     }
 
