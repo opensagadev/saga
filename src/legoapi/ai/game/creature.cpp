@@ -3631,8 +3631,8 @@ i32 GameDrawCharacterModel(CHARACTERMODEL_s *model, ANIMPACKET_s *animation, NUM
                 }
             }
         }
-    } else if (__builtin_expect(result != 0 && object != NULL && !object->hide_shadow &&
-               (object->apiobj.character_data->model_flags & 0x10000) == 0, 0)) {
+    } else if (result != 0 && object != NULL && !object->hide_shadow &&
+               (object->apiobj.character_data->model_flags & 0x10000) == 0) {
         draw_shadow = 1;
     }
     if (g_lowEndLevelBehaviour != 0 && object != NULL && !object->apiobj.player_controlled)
@@ -3904,7 +3904,7 @@ u32 AdjustLayerBits(u32 mask, GameObject_s *object) {
         mask &= ~hair;
     SUIT_s *suit = static_cast<SUIT_s *>(object->suit);
     if (suit != NULL && object->id == id_BATMAN) {
-        if ((suit->flags & 4) != 0) {
+        if (__builtin_expect((suit->flags & 4) != 0, 0)) {
             mask = (mask & ~cape) | SpecialLayer[0].mask;
             mask = (mask & ~SpecialLayer[3].mask) | SpecialLayer[5].mask;
             if ((mask & SpecialLayer[20].mask) != 0)
@@ -3914,7 +3914,7 @@ u32 AdjustLayerBits(u32 mask, GameObject_s *object) {
             mask = (mask & ~SpecialLayer[17].mask) | SpecialLayer[19].mask;
         } else if ((suit->flags & 2) != 0) {
             mask &= ~cape;
-        } else if ((suit->flags & 8) != 0) {
+        } else if (__builtin_expect((suit->flags & 8) != 0, 0)) {
             mask = (mask & ~cape) | SpecialLayer[1].mask | SpecialLayer[7].mask;
             mask = (mask & ~SpecialLayer[3].mask) | SpecialLayer[4].mask;
             if ((mask & SpecialLayer[20].mask) != 0)
@@ -3938,7 +3938,7 @@ u32 AdjustLayerBits(u32 mask, GameObject_s *object) {
                 mask = (mask & ~SpecialLayer[10].mask) | SpecialLayer[13].mask;
         }
     } else if (suit != NULL && object->id == id_ROBIN) {
-        if ((suit->flags & 0x10) != 0) {
+        if (__builtin_expect((suit->flags & 0x10) != 0, 0)) {
             mask = (mask & ~(hair | cape)) | SpecialLayer[27].mask;
             if ((mask & SpecialLayer[30].mask) != 0)
                 mask = (mask & ~SpecialLayer[30].mask) | SpecialLayer[39].mask;
@@ -3946,7 +3946,7 @@ u32 AdjustLayerBits(u32 mask, GameObject_s *object) {
                 mask = (mask & ~SpecialLayer[31].mask) | SpecialLayer[40].mask;
             else if ((mask & SpecialLayer[32].mask) != 0)
                 mask = (mask & ~SpecialLayer[32].mask) | SpecialLayer[41].mask;
-        } else if ((suit->flags & 0x40) != 0) {
+        } else if (__builtin_expect((suit->flags & 0x40) != 0, 0)) {
             mask = (mask & ~cape) | SpecialLayer[26].mask;
             if ((mask & SpecialLayer[30].mask) != 0)
                 mask = (mask & ~SpecialLayer[30].mask) | SpecialLayer[36].mask;
@@ -3954,7 +3954,7 @@ u32 AdjustLayerBits(u32 mask, GameObject_s *object) {
                 mask = (mask & ~SpecialLayer[31].mask) | SpecialLayer[37].mask;
             else if ((mask & SpecialLayer[32].mask) != 0)
                 mask = (mask & ~SpecialLayer[32].mask) | SpecialLayer[38].mask;
-        } else if ((suit->flags & 0x20) != 0) {
+        } else if (__builtin_expect((suit->flags & 0x20) != 0, 0)) {
             mask = (mask & ~cape) | SpecialLayer[28].mask;
             if ((mask & SpecialLayer[30].mask) != 0)
                 mask = (mask & ~SpecialLayer[30].mask) | SpecialLayer[33].mask;

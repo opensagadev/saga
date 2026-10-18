@@ -5728,9 +5728,12 @@ static void edgracbChangeInstanceMenu(eduimenu_s *parent, eduiitem_s *, u32) {
     char *name = NULL;
     for (i32 i = 0; i < count; ++i) {
         nuhspecial_s special;
+        NuGScnGetSpecial(&special, edbits_base_scene, i);
+        if (NuSpecialExistsFn(&special))
+            name = NuSpecialGetName(&special);
         const i32 selected = i == GrassClumps[edgra_nearest].special_index;
         NuGScnGetSpecial(&special, edbits_base_scene, i);
-        if (__builtin_expect(!!(NuSpecialExistsFn(&special)), 1))
+        if (NuSpecialExistsFn(&special))
             name = NuSpecialGetName(&special);
         if (__builtin_expect(edgra_filter && NuStrNCmp(edgra_filter_string, name, NuStrLen(edgra_filter_string)), 1)) {
             if (__builtin_expect(!selected, 1))
@@ -19565,12 +19568,12 @@ f32 NewCast(nuvec_s *position, f32 height_above, f32 roof_range) {
         shadhit = 1;
         castnum = roof_group;
         ShadPoly = roof_poly;
-    } else if (__builtin_expect(floor_y > -2000000.0f, 0)) {
+    } else if (__builtin_expect(floor_y > -2000000.0f, 1)) {
         ShadNorm.x = floor_nx;
         ShadNorm.y = floor_ny;
         ShadNorm.z = floor_nz;
-        ShadPoly = floor_poly;
         shadhit = 2;
+        ShadPoly = floor_poly;
         position->y = floor_y;
     } else {
         shadhit = 3;
@@ -19984,7 +19987,7 @@ i32 HitPoly(f32 primary_start, f32 primary_end, f32 secondary_start, f32 seconda
         contact_point.x = query->movement.x * candidate_time;
         contact_point.z = query->movement.z * candidate_time;
         test_primary_face = 1;
-    } else if (__builtin_expect(primary_start <= 0.0f && primary_end <= 0.0f && primary_start >= -radius && primary_end >= -radius, 0)) {
+    } else if (primary_start <= 0.0f && primary_end <= 0.0f && primary_end >= -radius && primary_start >= -radius) {
         candidate_time = primary_start;
         const f32 projection_distance = -primary_start;
         contact_point.y = primary_normal.y * projection_distance;
@@ -20014,7 +20017,9 @@ i32 HitPoly(f32 primary_start, f32 primary_end, f32 secondary_start, f32 seconda
             query->hit_time = candidate_time;
             query->hit_type =
                 primary_start > 0.0f ? TERRAIN_HIT_TYPE_FACE : TERRAIN_HIT_TYPE_FACE | TERRAIN_HIT_TYPE_SECOND_NORMAL;
-            query->movement_normal = primary_normal;
+            query->movement_normal.x = primary_normal.x;
+            query->movement_normal.y = primary_normal.y;
+            query->movement_normal.z = primary_normal.z;
             collision_found = 1;
         }
     }
@@ -22037,7 +22042,7 @@ i32 TerrainPlatformEmbedded(nuvec_s *movement_delta) {
         TerI->hit_flags[1] = 1;
         PlatformConnect(reinterpret_cast<char *>(old_query->hit_flags), &old_query->movement, movement_delta,
                         CurTerr->groups[castnum].scene_index);
-    } else if (__builtin_expect(CurTrackInfo != NULL, 0)) {
+    } else if (__builtin_expect(CurTrackInfo != NULL, 1)) {
         CurTrackInfo->flags &= ~TERRAIN_TRACK_FLAG_CONNECTED;
     }
     NuScratchRelease();
@@ -23537,7 +23542,7 @@ void edanimDoInput(nupad_s *pad) {
             if ((pad->digital_buttons_pressed & 0x10) != 0) {
                 if (edanim_sound_mode != 0) {
                     edanim_sound_mode = 0;
-                } else if (edanim_nearest_param_id != -1 && edanim_nearest != -1) {
+                } else if (edanim_nearest != -1 && edanim_nearest_param_id != -1) {
                     edanim_sound_mode = 1;
                     edanim_nearest_sound = -1;
                 }

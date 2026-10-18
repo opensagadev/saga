@@ -4651,7 +4651,7 @@ extern "C" void eduiMenuDestroyItems(eduimenu_s *menu) {
 
         if (__builtin_expect(!!(pad->digital_buttons_pressed & 0x4000), 0))
             next_row();
-        if (__builtin_expect(!!(pad->digital_buttons_pressed & 0x1000), 0))
+        if (pad->digital_buttons_pressed & 0x1000)
             previous_row();
         if (pad->digital_buttons_pressed & 0x8000)
             previous_column();
@@ -4675,7 +4675,7 @@ extern "C" void eduiMenuDestroyItems(eduimenu_s *menu) {
         if (pad->digital_buttons_pressed & 4)
             picker->cursor = picker->cursor > 0 ? picker->cursor - 1 : 0;
         if (pad->digital_buttons_pressed & 8) {
-            if (__builtin_expect(picker->cursor < NuStrLen(picker->value), 0))
+            if (picker->cursor < NuStrLen(picker->value))
                 ++picker->cursor;
             else
                 picker->cursor = NuStrLen(picker->value);

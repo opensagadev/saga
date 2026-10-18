@@ -2046,19 +2046,20 @@ load_type_done:
             return;
         }
 
-        if (HUB_ADATA != NULL && HUB_ADATA->index == Area && character_load_active && AreaDataLoaded != 0 &&
-            waiting_for_character == -1) {
-            static i32 lastLoadedCharacter = -1;
-            if (hub_character_ready != -1) {
-                lastLoadedCharacter = hub_character_ready;
-                hub_character_ready = -1;
+        if (HUB_ADATA->index == Area) {
+            if (character_load_active && AreaDataLoaded != 0 && waiting_for_character == -1) {
+                static i32 lastLoadedCharacter = -1;
+                if (hub_character_ready != -1) {
+                    lastLoadedCharacter = hub_character_ready;
+                    hub_character_ready = -1;
+                }
+                UpdateCharacterLoad();
+                if (waiting_for_character == -1) {
+                    hub_character_ready = lastLoadedCharacter;
+                    character_load_active = false;
+                }
             }
-            UpdateCharacterLoad();
-            if (waiting_for_character == -1) {
-                hub_character_ready = lastLoadedCharacter;
-                character_load_active = false;
-            }
-        } else if (HUB_ADATA == NULL || HUB_ADATA->index != Area) {
+        } else {
             character_load_active = false;
         }
 
@@ -2071,11 +2072,13 @@ load_type_done:
         if (load_type == 2) {
             if (AreaDataLoaded != 0 && !character_load_active && LoadWait == LOADWAITTIME && !(LoadTime >= 45.0f) &&
                 !skip_text_scroll && (NuSound3LoadingSfx() == 0 || LoadTime >= 20.0f)) {
-                const u32 skip_buttons = GAMEPAD_JUMP | GAMEPAD_START | GAMEPAD_SPECIAL | GAMEPAD_ACTION | GAMEPAD_TAG;
                 if (VEHICLES_ADATA != NULL && VEHICLES_ADATA->index == Area) {
                     skip_text_scroll = true;
                     draw_touch_prompt = false;
-                } else if (((GamePad[0].buttons_pressed | GamePad[1].buttons_pressed) & skip_buttons) != 0 ||
+                } else if ((GamePad[0].buttons_pressed &
+                            (GAMEPAD_JUMP | GAMEPAD_START | GAMEPAD_SPECIAL | GAMEPAD_ACTION | GAMEPAD_TAG)) != 0 ||
+                           (GamePad[1].buttons_pressed &
+                            (GAMEPAD_JUMP | GAMEPAD_START | GAMEPAD_SPECIAL | GAMEPAD_ACTION | GAMEPAD_TAG)) != 0 ||
                            NuKeyboard_db(1) != 0 || MechSystems::SkipTextScroll != 0) {
                     skip_text_scroll = true;
                     draw_touch_prompt = false;
@@ -2174,10 +2177,12 @@ load_type_done:
             }
 
             if (LoadWait == LOADWAITTIME) {
-                const i32 wobble_angle = static_cast<i32>(NuFmod(LoadTime, 1.0f) * 65536.0f);
-                if (HUB_ADATA != NULL && HUB_ADATA->index == Area && CharacterDataLoad != 0 && icon_time > 0.0f &&
-                    icon_time < icons_end_time) {
-                    const f32 wobble = NuTrigTable[(wobble_angle >> 1) & 0x7fff] * 0.15f;
+                const f32 wobble_sin =
+                    NuTrigTable[(static_cast<i32>(NuFmod(LoadTime, 1.0f) * 65536.0f) >> 1) & 0x7fff];
+                if (HUB_ADATA == NULL || HUB_ADATA->index != Area) {
+                    fade_scene_active = true;
+                } else if (CharacterDataLoad != 0 && icon_time > 0.0f && icon_time < icons_end_time) {
+                    const f32 wobble = wobble_sin * 0.15f;
                     const bool widescreen = Game_OptionsSave != NULL && Game_OptionsSave->field11_0xb != 0;
                     const f32 icon_travel = widescreen ? 0.406875f : 0.4425f;
                     const f32 icon_x = widescreen ? 0.106875f : 0.1425f;
@@ -2219,7 +2224,7 @@ load_type_done:
             }
         }
 
-        if (load_type != 2 && (HUB_ADATA == NULL || HUB_ADATA->index != Area || fade_scene_active)) {
+        if (fade_scene_active) {
             NuRndrEndScene();
             FadeSys.Update();
             FadeSys.Draw();
@@ -2227,7 +2232,7 @@ load_type_done:
             fade_scene_active = true;
         }
 
-        static_cast<ThingManager *>(theGameThings)->RenderThings(NULL);
+        static_cast<ThingManager *>(theGameThings)->DisplayThings(NULL);
         NuRndrEndScene();
 
         if (AreaDataLoaded != 0 && !character_load_active && !(LoadWait >= 0.1f) &&

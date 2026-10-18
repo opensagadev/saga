@@ -3122,7 +3122,7 @@ static void edpartFileSaveEffects(eduimenu_s *parent, eduiitem_s *, u32) {
         __builtin_memcpy(general_directory, ".", 2);
     else
         strcpy(general_directory, edbits_general_save_directory);
-    if (__builtin_expect(!edbits_general_save_name[0], 0))
+    if (__builtin_expect(!edbits_general_save_name[0], 1))
         __builtin_memcpy(general_name, "part", 5);
     else
         strcpy(general_name, edbits_general_save_name);
@@ -3149,8 +3149,14 @@ static void edpartFileSaveEffects(eduimenu_s *parent, eduiitem_s *, u32) {
     i32 general_saved = edpartSaveEffects(path, 0);
     sprintf(path, "%s\\%s.%s", level_directory, level_name, level_extension);
     sprintf(backup, "%s\\%s.%s.bak", level_directory, level_name, level_extension);
-    bool level_backup = edbits_override_backups || EdFileBackup(path, backup);
+    i32 level_backup = 1;
+    if (!edbits_override_backups)
+        level_backup = EdFileBackup(path, backup);
     bool level_saved = edpartSaveEffects(path, 1) != 0;
+    if (general_saved && general_backup && level_saved && level_backup) {
+        edpartSaveMessage(parent, "Saved OK", true);
+        return;
+    }
     if (!general_saved && !level_saved) {
         edpartSaveMessage(parent, "Both Saves Failed", false);
         return;
@@ -3163,21 +3169,15 @@ static void edpartFileSaveEffects(eduimenu_s *parent, eduiitem_s *, u32) {
         edpartSaveMessage(parent, "Level Save Failed", false);
         return;
     }
-    if (!general_backup) {
-        if (!level_backup) {
-            edpartSaveMessage(parent, "Saved OK - Both Backups Failed", false);
-            return;
-        }
-    }
-    if (!general_backup) {
-        edpartSaveMessage(parent, "Saved OK - General Backup Failed", false);
-        return;
-    }
-    if (!level_backup) {
+    if (general_backup) {
         edpartSaveMessage(parent, "Saved OK - Level Backup Failed", false);
         return;
     }
-    edpartSaveMessage(parent, "Saved OK", true);
+    if (level_backup) {
+        edpartSaveMessage(parent, "Saved OK - General Backup Failed", false);
+        return;
+    }
+    edpartSaveMessage(parent, "Saved OK - Both Backups Failed", false);
 }
 
 static void edpartFileSaveEffectsLevel(eduimenu_s *parent, eduiitem_s *, u32) {

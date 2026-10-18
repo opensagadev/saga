@@ -1239,13 +1239,13 @@ void Bolt_HitGameObjectRC(NetMessage &message) {
     }
     if (message.data != NULL) {
         memmove(&hit, message.data->bytes + message.read_offset, 4);
-        if (__builtin_expect(message.swap_endianness, 1))
+        if (message.swap_endianness)
             EdFileSwapEndianess32(&hit);
         message.read_offset += 4;
     }
     if (message.data != NULL) {
         memmove(&client, message.data->bytes + message.read_offset, 4);
-        if (__builtin_expect(message.swap_endianness, 1))
+        if (message.swap_endianness)
             EdFileSwapEndianess32(&client);
         message.read_offset += 4;
     }
@@ -1258,7 +1258,7 @@ void Bolt_HitGameObjectRC(NetMessage &message) {
     i32 deflect = has_deflect;
     i32 cheat_deflect = 0;
     if (Cheats_CheckFlags(0x100000) != 0)
-        cheat_deflect = (object->apiobj.flags_low & 0x80) != 0;
+        cheat_deflect = object->apiobj.player_controlled;
     if (!has_deflect)
         deflect = TouchHacks::ShouldDeflectBolt(*object, *bolt);
     NewRumble(object->pad_gamepad->pad, 0.5f, 0);

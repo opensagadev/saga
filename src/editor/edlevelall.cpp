@@ -3581,13 +3581,13 @@ void eduiSetPinnedMenu(eduimenu_s *menu) {
 void ClassEditor::cbEdClassSetPinned(eduimenu_s *menu, eduiitem_s *item, u32) {
     item->highlighted = !item->highlighted;
     menu->flags ^= 4;
-    if (__builtin_expect(!!(menu->flags & 4), 0)) {
+    if (menu->flags & 4) {
         eduiMenuDetach(menu);
         eduiSetPinnedMenu(menu);
     } else {
         eduiMenuDetach(menu);
         eduiMenuDestroy(menu);
-        if (__builtin_expect(edLevelActiveMenu == menu, 1)) {
+        if (edLevelActiveMenu == menu) {
             edLevelActiveMenu = NULL;
         }
         eduiSetPinnedMenu(NULL);
@@ -4240,7 +4240,7 @@ void LevelEditor::Display(ThingRenderData *) {
         }
         i32 draw_camera;
         // The original keeps the no-cursor path in the main render sequence.
-        if (__builtin_expect(edmainGetCursorEnabled() == 0, 1)) {
+        if (edmainGetCursorEnabled() == 0) {
             draw_camera = field_0x28;
         } else {
             eduiFlushInteracts();
@@ -9575,8 +9575,8 @@ __attribute__((force_align_arg_pointer)) i32 EdManScale::Process(EdInputContext 
             average = VuVec(0.0f, 0.0f, 0.0f, 1.0f);
             matrix_type = EdType_VuMtx;
             if (__builtin_expect(entry->reference == NULL ||
-                entry->reference->GetAttributeData(entry->object, 0x20, matrix_type, &transform, 0) == 0, 0)) {
-                if (__builtin_expect(entry->ed_class->FindMember(&member, entry->object, 0x20, 1) != 0, 1))
+                entry->reference->GetAttributeData(entry->object, 0x20, matrix_type, &transform, 0) == 0, 1)) {
+                if (entry->ed_class->FindMember(&member, entry->object, 0x20, 1) != 0)
                     member.reference->GetAttributeData(member.object, 0x20, matrix_type, &transform, 0);
             }
 

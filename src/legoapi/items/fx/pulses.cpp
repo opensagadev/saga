@@ -88,10 +88,7 @@ void Pulses_Configure(WORLDINFO_s *world, char *config) {
     pulse_sys.radial_hit_direction = 1;
     pulse_sys.debris_hit_player = -1;
 
-    while (NuFParGetLine(parser) != 0) {
-        if (NuFParGetWord(parser) == 0) {
-            break;
-        }
+    while (NuFParGetLine(parser) != 0 && NuFParGetWord(parser) != 0) {
         if (NuStrICmp(parser->word_buf, "pulses_start") == 0) {
             while (NuFParGetLine(parser) != 0) {
                 memset(pulse, 0, sizeof(*pulse));
@@ -103,26 +100,16 @@ void Pulses_Configure(WORLDINFO_s *world, char *config) {
                     goto parsing_done;
                 }
 
-                if (NuStrICmp(parser->word_buf, "sfx_onloop") == 0) {
-                    if (NuFParGetWord(parser) != 0) {
-                        pulse_sys.sfx_on_loop = static_cast<i16>(GetSfxId(parser->word_buf));
-                    }
-                } else if (NuStrICmp(parser->word_buf, "sfx_offloop") == 0) {
-                    if (NuFParGetWord(parser) != 0) {
-                        pulse_sys.sfx_off_loop = static_cast<i16>(GetSfxId(parser->word_buf));
-                    }
-                } else if (NuStrICmp(parser->word_buf, "sfx_turnon") == 0) {
-                    if (NuFParGetWord(parser) != 0) {
-                        pulse_sys.sfx_turn_on = static_cast<i16>(GetSfxId(parser->word_buf));
-                    }
-                } else if (NuStrICmp(parser->word_buf, "sfx_turnoff") == 0) {
-                    if (NuFParGetWord(parser) != 0) {
-                        pulse_sys.sfx_turn_off = static_cast<i16>(GetSfxId(parser->word_buf));
-                    }
-                } else if (NuStrICmp(parser->word_buf, "sfx_hitplayer") == 0) {
-                    if (NuFParGetWord(parser) != 0) {
-                        pulse_sys.sfx_hit_player = static_cast<i16>(GetSfxId(parser->word_buf));
-                    }
+                if (NuStrICmp(parser->word_buf, "sfx_onloop") == 0 && NuFParGetWord(parser) != 0) {
+                    pulse_sys.sfx_on_loop = static_cast<i16>(GetSfxId(parser->word_buf));
+                } else if (NuStrICmp(parser->word_buf, "sfx_offloop") == 0 && NuFParGetWord(parser) != 0) {
+                    pulse_sys.sfx_off_loop = static_cast<i16>(GetSfxId(parser->word_buf));
+                } else if (NuStrICmp(parser->word_buf, "sfx_turnon") == 0 && NuFParGetWord(parser) != 0) {
+                    pulse_sys.sfx_turn_on = static_cast<i16>(GetSfxId(parser->word_buf));
+                } else if (NuStrICmp(parser->word_buf, "sfx_turnoff") == 0 && NuFParGetWord(parser) != 0) {
+                    pulse_sys.sfx_turn_off = static_cast<i16>(GetSfxId(parser->word_buf));
+                } else if (NuStrICmp(parser->word_buf, "sfx_hitplayer") == 0 && NuFParGetWord(parser) != 0) {
+                    pulse_sys.sfx_hit_player = static_cast<i16>(GetSfxId(parser->word_buf));
                 } else if (NuStrICmp(parser->word_buf, "collide_radius") == 0) {
                     pulse_sys.collide_radius = NuFParGetFloat(parser);
                 } else if (NuStrICmp(parser->word_buf, "hit_direction_line") == 0) {
@@ -133,16 +120,14 @@ void Pulses_Configure(WORLDINFO_s *world, char *config) {
                     pulse_sys.hit_direction_line = NuFParGetFloat(parser);
                     pulse_sys.hit_direction_radius_origin = NuFParGetFloat(parser);
                     pulse_sys.radial_hit_direction = 1;
-                } else if (NuStrICmp(parser->word_buf, "debris_hitplayer") == 0) {
-                    if (NuFParGetWord(parser) != 0) {
-                        pulse_sys.debris_hit_player =
-                            static_cast<i16>(FindGameDebris(world->debris_sys, parser->word_buf));
-                    }
+                } else if (NuStrICmp(parser->word_buf, "debris_hitplayer") == 0 && NuFParGetWord(parser) != 0) {
+                    pulse_sys.debris_hit_player = static_cast<i16>(FindGameDebris(world->debris_sys, parser->word_buf));
                 } else if (NuStrICmp(parser->word_buf, "pulse") == 0 && NuFParGetWord(parser) != 0 &&
                            NuSpecialFind(world->current_gscn, &pulse->special, parser->word_buf, 1) != 0) {
                     while (NuFParGetWord(parser) != 0) {
                         if (NuStrICmp(parser->word_buf, "gizmo") == 0) {
-                            if (NuFParGetWord(parser) != 0 && NuStrLen(parser->word_buf) < sizeof(pulse->gizmo_name)) {
+                            if (NuFParGetWord(parser) != 0 &&
+                                NuStrLen(parser->word_buf) < static_cast<i32>(sizeof(pulse->gizmo_name))) {
                                 NuStrCpy(pulse->gizmo_name, parser->word_buf);
                             }
                         } else if (NuStrICmp(parser->word_buf, "on_time") == 0) {
@@ -177,14 +162,12 @@ void Pulses_Configure(WORLDINFO_s *world, char *config) {
 
 parsing_done:
     NuFParDestroy(parser);
-    if (pulse_sys.pulse_count == 0) {
-        return;
+    if (pulse_sys.pulse_count != 0) {
+        world->giz_buffer.addr = reinterpret_cast<usize>(pulse);
+        world->pulses_sys = reinterpret_cast<PULSESYS_s *>(world->giz_buffer.addr);
+        *world->pulses_sys = pulse_sys;
+        world->giz_buffer.addr = ALIGN(world->giz_buffer.addr + sizeof(PULSESYS_s), 4);
     }
-
-    world->giz_buffer.addr = reinterpret_cast<usize>(pulse);
-    world->pulses_sys = reinterpret_cast<PULSESYS_s *>(world->giz_buffer.addr);
-    *world->pulses_sys = pulse_sys;
-    world->giz_buffer.addr = ALIGN(world->giz_buffer.addr + sizeof(PULSESYS_s), 4);
 }
 
 void Pulses_Update(PULSESYS_s *pulse_sys) {

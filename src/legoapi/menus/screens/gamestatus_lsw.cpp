@@ -1451,38 +1451,24 @@ static void LevelComplete_LSW_DrawActive(STATUS_STAGE_s *stage, STATUSPACKET_s *
                 SmartTextEx(TTab[tBONUSUNLOCKED], 0.0f, 0.0f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,
                             STATUS_B, 1.7f, 1, NULL, 0, opacity);
             } else if (stage->type == 23) {
-                if (packet->challenge_state == 2) {
-                    SmartTextEx(TTab[tCHALLENGECOMPLETE], 0.0f, 0.0f, 1.0f, 0.7f, 0.7f, 0.7f, 0, 255, 255, 255,
-                                1.7f, 1, NULL, 0, opacity);
-                } else if (packet->challenge_state == 3) {
-                    SmartTextEx(TTab[tOUTOFTIME], 0.0f, 0.0f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,
-                                STATUS_B, 1.7f, 1, NULL, 0, opacity);
-                } else {
-                    SmartTextEx(TTab[tYOUDIDNTCOLLECTALL10CANISTERS], 0.0f, 0.0f, 1.0f, 0.7f, 0.7f, 0.7f, 0,
-                                STATUS_R, STATUS_G, STATUS_B, 1.7f, 1, NULL, 0, opacity);
-                }
+                bool complete = packet->challenge_state == 2;
+                SmartTextEx(TTab[complete                         ? tCHALLENGECOMPLETE
+                                 : packet->challenge_state == 3 ? tOUTOFTIME
+                                                                : tYOUDIDNTCOLLECTALL10CANISTERS],
+                            0.0f, 0.0f, 1.0f, 0.7f, 0.7f, 0.7f, 0, complete ? 255 : STATUS_R, complete ? 255 : STATUS_G,
+                            complete ? 255 : STATUS_B, 1.7f, 1, NULL, 0, opacity);
             } else if (stage->type == 26) {
-                if (packet->mission_state == 2) {
-                    SmartTextEx(TTab[tMISSIONCOMPLETE], 0.0f, 0.0f, 1.0f, 0.7f, 0.7f, 0.7f, 0, 255, 255, 255, 1.7f,
-                                1, NULL, 0, opacity);
-                } else {
-                    SmartTextEx(TTab[tOUTOFTIME], 0.0f, 0.0f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,
-                                STATUS_B, 1.7f, 1, NULL, 0, opacity);
-                }
+                bool complete = packet->mission_state == 2;
+                SmartTextEx(TTab[complete ? tMISSIONCOMPLETE : tOUTOFTIME], 0.0f, 0.0f, 1.0f, 0.7f, 0.7f, 0.7f, 0,
+                            complete ? 255 : STATUS_R, complete ? 255 : STATUS_G, complete ? 255 : STATUS_B, 1.7f, 1,
+                            NULL, 0, opacity);
             } else {
-                i16 label;
-                if (stage->type == 29)
-                    label = tEPISODEICOMPLETE;
-                else if (stage->type == 30)
-                    label = tEPISODEIICOMPLETE;
-                else if (stage->type == 31)
-                    label = tEPISODEIIICOMPLETE;
-                else if (stage->type == 32)
-                    label = tEPISODEIVCOMPLETE;
-                else if (stage->type == 33)
-                    label = tEPISODEVCOMPLETE;
-                else
-                    label = tEPISODEVICOMPLETE;
+                const i16 &label = stage->type == 29   ? tEPISODEICOMPLETE
+                                   : stage->type == 30 ? tEPISODEIICOMPLETE
+                                   : stage->type == 31 ? tEPISODEIIICOMPLETE
+                                   : stage->type == 32 ? tEPISODEIVCOMPLETE
+                                   : stage->type == 33 ? tEPISODEVCOMPLETE
+                                                       : tEPISODEVICOMPLETE;
                 SmartTextEx(TTab[label], 0.0f, 0.1f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G, STATUS_B, 1.7f,
                             1, NULL, 0, opacity);
                 SmartTextEx(TTab[tSTORYCLIPSUNLOCKED], 0.0f, -0.1f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,

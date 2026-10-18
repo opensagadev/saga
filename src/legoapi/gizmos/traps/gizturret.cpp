@@ -168,7 +168,7 @@ static void GizTurrets_Update(void *context, void *system_ptr, float frame_time)
                                     turret->pitch = SeekRot(turret->pitch, desired_pitch, pitch_rate);
                                     turret->yaw = SeekRot(turret->yaw, desired_yaw, yaw_rate);
                                     if (__builtin_expect(turret->fire_cooldown > 0.0f &&
-                                        (turret->controller->pad_gamepad->buttons_pressed & GAMEPAD_ACTION), 0)) {
+                                        (turret->controller->pad_gamepad->buttons_pressed & GAMEPAD_ACTION), 1)) {
                                         f32 rapid_interval = turret->fire_interval * gizturret_rapid_fire_rate;
                                         if (__builtin_expect(turret->fire_cooldown > rapid_interval, 0))
                                             turret->fire_cooldown = rapid_interval;

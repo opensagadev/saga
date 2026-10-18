@@ -168,7 +168,7 @@ void MechInputTouchGestureTrackingSystem::ReadData(GameObject_s &object, NuInput
         holder.sample_countdown += FRAMETIME;
     }
 
-    for (u32 index = 0; index < data.touch_count; ++index) {
+    for (i32 index = 0; index < data.touch_count; ++index) {
         f32 x, y;
         MechInputTouchSystem::ConvertToScreenCoords(data.touch_events[index].unknown_04,
                                                     data.touch_events[index].unknown_08, x, y);

@@ -1714,7 +1714,9 @@ static EDAIAREA_s *areaEditorCreateArea() {
     if (area == NULL)
         return NULL;
     if (previous != NULL) {
-        area->size = previous->size;
+        area->size.x = previous->size.x;
+        area->size.y = previous->size.y;
+        area->size.z = previous->size.z;
     } else {
         area->size.x = 1.0f;
         area->size.y = 1.0f;
@@ -8872,7 +8874,7 @@ static void pathEditorCreateSpecialRouteData(AIPATH_s *path, EDAIPATH_s *editor_
                 if (editor_connection->node == nullptr || editor_connection->route_mask == 0) {
                     continue;
                 }
-                const i32 other_index = editor_connection->node->index;
+                const i16 other_index = editor_connection->node->index;
                 const u16 connection_routes = editor_connection->route_mask;
                 for (i32 edge = 0; edge < runtime_node->connection_count; ++edge) {
                     AIPATHCNX_s *connection = runtime_node->connections[edge];
@@ -8899,7 +8901,7 @@ static void pathEditorCreateSpecialRouteData(AIPATH_s *path, EDAIPATH_s *editor_
         for (i32 route_index = 0; route_index < path->route_count; ++route_index) {
             AIPATHROUTE_s *route = &path->routes[route_index];
             for (i32 node = 0; node < path->node_count; ++node) {
-                if (__builtin_expect(!!(route_members[route_index][node >> 3] & (1u << (node & 7))), 0)) {
+                if (route_members[route_index][node >> 3] & (1u << (node & 7))) {
                     ++route->route_count;
                 }
                 if (path->nodes[node].route_boundary_mask & (1ULL << route_indices[route_index])) {
@@ -8963,7 +8965,7 @@ static void pathEditorCreateSpecialRouteData(AIPATH_s *path, EDAIPATH_s *editor_
                     }
                     f32 best = FLT_MAX;
                     AIPATHNODE_s *node = &path->nodes[source];
-                    for (i32 edge = 0; edge < node->connection_count; ++edge) {
+                    for (u32 edge = 0; edge < node->connection_count; ++edge) {
                         AIPATHCNX_s *connection = node->connections[edge];
                         i32 direction = connection->node_indices[0] != source;
                         if (__builtin_expect(!!(connection->traversal_flags[direction] & 0x40000000), 0)) {
@@ -12537,7 +12539,9 @@ void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *objec
         }
     }
     if (connection == NULL || path == NULL || destination_connection == NULL) {
-        packet->movement_destination = packet->owner->apiobj.position;
+        packet->movement_destination.x = packet->owner->apiobj.position.x;
+        packet->movement_destination.y = packet->owner->apiobj.position.y;
+        packet->movement_destination.z = packet->owner->apiobj.position.z;
         packet->movement_stopping_distance = 0.0f;
         return;
     }
@@ -14742,7 +14746,9 @@ static void pathEditorDrawPath(EDAIPATH_s *path, i32 path_index) {
                         vertices[0].colour = edge_colour;
                         vertices[0].position.x += node->radius * direction.z;
                         vertices[0].position.z -= node->radius * direction.x;
-                        vertices[1].position = other->position;
+                        vertices[1].position.x = other->position.x;
+                        vertices[1].position.y = other->position.y;
+                        vertices[1].position.z = other->position.z;
                         vertices[1].colour = edge_colour;
                         vertices[1].position.x += other->radius * direction.z;
                         vertices[1].position.z -= other->radius * direction.x;
@@ -17685,7 +17691,7 @@ eduimenu_s *pathEditor_Process(nupad_s *pad) {
         f32 best = 3.402823466e38f;
         i32 nearest = -1;
         if (runtime && runtime->node_count) {
-            for (i32 i = 0; i < runtime->node_count; ++i) {
+            for (u32 i = 0; i < runtime->node_count; ++i) {
                 NUVEC delta;
                 AIPATHNODE_s *node = &runtime->nodes[i];
                 f32 distance = NuVecXZDistSqr(&aieditor->cursor_position, &node->position, &delta);
@@ -17699,7 +17705,7 @@ eduimenu_s *pathEditor_Process(nupad_s *pad) {
         path->runtime_nearest = static_cast<i16>(nearest);
         if (pad->digital_buttons_pressed & 0x40) {
             path = aieditor->current_path;
-            if (__builtin_expect(path->runtime_nearest >= 0, 0))
+            if (__builtin_expect(path->runtime_nearest >= 0, 1))
                 path->runtime_start = path->runtime_nearest;
         }
         if (pad->digital_buttons_pressed & 0x10) {
@@ -17709,7 +17715,7 @@ eduimenu_s *pathEditor_Process(nupad_s *pad) {
         }
         if (pad->digital_buttons_pressed & 0x100) {
             path = aieditor->current_path;
-            if (__builtin_expect(path->runtime_nearest >= 0, 1)) {
+            if (path->runtime_nearest >= 0) {
                 path->runtime_start = path->runtime_nearest;
                 edcamSetPos(&aieditor->runtime_path->nodes[path->runtime_nearest].position);
                 path = aieditor->current_path;
@@ -17784,13 +17790,13 @@ eduimenu_s *pathEditor_Process(nupad_s *pad) {
             locatorEditor_PathNodeMoved(aieditor->current_path->current_node);
             if (AIPathNodeDeletedFn)
                 AIPathNodeDeletedFn(aieditor->current_path->current_node);
-            if (__builtin_expect(!!(pad->digital_buttons & 0x200), 1)) {
+            if (__builtin_expect(!!(pad->digital_buttons & 0x200), 0)) {
                 path = aieditor->current_path;
                 f32 dx = path->current_node->position.x - old_x, dz = path->current_node->position.z - old_z;
                 for (EDAIPATHNODE_s *node = reinterpret_cast<EDAIPATHNODE_s *>(NuLinkedListGetHead(&path->nodes)); node;
                      node = reinterpret_cast<EDAIPATHNODE_s *>(
                          NuLinkedListGetNext(&aieditor->current_path->nodes, &node->link))) {
-                    if (__builtin_expect(node != aieditor->current_path->current_node, 0)) {
+                    if (__builtin_expect(node != aieditor->current_path->current_node, 1)) {
                         node->position.x += dx;
                         node->position.z += dz;
                         locatorEditor_PathNodeMoved(node);

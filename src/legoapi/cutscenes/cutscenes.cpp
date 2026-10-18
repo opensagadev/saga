@@ -815,8 +815,10 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
             gungansRenderedThisFrame = 0;
             lastFrameTime = frame;
         }
-        if (model->model_id == id_GUNGAN && gungansRenderedThisFrame++ > 7) {
-            return;
+        if (model->model_id == id_GUNGAN) {
+            if (gungansRenderedThisFrame++ > 7) {
+                return;
+            }
         }
     }
 
@@ -828,7 +830,7 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
 
     if (instance->field_15 != animation_index) {
         const u8 requested_animation = static_cast<u8>(animation_index);
-        if (__builtin_expect(!(blend_time > 0.0f) || instance->field_15 == 0xff, 0)) {
+        if (!(blend_time > 0.0f) || instance->field_15 == 0xff) {
             instance->animation_frame_a = !(animation_start_frame > 1.0f) ? 1.0f : animation_start_frame;
             instance->field_16 = requested_animation;
         } else {
@@ -1018,7 +1020,7 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
                                                CutBlobShadowFadeFar, 1.0f);
                     if (alpha > 0.0f) {
                         for (i32 i = 0; i < 16; ++i) {
-                            if (__builtin_expect((game_data->shadow_locators & (1 << i)) != 0 && model->points_of_interest[i] != NULL, 0)) {
+                            if ((game_data->shadow_locators & (1 << i)) != 0 && model->points_of_interest[i] != NULL) {
                                 NUVEC shadow_position;
                                 shadow_position.x = locator_positions[i].x;
                                 f32 locator_ground = GameShadow(NULL, &locator_positions[i], 5.0f, -1);

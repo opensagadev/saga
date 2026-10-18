@@ -671,7 +671,7 @@ void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
         NUVEC *hook = &zipup->hook_origin;
         NUVEC *destination = object->field_0x7a3 == 0 ? &zipup->upper_position : &zipup->lower_position;
         if ((zipup->flags & 1) == 0) {
-            if (__builtin_expect(NuVecDistSqr(&api.position, hook, NULL) < 0.01f || object->context_animation_timer >= 5.0f, 0)) {
+            if (__builtin_expect(NuVecDistSqr(&api.position, hook, NULL) < 0.01f || object->context_animation_timer >= 5.0f, 1)) {
                 StartJump(object, 6);
                 PlaySfx("GrapDetach", &api.collision_position);
                 if ((api.flags_low & 0x80) != 0)
@@ -763,7 +763,7 @@ void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
     ZIPUP *zipup = ZipUp_FindNearest(WORLD, &api.lower_position, api.collision_radius, NULL, &endpoint, object, false);
     if (objInNetWaitContext(object, 0x47)) {
         object->context_animation_timer -= FRAMETIME;
-        if (__builtin_expect(object->context_animation_timer <= 0.0f, 0))
+        if (__builtin_expect(object->context_animation_timer <= 0.0f, 1))
             object->character_context = -1;
     }
     if (zipup == NULL)
@@ -779,7 +779,7 @@ void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
             object->context_variant_flags |= 1;
         return;
     }
-    if (__builtin_expect((api.flags_low & 0x80) != 0, 0))
+    if ((api.flags_low & 0x80) != 0)
         Hint_SetComplete(0x262);
     object->field_0x788 = zipup;
     object->character_context = 0x47;

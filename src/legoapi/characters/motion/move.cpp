@@ -3262,7 +3262,7 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
                         degrees = (i32)(degrees * turn_multiplier);
                     i32 limit = static_cast<i32>(static_cast<u32>(degrees) << 16) / 360;
                     if (abs(delta) <= 0x4000) {
-                        if (__builtin_expect(delta < -limit, 0))
+                        if (delta < -limit)
                             api.movement_facing_angle = narrow_yaw - limit;
                         else if (delta > limit)
                             api.movement_facing_angle = narrow_yaw + limit;

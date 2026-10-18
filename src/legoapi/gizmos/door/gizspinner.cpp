@@ -788,7 +788,7 @@ int GizSpinner_Update(GIZSPINNER_s *spinner) {
     }
 
     const u32 old_flags = spinner->state_flags;
-    const bool stop_animation = (old_flags & SPINNER_STATE_STOP_ANIMATION) != 0;
+    const u32 stop_animation = old_flags & SPINNER_STATE_STOP_ANIMATION;
     spinner->state_flags &= ~SPINNER_STATE_TRANSIENT_MASK;
     if (stop_animation) {
         GameAnimSet_Stop(spinner->anim_set);
@@ -853,7 +853,7 @@ int GizSpinner_Update(GIZSPINNER_s *spinner) {
                 GameAnimSet_Stop(spinner->anim_set);
                 spinner->field_0x090 = 0.0f;
             } else {
-                const f32 blend = NU_SIN_LUT(static_cast<u16>((1.0f - spinner->field_0x090 * 4.0f) * 16384.0f));
+                const f32 blend = NU_SIN_LUT(static_cast<i32>((1.0f - spinner->field_0x090 * 4.0f) * 16384.0f));
                 i32 difference = RotDiff(spinner->previous_rotation, spinner->target_rotation);
                 if ((spinner->state_flags & SPINNER_STATE_ROTATE_POSITIVE) != 0) {
                     if (difference < 0) {
@@ -951,17 +951,15 @@ void GizSpinners_Update(void *world_ptr, void *, float) {
         spinner->matrix = matrix;
         i32 angle = 0;
         auto spinner_rotation = spinner->rotation;
-        i32 arm_count = spinner->type < 8 ? spinner->type : 8;
-        for (i32 arm = 0; arm < arm_count; ++arm) {
+        for (i32 arm = 0; arm < spinner->type; ++arm) {
             NuMtxSetRotationY(&matrix, 0);
             NuMtxRotateY(&matrix, spinner_rotation + spinner->initial_rotation);
             NuMtxRotateY(&matrix, angle);
             NuMtxTranslate(&matrix, &spinner->position);
             spinner->arms[arm].matrix = matrix;
             angle += arm_angle;
-            arm_count = spinner->type < 8 ? spinner->type : 8;
         }
-        if (__builtin_expect(GameAnimSet_GetVisibility(spinner->anim_set) == GAMEANIMSET_VISIBILITY_NONE, 0))
+        if (__builtin_expect(GameAnimSet_GetVisibility(spinner->anim_set) == GAMEANIMSET_VISIBILITY_NONE, 1))
             spinner->flags |= SPINNER_RUNTIME_ANIMATION_HIDDEN;
         else if ((spinner->flags & SPINNER_RUNTIME_ANIMATION_HIDDEN) != 0)
             spinner->flags &= static_cast<u8>(~SPINNER_RUNTIME_ANIMATION_HIDDEN);
@@ -1046,42 +1044,37 @@ void GizSpinners_Update(void *world_ptr, void *, float) {
              (GIZSPINNER_FLAG_HIDE_ARM | SPINNER_RUNTIME_ANIMATION_HIDDEN | SPINNER_RUNTIME_AUTO_RETURN)) != 0 ||
             (spinner->state_flags & 8) == 0 ||
             ((spinner->state_flags & 0x400) != 0 && spinner->anim_set->state == GAMEANIMSET_STATE_AT_END) ||
-            (spinner->state_flags & SPINNER_STATE_ROTATING) != 0)
+            spinner->anim_set == NULL)
             continue;
         object = spinner->primary_anim_obj;
-        if (object == NULL || object->instance_animation == NULL)
+        if (object == NULL || object->instance_animation == NULL ||
+            (spinner->state_flags & SPINNER_STATE_ROTATING) != 0)
             continue;
-        length = object->end_frame - object->start_frame + 1.0f;
-        const u32 direction_flags = spinner->state_flags & 6;
-        const f32 direction = direction_flags == 2 || direction_flags == 4 ? 1.0f : -1.0f;
-        f32 target = 1.0f;
-        if (spinner->output_count != 1) {
-            if (length == 1.0f)
-                continue;
-            target = (spinner->animation_points[output + 1] - 1.0f) / (length - 1.0f);
-        }
-        const f32 speed = spinner->animation_speed;
         const f32 rate = object->instance_animation->fparam1;
+        const u32 direction_flags = spinner->state_flags & 6;
+        const i32 direction = direction_flags == 2 || direction_flags == 4 ? 1 : -1;
+        length = object->end_frame - object->start_frame + 1.0f;
+        f32 target = 1.0f;
+        if (spinner->output_count != 1)
+            target = (spinner->animation_points[output + 1] - 1.0f) / (length - 1.0f);
+        const f32 speed = spinner->animation_speed;
         const f32 difference = __builtin_fabsf(target - spinner->field_70);
+        const f32 step = __builtin_fabsf(60.0f * speed * rate / length);
         if (difference < 0.001f) {
             GameAnimSet_Stop(spinner->anim_set);
             GameAnimSet_JumpToAnimPos(spinner->anim_set, target);
-            if (length != 0.0f && speed != 0.0f && rate != 0.0f) {
-                const f32 duration = __builtin_fabsf(length / (speed * rate * 60.0f));
-                const f32 rotation =
-                    (((duration * 30.0f) / length) * (length / 100.0f)) * (target * 100.0f) * 65536.0f / 360.0f;
-                spinner->rotation =
-                    static_cast<u16>(static_cast<i32>(direction * rotation) + spinner->initial_rotation);
-            }
-        } else if (length != 0.0f) {
-            const f32 rotation = direction * (__builtin_fabsf(60.0f * speed * rate / length) * difference * 5461.0f);
-            if (target < spinner->field_70) {
-                GameAnimSet_Play(spinner->anim_set, -0.25f, 1);
-                spinner->rotation = static_cast<u16>(spinner->rotation - static_cast<i32>(rotation));
-            } else if (target > spinner->field_70) {
-                GameAnimSet_Play(spinner->anim_set, 0.25f, 1);
-                spinner->rotation = static_cast<u16>(spinner->rotation + static_cast<i32>(rotation));
-            }
+            const f32 duration = __builtin_fabsf(length / (speed * rate * 60.0f));
+            const f32 rotation =
+                (((duration * 30.0f) / length) * (length / 100.0f)) * (target * 100.0f) * 65536.0f / 360.0f;
+            spinner->rotation = static_cast<u16>(static_cast<i32>(direction * rotation) + spinner->initial_rotation);
+        } else if (target < spinner->field_70) {
+            GameAnimSet_Play(spinner->anim_set, -0.25f, 1);
+            spinner->rotation =
+                static_cast<u16>(spinner->rotation - static_cast<i32>(direction * (step * difference * 5461.0f)));
+        } else if (target > spinner->field_70) {
+            GameAnimSet_Play(spinner->anim_set, 0.25f, 1);
+            spinner->rotation =
+                static_cast<u16>(spinner->rotation + static_cast<i32>(direction * (step * difference * 5461.0f)));
         }
     }
 }

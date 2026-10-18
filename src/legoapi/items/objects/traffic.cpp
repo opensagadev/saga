@@ -280,19 +280,18 @@ void TrafficAnimSys_Update(TRAFFICANIMSYS_s *system) {
     }
 
     TRAFFICANIM_s *animation = system->animations;
-    auto system_animation_count = system->animation_count;
-    for (i32 animation_index = 0; animation_index < system_animation_count; ++animation_index, ++animation) {
+    for (i32 animation_index = 0; animation_index < system->animation_count; ++animation_index, ++animation) {
         animation->next_spawn_time -= animation->tfactor * FRAMETIME * 60.0f;
         if (animation->next_spawn_time <= 0.0f) {
-            if (animation->vehicle_count != 0) {
+            if (animation->vehicle_count > 0) {
                 instance = reinterpret_cast<TRAFFICANIMINSTANCE_s *>(NuLinkedListGetHead(&system->free_instances));
                 if (instance != NULL) {
                     NuLinkedListRemove(&system->free_instances, &instance->link);
                     NuLinkedListAppend(&system->active_instances, &instance->link);
                     instance->frame = 0.0f;
-                    i32 random = qrand();
+                    const i32 vehicle_index = qrand() / (0xffff / animation->vehicle_count + 1);
                     instance->animation = animation;
-                    instance->vehicle_index = random / (0xffff / static_cast<i32>(animation->vehicle_count) + 1);
+                    instance->vehicle_index = vehicle_index;
                 }
             }
 

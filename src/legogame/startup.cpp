@@ -482,7 +482,7 @@ void LoadPerm(void) {
         if (ready_timer < 1.0f && LoadPerm_LanguageSelect == 3 && LoadPerm_StringsLoaded != 0 && saveload_status == 1 &&
             GameMenuLevel == 0) {
             ready_timer += FRAMETIME;
-            if (ready_timer > 1.0f) {
+            if (ready_timer >= 1.0f) {
                 ready_timer = 1.0f;
             }
         }
@@ -541,127 +541,123 @@ void LoadPerm(void) {
             }
         }
 
-        const bool sequence_done = PermDataLoaded != 0 && LoadPerm_LanguageSelect == 3 && ready_timer >= 1.0f &&
-                                   legal_timer >= 5.8f && intro_timer >= 3.8f;
-        if (sequence_done) {
+        if (PermDataLoaded != 0 && LoadPerm_LanguageSelect == 3 && ready_timer >= 1.0f && legal_timer >= 5.8f &&
+            intro_timer >= 3.8f) {
             tail_timer -= FRAMETIME;
+            if (tail_timer < 0.0f) {
+                tail_timer = 0.0f;
+            }
         }
 
-        if (!(!sequence_done || tail_timer >= 0.0f)) {
-            NuRndrBeginScene(-1);
-            NuRndrGradClear(0xf00, 0x80000000, 0x80000000, 1.0f);
-            tail_timer = 0.0f;
-        } else {
-            NuRndrBeginScene(-1);
-            NuRndrGradClear(0xf00, 0x80000000, 0x80000000, 1.0f);
-            if (tail_timer == 0.2f) {
-                DrawMenu(0);
+        NuRndrBeginScene(-1);
+        NuRndrGradClear(0xf00, 0x80000000, 0x80000000, 1.0f);
+        if (tail_timer == 0.2f) {
+            DrawMenu(0);
 
-                if (legal_timer > 0.0f && legal_timer < 5.8f && legal_mtl != nullptr) {
-                    f32 alpha;
-                    if (!(legal_timer < 0.3f)) {
-                        if (legal_timer < 5.3f) {
-                            alpha = 1.0f;
-                        } else if (legal_timer >= 5.6000003814697266f) {
-                            alpha = 0.0f;
-                        } else {
-                            alpha = 1.0f - (legal_timer - 5.3f) / 0.30000019f;
-                        }
-                    } else {
-                        alpha = legal_timer / 0.3f;
-                    }
-
-                    if (alpha > 0.0f) {
-                        if (legal_timer < 0.0f) {
-                            if (legal_timer >= -0.3f) {
-                                alpha *= 1.0f - (legal_timer + 0.3f) / 0.3f;
-                            }
-                            const i32 text_alpha = static_cast<i32>(alpha * 128.0f);
-                            SmartTextEx(TTab[1517] != nullptr ? TTab[1517] : (char *)"Test", 0.0f,
-                                        TTab[1578] != nullptr ? 0.4f : 0.0f, 1.0f, 0.5f, 0.5f, 0.5f, 0, 255, 255, 255,
-                                        1.9f, 1, nullptr, 0, text_alpha);
-                            if (TTab[1578] != nullptr) {
-                                SmartTextEx(TTab[1578], 0.0f, -0.25f, 1.0f, 0.5f, 0.5f, 0.5f, 0, RAP_WARNING_R,
-                                            RAP_WARNING_G, RAP_WARNING_B, 1.9f, 4, nullptr, 0, text_alpha);
-                            }
-                        } else {
-                            if (legal_timer < 0.3f) {
-                                alpha *= (legal_timer - 0.3f) / 0.3f;
-                            }
-
-                            const f32 aspect = NuIOS_GetAspectRatio();
-                            f32 half_w;
-                            f32 half_h;
-                            if (!(aspect > 1.7777778f)) {
-                                half_w = 0.5f;
-                                half_h = aspect * 0.5f / 1.7777778f;
-                            } else {
-                                half_h = 0.5f;
-                                half_w = aspect * 0.5f / 1.7777778f;
-                            }
-
-                            NuRndrClear(0xb00, 0, 1.0f);
-                            const u32 colour = SAGA_X86_F32_TO_U32(alpha * 255.0f) << 24;
-                            NuPrimCSPos++;
-                            NuPrimSetCoordinateSystem(NUPRIM_SCALEMODE_ABSOLUTE);
-                            NuPrim2DBegin(4, 7, legal_mtl);
-
-                            struct LegalVertex {
-                                f32 x, y, z;
-                                u32 colour;
-                                union {
-                                    struct {
-                                        f32 u, v;
-                                    } full;
-                                    struct {
-                                        u16 u, v;
-                                        u32 pad;
-                                    } half;
-                                };
-                            };
-
-                            LegalVertex *vert = reinterpret_cast<LegalVertex *>(g_NuPrim_StreamBufferPtr->addr);
-                            vert->colour = colour | (g_NuPrim_NeedsOverbrightening ? 0x808080u : 0x404040u);
-                            if (!g_NuPrim_NeedsHalfUVs) {
-                                vert->full.u = 0.0f;
-                                vert->full.v = 0.0f;
-                            } else {
-                                vert->half.u = F32ToF16(0.0f);
-                                vert->half.v = F32ToF16(0.0f);
-                            }
-                            NuPrim2DAddXYZ(0.5f - half_w, 0.5f - half_h, 0.0f);
-
-                            vert = reinterpret_cast<LegalVertex *>(g_NuPrim_StreamBufferPtr->addr);
-                            vert->colour = colour | (g_NuPrim_NeedsOverbrightening ? 0x808080u : 0x404040u);
-                            if (!g_NuPrim_NeedsHalfUVs) {
-                                vert->full.u = 1.0f;
-                                vert->full.v = 1.0f;
-                            } else {
-                                vert->half.u = F32ToF16(1.0f);
-                                vert->half.v = F32ToF16(1.0f);
-                            }
-                            NuPrim2DAddXYZ(0.5f + half_w, 0.5f + half_h, 0.0f);
-                            NuPrim2DEnd();
-                            NuPrimCSPos--;
-                            NuPrimSetCoordinateSystem(NuPrimCoordSystemStack[NuPrimCSPos]);
-                        }
-                    }
-                }
-
-                if (intro_timer > 0.0f && intro_timer < 3.8f) {
-                    f32 alpha;
-                    if (intro_timer < 0.3f) {
-                        alpha = intro_timer / 0.3f;
-                    } else if (intro_timer < 3.3f) {
+            if (legal_timer > 0.0f && legal_timer < 5.8f && legal_mtl != nullptr) {
+                f32 alpha;
+                if (!(legal_timer < 0.3f)) {
+                    if (legal_timer < 5.3f) {
                         alpha = 1.0f;
-                    } else if (intro_timer >= 3.6f) {
+                    } else if (legal_timer >= 5.6000003814697266f) {
                         alpha = 0.0f;
                     } else {
-                        alpha = 1.0f - (intro_timer - 3.3f) / 0.29999995f;
+                        alpha = 1.0f - (legal_timer - 5.3f) / 0.30000019f;
                     }
-                    if (alpha > 0.0f) {
-                        IntroText_Draw(alpha);
+                } else {
+                    alpha = legal_timer / 0.3f;
+                }
+
+                if (alpha > 0.0f) {
+                    if (legal_timer < 0.0f) {
+                        if (legal_timer >= -0.3f) {
+                            alpha *= 1.0f - (legal_timer + 0.3f) / 0.3f;
+                        }
+                        const i32 text_alpha = static_cast<i32>(alpha * 128.0f);
+                        SmartTextEx(TTab[1517] != nullptr ? TTab[1517] : (char *)"Test", 0.0f,
+                                    TTab[1578] != nullptr ? 0.4f : 0.0f, 1.0f, 0.5f, 0.5f, 0.5f, 0, 255, 255, 255, 1.9f,
+                                    1, nullptr, 0, text_alpha);
+                        if (TTab[1578] != nullptr) {
+                            SmartTextEx(TTab[1578], 0.0f, -0.25f, 1.0f, 0.5f, 0.5f, 0.5f, 0, RAP_WARNING_R,
+                                        RAP_WARNING_G, RAP_WARNING_B, 1.9f, 4, nullptr, 0, text_alpha);
+                        }
+                    } else {
+                        if (legal_timer < 0.3f) {
+                            alpha *= (legal_timer - 0.3f) / 0.3f;
+                        }
+
+                        const f32 aspect = NuIOS_GetAspectRatio();
+                        f32 half_w;
+                        f32 half_h;
+                        if (!(aspect > 1.7777778f)) {
+                            half_w = 0.5f;
+                            half_h = aspect * 0.5f / 1.7777778f;
+                        } else {
+                            half_h = 0.5f;
+                            half_w = aspect * 0.5f / 1.7777778f;
+                        }
+
+                        NuRndrClear(0xb00, 0, 1.0f);
+                        const u32 colour = SAGA_X86_F32_TO_U32(alpha * 255.0f) << 24;
+                        NuPrimCSPos++;
+                        NuPrimSetCoordinateSystem(NUPRIM_SCALEMODE_ABSOLUTE);
+                        NuPrim2DBegin(4, 7, legal_mtl);
+
+                        struct LegalVertex {
+                            f32 x, y, z;
+                            u32 colour;
+                            union {
+                                struct {
+                                    f32 u, v;
+                                } full;
+                                struct {
+                                    u16 u, v;
+                                    u32 pad;
+                                } half;
+                            };
+                        };
+
+                        LegalVertex *vert = reinterpret_cast<LegalVertex *>(g_NuPrim_StreamBufferPtr->addr);
+                        vert->colour = colour | (g_NuPrim_NeedsOverbrightening ? 0x808080u : 0x404040u);
+                        if (!g_NuPrim_NeedsHalfUVs) {
+                            vert->full.u = 0.0f;
+                            vert->full.v = 0.0f;
+                        } else {
+                            vert->half.u = F32ToF16(0.0f);
+                            vert->half.v = F32ToF16(0.0f);
+                        }
+                        NuPrim2DAddXYZ(0.5f - half_w, 0.5f - half_h, 0.0f);
+
+                        vert = reinterpret_cast<LegalVertex *>(g_NuPrim_StreamBufferPtr->addr);
+                        vert->colour = colour | (g_NuPrim_NeedsOverbrightening ? 0x808080u : 0x404040u);
+                        if (!g_NuPrim_NeedsHalfUVs) {
+                            vert->full.u = 1.0f;
+                            vert->full.v = 1.0f;
+                        } else {
+                            vert->half.u = F32ToF16(1.0f);
+                            vert->half.v = F32ToF16(1.0f);
+                        }
+                        NuPrim2DAddXYZ(0.5f + half_w, 0.5f + half_h, 0.0f);
+                        NuPrim2DEnd();
+                        NuPrimCSPos--;
+                        NuPrimSetCoordinateSystem(NuPrimCoordSystemStack[NuPrimCSPos]);
                     }
+                }
+            }
+
+            if (intro_timer > 0.0f && intro_timer < 3.8f) {
+                f32 alpha;
+                if (intro_timer < 0.3f) {
+                    alpha = intro_timer / 0.3f;
+                } else if (intro_timer < 3.3f) {
+                    alpha = 1.0f;
+                } else if (intro_timer >= 3.6f) {
+                    alpha = 0.0f;
+                } else {
+                    alpha = 1.0f - (intro_timer - 3.3f) / 0.29999995f;
+                }
+                if (alpha > 0.0f) {
+                    IntroText_Draw(alpha);
                 }
             }
         }

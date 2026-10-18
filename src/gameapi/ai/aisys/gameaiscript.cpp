@@ -5856,16 +5856,15 @@ i32 Action_HelpWithTriggers(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s 
             ClearSpecialMove(object);
             for (i32 i = 0; i < 2; ++i) {
                 GameObject_s *other = Player[i];
-                if (other == NULL || other->character_context != 0x46)
-                    continue;
-                auto f0x788 = other->field_0x788;
-                for (i32 j = 0; j < set->trigger_count; ++j) {
-                    if (set->triggers[j] != NULL && set->triggers[j]->object == f0x788) {
-                        if (player->apiobj.position.y > object->apiobj.position.y + 0.05f)
-                            object->field_0x107e = 1;
-                        else if (object->apiobj.position.y - 0.05f > player->apiobj.position.y)
-                            object->field_0x107e = 2;
-                        return 0;
+                if (other != NULL && __builtin_expect(other->character_context == 0x46, 1)) {
+                    for (i32 j = 0; j < set->trigger_count; ++j) {
+                        if (set->triggers[j] != NULL && set->triggers[j]->object == other->field_0x788) {
+                            if (player->apiobj.position.y > object->apiobj.position.y + 0.05f)
+                                object->field_0x107e = 1;
+                            else if (object->apiobj.position.y - 0.05f > player->apiobj.position.y)
+                                object->field_0x107e = 2;
+                            return 0;
+                        }
                     }
                 }
             }

@@ -1637,30 +1637,6 @@ static inline void SkipAni4V4Curve(u16 type, u8 *&keys, ani3_scalemin_s *&scale_
     }
 }
 
-static inline void GetAni4SamplePosition(const ani3_animheader_s *anim, f32 frame, u32 &quarter, f32 &fraction,
-                                         i32 &key_offset) {
-    if (anim->key_count == 1) {
-        quarter = 0;
-        fraction = 0.0f;
-        key_offset = 0;
-        return;
-    }
-
-    const f32 last_key = static_cast<f32>(anim->key_count - 1);
-    f32 key = (frame - anim->first_frame) * last_key / static_cast<f32>(anim->frame_count - 1);
-    if (key < 0.0f) {
-        key = 0.0f;
-    }
-    if (last_key <= key) {
-        key = last_key;
-    }
-
-    const i32 whole_key = static_cast<i32>(key);
-    quarter = static_cast<u32>(whole_key) & 3;
-    fraction = key - static_cast<f32>(whole_key);
-    key_offset = (whole_key >> 2) * anim->key_stride;
-}
-
 static inline f32 DecodeAni4Quat3Scalar(const ani3_animheader_s *anim, i32 key_stride, const u16 *constants, u16 type,
                                         u32 quarter, f32 fraction, u8 *&keys, ani3_scalemin_s *&scale_min) {
     if (type != 6) {
@@ -3409,8 +3385,8 @@ extern "C++" {
             void *geometry_packet = geometry->next;
             void *lighting_packet = geometry[-2].next;
             list->items->type = geometry[-2].type;
-            list->items->id = 3;
             list->items->next = lighting_packet;
+            list->items->id = 3;
             first_and_last[0] = list->items++;
             *transform_packet = DisplayListCreateGeomTransformPS(buffer, world_matrix, list->dlist->mtls[list->mtl_id],
                                                                  geometry_packet, *transform_packet);
@@ -3451,8 +3427,8 @@ extern "C++" {
             list->items->next = skin_packet;
             first_and_last[1] = list->items++;
 
-            list->items->type = 0x98;
             list->items->id = 3;
+            list->items->type = 0x98;
             list->items->next = render_geometry;
             first_and_last[1] = list->items++;
 
@@ -3930,8 +3906,8 @@ extern "C" void NuPostEffectAccumulationMotionBlur(i32 frames, f32 blend, f32 mo
     }
     if (motionAccumFilter != NULL) {
         motionAccumFilter->frames = frames;
-        motionAccumFilter->blend = blend;
         motionAccumFilter->mode = mode;
+        motionAccumFilter->blend = blend;
     }
 }
 
@@ -7443,7 +7419,27 @@ __attribute__((optimize("O2"))) i32 ANI_SimpleAni3PlayerV4Joint_Quat3W(ani3_anim
     f32 fraction;
     u32 quarter;
     i32 key_offset;
-    GetAni4SamplePosition(anim, frame, quarter, fraction, key_offset);
+    if (anim->key_count == 1) {
+        quarter = 0;
+        fraction = 0.0f;
+        key_offset = 0;
+    } else {
+        const f32 last_key = static_cast<f32>(anim->key_count - 1);
+        f32 key = (frame - anim->first_frame) * last_key / static_cast<f32>(anim->frame_count - 1);
+        if (key < 0.0f) {
+            key = 0.0f;
+        }
+        i32 whole_key;
+        if (last_key <= key) {
+            whole_key = static_cast<i32>(last_key);
+            fraction = last_key - static_cast<f32>(whole_key);
+        } else {
+            whole_key = static_cast<i32>(key);
+            fraction = key - static_cast<f32>(whole_key);
+        }
+        quarter = static_cast<u32>(whole_key) & 3;
+        key_offset = (whole_key / 4) * anim->key_stride;
+    }
     const u16 *constants = reinterpret_cast<const u16 *>(anim->constants);
     ani3_scalemin_s *scale_min = anim->scale_min;
     u8 *keys = anim->keys + key_offset;
@@ -8266,8 +8262,8 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint_Blend(ani3_animheader_s *anim, f32 fr
                 group_values[1] *= inverse_blend;
                 group_values[2] *= inverse_blend;
                 if (root != NULL) {
-                    root->x = 0.0f;
                     root->y = 0.0f;
+                    root->x = 0.0f;
                     root->z = 0.0f;
                 }
             }
@@ -8884,8 +8880,8 @@ extern "C" i32 NuSpecialFindMulti(NUGSCN *scene, nuhspecial_s *dest, char *name,
                 if (__builtin_expect(NuStrIStr(special->name, name) != NULL, 0)) {
                     ++count;
                     dest->scene = scene;
-                    dest->special = special;
                     dest->display_special = NULL;
+                    dest->special = special;
                     ++dest;
                     if (count >= capacity) {
                         return count;
@@ -16938,7 +16934,7 @@ void DisplayListLinkDynamicMtls(void) {
 
         {
             sp->nmtls--;
-            if (__builtin_expect(sp->nmtls == 0, 1)) {
+            if (sp->nmtls == 0) {
                 // Unlink empty sortpri.
                 if (mgr->sort_list != sp) {
                     nusortpri_s *cur = mgr->sort_list;
@@ -17059,7 +17055,7 @@ void DisplayListLinkDynamicMtls(void) {
 
         {
             for (i32 i = 0; i < static_cast<i32>(mgr->dyn_mtl_dlist.nmtls); ++i) {
-                if (__builtin_expect(mgr->material_used[i] != 0, 1)) {
+                if (mgr->material_used[i] != 0) {
                     mgr->dyn_mtl_dlist.mtls[i]->display_list->mtl_id = i;
                 }
             }
@@ -17137,7 +17133,7 @@ void DisplayListLinkDynamicMtls(void) {
                 if (sp->nmtls == 0)
                     continue;
                 for (u32 k = 0; k < total; ++k) {
-                    if (__builtin_expect(MtlSortKey(mgr->dyn_mtl_dlist.mtls[k]) == sp->sort_pri, 0)) {
+                    if (MtlSortKey(mgr->dyn_mtl_dlist.mtls[k]) == sp->sort_pri) {
                         sp->mtl_first = static_cast<u16>(k);
                         break;
                     }
@@ -21699,7 +21695,7 @@ static NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIPTR *buf_end, char *path, ch
     void **fixed = (void **)NuPtrBlockFix((char *)scene + 0x18);
     NUGSCN *fixed_scene = (NUGSCN *)*fixed;
     if (fixed_scene != NULL) {
-        if (__builtin_expect(*reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(fixed_scene) + 0x168) > 0, 0)) {
+        if (__builtin_expect(*reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(fixed_scene) + 0x168) > 0, 1)) {
             if (version < 0 || version > 2) {
                 NuSevereWarning("Your Character version is %d, whereas the Engine only accepts Character versions "
                                 "from %d to %d",

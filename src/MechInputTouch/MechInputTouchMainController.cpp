@@ -49,7 +49,7 @@ void MechInputTouchMainController::UpdateButtons() {
 
     button_repeats[0] = button_was_pressed[0];
     if (button_was_pressed[0] == 0 && button_pressed[0] != 0) {
-        if ((buttons_repeat_timers[0] -= frame_time) <= 0.0f) {
+        if (__builtin_expect((buttons_repeat_timers[0] -= frame_time) <= 0.0f, 0)) {
             buttons_repeat_timers[0] = tap_frequency;
             button_repeats[0] = 1;
         }
@@ -59,7 +59,7 @@ void MechInputTouchMainController::UpdateButtons() {
 
     button_repeats[1] = button_was_pressed[1];
     if (button_was_pressed[1] == 0 && button_pressed[1] != 0) {
-        if ((buttons_repeat_timers[1] -= frame_time) <= 0.0f) {
+        if (__builtin_expect((buttons_repeat_timers[1] -= frame_time) <= 0.0f, 0)) {
             buttons_repeat_timers[1] = tap_frequency;
             button_repeats[1] = 1;
         }
@@ -69,7 +69,7 @@ void MechInputTouchMainController::UpdateButtons() {
 
     button_repeats[2] = button_was_pressed[2];
     if (button_was_pressed[2] == 0 && button_pressed[2] != 0) {
-        if ((buttons_repeat_timers[2] -= frame_time) <= 0.0f) {
+        if (__builtin_expect((buttons_repeat_timers[2] -= frame_time) <= 0.0f, 0)) {
             buttons_repeat_timers[2] = tap_frequency;
             button_repeats[2] = 1;
         }
@@ -79,7 +79,7 @@ void MechInputTouchMainController::UpdateButtons() {
 
     button_repeats[3] = button_was_pressed[3];
     if (button_was_pressed[3] == 0 && button_pressed[3] != 0) {
-        if ((buttons_repeat_timers[3] -= frame_time) <= 0.0f) {
+        if (__builtin_expect((buttons_repeat_timers[3] -= frame_time) <= 0.0f, 0)) {
             buttons_repeat_timers[3] = tap_frequency;
             button_repeats[3] = 1;
         }

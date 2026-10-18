@@ -53,7 +53,7 @@ static NUFPCOMJMP Teleport_ConfigKeywords[] = {
 static i32 FindTeleport_Direction;
 
 static inline void Teleport_GetSegment(GameObject_s *object, TELEPORT_s *teleport, i32 *start, i32 *end) {
-    const bool forwards = (object->context_variant_flags & 4) != 0;
+    const u8 forwards = object->context_variant_flags & 4;
     if ((teleport->flags & 4) != 0) {
         *start = forwards ? 0 : 3;
         *end = forwards ? 3 : 0;
@@ -431,7 +431,7 @@ void Teleport_NetMoveCode(GameObject_s *object) {
         return;
 
     TELEPORT_s *teleport = static_cast<TELEPORT_s *>(object->field_0x788);
-    const bool forwards = (object->context_variant_flags & 4) != 0;
+    const u8 forwards = object->context_variant_flags & 4;
     const i16 flap1_rotation = forwards ? 0x4000 : -0x4000;
     const i16 flap2_rotation = forwards ? -0x4000 : 0x4000;
 
@@ -532,7 +532,7 @@ void Teleport_MoveCode(GameObject_s *object, i32 start_immediately) {
     TELEPORT_s *teleport = static_cast<TELEPORT_s *>(object->field_0x788);
 
     if (object->field_0x7a3 == 0) {
-        const bool forwards = (object->context_variant_flags & 4) != 0;
+        const u8 forwards = object->context_variant_flags & 4;
         const i16 flap1_rotation = forwards ? 0x4000 : -0x4000;
         const i16 flap2_rotation = forwards ? -0x4000 : 0x4000;
         if (NuSpecialExistsFn(&teleport->flap1_special) &&

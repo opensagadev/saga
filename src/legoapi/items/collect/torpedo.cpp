@@ -134,8 +134,8 @@ void Torpedo_UpdateJobbies(GameObject_s *object) {
 
         const f32 distance =
             1.5f * object->apiobj.field_0x1dc + static_cast<f32>(index) * object->apiobj.field_0x1dc * 1.25f;
-        const u16 y_rotation = static_cast<u16>(packet->pickup_flags[index]);
-        const u16 z_rotation = static_cast<u16>(packet->pickup_data[index]);
+        const i32 y_rotation = packet->pickup_flags[index];
+        const i32 z_rotation = packet->pickup_data[index];
         NUVEC position;
         position.x = NU_SIN_LUT(z_rotation) * NU_COS_LUT(y_rotation) * distance + object->apiobj.collision_position.x;
         position.y = NU_SIN_LUT(y_rotation) * distance + object->apiobj.collision_position.y;
@@ -176,9 +176,7 @@ void Torpedo_UpdateJobbies(GameObject_s *object) {
             AddVariableShotDebrisEffectTimed1(
                 WORLD->debris_sys->entries[129].effect, &packet->pickup_positions[index - 1], 90, FRAMETIME,
                 static_cast<i16>(target_z_rotation), static_cast<i16>(target_y_rotation), NULL);
-        }
-
-        if (index == 0) {
+        } else {
             AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[129].effect, &object->apiobj.position, 90,
                                               FRAMETIME, static_cast<i16>(packet->pickup_flags[0] - NUANG_90DEG),
                                               static_cast<i16>(packet->pickup_data[0] - NUANG_90DEG), NULL);
@@ -735,7 +733,7 @@ void Torpedo_EndBolt(BOLT_s *bolt) {
 void Torpedo_Shoot(GameObject_s *object) {
     NUVEC position = object->torpedo->pickup_positions[object->torpedo->count - 1];
     NUVEC direction;
-    const u16 angle = BoltSys->shoot_direction(object, &direction);
+    const i32 angle = static_cast<u16>(BoltSys->shoot_direction(object, &direction));
     NUMTX matrix;
     matrix.m00 = matrix.m22 = NU_COS_LUT(angle);
     matrix.m20 = NU_SIN_LUT(angle);

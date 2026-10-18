@@ -1241,7 +1241,8 @@ void SpecialMiniKits_Configure(WORLDINFO_s *world, char *config) {
         item.flags = 1;
         while (NuFParGetWord(parser) != 0) {
             if (NuStrICmp(parser->word_buf, const_cast<char *>("pickup")) == 0) {
-                if (NuFParGetWord(parser) != 0 && NuStrLen(parser->word_buf) < sizeof(item.pickup_name)) {
+                if (NuFParGetWord(parser) != 0 &&
+                    NuStrLen(parser->word_buf) < static_cast<i32>(sizeof(item.pickup_name))) {
                     NuStrCpy(item.pickup_name, parser->word_buf);
                 }
             } else if (NuStrICmp(parser->word_buf, const_cast<char *>("at_object")) == 0) {
@@ -1250,7 +1251,8 @@ void SpecialMiniKits_Configure(WORLDINFO_s *world, char *config) {
                     item.flags &= ~0x20;
                 }
             } else if (NuStrICmp(parser->word_buf, const_cast<char *>("at_gizmo")) == 0) {
-                if (NuFParGetWord(parser) != 0 && NuStrLen(parser->word_buf) < sizeof(item.special_name)) {
+                if (NuFParGetWord(parser) != 0 &&
+                    NuStrLen(parser->word_buf) < static_cast<i32>(sizeof(item.special_name))) {
                     NuStrCpy(item.special_name, parser->word_buf);
                     item.flags |= 0x20;
                 }

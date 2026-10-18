@@ -1009,7 +1009,7 @@ void PodRacePanel(WORLDINFO_s *world) {
 void UpdatePodRaceLapDisplay(float arg) {
     if (__builtin_expect(FadeSys.fade == 0.0f && MiniCutCam == 0 && CUTSTOPGAME == 0, 1)) {
         float target = 0.0f;
-        if (__builtin_expect(Paused != 0, 1))
+        if (Paused != 0)
             target = 1.0f;
         else if (WORLD->current_level == PODRACEB_LDATA && GameTimer.time_elapsed >= 1.0f &&
                  GameTimer.time_elapsed < 6.0f)

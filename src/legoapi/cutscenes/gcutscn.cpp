@@ -741,7 +741,7 @@ extern "C" {
         if (cutscene == NULL) {
             return;
         }
-        if (__builtin_expect(cutscene->version > 1, 0)) {
+        if (__builtin_expect(cutscene->version > 1, 1)) {
             cutscene->scene = scene;
             cutscene->extra_scene = reinterpret_cast<void *>(static_cast<usize>(flags));
         }
@@ -885,6 +885,136 @@ extern "C" {
         active_cutscene_instances = NULL;
     }
 
+    static inline instNUGCUTSCENECAMERA_s *instNuGCutCamSysCreate(NUGCUTCAMERASYS_s *camera_system, VARIPTR *buf) {
+        if (camera_system->camera_count == 0) {
+            return NULL;
+        }
+        buf->addr = ALIGN(buf->addr, 0x10);
+        instNUGCUTSCENECAMERA_s *camera_instance = reinterpret_cast<instNUGCUTSCENECAMERA_s *>(buf->void_ptr);
+        buf->void_ptr = camera_instance + 1;
+        memset(camera_instance, 0, sizeof(*camera_instance));
+        buf->addr = ALIGN(buf->addr, 0x10);
+        camera_instance->camera_states = reinterpret_cast<instNUGCUTCAMSTATE_s *>(buf->void_ptr);
+        buf->addr += camera_system->camera_count * sizeof(instNUGCUTCAMSTATE_s);
+        memset(camera_instance->camera_states, 0, camera_system->camera_count * sizeof(instNUGCUTCAMSTATE_s));
+        return camera_instance;
+    }
+
+    static inline instNUGCUTRIGIDSYS_s *instNuGCutRigidSysCreate(NUGCUTRIGIDSYS_s *rigid_system, NUGSCN *scene,
+                                                                 VARIPTR *buf) {
+        if (rigid_system->count == 0) {
+            return NULL;
+        }
+        instNUGCUTRIGIDSYS_s *rigid_instance = reinterpret_cast<instNUGCUTRIGIDSYS_s *>(ALIGN(buf->addr, 0x10));
+        buf->void_ptr = rigid_instance + 1;
+        memset(rigid_instance, 0, sizeof(*rigid_instance));
+        buf->addr = ALIGN(buf->addr, 0x10);
+        rigid_instance->rigids = reinterpret_cast<instNUGCUTRIGID_s *>(buf->void_ptr);
+        buf->void_ptr = rigid_instance->rigids + rigid_system->count;
+        memset(rigid_instance->rigids, 0, rigid_system->count * sizeof(instNUGCUTRIGID_s));
+        for (u32 i = 0; i < rigid_system->count; ++i) {
+            NUGCUTRIGID_s *rigid = &rigid_system->rigids[i];
+            instNUGCUTRIGID_s *inst_rigid = &rigid_instance->rigids[i];
+            if (scene == NULL || scene == rigid->scene) {
+                inst_rigid->scene = scene == NULL ? rigid->scene : scene;
+                if (inst_rigid->scene != NULL && inst_rigid->scene->display_list != NULL) {
+                    inst_rigid->special = NULL;
+                    inst_rigid->display_special = rigid->special_object;
+                } else {
+                    inst_rigid->special = rigid->special_object;
+                    inst_rigid->display_special = NULL;
+                }
+            } else if (rigid->special_object != NULL) {
+                inst_rigid->scene = scene;
+                if (scene->display_list == NULL) {
+                    const usize offset = (reinterpret_cast<usize>(rigid->special_object) -
+                                          reinterpret_cast<usize>(rigid->scene->specials)) &
+                                         ~static_cast<usize>(3);
+                    inst_rigid->special = reinterpret_cast<u8 *>(scene->specials) + offset;
+                    inst_rigid->display_special = NULL;
+                } else {
+                    const usize offset = (reinterpret_cast<usize>(rigid->special_object) -
+                                          reinterpret_cast<usize>(rigid->scene->display_list->specials)) &
+                                         ~static_cast<usize>(0xf);
+                    inst_rigid->special = NULL;
+                    inst_rigid->display_special = reinterpret_cast<u8 *>(scene->display_list->specials) + offset;
+                }
+                if ((rigid->flags & 2) != 0) {
+                    inst_rigid->visible = rigid->flags & 1;
+                }
+            }
+        }
+        return rigid_instance;
+    }
+
+    static inline instNUGCUTCHARSYS_s *instNuGCutCharSysCreate(NUGCUTCHARSYS_s *character_system, VARIPTR *buf) {
+        if (character_system->character_count == 0) {
+            return NULL;
+        }
+        instNUGCUTCHARSYS_s *character_instance = reinterpret_cast<instNUGCUTCHARSYS_s *>(ALIGN(buf->addr, 0x10));
+        buf->void_ptr = character_instance + 1;
+        memset(character_instance, 0, sizeof(*character_instance));
+        buf->addr = ALIGN(buf->addr, 0x10);
+        character_instance->characters = reinterpret_cast<instNUGCUTCHAR_s *>(buf->void_ptr);
+        buf->void_ptr = character_instance->characters + character_system->character_count;
+        memset(character_instance->characters, 0, character_system->character_count * sizeof(instNUGCUTCHAR_s));
+        for (i32 i = 0; i < character_system->character_count; ++i) {
+            instNUGCUTCHAR_s *inst_character = &character_instance->characters[i];
+            NUGCUTCHAR_s *character = &character_system->characters[i];
+            inst_character->field_16 = 0xff;
+            inst_character->field_15 = 0xff;
+            if ((character->flags & 2) != 0) {
+                if (NuCutSceneCharacterCreateData != NULL) {
+                    NuCutSceneCharacterCreateData(character, inst_character, buf);
+                }
+            } else {
+                inst_character->character_model = character->character_model;
+            }
+        }
+        return character_instance;
+    }
+
+    static inline instNUGCUTLOCATORSYS_s *instNuGCutLocatorSysCreate(NUGCUTLOCATORSYS_s *locator_system, VARIPTR *buf) {
+        if (locator_system->locator_count == 0) {
+            return NULL;
+        }
+        instNUGCUTLOCATORSYS_s *locator_instance = reinterpret_cast<instNUGCUTLOCATORSYS_s *>(ALIGN(buf->addr, 0x10));
+        buf->void_ptr = locator_instance + 1;
+        memset(locator_instance, 0, sizeof(*locator_instance));
+        buf->addr = ALIGN(buf->addr, 0x10);
+        locator_instance->locators = reinterpret_cast<instNUGCUTLOCATOR_s *>(buf->void_ptr);
+        buf->void_ptr = locator_instance->locators + locator_system->locator_count;
+        memset(locator_instance->locators, 0, locator_system->locator_count * sizeof(instNUGCUTLOCATOR_s));
+        for (i32 i = 0; i < locator_system->locator_count; ++i) {
+            NUGCUTLOCATOR_s *locator = &locator_system->locators[i];
+            NUGCUTLOCATORTYPE_s *type = &locator_system->types[locator->type_index];
+            if ((type->flags & 1) != 0) {
+                if ((locator->flags & 0x20) != 0) {
+                    locator_instance->locators[i].effect_handle = -1;
+                }
+            } else if ((type->flags & 2) != 0) {
+            } else if ((type->flags & 0x10) != 0) {
+                locator_instance->locators[i].effect_handle = -1;
+            } else if ((type->flags & 8) != 0) {
+                buf->addr = ALIGN(buf->addr, 4);
+                void *effect = buf->void_ptr;
+                locator_instance->locators[i].effect_handle = static_cast<i32>(reinterpret_cast<usize>(effect));
+                buf->addr += 0x18;
+                memset(effect, 0, 0x18);
+                if (locator->field_5b != 0) {
+                    *reinterpret_cast<NUGCUTLOCATOR_s **>(static_cast<u8 *>(effect) + 0x14) = locator;
+                }
+            } else if ((type->flags & 4) != 0) {
+                buf->addr = ALIGN(buf->addr, 0x10);
+                void *effect = buf->void_ptr;
+                locator_instance->locators[i].effect_handle = static_cast<i32>(reinterpret_cast<usize>(effect));
+                buf->addr += 0x10;
+                memset(effect, 0, 0x10);
+            }
+        }
+        return locator_instance;
+    }
+
     instNUGCUTSCENE_s *instNuGCutSceneCreate(NUGCUTSCENE_s *cutscene, NUGSCN *scene, void *extra, char *name,
                                              VARIPTR *buf, i32 flags) {
         if (cutscene == NULL) {
@@ -916,138 +1046,20 @@ extern "C" {
             sprintf(instance->name, name);
         }
 
-        NUGCUTCAMERASYS_s *camera_system = cutscene->camera_system;
-        if (camera_system != NULL) {
-            instNUGCUTSCENECAMERA_s *camera_instance = NULL;
-            if (camera_system->camera_count != 0) {
-                buf->addr = ALIGN(buf->addr, 0x10);
-                camera_instance = reinterpret_cast<instNUGCUTSCENECAMERA_s *>(buf->void_ptr);
-                buf->void_ptr = camera_instance + 1;
-                memset(camera_instance, 0, sizeof(*camera_instance));
-                buf->addr = ALIGN(buf->addr, 0x10);
-                camera_instance->camera_states = reinterpret_cast<instNUGCUTCAMSTATE_s *>(buf->void_ptr);
-                buf->void_ptr = camera_instance->camera_states + camera_system->camera_count;
-                memset(camera_instance->camera_states, 0, camera_system->camera_count * sizeof(instNUGCUTCAMSTATE_s));
-            }
-            instance->camera_instance = camera_instance;
+        if (cutscene->camera_system != NULL) {
+            instance->camera_instance = instNuGCutCamSysCreate(cutscene->camera_system, buf);
         }
 
-        NUGCUTRIGIDSYS_s *rigid_system = cutscene->rigid_system;
-        if (rigid_system != NULL) {
-            instNUGCUTRIGIDSYS_s *rigid_instance = NULL;
-            if (rigid_system->count != 0) {
-                rigid_instance = reinterpret_cast<instNUGCUTRIGIDSYS_s *>(ALIGN(buf->addr, 0x10));
-                buf->void_ptr = rigid_instance + 1;
-                rigid_instance->rigids = NULL;
-                buf->addr = ALIGN(buf->addr, 0x10);
-                rigid_instance->rigids = reinterpret_cast<instNUGCUTRIGID_s *>(buf->void_ptr);
-                buf->void_ptr = rigid_instance->rigids + rigid_system->count;
-                memset(rigid_instance->rigids, 0, rigid_system->count * sizeof(instNUGCUTRIGID_s));
-                for (u32 i = 0; i < rigid_system->count; ++i) {
-                    NUGCUTRIGID_s *rigid = &rigid_system->rigids[i];
-                    instNUGCUTRIGID_s *inst_rigid = &rigid_instance->rigids[i];
-                    if (scene == NULL || scene == rigid->scene) {
-                        inst_rigid->scene = scene == NULL ? rigid->scene : scene;
-                        if (inst_rigid->scene != NULL && inst_rigid->scene->display_list != NULL) {
-                            inst_rigid->special = NULL;
-                            inst_rigid->display_special = rigid->special_object;
-                        } else {
-                            inst_rigid->special = rigid->special_object;
-                            inst_rigid->display_special = NULL;
-                        }
-                    } else if (rigid->special_object != NULL) {
-                        inst_rigid->scene = scene;
-                        if (scene->display_list == NULL) {
-                            const usize offset = (reinterpret_cast<usize>(rigid->special_object) -
-                                                  reinterpret_cast<usize>(rigid->scene->specials)) &
-                                                 ~static_cast<usize>(3);
-                            inst_rigid->special = reinterpret_cast<u8 *>(scene->specials) + offset;
-                            inst_rigid->display_special = NULL;
-                        } else {
-                            const usize offset = (reinterpret_cast<usize>(rigid->special_object) -
-                                                  reinterpret_cast<usize>(rigid->scene->display_list->specials)) &
-                                                 ~static_cast<usize>(0xf);
-                            inst_rigid->special = NULL;
-                            inst_rigid->display_special =
-                                reinterpret_cast<u8 *>(scene->display_list->specials) + offset;
-                        }
-                        if ((rigid->flags & 2) != 0) {
-                            inst_rigid->visible = rigid->flags & 1;
-                        }
-                    }
-                }
-            }
-            instance->rigid_instance = rigid_instance;
+        if (cutscene->rigid_system != NULL) {
+            instance->rigid_instance = instNuGCutRigidSysCreate(cutscene->rigid_system, scene, buf);
         }
 
-        NUGCUTCHARSYS_s *character_system = cutscene->character_system;
-        if (character_system != NULL) {
-            instNUGCUTCHARSYS_s *character_instance = NULL;
-            if (character_system->character_count != 0) {
-                character_instance = reinterpret_cast<instNUGCUTCHARSYS_s *>(ALIGN(buf->addr, 0x10));
-                buf->void_ptr = character_instance + 1;
-                character_instance->characters = NULL;
-                buf->addr = ALIGN(buf->addr, 0x10);
-                character_instance->characters = reinterpret_cast<instNUGCUTCHAR_s *>(buf->void_ptr);
-                buf->void_ptr = character_instance->characters + character_system->character_count;
-                memset(character_instance->characters, 0, character_system->character_count * sizeof(instNUGCUTCHAR_s));
-                for (i32 i = 0; i < character_system->character_count; ++i) {
-                    instNUGCUTCHAR_s *inst_character = &character_instance->characters[i];
-                    NUGCUTCHAR_s *character = &character_system->characters[i];
-                    inst_character->field_16 = 0xff;
-                    inst_character->field_15 = 0xff;
-                    if ((character->flags & 2) != 0) {
-                        if (NuCutSceneCharacterCreateData != NULL) {
-                            NuCutSceneCharacterCreateData(character, inst_character, buf);
-                        }
-                    } else {
-                        inst_character->character_model = character->character_model;
-                    }
-                }
-            }
-            instance->character_instance = character_instance;
+        if (cutscene->character_system != NULL) {
+            instance->character_instance = instNuGCutCharSysCreate(cutscene->character_system, buf);
         }
 
-        NUGCUTLOCATORSYS_s *locator_system = cutscene->locator_system;
-        if (locator_system != NULL) {
-            instNUGCUTLOCATORSYS_s *locator_instance = NULL;
-            if (locator_system->locator_count != 0) {
-                locator_instance = reinterpret_cast<instNUGCUTLOCATORSYS_s *>(ALIGN(buf->addr, 0x10));
-                buf->void_ptr = locator_instance + 1;
-                locator_instance->locators = NULL;
-                buf->addr = ALIGN(buf->addr, 0x10);
-                locator_instance->locators = reinterpret_cast<instNUGCUTLOCATOR_s *>(buf->void_ptr);
-                buf->void_ptr = locator_instance->locators + locator_system->locator_count;
-                memset(locator_instance->locators, 0, locator_system->locator_count * sizeof(instNUGCUTLOCATOR_s));
-                for (i32 i = 0; i < locator_system->locator_count; ++i) {
-                    NUGCUTLOCATOR_s *locator = &locator_system->locators[i];
-                    NUGCUTLOCATORTYPE_s *type = &locator_system->types[locator->type_index];
-                    if ((type->flags & 1) != 0) {
-                        if ((locator->flags & 0x20) != 0) {
-                            locator_instance->locators[i].effect_handle = -1;
-                        }
-                    } else if ((type->flags & 2) != 0) {
-                    } else if ((type->flags & 0x10) != 0) {
-                        locator_instance->locators[i].effect_handle = -1;
-                    } else if ((type->flags & 8) != 0) {
-                        buf->addr = ALIGN(buf->addr, 4);
-                        void *effect = buf->void_ptr;
-                        locator_instance->locators[i].effect_handle = static_cast<i32>(reinterpret_cast<usize>(effect));
-                        buf->addr += 0x18;
-                        memset(effect, 0, 0x18);
-                        if (locator->field_5b != 0) {
-                            *reinterpret_cast<NUGCUTLOCATOR_s **>(static_cast<u8 *>(effect) + 0x14) = locator;
-                        }
-                    } else if ((type->flags & 4) != 0) {
-                        buf->addr = ALIGN(buf->addr, 0x10);
-                        void *effect = buf->void_ptr;
-                        locator_instance->locators[i].effect_handle = static_cast<i32>(reinterpret_cast<usize>(effect));
-                        buf->addr += 0x10;
-                        memset(effect, 0, 0x10);
-                    }
-                }
-            }
-            instance->locator_instance = locator_instance;
+        if (cutscene->locator_system != NULL) {
+            instance->locator_instance = instNuGCutLocatorSysCreate(cutscene->locator_system, buf);
         }
 
         if (cutscene->trigger_system != NULL && extra != NULL) {
@@ -1622,12 +1634,10 @@ extern "C" {
         char *dot = strchr(path, '.');
         NuStrCpy(extension, dot);
 
-        const i32 tens = (cutscene_load_instance->stream_index + 1) / 10;
-        const i32 units = (cutscene_load_instance->stream_index + 1) % 10;
-        if (tens != 0) {
-            *dot++ = static_cast<char>('0' + tens);
+        if ((cutscene_load_instance->stream_index + 1) / 10 != 0) {
+            *dot++ = static_cast<char>('0' + (cutscene_load_instance->stream_index + 1) / 10);
         }
-        *dot++ = static_cast<char>('0' + units);
+        *dot++ = static_cast<char>('0' + (cutscene_load_instance->stream_index + 1) % 10);
         NuStrCpy(dot, extension);
 
         // Retail realigns the frame (and esp,-16) and keeps both buffer cursors in 16-byte aligned slots.

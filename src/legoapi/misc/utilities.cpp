@@ -1153,7 +1153,7 @@ void PointAlongSpline(NUGSPLINE *spline, f32 along, NUVEC *position, u16 *angle,
         index = 0;
     }
     fixed &= 0xffff;
-    if (__builtin_expect(fixed == 0, 0))
+    if (fixed == 0)
         return;
     NUVEC *next = &spline->pts[index];
     f32 fraction = fixed * (1.0f / 65536.0f);
