@@ -349,6 +349,12 @@ typedef struct AIPACKET_s {
     union {
         u8 movement_flags; // 0x1e4
         u8 field_0x1e4;
+        struct {
+            u8 : 5;
+            u8 diversion_right : 1;
+            u8 diversion_left : 1;
+            u8 : 1;
+        };
     };
     union {
         u8 field_0x1e5;
@@ -505,7 +511,14 @@ typedef struct APIOBJECT_s {
         u64 colliding_objects_mask;
         u64 collision_contact_mask; // 0x1ec
     };
-    u32 field_0x1f4; // 0x1f4
+    union {
+        u32 field_0x1f4; // 0x1f4
+        struct {
+            u32 : 6;
+            u32 shadow_enabled : 1;
+            u32 : 25;
+        };
+    };
     union {
         u32 object_flags; // 0x1f8, complete flag word
         struct {
@@ -1466,6 +1479,10 @@ typedef struct GameObject_s {
     union {
         u8 field_0xf04;
         u8 jump_input_flags; // 0x0f04, buffered airborne action inputs
+        struct {
+            u8 : 7;
+            u8 field_0xf04_bit7 : 1;
+        };
     };
     u8 edge_stop_requests; // 0xf05
     u8 pad_f06[2];

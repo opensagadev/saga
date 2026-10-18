@@ -619,11 +619,12 @@ void UpdateTrooperCannons(WORLDINFO_s *) {
         if (cannon.object == NULL || netclient != 0)
             break;
 
-        GameObject_s *callback_object = cannon.object->field_0xcc0;
-        if (callback_object == NULL)
-            callback_object = cannon.object;
-        if (callback_object->field_0xeb4 == NULL)
-            callback_object->field_0xeb4 = KilledTrooperCannon;
+        if (cannon.object->field_0xcc0 != NULL) {
+            if (cannon.object->field_0xcc0->field_0xeb4 == NULL)
+                cannon.object->field_0xcc0->field_0xeb4 = KilledTrooperCannon;
+        } else if (cannon.object->field_0xeb4 == NULL) {
+            cannon.object->field_0xeb4 = KilledTrooperCannon;
+        }
     }
 }
 

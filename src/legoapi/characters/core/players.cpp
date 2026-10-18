@@ -308,7 +308,7 @@ inline void ThingManager::operator delete(void *thing, usize size) {
 void Players_InitPositions(WORLDINFO *world) {
     i32 bonus = 0;
     if (world->area != NULL) {
-        bonus = (i32)((world->area->flags >> 2) & 1);
+        bonus = (world->area->flags & 4) != 0;
     }
 
     for (i32 i = 0; i < 8; i++) {

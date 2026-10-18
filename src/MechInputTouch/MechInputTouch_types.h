@@ -163,7 +163,7 @@ struct TouchHolder {
 
     i32 touch_id;
     u8 clicked;
-    u8 is_down;
+    bool is_down;
     u8 field_0x6;
     u8 consumed;
     u8 click_candidate;

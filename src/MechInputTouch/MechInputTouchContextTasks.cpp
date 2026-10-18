@@ -1110,9 +1110,9 @@ void MechTouchTaskPlannedDoubleClickGoTo::OnResume() {
 
     VuVec position;
     target.Get()->GetPos(position, -1);
-    const f32 dx = position.x - player->apiobj.position.x;
     const f32 dy = position.y - player->apiobj.position.y;
     const f32 dz = position.z - player->apiobj.position.z;
+    const f32 dx = position.x - player->apiobj.position.x;
     const GAMECHARACTERDATA *character = player->apiobj.character_data->game_character;
     const f32 max_rise =
         -(character->jump_speed * character->jump_speed) / (character->gravity + character->gravity) * 2.5f;
@@ -1160,7 +1160,11 @@ void MechTouchTaskPlannedDoubleClickGoTo::OnResume() {
     packet.velocity.y = velocity_y;
     packet.velocity.z = velocity_z;
     packet.velocity.w = 1.0f;
-    *reinterpret_cast<VuVec *>(packet.field_1c) = position;
+    VuVec *destination = reinterpret_cast<VuVec *>(packet.field_1c);
+    destination->x = position.x;
+    destination->y = position.y;
+    destination->z = position.z;
+    destination->w = position.w;
     if (!controller->TriggerJumpTask(packet, true, true, true)) {
         player->apiobj.velocity.x = previous_x;
         player->apiobj.velocity.y = previous_y;

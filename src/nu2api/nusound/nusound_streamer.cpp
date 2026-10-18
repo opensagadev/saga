@@ -154,14 +154,15 @@ void NuSoundStreamer::ThreadFunc(void *self) {
             element = streamer->queue1.Pop();
         }
 
+        NuSoundStreamingSample *sample = element.sample;
         switch (element.message) {
             case QueueElement::Message::OPEN_SAMPLE:
-                element.sample->Open(element.start_offset, element.loop, element.weak_flag);
-                element.sample->RemovedFromThreadQueue();
+                sample->Open(element.start_offset, element.loop, element.weak_flag);
+                sample->RemovedFromThreadQueue();
                 break;
 
             case QueueElement::Message::FILL_STREAM_BUFFER: {
-                NuSoundLoader *loader = element.sample->file_loader;
+                NuSoundLoader *loader = sample->file_loader;
                 loader->FillStreamBuffer(element.buffer, element.loop);
 
                 NuSoundBuffer::Context &context = element.buffer->GetCurrentContext();
@@ -177,13 +178,13 @@ void NuSoundStreamer::ThreadFunc(void *self) {
             }
 
             case QueueElement::Message::CLOSE_SAMPLE:
-                element.sample->Close();
-                element.sample->RemovedFromThreadQueue();
+                sample->Close();
+                sample->RemovedFromThreadQueue();
                 break;
 
             case QueueElement::Message::RECUE_SAMPLE:
-                element.sample->ReCue(element.start_offset, element.loop);
-                element.sample->RemovedFromThreadQueue();
+                sample->ReCue(element.start_offset, element.loop);
+                sample->RemovedFromThreadQueue();
                 break;
 
             case QueueElement::Message::SHUTDOWN:

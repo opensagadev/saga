@@ -138,13 +138,16 @@ initialise_slot:
         }
 
         i32 length = NuStrLen(message->text);
-        if (length <= 0) {
-            return NULL;
-        }
         if ((message->flags & 0x2000) != 0) {
+            if (length <= 0) {
+                return NULL;
+            }
             slot->text = message->text;
         } else {
-            for (; text_index < length && text_index <= 0x76; ++text_index) {
+            if (length <= 0) {
+                return NULL;
+            }
+            for (; text_index <= 0x76 && text_index < length; ++text_index) {
                 slot->text_buffer[text_index] = message->text[text_index];
             }
         }
@@ -178,12 +181,14 @@ initialise_slot:
         target_position = message->position;
     slot->target_position = *target_position;
     slot->target_scale = message->target_scale;
-    if ((message->flags & 1) == 0) {
+    if ((message->flags & 1) != 0) {
+        slot->field_0xf9 = 0;
+    } else {
         slot->field_0xb8 = message->scale;
         slot->start_position = slot->position;
         slot->field_0xfb = 0;
+        slot->field_0xf9 = 1;
     }
-    slot->field_0xf9 = static_cast<u8>((message->flags & 1) == 0);
     slot->active = 1;
     slot->field_0xfa = 0;
     slot->field_0xfc = message->field_0x4f;

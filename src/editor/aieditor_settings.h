@@ -59,7 +59,7 @@ struct aieditor_settings_s {
         void (*leave)();
     } modes[8];
     i16 mode_count;
-    u16 current_mode;
+    i16 current_mode;
 };
 
 DECOMP_ASSERT(sizeof(aieditor_settings_s) == 0x200, "aieditor settings size");

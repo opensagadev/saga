@@ -1353,10 +1353,8 @@ void MechTouchUITagButton::Process(float dt) {
 
     const f32 lower = TagButtonSize - 1.0f;
     const f32 upper = 1.0f - TagButtonSize;
-    const f32 clipped_x = upper > screen_position.x ? screen_position.x : upper;
-    const f32 clipped_y = upper > screen_position.y ? screen_position.y : upper;
-    position.y = lower > clipped_y ? lower : clipped_y;
-    position.x = lower > clipped_x ? lower : clipped_x;
+    position.x = MAX(lower, MIN(screen_position.x, upper));
+    position.y = MAX(lower, MIN(screen_position.y, upper));
 }
 
 bool ClickToPressStartGestureTracker::OnClick(GameObject_s &, TouchHolder &) {

@@ -383,11 +383,12 @@ void NuDDSSetTextureDescription(char *dds_data, NUTEXFORMAT format, i32 width, i
         header->dw_flags |= 0x800000;
         header->dw_depth = depth;
     }
-    header->dw_mip_map_count = 1;
+    u32 mipmap_count = 1;
     if (mip_count > 1) {
-        header->dw_mip_map_count = mip_count;
+        mipmap_count = mip_count;
         header->dw_flags |= 0x20000;
     }
+    header->dw_mip_map_count = mipmap_count;
     if (texture_type == 3) {
         header->dw_caps |= 8;
         header->dw_caps2 |= 0xfe00;

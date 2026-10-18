@@ -64,20 +64,3 @@ static inline void NuRndrPrimUV(f32 u, f32 v) {
     }
 }
 
-static inline void NuRndrPrimTexturedColour(f32 u, f32 v, i32 colour) {
-    PrimVertexRaw *vertex;
-    if (!g_NuPrim_NeedsHalfUVs) {
-        vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);
-        vertex->float_uv[0] = u;
-        vertex->float_uv[1] = v;
-    } else {
-        vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);
-        vertex->half_uv[0] = NuRndrFloatToHalf(u);
-        vertex->half_uv[1] = NuRndrFloatToHalf(v);
-    }
-    i32 adjusted_colour = colour;
-    if (!g_NuPrim_NeedsOverbrightening) {
-        adjusted_colour = ((colour >> 1) & 0x007f7f7f) | (colour & 0xff000000);
-    }
-    vertex->color = adjusted_colour;
-}

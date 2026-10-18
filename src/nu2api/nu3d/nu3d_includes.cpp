@@ -5901,7 +5901,9 @@ extern "C" {
 
         if (isBitCountTable == 0)
             buildBitCountTable();
-        nuanimdata_s *data = static_cast<nuanimdata_s *>(NuLegacyRelocatePointer(animation, delta));
+        if (animation != NULL)
+            animation = reinterpret_cast<void *>(reinterpret_cast<usize>(animation) + delta);
+        nuanimdata_s *data = static_cast<nuanimdata_s *>(animation);
         data->node_name = static_cast<char *>(NuLegacyRelocatePointer(data->node_name, delta));
         data->chunks = static_cast<nuanimdatachunk_s **>(NuLegacyRelocatePointer(data->chunks, delta));
         if (data->chunks != NULL) {
@@ -13156,11 +13158,14 @@ extern "C" {
             sprintf(text, "<TABLE height=%d width=\"100%%%%\" cellSpacing=1 cellPadding=0 border=0><TR>\r\n",
                     row_height);
             NuHtmlWrite(text);
-            char *label = labels != NULL ? labels[index] : NULL;
+            const char *label = " ";
+            if (labels != NULL && labels[index] != NULL) {
+                label = labels[index];
+            }
             sprintf(text,
                     "<TD align=right width=\"%d%%%%\" bgColor=lightgrey>"
                     "<DIV style=\"FONT-SIZE: 10pt\">%s</TD>\r\n",
-                    12, label != NULL ? label : " ");
+                    12, label);
             NuHtmlWrite(text);
             sprintf(text, "<TD width=\"%d%%%%\" bgColor=%06X></TD>\r\n", bar_width, colour);
             NuHtmlWrite(text);
@@ -13226,11 +13231,14 @@ extern "C" {
             }
             sprintf(text, "<TR><TD Height=\"%d%%%%\" bgColor=%06X></TD></TR>\r\n", bar_height, colour);
             NuHtmlWrite(text);
-            char *label = labels != NULL ? labels[index] : NULL;
+            const char *label = " ";
+            if (labels != NULL && labels[index] != NULL) {
+                label = labels[index];
+            }
             sprintf(text,
                     "<TR><TD Height=\"%d%%%%\" bgColor=lightgrey><DIV style=\"FONT-SIZE: 10pt; WIDTH: 10pt; "
                     "WRITING-MODE: tb-rl\">%s</DIV></TD></TR></TABLE>\r\n",
-                    20, label != NULL ? label : " ");
+                    20, label);
             NuHtmlWrite(text);
         }
         NuHtmlWrite("</TABLE></TD></tr></TABLE>\r\n");
@@ -15071,34 +15079,11 @@ extern "C" i32 NuRndrLine2d(NuLineVertex2D *vertices, NUMTL *material) {
 extern "C" void NuRndrRect(f32 x, f32 y, f32 z, f32 width, f32 height, f32 u0, f32 v0, f32 u1, f32 v1, i32 colour,
                            NUMTL *material) {
     NuPrim2DBegin(4, 7, material);
-    u8 *vertex;
-    if (!g_NuPrim_NeedsHalfUVs) {
-        vertex = g_NuPrim_StreamBufferPtr->u8_ptr;
-        *(f32 *)(vertex + 0x10) = u0;
-        *(f32 *)(vertex + 0x14) = v0;
-    } else {
-        vertex = g_NuPrim_StreamBufferPtr->u8_ptr;
-        *(u16 *)(vertex + 0x10) = NuRndrFloatToHalf(u0);
-        *(u16 *)(vertex + 0x12) = NuRndrFloatToHalf(v0);
-    }
-    i32 adjusted_colour = colour;
-    if (!g_NuPrim_NeedsOverbrightening)
-        adjusted_colour = ((colour >> 1) & 0x007f7f7f) | (colour & 0xff000000);
-    *(i32 *)(vertex + 0x0c) = adjusted_colour;
+    NuRndrPrimUV(u0, v0);
+    NuRndrPrimSetColour(colour);
     NuPrim2DAddXYZ(x, y, z);
-    if (!g_NuPrim_NeedsHalfUVs) {
-        vertex = g_NuPrim_StreamBufferPtr->u8_ptr;
-        *(f32 *)(vertex + 0x10) = u1;
-        *(f32 *)(vertex + 0x14) = v1;
-    } else {
-        vertex = g_NuPrim_StreamBufferPtr->u8_ptr;
-        *(u16 *)(vertex + 0x10) = NuRndrFloatToHalf(u1);
-        *(u16 *)(vertex + 0x12) = NuRndrFloatToHalf(v1);
-    }
-    adjusted_colour = colour;
-    if (!g_NuPrim_NeedsOverbrightening)
-        adjusted_colour = ((colour >> 1) & 0x007f7f7f) | (colour & 0xff000000);
-    *(i32 *)(vertex + 0x0c) = adjusted_colour;
+    NuRndrPrimUV(u1, v1);
+    NuRndrPrimSetColour(colour);
     NuPrim2DAddXYZ(x + width, y + height, z);
     NuPrim2DEnd();
 }
@@ -15135,9 +15120,11 @@ extern "C" void NuRndrRect2di(i32 x, i32 y, i32 w, i32 h, i32 colour, numtl_s *m
 void NuRndrRectUV2d(f32 x, f32 y, f32, f32 width, f32 height, f32 u0, f32 v0, f32 u1, f32 v1, i32 colour,
                     numtl_s *material) {
     NuPrim2DBegin(4, 7, material);
-    NuRndrPrimTexturedColour(u0, v0, colour);
+    NuRndrPrimUV(u0, v0);
+    NuRndrPrimSetColour(colour);
     NuPrim2DAddXYZ(x, y, 0.0f);
-    NuRndrPrimTexturedColour(u1, v1, colour);
+    NuRndrPrimUV(u1, v1);
+    NuRndrPrimSetColour(colour);
     NuPrim2DAddXYZ(x + width, y + height, 0.0f);
     NuPrim2DEnd();
 }
@@ -15150,38 +15137,11 @@ extern "C" void NuRndrRectUV2di(i32 x, i32 y, i32 w, i32 h, f32 u0, f32 v0, f32 
     const f32 sh = static_cast<f32>(h) * 0.0625f;
 
     NuPrim2DBegin(4, 7, mtl);
-    u8 *vertex;
-    if (!g_NuPrim_NeedsHalfUVs) {
-        vertex = g_NuPrim_StreamBufferPtr->u8_ptr;
-        *reinterpret_cast<f32 *>(vertex + 0x10) = u0;
-        *reinterpret_cast<f32 *>(vertex + 0x14) = v0;
-    } else {
-        vertex = g_NuPrim_StreamBufferPtr->u8_ptr;
-        *reinterpret_cast<u16 *>(vertex + 0x10) = NuRndrFloatToHalf(u0);
-        *reinterpret_cast<u16 *>(vertex + 0x12) = NuRndrFloatToHalf(v0);
-    }
-    const char *needs_overbrightening = &g_NuPrim_NeedsOverbrightening;
-    i32 adjusted_colour = colour;
-    if (!*needs_overbrightening) {
-        adjusted_colour = ((colour >> 1) & 0x007f7f7f) | (colour & 0xff000000);
-    }
-    *reinterpret_cast<u32 *>(vertex + 0x0c) = adjusted_colour;
+    NuRndrPrimUV(u0, v0);
+    NuRndrPrimSetColour(colour);
     NuPrim2DAddXYZ(sx, sy, 0.0f);
-
-    if (!g_NuPrim_NeedsHalfUVs) {
-        vertex = g_NuPrim_StreamBufferPtr->u8_ptr;
-        *reinterpret_cast<f32 *>(vertex + 0x10) = u1;
-        *reinterpret_cast<f32 *>(vertex + 0x14) = v1;
-    } else {
-        vertex = g_NuPrim_StreamBufferPtr->u8_ptr;
-        *reinterpret_cast<u16 *>(vertex + 0x10) = NuRndrFloatToHalf(u1);
-        *reinterpret_cast<u16 *>(vertex + 0x12) = NuRndrFloatToHalf(v1);
-    }
-    adjusted_colour = colour;
-    if (!*needs_overbrightening) {
-        adjusted_colour = ((colour >> 1) & 0x007f7f7f) | (colour & 0xff000000);
-    }
-    *reinterpret_cast<u32 *>(vertex + 0x0c) = adjusted_colour;
+    NuRndrPrimUV(u1, v1);
+    NuRndrPrimSetColour(colour);
     NuPrim2DAddXYZ(sx + sw, sy + sh, 0.0f);
     NuPrim2DEnd();
 }
@@ -15527,9 +15487,9 @@ extern "C" void NuRndrSphereEx(NUVEC *centre, f32 radius, i32 colour, f32 vertic
         f32 upper_radius = radius * NU_SIN_LUT((band < 3 ? band + 1 : 7 - band) * 4096);
         f32 lower_y = NuFsqrt(radius_squared - lower_radius * lower_radius) * vertical_scale;
         f32 upper_y = NuFsqrt(radius_squared - upper_radius * upper_radius) * vertical_scale;
-        if (band > 4)
+        if (__builtin_expect(band > 4, 0))
             lower_y = -lower_y;
-        if (band > 3)
+        if (__builtin_expect(band > 3, 0))
             upper_y = -upper_y;
         lower_y += centre->y;
         upper_y += centre->y;
@@ -15686,9 +15646,11 @@ void NuRndrRectUV2diZ(i32 x, i32 y, i32 width, i32 height, f32 u0, f32 v0, f32 u
     const f32 sh = static_cast<f32>(height) * 0.0625f;
     const f32 sz = static_cast<f32>(z) * (1.0f / 16777215.0f);
     NuPrim2DBegin(4, 7, material);
-    NuRndrPrimTexturedColour(u0, v0, colour);
+    NuRndrPrimUV(u0, v0);
+    NuRndrPrimSetColour(colour);
     NuPrim2DAddXYZ(sx, sy, sz);
-    NuRndrPrimTexturedColour(u1, v1, colour);
+    NuRndrPrimUV(u1, v1);
+    NuRndrPrimSetColour(colour);
     NuPrim2DAddXYZ(sx + sw, sy + sh, sz);
     NuPrim2DEnd();
 }

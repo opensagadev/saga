@@ -1019,7 +1019,9 @@ static void Hub_DrawMiniKitCount(f32 x, f32 y, i32 count, i32 total, f32 alpha) 
 static void Hub_DrawSelectModeMenu(int selected, float alpha) {
     const i32 area = LDataList[hub_new_level].area_index;
     const i32 complete = Game.area_save[area].area_complete;
-    const i32 lost_temple = LOSTTEMPLE_ADATA != NULL && area == LOSTTEMPLE_ADATA->index;
+    i32 lost_temple = 0;
+    if (LOSTTEMPLE_ADATA != NULL)
+        lost_temple = area == LOSTTEMPLE_ADATA->index;
     i32 unlocked = FreePlayUnlocked();
     if (unlocked != 1 && area != -1) {
         unlocked = ADataList[area].episode_index == 0xff && (ADataList[area].flags & 0x4000) != 0;

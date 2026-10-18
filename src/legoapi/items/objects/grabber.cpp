@@ -26,6 +26,7 @@
 #include "legoapi/render/core/terrain.h"
 #include "legoapi/render/core/rtl.h"
 #include "nu2api/numath/numtx.h"
+#include "nu2api/numath/numtx_inline.h"
 #include "gameapi/ai/aisys/aisys.h"
 #include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/gizmo/base/gizmo.h"
@@ -771,25 +772,16 @@ void Grabber_Draw(WORLDINFO_s *world) {
                 position.y += 0.005f;
             position.z = g->grab_position.z;
             if (NuSpecialExistsFn(&g->shadow_special)) {
-                f32 sx = NU_SIN_LUT(g->shadow_x_angle), cx = NU_SIN_LUT(g->shadow_x_angle + 0x4000);
-                f32 sz = NU_SIN_LUT(g->shadow_z_angle), cz = NU_SIN_LUT(g->shadow_z_angle + 0x4000);
-                f32 zero_s = sz * 0.0f, zero_c = 0.0f * cz;
-                reflection.m00 = cx;
-                reflection.m02 = sx * sz + zero_c;
-                reflection.m01 = sx * cz - zero_s;
-                reflection.m03 = 0;
-                reflection.m11 = cx * cz - zero_s;
-                reflection.m10 = -sx;
-                reflection.m12 = cx * sz + zero_c;
-                reflection.m13 = 0;
-                reflection.m20 = 0;
-                reflection.m21 = zero_c - sz;
-                reflection.m22 = cz + zero_s;
-                reflection.m30 = 0;
-                reflection.m23 = 0;
-                reflection.m32 = zero_c + zero_s;
-                reflection.m31 = zero_c - zero_s;
-                reflection.m33 = 1;
+                // Inline NuMtxSetRotationZ by the x angle, then NuMtxRotateX by the z angle.
+                const NUANG x_angle = g->shadow_x_angle;
+                reflection.m00 = reflection.m11 = NU_COS_LUT(x_angle);
+                reflection.m01 = NU_SIN_LUT(x_angle);
+                reflection.m10 = -reflection.m01;
+                reflection.m22 = 1.0f;
+                reflection.m02 = reflection.m12 = reflection.m03 = reflection.m23 = reflection.m20 = reflection.m21 =
+                    reflection.m13 = reflection.m30 = reflection.m31 = reflection.m32 = 0.0f;
+                reflection.m33 = 1.0f;
+                NuMtxRotateXInline(&reflection, g->shadow_z_angle);
                 NuMtxTranslate(&reflection, &position);
                 NuSpecialDrawAt(&g->shadow_special, &reflection);
             } else

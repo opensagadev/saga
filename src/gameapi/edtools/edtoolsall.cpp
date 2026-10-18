@@ -3970,11 +3970,9 @@ extern "C" {
         NuQFntSetScale(edui_font, edui_font_scale_x, edui_font_scale_y);
 
         i32 width = 0;
-        if (menu->title) {
-            i32 title_width = static_cast<i32>(NuQFntPrintLenU(edui_font, menu->title)) >> 4;
-            if (title_width > width)
-                width = title_width;
-        }
+        i32 title_width = menu->title ? static_cast<i32>(NuQFntPrintLenU(edui_font, menu->title)) >> 4 : 0;
+        if (title_width > width)
+            width = title_width;
         i32 property_label_width = 0;
         i32 property_value_width = 0;
 
@@ -7579,7 +7577,7 @@ extern "C" void CreateColourPicker(void) {
     }
 }
 
-extern "C" void RndrOSphere(NUVEC *centre, f32 radius, i32 colour, i32 segments, i32) {
+extern "C" void RndrOSphere(NUVEC *centre, f32 radius, i32 colour, i32 segments, numtl_s *) {
     NUMTX_ALIGNED32 matrix = global_camera.mtx;
     matrix.m30 = centre->x;
     matrix.m31 = centre->y;
@@ -7627,7 +7625,7 @@ extern "C" void RndrCircleXZ(NUVEC *centre, f32 radius, i32 colour, i32 segments
     }
 }
 
-extern "C" void RndrOSquare(NUVEC *centre, f32 radius, i32 colour) {
+extern "C" void RndrOSquare(NUVEC *centre, f32 radius, i32 colour, numtl_s *) {
     f32 corners[4][2] = {{-1.0f, -1.0f}, {1.0f, -1.0f}, {1.0f, 1.0f}, {-1.0f, 1.0f}};
     NUMTX_ALIGNED32 matrix = global_camera.mtx;
     matrix.m31 = centre->y;

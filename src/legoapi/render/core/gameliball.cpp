@@ -6097,17 +6097,12 @@ uv1deb *GenDebIndexRadial(debkeydatatype_s *key, debinftype *effect, float time)
 }
 
 uv1deb *GenDebIndex(debkeydatatype_s *key, debinftype *effect, float time) {
-    u16 particle_index = key->field_18a;
-    u16 next_particle_index;
-    if (static_cast<i16>(particle_index) < key->particle_count) {
-        next_particle_index = particle_index + 1;
-    } else {
-        particle_index = 0;
-        next_particle_index = 1;
+    if (key->field_18a >= key->particle_count) {
+        key->field_18a = 0;
     }
-
+    u16 particle_index = key->field_18a;
     dma_particle_s *particle = DebrisParticleAt(key, particle_index, effect->particle_type);
-    key->field_18a = next_particle_index;
+    key->field_18a = particle_index + 1;
     particle->start_time = time;
     key->emission_epoch = time;
     particle->inverse_lifetime = 64.0f / effect->particle_lifetime;
@@ -6148,16 +6143,12 @@ uv1deb *GenDebIndex(debkeydatatype_s *key, debinftype *effect, float time) {
     particle->momentum.z += key->momentum.z;
 
     for (i32 trail = 0; trail < static_cast<i8>(effect->trail_count); ++trail) {
-        u16 trail_index = key->field_18a;
-        u16 next_trail_index;
-        if (static_cast<i16>(trail_index) < key->particle_count) {
-            next_trail_index = trail_index + 1;
-        } else {
-            trail_index = 0;
-            next_trail_index = 1;
+        if (key->field_18a >= key->particle_count) {
+            key->field_18a = 0;
         }
+        u16 trail_index = key->field_18a;
         dma_particle_s *trail_particle = DebrisParticleAt(key, trail_index, effect->particle_type);
-        key->field_18a = next_trail_index;
+        key->field_18a = trail_index + 1;
         *trail_particle = *particle;
         trail_particle->start_time += static_cast<f32>(trail + 1) * effect->trail_time;
     }
@@ -6395,17 +6386,12 @@ static __attribute__((used)) void edanimcbMCTBCardPresent(eduimenu_s *menu, edui
 }
 
 uv1deb *GenDebIndexSpheroid(debkeydatatype_s *key, debinftype *effect, float time) {
-    u16 particle_index = key->field_18a;
-    u16 next_particle_index;
-    if (static_cast<i16>(particle_index) < key->particle_count) {
-        next_particle_index = particle_index + 1;
-    } else {
-        particle_index = 0;
-        next_particle_index = 1;
+    if (key->field_18a >= key->particle_count) {
+        key->field_18a = 0;
     }
-
+    u16 particle_index = key->field_18a;
     dma_particle_s *particle = DebrisParticleAt(key, particle_index, effect->particle_type);
-    key->field_18a = next_particle_index;
+    key->field_18a = particle_index + 1;
     particle->start_time = time;
     key->emission_epoch = time;
     particle->inverse_lifetime = 64.0f / effect->particle_lifetime;
@@ -6451,16 +6437,12 @@ uv1deb *GenDebIndexSpheroid(debkeydatatype_s *key, debinftype *effect, float tim
     particle->momentum.z += key->momentum.z;
 
     for (i32 trail = 0; trail < static_cast<i8>(effect->trail_count); ++trail) {
-        u16 trail_index = key->field_18a;
-        u16 next_trail_index;
-        if (static_cast<i16>(trail_index) < key->particle_count) {
-            next_trail_index = trail_index + 1;
-        } else {
-            trail_index = 0;
-            next_trail_index = 1;
+        if (key->field_18a >= key->particle_count) {
+            key->field_18a = 0;
         }
+        u16 trail_index = key->field_18a;
         dma_particle_s *trail_particle = DebrisParticleAt(key, trail_index, effect->particle_type);
-        key->field_18a = next_trail_index;
+        key->field_18a = trail_index + 1;
         *trail_particle = *particle;
         trail_particle->start_time += static_cast<f32>(trail + 1) * effect->trail_time;
     }
@@ -6499,42 +6481,14 @@ void CRC_Init(VARIPTR *buffer_start) {
     buffer_start->addr = reinterpret_cast<usize>(g_crc_table + 0x100);
 
     for (u32 i = 0; i < 0x100; i++) {
-        u32 crc = (i & 0x80U) != 0 ? (i << 25) ^ CRC32_POLY : i << 25;
+        u32 crc = i << 24;
 
-        if ((crc & 0x80000000U) != 0) {
-            crc = (crc << 1) ^ CRC32_POLY;
-        } else {
+        for (i32 j = 0; j < 8; j++) {
+            u32 top_bit = crc & 0x80000000U;
             crc <<= 1;
-        }
-        if ((crc & 0x80000000U) != 0) {
-            crc = (crc << 1) ^ CRC32_POLY;
-        } else {
-            crc <<= 1;
-        }
-        if ((crc & 0x80000000U) != 0) {
-            crc = (crc << 1) ^ CRC32_POLY;
-        } else {
-            crc <<= 1;
-        }
-        if ((crc & 0x80000000U) != 0) {
-            crc = (crc << 1) ^ CRC32_POLY;
-        } else {
-            crc <<= 1;
-        }
-        if ((crc & 0x80000000U) != 0) {
-            crc = (crc << 1) ^ CRC32_POLY;
-        } else {
-            crc <<= 1;
-        }
-        if ((crc & 0x80000000U) != 0) {
-            crc = (crc << 1) ^ CRC32_POLY;
-        } else {
-            crc <<= 1;
-        }
-        if ((crc & 0x80000000U) != 0) {
-            crc = (crc << 1) ^ CRC32_POLY;
-        } else {
-            crc <<= 1;
+            if (top_bit != 0) {
+                crc ^= CRC32_POLY;
+            }
         }
         g_crc_table[i] = crc;
     }
@@ -18222,105 +18176,102 @@ void TerrDrawPlatCol(tertype *terrain, i16 index, i32 colour) {
     TERRAIN_DEBUG_RECORD *record = reinterpret_cast<TERRAIN_DEBUG_RECORD *>(terrain);
     TERRAIN_GROUP &group = CurTerr->groups[index];
     TERRAIN_PLATFORM &platform = CurTerr->platforms[group.scene_index];
-    if (platform.scene_transform != NULL) {
-        if ((platform.flags & TERRAIN_PLATFORM_FLAG_DISPLAY_LIST_BACKED) != 0) {
-            if ((*static_cast<u8 *>(platform.scene_transform) & 2) == 0)
-                return;
-        } else if ((*static_cast<u8 *>(platform.scene_transform) & 1) == 0) {
-            return;
-        }
-    }
+    if (platform.scene_transform == NULL ||
+        ((platform.flags & TERRAIN_PLATFORM_FLAG_DISPLAY_LIST_BACKED) != 0
+             ? (*static_cast<u8 *>(platform.scene_transform) & 2) != 0
+             : (*static_cast<u8 *>(platform.scene_transform) & 1) != 0)) {
 
-    NUVEC4 points[4];
-    for (i32 i = 0; i < 3; ++i) {
-        points[i].x = record->vertices[i].x;
-        points[i].y = record->vertices[i].y;
-        points[i].z = record->vertices[i].z;
-        points[i].w = 0.0f;
-    }
-    NUVEC4 normals[2];
-    normals[0].x = record->normals[0].x * 0.4f;
-    normals[0].y = record->normals[0].y * 0.4f;
-    normals[0].z = record->normals[0].z * 0.4f;
-    normals[0].w = 0.0f;
-    if ((platform.flags & TERRAIN_PLATFORM_FLAG_ROTATING) != 0) {
-        NuVec4MtxTransformVU0(&points[0], &points[0], static_cast<NUMTX *>(platform.scene_object));
-        NuVec4MtxTransformVU0(
-            &points[1], &points[1],
-            static_cast<NUMTX *>(CurTerr->platforms[CurTerr->groups[index].scene_index].scene_object));
-        NuVec4MtxTransformVU0(
-            &points[2], &points[2],
-            static_cast<NUMTX *>(CurTerr->platforms[CurTerr->groups[index].scene_index].scene_object));
-        NuVec4MtxTransformVU0(
-            &normals[0], &normals[0],
-            static_cast<NUMTX *>(CurTerr->platforms[CurTerr->groups[index].scene_index].scene_object));
-    }
-    const bool quad = !(record->normals[1].y > 65535.0f);
-    if (quad) {
-        points[3].x = record->vertices[3].x;
-        points[3].y = record->vertices[3].y;
-        points[3].z = record->vertices[3].z;
-        points[3].w = 0.0f;
-        NuVec4MtxTransformVU0(
-            &points[3], &points[3],
-            static_cast<NUMTX *>(CurTerr->platforms[CurTerr->groups[index].scene_index].scene_object));
-        normals[1].x = record->normals[1].x * 0.4f;
-        normals[1].y = record->normals[1].y * 0.4f;
-        normals[1].z = record->normals[1].z * 0.4f;
-        normals[1].w = 0.0f;
-        // Retail transforms the first normal again here, leaving the second in local space.
-        NuVec4MtxTransformVU0(
-            &normals[0], &normals[0],
-            static_cast<NUMTX *>(CurTerr->platforms[CurTerr->groups[index].scene_index].scene_object));
-    }
+        NUVEC4 points[4];
+        for (i32 i = 0; i < 3; ++i) {
+            points[i].x = record->vertices[i].x;
+            points[i].y = record->vertices[i].y;
+            points[i].z = record->vertices[i].z;
+            points[i].w = 0.0f;
+        }
+        NUVEC4 normals[2];
+        normals[0].x = record->normals[0].x * 0.4f;
+        normals[0].y = record->normals[0].y * 0.4f;
+        normals[0].z = record->normals[0].z * 0.4f;
+        normals[0].w = 0.0f;
+        if ((platform.flags & TERRAIN_PLATFORM_FLAG_ROTATING) != 0) {
+            NuVec4MtxTransformVU0(&points[0], &points[0], static_cast<NUMTX *>(platform.scene_object));
+            NuVec4MtxTransformVU0(
+                &points[1], &points[1],
+                static_cast<NUMTX *>(CurTerr->platforms[CurTerr->groups[index].scene_index].scene_object));
+            NuVec4MtxTransformVU0(
+                &points[2], &points[2],
+                static_cast<NUMTX *>(CurTerr->platforms[CurTerr->groups[index].scene_index].scene_object));
+            NuVec4MtxTransformVU0(
+                &normals[0], &normals[0],
+                static_cast<NUMTX *>(CurTerr->platforms[CurTerr->groups[index].scene_index].scene_object));
+        }
+        const bool quad = !(record->normals[1].y > 65535.0f);
+        if (quad) {
+            points[3].x = record->vertices[3].x;
+            points[3].y = record->vertices[3].y;
+            points[3].z = record->vertices[3].z;
+            points[3].w = 0.0f;
+            NuVec4MtxTransformVU0(
+                &points[3], &points[3],
+                static_cast<NUMTX *>(CurTerr->platforms[CurTerr->groups[index].scene_index].scene_object));
+            normals[1].x = record->normals[1].x * 0.4f;
+            normals[1].y = record->normals[1].y * 0.4f;
+            normals[1].z = record->normals[1].z * 0.4f;
+            normals[1].w = 0.0f;
+            // Retail transforms the first normal again here, leaving the second in local space.
+            NuVec4MtxTransformVU0(
+                &normals[0], &normals[0],
+                static_cast<NUMTX *>(CurTerr->platforms[CurTerr->groups[index].scene_index].scene_object));
+        }
 
-    if (!quad) {
-        for (i32 i = 0; i < 2; ++i) {
-            const f32 t = static_cast<f32>(i);
+        if (!quad) {
+            for (i32 i = 0; i < 2; ++i) {
+                const f32 t = static_cast<f32>(i);
+                const NUVEC &origin = CurTerr->groups[index].origin;
+                NuRndrLine3dDbg(origin.x + points[0].x, origin.y + points[0].y, origin.z + points[0].z,
+                                origin.x + points[1].x + (points[2].x - points[1].x) * t,
+                                origin.y + points[1].y + (points[2].y - points[1].y) * t,
+                                origin.z + points[1].z + (points[2].z - points[1].z) * t, colour);
+            }
+            for (i32 i = 0; i < 2; ++i) {
+                const f32 t = static_cast<f32>(i);
+                const NUVEC &origin = CurTerr->groups[index].origin;
+                NuRndrLine3dDbg(origin.x + points[1].x, origin.y + points[1].y, origin.z + points[1].z,
+                                origin.x + points[0].x + (points[2].x - points[0].x) * t,
+                                origin.y + points[0].y + (points[2].y - points[0].y) * t,
+                                origin.z + points[0].z + (points[2].z - points[0].z) * t, colour);
+            }
+        } else {
+            for (i32 i = 0; i < 2; ++i) {
+                const f32 t = static_cast<f32>(i);
+                const NUVEC &origin = CurTerr->groups[index].origin;
+                NuRndrLine3dDbg(origin.x + points[0].x + (points[1].x - points[0].x) * t,
+                                origin.y + points[0].y + (points[1].y - points[0].y) * t,
+                                origin.z + points[0].z + (points[1].z - points[0].z) * t,
+                                origin.x + points[2].x + (points[3].x - points[2].x) * t,
+                                origin.y + points[2].y + (points[3].y - points[2].y) * t,
+                                origin.z + points[2].z + (points[3].z - points[2].z) * t, colour);
+            }
+            for (i32 i = 0; i < 2; ++i) {
+                const f32 t = static_cast<f32>(i);
+                const NUVEC &origin = CurTerr->groups[index].origin;
+                NuRndrLine3dDbg(origin.x + points[0].x + (points[2].x - points[0].x) * t,
+                                origin.y + points[0].y + (points[2].y - points[0].y) * t,
+                                origin.z + points[0].z + (points[2].z - points[0].z) * t,
+                                origin.x + points[1].x + (points[3].x - points[1].x) * t,
+                                origin.y + points[1].y + (points[3].y - points[1].y) * t,
+                                origin.z + points[1].z + (points[3].z - points[1].z) * t, colour);
+            }
             const NUVEC &origin = CurTerr->groups[index].origin;
-            NuRndrLine3dDbg(origin.x + points[0].x, origin.y + points[0].y, origin.z + points[0].z,
-                            origin.x + points[1].x + (points[2].x - points[1].x) * t,
-                            origin.y + points[1].y + (points[2].y - points[1].y) * t,
-                            origin.z + points[1].z + (points[2].z - points[1].z) * t, colour);
-        }
-        for (i32 i = 0; i < 2; ++i) {
-            const f32 t = static_cast<f32>(i);
-            const NUVEC &origin = CurTerr->groups[index].origin;
-            NuRndrLine3dDbg(origin.x + points[1].x, origin.y + points[1].y, origin.z + points[1].z,
-                            origin.x + points[0].x + (points[2].x - points[0].x) * t,
-                            origin.y + points[0].y + (points[2].y - points[0].y) * t,
-                            origin.z + points[0].z + (points[2].z - points[0].z) * t, colour);
-        }
-    } else {
-        for (i32 i = 0; i < 2; ++i) {
-            const f32 t = static_cast<f32>(i);
-            const NUVEC &origin = CurTerr->groups[index].origin;
-            NuRndrLine3dDbg(origin.x + points[0].x + (points[1].x - points[0].x) * t,
-                            origin.y + points[0].y + (points[1].y - points[0].y) * t,
-                            origin.z + points[0].z + (points[1].z - points[0].z) * t,
-                            origin.x + points[2].x + (points[3].x - points[2].x) * t,
-                            origin.y + points[2].y + (points[3].y - points[2].y) * t,
-                            origin.z + points[2].z + (points[3].z - points[2].z) * t, colour);
-        }
-        for (i32 i = 0; i < 2; ++i) {
-            const f32 t = static_cast<f32>(i);
-            const NUVEC &origin = CurTerr->groups[index].origin;
-            NuRndrLine3dDbg(origin.x + points[0].x + (points[2].x - points[0].x) * t,
-                            origin.y + points[0].y + (points[2].y - points[0].y) * t,
-                            origin.z + points[0].z + (points[2].z - points[0].z) * t,
-                            origin.x + points[1].x + (points[3].x - points[1].x) * t,
-                            origin.y + points[1].y + (points[3].y - points[1].y) * t,
-                            origin.z + points[1].z + (points[3].z - points[1].z) * t, colour);
+            NuRndrLine3dDbg(origin.x + points[3].x, origin.y + points[3].y, origin.z + points[3].z,
+                            origin.x + points[3].x + normals[1].x, origin.y + points[3].y + normals[1].y,
+                            origin.z + points[3].z + normals[1].z, 0xff);
         }
         const NUVEC &origin = CurTerr->groups[index].origin;
-        NuRndrLine3dDbg(origin.x + points[3].x, origin.y + points[3].y, origin.z + points[3].z,
-                        origin.x + points[3].x + normals[1].x, origin.y + points[3].y + normals[1].y,
-                        origin.z + points[3].z + normals[1].z, 0xff);
+        NuRndrLine3dDbg(origin.x + points[0].x, origin.y + points[0].y, origin.z + points[0].z,
+                        origin.x + points[0].x + normals[0].x, origin.y + points[0].y + normals[0].y,
+                        origin.z + points[0].z + normals[0].z, 0xff);
     }
-    const NUVEC &origin = CurTerr->groups[index].origin;
-    NuRndrLine3dDbg(origin.x + points[0].x, origin.y + points[0].y, origin.z + points[0].z,
-                    origin.x + points[0].x + normals[0].x, origin.y + points[0].y + normals[0].y,
-                    origin.z + points[0].z + normals[0].z, 0xff);
 }
 
 extern "C" {

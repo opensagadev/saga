@@ -1762,8 +1762,8 @@ i32 DoBuckStart(GameObject_s *object) {
     WORLDINFO_s *world = WorldInfo_CurrentlyActive();
     if (world->current_level != HOTHESCAPEB_LDATA || object->id != id_SNOWMOB)
         return 0;
+    static NUVEC forward = {0.0f, 0.0f, 1.0f};
     i32 jumped = 0;
-    NUVEC forward = {0.0f, 0.0f, 1.0f};
     for (i32 i = 0; i < 8; ++i) {
         GameObject_s *player = Player[i];
         if (player == NULL || (player->apiobj.field_0x1f8 & 0x1001) != 0x1001 || player->apiobj.field_0x287 != 0 ||

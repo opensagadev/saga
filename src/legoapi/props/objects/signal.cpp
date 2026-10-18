@@ -317,7 +317,7 @@ static void Signal_SetVisibility(SIGNAL *signal, i32 visible) {
     u8 was_visible = signal->visible;
     signal->visible = visible != 0;
 
-    if (signal->visible) {
+    if (visible) {
         if (!was_visible) {
             signal->platform_id = NewPlatPickupInst(&signal->matrix, 2);
         }

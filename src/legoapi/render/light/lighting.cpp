@@ -272,20 +272,19 @@ void LightGameObject(GameObject_s *object, void *set) {
 
     const rtldata_s &target = object->light_data;
     OBJECTLIGHTINGSTATE_s &current = object->lighting_state;
-    const bool reset = object->reset_lighting;
 
     f32 surface_fade = 0.0f;
     if (object->apiobj.field_0x218 != 2000000.0f &&
         (TerSurface[static_cast<i8>(object->apiobj.field_0x281)].flags & 8) != 0) {
         surface_fade = 1.0f;
     }
-    if (reset) {
+    if (object->reset_lighting) {
         object->field_0xd6c = surface_fade;
     } else {
         object->field_0xd6c = SeekLinearF(object->field_0xd6c, surface_fade, 3.0f * FRAMETIME);
     }
 
-    if (reset) {
+    if (object->reset_lighting) {
         current.ambient = target.ambient;
     } else {
         current.ambient.x = SeekValF(current.ambient.x, target.ambient.x, 5.0f);
@@ -293,7 +292,7 @@ void LightGameObject(GameObject_s *object, void *set) {
         current.ambient.z = SeekValF(current.ambient.z, target.ambient.z, 5.0f);
     }
 
-    if (reset) {
+    if (object->reset_lighting) {
         current.intensity[0] = target.intensity[0];
         current.direction[0] = target.direction[0];
     } else {
@@ -310,7 +309,7 @@ void LightGameObject(GameObject_s *object, void *set) {
         current.direction[0] = target.direction[0];
     }
 
-    if (reset) {
+    if (object->reset_lighting) {
         current.intensity[1] = target.intensity[1];
         current.direction[1] = target.direction[1];
     } else {
@@ -327,7 +326,7 @@ void LightGameObject(GameObject_s *object, void *set) {
         current.direction[1] = target.direction[1];
     }
 
-    if (reset) {
+    if (object->reset_lighting) {
         current.intensity[2] = target.intensity[2];
         current.direction[2] = target.direction[2];
     } else {

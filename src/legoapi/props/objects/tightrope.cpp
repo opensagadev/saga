@@ -232,7 +232,7 @@ static void TightRopes_Draw(void *world_info, void *, float) {
         i32 count = 0;
         GameObject_s *object = Obj;
         for (i32 object_index = 0; object_index < HIGHGAMEOBJECT; ++object_index, ++object) {
-            if ((object->apiobj.object_flags & 0x1001) != 0x1001 || object->character_context != 0x44 ||
+            if ((object->apiobj.field_0x1f8 & 0x1001) != 0x1001 || object->character_context != 0x44 ||
                 static_cast<u16>(object->context_animation - 5) <= 1 || object->field_0x788 != rope) {
                 continue;
             }
@@ -261,7 +261,7 @@ static void TightRopes_Draw(void *world_info, void *, float) {
 
         vertices[0].position = rope->start;
         NURND_VERTEX3D *vertex = &vertices[1];
-        for (NUVEC **position = positions; position != positions + count; ++position, ++vertex) {
+        for (NUVEC **position = positions; position < positions + count; ++position, ++vertex) {
             vertex->position = **position;
         }
         vertices[count + 1].position = rope->end;

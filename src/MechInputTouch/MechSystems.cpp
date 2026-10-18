@@ -360,8 +360,9 @@ void HudRadarPulse::Process(float delta) {
                 pulses[i].delay_finished = 1;
         }
         if (pulses[i].delay_finished && !pulses[i].finished) {
-            pulses[i].radius += pulses[i].speed * delta;
-            float speed = pulses[i].speed - 0.4f * delta;
+            float speed = pulses[i].speed;
+            pulses[i].radius += speed * delta;
+            speed -= 0.4f * delta;
             pulses[i].speed = speed > 0.0f ? speed : 0.0f;
             pulses[i].angle += static_cast<i32>(32768.0f * delta);
             if (pulses[i].angle > 0x7fff)

@@ -404,18 +404,18 @@ void NuVirtualTouchDevice::Execute(u32 port, NUPADTYPE in_type, NUPADATTACHMENTT
     out_caps = 0x418;
     out_buttons = 0;
     memset(out_analog, 0, 12 * sizeof(float));
-    for (u32 i = 0; i < unknown_d4[unknown_04].unknown_c8; ++i) {
-        if (unknown_d4[unknown_04].elements[i]->type == NuTouchInputElement::TYPE_LEFT_STICK) {
-            out_analog[8] = unknown_d4[unknown_04].elements[i]->GetStickX();
-            out_analog[9] = unknown_d4[unknown_04].elements[i]->GetStickY();
-        } else if (unknown_d4[unknown_04].elements[i]->type == NuTouchInputElement::TYPE_RIGHT_STICK) {
-            out_analog[10] = unknown_d4[unknown_04].elements[i]->GetStickX();
-            out_analog[11] = unknown_d4[unknown_04].elements[i]->GetStickY();
+    for (u32 i = 0; i < CurrentLayout()->unknown_c8; ++i) {
+        if (CurrentLayout()->elements[i]->type == NuTouchInputElement::TYPE_LEFT_STICK) {
+            out_analog[8] = CurrentLayout()->elements[i]->GetStickX();
+            out_analog[9] = CurrentLayout()->elements[i]->GetStickY();
+        } else if (CurrentLayout()->elements[i]->type == NuTouchInputElement::TYPE_RIGHT_STICK) {
+            out_analog[10] = CurrentLayout()->elements[i]->GetStickX();
+            out_analog[11] = CurrentLayout()->elements[i]->GetStickY();
         } else {
             static i32 test;
-            if (unknown_d4[unknown_04].elements[i]->IsPressed()) {
+            if (CurrentLayout()->elements[i]->IsPressed()) {
                 ++test;
-                out_buttons |= unknown_d4[unknown_04].elements[i]->index;
+                out_buttons |= CurrentLayout()->elements[i]->index;
             } else {
                 test = 0;
             }

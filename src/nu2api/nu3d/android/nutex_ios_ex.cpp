@@ -840,11 +840,6 @@ i32 GetMipOffset(i32 width, i32 height, NUTEXFORMAT format, i32 depth, bool isCu
 
     isAuto = targetMip < 0 && targetSlice < 0;
 
-    if (isAuto != 0) {
-        targetSlice = isCubemap ? 5 : depth;
-        targetMip = mips;
-    }
-
     u8 isCompressed;
     i32 bytesPerBlockOrPixel;
     i32 blockWidth;
@@ -861,6 +856,11 @@ i32 GetMipOffset(i32 width, i32 height, NUTEXFORMAT format, i32 depth, bool isCu
         minBlocks = 1;
         bytesPerBlockOrPixel = 0;
         blockWidth = 4;
+    }
+
+    if (isAuto != 0) {
+        targetSlice = isCubemap ? 5 : depth;
+        targetMip = mips;
     }
 
     while (true) {
@@ -1181,21 +1181,17 @@ GLuint NuIOS_CreateGLTexFromPlatfomSpecificForecPVR(const char *filename) {
 }
 
 GLuint NuIOS_CreateGLTexFromFile(const char *filename) {
-    const i32 platform = NuPlatform::Get()->GetCurrentPlatform();
-    if (platform == ANDROID_ATITC_PLATFORM) {
-        goto load_android_texture;
-    }
-    if (platform >= ANDROID_ATITC_PLATFORM) {
-        if (platform == ANDROID_PVRTC_PLATFORM) {
+    switch (NuPlatform::Get()->GetCurrentPlatform()) {
+        case ANDROID_ATITC_PLATFORM:
+        case ANDROID_S3TC_PLATFORM:
+        case ANDROID_ETC1_PLATFORM:
+            break;
+        case ANDROID_PVRTC_PLATFORM:
             return NuIOS_CreateGLTexFromPlatfomSpecificFile(filename);
-        }
-        if (platform <= ANDROID_ETC1_PLATFORM) {
-            goto load_android_texture;
-        }
+        default:
+            return 0;
     }
-    return 0;
 
-load_android_texture:
     char fixed_filename[0x200];
     char extension[0x200];
     NuStrCpy(extension, NuPlatform::Get()->GetCurrentTextureExtension());

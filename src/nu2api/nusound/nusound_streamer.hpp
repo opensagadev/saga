@@ -128,7 +128,7 @@ class NuSoundStreamer {
 
   private:
     NuThread *thread;
-    bool running;
+    volatile bool running;
 
     RingQueue queue1; // control queue (open / close / recue / shutdown)
     RingQueue queue2; // fill queue — always drained first

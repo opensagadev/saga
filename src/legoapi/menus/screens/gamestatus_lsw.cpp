@@ -440,11 +440,10 @@ void CollectCharcters_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 ac
         return;
     if (stage->field_0x14 == 0) {
         const f32 offscreen = (1.0f - fabsf(COLLECTION_Y_STATUS)) + 1.0f;
+        const f32 range = COLLECTION_Y_STATUS + offscreen;
         const f32 ratio = NuFdiv(stage->field_0x18, stage->field_0x1c);
         Collection_Draw(collection, 0.0f,
-                        NuTrigTable[(static_cast<i32>(ratio * 16384.0f) >> 1) & 0x7fff] *
-                                (COLLECTION_Y_STATUS + offscreen) -
-                            offscreen,
+                        NuTrigTable[(static_cast<i32>(ratio * 16384.0f) >> 1) & 0x7fff] * range - offscreen,
                         collection->field_10, NULL, 1.0f, 0);
         return;
     }
@@ -556,9 +555,10 @@ void MiniKit_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float ela
     switch (stage->field_0x14) {
         case 0:
             newminikitcount = packet->new_minikits;
-            currentminikit = Game.area_save[packet->area->index].field_0x5[0];
             if (newminikitcount > 0)
-                currentminikit -= newminikitcount;
+                currentminikit = Game.area_save[packet->area->index].field_0x5[0] - newminikitcount;
+            else
+                currentminikit = Game.area_save[packet->area->index].field_0x5[0];
             stage->field_0x18 = 0.0f;
             stage->field_0x1c = 1.0f;
             stage->field_0x14 = 1;
@@ -627,7 +627,7 @@ void MiniKit_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float ela
             SetDrawGoldBrick(packet, packet->current_gold_brick);
             const f32 previous = stage->field_0x18;
             stage->field_0x18 += elapsed;
-            if (!(stage->field_0x18 < stage->field_0x1c)) {
+            if (stage->field_0x18 >= stage->field_0x1c) {
                 if (previous < stage->field_0x1c) {
                     AddStatusMiniKitParts();
                     NewStatusRumbleBuzz(-1, 1.0f, 0.1f, 0);
@@ -1756,16 +1756,18 @@ void AllMiniKits_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 cur
     }
     if (stage->field_0x12 != 0) {
         const f32 alpha = getFinishedStatusAlpha(packet);
+        const f32 kit_wobble = NuTrigTable[(static_cast<i32>(alpha * 16384.0f) >> 1) & 0x7fff];
         const u8 opacity = static_cast<u8>(static_cast<i32>(alpha * 128.0f));
-        i32 angle = 0x2000;
-        if (GameTimer.time_elapsed_mod_seconds <= 0.25f)
-            angle = (static_cast<i32>(GameTimer.time_elapsed_mod_seconds * 32768.0f + 16384.0f) >> 1) & 0x7fff;
+        const i32 angle = GameTimer.time_elapsed_mod_seconds > 0.25f
+                              ? 0x2000
+                              : (static_cast<i32>(GameTimer.time_elapsed_mod_seconds * 32768.0f + 16384.0f) >> 1) &
+                                    0x7fff;
+        const f32 pulse = NuTrigTable[angle];
         if (Game.area_save[packet->area->index].field_0x5[0] != 0) {
-            DrawStatusMiniKit(-0.6f, -0.5f, 1.1f,
-                              NuTrigTable[(static_cast<i32>(alpha * 16384.0f) >> 1) & 0x7fff] * 0.15f, 1.0f,
+            DrawStatusMiniKit(-0.6f, -0.5f, 1.1f, kit_wobble * 0.15f, 1.0f,
                               Game.area_save[packet->area->index].field_0x5[0], packet, 0.0f);
         } else {
-            const f32 size = ((1.0f - fabsf(NuTrigTable[angle])) + 1.0f) * 1.2f;
+            const f32 size = ((1.0f - fabsf(pulse)) + 1.0f) * 1.2f;
             Text3DEx("?", -0.6f, -0.6f, 1.1f, size, size, size, 0, 255, 255, 255, opacity);
         }
         if (Game.area_save[packet->area->index].field_0x5[0] != packet->minikit_max) {

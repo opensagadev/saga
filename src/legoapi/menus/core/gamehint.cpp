@@ -607,7 +607,8 @@ void MenuDrawHints(MENU_s *menu) {
         const f32 start_x = -1.0f - (1.0f - __builtin_fabsf(icon_x));
         icon_x = start_x + (icon_x - start_x) * NU_SIN_LUT(static_cast<i32>(MenuAlpha * 16384.0f));
     }
-    f32 y = -0.15f - -0.35f * updatehints_current_y[MechInputTouchSystem::s_baseControlMode];
+    const f32 scroll = -0.35f * updatehints_current_y[MechInputTouchSystem::s_baseControlMode];
+    f32 y = -0.15f - scroll;
     const f32 height = 0.15f / GetAspectRatio();
     Text3D(ASCII_UP, 0.85f, 0.15f, 1.0f, 1.2f, 1.2f, 1.2f, 0, red, green, blue);
     menu->item_column[0] = 0;

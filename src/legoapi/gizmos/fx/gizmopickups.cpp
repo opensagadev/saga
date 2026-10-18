@@ -34,6 +34,7 @@
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nutrig.h"
+#include "nu2api/numath/numtx_inline.h"
 #include "nu2api/numath/nuvec.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nurndr.h"
@@ -600,27 +601,15 @@ static void GizmoPickups_DrawList(WORLDINFO *world, GIZMOPICKUP_s *pickups, i32 
             if ((type->flags & GIZMOPICKUP_TYPE_DRAW_TUMBLING) != 0) {
                 const u16 y_rotation = pickup.draw_rotation;
                 const i32 x_rotation = static_cast<i32>(NuTrigTable[y_rotation & 0x7fff] * 1820.0f);
-                const f32 cos_x = NU_COS_LUT(x_rotation);
-                const f32 sin_x = NU_SIN_LUT(x_rotation);
-                const f32 cos_y = NU_COS_LUT(y_rotation);
-                const f32 sin_y = NU_SIN_LUT(y_rotation);
-
-                matrix.m00 = cos_y + sin_y * 0.0f;
-                matrix.m01 = 0.0f;
-                matrix.m02 = cos_y * 0.0f - sin_y;
-                matrix.m03 = 0.0f;
-                matrix.m11 = cos_x;
-                matrix.m10 = sin_x * sin_y + cos_y * 0.0f;
-                matrix.m12 = sin_x * cos_y - sin_y * 0.0f;
-                matrix.m13 = 0.0f;
-                matrix.m21 = -sin_x;
-                matrix.m20 = sin_y * cos_x + cos_y * 0.0f;
-                matrix.m22 = cos_y * cos_x - sin_y * 0.0f;
-                matrix.m23 = 0.0f;
-                matrix.m30 = sin_y * 0.0f + cos_y * 0.0f;
-                matrix.m31 = 0.0f;
-                matrix.m32 = cos_y * 0.0f - sin_y * 0.0f;
+                // Inline NuMtxSetRotationX followed by NuMtxRotateY.
+                matrix.m11 = matrix.m22 = NU_COS_LUT(x_rotation);
+                matrix.m12 = NU_SIN_LUT(x_rotation);
+                matrix.m21 = -matrix.m12;
+                matrix.m00 = 1.0f;
+                matrix.m01 = matrix.m02 = matrix.m03 = matrix.m23 = matrix.m10 = matrix.m20 = matrix.m13 = matrix.m30 =
+                    matrix.m31 = matrix.m32 = 0.0f;
                 matrix.m33 = 1.0f;
+                NuMtxRotateYInline(&matrix, y_rotation);
                 NuMtxTranslate(&matrix, &pickup.position);
             } else if ((type->flags & GIZMOPICKUP_TYPE_DRAW_Y_ROTATION) != 0) {
                 const i32 y_rotation = pickup.draw_rotation;

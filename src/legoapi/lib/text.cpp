@@ -966,12 +966,18 @@ void TextCrawl_Draw(float dt, i32 paragraphs, float alpha, char *text) {
     NuQFntPushPrintMode(4);
     NuQFntSetCoordinateSystem(NUQFNT_CSMODE_ABSOLUTE);
 
-    f32 colour_scale = 1.0f;
+    f32 colour_alpha = 128.0f;
+    f32 colour_red = 0.0f;
+    f32 colour_green = 111.0f;
     if (paragraphs == 0 && QFont3DTime >= 55.0f) {
-        colour_scale = 1.0f - (QFont3DTime - 55.0f) / 5.0f;
+        const f32 colour_scale = 1.0f - (QFont3DTime - 55.0f) / 5.0f;
+        colour_alpha *= colour_scale;
+        colour_red *= colour_scale;
+        colour_green *= colour_scale;
     }
-    const u32 colour = (static_cast<u32>(static_cast<i32>(128.0f * colour_scale * alpha)) << 24) |
-                       ((static_cast<u32>(static_cast<i32>(111.0f * colour_scale)) & 0xff) << 8) | 0xff;
+    const u32 colour = 0xff | ((static_cast<u32>(static_cast<i32>(colour_green)) & 0xff) << 8) |
+                       ((static_cast<u32>(static_cast<i32>(colour_red)) & 0xff) << 16) |
+                       (static_cast<u32>(static_cast<i32>(colour_alpha * alpha)) << 24);
     NuQFntSetColour(QFont3DZ, colour);
 
     f32 y = QFont3DTime * 0.4f - 4.5f;

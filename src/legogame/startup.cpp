@@ -226,10 +226,10 @@ static void LoadPermData(BGPROCINFO *proc) {
 
     // Font path depends on language.  `Text_Language == 0` is Japanese in the
     // original; everything else uses the Latin font.
-    if (Text_Language == 0) {
-        Text_LoadFont((char *)"stuff\\text\\starwars_font_j", &permbuffer_ptr, &permbuffer_end);
-    } else {
+    if (Text_Language != 0) {
         Text_LoadFont((char *)"stuff\\text\\starwars_font", &permbuffer_ptr, &permbuffer_end);
+    } else {
+        Text_LoadFont((char *)"stuff\\text\\starwars_font_j", &permbuffer_ptr, &permbuffer_end);
     }
 
     // PAL builds show the language menu — the loader spins here until the menu
@@ -256,7 +256,11 @@ static void LoadPermData(BGPROCINFO *proc) {
         char legal_name[64];
         NuStrCpy(legal_path, "stuff\\legal\\");
         NuIOS_GetDeviceLanguage();
-        NuStrCpy(legal_name, Text_Language == 2 ? "LEGAL_FRENCH" : "LEGAL_ENGLISH");
+        if (Text_Language == 2) {
+            NuStrCpy(legal_name, "LEGAL_FRENCH");
+        } else {
+            NuStrCpy(legal_name, "LEGAL_ENGLISH");
+        }
         NuStrCat(legal_path, legal_name);
         legal_tid = NuTexRead(legal_path, &legal_tex_base, legal_tex_end);
         loadlegal_done = 1;

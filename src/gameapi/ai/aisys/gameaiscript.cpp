@@ -6553,11 +6553,11 @@ __used__ static i32 Action_CircleLocator(AISYS *sys, AISCRIPTPROCESS *processor,
                     packet->movement_instruction_parameter =
                         AIParamToFloatEx(packet, processor, value + NuStrLen("goalrange") + 1);
                 } else if (NuStrICmp(params[index], "reverse") == 0) {
-                    packet->field_0x1e5 ^= 2;
+                    packet->circle_clockwise = !packet->circle_clockwise;
                 } else if (NuStrICmp(params[index], "anticlockwise") == 0) {
-                    packet->field_0x1e5 &= static_cast<u8>(~2u);
+                    packet->circle_clockwise = 0;
                 } else if (NuStrICmp(params[index], "clockwise") == 0) {
-                    packet->field_0x1e5 |= 2;
+                    packet->circle_clockwise = 1;
                 } else {
                     packet->movement_instruction_parameter = AIParamToFloatEx(packet, processor, params[index]);
                 }
@@ -8676,15 +8676,14 @@ __used__ static i32 Action_AddDebris(AISYS *sys, AISCRIPTPROCESS *processor, AIP
             }
         }
 
-        NUVEC *debris_position;
-        if (position.x == 1000000000.0f && position.y == 1000000000.0f && position.z == 1000000000.0f) {
-            if (object == NULL)
-                return 1;
-            debris_position = &object->apiobj.collision_position;
+        if (position.x == 1000000000.0f || position.y == 1000000000.0f || position.z == 1000000000.0f) {
+            if (object != NULL) {
+                AddFiniteShotDebrisEffect(&handle, WORLD->debris_sys->entries[debris_type].effect,
+                                          &object->apiobj.collision_position, 1);
+            }
         } else {
-            debris_position = &position;
+            AddFiniteShotDebrisEffect(&handle, WORLD->debris_sys->entries[debris_type].effect, &position, 1);
         }
-        AddFiniteShotDebrisEffect(&handle, WORLD->debris_sys->entries[debris_type].effect, debris_position, 1);
     }
     return 1;
 }
@@ -9473,7 +9472,7 @@ __used__ static i32 Action_EngageOpponent(AISYS *sys, AISCRIPTPROCESS *processor
             } else if (NuStrIStr(params[index], "no_fire_in_minicut") != NULL) {
                 processor->action_data_1 |= 4;
             } else if (NuStrIStr(params[index], "circle") != NULL) {
-                packet->field_0x1e5 ^= 2;
+                packet->circle_clockwise = !packet->circle_clockwise;
                 processor->action_data_1 |= 8;
             } else if ((value = NuStrIStr(params[index], "fireinterval")) != NULL) {
                 processor->action_data_5 = AIParamToFloat(processor, value + 13);

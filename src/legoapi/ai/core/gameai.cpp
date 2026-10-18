@@ -1732,7 +1732,8 @@ void AIPathCnxControlSysUpdate(AIPATHCNXCONTROLSYS_s *system) {
                     on = 0;
                 break;
             case 8:
-                on = static_cast<GIZOBSTACLE_s *>(controller->target)->anim_set->state == GAMEANIMSET_STATE_AT_END;
+                if (static_cast<GIZOBSTACLE_s *>(controller->target)->anim_set->state != GAMEANIMSET_STATE_AT_END)
+                    on = 0;
                 break;
             case 9:
                 on = (static_cast<ZIPUP *>(controller->target)->flags & (ZIPUP_FLAG_ACTIVE | ZIPUP_FLAG_VISIBLE)) ==

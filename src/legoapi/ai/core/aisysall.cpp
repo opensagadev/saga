@@ -3387,12 +3387,12 @@ static void AISysCheckAntinode_Ellipse(APIOBJECT *object, AIANTINODE *antinode, 
                     object->ai->antinode_clockwise = !object->ai->antinode_clockwise;
                     object->ai->antinode_timer = antinode_time + antinode_reverse_time;
                 }
-                if (object->ai->antinode_clockwise) {
-                    if (turn < 0) {
-                        turn += 0x10000;
+                if (!object->ai->antinode_clockwise) {
+                    if (turn > 0) {
+                        turn -= 0x10000;
                     }
-                } else if (turn > 0) {
-                    turn -= 0x10000;
+                } else if (turn < 0) {
+                    turn += 0x10000;
                 }
             } else if (turn > 0) {
                 object->ai->antinode_clockwise = 1;
@@ -7209,7 +7209,7 @@ static void xConditions(NUFPAR *parser) {
 
                         if (param_name != NULL && NuStrICmp(param_name, parser->word_buf) == 0) {
                             cond->param_idx = i;
-                            *(reinterpret_cast<u8 *>(cond) + offsetof(AICONDITION, param_idx) + 1) |= 4;
+                            cond->is_param_idx_valid = 1;
 
                             break;
                         }
@@ -7219,11 +7219,11 @@ static void xConditions(NUFPAR *parser) {
                     cond->param_idx = param_idx;
 
                     if (param_idx < 4) {
-                        *(reinterpret_cast<u8 *>(cond) + offsetof(AICONDITION, param_idx) + 1) |= 4;
+                        cond->is_param_idx_valid = 1;
                     }
                 }
 
-                if (!(*(reinterpret_cast<u8 *>(cond) + offsetof(AICONDITION, param_idx) + 1) & 4)) {
+                if (!cond->is_param_idx_valid) {
                     i32 i;
 
                     for (i = 0; i < aiscript_const_curr; i++) {
@@ -7238,7 +7238,7 @@ static void xConditions(NUFPAR *parser) {
                         cond->param_val = AiParseExpression(parser->word_buf);
 
                         if (AiParseExpressionFailed) {
-                            *(reinterpret_cast<u8 *>(cond) + offsetof(AICONDITION, param_idx) + 1) |= 8;
+                            cond->is_complex = 1;
                             cond->param_idx = complex_idx++;
                             cond->complex_arg = AIScriptCopyString(parser->word_buf, load_buff, load_endbuff);
                         }
@@ -7251,7 +7251,7 @@ static void xConditions(NUFPAR *parser) {
             if (NuStrICmp(parser->word_buf, "goto") == 0) {
                 ConditionsParseFinalise(cond, parser);
             } else if (NuStrICmp(parser->word_buf, "and") == 0) {
-                *(reinterpret_cast<u8 *>(cond) + offsetof(AICONDITION, param_idx) + 1) |= 1;
+                cond->bool_and = 1;
             }
         } else if (NuStrICmp(parser->word_buf, "OnMacro") == 0) {
             AICONDITIONMACRO *macro;
@@ -7271,7 +7271,7 @@ static void xConditions(NUFPAR *parser) {
                     if (NuStrICmp(parser->word_buf, "goto") == 0) {
                         ConditionsParseFinalise(macro_last, parser);
                     } else if (NuStrICmp(parser->word_buf, "and") == 0) {
-                        *(reinterpret_cast<u8 *>(macro_last) + offsetof(AICONDITION, param_idx) + 1) |= 1;
+                        macro_last->bool_and = 1;
                     }
 
                     break;
@@ -9529,23 +9529,51 @@ void AISysDrawAntinode_Rectangle(AIANTINODE_s *node, u32 colour) {
     NuMtxSetTranslation(&matrix, &node->position);
     NuMtxPreRotateY(&matrix, node->flags);
 
-    NUVEC corners[8] = {
-        {-node->base_radius, node->min_y, -node->base_height}, {node->base_radius, node->min_y, -node->base_height},
-        {node->base_radius, node->min_y, node->base_height},   {-node->base_radius, node->min_y, node->base_height},
-        {-node->base_radius, node->max_y, -node->base_height}, {node->base_radius, node->max_y, -node->base_height},
-        {node->base_radius, node->max_y, node->base_height},   {-node->base_radius, node->max_y, node->base_height},
-    };
-    NuVecMtxTransform(&corners[0], &corners[0], &matrix);
-    NuVecMtxTransform(&corners[1], &corners[1], &matrix);
-    NuVecMtxTransform(&corners[2], &corners[2], &matrix);
-    NuVecMtxTransform(&corners[3], &corners[3], &matrix);
-    NuVecMtxTransform(&corners[4], &corners[4], &matrix);
-    NuVecMtxTransform(&corners[5], &corners[5], &matrix);
-    NuVecMtxTransform(&corners[6], &corners[6], &matrix);
-    NuVecMtxTransform(&corners[7], &corners[7], &matrix);
+    NURND_VERTEX3D corners[8];
+    corners[0].position.x = -node->base_radius;
+    corners[0].position.y = node->min_y;
+    corners[0].position.z = -node->base_height;
+    corners[1].position.x = node->base_radius;
+    corners[1].position.y = node->min_y;
+    corners[1].position.z = -node->base_height;
+    corners[2].position.x = node->base_radius;
+    corners[2].position.y = node->min_y;
+    corners[2].position.z = node->base_height;
+    corners[3].position.x = -node->base_radius;
+    corners[3].position.y = node->min_y;
+    corners[3].position.z = node->base_height;
+    corners[4].position.x = -node->base_radius;
+    corners[4].position.y = node->max_y;
+    corners[4].position.z = -node->base_height;
+    corners[5].position.x = node->base_radius;
+    corners[5].position.y = node->max_y;
+    corners[5].position.z = -node->base_height;
+    corners[6].position.x = node->base_radius;
+    corners[6].position.y = node->max_y;
+    corners[6].position.z = node->base_height;
+    corners[7].position.x = -node->base_radius;
+    corners[7].position.y = node->max_y;
+    corners[7].position.z = node->base_height;
+    NuVecMtxTransform(&corners[0].position, &corners[0].position, &matrix);
+    NuVecMtxTransform(&corners[1].position, &corners[1].position, &matrix);
+    NuVecMtxTransform(&corners[2].position, &corners[2].position, &matrix);
+    NuVecMtxTransform(&corners[3].position, &corners[3].position, &matrix);
+    NuVecMtxTransform(&corners[4].position, &corners[4].position, &matrix);
+    NuVecMtxTransform(&corners[5].position, &corners[5].position, &matrix);
+    NuVecMtxTransform(&corners[6].position, &corners[6].position, &matrix);
+    NuVecMtxTransform(&corners[7].position, &corners[7].position, &matrix);
+    corners[0].colour = colour;
+    corners[1].colour = colour;
+    corners[2].colour = colour;
+    corners[3].colour = colour;
+    corners[4].colour = colour;
+    corners[5].colour = colour;
+    corners[6].colour = colour;
+    corners[7].colour = colour;
 
 #define ANTINODE_DEBUG_EDGE(a, b)                                                                                      \
-    AiRndrLine3dDbg(corners[a].x, corners[a].y, corners[a].z, corners[b].x, corners[b].y, corners[b].z, colour)
+    AiRndrLine3dDbg(corners[a].position.x, corners[a].position.y, corners[a].position.z, corners[b].position.x,         \
+                    corners[b].position.y, corners[b].position.z, colour)
     ANTINODE_DEBUG_EDGE(0, 1);
     ANTINODE_DEBUG_EDGE(1, 2);
     ANTINODE_DEBUG_EDGE(2, 3);
@@ -10860,15 +10888,14 @@ static __attribute__((noinline, noclone)) u32 CalculateIntersection(AISYS *syste
                                                &target_connection->horizontal_distance, first_angle, second_angle,
                                                before, &shared->position.y, shared->radius, after,
                                                &packet->right_diversion);
-        packet->movement_flags = (packet->movement_flags & ~AIPACKET_MOVEMENT_DIVERSION_RIGHT) | ((right & 1) << 5);
+        packet->diversion_right = right;
         u32 left = CalculateRightIntersection(object->collision_radius, target_connection->horizontal_distance,
                                               &current_connection->horizontal_distance, second_angle, first_angle,
                                               after, &shared->position.y, shared->radius, before,
                                               &packet->left_diversion);
-        packet->movement_flags = (packet->movement_flags & ~AIPACKET_MOVEMENT_DIVERSION_LEFT) | ((left & 1) << 6);
+        packet->diversion_left = left;
     }
-    return ((packet->movement_flags & AIPACKET_MOVEMENT_DIVERSION_RIGHT) != 0) |
-           ((packet->movement_flags & AIPACKET_MOVEMENT_DIVERSION_LEFT) != 0);
+    return packet->diversion_right | packet->diversion_left;
 }
 
 extern "C" {
@@ -11393,7 +11420,11 @@ extern "C" {
             if (packet->path_info.path == NULL) {
                 packet->last_path_position = object->position;
             } else {
-                AISysGetCharacterPathPos(system, object, packet, (object->field_0x1fa & 8) == 0 ? 1 : 0, checks);
+                if ((object->field_0x1fa & 8) == 0) {
+                    AISysGetCharacterPathPos(system, object, packet, 1, checks);
+                } else {
+                    AISysGetCharacterPathPos(system, object, packet, 0, checks);
+                }
                 movement_source_flags = packet->field_0x1e7;
             }
 
@@ -13467,8 +13498,10 @@ extern "C" void LocaledbitsDrawSolidEllipseXY(NUVEC *centre, f32 radius_x, f32 r
     second.colour = colour;
     for (i32 i = 1; i <= segments; ++i) {
         first.position = second.position;
+        second.position.x = centre->x;
+        second.position.y = centre->y;
+        second.position.z = centre->z;
         i32 angle = (i * 65536) / segments;
-        second.position = *centre;
         NUVEC offset;
         offset.x = radius_x * NU_SIN_LUT(angle);
         offset.y = 0.0f;
@@ -16754,13 +16787,16 @@ extern "C" {
                     else
                         LocaledbitsDrawCircleXY(&node->position, node->radius, colour, 0, segments);
                     break;
-                case 1: {
-                    f32 lower = solid ? node->position.y + node->lower_height : node->position.y;
-                    f32 upper = solid ? node->position.y + node->upper_height : node->position.y;
-                    LocaledbitsDrawSolidEllipseXY(&node->position, node->base_radius, node->base_height, node->flags,
-                                                  lower, upper, colour, 0, segments);
+                case 1:
+                    if (solid)
+                        LocaledbitsDrawSolidEllipseXY(&node->position, node->base_radius, node->base_height,
+                                                      node->flags, node->position.y + node->lower_height,
+                                                      node->position.y + node->upper_height, colour, 0, segments);
+                    else
+                        LocaledbitsDrawSolidEllipseXY(&node->position, node->base_radius, node->base_height,
+                                                      node->flags, node->position.y, node->position.y, colour, 0,
+                                                      segments);
                     break;
-                }
                 case 2: {
                     NUMTX matrix;
                     NuMtxSetTranslation(&matrix, &node->position);
@@ -16880,34 +16916,26 @@ extern "C" {
             AIPATH *runtime_path = system->paths[reinterpret_cast<EDAIPATH_s *>(creature->path)->draw_index];
             EDAIPATHCHECK_s *check = reinterpret_cast<EDAIPATHCHECK_s *>(reinterpret_cast<u8 *>(creature) + 0x38);
             i16 connection_index = 0;
-            bool connection_found = false;
-            bool reversed = false;
+            i32 direction = 0;
             for (i32 index = 0; index < runtime_path->connection_count; ++index) {
                 AIPATHCNX *connection = &runtime_path->connections[index];
                 i32 second_index = check->second->index;
                 i32 first_index = check->first->index;
                 if (connection->node_indices[0] == first_index && connection->node_indices[1] == second_index) {
                     connection_index = index;
-                    connection_found = true;
+                    i32 path_angle = check->angle;
+                    if ((path_angle < 0 ? -path_angle : path_angle) > 0x3fff)
+                        direction = 1;
                     break;
                 }
                 if (connection->node_indices[0] == second_index && connection->node_indices[1] == first_index) {
                     connection_index = index;
-                    connection_found = true;
-                    reversed = true;
-                    break;
-                }
-            }
-            i32 direction = 0;
-            if (connection_found) {
-                i32 path_angle = check->angle;
-                i32 magnitude = path_angle < 0 ? -path_angle : path_angle;
-                if (reversed) {
-                    if (magnitude <= 0x3fff) {
+                    i32 path_angle = check->angle;
+                    if ((path_angle < 0 ? -path_angle : path_angle) > 0x3fff)
+                        direction = 0;
+                    else
                         direction = 1;
-                    }
-                } else if (magnitude > 0x3fff) {
-                    direction = 1;
+                    break;
                 }
             }
             EdFileWriteChar(direction);
@@ -18920,8 +18948,8 @@ void locatorEditor_Render(i32 x, i32 y, float x_scale, float y_scale) {
                 NuVecSub(&direction, &previous, &current);
                 NuVecNorm(&direction, &direction);
                 NuVecScale(&direction, &direction, 0.05f);
-                NUVEC midpoint = current;
-                NuVecAdd(&midpoint, &midpoint, &previous);
+                NUVEC midpoint;
+                NuVecAdd(&midpoint, &current, &previous);
                 NuVecScale(&midpoint, &midpoint, 0.5f);
                 vertices[0].position = midpoint;
                 vertices[0].position.x -= direction.x * 0.5f;

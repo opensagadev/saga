@@ -3699,12 +3699,13 @@ extern "C" void edrtlDrawLightEx(i32 index, i32 style) {
     // Three distinct reference switch arms render the same radius pair.
 #define EDRTL_RADIUS_PAIR()                                                                                            \
     RndrOSphere(&curr_set->lights[index].position, curr_set->lights[index].inner_radius, inner_colour, numsegs,        \
-                static_cast<i32>(reinterpret_cast<uintptr_t>(mtls[rtl_zoff ? 1 : 0])));                                \
+                mtls[rtl_zoff ? 1 : 0]);                                                                               \
     if (curr_set->lights[index].outer_radius > curr_set->lights[index].inner_radius)                                   \
         RndrOSphere(&curr_set->lights[index].position, curr_set->lights[index].outer_radius, outer_colour, numsegs,    \
-                    static_cast<i32>(reinterpret_cast<uintptr_t>(mtls[rtl_zoff ? 1 : 0])));                            \
+                    mtls[rtl_zoff ? 1 : 0]);                                                                           \
     if (&curr_set->lights[index] == curr_rtl)                                                                          \
-    RndrOSquare(&curr_set->lights[index].position, curr_set->lights[index].outer_radius, -1)
+    RndrOSquare(&curr_set->lights[index].position, curr_set->lights[index].outer_radius, -1,                           \
+                mtls[rtl_zoff ? 1 : 0])
     switch (curr_set->lights[index].type) {
         case 1:
             EDRTL_RADIUS_PAIR();
@@ -3724,10 +3725,9 @@ extern "C" void edrtlDrawLightEx(i32 index, i32 style) {
             NuVecMtxRotate(&line[1].position, &line[1].position, &global_camera.mtx);
             NuVecSub(&line[1].position, &line[0].position, &line[1].position);
             edrtlRndrLine3d(line, NULL, NULL);
-            RndrOSphere(&curr_set->lights[index].position, 2.0f, colour, numsegs,
-                        static_cast<i32>(reinterpret_cast<uintptr_t>(mtls[rtl_zoff ? 1 : 0])));
+            RndrOSphere(&curr_set->lights[index].position, 2.0f, colour, numsegs, mtls[rtl_zoff ? 1 : 0]);
             if (&curr_set->lights[index] == curr_rtl)
-                RndrOSquare(&curr_set->lights[index].position, 2.0f, -1);
+                RndrOSquare(&curr_set->lights[index].position, 2.0f, -1, mtls[rtl_zoff ? 1 : 0]);
             return;
         case 2:
         case 3:
@@ -3764,7 +3764,7 @@ extern "C" void edrtlDrawFog(EDRTLFOG_s *fog) {
             default:
                 break;
             case 1:
-                RndrOSphere(&fog->position, fog->radius, colour, numsegs, 0);
+                RndrOSphere(&fog->position, fog->radius, colour, numsegs, NULL);
                 break;
         }
     }
@@ -3792,11 +3792,11 @@ static void edrtlDrawBurnouts() {
         }
         if (edrtl_edit_burnset->burnouts[index].active) {
             RndrOSphere(&edrtl_edit_burnset->burnouts[index].position, edrtl_edit_burnset->burnouts[index].field_1c,
-                        colour, segments, 0);
+                        colour, segments, NULL);
             if (edrtl_edit_burnset->burnouts[index].field_20 > 0.0f) {
                 RndrOSphere(&edrtl_edit_burnset->burnouts[index].position,
                             edrtl_edit_burnset->burnouts[index].field_1c + edrtl_edit_burnset->burnouts[index].field_20,
-                            colour, segments, 0);
+                            colour, segments, NULL);
             }
         }
     }

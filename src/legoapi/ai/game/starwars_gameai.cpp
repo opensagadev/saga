@@ -468,7 +468,7 @@ static i32 StarWars_MidSpecialMove_Default(AISYS_s *system, AIPACKET_s *packet, 
         if ((capabilities & 4) != 0) {
             if (packet->terrain_origin.y >= destination->min_height) {
                 owner->pad_gamepad->buttons_held |= GAMEPAD_JUMP;
-                if (owner->field_0xe31 == 3 || owner->field_0xe31 == 0) {
+                if (owner->field_0xe31 == 0 || owner->field_0xe31 == 3) {
                     owner->pad_gamepad->buttons_pressed |= GAMEPAD_JUMP;
                 }
             }

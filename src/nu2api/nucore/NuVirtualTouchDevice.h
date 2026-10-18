@@ -35,6 +35,9 @@ class NuVirtualTouchDevice : public NuInputDeviceTranslator {
     u32 GetCurrentLayoutIndex() const {
         return unknown_04;
     }
+    NuButtonLayout *CurrentLayout() {
+        return &unknown_d4[unknown_04];
+    }
     void Render();
     void SetCurrentLayoutIndex(u32 index);
 

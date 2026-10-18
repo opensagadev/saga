@@ -17,6 +17,7 @@
 #include "legoapi/world/level.h"
 #include "legoapi/world/world.h"
 #include "nu2api/numath/nutrig.h"
+#include "nu2api/numath/numtx_inline.h"
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/menus/core/text.h"
 #include "legoapi/menus/screens/gamestatus_lsw.h"
@@ -895,9 +896,8 @@ void DrawStatusMiniKit(float x, float y, float z, float built_scale, float new_s
     NUVEC built_size = {built_scale, built_scale, built_scale};
     NUVEC new_size = {new_scale, new_scale, new_scale};
     NUVEC offset = v000;
-    const u8 current_direction = pieces[currentminikit].direction;
-    if (__builtin_expect(current_direction <= 5, 0)) {
-        switch (current_direction) {
+    if (__builtin_expect(pieces[currentminikit].direction <= 5, 0)) {
+        switch (pieces[currentminikit].direction) {
             case 0:
                 offset.x += 0.035f * NuTrigTable[(static_cast<i32>(slide * 32768.0f) >> 1) & 0x7fff];
                 break;
@@ -977,58 +977,14 @@ void DrawStatusMiniKit(float x, float y, float z, float built_scale, float new_s
                 matrix.m30 += offset.x;
             }
 
-            const NUANG rotation_y =
-                static_cast<u16>(static_cast<i32>(NuFmod(GameTimer.time_elapsed, 2.0f) * 0.5f * 65536.0f));
-            const f32 y0 = matrix.m00;
-            const f32 y1 = matrix.m10;
-            const f32 y2 = matrix.m20;
-            const f32 y3 = matrix.m30;
-            const f32 cy = NU_COS_LUT(rotation_y);
-            const f32 sy = NU_SIN_LUT(rotation_y);
-            matrix.m00 = y0 * cy + matrix.m02 * sy;
-            matrix.m02 = matrix.m02 * cy - y0 * sy;
-            matrix.m10 = y1 * cy + matrix.m12 * sy;
-            matrix.m12 = matrix.m12 * cy - y1 * sy;
-            matrix.m20 = y2 * cy + matrix.m22 * sy;
-            matrix.m22 = matrix.m22 * cy - y2 * sy;
-            matrix.m30 = y3 * cy + matrix.m32 * sy;
-            matrix.m32 = matrix.m32 * cy - y3 * sy;
-
+            NuMtxRotateYInline(&matrix,
+                               static_cast<u16>(static_cast<i32>(NuFmod(GameTimer.time_elapsed, 2.0f) * 0.5f * 65536.0f)));
             const u16 z_phase =
                 static_cast<u16>(static_cast<i32>(NuFmod(GameTimer.time_elapsed, 2.24f) / 2.24f * 65536.0f));
-            const NUANG rotation_z = static_cast<u16>(static_cast<i32>(2730.0f * NU_SIN_LUT(z_phase)));
-            const f32 z0 = matrix.m00;
-            const f32 z1 = matrix.m10;
-            const f32 z2 = matrix.m20;
-            const f32 z3 = matrix.m30;
-            const f32 cz = NU_COS_LUT(rotation_z);
-            const f32 sz = NU_SIN_LUT(rotation_z);
-            matrix.m00 = z0 * cz - matrix.m01 * sz;
-            matrix.m01 = z0 * sz + matrix.m01 * cz;
-            matrix.m10 = z1 * cz - matrix.m11 * sz;
-            matrix.m11 = z1 * sz + matrix.m11 * cz;
-            matrix.m20 = z2 * cz - matrix.m21 * sz;
-            matrix.m21 = z2 * sz + matrix.m21 * cz;
-            matrix.m30 = z3 * cz - matrix.m31 * sz;
-            matrix.m31 = z3 * sz + matrix.m31 * cz;
-
+            NuMtxRotateZInline(&matrix, static_cast<u16>(static_cast<i32>(2730.0f * NU_SIN_LUT(z_phase))));
             const u16 x_phase =
                 static_cast<u16>(static_cast<i32>(NuFmod(GameTimer.time_elapsed, 1.87f) / 1.87f * 65536.0f));
-            const NUANG rotation_x = static_cast<u16>(static_cast<i32>(2730.0f * NU_SIN_LUT(x_phase) - 5461.0f));
-            const f32 x0 = matrix.m01;
-            const f32 x1 = matrix.m11;
-            const f32 x2 = matrix.m21;
-            const f32 x3 = matrix.m31;
-            const f32 cx = NU_COS_LUT(rotation_x);
-            const f32 sx = NU_SIN_LUT(rotation_x);
-            matrix.m01 = x0 * cx - matrix.m02 * sx;
-            matrix.m02 = x0 * sx + matrix.m02 * cx;
-            matrix.m11 = x1 * cx - matrix.m12 * sx;
-            matrix.m12 = x1 * sx + matrix.m12 * cx;
-            matrix.m21 = x2 * cx - matrix.m22 * sx;
-            matrix.m22 = x2 * sx + matrix.m22 * cx;
-            matrix.m31 = x3 * cx - matrix.m32 * sx;
-            matrix.m32 = x3 * sx + matrix.m32 * cx;
+            NuMtxRotateXInline(&matrix, static_cast<u16>(static_cast<i32>(2730.0f * NU_SIN_LUT(x_phase) - 5461.0f)));
 
             matrix.m31 += y * PANEL3DMULY;
             matrix.m32 += z;
@@ -1059,9 +1015,7 @@ void AddStatusMiniKitParts() {
         KitPartRTL.intensity[i] = panelcol[i];
         KitPartRTL.direction[i] = paneldir[i];
     }
-    KitPartRTL.ambient.x = panelamb.r;
-    KitPartRTL.ambient.y = panelamb.g;
-    KitPartRTL.ambient.z = panelamb.b;
+    KitPartRTL.ambient_colour = panelamb;
 
     f32 delay = 0.0f;
     for (i32 i = 0; i < 10; ++i) {

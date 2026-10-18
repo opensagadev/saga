@@ -13,6 +13,13 @@
 
 static f32 water_theta_step = 0.26666668f;
 
+// The water table entries have an empty user-provided constructor, so the
+// function-local table is constructed under a static guard.
+struct WaterTableEntry : NUVEC4 {
+    WaterTableEntry() {
+    }
+};
+
 void NuShaderObjectBaseCreate(NUSHADEROBJECTBASE *shader) {
     shader->field0 = -1;
     shader->field1 = 0;
@@ -38,7 +45,7 @@ void NuShaderObjectBaseSetWaterSpeed(f32 speed) {
 }
 
 extern "C" void NuShaderObjectBaseUpdateWaterTable(NUSHADEROBJECT *shader, numtl_s *mtl) {
-    static NUVEC4 waterTable[32];
+    static WaterTableEntry waterTable[32];
     static i32 lastintsame = -1;
     static numtl_s *prev_mtl;
     static f32 theta = 0.7f;
@@ -46,9 +53,9 @@ extern "C" void NuShaderObjectBaseUpdateWaterTable(NUSHADEROBJECT *shader, numtl
     i32 frame;
     memcpy(&frame, &nuapi.frame_count, sizeof(frame));
     const f32 *material = reinterpret_cast<const f32 *>(mtl);
-    if (__builtin_expect(frame != lastintsame, 0))
+    if (frame != lastintsame)
         theta = material[0x60 / 4] * water_theta_step + theta;
-    if (__builtin_expect(frame != lastintsame || mtl != prev_mtl, 1)) {
+    if (frame != lastintsame || prev_mtl != mtl) {
         NUMTX inverse;
         NuMtxInvR(&inverse, &global_camera.mtx);
         NuMtxScale(&inverse, &scale);

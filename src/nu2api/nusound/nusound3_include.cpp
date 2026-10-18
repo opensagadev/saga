@@ -1070,10 +1070,15 @@ void NuMusic::ParseTrack(u32 category, nufpar_s *fpar) {
 
     // Signature (4), overlay (8) and cutscene (16) tracks default to
     // non-looping; everything else loops until NONLOOPING says otherwise.
-    if (category <= 0x10 && ((1u << ((u8)category & 0x1f)) & 0x10110u) != 0) {
-        ((u8 *)&track->flags)[0] &= 0xfd;
-    } else {
-        ((u8 *)&track->flags)[0] |= 2;
+    switch (category) {
+        case 4:
+        case 8:
+        case 16:
+            ((u8 *)&track->flags)[0] &= 0xfd;
+            break;
+        default:
+            ((u8 *)&track->flags)[0] |= 2;
+            break;
     }
 
     char buf[256];

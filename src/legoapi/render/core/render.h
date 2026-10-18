@@ -35,8 +35,8 @@ void Draw_AUTOSAVECANCEL(void);
 extern "C" {
 #endif
     void RndrCircleXZ(NUVEC *centre, f32 radius, i32 colour, i32 segments);
-    void RndrOSphere(NUVEC *centre, f32 radius, i32 colour, i32 segments, i32 unused);
-    void RndrOSquare(NUVEC *centre, f32 radius, i32 colour);
+    void RndrOSphere(NUVEC *centre, f32 radius, i32 colour, i32 segments, struct numtl_s *unused);
+    void RndrOSquare(NUVEC *centre, f32 radius, i32 colour, struct numtl_s *unused);
     void LocaledbitsDrawCircleXY(NUVEC *centre, f32 radius, u32 colour, i32 unused, i32 segments);
     void LocaledbitsDrawSolidEllipseXY(NUVEC *centre, f32 radius_x, f32 radius_z, i32 rotation, f32 lower_y,
                                        f32 upper_y, u32 colour, i32 unused, i32 segments);

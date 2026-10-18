@@ -1217,7 +1217,7 @@ i32 InitCreature(GameObject_s *obj, i32 id, i32 param) {
         obj->apiobj.field_0x1f4 |= 2;
     }
     if ((WORLD->current_level->flags & 0x40000) == 0) {
-        obj->apiobj.field_0x1f4 |= 0x40;
+        obj->apiobj.shadow_enabled = 1;
     }
 
     obj->pad_gamepad = GamePad_Allocate();
@@ -1864,16 +1864,11 @@ i32 NewPlayerCharacter(GameObject_s *object, i32 id, i32 old_id, i32) {
     if (lean_enabled && (object->apiobj.character_data->model_flags & 0x2000) != 0)
         object->movement_lean_angle = lean;
     data = apicharsys->char_data[object->id].game_character;
-    // Read everything before the stores so the four-float copy vectorizes like retail.
-    const f32 viewdistance = data->viewdistance;
-    const f32 heardistance = data->heardistance;
-    const f32 maxviewheight = data->maxviewheight;
-    const u32 flags_090_bit17 = (object->apiobj.character_data->game_character->flags_090 >> 17) & 1;
-    object->apiobj.viewdistance = viewdistance;
-    object->apiobj.heardistance = heardistance;
-    object->apiobj.maxviewheight = maxviewheight;
+    object->apiobj.viewdistance = data->viewdistance;
+    object->apiobj.heardistance = data->heardistance;
+    object->apiobj.maxviewheight = data->maxviewheight;
     object->apiobj.minviewheight = data->minviewheight;
-    object->is_female = flags_090_bit17;
+    object->is_female = (object->apiobj.character_data->game_character->flags_090 >> 17) & 1;
     if (object->id == id_MOSEISLEYCITIZEN) {
         SetLayers_MOSEISLEYCITIZEN(&object->field_0x1054);
     } else if (object->id == id_CANTINAALIEN) {
@@ -1910,7 +1905,9 @@ void ResetPlayer(GameObject_s *obj, i32 reset_moves, nuvec_s *position, i32 snap
         return;
     }
 
-    const bool restore_hitpoints = obj->apiobj.field_0x27c != -1 && obj->field_0x7a5 == 0x2b;
+    i32 restore_hitpoints = 0;
+    if (obj->apiobj.field_0x27c != -1)
+        restore_hitpoints = obj->field_0x7a5 == 0x2b;
 
     if (reset_moves != 0) {
         if (position == NULL) {
@@ -2148,10 +2145,8 @@ void KeepOnScreen(GameObject_s *object) {
             static_cast<TECHNO *>(player->field_0x788)->controlled_object == object)
             controlled = 1;
     }
-    if (__builtin_expect(static_cast<i8>(object->apiobj.flags_low) >= 0, 0)) {
-        if (controlled == 0)
-            return;
-    }
+    if (!object->apiobj.is_player && controlled == 0)
+        return;
     if (object->apiobj.field_0x287 != 0) {
         return;
     }
@@ -2197,8 +2192,8 @@ void KeepOnScreen(GameObject_s *object) {
             (static_cast<i8>(other_player->apiobj.flags_low) >= 0 || other_player->character_context == 0x2b))
             return;
     }
-    const i32 two_players = Player[0] != NULL && static_cast<i8>(Player[0]->apiobj.flags_low) < 0 &&
-                            Player[1] != NULL && static_cast<i8>(Player[1]->apiobj.flags_low) < 0;
+    const i32 two_players = Player[0] != NULL && Player[0]->apiobj.is_player &&
+                            Player[1] != NULL && Player[1]->apiobj.is_player;
     GAMECHARACTERDATA *character = object->apiobj.character_data->game_character;
     const f32 push_distance = VehicleArea != 0 ? character->walk_speed : character->run_speed;
     NUVEC constrained_movement = object->apiobj.velocity;
@@ -3398,7 +3393,7 @@ i32 DrawGameObjectsProcess() {
             continue;
         if (object->character_context != 0x39 && object->character_context != 0x3b) {
             if (CharClipToBlobShadows != 0 && WORLD->area != KAMINO_ADATA && WORLD->area != HOTHBATTLE_ADATA &&
-                WORLD->area != DEATHSTARBATTLE2_ADATA && static_cast<i8>(object->field_0xf04) < 0 &&
+                WORLD->area != DEATHSTARBATTLE2_ADATA && object->field_0xf04_bit7 &&
                 object->apiobj.field_0x27c == -1 && !object->is_boss &&
                 object->ai_update_distance > static_cast<u8>(WORLD->current_level->blob_shadow_fade_far))
                 continue;
