@@ -744,16 +744,13 @@ void Torpedo_Shoot(GameObject_s *object) {
     matrix.m01 = matrix.m03 = matrix.m10 = matrix.m12 = matrix.m13 = 0.0f;
     matrix.m21 = matrix.m23 = matrix.m30 = matrix.m31 = matrix.m32 = 0.0f;
 
-    i32 type = 15;
-    if (WORLD != NULL && WORLD->area != NULL && (WORLD->area->flags & AREAFLAG_BONUS_AREA) != 0) {
-        type = 16;
-    }
-    Bolt_Add(object, &position, &matrix, type, 0);
+    if (WORLD != NULL && WORLD->area != NULL && (WORLD->area->flags & AREAFLAG_BONUS_AREA) != 0)
+        Bolt_Add(object, &position, &matrix, 16, 0);
+    else
+        Bolt_Add(object, &position, &matrix, 15, 0);
     --object->torpedo->count;
     object->torpedo->field_0x1 |= 2;
-    if (!(static_cast<i8>(object->apiobj.flags_low) < 0)) {
-        return;
-    }
-    Hint_SetComplete(0x289);
+    if (object->apiobj.player_controlled)
+        Hint_SetComplete(0x289);
 }
 

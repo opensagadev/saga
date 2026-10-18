@@ -968,7 +968,7 @@ extern "C" {
                     ++list;
                     continue;
                 }
-                for (i32 poi = 0; poi < 16; ++poi) {
+                for (u32 poi = 0; poi < 16; ++poi) {
                     model->points_of_interest[poi] = NuHGobjGetPOI(model->hierarchy, poi);
                 }
                 model_loaded = 1;

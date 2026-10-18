@@ -65,18 +65,6 @@
 
 struct GAMECAMERA_s;
 
-namespace {
-
-} // namespace
-
-namespace {
-
-} // namespace
-
-namespace {
-
-} // namespace
-
 static inline void MakePlayCorner(GAMECAMERA_s *camera, f32 screen_x, f32 screen_y, NUVEC *near_corner,
                                   NUVEC *far_corner) {
     NUVEC ray = {screen_x, screen_y, 1.0f};
@@ -101,23 +89,7 @@ static inline void SetPlayPlane(PLAYPLANE_s *plane, NUVEC *a, NUVEC *b, NUVEC *c
     NuVecNorm(&plane->normal, &plane->normal);
 }
 
-namespace {
-
-} // namespace
-
-namespace {
-
-} // namespace
-
 // Original 0x378fb0: the optimized rotating scan shares the terrain engine state.
-
-namespace {
-
-} // namespace
-
-namespace {
-
-} // namespace
 
 static NARROWSOCKEXCEPTION *NarrowSockException;
 

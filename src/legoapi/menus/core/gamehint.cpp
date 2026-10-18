@@ -58,7 +58,7 @@ void MechHintUIButton::Render() {
 }
 
 void MechHintUIButton::Process(float elapsed) {
-    if (__builtin_expect(active_hint != NULL, 0)) {
+    if (__builtin_expect(active_hint != NULL, 1)) {
         display_elapsed += elapsed;
         if (MechSystems::Get()->PlayerButton().selector != NULL ||
             (active_hint->display_duration > 0.0f && display_elapsed >= active_hint->display_duration)) {
@@ -92,7 +92,7 @@ void MechHintUIButton::Process(float elapsed) {
     scale_elapsed = scale_duration;
     if (__builtin_expect(!(slide_duration < 0.0f) && !(slide_elapsed >= slide_duration + slide_delay), 0)) {
         slide_elapsed += elapsed;
-        if (__builtin_expect(slide_elapsed > slide_duration + slide_delay, 0))
+        if (__builtin_expect(slide_elapsed > slide_duration + slide_delay, 1))
             slide_elapsed = slide_duration + slide_delay;
         if (slide_elapsed >= slide_delay)
             *slide_target = ((slide_elapsed - slide_delay) / slide_duration) * (slide_to - slide_from) + slide_from;
@@ -131,7 +131,7 @@ void MechHintUIButton::Process(float elapsed) {
     MechTouchUITexButton::Process(elapsed);
     if (visible) {
         visible = 0;
-        if (__builtin_expect(NewMode == 0, 0) && NewLData == NULL && editor_active == 0 && GameTimer.time_elapsed > 0.0f &&
+        if (NewMode == 0 && NewLData == NULL && editor_active == 0 && GameTimer.time_elapsed > 0.0f &&
             GameTimer.update_count != 0 && WORLD != NULL && WORLD->current_level != TITLES_LDATA &&
             CutSceneWaiting == 0 && Paused == 0 && CUTSTOPGAME == 0 && MiniCutCam == 0 && PANELOFF == 0 &&
             WORLD->current_level != STATUS_LDATA && (WORLD->current_level->flags & 0x400) == 0)
@@ -150,9 +150,6 @@ void Hint_CancelCurrent();
 // Static game message and hint helpers. Stubbed to satisfy the symbol baseline.
 
 void RegisterWithHintSys(void (*update_fn)(HINT_s *, i32), HINT_s *hints, u32 *save_bits, i32 save_bit_count);
-
-struct AIROW_s;
-struct nunativegscene_s;
 
 // The hint icon transitions and the touch icon x position are dynamically
 // initialized in this unit's static constructor in the reference.

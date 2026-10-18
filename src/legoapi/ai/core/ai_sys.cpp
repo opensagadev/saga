@@ -6,9 +6,6 @@
 #include "nu2api/numath/nuvec.h"
 
 #include <string.h>
-struct nuhspecial_s;
-struct minitrooperteam_s;
-struct nuvec_s;
 
 void *GameBufferAlloc(VARIPTR *, VARIPTR *, i32);
 

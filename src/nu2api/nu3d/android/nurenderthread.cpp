@@ -47,7 +47,7 @@ static i32 dynamicLightsCount_safe;
 static VARIPTR nuspecial_vertex_offsets_safe;
 static i32 nuspecial_vertex_noffsets_safe;
 
-extern const f32 nuvec4_one[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+f32 nuvec4_one[4] = {1.0f, 1.0f, 1.0f, 1.0f};
 
 extern "C" void NuShaderManagerSetfv(i32 id, const f32 *values);
 i32 global_frame_count = 0;
@@ -223,11 +223,8 @@ i32 renderThread_processRenderScenes(void) {
     g_boundShader = 0;
     glUseProgram(0);
     g_currentShaderProgram = 0;
-    g_renderContext_kTint[0] = nuvec4_one[0];
-    g_renderContext_kTint[1] = nuvec4_one[1];
-    g_renderContext_kTint[2] = nuvec4_one[2];
-    g_renderContext_kTint[3] = nuvec4_one[3];
-    NuShaderManagerSetfv(0x44, &nuvec4_one[0]);
+    memcpy(g_renderContext_kTint, nuvec4_one, sizeof(g_renderContext_kTint));
+    NuShaderManagerSetfv(0x44, nuvec4_one);
 
     f32 cpu_max_ms = cpu_ms < 0.0f ? 0.0f : cpu_ms;
     NuTimeBarSlotReset(-1, 1);

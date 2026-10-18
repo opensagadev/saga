@@ -68,8 +68,6 @@ AREADATA *ADataList = NULL;
 i32 AREA_DEFAULTBONUSTIMETRIALTIME = 300;
 i32 AREA_DEFAULTCHALLENGETIME = 600;
 
-struct bgprocinfo_s;
-
 static void AddToModelList(APICHARACTERMODELLIST_s *list, i32 *count, i32 capacity, i32 character_id, i32 load_model,
                            EXTRAMODEL *extra_models) {
     if (*count < capacity && InModelList(list, character_id, NULL) == 0) {

@@ -189,72 +189,69 @@ NuSoundMemoryBuffer *NuSoundMemoryManager::Defragment(u32 size) {
     pthread_mutex_lock(&this->mutex);
     NuSoundMemoryBuffer::BeginCriticalSection();
 
-    NuSoundMemoryBuffer *buffer = NULL;
-    if (this->free_count != 0) {
-        buffer = this->free_list_head;
+    if (this->free_count == 0) {
+        NuSoundMemoryBuffer::EndCriticalSection();
+        pthread_mutex_unlock(&this->mutex);
+        return NULL;
+    }
 
-        while (buffer != NULL) {
-            NuSoundMemoryBuffer *next = buffer->GetNext();
-            if (next == NULL) {
-                buffer = NULL;
-                break;
-            }
+    NuSoundMemoryBuffer *buffer = this->free_list_head;
+    while (buffer != NULL) {
+        NuSoundMemoryBuffer *next = buffer->GetNext();
+        if (next == NULL) {
+            break;
+        }
 
-            if (!buffer->IsAlloced()) {
-                if (!next->IsAlloced()) {
-                    buffer = this->MergeFreeBuffer(buffer);
-                    if (size != 0 && buffer->GetSize() >= size) {
-                        goto done;
-                    }
-                    continue;
-                }
-
-                NuSoundMemoryBuffer *split = NULL;
-                NuSoundMemoryBuffer *merged = NULL;
-                NuSoundMemoryBuffer *moved = this->MoveLargestTrailingBufferIntoBuffer(buffer, &split, &merged);
-
-                if (size != 0 && merged != NULL && merged->GetSize() >= size) {
-                    buffer = merged;
+        if (!buffer->IsAlloced()) {
+            if (!next->IsAlloced()) {
+                buffer = this->MergeFreeBuffer(buffer);
+                if (size != 0 && buffer->GetSize() >= size) {
                     goto done;
                 }
-
-                if (moved == buffer) {
-                    u32 old_size = buffer->GetSize();
-                    NuSoundMemoryBuffer *scan = buffer;
-                    do {
-                        scan = this->SwapOrMergeAdjacentBuffers(scan);
-                        if (scan == NULL) {
-                            buffer = NULL;
-                            break;
-                        }
-                    } while (scan->GetSize() <= old_size);
-
-                    if (scan == NULL) {
-                        break;
-                    }
-                    buffer = scan;
-                    if (size != 0 && buffer->GetSize() >= size) {
-                        goto done;
-                    }
-                    continue;
-                }
-
-                buffer = moved;
                 continue;
             }
 
-            buffer = next;
+            NuSoundMemoryBuffer *split = NULL;
+            NuSoundMemoryBuffer *merged = NULL;
+            NuSoundMemoryBuffer *moved = this->MoveLargestTrailingBufferIntoBuffer(buffer, &split, &merged);
+
+            if (size != 0 && merged != NULL && merged->GetSize() >= size) {
+                buffer = merged;
+                goto done;
+            }
+
+            if (moved == buffer) {
+                u32 old_size = buffer->GetSize();
+                NuSoundMemoryBuffer *scan = buffer;
+                do {
+                    scan = this->SwapOrMergeAdjacentBuffers(scan);
+                    if (scan == NULL) {
+                        break;
+                    }
+                } while (scan->GetSize() <= old_size);
+
+                if (scan == NULL) {
+                    break;
+                }
+                buffer = scan;
+                if (size != 0 && buffer->GetSize() >= size) {
+                    goto done;
+                }
+                continue;
+            }
+
+            buffer = moved;
+            continue;
         }
+
+        buffer = next;
     }
 
+    buffer = NULL;
     this->free_count = 0;
 done:
     NuSoundMemoryBuffer::EndCriticalSection();
     pthread_mutex_unlock(&this->mutex);
-
-    if (size == 0) {
-        return NULL;
-    }
     return buffer;
 }
 

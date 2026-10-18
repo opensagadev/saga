@@ -680,7 +680,7 @@ extern f32 avg_currentspeed_mul;
 extern GameObject_s *player2;
 extern GameObject_s *player;
 extern GameObject_s *CutDeadVehiclePlayer;
-extern GameObject_s *Player[8];
+extern GameObject_s *Player[];
 extern i32 troopers_gdeb[4];
 extern nuhspecial_s *hothtroopers;
 extern u8 PlayerRGB[2][3];

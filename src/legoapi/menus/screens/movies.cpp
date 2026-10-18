@@ -8,11 +8,6 @@
 #include "nu2api/nufile/nufpar.h"
 #include "nu2api/nusound/nusound.h"
 
-struct AIROW_s;
-struct nuqthdr_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
-
 static i32 movie_skipped;
 static f32 MoviePlayTime;
 static f32 MovieFrameTime;

@@ -52,8 +52,8 @@ static inline void InitCredit(CREDIT_s *credit, char *text, f32 x, f32 y, f32 sc
     }
     credit->text = copy;
     credit->x = x;
-    credit->scale = scale;
     credit->y = y;
+    credit->scale = scale;
     credit->red = red;
     credit->green = green;
     credit->blue = blue;

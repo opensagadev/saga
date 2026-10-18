@@ -7,5 +7,4 @@
 
 #include <stdio.h>
 #include <string.h>
-struct FLOWBOX_s;
 

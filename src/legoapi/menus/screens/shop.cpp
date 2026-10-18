@@ -106,9 +106,6 @@ i32 codevalid;
 i32 codechar;
 char codechars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
-struct AIROW_s;
-struct nuqthdr_s;
-struct nunativegscene_s;
 struct SHOPINPUT;
 
 shopitem_s TopShelf[6] = {};
@@ -235,10 +232,6 @@ static f32 ShopSinePhase(f32 phase) {
 
 extern i16 tSELECT, tBACK, tBUY, tPLAY, tSELECTING;
 
-struct starfighter_s;
-struct rtl_s;
-struct rtlidata_s;
-
 extern i16 tHINTS;
 extern i16 tCHARACTERS;
 extern i16 tEXTRAS;
@@ -249,18 +242,9 @@ extern i16 tENTERCODE;
 f32 HUB_EPISODESUBTITLEY = -0.745f;
 f32 HUB_EPISODETITLEY = -0.595f;
 
-struct GAMEMESSAGE_s;
 struct HINT_s;
 struct MENU_s;
-struct NuBloomParameters;
-struct STATUSPACKET_s;
-struct TouchHolder;
-struct _vum_s;
-struct _vuv_s;
 struct nuhspecial_s;
-struct ripple_node_s;
-struct ripple_set_s;
-struct VuVec;
 
 extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
 extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
@@ -280,8 +264,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 }
 
-struct CUTSCENEPLAYERCLIP;
-
 extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER;
 
 // ThingManager objects return to the theMemoryManager pool (D0 @0x425a50).
@@ -297,8 +279,6 @@ GameObject_s *FindNearestGameObject(NUVEC *position, GameObject_s *exclude, u32 
 SAGA_HOST_WEAK void InitStillRender(variptr_u *, variptr_u);
 
 void FadeLoop(char *text, i32 direction, float duration, void (*draw)(float));
-
-struct AISYS_s;
 
 static void Shop_GetInput(SHOPINPUT *input) {
     memset(input, 0, sizeof(*input));
@@ -412,7 +392,11 @@ i32 ItemMenu(MENU_s *menu) {
 
     if (candidate != entry_picked) {
         lastitem = picked;
-        picked = candidate <= 0 ? 1 : candidate > 5 ? 5 : candidate;
+        picked = candidate;
+        if (picked < 1)
+            picked = 1;
+        else if (picked > 5)
+            picked = 5;
         SubMenu = 0;
 
         slidetimer = 0.125f;
@@ -879,8 +863,8 @@ void DrawSubItemMenu2D() {
         if (!(ShopNameAlpha > 0.0f))
             return;
         if (show_name) {
-            f32 y = buyable ? HUB_EPISODETITLEY : (HUB_EPISODETITLEY + HUB_EPISODESUBTITLEY) * 0.5f;
             f32 scale = buyable ? 0.6f : 0.8f;
+            f32 y = buyable ? HUB_EPISODETITLEY : (HUB_EPISODETITLEY + HUB_EPISODESUBTITLEY) * 0.5f;
             SmartTextEx(name, 0.0f, y, 1.0f, scale, scale, scale, 0, 255, 255, 255, 1.7f, 1, NULL, 0,
                         static_cast<i32>(128.0f * ShopNameAlpha));
         }
@@ -1604,8 +1588,8 @@ static inline i32 SubItemMenu(MENU_s *menu) {
 
     shopitem_s *items = NULL;
     i32 *ids = NULL, *count = NULL;
-    f32 ypush = 0.0f;
     NUVEC *positions = NULL;
+    f32 ypush = 0.0f;
     if (picked == 0) {
         items = HintItems;
         ids = HintShelfIds;
@@ -2007,9 +1991,7 @@ void DrawTopShelf(i32) {
         }
 
         NUVEC world_position;
-        world_position.x = ShelfPos[shelf_index].x;
-        world_position.y = ShelfPos[shelf_index].y;
-        world_position.z = ShelfPos[shelf_index].z;
+        world_position = ShelfPos[shelf_index];
         world_position.y += toppush[shelf_index];
         const f32 size = topscale[shelf_index] / TopShelfScale[shelf_index] * 0.15f;
         const f32 aspect_ratio = GetAspectRatio();
@@ -2141,7 +2123,7 @@ void DrawSubItems() {
             scale *= alpha;
         shopitem_s *item = &items[shelf_ids[slot]];
         NUVEC position = positions[slot];
-        if (subitemselected == 2 && slot == 3) {
+        if (slot == 3 && subitemselected == 2) {
             NuVecAdd(&position, &position, &selectedoff);
             scale *= 1.25f;
         }

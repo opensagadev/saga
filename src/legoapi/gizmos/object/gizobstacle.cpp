@@ -93,11 +93,9 @@ static i32 GizObstacles_GetMaxGizmos(void *obstacle) {
 static void GizObstacles_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *, void *data) {
     GIZOBSTACLESYS_s *obstacle_sys = static_cast<GIZOBSTACLESYS_s *>(data);
     if (obstacle_sys != NULL) {
-        if (obstacle_sys->count != 0) {
-            for (i32 i = 0; i < obstacle_sys->count; ++i) {
-                if (NuStrLen(obstacle_sys->obstacles[i].name) != 0) {
-                    AddGizmo(gizmo_sys, type_id, NULL, &obstacle_sys->obstacles[i]);
-                }
+        for (i32 i = 0; i < obstacle_sys->count; ++i) {
+            if (NuStrLen(obstacle_sys->obstacles[i].name) != 0) {
+                AddGizmo(gizmo_sys, type_id, NULL, &obstacle_sys->obstacles[i]);
             }
         }
     }
@@ -113,8 +111,8 @@ static void GizObstacles_Update(void *world_ptr, void *data, float) {
     GIZMOSET &gizmo_set = world->gizmo_sys->sets[obstacle_gizmotype_id];
     obstacle_sys->active_gizmo_count = 0;
 
-    i32 count = gizmo_set.count;
     GIZMO *gizmo = gizmo_set.gizmos;
+    i32 count = gizmo_set.count;
     for (i32 index = 0; index < count; ++index, ++gizmo) {
         GIZOBSTACLE_s *obstacle = static_cast<GIZOBSTACLE_s *>(gizmo->object);
         if (obstacle == NULL) {
@@ -451,7 +449,8 @@ static i32 GizObstacles_BoltHitPlat(void *world_ptr, void *data, BOLT *bolt, uns
         return 0;
     }
 
-    for (i32 index = 0; index < count; ++index) {
+    i32 index = 0;
+    do {
         GIZOBSTACLE_s *obstacle = static_cast<GIZOBSTACLE_s *>(system->active_gizmos[index]->object);
         if ((obstacle->progress_flags & GIZOBSTACLE_PROGRESS_FLAG_VISIBLE) != 0 && obstacle->progress_enabled &&
             obstacle->runtime_has_platform && static_cast<i8>(obstacle->runtime_flags) >= 0) {
@@ -465,7 +464,7 @@ static i32 GizObstacles_BoltHitPlat(void *world_ptr, void *data, BOLT *bolt, uns
                 }
             }
         }
-    }
+    } while (++index < count);
     return 0;
 }
 
@@ -489,14 +488,14 @@ static i32 *GizObstacles_GetBestBoltTarget(GIZMOSET *set, float *result_distance
 
     NUVEC aim = *direction;
     const float min_x = position->x - radius;
-    const float max_x = position->x + radius;
     const float min_z = position->z - radius;
+    const float max_x = position->x + radius;
     const float max_z = position->z + radius;
     if (directional != 0 && (bolt_type->field_60 & 0x20000) != 0) {
         aim.y = 0.0f;
         NuVecNorm(&aim, &aim);
     }
-    const u16 active_count = system->active_gizmo_count;
+    const i32 active_count = system->active_gizmo_count;
     if (active_count == 0) {
         return NULL;
     }
@@ -505,7 +504,8 @@ static i32 *GizObstacles_GetBestBoltTarget(GIZMOSET *set, float *result_distance
     GIZMO *best = NULL, *previous = NULL;
     NUVEC *best_position = NULL, *previous_position = NULL;
     float nearest_distance = 100000000.0f;
-    for (i32 i = 0; i < active_count; ++i) {
+    i32 i = 0;
+    do {
         GIZMO *gizmo = system->active_gizmos[i];
         GIZOBSTACLE_s *obstacle = static_cast<GIZOBSTACLE_s *>(gizmo->object);
         if ((obstacle->progress_flags & GIZOBSTACLE_PROGRESS_FLAG_VISIBLE) == 0)
@@ -553,7 +553,7 @@ static i32 *GizObstacles_GetBestBoltTarget(GIZMOSET *set, float *result_distance
             best = gizmo;
             best_position = target_position;
         }
-    }
+    } while (++i < active_count);
 
     if (best != NULL) {
         *result_position = *best_position;

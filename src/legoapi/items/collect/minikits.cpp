@@ -70,15 +70,6 @@ void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 struct GAMEMESSAGE_s;
 struct nuhspecial_s;
 
-#if defined(__i386__)
-#define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone, regparm(2)))
-#else
-#define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone))
-#endif
-static NU_READ_GRAPHICS_DATA_ATTR NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIPTR *buf_end, char *path,
-                                                             char *scene_data)
-    __asm__("_ZL18NuReadGraphicsDataP9variptr_uS0_PcS1_S1_.isra.104");
-
 f32 KITPOSX = -0.725f;
 f32 KITPOSY = -0.7f;
 f32 KITPOS2X = -1.275f;
@@ -164,7 +155,7 @@ void CharMiniKit_Draw(i32 id, numtx_s *matrix, i32 reflection_axis, float reflec
     if (Char_MiniKit == NULL)
         return;
     HUBMINIKITPIECES_s *kit = Char_MiniKit[id];
-    if (kit != NULL && kit->piece_count != 0) {
+    if (kit != NULL) {
         bool reflection = reflection_axis != 0 && reflection_plane != 2000000.0f;
         for (i32 i = 0; i < kit->piece_count; ++i) {
             HUBMINIKITPIECE_s *piece = &kit->pieces[i];
@@ -202,7 +193,7 @@ void CharacterMiniKits_Load(COLLECTION_s *collection, WORLDINFO *world, VARIPTR 
     memset(world->minikit_pieces_buf, 0, static_cast<usize>(CHARCOUNT) * sizeof(*world->minikit_pieces_buf));
     buf->addr += static_cast<usize>(CHARCOUNT) * sizeof(*world->minikit_pieces_buf);
 
-    for (i32 index = 0; index < collection->count_y; ++index) {
+    for (u32 index = 0; index < collection->count_y; ++index) {
         const i32 character_id = collection->list[index].id;
         if ((GCDataList[character_id].flags_094[1] & 4) != 0 || APICharacterLoaded(character_id) == NULL)
             continue;

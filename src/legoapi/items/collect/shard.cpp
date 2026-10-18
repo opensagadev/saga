@@ -17,11 +17,6 @@
 #include "legoapi/core/input/gamepads.h"
 #include <string.h>
 
-struct AIROW_s;
-struct nuqthdr_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
-
 static void *Shards_ReserveBufferSpace(void *context) {
     WORLDINFO *world = static_cast<WORLDINFO *>(context);
     world->shards = NULL;

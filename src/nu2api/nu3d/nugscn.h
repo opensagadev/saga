@@ -91,7 +91,7 @@ struct nurenderscene_s {
     u32 unknown_174;                 // 0x174
     u32 unknown_178;                 // 0x178
     i32 accumulation_frames;         // 0x17c
-    i32 accumulation_mode;           // 0x180
+    f32 accumulation_mode;           // 0x180
     f32 accumulation_blend;          // 0x184
     union {
         NuSpeedBlurParameters speed_blur;

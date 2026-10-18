@@ -47,7 +47,7 @@ EPISODEDATA *Episodes_ConfigureList(char *file, VARIPTR *bufferStart, VARIPTR *b
         if (in_episode) {
             if (NuStrICmp(fp->word_buf, "episode_end") == 0) {
                 in_episode = 0;
-                if (__builtin_expect(episode->area_count != 0, 0)) {
+                if (__builtin_expect(episode->area_count != 0, 1)) {
                     count++;
                     episode++;
                 }

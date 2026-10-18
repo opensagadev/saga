@@ -19,19 +19,22 @@ struct NetOutputStream : EdOutputStream {
     }
 
     virtual i32 SerialiseBuffer(void *buffer, i32 element_size, i32 count) {
-        NetMessage &output = *message;
         i32 size = element_size * count;
+        NetMessage &output = *message;
         if (output.data != NULL) {
             memmove(output.data->bytes + output.write_offset, buffer, size);
             if (output.swap_endianness && element_size > 1) {
                 u8 *destination = output.data->bytes + output.write_offset;
                 for (i32 i = 0; i < count; ++i) {
-                    if (element_size == 2) {
-                        EdFileSwapEndianess16(destination);
-                        destination += 2;
-                    } else if (element_size == 4) {
-                        EdFileSwapEndianess32(destination);
-                        destination += 4;
+                    switch (element_size) {
+                        case 2:
+                            EdFileSwapEndianess16(destination);
+                            destination += 2;
+                            break;
+                        case 4:
+                            EdFileSwapEndianess32(destination);
+                            destination += 4;
+                            break;
                     }
                 }
             }

@@ -90,9 +90,10 @@ extern "C" {
 
 GAMEPAD_s *GamePad_Allocate() {
     for (i32 i = 0; i < 64; i++) {
-        if ((GamePad[i].allocated_5a & 1) == 0) {
-            GamePad[i].allocated_5a |= 1;
-            return &GamePad[i];
+        GAMEPAD_s *pad = &GamePad[i];
+        if ((pad->allocated_5a & 1) == 0) {
+            pad->allocated_5a |= 1;
+            return pad;
         }
     }
     return NULL;
@@ -129,17 +130,14 @@ f32 GamePad_Rotate(GameObject_s *object) {
     }
 
     GAMEPAD_s *pad = object->pad_gamepad;
-    if (pad == NULL || pad->input_magnitude == 0.0f || PadOldSpeed[player_index] == 0.0f ||
-        PadOldSpeed2[player_index] == 0.0f) {
+    if (pad->input_magnitude == 0.0f || PadOldSpeed[player_index] == 0.0f || PadOldSpeed2[player_index] == 0.0f) {
         return 0.0f;
     }
 
     const i32 current_delta = RotDiff(PadOldAngle[player_index], pad->input_angle);
     const i32 previous_delta = RotDiff(PadOldAngle2[player_index], PadOldAngle[player_index]);
-    const bool turning_clockwise = current_delta > 0 && previous_delta > 0;
-    const bool turning_counter_clockwise = current_delta < 0 && previous_delta < 0;
-    if ((!turning_clockwise && !turning_counter_clockwise) || RotationDistance(current_delta) >= 0x2000 ||
-        RotationDistance(previous_delta) >= 0x2000) {
+    if (!(current_delta < 0 && previous_delta < 0 && current_delta > -0x2000 && previous_delta > -0x2000) &&
+        !(current_delta > 0 && previous_delta > 0 && current_delta < 0x2000 && previous_delta < 0x2000)) {
         return 0.0f;
     }
     return (static_cast<f32>(current_delta) / 65536.0f) / FRAMETIME;
@@ -459,23 +457,13 @@ void DoInput(WORLDINFO_s *world) {
 }
 
 u16 GamePad_InputAngle(GameObject_s *object, GAMEPAD_s *pad) {
-    if (!object->apiobj.player_controlled || object->field_0x661 == 0xff) {
-        goto camera_relative;
-    }
-    {
+    if (object->apiobj.player_controlled && object->field_0x661 != 0xff) {
         SOCK &socket = WORLD->sock_sys->sock[static_cast<i8>(object->field_0x661)];
         if ((socket.flags & 0x40) != 0) {
-            goto socket_relative;
+            return static_cast<u16>(pad->input_angle + object->yrot + socket.input_yaw);
         }
     }
-
-camera_relative:
-    return static_cast<u16>(pad->input_angle + GameCam->input_yaw);
-
-socket_relative: {
-    SOCK &socket = WORLD->sock_sys->sock[static_cast<i8>(object->field_0x661)];
-    return static_cast<u16>(pad->input_angle + object->yrot + socket.input_yaw);
-}
+    return static_cast<u16>(GameCam->input_yaw + pad->input_angle);
 }
 
 i32 GamePads_SkipMovie() {

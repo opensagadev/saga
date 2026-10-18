@@ -123,6 +123,7 @@ template <typename T> class NuList {
 
         node->Remove();
 
+        static_cast<NuListNode<T> *>(node)->~NuListNode<T>();
         NU_FREE(node);
     }
 

@@ -34,9 +34,6 @@
 #include "legoapi/items/collect/thermaldetonators.h"
 #include "legoapi/props/objects/zipup.h"
 
-struct AIROW_s;
-struct nunativegscene_s;
-
 MechWeakPtr<MechObjectInterface, 4> NextThermalTarget;
 
 i32 MatrixReflection(NUMTX *matrix, i32 axis, f32 plane, f32 height, NUMTX *result);

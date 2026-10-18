@@ -516,7 +516,7 @@ static void Lever_SetVisibility(GIZMO *gizmo, i32 visible) {
     }
 
     LEVER_s *lever = static_cast<LEVER_s *>(gizmo->object);
-    const i32 was_visible = lever->visible;
+    const u8 was_visible = lever->visible;
     lever->visible = visible != 0;
     if (lever->visible) {
         if (!was_visible) {

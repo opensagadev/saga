@@ -920,11 +920,11 @@ void MechTouchTaskPlannedGoTo::SetupForAnalysis() {
     const f32 zero_z = zero.z;
     const f32 zero_w = zero.w;
     for (i32 i = 0; i <= path_count; ++i) {
-        path_points[i].x = zero_x;
         path_points[i].y = zero_y;
+        path_points[i].x = zero_x;
         path_points[i].z = zero_z;
-        path_points[i].w = zero_w;
         path_points[i].y = -1000000000.0f;
+        path_points[i].w = zero_w;
     }
     path_points[0] = origin;
     start_position = origin;

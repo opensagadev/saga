@@ -100,8 +100,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 }
 
-struct CUTSCENEPLAYERCLIP;
-
 CABLE_s cables[8];
 
 extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER;
@@ -115,23 +113,6 @@ GameObject_s *FindNearestGameObject(NUVEC *position, GameObject_s *exclude, u32 
                                     f32 extra_radius, i32 animation, i32 character_id, i32 player_index,
                                     f32 *distance_squared, i32 horizontal_only, i32 (*filter)(GameObject_s *),
                                     bool first_match);
-
-struct starfighter_s;
-struct rtl_s;
-struct rtlidata_s;
-
-struct GAMEMESSAGE_s;
-struct HINT_s;
-struct MENU_s;
-struct NuBloomParameters;
-struct STATUSPACKET_s;
-struct TouchHolder;
-struct _vum_s;
-struct _vuv_s;
-struct nuhspecial_s;
-struct ripple_node_s;
-struct ripple_set_s;
-struct VuVec;
 
 i32 solid_cable;
 i32 nsegments_drawn;
@@ -163,8 +144,8 @@ CABLE_s *CreateCable(GameObject_s *source, GameObject_s *target, i32 sound) {
     }
     for (i32 i = 0; i < 8; ++i) {
         CABLE_s *cable = &cables[i];
-        if ((cable->flags_1e9 & 1) == 0) {
-            cable->flags_1e9 |= 1;
+        if (cable->active == 0) {
+            cable->active = 1;
             cable->source = source;
             cable->target = target;
             if (source == player || source == player2) {
@@ -184,21 +165,21 @@ CABLE_s *GameObjOwnsAnyCables(GameObject_s *object) {
     if (__builtin_expect(cables[0].source != object, 1))
         return NULL;
 
-    if ((cables[0].flags_1e9 & 1) != 0)
+    if (cables[0].active != 0)
         return &cables[0];
-    if ((cables[1].flags_1e9 & 1) != 0)
+    if (cables[1].active != 0)
         return &cables[1];
-    if ((cables[2].flags_1e9 & 1) != 0)
+    if (cables[2].active != 0)
         return &cables[2];
-    if ((cables[3].flags_1e9 & 1) != 0)
+    if (cables[3].active != 0)
         return &cables[3];
-    if ((cables[4].flags_1e9 & 1) != 0)
+    if (cables[4].active != 0)
         return &cables[4];
-    if ((cables[5].flags_1e9 & 1) != 0)
+    if (cables[5].active != 0)
         return &cables[5];
-    if ((cables[6].flags_1e9 & 1) != 0)
+    if (cables[6].active != 0)
         return &cables[6];
-    if ((cables[7].flags_1e9 & 1) != 0)
+    if (cables[7].active != 0)
         return &cables[7];
     return NULL;
 }
@@ -207,21 +188,21 @@ CABLE_s *GameObjIsCableTied(GameObject_s *object) {
     if (__builtin_expect(cables[0].target != object, 1))
         return NULL;
 
-    if ((cables[0].flags_1e9 & 1) != 0)
+    if (cables[0].active != 0)
         return &cables[0];
-    if ((cables[1].flags_1e9 & 1) != 0)
+    if (cables[1].active != 0)
         return &cables[1];
-    if ((cables[2].flags_1e9 & 1) != 0)
+    if (cables[2].active != 0)
         return &cables[2];
-    if ((cables[3].flags_1e9 & 1) != 0)
+    if (cables[3].active != 0)
         return &cables[3];
-    if ((cables[4].flags_1e9 & 1) != 0)
+    if (cables[4].active != 0)
         return &cables[4];
-    if ((cables[5].flags_1e9 & 1) != 0)
+    if (cables[5].active != 0)
         return &cables[5];
-    if ((cables[6].flags_1e9 & 1) != 0)
+    if (cables[6].active != 0)
         return &cables[6];
-    if ((cables[7].flags_1e9 & 1) != 0)
+    if (cables[7].active != 0)
         return &cables[7];
     return NULL;
 }
@@ -236,7 +217,7 @@ void DestroyCable(CABLE_s *cable) {
 }
 
 void ReleaseCable(CABLE_s *cable, i32 snapped) {
-    cable->flags_1e9 |= 4;
+    cable->released = 1;
     if (cable->target != NULL) {
         cable->target->field_0xf00 &= static_cast<u8>(~0x20u);
         cable->target->field_0xf01 &= static_cast<u8>(~2u);
@@ -261,11 +242,11 @@ void ReleaseCable(CABLE_s *cable, i32 snapped) {
 void UpdateCables() {
     NUVEC closest;
     for (CABLE_s *cable = cables; cable != cables + 8; ++cable) {
-        if ((cable->flags_1e9 & 1) == 0) {
+        if (cable->active == 0) {
             continue;
         }
         NUVEC delta;
-        if (cable->flags_1e9 & 4) {
+        if (cable->released) {
             cable->total_length = 0.0f;
             i32 grounded = 1;
             for (i32 i = 0; i < cable->point_count; ++i) {
@@ -301,12 +282,12 @@ void UpdateCables() {
         GameObject_s *source = cable->source;
         if (source == NULL || (source->apiobj.field_0x1f8 & 0x1000) == 0 || source->apiobj.field_0x287 != 0 ||
             (source->field_0xe20 & 0x20) || (target != NULL && target->character_context == 0x17) ||
-            ((cable->flags_1e9 & 2) && source->pad_gamepad->pad != NULL &&
+            (cable->armed && source->pad_gamepad->pad != NULL &&
              (source->pad_gamepad->pad->digital_buttons_pressed & GAMEPAD_SPECIAL))) {
             ReleaseCable(cable, 0);
             continue;
         }
-        cable->flags_1e9 |= 2;
+        cable->armed = 1;
         NUVEC path[16];
         path[0] = source->apiobj.collision_position;
         if (target == NULL || (target->apiobj.field_0x1f8 & 0x1000) == 0 || target->apiobj.field_0x287 != 0) {
@@ -341,8 +322,8 @@ void UpdateCables() {
             NUVEC *last_position = NUMTX_GET_ROW_VEC(&target->joint_matrices[atat_locators[last]], 3);
             if (!(cable->wrap_count > 1)) {
                 f32 along0, along1;
-                i32 next = (last + 1) & 3;
                 i32 previous = (last + 3) & 3;
+                i32 next = (last + 1) & 3;
                 // Preserve the reverse-edge locators across the first intersection callback.
                 i32 previous_locator = atat_locators[previous];
                 i32 opposite_locator = atat_locators[(previous + 3) & 3];
@@ -359,8 +340,8 @@ void UpdateCables() {
                     cable->wrap_indices[cable->wrap_count++] = static_cast<u8>(next);
                 }
             } else {
-                i32 previous = cable->wrap_indices[cable->wrap_count - 2];
                 i32 next = (last + 1) & 3;
+                i32 previous = cable->wrap_indices[cable->wrap_count - 2];
                 i32 direction = 1;
                 if (next == previous) {
                     next = (last + 3) & 3;
@@ -553,10 +534,10 @@ void UpdateCables() {
         }
         if (cable->source != NULL && cable->target != NULL) {
             for (i32 i = 0; i < cable->point_count; ++i)
-                if (i == 0)
-                    cable->velocities[i] = cable->source->apiobj.velocity;
-                else
+                if (i != 0)
                     cable->velocities[i] = cable->target->apiobj.velocity;
+                else
+                    cable->velocities[i] = cable->source->apiobj.velocity;
         }
     }
 }
@@ -571,12 +552,12 @@ void DrawCables() {
     nsegments_drawn = 0;
     for (CABLE_s *current = cables; current != cables + 8; ++current) {
         CABLE_s &cable = *current;
-        if ((cable.flags_1e9 & 1) == 0) {
+        if (cable.active == 0) {
             continue;
         }
 
         const f32 y_span = cable.points[cable.point_count - 1].y - cable.points[0].y;
-        if ((cable.flags_1e9 & 4) != 0) {
+        if (cable.released != 0) {
             cable.slack += FRAMETIME * cable_slack * slack_factor;
             if (cable.slack > cable_slack) {
                 cable.slack = cable_slack;
@@ -619,7 +600,9 @@ void DrawCables() {
             }
             for (i32 segment = 0; segment < cable.point_count - 1; ++segment) {
                 NUVEC previous = endpoint;
-                endpoint = cable.points[segment + 1];
+                endpoint.x = cable.points[segment + 1].x;
+                endpoint.y = cable.points[segment + 1].y;
+                endpoint.z = cable.points[segment + 1].z;
                 endpoint.y = NuFdiv(distance_along + cable.segment_lengths[segment], cable.total_length) * y_span +
                              cable.points[0].y;
                 f32 ground_end = GameShadow(NULL, &endpoint, 5.0f, -1);

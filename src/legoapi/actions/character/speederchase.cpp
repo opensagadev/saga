@@ -37,9 +37,6 @@
 #include "legoapi/characters/motion/camera.h"
 #include "legoapi/world/levels/episodeV.h"
 
-struct AIROW_s;
-struct nunativegscene_s;
-
 static i32 snaphack[2];
 static i32 snaphacktimer[2];
 
@@ -171,8 +168,8 @@ void SpeederChaseA_Update(WORLDINFO_s *world) {
     }
 
     WORLDINFO_s *current_world = WORLD;
-    const i16 bike_id = id_SPEEDERBIKE;
     LEVELDATA *chase_level = SPEEDERCHASEA_LDATA;
+    const i16 bike_id = id_SPEEDERBIKE;
     if (disable_narrow_socks != 0) {
         if (Player[0] != NULL) {
             Player[0]->field_0xf03 &= ~1;
@@ -206,38 +203,25 @@ void SpeederChaseA_Update(WORLDINFO_s *world) {
 
     u8 *sound_flags = reinterpret_cast<u8 *>(LevSfxFlag);
 
-#define UPDATE_FORCE_FIELD_SOUND(index)                                                                                \
-    do {                                                                                                               \
-        nuinstanim_s *animation = NuSpecialGetInstAnim(&LevHSpecial[index]);                                           \
-        NUVEC *position = NuSpecialGetDrawPos(&LevHSpecial[index]);                                                    \
-        if (animation != NULL) {                                                                                       \
-            void *animation_data = WORLD->current_gscn->instance_animation_data[animation->anim_ix];                   \
-            if (sound_flags[index] == 0) {                                                                             \
-                if (animation->ltime > 0.0f && animation->ltime != NuAnimEndFrameOld(animation_data)) {                \
-                    PlaySfx("env_laser_gate_on", position);                                                            \
-                    sound_flags[index] = 1;                                                                            \
-                }                                                                                                      \
-            } else if ((animation->flags & NUINSTANIM_FLAG_PLAYING) != 0 ||                                            \
-                       animation->ltime != NuAnimEndFrameOld(animation_data)) {                                        \
-                PlaySfx("env_laser_gate_lp", position);                                                                \
-            } else {                                                                                                   \
-                PlaySfx("env_laser_gate_off", position);                                                               \
-                sound_flags[index] = 0;                                                                                \
-            }                                                                                                          \
-        }                                                                                                              \
-    } while (0)
-
-    UPDATE_FORCE_FIELD_SOUND(0);
-    UPDATE_FORCE_FIELD_SOUND(1);
-    UPDATE_FORCE_FIELD_SOUND(2);
-    UPDATE_FORCE_FIELD_SOUND(3);
-    UPDATE_FORCE_FIELD_SOUND(4);
-    UPDATE_FORCE_FIELD_SOUND(5);
-    UPDATE_FORCE_FIELD_SOUND(6);
-    UPDATE_FORCE_FIELD_SOUND(7);
-    UPDATE_FORCE_FIELD_SOUND(8);
-
-#undef UPDATE_FORCE_FIELD_SOUND
+    for (i32 i = 0; i < 9; i++) {
+        nuinstanim_s *animation = NuSpecialGetInstAnim(&LevHSpecial[i]);
+        NUVEC *position = NuSpecialGetDrawPos(&LevHSpecial[i]);
+        if (animation != NULL) {
+            void *animation_data = WORLD->current_gscn->instance_animation_data[animation->anim_ix];
+            if (sound_flags[i] == 0) {
+                if (animation->ltime > 0.0f && animation->ltime != NuAnimEndFrameOld(animation_data)) {
+                    PlaySfx("env_laser_gate_on", position);
+                    sound_flags[i] = 1;
+                }
+            } else if ((animation->flags & NUINSTANIM_FLAG_PLAYING) != 0 ||
+                       animation->ltime != NuAnimEndFrameOld(animation_data)) {
+                PlaySfx("env_laser_gate_lp", position);
+            } else {
+                PlaySfx("env_laser_gate_off", position);
+                sound_flags[i] = 0;
+            }
+        }
+    }
 }
 
 void SpeederChaseA_Panel(WORLDINFO_s *) {
@@ -371,12 +355,11 @@ i32 Action_SpeederBeingChased(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_
         speed = values->behind_speed * ratio + (1.0f - ratio);
         seek = values->behind_seek;
     } else {
-        SPEEDERCHASEVALUES *values = &speedervals[processor->action_data_1];
-        ratio = error / values->ahead_range;
+        ratio = error / speedervals[processor->action_data_1].ahead_range;
         if (ratio > 1.0f)
             ratio = 1.0f;
-        speed = values->ahead_speed * ratio + (1.0f - ratio);
-        seek = values->ahead_seek;
+        speed = speedervals[processor->action_data_1].ahead_speed * ratio + (1.0f - ratio);
+        seek = speedervals[processor->action_data_1].ahead_seek;
     }
     object->run_speed_override = SeekValF(object->run_speed_override, speed * base_speed, seek);
     if (processor->speeder_ahead_latched != 0)

@@ -20,11 +20,6 @@
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nutrig.h"
 
-struct AIROW_s;
-struct nuqthdr_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
-
 void SecurityDoor_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
     if (object->character_context == 0x5c) {
         f32 *playing = NULL;
@@ -116,8 +111,7 @@ void SecurityDoors_InitTerrain(WORLDINFO_s *world) {
 }
 
 struct SECURITYDOORPROGRESS {
-    i32 state[2];
-    i32 activated;
+    i32 state[3];
 };
 
 static i32 SecurityDoors_GetMaxGizmos(void *door) {
@@ -128,9 +122,8 @@ static i32 SecurityDoors_GetMaxGizmos(void *door) {
 static void SecurityDoors_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *world_data, void *) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_data);
     for (i32 i = 0; i < world->security_door_count; ++i) {
-        SECURITYDOOR *door = &world->security_doors[i];
-        if (NuStrLen(door->name) != 0) {
-            AddGizmo(gizmo_sys, type_id, NULL, door);
+        if (NuStrLen(world->security_doors[i].name) != 0) {
+            AddGizmo(gizmo_sys, type_id, NULL, &world->security_doors[i]);
         }
     }
 }
@@ -278,10 +271,11 @@ static void SecurityDoors_ClearProgress(void *, void *progress_data) {
 
     progress->state[0] = -1;
     progress->state[1] = -1;
-    progress->activated = 0;
+    progress->state[2] = 0;
 }
 
 static void SecurityDoors_StoreProgress(void *world_data, void *, void *progress_data) {
+    WORLDINFO *world = static_cast<WORLDINFO *>(world_data);
     SECURITYDOORPROGRESS *progress = static_cast<SECURITYDOORPROGRESS *>(progress_data);
     if (progress == NULL) {
         return;
@@ -289,9 +283,8 @@ static void SecurityDoors_StoreProgress(void *world_data, void *, void *progress
 
     progress->state[0] = -1;
     progress->state[1] = -1;
-    progress->activated = 0;
+    progress->state[2] = 0;
 
-    WORLDINFO *world = static_cast<WORLDINFO *>(world_data);
     if (world == NULL || world->security_doors == NULL) {
         return;
     }
@@ -311,7 +304,7 @@ static void SecurityDoors_StoreProgress(void *world_data, void *, void *progress
             progress->state[1 + word] &= ~mask;
         }
         if (door->opened) {
-            reinterpret_cast<u32 *>(&progress->activated)[word] |= mask;
+            progress->state[2 + word] |= mask;
         }
     }
 }
@@ -371,7 +364,7 @@ static void SecurityDoors_Reset(void *world_data, void *, void *progress_data) {
             const u32 mask = 1U << i;
             door->visible = (progress->state[0] & mask) != 0;
             door->active = (progress->state[1] & mask) != 0;
-            door->opened = (progress->activated & mask) != 0;
+            door->opened = (progress->state[2] & mask) != 0;
             if (door->opened) {
                 door->opening = 1.0f;
                 door->state = 2;
@@ -394,18 +387,17 @@ static void SecurityDoors_Reset(void *world_data, void *, void *progress_data) {
 
 static void *SecurityDoors_ReserveBufferSpace(void *world_data) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_data);
+    SECURITYDOOR *doors = NULL;
     world->security_doors = NULL;
     world->security_door_count = 0;
 
-    const i32 count = world->current_level->max_security_doors;
-    if (count == 0) {
-        return NULL;
+    if (world->current_level->max_security_doors != 0) {
+        world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 16);
+        doors = static_cast<SECURITYDOOR *>(world->giz_buffer.void_ptr);
+        world->security_doors = doors;
+        world->giz_buffer.addr += sizeof(SECURITYDOOR) * world->current_level->max_security_doors;
     }
-
-    world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 16);
-    world->security_doors = static_cast<SECURITYDOOR *>(world->giz_buffer.void_ptr);
-    world->giz_buffer.addr += sizeof(SECURITYDOOR) * count;
-    return world->security_doors;
+    return doors;
 }
 
 static i32 SecurityDoors_Load(void *world_data, void *) {

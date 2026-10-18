@@ -319,7 +319,7 @@ extern "C" {
     void DebrisResetTimers(void);
     void DebrisSetDetailLevels(i32, i32);
     void DebrisSetDrawFlag(i32 handle, i8 draw_flag);
-    void DebrisSetFacing(i32, u8, i16, i16);
+    void DebrisSetFacing(i32, i8, i16, i16);
     void DebrisSetGroupID(i32, i16);
     void DebrisSetPriority(i32, u16, u8);
     void DebrisSetRenderGroup(i32 group);

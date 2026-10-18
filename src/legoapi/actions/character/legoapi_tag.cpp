@@ -663,8 +663,8 @@ void Tag_Check(GameObject_s *object) {
             } else {
                 if (Arcade == 0 && Tag_Mode == 3 && GetMenuID() == -1) {
                     if (__builtin_expect(FindGameMsgsWithID(-1, 0, -1, NULL) == 0, 1)) {
-                        f32 nearest = 0.7f * 0.7f * 2.0f;
                         i32 pack_index = -1;
+                        f32 nearest = 0.7f * 0.7f * 2.0f;
 
                         for (i32 i = 0; i < 11; ++i) {
                             if (!Store_IsPackUnlocked(i) && StorePack[i].id != NULL) {
@@ -866,7 +866,7 @@ __attribute__((force_align_arg_pointer)) void TakeOverCode(GameObject_s *object,
         }
         const f32 phase = fraction * 32768.0f;
         api.position.y += height * NU_SIN_LUT(static_cast<i32>(phase));
-        const u16 start_angle = object->takeover_start_angle;
+        const i32 start_angle = object->takeover_start_angle;
         const i32 difference = RotDiff(start_angle, target->apiobj.field_0x276);
         const f32 blend = 1.0f - (NU_SIN_LUT(static_cast<i32>(phase + 16384.0f)) + 1.0f) * 0.5f;
         const u16 angle = static_cast<u16>(static_cast<f32>(start_angle) + static_cast<f32>(difference) * blend);

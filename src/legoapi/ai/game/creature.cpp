@@ -135,30 +135,9 @@
 #include "legoapi/lib/camera.h"
 #include "legoapi/misc/utilities.h"
 
-struct AIROW_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
-
-struct starfighter_s;
-struct rtl_s;
-struct rtlidata_s;
-
 i32 MatrixReflection(NUMTX *matrix, i32 axis, f32 plane, f32 height, NUMTX *result);
 
 i32 draw_para = 1;
-
-struct GAMEMESSAGE_s;
-struct HINT_s;
-struct MENU_s;
-struct NuBloomParameters;
-struct STATUSPACKET_s;
-struct TouchHolder;
-struct _vum_s;
-struct _vuv_s;
-struct nuhspecial_s;
-struct ripple_node_s;
-struct ripple_set_s;
-struct VuVec;
 
 // These rotations are also used by the shop translation unit. Keep them local
 // so the compiler can inline the matrix arithmetic at each call site.
@@ -252,11 +231,6 @@ static u32 LayerBit(u8 layer) {
 static MOSEISLEY_LAYERS_ATTR void SetLayers_MOSEISLEYCITIZEN(u32 *layers)
     __asm__("_ZL26SetLayers_MOSEISLEYCITIZENP12GameObject_s.isra.2");
 
-struct tertype;
-struct terrsitu_s;
-struct PLATSKININFO;
-struct GAMECAMERA_s;
-struct pushblock_s;
 i32 NOTERRAINSTOP;
 extern "C" i16 id_SNAKE;
 
@@ -264,14 +238,6 @@ i32 testshadowfix = 1;
 
 namespace {
 #include "legoapi/render/core/terrain_types.h"
-
-} // namespace
-
-namespace {
-
-} // namespace
-
-namespace {
 
 } // namespace
 
@@ -283,29 +249,9 @@ namespace {
 static TERRAIN_KILL_PLAYER_ATTR i32 TerrainKillPlayer(GameObject_s *object, i32 surface, const f32 *normal_y)
     __asm__("_ZL17TerrainKillPlayerP12GameObject_siP7nuvec_s.isra.4");
 
-namespace {
-
-} // namespace
-
-namespace {
-
-} // namespace
-
 // Original 0x378fb0: the optimized rotating scan shares the terrain engine state.
 
-namespace {
-
-} // namespace
-
-namespace {
-
-} // namespace
-
-struct MechTouchUIElement;
-struct PLAYERITEM_s;
-struct PLAYERITEMTYPE_s;
 struct PLAYERPACKET_s;
-struct SOCKPOSITION_s;
 
 extern i32 complexsockposition_forcesock;
 extern i32 movegamecamera_forcesock;
@@ -364,8 +310,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
                   "complete game AI condition registry");
 
 }
-
-struct CUTSCENEPLAYERCLIP;
 
 extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER;
 extern i16 id_ANAKINJEDISCARRED;
@@ -748,10 +692,11 @@ void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *) {
     gamepad->rumble_packet.rumble_amount = 0.0f;
     gamepad->rumble_packet.field_0x08 = 0;
     gamepad->rumble_packet.rumble_time = 0.0f;
-    gamepad->allocated_5a &= static_cast<u8>(~(0x04 | 0x10));
+    packet->gamepad->allocated_5a &= static_cast<u8>(~0x04);
+    packet->gamepad->allocated_5a &= static_cast<u8>(~0x10);
+    packet->gamepad->operator_data = NULL;
     packet->secondary_flags &= static_cast<u8>(~0x04);
     packet->input_state = 0;
-    gamepad->operator_data = NULL;
 
     CharShadows_Reset(packet);
     packet->field_0x6c8 = 0;
@@ -772,8 +717,8 @@ void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *) {
     packet->movement_flags &= static_cast<u8>(~0x01);
     packet->movement_angle_0 = -1;
     packet->force_glow_index = -1;
+    packet->movement_angle_1 = qrand() <= 0x7fff ? 0x26 : 0x4f;
     packet->field_0x718 = 0;
-    packet->movement_angle_1 = qrand() > 0x7fff ? 0x4f : 0x26;
     packet->random_state[0] = static_cast<u8>(qrand() >> 8);
     packet->random_state[1] = static_cast<u8>(qrand() >> 8);
     packet->random_state[2] = static_cast<u8>(qrand() >> 8);
@@ -785,8 +730,8 @@ void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *) {
     packet->field_0x69c = 0;
     packet->field_0x690 = 0;
     packet->field_0x694 = 0;
-    packet->field_0x688 = 0;
     packet->field_0x794 = 0;
+    packet->field_0x688 = 0;
     packet->field_0x771 &= static_cast<u8>(~0x0c);
     packet->field_0x604 = NULL;
     packet->surface_type = -1;
@@ -1134,23 +1079,18 @@ i32 GetDefaultIdle(GameObject_s *obj) {
     DefaultIdleCharacterData *game_character = static_cast<DefaultIdleCharacterData *>(character->field11_0x24);
 
     i32 animation;
-    i32 table_offset;
     if (game_character->use_standard_idle != 0) {
         animation = 25;
-        table_offset = 100;
     } else {
-        const u32 alternate = character->model_flags & 0x80;
-        table_offset = alternate != 0 ? 472 : 100;
-        animation = alternate != 0 ? 118 : 25;
+        animation = (character->model_flags & 0x80) != 0 ? 118 : 25;
     }
     if (obj->batarang != NULL && *(reinterpret_cast<u8 *>(obj->batarang) + 0x7d) != 0) {
         return 151;
     }
 
-    u8 *animation_table = reinterpret_cast<u8 *>(obj->apiobj.character_model->model_data_b);
-    void *entry = *reinterpret_cast<void **>(animation_table + table_offset);
-    if ((*reinterpret_cast<i32 *>(animation_table + 4) == 0 || (obj->field_0xe22 & 1) != 0 || obj->field_0xe32 == 1) &&
-        entry != NULL) {
+    void **animations = obj->apiobj.character_model->model_data_b;
+    if ((animations[1] == NULL || (obj->field_0xe22 & 1) != 0 || obj->field_0xe32 == 1) &&
+        animations[animation] != NULL) {
         return animation;
     }
     return 1;
@@ -1331,7 +1271,7 @@ i32 InitCreature(GameObject_s *obj, i32 id, i32 param) {
     obj->saved_position = obj->apiobj.position;
 
     game_character_data = obj->apiobj.character_data->game_character;
-    obj->field_0xf01 = (obj->field_0xf01 & ~8) | (((game_character_data->flags_090 >> 17) & 1) << 3);
+    obj->is_female = (game_character_data->flags_090 >> 17) & 1;
     if (obj->id == id_MOSEISLEYCITIZEN) {
         SetLayers_MOSEISLEYCITIZEN(&obj->field_0x1054);
     } else if (obj->id == id_CANTINAALIEN) {
@@ -1350,7 +1290,7 @@ i32 InitCreature(GameObject_s *obj, i32 id, i32 param) {
         obj->field_0x1054 |= LayerBit(head_layers[qrand() / 0x5556]);
         obj->field_0x1054 |= LayerBit(body_layers[qrand() / 0x5556]);
         obj->field_0x1054 |= LayerBit(leg_layers[qrand() / 0x5556]);
-        obj->field_0xf01 = (obj->field_0xf01 & ~8) | (((obj->field_0x1054 >> 7) & 1) << 3);
+        obj->is_female = (obj->field_0x1054 >> 7) & 1;
     } else if (obj->id == id_BOB) {
         SetLayers_BOB(obj);
     } else if (obj->id == id_GEONOSIAN) {
@@ -1420,7 +1360,11 @@ void InitAICreatures(AISYS_s *system) {
             } else if ((model_flags & 0x4) != 0) {
                 object->apiobj.field_0x1f4 |= 0x401;
             }
-            object->field_0x1050 |= (model_flags & 0x1000) != 0 ? 5 : 1;
+            if ((model_flags & 0x1000) == 0) {
+                object->field_0x1050 |= 1;
+            } else {
+                object->field_0x1050 |= 5;
+            }
             object->ai.field_0x134 = static_cast<u8>(creature_index);
 
             if (member == 0 && creature.count > 1 && creature.start_stagger == 0.0f) {
@@ -1445,7 +1389,7 @@ void InitAICreatures(AISYS_s *system) {
 }
 
 void Players_Init(void) {
-    memset(Player, 0, sizeof(Player));
+    memset(Player, 0, 8 * sizeof(Player[0]));
     GameObject_s **p = Player;
 
     if (netclient != 0) {
@@ -1725,16 +1669,12 @@ void ResetAICreature(GameObject_s *object, AISYS_s *system) {
     object->ai.reset_mode = AI_CREATURE_RESET_ACTIVE;
 
     if (object->ai.group != NULL) {
-        AIGROUP *group = object->ai.group;
-        if (object->ai.group_member_index < 32) {
-            group->member_is_alive |= 1u << object->ai.group_member_index;
-        }
+        object->ai.group->member_is_alive |= static_cast<u32>(object->ai.group_member_index < 32)
+                                             << object->ai.group_member_index;
 
-        AIROW &group_row = group->rows[object->ai.group_row];
-        const i32 member_column = object->ai.group_member_index - creature.count_across * object->ai.group_row;
-        if (static_cast<u32>(member_column) < 8) {
-            group_row.is_alive |= static_cast<u8>(1u << member_column);
-        }
+        AIROW &group_row = object->ai.group->rows[object->ai.group_row];
+        const u8 member_column = object->ai.group_member_index - creature.count_across * object->ai.group_row;
+        group_row.is_alive |= static_cast<u8>(static_cast<u32>(member_column < 8) << member_column);
         if (object->ai.group_column == 0) {
             group_row.pos = object->apiobj.position;
             group_row.path_info = object->ai.path_info;
@@ -1937,12 +1877,11 @@ i32 NewPlayerCharacter(GameObject_s *object, i32 id, i32 old_id, i32) {
     const f32 viewdistance = data->viewdistance;
     const f32 heardistance = data->heardistance;
     const f32 maxviewheight = data->maxviewheight;
-    const f32 minviewheight = data->minviewheight;
     const u32 flags_090_bit17 = (object->apiobj.character_data->game_character->flags_090 >> 17) & 1;
     object->apiobj.viewdistance = viewdistance;
     object->apiobj.heardistance = heardistance;
     object->apiobj.maxviewheight = maxviewheight;
-    object->apiobj.minviewheight = minviewheight;
+    object->apiobj.minviewheight = data->minviewheight;
     object->field_0xf01 = (object->field_0xf01 & ~8) | (flags_090_bit17 << 3);
     if (object->id == id_MOSEISLEYCITIZEN) {
         SetLayers_MOSEISLEYCITIZEN(&object->field_0x1054);
@@ -2429,18 +2368,15 @@ void MovePlayerSpline(GameObject_s *object) {
                                     FRAMETIME);
             roll += static_cast<i32>(object->movement_spline_lateral_speed * spline_xoffset_speed_roll);
         }
-        i32 target_roll;
-        if (roll < -0x10000) {
+        if (roll < -0x10000)
+            roll = -0x10000;
+        else if (roll > 0x10000)
+            roll = 0x10000;
+        i32 target_roll = roll / 4;
+        if (target_roll < -0x2000)
             target_roll = -0x2000;
-        } else if (roll > 0x10000) {
+        else if (target_roll > 0x2000)
             target_roll = 0x2000;
-        } else {
-            target_roll = roll / 4;
-            if (target_roll < -0x2000)
-                target_roll = -0x2000;
-            else if (target_roll > 0x2000)
-                target_roll = 0x2000;
-        }
         object->movement_lean_angle = SeekRot(object->movement_lean_angle, target_roll, 8.0f);
     }
     APIObjectVelocities(object);
@@ -2575,16 +2511,15 @@ void MovePlayer(GameObject_s *object) {
                 if (0.2f > magnitude) {
                     pad->input_magnitude = 0.0f;
                 } else {
-                    GAMECHARACTERDATA *data = api.character_data->game_character;
                     if ((api.character_data->model_flags & 0x20) != 0 &&
                         (api.field_0x27c == -1 ? object->current_hp <= 2 : object->field_0xe38 <= 2)) {
-                        pad->input_magnitude = data->walk_speed;
-                    } else if (magnitude < 0.5f && (data->flags_090 & 8) == 0) {
-                        pad->input_magnitude = data->tiptoe_speed;
+                        pad->input_magnitude = api.character_data->game_character->walk_speed;
+                    } else if (magnitude < 0.5f && (api.character_data->game_character->flags_090 & 8) == 0) {
+                        pad->input_magnitude = api.character_data->game_character->tiptoe_speed;
                     } else if (magnitude < 0.8f) {
-                        pad->input_magnitude = data->walk_speed;
+                        pad->input_magnitude = api.character_data->game_character->walk_speed;
                     } else {
-                        pad->input_magnitude = data->run_speed;
+                        pad->input_magnitude = api.character_data->game_character->run_speed;
                     }
                 }
                 // The original player path writes X to +0x2c and Z to +0x30;
@@ -4078,12 +4013,10 @@ void FixUpLayers() {
         }
     }
 
-    SPECIAL_LAYER_s *layer = SpecialLayer;
-    SPECIAL_LAYER_s *layer_end = SpecialLayer + sizeof(SpecialLayer) / sizeof(SpecialLayer[0]);
-    for (; layer != layer_end; ++layer) {
-        layer->mask = 0;
-        if (layer->character_id != NULL && *layer->character_id != -1) {
-            layer->mask = 1 << LayerFromName(&GCDataList[*layer->character_id], layer->name);
+    for (u32 i = 0; i < sizeof(SpecialLayer) / sizeof(SpecialLayer[0]); ++i) {
+        SpecialLayer[i].mask = 0;
+        if (SpecialLayer[i].character_id != NULL && *SpecialLayer[i].character_id != -1) {
+            SpecialLayer[i].mask = 1 << LayerFromName(&GCDataList[*SpecialLayer[i].character_id], SpecialLayer[i].name);
         }
     }
 }
@@ -4289,9 +4222,10 @@ static void DrawParaphernalia(GameObject_s *object) {
           (object->apiobj.character_data->game_character->flags_098[0] & 0x40) == 0)) {
         if ((object->field_0xe24 & 1) && object->field_0x780 != NULL) {
             GameObject_s *passenger = static_cast<GameObject_s *>(object->field_0x780);
-            i32 locator = object->apiobj.character_data->game_character->weapon_joints[0];
-            if (locator != -1 && object->apiobj.character_model->points_of_interest[locator] != NULL) {
-                matrix = object->joint_matrices[locator];
+            if (object->apiobj.character_data->game_character->weapon_joints[0] != -1 &&
+                object->apiobj.character_model
+                        ->points_of_interest[object->apiobj.character_data->game_character->weapon_joints[0]] != NULL) {
+                matrix = object->joint_matrices[object->apiobj.character_data->game_character->weapon_joints[0]];
             } else {
                 rotation.x = -0x4000;
                 rotation.y = object->apiobj.field_0x276;
@@ -4335,9 +4269,9 @@ static void DrawParaphernalia(GameObject_s *object) {
             MatrixReflection(&matrix, carried->field_0x1087, carried->field_0x1020, WORLD->current_level->unknown_0cc,
                              &reflected))
             reflection = &reflected;
-        GAMECHARACTERDATA_s *carried_config = carried->apiobj.character_data->game_character;
-        u32 layers = carried->id == id_ANAKINJEDISCARRED ? carried_config->layer_mask_special
-                                                         : carried_config->layer_mask_medium;
+        u32 layers = carried->id == id_ANAKINJEDISCARRED
+                         ? carried->apiobj.character_data->game_character->layer_mask_special
+                         : carried->apiobj.character_data->game_character->layer_mask_medium;
         layers = AdjustLayerBits(layers, carried);
         if (GameDrawCharacterModel(carried->apiobj.character_model, &carried->apiobj.anim_packet, &matrix, NULL,
                                    reflection, attachment_matrices, NULL, layers)) {
@@ -4363,10 +4297,10 @@ static void DrawParaphernalia(GameObject_s *object) {
         }
     } else {
         if (object->apiobj.character_data->flags & 1) {
-            i32 locator = config->thingy_locator;
-            matrix = locator != -1 && object->apiobj.character_model->points_of_interest[locator] != NULL &&
+            matrix = config->thingy_locator != -1 &&
+                             object->apiobj.character_model->points_of_interest[config->thingy_locator] != NULL &&
                              object->apiobj.model_draw_result
-                         ? joints[locator]
+                         ? joints[config->thingy_locator]
                          : object->apiobj.field_0xb8;
             reflected = object->apiobj.field_0x138;
             CharScene_Draw(WORLD, object->id, &matrix, object->field_0x1088 ? &reflected : NULL);

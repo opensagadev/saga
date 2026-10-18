@@ -108,7 +108,7 @@ static void GizActions_ChangeObstTriggerType(GIZFLOW_s *flow, FLOWBOX_s *, char 
             mode = 7;
         }
     }
-    if (mode == -1 || name == NULL) {
+    if (name == NULL || mode == -1) {
         return;
     }
     GIZMO_s *gizmo = GizmoFindByName(flow->gizmo_sys, obstacle_gizmotype_id, name);
@@ -420,7 +420,7 @@ static void GizAction_SetAIState(GIZFLOW_s *, FLOWBOX_s *, char **params, int co
                 matching_type = 1;
             }
         }
-        if (matching_type != 0 && range_squared > distance_squared) {
+        if (range_squared > distance_squared && matching_type != 0) {
             object->ai.script_process.next_state = AIStateFind(state_name, object->ai.script_process.script);
         }
     }

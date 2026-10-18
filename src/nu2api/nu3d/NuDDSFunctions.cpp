@@ -160,13 +160,19 @@ i32 NuDDSGetSize(char const *dds_data) {
     NuDDSGetMipLevel(width, height, depth, format, mip_count, is_cube_map, mip_count, is_cube_map ? 6 : 0, mip_width,
                      mip_height, mip_size);
 
-    i32 palette_size = 0;
-    if (format == NUTEX_PAL8) {
-        palette_size = 0x200;
-    } else if (format == NUTEX_PAL4) {
-        palette_size = 0x20;
+    i32 palette_size;
+    switch (format) {
+        case NUTEX_PAL8:
+            palette_size = 0x200;
+            break;
+        case NUTEX_PAL4:
+            palette_size = 0x20;
+            break;
+        default:
+            palette_size = 0;
+            break;
     }
-    return sizeof(dds_header_s) + palette_size + mip_width + mip_height;
+    return palette_size + mip_width + mip_height + sizeof(dds_header_s);
 }
 
 void NuDDSGetMipLevel(i32 width, i32 height, i32 depth, NUTEXFORMAT format, i32 mip_count, bool is_cube_map, i32 level,

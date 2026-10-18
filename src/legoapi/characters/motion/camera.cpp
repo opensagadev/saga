@@ -109,23 +109,6 @@ void SetDepthOfField();
 
 void SetCameraMatrices();
 
-struct starfighter_s;
-struct rtl_s;
-struct rtlidata_s;
-
-struct GAMEMESSAGE_s;
-struct HINT_s;
-struct MENU_s;
-struct NuBloomParameters;
-struct STATUSPACKET_s;
-struct TouchHolder;
-struct _vum_s;
-struct _vuv_s;
-struct nuhspecial_s;
-struct ripple_node_s;
-struct ripple_set_s;
-struct VuVec;
-
 extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
 extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
 
@@ -458,8 +441,8 @@ mode_selected:
                 if (PODRACE_ADATA != NULL && WORLD->area == PODRACE_ADATA) {
                     player_focus[player_count] = Player[i]->apiobj.collision_position;
                     NUVEC &pod_offset = mode_scratch;
-                    pod_offset.x = 0.0f;
                     pod_offset.y = 0.0f;
+                    pod_offset.x = 0.0f;
                     pod_offset.z = 2.0f;
                     NuVecRotateY(
                         &pod_offset, &pod_offset,

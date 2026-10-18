@@ -17,9 +17,6 @@
 #include <string.h>
 #include "legoapi/gizmo/object/gizmoblowups.h"
 
-struct AIROW_s;
-struct nunativegscene_s;
-
 struct RadioEntry {
     union {
         GIZMOBLOWUP_s *blowup;
@@ -45,43 +42,42 @@ void UpdateRadios() {
     }
 
     radios_playing = 0;
-    for (i32 i = 0; i < 8; i++) {
-        RadioEntry *radio = &radios[i];
-        if (radio->time <= 0.0f) {
+    for (RadioEntry *radio = radios; radio != &radios[8]; radio++) {
+        if (!(radio->time > 0.0f)) {
             continue;
         }
 
         radio->time -= FRAMETIME;
-        if (!(radio->time >= 0.0f)) {
+        if (radio->time < 0.0f) {
             radio->time = 0.0f;
         } else {
             radios_playing = 1;
         }
 
         f32 phase = NuFmod(radio->time, 0.5f);
-        i32 angle = static_cast<i32>(phase * 65536.0f) >> 1;
-        NUMTX *matrix;
+        i32 angle = static_cast<i32>(phase * 65536.0f);
         if (radio->blowup != NULL) {
             GizmoBlowupUpdateMatrix(radio->blowup);
-            f32 scale_value = NuTrigTable[angle & 0x7fff] * 0.1f + 1.0f;
+            f32 scale_value = NuTrigTable[(angle >> 1) & 0x7fff] * 0.1f + 1.0f;
             NUVEC scale = {scale_value, scale_value, scale_value};
-            matrix = &radio->blowup->transform;
-            NuMtxPreScale(matrix, &scale);
+            NuMtxPreScale(&radio->blowup->transform, &scale);
             radio->blowup->state_flags |= 1;
+            PlaySfx("swdisco", reinterpret_cast<NUVEC *>(&radio->blowup->transform.m30));
         } else {
             if (NuSpecialExistsFn(&radio->special) == 0) {
                 continue;
             }
-            *NuSpecialGetDrawMtx(&radio->special) = *NuSpecialGetMtx(&radio->special);
-            matrix = NuSpecialGetDrawMtx(&radio->special);
-            if (static_cast<i32>(phase * 65536.0f) != 0) {
-                f32 scale_value = NuTrigTable[angle & 0x7fff] * 0.1f + 1.0f;
+            NUMTX *source = NuSpecialGetMtx(&radio->special);
+            NUMTX *matrix = NuSpecialGetDrawMtx(&radio->special);
+            *matrix = *source;
+            if (angle != 0) {
+                f32 scale_value = NuTrigTable[(angle >> 1) & 0x7fff] * 0.1f + 1.0f;
                 NUVEC scale = {scale_value, scale_value, scale_value};
                 NuMtxPreScale(matrix, &scale);
                 NuSpecialUpdate(&radio->special);
             }
+            PlaySfx("swdisco", reinterpret_cast<NUVEC *>(&matrix->m30));
         }
-        PlaySfx("swdisco", reinterpret_cast<NUVEC *>(&matrix->m30));
     }
 }
 
@@ -118,41 +114,26 @@ void PlayRadio(char *special_name, char *blowup_name, i32 play) {
         if (blowup_name == NULL) {
             return;
         }
-        RadioEntry *radio = NULL;
-        if (special_name != NULL) {
-            for (i32 i = 0; i < 8; i++) {
-                radio = &radios[i];
-                if (radio->blowup != NULL && NuStrICmp(radio->blowup->name, blowup_name) == 0) {
-                    goto stop_blowup;
-                }
+        for (i32 i = 0; i < 8; i++) {
+            RadioEntry *radio = &radios[i];
+            if (radio->blowup != NULL && NuStrICmp(radio->blowup->name, blowup_name) == 0) {
+                GizmoBlowupUpdateMatrix(radio->blowup);
+                radio->blowup->state_flags |= 1;
+                memset(radio, 0, sizeof(*radio));
+                return;
+            }
+            if (special_name != NULL) {
                 char *name = NuSpecialGetName(&radio->special);
                 if (name != NULL && NuStrICmp(name, special_name) == 0) {
-                    goto stop_special;
-                }
-            }
-        } else {
-            for (i32 i = 0; i < 8; i++) {
-                radio = &radios[i];
-                if (radio->blowup != NULL && NuStrICmp(radio->blowup->name, blowup_name) == 0) {
-                    goto stop_blowup;
+                    NUMTX *source = NuSpecialGetMtx(&radio->special);
+                    NUMTX *instance = NuSpecialGetInstanceMtx(&radio->special);
+                    *instance = *source;
+                    NuSpecialUpdate(&radio->special);
+                    memset(radio, 0, sizeof(*radio));
+                    return;
                 }
             }
         }
-        return;
-
-    stop_blowup:
-        if (radio->blowup != NULL) {
-            GizmoBlowupUpdateMatrix(radio->blowup);
-            radio->blowup->state_flags |= 1;
-            memset(radio, 0, sizeof(*radio));
-            return;
-        }
-    stop_special:
-        NUMTX *source = NuSpecialGetMtx(&radio->special);
-        NUMTX *instance = NuSpecialGetInstanceMtx(&radio->special);
-        *instance = *source;
-        NuSpecialUpdate(&radio->special);
-        memset(radio, 0, sizeof(*radio));
     }
 }
 

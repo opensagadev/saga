@@ -37,11 +37,6 @@
 #include "nu2api/numath/nutrig.h"
 #include <stdio.h>
 
-struct AIROW_s;
-struct nuqthdr_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
-
 void TimingBars(void);
 
 static f32 redbrickslidetime;
@@ -98,10 +93,10 @@ static void DrawCoinTotal(i32 source, i32 hide_super_story_target) {
         total = static_cast<i32>(Game.coins);
     }
 
-    if (target_met)
-        CoinTotal_Draw(total, y, CoinTotalScale, 1, 1.0f, 63, 255, 31);
-    else
+    if (!target_met)
         CoinTotal_Draw(total, y, CoinTotalScale, 1, 1.0f, 255, 191, 0);
+    else
+        CoinTotal_Draw(total, y, CoinTotalScale, 1, 1.0f, 63, 255, 31);
 }
 
 i32 Tag_UpdateHint(HINT_s *hint) {
@@ -120,7 +115,7 @@ i32 Tag_UpdateHint(HINT_s *hint) {
         case 600:
             if (FreePlay == 0)
                 return 0;
-            if (player != NULL && static_cast<i8>(player->apiobj.flags_low) < 0 && player->field_0xcc0 != NULL)
+            if (player != NULL && player->apiobj.player_controlled && player->field_0xcc0 != NULL)
                 return 0;
             return player2 == NULL || static_cast<i8>(player2->apiobj.flags_low) >= 0 || player2->field_0xcc0 == NULL;
         case 602: {
@@ -134,7 +129,7 @@ i32 Tag_UpdateHint(HINT_s *hint) {
             GameObject_s *first = player;
             if (first != NULL && static_cast<i8>(first->apiobj.flags_low) < 0 && first->field_0xcc0 != NULL)
                 return 0;
-            if (second != NULL && static_cast<i8>(second->apiobj.flags_low) < 0 && second->field_0xcc0 != NULL)
+            if (second != NULL && second->apiobj.player_controlled && second->field_0xcc0 != NULL)
                 return 0;
             i32 count = 0;
             i32 active = 0;
@@ -189,7 +184,7 @@ i32 Tag_UpdateHint(HINT_s *hint) {
         case 606:
             for (i32 i = 0; i < 2; ++i) {
                 GameObject_s *object = Player[i];
-                if (object != NULL && static_cast<i8>(object->apiobj.flags_low) < 0 && object->field_0xcc0 != NULL &&
+                if (object != NULL && object->apiobj.player_controlled && object->field_0xcc0 != NULL &&
                     object->id != id_LUKESKYWALKERDAGOBAH)
                     return WORLD->current_level != SPEEDERCHASEA_LDATA || disable_narrow_socks != 0;
             }
@@ -274,9 +269,9 @@ static __attribute__((noinline, noclone, hot, section(".text"))) void DrawHitPoi
 static void DrawHitPoints(GameObject_s *object, float x, float y, float scale, float alpha, i32 alignment) {
     // Retail has no NULL guards here; both callers pass a live object.
     i32 two_rows = 0;
-    if (__builtin_expect(SuperStory != 0, 0) && WORLD->current_level == VADERC_LDATA && object->hitpoints == 10) {
+    if (SuperStory != 0 && WORLD->current_level == VADERC_LDATA && object->hitpoints == 10) {
         two_rows = 1;
-    } else if (__builtin_expect((object->field_0xefb & 8) != 0, 0)) {
+    } else if ((object->field_0xefb & 8) != 0) {
         two_rows = drawbosshitpoints_2rows != 0;
         drawbosshitpoints_2rows = 0;
     }
@@ -342,7 +337,7 @@ static void DrawHitPoints(GameObject_s *object, float x, float y, float scale, f
         object_scale.x = scale;
         const i32 half_hp = (i + 1) * 2;
         float draw_alpha = 0.5f;
-        if (__builtin_expect(i < current_hp, 1)) {
+        if (i < current_hp) {
             draw_alpha = 1.0f;
             if (PLAYERHITPOINTS_2HEARTSIN1 != 0 && object->apiobj.player_controlled && i == current_hp - 1 &&
                 static_cast<i8>(object->current_hp) < half_hp) {
@@ -390,7 +385,7 @@ void UpdateStats() {
     if ((WORLD->current_level->flags & LEVEL_GAMEPLAY) == 0)
         return;
     f32 stats_target = 0.0f;
-    if (__builtin_expect(FadeSys.fade == 0.0f && CUTSTOPGAME == 0 && newgamecam == 0, 0)) {
+    if (__builtin_expect(FadeSys.fade == 0.0f && CUTSTOPGAME == 0 && newgamecam == 0, 1)) {
         const bool hub_hidden = HUB_ADATA != NULL && WORLD->area == HUB_ADATA && GameCam->mode == 4;
         if (!hub_hidden && GetMenuID() != PANEL_MENU_EPISODE_I && GetMenuID() != PANEL_MENU_EPISODE_II &&
             GetMenuID() != PANEL_MENU_EPISODE_III && GetMenuID() != PANEL_MENU_EPISODE_IV)
@@ -459,11 +454,11 @@ void UpdateStats() {
             builduptime = SeekLinearF(builduptime, target, FRAMETIME);
             const i32 freeplay = GAMEDEMO != 0 ? 0 : FreePlay;
             if (WORLD->area != NULL && (WORLD->area->flags & 0x4010) != 0) {
-                AREASAVE_s &save = Game.area_save[WORLD->level_sub_id];
                 if (BOTHTRUEJEDIGOLDBRICKS == 0) {
-                    if (save.true_hero_complete[0] != 0 || save.true_hero_complete[1] != 0)
+                    if (Game.area_save[WORLD->level_sub_id].true_hero_complete[0] != 0 ||
+                        Game.area_save[WORLD->level_sub_id].true_hero_complete[1] != 0)
                         goto buildup_finished;
-                } else if (save.true_hero_complete[freeplay] != 0) {
+                } else if (Game.area_save[WORLD->level_sub_id].true_hero_complete[freeplay] != 0) {
                     goto buildup_finished;
                 }
                 {
@@ -1129,9 +1124,9 @@ void DrawPanel() {
                                     NU_SIN_LUT(static_cast<i32>(builduptime * 16384.0f)) * (STATSPOSY - STATSPOS2Y) +
                                     STATSPOS2Y;
                                 f32 y = status_y + PANEL_COINY;
-                                AREASAVE_s *save = &Game.area_save[WORLD->level_sub_id];
                                 i32 amount;
-                                if (save->true_hero_complete[0] || save->true_hero_complete[1])
+                                if (Game.area_save[WORLD->level_sub_id].true_hero_complete[0] ||
+                                    Game.area_save[WORLD->level_sub_id].true_hero_complete[1])
                                     maximum = amount = BuildUpTotal;
                                 else
                                     amount = BuildUpDone ? maximum : BuildUpTotal;

@@ -10,11 +10,6 @@
 
 extern f32 FRAMETIME;
 
-struct AIROW_s;
-struct nuqthdr_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
-
 struct STREAK_s {
     STREAK_s *next;
     STREAK_s *prev;
@@ -79,8 +74,8 @@ static void CalculateBezierPoint(NUVEC *result, NUVEC *start, NUVEC *end, NUVEC 
     const f32 start_weight = inverse * inverse * inverse;
     const f32 three_amount = 3.0f * amount;
     const f32 control_a_weight = inverse * three_amount * inverse;
-    const f32 control_b_weight = amount * three_amount * inverse;
     const f32 end_weight = amount * amount * amount;
+    const f32 control_b_weight = amount * three_amount * inverse;
     result->x =
         start->x * start_weight + control_a.x * control_a_weight + control_b.x * control_b_weight + end->x * end_weight;
     result->y =
@@ -360,7 +355,7 @@ void DrawStreaks() {
         const u32 endpoint_colour = header->colour;
         STREAK_s *streak = header->streaks;
 
-        while (vertex_count < 254 && streak != NULL) {
+        while (streak != NULL && vertex_count < 254) {
             const f32 fade = streak->remaining_time < 0.0f ? 0.0f : streak->remaining_time;
             i32 alpha = static_cast<i32>(static_cast<f32>(endpoint_colour >> 24) * fade * 2.0f);
             if (alpha > 255)
@@ -395,8 +390,8 @@ void DrawStreaks() {
                 const u32 segment_colour = (header->colour & 0x00ffffff) | (static_cast<u32>(segment_alpha) << 24);
 
                 vertices[vertex_count].position = streak->positions[index];
-                vertices[vertex_count].colour = segment_colour;
                 vertices[vertex_count].u = 0.01f;
+                vertices[vertex_count].colour = segment_colour;
                 vertices[vertex_count + 1].position = streak->tangents[index];
                 vertices[vertex_count + 1].colour = segment_colour;
                 vertices[vertex_count + 1].u = 1.01f;

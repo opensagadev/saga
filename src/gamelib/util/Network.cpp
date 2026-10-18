@@ -52,19 +52,20 @@ static f32 NetworkFrameTime() {
 }
 
 static f32 ClampPrediction(NetPredictor const *predictor, f32 value) {
-    if ((predictor->replication_group & 0x10) != 0 && value < predictor->minimum_value) {
-        value = predictor->minimum_value;
+    if ((predictor->replication_group & 0x10) != 0) {
+        value = value > predictor->minimum_value ? value : predictor->minimum_value;
     }
-    if ((predictor->replication_group & 0x20) != 0 && value > predictor->maximum_value) {
-        value = predictor->maximum_value;
+    if ((predictor->replication_group & 0x20) != 0) {
+        value = value < predictor->maximum_value ? value : predictor->maximum_value;
     }
     return value;
 }
 
 void NetRotator2::PredictValue(EdClass const *, void *, NetPredictor::PredictorTime *time,
                                NetPredictor::PredictorData **samples, float *values, i32 count) {
+    f32 now = NetworkFrameTime();
     f32 interval_scale = 1.0f / (time->values[2] - time->values[1]);
-    f32 elapsed = NetworkFrameTime() - time->values[2];
+    f32 elapsed = now - time->values[2];
     for (i32 i = 0; i < count; i++) {
         i32 delta = (static_cast<i32>(samples[i]->values[2]) - static_cast<i32>(samples[i]->values[1])) & 0xffff;
         if (delta >= 0x8000) {
@@ -87,15 +88,13 @@ i32 NetPredictor::AllowPush(EdClass const *object_class, void const *object, Rep
         allowed = 1;
     } else if (now - *last_push > minimum_interval) {
         ReplicatorData prediction_data = data;
-        if (DoPrediction(object_class, const_cast<void *>(object), prediction_data, 1) == 0) {
-            if (*failed_predictions <= 2) {
-                ++*failed_predictions;
-                replication_group &= ~1;
-                allowed = 1;
-            }
-        } else {
+        if (DoPrediction(object_class, const_cast<void *>(object), prediction_data, 1) != 0) {
             *failed_predictions = 0;
             replication_group |= 1;
+            allowed = 1;
+        } else if (*failed_predictions <= 2) {
+            ++*failed_predictions;
+            replication_group &= ~1;
             allowed = 1;
         }
     }
@@ -126,12 +125,14 @@ static i32 PredictorValues(EdRef *member, u8 *member_data, f32 *converted, f32 *
     }
     if (member->type_id == EdType_Char) {
         converted[0] = static_cast<f32>(*reinterpret_cast<i8 *>(member_data));
+        values = converted;
     } else if (member->type_id == EdType_Short) {
         converted[0] = static_cast<f32>(*reinterpret_cast<i16 *>(member_data));
+        values = converted;
     } else if (member->type_id == EdType_Int) {
         converted[0] = static_cast<f32>(*reinterpret_cast<i32 *>(member_data));
+        values = converted;
     }
-    values = converted;
     return 1;
 }
 
@@ -168,9 +169,9 @@ void NetPredictor3::PredictValue(EdClass const *, void *, NetPredictor::Predicto
                                  NetPredictor::PredictorData **samples, float *values, i32 count) {
     f32 now = NetworkFrameTime();
     for (i32 i = 0; i < count; i++) {
-        f32 predicted = samples[i]->values[0] * (now - time->values[1]) * (now - time->values[2]) * time->factors[0] +
-                        samples[i]->values[1] * (now - time->values[0]) * (now - time->values[2]) * time->factors[1] +
-                        samples[i]->values[2] * (now - time->values[0]) * (now - time->values[1]) * time->factors[2];
+        f32 predicted = (now - time->values[1]) * (now - time->values[2]) * time->factors[0] * samples[i]->values[0] +
+                        (now - time->values[0]) * (now - time->values[2]) * time->factors[1] * samples[i]->values[1] +
+                        (now - time->values[0]) * (now - time->values[1]) * time->factors[2] * samples[i]->values[2];
         predicted = ClampPrediction(this, predicted);
         values[i] = values[i] * 0.8f + predicted * 0.2f;
     }
@@ -178,8 +179,9 @@ void NetPredictor3::PredictValue(EdClass const *, void *, NetPredictor::Predicto
 
 void NetPredictor2::PredictValue(EdClass const *, void *, NetPredictor::PredictorTime *time,
                                  NetPredictor::PredictorData **samples, float *values, i32 count) {
+    f32 now = NetworkFrameTime();
     f32 interval_scale = 1.0f / (time->values[2] - time->values[1]);
-    f32 elapsed = NetworkFrameTime() - time->values[2];
+    f32 elapsed = now - time->values[2];
     for (i32 i = 0; i < count; i++) {
         f32 predicted =
             samples[i]->values[2] + (samples[i]->values[2] - samples[i]->values[1]) * interval_scale * elapsed;
@@ -304,7 +306,7 @@ i32 NetPredictor::DoPrediction(EdClass const *object_class, void *object, Replic
             PredictValue(object_class, object, time, samples, values, count);
 
             if (check_only == 0) {
-                StorePredictedValues(member, member_data, values);
+                StorePredictedValues(member, member_data, converted);
                 member->SetMemberData(object, member->type_id, member_data, sizeof(member_data), NULL);
             } else {
                 result |= CheckPredictionError(object_class, object, actual, values, count);
@@ -345,7 +347,7 @@ NetReplicator::NetReplicator(i32 group, float minimum_seconds, float maximum_sec
 
 i32 NetReplicator::SerialiseObject(EdStream &stream, NetPeer *peer, EdClass const *object_class, void *object,
                                    ReplicatorData &data, i16 *class_mapping) {
-    u8 member_data[256] = {};
+    u8 member_data[256] __attribute__((aligned(16))) = {};
     for (EdRef *member = object_class->members; member != NULL; member = member->next) {
         if (!(member->attributes < 0)) {
             if (member->replication_group == id) {
@@ -440,7 +442,8 @@ i32 NetChangedReplicator::AllowPush(EdClass const *object_class, void const *obj
                                     i32 skip_checksum) {
     u32 checksum = 0xffffffffu;
     u32 *last_push = reinterpret_cast<u32 *>((reinterpret_cast<uintptr_t>(data.cursor) + 3) & ~3u);
-    u32 *last_checksum = last_push + 1;
+    data.cursor = reinterpret_cast<u8 *>(last_push + 1);
+    u32 *last_checksum = reinterpret_cast<u32 *>((reinterpret_cast<uintptr_t>(data.cursor) + 3) & ~3u);
     data.cursor = reinterpret_cast<u8 *>(last_checksum + 1);
 
     u32 now = UtilGetFrameStartTime();
@@ -1638,8 +1641,7 @@ void NetworkObjectManager::Update() {
         }
     }
 
-    for (i32 i = 0; i < 8; i++) {
-        NetPeerPush *push = &peer_push[i];
+    for (NetPeerPush *push = peer_push; push != peer_push + 8; ++push) {
         if (push->peer == NULL) {
             continue;
         }

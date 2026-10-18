@@ -161,31 +161,12 @@ extern WORLDINFO WorldInfo[2];
 struct GIZMOPICKUP_s;
 struct PART_s;
 
-static __used__ void Collection_GetSelectingPlayerIDs(i16 *ids);
-
-namespace {
-
-} // namespace
-
 // Retail only has the constant-propagated clone of
 // DrawHitPoints(GameObject_s *, float, float, float, float, i32, float, i32); every caller passes 0.0f and 0
 // for the two trailing (unused) arguments, so the clone drops them.
 static __attribute__((noinline, noclone, hot, section(".text"))) void DrawHitPoints(GameObject_s *object, float x, float y, float scale,
                                                              float alpha, i32 alignment)
     __asm__("_ZL13DrawHitPointsP12GameObject_sffffifi.constprop.39");
-
-static __used__ void PartImpact_Coin(PART_s *part);
-static __used__ void PartStolen_Coin(PART_s *part);
-static __used__ void PartExtra_BlueCoin(PART_s *part);
-static __used__ void PartExtra_PurpleCoin(PART_s *part);
-static __used__ i32 PowerUp_DrawPart(PART_s *part);
-static __used__ void PowerUp_ImpactPart(PART_s *part);
-static __used__ void PowerUp_UpdatePart(PART_s *part);
-static __used__ void PowerUp_EndMsg(GAMEMESSAGE_s *message);
-static __used__ void PowerUp_UpdateMsg(GAMEMESSAGE_s *message);
-static __used__ i32 PartDraw_VehicleHeart(PART_s *part);
-static __used__ void PartMove_VehicleHeart(PART_s *part, f32);
-static __used__ void PartMove_VehiclePickup(PART_s *part, f32);
 
 // NuFileExists @nufile (nucore_plain.cpp).
 
@@ -640,7 +621,7 @@ static void GizmoPickups_DrawList(WORLDINFO *world, GIZMOPICKUP_s *pickups, i32 
                 matrix.m33 = 1.0f;
                 NuMtxTranslate(&matrix, &pickup.position);
             } else if ((type->flags & GIZMOPICKUP_TYPE_DRAW_Y_ROTATION) != 0) {
-                const u16 y_rotation = pickup.draw_rotation;
+                const i32 y_rotation = pickup.draw_rotation;
                 matrix.m01 = 0.0f;
                 matrix.m03 = 0.0f;
                 matrix.m10 = 0.0f;
@@ -675,10 +656,9 @@ static void GizmoPickups_DrawList(WORLDINFO *world, GIZMOPICKUP_s *pickups, i32 
                                                  (drawn != 0 ? GIZMOPICKUP_STATE_DRAWN : 0));
 
             if (drawn != 0 && type->overlay_model_id != -1) {
-                LEVEL_OBJECT_RUNTIME_s &overlay = world->lev_objs[type->overlay_model_id];
-                if (overlay.active != 0) {
+                if (world->lev_objs[type->overlay_model_id].active != 0) {
                     ResetShadowMapRendering();
-                    NuSpecialDrawAt(&overlay.special, &matrix);
+                    NuSpecialDrawAt(&world->lev_objs[type->overlay_model_id].special, &matrix);
                     EnableShadowMapRendering(0);
                 }
             }
@@ -1404,7 +1384,6 @@ void SpecialMiniKits_Draw(WORLDINFO_s *world) {
             if ((pickup->state_flags & GIZMOPICKUP_STATE_ALTERNATE_TYPE) != 0 && GizmoPickupSys->alternate_type != -1) {
                 type_index = GizmoPickupSys->alternate_type;
             }
-            GIZMO_PICKUP_TYPE *type = &GizmoPickupSys->types[type_index];
 
             if ((item->flags & 0x10) == 0) {
                 NuMtxSetScale(&matrix, &scale);
@@ -1412,7 +1391,8 @@ void SpecialMiniKits_Draw(WORLDINFO_s *world) {
                 NuMtxRotateX(&matrix, x_rotation);
                 NuMtxTranslate(&matrix, position);
             }
-            NuSpecialDrawAt(&world->lev_objs[static_cast<i16>(type->first_model_id)].special, &matrix);
+            NuSpecialDrawAt(
+                &world->lev_objs[static_cast<i16>(GizmoPickupSys->types[type_index].first_model_id)].special, &matrix);
         }
     }
 }

@@ -98,7 +98,7 @@ static NUFPCOMJMP cfgtab_Gizmo[] = {
     {NULL, NULL},
 };
 
-static __used__ void xGizmo(nufpar_s *parser) {
+static void xGizmo(nufpar_s *parser) {
     if (load_flowbox == NULL)
         return;
     FLOWBOXGIZMODATA_s *data = load_flowbox->data;
@@ -170,9 +170,9 @@ static i32 load_parents[16];
 static i32 load_children[32];
 static u8 load_parent_output_ix[16];
 
-static __used__ void remapChildren(i32 id) {
+static void remapChildren(i32 id) {
     for (i32 i = 0; load_nchildren < 32 && remap[~id].children[i] != id; ++i) {
-        i32 child = remap[~id].children[i];
+        i16 child = remap[~id].children[i];
         if (child < 0)
             remapChildren(child);
         else
@@ -182,7 +182,7 @@ static __used__ void remapChildren(i32 id) {
 
 static void remapParent(i32 id) {
     for (i32 i = 0; load_nparents < 16 && remap[~id].parents[i] != id; ++i) {
-        i32 parent = remap[~id].parents[i];
+        i16 parent = remap[~id].parents[i];
         if (parent < 0)
             remapParent(parent);
         else {
@@ -908,7 +908,7 @@ static u8 getNextLoopChecksum() {
 static i32 Loop_CountLoopingInputs(FLOWBOX_s *box) {
     u8 checksum = getNextLoopChecksum();
     i32 count = 0;
-    for (i32 child = 0; child < box->child_count; ++child) {
+    for (u32 child = 0; child < box->child_count; ++child) {
         count = Loop_CountLoopingInputsEx(box, box->children[child], count, checksum);
     }
     return count;

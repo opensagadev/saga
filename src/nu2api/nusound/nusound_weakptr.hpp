@@ -8,16 +8,19 @@
 
 #include "decomp.h"
 
-struct NuSoundWeakPtrListNode {
+struct NuSoundWeakPtrListNode;
+
+// The intrusive list links are a plain base of the polymorphic node, so they
+// sit after the vtable pointer and node/link conversions adjust by its width.
+struct NuSoundWeakPtrListLink {
+    NuSoundWeakPtrListNode *prev;
+    NuSoundWeakPtrListNode *next;
+};
+
+struct NuSoundWeakPtrListNode : public NuSoundWeakPtrListLink {
   public:
     static NuSoundCriticalSection sPtrListLock;
     static NuSoundCriticalSection sPtrAccessLock;
-
-  public:
-    // struct Payload {
-    NuSoundWeakPtrListNode *prev;
-    NuSoundWeakPtrListNode *next;
-    //} payload;
 
   public:
     virtual ~NuSoundWeakPtrListNode() {
@@ -53,20 +56,14 @@ template <typename T> class NuSoundWeakPtrObj {
     void Link(NuSoundWeakPtrListNode *node) {
         NuSoundWeakPtrListNode::sPtrListLock.Lock();
 
-        NuSoundWeakPtrListNode *tail = this->tail;
-        NuSoundWeakPtrListNode **tail_prev = tail != NULL ? &tail->prev : NULL;
-        NuSoundWeakPtrListNode *previous = tail_prev != NULL ? *tail_prev : NULL;
-        if (previous != NULL) {
-            *tail_prev = node;
-            node->prev = previous;
-            previous->next = node;
-        } else {
-            if (tail_prev != NULL) {
-                *tail_prev = node;
-            }
-            node->prev = NULL;
-        }
-        node->next = tail;
+        // Insert before the end sentinel.
+        NuSoundWeakPtrListLink *link = node;
+        NuSoundWeakPtrListLink *tail = this->tail;
+        NuSoundWeakPtrListLink *previous = tail->prev;
+        tail->prev = static_cast<NuSoundWeakPtrListNode *>(link);
+        link->prev = static_cast<NuSoundWeakPtrListNode *>(previous);
+        previous->next = node;
+        link->next = static_cast<NuSoundWeakPtrListNode *>(tail);
         this->weak_count++;
 
         NuSoundWeakPtrListNode::sPtrListLock.Unlock();
@@ -75,43 +72,34 @@ template <typename T> class NuSoundWeakPtrObj {
     void Unlink(NuSoundWeakPtrListNode *node) {
         NuSoundWeakPtrListNode::sPtrListLock.Lock();
 
-        NuSoundWeakPtrListNode *next = node->next;
-        NuSoundWeakPtrListNode *previous = node->prev;
-        this->weak_count--;
+        if (node->next != NULL || node->prev != NULL) {
+            this->weak_count--;
 
-        if (next != NULL) {
+            NuSoundWeakPtrListLink *next = node->next;
+            NuSoundWeakPtrListLink *previous = node->prev;
             if (previous != NULL) {
-                previous->next = next;
-                next->prev = previous;
-            } else {
-                next->prev = NULL;
+                previous->next = static_cast<NuSoundWeakPtrListNode *>(next);
             }
-        } else if (previous != NULL) {
-            previous->next = NULL;
+            if (next != NULL) {
+                next->prev = static_cast<NuSoundWeakPtrListNode *>(previous);
+            }
+            node->prev = NULL;
+            node->next = NULL;
         }
-
-        node->prev = NULL;
-        node->next = NULL;
 
         NuSoundWeakPtrListNode::sPtrListLock.Unlock();
     }
 
-    // Removes the first linked weak pointer; the retail list helper guards the
-    // successor's back link through a pointer-to-member that may be null.
+    // Removes the first linked weak pointer.
     NuSoundWeakPtrListNode *PopFront() {
         NuSoundWeakPtrListNode *node = this->head->next;
-        NuSoundWeakPtrListNode *next = node->next;
-        NuSoundWeakPtrListNode *previous = node->prev;
-        NuSoundWeakPtrListNode **next_prev = next != NULL ? &next->prev : NULL;
+        NuSoundWeakPtrListLink *next = node->next;
+        NuSoundWeakPtrListLink *previous = node->prev;
         if (previous != NULL) {
-            if (next_prev != NULL) {
-                previous->next = next;
-                *next_prev = previous;
-            } else {
-                previous->next = NULL;
-            }
-        } else if (next_prev != NULL) {
-            *next_prev = previous;
+            previous->next = static_cast<NuSoundWeakPtrListNode *>(next);
+        }
+        if (next != NULL) {
+            next->prev = static_cast<NuSoundWeakPtrListNode *>(previous);
         }
         this->weak_count--;
         node->next = NULL;
@@ -164,7 +152,7 @@ template <typename T> class NuSoundWeakPtr : public NuSoundWeakPtrListNode {
         this->obj = NULL;
     }
 
-    void Set(T *ptr);
+    __attribute__((noinline)) void Set(T *ptr);
 
     // Copies, assignments and some direct updates expand the pointer update
     // in place.
@@ -207,4 +195,13 @@ template <typename T> void NuSoundWeakPtr<T>::Set(T *ptr) {
     }
 
     NuSoundWeakPtrListNode::sPtrListLock.Unlock();
+}
+
+// Builds a weak pointer whose target is registered in place (Assign) rather
+// than through the out-of-line Set; used when a temporary callback pointer is
+// handed straight to RequestBuffer.
+template <typename T> inline NuSoundWeakPtr<T> NuSoundMakeWeakPtr(T *ptr) {
+    NuSoundWeakPtr<T> pointer;
+    pointer.Assign(ptr);
+    return pointer;
 }

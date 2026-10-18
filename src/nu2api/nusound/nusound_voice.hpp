@@ -32,42 +32,6 @@ struct nuvec_s;
 struct VuMtx;
 struct VuVec;
 
-// A voice's membership in a listener's circular voice ring.  The voice embeds
-// one link for its nearest real listener and one for its focus listener; the
-// links detach themselves when the voice is destroyed.
-struct NuSoundVoiceListenerLink {
-    NuSoundListener *listener;
-    NuSoundVoiceListenerLink *previous;
-    NuSoundVoiceListenerLink *next;
-
-    ~NuSoundVoiceListenerLink() {
-        Detach();
-    }
-
-    void Detach() {
-        NuSoundListener *listener = this->listener;
-        if (listener == NULL) {
-            return;
-        }
-
-        NuSoundVoiceListenerLink *previous = this->previous;
-        if (previous == this) {
-            listener->field_0x8 = NULL;
-        } else {
-            NuSoundVoiceListenerLink *next = this->next;
-            previous->next = next;
-            next->previous = previous;
-            if (listener->field_0x8 == this) {
-                listener->field_0x8 = previous;
-            }
-        }
-
-        this->listener = NULL;
-        this->previous = NULL;
-        this->next = NULL;
-    }
-};
-
 // The voice doubles as the NuSoundBufferCallback the sample hands filled
 // buffers to (the original dispatched through the callback vtable slot +8,
 // which is NuVoiceAndroid::SubmitBuffer).

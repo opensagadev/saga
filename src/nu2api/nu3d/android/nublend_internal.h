@@ -6,9 +6,6 @@
 template <typename AlphaReference>
 static inline void NuSetBlendState(u32 blend, AlphaReference alpha_reference) {
     switch (blend) {
-        case 0:
-            glDisable(GL_BLEND);
-            break;
         case 1:
             glEnable(GL_BLEND);
             glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
@@ -23,6 +20,9 @@ static inline void NuSetBlendState(u32 blend, AlphaReference alpha_reference) {
             glEnable(GL_BLEND);
             glBlendEquationSeparate(GL_FUNC_REVERSE_SUBTRACT, GL_FUNC_ADD);
             glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE, GL_ONE, GL_ONE);
+            break;
+        case 0:
+            glDisable(GL_BLEND);
             break;
         case 10:
             glDisable(GL_BLEND);

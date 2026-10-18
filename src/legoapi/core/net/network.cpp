@@ -44,21 +44,26 @@ void TTNetwork::Display(ThingRenderData *) {
     }
 
     NetSmallStats *stats = NULL;
-    if (field_2150 == 1) {
-        stats = &theNuNetEmu.packet_stats;
-    } else if (field_2150 == 2) {
-        stats = &theNuNetEmu.raw_stats;
-    } else if (field_2150 == 3) {
-        stats = &reinterpret_cast<V2SessionManager *>(session)->stats;
-    } else {
+    switch (field_2150) {
+        case 1:
+            stats = &theNuNetEmu.packet_stats;
+            break;
+        case 2:
+            stats = &theNuNetEmu.raw_stats;
+            break;
+        case 3:
+            stats = &reinterpret_cast<V2SessionManager *>(session)->stats;
+            break;
+    }
+
+    if (stats == NULL) {
         i32 display_index = 4;
         NetPeer *peer = reinterpret_cast<V2SessionManager *>(session)->first_peer;
         while (peer != NULL) {
-            if (field_2150 == display_index) {
+            if (field_2150 == display_index++) {
                 stats = &peer->stats;
                 break;
             }
-            ++display_index;
             peer = peer->next;
         }
 
@@ -66,12 +71,10 @@ void TTNetwork::Display(ThingRenderData *) {
             for (i32 i = 0; i < theRegistry.class_count; ++i) {
                 EdClass *object_class = theRegistry.GetClass(i);
                 if (object_class->interface != NULL) {
-                    if (field_2150 == display_index) {
+                    if (field_2150 == display_index++) {
                         stats = network_objects.class_stats[i];
-                        ++display_index;
                         break;
                     }
-                    ++display_index;
                 }
             }
         }

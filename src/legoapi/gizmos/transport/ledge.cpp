@@ -81,9 +81,6 @@ static inline void Ledge_UpdateUnattached(WORLDINFO_s *world, GameObject_s *obje
         Ledge_TryAttach(world, object);
 }
 
-struct AIROW_s;
-struct nunativegscene_s;
-
 static void *Ledges_ReserveBufferSpace(void *world_info) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_info);
     world->ledges = NULL;

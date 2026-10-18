@@ -11,16 +11,14 @@ i32 GetMenuID();
 
 TouchHolder *MechInputTouchGestureTrackingSystem::GetTouch(NuInputTouch const &touch) {
     for (i32 index = 0; index < 10; ++index) {
-        TouchHolder *holder = &holders[index];
-        if (holder->touch_id == static_cast<i32>(touch.unknown_14)) {
-            return holder;
+        if (holders[index].touch_id == static_cast<i32>(touch.unknown_14)) {
+            return &holders[index];
         }
     }
     for (i32 index = 0; index < 10; ++index) {
-        TouchHolder *holder = &holders[index];
-        if (holder->touch_id == -1) {
-            holder->touch_id = touch.unknown_14;
-            return holder;
+        if (holders[index].touch_id == -1) {
+            holders[index].touch_id = touch.unknown_14;
+            return &holders[index];
         }
     }
     return holders;
@@ -131,10 +129,9 @@ void MechInputTouchGestureTrackingSystem::LookForSwipe(GameObject_s &object) {
             }
             if (sample_index > 0 && elapsed < 0.2f) {
                 previous_index = sample_index - 1;
-                TouchSwipeSample &previous = holder.swipe_samples[previous_index];
-                elapsed += previous.time - sample.time;
-                f32 dy = sample.position.y - previous.position.y;
-                f32 dx = sample.position.x - previous.position.x;
+                elapsed += holder.swipe_samples[previous_index].time - sample.time;
+                f32 dy = sample.position.y - holder.swipe_samples[previous_index].position.y;
+                f32 dx = sample.position.x - holder.swipe_samples[previous_index].position.x;
                 squared_path += dx * dx + dy * dy;
             }
         }
@@ -172,10 +169,10 @@ void MechInputTouchGestureTrackingSystem::ReadData(GameObject_s &object, NuInput
     }
 
     for (u32 index = 0; index < data.touch_count; ++index) {
-        NuInputTouch const &touch = data.touch_events[index];
         f32 x, y;
-        MechInputTouchSystem::ConvertToScreenCoords(touch.unknown_04, touch.unknown_08, x, y);
-        TouchHolder *holder = GetTouch(touch);
+        MechInputTouchSystem::ConvertToScreenCoords(data.touch_events[index].unknown_04,
+                                                    data.touch_events[index].unknown_08, x, y);
+        TouchHolder *holder = GetTouch(data.touch_events[index]);
         if (!holder->field_0x6) {
             holder->click_candidate = 0;
             holder->down_position.x = x;
@@ -287,7 +284,7 @@ void MechInputTouchGestureTrackingSystem::Update(NuInputTouchData const *data) {
     if (data == NULL) {
         return;
     }
-    GameObject_s *object = Player[0];
+    GameObject_s *object = player;
     if (object == NULL) {
         object = Obj;
     }

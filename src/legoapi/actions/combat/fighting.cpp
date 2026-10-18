@@ -139,19 +139,10 @@ inline void ThingManager::operator delete(void *thing, usize size) {
 
 // ---- Misc player/gameobject helpers relocated from doorstubs.cpp ----
 
-namespace {
-
-} // namespace
-
 // This alignment affects PodRaceAUpdate codegen even though the linked address is 32-byte aligned.
 
 DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 
-struct FLOWBOX_s;
-
-struct JEDIBNETPACKET_s;
-
-struct nuhspecial_s;
 struct nuvec_s;
 
 extern AIACTIONDEF api_aiactiondefs[55];
@@ -161,93 +152,16 @@ DECOMP_ASSERT(sizeof(api_aiactiondefs) == 0x294, "API action registry size");
 
 DECOMP_ASSERT(sizeof(api_aiconditiondefs) == 0x258, "API condition registry size");
 
-struct nupad_s;
-
-struct EDAISHAREDPATHNODE_s;
-struct eduimenu_s;
-struct eduiitem_s;
-
-static __used__ void pathEditor_cbCancelRenamePathMenu(eduimenu_s *, eduimenu_s *);
-static __used__ void pathEditor_cbCancelRenameNodeMenu(eduimenu_s *, eduimenu_s *);
-static __used__ void pathEditor_cbCancelSelectMenu(eduimenu_s *, eduimenu_s *);
-static __used__ void pathEditor_cbSetCurrentPath(eduimenu_s *, eduiitem_s *, u32);
-static __used__ void pathEditor_cbSetCurrentPath(eduimenu_s *, eduiitem_s *item, u32);
-static __used__ void pathEditor_cbCancelSelectMenu(eduimenu_s *menu, eduimenu_s *);
-static __used__ void pathEditor_cbCancelRenameNodeMenu(eduimenu_s *menu, eduimenu_s *);
-static __used__ void pathEditor_cbCancelRenamePathMenu(eduimenu_s *menu, eduimenu_s *);
-static __used__ void routeEditor_cbCancelRouteUsers(eduimenu_s *, eduimenu_s *);
-static __used__ void routeEditor_cbSetRouteUsers(eduimenu_s *, eduiitem_s *, u32);
-static __used__ __attribute__((optimize("peel-loops"))) void routeEditor_cbRenameRoute(eduimenu_s *, eduiitem_s *item, u32);
-static __used__ void routeEditor_cbCancelRenameRouteMenu(eduimenu_s *, eduimenu_s *);
-static __used__ void routeEditor_cbSetRouteUsers(eduimenu_s *, eduiitem_s *item, u32);
-static __used__ void routeEditor_cbCancelRouteUsers(eduimenu_s *menu, eduimenu_s *);
-static __used__ void routeEditor_cbCancelRenameRouteMenu(eduimenu_s *menu, eduimenu_s *);
-
-static __used__ i32 routeEditor_AddToRoute(EDAIPATHNODE_s *node, EDAIPATHNODE_s *other) __asm__(
-    "_ZL22routeEditor_AddToRouteP14EDAIPATHNODE_sS0_.part.7");
-
-static __used__ i32 routeEditor_AddToRoute(EDAIPATHNODE_s *node, EDAIPATHNODE_s *other);
-
 struct EDCREATURE_s;
-
-#if defined(__i386__)
-#define CREATURE_EDITOR_REGPARM1 __attribute__((regparm(1)))
-#else
-#define CREATURE_EDITOR_REGPARM1
-#endif
-static __used__
-    __attribute__((always_inline)) CREATURE_EDITOR_REGPARM1 void creatureEditor_Updated(EDCREATURE_s *creature);
-
-static __used__ __attribute__((force_align_arg_pointer)) void creatureEditor_cbResetParams(eduimenu_s *menu,
-                                                                                           eduiitem_s *, unsigned int);
-
-static __used__ __attribute__((force_align_arg_pointer)) void creatureEditor_cbVisionMenu(eduimenu_s *parent,
-                                                                                          eduiitem_s *, unsigned int);
-
-static __used__ __attribute__((force_align_arg_pointer)) void creatureEditor_cbSetScript(eduimenu_s *, eduiitem_s *item,
-                                                                                         unsigned int);
 
 extern "C" {
     struct EDCREATURE_s;
 }
 
-#if defined(__i386__)
-static void __attribute__((regparm(1))) DestroyLocator(EDLOCATOR_s *);
-static unsigned int __attribute__((regparm(2))) AddLocatorToSet(EDLOCATORSET_s *, EDLOCATOR_s *, EDLOCATOR_s *);
-#else
-static void DestroyLocator(EDLOCATOR_s *);
-static unsigned int AddLocatorToSet(EDLOCATORSET_s *, EDLOCATOR_s *, EDLOCATOR_s *);
-#endif
-static __used__ void locatorEditor_cbAddLocatorsByNameYesNo(eduimenu_s *, eduiitem_s *, u32);
-
-static __used__ __attribute__((optimize("no-tree-vectorize"))) void
-locatorEditor_cbAddLocatorsByNameYesNo(eduimenu_s *, eduiitem_s *item, u32);
-static __used__ __attribute__((optimize("no-tree-vectorize"))) void DestroyLocator(EDLOCATOR_s *locator);
-
-static __used__ unsigned int AddLocatorToSet(EDLOCATORSET_s *set, EDLOCATOR_s *locator, EDLOCATOR_s *before);
-
-#if defined(__i386__)
-static __attribute__((noinline, optimize("no-tree-vectorize"), regparm(2))) unsigned int
-#else
-static __attribute__((noinline, optimize("no-tree-vectorize"))) unsigned int
-#endif
-AddLocatorToSetAtEnd(EDLOCATORSET_s *set, EDLOCATOR_s *locator) __asm__(
-    "_ZL15AddLocatorToSetP14EDLOCATORSET_sP11EDLOCATOR_sS2_.constprop.131");
-
 extern "C" {
 extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 }
-
-namespace {
-
-} // namespace
-
-struct AIPACKET_s;
-struct AISYS_s;
-
-struct GIZMOPICKUP_s;
-struct PART_s;
 
 // Original writable flagremaptab at 0x668520, 32 pairs of 32-bit masks.
 extern "C" {

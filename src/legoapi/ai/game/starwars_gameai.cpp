@@ -56,10 +56,7 @@
 #include "legoapi/ai/game/lsw_hub_ai.h"
 #include "legoapi/ai/game/starwars_gameai.h"
 
-struct AIROW_s;
 struct AISYS_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
 
 typedef i32 (*MIDSPECIALMOVEFN)(AISYS_s *, AIPACKET_s *, APIOBJECT_s *);
 typedef void (*HUBCALLBACK)(WORLDINFO_s *);
@@ -123,22 +120,7 @@ MIDSPECIALMOVEFN starwars_midspecialmovefns[] = {
 
 f32 jump_stuck_time = 0.1f;
 
-struct starfighter_s;
-struct rtl_s;
-struct rtlidata_s;
-
 struct GAMEMESSAGE_s;
-struct HINT_s;
-struct MENU_s;
-struct NuBloomParameters;
-struct STATUSPACKET_s;
-struct TouchHolder;
-struct _vum_s;
-struct _vuv_s;
-struct nuhspecial_s;
-struct ripple_node_s;
-struct ripple_set_s;
-struct VuVec;
 
 extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
 extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);

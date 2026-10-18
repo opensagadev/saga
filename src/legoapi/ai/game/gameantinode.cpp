@@ -34,8 +34,11 @@ void *GameAntnode_CreateSys(WORLDINFO_s *world, variptr_u *buf, variptr_u *buf_e
     system->world = world;
     system->free = system->nodes;
     // The original links count - 1 pool entries, leaving the final entry unused.
-    for (i32 i = 0; i < count - 2; ++i)
-        system->nodes[i].next = &system->nodes[i + 1];
+    GAMEANTINODE_s *node = system->nodes;
+    for (i32 i = 1; i < count - 1; ++i) {
+        node->next = &system->nodes[i];
+        node = node->next;
+    }
     buf->u8_ptr += node_bytes;
     return system;
 }
@@ -44,7 +47,7 @@ void GameAntinode_Update(GAMEANTINODESYS_s *system) {
     if (system == NULL)
         return;
     memset(GameAntinode_grid, 0, sizeof(GameAntinode_grid));
-    u8 min_x, min_z, max_x, max_z;
+    u8 min_x, max_x, min_z, max_z;
     GameObject_s *object = Obj;
     for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++object) {
         if ((object->apiobj.flags_high & 0x10) == 0 || object->apiobj.field_0x287 != 0)
@@ -63,17 +66,16 @@ void GameAntinode_Update(GAMEANTINODESYS_s *system) {
     }
     for (GAMEANTINODE_s *node = system->active, *next; node != NULL; node = next) {
         next = node->next;
-        if (!(node->remaining_time <= 0.0f)) {
+        if (node->remaining_time > 0.0f) {
             node->remaining_time -= FRAMETIME;
-            if (!(node->remaining_time > 0.0f)) {
+            if (node->remaining_time <= 0.0f) {
                 GameAntinode_UnregisterAntiNode(system, node);
                 continue;
             }
         }
-        auto node_grid_max_x = node->grid_max_x;
-        for (i32 x = 0; x <= node_grid_max_x - node->grid_min_x; ++x) {
-            for (i32 z = 0; z <= node->grid_max_z - node->grid_min_z; ++z) {
-                if (((GameAntinode_grid[node->grid_min_x + x] >> (node->grid_min_z + z)) & 1) != 0) {
+        for (i32 x = node->grid_min_x; x <= node->grid_max_x; ++x) {
+            for (i32 z = node->grid_min_z; z <= node->grid_max_z; ++z) {
+                if (((GameAntinode_grid[x] >> z) & 1) != 0) {
                     AIANTINODE_s *active = AIAntinodeCreateSingleFrame(&node->position, node->radius);
                     if (active != NULL) {
                         active->base_radius = node->extent_x;
@@ -170,10 +172,14 @@ GAMEANTINODE_s *GameAntinode_RegisterAntiNode(GAMEANTINODESYS_s *system, NUVEC *
     node->min_y = node->position.y - default_path_heighttol;
     node->max_y = default_path_heighttol + node->position.y;
     node->remaining_time = duration;
-    if (node->shape == 1)
-        radius = extent_x > extent_z ? extent_x : extent_z;
-    else if (node->shape == 2)
-        radius = NuFsqrt(extent_x * extent_x + extent_z * extent_z);
+    switch (node->shape) {
+        case 1:
+            radius = extent_x > extent_z ? extent_x : extent_z;
+            break;
+        case 2:
+            radius = NuFsqrt(extent_x * extent_x + extent_z * extent_z);
+            break;
+    }
     node->radius = radius;
     GameAntinode_FindGridPosition(system->world, &node->position, radius, radius, &node->grid_min_x, &node->grid_min_z,
                                   &node->grid_max_x, &node->grid_max_z);

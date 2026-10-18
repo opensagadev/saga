@@ -9,11 +9,6 @@
 #include "nu2api/numath/nuvec.h"
 #include "globals.h"
 
-struct AIROW_s;
-struct nuqthdr_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
-
 // Retail realigns this stack frame before copying the matrix local.
 void __attribute__((force_align_arg_pointer)) Faders_Draw(WORLDINFO_s *world) {
     if (world->faders == NULL) {
@@ -66,31 +61,30 @@ void Faders_Configure(WORLDINFO_s *world, char *config) {
     FADER_s *fader = world->faders;
     while (NuFParGetLine(parser) != 0) {
         NuFParGetWord(parser);
-        if (NuStrICmp(parser->word_buf, const_cast<char *>("fader")) != 0) {
-            continue;
-        }
-        fader->special.scene = NULL;
-        fader->special.special = NULL;
-        fader->special.display_special = NULL;
-        fader->while_animating.scene = NULL;
-        fader->while_animating.special = NULL;
-        fader->while_animating.display_special = NULL;
-        if (NuFParGetWord(parser) == 0 ||
-            NuSpecialFind(world->current_gscn, &fader->special, parser->word_buf, 1) == 0) {
-            continue;
-        }
-        while (NuFParGetWord(parser) != 0) {
-            if (NuStrICmp(parser->word_buf, const_cast<char *>("while_animating")) == 0 && NuFParGetWord(parser) != 0) {
-                NuSpecialFind(world->current_gscn, &fader->while_animating, parser->word_buf, 1);
+        if (NuStrICmp(parser->word_buf, const_cast<char *>("fader")) == 0) {
+            fader->special.scene = NULL;
+            fader->special.special = NULL;
+            fader->special.display_special = NULL;
+            fader->while_animating.scene = NULL;
+            fader->while_animating.special = NULL;
+            fader->while_animating.display_special = NULL;
+            if (NuFParGetWord(parser) != 0 &&
+                NuSpecialFind(world->current_gscn, &fader->special, parser->word_buf, 1) != 0) {
+                while (NuFParGetWord(parser) != 0) {
+                    if (NuStrICmp(parser->word_buf, const_cast<char *>("while_animating")) == 0 &&
+                        NuFParGetWord(parser) != 0) {
+                        NuSpecialFind(world->current_gscn, &fader->while_animating, parser->word_buf, 1);
+                    }
+                }
+                ++world->fader_count;
+                ++fader;
             }
         }
-        ++world->fader_count;
-        ++fader;
     }
     NuFParDestroy(parser);
-    if (world->fader_count == 0) {
-        world->faders = NULL;
+    if (world->fader_count > 0) {
+        world->giz_buffer.addr = ALIGN(reinterpret_cast<usize>(fader), 4);
     } else {
-        world->giz_buffer.addr = reinterpret_cast<usize>(fader);
+        world->faders = NULL;
     }
 }

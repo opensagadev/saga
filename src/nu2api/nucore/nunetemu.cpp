@@ -154,7 +154,7 @@ NuNetEmu::EmuPacket *NuNetEmu::FindPacket(nunetaddr_s *, i32 size) {
     u32 now = UtilGetFrameStartTime();
     size += 2;
     while (packet != NULL) {
-        if (size <= 0xbb8 - packet->payload_size &&
+        if (size <= (i32)(0xbb8 - packet->payload_size) &&
             (packet->flush_time >= packet->send_time || now <= packet->flush_time)) {
             break;
         }

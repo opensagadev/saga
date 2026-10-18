@@ -614,8 +614,8 @@ HATMACHINE *HatMachine_FindNearest(WORLDINFO_s *world, nuvec_s *position, GameOb
         return NULL;
     }
 
-    f32 nearest_distance = 1.0e9f;
     HATMACHINE_s *nearest = NULL;
+    f32 nearest_distance = 1.0e9f;
     for (i32 index = 0; index < world->hat_machine_sys->count; ++index) {
         HATMACHINE_s *machine = &world->hat_machine_sys->machines[index];
         if (object != NULL) {

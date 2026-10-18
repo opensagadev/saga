@@ -23,5 +23,5 @@ extern "C" {
 #endif
 
 // Declared here for the other units that use them.
-extern const f32 nuvec4_one[4];
+extern f32 nuvec4_one[4];
 extern i32 global_frame_count;

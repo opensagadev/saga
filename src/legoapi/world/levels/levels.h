@@ -109,7 +109,6 @@ extern void *factoryb_conveyor_stopped_msg;
 extern float podanimendframe;
 extern PODSPRINT_s podsprint; // held by value in the original (0x94 bytes)
 extern GameObject_s **game_objects;
-extern float pacemaker_alpha_table[];
 extern i32 clients_mines_bitfield[2];
 extern i32 pod_mines_bitfield[2];
 extern GAMECUTSCENES_s game_cutscenes; // held by value in the original (0x28 bytes)

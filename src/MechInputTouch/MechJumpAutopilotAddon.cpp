@@ -65,7 +65,7 @@ void MechJumpAutoPilotAddon::CalculateModifiedJumpTrajectory() {
     const float vx = field_34.x * time;
     const float vz = field_34.z * time;
     speed_scale = ((dx * dx + dz * dz) * 0.5f) / (vx * vx + vz * vz);
-    if (__builtin_expect(!(speed_scale < 1.0f) && !(character->jump_input_flags & 0x10), 1)) {
+    if (!(speed_scale < 1.0f) && !(character->jump_input_flags & 0x10)) {
         speed_scale = 1.0f;
         character->jump_input_flags |= 0x10;
         state = 6;

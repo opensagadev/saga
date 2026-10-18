@@ -276,7 +276,7 @@ giz_freeplay:
     }
 
     ResetCharacterBuffer(0);
-    memset(Player, 0, sizeof(Player));
+    memset(Player, 0, 8 * sizeof(Player[0]));
 
     if ((PlayTrailer != -1) && (characterbuffer_ptr.void_ptr == characterbuffer_base.void_ptr)) {
         Movie_Play(Trailer[PlayTrailer * 3], &characterbuffer_ptr, &characterbuffer_end, DEFAULTFRAMETIME, NULL,

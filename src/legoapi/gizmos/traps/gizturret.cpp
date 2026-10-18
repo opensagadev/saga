@@ -378,11 +378,11 @@ static void GizTurrets_Update(void *context, void *system_ptr, float frame_time)
                                     sound_muzzle = qrand() / (65535 / turret->field_0x130 + 1);
                                 turret->fired_this_frame = 1;
                                 for (i32 muzzle = 0; muzzle < turret->field_0x130; ++muzzle) {
-                                    NUVEC *offset = &turret->field_0x74[muzzle];
                                     NUMTX muzzle_matrix = *primary_draw;
-                                    if (offset->x != 0.0f || offset->y != 0.0f || offset->z != 0.0f) {
+                                    if (turret->field_0x74[muzzle].x != 0.0f || turret->field_0x74[muzzle].y != 0.0f ||
+                                        turret->field_0x74[muzzle].z != 0.0f) {
                                         NuMtxPreRotateY(&muzzle_matrix, 0x8000);
-                                        NuMtxPreTranslate(&muzzle_matrix, offset);
+                                        NuMtxPreTranslate(&muzzle_matrix, &turret->field_0x74[muzzle]);
                                     }
                                     NUMTX direction_matrix = *primary_draw;
                                     if (turret->behavior_flags & 0x40)
@@ -608,8 +608,8 @@ static i32 *GizTurrets_GetBestBoltTarget(GIZMOSET *set, float *result_distance, 
     }
 
     NUVEC aim = *direction;
-    const float max_x = position->x + radius;
     const float min_z = position->z - radius;
+    const float max_x = position->x + radius;
     const float min_x = position->x - radius;
     const float max_z = position->z + radius;
     if (directional != 0 && (bolt_type->field_60 & 0x20000) != 0) {
@@ -1285,12 +1285,10 @@ i32 GizTurrets_UpdateHint(HINT_s *) {
 GIZTURRET_s *GizTurret_FindByController(GIZTURRETSYS_s *system, GameObject_s &controller) {
     if (system != NULL) {
         GIZTURRET_s *turret = system->turrets;
-        const i32 count = system->count;
-        if (count != 0) {
-            for (i32 i = 0; i < count; ++i, ++turret) {
-                if (turret->controller == &controller) {
-                    return turret;
-                }
+        const u16 count = system->count;
+        for (i32 i = 0; i < count; ++i, ++turret) {
+            if (turret->controller == &controller) {
+                return turret;
             }
         }
     }
@@ -1332,7 +1330,7 @@ void GizTurrets_OpponentSelection(GIZTURRETSYS_s *system, i32 goody_count, APIOB
             candidates = goodies;
             candidate_count = goody_count;
         }
-        if (candidates == NULL || candidate_count == 0) {
+        if (candidate_count == 0 || candidates == NULL) {
             return;
         }
         if (candidate_count <= 0) {

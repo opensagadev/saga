@@ -6,11 +6,6 @@
 #include "legoapi/legoapi_types.h"
 #include "nu2api/numath/nuvec.h"
 
-struct AIROW_s;
-struct nuqthdr_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
-
 static CHARPIVOT *CharPivot;
 
 CHARPIVOT CharPivot_LSW[32] = {

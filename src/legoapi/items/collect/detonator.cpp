@@ -22,9 +22,6 @@
 #include "legoapi/items/collect/detonator.h"
 #include "legoapi/props/objects/zipup.h"
 
-struct AIROW_s;
-struct nunativegscene_s;
-
 void Detonators_Draw() {
     if (!WORLD->lev_objs[0xec].active) {
         return;
@@ -303,7 +300,9 @@ void Detonator_MoveCode(GameObject_s *object) {
         return;
     }
     DETONATOR_s *detonator = &Detonator[slot];
-    detonator->position = object->context_destination;
+    detonator->position.x = object->context_destination.x;
+    detonator->position.y = object->context_destination.y;
+    detonator->position.z = object->context_destination.z;
     detonator->active = 1;
     detonator->object = object;
     detonator->rotation_x = object->context_x_rotation;

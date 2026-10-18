@@ -597,7 +597,7 @@ void BoltTypes_Init(WORLDINFO_s *world) {
         type->specials.shadow_special.special = NULL;
         type->specials.shadow_special.display_special = NULL;
 
-        const i16 object_id = type->object_ids[0];
+        const i32 object_id = type->object_ids[0];
         if (object_id != -1) {
             type->specials.object_special = world->lev_objs[object_id].special;
             if (type->object_ids[1] != -1) {
@@ -799,10 +799,10 @@ void Bolt_Init(void *storage, NetMessage &message) {
     u32 flags = type->field_60;
     if (owner != NULL) {
         if (__builtin_expect((owner->apiobj.flags_low & 0x80) != 0, 0)) {
-            if (owner->apiobj.field_0x27c == 0)
-                flags |= 0x29;
-            else
+            if (owner->apiobj.field_0x27c != 0)
                 flags |= owner->apiobj.field_0x27c == 1 ? 0x2a : 0x28;
+            else
+                flags |= 0x29;
         }
         bool add_speed = InitBolt_AddMomentumType != NULL && InitBolt_AddMomentumType(bolt, owner, &momentum) != 0;
         if (!add_speed) {
@@ -1252,7 +1252,7 @@ void Bolt_HitGameObjectRC(NetMessage &message) {
     GameObject_s *object = &Obj[object_index];
     BOLT_s *bolt = &Bolt[bolt_index];
     BOLTTYPE_s *type = bolt->type;
-    if (BoltSys->stop_targeting != NULL && bolt->owner != NULL && (bolt->owner->apiobj.flags_low & 0x80) != 0)
+    if (BoltSys->stop_targeting != NULL && bolt->owner != NULL && bolt->owner->apiobj.player_controlled)
         BoltSys->stop_targeting(bolt->owner, &bolt->position);
     bool has_deflect = (object->apiobj.flags_low & 0x80) != 0 && Player_HasDeflectBolts(object) != 0;
     i32 deflect = has_deflect;
@@ -1283,7 +1283,7 @@ void Bolt_HitGameObjectRC(NetMessage &message) {
         else
             NuVecSub(&direction, &bolt->previous_position, &points[hit]);
         FindAnglesXY(&direction, NULL, NULL);
-        if (((bolt->flags & 0x40) == 0 || deflect) && (object->apiobj.flags_low & 0x80) != 0 &&
+        if (((bolt->flags & 0x40) == 0 || deflect) && object->apiobj.player_controlled &&
             ((LEGOCONTEXT_BLOCK != -1 && object->character_context == LEGOCONTEXT_BLOCK) || cheat_deflect) &&
             (object->apiobj.character_data->model_flags & 8) != 0) {
             if (bolt->owner == NULL || (bolt->owner->apiobj.flags_low & 1) == 0 ||
@@ -1314,7 +1314,7 @@ void Bolt_HitGameObjectRC(NetMessage &message) {
             ((object->apiobj.character_data->game_character->flags_094[3] & 4) != 0 && VehicleArea != 0 &&
              BonusArea != 0) ||
             (object->current_hp == 0 && (object->apiobj.character_data->model_flags & 0x2000) != 0) ||
-            ((object->apiobj.flags_low & 0x80) != 0 &&
+            (object->apiobj.player_controlled &&
              (object->apiobj.character_data->game_character->flags_090 & 0x40) != 0 &&
              (bolt->owner == NULL || (bolt->owner->apiobj.character_data->game_character->flags_090 & 0x40) == 0)) ||
             ((object->apiobj.character_data->model_flags & 0x20000000) != 0 && object->field_0xcc0 == NULL)) {
@@ -1371,14 +1371,14 @@ void Bolt_HitGameObjectRC(NetMessage &message) {
         }
     }
 finish:
-    if (object->apiobj.field_0x287 == 0 && (object->apiobj.flags_low & 2) == 0) {
+    if (object->apiobj.field_0x287 == 0 && !object->apiobj.flags_low_bit1) {
         f32 amount = object->apiobj.character_data->game_character->field_0x18;
         if (object->apiobj.scaled_radius > 1.0f)
             amount /= object->apiobj.scaled_radius;
         object->apiobj.velocity.x += bolt->field_0xac.x * amount;
         object->apiobj.velocity.z += bolt->field_0xac.z * amount;
     }
-    if ((object->apiobj.flags_low & 0x80) != 0)
+    if (object->apiobj.player_controlled)
         GameCam_HitJudder();
     Bolt_End(bolt, 1);
 }

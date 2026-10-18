@@ -36,7 +36,7 @@ struct NuMainFilterGen : NuPostFilterGen {
     f32 motion_scale, motion_maximum, motion_falloff;
     i32 accumulation_frames;
     f32 accumulation_blend;
-    i32 accumulation_mode;
+    f32 accumulation_mode;
     virtual bool isEnabled() {
         return active_filter_count != 0;
     }

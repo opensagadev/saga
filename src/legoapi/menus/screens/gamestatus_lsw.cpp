@@ -77,10 +77,6 @@
 #include "legoapi/core/startup/text.h"
 #include "legoapi/misc/legoapi_status.h"
 
-struct AIROW_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
-
 extern "C" STATUSPACKET_s StatusPacket;
 
 void IncreaseScore(u32 *, u64, i32);
@@ -165,22 +161,8 @@ static __attribute__((noinline, noclone)) void LevelComplete_LSW_DrawActive(STAT
 
 extern i16 tWINNER;
 
-struct starfighter_s;
-struct rtl_s;
-struct rtlidata_s;
-
-struct GAMEMESSAGE_s;
-struct HINT_s;
-struct MENU_s;
-struct NuBloomParameters;
 struct STATUSPACKET_s;
-struct TouchHolder;
-struct _vum_s;
-struct _vuv_s;
 struct nuhspecial_s;
-struct ripple_node_s;
-struct ripple_set_s;
-struct VuVec;
 
 extern i16 tNONEWBESTTIME, tNEWBESTTIME;
 
@@ -189,8 +171,6 @@ extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
 extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
 
 extern i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
-
-struct AISYS_s;
 
 f32 COLLECTION_Y_STATUS = -0.3f;
 static i32 playedappearsfx;
@@ -372,7 +352,7 @@ void Coins_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet) {
 
 void MiniKit_LSW_Skip(STATUS_STAGE_s *stage, STATUSPACKET_s *packet) {
     currentminikit += newminikitcount;
-    if ((packet->field_0xb0 & 0x10) != 0 && (stage->field_0x14 != 6 || stage->field_0x18 < stage->field_0x1c))
+    if (packet->new_minikit_complete && (stage->field_0x14 != 6 || stage->field_0x18 < stage->field_0x1c))
         IncreaseScore(packet->score, 50000, 0);
     NextStatusStage(packet);
 }
@@ -1298,7 +1278,7 @@ void Prompt_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elap
     }
 }
 
-__attribute__((optimize("O3"))) void GoldBrick_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active) {
+void GoldBrick_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active) {
     if (active == 0)
         return;
     if (stage->field_0x14 > 0) {

@@ -125,6 +125,10 @@ struct edui_slider_s : eduiitem_s {
     f32 granularity;
 };
 
+struct edui_separator_s : eduiitem_s {
+    i32 (*interact)(edui_interact_s *);
+};
+
 struct edui_sel_s : eduiitem_s {
     i32 (*interact)(edui_interact_s *);
     EdUiItemCallback selected;

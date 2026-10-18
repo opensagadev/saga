@@ -71,8 +71,23 @@ struct nuanimcurveset_s {
     u32 flags;
     f32 *constants;
     nuanimcurve_s **curves;
-    u8 curve_count;
+    i8 curve_count;
     u8 padding[3];
+};
+
+struct nuanimdatachunk_s {
+    i32 node_count;
+    i32 valid_curve_set_count;
+    nuanimcurveset_s **curve_sets;
+    nuanimkey_s *keys;
+    nuanimcurve_s *curves;
+};
+
+struct nuanimdata_s {
+    f32 time;
+    char *node_name;
+    i32 chunk_count;
+    nuanimdatachunk_s **chunks;
 };
 
 struct nuanimcurve2_s {

@@ -134,11 +134,6 @@ static GIZAIMESSAGE_s *Vader_ai_message;
 static u8 turretAliveCount;
 nuhspecial_s specialIcon;
 
-struct AIROW_s;
-struct nuqthdr_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
-
 extern "C" {
     GIZBOMBGEN *HothBattleC_BombGenerator = NULL;
     HOTHBATTLE_MELEE_s melee;
@@ -199,11 +194,6 @@ static inline void AsteroidChaseD_SetTurretTarget(i32 index, NUVEC *position) {
     }
 }
 
-struct rtlset;
-
-struct spacelevel_s;
-struct quickboltinfo;
-
 TROOPERCANNON_s troopercannons[4];
 
 static __used__ void KilledTrooperCannon(GameObject_s *object);
@@ -231,82 +221,26 @@ static inline void IncrementMinikitCounterFor(WORLDINFO_s *world, NUVEC *average
         NuVecAdd(&camera, &camera, &pickup->position);
         GameCameraMakeMiniCut2(&camera, &pickup->position, 0, 0.0f, 4.0f, 0.0f, 0.0f, 0, 0, 0);
         GizmoActivate(world->gizmo_sys, LevGizmo[gizmo_index], 1, 1);
+        // ORIG_BUG: the completion message is placed at a position that is never set.
+        NUVEC message_pos;
+        AddGameMsgCount(&message_pos, *counter, 10, 200, 100, 30, 0.75f);
+        return;
     }
-    // The reference's completion branch passes an uninitialized temporary.
-    // Keep the message at the same valid averaged position as earlier counts.
     AddGameMsgCount(average, *counter, 10, 200, 100, 30, 0.75f);
 }
 
-struct starfighter_s;
-struct rtl_s;
-struct rtlidata_s;
-
-struct GAMEMESSAGE_s;
-struct HINT_s;
-struct MENU_s;
-struct NuBloomParameters;
-struct STATUSPACKET_s;
-struct TouchHolder;
-struct _vum_s;
-struct _vuv_s;
 struct nuhspecial_s;
-struct ripple_node_s;
-struct ripple_set_s;
-struct VuVec;
 
 extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
 extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
 
 extern i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
 
-struct tertype;
-struct terrsitu_s;
-struct PLATSKININFO;
-struct GAMECAMERA_s;
-struct pushblock_s;
 extern "C" i16 id_SNAKE;
-
-namespace {
-
-} // namespace
-
-namespace {
-
-} // namespace
-
-namespace {
-
-} // namespace
-
-namespace {
-
-} // namespace
-
-namespace {
-
-} // namespace
 
 // Original 0x378fb0: the optimized rotating scan shares the terrain engine state.
 
-namespace {
-
-} // namespace
-
-namespace {
-
-} // namespace
-
-struct MechTouchUIElement;
-struct PLAYERITEM_s;
-struct PLAYERITEMTYPE_s;
-struct PLAYERPACKET_s;
-struct SOCKPOSITION_s;
-
 // ---- Misc player/gameobject helpers relocated from doorstubs.cpp ----
-
-namespace {
-
-} // namespace
 
 extern i16 id_GAMORREANGUARD;
 
@@ -321,8 +255,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
                   "complete game AI condition registry");
 
 }
-
-struct CUTSCENEPLAYERCLIP;
 
 extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER;
 
@@ -515,8 +447,7 @@ static void Asteroids_Reset(WORLDINFO_s *world) {
 
     for (i32 blowup_index = 0; blowup_index < world->gizmo_blowup_count; ++blowup_index) {
         ASTEROID_s *asteroid = &asteroids[nasteroids];
-        GIZMOBLOWUP_s *blowup = &world->gizmo_blowups[blowup_index];
-        char *name = blowup->name;
+        char *name = world->gizmo_blowups[blowup_index].name;
         i32 asteroid_type;
         if (name == NULL || NuStrIStr(name, "asteroid_a") != NULL || NuStrIStr(name, "asteroid_pop") != NULL) {
             asteroid_type = 0;
@@ -526,7 +457,7 @@ static void Asteroids_Reset(WORLDINFO_s *world) {
             continue;
         }
 
-        asteroid->blowup = blowup;
+        asteroid->blowup = &world->gizmo_blowups[blowup_index];
         i32 max_speed = maxrotspd[asteroid_type];
         asteroid->rotation_speed_x = static_cast<i16>(qrand() / ~(0xffff / (max_speed * 2)) + max_speed);
         asteroid->rotation_speed_y = static_cast<i16>(qrand() / ~(0xffff / (max_speed * 2)) + max_speed);
@@ -591,13 +522,12 @@ static __used__ void KilledTrooperCannon(GameObject_s *object) {
 
     for (i32 i = 0; i < 4; ++i) {
         if (troopercannons[i].object == object) {
-            TROOPERCANNON_s &cannon = troopercannons[i];
-            DeactivateCharacter(cannon.character_name);
-            GizBuildIt_SetToStart(cannon.buildit, 0, 0);
-            GIZMO *gizmo = GizmoFindByData(WORLD->gizmo_sys, gizbuildit_gizmotype_id, cannon.buildit);
+            DeactivateCharacter(troopercannons[i].character_name);
+            GizBuildIt_SetToStart(troopercannons[i].buildit, 0, 0);
+            GIZMO *gizmo = GizmoFindByData(WORLD->gizmo_sys, gizbuildit_gizmotype_id, troopercannons[i].buildit);
             GizmoActivate(WORLD->gizmo_sys, gizmo, 1, 1);
-            GizBuildit_SetVisibility(cannon.buildit, 1);
-            cannon.rebuilding = 1;
+            GizBuildit_SetVisibility(troopercannons[i].buildit, 1);
+            troopercannons[i].rebuilding = 1;
             WORLD->level_progress->destroyed_trooper_cannon_mask |= 1u << i;
             return;
         }
@@ -617,46 +547,46 @@ void ResetTrooperCannons(WORLDINFO_s *world, i32 trooper_id) {
     i32 cannon_index = 0;
     char name[32];
     for (i32 number = 1; number < 5; ++number) {
-        TROOPERCANNON_s &cannon = troopercannons[cannon_index];
-        cannon = TROOPERCANNON_s();
+        troopercannons[cannon_index] = TROOPERCANNON_s();
 
         sprintf(name, "trooper_cannon%d", number);
-        cannon.buildit = GizBuildIt_Find(world, name);
-        if (cannon.buildit != NULL) {
+        troopercannons[cannon_index].buildit = GizBuildIt_Find(world, name);
+        if (troopercannons[cannon_index].buildit != NULL) {
             sprintf(name, "troopercannon_%d", number);
-            cannon.object = GetNamedGameObject(world->ai_sys, name);
-            if (cannon.object != NULL)
-                NuStrCpy(cannon.character_name, name);
+            troopercannons[cannon_index].object = GetNamedGameObject(world->ai_sys, name);
+            if (troopercannons[cannon_index].object != NULL)
+                NuStrCpy(troopercannons[cannon_index].character_name, name);
         }
 
         sprintf(name, "BASE%d", number);
-        cannon.base = GizmoFindByName(world->gizmo_sys, obstacle_gizmotype_id, name);
+        troopercannons[cannon_index].base = GizmoFindByName(world->gizmo_sys, obstacle_gizmotype_id, name);
 
         if (netclient != 0) {
-            if (cannon.object != NULL)
+            if (troopercannons[cannon_index].object != NULL)
                 ++cannon_index;
             continue;
         }
 
-        if (cannon.buildit != NULL && cannon.object != NULL) {
-            if ((world->level_progress->destroyed_trooper_cannon_mask & (1u << cannon_index)) != 0) {
-                GizBuildIt_SetToStart(cannon.buildit, 0, 0);
-                cannon.rebuilding = 1;
+        if (troopercannons[cannon_index].buildit != NULL && troopercannons[cannon_index].object != NULL) {
+            if ((world->level_progress->destroyed_trooper_cannon_mask & (1u << (number - 1))) != 0) {
+                GizBuildIt_SetToStart(troopercannons[cannon_index].buildit, 0, 0);
+                troopercannons[cannon_index].rebuilding = 1;
             } else {
-                if (cannon.base != NULL) {
-                    GizmoSetVisibility(world->gizmo_sys, cannon.base, 1, 1);
-                    GizObstacle_PlayBackwards(static_cast<GIZOBSTACLE_s *>(cannon.base->object));
+                if (troopercannons[cannon_index].base != NULL) {
+                    GizmoSetVisibility(world->gizmo_sys, troopercannons[cannon_index].base, 1, 1);
+                    GizObstacle_PlayBackwards(static_cast<GIZOBSTACLE_s *>(troopercannons[cannon_index].base->object));
                 }
-                GizBuildIt_Finish(cannon.buildit);
-                GizBuildit_SetVisibility(cannon.buildit, 0);
-                cannon.rebuilding = 0;
+                GizBuildIt_Finish(troopercannons[cannon_index].buildit);
+                GizBuildit_SetVisibility(troopercannons[cannon_index].buildit, 0);
+                troopercannons[cannon_index].rebuilding = 0;
                 ActivateCharacter(name, NULL, 0);
-                AddGameDebris(world->debris_sys, 0x5c, &cannon.object->apiobj.collision_position);
-                GameObject_s *trooper = AddDynamicCreature(trooper_id, &cannon.object->apiobj.collision_position,
-                                                           cannon.object->apiobj.field_0x276, "CannonTrooper",
-                                                           &cannon.object->ai.path_info, NULL, 0, NULL, NULL, 0, 0);
+                AddGameDebris(world->debris_sys, 0x5c, &troopercannons[cannon_index].object->apiobj.collision_position);
+                GameObject_s *trooper =
+                    AddDynamicCreature(trooper_id, &troopercannons[cannon_index].object->apiobj.collision_position,
+                                       troopercannons[cannon_index].object->apiobj.field_0x276, "CannonTrooper",
+                                       &troopercannons[cannon_index].object->ai.path_info, NULL, 0, NULL, NULL, 0, 0);
                 if (trooper != NULL)
-                    TakeOverGameObject(trooper, cannon.object, 0, 1);
+                    TakeOverGameObject(trooper, troopercannons[cannon_index].object, 0, 1);
             }
         }
         ++cannon_index;
@@ -1315,7 +1245,7 @@ void DagobahA_Update(WORLDINFO_s *world) {
         return;
 
     GIZFORCEGROUP_s *group = first->group;
-    if (__builtin_expect(group != NULL && (group->field_0x24 & 2) != 0, 0)) {
+    if (__builtin_expect(group != NULL && (group->field_0x24 & 2) != 0, 1)) {
         if (dagobahA_nodesNeedUpdating != 0)
             return;
         dagobahA_nodesNeedUpdating = 1;
@@ -1906,8 +1836,8 @@ void HothBattle_ManageBackgroundCreatures() {
             wave_types |= 8;
         }
     }
-    i32 probe_count = g_lowEndLevelBehaviour != 0 ? 2 : 5;
     i32 atst_count = g_lowEndLevelBehaviour != 0 ? 2 : 6;
+    i32 probe_count = g_lowEndLevelBehaviour != 0 ? 2 : 5;
     f32 radius = apicharsys->char_data[id_PROBEDROID].collision_radius;
     while (probe_count > aicreature_sets_alive[0] && (wave_types & 1) == 0) {
         AILOCATOR_s *spawn = getSpawnLocator(radius, "spawn");

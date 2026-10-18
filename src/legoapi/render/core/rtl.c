@@ -31,10 +31,7 @@
 #include "legoapi/render/light/lighting.h"
 #include "nu2api/nu3d/nu3d_includes.h"
 
-struct nuqtdim_s;
-struct nuqthdr_s;
 struct rtl_s;
-struct NUFRUSTRUM;
 
 static NULSTHDR *rtl_dynamic_pool;
 static i32 rtl_dynamic_lights_enabled = 1;
@@ -2681,7 +2678,7 @@ static void edrtlCancelBurnTransitionsMenu(eduimenu_s *, eduimenu_s *) {
 
 static void edrtlBurnTransitionsMenu(eduimenu_s *parent, eduiitem_s *, u32) {
     edrtl_burn_transitions_menu =
-        eduiMenuCreate(70, 70, 220, 250, ed_fnt, edrtlCancelBurnTransitionsMenu, "Transitions");
+        eduiMenuCreate(70, 70, 250, 300, ed_fnt, edrtlCancelBurnTransitionsMenu, "Transitions");
     if (edrtl_edit_burnset != NULL && edrtl_burn_transitions_menu != NULL) {
         burnset_s *set = edrtl_edit_burnset;
 #define BURN_TRANSITION_SLIDER(callback, minimum, maximum, value, label)                                               \

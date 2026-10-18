@@ -73,15 +73,6 @@ static NUFPCOMJMP RippleEffect_ConfigKeywords[] = {{"texture_name", RE_texture_n
 struct ripple_node_s;
 struct ripple_set_s;
 
-#if defined(__i386__)
-#define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone, regparm(2)))
-#else
-#define NU_READ_GRAPHICS_DATA_ATTR __attribute__((noinline, noclone))
-#endif
-static NU_READ_GRAPHICS_DATA_ATTR NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIPTR *buf_end, char *path,
-                                                             char *scene_data)
-    __asm__("_ZL18NuReadGraphicsDataP9variptr_uS0_PcS1_S1_.isra.104");
-
 static void RE_end_radius(NUFPAR *parser) {
     RE_rippleeffect->end_size = NuFParGetFloat(parser);
 }
@@ -224,8 +215,8 @@ void InitRipples(ripple_set_s **result, variptr_u *buf, variptr_u *, i32 count) 
         node_bytes = 0;
         node_count = 0;
     } else if (count < 0x40) {
-        node_bytes = static_cast<usize>(count) * sizeof(ripple_node_s);
         effect_bytes = static_cast<usize>(count) * sizeof(*eraselist);
+        node_bytes = static_cast<usize>(count) * sizeof(ripple_node_s);
         node_count = count;
     } else {
         effect_bytes = 0x100;

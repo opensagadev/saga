@@ -151,10 +151,9 @@ static i32 GizPanel_Load(void *world_ptr, void *) {
                                 (shadow_panel.draw_flags & ~GIZPANEL_DRAW_FLAG_NO_SHADOW_RESET) |
                                 (no_shadow_reset << 1));
                             if (version != 7) {
-                                GIZPANEL &legacy_panel = panel_sys->panels[index];
                                 const bool legacy = EdFileReadChar() != 0;
-                                legacy_panel.draw_flags = static_cast<GIZPANEL_DRAW_FLAGS>(
-                                    (legacy_panel.draw_flags & ~GIZPANEL_DRAW_FLAG_LEGACY) |
+                                panel_sys->panels[index].draw_flags = static_cast<GIZPANEL_DRAW_FLAGS>(
+                                    (panel_sys->panels[index].draw_flags & ~GIZPANEL_DRAW_FLAG_LEGACY) |
                                     (legacy ? GIZPANEL_DRAW_FLAG_LEGACY : 0));
                             }
                         }

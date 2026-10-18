@@ -11,12 +11,5 @@
 
 #include <stdio.h>
 
-struct AIROW_s;
-struct nunativegscene_s;
-
-namespace {
-
-} // namespace
-
 void IncreaseScore(u32 *total, u64 amount, i32 apply_multiplier);
 

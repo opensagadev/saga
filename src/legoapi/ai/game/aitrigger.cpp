@@ -16,11 +16,6 @@
 
 #include <string.h>
 
-struct AIROW_s;
-struct nuqthdr_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
-
 void AITriggerSetSysReset(AITRIGGERSETSYS_s *system) {
     if (system == NULL) {
         return;
@@ -288,77 +283,80 @@ void AITriggerSetSysProcess(AITRIGGERSETSYS_s *system) {
                  ++index) {
                 if (!((f0x20e >> index) & 1) && set->trigger_indices[index] == -1) {
                     GIZMO_s *gizmo = set->gizmos[index];
-                    bool available = false;
                     if (gizmo->type_id == lever_gizmotype_id) {
-                        available = (static_cast<LEVER_s *>(gizmo->object)->flags & 0x82) == 0x80;
+                        if ((static_cast<LEVER_s *>(gizmo->object)->flags & 0x82) != 0x80)
+                            continue;
                     } else if (gizmo->type_id == obstacle_gizmotype_id) {
                         GIZOBSTACLE_s *obstacle = static_cast<GIZOBSTACLE_s *>(gizmo->object);
-                        available = (obstacle->progress_flags & 1) && obstacle->anim_set->state != 2;
+                        if (!(obstacle->progress_flags & 1) || obstacle->anim_set->state == 2)
+                            continue;
                     } else if (gizmo->type_id == spinner_gizmotype_id) {
-                        available = static_cast<GIZSPINNER_s *>(gizmo->object)->room_index == -1;
+                        if (static_cast<GIZSPINNER_s *>(gizmo->object)->room_index != -1)
+                            continue;
                     } else if (gizmo->type_id == force_gizmotype_id) {
                         GIZFORCE_s *force = static_cast<GIZFORCE_s *>(gizmo->object);
-                        available =
-                            (force->progress_flags & 1) && force->using_object == NULL && force->field_0x3c_bits == 0;
+                        if (!(force->progress_flags & 1) || force->using_object != NULL || force->field_0x3c_bits != 0)
+                            continue;
                     } else if (gizmo->type_id == grapple_gizmotype_id) {
-                        available = Grapple_Occupied(static_cast<GRAPPLE_s *>(gizmo->object), NULL, NULL) == NULL;
+                        if (Grapple_Occupied(static_cast<GRAPPLE_s *>(gizmo->object), NULL, NULL) != NULL)
+                            continue;
+                    } else {
+                        continue;
                     }
-                    if (available) {
-                        AILOCATOR *locator = &set->locators[index];
-                        u64 routes = locator->path_info.connection->route_mask;
-                        if (routes != 0) {
-                            AIPATH_s *path = locator->path_info.path;
-                            for (i32 route = 0; route < path->route_count; ++route)
-                                if ((routes >> (route & 63)) & 1)
-                                    character_mask |= path->routes[route].character_masks[0];
-                        }
-                        f32 best_distance = 1000000000.0f;
-                        i32 best = -1;
-                        GameObject_s *object = Obj;
-                        for (i32 object_index = 0; object_index < HIGHGAMEOBJECT; ++object_index, ++object) {
-                            if (system->field_0x42c0[object_index] != -1 ||
-                                (object->apiobj.field_0x1f8 & 0x1001) != 0x1001 || object->apiobj.field_0x287 != 0 ||
-                                (object->apiobj.flags_low & 0x80) || (object->field_0xeff & 1) ||
-                                (character_mask && !(character_mask & object->ai.character_type_mask)) ||
-                                !(object->field_0xf02 & 4) || (!f0x20e && object->trigger_set != set))
+                    AILOCATOR *locator = &set->locators[index];
+                    u64 routes = locator->path_info.connection->route_mask;
+                    if (routes != 0) {
+                        AIPATH_s *path = locator->path_info.path;
+                        for (i32 route = 0; route < path->route_count; ++route)
+                            if ((routes >> (route & 63)) & 1)
+                                character_mask |= path->routes[route].character_masks[0];
+                    }
+                    f32 best_distance = 1000000000.0f;
+                    i32 best = -1;
+                    GameObject_s *object = Obj;
+                    for (i32 object_index = 0; object_index < HIGHGAMEOBJECT; ++object_index, ++object) {
+                        if (system->field_0x42c0[object_index] != -1 ||
+                            (object->apiobj.field_0x1f8 & 0x1001) != 0x1001 || object->apiobj.field_0x287 != 0 ||
+                            (object->apiobj.flags_low & 0x80) || (object->field_0xeff & 1) ||
+                            (character_mask && !(character_mask & object->ai.character_type_mask)) ||
+                            !(object->field_0xf02 & 4) || (!f0x20e && object->trigger_set != set))
+                            continue;
+                        if (!FreePlay) {
+                            GIZMO_s *target = set->gizmos[index];
+                            if (target->type_id == lever_gizmotype_id && !(object->field_0xefe & 0x80))
                                 continue;
-                            if (!FreePlay) {
-                                GIZMO_s *target = set->gizmos[index];
-                                if (target->type_id == lever_gizmotype_id && !(object->field_0xefe & 0x80))
-                                    continue;
-                                if (target->type_id != force_gizmotype_id) {
-                                    if (target->type_id != obstacle_gizmotype_id) {
-                                        if (target->type_id == grapple_gizmotype_id && !(object->ai.capabilities & 8)) {
-                                            continue;
-                                        }
-                                    } else {
-                                        if (static_cast<GIZOBSTACLE_s *>(target->object)->mode == 7)
-                                            continue;
-                                    }
-                                } else {
-                                    GIZFORCE_s *force = static_cast<GIZFORCE_s *>(target->object);
-                                    if (force->config_flags & 0x10) {
-                                        if (!CharCategory_IsCategory(object, 1))
-                                            continue;
-                                        if (!(force->config_flags & 0x10) && !CharCategory_IsCategory(object, 0))
-                                            continue;
-                                    } else if (!CharCategory_IsCategory(object, 0)) {
+                            if (target->type_id != force_gizmotype_id) {
+                                if (target->type_id != obstacle_gizmotype_id) {
+                                    if (target->type_id == grapple_gizmotype_id && !(object->ai.capabilities & 8)) {
                                         continue;
                                     }
+                                } else {
+                                    if (static_cast<GIZOBSTACLE_s *>(target->object)->mode == 7)
+                                        continue;
+                                }
+                            } else {
+                                GIZFORCE_s *force = static_cast<GIZFORCE_s *>(target->object);
+                                if (force->config_flags & 0x10) {
+                                    if (!CharCategory_IsCategory(object, 1))
+                                        continue;
+                                    if (!(force->config_flags & 0x10) && !CharCategory_IsCategory(object, 0))
+                                        continue;
+                                } else if (!CharCategory_IsCategory(object, 0)) {
+                                    continue;
                                 }
                             }
-                            NUVEC difference;
-                            f32 distance = NuVecDistSqr(&locator->position, &object->ai.terrain_origin, &difference);
-                            if (distance < best_distance) {
-                                best_distance = distance;
-                                best = object_index;
-                            }
                         }
-                        if (best != -1) {
-                            set->trigger_indices[index] = best;
-                            system->field_0x4280[best] = set_index;
-                            system->field_0x42c0[best] = index;
+                        NUVEC difference;
+                        f32 distance = NuVecDistSqr(&locator->position, &object->ai.terrain_origin, &difference);
+                        if (distance < best_distance) {
+                            best_distance = distance;
+                            best = object_index;
                         }
+                    }
+                    if (best != -1) {
+                        set->trigger_indices[index] = best;
+                        system->field_0x4280[best] = set_index;
+                        system->field_0x42c0[best] = index;
                     }
                 }
                 if (set->trigger_indices[index] != -1)
