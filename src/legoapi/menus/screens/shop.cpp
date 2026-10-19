@@ -1339,7 +1339,7 @@ i32 SelectShopItem(shopitem_s *items, i32 index) {
     switch (item->type) {
         case 0: {
             id = static_cast<u16>(item->item_id);
-            if (item->unlocked == 1 || item->price == 0)
+            if (__builtin_expect(item->unlocked == 1 || item->price == 0, 1))
                 return 1;
             if (!CheckCash(items, index))
                 break;
@@ -1352,7 +1352,7 @@ i32 SelectShopItem(shopitem_s *items, i32 index) {
             id = static_cast<u16>(item->item_id);
             if (item->unlocked == 1 || id >= CHARCOUNT)
                 return 0;
-            if (!CollectIDUnlocked(id))
+            if (__builtin_expect(!CollectIDUnlocked(id), 0))
                 goto locked;
             if (!CheckCash(items, index))
                 break;
@@ -1383,7 +1383,7 @@ i32 SelectShopItem(shopitem_s *items, i32 index) {
         case 4:
             if (item->unlocked == 1 || item->price == 0)
                 return 0;
-            if (static_cast<f32>(index * 3600) > Game.field30_0x7c2c)
+            if (__builtin_expect(static_cast<f32>(index * 3600) > Game.field30_0x7c2c, 0))
                 goto locked;
             if (!CheckCash(items, index))
                 break;
@@ -1620,7 +1620,7 @@ static inline i32 SubItemMenu(MENU_s *menu) {
     }
     if (__builtin_expect(slidetimer >= 0.0f, 1)) {
         slidetimer -= FRAMETIME;
-        if (__builtin_expect(slidetimer < 0.0f, 0))
+        if (__builtin_expect(slidetimer < 0.0f, 1))
             ShopNameAlpha = 0.0f;
     }
     if (easesubin != 0) {
@@ -2017,7 +2017,7 @@ void DrawSubItems() {
     NUMTX_ALIGNED16 item_matrix_a;
     NUMTX_ALIGNED16 item_matrix_b;
     f32 alpha = 1.0f;
-    if (GetMenuID() == 13 && !TestForController()) {
+    if (__builtin_expect(GetMenuID() == 13 && !TestForController(), 0)) {
         const f32 since_touch = GlobalTimer.time_elapsed - (LastTouchTime + 2.64f);
         if (__builtin_expect(since_touch > 4.0f, 1)) {
             const f32 phase = NuFmod(since_touch, 4.0f);

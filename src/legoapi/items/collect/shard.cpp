@@ -205,7 +205,7 @@ static void Shards_Reset(void *context, void *, void *data) {
         LEVEL_OBJECT_RUNTIME_s *models = world->lev_objs;
         for (i32 attempt = 0; attempt < 7 && models[current->model_index + 65].active == 0; ++attempt) {
             current->model_index++;
-            if (current->model_index == 7)
+            if (__builtin_expect(current->model_index == 7, 1))
                 current->model_index = 0;
         }
         current->model_index += 65;

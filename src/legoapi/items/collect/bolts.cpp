@@ -1176,7 +1176,7 @@ static i32 Bolt_HitPlat(BOLT_s *bolt, u8 *hit_flags) {
     if ((bolt->hit_flags & 0x800) != 0 && GizmoSys_BoltHitPlat(WORLD->gizmo_sys, WORLD, bolt, hit_flags))
         return 1;
     GIZMOBLOWUP_s *blowup = GizmoBlowUp_FindFromPlatID(WORLD, bolt->hit_platform);
-    if (__builtin_expect(blowup != NULL, 1) && __builtin_expect((blowup->draw_flags & 0x8000) != 0, 1)) {
+    if (blowup != NULL && __builtin_expect((blowup->draw_flags & 0x8000) != 0, 1)) {
         GameObject_s *owner = bolt->owner;
         if (owner != NULL && (blowup->draw_flags & 0x80000) != 0) {
             if ((exclude & 1) != 0 && !(owner->apiobj.character_data->game_character->field_0x28 <= 0.0f))

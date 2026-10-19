@@ -1126,7 +1126,7 @@ void MakeFreePlayModelList(i32 model1, i32 model2, i32 area, i32 level, i32 para
         }
     }
 
-    if (data != NULL && (flags & 0x10) == 0 && data->hub_player_ids != NULL) {
+    if (__builtin_expect(data != NULL && (flags & 0x10) == 0 && data->hub_player_ids != NULL, 1)) {
         for (i16 *id = data->hub_player_ids; *id != -1; ++id) {
             World_AddFreePlayModel(*id);
             // Retail counts resident entries, including a duplicate or one
@@ -1202,7 +1202,7 @@ void MakeFreePlayModelList(i32 model1, i32 model2, i32 area, i32 level, i32 para
     for (EXTRAMODEL *extra = ExtraModelList; extra->model_list != NULL; ++extra) {
         const i32 source = *extra->model_list;
         bool found = false;
-        if (source != -1) {
+        if (__builtin_expect(source != -1, 1)) {
             for (i32 i = 0; i < FreePlayModelCount; ++i) {
                 if (FreePlayModelList[i].model_id == source) {
                     found = true;
@@ -1396,11 +1396,11 @@ i32 EffectOffProgress_Update(LEVEL_PROGRESS_s *progress, char *name, i32 visible
         return 0;
     i32 i;
     for (i = 0; i < 12; ++i) {
-        if (NuStrICmp(progress->disabled_effect_names[i], name) == 0)
+        if (__builtin_expect(NuStrICmp(progress->disabled_effect_names[i], name) == 0, 0))
             break;
     }
     if (i < 12) {
-        if (visible != 0) {
+        if (__builtin_expect(visible != 0, 0)) {
             progress->disabled_effect_names[i][0] = '\0';
             return 2;
         }
@@ -1409,7 +1409,7 @@ i32 EffectOffProgress_Update(LEVEL_PROGRESS_s *progress, char *name, i32 visible
     if (visible != 0)
         return 0;
     for (i = 0; i < 12; ++i) {
-        if (progress->disabled_effect_names[i][0] == '\0')
+        if (__builtin_expect(progress->disabled_effect_names[i][0] == '\0', 1))
             break;
     }
     if (i < 12)
@@ -1769,7 +1769,7 @@ void ClearUpAreaData() {
     }
     if (Customiser_AccessoriesLoaded == 2) {
         Customiser_RestoreModelTextureIDs(CharacterCustomiser);
-    } else if (Customiser_AccessoriesLoaded == 1) {
+    } else if (__builtin_expect(Customiser_AccessoriesLoaded == 1, 0)) {
         Customiser_DumpAccessories(CharacterCustomiser);
     }
     Customiser_AccessoriesLoaded = 0;
@@ -2166,7 +2166,7 @@ void StoreLevelProgressFn(WORLDINFO_s *world, LEVEL_PROGRESS_s *progress, i32 ar
         if (world == NULL)
             return;
         index = (i8)world->current_level->area_level_index;
-        if (world->area != NULL && (world->area->flags & 4) != 0)
+        if (__builtin_expect(world->area != NULL && (world->area->flags & 4) != 0, 0))
             goto store_flags;
     }
     StoreProgressAICharacter(progress);
@@ -2273,7 +2273,7 @@ SCENESPECIALPROGRESS_s *FindSceneStateObj(nugscn_s *scene, SCENEPROGRESS_s *prog
 void CalculateWorldSize(WORLDINFO *world) {
     NUVEC minimum = v000;
     NUVEC maximum = v000;
-    if (world == NULL || world->current_gscn == NULL) {
+    if (__builtin_expect(world == NULL || world->current_gscn == NULL, 0)) {
         return;
     }
 
@@ -2383,7 +2383,7 @@ void WorldInfo_Load(WORLDINFO *world) {
     }
 
     // Load pictures for titles/credits
-    if (world->current_level == TITLES_LDATA || world->current_level == CREDITS_LDATA) {
+    if (__builtin_expect(world->current_level == TITLES_LDATA || world->current_level == CREDITS_LDATA, 1)) {
         numtl_force_mipmode = (i32)(u8)world->current_level->mipmap_mode + 1;
         world->scene = NuGScnRead(&world->giz_buffer, world->unknown_0108, "levels\\titles\\pictures.gsc");
         if (abort_load != 0)
@@ -2426,13 +2426,13 @@ void WorldInfo_Load(WORLDINFO *world) {
     if (world->area == NULL) {
         goto after_area;
     }
-    if (world->area == HUB_ADATA && GAMEDEMO == 0) {
+    if (__builtin_expect(world->area == HUB_ADATA && GAMEDEMO == 0, 0)) {
         Hub_LoadAndFixUpMiniKits(world, &world->giz_buffer, &world->unknown_0108);
         if (abort_load != 0)
             goto abort;
         goto after_area;
     }
-    if ((world->current_level->flags & LEVEL_STATUS) != 0 && world->area->minikit_id != -1) {
+    if (__builtin_expect((world->current_level->flags & LEVEL_STATUS) != 0 && world->area->minikit_id != -1, 1)) {
         MiniKit_Load(&world->minikit, (i32)(i16)world->area->minikit_id, &world->giz_buffer, &world->unknown_0108,
                      NULL);
         if (world->minikit.gscn != NULL) {

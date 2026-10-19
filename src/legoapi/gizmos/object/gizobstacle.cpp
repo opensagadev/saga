@@ -1269,7 +1269,7 @@ static void GizObstacleUpdate_Proximity(GIZOBSTACLE_s *obstacle) {
                 (object->field_0xf03 & GAMEOBJECT_F03_FLAG_OBSTACLE_TERRAIN_VALID) == 0 && object->field_0xe31 != 1;
             if (__builtin_expect(!!(requires_obstacle_platform), 1)) {
                 bool on_obstacle_platform = false;
-                if (obstacle->anim_set != NULL) {
+                if (__builtin_expect(obstacle->anim_set != NULL, 0)) {
                     for (GAMEANIMOBJ_s *anim_object = obstacle->anim_set->objects; anim_object != NULL;
                          anim_object = anim_object->next) {
                         i16 *object_data = static_cast<i16 *>(anim_object->object_data);

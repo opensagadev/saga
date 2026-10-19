@@ -382,12 +382,12 @@ reset_space:
 
     STARFIGHTERDRAWSCALE = {4.0f, 4.0f, 4.0f, 1.0f};
     space->draw_scale = {-141.0f, -121.0f, -1034.0f, 1.0f};
-    if (world->current_level == DOGFIGHTA_LDATA) {
+    if (__builtin_expect(world->current_level == DOGFIGHTA_LDATA, 1)) {
         space->unknown_3370 = NULL;
     } else {
         space->unknown_3370 = &Actions_AnakinA;
     }
-    if (space->reset_buffer_count != 0) {
+    if (__builtin_expect(space->reset_buffer_count != 0, 1)) {
         memset(space->reset_buffer, 0, space->reset_buffer_count * 96);
         space->reset_buffer_used = 0;
     }
@@ -503,7 +503,7 @@ void ChrisAnakinCReset() {
     anakin_door_s *door = AnakinC;
     i32 count = 0;
     for (anakin_door_setup_s *setup = DoorSetupList; count < 12; ++setup) {
-        if (setup->name == NULL) {
+        if (__builtin_expect(setup->name == NULL, 0)) {
             for (; count < 12; ++count, ++door)
                 door->active = 0;
             return;
@@ -750,7 +750,7 @@ static void DrawSpaceLevel(spacelevel_s *space) {
         DrawCross_Now(reinterpret_cast<_vuv_s *>(&space->crosses[0].world_position), space->crosses[0].scale,
                       space->crosses[0].colour, 1);
     }
-    if (space->crosses[1].enabled != 0) {
+    if (__builtin_expect(space->crosses[1].enabled != 0, 1)) {
         NuVecMtxTransform(reinterpret_cast<NUVEC *>(&space->crosses[1].world_position),
                           reinterpret_cast<NUVEC *>(&space->crosses[1].local_position), &GameCam->render_mtx);
         DrawCross_Now(reinterpret_cast<_vuv_s *>(&space->crosses[1].world_position), space->crosses[1].scale,
@@ -1244,7 +1244,7 @@ void FlightSpline_Init(WORLDINFO_s *world, flightspline_s *splines, i32 capacity
         for (i = 0; i < count; ++i) {
             flightspline_s *spline = &splines[i];
             f32 distance = 0.0f;
-            if (spline->point_count != 0) {
+            if (__builtin_expect(spline->point_count != 0, 1)) {
                 _vuv_s current;
                 CalcSplinePoint(spline, &current, 1.0f);
                 f32 along = 1.0f;
@@ -1516,7 +1516,7 @@ static void ProcessSpaceLevel(spacelevel_s *space) {
         i32 valid0 = 0, valid1 = 0;
         f32 player0x, player0y, player0z;
         f32 player1x, player1y, player1z;
-        if (Player[0] != NULL && Player[0]->apiobj.player_controlled) {
+        if (__builtin_expect(Player[0] != NULL && Player[0]->apiobj.player_controlled, 0)) {
             player0x = Player[0]->apiobj.field_0xb8.m30;
             player0y = Player[0]->apiobj.field_0xb8.m31;
             player0z = Player[0]->apiobj.field_0xb8.m32;
@@ -1573,7 +1573,7 @@ static void ProcessSpaceLevel(spacelevel_s *space) {
                 if (space->queued_fighters[j].active == 0)
                     break;
             }
-            if (__builtin_expect(j != 96, 1)) {
+            if (j != 96) {
                 starfighter_s *fighter = &space->queued_fighters[j];
                 fighter->spawn_time = spline->spawn_time;
                 NuMtxSetIdentity(&fighter->matrix);
@@ -1896,8 +1896,9 @@ i32 ShipDropCoins(starfighter_s *fighter) {
     i32 index = 0;
     if (space->coin_history_count > 0) {
         for (; index < space->coin_history_count; ++index) {
-            if (space->coin_history[index].spline_id == fighter->spline->id &&
-                fighter->spawn_time == space->coin_history[index].spawn_time)
+            if (__builtin_expect(space->coin_history[index].spline_id == fighter->spline->id &&
+                                     fighter->spawn_time == space->coin_history[index].spawn_time,
+                                 0))
                 return 0;
         }
         if (index > 255)

@@ -6228,7 +6228,7 @@ void EdRegistry::Serialise(EdStream &stream) {
 
 EdRef *EdClass::FindTypeRef(char *member_name, i32 recursive) {
     for (EdRef *member = members; member != NULL; member = member->next) {
-        if (recursive != 0 && member->attributes < 0) {
+        if (__builtin_expect(recursive != 0 && member->attributes < 0, 0)) {
             EdRef *reference = theRegistry.GetClass(member->type_id)->FindTypeRef(member_name, 1);
             if (reference != NULL) {
                 return reference;
@@ -6425,7 +6425,7 @@ void ClassObject::Set(char *name) {
     NuStrCpy(object_name, separator + 1);
 
     ed_class = theRegistry.GetClass(class_name);
-    if (ed_class == NULL || !(ed_class->flags & 2) || ed_class->interface == NULL) {
+    if (__builtin_expect(ed_class == NULL || !(ed_class->flags & 2) || ed_class->interface == NULL, 0)) {
         return;
     }
 
@@ -6615,7 +6615,7 @@ void ClassEditor::cbEdClassNewObject(eduimenu_s *parent, eduiitem_s *item, u32) 
     const char *error_text = "Unknown class id";
     if (ed_class != NULL)
         error_text = "No selected objects to clone";
-    if (ed_class == NULL || (ed_class->flags & 0x04000000))
+    if (__builtin_expect(ed_class == NULL || (ed_class->flags & 0x04000000), 0))
         eduiMenuAddItem(error_menu, eduiItemSelCreate(1, &EdLevelAttr, 0, 0, cbEdLevelDestroyOnSelect,
                                                       const_cast<char *>(error_text)));
     eduiMenuFitWidth(error_menu, 5);
@@ -6645,7 +6645,7 @@ i32 ClassObjectList::GetAveragePosition(VuVec &average) {
             ++position_count;
         }
     }
-    if (position_count != 0) {
+    if (__builtin_expect(position_count != 0, 1)) {
         float scale = 1.0f / position_count;
         average.x *= scale;
         average.y *= scale;
@@ -9151,7 +9151,7 @@ void SplineHelper::cbEdSplineSmoothKnot(eduimenu_s *, eduiitem_s *, u32) {
         i32 index = 0;
         while (index < changed_count && changed_splines[index] != knot->spline)
             ++index;
-        if (index == changed_count)
+        if (__builtin_expect(index == changed_count, 0))
             changed_splines[changed_count++] = knot->spline;
     }
     for (i32 index = 0; index < changed_count; ++index)

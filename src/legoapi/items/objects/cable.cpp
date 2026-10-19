@@ -323,17 +323,17 @@ void UpdateCables() {
                 // Preserve the reverse-edge locators across the first intersection callback.
                 i32 previous_locator = atat_locators[previous];
                 i32 opposite_locator = atat_locators[(previous + 3) & 3];
-                if (!(XZLinesIntersect(&path[0], last_position,
-                                       NUMTX_GET_ROW_VEC(&target->joint_matrices[atat_locators[next]], 3),
-                                       NUMTX_GET_ROW_VEC(&target->joint_matrices[atat_locators[(last + 2) & 3]], 3),
-                                       &along0, &along1))) {
+                if (XZLinesIntersect(&path[0], last_position,
+                                     NUMTX_GET_ROW_VEC(&target->joint_matrices[atat_locators[next]], 3),
+                                     NUMTX_GET_ROW_VEC(&target->joint_matrices[atat_locators[(last + 2) & 3]], 3),
+                                     &along0, &along1)) {
+                    cable->wrap_indices[cable->wrap_count++] = static_cast<u8>(next);
+                } else {
                     if (XZLinesIntersect(
                             &path[0], last_position, NUMTX_GET_ROW_VEC(&target->joint_matrices[previous_locator], 3),
                             NUMTX_GET_ROW_VEC(&target->joint_matrices[opposite_locator], 3), &along0, &along1)) {
                         cable->wrap_indices[cable->wrap_count++] = static_cast<u8>(previous);
                     }
-                } else {
-                    cable->wrap_indices[cable->wrap_count++] = static_cast<u8>(next);
                 }
             } else {
                 i32 next = (last + 1) & 3;

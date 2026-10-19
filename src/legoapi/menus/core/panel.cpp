@@ -114,7 +114,7 @@ i32 Tag_UpdateHint(HINT_s *hint) {
         case 600:
             if (FreePlay == 0)
                 return 0;
-            if (player != NULL && player->apiobj.player_controlled && player->field_0xcc0 != NULL)
+            if (__builtin_expect(player != NULL && player->apiobj.player_controlled && player->field_0xcc0 != NULL, 0))
                 return 0;
             return player2 == NULL || static_cast<i8>(player2->apiobj.flags_low) >= 0 || player2->field_0xcc0 == NULL;
         case 602: {
@@ -128,7 +128,7 @@ i32 Tag_UpdateHint(HINT_s *hint) {
             GameObject_s *first = player;
             if (first != NULL && static_cast<i8>(first->apiobj.flags_low) < 0 && first->field_0xcc0 != NULL)
                 return 0;
-            if (second != NULL && second->apiobj.player_controlled && second->field_0xcc0 != NULL)
+            if (__builtin_expect(second != NULL && second->apiobj.player_controlled && second->field_0xcc0 != NULL, 0))
                 return 0;
             i32 count = 0;
             i32 active = 0;
@@ -778,8 +778,8 @@ void DrawMeleeTargetsNumber(i16 *targets, u8 *counts, i32 count, u8 reset, nuhsp
                     meleeTarg_flashTime[i] = 0.01f;
                 meleeTarg_flashTime[i] += FRAMETIME;
 
-                if (!(meleeTarg_flashTime[i] < 0.375f)) {
-                    if (meleeTarg_flashTime[i] < 0.625f) {
+                if (__builtin_expect(!(meleeTarg_flashTime[i] < 0.375f), 1)) {
+                    if (__builtin_expect(meleeTarg_flashTime[i] < 0.625f, 1)) {
                         meleeTarg_localCount[i] = counts[i];
                         red = 0;
                         green = 255;

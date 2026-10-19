@@ -438,7 +438,9 @@ void UpdatePaintPuzzle(WORLDINFO_s *world) {
                     paintmixed = 3;
                 } else if ((paintsused[0] == 2 && paintsused[1] == 1) || (paintsused[1] == 2 && paintsused[0] == 1)) {
                     paintmixed = 4;
-                } else if ((paintsused[1] == 2 && paintsused[0] == 0) || (paintsused[0] == 2 && paintsused[1] == 0)) {
+                } else if (__builtin_expect((paintsused[1] == 2 && paintsused[0] == 0) ||
+                                                (paintsused[0] == 2 && paintsused[1] == 0),
+                                            0)) {
                     paintmixed = 5;
                 } else {
                     paintmixed = -1;
@@ -1099,7 +1101,7 @@ void JediB_DrawPanel(WORLDINFO_s *) {
                 }
                 break;
             case 7:
-                if (jedi_b.boss == NULL) {
+                if (__builtin_expect(jedi_b.boss == NULL, 1)) {
                     jedi_b.boss = (GameObject_s *)FindGameObject((i32)(i16)id_JANGOFETT, 1, 1, 0, 0);
                     if (jedi_b.boss == NULL) {
                         return;
@@ -1523,7 +1525,7 @@ void KaminoC_Update(WORLDINFO_s *world) {
     KaminoProgressGizmo_s *progress = static_cast<KaminoProgressGizmo_s *>(LevGizmo[0]->object);
     if (GizmoGetOutput(world->gizmo_sys, LevGizmo[0], 0, 0)) {
         GizmoSetVisibility(world->gizmo_sys, LevGizmo[1], 0, 1);
-    } else if (!(progress->flags & 1)) {
+    } else if (__builtin_expect(!(progress->flags & 1), 1)) {
         GizmoActivate(world->gizmo_sys, LevGizmo[1], 1, 1);
         if (GizmoGetOutput(world->gizmo_sys, gizTurrets[0], 0, 0) &&
             GizmoGetOutput(world->gizmo_sys, gizTurrets[1], 0, 0))
@@ -2158,7 +2160,7 @@ void GunShip_DragBombSeekBlowUp(GameObject_s *object) {
     f32 nearest_distance = gunshipb_seekrange * gunshipb_seekrange;
     NUVEC offset, nearest_offset, direction;
     for (i32 i = 0; i < 8; ++i) {
-        if (LevGizmo[i] == NULL)
+        if (__builtin_expect(LevGizmo[i] == NULL, 0))
             continue;
         GIZMOBLOWUP_s *blowup = static_cast<GIZMOBLOWUP_s *>(LevGizmo[i]->object);
         if (blowup == NULL || (blowup->status_flags & 0x800001) != 0x800000)

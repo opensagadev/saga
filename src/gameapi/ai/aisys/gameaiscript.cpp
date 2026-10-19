@@ -9225,7 +9225,7 @@ __used__ static i32 Action_Kill(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET
                 candidate->respawn_at_origin = respawn_at_origin;
                 if (parts_on)
                     KillParts(candidate, -1, -1, 1, 0.0f, 0, NULL);
-                if (!debris)
+                if (__builtin_expect(!debris, 0))
                     KillGameObject(candidate, 4, 0);
                 else
                     KillGameObject(candidate, 2, 0);
@@ -10603,7 +10603,7 @@ i32 Action_GetLocatorFromSet(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKE
             continue;
         }
         value = NuStrIStr(params[index], "off_screen_radius=");
-        if (value != NULL) {
+        if (__builtin_expect(value != NULL, 1)) {
             off_screen_radius = AIParamToFloat(processor, value + sizeof("off_screen_radius=") - 1);
             continue;
         }
@@ -10722,7 +10722,7 @@ i32 Action_GetLocatorFromSet(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKE
                     target->field_0x1fa |= 0x10;
                     direction = -1;
                     candidate = locator_set->locator_count - 2;
-                } else if (candidate < 0) {
+                } else if (__builtin_expect(candidate < 0, 1)) {
                     target->field_0x1fa &= static_cast<u8>(~0x10);
                     direction = 1;
                     candidate = 1;
@@ -11459,7 +11459,7 @@ __used__ static i32 Action_CreateCreatures(AISYS *sys, AISCRIPTPROCESS *processo
     while (count != 0) {
         if ((locator_count | zipup_count) == 0 && start_locator == 0 && rider == NULL)
             break;
-        if (model_count == 0)
+        if (__builtin_expect(model_count == 0, 0))
             break;
         i32 model = models[NuRand(NULL) % model_count];
         AILOCATOR *locator = NULL;
@@ -11540,7 +11540,7 @@ __used__ static i32 Action_CreateCreatures(AISYS *sys, AISCRIPTPROCESS *processo
                 if (state != NULL)
                     AIScriptSetBaseScriptStateByName(&object->ai.script_process, state);
                 object->ai.locator = locator;
-                if (inherit != 0)
+                if (__builtin_expect(inherit != 0, 1))
                     object->ai.locator_set = locator_set;
                 if (no_gun != 0)
                     object->field_0xef8 &= ~4;

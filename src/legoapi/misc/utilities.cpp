@@ -1417,7 +1417,7 @@ void MoveSplinePosition(SPLINEPOS_s *position, f32 distance) {
             if (distance >= 0.0f) {
                 while (distance > 0.0f) {
                     position->segment_distance += distance;
-                    if (!(position->segment_distance >= position->segment_length))
+                    if (__builtin_expect(!(position->segment_distance >= position->segment_length), 0))
                         goto interpolate;
                     distance = position->segment_distance - position->segment_length;
                     i16 previous = position->segment;
@@ -1763,30 +1763,30 @@ void EvalAnim2(nuhspecial_s *special, float frame) {
 }
 
 void SetAnimFrame(nuhspecial_s *special, float frame) {
-    if (NuSpecialExistsFn(special) == 0)
-        return;
-    NUMTX_ALIGNED16 matrix;
-    NuMtxSetIdentity(&matrix);
-    nuinstanim_s *instance_animation = NuSpecialGetInstAnim(special);
-    if (instance_animation == NULL)
-        return;
-    nuanimdata_s *animation = special->scene->instance_animation_data[instance_animation->anim_ix];
-    if (animation == NULL)
-        return;
-    // The animation header begins with its final frame; the remaining header is opaque here.
-    f32 end_frame;
-    memcpy(&end_frame, animation, sizeof(end_frame));
-    if (frame == 1.0e9f)
-        frame = end_frame;
-    if (!(frame >= 1.0f) || frame > end_frame)
-        return;
-    NuAnimData2CalcMatrix(animation, 0, frame, &matrix);
-    instance_animation->mtx = matrix;
-    NUMTX *instance_matrix = NuSpecialGetInstanceMtx(special);
-    instance_animation->mtx.m30 = instance_matrix->m30;
-    instance_animation->mtx.m31 = instance_matrix->m31;
-    instance_animation->mtx.m32 = instance_matrix->m32;
-    instance_animation->ltime = frame;
+    if (NuSpecialExistsFn(special) != 0) {
+        NUMTX_ALIGNED16 matrix;
+        NuMtxSetIdentity(&matrix);
+        nuinstanim_s *instance_animation = NuSpecialGetInstAnim(special);
+        if (instance_animation == NULL)
+            return;
+        nuanimdata_s *animation = special->scene->instance_animation_data[instance_animation->anim_ix];
+        if (animation == NULL)
+            return;
+        // The animation header begins with its final frame; the remaining header is opaque here.
+        f32 end_frame;
+        memcpy(&end_frame, animation, sizeof(end_frame));
+        if (frame == 1.0e9f)
+            frame = end_frame;
+        if (!(frame >= 1.0f) || frame > end_frame)
+            return;
+        NuAnimData2CalcMatrix(animation, 0, frame, &matrix);
+        instance_animation->mtx = matrix;
+        NUMTX *instance_matrix = NuSpecialGetInstanceMtx(special);
+        instance_animation->mtx.m30 = instance_matrix->m30;
+        instance_animation->mtx.m31 = instance_matrix->m31;
+        instance_animation->mtx.m32 = instance_matrix->m32;
+        instance_animation->ltime = frame;
+    }
 }
 
 f32 NuSpecialGetAnimPos(nuhspecial_s *special) {

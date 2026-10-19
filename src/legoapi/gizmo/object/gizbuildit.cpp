@@ -1340,29 +1340,27 @@ static void GizmoBuildit_Activate(GIZMO *gizmo, i32 active) {
     GizBuildit_Reset(buildit, NULL);
     buildit->reward_released = reward_released;
 
-    if ((buildit->state_flags & GIZBUILDIT_STATE_AUTO_BUILD_STATIC_OBJECTS) == 0 || GizBuildit_AutoBuildPosFn == NULL) {
-        return;
-    }
-
-    NUVEC scatter_position;
-    if (GizBuildit_AutoBuildPosFn(NULL, &buildit->start_position, &scatter_position, NULL) == 0) {
-        return;
-    }
-
-    buildit->step_timer = 5.0f;
-    for (i32 index = 0; index < buildit->anim_object_count; ++index) {
-        scatter_position.x += NuFloatRand(reinterpret_cast<NURAND *>(&GAMERAND)) / 5.0f - 0.1f;
-        scatter_position.y += NuFloatRand(reinterpret_cast<NURAND *>(&GAMERAND)) / 5.0f - 0.1f;
-        scatter_position.z += NuFloatRand(reinterpret_cast<NURAND *>(&GAMERAND)) / 5.0f - 0.1f;
-
-        GAMEANIMOBJ_s *object = buildit->anim_objects[index];
-        if (buildit->linked_buildit == NULL) {
-            NuSpecialSetDrawPos(&object->special, &scatter_position);
-        } else {
-            GIZBUILDITANIMDATA_s *object_data = static_cast<GIZBUILDITANIMDATA_s *>(object->object_data);
-            *NUMTX_GET_ROW_VEC(&object_data->draw_mtx, 3) = scatter_position;
+    if ((buildit->state_flags & GIZBUILDIT_STATE_AUTO_BUILD_STATIC_OBJECTS) != 0 && GizBuildit_AutoBuildPosFn != NULL) {
+        NUVEC scatter_position;
+        if (GizBuildit_AutoBuildPosFn(NULL, &buildit->start_position, &scatter_position, NULL) == 0) {
+            return;
         }
-        AddGameDebris(WORLD->debris_sys, GizBuilditGDeb[qrand() / 0x2aab], &scatter_position);
+
+        buildit->step_timer = 5.0f;
+        for (i32 index = 0; index < buildit->anim_object_count; ++index) {
+            scatter_position.x += NuFloatRand(reinterpret_cast<NURAND *>(&GAMERAND)) / 5.0f - 0.1f;
+            scatter_position.y += NuFloatRand(reinterpret_cast<NURAND *>(&GAMERAND)) / 5.0f - 0.1f;
+            scatter_position.z += NuFloatRand(reinterpret_cast<NURAND *>(&GAMERAND)) / 5.0f - 0.1f;
+
+            GAMEANIMOBJ_s *object = buildit->anim_objects[index];
+            if (buildit->linked_buildit == NULL) {
+                NuSpecialSetDrawPos(&object->special, &scatter_position);
+            } else {
+                GIZBUILDITANIMDATA_s *object_data = static_cast<GIZBUILDITANIMDATA_s *>(object->object_data);
+                *NUMTX_GET_ROW_VEC(&object_data->draw_mtx, 3) = scatter_position;
+            }
+            AddGameDebris(WORLD->debris_sys, GizBuilditGDeb[qrand() / 0x2aab], &scatter_position);
+        }
     }
 }
 

@@ -7336,13 +7336,13 @@ __attribute__((optimize("O2"))) i32 ANI_SimpleAni3PlayerV4Joint_Quat3(ani3_animh
         f32 key = (frame - anim->first_frame) * static_cast<f32>(last) / static_cast<f32>(anim->frame_count - 1);
         key = key < 0.0f ? 0.0f : key;
         i32 whole;
-        if (static_cast<f32>(last) <= key) {
+        if (!(static_cast<f32>(last) <= key)) {
+            whole = static_cast<i32>(key);
+            fraction = key - static_cast<f32>(whole);
+        } else {
             const f32 final_key = static_cast<f32>(last);
             whole = static_cast<i32>(final_key);
             fraction = final_key - static_cast<f32>(whole);
-        } else {
-            whole = static_cast<i32>(key);
-            fraction = key - static_cast<f32>(whole);
         }
         quarter = static_cast<u32>(whole) & 3;
         key_offset = (whole / 4) * key_stride;
@@ -11300,84 +11300,83 @@ extern "C" void NuTexAnimProcessEx(f32 frame_time, u16 mask) {
 
     void **NuHGobjEvalDwaBlend2(i32 render_count, i16 *render_indices, nuanimdata2_s *animation_a, f32 frame_a,
                                 nuanimdata2_s *animation_b, f32 frame_b, f32 blend) {
-        if ((animation_a == NULL && animation_b == NULL) || render_count == 0) {
-            return NULL;
-        }
-
-        nuanimtime_s time_a;
-        nuanimtime_s time_b;
-        if (animation_a != NULL) {
-            NuAnimData2CalcTime(animation_a, frame_a, &time_a);
-        }
-        if (animation_b != NULL) {
-            NuAnimData2CalcTime(animation_b, frame_b, &time_b);
-        }
-
-        usize clear_size;
-        if (render_indices == NULL) {
-            render_count = 1;
-            clear_size = 1;
-        } else {
-            clear_size = (static_cast<usize>(render_count) * sizeof(void *) + 0xf) >> 4;
-        }
-        f32 **weights_by_render = NuRndrCreateBlendShapeDWAPointers(render_count);
-        if (weights_by_render == NULL) {
-            return NULL;
-        }
-        memset(weights_by_render, 0, clear_size);
-
-        nuanimcurve2_s *curves_a = NULL;
-        u8 *types_a = NULL;
-        nuanimcurve2_s *curves_b = NULL;
-        u8 *types_b = NULL;
-        for (i32 render = 0; render < render_count; ++render) {
-            i32 node = render_indices == NULL ? 0 : render_indices[render];
-            if (node < 0) {
-                continue;
+        if (!(animation_a == NULL && animation_b == NULL) && render_count != 0) {
+            nuanimtime_s time_a;
+            nuanimtime_s time_b;
+            if (animation_a != NULL) {
+                NuAnimData2CalcTime(animation_a, frame_a, &time_a);
+            }
+            if (animation_b != NULL) {
+                NuAnimData2CalcTime(animation_b, frame_b, &time_b);
             }
 
-            i32 count_a;
-            if (animation_a != NULL && node < NuAnimNumNodes(animation_a)) {
-                count_a = static_cast<i16>(animation_a->curve_count);
-                curves_a = animation_a->curves + count_a * node;
-                types_a = animation_a->curve_types + count_a * node;
+            usize clear_size;
+            if (render_indices == NULL) {
+                render_count = 1;
+                clear_size = 1;
             } else {
-                count_a = 0;
+                clear_size = (static_cast<usize>(render_count) * sizeof(void *) + 0xf) >> 4;
             }
-
-            i32 count_b;
-            if (animation_b != NULL && node < NuAnimNumNodes(animation_b)) {
-                count_b = static_cast<i16>(animation_b->curve_count);
-                curves_b = animation_b->curves + count_b * node;
-                types_b = animation_b->curve_types + count_b * node;
-            } else {
-                count_b = 0;
+            f32 **weights_by_render = NuRndrCreateBlendShapeDWAPointers(render_count);
+            if (weights_by_render == NULL) {
+                return NULL;
             }
+            memset(weights_by_render, 0, clear_size);
 
-            i32 curve_count = count_a < count_b ? count_b : count_a;
-            f32 *weights = NuRndrCreateBlendShapeDeformerWeightsArray(curve_count);
-            weights_by_render[render] = weights;
-            if (weights == NULL) {
-                continue;
-            }
-
-            nuanimcurve2_s *curve_a = curves_a;
-            nuanimcurve2_s *curve_b = curves_b;
-            for (i32 curve = 0; curve < curve_count; ++curve, ++curve_a, ++curve_b) {
-                f32 value_a = 0.0f;
-                if (curve < count_a) {
-                    const i32 type = static_cast<i8>(types_a[curve]);
-                    value_a = type == 0 ? curve_a->data.constant : NuAnimCurve2CalcValEx(curve_a, &time_a, type);
+            nuanimcurve2_s *curves_a = NULL;
+            u8 *types_a = NULL;
+            nuanimcurve2_s *curves_b = NULL;
+            u8 *types_b = NULL;
+            for (i32 render = 0; render < render_count; ++render) {
+                i32 node = render_indices == NULL ? 0 : render_indices[render];
+                if (node < 0) {
+                    continue;
                 }
-                f32 value_b = 0.0f;
-                if (curve < count_b) {
-                    const i32 type = static_cast<i8>(types_b[curve]);
-                    value_b = type == 0 ? curve_b->data.constant : NuAnimCurve2CalcValEx(curve_b, &time_b, type);
+
+                i32 count_a;
+                if (animation_a != NULL && node < NuAnimNumNodes(animation_a)) {
+                    count_a = static_cast<i16>(animation_a->curve_count);
+                    curves_a = animation_a->curves + count_a * node;
+                    types_a = animation_a->curve_types + count_a * node;
+                } else {
+                    count_a = 0;
                 }
-                weights[curve + 1] = value_b * blend + (1.0f - blend) * value_a;
+
+                i32 count_b;
+                if (animation_b != NULL && node < NuAnimNumNodes(animation_b)) {
+                    count_b = static_cast<i16>(animation_b->curve_count);
+                    curves_b = animation_b->curves + count_b * node;
+                    types_b = animation_b->curve_types + count_b * node;
+                } else {
+                    count_b = 0;
+                }
+
+                i32 curve_count = count_a < count_b ? count_b : count_a;
+                f32 *weights = NuRndrCreateBlendShapeDeformerWeightsArray(curve_count);
+                weights_by_render[render] = weights;
+                if (weights == NULL) {
+                    continue;
+                }
+
+                nuanimcurve2_s *curve_a = curves_a;
+                nuanimcurve2_s *curve_b = curves_b;
+                for (i32 curve = 0; curve < curve_count; ++curve, ++curve_a, ++curve_b) {
+                    f32 value_a = 0.0f;
+                    if (curve < count_a) {
+                        const i32 type = static_cast<i8>(types_a[curve]);
+                        value_a = type == 0 ? curve_a->data.constant : NuAnimCurve2CalcValEx(curve_a, &time_a, type);
+                    }
+                    f32 value_b = 0.0f;
+                    if (curve < count_b) {
+                        const i32 type = static_cast<i8>(types_b[curve]);
+                        value_b = type == 0 ? curve_b->data.constant : NuAnimCurve2CalcValEx(curve_b, &time_b, type);
+                    }
+                    weights[curve + 1] = value_b * blend + (1.0f - blend) * value_a;
+                }
             }
+            return reinterpret_cast<void **>(weights_by_render);
         }
-        return reinterpret_cast<void **>(weights_by_render);
+        return NULL;
     }
 
     // Original @0x2ce450. Evaluate and blend two legacy animation chunks
@@ -15421,10 +15420,10 @@ static void roomRecursive(NUGSCN *scene, NUFRUSTRUM *frustum, i16 room_id, i16 p
         for (i32 plane_index = 0; plane_index < frustum->plane_count; ++plane_index) {
             i32 outside_vertices = 0;
             for (i32 vertex_index = 0; vertex_index < portal->vertex_count; ++vertex_index) {
-                if (planeDistance(frustum->planes[plane_index], portal->vertices[vertex_index]) >= 0.0f) {
-                    ++inside_tests;
-                } else {
+                if (!(planeDistance(frustum->planes[plane_index], portal->vertices[vertex_index]) >= 0.0f)) {
                     ++outside_vertices;
+                } else {
+                    ++inside_tests;
                 }
             }
             if (outside_vertices == portal->vertex_count) {
@@ -17074,25 +17073,7 @@ void DisplayListLinkDynamicMtls(void) {
         dl->mtl_id = insert;
 
         nusortpri_s *sp;
-        if (sp_idx != -1) {
-            sp = &mgr->dyn_mtl_dlist.sort_pris[sp_idx];
-            if (__builtin_expect(insert != 0 && MtlSortKey(mgr->dyn_mtl_dlist.mtls[insert - 1]) == key, 0)) {
-                // Splice after previous material's block.
-                auto *anchor = mgr->dyn_mtl_dlist.mtls[insert - 1]->display_list->mtl_item;
-                auto *follow = static_cast<nudisplaylistitem_s *>(anchor[7].next);
-                items[7].type = kItemType_Link;
-                items[7].id = kItemId_Next;
-                items[7].next = follow;
-                anchor[7].next = items;
-            } else {
-                // Head of chain.
-                items[7].type = kItemType_Link;
-                items[7].id = kItemId_Next;
-                items[7].next = sp->items;
-                sp->items = items;
-            }
-            ++sp->nmtls;
-        } else {
+        if (sp_idx == -1) {
             sp = &mgr->dyn_mtl_dlist.sort_pris[mgr->dyn_mtl_dlist.nsort_pris];
             sp->items = items;
             sp->field_18 = mgr->field_4a8;
@@ -17120,6 +17101,24 @@ void DisplayListLinkDynamicMtls(void) {
             ++mgr->nused_sort_pris;
             ++mgr->dyn_mtl_dlist.nsort_pris;
             sp->nmtls = 1;
+        } else {
+            sp = &mgr->dyn_mtl_dlist.sort_pris[sp_idx];
+            if (__builtin_expect(insert != 0 && MtlSortKey(mgr->dyn_mtl_dlist.mtls[insert - 1]) == key, 0)) {
+                // Splice after previous material's block.
+                auto *anchor = mgr->dyn_mtl_dlist.mtls[insert - 1]->display_list->mtl_item;
+                auto *follow = static_cast<nudisplaylistitem_s *>(anchor[7].next);
+                items[7].type = kItemType_Link;
+                items[7].id = kItemId_Next;
+                items[7].next = follow;
+                anchor[7].next = items;
+            } else {
+                // Head of chain.
+                items[7].type = kItemType_Link;
+                items[7].id = kItemId_Next;
+                items[7].next = sp->items;
+                sp->items = items;
+            }
+            ++sp->nmtls;
         }
 
         {
@@ -17496,7 +17495,14 @@ void xxxNuDisplayListUpdateSpecial(nuhspecial_s *special) {
     NuVecMax(&maximum, &maximum, &corners[6]);
     NuVecMax(&maximum, &maximum, &corners[7]);
 
-    if ((scene->render_buffer & NUDL_SCENE_RENDER_FLAG_CENTER_EXTENT_BOUNDS) != 0) {
+    if ((scene->render_buffer & NUDL_SCENE_RENDER_FLAG_CENTER_EXTENT_BOUNDS) == 0) {
+        NUCLIPBOUNDS *bounds = &scene->clip_bounds[display->instance_ix];
+        bounds->center = minimum;
+        bounds->extent = maximum;
+        // Retail copies uninitialized local W components in min/max mode.
+        // They are not clipping coordinates; retain the destination padding,
+        // as the active NuDisplayListUpdateSpecial implementation does.
+    } else {
         NUVEC extent;
         extent.y = (maximum.y - minimum.y) * 0.5f;
         extent.x = (maximum.x - minimum.x) * 0.5f;
@@ -17508,13 +17514,6 @@ void xxxNuDisplayListUpdateSpecial(nuhspecial_s *special) {
         bounds->center.z = (maximum.z + minimum.z) * 0.5f;
         bounds->center_w = radius;
         bounds->extent = extent;
-    } else {
-        NUCLIPBOUNDS *bounds = &scene->clip_bounds[display->instance_ix];
-        bounds->center = minimum;
-        bounds->extent = maximum;
-        // Retail copies uninitialized local W components in min/max mode.
-        // They are not clipping coordinates; retain the destination padding,
-        // as the active NuDisplayListUpdateSpecial implementation does.
     }
     DisplayListUpdateSpecialTransformPS(special, &matrix);
 }
@@ -18714,16 +18713,16 @@ void NuLgtArcLaserDraw(i32 paused) {
         auto laser_wobble = laser->wobble;
         do {
             f32 next = progress + step;
-            if (!(next >= 1.0f)) {
-                i32 angle = ((i32)(32768.0f * next) >> 1) & 0x7fff;
-                vertices[5].x = next * vertices[7].x + vertices[6].x + vertices[10].x * NuTrigTable[angle];
-                vertices[5].y = next * vertices[7].y + vertices[6].y + vertices[10].y * NuTrigTable[angle];
-                vertices[5].z = next * vertices[7].z + vertices[6].z + vertices[10].z * NuTrigTable[angle];
-            } else {
+            if (next >= 1.0f) {
                 vertices[5].x = vertices[6].x + vertices[7].x;
                 vertices[5].y = vertices[6].y + vertices[7].y;
                 vertices[5].z = vertices[6].z + vertices[7].z;
                 u = NuLgtArcMtl[0].u1 + (1.0f - progress) * (NuLgtArcMtl[0].u0 - NuLgtArcMtl[0].u1) / step;
+            } else {
+                i32 angle = ((i32)(32768.0f * next) >> 1) & 0x7fff;
+                vertices[5].x = next * vertices[7].x + vertices[6].x + vertices[10].x * NuTrigTable[angle];
+                vertices[5].y = next * vertices[7].y + vertices[6].y + vertices[10].y * NuTrigTable[angle];
+                vertices[5].z = next * vertices[7].z + vertices[6].z + vertices[10].z * NuTrigTable[angle];
             }
             vertices[5].w = 1.0f;
             NuVec4MtxTransformVU0(&vertices[5], &vertices[5], clip);
@@ -19204,17 +19203,15 @@ extern "C" NUDLDLISTSCENE *NuDisplaySceneClone(NUDLDLISTSCENE *source, VARIPTR *
     auto source_nitems = source->nitems;
     for (i32 i = 0; i < source_nitems; ++i) {
         NUDISPLAYLISTITEM *item = &scene->items[i];
-        if (item->type != 0x80) {
-            if (item->type == 0x85) {
-                item->next = scene->items + (static_cast<NUDISPLAYLISTITEM *>(source->items[i].next) - source->items);
-            }
-        } else {
+        if (item->type == 0x80) {
             for (i32 j = 0; j < static_cast<i32>(source->nmtls); ++j) {
                 if (source->items[i].next == source->mtls[j]) {
                     item->next = scene->mtls[j];
                     break;
                 }
             }
+        } else if (item->type == 0x85) {
+            item->next = scene->items + (static_cast<NUDISPLAYLISTITEM *>(source->items[i].next) - source->items);
         }
     }
     if (source->material_animations != NULL) {
@@ -19252,12 +19249,12 @@ extern "C" NUDLDLISTSCENE *NuDisplaySceneClone(NUDLDLISTSCENE *source, VARIPTR *
                     previous = current;
                     current = current->sys_next;
                 }
-                if (previous == NULL) {
-                    sort->sys_next = sort_list;
-                    sort_list = sort;
-                } else {
+                if (previous != NULL) {
                     sort->sys_next = current;
                     previous->sys_next = sort;
+                } else {
+                    sort->sys_next = sort_list;
+                    sort_list = sort;
                 }
             }
             ++used_sort_pris;
@@ -20592,11 +20589,11 @@ NUQFNT *NuQFntReadBuffer(VARIPTR *font, VARIPTR *buf, VARIPTR buf_end) {
         *(i32 *)relocation_table.void_ptr = relocation_count;
         relocation_entry.addr = relocation_table.addr + 4;
         for (i = 0; i < relocation_count; i++, relocation_entry.addr += 4) {
-            if (relocations[i].pointer == 0) {
-                *(i32 *)relocation_entry.void_ptr = 0;
-            } else {
+            if (relocations[i].pointer != 0) {
                 *(i32 *)relocation_entry.void_ptr = relocations[i].pointer - (relocation_entry.addr - base.addr);
                 *(i32 *)(base.addr + relocations[i].pointer) = relocations[i].target - relocations[i].pointer;
+            } else {
+                *(i32 *)relocation_entry.void_ptr = 0;
             }
         }
     }

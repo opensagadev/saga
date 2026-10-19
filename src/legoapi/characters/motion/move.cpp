@@ -2460,7 +2460,7 @@ void ApplyGravity(GameObject_s *object, float *gravity, float hover_height, floa
                 if (object->apiobj.field_0x281 == 0x1a) {
                     object->field_0xe31 = 3;
                     object->jump_variant_timer = 0.0f;
-                } else if ((object->pad_gamepad->buttons_held & GAMEPAD_JUMP) == 0) {
+                } else if (__builtin_expect((object->pad_gamepad->buttons_held & GAMEPAD_JUMP) == 0, 0)) {
                     if (object->field_0xe31 == 2) {
                         object->field_0xe31 = 3;
                     }
@@ -6576,8 +6576,10 @@ void FindForcePushTarget(GameObject_s *object, i32 activate, i32 target_filter) 
     i32 selected_direct;
     if ((object->pad_gamepad->allocated_5a & 0x10) != 0 && object->force_push_target != NULL) {
         best = object->force_push_target;
-        if (choke_style == 0 && object->apiobj.character_data->game_character->uses_weapon_action == 0x0c &&
-            (object->apiobj.character_data->model_flags & 8) != 0) {
+        if (__builtin_expect(choke_style == 0 &&
+                                 object->apiobj.character_data->game_character->uses_weapon_action == 0x0c &&
+                                 (object->apiobj.character_data->model_flags & 8) != 0,
+                             0)) {
             choke_style = best->id == id_GAMORREANGUARD;
         }
         i32 target_special = best->apiobj.character_data->model_flags & 0x10;
@@ -6587,7 +6589,7 @@ void FindForcePushTarget(GameObject_s *object, i32 activate, i32 target_filter) 
             continuing_direct = 1;
         } else if ((choke_style | second_style) != 0) {
             if (second_style != 0) {
-                if (best->apiobj.character_model->model_data_b[0x54] == NULL) {
+                if (__builtin_expect(best->apiobj.character_model->model_data_b[0x54] == NULL, 0)) {
                     if (target_special == 0)
                         return;
                     choke_style = 0;

@@ -155,26 +155,25 @@ void CharMiniKit_Draw(i32 id, numtx_s *matrix, i32 reflection_axis, float reflec
     if (Char_MiniKit == NULL)
         return;
     HUBMINIKITPIECES_s *kit = Char_MiniKit[id];
-    if (kit != NULL) {
-        bool reflection = reflection_axis != 0 && reflection_plane != 2000000.0f;
-        for (i32 i = 0; i < kit->piece_count; ++i) {
-            HUBMINIKITPIECE_s *piece = &kit->pieces[i];
-            if (NuSpecialExistsFn(&piece->special) == 0)
-                continue;
-            piece = &kit->pieces[i];
-            draw_matrix = piece->matrix;
-            NuMtxMul(&draw_matrix, &draw_matrix, matrix);
-            piece = &kit->pieces[i];
-            NuSpecialDrawAt(&piece->special, &draw_matrix);
-            if (reflection) {
-                NUMTX reflected;
-                if (MatrixReflection(&draw_matrix, reflection_axis, reflection_plane, reflection_height, &reflected) !=
-                    0) {
-                    NuRndrStartReflectionRender(0);
-                    piece = &kit->pieces[i];
-                    NuSpecialDrawAt(&piece->special, &reflected);
-                    NuRndrEndReflectionRender();
-                }
+    if (kit == NULL)
+        return;
+    bool reflection = reflection_axis != 0 && reflection_plane != 2000000.0f;
+    for (i32 i = 0; i < kit->piece_count; ++i) {
+        HUBMINIKITPIECE_s *piece = &kit->pieces[i];
+        if (NuSpecialExistsFn(&piece->special) == 0)
+            continue;
+        piece = &kit->pieces[i];
+        draw_matrix = piece->matrix;
+        NuMtxMul(&draw_matrix, &draw_matrix, matrix);
+        piece = &kit->pieces[i];
+        NuSpecialDrawAt(&piece->special, &draw_matrix);
+        if (reflection) {
+            NUMTX reflected;
+            if (MatrixReflection(&draw_matrix, reflection_axis, reflection_plane, reflection_height, &reflected) != 0) {
+                NuRndrStartReflectionRender(0);
+                piece = &kit->pieces[i];
+                NuSpecialDrawAt(&piece->special, &reflected);
+                NuRndrEndReflectionRender();
             }
         }
     }

@@ -1519,15 +1519,13 @@ void UpdateGameObjects(WORLDINFO_s *world) {
         if ((object->apiobj.field_0x1f4 & 0x40000) != 0) {
             MovePlayer_NETWORK(object);
         } else {
-            if (!object->apiobj.player_controlled) {
-                if (FreePlay != 0) {
-                    Player_ToggleCharacter(object, 0, 0);
-                }
-            } else {
+            if (object->apiobj.player_controlled) {
                 if (object->pad_gamepad->pad != NULL) {
                     UpdateRumble(&object->pad_gamepad->rumble_packet);
                     Player_ToggleCharacter(object, 0, 1);
                 }
+            } else if (FreePlay != 0) {
+                Player_ToggleCharacter(object, 0, 0);
             }
             if (TimingBarSet == 3)
                 TBOPENFN("Move", 3);
@@ -1796,20 +1794,7 @@ void UpdateGameObjects(WORLDINFO_s *world) {
     CollideGameObjects(world);
     if (TimingBarSet == 2)
         TBCLOSEFN("Coll", 2);
-    if (do_player_tag == 0) {
-        if (player_tag_timer > 0.0f) {
-            player_tag_timer -= FRAMETIME;
-            if (player_tag_timer < 0.0f || player_tag_to == NULL || player_tag_from == NULL ||
-                (player_tag_to->apiobj.field_0x1f8 & 0x1001) != 0x1001 || player_tag_to->apiobj.field_0x287 != 0 ||
-                (player_tag_to->tag_flags & 2) != 0 || (player_tag_from->apiobj.field_0x1f8 & 0x1001) != 0x1001 ||
-                player_tag_from->apiobj.field_0x287 != 0 || (player_tag_from->tag_flags & 2) != 0) {
-                player_tag_to = NULL;
-                player_tag_timer = 0.0f;
-                player_tag_from = NULL;
-                do_player_tag = 0;
-            }
-        }
-    } else {
+    if (do_player_tag != 0) {
         i32 result = 0;
         if (player_tag_to != NULL && player_tag_from != NULL && player_tag_to != player_tag_from &&
             (player_tag_to->apiobj.field_0x1f8 & 0x1001) == 0x1001 && player_tag_to->apiobj.field_0x287 == 0 &&
@@ -1825,6 +1810,17 @@ void UpdateGameObjects(WORLDINFO_s *world) {
             }
         }
         if (result != 2) {
+            player_tag_to = NULL;
+            player_tag_timer = 0.0f;
+            player_tag_from = NULL;
+            do_player_tag = 0;
+        }
+    } else if (player_tag_timer > 0.0f) {
+        player_tag_timer -= FRAMETIME;
+        if (player_tag_timer < 0.0f || player_tag_to == NULL || player_tag_from == NULL ||
+            (player_tag_to->apiobj.field_0x1f8 & 0x1001) != 0x1001 || player_tag_to->apiobj.field_0x287 != 0 ||
+            (player_tag_to->tag_flags & 2) != 0 || (player_tag_from->apiobj.field_0x1f8 & 0x1001) != 0x1001 ||
+            player_tag_from->apiobj.field_0x287 != 0 || (player_tag_from->tag_flags & 2) != 0) {
             player_tag_to = NULL;
             player_tag_timer = 0.0f;
             player_tag_from = NULL;

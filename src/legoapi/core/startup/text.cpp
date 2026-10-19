@@ -277,8 +277,9 @@ extern "C" {
 
 __attribute__((optimize("O2", "tree-vectorize"))) void Tag_DrawIcon_Batman(GameObject_s *object) {
     i32 count;
-    if (VehicleArea != 0 || FadeSys.fade != 0.0f || !object->apiobj.player_controlled ||
-        !(object->pause_context_state > 0.0f)) {
+    if (__builtin_expect(VehicleArea != 0 || FadeSys.fade != 0.0f || !object->apiobj.player_controlled ||
+                             !(object->pause_context_state > 0.0f),
+                         0)) {
         return;
     }
 
@@ -333,7 +334,7 @@ __attribute__((optimize("O2", "tree-vectorize"))) void Tag_DrawIcon_Batman(GameO
         TAG_INCLUDE_POI(13)
         TAG_INCLUDE_POI(14)
         TAG_INCLUDE_POI(15)
-        if (count != 0) {
+        if (__builtin_expect(count != 0, 0)) {
             const f32 inv_count = 1.0f / static_cast<f32>(count);
             position.x = (x_sum * inv_count + position.x) * 0.5f;
             position.y = ((max_y + 0.05f) + position.y) * 0.5f;

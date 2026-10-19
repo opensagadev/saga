@@ -166,35 +166,34 @@ static void GizTorp_Draw(void *world_ptr, void *, float) {
     EnableShadowMapRendering(0);
     for (i32 index = 0; index < system->count; ++index) {
         GIZTORPMACHINE &machine = system->machines[index];
-        if ((machine.flags & GIZTORPMACHINE_FLAG_VISIBLE) == 0 && editor_active == 0) {
-            continue;
-        }
+        if ((machine.flags & GIZTORPMACHINE_FLAG_VISIBLE) != 0 || editor_active != 0) {
+            NUMTX_ALIGNED16 matrix;
+            NuMtxSetRotationY(&matrix, machine.y_rotation);
+            NuMtxTranslate(&matrix, &machine.position);
+            NuMtxPreScaleU(&matrix, system->scale);
 
-        NUMTX_ALIGNED16 matrix;
-        NuMtxSetRotationY(&matrix, machine.y_rotation);
-        NuMtxTranslate(&matrix, &machine.position);
-        NuMtxPreScaleU(&matrix, system->scale);
-
-        if ((machine.flags & GIZTORPMACHINE_FLAG_ALTERNATE_MODEL) != 0) {
-            if (world->lev_objs[GIZTORP_LEVEL_OBJECT_ALTERNATE].active != 0) {
-                NuSpecialDrawAt(&world->lev_objs[GIZTORP_LEVEL_OBJECT_ALTERNATE].special, &matrix);
+            if ((machine.flags & GIZTORPMACHINE_FLAG_ALTERNATE_MODEL) != 0) {
+                if (world->lev_objs[GIZTORP_LEVEL_OBJECT_ALTERNATE].active != 0) {
+                    NuSpecialDrawAt(&world->lev_objs[GIZTORP_LEVEL_OBJECT_ALTERNATE].special, &matrix);
+                }
+            } else if (world->lev_objs[GIZTORP_LEVEL_OBJECT_PRIMARY].active != 0) {
+                NuSpecialDrawAt(&world->lev_objs[GIZTORP_LEVEL_OBJECT_PRIMARY].special, &matrix);
             }
-        } else if (world->lev_objs[GIZTORP_LEVEL_OBJECT_PRIMARY].active != 0) {
-            NuSpecialDrawAt(&world->lev_objs[GIZTORP_LEVEL_OBJECT_PRIMARY].special, &matrix);
-        }
 
-        if ((machine.flags & GIZTORPMACHINE_FLAG_ACTIVE) != 0 && machine.activation_time > 0.0f) {
-            const f32 activation_phase = machine.activation_time * 2.0f;
-            if (activation_phase >= 0.3f) {
-                const i32 opening_angle = (static_cast<i32>((activation_phase - 0.3f) / 0.7f * 16384.0f) >> 1) & 0x7fff;
-                const f32 opening_scale = (4.0f * WORLD->giz_torp_machine_sys->scale) * NuTrigTable[opening_angle];
-                const i32 pulse_angle =
-                    (static_cast<i32>(NuFmod(GameTimer.time_elapsed_mod_seconds, 0.2f) / 0.2f * 65536.0f) >> 1) &
-                    0x7fff;
-                const f32 effect_scale = opening_scale * (0.1f * NuTrigTable[pulse_angle] + 1.0f);
+            if ((machine.flags & GIZTORPMACHINE_FLAG_ACTIVE) != 0 && machine.activation_time > 0.0f) {
+                const f32 activation_phase = machine.activation_time * 2.0f;
+                if (activation_phase >= 0.3f) {
+                    const i32 opening_angle =
+                        (static_cast<i32>((activation_phase - 0.3f) / 0.7f * 16384.0f) >> 1) & 0x7fff;
+                    const f32 opening_scale = (4.0f * WORLD->giz_torp_machine_sys->scale) * NuTrigTable[opening_angle];
+                    const i32 pulse_angle =
+                        (static_cast<i32>(NuFmod(GameTimer.time_elapsed_mod_seconds, 0.2f) / 0.2f * 65536.0f) >> 1) &
+                        0x7fff;
+                    const f32 effect_scale = opening_scale * (0.1f * NuTrigTable[pulse_angle] + 1.0f);
 
-                Draw3DObject(world, 0x79, &machine.position, 0, 0, 0, effect_scale, effect_scale, effect_scale, 2);
-                Draw3DObject(world, 0x7b, &machine.position, 0, 0, 0, effect_scale, effect_scale, effect_scale, 2);
+                    Draw3DObject(world, 0x79, &machine.position, 0, 0, 0, effect_scale, effect_scale, effect_scale, 2);
+                    Draw3DObject(world, 0x7b, &machine.position, 0, 0, 0, effect_scale, effect_scale, effect_scale, 2);
+                }
             }
         }
     }

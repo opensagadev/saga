@@ -701,7 +701,13 @@ i32 refpack(unsigned char *source, abi_long source_size, unsigned char *destinat
             } while (candidate_index >= chain_limit);
         }
 
-        if (command_size < match_length) {
+        if (command_size >= match_length) {
+            LinkArray[input_index & 0x3fff] = HashTable[hash];
+            HashTable[hash] = input_index;
+            ++source;
+            --source_size;
+            ++literal_count;
+        } else {
             while (literal_count > 3) {
                 const u32 count = MIN(literal_count & ~3u, 0x70u);
                 *output++ = (count >> 2) - 0x21;
@@ -735,12 +741,6 @@ i32 refpack(unsigned char *source, abi_long source_size, unsigned char *destinat
             source_size -= match_length;
             literal_start = source;
             literal_count = 0;
-        } else {
-            LinkArray[input_index & 0x3fff] = HashTable[hash];
-            HashTable[hash] = input_index;
-            ++source;
-            --source_size;
-            ++literal_count;
         }
     }
 

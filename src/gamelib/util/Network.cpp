@@ -1653,10 +1653,10 @@ void NetworkObjectManager::Update() {
                 object_count = local_object_count;
             }
 
-            if (!(object_index >= local_object_count)) {
-                push->field_10 = object_index;
-            } else {
+            if (object_index >= local_object_count) {
                 push->NextStage();
+            } else {
+                push->field_10 = object_index;
             }
         }
         push->FlushMessages();

@@ -426,12 +426,12 @@ static void GizForces_Update(void *world_ptr, void *data, float) {
             offset.z = qrand() * (1.0f / 65535.0f) * 0.05f - 0.025f;
             GameAnimSet_SetOffset(force->anim_set, &offset);
             force->runtime_flags |= GIZFORCE_RUNTIME_OFFSET_APPLIED;
-            if (force->start_sfx_id == -1) {
-                PlaySfx("LegShakeL", &force->position);
-            } else {
+            if (force->start_sfx_id != -1) {
                 if (started_shaking || IsSfxLooping(force->start_sfx_id)) {
                     GameAudio_PlaySfxById(force->start_sfx_id, &force->position, 0, 0);
                 }
+            } else {
+                PlaySfx("LegShakeL", &force->position);
             }
         }
 
@@ -546,26 +546,7 @@ static void GizForces_Update(void *world_ptr, void *data, float) {
             force_sys->hit_test_gizmos[force_sys->hit_test_gizmo_count++] = gizmo;
         }
         if ((force->progress_flags & GIZFORCE_PROGRESS_DRAW_ACTIVE) != 0 && !GizForce_Complete(force)) {
-            if ((force->config_flags & 0x400) == 0) {
-                if ((force->field_0xaa & 2) == 0) {
-                    radius = 0.0f;
-                    GameAnimSet_GetCentreAndRadius(force->anim_set, &centre, &radius, 2, 1, 1);
-                    radius = 1.2f * force->horizontal_range * radius;
-                    glow_offset = {0.0f, 0.0f, 0.0f};
-                    if (radius != 0.0f)
-                        glow_offset.y = qrand() / (65535.0f / (0.5f * radius) + 1.0f);
-                    NuVecRotateZ(&glow_offset, &glow_offset, qrand());
-                    NuVecRotateY(&glow_offset, &glow_offset, qrand() & 0xffff);
-                    NuVecAdd(&centre, &centre, &glow_offset);
-                    if ((force->config_flags & 0x10) != 0) {
-                        AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[110].effect, &centre,
-                                                          static_cast<i32>(90.0f * radius), FRAMETIME, 0, 0, NULL);
-                    } else {
-                        AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[109].effect, &centre,
-                                                          static_cast<i32>(90.0f * radius), FRAMETIME, 0, 0, NULL);
-                    }
-                }
-            } else {
+            if ((force->config_flags & 0x400) != 0) {
                 auto force_horizontal_range = force->horizontal_range;
                 for (GAMEANIMOBJ_s *object = force->anim_set->objects; object != NULL; object = object->next) {
                     GIZFORCEANIMDATA_s *object_data = static_cast<GIZFORCEANIMDATA_s *>(object->object_data);
@@ -590,6 +571,23 @@ static void GizForces_Update(void *world_ptr, void *data, float) {
                                                               static_cast<i32>(90.0f * radius), FRAMETIME, 0, 0, NULL);
                         }
                     }
+                }
+            } else if ((force->field_0xaa & 2) == 0) {
+                radius = 0.0f;
+                GameAnimSet_GetCentreAndRadius(force->anim_set, &centre, &radius, 2, 1, 1);
+                radius = 1.2f * force->horizontal_range * radius;
+                glow_offset = {0.0f, 0.0f, 0.0f};
+                if (radius != 0.0f)
+                    glow_offset.y = qrand() / (65535.0f / (0.5f * radius) + 1.0f);
+                NuVecRotateZ(&glow_offset, &glow_offset, qrand());
+                NuVecRotateY(&glow_offset, &glow_offset, qrand() & 0xffff);
+                NuVecAdd(&centre, &centre, &glow_offset);
+                if ((force->config_flags & 0x10) != 0) {
+                    AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[110].effect, &centre,
+                                                      static_cast<i32>(90.0f * radius), FRAMETIME, 0, 0, NULL);
+                } else {
+                    AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[109].effect, &centre,
+                                                      static_cast<i32>(90.0f * radius), FRAMETIME, 0, 0, NULL);
                 }
             }
         }
@@ -1017,7 +1015,7 @@ static i32 GizForces_BoltHit(void *world_ptr, void *data, void *object_ptr, NUVE
             continue;
         }
         for (i32 point = point_count - 1; point >= 0; --point) {
-            if (!(SphereSphereOverlap(&force->position, extent, &points[point], radius))) {
+            if (__builtin_expect(!SphereSphereOverlap(&force->position, extent, &points[point], radius), 0)) {
                 continue;
             }
             NUVEC *origin = object != NULL ? &object->apiobj.collision_position : &points[point];
@@ -1217,12 +1215,12 @@ static void GizForces_Reset(void *world_ptr, void *data, void *progress_ptr) {
         for (i32 group_index = 0; group_index < 8; ++group_index) {
             for (i32 member = 0; member < 8; ++member) {
                 const u8 force_index = static_cast<u8>(progress->group_members[group_index][member]);
-                if (force_index >= force_sys->count) {
+                if (__builtin_expect(force_index >= force_sys->count, 0)) {
                     continue;
                 }
 
                 GIZFORCE_s &force = force_sys->forces[force_index];
-                if ((force.progress_flags & GIZFORCE_PROGRESS_GROUP_MEMBER) == 0) {
+                if (__builtin_expect((force.progress_flags & GIZFORCE_PROGRESS_GROUP_MEMBER) == 0, 1)) {
                     if (force.group == NULL || force.group->count >= 8) {
                         continue;
                     }

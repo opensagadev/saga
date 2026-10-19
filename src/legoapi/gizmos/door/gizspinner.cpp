@@ -619,7 +619,27 @@ static i32 GizSpinner_Load(void *world_ptr, void *) {
         }
 
         spinner = &world->spinners[index];
-        if (version > 6) {
+        if (version <= 6) {
+            initial_animation_point = animation_speed;
+            if (spinner->anim_set != NULL && spinner->primary_anim_obj != NULL) {
+                const f32 start_frame = spinner->primary_anim_obj->start_frame;
+                const f32 duration = spinner->primary_anim_obj->end_frame - start_frame;
+                if (__builtin_expect(output_points > 0, 1)) {
+                    {
+                        const f32 interval = duration / static_cast<f32>(output_points - 1);
+                        for (i32 point = 0; point < output_points; ++point) {
+                            spinner->animation_points[point + 1] =
+                                static_cast<f32>(static_cast<i32>(static_cast<f32>(point) * interval)) + start_frame;
+                        }
+                    }
+                }
+                if (output_points <= 7) {
+                    for (i32 point = output_points + 1; point < 9; ++point) {
+                        spinner->animation_points[point] = -1.0f;
+                    }
+                }
+            }
+        } else {
             if (output_points > 0) {
                 for (i32 point = 1; point <= output_points; ++point) {
                     world->spinners[index].animation_points[point] = EdFileReadFloat();
@@ -641,26 +661,6 @@ static i32 GizSpinner_Load(void *world_ptr, void *) {
                 } else {
                     initial_animation_point = EdFileReadFloat();
                     spinner = &world->spinners[index];
-                }
-            }
-        } else {
-            initial_animation_point = animation_speed;
-            if (spinner->anim_set != NULL && spinner->primary_anim_obj != NULL) {
-                const f32 start_frame = spinner->primary_anim_obj->start_frame;
-                const f32 duration = spinner->primary_anim_obj->end_frame - start_frame;
-                if (__builtin_expect(output_points > 0, 1)) {
-                    {
-                        const f32 interval = duration / static_cast<f32>(output_points - 1);
-                        for (i32 point = 0; point < output_points; ++point) {
-                            spinner->animation_points[point + 1] =
-                                static_cast<f32>(static_cast<i32>(static_cast<f32>(point) * interval)) + start_frame;
-                        }
-                    }
-                }
-                if (output_points <= 7) {
-                    for (i32 point = output_points + 1; point < 9; ++point) {
-                        spinner->animation_points[point] = -1.0f;
-                    }
                 }
             }
         }
@@ -795,7 +795,7 @@ int GizSpinner_Update(GIZSPINNER_s *spinner) {
         GameAnimSet_Stop(spinner->anim_set);
     }
 
-    if ((spinner->state_flags & SPINNER_STATE_NO_CHARACTER_DEFLECTION) == 0) {
+    if (__builtin_expect((spinner->state_flags & SPINNER_STATE_NO_CHARACTER_DEFLECTION) == 0, 1)) {
         const f32 collision_x = spinner->position.x;
         const f32 collision_radius = spinner->field_0x09c;
         const f32 collision_z = spinner->position.z;
@@ -1068,7 +1068,7 @@ void GizSpinners_Update(void *world_ptr, void *, float) {
             const f32 rotation =
                 (((duration * 30.0f) / length) * (length / 100.0f)) * (target * 100.0f) * 65536.0f / 360.0f;
             spinner->rotation = static_cast<u16>(static_cast<i32>(direction * rotation) + spinner->initial_rotation);
-        } else if (target < spinner->field_70) {
+        } else if (__builtin_expect(target < spinner->field_70, 0)) {
             GameAnimSet_Play(spinner->anim_set, -0.25f, 1);
             spinner->rotation =
                 static_cast<u16>(spinner->rotation - static_cast<i32>(direction * (step * difference * 5461.0f)));
@@ -1433,10 +1433,10 @@ GIZSPINNER_s *GizSpinner_FindNearest(nuvec_s *position, WORLDINFO_s *world, f32 
             NUVEC spinner_position;
             GizSpinner_GetSpinnerPos(spinner, &spinner_position);
             f32 distance = NuVecDistSqr(position, &spinner_position, NULL);
-            if (distance < nearest_distance) {
-                nearest_distance = distance;
-                nearest = spinner;
-            }
+            if (distance >= nearest_distance)
+                continue;
+            nearest_distance = distance;
+            nearest = spinner;
         }
         if (distance_out != NULL) {
             *distance_out = nearest_distance;

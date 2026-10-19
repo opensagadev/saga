@@ -1982,8 +1982,9 @@ void CutScenes_Draw(WORLDINFO_s *world) {
         if (CUTDRAWWORLD != 0 && world->current_gscn != NULL) {
             SetLevelLights(world->rtl_set, 1.0f);
             NuGScnRndr3(world->current_gscn);
-            if (world->gizmo_sys != NULL && CutStopInfo != NULL &&
-                (static_cast<CUTINFO *>(CutStopInfo)->flags & 0x8000) != 0) {
+            if (__builtin_expect(world->gizmo_sys != NULL && CutStopInfo != NULL &&
+                                     (static_cast<CUTINFO *>(CutStopInfo)->flags & 0x8000) != 0,
+                                 0)) {
                 GizmoSysDraw(world->gizmo_sys, world, FRAMETIME);
             }
         }
@@ -2068,7 +2069,7 @@ void CutScenePlayer_Configure(char *file, VARIPTR *buffer, VARIPTR *, i16 *clip_
                 } else if (NuStrICmp(fp->word_buf, "name") == 0) {
                     if (NuFParGetWord(fp) && NuStrLen(fp->word_buf) <= 63)
                         NuStrCpy(clip->name, fp->word_buf);
-                } else if (NuStrICmp(fp->word_buf, "intro") == 0)
+                } else if (__builtin_expect(NuStrICmp(fp->word_buf, "intro") == 0, 1))
                     clip->type = CLIP_INTRO;
                 else if (NuStrICmp(fp->word_buf, "midtro") == 0)
                     clip->type = CLIP_MIDTRO;
@@ -2641,7 +2642,7 @@ void CutScenes_Reset(WORLDINFO_s *world) {
             if (cut == NULL)
                 cut = world->cutscene_sys->cuts[0];
         }
-        if (cut == NULL && cutskip_dontplaylevelintro == 0) {
+        if (__builtin_expect(cut == NULL && cutskip_dontplaylevelintro == 0, 1)) {
             for (i32 i = 0; i < world->cutscene_sys->count; ++i) {
                 if ((world->cutscene_sys->cuts[i]->flags & 0x1000) == 0) {
                     continue;

@@ -416,9 +416,7 @@ void Attracto_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
         AddGameMessage("[  ]", &object->external_force, 1.0f, NULL, 0.0f, red, green, blue, 0x1080, 0.0f);
         return;
     }
-    if (!available || object->apiobj.field_0x27d == 0 || !ObjLandReady(object))
-        return;
-    {
+    if (available && object->apiobj.field_0x27d != 0 && ObjLandReady(object)) {
         f32 radius = object->apiobj.field_0x1dc + 0.25f;
         f32 distance;
         ATTRACTO_s *attracto = Attracto_FindNearest(world, &object->apiobj.lower_position, object, &distance);
@@ -431,10 +429,12 @@ void Attracto_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
             object->apiobj.movement_facing_angle = attracto->angle;
             return;
         }
-    }
-    if (object->apiobj.model_draw_result == 0 || !(object->camera_screen_position.z > 0.0f) ||
-        (object->pad_gamepad->buttons_held & GAMEPAD_SPECIAL) == 0)
+        if (object->apiobj.model_draw_result == 0 || !(object->camera_screen_position.z > 0.0f) ||
+            (object->pad_gamepad->buttons_held & GAMEPAD_SPECIAL) == 0)
+            return;
+    } else {
         return;
+    }
 begin_suction:
     object->character_context = 0x52;
     object->context_animation = 0x9a;

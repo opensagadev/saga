@@ -776,7 +776,7 @@ static void Hub_DrawBonusModeMenu(int selected, float alpha) {
                     NuStrCat(text[0], TTab[area->name_id]);
                 else
                     NuStrCat(text[0], "?");
-            } else if (i == 1) {
+            } else if (__builtin_expect(i == 1, 1)) {
                 if (text[0][0])
                     NuStrCat(text[0], ": ");
                 char *mode_text = TTab[*Arcade_Mode[static_cast<i8>(ArcadeItem.field_c_0xc)].text];
@@ -3454,7 +3454,7 @@ static void DrawEpisodesMenu(i32 selected, f32 alpha) {
             for (i32 column = 0; column < 3; ++column, x += dx) {
                 const i32 episode = row * 3 + column;
                 u32 red, green, blue;
-                if (selected && episode == i_episodes && TestForController()) {
+                if (__builtin_expect(selected && episode == i_episodes && TestForController(), 0)) {
                     if (menu_pulsate > 0.0f) {
                         red = static_cast<i32>(static_cast<u32>(MENUFLASH0R) * menu_pulsate +
                                                static_cast<u32>(MENUFLASH1R) * (1.0f - menu_pulsate));
@@ -4187,7 +4187,7 @@ void Hub_Update(WORLDINFO_s *world) {
             i32 loaded = 0;
             for (i32 pack = 0; pack < 11; ++pack) {
                 STOREPACK &store_pack = StorePack[pack];
-                if (Store_IsPackUnlocked(pack) != 0 || store_pack.id == NULL) {
+                if (__builtin_expect(Store_IsPackUnlocked(pack) != 0 || store_pack.id == NULL, 0)) {
                     continue;
                 }
                 const i32 id = *store_pack.id;
@@ -4265,7 +4265,7 @@ void Hub_Update(WORLDINFO_s *world) {
         hub_jabbaawake = 1.0f;
     } else if (!(hub_jabbaawake <= 0.0f)) {
         hub_jabbaawake -= FRAMETIME * 0.333f;
-        if (__builtin_expect(hub_jabbaawake < 0.0f, 0)) {
+        if (hub_jabbaawake < 0.0f) {
             hub_jabbaawake = 0.0f;
         }
     }
@@ -4576,7 +4576,11 @@ void Hub_Update(WORLDINFO_s *world) {
     } else if (LevTime[4] > 0.0f) {
         LevTime[4] -= FRAMETIME;
     }
-    if (FadeSys.fade == 0.0f) {
+    if (FadeSys.fade != 0.0f) {
+        hub_minikitarea = -1;
+        hub_minikitarea_time = 0.0f;
+        hub_minikitarea_opentime = 0.0f;
+    } else {
         if (LevLock[4] == 0) {
             i32 selected_minikit = -1;
             if (__builtin_expect(!(hub_episode != -1 && hub_episode_time > 0.0f) &&
@@ -4614,10 +4618,6 @@ void Hub_Update(WORLDINFO_s *world) {
                 PlaySfxAndSetPitch(const_cast<char *>("JForcePush"), NULL, 1.5f);
             }
         }
-    } else {
-        hub_minikitarea = -1;
-        hub_minikitarea_time = 0.0f;
-        hub_minikitarea_opentime = 0.0f;
     }
     Hub_UpdateMiniKits(world);
 

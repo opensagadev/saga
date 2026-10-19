@@ -1772,30 +1772,30 @@ void NuSound3PauseStereoStream(i32 stream_index) {
 }
 
 i32 NuMusic::PauseTrack(u32 clazz) {
-    if (this == NULL || the_music_player == NULL || this->album == NULL) {
-        return 0;
-    }
-
-    Track *tracks[6];
-    if (this->album->GetTracks(clazz, tracks) == 0) {
-        return 0;
-    }
-
-    i32 result = 0;
-    for (i32 i = 0; i < 6; i++) {
-        Track *track = tracks[i];
-        if (track == NULL) {
-            continue;
+    if (this != NULL && the_music_player != NULL && this->album != NULL) {
+        Track *tracks[6];
+        if (this->album->GetTracks(clazz, tracks) == 0) {
+            return 0;
         }
-        Voice *voice = FindVoiceByTrack(track);
-        if (voice != NULL && static_cast<u32>(voice->status - VOICE_STATUS_PLAYING) <= 1 && (voice->flags & 2) == 0) {
-            NuSound3PauseStereoStream(voice->stream_index);
-            voice->flags |= 2u;
-            result = 1;
-        }
-    }
 
-    return result;
+        i32 result = 0;
+        for (i32 i = 0; i < 6; i++) {
+            Track *track = tracks[i];
+            if (track == NULL) {
+                continue;
+            }
+            Voice *voice = FindVoiceByTrack(track);
+            if (voice != NULL && static_cast<u32>(voice->status - VOICE_STATUS_PLAYING) <= 1 &&
+                (voice->flags & 2) == 0) {
+                NuSound3PauseStereoStream(voice->stream_index);
+                voice->flags |= 2u;
+                result = 1;
+            }
+        }
+
+        return result;
+    }
+    return 0;
 }
 
 void NuSound3ResumeStereoStream(i32 stream_index) {
@@ -1806,30 +1806,30 @@ void NuSound3ResumeStereoStream(i32 stream_index) {
 }
 
 i32 NuMusic::ResumeTrack(u32 clazz) {
-    if (this == NULL || the_music_player == NULL || this->album == NULL) {
-        return 0;
-    }
-
-    Track *tracks[6];
-    if (this->album->GetTracks(clazz, tracks) == 0) {
-        return 0;
-    }
-
-    i32 result = 0;
-    for (i32 i = 0; i < 6; i++) {
-        Track *track = tracks[i];
-        if (track == NULL) {
-            continue;
+    if (this != NULL && the_music_player != NULL && this->album != NULL) {
+        Track *tracks[6];
+        if (this->album->GetTracks(clazz, tracks) == 0) {
+            return 0;
         }
-        Voice *voice = FindVoiceByTrack(track);
-        if (voice != NULL && static_cast<u32>(voice->status - VOICE_STATUS_PLAYING) <= 1 && (voice->flags & 2) != 0) {
-            NuSound3ResumeStereoStream(voice->stream_index);
-            voice->flags &= ~2u;
-            result = 1;
-        }
-    }
 
-    return result;
+        i32 result = 0;
+        for (i32 i = 0; i < 6; i++) {
+            Track *track = tracks[i];
+            if (track == NULL) {
+                continue;
+            }
+            Voice *voice = FindVoiceByTrack(track);
+            if (voice != NULL && static_cast<u32>(voice->status - VOICE_STATUS_PLAYING) <= 1 &&
+                (voice->flags & 2) != 0) {
+                NuSound3ResumeStereoStream(voice->stream_index);
+                voice->flags &= ~2u;
+                result = 1;
+            }
+        }
+
+        return result;
+    }
+    return 0;
 }
 
 // Volume arrives as the PS2-style 0..16383 fixed point computed by
@@ -2458,12 +2458,12 @@ i32 NuMusic::StopTrack(u32 clazz, i32 fade) {
             voice->SetStatusFn(VOICE_STATUS_NONE, 0x46a);
             result = 1;
         } else if (__builtin_expect(static_cast<u32>(voice->status - VOICE_STATUS_PLAYING) <= 1, 1)) {
-            if (fade & 1) {
-                voice->fade_rate = 2.0f;
-                voice->flags |= 1u;
-            } else {
+            if (!(fade & 1)) {
                 NuSound3StopStereoStream(voice->stream_index);
                 voice->SetStatusFn(VOICE_STATUS_NONE, 0x464);
+            } else {
+                voice->fade_rate = 2.0f;
+                voice->flags |= 1u;
             }
             result = 1;
         }

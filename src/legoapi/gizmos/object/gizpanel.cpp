@@ -1000,7 +1000,7 @@ i32 GizPanel_UpdateHint(HINT_s *hint) {
     i32 droid_type = -1;
     bool bountyhunter = false;
     for (i32 index = 0; index < 8; ++index) {
-        if (Player[index] == NULL)
+        if (__builtin_expect(Player[index] == NULL, 0))
             continue;
         f32 distance;
         GIZPANEL_s *panel = GizPanel_FindNearest(WORLD, &Player[index]->apiobj.position, Player[index], &distance, 0);

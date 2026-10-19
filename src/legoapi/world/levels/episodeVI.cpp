@@ -329,7 +329,7 @@ void DeathStar2BattleD_Update(WORLDINFO_s *) {
             continue;
         }
         GIZMOBLOWUP_s *blowup = DeathStar2BattleD_InZapRange(*player);
-        if (blowup == NULL) {
+        if (__builtin_expect(blowup == NULL, 0)) {
             continue;
         }
 
@@ -1164,7 +1164,7 @@ void JabbasPalaceE_Update(WORLDINFO_s *world) {
     }
     blowup = LevGizmo[1] != NULL ? static_cast<GIZMOBLOWUP_s *>(LevGizmo[1]->object) : NULL;
     if (blowup != NULL && (blowup->status_flags & 1) != 0) {
-        if (LevFlag[7] == 0) {
+        if (__builtin_expect(LevFlag[7] == 0, 0)) {
             PlaySfx("exp_minecart", &blowup->position);
             LevFlag[7] = 1;
         }
@@ -1947,7 +1947,7 @@ void NewTown_Reset(WORLDINFO_s *world) {
 }
 
 void NewTown_Update(WORLDINFO_s *world) {
-    if (world == NULL || world->pickup_sys == NULL) {
+    if (__builtin_expect(world == NULL || world->pickup_sys == NULL, 0)) {
         return;
     }
     u8 onTaunTaun = 0;

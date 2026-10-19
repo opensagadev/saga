@@ -1458,12 +1458,12 @@ void UpdatePushBlocks(void *world_ptr, void *, float) {
                 if (!(p->runtime_flags_0c8 & 0x40))
                     p->target_velocity.z = p->target_velocity.x = 0;
                 f32 x = p->pushing_object->target_velocity.x, z = p->pushing_object->target_velocity.z;
-                if (!(fabsf(x) > fabsf(z))) {
-                    p->velocity.x = p->target_velocity.x = 0;
-                    p->target_velocity.z = z * FRAMETIME;
-                } else {
+                if (fabsf(x) > fabsf(z)) {
                     p->velocity.z = p->target_velocity.z = 0;
                     p->target_velocity.x = x * FRAMETIME;
+                } else {
+                    p->velocity.x = p->target_velocity.x = 0;
+                    p->target_velocity.z = z * FRAMETIME;
                 }
             } else if (same) {
                 p->target_velocity.x *= TerSurface[surface].movement_scale;
@@ -1667,9 +1667,10 @@ i32 Push_UpdateHints(HINT_s *) {
         return 0;
     for (i32 i = 0; i < 8; ++i) {
         GameObject_s *object = Player[i];
-        if (object != NULL && object->apiobj.player_controlled &&
-            object->apiobj.character_model->model_data_b[LEGOACT_PUSH] != NULL &&
-            NearestPushBlock(WORLD, &object->apiobj.collision_position, 2.0f) != NULL)
+        if (__builtin_expect(object != NULL && object->apiobj.player_controlled &&
+                                 object->apiobj.character_model->model_data_b[LEGOACT_PUSH] != NULL &&
+                                 NearestPushBlock(WORLD, &object->apiobj.collision_position, 2.0f) != NULL,
+                             1))
             return 1;
     }
     return 0;

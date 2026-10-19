@@ -504,354 +504,356 @@ void InitStatusScreen(WORLDINFO_s *world) {
         if (__builtin_expect((p.area->flags & 0x100) != 0, 0))
             p.super_bonus_mode = 1;
     }
-    if (p.init_callback(world, &p) != 0) {
-        return;
-    }
-    if (p.super_story_mode) {
-        if (NewLData == STATUS_LDATA || WORLD->current_level == STATUS_LDATA) {
-            const u32 previous_score = Game.episode_save[episode].superstory_score_target;
-            p.previous_best_score = previous_score;
-            p.previous_best_time = Game.episode_save[episode].superstory_time_limit;
-            p.superstory_time = SuperStoryTimer.time_elapsed;
-            p.superstory_score = SuperStoryScore;
-            i32 gold = 0;
-            if (episode == -1) {
-                p.new_best_score = 0;
-                p.new_best_time = 0.0f;
-                p.time_reward_score = *p.score;
-            } else {
-                f32 new_time = p.superstory_time;
-                if (new_time < p.previous_best_time)
-                    Game.episode_save[episode].superstory_time_limit = new_time;
-                else
-                    new_time = 0.0f;
-                p.new_best_time = new_time;
-                u32 new_score = p.superstory_score;
-                if (new_score > previous_score)
-                    Game.episode_save[episode].superstory_score_target = new_score;
-                else
-                    new_score = 0;
-                p.new_best_score = new_score;
-                if (__builtin_expect(Game.episode_save[episode].superstory_complete == 0, 1)) {
-                    Game.episode_save[episode].superstory_complete = 1;
-                    AddToCompletionPoints(POINTS_PER_SUPERSTORY);
-                    if (GOLDBRICKFORSUPERSTORY != 0)
-                        gold = AddGoldBrickMessage(&p, tSUPERSTORYCOMPLETE);
+    if (p.init_callback(world, &p) == 0) {
+        if (p.super_story_mode) {
+            if (NewLData == STATUS_LDATA || WORLD->current_level == STATUS_LDATA) {
+                const u32 previous_score = Game.episode_save[episode].superstory_score_target;
+                p.previous_best_score = previous_score;
+                p.previous_best_time = Game.episode_save[episode].superstory_time_limit;
+                p.superstory_time = SuperStoryTimer.time_elapsed;
+                p.superstory_score = SuperStoryScore;
+                i32 gold = 0;
+                if (episode == -1) {
+                    p.new_best_score = 0;
+                    p.new_best_time = 0.0f;
+                    p.time_reward_score = *p.score;
+                } else {
+                    f32 new_time = p.superstory_time;
+                    if (new_time < p.previous_best_time)
+                        Game.episode_save[episode].superstory_time_limit = new_time;
+                    else
+                        new_time = 0.0f;
+                    p.new_best_time = new_time;
+                    u32 new_score = p.superstory_score;
+                    if (new_score > previous_score)
+                        Game.episode_save[episode].superstory_score_target = new_score;
+                    else
+                        new_score = 0;
+                    p.new_best_score = new_score;
+                    if (__builtin_expect(Game.episode_save[episode].superstory_complete == 0, 1)) {
+                        Game.episode_save[episode].superstory_complete = 1;
+                        AddToCompletionPoints(POINTS_PER_SUPERSTORY);
+                        if (GOLDBRICKFORSUPERSTORY != 0)
+                            gold = AddGoldBrickMessage(&p, tSUPERSTORYCOMPLETE);
+                    }
+                    p.time_reward_score = *p.score;
+                    if (p.new_best_time != 0.0f) {
+                        u64 reward = static_cast<i64>(static_cast<i32>(p.previous_best_time - p.new_best_time) * 100);
+                        if (reward < 100)
+                            reward = 100;
+                        IncreaseScore(&p.time_reward_score, reward, 0);
+                    }
                 }
-                p.time_reward_score = *p.score;
-                if (p.new_best_time != 0.0f) {
-                    u64 reward = static_cast<i64>(static_cast<i32>(p.previous_best_time - p.new_best_time) * 100);
-                    if (reward < 100)
-                        reward = 100;
-                    IncreaseScore(&p.time_reward_score, reward, 0);
+                p.final_reward_score = p.time_reward_score;
+                IncreaseScore(&p.final_reward_score, static_cast<u64>(p.superstory_score), 0);
+                AddStatusStage(&p, 14, gold);
+                AddStatusStage(&p, 15, 0);
+                AddStatusStage(&p, 16, 0);
+                if (Game.field_0x7c26[0] > p.previous_gold_bricks)
+                    AddStatusStage(&p, 19, 0);
+                if (netclient == 0 && (p.new_best_time != 0.0f || p.new_best_score != 0 || p.superstory_score != 0)) {
+                    AddStatusStage(&p, 11, 0);
                 }
+                hub_from_superstory = static_cast<i8>(p.area->episode_index);
             }
-            p.final_reward_score = p.time_reward_score;
-            IncreaseScore(&p.final_reward_score, static_cast<u64>(p.superstory_score), 0);
-            AddStatusStage(&p, 14, gold);
-            AddStatusStage(&p, 15, 0);
-            AddStatusStage(&p, 16, 0);
+            AddStatusStage(&p, 10, 0);
+            p.current_gold_brick = -1;
+            p.stage_types[p.stage_count] = -1;
+            p.next_stage = FindStatusStage(p.stage_types[0]);
+            NextStatusStage(&p);
+            if (episode != -1 && p.chapter < EDataList[episode].regular_areas) {
+                p.next_area = EDataList[episode].area_ids[p.chapter + 1];
+                if (p.next_area != -1 && (ADataList[p.next_area].flags & 2) != 0)
+                    hub_from_superstory = episode;
+            }
+            return;
+        }
+        if ((p.mode_flags & 1) != 0 && area != -1) {
+            p.field_0xb0 = (p.field_0xb0 & 0xdf) | ((BonusWinner & 1) << 5);
+            p.elapsed_time = BonusTimer.time_elapsed;
+            p.previous_best_time = Game.area_save[area].challenge_trial_time;
+            i32 gold = 0;
+            if (!(p.previous_best_time > 0.0f) || p.elapsed_time < p.previous_best_time) {
+                if (WORLD->area->challenge_trial_time != 0 &&
+                    WORLD->area->challenge_trial_time <= p.previous_best_time) {
+                    AddToCompletionPoints(POINTS_PER_TIMETRIAL);
+                    gold = AddGoldBrickMessage(&p, tNEWBESTTIME);
+                }
+                p.new_best_time = p.elapsed_time;
+                Game.area_save[area].challenge_trial_time = p.elapsed_time;
+            }
+            if ((p.mode_flags & 2) == 0) {
+                AddStatusStage(&p, 20, 0);
+                if (p.elapsed_time < p.previous_best_time)
+                    AddStatusStage(&p, 3, 0);
+            } else {
+                if (Game.area_save[p.area_id].area_complete == 0) {
+                    Game.area_save[p.area_id].area_complete = 1;
+                    AddToCompletionPoints(POINTS_PER_SUPERBONUSCOMPLETE);
+                    p.newly_completed = 1;
+                    if (GOLDBRICKFORSUPERBONUS != 0)
+                        gold = AddGoldBrickMessage(&p, tLEVELCOMPLETE);
+                }
+                AddStatusStage(&p, 22, gold);
+                gold = 0;
+            }
+            AddStatusStage(&p, 21, gold);
             if (Game.field_0x7c26[0] > p.previous_gold_bricks)
                 AddStatusStage(&p, 19, 0);
-            if (netclient == 0 && (p.new_best_time != 0.0f || p.new_best_score != 0 || p.superstory_score != 0)) {
+            AddStatusStage(&p, 9, 0);
+            AddStatusStage(&p, 10, 0);
+            if (netclient == 0)
                 AddStatusStage(&p, 11, 0);
-            }
-            hub_from_superstory = static_cast<i8>(p.area->episode_index);
+            AddStatusStage(&p, 12, 0);
+            p.current_gold_brick = -1;
+            p.stage_types[p.stage_count] = -1;
+            p.next_stage = FindStatusStage(p.stage_types[0]);
+            NextStatusStage(&p);
+            draw_player_icons = 1;
+            return;
         }
-        AddStatusStage(&p, 10, 0);
-        p.current_gold_brick = -1;
-        p.stage_types[p.stage_count] = -1;
-        p.next_stage = FindStatusStage(p.stage_types[0]);
-        NextStatusStage(&p);
-        if (episode != -1 && p.chapter < EDataList[episode].regular_areas) {
-            p.next_area = EDataList[episode].area_ids[p.chapter + 1];
-            if (p.next_area != -1 && (ADataList[p.next_area].flags & 2) != 0)
-                hub_from_superstory = episode;
-        }
-        return;
-    }
-    if ((p.mode_flags & 1) != 0 && area != -1) {
-        p.field_0xb0 = (p.field_0xb0 & 0xdf) | ((BonusWinner & 1) << 5);
-        p.elapsed_time = BonusTimer.time_elapsed;
-        p.previous_best_time = Game.area_save[area].challenge_trial_time;
-        i32 gold = 0;
-        if (!(p.previous_best_time > 0.0f) || p.elapsed_time < p.previous_best_time) {
-            if (WORLD->area->challenge_trial_time != 0 && WORLD->area->challenge_trial_time <= p.previous_best_time) {
-                AddToCompletionPoints(POINTS_PER_TIMETRIAL);
-                gold = AddGoldBrickMessage(&p, tNEWBESTTIME);
-            }
-            p.new_best_time = p.elapsed_time;
-            Game.area_save[area].challenge_trial_time = p.elapsed_time;
-        }
-        if ((p.mode_flags & 2) == 0) {
-            AddStatusStage(&p, 20, 0);
-            if (p.elapsed_time < p.previous_best_time)
-                AddStatusStage(&p, 3, 0);
-        } else {
-            if (Game.area_save[p.area_id].area_complete == 0) {
-                Game.area_save[p.area_id].area_complete = 1;
-                AddToCompletionPoints(POINTS_PER_SUPERBONUSCOMPLETE);
-                p.newly_completed = 1;
-                if (GOLDBRICKFORSUPERBONUS != 0)
-                    gold = AddGoldBrickMessage(&p, tLEVELCOMPLETE);
-            }
-            AddStatusStage(&p, 22, gold);
-            gold = 0;
-        }
-        AddStatusStage(&p, 21, gold);
-        if (Game.field_0x7c26[0] > p.previous_gold_bricks)
-            AddStatusStage(&p, 19, 0);
-        AddStatusStage(&p, 9, 0);
-        AddStatusStage(&p, 10, 0);
-        if (netclient == 0)
-            AddStatusStage(&p, 11, 0);
-        AddStatusStage(&p, 12, 0);
-        p.current_gold_brick = -1;
-        p.stage_types[p.stage_count] = -1;
-        p.next_stage = FindStatusStage(p.stage_types[0]);
-        NextStatusStage(&p);
-        draw_player_icons = 1;
-        return;
-    }
-    if (p.mission_state != 0) {
-        p.elapsed_time = MissionSys->timer.time_elapsed;
-        p.newly_completed = 0;
-        p.original_score = *p.score;
-        p.reward_score = p.original_score;
-        i32 gold = 0;
-        if (p.mission_state == 2) {
-            const i32 mission = static_cast<i8>(MissionSys->mission->count);
-            if (Game_MissionSave == NULL || reinterpret_cast<u8 *>(Game_MissionSave)[0x50 + mission] == 0) {
-                if (Game_MissionSave != NULL)
-                    reinterpret_cast<u8 *>(Game_MissionSave)[0x50 + mission] = 1;
-                AddToCompletionPoints(POINTS_PER_MISSION);
-                gold = AddGoldBrickMessage(&p, tMISSIONCOMPLETE);
-                sprintf(event, "bounty_mission_%i_complete", static_cast<i8>(MissionSys->mission->count) + 1);
-                NuIOS_RecordFlurryEvent(event);
-            }
-            u64 reward = static_cast<i64>(static_cast<i32>(static_cast<u16>(p.mission->time) - p.elapsed_time) * 150);
-            if (reward < 150)
-                reward = 150;
-            IncreaseScore(&p.reward_score, reward, 0);
-            if (Game_MissionSave != NULL) {
-                f32 &best = reinterpret_cast<f32 *>(Game_MissionSave)[static_cast<i8>(MissionSys->mission->count)];
-                if (best == 0.0f || p.elapsed_time < best)
-                    best = p.elapsed_time;
-            }
-        }
-        AddStatusStage(&p, 26, gold);
-        if (Game.field_0x7c26[0] > p.previous_gold_bricks)
-            AddStatusStage(&p, 19, 0);
-        AddStatusStage(&p, 9, 0);
-        AddStatusStage(&p, 10, 0);
-        goto challenge_finish;
-    }
-    if (p.challenge_state != 0) {
-        p.elapsed_time = ChallengeTimer.time_elapsed;
-        p.original_score = *p.score;
-        p.reward_score = p.original_score;
-        if (p.challenge_state == 2) {
+        if (p.mission_state != 0) {
+            p.elapsed_time = MissionSys->timer.time_elapsed;
+            p.newly_completed = 0;
+            p.original_score = *p.score;
+            p.reward_score = p.original_score;
             i32 gold = 0;
-            if (Game.area_save[p.area_id].field_0x5[2] == 0) {
-                AddToCompletionPoints(POINTS_PER_CHALLENGE);
-                if (__builtin_expect(GOLDBRICKFORCHALLENGE != 0, 1))
-                    gold = AddGoldBrickMessage(&p, tCHALLENGECOMPLETE);
-                Game.area_save[p.area_id].field_0x5[2] = 1;
-                if (p.episode_id != -1 && p.chapter != -1) {
-                    sprintf(event, "challenge_ep%i_ch%i_complete", p.episode_id + 1, p.chapter + 1);
+            if (p.mission_state == 2) {
+                const i32 mission = static_cast<i8>(MissionSys->mission->count);
+                if (Game_MissionSave == NULL || reinterpret_cast<u8 *>(Game_MissionSave)[0x50 + mission] == 0) {
+                    if (Game_MissionSave != NULL)
+                        reinterpret_cast<u8 *>(Game_MissionSave)[0x50 + mission] = 1;
+                    AddToCompletionPoints(POINTS_PER_MISSION);
+                    gold = AddGoldBrickMessage(&p, tMISSIONCOMPLETE);
+                    sprintf(event, "bounty_mission_%i_complete", static_cast<i8>(MissionSys->mission->count) + 1);
                     NuIOS_RecordFlurryEvent(event);
                 }
+                u64 reward =
+                    static_cast<i64>(static_cast<i32>(static_cast<u16>(p.mission->time) - p.elapsed_time) * 150);
+                if (reward < 150)
+                    reward = 150;
+                IncreaseScore(&p.reward_score, reward, 0);
+                if (Game_MissionSave != NULL) {
+                    f32 &best = reinterpret_cast<f32 *>(Game_MissionSave)[static_cast<i8>(MissionSys->mission->count)];
+                    if (best == 0.0f || p.elapsed_time < best)
+                        best = p.elapsed_time;
+                }
             }
-            u64 reward =
-                static_cast<i64>(static_cast<i32>(ADataList[p.area_id].challenge_trial_time - p.elapsed_time) * 500);
-            if (reward < 500)
-                reward = 500;
-            IncreaseScore(&p.reward_score, reward, 0);
-            AddStatusStage(&p, 23, 0);
-            if (p.challenge_state == 2 && gold != 0)
-                AddStatusStage(&p, 25, 0);
-        } else
-            AddStatusStage(&p, 23, 0);
-        if (Game.field_0x7c26[0] > p.previous_gold_bricks)
-            AddStatusStage(&p, 19, 0);
-        AddStatusStage(&p, 9, 0);
-        AddStatusStage(&p, 10, 0);
-    challenge_finish:
-        if (netclient == 0)
-            AddStatusStage(&p, 11, 0);
-        AddStatusStage(&p, 12, 0);
-        p.current_gold_brick = -1;
-        p.stage_types[p.stage_count] = -1;
-        p.next_stage = FindStatusStage(p.stage_types[0]);
-        NextStatusStage(&p);
-        draw_player_icons = 1;
-        cointotal_i_obj[0] = cointotal_i_obj[1] = 0xc3;
-        return;
-    }
-    if (area != -1) {
-        if (BuildUpDone != 0)
-            p.field_0xb0 |= 4;
-        p.minikit_count = Game.area_save[area].field_0x5[0] + AreaGlobals.values.field_0x10;
-        p.minikit_max = (p.area->flags & 0x10) != 0 ? 10 : 0;
-        if (p.minikit_count > p.minikit_max)
-            p.minikit_count = p.minikit_max;
-        p.true_hero_target = static_cast<u32>(p.area->true_hero_targets[p.free_play]);
-    }
-    p.area_time = AreaTimer.time_elapsed;
-    const u64 total = static_cast<u64>(p.coins_remaining[0]) + p.coins_remaining[1];
-    if (total >= 4000000000ULL)
-        p.collected_score = 4000000000.0f;
-    else
-        p.collected_score = static_cast<f32>(p.coins_remaining[0] + p.coins_remaining[1]);
-    p.newly_completed = 0;
-    if ((p.field_0xb0 & 4) != 0) {
-        p.true_hero_percent = 100.0f;
-    } else {
-        f32 numerator = p.collected_score * 100.0f;
-        if (numerator != 0.0f && p.true_hero_target != 0.0f) {
-            f32 percent = numerator / p.true_hero_target;
-            p.true_hero_percent = MIN(percent, 99.0f);
+            AddStatusStage(&p, 26, gold);
+            if (Game.field_0x7c26[0] > p.previous_gold_bricks)
+                AddStatusStage(&p, 19, 0);
+            AddStatusStage(&p, 9, 0);
+            AddStatusStage(&p, 10, 0);
+            goto challenge_finish;
+        }
+        if (p.challenge_state != 0) {
+            p.elapsed_time = ChallengeTimer.time_elapsed;
+            p.original_score = *p.score;
+            p.reward_score = p.original_score;
+            if (p.challenge_state == 2) {
+                i32 gold = 0;
+                if (Game.area_save[p.area_id].field_0x5[2] == 0) {
+                    AddToCompletionPoints(POINTS_PER_CHALLENGE);
+                    if (__builtin_expect(GOLDBRICKFORCHALLENGE != 0, 1))
+                        gold = AddGoldBrickMessage(&p, tCHALLENGECOMPLETE);
+                    Game.area_save[p.area_id].field_0x5[2] = 1;
+                    if (p.episode_id != -1 && p.chapter != -1) {
+                        sprintf(event, "challenge_ep%i_ch%i_complete", p.episode_id + 1, p.chapter + 1);
+                        NuIOS_RecordFlurryEvent(event);
+                    }
+                }
+                u64 reward = static_cast<i64>(
+                    static_cast<i32>(ADataList[p.area_id].challenge_trial_time - p.elapsed_time) * 500);
+                if (reward < 500)
+                    reward = 500;
+                IncreaseScore(&p.reward_score, reward, 0);
+                AddStatusStage(&p, 23, 0);
+                if (p.challenge_state == 2 && gold != 0)
+                    AddStatusStage(&p, 25, 0);
+            } else
+                AddStatusStage(&p, 23, 0);
+            if (Game.field_0x7c26[0] > p.previous_gold_bricks)
+                AddStatusStage(&p, 19, 0);
+            AddStatusStage(&p, 9, 0);
+            AddStatusStage(&p, 10, 0);
+        challenge_finish:
+            if (netclient == 0)
+                AddStatusStage(&p, 11, 0);
+            AddStatusStage(&p, 12, 0);
+            p.current_gold_brick = -1;
+            p.stage_types[p.stage_count] = -1;
+            p.next_stage = FindStatusStage(p.stage_types[0]);
+            NextStatusStage(&p);
+            draw_player_icons = 1;
+            cointotal_i_obj[0] = cointotal_i_obj[1] = 0xc3;
+            return;
+        }
+        if (area != -1) {
+            if (BuildUpDone != 0)
+                p.field_0xb0 |= 4;
+            p.minikit_count = Game.area_save[area].field_0x5[0] + AreaGlobals.values.field_0x10;
+            p.minikit_max = (p.area->flags & 0x10) != 0 ? 10 : 0;
+            if (p.minikit_count > p.minikit_max)
+                p.minikit_count = p.minikit_max;
+            p.true_hero_target = static_cast<u32>(p.area->true_hero_targets[p.free_play]);
+        }
+        p.area_time = AreaTimer.time_elapsed;
+        const u64 total = static_cast<u64>(p.coins_remaining[0]) + p.coins_remaining[1];
+        if (total >= 4000000000ULL)
+            p.collected_score = 4000000000.0f;
+        else
+            p.collected_score = static_cast<f32>(p.coins_remaining[0] + p.coins_remaining[1]);
+        p.newly_completed = 0;
+        if ((p.field_0xb0 & 4) != 0) {
+            p.true_hero_percent = 100.0f;
         } else {
-            p.true_hero_percent = 0.0f;
-        }
-    }
-    p.coins_collected[0] = p.coins_remaining[0];
-    p.coins_collected[1] = p.coins_remaining[1];
-    draw_player_icons = 0;
-    if (area != -1) {
-        if (!p.free_play && p.episode != NULL && p.chapter < p.episode->regular_areas) {
-            p.next_area = p.episode->area_ids[p.chapter + 1];
-            if (p.chapter < p.episode->regular_areas - 1)
-                p.field_0xb0 |= 8;
-        }
-        for (i32 i = 0; i < AreaGlobals.values.field_0x10; ++i) {
-            if (Game.area_save[area].field_0x5[0] < 10)
-                ++Game.area_save[area].field_0x5[0];
-            u8 *save = Game.level_save + NewMiniPiece[i].level * 0x54;
-            if (save[0x50] < 10) {
-                NuStrCpy(reinterpret_cast<char *>(save + save[0x50] * 8), NewMiniPiece[i].name);
-                ++save[0x50];
+            f32 numerator = p.collected_score * 100.0f;
+            if (numerator != 0.0f && p.true_hero_target != 0.0f) {
+                f32 percent = numerator / p.true_hero_target;
+                p.true_hero_percent = MIN(percent, 99.0f);
+            } else {
+                p.true_hero_percent = 0.0f;
             }
         }
-        i32 gold;
-        i32 completed_episode;
-        if (!p.free_play && Game.area_save[area].area_complete == 0 && (p.area->flags & 0x26) == 0) {
-            Game.area_save[area].area_complete = 1;
-            p.newly_completed = 1;
-            AddToCompletionPoints(POINTS_PER_STORY);
-            gold = 0;
-            if ((p.mode_flags & 1) == 0 && (p.area->flags & 0x800) == 0)
-                gold = AddGoldBrickMessage(&p, tLEVELCOMPLETE);
-            if (p.episode != NULL && Episode_IsComplete(p.episode, NULL) != 0)
-                completed_episode = static_cast<i8>(p.area->episode_index);
-            else
+        p.coins_collected[0] = p.coins_remaining[0];
+        p.coins_collected[1] = p.coins_remaining[1];
+        draw_player_icons = 0;
+        if (area != -1) {
+            if (!p.free_play && p.episode != NULL && p.chapter < p.episode->regular_areas) {
+                p.next_area = p.episode->area_ids[p.chapter + 1];
+                if (p.chapter < p.episode->regular_areas - 1)
+                    p.field_0xb0 |= 8;
+            }
+            for (i32 i = 0; i < AreaGlobals.values.field_0x10; ++i) {
+                if (Game.area_save[area].field_0x5[0] < 10)
+                    ++Game.area_save[area].field_0x5[0];
+                u8 *save = Game.level_save + NewMiniPiece[i].level * 0x54;
+                if (save[0x50] < 10) {
+                    NuStrCpy(reinterpret_cast<char *>(save + save[0x50] * 8), NewMiniPiece[i].name);
+                    ++save[0x50];
+                }
+            }
+            i32 gold;
+            i32 completed_episode;
+            if (!p.free_play && Game.area_save[area].area_complete == 0 && (p.area->flags & 0x26) == 0) {
+                Game.area_save[area].area_complete = 1;
+                p.newly_completed = 1;
+                AddToCompletionPoints(POINTS_PER_STORY);
+                gold = 0;
+                if ((p.mode_flags & 1) == 0 && (p.area->flags & 0x800) == 0)
+                    gold = AddGoldBrickMessage(&p, tLEVELCOMPLETE);
+                if (p.episode != NULL && Episode_IsComplete(p.episode, NULL) != 0)
+                    completed_episode = static_cast<i8>(p.area->episode_index);
+                else
+                    completed_episode = 0;
+                if (p.episode_id != -1 && p.chapter != -1) {
+                    sprintf(event, "story_ep%i_ch%i_complete", p.episode_id + 1, p.chapter + 1);
+                    NuIOS_RecordFlurryEvent(event);
+                }
+                if (p.area == NEGOTIATIONS_ADATA) {
+                    Game.area_save[EDataList[1].area_ids[0]].complete = 1;
+                    Game.area_save[EDataList[2].area_ids[0]].complete = 1;
+                    Game.area_save[EDataList[3].area_ids[0]].complete = 1;
+                    Game.area_save[EDataList[4].area_ids[0]].complete = 1;
+                    Game.area_save[EDataList[5].area_ids[0]].complete = 1;
+                }
+                if ((p.field_0xb0 & 8) != 0)
+                    Game.area_save[p.next_area].complete = 1;
+                else if (p.episode != NULL) {
+                    const i32 bonus = Episode_FindAreaFromFlags(p.episode, 5, 4);
+                    const i32 bonus2 = Episode_FindAreaFromFlags(p.episode, 5, 5);
+                    if (bonus != -1)
+                        Game.area_save[bonus].complete = 1;
+                    if (bonus2 != -1)
+                        Game.area_save[bonus2].complete = 1;
+                    hub_startoutsidebonusdoor_area = bonus2;
+                }
+            } else {
+                gold = 0;
                 completed_episode = 0;
+            }
+            if (p.newly_completed != 0)
+                AddStatusStage(&p, 13, gold);
+            if (completed_episode != 0)
+                AddStatusStage(&p, completed_episode + 29, 0);
+        }
+        if (p.area != NULL && static_cast<i8>(p.area->cheat) != -1 && Game.area_save[area].field_0x5[1] == 0 &&
+            AreaGlobals.values.field_0x08 != 0) {
+            AddToCompletionPoints(POINTS_PER_REDBRICK);
+            Game.area_save[area].field_0x5[1] = 1;
+            AddStatusStage(&p, 18, 0);
             if (p.episode_id != -1 && p.chapter != -1) {
-                sprintf(event, "story_ep%i_ch%i_complete", p.episode_id + 1, p.chapter + 1);
+                sprintf(event, "redbrick_ep%i_ch%i_awarded", p.episode_id + 1, p.chapter + 1);
                 NuIOS_RecordFlurryEvent(event);
             }
-            if (p.area == NEGOTIATIONS_ADATA) {
-                Game.area_save[EDataList[1].area_ids[0]].complete = 1;
-                Game.area_save[EDataList[2].area_ids[0]].complete = 1;
-                Game.area_save[EDataList[3].area_ids[0]].complete = 1;
-                Game.area_save[EDataList[4].area_ids[0]].complete = 1;
-                Game.area_save[EDataList[5].area_ids[0]].complete = 1;
-            }
-            if ((p.field_0xb0 & 8) != 0)
-                Game.area_save[p.next_area].complete = 1;
-            else if (p.episode != NULL) {
-                const i32 bonus = Episode_FindAreaFromFlags(p.episode, 5, 4);
-                const i32 bonus2 = Episode_FindAreaFromFlags(p.episode, 5, 5);
-                if (bonus != -1)
-                    Game.area_save[bonus].complete = 1;
-                if (bonus2 != -1)
-                    Game.area_save[bonus2].complete = 1;
-                hub_startoutsidebonusdoor_area = bonus2;
-            }
-        } else {
-            gold = 0;
-            completed_episode = 0;
         }
-        if (p.newly_completed != 0)
-            AddStatusStage(&p, 13, gold);
-        if (completed_episode != 0)
-            AddStatusStage(&p, completed_episode + 29, 0);
-    }
-    if (p.area != NULL && static_cast<i8>(p.area->cheat) != -1 && Game.area_save[area].field_0x5[1] == 0 &&
-        AreaGlobals.values.field_0x08 != 0) {
-        AddToCompletionPoints(POINTS_PER_REDBRICK);
-        Game.area_save[area].field_0x5[1] = 1;
-        AddStatusStage(&p, 18, 0);
-        if (p.episode_id != -1 && p.chapter != -1) {
-            sprintf(event, "redbrick_ep%i_ch%i_awarded", p.episode_id + 1, p.chapter + 1);
-            NuIOS_RecordFlurryEvent(event);
+        if (p.newly_completed != 0 && newCharactersCollected(&p) > 0) {
+            AddStatusStage(&p, 35, 0);
+            AddStatusStage(&p, 36, 0);
+            RememberPlayerIDs(1, static_cast<i16>(p.player_model[0]), static_cast<i16>(p.player_model[1]));
         }
-    }
-    if (p.newly_completed != 0 && newCharactersCollected(&p) > 0) {
-        AddStatusStage(&p, 35, 0);
-        AddStatusStage(&p, 36, 0);
-        RememberPlayerIDs(1, static_cast<i16>(p.player_model[0]), static_cast<i16>(p.player_model[1]));
-    }
-    if (area != -1 && ((p.area->flags & 0x136) == 0x10 || (p.area->flags & 0x4000) != 0)) {
-        if (BOTHTRUEJEDIGOLDBRICKS != 0) {
-            u8 &complete = Game.area_save[area].true_hero_complete[p.free_play];
-            if (complete == 0) {
+        if (area != -1 && ((p.area->flags & 0x136) == 0x10 || (p.area->flags & 0x4000) != 0)) {
+            if (BOTHTRUEJEDIGOLDBRICKS != 0) {
+                u8 &complete = Game.area_save[area].true_hero_complete[p.free_play];
+                if (complete == 0) {
+                    if ((p.field_0xb0 & 4) != 0) {
+                        complete = 1;
+                        AddToCompletionPoints(POINTS_PER_TRUEJEDI);
+                        AddStatusStage(&p, 1, AddGoldBrickMessage(&p, tTRUEHERO));
+                    } else if (p.collected_score > 0.0f)
+                        AddStatusStage(&p, 2, 0);
+                }
+            } else if (Game.area_save[area].true_hero_complete[0] == 0 &&
+                       Game.area_save[area].true_hero_complete[1] == 0) {
                 if ((p.field_0xb0 & 4) != 0) {
-                    complete = 1;
+                    Game.area_save[area].true_hero_complete[0] = Game.area_save[area].true_hero_complete[1] = 1;
                     AddToCompletionPoints(POINTS_PER_TRUEJEDI);
                     AddStatusStage(&p, 1, AddGoldBrickMessage(&p, tTRUEHERO));
-                } else if (p.collected_score > 0.0f)
+                    if (p.episode_id != -1 && p.chapter != -1) {
+                        sprintf(event, "truejedi_ep%i_ch%i_awarded", p.episode_id + 1, p.chapter + 1);
+                        NuIOS_RecordFlurryEvent(event);
+                    } else {
+                        sprintf(event, "truejedi_%s_awarded", p.area->file);
+                        NuIOS_RecordFlurryEvent(event);
+                    }
+                } else if (p.collected_score > 0.0f && (p.mode_flags & 8) == 0)
                     AddStatusStage(&p, 2, 0);
             }
-        } else if (Game.area_save[area].true_hero_complete[0] == 0 && Game.area_save[area].true_hero_complete[1] == 0) {
-            if ((p.field_0xb0 & 4) != 0) {
-                Game.area_save[area].true_hero_complete[0] = Game.area_save[area].true_hero_complete[1] = 1;
-                AddToCompletionPoints(POINTS_PER_TRUEJEDI);
-                AddStatusStage(&p, 1, AddGoldBrickMessage(&p, tTRUEHERO));
-                if (p.episode_id != -1 && p.chapter != -1) {
-                    sprintf(event, "truejedi_ep%i_ch%i_awarded", p.episode_id + 1, p.chapter + 1);
-                    NuIOS_RecordFlurryEvent(event);
-                } else {
-                    sprintf(event, "truejedi_%s_awarded", p.area->file);
-                    NuIOS_RecordFlurryEvent(event);
-                }
-            } else if (p.collected_score > 0.0f && (p.mode_flags & 8) == 0)
-                AddStatusStage(&p, 2, 0);
         }
+        if (p.collected_score > 0.0f)
+            AddStatusStage(&p, 3, 0);
+        if (p.minikit_max != 0 && (p.area->flags & 0x36) == 0x10 &&
+            Game.area_save[area].minikit_complete == SAVE_INCOMPLETE && AreaGlobals.values.field_0x10 > 0) {
+            p.new_minikits = AreaGlobals.values.field_0x10;
+            i32 gold = 0;
+            if (p.minikit_max <= Game.area_save[area].field_0x5[0]) {
+                Game.area_save[area].minikit_complete = SAVE_COMPLETE;
+                p.field_0xb0 |= 0x10;
+                AddToCompletionPoints(POINTS_PER_MINIKIT);
+                gold = AddGoldBrickMessage(&p, tMINIKIT);
+            }
+            if (from_save_and_exit == 0 || p.new_minikits != 0)
+                AddStatusStage(&p, 4, gold);
+            if ((p.field_0xb0 & 0x10) != 0 && AllMiniKitsDone(Game.area_save) != 0) {
+                AddToCollection(id_SLAVE1);
+                AddStatusStage(&p, 17, 0);
+            }
+        }
+        if (Game.field_0x7c26[0] > p.previous_gold_bricks)
+            AddStatusStage(&p, 19, 0);
+        if ((p.mode_flags & 8) == 0)
+            AddStatusStage(&p, 9, 0);
+        AddStatusStage(&p, 10, 0);
+        if (netclient == 0)
+            AddStatusStage(&p, 11, 0);
+        AddStatusStage(&p, 12, 0);
+        p.current_gold_brick = -1;
+        p.stage_types[p.stage_count] = -1;
+        p.next_stage = FindStatusStage(p.stage_types[0]);
+        NextStatusStage(&p);
+        collect_suit_bits = Game.initial_store_pack_flags;
+        Game.initial_store_pack_flags = areaSuitBits;
     }
-    if (p.collected_score > 0.0f)
-        AddStatusStage(&p, 3, 0);
-    if (p.minikit_max != 0 && (p.area->flags & 0x36) == 0x10 &&
-        Game.area_save[area].minikit_complete == SAVE_INCOMPLETE && AreaGlobals.values.field_0x10 > 0) {
-        p.new_minikits = AreaGlobals.values.field_0x10;
-        i32 gold = 0;
-        if (p.minikit_max <= Game.area_save[area].field_0x5[0]) {
-            Game.area_save[area].minikit_complete = SAVE_COMPLETE;
-            p.field_0xb0 |= 0x10;
-            AddToCompletionPoints(POINTS_PER_MINIKIT);
-            gold = AddGoldBrickMessage(&p, tMINIKIT);
-        }
-        if (from_save_and_exit == 0 || p.new_minikits != 0)
-            AddStatusStage(&p, 4, gold);
-        if ((p.field_0xb0 & 0x10) != 0 && AllMiniKitsDone(Game.area_save) != 0) {
-            AddToCollection(id_SLAVE1);
-            AddStatusStage(&p, 17, 0);
-        }
-    }
-    if (Game.field_0x7c26[0] > p.previous_gold_bricks)
-        AddStatusStage(&p, 19, 0);
-    if ((p.mode_flags & 8) == 0)
-        AddStatusStage(&p, 9, 0);
-    AddStatusStage(&p, 10, 0);
-    if (netclient == 0)
-        AddStatusStage(&p, 11, 0);
-    AddStatusStage(&p, 12, 0);
-    p.current_gold_brick = -1;
-    p.stage_types[p.stage_count] = -1;
-    p.next_stage = FindStatusStage(p.stage_types[0]);
-    NextStatusStage(&p);
-    collect_suit_bits = Game.initial_store_pack_flags;
-    Game.initial_store_pack_flags = areaSuitBits;
 }
 
 void EndOfDemo(i32) {
@@ -1440,7 +1442,7 @@ void UpdateStatusScreen(WORLDINFO_s *) {
         if (skip) {
             MechInputTouchMenuController::AnyTouchesThisFrame = 0;
         } else {
-            const u32 button = __builtin_expect(Text_Language != 0, 0) ? GAMEPAD_JUMP : GAMEPAD_MENUSELECT;
+            const u32 button = Text_Language != 0 ? GAMEPAD_JUMP : GAMEPAD_MENUSELECT;
             skip = (StatusPacket.player_active[0] != 0 && (GamePad[0].buttons_pressed & button) != 0) ||
                    (StatusPacket.player_active[1] != 0 && (GamePad[1].buttons_pressed & button) != 0);
         }

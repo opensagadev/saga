@@ -402,7 +402,7 @@ static void Asteroids_Reset(WORLDINFO_s *world) {
     if (special_count == 0)
         return;
 
-    if (special_count > 0) {
+    if (__builtin_expect(special_count > 0, 1)) {
         for (i32 special_index = 0; special_index < special_count; ++special_index) {
             for (i32 type_index = 0; type_index < world->gizmo_blowup_type_count; ++type_index) {
                 NuSpecialCompare(&world->gizmo_blowup_types[type_index].special, &specials[special_index]);
@@ -418,7 +418,7 @@ static void Asteroids_Reset(WORLDINFO_s *world) {
                     asteroid_type = 0;
                 } else if (NuStrIStr(name, "asteroid_b") != NULL) {
                     asteroid_type = 1;
-                } else if (NuStrIStr(name, "asteroid_c") != NULL) {
+                } else if (__builtin_expect(NuStrIStr(name, "asteroid_c") != NULL, 1)) {
                     asteroid_type = 2;
                 } else {
                     asteroid_type = 0;
@@ -572,7 +572,7 @@ void ResetTrooperCannons(WORLDINFO_s *world, i32 trooper_id) {
                     AddDynamicCreature(trooper_id, &troopercannons[cannon_index].object->apiobj.collision_position,
                                        troopercannons[cannon_index].object->apiobj.field_0x276, "CannonTrooper",
                                        &troopercannons[cannon_index].object->ai.path_info, NULL, 0, NULL, NULL, 0, 0);
-                if (trooper != NULL)
+                if (__builtin_expect(trooper != NULL, 1))
                     TakeOverGameObject(trooper, troopercannons[cannon_index].object, 0, 1);
             }
         }
@@ -1591,7 +1591,7 @@ void HothBattleE_Panel(WORLDINFO_s *) {
         case 1:
         case 2:
             for (i32 index = 0; index < melee.waves[0].initial_count; ++index) {
-                if (index == (melee.waves[0].initial_count >> 1) + 1) {
+                if (__builtin_expect(index == (melee.waves[0].initial_count >> 1) + 1, 1)) {
                     targets[count] = -1;
                     defeated[count] = 0;
                     ++count;
@@ -1922,7 +1922,7 @@ void HothBattleE_UpdateWave() {
                 melee.current_wave = melee.next_wave;
                 pending = 1;
             }
-        } else if (melee.transition_phase == 0 && MiniCutCam != 0) {
+        } else if (__builtin_expect(melee.transition_phase == 0 && MiniCutCam != 0, 0)) {
             melee.transition_phase = 1;
         }
     }
@@ -1932,7 +1932,8 @@ void HothBattleE_UpdateWave() {
         SpawnMeleeCreatureType(type);
     }
     HothBattle_ManageBackgroundCreatures();
-    if (melee.current_wave == 3 && melee.waves[0].creatures[0] != NULL && melee.waves[0].creatures[1] != NULL) {
+    if (__builtin_expect(
+            melee.current_wave == 3 && melee.waves[0].creatures[0] != NULL && melee.waves[0].creatures[1] != NULL, 0)) {
         AIANTINODE_s *node = AIAntinodeCreateSingleFrame(&melee.waves[0].creatures[0]->apiobj.collision_position,
                                                          melee.waves[0].creatures[type]->apiobj.field_0x1dc * 3.0f);
         node->excluded_character_types = ~(1 << melee.waves[0].creatures[1]->apiobj.field_0x289);

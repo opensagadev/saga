@@ -672,7 +672,7 @@ void GizmoPickup_CollectCoin(WORLDINFO_s *world, nuvec_s *position, i32 type_ind
     } else {
         i32 player0_active = Player[0] == NULL ? 0 : Player[0]->apiobj.player_controlled;
         if (__builtin_expect(Player[1] == NULL || !Player[1]->apiobj.player_controlled, 0)) {
-            if (player0_active == 0) {
+            if (__builtin_expect(player0_active == 0, 0)) {
                 return;
             }
             player_index = 0;

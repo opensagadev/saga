@@ -747,7 +747,7 @@ extern "C" {
         }
         NUGCUTRIGIDSYS_s *rigid_system = cutscene->rigid_system;
         if (rigid_system != NULL) {
-            if (scene != NULL) {
+            if (__builtin_expect(scene != NULL, 1)) {
                 NUGCUTLOCATORSYS_s *locator_system = cutscene->locator_system;
                 for (i32 i = 0; i < rigid_system->count; ++i) {
                     NUGCUTRIGID_s *rigid = &rigid_system->rigids[i];
@@ -1074,7 +1074,7 @@ extern "C" {
         }
 
         NUVEC *bounds = static_cast<NUVEC *>(instance->cutscene->bounds);
-        if (bounds == NULL) {
+        if (__builtin_expect(bounds == NULL, 0)) {
             instance->transformed_bounds_center.x = 0.0f;
             instance->transformed_bounds_center.y = 0.0f;
             instance->transformed_bounds_center.z = 0.0f;
@@ -1873,7 +1873,7 @@ static void instNuGCutCamSysUpdate(instNUGCUTSCENE_s *instance, float frame) {
         }
     }
 
-    if (static_cast<i8>(instance->flags_88) < 0) {
+    if (__builtin_expect(static_cast<i8>(instance->flags_88) < 0, 1)) {
         NuMtxMul(&cutscenecammtx, &cutscenecammtx, &instance->matrix);
     }
     set_cutscenecammtx = 1;
@@ -2739,7 +2739,7 @@ static void instNuGCutLookAtLocatorUpdate(i32 *effect_handle, NUGCUTLOCATOR_s *l
     {
         NUMTX matrix;
         values = NuGCutLocatorCalcMtx(locator, frame, &matrix, NULL);
-        if (__builtin_expect((locator->flags & 4) != 0, 0)) {
+        if ((locator->flags & 4) != 0) {
             NuMtxPreTranslate(&matrix, &locator->pivot);
         }
         if (parent_mtx != NULL) {
@@ -2907,7 +2907,7 @@ extern "C" {
                 }
                 return;
             }
-            if ((locator->flags & 0x20) != 0) {
+            if (__builtin_expect((locator->flags & 0x20) != 0, 0)) {
                 if (inst_locator->effect_handle >= 0) {
                     DebFreeInstantly(&inst_locator->effect_handle);
                 }
@@ -3881,7 +3881,7 @@ extern "C" {
         NuPrimSetCoordinateSystem(NUPRIM_SCALEMODE_PS2);
         NuPrim2DBegin(4, 5, NULL);
 
-        if (DefragInstBaseMem != NULL) {
+        if (__builtin_expect(DefragInstBaseMem != NULL, 1)) {
             const u32 cut_span = static_cast<u32>(reinterpret_cast<usize>(DefragCutSceneEndMem) -
                                                   reinterpret_cast<usize>(DefragCutSceneBaseMem));
             const f32 cut_scale = 580.0f / static_cast<f32>(cut_span);
@@ -3932,7 +3932,7 @@ extern "C" {
 
             CutSceneCleanUpEntry *const list_end = DefragCutSceneListBase + DefragCutSceneListSize;
             for (CutSceneCleanUpEntry *entry = DefragCutSceneListBase; entry < list_end; ++entry) {
-                if ((entry->flags & 4) == 0) {
+                if (__builtin_expect((entry->flags & 4) == 0, 1)) {
                     continue;
                 }
                 instNUGCUTSCENE_s *instance = DefragGetInstFn(entry->handle);

@@ -12543,9 +12543,11 @@ void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *objec
                     ((static_cast<u64>(destination_connection->route_mask) >> packet->current_route) & 1) == 0) {
                     for (i32 end = 0; end < 2; ++end) {
                         AIPATHNODE *node = &path->nodes[destination_connection->node_indices[end]];
-                        if ((static_cast<u64>(node->route_membership_mask & ~node->route_boundary_mask) >>
-                                 packet->current_route &
-                             1) == 0) {
+                        if (__builtin_expect(
+                                (static_cast<u64>(node->route_membership_mask & ~node->route_boundary_mask) >>
+                                     packet->current_route &
+                                 1) == 0,
+                                1)) {
                             continue;
                         }
                         destination_distances[end] = FLT_MAX;
@@ -12619,11 +12621,11 @@ void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *objec
                                       packet->path_info.path, connection->node_indices[packet->path_info.direction],
                                       destination_connection->node_indices[1], packet->current_route, 0)
                                 : FLT_MAX;
-                        if (candidate != FLT_MAX) {
+                        if (__builtin_expect(candidate != FLT_MAX, 0)) {
                             candidate =
                                 candidate + destination_distances[1] + endpoint_distances[packet->path_info.direction];
                         }
-                        if (candidate < best_distance) {
+                        if (__builtin_expect(candidate < best_distance, 1)) {
                             best_distance = candidate;
                             goal_index = destination_connection->node_indices[1];
                             direction = packet->path_info.direction == 0;
@@ -12682,7 +12684,7 @@ void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *objec
         }
     }
     if (PreparingForSpecialMoveFn != NULL) {
-        if (connection != destination_connection) {
+        if (__builtin_expect(connection != destination_connection, 0)) {
             packet->movement_event_flags |= 0x20;
         }
         if (PreparingForSpecialMoveFn(packet, object, checks) != 0) {
@@ -12779,16 +12781,18 @@ void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *objec
                 target = path->nodes[next->node_indices[direction]].position;
                 packet->runtime_flags |= 8;
             }
-            if (WithinConnection(system, &target, packet->path_info.path, current, checks, packet->path_info.connection,
-                                 packet->current_route, object->field_0x289, NULL, object->collision_radius, 0) == 0) {
-                if (CalculateIntersection(system, packet, object, current, next) != 0) {
+            if (__builtin_expect(WithinConnection(system, &target, packet->path_info.path, current, checks,
+                                                  packet->path_info.connection, packet->current_route,
+                                                  object->field_0x289, NULL, object->collision_radius, 0) == 0,
+                                 1)) {
+                if (__builtin_expect(CalculateIntersection(system, packet, object, current, next) != 0, 1)) {
                     bool use_left = false;
                     NUVEC offset;
-                    if ((packet->movement_flags & AIPACKET_MOVEMENT_DIVERSION_LEFT) != 0) {
+                    if (__builtin_expect((packet->movement_flags & AIPACKET_MOVEMENT_DIVERSION_LEFT) != 0, 0)) {
                         NuVecSub(&offset, &packet->left_diversion, &object->position);
                         i32 angle = NuAtan2D(offset.x, offset.z);
                         NuVecSub(&offset, &target, &object->position);
-                        if (NuAngSub(NuAtan2D(offset.x, offset.z), angle) < 0) {
+                        if (__builtin_expect(NuAngSub(NuAtan2D(offset.x, offset.z), angle) < 0, 1)) {
                             target.x = packet->left_diversion.x;
                             target.y = packet->left_diversion.y;
                             target.z = packet->left_diversion.z;
@@ -17749,7 +17753,7 @@ eduimenu_s *pathEditor_Process(nupad_s *pad) {
             locatorEditor_PathNodeMoved(aieditor->current_path->current_node);
             if (AIPathNodeDeletedFn)
                 AIPathNodeDeletedFn(aieditor->current_path->current_node);
-            if (__builtin_expect(!!(pad->digital_buttons & 0x200), 0)) {
+            if (pad->digital_buttons & 0x200) {
                 path = aieditor->current_path;
                 f32 dx = path->current_node->position.x - old_x, dz = path->current_node->position.z - old_z;
                 for (EDAIPATHNODE_s *node = reinterpret_cast<EDAIPATHNODE_s *>(NuLinkedListGetHead(&path->nodes)); node;
@@ -17874,7 +17878,7 @@ eduimenu_s *pathEditor_Process(nupad_s *pad) {
                 f32 step = node->height_max * .05f;
                 if (pad->digital_buttons & 4)
                     node->height_max += step;
-                else if (pad->digital_buttons & 1)
+                else if (__builtin_expect(pad->digital_buttons & 1, 0))
                     node->height_max -= step;
                 if (node->height_max < .01f)
                     node->height_max = .01f;
@@ -17882,7 +17886,7 @@ eduimenu_s *pathEditor_Process(nupad_s *pad) {
                 aieditor->flags |= 4;
                 node = path->current_node;
                 f32 step = -node->height_min * .05f;
-                if (pad->digital_buttons & 4)
+                if (__builtin_expect((pad->digital_buttons & 4) != 0, 1))
                     node->height_min += step;
                 else if (pad->digital_buttons & 1)
                     node->height_min -= step;
@@ -17907,7 +17911,7 @@ eduimenu_s *pathEditor_Process(nupad_s *pad) {
             named_only = true;
         }
     }
-    if (!direction && !(aieditorsettings.path_flags & 0x80)) {
+    if (__builtin_expect(!direction && !(aieditorsettings.path_flags & 0x80), 0)) {
         if (pad->digital_buttons_pressed & 0x1000)
             direction = 1;
         else if (pad->digital_buttons_pressed & 0x4000)

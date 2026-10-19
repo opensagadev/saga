@@ -889,13 +889,13 @@ extern "C" void NewMenu(i32 menu_id, i32 menu_y, i32 param3) {
     if (MenuInfo[menu->menu].memory_x != -1) {
         menu->selected_column = MenuInfo[menu->menu].memory_x;
     }
-    if (menu->selected_column < menu->first_column) {
+    if (__builtin_expect(menu->selected_column < menu->first_column, 1)) {
         menu->selected_column = menu->first_column;
-    } else if (menu->selected_column > menu->last_column) {
+    } else if (__builtin_expect(menu->selected_column > menu->last_column, 0)) {
         menu->selected_column = menu->last_column;
     }
     if (menu_y < menu->first_row || menu_y > menu->last_row) {
-        if (MenuInfo[menu->menu].memory_y != -1) {
+        if (__builtin_expect(MenuInfo[menu->menu].memory_y != -1, 1)) {
             menu->selected_row = MenuInfo[menu->menu].memory_y;
         }
         if (menu->selected_row < menu->first_row) {
@@ -2939,7 +2939,7 @@ void APIMenuDrawMemCardSlots(MENU *menu, f32 y) {
             blue = MENUFLASH1B;
             green = MENUFLASH1G;
         }
-    } else if (menu_pulse > 0.0f) {
+    } else if (__builtin_expect(menu_pulse > 0.0f, 1)) {
         red = MenuSlotColourLerp(MENUFLASH0R, MENUNORMALR, menu_pulse);
         green = MenuSlotColourLerp(MENUFLASH0G, MENUNORMALG, menu_pulse);
         blue = MenuSlotColourLerp(MENUFLASH0B, MENUNORMALB, menu_pulse);
@@ -3042,7 +3042,7 @@ i32 FindNearestBreak(unsigned char *text, i32 index) {
         while (static_cast<u8>(text[backward] - 0x80) <= 0x3f)
             --backward;
 
-        if (IsTextBreak(text, forward))
+        if (__builtin_expect(IsTextBreak(text, forward), 1))
             return forward;
         if (IsTextBreak(text, backward))
             return backward;
@@ -4148,7 +4148,7 @@ extern "C" {
             f32 scale = game_font->height / button_font->height;
             for (i32 i = 0; i < button_font->glyph_count; i++) {
                 for (i32 j = 0; j < game_font->glyph_count; j++) {
-                    if (button_font->unicode_map[i].unicode != game_font->unicode_map[j].unicode) {
+                    if (__builtin_expect(button_font->unicode_map[i].unicode != game_font->unicode_map[j].unicode, 0)) {
                         continue;
                     }
                     if (button_font->unicode_map[i].unicode >= 0x531 && button_font->unicode_map[i].unicode <= 0x53f) {

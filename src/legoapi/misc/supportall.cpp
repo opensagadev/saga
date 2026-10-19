@@ -314,7 +314,7 @@ void ThingManager::EffectsThings(ThingRenderData *data) {
         if (this->things[i] == NULL || (this->things[i]->flags & THING_FLAG_SKIP_EFFECTS) != 0) {
             continue;
         }
-        if (__builtin_expect(this->things[i]->profiling_0xc != 0, 0)) {
+        if (__builtin_expect(this->things[i]->profiling_0xc != 0, 1)) {
             _NuTimeBarSlotBegin(this->timebar, 5, name);
         }
         this->things[i]->Effects(data);
@@ -333,7 +333,7 @@ void ThingManager::DisplayThings(ThingRenderData *data) {
     for (i32 i = 0; i < this->count; ++i) {
         BaseThing *thing = this->things[i];
         if (thing != NULL && (thing->flags & THING_FLAG_SKIP_DISPLAY) == 0) {
-            if (__builtin_expect(thing->profiling_0xc != 0, 0)) {
+            if (__builtin_expect(thing->profiling_0xc != 0, 1)) {
                 _NuTimeBarSlotBegin(this->timebar, 3, name);
                 thing = this->things[i];
             }
@@ -354,7 +354,7 @@ void ThingManager::RenderThings(ThingRenderData *data) {
     for (i32 i = 0; i < this->count; ++i) {
         BaseThing *thing = this->things[i];
         if (thing != NULL && (thing->flags & THING_FLAG_SKIP_RENDER) == 0) {
-            if (__builtin_expect(thing->profiling_0xc != 0, 0)) {
+            if (__builtin_expect(thing->profiling_0xc != 0, 1)) {
                 _NuTimeBarSlotBegin(this->timebar, 1, name);
                 thing = this->things[i];
             }
@@ -376,7 +376,7 @@ void ThingManager::ProcessThings(ThingProcessData *data) {
     const char *name = "PROC";
     for (i32 i = 0; i < this->count; ++i) {
         if (this->things[i] != NULL && (this->things[i]->flags & THING_FLAG_SKIP_PROCESS_EVEN_WHEN_PAUSED) == 0) {
-            if (__builtin_expect(this->things[i]->profiling_0xc != 0, 0)) {
+            if (__builtin_expect(this->things[i]->profiling_0xc != 0, 1)) {
                 _NuTimeBarSlotBegin(this->timebar, 0, name);
             }
             this->things[i]->ProcessEvenWhenPaused(data);
@@ -417,7 +417,7 @@ void ThingManager::ResetThings(ThingResetData *data) {
 
     for (i32 i = 0; i < this->count; ++i) {
         if (this->things[i] != NULL && (this->things[i]->flags & 8) == 0) {
-            if (__builtin_expect(this->things[i]->profiling_0xc != 0, 0)) {
+            if (__builtin_expect(this->things[i]->profiling_0xc != 0, 1)) {
                 _NuTimeBarSlotBegin(this->timebar, 4, name);
             }
             this->things[i]->Reset(data);

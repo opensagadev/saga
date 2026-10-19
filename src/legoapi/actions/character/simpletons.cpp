@@ -362,7 +362,7 @@ i32 TrooperShoot(WORLDINFO_s *world, minitrooperteam_s *team, minisnowtrooper_s 
 
         if (second_distance > first_distance && first_distance < 60.0f) {
             NuVecSub(&direction, &Player[0]->apiobj.position, &shot_position);
-        } else if (second_distance < 60.0f) {
+        } else if (__builtin_expect(second_distance < 60.0f, 0)) {
             NuVecSub(&direction, &Player[1]->apiobj.position, &shot_position);
         } else {
             return 0;

@@ -782,13 +782,14 @@ void GameCreatureOpponentSelection(AISYS_s *system, i32 count, APIOBJECT_s **obj
                 if ((object->ai_awareness_mask & alert_mask) != 0) {
                     object->objptr->alert_target_timer = 5.0f;
                     object->objptr->alert_target = &alert_obj->apiobj;
-                } else if (WORLD->rooms_visible_ptr[object->objptr->room_id] != 0) {
+                } else if (__builtin_expect(WORLD->rooms_visible_ptr[object->objptr->room_id] != 0, 1)) {
                     difference.x = alert_pos.x - object->collision_position.x;
                     if (object->heardistance > difference.x) {
                         difference.z = alert_pos.z - object->collision_position.z;
                         if (object->heardistance > difference.z) {
                             difference.y = alert_pos.y - object->collision_position.y;
-                            if (object->maxviewheight > difference.y && difference.y > object->minviewheight) {
+                            if (__builtin_expect(
+                                    object->maxviewheight > difference.y && difference.y > object->minviewheight, 0)) {
                                 distance = difference.x * difference.x + difference.z * difference.z;
                                 if (!(object->heardistance * object->heardistance > distance))
                                     continue;
@@ -892,8 +893,9 @@ void GameCreatureOpponentSelection(AISYS_s *system, i32 count, APIOBJECT_s **obj
                         baddy_id = baddy_object->id;
                     } else {
                         if (!(goody->character_data->model_flags & 0x80000)) {
-                            if (baddy_object->only_attack_players && goody->objptr != player &&
-                                goody->objptr != player2) {
+                            if (__builtin_expect(baddy_object->only_attack_players && goody->objptr != player &&
+                                                     goody->objptr != player2,
+                                                 0)) {
                                 baddy_object->ai_opponent_exclusion_mask |= (u64)1 << goody->field_0x289;
                             } else if (goody->objptr->id == id_DRAGBOMB && baddy_id != id_ATAT) {
                                 baddy_object->ai_opponent_exclusion_mask |= (u64)1 << goody->field_0x289;
@@ -935,7 +937,7 @@ void GameCreatureOpponentSelection(AISYS_s *system, i32 count, APIOBJECT_s **obj
                     if (baddy_id == id_JAWA || baddy_id == id_UGNAUGHT ||
                         (baddy->character_data->model_flags & 0x80000))
                         goody_object->ai_opponent_exclusion_mask |= (u64)1 << baddy->field_0x289;
-                    if (!((goody_object->ai_opponent_exclusion_mask >> baddy->field_0x289) & 1)) {
+                    if (__builtin_expect(!((goody_object->ai_opponent_exclusion_mask >> baddy->field_0x289) & 1), 1)) {
                         AIPACKET *packet = goody->ai;
                         if (packet->pending_nearest_metric > distance) {
                             packet->pending_nearest_metric = distance;
@@ -986,7 +988,7 @@ void GameCreatureOpponentSelection(AISYS_s *system, i32 count, APIOBJECT_s **obj
                 }
             }
         }
-        if (!complete)
+        if (__builtin_expect(!complete, 0))
             return;
         system->goody_idx = 0;
         nbaddies_can_see_players = 0;
@@ -995,7 +997,7 @@ void GameCreatureOpponentSelection(AISYS_s *system, i32 count, APIOBJECT_s **obj
             APIOBJECT_s *goody = goodies[i];
             for (i32 j = 0; j < baddy_count; ++j) {
                 APIOBJECT_s *baddy = baddies[j];
-                if (!((goody->ai_awareness_mask >> baddy->field_0x289) & 1)) {
+                if (__builtin_expect(!((goody->ai_awareness_mask >> baddy->field_0x289) & 1), 0)) {
                     if ((goody->objptr->ai_seen_mask >> baddy->field_0x289) & 1) {
                         goody->objptr->ai_seen_mask &= ~((u64)1 << baddy->field_0x289);
                     }
@@ -1004,7 +1006,8 @@ void GameCreatureOpponentSelection(AISYS_s *system, i32 count, APIOBJECT_s **obj
                         goody->objptr->ai_seen_mask |= (u64)1 << baddy->field_0x289;
                 }
                 if ((baddy->ai_awareness_mask >> goody->field_0x289) & 1) {
-                    if ((WORLD->api_object_sys->line_of_sight[baddy->field_0x289] >> goody->field_0x289) & 1)
+                    if (__builtin_expect(
+                            (WORLD->api_object_sys->line_of_sight[baddy->field_0x289] >> goody->field_0x289) & 1, 0))
                         baddy->objptr->ai_seen_mask |= (u64)1 << goody->field_0x289;
                 } else if ((baddy->objptr->ai_seen_mask >> goody->field_0x289) & 1) {
                     baddy->objptr->ai_seen_mask &= ~((u64)1 << goody->field_0x289);
@@ -1843,12 +1846,13 @@ void oneAtOnce_MaintainArray() {
             if (AtOnce_attackingPlayer[player][slot].object == previous_attackers[player][2]) {
                 AtOnce_attackingPlayer[player][slot].distance *= 0.75f;
             }
-            if (AtOnce_attackingPlayer[player][slot].object == previous_attackers[player][3]) {
+            if (__builtin_expect(AtOnce_attackingPlayer[player][slot].object == previous_attackers[player][3], 0)) {
                 AtOnce_attackingPlayer[player][slot].distance *= 0.75f;
             }
             for (i32 adjacent = 1; adjacent <= attacker_count[player] - slot; ++adjacent) {
-                if (AtOnce_attackingPlayer[player][adjacent].distance <
-                    AtOnce_attackingPlayer[player][adjacent - 1].distance) {
+                if (__builtin_expect(AtOnce_attackingPlayer[player][adjacent].distance <
+                                         AtOnce_attackingPlayer[player][adjacent - 1].distance,
+                                     1)) {
                     GameObject_s *object = AtOnce_attackingPlayer[player][adjacent - 1].object;
                     const f32 distance = AtOnce_attackingPlayer[player][adjacent - 1].distance;
                     AtOnce_attackingPlayer[player][adjacent - 1].object =
@@ -2666,7 +2670,7 @@ GameObject_s *AddDynamicCreature(i32 model, nuvec_s *position, i32 angle, char *
         if (group != NULL) {
             AddToAIGroup(group, &object->apiobj);
             offset.x = ((object->ai.group_column + 1) / 2) * group->x_spacing;
-            if (object->ai.group_column & 1)
+            if (__builtin_expect(object->ai.group_column & 1, 0))
                 offset.x = -offset.x;
             offset.z = -group->z_spacing * static_cast<u32>(object->ai.group_member);
             offset.y = 0.0f;
@@ -2724,8 +2728,8 @@ GameObject_s *AddDynamicCreature(i32 model, nuvec_s *position, i32 angle, char *
     object->ai.field_0x124 = -1;
     object->ai.field_0x138 = 0xff;
     object->ai.field_0x139 = 0;
-    if (has_no_spline) {
-        if (path_info != NULL) {
+    if (__builtin_expect(has_no_spline, 0)) {
+        if (__builtin_expect(path_info != NULL, 0)) {
             AISysCharacterSetPath(&object->ai, path_info->path);
             AISysCharacterSetPathCnx(&object->ai, &object->apiobj.position, path_info->connection,
                                      path_info->direction);

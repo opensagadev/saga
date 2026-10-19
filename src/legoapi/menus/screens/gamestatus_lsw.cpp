@@ -510,7 +510,7 @@ void GoldBrick_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float e
         case 1: {
             const f32 previous = stage->field_0x18;
             stage->field_0x18 += elapsed;
-            if (stage->field_0x18 >= stage->field_0x1c)
+            if (__builtin_expect(stage->field_0x18 >= stage->field_0x1c, 0))
                 NextStatusStage(packet);
             else
                 for (i32 i = 0; i <= last; ++i) {
@@ -609,7 +609,7 @@ void MiniKit_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float ela
                 } else if (stage->field_0x14 != 4)
                     return;
             }
-            if ((packet->field_0xb0 & 0x10) == 0)
+            if (__builtin_expect((packet->field_0xb0 & 0x10) == 0, 0))
                 PlaySfx(const_cast<char *>("TrueJedi_NOT"), NULL);
             else {
                 stage->field_0x14 = 6;
@@ -1239,7 +1239,7 @@ void Prompt_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elap
                                     ++status_prompt;
                                     moved_down = 1;
                                 }
-                            } else if (((buttons | pad->left_directions) & GAMEPAD_DUP) != 0) {
+                            } else if (__builtin_expect(((buttons | pad->left_directions) & GAMEPAD_DUP) != 0, 1)) {
                                 GameAudio_PlaySfx(0x2f, NULL, 0, 0);
                                 --status_prompt;
                                 moved_up = 1;
@@ -1248,7 +1248,7 @@ void Prompt_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elap
                     }
                     ++player;
                     ++pad;
-                    if (selected != 0) {
+                    if (__builtin_expect(selected != 0, 1)) {
                         break;
                     }
                 } while (player < 2 && (moved_down | moved_up) == 0);
@@ -1267,7 +1267,7 @@ void Prompt_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elap
             break;
         }
         case 1: {
-            if (stage->field_0x18 == 0.0f) {
+            if (__builtin_expect(stage->field_0x18 == 0.0f, 1)) {
                 BackupMenu();
             }
             stage->field_0x18 += elapsed;
@@ -1687,7 +1687,7 @@ void Coins_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active) {
             const u32 coins = packet->coins_remaining[0];
             const f32 score_x = -PANEL_SCOREX;
             const i32 object_index = coins > 999 ? 0xc3 : coins > 99 ? 0xbb : 0xb3;
-            if (WORLD->lev_objs[object_index].active != 0) {
+            if (__builtin_expect(WORLD->lev_objs[object_index].active != 0, 0)) {
                 DrawPanel3DObject(-PANEL_COINX, coin_y, 1.0f, PANEL_COINSCALE_END, PANEL_COINSCALE_END, PANEL_COINSCALE_END,
                                   0, 0, 0, &WORLD->lev_objs[object_index].special, 0, player_alpha);
             }
@@ -1844,7 +1844,7 @@ void MiniKit_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current
             }
             case 3: {
                 f32 blend = 0.0f;
-                if (!(stage->field_0x1c - jibberlen >= stage->field_0x18))
+                if (__builtin_expect(!(stage->field_0x1c - jibberlen >= stage->field_0x18), 0))
                     blend = (stage->field_0x18 - (stage->field_0x1c - jibberlen)) / jibberlen;
                 DrawStatusMiniKit(0.0f, 0.0f, 1.1f, 0.333f, 0.333f, currentminikit + 1, packet, blend);
                 i32 count =
