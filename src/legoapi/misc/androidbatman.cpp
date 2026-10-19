@@ -61,37 +61,19 @@ static void SystemDidBecomeActiveCallback(const NuPhoneOSMessageData *) {
 
 static void SystemPauseCallback(const NuPhoneOSMessageData *) {
     WORLDINFO_s *world = WorldInfo_CurrentlyActive();
-    const i32 dropin_context = LEGOCONTEXT_DROPIN;
-    const f32 autosave_post_delay = memcard_autosavepostdelay;
-    LEVELDATA_s *title_level = TITLES_LDATA;
-    const f32 autosave_pre_delay = memcard_autosavepredelay;
-    const i32 new_mode = NewMode;
-    const i32 menu_level = GameMenuLevel;
-    LEVELDATA_s *new_level = NewLData;
-    const f32 fade = FadeSys.fade;
-    const i32 cutscene_waiting = CutSceneWaiting;
-    const i32 editor_is_active = editor_active;
-    const i32 cutscene_stops_game = CUTSTOPGAME;
-    const f32 game_time = GameTimer.time_elapsed;
-    const i32 timer_updates = GameTimer.update_count;
-    const i32 mini_cut_camera = MiniCutCam;
-    const i32 game_is_paused = Paused;
-    const i32 autosave_started = memcard_autosavestarted;
-    GameObject_s *pause_player;
 
-    if (game_is_paused == 0 && timer_updates != 0 && !(autosave_pre_delay > 0.0f) && new_mode == 0 &&
-        (((pause_player = Player[0]) != NULL && static_cast<i8>(pause_player->apiobj.field_0x1f8) < 0 &&
-          (dropin_context == -1 || dropin_context != static_cast<i8>(pause_player->field_0x7a5)) && new_level == NULL &&
-          fade == 0.0f && editor_is_active == 0 && game_time > 0.0f && world != NULL &&
-          world->current_level != title_level && GameMenu[menu_level].menu == -1 && cutscene_waiting == 0 &&
-          cutscene_stops_game == 0 && mini_cut_camera == 0 && autosave_started == 0 && !(autosave_post_delay > 0.0f)) ||
-         ((pause_player = Player[1]) != NULL && static_cast<i8>(pause_player->apiobj.field_0x1f8) < 0 &&
-          (dropin_context == -1 || dropin_context != static_cast<i8>(pause_player->field_0x7a5)) && new_level == NULL &&
-          fade == 0.0f && editor_is_active == 0 && game_time > 0.0f && world != NULL &&
-          world->current_level != title_level && GameMenu[menu_level].menu == -1 && cutscene_waiting == 0 &&
-          cutscene_stops_game == 0 && mini_cut_camera == 0 && autosave_started == 0 &&
-          !(autosave_post_delay > 0.0f)))) {
-        PauseGame(pause_player->pad_gamepad - GamePad);
+    for (i32 player_index = 0; player_index < 2; ++player_index) {
+        GameObject_s *player = Player[player_index];
+        if (Paused == 0 && GameTimer.update_count != 0 && !(memcard_autosavepredelay > 0.0f) && NewMode == 0 &&
+            player != NULL && static_cast<i8>(player->apiobj.field_0x1f8) < 0 &&
+            (LEGOCONTEXT_DROPIN == -1 || LEGOCONTEXT_DROPIN != static_cast<i8>(player->field_0x7a5)) &&
+            NewLData == NULL && FadeSys.fade == 0.0f && editor_active == 0 && GameTimer.time_elapsed > 0.0f &&
+            world != NULL && world->current_level != TITLES_LDATA && GameMenu[GameMenuLevel].menu == -1 &&
+            CutSceneWaiting == 0 && CUTSTOPGAME == 0 && MiniCutCam == 0 && memcard_autosavestarted == 0 &&
+            !(memcard_autosavepostdelay > 0.0f)) {
+            PauseGame(player->pad_gamepad - GamePad);
+            break;
+        }
     }
 
     for (i32 track = 0; track < 2; ++track) {

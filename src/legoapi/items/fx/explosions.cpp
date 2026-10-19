@@ -253,34 +253,7 @@ void UpdateExplosion_Generic(EXPLOSION *explosion) {
     }
 }
 
-void UpdateExplosions() {
-#define UPDATE_EXPLOSION(index)                                                                                        \
-    do {                                                                                                               \
-        EXPLOSION *explosion = &Explosion[index];                                                                      \
-        if (explosion->field_0x1c < explosion->field_0x20) {                                                           \
-            explosion->field_0x1c += FRAMETIME;                                                                        \
-            if (explosion->field_0x1c >= explosion->field_0x20) {                                                      \
-                explosion->field_0x1c = explosion->field_0x20;                                                         \
-            } else {                                                                                                   \
-                if (explosion->object != NULL && (explosion->object->apiobj.flags_low & 1) == 0) {                     \
-                    explosion->object = NULL;                                                                          \
-                }                                                                                                      \
-                UpdateExplosion_Generic(explosion);                                                                    \
-            }                                                                                                          \
-        }                                                                                                              \
-    } while (0)
-
-    UPDATE_EXPLOSION(0);
-    UPDATE_EXPLOSION(1);
-    UPDATE_EXPLOSION(2);
-    UPDATE_EXPLOSION(3);
-    UPDATE_EXPLOSION(4);
-    UPDATE_EXPLOSION(5);
-    UPDATE_EXPLOSION(6);
-
-#undef UPDATE_EXPLOSION
-
-    EXPLOSION *explosion = &Explosion[7];
+static inline void UpdateExplosion(EXPLOSION *explosion) {
     if (explosion->field_0x1c < explosion->field_0x20) {
         explosion->field_0x1c += FRAMETIME;
         if (explosion->field_0x1c >= explosion->field_0x20) {
@@ -292,5 +265,16 @@ void UpdateExplosions() {
         }
         UpdateExplosion_Generic(explosion);
     }
+}
+
+void UpdateExplosions() {
+    UpdateExplosion(&Explosion[0]);
+    UpdateExplosion(&Explosion[1]);
+    UpdateExplosion(&Explosion[2]);
+    UpdateExplosion(&Explosion[3]);
+    UpdateExplosion(&Explosion[4]);
+    UpdateExplosion(&Explosion[5]);
+    UpdateExplosion(&Explosion[6]);
+    UpdateExplosion(&Explosion[7]);
 }
 

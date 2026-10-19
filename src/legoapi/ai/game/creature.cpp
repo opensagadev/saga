@@ -201,8 +201,22 @@ u8 CharClipToBlobShadows;
 static inline void DrawSetRotationY(NUMTX *matrix, NUANG angle) {
     const f32 cosine = NU_COS_LUT(angle);
     const f32 sine = NU_SIN_LUT(angle);
-    NUMTX value = {cosine, 0.0f, -sine, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, sine, 0.0f, cosine, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f};
-    *matrix = value;
+    matrix->m11 = 1.0f;
+    matrix->m33 = 1.0f;
+    matrix->m00 = cosine;
+    matrix->m01 = 0.0f;
+    matrix->m02 = -sine;
+    matrix->m03 = 0.0f;
+    matrix->m10 = 0.0f;
+    matrix->m12 = 0.0f;
+    matrix->m13 = 0.0f;
+    matrix->m20 = sine;
+    matrix->m21 = 0.0f;
+    matrix->m22 = cosine;
+    matrix->m23 = 0.0f;
+    matrix->m30 = 0.0f;
+    matrix->m31 = 0.0f;
+    matrix->m32 = 0.0f;
 }
 
 extern i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;

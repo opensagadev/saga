@@ -917,7 +917,8 @@ void Climb_MoveCode(GameObject_s *object) {
     if ((object->apiobj.field_0x27d & 2) != 0 &&
         (object->apiobj.field_0x281 == object->field_0x7a6 ||
          (object->pad_gamepad->input_magnitude > 0.0f &&
-          PushingTowardsAngle(input_angle, object->apiobj.movement_facing_angle) < 0.0f))) {
+          __builtin_expect(PushingTowardsAngle(input_angle, object->apiobj.movement_facing_angle) < 0.0f,
+                           0)))) {
         object->character_context = -1;
     } else if (object->field_0x1084 != 0 && object->field_0x6b0 == object->field_0x7a6) {
         object->airborne_action_duration = 0.25f;

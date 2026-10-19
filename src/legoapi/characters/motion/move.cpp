@@ -1722,7 +1722,7 @@ static void JediLightCode(GameObject_s *object) {
         if (__builtin_expect(!(object->weapon_scale > 0.0f) || object->sabre_flags == 0, 0))
             return;
         position = v000;
-        if (object->apiobj.field_0x288 == 0)
+        if (__builtin_expect(object->apiobj.field_0x288 == 0, 0))
             return;
         i32 point_count = 0;
         for (i32 blade = 0; blade < 4; ++blade) {

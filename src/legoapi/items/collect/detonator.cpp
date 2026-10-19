@@ -54,41 +54,37 @@ void Detonators_Draw() {
     }
 }
 
+static inline void Detonator_Update(DETONATOR_s *detonator) {
+    if (detonator->active == 0) {
+        return;
+    }
+    detonator->timer += FRAMETIME;
+    NuCameraTransformScreenClip(&detonator->field_0x18, &detonator->field_0x0c, 1, NULL);
+    if (detonator->timer >= 10.7f) {
+        Detonator_Detonate(detonator);
+    } else if (detonator->field_0x34 != NULL) {
+        DetonatorHitData *hit_data = static_cast<DetonatorHitData *>(detonator->field_0x34);
+        if (!(detonator->timer >= 10.0f) &&
+            (detonator->object == NULL || detonator->object->apiobj.field_0x287 != 0 ||
+             !(detonator->object->field_0xde0 >= 0.3f))) {
+            hit_data->field_0x0c = 0.08f;
+        } else {
+            hit_data->field_0x0c = 0.75f;
+        }
+    }
+}
+
 void Detonators_Update() {
-#define UPDATE_DETONATOR(i)                                                                                            \
-    do {                                                                                                               \
-        DETONATOR_s *detonator = &Detonator[i];                                                                        \
-        if (detonator->active == 0) {                                                                                  \
-            break;                                                                                                     \
-        }                                                                                                              \
-        detonator->timer += FRAMETIME;                                                                                 \
-        NuCameraTransformScreenClip(&detonator->field_0x18, &detonator->field_0x0c, 1, NULL);                          \
-        if (detonator->timer >= 10.7f) {                                                                               \
-            Detonator_Detonate(detonator);                                                                             \
-        } else if (detonator->field_0x34 != NULL) {                                                                    \
-            DetonatorHitData *hit_data = static_cast<DetonatorHitData *>(detonator->field_0x34);                       \
-            if (detonator->timer >= 10.0f ||                                                                           \
-                (detonator->object != NULL && detonator->object->apiobj.field_0x287 == 0 &&                            \
-                 detonator->object->field_0xde0 >= 0.3f)) {                                                            \
-                hit_data->field_0x0c = 0.75f;                                                                          \
-            } else {                                                                                                   \
-                hit_data->field_0x0c = 0.08f;                                                                          \
-            }                                                                                                          \
-        }                                                                                                              \
-    } while (0)
-
-    UPDATE_DETONATOR(0);
-    UPDATE_DETONATOR(1);
-    UPDATE_DETONATOR(2);
-    UPDATE_DETONATOR(3);
-    UPDATE_DETONATOR(4);
-    UPDATE_DETONATOR(5);
-    UPDATE_DETONATOR(6);
-    UPDATE_DETONATOR(7);
-    UPDATE_DETONATOR(8);
-    UPDATE_DETONATOR(9);
-
-#undef UPDATE_DETONATOR
+    Detonator_Update(&Detonator[0]);
+    Detonator_Update(&Detonator[1]);
+    Detonator_Update(&Detonator[2]);
+    Detonator_Update(&Detonator[3]);
+    Detonator_Update(&Detonator[4]);
+    Detonator_Update(&Detonator[5]);
+    Detonator_Update(&Detonator[6]);
+    Detonator_Update(&Detonator[7]);
+    Detonator_Update(&Detonator[8]);
+    Detonator_Update(&Detonator[9]);
 }
 
 void Detonator_Detonate(DETONATOR_s *detonator) {
@@ -168,7 +164,7 @@ void Detonator_MoveCode(GameObject_s *object) {
             }
             object->field_0xe21 |= 0x80;
             object->field_0xde0 += FRAMETIME;
-            if (__builtin_expect(object->field_0xde0 >= 0.3f && object->field_0xde0 >= 1.0f, 1)) {
+            if (object->field_0xde0 >= 0.3f && object->field_0xde0 >= 1.0f) {
                 oldest_time = -1.0f;
                 DETONATOR_s *oldest = NULL;
                 if (Detonator[0].active != 0) {

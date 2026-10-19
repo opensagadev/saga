@@ -1430,7 +1430,7 @@ static __used__ void eduiFntPrintExGeneric(void *font, int x, int y, int alignme
 static __used__ void eduiFntPrintClipEx(void *font, float x, float y, int alignment, float clip_x, float clip_width,
                                         char *format, ...) {
     va_list arguments;
-    if (__builtin_expect(!edui_donotdraw, 1)) {
+    if (!edui_donotdraw) {
         char text[1024];
         i32 screen_x = static_cast<i32>(x * 16.0f);
         i32 screen_y = static_cast<i32>(y * 8.0f);
@@ -2328,9 +2328,11 @@ extern "C" {
         if (__builtin_expect(edui_cursor_buttons_db & EDUI_CURSOR_PRIMARY, 1)) {
             if (expander->changed)
                 expander->changed(menu, expander, 0);
-            if (edui_cursor_x >= expander->button_x && edui_cursor_y >= expander->button_y * 0.5f &&
-                edui_cursor_x < expander->button_x + expander->button_size &&
-                edui_cursor_y < (expander->button_y + expander->button_size) * 0.5f && expander->first_child) {
+            if (__builtin_expect(edui_cursor_x >= expander->button_x && edui_cursor_y >= expander->button_y * 0.5f &&
+                                     edui_cursor_x < expander->button_x + expander->button_size &&
+                                     edui_cursor_y < (expander->button_y + expander->button_size) * 0.5f &&
+                                     expander->first_child,
+                                 1)) {
                 if (!expander->open) {
                     expander->last_child->next = expander->next;
                     if (expander->next)
@@ -3930,7 +3932,7 @@ extern "C" {
                     i32 value_width = property->property_text
                                           ? static_cast<i32>(NuQFntPrintLenU(edui_font, property->property_text)) >> 4
                                           : 30;
-                    if (value_width > property_value_width)
+                    if (__builtin_expect(value_width > property_value_width, 1))
                         property_value_width = value_width;
                     item_text_width = value_width;
                     break;
@@ -3960,7 +3962,7 @@ extern "C" {
             width = property_width;
 
         for (eduiitem_s *item = menu->first; item; item = item->next) {
-            if (item->type == 17)
+            if (__builtin_expect(item->type == 17, 1))
                 static_cast<edui_prop_s *>(item)->label_width = static_cast<f32>(property_label_width + 1);
         }
         menu->width = width + padding;
@@ -4992,7 +4994,7 @@ extern "C" {
             if (item->type == 7)
                 eduiGradStageSetHSV(stage, cliph, clips, clipv);
             if (item->type == 8)
-                eduiGradStageSetHSV(stage, 0.0f, 0.0f, clipg);
+                eduiGradStageSetHSV(picker->selected_stage, 0.0f, 0.0f, clipg);
             if (picker->paste != nullptr)
                 picker->paste(menu, item, value);
         }
@@ -5576,13 +5578,13 @@ extern "C" {
                 return editor_return;
             if (ed_curr->deactivate)
                 ed_curr->deactivate();
-            if (result == 2)
+            if (__builtin_expect(result == 2, 1))
                 editor_return = 1;
             ed_module_active = 0;
             return editor_return;
         }
 
-        if (!ed_curr) {
+        if (__builtin_expect(!ed_curr, 0)) {
             ed_curr = ed_list;
             eduiSetActiveMenu(ed_main_menu);
             eduiSetDefaultActiveMenu(ed_main_menu);
@@ -5702,7 +5704,7 @@ extern "C" {
         if (configuration_file) {
             NuStrCpy(ed_levelfile, configuration_file);
             i32 file;
-            if (ed_levelfile[0] && (file = NuFileOpen(ed_levelfile, NUFILE_READ)) != 0) {
+            if (__builtin_expect(ed_levelfile[0] && (file = NuFileOpen(ed_levelfile, NUFILE_READ)) != 0, 1)) {
                 NuFileBeginBlkRead(file, 0x3032554e);
                 i32 block;
                 while ((block = NuFileBeginBlkRead(file, 0)) != 0) {
@@ -6071,7 +6073,7 @@ extern "C" {
             } else if (buttons == 3 || buttons == 4) {
                 movement.x += mouse_x * 0.0078125f;
                 movement.y -= mouse_y * 0.0078125f;
-            } else if (buttons == 1) {
+            } else if (__builtin_expect(buttons == 1, 0)) {
                 if (camera->freedoms & EDCAM_FREEDOM_PITCH) {
                     camera->pitch -= static_cast<i32>(mouse_y * 16.0f);
                     if (camera->pitch > 0x4000)
@@ -6371,7 +6373,7 @@ i32 EdFileOpen(char *filepath, NUFILEMODE mode) {
         return 0;
     }
 
-    if (edfile_pakfile != NULL) {
+    if (__builtin_expect(edfile_pakfile != NULL, 1)) {
         item_handle = NuFilePakGetItem(edfile_pakfile, filepath);
 
         if (item_handle != 0) {
@@ -6997,7 +6999,7 @@ i32 FS_FileNameFilter(char *name) {
                     if (match == NULL)
                         break;
                 }
-                if (match == NULL || (slot == 6 && filterblocks[i][72] != '\0'))
+                if (__builtin_expect(match == NULL || (slot == 6 && filterblocks[i][72] != '\0'), 0))
                     continue;
             }
             i32 dots = 0;
@@ -7104,7 +7106,7 @@ void FS_SetCursorToLastFileName() {
             FS_CurrentPos = entry;
             FS_CursorLine = 0;
             FS_CurrentPosFileNum = index;
-            if (index == 0 || index + 13 < FS_NumFiles) {
+            if (__builtin_expect(index == 0 || index + 13 < FS_NumFiles, 1)) {
                 return;
             }
             char *current = entry;
@@ -7152,8 +7154,9 @@ void FS_GetDirList(char *path, char *filter, char *filter_out) {
         next = FS_FileList + 10;
         while (i32 name_length = NuFileReadDir(directory, entry)) {
             char *name = entry + 0x18;
-            if (*reinterpret_cast<u16 *>(name) == '.' || (*reinterpret_cast<u32 *>(name) & 0xffffff) == 0x2e2e ||
-                !(entry[0] & 8)) {
+            if (__builtin_expect(*reinterpret_cast<u16 *>(name) == '.' ||
+                                     (*reinterpret_cast<u32 *>(name) & 0xffffff) == 0x2e2e || !(entry[0] & 8),
+                                 1)) {
                 continue;
             }
             if (next + name_length + 8 >= FS_FileList + sizeof(FS_FileList)) {
@@ -7187,7 +7190,7 @@ void FS_GetDirList(char *path, char *filter, char *filter_out) {
     if (directory != 0) {
         while (i32 name_length = NuFileReadDir(directory, entry)) {
             char *name = entry + 0x18;
-            if ((entry[0] & 8) || !FS_FileNameFilter(name)) {
+            if (__builtin_expect((entry[0] & 8) || !FS_FileNameFilter(name), 1)) {
                 continue;
             }
             if (next + name_length + 8 >= FS_FileList + sizeof(FS_FileList)) {
@@ -7448,11 +7451,16 @@ void edDrawLine(nuvec_s *, nuvec_s *, unsigned char, unsigned char, unsigned cha
 extern "C" {
 extern "C" void AddColourPick(eduimenu_s *parent, eduiitem_s *item, f32 *red, f32 *green, f32 *blue, u32 *rgba) {
     eduiMenuAttach(parent, colourmenu);
-    colourmenu->x = (item != nullptr ? item->x : parent->x) + 10;
-    i32 y = (item != nullptr ? item->y : parent->y) + 10;
+    if (item != nullptr) {
+        colourmenu->x = item->x + 10;
+        colourmenu->y = item->y + 10;
+    } else {
+        colourmenu->x = parent->x + 10;
+        colourmenu->y = parent->y + 10;
+    }
     i32 bottom = PS2_REZ_H - 20 - colourmenu->height;
-    colourmenu->y = y <= bottom ? y : bottom;
     cp_rgba = rgba;
+    colourmenu->y = colourmenu->y <= bottom ? colourmenu->y : bottom;
 
     f32 red_value;
     f32 green_value;

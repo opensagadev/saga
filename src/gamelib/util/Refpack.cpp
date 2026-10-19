@@ -668,44 +668,38 @@ i32 refpack(unsigned char *source, abi_long source_size, unsigned char *destinat
         const i32 input_index = source - input_start;
         i32 candidate_index = HashTable[hash];
         const i32 chain_limit = input_index >= 0x4000 ? input_index - 0x3fff : 0;
-        if (candidate_index < chain_limit) {
-            LinkArray[input_index & 0x3fff] = candidate_index;
-            HashTable[hash] = input_index;
-            ++source;
-            --source_size;
-            ++literal_count;
-            continue;
-        }
         u32 match_length = 2;
         u32 command_size = 2;
         u32 match_offset = 0;
 
-        do {
-            unsigned char *candidate = input_start + candidate_index;
-            if (candidate[match_length] == source[match_length]) {
-                const u32 length = GetMatchLength(source, candidate, MIN(source_size, 0x404));
-                if (length > match_length) {
-                    const u32 offset = input_index - 1 - candidate_index;
-                    u32 size;
-                    if (length <= 0xa && offset <= 0x3ff) {
-                        size = 2;
-                    } else if (length <= 0x43 && offset <= 0x3fff) {
-                        size = 3;
-                    } else {
-                        size = 4;
-                    }
-                    if (length + 4 - size > match_length + 4 - command_size) {
-                        match_length = length;
-                        match_offset = offset;
-                        command_size = size;
-                        if (length > 0x403) {
-                            break;
+        if (candidate_index >= chain_limit) {
+            do {
+                unsigned char *candidate = input_start + candidate_index;
+                if (candidate[match_length] == source[match_length]) {
+                    const u32 length = GetMatchLength(source, candidate, MIN(source_size, 0x404));
+                    if (length > match_length) {
+                        const u32 offset = input_index - 1 - candidate_index;
+                        u32 size;
+                        if (length <= 0xa && offset <= 0x3ff) {
+                            size = 2;
+                        } else if (length <= 0x43 && offset <= 0x3fff) {
+                            size = 3;
+                        } else {
+                            size = 4;
+                        }
+                        if (length + 4 - size > match_length + 4 - command_size) {
+                            match_length = length;
+                            match_offset = offset;
+                            command_size = size;
+                            if (length > 0x403) {
+                                break;
+                            }
                         }
                     }
                 }
-            }
-            candidate_index = LinkArray[candidate_index & 0x3fff];
-        } while (candidate_index >= chain_limit);
+                candidate_index = LinkArray[candidate_index & 0x3fff];
+            } while (candidate_index >= chain_limit);
+        }
 
         if (command_size < match_length) {
             while (literal_count > 3) {

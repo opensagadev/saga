@@ -182,7 +182,7 @@ u32 NuSoundSystem::GetFreeMemory(MemoryDiscipline disc) {
 }
 
 void *NuSoundSystem::_AllocMemory(MemoryDiscipline disc, u32 size, u32 align, const char *name) {
-    if (GetFreeMemory(disc) < size) {
+    if (__builtin_expect(GetFreeMemory(disc) < size, 0)) {
         return NULL;
     }
 
@@ -703,7 +703,7 @@ NuSoundSample *NuSoundSystem::AddSample(const char *name, FileType file_type, Nu
     if (feed_type == NuSoundSource::FeedType::ZERO) {
         sample = (NuSoundSample *)_AllocMemory(MemoryDiscipline::SCRATCH, 0x80, 4,
                                                "i:/SagaTouch-Android_9176564/nu2api.2013/nusound/nusound.cpp:646");
-        if (sample == NULL) {
+        if (__builtin_expect(sample == NULL, 1)) {
             return NULL;
         }
 

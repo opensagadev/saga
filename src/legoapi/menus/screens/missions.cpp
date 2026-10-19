@@ -180,7 +180,7 @@ void MenuUpdateMissions(MENU_s *menu) {
         if (MenuPacket.active_player[0]) {
             const u32 pressed = GamePad[0].buttons_pressed;
             if (pressed & GAMEPAD_MENUSELECT) {
-                if (!MenuPacket.active_player[1]) {
+                if (__builtin_expect(!MenuPacket.active_player[1], 0)) {
                     start = 1;
                     goto collected_input;
                 }
@@ -199,7 +199,7 @@ void MenuUpdateMissions(MENU_s *menu) {
                 }
                 MenuPacket.reserved_1[0] = 0;
                 GameAudio_PlaySfx(0x31, NULL, 0, 0);
-            } else if (MenuPacket.reserved_1[0] == 0 && MenuPacket.reserved_1[1] == 0) {
+            } else if (__builtin_expect(MenuPacket.reserved_1[0] == 0 && MenuPacket.reserved_1[1] == 0, 1)) {
                 const u32 directions = GamePad[0].unknown_10;
                 if ((directions & GAMEPAD_DLEFT) || (pressed & (GAMEPAD_DLEFT | GAMEPAD_TOGGLELEFT)))
                     left = 1;
@@ -214,7 +214,7 @@ void MenuUpdateMissions(MENU_s *menu) {
                     start = 1;
                     goto collected_input;
                 }
-                if (!MenuPacket.reserved_1[1]) {
+                if (__builtin_expect(!MenuPacket.reserved_1[1], 0)) {
                     MenuPacket.reserved_1[1] = 1;
                     if (MenuPacket.reserved_1[0]) {
                         start = 1;

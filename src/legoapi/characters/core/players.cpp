@@ -766,7 +766,7 @@ void Player_ToggleCharacter(GameObject_s *object, i32 direction, i32 sound) {
         GAMEPAD_s *pad = object->pad_gamepad;
         right = pad->buttons_pressed & right_mask;
         left = pad->buttons_pressed & left_mask;
-        if ((right != 0 && left != 0) || (left | right) == 0) {
+        if (__builtin_expect((right != 0 && left != 0) || (left | right) == 0, 0)) {
             if (!object->apiobj.player_controlled) {
                 return;
             }
@@ -847,14 +847,16 @@ void Player_ToggleCharacter(GameObject_s *object, i32 direction, i32 sound) {
                 if ((object->apiobj.flags_low & 0x80) == 0 || Cheats_CheckFlags(0x100) == 0) {
                     goto next_character;
                 }
-            } else if ((GCDataList[id].flags_094[3] & 1) == 0 && (collected == -1 || Collection_Got(id) == 0)) {
+            } else if (__builtin_expect(
+                           (GCDataList[id].flags_094[3] & 1) == 0 && (collected == -1 || Collection_Got(id) == 0), 1)) {
                 goto next_character;
             }
         }
-        if (object->apiobj.field_0x218 != 2000000.0f && object->apiobj.field_0x220 != 2000000.0f &&
-            object->apiobj.character_data->move_fn != Move_DEFAULT &&
-            CDataList[id].bounds_max_y - CDataList[id].bounds_min_y >=
-                object->apiobj.field_0x220 - object->apiobj.field_0x218) {
+        if (__builtin_expect(object->apiobj.field_0x218 != 2000000.0f && object->apiobj.field_0x220 != 2000000.0f &&
+                                 object->apiobj.character_data->move_fn != Move_DEFAULT &&
+                                 CDataList[id].bounds_max_y - CDataList[id].bounds_min_y >=
+                                     object->apiobj.field_0x220 - object->apiobj.field_0x218,
+                             0)) {
             GameAudio_PlaySfx(0x32, &object->apiobj.collision_position, 0, 0);
             goto next_character;
         }

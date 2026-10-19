@@ -449,7 +449,7 @@ extern "C" void NuShaderObjectGLSLProbeSemantics(NUSHADEROBJECT *shader) {
             usage_mask.semantics[semantic >> 5] |= 1u << (semantic & 31);
 
             const GLSLTypeInfo *type_info = GetGLSLTypeInfo(type);
-            if (type_info != NULL) {
+            if (__builtin_expect(type_info != NULL, 1)) {
                 parameter.parameter_type = type_info->parameter_type;
                 parameter.setter_class = type_info->setter_class;
                 parameter.element_count = type_info->element_count;
@@ -800,13 +800,13 @@ static void NuShaderObjectGLSLSetCustomSetterParameters(nushaderobjectglsl_s *gl
                     if (values52[1] <= 0.0f) {
                         values52[1] = 0.0f;
                     }
-                } else if (g_alphaFunc == 3) {
+                } else if (__builtin_expect(g_alphaFunc == 3, 0)) {
                     values52[0] = -1.0f;
                     values52[1] = static_cast<f32>(0u - g_alphaRef) * (1.0f / 255.0f);
                 } else if (g_alphaFunc == 5) {
                     values52[0] = 1.0f;
                     values52[1] = alpha_ref;
-                } else if (g_alphaFunc == 6) {
+                } else if (__builtin_expect(g_alphaFunc == 6, 0)) {
                     values52[0] = 1.0f;
                     values52[1] = alpha_ref + (1.0f / 255.0f);
                 } else {
@@ -895,7 +895,7 @@ extern "C" void NuShaderObjectGLSLSetupMaterial(NUSHADEROBJECT *shader, struct n
                         BIND_MATERIAL_2D(mtl->shader_desc.field_1e8);
                         break;
                     case 18:
-                        if (NuWindCurrent(nuapi.wind) >= 0) {
+                        if (__builtin_expect(NuWindCurrent(nuapi.wind) >= 0, 0)) {
                             const u32 texture_unit = static_cast<u16>(parameter.location) & 0x7ff;
                             NuTexSetTextureWithStagePS(NuTexGetNative(NuWindCurrent(nuapi.wind)), texture_unit);
                         }
@@ -1021,7 +1021,7 @@ extern "C" void NuShaderObjectGLSLSetupTextureStates(NUSHADEROBJECT *shader, num
                 NuCheckGLErrorsFL(source, 0x4b5);
                 break;
             case 18:
-                if (NuWindCurrent(nuapi.wind) >= 0) {
+                if (__builtin_expect(NuWindCurrent(nuapi.wind) >= 0, 1)) {
                     const u32 unit = static_cast<u16>(parameter.location) & 0x7ff;
                     NuTexSetTextureWithStagePS(NuTexGetNative(NuWindCurrent(nuapi.wind)), unit);
                     REPEAT_STATE();

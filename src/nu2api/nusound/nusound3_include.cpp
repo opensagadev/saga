@@ -560,7 +560,7 @@ void NuSound3SampleLoadThread(void *arg) {
         g_NuSoundLoadTrigger.a = g_NuSoundLoadTrigger.b;
         pthread_mutex_unlock(&g_NuSoundLoadTrigger.mutex);
 
-        if (g_NuSoundLoadBits != NULL) {
+        if (__builtin_expect(g_NuSoundLoadBits != NULL, 0)) {
             g_NuSoundLoadCriticalSection.Lock();
 
             for (u32 i = 0; i < g_NuSoundSamples.length; i++) {
@@ -1664,12 +1664,14 @@ void NuSound3CreateVoice(nuvec_s *pos, i32 index, f32 falloff_a, f32 falloff_b, 
                          f32 pitch, bool loop) {
     f32 oldest_time;
     (void)volume_right;
-    if (!(NuSound.GetNumAvailableOutputDevices() < 1 || index < 0 ||
-          index >= static_cast<i32>(g_NuSoundSamples.length))) {
+    if (__builtin_expect(!(NuSound.GetNumAvailableOutputDevices() < 1 || index < 0 ||
+                           index >= static_cast<i32>(g_NuSoundSamples.length)),
+                         1)) {
         NuSoundSource *source = g_NuSoundSamples.data[index].sample;
         NuSoundSample *sample = (NuSoundSample *)source;
-        if (sample == NULL || sample->GetLoadState() != NuSoundSample::LoadState::LOADED ||
-            sample->GetResourceCount() < 1) {
+        if (__builtin_expect(sample == NULL || sample->GetLoadState() != NuSoundSample::LoadState::LOADED ||
+                                 sample->GetResourceCount() < 1,
+                             0)) {
             return;
         }
 
@@ -1681,13 +1683,13 @@ void NuSound3CreateVoice(nuvec_s *pos, i32 index, f32 falloff_a, f32 falloff_b, 
                 source_voice_count++;
             }
         }
-        if (source_voice_count > 2 || in_flight > 15) {
+        if (__builtin_expect(source_voice_count > 2 || in_flight > 15, 0)) {
             if (loop || g_NuSoundSamples.data[index].field7_0x1c == 0 || source_voice_count <= 2) {
                 return;
             }
 
             NuSoundVoice *oldest_voice = NuSound.GetOldestVoice(sample, oldest_time);
-            if (oldest_voice != NULL) {
+            if (__builtin_expect(oldest_voice != NULL, 0)) {
                 NuSound3StopVoice(oldest_voice);
             }
         }
@@ -1724,7 +1726,7 @@ extern "C" void NuSound3Play3dLoopSfx(nuvec_s *position, i32 sample_index, f32 f
     }
 
     entry->pause_counter = 0;
-    if (entry->weak_ptr.obj != NULL) {
+    if (__builtin_expect(entry->weak_ptr.obj != NULL, 1)) {
         reinterpret_cast<NuSoundVoice *>(entry->weak_ptr.obj)->SetPosition(reinterpret_cast<VuVec *>(position));
         reinterpret_cast<NuSoundVoice *>(entry->weak_ptr.obj)->SetVolume(PS2VolumeToScalar(volume_left));
         reinterpret_cast<NuSoundVoice *>(entry->weak_ptr.obj)->SetPitch(pitch);
@@ -2308,7 +2310,7 @@ i32 NuSound3PlayStereoV(NUSOUNDPLAYTOK token, ...) {
     if (streaming_sample->GetThreadQueueCount() < 1) {
         NuSoundStream *stream_ptr = g_NuSoundStreams[stream_index];
         if (stream_ptr != NULL) {
-            if (stream_ptr->stream != streaming_sample) {
+            if (__builtin_expect(stream_ptr->stream != streaming_sample, 1)) {
                 NuSound3StopStereoStream(stream_index);
             }
 
@@ -2316,7 +2318,7 @@ i32 NuSound3PlayStereoV(NUSOUNDPLAYTOK token, ...) {
             if ((load_state == NuSoundSample::LoadState::NOT_LOADED) && stream_ptr->stream->GetResourceCount() == 0) {
                 delete stream_ptr;
                 g_NuSoundStreams[stream_index] = NULL;
-            } else if (g_NuSoundStreams[stream_index] != NULL) {
+            } else if (__builtin_expect(g_NuSoundStreams[stream_index] != NULL, 0)) {
                 return 0;
             }
         }
@@ -2331,8 +2333,8 @@ i32 NuSound3PlayStereoV(NUSOUNDPLAYTOK token, ...) {
             node->ps2volume = volume_bits;
             node->pending_start = start_voice;
 
-            streaming_sample->sound_buffer1 = &g_NuSoundStreamBuffers[stream_index * 2];
-            streaming_sample->sound_buffer2 = &g_NuSoundStreamBuffers[stream_index * 2 + 1];
+            streaming_sample->sound_buffers[0] = &g_NuSoundStreamBuffers[stream_index * 2];
+            streaming_sample->sound_buffers[1] = &g_NuSoundStreamBuffers[stream_index * 2 + 1];
 
             streaming_sample->Reference();
             g_NuSoundStreamer->RequestCue(streaming_sample, voice_loop, start_offset, false);
@@ -2437,7 +2439,7 @@ i32 NuMusic::StopTrack(u32 clazz, i32 fade) {
     }
 
     Track *tracks[6];
-    if (this->album->GetTracks(clazz, tracks) == 0) {
+    if (__builtin_expect(this->album->GetTracks(clazz, tracks) == 0, 0)) {
         return 0;
     }
 
@@ -2451,7 +2453,7 @@ i32 NuMusic::StopTrack(u32 clazz, i32 fade) {
         if (voice == NULL) {
             continue;
         }
-        if (static_cast<u32>(voice->status - VOICE_STATUS_STOPPING) <= 1) {
+        if (__builtin_expect(static_cast<u32>(voice->status - VOICE_STATUS_STOPPING) <= 1, 0)) {
             NuSound3StopStereoStream(voice->stream_index);
             voice->SetStatusFn(VOICE_STATUS_NONE, 0x46a);
             result = 1;
@@ -2741,7 +2743,7 @@ i32 NuMusic::CueTrack(u32 clazz) {
         return -2;
     }
     Track *track = this->album->GetTrack(clazz);
-    if (track == NULL || track->file_indexes[this->track_index] == -1) {
+    if (__builtin_expect(track == NULL || track->file_indexes[this->track_index] == -1, 0)) {
         return -3;
     }
     Voice *voice = FindVoiceByTrack(track);

@@ -3476,7 +3476,7 @@ static i32 CreateTimeBar(VARIPTR *buffer, i32 *colours, i32 slot_count) {
         NuTimeBar_SetList[list_index] = timebar;
     }
 
-    if (colours != NULL) {
+    if (__builtin_expect(colours != NULL, 0)) {
         std::memcpy(timebar->colours, colours, static_cast<usize>(slot_count) * sizeof(i32));
     } else {
         std::memcpy(timebar->colours, NuTimeBar_DefaultColours, static_cast<usize>(slot_count) * sizeof(i32));
@@ -4753,7 +4753,9 @@ bool OccluderSet::IsOccludedSphere(nuvec_s const *center, float radius) {
         normal.x = end->y - start->y;
         normal.z = normal.w = 0.0f;
         NuVecNorm(reinterpret_cast<NUVEC *>(&normal), reinterpret_cast<NUVEC *>(&normal));
-        if ((projected.x - start->x) * normal.x + (projected.y - start->y) * normal.y + 0.0f - screen_radius < 0.0f)
+        if (__builtin_expect(
+                (projected.x - start->x) * normal.x + (projected.y - start->y) * normal.y + 0.0f - screen_radius < 0.0f,
+                0))
             continue;
         start = &v[(!(winding > 0.0f)) + 1];
         end = &v[(winding > 0.0f) + 1];
@@ -4815,7 +4817,7 @@ bool OccluderSet::IsOccludedOBB(nuvec_s const *minimum, nuvec_s const *maximum, 
     }
     i32 limit = static_cast<i32>(count) < 100 ? static_cast<i32>(count) : 100;
     for (i32 i = 0; i != limit; ++i) {
-        if (indices[i] == 0xffffffffu)
+        if (__builtin_expect(indices[i] == 0xffffffffu, 0))
             continue;
         OccluderRecord &record = occluders[indices[i]];
         if (record.depth > min_depth - 2.0f)
@@ -4836,13 +4838,13 @@ bool OccluderSet::IsOccludedOBB(nuvec_s const *minimum, nuvec_s const *maximum, 
             for (u32 corner = 0; corner < 8; ++corner) {
                 float distance =
                     (corners[corner].x - v[start].x) * normal.x + (corners[corner].y - v[start].y) * normal.y + 0.0f;
-                if (distance < 0.01f) {
+                if (__builtin_expect(distance < 0.01f, 0)) {
                     inside = false;
                     break;
                 }
             }
         }
-        if (inside)
+        if (__builtin_expect(!!(inside), 1))
             return true;
     }
     return false;
@@ -5310,12 +5312,18 @@ extern "C" {
     void NuDynamicLightTestShadowExtrusionsExtent(NuDynamicLight *light, const NUVEC *center, const NUVEC *extent) {
         VuVec minimum;
         VuVec maximum;
-        minimum.x = center->x - extent->x;
-        minimum.y = center->y - extent->y;
-        minimum.z = center->z - extent->z;
-        maximum.x = center->x + extent->x;
-        maximum.y = center->y + extent->y;
-        maximum.z = center->z + extent->z;
+        const f32 extent_x = extent->x;
+        const f32 extent_y = extent->y;
+        const f32 extent_z = extent->z;
+        const f32 center_x = center->x;
+        const f32 center_y = center->y;
+        const f32 center_z = center->z;
+        minimum.x = center_x - extent_x;
+        minimum.y = center_y - extent_y;
+        minimum.z = center_z - extent_z;
+        maximum.x = extent_x + center_x;
+        maximum.y = extent_y + center_y;
+        maximum.z = extent_z + center_z;
         light->testShadowExtrusions(minimum, maximum);
     }
 
@@ -12582,10 +12590,15 @@ extern "C" {
 void OcclusionManager::AddOccluder(nuvec_s const *minimum, nuvec_s const *maximum, numtx_s const *matrix) {
     if (!initialized || !enabled)
         return;
-    NUVEC4 corners[8] = {{minimum->x, maximum->y, minimum->z, 1.0f}, {maximum->x, maximum->y, maximum->z, 1.0f},
-                         {maximum->x, minimum->y, maximum->z, 1.0f}, {minimum->x, minimum->y, minimum->z, 1.0f},
-                         {minimum->x, maximum->y, maximum->z, 1.0f}, {maximum->x, maximum->y, minimum->z, 1.0f},
-                         {maximum->x, minimum->y, minimum->z, 1.0f}, {minimum->x, minimum->y, maximum->z, 1.0f}};
+    const f32 min_x = minimum->x;
+    const f32 min_y = minimum->y;
+    const f32 min_z = minimum->z;
+    const f32 max_x = maximum->x;
+    const f32 max_y = maximum->y;
+    const f32 max_z = maximum->z;
+    NUVEC4 corners[8] = {{min_x, max_y, min_z, 1.0f}, {max_x, max_y, max_z, 1.0f}, {max_x, min_y, max_z, 1.0f},
+                         {min_x, min_y, min_z, 1.0f}, {min_x, max_y, max_z, 1.0f}, {max_x, max_y, min_z, 1.0f},
+                         {max_x, min_y, min_z, 1.0f}, {min_x, min_y, max_z, 1.0f}};
     for (u32 i = 0; i < 8; ++i) {
         NUVEC *vertex = reinterpret_cast<NUVEC *>(&corners[i]);
         NuVecMtxTransform(vertex, vertex, const_cast<NUMTX *>(matrix));
@@ -14951,7 +14964,7 @@ extern "C" i32 NuRndrHighResScreenGrab(char *prefix, f32 scale, f32 a, f32 b, f3
         return 1;
     }
     NuRndrScreenGrabTileBegin(&tile);
-    if (tile == NULL) {
+    if (__builtin_expect(tile == NULL, 0)) {
         NuRndrScreenGrabTileDeInit(&params);
         dump_state = -1;
         NuFileClose(fh);
@@ -17756,7 +17769,7 @@ extern "C" void NuDisplayListSwapBuffersEndFrame(void) {
         for (i32 m = 0; m < sp->nmtls; ++m) {
             i32 mi = sp->mtl_first + m;
             NUDISPLAYLIST *dl = sc->dlist_mtls[mi];
-            if (dl->mtl_item->id != kItemId_Cnt)
+            if (__builtin_expect(dl->mtl_item->id != kItemId_Cnt, 0))
                 continue;
 
             NUMTL *mtl = sc->mtls[mi];
@@ -21097,7 +21110,7 @@ extern "C" void NuTimeBarSetRender(i32 set) {
     TimeBarSet *timebar = NuTimeBar_SetList[set + 1];
     f32 gpu_frames = 0.0f;
     if (set == -1) {
-        if (NuTimeBar_GpuFrameOutEnabled != 0) {
+        if (__builtin_expect(NuTimeBar_GpuFrameOutEnabled != 0, 0)) {
             i32 buffer = timebar->toggle_flags[1];
             u32 gpu_time = static_cast<u32>(timebar->accumulators[buffer][1]);
             gpu_frames = timebar_unsigned_float(gpu_time) * nuapi.fps / 1000000.0f;

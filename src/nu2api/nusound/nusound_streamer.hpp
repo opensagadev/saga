@@ -28,8 +28,7 @@ class NuSoundLoader;
 // voice round-robin while the loader keeps them filled on the streamer thread.
 class NuSoundStreamingSample : public NuSoundSample {
   public:
-    NuSoundBuffer *sound_buffer1;
-    NuSoundBuffer *sound_buffer2;
+    NuSoundBuffer *sound_buffers[2];
 
     u8 field_0x88; // set once this sample allocated its own buffers
 

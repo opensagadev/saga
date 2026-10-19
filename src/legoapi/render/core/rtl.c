@@ -2679,17 +2679,19 @@ static void edrtlBurnTransitionsMenu(eduimenu_s *parent, eduiitem_s *, u32) {
     edrtl_burn_transitions_menu =
         eduiMenuCreate(70, 70, 250, 300, ed_fnt, edrtlCancelBurnTransitionsMenu, "Transitions");
     if (edrtl_edit_burnset != NULL && edrtl_burn_transitions_menu != NULL) {
-        burnset_s *set = edrtl_edit_burnset;
 #define BURN_TRANSITION_SLIDER(callback, minimum, maximum, value, label)                                               \
     eduiMenuAddItem(edrtl_burn_transitions_menu,                                                                       \
                     eduiItemSliderCreate(0, edblack, 0, callback, minimum, maximum, value, label))
-        BURN_TRANSITION_SLIDER(edrtlSetBurnoutNormalRate, 0.01f, 4.99f, set->field_b8, "Normal Rate");
-        BURN_TRANSITION_SLIDER(edrtlSetBurnoutOvershootRate, 0.01f, 4.99f, set->field_bc, "Overshoot Rate");
-        BURN_TRANSITION_SLIDER(edrtlSetBurnoutOvershootCutin, 0.0f, 2.0f, set->field_c0, "Overshoot Cutin");
-        BURN_TRANSITION_SLIDER(edrtlSetBurnoutOvershootAmount, 0.0f, 2.0f, set->field_c4, "Overshoot Amount");
-        BURN_TRANSITION_SLIDER(edrtlSetBurnoutOverbrightCap, 0.0f, 2.0f, set->field_c8,
+        BURN_TRANSITION_SLIDER(edrtlSetBurnoutNormalRate, 0.01f, 4.99f, edrtl_edit_burnset->field_b8, "Normal Rate");
+        BURN_TRANSITION_SLIDER(edrtlSetBurnoutOvershootRate, 0.01f, 4.99f, edrtl_edit_burnset->field_bc,
+                               "Overshoot Rate");
+        BURN_TRANSITION_SLIDER(edrtlSetBurnoutOvershootCutin, 0.0f, 2.0f, edrtl_edit_burnset->field_c0,
+                               "Overshoot Cutin");
+        BURN_TRANSITION_SLIDER(edrtlSetBurnoutOvershootAmount, 0.0f, 2.0f, edrtl_edit_burnset->field_c4,
+                               "Overshoot Amount");
+        BURN_TRANSITION_SLIDER(edrtlSetBurnoutOverbrightCap, 0.0f, 2.0f, edrtl_edit_burnset->field_c8,
                                "edrtl_edit_burnset->Overbright Cap");
-        BURN_TRANSITION_SLIDER(edrtlSetBurnoutOverdarkCap, 0.0f, 2.0f, set->field_cc,
+        BURN_TRANSITION_SLIDER(edrtlSetBurnoutOverdarkCap, 0.0f, 2.0f, edrtl_edit_burnset->field_cc,
                                "edrtl_edit_burnset->Overdark Cap");
 #undef BURN_TRANSITION_SLIDER
         eduiMenuAttach(parent, edrtl_burn_transitions_menu);

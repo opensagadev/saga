@@ -308,9 +308,9 @@ ADDGIZMOTYPE *Attractos_RegisterGizmo(i32 type_id) {
 void Attracto_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
     NUVEC position;
     char text[32];
-    bool available = false;
-    if ((object->apiobj.flags_low & 0x80) != 0 && object->suit != NULL &&
-        (static_cast<SUIT_s *>(object->suit)->flags & 0x80) != 0) {
+    i32 available = 0;
+    if (__builtin_expect((object->apiobj.flags_low & 0x80) != 0, 1) && object->suit != NULL &&
+        __builtin_expect((static_cast<SUIT_s *>(object->suit)->flags & 0x80) != 0, 1)) {
 
         sprintf(text, "%i", object->field_0x106e);
 
@@ -318,9 +318,9 @@ void Attracto_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
         NuVecAdd(&position, &position, &object->apiobj.position);
         GAMEMESSAGE_s *message = static_cast<GAMEMESSAGE_s *>(
             AddGameMessage(text, &position, 1.3f, NULL, 0.0f, 255, 255, 255, 0x1087, 0.0f));
-        if (__builtin_expect(message != NULL, 0))
+        if (__builtin_expect(message != NULL, 1))
             message->alpha = static_cast<i32>((0.2f * game_pulse + 0.6f) * 128.0f);
-        available = true;
+        available = 1;
     }
     if (object->character_context == 0x53) {
         if (object->apiobj.character_model->model_data_b[object->context_animation] != NULL &&
@@ -329,7 +329,7 @@ void Attracto_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
         if ((object->pad_gamepad->buttons_held & GAMEPAD_SPECIAL) != 0) {
             object->context_animation_timer += FRAMETIME;
             object->airborne_action_duration -= FRAMETIME;
-            if (__builtin_expect(!(object->airborne_action_duration <= 0.0f), 1))
+            if (!(object->airborne_action_duration <= 0.0f))
                 return;
             if (object->field_0x106e != 0) {
                 ATTRACTO_s *attracto = static_cast<ATTRACTO_s *>(object->field_0x788);

@@ -1735,15 +1735,15 @@ i32 GizForce_FindBestForceTarget(GIZFORCESYS_s *force_sys, GameObject_s *object)
             }
             continue;
         }
-        if (delta.x * facing_x + delta.z * facing_z < 0.0f ||
-            (object->force_glow_previous != NULL && object->force_glow_previous != force))
-            continue;
-        possible_forcetargets[count].force = force;
-        possible_forcetargets[count].animation = NULL;
-        possible_forcetargets[count].distance = distance;
-        possible_forcetargets[count].index =
-            force->anim_set->objects != NULL ? force->anim_set->objects - force_sys->anim_pool->objects : -1;
-        ++count;
+        if (!(delta.x * facing_x + delta.z * facing_z < 0.0f) &&
+            (object->force_glow_previous == NULL || object->force_glow_previous == force)) {
+            possible_forcetargets[count].force = force;
+            possible_forcetargets[count].animation = NULL;
+            possible_forcetargets[count].distance = distance;
+            possible_forcetargets[count].index =
+                force->anim_set->objects != NULL ? force->anim_set->objects - force_sys->anim_pool->objects : -1;
+            ++count;
+        }
     }
     if (count == 0)
         return 0;
@@ -1779,8 +1779,8 @@ i32 GizForce_FindBestForceTarget(GIZFORCESYS_s *force_sys, GameObject_s *object)
                     if (!clear && (oldest->force->runtime_flags & 1) != 0 && TerrainPlatId() != -1) {
                         for (GAMEANIMOBJ_s *animation = oldest->force->anim_set->objects; animation != NULL;
                              animation = animation->next) {
-                            if (static_cast<GIZFORCEANIMDATA_s *>(animation->object_data)->platform_id ==
-                                TerrainPlatId()) {
+                            const GIZFORCEANIMDATA_s *data = static_cast<GIZFORCEANIMDATA_s *>(animation->object_data);
+                            if (__builtin_expect(data->platform_id == TerrainPlatId(), 1)) {
                                 clear = 1;
                                 break;
                             }

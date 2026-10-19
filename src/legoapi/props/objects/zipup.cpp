@@ -305,7 +305,7 @@ void ZipUps_Reset(void *world_ptr, void *, void *progress_ptr) {
 
             NewTerrPlatformsOff();
             f32 ground_height = GameShadow(NULL, &zipup->lower_position, 5.0f, -1);
-            if (ground_height != 2000000.0f) {
+            if (__builtin_expect(ground_height != 2000000.0f, 0)) {
                 zipup->lower_ground_height = ground_height + 0.005f;
                 FindAnglesZX(&ShadNorm, &zipup->lower_ground_x_rotation, &zipup->lower_ground_z_rotation);
             } else {
@@ -512,7 +512,7 @@ static void ZipUps_Draw(void *world_ptr, void *, float) {
                 continue;
             }
 
-            if (world->lev_objs[ZIPUP_SPECIAL_GROUND_SWIRL].active != 0) {
+            if (__builtin_expect(world->lev_objs[ZIPUP_SPECIAL_GROUND_SWIRL].active != 0, 0)) {
                 NuMtxSetRotationY(&matrices[ZIPUP_MATRIX_LOWER_SWIRL], spin_angle);
                 NuMtxRotateZ(&matrices[ZIPUP_MATRIX_LOWER_SWIRL], zipup->lower_ground_z_rotation);
                 NuMtxRotateX(&matrices[ZIPUP_MATRIX_LOWER_SWIRL], zipup->lower_ground_x_rotation);
@@ -564,7 +564,7 @@ ZIPUP *ZipUp_FindNearest(WORLDINFO_s *world, nuvec_s *position, float radius, fl
     ZIPUP *nearest = NULL;
     ZIPUP *zipup = world->zipups;
     for (i32 i = 0; i < world->zipup_count; ++i, ++zipup) {
-        if (zipup != NULL && !ZipUp_CanUse(zipup, object))
+        if (__builtin_expect(zipup != NULL && !ZipUp_CanUse(zipup, object), 0))
             continue;
         float candidate = NuVecDistSqr(position, &zipup->lower_position, NULL);
         if (candidate < nearest_distance) {
@@ -828,7 +828,7 @@ void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
     NUVEC *heading = start->x == hook->x && start->z == hook->z ? destination : hook;
     api.movement_facing_angle = NuAtan2D(heading->x - start->x, heading->z - start->z);
     api.velocity.y = 0.0f;
-    if (__builtin_expect(api.character_data->game_character->field275_0x116 == 2, 1))
+    if (api.character_data->game_character->field275_0x116 == 2)
         FastWeaponOut(object, 1);
     object->context_animation_timer = 0.0f;
     PlaySfx("GrapAttach", &api.upper_position);
@@ -935,7 +935,7 @@ void InitRopeMtl(char *name, variptr_u *buffer, variptr_u *buffer_end) {
     NuStrCat(path, name);
     buffer->addr = ALIGN(buffer->addr, 16);
     ropemtl->tex_id = NuTexRead(path, buffer, *buffer_end);
-    if (ropemtl->tex_id == 0) {
+    if (__builtin_expect(ropemtl->tex_id == 0, 0)) {
         NuMtlDestroy(ropemtl);
         ropemtl = NULL;
     } else {

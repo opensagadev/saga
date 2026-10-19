@@ -70,7 +70,7 @@ static void D_cam_lookatplayers(NUFPAR *) {
 }
 
 static void D_spline(NUFPAR *parser) {
-    if (NuFParGetWord(parser) == 0 || NuStrLen(parser->word_buf) > 63) {
+    if (__builtin_expect(NuFParGetWord(parser) == 0 || NuStrLen(parser->word_buf) > 63, 1)) {
         return;
     }
 
@@ -394,7 +394,7 @@ i32 StartDoorPositions(void) {
         return 0;
     }
     DOOR_s *a = WORLD->doors;
-    if (a != NULL && WORLD->door_count > 0) {
+    if (__builtin_expect(a != NULL && WORLD->door_count > 0, 1)) {
         i32 i = 0;
         do {
             if (a->spline != NULL && NuStrICmp(a->name, Door_ExitName) == 0) {
@@ -497,7 +497,7 @@ void Door_GoThrough(WORLDINFO_s *world, DOOR_s *door, i32 player_triggered) {
     Door_NextSock = static_cast<i8>(door->next_sock);
     Door_SetCutCam(door);
     ResetBits |= RESETBIT_DOOR_TRANSITION;
-    if (NewLData != NULL && NewLData != world->current_level) {
+    if (__builtin_expect(NewLData != NULL && NewLData != world->current_level, 1)) {
         if (world->area == HUB_ADATA) {
             Hub_ActivateDoorMenu(&NewLData);
         } else if (NewLData->area_index == world->level_sub_id) {
@@ -517,7 +517,8 @@ void Doors_Check(WORLDINFO_s *world, GameObject_s *object) {
         !(LEGOCONTEXT_DOOMED != -1 && LEGOCONTEXT_DOOMED == static_cast<i8>(object->field_0x7a5)) && NewLData == NULL) {
 
         DOOR_s *doors = WORLD->doors;
-        if (doors == NULL || (object->apiobj.field_0x1f4 & APIOBJECT_STATE_FLAG_IGNORE_DOORS) != 0) {
+        if (__builtin_expect(doors == NULL || (object->apiobj.field_0x1f4 & APIOBJECT_STATE_FLAG_IGNORE_DOORS) != 0,
+                             0)) {
             return;
         }
 
@@ -600,7 +601,7 @@ DOOR_s *Door_FindByIndex(WORLDINFO_s *world, i32 area, i32 level, NUVEC *positio
     DOOR_s *best = NULL;
     f32 best_distance = 1000000.0f;
     for (i32 i = 0; i < world->door_count; ++i, ++door) {
-        if ((door->flags & 4) != 0 || door->level == -1)
+        if (__builtin_expect((door->flags & 4) != 0 || door->level == -1, 0))
             continue;
         if ((area != -1 && LDataList[door->level].area_index == area) || (level != -1 && door->level == level)) {
             if (position == NULL)

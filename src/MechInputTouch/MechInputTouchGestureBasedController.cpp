@@ -694,7 +694,7 @@ __attribute__((optimize("no-tree-slp-vectorize"))) bool MechInputTouchGestureBas
 
     VuVec touch_position(holder.down_position.x, holder.down_position.y, 0.0f, 1.0f);
     MechObjectInterface *target = holder.target_object.Get();
-    if (target == NULL)
+    if (__builtin_expect(target == NULL, 0))
         target = holder.previous_target_object.Get();
     if (target == NULL)
         target = MechInputTouchSystem::FindTargetObject(object, touch_position, 0x80, NULL, &temporary_position);
@@ -752,7 +752,7 @@ __attribute__((optimize("no-tree-slp-vectorize"))) bool MechInputTouchGestureBas
         StartNewTask(new MechTouchTaskPlannedDoubleClickGoTo(*this, target), holder, false, true);
         return true;
     }
-    if ((object.apiobj.character_data->model_flags & 8) == 0)
+    if (__builtin_expect((object.apiobj.character_data->model_flags & 8) == 0, 1))
         return OnClick(object, holder);
 
     if (attack_jump)

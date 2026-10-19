@@ -140,11 +140,11 @@ bool NuSoundBuffer::IsAllocated() const {
 
 i32 NuSoundBuffer::Allocate(u64 size, NuSoundSystem::MemoryDiscipline disc) {
     if (IsAllocated()) {
-        if (size <= this->size) {
+        if (__builtin_expect(size <= this->size, 1)) {
             return 1;
         }
     }
-    if (IsAllocated()) {
+    if (__builtin_expect(!!(IsAllocated()), 0)) {
         Free();
     }
 

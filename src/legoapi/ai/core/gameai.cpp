@@ -885,7 +885,12 @@ void GameCreatureOpponentSelection(AISYS_s *system, i32 count, APIOBJECT_s **obj
                         distance = NuVecDist(&baddy->position, &goody->position, &difference);
                     GameObject_s *baddy_object = baddy->objptr;
                     i16 baddy_id = baddy_object->id;
-                    if (baddy_id != id_UGNAUGHT && baddy_id != id_JAWA) {
+                    if (baddy_id == id_UGNAUGHT || baddy_id == id_JAWA) {
+                        if (!ZapTarget(goody->objptr))
+                            baddy->objptr->ai_opponent_exclusion_mask |= (u64)1 << goody->field_0x289;
+                        baddy_object = baddy->objptr;
+                        baddy_id = baddy_object->id;
+                    } else {
                         if (!(goody->character_data->model_flags & 0x80000)) {
                             if (baddy_object->only_attack_players && goody->objptr != player &&
                                 goody->objptr != player2) {
@@ -896,11 +901,6 @@ void GameCreatureOpponentSelection(AISYS_s *system, i32 count, APIOBJECT_s **obj
                         } else {
                             baddy_object->ai_opponent_exclusion_mask |= (u64)1 << goody->field_0x289;
                         }
-                    } else {
-                        if (!ZapTarget(goody->objptr))
-                            baddy->objptr->ai_opponent_exclusion_mask |= (u64)1 << goody->field_0x289;
-                        baddy_object = baddy->objptr;
-                        baddy_id = baddy_object->id;
                     }
                     GameObject_s *goody_object = goody->objptr;
                     if (!((baddy_object->ai_opponent_exclusion_mask >> goody->field_0x289) & 1)) {
@@ -2232,12 +2232,12 @@ void GameAIProcess() {
                             object->input_toggle_hold_time = 0.25f;
                     }
                 }
-            } else if ((object->ai.capabilities & (LEGO_AIPATHCNX_R2D2GLIDE | LEGO_AIPATHCNX_JUMP)) != 0 &&
-                       object->field_0xe31 == 0) {
+            } else if ((object->ai.capabilities & (LEGO_AIPATHCNX_R2D2GLIDE | LEGO_AIPATHCNX_JUMP)) == 0 ||
+                       object->field_0xe31 != 0) {
+                object->ai.field_0x1e6 |= AIPACKET_RUNTIME_USING_PATH_WAYPOINT;
+            } else {
                 object->pad_gamepad->buttons_pressed |= GAMEPAD_JUMP;
                 object->apiobj.movement_stuck_time = 0.0f;
-            } else {
-                object->ai.field_0x1e6 |= AIPACKET_RUNTIME_USING_PATH_WAYPOINT;
             }
             goto ai_route;
         ai_wall_shuffle: {

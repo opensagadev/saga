@@ -272,7 +272,7 @@ NuSoundMemoryBuffer *NuSoundMemoryManager::Alloc(u32 size) {
     pthread_mutex_lock(&this->mutex);
 
     NuSoundMemoryBuffer *best = NULL;
-    if (alloc_size <= this->GetFree()) {
+    if (__builtin_expect(alloc_size <= this->GetFree(), 1)) {
         for (NuSoundMemoryBuffer *buf = this->free_list_head; buf != NULL;) {
             if (!buf->IsAlloced()) {
                 u32 buf_size = buf->GetSize();
@@ -621,7 +621,7 @@ NuSoundMemoryBuffer *NuSoundMemoryManager::SwapOrMergeAdjacentBuffers(NuSoundMem
     buffer->SetAddress(buffer_address + next_size);
     next->SetAddress(buffer_address);
 
-    if (buffer_size >= next_size) {
+    if (__builtin_expect(buffer_size >= next_size, 0)) {
         memmove(buffer_address, next_address, next_size);
     } else {
         i32 remaining = next_size;

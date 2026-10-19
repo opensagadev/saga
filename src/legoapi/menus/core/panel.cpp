@@ -146,7 +146,7 @@ i32 Tag_UpdateHint(HINT_s *hint) {
         }
         case 603: {
             if (!LSW_HintConditions.panel_used) {
-                if (Tag_DoneFirst > 1)
+                if (__builtin_expect(Tag_DoneFirst > 1, 0))
                     Tag_DoneFirst = 1;
                 return 0;
             }

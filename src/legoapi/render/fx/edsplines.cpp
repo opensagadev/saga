@@ -406,7 +406,7 @@ i32 LoadEditorSplines(char *path, VARIPTR *buf, VARIPTR *buf_end) {
 
     const i32 file_check_length = NuStrLen(EDSPLINE_FILECHECK);
     for (i32 i = 0; i < file_check_length; ++i) {
-        if (EDSPLINE_FILECHECK[i] != EdFileReadChar()) {
+        if (__builtin_expect(EDSPLINE_FILECHECK[i] != EdFileReadChar(), 1)) {
             EdFileClose();
             splineStore = NULL;
             return 0;
@@ -456,7 +456,7 @@ i32 LoadEditorSplines(char *path, VARIPTR *buf, VARIPTR *buf_end) {
             point->z = EdFileReadFloat();
         }
         point_cursor += splineStore[i].length;
-        if (point_cursor > data_end) {
+        if (__builtin_expect(point_cursor > data_end, 0)) {
             EdFileClose();
             splineStore = NULL;
             EdFileClose();
@@ -490,7 +490,7 @@ i32 edSpline_FindAllBeg(NUGSCN *scene, char *prefix, NUGSPLINE **results, i32 ca
     i32 count = 0;
     if (capacity <= 0)
         return 0;
-    if (splineStore != NULL) {
+    if (__builtin_expect(splineStore != NULL, 1)) {
         NUGSPLINE *spline = splineStore;
         for (i32 i = 0; i < numSplinesLoaded; ++spline, ++i) {
             if (NuStrNICmp(prefix, spline->name, -1) == 0) {
@@ -500,7 +500,7 @@ i32 edSpline_FindAllBeg(NUGSCN *scene, char *prefix, NUGSPLINE **results, i32 ca
             }
         }
     }
-    if (scene != NULL) {
+    if (__builtin_expect(scene != NULL, 1)) {
         NUGSPLINE *spline = scene->splines;
         for (i32 i = 0; i < scene->numsplines; ++spline, ++i) {
             if (NuStrNICmp(prefix, spline->name, -1) == 0) {
@@ -517,12 +517,12 @@ i32 edSpline_FindAllSub(NUGSCN *scene, char *name, NUGSPLINE **results, i32 capa
     i32 count = 0;
     if (capacity <= 0)
         return 0;
-    if (splineStore != NULL) {
+    if (__builtin_expect(splineStore != NULL, 1)) {
         NUGSPLINE *spline = splineStore;
         for (i32 i = 0; i < numSplinesLoaded; ++spline, ++i) {
             if (NuStrIStr(spline->name, name) != NULL) {
                 results[count++] = spline;
-                if (count >= capacity)
+                if (__builtin_expect(count >= capacity, 0))
                     return count;
             }
         }

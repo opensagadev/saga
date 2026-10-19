@@ -216,7 +216,7 @@ static void TightRopes_Draw(void *world_info, void *, float) {
                 NuSpecialDrawAt(&WORLD->lev_objs[endpoint_model].special, &matrix);
             }
         }
-        if (rope->visible != 0) {
+        if (__builtin_expect(rope->visible != 0, 1)) {
             i32 endpoint_model = rope->field_0x31 == 0 ? 63 : 64;
             if (WORLD->lev_objs[endpoint_model].active != 0) {
                 NuMtxSetRotationX(&matrix, rope->field_0x2a);
@@ -365,7 +365,9 @@ TIGHTROPE *TightRope_InRange(GameObject_s *object, WORLDINFO_s *world, NUVEC *po
         offset.y = 0.0f;
         offset.z = origin.z - rope->start.z;
         NuVecRotateY(&offset, &offset, -rope->rotation);
-        if (!(offset.z >= 0.0f && rope->horizontal_length >= offset.z && offset.x >= -width && width >= offset.x)) {
+        if (__builtin_expect(
+                !(offset.z >= 0.0f && rope->horizontal_length >= offset.z && offset.x >= -width && width >= offset.x),
+                0)) {
             continue;
         }
         offset.x = 0.0f;

@@ -183,7 +183,7 @@ static void Signals_Update(void *world_info, void *, float) {
                     f32 along_normal = NuVecDot(&offset, &signal->normal);
                     f32 distance = NuVecMag(&offset);
                     f32 radius = player->apiobj.field_0x1dc + 0.3f;
-                    if (distance * distance - along_normal * along_normal < radius * radius) {
+                    if (__builtin_expect(distance * distance - along_normal * along_normal < radius * radius, 0)) {
                         break;
                     }
                 }
@@ -265,7 +265,7 @@ static void Signals_Reset(void *world_info, void *, void *progress_data) {
         }
         signal->character_letter = signal->suit->group;
         signal->suit_letter = signal->suit->letter;
-        if (signal->character_letter == 'r') {
+        if (__builtin_expect(signal->character_letter == 'r', 0)) {
             signal->animation_0 = 0x3a;
             signal->animation_1 = 0x3b;
             signal->animation_2 = 0x3c;

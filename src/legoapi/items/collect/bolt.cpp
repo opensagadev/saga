@@ -170,7 +170,7 @@ void Bolt_Debris_LSW(BOLT_s *bolt, nuvec_s *points, i32 point, nuvec_s *, i32 no
         if (!(bolt->flags & 0x10000000) && Player_HasDoubleBoltDamage_FromBolt(bolt))
             AddGameDebris(world->debris_sys, effect, &points[2]);
     }
-    if (bolt->hit_part_debris != -1)
+    if (__builtin_expect(bolt->hit_part_debris != -1, 1))
         AddPartDebris(world->part_debris_sys, bolt->hit_part_debris, &bolt->position);
     if (bolt->type_id == 0x1d) {
         AddGameDebris(world->debris_sys, 0x7f, &bolt->position);

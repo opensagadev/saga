@@ -2390,10 +2390,12 @@ i32 KillGameObject(GameObject_s *object, i32 requested_reason, i32) {
     ReleaseLever(object);
     Player_ResetContexts(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));
     if (object->apiobj.player_controlled) {
-        while (object->torpedo != NULL && object->torpedo->count != 0) {
-            AddVariableShotDebrisEffect(WORLD->debris_sys->entries[71].effect,
-                                        &object->torpedo->pickup_positions[object->torpedo->count], 30, 0, 0);
-            --object->torpedo->count;
+        if (object->torpedo != NULL) {
+            while (object->torpedo->count != 0) {
+                AddVariableShotDebrisEffect(WORLD->debris_sys->entries[71].effect,
+                                            &object->torpedo->pickup_positions[object->torpedo->count], 30, 0, 0);
+                --object->torpedo->count;
+            }
         }
         if (object->apiobj.field_0x287 == 0 || !object->apiobj.player_controlled ||
             (object->apiobj.character_data->model_flags & 0x2000) == 0 ||

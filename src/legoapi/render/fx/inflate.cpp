@@ -70,7 +70,7 @@ static void FillBits(DEFLATECONTEXT *ctx) {
 
 #define READBITS(ctx, n)                                                                                               \
     ({                                                                                                                 \
-        if ((ctx)->num_bits_available < (n)) {                                                                         \
+        if (__builtin_expect((ctx)->num_bits_available < (n), 0)) {                                                    \
             FillBits((ctx));                                                                                           \
         }                                                                                                              \
                                                                                                                        \
@@ -211,13 +211,13 @@ i32 DecodeDeflatedBlock(DEFLATECONTEXT *ctx) {
             symbol -= 257;
 
             i32 length = LengthBase[symbol];
-            if (__builtin_expect(LengthExtraBits[symbol] != 0, 0)) {
+            if (LengthExtraBits[symbol] != 0) {
                 length += READBITS(ctx, LengthExtraBits[symbol]);
             }
 
             symbol = CtxReadHuffmanSymbol(ctx, &ctx->distance_tree);
             i32 distance = DistanceBase[symbol];
-            if (__builtin_expect(DistanceExtraBits[symbol] != 0, 1)) {
+            if (DistanceExtraBits[symbol] != 0) {
                 distance += READBITS(ctx, DistanceExtraBits[symbol]);
             }
 
@@ -261,7 +261,7 @@ i32 DecompressHuffmanTrees(DEFLATECONTEXT *ctx) {
             symbol = READBITS(ctx, 2) + 3;
             memset(allCodeLengths + i, allCodeLengths[i - 1], symbol);
             i += symbol;
-        } else if (symbol == 17) {
+        } else if (__builtin_expect(symbol == 17, 0)) {
             symbol = READBITS(ctx, 3) + 3;
             memset(allCodeLengths + i, 0, symbol);
             i += symbol;
@@ -360,12 +360,12 @@ i32 DecodeDeflated(DEFLATECONTEXT *ctx) {
 
         switch (type) {
             default:
-                if (__builtin_expect(!DecompressHuffmanTrees(ctx), 1)) {
+                if (!DecompressHuffmanTrees(ctx)) {
                     return 0;
                 }
                 break;
             case BLOCK_FIXED_HUFFMAN:
-                if (__builtin_expect(DefaultDistances[0x1f] == '\0', 1)) {
+                if (DefaultDistances[0x1f] == '\0') {
                     InitHuffmanDefaults();
                 }
 
@@ -378,13 +378,13 @@ i32 DecodeDeflated(DEFLATECONTEXT *ctx) {
                 }
                 break;
             case BLOCK_UNCOMPRESSED:
-                if (__builtin_expect(!DecodeUncompressedBlock(ctx), 1)) {
+                if (__builtin_expect(!DecodeUncompressedBlock(ctx), 0)) {
                     return 0;
                 }
                 continue;
         }
 
-        if (__builtin_expect(!DecodeDeflatedBlock(ctx), 1)) {
+        if (!DecodeDeflatedBlock(ctx)) {
             return 0;
         }
     } while (!is_final_block);

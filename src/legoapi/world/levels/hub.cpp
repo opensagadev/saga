@@ -1480,23 +1480,21 @@ static __used__ void Hub_UpdateSelectMode() {
             const u32 up_mask = GAMEPAD_DUP;
             const u32 down_mask = GAMEPAD_DDOWN;
             i32 confirm = 0, cancel = 0, up = 0, down = 0;
-            for (i32 i = 0; i < 2; ++i) {
+            for (i32 i = 0; i < 2 && !confirm && !cancel; ++i) {
                 if (!MenuPacket.active_player[i])
                     continue;
                 const u32 pressed = GamePad[i].buttons_pressed;
                 if ((pressed & select_mask) != 0) {
                     confirm = true;
-                    break;
-                }
-                if ((pressed & cancel_mask) != 0) {
+                } else if ((pressed & cancel_mask) != 0) {
                     cancel = true;
-                    break;
-                }
-                const u32 directions = pressed | GamePad[i].left_directions;
-                if ((directions & up_mask) != 0) {
-                    up = true;
-                } else if ((directions & down_mask) != 0) {
-                    down = true;
+                } else {
+                    const u32 directions = pressed | GamePad[i].left_directions;
+                    if ((directions & up_mask) != 0) {
+                        up = true;
+                    } else if ((directions & down_mask) != 0) {
+                        down = true;
+                    }
                 }
             }
             if (menu->input_activity != 0) {
@@ -3560,27 +3558,25 @@ void MenuUpdateEpisodes(MENU_s *) {
     switch (episodesmode) {
         case 0: {
             i32 up = 0, down = 0, left = 0, right = 0, confirm = 0, cancel = 0;
-            for (i32 player = 0; player < 2; ++player) {
-                if (__builtin_expect(!MenuPacket.active_player[player], 0))
+            for (i32 player = 0; player < 2 && !confirm && !cancel; ++player) {
+                if (!MenuPacket.active_player[player])
                     continue;
                 const u32 pressed = GamePad[player].buttons_pressed;
-                if (__builtin_expect(!!(pressed & GAMEPAD_MENUSELECT), 0)) {
+                if (pressed & GAMEPAD_MENUSELECT) {
                     confirm = 1;
-                    break;
-                }
-                if (pressed & GAMEPAD_MENUCANCEL) {
+                } else if (pressed & GAMEPAD_MENUCANCEL) {
                     cancel = 1;
-                    break;
+                } else {
+                    const u32 directions = pressed | GamePad[player].left_directions;
+                    if (directions & GAMEPAD_DUP)
+                        up = 1;
+                    else if (directions & GAMEPAD_DDOWN)
+                        down = 1;
+                    else if (directions & GAMEPAD_DLEFT)
+                        left = 1;
+                    else if (directions & GAMEPAD_DRIGHT)
+                        right = 1;
                 }
-                const u32 directions = pressed | GamePad[player].left_directions;
-                if (directions & GAMEPAD_DUP)
-                    up = 1;
-                else if (directions & GAMEPAD_DDOWN)
-                    down = 1;
-                else if (directions & GAMEPAD_DLEFT)
-                    left = 1;
-                else if (directions & GAMEPAD_DRIGHT)
-                    right = 1;
             }
             if (menu->input_activity) {
                 if (menu->confirm_pressed) {
@@ -3589,7 +3585,7 @@ void MenuUpdateEpisodes(MENU_s *) {
                     else
                         i_episodes = menu->selected_item;
                 }
-                if (__builtin_expect(!!(menu->cancel_pressed), 0))
+                if (menu->cancel_pressed)
                     cancel = 1;
             }
             if (confirm) {
@@ -3632,7 +3628,7 @@ void MenuUpdateEpisodes(MENU_s *) {
         case 2: {
             const i32 all = hub_new_level == -1 || LDataList[hub_new_level].episode_index == -1;
             const u16 count = CutScenePlayer_CountEpisodeClips(i_episodes, all, clips);
-            if (__builtin_expect(i_clip[i_episodes] >= count, 1))
+            if (i_clip[i_episodes] >= count)
                 i_clip[i_episodes] = count - 1;
             const i32 previous = i_clip[i_episodes];
             bool confirm = false, cancel = false;
@@ -3717,7 +3713,7 @@ void MenuUpdateEpisodes(MENU_s *) {
                 lastepisodesmode = episodesmode;
                 episodesmode = 0;
                 episodesduration = 0.6f;
-                if (__builtin_expect(hub_new_level != -1 && LDataList[hub_new_level].episode_index != -1, 0))
+                if (hub_new_level != -1 && LDataList[hub_new_level].episode_index != -1)
                     episodesmode = 1;
             } else if (previous != i_clip[i_episodes]) {
                 GameAudio_PlaySfx(0x2f, NULL, 0, 0);
@@ -3922,16 +3918,14 @@ void MenuUpdateBonusMode(MENU_s *) {
     }
 
     i32 confirm = 0, cancel = 0, up = 0, down = 0, left = 0, right = 0;
-    for (i32 i = 0; i < 2; ++i) {
+    for (i32 i = 0; i < 2 && !confirm && !cancel; ++i) {
         if (!MenuPacket.active_player[i])
             continue;
         const u32 pressed = GamePad[i].buttons_pressed;
         if (pressed & GAMEPAD_MENUSELECT) {
             confirm = 1;
-            break;
         } else if (pressed & GAMEPAD_MENUCANCEL) {
             cancel = 1;
-            break;
         } else {
             const u32 direction = pressed | GamePad[i].left_directions;
             if (direction & GAMEPAD_DUP)
@@ -3946,12 +3940,7 @@ void MenuUpdateBonusMode(MENU_s *) {
     }
 
     if (menu->input_activity) {
-        if (!bonusmodearcade) {
-            if (menu->confirm_pressed) {
-                hub_bonusmode = menu->selected_item;
-                confirm = 1;
-            }
-        } else {
+        if (bonusmodearcade) {
             const i32 item = menu->selected_item;
             const u8 choices = reinterpret_cast<u8 *>(&ArcadeItem)[item * 8 + 5];
             if (menu->left_pressed && choices >= 2)
@@ -3969,6 +3958,9 @@ void MenuUpdateBonusMode(MENU_s *) {
                     menu->confirm_pressed = 0;
                 }
             }
+        } else if (menu->confirm_pressed) {
+            hub_bonusmode = menu->selected_item;
+            confirm = 1;
         }
         if (menu->cancel_pressed)
             cancel = 1;
@@ -3976,7 +3968,7 @@ void MenuUpdateBonusMode(MENU_s *) {
 
     if (player_up[0])
         BlipU[0] = 0.1f;
-    if (player_down[0])
+    if (__builtin_expect(!!(player_down[0]), 0))
         BlipD[0] = 0.1f;
     if (player_left[0])
         BlipL[0] = 0.1f;
@@ -4296,8 +4288,9 @@ void Hub_Update(WORLDINFO_s *world) {
             if (player != NULL && player->apiobj.player_controlled &&
                 __builtin_expect(player->apiobj.field_0x27d != 0, 1) && player->pad_gamepad->input_magnitude == 0.0f &&
                 player->pad_gamepad->previous_input_magnitude == 0.0f &&
-                (player->field_0x7a5 == 0xff || player->field_0x7a5 == 0x31 || player->field_0x7a5 == 0x32)) {
-                shop_available = player->apiobj.field_0x281 == 0x0e;
+                (player->field_0x7a5 == 0xff || player->field_0x7a5 == 0x31 || player->field_0x7a5 == 0x32) &&
+                player->apiobj.field_0x281 == 0x0e) {
+                shop_available = true;
             }
         }
         if (shop_available && !HubShopUnlocked()) {

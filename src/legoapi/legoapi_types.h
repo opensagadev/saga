@@ -5505,7 +5505,7 @@ struct PART_s {
                     u8 : 4;
                     u8 active_bit4 : 1;
                     u8 radius_state : 2;
-                    u8 : 1;
+                    u8 active_bit7 : 1;
                 };
             };
             u8 render_flags;

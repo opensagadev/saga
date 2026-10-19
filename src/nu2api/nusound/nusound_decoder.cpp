@@ -309,7 +309,7 @@ void NuSoundDecodeThread::ThreadFunc(void *self_) {
 
                 NuSoundWeakPtrListNode::sPtrAccessLock.Lock();
                 NuSoundBufferCallback *callback = (NuSoundBufferCallback *)request.callback.obj;
-                if (callback != NULL) {
+                if (__builtin_expect(callback != NULL, 0)) {
                     callback->SubmitBuffer(buffer);
                 }
                 NuSoundWeakPtrListNode::sPtrAccessLock.Unlock();

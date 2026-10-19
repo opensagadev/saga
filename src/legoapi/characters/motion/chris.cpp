@@ -355,13 +355,12 @@ static void ResetSpaceLevel(WORLDINFO_s *world, spacelevel_s *space) {
     space->inverse_direction_length = 1.0f / space->direction_length;
 
     for (door_index = 6; door_index >= 0; --door_index) {
-        for (i32 player = 0; player < 2; ++player) {
-            if (Player[player] != NULL && Player[player]->field_0x68c > DogFightDoors.doors[door_index].distance) {
-                space->door_time = DogFightDoors.doors[door_index].timer;
-                space->door_countdown = space->door_time * 94.977417f / 59.449684f;
-                space->door_elapsed = (space->door_countdown - FRAMETIME) * 94.977417f / 59.449684f;
-                goto reset_space;
-            }
+        if ((Player[0] != NULL && Player[0]->field_0x68c > DogFightDoors.doors[door_index].distance) ||
+            (Player[1] != NULL && Player[1]->field_0x68c > DogFightDoors.doors[door_index].distance)) {
+            space->door_time = DogFightDoors.doors[door_index].timer;
+            space->door_countdown = space->door_time * 94.977417f / 59.449684f;
+            space->door_elapsed = (space->door_countdown - FRAMETIME) * 94.977417f / 59.449684f;
+            goto reset_space;
         }
     }
     space->door_countdown = 0.0f;
@@ -1324,12 +1323,11 @@ void SpaceAudioPoint() {
 
 void SpaceResetAudioPoint() {
     for (i32 door = 6; door >= 0; --door) {
-        for (i32 player = 0; player < 2; ++player) {
-            if (Player[player] != NULL && Player[player]->sock_position.distance > DogFightDoors.doors[door].distance) {
-                music_man.SetTrackEntryTimeByClass(TRACK_CLASS_ACTION, DogFightDoors.doors[door].timer);
-                music_man.SetTrackEntryTimeByClass(TRACK_CLASS_NOMUSIC, DogFightDoors.doors[door].timer);
-                return;
-            }
+        if ((Player[0] != NULL && Player[0]->sock_position.distance > DogFightDoors.doors[door].distance) ||
+            (Player[1] != NULL && Player[1]->sock_position.distance > DogFightDoors.doors[door].distance)) {
+            music_man.SetTrackEntryTimeByClass(TRACK_CLASS_ACTION, DogFightDoors.doors[door].timer);
+            music_man.SetTrackEntryTimeByClass(TRACK_CLASS_NOMUSIC, DogFightDoors.doors[door].timer);
+            return;
         }
     }
     SetPreSeekStartPoint(0.0f);

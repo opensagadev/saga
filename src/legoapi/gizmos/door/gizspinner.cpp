@@ -449,7 +449,7 @@ i32 GizSpinner_UsingSpecial(GIZMO **results, void *world_ptr, i32 capacity, char
                 }
                 for (GAMEANIMOBJ_s *object = world->spinners[index].anim_set->objects; object != NULL;
                      object = object->next) {
-                    if (NuSpecialCompare(&special, &object->special) != 0) {
+                    if (__builtin_expect(NuSpecialCompare(&special, &object->special) != 0, 0)) {
                         GIZMO *gizmo = GizmoFindByName(world->gizmo_sys, type_id, name);
                         if (gizmo != NULL) {
                             type_id = gizmo->type_id;

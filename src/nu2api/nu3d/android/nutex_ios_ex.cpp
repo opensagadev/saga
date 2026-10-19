@@ -705,9 +705,9 @@ void GetNativeTextureFormat(NUTEXFORMAT inFormat, i32 &outBpp, u32 &outInternalF
         outIsCompressed = false;
         outBpp = 0;
     } else {
-        if (g_renderDevice.enabled_extensions[NUTEX_DXT1]) {
+        if (__builtin_expect(!!(g_renderDevice.enabled_extensions[NUTEX_DXT1]), 0)) {
             outBpp = 0;
-        } else if (g_renderDevice.enabled_extensions[NUTEX_ETC1]) {
+        } else if (__builtin_expect(!!(g_renderDevice.enabled_extensions[NUTEX_ETC1]), 0)) {
             inFormat = NUTEX_ETC1;
             formatToCheck = NUTEX_ETC1;
             outBpp = 0;
@@ -1213,7 +1213,7 @@ GLuint NuIOS_CreateGLTexFromFile(const char *filename) {
     }
 
     GLuint texture = NuIOS_CreateGLTexFromPlatfomSpecificFile(fixed_filename);
-    if (texture != 0) {
+    if (__builtin_expect(texture != 0, 1)) {
         return texture;
     }
     return NuIOS_CreateGLTexFromPlatfomSpecificForecPVR(filename);

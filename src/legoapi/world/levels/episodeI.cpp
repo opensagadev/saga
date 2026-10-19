@@ -1858,7 +1858,7 @@ speed_section:
         if (FadeSys.fade == 0.0f)
             ps->speed -= FRAMETIME;
         float remaining = ps->speed;
-        if (Player[0] != NULL) {
+        if (__builtin_expect(Player[0] != NULL, 1)) {
             if (remaining <= 0.0f) {
                 Player[0]->field_0xee0 = 1000000000.0f;
             } else {

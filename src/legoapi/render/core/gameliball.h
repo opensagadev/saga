@@ -375,7 +375,7 @@ extern "C" {
     void edbriBridgesReset(void);
     void edbriStopPage(i8 page);
     void edgraInitAllClumps(void);
-    void edgraSetMemoryBuffer(VARIPTR start, VARIPTR end);
+    void edgraSetMemoryBuffer(VARIPTR *start, VARIPTR *end);
     void edgraSetThinning(i32 clumps, i32 elements);
     void edgraSetup(VARIPTR *, VARIPTR, i32, i32, i32);
     void edppDeleteEffect(i32 index);

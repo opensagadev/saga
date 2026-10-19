@@ -608,10 +608,10 @@ static i32 *GizTurrets_GetBestBoltTarget(GIZMOSET *set, float *result_distance, 
     }
 
     NUVEC aim = *direction;
+    const float min_x = position->x - radius;
     const float min_z = position->z - radius;
     const float max_x = position->x + radius;
     const float max_z = position->z + radius;
-    const float min_x = position->x - radius;
     if (directional != 0 && (bolt_type->field_60 & 0x20000) != 0) {
         aim.y = 0.0f;
         NuVecNorm(&aim, &aim);

@@ -212,8 +212,9 @@ static inline void Techno_DrawHand(WORLDINFO *world, TECHNO *techno, NUMTX *matr
 
 static void Technos_Draw(void *world_ptr, void *, float) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
-    if (TechnoSys.active_effect_id == -1 || world->lev_objs[TechnoSys.active_effect_id].active == 0 ||
-        world->technos == NULL) {
+    if (__builtin_expect(TechnoSys.active_effect_id == -1 || world->lev_objs[TechnoSys.active_effect_id].active == 0 ||
+                             world->technos == NULL,
+                         0)) {
         return;
     }
 
@@ -411,7 +412,7 @@ void *Technos_FindTgt(TECHNO_s *techno) {
             break;
         case 3:
             techno->controlled_object = GizmoFindByName(WORLD->gizmo_sys, -1, techno->target_name);
-            if (techno->controlled_object == NULL) {
+            if (__builtin_expect(techno->controlled_object == NULL, 0)) {
                 techno->target_mode = 0;
             }
             break;
@@ -452,12 +453,12 @@ void Technos_MoveTarget(TECHNO_s *techno, GameObject_s *object) {
         return;
     }
 
-    GIZMO *gizmo = static_cast<GIZMO *>(techno->controlled_object);
-    if (NuStrICmp(gizmotypes->types[gizmo->type_id].name, "GIZOBSTACLE") != 0) {
+    if (NuStrICmp(gizmotypes->types[static_cast<GIZMO *>(techno->controlled_object)->type_id].name,
+                  "GIZOBSTACLE") != 0) {
         return;
     }
 
-    GIZOBSTACLE_s *obstacle = static_cast<GIZOBSTACLE_s *>(gizmo->object);
+    GIZOBSTACLE_s *obstacle = static_cast<GIZOBSTACLE_s *>(static_cast<GIZMO *>(techno->controlled_object)->object);
     if ((techno->enabled & 2) != 0 && object != NULL && static_cast<u8>(object->apiobj.field_0x27c) < 2) {
         f32 rate = object->pad_gamepad->waggle_magnitude != 0.0f ? 3.0f * FRAMETIME : 2.0f * FRAMETIME;
         TechnoMoveSpeed[static_cast<i8>(object->apiobj.field_0x27c)] =
