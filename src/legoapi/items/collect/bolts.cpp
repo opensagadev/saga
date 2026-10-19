@@ -1179,7 +1179,7 @@ static i32 Bolt_HitPlat(BOLT_s *bolt, u8 *hit_flags) {
     if (__builtin_expect(blowup != NULL, 1) && __builtin_expect((blowup->draw_flags & 0x8000) != 0, 1)) {
         GameObject_s *owner = bolt->owner;
         if (owner != NULL && (blowup->draw_flags & 0x80000) != 0) {
-            if ((exclude & 1) != 0 && owner->apiobj.character_data->game_character->field_0x28 > 0.0f)
+            if ((exclude & 1) != 0 && !(owner->apiobj.character_data->game_character->field_0x28 <= 0.0f))
                 return 0;
             if (owner->field_0xcc0 == NULL)
                 return 0;

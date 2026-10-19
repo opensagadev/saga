@@ -356,7 +356,7 @@ static GIZMOPICKUP_s *GizmoPickups_CollideList(GameObject_s *object, GIZMOPICKUP
         f32 radius_y = scale * (coin_magnet ? type->shadow_extent_z : type->shadow_radius_z);
         if (object->apiobj.collision_min.x > pickup->position.x + radius_x ||
             pickup->position.x - radius_x > object->apiobj.collision_max.x ||
-            object->apiobj.collision_min.z > pickup->position.z + radius_x ||
+            !(object->apiobj.collision_min.z <= pickup->position.z + radius_x) ||
             pickup->position.z - radius_x > object->apiobj.collision_max.z) {
             continue;
         }
@@ -368,7 +368,7 @@ static GIZMOPICKUP_s *GizmoPickups_CollideList(GameObject_s *object, GIZMOPICKUP
             if (!(dx * dx + dz * dz >= radius * radius)) {
                 return pickup;
             }
-        } else if (!(object->apiobj.collision_min.y > pickup->position.y + radius_y) &&
+        } else if (object->apiobj.collision_min.y <= pickup->position.y + radius_y &&
                    !(pickup->position.y - radius_y > object->apiobj.collision_max.y)) {
             if (object->field_0xcc0 == NULL) {
                 if (SphereSphereOverlapScaleY(&pickup->position, radius_x, radius_y, &object->apiobj.collision_position,
@@ -659,7 +659,7 @@ static void GizmoPickups_DrawList(WORLDINFO *world, GIZMOPICKUP_s *pickups, i32 
         }
         const f32 distance_squared = camera_x * camera_x + camera_z * camera_z;
         if (VehicleArea == 0 && pickup.floor_height != 2000000.0f && maximum_distance_squared > 0.0f &&
-            distance_squared < shadow_distance_squared) {
+            !(distance_squared >= shadow_distance_squared)) {
             const f32 distance_ratio = distance_squared / shadow_distance_squared;
             NUVEC shadow_position = pickup.position;
             shadow_position.y = pickup.floor_height + 0.005f;
@@ -798,7 +798,7 @@ static i32 GizmoPickups_Load(void *world_ptr, void *) {
         AreaPickupScale = 1.0f;
     }
 
-    if (version < 6 && pickup_sys->draw_distance < 10.0f) {
+    if (version < 6 && !(pickup_sys->draw_distance >= 10.0f)) {
         pickup_sys->draw_distance = 10.0f;
     }
     if (version <= 6 && world->level_sub_id >= 0 && world->level_sub_id < AREACOUNT &&
@@ -1026,7 +1026,7 @@ void MiniKitDetector(nuvec_s *position) {
 static void GizmoPickups_UpdateListBody(WORLDINFO *world, GIZMOPICKUP_s *pickups, i32 count, i32 play_nearby_sfx) {
 
     const bool detector_phase =
-        play_nearby_sfx && FadeSys.fade == 0.0f && NuFmod(GameTimer.time_elapsed_mod_seconds, 0.2f) < 0.1f;
+        play_nearby_sfx && FadeSys.fade == 0.0f && !(NuFmod(GameTimer.time_elapsed_mod_seconds, 0.2f) >= 0.1f);
     const bool minikit_detector = detector_phase && Cheats_CheckFlags(0x200) != 0;
     const bool red_brick_detector = detector_phase && Cheats_CheckFlags(0x40000) != 0;
     NUVEC *nearby_pickup = NULL;

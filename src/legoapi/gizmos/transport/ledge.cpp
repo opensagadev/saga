@@ -255,7 +255,7 @@ static LEDGE *Ledge_AttachPoint(WORLDINFO_s *world, NUVEC *position, NUVEC *boun
     for (i32 i = 0; i < count; ++i, ++ledge) {
         if ((ledge->state_flags & 3) != 3 || ((ledge->flags & 1) && ShadowMode == 0))
             continue;
-        if (bounds_min->x > ledge->bounds_max.x || ledge->bounds_min.x > bounds_max->x ||
+        if (!(bounds_min->x <= ledge->bounds_max.x) || ledge->bounds_min.x > bounds_max->x ||
             bounds_min->z > ledge->bounds_max.z || ledge->bounds_min.z > bounds_max->z ||
             bounds_min->y > ledge->bounds_max.y || ledge->bounds_min.y > bounds_max->y)
             continue;
@@ -464,7 +464,7 @@ void Ledge_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
         StartJump(object, 0);
         object->movement_runtime_flags |= 0x10;
         f32 height = 0.2f + object->external_force.y - object->jump_start_height;
-        if (!(height <= 0.0f)) {
+        if (height > 0.0f) {
             object->apiobj.velocity.y =
                 NuFsqrt(-2.0f * object->apiobj.character_data->game_character->gravity * height);
         }

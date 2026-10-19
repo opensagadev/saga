@@ -2282,7 +2282,7 @@ extern "C" {
                 memcard_autosaveinprogress = 1;
             }
         } else if (memcard_autosavestarted != 0 && memcard_saveneeded == 0 && memcard_savestarted == 0 &&
-                   !(memcard_autosavepredelay > 0.0f)) {
+                   memcard_autosavepredelay <= 0.0f) {
             memcard_slot = saveload_autosave;
             memcard_saveneeded = 1;
         }
@@ -4044,7 +4044,7 @@ extern "C" {
                 if (text[position] == '\\' && text[position + 1] == 'n') {
                     previous_break = position + 1;
                     text[previous_break] = ' ';
-                } else if (max_width > width) {
+                } else if (!(max_width <= width)) {
                     previous_break = position;
                     continue;
                 } else if (previous_break == line_start) {

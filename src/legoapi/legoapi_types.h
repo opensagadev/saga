@@ -5498,15 +5498,20 @@ struct PART_s {
     u16 field_140;
     u8 rotation_axis_1, rotation_axis_2;
     union {
-        u8 active;
         struct {
-            u8 : 4;
-            u8 active_bit4 : 1;
-            u8 radius_state : 2;
-            u8 : 1;
+            union {
+                u8 active;
+                struct {
+                    u8 : 4;
+                    u8 active_bit4 : 1;
+                    u8 radius_state : 2;
+                    u8 : 1;
+                };
+            };
+            u8 render_flags;
         };
+        u16 active_render_flags; // active in the low byte, render_flags in the high byte
     };
-    u8 render_flags;
     u8 reflection_flags;
     u8 pad_147;
     nuhspecial_s special;

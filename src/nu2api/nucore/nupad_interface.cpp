@@ -495,7 +495,7 @@ extern "C" {
                     nearest = i;
                 }
             }
-            if (nearest_distance > 0.04f) {
+            if (!(nearest_distance <= 0.04f)) {
                 memset(data->touch_events, 0, sizeof(data->touch_events));
                 data->touch_count = 0;
                 memset(used_touch_IDs, 0, sizeof(used_touch_IDs));
@@ -680,12 +680,12 @@ void NuTouchInputStick::Update(NuInputTouchData const *data) {
             float magnitude = distance / height;
             float sx = NU_SIN_LUT(angle);
             float sy = NU_COS_LUT(angle);
-            magnitude = magnitude < 1.0f ? (magnitude < 0.0f ? 0.0f : magnitude) : 1.0f;
+            magnitude = MAX(0.0f, MIN(magnitude, 1.0f));
             magnitude = (float)(magnitude * 1.4) * 3.0f;
             sx *= magnitude;
             sy *= magnitude;
-            stick_x = sx < 1.0f ? (sx > -1.0f ? sx : -1.0f) : 1.0f;
-            stick_y = sy < 1.0f ? (sy > -1.0f ? sy : -1.0f) : 1.0f;
+            stick_x = MAX(-1.0f, MIN(sx, 1.0f));
+            stick_y = MAX(-1.0f, MIN(sy, 1.0f));
             return;
         }
     }

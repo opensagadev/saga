@@ -424,7 +424,7 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
                 }
             }
             object->context_animation_timer -= FRAMETIME;
-            if (__builtin_expect(object->context_animation_timer <= 0.0f, 1)) {
+            if (__builtin_expect(!(object->context_animation_timer > 0.0f), 1)) {
                 object->field_0x7a3 = 2;
                 object->context_animation = LEGOACT_SUPERCARRY_IDLE;
                 if ((object->context_flags & 0x40) == 0)
@@ -862,7 +862,7 @@ void ReStoreStatusTakeOverObjectSys(i32 restore_progress) {
         if (object != NULL) {
             object->current_hp = record->hitpoints;
             GameObject_s *controller;
-            if (!(!(!(record->contact_index != 0xff && (controller = Player[record->contact_index]) != NULL)))) {
+            if (!(record->contact_index != 0xff && (controller = Player[record->contact_index]) != NULL)) {
                 SnapCreaturePos(record->object, &record->last_safe_position, record->heading, NULL, 1);
             } else {
                 object->apiobj.flags_high |= 0x10;

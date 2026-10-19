@@ -928,7 +928,7 @@ static i32 *GizForces_GetBestBoltTarget(GIZMOSET *set, float *result_distance, N
             continue;
         NUVEC *target_position = &force->position;
         if (target_position->x < min_x || target_position->x > max_x || target_position->z < min_z ||
-            target_position->z > max_z) {
+            !(target_position->z <= max_z)) {
             continue;
         }
 

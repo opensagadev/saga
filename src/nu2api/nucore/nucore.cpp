@@ -28,8 +28,6 @@
 #include "nu2api/numath/nuvec4.h"
 #include "nu2api/numath/nufloat.h"
 
-extern "C" void NuShaderManagerSetfv(i32, const f32 *);
-
 NuApplicationState *NuCore::m_applicationState;
 NuThreadManager *NuCore::m_threadManager;
 

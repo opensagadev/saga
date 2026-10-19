@@ -274,7 +274,7 @@ void PushCode(GameObject_s *object, i32 allow_push) {
                     spinner = GizSpinner_Find(WORLD, &object->apiobj.collision_position, 1);
                 if (spinner != NULL) {
                     if (((spinner->flags & 8) == 0 || ShadowMode != 0) && spinner->room_index == -1 &&
-                        spinner->field_0x090 <= 0.0f) {
+                        !(spinner->field_0x090 > 0.0f)) {
                         // A spinner can only be attached to one party member.
                         bool occupied = false;
                         for (i32 player_index = 0; player_index < 8; ++player_index) {

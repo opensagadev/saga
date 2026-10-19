@@ -43,8 +43,8 @@ void Detonators_Draw() {
 
         const bool flicker_on = PickUpFlickerTest <= PickupFlickerFrame % PickUpFlickerFrames;
         if (!flicker_on &&
-            !(!(detonator.timer >= 10.0f) && (detonator.object == NULL || detonator.object->apiobj.field_0x287 != 0 ||
-                                              !(detonator.object->field_0xde0 >= 0.3f)))) {
+            (detonator.timer >= 10.0f || (detonator.object != NULL && detonator.object->apiobj.field_0x287 == 0 &&
+                                          detonator.object->field_0xde0 >= 0.3f))) {
             if (WORLD->lev_objs[0xef].active)
                 detonator.draw_result = NuSpecialDrawAt(&WORLD->lev_objs[0xef].special, &matrix);
         } else {
@@ -273,10 +273,10 @@ void Detonator_MoveCode(GameObject_s *object) {
         if (__builtin_expect(object->apiobj.character_model->model_data_b[object->context_animation] != NULL, 1)) {
             const f32 marker = AnimListFrame(object->apiobj.character_model, object->context_animation,
                                              object->character_context == 0x49 ? 0 : 2);
-            if (frame == NULL || !(*frame > 0.0f) || !(*frame >= marker)) {
+            if (frame == NULL || !(*frame > 0.0f) || *frame < marker) {
                 return;
             }
-        } else if (__builtin_expect(!(object->context_animation_timer < 0.5f), 1)) {
+        } else if (__builtin_expect(object->context_animation_timer >= 0.5f, 1)) {
             return;
         }
         object->field_0x7a3 = 1;

@@ -574,7 +574,7 @@ void UpdateMiniSnowTroopers(WORLDINFO_s *world) {
                         const f32 target_z = teams[team_index].origin_z + slot->formation_z;
                         const f32 dx = trooper->shot_position.x - target_x;
                         const f32 dz = trooper->shot_position.z - target_z;
-                        if (dx * dx + dz * dz <= 0.2f * 0.2f) {
+                        if (!(dx * dx + dz * dz > 0.2f * 0.2f)) {
                             trooper->stopped = 1;
                             ++stopped_count;
                         }

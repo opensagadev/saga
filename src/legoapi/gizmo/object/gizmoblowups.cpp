@@ -786,7 +786,7 @@ i32 GizmoBlowupBlowup(GIZMOBLOWUP_s *blowup, i32 effects, i32 hit_type, i32 dama
             }
         } else {
             if ((blowup->draw_flags & 0x208) && blowup->saved_state_0 != 0 &&
-                (!(blowup->field_0xb4 <= 0.0f) || !(blowup->field_0xb8 > 0.0f))) {
+                (!(blowup->field_0xb4 <= 0.0f) || blowup->field_0xb8 <= 0.0f)) {
                 const f32 radius_squared = blowup->field_0xb4 * blowup->field_0xb4;
                 auto blowup_saved_state_0 = blowup->saved_state_0;
                 for (i32 player = 0; player < 8; ++player) {

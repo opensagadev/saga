@@ -31,17 +31,6 @@ extern struct nurenderscene_s currentScene;
 volatile bool g_isBlockedInSwapScreen = false;
 
 extern "C" {
-    void NuDynamicLightAddRenderScene(struct NuDynamicLight *, i32, i32);
-}
-
-// Scene / GScn
-using NUGSCNVIDEOMEMFN = void (*)(NUGSCN *);
-
-extern NUGSCNVIDEOMEMFN gscene_to_video_mem;
-extern NUGSCNVIDEOMEMFN video_mem_to_gscene;
-extern "C" void NuGScnFromVideoMem(NUGSCNVIDEOMEMFN callback);
-class NuDynamicLight;
-extern "C" {
     extern nurenderscene_s currentScene;
 
 #if defined(__i386__)
@@ -55,10 +44,6 @@ extern "C" {
 static void NuDisplaySceneRndrBody(NUDLDLISTSCENE *scene);
 }
 
-extern "C" void NuGScnToVideoMem(NUGSCNVIDEOMEMFN callback);
-
-extern "C" void NuMtlAnimateSetMask(i32 mask);
-extern "C" void NuMtlAnimateSetSpeedScale(f32 speed_scale);
 static void NuMtlCreate3D(void) {
     STUBBED();
 }
@@ -66,12 +51,6 @@ static void NuMtlCreate3D(void) {
 static void NuMtlSetRenderStatesPS(void) {
     STUBBED();
 }
-
-// Debug / visualisation geometry
-extern "C" __attribute__((force_align_arg_pointer)) i32 NuRndrCircle(f32 x, f32 y, f32 radius, f32 aspect, i32 count, f32 u0, f32 v0, f32 u1, f32 v1, i32 colour,
-                            numtl_s *material);
-
-extern "C" void NuRndrGlobalFrameCountPause(i32 paused);
 
 // NuRndrRect2di and NuRndrGradRect2di write the attributes for the current
 // vertex before handing its position to NuPrim2DAddXYZ.  The latter advances

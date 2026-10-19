@@ -3454,7 +3454,7 @@ static void pathEditorCalcRouteIterator(AIPATH_s *path, f32 *distances, u8 *visi
     AIPATHNODE_s *node = &path->nodes[current];
     NUVEC difference;
     distance += NuVecDist(&path->nodes[previous].position, &node->position, &difference);
-    if (distances[current] >= distance) {
+    if (!(distances[current] < distance)) {
         distances[current] = distance;
         if (__builtin_expect(route_mask != 0, 1)) {
             for (i32 index = 0; index < node->connection_count; ++index) {
@@ -3513,10 +3513,9 @@ static void antinodeEditor_cbAntiNodeFlagsToggle(eduimenu_s *, eduiitem_s *item,
     EDANTINODE_s *node = antinode_selected();
     if (node == nullptr)
         return;
-    u8 previous_flags = node->game_flags;
+    u32 flags = node->game_flags;
     u32 mask = item->data;
-    u32 next_flags = previous_flags | mask;
-    node->game_flags = previous_flags & mask ? previous_flags & ~mask : next_flags;
+    node->game_flags = flags & mask ? flags & ~mask : flags | mask;
     node = antinode_selected();
     if (static_cast<i8>(node->game_flags) < 0)
         memset(&node->special, 0, sizeof(node->special));
@@ -4552,7 +4551,7 @@ static __used__ i32 RowMoveTowards(AIGROUP *group, AIROW *row, AIROW *previous, 
     }
     if (row->next_connection == NULL) {
         if (row->path_info.direction != 0) {
-            if (row->path_info.dist < 0.0f)
+            if (!(row->path_info.dist >= 0.0f))
                 return 1;
         } else if (row->path_info.dist > 1.0f) {
             return 1;
@@ -5250,7 +5249,7 @@ static EDANTINODE_REGPARM1 EDANTINODE_s *antinodeEditor_GetNearestAntinode(i32 r
                     rectangle_offset.y = 0.0f;
                     NuVecRotateY(&rectangle_offset, &rectangle_offset, -node->flags);
                     if (!(node->base_radius > NuFabs(rectangle_offset.x)) ||
-                        !(node->base_height > NuFabs(rectangle_offset.z)))
+                        node->base_height <= NuFabs(rectangle_offset.z))
                         continue;
                 } else {
                     continue;
@@ -9357,7 +9356,7 @@ extern "C" void *AISysLoad(void *buf, void *buf_end, i32 size, void *gscn, char 
 
             const f32 position_on_connection = locator->path_info.dist;
             f32 radius;
-            if (position_on_connection <= 1.0f) {
+            if (!(position_on_connection > 1.0f)) {
                 if (position_on_connection < 0.0f) {
                     radius = start->radius;
                 } else {
@@ -9657,7 +9656,7 @@ extern "C" {
                                          f32 delta_time) {
         for (i32 index = 0; index < object_count; ++index) {
             f32 timer = objects[index]->ai->antinode_timer - delta_time;
-            if (timer < 0.0f) {
+            if (!(timer >= 0.0f)) {
                 timer = 0.0f;
             }
             objects[index]->ai->antinode_timer = timer;
@@ -9765,7 +9764,7 @@ extern "C" {
                             first_ai->antinode_timer = second_timer;
                             first_ai->antinode_clockwise = second_ai->antinode_clockwise;
                         }
-                    } else if (second_timer > antinode_time) {
+                    } else if (!(second_timer <= antinode_time)) {
                         first_ai->antinode_timer = second_timer;
                         first_ai->antinode_clockwise = second_ai->antinode_clockwise;
                     } else if (first_timer > 0.0f) {
@@ -10631,7 +10630,7 @@ extern "C" i32 WithinConnection(AISYS *system, NUVEC *position, AIPATH *path, AI
             width = -width;
         if (width > first_radius && width > second_radius)
             return 0;
-        if (local.z < -first_radius || local.z > connection->horizontal_distance + second_radius)
+        if (local.z < -first_radius || !(local.z <= connection->horizontal_distance + second_radius))
             return 0;
         NUVEC wall = local;
         const i32 angle = AISysPathIntersectionAngle((second_radius - first_radius) / connection->horizontal_distance);
@@ -10749,7 +10748,7 @@ static i32 TestPointPathCheck(nuvec_s *point, EDAIPATHNODE_s *first, EDAIPATHNOD
     } else {
         *width = NuFsqrt(distance_squared) / radius;
     }
-    if (relative.x < 0.0f) {
+    if (!(relative.x >= 0.0f)) {
         *width = -*width;
     }
     return 1;
@@ -10976,14 +10975,14 @@ static u32 AISysCharacterTestPathCnx(AISYS *system, APIOBJECT *object, AIPACKET 
     NuVecRotateY(&local, &delta, -connection->rotation);
     NUVEC radial;
     if (NuFabs(second_radius - first_radius) > connection->horizontal_distance) {
-        if (second_radius > first_radius) {
+        if (!(second_radius <= first_radius)) {
             first_radius = second_radius;
             first = second;
         }
         f32 height_distance = NuFabs(first->position.y - packet->terrain_origin.y);
         f32 distance = NuVecXZDist(&object->position, &first->position, &radial);
         f32 clearance;
-        if (first->min_height > packet->terrain_origin.y || packet->terrain_origin.y > first->max_height) {
+        if (first->min_height > packet->terrain_origin.y || !(packet->terrain_origin.y <= first->max_height)) {
             clearance = distance - first_radius;
             clearance = height_distance > clearance ? height_distance : clearance;
         } else if (first_radius >= distance) {
@@ -11010,7 +11009,7 @@ static u32 AISysCharacterTestPathCnx(AISYS *system, APIOBJECT *object, AIPACKET 
             AISysCharacterSetPathCnx(packet, &object->position, connection, direction);
             packet->path_info.dist = local.z / connection->horizontal_distance;
             packet->path_info.width = local.x;
-            if (!(first_radius < distance)) {
+            if (first_radius >= distance) {
                 packet->last_path_position.x = object->position.x;
                 packet->last_path_position.z = object->position.z;
             } else {
@@ -11941,7 +11940,7 @@ __used__ static i32 Action_GoToOrigin(AISYS *sys, AISCRIPTPROCESS *processor, AI
         }
         remaining_time -= elapsed;
         processor->action_timer = remaining_time;
-        if (remaining_time < 0.0f) {
+        if (!(remaining_time >= 0.0f)) {
             processor->action_timer = 0.0f;
         }
     }
@@ -13323,7 +13322,7 @@ extern "C" {
                                     }
                                 }
                             }
-                        } else if (distance_squared < radius * radius) {
+                        } else if (!(distance_squared >= radius * radius)) {
                             packet->field_0x1e7 =
                                 current_source_flags & static_cast<u8>(~AIPACKET_MOVEMENT_SOURCE_ACTIVE);
                         }
@@ -13465,10 +13464,8 @@ extern "C" void LocaledbitsDrawCircleXY(NUVEC *centre, f32 radius, u32 colour, i
 extern "C" void ResetAIMessageSys(AIMESSAGESYS_s *sys) {
     if (sys != NULL) {
         NULISTHDR *free_list = &sys->free_list;
-        free_list->head = NULL;
-        free_list->tail = NULL;
-        sys->active_list.head = NULL;
-        sys->active_list.tail = NULL;
+        memset(free_list, 0, sizeof(*free_list));
+        memset(&sys->active_list, 0, sizeof(sys->active_list));
         memset(sys->messages, 0, sys->count * sizeof(AIMESSAGE_s));
         for (i32 index = 0; index < sys->count; ++index) {
             NuLinkedListAppend(free_list, &sys->messages[index].links);
@@ -13971,7 +13968,7 @@ i32 NuSpecialFindByPlatformID(nugscn_s *scene, nuhspecial_s *result, i32 platfor
         }
         f32 along = (position->x - start->position.x) * dx + (position->z - start->position.z) * dz + distance;
         if (along > length || along < 0.0f) {
-            AIPATHNODE *junction = along < 0.0f ? start : end;
+            AIPATHNODE *junction = !(along >= 0.0f) ? start : end;
             const i32 connection_end = static_cast<i32>(junction->connection_count) + 1;
             if (connection_end != 1) {
                 AIPATHCNX **connections = junction->connections;
@@ -13987,7 +13984,7 @@ i32 NuSpecialFindByPlatformID(nugscn_s *scene, nuhspecial_s *result, i32 platfor
                     dx = candidate_end->position.x - candidate_start->position.x;
                     dz = candidate_end->position.z - candidate_start->position.z;
                     i32 reverse = 0;
-                    if (direction_x * dx + direction_z * dz < 0.0f) {
+                    if (!(direction_x * dx + direction_z * dz >= 0.0f)) {
                         dx = candidate_start->position.x - candidate_end->position.x;
                         dz = candidate_start->position.z - candidate_end->position.z;
                         reverse = 1;
@@ -17697,7 +17694,7 @@ eduimenu_s *pathEditor_Process(nupad_s *pad) {
                         const f32 height = aieditor->cursor_position.y - candidate->position.y;
                         const f32 upper = NuFmax(0.2f, candidate->height_max);
                         const f32 lower = NuFmin(-0.2f, candidate->height_min);
-                        if (height <= upper && height >= lower) {
+                        if (height <= upper && !(height < lower)) {
                             node = candidate;
                             nearest_distance = distance;
                         }

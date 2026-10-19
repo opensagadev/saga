@@ -140,7 +140,7 @@ void Torpedo_UpdateJobbies(GameObject_s *object) {
         position.y = NU_SIN_LUT(y_rotation) * distance + object->apiobj.collision_position.y;
         position.z = NU_COS_LUT(z_rotation) * NU_COS_LUT(y_rotation) * distance + object->apiobj.collision_position.z;
 
-        if (packet->field_08 < 0.8f && index + 1 == packet->count) {
+        if (!(packet->field_08 >= 0.8f) && index + 1 == packet->count) {
             NUVEC direction;
             NuVecSub(&direction, &position, &packet->pickup_positions[index]);
             packet = object->torpedo;
@@ -326,7 +326,7 @@ void TorpedoCode(GameObject_s *object, i32 fire, f32 fire_cooldown) {
 
     if (!(object->torpedo->field_08 < 0.8f)) {
         if (Cheat_IsOn(42) != 0 && static_cast<i8>(object->apiobj.flags_low) < 0 &&
-            object->torpedo_fire_cooldown <= 0.0f && object->apiobj.field_0x287 == 0 &&
+            !(object->torpedo_fire_cooldown > 0.0f) && object->apiobj.field_0x287 == 0 &&
             (object->torpedo->field_0x1 & 2) == 0) {
             if (object->torpedo->count < maximum) {
                 object->torpedo->pickup_positions[object->torpedo->count] = object->apiobj.position;

@@ -2,6 +2,7 @@
 
 #include "decomp.h"
 #include "nu2api/nu3d/android/nudlist_callbacks.h"
+#include "nu2api/numath/numtx.h"
 
 struct PartHeader;
 struct debinftype;

@@ -170,7 +170,7 @@ static void GizTurrets_Update(void *context, void *system_ptr, float frame_time)
                                     if (__builtin_expect(turret->fire_cooldown > 0.0f &&
                                         (turret->controller->pad_gamepad->buttons_pressed & GAMEPAD_ACTION), 1)) {
                                         f32 rapid_interval = turret->fire_interval * gizturret_rapid_fire_rate;
-                                        if (__builtin_expect(turret->fire_cooldown > rapid_interval, 0))
+                                        if (__builtin_expect(!(turret->fire_cooldown <= rapid_interval), 0))
                                             turret->fire_cooldown = rapid_interval;
                                         turret->rapid_fire_pending = 1;
                                     }
@@ -1279,7 +1279,7 @@ i32 GizTurrets_UpdateHint(HINT_s *) {
     GIZTURRET_s *turret = system->turrets;
     for (i32 i = 0; i < system->count; ++i, ++turret) {
         if ((turret->flags & 6) == 6 && (turret->behavior_flags & 0x4010) == 0x4000 && turret->field_0xe4 != NULL &&
-            36.0f > NuVecDistSqr(&GameCam->pos, &turret->position, NULL)) {
+            !(36.0f <= NuVecDistSqr(&GameCam->pos, &turret->position, NULL))) {
             return 1;
         }
     }
@@ -1379,12 +1379,12 @@ void GizTurrets_OpponentSelection(GIZTURRETSYS_s *system, i32 goody_count, APIOB
                             if ((candidate_flags ^ selected_flags) < 0) {
                                 continue;
                             }
-                            if (!(distance < selected_distance)) {
+                            if (distance >= selected_distance) {
                                 continue;
                             }
                         }
                     }
-                } else if (!(distance < selected_distance)) {
+                } else if (distance >= selected_distance) {
                     continue;
                 }
             } else {

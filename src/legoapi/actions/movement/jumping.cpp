@@ -534,27 +534,26 @@ i32 StartFallLand(GameObject_s *object, i32 action) {
         object->movement_runtime_flags &= ~4;
         return 0;
     }
-    void **animations = object->apiobj.character_model->model_data_b;
-    if (!(action == -1 || animations[action] == NULL)) {
+    if (!(action == -1 || object->apiobj.character_model->model_data_b[action] == NULL)) {
         object->context_animation = action;
-        if (animations[object->context_animation] == NULL) {
+        if (object->apiobj.character_model->model_data_b[object->context_animation] == NULL) {
             object->movement_runtime_flags &= ~4;
             return 0;
         }
     } else {
         if (IsWearingBackPackFn != NULL && IsWearingBackPackFn(object) && LEGOACT_BACKPACKFALLLAND != -1 &&
-            animations[LEGOACT_BACKPACKFALLLAND] != NULL) {
+            object->apiobj.character_model->model_data_b[LEGOACT_BACKPACKFALLLAND] != NULL) {
             object->context_animation = LEGOACT_BACKPACKFALLLAND;
         } else if (UsingExtraActionsFn != NULL && UsingExtraActionsFn(object) && LEGOACT_EXTRA_LAND2 != -1 &&
-                   animations[LEGOACT_EXTRA_LAND2] != NULL) {
+                   object->apiobj.character_model->model_data_b[LEGOACT_EXTRA_LAND2] != NULL) {
             object->context_animation = LEGOACT_EXTRA_LAND2;
-        } else if (LEGOACT_FALLLAND != -1 && animations[LEGOACT_FALLLAND] != NULL) {
+        } else if (LEGOACT_FALLLAND != -1 && object->apiobj.character_model->model_data_b[LEGOACT_FALLLAND] != NULL) {
             object->context_animation = LEGOACT_FALLLAND;
-        } else if (LEGOACT_LAND2 != -1 && animations[LEGOACT_LAND2] != NULL) {
+        } else if (LEGOACT_LAND2 != -1 && object->apiobj.character_model->model_data_b[LEGOACT_LAND2] != NULL) {
             object->context_animation = LEGOACT_LAND2;
         } else {
             object->context_animation = LEGOACT_LAND;
-            if (animations[object->context_animation] == NULL) {
+            if (object->apiobj.character_model->model_data_b[object->context_animation] == NULL) {
                 object->movement_runtime_flags &= ~4;
                 return 0;
             }
@@ -566,7 +565,7 @@ i32 StartFallLand(GameObject_s *object, i32 action) {
     object->fall_animation_timer = 0.0f;
     object->context_animation_timer = AnimDuration(object->id, object->context_animation, 0.0f, 0.0f, 1);
     object->movement_runtime_flags =
-        static_cast<u8>((object->movement_runtime_flags & ~0x08) | ((object->movement_runtime_flags & 0x04) << 1));
+        static_cast<u8>((object->movement_runtime_flags & ~0x08) | ((object->movement_runtime_flags << 1) & 0x08));
     return 1;
 }
 
@@ -1020,11 +1019,11 @@ void JumpCode(GameObject_s *object, i32 jump_pressed, i32 jump_held, u32 animati
                                   object->action_movement_state != 5 && object->action_movement_state != 8;
         if (restart_jump) {
             if (object->action_movement_state == 1) {
-                if (object->pad_gamepad->input_magnitude > 0.0f && (object->field_0xe22 & 0x20) != 0 &&
+                if (!(object->pad_gamepad->input_magnitude <= 0.0f) && (object->field_0xe22 & 0x20) != 0 &&
                     abs(RotDiff(object->apiobj.movement_facing_angle, object->current_input_angle)) > 0x6aaa)
                     force_flip = 1;
             } else if (object->action_movement_state == 2) {
-                if (object->pad_gamepad->input_magnitude > 0.0f && (object->field_0xe22 & 0x20) != 0 &&
+                if (!(object->pad_gamepad->input_magnitude <= 0.0f) && (object->field_0xe22 & 0x20) != 0 &&
                     abs(RotDiff(object->apiobj.movement_facing_angle, object->current_input_angle)) < 0x1555)
                     force_flip = 1;
             }

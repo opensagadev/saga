@@ -126,13 +126,7 @@ void MechInputTouchSpeederChaseController::Update(NuInputTouchData const *) {
                 swipe_direction = false;
             }
         }
-        float x = touch_holder->touch_position.x;
-        if (x < 1.0f) {
-            x = x > -1.0f ? x : -1.0f;
-        } else {
-            x = x < 1.0f ? x : 1.0f;
-        }
-        stick_values[0] = x;
+        stick_values[0] = MAX(-1.0f, MIN(touch_holder->touch_position.x, 1.0f));
         button_was_pressed[0] = 1;
     }
     UpdateButtons();

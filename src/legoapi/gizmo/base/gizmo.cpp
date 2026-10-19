@@ -1174,7 +1174,7 @@ i32 GizmoSysWriteInfo(GIZMOSYS_s *gizmo_sys, char *path, nugscn_s *scene) {
                 if (name != NULL) {
                     length = strlen(name) + 1;
                     EdFileWriteInt(length);
-                    if (length != 0) {
+                    if (length > 0) {
                         EdFileWrite(name, length);
                     }
                 } else {
@@ -1187,7 +1187,7 @@ i32 GizmoSysWriteInfo(GIZMOSYS_s *gizmo_sys, char *path, nugscn_s *scene) {
                     if (name != NULL) {
                         length = strlen(name) + 1;
                         EdFileWriteInt(length);
-                        if (length != 0) {
+                        if (length > 0) {
                             EdFileWrite(name, length);
                         }
                     } else {
@@ -1214,7 +1214,7 @@ i32 GizmoSysWriteInfo(GIZMOSYS_s *gizmo_sys, char *path, nugscn_s *scene) {
             if (name != NULL) {
                 length = NuStrLen(name) + 1;
                 EdFileWriteInt(length);
-                if (length != 0) {
+                if (length > 0) {
                     EdFileWrite(name, length);
                 }
             } else {

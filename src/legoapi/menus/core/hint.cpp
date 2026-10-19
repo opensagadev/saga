@@ -1060,7 +1060,7 @@ void Hint_Process(float elapsed) {
     HINT_s *hint = hintsys.active_hint;
     if (hint != NULL) {
         hintsys.display_elapsed += elapsed;
-        if ((hint->display_duration > 0.0f && hintsys.display_elapsed >= hint->display_duration) ||
+        if ((hint->display_duration > 0.0f && !(hintsys.display_elapsed < hint->display_duration)) ||
             MechSystems::Get()->PlayerButton().selector != NULL)
             hintsys.active_hint = NULL;
     }

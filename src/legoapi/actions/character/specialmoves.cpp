@@ -16,20 +16,25 @@ static i32 SpecialMoveCount;
 extern i32 objhitobj_throwkillpartsup;
 
 i32 SpecialMove_Check(GameObject_s *attacker, GameObject_s *victim) {
-    if (SpecialMove != NULL && ((attacker->apiobj.flags_low & 0x80) == 0 || attacker->field_0xda8 <= 0.0f) &&
+    if (SpecialMove != NULL && ((attacker->apiobj.flags_low & 0x80) == 0 || !(attacker->field_0xda8 > 0.0f)) &&
         LEGOCONTEXT_SPECIALMOVE_ATTACKER != -1 && LEGOCONTEXT_SPECIALMOVE_VICTIM != -1) {
         for (i32 i = 0; i < SpecialMoveCount; ++i) {
             SPECIALMOVE_s *move = &SpecialMove[i];
-            GAMECHARACTERDATA *a = static_cast<GAMECHARACTERDATA *>(attacker->apiobj.character_data->field11_0x24);
-            GAMECHARACTERDATA *v = static_cast<GAMECHARACTERDATA *>(victim->apiobj.character_data->field11_0x24);
+            // The character data is re-read per test and its action type compared as a signed byte.
             if ((move->attacker_id == attacker->id ||
-                 (move->attacker_action_type != -1 && move->attacker_action_type == a->field275_0x116)) &&
+                 (move->attacker_action_type != -1 &&
+                  move->attacker_action_type ==
+                      static_cast<i8>(static_cast<GAMECHARACTERDATA *>(attacker->apiobj.character_data->field11_0x24)
+                                          ->field275_0x116))) &&
                 attacker->apiobj.character_model->model_data_b[move->attacker_animation] != NULL &&
                 (move->victim_id == victim->id ||
-                 (move->victim_action_type != -1 && move->victim_action_type == v->field275_0x116)) &&
+                 (move->victim_action_type != -1 &&
+                  move->victim_action_type ==
+                      static_cast<i8>(static_cast<GAMECHARACTERDATA *>(victim->apiobj.character_data->field11_0x24)
+                                          ->field275_0x116))) &&
                 victim->apiobj.character_model->model_data_b[move->victim_animation] != NULL &&
                 ((victim->apiobj.flags_low & 0x80) == 0 ||
-                 (victim->spawn_protection_timer <= 0.0f && (victim->field_0xefe & 0x40) == 0)))
+                 (!(victim->spawn_protection_timer > 0.0f) && (victim->field_0xefe & 0x40) == 0)))
                 return i;
         }
     }

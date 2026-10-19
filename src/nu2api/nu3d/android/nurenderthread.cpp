@@ -25,6 +25,7 @@
 #include "nu2api/nu3d/nugscn.h"
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/nuspecial.h"
+#include "nu2api/nu3d/nushader_plain.h"
 #include "nu2api/nuandroid/ios_graphics.h"
 #include "nu2api/nucore/nuapi.h"
 #include "nu2api/nucore/nuthread.h"
@@ -49,7 +50,6 @@ static i32 nuspecial_vertex_noffsets_safe;
 
 f32 nuvec4_one[4] = {1.0f, 1.0f, 1.0f, 1.0f};
 
-extern "C" void NuShaderManagerSetfv(i32 id, const f32 *values);
 i32 global_frame_count = 0;
 i32 global_frame_count_paused = 0;
 

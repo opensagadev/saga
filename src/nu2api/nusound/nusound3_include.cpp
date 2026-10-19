@@ -1571,11 +1571,7 @@ extern "C" {
 }
 
 void NuSound3SetSampleTable(nusound_filename_info_s *info, variptr_u *buffer_start, variptr_u buffer_end) {
-    if (info == NULL) {
-        return;
-    }
-
-    for (; info->index != -1; info++) {
+    for (; info != NULL && info->index != -1; info++) {
         // TODO: dont cast classes
         if (!(info->index < 0x1000)) {
             info->sample = (NuSoundStreamingSample *)NuSound.AddSample(info->filename, NuSoundSystem::FileType::WAV,
@@ -1643,12 +1639,14 @@ extern "C" void NuSound3StopVoice(NuSoundVoice *voice) {
     }
 
     voice->Stop(false);
-    NuSound3Voice *entry = g_NuSoundVoicesActive.Front();
-    NuSound3Voice *end = g_NuSoundVoicesActive.End();
-    while (entry != end && entry->weak_ptr.obj != reinterpret_cast<NuSoundWeakPtrObj<NuSoundVoice> *>(voice)) {
-        entry = entry->intrusive_next;
+    NuSound3Voice *entry = NULL;
+    for (NuSound3Voice *it = g_NuSoundVoicesActive.Front(); it != g_NuSoundVoicesActive.End() && entry == NULL;
+         it = it->intrusive_next) {
+        if (it->weak_ptr.obj == reinterpret_cast<NuSoundWeakPtrObj<NuSoundVoice> *>(voice)) {
+            entry = it;
+        }
     }
-    if (entry == end) {
+    if (entry == NULL) {
         return;
     }
 

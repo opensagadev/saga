@@ -13,7 +13,7 @@ HashedKey MechJumpAutoPilotAddon::s_hashId("MechJumpAutopilotAddon", HashedKey::
 void MechJumpAutoPilotAddon::AnalyseJumpTrajectory() {
     float y = field_44.y;
     float limit = field_24.y - 2.0f;
-    if (!(y >= limit) || state == 2)
+    if (y < limit || state == 2)
         goto finish;
 
     {
@@ -71,7 +71,7 @@ void MechJumpAutoPilotAddon::CalculateModifiedJumpTrajectory() {
         state = 6;
         return;
     }
-    if (speed_scale < 0.5f)
+    if (!(speed_scale >= 0.5f))
         speed_scale = 0.5f;
     if (speed_scale > 1.5f)
         speed_scale = 1.5f;

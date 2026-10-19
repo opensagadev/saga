@@ -26,7 +26,7 @@ bool MechEdgeStopAddon::OnProcess(MechAddon::ProcessStage stage, float delta_tim
             }
         } else if (jumping) {
             jump_start_height = character->apiobj.field_0x218;
-            if (character->apiobj.field_0x218 > jump_start_height + 0.15f) {
+            if (!(character->apiobj.field_0x218 <= jump_start_height + 0.15f)) {
                 stop_timer = 0.5f;
                 stopped = true;
             }

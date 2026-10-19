@@ -572,14 +572,14 @@ i32 StarWars_PrepareJump(AIPACKET_s *packet, APIOBJECT_s *object, i32 checks) {
     offset.y = 0.0f;
     offset.z = destination->position.z - source->position.z;
     f32 radius = source->radius;
-    if (radius < 0.0f) {
+    if (!(radius >= 0.0f)) {
         radius = 0.0f;
     }
     NuVecScale(&offset, &offset, radius / connection->horizontal_distance);
     NuVecAdd(&packet->movement_destination, &source->position, &offset);
     f32 distance = NuVecXZDistSqr(&object->position, &packet->movement_destination, &offset);
     i32 ready = 0;
-    if (checks != 0 && (ai_moveradius * ai_moveradius > distance || owner->apiobj.respawn_timer > jump_stuck_time ||
+    if (checks != 0 && (!(ai_moveradius * ai_moveradius <= distance) || owner->apiobj.respawn_timer > jump_stuck_time ||
                         owner->character_context == 0x44)) {
         ready = 1;
         packet->movement_destination = object->position;
@@ -698,7 +698,7 @@ i32 StarWars_PrepareJump(AIPACKET_s *packet, APIOBJECT_s *object, i32 checks) {
                         !(height + owner->apiobj.scaled_height >= other->apiobj.collision_min.y)) {
                         continue;
                     }
-                    if (!(clearance * clearance > offset.x * offset.x + offset.z * offset.z))
+                    if (clearance * clearance <= offset.x * offset.x + offset.z * offset.z)
                         continue;
                     packet->path_connection_state = 1;
                     object->collision_priority |= 0x2000;

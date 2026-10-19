@@ -1009,7 +1009,7 @@ pushblock_s *NearestFacingPushBlock(WORLDINFO_s *world, GameObject_s *object, fl
         goto have_gap;
     }
     have_gap: {
-        if (gap > (object->apiobj.field_0x1dc + 0.01f) * 2.0f)
+        if (!(gap <= (object->apiobj.field_0x1dc + 0.01f) * 2.0f))
             continue;
         i32 yaw = NuAtan2D(delta.x, delta.z);
         i32 rot = 0x4000 - (yaw & 0xffff);
@@ -1025,7 +1025,7 @@ pushblock_s *NearestFacingPushBlock(WORLDINFO_s *world, GameObject_s *object, fl
         if ((u16)pitch_diff > 0x4000)
             continue;
         f32 dist2 = dx * dx + dz * dz;
-        if (!(range > dist2))
+        if (range <= dist2)
             continue;
         if (!(nearest_dist > dist2))
             continue;

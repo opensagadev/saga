@@ -840,7 +840,7 @@ void MenuDrawStore(MENU_s *) {
     if (product.description[0] != 0) {
         SmartTextEx(product.description, 0.0f, y, 1.0f, 0.3f, 0.3f, 0.3f, 1, 255, 127, 0, 1.9f, 2, &text_box, 0, MenuA);
         y -= text_box.height;
-        if (StoreIAP[0].width < text_box.width) {
+        if (!(StoreIAP[0].width >= text_box.width)) {
             StoreIAP[0].width = text_box.width;
         }
     }

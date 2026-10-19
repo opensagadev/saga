@@ -572,7 +572,7 @@ void Doors_Check(WORLDINFO_s *world, GameObject_s *object) {
                                 return;
                             }
 
-                            if (NuFabs(door->normal.y) >= NuTrigTable[0xaaa]) {
+                            if (!(NuFabs(door->normal.y) < NuTrigTable[0xaaa])) {
                                 return;
                             }
 

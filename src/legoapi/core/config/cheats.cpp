@@ -733,7 +733,7 @@ i32 GetAnimDirection(nuinstanim_s *animation) {
     if (animation == NULL || animation->tfactor == 0.0f) {
         return -1;
     }
-    return animation->tfactor < 0.0f ? 1 : 0;
+    return !(animation->tfactor >= 0.0f) ? 1 : 0;
 }
 
 void DrawCross(nuvec_s *centre, float radius, numtl_s *material, i32 colour) {

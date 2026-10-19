@@ -94,11 +94,7 @@ i32 PartDraw_ThermalDetonator(PART_s *part) {
 }
 
 void PartUpdate_ThermalDetonator(PART_s *part) {
-    if (part == NULL) {
-        return;
-    }
-    const u16 flags = static_cast<u16>(part->active) | (static_cast<u16>(part->render_flags) << 8);
-    if ((flags & 0x4002) == 2) {
+    if ((part->active_render_flags & 0x4002) == 2) {
         if (part->field_100 > 0.0f && part->field_100 < 1.0f) {
             PlaySfx(const_cast<char *>("ThermalDet_Beep"), &part->position);
             part->render_flags |= 0x40;
@@ -117,7 +113,7 @@ void PartUpdate_ThermalDetonator(PART_s *part) {
     }
     if (part->position.y > height) {
         i32 surface = ShadowInfo();
-        if (static_cast<u32>(surface) <= 16 && (TerSurface[surface].flags & 2) != 0) {
+        if (surface >= -1 && surface <= 16 && (TerSurface[surface].flags & 2) != 0) {
             part->reflection_height = height;
             part->reflection_flags |= 2;
         }
@@ -134,7 +130,7 @@ void PartUpdate_ThermalDetonator(PART_s *part) {
         ((TerLayer[layer].flags & 1) != 0 || (layer & ~8) == 1)) {
         part->render_flags |= 0x80;
     }
-    if (WORLD != NULL && GameCam != NULL && WORLD->current_level == DEATHSTARRESCUEA_LDATA &&
+    if (WORLD->current_level == DEATHSTARRESCUEA_LDATA &&
         GameCam->sock_position.location.sock == 2) {
         part->velocity.x = SeekValF(part->velocity.x, 0.0f, 3.0f);
         part->velocity.z = SeekValF(part->velocity.z, 0.0f, 3.0f);
@@ -434,7 +430,7 @@ i32 ThermalDetonator_MoveCode(GameObject_s *object) {
     } else if ((object->context_flags & 0x40) == 0) {
         if (object->apiobj.character_model->model_data_b[object->context_animation] != NULL) {
             const f32 release_frame = AnimListFrame(object->apiobj.character_model, object->context_animation, 2);
-            if (frame != NULL && *frame > 0.0f && *frame >= release_frame) {
+            if (frame != NULL && !(*frame <= 0.0f) && *frame >= release_frame) {
                 object->movement_runtime_flags |= 0x40;
             }
         } else if (!(object->context_animation_timer >= 0.5f)) {
@@ -458,7 +454,7 @@ i32 ShinyMetal_UpdateHint(HINT_s *hint) {
             NuVecDistSqr(&player->apiobj.collision_position, &LevBlowUp[0]->mid_position, NULL) < 25.0f)
             return 1;
         if (player2 != NULL &&
-            NuVecDistSqr(&player2->apiobj.collision_position, &LevBlowUp[0]->mid_position, NULL) < 25.0f)
+            !(NuVecDistSqr(&player2->apiobj.collision_position, &LevBlowUp[0]->mid_position, NULL) >= 25.0f))
             return 1;
     }
     if (FreePlay == 0) {

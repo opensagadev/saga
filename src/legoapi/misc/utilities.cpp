@@ -1007,9 +1007,8 @@ i32 MatrixReflection(numtx_s *matrix, i32 axis, f32 plane, f32 override_plane, n
 i32 MatrixReflectionVU0_AXISY(numtx_s *matrix, f32 plane, f32 override_plane, numtx_s *result) {
     if (static_cast<u8>(Reflections_On) == 0)
         return 0;
-    if (override_plane != 2000000.0f) {
-        if (MatrixReflection_CanOverrideFn != NULL && MatrixReflection_CanOverrideFn(plane) == 0)
-            return 0;
+    if (override_plane != 2000000.0f &&
+        (MatrixReflection_CanOverrideFn == NULL || MatrixReflection_CanOverrideFn(plane) != 0)) {
         plane = override_plane;
     }
     *result = *matrix;
@@ -1448,7 +1447,7 @@ void MoveSplinePosition(SPLINEPOS_s *position, f32 distance) {
             } else if (position->segment >= 0 && distance < 0.0f) {
                 for (;;) {
                     position->segment_distance += distance;
-                    if (__builtin_expect(!(position->segment_distance < 0.0f), 0))
+                    if (__builtin_expect(position->segment_distance >= 0.0f, 0))
                         break;
                     distance = position->segment_distance;
                     i16 previous = position->segment;
@@ -1779,7 +1778,7 @@ void SetAnimFrame(nuhspecial_s *special, float frame) {
     memcpy(&end_frame, animation, sizeof(end_frame));
     if (frame == 1.0e9f)
         frame = end_frame;
-    if (!(frame >= 1.0f && frame <= end_frame))
+    if (!(frame >= 1.0f) || frame > end_frame)
         return;
     NuAnimData2CalcMatrix(animation, 0, frame, &matrix);
     instance_animation->mtx = matrix;

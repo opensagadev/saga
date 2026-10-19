@@ -3540,7 +3540,7 @@ void EdDrawPolyArrow(VuVec const &start, VuVec const &end, i32 sides, i32 colour
     }
     angles.z = 0;
     const float draw_radius = radius > minimum_radius ? radius : minimum_radius;
-    const float draw_limit = limit < draw_radius ? limit : draw_radius;
+    const float draw_limit = !(limit >= draw_radius) ? limit : draw_radius;
 
     VuMtx transform;
     VuVec center(start.x + displacement.x * 0.4f, start.y + displacement.y * 0.4f, start.z + displacement.z * 0.4f,
@@ -6961,7 +6961,7 @@ i32 ClassEditor::FindNearestObject(VuVec &point, ClassObject &result, i32 filter
             if (nearest_class->FindMember(&member, nearest_object, 0x40, 1))
                 member.reference->GetAttributeData(member.object, 0x40, EdType_Float, &radius, 0);
         }
-        if (nearest_radius > radius) {
+        if (!(nearest_radius <= radius)) {
             nearest_class = NULL;
             nearest_object = NULL;
         }
@@ -9302,7 +9302,7 @@ i32 EdManipulator::Process(EdInputContext &input, ClassObjectList &selected) {
     if (input.GetHold(14) != 0.0f)
         Scale += step * input.delta_time;
     if (input.GetHold(15) != 0.0f) {
-        if (!(Scale <= 0.1f))
+        if (Scale > 0.1f)
             Scale -= step * input.delta_time;
         else
             Scale = 0.1f;
@@ -9771,7 +9771,7 @@ i32 LineToSphereIntersection(VuVec &origin, VuVec &direction, VuVec &center, f32
     f32 origin_center = (origin.x * center.x + origin.y * center.y) + origin.z * center.z;
     f32 c = ((center_squared + origin_squared) - (origin_center + origin_center)) - radius * radius;
     f32 discriminant = b * b - (4.0f * a) * c;
-    if (discriminant < 0.0f)
+    if (!(discriminant >= 0.0f))
         return 0;
     f32 far_root = NuFsqrt(discriminant);
     f32 denominator = a + a;

@@ -981,7 +981,7 @@ bool MechInputTouchGestureBasedController::PerformCloseMechanic(GameObject_s &ob
             f32 dx = teleport_position.x - object.apiobj.position.x;
             f32 dy = teleport_position.y - object.apiobj.position.y;
             f32 dz = teleport_position.z - object.apiobj.position.z;
-            if (__builtin_fabsf(dy) < object.apiobj.scaled_height && dx * dx + dz * dz < 0.35f * 0.35f) {
+            if (__builtin_fabsf(dy) < object.apiobj.scaled_height && !(dx * dx + dz * dz >= 0.35f * 0.35f)) {
                 StartNewTask(new MechTouchTaskUseTeleport(*this, NULL, position), holder, true, true);
                 return true;
             }

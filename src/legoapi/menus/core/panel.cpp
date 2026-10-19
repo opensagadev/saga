@@ -300,7 +300,7 @@ static void DrawHitPoints(GameObject_s *object, float x, float y, float scale, f
 
     i32 transitioning = 0;
     if (static_cast<u8>(object->apiobj.field_0x27c) <= 1 && hitpoints > 1 && object->apiobj.field_0x287 != 0 &&
-        object->field_0x101c > 0.0f && object->field_0x101c < 1.0f) {
+        object->field_0x101c > 0.0f && !(object->field_0x101c >= 1.0f)) {
         current_hp =
             static_cast<i32>(static_cast<float>(static_cast<i32>(object->hitpoints)) * (1.0f - object->field_0x101c));
         transitioning = 1;
@@ -406,7 +406,7 @@ void UpdateStats() {
         if (DrawMiniKitTime > 0.0f)
             DrawMiniKitTime -= FRAMETIME;
         f32 target = 1.0f;
-        if (FadeSys.fade != 0.0f || CUTSTOPGAME != 0 || (Paused == 0 && NetPaused == 0 && !(DrawMiniKitTime > 0.0f)) ||
+        if (FadeSys.fade != 0.0f || CUTSTOPGAME != 0 || (Paused == 0 && NetPaused == 0 && DrawMiniKitTime <= 0.0f) ||
             screendump != 0 || GetMenuID() == PANEL_MENU_SAVE || GetMenuID() == PANEL_MENU_LOAD ||
             GetMenuID() == PANEL_MENU_EPISODE_I || GetMenuID() == PANEL_MENU_EPISODE_II ||
             GetMenuID() == PANEL_MENU_EPISODE_III || GetMenuID() == PANEL_MENU_EPISODE_IV)
@@ -441,7 +441,7 @@ void UpdateStats() {
                 target = 0.0f;
             redbrickslidetime = SeekLinearF(redbrickslidetime, target, FRAMETIME);
             RedBrickScale = SeekLinearF(RedBrickScale, 1.0f, 5.0f * FRAMETIME);
-            if (DrawBuildUpTime > 0.0f)
+            if (!(DrawBuildUpTime <= 0.0f))
                 DrawBuildUpTime -= FRAMETIME;
             target = 1.0f;
             if (FadeSys.fade != 0.0f || CUTSTOPGAME != 0 ||
@@ -783,7 +783,7 @@ void DrawMeleeTargetsNumber(i16 *targets, u8 *counts, i32 count, u8 reset, nuhsp
                         meleeTarg_localCount[i] = counts[i];
                         red = 0;
                         green = 255;
-                    } else if (meleeTarg_flashTime[i] < 1.0f) {
+                    } else if (!(meleeTarg_flashTime[i] >= 1.0f)) {
                         const f32 phase = (meleeTarg_flashTime[i] - 0.5f) * 2.0f * 255.0f;
                         red = static_cast<i32>(phase);
                         green = static_cast<i32>(255.0f - phase);
@@ -1001,8 +1001,8 @@ void DrawPanel() {
                     f32 name_x = -(ICONX + 0.075f);
                     if (object->apiobj.player_controlled && object->apiobj.character_data->name_id != -1) {
                         bool draw_name = paused != 0;
-                        if (!draw_name && object->hud_icon_timer > 0.0f && object->hud_icon_timer < 2.0f)
-                            draw_name = NuFmod(object->hud_icon_timer, 0.4f) < 0.2f;
+                        if (!draw_name && object->hud_icon_timer > 0.0f && !(object->hud_icon_timer >= 2.0f))
+                            draw_name = !(NuFmod(object->hud_icon_timer, 0.4f) >= 0.2f);
                         if (draw_name) {
                             const i32 name_alpha = static_cast<i32>(base_alpha * 128.0f);
                             f32 width = Game.options_save.widescreen ? 0.7f : 0.5f;

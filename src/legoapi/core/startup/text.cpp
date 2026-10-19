@@ -377,7 +377,7 @@ __attribute__((optimize("O2", "tree-vectorize"))) void Tag_DrawIcon_LSW(GameObje
     }
     if ((object->field_0xefe & 0x10) == 0) {
         f32 timer = object->hud_icon_timer;
-        if (!(timer > 0.0f) || (timer < 2.0f && NuFmod(timer, 0.4f) < 0.2f)) {
+        if (!(timer > 0.0f) || (!(timer >= 2.0f) && !(NuFmod(timer, 0.4f) >= 0.2f))) {
             return;
         }
     }

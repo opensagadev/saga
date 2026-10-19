@@ -424,7 +424,7 @@ i32 ItemMenu(MENU_s *menu) {
         GameAudio_PlaySfx(0x31, NULL, 0, 0);
     }
 
-    if (slidetimer < 0.0f)
+    if (!(slidetimer >= 0.0f))
         enteredshop = 0;
     else if ((lastitem != picked || enteredshop) && !SubMenu) {
         const f32 reverse_phase = slidetimer * 8.0f;
@@ -454,7 +454,7 @@ i32 ItemMenu(MENU_s *menu) {
         return 7;
     }
 
-    if (slidetimer > 0.0f)
+    if (!(slidetimer <= 0.0f))
         return 7;
 
     picked = lastitem;
@@ -869,7 +869,7 @@ void DrawSubItemMenu2D() {
                 if (since_touch > 4.0f) {
                     i32 angle = static_cast<i32>(NuFmod(since_touch, 4.0f) * 0.25f * 65536.0f);
                     f32 value = NuTrigTable[(angle >> 1) & 0x7fff] - 0.8f;
-                    if (!(value < 0.0f))
+                    if (value >= 0.0f)
                         pulse = value + 1.0f;
                 }
             }
@@ -945,7 +945,7 @@ i32 Shop_UpdateHint(HINT_s *hint) {
         return 0;
     if (GameCam->sock_position.location.sock != 0 || !player)
         return 0;
-    if (!(NuVecXZDistSqr(&player->apiobj.position, &HubShopPos, NULL) < 1.0f))
+    if (NuVecXZDistSqr(&player->apiobj.position, &HubShopPos, NULL) >= 1.0f)
         return 0;
 
     if (hint->control_mode_ids[0] == 0x5ea) {
@@ -968,7 +968,7 @@ i32 Shop_UpdateHint(HINT_s *hint) {
             i32 time_required = 0;
             for (i32 i = 0; i != SHOPGOLDBRICKS; ++i, time_required += 3600, ++item) {
                 if (!(static_cast<u64>((&Game.shop_gold_brick_purchased_bits)[i >> 5]) >> (i & 31) & 1) &&
-                    static_cast<f32>(time_required) <= Game.field30_0x7c2c &&
+                    !(static_cast<f32>(time_required) > Game.field30_0x7c2c) &&
                     Game.coins >= static_cast<u32>(item->price))
                     return 1;
             }
@@ -1438,7 +1438,7 @@ locked:
 }
 
 i32 MoveSubItemsRight(i32 *ids, NUVEC *positions, i32 count) {
-    if (slidetimer > 0.0f) {
+    if (!(slidetimer <= 0.0f)) {
         const f32 phase = 1.0f - slidetimer * 8.0f;
         const i32 angle = static_cast<i32>(phase * 32768.0f + 16384.0f);
         f32 t = 1.0f - (NuTrigTable[(angle >> 1) & 0x7fff] + 1.0f) * 0.5f;
@@ -1485,7 +1485,7 @@ i32 MoveSubItemsRight(i32 *ids, NUVEC *positions, i32 count) {
 }
 
 i32 MoveSubItemsLeft(i32 *ids, NUVEC *positions, i32 count) {
-    if (slidetimer > 0.0f) {
+    if (!(slidetimer <= 0.0f)) {
         const f32 phase = 1.0f - slidetimer * 8.0f;
         const i32 angle = static_cast<i32>(phase * 32768.0f + 16384.0f);
         f32 t = 1.0f - (NuTrigTable[(angle >> 1) & 0x7fff] + 1.0f) * 0.5f;
@@ -2234,7 +2234,7 @@ void DrawSubItems() {
             }
             case 4: {
                 if (items[shelf_ids[slot]].unlocked == 1) {
-                    if (pickedbing > 0.0f && slot == 3)
+                    if (!(pickedbing <= 0.0f) && slot == 3)
                         rotation += static_cast<i32>(NuFmod(GameTimer.time_elapsed, 4.0f) * 0.25f * 65536.0f);
                     else
                         rotation = static_cast<i32>(NuFmod(GameTimer.time_elapsed, 4.0f) * 0.25f * 65536.0f);
@@ -2336,7 +2336,7 @@ void DrawShopPrompts() {
             }
             case 4: {
                 i32 id = BrickShelfIds[3];
-                if (BrickItems[id].price <= Game.coins && static_cast<f32>(id * 3600) <= Game.field30_0x7c2c)
+                if (BrickItems[id].price <= Game.coins && !(static_cast<f32>(id * 3600) > Game.field30_0x7c2c))
                     alpha = 1.0f;
                 break;
             }

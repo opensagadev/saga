@@ -37,7 +37,10 @@
 #include "nu2api/nucore/NuSpeedBlurFilter.h"
 #include "nu2api/nucore/NuSpeedBlurFilterGen.h"
 #include "nu2api/nucore/NuVoiceAndroid.h"
+#include "gamelib/util/Refpack.h"
 #include "gamelib/util/Utilities.h"
+#include "globals.h"
+#include "legoapi/legoapi_types.h"
 #include "nu2api/nucore/numemory.h"
 #include "nu2api/nucore/nuthread.h"
 #include "nu2api/nu3d/nupostresources.h"
@@ -48,6 +51,7 @@
 #include "nu2api/numath/nuvec4.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/nucore/nuvuvectype.hpp"
+#include "nu2api/nucore/unref.h"
 #include "nu2api/nu3d/nuqfnt.h"
 
 #include <stdio.h>
@@ -59,10 +63,6 @@ NuNetEmu theNuNetEmu;
 
 typedef i32 (*NuNetSessionSendToFn)(NetSession *, void *, i32, nunetaddr_s *);
 typedef i32 (*NuNetSessionRecvFromFn)(NetSession *, void *, i32, nunetaddr_s *);
-struct MemoryManager;
-extern MemoryManager theMemoryManager;
-extern "C" void *MemoryManagerAllocPool(MemoryManager *, u32, i32) asm("_ZN13MemoryManager9AllocPoolEji");
-extern "C" void MemoryManagerFreePool(MemoryManager *, void *, u32) asm("_ZN13MemoryManager8FreePoolEPvj");
 
 static inline i32 NuNetSessionSendTo(void *data, i32 size, nunetaddr_s *address) {
     void **vtable = *reinterpret_cast<void ***>(theSession);
@@ -73,9 +73,6 @@ static inline i32 NuNetSessionRecvFrom(void *data, i32 size, nunetaddr_s *addres
     void **vtable = *reinterpret_cast<void ***>(theSession);
     return reinterpret_cast<NuNetSessionRecvFromFn>(vtable[23])(theSession, data, size, address);
 }
-
-extern i32 unref(unsigned char *, unsigned char *);
-extern i32 refpack(unsigned char *, abi_long, unsigned char *);
 
 struct NuNetEmuSegment {
     u16 offset;
@@ -199,14 +196,14 @@ NuNetEmu::EmuPacket::EmuPacket(nunetaddr_s *net_address) {
         next = NULL;
         previous = NULL;
     }
-    payload = static_cast<u8 *>(MemoryManagerAllocPool(&theMemoryManager, 0xbb8, 1));
+    payload = static_cast<u8 *>(theMemoryManager.AllocPool(0xbb8, 1));
     payload_size = 0;
     payload_count = 0;
     address = *reinterpret_cast<u32 *>(net_address);
 }
 
 NuNetEmu::EmuPacket::~EmuPacket() {
-    MemoryManagerFreePool(&theMemoryManager, payload, 0xbb8);
+    theMemoryManager.FreePool(payload, 0xbb8);
 }
 
 i32 NuNetEmu::SplitSendPacket(NuNetEmu::EmuPacket *packet) {
@@ -235,9 +232,9 @@ i32 NuNetEmu::SplitSendPacket(NuNetEmu::EmuPacket *packet) {
     }
     qsort(segments, segment_count, sizeof(NuNetEmuSegment), cbSortSeg);
 
-    EmuPacket *first = new (MemoryManagerAllocPool(&theMemoryManager, sizeof(EmuPacket), 1))
+    EmuPacket *first = new (theMemoryManager.AllocPool(sizeof(EmuPacket), 1))
         EmuPacket(reinterpret_cast<nunetaddr_s *>(&packet->address));
-    EmuPacket *second = new (MemoryManagerAllocPool(&theMemoryManager, sizeof(EmuPacket), 1))
+    EmuPacket *second = new (theMemoryManager.AllocPool(sizeof(EmuPacket), 1))
         EmuPacket(reinterpret_cast<nunetaddr_s *>(&packet->address));
 
     EmuPacket *packets[2] = {first, second};
@@ -251,11 +248,11 @@ i32 NuNetEmu::SplitSendPacket(NuNetEmu::EmuPacket *packet) {
     i32 sent = SplitSendPacket(first) + SplitSendPacket(second);
     if (first != NULL) {
         first->~EmuPacket();
-        MemoryManagerFreePool(&theMemoryManager, first, sizeof(EmuPacket));
+        theMemoryManager.FreePool(first, sizeof(EmuPacket));
     }
     if (second != NULL) {
         second->~EmuPacket();
-        MemoryManagerFreePool(&theMemoryManager, second, sizeof(EmuPacket));
+        theMemoryManager.FreePool(second, sizeof(EmuPacket));
     }
     return sent;
 }
@@ -292,7 +289,7 @@ void NuNetEmu::Update() {
                 packet->previous = NULL;
                 field_0c--;
                 packet->~EmuPacket();
-                MemoryManagerFreePool(&theMemoryManager, packet, sizeof(EmuPacket));
+                theMemoryManager.FreePool(packet, sizeof(EmuPacket));
                 packet = next;
             } else {
                 packet = packet->next;
@@ -368,7 +365,7 @@ i32 NuNetEmu::SendTo(void *data, i32 size, nunetaddr_s *address, i32) {
 
     EmuPacket *packet = FindPacket(address, size);
     if (packet == NULL) {
-        packet = new (MemoryManagerAllocPool(&theMemoryManager, sizeof(EmuPacket), 1)) EmuPacket(address);
+        packet = new (theMemoryManager.AllocPool(sizeof(EmuPacket), 1)) EmuPacket(address);
         u32 now = UtilGetFrameStartTime();
         if (field_18 > 0) {
             f32 range = static_cast<f32>(field_18 - field_14);

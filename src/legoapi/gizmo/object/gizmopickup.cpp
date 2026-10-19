@@ -694,7 +694,7 @@ void GizmoPickup_CollectCoin(WORLDINFO_s *world, nuvec_s *position, i32 type_ind
         }
     }
 
-    if (DoubleScoreTime > 0.0f || type_index == 2 || type_index == 3) {
+    if (!(DoubleScoreTime <= 0.0f) || type_index == 2 || type_index == 3) {
         PlaySfx(const_cast<char *>("PickupCoinB"), position);
     } else {
         PlaySfx(const_cast<char *>("PickupCoin"), position);

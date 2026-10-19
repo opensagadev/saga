@@ -715,9 +715,9 @@ void HatMachine_MoveCode(WORLDINFO_s *world, GameObject_s *object, i32 special_p
         if (distance < (0.25f + object->apiobj.field_0x1dc) * machine->scale &&
             (special_pressed != 0 || (object->panel_use_request == 2 && object->big_jump_data != NULL))) {
             object->field_0x788 = machine;
+            object->apiobj.movement_facing_angle = machine->yaw;
             object->delayed_turn_timer = 0.0f;
             object->field_0x768 = 0.0f;
-            object->apiobj.movement_facing_angle = machine->yaw;
             object->field_0xe21 &= ~0x10;
             object->character_context = 0x61;
             object->field_0x7a3 = 0;
@@ -738,9 +738,10 @@ void HatMachine_MoveCode(WORLDINFO_s *world, GameObject_s *object, i32 special_p
             }
             AlertSurroundingCreatures(object, &object->apiobj.collision_position);
             machine = static_cast<HATMACHINE_s *>(object->field_0x788);
-            object->context_animation_timer = AnimDuration(object->id, object->context_animation, 0.0f, 0.0f, 1);
-            machine->animation_duration = object->context_animation_timer;
-            if (!(object->context_animation_timer > 0.0f)) {
+            const f32 duration = AnimDuration(object->id, object->context_animation, 0.0f, 0.0f, 1);
+            object->context_animation_timer = duration;
+            machine->animation_duration = duration;
+            if (duration <= 0.0f) {
                 object->context_animation_timer = 2.0f;
             }
             object->field_0xdb0 = 0.0f;
@@ -758,7 +759,7 @@ void HatMachine_MoveCode(WORLDINFO_s *world, GameObject_s *object, i32 special_p
     if (object->apiobj.character_model->model_data_b[object->context_animation] == NULL ||
         AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0) != NULL) {
         const f32 progress = object->field_0x768 + FRAMETIME;
-        object->field_0x768 = progress >= 1.0f ? 1.0f : progress;
+        object->field_0x768 = progress <= 1.0f ? progress : 1.0f;
         object->context_animation_timer -= FRAMETIME;
 
         switch (object->field_0x7a3) {
@@ -766,9 +767,9 @@ void HatMachine_MoveCode(WORLDINFO_s *world, GameObject_s *object, i32 special_p
                 if (!(object->context_animation_timer <= 0.0f)) {
                     return;
                 }
-                const bool disguise_blocked = (object->apiobj.character_data->game_character->flags_090 & 0x10) == 0 &&
-                                              (object->id != id_PRINCESSLEIABOUSHH || FreePlay == 0);
-                if (object->apiobj.character_model->model_data_b[0x6d] == NULL || disguise_blocked) {
+                if (object->apiobj.character_model->model_data_b[0x6d] == NULL ||
+                    ((object->apiobj.character_data->game_character->flags_090 & 0x10) == 0 &&
+                     (object->id != id_PRINCESSLEIABOUSHH || FreePlay == 0))) {
                     if (object->apiobj.character_model->model_data_b[0x5e] == NULL) {
                         if (machine->animation_state != 2) {
                             return;
@@ -849,13 +850,11 @@ void HatMachine_MoveCode(WORLDINFO_s *world, GameObject_s *object, i32 special_p
             NewRumble(object->pad_gamepad->pad, 0.5f, 0);
         } else {
             NewBuzz(object->pad_gamepad->pad, 0.1f, 0);
-            machine = static_cast<HATMACHINE_s *>(object->field_0x788);
-            machine->hat_delay = 0.6f;
-            if (machine->configured_hat == 6) {
+            static_cast<HATMACHINE_s *>(object->field_0x788)->hat_delay = 0.6f;
+            if (static_cast<HATMACHINE_s *>(object->field_0x788)->configured_hat == 6) {
                 PlaySfx(const_cast<char *>("Hunter_Granted"), &object->apiobj.collision_position);
-                machine = static_cast<HATMACHINE_s *>(object->field_0x788);
             }
-            if (machine->configured_hat == 5) {
+            if (static_cast<HATMACHINE_s *>(object->field_0x788)->configured_hat == 5) {
                 PlaySfx(const_cast<char *>("Trooper_Granted"), &object->apiobj.collision_position);
             }
         }

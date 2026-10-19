@@ -1261,7 +1261,7 @@ mode_selected:
                 }
                 if (!changed && object->field_0xef0 < 0.3f) {
                     object->field_0xef0 += FRAMETIME;
-                    if (object->field_0xef0 >= 0.3f) {
+                    if (!(object->field_0xef0 < 0.3f)) {
                         object->field_0xef0 = 0.3f;
                         object->field_0xefe = (object->field_0xefe & ~0x10) | (was_blocked << 4);
                     }

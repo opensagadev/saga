@@ -27,7 +27,9 @@ void __attribute__((weak)) GLSLParameter::setElementsMatrix(i32 first_element, i
     const NUMTX *source = reinterpret_cast<const NUMTX *>(values);
     NUMTX *destination = transposed;
     for (i32 i = 0; i < count; ++i) {
-        NuMtxTranspose(destination++, const_cast<NUMTX *>(source++));
+        NuMtxTranspose(destination, const_cast<NUMTX *>(source));
+        destination++;
+        source++;
     }
 
     const i32 vectors_remaining = element_count - first_element * 4;

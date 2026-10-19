@@ -637,11 +637,11 @@ void LoadPerm(void) {
 
             if (intro_timer > 0.0f && intro_timer < 3.8f) {
                 f32 alpha;
-                if (intro_timer < 0.3f) {
+                if (!(intro_timer >= 0.3f)) {
                     alpha = intro_timer / 0.3f;
                 } else if (intro_timer < 3.3f) {
                     alpha = 1.0f;
-                } else if (intro_timer >= 3.6f) {
+                } else if (!(intro_timer < 3.6f)) {
                     alpha = 0.0f;
                 } else {
                     alpha = 1.0f - (intro_timer - 3.3f) / 0.29999995f;

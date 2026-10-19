@@ -91,7 +91,7 @@ void Lever_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
                 f32 frame = *playing;
                 if (!(frame >= AnimListFrame(object->apiobj.character_model, object->context_animation, 0)))
                     return;
-            } else if (!(object->context_animation_timer >= 0.25f)) {
+            } else if (object->context_animation_timer < 0.25f) {
                 return;
             }
         }
@@ -330,7 +330,7 @@ static void Levers_Draw(void *world_ptr, void *, float) {
             NuSpecialDrawAt(&world->lev_objs[LEVER_SPECIAL_ANIMATED].special, &animated_matrix);
         } else {
             f32 animation_frame = 0.0f;
-            if (lever.pull_progress > 0.0f) {
+            if (!(lever.pull_progress <= 0.0f)) {
                 if (lever.auto_reset_timer > 0.0f) {
                     animation_frame = 32.0f;
                 } else if ((lever.flags & LEVER_FLAG_RETURNING) == 0) {
@@ -374,7 +374,7 @@ static void Levers_Draw(void *world_ptr, void *, float) {
 
         i32 status_special = LEVER_SPECIAL_INCOMPLETE;
         if ((lever.flags & LEVER_FLAG_ENABLED) != 0) {
-            status_special = lever.pull_progress < 1.0f ? LEVER_SPECIAL_INCOMPLETE : LEVER_SPECIAL_COMPLETE;
+            status_special = !(lever.pull_progress >= 1.0f) ? LEVER_SPECIAL_INCOMPLETE : LEVER_SPECIAL_COMPLETE;
             bool draw_target = false;
             if ((lever.flags & LEVER_FLAG_HIDE_TARGET_INDICATOR) == 0 && lever.target_offset.y != 2000000.0f) {
                 draw_target = world->lev_objs[LEVER_SPECIAL_TARGET].active != 0;

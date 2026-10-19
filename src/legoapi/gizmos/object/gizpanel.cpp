@@ -1004,7 +1004,7 @@ i32 GizPanel_UpdateHint(HINT_s *hint) {
             continue;
         f32 distance;
         GIZPANEL_s *panel = GizPanel_FindNearest(WORLD, &Player[index]->apiobj.position, Player[index], &distance, 0);
-        if (panel == NULL || static_cast<u8>(panel->flags & 0x0b) != 8)
+        if (panel == NULL || panel->reserved_flag || panel->state || !panel->track_player)
             continue;
         f32 radius = (1.0f + Player[index]->apiobj.field_0x1dc) * panel->target_scale;
         if (distance < radius * radius) {

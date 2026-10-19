@@ -175,6 +175,7 @@ extern "C" {
     u32 NuQFntGetPrintMode(void);
     void NuQFntEncodeUnicodeString(NUQFNT *font, u16 *text);
     f32 NuQFntPrintLenV(NUQFNT *font, const char *format, va_list arguments);
+    void NuQFntPrintV(NUQFNT *font, const char *format, va_list arguments);
     void NuQFntWrite(char *path, VUFNT *font);
     void NuQFntWriteUniversalFont(char *path, VUFNT *font, char *texture_path);
     void NuQFntSet2d(NUQFNT *font);

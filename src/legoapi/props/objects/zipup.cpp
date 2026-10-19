@@ -635,7 +635,7 @@ void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
                     NuVecSub(&delta, &object->zipup_swing_position, &object->zipup_start_position);
                     NuVecScale(&delta, &delta, fraction);
                     NuVecAdd(&api.position, &object->zipup_start_position, &delta);
-                    if (object->context_animation_timer >= object->airborne_action_duration) {
+                    if (!(object->context_animation_timer < object->airborne_action_duration)) {
                         object->field_0x7a3 = 2;
                         object->context_animation_timer = 0.0f;
                         object->context_animation = LEGOACT_WHIP_SWING_JUMP;

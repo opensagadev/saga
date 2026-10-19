@@ -575,7 +575,7 @@ void InitStatusScreen(WORLDINFO_s *world) {
         p.elapsed_time = BonusTimer.time_elapsed;
         p.previous_best_time = Game.area_save[area].challenge_trial_time;
         i32 gold = 0;
-        if (p.previous_best_time <= 0.0f || p.elapsed_time < p.previous_best_time) {
+        if (!(p.previous_best_time > 0.0f) || p.elapsed_time < p.previous_best_time) {
             if (WORLD->area->challenge_trial_time != 0 && WORLD->area->challenge_trial_time <= p.previous_best_time) {
                 AddToCompletionPoints(POINTS_PER_TIMETRIAL);
                 gold = AddGoldBrickMessage(&p, tNEWBESTTIME);
@@ -1296,7 +1296,7 @@ void DrawStatusScreen(WORLDINFO_s *) {
         } else if (stage->type == 12) {
             alpha = 0.0f;
         } else if (stage->type == 10) {
-            alpha = stage->field_0x18 < 1.0f ? 1.0f - stage->field_0x18 : 0.0f;
+            alpha = !(stage->field_0x18 >= 1.0f) ? 1.0f - stage->field_0x18 : 0.0f;
         } else {
             alpha = 1.0f;
             if (stage->type == 19 && stage->field_0x14 != 0) {

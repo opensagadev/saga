@@ -183,10 +183,14 @@ void VirtualControlDPad::Process(float elapsed) {
         const f32 dy = -(owner->touch_position.y - position.y);
         const f32 distance = NuFsqrt(dx * dx + dy * dy);
         const i32 angle = NuAtan2D(dx, dy);
+        f32 sx = NU_SIN_LUT(angle);
+        f32 sy = NU_COS_LUT(angle);
         const f32 ratio = distance / radius_y;
         const f32 strength = static_cast<f32>(static_cast<double>(MAX(0.0f, MIN(ratio, 1.0f))) * 1.4) * 3.0f;
-        stick_values.x = MAX(-1.0f, MIN(NU_SIN_LUT(angle) * strength, 1.0f));
-        stick_values.y = MAX(-1.0f, MIN(NU_COS_LUT(angle) * strength, 1.0f));
+        sx *= strength;
+        sy *= strength;
+        stick_values.x = MAX(-1.0f, MIN(sx, 1.0f));
+        stick_values.y = MAX(-1.0f, MIN(sy, 1.0f));
         MechInputTouchVirtualConsoleController::s_noInputTimer = 20.0f;
     }
 
@@ -413,7 +417,7 @@ void VirtualControlButtonMover::Process(float elapsed) {
         position.x = owner->touch_position.x + drag_offset.x;
         position.y = owner->touch_position.y + drag_offset.y;
         if (NuIOS_IsSmallScreen()) {
-            position.x = MAX(0.38f, MIN(position.x, 0.62f));
+            position.x = MAX(0.38f, MIN(position.x, 0.62));
             position.y = MAX(-0.49f, MIN(position.y, 0.0f));
         } else {
             position.x = MAX(0.23f, MIN(position.x, 0.77f));
@@ -482,7 +486,7 @@ void MechInputTouchVirtualConsoleController::ProcessDragMovement(GameObject_s &)
     const f32 dy = down_y - dpad_touch->touch_position.y;
     const f32 dx = down_x - dpad_touch->touch_position.x;
     const f32 distance = NuFsqrt(dx * dx + dy * dy);
-    if (distance > 0.05f) {
+    if (!(distance <= 0.05f)) {
         if (dpad_touch->held_time > 0.2f) {
             const i32 angle = NuAtan2D(dx, dy);
             const f32 sine = NU_SIN_LUT(angle);

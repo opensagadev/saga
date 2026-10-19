@@ -314,7 +314,10 @@ MechInputTouchMenuController::MechInputTouchMenuController(i32 player_id)
 void VirtualControlDPad_LockButton::Process(float) {
     const f32 button_radius_x = radius_x;
     const f32 button_radius_y = radius_y;
-    position = dpad->position;
+    position.x = dpad->position.x;
+    position.y = dpad->position.y;
+    position.z = dpad->position.z;
+    position.w = dpad->position.w;
     const f32 desired_y = dpad->position.y - (dpad->position.w * 0.75f + button_radius_y);
     const f32 desired_x = dpad->position.z * 0.75f + button_radius_x + dpad->position.x;
     position.x = MAX(button_radius_x - 0.975f, MIN(desired_x, 0.1f));

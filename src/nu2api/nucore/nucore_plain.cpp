@@ -35,21 +35,10 @@
 // reconstructed. Domain families move to their evidenced owner as complete
 // groups; this file is not itself evidence of one original nucore TU.
 
-struct nuanimdatachunk_s;
-
 extern "C" {
 extern GLuint g_colorRenderbuffer;
 extern GLuint g_depthRenderbuffer;
 }
-
-using NUHGOBJVIDEOMEMFN = void (*)(nuhgobj_s *);
-
-extern NUHGOBJVIDEOMEMFN hgobj_to_video_mem;
-extern NUHGOBJVIDEOMEMFN video_mem_to_hgobj;
-
-void NuPadRecordEndFrame(void);                      // nupad_interface.cpp
-i32 NuCameraClipHGobj(nugscn_s *, NUMTX *, NUMTX *); // nu2api_nucore_misc.cpp
-i32 findrange(nugscn_s *, i32);                      // utilities.cpp
 
 extern "C" {
     extern nurenderscene_s currentScene;
@@ -88,14 +77,9 @@ static void DisplayListProcessLightmapped(NUDISPLAYLIST *list, NUDISPLAYLISTITEM
     void NuIOS_AwardAchievement(void) {
         // Retail no-op.
     }
-void NuIOS_DeallocateSystemFramebuffers(void);
-
-void NuIOS_RecordFlurryEvent(char *event_name);
     void NuIOS_ShowAchievements(void) {
         // Retail no-op.
     }
-
-    extern "C++" void NuAnimDataChunkDestroy(nuanimdatachunk_s *chunk);
 
     static void *dirnames[16];
     static i32 numdirs;
@@ -115,17 +99,10 @@ void NuIOS_RecordFlurryEvent(char *event_name);
         return 0;
     }
 
-void NuQFntPrint2dW(NUQFNT *font, u16 *text);
-void NuQFntPrint3DU(NUQFNT *font, char *text);
-void NuQFntPrint3DW(NUQFNT *font, u16 *text);
-void NuQFntPrintV(NUQFNT *font, const char *format, va_list arguments);
-
     extern nurenderscene_s currentScene;
     i32 NuLgtArcLaserOldCnt;
 
 #include "nu2api/nucore/nucore_plain_types.h"
-void NuHGobjFromVideoMem(NUHGOBJVIDEOMEMFN callback);
-void NuHGobjToVideoMem(NUHGOBJVIDEOMEMFN callback);
 #undef NUGCUT_CURVE_VALUE
 
     // ---------------------------------------------------------------------------
@@ -139,8 +116,6 @@ void NuHGobjToVideoMem(NUHGOBJVIDEOMEMFN callback);
 static void ClipInstTree(NuInstanceTree_s *tree, i32 tree_index);
     }
 
-    extern "C++" void OctreeRndr(u8 *visibility, nuoctreenode_s *root, i32 enabled);
-
 #ifndef ANDROID
     void NuGetCurrentThreadId(void) {
         STUBBED();
@@ -153,6 +128,5 @@ static void ClipInstTree(NuInstanceTree_s *tree, i32 tree_index);
 #endif
 
     extern void (*nuapi_endframe_callbackfn)(void);
-void NuRegisterEndFrameCallBackFn(void (*callback)(void));
 } // extern "C"
 

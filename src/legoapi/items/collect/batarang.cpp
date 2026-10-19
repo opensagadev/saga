@@ -600,7 +600,7 @@ void Batarang_MoveCode(GameObject_s *object) {
             return;
         }
         object->field_0xe22 |= 0x40;
-        if (0.25f <= object->hold_timer - FRAMETIME) {
+        if (!(0.25f > object->hold_timer - FRAMETIME)) {
             return;
         }
         Batarang_StartTargetting(object);

@@ -122,9 +122,6 @@ void NuSoundStreamer::ShutdownThread() {
     while (this->running) {
         NuThreadSleep(1);
     }
-
-    NuSoundWeakPtrListNode::sPtrListLock.Lock();
-    NuSoundWeakPtrListNode::sPtrListLock.Unlock();
 }
 
 void NuSoundStreamer::ShutdownAll() {

@@ -520,7 +520,7 @@ NuSoundMemoryBuffer *NuSoundMemoryManager::MoveLargestTrailingBufferIntoBuffer(N
     }
 
     NuSoundMemoryBuffer *tail = buffer;
-    while (tail->GetNext() != NULL) {
+    while (tail != NULL && tail->GetNext() != NULL) {
         tail = tail->GetNext();
     }
     if (tail == buffer || tail == NULL) {
@@ -529,17 +529,25 @@ NuSoundMemoryBuffer *NuSoundMemoryManager::MoveLargestTrailingBufferIntoBuffer(N
 
     NuSoundMemoryBuffer *candidate = NULL;
     u32 candidate_adjacency = 0;
-    for (NuSoundMemoryBuffer *scan = tail; scan != NULL && scan != buffer; scan = scan->GetPrev()) {
-        if (!scan->IsAlloced() || scan->IsLocked() || buffer->GetSize() < scan->GetSize()) {
-            continue;
+    NuSoundMemoryBuffer *scan = tail;
+    do {
+        if (scan->IsAlloced() && !scan->IsLocked() && buffer->GetSize() >= scan->GetSize()) {
+            if (candidate == NULL) {
+                candidate = scan;
+                candidate_adjacency = this->CountAdjacentFreeBuffers(scan);
+            } else if (candidate->GetSize() == scan->GetSize()) {
+                u32 adjacency = this->CountAdjacentFreeBuffers(scan);
+                if (adjacency > candidate_adjacency) {
+                    candidate = scan;
+                    candidate_adjacency = adjacency;
+                }
+            } else if (candidate->GetSize() < scan->GetSize()) {
+                candidate = scan;
+                candidate_adjacency = this->CountAdjacentFreeBuffers(scan);
+            }
         }
-
-        if (candidate == NULL || candidate->GetSize() < scan->GetSize() ||
-            (candidate->GetSize() == scan->GetSize() && this->CountAdjacentFreeBuffers(scan) > candidate_adjacency)) {
-            candidate = scan;
-            candidate_adjacency = this->CountAdjacentFreeBuffers(scan);
-        }
-    }
+        scan = scan->GetPrev();
+    } while (scan != NULL && scan != buffer);
 
     if (candidate == NULL) {
         return buffer;

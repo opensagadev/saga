@@ -334,8 +334,8 @@ static __attribute__((noinline)) void StarFighterAlign(starfighter_s *fighter, _
     if (roll < limit)
         roll = static_cast<i16>(static_cast<i32>(limit));
     i32 adjustment = 0;
-    if (distance <= 2.0f) {
-        if (distance <= 1.0f)
+    if (!(distance > 2.0f)) {
+        if (!(distance > 1.0f))
             adjustment = -static_cast<i16>(static_cast<i32>(roll));
         else
             adjustment = -static_cast<i16>(static_cast<i32>((2.0f - distance) * roll));
@@ -1303,7 +1303,7 @@ void ChrisRadialCam(nuvec_s *position, nuvec_s *target) {
     position->y = position_y;
     position->z = RadialMoveCentre.z + position_delta.z;
 
-    if (base_radius <= origin_radius) {
+    if (!(base_radius > origin_radius)) {
         target_radius = base_radius + 0.6f * extra_radius;
     }
     if (origin_radius != 0.0f) {
@@ -1460,7 +1460,7 @@ static void ProcessSpaceLevel(spacelevel_s *space) {
         }
         if (space->unknown_337c == 0) {
             space->action_timer -= FRAMETIME;
-            if (__builtin_expect(space->action_timer <= 0.0f, 1))
+            if (__builtin_expect(!(space->action_timer > 0.0f), 1))
                 space->unknown_337c = 4;
         }
     }
@@ -1920,7 +1920,7 @@ static i32 CollideBoltStarFighter(BOLT_s *bolt, starfighter_s *fighter, _vuv_s *
     const f32 dz = position->z - fighter->matrix.m32;
     const f32 a = vx * vx + vy * vy + vz * vz;
     const f32 c = dx * dx + dy * dy + dz * dz - 2.0f;
-    if (!(a <= 0.0f)) {
+    if (a > 0.0f) {
         const f32 b = 2.0f * (dx * vx + dy * vy + dz * vz);
         const f32 discriminant = b * b - 4.0f * a * c;
         if (!(discriminant >= 0.0f))
@@ -1938,7 +1938,7 @@ static i32 CollideBoltStarFighter(BOLT_s *bolt, starfighter_s *fighter, _vuv_s *
         position->y += vy * time;
         position->z += vz * time;
     } else {
-        if (!(c <= 0.0f))
+        if (c > 0.0f)
             return 0;
     }
     if (fighter->spline == NULL || static_cast<u32>(fighter->spline->id - 84) > 1) {

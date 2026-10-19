@@ -588,7 +588,7 @@ extern "C" {
 
 static __used__ void ClimbObject_FindNormal(CLIMBOBJECT_s *object) {
     AIPATHNODE *second = &object->path->nodes[object->connection->node_indices[1]];
-    AIPATHNODE *node = second->position.y > object->path->nodes[object->connection->node_indices[0]].position.y
+    AIPATHNODE *node = !(second->position.y <= object->path->nodes[object->connection->node_indices[0]].position.y)
                            ? &object->path->nodes[object->connection->node_indices[0]]
                            : second;
     NUVEC displacement, origin;
@@ -1196,7 +1196,8 @@ void SlowWeaponOut(GameObject_s *object) {
                 if (finish > end || finish > start) {
                     object->context_animation = action;
                     object->character_context = LEGOCONTEXT_WEAPONOUT;
-                    object->context_animation_timer = AnimDuration(object->id, action, 0.0f, 0.0f, 1);
+                    object->context_animation_timer =
+                        AnimDuration(object->id, object->context_animation, 0.0f, 0.0f, 1);
                     object->weapon_scale = 0.0f;
                     object->weapon_out_timer = 0.0f;
                     return;
@@ -1236,19 +1237,21 @@ void FastWeaponIn(GameObject_s *object, i32 force_sound) {
 }
 
 void SlowWeaponIn(GameObject_s *object) {
-    if (LEGOCONTEXT_WEAPONIN != -1 && Fighting_WeaponInActionFn != NULL) {
-        const i32 action = Fighting_WeaponInActionFn(object);
-        if (action != -1 && object->apiobj.character_model->model_data_b[action] != NULL) {
+    if (LEGOCONTEXT_WEAPONIN != -1) {
+        // Retail indexes the model data without checking for a -1 action.
+        const i32 action = Fighting_WeaponInActionFn != NULL ? Fighting_WeaponInActionFn(object) : -1;
+        if (object->apiobj.character_model->model_data_b[action] != NULL) {
             const f32 end = NuAnimEndFrame(object->apiobj.character_model->model_data_b[action]);
             f32 start = AnimListFrame(object->apiobj.character_model, action, 0);
-            if (!(start >= 1.0f))
+            if (start < 1.0f)
                 start = 1.0f;
             if (start >= 1.0f && start < end) {
                 const f32 finish = AnimListFrame(object->apiobj.character_model, action, 1);
                 if (finish > end || finish > start) {
                     object->context_animation = action;
                     object->character_context = LEGOCONTEXT_WEAPONIN;
-                    object->context_animation_timer = AnimDuration(object->id, action, 0.0f, 0.0f, 1);
+                    object->context_animation_timer =
+                        AnimDuration(object->id, object->context_animation, 0.0f, 0.0f, 1);
                     object->weapon_scale = 1.0f;
                     return;
                 }

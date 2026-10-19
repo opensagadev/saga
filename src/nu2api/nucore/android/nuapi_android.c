@@ -1,6 +1,8 @@
 #include "decomp.h"
 #include "nu2api/nu3d/NuRenderDevice.h"
 #include "nu2api/nu3d/android/nugscn_android.h"
+#include "nu2api/nu3d/android/numtl_android.h"
+#include "nu2api/nu3d/android/nuptl_android.h"
 #include "nu2api/nu3d/android/nurenderthread.h"
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/nurendercontext.h"
@@ -14,9 +16,6 @@
 
 // The original unit constructs its six homogeneous vectors.
 #include "nu2api/nucore/nuvuvec.hpp"
-
-extern "C" void NuInitDebrisRenderer(VARIPTR *buffer, VARIPTR buffer_end);
-extern "C" void NuIOSMtlInit(void);
 
 extern "C" NUPADREC *PadRecPtr(void) {
     STUBBED();

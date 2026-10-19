@@ -426,36 +426,37 @@ void Teleports_UpdateAfterGameObjects(WORLDINFO_s *world) {
     }
 }
 
+static inline TELEPORT_s *ObjectTeleport(GameObject_s *object) {
+    return static_cast<TELEPORT_s *>(object->field_0x788);
+}
+
 void Teleport_NetMoveCode(GameObject_s *object) {
     if (object->field_0x7a5 != 15 || object->field_0x7a3 != 0)
         return;
 
-    TELEPORT_s *teleport = static_cast<TELEPORT_s *>(object->field_0x788);
     const u8 forwards = object->context_variant_flags & 4;
     const i16 flap1_rotation = forwards ? 0x4000 : -0x4000;
     const i16 flap2_rotation = forwards ? -0x4000 : 0x4000;
 
-    if (NuSpecialExistsFn(&teleport->flap1_special) &&
-        NuVecDistSqr(&object->apiobj.collision_position, NuSpecialGetDrawPos(&teleport->flap1_special), NULL) < 0.36f) {
-        teleport->field_78 = flap1_rotation;
+    if (NuSpecialExistsFn(&ObjectTeleport(object)->flap1_special) &&
+        NuVecDistSqr(&object->apiobj.collision_position, NuSpecialGetDrawPos(&ObjectTeleport(object)->flap1_special),
+                     NULL) < 0.36f) {
+        ObjectTeleport(object)->field_78 = flap1_rotation;
         if ((object->context_x_rotation & 1) == 0) {
             object->context_x_rotation |= 1;
             PlaySfx(const_cast<char *>("env_door_flap"), &object->apiobj.collision_position);
         }
     }
 
-    if (NuSpecialExistsFn(&teleport->flap2_special) &&
-        NuVecDistSqr(&object->apiobj.collision_position, NuSpecialGetDrawPos(&teleport->flap2_special), NULL) < 0.36f) {
-        teleport->field_7a = flap2_rotation;
+    if (NuSpecialExistsFn(&ObjectTeleport(object)->flap2_special) &&
+        !(NuVecDistSqr(&object->apiobj.collision_position, NuSpecialGetDrawPos(&ObjectTeleport(object)->flap2_special),
+                       NULL) >= 0.36f)) {
+        ObjectTeleport(object)->field_7a = flap2_rotation;
         if ((object->context_x_rotation & 2) == 0) {
             object->context_x_rotation |= 2;
             PlaySfx(const_cast<char *>("env_door_flap"), &object->apiobj.collision_position);
         }
     }
-}
-
-static inline TELEPORT_s *ObjectTeleport(GameObject_s *object) {
-    return static_cast<TELEPORT_s *>(object->field_0x788);
 }
 
 void Teleport_MoveCode(GameObject_s *object, i32 start_immediately) {

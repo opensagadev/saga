@@ -2433,7 +2433,7 @@ extern "C" {
             movement.z = time * part->velocity.z;
         }
         f32 distance = NuVecMagSqr(&movement);
-        if (distance < 0.001f || distance > 10000.0f) {
+        if (!(distance >= 0.001f) || distance > 10000.0f) {
             part->field_209 = -1;
             return;
         }
@@ -2826,8 +2826,8 @@ void edpartHighlightNearest() {
                 continue;
 
             NuVecSub(&delta, &edpart_cam_pos, &part_emits[index].position);
-            if (edpart_copy_size < __builtin_fabsf(delta.x) || edpart_copy_size < __builtin_fabsf(delta.y) ||
-                edpart_copy_size < __builtin_fabsf(delta.z))
+            if (!(edpart_copy_size >= __builtin_fabsf(delta.x)) || !(edpart_copy_size >= __builtin_fabsf(delta.y)) ||
+                !(edpart_copy_size >= __builtin_fabsf(delta.z)))
                 continue;
             ++edpart_copy_enclosed;
             edbitsDrawDiagonalCross(part_emits[index].position.x, part_emits[index].position.y,
@@ -4590,7 +4590,7 @@ void UpdatePartEmits(f32 time) {
             PART_EMIT_SOUND_ON(3);
         }
         if ((type->flags & 0x400000) != 0) {
-            if (type->maximum_distance > emitter->camera_distance && previous_distance >= type->maximum_distance) {
+            if (!(type->maximum_distance <= emitter->camera_distance) && previous_distance >= type->maximum_distance) {
                 emitter->time_24 = partglobaltime;
                 emitter->time_20 = partglobaltime - interval + 0.001f;
                 emitter->time_28 = partglobaltime - 1.0f;
@@ -4813,7 +4813,7 @@ extern "C" {
                 f32 movement_time = time;
                 if ((part->flags & 0x400) == 0) {
                     if (!(time < part->elapsed)) {
-                        part->radius_state = part->target_radius > part->radius ? 1 : 0;
+                        part->radius_state = !(part->target_radius <= part->radius) ? 1 : 0;
                         if ((part->active & 4) != 0) {
                             if ((part->flags & 0x80000) != 0 && (part->active & 0x10) != 0 && part_platimpactcnt < 4) {
                                 part_platimpactlist[part_platimpactcnt++] = part->field_200;

@@ -597,7 +597,7 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
                 center.y = position->y;
                 center.w = 1.0f;
                 f32 distance = CalcCapsuleIntersectDistance(start, direction, best_distance, center, 0.2f);
-                if (best_distance > distance) {
+                if (!(best_distance <= distance)) {
                     best_distance = distance;
                     best = item->GetMechObjectInterface();
                 }

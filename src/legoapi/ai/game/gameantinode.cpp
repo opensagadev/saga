@@ -64,7 +64,7 @@ void GameAntinode_Update(GAMEANTINODESYS_s *system) {
     }
     for (GAMEANTINODE_s *node = system->active, *next; node != NULL; node = next) {
         next = node->next;
-        if (node->remaining_time > 0.0f) {
+        if (!(node->remaining_time <= 0.0f)) {
             node->remaining_time -= FRAMETIME;
             if (node->remaining_time <= 0.0f) {
                 GameAntinode_UnregisterAntiNode(system, node);

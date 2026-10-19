@@ -126,7 +126,7 @@ bool MechTouchTaskGoTo::Update() {
                     controller->button_was_pressed[2] = 1;
                 }
             } else if (!(field_44 < 0.000001f) && !(field_40 < 0.1f)) {
-                if (field_4c != 0 && field_40 > s_mechTouchMoveToWalkAlwaysDist) {
+                if (field_4c != 0 && !(field_40 <= s_mechTouchMoveToWalkAlwaysDist)) {
                     // Far targets keep running at full speed.
                 } else {
                     direction.x *= s_mechTouchMoveToWalkSpeed;
@@ -228,8 +228,8 @@ MechTouchTaskJump::MechTouchTaskJump(MechInputTouchGestureBasedController &owner
             stick.x *= speed;
             stick.y *= speed;
             stick.x = -stick.x;
-            stick.x = stick.x < 1.0f ? MAX(-1.0f, stick.x) : MIN(stick.x, 1.0f);
-            stick.y = stick.y < 1.0f ? MAX(-1.0f, stick.y) : MIN(stick.y, 1.0f);
+            stick.y = MAX(-1.0f, MIN(stick.y, 1.0f));
+            stick.x = MAX(-1.0f, MIN(stick.x, 1.0f));
         }
     }
     flags |= 10;
@@ -273,7 +273,7 @@ bool MechTouchTaskJump::Update() {
             } else {
                 controller->stick_values[0] = stick.x;
                 controller->stick_values[1] = stick.y;
-                if (stick.x * stick.x + stick.y * stick.y < 1.1920928955078125e-7f) {
+                if (!(stick.x * stick.x + stick.y * stick.y >= 1.1920928955078125e-7f)) {
                     player->apiobj.velocity.x = player->target_velocity.x = 0.0f;
                     player->apiobj.velocity.z = player->target_velocity.z = 0.0f;
                 }
@@ -971,7 +971,7 @@ bool MechTouchTaskPlannedGoTo::Update() {
     f32 velocity_x;
     f32 velocity_y;
     f32 velocity_z;
-    const bool double_jump = dx * dx + dy * dy + dz * dz > 1.4f * 1.4f || dy > player->apiobj.scaled_height;
+    const bool double_jump = dx * dx + dy * dy + dz * dz > 1.4f * 1.4f || !(dy <= player->apiobj.scaled_height);
     if (!double_jump) {
         const VuVec velocity = TouchHacks::CalculateJumpVelToHitPoint(*player, waypoint.position);
         velocity_x = velocity.x;

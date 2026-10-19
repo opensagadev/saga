@@ -2080,7 +2080,7 @@ load_type_done:
                     }
 
                     const f32 second_time = icon_time - 0.25f;
-                    if (!(second_time <= 0.0f) && !(second_time >= icon_end_time)) {
+                    if (!(second_time <= 0.0f) && second_time < icon_end_time) {
                         f32 alpha = 1.0f;
                         f32 x = icon_x;
                         if (!(second_time >= 0.6f)) {
@@ -2110,7 +2110,7 @@ load_type_done:
         static_cast<ThingManager *>(theGameThings)->DisplayThings(NULL);
         NuRndrEndScene();
 
-        if (AreaDataLoaded != 0 && !character_load_active && !(LoadWait >= 0.1f) &&
+        if (AreaDataLoaded != 0 && !character_load_active && LoadWait < 0.1f &&
             (FadeSys.pending_type == FADE_TYPE_NONE || FadeSys.pending_type == FADE_TYPE_STILL)) {
             FADETYPE wipe = {FADE_TYPE_STILL_WIPE};
             FadeSys.SetFade(wipe, 0);

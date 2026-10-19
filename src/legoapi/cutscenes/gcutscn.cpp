@@ -2804,8 +2804,8 @@ static void instNuGCutLookAtLocatorUpdate(i32 *effect_handle, NUGCUTLOCATOR_s *l
         numtl_s *material = scene->mtls[state->secondary_material_index - 1];
         // The vertical range narrows as the eyes turn sideways.
         const f32 limit = (NU_COS_LUT(NuFabs(look_x) / 0.24f * 8192.0f) - 0.7f) * 0.18f / 0.3f;
-        look_y = look_y < limit ? look_y : limit;
-        look_y = -limit > look_y ? -limit : look_y;
+        look_y = MIN(limit, look_y);
+        look_y = MAX(-limit, look_y);
         material->delta_u += (look_x - material->delta_u) * 0.125f;
         material->delta_v += (-look_y - material->delta_v) * 0.125f;
         closed = material->delta_v < -0.15f;

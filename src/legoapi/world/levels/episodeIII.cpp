@@ -798,7 +798,7 @@ i32 Action_BoulderSection(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKE
                             CharCategory_IsCategory(object, 1) != 0 || CharCategory_IsCategory(object, 8) != 0;
     if (!can_attack) {
         processor->action_timer -= FRAMETIME;
-        if (processor->action_timer < 0.0f) {
+        if (!(processor->action_timer >= 0.0f)) {
             processor->action_timer = 0.5f;
             object->pad_gamepad->buttons_pressed |= GAMEPAD_TOGGLELEFT;
         }

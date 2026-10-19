@@ -460,7 +460,7 @@ void GameTiming(WORLDINFO_s *world, float *game_time) {
                     if (ChallengeMode == 1) {
                         UpdateTimer(&ChallengeTimer);
                         if (Game_AreaSave != NULL &&
-                            !(ChallengeTimer.time_elapsed < Game_AreaSave[world->level_sub_id].challenge_trial_time))
+                            ChallengeTimer.time_elapsed >= Game_AreaSave[world->level_sub_id].challenge_trial_time)
                             EndChallenge(3, 1);
                     } else {
                         if (Mission_CurrentState(NULL) == 1) {

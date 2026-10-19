@@ -171,7 +171,7 @@ void AddFootSteps(GameObject_s *object) {
         } else {
             for (i32 i = 0; i < 4; ++i) {
                 const f32 frame = config->event_frames[i];
-                if (frame >= 1.0f && (packet.current_time >= frame || frame > packet.previous_time))
+                if (!(frame < 1.0f) && (packet.current_time >= frame || frame > packet.previous_time))
                     crossed = true;
             }
         }

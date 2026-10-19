@@ -3046,7 +3046,7 @@ static void PartCollide(PART_s *part, i32 three_dimensional) {
         collect_pickup:
             if ((part->active & 2) == 0) {
                 if (part_pickup_type == 0xcb) {
-                    if (!(part->scale_time >= 0.5f))
+                    if (part->scale_time < 0.5f)
                         continue;
                     if (VehicleArea == 0 && (static_cast<i8>(object->current_hp) <= 0 ||
                                              static_cast<i8>(object->current_hp) >= object->hitpoints))

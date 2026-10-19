@@ -671,9 +671,8 @@ static u32 AIBigJumpToDestination(APIOBJECT *object, NUVEC *destination) {
     GameObject_s *game_object = object->objptr;
     if (game_object->field_0xcc0 == NULL) {
         if ((object->character_data->model_flags & CHARACTER_AI_MODEL_FLAG_SNAP_ON_BIG_JUMP) != 0) {
-            object->start_position = *destination;
+            object->start_position = object->position = *destination;
             object->velocity = v000;
-            object->position = *destination;
             ResetPlayerMoves(game_object);
             object->respawn_timer = 0.0f;
         } else {
@@ -1212,7 +1211,7 @@ void GameAISysStartFrame(AISYS_s *system) {
             NuVecRotateY(&local_position, &local_position, -area->rotation);
             const bool is_inside = local_position.x >= -area->half_width && local_position.y >= -0.1f &&
                                    local_position.z >= -area->half_depth && local_position.x <= area->half_width &&
-                                   local_position.y <= area->height && local_position.z <= area->half_depth;
+                                   local_position.y <= area->height && !(local_position.z > area->half_depth);
             if (!is_inside) {
                 // Outside removal addresses the full 64-bit area bit.
                 const u64 area_bit = 1ULL << area_index;
@@ -1377,10 +1376,8 @@ void AIPathCnxControlSysReset(AIPATHCNXCONTROLSYS_s *system) {
     }
 
     NULISTHDR *available = &system->available_controllers;
-    available->head = NULL;
-    available->tail = NULL;
-    system->active_controllers.head = NULL;
-    system->active_controllers.tail = NULL;
+    memset(available, 0, sizeof(*available));
+    memset(&system->active_controllers, 0, sizeof(system->active_controllers));
     memset(system->controllers, 0, system->controller_count * sizeof(*system->controllers));
     for (i32 i = 0; i < system->controller_count; ++i) {
         NuLinkedListAppend(available, &system->controllers[i].links);
@@ -2184,7 +2181,7 @@ void GameAIProcess() {
                 } else {
                     object->ai_jump_timer = 0.0f;
                 }
-            } else if (object->pad_gamepad->input_magnitude > threshold) {
+            } else if (!(object->pad_gamepad->input_magnitude <= threshold)) {
                 object->ai_jump_timer += FRAMETIME;
                 if (object->ai_jump_timer > 1.0f) {
                     object->pad_gamepad->buttons_pressed |= GAMEPAD_JUMP;
@@ -2281,7 +2278,7 @@ void GameAIProcess() {
                                 wall_direction.z = -lateral.z;
                             }
                         }
-                    } else if (first_distance < 1.0e9f) {
+                    } else if (!(first_distance >= 1.0e9f)) {
                         wall_direction = lateral;
                     }
                 } else {
@@ -2539,7 +2536,7 @@ void GameAIProcess() {
                     } else if (second_timer > antinode_time) {
                         first_ai->antinode_timer = second_timer;
                         first_ai->antinode_clockwise = second->ai->antinode_clockwise;
-                    } else if (first_timer > 0.0f) {
+                    } else if (!(first_timer <= 0.0f)) {
                         second->ai->antinode_timer = first_timer;
                         second->ai->antinode_clockwise = first_ai->antinode_clockwise;
                     }

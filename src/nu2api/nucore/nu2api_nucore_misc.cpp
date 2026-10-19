@@ -23,18 +23,6 @@
 #include <stdio.h>
 #include <math.h>
 
-struct TERRSET;
-extern TERRSET *CurTerr;
-extern "C" void BeginCriticalSectionGL(const char *, i32);
-extern "C" void EndCriticalSectionGL(const char *, i32);
-extern i32 bgProcIsBgThread(void);
-struct MemoryManager;
-extern MemoryManager theMemoryManager;
-extern "C" void *MemoryManagerAllocPool(MemoryManager *, u32, i32) asm("_ZN13MemoryManager9AllocPoolEji");
-extern "C" void MemoryManagerFreePool(MemoryManager *, void *, u32) asm("_ZN13MemoryManager8FreePoolEPvj");
-extern nurenderscene_s currentScene;
-extern HashRedirect g_shaderProgramRedirects[417];
-
 // NuIOSDLGeom2DCallback is transcribed in android/nuiosdl_gl.cpp (original 0x29d1a0).
 
 i32 NuIOS_GetInAppProduct(i32, NuIOS_InAppProduct *) {

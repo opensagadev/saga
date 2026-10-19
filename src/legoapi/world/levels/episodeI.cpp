@@ -453,8 +453,8 @@ static void RacePodAlign(racepod_s *pod, _vuv_s *direction, float blend) {
     if (roll < min_roll)
         roll = (float)(i16)(i32)min_roll;
     i32 angle = 0;
-    if (blend <= 2.0f) {
-        if (blend <= 1.0f)
+    if (!(blend > 2.0f)) {
+        if (!(blend > 1.0f))
             angle = -(i16)(i32)roll;
         else
             angle = -(i16)(i32)((2.0f - blend) * roll);
@@ -502,7 +502,7 @@ static __used__ void UpdatePodRaceMines(void) {
 
             entry->grow += FRAMETIME;
             entry->grow_alpha = entry->grow;
-            if (entry->grow > 1.0f)
+            if (!(entry->grow <= 1.0f))
                 entry->grow_alpha = 1.0f;
 
             float r = entry->grow_alpha * mines->mine_radius;
@@ -829,11 +829,7 @@ void PodRaceUpdate(WORLDINFO_s *world, float dt) {
                 if (PodRace->prev_lap_display < PodRace->max_lap_time && PodRace->lap_attempts_per_increment != 0 &&
                     PodRace->lap_attempts % PodRace->lap_attempts_per_increment == 0) {
                     float time = PodRace->prev_lap_display + PodRace->lap_time_increment;
-                    if (time < PodRace->max_lap_time) {
-                        PodRace->prev_lap_display = time;
-                    } else {
-                        PodRace->prev_lap_display = PodRace->max_lap_time;
-                    }
+                    PodRace->prev_lap_display = MIN(PodRace->max_lap_time, time);
                 }
             }
         }
@@ -847,7 +843,7 @@ void PodRaceUpdate(WORLDINFO_s *world, float dt) {
             memset(pod, 0, sizeof(*pod));
             continue;
         }
-        if (PodRace->lap_countdown <= 0.0f) {
+        if (!(PodRace->lap_countdown > 0.0f)) {
             _vuv_s direction = {pod->previous_position.x - pod->matrix.m30, pod->previous_position.y - pod->matrix.m31,
                                 pod->previous_position.z - pod->matrix.m32, 0.0f};
             float length_sq = direction.x * direction.x + direction.y * direction.y + direction.z * direction.z;
@@ -856,7 +852,7 @@ void PodRaceUpdate(WORLDINFO_s *world, float dt) {
                     direction.x * pod->matrix.m20 + direction.y * pod->matrix.m21 + direction.z * pod->matrix.m22;
                 while (length_sq < 1.0f || dot < 0.0f) {
                     pod->start += PODRACE_SPLINEINC;
-                    if (pod->start > 1.0f) {
+                    if (!(pod->start <= 1.0f)) {
                         pod->start = 1.0f;
                         break;
                     }
@@ -1193,7 +1189,7 @@ void PodRaceBUpdate(WORLDINFO_s *world) {
         if (PodRace->mushroom_timer > 1.0f && mushroom_collapse != 0) {
             switch (LevFlag.mushroom_state) {
                 case 0:
-                    if (gamcam->sock_position.distance > mushroom0_along) {
+                    if (!(gamcam->sock_position.distance <= mushroom0_along)) {
                         NewCutScene(NULL, world->cutscene_sys, "ep1_podrace_mushroom0", 1);
                         LevFlag.mushroom_state = 1;
                     }
@@ -1354,7 +1350,7 @@ i32 Action_CreatePod(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **
 
     float spline_length = spline->length;
     float duration = time_factor * PodRace->prev_lap_display;
-    pod->speed = duration > 0.0f ? ((end - start) * spline_length) / duration : 1.0f;
+    pod->speed = !(duration <= 0.0f) ? ((end - start) * spline_length) / duration : 1.0f;
 
     _vuv_s position __attribute__((aligned(16)));
     _vuv_s next_position __attribute__((aligned(16)));
@@ -1408,7 +1404,7 @@ i32 Action_Sebulba(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **, 
         float z2 = object->apiobj.position.z - player2->apiobj.position.z;
         float x1 = object->apiobj.position.x - target->apiobj.position.x;
         float z1 = object->apiobj.position.z - target->apiobj.position.z;
-        if (x2 * x2 + z2 * z2 <= x1 * x1 + z1 * z1)
+        if (!(x2 * x2 + z2 * z2 > x1 * x1 + z1 * z1))
             target = player2;
     }
 
@@ -1873,7 +1869,7 @@ speed_section:
             }
         }
         if (Player[1] != NULL) {
-            if (remaining <= 0.0f) {
+            if (!(remaining > 0.0f)) {
                 Player[1]->field_0xee0 = 1000000000.0f;
             } else {
                 Player[1]->field_0xdc8 = 0.0f;
@@ -2008,7 +2004,7 @@ void PodSprintA_Panel(WORLDINFO_s *world) {
             podlapalpha = 0.0f;
         } else {
             float seek_arg = 1.0f;
-            if (Paused == 0 && ps->field_0x88 >= 6.0f)
+            if (Paused == 0 && !(ps->field_0x88 < 6.0f))
                 seek_arg = 0.0f;
             podlapalpha = SeekLinearF(podlapalpha, seek_arg, FRAMETIME * 2.0f);
         }
@@ -2026,7 +2022,7 @@ void PodSprintA_Panel(WORLDINFO_s *world) {
                 n = 3;
             sprintf(buf, "%i", n);
             float m = NuFmod(v, 1.0f);
-            if (m >= 0.7f)
+            if (!(m < 0.7f))
                 m = (m - 0.7f) / 0.3f + 1.0f;
             else
                 m = 1.0f;
@@ -2157,7 +2153,7 @@ i32 Action_NewSebulba(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *
         catchup: {
             float ratio = distance / sebulba_catchup_dist;
             float base = 0.0f;
-            if (ratio > 1.0f)
+            if (!(ratio <= 1.0f))
                 ratio = 1.0f;
             else
                 base = 1.0f - ratio;

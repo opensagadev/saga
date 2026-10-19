@@ -34,7 +34,7 @@ void MechInputTouchGestureTrackingSystem::LookForClicks(GameObject_s &object) {
         holder.click_candidate = 1;
         f32 dx = holder.touch_position.x - holder.down_position.x;
         f32 dy = holder.touch_position.y - holder.down_position.y;
-        if (dy * dy + dx * dx >= 0.0025f) {
+        if (!(dy * dy + dx * dx < 0.0025f)) {
             continue;
         }
         bool first_recent = holder.click_timer < 0.3f;
@@ -124,7 +124,7 @@ void MechInputTouchGestureTrackingSystem::LookForSwipe(GameObject_s &object) {
         i32 previous_index = 0;
         for (i32 sample_index = 0; sample_index < 20; ++sample_index) {
             TouchSwipeSample &sample = holder.swipe_samples[sample_index];
-            if (sample.time < 0.0f) {
+            if (!(sample.time >= 0.0f)) {
                 break;
             }
             if (sample_index > 0 && elapsed < 0.2f) {

@@ -255,7 +255,7 @@ void UpdateCables() {
                 cable->points[i].x += FRAMETIME * cable->velocities[i].x;
                 cable->points[i].y += cable->velocities[i].y * FRAMETIME;
                 cable->points[i].z += FRAMETIME * cable->velocities[i].z;
-                if (!(ground <= cable->points[i].y)) {
+                if (ground > cable->points[i].y) {
                     cable->points[i].y = ground;
                     cable->velocities[i].x -= (cable->velocities[i].x * cable_ground_damping) * FRAMETIME;
                     cable->velocities[i].z -= (cable_ground_damping * cable->velocities[i].z) * FRAMETIME;
@@ -509,7 +509,7 @@ void UpdateCables() {
             cable->max_length = remaining;
             for (i32 i = 0; i < path_count - 1; ++i) {
                 f32 length = NuVecDist(&path[i + 1], &path[i], &delta);
-                if (!(remaining >= length)) {
+                if (remaining < length) {
                     cable->segment_lengths[i] = remaining;
                     cable->total_length += remaining;
                     f32 scale = NuFdiv(remaining, length);

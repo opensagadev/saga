@@ -15,6 +15,7 @@ extern i32 nurndr_force_lod;
 extern "C" i32 PS2_REZ_W;
 extern "C" i32 PS2_REZ_H;
 extern "C" void NuRndrEndScene(void);
+void NuRndrInitGeneric(void);
 
 typedef i32 NUCOLOUR32;
 

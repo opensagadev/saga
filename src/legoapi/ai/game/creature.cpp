@@ -832,7 +832,7 @@ void InitPlayerAI(GameObject_s *object) {
     flags_f02->bit3 = 0;
     *reinterpret_cast<u32 *>(b + 0x1058) = 0;
     *reinterpret_cast<f32 *>(b + 0x4ac) = DEFAULT_MOVE_RANGE;
-    flags_4a7->bit2 = DEFAULT_MOVE_RANGE > 0.0f;
+    flags_4a7->bit2 = !(DEFAULT_MOVE_RANGE <= 0.0f);
     flags_4a7->bit3 = 0;
     flags_4a7->bit4 = 0;
     flags_f02->bit5 = 0;
@@ -2096,7 +2096,7 @@ void UpdateCharacterIdle(GameObject_s *object) {
     } else if (packet.requested_animation == alternate_idle) {
         object->idle_total_time += FRAMETIME;
         object->idle_animation_time += FRAMETIME;
-        if (object->idle_animation_time >= object->idle_animation_limit) {
+        if (!(object->idle_animation_time < object->idle_animation_limit)) {
             if (object->idle_animation == alternate_idle) {
                 NewCharacterIdle(object, alternate_idle);
             } else {
@@ -2215,7 +2215,7 @@ void KeepOnScreen(GameObject_s *object) {
             // The upper screen plane uses the opposite depth response.  This
             // distinction is important: using the same plane for both sides
             // can cancel movement in the wrong world-space direction.
-            depth_plane = !(GameCam->dir.y <= 0.0f) ? &PlayPlane[0] : &PlayPlane[5];
+            depth_plane = GameCam->dir.y > 0.0f ? &PlayPlane[0] : &PlayPlane[5];
         }
 
         if (depth_plane != NULL) {
@@ -2418,9 +2418,9 @@ void MovePlayer(GameObject_s *object) {
             if ((object->ai.runtime_flags & 8) == 0 && pad->input_magnitude < data->tiptoe_speed * 0.5f)
                 pad->input_magnitude = 0.0f;
             if ((object->ai.movement_flags & 8) == 0) {
-                if (object->ai.goal_speed_mode == 1 && pad->input_magnitude > walk_speed)
+                if (object->ai.goal_speed_mode == 1 && !(pad->input_magnitude <= walk_speed))
                     pad->input_magnitude = walk_speed;
-                else if (object->ai.goal_speed_mode == 2 && pad->input_magnitude > data->tiptoe_speed)
+                else if (object->ai.goal_speed_mode == 2 && !(pad->input_magnitude <= data->tiptoe_speed))
                     pad->input_magnitude = data->tiptoe_speed;
             }
             if ((api.field_0x1f4 & 0x400) == 0 && !object->catch_up_forbidden &&
@@ -3315,7 +3315,7 @@ void AnimatePlayer(GameObject_s *object) {
                 GAMECHARACTER_FLAG_ANIMATION_SPEED_FROM_VELOCITY) != 0) {
         const f32 forward_speed = object->apiobj.velocity.x * object->facing_direction.x +
                                   object->apiobj.velocity.z * object->facing_direction.z;
-        movement_speed = forward_speed < 0.0f ? 0.0f : forward_speed;
+        movement_speed = !(forward_speed >= 0.0f) ? 0.0f : forward_speed;
     } else {
         movement_speed = object->pad_gamepad->input_magnitude;
     }
@@ -3978,10 +3978,15 @@ void FixUpLayers() {
 }
 
 i32 ObjLookingWithLeftStick(GameObject_s *object) {
+    i32 result = 1;
     if (object->character_id_0x7a5 == 0x4d) {
-        return object->field_0x7a3 == 0 ? 2 : 1;
+        if (object->field_0x7a3 == 0) {
+            result = 2;
+        }
+    } else if (object->character_id_0x7a5 == 0x52) {
+        result = 2;
     }
-    return object->character_id_0x7a5 == 0x52 ? 2 : 1;
+    return result;
 }
 
 i32 SuperWeirdo(GameObject_s *object) {
@@ -4221,7 +4226,8 @@ static void DrawParaphernalia(GameObject_s *object) {
         }
         NUMTX *reflection = NULL;
         if (carried->field_0x1087 && carried->field_0x1020 != 2000000.0f &&
-            static_cast<u32>(static_cast<u8>(WORLD->current_level->reflection_range)) > object->ai_update_distance &&
+            !(static_cast<u32>(static_cast<u8>(WORLD->current_level->reflection_range)) <=
+              object->ai_update_distance) &&
             MatrixReflection(&matrix, carried->field_0x1087, carried->field_0x1020, WORLD->current_level->unknown_0cc,
                              &reflected))
             reflection = &reflected;
@@ -4617,12 +4623,12 @@ static void DrawParaphernalia(GameObject_s *object) {
         if (start >= 1.0f) {
             f32 finish = AnimListFrame(object->apiobj.character_model, 1, 1);
             f32 frame = *special_time;
-            if (finish >= start && frame < finish && frame > start) {
+            if (!(finish < start) && frame < finish && frame > start) {
                 f32 fraction = (frame - start) / (finish - start);
                 f32 scale;
-                if (fraction < 0.1f)
+                if (!(fraction >= 0.1f))
                     scale = fraction / 0.1f;
-                else if (fraction < 0.9f)
+                else if (!(fraction >= 0.9f))
                     scale = 1.0f;
                 else
                     scale = 1.0f - (fraction - 0.9f) / 0.1f;

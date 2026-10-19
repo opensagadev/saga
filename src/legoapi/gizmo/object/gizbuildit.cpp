@@ -371,13 +371,13 @@ GIZBUILDIT_s *GizBuildIt_FindNearest(WORLDINFO_s *world, GameObject_s *player, B
         const f32 height = static_cast<f32>(static_cast<u32>(buildit->progress)) / 100.0f * buildit->bounds_radius;
         if (top < buildit->start_position.y - height || buildit->start_position.y + height < bottom)
             continue;
-        const f32 radius = buildit->bounds_radius + 0.3f;
+        f32 radius = buildit->bounds_radius + 0.3f;
+        radius *= radius;
         const f32 distance = NuVecXZDistSqr(&buildit->start_position, &position, NULL);
-        if (!(distance < radius * radius && distance < nearest_distance)) {
-            continue;
+        if (distance < radius && distance < nearest_distance) {
+            nearest_distance = distance;
+            nearest = buildit;
         }
-        nearest_distance = distance;
-        nearest = buildit;
     }
     return nearest;
 }
@@ -962,7 +962,7 @@ static void GizBuildIts_LateUpdate(void *world_ptr, void *data, float) {
                     if (__builtin_expect(GizBuildit_AutoBuildPosFn(world, &buildit.start_position, &centre, &facing) != 0, 1)) {
                         f32 radius;
                         u16 angle;
-                        if (!(buildit.step_timer > 4.5f)) {
+                        if (buildit.step_timer <= 4.5f) {
                             const f32 phase = ((4.5f - buildit.step_timer) / 4.5f) * 16384.0f + 32768.0f;
                             const f32 progress = 1.0f + NU_SIN_LUT(phase + 16384.0f);
                             angle = static_cast<i32>(static_cast<f32>(static_cast<i32>(facing) - 0x4000) +

@@ -7272,7 +7272,7 @@ static void fnAudioSample(nufpar_s *fpar) {
             g_soundInfo[NumSfxInst].nofade = 1;
         } else if (NuStrICmp(fpar->word_buf, "volume_rnd") == 0) {
             f32 volume_rnd = NuFParGetFloat(fpar);
-            g_soundInfo[NumSfxInst].volume_rnd = volume_rnd < -1.0f ? -1.0f : volume_rnd > 0.0f ? 0.0f : volume_rnd;
+            g_soundInfo[NumSfxInst].volume_rnd = !(volume_rnd >= -1.0f) ? -1.0f : volume_rnd > 0.0f ? 0.0f : volume_rnd;
         } else if (NuStrICmp(fpar->word_buf, "near") == 0) {
             f32 falloff_near = NuFParGetFloat(fpar);
             g_soundInfo[NumSfxInst].falloff_near = falloff_near < 0.0f     ? 0.0f
@@ -9404,7 +9404,7 @@ extern "C" void DebrisStartOffsetEx(debkeydatatype_s *key, f32 offset) {
         }
         start += interval;
         key->emission_time = start;
-        while (now < start) {
+        while (!(now >= start)) {
             start -= interval;
         }
         key->emission_time = start;
@@ -9912,7 +9912,7 @@ extern "C" {
                     DebrisProcessSpheres(particle, emission_time, effect, key, 1);
                 }
                 emission_time = key->emission_epoch + emission_interval;
-            } while (emission_time <= end_time && ++i != 100);
+            } while (!(emission_time > end_time) && ++i != 100);
         }
 
         DebrisGetControlStackLock();
@@ -11223,7 +11223,7 @@ extern "C" {
                 }
                 i32 visible = 1;
                 if (!assigned && effect->sound_range > 0.0f && effect->use_explicit_clip_box == 0 &&
-                    key->cutoff_distance > effect->sound_range)
+                    !(key->cutoff_distance <= effect->sound_range))
                     visible = 0;
                 if (key->field_2f7 == 0)
                     continue;
@@ -11536,7 +11536,7 @@ i32 DebrisSingleCollisionCheckScaleYFlag(i32 key_index, NUVEC *position, f32 rad
     do {
         {
             f32 age = globaltime - sphere->time;
-            if (!(age >= 0.0f && age <= effect->particle_lifetime))
+            if (!(age >= 0.0f && !(age > effect->particle_lifetime)))
                 goto next_sphere;
 
             const f32 x = sphere->momentum.x * age + sphere->position.x;
@@ -12403,13 +12403,13 @@ extern "C" void edbitsDrawCross(f32 x, f32 y, f32 z, f32 radius, i32 colour, num
                         break;
                     case 4: {
                         const f32 distance = edanimPlayerAnimDistance(index);
-                        animation->playing = AnimParams[index].field_014 > distance;
+                        animation->playing = !(AnimParams[index].field_014 <= distance);
                         break;
                     }
                     case 5: {
                         animation->repeating = 0;
                         const f32 distance = edanimPlayerAnimDistance(index);
-                        if (AnimParams[index].field_014 > distance && !animation->playing) {
+                        if (!(AnimParams[index].field_014 <= distance) && !animation->playing) {
                             animation->playing = 1;
                             animation->backwards = 0;
                             animation->ltime = 1.0f;
@@ -18184,7 +18184,7 @@ void TerrDrawPlatCol(tertype *terrain, i16 index, i32 colour) {
                 &normals[0], &normals[0],
                 static_cast<NUMTX *>(CurTerr->platforms[CurTerr->groups[index].scene_index].scene_object));
         }
-        const bool quad = !(record->normals[1].y > 65535.0f);
+        const bool quad = record->normals[1].y <= 65535.0f;
         if (quad) {
             points[3].x = record->vertices[3].x;
             points[3].y = record->vertices[3].y;
@@ -18713,7 +18713,7 @@ i16 InsidePolLines(f32 point_x, f32 point_y, f32 point_z, f32 edge_a_x, f32 edge
         return InsideLineF(point_x, point_z, edge_b_x, edge_b_z, edge_a_x, edge_a_z) != 0;
     }
 
-    if (NuFabs(normal->y) > NuFabs(normal->x) || NuFabs(normal->z) > NuFabs(normal->x)) {
+    if (!(NuFabs(normal->y) <= NuFabs(normal->x)) || !(NuFabs(normal->z) <= NuFabs(normal->x))) {
         if (0.0f > normal->z) {
             if (InsideLineF(point_y, point_x, 0.0f, 0.0f, edge_a_y, edge_a_x) == 0 ||
                 InsideLineF(point_y, point_x, edge_b_y, edge_b_x, 0.0f, 0.0f) == 0) {
@@ -19099,11 +19099,11 @@ void NewScanRot(nuvec_s *position, i32 terrain_mask) {
                 while (batch->marker >= 0) {
                     TERRAIN_SHAPE *shapes = reinterpret_cast<TERRAIN_SHAPE *>(batch + 1);
                     const i32 count = batch->shape_count;
-                    if (local_max_x >= batch->min_x && batch->max_x > local_min_x && local_max_z >= batch->min_z &&
-                        batch->max_z > local_min_z) {
+                    if (local_max_x >= batch->min_x && batch->max_x > local_min_x && !(local_max_z < batch->min_z) &&
+                        !(batch->max_z <= local_min_z)) {
                         TERRAIN_SHAPE *shape = shapes;
                         for (i32 remaining = count; remaining > 0; --remaining, ++shape) {
-                            if (shape->min_x <= local_max_x && !(local_min_x >= shape->max_x) &&
+                            if (!(shape->min_x > local_max_x) && !(local_min_x >= shape->max_x) &&
                                 shape->min_z <= local_max_z && local_min_z < shape->max_z &&
                                 reinterpret_cast<u8 *>(writer.cursor) < writer.limit &&
                                 (shape->material[1] == 0 || (shape->material[1] & terrain_mask) != 0)) {
@@ -19626,8 +19626,9 @@ i32 CheckCylinder(i32 first_vertex, i32 second_vertex, i32 *vertex_mask, i32 rem
         local_normal.z = 0.0f;
         RotateVec(&local_normal, &local_normal);
         const NUVEC &surface_normal = query->working_surface->normals[0];
-        if (local_normal.x * surface_normal.x + local_normal.y * surface_normal.y + local_normal.z * surface_normal.z <=
-            0.0f) {
+        if (!(local_normal.x * surface_normal.x + local_normal.y * surface_normal.y +
+                  local_normal.z * surface_normal.z >
+              0.0f)) {
             return 0;
         }
 
@@ -19741,9 +19742,9 @@ i32 CheckCylinder(i32 first_vertex, i32 second_vertex, i32 *vertex_mask, i32 rem
 
     // No forward-time hit was found. Test whether the sphere already overlaps
     // the finite edge at the start of the sweep.
-    if ((query->transformed_vertices[first_vertex].z < -query->collision_radius &&
+    if ((!(query->transformed_vertices[first_vertex].z >= -query->collision_radius) &&
          !(query->transformed_vertices[second_vertex].z >= -query->collision_radius)) ||
-        (query->transformed_vertices[first_vertex].z > query->collision_radius &&
+        (!(query->transformed_vertices[first_vertex].z <= query->collision_radius) &&
          query->transformed_vertices[second_vertex].z > query->collision_radius)) {
         return 0;
     }
@@ -19981,7 +19982,7 @@ i32 HitPoly(f32 primary_start, f32 primary_end, f32 secondary_start, f32 seconda
         const f32 secondary_base_z = query->local_start.z - secondary_normal.z * radius - secondary_origin.z;
 
         i32 test_secondary_face = 0;
-        if (!(secondary_start <= 0.0f) && secondary_end < 0.0f) {
+        if (secondary_start > 0.0f && secondary_end < 0.0f) {
             candidate_time = secondary_start / (secondary_start - secondary_end);
             contact_point.x = query->movement.x * candidate_time;
             contact_point.y = query->movement.y * candidate_time;
@@ -22165,7 +22166,7 @@ i32 PlatformChecks(i32 count, nuvec_s *movement) {
             return count;
         }
     }
-    if (query->movement_normal.y >= 0.707f && query->terrain_group_index >= 0 && group->chunk_type == 1)
+    if (!(query->movement_normal.y < 0.707f) && query->terrain_group_index >= 0 && group->chunk_type == 1)
         CurTerr->platforms[platform_index].flags |= 2;
     old_query->platform_position.x = query->platform_position.x;
     old_query->platform_position.y = query->platform_position.y + old_query->collision_radius;
@@ -22205,7 +22206,7 @@ i32 PlatformChecks(i32 count, nuvec_s *movement) {
     if (opposing_contact || clear != 0) {
         TerrPoly = query->surface;
         TerI->position = TerI->platform_position;
-        if (!(movement->y < 0.0f)) {
+        if (movement->y >= 0.0f) {
             TerI->movement.y *= 0.75f;
         } else {
             FullDeflect(&ShadNorm, &TerI->movement, &TerI->movement);
@@ -24616,7 +24617,7 @@ void ScanTerrainPlatform(i32 group_index, i32 terrain_mask) {
     if ((platform->flags & TERRAIN_PLATFORM_FLAG_ROTATING) == 0) {
         if (group->bounds_min.x <= local.max_x && group->bounds_min.y <= local.max_y &&
             group->bounds_min.z <= local.max_z && local.min_x <= group->bounds_max.x &&
-            local.min_y < group->bounds_max.y && local.min_z < group->bounds_max.z && group->chunk_type != -1) {
+            local.min_y < group->bounds_max.y && !(local.min_z >= group->bounds_max.z) && group->chunk_type != -1) {
             TERRAIN_SHAPE_BATCH *batch = static_cast<TERRAIN_SHAPE_BATCH *>(group->data);
             while (batch->marker >= 0) {
                 i32 shape_count = batch->shape_count;

@@ -150,19 +150,18 @@ i32 GetMipOffset(NuHardwareTexture *tex, i32 targetMip, i32 targetSlice, NUTEXFO
 
     NUTEXFORMAT format = (overrideFormat != 0) ? overrideFormat : tex->format;
     bool isAutoMode = (targetMip < 0 && targetSlice < 0);
-    i32 currentMipLimit = targetMip;
-    i32 currentSliceLimit = targetSlice;
 
+    // Auto mode walks every mip of every slice; the limits replace the targets.
     if (isAutoMode) {
-        currentMipLimit = tex->mips;
-        currentSliceLimit = (tex->flags & 1) ? 5 : tex->depth;
+        targetMip = tex->mips;
+        targetSlice = (tex->flags & 1) ? 5 : tex->depth;
     }
 
     i32 currentSlice = 0;
     i32 totalOffset = 0;
 
     while (true) {
-        i32 innerMipLimit = currentMipLimit;
+        i32 innerMipLimit = targetMip;
 
         if ((tex->flags & 1) && (currentSlice < targetSlice)) {
             innerMipLimit = tex->mips;
@@ -190,7 +189,7 @@ i32 GetMipOffset(NuHardwareTexture *tex, i32 targetMip, i32 targetSlice, NUTEXFO
             currentMip++;
         }
 
-        if (!(tex->flags & 1) || currentSlice == currentSliceLimit) {
+        if (!(tex->flags & 1) || currentSlice == targetSlice) {
             break;
         }
 

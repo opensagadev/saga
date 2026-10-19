@@ -261,7 +261,7 @@ u32 DoSomeChecks(GameObject_s &object, AIPATH_s &path, AIPATHCNX_s &connection, 
         }
     } else if (distance < node->radius_squared) {
         result = 1;
-        if (distance < testAutoJumpXZCanDisplayRangeSqr) {
+        if (!(distance >= testAutoJumpXZCanDisplayRangeSqr)) {
             result |= 2;
         }
     }

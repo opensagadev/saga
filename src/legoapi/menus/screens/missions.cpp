@@ -90,7 +90,7 @@ void MenuDrawMissions(MENU_s *menu) {
     for (i32 i = 0; i < MissionSys->count; ++i) {
         f32 size = MissionIconScale[i] * 0.075f + 0.125f;
         f32 x = MissionIconX[i];
-        if (fabsf(x) > 1.0f)
+        if (!(fabsf(x) <= 1.0f))
             size = 0.0f;
         else {
             f32 opacity = (MissionIconScale[i] * 0.3f + 0.7f) * alpha;

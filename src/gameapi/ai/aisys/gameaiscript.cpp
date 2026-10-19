@@ -4222,7 +4222,7 @@ i32 Action_GameFollowPlayer(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET
                 if (player != NULL && player2 != NULL) {
                     f32 first = NuVecDist(&packet->owner->apiobj.position, &player->apiobj.position, NULL);
                     f32 second = NuVecDist(&packet->owner->apiobj.position, &player2->apiobj.position, NULL);
-                    if (!(second < first)) {
+                    if (second >= first) {
                         processor->action_data_3 = player;
                     } else {
                         processor->action_data_3 = player2;
@@ -5036,7 +5036,7 @@ __used__ static i32 Action_AttackOpponent(AISYS *sys, AISCRIPTPROCESS *processor
             AIMoveInstruction(packet, &opponent->ai.last_path_position, packet->mover_height, &opponent->ai.path_info,
                               AIPACKET_MOVEMENT_RETREAT, range);
             packet->goal_speed_mode = 0;
-        } else if (!(distance_squared > (range + aitol) * (range + aitol))) {
+        } else if (distance_squared <= (range + aitol) * (range + aitol)) {
             packet->movement_look_target = &opponent->apiobj.position;
         } else {
             AIMoveInstruction(packet, &opponent->ai.last_path_position, packet->mover_height, &opponent->ai.path_info,
@@ -5910,7 +5910,7 @@ i32 Action_HelpWithTriggers(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s 
 change_character:
     if (FreePlay != 0) {
         processor->action_timer -= elapsed;
-        if (processor->action_timer < 0.0f) {
+        if (!(processor->action_timer >= 0.0f)) {
             processor->action_timer = 0.5f;
             object->pad_gamepad->buttons_down_08 |= GAMEPAD_TOGGLERIGHT;
         }
@@ -9292,7 +9292,7 @@ __used__ static i32 Action_ForcePush(AISYS *sys, AISCRIPTPROCESS *processor, AIP
     if (CharCategory_IsCategory(object, 0) == 0) {
         if (FreePlay != 0) {
             processor->action_timer -= param_6;
-            if (processor->action_timer < 0.0f) {
+            if (!(processor->action_timer >= 0.0f)) {
                 processor->action_timer = 0.5f;
                 object->pad_gamepad->buttons_pressed |= GAMEPAD_TOGGLERIGHT;
             }
@@ -11236,7 +11236,7 @@ AILOCATOR_s *LocalGetNearestLocator(AILOCATOR_s **locators, i32 count, f32 clip_
         if (min_delta_y != 1000000000.0f && min_delta_y > delta.y) {
             continue;
         }
-        if (max_delta_y != 1000000000.0f && delta.y > max_delta_y) {
+        if (max_delta_y != 1000000000.0f && !(delta.y <= max_delta_y)) {
             continue;
         }
         if (!(nearest_distance > distance)) {

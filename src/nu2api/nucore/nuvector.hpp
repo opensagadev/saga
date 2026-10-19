@@ -27,10 +27,12 @@ template <typename T> class NuVector {
     }
 
     void PushBack(const T &value) {
-        if (length >= capacity) {
+        usize new_length = length + 1;
+        if (new_length > capacity) {
             resize((length + 4) & ~usize(3));
         }
-        data[length++] = value;
+        data[length] = value;
+        length = new_length;
     }
 
   private:

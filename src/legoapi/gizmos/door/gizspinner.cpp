@@ -809,7 +809,7 @@ int GizSpinner_Update(GIZSPINNER_s *spinner) {
                 collision_x - collision_radius > api->collision_max.x ||
                 api->collision_min.x > collision_x + collision_radius ||
                 collision_z - collision_radius > api->collision_max.z ||
-                api->collision_min.z > collision_z + collision_radius) {
+                !(api->collision_min.z <= collision_z + collision_radius)) {
                 continue;
             }
 
@@ -885,7 +885,7 @@ int GizSpinner_Update(GIZSPINNER_s *spinner) {
             }
             goto play_animation;
         }
-        if ((spinner->flags & SPINNER_RUNTIME_AUTO_RETURN) == 0 || !(spinner->field_0x090 <= 0.0f) ||
+        if ((spinner->flags & SPINNER_RUNTIME_AUTO_RETURN) == 0 || spinner->field_0x090 > 0.0f ||
             ((spinner->state_flags & 0x400) != 0 && spinner->anim_set->state == GAMEANIMSET_STATE_AT_END)) {
             GameAnimSet_Stop(spinner->anim_set);
             spinner->state_flags &= ~SPINNER_STATE_ROTATING;
@@ -1314,12 +1314,11 @@ static i32 GizSpinner_BoltHitPlat(void *, void *spinner_ptr, BOLT *bolt, unsigne
         return 0;
     }
 
-    bool active = (spinner->flags & (GIZSPINNER_FLAG_HIDE_ARM | SPINNER_RUNTIME_ANIMATION_HIDDEN)) == 0;
-    if (spinner->platform_id == bolt->hit_platform) {
-        if (!active) {
-            return 1;
-        }
-    } else {
+    if ((spinner->flags & (GIZSPINNER_FLAG_HIDE_ARM | SPINNER_RUNTIME_ANIMATION_HIDDEN)) != 0 &&
+        spinner->platform_id == bolt->hit_platform) {
+        return 1;
+    }
+    if (spinner->platform_id != bolt->hit_platform) {
         const i32 arm_count = spinner->type;
         i32 arm;
         for (arm = 0; arm != arm_count; ++arm) {
@@ -1452,7 +1451,7 @@ GIZSPINNER_s *GizSpinner_Find(WORLDINFO_s *world, nuvec_s *position, i32 alterna
     for (i32 index = 0; index < world->current_level->max_spinners; ++index) {
         GIZSPINNER_s *spinner = &world->spinners[index];
         if ((spinner->flags & 0x27) == GIZSPINNER_FLAG_VALID &&
-            (alternate == 0 ? (spinner->state_flags & 8) == 0 : (spinner->state_flags & 8) != 0)) {
+            (alternate != 0 ? (spinner->state_flags & 8) != 0 : (spinner->state_flags & 8) == 0)) {
             NUVEC spinner_position;
             GizSpinner_GetSpinnerPos(spinner, &spinner_position);
             f32 distance = NuVecDistSqr(position, &spinner_position, NULL);

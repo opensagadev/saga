@@ -32,7 +32,7 @@ void CharShadows_Draw() {
               (CInfo[object->character_context].flags & CHARACTER_CONTEXT_INFO_FLAG_ALLOW_DISABLED_MOVEMENT_SHADOW) ==
                   0)) {
             if ((object->apiobj.character_data->model_flags & CHARACTER_MODEL_FLAG_DISABLE_BLOB_SHADOW) != 0 ||
-                !(object->shadow_opacity > 0.0f) || object->apiobj.model_draw_result == 0 ||
+                object->shadow_opacity <= 0.0f || object->apiobj.model_draw_result == 0 ||
                 object->shadow_joint_mask == 0 || object->hide_shadow ||
                 (CInfo[object->character_context].flags & CHARACTER_CONTEXT_INFO_FLAG_DISABLE_BLOB_SHADOW) != 0) {
                 continue;
@@ -43,7 +43,7 @@ void CharShadows_Draw() {
             if (alpha == 0xff) {
                 alpha = static_cast<u8>(WORLD->current_level->blob_shadow_alpha);
             }
-            if (alpha <= 0 || !(object->shadow_radius > 0.0f)) {
+            if (alpha <= 0 || object->shadow_radius <= 0.0f) {
                 continue;
             }
 
@@ -148,7 +148,7 @@ void CharShadows_Update() {
             const i32 layer_index = EShadowInfo();
             if (layer_index >= 0 && EShadY != kInvalidShadowHeight && layer_index <= 16 &&
                 (TerLayer[layer_index].flags & TERRAIN_LAYER_FLAG_REJECT_CHARACTER_SHADOW) != 0 &&
-                (EShadY > shadow_height || shadow_height > 0.075f + joint_position.y)) {
+                (!(EShadY <= shadow_height) || shadow_height > 0.075f + joint_position.y)) {
                 shadow.position.y = kInvalidShadowHeight;
                 ++shadow_index;
                 continue;

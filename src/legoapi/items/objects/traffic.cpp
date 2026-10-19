@@ -83,14 +83,15 @@ static void Traffic_vehicle(NUFPAR *parser) {
         return;
     }
 
-    i32 vehicle_index;
-    for (vehicle_index = 0; vehicle_index < parse_trafficanimsys->vehicle_count; ++vehicle_index) {
-        if (NuStrICmp(name, NuSpecialGetName(&parse_trafficanimsys->vehicles[vehicle_index])) == 0) {
+    i32 vehicle_index = -1;
+    for (i32 i = 0; i < parse_trafficanimsys->vehicle_count; ++i) {
+        if (NuStrICmp(name, NuSpecialGetName(&parse_trafficanimsys->vehicles[i])) == 0) {
+            vehicle_index = i;
             break;
         }
     }
 
-    if (vehicle_index == parse_trafficanimsys->vehicle_count) {
+    if (vehicle_index == -1) {
         if (parse_trafficanimsys->vehicle_count > 15) {
             return;
         }
@@ -101,7 +102,9 @@ static void Traffic_vehicle(NUFPAR *parser) {
         vehicle_index = parse_trafficanimsys->vehicle_count++;
     }
 
-    reference_trafficanim.vehicle_indices[reference_trafficanim.vehicle_count++] = vehicle_index;
+    if (vehicle_index != -1) {
+        reference_trafficanim.vehicle_indices[reference_trafficanim.vehicle_count++] = vehicle_index;
+    }
 }
 
 static void Traffic_animobj(NUFPAR *parser) {
@@ -309,13 +312,9 @@ void TrafficAnimSys_Draw(TRAFFICANIMSYS_s *system) {
 
     if (traffic_portalling != 0) {
         u32 visible_rooms = 0;
-        if (WORLD->current_gscn->num_rooms > 0) {
-            room = 0;
-            while (room < WORLD->current_gscn->num_rooms && room < 32) {
-                if (WORLD->rooms_visible_ptr[room] != 0) {
-                    visible_rooms |= 1U << room;
-                }
-                ++room;
+        for (room = 0; room < WORLD->current_gscn->num_rooms && room < 32; ++room) {
+            if (WORLD->rooms_visible_ptr[room] != 0) {
+                visible_rooms |= 1U << room;
             }
         }
 

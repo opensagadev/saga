@@ -353,7 +353,7 @@ void Coins_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet) {
 
 void MiniKit_LSW_Skip(STATUS_STAGE_s *stage, STATUSPACKET_s *packet) {
     currentminikit += newminikitcount;
-    if (packet->new_minikit_complete && (stage->field_0x14 != 6 || stage->field_0x18 < stage->field_0x1c))
+    if (packet->new_minikit_complete && (stage->field_0x14 != 6 || !(stage->field_0x18 >= stage->field_0x1c)))
         IncreaseScore(packet->score, 50000, 0);
     NextStatusStage(packet);
 }
@@ -725,7 +725,7 @@ void BonusComplete_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 c
         f32 alpha;
         if (time < 0.5f)
             alpha = time + time;
-        else if (time >= 3.5f)
+        else if (!(time < 3.5f))
             alpha = 1.0f - ((time - 3.5f) + (time - 3.5f));
         else
             alpha = 1.0f;
@@ -818,7 +818,7 @@ static void SuperStoryScore_LSW_DrawBody(STATUS_STAGE_s *stage, STATUSPACKET_s *
         char text[256], previous[256];
         const f32 time = stage->field_0x18;
         f32 alpha;
-        if (time >= 0.5f) {
+        if (!(time < 0.5f)) {
             alpha = 1.0f;
             if (time >= 4.5f)
                 alpha = coin_progress = 1.0f - ((time - 4.5f) + (time - 4.5f));
@@ -831,14 +831,14 @@ static void SuperStoryScore_LSW_DrawBody(STATUS_STAGE_s *stage, STATUSPACKET_s *
                     new_best ? 0 : 255, new_best ? 255 : 0, 0, 1.7f, 1, NULL, 0, opacity);
         const f32 draw_time = stage->field_0x18;
         f32 blend = 0.0f;
-        if (draw_time >= 0.5f)
+        if (!(draw_time < 0.5f))
             blend = draw_time < 4.0f ? (draw_time - 0.5f) / 3.5f : 1.0f;
         const u32 score = packet->superstory_score;
         const f32 interpolated_score =
             (static_cast<f32>(score >> 16) * 65536.0f + static_cast<f32>(score & 0xffff)) * blend;
         // The reference's unsigned SSE conversion wraps the f32-rounded 2^32
         // endpoint to zero. Avoid an out-of-range float-to-integer conversion.
-        const u32 displayed_score = interpolated_score < 4294967296.0f ? static_cast<u32>(interpolated_score) : 0;
+        const u32 displayed_score = !(interpolated_score >= 4294967296.0f) ? static_cast<u32>(interpolated_score) : 0;
         Text_MakeScore(displayed_score, text);
         Text3DEx(text, 0.0f, 0.0f, 1.0f, 0.7f, 0.7f, 0.7f, 0, 255, 255, 255, static_cast<u8>(opacity));
         Text_MakeScore(packet->previous_best_score, text);
@@ -1510,7 +1510,7 @@ static void LevelComplete_LSW_DrawActive(STATUS_STAGE_s *stage, STATUSPACKET_s *
         slide = 1.0f;
     }
     f32 coin_slide = slide;
-    if (stage->field_0x18 >= 0.75f)
+    if (!(stage->field_0x18 < 0.75f))
         coin_slide = 1.0f;
     u32 score = packet->original_score;
     IncreaseScore(&score,
@@ -1520,9 +1520,7 @@ static void LevelComplete_LSW_DrawActive(STATUS_STAGE_s *stage, STATUSPACKET_s *
                        STATSPOS2Y,
                    CoinTotalScale, 1, 1.0f, 255, 191, 0);
     if (stage->type == 26) {
-        f32 remaining = static_cast<u16>(packet->mission->time) - packet->elapsed_time;
-        if (remaining < 0.0f)
-            remaining = 0.0f;
+        const f32 remaining = MAX(0.0f, static_cast<u16>(packet->mission->time) - packet->elapsed_time);
         Text_MakeTime((1.0f - progress) * remaining, 0, 1, 1, text);
         Text3D(text, 0.0f,
                -((STATSPOSY - STATSPOS2Y) * NuTrigTable[(static_cast<i32>(slide * 16384.0f) >> 1) & 0x7fff] +
@@ -1530,9 +1528,7 @@ static void LevelComplete_LSW_DrawActive(STATUS_STAGE_s *stage, STATUSPACKET_s *
                1.0f, 0.6f, 0.6f, 0.6f, 0, 255, 191, 0);
     }
     if (stage->type == 23) {
-        f32 remaining = packet->area->challenge_trial_time - packet->elapsed_time;
-        if (remaining < 0.0f)
-            remaining = 0.0f;
+        const f32 remaining = MAX(0.0f, packet->area->challenge_trial_time - packet->elapsed_time);
         Text_MakeTime((1.0f - progress) * remaining, 0, 1, 1, text);
         Text3D(text, 0.0f,
                -((STATSPOSY - STATSPOS2Y) * NuTrigTable[(static_cast<i32>(slide * 16384.0f) >> 1) & 0x7fff] +
@@ -1607,7 +1603,7 @@ void BonusTime_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 curre
         if (stage->field_0x14 > 0) {
             f32 alpha = stage->field_0x18;
             f32 time;
-            if (!(alpha >= 0.5f)) {
+            if (alpha < 0.5f) {
                 alpha += alpha;
                 time = 0.0f;
             } else {
@@ -1701,7 +1697,7 @@ void Coins_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active) {
                      static_cast<u8>(static_cast<i32>(player_alpha * 128.0f)));
             CoinTotal_Draw(*packet->score, total_y, scale, 1, 1.0f, 255, 191, 0);
         }
-        alpha = alpha < 0.0f ? 0.0f : alpha > 1.0f ? 1.0f : alpha;
+        alpha = !(alpha >= 0.0f) ? 0.0f : alpha > 1.0f ? 1.0f : alpha;
         Text3DEx(TTab[tCOINTOTAL], 0.0f, STATUS_TITLE_Y, 1.0f, 0.5f, 0.5f, 0.5f, 0, 255, 255, 255,
                  static_cast<u8>(static_cast<i32>(alpha * 128.0f)));
     } else if (stage->field_0x12 != 0) {
@@ -1814,7 +1810,7 @@ void MiniKit_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current
             case 1: {
                 title_alpha = stage->field_0x18;
                 i32 angle = 0x6000;
-                if (title_alpha < 1.0f)
+                if (!(title_alpha >= 1.0f))
                     angle = (static_cast<i32>(title_alpha * 32768.0f + 16384.0f) >> 1) & 0x7fff;
                 const f32 blend = 1.0f - (NuTrigTable[angle] + 1.0f) * 0.5f;
                 if (title_alpha <= stage->field_0x1c)
@@ -1848,12 +1844,12 @@ void MiniKit_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current
             }
             case 3: {
                 f32 blend = 0.0f;
-                if (stage->field_0x1c - jibberlen < stage->field_0x18)
+                if (!(stage->field_0x1c - jibberlen >= stage->field_0x18))
                     blend = (stage->field_0x18 - (stage->field_0x1c - jibberlen)) / jibberlen;
                 DrawStatusMiniKit(0.0f, 0.0f, 1.1f, 0.333f, 0.333f, currentminikit + 1, packet, blend);
                 i32 count =
                     packet->new_minikits < 1 ? Game.area_save[packet->area->index].field_0x5[0] : currentminikit;
-                if (blend >= 0.5f)
+                if (!(blend < 0.5f))
                     ++count;
                 if (count < 0)
                     count = 0;
@@ -1882,7 +1878,7 @@ void MiniKit_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current
             case 6: {
                 title_alpha = 1.0f - stage->field_0x18;
                 i32 angle = 0x2000;
-                if (stage->field_0x18 < 1.0f)
+                if (!(stage->field_0x18 >= 1.0f))
                     angle = (static_cast<i32>(title_alpha * 32768.0f + 16384.0f) >> 1) & 0x7fff;
                 if (__builtin_expect(stage->field_0x18 < stage->field_0x1c, 0)) {
                     DrawMiniKitCount(1.0f - (NuTrigTable[angle] + 1.0f) * 0.5f, 1.0f,

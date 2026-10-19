@@ -346,41 +346,39 @@ i32 ReadPad(i32 port) {
         return 3;
     }
 
-    const f32 left_y = static_cast<f32>(pad->analog_left_y) - 127.5f;
+    gamepad->unknown_0c = 0;
     const f32 left_x = static_cast<f32>(pad->analog_left_x) - 127.5f;
-    u32 left_directions = 0;
     if (left_x < -85.0f) {
-        left_directions = GAMEPAD_DLEFT;
+        gamepad->unknown_0c |= GAMEPAD_DLEFT;
     } else if (left_x > 85.0f) {
-        left_directions = GAMEPAD_DRIGHT;
+        gamepad->unknown_0c |= GAMEPAD_DRIGHT;
     }
+    const f32 left_y = static_cast<f32>(pad->analog_left_y) - 127.5f;
     if (left_y < -85.0f) {
-        left_directions |= GAMEPAD_DUP;
+        gamepad->unknown_0c |= GAMEPAD_DUP;
     } else if (left_y > 85.0f) {
-        left_directions |= GAMEPAD_DDOWN;
+        gamepad->unknown_0c |= GAMEPAD_DDOWN;
     }
-    gamepad->unknown_0c = left_directions;
-    gamepad->unknown_10 = left_directions & ~gamepad->unknown_14;
-    gamepad->unknown_14 = left_directions;
+    gamepad->unknown_10 = gamepad->unknown_0c & ~gamepad->unknown_14;
+    gamepad->unknown_14 = gamepad->unknown_0c;
 
-    const f32 right_y = static_cast<f32>(pad->analog_right_y) - 127.5f;
+    gamepad->unknown_18 = 0;
     const f32 right_x = static_cast<f32>(pad->analog_right_x) - 127.5f;
-    u32 right_directions = 0;
     if (right_x < -85.0f) {
-        right_directions = GAMEPAD_DLEFT;
+        gamepad->unknown_18 |= GAMEPAD_DLEFT;
     } else if (right_x > 85.0f) {
-        right_directions = GAMEPAD_DRIGHT;
+        gamepad->unknown_18 |= GAMEPAD_DRIGHT;
     }
+    const f32 right_y = static_cast<f32>(pad->analog_right_y) - 127.5f;
     if (!(right_y < -85.0f)) {
         if (right_y > 85.0f) {
-            right_directions |= GAMEPAD_DDOWN;
+            gamepad->unknown_18 |= GAMEPAD_DDOWN;
         }
     } else {
-        right_directions |= GAMEPAD_DUP;
+        gamepad->unknown_18 |= GAMEPAD_DUP;
     }
-    gamepad->unknown_18 = right_directions;
-    gamepad->unknown_1c = right_directions & ~gamepad->unknown_20;
-    gamepad->unknown_20 = right_directions;
+    gamepad->unknown_1c = gamepad->unknown_18 & ~gamepad->unknown_20;
+    gamepad->unknown_20 = gamepad->unknown_18;
     gamepad->input_state = 1;
 
     gamepad->buttons_down_08 = pad->digital_buttons_pressed;

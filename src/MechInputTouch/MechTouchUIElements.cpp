@@ -1341,7 +1341,7 @@ void MechTouchUITagButton::Process(float dt) {
     second_fade.Process(dt);
     hover_animation.Process(dt);
     timer_animation.Process(dt);
-    disabled = second_fade.value < 1.0f;
+    disabled = !(second_fade.value >= 1.0f);
 
     NUVEC world_position = {
         target->apiobj.collision_position.x,

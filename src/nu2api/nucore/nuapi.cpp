@@ -52,15 +52,6 @@ extern "C" i32 Nu360GetCommandLine(char **arguments, i32 capacity) {
     return count + 1;
 }
 
-// Nucore bootstrap helpers; display-list and framebuffer initialization are
-// declared by their owning public headers.
-extern "C" {
-    void NuPostEffectInit(u32, VARIPTR *, VARIPTR);
-}
-
-void NuRndrInitGeneric(void); // nurndr.cpp (C++ linkage)
-void bgProcInit(void);        // bgproc_android.cpp
-
 // Frame-end hooks (original bss @0x6bdaec / 0x6bdaf0 / 0x6bdad0).
 void (*preRenderFlashingHack)(void) = NULL;
 void (*postRenderFlashingHack)(void) = NULL;

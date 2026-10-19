@@ -702,7 +702,7 @@ void ManageGameObjects() {
                     i64 mask = static_cast<i32>(1u << (area & 31));
                     if (player == NULL || (player->apiobj.ai_area_mask & mask) == 0 ||
                         Game.difficulty < creature->activation_difficulty) {
-                        if (creature->count > 1 && creature->start_stagger > 0.0f)
+                        if (creature->count > 1 && !(creature->start_stagger <= 0.0f))
                             object->ai_spawn_delay = static_cast<f32>(static_cast<u32>(object->ai.group_member_index)) *
                                                      creature->start_stagger;
                         continue;
@@ -867,7 +867,7 @@ void CollideGameObjects(WORLDINFO_s *world) {
                 for (i32 player_index = 0; player_index < 8; ++player_index) {
                     GameObject_s *player = Player[player_index];
                     if (player == NULL || (player->apiobj.field_0x1f8 & 0x1001) != 0x1001 || player == object ||
-                        !(player->field_0xdc4 > 0.0f) ||
+                        player->field_0xdc4 <= 0.0f ||
                         player->apiobj.supporting_platform_id != object->field_0x107c ||
                         (object->field_0x107c == player->field_0x1078 &&
                          (player->apiobj.field_0x27d != 0 || GameObjectNearFloor(player, 3.0f, NULL) != 0))) {
@@ -1032,7 +1032,7 @@ void GameObjectRotation(GameObject_s *object, i32 mode) {
                 if ((api.character_data->model_flags & 0x100) != 0 &&
                     api.character_data->game_character->field_0x28 == 0.0f &&
                     (api.character_data->game_character->flags_090 & 0x100) != 0 && api.field_0x218 != 2000000.0f) {
-                    alignment = api.field_0x1e0 > api.collision_min.y - api.field_0x218;
+                    alignment = !(api.field_0x1e0 <= api.collision_min.y - api.field_0x218);
                 }
             }
         }
@@ -1064,7 +1064,7 @@ void GameObjectRotation(GameObject_s *object, i32 mode) {
         } else if (reflection) {
             api.pitch_angle = object->field_0x1068;
             api.roll_angle = object->field_0x106a;
-        } else if (alignment == 2 || object->surface_normal.y > NuTrigTable[0x3000]) {
+        } else if (alignment == 2 || !(object->surface_normal.y <= NuTrigTable[0x3000])) {
             api.pitch_angle = x;
             api.roll_angle = z;
         } else {

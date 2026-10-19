@@ -680,7 +680,7 @@ void Grabber_Update(WORLDINFO_s *world) {
             if (g->flags_559 & 2)
                 break;
             f32 trigger = AnimListFrame(g->character_model, 103, 0);
-            if (trigger > 0 && *frame >= trigger)
+            if (trigger > 0 && !(*frame < trigger))
                 Grabber_Drop(g, &previous);
             break;
         }

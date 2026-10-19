@@ -45,6 +45,7 @@
 #include "nu2api/nucore/nuanim3.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/nu3d/nuqfnt.h"
+#include "nu2api/nu3d/android/nupostfilter.h"
 #include "nu2api/nu3d/android/nutimebar_plain.h"
 #include "nu2api/nucore/nuonline.h"
 #include "gamelib/nuwind/nuwind.h"
@@ -353,15 +354,6 @@ static NUWCHAR **BadWords;
 static i32 NumBadWords;
 static u32 frameStartTime;
 
-// Nucore bootstrap helpers; display-list and framebuffer initialization are
-// declared by their owning public headers.
-extern "C" {
-    void NuPostEffectInit(u32, VARIPTR *, VARIPTR);
-}
-
-void NuRndrInitGeneric(void); // nurndr.cpp (C++ linkage)
-void bgProcInit(void);        // bgproc_android.cpp
-
 NUAPI nuapi;
 
 i32 nuapi_use_target_manager;
@@ -416,8 +408,6 @@ static void DisplayListProcessLightmapped(NUDISPLAYLIST *list, NUDISPLAYLISTITEM
     }
 
     extern void (*nuapi_endframe_callbackfn)(void);
-
-void NuQFntPrintV(NUQFNT *font, const char *format, va_list arguments);
 
 #include "nu2api/nucore/nucore_plain_types.h"
 #undef NUGCUT_CURVE_VALUE

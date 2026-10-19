@@ -142,7 +142,7 @@ void MechHintUIButton::Process(float elapsed) {
     }
     disabled = (GetMenuID() != -1 && GetMenuID() != 13) || Paused != 0 || NewMode != 0 || NewLData != NULL ||
                CUTSTOPGAME != 0 || MiniCutCam != 0 || FadeSys.fade > 0.0f || player == NULL;
-    if (!pulse_active && (slide_duration < 0.0f || slide_elapsed >= slide_duration + slide_delay) && slide > -1.0f)
+    if (!pulse_active && (slide_duration < 0.0f || !(slide_elapsed < slide_duration + slide_delay)) && slide > -1.0f)
         StartPulse();
 }
 
@@ -470,7 +470,7 @@ static void DrawHint_LSWBody(HINT_s *hint, i32 max_lines) {
 
     const i32 slide_angle = static_cast<i32>(alpha * 16384.0f);
     const f32 wave_x = (icon_x + 1.1f) * NU_SIN_LUT(slide_angle) - 1.1f;
-    if (hintIconPos.duration < 0.0f || hintIconPos.elapsed >= hintIconPos.duration + hintIconPos.delay)
+    if (!(hintIconPos.duration >= 0.0f) || hintIconPos.elapsed >= hintIconPos.duration + hintIconPos.delay)
         hintIconPos.value.x = wave_x;
 
     if ((hint->flags & HINT_DIRECT_DISPLAY) != 0) {

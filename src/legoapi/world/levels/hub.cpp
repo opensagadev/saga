@@ -1109,7 +1109,7 @@ static void Hub_DrawIconCursors(COLLECTION_s *collection, f32 scale) {
     }
     f32 size = Game_OptionsSave != NULL && Game_OptionsSave->widescreen != 0 ? 0.14f : 0.16f;
     size *= collection->field_10 / 0.675f;
-    if (freeplay_time[player] <= 0.0f) {
+    if (!(freeplay_time[player] > 0.0f)) {
         if (freeplay_selected[player] != 0)
             size = 0.0f;
     } else {
@@ -2472,7 +2472,7 @@ void Hub_DrawFreePlaySelect() {
                 size = (COLLECTION_ICONSIZE - base_size) * eased + base_size;
                 y = (STATSPOSY - 0.7f) * eased + 0.7f;
                 if (opacity > 0.0f) {
-                    if (freeplay_time[0] > 0.0f || opacity != 1.0f) {
+                    if (!(freeplay_time[0] <= 0.0f) || opacity != 1.0f) {
                         radarpulsetimer = 2.0f;
                     } else if (radarpulsetimer < 0.0f) {
                         const VuVec position{x, y, 0.0f, 1.0f};
@@ -2484,7 +2484,7 @@ void Hub_DrawFreePlaySelect() {
                     f32 grow = 1.0f;
                     if (!TestForController()) {
                         const f32 elapsed = GlobalTimer.time_elapsed - (LastTouchTime + 2.0f);
-                        if (elapsed > 4.0f) {
+                        if (!(elapsed <= 4.0f)) {
                             f32 wave = NU_SIN_LUT(static_cast<i32>(NuFmod(elapsed, 4.0f) * 0.25f * 65536.0f)) - 0.8f;
                             if (wave < 0.0f)
                                 wave = 0.0f;
@@ -2548,10 +2548,10 @@ void Hub_DrawFreePlaySelect() {
                 list[count++] = fplist[i];
             list[count].model_id = -1;
             f32 alpha = 0.0f;
-            if (freeplaytime < freeplayduration - 0.1f)
+            if (!(freeplaytime >= freeplayduration - 0.1f))
                 alpha = 1.0f - freeplaytime / (freeplayduration - 0.1f);
             Collection_Draw(collection, 0.0f, COLLECTION_Y_HUB, collection->field_10, list, alpha, 1);
-            if (alpha >= 0.0f)
+            if (!(alpha < 0.0f))
                 Hub_DrawIconCursors(collection, alpha);
         }
         return;
@@ -2779,13 +2779,13 @@ __attribute__((optimize("O2", "tree-vectorize"))) i32 Percent_UpdateHint(HINT_s 
     GameObject_s *object = Player[0];
     if (object != NULL && static_cast<i8>(object->apiobj.flags_low) < 0) {
         active_players++;
-        if (NuVecXZDistSqr(&object->apiobj.position, &PercentHint_TriggerPos, NULL) < 4.0f)
+        if (!(NuVecXZDistSqr(&object->apiobj.position, &PercentHint_TriggerPos, NULL) >= 4.0f))
             nearby_players++;
     }
     object = Player[1];
     if (object != NULL && object->apiobj.player_controlled) {
         active_players++;
-        if (NuVecXZDistSqr(&object->apiobj.position, &PercentHint_TriggerPos, NULL) < 4.0f)
+        if (!(NuVecXZDistSqr(&object->apiobj.position, &PercentHint_TriggerPos, NULL) >= 4.0f))
             nearby_players++;
     }
     if (active_players <= 0 || active_players != nearby_players)
@@ -2935,11 +2935,11 @@ void Hub_DrawPanel(WORLDINFO_s *) {
         f32 alpha = 0.0f;
         if (newgamecamtime < 2.0f)
             alpha = 0.0f;
-        else if (newgamecamtime < 2.5f)
+        else if (!(newgamecamtime >= 2.5f))
             alpha = (newgamecamtime - 2.0f) * 2.0f;
         else if (newgamecamtime < 7.5f)
             alpha = 1.0f;
-        else if (newgamecamtime < 8.0f)
+        else if (!(newgamecamtime >= 8.0f))
             alpha = 1.0f - (newgamecamtime - 7.5f) * 2.0f;
         if (alpha > 0.0f)
             SmartTextEx(TTab[tMAP], 0.0f, (HUB_EPISODETITLEY + HUB_EPISODESUBTITLEY) * 0.5f, 1.0f, 0.8f, 0.8f, 0.8f, 0,
@@ -3176,7 +3176,7 @@ void Hub_DrawPanel(WORLDINFO_s *) {
             Hub_DrawMiniKitCount(0.0f, HUB_EPISODETITLEY, 0, 10, phase);
             sprintf(title, "%s, %s %i", TTab[EDataList[episode].name_id], TTab[tCHAPTER],
                     static_cast<i8>(ADataList[index].area_index) + 1);
-            if (scale > 0.0f)
+            if (!(scale <= 0.0f))
                 SmartTextEx(title, 0.0f, HUB_EPISODESUBTITLEY, 1.0f, scale, scale, scale, 0, HUB_EPISODER, HUB_EPISODEG,
                             HUB_EPISODEB, 1.7f, 1, NULL, 0, alpha);
         }
@@ -3225,7 +3225,7 @@ void Hub_DrawPanel(WORLDINFO_s *) {
                     }
                 }
                 // Touch selection and the other entries share the normal menu pulse.
-                if (menu_pulse > 0.0f) {
+                if (!(menu_pulse <= 0.0f)) {
                     red = static_cast<i32>(static_cast<u32>(MENUFLASH0R) * menu_pulse +
                                            static_cast<u32>(MENUNORMALR) * (1.0f - menu_pulse));
                     green = static_cast<i32>(static_cast<u32>(MENUFLASH0G) * menu_pulse +
@@ -3771,7 +3771,7 @@ void MenuDrawEpisodes(MENU_s *) {
         const f32 menu_alpha = 1.0f - NU_SIN_LUT(static_cast<i32>((1.0f - MainRenderTime) * 16384.0f + 16384.0f));
         DrawEpisodesMenu(0, menu_alpha * alpha);
     }
-    if (MainRenderTime <= 0.0f && alpha == 1.0f)
+    if (!(MainRenderTime > 0.0f) && alpha == 1.0f)
         DrawPlayerIconPrompts(MenuPacket.active_player[0], tSELECT, 1.0f, -1, tBACK, -1, tSELECTING,
                               MenuPacket.active_player[1], tSELECT, 1.0f, -1, tBACK, -1, tSELECTING);
 }
@@ -3812,7 +3812,7 @@ void MenuDrawSelectMode(MENU_s *) {
         if (FadeSys.fade > 0.0f)
             return;
     } else if (selectmodemode == 4) {
-        if (pFadeInfo->fade > 0.0f)
+        if (!(pFadeInfo->fade <= 0.0f))
             return;
     }
     f32 alpha = 1.0f;
@@ -4271,7 +4271,7 @@ void Hub_Update(WORLDINFO_s *world) {
         NU_SIN_LUT(static_cast<u16>(static_cast<i32>((pulse_time + pulse_time) * 65536.0f))) * 16.0f + 80.0f);
     if (menu == 8) {
         hub_jabbaawake = 1.0f;
-    } else if (hub_jabbaawake > 0.0f) {
+    } else if (!(hub_jabbaawake <= 0.0f)) {
         hub_jabbaawake -= FRAMETIME * 0.333f;
         if (__builtin_expect(hub_jabbaawake < 0.0f, 0)) {
             hub_jabbaawake = 0.0f;
@@ -4519,7 +4519,7 @@ void Hub_Update(WORLDINFO_s *world) {
             }
         }
         static NUVEC minikit_hubpos = {-27.0f, 0.0f, -24.6f};
-        if (E1VEHICLE_ADATA != NULL && NuVecXZDistSqr(&player->apiobj.position, &minikit_hubpos, NULL) < 0.25f) {
+        if (E1VEHICLE_ADATA != NULL && !(NuVecXZDistSqr(&player->apiobj.position, &minikit_hubpos, NULL) >= 0.25f)) {
             selected_area = E1VEHICLE_ADATA->index;
             if (__builtin_expect(!HubMinikitViewerUnlocked(), 0)) {
                 if (GetHintFromUIButton() != NULL ||
@@ -4565,7 +4565,7 @@ void Hub_Update(WORLDINFO_s *world) {
             break;
         }
         if (Player[1] != NULL && Player[1]->apiobj.player_controlled &&
-            NuVecDistSqr(&Player[1]->apiobj.position, position, NULL) < 0.25f) {
+            !(NuVecDistSqr(&Player[1]->apiobj.position, position, NULL) >= 0.25f)) {
             break;
         }
     }

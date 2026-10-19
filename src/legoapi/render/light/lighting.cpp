@@ -445,7 +445,7 @@ __attribute__((force_align_arg_pointer)) void SetCreatureLights(APIOBJECT_s *obj
         red *= GhostLightMul;
         green *= GhostLightMul;
         blue *= GhostLightMul;
-        if (red > 2.0f)
+        if (!(red <= 2.0f))
             red = 2.0f;
         if (green > 2.0f)
             green = 2.0f;

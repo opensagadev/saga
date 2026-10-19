@@ -1007,7 +1007,7 @@ void MenuUpdateOptions(MENU_s *menu) {
 
     i32 preview = 0;
     opts_sfx_wait -= FRAMETIME;
-    if (opts_sfx_wait <= 0.0f) {
+    if (!(opts_sfx_wait > 0.0f)) {
         opts_sfx_i = static_cast<i32>(static_cast<u32>(opts_sfx_i) + 1);
         opts_sfx_wait += 1.5f;
         if (opts_sfx_i == 1)
@@ -1370,7 +1370,7 @@ void UpdateGameMenu(GAMEPAD_s *pad, i32 a2) {
     // after the save loader has selected the destination level.
     if (!(FadeSys.fade > 0.0f) && NewMode == 0 && NewLData == NULL && editor_active == 0) {
         u32 held = 0, pressed = 0, alternate_held = 0, alternate_pressed = 0;
-        if (menu_id != 1 || !(GameTimer.time_elapsed < 4.0f)) {
+        if (menu_id != 1 || GameTimer.time_elapsed >= 4.0f) {
             if (both_pads) {
                 held = GamePad[0].unknown_04 | GamePad[1].unknown_04;
                 pressed = GamePad[0].buttons_down_08 | GamePad[1].buttons_down_08;

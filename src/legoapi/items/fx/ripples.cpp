@@ -316,7 +316,7 @@ void UpdateRippleSet(ripple_set_s *set) {
         if (node == NULL)
             continue;
         ripple_node_s *next = node->next;
-        if (!(!(node->lifetime >= node->age))) {
+        if (node->lifetime >= node->age) {
             if (!(node->delay > 0.0f)) {
                 f32 ratio = node->age / node->lifetime;
                 if ((node->flags & 1) != 0)

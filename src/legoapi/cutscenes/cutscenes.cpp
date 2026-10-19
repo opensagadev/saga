@@ -828,8 +828,8 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
 
     if (instance->field_15 != animation_index) {
         const u8 requested_animation = static_cast<u8>(animation_index);
-        if (!(blend_time > 0.0f) || instance->field_15 == 0xff) {
-            instance->animation_frame_a = !(animation_start_frame > 1.0f) ? 1.0f : animation_start_frame;
+        if (blend_time <= 0.0f || instance->field_15 == 0xff) {
+            instance->animation_frame_a = animation_start_frame <= 1.0f ? 1.0f : animation_start_frame;
             instance->field_16 = requested_animation;
         } else {
             if ((instance->field_14 & 1) == 0) {
@@ -861,7 +861,7 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
     bool blending = (instance->field_14 & 1) != 0;
     u32 animation_a_index = instance->field_16;
     if (blending) {
-        if (blend_time <= 0.0f) {
+        if (!(blend_time > 0.0f)) {
             instance->blend_progress = 0;
             animation_a_index = instance->field_17;
             instance->field_14 ^= 1;
@@ -870,7 +870,7 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
             blending = false;
         } else {
             instance->blend_progress += (1.0f / blend_time) * (FRAMETIME * 60.0f);
-            if (__builtin_expect(instance->blend_progress >= 1.0f, 0)) {
+            if (__builtin_expect(!(instance->blend_progress < 1.0f), 0)) {
                 instance->blend_progress = 0;
                 animation_a_index = instance->field_17;
                 instance->field_16 = instance->field_17;
@@ -2403,7 +2403,7 @@ void CutScenes_Update(WORLDINFO_s *world, i32 paused) {
                 continue;
             }
             instNUGCUTSCENE_s *instance = static_cast<instNUGCUTSCENE_s *>(cut->instance);
-            if (instance->rate > 0.0f) {
+            if (!(instance->rate <= 0.0f)) {
                 for (i32 j = 0; j < 6; ++j) {
                     CUTSCENESFX *sfx = &cut->sfx[j];
                     if (sfx->id != -1 && cut->previous_frame < sfx->frame &&

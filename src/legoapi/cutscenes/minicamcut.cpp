@@ -398,7 +398,7 @@ execute_command:
         }
     }
     MiniCam.delta_time += FRAMETIME;
-    if (MiniCam.delta_time >= command_duration) {
+    if (!(MiniCam.delta_time < command_duration)) {
         Minicam_AddDeltas(command_duration);
         Minicam_ResetForNextCommand();
     } else {
