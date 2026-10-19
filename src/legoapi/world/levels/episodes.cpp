@@ -34,9 +34,9 @@ EPISODEDATA *Episodes_ConfigureList(char *file, VARIPTR *bufferStart, VARIPTR *b
 
     i32 count = 0;
     i32 in_episode = 0;
-    EPISODEDATA *list = (EPISODEDATA *)ALIGN((usize)bufferStart->void_ptr, 4);
-    bufferStart->void_ptr = (void *)list;
-    EPISODEDATA *episode = list;
+    EPISODEDATA *episode = (EPISODEDATA *)ALIGN((usize)bufferStart->void_ptr, 4);
+    bufferStart->void_ptr = (void *)episode;
+    EPISODEDATA *list = episode;
 
     while (NuFParGetLine(fp)) {
         NuFParGetWord(fp);

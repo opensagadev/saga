@@ -6,6 +6,3 @@
 #include "nu2api/numath/nuvec.h"
 
 #include <string.h>
-
-void *GameBufferAlloc(VARIPTR *, VARIPTR *, i32);
-

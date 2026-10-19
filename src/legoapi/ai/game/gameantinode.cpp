@@ -12,13 +12,11 @@
 #include "nu2api/nu3d/nurndr.h"
 #include <string.h>
 #include "legoapi/ai/core/gameai.h"
+#include "legoapi/characters/motion.h"
 
 extern "C" {
     u64 GameAntinode_grid[64];
 }
-i32 ViewCamGetMode();
-NUVEC *ViewCamGetTgt();
-void GameAntinode_FindGridPosition(WORLDINFO_s *, NUVEC *, f32, f32, u8 *, u8 *, u8 *, u8 *);
 
 void *GameAntnode_CreateSys(WORLDINFO_s *world, variptr_u *buf, variptr_u *buf_end, i32 count) {
     usize node_bytes = count * sizeof(GAMEANTINODE_s);

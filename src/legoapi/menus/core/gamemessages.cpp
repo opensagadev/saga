@@ -359,7 +359,6 @@ void TransformGameMessages(nuvec_s *camera_position, nuvec_s *camera_scale, nuve
 
 void DrawGameMessages() {
     extern GAMEMESSAGE_s GameMessage[128];
-    extern i32 DrawPanel3DObjectNoAlpha(float, float, float, float, float, float, u16, u16, u16, nuhspecial_s *, i32);
 
     GAMEMESSAGE_s *message = GameMessage;
     GAMEMESSAGE_s *end = message + 128;

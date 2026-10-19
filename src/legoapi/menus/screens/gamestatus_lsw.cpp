@@ -76,10 +76,9 @@
 #include "nu2api/nu3d/nugscn.h"
 #include "legoapi/core/startup/text.h"
 #include "legoapi/misc/legoapi_status.h"
+#include "legoapi/misc/utilities.h"
 
 extern "C" STATUSPACKET_s StatusPacket;
-
-void IncreaseScore(u32 *, u64, i32);
 
 extern i16 tCOINTOTAL;
 extern i16 tSELECT;
@@ -168,7 +167,6 @@ extern i16 tNONEWBESTTIME, tNEWBESTTIME;
 
 extern i32 currentminikit;
 extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
-extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
 
 extern i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
 

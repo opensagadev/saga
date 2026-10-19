@@ -552,7 +552,7 @@ void TightRope_MoveCode(GameObject_s *object, i32 jump_pressed) {
                     object->airborne_action_duration + object->airborne_action_duration) {
                     StartEndOfJump(object);
                 }
-            } else if (object->context_animation_timer >= object->airborne_action_duration) {
+            } else if (!(object->context_animation_timer < object->airborne_action_duration)) {
                 object->context_animation = 5;
             }
             if (0.0f >= object->apiobj.velocity.y && TightRope_Attach(object, WORLD) == 0 &&

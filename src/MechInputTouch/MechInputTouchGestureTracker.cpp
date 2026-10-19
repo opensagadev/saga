@@ -4,10 +4,10 @@
 #include "nu2api/nucore/NuInputDevice.h"
 #include "legoapi/items/base/apiobject.h"
 #include "legoapi/characters/core/character.h"
+#include "legoapi/lib/text.h"
 #include "gamelib/util/gamelib_util_types.h"
 
 f32 TimeSampleDelta = 0.05f;
-i32 GetMenuID();
 
 TouchHolder *MechInputTouchGestureTrackingSystem::GetTouch(NuInputTouch const &touch) {
     for (i32 index = 0; index < 10; ++index) {

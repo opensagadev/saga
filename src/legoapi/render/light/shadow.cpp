@@ -8,8 +8,6 @@
 #include "legoapi/items/base/apiobject.h"
 #include "nu2api/nu3d/nucamera.h"
 
-void RenderShadowLights(i32);
-
 void Shadow_SetMode() {
     ShadowMode = 0;
     for (i32 i = 0; i < 8; ++i) {

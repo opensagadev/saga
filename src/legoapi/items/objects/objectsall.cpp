@@ -93,8 +93,6 @@
 #include "nu2api/nu3d/nupostparams.h"
 #include "nu2api/nu3d/nu3d_includes.h"
 
-pushblock_s *BlockInBlock(WORLDINFO_s *world, pushblock_s *block, i32 excluded, pushblock_s **support);
-
 extern "C" {
     i32 edpart_set_part = 5;
     i32 edpart_filter;
@@ -366,18 +364,6 @@ extern "C" {
     ed_module_s edpartdesc = {NULL,        NULL, "PART Editor", edpartInit, edpartClose, edpartEnter,  NULL,
                               edpartApply, NULL, NULL,          0x74726170, edpartProc,  edpartRender, NULL};
 }
-
-extern "C" {
-    extern "C++" void DebrisProcessSpheres(uv1deb *, f32, debinftype *, debkeydatatype_s *, i32);
-}
-
-extern "C" {
-void Debris(i32 update_panel_time);
-} // extern "C"
-
-extern "C" {
-extern "C++" TERRAIN_TRACK_SLOT *AllocTerrId();
-} // extern "C"
 
 struct rtlset;
 rtlset *PartRTL = NULL;
@@ -685,14 +671,6 @@ extern i16 tSELECT, tSELECTED, tSELECTING;
 extern void (*drawslotinfofn)(f32, f32, i32, i32);
 extern void (*drawslotsfn)(MENU *, f32);
 
-void MenuInitialiseEx(MENUFNINFO *menu_info, i32 menu_id_count, i32 language_count,
-                      void (*draw_save_slots_info_fn)(f32, f32, i32, i32), i32 is_fade_enabled, i32 is_shadow_enabled);
-
-void MenuInitialise(MENUFNINFO *menu_info, i32 menu_id_count, i32 language_count,
-                    void (*draw_save_slots_fn)(MENU *, f32), i32 is_fade_enabled, i32 is_shadow_enabled);
-
-void NuPadRecordEndFrame(void);                      // nupad_interface.cpp
-
 extern "C" {
     extern "C++" {
         static __attribute__((noinline, noclone)) void
@@ -734,13 +712,8 @@ DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 
 extern "C" i16 id_LANDSPEEDER;
 extern i32 CUTCAMONLY, GUNSHIPAHACK, netcamera, complexsockposition_forcesock, movegamecamera_forcesock;
-GameObject_s *FindNearestGameObject(NUVEC *, GameObject_s *, u32, f32, f32, i32, i32, i32, f32 *, i32,
-                                    i32 (*)(GameObject_s *), bool);
 
 extern void (*FS_Callback)(char *, char *);
-
-extern "C" void StartFileSel(char *title, char *path, char *filter, char *filter_out,
-                             void (*callback)(char *, char *));
 
 struct nuhspecial_s;
 
@@ -748,14 +721,6 @@ extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
 extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
 
 extern i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
-
-extern "C" {
-extern "C" void StartFileSel(char *title, char *path, char *filter, char *filter_out,
-                             void (*callback)(char *, char *));
-
-}
-
-void NuPadRecordEndFrame(void);                      // nupad_interface.cpp
 
 extern "C" {
     extern "C++" {
@@ -3730,7 +3695,7 @@ extern "C" PART_s *HitParts(GameObject_s *owner, NUVEC *positions, i32 count, f3
         const f32 interval = NuFdiv(1.0f, effective_rate);
         const f32 end_time = partglobaltime + duration;
         f32 emission_time = static_cast<i32>(NuFdiv(partglobaltime, interval)) * interval + interval;
-        if (emission_time <= end_time) {
+        if (!(emission_time > end_time)) {
 
             i32 remaining = 99;
             do {
@@ -4847,7 +4812,7 @@ extern "C" {
             if ((part->active & 2) == 0) {
                 f32 movement_time = time;
                 if ((part->flags & 0x400) == 0) {
-                    if (time >= part->elapsed) {
+                    if (!(time < part->elapsed)) {
                         part->radius_state = part->target_radius > part->radius ? 1 : 0;
                         if ((part->active & 4) != 0) {
                             if ((part->flags & 0x80000) != 0 && (part->active & 0x10) != 0 && part_platimpactcnt < 4) {
@@ -4989,7 +4954,7 @@ extern "C" {
                 if ((part->active & 1) != 0) {
                     if (part->field_1c4 != NULL)
                         part->field_1c4(part);
-                    if (part->field_100 > 0.0f) {
+                    if (!(part->field_100 <= 0.0f)) {
                         part->field_100 -= time;
                         if (part->field_100 <= 0.0f)
                             KillPart(part, 0);

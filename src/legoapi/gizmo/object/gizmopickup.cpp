@@ -86,6 +86,8 @@
 #include "legoapi/menus/core/hint.h"
 #include "legoapi/render/core/gameliball.h"
 #include "legogame/game.h"
+#include "legoapi/gizmo/object/gizmoblowups.h"
+#include "legoapi/misc/utilities.h"
 
 static void Pup_CollectCharKit(WORLDINFO_s *, GIZMOPICKUP_s *pickup, i32, GameObject_s *object, i32);
 static void Pup_CollectRedBrick(WORLDINFO_s *, GIZMOPICKUP_s *pickup, i32, GameObject_s *object, i32);
@@ -149,11 +151,6 @@ inline void ThingManager::operator delete(void *thing, usize size) {
     theMemoryManager.FreePool(thing, size);
 }
 
-GameObject_s *FindNearestGameObject(NUVEC *position, GameObject_s *exclude, u32 required_flags, f32 radius,
-                                    f32 extra_radius, i32 animation, i32 character_id, i32 player_index,
-                                    f32 *distance_squared, i32 horizontal_only, i32 (*filter)(GameObject_s *),
-                                    bool first_match);
-
 ADDPART_s Default_ADDPART = {NULL,
                              0,
                              NULL,
@@ -214,18 +211,10 @@ static __used__ i32 PartDraw_VehicleHeart(PART_s *part);
 static __used__ void PartMove_VehicleHeart(PART_s *part, f32);
 static __used__ void PartMove_VehiclePickup(PART_s *part, f32);
 
-extern void IncreaseScore(u32 *, u64, i32);
-
-void IncreaseScore(u32 *, u64, i32);
-
 extern i16 tALLMINIKITSBUILT;
-
-u32 GizmoBlowups_TotalScore(void *world);
 
 struct GIZMOPICKUP_s;
 struct PART_s;
-
-u32 GizmoBlowups_TotalScore(void *);
 
 void GameMsg_DrawAdjustNewPos_CoinToTotal(GAMEMESSAGE_s *message) {
     message->target_position.x = cointotal_x[message->player_index];

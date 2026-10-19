@@ -29,12 +29,9 @@
 #include "legoapi/actions/movement/climbing.h"
 #include "legoapi/characters/motion/move.h"
 #include "legoapi/misc/utilities.h"
-
-extern "C" void NewTerrPlatformsOff(void);
-f32 GameShadow(GameObject_s *object, NUVEC *position, f32 probe_height, i32 terrain_mask);
-void FindAnglesZX(NUVEC *normal, u16 *x_rotation, u16 *z_rotation);
-void EnableShadowMapRendering(i32 enabled);
-void ResetShadowMapRendering();
+#include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/render/core/terrain.h"
+#include "legoapi/render/light/shadow.h"
 
 extern "C" i32 editor_active;
 

@@ -129,10 +129,10 @@ static void GizBuildIts_EarlyUpdate(void *, void *data, float) {
         return;
     }
 
-    for (i32 index = 0; index < buildit_sys->count; ++index) {
-        GIZBUILDIT_s &buildit = buildit_sys->buildits[index];
-        buildit.availability_flags &= static_cast<u8>(~GIZBUILDIT_AVAILABILITY_INTERACTING);
-        buildit.builders_active = 0;
+    GIZBUILDIT_s *buildit = buildit_sys->buildits;
+    for (i32 index = 0; index < buildit_sys->count; ++index, ++buildit) {
+        buildit->availability_flags &= static_cast<u8>(~GIZBUILDIT_AVAILABILITY_INTERACTING);
+        buildit->builders_active = 0;
     }
 }
 
@@ -491,10 +491,12 @@ void GizDrawBuildItPiece(GameObject_s *player, i32 draw_reflection) {
         NuQuatSlerp(&rotation, &from, &to, progress);
         NUMTX_ALIGNED16 interpolated;
         NuQuatToMtx(&rotation, &interpolated);
-        interpolated.m31 = matrix.m31 + (data->end_mtx.m31 - matrix.m31) * progress;
-        interpolated.m30 = matrix.m30 + (data->end_mtx.m30 - matrix.m30) * progress;
-        interpolated.m32 = matrix.m32 + (data->end_mtx.m32 - matrix.m32) * progress;
-        interpolated.m31 += 0.1f * NU_SIN_LUT(static_cast<i32>(32768.0f * progress));
+        const f32 x = matrix.m30 + (data->end_mtx.m30 - matrix.m30) * progress;
+        const f32 y = matrix.m31 + (data->end_mtx.m31 - matrix.m31) * progress;
+        const f32 z = matrix.m32 + (data->end_mtx.m32 - matrix.m32) * progress;
+        interpolated.m30 = x;
+        interpolated.m31 = y + 0.1f * NU_SIN_LUT(static_cast<i32>(32768.0f * progress));
+        interpolated.m32 = z;
         matrix = interpolated;
     }
     if (buildit->linked_buildit != NULL) {
@@ -502,7 +504,6 @@ void GizDrawBuildItPiece(GameObject_s *player, i32 draw_reflection) {
     } else {
         NuSpecialDrawAt(&object->special, &matrix);
         if (draw_reflection != 0) {
-            extern i32 MatrixReflection(NUMTX *, i32, f32, f32, NUMTX *);
             NUMTX_ALIGNED16 reflection;
             if (MatrixReflection(&matrix, player->field_0x1087, player->field_0x1020, WORLD->current_level->unknown_0cc,
                                  &reflection) != 0) {
@@ -707,11 +708,8 @@ f32 GizBuildItMul(GameObject_s *player) {
     if ((completed_count - build_amount + total_count) / 2 <= completed_count) {
         build_amount = total_count - completed_count;
     }
-    if (build_amount < 0) {
-        build_amount = 0;
-    } else if (build_amount > 10) {
-        build_amount = 10;
-    }
+    build_amount = MAX(build_amount, 0);
+    build_amount = MIN(build_amount, 10);
     return static_cast<f32>(build_amount) / 10.0f + 1.0f;
 }
 

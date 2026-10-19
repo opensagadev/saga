@@ -73,8 +73,6 @@
 #include "nu2api/nu3d/android/nugscn_android.h"
 #include "nu2api/nu3d/nupostparams.h"
 
-void OctreeRndr(u8 *visibility, nuoctreenode_s *root, i32 enabled);
-
 #if defined(__SSE__)
 #include <xmmintrin.h>
 #endif

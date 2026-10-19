@@ -19,4 +19,6 @@ i32 UseFallAnim(GameObject_s *object);
 void BackFlipCode(GameObject_s *object);
 void BigJumpCode(GameObject_s *object);
 void FindSlamOrigin(GameObject_s *, nuvec_s *, nuvec_s *);
+void JumpCode(GameObject_s *object, i32 jump_pressed, i32 jump_held, u32 animation_set, i32 action_pressed,
+              i32 action_held, i32 hit_effect);
 void MakeJumpReachHeight(GameObject_s *object, float height, i32 force);

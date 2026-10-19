@@ -740,7 +740,7 @@ void HatMachine_MoveCode(WORLDINFO_s *world, GameObject_s *object, i32 special_p
             machine = static_cast<HATMACHINE_s *>(object->field_0x788);
             object->context_animation_timer = AnimDuration(object->id, object->context_animation, 0.0f, 0.0f, 1);
             machine->animation_duration = object->context_animation_timer;
-            if (object->context_animation_timer <= 0.0f) {
+            if (!(object->context_animation_timer > 0.0f)) {
                 object->context_animation_timer = 2.0f;
             }
             object->field_0xdb0 = 0.0f;

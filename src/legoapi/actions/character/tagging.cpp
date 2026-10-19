@@ -360,7 +360,7 @@ second_player:
         if (!(Tag_Transfer[1].time < Tag_TransferResetTimer))
             return;
         Tag_Transfer[1].time += FRAMETIME;
-        if (Tag_Transfer[1].time > Tag_TransferResetTimer) {
+        if (!(Tag_Transfer[1].time <= Tag_TransferResetTimer)) {
             Tag_Transfer[1].time = Tag_TransferResetTimer;
             return;
         }

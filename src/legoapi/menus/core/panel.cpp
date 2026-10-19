@@ -35,9 +35,8 @@
 #include "nu2api/nucore/nupad.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nutrig.h"
+#include "legoapi/core/input/timing.h"
 #include <stdio.h>
-
-void TimingBars(void);
 
 static f32 redbrickslidetime;
 f32 TimerAlpha = 0.0f;

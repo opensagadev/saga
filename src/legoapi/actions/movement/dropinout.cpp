@@ -48,7 +48,7 @@ void DropInOutCode(GameObject_s *object) {
     }
 
     object->drop_transition_time += FRAMETIME;
-    if (object->drop_transition_time < object->drop_transition_duration) {
+    if (!(object->drop_transition_time >= object->drop_transition_duration)) {
         if (WORLD->current_level == PODSPRINTA_LDATA) {
             GameObject_s *other = Player[0] == object ? Player[1] : Player[0];
             object->apiobj.position = other->apiobj.position;

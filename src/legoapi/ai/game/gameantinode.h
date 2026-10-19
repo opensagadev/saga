@@ -16,6 +16,8 @@ GAMEANTINODE_s *GameAntinode_RegisterAntiNodeUsingData(GAMEANTINODESYS_s *system
 
 // Declared here for the other units that use them.
 struct GAMEANTINODESYS_s;
+struct WORLDINFO_s;
+void GameAntinode_FindGridPosition(WORLDINFO_s *, nuvec_s *, float, float, u8 *, u8 *, u8 *, u8 *);
 void GameAntinode_Update(GAMEANTINODESYS_s *);
 extern "C" {
     extern u64 GameAntinode_grid[64];

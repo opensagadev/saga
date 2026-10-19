@@ -605,7 +605,7 @@ void BackFlipCode(GameObject_s *object) {
     }
 
     object->context_animation_timer -= FRAMETIME;
-    if (object->context_animation_timer > 0.0f) {
+    if (!(object->context_animation_timer <= 0.0f)) {
         return;
     }
 
@@ -1133,7 +1133,7 @@ void JumpCode(GameObject_s *object, i32 jump_pressed, i32 jump_held, u32 animati
                                    LEGOCONTEXT_LAND_JUMP != -1 && LEGOACT_LAND != -1 &&
                                    object->apiobj.character_model->model_data_b[LEGOACT_LAND] != NULL &&
                                    object->pad_gamepad->input_magnitude == 0.0f) {
-                            if (object->fall_animation_timer >= 0.2f) {
+                            if (!(object->fall_animation_timer < 0.2f)) {
                                 StartFallLand(object, -1);
                             } else {
                                 object->character_context = LEGOCONTEXT_LAND_JUMP;

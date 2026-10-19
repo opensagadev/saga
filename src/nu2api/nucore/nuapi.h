@@ -94,6 +94,7 @@ extern "C" {
     void NudxFw_D3DBeginCriticalSection(void);
     void NudxFw_D3DEndCriticalSection(void);
     void NuFrameBegin(void);
+    f32 NuFrameEnd(void);
     i32 NuLanguageGet(void);
     void NuLanguageSet(i32 language);
 #ifdef __cplusplus

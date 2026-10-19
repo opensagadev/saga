@@ -44,18 +44,15 @@
 #include "legoapi/actions/character/legoapi_tag.h"
 #include "legoapi/lib/text.h"
 #include "nu2api/nucore/nu2api_nucore_misc.h"
+#include "legoapi/lib/camera.h"
+#include "legoapi/misc/utilities.h"
+#include "nu2api/nuandroid/ios_device.h"
 
 struct GameObject_s;
 struct WORLDINFO_s;
 struct NuIOS_InAppProduct;
-i32 NuIOS_AreInAppPurchasesAvailable();
-i32 NuIOS_CanMakeInAppPurchases();
-extern "C" void NuIOS_RecordFlurryEvent(char *);
 i32 LEGOMENU_PAUSESYNC = -1;
 i32 LEGOMENU_STORE_PURCHASE = 0x17;
-extern NuVec2 StoreTouchLastPos __asm__("_ZN28MechInputTouchMenuController12LastTouchPosE");
-void GameCam_HitRoll();
-void DrawRectRGBA(f32, f32, f32, f32, u32, numtl_s *, i32, f32);
 extern i16 tCONTINUE;
 extern i16 tACCEPT;
 extern u8 RAP_WARNING_R, RAP_WARNING_G, RAP_WARNING_B;
@@ -970,8 +967,8 @@ void MenuUpdateStore(MENU_s *menu) {
             }
         }
         if (MenuAlpha >= 1.0f && MechInputTouchMenuController::AnyTouchesThisFrame > 0) {
-            const f32 dx = StoreTouchLastPos.x - position.x;
-            const f32 dy = StoreTouchLastPos.y - position.y;
+            const f32 dx = MechInputTouchMenuController::LastTouchPos.x - position.x;
+            const f32 dy = MechInputTouchMenuController::LastTouchPos.y - position.y;
             if (__builtin_expect(dx * dx + dy * dy < 0.01f, 0)) {
                 goto store_touch_selected;
             }

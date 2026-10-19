@@ -175,8 +175,6 @@ extern void *(*DefragCreateInstFn)(void *, NUGCUTSCENE_s *, VARIPTR *);
 
 }
 
-void NuPadRecordEndFrame(void);                      // nupad_interface.cpp
-
 extern "C" {
     extern "C++" {
         static __attribute__((noinline, noclone)) void
@@ -210,28 +208,9 @@ extern "C" {
 #endif
 } // extern "C"
 
-i32 GizmoFileReadGameAnimSet(GAMEANIMSET_s *set, void *world_ptr,
-                             void (*read_object_data)(GAMEANIMOBJ_s *, unsigned char), unsigned char version,
-                             char *prefix, char *suffix);
-
 extern "C" {
 extern void (*checkantinodefns[3])(APIOBJECT *, AIANTINODE *, NUVEC *, f32);
     extern void (*checkantinodefns[3])(APIOBJECT_s *, AIANTINODE_s *, NUVEC *, f32);
-}
-
-extern "C" {
-void *AIPAthFindPathCnx(AISYS_s *system, AIPATH_s *path, char *from_name, char *to_name, i32 *direction);
-} // extern "C"
-
-// Callback storage is declared in reverse linked-BSS order because the
-// original GCC 4.7 -O3 object emits these definitions in reverse source order.
-extern "C" {
-void NuSetCutSceneDestroyCharactersFn(void (*callback)(NUGCUTSCENE_s *));
-} // extern "C"
-
-extern "C" {
-void NuSetCutSceneDestroyCharactersFn(void (*callback)(NUGCUTSCENE_s *));
-
 }
 
 extern f32 HUB_EPISODETITLEY;
@@ -239,12 +218,6 @@ extern i16 tSELECT, tSELECTED, tSELECTING;
 
 extern void (*drawslotinfofn)(f32, f32, i32, i32);
 extern void (*drawslotsfn)(MENU *, f32);
-
-void MenuInitialiseEx(MENUFNINFO *menu_info, i32 menu_id_count, i32 language_count,
-                      void (*draw_save_slots_info_fn)(f32, f32, i32, i32), i32 is_fade_enabled, i32 is_shadow_enabled);
-
-void MenuInitialise(MENUFNINFO *menu_info, i32 menu_id_count, i32 language_count,
-                    void (*draw_save_slots_fn)(MENU *, f32), i32 is_fade_enabled, i32 is_shadow_enabled);
 
 extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
 extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
@@ -255,26 +228,7 @@ extern "C" {
     extern "C++" FadeSystem FadeSys;
 }
 
-void SaveSystemInitialise(i32 slots, void *makeSaveHash, void *save, i32 saveSize, i32 saveCount,
-                          void (*drawSaveIcon)(void), void *extradata, i32 extradataSize);
-
 extern void (*FS_Callback)(char *, char *);
-
-extern "C" void StartFileSel(char *title, char *path, char *filter, char *filter_out,
-                             void (*callback)(char *, char *));
-
-extern "C" {
-void TextRegisterButtonMapFn(void (*fn)(char *, char *));
-void TextRegisterPulseTimerFn(f32 (*fn)(f32));
-}
-
-extern "C" {
-    extern "C++" void DebrisProcessSpheres(uv1deb *, f32, debinftype *, debkeydatatype_s *, i32);
-}
-
-extern "C" {
-extern "C++" TERRAIN_TRACK_SLOT *AllocTerrId();
-} // extern "C"
 
 #if defined(__SSE__)
 #include <xmmintrin.h>
@@ -389,8 +343,6 @@ __attribute__((force_align_arg_pointer)) static __used__ i32 eduicbRenderCheck(e
                                                                                    i32 x, i32 y, i32 width, i32);
 }
 
-void NuPadRecordEndFrame(void);                      // nupad_interface.cpp
-
 extern "C" {
     extern "C++" {
         static __attribute__((noinline, noclone)) void
@@ -417,16 +369,6 @@ DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 
 extern "C" i16 id_LANDSPEEDER;
 extern i32 CUTCAMONLY, GUNSHIPAHACK, netcamera, complexsockposition_forcesock, movegamecamera_forcesock;
-GameObject_s *FindNearestGameObject(NUVEC *, GameObject_s *, u32, f32, f32, i32, i32, i32, f32 *, i32,
-                                    i32 (*)(GameObject_s *), bool);
-
-extern "C" {
-extern "C" void StartFileSel(char *title, char *path, char *filter, char *filter_out,
-                             void (*callback)(char *, char *));
-
-}
-
-void NuPadRecordEndFrame(void);                      // nupad_interface.cpp
 
 extern "C" {
     extern "C++" {
@@ -447,13 +389,6 @@ extern "C" {
 
 #include "nu2api/nucore/nucore_plain_types.h"
 } // extern "C"
-
-extern "C" {
-void TextRegisterButtonMapFn(void (*fn)(char *, char *));
-
-void TextRegisterPulseTimerFn(f32 (*fn)(f32));
-
-}
 
 struct AISYS_s;
 struct AISCRIPT_s;

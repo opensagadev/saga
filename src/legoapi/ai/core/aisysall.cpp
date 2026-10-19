@@ -100,18 +100,8 @@ static AISYSALL_CLONE_ATTR1 i32 AIMoveAdjustDestinationPath(AIPACKET *packet)
 static AISYSALL_CLONE_ATTR2 i32 AIMoveChooseExitNodePath(AIPATHSYS **path_sys, AIPACKET *packet)
     __asm__("_ZL24AIMoveChooseExitNodePathP7AISYS_sP10AIPACKET_s.isra.82");
 
-void AddGameMsgCount(NUVEC *position, i32 count, i32 total, u8 red, u8 green, u8 blue, f32 duration);
-
-extern void KillParts(GameObject_s *object, i32 part, i32 joint, i32 visible, f32 velocity, i32 flags, u16 *part_ids);
-extern "C" void *AIPAthFindPathCnx(AISYS_s *system, AIPATH_s *path, char *from, char *to, i32 *direction);
 extern "C" ADDPART_s Default_ADDPART;
 extern f32 ForceThrowSpeed, ForceThrowGravity;
-extern "C" PART_s *AddPart(ADDPART_s *);
-
-void PartCollide_3D(PART_s *);
-
-void MakeThrowVector(NUVEC *, NUVEC *, NUVEC *, NUVEC *, f32, f32);
-
 static void ActionCopyParam(char *destination, i32 capacity, const char *source) {
     i32 index = 0;
     while (index + 1 < capacity && source[index] != '\0') {
@@ -292,8 +282,6 @@ __used__ static i32 Action_FollowOpponent(AISYS *sys, AISCRIPTPROCESS *processor
 
 __used__ static i32 Action_GoToNodeRandom(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                           i32 param_count, i32 first_time, f32 elapsed);
-
-void PartKill_ForceThrow(PART_s *, i32);
 
 __used__ static i32 Action_SetHearDistance(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                            i32 param_4, i32 param_5, f32 param_6);
@@ -1513,10 +1501,6 @@ static void AISysLoadAntinodes(AISYS *system, i32 version, NUGSCN *scene, char *
     }
 }
 
-extern "C" {
-void *AIPAthFindPathCnx(AISYS_s *system, AIPATH_s *path, char *from_name, char *to_name, i32 *direction);
-} // extern "C"
-
 static AICONDITION *AIScriptFinishStateConditions(NULISTHDR *conditions, AIPACKET *packet, AISCRIPTPROCESS *processor,
                                                   AICONDITION *condition, i32 stack_index) {
     if (processor->param_stack[stack_index].force_complex_eval) {
@@ -2042,7 +2026,6 @@ static inline __attribute__((always_inline)) CreatureEditorRecord *creatureEdito
     return reinterpret_cast<CreatureEditorRecord *>(aieditor->mode_selection_36930);
 }
 
-extern i32 creatureEditor_CalculatePos(EDCREATURE_s *, i32, nuvec_s *, i32);
 extern "C" void aieditor_SetCurrentScript(char *, const AIEditorScriptSelection *);
 static eduiitem_s *reset_params_option;
 static void creatureEditor_cb_ngroup(eduimenu_s *, eduiitem_s *, u32);
@@ -2414,11 +2397,6 @@ static SCRIPT_ERROR_LEVEL ScriptErrorLevel;
 
 extern f32 LevelNameTime, LevelNameMul;
 
-extern "C" {
-void SetScriptErrorLevel(SCRIPT_ERROR_LEVEL level);
-}
-
-void FindAnglesZX(NUVEC *, u16 *, u16 *);
 extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER;
 extern i16 id_ANAKINJEDISCARRED;
 
@@ -2426,30 +2404,16 @@ extern "C" {
 extern i32 party_under_cover;
 }
 
-i32 SphereSphereOverlapScaleY(NUVEC *, f32, f32, NUVEC *, f32, f32);
-
-void DestroySnakeBody(GameObject_s *);
-void BlowUpSnakeBody(GameObject_s *);
-
 extern GameObject_s * player_tag_to;
 extern GameObject_s * player_tag_from;
-
-void DestroySnakeBody(GameObject_s *obj);
 
 extern u16 TargetDeg_Near, TargetDeg_Mid, TargetDeg_Far;
 extern f32 TargetDist_Near2, TargetDist_Mid2;
 extern i8 (*adtab)[4];
 
-GameObject_s *FindNearestGameObject(NUVEC *position, GameObject_s *exclude, u32 required_flags, f32 radius,
-                                    f32 extra_radius, i32 animation, i32 character_id, i32 player_index,
-                                    f32 *distance_squared, i32 horizontal_only, i32 (*filter)(GameObject_s *),
-                                    bool first_match);
-
 extern "C" {
     extern i32 freechunkcontrolsptr;
 }
-
-void RemoveChunkFromRenderStack(particlechunkrendertype_s *chunk, particlechunkrendertype_s **stack);
 
 #include "gameapi/ai/aisys/aisys.h"
 
@@ -2537,15 +2501,9 @@ extern void (*Punch_HitExtraCodeFn)(GameObject_s *, nuvec_s *);
 #include <stdint.h>
 #include "nu2api/nucore/nulist.h"
 
-extern "C" void *AIPAthFindPathCnx(AISYS_s *, AIPATH_s *, char *, char *, i32 *);
-
 __attribute__((force_align_arg_pointer)) void pathEditorDrawNode(nuvec_s *position, float radius, float lower_height,
                                                                  float upper_height, u32 colour, numtl_s *material,
                                                                  i32 segments, i32 solid);
-
-AIPATHCNXHELPER_s *AIPathCnxHelperSys_Find(AIPATHCNXHELPERSYS_s *system, GameObject_s *object, AIPATHCNX_s *connection,
-                                           u8 direction, u8 type,
-                                           i32 (*filter)(AIPATHCNXHELPER_s *, GameObject_s *, AIPATHCNX_s *, u8, u8));
 
 #include "legoapi/world/world_shared.h"
 #include "decomp.h"
@@ -2578,11 +2536,6 @@ struct nuhspecial_s;
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include <string.h>
-
-void GameAntinode_FindGridPosition(WORLDINFO_s *, NUVEC *, f32, f32, u8 *, u8 *, u8 *, u8 *);
-
-void GameAntinode_FindGridPosition(WORLDINFO_s *world, NUVEC *position, f32 radius_x, f32 radius_z, u8 *min_x,
-                                   u8 *min_z, u8 *max_x, u8 *max_z);
 
 #include "decomp.h"
 #include "legoapi/render/core/render.h"
@@ -2692,20 +2645,8 @@ extern "C" {
 #include "decomp.h"
 #include "gameapi/ai/aisys/aisys.h"
 
-struct AIPACKET_s;
-struct APIOBJECT_s;
-struct AISYS_s;
-
-typedef i32 (*MIDSPECIALMOVEFN)(AISYS_s *, AIPACKET_s *, APIOBJECT_s *);
-
 PREPARINGSPECIALMOVEFN PreparingForSpecialMoveFn = NULL;
 MIDSPECIALMOVEFN MidSpecialMoveFn = NULL;
-
-extern "C" {
-void InitFn_MidSpecialMove(MIDSPECIALMOVEFN function);
-
-void InitFn_PreparingForSpecialMove(PREPARINGSPECIALMOVEFN function);
-} // extern "C"
 
 #include "decomp.h"
 #include "globals.h"
@@ -2739,8 +2680,6 @@ void InitFn_PreparingForSpecialMove(PREPARINGSPECIALMOVEFN function);
 #include "nu2api/nu3d/nutex.h"
 #include <stdio.h>
 #include <string.h>
-
-i32 creatureEditor_CalculatePos(EDCREATURE_s *, i32, nuvec_s *, i32);
 
 extern "C" {
     extern void *ed_fnt;
@@ -2781,11 +2720,6 @@ __attribute__((force_align_arg_pointer)) i32 creatureEditor_CalculatePos(EDCREAT
 i32 geom;
 
 extern "C" {
-    void *NuScratchAlloc32(i32 size);
-    void NuScratchRelease(void);
-}
-
-extern "C" {
     extern i32 EDPP_MAX_TYPES;
     extern f32 panelglobaltime;
     extern f32 globaltime;
@@ -2796,25 +2730,7 @@ extern "C" {
     extern u32 *spherecolldata;
     extern u32 *toruscolldata;
     extern NUMTL *DebMat[10];
-    extern "C++" void DebrisProcessSpheres(uv1deb *, f32, debinftype *, debkeydatatype_s *, i32);
-    extern "C++" {
-        void AddChunkToRenderStack(particlechunkrendertype_s *, particlechunkrendertype_s **);
-        void DebrisCleanUpDmaDebTypeTables(void);
-        void DebrisProcessAllocation(void);
-        void DebrisProcessControlChunks(i32);
-        void RemoveChunkFromRenderStack(particlechunkrendertype_s *, particlechunkrendertype_s **);
-    }
 }
-
-extern "C" {
-void PlatInstBounce(i32 index, f32 impulse, f32 spring, f32 damping);
-
-void PlatformRemoveCallback(void (*function)(void *));
-
-void PlatformUpdateCallback(void (*function)(void *), void *argument);
-
-extern "C++" TERRAIN_TRACK_SLOT *AllocTerrId();
-} // extern "C"
 
 static i32 AiParseExpressionNameLoopup(char *name, f32 *float_out, i32 *int_out) {
     f32 value;

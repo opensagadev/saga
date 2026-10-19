@@ -62,10 +62,10 @@
 #include "legoapi/ai/core/gameai.h"
 #include "legoapi/characters/motion/chris.h"
 #include "legoapi/world/levels/episodeI.h"
+#include "legoapi/ai/core/aisysall.h"
 extern struct LEVFLAGBYTES_s LevFlag;
 
 extern "C" {
-    void *AIPAthFindPathCnx(AISYS_s *, AIPATH_s *, char *, char *, i32 *); // original name keeps the typo
     i32 mine_max_tile = 0x2000;
 }
 

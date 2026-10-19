@@ -117,9 +117,9 @@
 #include "legoapi/ai/core/gameai.h"
 #include "legoapi/characters/motion/move.h"
 #include "legoapi/gizmos/door/gizspinner.h"
+#include "legoapi/actions/movement/pushblocks.h"
 
 extern u32 (*CanPushObstaclesFn)(GameObject_s *);
-i32 PushBlock(GameObject_s *object);
 
 extern i32 LevFlag[4];
 

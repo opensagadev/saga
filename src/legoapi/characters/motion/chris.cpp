@@ -28,6 +28,7 @@
 #include "nu2api/nucore/nustring.h"
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/core/input/qrand.h"
+#include "legoapi/gizmo/object/gizmoblowups.h"
 #include "legoapi/world/area.h"
 #include "legoapi/characters/core/playeritems.h"
 #include "legoapi/gizmo/object/gizmopickup.h"
@@ -202,7 +203,6 @@ struct nuhspecial_s;
 extern i16 tNONEWBESTTIME, tNEWBESTTIME;
 
 extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
-extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
 
 extern i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
 
@@ -222,7 +222,6 @@ typedef f32 BezierVec4Unaligned __attribute__((vector_size(16), aligned(4)));
 // Retail only keeps the split-out body of the IPA-SRA clone, which takes
 // &spline->length and &spline->pts in place of the spline.
 
-extern i32 (*GamePads_IgnoreInputFn)(void);
 extern "C" {
     extern "C++" FadeSystem FadeSys;
     extern i32 CutSceneWaiting;
@@ -236,8 +235,6 @@ f32 MulAdd = 0.0f;
 // This alignment affects PodRaceAUpdate codegen even though the linked address is 32-byte aligned.
 
 DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
-
-void SetLevelExBlowupFunc(i32 (*callback)(GIZMOBLOWUP_s *, i32));
 
 anakin_door_s *volatile AnakinC = NULL;
 

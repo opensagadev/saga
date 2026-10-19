@@ -118,12 +118,12 @@
 #include "legoapi/gizmos/traps/gizturret.h"
 #include "legoapi/world/levels.h"
 #include "legoapi/world/levels/hub.h"
+#include "legoapi/actions/character/suit.h"
 
 i8 adtabentries[9][4] = {{-1, -1, -1, -1}, {-1, -1, -1, 0}, {-1, -1, 0, 0}, {-1, 0, 0, 0}, {0, 0, 0, 0},
                          {1, 0, 0, 0},     {1, 1, 0, 0},    {1, 1, 1, 0},   {1, 1, 1, 1}};
 i8 (*adtab)[4] = &adtabentries[4];
 
-i32 Suit_GetIndex(SUIT_s *);
 extern i16 id_GAMORREANGUARD;
 f32 DEFENDTIME = 4.0f;
 i32 teleport_all_freeplay_modes = 1;
@@ -200,10 +200,6 @@ static void TestWalkAround(APIOBJECT *object, f32 *other_x, f32 *other_z, NUVEC 
     }
 }
 
-extern "C" {
-void SetScriptErrorLevel(SCRIPT_ERROR_LEVEL level);
-}
-
 extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER;
 
 extern "C" {
@@ -215,17 +211,10 @@ inline void ThingManager::operator delete(void *thing, usize size) {
     theMemoryManager.FreePool(thing, size);
 }
 
-GameObject_s *FindNearestGameObject(NUVEC *position, GameObject_s *exclude, u32 required_flags, f32 radius,
-                                    f32 extra_radius, i32 animation, i32 character_id, i32 player_index,
-                                    f32 *distance_squared, i32 horizontal_only, i32 (*filter)(GameObject_s *),
-                                    bool first_match);
-
 GameObject_s *alert_obj;
 NUVEC alert_pos;
 f32 alert_timer;
 f32 alert_time = 10.0f;
-
-extern "C" void *AIPAthFindPathCnx(AISYS_s *, AIPATH_s *, char *, char *, i32 *);
 
 struct nuhspecial_s;
 struct nuvec_s;
@@ -235,8 +224,6 @@ static i32 AtOnce_attackersPerRow = 32;
 static f32 AtOnce_InitialRowDist = 0.75f;
 static f32 AtOnce_RowDist = 0.75f;
 static i32 AtOnce_maxAttackers = 1;
-
-extern "C" void *AIPAthFindPathCnx(AISYS_s *system, AIPATH_s *path, char *from, char *to, i32 *direction);
 
 extern AIACTIONDEF api_aiactiondefs[55];
 extern AICONDITIONDEF api_aiconditiondefs[50];
@@ -249,10 +236,6 @@ extern "C" {
 extern void (*checkantinodefns[3])(APIOBJECT *, AIANTINODE *, NUVEC *, f32);
     extern void (*checkantinodefns[3])(APIOBJECT_s *, AIANTINODE_s *, NUVEC *, f32);
 }
-
-extern "C" {
-void *AIPAthFindPathCnx(AISYS_s *system, AIPATH_s *path, char *from_name, char *to_name, i32 *direction);
-} // extern "C"
 
 struct AIPATH_s;
 
@@ -281,10 +264,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 }
 
 extern "C" {
-void SetScriptErrorLevel(SCRIPT_ERROR_LEVEL level);
-}
-
-extern "C" {
 extern i32 party_under_cover;
 }
 
@@ -296,24 +275,6 @@ extern i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
 struct APIOBJECT_s;
 struct AISYS_s;
 struct AIGROUP_s;
-
-extern "C" {
-    extern "C++" void DebrisProcessSpheres(uv1deb *, f32, debinftype *, debkeydatatype_s *, i32);
-}
-
-extern "C" {
-extern "C++" TERRAIN_TRACK_SLOT *AllocTerrId();
-} // extern "C"
-
-extern "C" {
-void SetScriptErrorLevel(SCRIPT_ERROR_LEVEL level);
-
-}
-
-extern "C" {
-void *AIPAthFindPathCnx(AISYS_s *system, AIPATH_s *path, char *from_name, char *to_name, i32 *direction);
-
-}
 
 static char *LevelCharacterName(u8 character_index) {
     if (character_index == 0xff || CurrentStoryCList == NULL) {

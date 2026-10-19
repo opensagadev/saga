@@ -88,23 +88,14 @@
 #include "legoapi/world/levels.h"
 #include "nu2api/nu3d/nu3d_includes.h"
 #include "nu2api/nuandroid/ios_device.h"
-
-extern "C" {
-    // nucore / nurndr plain stubs and editor helpers (extern "C" TUs).
-    void NuLanguageSet(i32 language);
-    void NuFrameBegin(void);
-    f32 NuFrameEnd(void);
-    void edGraEnableTerrainSwap(void);
-    void edGraDisableTerrainSwap(void);
-    void DrawMenu(i32 menu_id);
-}
-
-// C++ linkage — defined in their own TUs.
-void InitMemCard(void);                                         // saveload.cpp
-void Text_LoadFont(char *path, VARIPTR *buf, VARIPTR *buf_end); // text.cpp
-void *Text_IsFontLoaded(void);                                  // text.cpp
-void Movies_ConfigureList(char *path, VARIPTR *buf, VARIPTR *buf_end);
-GIZAIMESSAGESYS_s *CreateGizAIMessageSys(VARIPTR *buf, VARIPTR *buf_end, i32 size);
+#include "gameapi/edtools/edgra.h"
+#include "legoapi/gizmo/base/gizmessage.h"
+#include "legoapi/gizmos/object/gizobstacles.h"
+#include "legoapi/items/collect/bolt.h"
+#include "legoapi/menus/screens/gamemenuall.h"
+#include "legoapi/menus/screens/menu.h"
+#include "legoapi/menus/screens/movies.h"
+#include "nu2api/nucore/nuapi.h"
 
 // buffer globals owned by the batman TU (batman.h declares them extern "C")
 extern "C" {
@@ -112,19 +103,14 @@ extern "C" {
     extern VARIPTR characterbuffer_base;
     extern VARIPTR characterbuffer_end;
 }
-void UpdateGameMenu(GAMEPAD_s *pad, i32 a2);
 
 // Globals / objects declared elsewhere.
 extern i16 id_OBIWANKENOBI;
 extern "C" GAMEPAD_s GamePad[64]; // gamepads.cpp, bss @0x127a500
 extern u8 RAP_WARNING_R, RAP_WARNING_G, RAP_WARNING_B;
 
-void *GameBufferAlloc(VARIPTR *buf, VARIPTR *buf_end, i32 size); // gameobjects.cpp
 struct CHARFIXUP;
 extern CHARFIXUP CharFixUp[222]; // characters.cpp
-
-// LSW gameplay hooks wired by LoadPermData.
-void GizObstacle_SetDefaultSFXFn_LSW(void *, GIZOBSTACLE_s *);
 
 // ---------------------------------------------------------------------------
 // File-local constants and helpers.

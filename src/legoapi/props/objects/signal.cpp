@@ -15,6 +15,7 @@
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/menus/core/gamemessages.h"
+#include "legoapi/misc/utilities.h"
 #include "legoapi/render/core/terrain.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/world.h"
@@ -24,8 +25,6 @@
 #include "nu2api/numath/nuvec.h"
 
 #include <string.h>
-
-void FindAnglesZX(NUVEC *normal, u16 *x_rotation, u16 *z_rotation);
 
 static void Signal_SetVisibility(SIGNAL *signal, i32 visible);
 
@@ -474,5 +473,3 @@ void Signal_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
         }
     }
 }
-
-void SetTexAnimSignals();

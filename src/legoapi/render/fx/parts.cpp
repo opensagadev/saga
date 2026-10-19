@@ -46,8 +46,6 @@
 #include "legoapi/items/objects/objectsall.h"
 #include "legoapi/misc/utilities.h"
 
-void FindAnglesZX(NUVEC *, u16 *, u16 *);
-
 extern u16 TargetDeg_Near, TargetDeg_Mid, TargetDeg_Far;
 extern f32 TargetDist_Near2, TargetDist_Mid2;
 static i32 PDEBCOUNT;

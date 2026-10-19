@@ -9,6 +9,7 @@ struct GameObject_s;
 struct nuvec_s;
 i32 StunGameObject(GameObject_s *, GameObject_s *, f32, i32);
 void ClearLastSafeTakeOver(GameObject_s *object);
+void GameObjectRotation(GameObject_s *object, i32 mode);
 void InstantKillParts(GameObject_s *object, i32 mode, f32 delay);
 void KillParts_ATAT(ADDPART_s *, i32, i32, GameObject_s *);
 void KillParts_TIEFIGHTER(ADDPART_s *, i32, i32, GameObject_s *, i32, u16, u16, nuvec_s *);

@@ -121,11 +121,6 @@ char *apitxt_DANISH = const_cast<char *>("Dansk");
 
 extern i16 tALONGTIMEAGO;
 
-extern "C" {
-void TextRegisterButtonMapFn(void (*fn)(char *, char *));
-void TextRegisterPulseTimerFn(f32 (*fn)(f32));
-}
-
 i32 (*Tag_NoHiddenIconFn)(GameObject_s *) = NULL;
 char *LEGOASCII_UP = NULL;
 
@@ -312,7 +307,7 @@ __attribute__((optimize("O2", "tree-vectorize"))) void Tag_DrawIcon_Batman(GameO
             count = 1;
             const f32 y = object->joint_matrices[0].m31;
             x_sum += x;
-            max_y = y > max_y ? y : max_y;
+            max_y = MAX(max_y, y);
             z_sum += object->joint_matrices[0].m32;
         }
 #define TAG_INCLUDE_POI(index)                                                                                         \

@@ -69,19 +69,15 @@
 #include "legoapi/lib/camera.h"
 #include "legoapi/world/levels/episodeI.h"
 #include "legoapi/world/levels/hub.h"
-
-void Hint_CancelCurrent(void);
+#include "legoapi/gizmos/transport/grapples.h"
+#include "legoapi/menus/core/hint.h"
+#include "legoapi/menus/screens/customise.h"
+#include "legoapi/render/core/render.h"
+#include "legoapi/render/light/lighting.h"
 
 VIEWCAM_s ViewCam = {0, {1000000000.0f, 0.0f, 0.0f}, -8192, -29500, 2.66f, 0.0f, 120.0f, 200.0f, NULL};
 // Original data symbol testmovef is float0.005 at 0x617cb0.
 f32 testmovef = 0.005f;
-
-void GameCam_HitRoll();
-
-void GameCameraMakeMiniCut3(u32 flags, float distance, i32 pitch, i32 yaw, i32 roll, void *focus, i32 target_guid,
-                            nuvec_s *position, float start_time, float blend_in_time, float end_time,
-                            float blend_out_time, float blend_time, float hold_time, float max_time, i32 borders,
-                            nugspline_s *spline, char mode, char easing);
 
 extern "C" i16 id_LANDSPEEDER;
 extern "C" f32 MainRenderTime;
@@ -89,9 +85,6 @@ extern f32 newgamecamtime, cutscenecam_focalLength, CamStopBlend, EMPERORFIGHTA_
 extern i32 CUTCAMONLY, GUNSHIPAHACK, netcamera, complexsockposition_forcesock, movegamecamera_forcesock;
 extern i32 LevFlag[4];
 extern NUMTX cutscenecammtx, CutCamMtx;
-GameObject_s *FindNearestGameObject(NUVEC *, GameObject_s *, u32, f32, f32, i32, i32, i32, f32 *, i32,
-                                    i32 (*)(GameObject_s *), bool);
-void Customiser_GetActiveWeirdoIndex(i32 *, i32 *);
 
 static NUVEC GunshipAOffset = {12.0f, 22.5f, -12.0f};
 NUVEC CustomisePos[2];
@@ -101,16 +94,10 @@ NUVEC ObstacleCamCutPts[2];
 f32 EMPERORFIGHTA_CAMDYHACK = 0.35f;
 i32 movegamecamera_forcesock = -1;
 NUMTX CutCamMtx;
-i32 Grapple_LookAtPos(GameObject_s *, NUVEC *);
 
 void MoveGameCamera(GAMECAMERA_s *camera);
 
-void SetDepthOfField();
-
-void SetCameraMatrices();
-
 extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
-extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
 
 extern i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
 

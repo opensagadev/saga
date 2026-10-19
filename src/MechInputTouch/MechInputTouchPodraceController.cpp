@@ -2,11 +2,11 @@
 #include "MechInputTouch_types.h"
 #include "globals.h"
 #include "gamelib/util/gamelib_util_types.h"
+#include "legoapi/lib/text.h"
 #include "legoapi/world/levels/levels.h"
 #include "legoapi/world/world.h"
 #include "nu2api/nucore/common.h"
 
-i32 GetMenuID();
 
 void MechInputTouchPodraceController::Activate() {
     if (active) {

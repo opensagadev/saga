@@ -58,11 +58,8 @@
 
 struct AISYS_s;
 
-typedef i32 (*MIDSPECIALMOVEFN)(AISYS_s *, AIPACKET_s *, APIOBJECT_s *);
 typedef void (*HUBCALLBACK)(WORLDINFO_s *);
 
-extern "C" void InitFn_PreparingForSpecialMove(PREPARINGSPECIALMOVEFN);
-extern "C" void InitFn_MidSpecialMove(MIDSPECIALMOVEFN);
 extern HUBCALLBACK Hub_InitAIFn;
 extern HUBCALLBACK Hub_ResetAIFn;
 extern HUBCALLBACK Hub_UpdateAIFn;

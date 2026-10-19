@@ -32,11 +32,14 @@ i32 GizmoBlowupGetNameTableId(char *name);
 i32 GizmoBlowupGetTypeFromNameTableId(WORLDINFO_s *world, i32 name_table_id);
 
 // Declared here for the other units that use them.
+struct BOLT_s;
 struct GIZMOBLOWUP_s;
 struct GIZMO_s;
 struct GameObject_s;
 struct WORLDINFO_s;
 struct numtx_s;
+GIZMOBLOWUP_s *GizmoBlowUp_Hit(GameObject_s *object, nuvec_s *points, i32 point_count, float radius, nuvec_s *minimum,
+                               nuvec_s *maximum, BOLT_s *bolt, u32 hit_type, u8 *flags);
 i32 Blowup_GetVisibility(GIZMO_s *gizmo);
 i32 GizBlowup_InitSingleTerrain(GIZMOBLOWUP_s *blowup);
 i32 GizmoBlowupCheckProximity(WORLDINFO_s *world, GameObject_s *object);
@@ -53,3 +56,6 @@ void GizmoBlowupLateUpdate(void *world_ptr, void *, float);
 void GizmoBlowupUpdateMatrix(GIZMOBLOWUP_s *blowup);
 void GizmoBlowupVisibilityOverrides(WORLDINFO_s *);
 void GizmoBlowupsFinalSetup(WORLDINFO_s *world);
+void SetLevelExBlowupFunc(i32 (*callback)(GIZMOBLOWUP_s *, i32));
+u32 GizmoBlowups_TotalScore(void *context);
+GIZMOBLOWUP_s *FindNearestGizmoBlowUp(WORLDINFO_s *world, nuvec_s *position, float max_distance_squared);

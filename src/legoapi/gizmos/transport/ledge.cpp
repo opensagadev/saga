@@ -147,10 +147,11 @@ static void Ledges_Reset(void *world_info, void *, void *progress_data) {
                 break;
         }
         if (type == 6) {
-            type = 2;
+            ledge->type_index = 2;
             ledge->type_code = LedgePiece[2].type_code;
+        } else {
+            ledge->type_index = type;
         }
-        ledge->type_index = type;
         ledge->bounds_min.x = ledge->bounds_min.y = ledge->bounds_min.z = 999.0f;
         ledge->bounds_max.x = ledge->bounds_max.y = ledge->bounds_max.z = -999.0f;
         NUVEC_ALIGNED16 point;

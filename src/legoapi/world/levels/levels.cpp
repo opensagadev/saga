@@ -163,6 +163,8 @@
 #include "nu2api/nu3d/android/nubridge_android.h"
 #include "nu2api/nu3d/nu3d_includes.h"
 #include "nu2api/nucore/android/stubs_android.h"
+#include "legoapi/gizmos/door/securitydoors.h"
+#include "legoapi/menus/screens/credits.h"
 
 extern "C" char ConfigBuffer[0x10000];
 
@@ -184,9 +186,7 @@ i32 LEVELCOUNT;
 LEVELFIXUP LevFixUp;
 
 LEVELDATA *ANEWHOPELEVELS[4];
-void Credits_Load(WORLDINFO_s *, variptr_u *, variptr_u *);
 
-extern void (*WorldInfo_InitMenuFn)(WORLDINFO *, i32 *, i32 *);
 volatile i32 abort_load = 0;
 char ConfigBuffer[0x10000];
 i32 numtl_force_mipmode = 0;
@@ -219,7 +219,6 @@ extern "C" {
     extern i16 id_IMPERIALSHUTTLEPILOT;
 }
 
-i32 InModelListDataFlags(APICHARACTERMODELLIST_s *, u32, u32, i32, i32);
 static inline i32 World_AddFreePlayModel(i32 model) {
     if (model == -1 || FreePlayModelCount >= 48)
         return 0;
@@ -365,8 +364,6 @@ APICHARACTERMODELLIST_s PermModelList[] = {{-1, 0}};
 NUMTL *lightningmat;
 extern "C" NUMTL *DebMat[10];
 
-void SecurityDoors_InitTerrain(WORLDINFO_s *world);
-
 extern "C" i16 id_GAMORREANGUARD;
 
 extern "C" {
@@ -388,15 +385,9 @@ inline void ThingManager::operator delete(void *thing, usize size) {
     theMemoryManager.FreePool(thing, size);
 }
 
-GameObject_s *FindNearestGameObject(NUVEC *position, GameObject_s *exclude, u32 required_flags, f32 radius,
-                                    f32 extra_radius, i32 animation, i32 character_id, i32 player_index,
-                                    f32 *distance_squared, i32 horizontal_only, i32 (*filter)(GameObject_s *),
-                                    bool first_match);
-
 struct nuhspecial_s;
 
 extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
-extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
 
 extern "C" i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
 
@@ -418,8 +409,6 @@ extern i16 id_GRANDMOFFTARKIN;
 
 }
 
-extern void (*CutScene_OverrideConfigFileNameFn)(char *, i32, i32);
-
 typedef isize __attribute__((may_alias)) NuGCutWord;
 
 extern i16 id_GAMORREANGUARD;
@@ -430,9 +419,6 @@ extern "C" {
 
 extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER;
 extern i16 id_ANAKINJEDISCARRED;
-extern "C" void *AIPAthFindPathCnx(AISYS_s *, AIPATH_s *, char *, char *, i32 *);
-
-extern "C" void *AIPAthFindPathCnx(AISYS_s *system, AIPATH_s *path, char *from, char *to, i32 *direction);
 
 extern AIACTIONDEF api_aiactiondefs[55];
 extern AICONDITIONDEF api_aiconditiondefs[50];
@@ -440,15 +426,6 @@ extern AICONDITIONDEF api_aiconditiondefs[50];
 DECOMP_ASSERT(sizeof(api_aiactiondefs) == 0x294, "API action registry size");
 
 DECOMP_ASSERT(sizeof(api_aiconditiondefs) == 0x258, "API condition registry size");
-
-extern "C" {
-extern void (*checkantinodefns[3])(APIOBJECT *, AIANTINODE *, NUVEC *, f32);
-    extern void (*checkantinodefns[3])(APIOBJECT_s *, AIANTINODE_s *, NUVEC *, f32);
-}
-
-extern "C" {
-void *AIPAthFindPathCnx(AISYS_s *system, AIPATH_s *path, char *from_name, char *to_name, i32 *direction);
-} // extern "C"
 
 struct AIPATH_s;
 struct eduimenu_s;
@@ -469,31 +446,13 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 extern i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
 
-i32 InModelListDataFlags(APICHARACTERMODELLIST_s *models, u32 model_flags, u32 game_flags, i32 require_hats,
-                         i32 reject_flag_40);
-
 extern "C" {
     extern NUMTL *DebMat[10];
-    extern "C++" void DebrisProcessSpheres(uv1deb *, f32, debinftype *, debkeydatatype_s *, i32);
-}
-
-extern "C" {
-extern "C++" TERRAIN_TRACK_SLOT *AllocTerrId();
-} // extern "C"
-
-extern "C" {
-void *AIPAthFindPathCnx(AISYS_s *system, AIPATH_s *path, char *from_name, char *to_name, i32 *direction);
-
 }
 
 extern "C" {
     extern NUMTL *DebMat[10];
-    extern "C++" void DebrisProcessSpheres(uv1deb *, f32, debinftype *, debkeydatatype_s *, i32);
 }
-
-extern "C" {
-extern "C++" TERRAIN_TRACK_SLOT *AllocTerrId();
-} // extern "C"
 
 #if defined(__SSE__)
 #include <xmmintrin.h>
@@ -619,17 +578,6 @@ __attribute__((force_align_arg_pointer)) static __used__ i32 eduicbRenderCheck(e
 extern f32 HUB_EPISODETITLEY;
 extern i16 tSELECT, tSELECTED, tSELECTING;
 
-extern void (*drawslotinfofn)(f32, f32, i32, i32);
-extern void (*drawslotsfn)(MENU *, f32);
-
-void MenuInitialiseEx(MENUFNINFO *menu_info, i32 menu_id_count, i32 language_count,
-                      void (*draw_save_slots_info_fn)(f32, f32, i32, i32), i32 is_fade_enabled, i32 is_shadow_enabled);
-
-void MenuInitialise(MENUFNINFO *menu_info, i32 menu_id_count, i32 language_count,
-                    void (*draw_save_slots_fn)(MENU *, f32), i32 is_fade_enabled, i32 is_shadow_enabled);
-
-void NuPadRecordEndFrame(void);                      // nupad_interface.cpp
-
 extern "C" {
     extern "C++" {
         static __attribute__((noinline, noclone)) void
@@ -671,21 +619,6 @@ DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 
 extern "C" i16 id_LANDSPEEDER;
 extern i32 CUTCAMONLY, GUNSHIPAHACK, netcamera, complexsockposition_forcesock, movegamecamera_forcesock;
-GameObject_s *FindNearestGameObject(NUVEC *, GameObject_s *, u32, f32, f32, i32, i32, i32, f32 *, i32,
-                                    i32 (*)(GameObject_s *), bool);
-
-extern void (*FS_Callback)(char *, char *);
-
-extern "C" void StartFileSel(char *title, char *path, char *filter, char *filter_out,
-                             void (*callback)(char *, char *));
-
-extern "C" {
-extern "C" void StartFileSel(char *title, char *path, char *filter, char *filter_out,
-                             void (*callback)(char *, char *));
-
-}
-
-void NuPadRecordEndFrame(void);                      // nupad_interface.cpp
 
 extern "C" {
     extern "C++" {
@@ -713,22 +646,9 @@ extern "C" {
     extern "C++" FadeSystem FadeSys;
 }
 
-void SaveSystemInitialise(i32 slots, void *makeSaveHash, void *save, i32 saveSize, i32 saveCount,
-                          void (*drawSaveIcon)(void), void *extradata, i32 extradataSize);
-
-extern "C" {
-void TextRegisterButtonMapFn(void (*fn)(char *, char *));
-void TextRegisterPulseTimerFn(f32 (*fn)(f32));
-}
-
 extern "C" {
     extern NUMTL *DebMat[10];
-    extern "C++" void DebrisProcessSpheres(uv1deb *, f32, debinftype *, debkeydatatype_s *, i32);
 }
-
-extern "C" {
-extern "C++" TERRAIN_TRACK_SLOT *AllocTerrId();
-} // extern "C"
 
 #if defined(__SSE__)
 #include <xmmintrin.h>
@@ -760,8 +680,6 @@ __attribute__((force_align_arg_pointer)) static __used__ i32 eduicbRenderCheck(e
                                                                                    i32 x, i32 y, i32 width, i32);
 }
 
-void NuPadRecordEndFrame(void);                      // nupad_interface.cpp
-
 extern "C" {
     extern "C++" {
         static __attribute__((noinline, noclone)) void
@@ -783,14 +701,6 @@ extern "C" {
 } // extern "C"
 
 extern "C" {
-extern "C" void StartFileSel(char *title, char *path, char *filter, char *filter_out,
-                             void (*callback)(char *, char *));
-
-}
-
-void NuPadRecordEndFrame(void);                      // nupad_interface.cpp
-
-extern "C" {
     extern "C++" {
         static __attribute__((noinline, noclone)) void
         DisplayListProcessSkin(NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry, NUDISPLAYLISTITEM **first_and_last,
@@ -809,13 +719,6 @@ extern "C" {
 
 #include "nu2api/nucore/nucore_plain_types.h"
 } // extern "C"
-
-extern "C" {
-void TextRegisterButtonMapFn(void (*fn)(char *, char *));
-
-void TextRegisterPulseTimerFn(f32 (*fn)(f32));
-
-}
 
 extern i16 tCHALLENGECOMPLETE, tMINIKIT;
 
@@ -824,13 +727,6 @@ extern char usercode[6];
 extern i16 tSELECT, tBACK, tBUY, tPLAY, tSELECTING;
 
 extern "C" {
-extern void *(*DefragCreateInstFn)(void *, NUGCUTSCENE_s *, VARIPTR *);
-
-}
-
-void NuPadRecordEndFrame(void);                      // nupad_interface.cpp
-
-extern "C" {
     extern "C++" {
         static __attribute__((noinline, noclone)) void
         DisplayListProcessSkin(NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry, NUDISPLAYLISTITEM **first_and_last,
@@ -850,31 +746,10 @@ extern "C" {
 #include "nu2api/nucore/nucore_plain_types.h"
 } // extern "C"
 
-i32 GizmoFileReadGameAnimSet(GAMEANIMSET_s *set, void *world_ptr,
-                             void (*read_object_data)(GAMEANIMOBJ_s *, unsigned char), unsigned char version,
-                             char *prefix, char *suffix);
-
 extern "C" {
-extern void (*checkantinodefns[3])(APIOBJECT *, AIANTINODE *, NUVEC *, f32);
-    extern void (*checkantinodefns[3])(APIOBJECT_s *, AIANTINODE_s *, NUVEC *, f32);
-}
-
-extern "C" {
-void *AIPAthFindPathCnx(AISYS_s *system, AIPATH_s *path, char *from_name, char *to_name, i32 *direction);
 
 #include "legoapi/ai/core/ai_sys_stubs_types.h"
 } // extern "C"
-
-// Callback storage is declared in reverse linked-BSS order because the
-// original GCC 4.7 -O3 object emits these definitions in reverse source order.
-extern "C" {
-void NuSetCutSceneDestroyCharactersFn(void (*callback)(NUGCUTSCENE_s *));
-} // extern "C"
-
-extern "C" {
-void NuSetCutSceneDestroyCharactersFn(void (*callback)(NUGCUTSCENE_s *));
-
-}
 
 extern "C" {
     extern i16 id_LANDSPEEDER;

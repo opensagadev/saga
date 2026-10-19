@@ -383,7 +383,7 @@ void DrawStreaks() {
                 continue;
 
             for (i32 index = 0; index < segment_count - 1; ++index) {
-                const f32 segment_fade = fade < 0.0f ? 0.0f : fade;
+                const f32 segment_fade = MAX(fade, 0.0f);
                 i32 segment_alpha = static_cast<i32>(static_cast<f32>(header->colour >> 24) * segment_fade * 2.0f);
                 if (segment_alpha > 255)
                     segment_alpha = 255;

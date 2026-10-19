@@ -36,23 +36,17 @@
 #include "nu2api/nufile/nufile.h"
 #include "legoapi/items/fx/explosions.h"
 #include "legoapi/props/objects/zipup.h"
+#include "legoapi/audio/sfx.h"
+#include "legoapi/items/collect/bolts.h"
 
 static void UpdateBolt_Geonosian(BOLT_s *);
 static void EndBolt_EwokTorpedo(BOLT_s *);
 
 #include "legoapi/items/collect/bolttypes_lsw.inc"
 
-extern "C" void PlaySfx(char *, NUVEC *);
-
-__attribute__((force_align_arg_pointer)) void Bolt_AddDeflectedBolt(BOLT_s *bolt, nuvec_s *direction, nuvec_s *normal,
-                                                                    unsigned char *processed);
-
 static __used__ void UpdateBolt_Geonosian(BOLT_s *bolt);
 static __used__ void EndBolt_EwokTorpedo(BOLT_s *bolt);
 extern void (*FS_Callback)(char *, char *);
-
-extern "C" void StartFileSel(char *title, char *path, char *filter, char *filter_out,
-                             void (*callback)(char *, char *));
 
 static __used__ void EndBolt_EwokTorpedo(BOLT_s *bolt) {
     Detonate(&bolt->position, 0);

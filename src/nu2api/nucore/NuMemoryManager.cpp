@@ -568,9 +568,9 @@ void NuMemoryManager::AddPage(void *ptr, u32 size, bool _unknown) {
     memset(page, 0, sizeof(Page));
 
     page->original_ptr = ptr;
+    page->first_header = (Header *)((usize)page + 0x20);
     page->end = (u32 *)(allocation_end - 4);
     page->size = size;
-    page->first_header = (Header *)((usize)page + 0x20);
     page->is_external = _unknown;
 
     // Fence flags prevent coalescing beyond the page while preserving the other bits.

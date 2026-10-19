@@ -54,10 +54,9 @@
 #include "legoapi/items/collect/bolts.h"
 #include "legoapi/items/fx/explosions.h"
 #include "legoapi/items/objects/game_obj.h"
-
-i32 SphereSphereOverlapScaleY(NUVEC *, f32, f32, NUVEC *, f32, f32);
-void GameCam_HitJudder();
-GIZMOBLOWUP_s *GizmoBlowUp_Hit(GameObject_s *, NUVEC *, i32, f32, NUVEC *, NUVEC *, BOLT_s *, u32, u8 *);
+#include "legoapi/gizmo/object/gizmoblowups.h"
+#include "legoapi/lib/camera.h"
+#include "legoapi/misc/utilities.h"
 
 void ResetExplosions() {
     memset(Explosion, 0, sizeof(Explosion));

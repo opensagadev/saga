@@ -187,3 +187,4 @@ extern "C" {
     void RemapAddr(void *new_base, void *old_base, void **address);
     void SetProceduralAnimationFn(void *function);
 }
+i32 findrange(nugscn_s *scene, i32 first_joint);

@@ -14,8 +14,7 @@
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nuvec.h"
-
-void SetWeaponIn(GameObject_s *object);
+#include "legoapi/actions/movement/climbing.h"
 
 void Whip_MoveCode(GameObject_s *object) {
     if (LEGOCONTEXT_WHIP == -1) {

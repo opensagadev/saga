@@ -10,6 +10,7 @@
 #include "legoapi/props/doors/door.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/level.h"
+#include "legoapi/world/levels/hub.h"
 #include "legoapi/world/mission.h"
 #include "legoapi/world/world.h"
 #include "legoapi/world/world_shared.h"
@@ -23,8 +24,6 @@
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nuvec.h"
-
-void Hub_ActivateDoorMenu(LEVELDATA_s **level);
 
 namespace {
     const f32 DOOR_BLOCK_VELOCITY = 10.0f;

@@ -89,6 +89,7 @@
 #include "legoapi/cutscenes/gcutscn.h"
 #include "legoapi/gizmos/traps/gizturret.h"
 #include "legoapi/misc/utilities.h"
+#include "legoapi/ai/core/aisysall.h"
 #include "legoapi/world/levels/episodeII.h"
 
 struct instNUGCUTSCENE_s;
@@ -97,12 +98,6 @@ extern nuhspecial_s disco_on_spin[3], walllights_disco[2], walllights[2], stripl
     discorm_wall_off, discorm_wall_on;
 extern GIZMO *disco_off_spina[3], *gizTurrets[2];
 extern struct GUNSHIP_LEVFLAG_s LevFlag;
-
-// --- Cross-file entry points / id globals ---
-//
-extern "C" {
-    void *AIPAthFindPathCnx(AISYS_s *, AIPATH_s *, char *, char *, i32 *); // legoapi/ai pathfinding
-}
 
 struct JEDIBNETPACKET_s;
 
@@ -240,7 +235,6 @@ f32 gunshipb_seekrange = 4.0f;
 struct nuhspecial_s;
 
 extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
-extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
 
 extern i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
 

@@ -3,6 +3,7 @@
 #include "decomp.h"
 
 // Declared here for the other units that use them.
+struct GAMEPAD_s;
 struct MENU_s;
 void MenuDrawExtras(MENU_s *menu);
 void MenuDrawNewGame(MENU_s *menu);
@@ -16,3 +17,4 @@ void MenuUpdateNewGame(MENU_s *menu);
 void MenuUpdateOptions(MENU_s *menu);
 void MenuUpdateRestoreNewGame(MENU_s *menu);
 void MenuUpdateSelectControls(MENU_s *menu);
+void UpdateGameMenu(GAMEPAD_s *pad, i32 a2);

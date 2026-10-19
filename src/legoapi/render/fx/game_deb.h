@@ -30,6 +30,7 @@ extern "C" {
     extern i32 debris_detail_level;
     extern i32 DebrisSuspendDrawObjectSwitch;
     extern i32 g_renderingDebris;
+    void Debris(i32 update_panel_time);
     void DebrisDraw(i32 paused, i32 pass);
     i32 DebrisGlassParticlesActive(void);
     void DebrisGlassClose(void);

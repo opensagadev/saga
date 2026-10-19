@@ -14,10 +14,9 @@
 
 #include <stdio.h>
 #include <string.h>
+#include "legoapi/cutscenes/minicamcut.h"
 
 extern "C" i32 editor_active;
-void GameCameraMakeMiniCut3(u32, float, i32, i32, i32, void *, i32, NUVEC *, float, float, float, float, float, float,
-                            float, i32, nugspline_s *, char, char);
 
 static GAMECAMERA_s GameCamera;
 GAMECAMERA_s *GameCam = &GameCamera;

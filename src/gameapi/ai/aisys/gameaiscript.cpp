@@ -123,11 +123,9 @@
 #include "legoapi/world/levels/episodeIII.h"
 #include "legoapi/world/levels/hub.h"
 #include "legogame/game.h"
+#include "legoapi/cutscenes/minicamcut.h"
 
-extern "C" void *AIPAthFindPathCnx(AISYS_s *system, AIPATH_s *path, char *from, char *to, i32 *direction);
 extern f32 ForceThrowSpeed, ForceThrowGravity;
-
-void MakeThrowVector(NUVEC *, NUVEC *, NUVEC *, NUVEC *, f32, f32);
 
 static i32 Action_SetCurrentSpeed(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **, i32, i32, f32);
 static i32 Action_GoToOriginalPath(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **, i32, i32, f32);
@@ -1480,10 +1478,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 extern f32 LevelNameTime, LevelNameMul;
 
-extern "C" {
-void SetScriptErrorLevel(SCRIPT_ERROR_LEVEL level);
-}
-
 extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER;
 
 extern "C" {
@@ -1495,28 +1489,16 @@ inline void ThingManager::operator delete(void *thing, usize size) {
     theMemoryManager.FreePool(thing, size);
 }
 
-void DestroySnakeBody(GameObject_s *);
-
 extern GameObject_s * player_tag_to;
 extern GameObject_s * player_tag_from;
-
-void DestroySnakeBody(GameObject_s *obj);
 
 extern u16 TargetDeg_Near, TargetDeg_Mid, TargetDeg_Far;
 extern f32 TargetDist_Near2, TargetDist_Mid2;
 extern i8 (*adtab)[4];
 
-GameObject_s *FindNearestGameObject(NUVEC *position, GameObject_s *exclude, u32 required_flags, f32 radius,
-                                    f32 extra_radius, i32 animation, i32 character_id, i32 player_index,
-                                    f32 *distance_squared, i32 horizontal_only, i32 (*filter)(GameObject_s *),
-                                    bool first_match);
-
 extern "C" {
     extern i32 freechunkcontrolsptr;
 }
-
-void GameCameraMakeMiniCut3(u32, float, i32, i32, i32, void *, i32, NUVEC *, float, float, float, float, float, float,
-                            float, i32, nugspline_s *, char, char);
 
 f32 party_follow_offsets[8];
 
@@ -5255,8 +5237,6 @@ static i32 Action_SnapToSockPosition(AISYS *, AISCRIPTPROCESS *processor, AIPACK
             object->apiobj.last_safe_position = position;
             object->ai_update_position = position;
             object->apiobj.velocity = v000;
-            extern void InitSurfaceInfo(GameObject *);
-            extern i32 SetObjOnSurface(GameObject *, i32);
             InitSurfaceInfo(object);
             SetObjOnSurface(object, 0);
         }
@@ -10380,8 +10360,6 @@ __used__ static i32 Action_SnapToLocator(AISYS *sys, AISCRIPTPROCESS *processor,
                 object->apiobj.last_safe_position = object->apiobj.position;
                 object->saved_position = object->apiobj.position;
                 object->apiobj.velocity = v000;
-                extern void InitSurfaceInfo(GameObject *);
-                extern i32 SetObjOnSurface(GameObject *, i32);
                 InitSurfaceInfo(object);
                 if (check_terrain != 0)
                     SetObjOnSurface(object, 0);

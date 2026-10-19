@@ -211,7 +211,6 @@ extern "C" VuVec SpherePos2;
 VuVec SpherePos1;
 VuVec SpherePos2;
 extern EdInputContext * Input;
-extern "C" eduiitem_s *eduiItemColourPickCreate(usize, const void *, EdUiItemCallback, char *);
 i32 EdType_Char;
 i32 EdType_Short;
 i32 EdType_Int;
@@ -397,8 +396,6 @@ extern "C" {
 }
 
 extern "C" {
-eduiitem_s *eduiItemColourPickCreate(usize data, const void *colours, EdUiItemCallback callback, char *text);
-
 __attribute__((force_align_arg_pointer)) static __used__ i32 eduicbRenderCheck(eduimenu_s *, eduiitem_s *item,
                                                                                    i32 x, i32 y, i32 width, i32);
     static void eduiDrawHueValueBand(i32 x, i32 y, i32 width, i32 height, f32 start, f32 end, u32 first, u32 second)
@@ -458,11 +455,6 @@ DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 
 struct nuhspecial_s;
 struct VuVec;
-
-extern "C" {
-eduiitem_s *eduiItemColourPickCreate(usize data, const void *colours, EdUiItemCallback callback, char *text);
-
-}
 
 i16 Placeable::CurrentLedFile;
 static EdStringControl *edObjectNameControl;

@@ -12,5 +12,6 @@ i32 SpecialMove_Check(GameObject_s *, GameObject_s *);
 i32 SpecialMove_GetAttackerAction(i32);
 i32 SpecialMove_GetVictimAction(i32);
 i32 SpecialMove_ReleaseVictim(GameObject_s *);
+u32 SpecialMove_GetFlags(i32 index, u32 mask);
 void SpecialMove_Cancel(GameObject_s *object);
 void SpecialMove_VictimCode(GameObject_s *);

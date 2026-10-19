@@ -57,6 +57,8 @@ extern "C" {
     void SetGameFont(vufnt_s *font);
     extern i32 MenuStopDraw;
     extern i32 smarttextex_drawmessagebox;
+    void SmartText(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
+                   u8 green, u8 blue, f32 max_width, i32 max_lines);
     void SmartTextEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
                      u8 green, u8 blue, f32 max_width, i32 max_lines, void *message_box, i32 suppress_draw, u32 alpha);
     void SmartTextEx2(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,

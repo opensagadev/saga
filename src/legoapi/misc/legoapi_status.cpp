@@ -83,6 +83,7 @@
 #include "legoapi/menus/screens/missions.h"
 #include "legoapi/misc/legoapi_status.h"
 #include "legogame/game.h"
+#include "nu2api/nuandroid/ios_device.h"
 
 extern "C" {
     i32 DEVCDDVDROM_Interrogate(NUFILE_DEVICE *device) {
@@ -101,7 +102,6 @@ extern "C" {
 
 extern "C" STATUSPACKET_s StatusPacket;
 
-void IncreaseScore(u32 *, u64, i32);
 static i32 gamedemo_option;
 static i32 goldbrickmsgcount;
 
@@ -112,7 +112,6 @@ extern "C" TIMER BonusTimer;
 extern i16 tSUPERSTORYCOMPLETE, tNEWBESTTIME, tLEVELCOMPLETE, tMISSIONCOMPLETE;
 extern i16 tNONEWBESTTIME;
 extern i16 tCHALLENGECOMPLETE, tMINIKIT;
-extern "C" void NuIOS_RecordFlurryEvent(char *);
 extern i32 newminikitcount;
 extern i32 currentminikit;
 static u32 collect_suit_bits;
@@ -711,7 +710,7 @@ void InitStatusScreen(WORLDINFO_s *world) {
         f32 numerator = p.collected_score * 100.0f;
         if (numerator != 0.0f && p.true_hero_target != 0.0f) {
             f32 percent = numerator / p.true_hero_target;
-            p.true_hero_percent = 99.0f < percent ? 99.0f : percent;
+            p.true_hero_percent = MIN(percent, 99.0f);
         } else {
             p.true_hero_percent = 0.0f;
         }
@@ -1120,7 +1119,7 @@ void Status_DrawPromptMenu(STATUSPACKET_s *packet, i32 selected, float alpha) {
     for (i32 i = 0; i < count; ++i) {
         i32 red, green, blue;
         if (selected != 0 && status_prompt == i && TestForController()) {
-            if (menu_pulsate > 0.0f) {
+            if (!(menu_pulsate <= 0.0f)) {
                 const f32 inverse = 1.0f - menu_pulsate;
                 red = static_cast<u32>(MENUFLASH0R) * menu_pulsate + static_cast<u32>(MENUFLASH1R) * inverse;
                 green = static_cast<u32>(MENUFLASH0G) * menu_pulsate + static_cast<u32>(MENUFLASH1G) * inverse;
@@ -1269,7 +1268,7 @@ void DrawStatusScreen(WORLDINFO_s *) {
         }
         return;
     }
-    if (FadeSys.fade > 0.0f) {
+    if (!(FadeSys.fade <= 0.0f)) {
         return;
     }
 

@@ -44,6 +44,8 @@
 #include "legoapi/items/collect/bolts.h"
 #include "legoapi/items/fx/explosions.h"
 #include "legoapi/render/fx/edsplines.h"
+#include "legoapi/characters/core/playeritems.h"
+#include "legoapi/render/fx/parts.h"
 
 i32 GizmoBlowup_HitMultiplier = 1;
 void (*GameBlowUpBlownUpFn)(GIZMOBLOWUP_s *) = NULL;
@@ -57,13 +59,6 @@ i32 (*GizmoBlowUp_NoTargetFn)(WORLDINFO_s *, GameObject_s *) = NULL;
 
 i32 MAXBLOWUPRANDSPANG = 60;
 extern ADDPART_s Default_ADDPART;
-extern "C" PART_s *AddPart(ADDPART_s *);
-i32 PartDraw_Flickerer(PART_s *);
-void PartStop_Flickerer(PART_s *);
-i32 ReleaseHearts();
-
-void Bolt_AddDeflectedBolt(BOLT_s *, nuvec_s *, nuvec_s *, unsigned char *);
-void Bolt_End(BOLT_s *, i32);
 
 static void Blowups_Reset(void *world_ptr, void *, void *progress_ptr);
 static i32 gizmoblowupnametable_numids;

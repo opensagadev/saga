@@ -135,8 +135,6 @@
 #include "legoapi/lib/camera.h"
 #include "legoapi/misc/utilities.h"
 
-i32 MatrixReflection(NUMTX *matrix, i32 axis, f32 plane, f32 height, NUMTX *result);
-
 i32 draw_para = 1;
 
 // These rotations are also used by the shop translation unit. Keep them local
@@ -320,17 +318,9 @@ inline void ThingManager::operator delete(void *thing, usize size) {
 }
 
 extern f32 Hub_PadSpeed[2];
-void UpdateRumble(RUMBLEPACKET *);
-
-GameObject_s *FindNearestGameObject(NUVEC *position, GameObject_s *exclude, u32 required_flags, f32 radius,
-                                    f32 extra_radius, i32 animation, i32 character_id, i32 player_index,
-                                    f32 *distance_squared, i32 horizontal_only, i32 (*filter)(GameObject_s *),
-                                    bool first_match);
 
 extern "C" i16 id_LANDSPEEDER;
 extern i32 CUTCAMONLY, GUNSHIPAHACK, netcamera, complexsockposition_forcesock, movegamecamera_forcesock;
-GameObject_s *FindNearestGameObject(NUVEC *, GameObject_s *, u32, f32, f32, i32, i32, i32, f32 *, i32,
-                                    i32 (*)(GameObject_s *), bool);
 
 extern MechWeakPtr<MechObjectInterface, 4> nextShootTarget;
 extern MechWeakPtr<MechObjectInterface, 4> forceNextAttackOpponent;
@@ -376,25 +366,13 @@ extern i16 id_MINIATST, id_MINIATTE;
 
 extern i16 id_PENGUIN, id_UMBRELLA, id_GLIDEPACK;
 
-i32 GizmoFileReadGameAnimSet(GAMEANIMSET_s *set, void *world_ptr,
-                             void (*read_object_data)(GAMEANIMOBJ_s *, unsigned char), unsigned char version,
-                             char *prefix, char *suffix);
-
-extern "C" {
-    void *AIPAthFindPathCnx(AISYS_s *, AIPATH_s *, char *, char *, i32 *);
-}
-
 extern i16 id_WOOKIEE;
 
 extern speedup_s DogFightSpeedList[9];
 
-extern "C" void NuRndrShadowDirCol(const NUVEC *direction, u32 colour, f32 near_distance, f32 far_distance);
-
 extern "C" {
     extern "C++" FadeSystem FadeSys;
 }
-
-void UpdateRumble(RUMBLEPACKET *packet);
 
 #if defined(__SSE__)
 #include <xmmintrin.h>
@@ -3268,7 +3246,6 @@ void TerrainPlayer(GameObject_s *object) {
                 }
             }
             if (api.model_draw_result != 0 && object->character_context != 0x40 && object->character_context != 0x2c) {
-                extern void GameObjectRotation(GameObject_s *, i32);
                 GameObjectRotation(object, 2);
             }
             // The jump callback returns to the common saved-button restoration

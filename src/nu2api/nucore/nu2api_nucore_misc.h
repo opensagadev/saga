@@ -4,6 +4,8 @@
 
 // Declared here for the other units that use them.
 struct NuIOS_InAppProduct;
+i32 NuIOS_AreInAppPurchasesAvailable();
+i32 NuIOS_CanMakeInAppPurchases();
 i32 NuIOS_GetInAppProductByID(char *, NuIOS_InAppProduct *);
 i32 NuIOS_GetPurchaseResult();
 i32 NuIOS_IsProductPurchased(char *);

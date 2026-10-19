@@ -3,13 +3,13 @@
 #include "globals.h"
 #include "gamelib/util/gamelib_util_types.h"
 #include "legoapi/items/base/apiobject.h"
+#include "legoapi/lib/text.h"
 #include "legoapi/world/levels/levels.h"
 #include "legoapi/world/world.h"
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nuvec.h"
 
-i32 GetMenuID();
 
 void MechInputTouchBonusCavalryController::Activate() {
     if (active) {

@@ -10,6 +10,8 @@ struct nuvec_s;
 i32 IntersectWater(GameObject_s *object);
 i32 UnderWater(GameObject_s *object);
 void GetSurfaceInfo(GameObject_s *object, i32 update_surface, f32 shadow_height);
+void SurfaceMaskOff(u32 *surface_mask);
+void SurfaceMaskOn(u32 *surface_mask);
 void Surface_Deflect(nuvec_s *normal, nuvec_s *movement, nuvec_s *result, i32 mode);
 void Surfaces_Reset(void);
 extern "C" {

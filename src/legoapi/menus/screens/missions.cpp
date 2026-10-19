@@ -35,16 +35,14 @@
 #include "legoapi/world/world_shared.h"
 #include "legoapi/menus/core/gamemessages.h"
 #include "legoapi/menus/screens/missions.h"
+#include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/menus/screens/gamestatus_lsw.h"
+#include "legoapi/world/levels/levels.h"
 
 extern f32 HUB_EPISODETITLEY;
 extern i16 tSELECT, tSELECTED, tSELECTING;
-void Hub_DrawImportantBrick(i32, f32, f32, f32, i32, i32);
-extern "C" void SmartText(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
-                          u8 green, u8 blue, f32 max_width, i32 max_lines);
 extern i16 tOUTOFTIME;
 extern "C" TIMER BonusTimer;
-extern void SetBonusWinner(i32);
-extern GameObject_s *FindGameObject(i32, u32, i32, i32, i32);
 static f32 MissionsAlpha;
 static i32 hub_mission;
 static f32 MissionIconScale[20];

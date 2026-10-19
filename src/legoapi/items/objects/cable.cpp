@@ -68,6 +68,8 @@
 #include "legoapi/characters/motion/move.h"
 #include "legoapi/items/objects/cable.h"
 #include "legoapi/misc/utilities.h"
+#include "legoapi/misc.h"
+#include "legoapi/items/objects/gameobjects.h"
 
 f32 cable_ground_damping = 20.0f;
 f32 cable_damping = 2.0f;
@@ -75,7 +77,6 @@ f32 cable_gravity = 3.0f;
 f32 cable_speed = 20.0f;
 i32 atat_locators[4] = {0, 1, 2, 3};
 extern i32 TERRAINMASK_NONDROID;
-i32 XZLinesIntersect(NUVEC *, NUVEC *, NUVEC *, NUVEC *, f32 *, f32 *);
 f32 default_targetmomf = 4.0f;
 f32 targetmomf = 4.0f;
 f32 default_ownermomf = 5.0f;
@@ -108,11 +109,6 @@ extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER;
 inline void ThingManager::operator delete(void *thing, usize size) {
     theMemoryManager.FreePool(thing, size);
 }
-
-GameObject_s *FindNearestGameObject(NUVEC *position, GameObject_s *exclude, u32 required_flags, f32 radius,
-                                    f32 extra_radius, i32 animation, i32 character_id, i32 player_index,
-                                    f32 *distance_squared, i32 horizontal_only, i32 (*filter)(GameObject_s *),
-                                    bool first_match);
 
 i32 solid_cable;
 i32 nsegments_drawn;
@@ -259,7 +255,7 @@ void UpdateCables() {
                 cable->points[i].x += FRAMETIME * cable->velocities[i].x;
                 cable->points[i].y += cable->velocities[i].y * FRAMETIME;
                 cable->points[i].z += FRAMETIME * cable->velocities[i].z;
-                if (ground > cable->points[i].y) {
+                if (!(ground <= cable->points[i].y)) {
                     cable->points[i].y = ground;
                     cable->velocities[i].x -= (cable->velocities[i].x * cable_ground_damping) * FRAMETIME;
                     cable->velocities[i].z -= (cable_ground_damping * cable->velocities[i].z) * FRAMETIME;
@@ -309,7 +305,7 @@ void UpdateCables() {
                 for (i32 i = 1; i < 4; ++i) {
                     f32 distance = NuVecDistSqr(
                         &path[0], NUMTX_GET_ROW_VEC(&cable->target->joint_matrices[atat_locators[i]], 3), &delta);
-                    if (nearest > distance) {
+                    if (!(nearest <= distance)) {
                         nearest = distance;
                         selected = i;
                     }

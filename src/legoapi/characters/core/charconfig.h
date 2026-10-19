@@ -97,6 +97,8 @@ struct APICHARACTERMODELLIST_s;
 struct nufpcomjmp_s;
 union variptr_u;
 extern void GameLoadCharacterModels(APICHARACTERMODELLIST_s *, i32, variptr_u *, variptr_u *, i32, i32);
+i32 InModelListDataFlags(APICHARACTERMODELLIST_s *models, u32 model_flags, u32 game_flags, i32 require_hats,
+                         i32 reject_flag_40);
 void CharConfig_ConfigureAll(i32 permanent, nufpcomjmp_s *game_keywords);
 extern "C" {
     extern i32 aisys_maxnumcreaturesets;

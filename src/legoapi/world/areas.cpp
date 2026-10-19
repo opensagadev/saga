@@ -106,9 +106,9 @@ AREADATA *Areas_ConfigureList(char *file, VARIPTR *bufferStart, VARIPTR *bufferE
 
     i32 in_area = 0;
     i32 area_count = 0;
-    AREADATA *area = (AREADATA *)ALIGN((usize)bufferStart->void_ptr, 4);
-    bufferStart->void_ptr = area;
-    AREADATA *area_base = area;
+    AREADATA *area_base = (AREADATA *)ALIGN((usize)bufferStart->void_ptr, 4);
+    bufferStart->void_ptr = area_base;
+    AREADATA *area = area_base;
 
     while (NuFParGetLine(fp)) {
         NuFParGetWord(fp);

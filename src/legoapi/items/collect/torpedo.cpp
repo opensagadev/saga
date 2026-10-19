@@ -98,8 +98,7 @@ void FreeTorpedoPacket(TORPEDOPACKET_s **packet) {
 void DropTorpedoPickups(TORPEDOPACKET_s *packet, i32 count) {
     if (count == 0 || packet == NULL)
         return;
-    if (count > packet->count)
-        count = packet->count;
+    count = MIN(count, packet->count);
     if (count < 0)
         return;
     for (i32 index = 1; index <= count; ++index) {
@@ -352,7 +351,7 @@ void TorpedoCode(GameObject_s *object, i32 fire, f32 fire_cooldown) {
         }
     } else {
         object->torpedo->field_08 += FRAMETIME;
-        if (object->torpedo->field_08 >= 0.8f)
+        if (!(object->torpedo->field_08 < 0.8f))
             object->torpedo->field_03 = 0;
     }
 

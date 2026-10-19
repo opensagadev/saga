@@ -24,6 +24,7 @@ extern rtldata_s lev_rtldata;
 void EnableShadowMapRenderingFn();
 void FindAndSetLights(nuvec_s *, f32, void *);
 void ResetShadowMapRenderingFn();
+void SetDepthOfField(void);
 void SetLights(nucolour3_s *colour0, nuvec_s *direction0, nucolour3_s *colour1, nuvec_s *direction1, nucolour3_s *colour2, nuvec_s *direction2, nuvec_s *ambient);
 void SetShadowLight();
 void SetZeroLights(void);

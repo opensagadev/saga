@@ -9,6 +9,7 @@
 #include "globals.h"
 #include "legoapi/cutscenes/minicamcut.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/misc/utilities.h"
 #include "nu2api/numath/nuvec.h"
 #include "decomp.h"
 #include "legoapi/core/config/cheat.h"
@@ -27,6 +28,7 @@
 #include "nu2api/numath/numtx.h"
 #include "legoapi/items/collect/torpedo.h"
 #include "legoapi/menus/core/gamehint.h"
+#include "legoapi/menus/core/hint.h"
 #include "MechInputTouch/MechInputTouch_types.h"
 #include "gamelib/util/gamelib_util_types.h"
 #include "legoapi/render/fx/edsplines.h"
@@ -54,10 +56,7 @@
 #include "nu2api/nu3d/nupostparams.h"
 #include "legoapi/characters/motion/camera.h"
 
-void FindAnglesXY(nuvec_s *, u16 *, u16 *);
 MINICAM_s MiniCam = {};
-
-void Hint_CancelCurrent(void);
 
 nugspline_s ObstacleCamCutSpline;
 i32 ObstacleCamTargetGuid;

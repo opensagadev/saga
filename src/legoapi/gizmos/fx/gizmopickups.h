@@ -41,4 +41,5 @@ void GizmoPickup_TurnOnPickup(GIZMOPICKUP_s *pickup);
 void GizmoPickups_PostLoad(void *, void *);
 void PartUpdate_Heart(PART_s *);
 void ResetCoinPacket(COINPACKET_s *);
+void UpdateCoinPacket(COINPACKET_s *, i32, i32);
 void SetAreaPickupGravity(i32 area, i32 level);

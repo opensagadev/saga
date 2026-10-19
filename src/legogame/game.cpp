@@ -203,9 +203,8 @@
 #include "legoapi/world/levels/hub.h"
 #include "nu2api/nu3d/nu3d_includes.h"
 #include "nu2api/nuandroid/ios_device.h"
-
-void SurfaceMaskOff(u32 *surface_mask);
-void SurfaceMaskOn(u32 *surface_mask);
+#include "legoapi/actions/movement/carrying.h"
+#include "legoapi/actions/movement/pushblocks.h"
 
 NARROWSOCKEXCEPTION NarrowSockException_LSW[] = {
     {const_cast<char *>("deathstarbattle_d"), -1, 1, 67.5f, 999.0f},
@@ -229,16 +228,9 @@ static PLAYERITEMTYPE_s PlayerItemType_INDY[] = {
     {15, 6, 0, const_cast<char *>("blue"), 2, 0, 0, 0},
     {-1, 0, 0, NULL, 0, 0, 0, 0},
 };
-extern void (*Player_ClearContextFn)(GameObject_s *, i32);
 static void GizBuildIt_FinishFn_Game(GIZBUILDIT_s *buildit);
-extern u32 (*CanSuperCarryFn)(GameObject_s *);
-extern u32 (*CanPushBlocksFn)(GameObject_s *);
-extern u32 (*CanPushObstaclesFn)(GameObject_s *);
 extern i16 tCLIPi, tINTRO, tMIDTRO, tOUTRO, tENDING;
 extern "C" i16 id_GAMORREANGUARD;
-extern void (*Punch_HitHoldFn)(GameObject_s *, GameObject_s *);
-extern i32 (*Punch_GetDamageFn)(GameObject_s *, GameObject_s *);
-extern void (*Punch_HitExtraCodeFn)(GameObject_s *, nuvec_s *);
 extern AREADATA *E1CHARACTER_ADATA;
 extern AREADATA *E2CHARACTER_ADATA;
 extern AREADATA *E3CHARACTER_ADATA;
@@ -331,11 +323,6 @@ static __used__ void LEGO_AllGoldBricksFn();
 extern u16 TargetDeg_Near, TargetDeg_Mid, TargetDeg_Far;
 extern f32 TargetDist_Near2, TargetDist_Mid2;
 
-GameObject_s *FindNearestGameObject(NUVEC *position, GameObject_s *exclude, u32 required_flags, f32 radius,
-                                    f32 extra_radius, i32 animation, i32 character_id, i32 player_index,
-                                    f32 *distance_squared, i32 horizontal_only, i32 (*filter)(GameObject_s *),
-                                    bool first_match);
-
 struct GAMEMESSAGE_s;
 struct HINT_s;
 struct MENU_s;
@@ -345,7 +332,6 @@ struct nuhspecial_s;
 extern i32 LEGOOBJ_CHARKIT;
 extern i32 LEGOOBJ_MINIKIT;
 extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
-extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
 
 static __used__ i32 PauseRenderOff();
 static __used__ i32 MatrixReflection_CanOverride();
@@ -391,8 +377,6 @@ static u32 CompletionPointInfo_ReCalculate[7];
 
 struct NUGCUTCHAR_s;
 
-extern void (*CutScene_OverrideConfigFileNameFn)(char *, i32, i32);
-
 typedef isize __attribute__((may_alias)) NuGCutWord;
 
 struct instNUGCUTSCENE_s;
@@ -416,25 +400,12 @@ extern "C" {
 extern i32 party_under_cover;
 }
 
-extern "C" void *AIPAthFindPathCnx(AISYS_s *, AIPATH_s *, char *, char *, i32 *);
-
-extern "C" void *AIPAthFindPathCnx(AISYS_s *system, AIPATH_s *path, char *from, char *to, i32 *direction);
-
 extern AIACTIONDEF api_aiactiondefs[55];
 extern AICONDITIONDEF api_aiconditiondefs[50];
 
 DECOMP_ASSERT(sizeof(api_aiactiondefs) == 0x294, "API action registry size");
 
 DECOMP_ASSERT(sizeof(api_aiconditiondefs) == 0x258, "API condition registry size");
-
-extern "C" {
-extern void (*checkantinodefns[3])(APIOBJECT *, AIANTINODE *, NUVEC *, f32);
-    extern void (*checkantinodefns[3])(APIOBJECT_s *, AIANTINODE_s *, NUVEC *, f32);
-}
-
-extern "C" {
-void *AIPAthFindPathCnx(AISYS_s *system, AIPATH_s *path, char *from_name, char *to_name, i32 *direction);
-} // extern "C"
 
 struct AIPATH_s;
 struct eduimenu_s;
@@ -466,27 +437,6 @@ extern i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
 
 struct AISYS_s;
 struct nufpar_s;
-
-extern "C" {
-    extern "C++" void DebrisProcessSpheres(uv1deb *, f32, debinftype *, debkeydatatype_s *, i32);
-}
-
-extern "C" {
-extern "C++" TERRAIN_TRACK_SLOT *AllocTerrId();
-} // extern "C"
-
-extern "C" {
-void *AIPAthFindPathCnx(AISYS_s *system, AIPATH_s *path, char *from_name, char *to_name, i32 *direction);
-
-}
-
-extern "C" {
-    extern "C++" void DebrisProcessSpheres(uv1deb *, f32, debinftype *, debkeydatatype_s *, i32);
-}
-
-extern "C" {
-extern "C++" TERRAIN_TRACK_SLOT *AllocTerrId();
-} // extern "C"
 
 #if defined(__SSE__)
 #include <xmmintrin.h>
@@ -603,20 +553,7 @@ __attribute__((force_align_arg_pointer)) static __used__ i32 eduicbRenderCheck(e
 
 extern f32 HUB_EPISODETITLEY;
 extern i16 tSELECT, tSELECTED, tSELECTING;
-extern "C" void SmartText(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
-                          u8 green, u8 blue, f32 max_width, i32 max_lines);
 extern i16 tOUTOFTIME;
-
-extern void (*drawslotinfofn)(f32, f32, i32, i32);
-extern void (*drawslotsfn)(MENU *, f32);
-
-void MenuInitialiseEx(MENUFNINFO *menu_info, i32 menu_id_count, i32 language_count,
-                      void (*draw_save_slots_info_fn)(f32, f32, i32, i32), i32 is_fade_enabled, i32 is_shadow_enabled);
-
-void MenuInitialise(MENUFNINFO *menu_info, i32 menu_id_count, i32 language_count,
-                    void (*draw_save_slots_fn)(MENU *, f32), i32 is_fade_enabled, i32 is_shadow_enabled);
-
-void NuPadRecordEndFrame(void);                      // nupad_interface.cpp
 
 extern "C" {
     extern "C++" {
@@ -659,21 +596,6 @@ extern i16 id_GAMORREANGUARD;
 
 extern "C" i16 id_LANDSPEEDER;
 extern i32 CUTCAMONLY, GUNSHIPAHACK, netcamera, complexsockposition_forcesock, movegamecamera_forcesock;
-GameObject_s *FindNearestGameObject(NUVEC *, GameObject_s *, u32, f32, f32, i32, i32, i32, f32 *, i32,
-                                    i32 (*)(GameObject_s *), bool);
-
-extern void (*FS_Callback)(char *, char *);
-
-extern "C" void StartFileSel(char *title, char *path, char *filter, char *filter_out,
-                             void (*callback)(char *, char *));
-
-extern "C" {
-extern "C" void StartFileSel(char *title, char *path, char *filter, char *filter_out,
-                             void (*callback)(char *, char *));
-
-}
-
-void NuPadRecordEndFrame(void);                      // nupad_interface.cpp
 
 extern "C" {
     extern "C++" {
@@ -708,24 +630,6 @@ extern "C" {
     extern "C++" FadeSystem FadeSys;
 }
 
-void SaveSystemInitialise(i32 slots, void *makeSaveHash, void *save, i32 saveSize, i32 saveCount,
-                          void (*drawSaveIcon)(void), void *extradata, i32 extradataSize);
-
-extern "C" {
-void SmartText(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
-                   u8 green, u8 blue, f32 max_width, i32 max_lines);
-void TextRegisterButtonMapFn(void (*fn)(char *, char *));
-void TextRegisterPulseTimerFn(f32 (*fn)(f32));
-}
-
-extern "C" {
-    extern "C++" void DebrisProcessSpheres(uv1deb *, f32, debinftype *, debkeydatatype_s *, i32);
-}
-
-extern "C" {
-extern "C++" TERRAIN_TRACK_SLOT *AllocTerrId();
-} // extern "C"
-
 #if defined(__SSE__)
 #include <xmmintrin.h>
 #endif
@@ -748,8 +652,6 @@ __attribute__((force_align_arg_pointer)) static __used__ i32 eduicbRenderCheck(e
                                                                                    i32 x, i32 y, i32 width, i32);
 }
 
-void NuPadRecordEndFrame(void);                      // nupad_interface.cpp
-
 extern "C" {
     extern "C++" {
         static __attribute__((noinline, noclone)) void
@@ -771,14 +673,6 @@ extern "C" {
 } // extern "C"
 
 extern "C" {
-extern "C" void StartFileSel(char *title, char *path, char *filter, char *filter_out,
-                             void (*callback)(char *, char *));
-
-}
-
-void NuPadRecordEndFrame(void);                      // nupad_interface.cpp
-
-extern "C" {
     extern "C++" {
         static __attribute__((noinline, noclone)) void
         DisplayListProcessSkin(NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry, NUDISPLAYLISTITEM **first_and_last,
@@ -797,19 +691,6 @@ extern "C" {
 
 #include "nu2api/nucore/nucore_plain_types.h"
 } // extern "C"
-
-extern "C" {
-void TextRegisterButtonMapFn(void (*fn)(char *, char *));
-
-void TextRegisterPulseTimerFn(f32 (*fn)(f32));
-
-}
-
-extern "C" {
-void SmartText(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
-                   u8 green, u8 blue, f32 max_width, i32 max_lines);
-
-}
 
 extern i16 tCHALLENGECOMPLETE, tMINIKIT;
 extern i16 tOUTOFTIME, tYOUDIDNTCOLLECTALL10CANISTERS, tSTORYCLIPSUNLOCKED;
@@ -890,13 +771,6 @@ extern i32 party_under_cover;
 }
 
 extern "C" {
-extern void *(*DefragCreateInstFn)(void *, NUGCUTSCENE_s *, VARIPTR *);
-
-}
-
-void NuPadRecordEndFrame(void);                      // nupad_interface.cpp
-
-extern "C" {
     extern "C++" {
         static __attribute__((noinline, noclone)) void
         DisplayListProcessSkin(NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry, NUDISPLAYLISTITEM **first_and_last,
@@ -918,33 +792,12 @@ extern "C" {
 
 extern i16 id_GAMORREANGUARD, id_PRINCESSLEIASLAVE, id_LAMASU, id_TAUNWE;
 
-i32 GizmoFileReadGameAnimSet(GAMEANIMSET_s *set, void *world_ptr,
-                             void (*read_object_data)(GAMEANIMOBJ_s *, unsigned char), unsigned char version,
-                             char *prefix, char *suffix);
-
 extern "C" {
-extern void (*checkantinodefns[3])(APIOBJECT *, AIANTINODE *, NUVEC *, f32);
-    extern void (*checkantinodefns[3])(APIOBJECT_s *, AIANTINODE_s *, NUVEC *, f32);
-}
-
-extern "C" {
-void *AIPAthFindPathCnx(AISYS_s *system, AIPATH_s *path, char *from_name, char *to_name, i32 *direction);
 
 #include "legoapi/ai/core/ai_sys_stubs_types.h"
 } // extern "C"
 
-// Callback storage is declared in reverse linked-BSS order because the
-// original GCC 4.7 -O3 object emits these definitions in reverse source order.
-extern "C" {
-void NuSetCutSceneDestroyCharactersFn(void (*callback)(NUGCUTSCENE_s *));
-} // extern "C"
-
 extern i16 tEPISODEVUNLOCKED, tEPISODEVIUNLOCKED, tCHALLENGECOMPLETE, tOUTOFTIME;
-
-extern "C" {
-void NuSetCutSceneDestroyCharactersFn(void (*callback)(NUGCUTSCENE_s *));
-
-}
 
 static NUVEC PodRaceADiePos = {350.0f, 0.25f, -15.0f};
 static NUVEC PodRaceBDiePos = {138.0f, 0.15f, 178.0f};
@@ -952,9 +805,6 @@ static NUVEC PodRaceCDiePos = {140.0f, -7.2f, 52.0f};
 static NUVEC GunshipADiePos = {10.0f, -1.0f, -20.0f};
 static NUVEC GunshipBDiePos = {0.0f, -1.0f, -150.0f};
 static NUVEC PodAvalanchePeakPos = {-110.0f, -10.0f, -455.0f};
-
-__attribute__((force_align_arg_pointer)) void Bolt_AddDeflectedBolt(BOLT_s *bolt, nuvec_s *direction, nuvec_s *normal,
-                                                                    unsigned char *processed);
 
 static __used__ void LC_BL_max_attractos(nufpar_s *fp);
 static __used__ void LC_BL_max_bombgen_objects(nufpar_s *fp);

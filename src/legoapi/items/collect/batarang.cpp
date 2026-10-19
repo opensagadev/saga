@@ -26,11 +26,10 @@
 #include <string.h>
 #include "legoapi/items/collect/detonator.h"
 #include "legoapi/items/objects/game_obj.h"
+#include "legoapi/gizmo/object/gizmoblowups.h"
 
 extern BATARANG_s Batarang[8];
 extern i16 id_CATWOMAN;
-
-i32 GizmoBlowupBlowup(GIZMOBLOWUP_s *, i32, i32, i32, GameObject_s *, i32);
 
 static unsigned int Batarang_GetTargetPos(BATARANG_s *batarang, int index, nuvec_s *position) {
     if (batarang->field_0x7d != 0 && batarang->active != 0 && batarang->active == index) {
@@ -579,7 +578,7 @@ void Batarang_MoveCode(GameObject_s *object) {
         }
         if (!(object->pad_gamepad->input_magnitude > 0.0f)) {
             object->context_animation_timer -= FRAMETIME;
-            if (0.0f < object->context_animation_timer) {
+            if (!(object->context_animation_timer <= 0.0f)) {
                 return;
             }
             if ((object->pad_gamepad->buttons_held & GAMEPAD_ACTION) != 0) {
@@ -640,7 +639,7 @@ void Batarang_MoveCode(GameObject_s *object) {
                 object->context_animation_timer += FRAMETIME;
                 f32 x = pad->input_direction_z * 1.25f;
                 f32 y = 1.25f * pad->input_direction_x;
-                if (object->context_animation_timer < 0.25f) {
+                if (!(object->context_animation_timer >= 0.25f)) {
                     const f32 ramp = object->context_animation_timer * 4.0f;
                     x *= ramp;
                     y *= ramp;

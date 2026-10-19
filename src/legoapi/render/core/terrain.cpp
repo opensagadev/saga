@@ -221,8 +221,6 @@ extern i32 Grass_Available;
 
 #undef TERRAIN_SCALE_SCAN_SHAPE
 
-i32 TerrainBlockOnBlock(WORLDINFO_s *world, pushblock_s *block, nuvec_s *points, float *heights);
-
 #undef TERRAIN_GET_SCAN_BOUNDS
 
 namespace {

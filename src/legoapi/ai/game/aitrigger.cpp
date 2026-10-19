@@ -3,6 +3,8 @@
 #include "nu2api/nu3d/nutex.h"
 #include "legoapi/world/world.h"
 #include "gameapi/ai/aisys/aisys.h"
+#include "legoapi/ai/core/gameai.h"
+#include "legoapi/ai/game/aitrigger.h"
 #include "legoapi/gizmo/base/gizmo.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/gizmos/object/lever.h"
@@ -33,8 +35,6 @@ void AITriggerSetSysReset(AITRIGGERSETSYS_s *system) {
     }
 }
 
-extern "C" void *AISysBufferAlloc(VARIPTR *, VARIPTR *, u32);
-
 AITRIGGERSETSYS_s *AITriggerSetSysCreate(VARIPTR *buffer, VARIPTR *buffer_end) {
     AITRIGGERSETSYS_s *system =
         static_cast<AITRIGGERSETSYS_s *>(AISysBufferAlloc(buffer, buffer_end, sizeof(AITRIGGERSETSYS_s)));
@@ -55,9 +55,6 @@ AITRIGGERSET_s *AITriggerSetCreate(AITRIGGERSETSYS_s *system, FLOWBOX_s *box) {
     }
     return NULL;
 }
-
-i32 AITriggerSetAddTrigger(AISYS_s *, AITRIGGERSET_s *, GIZMO_s *);
-void AISysGetPathPos2(AISYS_s *, nuvec_s *, AIPATHINFO_s *, nuvec_s *, AIPATH_s *, i32);
 
 void AITriggerSysAutoSetUp(WORLDINFO_s *world, AITRIGGERSETSYS_s *system) {
     AITRIGGERSET_s *groups[32] = {};
@@ -174,8 +171,6 @@ i32 GameObjectUsingLever(GameObject_s *object, LEVER_s *lever) {
         return object->field_0x788 == lever;
     return 0;
 }
-
-GameObject_s *Grapple_Occupied(GRAPPLE_s *, GameObject_s *, AIPATHCNX_s *);
 
 void AITriggerSetSysProcess(AITRIGGERSETSYS_s *system) {
     if (system == NULL || player == NULL)

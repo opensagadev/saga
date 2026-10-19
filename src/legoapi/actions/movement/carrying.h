@@ -17,3 +17,7 @@ void SuperCarry_Release(GameObject_s *object);
 i32 SuperCarry_SetTargetMom(GameObject_s *object, f32 input_speed);
 i32 SuperCarry_YRotation(GameObject_s *object, u16 input_angle);
 i32 SuperCarry_Carrying(GameObject_s *object);
+
+// Declared here for the other units that use them.
+struct GameObject_s;
+extern u32 (*CanSuperCarryFn)(GameObject_s *);

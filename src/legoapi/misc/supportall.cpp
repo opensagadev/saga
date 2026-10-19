@@ -55,6 +55,7 @@
 #include "nu2api/nu3d/nuportal.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/nucore/nuhgobj.h"
+#include "legoapi/items/objects/gameobjects.h"
 
 MemoryManager theMemoryManager;
 BIGBUFFER_s BigBuffer;
@@ -100,7 +101,7 @@ void CloakMovement(GameObject_s *object) {
     high_weight = 0.0f;
     phase = phase - (FRAMETIME + FRAMETIME);
     low_weight = 1.0f;
-    if (0.0f <= phase) {
+    if (!(phase < 0.0f)) {
         high_weight = phase * phase;
         low_weight = 1.0f - high_weight;
     }
@@ -161,11 +162,6 @@ inline void ThingManager::operator delete(void *thing, usize size) {
 
 static eduimenu_s *edTimingMenu;
 static u32 EdAttr[] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
-
-GameObject_s *FindNearestGameObject(NUVEC *position, GameObject_s *exclude, u32 required_flags, f32 radius,
-                                    f32 extra_radius, i32 animation, i32 character_id, i32 player_index,
-                                    f32 *distance_squared, i32 horizontal_only, i32 (*filter)(GameObject_s *),
-                                    bool first_match);
 
 // BaseThing defaults @0x424bf0 (dtor) and 0x425990..0x425a20 (interface
 // defaults); RemoveDependancies returns 1, the rest are no-ops. GetName holds

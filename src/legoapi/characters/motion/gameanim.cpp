@@ -1408,7 +1408,6 @@ void GameAnimSet_DrawReflection(GAMEANIMSET_s *set, i32 axis, float offset, numt
         if ((object->flags & 2) == 0) {
             if (NuSpecialGetVisibilityFn(&object->special) != 0) {
                 NUMTX_ALIGNED16 reflection;
-                extern i32 MatrixReflection(NUMTX *, i32, f32, f32, NUMTX *);
                 NUMTX *draw_matrix = NuSpecialGetDrawMtx(&object->special);
                 if (MatrixReflection(draw_matrix, axis, plane, WORLD->current_level->unknown_0cc, &reflection) != 0) {
                     NuSpecialDrawAt(&object->special, &reflection);

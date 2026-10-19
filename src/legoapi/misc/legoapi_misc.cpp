@@ -8,6 +8,7 @@
 #include "nu2api/numath/nuvec.h"
 #include <math.h>
 #include <string.h>
+#include "legoapi/core/input/gamepads.h"
 
 extern "C" {
     extern i32 CutSceneWaiting;
@@ -21,8 +22,6 @@ void CatIToX(char *output, i32 value) {
         ++output;
     *IToX(output, value) = '\0';
 }
-
-void DoInput(WORLDINFO_s *world);
 
 void CatI64ToX(char *output, i64 value) {
     while (*output != '\0')

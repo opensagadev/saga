@@ -35,6 +35,7 @@
 #include "nu2api/nu3d/numtl.h"
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/nurendercontext.h"
+#include "nu2api/nu3d/nurendercontext_inline.h"
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/nushader.h"
 #include "nu2api/nu3d/nupostshaderparams.h"
@@ -456,7 +457,7 @@ nushaderprogram_s *NuPostFilterGen::blurGuardProgram;
 
 static inline void PostRegisterPort(NuPostDataPort &port, NuDataPortManager &manager, const char *name) {
     if (port.index >= 0)
-        --port.manager->entries[port.index].references;
+        --port.manager->getEntry(port.index).references;
     port.manager = &manager;
     port.index = manager.registerPort(name, NULL);
 }
@@ -728,7 +729,7 @@ static NUFRUSTRUM *copyFrustrum(NUFRUSTRUM *source, i16 room_id) {
     return copy;
 }
 
-static __used__ void roomRecursive(NUGSCN *scene, NUFRUSTRUM *frustum, i16 room_id, i16 previous_room, i32 depth);
+static void roomRecursive(NUGSCN *scene, NUFRUSTRUM *frustum, i16 room_id, i16 previous_room, i32 depth);
 static NUVEC *override_campos;
 static NUPLANE near_clip_plane;
 
@@ -3985,9 +3986,11 @@ extern "C" void NuPostEffectRender(nuframebuffer_s *output) {
     NuPostFilterGen::portDepthBuffer.set(&proxyDepthBuffer);
     NuPostFilterGen *filters[5];
     i32 count = 0;
-    if (speedBlurFilter != NULL && speedBlurFilter->isEnabled()) {
-        filters[count++] = speedBlurFilter;
-        NuFramebufferAttachTex2D(speedBlurFilter->getInputFbo(), 0, color, 0);
+    if (speedBlurFilter != NULL) {
+        if (speedBlurFilter->isEnabled()) {
+            filters[count++] = speedBlurFilter;
+            NuFramebufferAttachTex2D(speedBlurFilter->getInputFbo(), 0, color, 0);
+        }
     }
     if (deferredFilter != NULL) {
         if (deferredFilter->isEnabled()) {
@@ -3995,9 +3998,11 @@ extern "C" void NuPostEffectRender(nuframebuffer_s *output) {
             NuFramebufferAttachTex2D(deferredFilter->getInputFbo(), 0, color, 0);
         }
     }
-    if (mainFilter != NULL && mainFilter->isEnabled()) {
-        filters[count++] = mainFilter;
-        NuFramebufferAttachTex2D(mainFilter->getInputFbo(), 0, color, 0);
+    if (mainFilter != NULL) {
+        if (mainFilter->isEnabled()) {
+            filters[count++] = mainFilter;
+            NuFramebufferAttachTex2D(mainFilter->getInputFbo(), 0, color, 0);
+        }
     }
     if (motionFilter != NULL) {
         if (motionFilter->isEnabled()) {
@@ -13525,14 +13530,14 @@ extern "C" void BuildCamSpaceClipPlanes(void) {
     f32 x_inv = 1.0f / NuFsqrt(x * x + near_sq);
     f32 y_inv = 1.0f / NuFsqrt(y * y + near_sq);
     NuMtxSetZero(&CamSpaceFrustrumPlanes);
-    CamSpaceFrustrumPlanes.m00 = -near_dist * x_inv;
-    CamSpaceFrustrumPlanes.m01 = -CamSpaceFrustrumPlanes.m00;
-    CamSpaceFrustrumPlanes.m20 = -x * x_inv;
-    CamSpaceFrustrumPlanes.m21 = CamSpaceFrustrumPlanes.m20;
-    CamSpaceFrustrumPlanes.m22 = -y * y_inv;
-    CamSpaceFrustrumPlanes.m23 = CamSpaceFrustrumPlanes.m22;
     CamSpaceFrustrumPlanes.m12 = near_dist * y_inv;
     CamSpaceFrustrumPlanes.m13 = -CamSpaceFrustrumPlanes.m12;
+    CamSpaceFrustrumPlanes.m22 = -y * y_inv;
+    CamSpaceFrustrumPlanes.m23 = CamSpaceFrustrumPlanes.m22;
+    CamSpaceFrustrumPlanes.m20 = -x * x_inv;
+    CamSpaceFrustrumPlanes.m21 = CamSpaceFrustrumPlanes.m20;
+    CamSpaceFrustrumPlanes.m00 = -near_dist * x_inv;
+    CamSpaceFrustrumPlanes.m01 = -CamSpaceFrustrumPlanes.m00;
     x = zxs * near_dist;
     y = zys * near_dist;
     x_inv = 1.0f / NuFsqrt(x * x + near_sq);
@@ -15359,7 +15364,7 @@ static void drawClippedPortal(NUPORTAL *portal, NUPLANE **planes, u8 *plane_coun
     NuCameraRelock();
 }
 
-static __used__ void roomRecursive(NUGSCN *scene, NUFRUSTRUM *frustum, i16 room_id, i16 previous_room, i32 depth) {
+static void roomRecursive(NUGSCN *scene, NUFRUSTRUM *frustum, i16 room_id, i16 previous_room, i32 depth) {
     if (depth >= 2) {
         for (i32 i = 0; i < depth - 1; ++i) {
             if (__builtin_expect(rooms_visited[i] != room_id, 0)) {
@@ -16624,10 +16629,10 @@ void NuLgtArcLaserEx(i32 type, NUVEC *start, NUVEC *end, NUVEC *bend, f32 width,
     u32 alpha = ((u32)colour >> 24) * 2;
     if (red > 255)
         red = 255;
-    if (green > 0xff00)
-        green = 0xff00;
     if (blue > 255)
         blue = 255;
+    if (green > 0xff00)
+        green = 0xff00;
     if (alpha > 255)
         alpha = 255;
     NuLgtArcLaserData[index].colour = (blue | (red << 16)) | (green | (alpha << 24));
@@ -16674,7 +16679,7 @@ void NuDisplayListCreate(nudisplayscene_s *raw_scene, variptr_u *buffer, variptr
         NUMTL *materials = reinterpret_cast<NUMTL *>(ALIGN(buffer->addr, 0x10));
         buffer->addr = reinterpret_cast<usize>(materials + material_count);
         for (i32 i = 0; i < material_count; ++i) {
-            scene->mtls[i] = &materials[i];
+            scene->mtls[i] = materials++;
         }
     }
 
@@ -18313,12 +18318,7 @@ void NuDynamicLight::renderShadowMap(i32 index, nuframebuffer_s *) {
         item->type = 0x84;
         item->id = 4;
         item->next = NULL;
-        if (g_renderContext_zFunc != 0) {
-            glEnable(0xb71);
-            glDepthMask(1);
-            glDepthFunc(0x203);
-        }
-        g_renderContext_zFunc = 0;
+        NuRenderContextSetZFunc_inline(0);
         memcpy(g_renderContext_kTint, nuvec4_one, sizeof(g_renderContext_kTint));
         NuShaderManagerSetfv(0x44, nuvec4_one);
         NuDisplayListDrawItems(set.display_lists[0].first);
@@ -18329,12 +18329,7 @@ void NuDynamicLight::renderShadowMap(i32 index, nuframebuffer_s *) {
         item->type = 0x84;
         item->id = 4;
         item->next = NULL;
-        if (g_renderContext_zFunc != 0) {
-            glEnable(0xb71);
-            glDepthMask(1);
-            glDepthFunc(0x203);
-        }
-        g_renderContext_zFunc = 0;
+        NuRenderContextSetZFunc_inline(0);
         memcpy(g_renderContext_kTint, nuvec4_one, sizeof(g_renderContext_kTint));
         NuShaderManagerSetfv(0x44, nuvec4_one);
         NuDisplayListDrawItems(set.display_lists[1].first);
@@ -18767,13 +18762,13 @@ void DisplayListCreateDynMtlList(variptr_u *buffer, variptr_u buffer_end) {
     scene->nsort_pris = 0;
     scene->name = const_cast<char *>("Dynamic Material Display Scene");
 
+    NUDISPLAYLIST **display_lists = scene->dlist_mtls;
     NUDISPLAYLISTITEM *material_item = scene->items;
     for (i32 i = 0; i < 0x80; ++i) {
-        NUDISPLAYLIST *display_list = scene->dlist_mtls[i];
-        display_list->mtl_item = material_item;
-        display_list->dyn_geom = material_item + 6;
-        display_list->dlist = scene;
-        display_list->mtl_id = i;
+        display_lists[i]->mtl_item = material_item;
+        display_lists[i]->dyn_geom = material_item + 6;
+        display_lists[i]->dlist = scene;
+        display_lists[i]->mtl_id = i;
         material_item += 8;
     }
 
@@ -19581,8 +19576,8 @@ static void OccluderSetInitMaterials() {
     desc2d.vtx_desc.has_position = 1;
     desc2d.vtx_desc.has_no_transform = 1;
     NuMtlSetShaderDescPS(OccluderSet::ms_pZOnlyMtl2D, &desc2d);
-    OccluderSet::ms_pZOnlyMtl2D->attribs.alpha_mode = 13;
     OccluderSet::ms_pZOnlyMtl2D->attribs.cull_mode = 2;
+    OccluderSet::ms_pZOnlyMtl2D->attribs.alpha_mode = 13;
     OccluderSet::ms_pZOnlyMtl2D->attribs.z_mode = 0;
     OccluderSet::ms_pZOnlyMtl2D->attribs.unknown_2_8 = 0;
     NuMtlUpdate(OccluderSet::ms_pZOnlyMtl2D);
@@ -19591,13 +19586,13 @@ static void OccluderSetInitMaterials() {
     desc3d.flags = 0x1000;
     desc3d.vtx_desc.has_position = 1;
     NuMtlSetShaderDescPS(OccluderSet::ms_pZOnlyMtl3D, &desc3d);
-    OccluderSet::ms_pZOnlyMtl3D->attribs.alpha_mode = 13;
     OccluderSet::ms_pZOnlyMtl3D->attribs.cull_mode = 2;
+    OccluderSet::ms_pZOnlyMtl3D->attribs.alpha_mode = 13;
     OccluderSet::ms_pZOnlyMtl3D->attribs.z_mode = 0;
     OccluderSet::ms_pZOnlyMtl3D->attribs.unknown_2_8 = 0;
     NuMtlUpdate(OccluderSet::ms_pZOnlyMtl3D);
-    OccluderSet::ms_pAlphaMtl2D->attribs.alpha_mode = 1;
     OccluderSet::ms_pAlphaMtl2D->attribs.cull_mode = 2;
+    OccluderSet::ms_pAlphaMtl2D->attribs.alpha_mode = 1;
     OccluderSet::ms_pAlphaMtl2D->attribs.z_mode = 1;
     NuMtlUpdate(OccluderSet::ms_pAlphaMtl2D);
 }

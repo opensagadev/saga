@@ -15,16 +15,19 @@ struct NuDataPortManager {
     ~NuDataPortManager() {
     }
     i32 registerPort(char const *name, void *data);
+    Entry &getEntry(i32 index) {
+        return entries[index];
+    }
 };
 
 struct NuPostDataPort {
     i32 index;
     NuDataPortManager *manager;
     void *get() const {
-        return manager->entries[index].data;
+        return manager->getEntry(index).data;
     }
     void set(void *data) {
-        manager->entries[index].data = data;
+        manager->getEntry(index).data = data;
     }
 };
 
@@ -35,6 +38,6 @@ template <typename T> struct NuDataPort : NuPostDataPort {
     }
     ~NuDataPort() {
         if (index >= 0)
-            --manager->entries[index].references;
+            --manager->getEntry(index).references;
     }
 };

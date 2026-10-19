@@ -71,6 +71,9 @@
 #include "legoapi/props/system/socksys.h"
 #include "nu2api/nucore/numemory.h"
 #include "gameapi/edtools/gameapi_edtools_types.h"
+#include "legoapi/render/core/terrain.h"
+#include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/core/config/fileselect.h"
 #include "nu2api/nucore/nutime.h"
 #include "nu2api/nufile/nufpar.h"
 #include "nu2api/numusic/sfx.h"
@@ -223,7 +226,6 @@ extern char *apitxt_SAVING;
 extern f32 MENUBOTY;
 
 extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
-extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
 
 extern i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
 
@@ -393,7 +395,6 @@ void SaveSystemInitialise(i32 slots, void *makeSaveHash, void *save, i32 saveSiz
 
 extern i32 memcard_deleteneeded, memcard_deletestarted, memcard_deletefailed;
 extern i32 memcard_formatme, memcard_formatting, memcard_formatfailed;
-extern void (*FS_Callback)(char *, char *);
 
 f32 memcard_autosavecanceldelay = 1.5f;
 f32 memcard_createmessage_delay;
@@ -402,9 +403,6 @@ f32 memcard_message_delay;
 f32 memcard_result_delay;
 i32 memcard_justformatted;
 i32 saveload_autosavedisabled;
-
-extern "C" void StartFileSel(char *title, char *path, char *filter, char *filter_out,
-                             void (*callback)(char *, char *));
 
 extern "C" {
     void (*savesuccessfn)(void);
@@ -467,14 +465,6 @@ static i32 IsTextBreak(unsigned char *text, i32 index) {
     }
     return 0;
 }
-
-extern "C" {
-    extern "C++" void DebrisProcessSpheres(uv1deb *, f32, debinftype *, debkeydatatype_s *, i32);
-}
-
-extern "C" {
-extern "C++" TERRAIN_TRACK_SLOT *AllocTerrId();
-} // extern "C"
 
 #if defined(__SSE__)
 #include <xmmintrin.h>
@@ -595,8 +585,6 @@ extern i32 memcard_deletefailed;
 extern i32 memcard_formatting;
 extern i32 memcard_formatme;
 extern i32 memcard_formatfailed;
-extern void (*drawslotinfofn)(f32, f32, i32, i32);
-extern void (*drawslotsfn)(MENU *, f32);
 extern u8 RAP_WARNING_B;
 extern u8 RAP_WARNING_G;
 extern u8 RAP_WARNING_R;
@@ -605,8 +593,6 @@ extern "C" {
 extern f32 MENUBOTY;
 extern f32 MENUENTRYEXWIDTH;
 } // extern "C"
-
-void NuPadRecordEndFrame(void);                      // nupad_interface.cpp
 
 extern "C" {
     extern "C++" {
@@ -649,16 +635,6 @@ DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 
 extern "C" i16 id_LANDSPEEDER;
 extern i32 CUTCAMONLY, GUNSHIPAHACK, netcamera, complexsockposition_forcesock, movegamecamera_forcesock;
-GameObject_s *FindNearestGameObject(NUVEC *, GameObject_s *, u32, f32, f32, i32, i32, i32, f32 *, i32,
-                                    i32 (*)(GameObject_s *), bool);
-
-extern "C" {
-extern "C" void StartFileSel(char *title, char *path, char *filter, char *filter_out,
-                             void (*callback)(char *, char *));
-
-}
-
-void NuPadRecordEndFrame(void);                      // nupad_interface.cpp
 
 extern "C" {
     extern "C++" {

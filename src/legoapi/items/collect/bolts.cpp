@@ -50,6 +50,8 @@
 #include "legoapi/items/objects/game_obj.h"
 #include "legoapi/misc/utilities.h"
 #include "legoapi/render/core/gameliball.h"
+#include "legoapi/audio/audio.h"
+#include "legoapi/audio/sfx.h"
 
 static void Bolt_Debris_Default(BOLT_s *, NUVEC *, i32, NUVEC *, i32);
 static void Bolt_GetShootOrigin_Default(GameObject_s *, NUVEC *);
@@ -126,18 +128,9 @@ static NUFPCOMJMP BoltType_ConfigKeywords[] = {
 };
 
 f32 BOLT_SHOOTFLASHTIME = 0.1f;
-void FindAnglesXY(NUVEC *, u16 *, u16 *);
-void CalculateInterceptVector(NUVEC *, NUVEC *, NUVEC *, f32, NUVEC *, NUVEC *);
-void GameAudio_PlaySfxById(i32, NUVEC *, i32, i32);
-
-i32 MatrixReflectionVU0_AXISY(NUMTX *, f32, f32, NUMTX *);
-
-i32 SphereSphereOverlapScaleY(NUVEC *, f32, f32, NUVEC *, f32, f32);
-void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 
 i32 addbolt_nosfx;
 BOLT_s *objhitobj_bolt;
-i32 ObjHitObj(GameObject_s *, GameObject_s *, i32, u16, i32, i32);
 
 __attribute__((force_align_arg_pointer)) void Bolt_AddDeflectedBolt(BOLT_s *bolt, nuvec_s *direction, nuvec_s *normal,
                                                                     unsigned char *processed);
@@ -145,8 +138,6 @@ __attribute__((force_align_arg_pointer)) void Bolt_AddDeflectedBolt(BOLT_s *bolt
 static __attribute__((noinline, noclone)) i32 Bolt_HitPlat(BOLT_s *bolt, u8 *hit_flags)
     __asm__("_ZL12Bolt_HitPlatP6BOLT_sPhP11WORLDINFO_s.isra.38");
 
-GIZMOBLOWUP_s *GizmoBlowUp_Hit(GameObject_s *, NUVEC *, i32, f32, NUVEC *, NUVEC *, BOLT_s *, u32, u8 *);
-i32 ObjHitObj_Flags(GameObject_s *);
 i32 addbolt_noobjmom, addbolt_newsfx;
 NUVEC addbolt_newpos;
 i32 (*BoltInitSfxFn)(GameObject_s *);
@@ -154,8 +145,6 @@ i32 (*BoltInitSfxFn)(GameObject_s *);
 static __used__ void Bolt_Debris_Default(BOLT_s *bolt, nuvec_s *points, int point, nuvec_s *, int);
 static __used__ void Bolt_GetShootOrigin_Default(GameObject_s *object, nuvec_s *position);
 static __used__ i32 Bolt_GetShootDirection_Default(GameObject_s *object, nuvec_s *direction);
-
-void FindAnglesZX(NUVEC *, u16 *, u16 *);
 
 static inline i32 Bolt_HitScenery(BOLT_s *bolt, NUVEC *points, u8 *processed, WORLDINFO_s *world) {
     if (GizmoSys_BoltHit(world->gizmo_sys, world, bolt, points, &bolt->bounds_min, &bolt->bounds_max,
@@ -523,11 +512,11 @@ void Bolts_Draw(WORLDINFO_s *world) {
             NuMtxPreScale(&matrix, &scale);
         }
         NuMtxTranslate(&matrix, &bolt->position);
-        i32 first = 0, second = 0;
+        i32 drawn[2] = {0, 0};
         if (NuSpecialExistsFn(type->pad_68))
-            first = NuSpecialDrawAt(type->pad_68, &matrix);
+            drawn[0] = NuSpecialDrawAt(type->pad_68, &matrix);
         if (NuSpecialExistsFn(type->pad_68 + 12))
-            second = NuSpecialDrawAt(type->pad_68 + 12, &matrix);
+            drawn[1] = NuSpecialDrawAt(type->pad_68 + 12, &matrix);
         if (bolt->field_0xe8 != 2000000.0f) {
             NUMTX reflection;
             if (MatrixReflectionVU0_AXISY(&matrix, bolt->field_0xe8, world->current_level->unknown_0cc, &reflection)) {
@@ -547,7 +536,7 @@ void Bolts_Draw(WORLDINFO_s *world) {
             matrix.m32 = bolt->position.z;
             NuSpecialDrawAt(type->pad_68 + 48, &matrix);
         }
-        if (first != 0 || second != 0)
+        if (drawn[0] != 0 || drawn[1] != 0)
             bolt->field_0x102 = 1;
         else if (!Paused && bolt->field_0x102 != 0 && (bolt->flags & 0x20) == 0)
             Bolt_End(bolt, 0);
@@ -564,7 +553,7 @@ BOLTTYPE_s *BoltType_FindByID(i32 id, WORLDINFO_s *world) {
     return NULL;
 }
 
-i8 BoltType_FindIDByName(char *name, WORLDINFO *world) {
+i16 BoltType_FindIDByName(char *name, WORLDINFO *world) {
     if (NuStrLen(name) == 0)
         return -1;
     for (i32 i = 7; i >= 0; --i) {

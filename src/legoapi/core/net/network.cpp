@@ -7,8 +7,8 @@
 #include "nu2api/nucore/nupad.h"
 #include "nu2api/numath/nufloat.h"
 #include <string.h>
+#include "gamelib/util/Refpack.h"
 
-void refpack_init();
 extern EdRegistry theRegistry;
 
 static inline void CloneMessageData(NetMessage &message) {

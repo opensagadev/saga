@@ -19,6 +19,7 @@
 #include "legoapi/items/base/apiobject.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/misc/supportall.h"
 #include "legoapi/misc/utilities.h"
 #include "legoapi/render/core/terrain.h"
 #include "legoapi/world/level.h"
@@ -61,8 +62,6 @@ struct ZIPUPPROGRESS {
 i32 zipup_gizmotype_id = -1;
 static char zipup_outputName[] = "Active";
 static NUVEC ZipUpHookOffset = {0.0f, -0.1143f, -0.0859f};
-
-i32 SuperWeirdo(GameObject_s *);
 
 numtl_s *ropemtl;
 
@@ -143,8 +142,6 @@ static inline void SetRopeVertex(NURND_VERTEX3D *vertex, f32 x, f32 y, f32 z, f3
     vertex->v = v;
     vertex->colour = colour;
 }
-
-i32 SuperWeirdo(GameObject_s *object);
 
 // Each control mode retains its own requested and interpolated hint row.
 
@@ -702,7 +699,7 @@ void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
             PlaySfx("GrapWindLp", &api.collision_position);
             return;
         }
-        if (object->context_animation_timer < 1.5f) {
+        if (!(object->context_animation_timer >= 1.5f)) {
             zipup->runtime_flags |= 2;
             u16 start_angle = NuAtan2D(zipup->rider_start_offset.x, zipup->rider_start_offset.z);
             NUVEC end_offset;

@@ -297,8 +297,6 @@ i64 XToI64(char *input) {
 
 typedef f32 RawClipVec4 __attribute__((vector_size(16), aligned(4)));
 
-i32 findrange(nugscn_s *scene, i32 first_joint);
-
 #if defined(__i386__)
 #define SPLINE_POINT_ANGLES_ATTR __attribute__((noinline, noclone, regparm(2)))
 #else
@@ -898,12 +896,19 @@ void AnglesBetweenPoints(nuvec_s *from, nuvec_s *to, u16 *vertical, u16 *horizon
 
 void CalculateInterceptVector(NUVEC *origin, NUVEC *target, NUVEC *velocity, f32 speed, NUVEC *direction,
                               NUVEC *intercept) {
+    const bool zero_speed = speed == 0.0f;
     NUVEC prediction = *target;
     {
         NuVecSub(direction, &prediction, origin);
         f32 distance = NuVecMag(direction);
+        f32 time = (distance == 0.0f || zero_speed) ? 0.0f : distance / speed;
+        NuVecAddScale(&prediction, target, velocity, time);
+    }
+    {
+        NuVecSub(direction, &prediction, origin);
+        f32 distance = NuVecMag(direction);
         f32 time = distance;
-        if (distance == 0.0f || speed == 0.0f)
+        if (distance == 0.0f || zero_speed)
             time = 0.0f;
         else
             time /= speed;
@@ -913,17 +918,7 @@ void CalculateInterceptVector(NUVEC *origin, NUVEC *target, NUVEC *velocity, f32
         NuVecSub(direction, &prediction, origin);
         f32 distance = NuVecMag(direction);
         f32 time = distance;
-        if (distance == 0.0f || speed == 0.0f)
-            time = 0.0f;
-        else
-            time /= speed;
-        NuVecAddScale(&prediction, target, velocity, time);
-    }
-    {
-        NuVecSub(direction, &prediction, origin);
-        f32 distance = NuVecMag(direction);
-        f32 time = distance;
-        if (distance == 0.0f || speed == 0.0f)
+        if (distance == 0.0f || zero_speed)
             time = 0.0f;
         else
             time /= speed;

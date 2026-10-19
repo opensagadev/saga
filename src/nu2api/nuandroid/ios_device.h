@@ -11,6 +11,7 @@ extern "C" {
     i32 NuIOS_IsLowestEndDevice(void);
     i32 NuIOS_IsMidRangeDevice(void);
     i32 NuIOS_IsSmallScreen(void);
+    void NuIOS_RecordFlurryEvent(char *event_name);
     i64 getCurrentTime(void);
     void NuIOS_DeallocateSystemRenderbuffer(GLuint renderbuffer);
 }

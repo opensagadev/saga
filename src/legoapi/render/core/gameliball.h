@@ -353,6 +353,7 @@ extern "C" {
     void PlaySfxByIdAndSetVolumeAndPitch(i32 sfx_id, nuvec_s *position, f32 volume, f32 pitch);
     void RestoreGameMusic(void);
     void SetPreSeekStartPoint(f32 start_point);
+    void SetSoundBitsById(const i32 *sound_ids, void (*set_bit)(i32));
     void SetSoundVolume(f32);
     void SfxBitsRestore(SoundTable *table);
     void SfxBitsStore(SoundTable *table);

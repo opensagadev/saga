@@ -25,10 +25,9 @@
 #include "legoapi/world/world.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nu3d/nuspecial.h"
-
-void SetEffectVisibility(char *name, i32 visible);
-i32 EffectOffProgress_Update(LEVEL_PROGRESS_s *progress, char *name, i32 visible);
-void PlayRadio(char *special_name, char *blowup_name, i32 play);
+#include "legoapi/audio/radio.h"
+#include "legoapi/render/fx/particles.h"
+#include "legoapi/world/levels/levels.h"
 
 static void GizActions_EnableSock(GIZFLOW_s *, FLOWBOX_s *, char **params, int count) {
     i32 sock_index = -1;

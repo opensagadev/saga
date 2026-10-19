@@ -15,18 +15,14 @@
 #include "gamelib/util/gamelib_util_types.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/render/core/terrain.h"
+#include "legoapi/actions/character/legoapi_tag.h"
+#include "legoapi/actions/movement/climbing.h"
+#include "legoapi/characters/motion/move.h"
+#include "legoapi/gizmos/object/gizpanel.h"
 
 extern i16 id_YODA;
 extern i16 id_YODAGHOST;
 extern i16 id_WATTO;
-void GizPanel_Use(GameObject_s &, GIZPANEL_s &);
-void TakeOver2GetIn(GameObject_s *, GameObject_s *);
-i32 TagCode(GameObject_s *, GameObject_s *, i32, i32, i32);
-void SetForcedAttackOpponent(MechObjectInterface *);
-void SetWeaponOut(GameObject_s *);
-bool FireBountyHunterRocket(GameObject_s *);
-void SetBobaRocketTarget(MechObjectInterface *);
-f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
 extern MechWeakPtr<MechObjectInterface, 4> NextThermalTarget;
 
 f32 s_mechTouchMoveToStuckVel = 0.2f;

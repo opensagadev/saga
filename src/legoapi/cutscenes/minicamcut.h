@@ -84,3 +84,7 @@ struct nugspline_s;
 extern i32 ObstacleCamTargetGuid;
 extern nugspline_s ObstacleCamCutSpline;
 void GameCameraMakeMiniCut(nugspline_s *spline, f32 start, f32 end, f32 blend_in, f32 blend_out, i32 borders, i32 hold_until_players_move);
+void GameCameraMakeMiniCut3(u32 flags, f32 distance, i32 pitch, i32 yaw, i32 roll, void *focus, i32 target_guid,
+                            nuvec_s *position, f32 start_time, f32 blend_in_time, f32 end_time, f32 blend_out_time,
+                            f32 blend_time, f32 hold_time, f32 max_time, i32 borders, nugspline_s *spline, char mode,
+                            char easing);

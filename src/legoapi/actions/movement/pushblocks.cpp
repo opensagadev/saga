@@ -131,8 +131,9 @@
 #include "nu2api/nu3d/android/nutex_ios_ex.h"
 #include "nu2api/nu3d/nuspecial_internal.h"
 #include "nu2api/nu3d/nurendercontext.h"
-
-void AlertSurroundingCreatures(GameObject_s *, NUVEC *);
+#include "legoapi/actions/combat/shovesys.h"
+#include "legoapi/ai/core/gameai.h"
+#include "legoapi/misc/utilities.h"
 
 pushblock_s *BlockInBlock(WORLDINFO_s *, pushblock_s *, i32, pushblock_s **);
 
@@ -140,7 +141,6 @@ u32 (*CanPushBlocksFn)(GameObject_s *) = NULL;
 i32 pushposincrease;
 i32 runoutofpostabspace;
 
-void SetAnimFrame(nuhspecial_s *, f32);
 void ResetPushProgress(WORLDINFO_s *, void *);
 void ResetSinglePushBlockHeight(WORLDINFO_s *, pushblock_s *, i32);
 i32 TerrainBlockOnBlock(WORLDINFO_s *, pushblock_s *, NUVEC *, f32 *);
@@ -179,7 +179,6 @@ extern i32 LEGOHINT_PUSHBLOCKS;
 static NUVEC hothbtestpos = {29.0f, 0.0f, 13.0f};
 i32 SnapPosTaken(WORLDINFO_s *, pushblock_s *, NUVEC *, i32);
 i32 OtherBlockInRange(WORLDINFO_s *, pushblock_s *, NUVEC *, i32);
-void AddShoveObject(nuhspecial_s *, i16);
 void UpdatePushBlocks(void *world_ptr, void *, float);
 
 i32 GizPush_GetNumOutputs(GIZMO *gizmo);
@@ -192,18 +191,11 @@ i32 GizPush_GetOutput(GIZMO *gizmo, i32 output_index, i32);
 
 void ResetPushProgress(WORLDINFO_s *world, void *progress_data);
 
-void AlertSurroundingCreatures(GameObject_s *object, NUVEC *position);
-
-i32 PodLevel(AREADATA_s *);
 extern "C" i16 id_DODGEM;
-
-i32 PodLevel(AREADATA_s *area);
 
 extern i32 LevFlag[4];
 
 extern "C" i16 id_LANDSPEEDER;
-
-extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 
 extern "C" {
     extern i16 id_MINIATST, id_MINIATTE;
@@ -212,11 +204,6 @@ extern "C" {
 extern i16 id_MINIATST, id_MINIATTE;
 
 extern AILOCATOR_s * locator;
-
-extern "C" {
-    void PlaySfxById(i32, NUVEC *);
-
-}
 
 extern "C" {
     extern i16 id_LANDSPEEDER;
@@ -249,8 +236,6 @@ extern "C" {
     extern i16 id_LANDSPEEDER;
 }
 
-void AlertSurroundingCreatures(GameObject_s *object, nuvec_s *position);
-
 struct nuhspecial_s;
 struct nuvec_s;
 
@@ -279,15 +264,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 }
 
-i32 Action_ReleaseLocator(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
-                          i32 first_time, float);
-
-i32 Action_GetLocatorFromSet(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,
-                             i32 param_count, i32 first_time, float);
-
-i32 Action_AssignLocatorInSet(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
-                              i32 first_time, float);
-
 struct AIPACKET_s;
 struct AISYS_s;
 
@@ -310,11 +286,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 }
 
 pushblock_s *BlockInBlock(WORLDINFO_s *world, pushblock_s *block, i32 excluded, pushblock_s **support);
-
-extern "C" {
-    void PlaySfxById(i32, NUVEC *);
-
-}
 
 static __used__ __attribute__((noclone)) void eduiFntPrintExGeneric(void *font, int x, int y,
                                                                                 int alignment, char *format, ...)
@@ -353,7 +324,6 @@ static void eduiFntPrintExLeft(void *font, int x, int y, int, char *format, ...)
 static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ...);
 
 extern EdInputContext * Input;
-extern "C" void PlaySfxById(i32, nuvec_s *);
 
 inline EdMatrixControl::~EdMatrixControl() {
     Destroy();
@@ -470,11 +440,6 @@ extern "C" {
 i32 SnapPosTaken(WORLDINFO_s *world, pushblock_s *, nuvec_s *position, i32 excluded_index);
 
 extern "C" {
-    void PlaySfxById(i32, NUVEC *);
-
-}
-
-extern "C" {
     extern i16 id_LANDSPEEDER;
 }
 
@@ -516,8 +481,6 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 struct pushblock_s;
 
 i32 TerrainBlockOnBlock(WORLDINFO_s *world, pushblock_s *block, nuvec_s *points, float *heights);
-
-void NewScanRot(nuvec_s *position, i32 terrain_mask);
 
 // Original 0x378fb0: the optimized rotating scan shares the terrain engine state.
 
@@ -992,7 +955,7 @@ pushblock_s *NearestFacingPushBlock(WORLDINFO_s *world, GameObject_s *object, fl
     mode0_geometry: {
         f32 block_min_z = min_z + pos->z - 0.01f;
         f32 block_max_z = pos->z + max_z - 0.01f;
-        if (block_min_z >= object->apiobj.collision_position.z)
+        if (!(block_min_z < object->apiobj.collision_position.z))
             continue;
         if (object->apiobj.collision_position.z >= block_max_z)
             continue;
@@ -1062,9 +1025,9 @@ pushblock_s *NearestFacingPushBlock(WORLDINFO_s *world, GameObject_s *object, fl
         if ((u16)pitch_diff > 0x4000)
             continue;
         f32 dist2 = dx * dx + dz * dz;
-        if (range <= dist2)
+        if (!(range > dist2))
             continue;
-        if (nearest_dist <= dist2)
+        if (!(nearest_dist > dist2))
             continue;
         nearest_dist = dist2;
         nearest = block;
@@ -1418,7 +1381,7 @@ void UpdatePushBlocks(void *world_ptr, void *, float) {
             continue;
         if (__builtin_expect(!!(p->snap_positions), 1)) {
             if (p->runtime_flags_0c9 & 2) {
-                if (p->snap_timer <= snap_time) {
+                if (!(p->snap_timer > snap_time)) {
                     f32 fraction = NU_SIN_LUT((i32)((p->snap_timer / snap_time) * 16384.0f + 49152.0f + 16384.0f));
                     i32 ix = (p->packed_state_flags >> 15) & 7;
                     p->position->x = p->snap_origin.x + (p->snap_positions[ix].x - p->snap_origin.x) * fraction;

@@ -140,7 +140,7 @@ static void GizTurrets_Update(void *context, void *system_ptr, float frame_time)
                                 base_yaw = static_cast<i16>(home_yaw);
                             }
                             turret->fire_cooldown -= frame_time;
-                            if (turret->fire_cooldown < 0.0f)
+                            if (!(turret->fire_cooldown >= 0.0f))
                                 turret->fire_cooldown = 0.0f;
                             i32 desired_pitch = 0, desired_yaw = base_yaw;
                             should_fire = false;
@@ -658,7 +658,7 @@ static i32 *GizTurrets_GetBestBoltTarget(GIZMOSET *set, float *result_distance, 
         u16 angle;
         if (target_dist_near2 > distance && directional != 0) {
             angle = target_deg_near;
-        } else if (target_dist_mid2 > distance) {
+        } else if (!(target_dist_mid2 <= distance)) {
             angle = target_deg_mid;
         } else {
             angle = target_deg_far;

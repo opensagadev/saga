@@ -10,6 +10,5 @@
 #include "legoapi/legoapi_types.h"
 
 #include <stdio.h>
-
-void IncreaseScore(u32 *total, u64 amount, i32 apply_multiplier);
+#include "legoapi/misc/utilities.h"
 

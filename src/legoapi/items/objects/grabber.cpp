@@ -35,6 +35,13 @@
 #include "nu2api/nu3d/nurndr.h"
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/items/fx/explosions.h"
+#include "legoapi/audio/sfx.h"
+#include "legoapi/core/input/qrand.h"
+#include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/menus/core/gamehint.h"
+#include "legoapi/misc/utilities.h"
+#include "legoapi/render/fx/parts.h"
+#include "legoapi/render/light/shadow.h"
 
 GRABBER_s *Grab_grabber;
 
@@ -53,43 +60,19 @@ static NUFPCOMJMP Grabber_ConfigKeywords[] = {
     {"invert_x", Grab_invert_x}, {"shadow", Grab_shadow},   {NULL, NULL}};
 
 extern "C++" float FRAMETIME;
-extern "C" {
-    struct nuvec_s;
-    void PlaySfx(char *, nuvec_s *);
-}
 
 // Static grabber victim-pos helper. Moved from gizmisc_stubs.cpp.
 
 extern ADDPART_s Default_ADDPART;
-extern "C" PART_s *AddPart(ADDPART_s *);
 // Retail only has the IPA-SRA clone of this function.
 static __attribute__((noinline, noclone)) void Grabber_Drop(GRABBER_s *grabber, NUVEC *previous_position)
     __asm__("_ZL12Grabber_DropP9GRABBER_sP7nuvec_s.isra.4");
 
-extern "C" {
-    void PlaySfxAndSetPitch(char *, NUVEC *, f32);
-}
 // ===========================================================================
 // Episode bookkeeping
 // ===========================================================================
 
-GameObject_s *FindGameObject(i32, u32, i32, i32, i32);
-GameObject_s *FindNearestGameObject(NUVEC *, GameObject_s *, u32, f32, f32, i32, i32, i32, f32 *, i32,
-                                    i32 (*)(GameObject_s *), bool);
-u16 GamePad_InputAngle(GameObject_s *, GAMEPAD_s *);
-f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
-void FindAnglesZX(NUVEC *, u16 *, u16 *);
-i32 qrand();
-void NewRumbleAllPlayers(f32, f32, i32, i32);
-void Hint_SetComplete(i32);
-GIZMOBLOWUP_s *FindNearestGizmoBlowUp(WORLDINFO_s *, NUVEC *, f32);
-
 extern i32 obstacle_gizmotype_id;
-
-void EnableShadowMapRendering(i32);
-void ResetShadowMapRendering();
-i32 MatrixReflection(NUMTX *, i32, f32, f32, NUMTX *);
-i32 MatrixReflectionVU0_AXISY(NUMTX *, f32, f32, NUMTX *);
 
 static void Grab_invert_x(nufpar_s *) {
     Grab_grabber->invert_x = 1;
@@ -483,7 +466,7 @@ void Grabber_Update(WORLDINFO_s *world) {
         if (next.y < -4.85f) {
             next.y = -4.85f;
             g->target_velocity.y = g->velocity.y = 0.0f;
-        } else if (next.y > -3.9f) {
+        } else if (!(next.y <= -3.9f)) {
             next.y = -3.9f;
             g->target_velocity.y = g->velocity.y = 0.0f;
         }

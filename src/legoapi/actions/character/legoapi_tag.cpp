@@ -56,10 +56,13 @@
 #include "legoapi/ai/game/creature.h"
 #include "legoapi/characters/motion/move.h"
 #include "nu2api/nucore/nu2api_nucore_misc.h"
+#include "legoapi/gizmo/object/takeoverobjects.h"
+#include "legoapi/items/base/collection.h"
+#include "legoapi/lib/camera.h"
+#include "legoapi/menus/core/hint.h"
 
 // Character takeover and tag swapping (original legoapi_tag.cpp translation unit).
 
-void RegisterTakeOverObject(GameObject_s *object);
 i32 players_cannot_exit_speeder;
 
 static NUVEC SpeederChaseATATExitLandPos = {-159.0f, 6.869999885559082f, -17.600000381469727f};
@@ -84,14 +87,9 @@ DECOMP_ASSERT(offsetof(GameObject_s, field_0xeb4) == 0xeb4, "Object callback ABI
 DECOMP_ASSERT(offsetof(GameObject_s, current_hp) == 0x108b, "Tag signed health ABI");
 
 extern "C" i32 menu_i_pack;
-void Hint_CancelCurrent();
-i32 InCollectList_Index(i32, COLLECTID *, i32);
-i32 NuIOS_AreInAppPurchasesAvailable();
-i32 NuIOS_CanMakeInAppPurchases();
 struct NuIOS_InAppProduct;
 extern i16 tBUNDLESAVINGSAVAILABLE;
 extern f32 text3d_height;
-void GameCam_HitRoll();
 
 // GCC otherwise rewrites this once-called helper; the original has a separate local body.
 static __attribute__((noinline)) GameObject_s *Tag_FindGameObject_TRANSFER(GameObject_s *object) {

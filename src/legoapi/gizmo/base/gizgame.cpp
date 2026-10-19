@@ -99,8 +99,6 @@
 
 // Game-side gizmo registration and bolt targeting (retail gizgame.cpp).
 
-void Bolt_PlayHitSfx(BOLT_s *);
-
 // this technically has the wrong linkage, it does not have a C++ mangled name in the original binary... maybe should be
 // in a different file?
 static REGISTERGIZMOTYPEFN GizmoTypesLSW[] = {GizObstacles_RegisterGizmo,

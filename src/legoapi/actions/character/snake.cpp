@@ -9,6 +9,7 @@
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nufloat.h"
 #include "legoapi/characters/motion.h"
+#include "legoapi/items/objects/gameobjects.h"
 
 extern "C" {
     SNAKEBODY_s snakebodies[4];
@@ -48,14 +49,8 @@ void DestroySnakeBody(GameObject_s *object) {
     }
 }
 
-f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
-
 static inline f32 SnakeMin(f32 a, f32 b) {
     return a < b ? a : b;
-}
-
-static inline f32 SnakeMax(f32 a, f32 b) {
-    return a > b ? a : b;
 }
 
 void UpdateSnakeBody(GameObject_s *object) {
@@ -101,8 +96,8 @@ void UpdateSnakeBody(GameObject_s *object) {
         f32 curved = SnakeMin(NuFsqrt(1.0f - vertical * vertical), absolute);
         f32 side = (absolute - 0.7071067690849304f) * 3.402820018375656e+38f;
         f32 sign = vertical * 3.402820018375656e+38f;
-        side = SnakeMax(SnakeMin(side, 1.0f), 0.0f);
-        sign = SnakeMax(SnakeMin(sign, 1.0f), 0.0f);
+        side = MAX(MIN(side, 1.0f), 0.0f);
+        sign = MAX(MIN(sign, 1.0f), 0.0f);
         f32 t = curved * side;
         f32 t2 = t * t;
         f32 t3 = t * t2;

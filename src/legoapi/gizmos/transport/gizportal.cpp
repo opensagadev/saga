@@ -9,6 +9,8 @@
 #include "nu2api/nu3d/nuportal.h"
 #include "nu2api/nucore/nuanim3.h"
 #include "nu2api/nucore/nustring.h"
+#include "legoapi/world/levels.h"
+#include "legoapi/world/world_shared.h"
 
 i32 portal_gizmotype_id;
 
@@ -221,8 +223,4 @@ ADDGIZMOTYPE *Portal_RegisterGizmo(i32 type_id) {
 
     return &addtype;
 }
-
-void PortalDoors_Configure(WORLDINFO_s *world, char *config);
-
-void PortalDoors_Update(WORLDINFO_s *world);
 

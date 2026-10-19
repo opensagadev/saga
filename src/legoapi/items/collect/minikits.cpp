@@ -56,6 +56,7 @@
 #include "nu2api/numath/nuvec.h"
 #include "nu2api/nu3d/nuprim.h"
 #include "nu2api/nu3d/nupostparams.h"
+#include "legoapi/audio/audio.h"
 
 HUBMINIKITPIECES_s **Char_MiniKit;
 static VARIPTR minikits_savecharacterbufferptr;
@@ -65,7 +66,6 @@ extern "C" VARIPTR characterbuffer_end;
 char *LEGOASCII_BIGARROW = NULL;
 
 extern i32 LEGOOBJ_MINIKIT, LEGOOBJ_CHARKIT;
-void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 
 struct GAMEMESSAGE_s;
 struct nuhspecial_s;

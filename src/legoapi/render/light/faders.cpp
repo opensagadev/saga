@@ -26,11 +26,11 @@ void __attribute__((force_align_arg_pointer)) Faders_Draw(WORLDINFO_s *world) {
             if (distance < 0.5f) {
                 continue;
             }
-            if (distance < 2.0f) {
-                alpha = (distance - 0.5f) / 1.5f;
-            } else {
-                alpha = 1.0f;
+            if (!(distance < 2.0f)) {
+                NuSpecialDrawAtAlpha(&fader->special, &matrix, 1.0f);
+                continue;
             }
+            alpha = (distance - 0.5f) / 1.5f;
         }
         if (alpha > 0.0f) {
             NuSpecialDrawAtAlpha(&fader->special, &matrix, alpha);

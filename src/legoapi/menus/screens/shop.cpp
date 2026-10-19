@@ -90,7 +90,7 @@
 #include "nu2api/numusic/numusic.h"
 #include "legoapi/menus/core/hint.h"
 #include "legoapi/world/levels/hub.h"
-void *AddGameMessage(char *, NUVEC *, f32, NUVEC *, f32, u8, u8, u8, u32, f32);
+#include "legoapi/menus/core/gamemessage.h"
 extern f32 HUB_EPISODETITLEY;
 extern f32 HUB_EPISODESUBTITLEY;
 i32 POINTS_PER_HINT;
@@ -247,7 +247,6 @@ struct MENU_s;
 struct nuhspecial_s;
 
 extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
-extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
 
 extern i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
 extern i16 id_GAMORREANGUARD;
@@ -270,15 +269,6 @@ extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER;
 inline void ThingManager::operator delete(void *thing, usize size) {
     theMemoryManager.FreePool(thing, size);
 }
-
-GameObject_s *FindNearestGameObject(NUVEC *position, GameObject_s *exclude, u32 required_flags, f32 radius,
-                                    f32 extra_radius, i32 animation, i32 character_id, i32 player_index,
-                                    f32 *distance_squared, i32 horizontal_only, i32 (*filter)(GameObject_s *),
-                                    bool first_match);
-
-SAGA_HOST_WEAK void InitStillRender(variptr_u *, variptr_u);
-
-void FadeLoop(char *text, i32 direction, float duration, void (*draw)(float));
 
 static void Shop_GetInput(SHOPINPUT *input) {
     memset(input, 0, sizeof(*input));

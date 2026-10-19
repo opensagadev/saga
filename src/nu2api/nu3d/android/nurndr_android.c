@@ -14,6 +14,7 @@
 // numtl_android.cpp, matching the original material translation unit.
 
 #include "nu2api/nu3d/android/nurndr_android.h"
+#include "nu2api/nu3d/nurendercontext_inline.h"
 
 #include <GLES2/gl2.h>
 #include <string.h>
@@ -110,33 +111,6 @@ extern "C" {
     // Original 0x293399, 24 bytes.
     static numtl_s *NuRenderContextGetMaterialInUse(void) {
         return g_renderContext_materialInUse;
-    }
-
-    // Original 0x2933b1, 215 bytes.
-    static void NuRenderContextSetZFunc_inline(i32 mode) {
-        if (g_renderContext_zFunc != mode) {
-            switch (mode) {
-                case 0:
-                    glEnable(GL_DEPTH_TEST);
-                    glDepthMask(GL_TRUE);
-                    glDepthFunc(GL_LEQUAL);
-                    break;
-                case 1:
-                    glEnable(GL_DEPTH_TEST);
-                    glDepthMask(GL_FALSE);
-                    glDepthFunc(GL_LEQUAL);
-                    break;
-                case 2:
-                    glDisable(GL_DEPTH_TEST);
-                    glDepthMask(GL_TRUE);
-                    break;
-                case 3:
-                    glDisable(GL_DEPTH_TEST);
-                    glDepthMask(GL_FALSE);
-                    break;
-            }
-        }
-        g_renderContext_zFunc = mode;
     }
 
     // Original 0x293488, 620 bytes. Negation precedes unsigned-to-float conversion.

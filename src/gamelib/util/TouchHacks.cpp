@@ -26,12 +26,12 @@
 #include "legoapi/render/core/terrain.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/world.h"
-
-f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
-i32 SuperWeirdo(GameObject_s *);
-i32 GizForce_StoodOnForce(GIZFORCE_s *, GameObject_s *);
-EXPLOSION *AddExplosion(NUVEC *, f32, f32, GameObject_s *, i32, i32);
-extern "C" void PlaySfxAndSetVolume(char *, NUVEC *, f32);
+#include "legoapi/characters/motion/move.h"
+#include "legoapi/gizmos/traps/gizforce.h"
+#include "legoapi/items/fx/explosions.h"
+#include "legoapi/items/objects/cable.h"
+#include "legoapi/misc/supportall.h"
+#include "legoapi/render/core/gameliball.h"
 
 i32 TouchHacks::GetLoseStudsDieValue() {
     return BonusArea != 0 ? 10000 : 1000;
@@ -164,16 +164,18 @@ bool TouchHacks::CheckForAboutToRunIntoKillTerrain(GameObject_s &object, float t
 bool TouchHacks::CheckForAboutToRunOffAnEdge(GameObject_s &object, float time) {
     VuVec position(object.apiobj.position.x + object.apiobj.velocity.x * time, object.apiobj.position.y + 0.3f,
                    object.apiobj.position.z + object.apiobj.velocity.z * time, 1.0f);
-    if (object.apiobj.position.y - 0.3f <= GameShadow(&object, &position.xyz, 5.0f, -1)) {
-        return false;
+    if (GameShadow(&object, &position.xyz, 5.0f, -1) < object.apiobj.position.y - 0.3f) {
+        VuVec direction(object.apiobj.velocity.x, 0.0f, object.apiobj.velocity.z, 1.0f);
+        NuVecNorm(&direction.xyz, &direction.xyz);
+        const f32 radius = object.apiobj.collision_radius * 0.8f;
+        position.x += direction.x * radius;
+        position.z += direction.z * radius;
+        if (GameShadow(&object, &position.xyz, 5.0f, -1) >= object.apiobj.position.y - 0.3f) {
+            return false;
+        }
+        return true;
     }
-
-    VuVec direction(object.apiobj.velocity.x, 0.0f, object.apiobj.velocity.z, 1.0f);
-    NuVecNorm(&direction.xyz, &direction.xyz);
-    const f32 radius = object.apiobj.collision_radius * 0.8f;
-    position.x += direction.x * radius;
-    position.z += direction.z * radius;
-    return GameShadow(&object, &position.xyz, 5.0f, -1) < object.apiobj.position.y - 0.3f;
+    return false;
 }
 
 bool TouchHacks::SolveRoot(float a, float b, float c, float &root1, float &root2) {
@@ -309,8 +311,6 @@ bool TouchHacks::CanTagTo(GameObject_s &source, GameObject_s &target) {
     return !(dx * dx + dy * dy + dz * dz > 4.0f);
 }
 
-void Move_DEFAULT(GameObject_s *);
-
 bool TouchHacks::CanToggleTo(GameObject_s &object, i32 id) {
     if (object.id == id)
         return false;
@@ -327,12 +327,6 @@ bool TouchHacks::CanToggleTo(GameObject_s &object, i32 id) {
     return true;
 }
 
-void Move_CHARACTER(GameObject_s *);
-void Move_WEIRDO(GameObject_s *);
-void Move_JEDI(GameObject_s *);
-void Move_DROIDGENERIC(GameObject_s *);
-void Move_JAWA(GameObject_s *);
-void Move_GEONOSIAN(GameObject_s *);
 extern i16 id_SKELETON, id_GRIEVOUS, id_BODYGUARD, id_ATAT, id_STAP, id_STAP2;
 
 bool TouchHacks::CanTagVehicle(GameObject_s &object, GameObject_s &vehicle) {
@@ -499,7 +493,6 @@ nucolour3_s *TouchHacks::GetFlashColour() {
     return &flashCol;
 }
 
-CABLE_s *GameObjIsCableTied(GameObject_s *);
 i32 TouchHacks::ShouldDeflectBolt(GameObject_s &object, BOLT_s &bolt) {
     if (!TouchControlsActive || VehicleArea == 0)
         return 0;

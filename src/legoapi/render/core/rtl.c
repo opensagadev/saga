@@ -2565,7 +2565,6 @@ extern "C" {
     extern char edbits_level_save_directory[256];
     extern char edbits_level_save_name[256];
     extern char edbits_level_save_extension[256];
-    void eduiCreateMessageMenu(eduimenu_s *, char *, i32);
     extern eduimenu_s *edrtl_burn_main_menu;
     eduimenu_s *edrtl_burn_defaults_menu;
     eduimenu_s *edrtl_burn_radius_menu;

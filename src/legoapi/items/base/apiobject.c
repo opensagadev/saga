@@ -31,6 +31,7 @@
 #include <float.h>
 #include <stdarg.h>
 #include <string.h>
+#include "legoapi/render/core/terrain.h"
 
 static f32 MINFORCEAPART = 0.333f;
 static f32 MAXFORCEAPART = 0.666f;
@@ -572,8 +573,6 @@ extern "C" {
             memset(object, 0, system->object_size);
         }
     }
-
-    i32 NewRayCast(NUVEC *position, NUVEC *movement, f32 radius, i32 scan_flags);
 
     i32 QuickNewRayCast(NUVEC *position, NUVEC *movement, f32 radius, i32 scan_flags, f32 max_distance, f32 step) {
         if (step > 0.0f) {

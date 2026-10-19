@@ -16,6 +16,7 @@
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nucore/nuthread.h"
 #include "globals.h"
+#include "legoapi/core/input/gamepads.h"
 #include "legoapi/core/input/qrand.h"
 #include "gameapi/ai/aisys/aisys.h"
 #include "legoapi/characters/core/character.h"
@@ -53,10 +54,6 @@ extern "C" ripple_set_s *ripples;
 
 extern "C" i16 id_LANDSPEEDER;
 
-void NewRumble(nupad_s *pad, f32 strength, i32 mode);
-void NewBuzzFrames(nupad_s *pad, i32 frames, i32 mode);
-
-void FindAnglesXY(NUVEC *, u16 *, u16 *);
 
 void DebrisKillPlayers() {
     DebrisPreCheckCollisions(&GameCam->pos, 50.0f);
@@ -132,7 +129,7 @@ void AddSurfaceDebris(GameObject_s *object) {
     if (world->debris_sys->entries[effect].effect == -1 || run_speed <= 0.0f)
         return;
     f32 height_scale = 1.0f;
-    if (height > 0.0f) {
+    if (!(height <= 0.0f)) {
         height_scale = 1.0f - (object->apiobj.collision_min.y - surface_y) * (1.0f / height);
         if (height_scale <= 0.0f)
             return;
@@ -140,7 +137,7 @@ void AddSurfaceDebris(GameObject_s *object) {
             height_scale = 1.0f;
     }
     f32 emission_rate = (speed / run_speed) * rate;
-    if (emission_rate < minimum_rate)
+    if (!(emission_rate >= minimum_rate))
         emission_rate = minimum_rate;
     emission_rate *= height_scale;
     NUVEC current = {object->apiobj.position.x, surface_y, object->apiobj.position.z};

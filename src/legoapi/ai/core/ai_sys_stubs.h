@@ -4,9 +4,8 @@
 #include "decomp.h"
 
 // AI world-query helpers (module legoapi/ai/core, ai_sys_stubs.cpp). These are
-// C-linkage symbols (unmangled). AIPAthFindPathCnx is intentionally not here:
-// episodeI and episodeII call it with different arities (each byte-matched), so
-// it is declared locally in those files.
+// C-linkage symbols (unmangled). AIPAthFindPathCnx is declared in aisysall.h,
+// next to the rest of its unit.
 
 #ifdef __cplusplus
 extern "C" {

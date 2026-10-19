@@ -13,8 +13,10 @@
 
 struct AIMESSAGESYS_s;
 struct AIMESSAGE_s;
+struct AISYS_s;
 
 typedef i32 (*PREPARINGSPECIALMOVEFN)(AIPACKET_s *, APIOBJECT_s *, i32);
+typedef i32 (*MIDSPECIALMOVEFN)(AISYS_s *, AIPACKET_s *, APIOBJECT_s *);
 extern PREPARINGSPECIALMOVEFN PreparingForSpecialMoveFn;
 i32 TryToTeleportToNextNode(GameObject_s *, AIPATHNODE_s *, i32);
 void SetSpecialMove(GameObject_s *, AIPATHNODE_s *, AIPATHNODE_s *, char);
@@ -741,6 +743,8 @@ extern "C" {
     void InitFn_GameAILoad(GAMEAILOAD *function);
     void InitFn_GetAICreatureOrigin(AIGETCREATUREORIGIN *function);
     void InitFn_GetNamedAPIObject(AIGETNAMEDAPIOBJECT *function);
+    void InitFn_MidSpecialMove(MIDSPECIALMOVEFN function);
+    void InitFn_PreparingForSpecialMove(PREPARINGSPECIALMOVEFN function);
 
     void AIScriptLoadAll(char *path, VARIPTR *buf, VARIPTR *buf_end, AISYS *sys);
     void AIScriptLoadAllPakFile(void *pak, char *path, VARIPTR *buf, VARIPTR *buf_end, AISYS *sys);
@@ -833,6 +837,7 @@ extern "C" {
     void AISetPathHeightTol(f32 tolerance);
     void AISysSetPathCylinderCheck(i32 enabled);
     AIPATHCNX *AIPathFindPathCnxFromIX(AISYS *system, AIPATH *path, u8 from_index, u8 to_index);
+    void *AIPAthFindPathCnx(AISYS_s *system, AIPATH_s *path, char *from_name, char *to_name, i32 *direction);
     void AIMoveInstruction(AIPACKET *packet, NUVEC *destination, f32 stopping_distance, AIPATHINFO *path_info, i32 mode,
                            f32 movement_parameter);
     void FollowAPIObject(APIOBJECT *object, APIOBJECT *target, i32 flags, f32 movement_parameter);

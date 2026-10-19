@@ -36,6 +36,7 @@
 #include "legoapi/actions/character/legoapi_tag.h"
 #include "legoapi/characters/motion/camera.h"
 #include "legoapi/world/levels/episodeV.h"
+#include "legoapi/gizmo/object/gizmoblowups.h"
 
 static i32 snaphack[2];
 static i32 snaphacktimer[2];
@@ -67,8 +68,6 @@ i32 objopponent_ignoreaiopponent;
 i32 test_ai_combo = 1;
 i32 CanPunchGirls = 1;
 extern i16 id_STORMTROOPER;
-
-void SetLevelExBlowupFunc(i32 (*callback)(GIZMOBLOWUP_s *, i32));
 
 f32 getPodRoll(i32 index) {
     return pod_roll[index];

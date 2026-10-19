@@ -102,7 +102,6 @@ extern "C" NUMTL *edbri_mtl, *edbri_mtl_zoff;
 extern "C" f32 edbri_length, edbri_width;
 extern "C" i32 edbri_rotz, edbri_roty, edbri_planks, edbri_post_interval;
 extern "C" i32 edbri_plank_instance_type, edbri_post_instance_type, edbri_bridges_used;
-extern "C" eduiitem_s *eduiItemColourPickCreate(usize, const void *, EdUiItemCallback, char *);
 extern f32 Scale;
 
 extern "C" {
@@ -111,10 +110,6 @@ extern "C" {
     extern i32 edpp_copy_mode, edpp_copyrotz, edpp_copyroty, edpp_copy_source_count, edpp_copy_enclosed;
     extern NUMTL *edpp_mtl, *edpp_boxmtl;
 }
-
-__attribute__((force_align_arg_pointer)) void EdDrawPolyCylinder(VuVec const &start, VuVec const &end, i32 sides,
-                                                                 i32 colour, i32 cap_colour, float radius, float limit,
-                                                                 float offset);
 
 eduiitem_s *eduiItemFileSelectorCreate(u32 data, eduiiattr_s *colours, EdUiItemCallback callback, char *text);
 
@@ -456,8 +451,6 @@ extern "C" {
     extern char edbits_general_save_extension[256];
 }
 
-void cbFileSaveEffects(eduimenu_s *, eduiitem_s *, u32);
-
 #if defined(__SSE__)
 #include <xmmintrin.h>
 #endif
@@ -478,8 +471,6 @@ extern "C" {
 // Particle-list editor UI/menu callbacks.
 
 // Particle editor UI/menu callbacks.
-
-void cbFileSaveEffects(eduimenu_s *parent, eduiitem_s *, u32);
 
 // Particle list editor subsystem stubs (static, internal linkage).
 
@@ -780,20 +771,13 @@ extern "C" {
     NUMTX *ed_remap_mtx = NULL;
     i32 edmain_cursor_enabled = 0;
 
-void edanimUpdateObjects(float elapsed);
-
-void edbitsRegisterPlaySound(EDBITSPLAYSOUNDCALLBACK callback);
-void edbitsRegisterRequestSound(EDBITSREQUESTSOUNDCALLBACK callback);
     // Shared editor font; edmainInit receives and stores the font handle.
     void *ed_fnt;
 
     extern f32 globaltime;
 
-i32 edppFindAllSounds(i32 page, NUVEC *positions, i32 (*sounds)[4], i32 capacity, i32 skip);
-void edppSetSaveName(u32 page, char *name);
 edui_textpicker_s *eduiAddTextPickEntEx(eduimenu_s *menu, eduiitem_s *source, EdUiItemCallback callback);
     i32 bUsingMenuFocus;
-eduiitem_s *eduiItemColourPickCreate(usize data, const void *colours, EdUiItemCallback callback, char *text);
 eduiitem_s *eduiItemColourSliderCreate(usize data, const void *colours, i32 group, EdUiItemCallback callback,
                                            f32 minimum, f32 range, f32 value, u8 red, u8 green, u8 blue, char *text);
 eduiitem_s *eduiItemGraphCreate(usize data, const void *colours, EdUiItemCallback callback, nugraph_s *graph,
@@ -894,7 +878,6 @@ __attribute__((visibility("hidden"), optimize("O3"))) void tpentPropOnEnter(edui
 
 extern f32 HUB_EPISODETITLEY;
 extern i16 tSELECT, tSELECTED, tSELECTING;
-extern "C" void NuIOS_RecordFlurryEvent(char *event_name);
 extern i16 tLOCKED;
 extern i16 tPOWERBRICK;
 extern f32 newgamecamtime;
@@ -909,19 +892,9 @@ extern i32 memcard_formatfailed;
 extern void (*drawslotinfofn)(f32, f32, i32, i32);
 extern void (*drawslotsfn)(MENU *, f32);
 
-void MenuInitialiseEx(MENUFNINFO *menu_info, i32 menu_id_count, i32 language_count,
-                      void (*draw_save_slots_info_fn)(f32, f32, i32, i32), i32 is_fade_enabled, i32 is_shadow_enabled);
-
-void MenuInitialise(MENUFNINFO *menu_info, i32 menu_id_count, i32 language_count,
-                    void (*draw_save_slots_fn)(MENU *, f32), i32 is_fade_enabled, i32 is_shadow_enabled);
-
 extern "C" {
 extern f32 MENUBOTY;
 extern f32 MENUENTRYEXWIDTH;
-
-void MenuSetPreDrawFn(void (*draw_fn)(MENU *));
-
-void MenuSetHeaderDrawFn(void (*draw_fn)(void));
 } // extern "C"
 
 struct nuanimdatachunk_s;
@@ -931,13 +904,7 @@ extern GLuint g_colorRenderbuffer;
 extern GLuint g_depthRenderbuffer;
 }
 
-using NUHGOBJVIDEOMEMFN = void (*)(nuhgobj_s *);
-
-void NuPadRecordEndFrame(void);                      // nupad_interface.cpp
-
 extern "C" {
-    void NuShaderManagerSetfv(i32 semantic, const f32 *values);
-
     extern nurenderscene_s currentScene;
 } // extern "C"
 
@@ -962,22 +929,10 @@ extern "C" {
     extern void (*postRenderFlashingHack)(void);
     extern void (*nuapi_endframe_callbackfn)(void);
 
-void NuIOS_RecordFlurryEvent(char *event_name);
-
-    extern "C++" void NuAnimDataChunkDestroy(nuanimdatachunk_s *chunk);
-
-void NuQFntPrint2dW(NUQFNT *font, u16 *text);
-void NuQFntPrint3DU(NUQFNT *font, char *text);
-void NuQFntPrint3DW(NUQFNT *font, u16 *text);
-void NuQFntPrintV(NUQFNT *font, const char *format, va_list arguments);
 
     extern nurenderscene_s currentScene;
 
-    void NuWindUpdateArray(NUVEC **);
-
 #include "nu2api/nucore/nucore_plain_types.h"
-void NuHGobjFromVideoMem(NUHGOBJVIDEOMEMFN callback);
-void NuHGobjToVideoMem(NUHGOBJVIDEOMEMFN callback);
 
     // ---------------------------------------------------------------------------
     // Input / pad / key / mouse
@@ -1012,8 +967,6 @@ void NuHGobjToVideoMem(NUHGOBJVIDEOMEMFN callback);
                      i32 tree_index) __asm__("_ZL12ClipInstTreeP16NuInstanceTree_siP16nudisplayscene_sPc.isra.92");
     }
 
-    extern "C++" void OctreeRndr(u8 *visibility, nuoctreenode_s *root, i32 enabled);
-
 #ifndef ANDROID
     void NuGetCurrentThreadId(void) {
         STUBBED();
@@ -1026,7 +979,6 @@ void NuHGobjToVideoMem(NUHGOBJVIDEOMEMFN callback);
 #endif
 
     extern void (*nuapi_endframe_callbackfn)(void);
-void NuRegisterEndFrameCallBackFn(void (*callback)(void));
 } // extern "C"
 
 struct nupad_s;
@@ -1055,8 +1007,6 @@ extern "C" {
 
 DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 
-void SetLevelExBlowupFunc(i32 (*callback)(GIZMOBLOWUP_s *, i32));
-
 extern "C" {
     i32 edmain_auto_speed = 1;
 } // extern "C"
@@ -1065,8 +1015,6 @@ extern "C" i16 id_LANDSPEEDER;
 extern f32 newgamecamtime, cutscenecam_focalLength, CamStopBlend, EMPERORFIGHTA_CAMDYHACK;
 extern i32 CUTCAMONLY, GUNSHIPAHACK, netcamera, complexsockposition_forcesock, movegamecamera_forcesock;
 extern NUMTX cutscenecammtx, CutCamMtx;
-GameObject_s *FindNearestGameObject(NUVEC *, GameObject_s *, u32, f32, f32, i32, i32, i32, f32 *, i32,
-                                    i32 (*)(GameObject_s *), bool);
 
 extern f32 EMPERORFIGHTA_CAMDYHACK;
 extern i32 movegamecamera_forcesock;
@@ -1140,13 +1088,6 @@ static __attribute__((noinline, noclone)) void RenderFileSel3Body(i32 draw_title
 
 extern "C" void StartFileSel(char *title, char *path, char *filter, char *filter_out,
                              void (*callback)(char *, char *));
-
-extern "C" {
-void SaveSystemInitialiseEx(i32 slots, void *makeSaveHash, void *save, i32 saveSize, void *header, i32 headerSize,
-                                i32 autosave, void (*drawSaveIcon)(void));
-
-void SetSaveSuccessFn(void (*callback)(void));
-} // extern "C"
 
 extern f32 HUB_EPISODETITLEY;
 

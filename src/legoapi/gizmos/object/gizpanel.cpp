@@ -38,6 +38,8 @@
 #include "legoapi/ai/core/gameai.h"
 #include "legoapi/characters/motion/move.h"
 #include "legoapi/render/core/gameliball.h"
+#include "legoapi/misc/supportall.h"
+#include "legoapi/misc/utilities.h"
 
 struct GIZPANELPROGRESS {
     i32 state;
@@ -52,14 +54,10 @@ extern "C" {
     f32 GIZPANEL_PICZ = -0.123f;
 }
 
-void FindAnglesXY(NUVEC *direction, u16 *x_rotation, u16 *y_rotation);
-
 static __used__ u8 storm_panel_active;
 static __used__ u8 droid_panel_active;
 static __used__ u8 bountyhunter_panel_active;
 
-void FindAnglesZX(NUVEC *normal, u16 *x_rotation, u16 *z_rotation);
-i32 SuperWeirdo(GameObject_s *object);
 extern i16 id_GRANDMOFFTARKIN, id_IMPERIALOFFICER, id_IMPERIALSHUTTLEPILOT;
 
 static i32 GizPanel_GetMaxGizmos(void *world_ptr) {
@@ -357,9 +355,7 @@ static void GizPanel_Update(void *world_ptr, void *, float delta_time) {
                 PlaySfx(const_cast<char *>("DPanelAct"), &panel.position);
             } else {
                 panel.activation_time += FRAMETIME;
-                if (panel.activation_time > 0.8f) {
-                    panel.activation_time = 0.8f;
-                }
+                panel.activation_time = MIN(panel.activation_time, 0.8f);
             }
         }
     }

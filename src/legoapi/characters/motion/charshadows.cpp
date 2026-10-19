@@ -1,14 +1,12 @@
 #include "decomp.h"
 #include "globals.h"
 #include "legoapi/characters/core/character.h"
+#include "legoapi/actions/movement/dropinout.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/misc/utilities.h"
 #include "legoapi/render/core/terrain.h"
 #include "legoapi/world/level.h"
 #include "nu2api/nu3d/nurndr.h"
-
-f32 GameShadow(GameObject_s *object, NUVEC *position, f32 probe_height, i32 terrain_mask);
-f32 DropInOutScale(GameObject_s *object);
-void FindAnglesZX(NUVEC *normal, u16 *x_rotation, u16 *z_rotation);
 
 namespace {
     constexpr f32 kInvalidShadowHeight = 2000000.0f;

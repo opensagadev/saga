@@ -35,5 +35,6 @@ void CollectHitPoint(GameObject_s *object, NUVEC *position, i32 flags);
 struct PART_s;
 struct nuhspecial_s;
 struct nuvec_s;
+PART_s *FindIncomingPart(void *owner, NUVEC *position, f32 radius, u32 flags, f32 range);
 PART_s *Part_FindFromHSpecial(nuhspecial_s *);
 void MakePartVector(nuvec_s *velocity, nuvec_s *direction, f32 scale);

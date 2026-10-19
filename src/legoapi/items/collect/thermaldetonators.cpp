@@ -33,11 +33,11 @@
 #include "legoapi/ai/core/gameai.h"
 #include "legoapi/items/collect/thermaldetonators.h"
 #include "legoapi/props/objects/zipup.h"
+#include "legoapi/misc/supportall.h"
+#include "legoapi/misc/utilities.h"
 
 MechWeakPtr<MechObjectInterface, 4> NextThermalTarget;
 
-i32 MatrixReflection(NUMTX *matrix, i32 axis, f32 plane, f32 height, NUMTX *result);
-i32 SuperWeirdo(GameObject_s *object);
 extern i32 TERRAINMASK_NONWEAPON;
 extern "C" f32 brickimpactwait;
 
@@ -437,7 +437,7 @@ i32 ThermalDetonator_MoveCode(GameObject_s *object) {
             if (frame != NULL && *frame > 0.0f && *frame >= release_frame) {
                 object->movement_runtime_flags |= 0x40;
             }
-        } else if (object->context_animation_timer < 0.5f) {
+        } else if (!(object->context_animation_timer >= 0.5f)) {
             object->movement_runtime_flags |= 0x40;
         }
     }

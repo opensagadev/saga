@@ -732,7 +732,7 @@ void Collection_Draw(COLLECTION_s *collection, float x, float y, float scale, AP
             i32 id = entry->id;
             *reinterpret_cast<f32 *>(reinterpret_cast<u8 *>(entry) + 0x14) = px;
             *reinterpret_cast<f32 *>(reinterpret_cast<u8 *>(entry) + 0x18) = py;
-            if (alpha <= 0.0f)
+            if (!(alpha > 0.0f))
                 continue;
             i32 frame = LEGOOBJ_ICON_FRAME_NEUTRAL;
             f32 opacity = 1.0f;

@@ -11,6 +11,7 @@
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/audio/sfx.h"
 #include "legoapi/world/levels/levels.h"
+#include "nu2api/nu3d/nu3d_includes.h"
 #include "nu2api/nu3d/numtl.h"
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/nuspecial.h"
@@ -23,8 +24,6 @@
 extern f32 FRAMETIME;
 extern i32 pause_rndr_on;
 extern i32 wait_till_next_frame;
-extern void DrawFadeScreenWipe(void);
-extern "C" void NuRndrRect2di(i32, i32, i32, i32, i32, numtl_s *);
 
 extern NUMTL *ScreenFadeMtl;
 extern NUMTL *FadeMtl2;

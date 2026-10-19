@@ -3,6 +3,7 @@
 
 #include "decomp.h"
 #include "MechInputTouch/MechInputTouch_types.h"
+#include "MechInputTouch/MechTouchUIElements.h"
 #include "globals.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/items/base/apiobject.h"
@@ -804,7 +805,6 @@ void MoveToMarker::Render() {
             NuMtxScale(&ping_matrix, &ping_scale);
             draw_position.y += 0.01f;
             NuMtxTranslate(&ping_matrix, &draw_position);
-            extern void RndrTexQuad3D(VuMtx const &, i32, numtl_s *);
             const i32 ping_colour = (static_cast<i32>(alpha.value * 255.0f) << 24) | 0xffffff;
             RndrTexQuad3D(reinterpret_cast<VuMtx const &>(ping_matrix), ping_colour, systems->location_ping_material);
         }

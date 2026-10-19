@@ -3,15 +3,14 @@
 #include "gamelib/util/gamelib_util_types.h"
 #include "globals.h"
 #include "legoapi/characters/motion.h"
+#include "legoapi/gizmos/traps/gizturret.h"
 #include "legoapi/gizmos/traps/gizturrets.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/lib/text.h"
 #include "legoapi/world/levels/levels.h"
 #include "legoapi/world/world.h"
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/numath/nutrig.h"
-
-i32 GetMenuID();
-GIZTURRET_s *GizTurret_FindByController(GIZTURRETSYS_s *, GameObject_s &);
 
 void MechInputTouchDeathStarTurretController::Activate() {
     if (active) {

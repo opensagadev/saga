@@ -182,6 +182,8 @@ struct BOLT_s;
 struct GameObject_s;
 struct PLAYERPACKET_s;
 extern i32 LIFTPLAYER;
+extern u32 (*CanPushObstaclesFn)(GameObject_s *);
+extern void (*Player_ClearContextFn)(GameObject_s *, i32);
 extern void Player_ClearContext(GameObject_s *object, i32 mode);
 extern void Player_ResetContexts(PLAYERPACKET_s *packet);
 extern void SetPlayer();

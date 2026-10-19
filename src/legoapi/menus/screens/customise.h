@@ -17,5 +17,6 @@ extern void Customiser_Reset(CUSTOMISER *);
 extern void Customiser_Update(CUSTOMISER *, WORLDINFO_s *);
 void CustomiserMenu_Draw(MENU_s *menu);
 void CustomiserMenu_Update(MENU_s *menu);
+void Customiser_GetActiveWeirdoIndex(i32 *index, i32 *count);
 void Customiser_SetNameAndIcon(CUSTOMISER *, i32);
 void Customiser_SetUpCharacterData(CUSTOMISER *);

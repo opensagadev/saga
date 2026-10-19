@@ -58,4 +58,6 @@ extern "C" {
 extern "C" {
     void NuWindInit(void);
     void NuWindSetup(VARIPTR *, VARIPTR, i32, i32);
+    NuWindGType *NuWindCreateMtx(u32 *source, NUMTX *matrices, i16 count, f32 value20, f32 value24, i32 flags,
+                                 f32 near_distance, f32 far_distance);
 }

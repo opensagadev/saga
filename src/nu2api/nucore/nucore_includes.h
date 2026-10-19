@@ -17,4 +17,5 @@ extern "C" {
     void NuErrorCheck(void);
     void NuErrorSleep();
     void NuSevereWarning(const char *, ...);
+    void NuRegisterEndFrameCallBackFn(void (*callback)(void));
 }

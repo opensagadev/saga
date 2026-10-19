@@ -371,7 +371,7 @@ i32 KillBossPlayCutScene(i32, i32, float, char *name);
 extern CUTINFO *NewCutScene(CUTINFO *, CUTSYS *, char *, i32);
 void *SetLevelHack(i32);
 void ResetLevel(WORLDINFO_s *, char *, i32);
-extern i8 BoltType_FindIDByName(char *, WORLDINFO_s *);
+extern i16 BoltType_FindIDByName(char *, WORLDINFO_s *);
 extern BOLTTYPE_s *BoltType_FindByID(i32, WORLDINFO_s *);
 extern BOLT_s *Bolt_Add(GameObject_s *, nuvec_s *, numtx_s *, i32, i32);
 void TBOPENFN(char *, i32);

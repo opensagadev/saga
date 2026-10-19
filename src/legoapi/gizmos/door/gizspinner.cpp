@@ -27,6 +27,7 @@
 #include "nu2api/numath/numtx_inline.h"
 
 #include <string.h>
+#include "legoapi/items/collect/bolts.h"
 
 namespace {
     enum SPINNER_PROGRESS_FLAGS : u8 {
@@ -1305,9 +1306,6 @@ i32 GizSpinner_Spin(GIZSPINNER_s *spinner, i32 context) {
     spinner->field_0x090 = 0.25f;
     return 3;
 }
-
-void Bolt_PlayHitSfx(BOLT_s *bolt);
-void Bolt_AddDeflectedBolt(BOLT_s *bolt, NUVEC *velocity, NUVEC *normal, unsigned char *hit_flags);
 
 static i32 GizSpinner_BoltHitPlat(void *, void *spinner_ptr, BOLT *bolt, unsigned char *hit_flags) {
     GIZSPINNER_s *spinner = static_cast<GIZSPINNER_s *>(spinner_ptr);

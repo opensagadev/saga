@@ -2492,7 +2492,6 @@ i32 instNuGCutGetNextRigidInfo(instNUGCUTSCENE_s *instance, float frame, i32 ind
     NUGCUTRIGID_s *rigid = &rigid_system->rigids[index];
     instNUGCUTRIGID_s *instance_rigids = instance_rigid_system->rigids;
     if ((rigid->flags & 6) != 0) {
-        extern void NuGCutRigidCalcMtx(NUGCUTRIGID_s *, float, numtx_s *);
         NuGCutRigidCalcMtx(rigid, frame, matrix);
         if ((instance->flags_88 & 0x80) != 0)
             NuMtxMul(matrix, matrix, &instance->matrix);

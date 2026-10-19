@@ -384,8 +384,6 @@ extern i16 tCHAPTER;
 
 CUTSCENEPLAYER_s *CutScenePlayer = NULL;
 
-extern void (*CutScene_OverrideConfigFileNameFn)(char *, i32, i32);
-
 struct ani3_animheader_s;
 
 extern "C" {

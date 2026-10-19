@@ -84,6 +84,7 @@ extern "C" {
                          struct numtl_s *material);
     i32 NuRndrSetBlendData(void);
     void NuRndrShadowOnOff(i32 enabled);
+    void NuRndrShadowDirCol(const NUVEC *direction, u32 colour, f32 near_distance, f32 far_distance);
     i32 NuRndrLine3d(NURND_VERTEX3D *vertices, struct numtl_s *material, NUMTX *matrix);
     void NuRndrLine3dDbg(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, i32 colour);
     void NuRndrLine3dDbgFlush(void);

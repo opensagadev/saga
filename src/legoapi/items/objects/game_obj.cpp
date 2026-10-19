@@ -107,6 +107,9 @@
 #include "legoapi/world/levels/episodeV.h"
 #include "legoapi/world/levels/hub.h"
 #include "nu2api/nusound/nusound3_include.h"
+#include "legoapi/characters/core/characters.h"
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
 
 // Game-object update, hit and part-kill code (retail game_obj.cpp).
 
@@ -125,9 +128,6 @@ extern i16 id_ANAKINJEDI, id_ANAKINJEDISCARRED, id_GAMORREANGUARD, id_MOUSEDROID
     id_WOOKIEE;
 extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER;
 extern i32 objhitobj_noattackerrumble, objhitobj_nohurtsfx, objhitobj_noimpactsfx, objhitobj_throwkillpartsup;
-
-void UpdateCoinPacket(COINPACKET_s *, i32, i32);
-void UpdateRumble(RUMBLEPACKET *);
 
 void TiePart_Kill(PART_s *, i32) asm("_ZL12TiePart_KillP6PART_si") __attribute__((visibility("hidden")));
 void TiePart_Move(PART_s *, f32) asm("_ZL12TiePart_MoveP6PART_sf") __attribute__((visibility("hidden")));
@@ -1428,7 +1428,7 @@ void UpdateGameObjects(WORLDINFO_s *world) {
         object->field_0x1024 -= FRAMETIME;
         if (object->field_0x1024 < -1.0f)
             SetFlicker(object, 0.0f);
-        if (object->timer_d28 > 0.0f)
+        if (!(object->timer_d28 <= 0.0f))
             object->timer_d28 -= FRAMETIME;
         if (object->timer_d50 > 0.0f)
             object->timer_d50 -= FRAMETIME;
@@ -1509,7 +1509,7 @@ void UpdateGameObjects(WORLDINFO_s *world) {
                 flicker_decay = 0.5f;
         }
         object->field_0x1024 -= flicker_decay * FRAMETIME;
-        if (object->field_0x1024 < -1.0f)
+        if (!(object->field_0x1024 >= -1.0f))
             SetFlicker(object, 0.0f);
         if (object->timer_d28 > 0.0f)
             object->timer_d28 -= FRAMETIME;
@@ -2181,7 +2181,6 @@ void KillParts(GameObject_s *object, i32 animation, i32 excluded_layer, i32 mode
     if ((object->apiobj.character_data->flags & 1) != 0 && VehicleArea != 0 &&
         (object->apiobj.character_data->model_flags & 0x2000) != 0 &&
         object->apiobj.character_data->game_character->field_0x28 > 0.0f) {
-        extern nuhspecial_s *CharScene_FindHSpecial(WORLDINFO_s *, i32);
         nuhspecial_s *special = CharScene_FindHSpecial(WORLD, object->id);
         if (special != NULL) {
             NUMTX matrix = object->apiobj.field_0xb8;

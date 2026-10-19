@@ -11,8 +11,6 @@
 #include <stdint.h>
 #include "nu2api/nucore/nulist.h"
 
-extern "C" void *AIPAthFindPathCnx(AISYS_s *, AIPATH_s *, char *, char *, i32 *);
-
 void (*AIPathCnxHelperSysInitFn)(WORLDINFO_s *) = NULL;
 
 void AIPathCnxHelperSysReset(WORLDINFO_s *world, AIPATHCNXHELPERSYS_s *system) {

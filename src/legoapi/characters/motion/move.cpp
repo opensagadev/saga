@@ -4,6 +4,8 @@
 #include "decomp.h"
 #include <stdlib.h>
 #include "legoapi/actions/movement/jumping.h"
+#include "legoapi/actions/movement/pushblocks.h"
+#include "legoapi/ai/core/aisysall.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/items/collect/torpedo.h"
 #include "legoapi/actions/combat/hits.h"
@@ -581,15 +583,11 @@ float SLAMGRAVITY = -15.0f;
 float TURNTIME = 1.0f;
 static float applygravity_extrahoveroffset;
 
-void JumpCode(GameObject_s *object, i32 jump_pressed, i32 jump_held, u32 animation_set, i32 action_pressed,
-              i32 action_held, i32 special_animation);
 i32 GrappleSwingMode = 1;
 extern i16 id_GAMORREANGUARD;
 extern i16 id_CAPTAINTARPALS;
 extern "C" i16 id_BAT;
 extern i16 id_WATTO;
-PART_s *FindIncomingPart(void *, NUVEC *, f32, u32, f32);
-u32 SpecialMove_GetFlags(i32, u32);
 f32 FORCEGLOWTIME = 0.1f;
 f32 ForceThrowGravity = -2.5f;
 f32 ForceThrowSpeed = 5.0f;
@@ -637,10 +635,6 @@ static GAMECHARACTERDATA *GetGameCharacterData(GameObject_s *object) {
     return object->apiobj.character_data->game_character;
 }
 
-pushblock_s *BlockInBlock(WORLDINFO_s *, pushblock_s *, i32, pushblock_s **);
-void MoveBlocksOverBlock(WORLDINFO_s *, pushblock_s *, i32, nuvec_s *);
-void MoveBlocks(WORLDINFO_s *world, pushblock_s *block, i32 index, nuvec_s *velocity);
-
 static inline void CheckFallLand(GameObject_s *object) {
     if (object->character_context == -1 && object->field_0xe31 == 0 && object->apiobj.field_0x27d != 0 &&
         object->apiobj.field_0x27e == 0 &&
@@ -667,8 +661,6 @@ static inline void SelfDestructCode(GameObject_s *object, i32 pressed) {
         return;
     SelfDestructCodeBody(object);
 }
-
-void MoveBlocksOverBlock(WORLDINFO_s *world, pushblock_s *block, i32 excluded, nuvec_s *velocity);
 
 extern i32 LevFlag[4];
 // Original exported level control, initialized to 2 at 0x623d00.
@@ -837,8 +829,6 @@ static i32 IsAFallAnim(i32 animation) {
     return animation == 0x74;
 }
 
-i32 SnapPosTaken(WORLDINFO_s *world, pushblock_s *, nuvec_s *position, i32 excluded_index);
-
 void SetHeadTarget(GameObject_s *object, NUVEC *position, i8 priority, f32 time, f32 minimum_delay, f32 maximum_delay) {
     if (position != NULL) {
         if (object->head_target == NULL ||
@@ -859,9 +849,6 @@ void SetHeadTarget(GameObject_s *object, NUVEC *position, i8 priority, f32 time,
         object->head_target_delay = 0.0f;
     }
 }
-
-void JumpCode(GameObject_s *object, i32 jump_pressed, i32 jump_held, u32 animation_set, i32 action_pressed,
-              i32 action_held, i32 hit_effect);
 
 void SetObjAsHeadTarget(GameObject_s *object, GameObject_s *target, signed char, float, float, float) {
     if (target != NULL && object != NULL && target->apiobj.character_data != NULL) {
@@ -903,18 +890,11 @@ static inline i16 JediWeaponIdle(GameObject_s *object) {
     return CHARACTER_ANIMATION_WEAPON_IDLE;
 }
 
-i32 GizmoFileReadGameAnimSet(GAMEANIMSET_s *set, void *world_ptr,
-                             void (*read_object_data)(GAMEANIMOBJ_s *, unsigned char), unsigned char version,
-                             char *prefix, char *suffix);
-
 extern MechWeakPtr<MechObjectInterface, 4> BobaRocketTarget;
-extern "C" void *AIPAthFindPathCnx(AISYS_s *, AIPATH_s *, char *, char *, i32 *);
 
 f32 rocket_speed = 1.2f;
 
 extern f32 ForceThrowSpeed, ForceThrowGravity;
-
-PART_s *FindIncomingPart(void *owner, NUVEC *position, f32 radius, u32 flags, f32 range);
 
 i32 testlaser_type;
 f32 testlaser_endw = 0.1f;
@@ -941,19 +921,12 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 
 extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER;
 
-GIZMOBLOWUP_s *GizmoBlowUp_Hit(GameObject_s *, NUVEC *, i32, f32, NUVEC *, NUVEC *, BOLT_s *, u32, u8 *);
-
 // ThingManager objects return to the theMemoryManager pool (D0 @0x425a50).
 inline void ThingManager::operator delete(void *thing, usize size) {
     theMemoryManager.FreePool(thing, size);
 }
 
 extern i16 id_PKDROID;
-
-GameObject_s *FindNearestGameObject(NUVEC *position, GameObject_s *exclude, u32 required_flags, f32 radius,
-                                    f32 extra_radius, i32 animation, i32 character_id, i32 player_index,
-                                    f32 *distance_squared, i32 horizontal_only, i32 (*filter)(GameObject_s *),
-                                    bool first_match);
 
 struct HINT_s;
 
@@ -974,8 +947,6 @@ static f32 sPreResetMulG = 0.035f;
 
 extern "C" i16 id_LANDSPEEDER;
 extern i32 CUTCAMONLY, GUNSHIPAHACK, netcamera, complexsockposition_forcesock, movegamecamera_forcesock;
-GameObject_s *FindNearestGameObject(NUVEC *, GameObject_s *, u32, f32, f32, i32, i32, i32, f32 *, i32,
-                                    i32 (*)(GameObject_s *), bool);
 
 static u8 disorientAxis = 7;
 
@@ -986,20 +957,7 @@ DECOMP_ASSERT(sizeof(speedervals) == 0x70, "Speeder chase tuning table size");
 i32 IDLESPEEDINNARROWSOCKSONLY = 0;
 
 extern "C" {
-    extern "C++" i32 (*GamePads_IgnoreInputFn)(void);
     extern "C++" FadeSystem FadeSys;
-}
-
-// --- Cross-file entry points / id globals ---
-//
-extern "C" {
-    void *AIPAthFindPathCnx(AISYS_s *, AIPATH_s *, char *, char *, i32 *); // legoapi/ai pathfinding
-}
-
-// Jedi_B tuning and spawn tables (unmangled globals in the original).
-
-extern "C" {
-    void *AIPAthFindPathCnx(AISYS_s *, AIPATH_s *, char *, char *, i32 *); // original name keeps the typo
 }
 
 extern f32 testlaser_endw;
@@ -1017,23 +975,12 @@ extern "C" {
 struct nuhspecial_s;
 struct nuvec_s;
 
-extern "C" void *AIPAthFindPathCnx(AISYS_s *system, AIPATH_s *path, char *from, char *to, i32 *direction);
-
 extern AIACTIONDEF api_aiactiondefs[55];
 extern AICONDITIONDEF api_aiconditiondefs[50];
 
 DECOMP_ASSERT(sizeof(api_aiactiondefs) == 0x294, "API action registry size");
 
 DECOMP_ASSERT(sizeof(api_aiconditiondefs) == 0x258, "API condition registry size");
-
-extern "C" {
-extern void (*checkantinodefns[3])(APIOBJECT *, AIANTINODE *, NUVEC *, f32);
-    extern void (*checkantinodefns[3])(APIOBJECT_s *, AIANTINODE_s *, NUVEC *, f32);
-}
-
-extern "C" {
-void *AIPAthFindPathCnx(AISYS_s *system, AIPATH_s *path, char *from_name, char *to_name, i32 *direction);
-} // extern "C"
 
 struct AIPATH_s;
 
@@ -1059,29 +1006,13 @@ struct GAMEMESSAGE_s;
 struct VuVec;
 
 extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
-extern void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
 
 extern i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
 
 struct APIOBJECT_s;
 struct AISYS_s;
 
-extern "C" {
-    extern "C++" void DebrisProcessSpheres(uv1deb *, f32, debinftype *, debkeydatatype_s *, i32);
-}
-
-extern "C" {
-extern "C++" TERRAIN_TRACK_SLOT *AllocTerrId();
-} // extern "C"
-
-extern "C" {
-void *AIPAthFindPathCnx(AISYS_s *system, AIPATH_s *path, char *from_name, char *to_name, i32 *direction);
-
-}
-
 struct PART_s;
-
-extern i32 (*Slam_GetDebrisFn)(GameObject_s *, i32);
 
 extern f32 ForceThrowGravity;
 
@@ -1103,17 +1034,11 @@ static inline void RotateForceGlowMatrix(NUMTX *matrix, i32 angle) {
 }
 
 extern BATARANG_s Batarang[8];
-extern i32 (*BlowupExFunc)(GIZMOBLOWUP_s *, i32);
-extern void (*GizmoBlowUp_SfxFn)(GIZMOBLOWUP_s *, NUVEC *);
-extern i32 (*GizmoBlowUp_NoTargetFn)(WORLDINFO_s *, GameObject_s *);
 
 // Original writable flagremaptab at 0x668520, 32 pairs of 32-bit masks.
 extern "C" {
 extern u32 flagremaptab[32][2];
 }
-
-GIZMOBLOWUP_s *GizmoBlowUp_Hit(GameObject_s *object, NUVEC *points, i32 point_count, f32 radius, NUVEC *minimum,
-                               NUVEC *maximum, BOLT_s *bolt, u32 hit_type, u8 *flags);
 
 #if defined(__SSE__)
 #include <xmmintrin.h>
@@ -1870,7 +1795,6 @@ static void ShootThisFrame(GameObject_s *object, i32 bolt_id, i32 flags) {
     object->quick_shoot_bolt_id = bolt_id;
     object->quick_shoot_flags = flags;
     if ((object->apiobj.character_data->game_character->flags_098[0] & 2) != 0) {
-        extern void SetWeaponIn(GameObject_s *);
         SetWeaponIn(object);
     }
     if (object->field_0x7e4 != NULL && object->field_0x7e4[8] == 2 && object->field_0x7e8 != 0)
