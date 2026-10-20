@@ -14979,13 +14979,7 @@ static void edppRender() {
 
 extern "C" {
     void edppDeleteEffect(i32 index) {
-        // The original reads edpp_ptls[-1] when no particle is nearest, which
-        // only lands on a neighbouring global; host builds skip that read.
-#ifdef HOST_BUILD
-        if (edpp_nearest != -1 && edpp_ptls[edpp_nearest].effect_index == index)
-#else
         if (edpp_ptls[edpp_nearest].effect_index == index)
-#endif
             edpp_nearest = -1;
         DebFreeOrphansInstantly(debtab[index]);
         i32 replacement = LookupDebrisEffectPageIgnore(debtab[index]->name, 1, index);

@@ -41,6 +41,8 @@ build:native --define=SAGA_MODE=debug
 build:native --compilation_mode=dbg
 # Report and recover from ASan errors in the original particle editor routines.
 build:native --per_file_copt=src/gameapi/edtools/edtoolsall_plain.cpp@-fsanitize-recover=address
+# edppDeleteEffect reads edpp_ptls[-1] when no particle is nearest, as the original does.
+build:native --per_file_copt=src/legoapi/render/core/gameliball.cpp@-fsanitize-recover=address
 
 build:native_release --config=saga-common
 build:native_release --cxxopt=-std=c++17
