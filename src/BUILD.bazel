@@ -196,7 +196,11 @@ _HOST_PLATFORM_COPTS = select({
     ],
     "//conditions:default": [],
 }) + select({
-    ":native_linux_debug": ["-fsanitize=address,undefined"],
+    # Report ASan errors and keep running; the smoke harness still halts on them.
+    ":native_linux_debug": [
+        "-fsanitize=address,undefined",
+        "-fsanitize-recover=address",
+    ],
     "//conditions:default": [],
 }) + select({
     "//bazel/platforms:x86_64": ["-msse2"],

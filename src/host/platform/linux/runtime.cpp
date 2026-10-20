@@ -24,8 +24,8 @@ ANativeWindow *HostPlatformNativeWindow(SDL_Window *window) {
     return reinterpret_cast<ANativeWindow *>(handle);
 }
 
-// Recovery instrumentation is limited to the particle editor translation unit.
-// Other ASan-instrumented code retains its non-recovering report calls.
+// Debug builds compile with -fsanitize-recover=address, so ASan reports each
+// error and continues; the smoke harness overrides this to halt.
 extern "C" __attribute__((weak)) const char *__asan_default_options() {
     return "halt_on_error=0";
 }
