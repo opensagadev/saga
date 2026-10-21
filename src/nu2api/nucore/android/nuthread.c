@@ -58,7 +58,7 @@ i32 NuThreadCreateCriticalSection(void) {
 
     pthread_mutexattr_t attr;
     pthread_mutexattr_init(&attr);
-    pthread_mutexattr_settype(&attr, 1);
+    pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
     pthread_mutex_init(&NuThread_CriticalSections[index], &attr);
     pthread_mutexattr_destroy(&attr);
     NuThread_CriticalSectionsUsed[index] = true;
