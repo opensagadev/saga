@@ -17,15 +17,8 @@ extern "C" {
 #endif
 #endif
 
-// Define fixed-width types for convenience.
-typedef uint8_t u8;
-typedef uint16_t u16;
-typedef uint32_t u32;
-typedef uint64_t u64;
-typedef int8_t i8;
-typedef int16_t i16;
-typedef int32_t i32;
-typedef int64_t i64;
+// Fixed-width types for convenience.
+#include "nu2api/nucore/fixed_width.h"
 
 // This is a bit of a hack. It allows us to represent parameters representing
 // sizes in a way that's a bit more future-proof while retaining compatibility
@@ -42,7 +35,7 @@ typedef int32_t isize;
 
 // Ensure that floating-point types are of the expected width.
 typedef float f32;
-typedef double f64;
+typedef double f64 SAGA_I386_ALIGN;
 #ifdef __cplusplus
 static_assert(sizeof(f32) == 4, "f32 is not 4 bytes");
 static_assert(sizeof(f64) == 8, "f64 is not 8 bytes");

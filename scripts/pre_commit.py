@@ -154,14 +154,16 @@ def clang_tidy_commands() -> list[list[str]]:
                 "//src:clang_tidy_target",
             ]
         )
-    if system != "Darwin":
-        native_command = ["bazel", "build", "--config=native"]
-        if system == "Windows":
-            native_command.append("--config=windows-mingw")
-        native_command.extend(
-            ["//src:clang_tidy_native"]
+    # Native builds run on Linux; Windows binaries are cross-compiled there.
+    if system == "Linux":
+        commands.append(
+            [
+                "bazel",
+                "build",
+                "--config=native",
+                "//src:clang_tidy_native",
+            ]
         )
-        commands.append(native_command)
     commands.append(
         [
             "bazel",

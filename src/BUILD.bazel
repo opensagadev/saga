@@ -1,3 +1,4 @@
+load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@emsdk//emscripten_toolchain:wasm_rules.bzl", "wasm_cc_binary")
 load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
 load("@rules_cc//cc:cc_library.bzl", "cc_library")
@@ -187,6 +188,11 @@ _HOST_PLATFORM_COPTS = select({
     "//bazel/platforms:windows": [
         "-include",
         "src/host/platform/windows/posix_random.h",
+        "-march=i686",
+        "-msse2",
+        "-mfpmath=sse",
+        # Lay out bit-fields as GCC does on i386 Linux/Android, not as MSVC.
+        "-mno-ms-bitfields",
     ],
     "//bazel/platforms:linux": [
         "-m32",
@@ -213,7 +219,12 @@ _HOST_PLATFORM_DEPS = select({
         ":saga_macos_platform",
         "@system_host_deps_macos//:host_deps",
     ],
-    "//bazel/platforms:windows": ["@system_host_deps_windows//:host_deps"],
+    "//bazel/platforms:windows": [
+        "@libogg_wasm//:ogg",
+        "@libvorbis_wasm//:vorbis",
+        "@libvorbis_wasm//:vorbisfile",
+        "@windows_i686_deps//:host_deps",
+    ],
     "//conditions:default": [],
 }) + ["@libsquish//:squish"]
 
@@ -283,8 +294,34 @@ function_declaration_index(
     srcs = _NATIVE_COMPONENTS + [":saga_native_platform"],
 )
 
+# Windows resolves DLLs from the executable's directory, so stage them beside
+# bazel-bin/src/saga_native.exe.
+_WINDOWS_RUNTIME_DLLS = [
+    "SDL3.dll",
+    "libEGL.dll",
+    "libGLESv2.dll",
+    "libgcc_s_dw2-1.dll",
+    "libstdc++-6.dll",
+    "libwinpthread-1.dll",
+    "zlib1.dll",
+]
+
+[
+    copy_file(
+        name = dll,
+        src = "@windows_i686_deps//:mingw32/bin/" + dll,
+        out = dll,
+        target_compatible_with = ["@platforms//os:windows"],
+    )
+    for dll in _WINDOWS_RUNTIME_DLLS
+]
+
 cc_binary(
     name = "saga_native",
+    data = select({
+        "//bazel/platforms:windows": [":" + dll for dll in _WINDOWS_RUNTIME_DLLS],
+        "//conditions:default": [],
+    }),
     linkopts = select({
         "//bazel/platforms:linux": [
             "-m32",

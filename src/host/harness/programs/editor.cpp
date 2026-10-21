@@ -34,6 +34,7 @@
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>
+#include <filesystem>
 #include <iostream>
 #include <optional>
 #include <string>
@@ -466,6 +467,18 @@ namespace saga::host::harness {
 
             [[nodiscard]] bool initialize_editor() {
                 if (this->save_directory.empty()) {
+#ifdef _WIN32
+                    // MinGW has no mkdtemp.
+                    std::error_code error;
+                    const std::filesystem::path directory = std::filesystem::temp_directory_path(error) /
+                                                            ("saga-editor-" + std::to_string(SDL_GetTicksNS()));
+                    if (error || !std::filesystem::create_directory(directory, error)) {
+                        LOG_ERR("editor: could not create a temporary directory for level saves");
+                        this->exit_status.store(1, std::memory_order_release);
+                        return false;
+                    }
+                    this->save_directory = directory.string();
+#else
                     std::string directory_template = "/tmp/saga-editor-XXXXXX";
                     if (!::mkdtemp(directory_template.data())) {
                         LOG_ERR("editor: could not create a temporary directory for level saves");
@@ -473,6 +486,7 @@ namespace saga::host::harness {
                         return false;
                     }
                     this->save_directory = std::move(directory_template);
+#endif
                     LOG_INFO("editor: level saves will be written to %s", this->save_directory.c_str());
                 }
                 if (!this->editor_pool_installed) {

@@ -21,7 +21,8 @@ not need to be installed separately or added to `PATH`.
 
 ### Linux
 
-Linux supports all three builds: `target`, `native`, and `wasm`.
+Linux supports all three builds: `target`, `native`, and `wasm`. It also
+cross-compiles the Windows `native` build.
 
 Only the Linux `native` build uses system libraries. It intentionally produces
 a 32-bit i686 executable, so the host needs a compiler capable of building
@@ -35,19 +36,16 @@ libraries; Bazel downloads their toolchains and libraries.
 ### Windows
 
 The `wasm` build works in the normal Windows Bazel environment. Build `target`
-and `native` from an MSYS2 MINGW64 shell.
-
-For both MSYS2 builds:
+from an MSYS2 shell:
 
 - set `BAZEL_SH` to MSYS2's `usr/bin/bash.exe`; and
 - set `MSYS2_ARG_CONV_EXCL='*'` so MSYS2 does not rewrite Bazel arguments.
 
-The Windows `native` build also needs the MINGW64 development packages for
-GCC, pkg-config, SDL 3, Vorbis, GLES headers, and ANGLE. Set
-`PKG_CONFIG_PATH=/mingw64/lib/pkgconfig`. Its commands must include
-`--config=windows-mingw`.
-
-These Windows native libraries are not used by the Android `target` build.
+The Windows `native` executable is cross-compiled on Linux, because the engine
+needs the 32-bit x86 struct layout of the original binary. The Linux host
+needs the i686 MinGW-w64 cross compiler with the posix thread model and lld
+(on Debian or Ubuntu, `g++-mingw-w64-i686-posix` and `lld`). Bazel downloads
+pinned i686 builds of SDL 3 and ANGLE from MSYS2 and builds Vorbis itself.
 
 ### macOS
 
@@ -135,14 +133,16 @@ It uses hidden graphics and dummy audio by default; an X display is required.
 See [host utilities](doc/host-utilities.md#direct-gameplay-smoke-tests-linux) for
 fixture selection, readiness checks, timeouts and exit statuses.
 
-On Windows, from MSYS2 MINGW64:
+For Windows, cross-compile on Linux:
 
 ```sh
-bazel build --config=native --config=windows-mingw //src:saga_native
+bazel build --config=native --config=windows-i686 //src:saga_native
 ```
 
 Build `native` when changing desktop runtime behavior. Linux produces
-`bazel-bin/src/saga_native`; Windows produces the corresponding `.exe`.
+`bazel-bin/src/saga_native`. The Windows build produces a 32-bit
+`bazel-bin/src/saga_native.exe` with the DLLs it needs beside it; copy them
+together to a Windows machine to run it.
 
 To run the native build, first place the OBB from the setup section under
 `res/`. Then open a window on Linux with:
@@ -151,11 +151,8 @@ To run the native build, first place the OBB from the setup section under
 bazel run --config=native //src:run_native -- window
 ```
 
-On Windows, include its required configuration:
-
-```sh
-bazel run --config=native --config=windows-mingw //src:run_native -- window
-```
+On Windows, run `saga_native.exe window` from a folder holding the executable,
+its DLLs and `res/`.
 
 Save-file inspection and editing live in the standalone
 [`opensagadev/nusave`](https://github.com/opensagadev/nusave) tool.
@@ -273,7 +270,7 @@ test pass. Shared behavior should still reconstruct the original game.
 
    macOS skips the unsupported `native` check. Apple Silicon also skips
    `target`, whose old Android toolchain requires an Intel environment.
-   On Windows, add `--config=windows-mingw` to the native command.
+   Windows skips the `native` check, which runs on Linux.
 
 4. Build `target` after shared game or engine changes. Also build `native`
    after desktop runtime changes and `wasm` after browser or portable-host
@@ -450,7 +447,8 @@ to `main`. GitHub Pages deployment is owned by the opensaga.dev repository.
 - `target` on Linux, Windows, and Intel macOS;
 - `wasm` on Linux, Windows, and macOS;
 - the i686 `native` build on Linux;
-- the MINGW64 `native` build on Windows; and
+- the i686 Windows `native` build, cross-compiled on Linux and uploaded as
+  the `saga-native-windows-i686` artifact; and
 - the target symbol check on Linux.
 
 CI cannot access `res/libTTapp.so`. Its symbol check therefore uses the

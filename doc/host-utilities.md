@@ -105,5 +105,4 @@ recovery introduced the original `lrand48` calls. Six explicit seeds agree
 with Linux libc for 10,000 draws each; the Bionic default agrees with libc
 seeded with `0x1234abcd` for another 10,000 draws. An initial comparison to
 unseeded Linux libc differed because its default state differs from Bionic.
-The adapter compiles with MinGW; target/Linux native builds and repository
-checks pass. Full Windows linkage still requires the CI graphics dependencies.
+The adapter is built by the i686 MinGW-w64 cross build of `native`.

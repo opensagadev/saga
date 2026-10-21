@@ -26,11 +26,6 @@ llvm_tools.toolchain(
 )
 use_repo(llvm_tools, "llvm_tools", "llvm_tools_llvm")
 
-# Expose rules_cc's detected host toolchain repository so Windows can opt into
-# its MinGW toolchain. Bazel otherwise auto-registers only MSVC on Windows.
-cc_configure = use_extension("@rules_cc//cc:extensions.bzl", "cc_configure_extension")
-use_repo(cc_configure, "local_config_cc")
-
 # Python-based checks and tools use this downloaded runtime on every host.
 python = use_extension("@rules_python//python/extensions:python.bzl", "python")
 python.toolchain(python_version = "3.12.12")
@@ -156,13 +151,21 @@ pkg_config_repository(
     ],
 )
 
-pkg_config_repository(
-    name = "system_host_deps_windows",
-    packages = [
-        "angleproject",
-        "sdl3",
-        "vorbis",
-        "vorbisfile",
-    ],
-    pkg_config = "pkgconf",
+msys2_repository = use_repo_rule("//bazel:msys2_repository.bzl", "msys2_repository")
+
+# Prebuilt i686 SDL3 and ANGLE for the cross-compiled Windows build, with the
+# runtime DLLs they import. Ogg, Vorbis and Squish are built from source.
+msys2_repository(
+    name = "windows_i686_deps",
+    build_file = "//third_party:windows_i686_deps.BUILD.bazel",
+    packages = {
+        "mingw-w64-i686-angleproject-2.1.r21358.2e285bb5-5-any": "09c7609df3be2b1348049777e8372e35a4bc8b9c4f5703b684966bc2390e0f0c",
+        "mingw-w64-i686-egl-headers-1.5.r284.3ae2b7c-1-any": "bc011e1b220c0f04ad2c11a07cc081b90c35140cb923cf9af3f1a064feff9a9e",
+        "mingw-w64-i686-gles-headers-3.2.r1065.7fc154c-1-any": "9a28b40ee5f377bb81270967168a65c37bfeaed26bfb96974078fedcb27e724e",
+        "mingw-w64-i686-libgcc-16.2.0-6-any": "7b89855e761f98b16608160771976f12e4075b28224ff9405fcf09ed37ddec44",
+        "mingw-w64-i686-libstdc++-16.2.0-6-any": "f04dfa26fe948b9a2166cfb39d5128c6a1fc48a10aba36ebf83b7f784c7b9b21",
+        "mingw-w64-i686-libwinpthread-14.0.0.r495.g63ebe6cdb-2-any": "ab46e79edef722b296fd63f5373260b3a338985f2da6842d777ff886f081b689",
+        "mingw-w64-i686-sdl3-3.4.10-1-any": "61525d27d9cf7ec1a765e33b25758df4f1d82bfa55cf897167c2ded8a6d40c73",
+        "mingw-w64-i686-zlib-1.3.2-2-any": "03d1f7030adc892eb1ee8434f7201847093ff69b8ad9ff77a650d6dfae72083a",
+    },
 )

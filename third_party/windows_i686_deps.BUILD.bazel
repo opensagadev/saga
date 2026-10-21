@@ -1,0 +1,26 @@
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+# Import libraries and headers for the DLLs below. The .dll.a files are
+# ordinary archives of import stubs.
+cc_library(
+    name = "host_deps",
+    srcs = [
+        "mingw32/lib/libEGL.dll.a",
+        "mingw32/lib/libGLESv2.dll.a",
+        "mingw32/lib/libSDL3.dll.a",
+    ],
+    hdrs = glob([
+        "mingw32/include/EGL/**",
+        "mingw32/include/GLES2/**",
+        "mingw32/include/GLES3/**",
+        "mingw32/include/SDL3/**",
+    ]),
+    includes = ["mingw32/include"],
+)
+
+# Everything saga_native.exe loads at run time besides Windows system DLLs.
+# ANGLE was built by MSYS2's GCC and needs its C++ runtime. //src copies these
+# next to the executable.
+exports_files(glob(["mingw32/bin/*.dll"]))

@@ -215,25 +215,17 @@ jobs:
           //src:clang_tidy_native
 
   native-windows:
-    name: Native / Windows MINGW64
-    runs-on: windows-latest
+    name: Native / Windows i686 (cross from Linux)
+    runs-on: ubuntu-latest
     needs: checks
     steps:
-      - uses: actions/checkout@v4
+      - name: Install MinGW-w64 i686 and lld
+        run: |
+          sudo apt-get -y update
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
+            g++-mingw-w64-i686-posix lld
 
-      - name: Setup MSYS2
-        id: msys2
-        uses: msys2/setup-msys2@v2
-        with:
-          msystem: MINGW64
-          path-type: inherit
-          update: true
-          install: >-
-            base-devel mingw-w64-x86_64-make
-            mingw-w64-x86_64-pkgconf
-            mingw-w64-x86_64-gcc
-            mingw-w64-x86_64-libvorbis mingw-w64-x86_64-gles-headers
-            mingw-w64-x86_64-angleproject mingw-w64-x86_64-sdl3
+      - uses: actions/checkout@v4
 
       - name: Setup Bazel
         uses: bazel-contrib/setup-bazel@0.19.0
@@ -245,17 +237,20 @@ jobs:
           cache-save: ${{ github.event_name != 'pull_request' }}
 
       - name: Verify Bazel version
-        shell: msys2 {0}
-        env:
-          BAZEL_SH: "${{ steps.msys2.outputs.msys2-location }}/usr/bin/bash.exe"
         run: test "$(bazel --version)" = "bazel $BAZEL_VERSION"
 
       - name: Build native (debug)
-        shell: msys2 {0}
-        env:
-          BAZEL_SH: "${{ steps.msys2.outputs.msys2-location }}/usr/bin/bash.exe"
-          MSYS2_ARG_CONV_EXCL: "*"
-          PKG_CONFIG_PATH: /mingw64/lib/pkgconfig
         run: >-
-          bazel build --config=native --config=windows-mingw
+          bazel build --config=native --config=windows-i686
           //src:saga_native
+
+      - name: Collect executable and DLLs
+        run: |
+          mkdir -p dist
+          cp -L bazel-bin/src/saga_native.exe bazel-bin/src/*.dll dist/
+
+      - name: Upload Windows build
+        uses: actions/upload-artifact@v4
+        with:
+          name: saga-native-windows-i686
+          path: dist/

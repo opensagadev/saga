@@ -80,9 +80,12 @@ cc_library(
     ],
     hdrs = VORBIS_HEADERS + VORBIS_PRIVATE_HEADERS,
     copts = [
-        "-DHAVE_ALLOCA_H",
         "-DUSE_MEMORY_H",
-    ],
+    ] + select({
+        # MinGW declares alloca in <malloc.h>, which os.h includes on _WIN32.
+        "@platforms//os:windows": [],
+        "//conditions:default": ["-DHAVE_ALLOCA_H"],
+    }),
     includes = [
         "include",
         "lib",
