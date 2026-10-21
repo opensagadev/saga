@@ -15,13 +15,13 @@
 
 DECOMP_ASSERT(sizeof(void *) == 4, "Unsupported pointer size");
 
-// i686 MinGW prefixes symbol names with '_' but emits asm labels verbatim.
-// GCC only resolves an alias to an asm-labelled symbol there when the target
-// is marked literal with '*'.
-#if defined(_WIN32) && defined(__i386__) && !defined(__clang__)
-#define DECOMP_ALIAS_TARGET(name) "*" name
+// Whether alias("name") can target an asm-labelled symbol. Clang cannot on
+// i686 Windows, where symbol names carry a '_' prefix that asm labels lack;
+// that build forwards to the target instead.
+#if defined(_WIN32) && defined(__i386__)
+#define DECOMP_ASM_ALIAS 0
 #else
-#define DECOMP_ALIAS_TARGET(name) name
+#define DECOMP_ASM_ALIAS 1
 #endif
 
 // Define undefined* types from ghidra

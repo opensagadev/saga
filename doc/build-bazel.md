@@ -9,10 +9,10 @@
 - `rules_python` supplies Python 3.12.12 to all declared Python targets.
 - The matching target uses Android NDK r8e GCC 4.7, API 9, and x86.
 - Native Linux intentionally uses i686 with ASan and UBSan.
-- Native Windows is i686, cross-compiled on Linux with the system MinGW-w64
-  GCC selected by `--config=windows-i686` (`//bazel/mingw`). Its wrapper
-  prefixes asm-label symbols with the `_` that i686 Windows expects and links
-  with lld, because GNU ld leaves GCC's i686 PE weak definitions unresolved.
+- Native Windows is i686, cross-compiled on Linux x86-64 with the pinned
+  llvm-mingw clang/lld toolchain (`@llvm_mingw`) selected by
+  `--config=windows-i686`. Its wrapper (`bazel/llvm_mingw_cc.sh`) prefixes
+  asm-label symbols with the `_` that i686 Windows expects.
   `u64`, `i64` and `f64` are 4-byte aligned there and bit-fields use the GCC
   layout, so the `DECOMP_ASSERT` layout checks hold as on Android.
 - WASM uses emsdk 6.0.8 and a pthread-enabled Emscripten toolchain.

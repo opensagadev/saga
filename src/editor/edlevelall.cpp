@@ -738,8 +738,16 @@ extern "C" void baseInterfaceDestructor(EdClassInterface *object) asm("_ZN16EdCl
 void baseInterfaceDestructor(EdClassInterface *object) {
     object->vtable = const_cast<EdClassInterfaceVTable *>(&sceneBaseInterfaceVTable.methods);
 }
+#if DECOMP_ASM_ALIAS
 extern "C" void baseInterfaceCompleteDestructor(EdClassInterface *) asm("_ZN16EdClassInterfaceD2Ev")
-    __attribute__((weak, alias(DECOMP_ALIAS_TARGET("_ZN16EdClassInterfaceD1Ev"))));
+    __attribute__((weak, alias("_ZN16EdClassInterfaceD1Ev")));
+#else
+extern "C" void baseInterfaceCompleteDestructor(EdClassInterface *object) asm("_ZN16EdClassInterfaceD2Ev")
+    __attribute__((weak));
+void baseInterfaceCompleteDestructor(EdClassInterface *object) {
+    baseInterfaceDestructor(object);
+}
+#endif
 extern "C" void baseInterfaceDeletingDestructor(EdClassInterface *object) asm("_ZN16EdClassInterfaceD0Ev")
     __attribute__((weak));
 void baseInterfaceDeletingDestructor(EdClassInterface *object) {
@@ -754,8 +762,16 @@ void sceneHelperDestructor(SceneObjectHelper *object) {
         const_cast<void *>(static_cast<void const *>(&edSubSystemVTable.methods));
     object->class_interface.vtable = const_cast<EdClassInterfaceVTable *>(&sceneBaseInterfaceVTable.methods);
 }
+#if DECOMP_ASM_ALIAS
 extern "C" void sceneHelperCompleteDestructor(SceneObjectHelper *) asm("_ZN17SceneObjectHelperD2Ev")
-    __attribute__((weak, alias(DECOMP_ALIAS_TARGET("_ZN17SceneObjectHelperD1Ev"))));
+    __attribute__((weak, alias("_ZN17SceneObjectHelperD1Ev")));
+#else
+extern "C" void sceneHelperCompleteDestructor(SceneObjectHelper *object) asm("_ZN17SceneObjectHelperD2Ev")
+    __attribute__((weak));
+void sceneHelperCompleteDestructor(SceneObjectHelper *object) {
+    sceneHelperDestructor(object);
+}
+#endif
 extern "C" void sceneHelperDeletingDestructor(SceneObjectHelper *object) asm("_ZN17SceneObjectHelperD0Ev")
     __attribute__((weak));
 void sceneHelperDeletingDestructor(SceneObjectHelper *object) {

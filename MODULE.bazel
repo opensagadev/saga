@@ -151,6 +151,15 @@ pkg_config_repository(
     ],
 )
 
+llvm_mingw_repository = use_repo_rule("//bazel:llvm_mingw_repository.bzl", "llvm_mingw_repository")
+
+# Hermetic clang/lld toolchain for the i686 Windows cross build.
+llvm_mingw_repository(
+    name = "llvm_mingw",
+    sha256 = "ceb8c5acc6f76e143f9c714772d2fa677027802561ce68c396e8dc990a80f0b6",
+    version = "20261020",
+)
+
 msys2_repository = use_repo_rule("//bazel:msys2_repository.bzl", "msys2_repository")
 
 # Prebuilt i686 SDL3 and ANGLE for the cross-compiled Windows build, with the

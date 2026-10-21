@@ -41,12 +41,10 @@ from an MSYS2 shell:
 - set `BAZEL_SH` to MSYS2's `usr/bin/bash.exe`; and
 - set `MSYS2_ARG_CONV_EXCL='*'` so MSYS2 does not rewrite Bazel arguments.
 
-The Windows `native` executable is cross-compiled on Linux, because the engine
-needs the 32-bit x86 struct layout of the original binary. The Linux host
-needs the i686 MinGW-w64 cross compiler with the posix thread model and lld
-(`g++-mingw-w64-i686-posix` and `lld` on Debian or Ubuntu, `mingw-w64-gcc`
-and `lld` on Arch). Bazel downloads
-pinned i686 builds of SDL 3 and ANGLE from MSYS2 and builds Vorbis itself.
+The Windows `native` executable is cross-compiled on Linux x86-64, because the
+engine needs the 32-bit x86 struct layout of the original binary. Nothing needs
+to be installed: Bazel downloads a pinned llvm-mingw toolchain and pinned i686
+builds of SDL 3 and ANGLE from MSYS2, and builds Vorbis itself.
 
 ### macOS
 

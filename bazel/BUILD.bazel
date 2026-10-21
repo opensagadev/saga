@@ -1,6 +1,8 @@
 exports_files([
     "android_cc_toolchain_config.bzl",
     "android_ndk_repository.bzl",
+    "llvm_mingw_cc.sh",
+    "llvm_mingw_cc_toolchain_config.bzl",
     "saga_components.bzl",
     "system_deps.bzl",
 ])

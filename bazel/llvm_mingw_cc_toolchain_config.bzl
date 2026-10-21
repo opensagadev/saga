@@ -1,8 +1,7 @@
-"""i686 MinGW-w64 cross toolchain for the native Windows build.
+"""i686 llvm-mingw cross toolchain for the native Windows build.
 
-Uses the system cross compiler installed on a Linux host, for example from
-Ubuntu's `g++-mingw-w64-i686-posix` or Arch's `mingw-w64-gcc` package. The posix thread model is
-required for the C++ threading support used by the host layer.
+Instantiated inside the @llvm_mingw repository (see llvm_mingw_repository.bzl),
+so the tool paths below are relative to that repository's root.
 """
 
 load("@rules_cc//cc:action_names.bzl", "ACTION_NAMES")
@@ -18,7 +17,6 @@ load("@rules_cc//cc/common:cc_common.bzl", "cc_common")
 load("@rules_cc//cc/toolchains:cc_toolchain_config_info.bzl", "CcToolchainConfigInfo")
 
 def _mingw_cc_toolchain_config_impl(ctx):
-    prefix = ctx.attr.tool_prefix
     compile_actions = [
         ACTION_NAMES.c_compile,
         ACTION_NAMES.cpp_compile,
@@ -66,29 +64,30 @@ def _mingw_cc_toolchain_config_impl(ctx):
         ),
         feature(
             # Ship one executable that only needs the bundled third-party DLLs.
+            # The host layer uses POSIX threads (winpthreads).
             name = "static_runtime",
             enabled = True,
             flag_sets = [
                 flag_set(
                     actions = link_actions,
-                    flag_groups = [flag_group(flags = ["-static"])],
+                    flag_groups = [flag_group(flags = ["-static", "-pthread"])],
                 ),
             ],
         ),
     ]
     paths = [
-        tool_path(name = "ar", path = prefix + "ar"),
-        tool_path(name = "cpp", path = prefix + "cpp"),
-        # As in the NDK toolchain, g++ drives every compile and the link; the
+        tool_path(name = "ar", path = "bin/llvm-ar"),
+        tool_path(name = "cpp", path = "bin/i686-w64-mingw32-clang"),
+        # clang++ drives every compile and the link (with lld); the
         # force_c_language feature restores C semantics for c_compile. The
         # wrapper fixes up asm-label symbol names after each compile.
-        tool_path(name = "gcc", path = "mingw_gcc.sh"),
-        tool_path(name = "gcov", path = prefix + "gcov"),
-        tool_path(name = "ld", path = prefix + "ld"),
-        tool_path(name = "nm", path = prefix + "nm"),
-        tool_path(name = "objcopy", path = prefix + "objcopy"),
-        tool_path(name = "objdump", path = prefix + "objdump"),
-        tool_path(name = "strip", path = prefix + "strip"),
+        tool_path(name = "gcc", path = "llvm_mingw_cc.sh"),
+        tool_path(name = "gcov", path = "/bin/false"),
+        tool_path(name = "ld", path = "bin/ld.lld"),
+        tool_path(name = "nm", path = "bin/llvm-nm"),
+        tool_path(name = "objcopy", path = "bin/llvm-objcopy"),
+        tool_path(name = "objdump", path = "bin/llvm-objdump"),
+        tool_path(name = "strip", path = "bin/llvm-strip"),
     ]
 
     return cc_common.create_cc_toolchain_config_info(
@@ -107,7 +106,7 @@ def _mingw_cc_toolchain_config_impl(ctx):
                 extension = ".dll",
             ),
         ],
-        compiler = "gcc",
+        compiler = "clang",
         cxx_builtin_include_directories = ctx.attr.builtin_include_directories,
         features = features,
         host_system_name = "x86_64-unknown-linux-gnu",
@@ -115,18 +114,13 @@ def _mingw_cc_toolchain_config_impl(ctx):
         target_libc = "msvcrt",
         target_system_name = "i686-w64-mingw32",
         tool_paths = paths,
-        toolchain_identifier = "mingw-w64-i686",
+        toolchain_identifier = "llvm-mingw-i686",
     )
 
 mingw_cc_toolchain_config = rule(
     implementation = _mingw_cc_toolchain_config_impl,
     attrs = {
-        "builtin_include_directories": attr.string_list(default = [
-            "/usr/lib/gcc/i686-w64-mingw32/",
-            "/usr/i686-w64-mingw32/include/",
-            "/usr/share/mingw-w64/include/",
-        ]),
-        "tool_prefix": attr.string(default = "/usr/bin/i686-w64-mingw32-"),
+        "builtin_include_directories": attr.string_list(mandatory = True),
     },
     provides = [CcToolchainConfigInfo],
 )
