@@ -252,13 +252,13 @@ void PushCode(GameObject_s *object, i32 allow_push) {
             if (object->field_0xdc4 >= 0.25f)
                 object->field_0xdc4 = 0.4f;
         }
-    } else if (object->pad_gamepad->input_magnitude > 0.0f ||
-               (LEGOCONTEXT_PUSHOBSTACLE != -1 && object->character_context == LEGOCONTEXT_PUSHOBSTACLE)) {
+    } else if (!(object->pad_gamepad->input_magnitude > 0.0f ||
+                 (LEGOCONTEXT_PUSHOBSTACLE != -1 && object->character_context == LEGOCONTEXT_PUSHOBSTACLE))) {
+        object->field_0xdc4 = 0.0f;
+    } else {
         object->field_0xdc4 -= FRAMETIME;
         if (object->field_0xdc4 < 0.0f)
             object->field_0xdc4 = 0.0f;
-    } else {
-        object->field_0xdc4 = 0.0f;
     }
 
     if ((CInfo[object->character_context].flags & 0x2000) == 0) {

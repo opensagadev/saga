@@ -3014,14 +3014,7 @@ void Hub_DrawPanel(WORLDINFO_s *) {
                     }
                 }
             }
-            if (__builtin_expect(!buildup_total, 0)) {
-                f32 x = 0.0f;
-                if (Game.indy_unlocked) {
-                    Hub_DrawImportantBrick(251, 0.1f, HUB_EPISODETITLEY - 0.225f, hub_episode_time, -1, -1);
-                    x = -0.1f;
-                }
-                Hub_DrawImportantBrick(211, x, HUB_EPISODETITLEY, hub_episode_time, gold_count, gold_total);
-            } else {
+            if (__builtin_expect(buildup_total, 1)) {
                 Hub_DrawImportantBrick(211, -0.20100002f, HUB_EPISODETITLEY, hub_episode_time, gold_count, gold_total);
                 DrawBuildUpBar(0.20100002f, HUB_EPISODETITLEY + PANEL_MINIKITY - PANEL_MINIKITCOUNTY, 100, 100,
                                NU_SIN_LUT(static_cast<i32>(16384.0f * hub_episode_time)), 1.0f, 1.0f, 0);
@@ -3029,6 +3022,13 @@ void Hub_DrawPanel(WORLDINFO_s *) {
                 Text3DEx(text, 0.20100002f, HUB_EPISODETITLEY, 1.0f, PANEL_MINIKITCOUNTSCALE, PANEL_MINIKITCOUNTSCALE,
                          PANEL_MINIKITCOUNTSCALE, 0, 255, 0, 127,
                          static_cast<u8>(static_cast<i32>(128.0f * hub_episode_time)));
+            } else {
+                f32 x = 0.0f;
+                if (Game.indy_unlocked) {
+                    Hub_DrawImportantBrick(251, 0.1f, HUB_EPISODETITLEY - 0.225f, hub_episode_time, -1, -1);
+                    x = -0.1f;
+                }
+                Hub_DrawImportantBrick(211, x, HUB_EPISODETITLEY, hub_episode_time, gold_count, gold_total);
             }
             SmartTextEx(TTab[tBONUS2], 0.0f, HUB_EPISODESUBTITLEY, 1.0f, HUB_EPISODESUBTITLESIZE,
                         HUB_EPISODESUBTITLESIZE, HUB_EPISODESUBTITLESIZE, 0, HUB_EPISODER, HUB_EPISODEG, HUB_EPISODEB,
@@ -3085,7 +3085,7 @@ void Hub_DrawPanel(WORLDINFO_s *) {
     if (hub_area != -1 && hub_area_time > 0.0f) {
         if (GameCam->sock_position.location.sock == 7 && (ADataList[hub_area].flags & 5) == 5) {
             i32 count = 0, total = 0;
-            if (Game_AreaSave) {
+            if (__builtin_expect(Game_AreaSave != 0, 1)) {
                 for (i32 i = 0; i < AREACOUNT; ++i) {
                     if (__builtin_expect((ADataList[i].flags & 5) == 5, 0)) {
                         ++total;

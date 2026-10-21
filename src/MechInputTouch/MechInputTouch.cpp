@@ -469,11 +469,7 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
         if ((flags & 0x10) && TouchHacks::CanUseGizForce(object)) {
             bool found = false;
             PART_s *part = static_cast<PART_s *>(object.force_glow_object);
-            if (!(part != NULL && object.force_glow_kind == 3)) {
-                if (!(flags & 0x2000)) {
-                    FindTargetForce(world, object, start, direction, best_distance, best, found, true);
-                }
-            } else {
+            if (__builtin_expect(part != NULL && object.force_glow_kind == 3, 0)) {
                 if (!(flags & 0x2000) || (part->flags & 0x8000)) {
                     f32 radius = part->radius;
                     if (part->flags & 0x8000)
@@ -490,8 +486,12 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
                         found = true;
                     }
                 }
+            } else {
+                if (!(flags & 0x2000)) {
+                    FindTargetForce(world, object, start, direction, best_distance, best, found, true);
+                }
             }
-            if (found)
+            if (__builtin_expect(found != 0, 1))
                 flags = 0;
             else if (!(flags & 0x2000))
                 FindTargetForce(world, object, start, direction, best_distance, best, found, false);
@@ -546,7 +546,7 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
                 }
             }
         }
-        if ((flags & 0x20) && TouchHacks::CanUseBuildIt(object)) {
+        if (__builtin_expect((flags & 0x20) && TouchHacks::CanUseBuildIt(object), 1)) {
             GIZBUILDITSYS_s *system = world->giz_buildit_sys;
             if (system != NULL && system->buildits != NULL) {
                 GIZBUILDIT_s *item = system->buildits;
@@ -654,7 +654,7 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
             GIZTURRETSYS_s *system = world->giz_turret_sys;
             GIZTURRET_s *item = system->turrets;
             for (i32 index = 0; index < system->count; ++index, ++item) {
-                if (item == NULL || (item->flags & 0x22) != 2)
+                if (__builtin_expect(item == NULL || (item->flags & 0x22) != 2, 0))
                     continue;
                 VuVec center;
                 center.z = item->field_0x3c.z;
@@ -710,18 +710,18 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
             bool nonplayer = !(candidate->apiobj.field_0x1f4 & 1);
             f32 weighted = selected != NULL && selected_nonplayer && !nonplayer ? distance * 0.5f : distance;
             if (weighted_distance > weighted) {
-                if (!((flags & 0x1000) && !selected_nonplayer && selected != NULL && nonplayer)) {
+                if ((flags & 0x1000) && !selected_nonplayer && selected != NULL && nonplayer) {
+                    selected_nonplayer = false;
+                } else {
                     weighted_distance = weighted;
                     selected_distance = distance;
                     selected = candidate;
                     selected_nonplayer = nonplayer;
-                } else {
-                    selected_nonplayer = false;
                 }
             }
         }
         if (selected != NULL && !(selected_nonplayer && best != NULL && (flags & 0x1000))) {
-            if (flags & 0x800)
+            if (__builtin_expect(flags & 0x800 != 0, 0))
                 selected_distance *= 0.25f;
             if (best_distance > selected_distance) {
                 best = selected->GetMechObjectInterface();

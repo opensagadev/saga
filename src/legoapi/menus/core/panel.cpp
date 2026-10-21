@@ -962,7 +962,7 @@ void DrawPanel() {
                     if (!paused || pause_i_pad == 0) {
                         icon_x = -ICONX;
                         base_alpha = 1.0f;
-                        if (!object->apiobj.player_controlled)
+                        if (__builtin_expect(!object->apiobj.player_controlled, 0))
                             dropin_alpha = DROPINALPHA;
                     } else if (object->apiobj.player_controlled) {
                         base_alpha = 0.5f;
@@ -1046,7 +1046,7 @@ void DrawPanel() {
                     if (object->apiobj.player_controlled) {
                         DrawHitPoints(object, -PANEL_HITPOINTSX, raised_hearts ? status_y : status_y + PANEL_HEARTY,
                                       0.195f, alpha, 2);
-                    } else if (!paused && !CUTSTOPGAME) {
+                    } else if (__builtin_expect(!paused && !CUTSTOPGAME, 1)) {
                         i32 dropin_alpha = static_cast<i32>(DROPINALPHA * 128.0f);
                         if (dropin_alpha > 0) {
                             f32 y = raised_hearts ? status_y : status_y + PANEL_HEARTY;
@@ -1192,7 +1192,7 @@ void DrawPanel() {
                 if (Arcade)
                     Arcade_DrawPanel(Paused || NetPaused);
                 else {
-                    if (WORLD->area->flags & 0x100) {
+                    if (__builtin_expect(WORLD->area->flags & 0x100 != 0, 0)) {
                         DrawCoinTotal(2, hide_target);
                         if (DrawCoinTotalY != 2000000.0f) {
                             Text_MakeScore(BonusCoinTarget, auxiliary);

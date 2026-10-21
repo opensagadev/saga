@@ -844,10 +844,10 @@ mode_selected:
                     ViewCam.distance += static_cast<f32>(static_cast<u32>(ViewCam.gamepad->pad->analog_r2)) * zoom_step;
                     if ((selected_pad->pad->digital_buttons & 0x40) != 0) {
                         addViewLDy += FRAMETIME;
-                    } else if ((selected_pad->pad->digital_buttons & 0x20) != 0) {
-                        addViewLDy -= FRAMETIME;
-                    } else {
+                    } else if ((selected_pad->pad->digital_buttons & 0x20) == 0) {
                         addViewLDy = 0.0f;
+                    } else {
+                        addViewLDy -= FRAMETIME;
                     }
                     ViewCam.distance += addViewLDy;
                     ViewCam.distance = NuFmax(0.1f, ViewCam.distance);
@@ -965,7 +965,7 @@ mode_selected:
                 offset.x = lateral.x * projection + offset.x;
                 offset.z = projection * lateral.z + offset.z;
                 ++shared_count;
-                if (shared_count == 2) {
+                if (__builtin_expect(shared_count == 2, 0)) {
                     offset.x *= 0.5f;
                     offset.z *= 0.5f;
                 }
@@ -1097,7 +1097,9 @@ mode_selected:
         camera->yaw = yaw;
         camera->roll = roll;
     } else {
-        if (pitch_override == -1) {
+        if (pitch_override != -1)
+            camera->pitch = pitch_override;
+        else {
             if (((camera->pitch - pitch) & 0xffff) > 0x7fff) {
                 CamStopBlend += FRAMETIME;
                 if (CamStopBlend > 1.0f)
@@ -1105,12 +1107,11 @@ mode_selected:
             }
             f32 pitch_seek = camera->angle_seek;
             camera->pitch = SeekRot(camera->pitch, pitch, NuFsqrt(CamStopBlend) * pitch_seek);
-        } else
-            camera->pitch = pitch_override;
-        if (yaw_override == -1)
-            camera->yaw = SeekRot(camera->yaw, yaw, camera->angle_seek * CamStopBlend);
-        else
+        }
+        if (yaw_override != -1)
             camera->yaw = yaw_override;
+        else
+            camera->yaw = SeekRot(camera->yaw, yaw, camera->angle_seek * CamStopBlend);
         if (roll_override == -1)
             roll = SeekRot(camera->roll, roll,
                            (roll_seek_override > 0.0f ? roll_seek_override : camera->angle_seek) * CamStopBlend);

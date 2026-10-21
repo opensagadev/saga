@@ -9280,7 +9280,16 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
                                  2) == 0 &&
                                 (api.anim_packet.flags & ANIMPACKET_FLAG_FINISHED) != 0)
                                 stopped = true;
-                            if (!stopped) {
+                            if (stopped) {
+                                object->target_velocity.z = 0.0f;
+                                object->target_velocity.x = 0.0f;
+                                const i32 surface = static_cast<i8>(api.field_0x281);
+                                if (!(api.field_0x27d != 0 && surface >= 0 && surface < 32 &&
+                                      TerSurface[surface].movement_scale < 1.0f)) {
+                                    api.velocity.x = 0.0f;
+                                    api.velocity.z = 0.0f;
+                                }
+                            } else {
                                 const u16 angle =
                                     (api.character_data->game_character->flags_090 & 0x100) != 0 && direct_turn == 0
                                         ? api.facing_angle
@@ -9290,15 +9299,6 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
                                 object->target_velocity.z = NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff] * speed;
                                 if (object->character_context == 0x25 && object->context_animation != 0x58)
                                     NuVecRotateY(&object->target_velocity, &object->target_velocity, 0x4000);
-                            } else {
-                                object->target_velocity.z = 0.0f;
-                                object->target_velocity.x = 0.0f;
-                                const i32 surface = static_cast<i8>(api.field_0x281);
-                                if (!(api.field_0x27d != 0 && surface >= 0 && surface < 32 &&
-                                      TerSurface[surface].movement_scale < 1.0f)) {
-                                    api.velocity.x = 0.0f;
-                                    api.velocity.z = 0.0f;
-                                }
                             }
                             break;
                         }
@@ -9558,7 +9558,16 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
                                     const f32 stop_frame = AnimStopFrame(api.character_model, animation);
                                     stopped = stop_frame > 0.0f && !(api.anim_packet.blend_source_time < stop_frame);
                                 }
-                                if (!stopped) {
+                                if (stopped) {
+                                    object->target_velocity.x = 0.0f;
+                                    object->target_velocity.z = 0.0f;
+                                    const i32 surface = static_cast<i8>(api.field_0x281);
+                                    if (!(api.field_0x27d != 0 && surface >= 0 && surface < 32 &&
+                                          TerSurface[surface].movement_scale < 1.0f)) {
+                                        api.velocity.x = 0.0f;
+                                        api.velocity.z = 0.0f;
+                                    }
+                                } else {
                                     const u16 angle =
                                         direct_turn == 0 &&
                                                 ((CInfo[object->character_context].flags & (2ull << 32)) != 0 ||
@@ -9570,15 +9579,6 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
                                     if (api.anim_packet.blend_animation_a == 0x4f ||
                                         api.anim_packet.blend_animation_a == 0x26)
                                         NuVecRotateY(&object->target_velocity, &object->target_velocity, 0x4000);
-                                } else {
-                                    object->target_velocity.x = 0.0f;
-                                    object->target_velocity.z = 0.0f;
-                                    const i32 surface = static_cast<i8>(api.field_0x281);
-                                    if (!(api.field_0x27d != 0 && surface >= 0 && surface < 32 &&
-                                          TerSurface[surface].movement_scale < 1.0f)) {
-                                        api.velocity.x = 0.0f;
-                                        api.velocity.z = 0.0f;
-                                    }
                                 }
                                 break;
                             }
@@ -9712,7 +9712,7 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
         }
         seek_rates.x = seek_rates.z = 1.0f;
         seek_rates.y = api.character_data->game_character->velocity_seek_rate;
-    } else if (!separate_seek_rates) {
+    } else if (__builtin_expect(!separate_seek_rates, 1)) {
         seek_rates.y =
             move_vertical != 0 ? seek_rates.x : object->apiobj.character_data->game_character->velocity_seek_rate;
         seek_rates.z = seek_rates.x;
@@ -9822,7 +9822,7 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
             lean = 0x2000;
         else {
             lean = rate / 4;
-            if (lean < -0x2000)
+            if (__builtin_expect(lean < -0x2000, 0))
                 lean = -0x2000;
             if (lean > 0x2000)
                 lean = 0x2000;

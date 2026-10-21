@@ -1344,7 +1344,7 @@ void UpdatePushBlocks(void *world_ptr, void *, float) {
         GizObstacles_AddTrigger(p->position);
         if ((p->runtime_flags_0c8 & 0x81) == 0x81)
             p->runtime_flags_0c8 &= 0x3f;
-        if ((i8)p->runtime_flags_0c8 < 0)
+        if (__builtin_expect((i8)p->runtime_flags_0c8 < 0, 1))
             p->runtime_flags_0c8 |= 0x40;
         if ((p->runtime_flags_0c9 & 1) || (p->flags_0cb & 2))
             continue;
@@ -1447,7 +1447,7 @@ void UpdatePushBlocks(void *world_ptr, void *, float) {
                     p->velocity.z = p->target_velocity.z = 0;
                 }
             } else {
-                if (__builtin_expect(fabsf(p->velocity.x) <= 0.0001f, 0)) {
+                if (fabsf(p->velocity.x) <= 0.0001f) {
                     p->runtime_flags_0c8 &= 0x3f;
                     p->velocity.x = p->target_velocity.x = 0;
                 }

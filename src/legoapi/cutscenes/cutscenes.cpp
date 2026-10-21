@@ -707,18 +707,18 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
 
     GameObject_s *scene_object = NULL;
     CHARACTERMODEL_s *model = NULL;
-    if (CutScene_ReplaceCharacterModelFn != NULL && cut != NULL) {
+    if (__builtin_expect(CutScene_ReplaceCharacterModelFn != NULL && cut != NULL, 0)) {
         i32 replacement_id = CutScene_ReplaceCharacterModelFn(cut, character);
         if (replacement_id != -1 && apicharsys->playermodelids[replacement_id] != -1) {
             model = &apicharsys->models[apicharsys->playermodelids[replacement_id]];
         }
     }
     if (model == NULL) {
-        if ((character->flags & 2) == 0) {
+        if ((character->flags & 2) != 0) {
+            model = static_cast<CHARACTERMODEL_s *>(instance->character_model);
+        } else {
             scene_object = static_cast<GameObject_s *>(instance->character_model);
             model = scene_object->apiobj.character_model;
-        } else {
-            model = static_cast<CHARACTERMODEL_s *>(instance->character_model);
         }
     }
     nuhgobj_s *hierarchy = model->hierarchy;
@@ -1018,7 +1018,7 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
                     if (ground_height != 2000000.0f) {
                         platform = NewShadowOnPlatform();
                         surface = ShadowInfo();
-                        if (ShadNorm.y > 0.0f) {
+                        if (__builtin_expect(ShadNorm.y > 0.0f, 0)) {
                             NUVEC shadow_position = *reinterpret_cast<NUVEC *>(&world_matrix.m30);
                             shadow_position.y = ground_height + 0.005f;
                             f32 alpha = BlobShadowFade(&shadow_position, CutBlobShadowFadeNear, CutBlobShadowFadeFar,
@@ -1044,7 +1044,7 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
         NuVecDistSqr(reinterpret_cast<NUVEC *>(&world_matrix.m30), reinterpret_cast<NUVEC *>(&GameCam->render_mtx.m30),
                      NULL) < CutReflectRange2 &&
         Reflections_On != 0) {
-        if (!shadow_sampled) {
+        if (__builtin_expect(!shadow_sampled, 1)) {
             ground_height = GameShadow(NULL, reinterpret_cast<NUVEC *>(&world_matrix.m30), 5.0f, -1);
             if (ground_height != 2000000.0f) {
                 platform = NewShadowOnPlatform();

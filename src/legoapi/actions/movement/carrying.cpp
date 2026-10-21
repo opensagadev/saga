@@ -407,7 +407,7 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
     f32 *frame = NULL;
     if (object->apiobj.character_model->model_data_b[object->context_animation] != NULL) {
         frame = AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0);
-        if (frame == NULL)
+        if (__builtin_expect(frame == NULL, 1))
             return;
     }
     switch (object->field_0x7a3) {
@@ -427,7 +427,7 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
             if (__builtin_expect(!(object->context_animation_timer > 0.0f), 1)) {
                 object->field_0x7a3 = 2;
                 object->context_animation = LEGOACT_SUPERCARRY_IDLE;
-                if ((object->context_flags & 0x40) == 0)
+                if (__builtin_expect((object->context_flags & 0x40) == 0, 1))
                     event = true;
             }
             if (event) {
@@ -493,17 +493,19 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
                     throw_object = object->pad_gamepad->input_magnitude > 0.0f;
                     put_down = !throw_object;
                 }
-                if (throw_object || put_down) {
-                    if ((throw_object || SuperCarry_UseActionButton == 0) && SuperCarry_Bash != 0 &&
-                        LEGOACT_SUPERCARRY_BASH != -1 &&
-                        object->apiobj.character_model->model_data_b[LEGOACT_SUPERCARRY_BASH] != NULL) {
+                if (__builtin_expect(throw_object || put_down, 1)) {
+                    if (__builtin_expect((throw_object || SuperCarry_UseActionButton == 0) && SuperCarry_Bash != 0 &&
+                                             LEGOACT_SUPERCARRY_BASH != -1 &&
+                                             object->apiobj.character_model->model_data_b[LEGOACT_SUPERCARRY_BASH] !=
+                                                 NULL,
+                                         0)) {
                         objopponent_ignoreaiopponent = 1;
                         object->force_target = ObjOpponent(object, 1.0f, PUNCHGAP, 1, 0, 1);
                         if (object->force_target == NULL) {
                             objopponent_ignoreaiopponent = 1;
                             object->force_target = ObjOpponent(object, 1.0f, PUNCHGAP, 1, 0, 2);
                         }
-                        if (object->force_target != NULL) {
+                        if (__builtin_expect(object->force_target != NULL, 0)) {
                             object->field_0x7a3 = 5;
                             object->context_animation = LEGOACT_SUPERCARRY_BASH;
                             object->context_flags &= static_cast<u8>(~0x40);
@@ -651,12 +653,12 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
             }
             object->field_0x7a3 = 7;
             object->context_animation = LEGOACT_SUPERCARRY_LAND;
-            if (object->context_animation == -1)
+            if (__builtin_expect(object->context_animation == -1, 1))
                 goto idle_or_walk;
         landing:
             f32 duration = AnimDuration(object->id, object->context_animation, 0.0f, 0.0f, 1);
             object->context_animation_timer = duration;
-            if (duration <= 0.0f)
+            if (__builtin_expect(duration <= 0.0f, 0))
                 object->context_animation_timer = 0.5f;
             ResetAnimPacket(&object->apiobj.anim_packet, -1);
             object->apiobj.velocity.x = object->apiobj.velocity.z = 0.0f;

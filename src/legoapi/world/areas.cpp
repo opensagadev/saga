@@ -621,7 +621,7 @@ void Area_Configure(i32 area, i32 param, EXTRAMODEL *models, i16 *s) {
         }
         APICHARACTERMODELLIST_s *player_models = reinterpret_cast<APICHARACTERMODELLIST_s *>(Area_PlayerModelList);
         for (i32 index = 0; index < MissionSys->character_count; ++index) {
-            if (Area_MissionModelCount < 0x30)
+            if (__builtin_expect(Area_MissionModelCount < 0x30, 1))
                 Area_MissionModelList[Area_MissionModelCount++] = {mission_characters[index], 1};
             if (Area_PlayerModelCount < 8)
                 player_models[Area_PlayerModelCount++] = {mission_characters[index], 1};
@@ -825,7 +825,7 @@ void Area_Configure(i32 area, i32 param, EXTRAMODEL *models, i16 *s) {
                         ADataList[area].true_hero_targets[0] = 40000;
                     continue;
                 }
-                if (area != -1 && NuStrICmp(fp->word_buf, "freeplay_coins") == 0) {
+                if (__builtin_expect(area != -1 && NuStrICmp(fp->word_buf, "freeplay_coins") == 0, 0)) {
                     ADataList[area].true_hero_targets[1] = NuFParGetInt(fp);
                     if (g_lowEndLevelBehaviour != 0 && &ADataList[area] == DOGFIGHT_ADATA)
                         ADataList[area].true_hero_targets[1] = 40000;

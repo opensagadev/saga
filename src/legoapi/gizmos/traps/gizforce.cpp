@@ -582,11 +582,11 @@ static void GizForces_Update(void *world_ptr, void *data, float) {
                 NuVecRotateZ(&glow_offset, &glow_offset, qrand());
                 NuVecRotateY(&glow_offset, &glow_offset, qrand() & 0xffff);
                 NuVecAdd(&centre, &centre, &glow_offset);
-                if ((force->config_flags & 0x10) != 0) {
-                    AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[110].effect, &centre,
+                if ((force->config_flags & 0x10) == 0) {
+                    AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[109].effect, &centre,
                                                       static_cast<i32>(90.0f * radius), FRAMETIME, 0, 0, NULL);
                 } else {
-                    AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[109].effect, &centre,
+                    AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[110].effect, &centre,
                                                       static_cast<i32>(90.0f * radius), FRAMETIME, 0, 0, NULL);
                 }
             }

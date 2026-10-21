@@ -1949,8 +1949,9 @@ void GameAIProcess() {
         party_follow_offsets[index] = 0.5f;
     }
     party_under_cover = cover_result;
-    if ((VADER_ADATA == NULL || WORLD->area != VADER_ADATA) && (all_under_cover != 0) &&
-        party_cant_be_under_cover == 0) {
+    if (__builtin_expect((VADER_ADATA == NULL || WORLD->area != VADER_ADATA) && (all_under_cover != 0) &&
+                             party_cant_be_under_cover == 0,
+                         1)) {
         party_under_cover = 1;
     }
     AITriggerSetSysProcess(WORLD->ai_trigger_set_sys);
@@ -2112,11 +2113,7 @@ void GameAIProcess() {
                               (ai_update_flags >> 3) & 1);
         goto ai_precombat;
     ai_combat:
-        if ((object->apiobj.field_0x1f8 & 0x180) == 0x80) {
-            object->field_0xefc &= ~4;
-            object->apiobj.flags_high =
-                (object->apiobj.flags_high & ~2) | ((object->apiobj.character_data->model_flags >> 27) & 2);
-        } else {
+        if ((object->apiobj.field_0x1f8 & 0x180) != 0x80) {
             object->apiobj.flags_high &= ~2;
             i32 defend = false;
             if ((object->field_0xef8 & 0x80) != 0 && object->ai.opponent_object != NULL) {
@@ -2154,7 +2151,7 @@ void GameAIProcess() {
                         object->pad_gamepad->buttons_pressed |= GAMEPAD_ACTION;
                 }
             }
-            if (object->use_weapon) {
+            if (__builtin_expect(object->use_weapon != 0, 1)) {
                 defend = true;
                 if ((object->field_0xe22 & 1) != 0) {
                     object->pad_gamepad->buttons_pressed |= GAMEPAD_ACTION;
@@ -2171,6 +2168,10 @@ void GameAIProcess() {
                        object->character_context != 6 && object->field_0xe32 == 0) {
                 object->pad_gamepad->buttons_pressed |= GAMEPAD_SPECIAL;
             }
+        } else {
+            object->field_0xefc &= ~4;
+            object->apiobj.flags_high =
+                (object->apiobj.flags_high & ~2) | ((object->apiobj.character_data->model_flags >> 27) & 2);
         }
         if ((object->apiobj.character_data->game_character->flags_094[3] & 0x10) != 0 &&
             !object->apiobj.player_controlled) {
@@ -2185,7 +2186,7 @@ void GameAIProcess() {
                 } else {
                     object->ai_jump_timer = 0.0f;
                 }
-            } else if (!(object->pad_gamepad->input_magnitude <= threshold)) {
+            } else if (__builtin_expect(!(object->pad_gamepad->input_magnitude <= threshold), 0)) {
                 object->ai_jump_timer += FRAMETIME;
                 if (object->ai_jump_timer > 1.0f) {
                     object->pad_gamepad->buttons_pressed |= GAMEPAD_JUMP;
@@ -2230,7 +2231,7 @@ void GameAIProcess() {
                         Player_ToggleCharacter(object, 1, 0);
                         if (object->id == id_DROIDEKA)
                             Player_ToggleCharacter(object, 1, 0);
-                        if (object->apiobj.model_draw_result == 0)
+                        if (__builtin_expect(object->apiobj.model_draw_result == 0, 0))
                             object->input_toggle_hold_time = 0.0f;
                         else
                             object->input_toggle_hold_time = 0.25f;

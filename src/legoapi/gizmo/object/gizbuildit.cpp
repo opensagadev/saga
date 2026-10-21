@@ -821,9 +821,7 @@ static void GizBuildIts_LateUpdate(void *world_ptr, void *data, float) {
         if (buildit.build_state == GIZBUILDIT_BUILD_FINISHING) {
             buildit.step_timer += FRAMETIME;
             f32 finish_progress;
-            if (!(buildit.step_timer >= BUILDIT_FINISH_DURATION)) {
-                finish_progress = buildit.step_timer / BUILDIT_FINISH_DURATION;
-            } else {
+            if (buildit.step_timer >= BUILDIT_FINISH_DURATION) {
                 Hint_SetComplete(LEGOHINT_BUILD);
                 GizBuildIt_Finish(&buildit);
                 NuVecAdd(&finish_position, &buildit.position, &buildit.effect_position);
@@ -845,6 +843,8 @@ static void GizBuildIts_LateUpdate(void *world_ptr, void *data, float) {
                     GameAnimSet_SetVisibility(buildit.anim_set, 0);
                 }
                 finish_progress = 1.0f;
+            } else {
+                finish_progress = buildit.step_timer / BUILDIT_FINISH_DURATION;
             }
             for (i32 piece_index = 0; piece_index < buildit.anim_object_count; ++piece_index) {
                 GAMEANIMOBJ_s *piece = buildit.anim_objects[piece_index];
@@ -922,7 +922,7 @@ static void GizBuildIts_LateUpdate(void *world_ptr, void *data, float) {
                     ((builder->pad_gamepad->buttons_held & GAMEPAD_SPECIAL) != 0 ||                                    \
                      (builder->apiobj.field_0x1f4 & 0x40000) != 0)) {                                                  \
                     builder->field_0xe21 ^= 0x40;                                                                      \
-                    if (__builtin_expect(builder->build_button_taps < 10, 0)) {                                                             \
+                    if (__builtin_expect(builder->build_button_taps < 10, 1)) {                                        \
                         ++builder->build_button_taps;                                                                  \
                     }                                                                                                  \
                 } else {                                                                                               \
@@ -938,7 +938,7 @@ static void GizBuildIts_LateUpdate(void *world_ptr, void *data, float) {
             }                                                                                                          \
             if (automatic) {                                                                                           \
                 GizMoveAttractoBuildItPiece(&buildit, piece);                                                          \
-            } else if (__builtin_expect(buildit.linked_buildit == NULL, 0)) {                                                               \
+            } else if (buildit.linked_buildit == NULL) {                                                               \
                 NuSpecialSetVisibility(&piece->special, 0);                                                            \
             }                                                                                                          \
         }                                                                                                              \

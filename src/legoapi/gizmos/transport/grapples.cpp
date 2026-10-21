@@ -1005,7 +1005,8 @@ void Grapple_MoveCode(GameObject_s *object) {
             if (GrappleSwingMode == 1)
                 GRAPPLE_QUANTIZE(angle);
             const i32 swing_mode = GrappleSwingMode;
-            if ((swing_mode == 0 && abs(RotDiff(angle, input_angle)) < 0x4000) || (swing_mode != 0 && swing)) {
+            if (__builtin_expect(
+                    (swing_mode == 0 && abs(RotDiff(angle, input_angle)) < 0x4000) || (swing_mode != 0 && swing), 1)) {
                 const u8 increased_degrees = static_cast<u8>(object->grapple_swing_degrees + 10);
                 object->grapple_swing_degrees = increased_degrees <= 60 ? increased_degrees : 60;
                 return;

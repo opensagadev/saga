@@ -350,15 +350,7 @@ void UpdateCables() {
                 NuVecSub(&delta, NUMTX_GET_ROW_VEC(&target->joint_matrices[next_locator], 3), last_position);
                 i32 next_angle = NuAtan2D(delta.x, delta.z);
                 i32 turn = NuAngSub(next_angle, angle);
-                if (cable->wrap_count < 15 && turn * direction > 0) {
-                    cable->wrap_indices[cable->wrap_count++] = static_cast<u8>(next);
-                    if (cable->wrap_count == 15) {
-                        DeactivatePlayer(cable->target, WORLD->current_level == HOTHBATTLED_LDATA ? 60.0f : 30.0f,
-                                         NULL);
-                        PlaySfx("AT_AT_FALL", &cable->target->apiobj.collision_position);
-                        lost_target = true;
-                    }
-                } else {
+                if (!(cable->wrap_count < 15 && turn * direction > 0)) {
                     NuVecSub(&delta, last_position, NUMTX_GET_ROW_VEC(&target->joint_matrices[previous_locator], 3));
                     i32 previous_angle = NuAtan2D(delta.x, delta.z);
                     if (NuAngSub(previous_angle, angle) * direction < 0) {
@@ -368,6 +360,14 @@ void UpdateCables() {
                         else
                             cable->wrap_indices[cable->wrap_count] = 0xff;
                         --cable->wrap_count;
+                    }
+                } else {
+                    cable->wrap_indices[cable->wrap_count++] = static_cast<u8>(next);
+                    if (__builtin_expect(cable->wrap_count == 15, 1)) {
+                        DeactivatePlayer(cable->target, WORLD->current_level == HOTHBATTLED_LDATA ? 60.0f : 30.0f,
+                                         NULL);
+                        PlaySfx("AT_AT_FALL", &cable->target->apiobj.collision_position);
+                        lost_target = true;
                     }
                 }
             }
@@ -390,7 +390,7 @@ void UpdateCables() {
             ReleaseCable(cable, 0);
             continue;
         }
-        if ((cable->source->apiobj.character_data->game_character->flags_090 & 0x400) == 0) {
+        if (__builtin_expect((cable->source->apiobj.character_data->game_character->flags_090 & 0x400) == 0, 0)) {
             target = cable->target;
             ReleaseCable(cable, 0);
             continue;
@@ -413,16 +413,17 @@ void UpdateCables() {
             if (object->cable != NULL &&
                 (object->cable->target == cable->target || object->cable->target == cable->source))
                 continue;
-            if (!(object == cable->source || object == cable->target)) {
+            if (__builtin_expect(!(object == cable->source || object == cable->target), 1)) {
 
                 f32 line_distance =
                     NuLineToPointDistSqrEx(&path[0], &path[1], &object->apiobj.collision_position, &closest);
                 f32 radius = object->apiobj.field_0x1dc;
                 f32 half_height = object->apiobj.field_0x1e0;
                 f32 combined = radius + half_height;
-                if (combined * combined > line_distance &&
-                    object->apiobj.collision_position.y + half_height > closest.y &&
-                    closest.y > object->apiobj.collision_position.y - half_height) {
+                if (__builtin_expect(combined * combined > line_distance &&
+                                         object->apiobj.collision_position.y + half_height > closest.y &&
+                                         closest.y > object->apiobj.collision_position.y - half_height,
+                                     1)) {
                     f32 dz = object->apiobj.collision_position.z - closest.z;
                     f32 dx = object->apiobj.collision_position.x - closest.x;
                     if (radius * radius > dx * dx + dz * dz) {
@@ -509,7 +510,7 @@ void UpdateCables() {
             cable->max_length = remaining;
             for (i32 i = 0; i < path_count - 1; ++i) {
                 f32 length = NuVecDist(&path[i + 1], &path[i], &delta);
-                if (remaining < length) {
+                if (__builtin_expect(remaining < length, 0)) {
                     cable->segment_lengths[i] = remaining;
                     cable->total_length += remaining;
                     f32 scale = NuFdiv(remaining, length);

@@ -407,10 +407,10 @@ void Grabber_Update(WORLDINFO_s *world) {
             } else {
                 g->target_velocity.y = pad->input_direction_x * g->speed;
                 g->target_velocity.x = 0.0f;
-                if (Grab_grabber->invert_x) {
-                    g->target_velocity.z = -(g->speed * pad->input_direction_z);
-                } else {
+                if (!(Grab_grabber->invert_x)) {
                     g->target_velocity.z = g->speed * pad->input_direction_z;
+                } else {
+                    g->target_velocity.z = -(g->speed * pad->input_direction_z);
                 }
             }
         }
@@ -573,17 +573,18 @@ void Grabber_Update(WORLDINFO_s *world) {
                 break;
             g->animation_timer -= FRAMETIME;
             if (g->animation_timer <= 0) {
-                if (g->victim || g->carried_blowup) {
+                if (__builtin_expect(!(g->victim || g->carried_blowup), 1))
+                    g->state = 0;
+                else {
                     g->stuck_timer = 0;
                     g->state = 2;
-                } else
-                    g->state = 0;
+                }
                 break;
             }
             if (g->flags_559 & 2)
                 break;
             f32 trigger = AnimListFrame(g->character_model, 102, 0);
-            if (!(trigger > 0) || !(*frame >= trigger))
+            if (__builtin_expect(!(trigger > 0) || !(*frame >= trigger), 1))
                 break;
             g->flags_559 |= 2;
             NUVEC *pos = Grabber_GetGrabPos(g, NULL);
@@ -652,17 +653,17 @@ void Grabber_Update(WORLDINFO_s *world) {
                        (g->action_switch->anim_set->flags & 1))
                 break;
         opening:
-            if (g->character_model && g->character_model->model_data_b[103]) {
+            if (!(g->character_model && g->character_model->model_data_b[103])) {
+                Grabber_Drop(g, &previous);
+                if (!control)
+                    g->flags_559 |= 4;
+            } else {
                 g->state = 3;
                 g->animation_timer = AnimDuration(g->character_model->model_id, 103, 0, 0, 1);
                 g->flags_559 &= ~2;
                 if (!control)
                     g->flags_559 |= 4;
                 NewRumbleAllPlayers(0, 0, 2, 0);
-            } else {
-                Grabber_Drop(g, &previous);
-                if (!control)
-                    g->flags_559 |= 4;
             }
             PlaySfx("env_grabber_down", Grabber_GetGrabPos(g, NULL));
             break;
@@ -673,7 +674,7 @@ void Grabber_Update(WORLDINFO_s *world) {
             g->animation_timer -= FRAMETIME;
             if (g->animation_timer <= 0) {
                 g->state = 0;
-                if (!(g->flags_559 & 2))
+                if (__builtin_expect(!(g->flags_559 & 2), 1))
                     Grabber_Drop(g, &previous);
                 break;
             }
@@ -685,7 +686,7 @@ void Grabber_Update(WORLDINFO_s *world) {
             break;
         }
     }
-    if (g->character_model) {
+    if (__builtin_expect(g->character_model != 0, 1)) {
         g->animation.previous_animation = g->animation.animation_index;
         g->animation.requested_animation = g->state == 1 ? 102 : g->state == 2 ? 15 : g->state == 3 ? 103 : 1;
         UpdateAnimPacket(g->character_model, &g->animation, FRAMETIME * 30.0f, g->speed, FRAMETIME, 0);

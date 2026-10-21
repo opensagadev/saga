@@ -107,7 +107,7 @@ static void GizTurrets_Update(void *context, void *system_ptr, float frame_time)
                 u8 rotation_sound_playing = turret->rotation_sound_playing;
                 turret->rotation_sound_playing = 0;
                 if (turret->visible)
-                    if (turret->active)
+                    if (__builtin_expect(turret->active != 0, 1))
                         if (!turret->update_disabled) {
                             BOLTTYPE_s *bolt_type = BoltType_FindByID(static_cast<i8>(turret->bolt_type_id),
                                                                       static_cast<WORLDINFO_s *>(context));
@@ -120,13 +120,14 @@ static void GizTurrets_Update(void *context, void *system_ptr, float frame_time)
                                 NuSpecialExistsFn(&turret->primary_anim_obj->special)) {
                                 primary_draw = NuSpecialGetDrawMtx(&turret->primary_anim_obj->special);
                                 primary_base = NuSpecialGetMtx(&turret->primary_anim_obj->special);
-                                if (turret->secondary_anim_obj != NULL &&
-                                    NuSpecialExistsFn(&turret->secondary_anim_obj->special)) {
+                                if (!(turret->secondary_anim_obj != NULL &&
+                                      NuSpecialExistsFn(&turret->secondary_anim_obj->special)))
+                                    reference = primary_base;
+                                else {
                                     secondary_base = NuSpecialGetMtx(&turret->secondary_anim_obj->special);
                                     secondary_draw = NuSpecialGetDrawMtx(&turret->secondary_anim_obj->special);
                                     reference = secondary_base;
-                                } else
-                                    reference = primary_base;
+                                }
                             } else {
                                 NuMtxSetTranslation(&fallback_draw, &turret->position);
                                 NuMtxPreRotateX(&fallback_draw, turret->pitch);
@@ -379,8 +380,10 @@ static void GizTurrets_Update(void *context, void *system_ptr, float frame_time)
                                 turret->fired_this_frame = 1;
                                 for (i32 muzzle = 0; muzzle < turret->field_0x130; ++muzzle) {
                                     NUMTX muzzle_matrix = *primary_draw;
-                                    if (turret->field_0x74[muzzle].x != 0.0f || turret->field_0x74[muzzle].y != 0.0f ||
-                                        turret->field_0x74[muzzle].z != 0.0f) {
+                                    if (__builtin_expect(turret->field_0x74[muzzle].x != 0.0f ||
+                                                             turret->field_0x74[muzzle].y != 0.0f ||
+                                                             turret->field_0x74[muzzle].z != 0.0f,
+                                                         1)) {
                                         NuMtxPreRotateY(&muzzle_matrix, 0x8000);
                                         NuMtxPreTranslate(&muzzle_matrix, &turret->field_0x74[muzzle]);
                                     }

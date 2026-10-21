@@ -2717,81 +2717,7 @@ void TerrainPlayer(GameObject_s *object) {
             api.position.z += api.velocity.z * FRAMETIME;
             if (TimingBarSet == 2)
                 TBCLOSEFN("Ter", 2);
-        } else if (shadow_grounding || retain_floor || (WORLD->current_level->flags & 0x10) != 0) {
-            // Ordinary path-following AI uses the target's inexpensive shadow
-            // grounding path.  Full swept collision is reserved for path
-            // connections whose traversal flags require special collision.
-            api.respawn_timer = 0.0f;
-            if (perform_motion) {
-                if (TimingBarSet == 2)
-                    TBOPENFN("Ter", 2);
-                object->field_0xe20 |= 2;
-                api.supporting_platform_id = -1;
-                api.position.x += api.velocity.x * FRAMETIME;
-                api.position.y += api.velocity.y * FRAMETIME;
-                api.position.z += api.velocity.z * FRAMETIME;
-
-                if (shadow_grounding) {
-                    if (object == CarWashHack) {
-                        NewTerrPlatformsOff();
-                    }
-                    if (testshadowfix == 0) {
-                        api.field_0x218 = GameShadow(object, &api.collision_position, 5.0f, terrain_mask | 0x1f);
-                    } else {
-                        NUVEC shadow_position = api.collision_position;
-                        if (api.initial_position.y > api.collision_position.y) {
-                            shadow_position.y = api.initial_position.y;
-                        } else {
-                            shadow_position.y = api.collision_position.y;
-                        }
-                        api.field_0x218 = GameShadow(object, &shadow_position, 5.0f, terrain_mask | 0x1f);
-                    }
-                    api.supporting_platform_id = static_cast<i16>(NewShadowOnPlatform());
-                    GetSurfaceInfo(object, api.field_0x218 != 2000000.0f ? 1 : 0, api.field_0x218);
-                    if (api.field_0x218 == 2000000.0f) {
-                        api.field_0x281 = 0;
-                        object->field_0xe41 = 0;
-                        object->surface_normal = NUVEC{0.0f, 1.0f, 0.0f};
-                        api.water_height = 2000000.0f;
-                        api.field_0x220 = 2000000.0f;
-                        api.field_0x27f = static_cast<u8>(-1);
-                        api.field_0x280 = static_cast<u8>(-1);
-                        object->field_0x1078 = -1;
-                    }
-                    api.is_underwater = static_cast<u8>(UnderWater(object));
-                    api.intersects_water = static_cast<u8>(IntersectWater(object));
-                    if (api.supporting_platform_id == -1 && api.field_0x27d != 0 && object->field_0x1078 != -1) {
-                        api.supporting_platform_id = object->field_0x1078;
-                    }
-                }
-                const f32 grounded_lower_bound = object->character_bottom * api.field_0xa8;
-                if (api.field_0x218 != 2000000.0f && api.position.y + grounded_lower_bound < api.field_0x218) {
-                    api.velocity.y = 0.0f;
-                    api.position.y = api.field_0x218 - grounded_lower_bound;
-                }
-
-                api.field_0x27d = 0;
-                if (__builtin_expect(GameObjectNearFloor(object, 1.0f, NULL) != 0, 1)) {
-                    api.field_0x27d |= APIOBJECT_TERRAIN_CONTACT_NEAR_FLOOR;
-                }
-                if (api.collision_min.y <= api.field_0x218) {
-                    api.field_0x27d |= APIOBJECT_TERRAIN_CONTACT_FLOOR;
-                }
-                if ((api.field_0x27d & APIOBJECT_TERRAIN_CONTACT_FLOOR) != 0) {
-                    object->field_0x1084 = 1;
-                    object->contact_position.x = api.position.x;
-                    object->contact_position.y = api.field_0x218;
-                    object->contact_position.z = api.position.z;
-                    object->contact_normal = shadow_grounding ? object->surface_normal : NUVEC{0.0f, 1.0f, 0.0f};
-                    object->field_0x6b0 = api.field_0x281;
-                    object->terrain_impact_speed = -api.velocity.y;
-                } else {
-                    object->field_0x6b0 = 0;
-                }
-                if (TimingBarSet == 2)
-                    TBCLOSEFN("Ter", 2);
-            }
-        } else {
+        } else if (!(shadow_grounding || retain_floor || (WORLD->current_level->flags & 0x10) != 0)) {
             if (!perform_motion) {
                 api.velocity.x = 0.0f;
                 api.velocity.y = 0.0f;
@@ -2960,7 +2886,7 @@ void TerrainPlayer(GameObject_s *object) {
                         object->character_context != 0x43 && object->character_context != 0x45 &&
                         (object->field_0xf02 & 1) == 0) {
                         for (i32 i = 0; i < impact_count; ++i) {
-                            if (impact_records[i].normal.y < 0.707f) {
+                            if (__builtin_expect(impact_records[i].normal.y < 0.707f, 0)) {
                                 wall_impact = true;
                                 break;
                             }
@@ -3024,6 +2950,80 @@ void TerrainPlayer(GameObject_s *object) {
             }
             if (__builtin_expect(api.field_0x27d != 0, 0)) {
                 object->touched_ground = 1;
+            }
+        } else {
+            // Ordinary path-following AI uses the target's inexpensive shadow
+            // grounding path.  Full swept collision is reserved for path
+            // connections whose traversal flags require special collision.
+            api.respawn_timer = 0.0f;
+            if (perform_motion) {
+                if (TimingBarSet == 2)
+                    TBOPENFN("Ter", 2);
+                object->field_0xe20 |= 2;
+                api.supporting_platform_id = -1;
+                api.position.x += api.velocity.x * FRAMETIME;
+                api.position.y += api.velocity.y * FRAMETIME;
+                api.position.z += api.velocity.z * FRAMETIME;
+
+                if (shadow_grounding) {
+                    if (object == CarWashHack) {
+                        NewTerrPlatformsOff();
+                    }
+                    if (testshadowfix == 0) {
+                        api.field_0x218 = GameShadow(object, &api.collision_position, 5.0f, terrain_mask | 0x1f);
+                    } else {
+                        NUVEC shadow_position = api.collision_position;
+                        if (api.initial_position.y > api.collision_position.y) {
+                            shadow_position.y = api.initial_position.y;
+                        } else {
+                            shadow_position.y = api.collision_position.y;
+                        }
+                        api.field_0x218 = GameShadow(object, &shadow_position, 5.0f, terrain_mask | 0x1f);
+                    }
+                    api.supporting_platform_id = static_cast<i16>(NewShadowOnPlatform());
+                    GetSurfaceInfo(object, api.field_0x218 != 2000000.0f ? 1 : 0, api.field_0x218);
+                    if (api.field_0x218 == 2000000.0f) {
+                        api.field_0x281 = 0;
+                        object->field_0xe41 = 0;
+                        object->surface_normal = NUVEC{0.0f, 1.0f, 0.0f};
+                        api.water_height = 2000000.0f;
+                        api.field_0x220 = 2000000.0f;
+                        api.field_0x27f = static_cast<u8>(-1);
+                        api.field_0x280 = static_cast<u8>(-1);
+                        object->field_0x1078 = -1;
+                    }
+                    api.is_underwater = static_cast<u8>(UnderWater(object));
+                    api.intersects_water = static_cast<u8>(IntersectWater(object));
+                    if (api.supporting_platform_id == -1 && api.field_0x27d != 0 && object->field_0x1078 != -1) {
+                        api.supporting_platform_id = object->field_0x1078;
+                    }
+                }
+                const f32 grounded_lower_bound = object->character_bottom * api.field_0xa8;
+                if (api.field_0x218 != 2000000.0f && api.position.y + grounded_lower_bound < api.field_0x218) {
+                    api.velocity.y = 0.0f;
+                    api.position.y = api.field_0x218 - grounded_lower_bound;
+                }
+
+                api.field_0x27d = 0;
+                if (__builtin_expect(GameObjectNearFloor(object, 1.0f, NULL) != 0, 1)) {
+                    api.field_0x27d |= APIOBJECT_TERRAIN_CONTACT_NEAR_FLOOR;
+                }
+                if (api.collision_min.y <= api.field_0x218) {
+                    api.field_0x27d |= APIOBJECT_TERRAIN_CONTACT_FLOOR;
+                }
+                if ((api.field_0x27d & APIOBJECT_TERRAIN_CONTACT_FLOOR) != 0) {
+                    object->field_0x1084 = 1;
+                    object->contact_position.x = api.position.x;
+                    object->contact_position.y = api.field_0x218;
+                    object->contact_position.z = api.position.z;
+                    object->contact_normal = shadow_grounding ? object->surface_normal : NUVEC{0.0f, 1.0f, 0.0f};
+                    object->field_0x6b0 = api.field_0x281;
+                    object->terrain_impact_speed = -api.velocity.y;
+                } else {
+                    object->field_0x6b0 = 0;
+                }
+                if (TimingBarSet == 2)
+                    TBCLOSEFN("Ter", 2);
             }
         }
 
@@ -3198,14 +3198,7 @@ void TerrainPlayer(GameObject_s *object) {
                         }
                     } else {
                         if (__builtin_expect(
-                                object->doomed_escape_locator != NULL && static_cast<i8>(api.flags_low) >= 0, 0)) {
-                            if (object->doomed_escape_take_damage || TouchHacks::AiPlayerTakeDamageOnKillRescue(*object)) {
-                                ObjHitObj(NULL, object, 1, 0, 0, 1);
-                            }
-                            if (api.field_0x287 == 0) {
-                                StartBigJump(object, &object->doomed_escape_locator->position, 0, 1.0f, 1.0f, 0, 0);
-                            }
-                        } else {
+                                !(object->doomed_escape_locator != NULL && static_cast<i8>(api.flags_low) >= 0), 1)) {
                             ClearLastSafeTakeOver(object);
                             Player_ClearContext(object, 1);
                             object->context_animation = 5;
@@ -3246,6 +3239,14 @@ void TerrainPlayer(GameObject_s *object) {
                                                static_cast<i8>(api.field_0x27c), 1.0f, height, NULL, 1, 0, false);
                                 }
                                 object->coinpacket->scale = 1.5f;
+                            }
+                        } else {
+                            if (object->doomed_escape_take_damage ||
+                                TouchHacks::AiPlayerTakeDamageOnKillRescue(*object)) {
+                                ObjHitObj(NULL, object, 1, 0, 0, 1);
+                            }
+                            if (api.field_0x287 == 0) {
+                                StartBigJump(object, &object->doomed_escape_locator->position, 0, 1.0f, 1.0f, 0, 0);
                             }
                         }
                     }

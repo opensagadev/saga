@@ -2702,16 +2702,18 @@ i32 ObjHitObj(GameObject_s *attacker, GameObject_s *target, i32 damage, u16 flag
         hit = 0;
         instant = false;
     }
-    if (attacker && (attacker->apiobj.player_controlled))
+    if (__builtin_expect(attacker && (attacker->apiobj.player_controlled), 1))
         AlertSurroundingCreatures(attacker, &target->apiobj.collision_position);
     if (hit > 0 || instant)
         target->field_0xef8 |= 1;
     if (!(flags & 0x100)) {
         damage = 0;
     } else {
-        if ((CInfo[target->character_context].flags & 0x4000000) ||
-            (target->character_context != -1 && (target->character_context == LEGOCONTEXT_LAND_SLAM ||
-                                                 target->character_context == LEGOCONTEXT_LAND_LUNGE))) {
+        if (__builtin_expect(
+                (CInfo[target->character_context].flags & 0x4000000) ||
+                    (target->character_context != -1 && (target->character_context == LEGOCONTEXT_LAND_SLAM ||
+                                                         target->character_context == LEGOCONTEXT_LAND_LUNGE)),
+                1)) {
             i32 angle = RotDiff(attacker->apiobj.movement_facing_angle, target->apiobj.movement_facing_angle);
             if (angle < 0)
                 angle = -angle;
@@ -2807,7 +2809,7 @@ attributed_hit:
             }
         }
     }
-    if (AIScriptSetBaseScriptStateByName(&target->ai.script_process, "TakenHit"))
+    if (__builtin_expect(AIScriptSetBaseScriptStateByName(&target->ai.script_process, "TakenHit") != 0, 1))
         AIScriptProcess(WORLD->ai_sys, &target->apiobj, &target->ai, &target->ai.script_process, FRAMETIME);
 impact:
     if (!no_impact) {
@@ -2965,7 +2967,8 @@ impact:
                     if (NuSpecialFind(WORLD->current_gscn, &special, name, 1))
                         NuSpecialSetVisibility(&special, 0);
                 }
-                if (attacker && attacker->id == id_OBIWANKENOBIEP3 && target->id == id_ANAKINJEDI) {
+                if (__builtin_expect(attacker && attacker->id == id_OBIWANKENOBIEP3 && target->id == id_ANAKINJEDI,
+                                     1)) {
                     NewCutScene(NULL, WORLD->cutscene_sys, const_cast<char *>("ep3_darthvader_outro2"), 1);
                 } else {
                     NewCutScene(NULL, WORLD->cutscene_sys, const_cast<char *>("ep3_darthvader_outro1"), 1);
@@ -2990,7 +2993,7 @@ surviving_hit:
     if (target->apiobj.player_controlled)
         TakeHitRumble(target, 0.666f);
     target->current_hp = health;
-    if (hit != 0) {
+    if (__builtin_expect(hit != 0, 0)) {
         if (AIScriptSetBaseScriptStateByName(&target->ai.script_process, "LostHitPoints"))
             AIScriptProcess(WORLD->ai_sys, &target->apiobj, &target->ai, &target->ai.script_process, FRAMETIME);
         SetFlicker(target, 0.4f);
