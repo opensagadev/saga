@@ -3136,9 +3136,11 @@ void TerrainPlayer(GameObject_s *object) {
                                 KillPlayer(object, 2, 1, NULL);
                                 break;
                             }
-                        } else if (((api.character_data->model_flags & 0x2000) != 0 ||
-                                    (api.character_data->game_character->flags_090 & 0x04000000) != 0) &&
-                                   api.field_0x27f == 6) {
+                        } else if (__builtin_expect(
+                                       ((api.character_data->model_flags & 0x2000) != 0 ||
+                                        (api.character_data->game_character->flags_090 & 0x04000000) != 0) &&
+                                           api.field_0x27f == 6,
+                                       0)) {
                             break;
                         }
                         if ((WORLD->area == NULL || WORLD->area != PODSPRINT_ADATA) &&
@@ -3195,7 +3197,8 @@ void TerrainPlayer(GameObject_s *object) {
                             KillPlayer(object, 3, 1, NULL);
                         }
                     } else {
-                        if (object->doomed_escape_locator != NULL && static_cast<i8>(api.flags_low) >= 0) {
+                        if (__builtin_expect(
+                                object->doomed_escape_locator != NULL && static_cast<i8>(api.flags_low) >= 0, 0)) {
                             if (object->doomed_escape_take_damage || TouchHacks::AiPlayerTakeDamageOnKillRescue(*object)) {
                                 ObjHitObj(NULL, object, 1, 0, 0, 1);
                             }
