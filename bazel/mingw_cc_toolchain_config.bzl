@@ -1,7 +1,7 @@
 """i686 MinGW-w64 cross toolchain for the native Windows build.
 
 Uses the system cross compiler installed on a Linux host, for example from
-Ubuntu's `g++-mingw-w64-i686-posix` package. The posix thread model is
+Ubuntu's `g++-mingw-w64-i686-posix` or Arch's `mingw-w64-gcc` package. The posix thread model is
 required for the C++ threading support used by the host layer.
 """
 
@@ -19,7 +19,6 @@ load("@rules_cc//cc/toolchains:cc_toolchain_config_info.bzl", "CcToolchainConfig
 
 def _mingw_cc_toolchain_config_impl(ctx):
     prefix = ctx.attr.tool_prefix
-    suffix = ctx.attr.tool_suffix
     compile_actions = [
         ACTION_NAMES.c_compile,
         ACTION_NAMES.cpp_compile,
@@ -79,12 +78,12 @@ def _mingw_cc_toolchain_config_impl(ctx):
     ]
     paths = [
         tool_path(name = "ar", path = prefix + "ar"),
-        tool_path(name = "cpp", path = prefix + "cpp" + suffix),
+        tool_path(name = "cpp", path = prefix + "cpp"),
         # As in the NDK toolchain, g++ drives every compile and the link; the
         # force_c_language feature restores C semantics for c_compile. The
         # wrapper fixes up asm-label symbol names after each compile.
         tool_path(name = "gcc", path = "mingw_gcc.sh"),
-        tool_path(name = "gcov", path = prefix + "gcov" + suffix),
+        tool_path(name = "gcov", path = prefix + "gcov"),
         tool_path(name = "ld", path = prefix + "ld"),
         tool_path(name = "nm", path = prefix + "nm"),
         tool_path(name = "objcopy", path = prefix + "objcopy"),
@@ -128,7 +127,6 @@ mingw_cc_toolchain_config = rule(
             "/usr/share/mingw-w64/include/",
         ]),
         "tool_prefix": attr.string(default = "/usr/bin/i686-w64-mingw32-"),
-        "tool_suffix": attr.string(default = "-posix"),
     },
     provides = [CcToolchainConfigInfo],
 )

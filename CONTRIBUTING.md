@@ -44,7 +44,8 @@ from an MSYS2 shell:
 The Windows `native` executable is cross-compiled on Linux, because the engine
 needs the 32-bit x86 struct layout of the original binary. The Linux host
 needs the i686 MinGW-w64 cross compiler with the posix thread model and lld
-(on Debian or Ubuntu, `g++-mingw-w64-i686-posix` and `lld`). Bazel downloads
+(`g++-mingw-w64-i686-posix` and `lld` on Debian or Ubuntu, `mingw-w64-gcc`
+and `lld` on Arch). Bazel downloads
 pinned i686 builds of SDL 3 and ANGLE from MSYS2 and builds Vorbis itself.
 
 ### macOS

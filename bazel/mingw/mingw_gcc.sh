@@ -8,6 +8,12 @@
 set -euo pipefail
 
 prefix="${SAGA_MINGW_PREFIX:-/usr/bin/i686-w64-mingw32-}"
+# Debian and Ubuntu suffix the posix-thread-model driver; Arch's mingw-w64-gcc
+# only has that model and uses the plain name.
+cxx="${prefix}g++-posix"
+if [ ! -x "$cxx" ]; then
+    cxx="${prefix}g++"
+fi
 
 compile=0
 for arg in "$@"; do
@@ -31,7 +37,7 @@ if [ "$compile" != 1 ]; then
             expanded+=("$arg")
         fi
     done
-    link="$("${prefix}g++-posix" -### "${expanded[@]}" 2>&1 | grep '/collect2 ')"
+    link="$("$cxx" -### "${expanded[@]}" 2>&1 | grep '/collect2 ')"
     eval "set -- $link"
     shift
     args=()
@@ -48,7 +54,7 @@ if [ "$compile" != 1 ]; then
     exec "${SAGA_LLD:-ld.lld}" "${args[@]}"
 fi
 
-"${prefix}g++-posix" "$@"
+"$cxx" "$@"
 
 compile=0
 output=""
