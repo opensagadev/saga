@@ -434,8 +434,8 @@ are in the [agent and maintainer reference documentation](doc/main.md).
 
 ## CI 🤖
 
-The Bazel build workflow runs for pull requests targeting `main` and pushes
-to `main`. GitHub Pages deployment is owned by the opensaga.dev repository.
+The Bazel build and Tests workflows run for pull requests targeting `main`
+and pushes to `main`. GitHub Pages deployment is owned by the opensaga.dev repository.
 
 ### Bazel build workflow
 
@@ -446,9 +446,19 @@ to `main`. GitHub Pages deployment is owned by the opensaga.dev repository.
 - `target` on Linux, Windows, and Intel macOS;
 - `wasm` on Linux, Windows, and macOS;
 - the i686 `native` build on Linux;
-- the i686 Windows `native` build, cross-compiled on Linux and uploaded as
-  the `saga-native-windows-i686` artifact; and
+- the i686 Windows `native` build, cross-compiled on Linux; and
 - the target symbol check on Linux.
+
+Every build job uploads its output as a workflow-run artifact, downloadable
+from the run's summary page: `saga-target-{linux,windows,macos}`
+(`libTTapp.so`), `saga-wasm-{linux,windows,macos}` (`saga.html`, `.js`,
+`.wasm`), `saga-native-linux-i686` and `saga-native-windows-i686` (the
+executable with the DLLs it loads).
+
+### Tests workflow
+
+`.github/workflows/tests.yaml` runs every test under `//tests/...` on Linux,
+once in the default debug mode and once with `--config=native_release`.
 
 CI cannot access `res/libTTapp.so`. Its symbol check therefore uses the
 original symbol list committed inside `matching.json`. CI verifies the symbol

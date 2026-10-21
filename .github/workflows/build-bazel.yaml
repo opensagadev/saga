@@ -56,6 +56,17 @@ jobs:
       - name: Build target
         run: bazel build --config=target //src:saga_target
 
+      - name: Collect build output
+        run: |
+          mkdir -p dist
+          cp -L bazel-bin/src/libTTapp.so dist/
+
+      - name: Upload build output
+        uses: actions/upload-artifact@v4
+        with:
+          name: saga-target-linux
+          path: dist/
+
       - name: Run target clang-tidy
         run: >-
           bazel build --config=target
@@ -97,6 +108,18 @@ jobs:
 
       - name: Build WebAssembly host (debug)
         run: bazel build --config=wasm //src:saga_wasm
+
+      - name: Collect build output
+        shell: bash
+        run: |
+          mkdir -p dist
+          cp -L bazel-bin/src/saga.html bazel-bin/src/saga.js bazel-bin/src/saga.wasm dist/
+
+      - name: Upload build output
+        uses: actions/upload-artifact@v4
+        with:
+          name: saga-wasm-${{ matrix.cache }}
+          path: dist/
 
       - name: Run WebAssembly clang-tidy
         if: matrix.os == 'ubuntu-latest'
@@ -143,6 +166,18 @@ jobs:
           MSYS2_ARG_CONV_EXCL: "*"
         run: bazel build --config=target //src:saga_target
 
+      - name: Collect build output
+        shell: msys2 {0}
+        run: |
+          mkdir -p dist
+          cp -L bazel-bin/src/libTTapp.so dist/
+
+      - name: Upload build output
+        uses: actions/upload-artifact@v4
+        with:
+          name: saga-target-windows
+          path: dist/
+
   target-macos:
     name: Target / macOS Intel
     runs-on: macos-15-intel
@@ -164,6 +199,17 @@ jobs:
 
       - name: Build target
         run: bazel build --config=target //src:saga_target
+
+      - name: Collect build output
+        run: |
+          mkdir -p dist
+          cp -L bazel-bin/src/libTTapp.so dist/
+
+      - name: Upload build output
+        uses: actions/upload-artifact@v4
+        with:
+          name: saga-target-macos
+          path: dist/
 
   native-linux:
     name: Native / Linux i686 (Ubuntu 26.04)
@@ -207,6 +253,17 @@ jobs:
           PKG_CONFIG_PATH: /usr/lib/i386-linux-gnu/pkgconfig
         run: bazel build --config=native //src:saga_native
 
+      - name: Collect build output
+        run: |
+          mkdir -p dist
+          cp -L bazel-bin/src/saga_native dist/
+
+      - name: Upload build output
+        uses: actions/upload-artifact@v4
+        with:
+          name: saga-native-linux-i686
+          path: dist/
+
       - name: Run native clang-tidy
         env:
           PKG_CONFIG_PATH: /usr/lib/i386-linux-gnu/pkgconfig
@@ -238,12 +295,12 @@ jobs:
           bazel build --config=native --config=windows-i686
           //src:saga_native
 
-      - name: Collect executable and DLLs
+      - name: Collect build output
         run: |
           mkdir -p dist
           cp -L bazel-bin/src/saga_native.exe bazel-bin/src/*.dll dist/
 
-      - name: Upload Windows build
+      - name: Upload build output
         uses: actions/upload-artifact@v4
         with:
           name: saga-native-windows-i686

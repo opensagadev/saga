@@ -1,5 +1,5 @@
 ---
-name: Combat regression
+name: Tests
 
 # GitHub Actions requires this key even though YAML 1.1 treats it as truthy.
 # yamllint disable-line rule:truthy
@@ -13,9 +13,17 @@ permissions:
   contents: read
 
 jobs:
-  combat:
-    name: Combat regression / Linux i686
+  tests:
+    name: Tests / Linux i686 (${{ matrix.name }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: debug
+            config: ""
+          - name: release
+            config: --config=native_release
     steps:
       - uses: actions/checkout@v4
 
@@ -28,10 +36,10 @@ jobs:
         uses: bazel-contrib/setup-bazel@0.19.0
         with:
           bazelisk-cache: true
-          disk-cache: bazel-${{ github.workflow }}-combat
+          disk-cache: bazel-${{ github.workflow }}-${{ matrix.name }}
           repository-cache: true
           external-cache: true
           cache-save: ${{ github.event_name != 'pull_request' }}
 
-      - name: Run isolated combat regression
-        run: bazel test //tests/combat:cannot_kill_test
+      - name: Run regression tests
+        run: bazel test ${{ matrix.config }} //tests/...
