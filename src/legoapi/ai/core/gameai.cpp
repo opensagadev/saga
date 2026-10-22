@@ -943,7 +943,7 @@ void GameCreatureOpponentSelection(AISYS_s *system, i32 count, APIOBJECT_s **obj
                         }
                     }
                     if (baddy_id == id_JAWA || baddy_id == id_UGNAUGHT ||
-                        (baddy->character_data->model_flags & 0x80000))
+                        __builtin_expect((baddy->character_data->model_flags & 0x80000) != 0, 0))
                         goody_object->ai_opponent_exclusion_mask |= (u64)1 << baddy->field_0x289;
                     if (!((goody_object->ai_opponent_exclusion_mask >> baddy->field_0x289) & 1)) {
                         AIPACKET *packet = goody->ai;
@@ -1009,7 +1009,7 @@ void GameCreatureOpponentSelection(AISYS_s *system, i32 count, APIOBJECT_s **obj
                     if ((WORLD->api_object_sys->line_of_sight[goody->field_0x289] >> baddy->field_0x289) & 1)
                         goody->objptr->ai_seen_mask |= (u64)1 << baddy->field_0x289;
                 } else {
-                    if ((goody->objptr->ai_seen_mask >> baddy->field_0x289) & 1) {
+                    if (__builtin_expect((goody->objptr->ai_seen_mask >> baddy->field_0x289) & 1 != 0, 1)) {
                         goody->objptr->ai_seen_mask &= ~((u64)1 << baddy->field_0x289);
                     }
                 }

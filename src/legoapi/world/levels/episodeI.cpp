@@ -815,11 +815,11 @@ void PodRaceUpdate(WORLDINFO_s *world, float dt) {
             PlaySfx("Pod_Race_Light", NULL);
     } else if (netclient == 0) {
         PodRace->mushroom_timer += dt;
-        if (__builtin_expect(PodRace->prev_lap_display > 0.0f, 1)) {
+        if (PodRace->prev_lap_display > 0.0f) {
             PodRace->lap_display = PodRace->prev_lap_display - PodRace->mushroom_timer;
             if (__builtin_expect(PodRace->lap_display < 0.0f && FadeSys.fade == 0.0f, 1)) {
                 PodRace->lap_display = 0.0f;
-                if (Player[0] != NULL && Player[0]->apiobj.player_controlled)
+                if (__builtin_expect(Player[0] != NULL, 1) && Player[0]->apiobj.player_controlled)
                     LoseCoins(Player[0], 1);
                 if (Player[1] != NULL && Player[1]->apiobj.player_controlled)
                     LoseCoins(Player[1], 1);
@@ -850,7 +850,7 @@ void PodRaceUpdate(WORLDINFO_s *world, float dt) {
             if (pod->start < 1.0f) {
                 float dot =
                     direction.x * pod->matrix.m20 + direction.y * pod->matrix.m21 + direction.z * pod->matrix.m22;
-                while (length_sq < 1.0f || dot < 0.0f) {
+                while (length_sq < 1.0f || __builtin_expect(dot < 0.0f, 0)) {
                     pod->start += PODRACE_SPLINEINC;
                     if (!(pod->start <= 1.0f)) {
                         pod->start = 1.0f;
@@ -865,7 +865,7 @@ void PodRaceUpdate(WORLDINFO_s *world, float dt) {
                 }
             }
             float length = NuFsqrt(length_sq);
-            if (pod->start >= 1.0f || length != 0.0f) {
+            if (__builtin_expect(pod->start >= 1.0f, 0) || length != 0.0f) {
                 if (pod->start < 1.0f) {
                     float ratio = PodRace->mushroom_timer / PodRace->prev_lap_display;
                     if (ratio > 1.0f)
@@ -873,10 +873,10 @@ void PodRaceUpdate(WORLDINFO_s *world, float dt) {
                     float speed = pod->speed;
                     if (WORLD->current_level == PODRACEB_LDATA && Lap == 1) {
                         speed /= 0.995f;
-                        if (ratio >= 0.01f)
-                            speed = speed * 1.5f - (ratio - 0.01f) * speed;
-                        else
+                        if (ratio < 0.01f)
                             speed = speed * ratio / 0.01f;
+                        else
+                            speed = speed * 1.5f - (ratio - 0.01f) * speed;
                     } else {
                         speed = 1.5f * speed - ratio * speed;
                     }
@@ -962,9 +962,8 @@ void PodRaceUpdate(WORLDINFO_s *world, float dt) {
             object->saved_position = object->apiobj.position;
         }
     }
-    if (__builtin_expect((PodRace->flags & 1) == 0 && ((Player[0] != NULL && Player[0]->apiobj.field_0x287 != 0) ||
-                                                       (Player[1] != NULL && Player[1]->apiobj.field_0x287 != 0)),
-                         0)) {
+    if ((PodRace->flags & 1) == 0 && ((Player[0] != NULL && Player[0]->apiobj.field_0x287 != 0) ||
+                                      (Player[1] != NULL && Player[1]->apiobj.field_0x287 != 0))) {
         PodRace->flags |= 1;
         char reason[0xc8];
         NuStrCpy(reason, (PodRace->flags & 2) == 0 ? "EP1_PODRACE_PODEXPLODE" : "Ep1_PodRace_OutOfTime");

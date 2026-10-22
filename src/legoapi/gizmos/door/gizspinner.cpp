@@ -291,10 +291,10 @@ static i32 *GizSpinner_GetBestBoltTarget(GIZMOSET *, float *, NUVEC *result_posi
             u16 target_angle;
             if (__builtin_expect(TargetDist_Near2 > distance && directional != 0, 0)) {
                 target_angle = TargetDeg_Near;
-            } else if (TargetDist_Mid2 > distance) {
-                target_angle = TargetDeg_Mid;
-            } else {
+            } else if (TargetDist_Mid2 <= distance) {
                 target_angle = TargetDeg_Far;
+            } else {
+                target_angle = TargetDeg_Mid;
             }
             if (__builtin_expect(!(dot > NuTrigTable[((target_angle + 0x4000) >> 1) & 0x7fff]), 0)) {
                 continue;
@@ -984,7 +984,7 @@ void GizSpinners_Update(void *world_ptr, void *, float) {
                 for (i32 player = 0; player < 8; ++player) {
                     GameObject_s *owner = Player[player];
                     if (owner != NULL && owner->character_context == LEGOCONTEXT_PUSHSPINNER &&
-                        owner->field_0x788 == spinner) {
+                        __builtin_expect(owner->field_0x788 == spinner, 0)) {
                         owner->character_context = -1;
                         owner->field_0x788 = NULL;
                     }
@@ -1020,7 +1020,8 @@ void GizSpinners_Update(void *world_ptr, void *, float) {
             output = candidate;
             break;
         }
-        if (output == -1 && frame < length + margin && length - margin < frame)
+        if (__builtin_expect(output == -1 && __builtin_expect(frame < length + margin, 1) && length - margin < frame,
+                             1))
             output = last;
         if (output == -1) {
             spinner->flags &= static_cast<u8>(~SPINNER_RUNTIME_AT_OUTPUT);
@@ -1033,7 +1034,7 @@ void GizSpinners_Update(void *world_ptr, void *, float) {
                 for (i32 player = 0; player < 8; ++player) {
                     GameObject_s *owner = Player[player];
                     if (owner != NULL && owner->character_context == LEGOCONTEXT_PUSHSPINNER &&
-                        owner->field_0x788 == spinner && owner->pad_gamepad != NULL) {
+                        __builtin_expect(owner->field_0x788 == spinner, 0) && owner->pad_gamepad != NULL) {
                         NewRumble(owner->pad_gamepad->pad, 0.8f, 0);
                         break;
                     }
@@ -1232,7 +1233,7 @@ i32 GizSpinner_Push(GIZSPINNER_s *spinner, i32 context) {
             } else {
                 spinner->rotation -= rotation_step;
             }
-        } else if (__builtin_expect((flags & 2) != 0, 1)) {
+        } else if (__builtin_expect((flags & 2) != 0, 0)) {
             spinner->rotation -= rotation_step;
         } else {
             spinner->rotation += rotation_step;

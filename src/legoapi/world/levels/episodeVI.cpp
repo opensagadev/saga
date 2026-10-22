@@ -784,7 +784,7 @@ void EmperorFightA_Update(WORLDINFO_s *world) {
     if (__builtin_expect(hspecial_efloor != NULL && packet->player_floor_mask, 1)) {
         for (i32 floor = 0; floor < 20; ++floor) {
             nuinstanim_s *animation = NuSpecialGetInstAnim(&hspecial_efloor[floor]);
-            if (animation == NULL || !(animation->ltime > 1.0f))
+            if (__builtin_expect(animation == NULL, 0) || !(animation->ltime > 1.0f))
                 continue;
             NUVEC *floor_position = NuSpecialGetDrawPos(&hspecial_efloor[floor]);
             floor_active = true;
@@ -823,7 +823,7 @@ void EmperorFightA_Update(WORLDINFO_s *world) {
                 floor_end.x += 0.2f - (random + random) * 0.2f;
                 if (floor_end.x > floor_position->x + 0.35f)
                     floor_end.x = floor_position->x + 0.35f;
-                else if (floor_position->x - 0.35f > floor_end.x)
+                else if (__builtin_expect(floor_position->x - 0.35f > floor_end.x, 0))
                     floor_end.x = floor_position->x - 0.35f;
                 floor_end.y = floor_position->y;
                 floor_end.z = Player[i]->apiobj.collision_position.z;
@@ -885,17 +885,17 @@ void EmperorFightA_Update(WORLDINFO_s *world) {
                         connection->traversal_flags[1] |= 0x80000000;
                     }
                 } else if (connection->route_mask & static_cast<u32>(routemask_efloor_off)) {
-                    if (floor_route_on) {
-                        connection->traversal_flags[0] |= 0x80000000;
-                        connection->traversal_flags[1] |= 0x80000000;
-                    } else {
+                    if (!(floor_route_on)) {
                         connection->traversal_flags[0] &= 0x7fffffff;
                         connection->traversal_flags[1] &= 0x7fffffff;
+                    } else {
+                        connection->traversal_flags[0] |= 0x80000000;
+                        connection->traversal_flags[1] |= 0x80000000;
                     }
                 }
             }
             for (i32 i = 0; i < 2; ++i)
-                if (Player[i] != NULL && (Player[i]->apiobj.object_flags & 0x1001) == 0x1001)
+                if (__builtin_expect(Player[i] != NULL, 1) && (Player[i]->apiobj.object_flags & 0x1001) == 0x1001)
                     AISysGetCharacterPathPos(WORLD->ai_sys, &Player[i]->apiobj, &Player[i]->ai, 0xff, 1);
             if (LevGameObject[0] != NULL)
                 AISysGetCharacterPathPos(WORLD->ai_sys, &LevGameObject[0]->apiobj, &LevGameObject[0]->ai, 0xff, 1);

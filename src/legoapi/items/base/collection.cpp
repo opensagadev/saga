@@ -425,7 +425,7 @@ void Collection_Configure(char *file, VARIPTR *bufferStart, VARIPTR *bufferEnd) 
             const i16 id = CharIDFromName(fp->word_buf);
             LOG_DEBUG("Collection_Configure: Found collect id %s -> %d", fp->word_buf, id);
             collect->id = id;
-            if (id == -1 || InCollectList_Index(id, CollectList, CollectCount) != -1)
+            if (id == -1 || __builtin_expect(InCollectList_Index(id, CollectList, CollectCount) != -1, 0))
                 continue;
             collect->type = 0;
             collect->field2_0x3 = 0xff;
@@ -474,7 +474,8 @@ void Collection_Configure(char *file, VARIPTR *bufferStart, VARIPTR *bufferEnd) 
                     NuStrUpr(code, code);
                 }
             }
-            if (collect->type == 0 ? collect->can_buy != 0 : collect->type != 8 && collect->type != 7) {
+            if (__builtin_expect(collect->type == 0 ? collect->can_buy != 0 : collect->type != 8, 1) &&
+                collect->type != 7) {
                 collect->field5_0x9 = 1;
                 ++COLLECTION_COMPLETIONCOUNT;
             }
@@ -487,7 +488,7 @@ void Collection_Configure(char *file, VARIPTR *bufferStart, VARIPTR *bufferEnd) 
         }
     }
     NuFParDestroy(fp);
-    if (CollectCount < 1)
+    if (__builtin_expect(CollectCount < 1, 0))
         CollectList = NULL;
     else
         bufferStart->void_ptr = collect;
@@ -678,7 +679,7 @@ void Collection_Draw(COLLECTION_s *collection, float x, float y, float scale, AP
             for (i32 row = 0; row < rows; ++row)
                 for (i32 col = 0; col < columns; ++col) {
                     const i32 index = row * columns + col;
-                    if (found != 2 && index < count &&
+                    if (__builtin_expect(found != 2, 1) && index < count &&
                         (collection->list[index].id == ids[0] || collection->list[index].id == ids[1])) {
                         selected_x[found] = col;
                         selected_y[found++] = row;
@@ -711,7 +712,7 @@ void Collection_Draw(COLLECTION_s *collection, float x, float y, float scale, AP
                 if (__builtin_expect(hide_selected != 0, 0))
                     continue;
                 opacity = 0.25f;
-                if (model_index == 0) {
+                if (__builtin_expect(model_index == 0, 1)) {
                     frame = LEGOOBJ_ICON_FRAME_BLUE;
                     opacity = Collection_SelectedOpacity();
                 } else if (model_index == 1) {
@@ -738,13 +739,12 @@ void Collection_Draw(COLLECTION_s *collection, float x, float y, float scale, AP
                 opacity *= 0.5f;
             else if ((neighbours & 4) != 0)
                 opacity *= 0.666f;
-            if (special == NULL)
-                DrawCharIcon(id, px, py, 0.002f, size, frame, opacity, opacity, 1, NULL);
-            else {
+            if (special != NULL) {
                 drawcharicon_hspecial_spin =
                     static_cast<i32>((NuFmod(GameTimer.time_elapsed, 3.0f) / 3.0f) * 65536.0f) + index * 0x1555;
                 DrawCharIcon(-1, px, py, 0.002f, size, frame, opacity, opacity, 1, unlocked != 0 ? special : NULL);
-            }
+            } else
+                DrawCharIcon(id, px, py, 0.002f, size, frame, opacity, opacity, 1, NULL);
         }
         py += dy;
     }

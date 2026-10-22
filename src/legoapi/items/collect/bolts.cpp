@@ -637,7 +637,7 @@ void BoltTypes_Configure(WORLDINFO_s *world, char *config) {
             if (__builtin_expect(NuStrICmp(parser->word_buf, const_cast<char *>("bolttype_end")) == 0, 1)) {
                 if (__builtin_expect(type.name[0] != '\0', 0)) {
                     for (i32 i = 0; i < 8; ++i) {
-                        if (NuStrLen(world->bolt_types[i].name) != 0) {
+                        if (__builtin_expect(NuStrLen(world->bolt_types[i].name) != 0, 1)) {
                             continue;
                         }
                         world->bolt_types[i] = type;
@@ -902,8 +902,10 @@ void Bolt_Init(void *storage, NetMessage &message) {
             if ((bolt->flags & 0x10000) == 0 && !Bolt_HitGameObjects(bolt, points, &bolt->bounds_min, &bolt->bounds_max,
                                                                      bolt->collision_radius, NULL)) {
                 bool hit = false;
-                if ((bolt->flags & 0x13) != 0 ||
-                    (bolt->owner != NULL && (bolt->owner->can_shoot_obstructions || bolt->owner->use_action == 5))) {
+                if (__builtin_expect(__builtin_expect((bolt->flags & 0x13) != 0, 0) ||
+                                         (bolt->owner != NULL &&
+                                          (bolt->owner->can_shoot_obstructions || bolt->owner->use_action == 5)),
+                                     1)) {
                     hit = bolt->hit_platform != -1 && Bolt_HitPlat(bolt, NULL);
                     if (!hit)
                         hit = GizmoSys_BoltHit(world->gizmo_sys, world, bolt, points, &bolt->bounds_min,
@@ -925,7 +927,7 @@ void Bolt_Init(void *storage, NetMessage &message) {
                         }
                     }
                 }
-                if (__builtin_expect(!hit, 1))
+                if (__builtin_expect(!hit, 0))
                     Bolt_PlayHitSfx(bolt);
                 if (BoltSys->stop_targeting != NULL && bolt->owner != NULL &&
                     (bolt->owner->apiobj.flags_low & 0x80) != 0)
@@ -1285,7 +1287,7 @@ void Bolt_HitGameObjectRC(NetMessage &message) {
         if (!TouchHacks::TouchControlsActive) {
             temp_yrot += static_cast<i32>((qrand() * (1.0f / 65535.0f)) * 16384.0f - 8192.0f);
             i_temp_xrot += static_cast<i32>((qrand() * (1.0f / 65535.0f)) * 16384.0f - 5461.0f);
-            if (__builtin_expect(i_temp_xrot < -8192, 0))
+            if (i_temp_xrot < -8192)
                 i_temp_xrot = -8192;
             else if (i_temp_xrot > 8192)
                 i_temp_xrot = 8192;
@@ -1344,8 +1346,8 @@ void Bolt_HitGameObjectRC(NetMessage &message) {
             }
             Bolt_PlayHitSfx(bolt);
             GameObject_s *owner = bolt->owner;
-            if (owner != NULL && (owner->apiobj.flags_low & 1) != 0 && (owner->apiobj.flags_low & 0x80) == 0 &&
-                (owner->apiobj.field_0x1f4 & 1) != 0 &&
+            if (owner != NULL && (owner->apiobj.flags_low & 1) != 0 &&
+                __builtin_expect((owner->apiobj.flags_low & 0x80) == 0, 1) && (owner->apiobj.field_0x1f4 & 1) != 0 &&
                 ((owner->apiobj.field_0x1f4 ^ object->apiobj.field_0x1f4) & 1) == 0)
                 goto owner_feedback;
             objhitobj_bolt = bolt;
@@ -1497,7 +1499,7 @@ void Bolts_Update(WORLDINFO_s *world) {
                     f32 time = bolt->time;
                     f32 ray_time = bolt->ray_time;
                     bolt->lifetime = time + ray_time * NewRayCastGetTOFI();
-                    if (bolt->type->ricochet_callback != NULL)
+                    if (__builtin_expect(bolt->type->ricochet_callback != NULL, 0))
                         bolt->type->ricochet_callback(bolt, &normal);
                 }
                 bolt->field_0xe8 = 2000000.0f;
@@ -1508,7 +1510,7 @@ void Bolts_Update(WORLDINFO_s *world) {
                         FindAnglesZX(&ShadNorm, &bolt->surface_x_rotation, &bolt->surface_z_rotation);
                     }
                     u32 surface = ShadowInfo();
-                    if (surface <= 31 && (TerSurface[surface].flags & 2) != 0)
+                    if (__builtin_expect(surface <= 31, 1) && (TerSurface[surface].flags & 2) != 0)
                         bolt->field_0xe8 = height;
                     else if (static_cast<f32>(NewShadowOnPlatform()) != -1.0f)
                         bolt->field_0xe8 = FindReflectionNoPlatforms(&bolt->position);
@@ -1557,7 +1559,7 @@ void Bolts_Update(WORLDINFO_s *world) {
 
                 Bolt_Reflect(&bolt->hit_normal, &bolt->velocity, &reflection);
                 NuVecScale(&reflection, &reflection, 0.2f);
-                if (bolt->hit_platform != -1 && bolt->field_0x104 != -1 &&
+                if (bolt->hit_platform != -1 && __builtin_expect(bolt->field_0x104 != -1, 1) &&
                     (TerSurface[bolt->field_0x104].flags & 0x1000) != 0)
                     BoltSys->debris(bolt, points, -1, &reflection, 1);
                 else

@@ -1393,23 +1393,24 @@ void Players_Init(void) {
         i16 *list;
         i16 list0;
 
-        if (__builtin_expect(
-                !(FreePlay == 0 && (Hub_UsePlayerList == 0 || HUB_ADATA == NULL || HUB_ADATA != WORLD->area) &&
-                  (UsePlayerList != 1 || (PlayerList[0] != -1 &&
-                                          (apicharsys->playermodelids[PlayerList[0]] == -1 ||
-                                           (PlayerList[1] != -1 && apicharsys->playermodelids[PlayerList[1]] == -1))))),
-                0)) {
-            list = PlayerList;
-            list0 = PlayerList[0];
-        } else {
+        if (__builtin_expect(FreePlay == 0 &&
+                                 (Hub_UsePlayerList == 0 || HUB_ADATA == NULL || HUB_ADATA != WORLD->area) &&
+                                 (UsePlayerList != 1 ||
+                                  (PlayerList[0] != -1 &&
+                                   (apicharsys->playermodelids[PlayerList[0]] == -1 ||
+                                    (PlayerList[1] != -1 && apicharsys->playermodelids[PlayerList[1]] == -1)))),
+                             1)) {
             list = Area_PlayerIDList;
             list0 = Area_PlayerIDList[0];
+        } else {
+            list = PlayerList;
+            list0 = PlayerList[0];
         }
 
         if (LevelChangesInArea == 0 && UsePlayerList != 0 && PlayerProgress[0].active == 0 &&
             PlayerProgress[1].active != 0 && FreePlay == 0 && (WORLD->area->flags & 5) == 1 && list0 != -1 &&
-            list0 == Area_StoryModelList[0].model_id && list[1] != -1 && list[1] == Area_StoryModelList[2].model_id &&
-            list0 != list[1]) {
+            __builtin_expect(list0 == Area_StoryModelList[0].model_id, 1) && list[1] != -1 &&
+            list[1] == Area_StoryModelList[2].model_id && list0 != list[1]) {
             list[0] = list[1];
             list[1] = list0;
         }
@@ -1498,7 +1499,8 @@ void Players_Init(void) {
                 }
             }
             idx++;
-            if (bonusmodearcade != 0 || (HUB_ADATA != NULL && HUB_ADATA == WORLD->area) || VehicleArea != 0)
+            if (bonusmodearcade != 0 || (HUB_ADATA != NULL && HUB_ADATA == WORLD->area) ||
+                __builtin_expect(VehicleArea != 0, 0))
                 break;
         }
     }
@@ -3364,7 +3366,7 @@ void AnimatePlayer(GameObject_s *object) {
                      time_multiplier * FRAMETIME,
                      object->apiobj.character_data->game_character->backwards_speed_multiplier);
     if ((packet.flags & ANIMPACKET_FLAG_ANIMATION_CHANGED) != 0 &&
-        (packet.blending != 0 ? packet.blend_animation_b : packet.animation_index) == 0x5f) {
+        __builtin_expect((packet.blending != 0 ? packet.blend_animation_b : packet.animation_index) == 0x5f, 1)) {
         f32 *time = packet.blending != 0 ? &packet.blend_target_time : &packet.current_time;
         const f32 duration = AnimDuration(object->id, 0x5f, 0.0f, 0.0f, 0);
         i32 count = static_cast<i32>(duration / 0.3f);
@@ -3922,12 +3924,12 @@ u32 AdjustLayerBits(u32 mask, GameObject_s *object) {
         } else if (__builtin_expect((suit->flags & 8) != 0, 0)) {
             mask = (mask & ~cape) | SpecialLayer[1].mask | SpecialLayer[7].mask;
             mask = (mask & ~SpecialLayer[3].mask) | SpecialLayer[4].mask;
-            if ((mask & SpecialLayer[20].mask) != 0)
+            if (__builtin_expect((mask & SpecialLayer[20].mask) != 0, 0))
                 mask = (mask & ~SpecialLayer[20].mask) | SpecialLayer[22].mask;
             else if ((mask & SpecialLayer[21].mask) != 0)
                 mask = (mask & ~SpecialLayer[21].mask) | SpecialLayer[23].mask;
             mask = (mask & ~SpecialLayer[17].mask) | SpecialLayer[18].mask;
-            if ((mask & SpecialLayer[8].mask) != 0)
+            if (__builtin_expect((mask & SpecialLayer[8].mask) != 0, 0))
                 mask = (mask & ~SpecialLayer[8].mask) | SpecialLayer[14].mask;
             else if (__builtin_expect((mask & SpecialLayer[9].mask) != 0, 0))
                 mask = (mask & ~SpecialLayer[9].mask) | SpecialLayer[15].mask;
@@ -3953,7 +3955,7 @@ u32 AdjustLayerBits(u32 mask, GameObject_s *object) {
                 mask = (mask & ~SpecialLayer[32].mask) | SpecialLayer[41].mask;
         } else if (__builtin_expect((suit->flags & 0x40) != 0, 0)) {
             mask = (mask & ~cape) | SpecialLayer[26].mask;
-            if ((mask & SpecialLayer[30].mask) != 0)
+            if (__builtin_expect((mask & SpecialLayer[30].mask) != 0, 0))
                 mask = (mask & ~SpecialLayer[30].mask) | SpecialLayer[36].mask;
             else if ((mask & SpecialLayer[31].mask) != 0)
                 mask = (mask & ~SpecialLayer[31].mask) | SpecialLayer[37].mask;

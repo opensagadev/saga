@@ -1211,7 +1211,7 @@ static i32 CheckMusicOther() {
         }
     } else if (level == ASTEROIDCHASEB_LDATA) {
         return GameCam->sock_position.location.sock == 4;
-    } else if (level == SARLACCPITB_LDATA) {
+    } else if (__builtin_expect(level == SARLACCPITB_LDATA, 0)) {
         return SarlaccPitDiscoActive(WORLD) != 0;
     }
     return 0;
@@ -1669,7 +1669,7 @@ void InitGameAfterConfig(void) {
                         }
                         COMPLETIONPOINTS = POINTS_PER_STORY + COMPLETIONPOINTS;
                         CompletionPointInfo[1] = POINTS_PER_STORY + CompletionPointInfo[1];
-                        if ((areaFlags & AREAFLAG_NO_GOLDBRICK) == 0) {
+                        if (__builtin_expect((areaFlags & AREAFLAG_NO_GOLDBRICK) == 0, 1)) {
                             GOLDBRICKPOINTS = GOLDBRICKPOINTS + 1;
                         }
 
@@ -1763,7 +1763,8 @@ void InitGameAfterConfig(void) {
                                     level->camera_judder_distance = 0x32;
                                     level->unknown_0da = 0x14;
                                 }
-                                if (((bVar1 != 0xff) && ((pAVar2[(char)episode].flags & 0x106) == 0)) &&
+                                if (__builtin_expect(
+                                        ((bVar1 != 0xff) && ((pAVar2[(char)episode].flags & 0x106) == 0)) != 0, 1) &&
                                     ((level->flags & (LEVEL_STATUS | LEVEL_OUTRO | LEVEL_MIDTRO | LEVEL_INTRO)) == 0)) {
                                     level->flags |= 0x2000;
                                 }

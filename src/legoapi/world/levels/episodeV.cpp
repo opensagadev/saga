@@ -1705,15 +1705,16 @@ __attribute__((optimize("O2", "tree-vectorize"))) i32 SpawnMeleeCreatureType(i32
         for (i32 attempts = 50; attempts > 0; --attempts) {
             locator = getSpawnLocator(5.0f, "spawn");
             if (locator != NULL) {
-                if (OnOrInsidePlane(&locator->position, &PlayPlane[1].point, &PlayPlane[1].normal, NULL, 0.5f, NULL) ==
-                        0 ||
+                if (__builtin_expect(OnOrInsidePlane(&locator->position, &PlayPlane[1].point, &PlayPlane[1].normal,
+                                                     NULL, 0.5f, NULL) == 0,
+                                     0) ||
                     OnOrInsidePlane(&locator->position, &PlayPlane[2].point, &PlayPlane[2].normal, NULL, 0.5f, NULL) ==
                         0) {
                     if (__builtin_expect(OnOrInsidePlane(&locator->position, &PlayPlane[1].point, &PlayPlane[1].normal,
                                                          NULL, 2.5f, NULL) != 0 ||
                                              OnOrInsidePlane(&locator->position, &PlayPlane[2].point,
                                                              &PlayPlane[2].normal, NULL, 2.5f, NULL) != 0,
-                                         1))
+                                         0))
                         break;
                 }
                 locator = NULL;
@@ -1897,10 +1898,10 @@ void HothBattleE_UpdateWave() {
             melee.wave_delay = 0.0f;
             HothBattle_ClearBackgroundObjects();
             char state[16];
-            if (g_lowEndLevelBehaviour == 0) {
-                sprintf(state, "CamCut_%d", melee.next_wave);
-            } else {
+            if (g_lowEndLevelBehaviour != 0) {
                 sprintf(state, "CamCutLow_%d", melee.next_wave);
+            } else {
+                sprintf(state, "CamCut_%d", melee.next_wave);
             }
             if (AIScriptSetBaseScriptStateByName(&WORLD->processors[0].processor, state) != 0) {
                 AIScriptProcess(WORLD->ai_sys, NULL, NULL, &WORLD->processors[0].processor, FRAMETIME);

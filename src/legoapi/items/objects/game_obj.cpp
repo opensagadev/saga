@@ -523,7 +523,7 @@ void ManageGameObjects() {
     memset(aicreature_sets_alive, 0, sizeof(aicreature_sets_alive));
     for (i32 i = 0; i < HIGHGAMEOBJECT; ++i) {
         GameObject_s *candidate = &object[i];
-        if ((candidate->apiobj.field_0x1f8 & 0x1000) != 0 && candidate->apiobj.field_0x287 == 0 &&
+        if (__builtin_expect((candidate->apiobj.field_0x1f8 & 0x1000) != 0, 0) && candidate->apiobj.field_0x287 == 0 &&
             candidate->ai.creature_set != 0)
             ++aicreature_sets_alive[candidate->ai.creature_set - 1];
     }
@@ -531,8 +531,10 @@ void ManageGameObjects() {
         if ((object->apiobj.field_0x1f8 & 1) == 0)
             continue;
         if ((object->apiobj.field_0x1f4 & 0x40000) != 0) {
-            if (nethost != 0 && (object->apiobj.field_0x1f8 & 0x1000) == 0 && object->ai.field_0x134 == 0xff &&
-                (object->ai.reset_mode & ~2) != 1 && (object->apiobj.field_0x1f4 & 0x4000) != 0)
+            if (__builtin_expect(nethost != 0 && (object->apiobj.field_0x1f8 & 0x1000) == 0 &&
+                                     object->ai.field_0x134 == 0xff && (object->ai.reset_mode & ~2) != 1 &&
+                                     (object->apiobj.field_0x1f4 & 0x4000) != 0,
+                                 1))
                 AIScriptProcess(WORLD->ai_sys, &object->apiobj, &object->ai, &object->ai.script_process, FRAMETIME);
             continue;
         }
@@ -545,13 +547,7 @@ void ManageGameObjects() {
             }
             if (object->field_0x101c > 0.0f) {
                 object->field_0x101c -= FRAMETIME;
-                if (!(object->field_0x101c <= 0.0f)) {
-                    if (WORLD->current_level == PODSPRINTA_LDATA) {
-                        GameObject_s *other = GetOtherActivePlayer(object);
-                        if (other != NULL)
-                            object->apiobj.position = other->apiobj.position;
-                    }
-                } else {
+                if (object->field_0x101c <= 0.0f) {
                     object->field_0x101c = 0.0f;
                     GameObject_s *other = NULL;
                     if (WORLD->current_level == PODSPRINTA_LDATA)
@@ -593,6 +589,12 @@ void ManageGameObjects() {
                     if (object->apiobj.player_controlled && WORLD->current_level == SPEEDERCHASEA_LDATA &&
                         disable_narrow_socks == 0)
                         GameCam_Blend(GameCam, 0.5f, 0.0f, 0);
+                } else {
+                    if (__builtin_expect(WORLD->current_level == PODSPRINTA_LDATA, 1)) {
+                        GameObject_s *other = GetOtherActivePlayer(object);
+                        if (other != NULL)
+                            object->apiobj.position = other->apiobj.position;
+                    }
                 }
                 continue;
             }
@@ -612,16 +614,7 @@ void ManageGameObjects() {
                     object->field_0x101c = 2.0f;
                 } else {
                     AICREATURE *creature = &WORLD->ai_sys->creatures[object->ai.field_0x134];
-                    if (object->respawnable) {
-                        if (!object->respawn_at_origin) {
-                            if (object->id == id_STAP2 && WORLD->current_level == NEGOTIATIONSC_LDATA) {
-                                object->field_0x101c = 5.0f;
-                            } else {
-                                object->field_0x101c = 1.0f;
-                            }
-                            continue;
-                        }
-                    } else {
+                    if (!(object->respawnable)) {
                         u32 limit = object->ai_respawn_count + 1;
                         if (creature->max_respawn_count != -1 && object->ai.respawn_locator == NULL)
                             limit = creature->min_respawn_count +
@@ -631,6 +624,15 @@ void ManageGameObjects() {
                         if (limit <= object->ai_respawn_count) {
                             object->apiobj.field_0x1f8 &= ~0x1000;
                             object->ai.reset_mode = 4;
+                            continue;
+                        }
+                    } else {
+                        if (!object->respawn_at_origin) {
+                            if (object->id == id_STAP2 && WORLD->current_level == NEGOTIATIONSC_LDATA) {
+                                object->field_0x101c = 5.0f;
+                            } else {
+                                object->field_0x101c = 1.0f;
+                            }
                             continue;
                         }
                     }
@@ -665,7 +667,7 @@ void ManageGameObjects() {
                         } else {
                             i32 area = creature->activate_area - system->areas;
                             i64 mask = static_cast<i32>(1u << (area & 31));
-                            if (__builtin_expect(player != NULL && (player->apiobj.ai_area_mask & mask) != 0, 1)) {
+                            if (__builtin_expect(player != NULL && (player->apiobj.ai_area_mask & mask) != 0, 0)) {
                                 if (Game.difficulty < creature->activation_difficulty) {
                                     object->ai.reset_mode = 4;
                                 } else if (creature->count > 1 && creature->start_stagger > 0.0f &&
@@ -688,14 +690,14 @@ void ManageGameObjects() {
                 }
             } else if (object->ai.reset_mode == 1) {
                 AIGROUP *group = object->ai.group;
-                if (group != NULL && !group->can_respawn)
+                if (group != NULL && __builtin_expect(!group->can_respawn, 0))
                     continue;
                 if (creature->activate_type == 1) {
                     i32 area = creature->activate_area - system->areas;
                     i64 mask = static_cast<i32>(1u << (area & 31));
                     if (player == NULL || (player->apiobj.ai_area_mask & mask) == 0 ||
                         Game.difficulty < creature->activation_difficulty) {
-                        if (creature->count > 1 && !(creature->start_stagger <= 0.0f))
+                        if (creature->count > 1 && __builtin_expect(!(creature->start_stagger <= 0.0f), 0))
                             object->ai_spawn_delay = static_cast<f32>(static_cast<u32>(object->ai.group_member_index)) *
                                                      creature->start_stagger;
                         continue;
@@ -807,8 +809,8 @@ void CollideGameObjects(WORLDINFO_s *world) {
         if (object->character_context == 0x3d && (flags & APIOBJECT_FLAG_PLAYER_ACTIVE) == 0) {
             flattened_mask |= bit;
         }
-        if (WORLD->current_level == SPEEDERCHASEA_LDATA && disable_narrow_socks == 0 && object->id == id_SPEEDERBIKE &&
-            object->apiobj.field_0x27c != -1) {
+        if (WORLD->current_level == SPEEDERCHASEA_LDATA && disable_narrow_socks == 0 &&
+            __builtin_expect(object->id == id_SPEEDERBIKE, 1) && object->apiobj.field_0x27c != -1) {
             narrow_speeder_mask |= bit;
         }
     }
@@ -828,8 +830,8 @@ void CollideGameObjects(WORLDINFO_s *world) {
         }
 
         const i32 context = object->character_context;
-        if ((CInfo[context].flags & 0x8000) != 0 || context == 0x3b || context == 0x3c || context == 0x0f ||
-            context == 0x39) {
+        if (__builtin_expect((CInfo[context].flags & 0x8000) != 0, 0) || context == 0x3b ||
+            __builtin_expect(context == 0x3c, 0) || context == 0x0f || __builtin_expect(context == 0x39, 0)) {
             continue;
         }
         if (!(context == 0x26 && object->field_0x7a7 != -1 && (object->context_variant_flags & 2) != 0)) {
@@ -859,8 +861,8 @@ void CollideGameObjects(WORLDINFO_s *world) {
                 object->apiobj.collision_mask_low |= player_collision_mask;
                 for (i32 player_index = 0; player_index < 8; ++player_index) {
                     GameObject_s *player = Player[player_index];
-                    if (player == NULL || (player->apiobj.field_0x1f8 & 0x1001) != 0x1001 || player == object ||
-                        player->field_0xdc4 <= 0.0f ||
+                    if (player == NULL || (player->apiobj.field_0x1f8 & 0x1001) != 0x1001 ||
+                        __builtin_expect(player == object, 0) || player->field_0xdc4 <= 0.0f ||
                         player->apiobj.supporting_platform_id != object->field_0x107c ||
                         (object->field_0x107c == player->field_0x1078 &&
                          (player->apiobj.field_0x27d != 0 || GameObjectNearFloor(player, 3.0f, NULL) != 0))) {
@@ -879,7 +881,7 @@ void CollideGameObjects(WORLDINFO_s *world) {
                 object->apiobj.collision_exclusion_mask |= bit;
             }
             if (WORLD->current_level == SPEEDERCHASEA_LDATA && disable_narrow_socks == 0 &&
-                object->id == id_SPEEDERBIKE && object->apiobj.field_0x27c != -1) {
+                object->id == id_SPEEDERBIKE && __builtin_expect(object->apiobj.field_0x27c != -1, 0)) {
                 object->apiobj.collision_mask_low |= narrow_speeder_mask;
             }
 
@@ -979,11 +981,13 @@ void GameObjectRotation(GameObject_s *object, i32 mode) {
     }
     if ((api.field_0x1f8 & 4) == 0) {
         if ((flags & 0x200000) == 0) {
-            if (object->surface_normal.x != 0.0f || object->surface_normal.y != 1.0f ||
-                object->surface_normal.z != 0.0f) {
-                FindAnglesZX(&object->surface_normal, &object->field_0x1062, &object->field_0x1064);
-            } else {
+            if (__builtin_expect(!(object->surface_normal.x != 0.0f ||
+                                   __builtin_expect(object->surface_normal.y != 1.0f, 0) ||
+                                   __builtin_expect(object->surface_normal.z != 0.0f, 0)),
+                                 0)) {
                 object->field_0x1062 = object->field_0x1064 = 0;
+            } else {
+                FindAnglesZX(&object->surface_normal, &object->field_0x1062, &object->field_0x1064);
             }
         } else {
             FindAnglesZX(&object->suspension_normal, &object->field_0x1062, &object->field_0x1064);
@@ -1043,7 +1047,7 @@ void GameObjectRotation(GameObject_s *object, i32 mode) {
         if (alignment == 0) {
             api.pitch_angle = api.roll_angle = 0;
         } else if (magnet) {
-            if (static_cast<u16>(object->context_animation - 5) <= 1)
+            if (__builtin_expect(static_cast<u16>(object->context_animation - 5) <= 1, 0))
                 api.pitch_angle = api.roll_angle = 0;
             else {
                 api.pitch_angle = object->magnet_surface_angle;
@@ -1057,7 +1061,7 @@ void GameObjectRotation(GameObject_s *object, i32 mode) {
         } else if (reflection) {
             api.pitch_angle = object->field_0x1068;
             api.roll_angle = object->field_0x106a;
-        } else if (alignment == 2 || !(object->surface_normal.y <= NuTrigTable[0x3000])) {
+        } else if (__builtin_expect(alignment == 2, 1) || !(object->surface_normal.y <= NuTrigTable[0x3000])) {
             api.pitch_angle = x;
             api.roll_angle = z;
         } else {

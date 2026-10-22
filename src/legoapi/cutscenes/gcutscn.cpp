@@ -1086,18 +1086,18 @@ extern "C" {
         instance->rate = 1.0f;
 
         (*NuThreadDisableThreadSwap)();
-        if (__builtin_expect(flags == 0, 1)) {
-            instance->next = active_cutscene_instances;
-            if (active_cutscene_instances != NULL) {
-                active_cutscene_instances->previous = instance;
-            }
-            active_cutscene_instances = instance;
-        } else {
+        if (__builtin_expect(flags != 0, 0)) {
             instance->next = background_cutscene_instances;
             if (background_cutscene_instances != NULL) {
                 background_cutscene_instances->previous = instance;
             }
             background_cutscene_instances = instance;
+        } else {
+            instance->next = active_cutscene_instances;
+            if (active_cutscene_instances != NULL) {
+                active_cutscene_instances->previous = instance;
+            }
+            active_cutscene_instances = instance;
         }
         instance->allocation_size = static_cast<i32>(buf->addr - reinterpret_cast<usize>(instance));
         (*NuThreadEnableThreadSwap)();
@@ -1814,7 +1814,7 @@ static void instNuGCutCamSysUpdate(instNUGCUTSCENE_s *instance, float frame) {
         state->event_index = camera_instance->next_target_index;
         ++camera_instance->next_target_index;
     }
-    while (camera_instance->next_target_index != 0 &&
+    while (__builtin_expect(camera_instance->next_target_index != 0, 1) &&
            frame < camera_instance->targets[camera_instance->next_target_index - 1].start_frame) {
         --camera_instance->next_target_index;
         const i8 mapped_camera =
@@ -1874,7 +1874,7 @@ static void instNuGCutCamSysUpdate(instNUGCUTSCENE_s *instance, float frame) {
         }
     }
 
-    if (__builtin_expect(static_cast<i8>(instance->flags_88) < 0, 1)) {
+    if (__builtin_expect(static_cast<i8>(instance->flags_88) < 0, 0)) {
         NuMtxMul(&cutscenecammtx, &cutscenecammtx, &instance->matrix);
     }
     set_cutscenecammtx = 1;
@@ -1901,7 +1901,7 @@ static void instNuGCutCamSysUpdate(instNUGCUTSCENE_s *instance, float frame) {
         }
         if (blend > 1.0f) {
             blend = 1.0f - blend;
-        } else if (!(blend < 0.0f) && reverse != 0) {
+        } else if (__builtin_expect(!(blend < 0.0f), 1) && reverse != 0) {
             blend = 1.0f - blend;
         }
 
@@ -2861,7 +2861,7 @@ extern "C" {
                 NuAnimData2CalcTime(locator->animation, frame, &time);
             }
             i32 visible = NuGCutLocatorIsVisble(locator, frame, &time, &scale, &rate);
-            if (visible != 0 && scale < 0.0f && (locator->flags & 0x10) == 0) {
+            if (__builtin_expect(visible != 0, 1) && scale < 0.0f && (locator->flags & 0x10) == 0) {
                 scale = static_cast<f32>(debtab[effect_index]->frequency) * -scale;
             }
             if (visible != 0 && scale > 0.1f) {
@@ -2908,7 +2908,7 @@ extern "C" {
                 }
                 return;
             }
-            if (__builtin_expect((locator->flags & 0x20) != 0, 0)) {
+            if (__builtin_expect((locator->flags & 0x20) != 0, 1)) {
                 if (inst_locator->effect_handle >= 0) {
                     DebFreeInstantly(&inst_locator->effect_handle);
                 }
@@ -3118,8 +3118,9 @@ static void instNuGCutSceneUpdate(instNUGCUTSCENE_s *instance, int paused, int s
         return;
     }
     if (instance->cutscene->version > 1) {
-        if ((instance->flags_8b & 0x20) != 0 && cutscene_load_instance == NULL && (instance->flags_8b & 8) == 0 &&
-            instance->stream_index != instNuGCutSceneLastStream(instance)) {
+        if ((instance->flags_8b & 0x20) != 0 && __builtin_expect(cutscene_load_instance == NULL, 1) &&
+            (instance->flags_8b & 8) == 0 &&
+            __builtin_expect(instance->stream_index != instNuGCutSceneLastStream(instance), 0)) {
             cutscene_load_instance = instance;
         }
         if (instance->queued_stream_instance != NULL && cutscene_load_instance == NULL &&
@@ -3144,11 +3145,11 @@ static void instNuGCutSceneUpdate(instNUGCUTSCENE_s *instance, int paused, int s
                 cutscene_quit_prompt = 1;
             }
         } else if ((instance->flags_8c & 0x10) != 0) {
-            if (skip == 0) {
-                cutscene_quit_prompt = 1;
-            } else {
+            if (skip != 0) {
                 instance->current_frame = cutscene->duration - 1.0f - instance->rate * elapsed;
                 cutscene_has_quit = 1;
+            } else {
+                cutscene_quit_prompt = 1;
             }
         }
     }
@@ -3178,10 +3179,10 @@ static void instNuGCutSceneUpdate(instNUGCUTSCENE_s *instance, int paused, int s
                         instance->current_frame = instance->cutscene->duration - 1.0f;
                     } else {
                         instance->stream_index = instance->cutscene->last_stream - 1;
-                        if ((instance->flags_8b & 0x10) == 0) {
-                            instance->pending_stream_buffer = static_cast<void *>(instance->stream_buffer_1);
-                        } else {
+                        if ((instance->flags_8b & 0x10) != 0) {
                             instance->pending_stream_buffer = static_cast<void *>(instance->stream_buffer_0);
+                        } else {
+                            instance->pending_stream_buffer = static_cast<void *>(instance->stream_buffer_1);
                         }
                         cutscene_load_instance = instance;
                     }

@@ -17598,7 +17598,7 @@ eduimenu_s *pathEditor_Process(nupad_s *pad) {
                                 eduiItemSelCreate(1, attr, 0, 0, pathEditor_cbShareNodeMenu, "Share node with..."));
             if (aieditor->current_path && !(aieditor->current_path->flags & 1))
                 eduiMenuAddItem(menu, eduiItemSelCreate(0, attr, 0, 0, pathEditor_cbDeletePath, "Delete Path Network"));
-            if (aieditor->current_path && !(aieditor->current_path->flags & 1))
+            if (__builtin_expect(aieditor->current_path != 0, 0) && !(aieditor->current_path->flags & 1))
                 eduiMenuAddItem(menu,
                                 eduiItemSelCreate(1, attr, 0, 0, pathEditor_cbRenamePathMenu, "Rename Path Network"));
         }

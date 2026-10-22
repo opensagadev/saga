@@ -1375,7 +1375,8 @@ i32 IsACoinType(i32 type) {
 i32 LoseCoins(GameObject_s *object, i32 cause) {
     if (Player_HasInvincibility(object) != 0 ||
         (object->apiobj.character_data->game_character->flags_090 & 0x8000) != 0 || object->coinpacket == NULL ||
-        (Arcade != 0 && (Arcade_Mode[static_cast<i8>(ArcadeItem.field_c_0xc)].field8_0x8 & 8) != 0)) {
+        __builtin_expect(
+            (Arcade != 0 && (Arcade_Mode[static_cast<i8>(ArcadeItem.field_c_0xc)].field8_0x8 & 8) != 0) != 0, 1)) {
         return 0;
     }
     u32 lost = 0;

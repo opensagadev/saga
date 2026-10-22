@@ -407,8 +407,9 @@ mode_selected:
                     (BonusWinner != -1 && BonusWinner != i))
                     continue;
                 vehicle_player[i] = object->apiobj.character_data->model_flags & 0x2000;
-                if (!(SPEEDERCHASEA_LDATA != NULL && WORLD->current_level == SPEEDERCHASEA_LDATA &&
-                      object->id == id_SPEEDERBIKE && disable_narrow_socks) &&
+                if (__builtin_expect(!(SPEEDERCHASEA_LDATA != NULL && WORLD->current_level == SPEEDERCHASEA_LDATA &&
+                                       object->id == id_SPEEDERBIKE && disable_narrow_socks),
+                                     1) &&
                     vehicle_player[i]) {
                     vehicle_count++;
                     if (object->id == id_LANDSPEEDER) {
@@ -425,7 +426,7 @@ mode_selected:
                         }
                     }
                 }
-                if (PODRACE_ADATA != NULL && WORLD->area == PODRACE_ADATA) {
+                if (PODRACE_ADATA != NULL && __builtin_expect(WORLD->area == PODRACE_ADATA, 0)) {
                     player_focus[player_count] = Player[i]->apiobj.collision_position;
                     NUVEC &pod_offset = mode_scratch;
                     pod_offset.y = 0.0f;
@@ -602,7 +603,7 @@ mode_selected:
                 if (WORLD->current_level == BONUS_GUNSHIPB_LDATA && camera->sock_position.location.sock != -1) {
                     position.x += target.x * 0.0625f;
                     position.z += target.z * 0.0625f;
-                } else if (WORLD->current_level == EMPERORFIGHTA_LDATA && player != NULL &&
+                } else if (__builtin_expect(WORLD->current_level == EMPERORFIGHTA_LDATA, 1) && player != NULL &&
                            player->sock_position.location.sock == 11 && WORLD->current_level != NULL)
                     position.y += EMPERORFIGHTA_CAMDYHACK;
             rail_vehicle_focus:
@@ -693,7 +694,7 @@ mode_selected:
                     NuVecSub(&offset, &rail_position, &average_position);
                     f32 magnitude = NuVecMagSqr(&offset);
                     f32 blend = 0.0f;
-                    if (player2 == NULL) {
+                    if (__builtin_expect(player2 == NULL, 1)) {
                         blend = magnitude / 125.0f;
                         if (blend > 0.75f)
                             blend = 0.6f;

@@ -69,7 +69,7 @@ i32 BoltType_FindIDByCreature(GameObject_s *object, i32 fallback) {
             return 9;
         return 7 + (world->current_level == ASTEROIDCHASED_LDATA);
     }
-    if (id == id_NABOOSTARFIGHTER || id == id_NABOOSTARFIGHTERLIME)
+    if (id == id_NABOOSTARFIGHTER || __builtin_expect(id == id_NABOOSTARFIGHTERLIME, 0))
         return 34;
     if (id == id_ANAKINSSPEEDER || id == id_ANAKINSSPEEDER_GREEN || id == id_ZAMSSPEEDER)
         return 11;

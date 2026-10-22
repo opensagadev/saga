@@ -1103,7 +1103,7 @@ void MenuUpdateNewGame(MENU *menu) {
     if (__builtin_expect((GamePad[0].unknown_04 & GAMEPAD_START) != 0, 1)) {
         NuPadSetStatus(GamePad[0].pad->port, NUPAD_STATUS_ACTIVE);
     }
-    if (static_cast<u8>(GamePad[0].unknown_24) == 0 || GamePad[0].pad->is_valid == 0) {
+    if (__builtin_expect(static_cast<u8>(GamePad[0].unknown_24) == 0, 0) || GamePad[0].pad->is_valid == 0) {
         PlayerProgress[0].active = 0;
     } else if (__builtin_expect(g_nupadMapping[0].is_active != 0, 1)) {
         PlayerProgress[0].active = 1;

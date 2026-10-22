@@ -756,7 +756,7 @@ i32 Action_BoulderSection(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKE
             char *value = NuStrIStr(params[index], "boulder_range=");
             if (value != NULL) {
                 processor->action_data_4 = AIParamToFloat(&packet->script_process, value + 14);
-            } else if ((value = NuStrIStr(params[index], "attack_time=")) != NULL) {
+            } else if (__builtin_expect((value = NuStrIStr(params[index], "attack_time=")) != NULL, 1)) {
                 processor->action_data_5 = AIParamToFloat(&packet->script_process, value + 12);
             } else {
                 packet->movement_instruction_parameter = AIParamToFloat(processor, params[index]);
@@ -765,7 +765,7 @@ i32 Action_BoulderSection(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKE
     }
     const bool can_attack = FreePlay == 0 || CharCategory_IsCategory(object, 0) != 0 ||
                             CharCategory_IsCategory(object, 1) != 0 || CharCategory_IsCategory(object, 8) != 0;
-    if (!can_attack) {
+    if (__builtin_expect(!can_attack, 0)) {
         processor->action_timer -= FRAMETIME;
         if (!(processor->action_timer >= 0.0f)) {
             processor->action_timer = 0.5f;
@@ -790,7 +790,7 @@ i32 Action_BoulderSection(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKE
     }
     // The retail third probe reads padding past this two-entry array. Do not
     // reproduce that out-of-bounds access or enlarge the recovered global.
-    if (nearest != NULL) {
+    if (__builtin_expect(nearest != NULL, 0)) {
         packet->movement_look_target = &nearest->position;
         if (can_attack)
             object->pad_gamepad->buttons_pressed |= GAMEPAD_ACTION;

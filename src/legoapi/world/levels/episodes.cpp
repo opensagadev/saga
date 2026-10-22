@@ -38,7 +38,7 @@ EPISODEDATA *Episodes_ConfigureList(char *file, VARIPTR *bufferStart, VARIPTR *b
     bufferStart->void_ptr = (void *)episode;
     EPISODEDATA *list = episode;
 
-    while (NuFParGetLine(fp)) {
+    while (__builtin_expect(NuFParGetLine(fp) != 0, 1)) {
         NuFParGetWord(fp);
         if (fp->word_buf[0] == '\0') {
             continue;
@@ -47,7 +47,7 @@ EPISODEDATA *Episodes_ConfigureList(char *file, VARIPTR *bufferStart, VARIPTR *b
         if (in_episode) {
             if (NuStrICmp(fp->word_buf, "episode_end") == 0) {
                 in_episode = 0;
-                if (__builtin_expect(episode->area_count != 0, 1)) {
+                if (episode->area_count != 0) {
                     count++;
                     episode++;
                 }
@@ -55,7 +55,7 @@ EPISODEDATA *Episodes_ConfigureList(char *file, VARIPTR *bufferStart, VARIPTR *b
                 if (__builtin_expect(episode->area_count < 10 && NuFParGetWord(fp) != 0, 0)) {
                     i32 area_index;
                     AREADATA *area = Area_FindByName(fp->word_buf, &area_index);
-                    if (area_index != -1) {
+                    if (__builtin_expect(area_index != -1, 1)) {
                         if (Episode_HasArea(episode, area_index)) {
                             continue;
                         }
@@ -66,7 +66,7 @@ EPISODEDATA *Episodes_ConfigureList(char *file, VARIPTR *bufferStart, VARIPTR *b
                                 break;
                             }
                         }
-                        if (__builtin_expect(j == count, 1)) {
+                        if (__builtin_expect(j == count, 0)) {
                             const i32 area_count = episode->area_count;
                             episode->area_ids[area_count] = (i16)area_index;
                             episode->area_count = (u8)(area_count + 1);
@@ -81,7 +81,7 @@ EPISODEDATA *Episodes_ConfigureList(char *file, VARIPTR *bufferStart, VARIPTR *b
             } else if (NuStrICmp(fp->word_buf, "text_id") == 0) {
                 episode->text_id = (i16)NuFParGetInt(fp);
             }
-        } else if (NuStrICmp(fp->word_buf, "episode_start") == 0 && count < maxCount) {
+        } else if (__builtin_expect(NuStrICmp(fp->word_buf, "episode_start") == 0, 1) && count < maxCount) {
             episode->name_id = -1;
             episode->text_id = -1;
             episode->area_count = 0;

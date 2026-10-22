@@ -817,7 +817,8 @@ bool NuMemoryManager::PopContext(NuMemoryManager::PopDebugMode debug_mode) {
                 char *cursor = stranded_dump_path;
 
                 do {
-                    if (*cursor == '/' || *cursor == '\\' || *cursor == ':' || *cursor == ' ') {
+                    if (*cursor == '/' || __builtin_expect(*cursor == '\\', 0) || *cursor == ':' ||
+                        __builtin_expect(*cursor == ' ', 1)) {
                         *cursor = '_';
                     }
 
@@ -887,17 +888,17 @@ bool NuMemoryManager::PopContext(NuMemoryManager::PopDebugMode debug_mode) {
         if (stranded_block_count != 0) {
             pthread_mutex_lock(&this->error_mutex);
 
-            if (leak_value[0] != '\0') {
+            if (leak_value[0] == '\0') {
+                snprintf(this->error_msg, sizeof(this->error_msg),
+                         "%u stranded memory blocks(s) [%u bytes] detected popping context %s\nReport dumped "
+                         "[%s]\nLargest leak [%s]\n",
+                         stranded_block_count, stranded_bytes_count, ctx_name, stranded_dump_path, largest_leak);
+            } else {
                 snprintf(this->error_msg, sizeof(this->error_msg),
                          "%u stranded memory blocks(s) [%u bytes] detected popping context %s\nReport dumped "
                          "[%s]\nLargest leak [%s]\nValue [%s]\n",
                          stranded_block_count, stranded_bytes_count, ctx_name, stranded_dump_path, largest_leak,
                          leak_value);
-            } else {
-                snprintf(this->error_msg, sizeof(this->error_msg),
-                         "%u stranded memory blocks(s) [%u bytes] detected popping context %s\nReport dumped "
-                         "[%s]\nLargest leak [%s]\n",
-                         stranded_block_count, stranded_bytes_count, ctx_name, stranded_dump_path, largest_leak);
             }
 
             this->error_handler->HandleError(this, MEM_ERROR_LEAK_DETECTED, this->error_msg);
@@ -1366,7 +1367,7 @@ u16 NuMemoryManager::DumpBlock(u32 dump_id, NuSymbolQuery *, Header *header, u32
     }
     error_handler->Dump(this, dump_id, line);
     if ((m_flags & MEM_MANAGER_EXTENDED_DEBUG) != 0 && (flags & 0x20) != 0 &&
-        reinterpret_cast<ExtendedDebugHeader *>(header)->backtrace_count == 0) {
+        __builtin_expect(reinterpret_cast<ExtendedDebugHeader *>(header)->backtrace_count == 0, 1)) {
         strcpy(line, "|            |            |               |     |           |   <NO BACKTRACE>\r\n");
         error_handler->Dump(this, dump_id, line);
     }

@@ -639,9 +639,8 @@ static i32 *GizTurrets_GetBestBoltTarget(GIZMOSET *set, float *result_distance, 
         if ((turret->flags & 0x30) != 0 || turret->primary_anim_obj == NULL)
             continue;
         NUVEC *target_position = NuSpecialGetDrawPos(&turret->primary_anim_obj->special);
-        if (__builtin_expect(target_position == NULL || target_position->x < min_x || target_position->x > max_x ||
-                                 target_position->z < min_z || target_position->z > max_z,
-                             1)) {
+        if (target_position == NULL || target_position->x < min_x || target_position->x > max_x ||
+            target_position->z < min_z || target_position->z > max_z) {
             continue;
         }
 
@@ -1243,7 +1242,7 @@ i32 GizTurrets_Hit(void *world, GIZTURRET_s *turret, nuvec_s *, i32 player_index
                    NULL, 1, 0, true);
         turret->runtime_flags |= 4;
     }
-    if ((turret->behavior_flags & 0x4010) == 0x4000 && LEGOHINT_SHOOTCAMERAS != -1) {
+    if (__builtin_expect((turret->behavior_flags & 0x4010) == 0x4000, 1) && LEGOHINT_SHOOTCAMERAS != -1) {
         Hint_SetComplete(LEGOHINT_SHOOTCAMERAS);
     }
     return 1;
@@ -1380,7 +1379,7 @@ void GizTurrets_OpponentSelection(GIZTURRETSYS_s *system, i32 goody_count, APIOB
                     if (selected != NULL) {
                         const i8 selected_flags = static_cast<i8>(selected->apiobj.flags_low);
                         const i8 candidate_flags = static_cast<i8>(candidate->apiobj.flags_low);
-                        if (candidate_flags >= 0 || selected_flags < 0) {
+                        if (__builtin_expect(candidate_flags >= 0, 0) || selected_flags < 0) {
                             if ((candidate_flags ^ selected_flags) < 0) {
                                 continue;
                             }

@@ -187,12 +187,12 @@ void WorldInfo_Init(WORLDINFO *world) {
             DebrisSetThinningLevel(1.0f);
             DebrisSetForcedThinning(0);
         }
-        if (NuDeviceSpecs::ms_instance->specs <= 2 && world->current_level != NULL &&
+        if (__builtin_expect(NuDeviceSpecs::ms_instance->specs <= 2, 0) && world->current_level != NULL &&
             NuStrIStr(world->current_level->name, "Negotiations_") != NULL) {
             Reflections_On = 0;
         }
     } else {
-        if (world->current_level != NULL) {
+        if (__builtin_expect(world->current_level != NULL, 0)) {
             DebrisSetThinningLevel(world->current_level->data_display.particle_thin);
             DebrisSetForcedThinning(world->current_level->data_display.particle_thin > 1.0f);
             character_farclip = world->current_level->unknown_11c;
@@ -333,7 +333,7 @@ void WorldInfo_Init(WORLDINFO *world) {
         WorldInfo_InitLastFn(world);
     }
 
-    if (__builtin_expect(NOSOUND == 0, 0)) {
+    if (NOSOUND == 0) {
         MechSystems::Get()->EnterLevel(world);
     }
 

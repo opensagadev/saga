@@ -742,7 +742,7 @@ void Player_ToggleCharacter(GameObject_s *object, i32 direction, i32 sound) {
             }
             right = pad->buttons_held & right_mask;
             left = pad->buttons_held & left_mask;
-            if ((right != 0 && left != 0) || (left | right) == 0) {
+            if (__builtin_expect((right != 0 && left != 0) != 0, 1) || (left | right) == 0) {
                 object->input_toggle_hold_time = TOGGLEHOLDTIME;
                 return;
             }
@@ -791,7 +791,8 @@ void Player_ToggleCharacter(GameObject_s *object, i32 direction, i32 sound) {
             if ((CDataList[id].model_flags & 0x2000) == 0 &&
                 !(BonusArea != 0 && (CDataList[id].model_flags & 0x4000000) != 0) &&
                 (i32)GCDataList[id].flags_090 >= 0 &&
-                !(BonusArea != 0 && Cheats_CheckFlags(0x100) != 0 && (GCDataList[id].flags_094[3] & 2) != 0)) {
+                __builtin_expect(
+                    !(BonusArea != 0 && Cheats_CheckFlags(0x100) != 0 && (GCDataList[id].flags_094[3] & 2) != 0), 0)) {
                 goto next_character;
             }
             if (BonusArea != 0) {
@@ -804,8 +805,10 @@ void Player_ToggleCharacter(GameObject_s *object, i32 direction, i32 sound) {
                                                                    (GCDataList[id].flags_094[3] & 2) != 0)) {
                     goto next_character;
                 }
-                if (object->apiobj.field_0x27f <= 16 && (TerLayer[(i8)object->apiobj.field_0x27f].flags & 1) != 0 &&
-                    GCDataList[id].field_0x28 <= 0.0f) {
+                if (__builtin_expect(object->apiobj.field_0x27f <= 16 &&
+                                         (TerLayer[(i8)object->apiobj.field_0x27f].flags & 1) != 0 &&
+                                         GCDataList[id].field_0x28 <= 0.0f,
+                                     1)) {
                     goto next_character;
                 }
             }
@@ -848,7 +851,7 @@ void Player_ToggleCharacter(GameObject_s *object, i32 direction, i32 sound) {
         if (sound != 0) {
             if (left != 0) {
                 GameAudio_PlaySfx(0x23, &object->apiobj.collision_position, 0, 0);
-            } else if (__builtin_expect(right != 0, 1)) {
+            } else if (__builtin_expect(right != 0, 0)) {
                 GameAudio_PlaySfx(0x24, &object->apiobj.collision_position, 0, 0);
             }
         }

@@ -692,7 +692,7 @@ i32 GizmoBlowupBlowup(GIZMOBLOWUP_s *blowup, i32 effects, i32 hit_type, i32 dama
                       i32 hit_context) {
     if (blowup == NULL || (blowup->state_flags & 0x80) == 0)
         return 0;
-    if ((blowup->draw_flags & 0x20) && ShadowMode == 0)
+    if (__builtin_expect((blowup->draw_flags & 0x20) != 0, 0) && ShadowMode == 0)
         return 0;
     if (!TouchHacks::CanBlowupBeBlownUp(*blowup, hit_type))
         return 0;
@@ -700,7 +700,7 @@ i32 GizmoBlowupBlowup(GIZMOBLOWUP_s *blowup, i32 effects, i32 hit_type, i32 dama
     GIZMOBLOWUPTYPE_s *type = blowup->type;
     if (animation != NULL && type->animation_start_frame != type->animation_end_frame) {
         if (__builtin_expect((type->animation_flags & 0x20) == 0 && (blowup->state_flags & 0x40) == 0, 1)) {
-            if ((blowup->draw_flags & 0x208) == 0) {
+            if (__builtin_expect((blowup->draw_flags & 0x208) == 0, 1)) {
                 if (blowup->animation_time < type->animation_end_frame) {
                     blowup->state_flags |= 8;
                     return 0;
@@ -817,7 +817,7 @@ i32 GizmoBlowupBlowup(GIZMOBLOWUP_s *blowup, i32 effects, i32 hit_type, i32 dama
                 blowup->state_flags |= 2;
             }
         }
-        if (blowup->draw_flags & 0x800) {
+        if (__builtin_expect(blowup->draw_flags & 0x800 != 0, 1)) {
             GizmoBlowupCreateStuff(blowup);
         }
         if (GameBlowUpBlownUpFn != NULL) {
@@ -838,7 +838,7 @@ i32 GizmoBlowupBlowup(GIZMOBLOWUP_s *blowup, i32 effects, i32 hit_type, i32 dama
     } else if (blowup->state_flags & 0x20) {
         effect_flags = 4;
     }
-    if (blowup->field_0xb8 > 0.0f && destroyed) {
+    if (blowup->field_0xb8 > 0.0f && __builtin_expect(destroyed != 0, 0)) {
         effect_flags |= 8;
     }
     if (effects != 0) {
@@ -1384,13 +1384,13 @@ void GizmoBlowupDraw(void *world_ptr, void *, float) {
                     GizmoBlowupGenDecalMatrix(blowup, &matrix, 0);
                     NuSpecialDrawAt(&blowup->type->decal_special, &matrix);
                 }
-                if (__builtin_expect(NuSpecialExistsFn(&blowup->type->burst_special) != 0, 1)) {
+                if (NuSpecialExistsFn(&blowup->type->burst_special) != 0) {
                     NuSpecialDrawAt(&blowup->type->burst_special, &blowup->transform);
                 }
             }
         }
-        if ((blowup->state_flags & 0x80) != 0 && (blowup->draw_flags & 0x20000) == 0 &&
-            NuSpecialExistsFn(&blowup->type->shadow_special)) {
+        if (__builtin_expect((blowup->state_flags & 0x80) != 0, 1) && (blowup->draw_flags & 0x20000) == 0 &&
+            __builtin_expect(NuSpecialExistsFn(&blowup->type->shadow_special) != 0, 0)) {
             GizmoBlowupGenShadowMatrix(blowup, &matrix);
             NuSpecialDrawAt(&blowup->type->shadow_special, &blowup->transform);
         }

@@ -364,7 +364,7 @@ i32 ThermalDetonator_MoveCode(GameObject_s *object) {
             (object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) != 0 &&
             ((object->apiobj.character_data->model_flags & 0x01000000) != 0 || object->field_0x108e == 6 ||
              SuperWeirdo(object) != 0) &&
-            (object->apiobj.field_0x27d != 0 || object->field_0xe31 == 1)) {
+            __builtin_expect((object->apiobj.field_0x27d != 0 || object->field_0xe31 == 1) != 0, 1)) {
             switch (object->character_context) {
                 case -1:
                 case 6:
@@ -431,7 +431,7 @@ i32 ThermalDetonator_MoveCode(GameObject_s *object) {
             if (frame != NULL && !(*frame <= 0.0f) && *frame >= release_frame) {
                 object->movement_runtime_flags |= 0x40;
             }
-        } else if (__builtin_expect(!(object->context_animation_timer >= 0.5f), 0)) {
+        } else if (__builtin_expect(!(object->context_animation_timer >= 0.5f), 1)) {
             object->movement_runtime_flags |= 0x40;
         }
     }

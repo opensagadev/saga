@@ -790,7 +790,7 @@ void CustomiserMenu_Draw(MENU_s *) {
         i32 side, active_count;
         if (!(Customise_NameAlpha <= 0.0f)) {
             Customiser_GetActiveWeirdoIndex(&side, &active_count);
-            if (active_count == 1 && MenuPacket.customise_other_player[side] != 0)
+            if (active_count == 1 && __builtin_expect(MenuPacket.customise_other_player[side] != 0, 0))
                 side = side == 0;
             for (i32 index = 0; index < active_count; ++index, ++side) {
                 const i32 blue = side == 0 ? 255 : 0;
@@ -889,12 +889,12 @@ void CustomiserMenu_Draw(MENU_s *) {
                 const f32 height = width / GetAspectRatio();
                 const i32 colour = menu_flash == 0 ? 255 : 191;
                 f32 toggle_x;
-                if (side != 0) {
-                    toggle_x = x - 0.2f;
-                    Text3D("<", toggle_x, -0.6f, 1.0f, pulse, pulse, pulse, 0, colour, colour, colour);
-                } else {
+                if (side == 0) {
                     toggle_x = x + 0.2f;
                     Text3D(">", toggle_x, -0.6f, 1.0f, pulse, pulse, pulse, 0, colour, colour, colour);
+                } else {
+                    toggle_x = x - 0.2f;
+                    Text3D("<", toggle_x, -0.6f, 1.0f, pulse, pulse, pulse, 0, colour, colour, colour);
                 }
                 customiser->touch_positions[5].x = toggle_x;
                 customiser->touch_positions[5].y = -0.6f;

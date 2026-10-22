@@ -1468,7 +1468,7 @@ static void LightSabreStreakCode(GameObject_s *object, i32 blade, i32 effect) {
         return;
     const i8 context = object->character_context;
     if ((context == 0 && (object->action_movement_state == 4 || object->action_movement_state == 2)) || context == 4 ||
-        context == 16 || (context == 13 && object->id != id_THEEMPEROR) || context == 14 ||
+        __builtin_expect(context == 16, 0) || (context == 13 && object->id != id_THEEMPEROR) || context == 14 ||
         (context == 31 && object->field_0x7a3 == 1) ||
         (object->apiobj.player_controlled && Cheat_PowerUpActive(object->apiobj.field_0x27c))) {
         object->sabre_flags |= 2;
@@ -1495,9 +1495,9 @@ static void LightSabreStreakCode(GameObject_s *object, i32 blade, i32 effect) {
         i32 colour;
         if (object->apiobj.field_0x27c != -1 && Cheat_IsOn(25))
             colour = 0;
-        else if (object->apiobj.field_0x27c != -1 && Player_HasPurpleForce(object))
+        else if (object->apiobj.field_0x27c != -1 && __builtin_expect(Player_HasPurpleForce(object) != 0, 0))
             colour = 3;
-        else if (object->id == id_GRIEVOUS && (blade == 3 || blade == 0))
+        else if (object->id == id_GRIEVOUS && __builtin_expect((blade == 3 || blade == 0) != 0, 1))
             colour = 2;
         else if (AnakinGreenSabre(object) || (object->id == id_BOB && object->random_layer_variant))
             colour = 1;
@@ -1521,9 +1521,9 @@ static void LightSabreStreakCode(GameObject_s *object, i32 blade, i32 effect) {
     }
     if ((object->sabre_flags & 7) == 0)
         return;
-    if (object->apiobj.field_0x27c != -1 && Cheat_IsOn(25))
+    if (__builtin_expect(object->apiobj.field_0x27c != -1 && Cheat_IsOn(25), 0))
         effect = 1;
-    else if (object->apiobj.field_0x27c != -1 && Player_HasPurpleForce(object))
+    else if (__builtin_expect(object->apiobj.field_0x27c != -1 && Player_HasPurpleForce(object), 0))
         effect = 4;
     else if (object->id == id_GRIEVOUS)
         effect = (blade == 3 || blade == 0) ? 3 : 2;
@@ -1585,7 +1585,7 @@ static void LightSabreStreakCode(GameObject_s *object, i32 blade, i32 effect) {
         GameObject_s *target = Obj;
         for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++target) {
             if (target == object || (target->apiobj.field_0x1f8 & 0x1001) != 0x1001 || target->use_model_origin <= 1 ||
-                target->apiobj.field_0x287 != 0 || (target->character_context & 0xfd) == 57 ||
+                __builtin_expect(target->apiobj.field_0x287 != 0, 1) || (target->character_context & 0xfd) == 57 ||
                 target->character_context == 60 || (CInfo[target->character_context].flags & 0x8000) != 0)
                 continue;
             GAMECHARACTERDATA *target_data =
@@ -3093,7 +3093,7 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
     } else
         object->previous_block_animation = -1;
     i32 in_tube = 0;
-    if (PODSPRINT_ADATA != NULL && (PODSPRINT_ADATA != NULL && WORLD->area == PODSPRINT_ADATA) &&
+    if (__builtin_expect(PODSPRINT_ADATA != NULL, 1) && (PODSPRINT_ADATA != NULL && WORLD->area == PODSPRINT_ADATA) &&
         api.player_controlled && Tube_InAnyCylinder(WORLD, object, 1)) {
         NewRumble(object->pad_gamepad->pad, qrand() * (1.0f / 65535.0f), 0);
         in_tube = 1;
@@ -3151,7 +3151,7 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
                                                   WORLD->current_level == DEATHSTAR2BATTLEF_LDATA ||
                                                   WORLD->current_level == DEATHSTAR2BATTLEG_LDATA)))
                     turn_multiplier = 0.5f;
-                else if (WORLD->current_level == SPEEDERCHASEA_LDATA && !disable_narrow_socks)
+                else if (WORLD->current_level == SPEEDERCHASEA_LDATA && __builtin_expect(!disable_narrow_socks, 1))
                     turn_multiplier = 0.75f;
                 else if (api.player_controlled && (PODSPRINT_ADATA != NULL && WORLD->area == PODSPRINT_ADATA))
                     turn_multiplier = 0.25f;
@@ -3182,7 +3182,8 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
                     i32 degrees = static_cast<i32>(-30.0f * object->field_0xdc8 + 60.0f);
                     if (degrees < 0)
                         degrees = 0;
-                    if (api.player_controlled && (PODSPRINT_ADATA != NULL && WORLD->area == PODSPRINT_ADATA))
+                    if (api.player_controlled &&
+                        __builtin_expect((PODSPRINT_ADATA != NULL && WORLD->area == PODSPRINT_ADATA) != 0, 1))
                         degrees = 0;
                     else if (turn_multiplier != 0.0f)
                         degrees = (i32)(degrees * turn_multiplier);
@@ -3223,7 +3224,8 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
                                          WORLD->current_level != SPEEDERCHASEA_LDATA,
                                      1)) {
                     i32 normal_yaw = NuAtan2D(object->contact_normal.x, object->contact_normal.z);
-                    if (requested_speed == 0.0f || abs(RotDiff(normal_yaw, object->current_input_angle)) > 0x4000) {
+                    if (requested_speed == 0.0f ||
+                        __builtin_expect(abs(RotDiff(normal_yaw, object->current_input_angle)) > 0x4000, 1)) {
                         i32 delta = RotDiff(normal_yaw, api.field_0x276);
                         if (abs(delta) > 0x4000) {
                             i32 tangent = normal_yaw + (delta < 0 ? -0x4000 : 0x4000);
@@ -3333,7 +3335,8 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
                         desired = 35.0f;
                     }
                     desired /= 35.0f;
-                } else if (requested_speed > 0.0f && speed_context != 0x23 && speed_context != 0x24) {
+                } else if (requested_speed > 0.0f && speed_context != 0x23 &&
+                           __builtin_expect(speed_context != 0x24, 1)) {
                     if (api.intersects_water) {
                         f32 fraction = (api.water_height - api.collision_min.y) / api.field_0x1e0;
                         if (fraction < 0.0f)
@@ -3358,7 +3361,8 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
                                         ? 0.5f
                                         : api.character_data->game_character->field_0x7c;
                     }
-                } else if (WORLD->current_level == SPEEDERCHASEA_LDATA && player_vehicle != 0 && !disable_narrow_socks)
+                } else if (__builtin_expect(WORLD->current_level == SPEEDERCHASEA_LDATA, 0) && player_vehicle != 0 &&
+                           !disable_narrow_socks)
                     desired = GetVehicleSpeedMul(object, api.character_data->game_character->run_speed * 0.75f);
                 else if (player_vehicle != 0 && (PODSPRINT_ADATA != NULL && WORLD->area == PODSPRINT_ADATA))
                     desired = 25.0f;
@@ -3384,7 +3388,7 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
                                                      WORLD->current_level == DEATHSTAR2BATTLEG_LDATA))
                 speed *= DeathStar2BattleFire_GetSlowDownMul(object) * 1.5f;
             else if (object->id == id_SPEEDERBIKE) {
-                if (WORLD->current_level == SPEEDERCHASEA_LDATA && disable_narrow_socks)
+                if (__builtin_expect(WORLD->current_level == SPEEDERCHASEA_LDATA, 0) && disable_narrow_socks)
                     speed *= 0.333f;
             } else if (in_tube)
                 speed *= 0.25f;
@@ -3443,7 +3447,8 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
             object->target_velocity.y = 5.0f;
             api.velocity.y = SeekValF(api.velocity.y, object->target_velocity.y, 10.0f);
         } else if (__builtin_expect((api.character_data->game_character->field_0x94 & 0x20) != 0, 0) &&
-                   ((pad->buttons_held & GAMEPAD_JUMP) != 0 || object->character_context != 0x4b)) {
+                   __builtin_expect(((pad->buttons_held & GAMEPAD_JUMP) != 0 || object->character_context != 0x4b) != 0,
+                                    0)) {
             object->target_velocity.y = (pad->buttons_held & GAMEPAD_JUMP) != 0
                                             ? api.character_data->game_character->run_speed * 0.7f
                                             : -api.character_data->game_character->run_speed * 0.7f;
@@ -12537,7 +12542,7 @@ void Move_POD(GameObject_s *object) {
 
 void Move_VEHICLE(GameObject_s *object) {
     GAMEPAD_s *pad = object->pad_gamepad;
-    if (FreePlay != 0 && WORLD->area != NULL && WORLD->area == PODSPRINT_ADATA) {
+    if (__builtin_expect(FreePlay != 0 && WORLD->area != NULL && WORLD->area == PODSPRINT_ADATA, 0)) {
         Move_POD(object);
         return;
     }
@@ -12666,7 +12671,7 @@ void Move_VEHICLE(GameObject_s *object) {
             object->apiobj.velocity.y = 0.0f;
             object->apiobj.velocity.z = 0.5f * object->apiobj.character_data->game_character->run_speed;
             x_rotation = object->apiobj.pitch_angle;
-            if (__builtin_expect(object->apiobj.pitch_angle == 0, 0)) {
+            if (object->apiobj.pitch_angle == 0) {
                 object->field_0x7a3 = 2;
                 object->context_destination.y = object->apiobj.position.y;
                 object->context_animation_timer = 0.0f;
@@ -12803,17 +12808,19 @@ void Move_VEHICLE(GameObject_s *object) {
             }
         } else if (__builtin_expect(object->field_0xcc0 != NULL && object->apiobj.field_0x27c == -1, 0)) {
             GameObject_s *player = Player[0];
-            if (player != NULL && static_cast<i8>(player->apiobj.flags_low) < 0 && player->field_0xcc0 != NULL &&
+            if (player != NULL && __builtin_expect(static_cast<i8>(player->apiobj.flags_low) < 0, 1) &&
+                player->field_0xcc0 != NULL &&
                 ((object->apiobj.field_0x1e4 & player->apiobj.field_0x1ec) |
                  (object->apiobj.field_0x1e8 & player->apiobj.field_0x1f0)) != 0 &&
                 object->field_0x1024 <= 0.0f) {
                 ObjHitObj(player, object, 1, 1, 0, 1);
             }
             player = Player[1];
-            if (player != NULL && player->apiobj.player_controlled && player->field_0xcc0 != NULL &&
-                ((object->apiobj.field_0x1e4 & player->apiobj.field_0x1ec) |
-                 (object->apiobj.field_0x1e8 & player->apiobj.field_0x1f0)) != 0 &&
-                object->field_0x1024 <= 0.0f) {
+            if (__builtin_expect(player != NULL && player->apiobj.player_controlled && player->field_0xcc0 != NULL &&
+                                     ((object->apiobj.field_0x1e4 & player->apiobj.field_0x1ec) |
+                                      (object->apiobj.field_0x1e8 & player->apiobj.field_0x1f0)) != 0 &&
+                                     object->field_0x1024 <= 0.0f,
+                                 1)) {
                 ObjHitObj(player, object, 1, 1, 0, 1);
             }
         }

@@ -800,11 +800,12 @@ static i32 GizmoPickups_Load(void *world_ptr, void *) {
         AreaPickupScale = 1.0f;
     }
 
-    if (version < 6 && !(pickup_sys->draw_distance >= 10.0f)) {
+    if (version < 6 && __builtin_expect(!(pickup_sys->draw_distance >= 10.0f), 0)) {
         pickup_sys->draw_distance = 10.0f;
     }
     if (version <= 6 && world->level_sub_id >= 0 && world->level_sub_id < AREACOUNT &&
-        (ADataList[world->level_sub_id].flags & AREAFLAG_VEHICLE_AREA) != 0 && pickup_sys->draw_distance < 100.0f) {
+        __builtin_expect((ADataList[world->level_sub_id].flags & AREAFLAG_VEHICLE_AREA) != 0, 0) &&
+        pickup_sys->draw_distance < 100.0f) {
         pickup_sys->draw_distance = 100.0f;
     }
     SetAreaPickupGravity(world->level_sub_id, world->level_idx);
@@ -1358,10 +1359,11 @@ void SpecialMiniKits_Draw(WORLDINFO_s *world) {
                 draw = ((item->flags & 2) != 0 && animation->ltime <= 1.0f) ||
                        ((item->flags & 8) != 0 && item->end_frame <= animation->ltime);
             }
-            if (!draw && (item->flags & 4) != 0 && (animation->flags & NUINSTANIM_FLAG_PLAYING) != 0) {
+            if (!draw && (item->flags & 4) != 0 &&
+                __builtin_expect((animation->flags & NUINSTANIM_FLAG_PLAYING) != 0, 0)) {
                 draw = true;
             }
-            if (!draw) {
+            if (__builtin_expect(!draw, 0)) {
                 continue;
             }
 
@@ -1376,7 +1378,8 @@ void SpecialMiniKits_Draw(WORLDINFO_s *world) {
         if (item->pickup_gizmo != NULL) {
             GIZMOPICKUP_s *pickup = static_cast<GIZMOPICKUP_s *>(item->pickup_gizmo->object);
             i32 type_index = pickup->type_index;
-            if ((pickup->state_flags & GIZMOPICKUP_STATE_ALTERNATE_TYPE) != 0 && GizmoPickupSys->alternate_type != -1) {
+            if (__builtin_expect((pickup->state_flags & GIZMOPICKUP_STATE_ALTERNATE_TYPE) != 0, 0) &&
+                GizmoPickupSys->alternate_type != -1) {
                 type_index = GizmoPickupSys->alternate_type;
             }
 

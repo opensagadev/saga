@@ -923,8 +923,8 @@ void UpdateLastSafePosition(GameObject_s *object) {
         } while (false);
         {
             i8 edge_layer;
-            if ((api.flags_low & 0x80) != 0 && (edge_layer = api.field_0x27f) != -1 &&
-                (TerLayer[edge_layer].flags & 1) != 0 && !NoLayerKill(object)) {
+            if (__builtin_expect((api.flags_low & 0x80) != 0, 1) && (edge_layer = api.field_0x27f) != -1 &&
+                __builtin_expect((TerLayer[edge_layer].flags & 1) != 0, 1) && !NoLayerKill(object)) {
                 if (object->fall_recovery_timer <= 0.0f)
                     object->fall_hover_height = api.position.y;
                 object->fall_recovery_timer += FRAMETIME;

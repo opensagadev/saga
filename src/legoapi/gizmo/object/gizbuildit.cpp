@@ -1520,7 +1520,7 @@ void BuildIt_MoveCode(GameObject_s *player) {
             return;
         if (player->apiobj.field_0x27d == 0)
             return;
-        if (ObjLandReady(player) == 0 && objInNetWaitContext(player, LEGOCONTEXT_BUILDIT) == 0)
+        if (__builtin_expect(ObjLandReady(player) == 0, 0) && objInNetWaitContext(player, LEGOCONTEXT_BUILDIT) == 0)
             return;
         if (__builtin_expect(player->touch_task != NULL &&
                                  player->touch_task->GetHashId().value != MechTouchTaskBuildIt::HashId.value,
@@ -1543,10 +1543,9 @@ void BuildIt_MoveCode(GameObject_s *player) {
         }
         GizBuildIt_SetHeadTarget(buildit, player);
         buildit->availability_flags |= GIZBUILDIT_AVAILABILITY_INTERACTING;
-        if (__builtin_expect((player->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) != 0 ||
-                                 (objInNetWaitContext(player, LEGOCONTEXT_BUILDIT) != 0 &&
-                                  (player->pad_gamepad->buttons_held & GAMEPAD_SPECIAL) != 0),
-                             1)) {
+        if ((player->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) != 0 ||
+            (objInNetWaitContext(player, LEGOCONTEXT_BUILDIT) != 0 &&
+             (player->pad_gamepad->buttons_held & GAMEPAD_SPECIAL) != 0)) {
             if (GizBuildIt_CanStartBuildingFn != NULL && GizBuildIt_CanStartBuildingFn(buildit, player) == 0)
                 return;
             nextBuildit = MechWeakPtr<MechObjectInterface, 4>();
@@ -1560,7 +1559,7 @@ void BuildIt_MoveCode(GameObject_s *player) {
             GameCam_Blend(GameCam, 0.5f, 0.0f, 1);
             Hint_SetComplete(LEGOHINT_BUILD);
         }
-        if (player->apiobj.player_controlled && player->apiobj.field_0x27d != 0) {
+        if (player->apiobj.player_controlled && __builtin_expect(player->apiobj.field_0x27d != 0, 0)) {
             GizBuildItPushAwayFromEnd(player);
         }
         return;
@@ -1572,7 +1571,7 @@ void BuildIt_MoveCode(GameObject_s *player) {
         return;
     GizBuildIt_SetHeadTarget(buildit, player);
     buildit = static_cast<GIZBUILDIT_s *>(player->field_0x788);
-    if ((buildit->state_flags & 0x80) != 0 && ShadowMode == 0) {
+    if ((buildit->state_flags & 0x80) != 0 && __builtin_expect(ShadowMode == 0, 0)) {
         player->build_context = -1;
         buildit->builders_active = 1;
         static_cast<GIZBUILDIT_s *>(player->field_0x788)->availability_flags |= GIZBUILDIT_AVAILABILITY_INTERACTING;

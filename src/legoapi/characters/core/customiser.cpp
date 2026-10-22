@@ -704,7 +704,7 @@ CUSTOMISER *Customiser_Configure(char *filename, VARIPTR *buffer, VARIPTR *, i32
                 } else if (NuStrICmp(parser->word_buf, "from_variant") == 0) {
                     if (NuFParGetWord(parser) != 0)
                         piece->collection_type = CharVariant_Find(parser->word_buf);
-                } else if (NuStrICmp(parser->word_buf, "no_hat") == 0) {
+                } else if (__builtin_expect(NuStrICmp(parser->word_buf, "no_hat") == 0, 0)) {
                     piece->availability_flags |= 1;
                 } else if (NuStrICmp(parser->word_buf, "hat_off") == 0) {
                     piece->availability_flags |= 0x20;
@@ -750,7 +750,7 @@ CUSTOMISER *Customiser_Configure(char *filename, VARIPTR *buffer, VARIPTR *, i32
                             while (NuFParGetWord(parser) != 0) {
                                 if (__builtin_expect(NuStrICmp(parser->word_buf, "xoffset") == 0, 0))
                                     x_offsets[category] = NuFParGetFloat(parser);
-                                else if (NuStrICmp(parser->word_buf, "yoffset") == 0)
+                                else if (__builtin_expect(NuStrICmp(parser->word_buf, "yoffset") == 0, 1))
                                     y_offsets[category] = NuFParGetFloat(parser);
                             }
                         }
@@ -770,7 +770,7 @@ CUSTOMISER *Customiser_Configure(char *filename, VARIPTR *buffer, VARIPTR *, i32
             break;
     }
     NuFParDestroy(parser);
-    if (count == 0)
+    if (__builtin_expect(count == 0, 0))
         return NULL;
 
     // Retail uses four-byte arena alignment. Pointer-bearing native records
@@ -803,7 +803,7 @@ CUSTOMISER *Customiser_Configure(char *filename, VARIPTR *buffer, VARIPTR *, i32
         if (customiser->piece_counts[category] > 0)
             buffer->addr = ALIGN(reinterpret_cast<usize>(output), alignof(CUSTOMPIECE));
     }
-    if (customiser->save == NULL) {
+    if (__builtin_expect(customiser->save == NULL, 0)) {
         customiser->save = static_cast<CUSTOMISESAVE_s *>(buffer->void_ptr);
         // The serialized save occupies a four-byte-rounded arena allocation.
         buffer->addr = ALIGN(buffer->addr + sizeof(CUSTOMISESAVE_s) * 2, 4);

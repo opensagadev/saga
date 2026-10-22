@@ -519,10 +519,10 @@ void InitStatusScreen(WORLDINFO_s *world) {
                     p.time_reward_score = *p.score;
                 } else {
                     f32 new_time = p.superstory_time;
-                    if (new_time >= p.previous_best_time)
-                        new_time = 0.0f;
-                    else
+                    if (new_time < p.previous_best_time)
                         Game.episode_save[episode].superstory_time_limit = new_time;
+                    else
+                        new_time = 0.0f;
                     p.new_best_time = new_time;
                     u32 new_score = p.superstory_score;
                     if (new_score > previous_score)

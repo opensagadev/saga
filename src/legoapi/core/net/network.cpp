@@ -59,7 +59,7 @@ void TTNetwork::Display(ThingRenderData *) {
     if (__builtin_expect(stats == NULL, 1)) {
         i32 display_index = 4;
         NetPeer *peer = reinterpret_cast<V2SessionManager *>(session)->first_peer;
-        while (__builtin_expect(peer != NULL, 1)) {
+        while (peer != NULL) {
             if (__builtin_expect(field_2150 == display_index++, 1)) {
                 stats = &peer->stats;
                 break;

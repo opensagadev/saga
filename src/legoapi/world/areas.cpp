@@ -124,7 +124,7 @@ AREADATA *Areas_ConfigureList(char *file, VARIPTR *bufferStart, VARIPTR *bufferE
                         area_count++;
                     }
                 } else if (NuStrICmp(fp->word_buf, "dir") == 0) {
-                    if (NuFParGetWord(fp) != 0 && NuStrLen(fp->word_buf) <= 0x3f)
+                    if (NuFParGetWord(fp) != 0 && __builtin_expect(NuStrLen(fp->word_buf) <= 0x3f, 0))
                         NuStrCpy(area->dir, fp->word_buf);
                     in_area = 1;
                 } else if (NuStrICmp(fp->word_buf, "file") == 0) {
@@ -773,7 +773,7 @@ void Area_Configure(i32 area, i32 param, EXTRAMODEL *models, i16 *s) {
                     if (level_index == -1 || LDataList[level_index].area_index != area)
                         continue;
                     i32 existing = 0;
-                    while (existing < LevelLoadCount && LevelLoad[existing].level != level_index)
+                    while (existing < LevelLoadCount && __builtin_expect(LevelLoad[existing].level != level_index, 1))
                         ++existing;
                     if (existing != LevelLoadCount)
                         continue;

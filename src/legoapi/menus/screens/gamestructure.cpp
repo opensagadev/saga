@@ -656,7 +656,7 @@ void Store_HubDrawFloorTargets(WORLDINFO_s *world) {
         Draw3DObjectAlpha(world, LEGOOBJ_ICON_FRAME_GREEN, &StorePack[i].custodian_position, 0x4000, frame_rotation, 0,
                           0.9f, 0.9f, 0.9f, 0, frame_alpha);
 
-        if (g_lowEndLevelBehaviour == 0 || Hub_LowEnd_IconsInsteadOfModels == 0 ||
+        if (g_lowEndLevelBehaviour == 0 || __builtin_expect(Hub_LowEnd_IconsInsteadOfModels == 0, 0) ||
             APICharacterLoaded(*StorePack[i].id) != NULL || big_icon_scene == NULL) {
             continue;
         }
@@ -1052,7 +1052,8 @@ void MenuUpdateStoreRestoring(MENU_s *menu) {
 
 #define CHECK_RESTORING_BUNDLE(INDEX)                                                                                  \
     do {                                                                                                               \
-        if (NuIOS_IsProductPurchased(StoreBundle[INDEX].name) != 0 && (restoring_bundle_bits & (1u << INDEX)) == 0) {  \
+        if (__builtin_expect(NuIOS_IsProductPurchased(StoreBundle[INDEX].name) != 0, 1) &&                             \
+            __builtin_expect((restoring_bundle_bits & (1u << INDEX)) == 0, 0)) {                                       \
             restoring_bundle_bits |= 1u << INDEX;                                                                      \
             restoring_bundle_list[restoring_bundle_count] = INDEX;                                                     \
             ++restoring_bundle_count;                                                                                  \
@@ -1066,8 +1067,8 @@ void MenuUpdateStoreRestoring(MENU_s *menu) {
     }
 #undef CHECK_RESTORING_BUNDLE
 
-    if (__builtin_expect(menu->confirm_pressed != 0, 1)) {
-        if (restoring_wait <= 0.0f) {
+    if (menu->confirm_pressed != 0) {
+        if (__builtin_expect(restoring_wait <= 0.0f, 1)) {
             BackupMenu();
         }
     } else if (menu->cancel_pressed != 0) {

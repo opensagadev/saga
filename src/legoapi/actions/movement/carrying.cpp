@@ -789,7 +789,7 @@ void RegisterTakeOverObject(GameObject_s *object) {
 }
 
 void StoreStatusTakeOverObjectSys() {
-    if (netclient != 0) {
+    if (__builtin_expect(netclient != 0, 0)) {
         return;
     }
     u8 level = static_cast<u8>(WORLD->current_level->area_level_index);
@@ -802,10 +802,11 @@ void StoreStatusTakeOverObjectSys() {
         record->last_safe_position = object->apiobj.last_safe_position;
         record->heading = object->apiobj.field_0x276;
         u8 contact = 0xff;
-        if (object->field_0xcc0 != NULL && LEGOCONTEXT_BEENTAKENOVER != -1 &&
-            object->field_0xcc0->character_context == LEGOCONTEXT_BEENTAKENOVER &&
-            static_cast<u8>(object->apiobj.field_0x27c) != 0xff && Door_Last != NULL &&
-            Door_Last->takeover_character_mask != 0) {
+        if (__builtin_expect(object->field_0xcc0 != NULL && __builtin_expect(LEGOCONTEXT_BEENTAKENOVER != -1, 1) &&
+                                 object->field_0xcc0->character_context == LEGOCONTEXT_BEENTAKENOVER &&
+                                 static_cast<u8>(object->apiobj.field_0x27c) != 0xff && Door_Last != NULL &&
+                                 Door_Last->takeover_character_mask != 0,
+                             1)) {
             if (__builtin_expect(Door_Last->takeover_character_mask == ~static_cast<u64>(0), 0)) {
                 contact = static_cast<u8>(object->apiobj.field_0x27c);
             } else {

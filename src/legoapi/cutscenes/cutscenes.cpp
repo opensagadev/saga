@@ -754,10 +754,10 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
     }
     if (layer_mask == -1) {
         if (!use_low_detail) {
-            if (reinterpret_cast<u8 *>(CutSceneSys)[7] == 0) {
-                layer_mask = static_cast<i32>(game_data->layer_mask_special);
-            } else {
+            if (!(reinterpret_cast<u8 *>(CutSceneSys)[7] == 0)) {
                 layer_mask = static_cast<i32>(game_data->layer_mask);
+            } else {
+                layer_mask = static_cast<i32>(game_data->layer_mask_special);
             }
         } else {
             layer_mask = static_cast<i32>(game_data->layer_mask_low);
@@ -1093,7 +1093,7 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
             i32 locator_index = character->locator_index + i;
             NUGCUTLOCATOR_s *locator = &locator_system->locators[locator_index];
             NUMTX *parent_matrix = &world_matrix;
-            if (locator->field_5a != 0xff) {
+            if (__builtin_expect(locator->field_5a != 0xff, 0)) {
                 NUMTX locator_parent;
                 NuMtxMulVU0(&locator_parent, &joint_matrices[locator->field_5a], &world_matrix);
                 instNuGCutLocatorUpdate(cutscene_instance, locator_system,

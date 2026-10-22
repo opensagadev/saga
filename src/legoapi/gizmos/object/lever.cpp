@@ -95,11 +95,11 @@ void Lever_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
                 return;
             }
         }
-        if (!(object->apiobj.character_data->model_flags & 4)) {
+        if (object->apiobj.character_data->model_flags & 4) {
+            static_cast<LEVER_s *>(object->field_0x788)->baddie = 1;
+        } else {
             if (!(object->apiobj.character_data->model_flags & 0x200))
                 static_cast<LEVER_s *>(object->field_0x788)->goodie = 1;
-        } else {
-            static_cast<LEVER_s *>(object->field_0x788)->baddie = 1;
         }
         static_cast<LEVER_s *>(object->field_0x788)->flags_high |= 8;
         object->context_flags |= 0x40;
@@ -128,7 +128,8 @@ void Lever_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
         f32 range = (object->apiobj.field_0x1dc + 0.25f) * lever->target_indicator_scale;
         if (__builtin_expect(!(distance < range * range), 0))
             return;
-        if (!(object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) && !objInNetWaitContext(object, 0x4a))
+        if (!(object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) &&
+            __builtin_expect(!objInNetWaitContext(object, 0x4a), 0))
             return;
         Lever_StartPull(object, lever);
     }

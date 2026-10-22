@@ -423,15 +423,16 @@ bool MechInputTouchGestureBasedController::OnHold(GameObject_s &object, TouchHol
                                ((WORLD != NULL && WORLD->area == HUB_ADATA) || TouchHacks::InParty(*character))),
                              1)) {
             GameAudio_PlaySfx(0x32, &object.apiobj.collision_position, 0, 0);
-            if (object.pad_gamepad != NULL) {
+            if (__builtin_expect(object.pad_gamepad != NULL, 0)) {
                 NewRumble(object.pad_gamepad->pad, 0.5f, 0);
             }
-            if (character->ai.script_process.base_script != NULL &&
-                AIScriptSetBaseScriptStateByName(&character->ai.script_process, const_cast<char *>("MapRunAway")) !=
-                    0) {
+            if (__builtin_expect(character->ai.script_process.base_script != NULL &&
+                                     AIScriptSetBaseScriptStateByName(&character->ai.script_process,
+                                                                      const_cast<char *>("MapRunAway")) != 0,
+                                 0)) {
                 const f32 elapsed = FRAMETIME;
                 WORLDINFO_s *world = WORLD;
-                if (world != NULL && world->ai_sys != NULL) {
+                if (__builtin_expect(world != NULL && world->ai_sys != NULL, 1)) {
                     AIScriptProcess(world->ai_sys, &character->apiobj, &character->ai, &character->ai.script_process,
                                     elapsed);
                 }
@@ -984,14 +985,15 @@ bool MechInputTouchGestureBasedController::PerformCloseMechanic(GameObject_s &ob
             f32 dx = teleport_position.x - object.apiobj.position.x;
             f32 dy = teleport_position.y - object.apiobj.position.y;
             f32 dz = teleport_position.z - object.apiobj.position.z;
-            if (__builtin_fabsf(dy) < object.apiobj.scaled_height && !(dx * dx + dz * dz >= 0.35f * 0.35f)) {
+            if (__builtin_expect(
+                    __builtin_fabsf(dy) < object.apiobj.scaled_height && !(dx * dx + dz * dz >= 0.35f * 0.35f), 0)) {
                 StartNewTask(new MechTouchTaskUseTeleport(*this, NULL, position), holder, true, true);
                 return true;
             }
         }
     }
 
-    if (TouchHacks::CanUseZipup(object) &&
+    if (__builtin_expect(TouchHacks::CanUseZipup(object) != 0, 0) &&
         ZipUp_FindNearest(WORLD, &object.apiobj.position, object.field_0x1008, NULL, NULL, &object, true) != NULL) {
         StartNewTask(new MechTouchTaskUseZipUp(*this), holder, true, true);
         return true;
@@ -1036,7 +1038,7 @@ bool MechInputTouchGestureBasedController::PerformCloseMechanic(GameObject_s &ob
     f32 range = object.field_0x1008 * 4.0f;
     GameObject_s *candidate =
         FindNearestGameObject(&object.apiobj.position, &object, 0, range, range, -1, -1, 100, NULL, 0, NULL, false);
-    if (candidate != NULL && static_cast<i32>(candidate->apiobj.field_0x1f4) >= 0) {
+    if (candidate != NULL && __builtin_expect(static_cast<i32>(candidate->apiobj.field_0x1f4) >= 0, 1)) {
         StartNewTask(new MechTouchTaskAttack(*this, candidate->GetMechObjectInterface(), position), holder, false,
                      true);
         return true;
@@ -1063,17 +1065,19 @@ bool MechInputTouchGestureBasedController::OnClick(GameObject_s &object, TouchHo
         target = MechInputTouchSystem::FindTargetObject(object, position, flags, NULL, NULL);
     }
     holder.previous_target_object = target;
-    if (target != NULL && target->GetCharacterObject() != NULL && target->GetCharacterObject()->id == id_BIGGUN) {
+    if (target != NULL && target->GetCharacterObject() != NULL &&
+        __builtin_expect(target->GetCharacterObject()->id == id_BIGGUN, 0)) {
         return false;
     }
 
     bool dispatch = object.id == id_TRAININGREMOTE;
-    if (!dispatch && object.character_context != LEGOCONTEXT_JUMP && object.character_context != LEGOCONTEXT_BIGJUMP) {
+    if (__builtin_expect(!dispatch, 1) && object.character_context != LEGOCONTEXT_JUMP &&
+        object.character_context != LEGOCONTEXT_BIGJUMP) {
         dispatch = object.apiobj.field_0x27d != 0 || VehicleArea != 0 ||
                    (object.apiobj.character_data->model_flags & 0x2000) != 0 || object.field_0xe31 == 1;
     }
     if (!dispatch) {
-        if ((object.apiobj.character_data->model_flags & 0x8000) != 0 && object.id != id_WATTO &&
+        if ((object.apiobj.character_data->model_flags & 0x8000) != 0 && __builtin_expect(object.id != id_WATTO, 1) &&
             object.field_0xe31 != 1) {
             object.field_0xf04 |= 0x10;
             return true;
@@ -1113,7 +1117,7 @@ bool MechInputTouchGestureBasedController::OnClick(GameObject_s &object, TouchHo
     if (target == NULL) {
         return false;
     }
-    if (__builtin_expect(VehicleArea != 0, 0))
+    if (__builtin_expect(VehicleArea != 0, 1))
         button_was_pressed[0] = 1;
     target->TargetedFlash();
     switch (target->GetObjectType()) {
@@ -1138,7 +1142,8 @@ bool MechInputTouchGestureBasedController::OnClick(GameObject_s &object, TouchHo
                 if (PerformCloseMechanic(object, holder)) {
                     return false;
                 }
-                if (object.character_context != LEGOCONTEXT_WEAPONOUT && !(object.weapon_scale > 0.0f)) {
+                if (__builtin_expect(object.character_context != LEGOCONTEXT_WEAPONOUT, 0) &&
+                    !(object.weapon_scale > 0.0f)) {
                     SlowWeaponOut(&object);
                 }
                 return true;

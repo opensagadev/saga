@@ -447,7 +447,7 @@ i32 ItemMenu(MENU_s *menu) {
     }
 
     if (SubMenu == 0) {
-        if (ExitMenu && slidetimer < 0.0f) {
+        if (ExitMenu && __builtin_expect(slidetimer < 0.0f, 0)) {
             menuptr = nullptr;
             return 5;
         }

@@ -1953,7 +1953,7 @@ load_type_done:
 
         if (previous_icon_stage == 1) {
             icon_time += FRAMETIME;
-            if (!(icon_time <= 0.6f) && CharacterDataLoad != 2) {
+            if (__builtin_expect(!(icon_time <= 0.6f), 1) && CharacterDataLoad != 2) {
                 icon_time = 0.6f;
             }
             if (!(icon_time < icons_end_time)) {
@@ -1978,7 +1978,7 @@ load_type_done:
         } else if (__builtin_expect(
                        AreaDataLoaded != 0 && !character_load_active && icon_stage == 2 && !(LoadWait <= 0.0f), 1)) {
             LoadWait -= FRAMETIME;
-            if (!(LoadWait >= 0.0f)) {
+            if (__builtin_expect(!(LoadWait >= 0.0f), 0)) {
                 LoadWait = 0.0f;
             }
         }
@@ -2003,7 +2003,7 @@ load_type_done:
             BackDrop_Draw(backdrop_alpha, 1);
 
             f32 crawl_alpha = 1.0f;
-            if (AreaDataLoaded == 0 || character_load_active ||
+            if (AreaDataLoaded == 0 || __builtin_expect(character_load_active != 0, 0) ||
                 (LoadWait >= 0.1f && (crawl_alpha = (LoadWait - 0.1f) / (LOADWAITTIME - 0.1f)) > 0.0f)) {
                 TextCrawl_Draw(FRAMETIME, 0, crawl_alpha, NULL);
                 SetQFont2D();

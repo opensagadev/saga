@@ -1621,7 +1621,7 @@ static void ProcessSpaceLevel(spacelevel_s *space) {
                     fighter->speed = 22.5f;
                 else if (__builtin_expect(static_cast<u32>(spline->id - 84) < 2, 0))
                     fighter->speed = 22.5f;
-                else if (spline->id == -307)
+                else if (__builtin_expect(spline->id == -307, 0))
                     fighter->speed = 33.0f;
                 if (spline->id == 54)
                     fighter->scale = 2.0f;
@@ -1652,7 +1652,7 @@ static void ProcessSpaceLevel(spacelevel_s *space) {
                 door_index = 6;
             else if (DOOR_REACHED(1, 5))
                 door_index = 5;
-            else if (DOOR_REACHED(1, 4))
+            else if (__builtin_expect(DOOR_REACHED(1, 4) != 0, 0))
                 door_index = 4;
             else if (DOOR_REACHED(1, 3))
                 door_index = 3;

@@ -175,7 +175,7 @@ static void GizTorp_Draw(void *world_ptr, void *, float) {
             NuMtxPreScaleU(&matrix, system->scale);
 
             if ((machine.flags & GIZTORPMACHINE_FLAG_ALTERNATE_MODEL) != 0) {
-                if (world->lev_objs[GIZTORP_LEVEL_OBJECT_ALTERNATE].active != 0) {
+                if (__builtin_expect(world->lev_objs[GIZTORP_LEVEL_OBJECT_ALTERNATE].active != 0, 0)) {
                     NuSpecialDrawAt(&world->lev_objs[GIZTORP_LEVEL_OBJECT_ALTERNATE].special, &matrix);
                 }
             } else if (world->lev_objs[GIZTORP_LEVEL_OBJECT_PRIMARY].active != 0) {

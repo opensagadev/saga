@@ -742,7 +742,7 @@ void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
             Hint_SetComplete(0x262);
         return;
     }
-    if (!ObjLandReady(object) && !objInNetWaitContext(object, 0x47))
+    if (__builtin_expect(!ObjLandReady(object), 1) && !objInNetWaitContext(object, 0x47))
         return;
     if (__builtin_expect((api.flags_low & 0x80) != 0, 0)) {
         if ((api.character_data->model_flags & 0x100000) == 0) {
@@ -759,7 +759,7 @@ void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
     ZIPUP *zipup = ZipUp_FindNearest(WORLD, &api.lower_position, api.collision_radius, NULL, &endpoint, object, false);
     if (objInNetWaitContext(object, 0x47)) {
         object->context_animation_timer -= FRAMETIME;
-        if (__builtin_expect(object->context_animation_timer <= 0.0f, 1))
+        if (__builtin_expect(object->context_animation_timer <= 0.0f, 0))
             object->character_context = -1;
     }
     if (zipup == NULL)

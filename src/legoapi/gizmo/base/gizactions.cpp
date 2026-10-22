@@ -421,11 +421,11 @@ static void GizAction_SetAIState(GIZFLOW_s *, FLOWBOX_s *, char **params, int co
             }
         } else {
             for (i32 type_index = 0; type_index < type_count; ++type_index) {
-                if (__builtin_expect(object->id == types[type_index], 1)) {
+                if (object->id == types[type_index]) {
                     matching_type = 1;
                 }
             }
-            if (matching_type != 0 && range_squared > distance_squared) {
+            if (matching_type != 0 && __builtin_expect(range_squared > distance_squared, 0)) {
                 object->ai.script_process.next_state =
                     AIStateFind(state_name, object->apiobj.ai->script_process.script);
             }

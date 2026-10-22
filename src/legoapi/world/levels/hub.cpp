@@ -4255,7 +4255,8 @@ void Hub_Update(WORLDINFO_s *world) {
         for (i32 player_index = 0; player_index < 2; ++player_index) {
             GameObject_s *player = Player[player_index];
             if (player != NULL && player->apiobj.player_controlled &&
-                __builtin_expect(player->apiobj.field_0x27d != 0, 1) && player->pad_gamepad->input_magnitude == 0.0f &&
+                __builtin_expect(player->apiobj.field_0x27d != 0, 1) &&
+                __builtin_expect(player->pad_gamepad->input_magnitude == 0.0f, 1) &&
                 player->pad_gamepad->previous_input_magnitude == 0.0f &&
                 (player->field_0x7a5 == 0xff || player->field_0x7a5 == 0x31 || player->field_0x7a5 == 0x32) &&
                 player->apiobj.field_0x281 == 0x0e) {
@@ -4280,7 +4281,7 @@ void Hub_Update(WORLDINFO_s *world) {
         if (!shop_available) {
             LevLock[0] = 0;
         }
-    } else if (GetMenuID() == -1 && shop_available) {
+    } else if (__builtin_expect(GetMenuID() == -1, 0) && shop_available) {
         TempGame = Game;
         SHOPACTIVE = 1;
         MakeMenuPacket();
@@ -4607,7 +4608,8 @@ void Hub_Update(WORLDINFO_s *world) {
         }
         if (__builtin_expect(LevGizmo[0] != NULL, 1)) {
             if (selected_buildit == -1 && GizmoGetOutput(world->gizmo_sys, LevGizmo[0], 0, 0) == 0) {
-                if (Player[0] != NULL && Player[0]->apiobj.player_controlled && Player[0]->field_0x7a5 != 0x2d &&
+                if (Player[0] != NULL && __builtin_expect(Player[0]->apiobj.player_controlled != 0, 0) &&
+                    Player[0]->field_0x7a5 != 0x2d &&
                     ((LevBuildIt[0]->availability_flags & GIZBUILDIT_AVAILABILITY_INTERACTING) != 0 ||
                      (nearest_buildit != NULL && nearest_buildit == LevBuildIt[0]))) {
                     selected_buildit = 999;

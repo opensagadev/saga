@@ -881,8 +881,8 @@ extern "C" {
 GameObject_s *CutDeadVehiclePlayer;
 
 __attribute__((optimize("O2", "tree-vectorize"))) void LevelStreaming_Update(WORLDINFO_s *world) {
-    if (LOADEROFF == 0 && BGLOAD != 0 && world->area != NULL && (world->area->flags & 8) == 0 && NewLData == NULL &&
-        Mission_Active(NULL) == NULL) {
+    if (LOADEROFF == 0 && BGLOAD != 0 && world->area != NULL && __builtin_expect((world->area->flags & 8) == 0, 1) &&
+        NewLData == NULL && Mission_Active(NULL) == NULL) {
 
         other_level = -1;
         if (no_more_loads == 0) {

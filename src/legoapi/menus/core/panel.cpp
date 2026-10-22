@@ -430,11 +430,12 @@ void UpdateStats() {
                 DrawRedBrickTime -= FRAMETIME;
             target = 1.0f;
             if (FadeSys.fade != 0.0f || CUTSTOPGAME != 0 ||
-                (Paused == 0 &&
-                 (NetPaused == 0 ||
-                  (AreaGlobals.values.field_0x08 == 0 &&
-                   (WORLD->level_sub_id == -1 || !Game.area_save[WORLD->level_sub_id].red_brick_collected))) &&
-                 !(DrawRedBrickTime > 0.0f)) ||
+                __builtin_expect((Paused == 0 &&
+                                  (NetPaused == 0 || (AreaGlobals.values.field_0x08 == 0 &&
+                                                      (WORLD->level_sub_id == -1 ||
+                                                       !Game.area_save[WORLD->level_sub_id].red_brick_collected))) &&
+                                  !(DrawRedBrickTime > 0.0f)) != 0,
+                                 1) ||
                 screendump != 0 || GetMenuID() == PANEL_MENU_SAVE || GetMenuID() == PANEL_MENU_LOAD ||
                 GetMenuID() == PANEL_MENU_EPISODE_I || GetMenuID() == PANEL_MENU_EPISODE_II ||
                 GetMenuID() == PANEL_MENU_EPISODE_III || GetMenuID() == PANEL_MENU_EPISODE_IV)
@@ -774,7 +775,8 @@ void DrawMeleeTargetsNumber(i16 *targets, u8 *counts, i32 count, u8 reset, nuhsp
 
             i32 red = 255;
             i32 green = 0;
-            if (counts[i] != meleeTarg_localCount[i] || meleeTarg_flashTime[i] != 0.0f) {
+            if (__builtin_expect(counts[i] != meleeTarg_localCount[i], 1) ||
+                __builtin_expect(meleeTarg_flashTime[i] != 0.0f, 0)) {
                 if (meleeTarg_flashTime[i] == 0.0f)
                     meleeTarg_flashTime[i] = 0.01f;
                 meleeTarg_flashTime[i] += FRAMETIME;
@@ -963,7 +965,7 @@ void DrawPanel() {
                     if (!paused || pause_i_pad == 0) {
                         icon_x = -ICONX;
                         base_alpha = 1.0f;
-                        if (__builtin_expect(!object->apiobj.player_controlled, 0))
+                        if (!object->apiobj.player_controlled)
                             dropin_alpha = DROPINALPHA;
                     } else if (object->apiobj.player_controlled) {
                         base_alpha = 0.5f;
@@ -986,7 +988,7 @@ void DrawPanel() {
                         i32 visible = 0;
                         if (icon_time <= 0.0f)
                             visible = 1;
-                        else if (icon_time < 2.0f)
+                        else if (__builtin_expect(icon_time < 2.0f, 1))
                             visible = NuFmod(icon_time, 0.4f) < 0.2f;
                         DrawCharIcon(object->id, icon_x, status_y, 0.0f, icon_size, 0xa6, alpha, alpha, visible, NULL);
                     } else {
@@ -1013,7 +1015,7 @@ void DrawPanel() {
                                         0, name_alpha);
                         }
                     }
-                    if (!paused && FadeSys.fade == 0.0f && object->apiobj.player_controlled &&
+                    if (!paused && __builtin_expect(FadeSys.fade == 0.0f, 0) && object->apiobj.player_controlled &&
                         MechSystems::Get()->PlayerButton().panel_state == NULL) {
                         if (ONEPLAYERPOWERUPS && object->field_0xdec > 0.0f) {
                             if (!FindGameMsgsWithID(7, 0, object->apiobj.field_0x27c, NULL) &&
@@ -1239,7 +1241,7 @@ void DrawPanel() {
                         target_point = v000;
                         NUVEC *position = &target->apiobj.collision_position;
                         bool hide_target = false;
-                        if (target->id == id_QUIGONJINN &&
+                        if (__builtin_expect(target->id == id_QUIGONJINN, 1) &&
                             (player->field_0x661 == 10 || player->field_0x661 == 4 || player->field_0x661 == 11))
                             hide_target = true;
                         if (!hide_target) {

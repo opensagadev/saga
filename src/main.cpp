@@ -435,9 +435,13 @@ giz_freeplay:
                     (((world == NULL) ||
                       ((world->area == NULL) || ((world->area->flags & AREAFLAG_ENDING_AREA) == 0))) &&
                      (NewMode == 0))) {
-                    if (((((NewLData == NULL) && (FadeSys.fade == 0.0f)) && (editor_active == 0)) &&
-                         ((GamePads_IgnoreInputFn == NULL) || (i = (*GamePads_IgnoreInputFn)(), i == 0))) &&
-                        ((CUTSTOPGAME == 0) || ((i = CutScene_IsSkippable((CUTINFO *)CutStopInfo), i != 0)))) {
+                    if (__builtin_expect(
+                            ((((NewLData == NULL) && (FadeSys.fade == 0.0f)) && (editor_active == 0)) &&
+                             ((GamePads_IgnoreInputFn == NULL) || (i = (*GamePads_IgnoreInputFn)(), i == 0))) != 0,
+                            1) &&
+                        __builtin_expect(
+                            ((CUTSTOPGAME == 0) || ((i = CutScene_IsSkippable((CUTINFO *)CutStopInfo), i != 0))) != 0,
+                            1)) {
                         if ((MiniCutCam == 0) && (CutSceneWaiting == 0)) {
                             if (GameMenu[GameMenuLevel].menu == -1) {
                                 if (Paused == 0) {
@@ -581,7 +585,7 @@ giz_freeplay:
                     UpdateSpecialSfx(world);
                     Teleports_UpdateBeforeGameObjects(world);
 
-                    if (__builtin_expect(TimingBarSet == 2, 1)) {
+                    if (TimingBarSet == 2) {
                         TBOPENFN("GameObj", 2);
                     }
 
@@ -760,12 +764,15 @@ giz_freeplay:
                     level = world->current_level;
                     if ((level != NULL) && ((level->flags & LEVEL_STATUS) != 0) && (HUB_LDATA != NULL) &&
                         (HUB_LDATA != NewLData) && (NewLData != NULL) && (NewLData->area_index != -1) &&
-                        ((ADataList[NewLData->area_index].flags & AREAFLAG_ENDING_AREA) == 0)) {
+                        __builtin_expect(((ADataList[NewLData->area_index].flags & AREAFLAG_ENDING_AREA) == 0) != 0,
+                                         1)) {
                         FadeSys.fade = 1.0f;
                         FinishLoop_On = 0;
                     } else {
                         if ((FadeSys.pending_type == FADE_TYPE_NONE) ||
-                            ((NewLData != NULL) && (WORLD->current_level != NewLData) && (NewLData == HUB_LDATA))) {
+                            __builtin_expect(((NewLData != NULL) && (WORLD->current_level != NewLData) &&
+                                              (NewLData == HUB_LDATA)) != 0,
+                                             1)) {
                             level = WORLD->current_level;
                             if (level != NULL) {
                                 if (NewLData == NULL) {
@@ -1141,7 +1148,7 @@ giz_freeplay:
             }
             if (shortestFrameIndex != 4) {
                 if (longestFrameIndex != 4) {
-                    if (0.0f <= pastFrameTimes[4]) {
+                    if (__builtin_expect(0.0f <= pastFrameTimes[4], 1)) {
                         frameTimeAccumulator += pastFrameTimes[4];
                         averagedFrameCount += 1;
                     }
@@ -1236,11 +1243,7 @@ giz_freeplay:
     i = NewLData->idx;
     Level = i;
 
-    if (Area != last_area) {
-        const i32 didLevelChange = NewLData->idx != LastLData->idx;
-        LevelChangesInArea = 0;
-        LevelChange = didLevelChange;
-    } else {
+    if (Area == last_area) {
         i = 0;
         if (last_area != -1) {
             i = LevelChangesInArea + 1;
@@ -1251,6 +1254,10 @@ giz_freeplay:
         if (new_level_from_menu == 0) {
             goto after_sound;
         }
+    } else {
+        const i32 didLevelChange = NewLData->idx != LastLData->idx;
+        LevelChangesInArea = 0;
+        LevelChange = didLevelChange;
     }
 
     if (NOSOUND == 0) {
@@ -1260,7 +1267,7 @@ giz_freeplay:
     }
     if (__builtin_expect(HUB_ADATA != NULL, 1)) {
         i = (u32)(byte)HUB_ADATA->index;
-        if (i == last_area) {
+        if (__builtin_expect(i == last_area, 0)) {
             goto after_sound;
         }
         if (Arcade == 0) {
@@ -1316,7 +1323,7 @@ after_sound:
         }
 
         if ((new_level_from_menu != 0) && (Area != last_area)) {
-            if (__builtin_expect(!((HUB_ADATA == NULL) || (Area != (u32)(byte)HUB_ADATA->index)), 1)) {
+            if (!((HUB_ADATA == NULL) || (Area != (u32)(byte)HUB_ADATA->index))) {
                 NextArea_FreePlay = 0;
                 FreePlay = 0;
             } else {

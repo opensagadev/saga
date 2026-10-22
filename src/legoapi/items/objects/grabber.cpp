@@ -524,7 +524,7 @@ void Grabber_Update(WORLDINFO_s *world) {
         case 0:
             if (__builtin_expect(pad == NULL, 0)) {
                 if ((g->flags_559 & 4) && g->action_switch && (g->action_switch->progress_flags & 2) &&
-                    GameAnimSet_IsAnimationReset(g->action_switch->anim_set))
+                    __builtin_expect(GameAnimSet_IsAnimationReset(g->action_switch->anim_set) != 0, 1))
                     g->flags_559 &= ~4;
                 if (g->flags_559 & 4)
                     break;

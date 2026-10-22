@@ -685,8 +685,10 @@ void JediB_Update(WORLDINFO_s *world) {
             }
         } else {
             if (__builtin_expect(jedi_b.phase != 7, 1)) {
-                if (player->apiobj.pos_x * player->apiobj.pos_x + player->apiobj.pos_z * player->apiobj.pos_z >
-                    jedib_safe_r * jedib_safe_r) {
+                if (__builtin_expect(player->apiobj.pos_x * player->apiobj.pos_x +
+                                             player->apiobj.pos_z * player->apiobj.pos_z >
+                                         jedib_safe_r * jedib_safe_r,
+                                     1)) {
                     jedi_b.exclusion_mask = 1ULL << player->apiobj.field_0x289;
                 }
                 if (player2 != NULL &&
@@ -755,7 +757,7 @@ void JediB_Update(WORLDINFO_s *world) {
                                     index = 0;
                                 }
                             }
-                            if (__builtin_expect(jedi_b.baddies[index].object != NULL, 0)) {
+                            if (jedi_b.baddies[index].object != NULL) {
                                 RemoveGameObject(jedi_b.baddies[index].object, 1);
                                 jedi_b.baddies[index].object = NULL;
                                 jedi_b.baddies[index].spawned_behind = 0;
@@ -811,7 +813,7 @@ void JediB_Update(WORLDINFO_s *world) {
                 if (jedi_b.msg_objectives_left == NULL) {
                     jedi_b.msg_objectives_left = CheckGizAIMessage(gizaimessagesys, "ObjectivesLeft", NULL);
                 }
-                if (jedi_b.msg_restrain[0] == NULL) {
+                if (__builtin_expect(jedi_b.msg_restrain[0] == NULL, 0)) {
                     jedi_b.msg_restrain[0] = CheckGizAIMessage(gizaimessagesys, "RestrainPadme", NULL);
                 }
                 if (jedi_b.msg_restrain[1] == NULL) {
@@ -941,10 +943,11 @@ void JediB_Update(WORLDINFO_s *world) {
                         object->ai.opponent = player;
                     }
                 } else {
-                    if ((OnOrInsidePlane(&object->apiobj.position, &PlayPlane[1].point, &PlayPlane[1].normal, NULL,
-                                         2.0f, NULL) == 0 &&
-                         OnOrInsidePlane(&baddie->object->apiobj.position, &PlayPlane[2].point, &PlayPlane[2].normal,
-                                         NULL, 2.0f, NULL) == 0) ||
+                    if (__builtin_expect((OnOrInsidePlane(&object->apiobj.position, &PlayPlane[1].point,
+                                                          &PlayPlane[1].normal, NULL, 2.0f, NULL) == 0 &&
+                                          OnOrInsidePlane(&baddie->object->apiobj.position, &PlayPlane[2].point,
+                                                          &PlayPlane[2].normal, NULL, 2.0f, NULL) == 0) != 0,
+                                         0) ||
                         (OnOrInsidePlane(&baddie->locator.position, &PlayPlane[1].point, &PlayPlane[1].normal, NULL,
                                          2.0f, NULL) == 0 &&
                          OnOrInsidePlane(&baddie->locator.position, &PlayPlane[2].point, &PlayPlane[2].normal, NULL,
@@ -1015,10 +1018,10 @@ void JediB_Update(WORLDINFO_s *world) {
                 if (baddie->id == id_BOB) {
                     if (baddie->field_0x58 == 0) {
                         baddie->field_0x58 = object->field_0x1054;
-                        if ((object->field_0xefd & 2) != 0) {
-                            baddie->two_row_hp = 1;
-                        } else {
+                        if ((object->field_0xefd & 2) == 0) {
                             baddie->two_row_hp = 0;
+                        } else {
+                            baddie->two_row_hp = 1;
                         }
                     } else {
                         object->field_0x1054 = baddie->field_0x58;
@@ -1032,7 +1035,7 @@ void JediB_Update(WORLDINFO_s *world) {
                 }
             }
 
-            if (__builtin_expect(object == NULL, 0)) {
+            if (__builtin_expect(object == NULL, 1)) {
                 continue;
             }
             jedib_n_active++;

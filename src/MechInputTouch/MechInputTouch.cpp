@@ -281,8 +281,9 @@ i32 MechInputTouchSystem::ChooseTouchLayout(bool) {
                player->id == id_GRABCONTROL) {
         layout = 5;
         active = true;
-    } else if (WORLD != NULL && WORLD->current_level == SPEEDERCHASEA_LDATA && players_cannot_exit_speeder != 0 &&
-               player != NULL && (player->id == id_SPEEDERBIKE || player->id == id_SPEEDERBIKESNOW)) {
+    } else if (WORLD != NULL && __builtin_expect(WORLD->current_level == SPEEDERCHASEA_LDATA, 1) &&
+               players_cannot_exit_speeder != 0 && player != NULL &&
+               (player->id == id_SPEEDERBIKE || player->id == id_SPEEDERBIKESNOW)) {
         layout = 6;
         active = true;
     } else {

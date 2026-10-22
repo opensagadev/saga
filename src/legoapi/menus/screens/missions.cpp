@@ -184,9 +184,9 @@ void MenuUpdateMissions(MENU_s *menu) {
                     start = 1;
                     goto collected_input;
                 }
-                if (__builtin_expect(!MenuPacket.reserved_1[0], 1)) {
+                if (!MenuPacket.reserved_1[0]) {
                     MenuPacket.reserved_1[0] = 1;
-                    if (MenuPacket.reserved_1[1]) {
+                    if (__builtin_expect(MenuPacket.reserved_1[1] != 0, 1)) {
                         start = 1;
                         goto collected_input;
                     }
@@ -223,7 +223,7 @@ void MenuUpdateMissions(MENU_s *menu) {
                     GameAudio_PlaySfx(0x30, NULL, 0, 0);
                 }
             } else if (pressed & GAMEPAD_MENUCANCEL) {
-                if (!MenuPacket.active_player[0] || !MenuPacket.reserved_1[1]) {
+                if (!MenuPacket.active_player[0] || __builtin_expect(!MenuPacket.reserved_1[1], 0)) {
                     cancel = 1;
                     goto collected_input;
                 }
@@ -233,7 +233,8 @@ void MenuUpdateMissions(MENU_s *menu) {
                 const u32 directions = GamePad[1].unknown_10;
                 if ((directions & GAMEPAD_DLEFT) || (pressed & (GAMEPAD_DLEFT | GAMEPAD_TOGGLELEFT)))
                     left = 1;
-                else if ((directions & GAMEPAD_DRIGHT) || (pressed & (GAMEPAD_DRIGHT | GAMEPAD_TOGGLERIGHT)))
+                else if (__builtin_expect((directions & GAMEPAD_DRIGHT) != 0, 0) ||
+                         (pressed & (GAMEPAD_DRIGHT | GAMEPAD_TOGGLERIGHT)))
                     right = 1;
             }
         }
@@ -242,7 +243,7 @@ void MenuUpdateMissions(MENU_s *menu) {
 collected_input:
     if (menu->input_activity) {
         if (menu->confirm_pressed) {
-            if (hub_mission == menu->selected_column)
+            if (__builtin_expect(hub_mission == menu->selected_column, 1))
                 start = 1;
             else
                 hub_mission = menu->selected_column;

@@ -750,7 +750,8 @@ void Tag_Check(GameObject_s *object) {
                             }
                         } else {
                             if (Tag_Mode == 1) {
-                                if (object->character_context == 0x17 || object->character_context == -1 ||
+                                if (object->character_context == 0x17 ||
+                                    __builtin_expect(object->character_context == -1, 0) ||
                                     (CInfo[object->character_context].flags & (0x10ull << 32)) != 0 ||
                                     (CInfo[object->character_context].flags & 4) != 0) {
                                     GameObject_s *found = Tag_FindGameObject_TRANSFER(object);
@@ -784,7 +785,7 @@ void Tag_Check(GameObject_s *object) {
                             }
                         }
                     }
-                    if (no_target && object->field_0xcc0 == NULL)
+                    if (no_target && __builtin_expect(object->field_0xcc0 == NULL, 1))
                         object->hud_icon_timer = 2.0f;
                 }
             }
@@ -793,17 +794,17 @@ void Tag_Check(GameObject_s *object) {
     if (result == 1) {
         object->tag_flags &= ~4;
         GameAudio_PlaySfx(0x21, &object->apiobj.collision_position, 0, 0);
-        if (__builtin_expect(target->apiobj.model_draw_result != 0, 1))
+        if (target->apiobj.model_draw_result != 0)
             GameCam_Blend(GameCam, 0.5f, 0.0f, 1);
         else
             GameCam_Reset(GameCam);
         RememberPlayerIDs(0, Player[0] != NULL ? Player[0]->id : -1, Player[1] != NULL ? Player[1]->id : -1);
-        if (__builtin_expect((Tag_Mode & ~2) == 1, 1))
+        if (__builtin_expect((Tag_Mode & ~2) == 1, 0))
             Tag_NewTransfer(object, target);
         if (static_cast<u8>(object->apiobj.field_0x27c) < 2 && static_cast<u8>(target->apiobj.field_0x27c) < 2)
             ResetTimer(&JoinInTimer, 0.0f);
     }
-    if (Tag_DrawIconFn != NULL)
+    if (__builtin_expect(Tag_DrawIconFn != NULL, 0))
         Tag_DrawIconFn(object);
 }
 
@@ -911,7 +912,8 @@ __attribute__((force_align_arg_pointer)) void TakeOverCode(GameObject_s *object,
         object->takeover_timer -= FRAMETIME;
         return;
     }
-    if (MiniCutCam != 0 || !api.player_controlled || api.field_0x287 != 0 || !(object->takeover_timer <= 0.0f) ||
+    if (MiniCutCam != 0 || !api.player_controlled || api.field_0x287 != 0 ||
+        __builtin_expect(!(object->takeover_timer <= 0.0f), 0) ||
         (object->character_context != -1 && (object->character_context != 0 || object->action_movement_state == 3 ||
                                              object->action_movement_state == 4)) ||
         api.field_0x27d == 0) {
