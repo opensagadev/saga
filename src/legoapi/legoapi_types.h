@@ -5678,7 +5678,10 @@ struct PlaceableHelper {
 };
 DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(PlaceableHelper) == 0x88, "PlaceableHelper size");
 extern PlaceableHelper thePlaceableHelper;
-struct PlaceableInterface {
+struct PlaceableInterface : EdClassInterface {
+    // Object-type ID that PlaceableHelper::RegisterObjectType assigns; matches Placeable::scene_id.
+    i32 scene_id;
+
     i32 DebugOutputObjects();
     Placeable *Find(char *);
     i32 Find(char *, Placeable **, i32);
@@ -5835,21 +5838,7 @@ struct SNIPER_s {
     float state;      // 0x1c
 }; // 0x20 bytes: the original strides this array by 0x20
 
-struct SceneObjectHelperVTableObject {
-    void *offset_to_top;
-    void *type_info;
-    EdClassInterfaceVTable methods;
-    void (*sub_render)(SceneObjectHelper *);
-    i32 subsystem_offset_to_top;
-    void *subsystem_type_info;
-    void (*subsystem_methods[6])();
-};
-extern const SceneObjectHelperVTableObject sceneObjectHelperVTable asm("_ZTV17SceneObjectHelper");
-
-struct SceneObjectHelper {
-    EdClassInterface class_interface;
-    i32 scene_id;
-    EdSubSystem subsystem;
+struct SceneObjectHelper : PlaceableInterface, EdSubSystem {
     u8 reserved_0x18[4];
     SceneObject *scenes[10];
     i32 scene_counts[10];
@@ -5865,41 +5854,34 @@ struct SceneObjectHelper {
     i32 show_owned_objects;
 
     SceneObjectHelper() {
-        class_interface.vtable = const_cast<EdClassInterfaceVTable *>(&sceneObjectHelperVTable.methods);
-        *reinterpret_cast<void **>(&subsystem) =
-            const_cast<void *>(static_cast<void const *>(&sceneObjectHelperVTable.subsystem_methods));
-        class_interface.object_class = NULL;
         scene_id = -1;
-        subsystem.next = NULL;
-        subsystem.previous = NULL;
+        next = NULL;
+        previous = NULL;
         owned_first = NULL;
         owned_last = NULL;
         owned_object_count = 0;
         show_hidden_wire = 1;
     }
-    ~SceneObjectHelper();
 
-    void AddMenuItems(eduimenu_s *);
-    void ClearLevel(i32);
-    void *CreateObject(void *, i32, i32);
-    void DestroyObject(void *, i32);
-    void Flush();
-    void *GetNextObject(void *);
-    i32 GetNumObjects();
+    void AddMenuItems(eduimenu_s *) override;
+    void ClearLevel(i32) override;
+    void *CreateObject(void *, i32, i32) override;
+    void DestroyObject(void *, i32) override;
+    void Flush() override;
+    void *GetNextObject(void *) override;
+    using EdClassInterface::GetNextObject;
+    i32 GetNumObjects() override;
     void Initialise();
-    void PostLoadInitialisation(MemoryBuffer *, MemoryBuffer *);
-    void PreLoadInitialisation(MemoryBuffer *, MemoryBuffer *);
+    void PostLoadInitialisation(MemoryBuffer *, MemoryBuffer *) override;
+    void PreLoadInitialisation(MemoryBuffer *, MemoryBuffer *) override;
     void SetSceneFilter(char *);
-    void SubRender();
-    void UpdateLists(MemoryBuffer *, MemoryBuffer *);
+    void SubRender() override;
+    void UpdateLists(MemoryBuffer *, MemoryBuffer *) override;
     static void cbEdSceneObjectShowHiddenSolid(eduimenu_s *, eduiitem_s *, u32);
     static void cbEdSceneObjectShowHiddenWire(eduimenu_s *, eduiitem_s *, u32);
     static void cbEdSceneObjectShowOwnedObjects(eduimenu_s *, eduiitem_s *, u32);
 };
 
-DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(SceneObjectHelperVTableObject) == 0xa8, "SceneObjectHelper vtable size");
-DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(SceneObjectHelperVTableObject, subsystem_methods) == 0x90,
-              "SceneObjectHelper secondary vtable offset");
 DECOMP_ASSERT(sizeof(SceneObjectHelper) == 0xb0, "SceneObjectHelper size");
 DECOMP_ASSERT(offsetof(SceneObjectHelper, scene_id) == 8, "SceneObjectHelper scene ID offset");
 DECOMP_ASSERT(offsetof(SceneObjectHelper, scenes) == 0x1c, "SceneObjectHelper scene-array offset");

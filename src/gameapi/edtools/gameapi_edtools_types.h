@@ -187,69 +187,65 @@ struct EdClass {
     void SerialiseObject(EdStream &, void *, EdClass *, EdRegistry *);
     i32 SerialiseObjectHeader(EdStream &, void *);
 };
-struct EdClassInterfaceVTable {
-    void (*destroy)(EdClassInterface *);
-    void (*delete_object)(EdClassInterface *);
-    void (*clear_level)(EdClassInterface *, i32);
-    void (*flush)(EdClassInterface *);
-    i32 (*get_num_objects)(EdClassInterface *);
-    void *(*get_next_object)(EdClassInterface *, void *);
-    void *(*get_next_filtered_object)(EdClassInterface *, void *, i32 (*)(void *));
-    void *(*create_object)(EdClassInterface *, void *, i32, i32);
-    void (*destroy_object)(EdClassInterface *, void *, i32);
-    void (*defunct_object)(EdClassInterface *, void *);
-    void (*revive_object)(EdClassInterface *, void *);
-    void (*set_object_guid)(EdClassInterface *, void *, i32);
-    i32 (*get_object_guid)(EdClassInterface *, void *);
-    i32 (*get_constructor_data)(EdClassInterface *, void *, void *, i32);
-    void (*construct)(EdClassInterface *, void *, void *);
-    void (*process)(EdClassInterface *, void *, EdInputContext &);
-    void (*render)(EdClassInterface *, void *, i32);
-    void (*enter_editor)(EdClassInterface *);
-    void (*exit_editor)(EdClassInterface *);
-    void (*enter_level)(EdClassInterface *);
-    void (*exit_level)(EdClassInterface *);
-    void (*update_lists)(EdClassInterface *, MemoryBuffer *, MemoryBuffer *);
-    void (*pre_load_initialisation)(EdClassInterface *, MemoryBuffer *, MemoryBuffer *);
-    void (*post_load_initialisation)(EdClassInterface *, MemoryBuffer *, MemoryBuffer *);
-    void (*pre_save_initialisation)(EdClassInterface *);
-    void (*post_save_initialisation)(EdClassInterface *);
-    void (*serialise_object)(EdClassInterface *, EdStream &, void *);
-    f32 (*distance_to_ray)(EdClassInterface *, VuVec &, VuVec &, void *, EdRef **);
-    f32 (*distance_to_point)(EdClassInterface *, VuVec &, void *, EdRef **);
-    void (*add_menu_items)(EdClassInterface *, eduimenu_s *);
-    void (*import)(EdClassInterface *);
-};
-DECOMP_ASSERT(offsetof(EdClassInterfaceVTable, get_next_object) == 0x14, "EdClassInterface next-object slot");
-DECOMP_ASSERT(offsetof(EdClassInterfaceVTable, serialise_object) == 0x68, "EdClassInterface serialise slot");
 struct EdClassInterface {
-    EdClassInterfaceVTable *vtable;
-    EdClass *object_class;
+    EdClassInterface() : object_class(NULL) {
+    }
+    virtual ~EdClassInterface() {
+    }
+    virtual void ClearLevel(i32) {
+    }
+    virtual void Flush() = 0;
+    virtual i32 GetNumObjects() = 0;
+    virtual void *GetNextObject(void *) = 0;
+    virtual void *GetNextObject(void *, i32 (*)(void *));
+    virtual void *CreateObject(void *, i32, i32) = 0;
+    virtual void DestroyObject(void *, i32) = 0;
+    virtual void DefunctObject(void *) {
+    }
+    virtual void ReviveObject(void *) {
+    }
+    virtual void SetObjectGuid(void *, i32) {
+    }
+    virtual i32 GetObjectGuid(void *) {
+        return 0;
+    }
+    virtual i32 GetConstructorData(void *, void *, i32) {
+        return 0;
+    }
+    virtual void Construct(void *, void *) {
+    }
+    virtual void Process(void *, EdInputContext &) {
+    }
+    virtual void Render(void *, i32) {
+    }
+    virtual void EnterEditor() {
+    }
+    virtual void ExitEditor() {
+    }
+    virtual void EnterLevel() {
+    }
+    virtual void ExitLevel() {
+    }
+    virtual void UpdateLists(MemoryBuffer *, MemoryBuffer *) {
+    }
+    virtual void PreLoadInitialisation(MemoryBuffer *, MemoryBuffer *) {
+    }
+    virtual void PostLoadInitialisation(MemoryBuffer *, MemoryBuffer *) {
+    }
+    virtual void PreSaveInitialisation() {
+    }
+    virtual void PostSaveInitialisation() {
+    }
+    virtual void SerialiseObject(EdStream &, void *) {
+    }
+    virtual f32 DistanceToObject(VuVec &, VuVec &, void *, EdRef **);
+    virtual f32 DistanceToObject(VuVec &, void *, EdRef **);
+    virtual void AddMenuItems(eduimenu_s *) {
+    }
+    virtual void Import() {
+    }
 
-    void ClearLevel(i32);
-    void DefunctObject(void *);
-    void ReviveObject(void *);
-    void SetObjectGuid(void *, i32);
-    i32 GetObjectGuid(void *);
-    i32 GetConstructorData(void *, void *, i32);
-    void Construct(void *, void *);
-    void Process(void *, EdInputContext &);
-    void Render(void *, i32);
-    void EnterEditor();
-    void ExitEditor();
-    void EnterLevel();
-    void ExitLevel();
-    void UpdateLists(MemoryBuffer *, MemoryBuffer *);
-    void PreLoadInitialisation(MemoryBuffer *, MemoryBuffer *);
-    void PostLoadInitialisation(MemoryBuffer *, MemoryBuffer *);
-    void PreSaveInitialisation();
-    void PostSaveInitialisation();
-    void SerialiseObject(EdStream &, void *);
-    void AddMenuItems(eduimenu_s *);
-    void Import();
-    f32 DistanceToObject(VuVec &, VuVec &, void *, EdRef **);
-    f32 DistanceToObject(VuVec &, void *, EdRef **);
-    void *GetNextObject(void *, i32 (*)(void *));
+    EdClass *object_class;
 };
 DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(EdClassInterface) == 0x8, "EdClassInterface size");
 struct EdControl {
@@ -801,61 +797,51 @@ struct EditorSettings {
     void Serialise(EdStream &);
 };
 DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(EditorSettings) == 0xc, "EditorSettings 32-bit size");
-struct EdClassInterfaceVTableObject {
-    void *offset_to_top;
-    void *type_info;
-    EdClassInterfaceVTable methods;
-};
-extern const EdClassInterfaceVTableObject splineHelperVTable asm("_ZTV12SplineHelper");
-extern const EdClassInterfaceVTableObject knotHelperVTable asm("_ZTV10KnotHelper");
-struct KnotHelper {
-    void *vtable;
-    EdClass *object_class;
+struct KnotHelper : EdClassInterface {
     EdRef *position_ref;
     EdRef *in_tangent_ref;
     EdRef *out_tangent_ref;
 
-    KnotHelper()
-        : vtable(const_cast<EdClassInterfaceVTable *>(&knotHelperVTable.methods)), object_class(NULL) {
+    void Flush() override {
     }
-    ~KnotHelper();
-    void Flush();
-    void *CreateObject(void *, i32, i32);
-    void DestroyObject(void *, i32);
-    f32 DistanceToObject(VuVec &, VuVec &, void *, EdRef **);
-    void *GetNextObject(void *);
-    i32 GetNumObjects();
-    void Process(void *, EdInputContext &);
-    void Render(void *, i32);
+    void *CreateObject(void *, i32, i32) override;
+    void DestroyObject(void *, i32) override;
+    f32 DistanceToObject(VuVec &, VuVec &, void *, EdRef **) override;
+    using EdClassInterface::DistanceToObject;
+    void *GetNextObject(void *) override;
+    using EdClassInterface::GetNextObject;
+    i32 GetNumObjects() override;
+    void Process(void *, EdInputContext &) override;
+    void Render(void *, i32) override;
 };
-struct SplineHelper {
-    void *vtable;
-    EdClass *object_class;
+struct SplineHelper : EdClassInterface {
     SplineObject *first_object;
     SplineObject *last_object;
     i32 object_count;
     i32 auto_generate_points;
 
-    SplineHelper()
-        : vtable(const_cast<EdClassInterfaceVTable *>(&splineHelperVTable.methods)), object_class(NULL),
-          first_object(NULL), last_object(NULL), object_count(0), auto_generate_points(1) {
+    SplineHelper() : first_object(NULL), last_object(NULL), object_count(0), auto_generate_points(1) {
     }
-    ~SplineHelper();
-    void Flush();
-    void AddMenuItems(eduimenu_s *);
-    void ClearLevel(i32);
-    void *CreateObject(void *, i32, i32);
-    void DestroyObject(void *, i32);
+    void Flush() override {
+        last_object = NULL;
+        first_object = NULL;
+        object_count = 0;
+    }
+    void AddMenuItems(eduimenu_s *) override;
+    void ClearLevel(i32) override;
+    void *CreateObject(void *, i32, i32) override;
+    void DestroyObject(void *, i32) override;
     SplineObject *Find(char *);
     i32 Find(char *, SplineObject **, i32);
-    void *GetNextObject(void *);
-    i32 GetNumObjects();
+    void *GetNextObject(void *) override;
+    using EdClassInterface::GetNextObject;
+    i32 GetNumObjects() override;
     void Initialise();
-    void PostLoadInitialisation(MemoryBuffer *, MemoryBuffer *);
-    void PreLoadInitialisation(MemoryBuffer *, MemoryBuffer *);
-    void Process(void *, EdInputContext &);
-    void Render(void *, i32);
-    void SerialiseObject(EdStream &, void *);
+    void PostLoadInitialisation(MemoryBuffer *, MemoryBuffer *) override;
+    void PreLoadInitialisation(MemoryBuffer *, MemoryBuffer *) override;
+    void Process(void *, EdInputContext &) override;
+    void Render(void *, i32) override;
+    void SerialiseObject(EdStream &, void *) override;
     static void cbEdSplineAutoGenPoints(eduimenu_s *, eduiitem_s *, u32);
     static void cbEdSplineReGenPoints(eduimenu_s *, eduiitem_s *, u32);
     static void cbEdSplineReverseSpline(eduimenu_s *, eduiitem_s *, u32);

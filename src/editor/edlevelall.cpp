@@ -570,195 +570,6 @@ void SceneInstance::SetName(char const *value) {
     name.Set(value);
 }
 
-// The original helper has an EdClassInterface primary vtable and an EdSubSystem
-// secondary vtable at +0xc. The field-based types retain those exact layouts.
-#define SCENE_VIRTUAL(name, symbol) extern "C" void name() asm(symbol)
-#define SCENE_SLOT(field, name) reinterpret_cast<decltype(EdClassInterfaceVTable::field)>(name)
-SCENE_VIRTUAL(base_destroy, "_ZN16EdClassInterfaceD1Ev");
-SCENE_VIRTUAL(base_delete, "_ZN16EdClassInterfaceD0Ev");
-SCENE_VIRTUAL(base_clear, "_ZN16EdClassInterface10ClearLevelEi");
-SCENE_VIRTUAL(base_next_filtered, "_ZN16EdClassInterface13GetNextObjectEPvPFiS0_E");
-SCENE_VIRTUAL(base_defunct, "_ZN16EdClassInterface13DefunctObjectEPv");
-SCENE_VIRTUAL(base_revive, "_ZN16EdClassInterface12ReviveObjectEPv");
-SCENE_VIRTUAL(base_set_guid, "_ZN16EdClassInterface13SetObjectGuidEPvi");
-SCENE_VIRTUAL(base_get_guid, "_ZN16EdClassInterface13GetObjectGuidEPv");
-SCENE_VIRTUAL(base_constructor_data, "_ZN16EdClassInterface18GetConstructorDataEPvS0_i");
-SCENE_VIRTUAL(base_construct, "_ZN16EdClassInterface9ConstructEPvS0_");
-SCENE_VIRTUAL(base_process, "_ZN16EdClassInterface7ProcessEPvR14EdInputContext");
-SCENE_VIRTUAL(base_render, "_ZN16EdClassInterface6RenderEPvi");
-SCENE_VIRTUAL(base_enter_editor, "_ZN16EdClassInterface11EnterEditorEv");
-SCENE_VIRTUAL(base_exit_editor, "_ZN16EdClassInterface10ExitEditorEv");
-SCENE_VIRTUAL(base_enter_level, "_ZN16EdClassInterface10EnterLevelEv");
-SCENE_VIRTUAL(base_exit_level, "_ZN16EdClassInterface9ExitLevelEv");
-SCENE_VIRTUAL(base_update_lists, "_ZN16EdClassInterface11UpdateListsEP12MemoryBufferS1_");
-SCENE_VIRTUAL(base_pre_load, "_ZN16EdClassInterface21PreLoadInitialisationEP12MemoryBufferS1_");
-SCENE_VIRTUAL(base_post_load, "_ZN16EdClassInterface22PostLoadInitialisationEP12MemoryBufferS1_");
-SCENE_VIRTUAL(base_pre_save, "_ZN16EdClassInterface21PreSaveInitialisationEv");
-SCENE_VIRTUAL(base_post_save, "_ZN16EdClassInterface22PostSaveInitialisationEv");
-SCENE_VIRTUAL(base_serialise, "_ZN16EdClassInterface15SerialiseObjectER8EdStreamPv");
-SCENE_VIRTUAL(base_distance_ray, "_ZN16EdClassInterface16DistanceToObjectER5VuVecS1_PvPP5EdRef");
-SCENE_VIRTUAL(base_distance_point, "_ZN16EdClassInterface16DistanceToObjectER5VuVecPvPP5EdRef");
-SCENE_VIRTUAL(base_add_menu, "_ZN16EdClassInterface12AddMenuItemsEP10eduimenu_s");
-SCENE_VIRTUAL(base_import, "_ZN16EdClassInterface6ImportEv");
-SCENE_VIRTUAL(scene_destroy, "_ZN17SceneObjectHelperD1Ev");
-SCENE_VIRTUAL(scene_delete, "_ZN17SceneObjectHelperD0Ev");
-SCENE_VIRTUAL(scene_clear, "_ZN17SceneObjectHelper10ClearLevelEi");
-SCENE_VIRTUAL(scene_flush, "_ZN17SceneObjectHelper5FlushEv");
-SCENE_VIRTUAL(scene_count, "_ZN17SceneObjectHelper13GetNumObjectsEv");
-SCENE_VIRTUAL(scene_next, "_ZN17SceneObjectHelper13GetNextObjectEPv");
-SCENE_VIRTUAL(scene_create, "_ZN17SceneObjectHelper12CreateObjectEPvii");
-SCENE_VIRTUAL(scene_destroy_object, "_ZN17SceneObjectHelper13DestroyObjectEPvi");
-SCENE_VIRTUAL(scene_update_lists, "_ZN17SceneObjectHelper11UpdateListsEP12MemoryBufferS1_");
-SCENE_VIRTUAL(scene_pre_load, "_ZN17SceneObjectHelper21PreLoadInitialisationEP12MemoryBufferS1_");
-SCENE_VIRTUAL(scene_post_load, "_ZN17SceneObjectHelper22PostLoadInitialisationEP12MemoryBufferS1_");
-SCENE_VIRTUAL(scene_add_menu, "_ZN17SceneObjectHelper12AddMenuItemsEP10eduimenu_s");
-SCENE_VIRTUAL(scene_sub_render, "_ZN17SceneObjectHelper9SubRenderEv");
-SCENE_VIRTUAL(scene_sub_destroy, "_ZThn12_N17SceneObjectHelperD1Ev");
-SCENE_VIRTUAL(scene_sub_delete, "_ZThn12_N17SceneObjectHelperD0Ev");
-SCENE_VIRTUAL(sub_initialise, "_ZN11EdSubSystem13SubInitialiseER9variptr_uS1_i");
-SCENE_VIRTUAL(sub_reset, "_ZN11EdSubSystem8SubResetEv");
-SCENE_VIRTUAL(sub_process, "_ZN11EdSubSystem10SubProcessEf");
-SCENE_VIRTUAL(scene_sub_render_thunk, "_ZThn12_N17SceneObjectHelper9SubRenderEv");
-
-extern const EdClassInterfaceVTableObject sceneBaseInterfaceVTable asm("_ZTV16EdClassInterface")
-    __attribute__((weak)) = {NULL,
-                             NULL,
-                             {SCENE_SLOT(destroy, base_destroy),
-                              SCENE_SLOT(delete_object, base_delete),
-                              SCENE_SLOT(clear_level, base_clear),
-                              NULL,
-                              NULL,
-                              NULL,
-                              SCENE_SLOT(get_next_filtered_object, base_next_filtered),
-                              NULL,
-                              NULL,
-                              SCENE_SLOT(defunct_object, base_defunct),
-                              SCENE_SLOT(revive_object, base_revive),
-                              SCENE_SLOT(set_object_guid, base_set_guid),
-                              SCENE_SLOT(get_object_guid, base_get_guid),
-                              SCENE_SLOT(get_constructor_data, base_constructor_data),
-                              SCENE_SLOT(construct, base_construct),
-                              SCENE_SLOT(process, base_process),
-                              SCENE_SLOT(render, base_render),
-                              SCENE_SLOT(enter_editor, base_enter_editor),
-                              SCENE_SLOT(exit_editor, base_exit_editor),
-                              SCENE_SLOT(enter_level, base_enter_level),
-                              SCENE_SLOT(exit_level, base_exit_level),
-                              SCENE_SLOT(update_lists, base_update_lists),
-                              SCENE_SLOT(pre_load_initialisation, base_pre_load),
-                              SCENE_SLOT(post_load_initialisation, base_post_load),
-                              SCENE_SLOT(pre_save_initialisation, base_pre_save),
-                              SCENE_SLOT(post_save_initialisation, base_post_save),
-                              SCENE_SLOT(serialise_object, base_serialise),
-                              SCENE_SLOT(distance_to_ray, base_distance_ray),
-                              SCENE_SLOT(distance_to_point, base_distance_point),
-                              SCENE_SLOT(add_menu_items, base_add_menu),
-                              SCENE_SLOT(import, base_import)}};
-
-extern const SceneObjectHelperVTableObject sceneObjectHelperVTable asm("_ZTV17SceneObjectHelper")
-    __attribute__((weak)) = {
-        NULL,
-        NULL,
-        {SCENE_SLOT(destroy, scene_destroy),
-         SCENE_SLOT(delete_object, scene_delete),
-         SCENE_SLOT(clear_level, scene_clear),
-         SCENE_SLOT(flush, scene_flush),
-         SCENE_SLOT(get_num_objects, scene_count),
-         SCENE_SLOT(get_next_object, scene_next),
-         SCENE_SLOT(get_next_filtered_object, base_next_filtered),
-         SCENE_SLOT(create_object, scene_create),
-         SCENE_SLOT(destroy_object, scene_destroy_object),
-         SCENE_SLOT(defunct_object, base_defunct),
-         SCENE_SLOT(revive_object, base_revive),
-         SCENE_SLOT(set_object_guid, base_set_guid),
-         SCENE_SLOT(get_object_guid, base_get_guid),
-         SCENE_SLOT(get_constructor_data, base_constructor_data),
-         SCENE_SLOT(construct, base_construct),
-         SCENE_SLOT(process, base_process),
-         SCENE_SLOT(render, base_render),
-         SCENE_SLOT(enter_editor, base_enter_editor),
-         SCENE_SLOT(exit_editor, base_exit_editor),
-         SCENE_SLOT(enter_level, base_enter_level),
-         SCENE_SLOT(exit_level, base_exit_level),
-         SCENE_SLOT(update_lists, scene_update_lists),
-         SCENE_SLOT(pre_load_initialisation, scene_pre_load),
-         SCENE_SLOT(post_load_initialisation, scene_post_load),
-         SCENE_SLOT(pre_save_initialisation, base_pre_save),
-         SCENE_SLOT(post_save_initialisation, base_post_save),
-         SCENE_SLOT(serialise_object, base_serialise),
-         SCENE_SLOT(distance_to_ray, base_distance_ray),
-         SCENE_SLOT(distance_to_point, base_distance_point),
-         SCENE_SLOT(add_menu_items, scene_add_menu),
-         SCENE_SLOT(import, base_import)},
-        reinterpret_cast<decltype(SceneObjectHelperVTableObject::sub_render)>(scene_sub_render),
-        -12,
-        NULL,
-        {scene_sub_destroy, scene_sub_delete, sub_initialise, sub_reset, sub_process, scene_sub_render_thunk}};
-
-struct EdSubSystemVTableObject {
-    void *offset_to_top;
-    void *type_info;
-    void (*methods[6])();
-};
-extern const EdSubSystemVTableObject edSubSystemVTable asm("_ZTV11EdSubSystem");
-
-extern "C" void baseInterfaceDestructor(EdClassInterface *object) asm("_ZN16EdClassInterfaceD1Ev")
-    __attribute__((weak));
-void baseInterfaceDestructor(EdClassInterface *object) {
-    object->vtable = const_cast<EdClassInterfaceVTable *>(&sceneBaseInterfaceVTable.methods);
-}
-#if DECOMP_ASM_ALIAS
-extern "C" void baseInterfaceCompleteDestructor(EdClassInterface *) asm("_ZN16EdClassInterfaceD2Ev")
-    __attribute__((weak, alias("_ZN16EdClassInterfaceD1Ev")));
-#else
-extern "C" void baseInterfaceCompleteDestructor(EdClassInterface *object) asm("_ZN16EdClassInterfaceD2Ev")
-    __attribute__((weak));
-void baseInterfaceCompleteDestructor(EdClassInterface *object) {
-    baseInterfaceDestructor(object);
-}
-#endif
-extern "C" void baseInterfaceDeletingDestructor(EdClassInterface *object) asm("_ZN16EdClassInterfaceD0Ev")
-    __attribute__((weak));
-void baseInterfaceDeletingDestructor(EdClassInterface *object) {
-    object->vtable = const_cast<EdClassInterfaceVTable *>(&sceneBaseInterfaceVTable.methods);
-    ::operator delete(object);
-}
-
-extern "C" void sceneHelperDestructor(SceneObjectHelper *object) asm("_ZN17SceneObjectHelperD1Ev")
-    __attribute__((weak));
-void sceneHelperDestructor(SceneObjectHelper *object) {
-    *reinterpret_cast<void **>(&object->subsystem) =
-        const_cast<void *>(static_cast<void const *>(&edSubSystemVTable.methods));
-    object->class_interface.vtable = const_cast<EdClassInterfaceVTable *>(&sceneBaseInterfaceVTable.methods);
-}
-#if DECOMP_ASM_ALIAS
-extern "C" void sceneHelperCompleteDestructor(SceneObjectHelper *) asm("_ZN17SceneObjectHelperD2Ev")
-    __attribute__((weak, alias("_ZN17SceneObjectHelperD1Ev")));
-#else
-extern "C" void sceneHelperCompleteDestructor(SceneObjectHelper *object) asm("_ZN17SceneObjectHelperD2Ev")
-    __attribute__((weak));
-void sceneHelperCompleteDestructor(SceneObjectHelper *object) {
-    sceneHelperDestructor(object);
-}
-#endif
-extern "C" void sceneHelperDeletingDestructor(SceneObjectHelper *object) asm("_ZN17SceneObjectHelperD0Ev")
-    __attribute__((weak));
-void sceneHelperDeletingDestructor(SceneObjectHelper *object) {
-    *reinterpret_cast<void **>(&object->subsystem) =
-        const_cast<void *>(static_cast<void const *>(&edSubSystemVTable.methods));
-    object->class_interface.vtable = const_cast<EdClassInterfaceVTable *>(&sceneBaseInterfaceVTable.methods);
-}
-extern "C" void sceneHelperSubDestructor(EdSubSystem *object) asm("_ZThn12_N17SceneObjectHelperD1Ev")
-    __attribute__((weak));
-void sceneHelperSubDestructor(EdSubSystem *object) {
-    sceneHelperDestructor(reinterpret_cast<SceneObjectHelper *>(reinterpret_cast<u8 *>(object) - 12));
-}
-extern "C" void sceneHelperSubDeletingDestructor(EdSubSystem *object) asm("_ZThn12_N17SceneObjectHelperD0Ev")
-    __attribute__((weak));
-void sceneHelperSubDeletingDestructor(EdSubSystem *object) {
-    sceneHelperDeletingDestructor(reinterpret_cast<SceneObjectHelper *>(reinterpret_cast<u8 *>(object) - 12));
-}
-
 template <typename Ref>
 static void add_scene_reference(EdClass *object_class, char *type, char *name, i32 offset, i32 size, i32 attributes,
                                 EdControl *control = NULL) {
@@ -767,153 +578,8 @@ static void add_scene_reference(EdClass *object_class, char *type, char *name, i
     object_class->AddType(reference);
 }
 
-extern "C" void sceneHelperSubRender(EdSubSystem *object) asm("_ZThn12_N17SceneObjectHelper9SubRenderEv");
-
 inline void SceneObject::operator delete(void *pointer) {
     theMemoryManager.FreePool(pointer, sizeof(SceneObject));
-}
-
-// EdClassInterface's field-based representation preserves the original ABI for
-// the rest of the editor.  These two objects are its original Itanium vtables:
-// two header words followed by the 31 EdClassInterface slots.
-#define EDVT_SYMBOL(name, symbol) extern "C" void name() asm(symbol)
-#define EDVT_SLOT(field, symbol) reinterpret_cast<decltype(EdClassInterfaceVTable::field)>(symbol)
-EDVT_SYMBOL(edvt_base_clear, "_ZN16EdClassInterface10ClearLevelEi");
-EDVT_SYMBOL(edvt_base_next_filtered, "_ZN16EdClassInterface13GetNextObjectEPvPFiS0_E");
-EDVT_SYMBOL(edvt_base_defunct, "_ZN16EdClassInterface13DefunctObjectEPv");
-EDVT_SYMBOL(edvt_base_revive, "_ZN16EdClassInterface12ReviveObjectEPv");
-EDVT_SYMBOL(edvt_base_set_guid, "_ZN16EdClassInterface13SetObjectGuidEPvi");
-EDVT_SYMBOL(edvt_base_get_guid, "_ZN16EdClassInterface13GetObjectGuidEPv");
-EDVT_SYMBOL(edvt_base_constructor_data, "_ZN16EdClassInterface18GetConstructorDataEPvS0_i");
-EDVT_SYMBOL(edvt_base_construct, "_ZN16EdClassInterface9ConstructEPvS0_");
-EDVT_SYMBOL(edvt_base_enter_editor, "_ZN16EdClassInterface11EnterEditorEv");
-EDVT_SYMBOL(edvt_base_exit_editor, "_ZN16EdClassInterface10ExitEditorEv");
-EDVT_SYMBOL(edvt_base_enter_level, "_ZN16EdClassInterface10EnterLevelEv");
-EDVT_SYMBOL(edvt_base_exit_level, "_ZN16EdClassInterface9ExitLevelEv");
-EDVT_SYMBOL(edvt_base_update_lists, "_ZN16EdClassInterface11UpdateListsEP12MemoryBufferS1_");
-EDVT_SYMBOL(edvt_base_pre_load, "_ZN16EdClassInterface21PreLoadInitialisationEP12MemoryBufferS1_");
-EDVT_SYMBOL(edvt_base_post_load, "_ZN16EdClassInterface22PostLoadInitialisationEP12MemoryBufferS1_");
-EDVT_SYMBOL(edvt_base_pre_save, "_ZN16EdClassInterface21PreSaveInitialisationEv");
-EDVT_SYMBOL(edvt_base_post_save, "_ZN16EdClassInterface22PostSaveInitialisationEv");
-EDVT_SYMBOL(edvt_base_serialise, "_ZN16EdClassInterface15SerialiseObjectER8EdStreamPv");
-EDVT_SYMBOL(edvt_base_distance_ray, "_ZN16EdClassInterface16DistanceToObjectER5VuVecS1_PvPP5EdRef");
-EDVT_SYMBOL(edvt_base_distance_point, "_ZN16EdClassInterface16DistanceToObjectER5VuVecPvPP5EdRef");
-EDVT_SYMBOL(edvt_base_add_menu, "_ZN16EdClassInterface12AddMenuItemsEP10eduimenu_s");
-EDVT_SYMBOL(edvt_base_import, "_ZN16EdClassInterface6ImportEv");
-EDVT_SYMBOL(edvt_spline_clear, "_ZN12SplineHelper10ClearLevelEi");
-EDVT_SYMBOL(edvt_spline_flush, "_ZN12SplineHelper5FlushEv");
-EDVT_SYMBOL(edvt_spline_count, "_ZN12SplineHelper13GetNumObjectsEv");
-EDVT_SYMBOL(edvt_spline_next, "_ZN12SplineHelper13GetNextObjectEPv");
-EDVT_SYMBOL(edvt_spline_create, "_ZN12SplineHelper12CreateObjectEPvii");
-EDVT_SYMBOL(edvt_spline_destroy, "_ZN12SplineHelper13DestroyObjectEPvi");
-EDVT_SYMBOL(edvt_spline_process, "_ZN12SplineHelper7ProcessEPvR14EdInputContext");
-EDVT_SYMBOL(edvt_spline_render, "_ZN12SplineHelper6RenderEPvi");
-EDVT_SYMBOL(edvt_spline_pre_load, "_ZN12SplineHelper21PreLoadInitialisationEP12MemoryBufferS1_");
-EDVT_SYMBOL(edvt_spline_post_load, "_ZN12SplineHelper22PostLoadInitialisationEP12MemoryBufferS1_");
-EDVT_SYMBOL(edvt_spline_serialise, "_ZN12SplineHelper15SerialiseObjectER8EdStreamPv");
-EDVT_SYMBOL(edvt_spline_add_menu, "_ZN12SplineHelper12AddMenuItemsEP10eduimenu_s");
-EDVT_SYMBOL(edvt_knot_flush, "_ZN10KnotHelper5FlushEv");
-EDVT_SYMBOL(edvt_knot_count, "_ZN10KnotHelper13GetNumObjectsEv");
-EDVT_SYMBOL(edvt_knot_next, "_ZN10KnotHelper13GetNextObjectEPv");
-EDVT_SYMBOL(edvt_knot_create, "_ZN10KnotHelper12CreateObjectEPvii");
-EDVT_SYMBOL(edvt_knot_destroy, "_ZN10KnotHelper13DestroyObjectEPvi");
-EDVT_SYMBOL(edvt_knot_process, "_ZN10KnotHelper7ProcessEPvR14EdInputContext");
-EDVT_SYMBOL(edvt_knot_render, "_ZN10KnotHelper6RenderEPvi");
-EDVT_SYMBOL(edvt_knot_distance_ray, "_ZN10KnotHelper16DistanceToObjectER5VuVecS1_PvPP5EdRef");
-EDVT_SYMBOL(edvt_spline_destructor, "_ZN12SplineHelperD1Ev");
-EDVT_SYMBOL(edvt_spline_delete, "_ZN12SplineHelperD0Ev");
-EDVT_SYMBOL(edvt_knot_destructor, "_ZN10KnotHelperD1Ev");
-EDVT_SYMBOL(edvt_knot_delete, "_ZN10KnotHelperD0Ev");
-
-extern const EdClassInterfaceVTableObject splineHelperVTable asm("_ZTV12SplineHelper")
-    __attribute__((weak)) = {NULL,
-                             NULL,
-                             {reinterpret_cast<decltype(EdClassInterfaceVTable::destroy)>(edvt_spline_destructor),
-                              reinterpret_cast<decltype(EdClassInterfaceVTable::delete_object)>(edvt_spline_delete),
-                              EDVT_SLOT(clear_level, edvt_spline_clear),
-                              EDVT_SLOT(flush, edvt_spline_flush),
-                              EDVT_SLOT(get_num_objects, edvt_spline_count),
-                              EDVT_SLOT(get_next_object, edvt_spline_next),
-                              EDVT_SLOT(get_next_filtered_object, edvt_base_next_filtered),
-                              EDVT_SLOT(create_object, edvt_spline_create),
-                              EDVT_SLOT(destroy_object, edvt_spline_destroy),
-                              EDVT_SLOT(defunct_object, edvt_base_defunct),
-                              EDVT_SLOT(revive_object, edvt_base_revive),
-                              EDVT_SLOT(set_object_guid, edvt_base_set_guid),
-                              EDVT_SLOT(get_object_guid, edvt_base_get_guid),
-                              EDVT_SLOT(get_constructor_data, edvt_base_constructor_data),
-                              EDVT_SLOT(construct, edvt_base_construct),
-                              EDVT_SLOT(process, edvt_spline_process),
-                              EDVT_SLOT(render, edvt_spline_render),
-                              EDVT_SLOT(enter_editor, edvt_base_enter_editor),
-                              EDVT_SLOT(exit_editor, edvt_base_exit_editor),
-                              EDVT_SLOT(enter_level, edvt_base_enter_level),
-                              EDVT_SLOT(exit_level, edvt_base_exit_level),
-                              EDVT_SLOT(update_lists, edvt_base_update_lists),
-                              EDVT_SLOT(pre_load_initialisation, edvt_spline_pre_load),
-                              EDVT_SLOT(post_load_initialisation, edvt_spline_post_load),
-                              EDVT_SLOT(pre_save_initialisation, edvt_base_pre_save),
-                              EDVT_SLOT(post_save_initialisation, edvt_base_post_save),
-                              EDVT_SLOT(serialise_object, edvt_spline_serialise),
-                              EDVT_SLOT(distance_to_ray, edvt_base_distance_ray),
-                              EDVT_SLOT(distance_to_point, edvt_base_distance_point),
-                              EDVT_SLOT(add_menu_items, edvt_spline_add_menu),
-                              EDVT_SLOT(import, edvt_base_import)}};
-
-extern const EdClassInterfaceVTableObject knotHelperVTable asm("_ZTV10KnotHelper")
-    __attribute__((weak)) = {NULL,
-                             NULL,
-                             {reinterpret_cast<decltype(EdClassInterfaceVTable::destroy)>(edvt_knot_destructor),
-                              reinterpret_cast<decltype(EdClassInterfaceVTable::delete_object)>(edvt_knot_delete),
-                              EDVT_SLOT(clear_level, edvt_base_clear),
-                              EDVT_SLOT(flush, edvt_knot_flush),
-                              EDVT_SLOT(get_num_objects, edvt_knot_count),
-                              EDVT_SLOT(get_next_object, edvt_knot_next),
-                              EDVT_SLOT(get_next_filtered_object, edvt_base_next_filtered),
-                              EDVT_SLOT(create_object, edvt_knot_create),
-                              EDVT_SLOT(destroy_object, edvt_knot_destroy),
-                              EDVT_SLOT(defunct_object, edvt_base_defunct),
-                              EDVT_SLOT(revive_object, edvt_base_revive),
-                              EDVT_SLOT(set_object_guid, edvt_base_set_guid),
-                              EDVT_SLOT(get_object_guid, edvt_base_get_guid),
-                              EDVT_SLOT(get_constructor_data, edvt_base_constructor_data),
-                              EDVT_SLOT(construct, edvt_base_construct),
-                              EDVT_SLOT(process, edvt_knot_process),
-                              EDVT_SLOT(render, edvt_knot_render),
-                              EDVT_SLOT(enter_editor, edvt_base_enter_editor),
-                              EDVT_SLOT(exit_editor, edvt_base_exit_editor),
-                              EDVT_SLOT(enter_level, edvt_base_enter_level),
-                              EDVT_SLOT(exit_level, edvt_base_exit_level),
-                              EDVT_SLOT(update_lists, edvt_base_update_lists),
-                              EDVT_SLOT(pre_load_initialisation, edvt_base_pre_load),
-                              EDVT_SLOT(post_load_initialisation, edvt_base_post_load),
-                              EDVT_SLOT(pre_save_initialisation, edvt_base_pre_save),
-                              EDVT_SLOT(post_save_initialisation, edvt_base_post_save),
-                              EDVT_SLOT(serialise_object, edvt_base_serialise),
-                              EDVT_SLOT(distance_to_ray, edvt_knot_distance_ray),
-                              EDVT_SLOT(distance_to_point, edvt_base_distance_point),
-                              EDVT_SLOT(add_menu_items, edvt_base_add_menu),
-                              EDVT_SLOT(import, edvt_base_import)}};
-
-extern const EdClassInterfaceVTableObject edClassInterfaceVTable asm("_ZTV16EdClassInterface");
-
-SplineHelper::~SplineHelper() {
-    vtable = const_cast<EdClassInterfaceVTable *>(&edClassInterfaceVTable.methods);
-}
-KnotHelper::~KnotHelper() {
-    vtable = const_cast<EdClassInterfaceVTable *>(&edClassInterfaceVTable.methods);
-}
-
-extern "C" void splineHelperDeletingDestructor(SplineHelper *object) asm("_ZN12SplineHelperD0Ev");
-void splineHelperDeletingDestructor(SplineHelper *object) {
-    object->vtable = const_cast<EdClassInterfaceVTable *>(&edClassInterfaceVTable.methods);
-    ::operator delete(object);
-}
-
-extern "C" void knotHelperDeletingDestructor(KnotHelper *object) asm("_ZN10KnotHelperD0Ev");
-void knotHelperDeletingDestructor(KnotHelper *object) {
-    object->vtable = const_cast<EdClassInterfaceVTable *>(&edClassInterfaceVTable.methods);
-    ::operator delete(object);
 }
 
 template <typename Ref>
@@ -968,8 +634,7 @@ inline void SplinePointBlock::operator delete(void *memory) {
     theMemoryManager.FreePool(memory, sizeof(SplinePointBlock));
 }
 
-// The original translation unit exports this internal counter under its unmangled C name.
-static i32 bezierline_depth asm("bezierline_depth");
+static i32 bezierline_depth;
 
 typedef f32 BezierVec4 __attribute__((vector_size(16)));
 typedef f32 BezierVec4Unaligned __attribute__((vector_size(16), aligned(4)));
@@ -1198,7 +863,7 @@ void ClassEditor::ClearLevel(i32 level) {
     for (i32 i = 0; i < theRegistry.class_count; ++i) {
         EdClassInterface *interface = theRegistry.classes[i].interface;
         if (interface != NULL) {
-            interface->vtable->clear_level(interface, level);
+            interface->ClearLevel(level);
         }
     }
 }
@@ -1207,7 +872,7 @@ void ClassEditor::Flush() {
     for (i32 i = 0; i < theRegistry.class_count; ++i) {
         EdClassInterface *interface = theRegistry.classes[i].interface;
         if (interface != NULL) {
-            interface->vtable->flush(interface);
+            interface->Flush();
         }
     }
 }
@@ -1216,7 +881,7 @@ void ClassEditor::Enter() {
     for (i32 i = 0; i < theRegistry.class_count; ++i) {
         EdClassInterface *interface = theRegistry.classes[i].interface;
         if (interface != NULL) {
-            interface->vtable->enter_editor(interface);
+            interface->EnterEditor();
         }
     }
 }
@@ -1225,7 +890,7 @@ void ClassEditor::Exit() {
     for (i32 i = 0; i < theRegistry.class_count; ++i) {
         EdClassInterface *interface = theRegistry.classes[i].interface;
         if (interface != NULL) {
-            interface->vtable->exit_editor(interface);
+            interface->ExitEditor();
         }
     }
 }
@@ -1366,9 +1031,9 @@ void SerialiseColour3(EdStream &stream, void *data, i32) {
 }
 
 void *EdClassInterface::GetNextObject(void *current, i32 (*filter)(void *)) {
-    void *next = vtable->get_next_object(this, current);
+    void *next = GetNextObject(current);
     while (next != NULL && filter(next) == 0)
-        next = vtable->get_next_object(this, next);
+        next = GetNextObject(next);
     return next;
 }
 
@@ -1432,13 +1097,10 @@ void SceneInstance::SetCurrentPosition(VuVec const *position) {
 }
 
 void SceneObjectHelper::ClearLevel(i32 level) {
-    for (SceneObject *object =
-             static_cast<SceneObject *>(class_interface.vtable->get_next_object(&class_interface, NULL));
-         object != NULL;) {
-        SceneObject *next_object =
-            static_cast<SceneObject *>(class_interface.vtable->get_next_object(&class_interface, object));
+    for (SceneObject *object = static_cast<SceneObject *>(GetNextObject(NULL)); object != NULL;) {
+        SceneObject *next_object = static_cast<SceneObject *>(GetNextObject(object));
         if (object->led_file == level)
-            class_interface.vtable->destroy_object(&class_interface, object, 0);
+            DestroyObject(object, 0);
         object = next_object;
     }
     for (i32 scene_index = 0; scene_index < 10; scene_index++) {
@@ -1462,7 +1124,7 @@ void SceneObjectHelper::PostLoadInitialisation(MemoryBuffer *, MemoryBuffer *) {
 }
 
 void SceneObjectHelper::UpdateLists(MemoryBuffer *first, MemoryBuffer *second) {
-    class_interface.vtable->pre_load_initialisation(&class_interface, first, second);
+    PreLoadInitialisation(first, second);
 }
 
 i32 SceneObjectHelper::GetNumObjects() {
@@ -1743,7 +1405,7 @@ void ClassEditor::AddMenuItems(eduimenu_s *menu) {
     }
     for (i32 index = 0; index < class_count; ++index) {
         EdClassInterface *interface = classes[index]->interface;
-        interface->vtable->add_menu_items(interface, menu);
+        interface->AddMenuItems(menu);
     }
 }
 
@@ -2140,12 +1802,11 @@ void ClassEditor::cbEdClassSetSnap(eduimenu_s *menu, eduiitem_s *item, u32) {
 void SplineHelper::ClearLevel(i32 level) {
     if (level == -1)
         return;
-    EdClassInterface *interface = reinterpret_cast<EdClassInterface *>(this);
-    for (SplineObject *spline = static_cast<SplineObject *>(interface->vtable->get_next_object(interface, NULL));
-         spline != NULL;) {
-        SplineObject *next = static_cast<SplineObject *>(interface->vtable->get_next_object(interface, spline));
+    EdClassInterface *interface = this;
+    for (SplineObject *spline = static_cast<SplineObject *>(interface->GetNextObject(NULL)); spline != NULL;) {
+        SplineObject *next = static_cast<SplineObject *>(interface->GetNextObject(spline));
         if (spline->led_file == level)
-            interface->vtable->destroy_object(interface, spline, 0);
+            interface->DestroyObject(spline, 0);
         spline = next;
     }
 }
@@ -2276,7 +1937,7 @@ void SceneObjectHelper::DestroyObject(void *item, i32) {
 }
 
 void *KnotHelper::GetNextObject(void *current) {
-    if (current == NULL) {
+    if (__builtin_expect(current == NULL, 0)) {
         SplineObject *spline = theSplineHelper.first_object;
         if (spline == NULL)
             return NULL;
@@ -2297,7 +1958,7 @@ void *KnotHelper::GetNextObject(void *current) {
                 if (spline->knots.count != 0)
                     return spline->knots.first;
                 spline = spline->next;
-            } while (spline != NULL);
+            } while (__builtin_expect(spline != NULL, 0));
         }
     }
     return next;
@@ -2554,7 +2215,7 @@ void ClassEditor::UpdateLists(MemoryBuffer *first, MemoryBuffer *second) {
     for (i32 i = 0; i < theRegistry.class_count; ++i) {
         EdClassInterface *interface = theRegistry.classes[i].interface;
         if (interface != NULL) {
-            interface->vtable->update_lists(interface, first, second);
+            interface->UpdateLists(first, second);
         }
     }
 }
@@ -2563,7 +2224,7 @@ void ClassEditor::PreLoadInitialisation(MemoryBuffer *first, MemoryBuffer *secon
     for (i32 i = 0; i < theRegistry.class_count; ++i) {
         EdClassInterface *interface = theRegistry.classes[i].interface;
         if (interface != NULL) {
-            interface->vtable->pre_load_initialisation(interface, first, second);
+            interface->PreLoadInitialisation(first, second);
         }
     }
 }
@@ -2572,7 +2233,7 @@ void ClassEditor::PostLoadInitialisation(MemoryBuffer *first, MemoryBuffer *seco
     for (i32 i = 0; i < theRegistry.class_count; ++i) {
         EdClassInterface *interface = theRegistry.classes[i].interface;
         if (interface != NULL) {
-            interface->vtable->post_load_initialisation(interface, first, second);
+            interface->PostLoadInitialisation(first, second);
         }
     }
 }
@@ -2581,7 +2242,7 @@ void ClassEditor::PreSaveInitialisation() {
     for (i32 i = 0; i < theRegistry.class_count; ++i) {
         EdClassInterface *interface = theRegistry.classes[i].interface;
         if (interface != NULL) {
-            interface->vtable->pre_save_initialisation(interface);
+            interface->PreSaveInitialisation();
         }
     }
 }
@@ -2590,7 +2251,7 @@ void ClassEditor::PostSaveInitialisation() {
     for (i32 i = 0; i < theRegistry.class_count; ++i) {
         EdClassInterface *interface = theRegistry.classes[i].interface;
         if (interface != NULL) {
-            interface->vtable->post_save_initialisation(interface);
+            interface->PostSaveInitialisation();
         }
     }
 }
@@ -4500,9 +4161,9 @@ void EdString::Set(char const *value) {
 }
 
 Placeable *PlaceableInterface::Find(char *name) {
-    EdClassInterface *interface = reinterpret_cast<EdClassInterface *>(this);
-    for (Placeable *object = static_cast<Placeable *>(interface->vtable->get_next_object(interface, NULL));
-         object != NULL; object = static_cast<Placeable *>(interface->vtable->get_next_object(interface, object))) {
+    EdClassInterface *interface = this;
+    for (Placeable *object = static_cast<Placeable *>(interface->GetNextObject(NULL)); object != NULL;
+         object = static_cast<Placeable *>(interface->GetNextObject(object))) {
         if (NuStrICmp(name, object->GetName()) == 0)
             return object;
     }
@@ -4510,22 +4171,21 @@ Placeable *PlaceableInterface::Find(char *name) {
 }
 
 i32 PlaceableInterface::Find(char *name, Placeable **objects, i32 capacity) {
-    EdClassInterface *interface = reinterpret_cast<EdClassInterface *>(this);
+    EdClassInterface *interface = this;
     i32 count = 0;
-    Placeable *object = static_cast<Placeable *>(interface->vtable->get_next_object(interface, NULL));
+    Placeable *object = static_cast<Placeable *>(interface->GetNextObject(NULL));
     while (object != NULL && count < capacity) {
         if (NuStrIStr(const_cast<char *>(object->GetName()), name) != NULL)
             objects[count++] = object;
-        object = static_cast<Placeable *>(interface->vtable->get_next_object(interface, object));
+        object = static_cast<Placeable *>(interface->GetNextObject(object));
     }
     return count;
 }
 
 i32 PlaceableInterface::DebugOutputObjects() {
-    EdClassInterface *interface = reinterpret_cast<EdClassInterface *>(this);
+    EdClassInterface *interface = this;
     i32 count = 0;
-    for (void *object = interface->vtable->get_next_object(interface, NULL); object != NULL;
-         object = interface->vtable->get_next_object(interface, object))
+    for (void *object = interface->GetNextObject(NULL); object != NULL; object = interface->GetNextObject(object))
         ++count;
     return count;
 }
@@ -4537,15 +4197,15 @@ PlaceableHelper::PlaceableHelper() {
 void PlaceableHelper::RegisterObjectType(char *name, PlaceableInterface *interface) {
     i32 index = object_type_count++;
     object_types[index].interface = interface;
-    *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(interface) + 8) = object_type_count;
+    interface->scene_id = object_type_count;
     object_types[index].name = name;
 }
 
 Placeable *PlaceableHelper::FindObject(char *name) {
     for (i32 index = 0; index < object_type_count; ++index) {
-        EdClassInterface *interface = reinterpret_cast<EdClassInterface *>(object_types[index].interface);
-        for (Placeable *object = static_cast<Placeable *>(interface->vtable->get_next_object(interface, NULL));
-             object != NULL; object = static_cast<Placeable *>(interface->vtable->get_next_object(interface, object))) {
+        EdClassInterface *interface = object_types[index].interface;
+        for (Placeable *object = static_cast<Placeable *>(interface->GetNextObject(NULL)); object != NULL;
+             object = static_cast<Placeable *>(interface->GetNextObject(object))) {
             if (NuStrICmp(object->GetName(), name) == 0)
                 return object;
         }
@@ -4557,9 +4217,8 @@ void *PlaceableHelper::GetNextObject(void *object) {
     if (object == NULL)
         iteration_object_type = 0;
     while (iteration_object_type < object_type_count) {
-        EdClassInterface *interface =
-            reinterpret_cast<EdClassInterface *>(object_types[iteration_object_type].interface);
-        void *next = interface->vtable->get_next_object(interface, object);
+        EdClassInterface *interface = object_types[iteration_object_type].interface;
+        void *next = interface->GetNextObject(object);
         if (next != NULL)
             return next;
         ++iteration_object_type;
@@ -4619,8 +4278,8 @@ void ClassEditor::cbEdClassRemoveDuplicates(eduimenu_s *, eduiitem_s *, u32) {
         NUVEC first_position = {position->x, position->y, position->z};
         i32 object_type = 0;
         for (; object_type < thePlaceableHelper.object_type_count; ++object_type) {
-            void *interface = thePlaceableHelper.object_types[object_type].interface;
-            if (reinterpret_cast<i32 *>(interface)[2] == object->scene_id)
+            PlaceableInterface *interface = thePlaceableHelper.object_types[object_type].interface;
+            if (interface->scene_id == object->scene_id)
                 break;
         }
         if (!(NuVecMag(&first_position) > 0.1f))
@@ -4632,8 +4291,8 @@ void ClassEditor::cbEdClassRemoveDuplicates(eduimenu_s *, eduiitem_s *, u32) {
                 NUVEC second_position = {other_position->x, other_position->y, other_position->z};
                 i32 other_type = 0;
                 for (; other_type < thePlaceableHelper.object_type_count; ++other_type) {
-                    void *interface = thePlaceableHelper.object_types[other_type].interface;
-                    if (reinterpret_cast<i32 *>(interface)[2] == objects[second]->scene_id)
+                    PlaceableInterface *interface = thePlaceableHelper.object_types[other_type].interface;
+                    if (interface->scene_id == objects[second]->scene_id)
                         break;
                 }
                 if (!(NuVecMag(&first_position) > 0.1f))
@@ -4642,9 +4301,8 @@ void ClassEditor::cbEdClassRemoveDuplicates(eduimenu_s *, eduiitem_s *, u32) {
                                     first_position.z - second_position.z};
                 if (NuVecMag(&separation) < 0.1f && object_type == other_type &&
                     (strstr(name, other_name) != NULL || strstr(other_name, name) != NULL)) {
-                    EdClassInterface *interface =
-                        reinterpret_cast<EdClassInterface *>(thePlaceableHelper.object_types[object_type].interface);
-                    interface->vtable->destroy_object(interface, objects[second], 0);
+                    EdClassInterface *interface = thePlaceableHelper.object_types[object_type].interface;
+                    interface->DestroyObject(objects[second], 0);
                     objects[second] = NULL;
                 }
             }
@@ -4728,7 +4386,7 @@ i32 PlaceableHelper::Find(char *name, Placeable **objects, i32 capacity) {
 i32 PlaceableHelper::IsEditorObject(ClassObject &object) {
     if (object.object != NULL) {
         for (i32 index = 0; index < object_type_count; ++index) {
-            EdClassInterface *interface = reinterpret_cast<EdClassInterface *>(object_types[index].interface);
+            EdClassInterface *interface = object_types[index].interface;
             if (interface->object_class == object.ed_class)
                 return 1;
         }
@@ -5755,14 +5413,14 @@ void EdRegistry::ClassIFaceProcess(i32 class_id, void *object, EdInputContext &c
     EdClass *object_class = GetClass(class_id);
     if (object_class && object_class->interface) {
         EdClassInterface *interface = object_class->interface;
-        interface->vtable->process(interface, object, context);
+        interface->Process(object, context);
     }
 }
 
 void EdRegistry::ClassIFaceProcess(EdClass *object_class, void *object, EdInputContext &context) {
     if (object_class && object_class->interface) {
         EdClassInterface *interface = object_class->interface;
-        interface->vtable->process(interface, object, context);
+        interface->Process(object, context);
     }
 }
 
@@ -5770,14 +5428,14 @@ void EdRegistry::ClassIFaceRender(i32 class_id, void *object, i32 flags) {
     EdClass *object_class = GetClass(class_id);
     if (object_class && object_class->interface) {
         EdClassInterface *interface = object_class->interface;
-        interface->vtable->render(interface, object, flags);
+        interface->Render(object, flags);
     }
 }
 
 void EdRegistry::ClassIFaceRender(EdClass *object_class, void *object, i32 flags) {
     if (object_class && object_class->interface) {
         EdClassInterface *interface = object_class->interface;
-        interface->vtable->render(interface, object, flags);
+        interface->Render(object, flags);
     }
 }
 
@@ -5799,9 +5457,9 @@ void *EdRegistry::CreateObject(EdClassInterface *interface, void *source, i32 in
     if (!guid && create_object_guid) {
         guid = create_object_guid();
     }
-    void *object = interface->vtable->create_object(interface, source, index, flags);
+    void *object = interface->CreateObject(source, index, flags);
     if (object) {
-        interface->vtable->set_object_guid(interface, object, guid);
+        interface->SetObjectGuid(object, guid);
         if (!(flags & 2)) {
             NotifyCreateObject(object, interface->object_class, source, index, guid, flags);
         }
@@ -5822,7 +5480,7 @@ void EdRegistry::DestroyObject(EdClassInterface *interface, void *object, i32 in
         if (!(flags & 2)) {
             NotifyDestroyObject(object, interface->object_class, index, flags);
         }
-        interface->vtable->destroy_object(interface, object, flags);
+        interface->DestroyObject(object, flags);
     }
     theLevelEditor.destroying_objects = 0;
 }
@@ -5876,7 +5534,7 @@ void EdRegistry::DefunctObject(EdClassInterface *interface, void *object, i32, i
         if (!(flags & 2)) {
             NotifyDefunctObject(object, interface->object_class, flags);
         }
-        interface->vtable->defunct_object(interface, object);
+        interface->DefunctObject(object);
         EdDefunctListEntry *entry = new EdDefunctListEntry;
         entry->object_class = interface->object_class;
         entry->object = object;
@@ -5904,7 +5562,7 @@ void EdDefunctList::ReviveAll(i32 flags) {
     while (first) {
         EdDefunctListEntry *entry = first;
         EdClassInterface *interface = entry->object_class->interface;
-        interface->vtable->revive_object(interface, entry->object);
+        interface->ReviveObject(entry->object);
         if (!(flags & 2)) {
             theRegistry.NotifyReviveObject(entry->object, entry->object_class, flags);
         }
@@ -5960,7 +5618,7 @@ void EdClass::SerialiseObject(EdStream &stream, void *object) {
             }
         }
         if (interface != NULL) {
-            interface->vtable->serialise_object(interface, stream, object);
+            interface->SerialiseObject(stream, object);
         }
     }
     stream.EndBlock();
@@ -6278,7 +5936,7 @@ void EdClass::SerialiseObject(EdStream &stream, void *object, EdClass *schema, E
             }
         }
         if (interface != NULL) {
-            interface->vtable->serialise_object(interface, stream, object);
+            interface->SerialiseObject(stream, object);
         }
     }
     stream.EndBlock();
@@ -6319,8 +5977,8 @@ void EdClassObjectNameControl::cbSelectClass(eduimenu_s *parent, eduiitem_s *ite
         return;
     EdRef *name_reference = ed_class->FindTypeRef(2, 1);
     if (name_reference != NULL) {
-        for (void *object = ed_class->interface->vtable->get_next_object(ed_class->interface, NULL); object != NULL;
-             object = ed_class->interface->vtable->get_next_object(ed_class->interface, object)) {
+        for (void *object = ed_class->interface->GetNextObject(NULL); object != NULL;
+             object = ed_class->interface->GetNextObject(object)) {
             char name[128];
             if (name_reference->GetAttributeData(object, 2, EdType_String, name, sizeof(name))) {
                 eduiMenuAddItem(
@@ -6415,7 +6073,7 @@ void ClassObject::Set(char *name) {
     }
 
     EdClassInterface *interface = ed_class->interface;
-    object = interface->vtable->get_next_object(interface, NULL);
+    object = interface->GetNextObject(NULL);
     while (object != NULL) {
         if (ed_class->FindMember(&member, object, 2, 1)) {
             member.reference->GetAttributeData(member.object, 2, EdType_String, candidate_name, 128);
@@ -6424,7 +6082,7 @@ void ClassObject::Set(char *name) {
             }
         }
         interface = ed_class->interface;
-        object = interface->vtable->get_next_object(interface, object);
+        object = interface->GetNextObject(object);
     }
 }
 
@@ -6438,7 +6096,7 @@ i32 ClassEditor::IsUniqueName(char *name) {
             continue;
         }
 
-        void *object = interface->vtable->get_next_object(interface, NULL);
+        void *object = interface->GetNextObject(NULL);
         if (object == NULL)
             continue;
         do {
@@ -6449,7 +6107,7 @@ i32 ClassEditor::IsUniqueName(char *name) {
                 }
             }
             interface = ed_class->interface;
-            object = interface->vtable->get_next_object(interface, object);
+            object = interface->GetNextObject(object);
         } while (object != NULL);
     }
     return 1;
@@ -6550,7 +6208,7 @@ i32 ClassEditor::CreateObject(ClassObject &source) {
     } else {
         created.ed_class->CopyObject(created.object, source.object);
         interface = created.ed_class->interface;
-        interface->vtable->construct(interface, created.object, source.object);
+        interface->Construct(created.object, source.object);
     }
     InitialiseObject(created);
     theRegistry.NotifyCreateObject(created.object, created.ed_class, NULL, 0, 0, 0);
@@ -6736,13 +6394,12 @@ i32 ClassEditor::FindNearestObject(VuVec &origin, VuVec &direction, ClassObject 
         if (__builtin_expect(
                 !Editable(NULL, ed_class, class_index) || ed_class->interface == NULL || (ed_class->flags & 8) == 0, 0))
             continue;
-        for (void *object = ed_class->interface->vtable->get_next_object(ed_class->interface, NULL); object != NULL;
-             object = ed_class->interface->vtable->get_next_object(ed_class->interface, object)) {
+        for (void *object = ed_class->interface->GetNextObject(NULL); object != NULL;
+             object = ed_class->interface->GetNextObject(object)) {
             if (!Editable(object, ed_class, -1))
                 continue;
             EdRef *reference;
-            f32 distance = ed_class->interface->vtable->distance_to_ray(ed_class->interface, origin, direction, object,
-                                                                        &reference);
+            f32 distance = ed_class->interface->DistanceToObject(origin, direction, object, &reference);
             if (distance < 0.01f && candidate_count < 16)
                 candidates[candidate_count++] = {ed_class, object, reference};
         }
@@ -6771,14 +6428,13 @@ i32 ClassEditor::FindNearestObject(VuVec &origin, VuVec &direction, ClassObject 
         EdClass *ed_class = &theRegistry.classes[class_index];
         if (!Editable(NULL, ed_class, class_index) || ed_class->interface == NULL || (ed_class->flags & 8) == 0)
             continue;
-        for (void *object = ed_class->interface->vtable->get_next_object(ed_class->interface, NULL); object != NULL;
-             object = ed_class->interface->vtable->get_next_object(ed_class->interface, object)) {
+        for (void *object = ed_class->interface->GetNextObject(NULL); object != NULL;
+             object = ed_class->interface->GetNextObject(object)) {
             if (!Editable(object, ed_class, -1))
                 continue;
             // The original keeps the hit reference in a 16-byte aligned slot.
             EdRef *reference __attribute__((aligned(16)));
-            f32 distance = ed_class->interface->vtable->distance_to_ray(ed_class->interface, origin, direction, object,
-                                                                        &reference);
+            f32 distance = ed_class->interface->DistanceToObject(origin, direction, object, &reference);
             if (distance < nearest_distance) {
                 nearest_class = ed_class;
                 nearest_object = object;
@@ -6800,13 +6456,13 @@ void ClassEditor::UpdateSelectedObjects(EdInputContext &input) {
         ClassObjectListEntry *next_entry = entry->next;
         void *selected_object = entry->object;
         EdClassInterface *interface = entry->ed_class->interface;
-        void *object = interface->vtable->get_next_object(interface, NULL);
+        void *object = interface->GetNextObject(NULL);
         for (;;) {
             if (object == NULL)
                 break;
             if (object == selected_object)
                 break;
-            object = interface->vtable->get_next_object(interface, object);
+            object = interface->GetNextObject(object);
         }
         if (object == NULL) {
             if (entry->next != NULL)
@@ -6830,15 +6486,15 @@ void ClassEditor::UpdateSelectedObjects(EdInputContext &input) {
     EdClassInterface *interface = entry->ed_class->interface;
     void *object = NULL;
     if (input.GetPress(19) != 0.0f) {
-        object = interface->vtable->get_next_object(interface, entry->object);
+        object = interface->GetNextObject(entry->object);
         if (object == NULL)
-            object = interface->vtable->get_next_object(interface, NULL);
+            object = interface->GetNextObject(NULL);
         for (i32 remaining = 4096; remaining != 0; --remaining) {
             if (Editable(object, entry->ed_class, -1))
                 break;
-            object = interface->vtable->get_next_object(interface, object);
+            object = interface->GetNextObject(object);
             if (object == NULL)
-                object = interface->vtable->get_next_object(interface, NULL);
+                object = interface->GetNextObject(NULL);
         }
     }
     if (input.GetPress(20) != 0.0f) {
@@ -6848,9 +6504,9 @@ void ClassEditor::UpdateSelectedObjects(EdInputContext &input) {
         for (i32 remaining = 4096; remaining != 0; --remaining) {
             if (Editable(current, entry_ed_class, -1))
                 previous = current;
-            current = interface->vtable->get_next_object(interface, current);
+            current = interface->GetNextObject(current);
             if (__builtin_expect(current == NULL, 1))
-                current = interface->vtable->get_next_object(interface, NULL);
+                current = interface->GetNextObject(NULL);
             if (current == entry->object)
                 break;
         }
@@ -6872,8 +6528,8 @@ i32 ClassEditor::FindNearestObject(VuVec &point, ClassObject &result, ClassObjec
         EdClass *ed_class = &theRegistry.classes[class_index];
         if (!Editable(NULL, ed_class, class_index) || (ed_class->flags & 8) == 0)
             continue;
-        for (void *object = ed_class->interface->vtable->get_next_object(ed_class->interface, NULL); object != NULL;
-             object = ed_class->interface->vtable->get_next_object(ed_class->interface, object)) {
+        for (void *object = ed_class->interface->GetNextObject(NULL); object != NULL;
+             object = ed_class->interface->GetNextObject(object)) {
             if (!Editable(object, ed_class, -1))
                 continue;
 
@@ -6922,8 +6578,8 @@ i32 ClassEditor::FindNearestObject(VuVec &point, ClassObject &result, i32 filter
         if (!Editable(NULL, ed_class, class_index) || (ed_class->flags & 8) == 0)
             continue;
         EdClassInterface *interface = ed_class->interface;
-        for (void *object = interface->vtable->get_next_object(interface, NULL); object != NULL;
-             object = ed_class->interface->vtable->get_next_object(ed_class->interface, object)) {
+        for (void *object = interface->GetNextObject(NULL); object != NULL;
+             object = ed_class->interface->GetNextObject(object)) {
             // The original keeps the lookup and position in 16-byte aligned slots.
             EdMember member __attribute__((aligned(16)));
             if (!ed_class->FindMember(&member, object, 8, 1))
@@ -6968,8 +6624,8 @@ void ClassEditor::cbEdClassSelectObjectMenu(eduimenu_s *parent, eduiitem_s *item
     if (menu == NULL)
         return;
     EdRef *name_ref = ed_class->FindTypeRef(2, 1);
-    for (void *object = ed_class->interface->vtable->get_next_object(ed_class->interface, NULL); object != NULL;
-         object = ed_class->interface->vtable->get_next_object(ed_class->interface, object)) {
+    for (void *object = ed_class->interface->GetNextObject(NULL); object != NULL;
+         object = ed_class->interface->GetNextObject(object)) {
         char name[128];
         if (name_ref == NULL || !name_ref->GetAttributeData(object, 2, EdType_String, name, sizeof(name)))
             NuStrCpy(name, ed_class->name);
@@ -7554,8 +7210,8 @@ void ClassEditor::Render() {
         if (!Editable(NULL, ed_class, index) || ed_class->interface == NULL || (ed_class->flags & 0x08000080) == 0)
             continue;
 
-        for (void *object = ed_class->interface->vtable->get_next_object(ed_class->interface, NULL); object != NULL;
-             object = ed_class->interface->vtable->get_next_object(ed_class->interface, object)) {
+        for (void *object = ed_class->interface->GetNextObject(NULL); object != NULL;
+             object = ed_class->interface->GetNextObject(object)) {
             if (!Editable(object, ed_class, -1))
                 continue;
 
@@ -7580,7 +7236,7 @@ void SceneObjectHelper::SubRender() {
         if (object->visibility == 0 &&
             (__builtin_expect(show_hidden_solid == 0, 0) || theLevelEditor.editors_entered == 0)) {
             if (__builtin_expect(show_hidden_wire != 0, 0) && theLevelEditor.editors_entered != 0) {
-                ClassObject selection{class_interface.object_class, object, NULL};
+                ClassObject selection{object_class, object, NULL};
                 theClassEditor.DrawObjectSphere(selection, 0x80808080);
             }
             continue;
@@ -7591,13 +7247,8 @@ void SceneObjectHelper::SubRender() {
     }
 }
 
-void sceneHelperSubRender(EdSubSystem *object) {
-    SceneObjectHelper *helper = reinterpret_cast<SceneObjectHelper *>(reinterpret_cast<u8 *>(object) - 12);
-    helper->SubRender();
-}
-
 void *EdClass::FindObject(char *object_name) {
-    void *object = interface->vtable->get_next_object(interface, NULL);
+    void *object = interface->GetNextObject(NULL);
     while (object != NULL) {
         EdMember member;
         i32 string_type = EdType_String;
@@ -7610,7 +7261,7 @@ void *EdClass::FindObject(char *object_name) {
                 return object;
             }
         }
-        object = interface->vtable->get_next_object(interface, object);
+        object = interface->GetNextObject(object);
     }
     return NULL;
 }
@@ -7680,9 +7331,8 @@ void EdRegistry::SerialiseObjects(EdStream &stream, EdRegistry *source_registry)
             stream.BeginBlock("ObjectList");
             stream.SerialiseString(&object_class->name);
             i32 object_count = 0;
-            for (void *object = object_class->interface->vtable->get_next_object(object_class->interface, NULL);
-                 object != NULL;
-                 object = object_class->interface->vtable->get_next_object(object_class->interface, object)) {
+            for (void *object = object_class->interface->GetNextObject(NULL); object != NULL;
+                 object = object_class->interface->GetNextObject(object)) {
                 group = 0;
                 filter_flags = 0;
                 get_attribute(object_class, object, 1, EdType_Int, &filter_flags, 0);
@@ -7698,9 +7348,8 @@ void EdRegistry::SerialiseObjects(EdStream &stream, EdRegistry *source_registry)
                 ++object_count;
             }
             stream.SerialiseBuffer(&object_count, sizeof(object_count), 1);
-            for (void *object = object_class->interface->vtable->get_next_object(object_class->interface, NULL);
-                 object != NULL;
-                 object = object_class->interface->vtable->get_next_object(object_class->interface, object)) {
+            for (void *object = object_class->interface->GetNextObject(NULL); object != NULL;
+                 object = object_class->interface->GetNextObject(object)) {
                 group = 0;
                 filter_flags = 0;
                 get_attribute(object_class, object, 1, EdType_Int, &filter_flags, 0);
@@ -7964,7 +7613,7 @@ Placeable *SceneObject::Clone(i32 attributes) const {
     SceneInstance *copy = static_cast<SceneInstance *>(theSceneObjectHelper.CreateObject(NULL, 0, 0));
     if (copy == NULL)
         return NULL;
-    EdClass *object_class = theSceneObjectHelper.class_interface.object_class;
+    EdClass *object_class = theSceneObjectHelper.object_class;
     object_class->CopyObject(copy, const_cast<SceneObject *>(this));
     char unique_name[128];
     theClassEditor.MakeUniqueName(copy->GetName(), unique_name, sizeof(unique_name));
@@ -8385,8 +8034,7 @@ void SplineHelper::Render(void *object, i32 flags) {
 }
 
 void SplineHelper::Initialise() {
-    EdClass *spline_class =
-        theRegistry.RegisterClass(const_cast<char *>("Spline"), reinterpret_cast<EdClassInterface *>(this), 0x08400100);
+    EdClass *spline_class = theRegistry.RegisterClass(const_cast<char *>("Spline"), this, 0x08400100);
     make_spline_reference<EdRef>(spline_class, const_cast<char *>("String"), const_cast<char *>("Spline"), 0x0c, 0x20,
                                  2, make_spline_string_control());
     make_spline_reference<EdRef>(spline_class, const_cast<char *>("Short"), const_cast<char *>("LEDFile"), 0x44, 0,
@@ -8400,8 +8048,7 @@ void SplineHelper::Initialise() {
     make_spline_reference<EdRefSpline>(spline_class, const_cast<char *>("Int"), const_cast<char *>("Closed"),
                                        static_cast<i32>(0x80000004), 0, 0, make_spline_yes_no_control());
 
-    EdClass *knot_class = theRegistry.RegisterClass(const_cast<char *>("Knot"),
-                                                    reinterpret_cast<EdClassInterface *>(&theKnotHelper), 0x18400000);
+    EdClass *knot_class = theRegistry.RegisterClass(const_cast<char *>("Knot"), &theKnotHelper, 0x18400000);
     theKnotHelper.position_ref =
         make_spline_reference<EdRefKnot>(knot_class, const_cast<char *>("VuVec"), const_cast<char *>("Pos"),
                                          static_cast<i32>(0x80000003), 0, 8, make_spline_vector_control(), false);
@@ -8827,7 +8474,7 @@ void EdSystem::RegisterSubSystem(EdSubSystem *subsystem) {
 }
 
 void SceneObjectHelper::Initialise() {
-    EdClass *object_class = theRegistry.RegisterClass("SceneObject", &class_interface, 0x100);
+    EdClass *object_class = theRegistry.RegisterClass("SceneObject", this, 0x100);
     if (object_class != NULL) {
         add_scene_reference<EdRef>(object_class, "Placeable", "Placeable", 0, 0, 0);
 
@@ -8856,8 +8503,8 @@ void SceneObjectHelper::Initialise() {
                                             0x10400000);
         add_scene_reference<EdRefPlaceable>(object_class, "VuMtx", "Pos", static_cast<i32>(0x80000006), 0, 0x10400000);
     }
-    thePlaceableHelper.RegisterObjectType("Scene Object", reinterpret_cast<PlaceableInterface *>(this));
-    theEdSystem.RegisterSubSystem(&subsystem);
+    thePlaceableHelper.RegisterObjectType("Scene Object", this);
+    theEdSystem.RegisterSubSystem(this);
     memset(scene_counts, 0, sizeof(scene_counts));
 }
 
@@ -9136,7 +8783,7 @@ void SplineHelper::cbEdSplineSmoothKnot(eduimenu_s *, eduiitem_s *, u32) {
         i32 index = 0;
         while (index < changed_count && changed_splines[index] != knot->spline)
             ++index;
-        if (__builtin_expect(index == changed_count, 0))
+        if (index == changed_count)
             changed_splines[changed_count++] = knot->spline;
     }
     for (i32 index = 0; index < changed_count; ++index)
@@ -9193,7 +8840,7 @@ void *KnotHelper::CreateObject(void *, i32, i32) {
     if (selected_knot == NULL) {
         knot->next = NULL;
         knot->previous = spline->knots.last;
-        if (spline->knots.last != NULL)
+        if (__builtin_expect(spline->knots.last != NULL, 0))
             spline->knots.last->next = knot;
         else
             spline->knots.first = knot;

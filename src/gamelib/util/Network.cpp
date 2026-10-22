@@ -622,8 +622,8 @@ void NetworkObjectManager::ChangeContext(NOSContext &new_context) {
 void NetworkObjectManager::ConstructObject(NetworkObject *object, NetworkObjectManager::NetPeerPush *peer_push) {
     u8 constructor_data[256] __attribute__((aligned(16)));
     EdClassInterface *interface = object->object_class->interface;
-    i16 size = static_cast<i16>(
-        interface->vtable->get_constructor_data(interface, object->object, constructor_data, sizeof(constructor_data)));
+    i16 size =
+        static_cast<i16>(interface->GetConstructorData(object->object, constructor_data, sizeof(constructor_data)));
     i16 class_id = static_cast<i16>(theRegistry.GetClassId(object->object_class));
     NetMessage *message = peer_push->GetReliableMessage(size + 10);
     message->Write8(1);
@@ -673,7 +673,7 @@ void NetworkObjectManager::FlushObjects(i32 flush_level_editor) {
     while (end != object) {
         if (object->id != 0) {
             EdClassInterface *interface = object->object_class->interface;
-            interface->vtable->set_object_guid(interface, object->object, 0);
+            interface->SetObjectGuid(object->object, 0);
             object->Destroy();
         }
         ++object;
@@ -744,15 +744,15 @@ void NetworkObjectManager::ImportObjects() {
             continue;
         }
 
-        void *object = object_class->interface->vtable->get_next_object(object_class->interface, NULL);
+        void *object = object_class->interface->GetNextObject(NULL);
         while (object != NULL) {
-            i32 guid = object_class->interface->vtable->get_object_guid(object_class->interface, object);
+            i32 guid = object_class->interface->GetObjectGuid(object);
             if (guid == 0) {
                 guid = GetNextGuid();
-                object_class->interface->vtable->set_object_guid(object_class->interface, object, guid);
+                object_class->interface->SetObjectGuid(object, guid);
             }
             RegisterObject(object, object_class, guid);
-            object = object_class->interface->vtable->get_next_object(object_class->interface, object);
+            object = object_class->interface->GetNextObject(object);
         }
     }
 }

@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 86.04215,
+    "fuzzy_match_percent": 86.04458,
     "total_code": "4722419",
-    "matched_code": "708842",
-    "matched_code_percent": 15.010147,
+    "matched_code": "709348",
+    "matched_code_percent": 15.020861,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 7254,
-    "matched_functions_percent": 53.897022,
+    "matched_functions": 7261,
+    "matched_functions_percent": 53.949028,
     "total_units": 1
   },
   "text": {
@@ -21791,7 +21791,7 @@
           "address": 5478832,
           "offset": 4588864,
           "size": 316,
-          "match_percent": 99.44444
+          "match_percent": 99.375
         },
         {
           "name": "_ZN15EdColourControl9cbChangedEP10eduimenu_sP10eduiitem_sj",
@@ -21855,7 +21855,7 @@
           "address": 5481136,
           "offset": 4591168,
           "size": 120,
-          "match_percent": 99.75
+          "match_percent": 100.0
         },
         {
           "name": "_ZN13EdInputStream15SerialiseStringEPPci",
@@ -21871,7 +21871,7 @@
           "address": 5481344,
           "offset": 4591376,
           "size": 388,
-          "match_percent": 99.63415
+          "match_percent": 100.0
         },
         {
           "name": "_ZN17EdFileInputStream15SerialiseBufferEPvii",
@@ -21879,7 +21879,7 @@
           "address": 5481744,
           "offset": 4591776,
           "size": 188,
-          "match_percent": 99.25
+          "match_percent": 99.73214
         },
         {
           "name": "_ZNK13SpecialObject6RenderEPK5VuMtx",
@@ -21919,7 +21919,7 @@
           "address": 5482496,
           "offset": 4592528,
           "size": 129,
-          "match_percent": 79.652176
+          "match_percent": 80.434784
         },
         {
           "name": "_ZN12SplineHelper13DestroyObjectEPvi",
@@ -24463,7 +24463,7 @@
           "address": 5568288,
           "offset": 4678320,
           "size": 236,
-          "match_percent": 85.44444
+          "match_percent": 85.20635
         },
         {
           "name": "_ZThn12_N17SceneObjectHelper9SubRenderEv",
@@ -24471,7 +24471,7 @@
           "address": 5568528,
           "offset": 4678560,
           "size": 10,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN7EdClass10FindObjectEPc",
@@ -24487,7 +24487,7 @@
           "address": 5568800,
           "offset": 4678832,
           "size": 2912,
-          "match_percent": 79.10339
+          "match_percent": 79.12556
         },
         {
           "name": "_ZN14EditorSettingsC1Ev",
@@ -25095,7 +25095,7 @@
           "address": 5594992,
           "offset": 4705024,
           "size": 132,
-          "match_percent": 100.0
+          "match_percent": 99.5946
         },
         {
           "name": "_ZN12SplineObject5CloneEv",
@@ -25135,7 +25135,7 @@
           "address": 5596320,
           "offset": 4706352,
           "size": 211,
-          "match_percent": 88.30986
+          "match_percent": 80.30986
         },
         {
           "name": "_ZN12SplineObject11SmoothKnotsEv",
@@ -25159,7 +25159,7 @@
           "address": 5596752,
           "offset": 4706784,
           "size": 571,
-          "match_percent": 82.12418
+          "match_percent": 81.503265
         },
         {
           "name": "_ZN11ClassEditor9SnapPointER5VuVec",
@@ -25215,7 +25215,7 @@
           "address": 5601680,
           "offset": 4711712,
           "size": 3144,
-          "match_percent": 69.29932
+          "match_percent": 69.32483
         },
         {
           "name": "_ZN9EdManMove7ProcessER14EdInputContextR15ClassObjectList",
@@ -25327,6 +25327,174 @@
           "address": 5611728,
           "offset": 4721760,
           "size": 29,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16EdClassInterface10ClearLevelEi",
+          "demangled_name": "EdClassInterface::ClearLevel(int)",
+          "address": 5611760,
+          "offset": 4721792,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16EdClassInterface13DefunctObjectEPv",
+          "demangled_name": "EdClassInterface::DefunctObject(void*)",
+          "address": 5611776,
+          "offset": 4721808,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16EdClassInterface12ReviveObjectEPv",
+          "demangled_name": "EdClassInterface::ReviveObject(void*)",
+          "address": 5611792,
+          "offset": 4721824,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16EdClassInterface13SetObjectGuidEPvi",
+          "demangled_name": "EdClassInterface::SetObjectGuid(void*, int)",
+          "address": 5611808,
+          "offset": 4721840,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16EdClassInterface13GetObjectGuidEPv",
+          "demangled_name": "EdClassInterface::GetObjectGuid(void*)",
+          "address": 5611824,
+          "offset": 4721856,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16EdClassInterface18GetConstructorDataEPvS0_i",
+          "demangled_name": "EdClassInterface::GetConstructorData(void*, void*, int)",
+          "address": 5611840,
+          "offset": 4721872,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16EdClassInterface9ConstructEPvS0_",
+          "demangled_name": "EdClassInterface::Construct(void*, void*)",
+          "address": 5611856,
+          "offset": 4721888,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16EdClassInterface7ProcessEPvR14EdInputContext",
+          "demangled_name": "EdClassInterface::Process(void*, EdInputContext&)",
+          "address": 5611872,
+          "offset": 4721904,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16EdClassInterface6RenderEPvi",
+          "demangled_name": "EdClassInterface::Render(void*, int)",
+          "address": 5611888,
+          "offset": 4721920,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16EdClassInterface11EnterEditorEv",
+          "demangled_name": "EdClassInterface::EnterEditor()",
+          "address": 5611904,
+          "offset": 4721936,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16EdClassInterface10ExitEditorEv",
+          "demangled_name": "EdClassInterface::ExitEditor()",
+          "address": 5611920,
+          "offset": 4721952,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16EdClassInterface10EnterLevelEv",
+          "demangled_name": "EdClassInterface::EnterLevel()",
+          "address": 5611936,
+          "offset": 4721968,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16EdClassInterface9ExitLevelEv",
+          "demangled_name": "EdClassInterface::ExitLevel()",
+          "address": 5611952,
+          "offset": 4721984,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16EdClassInterface11UpdateListsEP12MemoryBufferS1_",
+          "demangled_name": "EdClassInterface::UpdateLists(MemoryBuffer*, MemoryBuffer*)",
+          "address": 5611968,
+          "offset": 4722000,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16EdClassInterface21PreLoadInitialisationEP12MemoryBufferS1_",
+          "demangled_name": "EdClassInterface::PreLoadInitialisation(MemoryBuffer*, MemoryBuffer*)",
+          "address": 5611984,
+          "offset": 4722016,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16EdClassInterface22PostLoadInitialisationEP12MemoryBufferS1_",
+          "demangled_name": "EdClassInterface::PostLoadInitialisation(MemoryBuffer*, MemoryBuffer*)",
+          "address": 5612000,
+          "offset": 4722032,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16EdClassInterface21PreSaveInitialisationEv",
+          "demangled_name": "EdClassInterface::PreSaveInitialisation()",
+          "address": 5612016,
+          "offset": 4722048,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16EdClassInterface22PostSaveInitialisationEv",
+          "demangled_name": "EdClassInterface::PostSaveInitialisation()",
+          "address": 5612032,
+          "offset": 4722064,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16EdClassInterface15SerialiseObjectER8EdStreamPv",
+          "demangled_name": "EdClassInterface::SerialiseObject(EdStream&, void*)",
+          "address": 5612048,
+          "offset": 4722080,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16EdClassInterface12AddMenuItemsEP10eduimenu_s",
+          "demangled_name": "EdClassInterface::AddMenuItems(eduimenu_s*)",
+          "address": 5612064,
+          "offset": 4722096,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16EdClassInterface6ImportEv",
+          "demangled_name": "EdClassInterface::Import()",
+          "address": 5612080,
+          "offset": 4722112,
+          "size": 9,
           "match_percent": 100.0
         },
         {
@@ -25682,6 +25850,22 @@
           "match_percent": 100.0
         },
         {
+          "name": "_ZN12SplineHelper5FlushEv",
+          "demangled_name": "SplineHelper::Flush()",
+          "address": 5612992,
+          "offset": 4723024,
+          "size": 26,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN10KnotHelper5FlushEv",
+          "demangled_name": "KnotHelper::Flush()",
+          "address": 5613024,
+          "offset": 4723056,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
           "name": "_ZN13SpecialObject13GetNuHSpecialEv",
           "demangled_name": "SpecialObject::GetNuHSpecial()",
           "address": 5613168,
@@ -25695,6 +25879,22 @@
           "address": 5613184,
           "offset": 4723216,
           "size": 19,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN18PlaceableInterfaceD1Ev",
+          "demangled_name": "PlaceableInterface::~PlaceableInterface()",
+          "address": 5613216,
+          "offset": 4723248,
+          "size": 29,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN18PlaceableInterfaceD2Ev",
+          "demangled_name": "PlaceableInterface::~PlaceableInterface()",
+          "address": 5613216,
+          "offset": 4723248,
+          "size": 29,
           "match_percent": 100.0
         },
         {
@@ -25823,7 +26023,7 @@
           "address": 5613520,
           "offset": 4723552,
           "size": 10,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN17SceneObjectHelperD0Ev",
@@ -25839,7 +26039,7 @@
           "address": 5613584,
           "offset": 4723616,
           "size": 7,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN20PlaceableNameControlD1Ev",
@@ -25990,6 +26190,14 @@
           "demangled_name": "EdFileOutputStream::~EdFileOutputStream()",
           "address": 5615408,
           "offset": 4725440,
+          "size": 45,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN18PlaceableInterfaceD0Ev",
+          "demangled_name": "PlaceableInterface::~PlaceableInterface()",
+          "address": 5615456,
+          "offset": 4725488,
           "size": 45,
           "match_percent": 100.0
         },
@@ -32511,174 +32719,6 @@
           "match_percent": 100.0
         },
         {
-          "name": "_ZN16EdClassInterface10ClearLevelEi",
-          "demangled_name": "EdClassInterface::ClearLevel(int)",
-          "address": 5611760,
-          "offset": 4721792,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN16EdClassInterface13DefunctObjectEPv",
-          "demangled_name": "EdClassInterface::DefunctObject(void*)",
-          "address": 5611776,
-          "offset": 4721808,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN16EdClassInterface12ReviveObjectEPv",
-          "demangled_name": "EdClassInterface::ReviveObject(void*)",
-          "address": 5611792,
-          "offset": 4721824,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN16EdClassInterface13SetObjectGuidEPvi",
-          "demangled_name": "EdClassInterface::SetObjectGuid(void*, int)",
-          "address": 5611808,
-          "offset": 4721840,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN16EdClassInterface13GetObjectGuidEPv",
-          "demangled_name": "EdClassInterface::GetObjectGuid(void*)",
-          "address": 5611824,
-          "offset": 4721856,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN16EdClassInterface18GetConstructorDataEPvS0_i",
-          "demangled_name": "EdClassInterface::GetConstructorData(void*, void*, int)",
-          "address": 5611840,
-          "offset": 4721872,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN16EdClassInterface9ConstructEPvS0_",
-          "demangled_name": "EdClassInterface::Construct(void*, void*)",
-          "address": 5611856,
-          "offset": 4721888,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN16EdClassInterface7ProcessEPvR14EdInputContext",
-          "demangled_name": "EdClassInterface::Process(void*, EdInputContext&)",
-          "address": 5611872,
-          "offset": 4721904,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN16EdClassInterface6RenderEPvi",
-          "demangled_name": "EdClassInterface::Render(void*, int)",
-          "address": 5611888,
-          "offset": 4721920,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN16EdClassInterface11EnterEditorEv",
-          "demangled_name": "EdClassInterface::EnterEditor()",
-          "address": 5611904,
-          "offset": 4721936,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN16EdClassInterface10ExitEditorEv",
-          "demangled_name": "EdClassInterface::ExitEditor()",
-          "address": 5611920,
-          "offset": 4721952,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN16EdClassInterface10EnterLevelEv",
-          "demangled_name": "EdClassInterface::EnterLevel()",
-          "address": 5611936,
-          "offset": 4721968,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN16EdClassInterface9ExitLevelEv",
-          "demangled_name": "EdClassInterface::ExitLevel()",
-          "address": 5611952,
-          "offset": 4721984,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN16EdClassInterface11UpdateListsEP12MemoryBufferS1_",
-          "demangled_name": "EdClassInterface::UpdateLists(MemoryBuffer*, MemoryBuffer*)",
-          "address": 5611968,
-          "offset": 4722000,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN16EdClassInterface21PreLoadInitialisationEP12MemoryBufferS1_",
-          "demangled_name": "EdClassInterface::PreLoadInitialisation(MemoryBuffer*, MemoryBuffer*)",
-          "address": 5611984,
-          "offset": 4722016,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN16EdClassInterface22PostLoadInitialisationEP12MemoryBufferS1_",
-          "demangled_name": "EdClassInterface::PostLoadInitialisation(MemoryBuffer*, MemoryBuffer*)",
-          "address": 5612000,
-          "offset": 4722032,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN16EdClassInterface21PreSaveInitialisationEv",
-          "demangled_name": "EdClassInterface::PreSaveInitialisation()",
-          "address": 5612016,
-          "offset": 4722048,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN16EdClassInterface22PostSaveInitialisationEv",
-          "demangled_name": "EdClassInterface::PostSaveInitialisation()",
-          "address": 5612032,
-          "offset": 4722064,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN16EdClassInterface15SerialiseObjectER8EdStreamPv",
-          "demangled_name": "EdClassInterface::SerialiseObject(EdStream&, void*)",
-          "address": 5612048,
-          "offset": 4722080,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN16EdClassInterface12AddMenuItemsEP10eduimenu_s",
-          "demangled_name": "EdClassInterface::AddMenuItems(eduimenu_s*)",
-          "address": 5612064,
-          "offset": 4722096,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN16EdClassInterface6ImportEv",
-          "demangled_name": "EdClassInterface::Import()",
-          "address": 5612080,
-          "offset": 4722112,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
           "name": "_ZN14EdValueControlIfED1Ev",
           "demangled_name": "EdValueControl<float>::~EdValueControl()",
           "address": 5612128,
@@ -32692,22 +32732,6 @@
           "address": 5612128,
           "offset": 4722160,
           "size": 29,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN12SplineHelper5FlushEv",
-          "demangled_name": "SplineHelper::Flush()",
-          "address": 5612992,
-          "offset": 4723024,
-          "size": 26,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN10KnotHelper5FlushEv",
-          "demangled_name": "KnotHelper::Flush()",
-          "address": 5613024,
-          "offset": 4723056,
-          "size": 9,
           "match_percent": 100.0
         },
         {
@@ -60716,7 +60740,7 @@
           "address": 1249392,
           "offset": 359424,
           "size": 443,
-          "match_percent": 99.920456
+          "match_percent": 99.97727
         },
         {
           "name": "_ZL12TiePart_MoveP6PART_sf",
@@ -128223,30 +128247,6 @@
       "match_percent": 100.0
     },
     {
-      "name": "_ZN18PlaceableInterfaceD1Ev",
-      "demangled_name": "PlaceableInterface::~PlaceableInterface()",
-      "address": 5613216,
-      "offset": 4723248,
-      "size": 29,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN18PlaceableInterfaceD2Ev",
-      "demangled_name": "PlaceableInterface::~PlaceableInterface()",
-      "address": 5613216,
-      "offset": 4723248,
-      "size": 29,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN18PlaceableInterfaceD0Ev",
-      "demangled_name": "PlaceableInterface::~PlaceableInterface()",
-      "address": 5615456,
-      "offset": 4725488,
-      "size": 45,
-      "match_percent": 0.0
-    },
-    {
       "name": "oggpack_writeinit",
       "demangled_name": "oggpack_writeinit",
       "address": 5624512,
@@ -128882,8 +128882,8 @@
   "summary": {
     "bazel_units": 361,
     "functions": 13454,
-    "assigned_functions": 12868,
+    "assigned_functions": 12871,
     "ambiguous_functions": 260,
-    "unassigned_functions": 326
+    "unassigned_functions": 323
   }
 }
