@@ -791,7 +791,7 @@ void CollideGameObjects(WORLDINFO_s *world) {
         }
 
         const u32 bit = static_cast<u32>(static_cast<u64>(1) << object->apiobj.field_0x289);
-        if (object->apiobj.field_0x27c != -1) {
+        if (__builtin_expect(object->apiobj.field_0x27c != -1, 1)) {
             player_slot_mask |= bit;
         }
         GAMECHARACTERDATA *data = object->apiobj.character_data->game_character;
@@ -889,7 +889,7 @@ void CollideGameObjects(WORLDINFO_s *world) {
                 if (object->apiobj.field_0x27c == -1 && data->field_0x28 != 0.0f) {
                     object->apiobj.collision_mask_low |=
                         (vertical_movement_mask & player_slot_mask) | no_vertical_movement_mask;
-                } else if (data->field_0x28 == 0.0f) {
+                } else if (__builtin_expect(data->field_0x28 == 0.0f, 1)) {
                     object->apiobj.collision_mask_low |= (~player_slot_mask) & vertical_movement_mask;
                 } else {
                     object->apiobj.collision_mask_low |= vertical_movement_mask;

@@ -195,7 +195,8 @@ void CharacterMiniKits_Load(COLLECTION_s *collection, WORLDINFO *world, VARIPTR 
 
     for (i32 index = 0; index < collection->count_y; ++index) {
         const i32 character_id = collection->list[index].id;
-        if ((GCDataList[character_id].flags_094[1] & 4) != 0 || APICharacterLoaded(character_id) == NULL)
+        if (__builtin_expect(
+                (GCDataList[character_id].flags_094[1] & 4) != 0 || APICharacterLoaded(character_id) == NULL, 1))
             continue;
 
         world->minikit_pieces_buf[character_id] = reinterpret_cast<HUBMINIKITPIECES_s *>(buf->addr);
@@ -209,11 +210,11 @@ void CharacterMiniKits_Load(COLLECTION_s *collection, WORLDINFO *world, VARIPTR 
         NuStrCat(path, const_cast<char *>(".gsc"));
 
         buf->addr = ALIGN(buf->addr, 4);
-        if (index > 17)
+        if (index <= 17)
+            world->minikit_pieces_buf[character_id]->scene = NuGScnRead(buf, *buf_end, path);
+        else
             world->minikit_pieces_buf[character_id]->scene =
                 NuGScnRead(&characterbuffer_ptr, characterbuffer_end, path);
-        else
-            world->minikit_pieces_buf[character_id]->scene = NuGScnRead(buf, *buf_end, path);
 
         reinterpret_cast<MINIKIT *>(world->minikit_pieces_buf[character_id])->id = static_cast<i16>(character_id);
         if (world->minikit_pieces_buf[character_id]->scene == NULL) {

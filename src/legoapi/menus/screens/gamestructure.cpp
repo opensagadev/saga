@@ -641,11 +641,14 @@ void Store_HubDrawFloorTargets(WORLDINFO_s *world) {
     const f32 frame_alpha = NU_SIN_LUT(alpha_angle) * 0.2f + 0.8f;
 
     for (i32 i = 0; i < 11; ++i) {
-        if (StorePack[i].floor_target_door == NULL && (StorePack[i].id == NULL || *StorePack[i].id == -1)) {
+        if (__builtin_expect(
+                StorePack[i].floor_target_door == NULL && (StorePack[i].id == NULL || *StorePack[i].id == -1), 0)) {
             continue;
         }
-        if (Store_IsPackUnlocked(i) ||
-            (StorePack[i].field44_0x32 != 0xff && StorePack[i].field44_0x32 != static_cast<u8>(GameCam->sock_position.location.sock))) {
+        if (__builtin_expect(Store_IsPackUnlocked(i) ||
+                                 (StorePack[i].field44_0x32 != 0xff &&
+                                  StorePack[i].field44_0x32 != static_cast<u8>(GameCam->sock_position.location.sock)),
+                             0)) {
             continue;
         }
 
@@ -659,7 +662,7 @@ void Store_HubDrawFloorTargets(WORLDINFO_s *world) {
         }
 
         const i32 object_id = CDataList[*StorePack[i].id].field20_0x42;
-        if (object_id == -1) {
+        if (__builtin_expect(object_id == -1, 1)) {
             continue;
         }
 
@@ -876,8 +879,9 @@ void MenuDrawStore(MENU_s *) {
                 already_owned[count] = 0;
                 STORE_PRODUCT_s pack_product;
                 char *pack_product_id = *reinterpret_cast<char **>(&StorePack[pack].field1_0x4);
-                if (NuIOS_GetInAppProductByID(pack_product_id, reinterpret_cast<NuIOS_InAppProduct *>(&pack_product)) !=
-                    0) {
+                if (__builtin_expect(NuIOS_GetInAppProductByID(
+                                         pack_product_id, reinterpret_cast<NuIOS_InAppProduct *>(&pack_product)) != 0,
+                                     1)) {
                     separate_price += pack_product.price;
                 }
             }
@@ -991,7 +995,7 @@ store_touch_selected:
         }
         return;
     }
-    if (TTab[0x60f] != NULL) {
+    if (__builtin_expect(TTab[0x60f] != NULL, 0)) {
         NUVEC position = {0.0f, -0.6f, 1.0f};
         GAMEMESSAGE_s *message = static_cast<GAMEMESSAGE_s *>(
             AddGameMessage(TTab[0x60f], &position, 0.5f, &position, 0.55f, 255, 31, 31, 0x20, 2.5f));
@@ -1075,7 +1079,7 @@ void MenuDrawStoreRestoring(MENU_s *menu) {
     if (__builtin_expect(restoring_wait <= 0.0f || MenuStopDraw != 0, 0)) {
         menu->draw_y = -0.6f;
         GameDrawMenuEntry(menu, TTab[tACCEPT]);
-        if (MenuStopDraw != 0) {
+        if (__builtin_expect(MenuStopDraw != 0, 1)) {
             return;
         }
     }

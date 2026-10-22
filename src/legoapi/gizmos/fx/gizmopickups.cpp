@@ -789,7 +789,7 @@ static i32 GizmoPickups_Load(void *world_ptr, void *) {
     if (version >= 5) {
         pickup_sys->draw_distance = EdFileReadFloat();
         pickup_sys->pickup_scale = EdFileReadFloat();
-        if (version == 5) {
+        if (__builtin_expect(version == 5, 1)) {
             pickup_sys->pickup_scale = UpdateAreaPickupScale(world);
         }
         AreaPickupScale = pickup_sys->pickup_scale;
@@ -1378,7 +1378,7 @@ void SpecialMiniKits_Draw(WORLDINFO_s *world) {
                 type_index = GizmoPickupSys->alternate_type;
             }
 
-            if ((item->flags & 0x10) == 0) {
+            if (__builtin_expect((item->flags & 0x10) == 0, 0)) {
                 NuMtxSetScale(&matrix, &scale);
                 NuMtxRotateY(&matrix, y_rotation);
                 NuMtxRotateX(&matrix, x_rotation);

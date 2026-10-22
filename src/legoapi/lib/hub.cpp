@@ -189,7 +189,7 @@ void TBOPENFN(char *name, i32 type) {
     char label[256];
     NuStrCpy(label, name);
     i32 length = NuStrLen(label);
-    if (!(length > 0)) {
+    if (__builtin_expect(!(length > 0), 0)) {
         return;
     }
     if (length > 10)

@@ -749,7 +749,7 @@ i32 Action_BoulderSection(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKE
     if (packet == NULL || packet->owner == NULL || packet->owner->apiobj.objptr == NULL)
         return 1;
     GameObject_s *object = packet->owner->apiobj.objptr;
-    if (first_time != 0) {
+    if (__builtin_expect(first_time != 0, 1)) {
         processor->action_data_4 = 1.0f;
         processor->action_data_5 = 1.0f;
         for (i32 index = 0; index < param_count; ++index) {
@@ -785,7 +785,7 @@ i32 Action_BoulderSection(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKE
     }
     if (boulder_part[1] != NULL) {
         const f32 distance = NuVecDistSqr(&object->apiobj.collision_position, &boulder_part[1]->position, &difference);
-        if (distance < nearest_distance)
+        if (__builtin_expect(distance < nearest_distance, 1))
             nearest = boulder_part[1];
     }
     // The retail third probe reads padding past this two-entry array. Do not
@@ -877,7 +877,7 @@ void VaderA_Update(WORLDINFO_s *) {
     if (vader_a.timer_message != NULL)
         vader_a.timer_message->value += FRAMETIME;
 
-    if (netclient == 0) {
+    if (__builtin_expect(netclient == 0, 1)) {
         if (vader_a.collapse_started != 0) {
             vader_a.collapse_started = 0;
             if (Player[0] != NULL && (Player[0]->apiobj.field_0x1f8 & 1) != 0)
@@ -921,7 +921,7 @@ void VaderA_Update(WORLDINFO_s *) {
             if (time_limits[static_cast<i16>(vader_a.count)] > vader_a.timer) {
                 if (vader_a.count == 1) {
                     SetGizAIMessage(gizaimessagesys, "ceiling_collapse", 2.0f, vader_a.ceiling_collapse_message);
-                } else if (vader_a.count == 2) {
+                } else if (__builtin_expect(vader_a.count == 2, 1)) {
                     SetGizAIMessage(gizaimessagesys, "ceiling_collapse", 3.0f, vader_a.ceiling_collapse_message);
                     vader_a.timer = 2.0f;
                     NuCameraGetMtx();

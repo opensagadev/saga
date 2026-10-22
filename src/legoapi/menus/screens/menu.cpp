@@ -265,12 +265,15 @@ static __used__ void MenuEnterTitles(MENU *) {
 
 static __used__ void MenuUpdatePauseCut(MENU *menu) {
     MenuRefreshPauseCutTarget();
-    if (menu->confirm_pressed != 0 && menu->selected_item == 0) {
+    if (__builtin_expect(menu->confirm_pressed != 0 && menu->selected_item == 0, 0)) {
         ResumeGame(1, 1);
         return;
     }
     if (menu->confirm_pressed != 0 && menu->selected_item == 1) {
-        if (CutScenePlayer_Active() == 0) {
+        if (CutScenePlayer_Active() != 0) {
+            NewLevelFromMenu(HUB_LDATA, -1, -1, 1);
+            hub_from_cutsceneplayer = 1;
+        } else {
             if (pausecut_skip_to_level != -1) {
                 NewLData = &LDataList[pausecut_skip_to_level];
                 cutskip_dontplaylevelintro = 1;
@@ -292,9 +295,6 @@ static __used__ void MenuUpdatePauseCut(MENU *menu) {
             } else {
                 GameAudio_PlaySfx(0x32, NULL, 0, 0);
             }
-        } else {
-            NewLevelFromMenu(HUB_LDATA, -1, -1, 1);
-            hub_from_cutsceneplayer = 1;
         }
     }
 }
@@ -1000,7 +1000,7 @@ static __used__ void MenuUpdateTitles(MENU *menu) {
 
 void MenuUpdateOptions(MENU_s *menu) {
     GameSetSoundVolume(&TempOptions);
-    if (WORLD->current_level != TITLES_LDATA)
+    if (__builtin_expect(WORLD->current_level != TITLES_LDATA, 1))
         GameSetMusicVolume(&TempOptions);
     else
         legoSetMusicVolume(SuperOptions.music_enabled != 0 ? GameGetMusicVolume(&TempOptions) : 0.0f);
@@ -1010,7 +1010,7 @@ void MenuUpdateOptions(MENU_s *menu) {
     if (!(opts_sfx_wait > 0.0f)) {
         opts_sfx_i = static_cast<i32>(static_cast<u32>(opts_sfx_i) + 1);
         opts_sfx_wait += 1.5f;
-        if (opts_sfx_i == 1)
+        if (__builtin_expect(opts_sfx_i == 1, 1))
             opts_sfx_i = 0;
         preview = 1;
     }
@@ -1100,12 +1100,12 @@ void MenuUpdateNewGame(MENU *menu) {
         return;
     }
 
-    if ((GamePad[0].unknown_04 & GAMEPAD_START) != 0) {
+    if (__builtin_expect((GamePad[0].unknown_04 & GAMEPAD_START) != 0, 1)) {
         NuPadSetStatus(GamePad[0].pad->port, NUPAD_STATUS_ACTIVE);
     }
     if (static_cast<u8>(GamePad[0].unknown_24) == 0 || GamePad[0].pad->is_valid == 0) {
         PlayerProgress[0].active = 0;
-    } else if (g_nupadMapping[0].is_active != 0) {
+    } else if (__builtin_expect(g_nupadMapping[0].is_active != 0, 1)) {
         PlayerProgress[0].active = 1;
     }
 
@@ -1119,7 +1119,7 @@ void MenuUpdateNewGame(MENU *menu) {
     }
 
     startnewgame = 0;
-    if (startnewgame_initiated != 0 || saveload_autosave != -1) {
+    if (__builtin_expect(startnewgame_initiated != 0 || saveload_autosave != -1, 0)) {
         startnewgame_initiated = 0;
         startnewgame = 0;
         const i32 save_occurred = MenuSaveOccurred;

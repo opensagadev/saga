@@ -980,7 +980,7 @@ bool MechInputTouchGestureBasedController::PerformCloseMechanic(GameObject_s &ob
     VuVec position(holder.down_position.x, holder.down_position.y, 0.0f, 1.0f);
     if (TouchHacks::CanUseTeleport(object)) {
         VuVec teleport_position;
-        if (Teleport_Find(&object, 0.05f * 0.05f, &teleport_position) != NULL) {
+        if (__builtin_expect(Teleport_Find(&object, 0.05f * 0.05f, &teleport_position) != NULL, 1)) {
             f32 dx = teleport_position.x - object.apiobj.position.x;
             f32 dy = teleport_position.y - object.apiobj.position.y;
             f32 dz = teleport_position.z - object.apiobj.position.z;

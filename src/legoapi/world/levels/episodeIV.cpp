@@ -1314,7 +1314,7 @@ void DeathStarBattleDUpdate(WORLDINFO_s *world) {
     if (netclient == 0) {
         trenchrun.position.y = -10.5f;
         trenchrun.position.x = player->apiobj.collision_position.x;
-        if (__builtin_expect(trenchrun.position.x < -500.0f, 1)) {
+        if (trenchrun.position.x < -500.0f) {
             trenchrun.position.y = trench_spawn_height - 10.5f;
             i32 &midtro = *reinterpret_cast<i32 *>(&trenchrun.reserved_0x18[0]);
             if (__builtin_expect(FreePlay == 0 && midtro == 0, 0)) {

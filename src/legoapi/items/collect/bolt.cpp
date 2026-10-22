@@ -65,7 +65,7 @@ i32 BoltType_FindIDByCreature(GameObject_s *object, i32 fallback) {
         return fallback;
     i32 id = object->id;
     if (id == id_MILLENNIUMFALCON) {
-        if (world->area != VEHICLES_ADATA && object->bolt_fire_phase != 0)
+        if (__builtin_expect(world->area != VEHICLES_ADATA && object->bolt_fire_phase != 0, 1))
             return 9;
         return 7 + (world->current_level == ASTEROIDCHASED_LDATA);
     }
@@ -81,8 +81,9 @@ i32 BoltType_FindIDByCreature(GameObject_s *object, i32 fallback) {
         return 10;
     if (id == id_PROBEDROID || id == id_SNOWSPEEDER)
         return 11;
-    if (id == id_TIEFIGHTER || id == id_TIEINTERCEPTOR || id == id_TIEFIGHTERDARTH || id == id_TIEBOMBER ||
-        id == id_IMPERIALSHUTTLE) {
+    if (__builtin_expect(id == id_TIEFIGHTER || id == id_TIEINTERCEPTOR || id == id_TIEFIGHTERDARTH ||
+                             id == id_TIEBOMBER || id == id_IMPERIALSHUTTLE,
+                         0)) {
         if (world == NULL)
             return 12;
         if (world->current_level == DEATHSTARBATTLED_LDATA)
@@ -96,7 +97,7 @@ i32 BoltType_FindIDByCreature(GameObject_s *object, i32 fallback) {
     if (id == id_MINIMILLENNIUMFALCON)
         return object->bolt_fire_phase == 0 ? 21 : 22;
     if (id == id_JEDISTARFIGHTERYELLOWEP3 || id == id_JEDISTARFIGHTERREDEP3) {
-        if (WORLD->area != NULL && WORLD->area == DOGFIGHT_ADATA)
+        if (__builtin_expect(WORLD->area != NULL && WORLD->area == DOGFIGHT_ADATA, 1))
             return WORLD->lev_objs[0x12d].active == 0 ? 33 : 32;
         return 33;
     }

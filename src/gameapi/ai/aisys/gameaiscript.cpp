@@ -5827,7 +5827,9 @@ i32 Action_HelpWithTriggers(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s 
             NuVecAddScale(&spinner_position, &spinner_position, &spinner_direction, 0.5f);
             AIMoveInstruction(packet, &spinner_position, 0.0f, &target->path, 1, 0.0f);
         }
-    } else if (__builtin_expect(gizmo->type_id == grapple_gizmotype_id, 1)) {
+    } else if (__builtin_expect(!(gizmo->type_id == grapple_gizmotype_id), 0)) {
+        AIMoveInstruction(packet, &target->position, 0.0f, &target->path, 1, 0.0f);
+    } else {
         GRAPPLE *grapple = static_cast<GRAPPLE *>(gizmo->object);
         if (object->character_context == LEGOCONTEXT_GRAPPLE && object->field_0x788 == grapple) {
             object->field_0x1094 = 5;
@@ -5850,8 +5852,6 @@ i32 Action_HelpWithTriggers(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s 
             return 0;
         }
         GameObjectSetCanUse(object, grapple, 1, 50, 0.0f);
-        AIMoveInstruction(packet, &target->position, 0.0f, &target->path, 1, 0.0f);
-    } else {
         AIMoveInstruction(packet, &target->position, 0.0f, &target->path, 1, 0.0f);
     }
     gizmo = set->triggers[trigger_index];

@@ -234,7 +234,7 @@ bool MechInputTouchMenuController::OnRelease(GameObject_s &, TouchHolder &holder
         if (height == 0.0f) {
             NUVEC delta = {x, y, 0.0f};
             delta.x /= GetAspectRatio();
-            if (!(NuVecMag(&delta) < width)) {
+            if (__builtin_expect(!(NuVecMag(&delta) < width), 1)) {
                 continue;
             }
         } else {

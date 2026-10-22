@@ -570,8 +570,10 @@ static __used__ void ClimbObject_FindNormal(CLIMBOBJECT_s *object) {
         origin.x = node->position.x;                                                                                   \
         origin.y = (node->max_height + node->min_height) * 0.5f;                                                       \
         origin.z = node->position.z;                                                                                   \
-        if (GameRayCast(&origin, &displacement, 0.0f, TERRAINMASK_NONWEAPON | TERRAINMASK_NONDROID | 0x5f) != 0 &&     \
-            (TerSurface[static_cast<i8>(NewRayCastGetImpactTerrainType())].flags & 0x10000) != 0) {                    \
+        if (__builtin_expect(                                                                                          \
+                GameRayCast(&origin, &displacement, 0.0f, TERRAINMASK_NONWEAPON | TERRAINMASK_NONDROID | 0x5f) != 0 && \
+                    (TerSurface[static_cast<i8>(NewRayCastGetImpactTerrainType())].flags & 0x10000) != 0,              \
+                0)) {                                                                                                  \
             goto found_normal;                                                                                         \
         }                                                                                                              \
     } while (0)

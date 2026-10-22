@@ -792,9 +792,11 @@ void LoadGizmoSys(GIZMOSYS_s *gizmo_sys, void *world, char *config_file) {
 
                     i32 data_length = EdFileReadInt();
                     i32 type_id = GizmoGetTypeIDByName(gizmo_sys, gizmo_name);
-                    if (data_length > 0 && type_id >= 0 && type_id < gizmotypes->count &&
-                        gizmotypes->types[type_id].fns.load_fn != NULL &&
-                        gizmotypes->types[type_id].fns.load_fn(world, gizmo_sys->sets[type_id].unknown) != 0) {
+                    if (__builtin_expect(
+                            data_length > 0 && type_id >= 0 && type_id < gizmotypes->count &&
+                                gizmotypes->types[type_id].fns.load_fn != NULL &&
+                                gizmotypes->types[type_id].fns.load_fn(world, gizmo_sys->sets[type_id].unknown) != 0,
+                            1)) {
                         name_length = EdFileReadInt();
                         continue;
                     }
@@ -809,7 +811,7 @@ void LoadGizmoSys(GIZMOSYS_s *gizmo_sys, void *world, char *config_file) {
             }
 
             // File callbacks may replace or clear the registry before post-load dispatch.
-            if (gizmotypes != NULL) {
+            if (__builtin_expect(gizmotypes != NULL, 1)) {
                 GIZMOSET *set = gizmo_sys->sets;
                 GIZMOTYPE *type = gizmotypes->types;
                 for (i32 type_id = 0; type_id < gizmotypes->count; ++type_id, ++type, ++set) {

@@ -887,11 +887,7 @@ void TextCrawl_Draw(float dt, i32 paragraphs, float alpha, char *text) {
             }
             body_text_id = Arcade_TextCrawlID;
             paragraph_count = Arcade_TextCrawlParagraphs;
-        } else if (episode_index == -1) {
-            if (area != NULL && area->name_id != -1) {
-                area_name = TTab[area->name_id];
-            }
-        } else {
+        } else if (episode_index != -1) {
             if (EDataList[episode_index].name_id != -1) {
                 episode_name = TTab[EDataList[episode_index].name_id];
             }
@@ -912,10 +908,14 @@ void TextCrawl_Draw(float dt, i32 paragraphs, float alpha, char *text) {
                     }
                 }
             }
-            if (area->name_id != -1) {
+            if (__builtin_expect(area->name_id != -1, 1)) {
                 area_name = TTab[area->name_id];
             }
             paragraph_count = 0;
+        } else {
+            if (area != NULL && area->name_id != -1) {
+                area_name = TTab[area->name_id];
+            }
         }
     }
 
@@ -992,12 +992,12 @@ void TextCrawl_Draw(float dt, i32 paragraphs, float alpha, char *text) {
 
     if (body_text_id != -1) {
         NuQFntSetScale(QFont3DZ, x_scale, y_scale);
-        if (paragraph_count == 0) {
+        if (__builtin_expect(paragraph_count == 0, 1)) {
             paragraph_count = area == NULL ? s_crawlPtr->paragraph_count : area->text_id_value;
         }
         for (i32 i = 0; i < paragraph_count; ++i) {
             char *paragraph = TTab[body_text_id + i];
-            if (paragraph == NULL || *paragraph == '\0') {
+            if (__builtin_expect(paragraph == NULL || *paragraph == '\0', 1)) {
                 break;
             }
             Text3DStringEncode(paragraph, encoded);

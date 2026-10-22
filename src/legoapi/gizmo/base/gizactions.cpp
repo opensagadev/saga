@@ -400,7 +400,7 @@ static void GizAction_SetAIState(GIZFLOW_s *, FLOWBOX_s *, char **params, int co
         }
         return;
     }
-    if (named_object != NULL) {
+    if (__builtin_expect(named_object != NULL, 1)) {
         origin = named_object->apiobj.collision_position;
     }
     // Retail never resets the match flag, so every later in-range object of any type also switches state.
@@ -415,13 +415,13 @@ static void GizAction_SetAIState(GIZFLOW_s *, FLOWBOX_s *, char **params, int co
         NUVEC difference;
         NuVecSub(&difference, &origin, &object->apiobj.position);
         f32 distance_squared = difference.x * difference.x + difference.y * difference.y + difference.z * difference.z;
-        if (type_count == 0) {
+        if (__builtin_expect(type_count == 0, 0)) {
             if (range_squared > distance_squared) {
                 object->ai.script_process.next_state = AIStateFind(state_name, object->ai.script_process.script);
             }
         } else {
             for (i32 type_index = 0; type_index < type_count; ++type_index) {
-                if (object->id == types[type_index]) {
+                if (__builtin_expect(object->id == types[type_index], 1)) {
                     matching_type = 1;
                 }
             }
@@ -479,7 +479,7 @@ static void GizAction_ChangeTechnoTgt(GIZFLOW_s *, FLOWBOX_s *, char **params, i
                 target_name = value + NuStrLen("target=");
             } else if (NuStrICmp(value, "Move_Waggle") == 0) {
                 movement = 1;
-            } else if (NuStrICmp(value, "Move_Spin") == 0) {
+            } else if (__builtin_expect(NuStrICmp(value, "Move_Spin") == 0, 1)) {
                 movement = 2;
             } else if (NuStrICmp(value, "Move_Horizontal") == 0) {
                 movement = 8;
@@ -501,7 +501,7 @@ static void GizAction_ChangeTechnoTgt(GIZFLOW_s *, FLOWBOX_s *, char **params, i
         i32 type_id = GizmoGetTypeIDByName(WORLD->gizmo_sys, "Techno");
         GIZMO *gizmo = GizmoFindByName(WORLD->gizmo_sys, type_id, techno_name);
         TECHNO *techno = gizmo != NULL ? static_cast<TECHNO *>(gizmo->object) : NULL;
-        if (techno == NULL) {
+        if (__builtin_expect(techno == NULL, 1)) {
             return;
         }
         if (movement != 0xff) {

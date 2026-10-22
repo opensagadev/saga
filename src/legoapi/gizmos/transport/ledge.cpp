@@ -470,7 +470,7 @@ void Ledge_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
         }
         return;
     }
-    if (object->apiobj.field_0x27d & 2) {
+    if (__builtin_expect(object->apiobj.field_0x27d & 2 != 0, 0)) {
         object->character_context = -1;
         return;
     }
@@ -484,10 +484,10 @@ void Ledge_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
     f32 speed;
     if (!(push > NuTrigTable[0x3555])) {
         if (push < -NuTrigTable[0x3555]) {
-            if (object->apiobj.character_model->model_data_b[0x9e] != NULL) {
+            if (__builtin_expect(object->apiobj.character_model->model_data_b[0x9e] != NULL, 1)) {
                 object->context_animation = 0x9e;
                 speed = -AnimSpeed(object->apiobj.character_model, 0x9e);
-                if (speed == 0.0f)
+                if (__builtin_expect(speed == 0.0f, 1))
                     return;
             } else
                 speed = -0.5f;

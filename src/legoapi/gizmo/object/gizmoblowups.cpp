@@ -1237,7 +1237,7 @@ void GizmoBlowupBurstDraw(void *world_ptr, void *, float) {
     while (type_index < world->gizmo_blowup_type_count) {
         GIZMOBLOWUPTYPE_s *type = type_instances->type;
         GIZMOBLOWUP_s *next_type_instances = type_instances;
-        if (type != NULL) {
+        if (__builtin_expect(type != NULL, 1)) {
             NUMTX_ALIGNED16 animated_matrix;
             GIZMOBLOWUP_s *blowup = type_instances;
             for (i32 instance_index = 0; instance_index < type->instance_count; ++instance_index, ++blowup) {
@@ -1283,14 +1283,14 @@ void GizmoBlowupBurstDraw(void *world_ptr, void *, float) {
                         frame = frame - end_frame + animation->tfirst;
                     }
 
-                    if ((type->animation_flags & GIZMOBLOWUPTYPE_ANIMATION_INCLUDES_INSTANCE_TRANSFORM) == 0) {
+                    if ((type->animation_flags & GIZMOBLOWUPTYPE_ANIMATION_INCLUDES_INSTANCE_TRANSFORM) != 0) {
+                        EvalAnim(animated_special, frame, &animated_matrix, 1);
+                    } else {
                         if ((blowup->state_flags & GIZMOBLOWUP_STATE_REPEATING) == 0) {
                             frame = blowup->animation_time;
                         }
                         EvalAnim(animated_special, frame, &animated_matrix, 0);
                         NuMtxMulVU0(&animated_matrix, &animated_matrix, &blowup->transform);
-                    } else {
-                        EvalAnim(animated_special, frame, &animated_matrix, 1);
                     }
 
                     i32 drawn = NuSpecialDrawAt(animated_special, &animated_matrix);
@@ -1335,8 +1335,9 @@ void GizmoBlowupBurstDraw(void *world_ptr, void *, float) {
             if (NuSpecialExistsFn(&type->shadow_special) != 0) {
                 for (i32 instance_index = 0; instance_index < type->instance_count; ++instance_index) {
                     GIZMOBLOWUP_s *blowup = &type_instances[instance_index];
-                    if ((blowup->state_flags & GIZMOBLOWUP_STATE_ACTIVATED) != 0 &&
-                        (blowup->draw_flags & GIZMOBLOWUP_DRAW_RESET_SHADOW_MAP) == 0) {
+                    if (__builtin_expect((blowup->state_flags & GIZMOBLOWUP_STATE_ACTIVATED) != 0 &&
+                                             (blowup->draw_flags & GIZMOBLOWUP_DRAW_RESET_SHADOW_MAP) == 0,
+                                         1)) {
                         GizmoBlowupGenShadowMatrix(blowup, &animated_matrix);
                         NuSpecialDrawAt(&type->shadow_special, &animated_matrix);
                     }
@@ -1936,7 +1937,7 @@ GIZMOBLOWUP_s *GizmoBlowUp_Hit(GameObject_s *object, NUVEC *points, i32 point_co
     GIZMOBLOWUP_s *nearest = NULL;
     f32 nearest_distance = 1000000.0f;
     GIZMOBLOWUP_s *blowup = WORLD->gizmo_blowups;
-    if (blowup == NULL) {
+    if (__builtin_expect(blowup == NULL, 0)) {
         return NULL;
     }
     auto f0xcc0 = object->field_0xcc0;

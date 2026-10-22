@@ -1305,7 +1305,7 @@ i32 Action_CreatePod(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **
                 else
                     model_id = type;
             }
-        } else if ((value = NuStrIStr(*params, "spline_start=")) != NULL) {
+        } else if (__builtin_expect((value = NuStrIStr(*params, "spline_start=")) != NULL, 1)) {
             start = AIParamToFloat((AISCRIPTPROCESS *)packet, value + 13);
         } else if ((value = NuStrIStr(*params, "spline_end=")) != NULL) {
             end = AIParamToFloat((AISCRIPTPROCESS *)packet, value + 11);

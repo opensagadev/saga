@@ -1026,7 +1026,7 @@ i32 GizPanel_UpdateHint(HINT_s *hint) {
         }
     }
     if (storm && (hint->control_mode_ids[0] == 0x269 || hint->control_mode_ids[0] == 0x260)) {
-        if (AvailableToPlayer(0, 1, 5, 0) != 0)
+        if (__builtin_expect(AvailableToPlayer(0, 1, 5, 0) != 0, 1))
             return hint->control_mode_ids[0] == 0x260;
         return hint->control_mode_ids[0] == 0x269;
     }

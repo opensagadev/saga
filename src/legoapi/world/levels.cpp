@@ -922,7 +922,7 @@ __attribute__((optimize("O2", "tree-vectorize"))) void LevelStreaming_Update(WOR
                     if (i < LevelLoadCount) {
                         const i16 first_level = load->first_level;
                         const i16 second_level = load->second_level;
-                        if (first_level != second_level) {
+                        if (__builtin_expect(first_level != second_level, 0)) {
                             if (LEGOSPL_SPLIT != -1 && world->camera_splines[LEGOSPL_SPLIT] != NULL) {
                                 NUVEC *points = world->camera_splines[LEGOSPL_SPLIT]->pts;
                                 if (InsideLineXZ(position.x, position.z, points[0].x, points[0].z, points[1].x,

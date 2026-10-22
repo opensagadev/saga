@@ -1366,7 +1366,7 @@ i32 SelectShopItem(shopitem_s *items, i32 index) {
         }
         case 2: {
             id = static_cast<u16>(item->item_id);
-            if (item->unlocked == 1 || ((Game.extra_purchased_bits[id >> 5] >> (id & 31)) & 1))
+            if (__builtin_expect(item->unlocked == 1 || ((Game.extra_purchased_bits[id >> 5] >> (id & 31)) & 1), 1))
                 return 0;
             area = static_cast<i8>(Cheat[id].area);
             if (area != -1 && !Game.area_save[area].red_brick_collected)
@@ -1953,7 +1953,7 @@ void DrawTopShelf(i32) {
     const f32 item_push = toppush[2];
     const f32 item_scale = topscale[2];
     const u16 item_angle = shelfang;
-    if (NuSpecialExistsFn(&TopShelf[2].special) != 0) {
+    if (__builtin_expect(NuSpecialExistsFn(&TopShelf[2].special) != 0, 0)) {
         NUMTX &matrix = item_matrix;
         NUANGVEC rotation = {0, item_angle, 0};
         NuMtxSetRotateXYZVU0(&matrix, &rotation);

@@ -433,7 +433,7 @@ void HomeNearestTorpTarget(BOLT_s *bolt, TORPEDOPACKET_s *packet) {
     u8 target_type;
     if (target == NULL) {
         target = FindNearestTorpTarget(WORLD, &bolt->position, range * range, &target_type);
-        if (target == NULL) {
+        if (__builtin_expect(target == NULL, 1)) {
             if (bolt->time == 0.0f)
                 bolt->velocity.y += 6.0f;
             return;

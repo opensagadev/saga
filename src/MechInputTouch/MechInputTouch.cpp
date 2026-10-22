@@ -255,7 +255,7 @@ i32 MechInputTouchSystem::ChooseTouchLayout(bool) {
     s_baseControlMode = layout != 1;
     bool active;
     if (GetMenuID() == 0x19 || (Paused == 0 && GetMenuID() == -1)) {
-        if (Controller_IsConnected() != 0) {
+        if (__builtin_expect(Controller_IsConnected() != 0, 0)) {
             s_baseControlMode = 0;
             layout = 7;
             active = false;
@@ -265,7 +265,7 @@ i32 MechInputTouchSystem::ChooseTouchLayout(bool) {
             active = layout != 7 && layout != 1;
             goto done;
         }
-    } else if (Controller_IsConnected() != 0) {
+    } else if (__builtin_expect(Controller_IsConnected() != 0, 0)) {
         s_baseControlMode = 0;
         layout = 7;
         active = false;
@@ -274,7 +274,7 @@ i32 MechInputTouchSystem::ChooseTouchLayout(bool) {
     if (WORLD != NULL && (WORLD->area == PODRACE_ADATA || WORLD->area == PODSPRINT_ADATA)) {
         layout = 3;
         active = true;
-    } else if (WORLD != NULL && WORLD->area == BONUS_GUNSHIP_ADATA) {
+    } else if (__builtin_expect(WORLD != NULL && WORLD->area == BONUS_GUNSHIP_ADATA, 0)) {
         layout = 4;
         active = true;
     } else if (WORLD != NULL && WORLD->current_level == DEATHSTARRESCUEE_LDATA && player != NULL &&

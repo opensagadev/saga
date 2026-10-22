@@ -793,7 +793,7 @@ static i32 ProcessConditionFlowBox(GIZFLOW_s *flow, FLOWBOX_s *box, u8) {
             u8 *outputs = box->output_indices;
             for (i32 i = 0; i < box->parent_count; ++i) {
                 FLOWBOX_s *parent = parents[i];
-                if (flowboxtypes[parent->type].check_output(flow, parent, outputs[i]) != 0) {
+                if (__builtin_expect(flowboxtypes[parent->type].check_output(flow, parent, outputs[i]) != 0, 0)) {
                     return 0;
                 }
             }

@@ -156,9 +156,11 @@ static void *GizTorps_ReserveBufferSpace(void *world_ptr) {
 
 static void GizTorp_Draw(void *world_ptr, void *, float) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
-    if (world == NULL || world->giz_torp_machine_sys == NULL || world->giz_torp_machine_sys->count == 0 ||
-        world->lev_objs[GIZTORP_LEVEL_OBJECT_PRIMARY].active == 0 ||
-        world->lev_objs[GIZTORP_LEVEL_OBJECT_ALTERNATE].active == 0) {
+    if (__builtin_expect(world == NULL || world->giz_torp_machine_sys == NULL ||
+                             world->giz_torp_machine_sys->count == 0 ||
+                             world->lev_objs[GIZTORP_LEVEL_OBJECT_PRIMARY].active == 0 ||
+                             world->lev_objs[GIZTORP_LEVEL_OBJECT_ALTERNATE].active == 0,
+                         0)) {
         return;
     }
 
@@ -182,7 +184,7 @@ static void GizTorp_Draw(void *world_ptr, void *, float) {
 
             if ((machine.flags & GIZTORPMACHINE_FLAG_ACTIVE) != 0 && machine.activation_time > 0.0f) {
                 const f32 activation_phase = machine.activation_time * 2.0f;
-                if (activation_phase >= 0.3f) {
+                if (__builtin_expect(activation_phase >= 0.3f, 0)) {
                     const i32 opening_angle =
                         (static_cast<i32>((activation_phase - 0.3f) / 0.7f * 16384.0f) >> 1) & 0x7fff;
                     const f32 opening_scale = (4.0f * WORLD->giz_torp_machine_sys->scale) * NuTrigTable[opening_angle];

@@ -485,7 +485,7 @@ static i32 *GizObstacles_GetBestBoltTarget(GIZMOSET *set, float *result_distance
         return NULL;
     }
     GIZOBSTACLESYS_s *system = static_cast<GIZOBSTACLESYS_s *>(set->unknown);
-    if (system == NULL || bolt_type == NULL) {
+    if (__builtin_expect(system == NULL || bolt_type == NULL, 0)) {
         return NULL;
     }
 
@@ -620,10 +620,10 @@ static i32 GizObstacles_BoltHit(void *world, void *data, void *attacker_ptr, NUV
             }
         }
     } while (system->active_gizmo_count > ++index);
-    if (nearest == NULL) {
+    if (__builtin_expect(nearest == NULL, 0)) {
         return 0;
     }
-    if (__builtin_expect(hit_type != 7, 0) && hit_type != 2 && bolt != NULL) {
+    if (__builtin_expect(__builtin_expect(hit_type != 7, 0) && hit_type != 2 && bolt != NULL, 1)) {
         BoltType_FindByID(bolt->type_id, WORLD);
         Cheats_CheckFlags(2);
     }

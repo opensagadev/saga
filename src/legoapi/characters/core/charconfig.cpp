@@ -3129,7 +3129,9 @@ void CharConfig_ConfigureAll(i32 permanent, NUFPCOMJMP *game_keywords) {
         if (pak == NULL) {
             VARIPTR *end = permanent != 0 ? &permbuffer_end : NULL;
             VARIPTR *arena = permanent != 0 ? &permbuffer_ptr : NULL;
-            if (CharConfig(id, directory, filename, arena, end, permanent != 0, NULL, 0, 1, game_keywords) == 2) {
+            if (__builtin_expect(
+                    CharConfig(id, directory, filename, arena, end, permanent != 0, NULL, 0, 1, game_keywords) == 2,
+                    1)) {
                 SecondCharConfigure = 1;
                 CharConfig(id, directory, filename, arena, end, permanent != 0, NULL, 0, 0, game_keywords);
             }

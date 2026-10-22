@@ -552,7 +552,7 @@ NuSoundDecoder *NuSoundSystem::CreateDecoder(NuSoundSource *source) {
     const u16 appended_length = static_cast<u16>(name_length + 8);
     if (appended_length > name_capacity || decoded_name == theEmptyString) {
         name_capacity = static_cast<u16>((appended_length + 3) & 0xfffc);
-        if (decoded_name == theEmptyString) {
+        if (__builtin_expect(decoded_name == theEmptyString, 1)) {
             decoded_name = static_cast<char *>(
                 NU_ALLOC(name_capacity, 4, 5,
                          "i:/SagaTouch-Android_9176564/nu2api.saga/../nu2api.2013/numemory/NuMemory.h:328", 0));
@@ -569,7 +569,7 @@ NuSoundDecoder *NuSoundSystem::CreateDecoder(NuSoundSource *source) {
         decoder = static_cast<NuSoundDecoderOGG *>(
             NuSoundSystem::_AllocMemory(NuSoundSystem::MemoryDiscipline::SCRATCH, sizeof(NuSoundDecoderOGG), 4,
                                         "i:/SagaTouch-Android_9176564/nu2api.2013/nusound/nusound.cpp:1335"));
-        if (decoder != NULL) {
+        if (__builtin_expect(decoder != NULL, 0)) {
             new (decoder) NuSoundDecoderOGG(decoded_name, source);
         }
     }

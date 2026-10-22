@@ -380,8 +380,9 @@ static void Levers_Draw(void *world_ptr, void *, float) {
                 draw_target = world->lev_objs[LEVER_SPECIAL_TARGET].active != 0;
             }
 
-            if ((lever.flags & LEVER_FLAG_IDLE_STATE_MASK) == LEVER_FLAG_ENABLED &&
-                world->lev_objs[LEVER_SPECIAL_READY].active != 0) {
+            if (__builtin_expect((lever.flags & LEVER_FLAG_IDLE_STATE_MASK) == LEVER_FLAG_ENABLED &&
+                                     world->lev_objs[LEVER_SPECIAL_READY].active != 0,
+                                 0)) {
                 NuSpecialDrawAtAlpha(&world->lev_objs[LEVER_SPECIAL_READY].special, &target_matrix, ready_alpha);
             } else if (!draw_target) {
                 goto draw_status;

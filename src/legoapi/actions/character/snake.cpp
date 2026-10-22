@@ -188,7 +188,7 @@ void BlowUpSnakeBody(GameObject_s *object) {
 }
 
 void SnakeBeenHit(GameObject_s *object) {
-    if (object != NULL && object->snake_body != NULL && object->snake_body->segment_count > 2) {
+    if (__builtin_expect(object != NULL && object->snake_body != NULL && object->snake_body->segment_count > 2, 1)) {
         ADD_SNAKE_SEGMENT_DEBRIS(object->snake_body->segment_count - 1);
         ADD_SNAKE_SEGMENT_DEBRIS(object->snake_body->segment_count - 2);
         object->snake_body->segment_count -= 2;

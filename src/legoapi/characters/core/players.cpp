@@ -324,7 +324,7 @@ void Players_InitPositions(WORLDINFO *world) {
     // --- hub exit-door lookup ---
     if (HUB_ADATA != NULL && HUB_ADATA == world->area) {
         if (world->level_sub_id != last_area && hub_from_cutsceneplayer == 0) {
-            if (hub_from_superstory != -1) {
+            if (__builtin_expect(hub_from_superstory != -1, 1)) {
                 i32 area =
                     Episode_FindAreaFromFlags((EPISODEDATA *)((char *)EDataList + hub_from_superstory * 0x1c), 5, 5);
                 void *door = Door_FindByIndex(world, area, -1, NULL);
@@ -408,7 +408,8 @@ void Players_InitPositions(WORLDINFO *world) {
         hub_from_arcade = -1;
         if (hub_from_cutsceneplayer != 0) {
             void *av = CutScenePlayer_Available();
-            if (av != NULL && static_cast<CUTSCENEPLAYER_s *>(CutScenePlayer_Available())->return_door != -1) {
+            if (__builtin_expect(
+                    av != NULL && static_cast<CUTSCENEPLAYER_s *>(CutScenePlayer_Available())->return_door != -1, 1)) {
                 void *door = Door_FindByIndex(
                     world, -1, static_cast<CUTSCENEPLAYER_s *>(CutScenePlayer_Available())->return_door, NULL);
                 HubStartDoor = door;

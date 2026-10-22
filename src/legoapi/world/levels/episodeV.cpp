@@ -1709,10 +1709,11 @@ __attribute__((optimize("O2", "tree-vectorize"))) i32 SpawnMeleeCreatureType(i32
                         0 ||
                     OnOrInsidePlane(&locator->position, &PlayPlane[2].point, &PlayPlane[2].normal, NULL, 0.5f, NULL) ==
                         0) {
-                    if (OnOrInsidePlane(&locator->position, &PlayPlane[1].point, &PlayPlane[1].normal, NULL, 2.5f,
-                                        NULL) != 0 ||
-                        OnOrInsidePlane(&locator->position, &PlayPlane[2].point, &PlayPlane[2].normal, NULL, 2.5f,
-                                        NULL) != 0)
+                    if (__builtin_expect(OnOrInsidePlane(&locator->position, &PlayPlane[1].point, &PlayPlane[1].normal,
+                                                         NULL, 2.5f, NULL) != 0 ||
+                                             OnOrInsidePlane(&locator->position, &PlayPlane[2].point,
+                                                             &PlayPlane[2].normal, NULL, 2.5f, NULL) != 0,
+                                         1))
                         break;
                 }
                 locator = NULL;
@@ -1733,7 +1734,7 @@ __attribute__((optimize("O2", "tree-vectorize"))) i32 SpawnMeleeCreatureType(i32
             object = AddDynamicCreature(melee.waves[type].character_id, &locator->position, locator->direction,
                                         melee.waves[type].name, &locator->path_info, NULL, 1, NULL, NULL, 0, 0);
         }
-        if (object == NULL)
+        if (__builtin_expect(object == NULL, 0))
             return 0;
         melee.waves[type].creatures[slot] = object;
         object->ai.locator = locator;
@@ -1909,7 +1910,7 @@ void HothBattleE_UpdateWave() {
             melee.initialize_wave = 1;
             pending = 1;
         } else if (melee.transition_phase > 0) {
-            if (MiniCutCam == 0) {
+            if (__builtin_expect(MiniCutCam == 0, 1)) {
                 if (melee.transition_phase == 1) {
                     HothBattle_ClearBackgroundObjects();
                     melee.transition_phase = 2;
@@ -1963,7 +1964,8 @@ void HothBattleE_UpdateWave() {
             pending = 1;
         }
     }
-    if ((pending | MiniCutCam) == 0 && NOAICREATURES == 0 && melee.current_wave == melee.next_wave) {
+    if (__builtin_expect((pending | MiniCutCam) == 0 && NOAICREATURES == 0 && melee.current_wave == melee.next_wave,
+                         1)) {
         ++melee.next_wave;
     }
 }

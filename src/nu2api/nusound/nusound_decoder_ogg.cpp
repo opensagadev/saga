@@ -76,7 +76,7 @@ int NuSoundDecoderOGG::OGGReadCallbacksDecoder::Read(void *dest, unsigned int si
     u32 remaining = size;
     u8 *cursor = (u8 *)dest;
     u32 copied = 0;
-    while (remaining != 0) {
+    while (__builtin_expect(remaining != 0, 1)) {
         if (this->decoder->locked_buffer == NULL) {
             memset(cursor, 0, remaining);
             return (int)remaining;
@@ -103,7 +103,7 @@ int NuSoundDecoderOGG::OGGReadCallbacksDecoder::Read(void *dest, unsigned int si
             return (int)copied;
         }
 
-        if (context.size3 != 0 && context.size3 < context.read_size) {
+        if (__builtin_expect(context.size3 != 0 && context.size3 < context.read_size, 0)) {
             context.size3 = 0;
             break;
         }

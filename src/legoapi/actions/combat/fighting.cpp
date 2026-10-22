@@ -320,7 +320,7 @@ void Punch_Hit(GameObject_s *attacker, GameObject_s *target, float, float gap) {
 
 hit:
     attacker->movement_runtime_flags |= 1;
-    if (attacker->apiobj.player_controlled) {
+    if (__builtin_expect(attacker->apiobj.player_controlled != 0, 1)) {
         GameCam_HitJudder();
     }
     goto extra_code;

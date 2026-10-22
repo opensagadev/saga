@@ -1074,19 +1074,19 @@ extern "C" {
         }
 
         NUVEC *bounds = static_cast<NUVEC *>(instance->cutscene->bounds);
-        if (__builtin_expect(bounds == NULL, 0)) {
-            instance->transformed_bounds_center.x = 0.0f;
-            instance->transformed_bounds_center.y = 0.0f;
-            instance->transformed_bounds_center.z = 0.0f;
-        } else {
+        if (bounds != NULL) {
             instance->transformed_bounds_center.x = (bounds[1].x + bounds[0].x) * 0.5f;
             instance->transformed_bounds_center.y = (bounds[1].y + bounds[0].y) * 0.5f;
             instance->transformed_bounds_center.z = (bounds[1].z + bounds[0].z) * 0.5f;
+        } else {
+            instance->transformed_bounds_center.x = 0.0f;
+            instance->transformed_bounds_center.y = 0.0f;
+            instance->transformed_bounds_center.z = 0.0f;
         }
         instance->rate = 1.0f;
 
         (*NuThreadDisableThreadSwap)();
-        if (flags == 0) {
+        if (__builtin_expect(flags == 0, 1)) {
             instance->next = active_cutscene_instances;
             if (active_cutscene_instances != NULL) {
                 active_cutscene_instances->previous = instance;
@@ -1833,8 +1833,9 @@ static void instNuGCutCamSysUpdate(instNUGCUTSCENE_s *instance, float frame) {
     CameraDOFHack = 2;
     instNUGCUTCAMSTATE_s *camera_state = &camera_instance->camera_states[camera_index];
     CutSceneCameraCTRL = 1;
-    if ((system->cameras[camera_index].flags & 1) == 0 ||
-        system->cameras[camera_index].animation_node >= NuAnimNumNodes(system->animation)) {
+    if (__builtin_expect((system->cameras[camera_index].flags & 1) == 0 ||
+                             system->cameras[camera_index].animation_node >= NuAnimNumNodes(system->animation),
+                         0)) {
         cutscenecammtx = system->cameras[camera_index].base_matrix;
     } else {
         if ((instance->cutscene->version & 0xff) > 4 && system->focus_animation != NULL &&
@@ -1866,7 +1867,7 @@ static void instNuGCutCamSysUpdate(instNUGCUTSCENE_s *instance, float frame) {
             }
         }
         const u32 animation_magic = *reinterpret_cast<u32 *>(system->animation);
-        if (animation_magic - ANI3_MAGIC_VERSION_4 < 2) {
+        if (__builtin_expect(animation_magic - ANI3_MAGIC_VERSION_4 < 2, 1)) {
             NuAnimCurve2SetApplyToMatrix_3(reinterpret_cast<ani3_animheader_s *>(system->animation),
                                            system->cameras[camera_index].animation_node, instance->render_frame,
                                            &cutscenecammtx);
@@ -1895,7 +1896,7 @@ static void instNuGCutCamSysUpdate(instNUGCUTSCENE_s *instance, float frame) {
         NuMtxLookAtZ(&look_at_matrix, target->target);
 
         f32 blend = 1.0f;
-        if (duration > 0.01f) {
+        if (__builtin_expect(duration > 0.01f, 0)) {
             blend = (frame - target->start_frame) / duration;
         }
         if (blend > 1.0f) {
@@ -2875,7 +2876,13 @@ extern "C" {
                 if (parent_mtx != NULL) {
                     NuMtxMul(&matrix, &matrix, parent_mtx);
                 }
-                if ((locator->flags & 0x10) == 0) {
+                if ((locator->flags & 0x10) != 0) {
+                    i32 finite_handle = -1;
+                    AddScaledFiniteShotDebrisEffect(&finite_handle, effect_index,
+                                                    reinterpret_cast<NUVEC *>(&matrix.m30), 0, 0, 1, rate);
+                    DebrisEmitterOrientationMtx(finite_handle, &matrix);
+                    inst_locator->effect_handle = 1;
+                } else {
                     if ((locator->flags & 0x20) == 0) {
                         AddScaledVariableShotDebrisEffect2(effect_index, reinterpret_cast<NUVEC *>(&matrix.m30),
                                                            static_cast<i32>(scale), timeincrement, &matrix, 0, rate);
@@ -2885,7 +2892,7 @@ extern "C" {
                                             matrix.m32);
                             DebrisPopulateInstance(inst_locator->effect_handle, 0.0f);
                         }
-                        if (inst_locator->effect_handle >= 0) {
+                        if (__builtin_expect(inst_locator->effect_handle >= 0, 1)) {
                             if (processdeb == 1) {
                                 DebrisEmitterPos(inst_locator->effect_handle, matrix.m30, matrix.m31, matrix.m32);
                             } else if (processdeb == 2) {
@@ -2898,12 +2905,6 @@ extern "C" {
                             NuRndrAxisArrowsMtx(&matrix, glyntestha, 0);
                         }
                     }
-                } else {
-                    i32 finite_handle = -1;
-                    AddScaledFiniteShotDebrisEffect(&finite_handle, effect_index,
-                                                    reinterpret_cast<NUVEC *>(&matrix.m30), 0, 0, 1, rate);
-                    DebrisEmitterOrientationMtx(finite_handle, &matrix);
-                    inst_locator->effect_handle = 1;
                 }
                 return;
             }
@@ -2947,12 +2948,7 @@ extern "C" {
             if (locator->animation != NULL) {
                 NuAnimData2CalcTime(locator->animation, frame, &time);
             }
-            if (NuGCutLocatorIsVisble(locator, frame, &time, &opacity, NULL) == 0 || !(opacity > 0.1f)) {
-                if (inst_locator->effect_handle >= 0) {
-                    ReleaseLocatorVfxFn(inst_locator->effect_handle);
-                }
-                inst_locator->effect_handle = -1;
-            } else {
+            if (!(NuGCutLocatorIsVisble(locator, frame, &time, &opacity, NULL) == 0 || !(opacity > 0.1f))) {
                 // Retail realigns the frame and copies the locator matrix into the VFX matrix with movaps.
                 VuMtx vfx_matrix __attribute__((aligned(16)));
                 NUMTX locator_mtx __attribute__((aligned(16)));
@@ -2969,11 +2965,16 @@ extern "C" {
                 vfx_rows[1] = rows[1];
                 vfx_rows[2] = rows[2];
                 vfx_rows[3] = rows[3];
-                if (inst_locator->effect_handle >= 0 && UpdateLocatorVfxFn != NULL) {
+                if (__builtin_expect(inst_locator->effect_handle >= 0 && UpdateLocatorVfxFn != NULL, 1)) {
                     UpdateLocatorVfxFn(inst_locator->effect_handle, &vfx_matrix);
                 } else {
                     inst_locator->effect_handle = TriggerLocatorVfxFn(effect_index, &vfx_matrix);
                 }
+            } else {
+                if (inst_locator->effect_handle >= 0) {
+                    ReleaseLocatorVfxFn(inst_locator->effect_handle);
+                }
+                inst_locator->effect_handle = -1;
             }
         }
     }

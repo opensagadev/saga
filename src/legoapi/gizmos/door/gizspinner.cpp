@@ -268,7 +268,7 @@ static i32 *GizSpinner_GetBestBoltTarget(GIZMOSET *, float *, NUVEC *result_posi
             tangent.x = NuTrigTable[((angle + 0x4000) & 0xffff) >> 1];
             tangent.z = NuTrigTable[((angle + 0x8000) >> 1) & 0x7fff];
             NUVEC facing = *direction;
-            if (directional == 0) {
+            if (__builtin_expect(directional == 0, 1)) {
                 NuVecRotateY(&facing, &v001,
                              NuAtan2D(spinner->position.x - position->x, spinner->position.z - position->z));
             }
@@ -289,14 +289,14 @@ static i32 *GizSpinner_GetBestBoltTarget(GIZMOSET *, float *, NUVEC *result_posi
             NuVecNorm(&delta, &delta);
             float dot = NuVecDot(&delta, &aim);
             u16 target_angle;
-            if (TargetDist_Near2 > distance && directional != 0) {
+            if (__builtin_expect(TargetDist_Near2 > distance && directional != 0, 0)) {
                 target_angle = TargetDeg_Near;
             } else if (TargetDist_Mid2 > distance) {
                 target_angle = TargetDeg_Mid;
             } else {
                 target_angle = TargetDeg_Far;
             }
-            if (!(dot > NuTrigTable[((target_angle + 0x4000) >> 1) & 0x7fff])) {
+            if (__builtin_expect(!(dot > NuTrigTable[((target_angle + 0x4000) >> 1) & 0x7fff]), 0)) {
                 continue;
             }
 

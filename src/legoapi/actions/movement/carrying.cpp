@@ -282,8 +282,9 @@ void SuperCarry_Start(GameObject_s *object, GIZMOBLOWUP_s *blowup, i32 immediate
     object->action_movement_state = 0;
     object->field_0x788 = blowup;
     if (immediate == 0) {
-        if (LEGOACT_SUPERCARRY_PICKUP != -1 &&
-            object->apiobj.character_model->model_data_b[LEGOACT_SUPERCARRY_PICKUP] != NULL) {
+        if (__builtin_expect(LEGOACT_SUPERCARRY_PICKUP != -1 &&
+                                 object->apiobj.character_model->model_data_b[LEGOACT_SUPERCARRY_PICKUP] != NULL,
+                             1)) {
             object->context_animation = LEGOACT_SUPERCARRY_PICKUP;
             object->field_0x7a3 = 0;
             f32 duration = AnimDuration(object->id, LEGOACT_SUPERCARRY_PICKUP, 0.0f, 0.0f, 1);

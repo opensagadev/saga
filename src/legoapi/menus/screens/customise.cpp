@@ -541,7 +541,7 @@ void Customiser_Draw3D(CUSTOMISER *customiser) {
             layer_mask |= 1u << customiser->layer_indices[8];
         if (layer_mask == 0)
             layer_mask = 1;
-        if (runtime->cape_layer != -1) {
+        if (__builtin_expect(runtime->cape_layer != -1, 1)) {
             layer_mask |= 1u << runtime->cape_layer;
             if ((selected == -1 || GetMenuID() != 12 || customiser_quit != 0 || selected != 5) &&
                 (customiser->piece_sets[5][selection[5]].layer_flags & 0x40) != 0)

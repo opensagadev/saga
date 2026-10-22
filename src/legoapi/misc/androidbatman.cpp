@@ -64,20 +64,22 @@ static void SystemPauseCallback(const NuPhoneOSMessageData *) {
 
     for (i32 player_index = 0; player_index < 2; ++player_index) {
         GameObject_s *player = Player[player_index];
-        if (!(Paused == 0 && GameTimer.update_count != 0 && !(memcard_autosavepredelay > 0.0f) && NewMode == 0 &&
-             player != NULL && static_cast<i8>(player->apiobj.field_0x1f8) < 0 &&
-             (LEGOCONTEXT_DROPIN == -1 || LEGOCONTEXT_DROPIN != static_cast<i8>(player->field_0x7a5)) &&
-             NewLData == NULL && FadeSys.fade == 0.0f && editor_active == 0 && GameTimer.time_elapsed > 0.0f &&
-             world != NULL && world->current_level != TITLES_LDATA && GameMenu[GameMenuLevel].menu == -1 &&
-             CutSceneWaiting == 0 && CUTSTOPGAME == 0 && MiniCutCam == 0 && memcard_autosavestarted == 0 &&
-             !(memcard_autosavepostdelay > 0.0f)))
+        if (__builtin_expect(
+                !(Paused == 0 && GameTimer.update_count != 0 && !(memcard_autosavepredelay > 0.0f) && NewMode == 0 &&
+                  player != NULL && static_cast<i8>(player->apiobj.field_0x1f8) < 0 &&
+                  (LEGOCONTEXT_DROPIN == -1 || LEGOCONTEXT_DROPIN != static_cast<i8>(player->field_0x7a5)) &&
+                  NewLData == NULL && FadeSys.fade == 0.0f && editor_active == 0 && GameTimer.time_elapsed > 0.0f &&
+                  world != NULL && world->current_level != TITLES_LDATA && GameMenu[GameMenuLevel].menu == -1 &&
+                  CutSceneWaiting == 0 && CUTSTOPGAME == 0 && MiniCutCam == 0 && memcard_autosavestarted == 0 &&
+                  !(memcard_autosavepostdelay > 0.0f)),
+                0))
             continue;
         PauseGame(player->pad_gamepad - GamePad);
         break;
     }
 
     for (i32 track = 0; track < 2; ++track) {
-        if (NuSound3GetStereoStreamStatus(track) == NUSOUND_STEREO_STREAM_PLAYING) {
+        if (__builtin_expect(NuSound3GetStereoStreamStatus(track) == NUSOUND_STEREO_STREAM_PLAYING, 1)) {
             s_SystemPausedTracks[track] = 1;
             NuSound3PauseStereoStream(track);
         }

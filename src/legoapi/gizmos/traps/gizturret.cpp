@@ -704,7 +704,7 @@ static i32 GizTurrets_BoltHit(void *world, void *system_ptr, void *object_ptr, N
         return 0;
     }
     GIZTURRET_s *turret = system->turrets;
-    if (system->count == 0) {
+    if (__builtin_expect(system->count == 0, 0)) {
         return 0;
     }
     GameObject_s *object = static_cast<GameObject_s *>(object_ptr);
@@ -741,22 +741,22 @@ static i32 GizTurrets_BoltHit(void *world, void *system_ptr, void *object_ptr, N
     if (nearest == NULL) {
         return 0;
     }
-    if (hit_type != 7 && hit_type != 2 && bolt != NULL) {
+    if (__builtin_expect(hit_type != 7 && hit_type != 2 && bolt != NULL, 1)) {
         BoltType_FindByID(bolt->type_id, WORLD);
         Cheats_CheckFlags(2);
     }
     i32 damage = BoltType_FindByID(bolt->type_id, static_cast<WORLDINFO_s *>(world))->field_3c;
     i32 player_index = bolt->owner != NULL ? static_cast<i8>(bolt->owner->apiobj.field_0x27c) : -1;
-    if (GizTurrets_Hit(world, nearest, &bolt->position, player_index, damage) != 0) {
-        if (object != NULL) {
-            NewRumble(object->pad_gamepad->pad, 0.4f, 0);
-            GameCam_HitJudder();
-        }
-    } else {
+    if (GizTurrets_Hit(world, nearest, &bolt->position, player_index, damage) == 0) {
         NUVEC direction;
         NuVecSub(&direction, &nearest->position, &bolt->position);
         NuVecNorm(&direction, &direction);
         Bolt_AddDeflectedBolt(bolt, &bolt->field_0xac, &direction, hit_data);
+    } else {
+        if (object != NULL) {
+            NewRumble(object->pad_gamepad->pad, 0.4f, 0);
+            GameCam_HitJudder();
+        }
     }
     if (BoltSys->stop_targeting != NULL) {
         BoltSys->stop_targeting(object, points);

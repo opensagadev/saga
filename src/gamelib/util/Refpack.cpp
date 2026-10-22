@@ -651,12 +651,12 @@ i32 refpack(unsigned char *source, abi_long source_size, unsigned char *destinat
                         u32 size;
                         if (length <= 0xa && offset <= 0x3ff) {
                             size = 2;
-                        } else if (length <= 0x43 && offset <= 0x3fff) {
-                            size = 3;
-                        } else {
+                        } else if (!(length <= 0x43 && offset <= 0x3fff)) {
                             size = 4;
+                        } else {
+                            size = 3;
                         }
-                        if (length + 4 - size > match_length + 4 - command_size) {
+                        if (__builtin_expect(length + 4 - size > match_length + 4 - command_size, 1)) {
                             match_length = length;
                             match_offset = offset;
                             command_size = size;
@@ -722,7 +722,7 @@ i32 refpack(unsigned char *source, abi_long source_size, unsigned char *destinat
         literal_count -= count;
     }
     *output++ = literal_count - 4;
-    if (literal_count != 0) {
+    if (__builtin_expect(literal_count != 0, 1)) {
         memmove(output, literal_start, literal_count);
         output += literal_count;
     }

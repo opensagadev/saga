@@ -374,7 +374,8 @@ i32 TrooperShoot(WORLDINFO_s *world, minitrooperteam_s *team, minisnowtrooper_s 
 
         for (i32 i = 0; i < trooperteamcount; ++i) {
             minitrooperteam_s *candidate = &teams[i];
-            if (i == team_index || (candidate->state_flags & 1) == 0 || team->team_side == candidate->team_side)
+            if (__builtin_expect(
+                    i == team_index || (candidate->state_flags & 1) == 0 || team->team_side == candidate->team_side, 1))
                 continue;
 
             const f32 x = candidate->position.x - team->position.x;
@@ -407,7 +408,7 @@ i32 TrooperShoot(WORLDINFO_s *world, minitrooperteam_s *team, minisnowtrooper_s 
     NuMtxRotateYInline(&matrix, *shot_angle);
 
     BOLT_s *bolt = Bolt_Add(NULL, &shot_position, &matrix, team->bolt_type, 0);
-    if (bolt != NULL)
+    if (__builtin_expect(bolt != NULL, 1))
         Bolt[bolt->index].flags &= ~4;
     return 1;
 }

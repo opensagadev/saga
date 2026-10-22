@@ -678,7 +678,7 @@ void Grapple_DrawLine(GameObject_s *object) {
     const NUVEC *first_attachment;
     const NUVEC *second_attachment = NULL;
     const i32 joint_a = config->grapple_joint_a;
-    if (!(joint_a != -1 && object->apiobj.character_model->points_of_interest[joint_a] != NULL)) {
+    if (__builtin_expect(!(joint_a != -1 && object->apiobj.character_model->points_of_interest[joint_a] != NULL), 0)) {
         first_attachment = grapple->disabled ? &object->apiobj.collision_position : &object->apiobj.upper_position;
     } else {
         first_attachment = NUMTX_GET_ROW_VEC(&object->joint_matrices[joint_a], 3);
@@ -697,7 +697,8 @@ void Grapple_DrawLine(GameObject_s *object) {
     }
     NuRndrLine3d(vertices, SolidMtl3D, NULL);
     grapple = static_cast<GRAPPLE *>(object->field_0x788);
-    if ((grapple->flags & (GRAPPLE_FLAG_DISABLED | GRAPPLE_FLAG_REVERSED)) == GRAPPLE_FLAG_DISABLED) {
+    if (__builtin_expect((grapple->flags & (GRAPPLE_FLAG_DISABLED | GRAPPLE_FLAG_REVERSED)) == GRAPPLE_FLAG_DISABLED,
+                         1)) {
         vertices[0].position = vertices[1].position;
         DrawRopeCurved(&vertices[0].position, grapple->rope_points, 6, 0, NULL);
     }

@@ -823,7 +823,7 @@ void Hint_SetHint(HINT_s *hint, i32 force, i32 allow_completed) {
     HINTUIBUTTON_s *button = hintUIButton;
     if (button->field_0x78 != NULL && button->field_0x78 == hint)
         return;
-    if (hint == NULL) {
+    if (__builtin_expect(hint == NULL, 0)) {
         hintsys.active_hint = NULL;
         if (button->field_0x78 != NULL) {
             const f32 blend_time = AlphaBlendTime;

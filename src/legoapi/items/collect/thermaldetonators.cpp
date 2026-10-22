@@ -371,7 +371,7 @@ i32 ThermalDetonator_MoveCode(GameObject_s *object) {
                 case 7:
                     break;
                 default:
-                    if ((CInfo[object->character_context].flags & 4) == 0) {
+                    if (__builtin_expect((CInfo[object->character_context].flags & 4) == 0, 1)) {
                         return 0;
                     }
                     break;
@@ -392,7 +392,7 @@ i32 ThermalDetonator_MoveCode(GameObject_s *object) {
         object->character_context = 0x2e;
         if (object->field_0xe31 == 1) {
             object->context_animation = 0x6f;
-        } else if ((object->field_0xe22 & 1) != 0) {
+        } else if (__builtin_expect((object->field_0xe22 & 1) != 0, 1)) {
             object->context_animation = 0x6e;
         } else {
             object->context_animation = 0x65;
@@ -431,7 +431,7 @@ i32 ThermalDetonator_MoveCode(GameObject_s *object) {
             if (frame != NULL && !(*frame <= 0.0f) && *frame >= release_frame) {
                 object->movement_runtime_flags |= 0x40;
             }
-        } else if (!(object->context_animation_timer >= 0.5f)) {
+        } else if (__builtin_expect(!(object->context_animation_timer >= 0.5f), 0)) {
             object->movement_runtime_flags |= 0x40;
         }
     }

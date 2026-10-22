@@ -4312,7 +4312,7 @@ void edpartDoInput(nupad_s *pad) {
         }
     }
 
-    if (edpart_snap_enabled)
+    if (__builtin_expect(edpart_snap_enabled != 0, 1))
         edcamGetPosAngSnap(&edpart_cam_pos, &edpart_cam_ax, &edpart_cam_ay);
     else
         edcamGetPosAng(&edpart_cam_pos, &edpart_cam_ax, &edpart_cam_ay);
@@ -4906,17 +4906,17 @@ extern "C" {
             if ((part->active & 1) != 0) {
                 if ((part->flags & 2) != 0 && part->field_1bc != NULL)
                     part->field_1bc(part);
-                if ((part->active & 1) != 0) {
+                if (__builtin_expect((part->active & 1) != 0, 1)) {
                     if (part->field_1c4 != NULL)
                         part->field_1c4(part);
                     if (!(part->field_100 <= 0.0f)) {
                         part->field_100 -= time;
-                        if (part->field_100 <= 0.0f)
+                        if (__builtin_expect(part->field_100 <= 0.0f, 1))
                             KillPart(part, 0);
                     }
                 }
             }
-            if ((part->flags & 0x20000) != 0 && part->debris_key != NULL) {
+            if (__builtin_expect((part->flags & 0x20000) != 0 && part->debris_key != NULL, 1)) {
                 NuMtxSetIdentity(&emitter_orientation);
                 direction = part->velocity;
                 direction.x = -direction.x;

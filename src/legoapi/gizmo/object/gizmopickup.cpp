@@ -1421,10 +1421,10 @@ void GizmoPickups_SetOnOff() {
             GizmoPickupType[index].field_0x0f = 1;
         } else if (index == 4 && SuperStory != 0) {
             GizmoPickupType[index].field_0x0f = 1;
-        } else if (index == 9 && world->area != NULL && (world->area->flags & 0x100) != 0) {
-            GizmoPickupType[index].field_0x0f = 1;
-        } else {
+        } else if (!(index == 9 && world->area != NULL && (world->area->flags & 0x100) != 0)) {
             GizmoPickupType[index].field_0x0f = (arcade_flags & 0x20) != 0 && index != 9 && index != 5;
+        } else {
+            GizmoPickupType[index].field_0x0f = 1;
         }
     }
 }

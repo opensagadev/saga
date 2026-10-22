@@ -394,7 +394,7 @@ void ReadPads() {
 }
 
 void DoInput(WORLDINFO_s *world) {
-    if (world == NULL) {
+    if (__builtin_expect(world == NULL, 0)) {
         world = WorldInfo_CurrentlyActive();
     }
 

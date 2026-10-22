@@ -869,7 +869,7 @@ pushblock_s *NearestFacingPushBlock(WORLDINFO_s *world, GameObject_s *object, fl
             goto have_mode;
         } else if (angle <= 0xbc72) {
             return nearest;
-        } else if (angle > 0xc38d) {
+        } else if (__builtin_expect(angle > 0xc38d, 0)) {
             return nearest;
         } else {
             mode = 1;
@@ -944,7 +944,7 @@ pushblock_s *NearestFacingPushBlock(WORLDINFO_s *world, GameObject_s *object, fl
             continue;
         if ((block->flags_0ca & 0x20) != 0)
             continue;
-        if ((block->flags_0ca & 0x50) == 0x50)
+        if (__builtin_expect((block->flags_0ca & 0x50) == 0x50, 1))
             continue;
         gap = fabsf(dx) - block->bounds_max.x;
         goto have_gap;
@@ -958,7 +958,7 @@ pushblock_s *NearestFacingPushBlock(WORLDINFO_s *world, GameObject_s *object, fl
             continue;
         if ((block->flags_0ca & 0x10) != 0)
             continue;
-        if ((block->flags_0ca & 0x60) == 0x60)
+        if (__builtin_expect((block->flags_0ca & 0x60) == 0x60, 1))
             continue;
         gap = fabsf(dz) - max_z;
         goto have_gap;

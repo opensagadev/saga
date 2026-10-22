@@ -2398,7 +2398,7 @@ void WorldInfo_Load(WORLDINFO *world) {
     if (world->area == NULL) {
         goto after_area;
     }
-    if (__builtin_expect(world->area == HUB_ADATA && GAMEDEMO == 0, 0)) {
+    if (world->area == HUB_ADATA && GAMEDEMO == 0) {
         Hub_LoadAndFixUpMiniKits(world, &world->giz_buffer, &world->unknown_0108);
         if (abort_load != 0)
             goto abort;
@@ -2416,8 +2416,9 @@ void WorldInfo_Load(WORLDINFO *world) {
 
 after_area:
     // Load big icon scene for hub/status levels
-    if ((world->current_level == HUB_LDATA || (world->current_level->flags & LEVEL_STATUS) != 0) &&
-        big_icon_scene == NULL) {
+    if (__builtin_expect((world->current_level == HUB_LDATA || (world->current_level->flags & LEVEL_STATUS) != 0) &&
+                             big_icon_scene == NULL,
+                         1)) {
         world->icons_gscn = NuGScnRead(&world->giz_buffer, world->unknown_0108, "stuff\\icons\\starwars_icons_all.gsc");
     }
 
@@ -2583,7 +2584,7 @@ after_area:
         goto abort;
 
     // Level load function
-    if (world->current_level->load_fn != NULL) {
+    if (__builtin_expect(world->current_level->load_fn != NULL, 1)) {
         world->current_level->load_fn(world, &world->giz_buffer, &world->unknown_0108);
     }
 

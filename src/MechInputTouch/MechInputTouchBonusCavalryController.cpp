@@ -99,7 +99,7 @@ void MechInputTouchBonusCavalryController::Update(NuInputTouchData const *) {
     const f32 intensity = MAX(0.0f, MIN(1.0f, drag_length / drag_scale));
     stick_values[1] = -along * intensity;
     stick_values[0] = across * intensity;
-    if (WORLD->current_level == BONUS_GUNSHIPB_LDATA && __builtin_fabsf(stick_values[0]) > 0.3f) {
+    if (__builtin_expect(WORLD->current_level == BONUS_GUNSHIPB_LDATA && __builtin_fabsf(stick_values[0]) > 0.3f, 1)) {
         stick_values[0] = stick_values[0] < 0.0f ? -1.0f : 1.0f;
     }
     UpdateButtons();

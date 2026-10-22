@@ -160,7 +160,7 @@ void TrafficAnimSys_Configure(WORLDINFO_s *world, char *config) {
 
     i32 parsing_traffic = 0;
     while (NuFParGetLine(parser) != 0) {
-        if (NuFParGetWord(parser) == 0) {
+        if (__builtin_expect(NuFParGetWord(parser) == 0, 1)) {
             continue;
         }
         if (parsing_traffic == 0) {
@@ -238,7 +238,7 @@ void TrafficAnimSys_Reset(TRAFFICANIMSYS_s *system) {
     TRAFFICANIM_s *animation = system->animations;
     for (i32 animation_index = 0; animation_index < system->animation_count; ++animation_index, ++animation) {
         f32 frame = 0.0f;
-        if (animation->end_frame > 0.0f && animation->vehicle_count != 0) {
+        if (__builtin_expect(animation->end_frame > 0.0f && animation->vehicle_count != 0, 1)) {
             while (frame < animation->end_frame && animation->vehicle_count != 0) {
                 TRAFFICANIMINSTANCE_s *instance =
                     reinterpret_cast<TRAFFICANIMINSTANCE_s *>(NuLinkedListGetHead(&system->free_instances));
@@ -288,7 +288,7 @@ void TrafficAnimSys_Update(TRAFFICANIMSYS_s *system) {
         if (animation->next_spawn_time <= 0.0f) {
             if (animation->vehicle_count > 0) {
                 instance = reinterpret_cast<TRAFFICANIMINSTANCE_s *>(NuLinkedListGetHead(&system->free_instances));
-                if (instance != NULL) {
+                if (__builtin_expect(instance != NULL, 1)) {
                     NuLinkedListRemove(&system->free_instances, &instance->link);
                     NuLinkedListAppend(&system->active_instances, &instance->link);
                     instance->frame = 0.0f;

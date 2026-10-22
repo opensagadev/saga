@@ -2190,12 +2190,12 @@ void ReCalculateCompletionPoints() {
         CompletionPointInfo_ReCalculate[1] += POINTS_PER_STORY;
         if (save->area_complete != 0) {
             AddToCompletionPoints(POINTS_PER_STORY);
-            if ((area->flags & AREAFLAG_NO_GOLDBRICK) == 0) {
+            if (__builtin_expect((area->flags & AREAFLAG_NO_GOLDBRICK) == 0, 0)) {
                 AddToGoldBricks();
             }
         }
 
-        if ((area->flags & AREAFLAG_MINIKIT) == 0) {
+        if (__builtin_expect((area->flags & AREAFLAG_MINIKIT) == 0, 0)) {
             if ((area->flags & AREAFLAG_TRUE_JEDI) != 0 &&
                 (save->true_hero_complete[0] != 0 || save->true_hero_complete[1] != 0)) {
                 AddToCompletionPoints(POINTS_PER_TRUEJEDI);
@@ -2235,7 +2235,7 @@ void ReCalculateCompletionPoints() {
         }
 
         CompletionPointInfo_ReCalculate[1] += POINTS_PER_CHALLENGE;
-        if (save->reserved_0x7 != 0) {
+        if (__builtin_expect(save->reserved_0x7 != 0, 1)) {
             AddToCompletionPoints(POINTS_PER_CHALLENGE);
             if (GOLDBRICKFORCHALLENGE != 0) {
                 AddToGoldBricks();
@@ -2243,7 +2243,7 @@ void ReCalculateCompletionPoints() {
         }
     }
 
-    if (MissionSys != NULL && MissionSys->count != 0) {
+    if (__builtin_expect(MissionSys != NULL && MissionSys->count != 0, 1)) {
         for (i32 index = 0; index < MissionSys->count; ++index) {
             CompletionPointInfo_ReCalculate[3] += POINTS_PER_MISSION;
             if (Game.mission_save.completed[index] != 0) {

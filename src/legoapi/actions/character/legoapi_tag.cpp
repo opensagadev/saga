@@ -922,19 +922,22 @@ __attribute__((force_align_arg_pointer)) void TakeOverCode(GameObject_s *object,
     for (i32 i = 0; i < HIGHGAMEOBJECT; ++i) {
         GameObject_s *candidate = &Obj[i];
         const APIOBJECT &other = candidate->apiobj;
-        if ((other.field_0x1f8 & 0x1001) != 0x1001 || other.field_0x287 != 0 || other.field_0x27c != -1 ||
-            (CInfo[candidate->character_context].flags & 0x8000) != 0 || candidate->field_0xcc0 != NULL ||
-            (other.character_data->game_character->flags_090 & 0x40) == 0 ||
-            ((other.character_data->model_flags & 0x40000000) != 0 &&
-             (candidate->character_context == 0x3e || candidate->character_context == 0x17)) ||
-            (candidate->tag_flags & 2) != 0)
+        if (__builtin_expect((other.field_0x1f8 & 0x1001) != 0x1001 || other.field_0x287 != 0 ||
+                                 other.field_0x27c != -1 || (CInfo[candidate->character_context].flags & 0x8000) != 0 ||
+                                 candidate->field_0xcc0 != NULL ||
+                                 (other.character_data->game_character->flags_090 & 0x40) == 0 ||
+                                 ((other.character_data->model_flags & 0x40000000) != 0 &&
+                                  (candidate->character_context == 0x3e || candidate->character_context == 0x17)) ||
+                                 (candidate->tag_flags & 2) != 0,
+                             1))
             continue;
         if (candidate->id == id_ATAT && WORLD->current_level == SPEEDERCHASEA_LDATA) {
             if (api.field_0x281 == 0x13)
                 nearest = candidate;
             continue;
         }
-        if (api.collision_min.y > other.collision_max.y || other.collision_min.y > api.collision_max.y)
+        if (__builtin_expect(api.collision_min.y > other.collision_max.y || other.collision_min.y > api.collision_max.y,
+                             1))
             continue;
         const f32 dz = other.collision_position.z - api.collision_position.z;
         const f32 dx = other.collision_position.x - api.collision_position.x;
