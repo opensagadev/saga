@@ -1,6 +1,9 @@
 // Original translation unit reconstructed from the reference address map.
 // Functions are defined in original address order.
 
+// nutrig.c defines its own C-linkage NuASin (see nutrig.h).
+#define NUTRIG_LOCAL_ASIN
+
 // The original unit constructs the homogeneous VuVec header constants.
 #include "nu2api/nucore/nuvuvec.hpp"
 
@@ -56,12 +59,6 @@ static i32 pow_cache_free;
 #define POW3(x) ((x) * POW2(x))
 #define POW4(x) (POW2(x) * POW2(x))
 #define POW5(x) (POW2(x) * POW3(x))
-
-// nutrig.c's own arcsine; C linkage in the original, so it keeps its plain
-// name next to the C++ inline in nutrig.h.
-extern "C" {
-    static i16 NuASinC(f32 sin) __asm__("NuASin");
-}
 
 NUVEC v000 = {0};
 NUVEC nuvec_zero = {0};
@@ -181,7 +178,7 @@ extern "C" {
 }
 
 extern "C" {
-static i16 NuASinC(f32 sin) {
+static i16 NuASin(f32 sin) {
     f32 abs;
     f32 sqrt;
     f32 unknown_a;
@@ -211,7 +208,7 @@ static i16 NuASinC(f32 sin) {
 }
 
 i16 NuACos(f32 cos) {
-    return 0x4000 - NuASinC(cos);
+    return 0x4000 - NuASin(cos);
 }
 
 extern "C" {

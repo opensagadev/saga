@@ -517,9 +517,6 @@ extern "C" {
     void (*nuwarning_handler)(char *);
     i32 DisableDebugMsg;
 
-    // Bound to sprintf by symbol so the one-space caption stays a real call, as in the original.
-    int NuErrorSprintf(char *buffer, const char *format, ...) __asm__("sprintf");
-
 }
 
 extern "C" {
@@ -9936,7 +9933,7 @@ extern "C" {
     }
 
     void NuSevereWarning(const char *format, ...) {
-        NuErrorSprintf(captxt, " ");
+        sprintf(captxt, " ");
         va_list args;
         va_start(args, format);
         vsprintf(txt, format, args);

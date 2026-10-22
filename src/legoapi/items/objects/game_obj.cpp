@@ -129,13 +129,6 @@ extern i16 id_ANAKINJEDI, id_ANAKINJEDISCARRED, id_GAMORREANGUARD, id_MOUSEDROID
 extern i16 id_BUGGY, id_RADIOCAR, id_POLICECAR, id_MOWER;
 extern i32 objhitobj_noattackerrumble, objhitobj_nohurtsfx, objhitobj_noimpactsfx, objhitobj_throwkillpartsup;
 
-void TiePart_Kill(PART_s *, i32) asm("_ZL12TiePart_KillP6PART_si") __attribute__((visibility("hidden")));
-void TiePart_Move(PART_s *, f32) asm("_ZL12TiePart_MoveP6PART_sf") __attribute__((visibility("hidden")));
-void TiePart_Impact(PART_s *) asm("_ZL14TiePart_ImpactP6PART_s") __attribute__((visibility("hidden")));
-void TiePart_KillExplode(PART_s *, i32) asm("_ZL19TiePart_KillExplodeP6PART_si") __attribute__((visibility("hidden")));
-void TieSpinZPart_Move(PART_s *, f32) asm("_ZL17TieSpinZPart_MoveP6PART_sf") __attribute__((visibility("hidden")));
-void AtatPart_Stop(PART_s *part) __asm__("_ZL13AtatPart_StopP6PART_s") __attribute__((visibility("hidden")));
-void AtatPart_Update(PART_s *part) __asm__("_ZL15AtatPart_UpdateP6PART_s") __attribute__((visibility("hidden")));
 
 static const u8 objhit_damage_joints[3] = {6, 8, 7};
 
@@ -208,20 +201,20 @@ static __used__ i32 SpeederPart_Draw(PART_s *) {
     return 1;
 }
 
-__used__ void TiePart_Impact(PART_s *part) {
+static __used__ void TiePart_Impact(PART_s *part) {
     AddGameDebris(WORLD->debris_sys, 0x6a, &part->position);
 }
 
-__used__ void TiePart_Kill(PART_s *part, i32) {
+static __used__ void TiePart_Kill(PART_s *part, i32) {
     AddGameDebris(WORLD->debris_sys, 0x6a, &part->position);
 }
 
-void AtatPart_Stop(PART_s *part) {
+static void AtatPart_Stop(PART_s *part) {
     PlaySfx("EXPLODE1", &part->position);
     PartStop_Flickerer(part);
 }
 
-void AtatPart_Update(PART_s *part) {
+static void AtatPart_Update(PART_s *part) {
     f32 choice = NuFloatRand(reinterpret_cast<NURAND *>(&GAMERAND)) * 100.0f + 1.0f;
     if (part->scale_time < 1.0f) {
         AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[118].effect, &part->position,
@@ -366,7 +359,7 @@ static __used__ void SpeederPart_Update(PART_s *part) {
     }
 }
 
-__used__ void TiePart_KillExplode(PART_s *part, i32) {
+static __used__ void TiePart_KillExplode(PART_s *part, i32) {
     AddGameDebris(WORLD->debris_sys, 0x6b, &part->position);
     AddPartDebris(WORLD->part_debris_sys, 3, &part->position);
 }
@@ -456,7 +449,7 @@ void CreatureCrate_Stop(PART_s *part) {
     NewRumbleAllPlayers(0.0f, 0.0f, 2, 0);
 }
 
-__used__ void TieSpinZPart_Move(PART_s *part, f32 time) {
+static __used__ void TieSpinZPart_Move(PART_s *part, f32 time) {
     static NUVEC vec = {0.0f, 0.0f, -0.05f};
     part->field_124[3] = 200000;
     part->field_13c = static_cast<i32>(200000.0f * FRAMETIME);
@@ -477,7 +470,7 @@ __used__ void TieSpinZPart_Move(PART_s *part, f32 time) {
                                       NULL, NULL);
 }
 
-__used__ void TiePart_Move(PART_s *part, f32 time) {
+static __used__ void TiePart_Move(PART_s *part, f32 time) {
     part->field_124[3] = -32768;
     part->field_13c = static_cast<u16>(-32768.0f * FRAMETIME);
     NUVEC position;

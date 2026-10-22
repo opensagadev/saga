@@ -8,6 +8,11 @@
 
 #ifdef __cplusplus
 f32 NuASin_Accurate(f32 value);
+#endif
+
+// nutrig.c is a C unit in the original and defines its own static NuASin; it
+// sets NUTRIG_LOCAL_ASIN so this C++ inline does not shadow that one.
+#if defined(__cplusplus) && !defined(NUTRIG_LOCAL_ASIN)
 static inline i16 NuASin(f32 sin) {
     f32 abs;
     f32 sqrt;

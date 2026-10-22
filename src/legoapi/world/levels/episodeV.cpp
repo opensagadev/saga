@@ -128,7 +128,6 @@ extern i32 LevFlag[4];
 GIZPANEL_s *LevGizPanel;
 AILOCATOR_s *locator;
 GameObject_s *gameobj;
-extern i16 BoltType_FindIDByNameWide(char *, WORLDINFO_s *) asm("_Z21BoltType_FindIDByNamePcP11WORLDINFO_s");
 static GameObject_s *Vader_obj;
 static GIZAIMESSAGE_s *Vader_ai_message;
 static u8 turretAliveCount;
@@ -1441,8 +1440,8 @@ void IncrementMinikitCounter(GameObject_s *) {
 void HothBattleA_Init(WORLDINFO_s *world) {
     LevGizmo[0] = GizmoFindByName(world->gizmo_sys, gizmopickup_typeid, "m_pup3");
     GizmoSetVisibility(world->gizmo_sys, LevGizmo[0], 0, 1);
-    trooper_boltid[1] = BoltType_FindIDByNameWide("trooper_green", world);
-    trooper_boltid[0] = BoltType_FindIDByNameWide("trooper_red", world);
+    trooper_boltid[1] = BoltType_FindIDByName("trooper_green", world);
+    trooper_boltid[0] = BoltType_FindIDByName("trooper_red", world);
     trooper_side[0] = 0;
     trooper_side[1] = 1;
     InitMiniSnowTroopers(world, 2, 32, 0);
@@ -1499,8 +1498,8 @@ void HothBattleC_Init(WORLDINFO_s *world) {
     LevGizmo[0] = GizmoFindByName(world->gizmo_sys, obstacle_gizmotype_id, "obstacle3");
     LevGizmo[1] = GizmoFindByName(world->gizmo_sys, gizmopickup_typeid, "m_pup7");
     NuSpecialSetVisibility(&LevHSpecial[10], 0);
-    trooper_boltid[1] = BoltType_FindIDByNameWide("trooper_green", world);
-    trooper_boltid[0] = BoltType_FindIDByNameWide("trooper_red", world);
+    trooper_boltid[1] = BoltType_FindIDByName("trooper_green", world);
+    trooper_boltid[0] = BoltType_FindIDByName("trooper_red", world);
     trooper_side[0] = 0;
     trooper_side[1] = 1;
     InitMiniSnowTroopers(world, 2, 32, 0);
@@ -1977,8 +1976,8 @@ void HothBattleE_Update(WORLDINFO_s *world) {
 }
 
 void HothBattleE_Init(WORLDINFO_s *world) {
-    trooper_boltid[1] = BoltType_FindIDByNameWide("trooper_green", world);
-    trooper_boltid[0] = BoltType_FindIDByNameWide("trooper_red", world);
+    trooper_boltid[1] = BoltType_FindIDByName("trooper_green", world);
+    trooper_boltid[0] = BoltType_FindIDByName("trooper_red", world);
     trooper_side[0] = 0;
     trooper_side[1] = 0;
     trooper_side[2] = 0;
