@@ -519,10 +519,10 @@ void InitStatusScreen(WORLDINFO_s *world) {
                     p.time_reward_score = *p.score;
                 } else {
                     f32 new_time = p.superstory_time;
-                    if (new_time < p.previous_best_time)
-                        Game.episode_save[episode].superstory_time_limit = new_time;
-                    else
+                    if (new_time >= p.previous_best_time)
                         new_time = 0.0f;
+                    else
+                        Game.episode_save[episode].superstory_time_limit = new_time;
                     p.new_best_time = new_time;
                     u32 new_score = p.superstory_score;
                     if (new_score > previous_score)
@@ -672,7 +672,7 @@ void InitStatusScreen(WORLDINFO_s *world) {
                     AddStatusStage(&p, 25, 0);
             } else
                 AddStatusStage(&p, 23, 0);
-            if (Game.field_0x7c26[0] > p.previous_gold_bricks)
+            if (__builtin_expect(Game.field_0x7c26[0] > p.previous_gold_bricks, 1))
                 AddStatusStage(&p, 19, 0);
             AddStatusStage(&p, 9, 0);
             AddStatusStage(&p, 10, 0);
@@ -708,7 +708,7 @@ void InitStatusScreen(WORLDINFO_s *world) {
             p.true_hero_percent = 100.0f;
         } else {
             f32 numerator = p.collected_score * 100.0f;
-            if (numerator != 0.0f && p.true_hero_target != 0.0f) {
+            if (__builtin_expect(numerator != 0.0f && p.true_hero_target != 0.0f, 1)) {
                 f32 percent = numerator / p.true_hero_target;
                 p.true_hero_percent = MIN(percent, 99.0f);
             } else {
@@ -841,7 +841,7 @@ void InitStatusScreen(WORLDINFO_s *world) {
         }
         if (Game.field_0x7c26[0] > p.previous_gold_bricks)
             AddStatusStage(&p, 19, 0);
-        if ((p.mode_flags & 8) == 0)
+        if (__builtin_expect((p.mode_flags & 8) == 0, 1))
             AddStatusStage(&p, 9, 0);
         AddStatusStage(&p, 10, 0);
         if (netclient == 0)

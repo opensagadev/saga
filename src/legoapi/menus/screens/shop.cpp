@@ -2178,7 +2178,34 @@ void DrawSubItems() {
             }
             case 2: {
                 u16 spin = rotation;
-                if (items[shelf_ids[slot]].unlocked == 1) {
+                if (items[shelf_ids[slot]].unlocked != 1) {
+                    const u16 angle = shelfang + (item->unlocked == 1 ? spin : 0);
+                    DrawItem(&toolblank, &position, scale, 1.0f, ypush, 0, angle, 0);
+                    const i32 current_id = shelf_ids[slot];
+                    shopitem_s *current_item = &items[current_id];
+                    const i32 id = static_cast<u16>(current_item->item_id);
+                    if (!(!(Game.extra_purchased_bits[id >> 5] >> (id & 31) & 1) && id > 7 &&
+                          static_cast<i8>(Cheat[id].area) != -1 &&
+                          !Game.area_save[static_cast<i8>(Cheat[id].area)].red_brick_collected)) {
+                        if (NuSpecialExistsFn(&current_item->special) != 0) {
+                            NUANGVEC item_rotation;
+                            
+                            NUVEC item_scale;
+                            item_rotation.y = angle;
+                            item_rotation.x = 0;
+                            item_rotation.z = 0;
+                            NuMtxSetRotateXYZVU0(&item_matrix_b, &item_rotation);
+                            item_scale.x = item_scale.y = item_scale.z = scale;
+                            NuMtxScaleVU0(&item_matrix_b, &item_scale);
+                            *reinterpret_cast<NUVEC *>(&item_matrix_b.m30) = position;
+                            item_matrix_b.m31 += ypush;
+                            NuSpecialDrawAt(&current_item->special, &item_matrix_b);
+                        }
+                    } else {
+                        if (NuSpecialExistsFn(&extrasils[current_id]) != 0)
+                            DrawItem(&extrasils[shelf_ids[slot]], &position, scale, 1.0f, ypush, 0, angle, 0);
+                    }
+                } else {
                     if (pickedbing > 0.0f && slot == 3)
                         spin += static_cast<i32>(NuFmod(GameTimer.time_elapsed, 4.0f) * 0.25f * 65536.0f);
                     else
@@ -2200,33 +2227,6 @@ void DrawSubItems() {
                             *reinterpret_cast<NUVEC *>(&item_matrix_a.m30) = position;
                             item_matrix_a.m31 += ypush;
                             NuSpecialDrawAt(&current_item->special, &item_matrix_a);
-                        }
-                    }
-                } else {
-                    const u16 angle = shelfang + (item->unlocked == 1 ? spin : 0);
-                    DrawItem(&toolblank, &position, scale, 1.0f, ypush, 0, angle, 0);
-                    const i32 current_id = shelf_ids[slot];
-                    shopitem_s *current_item = &items[current_id];
-                    const i32 id = static_cast<u16>(current_item->item_id);
-                    if (!(Game.extra_purchased_bits[id >> 5] >> (id & 31) & 1) && id > 7 &&
-                        static_cast<i8>(Cheat[id].area) != -1 &&
-                        !Game.area_save[static_cast<i8>(Cheat[id].area)].red_brick_collected) {
-                        if (NuSpecialExistsFn(&extrasils[current_id]) != 0)
-                            DrawItem(&extrasils[shelf_ids[slot]], &position, scale, 1.0f, ypush, 0, angle, 0);
-                    } else {
-                        if (NuSpecialExistsFn(&current_item->special) != 0) {
-                            NUANGVEC item_rotation;
-                            
-                            NUVEC item_scale;
-                            item_rotation.y = angle;
-                            item_rotation.x = 0;
-                            item_rotation.z = 0;
-                            NuMtxSetRotateXYZVU0(&item_matrix_b, &item_rotation);
-                            item_scale.x = item_scale.y = item_scale.z = scale;
-                            NuMtxScaleVU0(&item_matrix_b, &item_scale);
-                            *reinterpret_cast<NUVEC *>(&item_matrix_b.m30) = position;
-                            item_matrix_b.m31 += ypush;
-                            NuSpecialDrawAt(&current_item->special, &item_matrix_b);
                         }
                     }
                 }

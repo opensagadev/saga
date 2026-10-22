@@ -197,8 +197,9 @@ static void GizBombGens_Update(void *world_ptr, void *system_ptr, float) {
                             player->cable = NULL;
                     }
 
-                    if (player != NULL && player->apiobj.player_controlled && player_bombs[0] != NULL &&
-                        player->cable == NULL) {
+                    if (__builtin_expect(player != NULL && player->apiobj.player_controlled &&
+                                             player_bombs[0] != NULL && player->cable == NULL,
+                                         1)) {
                         NUVEC bomb_position = {0.0f, 0.0f, -2.0f};
                         NuVecRotateY(&bomb_position, &bomb_position, player->apiobj.field_0x276);
                         NuVecAdd(&bomb_position, &bomb_position, &players[0]->apiobj.collision_position);

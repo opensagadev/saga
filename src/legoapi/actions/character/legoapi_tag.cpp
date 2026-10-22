@@ -650,7 +650,20 @@ void Tag_Check(GameObject_s *object) {
     }
     if (object->apiobj.field_0x27c == -1)
         return;
-    if ((object->tag_flags & 4) == 0) {
+    if ((object->tag_flags & 4) != 0) {
+        object->tag_cooldown -= FRAMETIME;
+        if (object->tag_cooldown > 0.0f && object->pending_tag_target != NULL) {
+            target = object->pending_tag_target;
+            if ((target->apiobj.field_0x1f8 & 0x1001) != 0x1001) {
+                object->pending_tag_target = NULL;
+            } else {
+                result = (object->field_0xf00 & 2) != 0 ? TakeOverYoda(object, target, 0, 1)
+                                                        : TagCode(object, target, (object->tag_flags >> 3) & 1, 0, 1);
+            }
+        }
+        if (result == 0)
+            object->tag_flags &= ~4;
+    } else {
         object->tag_player_index = -1;
         if (object->apiobj.player_controlled && object->apiobj.field_0x287 == 0 &&
             (CInfo[object->character_context].flags & 0x800) == 0 && !object->apiobj.script_enabled &&
@@ -659,7 +672,7 @@ void Tag_Check(GameObject_s *object) {
                 if ((object->pad_gamepad->buttons_pressed & GAMEPAD_TAG) != 0)
                     object->hud_icon_timer = 2.0f;
             } else {
-                if (Arcade == 0 && Tag_Mode == 3 && GetMenuID() == -1) {
+                if (__builtin_expect(Arcade == 0 && Tag_Mode == 3 && GetMenuID() == -1, 1)) {
                     if (__builtin_expect(FindGameMsgsWithID(-1, 0, -1, NULL) == 0, 1)) {
                         i32 pack_index = -1;
                         f32 nearest = 0.7f * 0.7f * 2.0f;
@@ -776,19 +789,6 @@ void Tag_Check(GameObject_s *object) {
                 }
             }
         }
-    } else {
-        object->tag_cooldown -= FRAMETIME;
-        if (object->tag_cooldown > 0.0f && object->pending_tag_target != NULL) {
-            target = object->pending_tag_target;
-            if ((target->apiobj.field_0x1f8 & 0x1001) != 0x1001) {
-                object->pending_tag_target = NULL;
-            } else {
-                result = (object->field_0xf00 & 2) != 0 ? TakeOverYoda(object, target, 0, 1)
-                                                        : TagCode(object, target, (object->tag_flags >> 3) & 1, 0, 1);
-            }
-        }
-        if (result == 0)
-            object->tag_flags &= ~4;
     }
     if (result == 1) {
         object->tag_flags &= ~4;

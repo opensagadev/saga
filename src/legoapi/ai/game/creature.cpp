@@ -4282,7 +4282,7 @@ static void DrawParaphernalia(GameObject_s *object) {
     GAMECHARACTERDATA_s *config = object->apiobj.character_data->game_character;
     NUMTX *joints = object->joint_matrices;
     if ((config->flags_094[0] & 1) != 0) {
-        if (BonusArea && VehicleArea) {
+        if (__builtin_expect(BonusArea && VehicleArea, 1)) {
             CharMiniKit_Draw(object->id, &object->apiobj.field_0xb8, object->field_0x1087, object->field_0x1020,
                              WORLD->current_level->unknown_0cc);
         }
@@ -4324,7 +4324,7 @@ static void DrawParaphernalia(GameObject_s *object) {
             (weapon_time = AnimPlaying(&object->apiobj.anim_packet, 0x5e, 1, 0)) != NULL) {
             f32 frame = *weapon_time;
             if (frame >= 18.0f && frame <= 65.0f) {
-                if (frame <= 27.0f)
+                if (__builtin_expect(frame <= 27.0f, 1))
                     scale = (frame - 18.0f) / 9.0f;
                 else if (frame < 55.0f)
                     scale = 1.0f;
@@ -4347,11 +4347,12 @@ static void DrawParaphernalia(GameObject_s *object) {
             scale = 1.0f;
             show = (GameTimer.update_count & 3) < 2;
         }
-        if (show) {
+        if (__builtin_expect(show != 0, 0)) {
             i32 locator = shield_config->shield_locator;
             NUVEC scaling = {scale, scale, scale};
             NuMtxSetScale(&shield_matrix, &scaling);
-            if (locator != -1 && object->apiobj.character_model->points_of_interest[locator] != NULL)
+            if (__builtin_expect(locator != -1 && object->apiobj.character_model->points_of_interest[locator] != NULL,
+                                 1))
                 NuMtxTranslate(&shield_matrix, reinterpret_cast<NUVEC *>(&joints[locator].m30));
             else
                 NuMtxTranslate(&shield_matrix, &object->apiobj.collision_position);
@@ -4371,14 +4372,7 @@ static void DrawParaphernalia(GameObject_s *object) {
         const i32 locator = communicate_config->thingy_locator;
         if (locator != -1 && object->apiobj.character_model->points_of_interest[locator] != NULL) {
             i32 model_id;
-            if (!(object->apiobj.character_data->model_flags & 0x40)) {
-                model_id = (communicate_config->flags_094[0] & 0x80) ? 0x0e : -1;
-                communicate_matrix = joints[locator];
-                if (object->communicate_blend != 1.0f) {
-                    effect_vector.x = effect_vector.y = effect_vector.z = object->communicate_blend;
-                    NuMtxPreScale(&communicate_matrix, &effect_vector);
-                }
-            } else {
+            if (object->apiobj.character_data->model_flags & 0x40) {
                 f32 scale = object->communicate_blend * object->apiobj.field_0xa8;
                 NUVEC scaling = {scale, scale, scale};
                 NuMtxSetScale(&communicate_matrix, &scaling);
@@ -4389,6 +4383,13 @@ static void DrawParaphernalia(GameObject_s *object) {
                 if (object->apiobj.field_0x27f == 9 && object->apiobj.water_height > communicate_matrix.m31)
                     communicate_matrix.m31 = object->apiobj.water_height;
                 model_id = 0x19;
+            } else {
+                model_id = (communicate_config->flags_094[0] & 0x80) ? 0x0e : -1;
+                communicate_matrix = joints[locator];
+                if (object->communicate_blend != 1.0f) {
+                    effect_vector.x = effect_vector.y = effect_vector.z = object->communicate_blend;
+                    NuMtxPreScale(&communicate_matrix, &effect_vector);
+                }
             }
             if (model_id != -1 && WORLD->lev_objs[model_id].active) {
                 NuSpecialDrawAt(&WORLD->lev_objs[model_id].special, &communicate_matrix);
@@ -4412,7 +4413,7 @@ static void DrawParaphernalia(GameObject_s *object) {
             effect_vector.z = object->apiobj.collision_position.z;
             f32 radius = NuFmax(object->apiobj.field_0x1dc, object->apiobj.field_0x1e0) * 1.75f;
             f32 alpha;
-            if (__builtin_expect(object->field_0x768 < 0.2f, 1)) {
+            if (object->field_0x768 < 0.2f) {
                 alpha = object->field_0x768 / 0.2f;
             } else if (object->context_animation_timer < 0.2f) {
                 alpha = object->context_animation_timer / 0.2f;
@@ -4547,7 +4548,7 @@ static void DrawParaphernalia(GameObject_s *object) {
                                 f32 decay_start = animation_end < finish ? animation_end : finish;
                                 f32 decay_end = animation_end < last ? animation_end : last;
                                 bool show = true;
-                                if (!(decay_start >= *placement_time)) {
+                                if (__builtin_expect(!(decay_start >= *placement_time), 0)) {
                                     if (decay_end > *placement_time && decay_end > decay_start)
                                         scale = 1.0f - (*placement_time - decay_start) / (decay_end - decay_start);
                                     else
@@ -4613,7 +4614,8 @@ static void DrawParaphernalia(GameObject_s *object) {
         Customiser_DrawAccessories(CharacterCustomiser, object, NULL);
         config = object->apiobj.character_data->game_character;
     }
-    if ((config->flags_090 & 0x01000000) && object->field_0xd80 > 0.0f && object->field_0xd8c > 0.0f)
+    if (__builtin_expect((config->flags_090 & 0x01000000) && object->field_0xd80 > 0.0f && object->field_0xd8c > 0.0f,
+                         1))
         Transform_DrawTarget(&object->force_glow_position,
                              (1.4f + 0.20000004768371582f * object->field_0xd80) * object->field_0xd8c,
                              0.4f + 0.6f * object->field_0xd80);
@@ -4645,7 +4647,7 @@ static void DrawParaphernalia(GameObject_s *object) {
                     }
                 }
             }
-            if (__builtin_expect(chosen != -1, 0))
+            if (__builtin_expect(chosen != -1, 1))
                 NuSpecialDrawAt(&WORLD->lev_objs[0x0a].special, NuSpecialGetDrawMtx(&LevHSpecial[chosen]));
         }
     } else if (object->id == id_TWOFACE && (special_time = AnimPlaying(&object->apiobj.anim_packet, 1, 0, 0)) != NULL) {

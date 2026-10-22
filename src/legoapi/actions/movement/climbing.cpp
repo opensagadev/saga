@@ -658,7 +658,7 @@ void LedgeTerrain_MoveCode(GameObject_s *object) {
                     NuFsqrt(-2.0f * object->apiobj.character_data->game_character->gravity * height);
             return;
         }
-        if (object->apiobj.field_0x27d & 2) {
+        if (__builtin_expect(object->apiobj.field_0x27d & 2 != 0, 0)) {
             object->character_context = -1;
             return;
         }
@@ -685,7 +685,7 @@ void LedgeTerrain_MoveCode(GameObject_s *object) {
             travelled = NuFsqrt(x * x + z * z);
         } else {
             object->airborne_action_duration -= FRAMETIME;
-            if (object->airborne_action_duration <= 0.0f) {
+            if (__builtin_expect(object->airborne_action_duration <= 0.0f, 1)) {
                 object->character_context = -1;
                 return;
             }
@@ -706,12 +706,12 @@ void LedgeTerrain_MoveCode(GameObject_s *object) {
                 object->context_animation = LEGOACT_LEDGE_RIGHT;
                 speed = fabsf(AnimSpeed(object->apiobj.character_model, LEGOACT_LEDGE_RIGHT));
             } else {
-                if (LedgeTerrain_CheckAnims)
+                if (__builtin_expect(LedgeTerrain_CheckAnims != 0, 1))
                     return;
                 speed = 0.5f;
                 goto move;
             }
-        } else if (push < -NuTrigTable[0x3555]) {
+        } else if (__builtin_expect(push < -NuTrigTable[0x3555], 1)) {
             if (LEGOACT_LEDGE_LEFT != -1 && object->apiobj.character_model->model_data_b[LEGOACT_LEDGE_LEFT] != NULL) {
                 object->context_animation = LEGOACT_LEDGE_LEFT;
                 speed = -fabsf(AnimSpeed(object->apiobj.character_model, LEGOACT_LEDGE_LEFT));
@@ -725,12 +725,12 @@ void LedgeTerrain_MoveCode(GameObject_s *object) {
             object->context_animation = LEGOACT_LEDGE_IDLE;
             return;
         }
-        if (speed == 0.0f)
+        if (__builtin_expect(speed == 0.0f, 0))
             return;
         if (LedgeTerrain_CheckAnims && !AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0))
             return;
     move:
-        if (speed < 0.0f)
+        if (__builtin_expect(speed < 0.0f, 1))
             travelled = -travelled;
         f32 distance = speed * FRAMETIME + travelled;
         NUVEC offset;
@@ -746,8 +746,9 @@ void LedgeTerrain_MoveCode(GameObject_s *object) {
     if (LedgeTerrain_CheckAnims &&
         (LEGOACT_LEDGE_IDLE == -1 || object->apiobj.character_model->model_data_b[LEGOACT_LEDGE_IDLE] == NULL))
         return;
-    if (object->character_context != -1 &&
-        !(LEGOCONTEXT_CLIMB != -1 && object->character_context == LEGOCONTEXT_CLIMB)) {
+    if (__builtin_expect(object->character_context != -1 &&
+                             !(LEGOCONTEXT_CLIMB != -1 && object->character_context == LEGOCONTEXT_CLIMB),
+                         1)) {
         if (LEGOCONTEXT_JUMP == -1 || object->character_context != LEGOCONTEXT_JUMP ||
             !(object->context_animation_timer >= 0.1f))
             return;

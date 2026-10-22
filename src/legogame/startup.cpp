@@ -420,7 +420,7 @@ void LoadPerm(void) {
         i32 language_index = 0;
         while (Text_LanguageList[language_index].language != device_language) {
             ++language_index;
-            if (language_index == LANGUAGECOUNT) {
+            if (__builtin_expect(language_index == LANGUAGECOUNT, 0)) {
                 break;
             }
         }
@@ -429,7 +429,7 @@ void LoadPerm(void) {
         } else {
             NuLanguageSet(device_language);
             Text_Language = static_cast<u32>(device_language);
-            if (language_index >= LANGUAGECOUNT) {
+            if (__builtin_expect(language_index >= LANGUAGECOUNT, 1)) {
                 LoadPerm_LanguageSelect = 0;
             }
         }
@@ -496,7 +496,7 @@ void LoadPerm(void) {
                 const i32 texture_id = legal_tid;
                 if (texture_id != 0) {
                     NUMTL *mtl = NuMtlCreate(1);
-                    if (mtl != nullptr) {
+                    if (__builtin_expect(mtl != nullptr, 0)) {
                         mtl->opacity = 1.0f;
                         mtl->diffuse_color = {1.0f, 1.0f, 1.0f};
                         mtl->shader_desc.flags = 0x1000;
@@ -541,7 +541,7 @@ void LoadPerm(void) {
 
         NuRndrBeginScene(-1);
         NuRndrGradClear(0xf00, 0x80000000, 0x80000000, 1.0f);
-        if (tail_timer == 0.2f) {
+        if (__builtin_expect(tail_timer == 0.2f, 1)) {
             DrawMenu(0);
 
             if (legal_timer > 0.0f && legal_timer < 5.8f && legal_mtl != nullptr) {
@@ -635,11 +635,11 @@ void LoadPerm(void) {
                 }
             }
 
-            if (intro_timer > 0.0f && intro_timer < 3.8f) {
+            if (__builtin_expect(intro_timer > 0.0f && intro_timer < 3.8f, 0)) {
                 f32 alpha;
-                if (!(intro_timer >= 0.3f)) {
+                if (__builtin_expect(!(intro_timer >= 0.3f), 0)) {
                     alpha = intro_timer / 0.3f;
-                } else if (intro_timer < 3.3f) {
+                } else if (__builtin_expect(intro_timer < 3.3f, 1)) {
                     alpha = 1.0f;
                 } else if (!(intro_timer < 3.6f)) {
                     alpha = 0.0f;
@@ -658,7 +658,7 @@ void LoadPerm(void) {
         edGraDisableTerrainSwap();
         if (FRAMETIME < DEFAULTFRAMETIME) {
             FRAMETIME = DEFAULTFRAMETIME;
-        } else if (FRAMETIME > DEFAULTFRAMETIME * 3.0f) {
+        } else if (__builtin_expect(FRAMETIME > DEFAULTFRAMETIME * 3.0f, 0)) {
             FRAMETIME = DEFAULTFRAMETIME * 3.0f;
         }
     }

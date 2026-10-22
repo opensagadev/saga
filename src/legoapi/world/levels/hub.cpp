@@ -2449,7 +2449,7 @@ void Hub_DrawFreePlaySelect() {
                         radarpulsetimer -= FRAMETIME;
                     }
                     f32 grow = 1.0f;
-                    if (!TestForController()) {
+                    if (__builtin_expect(!TestForController(), 1)) {
                         const f32 elapsed = GlobalTimer.time_elapsed - (LastTouchTime + 2.0f);
                         if (!(elapsed <= 4.0f)) {
                             f32 wave = NU_SIN_LUT(static_cast<i32>(NuFmod(elapsed, 4.0f) * 0.25f * 65536.0f)) - 0.8f;
@@ -2460,7 +2460,7 @@ void Hub_DrawFreePlaySelect() {
                     }
                     DrawCharIcon(model, x, y, 0.0f, grow * size, 0xa6, opacity, opacity, 1, NULL);
                 }
-                if (model != -1 && progress > 0.0f) {
+                if (__builtin_expect(model != -1 && progress > 0.0f, 1)) {
                     char name[64];
                     char *text = GameObj_GetName(model, NULL, name);
                     SmartTextEx(text, base_x, 0.475f, 1.0f, 0.45f, 0.45f, 0.45f, 1, 255, 191, 0, 1.25f, 2, NULL, 0,
@@ -4184,7 +4184,7 @@ void Hub_Update(WORLDINFO_s *world) {
                 APICharacterLoaded(id) != NULL && FindGameObject(id, 0, 0, 0, 0) == NULL) {
                 AIPATHINFO_s *path_info = NULL;
                 AILOCATORSET *locator_set = AIPathFindLocatorSet(world->ai_sys, store_pack.custodian_locator_set);
-                if (locator_set != NULL) {
+                if (__builtin_expect(locator_set != NULL, 1)) {
                     AILOCATOR *locators[64] = {};
                     AILocatorSet_CheckLocatorsStillAssigned(world->ai_sys, locator_set);
                     i32 count = 0;
@@ -4505,8 +4505,9 @@ void Hub_Update(WORLDINFO_s *world) {
         }
         const f32 target = hub_area != -1 && hub_area == selected_area ? 1.0f : 0.0f;
         hub_area_time = SeekLinearF(hub_area_time, target, FRAMETIME * 2.0f);
-        if (hub_area_time == 1.0f && VEHICLES_ADATA != NULL && VEHICLES_ADATA->index == hub_area &&
-            PLATFORM_LDATA != NULL) {
+        if (__builtin_expect(hub_area_time == 1.0f && VEHICLES_ADATA != NULL && VEHICLES_ADATA->index == hub_area &&
+                                 PLATFORM_LDATA != NULL,
+                             1)) {
             NewLData = PLATFORM_LDATA;
             Hub_ActivateDoorMenu(&NewLData);
         }
@@ -4566,7 +4567,7 @@ void Hub_Update(WORLDINFO_s *world) {
                 }
             }
             if (hub_minikitarea_time == 0.0f) {
-                if (hub_minikitarea != selected_minikit) {
+                if (__builtin_expect(hub_minikitarea != selected_minikit, 1)) {
                     hub_minikitarea_opentime = 0.0f;
                 }
                 hub_minikitarea = selected_minikit;
@@ -4580,7 +4581,7 @@ void Hub_Update(WORLDINFO_s *world) {
                 target = 1.0f;
             }
             hub_minikitarea_time = SeekLinearF(hub_minikitarea_time, target, FRAMETIME * 2.0f);
-            if (hub_minikitarea_opentime >= 1.0f) {
+            if (__builtin_expect(hub_minikitarea_opentime >= 1.0f, 0)) {
                 MakeMenuPacket();
                 Hint_CancelCurrent();
                 NewMenu(14, -1, -1);

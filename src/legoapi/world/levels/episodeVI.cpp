@@ -737,7 +737,7 @@ void EmperorFightA_Update(WORLDINFO_s *world) {
         }
         f32 state = LevAIMessage[1]->value;
         if (state == 1.0f) {
-            if (packet->player_floor_mask) {
+            if (__builtin_expect(packet->player_floor_mask != 0, 1)) {
                 if (packet->zap) {
                     eFloor_timer += FRAMETIME;
                     if ((packet->state == 1 || packet->state == 3) && eFloor_timer > 2.0f) {
@@ -809,7 +809,7 @@ void EmperorFightA_Update(WORLDINFO_s *world) {
                 if (!(player->apiobj.field_0x1f4 & 0x40000))
                     ObjHitObj(NULL, player, 1, 0, 0, 1);
                 player = Player[i];
-                if (__builtin_expect(!(dx <= 0.0f), 0))
+                if (!(dx <= 0.0f))
                     player->apiobj.velocity.x += 0.2f;
                 else
                     player->apiobj.velocity.x -= 0.2f;
@@ -872,7 +872,7 @@ void EmperorFightA_Update(WORLDINFO_s *world) {
             floor_route_on = 0;
             update_routes = true;
         }
-        if (update_routes) {
+        if (__builtin_expect(update_routes != 0, 1)) {
             AIPATH *path = world->ai_sys->path_sys->active_path;
             for (i32 i = 0; i < path->connection_count; ++i) {
                 AIPATHCNX *connection = &path->connections[i];
@@ -925,7 +925,7 @@ void EmperorFightA_Update(WORLDINFO_s *world) {
             GizObstacle_PlayForwards(LevGizObst[3]);
             break;
     }
-    if (!LevFlag[4]) {
+    if (__builtin_expect(!LevFlag[4], 1)) {
         {
             if (!LevFlag[1] && NuSpecialGetVisibilityFn(&LevHSpecial[1 + 2])) {
                 PlaySfx("env_block_light_on", NuSpecialGetDrawPos(&LevHSpecial[1 + 2]));
@@ -1511,9 +1511,9 @@ void SarlaccPitB_Update(WORLDINFO_s *world) {
                             partner = Player[1];
                         if (partner != NULL) {
                             NUVEC *help_position = NULL;
-                            if (controlled_panel == sarlaccdisco.first_panel)
+                            if (__builtin_expect(controlled_panel == sarlaccdisco.first_panel, 0))
                                 help_position = NuSpecialGetPos(&sarlaccdisco.flash[sarlaccdisco.second_panel]);
-                            else if (controlled_panel == sarlaccdisco.second_panel)
+                            else if (__builtin_expect(controlled_panel == sarlaccdisco.second_panel, 0))
                                 help_position = NuSpecialGetPos(&sarlaccdisco.flash[sarlaccdisco.first_panel]);
                             if (help_position != NULL) {
                                 SetGizAIMessage(gizaimessagesys, "HelpWithDisco", 1.0f, sarlaccdisco.help_message);

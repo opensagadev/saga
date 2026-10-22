@@ -980,7 +980,7 @@ void GizSpinners_Update(void *world_ptr, void *, float) {
             spinner->state_flags = (spinner->state_flags & ~SPINNER_STATE_ROTATING) | SPINNER_STATE_STOP_ANIMATION;
             // The reference indexes Player by spinner index after finding an
             // owner. Detach the actual owners instead of an unrelated/OOB slot.
-            if (LEGOCONTEXT_PUSHSPINNER != -1) {
+            if (__builtin_expect(LEGOCONTEXT_PUSHSPINNER != -1, 1)) {
                 for (i32 player = 0; player < 8; ++player) {
                     GameObject_s *owner = Player[player];
                     if (owner != NULL && owner->character_context == LEGOCONTEXT_PUSHSPINNER &&
@@ -995,7 +995,7 @@ void GizSpinners_Update(void *world_ptr, void *, float) {
             const u32 flags = spinner->state_flags;
             spinner->state_flags = (flags & ~SPINNER_STATE_ROTATING) | SPINNER_STATE_STOP_ANIMATION;
             spinner->output_pause_time -= FRAMETIME;
-            if (spinner->output_pause_time <= 0.0f) {
+            if (__builtin_expect(spinner->output_pause_time <= 0.0f, 0)) {
                 spinner->output_pause_time = 0.0f;
                 spinner->state_flags = flags & ~(SPINNER_STATE_STOP_ANIMATION | SPINNER_STATE_ROTATING);
             }
@@ -1026,10 +1026,10 @@ void GizSpinners_Update(void *world_ptr, void *, float) {
             spinner->flags &= static_cast<u8>(~SPINNER_RUNTIME_AT_OUTPUT);
             continue;
         }
-        if ((spinner->flags & SPINNER_RUNTIME_AT_OUTPUT) == 0 && spinner->field_0x2d8 > 0.0f) {
+        if (__builtin_expect((spinner->flags & SPINNER_RUNTIME_AT_OUTPUT) == 0 && spinner->field_0x2d8 > 0.0f, 1)) {
             spinner->output_pause_time = spinner->field_0x2d8;
             spinner->flags |= SPINNER_RUNTIME_AT_OUTPUT;
-            if (LEGOCONTEXT_PUSHSPINNER != -1) {
+            if (__builtin_expect(LEGOCONTEXT_PUSHSPINNER != -1, 1)) {
                 for (i32 player = 0; player < 8; ++player) {
                     GameObject_s *owner = Player[player];
                     if (owner != NULL && owner->character_context == LEGOCONTEXT_PUSHSPINNER &&
@@ -1072,7 +1072,7 @@ void GizSpinners_Update(void *world_ptr, void *, float) {
             GameAnimSet_Play(spinner->anim_set, -0.25f, 1);
             spinner->rotation =
                 static_cast<u16>(spinner->rotation - static_cast<i32>(direction * (step * difference * 5461.0f)));
-        } else if (target > spinner->field_70) {
+        } else if (__builtin_expect(target > spinner->field_70, 1)) {
             GameAnimSet_Play(spinner->anim_set, 0.25f, 1);
             spinner->rotation =
                 static_cast<u16>(spinner->rotation + static_cast<i32>(direction * (step * difference * 5461.0f)));

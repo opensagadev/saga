@@ -665,7 +665,7 @@ void ManageGameObjects() {
                         } else {
                             i32 area = creature->activate_area - system->areas;
                             i64 mask = static_cast<i32>(1u << (area & 31));
-                            if (player != NULL && (player->apiobj.ai_area_mask & mask) != 0) {
+                            if (__builtin_expect(player != NULL && (player->apiobj.ai_area_mask & mask) != 0, 1)) {
                                 if (Game.difficulty < creature->activation_difficulty) {
                                     object->ai.reset_mode = 4;
                                 } else if (creature->count > 1 && creature->start_stagger > 0.0f &&
@@ -725,11 +725,11 @@ void ManageGameObjects() {
                     object->ai.group->is_reversed = 0;
                 } else {
                     object->ai_spawn_delay = 0.0f;
-                    if (object->id != id_PKDROID) {
-                        ResetAICreature(object, WORLD->ai_sys);
-                    } else {
+                    if (!(object->id != id_PKDROID)) {
                         ResetAICreature(object, system);
                         SpawnCreatureFromCrate(object, 3.0f, 0.0f);
+                    } else {
+                        ResetAICreature(object, WORLD->ai_sys);
                     }
                 }
             }
@@ -944,7 +944,7 @@ void GameObjectRotation(GameObject_s *object, i32 mode) {
                     object->suspension[i].velocity = vertical_speed;
                 } else {
                     const f32 upper = api.lower_position.y + 3.0f * api.field_0x1dc;
-                    if (object->suspension[i].height > upper) {
+                    if (__builtin_expect(object->suspension[i].height > upper, 1)) {
                         object->suspension[i].velocity = vertical_speed;
                         object->suspension[i].height = upper;
                     }
@@ -1029,7 +1029,7 @@ void GameObjectRotation(GameObject_s *object, i32 mode) {
                 }
             }
         }
-        if (object->id == id_ATST && VehicleArea == 0) {
+        if (__builtin_expect(object->id == id_ATST && VehicleArea == 0, 1)) {
             x = static_cast<i32>(RotDiff(0, static_cast<u16>(temp_xrot)) * 0.5f);
             z = static_cast<i32>(RotDiff(0, static_cast<u16>(temp_zrot)) * 0.5f);
         }
@@ -1066,7 +1066,7 @@ void GameObjectRotation(GameObject_s *object, i32 mode) {
     } else if (mode == 2) {
         if (object->field_0x105e != object->field_0x1062)
             object->field_0x105e = SeekRot(object->field_0x105e, x, 8.0f);
-        if (object->field_0x1060 != object->field_0x1064)
+        if (__builtin_expect(object->field_0x1060 != object->field_0x1064, 0))
             object->field_0x1060 = SeekRot(object->field_0x1060, z, 8.0f);
         if (object->field_0x1086 != 2)
             return;
@@ -1385,7 +1385,7 @@ void UpdateGameObjects(WORLDINFO_s *world) {
             object->field_0xf00 &= ~GAME_OBJECT_AI_UPDATE_FORCED;
             const u32 update_phase =
                 static_cast<u32>(object->apiobj.field_0x289) + static_cast<u32>(GameTimer.update_count);
-            if (update_phase % static_cast<u32>(interval) != 0) {
+            if (__builtin_expect(update_phase % static_cast<u32>(interval) != 0, 1)) {
                 object->field_0xf00 &= ~GAME_OBJECT_AI_UPDATE_PROCESS;
                 continue;
             }
@@ -1431,7 +1431,7 @@ void UpdateGameObjects(WORLDINFO_s *world) {
             f32 frame_time = FRAMETIME;
             FRAMETIME = object->ai_elapsed_time;
             object->field_0xe20 &= ~0x20;
-            if (object->spawn_protection_timer > 0.0f)
+            if (__builtin_expect(object->spawn_protection_timer > 0.0f, 1))
                 object->spawn_protection_timer -= FRAMETIME;
             object->field_0xdec = 0.0f;
             if (TimingBarSet == 4)
@@ -1462,7 +1462,7 @@ void UpdateGameObjects(WORLDINFO_s *world) {
         if (data->field275_0x116 == 10 &&
             ((object->apiobj.model_draw_result != 0) != object->model_drawn_last_frame)) {
             f32 *wait = object->apiobj.model_draw_result != 0 ? &tieonsfxwait : &tieoffsfxwait;
-            if (*wait <= 0.0f) {
+            if (__builtin_expect(*wait <= 0.0f, 1)) {
                 PlaySfx("veh_tie_by", &object->apiobj.collision_position);
                 *wait = (static_cast<f32>(qrand()) * (1.0f / 65535.0f)) * 0.5f + 0.5f;
             }
@@ -1513,7 +1513,7 @@ void UpdateGameObjects(WORLDINFO_s *world) {
             MovePlayer_NETWORK(object);
         } else {
             if (object->apiobj.player_controlled) {
-                if (object->pad_gamepad->pad != NULL) {
+                if (__builtin_expect(object->pad_gamepad->pad != NULL, 1)) {
                     UpdateRumble(&object->pad_gamepad->rumble_packet);
                     Player_ToggleCharacter(object, 0, 1);
                 }
@@ -1614,7 +1614,7 @@ void UpdateGameObjects(WORLDINFO_s *world) {
         }
         NuCameraTransformScreenClip(&object->camera_screen_position, &object->apiobj.collision_position, 1, NULL);
         GameObjectToCameraCode(object);
-        if (TimingBarSet == 4)
+        if (__builtin_expect(TimingBarSet == 4, 1))
             TBCLOSEFN("Misc", 4);
         object->field_0xef8 &= ~1;
         if (object->timer_ed8 > 0.0f)
@@ -1656,8 +1656,9 @@ void UpdateGameObjects(WORLDINFO_s *world) {
         }
         if (object->oldpos != NULL)
             *object->oldpos = object->sock_position;
-        if (!(world->sock_sys != NULL &&
-              ((object->apiobj.flags_low & APIOBJECT_FLAG_PLAYER_ACTIVE) != 0 || VehicleArea != 0))) {
+        if (__builtin_expect(!(world->sock_sys != NULL &&
+                               ((object->apiobj.flags_low & APIOBJECT_FLAG_PLAYER_ACTIVE) != 0 || VehicleArea != 0)),
+                             1)) {
             object->sock_segment = -1;
             object->field_0x661 = 0xff;
             if (object->oldpos != NULL) {
@@ -1691,7 +1692,7 @@ void UpdateGameObjects(WORLDINFO_s *world) {
             object->id != id_ANAKINSNEWPODGREEN && object->id != id_SEBULBASPOD) {
             object->field_0x1004 = scale * 0.55f;
         }
-        if (object->field_0x1038 != 1000000000.0f)
+        if (__builtin_expect(object->field_0x1038 != 1000000000.0f, 0))
             object->field_0x1004 = object->field_0x1038;
         object->apiobj.field_0xa8 = object->field_0x1004 * object->apiobj.character_data->model_scale;
         ScaleGameObject(object);
@@ -1739,7 +1740,7 @@ void UpdateGameObjects(WORLDINFO_s *world) {
                 SeekLinearF(object->interaction_arrow_blend, target, FRAMETIME + FRAMETIME);
             if (object->apiobj.model_draw_result == 0)
                 continue;
-            if (i >= lighting_start && i < HIGHGAMEOBJECT)
+            if (__builtin_expect(i >= lighting_start && i < HIGHGAMEOBJECT, 1))
                 LightGameObject(object, world->rtl_set);
             if (object->interaction_arrow_blend > 0.0f) {
                 GAMECHARACTERDATA *data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
@@ -1802,7 +1803,7 @@ void UpdateGameObjects(WORLDINFO_s *world) {
                 player_tag_from->hud_icon_timer = 2.0f;
             }
         }
-        if (result != 2) {
+        if (__builtin_expect(result != 2, 0)) {
             player_tag_to = NULL;
             player_tag_timer = 0.0f;
             player_tag_from = NULL;
@@ -2374,7 +2375,7 @@ i32 KillGameObject(GameObject_s *object, i32 requested_reason, i32) {
         LoseHelmet(object, 1, 0);
     GameObject_s *rider = object->field_0xcc0;
     Player_ClearContext(object, 1);
-    if (kill_rider && rider != NULL)
+    if (__builtin_expect(kill_rider && rider != NULL, 1))
         KillGameObject(rider, 4, 0);
     ReleaseLever(object);
     Player_ResetContexts(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));
@@ -2531,7 +2532,7 @@ i32 KillGameObject(GameObject_s *object, i32 requested_reason, i32) {
                 remove = !persistent;
             }
         }
-        if (remove) {
+        if (__builtin_expect(remove != 0, 1)) {
             object->apiobj.character = 0;
             object->ai.reset_mode = 4;
         } else if (respawn && creature != NULL) {

@@ -646,11 +646,11 @@ void Customiser_Update(CUSTOMISER *customiser, WORLDINFO_s *world) {
                 continue;
             CUSTOMPIECE *weapon = &customiser->piece_sets[2][static_cast<u16>(selection[2])];
             const i32 saber_colour = LightSabre_ColourFromObj(weapon->weapon_model, NULL);
-            if (customiser->animation_state[side] != 0)
+            if (__builtin_expect(customiser->animation_state[side] != 0, 0))
                 --customiser->animation_state[side];
             const i32 intro = saber_colour == -1 ? 0x62 : 0x61;
             if (customiser->animation_active[side] == 0 && model->model_data_b[intro] != NULL) {
-                if (customiser->animation_values[side] == 0.0f) {
+                if (__builtin_expect(customiser->animation_values[side] == 0.0f, 0)) {
                     customiser->animation_values[side] = AnimDuration(model->model_id, intro, 0.0f, 0.0f, 1);
                 } else {
                     customiser->animation_values[side] -= FRAMETIME;
@@ -662,7 +662,7 @@ void Customiser_Update(CUSTOMISER *customiser, WORLDINFO_s *world) {
             }
             customiser->animation_packets[side].previous_animation =
                 customiser->animation_packets[side].animation_index;
-            if (saber_colour == -1)
+            if (__builtin_expect(saber_colour == -1, 0))
                 customiser->animation_packets[side].requested_animation =
                     customiser->animation_active[side] == 0 ? 0x62 : 0x63;
             else
@@ -1004,13 +1004,7 @@ void CustomiserMenu_Update(MENU_s *) {
                 } while (new_mode == 0);
                 GameAudio_PlaySfx(0x30, NULL, 0, 0);
                 cancel_name = true;
-            } else if (select[player] != 0 && (CustomiseMode[0] == 1 || CustomiseMode[1] == 1)) {
-                new_mode = old_mode;
-                do {
-                    new_mode = (new_mode + 1) % 3;
-                } while (new_mode == 0);
-                GameAudio_PlaySfx(0x30, NULL, 0, 0);
-            } else {
+            } else if (!(select[player] != 0 && (CustomiseMode[0] == 1 || CustomiseMode[1] == 1))) {
                 const f32 repeat_delay = old_mode == 1 ? 0.1f : 0.25f;
                 const i32 category = CustomiseMenuY[side];
                 const i32 piece_count = customiser->piece_counts[category];
@@ -1127,6 +1121,12 @@ void CustomiserMenu_Update(MENU_s *) {
                             Customiser_SetNameAndIcon(customiser, side);
                     }
                 }
+            } else {
+                new_mode = old_mode;
+                do {
+                    new_mode = (new_mode + 1) % 3;
+                } while (new_mode == 0);
+                GameAudio_PlaySfx(0x30, NULL, 0, 0);
             }
             if (new_mode != -1) {
                 CustomiseMode[side] = new_mode;

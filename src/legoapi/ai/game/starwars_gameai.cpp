@@ -555,7 +555,7 @@ i32 StarWars_PrepareJump(AIPACKET_s *packet, APIOBJECT_s *object, i32 checks) {
         ((packet->path_info.path->previous_inside_node_bits[destination_index >> 3] >> (destination_index & 7)) & 1) !=
             0;
     if (skip_to_destination) {
-        if (TryToTeleportToNextNode(owner, destination, 0) != 0) {
+        if (__builtin_expect(TryToTeleportToNextNode(owner, destination, 0) != 0, 0)) {
             return 1;
         }
         packet->path_connection_state = 1;
@@ -600,7 +600,7 @@ i32 StarWars_PrepareJump(AIPACKET_s *packet, APIOBJECT_s *object, i32 checks) {
     }
     switch (packet->path_connection_state) {
         case 1:
-            if (ready != 0) {
+            if (__builtin_expect(ready != 0, 0)) {
                 const u32 connection_flags = connection->traversal_flags[direction];
                 const u32 node = destination_index;
                 const bool skip_ahead =
@@ -622,7 +622,7 @@ i32 StarWars_PrepareJump(AIPACKET_s *packet, APIOBJECT_s *object, i32 checks) {
             }
             break;
         case 2:
-            if ((flags & 0x400) != 0) {
+            if (__builtin_expect((flags & 0x400) != 0, 0)) {
                 packet->path_connection_state = 4;
             } else {
                 distance = NuVecDist(&object->position, &destination->position, &offset);
@@ -655,8 +655,8 @@ i32 StarWars_PrepareJump(AIPACKET_s *packet, APIOBJECT_s *object, i32 checks) {
             }
             break;
         case 4:
-            if ((flags & 0x22) != 0) {
-                if (0.0f >= owner->jump_reentry_timer) {
+            if (__builtin_expect((flags & 0x22) != 0, 1)) {
+                if (__builtin_expect(0.0f >= owner->jump_reentry_timer, 0)) {
                     packet->path_connection_state = 5;
                     owner->field_0xef9 |= 0x10;
                 }
@@ -703,7 +703,7 @@ i32 StarWars_PrepareJump(AIPACKET_s *packet, APIOBJECT_s *object, i32 checks) {
                         !(height + owner->apiobj.scaled_height >= other->apiobj.collision_min.y)) {
                         continue;
                     }
-                    if (clearance * clearance <= offset.x * offset.x + offset.z * offset.z)
+                    if (__builtin_expect(clearance * clearance <= offset.x * offset.x + offset.z * offset.z, 1))
                         continue;
                     packet->path_connection_state = 1;
                     object->collision_priority |= 0x2000;

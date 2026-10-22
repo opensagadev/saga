@@ -253,7 +253,7 @@ static void GizPanel_SetVisibility(GIZMO *gizmo, i32 visible) {
 static void GizPanel_Update(void *world_ptr, void *, float delta_time) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
     GIZPANELSYS_s *panel_sys = world->giz_panel_sys;
-    if (panel_sys == NULL) {
+    if (__builtin_expect(panel_sys == NULL, 0)) {
         return;
     }
 
@@ -271,7 +271,9 @@ static void GizPanel_Update(void *world_ptr, void *, float delta_time) {
 #define CONSIDER_PANEL_PLAYER(player_index)                                                                            \
     do {                                                                                                               \
         GameObject_s *candidate = players[player_index];                                                               \
-        if (__builtin_expect(candidate != NULL && (candidate->apiobj.flags_high & 0x10) != 0 && candidate->apiobj.field_0x287 == 0, 1)) {   \
+        if (__builtin_expect(candidate != NULL && (candidate->apiobj.flags_high & 0x10) != 0 &&                        \
+                                 candidate->apiobj.field_0x287 == 0,                                                   \
+                             1)) {                                                                                     \
             panel_position = panel.position;                                                                           \
             if (panel.model_variant == 2) {                                                                            \
                 panel_position.y += 0.245f;                                                                            \
@@ -281,7 +283,7 @@ static void GizPanel_Update(void *world_ptr, void *, float delta_time) {
                 panel_position.z -= 0.17f;                                                                             \
             }                                                                                                          \
             const f32 distance = NuVecDistSqr(&panel_position, &candidate->apiobj.collision_position, &direction);     \
-            if (__builtin_expect(distance < nearest_distance && distance < maximum_distance, 0)) {                                          \
+            if (distance < nearest_distance && distance < maximum_distance) {                                          \
                 nearest_distance = distance;                                                                           \
                 nearest_player = players[player_index];                                                                \
                 player_direction = direction;                                                                          \

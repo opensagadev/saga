@@ -1057,7 +1057,7 @@ void MakeFreePlayModelList(i32 model1, i32 model2, i32 area, i32 level, i32 para
     i16 ids[341];
     i16 imperial_ids[500];
     u32 flags = 0;
-    if (WORLD != NULL && WORLD->area != NULL && WORLD->area == HUB_ADATA && bonusmodearcade != 0)
+    if (__builtin_expect(WORLD != NULL && WORLD->area != NULL && WORLD->area == HUB_ADATA && bonusmodearcade != 0, 1))
         flags = Arcade_Mode[static_cast<i8>(ArcadeItem.field_c_0xc)].field8_0x8;
 
     FreePlayModelCount = 0;
@@ -1077,7 +1077,7 @@ void MakeFreePlayModelList(i32 model1, i32 model2, i32 area, i32 level, i32 para
         Collection_GetIDList(&MiniKitCollection, 0x4000000, 0x4000000, ids, NULL, NULL, makefreeplaymodellist != 0);
         for (i16 *id = ids; *id != -1; ++id)
             World_AddFreePlayModel(*id);
-        if (FreePlayModelCount == 1)
+        if (__builtin_expect(FreePlayModelCount == 1, 1))
             PlayerList[1] = PlayerList[0];
         PlayerList[2] = -1;
     } else {
@@ -1143,7 +1143,8 @@ void MakeFreePlayModelList(i32 model1, i32 model2, i32 area, i32 level, i32 para
             }
             bool imperial = false;
             for (APICHARACTERMODELLIST_s *model = FreePlayModelList; model->model_id != -1; ++model) {
-                if (!(Collection_Got(model->model_id) != 0 && World_FreePlayImperial(model->model_id))) {
+                if (__builtin_expect(!(Collection_Got(model->model_id) != 0 && World_FreePlayImperial(model->model_id)),
+                                     1)) {
                     continue;
                 }
                 imperial = true;
@@ -1160,7 +1161,7 @@ void MakeFreePlayModelList(i32 model1, i32 model2, i32 area, i32 level, i32 para
                         imperial_ids[count++] = static_cast<i16>(i);
                 }
                 if (count != 0) {
-                    if (count != 1)
+                    if (__builtin_expect(count != 1, 0))
                         imperial_ids[0] = imperial_ids[qrand() / (0xffff / count + 1)];
                     if (World_AddFreePlayModel(imperial_ids[0]) != 0)
                         ++FreePlayBonusCount;
@@ -1173,13 +1174,13 @@ void MakeFreePlayModelList(i32 model1, i32 model2, i32 area, i32 level, i32 para
         bool found = false;
         if (__builtin_expect(source != -1, 1)) {
             for (i32 i = 0; i < FreePlayModelCount; ++i) {
-                if (FreePlayModelList[i].model_id == source) {
+                if (__builtin_expect(FreePlayModelList[i].model_id == source, 1)) {
                     found = true;
                     break;
                 }
             }
         }
-        if (found && extra->field_04 != NULL)
+        if (__builtin_expect(found && extra->field_04 != NULL, 0))
             World_AddFreePlayModel(*static_cast<i16 *>(extra->field_04));
     }
 }
@@ -1805,7 +1806,7 @@ void LoadAreaCharacters() {
         }
     }
 
-    if (SuperStory != 0 && (ADataList[Area].flags & AREAFLAG_ENDING_AREA) != 0) {
+    if (__builtin_expect(SuperStory != 0 && (ADataList[Area].flags & AREAFLAG_ENDING_AREA) != 0, 0)) {
         load_type = 1;
         goto load_type_done;
     } else if (last_area != -1 && LastLData != NULL && (LastLData->flags & 0x400) != 0 &&
@@ -1891,7 +1892,7 @@ load_type_done:
         }
 
         if (HUB_ADATA->index == Area) {
-            if (character_load_active && AreaDataLoaded != 0 && waiting_for_character == -1) {
+            if (__builtin_expect(character_load_active && AreaDataLoaded != 0 && waiting_for_character == -1, 1)) {
                 static i32 lastLoadedCharacter = -1;
                 if (hub_character_ready != -1) {
                     lastLoadedCharacter = hub_character_ready;
@@ -1973,7 +1974,8 @@ load_type_done:
                 AreaDataLoaded != 0 && !character_load_active ? LoadWait / LOADWAITTIME : 1.0f;
             BackDrop_Update(backdrop_dt_scale * FRAMETIME);
             BackDrop_UpdateColours(1);
-        } else if (AreaDataLoaded != 0 && !character_load_active && icon_stage == 2 && !(LoadWait <= 0.0f)) {
+        } else if (__builtin_expect(
+                       AreaDataLoaded != 0 && !character_load_active && icon_stage == 2 && !(LoadWait <= 0.0f), 1)) {
             LoadWait -= FRAMETIME;
             if (!(LoadWait >= 0.0f)) {
                 LoadWait = 0.0f;
@@ -2016,7 +2018,7 @@ load_type_done:
             }
         } else {
             NuRndrGradClear(0xf00, static_cast<i32>(0x80000000u), static_cast<i32>(0x80000000u), 1.0f);
-            if (load_type == 1) {
+            if (__builtin_expect(load_type == 1, 0)) {
                 BackDrop_Draw(1.0f, 1);
             }
 
@@ -2025,7 +2027,8 @@ load_type_done:
                     NuTrigTable[(static_cast<i32>(NuFmod(LoadTime, 1.0f) * 65536.0f) >> 1) & 0x7fff];
                 if (HUB_ADATA == NULL || HUB_ADATA->index != Area) {
                     fade_scene_active = true;
-                } else if (CharacterDataLoad != 0 && icon_time > 0.0f && icon_time < icons_end_time) {
+                } else if (__builtin_expect(CharacterDataLoad != 0 && icon_time > 0.0f && icon_time < icons_end_time,
+                                            1)) {
                     const f32 wobble = wobble_sin * 0.15f;
                     const bool widescreen = Game_OptionsSave != NULL && Game_OptionsSave->field11_0xb != 0;
                     const f32 icon_travel = widescreen ? 0.406875f : 0.4425f;

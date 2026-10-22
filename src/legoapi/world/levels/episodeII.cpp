@@ -706,7 +706,7 @@ void JediB_Update(WORLDINFO_s *world) {
                 continue;
             }
             Player[slot]->ai_opponent_exclusion_mask = 0;
-            if (jedi_b.phase == 7 && boss != NULL && !Player[slot]->apiobj.player_controlled) {
+            if (__builtin_expect(jedi_b.phase == 7 && boss != NULL && !Player[slot]->apiobj.player_controlled, 1)) {
                 Player[slot]->ai_opponent_exclusion_mask = 1ULL << boss->apiobj.field_0x289;
             }
         }
@@ -751,7 +751,7 @@ void JediB_Update(WORLDINFO_s *world) {
                                     break;
                                 }
                                 index++;
-                                if (index >= jedi_b.baddie_count) {
+                                if (__builtin_expect(index >= jedi_b.baddie_count, 1)) {
                                     index = 0;
                                 }
                             }
@@ -773,7 +773,7 @@ void JediB_Update(WORLDINFO_s *world) {
                     case 3:
                         for (JEDIB_PHASE_s *entry = phase_lists[jedi_b.phase - 1];
                              entry != NULL && entry->id != NULL && jedi_b.goody_count <= 7; entry++) {
-                            if (g_lowEndLevelBehaviour != 0 && jedi_b.goody_count == 5) {
+                            if (__builtin_expect(g_lowEndLevelBehaviour != 0 && jedi_b.goody_count == 5, 0)) {
                                 break;
                             }
 
@@ -802,7 +802,7 @@ void JediB_Update(WORLDINFO_s *world) {
                         break;
                 }
 
-                if (jedi_b.msg_phase == NULL) {
+                if (__builtin_expect(jedi_b.msg_phase == NULL, 0)) {
                     jedi_b.msg_phase = CheckGizAIMessage(gizaimessagesys, "Phase", NULL);
                 }
                 if (jedi_b.msg_phase_complete == NULL) {
@@ -854,7 +854,7 @@ void JediB_Update(WORLDINFO_s *world) {
                                         jedi_b.wave_spawned[4] != 0 && jedi_b.wave_spawned[5] != 0;
                         }
                         jedi_b.wave_timer += FRAMETIME;
-                        if (jedi_b.wave_timer > 5.0f) {
+                        if (__builtin_expect(jedi_b.wave_timer > 5.0f, 1)) {
                             i32 release = -1;
                             for (i32 i = 0; i < jedi_b.baddie_count; i++) {
                                 if (jedi_b.baddies[i].released != 0) {
@@ -880,7 +880,7 @@ void JediB_Update(WORLDINFO_s *world) {
                         if (__builtin_expect(boss == NULL, 0)) {
                             boss = FindGameObject(id_JANGOFETT, 1, 1, 0, 0);
                             jedi_b.boss = boss;
-                            if (__builtin_expect(boss == NULL, 1)) {
+                            if (__builtin_expect(boss == NULL, 0)) {
                                 break;
                             }
                         }
@@ -1022,7 +1022,7 @@ void JediB_Update(WORLDINFO_s *world) {
                         }
                     } else {
                         object->field_0x1054 = baddie->field_0x58;
-                        if (baddie->two_row_hp == 0) {
+                        if (__builtin_expect(baddie->two_row_hp == 0, 1)) {
                             object->field_0xefd &= static_cast<u8>(~2);
                         } else {
                             object->random_layer_variant = 1;
@@ -1032,7 +1032,7 @@ void JediB_Update(WORLDINFO_s *world) {
                 }
             }
 
-            if (object == NULL) {
+            if (__builtin_expect(object == NULL, 0)) {
                 continue;
             }
             jedib_n_active++;
@@ -1619,7 +1619,7 @@ void KaminoC_Update(WORLDINFO_s *world) {
                     if (occupied_by_player == kaminodisco.first_tile)
                         SetGizAIMessage(gizaimessagesys, "NextDiscoTile", static_cast<f32>(kaminodisco.second_tile + 1),
                                         kaminodisco.next_tile_message);
-                    else if (occupied_by_player == kaminodisco.second_tile)
+                    else if (__builtin_expect(occupied_by_player == kaminodisco.second_tile, 0))
                         SetGizAIMessage(gizaimessagesys, "NextDiscoTile", static_cast<f32>(kaminodisco.first_tile + 1),
                                         kaminodisco.next_tile_message);
                 }

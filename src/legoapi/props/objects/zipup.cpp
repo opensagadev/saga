@@ -670,7 +670,7 @@ void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
             if (__builtin_expect(NuVecDistSqr(&api.position, hook, NULL) < 0.01f || object->context_animation_timer >= 5.0f, 1)) {
                 StartJump(object, 6);
                 PlaySfx("GrapDetach", &api.collision_position);
-                if ((api.flags_low & 0x80) != 0)
+                if (__builtin_expect((api.flags_low & 0x80) != 0, 1))
                     Hint_SetComplete(0x262);
                 u16 angle = NuAtan2D(destination->x - api.position.x, destination->z - api.position.z);
                 api.field_0x276 = api.facing_angle = api.movement_facing_angle = angle;
@@ -699,7 +699,7 @@ void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
             PlaySfx("GrapWindLp", &api.collision_position);
             return;
         }
-        if (!(object->context_animation_timer >= 1.5f)) {
+        if (__builtin_expect(!(object->context_animation_timer >= 1.5f), 1)) {
             zipup->runtime_flags |= 2;
             u16 start_angle = NuAtan2D(zipup->rider_start_offset.x, zipup->rider_start_offset.z);
             NUVEC end_offset;
@@ -775,7 +775,7 @@ void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
             object->context_variant_flags |= 1;
         return;
     }
-    if ((api.flags_low & 0x80) != 0)
+    if (__builtin_expect((api.flags_low & 0x80) != 0, 1))
         Hint_SetComplete(0x262);
     object->field_0x788 = zipup;
     object->character_context = 0x47;
@@ -795,10 +795,10 @@ void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
             object->airborne_action_duration = 0.5f;
         object->zipup_entry_position = api.position;
         ZIPUP *current = static_cast<ZIPUP *>(object->field_0x788);
-        if (endpoint != 0) {
-            object->zipup_start_position = current->upper_position;
-        } else {
+        if (endpoint == 0) {
             object->zipup_start_position = current->lower_position;
+        } else {
+            object->zipup_start_position = current->upper_position;
         }
         object->zipup_landing_position = endpoint == 0 ? current->upper_position : current->lower_position;
         object->zipup_landing_position.y = endpoint == 0 ? zipup->upper_ground_height : zipup->lower_ground_height;

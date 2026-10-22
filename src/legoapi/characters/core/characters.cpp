@@ -227,7 +227,7 @@ void HeadMovement(GameObject_s *object) {
                     angle = NuAtan2(-direction.x, -direction.z);
                     second = angle + object->joint_modifiers[object->field_0x1089].rotation.z;
                     limit = character->game_character->field_0x50;
-                    if (second >= limit)
+                    if (__builtin_expect(second >= limit, 0))
                         second = limit;
                     else if (second <= -limit)
                         second = -limit;
@@ -290,12 +290,7 @@ void HeadMovement(GameObject_s *object) {
 
         i32 allowed;
         i16 animation;
-        if (!object->apiobj.anim_packet.blending) {
-            animation = object->apiobj.anim_packet.animation_index;
-            allowed = 1;
-            if (animation < 0)
-                goto gate_done_old;
-        } else {
+        if (object->apiobj.anim_packet.blending) {
             animation = object->apiobj.anim_packet.blend_animation_b;
             if (animation >= 0 && animation < apicharsys->model_id_capacity &&
                 object->apiobj.character_model->model_data_b[animation] != NULL) {
@@ -306,6 +301,11 @@ void HeadMovement(GameObject_s *object) {
                 }
             }
             animation = object->apiobj.anim_packet.blend_animation_a;
+            allowed = 1;
+            if (animation < 0)
+                goto gate_done_old;
+        } else {
+            animation = object->apiobj.anim_packet.animation_index;
             allowed = 1;
             if (animation < 0)
                 goto gate_done_old;
@@ -363,10 +363,11 @@ void HeadMovement(GameObject_s *object) {
         limit = static_cast<i32>(character->game_character->field_0x54 * 10430.3779296875f);
         object->joint_modifiers[object->field_0x1089].rotation_limit_start[1] = limit;
         object->joint_modifiers[object->field_0x1089].rotation_limit_end[1] = -limit;
-        if (object->joint_modifiers[object->field_0x1089].rotation.x > 0.0017453293548896909f ||
-            object->joint_modifiers[object->field_0x1089].rotation.x < -0.0017453293548896909f ||
-            object->joint_modifiers[object->field_0x1089].rotation.y > 0.0017453293548896909f ||
-            object->joint_modifiers[object->field_0x1089].rotation.y < -0.0017453293548896909f) {
+        if (__builtin_expect(object->joint_modifiers[object->field_0x1089].rotation.x > 0.0017453293548896909f ||
+                                 object->joint_modifiers[object->field_0x1089].rotation.x < -0.0017453293548896909f ||
+                                 object->joint_modifiers[object->field_0x1089].rotation.y > 0.0017453293548896909f ||
+                                 object->joint_modifiers[object->field_0x1089].rotation.y < -0.0017453293548896909f,
+                             0)) {
             object->joint_modifiers[object->field_0x1089].flags = NUJOINTANIM_ROTATION;
             if (allowed) {
                 if (object->joint_modifiers[object->field_0x1089].rotation.x != 0.0f)
@@ -392,7 +393,7 @@ void HeadMovement(GameObject_s *object) {
             object->field_0xefe &= ~1;
             i32 allowed;
             i16 animation;
-            if (!object->apiobj.anim_packet.blending) {
+            if (__builtin_expect(!object->apiobj.anim_packet.blending, 1)) {
                 animation = object->apiobj.anim_packet.animation_index;
                 allowed = 1;
                 if (animation < 0)

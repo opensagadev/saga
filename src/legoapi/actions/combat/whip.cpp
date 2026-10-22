@@ -22,9 +22,11 @@ void Whip_MoveCode(GameObject_s *object) {
     }
 
     if (object->character_context != LEGOCONTEXT_WHIP) {
-        if ((object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) == 0 || object->apiobj.field_0x27d == 0 ||
-            ObjLandReady(object) == 0 || LEGOACT_WHIP_START == -1 ||
-            object->apiobj.character_model->model_data_b[LEGOACT_WHIP_START] == NULL) {
+        if (__builtin_expect((object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) == 0 ||
+                                 object->apiobj.field_0x27d == 0 || ObjLandReady(object) == 0 ||
+                                 LEGOACT_WHIP_START == -1 ||
+                                 object->apiobj.character_model->model_data_b[LEGOACT_WHIP_START] == NULL,
+                             0)) {
             return;
         }
 
@@ -109,7 +111,7 @@ void Whip_MoveCode(GameObject_s *object) {
         return;
     }
 
-    if ((object->context_variant_flags & 1) != 0) {
+    if (__builtin_expect((object->context_variant_flags & 1) != 0, 0)) {
         NUVEC *target_position = NULL;
         if (object->field_0x788 != NULL) {
             target_position = &static_cast<GIZMOBLOWUP_s *>(object->field_0x788)->position;

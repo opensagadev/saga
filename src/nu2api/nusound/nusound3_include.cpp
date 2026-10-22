@@ -2802,7 +2802,7 @@ void NuSound3Update(void) {
         StreamListRemove(&g_NuSoundVoicesPendingPlayback, entry);
 
         NuSoundVoice *voice = NULL;
-        if (NuSound.GetVoiceCount() < 30) {
+        if (__builtin_expect(NuSound.GetVoiceCount() < 30, 0)) {
             voice = NuSound.CreateVoice(entry->source, entry->loop);
         }
         if (voice == NULL) {
@@ -2815,7 +2815,7 @@ void NuSound3Update(void) {
         voice->SetAutoDelete(true);
         voice->SetVolume(PS2VolumeToScalar(entry->volume));
         voice->SetPitch(entry->pitch);
-        if (entry->source_position != NULL) {
+        if (__builtin_expect(entry->source_position != NULL, 0)) {
             voice->SetFalloff(entry->falloff_a, entry->falloff_b, NuSoundSystem::FalloffType::LINEAR);
             voice->SetPosition((VuVec *)&entry->position);
             voice->SetSurroundMode(NuSoundSystem::SurroundMode::ZERO);
@@ -2851,7 +2851,9 @@ void NuSound3Update(void) {
         } else if (NuSound3Stream::mVoice.obj != NULL) {
             if (stream->field_0xd != 0) {
                 ((NuSoundVoice *)NuSound3Stream::mVoice.obj)->SetVolume(PS2VolumeToScalar(stream->ps2volume));
-                if (((NuSoundVoice *)NuSound3Stream::mVoice.obj)->GetState() == NuSoundVoice::PLAYSTATE_STOPPED) {
+                if (__builtin_expect(((NuSoundVoice *)NuSound3Stream::mVoice.obj)->GetState() ==
+                                         NuSoundVoice::PLAYSTATE_STOPPED,
+                                     0)) {
                     NuSound3StopStereoStream(i);
                 }
             }
@@ -2871,7 +2873,7 @@ void NuSound3Update(void) {
 
     // (e) Wake the sample loader when the registered request table changes.
     for (i32 i = 0; i < g_NuSoundNumLoadBitShorts; i++) {
-        if (g_NuSoundLoadBitsCache[i] != g_NuSoundLoadBits[i]) {
+        if (__builtin_expect(g_NuSoundLoadBitsCache[i] != g_NuSoundLoadBits[i], 1)) {
             memmove(g_NuSoundLoadBitsCache, g_NuSoundLoadBits,
                     static_cast<usize>(g_NuSoundNumLoadBitShorts) * sizeof(u16));
 
@@ -2879,7 +2881,7 @@ void NuSound3Update(void) {
             if (!g_NuSoundLoadTrigger.a) {
                 bool broadcast = g_NuSoundLoadTrigger.b;
                 g_NuSoundLoadTrigger.a = true;
-                if (broadcast) {
+                if (__builtin_expect(broadcast != 0, 0)) {
                     pthread_cond_broadcast(&g_NuSoundLoadTrigger.cond);
                 } else {
                     pthread_cond_signal(&g_NuSoundLoadTrigger.cond);

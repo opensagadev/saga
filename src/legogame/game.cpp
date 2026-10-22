@@ -2985,7 +2985,7 @@ static void PartCollide(PART_s *part, i32 three_dimensional) {
                     ReleasePush(object);
                     if (object->field_0xd24 >= 1.0f)
                         ObjHitShield(part->owner, object, object->field_0xe37, NULL);
-                    else if (!CannotKill(object)) {
+                    else if (__builtin_expect(!CannotKill(object), 0)) {
                         ObjHitObj((part->flags & 0x10000) != 0 ? NULL : part->owner, object, part->field_204,
                                   static_cast<u16>(part->force_flags), 0, 1);
                     } else if (part->owner != NULL) {
@@ -2996,7 +2996,7 @@ static void PartCollide(PART_s *part, i32 three_dimensional) {
             }
             if (api->field_0x287 != 0 || (api->flags_low & 2) != 0)
                 continue;
-            if ((part->active & 1) == 0) {
+            if (__builtin_expect((part->active & 1) == 0, 0)) {
                 f32 speed = static_cast<GAMECHARACTERDATA_s *>(api->character_data->field11_0x24)->run_speed;
                 if (api->scaled_radius > 1.0f)
                     speed /= api->scaled_radius;
@@ -3005,7 +3005,8 @@ static void PartCollide(PART_s *part, i32 three_dimensional) {
                 api->velocity.x += direction.x * speed;
                 api->velocity.z += direction.z * speed;
             }
-            if ((part->flags & 0x2000000) != 0 && ((part->flags & 0x4000000) == 0 || (part->active & 2) != 0)) {
+            if (__builtin_expect(
+                    (part->flags & 0x2000000) != 0 && ((part->flags & 0x4000000) == 0 || (part->active & 2) != 0), 1)) {
                 u16 angle = NuAtan2D(api->position.x - part->position.x, api->position.z - part->position.z);
                 f32 speed = static_cast<GAMECHARACTERDATA_s *>(api->character_data->field11_0x24)->run_speed;
                 api->field_0x1fc = NU_SIN_LUT(angle) * speed;

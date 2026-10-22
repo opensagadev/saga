@@ -1018,10 +1018,10 @@ void SetLevelSfxBits(WORLDINFO *world) {
         } else if (level == DEATHSTARBATTLEB_LDATA) {
             ADD_SFX("FField");
             ADD_SFX("FFieldOff");
-        } else if (level == DEATHSTARBATTLEC_LDATA) {
+        } else if (__builtin_expect(level == DEATHSTARBATTLEC_LDATA, 0)) {
             ADD_SFX("FField");
             ADD_SFX("FFieldOff");
-        } else if (level == DEATHSTARBATTLED_LDATA) {
+        } else if (__builtin_expect(level == DEATHSTARBATTLED_LDATA, 0)) {
             ADD_SFX("FField");
             ADD_SFX("FFieldOff");
         } else if (level == HOTHESCAPEA_LDATA) {
@@ -1033,10 +1033,10 @@ void SetLevelSfxBits(WORLDINFO *world) {
             ADD_SFX("exp_asteroid");
         } else if (level == CLOUDCITYTRAPA_LDATA) {
             ADD_SFX("Env_Steam_Lp");
-        } else if (level == CLOUDCITYESCAPEA_LDATA) {
+        } else if (__builtin_expect(level == CLOUDCITYESCAPEA_LDATA, 0)) {
             ADD_SFX("env_steam_lp");
             ADD_SFX("Env_ctrl_desk_on");
-        } else if (level == CLOUDCITYESCAPEC_LDATA) {
+        } else if (__builtin_expect(level == CLOUDCITYESCAPEC_LDATA, 0)) {
             ADD_SFX("env_steam_lp");
         } else if (level == DEATHSTAR2BATTLEB_LDATA) {
             ADD_SFX("FField");
@@ -1113,7 +1113,7 @@ void SetLevelSfxBits(WORLDINFO *world) {
                 const i16 configured_sfx = game_character->sfx_die;
                 if (configured_sfx != -1) {
                     sfx_ids[sfx_count++] = configured_sfx;
-                } else if ((character->model_flags & 0x44002010) == 0) {
+                } else if (__builtin_expect((character->model_flags & 0x44002010) == 0, 1)) {
                     ADD_GAME_SFX((static_cast<i32>(game_character->flags_090 << 14) >> 31) + 0x1c);
                 }
             }
@@ -1129,7 +1129,7 @@ void SetLevelSfxBits(WORLDINFO *world) {
                 const i32 configured_sfx = game_character->sfx_grunt;
                 if (configured_sfx != -1) {
                     sfx_ids[sfx_count++] = configured_sfx;
-                } else if ((character->model_flags & 0x44002010) == 0) {
+                } else if (__builtin_expect((character->model_flags & 0x44002010) == 0, 1)) {
                     ADD_GAME_SFX((static_cast<i32>(game_character->flags_090 << 14) >> 31) + 0x15);
                 }
             }

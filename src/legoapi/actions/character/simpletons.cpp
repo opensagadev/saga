@@ -455,8 +455,11 @@ void UpdateMiniSnowTroopers(WORLDINFO_s *world) {
                 GameObject_s *nearest = player;
                 const f32 player_x = player->apiobj.collision_position.x - teams[team_index].position.x;
                 const f32 player_z = player->apiobj.collision_position.z - teams[team_index].position.z;
-                if (player2 != NULL && player2->apiobj.collision_position.x - teams[team_index].position.x > player_x &&
-                    player2->apiobj.collision_position.z - teams[team_index].position.z > player_z) {
+                if (__builtin_expect(player2 != NULL &&
+                                         player2->apiobj.collision_position.x - teams[team_index].position.x >
+                                             player_x &&
+                                         player2->apiobj.collision_position.z - teams[team_index].position.z > player_z,
+                                     1)) {
                     nearest = player2;
                 }
                 if (__builtin_expect(
@@ -500,7 +503,7 @@ void UpdateMiniSnowTroopers(WORLDINFO_s *world) {
                 i32 shot = 0;
                 u8 stopped_count = 0;
                 for (i32 i = 0; i < teams[team_index].trooper_count; ++i, ++trooper) {
-                    if (i == selected && shoot_due != 0)
+                    if (__builtin_expect(i == selected && shoot_due != 0, 1))
                         shot = TrooperShoot(world, &teams[team_index], trooper, &shot_angle, team_index);
 
                     if (trooper->stopped != 0) {
@@ -607,7 +610,8 @@ void UpdateMiniSnowTroopers(WORLDINFO_s *world) {
                     total.x += trooper->shot_position.x;
                     total.z += trooper->shot_position.z;
                 }
-                if (aligned_count == teams[team_index].trooper_count && stopped_count == aligned_count)
+                if (__builtin_expect(aligned_count == teams[team_index].trooper_count && stopped_count == aligned_count,
+                                     1))
                     TrooperTeamSetStateCode(&teams[team_index]);
                 break;
             }

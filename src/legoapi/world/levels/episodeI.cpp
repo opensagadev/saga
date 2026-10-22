@@ -815,9 +815,9 @@ void PodRaceUpdate(WORLDINFO_s *world, float dt) {
             PlaySfx("Pod_Race_Light", NULL);
     } else if (netclient == 0) {
         PodRace->mushroom_timer += dt;
-        if (PodRace->prev_lap_display > 0.0f) {
+        if (__builtin_expect(PodRace->prev_lap_display > 0.0f, 1)) {
             PodRace->lap_display = PodRace->prev_lap_display - PodRace->mushroom_timer;
-            if (PodRace->lap_display < 0.0f && FadeSys.fade == 0.0f) {
+            if (__builtin_expect(PodRace->lap_display < 0.0f && FadeSys.fade == 0.0f, 1)) {
                 PodRace->lap_display = 0.0f;
                 if (Player[0] != NULL && Player[0]->apiobj.player_controlled)
                     LoseCoins(Player[0], 1);

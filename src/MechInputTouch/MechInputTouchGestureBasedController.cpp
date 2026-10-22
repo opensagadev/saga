@@ -1076,7 +1076,7 @@ bool MechInputTouchGestureBasedController::OnClick(GameObject_s &object, TouchHo
             return true;
         }
         if (target != NULL && (target->GetObjectType() == 4 || target->GetObjectType() == 2)) {
-            if (TouchHacks::CanShoot(object)) {
+            if (__builtin_expect(TouchHacks::CanShoot(object) != 0, 1)) {
                 ForceNextShootTarget(*target);
                 button_was_pressed[0] = 1;
                 return true;
@@ -1093,7 +1093,7 @@ bool MechInputTouchGestureBasedController::OnClick(GameObject_s &object, TouchHo
     if (target == NULL) {
         target = MechInputTouchSystem::FindTargetObject(object, position, 0x80, NULL, &temporary_position);
         if (VehicleArea != 0) {
-            if (target != NULL && object.character_context == -1) {
+            if (__builtin_expect(target != NULL && object.character_context == -1, 1)) {
                 VuVec target_position;
                 target->GetPos(target_position, -1);
                 target_position.x -= object.apiobj.position.x;
@@ -1110,7 +1110,7 @@ bool MechInputTouchGestureBasedController::OnClick(GameObject_s &object, TouchHo
     if (target == NULL) {
         return false;
     }
-    if (VehicleArea != 0)
+    if (__builtin_expect(VehicleArea != 0, 0))
         button_was_pressed[0] = 1;
     target->TargetedFlash();
     switch (target->GetObjectType()) {
@@ -1128,7 +1128,7 @@ bool MechInputTouchGestureBasedController::OnClick(GameObject_s &object, TouchHo
                 if (FireBountyHunterRocket(player)) {
                     return false;
                 }
-                if (TouchHacks::CanPoo(object)) {
+                if (__builtin_expect(TouchHacks::CanPoo(object) != 0, 1)) {
                     button_was_pressed[3] = 1;
                     return false;
                 }

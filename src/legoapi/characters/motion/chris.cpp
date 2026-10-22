@@ -1054,7 +1054,7 @@ static i32 ProcessStarFighter(starfighter_s *fighter, quickboltinfo *info) {
             f32 least = NuFabs(axis->x * offset.x + axis->y * offset.y + axis->z * offset.z);
             NUVEC *up = reinterpret_cast<NUVEC *>(&fighter->matrix.m10);
             const f32 up_dot = NuFabs(up->x * offset.x + up->y * offset.y + up->z * offset.z);
-            if (up_dot <= least) {
+            if (__builtin_expect(up_dot <= least, 1)) {
                 axis = up;
                 least = up_dot;
             }
@@ -1137,7 +1137,7 @@ fire: {
         NUVEC *position = reinterpret_cast<NUVEC *>(&aim_matrix.m30);
         if (fighter->model_id == -299)
             PlaySfx("Dog_TriFighterGuns", position);
-        else if (fighter->model_id == -300)
+        else if (__builtin_expect(fighter->model_id == -300, 1))
             PlaySfx("Dog_CloneARC170Gun", position);
         else if (fighter->model_id == -298 || fighter->model_id == -297)
             PlaySfx("Dog_DroidFighterBlast", position);
@@ -1425,7 +1425,7 @@ static void ProcessSpaceLevel(spacelevel_s *space) {
             space->current_action = &space->actions[space->unknown_3378];
             space->unknown_337c = space->current_action->command;
             ++space->unknown_3378;
-            if (space->unknown_337c == 3) {
+            if (__builtin_expect(space->unknown_337c == 3, 0)) {
                 space->unknown_3378 = 1;
                 space->unknown_337c = space->actions->command;
                 space->current_action = space->actions;
@@ -1440,7 +1440,7 @@ static void ProcessSpaceLevel(spacelevel_s *space) {
                 MakeWingFormation(reinterpret_cast<_vuv_s *>(&formation_start),
                                   reinterpret_cast<_vuv_s *>(&formation_target), space->current_action->value, 1);
                 space->unknown_337c = 4;
-            } else if (space->unknown_337c == 2) {
+            } else if (__builtin_expect(space->unknown_337c == 2, 1)) {
                 passing_start = {-10.0f, -5.0f, -10.0f, 1.0f};
                 NuVecRotateZ(reinterpret_cast<NUVEC *>(&passing_start), reinterpret_cast<NUVEC *>(&passing_start),
                              qrand());
@@ -1617,9 +1617,9 @@ static void ProcessSpaceLevel(spacelevel_s *space) {
                 fighter->speed = 50.0f;
                 if (spline->id == 87)
                     fighter->speed = 22.5f;
-                else if (spline->id == 86)
+                else if (__builtin_expect(spline->id == 86, 0))
                     fighter->speed = 22.5f;
-                else if (static_cast<u32>(spline->id - 84) < 2)
+                else if (__builtin_expect(static_cast<u32>(spline->id - 84) < 2, 0))
                     fighter->speed = 22.5f;
                 else if (spline->id == -307)
                     fighter->speed = 33.0f;

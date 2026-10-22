@@ -336,9 +336,7 @@ execute_command:
         return;
     }
     if (MiniCam.commands[MiniCam.current_command].type == 1) {
-        if (command_duration > MiniCam.delta_time) {
-            MiniCam.delta_time += FRAMETIME;
-        } else {
+        if (command_duration <= MiniCam.delta_time) {
             NUVEC delta;
             MiniCam.distance = MiniCam.start_distance =
                 NuVecDist(NUMTX_GET_ROW_VEC(&GameCam->render_mtx, 3), MiniCam.focus, &delta);
@@ -346,6 +344,8 @@ execute_command:
             MiniCam.yaw = MiniCam.start_yaw = GameCam->yaw;
             MiniCam.position = GameCam->pos;
             Minicam_ResetForNextCommand();
+        } else {
+            MiniCam.delta_time += FRAMETIME;
         }
         return;
     }
@@ -398,11 +398,11 @@ execute_command:
         }
     }
     MiniCam.delta_time += FRAMETIME;
-    if (!(MiniCam.delta_time < command_duration)) {
+    if (MiniCam.delta_time < command_duration) {
         Minicam_AddDeltas(command_duration);
-        Minicam_ResetForNextCommand();
     } else {
         Minicam_AddDeltas(command_duration);
+        Minicam_ResetForNextCommand();
     }
     Minicam_CalcCamPos();
     return;

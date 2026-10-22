@@ -480,7 +480,7 @@ void Teleport_MoveCode(GameObject_s *object, i32 start_immediately) {
                 break;
         }
 
-        if (!object->apiobj.player_controlled && object->use_action != 3)
+        if (__builtin_expect(!object->apiobj.player_controlled && object->use_action != 3, 0))
             return;
         if (object->touch_task != NULL &&
             object->touch_task->GetHashId().value != MechTouchTaskUseTeleport::HashId.value)
@@ -638,7 +638,7 @@ void Teleport_MoveCode(GameObject_s *object, i32 start_immediately) {
     }
     object->apiobj.position.y += progress * 0.0025f;
 
-    if (!completed)
+    if (__builtin_expect(!completed, 0))
         return;
     teleport = static_cast<TELEPORT_s *>(object->field_0x788);
     if ((teleport->flags & 4) != 0 || object->field_0x7a4 != 0) {

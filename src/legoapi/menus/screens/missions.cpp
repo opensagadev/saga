@@ -193,7 +193,7 @@ void MenuUpdateMissions(MENU_s *menu) {
                     GameAudio_PlaySfx(0x30, NULL, 0, 0);
                 }
             } else if (pressed & GAMEPAD_MENUCANCEL) {
-                if (!MenuPacket.active_player[1] || !MenuPacket.reserved_1[0]) {
+                if (__builtin_expect(!MenuPacket.active_player[1] || !MenuPacket.reserved_1[0], 0)) {
                     cancel = 1;
                     goto collected_input;
                 }
@@ -265,7 +265,7 @@ collected_input:
         GameAudio_PlaySfx(0x30, NULL, 0, 0);
         NextArea_FreePlay = FreePlay = 0;
         NewLData = &LDataList[MissionSys->mission->level];
-    } else if (cancel) {
+    } else if (__builtin_expect(cancel != 0, 0)) {
         GameAudio_PlaySfx(0x31, NULL, 0, 0);
         EndMissionsMenu();
     } else if (left) {

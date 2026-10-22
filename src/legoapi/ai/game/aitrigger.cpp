@@ -173,7 +173,7 @@ i32 GameObjectUsingLever(GameObject_s *object, LEVER_s *lever) {
 }
 
 void AITriggerSetSysProcess(AITRIGGERSETSYS_s *system) {
-    if (system == NULL || player == NULL)
+    if (__builtin_expect(system == NULL || player == NULL, 0))
         return;
     // The original accumulates route membership across all sets in this pass.
     u64 character_mask = 0;
@@ -233,7 +233,7 @@ void AITriggerSetSysProcess(AITRIGGERSETSYS_s *system) {
                 GIZFORCE_s *force = static_cast<GIZFORCE_s *>(gizmo->object);
                 if (GizForce_GameObjUsingForce(player, force) || GizForce_GameObjUsingForce(player2, force)) {
                     set->field_0x20e |= 1u << index;
-                } else if ((set->field_0x20e >> index) & 1) {
+                } else if (__builtin_expect((set->field_0x20e >> index) & 1 != 0, 1)) {
                     set->field_0x20e &= ~(1u << index);
                 } else if (GizForce_Complete(force)) {
                     release = true;
@@ -245,7 +245,7 @@ void AITriggerSetSysProcess(AITRIGGERSETSYS_s *system) {
                     (player2 != NULL && (i8)player2->character_context == LEGOCONTEXT_GRAPPLE &&
                      player2->field_0x788 == grapple)) {
                     set->field_0x20e |= 1u << index;
-                } else if ((set->field_0x20e >> index) & 1) {
+                } else if (__builtin_expect((set->field_0x20e >> index) & 1 != 0, 1)) {
                     set->field_0x20e &= ~(1u << index);
                 } else if (Grapple_Occupied(grapple, object, NULL)) {
                     release = true;
@@ -288,7 +288,7 @@ void AITriggerSetSysProcess(AITRIGGERSETSYS_s *system) {
                     } else if (gizmo->type_id == spinner_gizmotype_id) {
                         if (static_cast<GIZSPINNER_s *>(gizmo->object)->room_index != -1)
                             continue;
-                    } else if (gizmo->type_id == force_gizmotype_id) {
+                    } else if (__builtin_expect(gizmo->type_id == force_gizmotype_id, 0)) {
                         GIZFORCE_s *force = static_cast<GIZFORCE_s *>(gizmo->object);
                         if (!(force->progress_flags & 1) || force->using_object != NULL || force->field_0x3c_bits != 0)
                             continue;
@@ -354,7 +354,7 @@ void AITriggerSetSysProcess(AITRIGGERSETSYS_s *system) {
                         system->field_0x42c0[best] = index;
                     }
                 }
-                if (set->trigger_indices[index] != -1)
+                if (__builtin_expect(set->trigger_indices[index] != -1, 1))
                     ++assigned_count;
             }
         } else if (has_assignments) {
