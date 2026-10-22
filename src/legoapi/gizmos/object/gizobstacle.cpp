@@ -104,7 +104,8 @@ static void GizObstacles_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *, voi
 static void GizObstacles_Update(void *world_ptr, void *data, float) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
     GIZOBSTACLESYS_s *obstacle_sys = static_cast<GIZOBSTACLESYS_s *>(data);
-    if (obstacle_sys == NULL || world == NULL || world->gizmo_sys == NULL || world->gizmo_sys->sets == NULL) {
+    if (__builtin_expect(
+            obstacle_sys == NULL || world == NULL || world->gizmo_sys == NULL || world->gizmo_sys->sets == NULL, 0)) {
         return;
     }
 
@@ -121,11 +122,13 @@ static void GizObstacles_Update(void *world_ptr, void *data, float) {
 
         GameObject_s *previous_triggering_object = obstacle->triggering_object;
         obstacle->triggering_object = NULL;
-        if ((obstacle->progress_flags & GIZOBSTACLE_PROGRESS_FLAG_VISIBLE) == 0 ||
-            (obstacle->progress_flags &
-             (GIZOBSTACLE_PROGRESS_FLAG_ENABLED | GIZOBSTACLE_PROGRESS_FLAG_EXTERNAL_CONTROL)) == 0 ||
-            obstacle->anim_set == NULL || (obstacle->control_flags & GIZOBSTACLE_CONTROL_FLAG_REVERSE_ACTIVE) != 0 ||
-            (obstacle->runtime_flags & GIZOBSTACLE_RUNTIME_FLAG_DESTROYED) != 0) {
+        if (__builtin_expect((obstacle->progress_flags & GIZOBSTACLE_PROGRESS_FLAG_VISIBLE) == 0 ||
+                                 (obstacle->progress_flags & (GIZOBSTACLE_PROGRESS_FLAG_ENABLED |
+                                                              GIZOBSTACLE_PROGRESS_FLAG_EXTERNAL_CONTROL)) == 0 ||
+                                 obstacle->anim_set == NULL ||
+                                 (obstacle->control_flags & GIZOBSTACLE_CONTROL_FLAG_REVERSE_ACTIVE) != 0 ||
+                                 (obstacle->runtime_flags & GIZOBSTACLE_RUNTIME_FLAG_DESTROYED) != 0,
+                             1)) {
             continue;
         }
 
@@ -133,7 +136,7 @@ static void GizObstacles_Update(void *world_ptr, void *data, float) {
         if (obstacle->mode == 7) {
             if ((obstacle->progress_flags & GIZOBSTACLE_PROGRESS_FLAG_PUSH_CONTROL) != 0) {
                 obstacle->triggering_object = previous_triggering_object;
-                if (obstacle->animation_speed != 0.0f) {
+                if (__builtin_expect(obstacle->animation_speed != 0.0f, 1)) {
                     GizObstacle_PlayForwards(obstacle);
                     anim_set = obstacle->anim_set;
                 } else {
@@ -141,7 +144,7 @@ static void GizObstacles_Update(void *world_ptr, void *data, float) {
                     anim_set = obstacle->anim_set;
                 }
             } else {
-                if (obstacle->state == 1) {
+                if (__builtin_expect(obstacle->state == 1, 1)) {
                     obstacle->animation_speed = -1.0f;
                     GizObstacle_PlayForwards(obstacle);
                     anim_set = obstacle->anim_set;
@@ -180,14 +183,14 @@ static void GizObstacles_Update(void *world_ptr, void *data, float) {
             }
 
             anim_set = obstacle->anim_set;
-            if (obstacle->animation_speed < 0.0f) {
-                if (obstacle->stop_sfx_id != -1 &&
-                    (anim_set->state == GAMEANIMSET_STATE_AT_END || IsSfxLooping(obstacle->stop_sfx_id) != 0))
-                    GameAudio_PlaySfxById(obstacle->stop_sfx_id, &obstacle->evaluated_position, 0, 0);
-            } else {
+            if (!(obstacle->animation_speed < 0.0f)) {
                 if (obstacle->start_sfx_id != -1 &&
                     (anim_set->state == GAMEANIMSET_STATE_AT_START || IsSfxLooping(obstacle->start_sfx_id) != 0))
                     GameAudio_PlaySfxById(obstacle->start_sfx_id, &obstacle->evaluated_position, 0, 0);
+            } else {
+                if (obstacle->stop_sfx_id != -1 &&
+                    (anim_set->state == GAMEANIMSET_STATE_AT_END || IsSfxLooping(obstacle->stop_sfx_id) != 0))
+                    GameAudio_PlaySfxById(obstacle->stop_sfx_id, &obstacle->evaluated_position, 0, 0);
             }
             anim_set = obstacle->anim_set;
         }

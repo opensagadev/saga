@@ -223,7 +223,7 @@ i32 NuSoundStreamingSample::Open(f32 start_offset, bool loop, bool weak_flag) {
     i32 error = 0;
     i32 status = 0;
 
-    if (this->sound_buffers[0] == NULL) {
+    if (__builtin_expect(this->sound_buffers[0] == NULL, 0)) {
         u32 half_buffer_size = NuSoundSystem::GetStreamBufferSize() / 2;
 
         NuSoundBuffer *buffer = NU_ALLOC_T(NuSoundBuffer, 1, "", NUMEMORY_CATEGORY_NUSOUND);
@@ -232,7 +232,8 @@ i32 NuSoundStreamingSample::Open(f32 start_offset, bool loop, bool weak_flag) {
         }
         this->sound_buffers[0] = buffer;
 
-        if (this->sound_buffers[0]->Allocate(half_buffer_size, NuSoundSystem::MemoryDiscipline::SAMPLE) != 1) {
+        if (__builtin_expect(
+                this->sound_buffers[0]->Allocate(half_buffer_size, NuSoundSystem::MemoryDiscipline::SAMPLE) != 1, 0)) {
             goto alloc_error;
         }
 
@@ -251,7 +252,7 @@ i32 NuSoundStreamingSample::Open(f32 start_offset, bool loop, bool weak_flag) {
 
     this->file_loader = NuSoundSystem::CreateFileLoader(this->file_type);
     desc = this->file_loader->CreateHeader();
-    if (desc == NULL) {
+    if (__builtin_expect(desc == NULL, 0)) {
         NuSoundSystem::ReleaseFileLoader(this->file_loader);
         this->file_loader = NULL;
         return 3;
@@ -270,8 +271,8 @@ i32 NuSoundStreamingSample::Open(f32 start_offset, bool loop, bool weak_flag) {
         context.size3 = 0;
 
         context = this->file_loader->FillStreamBuffer(this->sound_buffers[0], loop);
-        if (context.size2 == 0) {
-            if (this->some_count == 0) {
+        if (__builtin_expect(context.size2 == 0, 1)) {
+            if (__builtin_expect(this->some_count == 0, 0)) {
                 this->file_loader->CloseStream();
                 status = 4;
             }
@@ -281,15 +282,15 @@ i32 NuSoundStreamingSample::Open(f32 start_offset, bool loop, bool weak_flag) {
         this->sound_buffers[0]->SetCurrentContext(context);
 
         context.flags &= ~1u;
-        if (status == 1 && (context.flags & 2) == 0) {
+        if (__builtin_expect(status == 1 && (context.flags & 2) == 0, 1)) {
             context = this->file_loader->FillStreamBuffer(this->sound_buffers[1], loop);
-            if (context.size2 == 0) {
+            if (context.size2 != 0) {
+                this->some_count++;
+            } else {
                 if (this->some_count == 0) {
                     this->file_loader->CloseStream();
                     status = 4;
                 }
-            } else {
-                this->some_count++;
             }
             this->sound_buffers[1]->SetCurrentContext(context);
         }

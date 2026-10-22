@@ -89,7 +89,7 @@ void PlayRadio(char *special_name, char *blowup_name, i32 play) {
                 if (radio->time <= 0.0f) {
                     if (blowup_name != NULL) {
                         GIZMO *gizmo = GizmoFindByName(WORLD->gizmo_sys, blowup_gizmotype_id, blowup_name);
-                        if (gizmo == NULL) {
+                        if (__builtin_expect(gizmo == NULL, 1)) {
                             return;
                         }
                         radio->blowup = static_cast<GIZMOBLOWUP_s *>(gizmo->object);
@@ -118,7 +118,7 @@ void PlayRadio(char *special_name, char *blowup_name, i32 play) {
             }
             if (special_name != NULL) {
                 char *name = NuSpecialGetName(&radio->special);
-                if (name != NULL && NuStrICmp(name, special_name) == 0) {
+                if (__builtin_expect(name != NULL && NuStrICmp(name, special_name) == 0, 1)) {
                     NUMTX *source = NuSpecialGetMtx(&radio->special);
                     NUMTX *instance = NuSpecialGetInstanceMtx(&radio->special);
                     *instance = *source;

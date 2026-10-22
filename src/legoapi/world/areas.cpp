@@ -131,7 +131,7 @@ AREADATA *Areas_ConfigureList(char *file, VARIPTR *bufferStart, VARIPTR *bufferE
                     if (NuFParGetWord(fp) != 0 && NuStrLen(fp->word_buf) <= 0x1f)
                         NuStrCpy(area->file, fp->word_buf);
                     in_area = 1;
-                } else if (NuStrICmp(fp->word_buf, "level") == 0) {
+                } else if (__builtin_expect(NuStrICmp(fp->word_buf, "level") == 0, 1)) {
                     if (area->level_count > 0xb || NuFParGetWord(fp) == 0) {
                         in_area = 1;
                     } else {
@@ -147,7 +147,7 @@ AREADATA *Areas_ConfigureList(char *file, VARIPTR *bufferStart, VARIPTR *bufferE
                                         if (area->levels[k] == li)
                                             break;
                                     }
-                                    if (k == in_area) {
+                                    if (__builtin_expect(k == in_area, 1)) {
                                         area->levels[in_area] = (i16)li;
                                         area->level_count = (u8)(in_area + 1);
                                     }
@@ -222,7 +222,7 @@ AREADATA *Areas_ConfigureList(char *file, VARIPTR *bufferStart, VARIPTR *bufferE
                     area->challenge_trial_time = NuFParGetInt(fp);
                 } else if (NuStrICmp(fp->word_buf, "redbrick_cheat") == 0 ||
                            NuStrICmp(fp->word_buf, "redbrick_extra") == 0) {
-                    if (NuFParGetWord(fp) == 0) {
+                    if (__builtin_expect(NuFParGetWord(fp) == 0, 1)) {
                         in_area = 1;
                     } else {
                         area->cheat = Cheat_FindByName(fp->word_buf);
@@ -258,7 +258,7 @@ AREADATA *Areas_ConfigureList(char *file, VARIPTR *bufferStart, VARIPTR *bufferE
     }
 
     NuFParDestroy(fp);
-    if (area_count != 0) {
+    if (__builtin_expect(area_count != 0, 1)) {
         bufferStart->void_ptr = area;
         if (countDest != NULL)
             *countDest = area_count;
@@ -266,7 +266,7 @@ AREADATA *Areas_ConfigureList(char *file, VARIPTR *bufferStart, VARIPTR *bufferE
         if (0 < area_count) {
             do {
                 while (true) {
-                    if (area_base[j].challenge_trial_time == 0) {
+                    if (__builtin_expect(area_base[j].challenge_trial_time == 0, 1)) {
                         if ((area_base[j].flags & AREAFLAG_SUPER_BONUS_AREA) == AREAFLAG_BONUS_AREA)
                             area_base[j].challenge_trial_time = (i16)AREA_DEFAULTBONUSTIMETRIALTIME;
                         else if ((area_base[j].flags & AREAFLAG_MINIKIT) != 0)

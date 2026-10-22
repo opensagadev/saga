@@ -1695,23 +1695,23 @@ void Hub_UpdateFreePlaySelect() {
                     }
                 }
                 if (cancel) {
-                    if (freeplay_selected[player] != 1) {
-                        if (freeplay_selected[player] != 2) {
-                            if (freeplay_selected[player] == 0 && freeplay_time[player] <= 0.0f) {
-                                exit = 1;
-                            }
-                        } else {
-                            if (MenuPacket.active_player[other] != 0 && freeplay_selected[other] < 2) {
-                                freeplay_selected[player] = 1;
-                                GameAudio_PlaySfx(0x31, NULL, 0, 0);
-                            }
-                        }
-                    } else {
-                        if (freeplay_time[player] <= 0.0f) {
+                    if (freeplay_selected[player] == 1) {
+                        if (__builtin_expect(freeplay_time[player] <= 0.0f, 1)) {
                             BigIconAlpha[player] = 0.0f;
                             freeplay_time[player] = 0.75f;
                             freeplay_selected[player] = 0;
                             GameAudio_PlaySfx(0x31, NULL, 0, 0);
+                        }
+                    } else {
+                        if (freeplay_selected[player] == 2) {
+                            if (MenuPacket.active_player[other] != 0 && freeplay_selected[other] < 2) {
+                                freeplay_selected[player] = 1;
+                                GameAudio_PlaySfx(0x31, NULL, 0, 0);
+                            }
+                        } else {
+                            if (freeplay_selected[player] == 0 && freeplay_time[player] <= 0.0f) {
+                                exit = 1;
+                            }
                         }
                     }
                 }

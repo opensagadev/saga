@@ -127,7 +127,7 @@ void GameCam_ResetLookRot(GAMECAMERA_s *camera) {
 void GameCam_UpdateLookRot(GAMECAMERA_s *camera) {
     // Retail handles each player separately, with directional buttons only for
     // the left-stick mode and seek speeds proportional to the angular ranges.
-    if (camera == NULL)
+    if (__builtin_expect(camera == NULL, 0))
         camera = GameCam;
     f32 look_pitch = 1820.0f, look_yaw = 2730.0f;
     camera->field_0x204 = 0.0f;
@@ -149,7 +149,7 @@ void GameCam_UpdateLookRot(GAMECAMERA_s *camera) {
                     u32 horizontal_buttons = buttons & (GAMEPAD_DLEFT | GAMEPAD_DRIGHT);
                     if (horizontal_buttons == GAMEPAD_DLEFT)
                         horizontal = -look_yaw;
-                    else if (horizontal_buttons == GAMEPAD_DRIGHT)
+                    else if (__builtin_expect(horizontal_buttons == GAMEPAD_DRIGHT, 0))
                         horizontal = look_yaw;
                     u32 vertical_buttons = buttons & (GAMEPAD_DUP | GAMEPAD_DDOWN);
                     if (vertical_buttons == GAMEPAD_DUP)
@@ -189,7 +189,7 @@ void GameCam_UpdateLookRot(GAMECAMERA_s *camera) {
                 if (Player[1]->pad_gamepad->input_mode == 1) {
                     u32 buttons = Player[1]->pad_gamepad->buttons_held;
                     u32 horizontal_buttons = buttons & (GAMEPAD_DLEFT | GAMEPAD_DRIGHT);
-                    if (horizontal_buttons == GAMEPAD_DLEFT)
+                    if (__builtin_expect(horizontal_buttons == GAMEPAD_DLEFT, 1))
                         horizontal = -look_yaw;
                     else if (horizontal_buttons == GAMEPAD_DRIGHT)
                         horizontal = look_yaw;

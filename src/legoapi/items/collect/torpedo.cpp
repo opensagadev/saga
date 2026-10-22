@@ -324,7 +324,11 @@ void TorpedoCode(GameObject_s *object, i32 fire, f32 fire_cooldown) {
         --object->torpedo->count;
     }
 
-    if (!(object->torpedo->field_08 < 0.8f)) {
+    if (object->torpedo->field_08 < 0.8f) {
+        object->torpedo->field_08 += FRAMETIME;
+        if (!(object->torpedo->field_08 < 0.8f))
+            object->torpedo->field_03 = 0;
+    } else {
         if (Cheat_IsOn(42) != 0 && static_cast<i8>(object->apiobj.flags_low) < 0 &&
             !(object->torpedo_fire_cooldown > 0.0f) && object->apiobj.field_0x287 == 0 &&
             (object->torpedo->field_0x1 & 2) == 0) {
@@ -334,7 +338,7 @@ void TorpedoCode(GameObject_s *object, i32 fire, f32 fire_cooldown) {
                 object->torpedo->field_08 = 0.0f;
                 object->torpedo->field_03 = 0;
             }
-        } else if (object->torpedo->count < maximum) {
+        } else if (__builtin_expect(object->torpedo->count < maximum, 1)) {
             f32 distance;
             GIZTORPMACHINE *machine = GizTorpMachine_FindNearest(WORLD, &object->apiobj.collision_position, &distance);
             if (machine != NULL && (machine->flags & GIZTORPMACHINE_FLAG_ACTIVE) != 0 && distance < TORPEDOGRABRANGE2) {
@@ -349,10 +353,6 @@ void TorpedoCode(GameObject_s *object, i32 fire, f32 fire_cooldown) {
                 }
             }
         }
-    } else {
-        object->torpedo->field_08 += FRAMETIME;
-        if (!(object->torpedo->field_08 < 0.8f))
-            object->torpedo->field_03 = 0;
     }
 
     Torpedo_UpdateJobbies(object);
@@ -366,9 +366,9 @@ void TorpedoCode(GameObject_s *object, i32 fire, f32 fire_cooldown) {
         const f32 range = type->field_14 * type->field_10;
         void *target = FindNearestTorpTarget(WORLD, &object->apiobj.position, range * range, &target_type);
         if (target != NULL) {
-            if (target == object->torpedo->target) {
+            if (__builtin_expect(target == object->torpedo->target, 1)) {
                 object->torpedo_target_timer += FRAMETIME;
-                if (object->torpedo_target_timer > 0.25f)
+                if (__builtin_expect(object->torpedo_target_timer > 0.25f, 0))
                     object->torpedo_target_timer = 0.25f;
             } else if (!(object->torpedo_target_timer > 0.0f) || object->torpedo->target == NULL) {
                 object->torpedo->target = target;
@@ -376,10 +376,10 @@ void TorpedoCode(GameObject_s *object, i32 fire, f32 fire_cooldown) {
                 object->torpedo_target_timer = 0.0f;
             } else {
                 const f32 timer = object->torpedo_target_timer - 2.0f * FRAMETIME;
-                if (timer < 0.0f) {
-                    object->torpedo_target_timer = 0.0f;
-                } else {
+                if (timer >= 0.0f) {
                     object->torpedo_target_timer = timer;
+                } else {
+                    object->torpedo_target_timer = 0.0f;
                 }
             }
         } else if ((object->torpedo->field_0x1 & 6) == 0) {

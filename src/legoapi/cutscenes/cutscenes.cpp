@@ -1748,11 +1748,11 @@ __attribute__((optimize("O2", "tree-vectorize"))) void *CutScenes_Load(char *con
                 name[dot] = '\0';
             }
 
-            if (name[0] == 'c' && name[1] == 'u' && name[2] == 't' && name[3] == '\\') {
+            if (__builtin_expect(name[0] == 'c' && name[1] == 'u' && name[2] == 't' && name[3] == '\\', 1)) {
                 NuStrCpy(name, name + 4);
             }
             NuStrCpy(config_name, name);
-            if (CutScene_OverrideConfigFileNameFn != NULL) {
+            if (__builtin_expect(CutScene_OverrideConfigFileNameFn != NULL, 1)) {
                 CutScene_OverrideConfigFileNameFn(config_name, param2, param3);
             }
             NuStrCpy(full_path, "cut\\");
@@ -1778,7 +1778,7 @@ __attribute__((optimize("O2", "tree-vectorize"))) void *CutScenes_Load(char *con
                 NuStrCat(full_path, name);
                 NuStrCat(full_path, ".cut");
                 cut->scene = NuGCutSceneLoad(full_path, buf, buf_end, 0);
-                if (cut->scene == NULL) {
+                if (__builtin_expect(cut->scene == NULL, 0)) {
                     buf->void_ptr = cut;
                     continue;
                 }
@@ -2257,7 +2257,7 @@ void CutScenes_Update(WORLDINFO_s *world, i32 paused) {
     i32 stop_index = -1;
     for (i32 i = 0; i < world->cutscene_sys->count; ++i) {
         CUTINFO *cut = world->cutscene_sys->cuts[i];
-        if (cut->instance == NULL) {
+        if (__builtin_expect(cut->instance == NULL, 0)) {
             continue;
         }
         instNUGCUTSCENE_s *instance = reinterpret_cast<instNUGCUTSCENE_s *>(cut->instance);
@@ -2311,7 +2311,7 @@ void CutScenes_Update(WORLDINFO_s *world, i32 paused) {
                     music_man.GetStatus(TRACK_CLASS_CUTSCENE, NULL) != 4) {
                     music_man.PlayTrack(TRACK_CLASS_CUTSCENE, 0);
                 } else if (music_man.GetStatus(TRACK_CLASS_CUTSCENE, NULL) == 4) {
-                    if (g_lastCutInfo != cut) {
+                    if (__builtin_expect(g_lastCutInfo != cut, 1)) {
                         g_accumCutsceneTime += g_lastCutsceneTime;
                         g_lastCutsceneTime =
                             static_cast<NUGCUTSCENE_s *>(cut->scene)->duration / cut->frames_per_second;
@@ -2419,7 +2419,27 @@ void CutScenes_Update(WORLDINFO_s *world, i32 paused) {
         }
     }
 
-    if (stop_cut->skip_level != -1) {
+    if (!(stop_cut->skip_level != -1)) {
+        CUTINFO *next = NewCutScene(NULL, world->cutscene_sys, stop_cut->next_cutscene, 0);
+        if (CutScenePlayer_Active() != 0 && next == NULL) {
+            NewLevelFromMenu(HUB_LDATA, -1, -1, 1);
+            hub_from_cutsceneplayer = 1;
+        } else if ((stop_cut->flags & 0x400) != 0) {
+            NewMode = 1;
+        } else if (stop_cut->door_name[0] != '\0') {
+            DOOR_s *door = Door_FindByName(world, stop_cut->door_name);
+            if (door != NULL) {
+                Door_GoThrough(world, door, 1);
+            }
+        } else if ((stop_cut->flags & 0x100) != 0) {
+            FADETYPE fade_type;
+            fade_type.type = FADE_TYPE_STILL_WIPE;
+            FadeSys.SetFade(fade_type, 0);
+            NeedScreenGrab(1);
+            FadeSys.SetStage(1);
+            GameAudio_PlaySfx(0x2d, NULL, 0, 0);
+        }
+    } else {
         NewLData = &LDataList[stop_cut->skip_level];
         if (HUB_LDATA != NULL && NewLData == HUB_LDATA) {
             if (CutScenePlayer_Active() != 0) {
@@ -2443,26 +2463,6 @@ void CutScenes_Update(WORLDINFO_s *world, i32 paused) {
             PauseGameCut();
             music_man.PauseTrack(TRACK_CLASS_CUTSCENE);
             newlevel_resumecutaudio = 1;
-        }
-    } else {
-        CUTINFO *next = NewCutScene(NULL, world->cutscene_sys, stop_cut->next_cutscene, 0);
-        if (CutScenePlayer_Active() != 0 && next == NULL) {
-            NewLevelFromMenu(HUB_LDATA, -1, -1, 1);
-            hub_from_cutsceneplayer = 1;
-        } else if ((stop_cut->flags & 0x400) != 0) {
-            NewMode = 1;
-        } else if (stop_cut->door_name[0] != '\0') {
-            DOOR_s *door = Door_FindByName(world, stop_cut->door_name);
-            if (door != NULL) {
-                Door_GoThrough(world, door, 1);
-            }
-        } else if ((stop_cut->flags & 0x100) != 0) {
-            FADETYPE fade_type;
-            fade_type.type = FADE_TYPE_STILL_WIPE;
-            FadeSys.SetFade(fade_type, 0);
-            NeedScreenGrab(1);
-            FadeSys.SetStage(1);
-            GameAudio_PlaySfx(0x2d, NULL, 0, 0);
         }
     }
     CUTNOFOG = 0;
@@ -2613,7 +2613,7 @@ void CutScenes_Reset(WORLDINFO_s *world) {
         }
         if (__builtin_expect(cut == NULL && cutskip_dontplaylevelintro == 0, 1)) {
             for (i32 i = 0; i < world->cutscene_sys->count; ++i) {
-                if ((world->cutscene_sys->cuts[i]->flags & 0x1000) == 0) {
+                if (__builtin_expect((world->cutscene_sys->cuts[i]->flags & 0x1000) == 0, 0)) {
                     continue;
                 }
                 cut = world->cutscene_sys->cuts[i];

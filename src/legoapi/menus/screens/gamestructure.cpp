@@ -1062,7 +1062,7 @@ void MenuUpdateStoreRestoring(MENU_s *menu) {
     }
 #undef CHECK_RESTORING_BUNDLE
 
-    if (menu->confirm_pressed != 0) {
+    if (__builtin_expect(menu->confirm_pressed != 0, 1)) {
         if (restoring_wait <= 0.0f) {
             BackupMenu();
         }

@@ -618,7 +618,7 @@ static void ProcessFlowBox(GIZFLOW_s *system, FLOWBOX_s *box, u8 frame) {
     box->state_flags_low = (box->state_flags_low & ~1) | 2;
     if (box->type == 0) {
         if (box->state_flags_low & 0x18) {
-            if (box->child_count != 0) {
+            if (__builtin_expect(box->child_count != 0, 0)) {
                 box->state_flags_low |= 0x20;
             } else {
                 FLOWBOXGIZMODATA_s *data = box->data;

@@ -1143,22 +1143,22 @@ void AddCoinsToPanel(i32 coins, nuvec_s *position, i32 player, float, GameObject
                 ++counts[type];
                 coins = remaining;
             }
-        } else if (coins > 0) {
+        } else if (__builtin_expect(coins > 0, 1)) {
             for (i32 i = 3; coins > 0; --i) {
                 i32 type = CoinTab[i];
-                while (coins - GizmoPickupType[type].score >= 0) {
+                while (__builtin_expect(coins - GizmoPickupType[type].score >= 0, 1)) {
                     coins -= GizmoPickupType[type].score;
                     ++counts[type];
                 }
             }
         }
-        if (static_cast<u32>(player) > 1)
+        if (__builtin_expect(static_cast<u32>(player) > 1, 1))
             player = -1;
         NUVEC target;
         target.x = player == 1 ? PANEL_COINX : -PANEL_COINX;
         i32 main_total = CoinsGoToMainTotal() != 0;
         f32 target_scale;
-        if (main_total) {
+        if (__builtin_expect(main_total != 0, 0)) {
             target.y = STATSPOSY;
             target_scale = COINTOTAL_COINSIZE;
         } else {

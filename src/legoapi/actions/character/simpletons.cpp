@@ -215,7 +215,7 @@ void InitMiniSnowTroopers(WORLDINFO_s *world, i32 team_count, i32 trooper_count,
 
         trooperteamcount = team_count;
 
-        if (world->mini_trooper_teams == NULL) {
+        if (__builtin_expect(world->mini_trooper_teams == NULL, 0)) {
             world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 4);
             world->mini_trooper_teams = world->giz_buffer.void_ptr;
             world->giz_buffer.void_ptr = static_cast<minitrooperteam_s *>(world->giz_buffer.void_ptr) + team_count;

@@ -51,7 +51,7 @@ EPISODEDATA *Episodes_ConfigureList(char *file, VARIPTR *bufferStart, VARIPTR *b
                     count++;
                     episode++;
                 }
-            } else if (NuStrICmp(fp->word_buf, "area") == 0) {
+            } else if (__builtin_expect(NuStrICmp(fp->word_buf, "area") == 0, 1)) {
                 if (__builtin_expect(episode->area_count < 10 && NuFParGetWord(fp) != 0, 0)) {
                     i32 area_index;
                     AREADATA *area = Area_FindByName(fp->word_buf, &area_index);
@@ -66,7 +66,7 @@ EPISODEDATA *Episodes_ConfigureList(char *file, VARIPTR *bufferStart, VARIPTR *b
                                 break;
                             }
                         }
-                        if (j == count) {
+                        if (__builtin_expect(j == count, 1)) {
                             const i32 area_count = episode->area_count;
                             episode->area_ids[area_count] = (i16)area_index;
                             episode->area_count = (u8)(area_count + 1);

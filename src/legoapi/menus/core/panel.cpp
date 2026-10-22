@@ -157,7 +157,7 @@ i32 Tag_UpdateHint(HINT_s *hint) {
             }
             if (Tag_DoneFirst != 1 || (previous != NULL && Hint_isComplete(previous) == 0))
                 return 0;
-            if (VehicleArea != 0 || WORLD->current_level == HUB_LDATA)
+            if (__builtin_expect(VehicleArea != 0 || WORLD->current_level == HUB_LDATA, 0))
                 return 0;
             return (player != NULL && player->field_0xcc0 == NULL) || (player2 != NULL && player2->field_0xcc0 == NULL);
         }
@@ -403,7 +403,7 @@ void UpdateStats() {
     } else {
         if (ChallengeMode != 0)
             DrawMiniKitTime = 2.0f;
-        if (DrawMiniKitTime > 0.0f)
+        if (__builtin_expect(DrawMiniKitTime > 0.0f, 1))
             DrawMiniKitTime -= FRAMETIME;
         f32 target = 1.0f;
         if (FadeSys.fade != 0.0f || CUTSTOPGAME != 0 || (Paused == 0 && NetPaused == 0 && DrawMiniKitTime <= 0.0f) ||
@@ -454,8 +454,9 @@ void UpdateStats() {
             const i32 freeplay = GAMEDEMO != 0 ? 0 : FreePlay;
             if (WORLD->area != NULL && (WORLD->area->flags & 0x4010) != 0) {
                 if (BOTHTRUEJEDIGOLDBRICKS == 0) {
-                    if (Game.area_save[WORLD->level_sub_id].true_hero_complete[0] != 0 ||
-                        Game.area_save[WORLD->level_sub_id].true_hero_complete[1] != 0)
+                    if (__builtin_expect(Game.area_save[WORLD->level_sub_id].true_hero_complete[0] != 0 ||
+                                             Game.area_save[WORLD->level_sub_id].true_hero_complete[1] != 0,
+                                         0))
                         goto buildup_finished;
                 } else if (Game.area_save[WORLD->level_sub_id].true_hero_complete[freeplay] != 0) {
                     goto buildup_finished;
@@ -464,7 +465,7 @@ void UpdateStats() {
                     const u32 maximum = static_cast<u32>(freeplay != 0 ? WORLD->area->true_hero_targets[1]
                                                                        : WORLD->area->true_hero_targets[0]);
                     if (maximum != 0) {
-                        if (BuildUpDone == 0) {
+                        if (__builtin_expect(BuildUpDone == 0, 0)) {
                             BuildUpTotal = 0;
                             if (Player[0] != NULL && Player[0]->coinpacket != NULL)
                                 BuildUpTotal = Player[0]->coinpacket->coins;
@@ -485,7 +486,7 @@ void UpdateStats() {
     }
     if (SuperStory != 0 && (WORLD->current_level->flags & LEVEL_SHOW_COIN_TOTAL) != 0)
         DrawCoinTotalTime = 1.0f;
-    if (DrawCoinTotalTime > 0.0f)
+    if (__builtin_expect(DrawCoinTotalTime > 0.0f, 0))
         DrawCoinTotalTime -= FRAMETIME;
     f32 coin_target = 1.0f;
     if (FadeSys.fade != 0.0f || CUTSTOPGAME != 0 || (Paused == 0 && NetPaused == 0 && !(DrawCoinTotalTime > 0.0f)) ||

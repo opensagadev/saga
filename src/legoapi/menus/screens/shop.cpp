@@ -612,7 +612,7 @@ i32 CodeMenu(MENU_s *) {
         if (right) {
             lastitem = col;
             ++col;
-            if (col > 5)
+            if (__builtin_expect(col > 5, 1))
                 col = 5;
             codevalid = 0;
             if (!usercode[col])

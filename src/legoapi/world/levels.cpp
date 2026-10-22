@@ -2039,9 +2039,10 @@ void LevelObjects_InitForLevel(WORLDINFO_s *world) {
 
             case LEVEL_OBJECT_SCENE_THINGS:
             default:
-                if (area_scene != NULL && world->area != NULL &&
-                    (world->area->flags & AREAFLAG_OVERRIDE_THINGS_SCENE) != 0) {
-                    if (NuSpecialFind(area_scene, &object.special, object_type.name, 1) != 0) {
+                if (__builtin_expect(area_scene != NULL && world->area != NULL &&
+                                         (world->area->flags & AREAFLAG_OVERRIDE_THINGS_SCENE) != 0,
+                                     1)) {
+                    if (__builtin_expect(NuSpecialFind(area_scene, &object.special, object_type.name, 1) != 0, 0)) {
                         goto object_resolved;
                     }
                 }
@@ -2055,7 +2056,7 @@ void LevelObjects_InitForLevel(WORLDINFO_s *world) {
 
     object_resolved:
         object.active = static_cast<u8>(NuSpecialExistsFn(&object.special));
-        if (object.active != 0) {
+        if (__builtin_expect(object.active != 0, 0)) {
             NuSpecialSetVisibility(&object.special, 0);
         }
     }

@@ -549,7 +549,7 @@ void TightRope_MoveCode(GameObject_s *object, i32 jump_pressed) {
         if (static_cast<u16>(object->context_animation - 5) <= 1) {
             object->context_animation_timer += FRAMETIME;
             void *rope = object->field_0x788;
-            if (object->context_animation == 5) {
+            if (__builtin_expect(object->context_animation == 5, 1)) {
                 if (object->context_animation_timer >=
                     object->airborne_action_duration + object->airborne_action_duration) {
                     StartEndOfJump(object);
@@ -557,10 +557,11 @@ void TightRope_MoveCode(GameObject_s *object, i32 jump_pressed) {
             } else if (!(object->context_animation_timer < object->airborne_action_duration)) {
                 object->context_animation = 5;
             }
-            if (0.0f >= object->apiobj.velocity.y && TightRope_Attach(object, WORLD) == 0 &&
-                object->apiobj.field_0x27d != 0) {
+            if (__builtin_expect(0.0f >= object->apiobj.velocity.y && TightRope_Attach(object, WORLD) == 0 &&
+                                     object->apiobj.field_0x27d != 0,
+                                 0)) {
                 object->movement_runtime_flags |= 4;
-                if (object->context_animation != 5 || StartFallLand(object, -1) == 0) {
+                if (__builtin_expect(object->context_animation != 5 || StartFallLand(object, -1) == 0, 0)) {
                     if (object->apiobj.character_model->model_data_b[7] != NULL &&
                         object->pad_gamepad->input_magnitude == 0.0f) {
                         object->character_context = 1;
@@ -574,7 +575,7 @@ void TightRope_MoveCode(GameObject_s *object, i32 jump_pressed) {
                 }
                 object->movement_runtime_flags &= ~4;
             }
-            if (object->character_context != 0x44 || object->field_0x788 != rope) {
+            if (__builtin_expect(object->character_context != 0x44 || object->field_0x788 != rope, 1)) {
                 return;
             }
             TightRope_MoveUpdate(object, 1);

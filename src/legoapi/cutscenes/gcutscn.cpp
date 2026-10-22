@@ -3167,20 +3167,20 @@ static void instNuGCutSceneUpdate(instNUGCUTSCENE_s *instance, int paused, int s
                 if (cutscene_load_instance == NULL) {
                     if (instance->stream_index == last_stream - 1) {
                         instNuGCutSceneSwapBuffers(instance, 0);
-                        if (NumCommonStreamingBuffers > 1) {
-                            NewCopyAnims(instance);
-                        } else {
+                        if (__builtin_expect(NumCommonStreamingBuffers <= 1, 0)) {
                             copyAnims(instance->cutscene, instNuGCutSceneCurrentStreamBuffer(instance));
+                        } else {
+                            NewCopyAnims(instance);
                         }
                         instance->stream_index = instance->cutscene->last_stream;
                         instNuGCutSceneStart(instance);
                         instance->current_frame = instance->cutscene->duration - 1.0f;
                     } else {
                         instance->stream_index = instance->cutscene->last_stream - 1;
-                        if ((instance->flags_8b & 0x10) != 0) {
-                            instance->pending_stream_buffer = static_cast<void *>(instance->stream_buffer_0);
-                        } else {
+                        if ((instance->flags_8b & 0x10) == 0) {
                             instance->pending_stream_buffer = static_cast<void *>(instance->stream_buffer_1);
+                        } else {
+                            instance->pending_stream_buffer = static_cast<void *>(instance->stream_buffer_0);
                         }
                         cutscene_load_instance = instance;
                     }
@@ -3261,7 +3261,9 @@ static void instNuGCutSceneUpdate(instNUGCUTSCENE_s *instance, int paused, int s
                                 instNuGCutSceneUpdate(instance->chained_instance, 0, skip, elapsed);
                                 instance->chained_instance = NULL;
                                 return;
-                            } else if ((instance->flags_88 & 8) != 0) {
+                            } else if ((instance->flags_88 & 8) == 0) {
+                                instNuGCutSceneEnd(instance);
+                            } else {
                                 f32 overflow = instance->current_frame - (cutscene->duration - 1.0f);
                                 if (overflow > cutscene->duration) {
                                     overflow = 0.0f;
@@ -3269,8 +3271,6 @@ static void instNuGCutSceneUpdate(instNUGCUTSCENE_s *instance, int paused, int s
                                 instNuGCutSceneStart(instance);
                                 instance->current_frame += overflow;
                                 instance->flags_88 |= 1;
-                            } else {
-                                instNuGCutSceneEnd(instance);
                             }
                         }
                     } else {
@@ -3283,7 +3283,10 @@ static void instNuGCutSceneUpdate(instNUGCUTSCENE_s *instance, int paused, int s
                                 }
                                 instance->accumulated_stream_duration += instance->cutscene->duration;
                                 ++instance->stream_index;
-                                if (instNuGCutSceneSwapBuffers(instance, 0) != 0) {
+                                if (instNuGCutSceneSwapBuffers(instance, 0) == 0) {
+                                    --instance->stream_index;
+                                    instance->current_frame = instance->cutscene->duration - 1.0f;
+                                } else {
                                     if (NumCommonStreamingBuffers > 1) {
                                         NewCopyAnims(instance);
                                     } else {
@@ -3293,9 +3296,6 @@ static void instNuGCutSceneUpdate(instNUGCUTSCENE_s *instance, int paused, int s
                                     instNuGCutSceneStart(instance);
                                     instance->current_frame += overflow;
                                     instance->flags_88 |= 1;
-                                } else {
-                                    --instance->stream_index;
-                                    instance->current_frame = instance->cutscene->duration - 1.0f;
                                 }
                             } else {
                                 instance->current_frame = instance->cutscene->duration - 1.0f;

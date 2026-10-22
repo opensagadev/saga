@@ -821,7 +821,8 @@ void CustomiserMenu_Draw(MENU_s *) {
                             letter_green = green;
                             letter_blue = blue;
                             scale = 1.0f;
-                            if (CustomiseNameX[side] < column && length <= column && letter[0] == ' ')
+                            if (__builtin_expect(CustomiseNameX[side] < column && length <= column && letter[0] == ' ',
+                                                 1))
                                 letter[0] = '.';
                         } else {
                             letter[0] = CustomiseLetter[CustomiseNameY[side]];
@@ -848,7 +849,7 @@ void CustomiserMenu_Draw(MENU_s *) {
                 }
                 const f32 icon_size = ICONSIZE;
                 f32 pulse = 1.0f;
-                if (!TestForController()) {
+                if (__builtin_expect(!TestForController(), 1)) {
                     const f32 idle = GlobalTimer.time_elapsed - (2.0f + LastTouchTime);
                     if (idle > 4.0f) {
                         const f32 time = NuFmod(idle, 4.0f);
@@ -872,7 +873,7 @@ void CustomiserMenu_Draw(MENU_s *) {
                 customiser->touch_widths[4] = size;
                 customiser->touch_heights[4] = size / GetAspectRatio();
                 pulse = 1.0f;
-                if (!TestForController()) {
+                if (__builtin_expect(!TestForController(), 1)) {
                     const f32 idle = GlobalTimer.time_elapsed - (3.0f + LastTouchTime);
                     if (idle > 4.0f) {
                         const f32 time = NuFmod(idle, 4.0f);

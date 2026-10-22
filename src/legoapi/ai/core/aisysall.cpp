@@ -12602,11 +12602,11 @@ void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *objec
                                       packet->path_info.path, connection->node_indices[packet->path_info.direction],
                                       destination_connection->node_indices[0], packet->current_route, 0)
                                 : FLT_MAX;
-                        if (candidate != FLT_MAX) {
+                        if (__builtin_expect(candidate != FLT_MAX, 1)) {
                             candidate =
                                 candidate + destination_distances[0] + endpoint_distances[packet->path_info.direction];
                         }
-                        if (candidate < best_distance) {
+                        if (__builtin_expect(candidate < best_distance, 1)) {
                             best_distance = candidate;
                             goal_index = destination_connection->node_indices[0];
                             direction = packet->path_info.direction == 0;
@@ -12656,7 +12656,7 @@ void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *objec
                 while (WithinConnection(system, &packet->terrain_origin, packet->path_info.path, next, checks,
                                         packet->path_info.connection, packet->current_route, object->field_0x289, NULL,
                                         object->collision_radius, 0) != 0) {
-                    if (connection == destination_connection) {
+                    if (__builtin_expect(connection == destination_connection, 1)) {
                         break;
                     }
                     AISysCharacterSetPathCnx(packet, &object->position, next, direction);
@@ -12684,7 +12684,7 @@ void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *objec
         }
     }
     if (PreparingForSpecialMoveFn != NULL) {
-        if (__builtin_expect(connection != destination_connection, 0)) {
+        if (__builtin_expect(connection != destination_connection, 1)) {
             packet->movement_event_flags |= 0x20;
         }
         if (PreparingForSpecialMoveFn(packet, object, checks) != 0) {
@@ -12740,7 +12740,7 @@ void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *objec
     } else if (current->node_indices[0] == destination_connection->node_indices[1]) {
         shared = &path->nodes[destination_connection->node_indices[1]];
         direction = 1;
-    } else if (current->node_indices[1] == destination_connection->node_indices[0]) {
+    } else if (__builtin_expect(current->node_indices[1] == destination_connection->node_indices[0], 0)) {
         shared = &path->nodes[destination_connection->node_indices[0]];
         direction = 0;
     } else if (current->node_indices[1] == destination_connection->node_indices[1]) {
@@ -12748,9 +12748,12 @@ void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *objec
         direction = 1;
     }
     AIPATHCNX *next;
-    if (shared != NULL && (packet->current_route == 0xff ||
-                           ((static_cast<u64>(destination_connection->route_mask) >> packet->current_route) & 1) != 0 ||
-                           ((static_cast<u64>(shared->route_boundary_mask) >> packet->current_route) & 1) != 0)) {
+    if (__builtin_expect(
+            shared != NULL &&
+                (packet->current_route == 0xff ||
+                 ((static_cast<u64>(destination_connection->route_mask) >> packet->current_route) & 1) != 0 ||
+                 ((static_cast<u64>(shared->route_boundary_mask) >> packet->current_route) & 1) != 0),
+            1)) {
         next = destination_connection;
     } else {
         next = GetNextConnection(packet, &direction);
@@ -17763,7 +17766,7 @@ eduimenu_s *pathEditor_Process(nupad_s *pad) {
                         node->position.x += dx;
                         node->position.z += dz;
                         locatorEditor_PathNodeMoved(node);
-                        if (AIPathNodeDeletedFn)
+                        if (__builtin_expect(AIPathNodeDeletedFn != 0, 0))
                             AIPathNodeDeletedFn(node);
                     }
                 }
@@ -17882,7 +17885,7 @@ eduimenu_s *pathEditor_Process(nupad_s *pad) {
                     node->height_max -= step;
                 if (node->height_max < .01f)
                     node->height_max = .01f;
-            } else if (pad->digital_buttons & 0x4000) {
+            } else if (__builtin_expect(pad->digital_buttons & 0x4000 != 0, 1)) {
                 aieditor->flags |= 4;
                 node = path->current_node;
                 f32 step = -node->height_min * .05f;

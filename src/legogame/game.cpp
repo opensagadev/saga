@@ -1643,7 +1643,7 @@ void InitGameAfterConfig(void) {
 
     AREADATA *pAVar10 = ADataList;
 
-    if (0 < AREACOUNT) {
+    if (__builtin_expect(0 < AREACOUNT, 1)) {
         i32 areaIndex;
         i32 areaId = 0;
         AREADATA *area = ADataList;
@@ -1654,7 +1654,14 @@ void InitGameAfterConfig(void) {
             area->area_index = (byte)areaIndex;
             if (area != HUB_ADATA) {
                 if ((areaFlags = area->flags, (areaFlags & 0x2022) == 0)) {
-                    if ((areaFlags & 0x100) == 0) {
+                    if ((areaFlags & 0x100) != 0) {
+                        COMPLETIONPOINTS = COMPLETIONPOINTS + POINTS_PER_SUPERBONUSCOMPLETE;
+                        CompletionPointInfo[1] = CompletionPointInfo[1] + POINTS_PER_SUPERBONUSCOMPLETE;
+                        if (GOLDBRICKFORSUPERBONUS == 0)
+                            goto LAB_0012ca68;
+                    LAB_0012ca5f:
+                        GOLDBRICKPOINTS = GOLDBRICKPOINTS + 1;
+                    } else {
                         if ((areaFlags & 4) != 0) {
                             COMPLETIONPOINTS = COMPLETIONPOINTS + POINTS_PER_TIMETRIAL;
                             CompletionPointInfo[1] = CompletionPointInfo[1] + POINTS_PER_TIMETRIAL;
@@ -1666,7 +1673,7 @@ void InitGameAfterConfig(void) {
                             GOLDBRICKPOINTS = GOLDBRICKPOINTS + 1;
                         }
 
-                        if ((areaFlags & 0x10) != 0) {
+                        if (__builtin_expect((areaFlags & 0x10) != 0, 1)) {
                             i32 local_24 = COMPLETIONPOINTS + POINTS_PER_MINIKIT + POINTS_PER_TRUEJEDI;
                             i32 iVar4 = GOLDBRICKPOINTS + 2;
                             i32 local_28 = POINTS_PER_MINIKIT + POINTS_PER_TRUEJEDI + CompletionPointInfo[1];
@@ -1688,13 +1695,6 @@ void InitGameAfterConfig(void) {
                                 GOLDBRICKPOINTS = GOLDBRICKPOINTS + 1;
                             }
                         }
-                    } else {
-                        COMPLETIONPOINTS = COMPLETIONPOINTS + POINTS_PER_SUPERBONUSCOMPLETE;
-                        CompletionPointInfo[1] = CompletionPointInfo[1] + POINTS_PER_SUPERBONUSCOMPLETE;
-                        if (GOLDBRICKFORSUPERBONUS == 0)
-                            goto LAB_0012ca68;
-                    LAB_0012ca5f:
-                        GOLDBRICKPOINTS = GOLDBRICKPOINTS + 1;
                     }
                 LAB_0012ca68:
                     if (area->cheat != 0xff) {
@@ -1738,7 +1738,7 @@ void InitGameAfterConfig(void) {
             }
             level->area_level_index = 0xff;
             level->area_index = 0xff;
-            if (iVar3 < 1) {
+            if (__builtin_expect(iVar3 < 1, 0)) {
                 areaIndex = 0;
             } else {
                 areaIndex = 0;

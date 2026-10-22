@@ -1000,11 +1000,11 @@ void Hint_Process(float elapsed) {
         BonusArea == 0 && (world->current_level->flags & 0x200) == 0 &&
         (world->area == NULL || (world->area->flags & 0x124) == 0) && GetMenuID() == -1 && FadeSys.fade == 0.0f &&
         (world->area == NULL || world->area != HUB_ADATA || Hub_PanelBusyFn == NULL || Hub_PanelBusyFn() == 0);
-    if (ChallengeMode != 0)
+    if (__builtin_expect(ChallengeMode != 0, 1))
         available = false;
     else if (Mission_Active(NULL) != NULL)
         available = false;
-    if (hintUIButton->field_0x78 != NULL || hintUIButton->field_0x7c != NULL)
+    if (__builtin_expect(hintUIButton->field_0x78 != NULL || hintUIButton->field_0x7c != NULL, 1))
         available = false;
 
     for (HINT_s *hint = hintsys.hints; hint->control_mode_ids[0] != -1; ++hint) {

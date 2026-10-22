@@ -114,10 +114,10 @@ void Credits_Load(WORLDINFO_s *, VARIPTR *buffer, VARIPTR *buffer_end) {
                         style_index = 2;
                     else if (__builtin_expect(NuStrICmp(CreditType[3].name, style_word) == 0, 0))
                         style_index = 3;
-                    else if (__builtin_expect(NuStrICmp(CreditType[4].name, style_word) == 0, 0))
-                        style_index = 4;
-                    else
+                    else if (__builtin_expect(NuStrICmp(CreditType[4].name, style_word) != 0, 1))
                         style_index = -1;
+                    else
+                        style_index = 4;
                     CREDIT_TYPE_s *type = style_index == -1 ? NULL : &CreditType[style_index];
                     if (type != NULL) {
                         char *text = NULL;

@@ -829,10 +829,10 @@ void Player_ToggleCharacter(GameObject_s *object, i32 direction, i32 sound) {
             GameAudio_PlaySfx(0x32, &object->apiobj.collision_position, 0, 0);
             goto next_character;
         }
-        if (attempts >= apicharsys->loaded_model_count) {
+        if (__builtin_expect(attempts >= apicharsys->loaded_model_count, 0)) {
             return;
         }
-        if ((object->apiobj.flags_low & 0x80) != 0) {
+        if (__builtin_expect((object->apiobj.flags_low & 0x80) != 0, 0)) {
             Hint_SetComplete(LEGOHINT_FREEPLAYTOGGLE);
             if (VehicleArea == 0) {
                 GameCam_Blend(GameCam, 1.0f, 0.0f, 1);
@@ -847,7 +847,7 @@ void Player_ToggleCharacter(GameObject_s *object, i32 direction, i32 sound) {
         if (sound != 0) {
             if (left != 0) {
                 GameAudio_PlaySfx(0x23, &object->apiobj.collision_position, 0, 0);
-            } else if (right != 0) {
+            } else if (__builtin_expect(right != 0, 1)) {
                 GameAudio_PlaySfx(0x24, &object->apiobj.collision_position, 0, 0);
             }
         }

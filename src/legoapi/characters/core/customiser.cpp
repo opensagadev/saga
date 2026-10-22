@@ -499,7 +499,7 @@ void Customiser_LoadAll(CUSTOMISER *customiser, WORLDINFO_s *world) {
                     world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 0x40);
                     resource->scene = NuGScnRead(&world->giz_buffer, world->unknown_0108, path);
                 }
-                if (resource->scene != NULL) {
+                if (__builtin_expect(resource->scene != NULL, 1)) {
                     NuSpecialFind(resource->scene, &resource->special, piece_name, 1);
                 }
                 continue;
@@ -509,11 +509,11 @@ void Customiser_LoadAll(CUSTOMISER *customiser, WORLDINFO_s *world) {
                 continue;
             }
             PLATFORMS_SUPPORTED platform = NuPlatform::Get()->GetCurrentPlatform();
-            if (platform != IOS_PLATFORM && platform != ANDROID_ATITC_PLATFORM) {
+            if (__builtin_expect(platform != IOS_PLATFORM && platform != ANDROID_ATITC_PLATFORM, 1)) {
                 NuStrCat(path, ".pnt");
             }
 
-            if (texture_pack != NULL) {
+            if (__builtin_expect(texture_pack != NULL, 1)) {
                 char converted_path[0x80];
                 reinterpret_cast<i32 (*)(char *, char *, i32)>(&NuFileExtConvert)(converted_path, path,
                                                                                    sizeof(converted_path));
@@ -525,7 +525,7 @@ void Customiser_LoadAll(CUSTOMISER *customiser, WORLDINFO_s *world) {
                     resource->texture_id = NuTexCreateNative(static_cast<NUNATIVETEX *>(texture_data), true);
                 }
             }
-            if (resource->texture_id == 0) {
+            if (__builtin_expect(resource->texture_id == 0, 1)) {
                 resource->texture_id = NuTexRead(path, &world->giz_buffer, world->unknown_0108);
             }
         }

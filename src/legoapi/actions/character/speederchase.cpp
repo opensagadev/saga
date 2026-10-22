@@ -335,7 +335,7 @@ i32 Action_SpeederBeingChased(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_
         else if (distance < length * -0.5f)
             distance += length;
         can_fire = distance < speederfirerange;
-        if (distance > speeder_kill_dist) {
+        if (__builtin_expect(distance > speeder_kill_dist, 0)) {
             KillGameObject(object, 4, 0);
             return 1;
         }
@@ -411,7 +411,7 @@ i32 Action_SpeederBeingChased(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_
             }
             break;
         case 1:
-            if (players_going_forward == 0)
+            if (__builtin_expect(players_going_forward == 0, 0))
                 goto reset_mode;
             if (distance < 0.0f) {
                 set_speedermode = 2;

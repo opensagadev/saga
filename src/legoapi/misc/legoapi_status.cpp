@@ -1082,8 +1082,9 @@ void Status_DrawPromptMenu(STATUSPACKET_s *packet, i32 selected, float alpha) {
     } else if (packet->mission_state != 0) {
         labels[0] = tRESTART;
         labels[1] = tMAP;
-    } else if ((packet->field_0xb0 & 0x40) != 0 ||
-               (packet->area_id != -1 && ADataList[packet->area_id].episode_index == 0xff)) {
+    } else if (__builtin_expect((packet->field_0xb0 & 0x40) != 0 ||
+                                    (packet->area_id != -1 && ADataList[packet->area_id].episode_index == 0xff),
+                                0)) {
         labels[0] = tMAP;
     } else {
         labels[0] = tFINISHSTORY;
@@ -1097,7 +1098,7 @@ void Status_DrawPromptMenu(STATUSPACKET_s *packet, i32 selected, float alpha) {
                             static_cast<i32>(alpha * 128.0f));
                 locked = true;
             } else {
-                if (packet->next_area == -1 || (ADataList[packet->next_area].flags & 2) == 0) {
+                if (__builtin_expect(packet->next_area == -1 || (ADataList[packet->next_area].flags & 2) == 0, 1)) {
                     labels[0] = tCONTINUESTORY;
                 }
                 labels[1] = tMAP;
@@ -1121,12 +1122,12 @@ void Status_DrawPromptMenu(STATUSPACKET_s *packet, i32 selected, float alpha) {
     for (i32 i = 0; i < count; ++i) {
         i32 red, green, blue;
         if (selected != 0 && status_prompt == i && TestForController()) {
-            if (!(menu_pulsate <= 0.0f)) {
+            if (__builtin_expect(!(menu_pulsate <= 0.0f), 1)) {
                 const f32 inverse = 1.0f - menu_pulsate;
                 red = static_cast<u32>(MENUFLASH0R) * menu_pulsate + static_cast<u32>(MENUFLASH1R) * inverse;
                 green = static_cast<u32>(MENUFLASH0G) * menu_pulsate + static_cast<u32>(MENUFLASH1G) * inverse;
                 blue = static_cast<u32>(MENUFLASH0B) * menu_pulsate + static_cast<u32>(MENUFLASH1B) * inverse;
-            } else if (menu_flash == 0) {
+            } else if (__builtin_expect(menu_flash == 0, 1)) {
                 red = MENUFLASH1R;
                 blue = MENUFLASH1B;
                 green = MENUFLASH1G;

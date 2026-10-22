@@ -165,7 +165,9 @@ void WorldInfo_Init(WORLDINFO *world) {
     Reflections_On = NuDeviceSpecs::ms_instance->specs > 1;
     g_lowEndLevelBehaviour = g_isLowEndDevice;
     if (!g_isLowEndDevice) {
-        if (world->current_level != NULL && NuStrIStr(world->current_level->name, "JabbasPalace_Intro1") != NULL) {
+        if (__builtin_expect(world->current_level != NULL &&
+                                 NuStrIStr(world->current_level->name, "JabbasPalace_Intro1") != NULL,
+                             0)) {
             DebrisSetThinningLevel(6.0f);
             DebrisSetForcedThinning(1);
         } else if (NuDeviceSpecs::ms_instance->specs <= 2 &&
@@ -331,7 +333,7 @@ void WorldInfo_Init(WORLDINFO *world) {
         WorldInfo_InitLastFn(world);
     }
 
-    if (NOSOUND == 0) {
+    if (__builtin_expect(NOSOUND == 0, 0)) {
         MechSystems::Get()->EnterLevel(world);
     }
 

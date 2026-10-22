@@ -1676,7 +1676,7 @@ i32 GizForce_FindBestForceTarget(GIZFORCESYS_s *force_sys, GameObject_s *object)
         return 0;
     }
     i32 super_force = 1;
-    if (__builtin_expect(SuperWeirdo(object) == 0, 0)) {
+    if (SuperWeirdo(object) == 0) {
         super_force = 0;
         if (__builtin_expect((object->apiobj.flags_low & 0x80) != 0, 1))
             super_force = Cheat_IsOn(25);
@@ -1717,8 +1717,9 @@ i32 GizForce_FindBestForceTarget(GIZFORCESYS_s *force_sys, GameObject_s *object)
         if ((force->config_flags & GIZFORCE_CONFIG_TARGET_ANIMATION_OBJECTS) != 0) {
             for (GAMEANIMOBJ_s *anim_object = force->anim_set->objects; anim_object != NULL;
                  anim_object = anim_object->next) {
-                if ((anim_object->flags & 1) != 0 ||
-                    (object->force_glow_previous != NULL && object->force_glow_previous != anim_object)) {
+                if (__builtin_expect((anim_object->flags & 1) != 0 || (object->force_glow_previous != NULL &&
+                                                                       object->force_glow_previous != anim_object),
+                                     1)) {
                     continue;
                 }
                 distance = NuVecDistSqr(NuSpecialGetDrawPos(&anim_object->special), &object->apiobj.collision_position,
@@ -1785,7 +1786,7 @@ i32 GizForce_FindBestForceTarget(GIZFORCESYS_s *force_sys, GameObject_s *object)
                         }
                     }
                 }
-                if (clear)
+                if (__builtin_expect(clear != 0, 0))
                     object->gizforce_los_info->words[index >> 5] |= 1u << (index & 31);
             } else {
                 los->words[index >> 5] |= 1u << (index & 31);

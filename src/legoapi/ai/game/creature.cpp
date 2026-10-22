@@ -2432,7 +2432,7 @@ void MovePlayer(GameObject_s *object) {
             pad->input_magnitude = (object->ai.runtime_flags & 4) ? 0.0f : pad->input_magnitude * run_speed;
             if ((object->ai.runtime_flags & 8) == 0 && pad->input_magnitude < data->tiptoe_speed * 0.5f)
                 pad->input_magnitude = 0.0f;
-            if ((object->ai.movement_flags & 8) == 0) {
+            if (__builtin_expect((object->ai.movement_flags & 8) == 0, 0)) {
                 if (object->ai.goal_speed_mode == 1 && !(pad->input_magnitude <= walk_speed))
                     pad->input_magnitude = walk_speed;
                 else if (object->ai.goal_speed_mode == 2 && !(pad->input_magnitude <= data->tiptoe_speed))
@@ -2464,7 +2464,7 @@ void MovePlayer(GameObject_s *object) {
                     z = static_cast<f32>(analog_y) - 127.5f;
                     if (WORLD->current_level != DOGFIGHTA_LDATA)
                         z = -z;
-                    if (__builtin_expect(x * x + z * z < 1806.25f, 0)) {
+                    if (x * x + z * z < 1806.25f) {
                         x = z = 0.0f;
                     } else if (x != 0.0f || z != 0.0f) {
                         pad->input_mode = 2;

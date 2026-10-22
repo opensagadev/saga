@@ -1491,7 +1491,7 @@ static void LightSabreStreakCode(GameObject_s *object, i32 blade, i32 effect) {
                offsetof(NUMTX, m30),
            sizeof(points[0]));
     points[1] = *NUMTX_GET_ROW_VEC(&object->joint_matrices[joint_b], 3);
-    if ((object->sabre_flags & 2) != 0) {
+    if (__builtin_expect((object->sabre_flags & 2) != 0, 1)) {
         i32 colour;
         if (object->apiobj.field_0x27c != -1 && Cheat_IsOn(25))
             colour = 0;
@@ -1509,7 +1509,7 @@ static void LightSabreStreakCode(GameObject_s *object, i32 blade, i32 effect) {
         if (object->apiobj.model_draw_result != 0) {
             const u32 packed = 0xff000000u | red | (green << 8) | (blue << 16);
             AddStreakPoints(points, 0.25f, packed, &object->sabre_streaks[blade][0], 0, object);
-            if (object->field_0x1087 != 0 && object->field_0x1020 != 2000000.0f) {
+            if (__builtin_expect(object->field_0x1087 != 0 && object->field_0x1020 != 2000000.0f, 0)) {
                 f32 plane = object->field_0x1020;
                 if (WORLD->current_level->unknown_0cc != 2000000.0f)
                     plane = WORLD->current_level->unknown_0cc;
@@ -1573,7 +1573,7 @@ static void LightSabreStreakCode(GameObject_s *object, i32 blade, i32 effect) {
     }
     // The original rechecks power-up effects after the geometry callbacks.
     if ((object->sabre_flags & 5) != 0) {
-        if (object->apiobj.field_0x27c != -1 && Cheat_IsOn(25))
+        if (__builtin_expect(object->apiobj.field_0x27c != -1 && Cheat_IsOn(25), 1))
             effect = 1;
         else if (object->apiobj.field_0x27c != -1 && Player_HasPurpleForce(object))
             effect = 4;
@@ -1644,7 +1644,7 @@ static void LightSabreStreakCode(GameObject_s *object, i32 blade, i32 effect) {
                 }
                 const f32 distance =
                     NuVecDistSqr(&object->apiobj.collision_position, &target->apiobj.collision_position, NULL);
-                if (distance < nearest_distance) {
+                if (__builtin_expect(distance < nearest_distance, 0)) {
                     nearest_distance = distance;
                     nearest_point = point;
                     nearest = target;
@@ -3072,10 +3072,12 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
         NuSpecialExistsFn(&LevHSpecial[0]) &&
         !(NuVecXZDistSqr(NuSpecialGetDrawPos(&LevHSpecial[0]), &api.collision_position, &carwash_delta) >= 0.36f)) {
         CarWashHack = object;
-        if (!(pad->input_magnitude <=
-              (api.character_data->game_character->walk_speed + api.character_data->game_character->run_speed) *
-                  0.5f) &&
-            (LevGizObst[0] == NULL || LevGizObst[0]->anim_set == NULL || (LevGizObst[0]->anim_set->flags & 1) == 0))
+        if (__builtin_expect(!(pad->input_magnitude <= (api.character_data->game_character->walk_speed +
+                                                        api.character_data->game_character->run_speed) *
+                                                           0.5f) &&
+                                 (LevGizObst[0] == NULL || LevGizObst[0]->anim_set == NULL ||
+                                  (LevGizObst[0]->anim_set->flags & 1) == 0),
+                             1))
             CarWashHack = NULL;
     }
     if (object->id == id_WOOKIEFLYER && object->character_context == 0x17)
@@ -3213,21 +3215,8 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
                 api.movement_facing_angle = TurnRot(api.movement_facing_angle, desired, (i32)(rate * 65536.0f), NULL);
             }
             u8 boundary_player = api.is_player;
-            if (!(object->character_context == -1 && object->field_0x1084 &&
-                  fabsf(object->contact_normal.y) < NuTrigTable[0x3aaa])) {
-                if (boundary_player != 0 && (api.character_data->game_character->flags_090 & 0x10000) == 0 &&
-                    (i8)object->field_0xf03 >= 0) {
-                    i32 outside = OutSideSplineArea(&api.collision_position, WORLD->camera_splines[16], &a, &b, 0);
-                    i32 inside = 0;
-                    if (!outside)
-                        inside = OutSideSplineArea(&api.collision_position, WORLD->camera_splines[17], &a, &b, 1);
-                    if ((api.field_0x1f4 & 0x400) == 0 && (object->field_0xe24 & 2) == 0 && (outside || inside)) {
-                        api.movement_facing_angle = NuAtan2D(-(b.z - a.z), b.x - a.x);
-                        object->field_0xe24 |= 2;
-                        object->field_0xddc = 0.1f;
-                    }
-                }
-            } else {
+            if (object->character_context == -1 && object->field_0x1084 &&
+                fabsf(object->contact_normal.y) < NuTrigTable[0x3aaa]) {
                 if (__builtin_expect(boundary_player != 0 &&
                                          (PODSPRINT_ADATA == NULL || WORLD->area != PODSPRINT_ADATA) &&
                                          (api.character_data->game_character->flags_090 & 0x10000) == 0 &&
@@ -3252,6 +3241,19 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
                                 object->field_0xddc = 0.1f;
                             }
                         }
+                    }
+                }
+            } else {
+                if (boundary_player != 0 && (api.character_data->game_character->flags_090 & 0x10000) == 0 &&
+                    (i8)object->field_0xf03 >= 0) {
+                    i32 outside = OutSideSplineArea(&api.collision_position, WORLD->camera_splines[16], &a, &b, 0);
+                    i32 inside = 0;
+                    if (!outside)
+                        inside = OutSideSplineArea(&api.collision_position, WORLD->camera_splines[17], &a, &b, 1);
+                    if ((api.field_0x1f4 & 0x400) == 0 && (object->field_0xe24 & 2) == 0 && (outside || inside)) {
+                        api.movement_facing_angle = NuAtan2D(-(b.z - a.z), b.x - a.x);
+                        object->field_0xe24 |= 2;
+                        object->field_0xddc = 0.1f;
                     }
                 }
             }
@@ -3495,8 +3497,9 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
             object->secondary_lean_angle = SeekRot(object->secondary_lean_angle, target, 5.0f);
         }
         if (WORLD->current_level == PLATFORM_LDATA) {
-            if (object->character_context != 0x2a && object->character_context != 0x36 &&
-                object->character_context != 0x3a) {
+            if (__builtin_expect(object->character_context != 0x2a && object->character_context != 0x36 &&
+                                     object->character_context != 0x3a,
+                                 1)) {
                 u16 target = 0;
                 if (object->pad_gamepad->input_magnitude > 0.0f)
                     target = -(i32)((1.0f - abs(RotDiff(api.field_0x276, input_yaw)) * (1.0f / 32768.0f)) * 4551.0f);
@@ -7939,7 +7942,7 @@ void GameObjectStuffAfterAnimation() {
         {
             if (object->script_fire_target != NULL && (object->script_fire_target->apiobj.field_0x1f8 & 1) == 0)
                 object->script_fire_target = NULL;
-            if (static_cast<i8>(object->quick_shoot_bolt_id) != -1) {
+            if (__builtin_expect(static_cast<i8>(object->quick_shoot_bolt_id) != -1, 1)) {
                 if (object->id == id_BASKETCANNON) {
                     GameAudio_PlaySfxById(
                         static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->sfx_shoot,
@@ -8007,7 +8010,7 @@ void GameObjectStuffAfterAnimation() {
                     if (object->character_context == 13) {
                         first = 2;
                         second = 0;
-                    } else if (object->character_context == 16) {
+                    } else if (__builtin_expect(object->character_context == 16, 1)) {
                         first = 3;
                         second = 2;
                     } else if (object->character_context == 5 &&
@@ -8112,10 +8115,10 @@ void GameObjectStuffAfterAnimation() {
             part.field_40 = PartCollide_3D;
             part.time_step = FRAMETIME;
             part.gravity = 0.0f;
-            if (player) {
-                part.field_a4 = 4.0f + 2.0f * (static_cast<f32>(qrand()) * (1.0f / 65535.0f));
-            } else {
+            if (!(player)) {
                 part.field_a4 = 10.0f;
+            } else {
+                part.field_a4 = 4.0f + 2.0f * (static_cast<f32>(qrand()) * (1.0f / 65535.0f));
             }
             NUVEC direction;
             BoltSys->shoot_direction(object, &direction);
@@ -8152,8 +8155,10 @@ void GameObjectStuffAfterAnimation() {
                 points[0] = *NUMTX_GET_ROW_VEC(&object->joint_matrices[joint_a], 3);
                 points[1] = *NUMTX_GET_ROW_VEC(&object->joint_matrices[joint_b], 3);
                 i8 colour = object->blade_states[blade];
-                if (colour != -1 && object->character_context == 5 && (object->context_flags & 0x1c) == 0 &&
-                    (static_cast<u8>(object->combo_branch) & 0xfb) == 2) {
+                if (__builtin_expect(colour != -1 && object->character_context == 5 &&
+                                         (object->context_flags & 0x1c) == 0 &&
+                                         (static_cast<u8>(object->combo_branch) & 0xfb) == 2,
+                                     0)) {
                     i32 index = object->combo_branch == 6 ? BladeTab[colour].hit_effect : BladeTab[colour].effect_6;
                     i32 effect = WORLD->debris_sys->entries[index].effect;
                     if (effect != -1) {
@@ -8233,11 +8238,11 @@ void GameObjectStuffAfterAnimation() {
             }
             effect = WORLD->debris_sys->entries[103].effect;
             if (effect != -1 && object->apiobj.field_0x218 != 2000000.0f) {
-                if (object->apiobj.character_model->points_of_interest[2] != NULL) {
+                if (__builtin_expect(object->apiobj.character_model->points_of_interest[2] != NULL, 1)) {
                     f32 height = object->joint_matrices[2].m31 - object->apiobj.field_0x218;
                     if (height > 0.0f && height <= 0.2f) {
                         f32 amount = 25.0f;
-                        if (height >= 0.1f)
+                        if (__builtin_expect(height >= 0.1f, 1))
                             amount = (1.0f - (height - 0.1f) / 0.1f) * 25.0f;
                         if (static_cast<i32>(amount * ratio) > 0) {
                             NUVEC position = {object->joint_matrices[2].m30, object->apiobj.field_0x218,
@@ -8275,9 +8280,11 @@ void GameObjectStuffAfterAnimation() {
             }
         }
         if (VehicleArea != 0 && static_cast<u8>(object->apiobj.field_0x27c) <= 1) {
-            if (object->id == id_MILLENNIUMFALCON && object->apiobj.player_controlled &&
-                object->locators_updated && object->apiobj.character_model->points_of_interest[2] != NULL &&
-                object->apiobj.field_0xa8 == 1.0f) {
+            if (__builtin_expect(object->id == id_MILLENNIUMFALCON && object->apiobj.player_controlled &&
+                                     object->locators_updated &&
+                                     object->apiobj.character_model->points_of_interest[2] != NULL &&
+                                     object->apiobj.field_0xa8 == 1.0f,
+                                 0)) {
                 if (FalconDebKey[static_cast<u8>(object->apiobj.field_0x27c)] == -1)
                     AddDebrisEffect(&FalconDebKey[static_cast<u8>(object->apiobj.field_0x27c)],
                                     WORLD->debris_sys->entries[136].effect, 0.0f, 0.0f, 0.0f);
@@ -12544,9 +12551,10 @@ void Move_VEHICLE(GameObject_s *object) {
         f32 hover_height;
         if (object->apiobj.character_data->game_character->uses_weapon_action == 0x15) {
             ApplyGravity(object, NULL, FindGunshipHoverHeight(object), 8.0f, NULL);
-        } else if (object->apiobj.character_data->game_character->field_0x28 > 0.0f &&
-                   ((hover_height = GetVehicleHoverHeight(object, NULL)) != 0.0f ||
-                    getvehiclehoverheight_hothbattlehack != 0)) {
+        } else if (__builtin_expect(object->apiobj.character_data->game_character->field_0x28 > 0.0f &&
+                                        ((hover_height = GetVehicleHoverHeight(object, NULL)) != 0.0f ||
+                                         getvehiclehoverheight_hothbattlehack != 0),
+                                    1)) {
             ApplyGravity(object, NULL, hover_height, 10.0f, NULL);
         } else {
             hover_height =
@@ -12657,7 +12665,7 @@ void Move_VEHICLE(GameObject_s *object) {
             object->apiobj.velocity.y = 0.0f;
             object->apiobj.velocity.z = 0.5f * object->apiobj.character_data->game_character->run_speed;
             x_rotation = object->apiobj.pitch_angle;
-            if (object->apiobj.pitch_angle == 0) {
+            if (__builtin_expect(object->apiobj.pitch_angle == 0, 0)) {
                 object->field_0x7a3 = 2;
                 object->context_destination.y = object->apiobj.position.y;
                 object->context_animation_timer = 0.0f;
@@ -12728,7 +12736,7 @@ void Move_VEHICLE(GameObject_s *object) {
         const i32 effect = WORLD->debris_sys->entries[96].effect;
         if (effect != -1) {
             i32 count = ParticlesPerSecond(50.0f, FRAMETIME);
-            if (count > 0) {
+            if (__builtin_expect(count > 0, 0)) {
                 do {
                     const f32 random = static_cast<f32>(qrand()) * (1.0f / 65535.0f);
                     NUVEC position = {
@@ -12748,7 +12756,7 @@ void Move_VEHICLE(GameObject_s *object) {
 
     if ((object->apiobj.character_data->game_character->flags_090 & 0x100000) != 0) {
         if (__builtin_expect(Cheat_IsOn(7) != 0, 1)) {
-            if ((pad->buttons_pressed & (GAMEPAD_ACTION | GAMEPAD_SPECIAL)) != 0) {
+            if (__builtin_expect((pad->buttons_pressed & (GAMEPAD_ACTION | GAMEPAD_SPECIAL)) != 0, 1)) {
                 GameAudio_PlaySfx(0x4b, &object->apiobj.collision_position, 0, 0);
             }
         }

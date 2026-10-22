@@ -272,7 +272,7 @@ __attribute__((optimize("O2", "tree-vectorize"))) void Tag_DrawIcon_Batman(GameO
         f32 x_sum = 0.0f;
         f32 z_sum = 0.0f;
         count = 0;
-        if (model->points_of_interest[0] != NULL) {
+        if (__builtin_expect(model->points_of_interest[0] != NULL, 1)) {
             const f32 x = object->joint_matrices[0].m30;
             count = 1;
             const f32 y = object->joint_matrices[0].m31;

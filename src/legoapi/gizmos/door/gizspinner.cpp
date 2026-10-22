@@ -830,7 +830,7 @@ int GizSpinner_Update(GIZSPINNER_s *spinner) {
                 movement_angle = NuAtan2D(api->velocity.x, api->velocity.z);
                 speed = NuFsqrt(api->velocity.x * api->velocity.x + api->velocity.z * api->velocity.z);
                 GAMECHARACTERDATA_s *character = api->character_data->game_character;
-                if (speed < character->tiptoe_speed) {
+                if (__builtin_expect(speed < character->tiptoe_speed, 1)) {
                     speed = character->tiptoe_speed;
                 } else if (speed < character->run_speed) {
                     speed = character->run_speed;
@@ -856,13 +856,13 @@ int GizSpinner_Update(GIZSPINNER_s *spinner) {
             } else {
                 const f32 blend = NU_SIN_LUT(static_cast<i32>((1.0f - spinner->field_0x090 * 4.0f) * 16384.0f));
                 i32 difference = RotDiff(spinner->previous_rotation, spinner->target_rotation);
-                if ((spinner->state_flags & SPINNER_STATE_ROTATE_POSITIVE) != 0) {
-                    if (difference < 0) {
-                        difference += 0x10000;
-                    }
-                } else {
+                if ((spinner->state_flags & SPINNER_STATE_ROTATE_POSITIVE) == 0) {
                     if (difference > 0) {
                         difference -= 0x10000;
+                    }
+                } else {
+                    if (difference < 0) {
+                        difference += 0x10000;
                     }
                 }
                 spinner->rotation = static_cast<u16>(static_cast<f32>(spinner->previous_rotation) +
@@ -893,7 +893,7 @@ int GizSpinner_Update(GIZSPINNER_s *spinner) {
         }
         if (GameAnimSet_IsAnimationReset(spinner->anim_set) != 0)
             goto stop_animation;
-        if (spinner->animation_speed == 0.0f || spinner->animation_points[0] == 0.0f)
+        if (__builtin_expect(spinner->animation_speed == 0.0f || spinner->animation_points[0] == 0.0f, 0))
             goto stop_animation;
         {
             const i32 rotation_step =
