@@ -9523,10 +9523,12 @@ __used__ static i32 Action_EngageOpponent(AISYS *sys, AISCRIPTPROCESS *processor
             }
         } else {
             goal_range = packet->movement_instruction_parameter;
-            if (goal_range != 0.0f && ((opponent->apiobj.player_controlled && object->apiobj.model_draw_result == 0) ||
-                                       ((WORLD->api_object_sys->line_of_sight[packet->owner->apiobj.field_0x289] >>
-                                         opponent->apiobj.field_0x289) &
-                                        1) == 0))
+            if (goal_range != 0.0f &&
+                __builtin_expect(((opponent->apiobj.player_controlled && object->apiobj.model_draw_result == 0) ||
+                                  ((WORLD->api_object_sys->line_of_sight[packet->owner->apiobj.field_0x289] >>
+                                    opponent->apiobj.field_0x289) &
+                                   1) == 0) != 0,
+                                 1))
                 goal_range = 0.1f;
         }
 
@@ -9604,7 +9606,7 @@ __used__ static i32 Action_EngageOpponent(AISYS *sys, AISCRIPTPROCESS *processor
                 const f32 interval = processor->action_data_5;
                 const f32 random = NuRandFloat();
                 processor->action_timer = 0.5f * interval + random * interval;
-                if (!PartyMemberInWay(object, opponent)) {
+                if (__builtin_expect(!PartyMemberInWay(object, opponent), 1)) {
                     if (oneAtOnce_CanAttack(object, opponent))
                         object->pad_gamepad->buttons_pressed |= GAMEPAD_ACTION;
                 }
@@ -11022,7 +11024,7 @@ i32 Action_CameraCut(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKET_s *
     NUVEC target_position = {1000000000.0f, 1000000000.0f, 1000000000.0f};
     NUVEC camera_position = {1000000000.0f, 1000000000.0f, 1000000000.0f};
     NUVEC camera_delta = {0.0f, 0.0f, 0.0f};
-    if (first_time == 0 || param_count <= 0)
+    if (first_time == 0 || __builtin_expect(param_count <= 0, 0))
         return 1;
 
     i32 rotation_x = 0;

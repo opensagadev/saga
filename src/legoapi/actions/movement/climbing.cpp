@@ -664,11 +664,11 @@ void LedgeTerrain_MoveCode(GameObject_s *object) {
             object->character_context = -1;
             return;
         }
-        if (object->field_0x7a3 || object->context_animation != LEGOACT_LEDGE_GRAB ||
+        if (object->field_0x7a3 || __builtin_expect(object->context_animation != LEGOACT_LEDGE_GRAB, 0) ||
             AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0)) {
             object->context_animation_timer += FRAMETIME;
         }
-        if (!object->field_0x7a3 && object->context_animation_timer >= object->field_0x768)
+        if (!object->field_0x7a3 && __builtin_expect(object->context_animation_timer >= object->field_0x768, 1))
             object->field_0x7a3 = 1;
         f32 travelled = 0.0f;
         if (LedgeTerrain_Attach(object, object->apiobj.movement_facing_angle, &position, &wall_angle)) {

@@ -1176,7 +1176,7 @@ void AddCoinsToPanel(i32 coins, nuvec_s *position, i32 player, float, GameObject
                 i32 model = base_model;
                 if (type->random_model_count != 0)
                     model += qrand() / (65535 / type->random_model_count + 1);
-                if (world->lev_objs[model].active == 0 || player == -1)
+                if (world->lev_objs[model].active == 0 || __builtin_expect(player == -1, 0))
                     continue;
                 ADDGAMEMSG_ALIGNED16 message = AddGameMsg_Default;
                 message.position = position;

@@ -634,7 +634,7 @@ void Customiser_Update(CUSTOMISER *customiser, WORLDINFO_s *world) {
             CUSTOMPIECE *torso = &customiser->piece_sets[1][static_cast<u16>(selection[1])];
             f32 no_hat = 0.0f;
             if ((torso->availability_flags & 1) != 0) {
-                if ((torso->availability_flags & 4) == 0)
+                if (__builtin_expect((torso->availability_flags & 4) == 0, 1))
                     no_hat = (head->availability_flags & 8) != 0 ? 0.168f : 0.126f;
                 else
                     no_hat = (head->availability_flags & 8) != 0 ? 0.21f : 0.168f;
@@ -673,9 +673,11 @@ void Customiser_Update(CUSTOMISER *customiser, WORLDINFO_s *world) {
             for (i32 category = 0; category < 9; ++category) {
                 const i32 selected = CustomiseMenuY[side];
                 const i32 locator = customiser->locator_indices[category];
-                if (selected == category && GetMenuID() == 12 && customiser_quit == 0 &&
-                    (active_count == 2 || side == preview_side) && control_side != -1 && locator != -1 &&
-                    model->points_of_interest[locator] != NULL) {
+                if (__builtin_expect(selected == category && GetMenuID() == 12 && customiser_quit == 0 &&
+                                         (active_count == 2 || side == preview_side) && control_side != -1 &&
+                                         __builtin_expect(locator != -1, 0) &&
+                                         model->points_of_interest[locator] != NULL,
+                                     0)) {
                     NUVEC position = {customiser->joint_matrices[side][locator].m30,
                                       customiser->joint_matrices[side][locator].m31,
                                       customiser->joint_matrices[side][locator].m32};

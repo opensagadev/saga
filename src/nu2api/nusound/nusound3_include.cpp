@@ -2815,7 +2815,7 @@ void NuSound3Update(void) {
         voice->SetAutoDelete(true);
         voice->SetVolume(PS2VolumeToScalar(entry->volume));
         voice->SetPitch(entry->pitch);
-        if (__builtin_expect(entry->source_position != NULL, 0)) {
+        if (__builtin_expect(entry->source_position != NULL, 1)) {
             voice->SetFalloff(entry->falloff_a, entry->falloff_b, NuSoundSystem::FalloffType::LINEAR);
             voice->SetPosition((VuVec *)&entry->position);
             voice->SetSurroundMode(NuSoundSystem::SurroundMode::ZERO);
@@ -2836,7 +2836,7 @@ void NuSound3Update(void) {
             continue;
         }
 
-        if (stream->pending_start != 0 && NuSound3Stream::mVoice.obj == NULL) {
+        if (stream->pending_start != 0 && __builtin_expect(NuSound3Stream::mVoice.obj == NULL, 0)) {
             if (stream->stream != NULL && stream->stream->GetLoadState() == NuSoundSample::LoadState::STREAM_READY &&
                 stream->stream->GetResourceCount() > 0 && stream->stream->GetThreadQueueCount() == 0) {
                 NuSound3Stream::mVoice.Set(NuSound.CreateVoice(stream->stream, stream->field_0xc != 0));
@@ -2859,7 +2859,7 @@ void NuSound3Update(void) {
             }
         }
 
-        if (stream->field_0xd != 0 && NuSound3Stream::mVoice.obj == NULL) {
+        if (__builtin_expect(stream->field_0xd != 0, 0) && NuSound3Stream::mVoice.obj == NULL) {
             NuSound3StopStereoStream(i);
         }
 
@@ -2878,7 +2878,7 @@ void NuSound3Update(void) {
                     static_cast<usize>(g_NuSoundNumLoadBitShorts) * sizeof(u16));
 
             pthread_mutex_lock(&g_NuSoundLoadTrigger.mutex);
-            if (!g_NuSoundLoadTrigger.a) {
+            if (__builtin_expect(!g_NuSoundLoadTrigger.a, 1)) {
                 bool broadcast = g_NuSoundLoadTrigger.b;
                 g_NuSoundLoadTrigger.a = true;
                 if (__builtin_expect(broadcast != 0, 0)) {

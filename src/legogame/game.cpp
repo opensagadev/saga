@@ -2941,11 +2941,11 @@ static void PartCollide(PART_s *part, i32 three_dimensional) {
             if (part->owner == object) {
                 if (part->scale_time < 0.5f)
                     continue;
-            } else if (api->field_0x27c != -1 && part->scale_time < 0.25f)
+            } else if (api->field_0x27c != -1 && __builtin_expect(part->scale_time < 0.25f, 0))
                 continue;
         } else if ((part->flags & 0x8000) == 0 && part->owner == object)
             continue;
-        if (context == 0x39 || context == 0x3b || context == 0x3c)
+        if (context == 0x39 || context == 0x3b || __builtin_expect(context == 0x3c, 0))
             continue;
         if ((part->flags & 0x4000) != 0 && part->field_207 == api->field_0x289)
             continue;
@@ -3018,8 +3018,9 @@ static void PartCollide(PART_s *part, i32 three_dimensional) {
                 if (part_pickup_type == 0xcb) {
                     if (part->scale_time < 0.5f)
                         continue;
-                    if (VehicleArea == 0 && (static_cast<i8>(object->current_hp) <= 0 ||
-                                             static_cast<i8>(object->current_hp) >= object->hitpoints))
+                    if (__builtin_expect(VehicleArea == 0, 0) &&
+                        (static_cast<i8>(object->current_hp) <= 0 ||
+                         static_cast<i8>(object->current_hp) >= object->hitpoints))
                         continue;
                 } else if (!(part->scale_time >= 0.1f))
                     continue;

@@ -413,8 +413,9 @@ void LoadPerm(void) {
     }
 
     i32 device_language = 0;
-    if (NuStrICmp(g_deviceManufacturer, (char *)"Amazon") == 0 ||
-        (device_language = NuIOS_GetDeviceLanguage(), LANGUAGECOUNT < 1)) {
+    if (__builtin_expect(NuStrICmp(g_deviceManufacturer, (char *)"Amazon") == 0 ||
+                             (device_language = NuIOS_GetDeviceLanguage(), LANGUAGECOUNT < 1),
+                         0)) {
         LoadPerm_LanguageSelect = 0;
     } else {
         i32 language_index = 0;
@@ -452,7 +453,7 @@ void LoadPerm(void) {
         UpdateTimer(&GlobalTimer);
         menu_flash = NuFmod(GlobalTimer.time_elapsed_mod_seconds, 0.2f) < 0.1f;
 
-        if (language_timer < 0.5f && Text_IsFontLoaded() != nullptr) {
+        if (language_timer < 0.5f && __builtin_expect(Text_IsFontLoaded() != nullptr, 0)) {
             if (LoadPerm_LanguageSelect == 0) {
                 NewMenu(7, 0, -1);
                 LoadPerm_LanguageSelect = 1;
@@ -478,7 +479,7 @@ void LoadPerm(void) {
         }
 
         if (legal_timer < 5.8f && LoadPerm_LanguageSelect == 3 && ready_timer >= 1.0f && loadlegal_done) {
-            if (!(legal_timer == 0.0f && legal_mtl == nullptr)) {
+            if (__builtin_expect(!(legal_timer == 0.0f && legal_mtl == nullptr), 1)) {
                 if (PermDataLoaded != 0 &&
                     ((GamePad[0].buttons_down_08 &
                       (GAMEPAD_JUMP | GAMEPAD_START | GAMEPAD_SPECIAL | GAMEPAD_ACTION | GAMEPAD_TAG)) != 0 ||
@@ -515,8 +516,10 @@ void LoadPerm(void) {
             }
         }
 
-        if (intro_timer < 3.8f && LoadPerm_LanguageSelect == 3 && ready_timer >= 1.0f && legal_timer >= 5.8f &&
-            Text_IsFontLoaded() != nullptr && LoadPerm_StringsLoaded != 0 && IntroText_TextID != -1) {
+        if (__builtin_expect(intro_timer < 3.8f && LoadPerm_LanguageSelect == 3 && ready_timer >= 1.0f &&
+                                 legal_timer >= 5.8f && Text_IsFontLoaded() != nullptr && LoadPerm_StringsLoaded != 0 &&
+                                 IntroText_TextID != -1,
+                             0)) {
             if (PermDataLoaded != 0 && ((GamePad[0].buttons_down_08 & (GAMEPAD_JUMP | GAMEPAD_START | GAMEPAD_SPECIAL |
                                                                        GAMEPAD_ACTION | GAMEPAD_TAG)) != 0 ||
                                         MechInputTouchMenuController::AnyTouchesThisFrame > 0)) {
@@ -549,10 +552,10 @@ void LoadPerm(void) {
                 if (!(legal_timer < 0.3f)) {
                     if (legal_timer < 5.3f) {
                         alpha = 1.0f;
-                    } else if (legal_timer >= 5.6000003814697266f) {
-                        alpha = 0.0f;
-                    } else {
+                    } else if (legal_timer < 5.6000003814697266f) {
                         alpha = 1.0f - (legal_timer - 5.3f) / 0.30000019f;
+                    } else {
+                        alpha = 0.0f;
                     }
                 } else {
                     alpha = legal_timer / 0.3f;
@@ -620,7 +623,7 @@ void LoadPerm(void) {
 
                         vert = reinterpret_cast<LegalVertex *>(g_NuPrim_StreamBufferPtr->addr);
                         vert->colour = colour | (g_NuPrim_NeedsOverbrightening ? 0x808080u : 0x404040u);
-                        if (!g_NuPrim_NeedsHalfUVs) {
+                        if (__builtin_expect(!g_NuPrim_NeedsHalfUVs, 1)) {
                             vert->full.u = 1.0f;
                             vert->full.v = 1.0f;
                         } else {
@@ -639,7 +642,7 @@ void LoadPerm(void) {
                 f32 alpha;
                 if (__builtin_expect(!(intro_timer >= 0.3f), 0)) {
                     alpha = intro_timer / 0.3f;
-                } else if (__builtin_expect(intro_timer < 3.3f, 1)) {
+                } else if (__builtin_expect(intro_timer < 3.3f, 0)) {
                     alpha = 1.0f;
                 } else if (!(intro_timer < 3.6f)) {
                     alpha = 0.0f;
@@ -658,7 +661,7 @@ void LoadPerm(void) {
         edGraDisableTerrainSwap();
         if (FRAMETIME < DEFAULTFRAMETIME) {
             FRAMETIME = DEFAULTFRAMETIME;
-        } else if (__builtin_expect(FRAMETIME > DEFAULTFRAMETIME * 3.0f, 0)) {
+        } else if (__builtin_expect(FRAMETIME > DEFAULTFRAMETIME * 3.0f, 1)) {
             FRAMETIME = DEFAULTFRAMETIME * 3.0f;
         }
     }

@@ -293,7 +293,7 @@ void HeadMovement(GameObject_s *object) {
         if (object->apiobj.anim_packet.blending) {
             animation = object->apiobj.anim_packet.blend_animation_b;
             if (animation >= 0 && animation < apicharsys->model_id_capacity &&
-                object->apiobj.character_model->model_data_b[animation] != NULL) {
+                __builtin_expect(object->apiobj.character_model->model_data_b[animation] != NULL, 1)) {
                 if (static_cast<CHARACTERANIM_s *>(object->apiobj.character_model->model_data_a[animation])->flags &
                     0x40) {
                     allowed = 0;

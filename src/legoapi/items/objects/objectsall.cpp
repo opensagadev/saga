@@ -4925,7 +4925,8 @@ extern "C" {
                 NuMtxLookAtY(&emitter_orientation, &direction);
                 DebrisOrientationMtx(*part->debris_key, &emitter_orientation);
                 DebrisEmitterPos(*part->debris_key, part->position.x, part->position.y, part->position.z);
-                if (((part->flags & 0x200000) != 0 && (part->active & 2) != 0) || (part->flags & 0x1000) != 0)
+                if (((part->flags & 0x200000) != 0 && (part->active & 2) != 0) ||
+                    __builtin_expect((part->flags & 0x1000) != 0, 0))
                     DebrisStatusAlwaysOff(part->debris_key);
             }
             if (time != 0.0f) {

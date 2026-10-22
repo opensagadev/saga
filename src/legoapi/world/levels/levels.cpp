@@ -1077,7 +1077,7 @@ void MakeFreePlayModelList(i32 model1, i32 model2, i32 area, i32 level, i32 para
         Collection_GetIDList(&MiniKitCollection, 0x4000000, 0x4000000, ids, NULL, NULL, makefreeplaymodellist != 0);
         for (i16 *id = ids; *id != -1; ++id)
             World_AddFreePlayModel(*id);
-        if (__builtin_expect(FreePlayModelCount == 1, 1))
+        if (__builtin_expect(FreePlayModelCount == 1, 0))
             PlayerList[1] = PlayerList[0];
         PlayerList[2] = -1;
     } else {

@@ -7951,7 +7951,8 @@ void GameObjectStuffAfterAnimation() {
                     i32 joint = drawn ? static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)
                                             ->weapon_shoot_joints[0]
                                       : -1;
-                    if (drawn && joint != -1 && object->apiobj.character_model->points_of_interest[joint] != NULL)
+                    if (__builtin_expect(drawn != 0, 1) && joint != -1 &&
+                        object->apiobj.character_model->points_of_interest[joint] != NULL)
                         matrix = object->joint_matrices[joint];
                     else {
                         matrix = object->apiobj.field_0xb8;

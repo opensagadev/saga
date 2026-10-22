@@ -144,7 +144,7 @@ static void GizObstacles_Update(void *world_ptr, void *data, float) {
                     anim_set = obstacle->anim_set;
                 }
             } else {
-                if (__builtin_expect(obstacle->state == 1, 1)) {
+                if (__builtin_expect(obstacle->state == 1, 0)) {
                     obstacle->animation_speed = -1.0f;
                     GizObstacle_PlayForwards(obstacle);
                     anim_set = obstacle->anim_set;
@@ -154,7 +154,7 @@ static void GizObstacles_Update(void *world_ptr, void *data, float) {
                     anim_set = obstacle->anim_set;
                 }
             }
-        } else if ((obstacle->progress_flags & GIZOBSTACLE_PROGRESS_FLAG_EXTERNAL_CONTROL) == 0) {
+        } else if (__builtin_expect((obstacle->progress_flags & GIZOBSTACLE_PROGRESS_FLAG_EXTERNAL_CONTROL) == 0, 0)) {
             GIZOBSTACLEUPDATEFN update_fn = gizobstacleupdatefns[obstacle->mode];
             if (update_fn != NULL) {
                 update_fn(obstacle);
@@ -204,7 +204,9 @@ static void GizObstacles_Update(void *world_ptr, void *data, float) {
         const bool animation_finished =
             ((anim_set->flags & GAMEANIMSET_FLAG_STOP_REQUESTED) != 0 || anim_set->animated_object_count == 0) &&
             anim_set->state == GAMEANIMSET_STATE_AT_END;
-        if (completion_mode && animation_finished && (obstacle->blowup_type != -1 || obstacle->pickup_count != 0)) {
+        if (__builtin_expect(completion_mode && animation_finished &&
+                                 (obstacle->blowup_type != -1 || obstacle->pickup_count != 0),
+                             1)) {
             if (obstacle->blowup_type != -1) {
                 if ((obstacle->config_flags & GIZOBSTACLE_CONFIG_BLOWUP_AT_ANIM_OBJECTS) == 0) {
                     GizmoBlowUpTypeBlowUp(world, obstacle->blowup_type, &obstacle->evaluated_position);
@@ -233,7 +235,7 @@ static void GizObstacles_Update(void *world_ptr, void *data, float) {
                 obstacle->runtime_flags |= GIZOBSTACLE_RUNTIME_FLAG_PICKUPS_SPAWNED;
             }
 
-            if (obstacle->state == 3) {
+            if (__builtin_expect(obstacle->state == 3, 1)) {
                 GameAnimSet_JumpToStart(obstacle->anim_set);
                 GizObstacle_EvalAveragePosAndRadius(obstacle, 2);
                 GameAnimSet_SetVisibility(obstacle->anim_set, 1);

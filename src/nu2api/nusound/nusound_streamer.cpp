@@ -215,7 +215,7 @@ NuSoundStreamingSample::~NuSoundStreamingSample() {
 
 i32 NuSoundStreamingSample::Open(f32 start_offset, bool loop, bool weak_flag) {
     LoadState load_state = GetLoadState();
-    if (GetResourceCount() == 0 || load_state == LoadState::STREAM_READY) {
+    if (__builtin_expect(GetResourceCount() == 0, 0) || __builtin_expect(load_state == LoadState::STREAM_READY, 0)) {
         return 0;
     }
 
@@ -243,7 +243,8 @@ i32 NuSoundStreamingSample::Open(f32 start_offset, bool loop, bool weak_flag) {
         }
         this->sound_buffers[1] = buffer;
 
-        if (this->sound_buffers[1]->Allocate(half_buffer_size, NuSoundSystem::MemoryDiscipline::SAMPLE) != 1) {
+        if (__builtin_expect(
+                this->sound_buffers[1]->Allocate(half_buffer_size, NuSoundSystem::MemoryDiscipline::SAMPLE) != 1, 0)) {
             goto alloc_error;
         }
 
@@ -284,7 +285,7 @@ i32 NuSoundStreamingSample::Open(f32 start_offset, bool loop, bool weak_flag) {
         context.flags &= ~1u;
         if (__builtin_expect(status == 1 && (context.flags & 2) == 0, 1)) {
             context = this->file_loader->FillStreamBuffer(this->sound_buffers[1], loop);
-            if (context.size2 != 0) {
+            if (__builtin_expect(context.size2 != 0, 1)) {
                 this->some_count++;
             } else {
                 if (this->some_count == 0) {

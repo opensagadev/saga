@@ -1910,11 +1910,11 @@ void GameAIProcess() {
         object->field_0x107e = 0;
         if (__builtin_expect(object->use_action_frames != 0, 1)) {
             --object->use_action_frames;
-        } else if (object->use_action_parameter > 0.0f) {
-            object->use_action_parameter -= frame_time;
-        } else {
+        } else if (!(object->use_action_parameter > 0.0f)) {
             object->can_use_object = NULL;
             object->use_action = 0;
+        } else {
+            object->use_action_parameter -= frame_time;
         }
         if (object->field_0x1094 != 0)
             --object->field_0x1094;
@@ -2124,7 +2124,7 @@ void GameAIProcess() {
         if ((object->apiobj.field_0x1f8 & 0x180) != 0x80) {
             object->apiobj.flags_high &= ~2;
             i32 defend = false;
-            if ((object->field_0xef8 & 0x80) != 0 && object->ai.opponent_object != NULL) {
+            if ((object->field_0xef8 & 0x80) != 0 && __builtin_expect(object->ai.opponent_object != NULL, 1)) {
                 BOLTTYPE_s *bolt = BoltType_FindByID(0, WORLD);
                 if (bolt->field_10 * bolt->field_14 > object->ai.opponent_metric) {
                     NUVEC forward;
@@ -2194,14 +2194,14 @@ void GameAIProcess() {
                 } else {
                     object->ai_jump_timer = 0.0f;
                 }
-            } else if (__builtin_expect(!(object->pad_gamepad->input_magnitude <= threshold), 0)) {
+            } else if (__builtin_expect(object->pad_gamepad->input_magnitude <= threshold, 1)) {
+                object->ai_jump_timer = 0.0f;
+            } else {
                 object->ai_jump_timer += FRAMETIME;
                 if (object->ai_jump_timer > 1.0f) {
                     object->pad_gamepad->buttons_pressed |= GAMEPAD_JUMP;
                     object->ai_jump_timer = 0.0f;
                 }
-            } else {
-                object->ai_jump_timer = 0.0f;
             }
         }
         if (__builtin_expect(object->ai.action_target_ref != NULL, 1))
@@ -2218,7 +2218,7 @@ void GameAIProcess() {
                 (object->ai.capabilities & LEGO_AIPATHCNX_R2D2GLIDE) == 0)
                 object->field_0xe31 = 0;
             if (object->character_context == 0x4b && object->suit != NULL &&
-                (static_cast<SUIT_s *>(object->suit)->flags & 0x10) != 0)
+                __builtin_expect((static_cast<SUIT_s *>(object->suit)->flags & 0x10) != 0, 1))
                 object->pad_gamepad->buttons_held |= GAMEPAD_SPECIAL;
             AIPATHCNX *connection = object->ai.path_info.connection;
             if (connection != NULL && (connection->traversal_flags[object->ai.path_info.direction] &
@@ -2239,7 +2239,7 @@ void GameAIProcess() {
                         Player_ToggleCharacter(object, 1, 0);
                         if (object->id == id_DROIDEKA)
                             Player_ToggleCharacter(object, 1, 0);
-                        if (__builtin_expect(object->apiobj.model_draw_result == 0, 0))
+                        if (__builtin_expect(object->apiobj.model_draw_result == 0, 1))
                             object->input_toggle_hold_time = 0.0f;
                         else
                             object->input_toggle_hold_time = 0.25f;
@@ -2261,11 +2261,7 @@ void GameAIProcess() {
             u8 other_node = connection->node_indices[direction == 0];
             u8 node = connection->node_indices[direction];
             u16 angle;
-            if (object->character_context == 0x45) {
-                angle = object->takeover_start_angle;
-                wall_direction = v001;
-                NuVecRotateY(&wall_direction, &wall_direction, angle);
-            } else {
+            if (!(object->character_context == 0x45)) {
                 NuVecSub(&lateral, &nodes[other_node].position, &nodes[node].position);
                 lateral.y = 0.0f;
                 NuVecNorm(&lateral, &lateral);
@@ -2307,6 +2303,10 @@ void GameAIProcess() {
                     }
                 }
                 angle = NuAtan2D(wall_direction.x, wall_direction.z);
+            } else {
+                angle = object->takeover_start_angle;
+                wall_direction = v001;
+                NuVecRotateY(&wall_direction, &wall_direction, angle);
             }
             movement.x = object->ai.movement_position.x - object->apiobj.position.x;
             movement.y = 0.0f;
@@ -2329,7 +2329,7 @@ void GameAIProcess() {
             if (!object->apiobj.player_controlled && object->character_context != 0x0b) {
                 if (drop_in_teleport == 1 && VehicleArea == 0 && (Arcade != 0 || teleport_all_freeplay_modes != 0) &&
                     object->apiobj.model_draw_result == 0 && (object->tag_flags & 2) == 0 &&
-                    drop_back_in_timer > 0.0f) {
+                    __builtin_expect(drop_back_in_timer > 0.0f, 0)) {
                     NUVEC position = player->apiobj.last_safe_position;
                     if (position.x == player->apiobj.position.x && position.y == player->apiobj.position.y &&
                         position.z == player->apiobj.position.z)
@@ -2503,8 +2503,9 @@ void GameAIProcess() {
                 if (difference.z > radius || difference.z < -radius)
                     continue;
                 if (first->collision_min.y > second->collision_max.y ||
-                    second->collision_min.y > first->collision_max.y || first->collision_link == second ||
-                    second->collision_link == first)
+                    second->collision_min.y > first->collision_max.y ||
+                    __builtin_expect(first->collision_link == second, 0) ||
+                    __builtin_expect(second->collision_link == first, 0))
                     continue;
                 bool fixed_first = first->player_controlled;
                 bool fixed_second = second->player_controlled;

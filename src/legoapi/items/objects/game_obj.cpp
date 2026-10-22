@@ -1597,7 +1597,7 @@ void UpdateGameObjects(WORLDINFO_s *world) {
         if (TimingBarSet == 4)
             TBOPENFN("Misc", 4);
         if (WORLD->current_level != SPEEDERCHASEA_LDATA || disable_narrow_socks != 0 || object->id != id_SPEEDERBIKE ||
-            object->apiobj.field_0x287 == 0)
+            __builtin_expect(object->apiobj.field_0x287 == 0, 1))
             UpdateLastSafePosition(object);
         f32 scale = 1.0f;
         if (object->apiobj.field_0x287 == 1)
@@ -2282,7 +2282,8 @@ i32 KillGameObject(GameObject_s *object, i32 requested_reason, i32) {
                    object->id == id_TIEFIGHTER || object->id == id_TIEINTERCEPTOR || object->id == id_TIEFIGHTERDARTH ||
                    object->id == id_TIEBOMBER || object->id == id_IMPERIALSHUTTLE || object->id == id_SLAVE1) {
             debris[0] = 34;
-            if (WORLD->current_level == DEATHSTARRESCUEE_LDATA && object->apiobj.field_0x27c == -1) {
+            if (__builtin_expect(WORLD->current_level == DEATHSTARRESCUEE_LDATA, 1) &&
+                object->apiobj.field_0x27c == -1) {
                 GameCam_Judder(GameCam, qrand() < 32768 ? -0.75f : 0.75f, 2, NULL);
                 NewRumbleAllPlayers(1.0f, 0.1f, 0, 0);
             }
@@ -2414,7 +2415,8 @@ i32 KillGameObject(GameObject_s *object, i32 requested_reason, i32) {
         object->apiobj.start_position = object->apiobj.position;
         object->field_0x1018 = 0.5f;
     }
-    if (terminal_kill == 0 && AIScriptSetBaseScriptStateByName(&object->ai.script_process, "BeenKilled"))
+    if (terminal_kill == 0 &&
+        __builtin_expect(AIScriptSetBaseScriptStateByName(&object->ai.script_process, "BeenKilled") != 0, 1))
         AIScriptProcess(WORLD->ai_sys, &object->apiobj, &object->ai, &object->ai.script_process, FRAMETIME);
 
     AIGROUP *group = object->ai.group;
@@ -2443,8 +2445,8 @@ i32 KillGameObject(GameObject_s *object, i32 requested_reason, i32) {
                 for (i32 i = group->member_count - 1; i != -1; --i) {
                     if (group->members[i] != NULL) {
                         GameObject_s *candidate = group->members[i]->objptr;
-                        if (candidate != object && (candidate->apiobj.field_0x1f8 & 0x1001) == 0x1001 &&
-                            candidate->apiobj.field_0x287 == 0) {
+                        if (__builtin_expect(candidate != object, 1) &&
+                            (candidate->apiobj.field_0x1f8 & 0x1001) == 0x1001 && candidate->apiobj.field_0x287 == 0) {
                             group->leader = &candidate->apiobj;
                             break;
                         }
@@ -2516,7 +2518,7 @@ i32 KillGameObject(GameObject_s *object, i32 requested_reason, i32) {
             bool persistent = object->respawnable;
             if ((object->apiobj.field_0x1f4 & 0x4400) == 0x4400) {
                 creature = &WORLD->ai_sys->creatures[object->ai.field_0x134];
-                if (persistent) {
+                if (__builtin_expect(persistent != 0, 0)) {
                     respawn = object->respawn_at_origin;
                 } else {
                     u32 limit = object->ai_respawn_count + 1;
@@ -2532,10 +2534,10 @@ i32 KillGameObject(GameObject_s *object, i32 requested_reason, i32) {
                 remove = !persistent;
             }
         }
-        if (__builtin_expect(remove != 0, 1)) {
+        if (remove != 0) {
             object->apiobj.character = 0;
             object->ai.reset_mode = 4;
-        } else if (respawn && creature != NULL) {
+        } else if (respawn && __builtin_expect(creature != NULL, 1)) {
             object->apiobj.character = 0;
             object->ai.reset_mode = 1;
             object->ai_spawn_delay = 1.0f - (static_cast<f32>(static_cast<u32>(Game.difficulty)) - 1.0f) / 9.0f;
@@ -2718,8 +2720,10 @@ i32 ObjHitObj(GameObject_s *attacker, GameObject_s *target, i32 damage, u16 flag
             i32 angle = RotDiff(attacker->apiobj.movement_facing_angle, target->apiobj.movement_facing_angle);
             if (angle < 0)
                 angle = -angle;
-            if (angle > 0x4000 && !(LEGOCONTEXT_COMBO != -1 && attacker->character_context == LEGOCONTEXT_COMBO &&
-                                    attacker->combo_branch == 6)) {
+            if (angle > 0x4000 &&
+                __builtin_expect(!(LEGOCONTEXT_COMBO != -1 && attacker->character_context == LEGOCONTEXT_COMBO &&
+                                   attacker->combo_branch == 6),
+                                 1)) {
                 if (target->apiobj.player_controlled)
                     NewRumble(target->pad_gamepad->pad, 0.75f, 0);
                 if (LEGOCONTEXT_HOLD != -1 && target->character_context == LEGOCONTEXT_HOLD) {
@@ -2733,9 +2737,10 @@ i32 ObjHitObj(GameObject_s *attacker, GameObject_s *target, i32 damage, u16 flag
         }
     }
     if (target->field_0xd24 >= 1.0f) {
-        if ((flags & 0x100) &&
-            (instant || (LEGOCONTEXT_COMBO != -1 && attacker->character_context == LEGOCONTEXT_COMBO &&
-                         attacker->combo_branch == 6)))
+        if (__builtin_expect((flags & 0x100) != 0, 0) &&
+            __builtin_expect((instant || (LEGOCONTEXT_COMBO != -1 && attacker->character_context == LEGOCONTEXT_COMBO &&
+                                          attacker->combo_branch == 6)) != 0,
+                             1))
             damage = target->field_0xe37;
         ObjHitShield(attacker, target, damage, bolt);
         return 0;
@@ -2749,28 +2754,31 @@ i32 ObjHitObj(GameObject_s *attacker, GameObject_s *target, i32 damage, u16 flag
                target->apiobj.field_0x27c == -1) {
         hit = -1;
     }
-    if ((target->field_0xefa & 8) && (flags & 0x80)) {
+    if (__builtin_expect((target->field_0xefa & 8) && (flags & 0x80), 1)) {
         hit = 0;
     } else {
         if (WORLD->current_level == SPEEDERCHASEA_LDATA) {
-            if (!disable_narrow_socks && (flags & 4) && (target->apiobj.player_controlled)) {
+            if (!disable_narrow_socks && __builtin_expect((flags & 4) != 0, 1) && (target->apiobj.player_controlled)) {
                 hit = 0;
                 goto attributed_hit;
             }
             if (target->id == id_SPEEDERBIKE && !target->apiobj.player_controlled) {
-                if (attacker && !(attacker->apiobj.character_data->model_flags & 0x2000))
+                if (__builtin_expect(attacker != 0, 0) && !(attacker->apiobj.character_data->model_flags & 0x2000))
                     hit = 0;
                 else if (target->ai.creature_set != 2)
                     hit = 0;
                 goto attributed_hit;
             }
         }
-        if (WORLD->area == HOTHBATTLE_ADATA &&
-            ((target->id == id_ATAT && !target->apiobj.player_controlled &&
-              (!attacker || !attacker->apiobj.player_controlled)) ||
-             (attacker && attacker->id == id_ATAT && !target->apiobj.player_controlled &&
-              !attacker->apiobj.player_controlled))) {
-            if (hit == -1 && target->id == id_ATAT) {
+        if (__builtin_expect(
+                WORLD->area == HOTHBATTLE_ADATA &&
+                    __builtin_expect(((target->id == id_ATAT && !target->apiobj.player_controlled &&
+                                       (!attacker || !attacker->apiobj.player_controlled)) ||
+                                      (attacker && attacker->id == id_ATAT && !target->apiobj.player_controlled &&
+                                       !attacker->apiobj.player_controlled)) != 0,
+                                     0),
+                1)) {
+            if (__builtin_expect(hit == -1, 1) && target->id == id_ATAT) {
                 if (target->character_context != 23)
                     hit = 0;
             } else
@@ -2839,7 +2847,7 @@ impact:
                 GameAudio_PlaySfx(74, &target->apiobj.collision_position, bits, 0);
             }
         } else if (attacker) {
-            if (attacker->apiobj.character_data->model_flags & 8)
+            if (__builtin_expect(attacker->apiobj.character_data->model_flags & 8 != 0, 0))
                 GameAudio_PlaySfx(65, &target->apiobj.collision_position, GameAudio_GetPlrSfxBits(attacker), 0);
             else
                 GameAudio_PlaySfx(74, &target->apiobj.collision_position, 0, 0);
@@ -2883,7 +2891,7 @@ impact:
                 SetFlicker(target, 0.4f);
             PlayerTakeHit(target, attacker);
             result = 0;
-            if (target->apiobj.player_controlled)
+            if (__builtin_expect(target->apiobj.player_controlled != 0, 1))
                 TakeHitRumble(target, 0.666f);
             goto hurt;
         }
@@ -2978,7 +2986,7 @@ impact:
             return 0;
         }
     }
-    if (no_impact && target->field_0xcc0) {
+    if (__builtin_expect(no_impact != 0, 0) && target->field_0xcc0) {
         KillParts(target->field_0xcc0, -1, target->field_0xcc0->id == id_BODYGUARD ? 4 : -1, 1, 0.0f, 0,
                   reinterpret_cast<u16 *>(parts_angle));
         KillGameObject(target->field_0xcc0, 2, 0);
@@ -3032,7 +3040,8 @@ finish:
             else
                 HitRumble(attacker);
         }
-        if (!(flags & 0x4000) && result == 2 && static_cast<u8>(attacker->apiobj.field_0x27c) <= 1 && Arcade)
+        if (__builtin_expect(!(flags & 0x4000), 0) && result == 2 &&
+            static_cast<u8>(attacker->apiobj.field_0x27c) <= 1 && Arcade)
             Arcade_Kill(attacker->apiobj.field_0x27c, target->apiobj.field_0x27c);
     }
     return result;

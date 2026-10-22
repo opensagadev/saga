@@ -117,7 +117,7 @@ static void GizTurrets_Update(void *context, void *system_ptr, float frame_time)
                             u16 home_yaw = 0;
                             i32 base_yaw = 0;
                             if (turret->primary_anim_obj != NULL &&
-                                NuSpecialExistsFn(&turret->primary_anim_obj->special)) {
+                                __builtin_expect(NuSpecialExistsFn(&turret->primary_anim_obj->special) != 0, 1)) {
                                 primary_draw = NuSpecialGetDrawMtx(&turret->primary_anim_obj->special);
                                 primary_base = NuSpecialGetMtx(&turret->primary_anim_obj->special);
                                 if (!(turret->secondary_anim_obj != NULL &&
@@ -314,7 +314,7 @@ static void GizTurrets_Update(void *context, void *system_ptr, float frame_time)
                                 if (NuSpecialExistsFn(&turret->primary_anim_obj->special)) {
                                     if (secondary_base == NULL) {
                                         *primary_draw = *primary_base;
-                                        if (turret->yaw != 0)
+                                        if (__builtin_expect(turret->yaw != 0, 0))
                                             NuMtxPreRotateY(primary_draw, turret->yaw);
                                     } else {
                                         *secondary_draw = *secondary_base;
@@ -330,7 +330,7 @@ static void GizTurrets_Update(void *context, void *system_ptr, float frame_time)
                             }
                             if (turret->secondary_anim_obj != NULL)
                                 NuSpecialUpdate(&turret->secondary_anim_obj->special);
-                            if (turret->field_0x126 != -1 && player != NULL) {
+                            if (turret->field_0x126 != -1 && __builtin_expect(player != NULL, 1)) {
                                 bool nearby = WORLD->area != NULL && (WORLD->area->flags & 1);
                                 if (!nearby) {
                                     NUVEC delta;

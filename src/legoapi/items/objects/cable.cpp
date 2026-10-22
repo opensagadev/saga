@@ -291,7 +291,7 @@ void UpdateCables() {
             continue;
         }
         if (target->id != id_ATAT) {
-            if (target->id == id_DRAGBOMB) {
+            if (__builtin_expect(target->id == id_DRAGBOMB, 1)) {
                 target->character_context = 0x34;
                 cable->target->context_animation_timer = 0.0f;
             }
@@ -316,26 +316,7 @@ void UpdateCables() {
             }
             i32 last = cable->wrap_indices[cable->wrap_count - 1];
             NUVEC *last_position = NUMTX_GET_ROW_VEC(&target->joint_matrices[atat_locators[last]], 3);
-            if (!(cable->wrap_count > 1)) {
-                f32 along0, along1;
-                i32 next = (last + 1) & 3;
-                i32 previous = (last + 3) & 3;
-                // Preserve the reverse-edge locators across the first intersection callback.
-                i32 previous_locator = atat_locators[previous];
-                i32 opposite_locator = atat_locators[(previous + 3) & 3];
-                if (XZLinesIntersect(&path[0], last_position,
-                                     NUMTX_GET_ROW_VEC(&target->joint_matrices[atat_locators[next]], 3),
-                                     NUMTX_GET_ROW_VEC(&target->joint_matrices[atat_locators[(last + 2) & 3]], 3),
-                                     &along0, &along1)) {
-                    cable->wrap_indices[cable->wrap_count++] = static_cast<u8>(next);
-                } else {
-                    if (XZLinesIntersect(
-                            &path[0], last_position, NUMTX_GET_ROW_VEC(&target->joint_matrices[previous_locator], 3),
-                            NUMTX_GET_ROW_VEC(&target->joint_matrices[opposite_locator], 3), &along0, &along1)) {
-                        cable->wrap_indices[cable->wrap_count++] = static_cast<u8>(previous);
-                    }
-                }
-            } else {
+            if (cable->wrap_count > 1) {
                 i32 next = (last + 1) & 3;
                 i32 previous = cable->wrap_indices[cable->wrap_count - 2];
                 i32 direction = 1;
@@ -370,14 +351,33 @@ void UpdateCables() {
                         lost_target = true;
                     }
                 }
+            } else {
+                f32 along0, along1;
+                i32 next = (last + 1) & 3;
+                i32 previous = (last + 3) & 3;
+                // Preserve the reverse-edge locators across the first intersection callback.
+                i32 previous_locator = atat_locators[previous];
+                i32 opposite_locator = atat_locators[(previous + 3) & 3];
+                if (XZLinesIntersect(&path[0], last_position,
+                                     NUMTX_GET_ROW_VEC(&target->joint_matrices[atat_locators[next]], 3),
+                                     NUMTX_GET_ROW_VEC(&target->joint_matrices[atat_locators[(last + 2) & 3]], 3),
+                                     &along0, &along1)) {
+                    cable->wrap_indices[cable->wrap_count++] = static_cast<u8>(next);
+                } else {
+                    if (XZLinesIntersect(
+                            &path[0], last_position, NUMTX_GET_ROW_VEC(&target->joint_matrices[previous_locator], 3),
+                            NUMTX_GET_ROW_VEC(&target->joint_matrices[opposite_locator], 3), &along0, &along1)) {
+                        cable->wrap_indices[cable->wrap_count++] = static_cast<u8>(previous);
+                    }
+                }
             }
         }
         i32 path_count;
-        if (cable->wrap_count != 0) {
+        if (__builtin_expect(cable->wrap_count != 0, 1)) {
             path_count = 1;
             for (i32 i = cable->wrap_count - 1; i >= 0; --i) {
                 i32 index = cable->wrap_indices[i];
-                if (cable->target->apiobj.character_model->points_of_interest[index]) {
+                if (__builtin_expect(cable->target->apiobj.character_model->points_of_interest[index] != 0, 1)) {
                     path[path_count++] = *NUMTX_GET_ROW_VEC(&cable->target->joint_matrices[atat_locators[index]], 3);
                 }
             }
@@ -396,7 +396,7 @@ void UpdateCables() {
             continue;
         }
         f32 distance_sq = NuVecDistSqr(&path[0], &path[1], &delta);
-        if (GameRayCast(&path[1], &delta, 0.0f, TERRAINMASK_NONDROID | 0x1f)) {
+        if (__builtin_expect(GameRayCast(&path[1], &delta, 0.0f, TERRAINMASK_NONDROID | 0x1f) != 0, 0)) {
             target = cable->target;
             ReleaseCable(cable, 1);
             continue;
@@ -405,10 +405,12 @@ void UpdateCables() {
         for (i32 i = 0; i < HIGHGAMEOBJECT; ++i) {
             GameObject_s *object = &Obj[i];
             if ((object->apiobj.field_0x1f8 & 0x1001) != 0x1001 || object->apiobj.field_0x287 != 0 ||
-                (object->field_0xe20 & 0x20) || object->apiobj.player_controlled)
+                __builtin_expect((object->field_0xe20 & 0x20) != 0, 1) ||
+                __builtin_expect(object->apiobj.player_controlled != 0, 1))
                 continue;
-            if (WORLD->area != NULL && WORLD->area == HOTHBATTLE_ADATA && object->id != id_ATAT &&
-                object->id != id_DRAGBOMB && object->id != id_ATST && object->id != id_ATST_LOWRES)
+            if (__builtin_expect(WORLD->area != NULL, 0) && __builtin_expect(WORLD->area == HOTHBATTLE_ADATA, 0) &&
+                object->id != id_ATAT && object->id != id_DRAGBOMB && object->id != id_ATST &&
+                object->id != id_ATST_LOWRES)
                 continue;
             if (object->cable != NULL &&
                 (object->cable->target == cable->target || object->cable->target == cable->source))
@@ -420,10 +422,9 @@ void UpdateCables() {
                 f32 radius = object->apiobj.field_0x1dc;
                 f32 half_height = object->apiobj.field_0x1e0;
                 f32 combined = radius + half_height;
-                if (__builtin_expect(combined * combined > line_distance &&
-                                         object->apiobj.collision_position.y + half_height > closest.y &&
-                                         closest.y > object->apiobj.collision_position.y - half_height,
-                                     1)) {
+                if (__builtin_expect(combined * combined > line_distance, 1) &&
+                    object->apiobj.collision_position.y + half_height > closest.y &&
+                    closest.y > object->apiobj.collision_position.y - half_height) {
                     f32 dz = object->apiobj.collision_position.z - closest.z;
                     f32 dx = object->apiobj.collision_position.x - closest.x;
                     if (radius * radius > dx * dx + dz * dz) {
@@ -433,7 +434,7 @@ void UpdateCables() {
                 }
             }
         }
-        if (obstruction) {
+        if (__builtin_expect(obstruction != 0, 0)) {
             target = cable->target;
             ReleaseCable(cable, 1);
             continue;

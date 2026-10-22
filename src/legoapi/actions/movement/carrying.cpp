@@ -431,7 +431,7 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
                 if (__builtin_expect((object->context_flags & 0x40) == 0, 1))
                     event = true;
             }
-            if (event) {
+            if (__builtin_expect(event != 0, 0)) {
                 object->context_flags |= 0x40;
                 GizmoBlowupBlowup(static_cast<GIZMOBLOWUP_s *>(object->field_0x788), 0, 7, -1, NULL, 1);
                 NewBuzzFrames(object->pad_gamepad->pad, 1, 0);
@@ -486,7 +486,7 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
             if (object->apiobj.field_0x27d != 0) {
                 bool throw_object = false, put_down = false;
                 if (SuperCarry_UseActionButton != 0) {
-                    if ((object->pad_gamepad->buttons_pressed & GAMEPAD_ACTION) != 0)
+                    if (__builtin_expect((object->pad_gamepad->buttons_pressed & GAMEPAD_ACTION) != 0, 0))
                         throw_object = true;
                     else
                         put_down = (object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) != 0;
@@ -535,7 +535,8 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
                         return;
                     }
                     GIZMOBLOWUP_s *blowup = static_cast<GIZMOBLOWUP_s *>(object->field_0x788);
-                    if (put_down && (blowup->secondary_flags & 4) != 0 && LEGOACT_SUPERCARRY_PUTDOWN != -1 &&
+                    if (put_down && __builtin_expect((blowup->secondary_flags & 4) != 0, 1) &&
+                        LEGOACT_SUPERCARRY_PUTDOWN != -1 &&
                         object->apiobj.character_model->model_data_b[LEGOACT_SUPERCARRY_PUTDOWN] != NULL &&
                         object->apiobj.field_0x218 != 2000000.0f &&
                         object->apiobj.lower_position.y - object->apiobj.field_0x218 < 0.1f) {
@@ -589,7 +590,7 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
             }
             object->context_animation_timer -= FRAMETIME;
             if (object->context_animation_timer <= 0.0f) {
-                if ((object->context_flags & 0x40) == 0)
+                if (__builtin_expect((object->context_flags & 0x40) == 0, 1))
                     event = true;
                 else
                     object->character_context = -1;
@@ -640,7 +641,7 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
             object->context_animation_timer += FRAMETIME;
             if (object->context_animation_timer >= object->airborne_action_duration)
                 object->context_variant_flags = static_cast<i8>(object->context_variant_flags | 0x80);
-            if (!(object->context_animation_timer >= 0.1f) || object->apiobj.field_0x27d == 0)
+            if (!(object->context_animation_timer >= 0.1f) || __builtin_expect(object->apiobj.field_0x27d == 0, 0))
                 return;
             if (object->context_variant_flags < 0) {
                 object->field_0x7a3 = 7;
@@ -659,7 +660,7 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
         landing:
             f32 duration = AnimDuration(object->id, object->context_animation, 0.0f, 0.0f, 1);
             object->context_animation_timer = duration;
-            if (__builtin_expect(duration <= 0.0f, 0))
+            if (__builtin_expect(duration <= 0.0f, 1))
                 object->context_animation_timer = 0.5f;
             ResetAnimPacket(&object->apiobj.anim_packet, -1);
             object->apiobj.velocity.x = object->apiobj.velocity.z = 0.0f;
@@ -671,7 +672,7 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
             object->context_animation_timer -= FRAMETIME;
             if (__builtin_expect(object->context_animation_timer <= 0.0f, 0))
                 goto idle_or_walk;
-            if (object->context_variant_flags >= 0 && object->pad_gamepad->input_magnitude > 0.0f)
+            if (__builtin_expect(object->context_variant_flags >= 0 && object->pad_gamepad->input_magnitude > 0.0f, 1))
                 goto idle_or_walk;
             return;
         default:

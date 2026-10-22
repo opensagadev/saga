@@ -2595,7 +2595,7 @@ void TerrainPlayer(GameObject_s *object) {
         const f32 entry_vertical_velocity = api.velocity.y;
         const AIPATHINFO &path_info = object->ai.path_info;
         i32 special_path_endpoints = false;
-        if (path_info.path != NULL && path_info.connection != NULL) {
+        if (path_info.path != NULL && __builtin_expect(path_info.connection != NULL, 1)) {
             const AIPATHCNX *path_connection = path_info.connection;
             const AIPATHNODE *nodes = path_info.path->nodes;
             special_path_endpoints = ((nodes[path_connection->node_indices[path_info.direction]].runtime_flags |
@@ -2749,7 +2749,7 @@ void TerrainPlayer(GameObject_s *object) {
                     !(WORLD->current_level == ENDORBATTLEC_LDATA && object->id == id_ATST)) {
                     i32 deflection_mode = 0;
                     if (VehicleArea != 0 && (api.character_data->model_flags & 0x2000) != 0 &&
-                        api.character_data->game_character->field_0x28 != 0.0f) {
+                        __builtin_expect(api.character_data->game_character->field_0x28 != 0.0f, 0)) {
                         deflection_mode = 2;
                     } else if (object->character_context == -1 && object->pad_gamepad->input_magnitude > 0.0f) {
                         deflection_mode = 1;
@@ -2800,7 +2800,7 @@ void TerrainPlayer(GameObject_s *object) {
                 }
                 if (object->character_context == 0) {
                     GameObject_s *target = object->airborne_collision_target;
-                    if (target != NULL && target->field_0x107c != -1) {
+                    if (target != NULL && __builtin_expect(target->field_0x107c != -1, 0)) {
                         excluded_platforms[excluded_count++] = target->field_0x107c;
                     }
                 } else {
@@ -2812,14 +2812,15 @@ void TerrainPlayer(GameObject_s *object) {
                     }
                 }
                 CHARPLATFORMSYS_s *platforms = WORLD->char_platform_sys;
-                if (__builtin_expect(platforms != NULL && VehicleArea == 0, 1)) {
+                if (platforms != NULL && VehicleArea == 0) {
                     const bool player = static_cast<i8>(api.flags_low) < 0;
                     if (!player || object->character_context == 0x3d || object->field_0xcc0 != NULL ||
                         object->character_context == 0x3b ||
                         (api.character_data->game_character->flags_090 & 0x8040) != 0) {
                         for (i32 i = 0; i < platforms->platform_count; ++i) {
                             GameObject_s *platform_object = platforms->platforms[i].object;
-                            if (platform_object != NULL && ((object->field_0xf02 & 8) == 0 || player)) {
+                            if (platform_object != NULL &&
+                                __builtin_expect(((object->field_0xf02 & 8) == 0 || player) != 0, 1)) {
                                 excluded_platforms[excluded_count++] = platform_object->field_0x107c;
                             }
                         }
@@ -2929,7 +2930,7 @@ void TerrainPlayer(GameObject_s *object) {
                     stopped_without_terrain = true;
                 }
             }
-            if (!stopped_without_terrain && (api.flags_low & 4) == 0) {
+            if (!stopped_without_terrain && __builtin_expect((api.flags_low & 4) == 0, 0)) {
                 api.field_0x218 = floor_height;
                 GetSurfaceInfo(object, floor_height != 2000000.0f ? 1 : 0, floor_height);
                 if (__builtin_expect(
@@ -3115,7 +3116,7 @@ void TerrainPlayer(GameObject_s *object) {
                     MiscTime = 0.1f;
                 }
             }
-            if (check_terrain_hazards && CannotKill(object) == 0 && api.field_0x287 == 0 &&
+            if (check_terrain_hazards && CannotKill(object) == 0 && __builtin_expect(api.field_0x287 == 0, 0) &&
                 (VehicleArea == 0 || static_cast<i8>(api.flags_low) < 0) && (object->field_0xefe & 4) != 0 &&
                 (object->field_0xefa & 4) == 0 && object->character_context != 0x5d) {
                 if (object->field_0x1084 != 0) {
@@ -4221,9 +4222,7 @@ static void DrawParaphernalia(GameObject_s *object) {
         carried->field_0x1087 = object->field_0x1087;
         carried->field_0x1020 = object->field_0x1020;
         i32 locator = object->apiobj.character_data->game_character->ride_locator;
-        if (locator != -1 && object->apiobj.character_model->points_of_interest[locator] != NULL) {
-            matrix = object->joint_matrices[locator];
-        } else {
+        if (!(locator != -1 && object->apiobj.character_model->points_of_interest[locator] != NULL)) {
             // The original fallback does not initialize its temporary Z component.
             // Zero gives this otherwise undefined path a deterministic position.
             position.x = 0.0f;
@@ -4235,11 +4234,14 @@ static void DrawParaphernalia(GameObject_s *object) {
             matrix.m30 = position.x;
             matrix.m31 = position.y;
             matrix.m32 = position.z;
+        } else {
+            matrix = object->joint_matrices[locator];
         }
         NUMTX *reflection = NULL;
         if (carried->field_0x1087 && carried->field_0x1020 != 2000000.0f &&
-            !(static_cast<u32>(static_cast<u8>(WORLD->current_level->reflection_range)) <=
-              object->ai_update_distance) &&
+            __builtin_expect(!(static_cast<u32>(static_cast<u8>(WORLD->current_level->reflection_range)) <=
+                               object->ai_update_distance),
+                             1) &&
             MatrixReflection(&matrix, carried->field_0x1087, carried->field_0x1020, WORLD->current_level->unknown_0cc,
                              &reflected))
             reflection = &reflected;
@@ -4346,14 +4348,15 @@ static void DrawParaphernalia(GameObject_s *object) {
         const u8 render_reflection = object->field_0x1088;
         f32 scale;
         bool show;
-        if (object->field_0xe37 != 0 || shield_config->field_0xf5 == 0 || !(object->timer_d28 > 0.0f)) {
+        if (object->field_0xe37 != 0 || __builtin_expect(shield_config->field_0xf5 == 0, 0) ||
+            !(object->timer_d28 > 0.0f)) {
             scale = object->field_0xd24;
             show = !(scale <= 0.0f);
         } else {
             scale = 1.0f;
             show = (GameTimer.update_count & 3) < 2;
         }
-        if (__builtin_expect(show != 0, 0)) {
+        if (show != 0) {
             i32 locator = shield_config->shield_locator;
             NUVEC scaling = {scale, scale, scale};
             NuMtxSetScale(&shield_matrix, &scaling);
@@ -4400,9 +4403,11 @@ static void DrawParaphernalia(GameObject_s *object) {
             if (model_id != -1 && WORLD->lev_objs[model_id].active) {
                 NuSpecialDrawAt(&WORLD->lev_objs[model_id].special, &communicate_matrix);
                 i32 reflection_id = LevelObject_GetReflection(model_id);
-                if (reflection_id != -1 && WORLD->lev_objs[reflection_id].active && render_reflection &&
-                    MatrixReflection(&communicate_matrix, object->field_0x1087, object->field_0x1020,
-                                     WORLD->current_level->unknown_0cc, &communicate_reflected)) {
+                if (reflection_id != -1 && __builtin_expect(WORLD->lev_objs[reflection_id].active != 0, 1) &&
+                    __builtin_expect(render_reflection != 0, 1) &&
+                    __builtin_expect(MatrixReflection(&communicate_matrix, object->field_0x1087, object->field_0x1020,
+                                                      WORLD->current_level->unknown_0cc, &communicate_reflected) != 0,
+                                     1)) {
                     NuRndrStartReflectionRender(0);
                     NuSpecialDrawAt(&WORLD->lev_objs[reflection_id].special, &communicate_reflected);
                     NuRndrEndReflectionRender();
@@ -4440,8 +4445,8 @@ static void DrawParaphernalia(GameObject_s *object) {
                               -1, joints, object->field_0x1088, object->field_0x1054, NULL, NULL, 1.0f, 1.0f);
     if (object->field_0x108e) {
         i32 locator = object->apiobj.character_data->game_character->helmet_locator;
-        if ((object->id == id_CHEWBACCA || object->id == id_WOOKIEE) && object->field_0x108e != 5 &&
-            object->field_0x108e != 6)
+        if ((object->id == id_CHEWBACCA || object->id == id_WOOKIEE) &&
+            __builtin_expect(object->field_0x108e != 5, 1) && object->field_0x108e != 6)
             locator = 9;
         DrawObjectOnCharacter(WORLD, object, object->field_0x108e + 0xf9, NULL, locator, -1, joints,
                               object->field_0x1088, object->field_0x1054, NULL, NULL, 1.0f, 1.0f);
@@ -4601,7 +4606,8 @@ static void DrawParaphernalia(GameObject_s *object) {
         const u8 render_reflection = object->field_0x1088;
         if (WORLD->lev_objs[0xf7].active) {
             const i32 locator = object->apiobj.character_data->game_character->hand_locators[0];
-            if (locator != -1 && object->apiobj.character_model->points_of_interest[locator] != NULL) {
+            if (__builtin_expect(locator != -1, 0) &&
+                object->apiobj.character_model->points_of_interest[locator] != NULL) {
                 NuMtxSetTranslation(&hand_matrix, reinterpret_cast<NUVEC *>(&joints[locator].m30));
                 Draw3DObjectMtx(NULL, 0xf7, &hand_matrix);
                 if (render_reflection && MatrixReflection(&hand_matrix, object->field_0x1087, object->field_0x1020,
@@ -4613,15 +4619,15 @@ static void DrawParaphernalia(GameObject_s *object) {
             }
         }
     }
-    if (object->torpedo != NULL && object->torpedo->count != 0)
+    if (__builtin_expect(object->torpedo != NULL, 1) && object->torpedo->count != 0)
         DrawTorpedos(object);
     config = object->apiobj.character_data->game_character;
     if (config->uses_weapon_action == 0) {
         Customiser_DrawAccessories(CharacterCustomiser, object, NULL);
         config = object->apiobj.character_data->game_character;
     }
-    if (__builtin_expect((config->flags_090 & 0x01000000) && object->field_0xd80 > 0.0f && object->field_0xd8c > 0.0f,
-                         1))
+    if (__builtin_expect((config->flags_090 & 0x01000000) != 0, 1) && object->field_0xd80 > 0.0f &&
+        object->field_0xd8c > 0.0f)
         Transform_DrawTarget(&object->force_glow_position,
                              (1.4f + 0.20000004768371582f * object->field_0xd80) * object->field_0xd8c,
                              0.4f + 0.6f * object->field_0xd80);

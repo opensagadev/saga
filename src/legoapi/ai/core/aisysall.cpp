@@ -12705,7 +12705,8 @@ void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *objec
     if (current == destination_connection &&
         (packet->current_route == 0xff ||
          ((static_cast<u64>(destination_connection->route_mask) >> packet->current_route) & 1) != 0)) {
-        if ((packet->path_info.flags & AIPATHINFO_FLAG_ON_PATH) == 0 || packet->movement_parameter == 0.0f) {
+        if (__builtin_expect(
+                (packet->path_info.flags & AIPATHINFO_FLAG_ON_PATH) == 0 || packet->movement_parameter == 0.0f, 1)) {
             packet->movement_stopping_distance = packet->fallback_stopping_distance;
             packet->movement_destination = packet->fallback_destination;
             return;
@@ -12795,7 +12796,7 @@ void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *objec
                         NuVecSub(&offset, &packet->left_diversion, &object->position);
                         i32 angle = NuAtan2D(offset.x, offset.z);
                         NuVecSub(&offset, &target, &object->position);
-                        if (__builtin_expect(NuAngSub(NuAtan2D(offset.x, offset.z), angle) < 0, 1)) {
+                        if (__builtin_expect(NuAngSub(NuAtan2D(offset.x, offset.z), angle) < 0, 0)) {
                             target.x = packet->left_diversion.x;
                             target.y = packet->left_diversion.y;
                             target.z = packet->left_diversion.z;
