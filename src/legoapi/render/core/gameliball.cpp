@@ -791,33 +791,6 @@ static void edptlcbSetScaleFactor(eduimenu_s *, eduiitem_s *item, u32);
 static void edptlcbSwitchTypeMenu(eduimenu_s *parent, eduiitem_s *, u32);
 static void edptlcbTestDetailMenu(eduimenu_s *parent, eduiitem_s *, u32);
 
-static __used__ __attribute__((noclone)) void eduiFntPrintExGeneric(void *font, int x, int y,
-                                                                                int alignment, char *format, ...)
-    __asm__("_ZL14eduiFntPrintExPviiiPcz");
-
-static __attribute__((noclone)) void eduiFntPrintExLeft(void *font, int x, int y, int alignment,
-                                                                  char *format, ...)
-    __asm__("_ZL14eduiFntPrintExPviiiPcz.constprop.67");
-
-static __attribute__((noclone)) void eduiFntPrintExCentre(void *font, int x, int y, int alignment,
-                                                                    char *format, ...)
-    __asm__("_ZL14eduiFntPrintExPviiiPcz.constprop.68");
-
-#if defined(__clang__)
-static void eduiFntPrintEx(void *font, int x, int y, int alignment, char *format, ...)
-    __asm__("eduiFntPrintExFormatted");
-#else
-static inline __attribute__((always_inline)) void eduiFntPrintEx(void *font, int x, int y, int alignment,
-                                                                 char *format, ...) {
-    if (__builtin_constant_p(alignment) && alignment == 16)
-        eduiFntPrintExLeft(font, x, y, alignment, format, __builtin_va_arg_pack());
-    else if (__builtin_constant_p(alignment) && alignment == 64)
-        eduiFntPrintExCentre(font, x, y, alignment, format, __builtin_va_arg_pack());
-    else
-        eduiFntPrintExGeneric(font, x, y, alignment, format, __builtin_va_arg_pack());
-}
-#endif
-
 static void edgraInit();
 static void edgraClose();
 static void edgraEnter();

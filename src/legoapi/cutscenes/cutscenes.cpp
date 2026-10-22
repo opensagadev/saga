@@ -429,41 +429,10 @@ extern "C" {
 #include <xmmintrin.h>
 #endif
 
-static __used__ __attribute__((noclone)) void eduiFntPrintExGeneric(void *font, int x, int y,
-                                                                                int alignment, char *format, ...)
-    __asm__("_ZL14eduiFntPrintExPviiiPcz");
-static __used__ void eduiFntPrintExGeneric(void *font, int x, int y, int alignment, char *format, ...);
-
-static __attribute__((noclone)) void eduiFntPrintExLeft(void *font, int x, int y, int alignment,
-                                                                  char *format, ...)
-    __asm__("_ZL14eduiFntPrintExPviiiPcz.constprop.67");
-
-static __attribute__((noclone)) void eduiFntPrintExCentre(void *font, int x, int y, int alignment,
-                                                                    char *format, ...)
-    __asm__("_ZL14eduiFntPrintExPviiiPcz.constprop.68");
-
-#if defined(__clang__)
-static void eduiFntPrintEx(void *font, int x, int y, int alignment, char *format, ...)
-    __asm__("eduiFntPrintExFormatted");
-#else
-static inline __attribute__((always_inline)) void eduiFntPrintEx(void *font, int x, int y, int alignment,
-                                                                 char *format, ...) {
-    if (__builtin_constant_p(alignment) && alignment == 16)
-        eduiFntPrintExLeft(font, x, y, alignment, format, __builtin_va_arg_pack());
-    else if (__builtin_constant_p(alignment) && alignment == 64)
-        eduiFntPrintExCentre(font, x, y, alignment, format, __builtin_va_arg_pack());
-    else
-        eduiFntPrintExGeneric(font, x, y, alignment, format, __builtin_va_arg_pack());
-}
-#endif
-
 extern "C" {
 __attribute__((force_align_arg_pointer)) static __used__ i32 eduicbRenderCheck(eduimenu_s *, eduiitem_s *item,
                                                                                    i32 x, i32 y, i32 width, i32);
 }
-
-static void eduiFntPrintExLeft(void *font, int x, int y, int, char *format, ...);
-static void eduiFntPrintExCentre(void *font, int x, int y, int, char *format, ...);
 
 extern EdInputContext * Input;
 
