@@ -4155,7 +4155,7 @@ void TurnCode(GameObject_s *object, i32 mode, GAMEPAD_s *pad) {
                     return;
                 }
             }
-            if (!(pad->input_magnitude > 0.0f)) {
+            if (__builtin_expect(!(pad->input_magnitude > 0.0f), 1)) {
                 return;
             }
 
@@ -4210,7 +4210,7 @@ void TurnCode(GameObject_s *object, i32 mode, GAMEPAD_s *pad) {
     const f32 half_duration = object->airborne_action_duration * 0.5f;
     const f32 quarter_duration = half_duration * 0.5f;
     f32 timer;
-    if ((object->field_0xe24 & 4) == 0) {
+    if (__builtin_expect((object->field_0xe24 & 4) == 0, 0)) {
         timer = object->context_animation_timer;
     } else {
         const f32 lean = static_cast<f32>(object->secondary_lean_angle) * (1.0f / 16384.0f);
@@ -4823,7 +4823,8 @@ static void PunchCode(GameObject_s *object, i32 pressed, i32 held, i32 require_t
             if (suppress_combo == 0 && static_cast<i8>(object->context_flags) >= 0 && object->combo_stage < 2 &&
                 object->combo_input_latched != 0 && object->attack_override != 6) {
                 SelectOpponent(object, 1.25f, punch_charge_gap, 1, 0);
-                if (require_target == 0 || object->force_target != NULL || object->blowup_target != NULL) {
+                if (__builtin_expect(
+                        require_target == 0 || object->force_target != NULL || object->blowup_target != NULL, 0)) {
                     i32 alternate_animations[4];
                     u8 combo_stage = object->combo_stage++;
                     if ((object->context_flags & 1) != 0) {
@@ -4855,7 +4856,8 @@ static void PunchCode(GameObject_s *object, i32 pressed, i32 held, i32 require_t
                             alternate_animations[0] != -1) {
                             for (i32 i = 0; i < 4; ++i) {
                                 i32 animation = object->queued_context_animation + alternate_animations[i];
-                                if (object->apiobj.character_model->model_data_b[animation] != NULL) {
+                                if (__builtin_expect(object->apiobj.character_model->model_data_b[animation] != NULL,
+                                                     1)) {
                                     object->context_animation = animation;
                                     break;
                                 }
@@ -4915,8 +4917,9 @@ static void PunchCode(GameObject_s *object, i32 pressed, i32 held, i32 require_t
         object->quick_shoot_timer -= FRAMETIME;
         return;
     }
-    if ((object->apiobj.field_0x27d == 0 || object->character_context != -1) &&
-        objInNetWaitContext(object, 0x26) == 0) {
+    if (__builtin_expect((object->apiobj.field_0x27d == 0 || object->character_context != -1) &&
+                             objInNetWaitContext(object, 0x26) == 0,
+                         0)) {
         return;
     }
     if (pressed == 0) {
@@ -4943,7 +4946,8 @@ static void PunchCode(GameObject_s *object, i32 pressed, i32 held, i32 require_t
             goto behind_attack;
         }
     } else {
-        if (!object->apiobj.player_controlled && object->attack_override == 0 && object->use_action != 5) {
+        if (__builtin_expect(
+                !object->apiobj.player_controlled && object->attack_override == 0 && object->use_action != 5, 0)) {
             return;
         }
     }
@@ -4996,7 +5000,7 @@ start_attack:
     if (require_target == 2 && object->force_target == NULL && object->blowup_target != NULL) {
         return;
     }
-    if (object->apiobj.character_model->model_data_b[object->context_animation] == NULL) {
+    if (__builtin_expect(object->apiobj.character_model->model_data_b[object->context_animation] == NULL, 0)) {
         return;
     }
     if (require_target != 0 && object->force_target == NULL && object->blowup_target == NULL) {
@@ -5016,15 +5020,15 @@ start_attack:
         }
         ResetAnimPacket(&object->apiobj.anim_packet, -1);
         if ((object->apiobj.character_data->game_character->flags_098[0] & 0x10) == 0) {
-            if ((AnimMiscFlags(object->apiobj.character_model, object->context_animation) & 4) != 0) {
-                PlaySfx(const_cast<char *>("WhipSwish"), &object->apiobj.collision_position);
-            } else {
+            if ((AnimMiscFlags(object->apiobj.character_model, object->context_animation) & 4) == 0) {
                 PlaySfx(const_cast<char *>("Swipe"), &object->apiobj.collision_position);
+            } else {
+                PlaySfx(const_cast<char *>("WhipSwish"), &object->apiobj.collision_position);
             }
         }
         if ((object->apiobj.character_data->game_character->flags_090 & 0x20) == 0) {
             bool weapon_out = true;
-            if ((object->field_0xe22 & 1) == 0) {
+            if (__builtin_expect((object->field_0xe22 & 1) == 0, 1)) {
                 weapon_out = object->field_0xe32 == 1;
             }
             object->weapon_out = weapon_out;
@@ -5156,7 +5160,17 @@ finished:
 static void BlockCode(GameObject_s *object, i32 pressed, i32 held, i32 jump_pressed, i32 allow_start) {
     if ((object->field_0xe22 & 1) != 0 && object->weapon_scale_state == 0)
         FindIncomingThreats(object);
-    if (object->character_context == 0xc) {
+    if (!(object->character_context == 0xc)) {
+        if (object->block_cooldown > 0.0f) {
+            object->block_cooldown -= FRAMETIME;
+            return;
+        }
+        if (!allow_start || !pressed || object->apiobj.field_0x27d == 0 ||
+            (CInfo[object->character_context].flags & 0x20) != 0 || (object->field_0xef8 & 2) == 0 ||
+            (object->incoming_bolt == NULL && object->incoming_melee == NULL && object->incoming_special == NULL &&
+             object->incoming_part == NULL))
+            return;
+    } else {
         GameObject_s *attacker = object->block_attacker;
         if (__builtin_expect(attacker != NULL, 1)) {
             if (jump_pressed != 0 && ComboJump(object))
@@ -5214,16 +5228,6 @@ static void BlockCode(GameObject_s *object, i32 pressed, i32 held, i32 jump_pres
             return;
         }
         if (!TouchHacks::ShouldBlock(*object))
-            return;
-    } else {
-        if (object->block_cooldown > 0.0f) {
-            object->block_cooldown -= FRAMETIME;
-            return;
-        }
-        if (!allow_start || !pressed || object->apiobj.field_0x27d == 0 ||
-            (CInfo[object->character_context].flags & 0x20) != 0 || (object->field_0xef8 & 2) == 0 ||
-            (object->incoming_bolt == NULL && object->incoming_melee == NULL && object->incoming_special == NULL &&
-             object->incoming_part == NULL))
             return;
     }
     if (!NewBlockAction(object)) {
@@ -5488,13 +5492,15 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
             context == 0x2d || context == 0xf || context == 0x27 || context == 0x28 || context == 0x59 ||
             context == 0x30 || context == 0x3d || context == 0x43 || context == 0x4a || context == 0x61 ||
             context == 0x4b) {
-            if (((object->pad_gamepad->allocated_5a & 4) != 0 || buttons_pressed != 0) &&
-                (object->field_0xe22 & GAMEOBJECT_E22_FLAG_WEAPON_ANIMATION) != 0 &&
-                object->weapon_scale_state == WEAPON_SCALE_IDLE && context != 6 && context != 7 && context != 18 &&
-                context != 27 && context != 29 && context != 13 && context != 14 && context != 46 &&
-                !(context == 0 && static_cast<u8>(object->action_movement_state - 3) < 2) &&
-                (object->field_0xe23 & 1) == 0 && (CInfo[context].flags & 0x4000000) == 0 &&
-                ((CInfo[context].flags & 0x8000000) == 0 || (object->jump_flags & 2) == 0) && context != 8) {
+            if (__builtin_expect(
+                    ((object->pad_gamepad->allocated_5a & 4) != 0 || buttons_pressed != 0) &&
+                        (object->field_0xe22 & GAMEOBJECT_E22_FLAG_WEAPON_ANIMATION) != 0 &&
+                        object->weapon_scale_state == WEAPON_SCALE_IDLE && context != 6 && context != 7 &&
+                        context != 18 && context != 27 && context != 29 && context != 13 && context != 14 &&
+                        context != 46 && !(context == 0 && static_cast<u8>(object->action_movement_state - 3) < 2) &&
+                        (object->field_0xe23 & 1) == 0 && (CInfo[context].flags & 0x4000000) == 0 &&
+                        ((CInfo[context].flags & 0x8000000) == 0 || (object->jump_flags & 2) == 0) && context != 8,
+                    1)) {
                 GAMECHARACTERDATA *data = GetGameCharacterData(object);
                 const i32 action =
                     data->field275_0x116 == 0 && (object->apiobj.character_data->model_flags & 0x80) != 0 ? 126 : 16;
@@ -5545,7 +5551,7 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
                 object->blocked_attack_stage = 0;
                 if ((object->apiobj.flags_low & 0x80) != 0)
                     Hint_SetComplete(0x5dd);
-            } else if (object->incoming_part != NULL) {
+            } else if (__builtin_expect(object->incoming_part != NULL, 0)) {
                 object->blocked_bolt = NULL;
                 object->blocked_part = object->incoming_part;
                 object->block_attacker = NULL;
@@ -6564,7 +6570,7 @@ void FindForcePushTarget(GameObject_s *object, i32 activate, i32 target_filter) 
 
     if ((object->pad_gamepad->allocated_5a & 0x10) != 0) {
         activate = 1;
-    } else if (!object->apiobj.player_controlled) {
+    } else if (__builtin_expect(!object->apiobj.player_controlled, 0)) {
         return;
     }
     if (object->apiobj.field_0x27d == 0) {
@@ -6604,7 +6610,7 @@ void FindForcePushTarget(GameObject_s *object, i32 activate, i32 target_filter) 
                     second_style = 0;
                 }
             } else if (best->apiobj.character_model->model_data_b[0x53] == NULL) {
-                if (target_special == 0)
+                if (__builtin_expect(target_special == 0, 0))
                     return;
                 choke_style = 0;
             }
@@ -6776,7 +6782,9 @@ void FindForcePushTarget(GameObject_s *object, i32 activate, i32 target_filter) 
 
         if ((object->field_0xe21 & 4) == 0) {
             FaceOpponent(object, NULL);
-            if ((object->field_0xe21 & 2) == 0) {
+            if ((object->field_0xe21 & 2) != 0) {
+                PlaySfx(const_cast<char *>("ForceMindTrick"), &object->apiobj.collision_position);
+            } else {
                 Player_ClearContext(best, 1);
                 Player_ResetContexts(reinterpret_cast<PLAYERPACKET_s *>(best->player_packet));
                 if ((object->field_0xe21 & 1) != 0) {
@@ -6801,8 +6809,6 @@ void FindForcePushTarget(GameObject_s *object, i32 activate, i32 target_filter) 
                 best->character_context = 0x1c;
                 FastWeaponIn(best, 0);
                 FaceOpponent(best, NULL);
-            } else {
-                PlaySfx(const_cast<char *>("ForceMindTrick"), &object->apiobj.collision_position);
             }
         }
         PlaySfx(const_cast<char *>("JForcePush"), &object->apiobj.collision_position);
@@ -7609,7 +7615,7 @@ static i32 ShootCode(GameObject_s *object, i32 pressed, i32 special_pressed, i32
     GameObject_s *target = NULL;
     GIZMOBLOWUP_s *blowup = NULL;
     if (object == Player[0]) {
-        if (nextShootTarget.Get() != NULL) {
+        if (__builtin_expect(nextShootTarget.Get() != NULL, 1)) {
             if (pressed != 0) {
                 target = nextShootTarget->GetCharacterObject();
                 if (object == Player[0] && nextShootTarget.Get() != NULL)
@@ -7696,12 +7702,15 @@ static i32 ShootCode(GameObject_s *object, i32 pressed, i32 special_pressed, i32
             if (weapon_mode == 2) {
                 SetWeaponOut(object);
             } else {
-                if (object->weapon_scale_state == 0 && object->apiobj.field_0x27d != 0 &&
-                    object->pad_gamepad->input_magnitude == 0.0f &&
-                    object->apiobj.character_model->model_data_b
-                            [data->uses_weapon_action == 0 && (character->model_flags & 0x80) != 0 ? 0x7f : 0x11] !=
-                        NULL &&
-                    (object->character_context == -1 || (CInfo[object->character_context].flags & 4) != 0))
+                if (__builtin_expect(
+                        object->weapon_scale_state == 0 && object->apiobj.field_0x27d != 0 &&
+                            object->pad_gamepad->input_magnitude == 0.0f &&
+                            object->apiobj.character_model
+                                    ->model_data_b[data->uses_weapon_action == 0 && (character->model_flags & 0x80) != 0
+                                                       ? 0x7f
+                                                       : 0x11] != NULL &&
+                            (object->character_context == -1 || (CInfo[object->character_context].flags & 4) != 0),
+                        1))
                     SlowWeaponOut(object);
                 else
                     FastWeaponOut(object, 1);
@@ -7843,7 +7852,7 @@ static i32 ShootCode(GameObject_s *object, i32 pressed, i32 special_pressed, i32
                     GameCam_NewShake(GameCam, 0.5f, 0.5f, 1.0f);
                 }
             }
-            if ((object->apiobj.character_data->game_character->flags_098[0] & 8) == 0) {
+            if (__builtin_expect((object->apiobj.character_data->game_character->flags_098[0] & 8) == 0, 0)) {
                 i32 flags = 3;
                 if (duration > 0.0f)
                     flags =
@@ -7883,7 +7892,7 @@ shoot_weapon_in:
         return 0;
     if ((object->pad_gamepad->allocated_5a & 4) == 0 && special_pressed == 0)
         return 0;
-    if ((object->field_0xe22 & 1) == 0 || object->weapon_scale_state != 0)
+    if (__builtin_expect((object->field_0xe22 & 1) == 0 || object->weapon_scale_state != 0, 0))
         return 0;
     if (object->character_context == 6 || object->character_context == 7 || object->character_context == 0x47 ||
         object->character_context == 0x46 || object->character_context == 0x0b || object->character_context == 0x2e)
@@ -7892,7 +7901,7 @@ shoot_weapon_in:
         return 0;
     if (object->character_context == 8)
         return 0;
-    if (object->character_context == 0x1b || object->character_context == 0x1d)
+    if (__builtin_expect(object->character_context == 0x1b || object->character_context == 0x1d, 0))
         return 0;
     if (TouchHacks::ShouldKeepWeaponOut(*object))
         return 0;

@@ -4592,7 +4592,7 @@ extern "C" void eduiMenuDestroyItems(eduimenu_s *menu) {
         const f32 baseline = NuQFntBaseline(edui_font);
         if (menu->title && menu->title[0]) {
             const i32 title_height = static_cast<i32>(font_height * 0.15625f);
-            if (!menu->child)
+            if (__builtin_expect(!menu->child, 0))
                 interact(x, y, menu->width, title_height, menu, NULL, cbInteractMenuTitle, 0x40, 0);
             rect(x << 4, y << 3, menu->width << 4, title_height << 3, 0x80000000, uimtls[ui_bgmtl]);
             font_set(edui_font);

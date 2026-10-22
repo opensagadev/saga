@@ -2342,12 +2342,12 @@ void Hub_DrawAreaStats(f32 phase, i32 area_index, i32 mode) {
         build_x = 0.20100002f;
     if ((flags & 0x800) != 0) {
         Hub_DrawImportantBrick(251, build_x, HUB_EPISODESUBTITLEY - 0.05f, phase, -1, -1);
-    } else if ((flags & 0x4000) != 0) {
+    } else if ((flags & 0x4000) == 0) {
+        Hub_DrawImportantBrick(211, -0.0f, HUB_EPISODESUBTITLEY + 0.05f, phase, -1, -1);
+    } else {
         const i32 gold_count =
             1 + (Game.area_save[area_index].true_hero_complete[0] || Game.area_save[area_index].true_hero_complete[1]);
         Hub_DrawImportantBrick(211, -0.20100002f, HUB_EPISODETITLEY, phase, gold_count, 2);
-    } else {
-        Hub_DrawImportantBrick(211, -0.0f, HUB_EPISODESUBTITLEY + 0.05f, phase, -1, -1);
     }
     if ((area->flags & 0x4000) == 0) {
         return;
@@ -3452,7 +3452,7 @@ static void DrawEpisodesMenu(i32 selected, f32 alpha) {
                 if (Game_AreaSave != NULL && Game_AreaSave[EDataList[episode].area_ids[0]].complete == 0)
                     opacity = 0.375f;
                 opacity = opacity * alpha;
-                if (episodesmode != 1 && episodestime < episodesduration)
+                if (__builtin_expect(episodesmode != 1 && episodestime < episodesduration, 1))
                     opacity = opacity * (episodestime / episodesduration);
                 Text3DEx(EpisodeNumerals[episode], x, y, 1.0f, 0.95f, 0.95f, 0.95f, 0, red, green, blue,
                          static_cast<i32>(128.0f * opacity));
@@ -3577,13 +3577,13 @@ void MenuUpdateEpisodes(MENU_s *) {
                 const i8 previous = i_episodes;
                 if (up && previous >= 3)
                     i_episodes -= 3;
-                else if (down && previous < 3)
+                else if (__builtin_expect(down && previous < 3, 0))
                     i_episodes += 3;
-                else if (left && previous % 3 > 0)
+                else if (__builtin_expect(left && previous % 3 > 0, 1))
                     --i_episodes;
                 else if (right && previous % 3 != 2)
                     ++i_episodes;
-                if (previous != i_episodes)
+                if (__builtin_expect(previous != i_episodes, 1))
                     GameAudio_PlaySfx(0x2f, NULL, 0, 0);
             }
             break;
@@ -3617,7 +3617,7 @@ void MenuUpdateEpisodes(MENU_s *) {
                         down = up = 0;
                     if (right && left)
                         right = left = 0;
-                    if (down_held && up_held)
+                    if (__builtin_expect(down_held && up_held, 1))
                         down_held = up_held = 0;
                     if (right_held && left_held)
                         right_held = left_held = 0;
@@ -3625,7 +3625,15 @@ void MenuUpdateEpisodes(MENU_s *) {
                     MenuRepeat(&down_held, &down, downrepeattime, downrepeatcount, 0.1f, FRAMETIME);
                     MenuRepeat(&left_held, &left, leftrepeattime, leftrepeatcount, 0.1f, FRAMETIME);
                     MenuRepeat(&right_held, &right, rightrepeattime, rightrepeatcount, 0.1f, FRAMETIME);
-                    if (__builtin_expect(!up, 0)) {
+                    if (__builtin_expect(up, 1)) {
+                        i32 next = previous - 7;
+                        if (__builtin_expect(next < 0, 0)) {
+                            next += (count / 7 + 1) * 7;
+                            if (next >= count)
+                                next -= 7;
+                        }
+                        i_clip[i_episodes] = next;
+                    } else {
                         if (down) {
                             i32 next = previous + 7;
                             if (next >= count) {
@@ -3649,19 +3657,11 @@ void MenuUpdateEpisodes(MENU_s *) {
                             const i32 next = row + column;
                             i_clip[i_episodes] = next < count ? next : row;
                         }
-                    } else {
-                        i32 next = previous - 7;
-                        if (__builtin_expect(next < 0, 0)) {
-                            next += (count / 7 + 1) * 7;
-                            if (next >= count)
-                                next -= 7;
-                        }
-                        i_clip[i_episodes] = next;
                     }
                 }
             }
             if (menu->input_activity && menu->confirm_pressed) {
-                if (__builtin_expect(menu->selected_item == i_clip[i_episodes], 0))
+                if (__builtin_expect(menu->selected_item == i_clip[i_episodes], 1))
                     confirm = true;
                 else
                     i_clip[i_episodes] = menu->selected_item;

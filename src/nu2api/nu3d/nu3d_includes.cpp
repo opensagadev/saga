@@ -5446,7 +5446,7 @@ void NuDynamicLight::computeWarpEffect(NuDynamicLight::RenderSet &set) {
     const NUVEC4 *source = set.corners;
     VuVec *destination = points;
     const NUVEC4 *end = source + 8;
-    while (source < end) {
+    while (__builtin_expect(source < end, 0)) {
         *destination++ = VuVec(source->x, source->y, source->z, source->w);
         ++source;
     }
@@ -7537,7 +7537,7 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint_EulerQuat(ani3_animheader_s *anim, f3
     i32 count = joint_count < anim->node_count ? joint_count : anim->node_count;
     const u8 *first_flags = node_flags + first_joint;
     for (const u8 *skip_flags = node_flags; skip_flags < first_flags; ++skip_flags) {
-        if (*skip_flags & 2) {
+        if (__builtin_expect(*skip_flags & 2 != 0, 1)) {
             SkipAni4V4Curve(curve_types[0], keys, scale_min);
             SkipAni4V4Curve(curve_types[1], keys, scale_min);
             SkipAni4V4Curve(curve_types[2], keys, scale_min);
@@ -7547,7 +7547,7 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint_EulerQuat(ani3_animheader_s *anim, f3
             SkipAni4V4Curve(curve_types[4], keys, scale_min);
             SkipAni4V4Curve(curve_types[5], keys, scale_min);
         }
-        if (*skip_flags & 8) {
+        if (__builtin_expect(*skip_flags & 8 != 0, 1)) {
             SkipAni4V4Curve(curve_types[6], keys, scale_min);
             SkipAni4V4Curve(curve_types[7], keys, scale_min);
             SkipAni4V4Curve(curve_types[8], keys, scale_min);
@@ -7627,7 +7627,7 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint_EulerQuat(ani3_animheader_s *anim, f3
 extern "C" __attribute__((optimize("O2"))) i32 ANI_SimpleAni3PlayerV4Joint(ani3_animheader_s *anim, f32 frame, nuanimbuff_s *buffer, i32 joint_count,
                                            i32 first_joint) {
     if ((anim->format_flags & ANI3_FORMAT_QUATERNION_ROTATION) != 0) {
-        if ((anim->format_flags & ANI3_FORMAT_QUATERNION_STORES_W) == 0) {
+        if (__builtin_expect((anim->format_flags & ANI3_FORMAT_QUATERNION_STORES_W) == 0, 1)) {
             return ANI_SimpleAni3PlayerV4Joint_Quat3(anim, frame, buffer, joint_count, first_joint);
         }
         return ANI_SimpleAni3PlayerV4Joint_Quat3W(anim, frame, buffer, joint_count, first_joint);
@@ -7653,7 +7653,7 @@ extern "C" __attribute__((optimize("O2"))) i32 ANI_SimpleAni3PlayerV4Joint(ani3_
             key = 0.0f;
         }
         i32 whole_key;
-        if (!(last_key <= key)) {
+        if (__builtin_expect(!(last_key <= key), 1)) {
             whole_key = static_cast<i32>(key);
             fraction = key - static_cast<f32>(whole_key);
         } else {
@@ -7707,7 +7707,7 @@ extern "C" __attribute__((optimize("O2"))) i32 ANI_SimpleAni3PlayerV4Joint(ani3_
                 ++skip_scale_min;
             }
         }
-        if (flags & 8) {
+        if (__builtin_expect(flags & 8 != 0, 1)) {
             if (skip_types[6] < 16) {
                 keys += 4;
                 ++skip_scale_min;
@@ -7780,7 +7780,7 @@ __attribute__((optimize("O2"))) i32 ANI_SimpleAni3PlayerV4Joint_Blend_Quat3(ani3
     u8 *keys = anim->keys + (whole / 4) * key_stride;
     const i32 count = joint_count < anim->node_count ? joint_count : anim->node_count;
     const u16 *curve_types = anim->curve_types;
-    if (first_joint != 0)
+    if (__builtin_expect(first_joint != 0, 1))
         root_translation = NULL;
     const u8 *first_flags = node_flags + first_joint;
     const u8 *end_flags = first_flags + count;
@@ -8062,7 +8062,7 @@ extern "C" __attribute__((optimize("O2"))) i32 ANI_SimpleAni3PlayerV4Joint_Blend
                         root->x = root->y = root->z = 0.0f;
                         root = NULL;
                     }
-                } else if (group == 1) {
+                } else if (__builtin_expect(group == 1, 0)) {
                     output[0] *= inverse_blend;
                     output[3] = output[3] * inverse_blend + blend;
                     output[1] *= inverse_blend;
@@ -8177,7 +8177,7 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint_Blend(ani3_animheader_s *anim, f32 fr
     // Advance all packed stream cursors to the first requested joint.
     for (i32 joint = 0; joint < first_joint; ++joint) {
         const u8 flags = anim->node_flags[joint];
-        if ((flags & NUANIMBUFF_JOINT_TRANSLATION) != 0) {
+        if (__builtin_expect((flags & NUANIMBUFF_JOINT_TRANSLATION) != 0, 1)) {
             SkipAni4V4Curve(curve_types[0], keys, scale_min);
             SkipAni4V4Curve(curve_types[1], keys, scale_min);
             SkipAni4V4Curve(curve_types[2], keys, scale_min);
@@ -8247,7 +8247,7 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint_Blend(ani3_animheader_s *anim, f32 fr
                 group_values[0] *= inverse_blend;
                 group_values[1] *= inverse_blend;
                 group_values[2] *= inverse_blend;
-                if (root != NULL) {
+                if (__builtin_expect(root != NULL, 0)) {
                     root->y = 0.0f;
                     root->x = 0.0f;
                     root->z = 0.0f;
@@ -10672,7 +10672,7 @@ extern "C" void NuTexAnimEnvProc(nutexanimenv_s *env) {
                 material->shader_desc.diffuse_map_tex_id[0] = *texture_id & 0x7fff;
                 env->instruction_index = next_instruction;
                 env->wait_remaining += env->wait_base;
-                if (env->wait_random != 0)
+                if (__builtin_expect(env->wait_random != 0, 1))
                     env->wait_remaining += NuRand(&texanim_rand) % env->wait_random;
                 if (env->wait_remaining < 0)
                     env->wait_remaining = 0;
@@ -10688,7 +10688,7 @@ extern "C" void NuTexAnimEnvProc(nutexanimenv_s *env) {
                 material->shader_desc.diffuse_map_tex_id[0] = *texture_id & 0x7fff;
                 env->instruction_index = next_instruction;
                 env->wait_remaining += env->wait_base;
-                if (env->wait_random != 0)
+                if (__builtin_expect(env->wait_random != 0, 0))
                     env->wait_remaining += NuRand(&texanim_rand) % env->wait_random;
                 if (env->wait_remaining < 0)
                     env->wait_remaining = 0;
@@ -10798,7 +10798,7 @@ extern "C" void NuTexAnimEnvProc(nutexanimenv_s *env) {
                 }
                 continue;
             case 16:
-                if (env->wait_remaining < 0)
+                if (__builtin_expect(env->wait_remaining < 0, 0))
                     env->wait_remaining = 0;
                 return;
             case 17:
@@ -15421,11 +15421,13 @@ static void roomRecursive(NUGSCN *scene, NUFRUSTRUM *frustum, i16 room_id, i16 p
                 NUVEC portal_minimum;
                 NUVEC portal_maximum;
                 computePortalExtents(&portal->vertices, &portal->vertex_count, &portal_maximum, &portal_minimum);
-                if (!(frustum->minimum.x < portal_maximum.x) || frustum->minimum.y >= portal_maximum.y ||
-                    portal_minimum.x >= frustum->maximum.x || portal_minimum.y >= frustum->maximum.y) {
+                if (__builtin_expect(
+                        !(frustum->minimum.x < portal_maximum.x) || frustum->minimum.y >= portal_maximum.y ||
+                            portal_minimum.x >= frustum->maximum.x || portal_minimum.y >= frustum->maximum.y,
+                        0)) {
                     continue;
                 }
-                if (portal_minimum.x < frustum->minimum.x)
+                if (__builtin_expect(portal_minimum.x < frustum->minimum.x, 0))
                     portal_minimum.x = frustum->minimum.x;
                 if (portal_minimum.y < frustum->minimum.y)
                     portal_minimum.y = frustum->minimum.y;
@@ -16474,8 +16476,8 @@ extern "C" {
             NuVec4MtxTransformVU0(&vertices[4], &vertices[4], &clip_matrix);
             f32 width_scale = 1.0f / vertices[4].w;
             NuVec4ScaleXYZVU0(&vertices[4], &vertices[4], width_scale);
-            if (laser->length > remaining) {
-                if (remaining < 0.0f)
+            if (__builtin_expect(laser->length > remaining, 1)) {
+                if (__builtin_expect(remaining < 0.0f, 0))
                     width_scale *= laser->end_width_ratio;
                 else
                     width_scale += (laser->end_width_ratio * width_scale - width_scale) * (laser->length - remaining) /
@@ -16512,7 +16514,7 @@ extern "C" {
                 width_scale = 1.0f / vertices[5].w;
                 NuVec4ScaleXYZVU0(&vertices[5], &vertices[5], width_scale);
                 if (laser->length > remaining) {
-                    if (remaining < 0.0f)
+                    if (__builtin_expect(remaining < 0.0f, 0))
                         width_scale *= laser->end_width_ratio;
                     else
                         width_scale += (width_scale * laser->end_width_ratio - width_scale) *
@@ -16869,12 +16871,7 @@ void DisplayListLinkDynamicMtls(void) {
         nudisplaylistitem_s *mtl_item = mtl->display_list->mtl_item;
 
         {
-            if (sp->items == mtl_item) {
-                sp->items = static_cast<nudisplaylistitem_s *>(mtl_item[7].next);
-                mtl_item[7].type = kItemType_Terminator;
-                mtl_item[7].id = kItemId_Ret;
-                mtl_item[7].next = nullptr;
-            } else {
+            if (!(sp->items == mtl_item)) {
                 for (i32 j = 0; j < sp->nmtls; ++j) {
                     nudisplaylistitem_s *prev =
                         mgr->dyn_mtl_dlist.mtls[sp->mtl_first + j]->display_list->mtl_item;
@@ -16886,6 +16883,11 @@ void DisplayListLinkDynamicMtls(void) {
                         break;
                     }
                 }
+            } else {
+                sp->items = static_cast<nudisplaylistitem_s *>(mtl_item[7].next);
+                mtl_item[7].type = kItemType_Terminator;
+                mtl_item[7].id = kItemId_Ret;
+                mtl_item[7].next = nullptr;
             }
         }
 
@@ -17059,7 +17061,7 @@ void DisplayListLinkDynamicMtls(void) {
                     prev = cur;
                     cur = cur->sys_next;
                 }
-                if (prev == nullptr) {
+                if (__builtin_expect(prev == nullptr, 0)) {
                     sp->sys_next = mgr->sort_list;
                     mgr->sort_list = sp;
                 } else {
@@ -17097,7 +17099,7 @@ void DisplayListLinkDynamicMtls(void) {
             }
             for (i32 i = 0; i < mgr->dyn_mtl_dlist.nsort_pris; ++i) {
                 nusortpri_s *sp = &mgr->dyn_mtl_dlist.sort_pris[i];
-                if (sp->nmtls == 0)
+                if (__builtin_expect(sp->nmtls == 0, 0))
                     continue;
                 for (u32 k = 0; k < total; ++k) {
                     if (MtlSortKey(mgr->dyn_mtl_dlist.mtls[k]) == sp->sort_pri) {
@@ -20735,7 +20737,7 @@ void DrawAlphaImage(i32 rows, i32 cols, numtl_s *material, i32 use_pixel_offsets
                     f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;
                     if (angle < parameters->direction_near_angle) {
                         brightness += 128.0f * parameters->direction_far_scale;
-                    } else if (!(angle > parameters->direction_far_angle)) {
+                    } else if (__builtin_expect(!(angle > parameters->direction_far_angle), 1)) {
                         f32 blend;
                         if (parameters->direction_bias == 1.0f)
                             blend = 1.0f - (angle - parameters->direction_near_angle) /
