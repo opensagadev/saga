@@ -354,7 +354,7 @@ i32 NuNetEmu::SendTo(void *data, i32 size, nunetaddr_s *address, i32) {
         }
     } else {
         f32 random = NuRandFloat();
-        if (field_34 > random) {
+        if (__builtin_expect(field_34 > random, 1)) {
             return size;
         }
     }

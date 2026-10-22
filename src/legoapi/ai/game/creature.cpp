@@ -1393,15 +1393,17 @@ void Players_Init(void) {
         i16 *list;
         i16 list0;
 
-        if (FreePlay == 0 && (Hub_UsePlayerList == 0 || HUB_ADATA == NULL || HUB_ADATA != WORLD->area) &&
-            (UsePlayerList != 1 ||
-             (PlayerList[0] != -1 && (apicharsys->playermodelids[PlayerList[0]] == -1 ||
-                                      (PlayerList[1] != -1 && apicharsys->playermodelids[PlayerList[1]] == -1))))) {
-            list = Area_PlayerIDList;
-            list0 = Area_PlayerIDList[0];
-        } else {
+        if (__builtin_expect(
+                !(FreePlay == 0 && (Hub_UsePlayerList == 0 || HUB_ADATA == NULL || HUB_ADATA != WORLD->area) &&
+                  (UsePlayerList != 1 || (PlayerList[0] != -1 &&
+                                          (apicharsys->playermodelids[PlayerList[0]] == -1 ||
+                                           (PlayerList[1] != -1 && apicharsys->playermodelids[PlayerList[1]] == -1))))),
+                0)) {
             list = PlayerList;
             list0 = PlayerList[0];
+        } else {
+            list = Area_PlayerIDList;
+            list0 = Area_PlayerIDList[0];
         }
 
         if (LevelChangesInArea == 0 && UsePlayerList != 0 && PlayerProgress[0].active == 0 &&
@@ -1506,7 +1508,7 @@ void Players_Init(void) {
     if (Player[0] != NULL) {
         Player[0]->coinpacket = CoinPacket;
         Player[0]->coinpacket->lastcoin = LEGOOBJ_DEFAULTLASTCOIN;
-        if (Area == last_area) {
+        if (__builtin_expect(Area == last_area, 0)) {
             Player[0]->coinpacket->coins = PlayerProgress[0].coins;
         } else {
             Player[0]->coinpacket->coins = 0;
@@ -1515,7 +1517,7 @@ void Players_Init(void) {
         memcpy(BackUpPlayers, Player[0], 0x439 * 4);
     }
 
-    if (Player[1] != NULL) {
+    if (__builtin_expect(Player[1] != NULL, 1)) {
         Player[1]->coinpacket = CoinPacket + 1;
         Player[1]->coinpacket->lastcoin = LEGOOBJ_DEFAULTLASTCOIN;
         if (Area == last_area) {
@@ -1565,7 +1567,7 @@ void ResetAICreature(GameObject_s *object, AISYS_s *system) {
 
     PreResetCode(object);
     PostResetCode(object);
-    if (system == NULL) {
+    if (__builtin_expect(system == NULL, 0)) {
         return;
     }
 
@@ -1600,7 +1602,7 @@ void ResetAICreature(GameObject_s *object, AISYS_s *system) {
 
     i32 angle;
     AIPATHINFO *path_info;
-    if (!(object->ai_respawn_count != 0 && object->ai.respawn_locator != NULL)) {
+    if (__builtin_expect(!(object->ai_respawn_count != 0 && object->ai.respawn_locator != NULL), 1)) {
         angle = creature.y_rot;
         NuVecRotateY(&offset, &offset, angle);
         NuVecAdd(&object->apiobj.position, &offset, &creature.pos);
@@ -1843,10 +1845,10 @@ i32 NewPlayerCharacter(GameObject_s *object, i32 id, i32 old_id, i32) {
     ResetMiniAnimPacket(&object->mini_animation, -1);
     object->weapon_scale = (object->field_0xe22 & 1) != 0 ? 1.0f : 0.0f;
     object->field_0xe32 = 0;
-    if (on_surface)
-        object->ground_contact_grace_timer = 0.2f;
-    else
+    if (!(on_surface))
         object->apiobj.velocity.y = velocity.y;
+    else
+        object->ground_contact_grace_timer = 0.2f;
     if (context == 0x33 && StartSlide(object, 0)) {
         object->apiobj.velocity.x = velocity.x;
         object->apiobj.velocity.z = velocity.z;
@@ -1905,7 +1907,7 @@ void ResetPlayer(GameObject_s *obj, i32 reset_moves, nuvec_s *position, i32 snap
         if (position == NULL) {
             position = Player_StartPos(obj);
         }
-        if (position != NULL) {
+        if (__builtin_expect(position != NULL, 1)) {
             obj->apiobj.position = *position;
         }
 
@@ -2178,7 +2180,7 @@ void KeepOnScreen(GameObject_s *object) {
         return;
     }
 
-    if (__builtin_expect(VehicleArea == 0, 1)) {
+    if (__builtin_expect(VehicleArea == 0, 0)) {
         GameObject_s *other_player = object == Player[0] ? Player[1] : object == Player[1] ? Player[0] : NULL;
         if (other_player != NULL &&
             (static_cast<i8>(other_player->apiobj.flags_low) >= 0 || other_player->character_context == 0x2b))
@@ -3342,7 +3344,7 @@ void AnimatePlayer(GameObject_s *object) {
             movement_speed = object->apiobj.character_data->game_character->walk_speed;
     } else if (__builtin_expect((object->apiobj.character_data->game_character->flags_090 &
                                  GAMECHARACTER_FLAG_ANIMATION_SPEED_FROM_VELOCITY) != 0,
-                                0)) {
+                                1)) {
         const f32 forward_speed = object->apiobj.velocity.x * object->facing_direction.x +
                                   object->apiobj.velocity.z * object->facing_direction.z;
         movement_speed = !(forward_speed >= 0.0f) ? 0.0f : forward_speed;
@@ -3489,7 +3491,9 @@ i32 DrawGameObjectsProcess() {
             if (object->tertiary_lean_angle != 0)
                 NuMtxPreRotateY(&matrix, object->tertiary_lean_angle);
             ApplyExtraRotation(object, &matrix);
-            if (object->field_0x1086 != 4 && (object->character_context == 0x23 || object->character_context == 0x24)) {
+            if (__builtin_expect(object->field_0x1086 != 4 &&
+                                     (object->character_context == 0x23 || object->character_context == 0x24),
+                                 1)) {
                 const f32 distance =
                     object->apiobj.character_data->collision_radius * object->apiobj.character_data->model_scale * 7.5f;
                 f32 offset = 1.0f - drop_scale;
@@ -3856,12 +3860,14 @@ i32 AvailableToPlayer(u32 character_flags, i32 weapon_action, i32 context, i32 r
             i32 model = apicharsys->playermodelids[index];
             if (model == -1 || FreePlay == 0 || (apicharsys->models[model].flags & 1) == 0)
                 continue;
-            if (!((Game_CharacterSave != NULL && (Game_CharacterSave[index] & 1) != 0) ||
-                  (static_cast<i32>(GCDataList[index].flags_090) < 0 && Cheats_CheckFlags(0x100) != 0)))
+            if (__builtin_expect(
+                    !((Game_CharacterSave != NULL && (Game_CharacterSave[index] & 1) != 0) ||
+                      (static_cast<i32>(GCDataList[index].flags_090) < 0 && Cheats_CheckFlags(0x100) != 0)),
+                    0))
                 continue;
             if (character_flags != 0) {
                 if ((CDataList[index].model_flags & character_flags) == character_flags) {
-                    if (require_all == 0)
+                    if (__builtin_expect(require_all == 0, 1))
                         return 1;
                 } else if (require_all != 0) {
                     continue;
@@ -3922,7 +3928,7 @@ u32 AdjustLayerBits(u32 mask, GameObject_s *object) {
             mask = (mask & ~SpecialLayer[17].mask) | SpecialLayer[18].mask;
             if ((mask & SpecialLayer[8].mask) != 0)
                 mask = (mask & ~SpecialLayer[8].mask) | SpecialLayer[14].mask;
-            else if ((mask & SpecialLayer[9].mask) != 0)
+            else if (__builtin_expect((mask & SpecialLayer[9].mask) != 0, 0))
                 mask = (mask & ~SpecialLayer[9].mask) | SpecialLayer[15].mask;
             else if ((mask & SpecialLayer[10].mask) != 0)
                 mask = (mask & ~SpecialLayer[10].mask) | SpecialLayer[16].mask;
@@ -3983,7 +3989,7 @@ u32 AdjustLayerBits(u32 mask, GameObject_s *object) {
             mask |= 0xc0;
         data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
     }
-    if (__builtin_expect(data->ride_layers_off != 0 && object->field_0xcc0 != NULL && object->field_0x7a5 == 0x3b, 0))
+    if (data->ride_layers_off != 0 && object->field_0xcc0 != NULL && object->field_0x7a5 == 0x3b)
         mask &= ~data->ride_layers_off;
     return mask;
 }

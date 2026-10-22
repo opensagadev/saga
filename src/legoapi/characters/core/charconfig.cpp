@@ -3019,7 +3019,8 @@ static i32 CharConfig(i32 character_id, char *directory, char *filename, VARIPTR
     charconfig.layer_scratch = layers;
     memset(effects, 0, sizeof(effects));
     GAMECHARACTERDATA_s *data = charconfig.runtime;
-    if (data->layers == NULL && (character->model_flags & 1) == 0 && arena != NULL && arena_end != NULL) {
+    if (__builtin_expect(
+            data->layers == NULL && (character->model_flags & 1) == 0 && arena != NULL && arena_end != NULL, 0)) {
         data->layers = layers;
         data->layer_count = 0;
         charconfig.flags |= 2;

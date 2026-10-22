@@ -276,7 +276,7 @@ void Grabber_Reset(WORLDINFO_s *world) {
         Grab_grabber->action_switch = NULL;
     handle = GizmoFindByName(world->gizmo_sys, obstacle_gizmotype_id, (char *)"pad_n");
     Grab_grabber->direction_switches[0] = handle ? (GIZOBSTACLE_s *)handle->object : NULL;
-    if (Grab_grabber->direction_switches[0] && !Grab_grabber->direction_switches[0]->anim_set)
+    if (__builtin_expect(Grab_grabber->direction_switches[0] && !Grab_grabber->direction_switches[0]->anim_set, 1))
         Grab_grabber->direction_switches[0] = NULL;
     handle = GizmoFindByName(world->gizmo_sys, obstacle_gizmotype_id, (char *)"pad_s");
     if (handle)
@@ -319,7 +319,7 @@ void Grabber_Reset(WORLDINFO_s *world) {
     f32 height = GameShadow(NULL, &query, 5.0f, -1);
     if (height != 2000000.0f) {
         i32 surface = ShadowInfo();
-        if ((u32)surface <= 31 && (TerSurface[surface].flags & 0x200)) {
+        if (__builtin_expect((u32)surface <= 31 && (TerSurface[surface].flags & 0x200), 1)) {
             g->shadow_height = height;
             FindAnglesZX(&ShadNorm, &g->shadow_z_angle, &g->shadow_x_angle);
             g->floor_height = (TerSurface[surface].flags & 2) ? height : 2000000.0f;

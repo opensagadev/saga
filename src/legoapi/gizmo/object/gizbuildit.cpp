@@ -1522,28 +1522,31 @@ void BuildIt_MoveCode(GameObject_s *player) {
             return;
         if (ObjLandReady(player) == 0 && objInNetWaitContext(player, LEGOCONTEXT_BUILDIT) == 0)
             return;
-        if (player->touch_task != NULL && player->touch_task->GetHashId().value != MechTouchTaskBuildIt::HashId.value)
+        if (__builtin_expect(player->touch_task != NULL &&
+                                 player->touch_task->GetHashId().value != MechTouchTaskBuildIt::HashId.value,
+                             0))
             return;
         GIZBUILDIT_s *buildit = nextBuildit.Get() != NULL ? nextBuildit->GetGizBuildit() : NULL;
         if (buildit == NULL)
             buildit = GizBuildIt_FindNearest(WORLD, player, BUILDIT_FIND_AVAILABLE, ShadowMode);
-        if (objInNetWaitContext(player, LEGOCONTEXT_BUILDIT) != 0) {
+        if (__builtin_expect(objInNetWaitContext(player, LEGOCONTEXT_BUILDIT) != 0, 1)) {
             player->context_animation_timer -= FRAMETIME;
             if (player->context_animation_timer <= 0.0f) {
                 player->build_context = -1;
                 player->big_jump_data = NULL;
             }
         }
-        if (buildit == NULL || !player->apiobj.player_controlled)
+        if (__builtin_expect(buildit == NULL || !player->apiobj.player_controlled, 0))
             return;
         if (player->apiobj.field_0x27d != 0 && (buildit->state_flags & 4) != 0) {
             GizBuildItPushAwayFromStart(player, buildit);
         }
         GizBuildIt_SetHeadTarget(buildit, player);
         buildit->availability_flags |= GIZBUILDIT_AVAILABILITY_INTERACTING;
-        if ((player->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) != 0 ||
-            (objInNetWaitContext(player, LEGOCONTEXT_BUILDIT) != 0 &&
-             (player->pad_gamepad->buttons_held & GAMEPAD_SPECIAL) != 0)) {
+        if (__builtin_expect((player->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) != 0 ||
+                                 (objInNetWaitContext(player, LEGOCONTEXT_BUILDIT) != 0 &&
+                                  (player->pad_gamepad->buttons_held & GAMEPAD_SPECIAL) != 0),
+                             1)) {
             if (GizBuildIt_CanStartBuildingFn != NULL && GizBuildIt_CanStartBuildingFn(buildit, player) == 0)
                 return;
             nextBuildit = MechWeakPtr<MechObjectInterface, 4>();
@@ -1584,7 +1587,7 @@ void BuildIt_MoveCode(GameObject_s *player) {
         player->context_animation_timer = 0.2f;
     } else {
         player->context_animation_timer -= FRAMETIME;
-        if (player->context_animation_timer <= 0.0f) {
+        if (__builtin_expect(player->context_animation_timer <= 0.0f, 0)) {
             player->build_context = -1;
             return;
         }

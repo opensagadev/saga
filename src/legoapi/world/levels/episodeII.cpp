@@ -475,7 +475,7 @@ void UpdatePaintPuzzle(WORLDINFO_s *world) {
                         randpaints[0] = qrand() / 21846;
                         do {
                             randpaints[1] = qrand() / 21846;
-                        } while (randpaints[1] == randpaints[0]);
+                        } while (__builtin_expect(randpaints[1] == randpaints[0], 0));
                         randpaints[2] = 3 - randpaints[0] - randpaints[1];
                         PAINTPUZZLESTAGE = 0;
                         painttry = 0;

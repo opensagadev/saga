@@ -606,7 +606,7 @@ static i32 *GizTurrets_GetBestBoltTarget(GIZMOSET *set, float *result_distance, 
     const u16 target_deg_far = TargetDeg_Far;
     const f32 target_dist_near2 = TargetDist_Near2;
     const f32 target_dist_mid2 = TargetDist_Mid2;
-    if (bolt_type == NULL || set == NULL) {
+    if (__builtin_expect(bolt_type == NULL || set == NULL, 0)) {
         return NULL;
     }
 
@@ -634,13 +634,14 @@ static i32 *GizTurrets_GetBestBoltTarget(GIZMOSET *set, float *result_distance, 
         }
         if (!turret->visible)
             continue;
-        if (!turret->active)
+        if (__builtin_expect(!turret->active, 1))
             continue;
         if ((turret->flags & 0x30) != 0 || turret->primary_anim_obj == NULL)
             continue;
         NUVEC *target_position = NuSpecialGetDrawPos(&turret->primary_anim_obj->special);
-        if (target_position == NULL || target_position->x < min_x || target_position->x > max_x ||
-            target_position->z < min_z || target_position->z > max_z) {
+        if (__builtin_expect(target_position == NULL || target_position->x < min_x || target_position->x > max_x ||
+                                 target_position->z < min_z || target_position->z > max_z,
+                             1)) {
             continue;
         }
 
@@ -1195,8 +1196,9 @@ i32 GizTurrets_Hit(void *world, GIZTURRET_s *turret, nuvec_s *, i32 player_index
     if (damage != -1) {
         // Health is stored as a byte and tested signed after wrapping.
         turret->field_0x12e = static_cast<u8>(static_cast<u32>(turret->field_0x12e) - static_cast<u32>(damage));
-        if (static_cast<i8>(turret->field_0x12e) > 0) {
-            if (player_index != -1 && static_cast<i8>(Player[player_index]->apiobj.field_0x1f8) < 0) {
+        if (__builtin_expect(static_cast<i8>(turret->field_0x12e) > 0, 1)) {
+            if (__builtin_expect(player_index != -1 && static_cast<i8>(Player[player_index]->apiobj.field_0x1f8) < 0,
+                                 1)) {
                 NewBuzz(Player[player_index]->pad_gamepad->pad, 0.1f, 0);
             }
             return 1;
@@ -1373,7 +1375,7 @@ void GizTurrets_OpponentSelection(GIZTURRETSYS_s *system, i32 goody_count, APIOB
                 }
             }
 
-            if ((turret->behavior_flags & 0x10) == 0) {
+            if (__builtin_expect((turret->behavior_flags & 0x10) == 0, 0)) {
                 if ((turret->behavior_flags & 8) != 0) {
                     if (selected != NULL) {
                         const i8 selected_flags = static_cast<i8>(selected->apiobj.flags_low);
@@ -1387,7 +1389,7 @@ void GizTurrets_OpponentSelection(GIZTURRETSYS_s *system, i32 goody_count, APIOB
                             }
                         }
                     }
-                } else if (distance >= selected_distance) {
+                } else if (__builtin_expect(distance >= selected_distance, 0)) {
                     continue;
                 }
             } else {

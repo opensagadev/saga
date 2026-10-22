@@ -4973,7 +4973,7 @@ __used__ static i32 Action_AttackOpponent(AISYS *sys, AISCRIPTPROCESS *processor
                 packet->movement_instruction_parameter = AIParamToFloat(processor, value + 10);
             } else if ((value = NuStrIStr(params[index], "range")) != NULL) {
                 packet->movement_instruction_parameter = AIParamToFloat(processor, value + 6);
-            } else if (NuStrICmp(params[index], "jediGoodie_attack") == 0) {
+            } else if (__builtin_expect(NuStrICmp(params[index], "jediGoodie_attack") == 0, 1)) {
                 processor->action_data_2 = 1;
             } else if ((value = NuStrIStr(params[index], "attack_override")) != NULL) {
                 char *name = value + 16;
@@ -5015,12 +5015,12 @@ __used__ static i32 Action_AttackOpponent(AISYS *sys, AISCRIPTPROCESS *processor
             NuVecDistSqr(&opponent->apiobj.position, &packet->owner->apiobj.position, &difference);
         if (object->use_one_at_once) {
             APIOBJECT *attack_opponent = static_cast<APIOBJECT *>(object->ai.opponent);
-            if (!oneAtOnce_CanAttack(object, attack_opponent->objptr)) {
-                packet->movement_instruction_parameter = oneAtOnce_GetHoldRange(object);
-                processor->action_data_1 |= 2;
-            } else {
+            if (!(!oneAtOnce_CanAttack(object, attack_opponent->objptr))) {
                 packet->movement_instruction_parameter = 0.0f;
                 processor->action_data_1 &= static_cast<u8>(~2u);
+            } else {
+                packet->movement_instruction_parameter = oneAtOnce_GetHoldRange(object);
+                processor->action_data_1 |= 2;
             }
         }
 
@@ -5030,12 +5030,12 @@ __used__ static i32 Action_AttackOpponent(AISYS *sys, AISCRIPTPROCESS *processor
                 AIMoveInstruction(packet, &opponent->ai.last_path_position, packet->mover_height,
                                   &opponent->ai.path_info, AIPACKET_MOVEMENT_RETREAT, range);
                 packet->goal_speed_mode = 0;
-            } else if (distance_squared <= (range + aitol) * (range + aitol)) {
-                packet->movement_look_target = &opponent->apiobj.position;
-            } else {
+            } else if (distance_squared > (range + aitol) * (range + aitol)) {
                 AIMoveInstruction(packet, &opponent->ai.last_path_position, packet->mover_height,
                                   &opponent->ai.path_info, AIPACKET_MOVEMENT_TO_DESTINATION, range);
                 packet->goal_speed_mode = 0;
+            } else {
+                packet->movement_look_target = &opponent->apiobj.position;
             }
         } else {
             const f32 range = packet->movement_instruction_parameter + opponent->ai.mover_height + packet->mover_height;
@@ -5193,7 +5193,7 @@ static i32 Action_SnapToSockPosition(AISYS *, AISCRIPTPROCESS *processor, AIPACK
     } else {
         SetSockPostion(WORLD->sock_sys, &sock_position, sock_index, 0, 0.0f);
     }
-    if (sock_position.location.sock == -1)
+    if (__builtin_expect(sock_position.location.sock == -1, 0))
         return 1;
     MoveSockPosition(WORLD->sock_sys, &sock_position, distance, &sock_position);
     f32 random_x = NuRandFloat();
@@ -5240,7 +5240,7 @@ static i32 Action_SnapToSockPosition(AISYS *, AISCRIPTPROCESS *processor, AIPACK
             InitSurfaceInfo(object);
             SetObjOnSurface(object, 0);
         }
-        if (party == 0)
+        if (__builtin_expect(party == 0, 0))
             break;
     }
     return 1;
@@ -6835,12 +6835,12 @@ __used__ static i32 Action_AddGameMsgCount(AISYS *sys, AISCRIPTPROCESS *processo
 
             for (i32 index = 0; index < param_4; ++index) {
                 if (NuStrICmp("mypos", params[index]) == 0) {
-                    if (object != NULL) {
+                    if (__builtin_expect(object != NULL, 1)) {
                         position = &object->apiobj.collision_position;
                     }
                 } else {
                     char *value = NuStrIStr(params[index], "total=");
-                    if (value != NULL) {
+                    if (__builtin_expect(value != NULL, 1)) {
                         total = static_cast<i32>(AIParamToFloat(processor, value + 6));
                     } else {
                         value = NuStrIStr(params[index], "count=");
@@ -7474,7 +7474,7 @@ static i32 Action_SelectRandomSpline(AISYS *, AISCRIPTPROCESS *, AIPACKET *, cha
             }
         }
         if (count != 0) {
-            if (unused) {
+            if (__builtin_expect(unused != 0, 1)) {
                 GameObject_s *object = Obj;
                 for (i32 index = 0; index < HIGHGAMEOBJECT; ++index, ++object) {
                     if ((object->apiobj.field_0x1f8 & 0x1001) == 0x1001 && object->apiobj.field_0x287 == 0 &&
@@ -9498,14 +9498,15 @@ __used__ static i32 Action_EngageOpponent(AISYS *sys, AISCRIPTPROCESS *processor
         }
         if (opponent == NULL) {
             APIOBJECT *api_opponent = static_cast<APIOBJECT *>(packet->opponent);
-            if (api_opponent == NULL || api_opponent->ai == NULL || api_opponent->objptr == NULL)
+            if (__builtin_expect(api_opponent == NULL || api_opponent->ai == NULL || api_opponent->objptr == NULL, 1))
                 return 0;
             opponent = api_opponent->objptr;
         }
         object->field_0xef8 |= 0x20;
-        if ((opponent->apiobj.field_0x1f8 & 0x1001) != 0x1001 || opponent->apiobj.field_0x287 != 0 ||
-            opponent->character_context == 0x2b ||
-            (opponent->apiobj.player_controlled && opponent->spawn_protection_timer > 1.5f))
+        if (__builtin_expect((opponent->apiobj.field_0x1f8 & 0x1001) != 0x1001 || opponent->apiobj.field_0x287 != 0 ||
+                                 opponent->character_context == 0x2b ||
+                                 (opponent->apiobj.player_controlled && opponent->spawn_protection_timer > 1.5f),
+                             0))
             return 0;
 
         NUVEC difference;
@@ -9718,7 +9719,7 @@ __used__ static i32 Action_SetSide(AISYS *sys, AISCRIPTPROCESS *processor, AIPAC
                 if (local_type != 0xff) {
                     const i32 global_type = LevelCharacterGlobalIDFn(local_type);
                     if (global_type != -1) {
-                        if (type_count < 10) {
+                        if (__builtin_expect(type_count < 10, 1)) {
                             type_ids[type_count++] = global_type;
                         }
                     }
@@ -11097,7 +11098,7 @@ i32 Action_CameraCut(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKET_s *
     NUVEC *target;
     if (target_locator != NULL) {
         AILOCATOR *locator = AIPathFindLocator(system, target_locator);
-        if (locator == NULL)
+        if (__builtin_expect(locator == NULL, 0))
             return 1;
         target = &locator->position;
     } else if (target_character != NULL) {
@@ -11117,8 +11118,9 @@ i32 Action_CameraCut(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKET_s *
         if (target == NULL)
             return 1;
     } else {
-        if (target_position.x == 1000000000.0f || target_position.y == 1000000000.0f ||
-            target_position.z == 1000000000.0f)
+        if (__builtin_expect(target_position.x == 1000000000.0f || target_position.y == 1000000000.0f ||
+                                 target_position.z == 1000000000.0f,
+                             1))
             return 1;
         target = &target_position;
     }

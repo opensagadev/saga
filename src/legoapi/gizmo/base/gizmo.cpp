@@ -492,7 +492,7 @@ void RegisterGizmoTypes(VARIPTR *buffer, VARIPTR *buffer_end, REGISTERGIZMOTYPEF
                 }
                 NuStrICmp(addgizmo->prefix, gizmotypes->types[i].prefix);
                 i = i + 1;
-            } while (i != n);
+            } while (__builtin_expect(i != n, 0));
         }
 
     copy_data:
@@ -539,7 +539,7 @@ void RegisterGizmoTypes(VARIPTR *buffer, VARIPTR *buffer_end, REGISTERGIZMOTYPEF
                     void *pvVar5 = gizmo->fns.allocate_progress_data_fn(buffer, buffer_end);
                     pvVar3[i].void_ptr = pvVar5;
                     i = i + 1;
-                    if (gizmotypes->unknown <= i)
+                    if (__builtin_expect(gizmotypes->unknown <= i, 0))
                         break;
                     pvVar3 = gizmo_buffer;
                 }
@@ -635,7 +635,7 @@ void GizmoSysClearLevelProgress(void *unknown, i32 type_id) {
 
 void GizmoSysStoreProgress(GIZMOSYS_s *system, void *world, i32 progress_index) {
     GizmoSysClearLevelProgress(world, progress_index);
-    if (gizmotypes == NULL || system == NULL)
+    if (__builtin_expect(gizmotypes == NULL || system == NULL, 1))
         return;
     GIZMOTYPE *type = gizmotypes->types;
     GIZMOSET *set = system->sets;

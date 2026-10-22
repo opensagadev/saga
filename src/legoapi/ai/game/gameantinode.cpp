@@ -241,7 +241,7 @@ GAMEANTINODE_s *GameAntinode_UpdateAntiNodeUsingData(GAMEANTINODESYS_s *system, 
             f32 radius = node->radius;
             if (node->shape == 1)
                 radius = node->extent_x > node->extent_z ? node->extent_x : node->extent_z;
-            else if (node->shape == 2)
+            else if (__builtin_expect(node->shape == 2, 0))
                 radius = NuFsqrt(node->extent_x * node->extent_x + node->extent_z * node->extent_z);
 
             // Unlike registration, updates use the enclosing radius only for grid coverage.

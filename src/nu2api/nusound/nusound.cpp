@@ -887,13 +887,13 @@ void NuSoundSystem::Update(f32 frametime) {
 NuSoundVoice *NuSoundSystem::CreateVoice(NuSoundSource *source, bool loop) {
     NuSoundVoice *voice;
     if (!SourceRequiresDecoder(source)) {
-        if (!source->IsStreamOpen()) {
+        if (__builtin_expect(!source->IsStreamOpen(), 1)) {
             return NULL;
         }
         NuSoundStreamDesc *desc = source->GetStreamDesc();
         NuSoundVoiceFactory *factory = factory_list.GetFactory(desc->GetDecodedDataFormat());
         voice = factory->CreateVoice(source, loop);
-        if (voice == NULL) {
+        if (__builtin_expect(voice == NULL, 1)) {
             return NULL;
         }
     } else {

@@ -534,20 +534,20 @@ void MenuDrawOptions(MENU_s *menu) {
     dme_sy = menu->item_scale;
     GameDrawMenuEntry(menu, text);
 
-    if (GAMEDEMO == 0) {
+    if (__builtin_expect(GAMEDEMO == 0, 1)) {
         sprintf(text, "%s: %s", TTab[tWIDESCREEN], TTab[TempOptions.field11_0xb != 0 ? tON : tOFF]);
         dme_sy = menu->item_scale;
         GameDrawMenuEntry(menu, text);
     }
 
-    if (memcmp(&TempOptions, &Game.options_save, sizeof(TempOptions)) != 0) {
+    if (__builtin_expect(memcmp(&TempOptions, &Game.options_save, sizeof(TempOptions)) == 0, 0)) {
+        NuStrCpy(text, TTab[tBACK]);
+    } else {
         if (menu->selected_item != menu->draw_item && menu_flash != 0) {
             text[0] = '\0';
         } else {
             NuStrCpy(text, TTab[tACCEPT]);
         }
-    } else {
-        NuStrCpy(text, TTab[tBACK]);
     }
     dme_sy = menu->item_scale;
     GameDrawMenuEntry(menu, text);

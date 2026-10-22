@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 86.58296,
+    "fuzzy_match_percent": 86.694916,
     "total_code": "4722419",
-    "matched_code": "709586",
-    "matched_code_percent": 15.0259,
+    "matched_code": "709589",
+    "matched_code_percent": 15.025965,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
@@ -15765,7 +15765,7 @@
           "address": 4475776,
           "offset": 3585808,
           "size": 1000,
-          "match_percent": 70.51477
+          "match_percent": 83.96625
         },
         {
           "name": "_ZN24MechTouchTaskPlannedGoTo17GenerateWaypointsEv",
@@ -16859,7 +16859,7 @@
           "address": 4515696,
           "offset": 3625728,
           "size": 1372,
-          "match_percent": 83.64669
+          "match_percent": 84.088326
         },
         {
           "name": "_ZN36MechInputTouchGestureBasedController20StartJumpUsingAIPathERK17JumpTriggerPacketi",
@@ -16875,7 +16875,7 @@
           "address": 4517632,
           "offset": 3627664,
           "size": 565,
-          "match_percent": 56.02222
+          "match_percent": 97.207405
         },
         {
           "name": "_ZN36MechInputTouchGestureBasedController7OnSwipeER12GameObject_sR11TouchHolderi",
@@ -17018,7 +17018,7 @@
           "address": 5246592,
           "offset": 4356624,
           "size": 602,
-          "match_percent": 73.69678
+          "match_percent": 75.4129
         },
         {
           "name": "_ZN35MechInputTouchGestureTrackingSystem24UnregisterGestureTrackerER28MechInputTouchGestureTracker",
@@ -20416,7 +20416,7 @@
           "address": 4547248,
           "offset": 3657280,
           "size": 695,
-          "match_percent": 58.605095
+          "match_percent": 59.337578
         },
         {
           "name": "_ZN20MechTouchUITexButton7ProcessEf",
@@ -20672,7 +20672,7 @@
           "address": 4557696,
           "offset": 3667728,
           "size": 1052,
-          "match_percent": 81.435
+          "match_percent": 90.47
         },
         {
           "name": "_ZN22MechTouchUIPauseButton6RenderEv",
@@ -28438,7 +28438,7 @@
           "address": 1618000,
           "offset": 728032,
           "size": 1470,
-          "match_percent": 79.60059
+          "match_percent": 93.80473
         },
         {
           "name": "_ZL21Action_AnimTimeRandomP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -28470,7 +28470,7 @@
           "address": 1620544,
           "offset": 730576,
           "size": 1718,
-          "match_percent": 84.73333
+          "match_percent": 93.207405
         },
         {
           "name": "_ZL23Action_GoToOriginalPathP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -29182,7 +29182,7 @@
           "address": 1643984,
           "offset": 754016,
           "size": 765,
-          "match_percent": 75.5
+          "match_percent": 91.64737
         },
         {
           "name": "_ZL23Action_SetObstacleToEndP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -29310,7 +29310,7 @@
           "address": 1652000,
           "offset": 762032,
           "size": 714,
-          "match_percent": 59.84577
+          "match_percent": 95.96517
         },
         {
           "name": "_ZL33Condition_RandomMapCharsAvailableP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
@@ -29726,7 +29726,7 @@
           "address": 1684160,
           "offset": 794192,
           "size": 2968,
-          "match_percent": 77.47676
+          "match_percent": 92.904045
         },
         {
           "name": "_ZL17Action_ProbeDroidP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -30022,7 +30022,7 @@
           "address": 1709328,
           "offset": 819360,
           "size": 2451,
-          "match_percent": 84.37847
+          "match_percent": 94.03646
         },
         {
           "name": "_Z21LocalGetRandomLocatorPP11AILOCATOR_sifP7nuvec_sfiff",
@@ -30046,7 +30046,7 @@
           "address": 1713520,
           "offset": 823552,
           "size": 6967,
-          "match_percent": 88.56453
+          "match_percent": 88.63354
         },
         {
           "name": "_Z23GameAIScriptAddLevelSfxP11WORLDINFO_sP11nulisthdr_s",
@@ -33811,7 +33811,7 @@
           "address": 5435776,
           "offset": 4545808,
           "size": 896,
-          "match_percent": 73.394066
+          "match_percent": 79.669495
         },
         {
           "name": "_ZN12NetPredictor15SerialiseObjectER8EdStreamP7NetPeerPK7EdClassPvR14ReplicatorDataPs",
@@ -34139,7 +34139,7 @@
           "address": 5445936,
           "offset": 4555968,
           "size": 810,
-          "match_percent": 74.50952
+          "match_percent": 84.09048
         },
         {
           "name": "_ZN20NetworkObjectManager11NetPeerPush13FlushMessagesEv",
@@ -34227,7 +34227,7 @@
           "address": 5450000,
           "offset": 4560032,
           "size": 755,
-          "match_percent": 73.25481
+          "match_percent": 80.62019
         },
         {
           "name": "_ZN20NetworkObjectManager22CalcReplicatorDataSizeEP13NetReplicatorPK7EdClassRiS5_",
@@ -35701,7 +35701,7 @@
           "address": 2416064,
           "offset": 1526096,
           "size": 1013,
-          "match_percent": 84.47642
+          "match_percent": 85.89151
         },
         {
           "name": "_Z14GetTakeOverPosP12GameObject_sP7nuvec_s",
@@ -36735,7 +36735,7 @@
           "address": 5232400,
           "offset": 4342432,
           "size": 449,
-          "match_percent": 63.46281
+          "match_percent": 70.89256
         },
         {
           "name": "_Z30ReStoreStatusTakeOverObjectSysi",
@@ -36950,7 +36950,7 @@
           "address": 5191168,
           "offset": 4301200,
           "size": 1059,
-          "match_percent": 84.95279
+          "match_percent": 85.16738
         },
         {
           "name": "_Z12WeaponInCodeP12GameObject_s",
@@ -37014,7 +37014,7 @@
           "address": 5194096,
           "offset": 4304128,
           "size": 711,
-          "match_percent": 71.552795
+          "match_percent": 92.496895
         }
       ]
     },
@@ -37148,7 +37148,7 @@
           "address": 5168304,
           "offset": 4278336,
           "size": 2012,
-          "match_percent": 90.010155
+          "match_percent": 91.380714
         },
         {
           "name": "_Z12ObjLandReadyP12GameObject_s",
@@ -37379,7 +37379,7 @@
           "address": 5208176,
           "offset": 4318208,
           "size": 631,
-          "match_percent": 61.925674
+          "match_percent": 62.567566
         },
         {
           "name": "_Z26ResetSinglePushBlockHeightP11WORLDINFO_sP11pushblock_si",
@@ -37395,7 +37395,7 @@
           "address": 5208992,
           "offset": 4319024,
           "size": 615,
-          "match_percent": 66.78195
+          "match_percent": 67.99248
         },
         {
           "name": "_Z10MoveBlocksP11WORLDINFO_sP11pushblock_siP7nuvec_s",
@@ -41574,7 +41574,7 @@
           "address": 1538768,
           "offset": 648800,
           "size": 495,
-          "match_percent": 56.507812
+          "match_percent": 99.84375
         },
         {
           "name": "_ZL12AI_AddGizmosP10GIZMOSYS_siPvS1_",
@@ -41734,7 +41734,7 @@
           "address": 1553088,
           "offset": 663120,
           "size": 1352,
-          "match_percent": 78.55307
+          "match_percent": 79.614525
         },
         {
           "name": "_Z14CheckPosAIAreaP8AIAREA_sP7nuvec_sf",
@@ -41766,7 +41766,7 @@
           "address": 1555232,
           "offset": 665264,
           "size": 537,
-          "match_percent": 94.163795
+          "match_percent": 94.42242
         },
         {
           "name": "_Z14SetSpecialMoveP12GameObject_sP12AIPATHNODE_sS2_c",
@@ -41790,7 +41790,7 @@
           "address": 1555920,
           "offset": 665952,
           "size": 150,
-          "match_percent": 99.71698
+          "match_percent": 100.0
         },
         {
           "name": "_Z25AIPathCnxControlSysCreateP9variptr_uS0_i",
@@ -41806,7 +41806,7 @@
           "address": 1556320,
           "offset": 666352,
           "size": 686,
-          "match_percent": 86.82208
+          "match_percent": 86.91411
         },
         {
           "name": "_Z25AIPathCnxControllerCreateP21AIPATHCNXCONTROLSYS_sP7AISYS_sP8AIPATH_sPcS5_iS5_ii",
@@ -41814,7 +41814,7 @@
           "address": 1557008,
           "offset": 667040,
           "size": 824,
-          "match_percent": 78.068184
+          "match_percent": 77.50455
         },
         {
           "name": "_Z26AIPathCnxControllerDestroyP21AIPATHCNXCONTROLSYS_sP21AIPATHCNXCONTROLLER_s",
@@ -41910,7 +41910,7 @@
           "address": 1575472,
           "offset": 685504,
           "size": 2528,
-          "match_percent": 89.422104
+          "match_percent": 89.76993
         },
         {
           "name": "_Z16AISysGetPathPos2P7AISYS_sP7nuvec_sP12AIPATHINFO_sS2_P8AIPATH_si",
@@ -42290,7 +42290,7 @@
           "address": 1041024,
           "offset": 151056,
           "size": 1719,
-          "match_percent": 74.190605
+          "match_percent": 78.46409
         },
         {
           "name": "_Z16ResetPlayerMovesP12GameObject_s",
@@ -42306,7 +42306,7 @@
           "address": 1043088,
           "offset": 153120,
           "size": 1561,
-          "match_percent": 72.138725
+          "match_percent": 76.05492
         },
         {
           "name": "_Z16ResetAICreaturesP7AISYS_s",
@@ -42330,7 +42330,7 @@
           "address": 1045808,
           "offset": 155840,
           "size": 1760,
-          "match_percent": 84.64616
+          "match_percent": 85.07692
         },
         {
           "name": "_Z11ResetPlayerP12GameObject_siP7nuvec_si",
@@ -42338,7 +42338,7 @@
           "address": 1047568,
           "offset": 157600,
           "size": 2198,
-          "match_percent": 88.25966
+          "match_percent": 88.270386
         },
         {
           "name": "_Z22SetPlayerGroupPositionfff",
@@ -42362,7 +42362,7 @@
           "address": 1050496,
           "offset": 160528,
           "size": 2970,
-          "match_percent": 85.066986
+          "match_percent": 87.19458
         },
         {
           "name": "_Z16MovePlayerSplineP12GameObject_s",
@@ -42394,7 +42394,7 @@
           "address": 1070800,
           "offset": 180832,
           "size": 996,
-          "match_percent": 62.415524
+          "match_percent": 67.83105
         },
         {
           "name": "_Z22DrawGameObjectsProcessv",
@@ -42402,7 +42402,7 @@
           "address": 1071808,
           "offset": 181840,
           "size": 7204,
-          "match_percent": 96.955505
+          "match_percent": 96.97813
         },
         {
           "name": "_Z16AnakinGreenSabreP12GameObject_s",
@@ -42458,7 +42458,7 @@
           "address": 1085200,
           "offset": 195232,
           "size": 4312,
-          "match_percent": 91.77101
+          "match_percent": 92.29245
         },
         {
           "name": "_Z20GetOtherActivePlayerP12GameObject_s",
@@ -42474,7 +42474,7 @@
           "address": 1089600,
           "offset": 199632,
           "size": 1295,
-          "match_percent": 62.40994
+          "match_percent": 64.32919
         },
         {
           "name": "_Z11FixUpLayersv",
@@ -42601,7 +42601,7 @@
           "address": 4906016,
           "offset": 4016048,
           "size": 500,
-          "match_percent": 69.26619
+          "match_percent": 69.98561
         },
         {
           "name": "_Z27GameAntinode_Debug_DrawGridP11WORLDINFO_s",
@@ -43022,7 +43022,7 @@
           "address": 5103312,
           "offset": 4213344,
           "size": 331,
-          "match_percent": 50.961166
+          "match_percent": 52.029125
         },
         {
           "name": "_Z10ChatterSfxP12GameObject_sif",
@@ -45327,7 +45327,7 @@
           "address": 4625328,
           "offset": 3735360,
           "size": 1633,
-          "match_percent": 88.988266
+          "match_percent": 89.0
         },
         {
           "name": "_Z23CharConfig_ConfigureAlliP12nufpcomjmp_s",
@@ -46070,7 +46070,7 @@
           "address": 2312672,
           "offset": 1422704,
           "size": 1070,
-          "match_percent": 77.193184
+          "match_percent": 77.943184
         },
         {
           "name": "_Z16ChrisAnakinCInitv",
@@ -46174,7 +46174,7 @@
           "address": 2332176,
           "offset": 1442208,
           "size": 464,
-          "match_percent": 64.25714
+          "match_percent": 64.457146
         },
         {
           "name": "_Z15SpaceAudioPointv",
@@ -49997,7 +49997,7 @@
           "address": 4405712,
           "offset": 3515744,
           "size": 954,
-          "match_percent": 71.47203
+          "match_percent": 71.66434
         },
         {
           "name": "NuGCutSceneFixUpExtra",
@@ -50701,7 +50701,7 @@
           "address": 4439520,
           "offset": 3549552,
           "size": 2000,
-          "match_percent": 86.22624
+          "match_percent": 86.285065
         }
       ]
     },
@@ -51442,7 +51442,7 @@
           "address": 4935936,
           "offset": 4045968,
           "size": 1120,
-          "match_percent": 80.47664
+          "match_percent": 80.60125
         },
         {
           "name": "_Z14ProcessGizFlowP9GIZFLOW_sf",
@@ -51727,7 +51727,7 @@
           "address": 4912112,
           "offset": 4022144,
           "size": 719,
-          "match_percent": 71.7844
+          "match_percent": 74.729355
         },
         {
           "name": "_Z14CreateGizmoSysPvP9variptr_uS1_",
@@ -51767,7 +51767,7 @@
           "address": 4913632,
           "offset": 4023664,
           "size": 317,
-          "match_percent": 47.072166
+          "match_percent": 61.649483
         },
         {
           "name": "_Z13GizmoSysResetP10GIZMOSYS_sPvi",
@@ -52420,7 +52420,7 @@
           "address": 5055840,
           "offset": 4165872,
           "size": 1298,
-          "match_percent": 81.42905
+          "match_percent": 87.10891
         }
       ]
     },
@@ -52787,7 +52787,7 @@
           "address": 4959808,
           "offset": 4069840,
           "size": 683,
-          "match_percent": 67.8
+          "match_percent": 72.2875
         },
         {
           "name": "_Z23GizmoBlowupUpdateMatrixP13GIZMOBLOWUP_s",
@@ -52827,7 +52827,7 @@
           "address": 4963248,
           "offset": 4073280,
           "size": 495,
-          "match_percent": 67.51667
+          "match_percent": 79.2
         },
         {
           "name": "_Z20GizmoBlowup_FindTypePcP11WORLDINFO_s",
@@ -52835,7 +52835,7 @@
           "address": 4963744,
           "offset": 4073776,
           "size": 147,
-          "match_percent": 100.0
+          "match_percent": 99.71698
         },
         {
           "name": "_Z16gizmoblowup_LoadPvS_.part.5",
@@ -52843,7 +52843,7 @@
           "address": 4963904,
           "offset": 4073936,
           "size": 4728,
-          "match_percent": 84.417816
+          "match_percent": 84.46978
         },
         {
           "name": "_Z16gizmoblowup_LoadPvS_",
@@ -52867,7 +52867,7 @@
           "address": 4969584,
           "offset": 4079616,
           "size": 1021,
-          "match_percent": 73.07265
+          "match_percent": 88.55556
         },
         {
           "name": "_Z21GetLevelExBlowupFlagsv",
@@ -52915,7 +52915,7 @@
           "address": 4972752,
           "offset": 4082784,
           "size": 1456,
-          "match_percent": 88.83442
+          "match_percent": 91.376625
         },
         {
           "name": "_Z25GizmoBlowupCheckProximityP11WORLDINFO_sP12GameObject_s",
@@ -53354,7 +53354,7 @@
           "address": 1994080,
           "offset": 1104112,
           "size": 342,
-          "match_percent": 48.185566
+          "match_percent": 61.072166
         },
         {
           "name": "_Z21GizmoPickups_SetOnOffv",
@@ -53656,7 +53656,7 @@
           "address": 5016608,
           "offset": 4126640,
           "size": 420,
-          "match_percent": 54.19608
+          "match_percent": 56.166668
         },
         {
           "name": "_Z24GizSpinner_GetOutputNameP7GIZMO_si",
@@ -53736,7 +53736,7 @@
           "address": 5028608,
           "offset": 4138640,
           "size": 619,
-          "match_percent": 58.944786
+          "match_percent": 65.21472
         },
         {
           "name": "_Z15GizSpinner_SpinP12GIZSPINNER_si",
@@ -54173,7 +54173,7 @@
           "address": 4978160,
           "offset": 4088192,
           "size": 961,
-          "match_percent": 84.17778
+          "match_percent": 85.41778
         },
         {
           "name": "_ZL33GizmoPickups_AllocateProgressDataP9variptr_uS0_",
@@ -54397,7 +54397,7 @@
           "address": 4988928,
           "offset": 4098960,
           "size": 1047,
-          "match_percent": 80.48485
+          "match_percent": 81.01515
         },
         {
           "name": "_Z21SpecialMiniKits_ResetP11WORLDINFO_s",
@@ -54675,7 +54675,7 @@
           "address": 4890816,
           "offset": 4000848,
           "size": 1109,
-          "match_percent": 85.0
+          "match_percent": 89.60166
         },
         {
           "name": "_ZL27Gizobstacle_ReadAnimSetDataP13GAMEANIMOBJ_sh",
@@ -55680,7 +55680,7 @@
           "address": 1904720,
           "offset": 1014752,
           "size": 1008,
-          "match_percent": 85.099525
+          "match_percent": 91.81991
         }
       ]
     },
@@ -57280,7 +57280,7 @@
           "address": 1868528,
           "offset": 978560,
           "size": 1455,
-          "match_percent": 83.47108
+          "match_percent": 83.98071
         },
         {
           "name": "_Z17GizForce_ResetLOSP12GameObject_s",
@@ -57671,7 +57671,7 @@
           "address": 5001536,
           "offset": 4111568,
           "size": 821,
-          "match_percent": 72.21782
+          "match_percent": 80.514854
         },
         {
           "name": "_Z21GizTurret_FindNearestP14GIZTURRETSYS_sP7nuvec_sP12GameObject_sPfi",
@@ -57703,7 +57703,7 @@
           "address": 5002848,
           "offset": 4112880,
           "size": 936,
-          "match_percent": 83.41081
+          "match_percent": 87.36216
         },
         {
           "name": "_ZL18GizTurrets_BoltHitPvS_S_P7nuvec_sifS1_S1_P6BOLT_sjPh",
@@ -57735,7 +57735,7 @@
           "address": 5005424,
           "offset": 4115456,
           "size": 1169,
-          "match_percent": 80.654366
+          "match_percent": 90.03691
         },
         {
           "name": "_ZN11GIZTURRET_s24ClearMechObjectInterfaceEv",
@@ -58961,7 +58961,7 @@
           "address": 5093232,
           "offset": 4203264,
           "size": 1034,
-          "match_percent": 81.94007
+          "match_percent": 89.134834
         },
         {
           "name": "_Z23Collection_CreateMasterPcPsP12COLLECTION_sif",
@@ -58993,7 +58993,7 @@
           "address": 5096800,
           "offset": 4206832,
           "size": 305,
-          "match_percent": 50.674156
+          "match_percent": 63.13483
         },
         {
           "name": "_Z14Collection_Goti",
@@ -59144,7 +59144,7 @@
           "address": 1935216,
           "offset": 1045248,
           "size": 329,
-          "match_percent": 42.677082
+          "match_percent": 58.197918
         },
         {
           "name": "_Z28Batarang_GetObjectFromCharIDi",
@@ -59614,7 +59614,7 @@
           "address": 4722016,
           "offset": 3832048,
           "size": 623,
-          "match_percent": 63.392857
+          "match_percent": 83.03571
         },
         {
           "name": "_Z24Bolt_ObjTargetPosYAdjustP12GameObject_s",
@@ -60518,7 +60518,7 @@
           "address": 5124912,
           "offset": 4234944,
           "size": 816,
-          "match_percent": 79.12844
+          "match_percent": 80.20642
         },
         {
           "name": "_Z10DrawRippleP13ripple_node_s",
@@ -60724,7 +60724,7 @@
           "address": 1248096,
           "offset": 358128,
           "size": 998,
-          "match_percent": 69.851166
+          "match_percent": 70.2
         },
         {
           "name": "_Z18CreatureCrate_StopP6PART_s",
@@ -60764,7 +60764,7 @@
           "address": 1250624,
           "offset": 360656,
           "size": 3364,
-          "match_percent": 37.156418
+          "match_percent": 37.196526
         },
         {
           "name": "_Z18CollideGameObjectsP11WORLDINFO_s",
@@ -60948,7 +60948,7 @@
           "address": 1295136,
           "offset": 405168,
           "size": 1587,
-          "match_percent": 72.76989
+          "match_percent": 73.01136
         },
         {
           "name": "_Z21ClearLastSafeTakeOverP12GameObject_s",
@@ -61394,7 +61394,7 @@
           "address": 2272848,
           "offset": 1382880,
           "size": 1293,
-          "match_percent": 81.7218
+          "match_percent": 82.81203
         },
         {
           "name": "_ZL12Grabber_DropP9GRABBER_sP7nuvec_s.isra.4",
@@ -62585,7 +62585,7 @@
           "address": 4297200,
           "offset": 3407232,
           "size": 6707,
-          "match_percent": 97.13407
+          "match_percent": 97.54417
         },
         {
           "name": "_Z22edpartDetermineNearestf",
@@ -62665,7 +62665,7 @@
           "address": 4310272,
           "offset": 3420304,
           "size": 1592,
-          "match_percent": 67.09697
+          "match_percent": 69.19697
         },
         {
           "name": "_ZL26edpartFileSaveEffectsLevelP10eduimenu_sP10eduiitem_sj",
@@ -62673,7 +62673,7 @@
           "address": 4311872,
           "offset": 3421904,
           "size": 978,
-          "match_percent": 73.57789
+          "match_percent": 74.69347
         },
         {
           "name": "_ZL28edpartFileSaveEffectsGeneralP10eduimenu_sP10eduiitem_sj",
@@ -62681,7 +62681,7 @@
           "address": 4312864,
           "offset": 3422896,
           "size": 978,
-          "match_percent": 73.57789
+          "match_percent": 74.69347
         },
         {
           "name": "_Z25edpartLookupObjectInScenePcP8nugscn_s",
@@ -62961,7 +62961,7 @@
           "address": 4327280,
           "offset": 3437312,
           "size": 1388,
-          "match_percent": 80.29121
+          "match_percent": 85.70879
         },
         {
           "name": "edpartLoadPage",
@@ -63931,7 +63931,7 @@
           "address": 5145728,
           "offset": 4255760,
           "size": 1526,
-          "match_percent": 89.54259
+          "match_percent": 90.914825
         }
       ]
     },
@@ -64448,7 +64448,7 @@
           "address": 1314512,
           "offset": 424544,
           "size": 1150,
-          "match_percent": 77.831894
+          "match_percent": 82.02155
         },
         {
           "name": "_Z16DrawMeleeTargetsPsPcPfi",
@@ -64885,7 +64885,7 @@
           "address": 4350048,
           "offset": 3460080,
           "size": 1045,
-          "match_percent": 69.520164
+          "match_percent": 72.314514
         },
         {
           "name": "_Z13MenuEnterLoadP6MENU_s",
@@ -65493,7 +65493,7 @@
           "address": 4376336,
           "offset": 3486368,
           "size": 2474,
-          "match_percent": 90.998245
+          "match_percent": 91.82777
         },
         {
           "name": "_Z13FindNextBreakPhi",
@@ -67050,7 +67050,7 @@
           "address": 1138560,
           "offset": 248592,
           "size": 965,
-          "match_percent": 72.81743
+          "match_percent": 74.3361
         },
         {
           "name": "_Z22MenuDrawSelectControlsP6MENU_s",
@@ -67454,7 +67454,7 @@
           "address": 2367200,
           "offset": 1477232,
           "size": 2237,
-          "match_percent": 83.16199
+          "match_percent": 88.16199
         },
         {
           "name": "_Z14DrawItemMenu2Dv",
@@ -67478,7 +67478,7 @@
           "address": 2370128,
           "offset": 1480160,
           "size": 3222,
-          "match_percent": 70.00881
+          "match_percent": 69.986786
         },
         {
           "name": "_Z17DrawSubItemMenu2Dv",
@@ -67606,7 +67606,7 @@
           "address": 2391568,
           "offset": 1501600,
           "size": 2909,
-          "match_percent": 93.60096
+          "match_percent": 92.80769
         },
         {
           "name": "_Z10DoShopMenuP6MENU_s",
@@ -68026,7 +68026,7 @@
           "address": 2447968,
           "offset": 1558000,
           "size": 879,
-          "match_percent": 69.55102
+          "match_percent": 70.688774
         },
         {
           "name": "_Z18UpdateAchievementsP14STATUSPACKET_s",
@@ -68718,7 +68718,7 @@
           "address": 4793488,
           "offset": 3903520,
           "size": 1657,
-          "match_percent": 83.25348
+          "match_percent": 93.27298
         },
         {
           "name": "_Z19LineIntersectSphereP7nuvec_sS0_S0_fPf",
@@ -69937,7 +69937,7 @@
           "address": 1882496,
           "offset": 992528,
           "size": 1134,
-          "match_percent": 84.92029
+          "match_percent": 84.99275
         },
         {
           "name": "_ZL20TightRopes_AddGizmosP10GIZMOSYS_siPvS1_",
@@ -70184,7 +70184,7 @@
           "address": 1909984,
           "offset": 1020016,
           "size": 612,
-          "match_percent": 66.012985
+          "match_percent": 68.67532
         },
         {
           "name": "_Z14ZipUp_MoveCodeP12GameObject_si",
@@ -82357,7 +82357,7 @@
           "address": 2107584,
           "offset": 1217616,
           "size": 1463,
-          "match_percent": 76.588234
+          "match_percent": 76.718956
         },
         {
           "name": "_Z12RetakeD_InitP11WORLDINFO_s",
@@ -82596,7 +82596,7 @@
           "address": 2115600,
           "offset": 1225632,
           "size": 1334,
-          "match_percent": 86.20294
+          "match_percent": 86.86471
         },
         {
           "name": "_Z10JediB_InitP11WORLDINFO_s",
@@ -83283,7 +83283,7 @@
           "address": 2166976,
           "offset": 1277008,
           "size": 4536,
-          "match_percent": 94.581985
+          "match_percent": 95.043526
         },
         {
           "name": "_Z16VaderC_DrawPanelP11WORLDINFO_s",
@@ -85413,7 +85413,7 @@
           "address": 1194368,
           "offset": 304400,
           "size": 3029,
-          "match_percent": 93.01351
+          "match_percent": 94.89527
         },
         {
           "name": "_ZL13Titles_UpdateP11WORLDINFO_s",
@@ -85469,7 +85469,7 @@
           "address": 1204608,
           "offset": 314640,
           "size": 1778,
-          "match_percent": 83.27714
+          "match_percent": 84.2679
         },
         {
           "name": "_Z8KillBossiif",
@@ -86271,7 +86271,7 @@
           "address": 1157024,
           "offset": 267056,
           "size": 372,
-          "match_percent": 45.932693
+          "match_percent": 85.78846
         },
         {
           "name": "_ZL19PauseGame_ExtraCodev",
@@ -86455,7 +86455,7 @@
           "address": 1162432,
           "offset": 272464,
           "size": 3069,
-          "match_percent": 92.006546
+          "match_percent": 99.554825
         },
         {
           "name": "_Z18BuckStartExtra_LSWP12GameObject_s",
@@ -86471,7 +86471,7 @@
           "address": 1165552,
           "offset": 275584,
           "size": 5015,
-          "match_percent": 75.9952
+          "match_percent": 76.019196
         },
         {
           "name": "_Z11LSW_SetIndyi",
@@ -100258,7 +100258,7 @@
           "address": 1005104,
           "offset": 115136,
           "size": 1320,
-          "match_percent": 84.85499
+          "match_percent": 85.489426
         },
         {
           "name": "_ZN15NuMemoryManager4DumpEjPKc",
@@ -107809,7 +107809,7 @@
           "address": 5622000,
           "offset": 4732032,
           "size": 513,
-          "match_percent": 62.885715
+          "match_percent": 63.271427
         },
         {
           "name": "_ZN8NuNetEmu13SetConditionsENS_11eConditionsE",
@@ -112943,7 +112943,7 @@
           "address": 3258352,
           "offset": 2368384,
           "size": 418,
-          "match_percent": 37.36
+          "match_percent": 57.024
         },
         {
           "name": "_ZN13NuSoundSystem17FileTypeSupportedENS_8FileTypeE",
@@ -113966,7 +113966,7 @@
           "address": 3211840,
           "offset": 2321872,
           "size": 778,
-          "match_percent": 71.22078
+          "match_percent": 72.2381
         },
         {
           "name": "_ZN7NuMusic14GetAlbumHandleEPKc",
@@ -114094,7 +114094,7 @@
           "address": 3214256,
           "offset": 2324288,
           "size": 580,
-          "match_percent": 48.875
+          "match_percent": 52.085526
         },
         {
           "name": "NuSound3SetRequestTable",

@@ -434,7 +434,7 @@ void Batarangs_CheckLostData(void *data) {
                 if (batarang->owner == data) {
                     goto reset;
                 }
-                if (batarang->field_0x7d != 0) {
+                if (__builtin_expect(batarang->field_0x7d != 0, 0)) {
                     target_data->lost = 1;
                     continue;
                 }

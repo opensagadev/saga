@@ -1040,10 +1040,12 @@ void VaderC_Update(WORLDINFO_s *world) {
                 progress |= 1;
                 vader_c.field_0x94 = progress;
             }
-            if (Player[1] != NULL && vader_c.platform_ids[i] != -1 && Player[1]->apiobj.field_0x27d != 0 &&
-                Player[1]->apiobj.supporting_platform_id == vader_c.platform_ids[i] &&
-                Player[1]->apiobj.position.y >=
-                    static_cast<NUMTX *>(CurTerr->platforms[vader_c.platform_ids[i]].scene_object)->m31) {
+            if (__builtin_expect(
+                    Player[1] != NULL && vader_c.platform_ids[i] != -1 && Player[1]->apiobj.field_0x27d != 0 &&
+                        Player[1]->apiobj.supporting_platform_id == vader_c.platform_ids[i] &&
+                        Player[1]->apiobj.position.y >=
+                            static_cast<NUMTX *>(CurTerr->platforms[vader_c.platform_ids[i]].scene_object)->m31,
+                    1)) {
                 progress |= 2;
                 vader_c.field_0x94 = progress;
             }

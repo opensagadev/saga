@@ -570,7 +570,7 @@ ZIPUP *ZipUp_FindNearest(WORLDINFO_s *world, nuvec_s *position, float radius, fl
         if (candidate < nearest_distance) {
             nearest = zipup;
             nearest_distance = candidate;
-            if (endpoint != NULL)
+            if (__builtin_expect(endpoint != NULL, 1))
                 *endpoint = 0;
         }
         if ((zipup->flags & 8) != 0) {

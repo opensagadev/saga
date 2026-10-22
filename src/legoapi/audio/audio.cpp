@@ -942,7 +942,7 @@ void AddLevSfx(WORLDINFO_s *world, nuvec_s *position, char *name, i32 sfx) {
     if (sfx == -1 && name != NULL) {
         sfx = GetSfxId(name);
     }
-    if (sfx == -1) {
+    if (__builtin_expect(sfx == -1, 0)) {
         return;
     }
 
@@ -954,7 +954,7 @@ void AddLevSfx(WORLDINFO_s *world, nuvec_s *position, char *name, i32 sfx) {
             break;
     }
     if (index == count) {
-        if (index >= 64) {
+        if (__builtin_expect(index >= 64, 0)) {
             return;
         }
         if (position != NULL) {

@@ -783,7 +783,7 @@ static void Titles_Draw(WORLDINFO *) {
             alpha = time - 8.166666f;
         else if (time < 12.333332f)
             alpha = 1.0f;
-        else if (time < 13.333332f)
+        else if (__builtin_expect(time < 13.333332f, 1))
             alpha = 1.0f - (time - 12.333332f);
         else
             alpha = 0.0f;
@@ -830,7 +830,7 @@ static void Titles_Draw(WORLDINFO *) {
         else
             alpha = 0.0f;
         if (alpha > 0.0f) {
-            if (NuSpecialExistsFn(&LevHSpecial[14]) != 0) {
+            if (__builtin_expect(NuSpecialExistsFn(&LevHSpecial[14]) != 0, 1)) {
                 draw_mtx.m31 = -0.15f;
                 NuSpecialDrawAtAlpha(&LevHSpecial[14], &draw_mtx, newgamealpha * 0.5f * alpha * LevTime[0]);
             }
@@ -841,7 +841,7 @@ static void Titles_Draw(WORLDINFO *) {
             alpha = time - 24.833332f;
         else if (time < 28.999998f)
             alpha = 1.0f;
-        else if (time < 29.999998f)
+        else if (__builtin_expect(time < 29.999998f, 1))
             alpha = 1.0f - (time - 28.999998f);
         else
             alpha = 0.0f;
@@ -855,7 +855,7 @@ static void Titles_Draw(WORLDINFO *) {
             alpha = time - 29.0f;
         else if (time < 33.166668f)
             alpha = 1.0f;
-        else if (time < 34.166668f)
+        else if (__builtin_expect(time < 34.166668f, 1))
             alpha = 1.0f - (time - 33.166668f);
         else
             alpha = 0.0f;
@@ -869,7 +869,7 @@ static void Titles_Draw(WORLDINFO *) {
             alpha = time - 33.166664f;
         else if (time < 37.333332f)
             alpha = 1.0f;
-        else if (time < 38.333332f)
+        else if (__builtin_expect(time < 38.333332f, 1))
             alpha = 1.0f - (time - 37.333332f);
         else
             alpha = 0.0f;
@@ -1212,7 +1212,8 @@ static __used__ void LoadAreaData(bgprocinfo_s *) {
         if (scene != NULL && scene->display_list != NULL)
             scene->display_list->flags |= NU_DISPLAYSCENE_FLAG_NEEDS_BUILD;
 
-        if ((ADataList[area].flags & (AREAFLAG_VEHICLE_AREA | AREAFLAG_BONUS_AREA)) != 0 && area != last_area) {
+        if (__builtin_expect(
+                (ADataList[area].flags & (AREAFLAG_VEHICLE_AREA | AREAFLAG_BONUS_AREA)) != 0 && area != last_area, 1)) {
             characterbuffer_ptr.addr = ALIGN(characterbuffer_ptr.addr, 4);
             scene = NuGScnRead(&characterbuffer_ptr, characterbuffer_end, "stuff\\vehicle_things.gsc");
             vehicle_scene = scene;
@@ -1266,7 +1267,7 @@ model_select:
     } else {
         list = FreePlayModelList;
         if (FreePlay == 0) {
-            if (Mission_Active(0) != 0)
+            if (__builtin_expect(Mission_Active(0) != 0, 1))
                 list = Area_MissionModelList;
             else
                 list = Area_StoryModelList;
@@ -1304,7 +1305,7 @@ icon_scenes:
     GameLoadCharacterModels(list, 0, &characterbuffer_ptr, &characterbuffer_end, 1, area);
     CharacterDataLoad = 2;
     CharScenes_AreaLoad(list, &characterbuffer_ptr, characterbuffer_end);
-    if (!(HUB_ADATA != NULL && HUB_ADATA->index == area))
+    if (__builtin_expect(!(HUB_ADATA != NULL && HUB_ADATA->index == area), 1))
         Customiser_LoadAccessories(CharacterCustomiser, list);
     Customiser_ResetModelTextureIDs(CharacterCustomiser);
     CurrentStoryCList = story_list;

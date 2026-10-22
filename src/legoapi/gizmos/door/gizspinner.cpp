@@ -441,10 +441,10 @@ i32 GizSpinner_UsingSpecial(GIZMO **results, void *world_ptr, i32 capacity, char
     if (world != NULL && results != NULL && world->spinners != NULL) {
         nuhspecial_s special;
         NuSpecialFind(world->current_gscn, &special, name, 0);
-        if (NuSpecialExistsFn(&special) != 0) {
+        if (__builtin_expect(NuSpecialExistsFn(&special) != 0, 1)) {
             i32 type_id = -1;
             for (u32 index = 0; index < world->current_level->max_spinners && count < capacity; ++index) {
-                if ((world->spinners[index].flags & GIZSPINNER_FLAG_VALID) == 0) {
+                if (__builtin_expect((world->spinners[index].flags & GIZSPINNER_FLAG_VALID) == 0, 0)) {
                     continue;
                 }
                 for (GAMEANIMOBJ_s *object = world->spinners[index].anim_set->objects; object != NULL;
@@ -1206,7 +1206,7 @@ i32 GizSpinner_Push(GIZSPINNER_s *spinner, i32 context) {
                 clear_context = 1;
                 goto stop_at_endpoint;
             }
-            if (!at_end || spinner->anim_set->object_count == 0) {
+            if (__builtin_expect(!at_end || spinner->anim_set->object_count == 0, 1)) {
                 goto rotate;
             }
             goto stop_at_endpoint;
@@ -1232,7 +1232,7 @@ i32 GizSpinner_Push(GIZSPINNER_s *spinner, i32 context) {
             } else {
                 spinner->rotation -= rotation_step;
             }
-        } else if ((flags & 2) != 0) {
+        } else if (__builtin_expect((flags & 2) != 0, 1)) {
             spinner->rotation -= rotation_step;
         } else {
             spinner->rotation += rotation_step;
@@ -1242,7 +1242,7 @@ i32 GizSpinner_Push(GIZSPINNER_s *spinner, i32 context) {
     }
 
 finalize:
-    if (!(RotDiff(spinner->rotation, spinner->previous_rotation) < 0)) {
+    if (__builtin_expect(!(RotDiff(spinner->rotation, spinner->previous_rotation) < 0), 1)) {
         spinner->state_flags &= ~1u;
     } else {
         spinner->state_flags |= 1;

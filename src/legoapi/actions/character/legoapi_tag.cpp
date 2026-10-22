@@ -428,7 +428,7 @@ i32 TagCharacter(GameObject_s *source, GameObject_s *target, i32 mode) {
             target = Player[4];
         else if (__builtin_expect(!!(available(Player[5])), 0))
             target = Player[5];
-        else if (available(Player[6]))
+        else if (__builtin_expect(available(Player[6]) != 0, 0))
             target = Player[6];
         else if (available(Player[7]))
             target = Player[7];

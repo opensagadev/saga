@@ -1091,7 +1091,7 @@ static void Blowups_Reset(void *world_ptr, void *, void *progress_ptr) {
     BLOWUPPROGRESS_s *progress = static_cast<BLOWUPPROGRESS_s *>(progress_ptr);
     if (world == NULL)
         return;
-    if (world->gizmo_blowups != NULL && world->gizmo_blowup_count > 0) {
+    if (__builtin_expect(world->gizmo_blowups != NULL && world->gizmo_blowup_count > 0, 1)) {
         const bool has_progress = progress != NULL;
         GIZMOBLOWUP_s *blowup = world->gizmo_blowups;
         for (i32 index = 0; index < world->gizmo_blowup_count; ++index, ++blowup) {
@@ -1111,7 +1111,7 @@ static void Blowups_Reset(void *world_ptr, void *, void *progress_ptr) {
                     const u8 previous_state_flags = state_flags;
                     state_flags |= GIZMOBLOWUP_STATE_ANIMATION_PLAYING;
                     blowup->state_flags = state_flags;
-                    if (animation->repeating != 0) {
+                    if (__builtin_expect(animation->repeating != 0, 0)) {
                         state_flags = previous_state_flags | GIZMOBLOWUP_STATE_REPEAT_ANIMATION |
                                       GIZMOBLOWUP_STATE_ANIMATION_PLAYING | GIZMOBLOWUP_STATE_REPEATING;
                         blowup->state_flags = state_flags;
@@ -1143,7 +1143,7 @@ static void Blowups_Reset(void *world_ptr, void *, void *progress_ptr) {
                 visible <<= 6;
                 blowup->visibility_flags = (old_visibility & ~GIZMOBLOWUP_VISIBLE) | visible;
                 if ((old_visibility & GIZMOBLOWUP_VISIBLE) != 0) {
-                    if ((blowup->visibility_flags & GIZMOBLOWUP_VISIBLE) == 0) {
+                    if (__builtin_expect((blowup->visibility_flags & GIZMOBLOWUP_VISIBLE) == 0, 0)) {
                         GizBlowup_DeleteSingleTerrain(blowup);
                         state_flags = blowup->state_flags;
                         output_flags = blowup->output_flags;
@@ -1384,7 +1384,7 @@ void GizmoBlowupDraw(void *world_ptr, void *, float) {
                     GizmoBlowupGenDecalMatrix(blowup, &matrix, 0);
                     NuSpecialDrawAt(&blowup->type->decal_special, &matrix);
                 }
-                if (NuSpecialExistsFn(&blowup->type->burst_special)) {
+                if (__builtin_expect(NuSpecialExistsFn(&blowup->type->burst_special) != 0, 1)) {
                     NuSpecialDrawAt(&blowup->type->burst_special, &blowup->transform);
                 }
             }
@@ -1865,7 +1865,7 @@ GIZMOBLOWUP_s *GizmoBlowUpOpponent(GameObject_s *object, f32 range, f32 extra_ra
                 if (value != 0) {
                     if ((flags & mask) != value)
                         continue;
-                } else if ((flags & mask) == 0) {
+                } else if (__builtin_expect((flags & mask) == 0, 1)) {
                     continue;
                 }
             }
@@ -2084,7 +2084,7 @@ GIZMOBLOWUP_s *GizmoBlowUp_Target(GameObject_s *object, nuvec_s *position, nuvec
     NUVEC aim = *direction;
     f32 min_x = position->x - radius, min_z = position->z - radius;
     f32 max_x = position->x + radius, max_z = position->z + radius;
-    if (directional != 0 && (bolt->field_60 & 0x20000) != 0) {
+    if (__builtin_expect(directional != 0 && (bolt->field_60 & 0x20000) != 0, 1)) {
         aim.y = 0.0f;
         NuVecNorm(&aim, &aim);
     }
@@ -2097,7 +2097,7 @@ GIZMOBLOWUP_s *GizmoBlowUp_Target(GameObject_s *object, nuvec_s *position, nuvec
     GIZMOBLOWUP_s *nearest = NULL, *fallback = NULL;
     f32 nearest_distance = 100000000.0f;
     for (i32 i = 0; i < count; ++i, ++blowup) {
-        if (world->field_0x50d0 != 0)
+        if (__builtin_expect(world->field_0x50d0 != 0, 0))
             blowup = world->blowup_target_candidates[i];
         if ((blowup->draw_flags & 0x8000) == 0 || (blowup->output_flags & 1) != 0 ||
             (blowup->status_flags & 0x08800000) == 0 || (blowup->visibility_flags & 0x40) == 0)

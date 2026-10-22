@@ -241,7 +241,7 @@ static void TightRopes_Draw(void *world_info, void *, float) {
                                    : &object->apiobj.upper_position;
             distances[count] = NuVecDist(positions[count], &rope->start, NULL);
             ++count;
-            if (count != 64) {
+            if (__builtin_expect(count != 64, 1)) {
                 continue;
             }
             break;

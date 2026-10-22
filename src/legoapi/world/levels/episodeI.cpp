@@ -2119,7 +2119,7 @@ i32 Action_NewSebulba(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *
                         distance += sock_length;
 
                     GameObject_s *lead_player;
-                    if (0.0f > goal)
+                    if (__builtin_expect(0.0f > goal, 0))
                         lead_player = distance <= 0.0f ? player2 : player;
                     else
                         lead_player = distance <= 0.0f ? player : player2;
@@ -2138,7 +2138,7 @@ i32 Action_NewSebulba(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *
                 else if (distance < sock_length * -0.5f)
                     distance += sock_length;
                 distance -= goal;
-                if (distance > 0.0f) {
+                if (__builtin_expect(distance > 0.0f, 0)) {
                     float ratio = distance / (sebulba_fallback_dist - goal);
                     float base = 0.0f;
                     if (ratio > 1.0f)

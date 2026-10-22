@@ -260,7 +260,7 @@ void MechInputTouchGestureTrackingSystem::RegisterGestureTracker(MechInputTouchG
             break;
         }
     }
-    if (insertion_index == 9) {
+    if (__builtin_expect(insertion_index == 9, 1)) {
         return;
     }
     for (GestureTrackerRegistration *entry = &entries[9]; entry != &entries[insertion_index]; --entry) {

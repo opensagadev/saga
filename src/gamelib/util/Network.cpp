@@ -209,7 +209,7 @@ i32 NetPredictor::SerialiseObject(EdStream &stream, NetPeer *peer, EdClass const
             if (size <= 0) {
                 size = type->size;
             }
-            if (object == NULL) {
+            if (__builtin_expect(object == NULL, 0)) {
                 stream.Eat(size, 1);
                 continue;
             }
@@ -1513,7 +1513,7 @@ i32 NetworkObjectManager::SendPushMessage(NetMessage *message, NetPeerPush const
         return 1;
     }
     if (peer != NULL) {
-        if ((flags & 1) == 0 || (push->stage >= 1 && push->stage <= 2)) {
+        if (__builtin_expect((flags & 1) == 0 || (push->stage >= 1 && push->stage <= 2), 1)) {
             theNetwork.ReliableSend(*message, 3, *peer, NULL, 0);
         } else {
             theNetwork.Send(*message, 3, *peer);
@@ -1603,7 +1603,7 @@ void NetworkObjectManager::Update() {
         i32 data_offset = 0;
         while (replicator != NULL) {
             i32 data_size = replicator->data_size;
-            if ((replicator->replication_group & 4) != 0) {
+            if (__builtin_expect((replicator->replication_group & 4) != 0, 1)) {
                 ReplicatorData data;
                 data.start = static_cast<u8 *>(object->replicator_data) + data_offset;
                 data.cursor = data.start;
@@ -1630,7 +1630,7 @@ void NetworkObjectManager::Update() {
 
             while (object_index < object_count && message_limit < theNuNetEmu.field_00) {
                 NetworkObject *object = local_objects[object_index++];
-                if (object == NULL || object->object == NULL) {
+                if (__builtin_expect(object == NULL || object->object == NULL, 0)) {
                     continue;
                 }
 

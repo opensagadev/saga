@@ -809,7 +809,7 @@ extern "C" {
                     if (NuCutSceneSFXFixUp != NULL) {
                         type->function_index =
                             static_cast<u16>(NuCutSceneSFXFixUp(reinterpret_cast<usize>(type->name)));
-                        if (static_cast<i16>(type->function_index) != -1) {
+                        if (__builtin_expect(static_cast<i16>(type->function_index) != -1, 1)) {
                             cutscene->flags |= 4;
                         }
                     }
@@ -3882,7 +3882,37 @@ extern "C" {
         NuPrimSetCoordinateSystem(NUPRIM_SCALEMODE_PS2);
         NuPrim2DBegin(4, 5, NULL);
 
-        if (__builtin_expect(DefragInstBaseMem != NULL, 1)) {
+        if (__builtin_expect(DefragInstBaseMem == NULL, 0)) {
+            const u32 cut_span = static_cast<u32>(reinterpret_cast<usize>(DefragCutSceneEndMem) -
+                                                  reinterpret_cast<usize>(DefragCutSceneBaseMem));
+            const f32 cut_scale = 580.0f / static_cast<f32>(cut_span);
+            CUT_MEMORY_VERTEX(30.0f, 206.0f, 0x40000040u, 0x40000080u);
+            CUT_MEMORY_VERTEX(610.0f, 210.0f, 0x40000040u, 0x40000080u);
+
+            CutSceneCleanUpEntry *const list_end = DefragCutSceneListBase + DefragCutSceneListSize;
+            for (CutSceneCleanUpEntry *entry = DefragCutSceneListBase; entry < list_end; ++entry) {
+                if ((entry->flags & 4) == 0) {
+                    continue;
+                }
+                instNUGCUTSCENE_s *instance = DefragGetInstFn(entry->handle);
+                NUGCUTSCENE_s *scene = instance->cutscene;
+                const u32 scene_start =
+                    static_cast<u32>(reinterpret_cast<usize>(scene) - reinterpret_cast<usize>(DefragCutSceneBaseMem));
+                const u32 scene_end = scene_start + scene->loaded_size;
+                const f32 scene_start_x = static_cast<f32>(scene_start) * cut_scale + 30.0f;
+                const f32 scene_end_x = static_cast<f32>(scene_end) * cut_scale + 30.0f;
+                CUT_MEMORY_VERTEX(scene_start_x, 206.0f, 0x40004040u, 0x40008080u);
+                CUT_MEMORY_VERTEX(scene_end_x, 210.0f, 0x40004040u, 0x40008080u);
+
+                const u32 inst_start = static_cast<u32>(reinterpret_cast<usize>(instance) -
+                                                        reinterpret_cast<usize>(DefragCutSceneBaseMem));
+                const u32 inst_end = inst_start + instance->allocation_size;
+                const f32 inst_start_x = static_cast<f32>(inst_start) * cut_scale + 30.0f;
+                const f32 inst_end_x = static_cast<f32>(inst_end) * cut_scale + 30.0f;
+                CUT_MEMORY_VERTEX(inst_start_x, 206.0f, 0x40400040u, 0x40800080u);
+                CUT_MEMORY_VERTEX(inst_end_x, 210.0f, 0x40400040u, 0x40800080u);
+            }
+        } else {
             const u32 cut_span = static_cast<u32>(reinterpret_cast<usize>(DefragCutSceneEndMem) -
                                                   reinterpret_cast<usize>(DefragCutSceneBaseMem));
             const f32 cut_scale = 580.0f / static_cast<f32>(cut_span);
@@ -3923,36 +3953,6 @@ extern "C" {
                 const f32 end_x = static_cast<f32>(end) * inst_scale + 30.0f;
                 CUT_MEMORY_VERTEX(start_x, 209.0f, 0x40400040u, 0x40800080u);
                 CUT_MEMORY_VERTEX(end_x, 211.0f, 0x40400040u, 0x40800080u);
-            }
-        } else {
-            const u32 cut_span = static_cast<u32>(reinterpret_cast<usize>(DefragCutSceneEndMem) -
-                                                  reinterpret_cast<usize>(DefragCutSceneBaseMem));
-            const f32 cut_scale = 580.0f / static_cast<f32>(cut_span);
-            CUT_MEMORY_VERTEX(30.0f, 206.0f, 0x40000040u, 0x40000080u);
-            CUT_MEMORY_VERTEX(610.0f, 210.0f, 0x40000040u, 0x40000080u);
-
-            CutSceneCleanUpEntry *const list_end = DefragCutSceneListBase + DefragCutSceneListSize;
-            for (CutSceneCleanUpEntry *entry = DefragCutSceneListBase; entry < list_end; ++entry) {
-                if (__builtin_expect((entry->flags & 4) == 0, 1)) {
-                    continue;
-                }
-                instNUGCUTSCENE_s *instance = DefragGetInstFn(entry->handle);
-                NUGCUTSCENE_s *scene = instance->cutscene;
-                const u32 scene_start =
-                    static_cast<u32>(reinterpret_cast<usize>(scene) - reinterpret_cast<usize>(DefragCutSceneBaseMem));
-                const u32 scene_end = scene_start + scene->loaded_size;
-                const f32 scene_start_x = static_cast<f32>(scene_start) * cut_scale + 30.0f;
-                const f32 scene_end_x = static_cast<f32>(scene_end) * cut_scale + 30.0f;
-                CUT_MEMORY_VERTEX(scene_start_x, 206.0f, 0x40004040u, 0x40008080u);
-                CUT_MEMORY_VERTEX(scene_end_x, 210.0f, 0x40004040u, 0x40008080u);
-
-                const u32 inst_start = static_cast<u32>(reinterpret_cast<usize>(instance) -
-                                                        reinterpret_cast<usize>(DefragCutSceneBaseMem));
-                const u32 inst_end = inst_start + instance->allocation_size;
-                const f32 inst_start_x = static_cast<f32>(inst_start) * cut_scale + 30.0f;
-                const f32 inst_end_x = static_cast<f32>(inst_end) * cut_scale + 30.0f;
-                CUT_MEMORY_VERTEX(inst_start_x, 206.0f, 0x40400040u, 0x40800080u);
-                CUT_MEMORY_VERTEX(inst_end_x, 210.0f, 0x40400040u, 0x40800080u);
             }
         }
 

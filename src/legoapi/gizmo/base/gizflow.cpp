@@ -994,7 +994,7 @@ void ResetGizFlow(GIZFLOW_s *system, GIZFLOWPROGRESS_s *progress) {
         if (box->type == 1 && box->condition_data[0] == 4) {
             box->loop_parent_count = Loop_CountLoopingInputs(box);
             box->state_flags_high |= 4;
-            if (box->parent_count == box->loop_parent_count) {
+            if (__builtin_expect(box->parent_count == box->loop_parent_count, 1)) {
                 box->state_flags_high |= 8;
                 box->state_flags_low |= 1;
             } else

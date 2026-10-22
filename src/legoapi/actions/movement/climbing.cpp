@@ -1259,8 +1259,9 @@ void WeaponOutCode(GameObject_s *object) {
 after_weapon_touch:
     if (LEGOCONTEXT_WEAPONOUT == -1 || object->character_context != LEGOCONTEXT_WEAPONOUT)
         return;
-    if (object->pad_gamepad->input_magnitude > 0.0f &&
-        (object->apiobj.character_data->game_character->field_0x94 & 0x1000) == 0) {
+    if (__builtin_expect(object->pad_gamepad->input_magnitude > 0.0f &&
+                             (object->apiobj.character_data->game_character->field_0x94 & 0x1000) == 0,
+                         0)) {
         if (object->weapon_scale == 0.0f && object->weapon_scale_state != WEAPON_SCALE_EXTENDING) {
             FastWeaponOut(object, 0);
         }
@@ -1480,7 +1481,7 @@ i32 StepBackFromTarget(GameObject_s *object) {
     float speed = AnimSpeed(object->apiobj.character_model, object->context_animation);
     if (speed != 0.0f) {
         float distance_squared = NuVecXZDistSqr(&object->apiobj.collision_position, target_position, NULL);
-        if (!(distance_squared >= outer_distance * outer_distance)) {
+        if (__builtin_expect(!(distance_squared >= outer_distance * outer_distance), 1)) {
             float blend = 1.0f;
             if (!(inner_distance * inner_distance >= distance_squared)) {
                 blend = 1.0f - (NuFsqrt(distance_squared) - inner_distance) / (outer_distance - inner_distance);

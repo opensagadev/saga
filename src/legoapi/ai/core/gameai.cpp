@@ -396,12 +396,12 @@ static char *AI_GetGizmoName(GIZMO *gizmo) {
     }
 
     LEVELSCRIPTPROCESS *level_process = static_cast<LEVELSCRIPTPROCESS *>(gizmo->object);
-    if (NuStrLen(level_process->name) != 0) {
+    if (__builtin_expect(NuStrLen(level_process->name) != 0, 0)) {
         return level_process->name;
     }
 
     AISCRIPTPROCESS *process = &level_process->processor;
-    if (process->script != NULL && process->script->name != NULL) {
+    if (__builtin_expect(process->script != NULL && process->script->name != NULL, 1)) {
         NuStrNCpy(name, process->script->name, sizeof(name));
     } else {
         NuStrCpy(name, "");
@@ -421,7 +421,7 @@ static char *AI_GetGizmoName(GIZMO *gizmo) {
         i8 total = length;
         total += NuStrLen("()");
         total += NuStrLen(process->unknown_a4->name);
-        if (total <= 15) {
+        if (__builtin_expect(total <= 15, 0)) {
             NuStrCat(name, "(");
             NuStrCat(name, process->unknown_a4->name);
             NuStrCat(name, ")");
@@ -1243,7 +1243,7 @@ void GameAISysStartFrame(AISYS_s *system) {
             }
             if ((object->apiobj.field_0x1f4 & 1) != 0) {
                 area->runtime_flags |= AIAREA_RUNTIME_OBJECT_STATE_SET;
-            } else if ((object->apiobj.field_0x1f4 & 4) == 0) {
+            } else if (__builtin_expect((object->apiobj.field_0x1f4 & 4) == 0, 1)) {
                 area->runtime_flags |= AIAREA_RUNTIME_OBJECT_STATE_CLEAR;
             }
         }
@@ -1509,7 +1509,7 @@ AIPATHCNXCONTROLLER_s *AIPathCnxControllerCreate(AIPATHCNXCONTROLSYS_s *control_
                         break;
                     }
                     case 5:
-                        if (fake_animation_id != 0) {
+                        if (__builtin_expect(fake_animation_id != 0, 1)) {
                             return NULL;
                         }
                         break;
@@ -2679,7 +2679,7 @@ GameObject_s *AddDynamicCreature(i32 model, nuvec_s *position, i32 angle, char *
         if (group != NULL) {
             AddToAIGroup(group, &object->apiobj);
             offset.x = ((object->ai.group_column + 1) / 2) * group->x_spacing;
-            if (__builtin_expect(object->ai.group_column & 1, 0))
+            if (__builtin_expect(object->ai.group_column & 1, 1))
                 offset.x = -offset.x;
             offset.z = -group->z_spacing * static_cast<u32>(object->ai.group_member);
             offset.y = 0.0f;

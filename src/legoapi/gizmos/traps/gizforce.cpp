@@ -1175,7 +1175,7 @@ static void GizForces_Reset(void *world_ptr, void *data, void *progress_ptr) {
                 if (world->terrain != NULL && (object_data->flags & 1) == 0 &&
                     NuSpecialExistsFn(&object->special) != 0) {
                     object_data->platform_id = FindPlatInst(NuSpecialGetInstanceix(&object->special));
-                    if (object_data->platform_id != -1) {
+                    if (__builtin_expect(object_data->platform_id != -1, 1)) {
                         force->runtime_flags |= GIZFORCE_RUNTIME_HAS_PLATFORM;
                     }
                 }

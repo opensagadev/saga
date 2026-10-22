@@ -805,7 +805,7 @@ void StoreStatusTakeOverObjectSys() {
             object->field_0xcc0->character_context == LEGOCONTEXT_BEENTAKENOVER &&
             static_cast<u8>(object->apiobj.field_0x27c) != 0xff && Door_Last != NULL &&
             Door_Last->takeover_character_mask != 0) {
-            if (Door_Last->takeover_character_mask == ~static_cast<u64>(0)) {
+            if (__builtin_expect(Door_Last->takeover_character_mask == ~static_cast<u64>(0), 0)) {
                 contact = static_cast<u8>(object->apiobj.field_0x27c);
             } else {
                 u8 character_index = static_cast<u8>(Area_CharIDInCurrentList(object->id));

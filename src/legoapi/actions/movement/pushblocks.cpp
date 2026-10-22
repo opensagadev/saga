@@ -1019,7 +1019,7 @@ i32 PushBlock(GameObject_s *object) {
 
 pushblock_s *BlockInBlock(WORLDINFO_s *world, pushblock_s *block, i32 excluded, pushblock_s **support) {
     NUVEC *position = block->position;
-    if (support)
+    if (__builtin_expect(support != 0, 1))
         *support = NULL;
     for (i32 i = 0; i < world->push_block_count; ++i) {
         if (i == excluded)
@@ -1081,7 +1081,7 @@ __attribute__((optimize("O2", "tree-vectorize"))) void MoveBlocksOverBlock(WORLD
     f32 xmin = block->bounds_min.x + block->position->x, xmax = block->position->x + block->bounds_max.x;
     f32 zmin = block->bounds_min.z + block->position->z, zmax = block->position->z + block->bounds_max.z;
     for (i32 i = 0; i < world->push_block_count; ++i) {
-        if (i == excluded)
+        if (__builtin_expect(i == excluded, 0))
             continue;
         pushblock_s *other = &world->push_blocks[i];
         if ((other->flags_0cb & 4) || !(other->flags_0ca & 4))

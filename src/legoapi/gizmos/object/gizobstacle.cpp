@@ -845,7 +845,7 @@ static i32 GizObstacles_Load(void *world_ptr, void *data) {
             } else {
                 char blowup_name[32];
                 const i32 name_length = static_cast<i8>(EdFileReadChar());
-                if (name_length != 0) {
+                if (__builtin_expect(name_length != 0, 0)) {
                     EdFileRead(blowup_name, name_length);
                     obstacle.blowup_type = static_cast<i16>(GizmoBlowupGetNameTableId(blowup_name));
                     if (obstacle.blowup_type != -1) {

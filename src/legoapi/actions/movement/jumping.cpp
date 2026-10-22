@@ -399,7 +399,7 @@ void BigJumpCode(GameObject_s *object) {
     if (LEGOCONTEXT_BIGJUMP == -1 || object->character_context != LEGOCONTEXT_BIGJUMP)
         return;
     object->apiobj.respawn_timer = 0.0f;
-    if (object->build_button_taps != 0 && object->field_0x1084 != 0) {
+    if (__builtin_expect(object->build_button_taps != 0 && object->field_0x1084 != 0, 0)) {
         object->character_context = -1;
         return;
     }
@@ -432,7 +432,7 @@ void BigJumpCode(GameObject_s *object) {
             }
             if ((object->context_variant_flags & 1) != 0 && object->apiobj.field_0x27d == 0) {
                 f32 ground = GameShadow(NULL, &object->launch_origin, 5.0f, -1);
-                if (ground != 2000000.0f && object->launch_origin.y - ground >= 0.1f) {
+                if (__builtin_expect(ground != 2000000.0f && object->launch_origin.y - ground >= 0.1f, 1)) {
                     StartEndOfJump(object);
                     return;
                 }
@@ -473,7 +473,7 @@ void BigJumpCode(GameObject_s *object) {
                         arc = rise / 3.0f + 0.0f;
                 } else if (rise < -0.21f) {
                     horizontal = NU_SIN_LUT(static_cast<i32>(fraction * 16384.0f + 49152.0f + 16384.0f));
-                    if (rise < -0.42f)
+                    if (__builtin_expect(rise < -0.42f, 1))
                         arc = 0.0f - rise / 3.0f;
                 }
             }

@@ -516,7 +516,7 @@ void ChrisAnakinCReset() {
 
         NuMtxSetIdentity(&door->original_matrix);
         door->matrix = door->original_matrix = *NuSpecialGetMtx(&door->special);
-        if (door->has_secondary != 0) {
+        if (__builtin_expect(door->has_secondary != 0, 0)) {
             NuMtxSetIdentity(&door->original_secondary_matrix);
             door->secondary_matrix = door->original_secondary_matrix = *NuSpecialGetMtx(&door->secondary_special);
         }
@@ -1286,7 +1286,7 @@ void ChrisRadialCam(nuvec_s *position, nuvec_s *target) {
     NUVEC new_target __attribute__((aligned(16)));
 
     f32 base_radius;
-    if (origin_radius < 120.0f) {
+    if (__builtin_expect(origin_radius < 120.0f, 1)) {
         base_radius = 120.0f;
     } else {
         base_radius = MIN(150.0f, origin_radius);

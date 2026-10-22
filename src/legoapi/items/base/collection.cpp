@@ -443,7 +443,7 @@ void Collection_Configure(char *file, VARIPTR *bufferStart, VARIPTR *bufferEnd) 
                         collect->type = 2;
                         collect->field2_0x3 = static_cast<u8>(area);
                     }
-                } else if (NuStrICmp(fp->word_buf, "all_episodes_complete") == 0) {
+                } else if (__builtin_expect(NuStrICmp(fp->word_buf, "all_episodes_complete") == 0, 1)) {
                     collect->type = 3;
                 } else if (NuStrICmp(fp->word_buf, "in_pack") == 0) {
                     if (NuFParGetWord(fp) != 0) {
@@ -583,8 +583,9 @@ COLLECTID *CollectIDUnlocked(i32 id) {
             case 0:
                 break;
             case 2:
-                if (static_cast<i8>(entry->field2_0x3) == -1 ||
-                    Game_AreaSave[static_cast<i8>(entry->field2_0x3)].area_complete == 0) {
+                if (__builtin_expect(static_cast<i8>(entry->field2_0x3) == -1 ||
+                                         Game_AreaSave[static_cast<i8>(entry->field2_0x3)].area_complete == 0,
+                                     1)) {
                     return NULL;
                 }
                 break;
@@ -610,7 +611,7 @@ COLLECTID *CollectIDUnlocked(i32 id) {
                 }
                 break;
             case 8:
-                if (!Store_IsPackUnlocked(static_cast<i8>(entry->field2_0x3))) {
+                if (__builtin_expect(!Store_IsPackUnlocked(static_cast<i8>(entry->field2_0x3)), 1)) {
                     return NULL;
                 }
                 break;

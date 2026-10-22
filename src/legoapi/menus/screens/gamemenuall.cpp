@@ -864,7 +864,7 @@ extern "C" void NewMenu(i32 menu_id, i32 menu_y, i32 param3) {
         menu->selected_column = menu->last_column;
     }
     if (menu_y < menu->first_row || menu_y > menu->last_row) {
-        if (__builtin_expect(MenuInfo[menu->menu].memory_y != -1, 1)) {
+        if (MenuInfo[menu->menu].memory_y != -1) {
             menu->selected_row = MenuInfo[menu->menu].memory_y;
         }
         if (menu->selected_row < menu->first_row) {
@@ -2861,21 +2861,23 @@ void APIMenuDrawMemCardSlots(MENU *menu, f32 y) {
         if (slot < 0 || slot > menu->last_column) {
             continue;
         }
-        if (!(slot < count)) {
+        if (slot < count) {
+            drawslotinfofn(x, y, highlight, slot);
+        } else {
             i32 red, green, blue;
             if (menu->selected_column == count && menu->selected_row == 0 && TestForController()) {
                 if (menu_pulsate > 0.0f) {
                     red = MenuSlotColourLerp(MENUFLASH0R, MENUFLASH1R, menu_pulsate);
                     green = MenuSlotColourLerp(MENUFLASH0G, MENUFLASH1G, menu_pulsate);
                     blue = MenuSlotColourLerp(MENUFLASH0B, MENUFLASH1B, menu_pulsate);
-                } else if (menu_flash != 0) {
-                    red = MENUFLASH0R;
-                    blue = MENUFLASH0B;
-                    green = MENUFLASH0G;
-                } else {
+                } else if (menu_flash == 0) {
                     red = MENUFLASH1R;
                     blue = MENUFLASH1B;
                     green = MENUFLASH1G;
+                } else {
+                    red = MENUFLASH0R;
+                    blue = MENUFLASH0B;
+                    green = MENUFLASH0G;
                 }
             } else if (menu_pulse > 0.0f) {
                 red = MenuSlotColourLerp(MENUFLASH0R, MENUNORMALR, menu_pulse);
@@ -2888,8 +2890,6 @@ void APIMenuDrawMemCardSlots(MENU *menu, f32 y) {
             }
             MenuText3DEx(apitxt_NEWSAVE, x, y, 1.0f, MENUTEXTSCALE * 0.85f, MENUTEXTSCALE * 0.85f, MENUTEXTSCALE, 0,
                          red, green, blue, static_cast<u8>(MenuA));
-        } else {
-            drawslotinfofn(x, y, highlight, slot);
         }
     }
 
@@ -2899,7 +2899,7 @@ void APIMenuDrawMemCardSlots(MENU *menu, f32 y) {
             red = MenuSlotColourLerp(MENUFLASH0R, MENUFLASH1R, menu_pulsate);
             green = MenuSlotColourLerp(MENUFLASH0G, MENUFLASH1G, menu_pulsate);
             blue = MenuSlotColourLerp(MENUFLASH0B, MENUFLASH1B, menu_pulsate);
-        } else if (menu_flash != 0) {
+        } else if (__builtin_expect(menu_flash != 0, 0)) {
             red = MENUFLASH0R;
             blue = MENUFLASH0B;
             green = MENUFLASH0G;

@@ -380,7 +380,7 @@ static i32 Collide2Objects(APIOBJECT *first, APIOBJECT *second) {
         second->collision_contact_mask |= first->collision_identity_mask;
         return collision_result;
     }
-    if (__builtin_expect(WORLD->current_level == DOGFIGHTA_LDATA, 0)) {
+    if (WORLD->current_level == DOGFIGHTA_LDATA) {
         collision_result = APIObjectCollision(first, second);
     } else {
         collision_result = APIObjectCollision2D(first, second);
@@ -391,8 +391,10 @@ static i32 Collide2Objects(APIOBJECT *first, APIOBJECT *second) {
             static_cast<GAMECHARACTERDATA *>(second_object->apiobj.character_data->field11_0x24);
         GAMECHARACTERDATA *first_data =
             static_cast<GAMECHARACTERDATA *>(first_object->apiobj.character_data->field11_0x24);
-        if (!((first_data->flags_090 & 0x1000) != 0 &&
-              first->horizontal_velocity_magnitude > first_data->movement_speed * 0.5f)) {
+        if ((first_data->flags_090 & 0x1000) != 0 &&
+            first->horizontal_velocity_magnitude > first_data->movement_speed * 0.5f) {
+            StartFlatten(first_object, second_object);
+        } else {
             if ((second_data->flags_090 & 0x1000) != 0 &&
                 second->horizontal_velocity_magnitude > second_data->movement_speed * 0.5f) {
                 StartFlatten(second_object, first_object);
@@ -403,8 +405,6 @@ static i32 Collide2Objects(APIOBJECT *first, APIOBJECT *second) {
                        second_object->field_0x107c == -1) {
                 second->velocity.y += first_vertical_velocity * 0.5f;
             }
-        } else {
-            StartFlatten(first_object, second_object);
         }
     }
 
@@ -3097,8 +3097,10 @@ GameObject_s *TargetGameObject(GameObject_s *object, nuvec_s *position, nuvec_s 
             if (((hostility >> target->apiobj.field_0x289) & 1) == 0)
                 continue;
         }
-        if (target->apiobj.collision_position.x < min_x || target->apiobj.collision_position.x > max_x ||
-            target->apiobj.collision_position.z < min_z || target->apiobj.collision_position.z > max_z)
+        if (__builtin_expect(
+                target->apiobj.collision_position.x < min_x || target->apiobj.collision_position.x > max_x ||
+                    target->apiobj.collision_position.z < min_z || target->apiobj.collision_position.z > max_z,
+                1))
             continue;
         if (WORLD->current_level == DEATHSTARRESCUEA_LDATA && target->apiobj.field_0x27c == -1 &&
             target->apiobj.position.y < -1.5f && GameCam->sock_position.location.sock == 2)

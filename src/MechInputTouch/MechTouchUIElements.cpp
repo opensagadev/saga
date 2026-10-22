@@ -502,7 +502,7 @@ void MechTouchUIPartySelector_OnRelease_Callback(MechTouchUIElement &element, To
     }
     if (target != NULL) {
         bool tagged = false;
-        if ((target->field_0xf00 & 2) == 0) {
+        if (__builtin_expect((target->field_0xf00 & 2) == 0, 1)) {
             if (TagCode(player, target, 0, 0, 1) == 1) {
                 Tag_NewTransfer(player, target);
                 tagged = true;
@@ -1065,7 +1065,7 @@ void DrawTouchPrompt(char *prompt, char *unused_label, bool hovered, bool large)
     // Retained from the original routine even though the result is unused.
     NuFmod(GlobalTimer.time_elapsed_mod_seconds, 0.5f);
 
-    if (NuStrICmp(prompt, ">") == 0) {
+    if (__builtin_expect(NuStrICmp(prompt, ">") == 0, 1)) {
         text_x_offset = 0.005f;
         text_y_offset = 0.0f;
     } else if (NuStrICmp(prompt, "<<") == 0) {

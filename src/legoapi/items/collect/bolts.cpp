@@ -634,8 +634,8 @@ void BoltTypes_Configure(WORLDINFO_s *world, char *config) {
         }
 
         if (reading_type != 0) {
-            if (NuStrICmp(parser->word_buf, const_cast<char *>("bolttype_end")) == 0) {
-                if (type.name[0] != '\0') {
+            if (__builtin_expect(NuStrICmp(parser->word_buf, const_cast<char *>("bolttype_end")) == 0, 1)) {
+                if (__builtin_expect(type.name[0] != '\0', 0)) {
                     for (i32 i = 0; i < 8; ++i) {
                         if (NuStrLen(world->bolt_types[i].name) != 0) {
                             continue;

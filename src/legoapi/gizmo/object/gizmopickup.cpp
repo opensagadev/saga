@@ -1391,7 +1391,7 @@ i32 LoseCoins(GameObject_s *object, i32 cause) {
         } else if (adjustment == -1) {
             lost >>= 1;
         }
-        if (lost > object->coinpacket->coins) {
+        if (__builtin_expect(lost > object->coinpacket->coins, 0)) {
             lost = object->coinpacket->coins;
             object->coinpacket->coins = 0;
         } else if (lost != 0) {

@@ -1235,7 +1235,7 @@ void NuMusic::InitData(const char *file, VARIPTR *buffer_start, VARIPTR buffer_e
     LOG_DEBUG("this->albums=%p, this->tracks=%p, this->indexes=%p", this->albums, this->tracks, this->indexes);
 
     i32 count = this->album_count;
-    if (count == 0 || (track_count = this->track_count, track_count == 0)) {
+    if (__builtin_expect(count == 0 || (track_count = this->track_count, track_count == 0), 0)) {
         *buffer_start = buffer_original;
         this->albums = NULL;
         this->album_count = 0;
@@ -1288,7 +1288,7 @@ void NuMusic::InitData(const char *file, VARIPTR *buffer_start, VARIPTR buffer_e
                     reinterpret_cast<Track *>(reinterpret_cast<char *>(album->tracks_source) + track_rebase);
             }
             ++album;
-        } while (album != end);
+        } while (__builtin_expect(album != end, 0));
         tracksPtr = this->tracks;
     }
 
@@ -1301,7 +1301,7 @@ LAB_003203e6:
     } else {
         local_20 = 0;
 
-        if (this->index_count != 0) {
+        if (__builtin_expect(this->index_count != 0, 0)) {
             memmove(__dest, pfVar2, this->index_count << 2);
             track_count = this->track_count;
             local_20 = this->index_count;
@@ -1542,12 +1542,12 @@ extern "C" {
 void NuSound3SetSampleTable(nusound_filename_info_s *info, variptr_u *buffer_start, variptr_u buffer_end) {
     for (; info != NULL && info->index != -1; info++) {
         // TODO: dont cast classes
-        if (!(info->index < 0x1000)) {
-            info->sample = (NuSoundStreamingSample *)NuSound.AddSample(info->filename, NuSoundSystem::FileType::WAV,
-                                                                       NuSoundSource::FeedType::ZERO);
-        } else {
+        if (__builtin_expect(info->index < 0x1000, 0)) {
             info->sample = (NuSoundStreamingSample *)NuSound.AddSample(info->filename, NuSoundSystem::FileType::OGG,
                                                                        NuSoundSource::FeedType::STREAMING);
+        } else {
+            info->sample = (NuSoundStreamingSample *)NuSound.AddSample(info->filename, NuSoundSystem::FileType::WAV,
+                                                                       NuSoundSource::FeedType::ZERO);
         }
 
         g_NuSoundSamples.PushBack(*info);

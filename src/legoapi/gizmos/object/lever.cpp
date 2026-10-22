@@ -91,7 +91,7 @@ void Lever_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
                 f32 frame = *playing;
                 if (!(frame >= AnimListFrame(object->apiobj.character_model, object->context_animation, 0)))
                     return;
-            } else if (object->context_animation_timer < 0.25f) {
+            } else if (__builtin_expect(object->context_animation_timer < 0.25f, 0)) {
                 return;
             }
         }
@@ -109,7 +109,7 @@ void Lever_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
     }
     if (object->apiobj.character_model->model_data_b[0x5d] == NULL || object->apiobj.field_0x27d == 0)
         return;
-    if (!(!ObjLandReady(object) && !objInNetWaitContext(object, 0x4a))) {
+    if (__builtin_expect(!(!ObjLandReady(object) && !objInNetWaitContext(object, 0x4a)), 1)) {
         LEVER_s *lever = Lever_FindNearest(world, &object->apiobj.lower_position, object, &distance);
         if (objInNetWaitContext(object, 0x4a)) {
             object->context_animation_timer -= FRAMETIME;
@@ -126,7 +126,7 @@ void Lever_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
                 show_lever_hint = 1;
         }
         f32 range = (object->apiobj.field_0x1dc + 0.25f) * lever->target_indicator_scale;
-        if (!(distance < range * range))
+        if (__builtin_expect(!(distance < range * range), 0))
             return;
         if (!(object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) && !objInNetWaitContext(object, 0x4a))
             return;

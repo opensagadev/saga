@@ -1401,13 +1401,7 @@ void NuMemoryManager::DumpBlocksForContext(u32 dump_id, NuSymbolQuery *query, Co
         for (Header *header = page->first_header; header != end;) {
             u32 block_size = BLOCK_SIZE(header->value);
             if ((header->value & ALLOC_MASK) != 0) {
-                if ((m_flags & MEM_MANAGER_DEBUG) == 0) {
-                    u16 category = DumpBlock(dump_id, query, header, 1, block_size, flags);
-                    block_size = BLOCK_SIZE(header->value);
-                    category_bytes[category] += block_size;
-                    total_bytes += block_size;
-                    ++total_blocks;
-                } else {
+                if ((m_flags & MEM_MANAGER_DEBUG) != 0) {
                     DebugHeader *debug = reinterpret_cast<DebugHeader *>(header);
                     if ((debug->flags.unknown & 1) == 0 && debug->flags.ctx_id == context_id &&
                         ((flags & 2) == 0 || (debug->flags.alloc_flags & 4) != 0)) {
@@ -1420,6 +1414,12 @@ void NuMemoryManager::DumpBlocksForContext(u32 dump_id, NuSymbolQuery *query, Co
                         total_blocks += count;
                         total_bytes += block_size;
                     }
+                } else {
+                    u16 category = DumpBlock(dump_id, query, header, 1, block_size, flags);
+                    block_size = BLOCK_SIZE(header->value);
+                    category_bytes[category] += block_size;
+                    total_bytes += block_size;
+                    ++total_blocks;
                 }
             }
             ValidateBlockEndTags(header, __FUNCTION__);

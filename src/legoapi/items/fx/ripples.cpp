@@ -355,7 +355,7 @@ void UpdateRippleSet(ripple_set_s *set) {
         if (node != NULL) {
             if (node == set->oldest)
                 set->oldest = node->next;
-            if (set->active_count != 0) {
+            if (__builtin_expect(set->active_count != 0, 1)) {
                 ripple_node_s *newest = set->newest;
                 ripple_node_s *free_head = set->free_head;
                 if (node->previous != NULL)

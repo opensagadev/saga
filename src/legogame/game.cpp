@@ -1197,10 +1197,10 @@ static i32 CheckMusicOther() {
     if (level == KAMINOE_LDATA) {
         return KaminoInside() == 0;
     }
-    if (level == MOSEISLEYD_LDATA) {
+    if (__builtin_expect(level == MOSEISLEYD_LDATA, 0)) {
         return socket_position.location.sock == 3;
     }
-    if (level == DEATHSTARBATTLED_LDATA) {
+    if (__builtin_expect(level == DEATHSTARBATTLED_LDATA, 0)) {
         if (DeathStarShieldDown() != 0) {
             deathstar_hold_count = 30;
             return 1;
@@ -1579,7 +1579,7 @@ void InitGameBeforeConfig(void) {
 i32 DoBuckStart(GameObject_s *object) {
     NUVEC delta;
     WORLDINFO_s *world = WorldInfo_CurrentlyActive();
-    if (world->current_level != HOTHESCAPEB_LDATA || object->id != id_SNOWMOB)
+    if (__builtin_expect(world->current_level != HOTHESCAPEB_LDATA || object->id != id_SNOWMOB, 0))
         return 0;
     static NUVEC forward = {0.0f, 0.0f, 1.0f};
     i32 jumped = 0;

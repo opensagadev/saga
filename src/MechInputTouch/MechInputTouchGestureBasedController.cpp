@@ -525,7 +525,7 @@ void MechInputTouchGestureBasedController::ProcessDragMovement(GameObject_s &obj
     stick_values[0] = MAX(-1.0f, (MIN(stick_x, 1.0f)));
     stick_values[1] = MAX(-1.0f, (MIN(stick_y, 1.0f)));
     field_9c += FRAMETIME;
-    if (field_9c > 1.0f) {
+    if (__builtin_expect(field_9c > 1.0f, 0)) {
         Hint_SetComplete(0x5f3);
     }
     if (field_94 != NULL) {
@@ -594,7 +594,7 @@ bool MechInputTouchGestureBasedController::TriggerJumpTask(JumpTriggerPacket con
         return false;
     }
     if (object->apiobj.field_0x27d == 0) {
-        if (VehicleArea == 0 && object->field_0xcc0 == NULL) {
+        if (__builtin_expect(VehicleArea == 0 && object->field_0xcc0 == NULL, 1)) {
             return false;
         }
     } else if (VehicleArea == 0 && object->field_0xcc0 == NULL) {
@@ -620,7 +620,7 @@ bool MechInputTouchGestureBasedController::TriggerJumpTask(JumpTriggerPacket con
         holder = packet.touch_holder;
         task = new MechTouchTaskAstroJetPack(*this);
     } else {
-        if (try_ai_path && StartJumpUsingAIPath(packet, object->apiobj.facing_angle))
+        if (__builtin_expect(try_ai_path && StartJumpUsingAIPath(packet, object->apiobj.facing_angle), 0))
             return true;
         holder = packet.touch_holder;
         task = new MechTouchTaskJump(*this, packet, disable_autopilot, use_velocity);

@@ -342,7 +342,7 @@ i32 ItemMenu(MENU_s *menu) {
     i32 cancel = 0;
     if (menu->confirm_pressed != 0 && menu->selected_row == 0) {
         candidate = static_cast<i32>(menu->selected_column) + 1;
-        if (candidate == entry_picked) {
+        if (__builtin_expect(candidate == entry_picked, 0)) {
             input.value[8] = 1;
         }
     }
@@ -370,7 +370,7 @@ i32 ItemMenu(MENU_s *menu) {
             if (picked == 0) {
                 picked = 1;
                 candidate = entry_picked;
-            } else if (picked == 5) {
+            } else if (__builtin_expect(picked == 5, 1)) {
                 picked = SHOPGOLDBRICKS != 0 ? 4 : 3;
                 candidate = entry_picked;
             } else
@@ -431,7 +431,7 @@ i32 ItemMenu(MENU_s *menu) {
         f32 old_factor = 1.0f - ShopSinePhase(1.0f - reverse_phase);
         f32 forward_factor = 1.0f - ShopSinePhase(reverse_phase);
 
-        if (lastitem != -1) {
+        if (__builtin_expect(lastitem != -1, 1)) {
             old_factor = ShopClamp01(old_factor);
             topscale[lastitem] = TopBigScale[lastitem] + (TopShelfScale[lastitem] - TopBigScale[lastitem]) * old_factor;
             forward_factor = ShopClamp01(forward_factor);
@@ -459,7 +459,7 @@ i32 ItemMenu(MENU_s *menu) {
 
     picked = lastitem;
     SubMenu = 0;
-    if (TopShelf[lastitem].type == 3) {
+    if (__builtin_expect(TopShelf[lastitem].type == 3, 0)) {
         lastitem = -1;
         easesubin = 1;
         inoutscale = 0.0f;
@@ -1663,7 +1663,7 @@ static inline i32 SubItemMenu(MENU_s *menu) {
             left = 1;
         else if (input.right_held)
             right = 1;
-        else if (input.confirm && !ExitMenu)
+        else if (__builtin_expect(input.confirm && !ExitMenu, 1))
             confirm = 1;
         else if (input.cancel)
             cancel = 1;
@@ -1676,7 +1676,7 @@ static inline i32 SubItemMenu(MENU_s *menu) {
                 confirm = 1;
             else {
                 moveitems = menu->selected_column - 3;
-                if (moveitems < 0)
+                if (__builtin_expect(moveitems < 0, 0))
                     left = 1;
                 else if (moveitems > 0)
                     right = 1;

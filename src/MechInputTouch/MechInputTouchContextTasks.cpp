@@ -726,7 +726,7 @@ void MechTouchTaskPlannedGoTo::AnalysePath() {
         position.y = path_points[path_index].y + step_y;
         ++path_index;
     }
-    if (path_index <= end) {
+    if (__builtin_expect(path_index <= end, 0)) {
         if (last_index > 0) {
             for (i32 i = last_index + 1; i <= path_count; ++i) {
                 path_points[i].y = -1000000000.0f;

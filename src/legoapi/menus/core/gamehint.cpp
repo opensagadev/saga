@@ -63,8 +63,10 @@ void MechHintUIButton::Render() {
 void MechHintUIButton::Process(float elapsed) {
     if (__builtin_expect(active_hint != NULL, 1)) {
         display_elapsed += elapsed;
-        if (MechSystems::Get()->PlayerButton().selector != NULL ||
-            (active_hint->display_duration > 0.0f && display_elapsed >= active_hint->display_duration)) {
+        if (__builtin_expect(
+                MechSystems::Get()->PlayerButton().selector != NULL ||
+                    (active_hint->display_duration > 0.0f && display_elapsed >= active_hint->display_duration),
+                1)) {
             if (active_hint != NULL) {
                 const f32 blend = AlphaBlendTime;
                 pending_hint = NULL;
@@ -85,11 +87,11 @@ void MechHintUIButton::Process(float elapsed) {
     }
     HINT_s *next_hint = pending_hint;
     const u8 was_pulsing = pulse_active;
-    if (hovered) {
-        scale_to = 0.6f;
+    if (!(hovered)) {
+        scale_to = 0.5f;
         scale = scale_to;
     } else {
-        scale_to = 0.5f;
+        scale_to = 0.6f;
         scale = scale_to;
     }
     scale_elapsed = scale_duration;

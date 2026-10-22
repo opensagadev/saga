@@ -1428,7 +1428,7 @@ void UpdateStatusScreen(WORLDINFO_s *) {
                 }
                 return;
             }
-        } else if (GAMEDEMO == 2) {
+        } else if (__builtin_expect(GAMEDEMO == 2, 1)) {
             if (GameTimer.time_elapsed >= 8.0f) {
                 EndOfDemo(0);
             }
@@ -1448,10 +1448,10 @@ void UpdateStatusScreen(WORLDINFO_s *) {
                    (StatusPacket.player_active[1] != 0 && (GamePad[1].buttons_pressed & button) != 0);
         }
         if (skip) {
-            if (StatusPacket.stage == NULL) {
+            if (__builtin_expect(StatusPacket.stage == NULL, 0)) {
                 return;
             }
-            if (StatusPacket.stage->skip_callback != NULL) {
+            if (__builtin_expect(StatusPacket.stage->skip_callback != NULL, 1)) {
                 StatusPacket.stage->skip_callback(StatusPacket.stage, &StatusPacket);
             }
         }

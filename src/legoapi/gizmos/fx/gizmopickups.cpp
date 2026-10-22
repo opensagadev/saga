@@ -354,10 +354,11 @@ static GIZMOPICKUP_s *GizmoPickups_CollideList(GameObject_s *object, GIZMOPICKUP
         f32 scale = type->score == 0 ? normal_pickup : scaled_pickup;
         f32 radius_x = type->shadow_extent_x * scale;
         f32 radius_y = scale * (coin_magnet ? type->shadow_extent_z : type->shadow_radius_z);
-        if (object->apiobj.collision_min.x > pickup->position.x + radius_x ||
-            pickup->position.x - radius_x > object->apiobj.collision_max.x ||
-            !(object->apiobj.collision_min.z <= pickup->position.z + radius_x) ||
-            pickup->position.z - radius_x > object->apiobj.collision_max.z) {
+        if (__builtin_expect(object->apiobj.collision_min.x > pickup->position.x + radius_x ||
+                                 pickup->position.x - radius_x > object->apiobj.collision_max.x ||
+                                 !(object->apiobj.collision_min.z <= pickup->position.z + radius_x) ||
+                                 pickup->position.z - radius_x > object->apiobj.collision_max.z,
+                             1)) {
             continue;
         }
 
@@ -368,8 +369,9 @@ static GIZMOPICKUP_s *GizmoPickups_CollideList(GameObject_s *object, GIZMOPICKUP
             if (!(dx * dx + dz * dz >= radius * radius)) {
                 return pickup;
             }
-        } else if (object->apiobj.collision_min.y <= pickup->position.y + radius_y &&
-                   !(pickup->position.y - radius_y > object->apiobj.collision_max.y)) {
+        } else if (__builtin_expect(object->apiobj.collision_min.y <= pickup->position.y + radius_y &&
+                                        !(pickup->position.y - radius_y > object->apiobj.collision_max.y),
+                                    1)) {
             if (object->field_0xcc0 == NULL) {
                 if (SphereSphereOverlapScaleY(&pickup->position, radius_x, radius_y, &object->apiobj.collision_position,
                                               object->apiobj.collision_radius, object->apiobj.field_0x1e0)) {
@@ -1260,7 +1262,7 @@ void SpecialMiniKits_Configure(WORLDINFO_s *world, char *config) {
             continue;
         }
         if ((item.flags & 0x20) != 0) {
-            if (item.special_name[0] == '\0') {
+            if (__builtin_expect(item.special_name[0] == '\0', 0)) {
                 continue;
             }
         } else if (NuSpecialExistsFn(&item.special) == 0) {

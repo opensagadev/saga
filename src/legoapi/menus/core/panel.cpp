@@ -779,7 +779,12 @@ void DrawMeleeTargetsNumber(i16 *targets, u8 *counts, i32 count, u8 reset, nuhsp
                     meleeTarg_flashTime[i] = 0.01f;
                 meleeTarg_flashTime[i] += FRAMETIME;
 
-                if (__builtin_expect(!(meleeTarg_flashTime[i] < 0.375f), 1)) {
+                if (__builtin_expect(meleeTarg_flashTime[i] < 0.375f, 0)) {
+                    const f32 phase = meleeTarg_flashTime[i] / 0.375f * 255.0f;
+                    green = static_cast<i32>(phase);
+                    red = static_cast<i32>(255.0f - phase);
+                    meleeTarg_scaleSize[i] = SeekLinearF(meleeTarg_scaleSize[i], 0.0f, 0.1f);
+                } else {
                     if (__builtin_expect(meleeTarg_flashTime[i] < 0.625f, 1)) {
                         meleeTarg_localCount[i] = counts[i];
                         red = 0;
@@ -795,11 +800,6 @@ void DrawMeleeTargetsNumber(i16 *targets, u8 *counts, i32 count, u8 reset, nuhsp
                         red = 255;
                         green = 0;
                     }
-                } else {
-                    const f32 phase = meleeTarg_flashTime[i] / 0.375f * 255.0f;
-                    green = static_cast<i32>(phase);
-                    red = static_cast<i32>(255.0f - phase);
-                    meleeTarg_scaleSize[i] = SeekLinearF(meleeTarg_scaleSize[i], 0.0f, 0.1f);
                 }
             }
 
