@@ -404,10 +404,7 @@ void Teleports_UpdateAfterGameObjects(WORLDINFO_s *world) {
         teleport->field_74 = SeekRot(teleport->field_74, teleport->field_78, 5.0f);
         if (NuSpecialExistsFn(&teleport->flap1_special)) {
             matrix = teleport->flap1_matrix;
-            if ((teleport->flags & 8) != 0)
-                NuMtxPreRotateX(&matrix, -teleport->field_74);
-            else
-                NuMtxPreRotateX(&matrix, teleport->field_74);
+            if ((teleport->flags & 8) == 0) NuMtxPreRotateX(&matrix, teleport->field_74); else NuMtxPreRotateX(&matrix, -teleport->field_74);
             NuSpecialSetDrawMtx(&teleport->flap1_special, &matrix);
             NuSpecialUpdate(&teleport->flap1_special);
         }

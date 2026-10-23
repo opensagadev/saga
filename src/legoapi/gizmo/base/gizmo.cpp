@@ -1109,7 +1109,7 @@ i32 GizmoGetGuid(GIZMOSYS_s *, GIZMO_s *) {
 i32 GizmoSysWriteInfo(GIZMOSYS_s *gizmo_sys, char *path, nugscn_s *scene) {
     nuhspecial_s special;
     GIZMO gizmo;
-    if (gizmotypes == NULL) {
+    if (__builtin_expect(gizmotypes == NULL, 0)) {
         return 0;
     }
     if (NuFileExists(path)) {
@@ -1135,7 +1135,7 @@ i32 GizmoSysWriteInfo(GIZMOSYS_s *gizmo_sys, char *path, nugscn_s *scene) {
             }
             length = NuStrLen(type->prefix) + 1;
             EdFileWriteChar(static_cast<char>(length));
-            if (length != 0) {
+            if (__builtin_expect(length != 0, 0)) {
                 EdFileWrite(type->prefix, length);
             }
             EdFileWriteInt(set->count);
@@ -1173,7 +1173,7 @@ i32 GizmoSysWriteInfo(GIZMOSYS_s *gizmo_sys, char *path, nugscn_s *scene) {
         GIZMOTYPE *special_type = &gizmotypes->types[gizspecial_gizmotype_id];
         i32 length = NuStrLen(special_type->prefix) + 1;
         EdFileWriteChar(static_cast<char>(length));
-        if (length != 0) {
+        if (__builtin_expect(length != 0, 0)) {
             EdFileWrite(special_type->prefix, length);
         }
 

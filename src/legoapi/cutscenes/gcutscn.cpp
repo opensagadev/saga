@@ -2309,10 +2309,10 @@ void instNuGCutSceneEndFirstFrame(instNUGCUTSCENE_s *instance) {
                 instNUGCUTCHAR_s *inst_character = &instance->character_instance->characters[i];
                 NUGCUTCHAR_s *character = &system->characters[i];
                 if (inst_character->character_model != NULL) {
-                    if ((character->flags & 2) == 0 && NuCutSceneCharacterEval != NULL) {
+                    if (__builtin_expect((character->flags & 2) == 0 && NuCutSceneCharacterEval != NULL, 1)) {
                         NuCutSceneCharacterEval(instance, scene, inst_character, character, frame);
                     }
-                    if (nu_current_thread_id == 0 && NuCutSceneCharacterRelease != NULL) {
+                    if (__builtin_expect(nu_current_thread_id == 0 && NuCutSceneCharacterRelease != NULL, 1)) {
                         NuCutSceneCharacterRelease(inst_character, character);
                     }
                 }
@@ -2330,10 +2330,10 @@ void instNuGCutSceneEndFirstFrame(instNUGCUTSCENE_s *instance) {
                 instNUGCUTCHAR_s *inst_character = &instance->character_instance->characters[i];
                 NUGCUTCHAR_s *character = &system->characters[i];
                 if (inst_character->character_model != NULL) {
-                    if ((character->flags & 2) == 0 && NuCutSceneCharacterEval != NULL) {
+                    if (__builtin_expect((character->flags & 2) == 0 && NuCutSceneCharacterEval != NULL, 1)) {
                         NuCutSceneCharacterEval(instance, scene, inst_character, character, frame);
                     }
-                    if (nu_current_thread_id == 0 && NuCutSceneCharacterRelease != NULL) {
+                    if (__builtin_expect(nu_current_thread_id == 0 && NuCutSceneCharacterRelease != NULL, 1)) {
                         NuCutSceneCharacterRelease(inst_character, character);
                     }
                 }

@@ -14967,7 +14967,7 @@ extern "C" {
                 }
             }
             for (i32 i = 0; i < maxdebkeys; ++i)
-                if (debkeydata[i].effect_index == index)
+                if (__builtin_expect(debkeydata[i].effect_index == index, 0))
                     debkeydata[i].effect_index = replacement;
         } else {
             for (i32 i = 0; i < 512; ++i)

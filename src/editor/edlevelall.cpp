@@ -8182,7 +8182,7 @@ i32 LevelEditor::Load(char *filename, variptr_u *buffer, variptr_u *buffer_end, 
     void *file_data = scratch.position->void_ptr;
     i32 file_size = NuFileLoadBuffer(save_filename, file_data, scratch.remaining);
     if (file_size > 0) {
-        if (static_cast<u32>(file_size) < scratch.end->addr - scratch.position->addr) {
+        if (__builtin_expect(static_cast<u32>(file_size) < scratch.end->addr - scratch.position->addr, 1)) {
             scratch.position->addr += file_size;
             scratch.used += file_size;
             scratch.remaining -= file_size;

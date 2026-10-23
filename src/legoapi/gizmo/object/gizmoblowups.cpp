@@ -1806,7 +1806,7 @@ void GizmoBlowupsFinalSetup(WORLDINFO_s *world) {
             blowup->bounds_max = v000;
             blowup->bounds_min = v000;
         } else {
-            if (NuSpecialExistsFn(&blowup->type->burst_special) != 0) {
+            if (__builtin_expect(NuSpecialExistsFn(&blowup->type->burst_special) != 0, 0)) {
                 NuSpecialSetVisibility(&blowup->type->burst_special, 0);
             }
             if ((blowup->type->animation_flags & 0x20) != 0) {

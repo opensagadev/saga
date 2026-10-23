@@ -1072,7 +1072,7 @@ f32 FindReflectionNoPlatforms(nuvec_s *position) {
 }
 
 f32 BlobShadowFade(NUVEC *position, f32 fade_start, f32 fade_end, f32 alpha) {
-    if (alpha <= 0.0f) {
+    if (__builtin_expect(alpha <= 0.0f, 0)) {
         return 0.0f;
     }
 

@@ -1196,11 +1196,11 @@ void MenuUpdateLoading(MENU_s *) {
     if (memcard_loadneeded != 0) {
         memcard_loadmessage_delay = 1.0f;
         memcard_loadresult_delay = 1.0f;
-        if (saveload_cardtype == -1 || memcard_cardchanged != 0) {
+        if (__builtin_expect(saveload_cardtype == -1 || memcard_cardchanged != 0, 1)) {
             memcard_loadneeded = 0;
             memcard_loadfailed = 1;
         }
-    } else if (memcard_loadstarted != 0 || memcard_loadmessage_delay > 0.0f) {
+    } else if (__builtin_expect(memcard_loadstarted != 0 || memcard_loadmessage_delay > 0.0f, 0)) {
         memcard_loadresult_delay = 1.0f;
     } else if (memcard_loadresult_delay <= 0.0f) {
         if (memcard_loadfailed == 0 && memcard_loadcorrupt == 0) {
