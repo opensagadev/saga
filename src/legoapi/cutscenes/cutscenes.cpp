@@ -735,7 +735,7 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
     f32 animation_rate;
     f32 blend_time;
     f32 animation_start_frame;
-    bool use_low_detail = false;
+    i32 use_low_detail = 0;
     if (cut != NULL) {
         use_low_detail = (cut->flags & 0x10000) != 0 && g_isLowEndDevice != 0;
         NuGCutCharAnimProcess(character, frame, &world_matrix, &visible, &animation_index, &animation_rate, &blend_time,

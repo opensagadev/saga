@@ -1386,6 +1386,15 @@ void SarlaccPitB_Reset(WORLDINFO_s *world) {
         GizObstacle_Stop(static_cast<GIZOBSTACLE_s *>(obstMirrorBall->object));
 }
 
+static i32 SarlaccDiscoPickPanel(i32 state, i32 exclude) {
+    i32 candidates[16];
+    i32 count = 0;
+    for (i32 index = 0; index < sarlaccdisco.count; ++index)
+        if (index != exclude && sarlaccdisco.panel_state[index] == state)
+            candidates[count++] = index;
+    return count != 0 ? candidates[NuRand(NULL) % count] : -1;
+}
+
 void SarlaccPitB_Update(WORLDINFO_s *world) {
 
     static NUVEC lumppos;
@@ -1407,7 +1416,6 @@ void SarlaccPitB_Update(WORLDINFO_s *world) {
         }
 
         switch (sarlaccdisco.phase) {
-            i32 candidates[16];
             case 0:
                 sarlaccb_netpacket->disco_active = 0;
                 if (NuSpecialExistsFn(&LevSpecial[0]) && ready &&
@@ -1418,16 +1426,8 @@ void SarlaccPitB_Update(WORLDINFO_s *world) {
                        static_cast<i32>(1u << ((sarlaccdisco.area - world->ai_sys->areas) & 31)))))) {
                     sarlaccdisco.phase = 1;
                     sarlaccdisco.timer = 0.0f;
-                    i32 count = 0;
-                    for (i32 index = 0; index < sarlaccdisco.count; ++index)
-                        if (sarlaccdisco.panel_state[index] == 0)
-                            candidates[count++] = index;
-                    sarlaccdisco.first_panel = count != 0 ? candidates[NuRand(NULL) % count] : -1;
-                    count = 0;
-                    for (i32 index = 0; index < sarlaccdisco.count; ++index)
-                        if (index != sarlaccdisco.first_panel && sarlaccdisco.panel_state[index] == 0)
-                            candidates[count++] = index;
-                    sarlaccdisco.second_panel = count != 0 ? candidates[NuRand(NULL) % count] : -1;
+                    sarlaccdisco.first_panel = SarlaccDiscoPickPanel(0, -1);
+                    sarlaccdisco.second_panel = SarlaccDiscoPickPanel(0, sarlaccdisco.first_panel);
                     if (sarlaccdisco.first_panel != -1 && sarlaccdisco.second_panel != -1) {
                         sarlaccdisco.panel_state[sarlaccdisco.first_panel] = 1;
                         sarlaccdisco.panel_state[sarlaccdisco.second_panel] = 1;
@@ -1447,11 +1447,11 @@ void SarlaccPitB_Update(WORLDINFO_s *world) {
                 NUVEC *position = NuSpecialGetPos(&sarlaccdisco.flash[sarlaccdisco.first_panel]);
                 for (i32 index = 0; index < 8; ++index) {
                     GameObject_s *object = Player[index];
-                    if (object != NULL && (object->apiobj.field_0x1f8 & 0x1001) == 0x1001 &&
+                    if (object != NULL && (~object->apiobj.field_0x1f8 & 0x1001) == 0 &&
                         object->apiobj.field_0x27d != 0) {
                         f32 dx = position->x - object->apiobj.position.x;
                         f32 dz = position->z - object->apiobj.position.z;
-                        if (dx * dx + dz * dz < 0.2f * 0.2f) {
+                        if (__builtin_expect(dx * dx + dz * dz < 0.2f * 0.2f, 1)) {
                             sarlaccdisco.panel_state[sarlaccdisco.first_panel] = 2;
                             first_occupied = 1;
                             if (object == player)
@@ -1476,7 +1476,7 @@ void SarlaccPitB_Update(WORLDINFO_s *world) {
                         object->apiobj.field_0x27d != 0) {
                         f32 dx = position->x - object->apiobj.position.x;
                         f32 dz = position->z - object->apiobj.position.z;
-                        if (!(dx * dx + dz * dz >= 0.2f * 0.2f)) {
+                        if (dx * dx + dz * dz < 0.2f * 0.2f) {
                             sarlaccdisco.panel_state[sarlaccdisco.second_panel] = 2;
                             second_occupied = 1;
                             if (object == player)
@@ -1491,16 +1491,26 @@ void SarlaccPitB_Update(WORLDINFO_s *world) {
                         NUMTX_GET_ROW_VEC(NuSpecialGetDrawMtx(&sarlaccdisco.on[sarlaccdisco.second_panel]), 3);
                     sarlaccb_netpacket->sound_mask |= 1 << sarlaccdisco.second_panel;
                 }
-                if (!(first_occupied && second_occupied)) {
+                if (first_occupied && second_occupied) {
+                    sarlaccdisco.timer = 0.0f;
+                    sarlaccdisco.panel_state[sarlaccdisco.first_panel] = 3;
+                    sarlaccdisco.panel_state[sarlaccdisco.second_panel] = 3;
+                    sarlaccdisco.first_panel = SarlaccDiscoPickPanel(0, -1);
+                    sarlaccdisco.second_panel = SarlaccDiscoPickPanel(0, sarlaccdisco.first_panel);
+                    if (sarlaccdisco.first_panel == -1 || sarlaccdisco.second_panel == -1) {
+                        sarlaccdisco.phase = 2;
+                        for (i32 index = 0; index < sarlaccdisco.count; ++index)
+                            sarlaccdisco.panel_state[index] = 4;
+                    } else {
+                        sarlaccdisco.panel_state[sarlaccdisco.first_panel] = 1;
+                        sarlaccdisco.panel_state[sarlaccdisco.second_panel] = 1;
+                    }
+                } else {
                     sarlaccdisco.timer += FRAMETIME;
                     if (sarlaccdisco.timer > 2.5f) {
                         sarlaccdisco.timer = 0.0f;
                         for (i32 pass = 0; pass < 2; ++pass) {
-                            i32 count = 0;
-                            for (i32 index = 0; index < sarlaccdisco.count; ++index)
-                                if (sarlaccdisco.panel_state[index] == 3)
-                                    candidates[count++] = index;
-                            i32 selected = count != 0 ? candidates[NuRand(NULL) % count] : -1;
+                            i32 selected = SarlaccDiscoPickPanel(3, -1);
                             if (selected != -1)
                                 sarlaccdisco.panel_state[selected] = 0;
                         }
@@ -1521,28 +1531,6 @@ void SarlaccPitB_Update(WORLDINFO_s *world) {
                                 LevelLocator->position.z = help_position->z;
                             }
                         }
-                    }
-                } else {
-                    sarlaccdisco.timer = 0.0f;
-                    sarlaccdisco.panel_state[sarlaccdisco.first_panel] = 3;
-                    sarlaccdisco.panel_state[sarlaccdisco.second_panel] = 3;
-                    i32 count = 0;
-                    for (i32 index = 0; index < sarlaccdisco.count; ++index)
-                        if (sarlaccdisco.panel_state[index] == 0)
-                            candidates[count++] = index;
-                    sarlaccdisco.first_panel = count != 0 ? candidates[NuRand(NULL) % count] : -1;
-                    count = 0;
-                    for (i32 index = 0; index < sarlaccdisco.count; ++index)
-                        if (index != sarlaccdisco.first_panel && sarlaccdisco.panel_state[index] == 0)
-                            candidates[count++] = index;
-                    sarlaccdisco.second_panel = count != 0 ? candidates[NuRand(NULL) % count] : -1;
-                    if (sarlaccdisco.first_panel == -1 || sarlaccdisco.second_panel == -1) {
-                        sarlaccdisco.phase = 2;
-                        for (i32 index = 0; index < sarlaccdisco.count; ++index)
-                            sarlaccdisco.panel_state[index] = 4;
-                    } else {
-                        sarlaccdisco.panel_state[sarlaccdisco.first_panel] = 1;
-                        sarlaccdisco.panel_state[sarlaccdisco.second_panel] = 1;
                     }
                 }
                 break;
@@ -1590,15 +1578,16 @@ void SarlaccPitB_Update(WORLDINFO_s *world) {
     }
     if (LevFlag[0] == 0 && NuSpecialGetVisibilityFn(&LevHSpecial[0])) {
         lumppos = *NuSpecialGetDrawPos(&LevHSpecial[0]);
-        LevFlag[0] = 1;
         enginetimer = 0.05f;
+        LevFlag[0] = 1;
     }
     if (LevFlag[0] != 0) {
+        f32 base = lumppos.z;
         enginetimer -= FRAMETIME;
         if (__builtin_expect(enginetimer <= 0.0f, 0))
             enginetimer = 0.1f;
         f32 offset = 1.0f - (NU_SIN_LUT(enginetimer * 10.0f * 32768.0f + 16384.0f) + 1.0f) * 0.5f;
-        f32 z = lumppos.z + (offset * 0.01f - 0.005f);
+        f32 z = base + (offset * 0.01f - 0.005f);
         NuSpecialGetDrawPos(&LevHSpecial[0])->z = z;
         PlaySfx("env_curtain_lp", NuSpecialGetDrawPos(&LevHSpecial[0]));
     }

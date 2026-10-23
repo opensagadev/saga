@@ -10990,7 +10990,7 @@ void DebrisProcessGeneration() {
         f32 sound_range = effect->sound_range_override;
         if (sound_range == 0.0f) {
             sound_range = effect->sound_range;
-            if (sound_range == 0.0f)
+            if (__builtin_expect(sound_range == 0.0f, 1))
                 sound_range = effect->clip_extent;
         }
         f32 volume = 1.0f;
@@ -11013,7 +11013,7 @@ void DebrisProcessGeneration() {
         if (key->field_2f4 == 0)
             key->field_184 = 0;
         else {
-            if (key->field_2f4 == 2)
+            if (__builtin_expect(key->field_2f4 == 2, 1))
                 key->field_184 = 1;
             if (key->field_184 != 0 && key->previous_allocated_chunk_count == 0) {
                 DebReAlloc(key, effect->max_particles);
@@ -11091,7 +11091,7 @@ void DebrisProcessGeneration() {
                     uv1deb *particle = key->generator(key, effect, emission_time);
                     if (effect->process_spheres != 0 && particle != NULL && emission == 1)
                         DebrisProcessSpheres(particle, emission_time, effect, key, 0);
-                    if (key->process_collision_sound != 0 && sound_range > key->cutoff_distance) {
+                    if (__builtin_expect(key->process_collision_sound != 0 && sound_range > key->cutoff_distance, 1)) {
                         for (i32 i = 0; i < 4; i++) {
                             if (effect->sound_data[i * 3] != -1 && effect->sound_data[i * 3 + 1] == 3)
                                 PlaySfxByIdEx(effect->sound_data[i * 3], &key->position, volume, 1.0f);
@@ -16914,7 +16914,7 @@ extern "C" void terrainpickupinit(char *path, void **buffer) {
             TERRAIN_SHAPE *shape = reinterpret_cast<TERRAIN_SHAPE *>(batch + 1);
             auto batch_shape_count = batch->shape_count;
             for (i32 i = 0; i < batch_shape_count; ++i, ++shape) {
-                if (shape->material[0] == 0xff) {
+                if (__builtin_expect(shape->material[0] == 0xff, 1)) {
                     shape->flags |= 0x80;
                     shape->material[0] = shape->material[1];
                     shape->material[1] = 0;
@@ -17390,7 +17390,7 @@ extern "C" {
         }
         const i32 matrix_count = version >= 8 ? EdFileReadInt() : 0x3000;
         usize vector_cursor;
-        if (edbits_editmode == 1 && edgra_vecbuffer != NULL) {
+        if (__builtin_expect(edbits_editmode == 1 && edgra_vecbuffer != NULL, 1)) {
             vector_cursor = reinterpret_cast<usize>(edgra_vecbuffer);
         } else {
             vector_cursor = matrix_base + static_cast<usize>(matrix_count) * sizeof(NUMTX);
@@ -17454,7 +17454,7 @@ extern "C" {
                 clump->near_distance = EdFileReadFloat();
                 clump->far_distance = EdFileReadFloat();
             }
-            if (version < 7) {
+            if (__builtin_expect(version < 7, 0)) {
                 if (clump->kind == 1) {
                     clump->field_42 = 0;
                     clump->field_43 = 0;
@@ -17526,7 +17526,7 @@ extern "C" {
                 clump->element_count = 4;
             }
 
-            if (clump->special_index == -1) {
+            if (__builtin_expect(clump->special_index == -1, 1)) {
                 clump->element_count = 0;
             }
             if (file_index % edgra_clumpthin != 0 && edbits_editmode == 0) {
@@ -23360,7 +23360,7 @@ extern "C" {
             }
             AnimParams[slot].field_17c = 0.99f;
             if (__builtin_expect(version > 1, 1)) {
-                if (AnimParams[slot].sound_count > 8)
+                if (__builtin_expect(AnimParams[slot].sound_count > 8, 1))
                     AnimParams[slot].sound_count = 8;
                 for (i32 sound = 0; sound < AnimParams[slot].sound_count; ++sound) {
                     EdFileRead(AnimParams[slot].sound_names[sound], 16);
@@ -23373,7 +23373,7 @@ extern "C" {
             nuhspecial_s special;
             NuGScnGetSpecial(&special, scene, AnimParams[slot].instance_id);
             AnimParams[slot].platform_id = FindPlatInst(NuSpecialGetInstanceix(&special));
-            if (version > 3) {
+            if (__builtin_expect(version > 3, 1)) {
                 AnimParams[slot].bounce_impulse = EdFileReadFloat();
                 AnimParams[slot].bounce_spring = EdFileReadFloat();
                 AnimParams[slot].bounce_damping = EdFileReadFloat();

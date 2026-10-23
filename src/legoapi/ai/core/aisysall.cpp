@@ -6874,7 +6874,7 @@ extern "C" {
 
 static __used__ void creatureEditor_cbSelectScript(eduimenu_s *parent, eduiitem_s *, unsigned int) {
     eduimenu_s *menu = eduiMenuCreate(220, 70, 240, 250, ed_fnt, creatureEditor_cbCancelMenu, "Select Script");
-    if (menu == nullptr)
+    if (__builtin_expect(menu == nullptr, 1))
         return;
     for (i32 index = 0;; ++index) {
         char *name = AIScriptNameFromIx(aieditor->ai_system, index);
@@ -6883,12 +6883,12 @@ static __used__ void creatureEditor_cbSelectScript(eduimenu_s *parent, eduiitem_
         if (NuStrICmp(name, "Level") == 0)
             continue;
         CreatureEditorRecord *creature = creatureEditor_Current();
-        if (creature != nullptr && NuStrICmp(creature->script_name, name) == 0) {
-            eduiMenuAddItem(menu, eduiItemCheckCreate(index, attr, 1, 1, creatureEditor_cbSetScript, name));
-            menu->selected = edui_last_item;
+        if (!(creature != nullptr && NuStrICmp(creature->script_name, name) == 0)) {
+            eduiMenuAddItem(menu, eduiItemCheckCreate(index, attr, 0, 1, creatureEditor_cbSetScript, name));
             eduiMenuAttach(parent, menu);
         } else {
-            eduiMenuAddItem(menu, eduiItemCheckCreate(index, attr, 0, 1, creatureEditor_cbSetScript, name));
+            eduiMenuAddItem(menu, eduiItemCheckCreate(index, attr, 1, 1, creatureEditor_cbSetScript, name));
+            menu->selected = edui_last_item;
             eduiMenuAttach(parent, menu);
         }
     }
@@ -11513,7 +11513,7 @@ extern "C" {
             info->direction = saved_direction;
         } else {
             i32 remaining = info->path->node_count < checks ? info->path->node_count : checks;
-            while (remaining != 0) {
+            while (__builtin_expect(remaining != 0, 1)) {
                 AIPATHNODE *node = &info->path->nodes[info->next_check];
                 for (i32 index = 0; index < node->connection_count; ++index) {
                     if (WithinConnection(system, position, path, node->connections[index], 1, NULL, 0xff, 0xff, info,
@@ -18210,7 +18210,9 @@ void creatureEditor_Render(i32 x, i32 y, float xscale, float yscale) {
                                 : (record == nearest_for_render ? -1 : 0);
         for (i32 group = 0; group < record[0x5b]; ++group, render_colour = 0) {
             u32 valid_positions = *reinterpret_cast<u32 *>(record + 0x54);
-            if (!((static_cast<u64>(valid_positions) >> (group & 63)) & 1) || !creatureEditor_IsSelectable(creature)) {
+            if (__builtin_expect(!((static_cast<u64>(valid_positions) >> (group & 63)) & 1) ||
+                                     !creatureEditor_IsSelectable(creature),
+                                 0)) {
                 continue;
             }
             nuvec_s position;

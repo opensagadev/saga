@@ -1828,11 +1828,11 @@ void BobaRocket_Move(PART_s *part, f32 elapsed) {
             target.y = target_y;
             target.z = target_z;
             has_target = true;
-        } else if (BobaRocketTarget.Get() != NULL) {
+        } else if (__builtin_expect(BobaRocketTarget.Get() != NULL, 0)) {
             BobaRocketTarget.Get()->GetPos(target, -1);
             has_target = true;
         }
-        if (has_target) {
+        if (has_target != 0) {
             NuVecSub(&delta, &target.xyz, &part->position);
             f32 horizontal_squared = delta.x * delta.x + delta.z * delta.z;
             i32 yaw = NuAtan2D(delta.x, delta.z);
@@ -1875,7 +1875,7 @@ void BobaRocket_Move(PART_s *part, f32 elapsed) {
         scale.z = factor;
         NuMtxPreScale(&part->transform, &scale);
     }
-    if (static_cast<i8>(part->active) < 0) {
+    if (__builtin_expect(static_cast<i8>(part->active) < 0, 1)) {
         i32 count = ParticlesPerFrame(1.0f, FRAMETIME);
         delta.x = -part->velocity.x;
         delta.y = -part->velocity.y;
@@ -11420,12 +11420,12 @@ void Animate_PROTOCOL(GameObject_s *object) {
         packet.requested_animation = object->context_animation;
         goto final_animation;
     }
-    if (object->context_target_position != NULL) {
+    if (__builtin_expect(object->context_target_position != NULL, 1)) {
         packet.requested_animation = static_cast<i16>(SetProtocolDroidFallAnim(object));
         goto final_animation;
     }
     packet.requested_animation = CHARACTER_ANIMATION_FALL;
-    if (object->character_context == CHARACTER_CONTEXT_DOOMED)
+    if (__builtin_expect(object->character_context == CHARACTER_CONTEXT_DOOMED, 1))
         goto falling;
     if (object->apiobj.field_0x27d != 0)
         goto idle;
@@ -11480,7 +11480,7 @@ idle:
     goto final_animation;
 falling:
     packet.requested_animation = static_cast<i16>(SetProtocolDroidFallAnim(object));
-    if (UseFallAnim(object))
+    if (__builtin_expect(UseFallAnim(object) != 0, 1))
         packet.requested_animation = CHARACTER_ANIMATION_FALL;
 final_animation:
     if (packet.requested_animation == CHARACTER_ANIMATION_FALL)
@@ -11667,9 +11667,11 @@ __attribute__((optimize("O2", "tree-vectorize"))) void Animate_SUPERBATTLEDROID(
                 if (!use_default_idle) {
                     const bool has_fall =
                         object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] != NULL;
-                    if (object->ground_contact_grace_timer > 0.0f || !has_fall ||
-                        (object->fall_animation_timer < 0.2f && object->nearby_floor_distance != 2000000.0f &&
-                         object->nearby_floor_distance < 0.25f && !(object->apiobj.velocity.y >= 0.0f))) {
+                    if (__builtin_expect(
+                            object->ground_contact_grace_timer > 0.0f || !has_fall ||
+                                (object->fall_animation_timer < 0.2f && object->nearby_floor_distance != 2000000.0f &&
+                                 object->nearby_floor_distance < 0.25f && !(object->apiobj.velocity.y >= 0.0f)),
+                            0)) {
                         use_default_idle = !(GetGameCharacterData(object)->field_0x28 > 0.0f) || !has_fall;
                     }
                 }
@@ -12498,8 +12500,9 @@ void Move_POD(GameObject_s *object) {
         }
         object->current_speed_mul = SeekLinearF(object->current_speed_mul, target_speed, rate);
 
-        if ((object->field_0xe20 & 0x20) == 0 && object->apiobj.field_0x281 == 0x14 &&
-            object->apiobj.collision_min.y - object->apiobj.field_0x218 < PODBOOSTHEIGHT) {
+        if (__builtin_expect((object->field_0xe20 & 0x20) == 0 && object->apiobj.field_0x281 == 0x14 &&
+                                 object->apiobj.collision_min.y - object->apiobj.field_0x218 < PODBOOSTHEIGHT,
+                             1)) {
             NewBuzz(object->pad_gamepad->pad, 0.1f, 0);
             NewRumble(object->pad_gamepad->pad, 0.5f, 0);
             object->current_speed_mul = WORLD->area == PODRACE_ADATA ? 2.0f : 1.4f;
@@ -12934,7 +12937,7 @@ void MovePlayer_NETWORK(GameObject_s *object) {
     Tag_Check(object);
     ForcePushCode(object, 0);
     object->field_0xd8c = 1.0f;
-    if (api.field_0x287 == 0 && FadeSys.fade == 0.0f) {
+    if (__builtin_expect(api.field_0x287 == 0 && FadeSys.fade == 0.0f, 1)) {
         if (object->force_glow_step > 0.0f)
             object->force_glow_step -= FRAMETIME;
         else

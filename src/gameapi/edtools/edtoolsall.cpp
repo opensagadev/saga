@@ -5253,7 +5253,7 @@ extern "C" {
             for (eduiitem_s *item = menu->field_0c; item && item != menu->field_10; item = item->next)
                 ++count;
             menu->selected = menu->field_0c;
-            while (menu->selected->previous && count--) {
+            while (__builtin_expect(menu->selected->previous && count--, 0)) {
                 menu->selected = menu->selected->previous;
                 menu->field_0c = menu->selected;
             }
@@ -5282,7 +5282,7 @@ extern "C" {
                 for (eduiitem_s *item = menu->field_0c; item && item != menu->field_10; item = item->next)
                     ++count;
                 menu->field_0c = menu->selected;
-                while (menu->field_0c->previous && count--)
+                while (__builtin_expect(menu->field_0c->previous && count--, 0))
                     menu->field_0c = menu->field_0c->previous;
             }
             return 0;
@@ -5964,10 +5964,10 @@ extern "C" {
 
                     f32 sine = NU_SIN_LUT(static_cast<u16>(angle) + 0x2000);
                     if (NuFabs(sine) > 0.1f) {
-                        if (sine > 0.0f)
-                            sine -= 0.1f;
-                        else
+                        if (sine <= 0.0f)
                             sine += 0.1f;
+                        else
+                            sine -= 0.1f;
                         f32 distance = NuFsqrt(mouse_x * mouse_x + mouse_y * mouse_y) * sine *
                                            (zoom_scale * camera->distance_speed) * camera->mouse_move_speed +
                                        camera->distance;
@@ -5981,7 +5981,7 @@ extern "C" {
             } else if (__builtin_expect(buttons == 1, 0)) {
                 if (camera->freedoms & EDCAM_FREEDOM_PITCH) {
                     camera->pitch -= static_cast<i32>(mouse_y * 16.0f);
-                    if (camera->pitch > 0x4000)
+                    if (__builtin_expect(camera->pitch > 0x4000, 0))
                         camera->pitch = 0x4000;
                     if (camera->pitch < -0x4000)
                         camera->pitch = -0x4000;
@@ -7055,7 +7055,7 @@ void FS_GetDirList(char *path, char *filter, char *filter_out) {
     char *volatile next;
     char entry[0x118] __attribute__((aligned(16)));
     volatile char header[7];
-    if (directory != 0) {
+    if (__builtin_expect(directory != 0, 1)) {
         next = FS_FileList + 10;
         while (i32 name_length = NuFileReadDir(directory, entry)) {
             char *name = entry + 0x18;
@@ -7092,7 +7092,7 @@ void FS_GetDirList(char *path, char *filter, char *filter_out) {
 
     char *file_begin = next;
     directory = NuFileOpenDir(path);
-    if (directory != 0) {
+    if (__builtin_expect(directory != 0, 1)) {
         while (i32 name_length = NuFileReadDir(directory, entry)) {
             char *name = entry + 0x18;
             if (__builtin_expect((entry[0] & 8) || !FS_FileNameFilter(name), 1)) {

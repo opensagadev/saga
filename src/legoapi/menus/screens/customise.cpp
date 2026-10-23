@@ -932,338 +932,333 @@ void CustomiserMenu_Update(MENU_s *) {
     if (customiser_save_done != 0) {
         CustomiserMenu_End();
         customiser_save_done = 0;
-        return;
-    }
-    CUSTOMISER *customiser = CharacterCustomiser;
-    bool quit = customiser == NULL;
-    i32 active_index, active_count;
-    Customiser_GetActiveWeirdoIndex(&active_index, &active_count);
-    BlipL[0] = BlipL[1] = 0.0f;
-    BlipR[0] = BlipR[1] = 0.0f;
-    BlipU[0] = BlipU[1] = 0.0f;
-    BlipD[0] = BlipD[1] = 0.0f;
-    i32 select[2];
-    bool cancel = false;
-    select[0] = 0;
-    CustomiseNameBoardTMul[0] = CustomiseMode[0] == 1 ? 1.0f : 0.0f;
-    CustomiseNameBoardMul[0] = SeekLinearF(CustomiseNameBoardMul[0], CustomiseNameBoardTMul[0], 4.0f * FRAMETIME);
-    CustomiseNameLetterBlipScale[0] = SeekLinearF(CustomiseNameLetterBlipScale[0], 1.0f, 5.0f * FRAMETIME);
-    if (MenuPacket.active_player[0] != 0) {
-        if ((GamePad[0].buttons_pressed & GAMEPAD_MENUSELECT) != 0)
-            select[0] = 1;
-        else if ((GamePad[0].buttons_pressed & GAMEPAD_MENUCANCEL) != 0)
-            cancel = true;
-    }
-
-    select[1] = 0;
-    CustomiseNameBoardTMul[1] = CustomiseMode[1] == 1 ? 1.0f : 0.0f;
-    CustomiseNameBoardMul[1] = SeekLinearF(CustomiseNameBoardMul[1], CustomiseNameBoardTMul[1], 4.0f * FRAMETIME);
-    CustomiseNameLetterBlipScale[1] = SeekLinearF(CustomiseNameLetterBlipScale[1], 1.0f, 5.0f * FRAMETIME);
-    if (MenuPacket.active_player[1] != 0) {
-        if ((GamePad[1].buttons_pressed & GAMEPAD_MENUSELECT) != 0)
-            select[1] = 1;
-        else if ((GamePad[1].buttons_pressed & GAMEPAD_MENUCANCEL) != 0)
-            cancel = true;
-    }
-    if (cancel && CustomiseMode[0] != 1 && CustomiseMode[1] != 1) {
-        if (GAMEDEMO != 0 && MenuPacket.active_player[0] != 0 && MenuPacket.active_player[1] != 0) {
-            if ((GamePad[0].buttons_pressed & GAMEPAD_MENUCANCEL) != 0)
-                MenuPacket.customise_demo_exit[0] = MenuPacket.customise_demo_exit[0] == 0;
-            if ((GamePad[1].buttons_pressed & GAMEPAD_MENUCANCEL) != 0)
-                MenuPacket.customise_demo_exit[1] = MenuPacket.customise_demo_exit[1] == 0;
-            if (MenuPacket.customise_demo_exit[0] != 0 && MenuPacket.customise_demo_exit[1] != 0)
-                quit = true;
-        } else
-            quit = true;
-    } else if ((select[0] != 0 || select[1] != 0) && active_count == 1 && CustomiseMode[0] != 1 &&
-               CustomiseMode[1] != 1) {
-        if (!quit) {
-            MenuPacket.customise_other_player[active_index] = MenuPacket.customise_other_player[active_index] == 0;
-            GameCam_Blend(GameCam, 1.0f, 0.0f, 1);
-            NewBuzzFrames(Player[active_index]->pad_gamepad->pad, 1, 0);
-        }
     } else {
-        bool toggle = false;
-        bool cancel_name = false;
-        quit = false;
-        GAMEPAD_s *pad = GamePad;
-        for (i32 player = 0; player != 2; ++player, ++pad) {
-            if (MenuPacket.active_player[player] == 0)
-                continue;
-            const u32 pressed = pad->buttons_pressed | pad->left_directions;
-            const u32 held = pad->buttons_held | pad->buttons_released;
-            i32 side = player;
-            if (active_count == 1 && MenuPacket.customise_other_player[player] != 0)
-                side = player ^ 1;
-            const i32 old_mode = CustomiseMode[side];
-            i32 new_mode = -1;
-            bool randomise = false, touch_exit = false;
-            if ((pressed & GAMEPAD_ACTION) != 0 && old_mode != 1) {
-                randomise = true;
-            } else if ((pressed & GAMEPAD_SPECIAL) != 0) {
-                new_mode = old_mode;
-                do {
-                    new_mode = (new_mode + 1) % 3;
-                } while (new_mode == 0);
-                GameAudio_PlaySfx(0x30, NULL, 0, 0);
-                cancel_name = true;
-            } else if (!(select[player] != 0 && (CustomiseMode[0] == 1 || CustomiseMode[1] == 1))) {
-                const f32 repeat_delay = old_mode == 1 ? 0.1f : 0.25f;
-                const i32 category = CustomiseMenuY[side];
-                const i32 piece_count = customiser->piece_counts[category];
-                u16 *pieces = Game.customizer[side].pieces;
-                const u16 old_piece = static_cast<u16>(pieces[category]);
-                i32 up = pressed & GAMEPAD_DUP, down = pressed & GAMEPAD_DDOWN;
-                i32 left = pressed & GAMEPAD_DLEFT, right = pressed & GAMEPAD_DRIGHT;
-                i32 up_held = held & GAMEPAD_DUP, down_held = held & GAMEPAD_DDOWN;
-                i32 left_held = held & GAMEPAD_DLEFT, right_held = held & GAMEPAD_DRIGHT;
-                if (__builtin_expect(up != 0 && down != 0, 1))
-                    up = down = 0;
-                if (left != 0 && right != 0)
-                    left = right = 0;
-                if (down_held != 0 && up_held != 0)
-                    up_held = down_held = 0;
-                if (left_held != 0 && right_held != 0)
-                    left_held = right_held = 0;
-                MenuRepeat(&up_held, &up, &uprepeattime[player], &uprepeatcount[player], 0.1f, FRAMETIME);
-                MenuRepeat(&down_held, &down, &downrepeattime[player], &downrepeatcount[player], 0.1f, FRAMETIME);
-                MenuRepeat(&left_held, &left, &leftrepeattime[player], &leftrepeatcount[player], repeat_delay,
-                           FRAMETIME);
-                MenuRepeat(&right_held, &right, &rightrepeattime[player], &rightrepeatcount[player], repeat_delay,
-                           FRAMETIME);
-                if (customiser->touch_requests[0] != 0) {
-                    left = 1;
-                    customiser->touch_requests[0] = 0;
-                }
-                if (customiser->touch_requests[1] != 0) {
-                    right = 1;
-                    customiser->touch_requests[1] = 0;
-                }
-                if (customiser->touch_requests[2] != 0) {
-                    up = 1;
-                    customiser->touch_requests[2] = 0;
-                }
-                if (customiser->touch_requests[3] != 0) {
-                    down = 1;
-                    customiser->touch_requests[3] = 0;
-                }
-                randomise = customiser->touch_requests[4] != 0;
-                if (randomise)
-                    customiser->touch_requests[4] = 0;
-                if (customiser->touch_requests[5] != 0) {
-                    toggle = true;
-                    customiser->touch_requests[5] = 0;
-                }
-                if (customiser->field_0xd16 != 0) {
-                    toggle = true;
-                    customiser->field_0xd16 = 0;
-                }
-                touch_exit = customiser->field_0xd17 != 0;
-                if (touch_exit)
-                    customiser->field_0xd17 = 0;
-                if (CustomiseMode[side] == 1) {
-                    char *name = Game.customizer[side].name;
-                    const i32 old_x = CustomiseNameX[side], old_y = CustomiseNameY[side];
-                    if (left != 0) {
-                        if (__builtin_expect(old_x > 0, 1)) {
-                            name[old_x] = CustomiseLetter[old_y];
-                            CustomiseNameX[side] = old_x - 1;
-                            CustomiseNameY[side] = Customise_FindLetter(name[CustomiseNameX[side]]);
-                        }
-                    } else if (right != 0) {
-                        NuStrLen(name);
-                        if (__builtin_expect(CustomiseNameX[side] < 14, 0)) {
-                            name[CustomiseNameX[side]] = CustomiseLetter[CustomiseNameY[side]];
-                            ++CustomiseNameX[side];
-                            CustomiseNameY[side] = Customise_FindLetter(name[CustomiseNameX[side]]);
-                        }
-                    } else if (up != 0) {
-                        CustomiseNameY[side] = old_y + 1 == 38 ? 0 : old_y + 1;
-                    } else if (down != 0) {
-                        CustomiseNameY[side] = old_y - 1 == -1 ? 37 : old_y - 1;
+        CUSTOMISER *customiser = CharacterCustomiser;
+        bool quit = customiser == NULL;
+        i32 active_index, active_count;
+        Customiser_GetActiveWeirdoIndex(&active_index, &active_count);
+        BlipL[0] = BlipL[1] = 0.0f;
+        BlipR[0] = BlipR[1] = 0.0f;
+        BlipU[0] = BlipU[1] = 0.0f;
+        BlipD[0] = BlipD[1] = 0.0f;
+        i32 select[2];
+        i32 cancel = 0;
+        i32 toggle = 0;
+        select[0] = 0;
+        CustomiseNameBoardTMul[0] = CustomiseMode[0] == 1 ? 1.0f : 0.0f;
+        CustomiseNameBoardMul[0] = SeekLinearF(CustomiseNameBoardMul[0], CustomiseNameBoardTMul[0], 4.0f * FRAMETIME);
+        CustomiseNameLetterBlipScale[0] = SeekLinearF(CustomiseNameLetterBlipScale[0], 1.0f, 5.0f * FRAMETIME);
+        if (MenuPacket.active_player[0] != 0) {
+            if ((GamePad[0].buttons_pressed & GAMEPAD_MENUSELECT) != 0)
+                select[0] = 1;
+            else if ((GamePad[0].buttons_pressed & GAMEPAD_MENUCANCEL) != 0)
+                cancel = 1;
+        }
+
+        select[1] = 0;
+        CustomiseNameBoardTMul[1] = CustomiseMode[1] == 1 ? 1.0f : 0.0f;
+        CustomiseNameBoardMul[1] = SeekLinearF(CustomiseNameBoardMul[1], CustomiseNameBoardTMul[1], 4.0f * FRAMETIME);
+        CustomiseNameLetterBlipScale[1] = SeekLinearF(CustomiseNameLetterBlipScale[1], 1.0f, 5.0f * FRAMETIME);
+        if (MenuPacket.active_player[1] != 0) {
+            if ((GamePad[1].buttons_pressed & GAMEPAD_MENUSELECT) != 0)
+                select[1] = 1;
+            else if ((GamePad[1].buttons_pressed & GAMEPAD_MENUCANCEL) != 0)
+                cancel = 1;
+        }
+        if (cancel && CustomiseMode[0] != 1 && CustomiseMode[1] != 1) {
+            if (GAMEDEMO != 0 && MenuPacket.active_player[0] != 0 && MenuPacket.active_player[1] != 0) {
+                if ((GamePad[0].buttons_pressed & GAMEPAD_MENUCANCEL) != 0)
+                    MenuPacket.customise_demo_exit[0] = MenuPacket.customise_demo_exit[0] == 0;
+                if ((GamePad[1].buttons_pressed & GAMEPAD_MENUCANCEL) != 0)
+                    MenuPacket.customise_demo_exit[1] = MenuPacket.customise_demo_exit[1] == 0;
+                if (MenuPacket.customise_demo_exit[0] != 0 && MenuPacket.customise_demo_exit[1] != 0)
+                    quit = true;
+            } else
+                quit = true;
+        } else if ((select[0] != 0 || select[1] != 0) && active_count == 1 && CustomiseMode[0] != 1 &&
+                   CustomiseMode[1] != 1) {
+            toggle = 1;
+        } else {
+            i32 cancel_name = 0;
+            i32 touch_exit = 0;
+            GAMEPAD_s *pad = GamePad;
+            for (i32 player = 0; player != 2; ++player, ++pad) {
+                if (MenuPacket.active_player[player] == 0)
+                    continue;
+                const u32 pressed = pad->buttons_pressed | pad->left_directions;
+                const u32 held = pad->buttons_held | pad->buttons_released;
+                i32 side = player;
+                if (active_count == 1 && MenuPacket.customise_other_player[player] != 0)
+                    side = player ^ 1;
+                const i32 old_mode = CustomiseMode[side];
+                i32 new_mode = -1;
+                i32 randomise = 0;
+                touch_exit = 0;
+                if ((pressed & GAMEPAD_ACTION) != 0 && old_mode != 1) {
+                    randomise = 1;
+                } else if ((pressed & GAMEPAD_SPECIAL) != 0) {
+                    new_mode = old_mode;
+                    do {
+                        new_mode = (new_mode + 1) % 3;
+                    } while (new_mode == 0);
+                    GameAudio_PlaySfx(0x30, NULL, 0, 0);
+                    cancel_name = 1;
+                } else if (!(select[player] != 0 && (CustomiseMode[0] == 1 || CustomiseMode[1] == 1))) {
+                    const f32 repeat_delay = old_mode == 1 ? 0.1f : 0.25f;
+                    const i32 category = CustomiseMenuY[side];
+                    const i32 piece_count = customiser->piece_counts[category];
+                    u16 *pieces = Game.customizer[side].pieces;
+                    const u16 old_piece = static_cast<u16>(pieces[category]);
+                    i32 up = pressed & GAMEPAD_DUP, down = pressed & GAMEPAD_DDOWN;
+                    i32 left = pressed & GAMEPAD_DLEFT, right = pressed & GAMEPAD_DRIGHT;
+                    i32 up_held = held & GAMEPAD_DUP, down_held = held & GAMEPAD_DDOWN;
+                    i32 left_held = held & GAMEPAD_DLEFT, right_held = held & GAMEPAD_DRIGHT;
+                    if (__builtin_expect(up != 0 && down != 0, 1))
+                        up = down = 0;
+                    if (left != 0 && right != 0)
+                        left = right = 0;
+                    if (down_held != 0 && up_held != 0)
+                        up_held = down_held = 0;
+                    if (left_held != 0 && right_held != 0)
+                        left_held = right_held = 0;
+                    MenuRepeat(&up_held, &up, &uprepeattime[player], &uprepeatcount[player], 0.1f, FRAMETIME);
+                    MenuRepeat(&down_held, &down, &downrepeattime[player], &downrepeatcount[player], 0.1f, FRAMETIME);
+                    MenuRepeat(&left_held, &left, &leftrepeattime[player], &leftrepeatcount[player], repeat_delay,
+                               FRAMETIME);
+                    MenuRepeat(&right_held, &right, &rightrepeattime[player], &rightrepeatcount[player], repeat_delay,
+                               FRAMETIME);
+                    if (customiser->touch_requests[0] != 0) {
+                        left = 1;
+                        customiser->touch_requests[0] = 0;
                     }
-                    if (old_x != CustomiseNameX[side] || old_y != CustomiseNameY[side]) {
-                        GameAudio_PlaySfx(0x2f, NULL, 0, 0);
-                        CustomiseNameLetterBlipScale[side] = 1.5f;
+                    if (customiser->touch_requests[1] != 0) {
+                        right = 1;
+                        customiser->touch_requests[1] = 0;
                     }
-                } else {
-                    if (__builtin_expect(up_held != 0 && category > 0, 0))
-                        BlipU[player] = 1.0f;
-                    else if (down_held != 0 && category < 8)
-                        BlipD[player] = 1.0f;
-                    if (left_held != 0)
-                        BlipL[player] = 1.0f;
-                    else if (__builtin_expect(right_held != 0, 0))
-                        BlipR[player] = 1.0f;
-                    i32 next_category = category;
-                    u32 next_piece = old_piece;
-                    bool category_changed = false, piece_changed = false;
-                    if (__builtin_expect(up != 0, 0)) {
-                        if (__builtin_expect(category > 0, 0)) {
-                            --next_category;
-                            category_changed = true;
-                        }
-                    } else if (down != 0) {
-                        if (category < 8) {
-                            ++next_category;
-                            category_changed = true;
-                        }
-                    } else if (left != 0) {
-                        next_piece = Customiser_NextPieceLeft(customiser, old_piece, piece_count, side, category);
-                        piece_changed = next_piece != old_piece;
-                    } else if (right != 0) {
-                        next_piece = Customiser_NextPieceRight(customiser, old_piece, piece_count, side, category);
-                        piece_changed = next_piece != old_piece;
+                    if (customiser->touch_requests[2] != 0) {
+                        up = 1;
+                        customiser->touch_requests[2] = 0;
                     }
-                    pieces[category] = static_cast<u16>(next_piece);
-                    CustomiseMenuY[side] = next_category;
-                    if (category_changed || piece_changed) {
-                        GameAudio_PlaySfx(0x2f, NULL, 0, 0);
-                        CustomiseMenuTime[side] = 0.0f;
-                        if (piece_changed)
-                            Customiser_SetNameAndIcon(customiser, side);
+                    if (customiser->touch_requests[3] != 0) {
+                        down = 1;
+                        customiser->touch_requests[3] = 0;
                     }
-                }
-            } else {
-                new_mode = old_mode;
-                do {
-                    new_mode = (new_mode + 1) % 3;
-                } while (new_mode == 0);
-                GameAudio_PlaySfx(0x30, NULL, 0, 0);
-            }
-            if (new_mode != -1) {
-                CustomiseMode[side] = new_mode;
-                char *name = Game.customizer[side].name;
-                // The upper half of each 32-byte name field holds the edit backup.
-                char *backup = name + 16;
-                if (new_mode != 1) {
-                    if (old_mode == 1) {
-                        if (cancel_name)
-                            NuStrCpy(name, backup);
-                        else {
-                            name[CustomiseNameX[side]] = CustomiseLetter[CustomiseNameY[side]];
-                            i32 length = 15;
-                            if (name[14] == ' ') {
-                                i32 last = 13;
-                                while (last >= 0 && name[last] == ' ')
-                                    --last;
-                                if (last < 0) {
-                                    NuStrCpy(name, TTab[side == 0 ? tPLAYER1 : tPLAYER2]);
-                                    FinishWeirdoNames(side);
-                                    length = -1;
-                                } else
-                                    length = last + 1;
+                    if (customiser->touch_requests[4] != 0) {
+                        customiser->touch_requests[4] = 0;
+                        randomise = 1;
+                    }
+                    if (customiser->touch_requests[5] != 0) {
+                        customiser->touch_requests[5] = 0;
+                        toggle = 1;
+                    }
+                    if (customiser->field_0xd16 != 0) {
+                        customiser->field_0xd16 = 0;
+                        toggle = 1;
+                    }
+                    if (customiser->field_0xd17 != 0) {
+                        customiser->field_0xd17 = 0;
+                        touch_exit = 1;
+                    }
+                    if (CustomiseMode[side] == 1) {
+                        char *name = Game.customizer[side].name;
+                        const i32 old_x = CustomiseNameX[side], old_y = CustomiseNameY[side];
+                        if (left != 0) {
+                            if (__builtin_expect(old_x > 0, 1)) {
+                                name[old_x] = CustomiseLetter[old_y];
+                                CustomiseNameX[side] = old_x - 1;
+                                CustomiseNameY[side] = Customise_FindLetter(name[CustomiseNameX[side]]);
                             }
-                            if (length >= 0)
-                                name[length] = 0;
-                            if (NuStringFilterBadWords(
-                                    reinterpret_cast<NUWCHAR8 *>(name), reinterpret_cast<NUWCHAR8 *>(name),
-                                    reinterpret_cast<NUWCHAR8 *>(const_cast<char *>("Stranger"))) != 0)
-                                NuStrCpy(name, backup);
+                        } else if (right != 0) {
+                            NuStrLen(name);
+                            if (__builtin_expect(CustomiseNameX[side] < 14, 0)) {
+                                name[CustomiseNameX[side]] = CustomiseLetter[CustomiseNameY[side]];
+                                ++CustomiseNameX[side];
+                                CustomiseNameY[side] = Customise_FindLetter(name[CustomiseNameX[side]]);
+                            }
+                        } else if (up != 0) {
+                            CustomiseNameY[side] = old_y + 1 == 38 ? 0 : old_y + 1;
+                        } else if (down != 0) {
+                            CustomiseNameY[side] = old_y - 1 == -1 ? 37 : old_y - 1;
+                        }
+                        if (old_x != CustomiseNameX[side] || old_y != CustomiseNameY[side]) {
+                            GameAudio_PlaySfx(0x2f, NULL, 0, 0);
+                            CustomiseNameLetterBlipScale[side] = 1.5f;
+                        }
+                    } else {
+                        if (__builtin_expect(up_held != 0 && category > 0, 0))
+                            BlipU[player] = 1.0f;
+                        else if (down_held != 0 && category < 8)
+                            BlipD[player] = 1.0f;
+                        if (left_held != 0)
+                            BlipL[player] = 1.0f;
+                        else if (right_held != 0)
+                            BlipR[player] = 1.0f;
+                        i32 next_category = category;
+                        u32 next_piece = old_piece;
+                        bool category_changed = false, piece_changed = false;
+                        if (__builtin_expect(up != 0, 0)) {
+                            if (__builtin_expect(category > 0, 0)) {
+                                --next_category;
+                                category_changed = true;
+                            }
+                        } else if (down != 0) {
+                            if (category < 8) {
+                                ++next_category;
+                                category_changed = true;
+                            }
+                        } else if (left != 0) {
+                            next_piece = Customiser_NextPieceLeft(customiser, old_piece, piece_count, side, category);
+                            piece_changed = next_piece != old_piece;
+                        } else if (right != 0) {
+                            next_piece = Customiser_NextPieceRight(customiser, old_piece, piece_count, side, category);
+                            piece_changed = next_piece != old_piece;
+                        }
+                        pieces[category] = static_cast<u16>(next_piece);
+                        CustomiseMenuY[side] = next_category;
+                        if (category_changed || piece_changed) {
+                            GameAudio_PlaySfx(0x2f, NULL, 0, 0);
+                            CustomiseMenuTime[side] = 0.0f;
+                            if (piece_changed)
+                                Customiser_SetNameAndIcon(customiser, side);
                         }
                     }
                 } else {
-                    NuStrCpy(backup, name);
-                    i32 length = NuStrLen(name);
-                    if (length < 15)
-                        name[length] = ' ';
-                    CustomiseNameY[side] = Customise_FindLetter(name[CustomiseNameX[side]]);
-                    CustomiseNameLetterBlipScale[side] = 1.0f;
+                    new_mode = old_mode;
+                    do {
+                        new_mode = (new_mode + 1) % 3;
+                    } while (new_mode == 0);
+                    GameAudio_PlaySfx(0x30, NULL, 0, 0);
                 }
-                Game.customizer[side].use_saved_name = 1;
-            }
-            if (randomise) {
-                NUVEC *position = &CustomisePos[side];
-                PlaySfx("ToggleChar", position);
-                NewBuzzFrames(pad->pad, 1, 0);
-                u16 *pieces = Game.customizer[side].pieces;
-                for (i32 category = 0; category != 9; ++category) {
-                    if (customiser->piece_counts[category] > 0) {
-                        i32 piece;
-                        do {
-                            piece = qrand() / (0xffff / customiser->piece_counts[category] + 1);
-                        } while (customiser->piece_available(&customiser->piece_sets[category][piece]) == 0);
-                        pieces[category] = static_cast<u16>(piece);
+                if (new_mode != -1) {
+                    CustomiseMode[side] = new_mode;
+                    char *name = Game.customizer[side].name;
+                    // The upper half of each 32-byte name field holds the edit backup.
+                    char *backup = name + 16;
+                    if (new_mode == 1) {
+                        NuStrCpy(backup, name);
+                        i32 length = NuStrLen(name);
+                        if (length < 15)
+                            name[length] = ' ';
+                        CustomiseNameY[side] = Customise_FindLetter(name[CustomiseNameX[side]]);
+                        CustomiseNameLetterBlipScale[side] = 1.0f;
+                    } else if (cancel_name) {
+                        if (old_mode == 1)
+                            NuStrCpy(name, backup);
+                    } else if (old_mode == 1) {
+                        name[CustomiseNameX[side]] = CustomiseLetter[CustomiseNameY[side]];
+                        i32 length = 15;
+                        if (name[14] == ' ') {
+                            i32 last = 13;
+                            while (last >= 0 && name[last] == ' ')
+                                --last;
+                            if (last < 0) {
+                                NuStrCpy(name, TTab[side == 0 ? tPLAYER1 : tPLAYER2]);
+                                FinishWeirdoNames(side);
+                                length = -1;
+                            } else
+                                length = last + 1;
+                        }
+                        if (length >= 0)
+                            name[length] = 0;
+                        if (NuStringFilterBadWords(reinterpret_cast<NUWCHAR8 *>(name),
+                                                   reinterpret_cast<NUWCHAR8 *>(name),
+                                                   reinterpret_cast<NUWCHAR8 *>(const_cast<char *>("Stranger"))) != 0)
+                            NuStrCpy(name, backup);
                     }
+                    Game.customizer[side].use_saved_name = 1;
                 }
-                Customiser_SetNameAndIcon(customiser, side);
-                NUVEC debris_position = {0.0f, 0.21f, 0.0f};
-                NUMTX_ALIGNED16 matrix;
-                const u16 tilt_z = CustomiseTiltZ[side] >> 1;
-                const i32 z = static_cast<i32>(NuTrigTable[tilt_z] * 910.0f);
-                const f32 cz = NuTrigTable[((z + 0x4000) >> 1) & 0x7fff], sz = NuTrigTable[(z >> 1) & 0x7fff];
-                matrix.m00 = cz;
-                matrix.m01 = sz;
-                matrix.m02 = matrix.m03 = 0.0f;
-                matrix.m10 = -sz;
-                matrix.m11 = cz;
-                matrix.m12 = matrix.m13 = 0.0f;
-                matrix.m20 = matrix.m21 = 0.0f;
-                matrix.m22 = 1.0f;
-                matrix.m23 = 0.0f;
-                matrix.m30 = matrix.m31 = matrix.m32 = 0.0f;
-                matrix.m33 = 1.0f;
-                const u16 tilt_x = CustomiseTiltX[side] >> 1;
-                const i32 x = static_cast<i32>(910.0f * NuTrigTable[tilt_x]);
-                const f32 cx = NuTrigTable[((x + 0x4000) >> 1) & 0x7fff], sx = NuTrigTable[(x >> 1) & 0x7fff];
+                if (randomise) {
+                    NUVEC *position = &CustomisePos[side];
+                    PlaySfx("ToggleChar", position);
+                    NewBuzzFrames(pad->pad, 1, 0);
+                    u16 *pieces = Game.customizer[side].pieces;
+                    for (i32 category = 0; category != 9; ++category) {
+                        if (customiser->piece_counts[category] > 0) {
+                            i32 piece;
+                            do {
+                                piece = qrand() / (0xffff / customiser->piece_counts[category] + 1);
+                            } while (customiser->piece_available(&customiser->piece_sets[category][piece]) == 0);
+                            pieces[category] = static_cast<u16>(piece);
+                        }
+                    }
+                    Customiser_SetNameAndIcon(customiser, side);
+                    NUVEC debris_position = {0.0f, 0.21f, 0.0f};
+                    NUMTX_ALIGNED16 matrix;
+                    const u16 tilt_z = static_cast<u16>(CustomiseTiltZ[side]) / 2u;
+                    const i32 z = static_cast<i32>(NuTrigTable[tilt_z] * 910.0f);
+                    const f32 cz = NuTrigTable[((z + 0x4000) >> 1) & 0x7fff], sz = NuTrigTable[(z >> 1) & 0x7fff];
+                    matrix.m00 = cz;
+                    matrix.m01 = sz;
+                    matrix.m02 = matrix.m03 = 0.0f;
+                    matrix.m10 = -sz;
+                    matrix.m11 = cz;
+                    matrix.m12 = matrix.m13 = 0.0f;
+                    matrix.m20 = matrix.m21 = 0.0f;
+                    matrix.m22 = 1.0f;
+                    matrix.m23 = 0.0f;
+                    matrix.m30 = matrix.m31 = matrix.m32 = 0.0f;
+                    matrix.m33 = 1.0f;
+                    const u16 tilt_x = static_cast<u16>(CustomiseTiltX[side]) / 2u;
+                    const i32 x = static_cast<i32>(910.0f * NuTrigTable[tilt_x]);
+                    const f32 cx = NuTrigTable[((x + 0x4000) >> 1) & 0x7fff], sx = NuTrigTable[(x >> 1) & 0x7fff];
 #define CUSTOMISE_ROTATE_X(row)                                                                                        \
     {                                                                                                                  \
         const f32 first = matrix.m##row##1, second = matrix.m##row##2;                                                 \
         matrix.m##row##1 = first * cx - second * sx;                                                                   \
         matrix.m##row##2 = first * sx + second * cx;                                                                   \
     }
-                CUSTOMISE_ROTATE_X(0);
-                CUSTOMISE_ROTATE_X(1);
-                CUSTOMISE_ROTATE_X(2);
-                CUSTOMISE_ROTATE_X(3);
+                    CUSTOMISE_ROTATE_X(0);
+                    CUSTOMISE_ROTATE_X(1);
+                    CUSTOMISE_ROTATE_X(2);
+                    CUSTOMISE_ROTATE_X(3);
 #undef CUSTOMISE_ROTATE_X
-                const u16 rotation_y = CustomiseRotY[side] >> 1;
-                const i32 y = static_cast<i32>(10922.0f * NuTrigTable[rotation_y]);
-                const f32 cy = NuTrigTable[((y + 0x4000) >> 1) & 0x7fff], sy = NuTrigTable[(y >> 1) & 0x7fff];
+                    const u16 rotation_y = static_cast<u16>(CustomiseRotY[side]) / 2u;
+                    const i32 y = static_cast<i32>(10922.0f * NuTrigTable[rotation_y]);
+                    const f32 cy = NuTrigTable[((y + 0x4000) >> 1) & 0x7fff], sy = NuTrigTable[(y >> 1) & 0x7fff];
 #define CUSTOMISE_ROTATE_Y(row)                                                                                        \
     {                                                                                                                  \
         const f32 first = matrix.m##row##0, second = matrix.m##row##2;                                                 \
         matrix.m##row##0 = first * cy + second * sy;                                                                   \
         matrix.m##row##2 = second * cy - first * sy;                                                                   \
     }
-                CUSTOMISE_ROTATE_Y(0);
-                CUSTOMISE_ROTATE_Y(1);
-                CUSTOMISE_ROTATE_Y(2);
-                CUSTOMISE_ROTATE_Y(3);
+                    CUSTOMISE_ROTATE_Y(0);
+                    CUSTOMISE_ROTATE_Y(1);
+                    CUSTOMISE_ROTATE_Y(2);
+                    CUSTOMISE_ROTATE_Y(3);
 #undef CUSTOMISE_ROTATE_Y
-                NuVecMtxRotate(&debris_position, &debris_position, &matrix);
-                NuVecAdd(&debris_position, &debris_position, position);
-                AddGameDebris(WORLD->debris_sys, 0x7b, &debris_position);
-                AddGameDebris(WORLD->debris_sys, 0x5c, &debris_position);
+                    NuVecMtxRotate(&debris_position, &debris_position, &matrix);
+                    NuVecAdd(&debris_position, &debris_position, position);
+                    AddGameDebris(WORLD->debris_sys, 0x7b, &debris_position);
+                    AddGameDebris(WORLD->debris_sys, 0x5c, &debris_position);
+                }
+                if (touch_exit)
+                    break;
             }
-            if (touch_exit) {
-                quit = true;
-                break;
-            }
+            quit = touch_exit;
         }
-        if (!quit && toggle) {
+        if (__builtin_expect(toggle, 0) && !quit) {
             MenuPacket.customise_other_player[active_index] = MenuPacket.customise_other_player[active_index] == 0;
             GameCam_Blend(GameCam, 1.0f, 0.0f, 1);
             NewBuzzFrames(Player[active_index]->pad_gamepad->pad, 1, 0);
         }
-    }
-    customiser_changed = memcmp(Game.customizer, OldCustomiseGame.customizer, sizeof(Game.customizer)) != 0 ||
-                         memcmp(Game.customizer[0].name, OldCustomiseGame.customizer[0].name, 0x20) != 0 ||
-                         Game.customizer[0].use_saved_name != OldCustomiseGame.customizer[0].use_saved_name ||
-                         Game.customizer[1].use_saved_name != OldCustomiseGame.customizer[1].use_saved_name;
-    if (quit) {
-        PlaySfx("menuBack", NULL);
-        customiser_quit = 1;
-        if (GAMEDEMO == 0 && customiser_changed != 0) {
-            Hub_ClearStats();
-            Text_FillInExtendedSaveInfo();
-            if (TriggerAutoSave() == 0) {
-                customiser_save_done = 1;
-                NewMenu(1000, -1, -1);
-                return;
+        customiser_changed = memcmp(Game.customizer, OldCustomiseGame.customizer, sizeof(Game.customizer)) != 0 ||
+                             memcmp(Game.customizer[0].name, OldCustomiseGame.customizer[0].name, 0x20) != 0 ||
+                             Game.customizer[0].use_saved_name != OldCustomiseGame.customizer[0].use_saved_name ||
+                             Game.customizer[1].use_saved_name != OldCustomiseGame.customizer[1].use_saved_name;
+        if (quit) {
+            PlaySfx("menuBack", NULL);
+            customiser_quit = 1;
+            if (GAMEDEMO == 0 && customiser_changed != 0) {
+                Hub_ClearStats();
+                Text_FillInExtendedSaveInfo();
+                if (TriggerAutoSave() == 0) {
+                    customiser_save_done = 1;
+                    NewMenu(1000, -1, -1);
+                    return;
+                }
             }
+            CustomiserMenu_End();
         }
-        CustomiserMenu_End();
     }
 }
 

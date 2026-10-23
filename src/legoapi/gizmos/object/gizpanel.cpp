@@ -467,7 +467,7 @@ static void GizPanel_Draw(void *world_ptr, void *, float) {
 
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
     GIZPANELSYS_s *panel_sys;
-    if (__builtin_expect(world == NULL || (panel_sys = world->giz_panel_sys) == NULL || panel_sys->count == 0, 0)) {
+    if (__builtin_expect(world == NULL || (panel_sys = world->giz_panel_sys) == NULL, 0) || panel_sys->count == 0) {
         return;
     }
 
@@ -499,19 +499,18 @@ static void GizPanel_Draw(void *world_ptr, void *, float) {
         }
 
         PANEL_MODELS models = {-1, -1, -1, -1, -1, -1, -1, {0.0f, 0.0f, 0.0f}};
-        const bool alternate = (panel.draw_flags & GIZPANEL_DRAW_FLAG_ALT_MODEL) != 0;
         switch (panel.model_variant) {
             case 0:
-                models.base = alternate ? 0x107 : 0x106;
-                models.animated = (panel.flags & GIZPANEL_FLAG_BADDIE) != 0 ? 0x109 : 0x108;
+                models.base = (panel.draw_flags & GIZPANEL_DRAW_FLAG_ALT_MODEL) != 0 ? 0x107 : 0x106;
+                models.animated = __builtin_expect((panel.flags & GIZPANEL_FLAG_BADDIE) != 0, 1) ? 0x109 : 0x108;
                 models.animated_transition = 0x10a;
                 models.state_off = 0x10c;
                 models.state_on = 0x10b;
                 models.target = 0x55;
                 break;
             case 1:
-                models.base = alternate ? 0x107 : 0x100;
-                models.animated = (panel.flags & GIZPANEL_FLAG_BADDIE) != 0 ? 0x102 : 0x101;
+                models.base = (panel.draw_flags & GIZPANEL_DRAW_FLAG_ALT_MODEL) != 0 ? 0x107 : 0x100;
+                models.animated = __builtin_expect((panel.flags & GIZPANEL_FLAG_BADDIE) != 0, 1) ? 0x102 : 0x101;
                 models.animated_transition = 0x103;
                 models.state_off = 0x105;
                 models.state_on = 0x104;
@@ -541,7 +540,7 @@ static void GizPanel_Draw(void *world_ptr, void *, float) {
                 break;
         }
 
-        NUMTX base_matrix;
+        NUMTX_ALIGNED16 base_matrix;
         NuMtxSetRotationY(&base_matrix, panel.y_rotation);
         NuMtxTranslate(&base_matrix, &panel.position);
         if ((panel.flags & GIZPANEL_FLAG_HIDE_BASE) == 0 && models.base != -1 &&
@@ -549,14 +548,19 @@ static void GizPanel_Draw(void *world_ptr, void *, float) {
             NuSpecialDrawAt(&world->lev_objs[models.base].special, &base_matrix);
         }
 
-        const i32 state_model = (panel.flags & GIZPANEL_FLAG_STATE) != 0 ? models.state_on : models.state_off;
-        if ((panel.flags & GIZPANEL_FLAG_HIDE_BASE) == 0 && state_model != -1 &&
-            world->lev_objs[state_model].active != 0) {
-            NuSpecialDrawAt(&world->lev_objs[state_model].special, &base_matrix);
+        if ((panel.flags & GIZPANEL_FLAG_HIDE_BASE) == 0) {
+            if ((panel.flags & GIZPANEL_FLAG_STATE) != 0) {
+                if (models.state_on != -1 && world->lev_objs[models.state_on].active != 0) {
+                    NuSpecialDrawAt(&world->lev_objs[models.state_on].special, &base_matrix);
+                }
+            } else {
+                if (models.state_off != -1 && world->lev_objs[models.state_off].active != 0) {
+                    NuSpecialDrawAt(&world->lev_objs[models.state_off].special, &base_matrix);
+                }
+            }
         }
 
-        if ((panel.flags & GIZPANEL_FLAG_HIDE_BASE) == 0 && (panel.activation_time > 0.0f || editor_active != 0) &&
-            models.animated != -1) {
+        if ((panel.flags & GIZPANEL_FLAG_HIDE_BASE) == 0 && (panel.activation_time > 0.0f || editor_active != 0)) {
             NUVEC picture_offset = {0.0f, GIZPANEL_PICY, GIZPANEL_PICZ};
             NUVEC transition_offset = {0.0f, GIZPANEL_PICY, GIZPANEL_PICZ - 0.0005f};
             NuVecRotateY(&picture_offset, &picture_offset, panel.y_rotation);
@@ -609,7 +613,7 @@ static void GizPanel_Draw(void *world_ptr, void *, float) {
             NuMtxTranslate(&base_matrix, &target_position);
             NuMtxPreScaleU(&base_matrix, panel.target_scale);
             NuSpecialDrawAtAlpha(&world->lev_objs[models.target].special, &base_matrix,
-                                 (panel.flags & 1) != 0 ? 0.0f : target_alpha);
+                                 __builtin_expect((panel.flags & 1) != 0, 1) ? 0.0f : target_alpha);
         }
 
         if ((panel.flags & GIZPANEL_FLAG_HIDE_BASE) == 0 && models.arm != -1 &&

@@ -5316,7 +5316,7 @@ void NuDynamicLight::bindShaderResources(nushaderprogram_s *program) {
     NUMTX inverse;
     NuMtxInv(&inverse, &view);
     NUVEC light;
-    if (parameter_4 == 0) {
+    if (__builtin_expect(parameter_4 == 0, 1)) {
         light.x = 0.0f;
         light.y = 0.0f;
         light.z = -1.0f;
@@ -8318,17 +8318,17 @@ extern "C" __attribute__((optimize("O2"))) void ANI_Ani3ExtractAllNodeCurves(ani
             if (key < 0.0f) {
                 key = 0.0f;
             }
-            if (__builtin_expect(last_key <= key, 0)) {
-                i32 whole_key = static_cast<i32>(last_key);
-                fraction = last_key - static_cast<float>(whole_key);
-                stride = anim->key_stride;
-                quarter = static_cast<u32>(whole_key) & 3;
-                key_offset = (whole_key / 4) * stride;
-            } else {
+            if (__builtin_expect(last_key > key, 1)) {
                 i32 whole_key = static_cast<i32>(key);
                 fraction = key - static_cast<float>(whole_key);
                 quarter = static_cast<u32>(whole_key) & 3;
                 stride = anim->key_stride;
+                key_offset = (whole_key / 4) * stride;
+            } else {
+                i32 whole_key = static_cast<i32>(last_key);
+                fraction = last_key - static_cast<float>(whole_key);
+                stride = anim->key_stride;
+                quarter = static_cast<u32>(whole_key) & 3;
                 key_offset = (whole_key / 4) * stride;
             }
         }
@@ -8703,7 +8703,7 @@ extern "C" __attribute__((optimize("O2"))) void ANI_Ani3ExtractAllNodeCurves(ani
         } else
             *scale = *parent_scale;
         if ((flags & 0x10) && parent_scale) {
-            if (parent_scale->x != 0.0f && parent_scale->y != 0.0f && parent_scale->z != 0.0f) {
+            if (__builtin_expect(parent_scale->x != 0.0f && parent_scale->y != 0.0f && parent_scale->z != 0.0f, 1)) {
                 temporary.x = 1.0f / parent_scale->x;
                 temporary.y = 1.0f / parent_scale->y;
                 temporary.z = 1.0f / parent_scale->z;
@@ -11323,7 +11323,7 @@ extern "C" void NuTexAnimProcessEx(f32 frame_time, u16 mask) {
                 i32 curve_count = count_a < count_b ? count_b : count_a;
                 f32 *weights = NuRndrCreateBlendShapeDeformerWeightsArray(curve_count);
                 weights_by_render[render] = weights;
-                if (weights == NULL) {
+                if (__builtin_expect(weights == NULL, 0)) {
                     continue;
                 }
 
@@ -21028,7 +21028,7 @@ extern "C" void NuTimeBarSetRenderHorizontal(i32 set) {
         if (tmppeak_reset == 0)
             recent_peak = 0;
         value = static_cast<u32>(timebar->accumulators[timebar->toggle_flags[slot]][slot]);
-        if (value > recent_peak)
+        if (__builtin_expect(value > recent_peak, 1))
             recent_peak = value;
 
         if (recent_peak != 0) {

@@ -7789,7 +7789,8 @@ void DrawBezierLine(VuVec &start, VuVec &start_control, VuVec &end, VuVec &end_c
     const f32 chord_y = end.y - start.y;
     const f32 chord_x = end.x - start.x;
     const f32 chord_z = end.z - start.z;
-    if (!(chord_x * chord_x + chord_y * chord_y + chord_z * chord_z > threshold) || bezier_draw_depth > 15) {
+    if (__builtin_expect(
+            !(chord_x * chord_x + chord_y * chord_y + chord_z * chord_z > threshold) || bezier_draw_depth > 15, 1)) {
         EdDrawLineSegment(start, end, colour);
         return;
     }

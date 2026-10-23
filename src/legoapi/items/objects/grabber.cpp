@@ -382,12 +382,11 @@ void Grabber_Update(WORLDINFO_s *world) {
     GRABBER_s *g = world->grabber;
     if (g == NULL)
         return;
-    if (g->victim != NULL &&
-        ((g->victim->apiobj.object_flags & 0x1001) != 0x1001 || g->victim->apiobj.field_0x287 != 0))
+    if (g->victim != NULL && ((g->victim->apiobj.field_0x1f8 & 0x1001) != 0x1001 || g->victim->apiobj.field_0x287 != 0))
         g->victim = NULL;
     if (g->platform_contact_timer > 0.0f)
         g->platform_contact_timer -= FRAMETIME;
-    g->target_velocity.z = g->target_velocity.y = g->target_velocity.x = 0.0f;
+    g->target_velocity.x = g->target_velocity.y = g->target_velocity.z = 0.0f;
     NUVEC next = g->grab_position, previous = g->grab_position;
     GameObject_s *control = FindGameObject(id_GRABCONTROL, 0, 0, 1, 0);
     GAMEPAD_s *pad = NULL;
@@ -694,16 +693,17 @@ void Grabber_Update(WORLDINFO_s *world) {
     if (g->victim) {
         g->victim->context_animation_timer += FRAMETIME;
         Grabber_SetVictimPos(g);
-        g->victim->apiobj.velocity.z = g->victim->apiobj.velocity.x = 0;
-        g->victim->apiobj.velocity.y = -0.1f;
-        g->victim->apiobj.field_0x27d = 0;
+        GameObject_s *v = g->victim;
+        v->apiobj.velocity.x = v->apiobj.velocity.z = 0;
+        v->apiobj.velocity.y = -0.1f;
+        v->apiobj.field_0x27d = 0;
     }
     if (g->character_id == id_GRABMACHINE) {
         bool found = false;
         i32 mask = 0;
         for (i32 i = 0; i < HIGHGAMEOBJECT; ++i) {
             GameObject_s *object = &Obj[i];
-            if (__builtin_expect((object->apiobj.object_flags & 0x1001) != 0x1001, 0))
+            if (__builtin_expect((object->apiobj.field_0x1f8 & 0x1001) != 0x1001, 0))
                 continue;
             if (object->apiobj.character_data->game_character->flags_090 & 0x8000)
                 found = true;

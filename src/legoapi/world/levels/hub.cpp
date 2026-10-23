@@ -905,7 +905,7 @@ static void Hub_DrawSelectModeMenu(int selected, float alpha) {
     const i32 area = LDataList[hub_new_level].area_index;
     const i32 complete = Game.area_save[area].area_complete;
     i32 lost_temple = 0;
-    if (LOSTTEMPLE_ADATA != NULL)
+    if (__builtin_expect(LOSTTEMPLE_ADATA != NULL, 1))
         lost_temple = area == LOSTTEMPLE_ADATA->index;
     i32 unlocked = FreePlayUnlocked();
     if (unlocked != 1 && area != -1) {
@@ -935,7 +935,7 @@ static void Hub_DrawSelectModeMenu(int selected, float alpha) {
     for (i32 i = 0; i < count; ++i) {
         i32 red, green, blue;
         if (selected && i == hub_selectmode && TestForController()) {
-            if (menu_pulsate > 0.0f) {
+            if (__builtin_expect(menu_pulsate > 0.0f, 1)) {
                 red = static_cast<i32>(static_cast<u32>(MENUFLASH0R) * menu_pulsate +
                                        static_cast<u32>(MENUFLASH1R) * (1.0f - menu_pulsate));
                 green = static_cast<i32>(static_cast<u32>(MENUFLASH0G) * menu_pulsate +

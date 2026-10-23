@@ -1337,7 +1337,7 @@ void UpdatePushBlocks(void *world_ptr, void *, float) {
     i32 target_seen = 0;
     for (i32 index = 0; index < world->push_block_count; ++index) {
         pushblock_s *p = &world->push_blocks[index];
-        i32 visible = NuSpecialGetVisibilityFn(&p->special) & 1;
+        u8 visible = NuSpecialGetVisibilityFn(&p->special) & 1;
         p->flags_0ca = (p->flags_0ca & ~4) | (visible << 2);
         if (!visible)
             continue;
@@ -1345,12 +1345,12 @@ void UpdatePushBlocks(void *world_ptr, void *, float) {
         if ((p->runtime_flags_0c8 & 0x81) == 0x81)
             p->runtime_flags_0c8 &= 0x3f;
         if (__builtin_expect((i8)p->runtime_flags_0c8 < 0, 1))
-            p->runtime_flags_0c8 |= 0x40;
+            p->flag_0c8_6 = 1;
         if ((p->runtime_flags_0c9 & 1) || (p->flags_0cb & 2))
             continue;
         if (__builtin_expect(!!(p->snap_positions), 1)) {
             if (p->runtime_flags_0c9 & 2) {
-                if (!(p->snap_timer > snap_time)) {
+                if (p->snap_timer <= snap_time) {
                     f32 fraction = NU_SIN_LUT((i32)((p->snap_timer / snap_time) * 16384.0f + 49152.0f + 16384.0f));
                     i32 ix = (p->packed_state_flags >> 15) & 7;
                     p->position->x = p->snap_origin.x + (p->snap_positions[ix].x - p->snap_origin.x) * fraction;
@@ -1369,7 +1369,7 @@ void UpdatePushBlocks(void *world_ptr, void *, float) {
                 }
                 PushSeekComplete(p, (p->packed_state_flags >> 15) & 7);
             } else {
-                for (i32 i = 1; i < ((p->runtime_flags_0c9 >> 4) & 7); ++i) {
+                for (i32 i = 1; i < p->snap_position_count; ++i) {
                     NUVEC *target = &p->snap_positions[i];
                     NUVEC delta = {target->x - p->position->x, target->y - p->position->y, target->z - p->position->z};
                     f32 radius = p->snap_distance;
@@ -1399,12 +1399,12 @@ void UpdatePushBlocks(void *world_ptr, void *, float) {
                     break;
                 }
                 if (!target_seen) {
-                    if (p->flags_0cb & 0x20) {
-                        p->flags_0cb &= ~0x10;
-                        p->packed_state_flags &= 0xfffc7fff;
+                    if (p->config_0cb_5) {
+                        p->field_0cb_4 = 0;
+                        p->snap_index = 0;
                     }
-                    if (!(p->flags_0cb & 0x40))
-                        p->completion_flags &= 0xf807;
+                    if (!p->config_0cb_6)
+                        p->completed_outputs = 0;
                 }
             }
         }
@@ -1421,7 +1421,7 @@ void UpdatePushBlocks(void *world_ptr, void *, float) {
                 if ((u32)surface <= 31 && (TerSurface[surface].flags & 0x20000))
                     p->runtime_flags_0c8 |= 0x40;
                 else
-                    p->runtime_flags_0c8 &= ~0x40;
+                    p->flag_0c8_6 = 0;
             }
             if (__builtin_expect(!!(p->pushing_object), 1)) {
                 if (!(p->runtime_flags_0c8 & 0x40))
@@ -1475,16 +1475,25 @@ void UpdatePushBlocks(void *world_ptr, void *, float) {
             continue;
         f32 left = fabsf(p->bounds_min.x) - 0.006f, right = fabsf(p->bounds_max.x) - 0.006f;
         f32 back = fabsf(p->bounds_min.z) - 0.006f, front = fabsf(p->bounds_max.z) - 0.006f;
-        NUVEC *position = p->position;
-        f32 y = (position->y - fabsf(p->bounds_min.y) + 0.001f) + 0.025f;
-        if (__builtin_expect(p->ground_height > y, 0))
-            y = p->ground_height + 0.25f;
-        NUVEC corners[4] = {
-            {position->x - left, y, position->z - back},
-            {position->x + right, y, position->z - back},
-            {position->x + right, y, position->z + front},
-            {position->x - left, y, position->z + front},
-        };
+        NUVEC corners[4];
+        corners[0] = *p->position;
+        corners[1] = corners[0];
+        corners[2] = corners[0];
+        corners[0].y = (corners[0].y - fabsf(p->bounds_min.y) + 0.001f) + 0.025f;
+        corners[1].y = corners[2].y = corners[0].y;
+        corners[3].x = corners[0].x - left;
+        corners[3].y = corners[0].y;
+        corners[3].z = corners[0].z + front;
+        corners[0].x -= left;
+        corners[0].z -= back;
+        corners[1].x += right;
+        corners[1].z -= back;
+        corners[2].x += right;
+        corners[2].z += front;
+        if (p->ground_height > corners[0].y) {
+            for (i32 i = 0; i < 4; ++i)
+                corners[i].y = p->ground_height + 0.25f;
+        }
         PlatOnOff(p->platform_id, 0);
         bool platforms_off = p->supporting_block || p->previous_supporting_block;
         f32 heights[4];
@@ -1505,28 +1514,35 @@ void UpdatePushBlocks(void *world_ptr, void *, float) {
                 if (support[i] != -10000.0f)
                     heights[i] = support[i];
         }
-        f32 low = p->ground_height - 0.01f, high = p->ground_height + 0.01f;
-        if ((low > heights[0] && low > heights[1] && low > heights[2] && low > heights[3]) ||
-            (heights[0] > high && heights[1] > high && heights[2] > high && heights[3] > high)) {
-            p->runtime_flags_0c8 |= 8;
-            p->ground_height = ((heights[0] + heights[1]) + heights[2] + heights[3]) * 0.25f + 0.01f;
-            p->ground_offset = (p->position->y + p->bounds_min.y) - p->ground_height;
+        NUVEC *pos = p->position;
+        if ((p->ground_height - 0.01f > heights[0] && p->ground_height - 0.01f > heights[1] &&
+             p->ground_height - 0.01f > heights[2] && p->ground_height - 0.01f > heights[3]) ||
+            (heights[0] > p->ground_height + 0.01f && heights[1] > p->ground_height + 0.01f &&
+             heights[2] > p->ground_height + 0.01f && heights[3] > p->ground_height + 0.01f)) {
+            f32 height = ((heights[0] + heights[1]) + heights[2] + heights[3]) * 0.25f + 0.01f;
+            f32 offset = (pos->y + p->bounds_min.y) - height;
+            p->moving = 1;
+            p->ground_height = height;
+            p->ground_offset = offset;
         }
         if (p->supporting_block) {
-            p->ground_height = p->position->y + p->supporting_block->bounds_max.y;
-            p->ground_offset = (p->position->y + p->bounds_min.y) - p->ground_height;
+            f32 y = pos->y;
+            p->ground_height = y + p->supporting_block->bounds_max.y;
+            p->ground_offset = (y + p->bounds_min.y) - p->ground_height;
         }
         if (p->ground_offset > 0.01f)
-            p->runtime_flags_0c8 |= 8;
-        else if (p->runtime_flags_0c8 & 8) {
-            p->runtime_flags_0c9 |= 8;
+            p->moving = 1;
+        else if (p->moving) {
+            p->flag_0c9_3 = 1;
             p->settled_height = p->ground_height;
-            p->runtime_flags_0c8 &= ~8;
+            p->moving = 0;
         }
         i32 safe = 0;
         for (i32 i = 0; i < 4; ++i)
-            if (p->extra_terrain_info[i] == 8 || p->terrain_info[i] == 14)
+            if (p->extra_terrain_info[i] == 8)
                 ++safe;
+            else
+                safe += p->terrain_info[i] == 14;
         bool reset = safe != 4;
         if (world->current_level == HOTHESCAPEB_LDATA && NuVecXZDistSqr(p->position, &hothbtestpos, NULL) < 1.0f) {
             if (!(corners[0].z < 13.2f && !(corners[1].z >= 13.2f) && !(corners[2].z >= 13.2f) &&
@@ -1540,10 +1556,10 @@ void UpdatePushBlocks(void *world_ptr, void *, float) {
         pushblock_s *p = &world->push_blocks[index];
         if (!(p->flags_0ca & 4) || (p->runtime_flags_0c9 & 1) || (p->flags_0cb & 2))
             continue;
-        if (!(p->runtime_flags_0c9 & 4) && (p->runtime_flags_0c8 & 1))
+        if (!(p->runtime_flags_0c9 & 4) && __builtin_expect(p->runtime_flags_0c8 & 1, 1))
             GameAudio_PlaySfx(72, p->position, GameAudio_GetPlrSfxBits(p->pushing_object), 0);
         if (p->runtime_flags_0c9 & 0xc) {
-            if (p->runtime_flags_0c9 & 4) {
+            if (p->flag_0c9_2) {
                 p->position->x = p->snap_origin.x;
                 p->position->z = p->snap_origin.z;
                 p->target_velocity.x = p->target_velocity.z = p->velocity.x = p->velocity.z = 0;
@@ -1575,8 +1591,7 @@ void UpdatePushBlocks(void *world_ptr, void *, float) {
             if ((p->runtime_flags_0c8 & 3) == 1 && p->pushing_object)
                 GameAudio_PlaySfx(71, &p->pushing_object->apiobj.collision_position,
                                   GameAudio_GetPlrSfxBits(p->pushing_object), 0);
-            if (LEGOHINT_PUSHBLOCKS != -1 && p->pushing_object &&
-                (p->pushing_object->apiobj.object_flags & 0x81) == 0x81)
+            if (LEGOHINT_PUSHBLOCKS != -1 && p->pushing_object && (p->pushing_object->apiobj.flags_low & 0x81) == 0x81)
                 Hint_SetComplete(LEGOHINT_PUSHBLOCKS);
         }
     }
@@ -1591,11 +1606,10 @@ void UpdatePushBlocks(void *world_ptr, void *, float) {
             } else
                 p->pushing_object->ignore_shove_system = 0;
         }
-        if (!(p->packed_state_flags & 0x220)) {
+        if (!p->flag_0c8_5 && !p->seeking) {
             i32 safe = 0;
             for (i32 i = 0; i < 4; ++i)
-                if (__builtin_expect(p->extra_terrain_info[i] == 8 || p->terrain_info[i] == 14, 0))
-                    ++safe;
+                safe += (p->extra_terrain_info[i] == 8 || p->terrain_info[i] == 14);
             if (safe == 4) {
                 memcpy(&p->previous_extra_terrain_info, p->extra_terrain_info, 4);
                 p->snap_origin = *p->position;
