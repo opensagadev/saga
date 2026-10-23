@@ -1341,7 +1341,7 @@ void Hub_InitFreePlaySelect(i32 area, i32 first_model, i32 second_model) {
     if (collection == &MiniKitCollection) {
         if (first_model == -1)
             first_model = MiniKitCollection.list[0].id;
-        if (second_model == -1) {
+        if (__builtin_expect(second_model == -1, 1)) {
             second_model = MiniKitCollection.list[1].id;
             goto make_default_pair;
         }

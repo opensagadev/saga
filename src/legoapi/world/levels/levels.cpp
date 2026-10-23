@@ -1767,23 +1767,25 @@ void LoadAreaCharacters() {
         Area_Configure(Area, Level, ExtraModelList, id_DEFAULTCHARACTER);
     }
 
+    i32 vehicle;
+    i32 bonus;
     if (Area == -1) {
-        BonusArea = 0;
-        VehicleArea = 0;
+        VehicleArea = vehicle = 0;
+        BonusArea = bonus = 0;
     } else {
         const u16 area_flags = ADataList[Area].flags;
         if ((area_flags & AREAFLAG_VEHICLE_AREA) == 0) {
-            VehicleArea = 0;
+            VehicleArea = vehicle = 0;
         } else {
-            VehicleArea = 1;
+            VehicleArea = vehicle = 1;
         }
         if ((area_flags & AREAFLAG_BONUS_AREA) == 0) {
-            BonusArea = 0;
+            BonusArea = bonus = 0;
         } else {
-            BonusArea = 1;
+            BonusArea = bonus = 1;
         }
     }
-    AreaGlobals.values.field_0x04 = VehicleArea != 0 && BonusArea == 0;
+    AreaGlobals.values.field_0x04 = vehicle != 0 && bonus == 0;
     loadareacharacters_loadedlevel = 0;
     AreaDataLoaded = 0;
     loadareadata_loadlevel = 0;
@@ -1866,7 +1868,7 @@ load_type_done:
 
     f32 icon_time = 0.0f;
     bool character_load_active = true;
-    bool fade_scene_active = false;
+    i32 fade_scene_active = 0;
     bool skip_text_scroll = false;
     bool draw_touch_prompt = false;
     f32 touch_prompt_time = 0.0f;

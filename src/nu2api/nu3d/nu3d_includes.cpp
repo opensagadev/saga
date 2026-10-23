@@ -3924,7 +3924,7 @@ extern "C" nueffecttex_s *NuPostEffectGetDepthBuffer(i32 frame) {
 
 extern "C" void NuPostEffectRender(nuframebuffer_s *output) {
     nuframebuffer_s *bound = NuFramebufferGetBound();
-    if (output == NULL)
+    if (__builtin_expect(output == NULL, 1))
         output = NuFramebufferGetObject(1);
     NuFramebufferGetObject(0);
     nueffecttex_s *color = NuFramebufferGetAttachedTex(bound, 0, NULL, NULL);
@@ -4216,7 +4216,7 @@ void NuPostFilterGen::blur7x7Loopback(nueffecttex_s *source, i32 source_lod, nue
 
 void NuMainFilterGen::preprocessDofMotionBlur(nueffecttex_s *) {
     i32 selection = 1;
-    if (dof_enabled) {
+    if (__builtin_expect(dof_enabled != 0, 1)) {
         selection = dof_bias == 1 ? (motion_blur_enabled ? 4 : 3) : (motion_blur_enabled ? 2 : 0);
     }
     nushaderprogram_s *program = programs[selection];
@@ -11369,7 +11369,7 @@ extern "C" void NuTexAnimProcessEx(f32 frame_time, u16 mask) {
             memset(joint_overrides, 0, object->joint_count * sizeof(*joint_overrides));
             for (u8 index = 0; index < override_count; ++index) {
                 u8 override_index = overrides[index].joint_index;
-                if (override_index < object->joint_override_map_count) {
+                if (__builtin_expect(override_index < object->joint_override_map_count, 1)) {
                     u8 joint_index = object->joint_override_map[override_index];
                     if (joint_index != 0xff) {
                         joint_overrides[joint_index] = &overrides[index];
@@ -13807,10 +13807,10 @@ extern "C" {
             NUROOM &first = scene->rooms[candidates[0]];
             NUROOM &second = scene->rooms[candidates[1]];
             if (candidate_count == 2) {
-                if (!(first.priority < second.priority)) {
-                    candidates[1] = static_cast<i16>(room_index);
-                } else {
+                if (first.priority < second.priority) {
                     candidates[0] = static_cast<i16>(room_index);
+                } else {
+                    candidates[1] = static_cast<i16>(room_index);
                 }
                 candidate_count = 3;
                 continue;
@@ -17351,7 +17351,7 @@ extern "C" void NuDisplaySceneDestroy(NUDLDLISTSCENE *scene) {
         if (delta == 0) {
             return scene;
         }
-        if (old_base == NULL || size == 0) {
+        if (__builtin_expect(old_base == NULL || size == 0, 0)) {
             return NULL;
         }
 
@@ -17383,7 +17383,7 @@ extern "C" void NuDisplaySceneDestroy(NUDLDLISTSCENE *scene) {
                 target += count;
                 source += count;
                 remaining -= count;
-            } while (remaining != 0);
+            } while (__builtin_expect(remaining != 0, 0));
         }
 
         NUGSCN *moved_scene = reinterpret_cast<NUGSCN *>(reinterpret_cast<u8 *>(scene) + delta);

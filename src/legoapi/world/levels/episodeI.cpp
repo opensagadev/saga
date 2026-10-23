@@ -835,8 +835,10 @@ void PodRaceUpdate(WORLDINFO_s *world, float dt) {
         }
     }
     for (i32 i = 0; i < 0x10; i++) {
+        if (PodRace->lap_entries[i].next == NULL)
+            continue;
         racepod_s *pod = &PodRace->lap_entries[i];
-        if (pod->next == NULL || pod->spline == NULL)
+        if (pod->spline == NULL)
             continue;
         GameObject_s *object = pod->object;
         if (object == NULL || !object->apiobj.in_use || object->apiobj.field_0x287 != 0) {
@@ -881,8 +883,8 @@ void PodRaceUpdate(WORLDINFO_s *world, float dt) {
                         speed = 1.5f * speed - ratio * speed;
                     }
                     speed /= length;
-                    pod->previous_axis.y = direction.y * speed;
                     pod->previous_axis.x = direction.x * speed;
+                    pod->previous_axis.y = direction.y * speed;
                     pod->previous_axis.z = direction.z * speed;
                 }
                 direction.x = pod->previous_axis.x * FRAMETIME;
@@ -958,7 +960,7 @@ void PodRaceUpdate(WORLDINFO_s *world, float dt) {
         object = pod->object;
         if (__builtin_expect(object != NULL, 0)) {
             object->vehicle_orientation = pod->matrix;
-            object->apiobj.position = *NUMTX_GET_ROW_VEC(&pod->matrix, 3);
+            object->apiobj.position = *NUMTX_GET_ROW_VEC(&object->vehicle_orientation, 3);
             object->saved_position = object->apiobj.position;
         }
     }
@@ -970,10 +972,10 @@ void PodRaceUpdate(WORLDINFO_s *world, float dt) {
         ResetLevel(world, reason, 1);
     }
     if (netclient == 0) {
-        podrace_netpacket->remaining_time = PodRace->lap_display;
         podrace_netpacket->start_countdown = PodRace->lap_countdown;
-        podrace_netpacket->available_time = PodRace->prev_lap_display;
+        podrace_netpacket->remaining_time = PodRace->lap_display;
         podrace_netpacket->lap = Lap;
+        podrace_netpacket->available_time = PodRace->prev_lap_display;
     }
 }
 

@@ -5870,7 +5870,7 @@ uv1deb *GenDebIndexRadialStar(debkeydatatype_s *key, debinftype *effect, float t
 }
 
 uv1deb *GenDebIndexImprovedRadial(debkeydatatype_s *key, debinftype *effect, float time) {
-    if (key->field_18a >= key->particle_count)
+    if (__builtin_expect(key->field_18a >= key->particle_count, 0))
         key->field_18a = 0;
     if (effect->particle_type == 7)
         return NULL;
@@ -11322,7 +11322,7 @@ extern "C" {
             }
             if (debkeydata[*handle].cutoff_distance < range) {
                 for (i32 i = 0; i < 4; i++) {
-                    if (debtab[effect]->sound_data[i * 3] != -1 && debtab[effect]->sound_data[i * 3 + 1] == 1)
+                    if (__builtin_expect(debtab[effect]->sound_data[i * 3] != -1 && debtab[effect]->sound_data[i * 3 + 1] == 1, 1))
                         PlaySfxByIdEx(debtab[effect]->sound_data[i * 3], position, volume, 1.0f);
                 }
             }
@@ -13984,7 +13984,7 @@ void edgraDrawCursor() {
         NuQFntPrintEx(system_qfont, 0x17c0, 0xa50, 0x10, "Curr Inst: %s", NuSpecialGetName(&special));
     }
     if (edgra_mode == 3) {
-        if (edgra_nearest == -1) {
+        if (__builtin_expect(edgra_nearest == -1, 0)) {
             NuQFntPrintEx(system_qfont, 0x17c0, 0xb90, 0x10, "Clump Size: -");
         } else {
             NuQFntPrintEx(system_qfont, 0x17c0, 0xb90, 0x10, "Clump Size: %d/%d",
@@ -13998,7 +13998,7 @@ void edgraDrawCursor() {
                   EDGRA_MAX_CLUMPS);
     if (edgra_dpadmode == 0)
         NuQFntPrintEx(system_qfont, 0x17c0, 0xcd0, 0x10, "Dpad Mode: Size");
-    else if (edgra_dpadmode == 1)
+    else if (__builtin_expect(edgra_dpadmode == 1, 0))
         NuQFntPrintEx(system_qfont, 0x17c0, 0xcd0, 0x10, "Dpad Mode: Tilt");
     NuQFntPrintEx(system_qfont, 0x17c0, 0xd70, 0x10, "%5.2f", edgra_cam_pos.x);
     NuQFntPrintEx(system_qfont, 0x1c20, 0xd70, 0x10, "%5.2f", edgra_cam_pos.y);
@@ -15078,7 +15078,7 @@ i32 edppSaveEffects(char *filename, char page) {
         if (debtab[index] == NULL)
             continue;
         if (category == 1) {
-            if (effecttypes[index].category == 1)
+            if (__builtin_expect(effecttypes[index].category == 1, 0))
                 effect_count += static_cast<i8>(effecttypes[index].page) == edbits_particle_level_page;
         } else if (category == 2) {
             ++effect_count;
@@ -15371,7 +15371,7 @@ i32 edppSaveEffects(char *filename, char page) {
             EdFileWriteInt(effecttypes[index].sound_data[7]);
             EdFileWriteInt(effecttypes[index].sound_data[8]);
         }
-        if (effecttypes[index].sound_data[9] != -1) {
+        if (__builtin_expect(effecttypes[index].sound_data[9] != -1, 1)) {
             EdFileWrite(const_cast<char *>(g_soundInfo[effecttypes[index].sound_data[9]].sfx_name), 16);
             EdFileWriteInt(effecttypes[index].sound_data[10]);
             EdFileWriteInt(effecttypes[index].sound_data[11]);
@@ -15389,7 +15389,7 @@ i32 edppSaveEffects(char *filename, char page) {
             instance_count += edpp_ptls[index].instance_id != -1;
         EdFileWriteInt(instance_count);
         for (i32 index = 0; index < 512; ++index) {
-            if (edpp_ptls[index].instance_id == -1)
+            if (__builtin_expect(edpp_ptls[index].instance_id == -1, 0))
                 continue;
             EdFileWriteNuVec(&edpp_ptls[index].position);
             EdFileWriteShort(edpp_ptls[index].rotation_z);
@@ -25105,7 +25105,7 @@ extern "C" {
                     minimum_z = group.origin.z + group.bounds_min.z;
                 if (maximum_x < group.bounds_max.x)
                     maximum_x = group.origin.x + group.bounds_max.x;
-                if (maximum_z < group.bounds_max.z)
+                if (__builtin_expect(maximum_z < group.bounds_max.z, 1))
                     maximum_z = group.origin.z + group.bounds_max.z;
             }
         }

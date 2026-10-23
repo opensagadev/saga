@@ -840,12 +840,14 @@ void GameCreatureOpponentSelection(AISYS_s *system, i32 count, APIOBJECT_s **obj
                     } else if ((WORLD->api_object_sys->line_of_sight[goody->field_0x289] >> baddy->field_0x289) & 1) {
                         distance = NuVecDist(&baddy->position, &goody->position, &difference);
                         have_distance = 1;
+                        const f32 diff_x = difference.x;
+                        const f32 diff_z = difference.z;
                         if ((!party_under_cover || ((goody->field_0x1f4 & 0x400) && (baddy->field_0x1f4 & 0x400))) &&
-                            (((awareness >> baddy->field_0x289) & 1) ||
+                            (__builtin_expect((awareness >> baddy->field_0x289) & 1, 0) ||
                              (((WORLD->api_object_sys->line_of_sight[goody->field_0x289] >> baddy->field_0x289) & 1) &&
                               ((goody->flags_high & 8) ||
-                               difference.x * goody->objptr->facing_direction.x +
-                                       difference.z * goody->objptr->facing_direction.z >=
+                               diff_x * goody->objptr->facing_direction.x +
+                                       diff_z * goody->objptr->facing_direction.z >=
                                    0.0f ||
                                (goody->heardistance > distance && (baddy->objptr->field_0xef9 & 8)))))) {
                             goody->ai_awareness_mask |= (u64)1 << baddy->field_0x289;
@@ -870,19 +872,16 @@ void GameCreatureOpponentSelection(AISYS_s *system, i32 count, APIOBJECT_s **obj
                         if (!have_distance)
                             distance = NuVecDist(&baddy->position, &goody->position, &difference);
                         have_distance = 1;
-                        if (__builtin_expect(
-                                (!party_under_cover ||
-                                 ((baddy->field_0x1f4 & 0x400) && (goody->field_0x1f4 & 0x400))) &&
-                                    (((awareness >> goody->field_0x289) & 1) ||
-                                     (((WORLD->api_object_sys->line_of_sight[baddy->field_0x289] >>
-                                        goody->field_0x289) &
-                                       1) &&
-                                      ((baddy->flags_high & 8) ||
-                                       -difference.z * baddy->objptr->facing_direction.z -
-                                               difference.x * baddy->objptr->facing_direction.x >=
-                                           0.0f ||
-                                       (baddy->heardistance > distance && (goody->objptr->field_0xef9 & 8))))),
-                                1)) {
+                        const f32 diff_x = difference.x;
+                        const f32 diff_z = difference.z;
+                        if ((!party_under_cover || ((baddy->field_0x1f4 & 0x400) && (goody->field_0x1f4 & 0x400))) &&
+                            (((awareness >> goody->field_0x289) & 1) ||
+                             (((WORLD->api_object_sys->line_of_sight[baddy->field_0x289] >> goody->field_0x289) & 1) &&
+                              ((baddy->flags_high & 8) ||
+                               -diff_z * baddy->objptr->facing_direction.z -
+                                       diff_x * baddy->objptr->facing_direction.x >=
+                                   0.0f ||
+                               (baddy->heardistance > distance && (goody->objptr->field_0xef9 & 8)))))) {
                             baddy->ai_awareness_mask |= (u64)1 << goody->field_0x289;
                             awareness |= baddy->ai_awareness_mask;
                         }
@@ -1008,16 +1007,13 @@ void GameCreatureOpponentSelection(AISYS_s *system, i32 count, APIOBJECT_s **obj
                 if (__builtin_expect((goody->ai_awareness_mask >> baddy->field_0x289) & 1, 1)) {
                     if ((WORLD->api_object_sys->line_of_sight[goody->field_0x289] >> baddy->field_0x289) & 1)
                         goody->objptr->ai_seen_mask |= (u64)1 << baddy->field_0x289;
-                } else {
-                    if (__builtin_expect((goody->objptr->ai_seen_mask >> baddy->field_0x289) & 1 != 0, 1)) {
-                        goody->objptr->ai_seen_mask &= ~((u64)1 << baddy->field_0x289);
-                    }
+                } else if (__builtin_expect((goody->objptr->ai_seen_mask >> baddy->field_0x289) & 1, 0)) {
+                    goody->objptr->ai_seen_mask &= ~((u64)1 << baddy->field_0x289);
                 }
                 if ((baddy->ai_awareness_mask >> goody->field_0x289) & 1) {
-                    if (__builtin_expect(
-                            (WORLD->api_object_sys->line_of_sight[baddy->field_0x289] >> goody->field_0x289) & 1, 0))
+                    if ((WORLD->api_object_sys->line_of_sight[baddy->field_0x289] >> goody->field_0x289) & 1)
                         baddy->objptr->ai_seen_mask |= (u64)1 << goody->field_0x289;
-                } else if (__builtin_expect((baddy->objptr->ai_seen_mask >> goody->field_0x289) & 1 != 0, 1)) {
+                } else if (__builtin_expect((baddy->objptr->ai_seen_mask >> goody->field_0x289) & 1, 1)) {
                     baddy->objptr->ai_seen_mask &= ~((u64)1 << goody->field_0x289);
                 }
             }

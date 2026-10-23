@@ -1837,13 +1837,13 @@ extern "C" {
 
         const u32 directions = 0xf000;
         u32 held = primary_held | alternate_held;
-        if (__builtin_expect((primary_held & directions) != 0, 1))
+        if ((primary_held & directions) != 0)
             held = primary_held;
         u32 pressed = primary_pressed | alternate_pressed;
         if ((primary_pressed & directions) != 0)
             pressed = primary_pressed;
 
-        if (__builtin_expect(MenuAlpha < 0.5f, 1)) {
+        if (__builtin_expect(MenuAlpha < 0.5f, 0)) {
             held = 0;
             pressed = 0;
         }
@@ -1853,11 +1853,11 @@ extern "C" {
         i32 right_pressed = pressed & 0x2000;
         i32 left_pressed = pressed & 0x8000;
         i32 up_held = held & 0x1000;
-        if (fastup_lock != 0) {
-            if (up_held != 0)
-                up_held = 0;
-            else
+        if (__builtin_expect(fastup_lock != 0, 0)) {
+            if (up_held == 0)
                 fastup_lock = 0;
+            else
+                up_held = 0;
         }
         i32 down_held = held & 0x4000;
         if (fastdown_lock != 0) {
@@ -1892,12 +1892,12 @@ extern "C" {
             confirm_pressed = pressed & confirm_mask;
             cancel_pressed = pressed & cancel_mask;
         }
-        if (__builtin_expect(down_pressed != 0, 1)) {
+        if (down_pressed != 0) {
             if (up_pressed != 0)
                 up_pressed = down_pressed = 0;
         }
         if (right_pressed != 0) {
-            if (left_pressed != 0)
+            if (__builtin_expect(left_pressed != 0, 0))
                 left_pressed = right_pressed = 0;
         }
         if (up_held != 0 && down_held != 0)
@@ -2636,7 +2636,8 @@ extern "C" {
 
     void Text3DEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32, u32 alignment, u8 red, u8 green,
                   u8 blue, i32 alpha) {
-        text3d_width = text3d_height = 0.0f;
+        text3d_width = 0.0f;
+        text3d_height = 0.0f;
         if ((SmartTextFont == NULL && QFont2D == NULL) || text == NULL || text[0] == '\0' || MenuStopDraw != 0)
             return;
         // The reference captures API scales before callbacks and reloads the active font for each operation.
@@ -2662,8 +2663,7 @@ extern "C" {
         text3d_width = width;
         f32 height = NuQFntHeight(SmartTextFont != NULL ? SmartTextFont : QFont2D);
         text3d_height = height;
-        y += NuQFntBaseline(SmartTextFont != NULL ? SmartTextFont : QFont2D);
-        f32 draw_y = y - height * 0.5f;
+        f32 draw_y = y + NuQFntBaseline(SmartTextFont != NULL ? SmartTextFont : QFont2D) - height * 0.5f;
         f32 button_scale = draw_x_scale;
         if (draw_x_scale != draw_y_scale) {
             if (__builtin_expect(ButtonScaleMode == 1, 0))
@@ -2673,7 +2673,7 @@ extern "C" {
             else
                 button_scale = 0.5f * (draw_x_scale + draw_y_scale);
             unsigned char buttons[512], normal[512];
-            i32 button_count = 0, normal_count = 0;
+            i32 normal_count = 0, button_count = 0;
             for (i32 i = 0; decoded[i] != 0;) {
                 if (decoded[i] == 0xd4 && decoded[i + 1] >= 0xb1 && decoded[i + 1] <= 0xbf) {
                     buttons[button_count++] = decoded[i++];
@@ -2718,11 +2718,11 @@ extern "C" {
             x -= (alignment & 8) != 0 ? width : width * 0.5f;
         const u32 opacity = static_cast<u32>(alpha) << 24;
         if (followon_line == 0) {
-            if (apitext_half_rgb == 0)
-                current_rgba = opacity | red | (static_cast<u32>(green) << 8) | (static_cast<u32>(blue) << 16);
-            else
+            if (apitext_half_rgb != 0)
                 current_rgba =
-                    opacity | (red >> 1) | (static_cast<u32>(green >> 1) << 8) | (static_cast<u32>(blue >> 1) << 16);
+                    opacity | (red / 2) | (static_cast<u32>(green / 2) << 8) | (static_cast<u32>(blue / 2) << 16);
+            else
+                current_rgba = opacity | red | (static_cast<u32>(green) << 8) | (static_cast<u32>(blue) << 16);
         }
         unsigned char fragment[1024];
         i32 count = 0;
@@ -2731,28 +2731,28 @@ extern "C" {
         do {
             if (decoded[i] == 0)
                 break;
-            if (decoded[i] == '~' && (decoded[i + 1] == '~' || (decoded[i + 1] >= '0' && decoded[i + 1] <= '9'))) {
+            if (decoded[i] == '~') {
                 u32 colour;
                 if (decoded[i + 1] != '~') {
                     colour = opacity;
                     if (red != 0 || green != 0 || blue != 0) {
                         const i32 preset = decoded[i + 1] - '0';
-                        if (apitext_half_rgb == 0)
+                        if (apitext_half_rgb != 0)
+                            colour |= text_preset_r[preset] | (static_cast<u32>(text_preset_g[preset]) << 8) |
+                                      (static_cast<u32>(text_preset_b[preset]) << 16);
+                        else
                             colour |= static_cast<u8>(text_preset_r[preset] * 2) |
                                       (static_cast<u32>((text_preset_g[preset] * 2) & 255) << 8) |
                                       (static_cast<u32>((text_preset_b[preset] * 2) & 255) << 16);
-                        else
-                            colour |= text_preset_r[preset] | (static_cast<u32>(text_preset_g[preset]) << 8) |
-                                      (static_cast<u32>(text_preset_b[preset]) << 16);
                     }
                 } else {
                     colour = opacity | red | (static_cast<u32>(green) << 8) | (static_cast<u32>(blue) << 16);
                     if (apitext_half_rgb != 0)
-                        colour = opacity | (red >> 1) | (static_cast<u32>(green >> 1) << 8) |
-                                 (static_cast<u32>(blue >> 1) << 16);
+                        colour = opacity | (red / 2) | (static_cast<u32>(green / 2) << 8) |
+                                 (static_cast<u32>(blue / 2) << 16);
                 }
                 i += 2;
-                if (__builtin_expect(count != 0 && colour != current_rgba, 0)) {
+                if (count != 0 && colour != current_rgba) {
                     fragment[count] = 0;
                     x += TextPrintSubstring(fragment, x, draw_y, z, button_font ? button_scale : draw_x_scale,
                                             button_font ? button_scale : draw_y_scale, current_rgba, button_font);
@@ -2761,8 +2761,7 @@ extern "C" {
                 current_rgba = colour;
                 continue;
             }
-            const bool next_button = decoded[i] == 0xd4 && decoded[i + 1] >= 0xb1 && decoded[i + 1] <= 0xbf;
-            if (next_button) {
+            if (decoded[i] == 0xd4 && decoded[i + 1] >= 0xb1 && decoded[i + 1] <= 0xbf) {
                 if (!button_font && count != 0) {
                     fragment[count] = 0;
                     x += TextPrintSubstring(fragment, x, draw_y, z, draw_x_scale, draw_y_scale, current_rgba, 0);
@@ -2773,7 +2772,7 @@ extern "C" {
                     fragment[count++] = decoded[i++];
                 button_font = true;
             } else {
-                if (button_font && count != 0) {
+                if (button_font && count > 0) {
                     fragment[count] = 0;
                     x += TextPrintSubstring(fragment, x, draw_y, z, button_scale, button_scale, current_rgba, 1);
                     count = 0;
@@ -3145,9 +3144,9 @@ extern "C" {
             y_scale = saved_y_scale * y_scale;
             APITEXTSCALEX = 1.0f;
             APITEXTSCALEY = 1.0f;
+            if (__builtin_expect(smarttextex_drawmessagebox != 0, 1))
+                message_box = message_box != NULL ? message_box : &local_box;
             BoxGeometry *box = static_cast<BoxGeometry *>(message_box);
-            if (smarttextex_drawmessagebox != 0 && box == NULL)
-                box = &local_box;
             x *= STCOORDSCALE;
             f32 available_width = STCOORDSCALE * max_width;
             TextDecode(text, decoded);
@@ -3221,7 +3220,6 @@ extern "C" {
                     begin = end + 2;
                 } while (line <= explicit_breaks);
                 last_line = explicit_breaks;
-                last_line -= lines[last_line][0] == '\0';
             } else if (last_line != 0) {
                 width = 0.0f;
                 if ((alignment & 10) != 0 && !constrained) {
@@ -3307,8 +3305,9 @@ extern "C" {
                         }
                     } while (++line <= last_line);
                 }
-                last_line -= lines[last_line][0] == '\0';
             }
+            if (last_line != 0)
+                last_line -= lines[last_line][0] == '\0';
             if (available_width < width) {
                 smarttextex_longestwidth = available_width;
                 draw_x_scale = (available_width / width) * draw_x_scale;
@@ -3354,20 +3353,21 @@ extern "C" {
             followon_line = 0;
             if (suppress_draw == 0) {
                 if (last_line != 0) {
-                    f32 first_y;
-                    if ((alignment & 1) != 0)
-                        first_y = y;
-                    else if ((alignment & 4) != 0)
-                        first_y = y - static_cast<f32>(last_line) * line_height;
-                    else
-                        first_y = y - static_cast<f32>(last_line) * 0.5f * line_height;
-                    for (i32 line = 0; line <= last_line; ++line) {
+                    i32 line = 0;
+                    do {
+                        f32 line_y;
+                        if ((alignment & 1) != 0)
+                            line_y = y;
+                        else if ((alignment & 4) != 0)
+                            line_y = y - static_cast<f32>(last_line) * line_height;
+                        else
+                            line_y = y - static_cast<f32>(last_line) * 0.5f * line_height;
+                        line_y = static_cast<f32>(line) * line_height + line_y;
                         if (line != 0)
                             followon_line = 1;
-                        Text3DEx(reinterpret_cast<char *>(lines[line]), x,
-                                 static_cast<f32>(line) * line_height + first_y, z, draw_x_scale, y_scale, z_scale,
+                        Text3DEx(reinterpret_cast<char *>(lines[line]), x, line_y, z, draw_x_scale, y_scale, z_scale,
                                  alignment, red, green, blue, alpha & 0xff);
-                    }
+                    } while (++line <= last_line);
                 } else {
                     Text3DEx(reinterpret_cast<char *>(decoded), x, y, z, draw_x_scale, y_scale, z_scale, alignment, red,
                              green, blue, alpha & 0xff);

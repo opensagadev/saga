@@ -425,7 +425,7 @@ void StatusPacketReset(STATUSPACKET_s *packet) {
 void InitStatusScreen(WORLDINFO_s *world) {
     STATUSPACKET_s &p = StatusPacket;
     char event[64];
-    if (__builtin_expect(p.lsw_packet == NULL, 0)) {
+    if (p.lsw_packet == NULL) {
         return;
     }
     for (i32 i = 0; StatusStages[i].type != -1; ++i) {
@@ -447,7 +447,7 @@ void InitStatusScreen(WORLDINFO_s *world) {
             } else {
                 p.player_model[i] = Player[i]->id;
                 p.player_active[i] = Player[i]->apiobj.player_controlled;
-                p.coins_remaining[i] = Player[i]->coinpacket == NULL ? 0 : Player[i]->coinpacket->coins;
+                p.coins_remaining[i] = Player[i]->coinpacket != NULL ? Player[i]->coinpacket->coins : 0;
                 ++p.status_flags;
             }
         }
@@ -493,7 +493,7 @@ void InitStatusScreen(WORLDINFO_s *world) {
         p.area = ADataList + area;
         p.episode_id = p.area->episode_index;
         episode = p.episode_id;
-        if (episode != -1) {
+        if (__builtin_expect(episode != -1, 1)) {
             p.episode = EDataList + static_cast<i8>(p.area->episode_index);
         }
         p.chapter = p.area->area_index;
@@ -501,7 +501,7 @@ void InitStatusScreen(WORLDINFO_s *world) {
             p.vehicle_area = 1;
         if ((p.area->flags & AREAFLAG_BONUS_AREA) != 0)
             p.bonus_mode = 1;
-        if (__builtin_expect((p.area->flags & 0x100) != 0, 0))
+        if ((p.area->flags & 0x100) != 0)
             p.super_bonus_mode = 1;
     }
     if (p.init_callback(world, &p) == 0) {
@@ -530,14 +530,14 @@ void InitStatusScreen(WORLDINFO_s *world) {
                     else
                         new_score = 0;
                     p.new_best_score = new_score;
-                    if (__builtin_expect(Game.episode_save[episode].superstory_complete == 0, 1)) {
+                    if (Game.episode_save[episode].superstory_complete == 0) {
                         Game.episode_save[episode].superstory_complete = 1;
                         AddToCompletionPoints(POINTS_PER_SUPERSTORY);
                         if (GOLDBRICKFORSUPERSTORY != 0)
                             gold = AddGoldBrickMessage(&p, tSUPERSTORYCOMPLETE);
                     }
                     p.time_reward_score = *p.score;
-                    if (p.new_best_time != 0.0f) {
+                    if (__builtin_expect(p.new_best_time != 0.0f, 1)) {
                         u64 reward = static_cast<i64>(static_cast<i32>(p.previous_best_time - p.new_best_time) * 100);
                         if (reward < 100)
                             reward = 100;
@@ -573,7 +573,7 @@ void InitStatusScreen(WORLDINFO_s *world) {
             p.elapsed_time = BonusTimer.time_elapsed;
             p.previous_best_time = Game.area_save[area].challenge_trial_time;
             i32 gold = 0;
-            if (!(p.previous_best_time > 0.0f) || p.elapsed_time < p.previous_best_time) {
+            if (p.previous_best_time <= 0.0f || p.elapsed_time < p.previous_best_time) {
                 if (WORLD->area->challenge_trial_time != 0 &&
                     WORLD->area->challenge_trial_time <= p.previous_best_time) {
                     AddToCompletionPoints(POINTS_PER_TIMETRIAL);
@@ -672,7 +672,7 @@ void InitStatusScreen(WORLDINFO_s *world) {
                     AddStatusStage(&p, 25, 0);
             } else
                 AddStatusStage(&p, 23, 0);
-            if (__builtin_expect(Game.field_0x7c26[0] > p.previous_gold_bricks, 1))
+            if (Game.field_0x7c26[0] > p.previous_gold_bricks)
                 AddStatusStage(&p, 19, 0);
             AddStatusStage(&p, 9, 0);
             AddStatusStage(&p, 10, 0);
@@ -699,14 +699,12 @@ void InitStatusScreen(WORLDINFO_s *world) {
         }
         p.area_time = AreaTimer.time_elapsed;
         const u64 total = static_cast<u64>(p.coins_remaining[0]) + p.coins_remaining[1];
-        if (total >= 4000000000ULL)
+        if (__builtin_expect(total >= 4000000000ULL, 0))
             p.collected_score = 4000000000.0f;
         else
             p.collected_score = static_cast<f32>(p.coins_remaining[0] + p.coins_remaining[1]);
         p.newly_completed = 0;
-        if ((p.field_0xb0 & 4) != 0) {
-            p.true_hero_percent = 100.0f;
-        } else {
+        if ((p.field_0xb0 & 4) == 0) {
             f32 numerator = p.collected_score * 100.0f;
             if (__builtin_expect(numerator != 0.0f && p.true_hero_target != 0.0f, 1)) {
                 f32 percent = numerator / p.true_hero_target;
@@ -714,6 +712,8 @@ void InitStatusScreen(WORLDINFO_s *world) {
             } else {
                 p.true_hero_percent = 0.0f;
             }
+        } else {
+            p.true_hero_percent = 100.0f;
         }
         p.coins_collected[0] = p.coins_remaining[0];
         p.coins_collected[1] = p.coins_remaining[1];
@@ -841,10 +841,10 @@ void InitStatusScreen(WORLDINFO_s *world) {
         }
         if (Game.field_0x7c26[0] > p.previous_gold_bricks)
             AddStatusStage(&p, 19, 0);
-        if (__builtin_expect((p.mode_flags & 8) == 0, 1))
+        if ((p.mode_flags & 8) == 0)
             AddStatusStage(&p, 9, 0);
         AddStatusStage(&p, 10, 0);
-        if (netclient == 0)
+        if (__builtin_expect(netclient == 0, 1))
             AddStatusStage(&p, 11, 0);
         AddStatusStage(&p, 12, 0);
         p.current_gold_brick = -1;

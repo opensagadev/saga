@@ -345,8 +345,10 @@ void UpdateCables() {
                 } else {
                     cable->wrap_indices[cable->wrap_count++] = static_cast<u8>(next);
                     if (__builtin_expect(cable->wrap_count == 15, 1)) {
-                        DeactivatePlayer(cable->target, WORLD->current_level == HOTHBATTLED_LDATA ? 60.0f : 30.0f,
-                                         NULL);
+                        if (WORLD->current_level == HOTHBATTLED_LDATA)
+                            DeactivatePlayer(cable->target, 60.0f, NULL);
+                        else
+                            DeactivatePlayer(cable->target, 30.0f, NULL);
                         PlaySfx("AT_AT_FALL", &cable->target->apiobj.collision_position);
                         lost_target = true;
                     }
@@ -401,6 +403,7 @@ void UpdateCables() {
             ReleaseCable(cable, 1);
             continue;
         }
+        NUVEC target_impulse;
         i32 obstruction = 0;
         for (i32 i = 0; i < HIGHGAMEOBJECT; ++i) {
             GameObject_s *object = &Obj[i];
@@ -425,9 +428,9 @@ void UpdateCables() {
                 if (__builtin_expect(combined * combined > line_distance, 1) &&
                     object->apiobj.collision_position.y + half_height > closest.y &&
                     closest.y > object->apiobj.collision_position.y - half_height) {
-                    f32 dz = object->apiobj.collision_position.z - closest.z;
-                    f32 dx = object->apiobj.collision_position.x - closest.x;
-                    if (radius * radius > dx * dx + dz * dz) {
+                    target_impulse.x = object->apiobj.collision_position.x - closest.x;
+                    target_impulse.z = object->apiobj.collision_position.z - closest.z;
+                    if (radius * radius > target_impulse.x * target_impulse.x + target_impulse.z * target_impulse.z) {
                         obstruction = 1;
                         break;
                     }
@@ -444,8 +447,10 @@ void UpdateCables() {
             if (target->id != id_ATAT) {
                 target->field_0xf01 |= 2;
                 AIScriptSetBaseScriptStateByName(&cable->target->ai.script_process, "BeingTowed");
-                cable->target->ai.opponent = cable->source;
-                FaceOpponent(cable->target, &cable->source->apiobj.collision_position);
+                GameObject_s *towed = cable->target;
+                GameObject_s *owner = cable->source;
+                towed->ai.opponent = owner;
+                FaceOpponent(towed, &owner->apiobj.collision_position);
                 target = cable->target;
                 if ((target->field_0xefd & 0x80) && !(CInfo[static_cast<i8>(target->character_context)].flags & 1))
                     target->apiobj.movement_facing_angle += 0x8000;
@@ -456,7 +461,7 @@ void UpdateCables() {
                 f32 maximum_sq = max_cable_length * max_cable_length;
                 f32 strength = distance_sq > maximum_sq ? distance_sq / maximum_sq : 1.0f;
                 NuVecScale(&delta, &delta, FRAMETIME);
-                NUVEC target_impulse, source_impulse;
+                NUVEC source_impulse;
                 NuVecScale(&target_impulse, &delta, strength * targetmomf);
                 NuVecScale(&source_impulse, &delta, strength * ownermomf);
                 if (cable->max_length == 1000000000.0f && cable->target->id != id_ATAT) {
@@ -511,7 +516,7 @@ void UpdateCables() {
             cable->max_length = remaining;
             for (i32 i = 0; i < path_count - 1; ++i) {
                 f32 length = NuVecDist(&path[i + 1], &path[i], &delta);
-                if (__builtin_expect(remaining < length, 0)) {
+                if (__builtin_expect(!(remaining >= length), 0)) {
                     cable->segment_lengths[i] = remaining;
                     cable->total_length += remaining;
                     f32 scale = NuFdiv(remaining, length);

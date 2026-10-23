@@ -2247,10 +2247,10 @@ float GetVehicleHoverHeight(GameObject_s *object, float *separation_offset) {
         float offset = blend * combined_height;
         float correction = 0.0f;
         float adjusted_height = height - offset;
-        if (adjusted_height < offset) {
+        if (__builtin_expect(adjusted_height < offset, 1)) {
             correction = offset - adjusted_height;
         }
-        if (Player[0] == object) {
+        if (__builtin_expect(Player[0] == object, 0)) {
             adjusted_height = height + offset;
             if (separation_offset != NULL) {
                 *separation_offset = offset;
@@ -2982,8 +2982,8 @@ void VehicleCollisionCode(GameObject_s *object) {
         debris_type = 101;
     }
     if (object->contact_normal.y <= 0.574f && object->contact_normal.y >= -0.574f) {
-        if (object->apiobj.horizontal_velocity_magnitude >
-            ((GAMECHARACTERDATA_s *)object->apiobj.character_data->field11_0x24)->field_0x10) {
+        if (__builtin_expect(object->apiobj.horizontal_velocity_magnitude >
+            ((GAMECHARACTERDATA_s *)object->apiobj.character_data->field11_0x24)->field_0x10, 1)) {
             NuVecNorm(&normal, &object->contact_normal);
             reverse_velocity = object->reset_velocity;
             NuVecNorm(&reverse_velocity, &reverse_velocity);
@@ -3000,7 +3000,7 @@ void VehicleCollisionCode(GameObject_s *object) {
                 return;
             magdif = (1.0f / ((GAMECHARACTERDATA_s *)object->apiobj.character_data->field11_0x24)->run_speed) *
                      (object->pre_terrain_speed - object->post_terrain_speed);
-            if (!(magdif > 0.6f))
+            if (__builtin_expect(!(magdif > 0.6f), 1))
                 return;
         emit_debris:
             if (debris_type != -1)
@@ -3768,7 +3768,7 @@ i32 MovePlayer_CIRCLE(GameObject_s *object) {
                                           static_cast<u16>(static_cast<i32>(5461.0f * pad->input_direction_z)), 8.0f);
     GAMECHARACTERDATA *data = object->apiobj.character_data->game_character;
     f32 seek_rate = data->velocity_seek_rate;
-    if (object->character_context == 0x23 || object->character_context == 0x24) {
+    if (__builtin_expect(object->character_context == 0x23 || object->character_context == 0x24, 0)) {
         object->target_velocity = {0.0f, 0.0f, 0.0f};
     } else if (object->field_0xe20 & 0x20) {
         GameObject_s *vehicle;
@@ -3788,7 +3788,7 @@ i32 MovePlayer_CIRCLE(GameObject_s *object) {
         return 1;
     } else {
         object->target_velocity.y = 0.0f;
-        if (object->apiobj.movement_direction.x != 0.0f || object->apiobj.movement_direction.z != 0.0f) {
+        if (__builtin_expect(object->apiobj.movement_direction.x != 0.0f || object->apiobj.movement_direction.z != 0.0f, 1)) {
             object->target_velocity.x = object->apiobj.movement_direction.x;
             object->target_velocity.z = object->apiobj.movement_direction.z;
             object->apiobj.movement_direction.x = 0.0f;
@@ -4436,7 +4436,7 @@ void TakeHitCode(GameObject_s *object) {
     object->context_animation_timer = timer;
     if (timer >= object->airborne_action_duration)
         goto finish_airborne;
-    if (timer > 0.5f)
+    if (__builtin_expect(timer > 0.5f, 0))
         goto check_ground_impact;
     return;
 
@@ -4483,7 +4483,7 @@ context_5a:
         object->context_animation = 0xaa;
     else if (animation == 0xa8)
         object->context_animation = 0xab;
-    else if (animation == 0xa9)
+    else if (__builtin_expect(animation == 0xa9, 0))
         object->context_animation = 0xac;
     else
         object->context_animation = 1;
@@ -6024,22 +6024,22 @@ void LightSabreDebris(GameObject_s *object) {
     auto object_field_0xe23 = object->field_0xe23;
     for (i32 blade = 0; blade < blade_count; ++blade) {
         i32 effect = hit_effect;
-        if (object_id == id_GRIEVOUS && !(object->apiobj.field_0x27c != -1 && Cheat_IsOn(0x19)) &&
-            !(object->apiobj.field_0x27c != -1 && Player_HasPurpleForce(object))) {
-            if (blade == 3 || blade == 0) {
+        if (__builtin_expect(object_id == id_GRIEVOUS && !(object->apiobj.field_0x27c != -1 && Cheat_IsOn(0x19)) &&
+            !(object->apiobj.field_0x27c != -1 && Player_HasPurpleForce(object)), 1)) {
+            if (__builtin_expect(blade == 3 || blade == 0, 0)) {
                 effect = 3;
             } else {
                 effect = 2;
             }
         }
-        if (effect == -1 || object->apiobj.field_0x288 == 0 || (object_field_0xe23 & 8) == 0)
+        if (__builtin_expect(effect == -1 || object->apiobj.field_0x288 == 0 || (object_field_0xe23 & 8) == 0, 0))
             continue;
         GAMECHARACTERDATA *data = object->apiobj.character_data->game_character;
         i8 first = data->streak_joints[blade][0];
-        if (first == -1 || object->apiobj.character_model->points_of_interest[first] == NULL)
+        if (__builtin_expect(first == -1 || object->apiobj.character_model->points_of_interest[first] == NULL, 0))
             continue;
         i32 second = data->streak_joints[blade][1];
-        if (second == -1 || object->apiobj.character_model->points_of_interest[second] == NULL)
+        if (__builtin_expect(second == -1 || object->apiobj.character_model->points_of_interest[second] == NULL, 1))
             continue;
         NUVEC start;
         NUVEC middle;
@@ -7588,7 +7588,7 @@ static void DodgeCode(GameObject_s *object, i32 action_pressed, i32 jump_pressed
 
             if (object->apiobj.character_model->model_data_b[object->context_animation] != NULL) {
                 object->context_animation_timer = AnimDuration(object->id, object->context_animation, 0.0f, 0.0f, 0);
-                if (object->context_animation_timer > 0.0f) {
+                if (__builtin_expect(object->context_animation_timer > 0.0f, 1)) {
                     object->character_context = 0x25;
                     object->blowup_target = NULL;
                     object->landing_followup = 2;
@@ -10222,7 +10222,7 @@ __attribute__((optimize("O2", "tree-vectorize"))) void Animate_BEAST(GameObject_
         packet.requested_animation = object->context_animation;
     } else {
         packet.requested_animation = CHARACTER_ANIMATION_FALL;
-        if (object->character_context != CHARACTER_CONTEXT_DOOMED &&
+        if (__builtin_expect(object->character_context != CHARACTER_CONTEXT_DOOMED &&
             (object->apiobj.field_0x27d != 0 ||
              ((object->ground_contact_grace_timer > 0.0f ||
                object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] == NULL ||
@@ -10230,7 +10230,7 @@ __attribute__((optimize("O2", "tree-vectorize"))) void Animate_BEAST(GameObject_
                 object->nearby_floor_distance < 0.25f && object->apiobj.velocity.y < 0.0f)) &&
               !(static_cast<const GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->field_0x28 >
                     0.0f &&
-                object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] != NULL)))) {
+                object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] != NULL))), 1)) {
             packet.requested_animation = static_cast<i16>(GetDefaultIdle(object));
         }
 
@@ -10275,13 +10275,13 @@ __attribute__((optimize("O2", "tree-vectorize"))) void Animate_BEAST(GameObject_
 
     UpdateCharacterIdle(object);
     const i16 animation = packet.requested_animation;
-    if (animation == CHARACTER_ANIMATION_FALL ||
+    if (__builtin_expect(!(animation == CHARACTER_ANIMATION_FALL ||
         ((object->apiobj.character_data->model_flags & CHARACTER_MODEL_FLAG_HIGH_JUMP) != 0 &&
          (animation == CHARACTER_ANIMATION_FALL_VARIANT_75 || animation == CHARACTER_ANIMATION_FALL_VARIANT_40 ||
-          animation == CHARACTER_ANIMATION_FALL_VARIANT_76))) {
-        object->fall_animation_timer += FRAMETIME;
-    } else {
+          animation == CHARACTER_ANIMATION_FALL_VARIANT_76))), 0)) {
         object->fall_animation_timer = 0.0f;
+    } else {
+        object->fall_animation_timer += FRAMETIME;
     }
 }
 
@@ -10867,7 +10867,7 @@ void Move_JEDI(GameObject_s *object) {
     FlattenCode(object);
     Hang_MoveCode(object);
     Ledge_MoveCode(WORLD, object);
-    if (LedgeTerrain_On != 0) {
+    if (__builtin_expect(LedgeTerrain_On != 0, 1)) {
         LedgeTerrain_MoveCode(object);
     }
     const i32 jump_pressed = input.pressed & input.jump_mask;
@@ -10913,7 +10913,7 @@ void Move_JEDI(GameObject_s *object) {
         ForceThrowCode(object, special_pressed);
         ForceCode(object, special_pressed, input.held & input.special_mask);
         FindForcePushTarget(object, special_pressed, 2);
-        if (object->apiobj.field_0x287 == 0 && FadeSys.fade == 0.0f) {
+        if (__builtin_expect(object->apiobj.field_0x287 == 0 && FadeSys.fade == 0.0f, 0)) {
             if (object->force_glow_step > 0.0f)
                 object->force_glow_step -= FRAMETIME;
             else
@@ -10921,7 +10921,7 @@ void Move_JEDI(GameObject_s *object) {
         } else
             ResetForceGlow(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));
     }
-    if ((object->apiobj.character_data->model_flags & 0x00040000) != 0) {
+    if (__builtin_expect((object->apiobj.character_data->model_flags & 0x00040000) != 0, 1)) {
         Teleport_MoveCode(object, special_pressed);
     }
     ThermalDetonator_MoveCode(object);
@@ -12177,7 +12177,7 @@ void Move_DROIDEKA(GameObject_s *object) {
             }
         }
     } else if (object->character_context == -1 && object->apiobj.field_0x27d != 0) {
-        if (object->pad_gamepad->input_magnitude >= object->apiobj.character_data->game_character->run_speed - 0.1f) {
+        if (__builtin_expect(object->pad_gamepad->input_magnitude >= object->apiobj.character_data->game_character->run_speed - 0.1f, 1)) {
             object->character_context = 0x31;
             object->context_animation = 3;
         } else if (CurrentAnim(&object->apiobj.anim_packet) == 5 &&
@@ -12211,7 +12211,7 @@ void Move_DROIDEKA(GameObject_s *object) {
 
 void Animate_DROIDEKA(GameObject_s *object) {
     ANIMPACKET_s &packet = object->apiobj.anim_packet;
-    if ((CInfo[object->character_context].flags & CHARACTER_CONTEXT_INFO_FLAG_OWNS_ANIMATION) != 0) {
+    if (__builtin_expect((CInfo[object->character_context].flags & CHARACTER_CONTEXT_INFO_FLAG_OWNS_ANIMATION) != 0, 1)) {
         packet.requested_animation = object->context_animation;
     } else {
         packet.requested_animation = CHARACTER_ANIMATION_FALL;
@@ -12252,14 +12252,14 @@ void Animate_DROIDEKA(GameObject_s *object) {
         MoveAnim_Check(object);
     }
 
-    if (packet.requested_animation != CHARACTER_ANIMATION_FALL &&
+    if (!(packet.requested_animation != CHARACTER_ANIMATION_FALL &&
         !((object->apiobj.character_data->model_flags & CHARACTER_MODEL_FLAG_HIGH_JUMP) != 0 &&
           (packet.requested_animation == CHARACTER_ANIMATION_FALL_VARIANT_75 ||
            packet.requested_animation == CHARACTER_ANIMATION_FALL_VARIANT_40 ||
-           packet.requested_animation == CHARACTER_ANIMATION_FALL_VARIANT_76))) {
-        object->fall_animation_timer = 0.0f;
-    } else {
+           packet.requested_animation == CHARACTER_ANIMATION_FALL_VARIANT_76)))) {
         object->fall_animation_timer += FRAMETIME;
+    } else {
+        object->fall_animation_timer = 0.0f;
     }
 }
 
@@ -12300,7 +12300,7 @@ void Move_GEONOSIAN(GameObject_s *object) {
         ShootCode(object, pressed & action_mask, special_pressed, 0, 1, 0);
     else if (object->id == id_WATTO)
         ZapCode(object, pressed & action_mask, 0);
-    if (static_cast<i8>(object->apiobj.character_data->game_character->flags_094[0]) < 0)
+    if (__builtin_expect(static_cast<i8>(object->apiobj.character_data->game_character->flags_094[0]) < 0, 1))
         CommunicateCode(object, special_pressed);
     CheckFallLand(object);
     HeadMovement(object);
@@ -12312,22 +12312,22 @@ void Move_GEONOSIAN(GameObject_s *object) {
 
 void Animate_GEONOSIAN(GameObject_s *object) {
     ANIMPACKET_s &packet = object->apiobj.anim_packet;
-    if ((CInfo[object->character_context].flags & CHARACTER_CONTEXT_INFO_FLAG_OWNS_ANIMATION) != 0) {
+    if (__builtin_expect((CInfo[object->character_context].flags & CHARACTER_CONTEXT_INFO_FLAG_OWNS_ANIMATION) != 0, 1)) {
         packet.requested_animation = object->context_animation;
     } else {
         packet.requested_animation = CHARACTER_ANIMATION_FALL;
-        if (object->character_context != CHARACTER_CONTEXT_DOOMED &&
+        if (__builtin_expect(object->character_context != CHARACTER_CONTEXT_DOOMED &&
             (object->apiobj.field_0x27d != 0 ||
              ((object->ground_contact_grace_timer > 0.0f ||
                object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] == NULL ||
                (object->fall_animation_timer < 0.2f && object->nearby_floor_distance != 2000000.0f &&
                 object->nearby_floor_distance < 0.25f && object->apiobj.velocity.y < 0.0f)) &&
               !(static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->field_0x28 > 0.0f &&
-                object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] != NULL)))) {
+                object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] != NULL))), 1)) {
             packet.requested_animation = static_cast<i16>(GetDefaultIdle(object));
         }
 
-        if (UseFallAnim(object)) {
+        if (__builtin_expect(UseFallAnim(object) != 0, 0)) {
             packet.requested_animation = CHARACTER_ANIMATION_FALL;
         } else if (object->character_context == -1 && object->field_0xe31 == 1) {
             packet.requested_animation = object->pad_gamepad->input_magnitude > 0.0f ? 37 : 15;

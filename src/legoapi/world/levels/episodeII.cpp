@@ -684,11 +684,9 @@ void JediB_Update(WORLDINFO_s *world) {
                 jedi_b.exclusion_mask |= 1ULL << player2->apiobj.field_0x289;
             }
         } else {
-            if (__builtin_expect(jedi_b.phase != 7, 1)) {
-                if (__builtin_expect(player->apiobj.pos_x * player->apiobj.pos_x +
-                                             player->apiobj.pos_z * player->apiobj.pos_z >
-                                         jedib_safe_r * jedib_safe_r,
-                                     1)) {
+            if (jedi_b.phase != 7) {
+                if (player->apiobj.pos_x * player->apiobj.pos_x + player->apiobj.pos_z * player->apiobj.pos_z >
+                    jedib_safe_r * jedib_safe_r) {
                     jedi_b.exclusion_mask = 1ULL << player->apiobj.field_0x289;
                 }
                 if (player2 != NULL &&
@@ -747,13 +745,10 @@ void JediB_Update(WORLDINFO_s *world) {
                             } else {
                                 id = (chosen & 1) != 0 ? id_DROIDEKA : id_SUPERBATTLEDROID;
                             }
-                            for (;;) {
-                                if (__builtin_expect(jedi_b.baddies[index].in_wave == 0 && jedi_b.baddies[index].random_type != 0 &&
-                                    jedi_b.baddies[index].id != id, 1)) {
-                                    break;
-                                }
+                            while (jedi_b.baddies[index].in_wave != 0 || jedi_b.baddies[index].random_type == 0 ||
+                                   jedi_b.baddies[index].id == id) {
                                 index++;
-                                if (__builtin_expect(index >= jedi_b.baddie_count, 1)) {
+                                if (__builtin_expect(index >= jedi_b.baddie_count, 0)) {
                                     index = 0;
                                 }
                             }
@@ -813,7 +808,7 @@ void JediB_Update(WORLDINFO_s *world) {
                 if (jedi_b.msg_objectives_left == NULL) {
                     jedi_b.msg_objectives_left = CheckGizAIMessage(gizaimessagesys, "ObjectivesLeft", NULL);
                 }
-                if (__builtin_expect(jedi_b.msg_restrain[0] == NULL, 0)) {
+                if (jedi_b.msg_restrain[0] == NULL) {
                     jedi_b.msg_restrain[0] = CheckGizAIMessage(gizaimessagesys, "RestrainPadme", NULL);
                 }
                 if (jedi_b.msg_restrain[1] == NULL) {
@@ -856,7 +851,7 @@ void JediB_Update(WORLDINFO_s *world) {
                                         jedi_b.wave_spawned[4] != 0 && jedi_b.wave_spawned[5] != 0;
                         }
                         jedi_b.wave_timer += FRAMETIME;
-                        if (__builtin_expect(jedi_b.wave_timer > 5.0f, 1)) {
+                        if (jedi_b.wave_timer > 5.0f) {
                             i32 release = -1;
                             for (i32 i = 0; i < jedi_b.baddie_count; i++) {
                                 if (jedi_b.baddies[i].released != 0) {

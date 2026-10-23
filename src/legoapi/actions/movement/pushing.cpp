@@ -233,8 +233,10 @@ void PushCode(GameObject_s *object, i32 allow_push) {
     const i8 saved_context = object->character_context;
     u16 wall_angle;
     i32 surface, angle_difference;
-    const i32 pushing = Pushing(object, &wall_angle, &surface, &angle_difference) != 0;
-    if (pushing) {
+    const f32 saved_push_timer = object->field_0xdc4;
+    i32 pushing = 0;
+    if (Pushing(object, &wall_angle, &surface, &angle_difference) != 0) {
+        pushing = 1;
         wall_angle += 0x8000;
         if (static_cast<u8>(object->apiobj.field_0x281) < 32 &&
             (TerSurface[object->apiobj.field_0x281].flags & 0x20000) != 0) {
@@ -261,7 +263,44 @@ void PushCode(GameObject_s *object, i32 allow_push) {
             object->field_0xdc4 = 0.0f;
     }
 
-    if ((CInfo[object->character_context].flags & 0x2000) == 0) {
+    if ((CInfo[object->character_context].flags & 0x2000) != 0) {
+        if (LEGOCONTEXT_WALLJUMPWAIT != -1 && object->character_context == LEGOCONTEXT_WALLJUMPWAIT) {
+            if ((object->pad_gamepad->buttons_pressed & GAMEPAD_JUMP) != 0)
+                object->landing_followup = 1;
+            else if ((object->pad_gamepad->buttons_pressed & GAMEPAD_ACTION) != 0)
+                object->landing_followup = 3;
+            if (object->apiobj.character_model->model_data_b[object->context_animation] != NULL &&
+                AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0) == NULL)
+                goto maintain;
+            object->context_animation_timer -= FRAMETIME;
+            if (object->context_animation_timer <= 0.0f) {
+                if (object->landing_followup == 1) {
+                    StartJump(object, 9);
+                    object->airborne_action_timer = 1.2f;
+                    object->apiobj.movement_facing_angle += 0x8000;
+                    object->apiobj.facing_angle = object->apiobj.movement_facing_angle;
+                    object->apiobj.field_0x276 = object->apiobj.movement_facing_angle;
+                    PlayGruntSfx(object);
+                } else if (object->landing_followup == 3 && LEGOACT_LUNGE != -1 &&
+                           object->apiobj.character_model->model_data_b[LEGOACT_LUNGE] != NULL) {
+                    object->apiobj.movement_facing_angle += 0x8000;
+                    object->apiobj.facing_angle = object->apiobj.movement_facing_angle;
+                    object->apiobj.field_0x276 = object->apiobj.movement_facing_angle;
+                    StartLunge(object, 1.0f, 0.0f);
+                    PlayGruntSfx(object);
+                } else
+                    StartEndOfJump(object);
+            }
+        } else {
+            if (!!(pushing))
+                object->takeover_start_angle = wall_angle;
+            if (object->field_0xdc4 <= 0.0f) {
+                if (LEGOCONTEXT_PUSHOBSTACLE != -1 && object->character_context == LEGOCONTEXT_PUSHOBSTACLE)
+                    GameCam_Blend(NULL, 0.5f, 0.0f, 1);
+                object->character_context = -1;
+            }
+        }
+    } else {
         if ((object->apiobj.field_0x27d != 0 || GameObjectNearFloor(object, 1.25f, NULL) != 0) &&
             object->character_context == -1 &&
             (allow_push == 0 ||
@@ -274,12 +313,13 @@ void PushCode(GameObject_s *object, i32 allow_push) {
                     spinner = GizSpinner_Find(WORLD, &object->apiobj.collision_position, 1);
                 if (spinner != NULL) {
                     if (((spinner->flags & 8) == 0 || ShadowMode != 0) && spinner->room_index == -1 &&
-                        !(spinner->field_0x090 > 0.0f)) {
+                        spinner->field_0x090 <= 0.0f) {
                         // A spinner can only be attached to one party member.
+                        const i32 spinner_context = LEGOCONTEXT_PUSHSPINNER;
                         bool occupied = false;
                         for (i32 player_index = 0; player_index < 8; ++player_index) {
                             if (Player[player_index] != NULL && Player[player_index] != object &&
-                                Player[player_index]->character_context == LEGOCONTEXT_PUSHSPINNER &&
+                                Player[player_index]->character_context == spinner_context &&
                                 Player[player_index]->field_0x788 == spinner) {
                                 occupied = true;
                                 break;
@@ -288,7 +328,7 @@ void PushCode(GameObject_s *object, i32 allow_push) {
                         if (!occupied) {
                             object->field_0x788 = spinner;
                             object->field_0x7a6 = static_cast<u8>(surface);
-                            object->character_context = LEGOCONTEXT_PUSHSPINNER;
+                            object->character_context = spinner_context;
                             FastWeaponIn(object, 0);
                             AlertSurroundingCreatures(object, &object->apiobj.collision_position);
                         }
@@ -308,6 +348,8 @@ void PushCode(GameObject_s *object, i32 allow_push) {
                         AlertSurroundingCreatures(object, &object->apiobj.collision_position);
                     }
                 }
+            } else if (object->apiobj.supporting_platform_id == -1 && object->field_0xdc4 >= saved_push_timer) {
+                object->character_context = LEGOCONTEXT_PUSH;
             } else {
                 object->character_context = LEGOCONTEXT_PUSH;
             }
@@ -351,44 +393,9 @@ void PushCode(GameObject_s *object, i32 allow_push) {
             object->context_animation = LEGOACT_WALLJUMP_WAIT;
             f32 duration = AnimDuration(object->id, object->context_animation, 0.0f, 0.0f, 0);
             object->landing_followup = 0;
-            object->context_animation_timer = duration <= 0.0f ? 0.3f : duration;
+            object->context_animation_timer = duration > 0.0f ? duration : 0.3f;
             object->apiobj.movement_facing_angle = wall_angle;
             object->apiobj.velocity = v000;
-        }
-    } else if (LEGOCONTEXT_WALLJUMPWAIT != -1 && object->character_context == LEGOCONTEXT_WALLJUMPWAIT) {
-        if ((object->pad_gamepad->buttons_pressed & GAMEPAD_JUMP) != 0)
-            object->landing_followup = 1;
-        else if ((object->pad_gamepad->buttons_pressed & GAMEPAD_ACTION) != 0)
-            object->landing_followup = 3;
-        if (object->apiobj.character_model->model_data_b[object->context_animation] != NULL &&
-            AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0) == NULL)
-            goto maintain;
-        object->context_animation_timer -= FRAMETIME;
-        if (object->context_animation_timer <= 0.0f) {
-            if (object->landing_followup == 1) {
-                StartJump(object, 9);
-                object->airborne_action_timer = 1.2f;
-                object->apiobj.movement_facing_angle += 0x8000;
-                object->apiobj.facing_angle = object->apiobj.movement_facing_angle;
-                object->apiobj.field_0x276 = object->apiobj.movement_facing_angle;
-                PlayGruntSfx(object);
-            } else if (object->landing_followup == 3 && LEGOACT_LUNGE != -1 &&
-                       object->apiobj.character_model->model_data_b[LEGOACT_LUNGE] != NULL) {
-                object->apiobj.movement_facing_angle += 0x8000;
-                object->apiobj.facing_angle = object->apiobj.movement_facing_angle;
-                object->apiobj.field_0x276 = object->apiobj.movement_facing_angle;
-                StartLunge(object, 1.0f, 0.0f);
-                PlayGruntSfx(object);
-            } else
-                StartEndOfJump(object);
-        }
-    } else {
-        if (!!(pushing))
-            object->takeover_start_angle = wall_angle;
-        if (object->field_0xdc4 <= 0.0f) {
-            if (LEGOCONTEXT_PUSHOBSTACLE != -1 && object->character_context == LEGOCONTEXT_PUSHOBSTACLE)
-                GameCam_Blend(NULL, 0.5f, 0.0f, 1);
-            object->character_context = -1;
         }
     }
 maintain:
@@ -409,10 +416,11 @@ maintain:
                 return;
             }
         } else {
-            i32 difference = RotDiff(GamePad_InputAngle(object, pad), object->takeover_start_angle);
+            const u16 input_angle = GamePad_InputAngle(object, pad);
+            i32 difference = RotDiff(input_angle, object->takeover_start_angle);
             if (difference < 0)
                 difference = -difference;
-            bool forward;
+            i32 forward;
             if (difference < 0x31c7) {
                 object->field_0x758 = 0.75f;
                 object->context_animation = LEGOACT_SUPERPUSH_PUSH;
@@ -426,18 +434,19 @@ maintain:
                 forward = object->field_0x7a6 != 0x1e;
             }
             GIZOBSTACLE_s *obstacle = static_cast<GIZOBSTACLE_s *>(object->field_0x788);
-            bool stopped;
+            i32 stopped, moving;
             if (forward) {
                 stopped = obstacle->anim_set->state == 2;
+                moving = obstacle->anim_set->state != 2;
                 GizObstacle_SetPushControlled(obstacle, object, 1.0f);
             } else {
                 stopped = obstacle->anim_set->state == 0;
+                moving = obstacle->anim_set->state != 0;
                 GizObstacle_SetPushControlled(obstacle, object, -1.0f);
             }
-            if (stopped) {
-                if (ParticlesPerSecond(3.0f, FRAMETIME) > 0)
-                    NewBuzzFrames(object->pad_gamepad->pad, 1, 0);
-            } else {
+            if (stopped && ParticlesPerSecond(3.0f, FRAMETIME) > 0) {
+                NewBuzzFrames(object->pad_gamepad->pad, 1, 0);
+            } else if (moving) {
                 f32 strength = QRAND_FLOAT() * 0.3f;
                 NewRumble(object->pad_gamepad->pad, strength, 0);
             }
@@ -467,7 +476,7 @@ maintain:
             // Pushing can leave the angle unwritten, so test shuffle availability first.
             if (LEGOCONTEXT_WALLSHUFFLE == -1 || LEGOACT_WALLSHUFFLE_IDLE == -1 ||
                 object->apiobj.character_model->model_data_b[LEGOACT_WALLSHUFFLE_IDLE] == NULL ||
-                (angle_difference < 0 ? -angle_difference : angle_difference) < 0x71c8)
+                abs(angle_difference) < 0x71c8)
                 object->character_context = -1;
             else {
                 object->character_context = LEGOCONTEXT_WALLSHUFFLE;

@@ -523,7 +523,7 @@ void ManageGameObjects() {
     memset(aicreature_sets_alive, 0, sizeof(aicreature_sets_alive));
     for (i32 i = 0; i < HIGHGAMEOBJECT; ++i) {
         GameObject_s *candidate = &object[i];
-        if (__builtin_expect((candidate->apiobj.field_0x1f8 & 0x1000) != 0, 0) && candidate->apiobj.field_0x287 == 0 &&
+        if ((candidate->apiobj.field_0x1f8 & 0x1000) != 0 && candidate->apiobj.field_0x287 == 0 &&
             candidate->ai.creature_set != 0)
             ++aicreature_sets_alive[candidate->ai.creature_set - 1];
     }
@@ -2705,7 +2705,7 @@ i32 ObjHitObj(GameObject_s *attacker, GameObject_s *target, i32 damage, u16 flag
         ObstacleCamHoldUntilPlayersMove = 0;
     i32 hit = damage;
     bool instant = damage == -1;
-    if (target->character_context == 76 || target->character_context == 81) {
+    if (target->character_context == 81 || target->character_context == 76) {
         hit = 0;
         instant = false;
     }
@@ -2728,12 +2728,12 @@ i32 ObjHitObj(GameObject_s *attacker, GameObject_s *target, i32 damage, u16 flag
                 __builtin_expect(!(LEGOCONTEXT_COMBO != -1 && attacker->character_context == LEGOCONTEXT_COMBO &&
                                    attacker->combo_branch == 6),
                                  1)) {
-                if (target->apiobj.player_controlled)
+                if (__builtin_expect(target->apiobj.player_controlled, 1))
                     NewRumble(target->pad_gamepad->pad, 0.75f, 0);
                 if (LEGOCONTEXT_HOLD != -1 && target->character_context == LEGOCONTEXT_HOLD) {
                     NewBlockAction(target);
                     if ((target->id == id_IMPERIALGUARD || target->id == id_GAMORREANGUARD) &&
-                        (target->character_context == 24 || target->character_context == 12))
+                        (target->character_context == 12 || target->character_context == 24))
                         GameAudio_PlaySfx(74, &target->apiobj.collision_position, 0, 0);
                 }
                 return 0;
@@ -2741,7 +2741,7 @@ i32 ObjHitObj(GameObject_s *attacker, GameObject_s *target, i32 damage, u16 flag
         }
     }
     if (target->field_0xd24 >= 1.0f) {
-        if (__builtin_expect((flags & 0x100) != 0, 0) &&
+        if ((flags & 0x100) &&
             __builtin_expect((instant || (LEGOCONTEXT_COMBO != -1 && attacker->character_context == LEGOCONTEXT_COMBO &&
                                           attacker->combo_branch == 6)) != 0,
                              1))
@@ -2767,7 +2767,7 @@ i32 ObjHitObj(GameObject_s *attacker, GameObject_s *target, i32 damage, u16 flag
                 goto attributed_hit;
             }
             if (target->id == id_SPEEDERBIKE && !target->apiobj.player_controlled) {
-                if (__builtin_expect(attacker != 0, 0) && !(attacker->apiobj.character_data->model_flags & 0x2000))
+                if (attacker && !(attacker->apiobj.character_data->model_flags & 0x2000))
                     hit = 0;
                 else if (target->ai.creature_set != 2)
                     hit = 0;
@@ -2782,7 +2782,7 @@ i32 ObjHitObj(GameObject_s *attacker, GameObject_s *target, i32 damage, u16 flag
                                        !attacker->apiobj.player_controlled)) != 0,
                                      0),
                 1)) {
-            if (__builtin_expect(hit == -1, 1) && target->id == id_ATAT) {
+            if (hit == -1 && target->id == id_ATAT) {
                 if (target->character_context != 23)
                     hit = 0;
             } else
@@ -2822,7 +2822,7 @@ attributed_hit:
             }
         }
     }
-    if (__builtin_expect(AIScriptSetBaseScriptStateByName(&target->ai.script_process, "TakenHit") != 0, 1))
+    if (AIScriptSetBaseScriptStateByName(&target->ai.script_process, "TakenHit"))
         AIScriptProcess(WORLD->ai_sys, &target->apiobj, &target->ai, &target->ai.script_process, FRAMETIME);
 impact:
     if (!no_impact) {
@@ -2851,7 +2851,7 @@ impact:
                 GameAudio_PlaySfx(74, &target->apiobj.collision_position, bits, 0);
             }
         } else if (attacker) {
-            if (__builtin_expect(attacker->apiobj.character_data->model_flags & 8 != 0, 0))
+            if (__builtin_expect((attacker->apiobj.character_data->model_flags & 8) != 0, 0))
                 GameAudio_PlaySfx(65, &target->apiobj.collision_position, GameAudio_GetPlrSfxBits(attacker), 0);
             else
                 GameAudio_PlaySfx(74, &target->apiobj.collision_position, 0, 0);
@@ -2895,7 +2895,7 @@ impact:
                 SetFlicker(target, 0.4f);
             PlayerTakeHit(target, attacker);
             result = 0;
-            if (__builtin_expect(target->apiobj.player_controlled != 0, 1))
+            if (target->apiobj.player_controlled)
                 TakeHitRumble(target, 0.666f);
             goto hurt;
         }

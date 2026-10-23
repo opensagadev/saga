@@ -9537,7 +9537,7 @@ extern "C" {
             if (count != 0) {
                 for (i32 index = 0; index < object_count; ++index) {
                     APIOBJECT *object = objects[index];
-                    if ((object->object_flags & 0x20080) != 0) {
+                    if (__builtin_expect((object->object_flags & 0x20080) != 0, 0)) {
                         continue;
                     }
                     for (i32 obstacle = 0; obstacle < count; ++obstacle) {
@@ -9552,7 +9552,7 @@ extern "C" {
                         NUVEC difference;
                         f32 radius = object->ai->mover_height + antinode->radius;
                         difference.x = object->ai->movement_position.x - antinode->position.x;
-                        if (difference.x > radius || difference.x < -radius) {
+                        if (__builtin_expect(difference.x > radius || difference.x < -radius, 0)) {
                             continue;
                         }
                         difference.z = object->ai->movement_position.z - antinode->position.z;
@@ -9608,7 +9608,7 @@ extern "C" {
                     continue;
                 }
                 difference.z = first_packet->movement_position.z - second_packet->movement_position.z;
-                if (difference.z > radius || difference.z < -radius) {
+                if (__builtin_expect(difference.z > radius || difference.z < -radius, 0)) {
                     continue;
                 }
                 if (first->collision_min.y > second->collision_max.y ||
@@ -9633,7 +9633,7 @@ extern "C" {
                     AIPACKET *second_ai = second->ai;
                     f32 first_timer = first_ai->antinode_timer;
                     f32 second_timer = second_ai->antinode_timer;
-                    if (first_timer > antinode_time && second_timer > antinode_time) {
+                    if (__builtin_expect(first_timer > antinode_time && second_timer > antinode_time, 0)) {
                         if (first_timer > second_timer) {
                             second_ai->antinode_timer = first_timer;
                             second_ai->antinode_clockwise = first_ai->antinode_clockwise;
@@ -9644,7 +9644,7 @@ extern "C" {
                     } else if (second_timer > antinode_time) {
                         first_ai->antinode_timer = second_timer;
                         first_ai->antinode_clockwise = second_ai->antinode_clockwise;
-                    } else if (first_timer > 0.0f) {
+                    } else if (__builtin_expect(first_timer > 0.0f, 1)) {
                         second_ai->antinode_timer = first_timer;
                         second_ai->antinode_clockwise = first_ai->antinode_clockwise;
                     }
@@ -9711,7 +9711,7 @@ extern "C" {
                 if (first->collision_priority > second->collision_priority) {
                     fixed_first = true;
                     fixed_second = second_fixed != 0;
-                } else if (first->collision_priority < second->collision_priority) {
+                } else if (__builtin_expect(first->collision_priority < second->collision_priority, 0)) {
                     fixed_first = first_fixed != 0;
                     fixed_second = true;
                 } else {
@@ -9725,7 +9725,7 @@ extern "C" {
                     difference.y = 0.0f;
                     f32 overlap = radius - distance;
                     if (fixed_first) {
-                        if (first->collision_priority > second->resolved_collision_priority) {
+                        if (__builtin_expect(first->collision_priority > second->resolved_collision_priority, 1)) {
                             f32 scale = overlap;
                             if (scale == 0.0f || distance == 0.0f) {
                                 scale = 0.0f;
@@ -9770,7 +9770,7 @@ extern "C" {
                             first_ai->antinode_timer = second_timer;
                             first_ai->antinode_clockwise = second_ai->antinode_clockwise;
                         }
-                    } else if (!(second_timer <= antinode_time)) {
+                    } else if (__builtin_expect(!(second_timer <= antinode_time), 0)) {
                         first_ai->antinode_timer = second_timer;
                         first_ai->antinode_clockwise = second_ai->antinode_clockwise;
                     } else if (first_timer > 0.0f) {
@@ -10069,7 +10069,7 @@ static AIPATHCNX *GetNextConnection(const AIPACKET *packet, i32 *direction) {
         return NULL;
     }
     if ((static_cast<u64>(static_cast<u16>(node->route_boundary_mask)) >> route_index & 1) != 0) {
-        if (connection == NULL) {
+        if (__builtin_expect(connection == NULL, 0)) {
             return NULL;
         }
         if ((static_cast<u64>(connection->route_mask) >> route_index & 1) == 0) {
@@ -10088,7 +10088,7 @@ static AIPATHCNX *GetNextConnection(const AIPACKET *packet, i32 *direction) {
                 AIPathNodeDistanceToPathNode(packet->path_info.path, route->exit_nodes[index], destination, 0xff,
                                              static_cast<u32>(static_cast<u64>(1) << packet->current_route));
             f32 distance = first != FLT_MAX && second != FLT_MAX ? first + second : FLT_MAX;
-            if (distance < nearest) {
+            if (__builtin_expect(distance < nearest, 0)) {
                 nearest = distance;
                 next_node = route->exit_nodes[index];
             }
@@ -11800,7 +11800,7 @@ __used__ static i32 Action_GoToLocator(AISYS *sys, AISCRIPTPROCESS *processor, A
                 continue;
             }
 
-            if (NuStrIStr(params[index], "personal") != NULL) {
+            if (__builtin_expect(NuStrIStr(params[index], "personal") != NULL, 1)) {
                 use_personal_name = 1;
                 continue;
             }
@@ -13116,9 +13116,9 @@ void AIWander(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *object, i32 chec
             packet->movement_target = node->connections[(index + start) % node->connection_count];
             AIPATHCNX *target = packet->movement_target;
             if (target != packet->path_info.connection) {
-                if (packet->current_route == 0xff ||
+                if (__builtin_expect(packet->current_route == 0xff ||
                     ((static_cast<u64>(target->route_mask) >> packet->current_route) & 1) != 0 ||
-                    ((static_cast<u64>(node->route_boundary_mask) >> packet->current_route) & 1) != 0) {
+                    ((static_cast<u64>(node->route_boundary_mask) >> packet->current_route) & 1) != 0, 1)) {
                     packet->movement_target_direction = node_index != target->node_indices[0];
                     if (target->traversal_flags[packet->movement_target_direction] == 0) {
                         break;
@@ -16041,7 +16041,7 @@ extern "C" {
                 for (i32 connection = 0; connection < node->connection_count; ++connection) {
                     EdFileWriteShort(node->connections[connection] - path->connections);
                 }
-                if (node->connection_count & 1) {
+                if (__builtin_expect(node->connection_count & 1 != 0, 0)) {
                     EdFileWriteShort(0);
                 }
                 EdFileWriteShort(node->route_membership_mask);
@@ -16327,7 +16327,7 @@ static __used__ void pathEditor_cbSetShareNode(eduimenu_s *, eduiitem_s *item, u
         ++path_number;
     }
     if (match_count == 0) {
-        if (item->data == 0) {
+        if (__builtin_expect(item->data == 0, 1)) {
             aieditor_ClearMainMenu();
         }
         return;
@@ -16365,7 +16365,7 @@ static __used__ void pathEditor_cbSetShareNode(eduimenu_s *, eduiitem_s *item, u
     }
     for (i32 i = 0; i < match_count; ++i) {
         EDAIPATHNODE_s *node = matches[i];
-        if (node->shared_node != shared) {
+        if (__builtin_expect(node->shared_node != shared, 1)) {
             if (node->shared_node != nullptr) {
                 --node->shared_node->reference_count;
                 if (node->shared_node->reference_count <= 1) {

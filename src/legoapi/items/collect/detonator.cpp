@@ -122,197 +122,194 @@ static inline i32 DetonatorPlacementSlot(GameObject_s *object) {
     DetonatorConsiderPlacementSlot(0, object, count, available);
     DetonatorConsiderPlacementSlot(1, object, count, available);
     DetonatorConsiderPlacementSlot(2, object, count, available);
-    if (count == 3)
+    if (__builtin_expect(count == 3, 1))
         return -1;
     DetonatorConsiderPlacementSlot(3, object, count, available);
-    if (count == 3)
+    if (__builtin_expect(count == 3, 1))
         return -1;
     DetonatorConsiderPlacementSlot(4, object, count, available);
-    if (count == 3)
+    if (__builtin_expect(count == 3, 1))
         return -1;
     DetonatorConsiderPlacementSlot(5, object, count, available);
-    if (count == 3)
+    if (__builtin_expect(count == 3, 1))
         return -1;
     DetonatorConsiderPlacementSlot(6, object, count, available);
-    if (count == 3)
+    if (__builtin_expect(count == 3, 1))
         return -1;
     DetonatorConsiderPlacementSlot(7, object, count, available);
-    if (count == 3)
+    if (__builtin_expect(count == 3, 1))
         return -1;
     DetonatorConsiderPlacementSlot(8, object, count, available);
-    if (count == 3)
+    if (__builtin_expect(count == 3, 1))
         return -1;
     DetonatorConsiderPlacementSlot(9, object, count, available);
-    if (count == 3)
+    if (__builtin_expect(count == 3, 1))
         return -1;
     return available;
 }
 
 void Detonator_MoveCode(GameObject_s *object) {
     f32 oldest_time;
-    if (__builtin_expect(object->character_context != 0x48 && object->character_context != 0x49, 1)) {
-        if (WORLD->lev_objs[0xec].active == 0 || static_cast<i8>(object->apiobj.flags_low) >= 0 ||
-            (object->apiobj.field_0x27d == 0 && object->field_0xe31 != 1) ||
-            (ObjLandReady(object) == 0 && (CInfo[object->character_context].flags & 0x2000) == 0)) {
-            object->field_0xde0 = 0.0f;
-            object->field_0xe21 |= 0x80;
+    if (object->character_context == 0x48 || object->character_context == 0x49) {
+        object->field_0xe21 |= 0x80;
+        object->field_0xde0 = 0.0f;
+        f32 *frame = NULL;
+        if (object->apiobj.character_model->model_data_b[object->context_animation] != NULL &&
+            (frame = AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0)) == NULL) {
             return;
         }
-        if ((object->pad_gamepad->buttons_held & GAMEPAD_SPECIAL) != 0) {
-            if (!(object->field_0xde0 > 0.0f) && static_cast<i8>(object->field_0xe21) < 0) {
+        object->context_animation_timer -= FRAMETIME;
+        if (__builtin_expect(object->context_animation_timer <= 0.0f, 0)) {
+            object->character_context = -1;
+            if (object->field_0x7a3 != 0) {
                 return;
             }
-            object->field_0xe21 |= 0x80;
-            object->field_0xde0 += FRAMETIME;
-            if (object->field_0xde0 >= 0.3f && object->field_0xde0 >= 1.0f) {
-                oldest_time = -1.0f;
-                DETONATOR_s *oldest = NULL;
-                if (Detonator[0].active != 0) {
-                    oldest = &Detonator[0];
-                    oldest_time = Detonator[0].timer;
-                    if (!(oldest_time > -1.0f)) {
-                        oldest = NULL;
-                        oldest_time = -1.0f;
+            // Expiry falls through to placement, including an unfinished pickup.
+            object->field_0x7a3 = 1;
+        } else {
+            if (object->field_0x7a3 != 0) {
+                return;
+            }
+            if (__builtin_expect(object->apiobj.character_model->model_data_b[object->context_animation] != NULL, 1)) {
+                const f32 marker = AnimListFrame(object->apiobj.character_model, object->context_animation,
+                                                 object->character_context == 0x49 ? 0 : 2);
+                if (frame == NULL || !(*frame > 0.0f) || !(*frame >= marker)) {
+                    return;
+                }
+            } else if (object->context_animation_timer >= 0.5f) {
+                return;
+            }
+            object->field_0x7a3 = 1;
+            if (__builtin_expect(object->character_context == 0x49, 1)) {
+                DETONATOR_s *detonator = static_cast<DETONATOR_s *>(object->field_0x788);
+                if (detonator != NULL) {
+                    detonator->active = 0;
+                    detonator = static_cast<DETONATOR_s *>(object->field_0x788);
+                    if (detonator->field_0x34 != NULL) {
+                        GameAntinode_UnregisterAntiNode(WORLD->game_antinode_sys,
+                                                        static_cast<GAMEANTINODE_s *>(detonator->field_0x34));
+                        static_cast<DETONATOR_s *>(object->field_0x788)->field_0x34 = NULL;
                     }
                 }
-                DetonatorConsiderOldest(&Detonator[1], oldest_time, oldest);
-                DetonatorConsiderOldest(&Detonator[2], oldest_time, oldest);
-                DetonatorConsiderOldest(&Detonator[3], oldest_time, oldest);
-                DetonatorConsiderOldest(&Detonator[4], oldest_time, oldest);
-                DetonatorConsiderOldest(&Detonator[5], oldest_time, oldest);
-                DetonatorConsiderOldest(&Detonator[6], oldest_time, oldest);
-                DetonatorConsiderOldest(&Detonator[7], oldest_time, oldest);
-                DetonatorConsiderOldest(&Detonator[8], oldest_time, oldest);
-                DetonatorConsiderOldest(&Detonator[9], oldest_time, oldest);
-                if (oldest != NULL) {
-                    Detonator_Detonate(oldest);
-                    object->field_0xde0 = 0.7f;
-                } else {
-                    object->field_0xde0 = 0.0f;
-                }
+                return;
             }
+        }
+        const i32 slot = DetonatorPlacementSlot(object);
+        if (slot < 0) {
+            GameAudio_PlaySfx(0x32, NULL, 0, 0);
             return;
         }
-        if (object->field_0xde0 > 0.0f && object->field_0xde0 < 0.3f) {
-            DETONATOR_s *nearest =
-                Detonator_FindNearest(&object->apiobj.lower_position, 0.0775f + object->apiobj.field_0x1dc, object);
-            if (nearest != NULL) {
-                object->field_0x7a3 = 0;
-                object->character_context = 0x49;
-                FastWeaponIn(object, 0);
-                object->field_0x788 = nearest;
-                object->context_animation = 0x66;
-                const u16 angle = NuAtan2D(nearest->position.x - object->apiobj.position.x,
-                                           nearest->position.z - object->apiobj.position.z);
-                nearest = static_cast<DETONATOR_s *>(object->field_0x788);
-                object->apiobj.movement_facing_angle = angle;
-                object->context_destination.x = nearest->position.x - NU_SIN_LUT(angle) * 0.1684f;
-                object->context_destination.z = nearest->position.z - NU_COS_LUT(angle) * 0.1684f;
-                object->carried_object_angle = RotDiff(angle, nearest->rotation_y);
-            } else if (__builtin_expect(DetonatorPlacementSlot(object) != -1 && object->apiobj.field_0x218 != 2000000.0f &&
-                       object->apiobj.lower_position.y - object->apiobj.field_0x218 < 0.155f, 1)) {
-                object->context_destination.x = object->apiobj.lower_position.x;
-                object->context_destination.y = object->apiobj.field_0x218;
-                object->context_destination.z = object->apiobj.lower_position.z;
-                if (__builtin_expect(Detonator_FindNearest(&object->context_destination, 0.155f, NULL) == NULL, 1)) {
-                    object->field_0x7a3 = 0;
-                    object->character_context = 0x48;
-                    FastWeaponIn(object, 0);
-                    object->context_animation = 0x8d;
-                    object->context_x_rotation = object->field_0x1062;
-                    object->carried_object_angle = qrand();
-                    object->context_z_rotation = object->field_0x1064;
-                } else {
-                    GameAudio_PlaySfx(0x32, NULL, 0, 0);
+        DETONATOR_s *detonator = &Detonator[slot];
+        detonator->position.x = object->context_destination.x;
+        detonator->position.y = object->context_destination.y;
+        detonator->position.z = object->context_destination.z;
+        detonator->active = 1;
+        detonator->object = object;
+        detonator->rotation_x = object->context_x_rotation;
+        detonator->rotation_y = object->carried_object_angle + object->apiobj.field_0x276;
+        detonator->rotation_z = object->context_z_rotation;
+        detonator->field_0x0c.z = 0.0f;
+        detonator->field_0x0c.x = 0.0f;
+        detonator->field_0x0c.y = 0.0775f;
+        NuVecRotateZ(&detonator->field_0x0c, &detonator->field_0x0c, detonator->rotation_z);
+        NuVecRotateX(&detonator->field_0x0c, &detonator->field_0x0c, detonator->rotation_x);
+        NuVecAdd(&detonator->field_0x0c, &detonator->field_0x0c, &detonator->position);
+        detonator->timer = 0.0f;
+        detonator->field_0x34 = GameAntinode_RegisterAntiNode(WORLD->game_antinode_sys, &detonator->field_0x0c, 1.0f,
+                                                              1.0f, 1.0f, 0, 0, 0.0f);
+        PlaySfx(const_cast<char *>("imp_thermalDet_attach"), &detonator->position);
+        return;
+    }
+    if (WORLD->lev_objs[0xec].active == 0 || static_cast<i8>(object->apiobj.flags_low) >= 0 ||
+        (object->apiobj.field_0x27d == 0 && object->field_0xe31 != 1) ||
+        (ObjLandReady(object) == 0 && (CInfo[object->character_context].flags & 0x2000) == 0)) {
+        object->field_0xde0 = 0.0f;
+        object->field_0xe21 |= 0x80;
+        return;
+    }
+    if ((object->pad_gamepad->buttons_held & GAMEPAD_SPECIAL) != 0) {
+        if (!(object->field_0xde0 > 0.0f) && static_cast<i8>(object->field_0xe21) < 0) {
+            return;
+        }
+        object->field_0xe21 |= 0x80;
+        object->field_0xde0 += FRAMETIME;
+        if (object->field_0xde0 >= 0.3f && object->field_0xde0 >= 1.0f) {
+            oldest_time = -1.0f;
+            DETONATOR_s *oldest = NULL;
+            if (__builtin_expect(Detonator[0].active != 0, 0)) {
+                oldest = &Detonator[0];
+                oldest_time = Detonator[0].timer;
+                if (!(oldest_time > -1.0f)) {
+                    oldest = NULL;
+                    oldest_time = -1.0f;
                 }
+            }
+            DetonatorConsiderOldest(&Detonator[1], oldest_time, oldest);
+            DetonatorConsiderOldest(&Detonator[2], oldest_time, oldest);
+            DetonatorConsiderOldest(&Detonator[3], oldest_time, oldest);
+            DetonatorConsiderOldest(&Detonator[4], oldest_time, oldest);
+            DetonatorConsiderOldest(&Detonator[5], oldest_time, oldest);
+            DetonatorConsiderOldest(&Detonator[6], oldest_time, oldest);
+            DetonatorConsiderOldest(&Detonator[7], oldest_time, oldest);
+            DetonatorConsiderOldest(&Detonator[8], oldest_time, oldest);
+            DetonatorConsiderOldest(&Detonator[9], oldest_time, oldest);
+            if (oldest != NULL) {
+                Detonator_Detonate(oldest);
+                object->field_0xde0 = 0.7f;
+            } else {
+                object->field_0xde0 = 0.0f;
+            }
+        }
+        return;
+    }
+    if (object->field_0xde0 > 0.0f && object->field_0xde0 < 0.3f) {
+        DETONATOR_s *nearest =
+            Detonator_FindNearest(&object->apiobj.lower_position, 0.0775f + object->apiobj.field_0x1dc, object);
+        if (nearest != NULL) {
+            object->field_0x7a3 = 0;
+            object->character_context = 0x49;
+            FastWeaponIn(object, 0);
+            object->field_0x788 = nearest;
+            object->context_animation = 0x66;
+            const u16 angle = NuAtan2D(nearest->position.x - object->apiobj.position.x,
+                                       nearest->position.z - object->apiobj.position.z);
+            nearest = static_cast<DETONATOR_s *>(object->field_0x788);
+            object->apiobj.movement_facing_angle = angle;
+            object->context_destination.x = nearest->position.x - NU_SIN_LUT(angle) * 0.1684f;
+            object->context_destination.z = nearest->position.z - NU_COS_LUT(angle) * 0.1684f;
+            object->carried_object_angle = RotDiff(angle, nearest->rotation_y);
+        } else if (DetonatorPlacementSlot(object) != -1 && object->apiobj.field_0x218 != 2000000.0f &&
+                   __builtin_expect(object->apiobj.lower_position.y - object->apiobj.field_0x218 < 0.155f, 0)) {
+            object->context_destination.x = object->apiobj.lower_position.x;
+            object->context_destination.y = object->apiobj.field_0x218;
+            object->context_destination.z = object->apiobj.lower_position.z;
+            if (Detonator_FindNearest(&object->context_destination, 0.155f, NULL) == NULL) {
+                object->field_0x7a3 = 0;
+                object->character_context = 0x48;
+                FastWeaponIn(object, 0);
+                object->context_animation = 0x8d;
+                object->context_x_rotation = object->field_0x1062;
+                object->carried_object_angle = qrand();
+                object->context_z_rotation = object->field_0x1064;
             } else {
                 GameAudio_PlaySfx(0x32, NULL, 0, 0);
             }
-            if (object->character_context == 0x48 || object->character_context == 0x49) {
-                object->apiobj.velocity.z = 0.0f;
-                object->apiobj.velocity.x = 0.0f;
-                if (AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 1) != NULL) {
-                    ResetAnimPacket(&object->apiobj.anim_packet, -1);
-                }
-                object->context_animation_timer =
-                    object->apiobj.character_model->model_data_b[object->context_animation] != NULL
-                        ? AnimDuration(object->id, object->context_animation, 0.0f, 0.0f, 1)
-                        : 1.0f;
-            }
+        } else {
+            GameAudio_PlaySfx(0x32, NULL, 0, 0);
         }
-        object->field_0xde0 = 0.0f;
-        object->field_0xe21 &= 0x7f;
-        return;
+        if (object->character_context == 0x48 || object->character_context == 0x49) {
+            object->apiobj.velocity.z = 0.0f;
+            object->apiobj.velocity.x = 0.0f;
+            if (AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 1) != NULL) {
+                ResetAnimPacket(&object->apiobj.anim_packet, -1);
+            }
+            object->context_animation_timer =
+                object->apiobj.character_model->model_data_b[object->context_animation] != NULL
+                    ? AnimDuration(object->id, object->context_animation, 0.0f, 0.0f, 1)
+                    : 1.0f;
+        }
     }
-
-    object->field_0xe21 |= 0x80;
     object->field_0xde0 = 0.0f;
-    f32 *frame = NULL;
-    if (object->apiobj.character_model->model_data_b[object->context_animation] != NULL) {
-        frame = AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0);
-        if (frame == NULL) {
-            return;
-        }
-    }
-    object->context_animation_timer -= FRAMETIME;
-    if (object->context_animation_timer <= 0.0f) {
-        object->character_context = -1;
-        if (object->field_0x7a3 != 0) {
-            return;
-        }
-        // Expiry falls through to placement, including an unfinished pickup.
-        object->field_0x7a3 = 1;
-    } else {
-        if (object->field_0x7a3 != 0) {
-            return;
-        }
-        if (__builtin_expect(object->apiobj.character_model->model_data_b[object->context_animation] != NULL, 1)) {
-            const f32 marker = AnimListFrame(object->apiobj.character_model, object->context_animation,
-                                             object->character_context == 0x49 ? 0 : 2);
-            if (frame == NULL || !(*frame > 0.0f) || *frame < marker) {
-                return;
-            }
-        } else if (__builtin_expect(object->context_animation_timer >= 0.5f, 1)) {
-            return;
-        }
-        object->field_0x7a3 = 1;
-        if (object->character_context == 0x49) {
-            DETONATOR_s *detonator = static_cast<DETONATOR_s *>(object->field_0x788);
-            if (detonator != NULL) {
-                detonator->active = 0;
-                detonator = static_cast<DETONATOR_s *>(object->field_0x788);
-                if (detonator->field_0x34 != NULL) {
-                    GameAntinode_UnregisterAntiNode(WORLD->game_antinode_sys,
-                                                    static_cast<GAMEANTINODE_s *>(detonator->field_0x34));
-                    static_cast<DETONATOR_s *>(object->field_0x788)->field_0x34 = NULL;
-                }
-            }
-            return;
-        }
-    }
-    const i32 slot = DetonatorPlacementSlot(object);
-    if (slot == -1) {
-        GameAudio_PlaySfx(0x32, NULL, 0, 0);
-        return;
-    }
-    DETONATOR_s *detonator = &Detonator[slot];
-    detonator->position.x = object->context_destination.x;
-    detonator->position.y = object->context_destination.y;
-    detonator->position.z = object->context_destination.z;
-    detonator->active = 1;
-    detonator->object = object;
-    detonator->rotation_x = object->context_x_rotation;
-    detonator->rotation_y = object->carried_object_angle + object->apiobj.field_0x276;
-    detonator->rotation_z = object->context_z_rotation;
-    detonator->field_0x0c.z = 0.0f;
-    detonator->field_0x0c.x = 0.0f;
-    detonator->field_0x0c.y = 0.0775f;
-    NuVecRotateZ(&detonator->field_0x0c, &detonator->field_0x0c, detonator->rotation_z);
-    NuVecRotateX(&detonator->field_0x0c, &detonator->field_0x0c, detonator->rotation_x);
-    NuVecAdd(&detonator->field_0x0c, &detonator->field_0x0c, &detonator->position);
-    detonator->timer = 0.0f;
-    detonator->field_0x34 =
-        GameAntinode_RegisterAntiNode(WORLD->game_antinode_sys, &detonator->field_0x0c, 1.0f, 1.0f, 1.0f, 0, 0, 0.0f);
-    PlaySfx(const_cast<char *>("imp_thermalDet_attach"), &detonator->position);
+    object->field_0xe21 &= 0x7f;
 }
 

@@ -2363,8 +2363,8 @@ void MovePlayer(GameObject_s *object) {
     GAMEPAD_s *pad = object->pad_gamepad;
     APIOBJECT &api = object->apiobj;
     object->field_0xe22 &= ~GAMEOBJECT_E22_FLAG_INPUT_ANGLE_VALID;
-    const i32 analog_y = pad->pad != NULL ? pad->pad->analog_left_y : 0;
     const i32 analog_x = pad->pad != NULL ? pad->pad->analog_left_x : 0;
+    const i32 analog_y = pad->pad != NULL ? pad->pad->analog_left_y : 0;
     if (pad->input_magnitude != pad->previous_input_magnitude)
         pad->allocated_5a |= GAMEPAD_RUNTIME_MAGNITUDE_CHANGED;
     api.field_0x214 = api.field_0x218;
@@ -2390,15 +2390,16 @@ void MovePlayer(GameObject_s *object) {
     object->field_0x107a = -1;
     object->field_0xefd &= ~GAMEOBJECT_MOVEMENT_FLAG_FACE_REVERSED;
     const i32 menu_id = GetMenuID();
-    if (__builtin_expect((api.field_0x1f8 & APIOBJECT_FLAG_AI_PLAYER_MASK) != APIOBJECT_FLAG_PLAYER_ACTIVE, 0)) {
-        if (object->dont_move) {
+    if ((api.field_0x1f8 & APIOBJECT_FLAG_AI_PLAYER_MASK) != APIOBJECT_FLAG_PLAYER_ACTIVE) {
+        if (__builtin_expect(object->dont_move, 1)) {
             pad->input_magnitude = 0.0f;
             object->pad_gamepad->buttons_held = 0;
             object->pad_gamepad->buttons_pressed = 0;
         } else if (object->ai.movement_stopped == 1) {
             pad->input_magnitude = 0.0f;
             pad->input_mode = 1;
-            pad->input_direction_z = pad->input_direction_x = 0.0f;
+            pad->input_direction_z = 0.0f;
+            pad->input_direction_x = 0.0f;
         } else if (object->character_context == 0x17 && (object->field_0xf04 & 1) == 0) {
             pad->input_magnitude = 0.0f;
         } else {
@@ -2408,7 +2409,8 @@ void MovePlayer(GameObject_s *object) {
                 if (z == 0.0f) {
                     pad->input_magnitude = 0.0f;
                     pad->input_angle = 0;
-                    pad->input_direction_z = pad->input_direction_x = 0.0f;
+                    pad->input_direction_z = 0.0f;
+                    pad->input_direction_x = 0.0f;
                     goto ai_input_done;
                 }
             }
@@ -2453,7 +2455,7 @@ void MovePlayer(GameObject_s *object) {
     } else {
         if (!(FadeSys.fade > 0.0f) && newgamecam == 0 &&
             !(api.player_controlled && (MiniCutCam == 2 || (menu_id != 0x0e && menu_id != -1)))) {
-            if (object->pad_gamepad == ViewCamGetGamePad()) {
+            if (__builtin_expect(object->pad_gamepad == ViewCamGetGamePad(), 0)) {
                 pad->input_magnitude = 0.0f;
             } else {
                 f32 x, z;
@@ -2499,8 +2501,8 @@ void MovePlayer(GameObject_s *object) {
                 }
                 // The original player path writes X to +0x2c and Z to +0x30;
                 // the AI path below uses the opposite component convention.
-                pad->input_direction_x = input.z;
                 pad->input_direction_z = input.x;
+                pad->input_direction_x = input.z;
                 if (pad->input_magnitude > 0.0f)
                     pad->input_angle = NuAtan2D(input.x, input.z);
                 i32 waggle = GamePad_Waggle(object->pad_gamepad);
@@ -2513,8 +2515,8 @@ void MovePlayer(GameObject_s *object) {
             }
         } else {
             pad->input_magnitude = 0.0f;
-            pad->input_direction_x = 0.0f;
             pad->input_direction_z = 0.0f;
+            pad->input_direction_x = 0.0f;
             pad->input_mode = 1;
         }
     }
@@ -2525,7 +2527,8 @@ void MovePlayer(GameObject_s *object) {
         Hub_PadAngle[index] = pad->input_angle;
         pad->input_mode = 1;
         pad->input_magnitude = 0.0f;
-        pad->input_direction_z = pad->input_direction_x = 0.0f;
+        pad->input_direction_z = 0.0f;
+        pad->input_direction_x = 0.0f;
     } else if (pad->input_magnitude > 0.0f) {
         pad->animation_input_magnitude = pad->input_magnitude;
     }

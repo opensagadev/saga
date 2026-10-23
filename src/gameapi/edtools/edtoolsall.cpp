@@ -6859,7 +6859,7 @@ char *FS_GetFilterString(char *input, char *output) {
     if (*end != '|' && *end != '\0') {
         do {
             ++end;
-        } while (*end != '\0' && *end != '|' && *end != '*');
+        } while (__builtin_expect(*end != '\0' && *end != '|' && *end != '*', 0));
 
         char *trimmed = end;
         while (trimmed != input && trimmed[-1] == ' ') {
