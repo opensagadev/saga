@@ -338,6 +338,9 @@ GLuint loadDefaultTexture(GLuint texture, GLint level, GLsizei size, GLenum text
     return textures[0];
 }
 
+// PVR metadata records are packed, so their u32 fields can sit at any alignment.
+typedef u32 __attribute__((aligned(1), may_alias)) pvr_unaligned_u32;
+
 GLuint NuIOS_CreateGLTexFromPVRInMemory(void *data, i32 *out_width, i32 *out_height) {
     extern bool comeFromHash;
     extern i32 g_loadDefaultTexture;
@@ -365,10 +368,10 @@ GLuint NuIOS_CreateGLTexFromPVRInMemory(void *data, i32 *out_width, i32 *out_hei
         u8 *record = metadata_start;
         while (record < pixels) {
             const usize remaining = pixels - record;
-            if (remaining < 12 || *(u32 *)(record + 8) > remaining - 12) {
+            if (remaining < 12 || *(const pvr_unaligned_u32 *)(record + 8) > remaining - 12) {
                 break;
             }
-            if (*(u32 *)record == 0x03525650 && *(u32 *)(record + 4) == 2 && *(u32 *)(record + 8) == 6) {
+            if (*(const pvr_unaligned_u32 *)record == 0x03525650 && *(const pvr_unaligned_u32 *)(record + 4) == 2 && *(const pvr_unaligned_u32 *)(record + 8) == 6) {
                 const u8 *metadata = record + 12;
                 switch (metadata[0]) {
                     case 'X':
@@ -496,7 +499,7 @@ GLuint NuIOS_CreateGLTexFromPVRInMemory(void *data, i32 *out_width, i32 *out_hei
                         break;
                 }
             }
-            record += *(u32 *)(record + 8) + 12;
+            record += *(const pvr_unaligned_u32 *)(record + 8) + 12;
         }
     }
 

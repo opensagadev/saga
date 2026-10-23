@@ -152,17 +152,18 @@ static i32 GameObjectAIUpdateInterval(WORLDINFO_s *world, GameObject_s *object) 
     // frames.  This avoids doing a full script, controller and terrain pass
     // for every off-screen Cantina inhabitant on the same frame.
     const i16 room = object->room_id;
-    if (world->rooms_visible_ptr[room] == 0 || object->apiobj.model_draw_result == 0) {
+    if (__builtin_expect(world->rooms_visible_ptr[room] == 0, 0) ||
+        __builtin_expect(object->apiobj.model_draw_result == 0, 0)) {
         return 10;
     }
     if (object->apiobj.field_0x27d == 0)
         return 1;
 
     const GAMECHARACTERDATA *character = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
-    const f32 distance = object->ai_update_distance;
-    i32 interval = character->ai_update_interval_0;
+    u8 interval = character->ai_update_interval_0;
     if (interval == 0)
         return 1;
+    const f32 distance = object->ai_update_distance;
     if (!(distance > character->ai_update_distance_0)) {
         interval = character->ai_update_interval_1;
         if (interval == 0)
@@ -182,7 +183,7 @@ static i32 GameObjectAIUpdateInterval(WORLDINFO_s *world, GameObject_s *object) 
 
     // Zero requests an immediate update at every tier. Nonzero cadence
     // values are selected only beyond that tier's distance threshold.
-    return interval < 7 ? interval : 7;
+    return interval > 6 ? 7 : interval;
 }
 
 void CreatureCrate_MoveFn(PART_s *part, f32 elapsed) {
@@ -1374,7 +1375,7 @@ void UpdateGameObjects(WORLDINFO_s *world) {
         object->ai_elapsed_time += FRAMETIME;
 
         const bool force_update =
-            timebase_updates == 0 || (object->apiobj.field_0x1f4 & APIOBJECT_MOTION_FLAG_AI_CONTROLLED) == 0 ||
+            timebase_updates == 0 || (reinterpret_cast<u8 *>(&object->apiobj.field_0x1f4)[1] & 4) == 0 ||
             object->is_boss || (object->field_0xf00 & GAME_OBJECT_AI_UPDATE_SPECIAL_STATE) != 0 ||
             (CInfo[object->character_context].flags & 0x200) != 0 || object->apiobj.supporting_platform_id != -1 ||
             (object->field_0xcc0 != NULL && object->character_context == CHARACTER_CONTEXT_LINKED_OBJECT) ||
@@ -1425,7 +1426,7 @@ void UpdateGameObjects(WORLDINFO_s *world) {
         object->field_0x1024 -= FRAMETIME;
         if (object->field_0x1024 < -1.0f)
             SetFlicker(object, 0.0f);
-        if (!(object->timer_d28 <= 0.0f))
+        if (object->timer_d28 > 0.0f)
             object->timer_d28 -= FRAMETIME;
         if (object->timer_d50 > 0.0f)
             object->timer_d50 -= FRAMETIME;
@@ -1463,8 +1464,8 @@ void UpdateGameObjects(WORLDINFO_s *world) {
             FRAMETIME = frame_time;
         }
         GAMECHARACTERDATA *data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
-        if (data->field275_0x116 == 10 &&
-            ((object->apiobj.model_draw_result != 0) != object->model_drawn_last_frame)) {
+        if (data->field275_0x116 == 10 && (object->apiobj.model_draw_result == 0 ? object->model_drawn_last_frame
+                                                                                 : !object->model_drawn_last_frame)) {
             f32 *wait = object->apiobj.model_draw_result != 0 ? &tieonsfxwait : &tieoffsfxwait;
             if (__builtin_expect(*wait <= 0.0f, 1)) {
                 PlaySfx("veh_tie_by", &object->apiobj.collision_position);
@@ -1506,7 +1507,7 @@ void UpdateGameObjects(WORLDINFO_s *world) {
                 flicker_decay = 0.5f;
         }
         object->field_0x1024 -= flicker_decay * FRAMETIME;
-        if (!(object->field_0x1024 >= -1.0f))
+        if (object->field_0x1024 < -1.0f)
             SetFlicker(object, 0.0f);
         if (object->timer_d28 > 0.0f)
             object->timer_d28 -= FRAMETIME;
@@ -1551,75 +1552,67 @@ void UpdateGameObjects(WORLDINFO_s *world) {
     object = Obj;
     for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++object) {
         const u16 character_flags = APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER;
-        if ((object->apiobj.field_0x1f8 & character_flags) != character_flags ||
-            (object->apiobj.field_0x1f4 & APIOBJECT_MOTION_FLAG_AI_CONTROLLED) == 0) {
-            object->field_0xef8 &= ~1;
-            if (object->timer_ed8 > 0.0f)
-                object->timer_ed8 -= FRAMETIME;
-            continue;
-        }
-        if (TimingBarSet == 2)
-            TBOPENFN("TA", 2);
-        if ((object->field_0xf00 & GAME_OBJECT_AI_UPDATE_PROCESS) != 0) {
-            const f32 frame_time = FRAMETIME;
-            FRAMETIME = object->ai_elapsed_time;
-            TerrainPlayer(object);
+        if ((object->apiobj.field_0x1f8 & character_flags) == character_flags &&
+            (object->apiobj.field_0x1f4 & APIOBJECT_MOTION_FLAG_AI_CONTROLLED) != 0) {
+            if (TimingBarSet == 2)
+                TBOPENFN("TA", 2);
+            if ((object->field_0xf00 & GAME_OBJECT_AI_UPDATE_PROCESS) != 0) {
+                const f32 frame_time = FRAMETIME;
+                FRAMETIME = object->ai_elapsed_time;
+                TerrainPlayer(object);
 
-            object->ai_update_position = object->apiobj.position;
+                object->ai_update_position = object->apiobj.position;
 
-            const f32 vertical_displacement = object->apiobj.position.y - object->apiobj.start_position.y;
-            if (!(vertical_displacement != 0.0f && object->ai_elapsed_time != 0.0f)) {
-                object->vertical_velocity = 0.0f;
+                const f32 vertical_displacement = object->apiobj.position.y - object->apiobj.start_position.y;
+                object->vertical_velocity = NuFdiv(vertical_displacement, object->ai_elapsed_time);
+                FRAMETIME = frame_time;
             } else {
-                object->vertical_velocity = vertical_displacement / object->ai_elapsed_time;
+                PreResetCode(object);
+                PostResetCode(object);
+                if ((object->apiobj.field_0x1f4 & APIOBJECT_STATE_FLAG_IGNORE_DOORS) != 0) {
+                    GameObjectOrigin(object);
+                } else {
+                    object->apiobj.position.x += object->apiobj.velocity.x * FRAMETIME;
+                    object->apiobj.position.y += object->vertical_velocity * FRAMETIME;
+                    object->apiobj.position.z += object->apiobj.velocity.z * FRAMETIME;
+                }
             }
-            FRAMETIME = frame_time;
-        } else {
-            PreResetCode(object);
-            PostResetCode(object);
-            if ((object->apiobj.field_0x1f4 & APIOBJECT_STATE_FLAG_IGNORE_DOORS) != 0) {
-                GameObjectOrigin(object);
-            } else {
-                object->apiobj.position.x += object->apiobj.velocity.x * FRAMETIME;
-                object->apiobj.position.y += object->vertical_velocity * FRAMETIME;
-                object->apiobj.position.z += object->apiobj.velocity.z * FRAMETIME;
-            }
-        }
 
-        AnimatePlayer(object);
-        object->context_target_position = NULL;
-        if (TimingBarSet == 2)
-            TBCLOSEFN("TA", 2);
-        if (world->sock_sys != NULL && (object->field_0xef9 & 0x40) != 0) {
-            ComplexSockPosition(world->sock_sys, &object->apiobj.position, static_cast<i8>(object->field_0x661),
-                                object->sock_segment, &object->sock_position);
-            ComplexSockAngles(&object->sock_angles);
-        } else {
-            object->sock_segment = -1;
-            object->field_0x661 = 0xff;
+            AnimatePlayer(object);
+            object->context_target_position = NULL;
+            if (TimingBarSet == 2)
+                TBCLOSEFN("TA", 2);
+            if (world->sock_sys != NULL && (object->field_0xef9 & 0x40) != 0) {
+                ComplexSockPosition(world->sock_sys, &object->apiobj.position, static_cast<i8>(object->field_0x661),
+                                    object->sock_segment, &object->sock_position);
+                ComplexSockAngles(&object->sock_angles);
+            } else {
+                object->sock_segment = -1;
+                object->field_0x661 = 0xff;
+            }
+            if (TimingBarSet == 4)
+                TBOPENFN("Misc", 4);
+            if (WORLD->current_level != SPEEDERCHASEA_LDATA || disable_narrow_socks != 0 ||
+                object->id != id_SPEEDERBIKE || __builtin_expect(object->apiobj.field_0x287 == 0, 1))
+                UpdateLastSafePosition(object);
+            f32 scale = 1.0f;
+            if (object->apiobj.field_0x287 == 1)
+                scale -= object->timer_1014 / object->field_0x1018;
+            object->field_0x1004 = scale;
+            if (object->field_0x1038 != 1000000000.0f)
+                object->field_0x1004 = object->field_0x1038;
+            object->apiobj.field_0xa8 = object->field_0x1004 * object->apiobj.character_data->model_scale;
+            ScaleGameObject(object);
+            GameObjectDimensions(object);
+            AddSurfaceRipples(object);
+            if (object->use_model_origin != 0xff) {
+                ++object->use_model_origin;
+            }
+            NuCameraTransformScreenClip(&object->camera_screen_position, &object->apiobj.collision_position, 1, NULL);
+            GameObjectToCameraCode(object);
+            if (TimingBarSet == 4)
+                TBCLOSEFN("Misc", 4);
         }
-        if (TimingBarSet == 4)
-            TBOPENFN("Misc", 4);
-        if (WORLD->current_level != SPEEDERCHASEA_LDATA || disable_narrow_socks != 0 || object->id != id_SPEEDERBIKE ||
-            __builtin_expect(object->apiobj.field_0x287 == 0, 1))
-            UpdateLastSafePosition(object);
-        f32 scale = 1.0f;
-        if (object->apiobj.field_0x287 == 1)
-            scale -= object->timer_1014 / object->field_0x1018;
-        object->field_0x1004 = scale;
-        if (object->field_0x1038 != 1000000000.0f)
-            object->field_0x1004 = object->field_0x1038;
-        object->apiobj.field_0xa8 = object->field_0x1004 * object->apiobj.character_data->model_scale;
-        ScaleGameObject(object);
-        GameObjectDimensions(object);
-        AddSurfaceRipples(object);
-        if (object->use_model_origin != 0xff) {
-            ++object->use_model_origin;
-        }
-        NuCameraTransformScreenClip(&object->camera_screen_position, &object->apiobj.collision_position, 1, NULL);
-        GameObjectToCameraCode(object);
-        if (__builtin_expect(TimingBarSet == 4, 1))
-            TBCLOSEFN("Misc", 4);
         object->field_0xef8 &= ~1;
         if (object->timer_ed8 > 0.0f)
             object->timer_ed8 -= FRAMETIME;
@@ -1644,11 +1637,7 @@ void UpdateGameObjects(WORLDINFO_s *world) {
         TerrainPlayer(object);
         object->ai_update_position = object->apiobj.position;
         const f32 vertical_displacement = object->apiobj.position.y - object->apiobj.start_position.y;
-        if (vertical_displacement == 0.0f || object->ai_elapsed_time == 0.0f) {
-            object->vertical_velocity = 0.0f;
-        } else {
-            object->vertical_velocity = vertical_displacement / object->ai_elapsed_time;
-        }
+        object->vertical_velocity = NuFdiv(vertical_displacement, object->ai_elapsed_time);
         AnimatePlayer(object);
         object->context_target_position = NULL;
         if (TimingBarSet == 2)
@@ -1696,19 +1685,20 @@ void UpdateGameObjects(WORLDINFO_s *world) {
             object->id != id_ANAKINSNEWPODGREEN && object->id != id_SEBULBASPOD) {
             object->field_0x1004 = scale * 0.55f;
         }
-        if (__builtin_expect(object->field_0x1038 != 1000000000.0f, 0))
+        if (object->field_0x1038 != 1000000000.0f)
             object->field_0x1004 = object->field_0x1038;
         object->apiobj.field_0xa8 = object->field_0x1004 * object->apiobj.character_data->model_scale;
         ScaleGameObject(object);
         GameObjectDimensions(object);
-        if ((object->apiobj.flags_low & APIOBJECT_FLAG_PLAYER_ACTIVE) != 0 && FadeSys.fade == 0.0f &&
-            InDoubleScoreZone(object) != 0) {
-            DoubleScore |= static_cast<i32>(1u << (static_cast<u8>(object->apiobj.field_0x27c) & 31));
+        if (__builtin_expect((object->apiobj.flags_low & APIOBJECT_FLAG_PLAYER_ACTIVE) != 0, 1) &&
+            FadeSys.fade == 0.0f && InDoubleScoreZone(object) != 0) {
+            DoubleScore |= static_cast<u32>(1) << static_cast<i8>(object->apiobj.field_0x27c);
         }
         UpdateCoinPacket(object->coinpacket, object->apiobj.is_player,
                          static_cast<i8>(object->apiobj.field_0x27c));
-        if (!((object->apiobj.flags_low & APIOBJECT_FLAG_PLAYER_ACTIVE) != 0 && object->apiobj.field_0x287 == 0 &&
-              object->field_0x7a5 != 0x2b && !(object->field_0x7a5 == 0x0f && object->field_0x7a3 == 1))) {
+        if (!(__builtin_expect((object->apiobj.flags_low & APIOBJECT_FLAG_PLAYER_ACTIVE) != 0, 1) &&
+              object->apiobj.field_0x287 == 0 && object->field_0x7a5 != 0x2b &&
+              !(object->field_0x7a5 == 0x0f && __builtin_expect(object->field_0x7a3 == 1, 1)))) {
             ResetCoinPacket(object->coinpacket);
         } else {
             GizmoPickups_Collide(world, object, 1);
@@ -1726,7 +1716,7 @@ void UpdateGameObjects(WORLDINFO_s *world) {
     }
 
     i32 lighting_start = 0;
-    const i32 lighting_phase = static_cast<i8>(MainFrameCounters.third_frame);
+    const i8 lighting_phase = static_cast<i8>(MainFrameCounters.third_frame);
     if (lighting_phase != -1)
         lighting_start = (lighting_phase * HIGHGAMEOBJECT) / 3;
     if (TimingBarSet == 2)
@@ -1751,13 +1741,9 @@ void UpdateGameObjects(WORLDINFO_s *world) {
                 i32 locator = data->ride_locator;
 
                 if (locator != -1 && object->apiobj.character_model->points_of_interest[locator] != NULL) {
-                    position.x = object->joint_matrices[locator].m30;
-                    position.y = object->joint_matrices[locator].m31;
-                    position.z = object->joint_matrices[locator].m32;
+                    position = *reinterpret_cast<NUVEC *>(&object->joint_matrices[locator].m30);
                 } else {
-                    position.x = object->apiobj.field_0x190;
-                    position.y = object->apiobj.field_0x194;
-                    position.z = object->apiobj.field_0x198;
+                    position = object->apiobj.upper_position;
                 }
                 f32 height = object->apiobj.field_0x1e0 * 0.5f;
                 position.y += 0.21f > height ? 0.21f : height;
@@ -1851,9 +1837,7 @@ void UpdateGameObjects(WORLDINFO_s *world) {
             GAMECHARACTERDATA *data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
             i32 locator = data->ride_locator;
             if (locator != -1 && object->apiobj.character_model->points_of_interest[locator] != NULL) {
-                position.x = object->joint_matrices[locator].m30;
-                position.y = object->joint_matrices[locator].m31;
-                position.z = object->joint_matrices[locator].m32;
+                position = *reinterpret_cast<NUVEC *>(&object->joint_matrices[locator].m30);
             } else {
                 position = object->apiobj.upper_position;
             }
@@ -1866,9 +1850,8 @@ void UpdateGameObjects(WORLDINFO_s *world) {
             NuVecAdd(&position, &position, &object->apiobj.position);
         } else {
             position.x = object->apiobj.collision_position.x;
-            position.y = object->apiobj.collision_position.y;
+            position.y = object->apiobj.collision_position.y + 1.5f * object->apiobj.field_0x1e0;
             position.z = object->apiobj.collision_position.z;
-            position.y += 1.5f * object->apiobj.field_0x1e0;
         }
         message = AddGameMsg_Default;
         message.text = ASCII_DOWN;
