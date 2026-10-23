@@ -709,7 +709,7 @@ PART_s *Bolt_HitParts(BOLT_s *bolt, NUVEC *points, NUVEC *minimum, NUVEC *maximu
             continue;
         BoltSys->debris(bolt, points, hit, &part->velocity, 0);
         Bolt_PlayHitSfx(bolt);
-        if (bolt->owner != NULL && (bolt->owner->apiobj.flags_low & 1) != 0)
+        if (__builtin_expect(bolt->owner != NULL && (bolt->owner->apiobj.flags_low & 1) != 0, 1))
             NewRumble(bolt->owner->pad_gamepad->pad, 0.7f, 0);
         Bolt_End(bolt, 1);
         if (BoltSys->hit_part != NULL && BoltSys->hit_part(bolt, part) == 1)

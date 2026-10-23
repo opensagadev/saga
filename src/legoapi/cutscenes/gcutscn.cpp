@@ -1560,7 +1560,7 @@ void NewCopyAnims(instNUGCUTSCENE_s *instance) {
 
     NUGCUTCHARSYS_s *destination_characters = destination->character_system;
     NUGCUTCHARSYS_s *source_characters = source->character_system;
-    if (destination_characters != NULL && destination_characters->character_count != 0) {
+    if (__builtin_expect(destination_characters != NULL && destination_characters->character_count != 0, 1)) {
         for (u32 i = 0; i < destination_characters->character_count; ++i) {
             nuanimdata2_s *animation = destination_characters->characters[i].animation;
             nuanimdata2_s *face_animation = destination_characters->characters[i].face_animation;

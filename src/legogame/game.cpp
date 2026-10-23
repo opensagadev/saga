@@ -334,7 +334,7 @@ extern i32 LEGOOBJ_MINIKIT;
 extern i16 tPOWERBRICK, tLOCKED, tGOLDBRICK;
 
 static __used__ i32 PauseRenderOff();
-static __used__ i32 MatrixReflection_CanOverride(f32);
+static __used__ i32 MatrixReflection_CanOverride();
 extern "C" i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
 static __used__ void BackDrop_Alpha(float *alpha);
 static __used__ float GizmoPickups_Collide2D(GameObject_s *object);
@@ -1070,7 +1070,7 @@ static i32 FindSlamOrigin_UseCPos(GameObject_s *object) {
     return object->id == id_GRIEVOUS;
 }
 
-static __used__ i32 MatrixReflection_CanOverride(f32) {
+static __used__ i32 MatrixReflection_CanOverride() {
     i32 result = 1;
     if (WORLD->current_level == DEATHSTARESCAPEA_LDATA) {
         const i8 sock = GameCam->sock_position.location.sock;
@@ -2082,7 +2082,7 @@ void InitGameAfterConfig(void) {
     //  PauseRenderOffFn = PauseRenderOff;
     FindSlamOrigin_UseCPosFn = FindSlamOrigin_UseCPos;
     GizmoBlowUp_NoTargetFn = GizmoBlowUp_NoTarget;
-    MatrixReflection_CanOverrideFn = MatrixReflection_CanOverride;
+    MatrixReflection_CanOverrideFn = reinterpret_cast<i32 (*)(f32)>(MatrixReflection_CanOverride);
     Jump_PreventJumpFn = Jump_PreventJump;
     //  SurfaceInfo_ExtraReflectFn = SurfaceInfo_ExtraReflect;
     Hint_AlphaTargetFn = Hint_AlphaTarget;

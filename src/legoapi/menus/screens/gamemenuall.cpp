@@ -1013,7 +1013,7 @@ void MenuUpdateCardWarning(MENU_s *menu) {
             BackupMenu();
             return;
         }
-    } else if (MenuCardWarningState == 3) {
+    } else if (__builtin_expect(MenuCardWarningState == 3, 1)) {
         BackupMenu();
         return;
     } else {

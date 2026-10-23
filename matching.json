@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 87.514786,
+    "fuzzy_match_percent": 87.51982,
     "total_code": "4722419",
     "matched_code": "709716",
     "matched_code_percent": 15.028654,
@@ -50237,7 +50237,7 @@
           "address": 4413104,
           "offset": 3523136,
           "size": 652,
-          "match_percent": 81.96774
+          "match_percent": 82.013824
         },
         {
           "name": "NuGCutSceneIsBackgroundLoading",
@@ -59638,7 +59638,7 @@
           "address": 4722800,
           "offset": 3832832,
           "size": 722,
-          "match_percent": 83.83721
+          "match_percent": 93.09884
         },
         {
           "name": "_Z9Bolt_InitPvR10NetMessage",
@@ -64917,7 +64917,7 @@
           "address": 4352320,
           "offset": 3462352,
           "size": 240,
-          "match_percent": 51.032787
+          "match_percent": 52.0
         },
         {
           "name": "_Z24MenuUpdateAutoSaveCancelP6MENU_s",
@@ -76582,7 +76582,7 @@
           "address": 3604384,
           "offset": 2714416,
           "size": 637,
-          "match_percent": 81.60479
+          "match_percent": 93.59281
         },
         {
           "name": "edgraInitAllClumps",
@@ -86168,6 +86168,14 @@
           "offset": 265808,
           "size": 39,
           "match_percent": 100.0
+        },
+        {
+          "name": "_ZL28MatrixReflection_CanOverridev",
+          "demangled_name": "MatrixReflection_CanOverride()",
+          "address": 1155824,
+          "offset": 265856,
+          "size": 90,
+          "match_percent": 86.15385
         },
         {
           "name": "_ZL21CutScenePlayer_AcceptP18CUTSCENEPLAYERCLIP",
@@ -97059,7 +97067,7 @@
           "address": 3067376,
           "offset": 2177408,
           "size": 525,
-          "match_percent": 77.84
+          "match_percent": 80.7
         },
         {
           "name": "NuDisplayListDebugToFile",
@@ -126575,14 +126583,6 @@
       "match_percent": 100.0
     },
     {
-      "name": "_ZL28MatrixReflection_CanOverridev",
-      "demangled_name": "MatrixReflection_CanOverride()",
-      "address": 1155824,
-      "offset": 265856,
-      "size": 90,
-      "match_percent": 0.0
-    },
-    {
       "name": "atexit",
       "demangled_name": "atexit",
       "address": 2454608,
@@ -128882,8 +128882,8 @@
   "summary": {
     "bazel_units": 361,
     "functions": 13454,
-    "assigned_functions": 12870,
+    "assigned_functions": 12871,
     "ambiguous_functions": 260,
-    "unassigned_functions": 324
+    "unassigned_functions": 323
   }
 }

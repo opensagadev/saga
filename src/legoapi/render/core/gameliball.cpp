@@ -16992,7 +16992,7 @@ extern "C" void TerrainSetCur(void *terrain) {
                 i32 count = clump->element_count;
                 if (edgra_units_used + count > 0x3000)
                     count = 0x3000 - edgra_units_used;
-                if (count > 0) {
+                if (__builtin_expect(count > 0, 0)) {
                     NUGSCN *scene = edgra_page_scene[page];
                     nuhspecial_s special;
                     special.scene = scene;

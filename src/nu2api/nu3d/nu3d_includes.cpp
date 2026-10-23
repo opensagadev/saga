@@ -18169,7 +18169,7 @@ extern "C" {
             } else {
                 do {
                     DisplayListPrintItem(item, item_index, depth, state, 0);
-                    if (item->id == 1) {
+                    if (__builtin_expect(item->id == 1, 1)) {
                         item = static_cast<NUDISPLAYLISTITEM *>(item->next);
                     } else {
                         ++item;
