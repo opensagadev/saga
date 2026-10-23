@@ -7310,7 +7310,7 @@ void EdRegistry::SerialiseObjects(EdStream &stream, EdRegistry *source_registry)
             if (object_class->interface == NULL)
                 continue;
             if (stream.flags & 0x400000) {
-                if (object_class->flags & 0x400000)
+                if (__builtin_expect(object_class->flags & 0x400000 != 0, 0))
                     continue;
             } else if (object_class->flags & 0x10000000) {
                 continue;
@@ -7325,7 +7325,7 @@ void EdRegistry::SerialiseObjects(EdStream &stream, EdRegistry *source_registry)
             if (stream.flags & 0x400000) {
                 if (object_class->flags & 0x400000)
                     continue;
-            } else if (object_class->flags & 0x10000000) {
+            } else if (__builtin_expect(object_class->flags & 0x10000000 != 0, 1)) {
                 continue;
             }
             stream.BeginBlock("ObjectList");
@@ -7360,7 +7360,7 @@ void EdRegistry::SerialiseObjects(EdStream &stream, EdRegistry *source_registry)
                 } else if (filter_flags & 0x10000000) {
                     continue;
                 }
-                if (group != stream.unknown_10)
+                if (__builtin_expect(group != stream.unknown_10, 0))
                     continue;
                 i32 object_flags = 0;
                 get_attribute(object_class, object, 1, EdType_Int, &object_flags, 0);
@@ -8371,10 +8371,10 @@ void LevelEditor::ProcessEvenWhenPaused(ThingProcessData *data) {
     }
     if (field_0x28 != 0) {
         if (eduiGetCameraEnabled()) {
-            if (edlevel_mouseandkeyboard == 0) {
-                edcamMove(pad);
-            } else {
+            if (edlevel_mouseandkeyboard != 0) {
                 edcamMove(NULL);
+            } else {
+                edcamMove(pad);
             }
             edcamGetPosAng(reinterpret_cast<NUVEC *>(background_colour), &field_0x20, &field_0x24);
         }
@@ -8395,13 +8395,13 @@ void LevelEditor::ProcessEvenWhenPaused(ThingProcessData *data) {
         if (eduiMenuProcess(edLevelActiveMenu, data->t, pad) != 0) {
             input.Clear(3);
         } else if (edLevelActiveMenu != edLevelPinnedMenu) {
-            if (input.GetPress(3) != 0.0f) {
+            if (__builtin_expect(input.GetPress(3) != 0.0f, 0)) {
                 eduiSetCameraEnabled(1);
                 eduiMenuDestroy(edLevelActiveMenu);
                 edLevelActiveMenu = NULL;
                 eduiSetDefaultActiveMenu(NULL);
             }
-            if (input.GetPress(4) != 0.0f) {
+            if (__builtin_expect(input.GetPress(4) != 0.0f, 1)) {
                 eduiMenuDestroy(edLevelActiveMenu);
                 edLevelActiveMenu = NULL;
                 theLevelEditor.CreateMenu();

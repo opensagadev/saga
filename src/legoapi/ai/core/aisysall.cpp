@@ -4467,7 +4467,7 @@ static __used__ i32 RowMoveWander(AIGROUP *group, AIROW *row, AIROW *previous, A
             }
         }
     }
-    if (row->is_turning) {
+    if (__builtin_expect(row->is_turning != 0, 1)) {
         i32 angle = row->next_connection->rotation;
         if (row->next_direction != 0)
             angle = NuAngAdd(angle, 0x8000);
@@ -4522,7 +4522,7 @@ static __used__ i32 RowMoveTowards(AIGROUP *group, AIROW *row, AIROW *previous, 
                                                                                 : previous->path_info.connection;
         } else if (group->leader != NULL) {
             AIPATHINFO *destination = &group->leader->ai->script_process.path_info;
-            if (destination->path == row->path_info.path) {
+            if (__builtin_expect(destination->path == row->path_info.path, 0)) {
                 i32 destination_node = destination->connection->node_indices[destination->dist > 0.5f];
                 direction_node = destination_node;
                 u8 connection_index = destination->path->route_matrix[node_index][destination_node];
@@ -4581,14 +4581,7 @@ static __used__ i32 RowMoveTowards(AIGROUP *group, AIROW *row, AIROW *previous, 
     NuVecRotateY(&rotated, &offset, row->y_rot);
     NuVecAdd(&centre, &rotated, &row->pos);
     if (!row->is_turning) {
-        if (row->path_info.connection != row->next_connection) {
-            AIPATHNODE *nodes = row->path_info.path->nodes;
-            f32 distance =
-                NuInfiniteLineToPointDistSqr(&nodes[row->next_connection->node_indices[0]].position,
-                                             &nodes[row->next_connection->node_indices[1]].position, &centre);
-            if (group->radius * group->radius >= distance)
-                row->is_turning = 1;
-        } else {
+        if (!(row->path_info.connection != row->next_connection)) {
             AIPATHNODE *node =
                 &row->path_info.path->nodes[row->path_info.connection->node_indices[row->path_info.direction == 0]];
             f32 distance = NuVecXZDistSqr(&row->pos, &node->position, &rotated);
@@ -4620,6 +4613,13 @@ static __used__ i32 RowMoveTowards(AIGROUP *group, AIROW *row, AIROW *previous, 
                 }
                 return 1;
             }
+        } else {
+            AIPATHNODE *nodes = row->path_info.path->nodes;
+            f32 distance =
+                NuInfiniteLineToPointDistSqr(&nodes[row->next_connection->node_indices[0]].position,
+                                             &nodes[row->next_connection->node_indices[1]].position, &centre);
+            if (group->radius * group->radius >= distance)
+                row->is_turning = 1;
         }
     }
     if (row->is_turning) {
@@ -6360,7 +6360,7 @@ eduimenu_s *routeEditor_Process(nupad_s *pad) {
                 if (index < 0)
                     index = 15;
                 path->current_route = &path->routes[index];
-                if (!(path->current_route->flags & 1)) {
+                if (__builtin_expect(!(path->current_route->flags & 1), 0)) {
                     --index;
                     if (index < 0)
                         index = 15;
@@ -6935,7 +6935,7 @@ eduimenu_s *areaEditor_Process(nupad_s *pad) {
                     selected->size.x *= 0.99f;
                 if (buttons & 0x1000)
                     selected->size.z *= 1.01f;
-                else if (buttons & 0x4000)
+                else if (__builtin_expect(buttons & 0x4000 != 0, 0))
                     selected->size.z *= 0.99f;
             }
         }
@@ -8307,7 +8307,7 @@ extern "C" {
             if (NuLinkedListGetHead(&reference->conditions) != NULL &&
                 AIScriptProcessStateConditions(system, &reference->conditions, packet, processor, 1) == NULL) {
                 processor->active_ref_count = index;
-                if (index == 0) {
+                if (__builtin_expect(index == 0, 1)) {
                     AICREATURE *creature = packet->field_0x134 != 0xff ? &system->creatures[packet->field_0x134] : NULL;
                     AIScriptProcessorInit(system, packet, processor, creature, NULL, NULL, 0, processor->base_script,
                                           reference->return_state);
@@ -8319,7 +8319,7 @@ extern "C" {
             }
         }
 
-        if (processor->next_state == NULL) {
+        if (__builtin_expect(processor->next_state == NULL, 0)) {
             if (processor->active_ref_count != 0 && processor->state == processor->script->base_state) {
                 const i32 completed_index = processor->active_ref_count - 1;
                 AIREFSCRIPT *completed_reference = processor->active_refs[completed_index];
@@ -8418,8 +8418,10 @@ extern "C" {
                 processor->param_stack[1].is_first_time_state = 1;
                 processor->param_stack[1].force_complex_eval = 1;
 
-                if (NuLinkedListGetHead(&reference->conditions) != NULL &&
-                    AIScriptProcessStateConditions(system, &reference->conditions, packet, processor, 1) == NULL) {
+                if (__builtin_expect(NuLinkedListGetHead(&reference->conditions) != NULL &&
+                                         AIScriptProcessStateConditions(system, &reference->conditions, packet,
+                                                                        processor, 1) == NULL,
+                                     1)) {
                     continue;
                 }
                 if (reference->script == NULL) {
@@ -8448,8 +8450,10 @@ extern "C" {
                     processor->param_stack[1].is_first_time_state = 1;
                     processor->param_stack[1].force_complex_eval = 1;
 
-                    if (NuLinkedListGetHead(&reference->conditions) != NULL &&
-                        AIScriptProcessStateConditions(system, &reference->conditions, packet, processor, 1) == NULL) {
+                    if (__builtin_expect(NuLinkedListGetHead(&reference->conditions) != NULL &&
+                                             AIScriptProcessStateConditions(system, &reference->conditions, packet,
+                                                                            processor, 1) == NULL,
+                                         1)) {
                         continue;
                     }
                     if (reference->script == NULL) {
@@ -9331,20 +9335,22 @@ extern "C" void *AISysLoad(void *buf, void *buf_end, i32 size, void *gscn, char 
         }
         {
             AIGROUP *group = &system->groups[15];
-            if (group->is_used) {
-                if (group->member_is_alive == 0)
-                    group->can_respawn = 1;
-                else
+            if (__builtin_expect(group->is_used != 0, 1)) {
+                if (!(group->member_is_alive == 0))
                     group->can_respawn = 0;
+                else
+                    group->can_respawn = 1;
             }
         }
 
         AILOCATOR *locator = system->locators;
         for (i32 index = 0; index < system->locator_count; ++index, ++locator) {
             AIPATHNODE *start = &locator->path_info.path->nodes[locator->path_info.connection->node_indices[0]];
-            if ((start->runtime_flags & AIPATHNODE_RUNTIME_POSITION_CHANGED) == 0 &&
-                (locator->path_info.path->nodes[locator->path_info.connection->node_indices[1]].runtime_flags &
-                 AIPATHNODE_RUNTIME_POSITION_CHANGED) == 0) {
+            if (__builtin_expect(
+                    (start->runtime_flags & AIPATHNODE_RUNTIME_POSITION_CHANGED) == 0 &&
+                        (locator->path_info.path->nodes[locator->path_info.connection->node_indices[1]].runtime_flags &
+                         AIPATHNODE_RUNTIME_POSITION_CHANGED) == 0,
+                    0)) {
                 continue;
             }
 
@@ -10473,7 +10479,9 @@ extern "C" AIPATHCNX *AIPathFindPathCnxFromIX(AISYS *system, AIPATH *path, u8 fr
 
     void AIPathNodeUpdatePos(AISYS *system, AIPATH *path, AIPATHNODE *node) {
         const i32 node_index = static_cast<i32>(node - path->nodes);
-        if (node->has_special == 0 || (path->updated_node_bits[node_index / 8] & (1 << (node_index % 8))) != 0) {
+        if (__builtin_expect(node->has_special == 0 ||
+                                 (path->updated_node_bits[node_index / 8] & (1 << (node_index % 8))) != 0,
+                             0)) {
             return;
         }
         path->updated_node_bits[node_index / 8] |= 1 << (node_index % 8);
@@ -10593,10 +10601,10 @@ extern "C" i32 WithinConnection(AISYS *system, NUVEC *position, AIPATH *path, AI
     else
         narrow = 1;
     f32 second_radius = second->radius;
-    if (second_radius > radius + 0.05f)
-        second_radius -= radius;
-    else
+    if (second_radius <= radius + 0.05f)
         narrow = 1;
+    else
+        second_radius -= radius;
 
     if (first->has_special != 0 &&
         (path->updated_node_bits[connection->node_indices[0] / 8] & (1 << (connection->node_indices[0] % 8))) == 0)
@@ -10625,7 +10633,7 @@ extern "C" i32 WithinConnection(AISYS *system, NUVEC *position, AIPATH *path, AI
         f32 width = local.x;
         if (width < 0.0f)
             width = -width;
-        if (width > first_radius && width > second_radius)
+        if (__builtin_expect(width > first_radius && width > second_radius, 0))
             return 0;
         if (local.z < -first_radius || !(local.z <= connection->horizontal_distance + second_radius))
             return 0;
@@ -10642,7 +10650,7 @@ extern "C" i32 WithinConnection(AISYS *system, NUVEC *position, AIPATH *path, AI
                 return 0;
         } else if (!(wall.z > NU_COS_LUT(angle) * connection->horizontal_distance)) {
             f32 minimum, maximum;
-            if (first_radius > local.z) {
+            if (__builtin_expect(first_radius > local.z, 1)) {
                 minimum = first->min_height;
                 maximum = first->max_height;
             } else if (local.z > connection->horizontal_distance - second_radius) {
@@ -11228,11 +11236,13 @@ extern "C" {
             AIPATHNODE &first_node = path->nodes[current_connection->node_indices[current_direction]];
             for (i32 connection_index = 0; connection_index < first_node.connection_count; ++connection_index) {
                 AIPATHCNX *candidate = first_node.connections[connection_index];
-                if (candidate != current_connection &&
-                    AISysCharacterTestPathCnx(system, object, packet, candidate,
-                                              candidate->node_indices[0] !=
-                                                  current_connection->node_indices[current_direction],
-                                              &nearest_distance_squared) != 0)
+                if (__builtin_expect(
+                        candidate != current_connection &&
+                            AISysCharacterTestPathCnx(system, object, packet, candidate,
+                                                      candidate->node_indices[0] !=
+                                                          current_connection->node_indices[current_direction],
+                                                      &nearest_distance_squared) != 0,
+                        1))
                     return;
             }
 
@@ -11241,11 +11251,13 @@ extern "C" {
             AIPATHNODE &second_node = path->nodes[current_connection->node_indices[other_direction]];
             for (i32 connection_index = 0; connection_index < second_node.connection_count; ++connection_index) {
                 AIPATHCNX *candidate = second_node.connections[connection_index];
-                if (candidate != current_connection &&
-                    AISysCharacterTestPathCnx(system, object, packet, candidate,
-                                              candidate->node_indices[0] !=
-                                                  current_connection->node_indices[other_direction],
-                                              &nearest_distance_squared) != 0)
+                if (__builtin_expect(
+                        candidate != current_connection &&
+                            AISysCharacterTestPathCnx(system, object, packet, candidate,
+                                                      candidate->node_indices[0] !=
+                                                          current_connection->node_indices[other_direction],
+                                                      &nearest_distance_squared) != 0,
+                        0))
                     return;
             }
         }
@@ -11273,7 +11285,7 @@ extern "C" {
         AIPATHCNX *original_connection = packet->path_info.connection;
         const u8 original_direction = packet->path_info.direction;
 
-        if (packet->path_info.path_index == 0xff) {
+        if (__builtin_expect(packet->path_info.path_index == 0xff, 0)) {
             packet->path_info.path_index = original_path->index;
         }
         if (packet->path_info.path_index >= system->path_sys->path_count) {
@@ -11313,7 +11325,7 @@ extern "C" {
 
             packet->path_info.next_check = 0;
             ++packet->path_info.path_index;
-            if (packet->path_info.path_index >= system->path_sys->path_count) {
+            if (__builtin_expect(packet->path_info.path_index >= system->path_sys->path_count, 0)) {
                 packet->path_info.path_index = 0;
             }
 
@@ -13316,7 +13328,7 @@ extern "C" {
                         const f32 distance_squared = NuVecXZDistSqr(source_position, &object->position, &source_delta);
                         const f32 radius = packet->movement_target_radius;
                         const u8 current_source_flags = packet->field_0x1e7;
-                        if ((current_source_flags & AIPACKET_MOVEMENT_SOURCE_ACTIVE) == 0) {
+                        if (__builtin_expect((current_source_flags & AIPACKET_MOVEMENT_SOURCE_ACTIVE) == 0, 0)) {
                             if (distance_squared > radius * radius) {
                                 const f32 release_radius = radius + 0.5f;
                                 if (distance_squared > release_radius * release_radius) {
@@ -13332,7 +13344,7 @@ extern "C" {
                                     }
                                 }
                             }
-                        } else if (!(distance_squared >= radius * radius)) {
+                        } else if (__builtin_expect(!(distance_squared >= radius * radius), 0)) {
                             packet->field_0x1e7 =
                                 current_source_flags & static_cast<u8>(~AIPACKET_MOVEMENT_SOURCE_ACTIVE);
                         }
@@ -13342,7 +13354,7 @@ extern "C" {
         }
 
         f32 clearance = 0.0f;
-        if (packet->movement_stopping_distance != 0.0f) {
+        if (__builtin_expect(packet->movement_stopping_distance != 0.0f, 0)) {
             clearance = packet->mover_height;
         }
 
@@ -13994,7 +14006,7 @@ i32 NuSpecialFindByPlatformID(nugscn_s *scene, nuhspecial_s *result, i32 platfor
                     dx = candidate_end->position.x - candidate_start->position.x;
                     dz = candidate_end->position.z - candidate_start->position.z;
                     i32 reverse = 0;
-                    if (!(direction_x * dx + direction_z * dz >= 0.0f)) {
+                    if (__builtin_expect(!(direction_x * dx + direction_z * dz >= 0.0f), 1)) {
                         dx = candidate_start->position.x - candidate_end->position.x;
                         dz = candidate_start->position.z - candidate_end->position.z;
                         reverse = 1;
@@ -14022,7 +14034,7 @@ i32 NuSpecialFindByPlatformID(nugscn_s *scene, nuhspecial_s *result, i32 platfor
                     start = &nodes[connection->direction_a];
                     dx = end->position.x - start->position.x;
                     dz = end->position.z - start->position.z;
-                    if (direction_x * dx + direction_z * dz < 0.0f) {
+                    if (__builtin_expect(direction_x * dx + direction_z * dz < 0.0f, 1)) {
                         dx = start->position.x - end->position.x;
                         dz = start->position.z - end->position.z;
                         AIPATHNODE *swap = start;
@@ -14038,7 +14050,7 @@ i32 NuSpecialFindByPlatformID(nugscn_s *scene, nuhspecial_s *result, i32 platfor
         f32 inverse_fraction = 1.0f - fraction;
         f32 radius = fraction * end->radius + inverse_fraction * start->radius;
         along = connection->horizontal_distance * fraction;
-        if ((flags & 1) != 0) {
+        if (__builtin_expect((flags & 1) != 0, 1)) {
             offset *= radius;
         }
         offset = NuFmin(NuFmax(offset, -radius), radius);
@@ -15314,7 +15326,7 @@ void locatorEditor_Enter(void) {
             do {
                 pathEditor_OnPathCheck(&locator->position, (EDAIPATHCHECK_s *)locator->path_check, path, tolerance);
                 tolerance += 0.01f;
-            } while (!locator->on_path);
+            } while (__builtin_expect(!locator->on_path, 0));
             locator->path_angle = NuAngSub(locator->direction, locator->path_angle);
         }
         for (i32 index = 0; index < (*state)->ai_system->locator_set_count; ++index) {

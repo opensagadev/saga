@@ -7555,7 +7555,7 @@ extern "C" {
             Music.requested_track = static_cast<i16>(track);
             Music.state = MUSIC_PLAYBACK_DUAL_STREAM;
             reinterpret_cast<u8 *>(&Music)[primary_stream + 0x12] = 0;
-            if (transition_frames >= 64) {
+            if (__builtin_expect(transition_frames >= 64, 0)) {
                 Music.pause_requested = false;
                 const f32 seek_offset = Music.seek_offset;
                 if (NOSOUND == 0 && NOMUSIC == 0) {
@@ -10436,7 +10436,7 @@ void DebrisProcessControlChunks(i32 panel_time) {
                 } else {
                     control->owner->particle_count -= 32;
                     control->owner->previous_particle_count -= 32;
-                    if (control->owner->field_18a > (chunk_index + 1) * 32) {
+                    if (__builtin_expect(control->owner->field_18a > (chunk_index + 1) * 32, 1)) {
                         control->owner->field_18a -= 32;
                     }
                 }
@@ -10516,7 +10516,7 @@ void DebrisProcessControlChunks(i32 panel_time) {
                 }
                 {
                     const i16 key_index = effect->particle_keys[7];
-                    if (key_index != -1 && &debkeydata[key_index] == control->owner) {
+                    if (__builtin_expect(key_index != -1 && &debkeydata[key_index] == control->owner, 1)) {
                         control->owner->effect_index = 0;
                         control->owner->allocation_index = -1;
                         --freedebkeyptr;
@@ -10576,7 +10576,7 @@ void DebrisTimeSlip(i32 group) {
         globaltime = renderglobaltime;
         for (debris_chunk_control_s *control = debris_chunk_control_stack[0]; control != NULL; control = control->next)
             control->expiry_time -= 800.0f;
-    } else if (group == 1) {
+    } else if (__builtin_expect(group == 1, 0)) {
         panelglobaltime = renderpanelglobaltime;
         for (debris_chunk_control_s *control = debris_chunk_control_stack[1]; control != NULL; control = control->next)
             control->expiry_time -= 800.0f;
@@ -11235,7 +11235,8 @@ extern "C" {
                         visible = NuPortalClipTest(key->gscene, &key->position, key->clip_radius, key->field_2f2) != 0;
                     NUVEC minimum = key->clip_min;
                     NUVEC maximum = key->clip_max;
-                    if (NuCameraClipTestExtents(&minimum, &maximum, &key->clip_matrix, 0.0f, 0) == 0)
+                    if (__builtin_expect(NuCameraClipTestExtents(&minimum, &maximum, &key->clip_matrix, 0.0f, 0) == 0,
+                                         0))
                         continue;
                 }
                 if (!visible)
@@ -11273,7 +11274,7 @@ extern "C" {
             i32 mode;
             if (effect->particle_type == 7)
                 mode = 4;
-            else if (effect->use_explicit_clip_box != 0) {
+            else if (__builtin_expect(effect->use_explicit_clip_box != 0, 1)) {
                 NuRndrSetDebBox(reinterpret_cast<NUVEC *>(effect->fields_2f8));
                 mode = 6;
             } else
@@ -13714,7 +13715,7 @@ void edgraCalculatePage(char page, i32 calculate_vectors) {
                     position.y =
                         terrain_height + static_cast<NUVEC *>(GrassClumps[clump_index].vector_buffer)[element].y;
                 NuMtxTranslate(element_matrix, &position);
-                if (GrassClumps[clump_index].kind == 1)
+                if (__builtin_expect(GrassClumps[clump_index].kind == 1, 0))
                     element_matrix->m33 = GrassClumps[clump_index].field_18 * sample.w;
             }
             ++element_matrix;
@@ -17957,11 +17958,13 @@ extern "C" void TerrainPlatformNewUpdate(void) {
                 group.origin.z - group.radius > max_z || group.origin.z + group.radius < min_z)
                 continue;
         } else {
-            if (group.bounds_min.x + group.origin.x > max_x || group.origin.x + group.bounds_max.x < min_x ||
-                group.bounds_min.z + group.origin.z > max_z || group.origin.z + group.bounds_max.z < min_z)
+            if (__builtin_expect(
+                    group.bounds_min.x + group.origin.x > max_x || group.origin.x + group.bounds_max.x < min_x ||
+                        group.bounds_min.z + group.origin.z > max_z || group.origin.z + group.bounds_max.z < min_z,
+                    0))
                 continue;
         }
-        if (CurTerr->active_platform_count < 96)
+        if (__builtin_expect(CurTerr->active_platform_count < 96, 0))
             CurTerr->active_platform_groups[CurTerr->active_platform_count++] = *group_index;
     }
 }
@@ -18066,7 +18069,7 @@ void TerrDrawSitu(tertype *terrain, terrsitu_s *situation) {
 void TerrDrawPlat(tertype *terrain, i16 index) {
     TERRAIN_DEBUG_RECORD *record = reinterpret_cast<TERRAIN_DEBUG_RECORD *>(terrain);
     TERRAIN_PLATFORM *platform = &CurTerr->platforms[CurTerr->groups[index].scene_index];
-    if (platform->scene_transform != NULL) {
+    if (__builtin_expect(platform->scene_transform != NULL, 1)) {
         if (platform->flags & TERRAIN_PLATFORM_FLAG_DISPLAY_LIST_BACKED) {
             if (!(*static_cast<u8 *>(platform->scene_transform) & 2))
                 return;
@@ -18427,7 +18430,7 @@ void SkinPlatform(terrsitu_s *terrain_group, unsigned char *buffer, PLATSKININFO
         return;
     TERRAIN_SHAPE_BATCH *input = static_cast<TERRAIN_SHAPE_BATCH *>(group->data);
     TERRAIN_SHAPE_BATCH *output = reinterpret_cast<TERRAIN_SHAPE_BATCH *>(buffer);
-    while (input->marker >= 0) {
+    while (__builtin_expect(input->marker >= 0, 1)) {
         output->shape_count = input->shape_count;
         output->marker = input->marker;
         TERRAIN_SHAPE *destination = reinterpret_cast<TERRAIN_SHAPE *>(output + 1);
@@ -18466,7 +18469,7 @@ void SkinPlatform(terrsitu_s *terrain_group, unsigned char *buffer, PLATSKININFO
             destination->max_x = shape_max_x + 0.05f;
             destination->max_y = shape_max_y + 0.05f;
             destination->max_z = shape_max_z + 0.05f;
-            if (source->normals[1].y < 65535.0f) {
+            if (__builtin_expect(source->normals[1].y < 65535.0f, 0)) {
                 NUVEC a, b;
                 a.x = destination->vectors[1].x - destination->vectors[3].x;
                 a.y = destination->vectors[1].y - destination->vectors[3].y;
@@ -22172,7 +22175,7 @@ i32 PlatformChecks(i32 count, nuvec_s *movement) {
     if (movement->y > TerConTol * 0.5f) {
         TERRAIN_PLATFORM *platform = &CurTerr->platforms[platform_index];
         NUMTX *matrix = static_cast<NUMTX *>(platform->scene_object);
-        if (movement->y > (TerConTol * 0.5f + matrix->m31) - platform->previous_matrix.m31) {
+        if (__builtin_expect(movement->y > (TerConTol * 0.5f + matrix->m31) - platform->previous_matrix.m31, 0)) {
             NuScratchRelease();
             return count;
         }
@@ -22206,7 +22209,7 @@ i32 PlatformChecks(i32 count, nuvec_s *movement) {
     NUVEC previous_position = TerI->position;
     i32 clear = TerrainPlatformMoveCheck(&TerI->platform_position, &TerI->platform_normal, platform_index, 1, 0);
     bool opposing_contact = false;
-    if (__builtin_expect(TerI->hit_type != 0 && TerI->terrain_group_index >= 0, 0)) {
+    if (TerI->hit_type != 0 && TerI->terrain_group_index >= 0) {
         TERRAIN_GROUP *hit_group = &CurTerr->groups[TerI->terrain_group_index];
         if (__builtin_expect(hit_group->chunk_type == 1, 0))
             CurTrackInfo->platform_index = hit_group->scene_index;
@@ -22235,7 +22238,7 @@ i32 PlatformChecks(i32 count, nuvec_s *movement) {
                       direction.z * TerI->platform_position.z;
             if (dot > 0.0f) {
                 f32 fraction = (distance - travelled) / dot;
-                if (fraction < 0.8f) {
+                if (__builtin_expect(fraction < 0.8f, 0)) {
                     TerI->platform_position.x = TerI->platform_position.x * fraction + TerI->position.x;
                     TerI->platform_position.y = TerI->platform_position.y * fraction + TerI->position.y;
                     TerI->platform_position.z = TerI->platform_position.z * fraction + TerI->position.z;
@@ -22684,7 +22687,7 @@ extern "C" void NewTerrainScaleYMask(NUVEC *position, NUVEC *movement, u8 *hit_f
 
         if (__builtin_expect(TerI->hit_type != TERRAIN_HIT_TYPE_NONE, 0)) {
             const i16 group_index = TerI->terrain_group_index;
-            if (group_index >= 0) {
+            if (__builtin_expect(group_index >= 0, 1)) {
                 ShadNorm = TerI->impact_normal;
 
                 f32 slope = 0.707f;
@@ -23517,7 +23520,32 @@ void edanimDoInput(nupad_s *pad) {
                     edanim_nearest_sound = -1;
                 }
             }
-            if (edanim_sound_mode != 0) {
+            if (edanim_sound_mode == 0) {
+                if (edanim_nearest != -1) {
+                    if (pad->digital_buttons_pressed & 0x8) {
+                        if (++edanim_nearest == NuGScnNumSpecials(edbits_base_scene))
+                            edanim_nearest = 0;
+                    }
+                    if (pad->digital_buttons_pressed & 0x2) {
+                        if (--edanim_nearest == -1)
+                            edanim_nearest = NuGScnNumSpecials(edbits_base_scene) - 1;
+                    }
+                } else {
+                    edanimDetermineNearestAnim(-1.0f);
+                }
+                if (edanim_nearest != -1) {
+                    nuhspecial_s special;
+                    NuGScnGetSpecial(&special, edbits_base_scene, edanim_nearest);
+                    edcamSetPos(NuSpecialGetPos(&special));
+                    edanim_nearest_param_id = -1;
+                    for (u32 index = 0; index < 64; ++index) {
+                        if (AnimParams[index].instance_id == edanim_nearest) {
+                            edanim_nearest_param_id = index;
+                            break;
+                        }
+                    }
+                }
+            } else {
                 if (edanim_nearest_sound == -1) {
                     edanimDetermineNearestSound(-1.0f);
                 } else {
@@ -23542,31 +23570,6 @@ void edanimDoInput(nupad_s *pad) {
                                  AnimParams[edanim_nearest_param_id].sound_positions[edanim_nearest_sound]));
                     edcamSetPos(&position);
                     edanim_sound_type = AnimParams[edanim_nearest_param_id].sound_ids[edanim_nearest_sound];
-                }
-            } else {
-                if (edanim_nearest != -1) {
-                    if (pad->digital_buttons_pressed & 0x8) {
-                        if (++edanim_nearest == NuGScnNumSpecials(edbits_base_scene))
-                            edanim_nearest = 0;
-                    }
-                    if (pad->digital_buttons_pressed & 0x2) {
-                        if (--edanim_nearest == -1)
-                            edanim_nearest = NuGScnNumSpecials(edbits_base_scene) - 1;
-                    }
-                } else {
-                    edanimDetermineNearestAnim(-1.0f);
-                }
-                if (edanim_nearest != -1) {
-                    nuhspecial_s special;
-                    NuGScnGetSpecial(&special, edbits_base_scene, edanim_nearest);
-                    edcamSetPos(NuSpecialGetPos(&special));
-                    edanim_nearest_param_id = -1;
-                    for (u32 index = 0; index < 64; ++index) {
-                        if (AnimParams[index].instance_id == edanim_nearest) {
-                            edanim_nearest_param_id = index;
-                            break;
-                        }
-                    }
                 }
             }
         }
@@ -23601,8 +23604,8 @@ void edanimDoInput(nupad_s *pad) {
                 edanim_nearest_param_id = edanimParamCreate(edanim_nearest);
             }
         }
-        if (pad->digital_buttons & 0x20) {
-            if (edanim_particle_mode != 0 && edanim_nearest_particle != -1) {
+        if (__builtin_expect(pad->digital_buttons & 0x20 != 0, 1)) {
+            if (__builtin_expect(edanim_particle_mode != 0 && edanim_nearest_particle != -1, 0)) {
                 edanimParticlePlace(edanim_nearest_particle, &edanim_cam_pos);
             } else if (edanim_nearest_sound != -1 && edanim_sound_mode != 0) {
                 edanimSoundPlace(edanim_nearest_sound, &edanim_cam_pos);
@@ -23631,10 +23634,10 @@ void edanimDoInput(nupad_s *pad) {
         edanim_emitroty += pad->analog_left_pad_right - pad->analog_left_pad_left;
         const i32 raised = edanim_emitrotz + pad->analog_left_pad_up;
         const i32 rotation = (raised < 0 ? raised : 0) - pad->analog_left_pad_down;
-        if (rotation > -32768) {
-            edanim_emitrotz = rotation;
-        } else {
+        if (rotation <= -32768) {
             edanim_emitrotz = -32768;
+        } else {
+            edanim_emitrotz = rotation;
         }
     }
 }

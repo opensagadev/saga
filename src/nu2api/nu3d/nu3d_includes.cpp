@@ -14273,7 +14273,7 @@ extern "C" void NuGScnUpdate(NUGSCN *gscn, f32 frame_delta) {
 
                 frame = instance_animation->ltime;
                 const f32 interval_end = instance_animation->tinterval + end_frame;
-                if (!(frame >= interval_end)) {
+                if (__builtin_expect(!(frame >= interval_end), 1)) {
                     if (frame > end_frame) {
                         frame = end_frame;
                     } else if (frame < 1.0f) {
@@ -14282,7 +14282,7 @@ extern "C" void NuGScnUpdate(NUGSCN *gscn, f32 frame_delta) {
                         frame = 1.0f;
                     }
                 } else {
-                    if (__builtin_expect(instance_animation->repeating != 0, 0)) {
+                    if (__builtin_expect(instance_animation->repeating != 0, 1)) {
                         const f32 repeat_length = interval_end - 1.0f;
                         const f32 repeats = NuFloor((instance_animation->ltime - 1.0f) / repeat_length);
                         const f32 live_repeat_length = instance_animation->tinterval + end_frame - 1.0f;
@@ -14320,13 +14320,13 @@ extern "C" void NuGScnUpdate(NUGSCN *gscn, f32 frame_delta) {
                         if (instance_animation->instance_ix != 0xffff) {
                             display_special = &static_cast<NUDISPLAYSPECIAL *>(
                                 display_list->specials)[instance_animation->instance_ix];
-                            if (state_value == 0) {
+                            if (state_value != 0) {
+                                display_special->flags |= NUDISPLAYSPECIAL_FLAG_VISIBLE;
+                            } else {
                                 display_special->flags &= ~NUDISPLAYSPECIAL_FLAG_VISIBLE;
                                 animation = NULL;
-                            } else {
-                                display_special->flags |= NUDISPLAYSPECIAL_FLAG_VISIBLE;
                             }
-                        } else if (state_value == 0) {
+                        } else if (__builtin_expect(state_value == 0, 0)) {
                             animation = NULL;
                         }
                     }
@@ -14864,7 +14864,7 @@ extern "C" i32 NuRndrHighResScreenGrab(char *prefix, f32 scale, f32 a, f32 b, f3
     } else {
         f32 n = scale / 0.75f;
         tiles = static_cast<f32>(static_cast<i32>(n));
-        if (!(n <= tiles))
+        if (__builtin_expect(!(n <= tiles), 0))
             tiles += 1.0f;
     }
     yTiles = tiles;
@@ -15003,7 +15003,7 @@ extern "C" i32 NuRndrHighResScreenGrab(char *prefix, f32 scale, f32 a, f32 b, f3
     f32 left = (-0.125f * w + x) / scale;
     f32 right = (x + w + -0.125f * w) / scale;
     xOffsetHack = 0;
-    if (right > w) {
+    if (__builtin_expect(right > w, 1)) {
         xOffsetHack = static_cast<i32>(right - w);
         left -= static_cast<f32>(xOffsetHack);
         right = w;
@@ -19185,7 +19185,7 @@ extern "C" NUDLDLISTSCENE *NuDisplaySceneClone(NUDLDLISTSCENE *source, VARIPTR *
             item->next = scene->items + (static_cast<NUDISPLAYLISTITEM *>(source->items[i].next) - source->items);
         }
     }
-    if (source->material_animations != NULL) {
+    if (__builtin_expect(source->material_animations != NULL, 1)) {
         scene->material_animations = CloneSceneAllocate<NUMTLANIMSET>(buffer, 1);
         *scene->material_animations = *source->material_animations;
         scene->material_animations->next = global_dlist_manager.mtlanim_list;
@@ -19220,7 +19220,7 @@ extern "C" NUDLDLISTSCENE *NuDisplaySceneClone(NUDLDLISTSCENE *source, VARIPTR *
                     previous = current;
                     current = current->sys_next;
                 }
-                if (previous != NULL) {
+                if (__builtin_expect(previous != NULL, 1)) {
                     sort->sys_next = current;
                     previous->sys_next = sort;
                 } else {
@@ -20174,7 +20174,7 @@ void NuDynamicLight::addShadowCasterScene(nugscn_s *scene) {
             f32 dz = global_camera.mtx.m32 - dl->clip_bounds[instance].center.z;
             f32 distance = dx * dx + dy * dy + dz * dz;
             if (dl->lod_ranges[lod] != 0.0f) {
-                while (dl->lod_ranges[lod] > distance)
+                while (__builtin_expect(dl->lod_ranges[lod] > distance, 1))
                     ++lod;
             }
             NUCLIPOBJECT *object = &dl->clip_objects[lod];
@@ -21083,7 +21083,7 @@ extern "C" void NuTimeBarSetRender(i32 set) {
             u32 gpu_time = static_cast<u32>(timebar->accumulators[buffer][1]);
             gpu_frames = timebar_unsigned_float(gpu_time) * nuapi.fps / 1000000.0f;
         }
-        if (NuTimeBar_EngineEnabled == 0 && gpu_frames <= 1.0f) {
+        if (__builtin_expect(NuTimeBar_EngineEnabled == 0 && gpu_frames <= 1.0f, 0)) {
             return;
         }
     }
@@ -21165,7 +21165,7 @@ extern "C" void NuTimeBarSetRender(i32 set) {
                                   static_cast<i32>(timebar_unsigned_float(static_cast<u32>(timebar->field_14[slot])) *
                                                    15734.0f / 1000000.0f));
                 }
-                if (timebar->slot_names[slot] != NULL) {
+                if (__builtin_expect(timebar->slot_names[slot] != NULL, 1)) {
                     const f32 column = static_cast<f32>(PS2_VREZ_W) * 0.025f;
                     const i32 text_x =
                         (static_cast<i32>(column) * (column_index * 3) + static_cast<i32>(column * 0.5f)) * 16;

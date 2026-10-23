@@ -1425,7 +1425,7 @@ static __used__ void Hub_UpdateSelectMode() {
             break;
         case 3:
             selectmodetime += FRAMETIME;
-            if (selectmodeduration <= selectmodetime) {
+            if (__builtin_expect(selectmodeduration <= selectmodetime, 0)) {
                 WipeBackToHub();
             }
             return;
@@ -1491,7 +1491,7 @@ static __used__ void Hub_UpdateSelectMode() {
                             const i32 count =
                                 Collection_GetIDList(&VehicleCollection, HUB_VEHICLE_COLLECTION_ALLOWED,
                                                      HUB_VEHICLE_COLLECTION_REQUIRED, ids, &first, &second, 0);
-                            if (count == 1) {
+                            if (__builtin_expect(count == 1, 1)) {
                                 selectmodetime = 0.0f;
                                 selectmodemode = 1;
                                 selectmodeduration = 0.6f;
@@ -1910,7 +1910,8 @@ void Hub_UpdateMiniKits(WORLDINFO_s *world) {
                     i_selectminikitepisode = menu->selected_item;
             }
             if (confirm || (GamePad[0].buttons_pressed & GAMEPAD_MENUSELECT)) {
-                if (Game_AreaSave == NULL || Game_AreaSave[hub_minikitviewer_area].minikit_complete) {
+                if (__builtin_expect(Game_AreaSave == NULL || Game_AreaSave[hub_minikitviewer_area].minikit_complete,
+                                     0)) {
                     if (Episode_CountOpenAreas(i_selectminikitepisode, -1, Game_AreaSave)) {
                         i32 area = Episode_FindAreaFromFlags(&EDataList[i_selectminikitepisode], 5, 5);
                         if (area != -1) {
@@ -1987,7 +1988,7 @@ void Hub_UpdateMiniKits(WORLDINFO_s *world) {
             rate = (MAX(-4551, (MIN(4551, rate))));
             kit->rotation_velocity = SeekRot(kit->rotation_velocity, rate, 8.0f);
             i32 tilt = 0;
-            if (i == hub_minikitviewer_area && speed > 0.0f) {
+            if (__builtin_expect(i == hub_minikitviewer_area && speed > 0.0f, 0)) {
                 i32 diff = RotDiff(old_rotation, kit->rotation);
                 f32 angular_speed = (f32)(diff < 0 ? -diff : diff) / FRAMETIME;
                 if (angular_speed < 32768.0f)
@@ -3877,7 +3878,7 @@ void MenuUpdateBonusMode(MENU_s *) {
             return;
         case 4:
             bonusmodetime += FRAMETIME;
-            if (bonusmodetime >= bonusmodeduration)
+            if (__builtin_expect(bonusmodetime >= bonusmodeduration, 0))
                 WipeBackToHub();
             return;
         case 0:
@@ -3920,7 +3921,7 @@ void MenuUpdateBonusMode(MENU_s *) {
                 if (choices == 1) {
                     hub_bonusmode = item;
                     confirm = 1;
-                } else if (item == hub_bonusmode) {
+                } else if (__builtin_expect(item == hub_bonusmode, 0)) {
                     right = 1;
                 } else {
                     hub_bonusmode = item;
