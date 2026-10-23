@@ -2606,7 +2606,7 @@ f32 TextPrintSubstring(unsigned char *text, f32 x, f32 y, f32 z, f32 x_scale, f3
     VUFNT *font;
     f32 relative_scale;
     f32 pulse;
-    if (QFont2DButtons == nullptr || button_font == 0) {
+    if (__builtin_expect(QFont2DButtons == nullptr || button_font == 0, 1)) {
         font = base_font;
         pulse = 1.0f;
         relative_scale = 1.0f;

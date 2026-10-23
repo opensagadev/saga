@@ -482,7 +482,7 @@ void NuInputDevice::ProcessTouchData() {
     }
     u32 added = 0;
     for (u32 i = 0; i < previous_count; ++i) {
-        if (unknown_touch_data.touch_events[i].unknown_01)
+        if (__builtin_expect(unknown_touch_data.touch_events[i].unknown_01 != 0, 0))
             continue;
         i32 current = 0xff;
         for (u32 j = 0; j < count; ++j) {

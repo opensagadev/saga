@@ -8379,8 +8379,8 @@ void AddChunkToRenderStack(particlechunkrendertype_s *chunk, particlechunkrender
             particlechunkrendertype_s *next = current->next;
             while (next != NULL) {
                 const u16 next_priority = static_cast<u16>(next->render_priority);
-                if (next_priority <= priority &&
-                    (priority != next_priority || chunk->effect->particle_type <= next->effect->particle_type)) {
+                if (__builtin_expect(next_priority <= priority &&
+                    (priority != next_priority || chunk->effect->particle_type <= next->effect->particle_type), 0)) {
                     break;
                 }
                 current = next;

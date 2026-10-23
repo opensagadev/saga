@@ -9035,7 +9035,7 @@ __used__ static i32 Action_SetInvulnerable(AISYS *sys, AISCRIPTPROCESS *processo
                 }
             } else {
                 for (i32 type_index = 0; type_index < type_count; ++type_index) {
-                    if (candidate->id == types[type_index]) {
+                    if (__builtin_expect(candidate->id == types[type_index], 0)) {
                         candidate->invulnerable = 0;
                     }
                 }

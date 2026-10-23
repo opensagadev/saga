@@ -38,10 +38,10 @@ void CharPivot_Init(CHARPIVOT *table) {
 }
 
 void CharPivot_Check(GameObject_s *object, NUVEC *velocity) {
-    if (object->apiobj.field_0x276 == object->previous_movement_angle || CharPivot == NULL)
+    if (__builtin_expect(object->apiobj.field_0x276 == object->previous_movement_angle || CharPivot == NULL, 0))
         return;
     for (CHARPIVOT *pivot = CharPivot; pivot->name != NULL; ++pivot) {
-        if (object->id != pivot->character_id)
+        if (__builtin_expect(object->id != pivot->character_id, 1))
             continue;
         if (pivot->animation != -1) {
             f32 *frame = AnimPlaying(&object->apiobj.anim_packet, pivot->animation, 1, 1);

@@ -386,7 +386,7 @@ void NuMemoryPool::ReleaseUnreferencedPages() {
                 while (reinterpret_cast<usize>(block) < cursor_page_end) {
                     block = block->next;
                     ++free_block_count;
-                    if (block != NULL) {
+                    if (__builtin_expect(block != NULL, 1)) {
                         continue;
                     }
                     break;
@@ -405,7 +405,7 @@ void NuMemoryPool::ReleaseUnreferencedPages() {
         for (u32 i = 0; i < 256; ++i) {
             FreeBlock volatile *block = free_lists[i];
             FreeBlock volatile *previous_block = NULL;
-            if (block != NULL) {
+            if (__builtin_expect(block != NULL, 1)) {
                 const usize list_page_end = page_begin + page->size;
                 while (reinterpret_cast<usize>(block) < list_page_end) {
                     if (reinterpret_cast<usize>(block) >= page_begin) {

@@ -1028,7 +1028,7 @@ i32 GizBlowup_InitSingleTerrain(GIZMOBLOWUP_s *blowup) {
         return 0;
     if (blowup->platform_id == -1) {
         i32 instance = NuSpecialGetInstanceix(&blowup->type->animated_special);
-        if (blowup->override_special != NULL && NuSpecialExistsFn(blowup->override_special)) {
+        if (__builtin_expect(blowup->override_special != NULL && NuSpecialExistsFn(blowup->override_special), 0)) {
             instance = NuSpecialGetInstanceix(blowup->override_special);
             blowup->platform_id = FindPlatInst(instance);
         } else if ((blowup->draw_flags & 0x802000) == 0x2000 || (blowup->draw_flags & 0x20000000) == 0) {

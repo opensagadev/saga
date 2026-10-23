@@ -1424,7 +1424,7 @@ static __used__ void MenuUpdateShop(MENU *menu) {
     ShopNameAlpha = 0.0f;
     shop_quit = 1;
 
-    if (hub_forceshopsave == 0) {
+    if (__builtin_expect(hub_forceshopsave == 0, 0)) {
         TempGame.field30_0x7c2c = Game.field30_0x7c2c;
         if (memcmp(&TempGame, &Game, sizeof(Game)) == 0) {
             NuIOS_RecordFlurryEvent(const_cast<char *>("hubshop_leavewithoutbuying"));

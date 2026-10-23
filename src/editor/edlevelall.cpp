@@ -7986,10 +7986,7 @@ void SplineObject::ReverseKnots() {
     knots.count = 0;
     while (old.last != NULL) {
         SplineKnot *knot = old.last;
-        if (knot->next != NULL)
-            knot->next->previous = knot->previous;
-        else
-            old.last = knot->previous;
+        if (!(knot->next != NULL)) old.last = knot->previous; else knot->next->previous = knot->previous;
         if (__builtin_expect(knot->previous != NULL, 1))
             knot->previous->next = knot->next;
         else
@@ -8003,7 +8000,7 @@ void SplineObject::ReverseKnots() {
         if (knots.last != NULL)
             knots.last->next = knot;
         knots.last = knot;
-        if (__builtin_expect(knots.first == NULL, 1))
+        if (__builtin_expect(knots.first == NULL, 0))
             knots.first = knot;
         ++knots.count;
     }

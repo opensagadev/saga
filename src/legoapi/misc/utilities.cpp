@@ -1123,11 +1123,11 @@ void PointAlongSpline(NUGSPLINE *spline, f32 along, NUVEC *position, u16 *angle,
     position->x += (next->x - current->x) * fraction;
     position->y += (next->y - current->y) * fraction;
     position->z += (next->z - current->z) * fraction;
-    if (angle != NULL || pitch != NULL) {
+    if (__builtin_expect(angle != NULL || pitch != NULL, 1)) {
         u16 next_angle, next_pitch;
         SplinePointAngles(spline, index, looping, pitch != NULL ? &next_pitch : NULL,
                           angle != NULL ? &next_angle : NULL);
-        if (angle != NULL)
+        if (__builtin_expect(angle != NULL, 1))
             *angle += (i32)(RotDiff(*angle, next_angle) * fraction);
         if (pitch != NULL)
             *pitch += (i32)(RotDiff(*pitch, next_pitch) * fraction);

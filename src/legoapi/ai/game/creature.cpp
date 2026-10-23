@@ -1733,7 +1733,7 @@ void ResetAICreatures(AISYS_s *system) {
         }
         if (creature.count > 1) {
             const f32 start_stagger = creature.start_stagger;
-            if (start_stagger > 0.0f && object.ai.group_member_index != 0) {
+            if (__builtin_expect(start_stagger > 0.0f && object.ai.group_member_index != 0, 0)) {
                 object.ai.reset_mode = AI_CREATURE_RESET_STAGGERED;
                 object.ai_spawn_delay =
                     static_cast<f32>(static_cast<u32>(object.ai.group_member_index)) * start_stagger;

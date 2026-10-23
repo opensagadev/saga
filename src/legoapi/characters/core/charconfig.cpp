@@ -1607,12 +1607,7 @@ static void CC_anim_start(NUFPAR *parser) {
                 } else if (NuStrICmp(parser->word_buf, "extra_character_off") == 0) {
                     CC_SetAnimMiscFlags(parser, &animation, 8);
                 } else if (NuStrICmp(parser->word_buf, "effect_start") == 0) {
-                    if ((charconfig.flags & 0x60) != 0x60) {
-                        while (NuFParGetLine(parser) != 0) {
-                            if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "effect_end") == 0)
-                                break;
-                        }
-                    } else {
+                    if ((charconfig.flags & 0x60) == 0x60) {
                         if (charconfig.effect_count < 32 && animation.action_id != -1) {
                             CHARACTER_EFFECT_s *effect = &charconfig.effect_scratch[charconfig.effect_count];
                             effect->frame_1 = 1.0f;
@@ -1762,6 +1757,11 @@ static void CC_anim_start(NUFPAR *parser) {
                                     break;
                                 }
                             }
+                        }
+                    } else {
+                        while (NuFParGetLine(parser) != 0) {
+                            if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "effect_end") == 0)
+                                break;
                         }
                     }
                 } else if (NuStrICmp(parser->word_buf, "anim_end") == 0) {

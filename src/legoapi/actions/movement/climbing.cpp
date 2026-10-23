@@ -1416,7 +1416,7 @@ i32 NewBlockAction(GameObject_s *object) {
     if (count != 1) {
         do {
             action = actions[qrand() / (0xffff / count + 1)];
-        } while (action == object->previous_block_animation);
+        } while (__builtin_expect(action == object->previous_block_animation, 0));
     }
     object->previous_block_animation = action;
     object->context_animation = action;

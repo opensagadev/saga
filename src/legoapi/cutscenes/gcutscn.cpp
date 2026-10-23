@@ -641,12 +641,12 @@ extern "C" {
                 usize stream_buffer = ALIGN(cutscene->field_4c + buf->addr, 0x10);
                 cutscene->stream_buffer_0 = reinterpret_cast<NUGCUTSCENE_s *>(stream_buffer);
                 stream_buffer += cutscene->stream_buffer_size;
-                if (NumCommonStreamingBuffers == 0) {
+                if (NumCommonStreamingBuffers != 0) {
+                    buf->addr = stream_buffer + 0x400;
+                } else {
                     stream_buffer = ALIGN(stream_buffer + 0x400, 0x10);
                     cutscene->stream_buffer_1 = reinterpret_cast<NUGCUTSCENE_s *>(stream_buffer);
                     buf->addr = stream_buffer + cutscene->stream_buffer_size + 0x400;
-                } else {
-                    buf->addr = stream_buffer + 0x400;
                 }
                 const i32 length = NuStrLen(name);
                 char *filename = reinterpret_cast<char *>(buf->void_ptr);
@@ -676,7 +676,7 @@ extern "C" {
             usize stream_buffer;
             if (cutscene->camera_system != NULL && cutscene->camera_system->animation != NULL) {
                 stream_buffer = reinterpret_cast<usize>(cutscene->camera_system->animation);
-            } else if (cutscene->rigid_system != NULL && cutscene->rigid_system->rigids[0].animation != NULL) {
+            } else if (__builtin_expect(cutscene->rigid_system != NULL && cutscene->rigid_system->rigids[0].animation != NULL, 1)) {
                 stream_buffer = reinterpret_cast<usize>(cutscene->rigid_system->rigids[0].animation);
             } else if (cutscene->character_system != NULL) {
                 NUGCUTCHAR_s *character = cutscene->character_system->characters;
@@ -2322,7 +2322,7 @@ void instNuGCutSceneEndFirstFrame(instNUGCUTSCENE_s *instance) {
         if (cutscene->rigid_system != NULL) {
             instNuGCutRigidSysEnd(instance, instance->current_frame);
         }
-        if (instance->character_instance != NULL) {
+        if (__builtin_expect(instance->character_instance != NULL, 1)) {
             NUGCUTSCENE_s *scene = instance->cutscene;
             const f32 frame = instance->current_frame;
             NUGCUTCHARSYS_s *system = scene->character_system;
@@ -2371,10 +2371,10 @@ extern "C" void instNuGCutSceneEnd(instNUGCUTSCENE_s *instance) {
                 NUGCUTCHAR_s *character = &system->characters[i];
                 instNUGCUTCHAR_s *inst_character = &instance->character_instance->characters[i];
                 if (inst_character->character_model != NULL) {
-                    if ((character->flags & 2) == 0 && NuCutSceneCharacterEval != NULL) {
+                    if (__builtin_expect((character->flags & 2) == 0 && NuCutSceneCharacterEval != NULL, 1)) {
                         NuCutSceneCharacterEval(instance, scene, inst_character, character, frame);
                     }
-                    if (nu_current_thread_id == 0 && NuCutSceneCharacterRelease != NULL) {
+                    if (__builtin_expect(nu_current_thread_id == 0 && NuCutSceneCharacterRelease != NULL, 1)) {
                         NuCutSceneCharacterRelease(inst_character, character);
                     }
                 }
@@ -2384,7 +2384,7 @@ extern "C" void instNuGCutSceneEnd(instNUGCUTSCENE_s *instance) {
         if (cutscene->rigid_system != NULL) {
             instNuGCutRigidSysEnd(instance, instance->current_frame);
         }
-        if (instance->character_instance != NULL) {
+        if (__builtin_expect(instance->character_instance != NULL, 1)) {
             NUGCUTSCENE_s *scene = instance->cutscene;
             const f32 frame = instance->current_frame;
             NUGCUTCHARSYS_s *system = scene->character_system;
@@ -2392,10 +2392,10 @@ extern "C" void instNuGCutSceneEnd(instNUGCUTSCENE_s *instance) {
                 NUGCUTCHAR_s *character = &system->characters[i];
                 instNUGCUTCHAR_s *inst_character = &instance->character_instance->characters[i];
                 if (inst_character->character_model != NULL) {
-                    if ((character->flags & 2) == 0 && NuCutSceneCharacterEval != NULL) {
+                    if (__builtin_expect((character->flags & 2) == 0 && NuCutSceneCharacterEval != NULL, 1)) {
                         NuCutSceneCharacterEval(instance, scene, inst_character, character, frame);
                     }
-                    if (nu_current_thread_id == 0 && NuCutSceneCharacterRelease != NULL) {
+                    if (__builtin_expect(nu_current_thread_id == 0 && NuCutSceneCharacterRelease != NULL, 1)) {
                         NuCutSceneCharacterRelease(inst_character, character);
                     }
                 }

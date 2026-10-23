@@ -236,7 +236,7 @@ void FinishWeirdoNames(i32 which) {
             Game.customizer[0].name[length] = ' ';
         }
         Game.customizer[0].name[15] = '\0';
-        if (which == 0) {
+        if (__builtin_expect(which == 0, 1)) {
             return;
         }
     }

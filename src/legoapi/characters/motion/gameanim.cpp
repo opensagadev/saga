@@ -1465,7 +1465,7 @@ void GameAnimSys_Update(GAMEANIMSYS_s *system) {
             object = object->next;
         }
 
-        if ((set->flags & GAMEANIMSET_FLAG_NO_VISIBILITY_TEST) != any_special_no_visibility_test) {
+        if (__builtin_expect((set->flags & GAMEANIMSET_FLAG_NO_VISIBILITY_TEST) != any_special_no_visibility_test, 1)) {
             object = set->objects;
             auto set_flags = set->flags;
             while (object != NULL) {

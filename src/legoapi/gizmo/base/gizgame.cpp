@@ -248,7 +248,7 @@ i32 GizmoSys_SetBestBoltTarget(GIZMOSYS_s *system, void *, GameObject_s *object,
         object->field_0xe21 |= 8;
         return 1;
     }
-    if (previous != NULL) {
+    if (__builtin_expect(previous != NULL, 0)) {
         object->attack_target_position = previous_position;
         object->attack_target_velocity = previous_velocity;
         object->attack_gizmo_target = VehicleArea != 0 ? NULL : previous;

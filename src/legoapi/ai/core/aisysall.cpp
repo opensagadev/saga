@@ -6716,7 +6716,7 @@ AISCRIPT *AIScriptFind(AISYS *sys, char *name, i32 can_use_default, i32 check_le
 
 static __used__ void creatureEditor_cbScriptParams(eduimenu_s *parent, eduiitem_s *, unsigned int) {
     char label[64];
-    if (creatureEditor_Current() == nullptr)
+    if (__builtin_expect(creatureEditor_Current() == nullptr, 0))
         return;
     eduimenu_s *menu = eduiMenuCreate(220, 70, 240, 250, ed_fnt, creatureEditor_cbCancelMenu, "Script Params");
     if (menu != nullptr) {
@@ -16918,7 +16918,7 @@ extern "C" {
             if (creature->activation == 1) {
                 EdFileWrite(reinterpret_cast<char *>(creature->activation_area) + 8, 0x10);
             }
-            if (aidata_version <= 10)
+            if (__builtin_expect(aidata_version <= 10, 0))
                 continue;
             if (GetViewRangeFn != nullptr && creature->view_distance == GetViewRangeFn(creature->character_type)) {
                 EdFileWriteFloat(0.0f);
