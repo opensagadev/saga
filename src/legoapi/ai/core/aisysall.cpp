@@ -3102,7 +3102,7 @@ static __used__ void pathEditor_cbDrawWallsplinesToggle(eduimenu_s *, eduiitem_s
 
 static __used__ void pathEditor_cbCnxFlagsToggle(eduimenu_s *, eduiitem_s *item, u32) {
     i32 type_index = item->data;
-    if (aieditor->current_path == nullptr) {
+    if (__builtin_expect(aieditor->current_path == nullptr, 0)) {
         return;
     }
     EDAIPATHNODE_s *node = aieditor->current_path->current_node;
@@ -3124,20 +3124,20 @@ static __used__ void pathEditor_cbCnxFlagsToggle(eduimenu_s *, eduiitem_s *item,
     u32 flags = connection->flags;
     u32 mask = type->connection_flag;
     u32 updated_flags = flags | mask;
-    if (flags & mask)
+    if (__builtin_expect(flags & mask != 0, 1))
         updated_flags = flags & ~mask;
     connection->flags = updated_flags;
-    if (type->flags != 0) {
+    if (__builtin_expect(type->flags != 0, 1)) {
         i32 j;
         for (j = 0; j < 8; ++j) {
-            if (other->connections[j].node == node) {
+            if (__builtin_expect(other->connections[j].node == node, 0)) {
                 break;
             }
         }
         if (j == 8) {
             return;
         }
-        if (!(connection->flags & mask)) {
+        if (__builtin_expect(!(connection->flags & mask), 1)) {
             other->connections[j].flags &= ~mask;
         } else {
             other->connections[j].flags |= mask;
@@ -3306,14 +3306,14 @@ static void AISysCheckAntinode_Ellipse(APIOBJECT *object, AIANTINODE *antinode, 
                     object->ai->antinode_clockwise = !object->ai->antinode_clockwise;
                     object->ai->antinode_timer = antinode_time + antinode_reverse_time;
                 }
-                if (!object->ai->antinode_clockwise) {
+                if (__builtin_expect(!object->ai->antinode_clockwise, 0)) {
                     if (turn > 0) {
                         turn -= 0x10000;
                     }
                 } else if (turn < 0) {
                     turn += 0x10000;
                 }
-            } else if (turn > 0) {
+            } else if (__builtin_expect(turn > 0, 1)) {
                 object->ai->antinode_clockwise = 1;
             } else {
                 object->ai->antinode_clockwise = 0;
@@ -3456,23 +3456,23 @@ static void pathEditorCalcRouteIterator(AIPATH_s *path, f32 *distances, u8 *visi
     distance += NuVecDist(&path->nodes[previous].position, &node->position, &difference);
     if (!(distances[current] < distance)) {
         distances[current] = distance;
-        if (__builtin_expect(route_mask != 0, 1)) {
-            for (i32 index = 0; index < node->connection_count; ++index) {
-                AIPATHCNX_s *connection = node->connections[index];
-                bool direction = connection->node_indices[0] != current;
-                if ((connection->traversal_flags[direction] & 0x40000000) == 0 &&
-                    (connection->route_mask & route_mask) != 0) {
-                    pathEditorCalcRouteIterator(path, distances, visited, current, connection->node_indices[!direction],
-                                                distance, route_mask);
-                }
-            }
-        } else {
+        if (__builtin_expect(route_mask == 0, 0)) {
             for (i32 index = 0; index < node->connection_count; ++index) {
                 AIPATHCNX_s *connection = node->connections[index];
                 bool direction = connection->node_indices[0] != current;
                 if (__builtin_expect((connection->traversal_flags[direction] & 0x40000000) == 0, 1)) {
                     pathEditorCalcRouteIterator(path, distances, visited, current, connection->node_indices[!direction],
                                                 distance, 0);
+                }
+            }
+        } else {
+            for (i32 index = 0; index < node->connection_count; ++index) {
+                AIPATHCNX_s *connection = node->connections[index];
+                bool direction = connection->node_indices[0] != current;
+                if (__builtin_expect((connection->traversal_flags[direction] & 0x40000000) == 0 &&
+                    (connection->route_mask & route_mask) != 0, 1)) {
+                    pathEditorCalcRouteIterator(path, distances, visited, current, connection->node_indices[!direction],
+                                                distance, route_mask);
                 }
             }
         }
@@ -5234,7 +5234,7 @@ static EDANTINODE_REGPARM1 EDANTINODE_s *antinodeEditor_GetNearestAntinode(i32 r
         if (require_inside) {
             if (node->type != 1) {
                 if (node->type == 0) {
-                    if (!(node->radius * node->radius > distance))
+                    if (__builtin_expect(!(node->radius * node->radius > distance), 1))
                         continue;
                 } else if (node->type == 2) {
                     f32 diagonal =
@@ -13199,7 +13199,7 @@ void AIMoveDirectlyToDestination(AISYS_s *, AIPACKET_s *packet, APIOBJECT_s *obj
 extern "C" {
     void AISysCharacterMovement(AISYS *system, AIPACKET *packet, APIOBJECT *object, i32 checks) {
         packet->movement_event_flags &= static_cast<u8>(~AIPACKET_PATH_CONNECTION_CHANGED);
-        if (MidSpecialMoveFn == NULL || MidSpecialMoveFn(system, packet, object) == 0) {
+        if (__builtin_expect(MidSpecialMoveFn == NULL || MidSpecialMoveFn(system, packet, object) == 0, 1)) {
             if (packet->path_info.path != NULL && packet->path_info.connection != NULL) {
                 packet->movement_destination = object->position;
                 packet->movement_stopping_distance = 0.0f;
@@ -16632,7 +16632,7 @@ locatorEditor_cbAddLocatorsByNameYesNo(eduimenu_s *, eduiitem_s *item, u32) {
 }
 
 static __used__ void areaEditor_cbDeleteArea(eduimenu_s *menu, eduiitem_s *, unsigned int) {
-    if (menu != NULL && menu->field_0c != NULL && area_selected() != NULL && area_selected() == area_hovered()) {
+    if (__builtin_expect(menu != NULL && menu->field_0c != NULL && area_selected() != NULL && area_selected() == area_hovered(), 1)) {
         NULISTHDR *scripts = reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x36924);
         for (NULISTLNK *node = NuLinkedListGetHead(scripts); node != NULL;
              node =
@@ -16642,7 +16642,7 @@ static __used__ void areaEditor_cbDeleteArea(eduimenu_s *menu, eduiitem_s *, uns
             if (*reinterpret_cast<EDAIAREA_s **>(script + 0x80) == selected) {
                 *reinterpret_cast<EDAIAREA_s **>(script + 0x80) = NULL;
             }
-            if (*reinterpret_cast<EDAIAREA_s **>(script + 0x6c) == selected) {
+            if (__builtin_expect(*reinterpret_cast<EDAIAREA_s **>(script + 0x6c) == selected, 0)) {
                 *reinterpret_cast<EDAIAREA_s **>(script + 0x6c) = NULL;
             }
         }
@@ -18627,7 +18627,7 @@ void antinodeEditor_Render(i32 x, i32 y, float xscale, float yscale) {
     EDANTINODE_s *display = selected;
     if (display == nullptr)
         display = *reinterpret_cast<EDANTINODE_s **>(reinterpret_cast<u8 *>(aieditor) + 0x42ea0);
-    if (display != nullptr) {
+    if (__builtin_expect(display != nullptr, 0)) {
         nuvec_s displacement;
         NuVecXZDist(&display->position, &aieditor->camera_position, &displacement);
     }
@@ -18916,7 +18916,7 @@ void areaEditor_Render(i32 x, i32 y, f32, f32) {
     NuQFntPrintEx(system_qfont, text_x, y * 8 - 40, 16, "Area Editor");
     NuQFntSetColour(system_qfont, 0x80000000);
     EDAIAREA_s *focus = area_selected() != NULL ? area_selected() : area_hovered();
-    if (focus != NULL) {
+    if (__builtin_expect(focus != NULL, 1)) {
         NUVEC delta;
         f32 range = NuVecXZDist(&focus->position, &aieditor->camera_position, &delta);
         y += 15;

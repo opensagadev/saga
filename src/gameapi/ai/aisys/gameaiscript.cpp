@@ -3744,7 +3744,7 @@ __used__ static i32 Action_SetScaleOverride(AISYS *sys, AISCRIPTPROCESS *process
         f32 zero = 0.0f;
         f32 max = 1000000000.0f;
 
-        if (param_4 <= 0) {
+        if (__builtin_expect(param_4 <= 0, 0)) {
             scale = 1000000000.0f;
         } else {
             for (i32 index = 0; index < param_4; ++index) {
@@ -3760,7 +3760,7 @@ __used__ static i32 Action_SetScaleOverride(AISYS *sys, AISCRIPTPROCESS *process
                             max = AIParamToFloat(processor, value + 4);
                         } else {
                             value = NuStrIStr(params[index], "time");
-                            if (value != NULL) {
+                            if (__builtin_expect(value != NULL, 1)) {
                                 time = AIParamToFloat(processor, value + NuStrLen("time") + 1);
                             } else {
                                 scale = AIParamToFloat(processor, params[index]);
@@ -3782,7 +3782,7 @@ __used__ static i32 Action_SetScaleOverride(AISYS *sys, AISCRIPTPROCESS *process
                 return 1;
             }
         } else {
-            if (max != 1000000000.0f) {
+            if (__builtin_expect(max != 1000000000.0f, 1)) {
                 if (min != 1000000000.0f) {
                     f32 random = NuRandFloat();
                     object->field_0x1038 = random * max + (1.0f - random) * min;
@@ -4334,7 +4334,7 @@ __used__ static i32 Action_CycleCharacter(AISYS *sys, AISCRIPTPROCESS *processor
             if (value != NULL) {
                 const i32 category = CharCategory_FindByName(value + 9);
                 if (category != -1) {
-                    if (processor->action_data_1 >= CHARCATEGORYCOUNT)
+                    if (__builtin_expect(processor->action_data_1 >= CHARCATEGORYCOUNT, 0))
                         processor->action_data_1 = static_cast<u8>(category);
                     else
                         processor->action_data_2 = static_cast<u8>(category);
@@ -4360,7 +4360,7 @@ __used__ static i32 Action_CycleCharacter(AISYS *sys, AISCRIPTPROCESS *processor
     if (first_category < CHARCATEGORYCOUNT) {
         if (processor->action_data_5 == 0.0f ||
             packet->owner->apiobj.character_data->game_character->run_speed >= processor->action_data_5) {
-            if (CharCategory_IsCategory(object, first_category) != 0)
+            if (__builtin_expect(CharCategory_IsCategory(object, first_category) != 0, 0))
                 return 1;
 
             const i32 second_category = processor->action_data_2;
@@ -4478,7 +4478,7 @@ static __used__ i32 Action_LaunchGuidedMissile(AISYS_s *, AISCRIPTPROCESS_s *pro
             }
         }
 
-        if (NuSpecialExistsFn(&source) != 0) {
+        if (__builtin_expect(NuSpecialExistsFn(&source) != 0, 1)) {
             NUMTX matrix = *NuSpecialGetDrawMtx(&source);
             NUVEC scale;
             scale = NuMtxGetScale(&matrix);
@@ -5284,7 +5284,7 @@ __used__ static i32 Action_GoToOriginalPath(AISYS *sys, AISCRIPTPROCESS *process
 
         AIPATHNODE *node = original_path->nodes;
         i32 node_index = 0;
-        while (node_index < original_path->node_count && (node->runtime_flags & 1) == 0) {
+        while (__builtin_expect(node_index < original_path->node_count && (node->runtime_flags & 1) == 0, 0)) {
             ++node_index;
             ++node;
         }
@@ -7583,7 +7583,7 @@ __used__ static i32 Action_SetStateArea(AISYS *sys, AISCRIPTPROCESS *processor, 
     NUVEC difference;
     (void)sys;
     (void)param_6;
-    if (param_5 == 0) {
+    if (__builtin_expect(param_5 == 0, 0)) {
         return 1;
     }
 
@@ -7611,7 +7611,7 @@ __used__ static i32 Action_SetStateArea(AISYS *sys, AISCRIPTPROCESS *processor, 
         }
     }
 
-    if (state_name == NULL || (type_count == 0 && !(range_squared > 0.0f))) {
+    if (__builtin_expect(state_name == NULL || (type_count == 0 && !(range_squared > 0.0f)), 0)) {
         processor->next_state = AIStateFind(state_name, processor->script);
         return 1;
     }
@@ -7642,7 +7642,7 @@ __used__ static i32 Action_SetStateArea(AISYS *sys, AISCRIPTPROCESS *processor, 
                     matching_type = 1;
                 }
             }
-            if (matching_type != 0 && range_squared > distance_squared) {
+            if (__builtin_expect(matching_type != 0 && range_squared > distance_squared, 1)) {
                 AIPACKET *object_packet = object->apiobj.ai;
                 object_packet->script_process.next_state =
                     AIStateFind(state_name, object_packet->script_process.script);
@@ -9175,16 +9175,18 @@ __used__ static i32 Action_Kill(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET
     if (all_ai) {
         GameObject_s *candidate = Obj;
         for (i32 index = 0; index < HIGHGAMEOBJECT; ++index, ++candidate) {
-            if (has_group_flags(candidate) && (candidate->apiobj.field_0x1f4 & 0x400u) != 0 && candidate != excluded &&
-                (!check_if_dead || (candidate->apiobj.field_0x287 == 0 && candidate->field_0x101c <= 0.0f))) {
-                candidate->respawnable = respawn;
-                candidate->respawn_at_origin = respawn_at_origin;
-                if (parts_on)
-                    KillParts(candidate, -1, -1, 1, 0.0f, 0, NULL);
-                if (debris)
-                    KillGameObject(candidate, 2, 0);
-                else
-                    KillGameObject(candidate, 4, 0);
+            if (has_group_flags(candidate)) {
+                if ((candidate->apiobj.field_0x1f4 & 0x400u) != 0 && candidate != excluded &&
+                    (!check_if_dead || (candidate->apiobj.field_0x287 == 0 && candidate->field_0x101c <= 0.0f))) {
+                    candidate->respawnable = respawn;
+                    candidate->respawn_at_origin = respawn_at_origin;
+                    if (parts_on)
+                        KillParts(candidate, -1, -1, 1, 0.0f, 0, NULL);
+                    if (debris)
+                        KillGameObject(candidate, 2, 0);
+                    else
+                        KillGameObject(candidate, 4, 0);
+                }
             }
         }
         return 1;
@@ -9215,8 +9217,7 @@ __used__ static i32 Action_Kill(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET
                 continue;
             }
             const isize area_index = area - area->system->areas;
-            const u64 mask = static_cast<u64>(candidate->apiobj.ai_area_mask_low) |
-                             (static_cast<u64>(candidate->apiobj.ai_area_mask_high) << 32);
+            const u64 mask = candidate->apiobj.ai_area_mask;
             if (((mask >> area_index) & 1) == 0) {
                 continue;
             }
@@ -9225,10 +9226,10 @@ __used__ static i32 Action_Kill(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET
                 candidate->respawn_at_origin = respawn_at_origin;
                 if (parts_on)
                     KillParts(candidate, -1, -1, 1, 0.0f, 0, NULL);
-                if (__builtin_expect(!debris, 0))
-                    KillGameObject(candidate, 4, 0);
-                else
+                if (__builtin_expect(debris, 0))
                     KillGameObject(candidate, 2, 0);
+                else
+                    KillGameObject(candidate, 4, 0);
             }
         }
         return 1;
@@ -9397,7 +9398,7 @@ __used__ static i32 Action_ShootAtOpponent(AISYS *sys, AISCRIPTPROCESS *processo
         return 0;
     if (!(distance < processor->action_data_4 * processor->action_data_4))
         return 0;
-    if (opponent->apiobj.field_0x287 != 0 && !(opponent->field_0x101c > 0.0f))
+    if (__builtin_expect(opponent->apiobj.field_0x287 != 0 && !(opponent->field_0x101c > 0.0f), 0))
         return 0;
     if (outside_arc != 0)
         return 0;
@@ -10861,7 +10862,7 @@ i32 Action_DynamicCameraCut(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPAC
             } else if ((value = NuStrIStr(params[index], "spline_dist_offset=")) != NULL) {
                 flags |= 0x4000;
                 range = AIParamToFloat(processor, value + 17);
-            } else if ((value = NuStrIStr(params[index], "start_time=")) != NULL) {
+            } else if (__builtin_expect((value = NuStrIStr(params[index], "start_time=")) != NULL, 1)) {
                 flags |= 0x200;
                 start_time = AIParamToFloat(processor, value + 11);
             } else if ((value = NuStrIStr(params[index], "blend_time=")) != NULL) {
@@ -10965,7 +10966,7 @@ i32 Action_DynamicCameraCut(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPAC
                 target = &object->apiobj.collision_position;
         } else if (target_object != NULL) {
             nuhspecial_s special;
-            if (NuSpecialFind(WORLD->current_gscn, &special, target_object, 1) != 0)
+            if (__builtin_expect(NuSpecialFind(WORLD->current_gscn, &special, target_object, 1) != 0, 1))
                 target = NuSpecialGetDrawPos(&special);
         } else if (target_position.x != 1000000000.0f && target_position.y != 1000000000.0f &&
                    target_position.z != 1000000000.0f) {
@@ -11001,7 +11002,7 @@ i32 Action_DynamicCameraCut(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPAC
             if (mode == -1)
                 mode = 1;
         } else {
-            if (target != NULL) {
+            if (__builtin_expect(target != NULL, 1)) {
                 camera_position.x = 0.0f;
                 camera_position.y = 0.0f;
                 camera_position.z = range;

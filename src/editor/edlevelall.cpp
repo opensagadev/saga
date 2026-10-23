@@ -3015,7 +3015,7 @@ void EdDrawPolySector(VuVec const &center, float radius, i32 axis, i32 first_ang
     const float negative_radius = -radius;
     do {
         const i32 previous_angle = angle;
-        if (__builtin_expect(remaining > step, 1)) {
+        if (remaining > step) {
             angle += step;
             remaining -= step;
         } else {
@@ -3069,7 +3069,7 @@ void EdDrawPolySector(VuVec const &center, float radius, i32 axis, i32 first_ang
         second.y += center.y;
         second.z += center.z;
         EdDrawPolyTri(center, first, second, colour);
-    } while (remaining > 0);
+    } while (__builtin_expect(remaining > 0, 1));
 }
 
 void EdDrawPolyCylinder(VuMtx const &transform, float half_length, float radius, float end_radius, i32 sides,

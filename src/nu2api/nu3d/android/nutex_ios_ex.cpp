@@ -343,6 +343,7 @@ GLuint NuIOS_CreateGLTexFromPVRInMemory(void *data, i32 *out_width, i32 *out_hei
     extern i32 g_loadDefaultTexture;
     extern i32 g_loadingCharacterInHub;
 
+    GLuint texture = 0;
     GLenum cube_faces[6] = {
         GL_TEXTURE_CUBE_MAP_POSITIVE_X, GL_TEXTURE_CUBE_MAP_NEGATIVE_X, GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
         GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, GL_TEXTURE_CUBE_MAP_POSITIVE_Z, GL_TEXTURE_CUBE_MAP_NEGATIVE_Z,
@@ -351,9 +352,8 @@ GLuint NuIOS_CreateGLTexFromPVRInMemory(void *data, i32 *out_width, i32 *out_hei
     comeFromHash = false;
 
     u8 *header = (u8 *)data;
-    const u32 pixel_format = *(u32 *)(header + 0x08);
-    u8 *pixels = header + 0x34 + *(u32 *)(header + 0x30);
-    const u32 channel_bits = *(u32 *)(header + 0x0c);
+    u8 *metadata_start = header + 0x34;
+    u8 *pixels = metadata_start + *(u32 *)(header + 0x30);
     const i32 &height = *(i32 *)(header + 0x18);
     const i32 &width = *(i32 *)(header + 0x1c);
     const u32 &depth = *(u32 *)(header + 0x20);
@@ -362,23 +362,14 @@ GLuint NuIOS_CreateGLTexFromPVRInMemory(void *data, i32 *out_width, i32 *out_hei
     const u32 &mip_count = *(u32 *)(header + 0x2c);
 
     if (faces == 6) {
-        struct PVRMetadataHeader {
-            u32 fourcc;
-            u32 key;
-            u32 data_size;
-        };
-        const u8 *metadata = header + 0x34;
-        usize remaining = *(u32 *)(header + 0x30);
-        while (remaining >= sizeof(PVRMetadataHeader)) {
-            PVRMetadataHeader record;
-            memcpy(&record, metadata, sizeof(record));
-            metadata += sizeof(record);
-            remaining -= sizeof(record);
-            if (__builtin_expect(record.data_size > remaining, 0)) {
+        u8 *record = metadata_start;
+        while (record < pixels) {
+            const usize remaining = pixels - record;
+            if (remaining < 12 || *(u32 *)(record + 8) > remaining - 12) {
                 break;
             }
-            if (record.fourcc == 0x03525650 && record.key == 2 && record.data_size == 6) {
-
+            if (*(u32 *)record == 0x03525650 && *(u32 *)(record + 4) == 2 && *(u32 *)(record + 8) == 6) {
+                const u8 *metadata = record + 12;
                 switch (metadata[0]) {
                     case 'X':
                         cube_faces[0] = GL_TEXTURE_CUBE_MAP_POSITIVE_X;
@@ -505,18 +496,22 @@ GLuint NuIOS_CreateGLTexFromPVRInMemory(void *data, i32 *out_width, i32 *out_hei
                         break;
                 }
             }
-            remaining -= record.data_size;
-            metadata += record.data_size;
+            record += *(u32 *)(record + 8) + 12;
         }
     }
 
-    GLenum internal_format = 0;
+    const u32 pixel_format = *(u32 *)(header + 0x08);
+    const u32 channel_bits = *(u32 *)(header + 0x0c);
     GLenum format = 0;
     GLenum type = 0;
     i32 bits_per_pixel = 0;
     bool compressed = false;
 
-    if (__builtin_expect(channel_bits == 0, 1)) {
+    if (__builtin_expect(channel_bits == 0, 0)) {
+        if (pixel_format >= 6) {
+            return 0;
+        }
+        bits_per_pixel = pixel_format < 2 ? 2 : 4;
         static const GLenum compressed_formats[6] = {
             0x8c01, // GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG
             0x8c03, // GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG
@@ -525,22 +520,24 @@ GLuint NuIOS_CreateGLTexFromPVRInMemory(void *data, i32 *out_width, i32 *out_hei
             0x9137, // GL_COMPRESSED_RGBA_PVRTC_2BPPV2_IMG
             0x9138, // GL_COMPRESSED_RGBA_PVRTC_4BPPV2_IMG
         };
-        if (pixel_format >= 6) {
-            return 0;
-        }
-        bits_per_pixel = pixel_format < 2 ? 2 : 4;
-        internal_format = compressed_formats[pixel_format];
+        format = compressed_formats[pixel_format];
         compressed = true;
-    } else if (pixel_format == 0x61626772 && channel_bits == 0x08080808) { // "rgba", 8 bits each
-        internal_format = GL_RGBA;
-        format = GL_RGBA;
-        type = GL_UNSIGNED_BYTE;
-        bits_per_pixel = 32;
-    } else if (__builtin_expect(pixel_format == 0x61626772 && channel_bits == 0x04040404, 0)) { // "rgba", 4 bits each
-        internal_format = GL_RGBA;
-        format = GL_RGBA;
-        type = GL_UNSIGNED_SHORT_4_4_4_4;
-        bits_per_pixel = 16;
+    } else {
+        u8 name[4];
+        u8 bits[4];
+        memcpy(name, header + 0x08, sizeof(name));
+        memcpy(bits, header + 0x0c, sizeof(bits));
+        if (name[0] == 'r' && name[1] == 'g' && name[2] == 'b' && name[3] == 'a') {
+            if (bits[0] == 4 && bits[1] == 4 && bits[2] == 4 && bits[3] == 4) {
+                format = GL_RGBA;
+                type = GL_UNSIGNED_SHORT_4_4_4_4;
+                bits_per_pixel = 16;
+            } else if (bits[0] == 8 && bits[1] == 8 && bits[2] == 8 && bits[3] == 8) {
+                format = GL_RGBA;
+                type = GL_UNSIGNED_BYTE;
+                bits_per_pixel = 32;
+            }
+        }
     }
 
     if (out_width != NULL) {
@@ -551,7 +548,6 @@ GLuint NuIOS_CreateGLTexFromPVRInMemory(void *data, i32 *out_width, i32 *out_hei
     }
 
     const GLenum texture_target = faces > 1 ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D;
-    GLuint texture = 0;
     BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nutex_ios_ex.cpp", 0x2e7);
     glGenTextures(1, &texture);
     if (faces <= 1) {
@@ -582,17 +578,16 @@ GLuint NuIOS_CreateGLTexFromPVRInMemory(void *data, i32 *out_width, i32 *out_hei
 
     usize offset = 0;
     for (u32 mip = 0; mip < mip_count; ++mip) {
-        const i32 mip_height = height >> mip;
-        const i32 mip_width = width >> mip;
-        usize mip_size = (usize)mip_width * (usize)mip_height * (usize)bits_per_pixel / 8;
-        if (mip_size < 0x20) {
-            mip_size = 0x20;
-        }
-
         for (u32 surface = 0; surface < surfaces; ++surface) {
             for (u32 face = 0; face < faces; ++face) {
-                const GLenum target = faces > 1 ? cube_faces[face] : GL_TEXTURE_2D;
                 for (u32 z = 0; z < depth; ++z) {
+                    const i32 mip_width = width >> mip;
+                    const i32 mip_height = height >> mip;
+                    const GLenum target = faces > 1 ? cube_faces[face] : GL_TEXTURE_2D;
+                    usize mip_size = (usize)mip_width * (usize)mip_height * (usize)bits_per_pixel / 8;
+                    if (mip_size < 0x20) {
+                        mip_size = 0x20;
+                    }
                     BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nutex_ios_ex.cpp",
                                            0x31d);
                     if (faces <= 1) {
@@ -614,14 +609,13 @@ GLuint NuIOS_CreateGLTexFromPVRInMemory(void *data, i32 *out_width, i32 *out_hei
                         if ((NuPlatform::Get()->GetCurrentPlatform() == IOS_PLATFORM ||
                              NuPlatform::Get()->GetCurrentPlatform() == ANDROID_PVRTC_PLATFORM) &&
                             g_loadDefaultTexture == 0) {
-                            glCompressedTexImage2D(target, mip, internal_format, mip_width, mip_height, 0, mip_size,
+                            glCompressedTexImage2D(target, mip, format, mip_width, mip_height, 0, mip_size,
                                                    pixels + offset);
                         } else {
                             loadDefaultTexture(texture, mip, mip_width, target, target);
                         }
                     } else {
-                        glTexImage2D(target, mip, internal_format, mip_width, mip_height, 0, format, type,
-                                     pixels + offset);
+                        glTexImage2D(target, mip, format, mip_width, mip_height, 0, format, type, pixels + offset);
                     }
                     EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nutex_ios_ex.cpp",
                                          0x341);

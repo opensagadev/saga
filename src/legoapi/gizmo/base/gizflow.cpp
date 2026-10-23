@@ -351,7 +351,7 @@ static void xAction(nufpar_s *parser) {
         action->parameters = NULL;
         action->parameter_count = 0;
         action->definition = NULL;
-        if (previous != NULL)
+        if (__builtin_expect(previous != NULL, 1))
             previous->next = action;
         else
             load_flowbox->actions = action;

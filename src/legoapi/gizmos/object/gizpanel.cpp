@@ -265,28 +265,27 @@ static void GizPanel_Update(void *world_ptr, void *, float delta_time) {
     for (i32 index = 0; index < panel_sys->count; ++index) {
         GIZPANEL &panel = panel_sys->panels[index];
 
-        if (__builtin_expect((panel.flags & GIZPANEL_FLAG_TRACK_PLAYER) != 0, 0)) {
+        if ((panel.flags & GIZPANEL_FLAG_TRACK_PLAYER) != 0) {
             const f32 maximum_distance = (panel.flags & GIZPANEL_FLAG_PLAYER_NEAR) != 0 ? 1.1f * 1.1f : 0.9f * 0.9f;
             f32 nearest_distance = 1000000000.0f;
 #define CONSIDER_PANEL_PLAYER(player_index)                                                                            \
     do {                                                                                                               \
         GameObject_s *candidate = players[player_index];                                                               \
-        if (__builtin_expect(candidate != NULL && (candidate->apiobj.flags_high & 0x10) != 0 &&                        \
-                                 candidate->apiobj.field_0x287 == 0,                                                   \
-                             1)) {                                                                                     \
+        if (candidate != NULL && (candidate->apiobj.flags_high & 0x10) != 0 &&                                         \
+            __builtin_expect(candidate->apiobj.field_0x287 == 0, 0)) {                                                 \
             panel_position = panel.position;                                                                           \
             if (panel.model_variant == 2) {                                                                            \
                 panel_position.y += 0.245f;                                                                            \
                 panel_position.z -= 0.19f;                                                                             \
-            } else if (panel.model_variant == 3) {                                                                     \
+            } else if (__builtin_expect(panel.model_variant == 3, 1)) {                                                \
                 panel_position.y += 0.34f;                                                                             \
                 panel_position.z -= 0.17f;                                                                             \
             }                                                                                                          \
             const f32 distance = NuVecDistSqr(&panel_position, &candidate->apiobj.collision_position, &direction);     \
             if (distance < nearest_distance && distance < maximum_distance) {                                          \
                 nearest_distance = distance;                                                                           \
-                nearest_player = players[player_index];                                                                \
                 player_direction = direction;                                                                          \
+                nearest_player = players[player_index];                                                                \
             } else if (player_index == 0) {                                                                            \
                 nearest_player = NULL;                                                                                 \
                 nearest_distance = 1000000000.0f;                                                                      \
@@ -312,7 +311,7 @@ static void GizPanel_Update(void *world_ptr, void *, float delta_time) {
         if (nearest_player == NULL) {
             panel.target_x_rotation = SeekRot(panel.target_x_rotation, 0xe000, 10.0f);
             panel.target_y_rotation = SeekRot(panel.target_y_rotation, 0, 10.0f);
-            if (__builtin_expect((panel.flags & GIZPANEL_FLAG_PLAYER_NEAR) != 0, 1)) {
+            if (__builtin_expect((panel.flags & GIZPANEL_FLAG_PLAYER_NEAR) != 0, 0)) {
                 PlaySfx(const_cast<char *>("DPanelDis"), &panel.position);
             }
             panel.flags = static_cast<GIZPANEL_FLAGS>(panel.flags & ~GIZPANEL_FLAG_PLAYER_NEAR);
@@ -330,19 +329,18 @@ static void GizPanel_Update(void *world_ptr, void *, float delta_time) {
             FindAnglesXY(&player_direction, &target_x_rotation, &target_y_rotation);
             target_y_rotation = static_cast<u16>(target_y_rotation - panel.y_rotation);
 
-            if (__builtin_expect(!(previous_y_rotation <= 0x4000), 0)) {
-                if (previous_y_rotation >= 0xc000 && target_y_rotation <= 0xbfff && target_y_rotation >= 0x4001) {
-                    target_y_rotation = 0xc000;
-                }
-            } else {
+            if (previous_y_rotation <= 0x4000) {
                 if (target_y_rotation > 0x4000) {
                     if (target_y_rotation < 0xc000) {
                         target_y_rotation = 0x4000;
                     }
                 }
+            } else if (previous_y_rotation >= 0xc000 && target_y_rotation <= 0xbfff && target_y_rotation >= 0x4001) {
+                target_y_rotation = 0xc000;
             }
             if (previous_x_rotation <= 0x4000) {
-                if (__builtin_expect(target_x_rotation > 0x4000 && target_x_rotation < 0xc000, 1)) {
+                if (__builtin_expect(target_x_rotation > 0x4000, 1) &&
+                    __builtin_expect(target_x_rotation < 0xc000, 1)) {
                     target_x_rotation = static_cast<u16>(panel.y_rotation + 0x4000);
                 }
             } else if (previous_x_rotation > 0xbfff && target_x_rotation < 0xc000 && target_x_rotation > 0x4000) {

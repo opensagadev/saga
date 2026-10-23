@@ -680,7 +680,7 @@ GameObject_s *CableTargetGameObject(GameObject_s *source, nuvec_s *position, f32
         if ((CInfo[context].flags & 0x8000) != 0 || context == 0x17) {
             continue;
         }
-        if (!(context == 0x3b || context == 0x41 || context == 0x3d)) {
+        if (__builtin_expect(!(context == 0x3b || context == 0x41 || context == 0x3d), 0)) {
             if (candidate->id != id_DRAGBOMB && candidate->id != id_ATAT && candidate->id != id_ATST &&
                 candidate->id != id_ATST_LOWRES) {
                 continue;
@@ -699,7 +699,7 @@ GameObject_s *CableTargetGameObject(GameObject_s *source, nuvec_s *position, f32
             } else if (candidate->id == id_ATAT) {
                 distance *= 0.9f;
             }
-            if (!(distance < radius_squared)) {
+            if (__builtin_expect(!(distance < radius_squared), 0)) {
                 continue;
             }
             if (distance < nearest_distance) {

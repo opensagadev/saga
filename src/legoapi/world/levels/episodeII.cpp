@@ -1813,19 +1813,30 @@ void KaminoE_AlwaysUpdate(WORLDINFO_s *) {
 }
 
 void KaminoE_Update(WORLDINFO_s *world) {
-    if (__builtin_expect(kamino_e.reset_turrets != NULL && kamino_e.reset_turrets->value == 1.0f, 0)) {
+    if (kamino_e.reset_turrets != NULL && kamino_e.reset_turrets->value == 1.0f) {
         kamino_e.active_turret = NULL;
-        for (i32 i = 0; i < 4; ++i) {
-            GIZMO *gizmo = GizmoFindByData(WORLD->gizmo_sys, gizpanel_gizmotype_id, kamino_e.panels[i]);
-            GizmoActivate(WORLD->gizmo_sys, gizmo, 1, 1);
-            kamino_e.turrets[i]->flags &= ~0x10;
-            kamino_e.turrets[i]->field_0x12e = 1;
-        }
+        GIZMO *gizmo0 = GizmoFindByData(WORLD->gizmo_sys, gizpanel_gizmotype_id, kamino_e.panels[0]);
+        GizmoActivate(WORLD->gizmo_sys, gizmo0, 1, 1);
+        kamino_e.turrets[0]->flags &= ~0x10;
+        kamino_e.turrets[0]->field_0x12e = 1;
+        GIZMO *gizmo1 = GizmoFindByData(WORLD->gizmo_sys, gizpanel_gizmotype_id, kamino_e.panels[1]);
+        GizmoActivate(WORLD->gizmo_sys, gizmo1, 1, 1);
+        kamino_e.turrets[1]->flags &= ~0x10;
+        kamino_e.turrets[1]->field_0x12e = 1;
+        GIZMO *gizmo2 = GizmoFindByData(WORLD->gizmo_sys, gizpanel_gizmotype_id, kamino_e.panels[2]);
+        GizmoActivate(WORLD->gizmo_sys, gizmo2, 1, 1);
+        kamino_e.turrets[2]->flags &= ~0x10;
+        kamino_e.turrets[2]->field_0x12e = 1;
+        GIZMO *gizmo3 = GizmoFindByData(WORLD->gizmo_sys, gizpanel_gizmotype_id, kamino_e.panels[3]);
+        GizmoActivate(WORLD->gizmo_sys, gizmo3, 1, 1);
+        kamino_e.turrets[3]->field_0x12e = 1;
+        kamino_e.turrets[3]->flags &= ~0x10;
         kamino_e.reset_turrets->value = 0.0f;
     }
     if (!netclient) {
         GameObject_s *jango = FindGameObject(id_JANGOFETT, 1, 1, 1, 0);
         GameObject_s *other_jango = FindGameObject(id_JANGOFETT, 4, 1, 1, 0);
+        i32 connection_direction = 0;
         if (jango != NULL) {
             if (jango->current_hp <= 0) {
                 if (FreePlay)
@@ -1835,7 +1846,6 @@ void KaminoE_Update(WORLDINFO_s *world) {
             }
         } else
             jango = other_jango;
-        i32 connection_direction = 0;
         if (kamino_e.jango_fight->value == 0.0f && !FreePlay && kamino_e.intro_cutscene != NULL &&
             instNuGCutSceneIsFinished(static_cast<instNUGCUTSCENE_s *>(kamino_e.intro_cutscene->instance)))
             kamino_e.jango_fight->value = 1.0f;
@@ -1865,9 +1875,8 @@ void KaminoE_Update(WORLDINFO_s *world) {
                     kamino_e.departure_timer = 0.0f;
                     GizObstacle_FindByName(world->giz_obstacle_sys, "slave1_debris");
                 }
-                kamino_e.position.x = kamino_e_centre.x;
+                kamino_e.position = kamino_e_centre;
                 kamino_e.position.y = -2.8f;
-                kamino_e.position.z = kamino_e_centre.z;
                 kamino_e.pitch = -0x4000;
                 kamino_e.yaw = 0;
                 kamino_e.orbit_pitch = -3640;
@@ -1902,12 +1911,13 @@ void KaminoE_Update(WORLDINFO_s *world) {
                 break;
             case 3:
                 kamino_e.departure_timer += FRAMETIME;
-                if (!(kamino_e.departure_timer < 4.0f)) {
+                if (kamino_e.departure_timer < 4.0f)
+                    kamino_e.yaw = SeekRot(kamino_e.yaw, 0xc000, kamino_e.departure_timer);
+                else {
                     kamino_e.yaw = SeekRot(kamino_e.yaw, 0xc000, 4.0f);
                     kamino_e.departure_timer = 0.0f;
                     kamino_e.departing = 4;
-                } else
-                    kamino_e.yaw = SeekRot(kamino_e.yaw, 0xc000, kamino_e.departure_timer);
+                }
                 kamino_e.pitch = SeekRot(kamino_e.pitch, 0, 4.0f);
                 break;
             case 4: {
@@ -1940,7 +1950,7 @@ void KaminoE_Update(WORLDINFO_s *world) {
                     f32 best = 1000000000.0f;
                     for (i32 i = 0; i < 8; ++i) {
                         GameObject_s *object = Player[i];
-                        if (object == NULL || (object->apiobj.field_0x1f8 & 0x1001) != 0x1001 ||
+                        if (object == NULL || __builtin_expect((object->apiobj.field_0x1f8 & 0x1001) != 0x1001, 1) ||
                             (object->apiobj.character_data->model_flags & 0x80000))
                             continue;
                         f32 distance = NuVecDistSqr(&object->apiobj.collision_position,
@@ -2021,7 +2031,7 @@ void KaminoE_Update(WORLDINFO_s *world) {
         AIAREA *fight_area = AISysFindArea(WORLD->ai_sys, "Fight");
         if (connection == NULL || jango == NULL || fight_area == NULL)
             return;
-        if (connection[connection_direction] >= 0 && connection[!connection_direction] >= 0)
+        if (connection[connection_direction] >= 0 && connection[connection_direction ? 0 : 1] >= 0)
             return;
         i32 area_index = static_cast<i32>(fight_area - world->ai_sys->areas);
         u64 mask = static_cast<u64>(static_cast<i64>(static_cast<i32>(1u << (area_index & 31))));
@@ -2035,13 +2045,13 @@ void KaminoE_Update(WORLDINFO_s *world) {
         jango->apiobj.movement_facing_angle = wait->direction;
         jango->apiobj.facing_angle = wait->direction;
         jango->ai.path_info = wait->path_info;
-        jango->apiobj.initial_position = wait->position;
-        jango->apiobj.collision_position = wait->position;
-        plr_lastpos = wait->position;
-        jango->apiobj.start_position = wait->position;
-        jango->apiobj.respawn_position = wait->position;
-        jango->apiobj.last_safe_position = wait->position;
-        jango->saved_position = wait->position;
+        jango->apiobj.initial_position = jango->apiobj.position;
+        jango->apiobj.collision_position = jango->apiobj.position;
+        plr_lastpos = jango->apiobj.position;
+        jango->apiobj.start_position = jango->apiobj.position;
+        jango->apiobj.respawn_position = jango->apiobj.position;
+        jango->apiobj.last_safe_position = jango->apiobj.position;
+        jango->saved_position = jango->apiobj.position;
         jango->apiobj.velocity = v000;
         InitSurfaceInfo(jango);
     }

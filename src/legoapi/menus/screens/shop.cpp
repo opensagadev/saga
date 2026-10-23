@@ -776,10 +776,10 @@ void DrawSubItemMenu2D() {
             const i32 id = static_cast<u16>(items[ids[3]].item_id);
             NuStrCpy(subtitle, TTab[Cheat[id].text_id ? *Cheat[id].text_id : tUNKNOWN]);
             name = subtitle;
-            i8 area = static_cast<i8>(Cheat[id].area);
             if (items[ids[3]].unlocked == 1)
                 show_name = 1;
-            else if (id <= 7 || area == -1 || Game.area_save[area].red_brick_collected)
+            else if (id <= 7 || static_cast<i8>(Cheat[id].area) == -1 ||
+                     Game.area_save[static_cast<i8>(Cheat[id].area)].red_brick_collected)
                 buyable = show_name = 1;
             else {
                 sprintf(title, "%s %i", TTab[tPOWERBRICK], id - 7);
@@ -869,7 +869,7 @@ void DrawSubItemMenu2D() {
                 if (since_touch > 4.0f) {
                     i32 angle = static_cast<i32>(NuFmod(since_touch, 4.0f) * 0.25f * 65536.0f);
                     f32 value = NuTrigTable[(angle >> 1) & 0x7fff] - 0.8f;
-                    if (value >= 0.0f)
+                    if (!(value < 0.0f))
                         pulse = value + 1.0f;
                 }
             }
@@ -1141,19 +1141,21 @@ void InitShop(WORLDINFO_s *world) {
     SHOPCHARCOUNT = 0;
     i32 code_count = 0;
     for (i32 i = 0; i < ShopCollection.count_y && i < 100; ++i) {
-        shopitem_s *item = &CharItems[SHOPCHARCOUNT];
         COLLECTID *collect = &ShopCollection.list[i];
-        item->unlocked = 0;
+        if (collect == NULL)
+            continue;
+        const i16 character_id = collect->id;
+        CharItems[SHOPCHARCOUNT].unlocked = 0;
+        shopitem_s *item = &CharItems[SHOPCHARCOUNT];
         item->type = 1;
 
-        if (((static_cast<u64>(Game.shop_character_purchased_bits[SHOPCHARCOUNT >> 5]) >> (SHOPCHARCOUNT & 0x1f)) &
-             1) != 0) {
+        if (((static_cast<u64>(Game.shop_character_purchased_bits[SHOPCHARCOUNT / 32]) >> (SHOPCHARCOUNT % 32)) & 1) !=
+            0) {
             item->unlocked = 1;
         }
 
-        const i32 character_id = collect->id;
         if (CDataList[character_id].name_id == -1) {
-            NuStrCpy(item->name, CDataList[character_id].dir);
+            NuStrCpy(item->name, CDataList[character_id].file);
         } else {
             NuStrCpy(item->name, TTab[CDataList[character_id].name_id]);
         }
@@ -1215,11 +1217,9 @@ void InitShop(WORLDINFO_s *world) {
     shopcampos = shopcamspline != NULL ? shopcamspline->pts : NULL;
     LoadShelfSplines();
 
-    if (SHOPCHARCOUNT > 0) {
-        for (i32 i = 0; i < 7; ++i) {
-            CharShelfIds[i] = (SHOPCHARCOUNT + i - 3) % SHOPCHARCOUNT;
-            CharCurPos[i] = SubShelfPos[i];
-        }
+    for (i32 i = 0; i < 7; ++i) {
+        CharShelfIds[i] = (SHOPCHARCOUNT + i - 3) % SHOPCHARCOUNT;
+        CharCurPos[i] = SubShelfPos[i];
     }
     if (SHOPHINTCOUNT > 0) {
         for (i32 i = 0; i < 7; ++i) {
@@ -1234,31 +1234,29 @@ void InitShop(WORLDINFO_s *world) {
         }
     }
 
-    const i32 brick_shelf_ids[7] = {11, 12, 13, 0, 1, 2, 3};
-    for (i32 i = 0; i < 7; ++i) {
-        BrickShelfIds[i] = brick_shelf_ids[i];
-        BrickCurPos[i] = SubShelfPos[i];
-    }
-
     for (i32 i = 0; i < SHOPGOLDBRICKS; ++i) {
         shopitem_s *item = &BrickItems[i];
         item->item_id = i;
         item->type = 4;
         item->price = 10000 + i * 5000;
+        item->special = TopShelf[4].special;
         item->unlocked = SAVE_OFF;
         if ((static_cast<u64>((&Game.shop_gold_brick_purchased_bits)[i >> 5]) >> (i & 31)) & 1)
             item->unlocked = SAVE_ON;
-        item->special = TopShelf[4].special;
+    }
+
+    for (i32 i = 0; i < 7; ++i) {
+        BrickShelfIds[i] = (14 + i - 3) % 14;
+        BrickCurPos[i] = SubShelfPos[i];
     }
 
     SHOPCUTCOUNT = CutScenePlayCount;
     for (i32 i = 0; i < CutScenePlayCount && i < 128; ++i) {
-        shopitem_s *item = &CutItems[i];
-        item->item_id = i;
-        item->type = 5;
-        item->price = 0;
-        item->unlocked = 0;
-        item->special = TopShelf[5].special;
+        CutItems[i].type = 5;
+        CutItems[i].item_id = i;
+        CutItems[i].price = 0;
+        CutItems[i].unlocked = 0;
+        CutItems[i].special = TopShelf[5].special;
     }
 
     if (shop_from_cutsceneplayer == 0 && CutScenePlayCount > 0) {
@@ -1269,29 +1267,32 @@ void InitShop(WORLDINFO_s *world) {
     }
 
     const f32 shelf_scale[6] = {0.9f, 0.28f, 0.9f, 0.95f, 0.8f, 0.9f};
+    memcpy(TopShelfScale, shelf_scale, sizeof(TopShelfScale));
+    for (i32 i = 0; i < 6; ++i)
+        topscale[i] = TopShelfScale[i];
+    picked = oldpicked;
+    subpicked = 0;
+    scalenorm = 1.0f;
+    scalepicked = 1.4f;
+    scale2 = scalenorm;
+    scale3 = scalepicked;
+    scale4 = scalenorm;
+    const f32 big_scale[6] = {0.9f * 1.6f, 0.28f * 1.6f, 0.9f * 1.6f, 0.95f * 1.65f, 1.35f, 0.9f * 1.6f};
+    memcpy(TopBigScale, big_scale, sizeof(TopBigScale));
     const f32 shelf_push[6] = {0.045f, 0.045f, 0.045f, 0.05f, 0.015f, 0.045f};
     const f32 current_push[6] = {0.0f, 0.0f, -0.005f, 0.0f, -0.01f, 0.0f};
-    memcpy(TopShelfScale, shelf_scale, sizeof(TopShelfScale));
-    memcpy(topscale, shelf_scale, sizeof(topscale));
     memcpy(TopShelfPush, shelf_push, sizeof(TopShelfPush));
     memcpy(TopBigPush, current_push, sizeof(TopBigPush));
-    memcpy(toppush, current_push, sizeof(toppush));
-    const f32 big_scale[6] = {1.44f, 0.448f, 1.44f, 1.5675f, 1.35f, 1.44f};
-    memcpy(TopBigScale, big_scale, sizeof(TopBigScale));
+    for (i32 i = 0; i < 6; ++i)
+        toppush[i] = TopBigPush[i];
     SubBigCharPush = 0.05f;
     SubNormCharPush = 0.02f;
     subpush[0] = subpush[2] = SubNormCharPush;
     subpush[1] = SubBigCharPush;
     for (i32 i = 0; i < 6; ++i) {
-        codebigscale[i] = 1.254f;
+        codebigscale[i] = 0.95f * 1.32f;
         codeshelfscale[i] = codemenuscale[i] = 0.76f;
     }
-    picked = oldpicked;
-    subpicked = 0;
-    scalenorm = 1.0f;
-    scalepicked = 1.4f;
-    scale2 = scale4 = scalenorm;
-    scale3 = scalepicked;
     shopcutsceneplayer = CutScenePlayer_Available();
 }
 

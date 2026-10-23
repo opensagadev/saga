@@ -553,10 +553,7 @@ void MiniKit_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float ela
     switch (stage->field_0x14) {
         case 0:
             newminikitcount = packet->new_minikits;
-            if (newminikitcount > 0)
-                currentminikit = Game.area_save[packet->area->index].field_0x5[0] - newminikitcount;
-            else
-                currentminikit = Game.area_save[packet->area->index].field_0x5[0];
+            if (newminikitcount <= 0) currentminikit = Game.area_save[packet->area->index].field_0x5[0]; else currentminikit = Game.area_save[packet->area->index].field_0x5[0] - newminikitcount;
             stage->field_0x18 = 0.0f;
             stage->field_0x1c = 1.0f;
             stage->field_0x14 = 1;
@@ -606,7 +603,7 @@ void MiniKit_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float ela
                     }
                     stage->field_0x1c = 1.0f;
                     stage->field_0x14 = 4;
-                } else if (stage->field_0x14 != 4)
+                } else if (__builtin_expect(stage->field_0x14 != 4, 1))
                     return;
             }
             if (__builtin_expect((packet->field_0xb0 & 0x10) == 0, 0))

@@ -4945,7 +4945,7 @@ static void cbPtlRotMenu(eduimenu_s *parent, eduiitem_s *, u32) {
 
     const debinftype *effect = debtab[debkeydata[edpp_ptls[edpp_nearest].instance_id].effect_index];
     ptlrotmenu = eduiMenuCreate(70, 70, 180, 300, ed_fnt, cbPtlCancelRotMenu, "Particle Rotation");
-    if (ptlrotmenu == NULL)
+    if (__builtin_expect(ptlrotmenu == NULL, 0))
         return;
 
     eduiMenuAddItem(ptlrotmenu, eduiItemGreyGradPickCreate(0, colours, cbPtlApplyRot, "Rotation Envelope"));
@@ -5711,7 +5711,7 @@ static void edgracbChangeInstanceMenu(eduimenu_s *parent, eduiitem_s *, u32) {
             name = NuSpecialGetName(&special);
         const i32 selected = i == GrassClumps[edgra_nearest].special_index;
         NuGScnGetSpecial(&special, edbits_base_scene, i);
-        if (NuSpecialExistsFn(&special))
+        if (__builtin_expect(NuSpecialExistsFn(&special) != 0, 1))
             name = NuSpecialGetName(&special);
         if (__builtin_expect(edgra_filter && NuStrNCmp(edgra_filter_string, name, NuStrLen(edgra_filter_string)), 1)) {
             if (__builtin_expect(!selected, 1))
@@ -9053,9 +9053,9 @@ uv1deb *GenDebIndexBounceY(debkeydatatype_s *key, debinftype *effect, float time
     particle->momentum.z = vector.z;
 
     f32 first, second;
-    if (SolveQuadratic(effect->field_0a0, particle->momentum.y, particle->position.y - key->collision_plane, &first,
+    if (__builtin_expect(SolveQuadratic(effect->field_0a0, particle->momentum.y, particle->position.y - key->collision_plane, &first,
                        &second) &&
-        (first > second ? first : second) > 0.0f && effect->particle_lifetime > (first > second ? first : second)) {
+        (first > second ? first : second) > 0.0f && effect->particle_lifetime > (first > second ? first : second), 1)) {
         DebrisGetControlStackLock();
         if (freechunkcontrolsptr < debrischunks + debrischunksglass) {
             const f32 collision_time = first > second ? first : second;
@@ -11170,7 +11170,7 @@ void DebrisProcessTriggers() {
                             }
                             volume = (range - key->cutoff_distance) / range;
                         }
-                        if (range > key->cutoff_distance) {
+                        if (__builtin_expect(range > key->cutoff_distance, 1)) {
                             for (i32 i = 0; i < 4; i++) {
                                 if (effect->sound_data[i * 3] != -1 && effect->sound_data[i * 3 + 1] == 1)
                                     PlaySfxByIdEx(effect->sound_data[i * 3], &key->position, volume, 1.0f);
@@ -15495,7 +15495,7 @@ void cbFileSaveEffects(eduimenu_s *parent, eduiitem_s *, u32) {
     if (edpp_usememcard == 0 && edbits_override_backups == 0 && valid_page)
         backup_succeeded = EdFileBackup(filename, backup);
     if (valid_page && edppSaveEffects(filename, edpp_effect_list)) {
-        if (backup_succeeded != 0) {
+        if (__builtin_expect(backup_succeeded != 0, 1)) {
             u32 colours[4] = {0x8000c000, 0x80ff0000, 0x80808080, 0x80404040};
             messagemenu = eduiMenuCreate(70, 70, 180, 250, ed_fnt, cbCancelMessageMenu, "Message");
             if (messagemenu != NULL) {
@@ -15958,7 +15958,7 @@ extern "C" {
                     edpp_ptls[slot].reflection_rotation_z = 0;
                     edpp_ptls[slot].reflection_rotation_y = 0;
                 }
-                if (version > 12)
+                if (__builtin_expect(version > 12, 0))
                     edpp_ptls[slot].reflection_bounce = EdFileReadFloat();
                 else
                     edpp_ptls[slot].reflection_bounce = 0.9f;
@@ -18177,7 +18177,7 @@ void TerrDrawPlatCol(tertype *terrain, i16 index, i32 colour) {
         normals[0].y = record->normals[0].y * 0.4f;
         normals[0].z = record->normals[0].z * 0.4f;
         normals[0].w = 0.0f;
-        if ((platform.flags & TERRAIN_PLATFORM_FLAG_ROTATING) != 0) {
+        if (__builtin_expect((platform.flags & TERRAIN_PLATFORM_FLAG_ROTATING) != 0, 0)) {
             NuVec4MtxTransformVU0(&points[0], &points[0], static_cast<NUMTX *>(platform.scene_object));
             NuVec4MtxTransformVU0(
                 &points[1], &points[1],
@@ -18655,7 +18655,7 @@ void DeRotateTerrain(tertype *surface) {
         transformed.z = (vertex.y - start_y) * sin_pitch + rotated_z * cos_pitch;
     }
 
-    if (65536.0f > surface->normals[1].y) {
+    if (__builtin_expect(65536.0f > surface->normals[1].y, 1)) {
         const NUVEC &vertex = surface->vectors[3];
         NUVEC &transformed = query->transformed_vertices[3];
         const f32 relative_z = vertex.z - start_z;

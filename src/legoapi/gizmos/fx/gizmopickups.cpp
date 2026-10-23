@@ -993,14 +993,14 @@ GIZMOPICKUP_s *GizmoPickups_Collide(WORLDINFO_s *world, GameObject_s *object, i3
     } else {
         pickup =
             GizmoPickups_CollideList(object, world->gizmo_pickup_sys->pickups, world->gizmo_pickup_sys->pickup_count);
-        if (pickup == NULL) {
+        if (__builtin_expect(pickup == NULL, 1)) {
             return NULL;
         }
         pickup->state_flags |= GIZMOPICKUP_STATE_COLLECTED;
     }
 
     i32 type_index = pickup->type_index;
-    if ((pickup->state_flags & GIZMOPICKUP_STATE_ALTERNATE_TYPE) != 0 && GizmoPickupSys->alternate_type != -1) {
+    if (__builtin_expect((pickup->state_flags & GIZMOPICKUP_STATE_ALTERNATE_TYPE) != 0 && GizmoPickupSys->alternate_type != -1, 1)) {
         type_index = GizmoPickupSys->alternate_type;
     }
     if (GizmoPickupSys->types[type_index].collection_sfx_name != NULL) {

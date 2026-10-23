@@ -53,11 +53,10 @@ static NUFPCOMJMP Teleport_ConfigKeywords[] = {
 static i32 FindTeleport_Direction;
 
 static inline void Teleport_GetSegment(GameObject_s *object, TELEPORT_s *teleport, i32 *start, i32 *end) {
-    const u8 forwards = object->context_variant_flags & 4;
     if ((teleport->flags & 4) != 0) {
-        *start = forwards ? 0 : 3;
-        *end = forwards ? 3 : 0;
-    } else if (forwards) {
+        *start = (object->context_variant_flags & 4) ? 0 : 3;
+        *end = (object->context_variant_flags & 4) ? 3 : 0;
+    } else if ((object->context_variant_flags & 4) != 0) {
         if (object->field_0x7a4 == 0) {
             *start = 0;
         } else {
@@ -467,27 +466,20 @@ void Teleport_MoveCode(GameObject_s *object, i32 start_immediately) {
         if (object->apiobj.field_0x27d == 0 || object->apiobj.field_0x287 != 0)
             return;
 
-        switch (object->field_0x7a5) {
-            case 1:
-            case 0xff:
-            case 2:
-            case 3:
-            case 4:
-                break;
-            default:
-                if (__builtin_expect(objInNetWaitContext(object, 15) == 0, 0))
-                    return;
-                break;
+        if (object->field_0x7a5 != 0xff && object->field_0x7a5 != 1 && object->field_0x7a5 != 2 &&
+            object->field_0x7a5 != 3 && object->field_0x7a5 != 4) {
+            if (__builtin_expect(objInNetWaitContext(object, 15) == 0, 0))
+                return;
         }
 
-        if (__builtin_expect(!object->apiobj.player_controlled && object->use_action != 3, 0))
+        if (!object->apiobj.player_controlled && __builtin_expect(object->use_action != 3, 1))
             return;
         if (object->touch_task != NULL &&
             object->touch_task->GetHashId().value != MechTouchTaskUseTeleport::HashId.value)
             return;
 
         TELEPORT_s *teleport = Teleport_Find(object, 0.0f, NULL);
-        if (teleport == NULL)
+        if (__builtin_expect(teleport == NULL, 0))
             return;
 
         if (__builtin_expect(objInNetWaitContext(object, 15) != 0, 1)) {
@@ -534,7 +526,7 @@ void Teleport_MoveCode(GameObject_s *object, i32 start_immediately) {
         return;
     }
 
-    TELEPORT_s *teleport = static_cast<TELEPORT_s *>(object->field_0x788);
+    TELEPORT_s *teleport;
 
     if (object->field_0x7a3 == 0) {
         const u8 forwards = object->context_variant_flags & 4;
@@ -564,7 +556,7 @@ void Teleport_MoveCode(GameObject_s *object, i32 start_immediately) {
         if (object->field_0x7a3 != 1)
             return;
         object->context_animation_timer -= FRAMETIME;
-        f32 progress = 1.0f - object->context_animation_timer * 0.5f;
+        f32 progress;
         f32 shadow_height = 2000000.0f;
         bool has_surface = false;
         if (object->context_animation_timer <= 0.0f) {
@@ -583,11 +575,14 @@ void Teleport_MoveCode(GameObject_s *object, i32 start_immediately) {
             has_surface = shadow_height != 2000000.0f;
             GetSurfaceInfo(object, has_surface, shadow_height);
             progress = 1.0f;
+        } else {
+            progress = 1.0f - object->context_animation_timer * 0.5f;
         }
+        i32 start_index = (object->context_variant_flags & 4) != 0 ? 1 : 2;
+        i32 end_index = (object->context_variant_flags & 4) != 0 ? 2 : 1;
         teleport = static_cast<TELEPORT_s *>(object->field_0x788);
-        NUVEC *points = teleport->path->pts;
-        NUVEC *start = &points[(object->context_variant_flags & 4) != 0 ? 1 : 2];
-        NUVEC *end = &points[(object->context_variant_flags & 4) != 0 ? 2 : 1];
+        NUVEC *start = &teleport->path->pts[start_index];
+        NUVEC *end = &teleport->path->pts[end_index];
         object->apiobj.position.x = (end->x - start->x) * progress + start->x;
         object->apiobj.position.y = (end->y - start->y) * progress + start->y;
         object->apiobj.position.z = (end->z - start->z) * progress + start->z;
@@ -597,18 +592,19 @@ void Teleport_MoveCode(GameObject_s *object, i32 start_immediately) {
         return;
     }
 
-    bool completed = false;
+    i32 completed = 0;
     if (object->apiobj.character_model->model_data_b[object->context_animation] == NULL ||
         CurrentAnim(&object->apiobj.anim_packet) == object->context_animation) {
         object->context_animation_timer -= FRAMETIME;
         if (object->context_animation_timer <= 0.0f) {
             object->field_0x7a5 = 0xff;
             object->context_animation_timer = 0.0f;
+            teleport = static_cast<TELEPORT_s *>(object->field_0x788);
             teleport->active = 0;
             if ((teleport->flags & 0x10) != 0)
                 GameCam_Blend(GameCam, 1.0f, 0.0f, 1);
             AlertSurroundingCreatures(object, &object->apiobj.collision_position);
-            completed = true;
+            completed = 1;
         }
     }
 
@@ -638,7 +634,7 @@ void Teleport_MoveCode(GameObject_s *object, i32 start_immediately) {
     }
     object->apiobj.position.y += progress * 0.0025f;
 
-    if (__builtin_expect(!completed, 0))
+    if (__builtin_expect(completed == 0, 0))
         return;
     teleport = static_cast<TELEPORT_s *>(object->field_0x788);
     if ((teleport->flags & 4) != 0 || object->field_0x7a4 != 0) {

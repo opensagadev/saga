@@ -266,7 +266,7 @@ void BountyHunterPursuitD_Update(WORLDINFO_s *) {
     GIZMOBLOWUP_s *nearest = NULL;
 
 #define CHECK_PURSUIT_GENERATOR(index)                                                                                 \
-    if (LevGizmo[index] != NULL) {                                                                                     \
+    if (__builtin_expect(LevGizmo[index] != NULL, 1)) {                                                                                     \
         GIZMOBLOWUP_s *generator = static_cast<GIZMOBLOWUP_s *>(LevGizmo[index]->object);                              \
         if ((generator->output_flags & 1) == 0) {                                                                      \
             f32 distance_sq = NuVecDistSqr(&generator->position, &LevGameObject[0]->apiobj.collision_position, NULL);  \

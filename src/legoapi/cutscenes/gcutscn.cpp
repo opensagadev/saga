@@ -2529,11 +2529,7 @@ void NuGCutCharAnimProcess_3(NUGCUTCHAR_s *character, f32 frame, NUMTX *matrix, 
     } else {
         *visible = character->flags & 1;
     }
-    if (animation_index == NULL) {
-        if (animation_start_frame != NULL) {
-            *animation_start_frame = 0.0f;
-        }
-    } else {
+    if (animation_index != NULL) {
         if (curve_count > 7) {
             const f32 value = values[7];
             if (value < 0.0f) {
@@ -2556,6 +2552,10 @@ void NuGCutCharAnimProcess_3(NUGCUTCHAR_s *character, f32 frame, NUMTX *matrix, 
                     *animation_start_frame = static_cast<f32>(character->animation_start_frame);
                 }
             }
+        }
+    } else {
+        if (animation_start_frame != NULL) {
+            *animation_start_frame = 0.0f;
         }
     }
     if (*visible != 0) {
@@ -2595,7 +2595,7 @@ void NuGCutCharAnimProcess_3(NUGCUTCHAR_s *character, f32 frame, NUMTX *matrix, 
                 *animation_rate = character->animation_rate;
             }
         }
-        if (blend_time != NULL) {
+        if (__builtin_expect(blend_time != NULL, 1)) {
             if (animation->curve_count > 8) {
                 *blend_time = values[8];
             } else {
@@ -3849,12 +3849,12 @@ extern "C" {
             cursor.void_ptr = DefragInstBaseMem;
         }
         for (CutSceneCleanUpEntry *entry = DefragCutSceneListBase; entry < end; ++entry) {
-            if (entry->flags == 0) {
-                DefragInstDestroyedFn(entry->handle);
-            } else {
+            if (!(entry->flags == 0)) {
                 instNUGCUTSCENE_s *instance =
                     static_cast<instNUGCUTSCENE_s *>(DefragCreateInstFn(entry->handle, entry->cutscene, &cursor));
                 instance->accumulated_stream_duration = entry->accumulated_duration;
+            } else {
+                DefragInstDestroyedFn(entry->handle);
             }
         }
         if (background_cutscene_instances != NULL) {

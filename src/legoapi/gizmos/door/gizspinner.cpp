@@ -529,7 +529,7 @@ static i32 GizSpinner_Load(void *world_ptr, void *) {
         const i32 special_name_length = static_cast<signed char>(EdFileReadChar());
         EdFileRead(special_name, special_name_length);
         nuhspecial_s special;
-        const bool special_missing = !GizSpinner_FindSpecial(world, &special, special_name);
+        const i32 special_missing = GizSpinner_FindSpecial(world, &special, special_name) ? 0 : 1;
         world->spinners[index].special = special;
 
         const u8 output_count = static_cast<u8>(EdFileReadChar());
@@ -620,35 +620,33 @@ static i32 GizSpinner_Load(void *world_ptr, void *) {
 
         spinner = &world->spinners[index];
         if (version <= 6) {
-            initial_animation_point = animation_speed;
             if (spinner->anim_set != NULL && spinner->primary_anim_obj != NULL) {
                 const f32 start_frame = spinner->primary_anim_obj->start_frame;
                 const f32 duration = spinner->primary_anim_obj->end_frame - start_frame;
                 if (__builtin_expect(output_points > 0, 1)) {
                     {
                         const f32 interval = duration / static_cast<f32>(output_points - 1);
+                        f32 *points = &spinner->animation_points[1];
                         for (i32 point = 0; point < output_points; ++point) {
-                            spinner->animation_points[point + 1] =
+                            points[point] =
                                 static_cast<f32>(static_cast<i32>(static_cast<f32>(point) * interval)) + start_frame;
                         }
                     }
                 }
-                if (output_points <= 7) {
-                    for (i32 point = output_points + 1; point < 9; ++point) {
-                        spinner->animation_points[point] = -1.0f;
-                    }
+                for (i32 point = output_points; point <= 7; ++point) {
+                    (&spinner->animation_points[1])[point] = -1.0f;
                 }
             }
+            initial_animation_point = animation_speed;
         } else {
             if (output_points > 0) {
                 for (i32 point = 1; point <= output_points; ++point) {
                     world->spinners[index].animation_points[point] = EdFileReadFloat();
                 }
             }
-            spinner = &world->spinners[index];
             if (output_points <= 7) {
-                for (i32 point = output_points + 1; point < 9; ++point) {
-                    spinner->animation_points[point] = -1.0f;
+                for (i32 point = output_points; point <= 7; ++point) {
+                    (&spinner->animation_points[1])[point] = -1.0f;
                 }
             }
             if (version == 7) {

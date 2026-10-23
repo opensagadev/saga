@@ -768,7 +768,9 @@ static void DrawSpaceLevel(spacelevel_s *space) {
         if (space->queued_fighters[i].active != 0)
             DrawStarFighter(&space->queued_fighters[i]);
     }
-    QuickBolt_Draw(&space->quick_bolts);
+    // Retail keeps QuickBolt_Draw's NULL check here, so the pointer is formed with byte arithmetic.
+    QuickBolt_Draw(
+        reinterpret_cast<quickboltinfo *>(reinterpret_cast<u8 *>(space) + offsetof(spacelevel_s, quick_bolts)));
 
     DrawSpaceJet(0, 0, false);
     DrawSpaceJet(0, 1, true);

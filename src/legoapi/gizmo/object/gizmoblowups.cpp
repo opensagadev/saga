@@ -159,7 +159,7 @@ static void Blowup_Activate(GIZMO *gizmo, i32 enabled) {
 
     nuinstanim_s *animation = NuSpecialGetInstAnim(&blowup->type->animated_special);
     if (animation != NULL) {
-        if (enabled == 0) {
+        if (__builtin_expect(enabled == 0, 0)) {
             animation->playing = 0;
         } else {
             if ((blowup->state_flags & GIZMOBLOWUP_STATE_ANIMATION_PLAYING) != 0)
@@ -584,7 +584,7 @@ void GizmoSortBlowups(WORLDINFO_s *world) {
                 while (candidate != end && candidate->type != type) {
                     ++candidate;
                 }
-                if (candidate == end) {
+                if (__builtin_expect(candidate == end, 1)) {
                     break;
                 }
                 GizmoSwapBlowups(blowup, candidate);

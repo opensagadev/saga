@@ -572,8 +572,8 @@ static i32 GizTurrets_BoltHitPlat(void *world_ptr, void *system_ptr, BOLT *bolt,
                     player_index = -1;
                     damage = bolt_type->field_3c;
                 } else {
-                    if (((turret->behavior_flags & 0x10000) != 0 && bolt->owner->field_0xcc0 == NULL) ||
-                        ((turret->behavior_flags & 0x20000) != 0 && !bolt->owner->apiobj.player_controlled)) {
+                    if (__builtin_expect(((turret->behavior_flags & 0x10000) != 0 && bolt->owner->field_0xcc0 == NULL) ||
+                        ((turret->behavior_flags & 0x20000) != 0 && !bolt->owner->apiobj.player_controlled), 1)) {
                         damage = 0;
                     } else {
                         damage = bolt_type->field_3c;
@@ -832,7 +832,7 @@ static void GizTurrets_StoreProgress(void *, void *system_ptr, void *progress_pt
 static void GizTurrets_Reset(void *world_ptr, void *system_ptr, void *progress_ptr) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
     GIZTURRETSYS_s *system = static_cast<GIZTURRETSYS_s *>(system_ptr);
-    if (system->count == 0) {
+    if (__builtin_expect(system->count == 0, 0)) {
         return;
     }
 
@@ -851,7 +851,7 @@ static void GizTurrets_Reset(void *world_ptr, void *system_ptr, void *progress_p
                 GizTurretAnimObjectData *object_data = static_cast<GizTurretAnimObjectData *>(object->object_data);
                 if (object_data->role == 1) {
                     turret->primary_anim_obj = object;
-                } else if (object_data->role == 2) {
+                } else if (__builtin_expect(object_data->role == 2, 0)) {
                     turret->secondary_anim_obj = object;
                 }
                 object_data->platform_id = -1;

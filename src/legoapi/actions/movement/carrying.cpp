@@ -133,7 +133,7 @@ void SuperCarry_DrawObject(GameObject_s *object) {
     NUMTX matrix;
     NUVEC offset;
     NUVEC *translation = NULL;
-    if (SuperCarry_AlignObject != 0) {
+    if (__builtin_expect(SuperCarry_AlignObject != 0, 0)) {
         NuVecRotateY(&offset, &object->carried_object_basis[0], object->apiobj.field_0x276);
         NuMtxSetRotationY(&matrix, object->carried_object_angle);
         translation = &offset;
@@ -143,7 +143,7 @@ void SuperCarry_DrawObject(GameObject_s *object) {
         *NUMTX_GET_ROW_VEC(&matrix, 1) = object->carried_object_basis[1];
         *NUMTX_GET_ROW_VEC(&matrix, 2) = object->carried_object_basis[2];
     }
-    if (SuperCarry_KeepObjectLevel != 0) {
+    if (__builtin_expect(SuperCarry_KeepObjectLevel != 0, 0)) {
         NuMtxRotateY(&matrix, object->apiobj.field_0x276);
         dco_locatorposonly = 1;
     }

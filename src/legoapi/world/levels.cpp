@@ -1621,7 +1621,7 @@ LEVELDATA *Levels_ConfigureList(char *file, VARIPTR *buf, VARIPTR *buf_end, i32 
                     }
                 }
 
-                if (NuStrICmp(parser->word_buf, "test_level") == 0) {
+                if (__builtin_expect(NuStrICmp(parser->word_buf, "test_level") == 0, 1)) {
                     cur_level->flags |= LEVEL_TEST;
                 } else if (NuStrICmp(parser->word_buf, "intro_level") == 0) {
                     cur_level->flags |= LEVEL_INTRO;

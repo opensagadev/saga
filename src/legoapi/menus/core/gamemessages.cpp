@@ -139,7 +139,7 @@ initialise_slot:
 
         i32 length = NuStrLen(message->text);
         if ((message->flags & 0x2000) != 0) {
-            if (length <= 0) {
+            if (__builtin_expect(length <= 0, 1)) {
                 return NULL;
             }
             slot->text = message->text;

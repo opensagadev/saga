@@ -753,7 +753,7 @@ void GizBuildIt_SetToStart(GIZBUILDIT_s *buildit, i32 emit_debris, i32 keep_buil
     const i32 first_piece_to_reset = restored_built_count;
     buildit->availability_flags |= GIZBUILDIT_AVAILABILITY_VISIBLE;
 
-    if (emit_debris != 0) {
+    if (__builtin_expect(emit_debris != 0, 1)) {
         for (i32 index = 0; index < buildit->anim_object_count; ++index) {
             GIZBUILDITANIMDATA_s *data = static_cast<GIZBUILDITANIMDATA_s *>(buildit->anim_objects[index]->object_data);
             if (index < buildit->built_object_count) {
@@ -1230,7 +1230,7 @@ static i32 GizBuildIts_Load(void *world_ptr, void *data) {
                 buildit->blowup_type = EdFileReadShort();
             } else {
                 const i32 blowup_name_length = static_cast<i8>(EdFileReadChar());
-                if (blowup_name_length != 0) {
+                if (__builtin_expect(blowup_name_length != 0, 0)) {
                     EdFileRead(blowup_name, blowup_name_length);
                     buildit->blowup_type = static_cast<i16>(GizmoBlowupGetNameTableId(blowup_name));
                     if (buildit->blowup_type != -1) {
@@ -1258,7 +1258,7 @@ static i32 GizBuildIts_Load(void *world_ptr, void *data) {
                     buildit->state_flags |= GIZBUILDIT_STATE_AUTO_BUILD_STATIC_OBJECTS;
                 }
             }
-            if (version == 3) {
+            if (__builtin_expect(version == 3, 0)) {
                 if (EdFileReadChar() != 0) {
                     buildit->state_flags |= 0x80;
                 }

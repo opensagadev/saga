@@ -461,7 +461,18 @@ void Door_GoThrough(WORLDINFO_s *world, DOOR_s *door, i32 player_triggered) {
     }
 
     NuStrCpy(Door_ExitName, door->name);
-    if (door->cutscene == NULL || CutScene_HasPlayed(static_cast<CUTINFO *>(door->cutscene))) {
+    if (!(door->cutscene == NULL || CutScene_HasPlayed(static_cast<CUTINFO *>(door->cutscene)))) {
+        CUTINFO *cutscene = static_cast<CUTINFO *>(door->cutscene);
+        if (cutscene != NULL) {
+            if (__builtin_expect(door_cutscenesnap != 0, 1)) {
+                NewCutScene(cutscene, WorldInfo_CurrentlyActive()->cutscene_sys, NULL, 0);
+            } else {
+                newmode_cutinfo = cutscene;
+                StartDoorPositions();
+                NewGameMode();
+            }
+        }
+    } else {
         door_cutscenesnap = 0;
         if (InStory() != 0 && door->level != world->level_idx) {
             Door_SetNewLevel(door->level);
@@ -480,17 +491,6 @@ void Door_GoThrough(WORLDINFO_s *world, DOOR_s *door, i32 player_triggered) {
                     current_player->apiobj.field_0x287 == 0 ? current_player->field_0xe38 : 4;
             }
             gone_through_door_to_new_mode = 1;
-        }
-    } else {
-        CUTINFO *cutscene = static_cast<CUTINFO *>(door->cutscene);
-        if (cutscene != NULL) {
-            if (door_cutscenesnap != 0) {
-                NewCutScene(cutscene, WorldInfo_CurrentlyActive()->cutscene_sys, NULL, 0);
-            } else {
-                newmode_cutinfo = cutscene;
-                StartDoorPositions();
-                NewGameMode();
-            }
         }
     }
 

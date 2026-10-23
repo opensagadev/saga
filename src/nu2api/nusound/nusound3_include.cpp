@@ -2844,16 +2844,14 @@ void NuSound3Update(void) {
                     ((NuSoundVoice *)NuSound3Stream::mVoice.obj)->SetAutoDelete(false);
                     ((NuSoundVoice *)NuSound3Stream::mVoice.obj)->SetVolume(PS2VolumeToScalar(stream->ps2volume));
                     ((NuSoundVoice *)NuSound3Stream::mVoice.obj)->Play();
-                    stream->field_0xd = 1;
                     stream->pending_start = 0;
+                    stream->field_0xd = 1;
                 }
             }
         } else if (NuSound3Stream::mVoice.obj != NULL) {
             if (stream->field_0xd != 0) {
                 ((NuSoundVoice *)NuSound3Stream::mVoice.obj)->SetVolume(PS2VolumeToScalar(stream->ps2volume));
-                if (__builtin_expect(((NuSoundVoice *)NuSound3Stream::mVoice.obj)->GetState() ==
-                                         NuSoundVoice::PLAYSTATE_STOPPED,
-                                     0)) {
+                if (((NuSoundVoice *)NuSound3Stream::mVoice.obj)->GetState() == NuSoundVoice::PLAYSTATE_STOPPED) {
                     NuSound3StopStereoStream(i);
                 }
             }
@@ -2873,7 +2871,7 @@ void NuSound3Update(void) {
 
     // (e) Wake the sample loader when the registered request table changes.
     for (i32 i = 0; i < g_NuSoundNumLoadBitShorts; i++) {
-        if (__builtin_expect(g_NuSoundLoadBitsCache[i] != g_NuSoundLoadBits[i], 1)) {
+        if (__builtin_expect(g_NuSoundLoadBits[i] != g_NuSoundLoadBitsCache[i], 1)) {
             memmove(g_NuSoundLoadBitsCache, g_NuSoundLoadBits,
                     static_cast<usize>(g_NuSoundNumLoadBitShorts) * sizeof(u16));
 

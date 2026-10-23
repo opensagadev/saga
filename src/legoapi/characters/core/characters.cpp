@@ -885,7 +885,7 @@ void DrawCharIcon(i32 character_id, float x, float y, float z, float scale, i32 
             if (icon_object_id != -1) {
                 if (drawcharicon_find != 0) {
                     NUGSCN *icon_scene = character_id == -1 ? NULL : IconScene_FindById(character_id);
-                    if (icon_scene != NULL) {
+                    if (__builtin_expect(icon_scene != NULL, 0)) {
                         NuSpecialFind(icon_scene, &special, ObjTabList[icon_object_id].name, 1);
                     } else {
                         NuSpecialFind(things_scene, &special, ObjTabList[icon_object_id].name, 1);

@@ -255,7 +255,7 @@ static __used__ void PodRaceSnipersUpdate(void) {
         i32 in_range = 0;
         for (i32 j = 0; j < 2; ++j) {
             GameObject_s *target = Player[j];
-            if (__builtin_expect(!(target != NULL && (target->apiobj.field_0x1f8 & 0x1001) == 0x1001), 0)) {
+            if (!(target != NULL && (target->apiobj.field_0x1f8 & 0x1001) == 0x1001)) {
                 continue;
             }
             direction.x = target->apiobj.collision_position.x - s->pos.x;
@@ -281,7 +281,7 @@ static __used__ void PodRaceSnipersUpdate(void) {
                     }
                     if (player_ix == 0)
                         target = player;
-                    if (target == NULL || type == NULL)
+                    if (__builtin_expect(target == NULL || type == NULL, 0))
                         continue;
                     CalculateInterceptVector(&s->prev, &target->apiobj.collision_position, &target->apiobj.velocity,
                                              type->field_10, &aim, NULL);

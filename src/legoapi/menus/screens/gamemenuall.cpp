@@ -2970,7 +2970,7 @@ begin_scan:
                 goto continue_scan;
             if (next == ';')
                 goto continue_scan;
-            if (next == ':')
+            if (__builtin_expect(next == ':', 0))
                 goto continue_scan;
             return index;
         } else if (ch == '.') {
@@ -2982,7 +2982,7 @@ begin_scan:
     continue_scan:;
     } while (--count != 0);
 
-    if (text[index] == '~') {
+    if (__builtin_expect(text[index] == '~', 0)) {
         if (index > 0 && text[index - 1] == '~')
             index -= 1;
     } else if (index > 0 && text[index - 1] == '~' && index != 1) {

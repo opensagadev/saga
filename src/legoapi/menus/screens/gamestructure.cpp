@@ -704,13 +704,13 @@ void MenuDrawDebugStore(MENU_s *menu) {
         if (NuIOS_GetInAppProductByID(product_id, reinterpret_cast<NuIOS_InAppProduct *>(&product)) != 0) {            \
             total += product.price;                                                                                    \
         }                                                                                                              \
-        if (Store_IsPackUnlocked(INDEX)) {                                                                             \
+        if (!(Store_IsPackUnlocked(INDEX))) {                                                                                                       \
+            dme_g = 31;                                                                                                \
+            dme_r = 255;                                                                                               \
+        } else {                                                                             \
             unlocked_total += product.price;                                                                           \
             dme_g = 255;                                                                                               \
             dme_r = 31;                                                                                                \
-        } else {                                                                                                       \
-            dme_g = 31;                                                                                                \
-            dme_r = 255;                                                                                               \
         }                                                                                                              \
         dme_rgb = 1;                                                                                                   \
         sprintf(line, "%s ~0%.2f~~", StorePack[INDEX].name, static_cast<double>(product.price));                       \

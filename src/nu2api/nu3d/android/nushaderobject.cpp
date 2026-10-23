@@ -1015,6 +1015,10 @@ extern "C" void NuShaderObjectGLSLSetupTextureStates(NUSHADEROBJECT *shader, num
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);                                                 \
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
         switch (semantic) {
+            case 8:
+                break;
+            case 10:
+                break;
             case 4:
                 BIND_STATE_TEXTURE(mtl->shader_desc.specular_map_tid);
                 REPEAT_STATE();
@@ -1146,6 +1150,8 @@ extern "C" void NuShaderObjectGLSLSetupTextureStates(NUSHADEROBJECT *shader, num
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
                 NuCheckGLErrorsFL(source, 0x52e);
+                break;
+            default:
                 break;
         }
 #undef BIND_STATE_TEXTURE

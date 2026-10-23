@@ -5218,11 +5218,11 @@ bool NuDynamicLight::testShadowExtrusion(const VuVec &minimum, const VuVec &maxi
         f32 y0 = min_y * plane.y;
         f32 z0 = min_z * plane.z;
         f32 xy00 = x0 + y0;
-        if ((xy00 + z0) + plane.w > 0.0f)
+        if (__builtin_expect((xy00 + z0) + plane.w > 0.0f, 0))
             continue;
         f32 y1 = max_y * plane.y;
         f32 xy01 = x0 + y1;
-        if ((xy01 + z0) + plane.w > 0.0f)
+        if (__builtin_expect((xy01 + z0) + plane.w > 0.0f, 0))
             continue;
         f32 x1 = max_x * plane.x;
         f32 xy11 = y1 + x1;
@@ -8845,7 +8845,7 @@ extern "C" i32 NuSpecialFindMultiWC(NUGSCN *scene, nuhspecial_s *dest, char (*wi
 
 extern "C" i32 NuSpecialFindMulti(NUGSCN *scene, nuhspecial_s *dest, char *name, i32 capacity, i32 flags) {
     i32 count = 0;
-    if (scene != NULL) {
+    if (__builtin_expect(scene != NULL, 1)) {
         if (scene->display_list != NULL) {
             NUDISPLAYSPECIAL *special = static_cast<NUDISPLAYSPECIAL *>(scene->display_list->specials);
             for (i32 i = 0; i < scene->display_list->nspecials; ++special, ++i) {
@@ -10504,7 +10504,7 @@ nutexanimprog_s *NuTexAnimProgParseFile(i32 file, VARIPTR *buffer, VARIPTR, i32)
     labtabcnt = 0;
     memset(labtab, 0, sizeof(labtab));
     NUFPAR *parser = NuFParOpen(file);
-    if (parser == NULL)
+    if (__builtin_expect(parser == NULL, 0))
         return NULL;
     NuFParPushCom(parser, nutexanimcomtab);
     NuTexAnimProgInit(program);
@@ -10611,7 +10611,7 @@ extern "C" void NuTexAnimProgReadCFG(char *path, VARIPTR *buffer, VARIPTR end) {
     VARIPTR list;
     list.char_ptr = end.char_ptr - 1;
     nufpar_s *parser = NuFParCreate(path);
-    if (parser != NULL) {
+    if (__builtin_expect(parser != NULL, 1)) {
         *list.char_ptr = '\0';
         while (NuFParGetLine(parser)) {
             NuFParGetWord(parser);
@@ -11130,7 +11130,7 @@ extern "C" void NuTexAnimProcessEx(f32 frame_time, u16 mask) {
                 chunk = NuLegacyDwaGetChunk(animation, time.chunk);
             }
             nuanimcurveset_s *set = chunk->curve_sets[node];
-            if (set == NULL) {
+            if (__builtin_expect(set == NULL, 0)) {
                 weights_by_render[render] = NuRndrCreateBlendShapeDeformerWeightsArray(0);
                 continue;
             }
@@ -11138,7 +11138,7 @@ extern "C" void NuTexAnimProcessEx(f32 frame_time, u16 mask) {
             i32 curve_count = static_cast<i8>(set->curve_count);
             f32 *weights = NuRndrCreateBlendShapeDeformerWeightsArray(curve_count);
             weights_by_render[render] = weights;
-            if (weights == NULL || curve_count <= 0)
+            if (__builtin_expect(weights == NULL || curve_count <= 0, 0))
                 continue;
             for (i32 curve = 0; curve < curve_count; ++curve) {
                 nuanimcurveset_s *curve_set = NuLegacyDwaGetChunk(animation, time.chunk)->curve_sets[node];
@@ -13325,7 +13325,7 @@ extern "C" {
                 if (delta < 0) {
                     value += static_cast<f32>(delta);
                     delta = -delta;
-                } else if (delta == 0) {
+                } else if (__builtin_expect(delta == 0, 0)) {
                     delta = 1;
                 }
                 i32 before = static_cast<i32>(value);

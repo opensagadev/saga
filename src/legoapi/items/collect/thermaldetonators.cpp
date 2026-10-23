@@ -82,7 +82,7 @@ i32 PartDraw_ThermalDetonator(PART_s *part) {
 
     if (reflected != 0) {
         NuRndrStartReflectionRender(1);
-        if (part->source_special != NULL) {
+        if (__builtin_expect(part->source_special != NULL, 1)) {
             NuSpecialDrawAt(&part->special, &reflection);
         }
         if (level_index != -1) {

@@ -248,7 +248,7 @@ void AITriggerSetSysProcess(AITRIGGERSETSYS_s *system) {
                     (player2 != NULL && (i8)player2->character_context == LEGOCONTEXT_GRAPPLE &&
                      player2->field_0x788 == grapple)) {
                     set->field_0x20e |= 1u << index;
-                } else if (__builtin_expect((set->field_0x20e >> index) & 1 != 0, 1)) {
+                } else if ((set->field_0x20e >> index) & 1) {
                     set->field_0x20e &= ~(1u << index);
                 } else if (Grapple_Occupied(grapple, object, NULL)) {
                     release = true;
@@ -281,24 +281,25 @@ void AITriggerSetSysProcess(AITRIGGERSETSYS_s *system) {
                  ++index) {
                 if (!((f0x20e >> index) & 1) && set->trigger_indices[index] == -1) {
                     GIZMO_s *gizmo = set->gizmos[index];
+                    void *gizmo_object = gizmo->object;
                     if (gizmo->type_id == lever_gizmotype_id) {
-                        if ((static_cast<LEVER_s *>(gizmo->object)->flags & 0x82) != 0x80)
+                        if (((u8) static_cast<LEVER_s *>(gizmo_object)->flags & 0x82) != 0x80)
                             continue;
                     } else if (gizmo->type_id == obstacle_gizmotype_id) {
-                        GIZOBSTACLE_s *obstacle = static_cast<GIZOBSTACLE_s *>(gizmo->object);
+                        GIZOBSTACLE_s *obstacle = static_cast<GIZOBSTACLE_s *>(gizmo_object);
                         if (!(obstacle->progress_flags & 1) || obstacle->anim_set->state == 2)
                             continue;
                     } else if (gizmo->type_id == spinner_gizmotype_id) {
-                        if (static_cast<GIZSPINNER_s *>(gizmo->object)->room_index != -1)
+                        if (static_cast<GIZSPINNER_s *>(gizmo_object)->room_index != -1)
                             continue;
                     } else if (__builtin_expect(gizmo->type_id == force_gizmotype_id, 0)) {
-                        GIZFORCE_s *force = static_cast<GIZFORCE_s *>(gizmo->object);
+                        GIZFORCE_s *force = static_cast<GIZFORCE_s *>(gizmo_object);
                         if (!(force->progress_flags & 1) || force->using_object != NULL ||
                             __builtin_expect(force->field_0x3c_bits != 0, 0))
                             continue;
                     } else if (gizmo->type_id == grapple_gizmotype_id) {
                         if (__builtin_expect(
-                                Grapple_Occupied(static_cast<GRAPPLE_s *>(gizmo->object), NULL, NULL) != NULL, 1))
+                                Grapple_Occupied(static_cast<GRAPPLE_s *>(gizmo_object), NULL, NULL) != NULL, 1))
                             continue;
                     } else {
                         continue;
@@ -323,8 +324,7 @@ void AITriggerSetSysProcess(AITRIGGERSETSYS_s *system) {
                             continue;
                         if (!FreePlay) {
                             GIZMO_s *target = set->gizmos[index];
-                            if (target->type_id == lever_gizmotype_id &&
-                                __builtin_expect(!(object->field_0xefe & 0x80), 1))
+                            if (target->type_id == lever_gizmotype_id && !(object->field_0xefe & 0x80))
                                 continue;
                             if (target->type_id == force_gizmotype_id) {
                                 GIZFORCE_s *force = static_cast<GIZFORCE_s *>(target->object);

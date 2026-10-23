@@ -221,7 +221,7 @@ void Torpedo_UpdateJobbies(GameObject_s *object) {
 }
 
 void *FindNearestTorpTarget(WORLDINFO_s *world, NUVEC *position, f32 distance_squared, u8 *target_type) {
-    if (world->gizmo_blowup_count == 0)
+    if (__builtin_expect(world->gizmo_blowup_count == 0, 0))
         return NULL;
     void *nearest = NULL;
     f32 nearest_distance = distance_squared;
@@ -247,7 +247,7 @@ void *FindNearestTorpTarget(WORLDINFO_s *world, NUVEC *position, f32 distance_sq
                     NUVEC *draw_position = NuSpecialGetDrawPos(&turret->primary_anim_obj->special);
                     if (draw_position != NULL) {
                         f32 distance = NuVecDistSqr(draw_position, position, &delta);
-                        if (distance < nearest_distance) {
+                        if (__builtin_expect(distance < nearest_distance, 1)) {
                             nearest_distance = distance;
                             nearest = turret;
                             type = 1;

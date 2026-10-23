@@ -88,11 +88,19 @@ EXPLOSION *AddExplosion(nuvec_s *position, float radius, float strength, GameObj
 void DrawExplosions() {
 }
 
+static inline void ExplosionFeedback(EXPLOSION *explosion) {
+    if ((explosion->field_0x24 & 0x40) != 0) {
+        NewRumbleAllPlayers(0.5f, 0.1f, 0, 0);
+        GameCam_HitJudder();
+    } else if (explosion->object != NULL)
+        NewBuzz(explosion->object->pad_gamepad->pad, 0.1f, 0);
+}
+
 void UpdateExplosion_Generic(EXPLOSION *explosion) {
     const f32 progress = explosion->field_0x1c / explosion->field_0x20;
     const f32 radius = explosion->field_0x18 * progress;
-    u16 angle = explosion->field_0x2a;
     if ((explosion->field_0x24 & 0x10) != 0) {
+        u16 angle = explosion->field_0x2a;
         for (i32 i = 0; i < 5; ++i) {
             const i32 count = ParticlesPerSecond(40.0f, FRAMETIME);
             NUVEC position;
@@ -103,8 +111,14 @@ void UpdateExplosion_Generic(EXPLOSION *explosion) {
             angle += 0x3333;
         }
     }
-    NUVEC maximum = {explosion->position.x + radius, explosion->position.y + radius, explosion->position.z + radius};
-    NUVEC minimum = {explosion->position.x - radius, explosion->position.y - radius, explosion->position.z - radius};
+    NUVEC maximum;
+    NUVEC minimum;
+    minimum.x = explosion->position.x - radius;
+    maximum.x = explosion->position.x + radius;
+    minimum.z = explosion->position.z - radius;
+    maximum.z = explosion->position.z + radius;
+    minimum.y = explosion->position.y - radius;
+    maximum.y = explosion->position.y + radius;
     i32 hit_character = 0;
     if ((explosion->field_0x24 & 0x100) == 0) {
         GameObject_s *target = Obj;
@@ -134,7 +148,7 @@ void UpdateExplosion_Generic(EXPLOSION *explosion) {
             if ((explosion->field_0x24 & 8) != 0) {
                 f32 x = object->collision_position.x - explosion->position.x;
                 f32 z = object->collision_position.z - explosion->position.z;
-                if (z == 0.0f && x == 0.0f) {
+                if (x == 0.0f && z == 0.0f) {
                     x = static_cast<f32>(qrand()) * (1.0f / 65535.0f) - 0.5f;
                     z = static_cast<f32>(qrand()) * (1.0f / 65535.0f) - 0.5f;
                 }
@@ -192,7 +206,11 @@ void UpdateExplosion_Generic(EXPLOSION *explosion) {
                 else if (explosion->field_0x33 == 1)
                     source = Player[1];
             }
-            const u16 hit_flags = explosion->field_0x2e | ((explosion->field_0x24 & 0x200) != 0 ? 0x4200 : 0x200);
+            u16 hit_flags;
+            if ((explosion->field_0x24 & 0x200) != 0)
+                hit_flags = explosion->field_0x2e | 0x4200;
+            else
+                hit_flags = explosion->field_0x2e | 0x200;
             if (ObjHitObj(source, target, damage, hit_flags, 0, 1) == 2) {
                 if (source != NULL)
                     NewRumble(source->pad_gamepad->pad, 0.5f, 0);
@@ -204,17 +222,13 @@ void UpdateExplosion_Generic(EXPLOSION *explosion) {
                         Arcade_AIKilled(static_cast<i8>(explosion->field_0x33));
                 }
             }
-            if ((explosion->field_0x24 & 0x40) != 0) {
-                NewRumbleAllPlayers(0.5f, 0.1f, 0, 0);
-                GameCam_HitJudder();
-            } else if (explosion->object != NULL)
-                NewBuzz(explosion->object->pad_gamepad->pad, 0.1f, 0);
+            ExplosionFeedback(explosion);
             hit_character = 1;
         }
     }
     if (!hit_character && (explosion->field_0x24 & 2) != 0) {
         u32 hit_type;
-        if (__builtin_expect((explosion->field_0x24 & 0x10) != 0, 1))
+        if ((explosion->field_0x24 & 0x10) != 0)
             hit_type = 3;
         else if ((explosion->field_0x24 & 0x100) != 0)
             hit_type = 7;
@@ -224,11 +238,7 @@ void UpdateExplosion_Generic(EXPLOSION *explosion) {
             hit_type = (explosion->field_0x24 & 0x8000) != 0 ? 9 : 2;
         if (GizmoBlowUp_Hit(explosion->object, &explosion->position, 1, radius, &minimum, &maximum, NULL, hit_type,
                             NULL)) {
-            if ((explosion->field_0x24 & 0x40) != 0) {
-                NewRumbleAllPlayers(0.5f, 0.1f, 0, 0);
-                GameCam_HitJudder();
-            } else if (explosion->object != NULL)
-                NewBuzz(explosion->object->pad_gamepad->pad, 0.1f, 0);
+            ExplosionFeedback(explosion);
             return;
         }
     }
@@ -245,11 +255,7 @@ void UpdateExplosion_Generic(EXPLOSION *explosion) {
     bolt.type_id = 1;
     bolt.type = BoltType_FindByID(1, WORLD);
     if (Bolt_HitParts(&bolt, points, &minimum, &maximum, radius, 0) != NULL) {
-        if ((explosion->field_0x24 & 0x40) != 0) {
-            NewRumbleAllPlayers(0.5f, 0.1f, 0, 0);
-            GameCam_HitJudder();
-        } else if (explosion->object != NULL)
-            NewBuzz(explosion->object->pad_gamepad->pad, 0.1f, 0);
+        ExplosionFeedback(explosion);
     }
 }
 

@@ -554,7 +554,7 @@ void CruiserDUpdate(WORLDINFO_s *) {
         }
     }
 
-    if (CruiserD_LiftAnim->playing)
+    if (__builtin_expect(CruiserD_LiftAnim->playing != 0, 0))
         PlaySfx("Cru_HugeWallMoveLp", NuSpecialGetDrawPos(&CruiserD_Lift));
 
     CruiserD_frame = CruiserD_LiftAnim->ltime;

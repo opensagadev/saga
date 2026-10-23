@@ -4271,10 +4271,9 @@ static void DrawParaphernalia(GameObject_s *object) {
     } else {
         if ((object->field_0xe24 & 1) && object->field_0x780 != NULL) {
             GameObject_s *passenger = static_cast<GameObject_s *>(object->field_0x780);
-            if (object->apiobj.character_data->game_character->weapon_joints[0] != -1 &&
-                object->apiobj.character_model
-                        ->points_of_interest[object->apiobj.character_data->game_character->weapon_joints[0]] != NULL) {
-                matrix = object->joint_matrices[object->apiobj.character_data->game_character->weapon_joints[0]];
+            i32 joint = object->apiobj.character_data->game_character->weapon_joints[0];
+            if (joint != -1 && object->apiobj.character_model->points_of_interest[joint] != NULL) {
+                matrix = object->joint_matrices[joint];
             } else {
                 rotation.x = -0x4000;
                 rotation.y = object->apiobj.field_0x276;
@@ -4351,6 +4350,7 @@ static void DrawParaphernalia(GameObject_s *object) {
         ResetShadowMapRendering();
         GAMECHARACTERDATA_s *shield_config = object->apiobj.character_data->game_character;
         const u8 render_reflection = object->field_0x1088;
+        const i32 locator = shield_config->shield_locator;
         f32 scale;
         bool show;
         if (object->field_0xe37 != 0 || __builtin_expect(shield_config->field_0xf5 == 0, 0) ||
@@ -4362,7 +4362,6 @@ static void DrawParaphernalia(GameObject_s *object) {
             show = (GameTimer.update_count & 3) < 2;
         }
         if (show != 0) {
-            i32 locator = shield_config->shield_locator;
             NUVEC scaling = {scale, scale, scale};
             NuMtxSetScale(&shield_matrix, &scaling);
             if (__builtin_expect(locator != -1 && object->apiobj.character_model->points_of_interest[locator] != NULL,
@@ -4398,7 +4397,7 @@ static void DrawParaphernalia(GameObject_s *object) {
                     communicate_matrix.m31 = object->apiobj.water_height;
                 model_id = 0x19;
             } else {
-                model_id = (communicate_config->flags_094[0] & 0x80) ? 0x0e : -1;
+                model_id = (communicate_config->flags_094[0] >> 7) ? 0x0e : -1;
                 communicate_matrix = joints[locator];
                 if (object->communicate_blend != 1.0f) {
                     effect_vector.x = effect_vector.y = effect_vector.z = object->communicate_blend;
@@ -4449,10 +4448,12 @@ static void DrawParaphernalia(GameObject_s *object) {
         DrawObjectOnCharacter(WORLD, object, 0xe7, NULL, object->apiobj.character_data->game_character->head_locator,
                               -1, joints, object->field_0x1088, object->field_0x1054, NULL, NULL, 1.0f, 1.0f);
     if (object->field_0x108e) {
-        i32 locator = object->apiobj.character_data->game_character->helmet_locator;
-        if ((object->id == id_CHEWBACCA || object->id == id_WOOKIEE) &&
-            __builtin_expect(object->field_0x108e != 5, 1) && object->field_0x108e != 6)
+        i32 locator;
+        if ((object->id == id_CHEWBACCA || object->id == id_WOOKIEE) && object->field_0x108e != 5 &&
+            object->field_0x108e != 6)
             locator = 9;
+        else
+            locator = object->apiobj.character_data->game_character->helmet_locator;
         DrawObjectOnCharacter(WORLD, object, object->field_0x108e + 0xf9, NULL, locator, -1, joints,
                               object->field_0x1088, object->field_0x1054, NULL, NULL, 1.0f, 1.0f);
     }

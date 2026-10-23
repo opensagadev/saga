@@ -1151,14 +1151,14 @@ static void MoveAnim_Manage(GameObject_s *object, f32 movement_speed, i32 allow_
 }
 
 static void JumpAnimCode(GameObject_s *object) {
-    if (object->context_variant_flags < 0) {
+    if (__builtin_expect(object->context_variant_flags < 0, 1)) {
         void **animations = object->apiobj.character_model->model_data_b;
         if (object->action_movement_state == PLAYER_JUMP_MOVEMENT_COMBAT_ROLL &&
             animations[PLAYER_JUMP_ACTION_COMBAT_ROLL_FALL] != NULL) {
             object->apiobj.anim_packet.requested_animation = PLAYER_JUMP_ACTION_COMBAT_ROLL_FALL;
             return;
         }
-        if (animations[PLAYER_JUMP_ACTION_FALL] != NULL) {
+        if (__builtin_expect(animations[PLAYER_JUMP_ACTION_FALL] != NULL, 1)) {
             object->apiobj.anim_packet.requested_animation = PLAYER_JUMP_ACTION_FALL;
             return;
         }
@@ -1168,9 +1168,9 @@ static void JumpAnimCode(GameObject_s *object) {
     ANIMPACKET_s *packet = &object->apiobj.anim_packet;
     packet->requested_animation = object->context_animation;
     const i32 state = object->action_movement_state;
-    if (object->context_animation != 0x49 && (state == 6 || state < 2 || state == 7 || state == 9)) {
-        if (!(packet->blending == 0 && object->context_animation == packet->animation_index &&
-              (packet->flags & 1) != 0)) {
+    if (__builtin_expect(object->context_animation != 0x49 && (state == 6 || state < 2 || state == 7 || state == 9), 0)) {
+        if (__builtin_expect(!(packet->blending == 0 && object->context_animation == packet->animation_index &&
+              (packet->flags & 1) != 0), 1)) {
             object->airborne_input_timer = 0.0f;
         } else {
             object->airborne_input_timer += FRAMETIME;
@@ -2703,7 +2703,9 @@ void PreResetCode(GameObject_s *obj) {
             obj->pre_reset_hover_height = GetHoverPosY(obj);
             {
                 u8 v = obj->apiobj.character_data->player_config->variant;
-                if (v != 0xff) {
+                if (v == 0xff) {
+                    obj->blade_index = 0xff;
+                } else {
                     if (static_cast<u8>(obj->apiobj.field_0x27c) != 0xff) {
                         if (Cheat_IsOn(0x19) != 0) {
                             obj->blade_index = 0x00;
@@ -2716,8 +2718,6 @@ void PreResetCode(GameObject_s *obj) {
                     } else {
                         obj->blade_index = v;
                     }
-                } else {
-                    obj->blade_index = 0xff;
                 }
 
                 {
@@ -4569,7 +4569,7 @@ void GrabVictim(GameObject_s *object, GameObject_s *victim) {
     object->character_context = 0x38;
     i16 animation = 0x64;
     i32 animation_offset = 0x190;
-    if (victim->id == id_GAMORREANGUARD) {
+    if (__builtin_expect(victim->id == id_GAMORREANGUARD, 1)) {
         animation_offset = victim->apiobj.field_0x27c == -1 ? 0x7c : 0x190;
         animation = victim->apiobj.field_0x27c == -1 ? 0x1f : 0x64;
     }
@@ -10529,9 +10529,9 @@ void Animate_JEDI(GameObject_s *object) {
 
 __attribute__((optimize("O2", "tree-vectorize"))) void Animate_ASTROMECH(GameObject_s *object) {
     ANIMPACKET_s &packet = object->apiobj.anim_packet;
-    if ((CInfo[object->character_context].flags & CHARACTER_CONTEXT_INFO_FLAG_OWNS_ANIMATION) == 0) {
+    if (__builtin_expect((CInfo[object->character_context].flags & CHARACTER_CONTEXT_INFO_FLAG_OWNS_ANIMATION) == 0, 1)) {
         if (object->context_target_position != NULL) {
-            if (object->apiobj.character_model->model_data_b[43] != NULL) {
+            if (__builtin_expect(object->apiobj.character_model->model_data_b[43] != NULL, 1)) {
                 packet.requested_animation = 43;
             } else {
                 packet.requested_animation =
@@ -10797,7 +10797,7 @@ void Move_BEAST(GameObject_s *object) {
     if (object->character_context == 0x3f) {
         object->context_animation_timer -= FRAMETIME;
         bool hit = false;
-        if (object->context_animation_timer <= 0.0f) {
+        if (__builtin_expect(object->context_animation_timer <= 0.0f, 0)) {
             object->character_context = -1;
             hit = (object->context_flags & 0x40) == 0;
         } else {
@@ -11504,7 +11504,7 @@ void Animate_BATTLEDROID(GameObject_s *object) {
             if (object->apiobj.character_model->model_data_b[43] != NULL) {
                 packet.requested_animation = 43;
             } else {
-                if (object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] == NULL) {
+                if (__builtin_expect(object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] == NULL, 0)) {
                     packet.requested_animation = CHARACTER_ANIMATION_IDLE;
                 } else {
                     packet.requested_animation = CHARACTER_ANIMATION_FALL;
@@ -11514,7 +11514,7 @@ void Animate_BATTLEDROID(GameObject_s *object) {
             packet.requested_animation = CHARACTER_ANIMATION_FALL;
             if (object->character_context == CHARACTER_CONTEXT_DOOMED)
                 goto choose_movement;
-            if (object->apiobj.field_0x27d != 0)
+            if (__builtin_expect(object->apiobj.field_0x27d != 0, 0))
                 goto default_idle;
             if (object->ground_contact_grace_timer > 0.0f ||
                 object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] == NULL ||

@@ -63,7 +63,7 @@ static i32 Customiser_FindSetFromNamePart(char *name) {
     return -1;
 }
 
-static inline i32 Customiser_FindSetFromName(char *name) {
+static inline __attribute__((always_inline)) i32 Customiser_FindSetFromName(char *name) {
     if (NuStrICmp(name, "hathair") == 0)
         return 0;
     if (NuStrICmp(name, "head") == 0)
@@ -695,7 +695,7 @@ CUSTOMISER *Customiser_Configure(char *filename, VARIPTR *buffer, VARIPTR *, i32
             if (CustomSetData[category].name == NULL && weapon_from_name != NULL)
                 piece->weapon_model = weapon_from_name(piece->name);
             while (NuFParGetWord(parser) != 0) {
-                if (NuStrICmp(parser->word_buf, "from") == 0) {
+                if (__builtin_expect(NuStrICmp(parser->word_buf, "from") == 0, 0)) {
                     if (NuFParGetWord(parser) != 0)
                         piece->character_id = CharIDFromName(parser->word_buf);
                 } else if (NuStrICmp(parser->word_buf, "icon_from") == 0) {
@@ -706,13 +706,13 @@ CUSTOMISER *Customiser_Configure(char *filename, VARIPTR *buffer, VARIPTR *, i32
                         piece->collection_type = CharVariant_Find(parser->word_buf);
                 } else if (__builtin_expect(NuStrICmp(parser->word_buf, "no_hat") == 0, 0)) {
                     piece->availability_flags |= 1;
-                } else if (NuStrICmp(parser->word_buf, "hat_off") == 0) {
+                } else if (__builtin_expect(NuStrICmp(parser->word_buf, "hat_off") == 0, 0)) {
                     piece->availability_flags |= 0x20;
                 } else if (NuStrICmp(parser->word_buf, "cape_off") == 0) {
                     piece->availability_flags |= 0x40;
                 } else if (NuStrICmp(parser->word_buf, "helmet") == 0) {
                     piece->availability_flags |= 2;
-                } else if (NuStrICmp(parser->word_buf, "big_head") == 0) {
+                } else if (__builtin_expect(NuStrICmp(parser->word_buf, "big_head") == 0, 0)) {
                     piece->availability_flags |= 4;
                 } else if (NuStrICmp(parser->word_buf, "big_hat") == 0) {
                     piece->availability_flags |= 8;
@@ -721,7 +721,7 @@ CUSTOMISER *Customiser_Configure(char *filename, VARIPTR *buffer, VARIPTR *, i32
                 } else if (NuStrICmp(parser->word_buf, "100_percent") == 0) {
                     if (NuFParGetWord(parser) != 0) {
                         i32 side = NuAToI(parser->word_buf);
-                        if (side == 1)
+                        if (__builtin_expect(side == 1, 1))
                             piece->availability_flags |= 0x80;
                         else if (side == 2)
                             piece->availability_flags |= 0x100;
@@ -745,14 +745,16 @@ CUSTOMISER *Customiser_Configure(char *filename, VARIPTR *buffer, VARIPTR *, i32
                     category = Customiser_FindSetFromName(parser->word_buf);
                     if (category != -1) {
                         i32 locator = NuFParGetInt(parser);
-                        locators[category] = static_cast<u32>(locator) < 16 ? locator : -1;
                         if (static_cast<u32>(locator) < 16) {
+                            locators[category] = locator;
                             while (NuFParGetWord(parser) != 0) {
                                 if (__builtin_expect(NuStrICmp(parser->word_buf, "xoffset") == 0, 0))
                                     x_offsets[category] = NuFParGetFloat(parser);
                                 else if (__builtin_expect(NuStrICmp(parser->word_buf, "yoffset") == 0, 1))
                                     y_offsets[category] = NuFParGetFloat(parser);
                             }
+                        } else {
+                            locators[category] = -1;
                         }
                     }
                 }

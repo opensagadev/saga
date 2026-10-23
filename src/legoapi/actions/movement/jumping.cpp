@@ -530,7 +530,7 @@ i32 UseFallAnim(GameObject_s *object) {
 
 i32 StartFallLand(GameObject_s *object, i32 action) {
     PlayLandSfx(object, 0, 0);
-    if (LEGOCONTEXT_LAND_JUMP == -1) {
+    if (__builtin_expect(LEGOCONTEXT_LAND_JUMP == -1, 0)) {
         object->movement_runtime_flags &= ~4;
         return 0;
     }

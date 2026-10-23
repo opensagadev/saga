@@ -373,7 +373,7 @@ TIGHTROPE *TightRope_InRange(GameObject_s *object, WORLDINFO_s *world, NUVEC *po
         offset.x = 0.0f;
         offset.y = (rope->end.y - rope->start.y) * (offset.z / rope->horizontal_length) + rope->start.y;
         if (object->apiobj.field_0x1e0 > fabsf(offset.y - origin.y)) {
-            if (position != NULL) {
+            if (__builtin_expect(position != NULL, 0)) {
                 f32 margin = (object->apiobj.character_data->game_character->flags_090 & 0x10000000) != 0
                                  ? object->apiobj.field_0x1e0
                                  : object->apiobj.field_0x1dc;

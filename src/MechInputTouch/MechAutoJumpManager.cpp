@@ -473,7 +473,7 @@ void MechAutoJumpManager::Process() {
             distance = testStreakMinDist;
         }
         f32 progress = streak->elapsed * testStreakSpeed;
-        if (progress > distance) {
+        if (__builtin_expect(progress > distance, 0)) {
             NuLinkedListRemove(&streaks, reinterpret_cast<NULISTLNK *>(streak));
             delete streak;
         } else {

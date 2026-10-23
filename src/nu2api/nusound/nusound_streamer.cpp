@@ -189,7 +189,7 @@ void NuSoundStreamer::ThreadFunc(void *self) {
                 break;
         }
 
-    } while (streamer->running != false);
+    } while (__builtin_expect(streamer->running != false, 1));
 }
 
 // ---------------------------------------------------------------------------
@@ -420,7 +420,7 @@ i32 NuSoundStreamingSample::ReCue(f32 start_offset, bool loop) {
     context.flags &= ~1;
     this->sound_buffers[0]->Unlock();
 
-    if ((context.flags & 2) == 0) {
+    if (__builtin_expect((context.flags & 2) == 0, 1)) {
         this->sound_buffers[1]->Lock();
         context = this->file_loader->FillStreamBuffer(this->sound_buffers[1], loop);
 

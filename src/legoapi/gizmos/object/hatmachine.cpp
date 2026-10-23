@@ -374,8 +374,11 @@ disable:
 
 static void HatMachine_Draw(void *world_ptr, void *, float) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
-    HATMACHINESYS_s *system;
-    if (__builtin_expect(world == NULL || (system = world->hat_machine_sys) == NULL || system->count == 0, 0)) {
+    if (world == NULL) {
+        return;
+    }
+    HATMACHINESYS_s *system = world->hat_machine_sys;
+    if (system == NULL || system->count == 0) {
         return;
     }
 
@@ -387,38 +390,17 @@ static void HatMachine_Draw(void *world_ptr, void *, float) {
 
     EnableShadowMapRendering(0);
 
-    // The four machine effects share the same animation playback convention.  End
-    // their current instance animation once per draw, before evaluating a frame.
-    nuhspecial_s *animated_special = &world->lev_objs[288].special;
-    nuinstanim_s *animated_instance_animation = NuSpecialGetInstAnim(animated_special);
-    f32 animated_end_frame = 0.0f;
-    if (animated_instance_animation != NULL && animated_special->scene != NULL) {
-        animated_end_frame =
-            NuAnimEndFrameOld(animated_special->scene->instance_animation_data[animated_instance_animation->anim_ix]);
-    }
-
-    nuhspecial_s *effect_special_a = &world->lev_objs[285].special;
-    nuinstanim_s *effect_instance_animation_a = NuSpecialGetInstAnim(effect_special_a);
-    f32 effect_end_frame_a = 0.0f;
-    if (effect_instance_animation_a != NULL && effect_special_a->scene != NULL) {
-        effect_end_frame_a =
-            NuAnimEndFrameOld(effect_special_a->scene->instance_animation_data[effect_instance_animation_a->anim_ix]);
-    }
-
-    nuhspecial_s *effect_special_b = &world->lev_objs[289].special;
-    nuinstanim_s *effect_instance_animation_b = NuSpecialGetInstAnim(effect_special_b);
-    f32 effect_end_frame_b = 0.0f;
-    if (effect_instance_animation_b != NULL && effect_special_b->scene != NULL) {
-        effect_end_frame_b =
-            NuAnimEndFrameOld(effect_special_b->scene->instance_animation_data[effect_instance_animation_b->anim_ix]);
-    }
-
-    nuhspecial_s *effect_special_c = &world->lev_objs[284].special;
-    nuinstanim_s *effect_instance_animation_c = NuSpecialGetInstAnim(effect_special_c);
-    f32 effect_end_frame_c = 0.0f;
-    if (effect_instance_animation_c != NULL && effect_special_c->scene != NULL) {
-        effect_end_frame_c =
-            NuAnimEndFrameOld(effect_special_c->scene->instance_animation_data[effect_instance_animation_c->anim_ix]);
+    // The four machine effects share the same animation playback convention.
+    nuhspecial_s *specials[4];
+    nuinstanim_s *anims[4];
+    f32 end_frames[4];
+    static const i32 effect_ids[4] = {288, 285, 289, 284};
+    for (i32 i = 0; i < 4; ++i) {
+        specials[i] = &world->lev_objs[effect_ids[i]].special;
+        anims[i] = NuSpecialGetInstAnim(specials[i]);
+        if (specials[i] != NULL && anims[i] != NULL) {
+            end_frames[i] = NuAnimEndFrameOld(specials[i]->scene->instance_animation_data[anims[i]->anim_ix]);
+        }
     }
 
     for (i32 index = 0; index < system->count; ++index) {
@@ -477,7 +459,7 @@ static void HatMachine_Draw(void *world_ptr, void *, float) {
 
         // The animated machine body is evaluated in its own space and then
         // composed with the machine transform.
-        if (animated_instance_animation != NULL) {
+        if (specials[0] != NULL && anims[0] != NULL) {
             if (!(machine->animation_state > 0)) {
                 machine->animation_time = 0.0f;
                 animation_frame = 0.0f;
@@ -504,16 +486,16 @@ static void HatMachine_Draw(void *world_ptr, void *, float) {
                     machine->state_elapsed = 0.0f;
                     machine->state_duration = 2.0f;
                 }
-                animation_frame = machine->animation_time * animated_instance_animation->tfactor * 60.0f;
-                if (animated_end_frame <= animation_frame) {
-                    animation_frame = animated_end_frame;
+                animation_frame = machine->animation_time * anims[0]->tfactor * 60.0f;
+                if (end_frames[0] <= animation_frame) {
+                    animation_frame = end_frames[0];
                 }
             }
 
             NUMTX animated_matrix;
-            EvalAnim(animated_special, animation_frame, &animated_matrix, 0);
+            EvalAnim(specials[0], animation_frame, &animated_matrix, 0);
             NuMtxMulVU0(&animated_matrix, &animated_matrix, &machine->transform);
-            NuSpecialDrawAt(animated_special, &animated_matrix);
+            NuSpecialDrawAt(specials[0], &animated_matrix);
             if (world->lev_objs[machine->target_special_index].active != 0) {
                 NuSpecialDrawAt(&world->lev_objs[machine->target_special_index].special, &animated_matrix);
             }
@@ -528,36 +510,35 @@ static void HatMachine_Draw(void *world_ptr, void *, float) {
         // effect's translation supplies the hat's final placement.
         NUVEC draw_position = machine->position;
         NUMTX effect_matrix;
-        if (effect_instance_animation_a != NULL) {
-            f32 frame = machine->animation_time * animated_instance_animation->tfactor * 60.0f;
-            if (effect_end_frame_a <= frame)
-                frame = effect_end_frame_a;
-            EvalAnim(effect_special_a, frame, &effect_matrix, 0);
+        if (specials[1] != NULL && anims[1] != NULL) {
+            f32 frame = machine->animation_time * anims[0]->tfactor * 60.0f;
+            if (end_frames[1] <= frame)
+                frame = end_frames[1];
+            EvalAnim(specials[1], frame, &effect_matrix, 0);
             NuMtxMulVU0(&effect_matrix, &effect_matrix, &machine->transform);
-            NuSpecialDrawAt(effect_special_a, &effect_matrix);
+            NuSpecialDrawAt(specials[1], &effect_matrix);
             draw_position.x = effect_matrix.m30;
             draw_position.z = effect_matrix.m32;
         }
-        if (effect_instance_animation_b != NULL) {
-            f32 frame = machine->animation_time * animated_instance_animation->tfactor * 60.0f;
-            if (effect_end_frame_b <= frame)
-                frame = effect_end_frame_b;
-            EvalAnim(effect_special_b, frame, &effect_matrix, 0);
+        if (specials[2] != NULL && anims[2] != NULL) {
+            f32 frame = machine->animation_time * anims[0]->tfactor * 60.0f;
+            if (end_frames[2] <= frame)
+                frame = end_frames[2];
+            EvalAnim(specials[2], frame, &effect_matrix, 0);
             NuMtxMulVU0(&effect_matrix, &effect_matrix, &machine->transform);
-            NuSpecialDrawAt(effect_special_b, &effect_matrix);
+            NuSpecialDrawAt(specials[2], &effect_matrix);
         }
-        if (effect_instance_animation_c != NULL) {
-            f32 frame = machine->animation_time * animated_instance_animation->tfactor * 60.0f;
-            if (effect_end_frame_c <= frame)
-                frame = effect_end_frame_c;
-            EvalAnim(effect_special_c, frame, &effect_matrix, 0);
+        if (specials[3] != NULL && anims[3] != NULL) {
+            f32 frame = machine->animation_time * anims[0]->tfactor * 60.0f;
+            if (end_frames[3] <= frame)
+                frame = end_frames[3];
+            EvalAnim(specials[3], frame, &effect_matrix, 0);
             NuMtxMulVU0(&effect_matrix, &effect_matrix, &machine->transform);
-            NuSpecialDrawAt(effect_special_c, &effect_matrix);
+            NuSpecialDrawAt(specials[3], &effect_matrix);
         }
 
         if ((machine->flags & HATMACHINE_FLAG_ENABLED) != 0 && machine->displayed_hat != 0) {
-            const i32 hat_index = machine->displayed_hat + 249;
-            if (!(machine->animation_time >= 2.35f) && world->lev_objs[hat_index].active != 0) {
+            if (world->lev_objs[machine->displayed_hat + 249].active != 0 && !(machine->animation_time >= 2.35f)) {
                 const NUVEC *hat_offset = &HatMachine_HatOffset;
                 NUVEC hat_position = *hat_offset;
                 const f32 hat_phase = machine->hat_delay * 32768.0f + 16384.0f;
@@ -580,7 +561,7 @@ static void HatMachine_Draw(void *world_ptr, void *, float) {
                 NuMtxTranslate(&effect_matrix, &draw_position);
                 NuMtxTranslate(&effect_matrix, &hat_position);
                 NuMtxPreScaleU(&effect_matrix, hat_scale);
-                NuSpecialDrawAt(&world->lev_objs[hat_index].special, &effect_matrix);
+                NuSpecialDrawAt(&world->lev_objs[machine->displayed_hat + 249].special, &effect_matrix);
             }
         }
     }
@@ -854,7 +835,7 @@ void HatMachine_MoveCode(WORLDINFO_s *world, GameObject_s *object, i32 special_p
             if (static_cast<HATMACHINE_s *>(object->field_0x788)->configured_hat == 6) {
                 PlaySfx(const_cast<char *>("Hunter_Granted"), &object->apiobj.collision_position);
             }
-            if (static_cast<HATMACHINE_s *>(object->field_0x788)->configured_hat == 5) {
+            if (__builtin_expect(static_cast<HATMACHINE_s *>(object->field_0x788)->configured_hat == 5, 1)) {
                 PlaySfx(const_cast<char *>("Trooper_Granted"), &object->apiobj.collision_position);
             }
         }

@@ -946,11 +946,11 @@ void DrawPanel() {
             goto draw_panel_menu;
         if (!(menu >= 15 && menu <= 19) && !CUTSTOPGAME) {
             bool player_hud =
-                (menu != 12 || customiser_quit) && (menu != 13 || shop_quit) && menu != 8 && menu != 14 && menu != 24;
+                (menu != 12 || customiser_quit) && (menu != 13 || shop_quit) && menu != 14 && menu != 8 && menu != 24;
             if (player_hud && FadeSys.fade == 0.0f && (WORLD->current_level->flags & LEVEL_GAMEPLAY)) {
                 u32 arcade_flags;
                 i32 arcade_mode = Arcade_GetMode(&arcade_flags);
-                status_y = NU_SIN_LUT(static_cast<i32>(statstime * 16384.0f)) * (STATSPOSY - STATSPOS2Y) + STATSPOS2Y;
+                status_y = (STATSPOSY - STATSPOS2Y) * NU_SIN_LUT(static_cast<i32>(statstime * 16384.0f)) + STATSPOS2Y;
                 bool raised_hearts =
                     (WORLD->area != NULL && (WORLD->area == HUB_ADATA || (WORLD->area->flags & 0x100))) || SuperStory ||
                     ChallengeMode || Mission_Active(NULL) != NULL || arcade_mode == 99;
@@ -1165,8 +1165,8 @@ void DrawPanel() {
                 }
                 if (BonusArea && WORLD->area != NULL && (WORLD->area->flags & 0x104) == 4) {
                     i32 *scores = Arcade ? Arcade_Points : BonusScore;
-                    i32 active2 = Player[1] != NULL && Player[1]->apiobj.player_controlled;
-                    i32 active1 = Player[0] != NULL && Player[0]->apiobj.player_controlled;
+                    i32 active2 = Player[1] != NULL ? Player[1]->apiobj.player_controlled : 0;
+                    i32 active1 = Player[0] != NULL ? Player[0]->apiobj.player_controlled : 0;
                     DrawBonusScore(status_y, active1, active2, 1.0f, scores);
                 }
                 if (HUB_ADATA != NULL && WORLD->area == HUB_ADATA && goldbricktime > 0.0f) {
@@ -1195,7 +1195,7 @@ void DrawPanel() {
                 if (Arcade)
                     Arcade_DrawPanel(Paused || NetPaused);
                 else {
-                    if (__builtin_expect(WORLD->area->flags & 0x100 != 0, 0)) {
+                    if (__builtin_expect((WORLD->area->flags & 0x100) != 0, 0)) {
                         DrawCoinTotal(2, hide_target);
                         if (DrawCoinTotalY != 2000000.0f) {
                             Text_MakeScore(BonusCoinTarget, auxiliary);
@@ -1208,7 +1208,7 @@ void DrawPanel() {
                     }
                     if (FadeSys.fade == 0.0f && (WORLD->current_level->flags & LEVEL_GAMEPLAY)) {
                         f32 y =
-                            NU_SIN_LUT(static_cast<i32>(statstime * 16384.0f)) * (STATSPOSY - STATSPOS2Y) + STATSPOS2Y;
+                            (STATSPOSY - STATSPOS2Y) * NU_SIN_LUT(static_cast<i32>(statstime * 16384.0f)) + STATSPOS2Y;
                         DrawSuperStoryTime(-y, BonusTimer.time_elapsed,
                                            Game.area_save[WORLD->level_sub_id].challenge_trial_time, 0, 1);
                     }
@@ -1220,10 +1220,10 @@ void DrawPanel() {
                 if (remaining < 0.0f)
                     remaining = 0.0f;
                 Text_MakeTime(remaining, 0, 1, 1, text);
-                f32 y = NU_SIN_LUT(static_cast<i32>(statstime * 16384.0f)) * (STATSPOSY - STATSPOS2Y) + STATSPOS2Y;
+                f32 y = (STATSPOSY - STATSPOS2Y) * NU_SIN_LUT(static_cast<i32>(statstime * 16384.0f)) + STATSPOS2Y;
                 Text3D(text, 0.0f, y, 1.0f, 0.6f, 0.6f, 0.6f, 0, 255, 191, 0);
             } else if (Mission_Active(NULL) != NULL) {
-                status_y = NU_SIN_LUT(static_cast<i32>(statstime * 16384.0f)) * (STATSPOSY - STATSPOS2Y) + STATSPOS2Y;
+                status_y = (STATSPOSY - STATSPOS2Y) * NU_SIN_LUT(static_cast<i32>(statstime * 16384.0f)) + STATSPOS2Y;
                 i32 mission_index = static_cast<i8>(MissionSys->mission->count);
                 f32 remaining =
                     static_cast<f32>(static_cast<i32>(static_cast<u16>(MissionSys->missions[mission_index].time))) -

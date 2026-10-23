@@ -400,7 +400,7 @@ void ThingManager::ProcessThings(ThingProcessData *data) {
     } else {
         for (i32 i = 0; i < this->count; ++i) {
             if (this->things[i] != NULL && (this->things[i]->flags & THING_FLAG_SKIP_PROCESS_ONLY_WHEN_PAUSED) == 0) {
-                if (__builtin_expect(this->things[i]->profiling_0xc != 0, 0)) {
+                if (__builtin_expect(this->things[i]->profiling_0xc != 0, 1)) {
                     _NuTimeBarSlotBegin(this->timebar, 0, name);
                 }
                 this->things[i]->ProcessOnlyWhenPaused(data);
