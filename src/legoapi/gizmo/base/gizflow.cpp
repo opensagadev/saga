@@ -731,7 +731,7 @@ void *LoadGizFlow(void *, GIZMOSYS_s *system, char *path, VARIPTR *buffer, VARIP
         }
         if (load_nflowboxes != 0) {
             parser = NuFParOpen(file);
-            if (parser != NULL) {
+            if (__builtin_expect(parser != NULL, 1)) {
                 flow = reinterpret_cast<GIZFLOW_s *>(GizmoBufferAlloc(load_buff, load_endbuff, sizeof(GIZFLOW_s)));
                 if (flow != NULL) {
                     flow->flowbox_count = load_nflowboxes;

@@ -639,7 +639,7 @@ void Text_InitTable(TEXTENTRY *entry, i32 first, i32 last) {
             if (index >= first && index <= last)
                 *entry->text_id = entry->value;
         } else {
-            if (index >= first && index <= last) {
+            if (__builtin_expect(index >= first && index <= last, 1)) {
                 entry->value = index;
                 *entry->text_id = index;
                 Text_StringBits[index / 32] |= 1U << (index & 0x1f);

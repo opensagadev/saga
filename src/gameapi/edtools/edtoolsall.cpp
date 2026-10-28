@@ -3312,7 +3312,7 @@ extern "C" {
             f32 hue;
             if (red == maximum)
                 hue = (green - blue) / delta;
-            else if (green == maximum)
+            else if (__builtin_expect(green == maximum, 0))
                 hue = 2.0f + (blue - red) / delta;
             else if (blue == maximum)
                 hue = 4.0f + (red - green) / delta;
@@ -6909,7 +6909,7 @@ i32 FS_FileNameFilter(char *name) {
             }
             i32 dots = 0;
             for (char *p = match; *p != '\0'; ++p) {
-                if (*p == '.') {
+                if (__builtin_expect(*p == '.', 1)) {
                     if (++dots > 1)
                         break;
                 }

@@ -2023,7 +2023,7 @@ void CutScenePlayer_Configure(char *file, VARIPTR *buffer, VARIPTR *, i16 *clip_
     player.midtro_text = midtro;
     player.outro_text = outro;
     player.ending_text = ending;
-    while (NuFParGetLine(fp)) {
+    while (__builtin_expect(NuFParGetLine(fp) != 0, 1)) {
         if (NuFParGetWord(fp) && !(NuStrICmp(fp->word_buf, "clip"))) {
             CUTSCENEPLAYERCLIP *clip = &player.clips[player.clip_count];
             clip->level_id = -1;

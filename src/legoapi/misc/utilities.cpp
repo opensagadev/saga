@@ -887,7 +887,7 @@ void CalculateInterceptVector(NUVEC *origin, NUVEC *target, NUVEC *velocity, f32
         NuVecSub(direction, &prediction, origin);
         f32 distance = NuVecMag(direction);
         f32 time = distance;
-        if (distance == 0.0f || zero_speed)
+        if (__builtin_expect(distance == 0.0f || zero_speed, 0))
             time = 0.0f;
         else
             time /= speed;

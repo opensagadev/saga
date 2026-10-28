@@ -4147,7 +4147,7 @@ static void edpartFileLoadEffects(eduimenu_s *parent, eduiitem_s *, u32) {
     if (NuFileExists(path))
         edpartLoadPage(path, 0, edbits_things_scene);
     sprintf(path, "%s\\%s.%s", level_directory, level_name, level_extension);
-    if (NuFileExists(path)) {
+    if (__builtin_expect(NuFileExists(path) != 0, 1)) {
         i32 page = edpartLoadPage(path, 1, edbits_base_scene);
         edpartStartPage(static_cast<i8>(page));
     }

@@ -14123,8 +14123,10 @@ static void cbPtlSelTextureType(eduimenu_s *menu, eduiitem_s *item, u32) {
         } else if (old_type == 7) {
             effect->time_group = 0;
         }
-        if (item->data == 7 ||
-            debtab[debkeydata[edpp_ptls[edpp_nearest].instance_id].effect_index]->particle_type == 7) {
+        if (!(item->data == 7 ||
+            debtab[debkeydata[edpp_ptls[edpp_nearest].instance_id].effect_index]->particle_type == 7)) {
+            effect->particle_type = static_cast<u8>(item->data);
+        } else {
             for (i32 index = 0; index < 512; ++index) {
                 if (edpp_ptls[index].effect_index == type) {
                     edppPtlShelve(index);
@@ -14139,7 +14141,7 @@ static void cbPtlSelTextureType(eduimenu_s *menu, eduiitem_s *item, u32) {
                 edpp_ptls[index].instance_id = -1;
                 AddDebrisEffect(&edpp_ptls[index].instance_id, type, edpp_ptls[index].position.x,
                                 edpp_ptls[index].position.y, edpp_ptls[index].position.z);
-                if (edpp_ptls[index].instance_id == -1) {
+                if (__builtin_expect(edpp_ptls[index].instance_id == -1, 0)) {
                     edpp_ptls[index].instance_id = 99999;
                     continue;
                 }
@@ -14160,8 +14162,6 @@ static void cbPtlSelTextureType(eduimenu_s *menu, eduiitem_s *item, u32) {
                 DebrisSetRoomID(edpp_ptls[index].instance_id,
                                 reinterpret_cast<nugscn_s *>(edpp_page_scene[edpp_ptls[index].page]));
             }
-        } else {
-            effect->particle_type = static_cast<u8>(item->data);
         }
     }
     eduimenu_s *parent = menu->parent;
@@ -20512,16 +20512,15 @@ void ScanTerrain(i32 scan_type, i32 terrain_mask, i32 scan_flags) {
             NuFsqrt(scan_query->movement.x * scan_query->movement.x + scan_query->movement.y * scan_query->movement.y +
                     scan_query->movement.z * scan_query->movement.z);
         scan_query = TerI;
-        f32 reach = move_length;
-        reach += 0.1f + scan_query->collision_radius;
+        f32 reach = move_length + (0.1f + scan_query->collision_radius);
         f32 vertical = reach;
         vertical *= scan_query->object_scale;
-        bounds.min_y = scan_query->position.y - 0.05f - vertical;
-        bounds.min_x = scan_query->position.x - 0.05f - reach;
         bounds.max_x = scan_query->position.x + 0.05f + reach;
-        bounds.max_y = scan_query->position.y + 0.05f + vertical;
-        bounds.min_z = scan_query->position.z - 0.05f - reach;
         bounds.max_z = scan_query->position.z + 0.05f + reach;
+        bounds.min_x = scan_query->position.x - 0.05f - reach;
+        bounds.max_y = scan_query->position.y + 0.05f + vertical;
+        bounds.min_y = scan_query->position.y - 0.05f - vertical;
+        bounds.min_z = scan_query->position.z - 0.05f - reach;
         scan_radius = reach;
     } else {
         const f32 radius = scan_query->collision_radius;

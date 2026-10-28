@@ -256,7 +256,7 @@ bool MechInputTouchMenuController::OnClick(GameObject_s &, TouchHolder &holder) 
     const volatile NuVec2 &touch = holder.touch_position;
     const f32 touch_y = touch.y;
     const f32 touch_x = touch.x;
-    if (!PackButtonActive) {
+    if (__builtin_expect(!PackButtonActive, 1)) {
         return false;
     }
     PackButtonActive = false;

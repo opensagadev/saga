@@ -143,7 +143,7 @@ void TTNetwork::ReliableBroadcast(NetMessage message, unsigned char channel) {
 }
 
 void TTNetwork::Broadcast(NetMessage message, unsigned char channel) {
-    if (message.data == NULL || static_cast<i32>(message.write_offset - message.read_offset) <= 0) {
+    if (__builtin_expect(message.data == NULL || static_cast<i32>(message.write_offset - message.read_offset) <= 0, 0)) {
         return;
     }
 

@@ -789,7 +789,7 @@ __attribute__((optimize("no-tree-slp-vectorize"))) bool MechInputTouchGestureBas
 void MechInputTouchGestureBasedController::ProcessAutoJumpOverGap(GameObject_s *object) {
     LEVELDATA *level = WORLD->current_level;
     if (level != RESCUEE_LDATA && level != GUNGAN_A_LDATA) {
-        if (level == MOSEISLEYA_LDATA && (object->apiobj.character_data->model_flags & 0x40) == 0) {
+        if (__builtin_expect(level == MOSEISLEYA_LDATA && (object->apiobj.character_data->model_flags & 0x40) == 0, 0)) {
             return;
         }
         TouchHolder *holder = field_90;
@@ -816,9 +816,9 @@ void MechInputTouchGestureBasedController::ProcessAutoJumpOverGap(GameObject_s *
         if (!danger && !TouchHacks::CheckForAboutToRunOffAnEdge(*object, 0.3f)) {
             return;
         }
-        if ((object->apiobj.character_data->model_flags & 0x40) == 0 && object->id != id_WATTO &&
+        if (__builtin_expect((object->apiobj.character_data->model_flags & 0x40) == 0 && object->id != id_WATTO &&
             MechAutoJumpGetBest(packet, object->apiobj.facing_angle) == NULL &&
-            !TouchHacks::CheckJumpForLandingSpot(*object, danger ? 2.0f : 0.05f)) {
+            !TouchHacks::CheckJumpForLandingSpot(*object, danger ? 2.0f : 0.05f), 0)) {
             return;
         }
         f32 speed =

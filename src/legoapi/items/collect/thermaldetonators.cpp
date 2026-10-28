@@ -301,9 +301,7 @@ void ThermalDetonator_ThrowMom(GameObject_s *object, nuvec_s *velocity) {
     // does not calculate or modify the caller's vector.
     NUMTX matrix;
     const i32 locator = object->apiobj.character_data->game_character->throw_locator;
-    if (locator == -1 || object->apiobj.character_model->points_of_interest[locator] == NULL) {
-        NuMtxSetTranslation(&matrix, &object->apiobj.collision_position);
-    } else {
+    if (!(locator == -1 || object->apiobj.character_model->points_of_interest[locator] == NULL)) {
         if (object->id == id_JANGOFETT && object->context_animation == 0x6e) {
             NuMtxSetRotationY(&matrix, qrand());
             NuMtxRotateZ(&matrix, qrand());
@@ -323,6 +321,8 @@ void ThermalDetonator_ThrowMom(GameObject_s *object, nuvec_s *velocity) {
 
         NuVecSub(&movement, NUMTX_GET_ROW_VEC(&matrix, 3), &origin);
         GameRayCast(&origin, &movement, 0.0f, TERRAINMASK_NONWEAPON | 0x1f);
+    } else {
+        NuMtxSetTranslation(&matrix, &object->apiobj.collision_position);
     }
     params.matrix = &matrix;
     params.velocity = velocity;

@@ -138,7 +138,7 @@ void DrawSnakeBody(GameObject_s *object) {
         nuhspecial_s *special = &snake_hspecials[special_index];
         if (NuSpecialExistsFn(special))
             NuSpecialDrawAt(special, &matrix);
-    } while (object->snake_body->segment_count > ++segment_index);
+    } while (__builtin_expect(object->snake_body->segment_count > ++segment_index, 1));
 }
 
 #define ADD_SNAKE_SEGMENT_DEBRIS(index)                                                                                \

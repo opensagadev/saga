@@ -1521,85 +1521,63 @@ void KaminoC_Reset(WORLDINFO_s *world) {
 
 void KaminoC_Update(WORLDINFO_s *world) {
     KaminoProgressGizmo_s *progress = static_cast<KaminoProgressGizmo_s *>(LevGizmo[0]->object);
-    if (GizmoGetOutput(world->gizmo_sys, LevGizmo[0], 0, 0)) {
+    if (GizmoGetOutput(world->gizmo_sys, LevGizmo[0], 0, 0) ||
+        (__builtin_expect(!(progress->flags & 1), 0) && (GizmoActivate(world->gizmo_sys, LevGizmo[1], 1, 1),
+                                                         GizmoGetOutput(world->gizmo_sys, gizTurrets[0], 0, 0) &&
+                                                             GizmoGetOutput(world->gizmo_sys, gizTurrets[1], 0, 0))))
         GizmoSetVisibility(world->gizmo_sys, LevGizmo[1], 0, 1);
-    } else if (__builtin_expect(!(progress->flags & 1), 1)) {
-        GizmoActivate(world->gizmo_sys, LevGizmo[1], 1, 1);
-        if (GizmoGetOutput(world->gizmo_sys, gizTurrets[0], 0, 0) &&
-            GizmoGetOutput(world->gizmo_sys, gizTurrets[1], 0, 0))
-            GizmoSetVisibility(world->gizmo_sys, LevGizmo[1], 0, 1);
-    }
     kaminoc_netpacket->sound_mask = 0;
     SetGizAIMessage(gizaimessagesys, "NextDiscoTile", 0.0f, kaminodisco.next_tile_message);
     SetGizAIMessage(gizaimessagesys, "DiscoComplete", 0.0f, kaminodisco.complete_message);
-    switch (kaminodisco.phase) {
-        case 0:
-            if (KaminoDiscoPlayerInArea(world)) {
-                kaminoc_netpacket->complete = 0;
-                kaminodisco.phase = 1;
-                kaminodisco.timer = 0.0f;
-                kaminodisco.first_tile = KaminoDiscoChooseTile(-1, 0);
-                kaminodisco.second_tile = KaminoDiscoChooseTile(kaminodisco.first_tile, 0);
-                if (kaminodisco.first_tile != -1 && kaminodisco.second_tile != -1) {
-                    kaminodisco.tile_state[kaminodisco.first_tile] = 1;
-                    kaminodisco.tile_state[kaminodisco.second_tile] = 1;
-                }
+    if (kaminodisco.phase == 1) {
+        i32 occupied_by_player = -1;
+        i32 first_occupied = 0;
+        i32 second_occupied = 0;
+        u8 old_state = kaminodisco.tile_state[kaminodisco.first_tile];
+        kaminodisco.tile_state[kaminodisco.first_tile] = 1;
+        NUVEC *position = NuSpecialGetPos(&kaminodisco.pending[kaminodisco.first_tile]);
+        for (i32 i = 0; i < 8 && !first_occupied; ++i) {
+            GameObject_s *object = Player[i];
+            if (__builtin_expect(!!(KaminoDiscoOccupied(object, position)), 0)) {
+                first_occupied = 1;
+                if (object == player)
+                    occupied_by_player = kaminodisco.first_tile;
+                kaminodisco.tile_state[kaminodisco.first_tile] = 2;
             }
-            break;
-        case 1: {
-            i32 occupied_by_player = -1;
-            bool first_occupied = false;
-            bool second_occupied = false;
-            u8 old_state = kaminodisco.tile_state[kaminodisco.first_tile];
-            kaminodisco.tile_state[kaminodisco.first_tile] = 1;
-            NUVEC *position = NuSpecialGetPos(&kaminodisco.pending[kaminodisco.first_tile]);
-            for (i32 i = 0; i < 8; ++i) {
-                GameObject_s *object = Player[i];
-                if (__builtin_expect(!!(KaminoDiscoOccupied(object, position)), 0)) {
-                    first_occupied = true;
-                    if (object == player)
-                        occupied_by_player = kaminodisco.first_tile;
-                    kaminodisco.tile_state[kaminodisco.first_tile] = 2;
-                    break;
-                }
+        }
+        if (old_state != kaminodisco.tile_state[kaminodisco.first_tile] &&
+            __builtin_expect(kaminodisco.tile_state[kaminodisco.first_tile] == 2, 1))
+            kaminoc_netpacket->sound_mask |= 1u << (kaminodisco.first_tile & 31);
+        old_state = kaminodisco.tile_state[kaminodisco.second_tile];
+        kaminodisco.tile_state[kaminodisco.second_tile] = 1;
+        position = NuSpecialGetPos(&kaminodisco.pending[kaminodisco.second_tile]);
+        for (i32 i = 0; i < 8 && !second_occupied; ++i) {
+            GameObject_s *object = Player[i];
+            if (__builtin_expect(!!(KaminoDiscoOccupied(object, position)), 0)) {
+                second_occupied = 1;
+                if (__builtin_expect(!!(object == player), 1))
+                    occupied_by_player = kaminodisco.second_tile;
+                kaminodisco.tile_state[kaminodisco.second_tile] = 2;
             }
-            if (old_state != kaminodisco.tile_state[kaminodisco.first_tile] &&
-                kaminodisco.tile_state[kaminodisco.first_tile] == 2)
-                kaminoc_netpacket->sound_mask |= 1u << (kaminodisco.first_tile & 31);
-            old_state = kaminodisco.tile_state[kaminodisco.second_tile];
-            kaminodisco.tile_state[kaminodisco.second_tile] = 1;
-            position = NuSpecialGetPos(&kaminodisco.pending[kaminodisco.second_tile]);
-            for (i32 i = 0; i < 8; ++i) {
-                GameObject_s *object = Player[i];
-                if (__builtin_expect(!!(KaminoDiscoOccupied(object, position)), 0)) {
-                    second_occupied = true;
-                    if (object == player)
-                        occupied_by_player = kaminodisco.second_tile;
-                    kaminodisco.tile_state[kaminodisco.second_tile] = 2;
-                    break;
-                }
+        }
+        if (old_state != kaminodisco.tile_state[kaminodisco.second_tile] &&
+            __builtin_expect(kaminodisco.tile_state[kaminodisco.second_tile] == 2, 1))
+            kaminoc_netpacket->sound_mask |= 1u << (kaminodisco.second_tile & 31);
+        if (first_occupied && second_occupied) {
+            kaminodisco.timer = 0.0f;
+            kaminodisco.tile_state[kaminodisco.first_tile] = 3;
+            kaminodisco.tile_state[kaminodisco.second_tile] = 3;
+            kaminodisco.first_tile = KaminoDiscoChooseTile(-1, 0);
+            kaminodisco.second_tile = KaminoDiscoChooseTile(kaminodisco.first_tile, 0);
+            if (!(kaminodisco.first_tile != -1 && kaminodisco.second_tile != -1)) {
+                kaminodisco.phase = 2;
+                for (i32 i = 0; i < kaminodisco.tile_count; ++i)
+                    kaminodisco.tile_state[i] = 0;
+            } else {
+                kaminodisco.tile_state[kaminodisco.first_tile] = 1;
+                kaminodisco.tile_state[kaminodisco.second_tile] = 1;
             }
-            if (old_state != kaminodisco.tile_state[kaminodisco.second_tile] &&
-                kaminodisco.tile_state[kaminodisco.second_tile] == 2)
-                kaminoc_netpacket->sound_mask |= 1u << (kaminodisco.second_tile & 31);
-            if (first_occupied) {
-                if (second_occupied) {
-                    kaminodisco.timer = 0.0f;
-                    kaminodisco.tile_state[kaminodisco.first_tile] = 3;
-                    kaminodisco.tile_state[kaminodisco.second_tile] = 3;
-                    kaminodisco.first_tile = KaminoDiscoChooseTile(-1, 0);
-                    kaminodisco.second_tile = KaminoDiscoChooseTile(kaminodisco.first_tile, 0);
-                    if (!(kaminodisco.first_tile != -1 && kaminodisco.second_tile != -1)) {
-                        kaminodisco.phase = 2;
-                        for (i32 i = 0; i < kaminodisco.tile_count; ++i)
-                            kaminodisco.tile_state[i] = 0;
-                    } else {
-                        kaminodisco.tile_state[kaminodisco.first_tile] = 1;
-                        kaminodisco.tile_state[kaminodisco.second_tile] = 1;
-                    }
-                    break;
-                }
-            }
+        } else {
             kaminodisco.timer += FRAMETIME;
             if (__builtin_expect(kaminodisco.timer > 2.5f, 1)) {
                 kaminodisco.timer = 0.0f;
@@ -1622,26 +1600,36 @@ void KaminoC_Update(WORLDINFO_s *world) {
                                         kaminodisco.next_tile_message);
                 }
             }
-            break;
         }
-        case 2:
-            SetGizAIMessage(gizaimessagesys, "DiscoComplete", 1.0f, kaminodisco.complete_message);
-            kaminoc_netpacket->complete = 1;
-            if (!KaminoDiscoPlayerInArea(world)) {
-                KaminoC_Reset(world);
-                return;
+    } else if (kaminodisco.phase == 2) {
+        SetGizAIMessage(gizaimessagesys, "DiscoComplete", 1.0f, kaminodisco.complete_message);
+        kaminoc_netpacket->complete = 1;
+        if (!KaminoDiscoPlayerInArea(world)) {
+            KaminoC_Reset(world);
+            return;
+        }
+        for (i32 i = 0; i < kaminodisco.tile_count; ++i)
+            kaminodisco.tile_state[i] = 4;
+        kaminodisco.timer += FRAMETIME;
+        if (__builtin_expect(kaminodisco.timer > 20.0f, 1)) {
+            KaminoC_Reset(world);
+            return;
+        }
+    } else if (kaminodisco.phase == 0) {
+        if (__builtin_expect(KaminoDiscoPlayerInArea(world), 0)) {
+            kaminoc_netpacket->complete = 0;
+            kaminodisco.phase = 1;
+            kaminodisco.timer = 0.0f;
+            kaminodisco.first_tile = KaminoDiscoChooseTile(-1, 0);
+            kaminodisco.second_tile = KaminoDiscoChooseTile(kaminodisco.first_tile, 0);
+            if (kaminodisco.first_tile != -1 && kaminodisco.second_tile != -1) {
+                kaminodisco.tile_state[kaminodisco.first_tile] = 1;
+                kaminodisco.tile_state[kaminodisco.second_tile] = 1;
             }
-            for (i32 i = 0; i < kaminodisco.tile_count; ++i)
-                kaminodisco.tile_state[i] = 4;
-            kaminodisco.timer += FRAMETIME;
-            if (__builtin_expect(kaminodisco.timer > 20.0f, 0)) {
-                KaminoC_Reset(world);
-                return;
-            }
-            break;
+        }
     }
-    kaminoc_netpacket->off_mask = 0;
     kaminoc_netpacket->final_mask = 0;
+    kaminoc_netpacket->off_mask = 0;
     kaminoc_netpacket->pending_mask = 0;
     kaminoc_netpacket->occupied_mask = 0;
     kaminoc_netpacket->complete_mask = 0;
@@ -1671,7 +1659,7 @@ void KaminoC_Update(WORLDINFO_s *world) {
         NuSpecialSetVisibility(&kaminodisco.occupied[i], kaminoc_netpacket->occupied_mask & bit);
         NuSpecialSetVisibility(&kaminodisco.final[i], kaminoc_netpacket->final_mask & bit);
         NuSpecialSetVisibility(&kaminodisco.complete[i], kaminoc_netpacket->complete_mask & bit);
-        if (kaminoc_netpacket->sound_mask & bit)
+        if ((kaminoc_netpacket->sound_mask >> i) & 1)
             PlaySfx("Kam_DiscoFloorPanelOn",
                     reinterpret_cast<NUVEC *>(&NuSpecialGetDrawMtx(&kaminodisco.complete[i])->m30));
     }

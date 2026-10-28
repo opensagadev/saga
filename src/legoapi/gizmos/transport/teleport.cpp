@@ -347,7 +347,7 @@ TELEPORT_s *Teleport_Find(GameObject_s *object, float range_squared, VuVec *posi
             nearest = i;
             nearest_distance = distance;
         }
-        if ((teleport->flags & 1) != 0)
+        if (__builtin_expect((teleport->flags & 1) != 0, 1))
             continue;
         point = &teleport->path->pts[teleport->path->length - 1];
         distance = NuVecDistSqr(&object->apiobj.collision_position, point, NULL);

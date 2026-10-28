@@ -1754,8 +1754,8 @@ i32 NuMusic::PauseTrack(u32 clazz) {
                 continue;
             }
             Voice *voice = FindVoiceByTrack(track);
-            if (voice != NULL && static_cast<u32>(voice->status - VOICE_STATUS_PLAYING) <= 1 &&
-                (voice->flags & 2) == 0) {
+            if (__builtin_expect(voice != NULL && static_cast<u32>(voice->status - VOICE_STATUS_PLAYING) <= 1 &&
+                (voice->flags & 2) == 0, 1)) {
                 NuSound3PauseStereoStream(voice->stream_index);
                 voice->flags |= 2u;
                 result = 1;
@@ -1788,8 +1788,8 @@ i32 NuMusic::ResumeTrack(u32 clazz) {
                 continue;
             }
             Voice *voice = FindVoiceByTrack(track);
-            if (voice != NULL && static_cast<u32>(voice->status - VOICE_STATUS_PLAYING) <= 1 &&
-                (voice->flags & 2) != 0) {
+            if (__builtin_expect(voice != NULL && static_cast<u32>(voice->status - VOICE_STATUS_PLAYING) <= 1 &&
+                (voice->flags & 2) != 0, 1)) {
                 NuSound3ResumeStereoStream(voice->stream_index);
                 voice->flags &= ~2u;
                 result = 1;

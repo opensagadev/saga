@@ -587,7 +587,7 @@ void BoltTypes_Init(WORLDINFO_s *world) {
         type->specials.shadow_special.display_special = NULL;
 
         const i32 object_id = type->object_ids[0];
-        if (object_id != -1) {
+        if (__builtin_expect(object_id != -1, 1)) {
             type->specials.object_special = world->lev_objs[object_id].special;
             if (type->object_ids[1] != -1) {
                 type->specials.glow_special = world->lev_objs[type->object_ids[1]].special;

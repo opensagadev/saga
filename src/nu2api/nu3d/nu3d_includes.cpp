@@ -13893,7 +13893,7 @@ extern "C" i32 clipTestBox(NUVEC *minimum, NUVEC *maximum, NUPLANE *planes, i32 
             ++inside_plane, ++inside_vertices;
         if (!(plane.a * max.x + plane.b * min.y + plane.c * max.z + plane.d < 0.0f))
             ++inside_plane, ++inside_vertices;
-        if (!(plane.a * max.x + plane.b * max.y + plane.c * max.z + plane.d < 0.0f))
+        if (__builtin_expect(!(plane.a * max.x + plane.b * max.y + plane.c * max.z + plane.d < 0.0f), 0))
             ++inside_plane, ++inside_vertices;
         if (!(plane.a * min.x + plane.b * max.y + plane.c * max.z + plane.d < 0.0f))
             ++inside_plane, ++inside_vertices;

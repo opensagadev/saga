@@ -307,7 +307,7 @@ i32 StartBigJump(GameObject_s *object, NUVEC *destination, i32 mode, f32 height,
         return 0;
     Player_ClearContext(object, 0);
     GameObject_s *carried = object->field_0xcc0;
-    if (carried == NULL || carried->id != id_YODA || WORLD->current_level != DAGOBAHE_LDATA)
+    if (__builtin_expect(carried == NULL || carried->id != id_YODA || WORLD->current_level != DAGOBAHE_LDATA, 1))
         carried = NULL;
     Player_ResetContexts(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));
     object->field_0xcc0 = carried;

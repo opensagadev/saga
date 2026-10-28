@@ -210,11 +210,11 @@ void InitRipples(ripple_set_s **result, variptr_u *buf, variptr_u *, i32 count) 
     usize node_bytes;
     usize effect_bytes;
     i32 node_count;
-    if (count < 1) {
+    if (__builtin_expect(count < 1, 0)) {
         effect_bytes = 0;
         node_bytes = 0;
         node_count = 0;
-    } else if (count < 0x40) {
+    } else if (__builtin_expect(count < 0x40, 0)) {
         effect_bytes = static_cast<usize>(count) * sizeof(*eraselist);
         node_bytes = static_cast<usize>(count) * sizeof(ripple_node_s);
         node_count = count;

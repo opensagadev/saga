@@ -554,10 +554,7 @@ void ResetTrooperCannons(WORLDINFO_s *world, i32 trooper_id) {
         }
 
         if (troopercannons[cannon_index].buildit != NULL && troopercannons[cannon_index].object != NULL) {
-            if ((world->level_progress->destroyed_trooper_cannon_mask & (1u << (number - 1))) != 0) {
-                GizBuildIt_SetToStart(troopercannons[cannon_index].buildit, 0, 0);
-                troopercannons[cannon_index].rebuilding = 1;
-            } else {
+            if ((world->level_progress->destroyed_trooper_cannon_mask & (1u << (number - 1))) == 0) {
                 if (troopercannons[cannon_index].base != NULL) {
                     GizmoSetVisibility(world->gizmo_sys, troopercannons[cannon_index].base, 1, 1);
                     GizObstacle_PlayBackwards(static_cast<GIZOBSTACLE_s *>(troopercannons[cannon_index].base->object));
@@ -571,8 +568,11 @@ void ResetTrooperCannons(WORLDINFO_s *world, i32 trooper_id) {
                     AddDynamicCreature(trooper_id, &troopercannons[cannon_index].object->apiobj.collision_position,
                                        troopercannons[cannon_index].object->apiobj.field_0x276, "CannonTrooper",
                                        &troopercannons[cannon_index].object->ai.path_info, NULL, 0, NULL, NULL, 0, 0);
-                if (__builtin_expect(trooper != NULL, 1))
+                if (trooper != NULL)
                     TakeOverGameObject(trooper, troopercannons[cannon_index].object, 0, 1);
+            } else {
+                GizBuildIt_SetToStart(troopercannons[cannon_index].buildit, 0, 0);
+                troopercannons[cannon_index].rebuilding = 1;
             }
         }
         ++cannon_index;

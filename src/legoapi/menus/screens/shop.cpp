@@ -1778,7 +1778,7 @@ i32 DoShopMenu(MENU_s *menu) {
             subitemselected = 0;
         }
 
-        if (result == 5) {
+        if (__builtin_expect(result == 5, 0)) {
             done = 1;
         } else if (result == 6) {
             GameCam_Blend(GameCam, 0.6f, 0.0f, 1);
@@ -2363,7 +2363,7 @@ void Shop_CollectAllCharacters(i32 mode) {
     const i32 count = ShopCollection.count_y;
     for (i32 i = 0; i != count && i != 100; ++i) {
         Game.shop_character_purchased_bits[i >> 5] |= static_cast<u32>(u64(1) << (i & 31));
-        if (WORLD->current_level == HUB_LDATA)
+        if (__builtin_expect(WORLD->current_level == HUB_LDATA, 0))
             CharItems[i].unlocked = SAVE_ON;
     }
 }

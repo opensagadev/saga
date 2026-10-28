@@ -534,12 +534,12 @@ void NuSoundVoice::UpdateHardwareVoice(f32) {
 // ---------------------------------------------------------------------------
 
 bool NuSoundVoice::AddEffect(NuSoundEffect *effect) {
-    if (effects.Contains(effect)) {
+    if (__builtin_expect(effects.Contains(effect) != 0, 0)) {
         return false;
     }
 
     bool attached = effect->AttachVoice(this);
-    if (attached) {
+    if (__builtin_expect(attached != 0, 1)) {
         NuSoundMemory::PushNuListNode(effects, effect);
     }
     return attached;

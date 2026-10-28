@@ -348,10 +348,7 @@ static __used__ void TrenchMove(GameObject_s *object) {
     f32 target_x;
     if (object->character_context == 0x2a) {
         const f32 phase = object->context_animation_timer / TURNTIME;
-        if (api.movement_facing_angle > 0x8000)
-            target_x = phase * 10.0f + (1.0f - phase) * -10.0f + trenchrun.position.x;
-        else
-            target_x = phase * -10.0f + (1.0f - phase) * 10.0f + trenchrun.position.x;
+        if (api.movement_facing_angle <= 0x8000) target_x = phase * -10.0f + (1.0f - phase) * 10.0f + trenchrun.position.x; else target_x = phase * 10.0f + (1.0f - phase) * -10.0f + trenchrun.position.x;
     } else if (api.movement_facing_angle > 0x8000) {
         target_x = trenchrun.position.x + 10.0f;
     } else {

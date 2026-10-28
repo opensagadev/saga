@@ -116,7 +116,7 @@ void GameAntinode_FindGridPosition(WORLDINFO_s *world, NUVEC *position, f32 radi
     f32 cell_z = (world->level_max[2] - world->level_min[2]) * (1.0f / 64.0f);
     if (min_x != NULL) {
         f32 offset = position->x - radius_x - world->level_min[0];
-        if (offset == 0.0f || cell_x == 0.0f) {
+        if (__builtin_expect(offset == 0.0f || cell_x == 0.0f, 0)) {
             *min_x = 0;
         } else {
             u8 index = static_cast<u8>(offset / cell_x);
@@ -125,7 +125,7 @@ void GameAntinode_FindGridPosition(WORLDINFO_s *world, NUVEC *position, f32 radi
     }
     if (max_x != NULL) {
         f32 offset = radius_x + position->x - world->level_min[0];
-        if (offset == 0.0f || cell_x == 0.0f) {
+        if (__builtin_expect(offset == 0.0f || cell_x == 0.0f, 0)) {
             *max_x = 0;
         } else {
             u8 index = static_cast<u8>(offset / cell_x);
@@ -134,7 +134,7 @@ void GameAntinode_FindGridPosition(WORLDINFO_s *world, NUVEC *position, f32 radi
     }
     if (min_z != NULL) {
         f32 offset = position->z - radius_z - world->level_min[2];
-        if (offset != 0.0f && cell_z != 0.0f) {
+        if (__builtin_expect(offset != 0.0f && cell_z != 0.0f, 1)) {
             u8 index = static_cast<u8>(offset / cell_z);
             *min_z = index < 64 ? index : 63;
         } else {

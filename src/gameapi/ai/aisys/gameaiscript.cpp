@@ -2977,7 +2977,7 @@ __used__ static i32 Action_SetControlSystem(AISYS *sys, AISCRIPTPROCESS *process
 
 static i32 Action_PressSpecialButton(AISYS *, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                      i32 param_count, i32 first_time, f32) {
-    if (packet == NULL || packet->owner == NULL)
+    if (__builtin_expect(packet == NULL || packet->owner == NULL, 1))
         return 1;
     GameObject_s *object = packet->owner->apiobj.objptr;
     if (object == NULL)
@@ -4230,7 +4230,7 @@ i32 Action_GameFollowPlayer(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET
                 } else {
                     processor->action_data_3 = player;
                 }
-            } else if (packet->movement_instruction_parameter == 0.0f) {
+            } else if (__builtin_expect(packet->movement_instruction_parameter == 0.0f, 0)) {
                 packet->movement_instruction_parameter = AIParamToFloat(processor, params[i]);
             }
         }
@@ -4770,7 +4770,7 @@ __used__ static i32 Action_UseForce(AISYS *, AISCRIPTPROCESS *processor, AIPACKE
                     triggered_by_hit = 1;
                 } else {
                     char *name = NuStrIStr(params[index], const_cast<char *>("name"));
-                    if (name != NULL) {
+                    if (__builtin_expect(name != NULL, 1)) {
                         name += 5;
                     } else {
                         name = params[index];
@@ -4835,7 +4835,7 @@ __used__ static i32 Action_UseForce(AISYS *, AISCRIPTPROCESS *processor, AIPACKE
     return 1;
 
 invalid_category:
-    if (triggered_by_hit != 0) {
+    if (__builtin_expect(triggered_by_hit != 0, 0)) {
         force->runtime_flags |= GIZFORCE_RUNTIME_PENDING_COMPLETION;
     } else if (FreePlay != 0) {
         processor->action_timer -= elapsed;
@@ -6518,8 +6518,8 @@ __used__ static i32 Action_CircleLocator(AISYS *sys, AISCRIPTPROCESS *processor,
         processor->action_data_3 = processor->locator;
         if (param_count != 0) {
             for (i32 index = 0; index < param_count; ++index) {
-                if (AIActionParseSpeedFn != NULL &&
-                    AIActionParseSpeedFn(params[index], &packet->goal_speed_mode) != 0) {
+                if (__builtin_expect(AIActionParseSpeedFn != NULL &&
+                    AIActionParseSpeedFn(params[index], &packet->goal_speed_mode) != 0, 0)) {
                     continue;
                 }
                 char *value = NuStrIStr(params[index], "name=");
@@ -6528,7 +6528,7 @@ __used__ static i32 Action_CircleLocator(AISYS *sys, AISCRIPTPROCESS *processor,
                 }
                 if (value != NULL) {
                     processor->action_data_3 = AIPathFindLocator(sys, value + NuStrLen("name="));
-                } else if ((value = NuStrIStr(params[index], "goalrange")) != NULL) {
+                } else if (__builtin_expect((value = NuStrIStr(params[index], "goalrange")) != NULL, 1)) {
                     packet->movement_instruction_parameter =
                         AIParamToFloatEx(packet, processor, value + NuStrLen("goalrange") + 1);
                 } else if (NuStrICmp(params[index], "reverse") == 0) {
@@ -9272,7 +9272,7 @@ __used__ static i32 Action_ForcePush(AISYS *sys, AISCRIPTPROCESS *processor, AIP
                     if (processor->action_data_3 == NULL) {
                         return 1;
                     }
-                } else if (NuStrICmp(params[index], "forcepush_highlight_only") == 0) {
+                } else if (__builtin_expect(NuStrICmp(params[index], "forcepush_highlight_only") == 0, 0)) {
                     processor->action_data_1 = 1;
                 }
             }

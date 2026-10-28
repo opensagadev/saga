@@ -411,7 +411,7 @@ i32 SpecialSfxLoad(char *path, WORLDINFO_s *world) {
                                                                                   sizeof(SPECIALSFXEVENT_s));
             entry->events = event;
             if (!(entry->event_count > 1)) {
-                if (event != NULL)
+                if (__builtin_expect(event != NULL, 0))
                     event->next = NULL;
                 event = next;
             } else {

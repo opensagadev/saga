@@ -104,7 +104,7 @@ void Pulses_Configure(WORLDINFO_s *world, char *config) {
                     pulse_sys.sfx_turn_on = static_cast<i16>(GetSfxId(parser->word_buf));
                 } else if (NuStrICmp(parser->word_buf, "sfx_turnoff") == 0 && NuFParGetWord(parser) != 0) {
                     pulse_sys.sfx_turn_off = static_cast<i16>(GetSfxId(parser->word_buf));
-                } else if (NuStrICmp(parser->word_buf, "sfx_hitplayer") == 0 && NuFParGetWord(parser) != 0) {
+                } else if (__builtin_expect(NuStrICmp(parser->word_buf, "sfx_hitplayer") == 0 && NuFParGetWord(parser) != 0, 1)) {
                     pulse_sys.sfx_hit_player = static_cast<i16>(GetSfxId(parser->word_buf));
                 } else if (NuStrICmp(parser->word_buf, "collide_radius") == 0) {
                     pulse_sys.collide_radius = NuFParGetFloat(parser);

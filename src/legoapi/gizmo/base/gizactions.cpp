@@ -135,7 +135,7 @@ static void GizActions_HitBlowup(GIZFLOW_s *, FLOWBOX_s *, char **params, int co
             damage = static_cast<i32>(NuAToF(value + NuStrLen("damage=")));
         }
     }
-    if (damage == 0 || name == NULL) {
+    if (__builtin_expect(damage == 0 || name == NULL, 0)) {
         return;
     }
     if (!turret) {

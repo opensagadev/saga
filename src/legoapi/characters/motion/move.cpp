@@ -5285,7 +5285,7 @@ static void SwipeCode(GameObject_s *object, i32 pressed, i32 held) {
                 object->field_0xe20 |= 4;
                 object->character_context = -1;
                 if (object->context_animation == 0x29) {
-                    if ((object->context_flags & 0x40) == 0) {
+                    if (__builtin_expect((object->context_flags & 0x40) == 0, 0)) {
                         ComboHitFrame(object, 1);
                         object->character_context = 0x10;
                         object->context_animation_timer = 0.001f;
@@ -5300,7 +5300,7 @@ static void SwipeCode(GameObject_s *object, i32 pressed, i32 held) {
                 object->character_context == 4 || object->character_context == 3) &&
                SetComboOpponent(object, 0.6f, 0, 2) == 1) {
         NUVEC *position;
-        if (object->force_target != NULL)
+        if (__builtin_expect(object->force_target != NULL, 0))
             position = &object->force_target->apiobj.position;
         else if (object->blowup_target != NULL)
             position = &object->blowup_target->mid_position;
@@ -5641,7 +5641,7 @@ void LetGoOfBalloon(GameObject_s *object) {
         return;
     }
     object->character_context = -1;
-    if (WORLD->lev_objs[0xf7].active == 0) {
+    if (__builtin_expect(WORLD->lev_objs[0xf7].active == 0, 0)) {
         return;
     }
     const i32 hand = object->apiobj.character_data->game_character->hand_locators[0];
@@ -7235,7 +7235,7 @@ i32 GetShootDirection_LSW(GameObject_s *object, nuvec_s *direction) {
         return NuAtan2D(direction->x, direction->z);
     }
     u16 angle;
-    if ((model->model_flags & 0x2000) == 0 && (data->flags_090 & 0x80) == 0) {
+    if (__builtin_expect((model->model_flags & 0x2000) == 0 && (data->flags_090 & 0x80) == 0, 0)) {
         angle = object->apiobj.movement_facing_angle;
     } else {
         angle = object->apiobj.facing_angle;
@@ -8688,7 +8688,7 @@ void CableCode(GameObject_s *object, i32 special_pressed, f32) {
     }
 
     if (object->apiobj.field_0x287 == 0 && FadeSys.fade == 0.0f) {
-        if (object->force_glow_step <= 0.0f) {
+        if (__builtin_expect(object->force_glow_step <= 0.0f, 1)) {
             ForceGlowCode(object, 0xe3);
         } else {
             object->force_glow_step -= FRAMETIME;
@@ -8697,8 +8697,8 @@ void CableCode(GameObject_s *object, i32 special_pressed, f32) {
         ResetForceGlow(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));
     }
 
-    if (object->apiobj.player_controlled && object->force_glow_candidate_kind != 0 &&
-        object->force_glow_candidate != NULL && object->field_0xd80 > 0.0f) {
+    if (__builtin_expect(object->apiobj.player_controlled && object->force_glow_candidate_kind != 0 &&
+        object->force_glow_candidate != NULL && object->field_0xd80 > 0.0f, 0)) {
         GameObject_s *target = static_cast<GameObject_s *>(object->force_glow_candidate);
         GAMEMESSAGE_s *message = static_cast<GAMEMESSAGE_s *>(
             AddGameMessage(const_cast<char *>("X"), &target->apiobj.collision_position,
@@ -8919,7 +8919,7 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
             api.movement_facing_angle = NuAtan2D(api.velocity.x, api.velocity.z);
     } else if ((context_flags & 0x4000) != 0) {
         api.movement_facing_angle = static_cast<u16>(GameCam->yaw + 0x8000);
-    } else if (object->id == id_GRABCONTROL || object->id == id_GRABR2CONTROL) {
+    } else if (__builtin_expect(object->id == id_GRABCONTROL || object->id == id_GRABR2CONTROL, 0)) {
         if (WORLD->grabber != NULL) {
             NUVEC *position = Grabber_GetGrabPos(WORLD->grabber, NULL);
             api.movement_facing_angle =
@@ -8938,8 +8938,7 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
                object->character_context != 0x47 &&
                (object->character_context != 0x29 || api.character_model->model_data_b[0x57] != NULL ||
                 (api.character_data->game_character->flags_094[2] & 0x10) != 0) &&
-               (object->touched_ground || CurrentAnim(&api.anim_packet) != 5) &&
-               object->character_context != 0x35) {
+               (object->touched_ground || CurrentAnim(&api.anim_packet) != 5) && object->character_context != 0x35) {
         // Retail uses ordered context tests here. The labels also retain the
         // ordinary opponent-facing fallthrough from context 0x1b to 0x16.
         do {
@@ -8958,7 +8957,7 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
                 goto directional_heading_0x1d;
             if (object->character_context == 0x12)
                 goto directional_heading_0x12;
-            if (object->character_context == 8)
+            if (__builtin_expect(object->character_context == 8, 1))
                 goto directional_heading_8;
             if (object->character_context == 0x2d)
                 goto directional_heading_0x2d;
@@ -8972,6 +8971,8 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
                 goto directional_heading_0x26;
             if (object->character_context == 0x58)
                 goto directional_heading_0x58;
+            if (__builtin_expect((CInfo[object->character_context].flags & 0x2000) != 0, 0))
+                goto directional_common_heading;
             if (object->character_context == 0x0a)
                 goto directional_heading_0x0a;
             if (object->character_context == 0x0c)
@@ -8984,7 +8985,7 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
                 goto directional_heading_0;
             goto directional_common_heading;
         directional_heading_0:
-            if ((CInfo[object->character_context].flags & 0x2000) == 0 && object->action_movement_state == 3) {
+            if (object->action_movement_state == 3) {
                 FaceOpponent(object, NULL);
                 break;
             }
@@ -8994,8 +8995,7 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
                 break;
             goto directional_common_heading;
         directional_heading_0x0a:
-            if ((CInfo[object->character_context].flags & 0x2000) != 0 ||
-                static_cast<u16>(object->context_animation - 0x5a) > 2)
+            if (static_cast<u16>(object->context_animation - 0x5a) > 2)
                 goto directional_common_heading;
             api.movement_facing_angle = NuAtan2D(object->attack_target_position.x - api.position.x,
                                                  object->attack_target_position.z - api.position.z);
@@ -9007,8 +9007,6 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
                 api.movement_facing_angle += 0x8000;
             break;
         directional_heading_0x18: {
-            if ((CInfo[object->character_context].flags & 0x2000) != 0)
-                goto directional_common_heading;
             NUVEC *position = NULL;
             if (object->incoming_bolt != NULL) {
                 if (object->incoming_bolt->active != 0)
@@ -9025,12 +9023,10 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
             break;
         }
         directional_heading_0x0c: {
-            if ((CInfo[object->character_context].flags & 0x2000) != 0)
-                goto directional_common_heading;
             if (object->block_latch != 0)
                 break;
             NUVEC *position = NULL;
-            if (object->blocked_bolt != NULL) {
+            if (__builtin_expect(object->blocked_bolt != NULL, 0)) {
                 if (object->blocked_bolt->active != 0)
                     position = &object->blocked_bolt->position;
             } else if (__builtin_expect(object->block_attacker != NULL, 0)) {
@@ -9051,14 +9047,14 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
                 api.movement_facing_angle += 0x8000;
             break;
         directional_heading_0x25:
-            if ((CInfo[object->character_context].flags & 0x2000) == 0 && object->context_animation != 0x58) {
+            if (object->context_animation != 0x58) {
                 FaceOpponent(object, NULL);
                 break;
             }
             // The original falls through to the shared push/input heading path.
             goto directional_common_heading;
         directional_heading_0x22:
-            if (ForceBackPos != NULL)
+            if (__builtin_expect(ForceBackPos != NULL, 1))
                 FaceOpponent(object, ForceBackPos);
             break;
         directional_heading_0x1d:
@@ -9148,7 +9144,7 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
             turn_rate = 8.0f * turn_override;
         else {
             turn_rate = 8.0f * api.character_data->game_character->turn_rate;
-            if (object->id == id_ATAT && WORLD->current_level == SPEEDERCHASEA_LDATA)
+            if (__builtin_expect(object->id == id_ATAT && WORLD->current_level == SPEEDERCHASEA_LDATA, 1))
                 turn_rate += turn_rate;
         }
         if ((object->field_0xefd & 0x80) != 0 && (CInfo[object->character_context].flags & 1) == 0)
@@ -9227,7 +9223,7 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
                 move_vertical = Grapple_SetTargetMom(object);
                 break;
             } else if (object->character_context == 0x4a) {
-                if ((api.field_0x1f4 & 0x40000) == 0) {
+                if (__builtin_expect((api.field_0x1f4 & 0x40000) == 0, 1)) {
                     const f32 rate = 10.0f * object->field_0x768 + 5.0f;
                     const NUVEC position = static_cast<LEVER_s *>(object->field_0x788)->floor_position;
                     object->target_velocity.z = (position.z - api.position.z) * rate;
@@ -9340,7 +9336,7 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
                             move_vertical = Slide_SetTargetMom(object, input_angle, desired_speed);
                             break;
                         }
-                        if (object->character_context == 0x58) {
+                        if (__builtin_expect(object->character_context == 0x58, 0)) {
                             move_vertical = SuperCarry_SetTargetMom(object, desired_speed);
                             break;
                         }
@@ -9557,7 +9553,7 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
                     }
                     const bool walking_input = !(pad->input_magnitude <= 0.0f);
                     bool walking_without_input = false;
-                    if (!walking_input) {
+                    if (__builtin_expect(!walking_input, 0)) {
                         if (object->id == id_ATST || object->id == id_MINIATST || object->id == id_ATST_LOWRES ||
                             object->id == id_ATAT || object->id == id_MINIATAT || object->id == id_MINIATTE)
                             walking_without_input = CurrentAnim(&api.anim_packet) == 0;
@@ -9677,7 +9673,8 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
                                                         ? 0.5f * api.character_data->game_character->run_speed
                                                         : api.character_data->game_character->walk_speed;
                             } else if (object->id == id_C3PO || object->id == id_TC14) {
-                                if (object->character_context == -1 && object->field_0xdb0 > 0.0f) {
+                                if (__builtin_expect(object->character_context == -1 && object->field_0xdb0 > 0.0f,
+                                                     1)) {
                                     walking_speed = (0.6f * walking_character->run_speed) / 3.0f;
                                     const f32 magnitude = object->pad_gamepad->input_magnitude;
                                     if (!((walking_character->tiptoe_speed + walking_character->walk_speed) * 0.5f >=
@@ -9690,7 +9687,7 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
                                     }
                                 }
                             } else if (object->id == id_DROIDEKA) {
-                                if (api.anim_packet.field_0x3a == 5)
+                                if (__builtin_expect(api.anim_packet.field_0x3a == 5, 1))
                                     walking_speed *= 0.5f;
                             } else if (object->id == id_ATST || object->id == id_MINIATST ||
                                        object->id == id_ATST_LOWRES || object->id == id_ATAT ||
@@ -9795,7 +9792,8 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
     }
     if (move_vertical != 0 || ObjInTube(object)) {
         // The vertical path shares the gizmo payload byte at +0x68.
-        if (object->field_0x788 != NULL && (static_cast<const u8 *>(object->field_0x788)[0x68] & 1) != 0) {
+        if (__builtin_expect(
+                object->field_0x788 != NULL && (static_cast<const u8 *>(object->field_0x788)[0x68] & 1) != 0, 1)) {
             seek_rates.x *= 0.5f;
             seek_rates.y *= 0.5f;
             seek_rates.z *= 0.5f;
@@ -9864,7 +9862,7 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
                    15;
             if (lean > 0x2000)
                 lean = 0x2000;
-            if (lean < -0x2000)
+            if (__builtin_expect(lean < -0x2000, 0))
                 lean = -0x2000;
         }
         object->movement_lean_angle = SeekRot(object->movement_lean_angle, static_cast<u16>(lean), 8.0f);

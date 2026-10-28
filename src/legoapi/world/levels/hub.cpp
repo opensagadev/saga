@@ -2896,9 +2896,179 @@ i32 Hub_InMenu() {
     return 0;
 }
 
+static void Hub_DrawChallengeStats() {
+    i32 count = 0, total = 0;
+    if (__builtin_expect(Game_AreaSave != 0, 1)) {
+        for (i32 i = 0; i < AREACOUNT; ++i) {
+            if ((ADataList[i].flags & 5) == 5) {
+                ++total;
+                if (Game_AreaSave[i].area_complete ||
+                    static_cast<f32>(static_cast<i32>(ADataList[i].challenge_trial_time)) >
+                        Game_AreaSave[i].challenge_trial_time)
+                    ++count;
+            }
+        }
+    }
+    Hub_DrawImportantBrick(211, 0.0f, HUB_EPISODETITLEY, hub_area_time, count, total);
+    SmartTextEx(TTab[tMINIKITS ? tMINIKITS : tMINIKIT], 0.0f, HUB_EPISODESUBTITLEY, 1.0f, HUB_EPISODESUBTITLESIZE,
+                HUB_EPISODESUBTITLESIZE, HUB_EPISODESUBTITLESIZE, 0, HUB_EPISODER, HUB_EPISODEG, HUB_EPISODEB, 1.7f, 1,
+                NULL, 0, static_cast<i32>(128.0f * hub_area_time));
+}
+
+static void Hub_DrawEpisodeStats(f32 phase, i32 alpha) {
+    char text[256];
+    if (BOTHTRUEJEDIGOLDBRICKS) {
+        DrawBuildUpBar(HUB_AREAPANELX[1], HUB_EPISODETITLEY + PANEL_MINIKITY - PANEL_MINIKITCOUNTY, 100, 100,
+                       NU_SIN_LUT(static_cast<i32>(16384.0f * phase)), 1.0f, 1.0f, 0);
+        sprintf(text, "%i/%i", EpStoryBuildUpCount, EpStoryBuildUpTotal);
+        Text3DEx(text, HUB_AREAPANELX[1], HUB_EPISODETITLEY, 1.0f, PANEL_MINIKITCOUNTSCALE, PANEL_MINIKITCOUNTSCALE,
+                 PANEL_MINIKITCOUNTSCALE, 0, 255, 0, 127, static_cast<u8>(alpha));
+        SmartTextEx(TTab[tSTORY], HUB_AREAPANELX[1], 0.235f + HUB_EPISODETITLEY, 1.0f, 0.45f, 0.45f, 0.45f, 0, 255, 255,
+                    255, 0.4f, 1, NULL, 0, static_cast<i32>(static_cast<f32>(TJTYPEA) * phase));
+        DrawBuildUpBar(HUB_AREAPANELX[4], HUB_EPISODETITLEY + PANEL_MINIKITY - PANEL_MINIKITCOUNTY, 100, 100,
+                       NU_SIN_LUT(static_cast<i32>(16384.0f * phase)), 1.0f, 1.0f, 0);
+        sprintf(text, "%i/%i", EpFreePlayBuildUpCount, EpFreePlayBuildUpTotal);
+        Text3DEx(text, HUB_AREAPANELX[4], HUB_EPISODETITLEY, 1.0f, PANEL_MINIKITCOUNTSCALE, PANEL_MINIKITCOUNTSCALE,
+                 PANEL_MINIKITCOUNTSCALE, 0, 255, 0, 127, static_cast<u8>(alpha));
+        SmartTextEx(TTab[tFREEPLAY], HUB_AREAPANELX[4], 0.235f + HUB_EPISODETITLEY, 1.0f, 0.45f, 0.45f, 0.45f, 0, 255,
+                    255, 255, 0.4f, 1, NULL, 0, static_cast<i32>(static_cast<f32>(TJTYPEA) * phase));
+    } else {
+        DrawBuildUpBar(HUB_AREAPANELX[1], HUB_EPISODETITLEY + PANEL_MINIKITY - PANEL_MINIKITCOUNTY, 100, 100,
+                       NU_SIN_LUT(static_cast<i32>(16384.0f * phase)), 1.0f, 1.0f, 0);
+        sprintf(text, "%i/%i", EpBuildUpCount, EpBuildUpTotal);
+        Text3DEx(text, HUB_AREAPANELX[1], HUB_EPISODETITLEY, 1.0f, PANEL_MINIKITCOUNTSCALE, PANEL_MINIKITCOUNTSCALE,
+                 PANEL_MINIKITCOUNTSCALE, 0, 255, 0, 127, static_cast<u8>(alpha));
+    }
+    Hub_DrawMiniKitCount(HUB_AREAPANELX[0], HUB_EPISODETITLEY, EpMiniKitCount, EpMiniKitTotal, phase);
+    Hub_DrawImportantBrick(210, HUB_AREAPANELX[2], HUB_EPISODETITLEY, phase, EpRedBrickCount, EpRedBrickTotal);
+    Hub_DrawImportantBrick(211, HUB_AREAPANELX[3], HUB_EPISODETITLEY, phase, EpGoldBrickCount, EpGoldBrickTotal);
+    if (__builtin_expect(!!(Store_IsPackUnlocked(8)), 1)) {
+        hub_drawminikitcount_charkit = 1;
+        Hub_DrawMiniKitCount(HUB_AREAPANELX[5], HUB_EPISODETITLEY, EpCharKitCount, EpCharKitTotal, phase);
+    }
+}
+
+static void Hub_DrawMiniKitViewer() {
+    char title[128];
+    const f32 phase = hub_minikitviewer_alpha;
+    const i32 index = hub_minikitviewer_area;
+    AREADATA *area = &ADataList[index];
+    AREASAVE_s *save = &Game.area_save[index];
+    const i32 alpha = static_cast<i32>(phase * 128.0f);
+    if (save->minikit_complete) {
+        const f32 scale = HUB_EPISODETITLESIZE;
+        if (area->minikit_id != -1 && CDataList[area->minikit_id].name_id != -1)
+            SmartTextEx(TTab[CDataList[area->minikit_id].name_id], 0.0f, HUB_EPISODETITLEY, 1.0f,
+                        HUB_EPISODESUBTITLESIZE, HUB_EPISODESUBTITLESIZE, HUB_EPISODESUBTITLESIZE, 0, HUB_EPISODER,
+                        HUB_EPISODEG, HUB_EPISODEB, 1.7f, 1, NULL, 0, alpha);
+        sprintf(title, "(%s)", TTab[area->name_id]);
+        if (scale > 0.0f)
+            SmartTextEx(title, 0.0f, HUB_EPISODESUBTITLEY, 1.0f, scale, scale, scale, 0, HUB_EPISODER, HUB_EPISODEG,
+                        HUB_EPISODEB, 1.7f, 1, NULL, 0, alpha);
+    } else if (save->minikit_count) {
+        const f32 scale = HUB_EPISODESUBTITLESIZE;
+        Hub_DrawMiniKitCount(0.0f, HUB_EPISODETITLEY, save->minikit_count, 10, phase);
+        char *name = TTab[area->name_id];
+        if (scale > 0.0f && name)
+            SmartTextEx(name, 0.0f, HUB_EPISODESUBTITLEY, 1.0f, scale, scale, scale, 0, HUB_EPISODER, HUB_EPISODEG,
+                        HUB_EPISODEB, 1.7f, 1, NULL, 0, alpha);
+    } else if (area->area_index != 0xff && area->episode_index != 0xff) {
+        const f32 scale = HUB_EPISODESUBTITLESIZE;
+        const i8 episode = area->episode_index;
+        Hub_DrawMiniKitCount(0.0f, HUB_EPISODETITLEY, 0, 10, phase);
+        sprintf(title, "%s, %s %i", TTab[EDataList[episode].name_id], TTab[tCHAPTER],
+                static_cast<i8>(ADataList[index].area_index) + 1);
+        if (!(scale <= 0.0f))
+            SmartTextEx(title, 0.0f, HUB_EPISODESUBTITLEY, 1.0f, scale, scale, scale, 0, HUB_EPISODER, HUB_EPISODEG,
+                        HUB_EPISODEB, 1.7f, 1, NULL, 0, alpha);
+    }
+    MENU *menu = &GameMenu[GameMenuLevel];
+    if (!Game_AreaSave || Game_AreaSave[index].minikit_complete) {
+        NUVEC minimum, maximum;
+        NuSpecialGetBounds(&WORLD->lev_objs[167].special, &minimum, &maximum);
+        const f32 icon_size = ICONSIZE;
+        const f32 text_scale = (icon_size / 0.35f) * 0.95f;
+        const f32 spacing = 1.2f * (icon_size * (maximum.x - minimum.x)) / PANEL3DMULX;
+        f32 x = -spacing * 2.5f;
+        const f32 y = HUB_EPISODETITLEY + (HUB_EPISODETITLEY - HUB_EPISODESUBTITLEY) * 1.5f;
+        f32 grow = 1.0f;
+        if (!TestForController()) {
+            const f32 elapsed = GlobalTimer.time_elapsed - (LastTouchTime + 2.0f);
+            if (elapsed > 4.0f) {
+                f32 wave = NU_SIN_LUT(static_cast<i32>((NuFmod(elapsed, 4.0f) * 0.25f) * 65536.0f)) - 0.8f;
+                if (wave < 0.0f)
+                    wave = 0.0f;
+                grow = wave + 1.0f;
+            }
+        }
+        for (i32 i = 0; i < 6; ++i) {
+            i32 red, green, blue;
+            f32 size = 1.0f;
+            if (i == i_selectminikitepisode) {
+                size = 1.2f;
+                if (TestForController()) {
+                    if (menu_pulsate > 0.0f) {
+                        red = static_cast<i32>(static_cast<u32>(MENUFLASH0R) * menu_pulsate +
+                                               static_cast<u32>(MENUFLASH1R) * (1.0f - menu_pulsate));
+                        green = static_cast<i32>(static_cast<u32>(MENUFLASH0G) * menu_pulsate +
+                                                 static_cast<u32>(MENUFLASH1G) * (1.0f - menu_pulsate));
+                        blue = static_cast<i32>(static_cast<u32>(MENUFLASH0B) * menu_pulsate +
+                                                static_cast<u32>(MENUFLASH1B) * (1.0f - menu_pulsate));
+                    } else {
+                        red = menu_flash ? MENUFLASH0R : MENUFLASH1R;
+                        green = menu_flash ? MENUFLASH0G : MENUFLASH1G;
+                        if (menu_flash) {
+                            blue = MENUFLASH0B;
+                        } else {
+                            blue = MENUFLASH1B;
+                        }
+                    }
+                    goto hub_episode_colour_ready;
+                }
+            }
+            // Touch selection and the other entries share the normal menu pulse.
+            if (!(menu_pulse <= 0.0f)) {
+                red = static_cast<i32>(static_cast<u32>(MENUFLASH0R) * menu_pulse +
+                                       static_cast<u32>(MENUNORMALR) * (1.0f - menu_pulse));
+                green = static_cast<i32>(static_cast<u32>(MENUFLASH0G) * menu_pulse +
+                                         static_cast<u32>(MENUNORMALG) * (1.0f - menu_pulse));
+                blue = static_cast<i32>(static_cast<u32>(MENUFLASH0B) * menu_pulse +
+                                        static_cast<u32>(MENUNORMALB) * (1.0f - menu_pulse));
+            } else {
+                red = MENUENTRYR;
+                green = MENUENTRYG;
+                blue = MENUENTRYB;
+            }
+        hub_episode_colour_ready:
+            size *= grow;
+            f32 opacity = phase;
+            if (!Episode_CountOpenAreas(i, -1, Game_AreaSave))
+                opacity *= 0.25f;
+            Text3DEx(EpisodeNumerals[i], x, y, 1.0f, text_scale * size, text_scale * size, text_scale * size, 0, red,
+                     green, blue, static_cast<u8>(static_cast<i32>(128.0f * opacity)));
+            const i32 bonus = Episode_FindAreaFromFlags(&EDataList[i], 5, 5);
+            i32 object = 167;
+            if (bonus != -1 && Game_AreaSave &&
+                (Game_AreaSave[bonus].area_complete ||
+                 static_cast<f32>(static_cast<i32>(ADataList[bonus].challenge_trial_time)) >
+                     Game_AreaSave[bonus].challenge_trial_time))
+                object = 168;
+            const f32 scale = icon_size * size;
+            DrawPanel3DObject(x, y, 1.0f, scale, scale, scale, 0, 0, 0, &WORLD->lev_objs[object].special, 0, opacity);
+            menu->item_x[i] = x;
+            menu->item_y[i] = y;
+            menu->item_width[i] = scale * 0.5f;
+            menu->item_height[i] = 0.0f;
+            x += spacing;
+        }
+    } else {
+        for (i32 i = 0; i < 6; ++i)
+            menu->item_width[i] = 0.0f;
+    }
+}
+
 void Hub_DrawPanel(WORLDINFO_s *) {
     char text[256];
-    char title[128];
     if (newgamecam) {
         f32 alpha = 0.0f;
         if (newgamecamtime < 2.0f)
@@ -2988,9 +3158,9 @@ void Hub_DrawPanel(WORLDINFO_s *) {
             }
         } else if (hub_episode == 8) {
             i32 gold_count = 0, gold_total = 0, buildup_count = 0, buildup_total = 0;
-            for (i32 i = 0; i < AREACOUNT; ++i) {
-                AREADATA *area = &ADataList[i];
-                AREASAVE_s *save = &Game.area_save[i];
+            AREADATA *area = ADataList;
+            AREASAVE_s *save = Game.area_save;
+            for (i32 i = 0; i < AREACOUNT; ++i, ++area, ++save) {
                 if (area == HUB_ADATA || (area->flags & 0x22) || area->episode_index != 0xff || (area->flags & 0x2010))
                     continue;
                 if (area->flags & 0x100) {
@@ -2999,23 +3169,21 @@ void Hub_DrawPanel(WORLDINFO_s *) {
                         if (save->area_complete)
                             ++gold_count;
                     }
-                    continue;
-                }
-                if (area->flags & 4 || area->flags & 0x800)
-                    continue;
-                ++gold_total;
-                if (save->area_complete)
-                    ++gold_count;
-                if (area->flags & 0x4000) {
+                } else if (!(area->flags & 4) && !(area->flags & 0x800)) {
                     ++gold_total;
-                    ++buildup_total;
-                    if (save->true_hero_complete[0] || save->true_hero_complete[1]) {
+                    if (save->area_complete)
                         ++gold_count;
-                        ++buildup_count;
+                    if (area->flags & 0x4000) {
+                        ++gold_total;
+                        ++buildup_total;
+                        if (save->true_hero_complete[0] || save->true_hero_complete[1]) {
+                            ++gold_count;
+                            ++buildup_count;
+                        }
                     }
                 }
             }
-            if (__builtin_expect(buildup_total, 1)) {
+            if (__builtin_expect(buildup_total, 0)) {
                 Hub_DrawImportantBrick(211, -0.20100002f, HUB_EPISODETITLEY, hub_episode_time, gold_count, gold_total);
                 DrawBuildUpBar(0.20100002f, HUB_EPISODETITLEY + PANEL_MINIKITY - PANEL_MINIKITCOUNTY, 100, 100,
                                NU_SIN_LUT(static_cast<i32>(16384.0f * hub_episode_time)), 1.0f, 1.0f, 0);
@@ -3039,39 +3207,7 @@ void Hub_DrawPanel(WORLDINFO_s *) {
             const f32 phase = hub_episode_time;
             Episode_CountOpenAreas(hub_episode, -1, Game.area_save);
             if (EpCompleteCount) {
-                if (BOTHTRUEJEDIGOLDBRICKS) {
-                    DrawBuildUpBar(HUB_AREAPANELX[1], HUB_EPISODETITLEY + PANEL_MINIKITY - PANEL_MINIKITCOUNTY, 100,
-                                   100, NU_SIN_LUT(static_cast<i32>(16384.0f * phase)), 1.0f, 1.0f, 0);
-                    sprintf(text, "%i/%i", EpStoryBuildUpCount, EpStoryBuildUpTotal);
-                    Text3DEx(text, HUB_AREAPANELX[1], HUB_EPISODETITLEY, 1.0f, PANEL_MINIKITCOUNTSCALE,
-                             PANEL_MINIKITCOUNTSCALE, PANEL_MINIKITCOUNTSCALE, 0, 255, 0, 127, static_cast<u8>(alpha));
-                    SmartTextEx(TTab[tSTORY], HUB_AREAPANELX[1], 0.235f + HUB_EPISODETITLEY, 1.0f, 0.45f, 0.45f, 0.45f,
-                                0, 255, 255, 255, 0.4f, 1, NULL, 0,
-                                static_cast<i32>(static_cast<f32>(TJTYPEA) * phase));
-                    DrawBuildUpBar(HUB_AREAPANELX[4], HUB_EPISODETITLEY + PANEL_MINIKITY - PANEL_MINIKITCOUNTY, 100,
-                                   100, NU_SIN_LUT(static_cast<i32>(16384.0f * phase)), 1.0f, 1.0f, 0);
-                    sprintf(text, "%i/%i", EpFreePlayBuildUpCount, EpFreePlayBuildUpTotal);
-                    Text3DEx(text, HUB_AREAPANELX[4], HUB_EPISODETITLEY, 1.0f, PANEL_MINIKITCOUNTSCALE,
-                             PANEL_MINIKITCOUNTSCALE, PANEL_MINIKITCOUNTSCALE, 0, 255, 0, 127, static_cast<u8>(alpha));
-                    SmartTextEx(TTab[tFREEPLAY], HUB_AREAPANELX[4], 0.235f + HUB_EPISODETITLEY, 1.0f, 0.45f, 0.45f,
-                                0.45f, 0, 255, 255, 255, 0.4f, 1, NULL, 0,
-                                static_cast<i32>(static_cast<f32>(TJTYPEA) * phase));
-                } else {
-                    DrawBuildUpBar(HUB_AREAPANELX[1], HUB_EPISODETITLEY + PANEL_MINIKITY - PANEL_MINIKITCOUNTY, 100,
-                                   100, NU_SIN_LUT(static_cast<i32>(16384.0f * phase)), 1.0f, 1.0f, 0);
-                    sprintf(text, "%i/%i", EpBuildUpCount, EpBuildUpTotal);
-                    Text3DEx(text, HUB_AREAPANELX[1], HUB_EPISODETITLEY, 1.0f, PANEL_MINIKITCOUNTSCALE,
-                             PANEL_MINIKITCOUNTSCALE, PANEL_MINIKITCOUNTSCALE, 0, 255, 0, 127, static_cast<u8>(alpha));
-                }
-                Hub_DrawMiniKitCount(HUB_AREAPANELX[0], HUB_EPISODETITLEY, EpMiniKitCount, EpMiniKitTotal, phase);
-                Hub_DrawImportantBrick(210, HUB_AREAPANELX[2], HUB_EPISODETITLEY, phase, EpRedBrickCount,
-                                       EpRedBrickTotal);
-                Hub_DrawImportantBrick(211, HUB_AREAPANELX[3], HUB_EPISODETITLEY, phase, EpGoldBrickCount,
-                                       EpGoldBrickTotal);
-                if (__builtin_expect(!!(Store_IsPackUnlocked(8)), 1)) {
-                    hub_drawminikitcount_charkit = 1;
-                    Hub_DrawMiniKitCount(HUB_AREAPANELX[5], HUB_EPISODETITLEY, EpCharKitCount, EpCharKitTotal, phase);
-                }
+                Hub_DrawEpisodeStats(phase, alpha);
             } else if (episode->name_id != -1) {
                 SmartTextEx(TTab[episode->name_id], 0.0f, HUB_EPISODETITLEY, 1.0f, HUB_EPISODETITLESIZE,
                             HUB_EPISODETITLESIZE, HUB_EPISODETITLESIZE, 0, HUB_EPISODER, HUB_EPISODEG, HUB_EPISODEB,
@@ -3085,22 +3221,7 @@ void Hub_DrawPanel(WORLDINFO_s *) {
     }
     if (hub_area != -1 && hub_area_time > 0.0f) {
         if (GameCam->sock_position.location.sock == 7 && (ADataList[hub_area].flags & 5) == 5) {
-            i32 count = 0, total = 0;
-            if (__builtin_expect(Game_AreaSave != 0, 1)) {
-                for (i32 i = 0; i < AREACOUNT; ++i) {
-                    if (__builtin_expect((ADataList[i].flags & 5) == 5, 0)) {
-                        ++total;
-                        if (Game_AreaSave[i].area_complete ||
-                            static_cast<f32>(static_cast<i32>(ADataList[i].challenge_trial_time)) >
-                                Game_AreaSave[i].challenge_trial_time)
-                            ++count;
-                    }
-                }
-            }
-            Hub_DrawImportantBrick(211, 0.0f, HUB_EPISODETITLEY, hub_area_time, count, total);
-            SmartTextEx(TTab[tMINIKITS ? tMINIKITS : tMINIKIT], 0.0f, HUB_EPISODESUBTITLEY, 1.0f,
-                        HUB_EPISODESUBTITLESIZE, HUB_EPISODESUBTITLESIZE, HUB_EPISODESUBTITLESIZE, 0, HUB_EPISODER,
-                        HUB_EPISODEG, HUB_EPISODEB, 1.7f, 1, NULL, 0, static_cast<i32>(128.0f * hub_area_time));
+            Hub_DrawChallengeStats();
         } else {
             AREADATA *area = &ADataList[hub_area];
             if (area->flags & 0x100) {
@@ -3115,124 +3236,8 @@ void Hub_DrawPanel(WORLDINFO_s *) {
             }
         }
     }
-    if (GetMenuID() == 14) {
-        const f32 phase = hub_minikitviewer_alpha;
-        const i32 index = hub_minikitviewer_area;
-        AREADATA *area = &ADataList[index];
-        AREASAVE_s *save = &Game.area_save[index];
-        const i32 alpha = static_cast<i32>(phase * 128.0f);
-        if (save->minikit_complete) {
-            const f32 scale = HUB_EPISODETITLESIZE;
-            if (area->minikit_id != -1 && CDataList[area->minikit_id].name_id != -1)
-                SmartTextEx(TTab[CDataList[area->minikit_id].name_id], 0.0f, HUB_EPISODETITLEY, 1.0f,
-                            HUB_EPISODESUBTITLESIZE, HUB_EPISODESUBTITLESIZE, HUB_EPISODESUBTITLESIZE, 0, HUB_EPISODER,
-                            HUB_EPISODEG, HUB_EPISODEB, 1.7f, 1, NULL, 0, alpha);
-            sprintf(title, "(%s)", TTab[area->name_id]);
-            if (scale > 0.0f)
-                SmartTextEx(title, 0.0f, HUB_EPISODESUBTITLEY, 1.0f, scale, scale, scale, 0, HUB_EPISODER, HUB_EPISODEG,
-                            HUB_EPISODEB, 1.7f, 1, NULL, 0, alpha);
-        } else if (save->minikit_count) {
-            const f32 scale = HUB_EPISODESUBTITLESIZE;
-            Hub_DrawMiniKitCount(0.0f, HUB_EPISODETITLEY, save->minikit_count, 10, phase);
-            char *name = TTab[area->name_id];
-            if (scale > 0.0f && name)
-                SmartTextEx(name, 0.0f, HUB_EPISODESUBTITLEY, 1.0f, scale, scale, scale, 0, HUB_EPISODER, HUB_EPISODEG,
-                            HUB_EPISODEB, 1.7f, 1, NULL, 0, alpha);
-        } else if (area->area_index != 0xff && area->episode_index != 0xff) {
-            const f32 scale = HUB_EPISODESUBTITLESIZE;
-            const i8 episode = area->episode_index;
-            Hub_DrawMiniKitCount(0.0f, HUB_EPISODETITLEY, 0, 10, phase);
-            sprintf(title, "%s, %s %i", TTab[EDataList[episode].name_id], TTab[tCHAPTER],
-                    static_cast<i8>(ADataList[index].area_index) + 1);
-            if (!(scale <= 0.0f))
-                SmartTextEx(title, 0.0f, HUB_EPISODESUBTITLEY, 1.0f, scale, scale, scale, 0, HUB_EPISODER, HUB_EPISODEG,
-                            HUB_EPISODEB, 1.7f, 1, NULL, 0, alpha);
-        }
-        MENU *menu = &GameMenu[GameMenuLevel];
-        if (!Game_AreaSave || Game_AreaSave[index].minikit_complete) {
-            NUVEC minimum, maximum;
-            NuSpecialGetBounds(&WORLD->lev_objs[167].special, &minimum, &maximum);
-            const f32 icon_size = ICONSIZE;
-            const f32 text_scale = (icon_size / 0.35f) * 0.95f;
-            const f32 spacing = 1.2f * (icon_size * (maximum.x - minimum.x)) / PANEL3DMULX;
-            f32 x = -spacing * 2.5f;
-            const f32 y = HUB_EPISODETITLEY + (HUB_EPISODETITLEY - HUB_EPISODESUBTITLEY) * 1.5f;
-            f32 grow = 1.0f;
-            if (!TestForController()) {
-                const f32 elapsed = GlobalTimer.time_elapsed - (LastTouchTime + 2.0f);
-                if (elapsed > 4.0f) {
-                    f32 wave = NU_SIN_LUT(static_cast<i32>((NuFmod(elapsed, 4.0f) * 0.25f) * 65536.0f)) - 0.8f;
-                    if (wave < 0.0f)
-                        wave = 0.0f;
-                    grow = wave + 1.0f;
-                }
-            }
-            for (i32 i = 0; i < 6; ++i) {
-                i32 red, green, blue;
-                f32 size = 1.0f;
-                if (i == i_selectminikitepisode) {
-                    size = 1.2f;
-                    if (TestForController()) {
-                        if (menu_pulsate > 0.0f) {
-                            red = static_cast<i32>(static_cast<u32>(MENUFLASH0R) * menu_pulsate +
-                                                   static_cast<u32>(MENUFLASH1R) * (1.0f - menu_pulsate));
-                            green = static_cast<i32>(static_cast<u32>(MENUFLASH0G) * menu_pulsate +
-                                                     static_cast<u32>(MENUFLASH1G) * (1.0f - menu_pulsate));
-                            blue = static_cast<i32>(static_cast<u32>(MENUFLASH0B) * menu_pulsate +
-                                                    static_cast<u32>(MENUFLASH1B) * (1.0f - menu_pulsate));
-                        } else {
-                            red = menu_flash ? MENUFLASH0R : MENUFLASH1R;
-                            green = menu_flash ? MENUFLASH0G : MENUFLASH1G;
-                            if (menu_flash) {
-                                blue = MENUFLASH0B;
-                            } else {
-                                blue = MENUFLASH1B;
-                            }
-                        }
-                        goto hub_episode_colour_ready;
-                    }
-                }
-                // Touch selection and the other entries share the normal menu pulse.
-                if (!(menu_pulse <= 0.0f)) {
-                    red = static_cast<i32>(static_cast<u32>(MENUFLASH0R) * menu_pulse +
-                                           static_cast<u32>(MENUNORMALR) * (1.0f - menu_pulse));
-                    green = static_cast<i32>(static_cast<u32>(MENUFLASH0G) * menu_pulse +
-                                             static_cast<u32>(MENUNORMALG) * (1.0f - menu_pulse));
-                    blue = static_cast<i32>(static_cast<u32>(MENUFLASH0B) * menu_pulse +
-                                            static_cast<u32>(MENUNORMALB) * (1.0f - menu_pulse));
-                } else {
-                    red = MENUENTRYR;
-                    green = MENUENTRYG;
-                    blue = MENUENTRYB;
-                }
-            hub_episode_colour_ready:
-                size *= grow;
-                f32 opacity = phase;
-                if (!Episode_CountOpenAreas(i, -1, Game_AreaSave))
-                    opacity *= 0.25f;
-                Text3DEx(EpisodeNumerals[i], x, y, 1.0f, text_scale * size, text_scale * size, text_scale * size, 0,
-                         red, green, blue, static_cast<u8>(static_cast<i32>(128.0f * opacity)));
-                const i32 bonus = Episode_FindAreaFromFlags(&EDataList[i], 5, 5);
-                i32 object = 167;
-                if (bonus != -1 && Game_AreaSave &&
-                    (Game_AreaSave[bonus].area_complete ||
-                     static_cast<f32>(static_cast<i32>(ADataList[bonus].challenge_trial_time)) >
-                         Game_AreaSave[bonus].challenge_trial_time))
-                    object = 168;
-                const f32 scale = icon_size * size;
-                DrawPanel3DObject(x, y, 1.0f, scale, scale, scale, 0, 0, 0, &WORLD->lev_objs[object].special, 0,
-                                  opacity);
-                menu->item_x[i] = x;
-                menu->item_y[i] = y;
-                menu->item_width[i] = scale * 0.5f;
-                menu->item_height[i] = 0.0f;
-                x += spacing;
-            }
-        } else {
-            for (i32 i = 0; i < 6; ++i)
-                menu->item_width[i] = 0.0f;
-        }
-    }
+    if (GetMenuID() == 14)
+        Hub_DrawMiniKitViewer();
     if (hub_buildit != -1 && hub_buildit_time > 0.0f) {
         i32 total;
         if (hub_buildit == 999)
@@ -3731,7 +3736,7 @@ void MenuDrawEpisodes(MENU_s *) {
     Hub_DrawAreaStats(alpha, last_hub_area, 18);
     const f32 icon_alpha = (MenuPacket.active_player[0] ? 1.0f : DROPINALPHA) * alpha;
     DrawCharIcon(MenuPacket.player_model[0], -ICONX, STATSPOSY, 0.0f, ICONSIZE, 166, icon_alpha, icon_alpha, 1, NULL);
-    if (MainRenderTime <= 0.0f) {
+    if (__builtin_expect(MainRenderTime <= 0.0f, 0)) {
         DrawEpisodesMenu(1, alpha);
     } else if (MainRenderTime < 1.0f) {
         const f32 menu_alpha = 1.0f - NU_SIN_LUT(static_cast<i32>((1.0f - MainRenderTime) * 16384.0f + 16384.0f));
@@ -4150,34 +4155,31 @@ void Hub_Update(WORLDINFO_s *world) {
 
     // Loading completion is tracked separately from the per-frame spawn pass.
     if (hub_custodians_finished_loading == 0) {
-        if (BGLOAD == 0) {
-            hub_custodians_finished_loading = 1;
-        } else {
+        if (BGLOAD != 0) {
             i32 required = 0;
             i32 loaded = 0;
             for (i32 pack = 0; pack < 11; ++pack) {
-                STOREPACK &store_pack = StorePack[pack];
-                if (__builtin_expect(Store_IsPackUnlocked(pack) != 0 || store_pack.id == NULL, 0)) {
-                    continue;
-                }
-                const i32 id = *store_pack.id;
-                if (id == -1) {
-                    continue;
-                }
-                ++required;
-                if (APICharacterLoaded(id) != NULL) {
-                    ++loaded;
+                if (Store_IsPackUnlocked(pack) == 0 && StorePack[pack].id != NULL) {
+                    const i32 id = *StorePack[pack].id;
+                    if (id != -1) {
+                        ++required;
+                        if (APICharacterLoaded(id) != NULL) {
+                            ++loaded;
+                        }
+                    }
                 }
             }
             if (loaded == required) {
                 hub_custodians_finished_loading = 1;
             }
+        } else {
+            hub_custodians_finished_loading = 1;
         }
     }
 
     for (i32 pack = 0; pack < 11; ++pack) {
         STOREPACK &store_pack = StorePack[pack];
-        if (__builtin_expect(store_pack.id != NULL, 1)) {
+        if (store_pack.id != NULL) {
             const i32 id = *store_pack.id;
             if (id != -1 && Store_IsPackUnlocked(pack) == 0 &&
                 (store_pack.field44_0x32 == 0xff ||
@@ -4402,7 +4404,7 @@ void Hub_Update(WORLDINFO_s *world) {
             gizmo = HubAreaInfo[i].bonus_gizmo;
             if (__builtin_expect(output == 0, 0)) {
                 GIZBUILDIT_s *buildit = static_cast<GIZBUILDIT_s *>(gizmo->object);
-                if (__builtin_expect(!(gold_bricks < buildit->anim_object_count), 1)) {
+                if (!(gold_bricks < buildit->anim_object_count)) {
                     if ((buildit->availability_flags & GIZBUILDIT_AVAILABILITY_ACTIVE) == 0) {
                         GizmoActivate(world->gizmo_sys, gizmo, 1, 0);
                     }
@@ -4569,10 +4571,11 @@ void Hub_Update(WORLDINFO_s *world) {
                 }
             }
             if (hub_minikitarea_time == 0.0f) {
-                if (__builtin_expect(hub_minikitarea != selected_minikit, 1)) {
+                if (hub_minikitarea != selected_minikit) {
                     hub_minikitarea_opentime = 0.0f;
                 }
                 hub_minikitarea = selected_minikit;
+                Hub_FindAreaInfoByIndex(hub_minikitarea); // retail keeps this dead lookup
             }
             f32 target = 0.0f;
             if (hub_minikitarea != -1 && hub_minikitarea == selected_minikit) {

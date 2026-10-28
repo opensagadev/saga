@@ -681,7 +681,7 @@ void MenuInitialiseEx(MENUFNINFO *menu_info, i32 menu_id_count, i32 language_cou
     // record for menu_id_count - 1.
     for (i32 i = 0; i < menu_ids_used; i++) {
         MenuInfo[RESERVED_MENUS_COUNT + i] = menu_info[i];
-        if (!(menu_info[i].id >= menu_ids_used - 1)) {
+        if (__builtin_expect(!(menu_info[i].id >= menu_ids_used - 1), 1)) {
             continue;
         }
         break;
@@ -1229,7 +1229,7 @@ void MenuUpdateAutoSaveWarning(MENU_s *menu) {
 }
 
 void MenuUpdateSaving(MENU_s *) {
-    if (memcard_saveneeded != 0) {
+    if (__builtin_expect(memcard_saveneeded != 0, 1)) {
         memcard_savemessage_delay = 1.0f;
         memcard_saveresult_delay = 1.0f;
         if (saveload_cardtype == -1 || memcard_cardchanged != 0) {

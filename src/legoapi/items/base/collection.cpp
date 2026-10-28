@@ -514,7 +514,7 @@ void Collection_CreateCustom(char *name, i16 *id_list, COLLECTION_s *collection,
     collection->count_y = 0;
 
     if (use_all_characters == 0) {
-        if (CollectCount > 0) {
+        if (__builtin_expect(CollectCount > 0, 1)) {
             COLLECTID *const end = CollectList + CollectCount;
             for (COLLECTID *current = CollectList; current != end; ++current) {
                 COLLECTID &source = *current;

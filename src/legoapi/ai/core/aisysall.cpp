@@ -5861,7 +5861,7 @@ static void xActions(NUFPAR *parser) {
             char params[24][128];
 
             def = AIActionFind(parser->word_buf);
-            if (def != NULL) {
+            if (__builtin_expect(def != NULL, 1)) {
                 i32 param_count;
 
                 action = (AIACTION *)AIScriptBufferAlloc(load_buff, load_endbuff, sizeof(AIACTION));
@@ -17918,8 +17918,8 @@ eduimenu_s *pathEditor_Process(nupad_s *pad) {
         }
         aieditor->flags |= 1;
     }
-    i32 direction = 0;
     bool named_only = false;
+    i32 direction = 0;
     if (pad->digital_buttons & 0x100) {
         if (pad->digital_buttons_pressed & 8)
             direction = 1;
@@ -17986,7 +17986,7 @@ extern "C" {
             EDAIPATHCHECK_s *check = reinterpret_cast<EDAIPATHCHECK_s *>(reinterpret_cast<u8 *>(record) + 0x38);
             if (check->first == node || check->second == node) {
                 pathEditor_OnPathCheck(&record->position, check, aieditor->current_path, 0.0f);
-                if (check->on_path == 0) {
+                if (__builtin_expect(check->on_path == 0, 0)) {
                     NuLinkedListRemove(&aieditor->creatures, link);
                     memset(record, 0, sizeof(*record));
                     NuLinkedListAppend(reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x3691c), link);
