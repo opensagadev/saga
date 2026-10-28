@@ -28,18 +28,18 @@ namespace nu2api {
 
         union KeyFlags {
             struct {
-                u8 lightmapA : 1;
-                u8 lightmapB : 1;
+                u8 lightmap_a : 1;
+                u8 lightmap_b : 1;
                 u8 low : 4;
-                u8 clearedLo : 2;
-                u8 clearedHi : 1;
+                u8 cleared_lo : 2;
+                u8 cleared_hi : 1;
                 u8 mid : 3;
                 u8 forced : 1;
-                u8 extraMapA : 1;
-                u8 extraMapB : 1;
+                u8 extra_map_a : 1;
+                u8 extra_map_b : 1;
                 u8 bit15 : 1;
                 u8 bits16 : 4;
-                u8 lightmapSelect : 1;
+                u8 lightmap_select : 1;
                 u8 bits21 : 3;
                 u8 byte3;
                 u32 nibble : 4;
@@ -63,8 +63,8 @@ namespace nu2api {
         KeyFlags &flags = keyData.flags;
         if (filter->variant == 0) {
             flags = *reinterpret_cast<const KeyFlags *>(descBytes + 0x1b8);
-            flags.bits.clearedLo = 0;
-            flags.bits.clearedHi = 0;
+            flags.bits.cleared_lo = 0;
+            flags.bits.cleared_hi = 0;
         } else {
             flags.words[0] = 0;
             flags.words[1] = 0;
@@ -103,9 +103,9 @@ namespace nu2api {
         u8 specularId;
         if (__builtin_expect(filter->variant == 0, 0)) {
             const KeyFlags *descFlags = reinterpret_cast<const KeyFlags *>(&filter->desc->flagsbits_1b8);
-            if (__builtin_expect(descFlags->bits.lightmapA, 1)) {
+            if (__builtin_expect(descFlags->bits.lightmap_a, 1)) {
                 block[0x15] = descBytes[0xa9];
-            } else if (descFlags->bits.lightmapB) {
+            } else if (descFlags->bits.lightmap_b) {
                 block[0x15] = descBytes[0xa9];
             } else {
                 block[0x15] = 0;
@@ -127,9 +127,9 @@ namespace nu2api {
         u8 extraMap = 0;
         if (__builtin_expect(filter->variant == 0, 1)) {
             const KeyFlags *descFlags = reinterpret_cast<const KeyFlags *>(&filter->desc->flagsbits_1b8);
-            if (__builtin_expect(descFlags->bits.extraMapA, 1)) {
+            if (__builtin_expect(descFlags->bits.extra_map_a, 1)) {
                 extraMap = descBytes[0xae];
-            } else if (descFlags->bits.extraMapB) {
+            } else if (descFlags->bits.extra_map_b) {
                 extraMap = descBytes[0xae];
             }
         }
@@ -149,16 +149,16 @@ namespace nu2api {
             const NUSHADERMTLDESC *d = filter->desc;
             const KeyFlags *descFlags = reinterpret_cast<const KeyFlags *>(&d->flagsbits_1b8);
             u8 v24;
-            if (descFlags->bits.lightmapA && d->lightmap_tex_id[1] > filter->texture_id_threshold) {
+            if (descFlags->bits.lightmap_a && d->lightmap_tex_id[1] > filter->texture_id_threshold) {
                 v24 = 2;
-            } else if (descFlags->bits.lightmapB) {
+            } else if (descFlags->bits.lightmap_b) {
                 v24 = d->lightmap_tex_id[1] > filter->texture_id_threshold;
             } else {
                 v24 = 0;
             }
             block[0x24] = v24;
 
-            block[0x25] = descFlags->bits.lightmapSelect
+            block[0x25] = descFlags->bits.lightmap_select
                               ? static_cast<u8>((d->lightmap_tex_id[0] > filter->texture_id_threshold) + 1)
                               : 0;
         } else {
@@ -171,17 +171,17 @@ namespace nu2api {
 
         // Texcoord type heuristic over the material attribute bytes at mtl+0x40..0x42.
         struct MtlAttribBytes {
-            u8 alphaMode : 4;
+            u8 alpha_mode : 4;
             u8 bits4 : 4;
             u8 bits8 : 6;
-            u8 zMode : 2;
+            u8 z_mode : 2;
             u8 bits16 : 4;
-            u8 alphaTest : 3;
+            u8 alpha_test : 3;
             u8 bit23 : 1;
         };
         const MtlAttribBytes *attr = reinterpret_cast<const MtlAttribBytes *>(&filter->mtl->attribs);
-        const i32 unitsLow = attr->alphaTest;
-        const u8 vtxType = attr->alphaMode;
+        const i32 unitsLow = attr->alpha_test;
+        const u8 vtxType = attr->alpha_mode;
 
         bool texcoordIsLong;
         if (unitsLow == 5 || unitsLow == 3) {
@@ -189,7 +189,7 @@ namespace nu2api {
         } else {
             texcoordIsLong = (vtxType == 10) | ((unitsLow & 3) == 2);
         }
-        if (__builtin_expect(attr->zMode == 0, 1) || attr->zMode == 2 || vtxType == 0 || vtxType == 10) {
+        if (__builtin_expect(attr->z_mode == 0, 1) || attr->z_mode == 2 || vtxType == 0 || vtxType == 10) {
             block[0x28] = texcoordIsLong;
         } else {
             block[0x28] = 0;
