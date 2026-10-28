@@ -159,7 +159,7 @@ void Animate_POD(GameObject_s *object) {
 normal_animation:
     if (PodSprint_InStartCountdown(WORLD) > 0.0f || PodRace_InStartCountdown(WORLD) != 0) {
         packet.requested_animation = 1;
-    } else if (object->camera_shake_strength > 0.0f) {
+    } else if (__builtin_expect(object->camera_shake_strength > 0.0f, 1)) {
         packet.requested_animation = 0x17;
     } else if (__builtin_expect(!object->apiobj.player_controlled, 0)) {
         packet.requested_animation = 3;
@@ -1127,7 +1127,7 @@ i32 GameAnimSet_Stop(GAMEANIMSET_s *set) {
     }
 
     GAMEANIMSET_STATE state = static_cast<GAMEANIMSET_STATE>(set->state & ~GAMEANIMSET_STATE_AT_END);
-    if (state != GAMEANIMSET_STATE_ACTIVE_FORWARD) {
+    if (__builtin_expect(state != GAMEANIMSET_STATE_ACTIVE_FORWARD, 0)) {
         return 1;
     }
 

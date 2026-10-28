@@ -563,7 +563,7 @@ static void GlobalCharacterRender(NUVEC *position, i16 angle, i32 character, i32
     i16 layers[32];
     if (character < CHARCOUNT) {
         i16 model_id = apicharsys->playermodelids[character];
-        if (model_id != -1) {
+        if (__builtin_expect(model_id != -1, 1)) {
             CHARACTERMODEL_s *model = &apicharsys->models[model_id];
 
             i32 layer_count = GCDataList[model->model_id].make_layer_list(

@@ -1581,15 +1581,13 @@ void Hub_UpdateFreePlaySelect() {
             break;
         case 1: {
             i32 active = 0, confirmed = 0;
-            bool exit = false;
-            auto menu_input_activity = menu->input_activity;
-            auto collection_count_x = collection->count_x;
+            i32 exit = 0;
             for (i32 player = 0; player < 2; ++player) {
                 const i32 other = (player + 1) & 1;
                 const i32 previous = freeplay_i[player];
                 i32 index = previous;
                 bool select = false, cancel = false;
-                if (__builtin_expect(menu_input_activity != 0 && player == 0, 1)) {
+                if (__builtin_expect(menu->input_activity != 0 && player == 0, 1)) {
                     if (menu->confirm_pressed != 0) {
                         if (__builtin_expect(menu->selected_item == 9999, 1))
                             select = 1;
@@ -1606,10 +1604,10 @@ void Hub_UpdateFreePlaySelect() {
                     } else if (__builtin_expect(freeplay_selected[player] == 0, 0)) {
                         const u32 held = GamePad[player].buttons_held | GamePad[player].buttons_released;
                         const u32 pressed = GamePad[player].buttons_pressed | GamePad[player].left_directions;
-                        i32 up = pressed & GAMEPAD_DUP, down = pressed & GAMEPAD_DDOWN;
-                        i32 left = pressed & GAMEPAD_DLEFT, right = pressed & GAMEPAD_DRIGHT;
-                        i32 up_held = held & GAMEPAD_DUP, down_held = held & GAMEPAD_DDOWN;
-                        i32 left_held = held & GAMEPAD_DLEFT, right_held = held & GAMEPAD_DRIGHT;
+                        i32 up = pressed & GAMEPAD_DUP, up_held = held & GAMEPAD_DUP;
+                        i32 down = pressed & GAMEPAD_DDOWN, down_held = held & GAMEPAD_DDOWN;
+                        i32 left = pressed & GAMEPAD_DLEFT, left_held = held & GAMEPAD_DLEFT;
+                        i32 right = pressed & GAMEPAD_DRIGHT, right_held = held & GAMEPAD_DRIGHT;
                         if (down && up)
                             down = up = 0;
                         if (right && left)
@@ -1626,9 +1624,10 @@ void Hub_UpdateFreePlaySelect() {
                         MenuRepeat(&right_held, &right, &rightrepeattime[player], &rightrepeatcount[player], 0.1f,
                                    FRAMETIME);
                         if (up) {
-                            const i32 columns = collection_count_x;
+                            COLLECTID *const list = collection->list;
                             const i32 count = collection->count_y;
-                            const i32 span = (static_cast<u32>(count) / static_cast<u32>(columns) + 1) * columns;
+                            const i32 columns = collection->count_x;
+                            const i32 span = (count / columns + 1) * columns;
                             index = previous;
                             do {
                                 index -= columns;
@@ -1637,11 +1636,12 @@ void Hub_UpdateFreePlaySelect() {
                                     if (index >= count)
                                         index -= columns;
                                 }
-                            } while (collection->list[index].id == MenuPacket.player_model[other]);
+                            } while (list[index].id == MenuPacket.player_model[other]);
                         } else if (down) {
+                            COLLECTID *const list = collection->list;
                             const i32 count = collection->count_y;
-                            const i32 columns = collection_count_x;
-                            const i32 span = (static_cast<u32>(count) / static_cast<u32>(columns) + 1) * columns;
+                            const i32 columns = collection->count_x;
+                            const i32 span = (count / columns + 1) * columns;
                             index = previous;
                             do {
                                 index += columns;
@@ -1650,10 +1650,11 @@ void Hub_UpdateFreePlaySelect() {
                                         index += columns;
                                     index -= span;
                                 }
-                            } while (collection->list[index].id == MenuPacket.player_model[other]);
+                            } while (list[index].id == MenuPacket.player_model[other]);
                         } else if (__builtin_expect(!!(left), 0)) {
+                            COLLECTID *const list = collection->list;
                             const i32 count = collection->count_y;
-                            const i32 columns = collection_count_x;
+                            const i32 columns = collection->count_x;
                             index = previous;
                             do {
                                 i32 column = index % columns - 1;
@@ -1662,10 +1663,11 @@ void Hub_UpdateFreePlaySelect() {
                                 index = (index / columns) * columns + column;
                                 if (index >= count)
                                     index = count - 1;
-                            } while (collection->list[index].id == MenuPacket.player_model[other]);
+                            } while (list[index].id == MenuPacket.player_model[other]);
                         } else if (right) {
-                            const u16 columns = collection_count_x;
+                            COLLECTID *const list = collection->list;
                             const i32 count = collection->count_y;
+                            const i32 columns = collection->count_x;
                             index = previous;
                             do {
                                 i32 column = index % columns + 1;
@@ -1673,7 +1675,7 @@ void Hub_UpdateFreePlaySelect() {
                                 if (column >= columns)
                                     column -= columns;
                                 index = row + column < count ? row + column : row;
-                            } while (collection->list[index].id == MenuPacket.player_model[other]);
+                            } while (list[index].id == MenuPacket.player_model[other]);
                         }
                     }
                     ++active;
@@ -1744,9 +1746,9 @@ void Hub_UpdateFreePlaySelect() {
                     if (fpcount > 3) {
                         for (i32 shuffle = 0; shuffle < 64; ++shuffle) {
                             const i32 first_offset = qrand() / (0xffff / (fpcount - 2) + 1);
+                            const i32 second_offset = qrand() / (0xffff / (fpcount - 3) + 1);
+                            const i32 second = (second_offset + first_offset) % (fpcount - 2) + 2;
                             const i32 first = first_offset + 2;
-                            const i32 second =
-                                (qrand() / (0xffff / (fpcount - 3) + 1) + first_offset) % (fpcount - 2) + 2;
                             const APICHARACTERMODELLIST_s saved = fplist[first];
                             fplist[first] = fplist[second];
                             fplist[second] = saved;
@@ -1839,12 +1841,12 @@ void Hub_LoadAndFixUpMiniKits(WORLDINFO *world, VARIPTR *buf, VARIPTR *buf_end) 
         world->minikit_pieces_buf[i] = reinterpret_cast<HUBMINIKITPIECES_s *>(buf->addr);
         buf->addr += 0x18;
         MiniKit_Load(reinterpret_cast<MINIKIT *>(world->minikit_pieces_buf[i]), minikit_id, buf, buf_end, NULL);
-        if (reinterpret_cast<MINIKIT *>(world->minikit_pieces_buf[i])->gscn == NULL) {
-            world->minikit_pieces_buf[i] = NULL;
-            buf->addr -= 0x18;
-        } else {
+        if (!(reinterpret_cast<MINIKIT *>(world->minikit_pieces_buf[i])->gscn == NULL)) {
             MiniKit_InitPieces(reinterpret_cast<MINIKIT *>(world->minikit_pieces_buf[i]), 10, buf, buf_end);
             reinterpret_cast<MINIKIT *>(world->minikit_pieces_buf[i])->field_0x9 = static_cast<i8>(i);
+        } else {
+            world->minikit_pieces_buf[i] = NULL;
+            buf->addr -= 0x18;
         }
     }
 }
@@ -2766,7 +2768,7 @@ __attribute__((optimize("O2", "tree-vectorize"))) i32 Percent_UpdateHint(HINT_s 
 
 i32 IndyUnlocked_UpdateHint(HINT_s *hint) {
     i32 control_mode = MechInputTouchSystem::s_baseControlMode;
-    if (hint->completion_flags[control_mode] != 0 || WORLD->current_level != HUB_LDATA)
+    if (__builtin_expect(hint->completion_flags[control_mode] != 0 || WORLD->current_level != HUB_LDATA, 1))
         return 0;
     if (FadeSys.fade != 0.0f || Game.indy_unlocked == 0)
         return 0;
@@ -3407,7 +3409,7 @@ static void DrawEpisodesMenu(i32 selected, f32 alpha) {
     MENU *menu = &GameMenu[menu_level];
     if (episodesmode != 0) {
         if (episodesmode == 1) {
-            if (hub_new_level != -1 && LDataList[hub_new_level].episode_index != -1)
+            if (__builtin_expect(hub_new_level != -1, 0) && LDataList[hub_new_level].episode_index != -1)
                 goto draw_clips;
         } else if (episodesmode == 2) {
             goto draw_clips;
@@ -3435,10 +3437,10 @@ static void DrawEpisodesMenu(i32 selected, f32 alpha) {
                     if (menu_pulsate > 0.0f) {
                         red = static_cast<i32>(static_cast<u32>(MENUFLASH0R) * menu_pulsate +
                                                static_cast<u32>(MENUFLASH1R) * (1.0f - menu_pulsate));
-                        blue = static_cast<i32>(static_cast<u32>(MENUFLASH0B) * menu_pulsate +
-                                                static_cast<u32>(MENUFLASH1B) * (1.0f - menu_pulsate));
                         green = static_cast<i32>(static_cast<u32>(MENUFLASH0G) * menu_pulsate +
                                                  static_cast<u32>(MENUFLASH1G) * (1.0f - menu_pulsate));
+                        blue = static_cast<i32>(static_cast<u32>(MENUFLASH0B) * menu_pulsate +
+                                                static_cast<u32>(MENUFLASH1B) * (1.0f - menu_pulsate));
                     } else {
                         red = menu_flash ? MENUFLASH0R : MENUFLASH1R;
                         green = menu_flash ? MENUFLASH0G : MENUFLASH1G;
@@ -3463,7 +3465,7 @@ static void DrawEpisodesMenu(i32 selected, f32 alpha) {
                 if (__builtin_expect(episodesmode != 1 && episodestime < episodesduration, 1))
                     opacity = opacity * (episodestime / episodesduration);
                 Text3DEx(EpisodeNumerals[episode], x, y, 1.0f, 0.95f, 0.95f, 0.95f, 0, red, green, blue,
-                         static_cast<i32>(128.0f * opacity));
+                         static_cast<u8>(static_cast<i32>(128.0f * opacity)));
                 DrawPanel3DObject(x, y, 1.0f, 0.35f, 0.35f, 0.35f, 0, 0, 0, &WORLD->lev_objs[167].special, 0, opacity);
                 menu->item_x[episode] = x;
                 menu->item_y[episode] = y;
@@ -3471,8 +3473,10 @@ static void DrawEpisodesMenu(i32 selected, f32 alpha) {
                 menu->item_height[episode] = 0.0f;
             }
         }
-        memset(GameMenu[menu_level].item_width + 6, 0, 394 * sizeof(f32));
-        memset(GameMenu[menu_level].item_height + 6, 0, 394 * sizeof(f32));
+        f32 *widths = GameMenu[menu_level].item_width;
+        memset(widths + 6, 0, 394 * sizeof(f32));
+        f32 *heights = GameMenu[menu_level].item_height;
+        memset(heights + 6, 0, 394 * sizeof(f32));
         return;
     }
 draw_clips: {
@@ -3488,10 +3492,11 @@ draw_clips: {
     return;
 }
 draw_play: {
+    f32 fade = alpha;
     if (episodestime < episodesduration)
-        alpha = (episodestime / episodesduration) * alpha;
+        fade = (episodestime / episodesduration) * fade;
     const f32 time = NuFmod(GameTimer.time_elapsed_mod_seconds, 0.5f);
-    alpha = (0.15f * NU_SIN_LUT(static_cast<i32>((time + time) * 65536.0f)) + 0.85f) * alpha;
+    alpha = (0.15f * NU_SIN_LUT(static_cast<i32>((time + time) * 65536.0f)) + 0.85f) * fade;
     const u8 text_alpha = static_cast<i32>(128.0f * alpha);
     Text3DEx(TTab[tPLAY], 0.0f, -0.15f, 1.0f, HUB_EPISODESUBTITLESIZE, HUB_EPISODESUBTITLESIZE, HUB_EPISODESUBTITLESIZE,
              0, 255, 255, 255, text_alpha);
@@ -3501,9 +3506,11 @@ draw_play: {
     menu->item_width[0] = 0.175f;
     menu->item_height[0] = 0.0f;
     const f32 text_scale = 0.35f * 3.0f;
-    Text3DEx(">", 0.0105f, 0.15f, 1.0f, text_scale * 1.5f, text_scale, text_scale, 0, 255, 255, 255, text_alpha);
-    memset(GameMenu[menu_level].item_width + 1, 0, 399 * sizeof(f32));
-    memset(GameMenu[menu_level].item_height + 1, 0, 399 * sizeof(f32));
+    Text3DEx(">", text_scale * 0.01f, 0.15f, 1.0f, text_scale * 1.5f, text_scale, text_scale, 0, 255, 255, 255,
+             text_alpha);
+    memset(menu->item_width + 1, 0, 399 * sizeof(f32));
+    f32 *heights = GameMenu[menu_level].item_height;
+    memset(heights + 1, 0, 399 * sizeof(f32));
 }
 }
 

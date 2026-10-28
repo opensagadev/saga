@@ -438,7 +438,7 @@ void LoadSpecialSfxFile(WORLDINFO *world) {
     char path[268];
     sprintf(path, "%s.sfx", world->config_file);
     if (NuFileExists(path) != 0) {
-        if (SpecialSfxLoad(path, world) != 0) {
+        if (__builtin_expect(SpecialSfxLoad(path, world) != 0, 1)) {
             i32 count = world->special_sfx_count;
             specialsfx_s *entry = world->special_sfx;
             if (count > 0) {

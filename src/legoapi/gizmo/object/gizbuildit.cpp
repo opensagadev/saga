@@ -286,7 +286,7 @@ static void GizBuildIts_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *, void
                     AddGizmo(gizmo_sys, type_id, NULL, &buildit_sys->buildits[i]);
                 }
                 ++i;
-            } while (buildit_sys->count > i);
+            } while (__builtin_expect(buildit_sys->count > i, 1));
         }
     }
 }

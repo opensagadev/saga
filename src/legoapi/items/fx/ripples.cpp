@@ -163,7 +163,7 @@ void RippleEffects_Configure(WORLDINFO_s *world, char *config) {
 }
 
 i32 LookupRippleEffectIndex(char *name) {
-    if (NuStrICmp("water", name) == 0)
+    if (__builtin_expect(NuStrICmp("water", name) == 0, 0))
         return 0;
     return NuStrICmp("forcefield", name) == 0 ? 1 : -1;
 }

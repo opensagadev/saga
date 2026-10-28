@@ -635,7 +635,7 @@ static void Push_StoreProgress(void *world_ptr, void *, void *progress_ptr) {
         if ((push_block->flags_0ca & PUSHBLOCK_FLAG_VISIBLE) == 0) {
             progress->visible_mask[mask_index] &= ~mask;
         }
-        if ((push_block->flags_0cb & PUSHBLOCK_FLAG_STATE) != 0) {
+        if (__builtin_expect((push_block->flags_0cb & PUSHBLOCK_FLAG_STATE) != 0, 1)) {
             progress->state_mask[mask_index] |= mask;
         }
 

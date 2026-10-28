@@ -484,11 +484,11 @@ static void Lever_Activate(GIZMO *gizmo, i32 enabled) {
     }
 
     LEVER_s *lever = static_cast<LEVER_s *>(gizmo->object);
-    if (enabled != 0) {
+    if (__builtin_expect(enabled == 0, 0)) {
+        lever->flags &= ~LEVER_FLAG_ENABLED;
+    } else {
         lever->flags |= LEVER_FLAG_ENABLED;
         Lever_Reset(lever);
-    } else {
-        lever->flags &= ~LEVER_FLAG_ENABLED;
     }
 }
 
@@ -517,7 +517,7 @@ static void Lever_SetVisibility(GIZMO *gizmo, i32 visible) {
     const u8 was_visible = lever->visible;
     lever->visible = visible != 0;
     if (lever->visible) {
-        if (!was_visible) {
+        if (__builtin_expect(!was_visible, 0)) {
             lever->platform_id = NewPlatPickupInst(lever, 3);
             PlatInstRotate(lever->platform_id, 1);
         }

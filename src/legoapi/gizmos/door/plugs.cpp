@@ -189,7 +189,7 @@ static void Plugs_StoreProgress(void *world_ptr, void *, void *progress_ptr) {
         if ((plug->flags & PLUG_FLAG_ACTIVE) == 0) {
             progress->active_mask[word] &= ~bit;
         }
-        if ((plug->flags & PLUG_FLAG_PLUGGED) != 0) {
+        if (__builtin_expect((plug->flags & PLUG_FLAG_PLUGGED) != 0, 1)) {
             // This is how the original encodes the state, despite having a
             // separately initialized plugged mask in the progress record.
             progress->active_mask[word] |= bit;

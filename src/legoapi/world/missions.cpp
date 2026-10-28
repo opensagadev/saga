@@ -119,7 +119,7 @@ MISSIONSYS *Missions_Configure(char *file, VARIPTR *bufferStart, VARIPTR *buffer
 void Mission_Clear(MISSIONSYS *ms) {
     if (ms == NULL) {
         ms = MissionSys;
-        if (ms == NULL) {
+        if (__builtin_expect(ms == NULL, 1)) {
             return;
         }
     }

@@ -767,7 +767,7 @@ i32 Customiser_MenuAvailable(CUSTOMISER *customiser) {
     if (first_animation != 99 && first_animation != 190) {
         return 0;
     }
-    if (APICharacterLoaded(customiser->character_ids[1]) == NULL) {
+    if (__builtin_expect(APICharacterLoaded(customiser->character_ids[1]) == NULL, 1)) {
         return 0;
     }
     const i16 second_animation = customiser->animation_packets[1].requested_animation;

@@ -372,7 +372,7 @@ static void GizPanel_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *world_ptr
             }
             panel_sys = world->giz_panel_sys;
             ++index;
-        } while (panel_sys->count > index);
+        } while (__builtin_expect(panel_sys->count > index, 1));
     }
 }
 

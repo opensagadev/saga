@@ -540,7 +540,7 @@ void Store_UnlockPack(i32, bool save) {
 }
 
 void Store_RestorePurchases() {
-    if (WORLD != NULL && HUB_LDATA != NULL && WORLD->current_level == HUB_LDATA) {
+    if (__builtin_expect(WORLD != NULL && HUB_LDATA != NULL && WORLD->current_level == HUB_LDATA, 1)) {
         TriggerExtraDataSave();
         TriggerAutoSave();
     } else {

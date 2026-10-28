@@ -1611,11 +1611,11 @@ extern "C" void NuSound3StopVoice(NuSoundVoice *voice) {
     NuSound3Voice *entry = NULL;
     for (NuSound3Voice *it = g_NuSoundVoicesActive.Front(); it != g_NuSoundVoicesActive.End() && entry == NULL;
          it = it->intrusive_next) {
-        if (it->weak_ptr.obj == reinterpret_cast<NuSoundWeakPtrObj<NuSoundVoice> *>(voice)) {
+        if (__builtin_expect(it->weak_ptr.obj == reinterpret_cast<NuSoundWeakPtrObj<NuSoundVoice> *>(voice), 0)) {
             entry = it;
         }
     }
-    if (entry == NULL) {
+    if (__builtin_expect(entry == NULL, 0)) {
         return;
     }
 

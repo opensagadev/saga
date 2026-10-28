@@ -398,7 +398,7 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
             message.green = PlayerRGB[player][1];
             message.blue = PlayerRGB[player][2];
             const u16 angle = static_cast<u16>(NuFmod(GameTimer.time_elapsed_mod_seconds, 0.5f) * 2.0f * 65536.0f);
-            message.alpha = static_cast<u8>(80.0f + 48.0f * NuTrigTable[angle >> 1]);
+            message.alpha = static_cast<u8>(80.0f + 48.0f * NU_SIN_LUT(angle));
             AddGameMsg(&message);
         }
         if ((object->pad_gamepad->buttons_held & GAMEPAD_SPECIAL) != 0)
@@ -413,7 +413,7 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
     }
     switch (object->field_0x7a3) {
         case 0: {
-            bool event = false;
+            i32 event = 0;
             if ((object->context_flags & 0x40) == 0) {
                 GIZMOBLOWUP_s *blowup = static_cast<GIZMOBLOWUP_s *>(object->field_0x788);
                 object->apiobj.movement_facing_angle =
@@ -425,7 +425,7 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
                 }
             }
             object->context_animation_timer -= FRAMETIME;
-            if (__builtin_expect(!(object->context_animation_timer > 0.0f), 1)) {
+            if (__builtin_expect(object->context_animation_timer <= 0.0f, 1)) {
                 object->field_0x7a3 = 2;
                 object->context_animation = LEGOACT_SUPERCARRY_IDLE;
                 if (__builtin_expect((object->context_flags & 0x40) == 0, 1))
@@ -439,7 +439,7 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
             return;
         }
         case 1: {
-            bool event = false;
+            i32 event = 0;
             if (__builtin_expect((object->context_flags & 0x40) == 0, 1)) {
                 if (frame == NULL) {
                     event = SuperCarry_PutDownDrop != 0;
@@ -457,8 +457,8 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
             if (event) {
                 object->context_flags |= 0x40;
                 NewBuzzFrames(object->pad_gamepad->pad, 1, 0);
-                GIZMOBLOWUP_s *blowup = static_cast<GIZMOBLOWUP_s *>(object->field_0x788);
                 if (SuperCarry_PutDownDrop != 0) {
+                    GIZMOBLOWUP_s *blowup = static_cast<GIZMOBLOWUP_s *>(object->field_0x788);
                     blowup->state_flags |= 0x80;
                     blowup->visibility_flags |= 0x40;
                     GizBlowup_Respawn(blowup);
@@ -474,7 +474,8 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
                         SuperCarry_Throw(object, 2);
                     }
                 } else {
-                    SuperCarry_TurnBlowupBackOn(blowup, &object->carried_object_drop_position,
+                    SuperCarry_TurnBlowupBackOn(static_cast<GIZMOBLOWUP_s *>(object->field_0x788),
+                                                &object->carried_object_drop_position,
                                                 object->carried_object_angle + object->apiobj.movement_facing_angle, 0);
                 }
             }
@@ -491,8 +492,10 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
                     else
                         put_down = (object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) != 0;
                 } else if ((object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) != 0) {
-                    throw_object = object->pad_gamepad->input_magnitude > 0.0f;
-                    put_down = !throw_object;
+                    if (object->pad_gamepad->input_magnitude > 0.0f)
+                        throw_object = true;
+                    else
+                        put_down = true;
                 }
                 if (__builtin_expect(throw_object || put_down, 1)) {
                     if (__builtin_expect((throw_object || SuperCarry_UseActionButton == 0) && SuperCarry_Bash != 0 &&
@@ -512,7 +515,7 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
                             object->context_flags &= static_cast<u8>(~0x40);
                             f32 duration = AnimDuration(object->id, object->context_animation, 0.0f, 0.0f, 1);
                             object->context_animation_timer = duration;
-                            if (!(duration > 0.0f))
+                            if (duration <= 0.0f)
                                 object->context_animation_timer = 0.5f;
                             return;
                         }
@@ -545,7 +548,7 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
                         object->context_flags &= static_cast<u8>(~0x40);
                         f32 duration = AnimDuration(object->id, object->context_animation, 0.0f, 0.0f, 1);
                         object->context_animation_timer = duration;
-                        if (!(duration > 0.0f))
+                        if (duration <= 0.0f)
                             object->context_animation_timer = 0.5f;
                         object->carried_object_drop_position.x = object->apiobj.lower_position.x;
                         object->carried_object_drop_position.y = object->apiobj.field_0x218;
@@ -583,7 +586,7 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
                 object->character_context = -1;
                 return;
             }
-            bool event = false;
+            i32 event = 0;
             if (frame != NULL && (object->context_flags & 0x40) == 0) {
                 f32 marker = AnimListFrame(object->apiobj.character_model, object->context_animation, 0);
                 event = marker >= 1.0f && *frame >= marker;
@@ -607,7 +610,7 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
                 object->character_context = -1;
                 return;
             }
-            bool event = false;
+            i32 event = 0;
             if (frame != NULL && (object->context_flags & 0x40) == 0) {
                 f32 marker = AnimListFrame(object->apiobj.character_model, object->context_animation, 0);
                 event = marker >= 1.0f && *frame >= marker;

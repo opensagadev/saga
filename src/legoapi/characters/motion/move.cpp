@@ -5327,7 +5327,6 @@ static void SwipeCode(GameObject_s *object, i32 pressed, i32 held) {
 
 static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 action_held, i32 jump_pressed,
                                 i32 buttons_pressed) {
-    ANIMPACKET_s &animation = object->apiobj.anim_packet;
     const u8 player_active = object->apiobj.flags_low & 0x80;
     f32 cooldown;
     if (player_active != 0) {
@@ -5335,7 +5334,7 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
         object->ai_combo_cooldown = cooldown;
     } else {
         cooldown = object->ai_combo_cooldown;
-        if (!(cooldown <= 0.0f)) {
+        if (cooldown > 0.0f) {
             cooldown -= FRAMETIME;
             object->ai_combo_cooldown = cooldown;
         }
@@ -5366,8 +5365,8 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
                     if (object->combo_branch == 1) {
                         object->combo_branch =
                             (object->field_0xe20 & 0x40) != 0 &&
-                                    JediHasAction(object,
-                                                  static_cast<JEDI_ACTION>(object->queued_context_animation + 4))
+                                    object->apiobj.character_model
+                                            ->model_data_b[object->queued_context_animation + 4] != NULL
                                 ? 4
                                 : 3;
                         if (object->combo_branch == 3)
@@ -5375,11 +5374,11 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
                     } else {
                         object->combo_branch =
                             (object->field_0xe20 & 0x40) != 0 &&
-                                    JediHasAction(object,
-                                                  static_cast<JEDI_ACTION>(object->queued_context_animation + 6))
+                                    object->apiobj.character_model
+                                            ->model_data_b[object->queued_context_animation + 6] != NULL
                                 ? 6
                                 : 5;
-                        if (__builtin_expect(object->combo_branch == 5, 1))
+                        if (object->combo_branch == 5)
                             object->field_0xe20 &= ~0x40;
                         else {
                             NewRumble(object->pad_gamepad->pad, 0.6f, 0);
@@ -5388,6 +5387,10 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
                             }
                         }
                     }
+                    object->context_animation = object->queued_context_animation + object->combo_branch;
+                    object->combo_input_latched = 0;
+                    object->field_0xe20 |= 0x40;
+                    object->context_flags &= ~0x50;
                 } else {
                     SetComboOpponent(object, 1.0f, 1, 0);
                     object->context_flags &= ~4;
@@ -5395,41 +5398,49 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
                     if (object->id != id_IMPERIALGUARD)
                         PlaySabreSfx(NULL, object, NULL, 1);
                     if ((object->field_0xe20 & 0x40) != 0 &&
-                        JediHasAction(object, static_cast<JEDI_ACTION>(object->queued_context_animation + 2))) {
+                        object->apiobj.character_model->model_data_b[object->queued_context_animation + 2] != NULL) {
                         object->combo_branch = 2;
                         NewRumble(object->pad_gamepad->pad, 0.5f, 0);
-                        if (__builtin_expect(object->id != id_IMPERIALGUARD, 0))
+                        if (object->id != id_IMPERIALGUARD)
                             PlaySabreSfx("ComboSaber2", object, &object->apiobj.collision_position, 0);
                     } else {
                         object->field_0xe20 &= ~0x40;
                         object->combo_branch = 1;
                         NewRumble(object->pad_gamepad->pad, 0.35f, 0);
                     }
+                    object->context_animation = object->queued_context_animation + object->combo_branch;
+                    object->combo_input_latched = 0;
+                    object->field_0xe20 |= 0x40;
+                    object->context_flags &= ~0x50;
                 }
-                object->context_animation = object->queued_context_animation + object->combo_branch;
-                object->combo_input_latched = 0;
-                object->field_0xe20 |= 0x40;
-                object->context_flags &= ~0x50;
             }
             goto combo_finished;
         }
-        if (animation.animation_index == object->context_animation && animation.blending == 0 &&
-            animation.requested_animation == object->context_animation) {
+        if (object->apiobj.anim_packet.animation_index == object->context_animation &&
+            object->apiobj.anim_packet.blending == 0 &&
+            object->apiobj.anim_packet.requested_animation == object->context_animation) {
             if (object->combo_stage == 2) {
                 f32 *frames = AnimListFrameArray(object->apiobj.character_model, object->context_animation);
-                if ((object->context_flags & 0x40) == 0 && frames[0] > 0.0f && animation.current_time >= frames[0]) {
+                if ((object->context_flags & 0x40) == 0 && frames[0] > 0.0f &&
+                    object->apiobj.anim_packet.current_time >= frames[0]) {
                     ComboHitFrame(object, object->combo_branch == 6 ? 3 : 1);
                 }
-                if (frames[1] > 0.0f && animation.current_time >= frames[1])
+                if (frames[1] > 0.0f && object->apiobj.anim_packet.current_time >= frames[1])
                     object->context_flags |= 8;
-                CHARACTERANIM_s *info = static_cast<CHARACTERANIM_s *>(
-                    object->apiobj.character_model->model_data_a[object->context_animation]);
-                if ((animation.flags & ANIMPACKET_FLAG_FINISHED) != 0 ||
-                    (info->blend_out_time > 0.0f &&
-                     AnimDuration(object->id, object->context_animation, animation.current_time, 0.0f, 0) <
-                         info->blend_out_time)) {
+                if ((object->apiobj.anim_packet.flags & ANIMPACKET_FLAG_FINISHED) != 0) {
                     object->character_context = CHARACTER_CONTEXT_NONE;
                     object->context_flags |= 2;
+                } else {
+                    const f32 blend_out_time =
+                        static_cast<CHARACTERANIM_s *>(
+                            object->apiobj.character_model->model_data_a[object->context_animation])
+                            ->blend_out_time;
+                    if (blend_out_time > 0.0f &&
+                        AnimDuration(object->id, object->context_animation, object->apiobj.anim_packet.current_time,
+                                     0.0f, 0) < blend_out_time) {
+                        object->character_context = CHARACTER_CONTEXT_NONE;
+                        object->context_flags |= 2;
+                    }
                 }
                 object->sabre_flags |= 2;
                 if ((object->context_flags & 0x40) == 0 &&
@@ -5450,7 +5461,7 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
                 }
                 goto combo_finished;
             }
-            if ((animation.flags & ANIMPACKET_FLAG_FINISHED) != 0) {
+            if ((object->apiobj.anim_packet.flags & ANIMPACKET_FLAG_FINISHED) != 0) {
                 object->combo_input_timer = 0.2f;
                 object->context_flags |= 4;
                 BlockSfx(object);
@@ -5460,7 +5471,7 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
                 goto combo_finished;
             }
         }
-        f32 *time = AnimPlaying(&animation, object->context_animation, 1, 0);
+        f32 *time = AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0);
         if (time != NULL && (object->context_flags & 0x40) == 0) {
             const f32 frame = AnimListFrame(object->apiobj.character_model, object->context_animation, 0);
             if (frame > 0.0f && *time >= frame) {
@@ -5474,43 +5485,52 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
                 if (frame > 0.0f && *time >= frame)
                     object->context_flags |= 0x10;
             }
-            can_queue = !(AnimDuration(object->id, object->context_animation, *time, 0.0f, 0) >= 0.1f);
+            can_queue = AnimDuration(object->id, object->context_animation, *time, 0.0f, 0) < 0.1f;
             if (can_queue)
                 object->field_0xe22 |= 8;
         }
         if (action_pressed != 0 && object->combo_input_latched == 0) {
-            if (!can_queue)
-                object->field_0xe20 &= ~0x40;
-            else
+            if (can_queue)
                 object->combo_input_latched = 1;
+            else
+                object->field_0xe20 &= ~0x40;
         }
         object->sabre_flags |= 3;
         goto combo_finished;
     }
 
     {
-        const i32 context = object->character_context;
-        if (__builtin_expect(action_pressed == 0, 0) || (!player_active && cooldown > 0.0f) || context == 0x15 ||
-            context == 0x5a || context == 0x13 || context == 0x2e ||
-            (!player_active && static_cast<u8>(context - 6) < 2) || context == 8 || context == 0x1b ||
-            context == 0x2d || context == 0xf || context == 0x27 || context == 0x28 || context == 0x59 ||
-            context == 0x30 || context == 0x3d || context == 0x43 || context == 0x4a || context == 0x61 ||
-            context == 0x4b) {
+        if (__builtin_expect(action_pressed == 0, 0) || (!player_active && !(cooldown <= 0.0f)) ||
+            object->character_context == 0x15 || object->character_context == 0x5a ||
+            object->character_context == 0x13 || object->character_context == 0x2e ||
+            (__builtin_expect(!player_active, 0) &&
+             (object->character_context == 6 || object->character_context == 7)) ||
+            object->character_context == 8 || object->character_context == 0x1b || object->character_context == 0x2d ||
+            object->character_context == 0xf || object->character_context == 0x27 ||
+            object->character_context == 0x28 || object->character_context == 0x59 ||
+            object->character_context == 0x30 || object->character_context == 0x3d ||
+            object->character_context == 0x43 || object->character_context == 0x4a ||
+            object->character_context == 0x61 || object->character_context == 0x4b) {
             if (__builtin_expect(
                     ((object->pad_gamepad->allocated_5a & 4) != 0 || buttons_pressed != 0) &&
                         (object->field_0xe22 & GAMEOBJECT_E22_FLAG_WEAPON_ANIMATION) != 0 &&
-                        object->weapon_scale_state == WEAPON_SCALE_IDLE && context != 6 && context != 7 &&
-                        context != 18 && context != 27 && context != 29 && context != 13 && context != 14 &&
-                        context != 46 && !(context == 0 && static_cast<u8>(object->action_movement_state - 3) < 2) &&
-                        (object->field_0xe23 & 1) == 0 && (CInfo[context].flags & 0x4000000) == 0 &&
-                        ((CInfo[context].flags & 0x8000000) == 0 || (object->jump_flags & 2) == 0) && context != 8,
+                        object->weapon_scale_state == WEAPON_SCALE_IDLE && object->character_context != 6 &&
+                        object->character_context != 7 && object->character_context != 18 &&
+                        object->character_context != 27 && object->character_context != 29 &&
+                        !(object->character_context == 0 && static_cast<u8>(object->action_movement_state - 3) < 2) &&
+                        object->character_context != 13 && object->character_context != 14 &&
+                        object->character_context != 46 && (object->field_0xe23 & 1) == 0 &&
+                        (CInfo[object->character_context].flags & 0x4000000) == 0 &&
+                        ((CInfo[object->character_context].flags & 0x8000000) == 0 || (object->jump_flags & 2) == 0) &&
+                        object->character_context != 8,
                     1)) {
-                GAMECHARACTERDATA *data = GetGameCharacterData(object);
-                const i32 action =
-                    data->field275_0x116 == 0 && (object->apiobj.character_data->model_flags & 0x80) != 0 ? 126 : 16;
                 if (object->apiobj.field_0x27d != 0 && object->pad_gamepad->input_magnitude == 0.0f &&
-                    object->apiobj.character_model->model_data_b[action] != NULL &&
-                    (context == -1 || (CInfo[context].flags & 4) != 0)) {
+                    object->apiobj.character_model
+                            ->model_data_b[GetGameCharacterData(object)->field275_0x116 == 0 &&
+                                                   (object->apiobj.character_data->model_flags & 0x80) != 0
+                                               ? 126
+                                               : 16] != NULL &&
+                    (object->character_context == -1 || (CInfo[object->character_context].flags & 4) != 0)) {
                     SlowWeaponIn(object);
                 } else {
                     FastWeaponIn(object, 1);
@@ -5519,12 +5539,15 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
             goto combo_finished;
         }
         if ((object->field_0xe22 & 1) == 0) {
-            GAMECHARACTERDATA *data = GetGameCharacterData(object);
-            const i32 draw_action =
-                data->field275_0x116 == 0 && (object->apiobj.character_data->model_flags & 0x80) != 0 ? 127 : 17;
             if (object->weapon_scale_state == 0 && object->apiobj.field_0x27d != 0 &&
                 object->pad_gamepad->input_magnitude == 0.0f &&
-                object->apiobj.character_model->model_data_b[draw_action] != NULL && context >= -1 && context <= 4) {
+                object->apiobj.character_model
+                        ->model_data_b[GetGameCharacterData(object)->field275_0x116 == 0 &&
+                                               (object->apiobj.character_data->model_flags & 0x80) != 0
+                                           ? 127
+                                           : 17] != NULL &&
+                (object->character_context == 1 || object->character_context == -1 || object->character_context == 2 ||
+                 object->character_context == 4 || object->character_context == 3)) {
                 SlowWeaponOut(object);
             } else {
                 FastWeaponOut(object, 1);
@@ -5533,8 +5556,9 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
         }
         if ((object->field_0xe20 & 4) != 0 || (!player_active && object->weapon_scale_state != 0) ||
             object->apiobj.field_0x27d == 0 ||
-            (context != 1 && context != -1 && context != 2 && context != 4 && context != 3 && context != 6 &&
-             context != 7))
+            (object->character_context != 1 && object->character_context != -1 && object->character_context != 2 &&
+             object->character_context != 4 && object->character_context != 3 && object->character_context != 6 &&
+             object->character_context != 7))
             goto combo_finished;
         SetWeaponOut(object);
         if (object->incoming_bolt != NULL || object->incoming_melee != NULL || object->incoming_special != NULL ||
@@ -5555,10 +5579,10 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
                 object->blocked_attack_stage = 0;
                 if ((object->apiobj.flags_low & 0x80) != 0)
                     Hint_SetComplete(0x5dd);
-            } else if (__builtin_expect(object->incoming_part != NULL, 0)) {
+            } else if (object->incoming_part != NULL) {
                 object->blocked_bolt = NULL;
-                object->blocked_part = object->incoming_part;
                 object->block_attacker = NULL;
+                object->blocked_part = object->incoming_part;
                 object->blocked_attack_stage = 0;
                 object->context_animation_timer = 0.3f;
             } else {
@@ -5588,14 +5612,8 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
         object->character_context = CHARACTER_CONTEXT_COMBO;
         object->combo_input_timer = 0.0f;
 
-        JEDI_ACTION action = JEDI_ACTION_COMBO_1_1;
-        u8 alternate = 0;
-        if (JediHasAction(object, JEDI_ACTION_COMBO_2_1)) {
-            if (object->combo_alternate == 0) {
-                action = JEDI_ACTION_COMBO_2_1;
-                alternate = 1;
-            }
-        }
+        const u8 alternate = JediHasAction(object, JEDI_ACTION_COMBO_2_1) && object->combo_alternate == 0;
+        const JEDI_ACTION action = alternate ? JEDI_ACTION_COMBO_2_1 : JEDI_ACTION_COMBO_1_1;
         object->queued_context_animation = action;
         object->context_animation = action;
         object->field_0xe22 |= GAMEOBJECT_E22_FLAG_WEAPON_ANIMATION;
@@ -5610,7 +5628,7 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
         if (object->id != id_IMPERIALGUARD)
             PlaySabreSfx(NULL, object, NULL, 1);
 
-        if (!JediHasAction(object, action)) {
+        if (!JediHasAction(object, static_cast<JEDI_ACTION>(object->context_animation))) {
             object->character_context = CHARACTER_CONTEXT_NONE;
         }
     }
@@ -7737,11 +7755,11 @@ static i32 ShootCode(GameObject_s *object, i32 pressed, i32 special_pressed, i32
             return 0;
         if (Cheat_IsOn(0x0f)) {
             const u8 kind = object->apiobj.character_data->game_character->uses_weapon_action;
-            if (kind == 8 || kind == 1)
+            if (kind == 1 || kind == 8)
                 return 0;
         }
         const i16 previous_animation = object->context_animation;
-        object->context_animation = fire_mode == 2 ? 0x3c : 0x16;
+        object->context_animation = fire_mode != 2 ? 0x16 : 0x3c;
         if (UnderPlayerControl(object)) {
             NUVEC position = object->apiobj.collision_position;
             NUVEC direction;
@@ -7819,7 +7837,7 @@ static i32 ShootCode(GameObject_s *object, i32 pressed, i32 special_pressed, i32
         if (static_cast<u16>(object->context_animation - 0x5a) <= 2) {
             if (AnimListFrame(object->apiobj.character_model, object->context_animation, 0) > 1.0f) {
                 object->context_animation_timer = object->quick_shoot_timer - animduration_blendouttime;
-                if (!(object->context_animation_timer <= 0.0f)) {
+                if (object->context_animation_timer > 0.0f) {
                     object->character_context = 0x0a;
                     goto cooldown;
                 }
@@ -7894,12 +7912,21 @@ static i32 ShootCode(GameObject_s *object, i32 pressed, i32 special_pressed, i32
 shoot_weapon_in:
     if (weapon_mode == 0)
         return 0;
-    if ((object->pad_gamepad->allocated_5a & 4) == 0 && special_pressed == 0)
+    if (__builtin_expect((object->pad_gamepad->allocated_5a & 4) == 0, 0) && special_pressed == 0)
         return 0;
     if (__builtin_expect((object->field_0xe22 & 1) == 0 || object->weapon_scale_state != 0, 0))
         return 0;
-    if (object->character_context == 6 || object->character_context == 7 || object->character_context == 0x47 ||
-        object->character_context == 0x46 || object->character_context == 0x0b || object->character_context == 0x2e)
+    if (object->character_context == 6)
+        return 0;
+    if (object->character_context == 7)
+        return 0;
+    if (object->character_context == 0x47)
+        return 0;
+    if (object->character_context == 0x46)
+        return 0;
+    if (object->character_context == 0x0b)
+        return 0;
+    if (object->character_context == 0x2e)
         return 0;
     if (object->apiobj.character_data->game_character->uses_weapon_action == 2 && object->field_0xe31 == 1)
         return 0;
@@ -12679,60 +12706,63 @@ void Move_VEHICLE(GameObject_s *object) {
 
         u16 x_rotation;
         object->field_0x1086 = 0;
-        if (object->field_0x7a3 == 0) {
-            if (object->apiobj.position.y >= hover_height) {
+        switch (object->field_0x7a3) {
+            case 0:
+                if (!(object->apiobj.position.y >= hover_height)) {
+                    object->apiobj.roll_angle = 0;
+                    object->apiobj.pitch_angle = 0xc000;
+                    object->apiobj.velocity.x = 0.0f;
+                    object->apiobj.velocity.y = 0.0f;
+                    object->apiobj.velocity.z = 0.5f * object->apiobj.character_data->game_character->run_speed;
+                    x_rotation = 0xc000;
+                    break;
+                }
                 object->field_0x7a3 = 1;
-            } else {
+                // fallthrough
+            case 1:
+                object->apiobj.pitch_angle = TurnRot(object->apiobj.pitch_angle, 0, 0x10000, NULL);
                 object->apiobj.roll_angle = 0;
-                object->apiobj.pitch_angle = 0xc000;
                 object->apiobj.velocity.x = 0.0f;
                 object->apiobj.velocity.y = 0.0f;
                 object->apiobj.velocity.z = 0.5f * object->apiobj.character_data->game_character->run_speed;
-                x_rotation = 0xc000;
-                goto rotate_flight_velocity;
+                x_rotation = object->apiobj.pitch_angle;
+                if (__builtin_expect(object->apiobj.pitch_angle == 0, 1)) {
+                    object->field_0x7a3 = 2;
+                    object->context_destination.y = object->apiobj.position.y;
+                    object->context_animation_timer = 0.0f;
+                }
+                break;
+            case 2: {
+                object->context_animation_timer += FRAMETIME;
+                f32 remaining;
+                f32 flight_time = object->context_animation_timer;
+                i32 phase;
+                if (!(object->context_animation_timer >= 1.0f)) {
+                    remaining = 1.0f - object->context_animation_timer;
+                    phase = (static_cast<i32>(32768.0f * object->context_animation_timer + 16384.0f) >> 1) & 0x7fff;
+                } else {
+                    object->character_context = -1;
+                    phase = 0x6000;
+                    remaining = 0.0f;
+                    flight_time = 1.0f;
+                }
+                object->apiobj.roll_angle = 0;
+                object->apiobj.pitch_angle = 0;
+                object->apiobj.velocity.x = 0.0f;
+                object->apiobj.velocity.y = 0.0f;
+                object->apiobj.velocity.z = flight_time * object->apiobj.character_data->game_character->run_speed +
+                                            object->apiobj.character_data->game_character->run_speed * 0.5f * remaining;
+                x_rotation = 0;
+                const f32 blend = 1.0f - (1.0f + NuTrigTable[phase]) * 0.5f;
+                object->apiobj.position.y = hover_height * blend + (1.0f - blend) * object->context_destination.y;
+                break;
             }
-        }
-        if (object->field_0x7a3 == 1) {
-            object->apiobj.pitch_angle = TurnRot(object->apiobj.pitch_angle, 0, 0x10000, NULL);
-            object->apiobj.roll_angle = 0;
-            object->apiobj.velocity.x = 0.0f;
-            object->apiobj.velocity.y = 0.0f;
-            object->apiobj.velocity.z = 0.5f * object->apiobj.character_data->game_character->run_speed;
-            x_rotation = object->apiobj.pitch_angle;
-            if (object->apiobj.pitch_angle == 0) {
-                object->field_0x7a3 = 2;
-                object->context_destination.y = object->apiobj.position.y;
-                object->context_animation_timer = 0.0f;
-            }
-        } else if (object->field_0x7a3 == 2) {
-            object->context_animation_timer += FRAMETIME;
-            f32 remaining;
-            f32 flight_time = object->context_animation_timer;
-            i32 phase;
-            if (!(object->context_animation_timer >= 1.0f)) {
-                remaining = 1.0f - object->context_animation_timer;
-                phase = (static_cast<i32>(32768.0f * object->context_animation_timer + 16384.0f) >> 1) & 0x7fff;
-            } else {
+            default:
+                x_rotation = object->apiobj.pitch_angle;
                 object->character_context = -1;
-                phase = 0x6000;
-                remaining = 0.0f;
-                flight_time = 1.0f;
-            }
-            object->apiobj.roll_angle = 0;
-            object->apiobj.pitch_angle = 0;
-            object->apiobj.velocity.x = 0.0f;
-            object->apiobj.velocity.y = 0.0f;
-            object->apiobj.velocity.z = flight_time * object->apiobj.character_data->game_character->run_speed +
-                                        object->apiobj.character_data->game_character->run_speed * 0.5f * remaining;
-            x_rotation = 0;
-            const f32 blend = 1.0f - (1.0f + NuTrigTable[phase]) * 0.5f;
-            object->apiobj.position.y = hover_height * blend + (1.0f - blend) * object->context_destination.y;
-        } else {
-            x_rotation = object->apiobj.pitch_angle;
-            object->character_context = -1;
+                break;
         }
 
-    rotate_flight_velocity:
         NuVecRotateX(&object->apiobj.velocity, &object->apiobj.velocity, x_rotation);
         NuVecRotateY(&object->apiobj.velocity, &object->apiobj.velocity, object->apiobj.field_0x276);
     }

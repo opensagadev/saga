@@ -349,7 +349,7 @@ void WorldInfo_Activate(void) {
     WorldInfo_Init(LWORLD);
 
     used_fog_color = 0;
-    if (NuIOS_IsLowEndDevice() && WORLD != NULL) {
+    if (__builtin_expect(NuIOS_IsLowEndDevice() && WORLD != NULL, 0)) {
         LEVELDATA *current_level = WORLD->current_level;
 
         if (current_level && current_level->data_display.far_clip < 20000.0f) {

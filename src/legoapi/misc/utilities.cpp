@@ -1686,7 +1686,7 @@ void EvalAnim(nuhspecial_s *special, float frame, numtx_s *matrix, i32 include_i
 
     NUGSCN *scene = special->scene;
     nuanimdata_s *animation = scene->instance_animation_data[instance_animation->anim_ix];
-    if (animation == NULL) {
+    if (__builtin_expect(animation == NULL, 1)) {
         return;
     }
 

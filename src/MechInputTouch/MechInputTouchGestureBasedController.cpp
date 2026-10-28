@@ -274,7 +274,7 @@ void MechInputTouchGestureBasedController::StartNewTask(MechTouchTask *task, Tou
         delete task;
         return;
     }
-    if (kill_tasks) {
+    if (__builtin_expect(kill_tasks != 0, 0)) {
         KillTasks(false);
     }
     if (object->touch_task != NULL && task != NULL) {

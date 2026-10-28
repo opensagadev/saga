@@ -1176,7 +1176,7 @@ __attribute__((force_align_arg_pointer)) void DeathStarEscapeB_Update(WORLDINFO_
     nuinstanim_s *animation1 = NuSpecialGetInstAnim(&LevHSpecial[1]);
     if (animation1 != NULL)
         data1 = LevHSpecial[1].scene->instance_animation_data[animation1->anim_ix];
-    if (data0 == NULL || data1 == NULL)
+    if (__builtin_expect(data0 == NULL || data1 == NULL, 0))
         return;
 
     if (NuSpecialGetVisibilityFn(&LevHSpecial[0])) {
@@ -1284,8 +1284,8 @@ i32 DeathStarShieldDown() {
     if (blowup->output_flags & 1)
         return 1;
     if (__builtin_expect(static_cast<i8>(blowup->state_flags) < 0, 1)) {
-        if (Player[0] != NULL && (WORLD->current_level != DEATHSTARBATTLED_LDATA ||
-                                  !ObjInNarrowSock(Player[0], WORLD->sock_sys, WORLD->level_idx))) {
+        if (__builtin_expect(Player[0] != NULL && (WORLD->current_level != DEATHSTARBATTLED_LDATA ||
+                                  !ObjInNarrowSock(Player[0], WORLD->sock_sys, WORLD->level_idx)), 1)) {
             TORPEDOPACKET_s *packet = Player[0]->torpedo;
             if (packet != NULL && (packet->count != 0 || (packet->field_0x1 & 2) != 0))
                 return 1;

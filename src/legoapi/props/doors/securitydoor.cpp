@@ -141,7 +141,7 @@ static void SecurityDoors_Update(void *world_data, void *, float) {
     }
 
     for (i32 i = 0; i < world->security_door_count; ++i, ++door) {
-        if (door->state == 2 && door->opening < 1.0f) {
+        if (__builtin_expect(door->state == 2 && door->opening < 1.0f, 0)) {
             door->opening += FRAMETIME;
             if (door->opening >= 1.0f) {
                 door->opening = 1.0f;
@@ -391,7 +391,7 @@ static void *SecurityDoors_ReserveBufferSpace(void *world_data) {
     world->security_doors = NULL;
     world->security_door_count = 0;
 
-    if (world->current_level->max_security_doors != 0) {
+    if (__builtin_expect(world->current_level->max_security_doors != 0, 1)) {
         world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 16);
         doors = static_cast<SECURITYDOOR *>(world->giz_buffer.void_ptr);
         world->security_doors = doors;

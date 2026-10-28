@@ -385,7 +385,7 @@ struct LEVELDATA_s *Area_FindStatusLevel(AREADATA *area, i32 *indexDest) {
         *indexDest = -1;
     }
 
-    if (area == NULL || area->level_count == 0) {
+    if (__builtin_expect(area == NULL || area->level_count == 0, 0)) {
         return NULL;
     }
 

@@ -420,7 +420,7 @@ void NuVoiceAndroid::ApplyHardwareVoiceMix() {
         level = (i16)(i32)(log10((f64)gain) * 2000.0);
     }
 
-    if (level != this->last_volume_level) {
+    if (__builtin_expect(level != this->last_volume_level, 1)) {
         u32 error = SL_SLOT(this->volume_interface, VolumeSetVolumeLevelFn, 0)(this->volume_interface, level);
         NuSoundAndroid::ReportErrorCode(error, "Volume SetVolumeLevel");
         this->last_volume_level = level;

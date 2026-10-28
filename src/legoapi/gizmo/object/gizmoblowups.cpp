@@ -234,7 +234,7 @@ static void Blowup_StoreProgress(void *world_ptr, void *, void *progress_ptr) {
     }
 
     Blowup_ClearProgress(NULL, progress);
-    if (world == NULL || world->gizmo_blowups == NULL) {
+    if (__builtin_expect(world == NULL || world->gizmo_blowups == NULL, 0)) {
         return;
     }
 
@@ -1459,21 +1459,23 @@ i32 gizmoblowup_Load(void *world_ptr, void *) {
 
             type.particle_types[0] = -1;
             type.particle_types[1] = -1;
-            if (version <= 4) {
-                type.particle_types[0] = EdFileReadShort();
-            } else if (version <= 16) {
-                if (Blowup_ReadName(part_name) > 0) {
-                    type.particle_types[0] = PARTLookupType(part_name);
+            if (version > 4) {
+                if (version > 16) {
+                    if (Blowup_ReadName(part_name) > 0) {
+                        type.particle_types[0] = -1;
+                        type.particle_types[0] = PARTLookupTypePageOnly(part_name, world->page_part);
+                    }
+                    if (Blowup_ReadName(part_name) > 0) {
+                        type.particle_types[1] = -1;
+                        type.particle_types[1] = PARTLookupTypePageOnly(part_name, world->page_part);
+                    }
+                } else {
+                    if (Blowup_ReadName(part_name) > 0) {
+                        type.particle_types[0] = PARTLookupType(part_name);
+                    }
                 }
             } else {
-                if (Blowup_ReadName(part_name) > 0) {
-                    type.particle_types[0] = -1;
-                    type.particle_types[0] = PARTLookupTypePageOnly(part_name, world->page_part);
-                }
-                if (Blowup_ReadName(part_name) > 0) {
-                    type.particle_types[1] = -1;
-                    type.particle_types[1] = PARTLookupTypePageOnly(part_name, world->page_part);
-                }
+                type.particle_types[0] = EdFileReadShort();
             }
 
             type.particle_types[4] = -1;
@@ -1499,12 +1501,12 @@ i32 gizmoblowup_Load(void *world_ptr, void *) {
                         type.particle_types[particle_index] = LookupDebrisEffect(debris_name);
                     }
                 }
-                if (version != 26) {
-                    for (i32 particle_index = 7; particle_index < 9; ++particle_index) {
-                        if (Blowup_ReadName(debris_name) > 0) {
-                            type.particle_types[particle_index] = -1;
-                            type.particle_types[particle_index] = LookupDebrisEffect(debris_name);
-                        }
+            }
+            if (version > 26) {
+                for (i32 particle_index = 7; particle_index < 9; ++particle_index) {
+                    if (Blowup_ReadName(debris_name) > 0) {
+                        type.particle_types[particle_index] = -1;
+                        type.particle_types[particle_index] = LookupDebrisEffect(debris_name);
                     }
                 }
             }
@@ -1593,12 +1595,12 @@ i32 gizmoblowup_Load(void *world_ptr, void *) {
                 if (Blowup_ReadName(text) > 0) {
                     Blowup_FindSpecial(world, &type.burst_special, text, const_cast<char *>("BlowUpSwap"), type.name);
                 }
-                if (version > 22) {
-                    type.field_0x9c = EdFileReadFloat();
-                    if (version > 23) {
-                        type.field_0x84 = EdFileReadFloat();
-                    }
-                }
+            }
+            if (version > 22) {
+                type.field_0x9c = EdFileReadFloat();
+            }
+            if (version > 23) {
+                type.field_0x84 = EdFileReadFloat();
             }
 
             if (exists != 0) {
@@ -1640,20 +1642,20 @@ i32 gizmoblowup_Load(void *world_ptr, void *) {
         blowup.field_0x114 = 0;
         if (version > 1) {
             blowup.draw_flags = 0;
-            u32 draw_flags;
             if (version < 20) {
-                draw_flags = static_cast<i16>(EdFileReadShort());
+                blowup.draw_flags = static_cast<i16>(EdFileReadShort());
             } else {
-                draw_flags = static_cast<u32>(EdFileReadInt());
+                const u32 read_flags = static_cast<u32>(EdFileReadInt());
                 if (version == 28) {
                     EdFileReadInt();
                 }
+                blowup.draw_flags = read_flags;
             }
-            blowup.draw_flags = draw_flags;
             blowup.secondary_flags = 0;
             if (version > 29) {
                 blowup.secondary_flags = static_cast<u32>(EdFileReadInt());
             } else {
+                u32 draw_flags = blowup.draw_flags;
                 // Older files kept the secondary flags in the draw flags.
                 if ((draw_flags & 0x100) != 0) {
                     draw_flags &= ~0x100;

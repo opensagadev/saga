@@ -221,8 +221,8 @@ i32 Bolt_AlternateFire_LSW(GameObject_s *object, i32 index) {
             if (index == 1 || index == 3)
                 return 0;
         }
-    } else if (id == id_MILLENNIUMFALCON || id == id_MINIMILLENNIUMFALCON || id == id_ATST ||
-               id == id_JEDISTARFIGHTERREDEP3 || id == id_JEDISTARFIGHTERYELLOWEP3) {
+    } else if (__builtin_expect(id == id_MILLENNIUMFALCON || id == id_MINIMILLENNIUMFALCON || id == id_ATST ||
+               id == id_JEDISTARFIGHTERREDEP3 || id == id_JEDISTARFIGHTERYELLOWEP3, 1)) {
         if (object->bolt_fire_phase != index)
             return 0;
     }

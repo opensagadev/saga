@@ -317,7 +317,7 @@ static void Shop_GetInput(SHOPINPUT *input) {
             input->up_pressed = 1;
         if (edge & down)
             input->down_pressed = 1;
-        if (input->up_pressed && input->down_pressed)
+        if (__builtin_expect(input->up_pressed && input->down_pressed, 1))
             input->up_pressed = input->down_pressed = 0;
     }
 }
@@ -1569,7 +1569,7 @@ void SelectSubItem() {
         default:
             return;
     }
-    if (index != -1 && items != NULL) {
+    if (__builtin_expect(index != -1 && items != NULL, 1)) {
         const i32 result = SelectShopItem(items, index);
         if (result == -1)
             PlaySfx("Shop_NotEnufMuny", &SubShelfPos[3]);

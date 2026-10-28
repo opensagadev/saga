@@ -793,10 +793,10 @@ int GizSpinner_Update(GIZSPINNER_s *spinner) {
         GameAnimSet_Stop(spinner->anim_set);
     }
 
+    const f32 collision_x = spinner->position.x;
+    const f32 collision_radius = spinner->field_0x09c;
+    const f32 collision_z = spinner->position.z;
     if (__builtin_expect((spinner->state_flags & SPINNER_STATE_NO_CHARACTER_DEFLECTION) == 0, 1)) {
-        const f32 collision_x = spinner->position.x;
-        const f32 collision_radius = spinner->field_0x09c;
-        const f32 collision_z = spinner->position.z;
         GameObject_s *object = Obj;
         for (i32 index = 0; index < HIGHGAMEOBJECT; ++index, ++object) {
             APIOBJECT_s *api = &object->apiobj;

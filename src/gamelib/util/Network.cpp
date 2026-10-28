@@ -687,7 +687,7 @@ void NetworkObjectManager::FlushObjects(i32 flush_level_editor) {
 }
 
 i32 NetworkObjectManager::GetNextGuid() {
-    if (guid_group < 0) {
+    if (__builtin_expect(guid_group < 0, 0)) {
         return 0;
     }
 

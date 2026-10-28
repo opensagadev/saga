@@ -637,39 +637,27 @@ void Tag_Check(GameObject_s *object) {
     GameObject_s *target = NULL;
     i32 result = 0;
     const i32 arcade = Arcade;
-    const bool disabled = (object->tag_flags & 1) != 0 || object->character_context == 0x51;
-    if (disabled) {
-        object->field_0xefe &= ~0x18;
-        object->hud_icon_timer = 0.0f;
-        object->field_0xef0 = 0.0f;
-        object->pause_context_state = 0.0f;
-        if (arcade == 0)
-            return;
-    } else if (arcade != 0) {
-        object->field_0xef0 = 0.0f;
-        object->pause_context_state = 0.0f;
-        object->field_0xefe &= ~0x18;
+    if (arcade != 0 || (object->tag_flags & 1) != 0 || object->character_context == 0x51) {
+        if ((object->tag_flags & 1) != 0 || object->character_context == 0x51) {
+            object->field_0xefe &= ~0x18;
+            object->hud_icon_timer = 0.0f;
+            object->field_0xef0 = 0.0f;
+            object->pause_context_state = 0.0f;
+            if (arcade == 0)
+                return;
+        } else {
+            object->field_0xef0 = 0.0f;
+            object->pause_context_state = 0.0f;
+            object->field_0xefe &= ~0x18;
+        }
     }
     if (object->apiobj.field_0x27c == -1)
         return;
-    if ((object->tag_flags & 4) != 0) {
-        object->tag_cooldown -= FRAMETIME;
-        if (object->tag_cooldown > 0.0f && object->pending_tag_target != NULL) {
-            target = object->pending_tag_target;
-            if ((target->apiobj.field_0x1f8 & 0x1001) != 0x1001) {
-                object->pending_tag_target = NULL;
-            } else {
-                result = (object->field_0xf00 & 2) != 0 ? TakeOverYoda(object, target, 0, 1)
-                                                        : TagCode(object, target, (object->tag_flags >> 3) & 1, 0, 1);
-            }
-        }
-        if (result == 0)
-            object->tag_flags &= ~4;
-    } else {
+    if ((object->tag_flags & 4) == 0) {
         object->tag_player_index = -1;
         if (object->apiobj.player_controlled && object->apiobj.field_0x287 == 0 &&
             (CInfo[object->character_context].flags & 0x800) == 0 && !object->apiobj.script_enabled &&
-            !(object->tag_cooldown > 0.0f)) {
+            object->tag_cooldown <= 0.0f) {
             if (VehicleArea != 0) {
                 if ((object->pad_gamepad->buttons_pressed & GAMEPAD_TAG) != 0)
                     object->hud_icon_timer = 2.0f;
@@ -691,10 +679,10 @@ void Tag_Check(GameObject_s *object) {
                         }
                         if (pack_index != -1) {
                             STOREPACK *pack = &StorePack[pack_index];
-                            NUVEC position = pack->custodian_position;
-                            position.y += CDataList[*pack->id].field16_0x38 + 0.075f;
+                            difference = pack->custodian_position;
+                            difference.y += CDataList[*pack->id].field16_0x38 + 0.075f;
                             ADDGAMEMSG message = AddGameMsg_Default;
-                            message.position = &position;
+                            message.position = &difference;
                             message.red = 255;
                             message.text = TTab[pack->message_text_index];
                             message.green = 191;
@@ -792,6 +780,19 @@ void Tag_Check(GameObject_s *object) {
                 }
             }
         }
+    } else {
+        object->tag_cooldown -= FRAMETIME;
+        if (object->tag_cooldown > 0.0f && object->pending_tag_target != NULL) {
+            target = object->pending_tag_target;
+            if ((target->apiobj.field_0x1f8 & 0x1001) != 0x1001) {
+                object->pending_tag_target = NULL;
+            } else {
+                result = (object->field_0xf00 & 2) != 0 ? TakeOverYoda(object, target, 0, 1)
+                                                        : TagCode(object, target, (object->tag_flags >> 3) & 1, 0, 1);
+            }
+        }
+        if (result == 0)
+            object->tag_flags &= ~4;
     }
     if (result == 1) {
         object->tag_flags &= ~4;
@@ -806,7 +807,7 @@ void Tag_Check(GameObject_s *object) {
         if (static_cast<u8>(object->apiobj.field_0x27c) < 2 && static_cast<u8>(target->apiobj.field_0x27c) < 2)
             ResetTimer(&JoinInTimer, 0.0f);
     }
-    if (__builtin_expect(Tag_DrawIconFn != NULL, 0))
+    if (Tag_DrawIconFn != NULL)
         Tag_DrawIconFn(object);
 }
 

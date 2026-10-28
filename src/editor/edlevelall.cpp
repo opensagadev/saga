@@ -3223,16 +3223,16 @@ void eduiSetPinnedMenu(eduimenu_s *menu) {
 void ClassEditor::cbEdClassSetPinned(eduimenu_s *menu, eduiitem_s *item, u32) {
     item->highlighted = !item->highlighted;
     menu->flags ^= 4;
-    if (menu->flags & 4) {
-        eduiMenuDetach(menu);
-        eduiSetPinnedMenu(menu);
-    } else {
+    if (!(menu->flags & 4)) {
         eduiMenuDetach(menu);
         eduiMenuDestroy(menu);
         if (edLevelActiveMenu == menu) {
             edLevelActiveMenu = NULL;
         }
         eduiSetPinnedMenu(NULL);
+    } else {
+        eduiMenuDetach(menu);
+        eduiSetPinnedMenu(menu);
     }
 }
 
@@ -4516,7 +4516,7 @@ void ClassEditor::SetMode(i32 new_mode) {
 }
 
 void ClassEditor::cbEdPadSetManipulatorMode(eduimenu_s *, eduiitem_s *, u32) {
-    if (theClassEditor.mode == 4) {
+    if (__builtin_expect(theClassEditor.mode == 4, 0)) {
         theClassEditor.mode = 5;
     } else if (theClassEditor.mode == 5) {
         theClassEditor.mode = 3;
@@ -4748,7 +4748,7 @@ void PropertyTool::BringToFront(PropertyMenu *menu) {
             last_menu->next = menu;
         }
         last_menu = menu;
-        if (active_menu == NULL) {
+        if (__builtin_expect(active_menu == NULL, 1)) {
             active_menu = menu;
         }
     } else {
@@ -5544,7 +5544,7 @@ void EdRegistry::DefunctObject(EdClassInterface *interface, void *object, i32, i
             defunct_objects.last->next = entry;
         }
         defunct_objects.last = entry;
-        if (!defunct_objects.first) {
+        if (__builtin_expect(!defunct_objects.first, 0)) {
             defunct_objects.first = entry;
         }
         ++defunct_objects.count;

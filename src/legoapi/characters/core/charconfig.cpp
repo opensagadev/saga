@@ -1105,7 +1105,7 @@ static void CC_hand_locators(NUFPAR *parser) {
     charconfig.runtime->hand_locators[0] = -1;
     if (NuFParGetWord(parser) != 0) {
         const i32 locator = NuAToI(parser->word_buf);
-        if (static_cast<u32>(locator) < 16) {
+        if (__builtin_expect(static_cast<u32>(locator) < 16, 0)) {
             charconfig.runtime->hand_locators[0] = static_cast<i8>(locator);
         }
     }

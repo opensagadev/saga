@@ -283,7 +283,7 @@ void PadOutPause(i32 port, WORLDINFO_s *world) {
     if (Paused != 0 || NoPad(port, 1) == 0 || NewMode != 0 || NewLData != NULL || FadeSys.fade != 0.0f) {
         return;
     }
-    if (GamePads_IgnoreInputFn != NULL && GamePads_IgnoreInputFn() != 0) {
+    if (__builtin_expect(GamePads_IgnoreInputFn != NULL && GamePads_IgnoreInputFn() != 0, 1)) {
         return;
     }
     if (MiniCutCam != 0 || (world->area != NULL && (world->area->flags & AREAFLAG_ENDING_AREA) != 0) ||

@@ -491,14 +491,14 @@ static inline __used__ void MenuDrawPauseMain(MENU *menu) {
     }
 
     char *last_entry;
-    if (WORLD->current_level != HUB_LDATA) {
+    if (!(WORLD->current_level != HUB_LDATA)) {
+        last_entry = TTab[tQUIT];
+    } else {
         if (GAMEDEMO != 0) {
             last_entry = TTab[tRESTARTDEMO];
         } else {
             last_entry = TTab[tMAP];
         }
-    } else {
-        last_entry = TTab[tQUIT];
     }
     GameDrawMenuEntry(menu, last_entry);
 }

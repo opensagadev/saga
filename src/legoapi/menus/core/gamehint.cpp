@@ -282,11 +282,11 @@ static __used__ i32 UnlockHubStuff_UpdateHint(HINT_s *hint) {
         return 0;
     switch (hint->control_mode_ids[0]) {
         case 0x619:
-            if (show_unlock_shop_hint != 0)
+            if (__builtin_expect(show_unlock_shop_hint != 0, 1))
                 return 1;
             break;
         case 0x61a:
-            if (show_unlock_customiser_hint != 0)
+            if (__builtin_expect(show_unlock_customiser_hint != 0, 0))
                 return 1;
             break;
         case 0x61b:

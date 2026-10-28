@@ -399,7 +399,7 @@ static void ZipUps_StoreProgress(void *world_ptr, void *, void *progress_ptr) {
         if ((world->zipups[index].flags & ZIPUP_FLAG_VISIBLE) == 0) {
             progress->visible_mask[word] &= ~mask;
         }
-        if ((world->zipups[index].flags & ZIPUP_FLAG_ACTIVE) == 0) {
+        if (__builtin_expect((world->zipups[index].flags & ZIPUP_FLAG_ACTIVE) == 0, 1)) {
             progress->active_mask[word] &= ~mask;
         }
     }
@@ -963,7 +963,7 @@ void DrawRopeSingle(nuvec_s *start, nuvec_s *end, float amount, numtl_s *materia
     static u32 ropedif = 0xff505050;
     ROPELEN = 0.04f;
     ropedif = Cheat_IsOn(3) ? 0xff103f10 : 0xff505050;
-    if (material == NULL)
+    if (__builtin_expect(material == NULL, 0))
         material = ropemtl;
     if (end == NULL || start == NULL)
         return;

@@ -125,7 +125,7 @@ static void bgThreadMain(void *data) {
 
             NuThreadCriticalSectionEnd(g_bgCritSec);
 
-            if (cur_pi != NULL) {
+            if (__builtin_expect(cur_pi != NULL, 0)) {
                 break;
             }
 
@@ -241,7 +241,7 @@ BGPROCINFO *bgPostRequest(bgprocdofn *do_fn, bgprocackfn *ack_fn, void *data, i3
     NuThreadCriticalSectionBegin(g_bgCritSec);
 
     info = (BGPROCINFO *)NuLstAllocTail(procinfo_pool);
-    if (info != NULL) {
+    if (__builtin_expect(info != NULL, 1)) {
         info->work_started = false;
         info->unknown_flag_2 = false;
 

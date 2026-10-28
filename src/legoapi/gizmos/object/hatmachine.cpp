@@ -225,7 +225,7 @@ static void HatMachine_SetVisibility(GIZMO *gizmo, i32 visible) {
     machine->flags = static_cast<HATMACHINE_FLAGS>(flags);
 
     if ((flags & HATMACHINE_FLAG_VISIBLE) != 0) {
-        if (was_visible == 0) {
+        if (__builtin_expect(was_visible == 0, 0)) {
             machine->platform_id = NewPlatPickupInst(machine, HATMACHINE_PLATFORM_COLLISION);
             PlatInstRotate(machine->platform_id, 1);
         }
@@ -356,7 +356,7 @@ static void HatMachines_Reset(void *world_ptr, void *, void *progress_ptr) {
 }
 
 static void HatMachine_Activate(GIZMO *gizmo, i32 enabled) {
-    if (gizmo == NULL || gizmo->object == NULL) {
+    if (__builtin_expect(gizmo == NULL || gizmo->object == NULL, 0)) {
         return;
     }
 

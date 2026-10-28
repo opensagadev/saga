@@ -1536,7 +1536,7 @@ static f32 Condition_GotGun(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char *
 }
 
 static f32 Condition_PrefersBrawling(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char *, void *) {
-    if (packet != NULL && packet->owner != NULL)
+    if (__builtin_expect(packet != NULL && packet->owner != NULL, 1))
         return static_cast<i32>(packet->owner->apiobj.character_data->model_flags) < 0 ? 1.0f : 0.0f;
     return 0.0f;
 }
@@ -1588,7 +1588,7 @@ static f32 Condition_ForcePushing(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *pa
             return 0.0f;
     }
     f32 result = 0.0f;
-    if (object != NULL) {
+    if (__builtin_expect(object != NULL, 1)) {
         result = object->character_context == 0x1b ? 1.0f : 0.0f;
     }
     return result;
@@ -2013,7 +2013,7 @@ static f32 Condition_InContext(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packe
     f32 result = 0.0f;
     if (packet != NULL && packet->owner != NULL) {
         GameObject_s *object = packet->owner->apiobj.objptr;
-        if (object != NULL && object->character_context == static_cast<i32>(reinterpret_cast<isize>(argument))) {
+        if (__builtin_expect(object != NULL && object->character_context == static_cast<i32>(reinterpret_cast<isize>(argument)), 1)) {
             result = 1.0f;
         }
     }
@@ -2179,7 +2179,7 @@ static f32 Condition_CheatProgress(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *,
 }
 
 static f32 Condition_BigJumpComplete(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
-    if (packet != NULL && packet->owner != NULL) {
+    if (__builtin_expect(packet != NULL && packet->owner != NULL, 0)) {
         return packet->owner->apiobj.objptr->character_context != 0x1f ? 1.0f : 0.0f;
     }
     return 1.0f;
@@ -2740,7 +2740,7 @@ static i32 Action_CanHelpWithTriggers(AISYS *, AISCRIPTPROCESS *, AIPACKET *pack
     GameObject_s *object = packet->owner->apiobj.objptr;
     if (object == NULL)
         return 1;
-    if (first_time) {
+    if (__builtin_expect(first_time != 0, 1)) {
         object->field_0xf02 |= 4;
         for (i32 index = 0; index < param_count; ++index) {
             if (NuStrICmp(params[index], "FALSE") == 0)
@@ -2828,7 +2828,7 @@ static i32 Action_ImmuneToKillTerrain(AISYS *, AISCRIPTPROCESS *, AIPACKET *pack
     GameObject_s *object = packet->owner->apiobj.objptr;
     if (object == NULL)
         return 1;
-    if (first_time) {
+    if (__builtin_expect(first_time != 0, 1)) {
         object->field_0xefa |= 4;
         for (i32 index = 0; index < param_count; ++index) {
             if (NuStrICmp(params[index], "false") == 0)
@@ -3020,7 +3020,7 @@ __used__ static i32 Action_UpdateSockPos(AISYS *sys, AISCRIPTPROCESS *processor,
                                          i32 param_4, i32 param_5, f32 param_6) {
     GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
     if (object != NULL) {
-        if (param_5 != 0) {
+        if (__builtin_expect(param_5 != 0, 1)) {
             object->field_0xef9 |= 0x40;
             for (i32 index = 0; index < param_4; ++index) {
                 if (NuStrICmp(params[index], "false") == 0) {
@@ -3096,7 +3096,7 @@ static i32 Action_CharClipToBlobShadows(AISYS *, AISCRIPTPROCESS *, AIPACKET *pa
     GameObject_s *object = packet->owner->apiobj.objptr;
     if (object == NULL)
         return 1;
-    if (first_time) {
+    if (__builtin_expect(first_time != 0, 1)) {
         object->jump_input_flags |= 0x80;
         for (i32 index = 0; index < param_count; ++index) {
             if (NuStrICmp(params[index], "false") == 0)
@@ -3454,7 +3454,7 @@ static f32 Condition_SockXDistanceToPlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPAC
         return 0.0f;
     if (packet->owner != NULL && player != NULL) {
         GameObject *object = packet->owner->apiobj.objptr;
-        if (player->field_0x661 != 0xff && player->field_0x661 == object->field_0x661) {
+        if (__builtin_expect(player->field_0x661 != 0xff && player->field_0x661 == object->field_0x661, 1)) {
             NuVecSub(&player_offset, &player->apiobj.position, &player->sock_position.midpoint);
             NuVecRotateY(&player_offset, &player_offset, -player->sock_position.midpoint_rotation.y);
             NuVecSub(&object_offset, &object->apiobj.position, &object->sock_position.midpoint);
@@ -5396,7 +5396,7 @@ static f32 Condition_PickupBeenTurnedOn(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET
 static f32 Condition_AngleAboutMyLocatorToPlayer(AISYS_s *, AISCRIPTPROCESS_s *process, AIPACKET_s *packet, char *,
                                                  void *argument) {
     f32 result = 0.0f;
-    if (argument != NULL && process->unknown_a4 != NULL && packet != NULL && packet->owner != NULL) {
+    if (__builtin_expect(argument != NULL && process->unknown_a4 != NULL && packet != NULL && packet->owner != NULL, 1)) {
         GameObject *object = packet->owner;
         GameObject *target = NULL;
         if ((intptr_t)argument == -1)
@@ -5618,7 +5618,7 @@ static f32 Condition_EitherPlayerLocatorRangeXZ(AISYS *, AISCRIPTPROCESS *proces
         AILOCATOR *locator = static_cast<AILOCATOR *>(argument);
         if (locator == NULL) {
             locator = processor->locator;
-            if (locator == NULL) {
+            if (__builtin_expect(locator == NULL, 1)) {
                 return 1.0e9f;
             }
         }

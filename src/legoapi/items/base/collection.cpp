@@ -395,7 +395,7 @@ i32 InCollectList_Index(i32 id, COLLECTID *list, i32 count) {
     if (list == NULL) {
         list = CollectList;
         count = CollectCount;
-        if (list == NULL)
+        if (__builtin_expect(list == NULL, 1))
             return id;
     }
 

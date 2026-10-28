@@ -460,7 +460,7 @@ static void Pup_UpdatePurpleCoin(WORLDINFO_s *, GIZMOPICKUP_s *pickup) {
         return;
     }
     f32 rate = 5.0f;
-    if (WORLD->area != NULL && (WORLD->area->flags & 0x104) == 4) {
+    if (__builtin_expect(WORLD->area != NULL && (WORLD->area->flags & 0x104) == 4, 1)) {
         rate = 2.5f;
     }
     i32 count = ParticlesPerSecond(rate, FRAMETIME);
@@ -543,7 +543,7 @@ static void Pup_UpdateBlueCoin(WORLDINFO_s *, GIZMOPICKUP_s *pickup) {
         return;
     }
     f32 rate = 5.0f;
-    if (WORLD->area != NULL && (WORLD->area->flags & 0x104) == 4) {
+    if (__builtin_expect(WORLD->area != NULL && (WORLD->area->flags & 0x104) == 4, 1)) {
         rate = 2.5f;
     }
     i32 count = ParticlesPerSecond(rate, FRAMETIME);
@@ -973,7 +973,7 @@ void CollectHitPoint(GameObject_s *object, NUVEC *position, i32) {
         if (static_cast<i8>(object->current_hp) > object->hitpoints)
             object->current_hp = object->hitpoints;
     }
-    if (object->field_0xe38 < 4) {
+    if (__builtin_expect(object->field_0xe38 < 4, 1)) {
         object->field_0xe38 += TouchHacks::TouchControlsActive ? 2 : 1;
         if (object->field_0xe38 == 5)
             object->field_0xe38 = 4;
@@ -1075,7 +1075,7 @@ static __used__ void PartStolen_Coin(PART_s *part) {
         return;
     GameObject_s *recipient = Player[0];
     i32 first_active = recipient != NULL && static_cast<i8>(recipient->apiobj.flags_low) < 0;
-    if (Player[1] != NULL && static_cast<i8>(Player[1]->apiobj.flags_low) < 0) {
+    if (__builtin_expect(Player[1] != NULL && static_cast<i8>(Player[1]->apiobj.flags_low) < 0, 0)) {
         recipient = Player[1];
         if (first_active)
             recipient = Player[qrand() / 0x8000];

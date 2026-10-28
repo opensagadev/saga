@@ -593,7 +593,7 @@ abi_ulong GetMatchLength(unsigned char *first, unsigned char *second, abi_ulong 
     if (maximum != 0 && *second == *first) {
         do {
             ++length;
-        } while (length != maximum && first[length] == second[length]);
+        } while (__builtin_expect(length != maximum && first[length] == second[length], 1));
     }
     return length;
 }

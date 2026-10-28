@@ -7881,11 +7881,11 @@ extern "C" __attribute__((optimize("O2"))) i32 ANI_SimpleAni3PlayerV4Joint(ani3_
 
 __attribute__((optimize("O2"))) i32 ANI_SimpleAni3PlayerV4Joint_Blend_Quat3(ani3_animheader_s *anim, f32 frame, nuanimbuff_s *buffer, f32 blend,
                                             i32 joint_count, i32 first_joint, NUVEC *root_translation) {
+    const u8 *node_flags = anim->node_flags;
+    const f32 inverse_blend = 1.0f - blend;
     nuanimbuffjoint_s *joint = buffer->joints;
     f32 key =
         (frame - anim->first_frame) * static_cast<f32>(anim->key_count - 1) / static_cast<f32>(anim->frame_count - 1);
-    const u8 *node_flags = anim->node_flags;
-    const f32 inverse_blend = 1.0f - blend;
     key = key < 0.0f ? 0.0f : key;
     if (static_cast<f32>(static_cast<i32>(anim->key_count)) <= key)
         key = static_cast<f32>(anim->key_count - 1);
@@ -7898,10 +7898,11 @@ __attribute__((optimize("O2"))) i32 ANI_SimpleAni3PlayerV4Joint_Blend_Quat3(ani3
     u8 *keys = anim->keys + (whole / 4) * key_stride;
     const i32 count = joint_count < anim->node_count ? joint_count : anim->node_count;
     const u16 *curve_types = anim->curve_types;
-    if (__builtin_expect(first_joint != 0, 1))
-        root_translation = NULL;
     const u8 *first_flags = node_flags + first_joint;
+    u8 *joint_flags = buffer->joint_flags + first_joint;
     const u8 *end_flags = first_flags + count;
+    if (first_joint != 0)
+        root_translation = NULL;
     for (; node_flags < first_flags; ++node_flags, ++joint) {
         if (*node_flags & 2) {
             SkipAni4V4Curve(curve_types[0], keys, scale_min);
@@ -7920,7 +7921,6 @@ __attribute__((optimize("O2"))) i32 ANI_SimpleAni3PlayerV4Joint_Blend_Quat3(ani3
         }
         curve_types += 9;
     }
-    u8 *joint_flags = buffer->joint_flags + first_joint;
     f32 *output = &joint->translation.x;
     for (; node_flags < end_flags; ++node_flags) {
         const u8 flags = *node_flags;
@@ -7943,7 +7943,7 @@ __attribute__((optimize("O2"))) i32 ANI_SimpleAni3PlayerV4Joint_Blend_Quat3(ani3
                     output[2] *= inverse_blend;
                     f32 length = NuFsqrt(output[3] * output[3] + output[0] * output[0] + output[1] * output[1] +
                                          output[2] * output[2]);
-                    f32 inverse_length = length == 0.0f ? 0.0f : 1.0f / length;
+                    f32 inverse_length = __builtin_expect(length == 0.0f, 0) ? 0.0f : 1.0f / length;
                     output[3] *= inverse_length;
                     output[0] *= inverse_length;
                     output[1] *= inverse_length;
@@ -7990,7 +7990,7 @@ __attribute__((optimize("O2"))) i32 ANI_SimpleAni3PlayerV4Joint_Blend_Quat3(ani3
                 result.w = first.w * (1.0f - fraction) + second.w * fraction;
                 f32 length =
                     NuFsqrt(result.w * result.w + result.x * result.x + result.y * result.y + result.z * result.z);
-                f32 inverse_length = length == 0.0f ? 0.0f : 1.0f / length;
+                f32 inverse_length = __builtin_expect(length == 0.0f, 0) ? 0.0f : 1.0f / length;
                 result.w *= inverse_length;
                 result.x *= inverse_length;
                 result.y *= inverse_length;
@@ -8139,56 +8139,55 @@ extern "C" __attribute__((optimize("O2"))) i32 ANI_SimpleAni3PlayerV4Joint_Blend
     const u8 *node_flags = anim->node_flags;
     const f32 inverse_blend = 1.0f - blend;
     const f32 last_key = static_cast<f32>(anim->key_count - 1);
-    f32 key = (frame - static_cast<f32>(anim->first_frame)) * last_key / static_cast<f32>(anim->frame_count - 1);
-    key = 0.0f <= key ? key : 0.0f;
+    f32 key = (frame - anim->first_frame) * last_key / static_cast<f32>(anim->frame_count - 1);
+    const i32 key_stride = anim->key_stride;
+    ani3_scalemin_s *scale_min = anim->scale_min;
+    key = key < 0.0f ? 0.0f : key;
     // The blend variant compares against key_count, then selects key_count - 1.
-    key = static_cast<f32>(anim->key_count) <= key ? last_key : key;
+    key = anim->key_count <= key ? last_key : key;
+    f32 *output = &buffer->joints->translation.x;
     const i32 whole = static_cast<i32>(key);
     const u32 quarter = static_cast<u32>(whole) & 3;
     const f32 fraction = key - static_cast<f32>(whole);
-    const i32 key_offset = (whole / 4) * anim->key_stride;
-    u8 *keys = anim->keys + key_offset;
     const u16 *constants = reinterpret_cast<const u16 *>(anim->constants);
-    i32 count = joint_count < anim->node_count ? joint_count : anim->node_count;
     const u16 *curve_types = anim->curve_types;
-    ani3_scalemin_s *scale_min = anim->scale_min;
+    u8 *keys = anim->keys + (whole / 4) * key_stride;
+    u8 *joint_flags = buffer->joint_flags + first_joint;
+    i32 count = joint_count < anim->node_count ? joint_count : anim->node_count;
     const u8 *first_flags = node_flags + first_joint;
-    for (const u8 *skip_flags = node_flags; skip_flags < first_flags; ++skip_flags) {
-        if (*skip_flags & 2) {
+    if (first_joint != 0)
+        root_translation = NULL;
+    for (; node_flags < first_flags; ++node_flags, output += 12) {
+        if (*node_flags & 2) {
             SkipAni4V4Curve(curve_types[0], keys, scale_min);
             SkipAni4V4Curve(curve_types[1], keys, scale_min);
             SkipAni4V4Curve(curve_types[2], keys, scale_min);
         }
-        if (__builtin_expect(!!(*skip_flags & 1), 1)) {
+        if (__builtin_expect(!!(*node_flags & 1), 1)) {
             SkipAni4V4Curve(curve_types[3], keys, scale_min);
             SkipAni4V4Curve(curve_types[4], keys, scale_min);
             SkipAni4V4Curve(curve_types[5], keys, scale_min);
         }
-        if (*skip_flags & 8) {
+        if (*node_flags & 8) {
             SkipAni4V4Curve(curve_types[6], keys, scale_min);
             SkipAni4V4Curve(curve_types[7], keys, scale_min);
             SkipAni4V4Curve(curve_types[8], keys, scale_min);
         }
         curve_types += 9;
     }
-    node_flags += first_joint;
-    const u8 *end_flags = node_flags + count;
-    u8 *joint_flags = buffer->joint_flags + first_joint;
-    nuanimbuffjoint_s *joint = buffer->joints + first_joint;
-    NUVEC *root = first_joint == 0 ? root_translation : NULL;
-    for (; node_flags < end_flags; ++node_flags, ++joint) {
+    const u8 *end_flags = first_flags + count;
+    for (; node_flags < end_flags; ++node_flags) {
         const u8 flags = *node_flags;
         *joint_flags++ |= flags;
-        f32 *output = &joint->translation.x;
         for (i32 group = 0; group < 3; ++group, curve_types += 3, output += 4) {
             if (!(flags & CurveGroupMasks[group])) {
                 if (group == 0) {
                     output[0] *= inverse_blend;
                     output[1] *= inverse_blend;
                     output[2] *= inverse_blend;
-                    if (root != NULL) {
-                        root->x = root->y = root->z = 0.0f;
-                        root = NULL;
+                    if (root_translation != NULL) {
+                        root_translation->x = root_translation->y = root_translation->z = 0.0f;
+                        root_translation = NULL;
                     }
                 } else if (__builtin_expect(group == 1, 0)) {
                     output[0] *= inverse_blend;
@@ -8208,32 +8207,32 @@ extern "C" __attribute__((optimize("O2"))) i32 ANI_SimpleAni3PlayerV4Joint_Blend
                     output[2] = output[2] * inverse_blend + blend;
                 }
             } else if (group != 1) {
-                f32 decoded = DecodeAni4Quat3Scalar(anim, anim->key_stride, constants, curve_types[0], quarter,
-                                                    fraction, keys, scale_min);
+                f32 decoded = DecodeAni4Quat3Scalar(anim, key_stride, constants, curve_types[0], quarter, fraction,
+                                                    keys, scale_min);
                 f32 delta = decoded - output[0];
-                if (root != NULL)
-                    root->x = decoded;
+                if (root_translation != NULL)
+                    root_translation->x = decoded;
                 output[0] += blend * delta;
-                decoded = DecodeAni4Quat3Scalar(anim, anim->key_stride, constants, curve_types[1], quarter, fraction,
-                                                keys, scale_min);
+                decoded = DecodeAni4Quat3Scalar(anim, key_stride, constants, curve_types[1], quarter, fraction, keys,
+                                                scale_min);
                 delta = decoded - output[1];
-                if (root != NULL)
-                    root->y = decoded;
+                if (root_translation != NULL)
+                    root_translation->y = decoded;
                 output[1] += blend * delta;
-                decoded = DecodeAni4Quat3Scalar(anim, anim->key_stride, constants, curve_types[2], quarter, fraction,
-                                                keys, scale_min);
+                decoded = DecodeAni4Quat3Scalar(anim, key_stride, constants, curve_types[2], quarter, fraction, keys,
+                                                scale_min);
                 delta = decoded - output[2];
-                if (root != NULL)
-                    root->z = -decoded;
-                root = NULL;
+                if (root_translation != NULL)
+                    root_translation->z = -decoded;
+                root_translation = NULL;
                 output[2] += blend * delta;
             } else {
                 NUVEC first_angles, second_angles;
-                DecodeAni4EulerPair(anim, anim->key_stride, constants, curve_types[0], quarter, keys, scale_min,
+                DecodeAni4EulerPair(anim, key_stride, constants, curve_types[0], quarter, keys, scale_min,
                                     first_angles.x, second_angles.x);
-                DecodeAni4EulerPair(anim, anim->key_stride, constants, curve_types[1], quarter, keys, scale_min,
+                DecodeAni4EulerPair(anim, key_stride, constants, curve_types[1], quarter, keys, scale_min,
                                     first_angles.y, second_angles.y);
-                DecodeAni4EulerPair(anim, anim->key_stride, constants, curve_types[2], quarter, keys, scale_min,
+                DecodeAni4EulerPair(anim, key_stride, constants, curve_types[2], quarter, keys, scale_min,
                                     first_angles.z, second_angles.z);
                 NUQUAT first, second;
                 NuQuatFromEulerXYZ(&first, static_cast<i32>(first_angles.x * 10430.378f),
@@ -13277,7 +13276,7 @@ extern "C" {
                     row_height);
             NuHtmlWrite(text);
             const char *label = " ";
-            if (labels != NULL && labels[index] != NULL) {
+            if (__builtin_expect(labels != NULL && labels[index] != NULL, 1)) {
                 label = labels[index];
             }
             sprintf(text,
@@ -13766,7 +13765,7 @@ extern "C" void BuildWorldSpaceClipPlanes(void) {
             return 1;
         }
 
-        if (use_scissor != 0) {
+        if (__builtin_expect(use_scissor != 0, 0)) {
             return 1;
         }
         if (far_distance > -near_radius || near_radius > near_distance) {
@@ -18697,14 +18696,20 @@ static u16 NuLgtArcHalf(f32 value) {
 }
 
 static inline void NuLgtArcVertex(NUVEC4 *position, i32 colour, f32 u, f32 v) {
-    g_NuPrim_StreamBufferPtr->u32_ptr[3] =
-        g_NuPrim_NeedsOverbrightening ? colour : ((colour >> 1) & 0x7f7f7f) | (colour & 0xff000000);
-    if (g_NuPrim_NeedsHalfUVs) {
-        ((u16 *)g_NuPrim_StreamBufferPtr->u8_ptr)[8] = NuLgtArcHalf(u);
-        ((u16 *)g_NuPrim_StreamBufferPtr->u8_ptr)[9] = NuLgtArcHalf(v);
+    u32 *vertex;
+    if (!g_NuPrim_NeedsOverbrightening) {
+        vertex = g_NuPrim_StreamBufferPtr->u32_ptr;
+        vertex[3] = ((colour >> 1) & 0x7f7f7f) | (colour & 0xff000000);
     } else {
-        g_NuPrim_StreamBufferPtr->f32_ptr[4] = u;
-        g_NuPrim_StreamBufferPtr->f32_ptr[5] = v;
+        vertex = g_NuPrim_StreamBufferPtr->u32_ptr;
+        vertex[3] = colour;
+    }
+    if (g_NuPrim_NeedsHalfUVs) {
+        ((u16 *)vertex)[8] = NuLgtArcHalf(u);
+        ((u16 *)vertex)[9] = NuLgtArcHalf(v);
+    } else {
+        ((f32 *)vertex)[4] = u;
+        ((f32 *)vertex)[5] = v;
     }
     NuPrim2DAddXYZ(position->x, position->y, position->z);
 }
@@ -18746,12 +18751,13 @@ void NuLgtArcLaserDraw(i32 paused) {
             vertices[6].x = (laser->start.x - laser->end.x) * numerator / denominator + laser->end.x;
             vertices[6].y = (laser->start.y - laser->end.y) * numerator / denominator + laser->end.y;
             vertices[6].z = (laser->start.z - laser->end.z) * numerator / denominator + laser->end.z;
+            vertices[6].w = 1.0f;
         } else {
             vertices[6].x = laser->start.x;
             vertices[6].y = laser->start.y;
             vertices[6].z = laser->start.z;
+            vertices[6].w = 1.0f;
         }
-        vertices[6].w = 1.0f;
         f32 dx = vertices[6].x - laser->end.x;
         f32 dy = vertices[6].y - laser->end.y;
         f32 dz = vertices[6].z - laser->end.z;
@@ -18762,12 +18768,13 @@ void NuLgtArcLaserDraw(i32 paused) {
             vertices[7].x = (laser->end.x - laser->start.x) * numerator / denominator + laser->start.x;
             vertices[7].y = (laser->end.y - laser->start.y) * numerator / denominator + laser->start.y;
             vertices[7].z = (laser->end.z - laser->start.z) * numerator / denominator + laser->start.z;
+            vertices[7].w = 1.0f;
         } else {
             vertices[7].x = laser->end.x;
             vertices[7].y = laser->end.y;
             vertices[7].z = laser->end.z;
+            vertices[7].w = 1.0f;
         }
-        vertices[7].w = 1.0f;
         NuVec4MtxTransformVU0(&vertices[4], &vertices[6], clip);
         NuVec4ScaleXYZVU0(&vertices[4], &vertices[4], 1.0f / vertices[4].w);
         NuVec4MtxTransformVU0(&vertices[5], &vertices[7], clip);
@@ -18805,18 +18812,20 @@ void NuLgtArcLaserDraw(i32 paused) {
         vertices[4].z = vertices[6].z;
         NuVec4MtxTransformVU0(&vertices[4], &vertices[4], clip);
         NuVec4ScaleXYZVU0(&vertices[4], &vertices[4], 1.0f / vertices[4].w);
-        vertices[1].x = vertices[3].x = vertices[4].x;
-        vertices[1].y = vertices[3].y = vertices[4].y;
-        vertices[1].z = vertices[3].z = vertices[4].z;
+        vertices[1].x = vertices[4].x;
+        vertices[1].y = vertices[4].y;
+        vertices[1].z = vertices[4].z;
+        vertices[3].x = vertices[4].x;
+        vertices[3].y = vertices[4].y;
+        vertices[3].z = vertices[4].z;
         f32 progress = 0.0f;
-        auto laser_wobble = laser->wobble;
         do {
             f32 next = progress + step;
             if (next >= 1.0f) {
                 vertices[5].x = vertices[6].x + vertices[7].x;
                 vertices[5].y = vertices[6].y + vertices[7].y;
                 vertices[5].z = vertices[6].z + vertices[7].z;
-                u = NuLgtArcMtl[0].u1 + (1.0f - progress) * (NuLgtArcMtl[0].u0 - NuLgtArcMtl[0].u1) / step;
+                u = (NuLgtArcMtl[0].u0 - NuLgtArcMtl[0].u1) * (1.0f - progress) / step + NuLgtArcMtl[0].u1;
             } else {
                 i32 angle = ((i32)(32768.0f * next) >> 1) & 0x7fff;
                 vertices[5].x = next * vertices[7].x + vertices[6].x + vertices[10].x * NuTrigTable[angle];
@@ -18830,8 +18839,8 @@ void NuLgtArcLaserDraw(i32 paused) {
             f32 jitter_x = 0.0f, jitter_y = 0.0f;
             if (1.0f - 1.5f * step > progress && NuLgtSeed != 0) {
                 f32 random = (f32)((NuLgtRand() & 0xff) - 128);
-                jitter_x = perpendicular.x * random * laser_wobble * reciprocal;
-                jitter_y = perpendicular.y * random * laser_wobble * reciprocal;
+                jitter_x = perpendicular.x * random * laser->wobble * reciprocal;
+                jitter_y = perpendicular.y * random * laser->wobble * reciprocal;
             }
             vertices[0].x = vertices[5].x - perpendicular.x * reciprocal + jitter_x;
             vertices[0].y = vertices[5].y - perpendicular.y * reciprocal + jitter_y;
@@ -21968,7 +21977,7 @@ extern "C" void NuTexDestroy(i32 tex_id) {
 
     i32 NuWindLoad(NUWIND *wind, i32 index, char *name, VARIPTR *buffer, VARIPTR buffer_end) {
         if (wind != NULL) {
-            if ((u32)index < 8) {
+            if (__builtin_expect((u32)index < 8, 1)) {
                 if (wind->unk0[index] >= 0) {
                     NuTexDestroy(wind->unk0[index]);
                 }

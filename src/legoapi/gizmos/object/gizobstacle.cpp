@@ -894,7 +894,7 @@ static void Gizobstacle_ReadAnimSetData(GAMEANIMOBJ_s *object, unsigned char ver
 
     u16 fallback_data = 0;
     u16 *object_data = static_cast<u16 *>(object->object_data);
-    if (object_data == NULL) {
+    if (__builtin_expect(object_data == NULL, 0)) {
         object_data = &fallback_data;
     }
 

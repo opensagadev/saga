@@ -1067,7 +1067,7 @@ void MenuUpdateDeleting(MENU_s *) {
             memcard_deleteresult_delay = 1.5f;
             return;
         }
-        if (memcard_deleteresult_delay <= 0.0f)
+        if (__builtin_expect(memcard_deleteresult_delay <= 0.0f, 1))
             BackupMenu();
         return;
     }

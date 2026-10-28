@@ -1074,7 +1074,7 @@ static __used__ i32 MatrixReflection_CanOverride() {
     i32 result = 1;
     if (WORLD->current_level == DEATHSTARESCAPEA_LDATA) {
         const i8 sock = GameCam->sock_position.location.sock;
-        if (sock != 0) {
+        if (__builtin_expect(sock != 0, 0)) {
             result = sock == 3;
         }
     }
@@ -3371,7 +3371,7 @@ i32 CutScene_ReplaceCharacterModelFn_LSW(CUTINFO *cut, NUGCUTCHAR_s *character) 
 }
 
 i32 InitBolt_AddMomentumType_LSW(BOLT_s *bolt, GameObject_s *object, NUVEC *momentum) {
-    if (object == NULL)
+    if (__builtin_expect(object == NULL, 0))
         return 0;
     if (LSW1 != 0 && momentum != NULL) {
         f32 scale = WORLD->current_level == BONUS_GUNSHIPB_LDATA ? 0.25f : 0.5f;

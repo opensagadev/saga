@@ -214,7 +214,7 @@ void ThingManager::RemoveTemporaryThings() {
 i32 ThingManager::RemoveDependanciesThings(ThingRemoveData *data) {
     i32 removed = 1;
     for (i32 i = 0; i < this->count; ++i) {
-        if (this->things[i] == NULL || (this->things[i]->flags & THING_FLAG_SKIP_REMOVE_DEPENDANCIES) != 0) {
+        if (__builtin_expect(this->things[i] == NULL || (this->things[i]->flags & THING_FLAG_SKIP_REMOVE_DEPENDANCIES) != 0, 1)) {
             continue;
         }
         removed &= this->things[i]->RemoveDependancies(data);
@@ -224,7 +224,7 @@ i32 ThingManager::RemoveDependanciesThings(ThingRemoveData *data) {
 
 void ThingManager::EnterLevelThings(ThingLevelData *data) {
     for (i32 i = 0; i < this->count; ++i) {
-        if (this->things[i] == NULL || (this->things[i]->flags & THING_FLAG_SKIP_ENTER_LEVEL) != 0) {
+        if (__builtin_expect(this->things[i] == NULL || (this->things[i]->flags & THING_FLAG_SKIP_ENTER_LEVEL) != 0, 1)) {
             continue;
         }
         this->things[i]->EnterLevel(data);
@@ -233,7 +233,7 @@ void ThingManager::EnterLevelThings(ThingLevelData *data) {
 
 void ThingManager::ExitLevelThings(ThingLevelData *data) {
     for (i32 i = 0; i < this->count; ++i) {
-        if (this->things[i] == NULL || (this->things[i]->flags & THING_FLAG_SKIP_EXIT_LEVEL) != 0) {
+        if (__builtin_expect(this->things[i] == NULL || (this->things[i]->flags & THING_FLAG_SKIP_EXIT_LEVEL) != 0, 1)) {
             continue;
         }
         this->things[i]->ExitLevel(data);

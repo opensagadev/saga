@@ -1852,7 +1852,7 @@ CUTINFO *NewCutScene(CUTINFO *cut, CUTSYS *system, char *name, i32) {
 
 i32 CutScene_PlayingOrRequested(CUTINFO *cut) {
     if (cut == NULL) {
-        if (CutStopInfo != NULL || NewCutInfoCount != 0)
+        if (__builtin_expect(CutStopInfo != NULL || NewCutInfoCount != 0, 1))
             return 1;
         return 0;
     }
@@ -1879,7 +1879,7 @@ i32 CutScene_HasPlayed(CUTINFO *cut) {
         }
     }
     i32 has_played = 0;
-    if (cutscene_index != -1) {
+    if (__builtin_expect(cutscene_index != -1, 1)) {
         world = WorldInfo_CurrentlyActive();
         has_played = (world->level_progress->played_cutscene_mask & (1 << cutscene_index)) != 0;
     }

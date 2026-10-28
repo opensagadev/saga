@@ -1083,7 +1083,7 @@ void PlayLandSfx(GameObject_s *object, i32 type, i32) {
             if (type != 0) {
                 return;
             }
-            if (alternate != 0) {
+            if (__builtin_expect(alternate != 0, 1)) {
                 sfx = GameAudio->sfx_ids[8];
             } else {
                 sfx = GameAudio->sfx_ids[7];
@@ -1096,7 +1096,7 @@ void PlayLandSfx(GameObject_s *object, i32 type, i32) {
             }
         }
     }
-    if (sfx != -1) {
+    if (__builtin_expect(sfx != -1, 1)) {
         if (static_cast<i8>(object->apiobj.flags_low) < 0 || object->is_boss) {
             GameAudio_PlaySfxById(sfx, &object->apiobj.lower_position, 0, 1);
         } else {
@@ -1119,7 +1119,7 @@ void PlayFootStepSfx(GameObject_s *object) {
         sfx = object->apiobj.character_data->game_character->sfx_footstep;
     } else {
         sfx = -1;
-        if (GameAudio->override_footstep_fn != NULL) {
+        if (__builtin_expect(GameAudio->override_footstep_fn != NULL, 1)) {
             sfx = GameAudio->override_footstep_fn(object, on_platform);
         }
         if (sfx == -1) {

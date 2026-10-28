@@ -2576,7 +2576,7 @@ i32 KillPlayer(GameObject_s *object, i32 reason, i32 ignore_spawn_protection, nu
     if (Arcade != 0) {
         i32 other_player = 1;
         if (object->apiobj.field_0x27c != 0) {
-            if (object->apiobj.field_0x27c != 1)
+            if (__builtin_expect(object->apiobj.field_0x27c != 1, 1))
                 return KillGameObject(object, reason, 0);
             other_player = 0;
         }

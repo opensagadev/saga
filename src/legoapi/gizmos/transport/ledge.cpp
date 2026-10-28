@@ -388,7 +388,7 @@ __attribute__((optimize("O2"))) static void Ledges_StoreProgress(void *world_inf
     for (i32 i = 0; i < world_ledge_count && i != 128; ++i, ++ledge) {
         const i32 word = i >> 5;
         const u32 mask = 1u << (i & 31);
-        if (!(ledge->state_flags & 2))
+        if (__builtin_expect(!(ledge->state_flags & 2), 1))
             progress->state[4 + word] &= ~mask;
         if (!(ledge->state_flags & 1))
             progress->state[word] &= ~mask;

@@ -1265,7 +1265,7 @@ static void *GizForces_ReserveBufferSpace(void *world_ptr) {
 
 // Finds the "<prefix>b" special next to one of the force's animated objects.
 static void GizForce_FindAlongSocket(GIZFORCE_s *force) {
-    force->along_socket = {};
+    memset(&force->along_socket, 0, sizeof(force->along_socket));
     if ((force->config_flags & GIZFORCE_CONFIG_ALONG_SOCKET) == 0) {
         return;
     }
@@ -1359,25 +1359,27 @@ static i32 GizForces_Load(void *world_ptr, void *data) {
         }
         force.blowup_type = -1;
 
-        if (version == 4) {
-            force.blowup_type = EdFileReadShort();
-            force.pickup_count = EdFileReadShort();
-            force.pickup_rotation_x = EdFileReadShort();
-            force.pickup_rotation_y = EdFileReadShort();
-            EdFileReadNuVec(&force.effect_position);
-        } else if (__builtin_expect(version > 4, 0)) {
-            const i32 name_length = static_cast<i8>(EdFileReadChar());
-            if (name_length != 0) {
-                EdFileRead(blowup_name, name_length);
-                force.blowup_type = static_cast<i16>(GizmoBlowupGetNameTableId(blowup_name));
-                if (force.blowup_type != -1) {
-                    force.runtime_flags |= GIZFORCE_RUNTIME_PENDING_BLOWUP_TYPE;
+        if (version > 3) {
+            if (version == 4) {
+                force.blowup_type = EdFileReadShort();
+                force.pickup_count = EdFileReadShort();
+                force.pickup_rotation_x = EdFileReadShort();
+                force.pickup_rotation_y = EdFileReadShort();
+                EdFileReadNuVec(&force.effect_position);
+            } else {
+                const i32 name_length = static_cast<i8>(EdFileReadChar());
+                if (name_length != 0) {
+                    EdFileRead(blowup_name, name_length);
+                    force.blowup_type = static_cast<i16>(GizmoBlowupGetNameTableId(blowup_name));
+                    if (force.blowup_type != -1) {
+                        force.runtime_flags |= GIZFORCE_RUNTIME_PENDING_BLOWUP_TYPE;
+                    }
                 }
+                force.pickup_count = EdFileReadShort();
+                force.pickup_rotation_x = EdFileReadShort();
+                force.pickup_rotation_y = EdFileReadShort();
+                EdFileReadNuVec(&force.effect_position);
             }
-            force.pickup_count = EdFileReadShort();
-            force.pickup_rotation_x = EdFileReadShort();
-            force.pickup_rotation_y = EdFileReadShort();
-            EdFileReadNuVec(&force.effect_position);
         }
 
         if (!(version > 9)) {

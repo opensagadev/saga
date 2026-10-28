@@ -444,7 +444,7 @@ stream_error:
 }
 
 bool NuSoundStreamingSample::IsLocked() const {
-    if (this->sound_buffers[0] != NULL && this->sound_buffers[0]->IsLocked()) {
+    if (__builtin_expect(this->sound_buffers[0] != NULL && this->sound_buffers[0]->IsLocked(), 0)) {
         return true;
     }
     if (this->sound_buffers[1] != NULL && this->sound_buffers[1]->IsLocked()) {
