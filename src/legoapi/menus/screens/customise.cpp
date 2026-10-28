@@ -991,7 +991,7 @@ void CustomiserMenu_Update(MENU_s *) {
         CustomiseNameBoardTMul[1] = CustomiseMode[1] == 1 ? 1.0f : 0.0f;
         CustomiseNameBoardMul[1] = SeekLinearF(CustomiseNameBoardMul[1], CustomiseNameBoardTMul[1], 4.0f * FRAMETIME);
         CustomiseNameLetterBlipScale[1] = SeekLinearF(CustomiseNameLetterBlipScale[1], 1.0f, 5.0f * FRAMETIME);
-        if (MenuPacket.active_player[1] != 0) {
+        if (__builtin_expect(MenuPacket.active_player[1] != 0, 1)) {
             if ((GamePad[1].buttons_pressed & GAMEPAD_MENUSELECT) != 0)
                 select[1] = 1;
             else if ((GamePad[1].buttons_pressed & GAMEPAD_MENUCANCEL) != 0)

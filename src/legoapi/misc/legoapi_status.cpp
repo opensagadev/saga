@@ -591,7 +591,7 @@ void InitStatusScreen(WORLDINFO_s *world) {
                     Game.area_save[p.area_id].area_complete = 1;
                     AddToCompletionPoints(POINTS_PER_SUPERBONUSCOMPLETE);
                     p.newly_completed = 1;
-                    if (GOLDBRICKFORSUPERBONUS != 0)
+                    if (__builtin_expect(GOLDBRICKFORSUPERBONUS != 0, 0))
                         gold = AddGoldBrickMessage(&p, tLEVELCOMPLETE);
                 }
                 AddStatusStage(&p, 22, gold);
@@ -602,7 +602,7 @@ void InitStatusScreen(WORLDINFO_s *world) {
                 AddStatusStage(&p, 19, 0);
             AddStatusStage(&p, 9, 0);
             AddStatusStage(&p, 10, 0);
-            if (netclient == 0)
+            if (__builtin_expect(netclient == 0, 1))
                 AddStatusStage(&p, 11, 0);
             AddStatusStage(&p, 12, 0);
             p.current_gold_brick = -1;
@@ -657,7 +657,7 @@ void InitStatusScreen(WORLDINFO_s *world) {
                     if (__builtin_expect(GOLDBRICKFORCHALLENGE != 0, 1))
                         gold = AddGoldBrickMessage(&p, tCHALLENGECOMPLETE);
                     Game.area_save[p.area_id].field_0x5[2] = 1;
-                    if (p.episode_id != -1 && p.chapter != -1) {
+                    if (__builtin_expect(p.episode_id != -1 && p.chapter != -1, 1)) {
                         sprintf(event, "challenge_ep%i_ch%i_complete", p.episode_id + 1, p.chapter + 1);
                         NuIOS_RecordFlurryEvent(event);
                     }
@@ -699,7 +699,7 @@ void InitStatusScreen(WORLDINFO_s *world) {
         }
         p.area_time = AreaTimer.time_elapsed;
         const u64 total = static_cast<u64>(p.coins_remaining[0]) + p.coins_remaining[1];
-        if (__builtin_expect(total >= 4000000000ULL, 0))
+        if (total >= 4000000000ULL)
             p.collected_score = 4000000000.0f;
         else
             p.collected_score = static_cast<f32>(p.coins_remaining[0] + p.coins_remaining[1]);
@@ -1087,24 +1087,20 @@ void Status_DrawPromptMenu(STATUSPACKET_s *packet, i32 selected, float alpha) {
                                 0)) {
         labels[0] = tMAP;
     } else {
-        labels[0] = tFINISHSTORY;
-        if ((packet->field_0xb0 & 8) != 0) {
-            if (packet->next_area != -1 && (ADataList[packet->next_area].flags & 2) == 0 &&
-                Game.area_save[packet->next_area].complete == 0) {
-                labels[0] = tMAP;
-                const i16 text =
-                    ADataList[packet->next_area].area_index == 5 ? tFINALCHAPTERLOCKED : tNEXTCHAPTERLOCKED;
-                SmartTextEx(TTab[text], 0.0f, 0.325f, 1.0f, 0.5f, 0.5f, 0.5f, 0, 255, 63, 0, 1.7f, 1, NULL, 0,
-                            static_cast<i32>(alpha * 128.0f));
-                locked = true;
-            } else {
-                if (__builtin_expect(packet->next_area == -1 || (ADataList[packet->next_area].flags & 2) == 0, 1)) {
-                    labels[0] = tCONTINUESTORY;
-                }
+        const i32 chapter = packet->field_0xb0 & 8;
+        if (chapter && packet->next_area != -1 && (ADataList[packet->next_area].flags & 2) == 0 &&
+            Game.area_save[packet->next_area].complete == 0) {
+            labels[0] = tMAP;
+            SmartTextEx(TTab[ADataList[packet->next_area].area_index == 5 ? tFINALCHAPTERLOCKED : tNEXTCHAPTERLOCKED],
+                        0.0f, 0.325f, 1.0f, 0.5f, 0.5f, 0.5f, 0, 255, 63, 0, 1.7f, 1, NULL, 0,
+                        static_cast<i32>(alpha * 128.0f));
+            locked = true;
+        } else {
+            labels[0] = (packet->next_area == -1 || (ADataList[packet->next_area].flags & 2) == 0) ? tCONTINUESTORY
+                                                                                                   : tFINISHSTORY;
+            if (chapter) {
                 labels[1] = tMAP;
             }
-        } else if (packet->next_area == -1 || (ADataList[packet->next_area].flags & 2) == 0) {
-            labels[0] = tCONTINUESTORY;
         }
     }
     const i32 count = labels[1] == -1 ? 1 : 2;
@@ -1121,13 +1117,13 @@ void Status_DrawPromptMenu(STATUSPACKET_s *packet, i32 selected, float alpha) {
     }
     for (i32 i = 0; i < count; ++i) {
         i32 red, green, blue;
-        if (selected != 0 && status_prompt == i && TestForController()) {
+        if (selected != 0 && status_prompt == i && __builtin_expect(TestForController(), 1)) {
             if (__builtin_expect(!(menu_pulsate <= 0.0f), 1)) {
                 const f32 inverse = 1.0f - menu_pulsate;
                 red = static_cast<u32>(MENUFLASH0R) * menu_pulsate + static_cast<u32>(MENUFLASH1R) * inverse;
                 green = static_cast<u32>(MENUFLASH0G) * menu_pulsate + static_cast<u32>(MENUFLASH1G) * inverse;
                 blue = static_cast<u32>(MENUFLASH0B) * menu_pulsate + static_cast<u32>(MENUFLASH1B) * inverse;
-            } else if (__builtin_expect(menu_flash == 0, 1)) {
+            } else if (__builtin_expect(menu_flash == 0, 0)) {
                 red = MENUFLASH1R;
                 blue = MENUFLASH1B;
                 green = MENUFLASH1G;
@@ -1136,15 +1132,15 @@ void Status_DrawPromptMenu(STATUSPACKET_s *packet, i32 selected, float alpha) {
                 blue = MENUFLASH0B;
                 green = MENUFLASH0G;
             }
-        } else if (menu_pulse > 0.0f) {
+        } else if (__builtin_expect(menu_pulse > 0.0f, 1)) {
             const f32 inverse = 1.0f - menu_pulse;
             red = static_cast<u32>(MENUFLASH0R) * menu_pulse + static_cast<u32>(MENUNORMALR) * inverse;
             green = static_cast<u32>(MENUFLASH0G) * menu_pulse + static_cast<u32>(MENUNORMALG) * inverse;
             blue = static_cast<u32>(MENUFLASH0B) * menu_pulse + static_cast<u32>(MENUNORMALB) * inverse;
         } else {
             red = MENUENTRYR;
-            green = MENUENTRYG;
             blue = MENUENTRYB;
+            green = MENUENTRYG;
         }
         smarttextex_drawmessagebox = 1;
         SmartTextEx(TTab[labels[i]], 0.0f, y, 1.0f, 0.7f, 0.7f, 0.7f, 0, red, green, blue, 1.7f, 1, NULL, 0,

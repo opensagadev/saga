@@ -9303,13 +9303,7 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
             } else if (object->character_context == 0x44) {
                 move_vertical = TightRope_SetTargetMom(object);
                 break;
-            } else if (object->character_context == 0x4f) {
-                move_vertical = Glide_SetTargetMom(object);
-                seek_rates.y = seek_rates.x;
-                seek_rates.x = seek_rates.z = 2.0f;
-                separate_seek_rates = true;
-                break;
-            } else {
+            } else if (!(object->character_context == 0x4f)) {
                 {
                     if (object->character_context == 0x61 && (api.field_0x1f4 & 0x40000) == 0) {
                         const f32 rate = 10.0f * object->field_0x768 + 5.0f;
@@ -9544,7 +9538,7 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
                                 }
                                 break;
                             }
-                            if (object->action_movement_state == 4)
+                            if (__builtin_expect(object->action_movement_state == 4, 1))
                                 goto directional_action_momentum;
                             if (object->action_movement_state == 2) {
                                 f32 speed = api.character_data->game_character->run_speed;
@@ -9613,16 +9607,7 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
                                     const f32 stop_frame = AnimStopFrame(api.character_model, animation);
                                     stopped = stop_frame > 0.0f && !(api.anim_packet.blend_source_time < stop_frame);
                                 }
-                                if (stopped) {
-                                    object->target_velocity.x = 0.0f;
-                                    object->target_velocity.z = 0.0f;
-                                    const i32 surface = static_cast<i8>(api.field_0x281);
-                                    if (!(api.field_0x27d != 0 && surface >= 0 && surface < 32 &&
-                                          TerSurface[surface].movement_scale < 1.0f)) {
-                                        api.velocity.x = 0.0f;
-                                        api.velocity.z = 0.0f;
-                                    }
-                                } else {
+                                if (!(stopped)) {
                                     const u16 angle =
                                         direct_turn == 0 &&
                                                 ((CInfo[object->character_context].flags & (2ull << 32)) != 0 ||
@@ -9634,6 +9619,15 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
                                     if (api.anim_packet.blend_animation_a == 0x4f ||
                                         api.anim_packet.blend_animation_a == 0x26)
                                         NuVecRotateY(&object->target_velocity, &object->target_velocity, 0x4000);
+                                } else {
+                                    object->target_velocity.x = 0.0f;
+                                    object->target_velocity.z = 0.0f;
+                                    const i32 surface = static_cast<i8>(api.field_0x281);
+                                    if (!(api.field_0x27d != 0 && surface >= 0 && surface < 32 &&
+                                          TerSurface[surface].movement_scale < 1.0f)) {
+                                        api.velocity.x = 0.0f;
+                                        api.velocity.z = 0.0f;
+                                    }
                                 }
                                 break;
                             }
@@ -9718,7 +9712,7 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
                                     }
                                 }
                             } else if (object->id == id_DROIDEKA) {
-                                if (__builtin_expect(api.anim_packet.field_0x3a == 5, 1))
+                                if (api.anim_packet.field_0x3a == 5)
                                     walking_speed *= 0.5f;
                             } else if (object->id == id_ATST || object->id == id_MINIATST ||
                                        object->id == id_ATST_LOWRES || object->id == id_ATAT ||
@@ -9744,6 +9738,12 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
                         NuTrigTable[((walking_angle + 0x4000) >> 1) & 0x7fff] * walking_speed * water_speed_multiplier;
                     break;
                 }
+            } else {
+                move_vertical = Glide_SetTargetMom(object);
+                seek_rates.y = seek_rates.x;
+                seek_rates.x = seek_rates.z = 2.0f;
+                separate_seek_rates = true;
+                break;
             }
         } while (false);
     }

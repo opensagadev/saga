@@ -988,7 +988,7 @@ void DrawPanel() {
                         i32 visible = 0;
                         if (icon_time <= 0.0f)
                             visible = 1;
-                        else if (__builtin_expect(icon_time < 2.0f, 1))
+                        else if (__builtin_expect(icon_time < 2.0f, 0))
                             visible = NuFmod(icon_time, 0.4f) < 0.2f;
                         DrawCharIcon(object->id, icon_x, status_y, 0.0f, icon_size, 0xa6, alpha, alpha, visible, NULL);
                     } else {

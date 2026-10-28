@@ -1093,16 +1093,16 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
             i32 locator_index = character->locator_index + i;
             NUGCUTLOCATOR_s *locator = &locator_system->locators[locator_index];
             NUMTX *parent_matrix = &world_matrix;
-            if (__builtin_expect(locator->field_5a != 0xff, 0)) {
+            if (__builtin_expect(!(locator->field_5a != 0xff), 1)) {
+                instNuGCutLocatorUpdate(cutscene_instance, locator_system,
+                                        &cutscene_instance->locator_instance->locators[locator_index], locator, frame,
+                                        parent_matrix, paused);
+            } else {
                 NUMTX locator_parent;
                 NuMtxMulVU0(&locator_parent, &joint_matrices[locator->field_5a], &world_matrix);
                 instNuGCutLocatorUpdate(cutscene_instance, locator_system,
                                         &cutscene_instance->locator_instance->locators[locator_index], locator, frame,
                                         &locator_parent, paused);
-            } else {
-                instNuGCutLocatorUpdate(cutscene_instance, locator_system,
-                                        &cutscene_instance->locator_instance->locators[locator_index], locator, frame,
-                                        parent_matrix, paused);
             }
         }
     }

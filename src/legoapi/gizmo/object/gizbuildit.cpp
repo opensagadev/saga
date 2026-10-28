@@ -920,7 +920,7 @@ static void GizBuildIts_LateUpdate(void *world_ptr, void *data, float) {
                     ((builder->pad_gamepad->buttons_held & GAMEPAD_SPECIAL) != 0 ||                                    \
                      (builder->apiobj.field_0x1f4 & 0x40000) != 0)) {                                                  \
                     builder->field_0xe21 ^= 0x40;                                                                      \
-                    if (__builtin_expect(builder->build_button_taps < 10, 1)) {                                        \
+                    if (__builtin_expect(builder->build_button_taps < 10, 0)) {                                        \
                         ++builder->build_button_taps;                                                                  \
                     }                                                                                                  \
                 } else {                                                                                               \
@@ -942,19 +942,7 @@ static void GizBuildIts_LateUpdate(void *world_ptr, void *data, float) {
         }                                                                                                              \
     } while (0)
 
-            if (!automatic_build) {
-                if (buildit.builders_active == 0) {
-                    GizBuildIt_SetStepTime(&buildit, NULL);
-                    if (buildit.linked_buildit == NULL && buildit.built_object_count < buildit.anim_object_count) {
-                        GAMEANIMOBJ_s *next_piece = buildit.anim_objects[buildit.built_object_count];
-                        NuSpecialSetVisibility(&next_piece->special, 1);
-                    }
-                    goto idle_wobble;
-                }
-
-                GameObject_s *builder = FindActiveBuilder(&buildit);
-                ADVANCE_BUILDIT_PIECE(false, builder);
-            } else {
+            if (automatic_build) {
                 if (GizBuildit_AutoBuildPosFn != NULL) {
                     u16 facing;
                     if (__builtin_expect(GizBuildit_AutoBuildPosFn(world, &buildit.start_position, &centre, &facing) != 0, 1)) {
@@ -998,6 +986,18 @@ static void GizBuildIts_LateUpdate(void *world_ptr, void *data, float) {
                     }
                 }
                 ADVANCE_BUILDIT_PIECE(true, static_cast<GameObject_s *>(NULL));
+            } else {
+                if (buildit.builders_active == 0) {
+                    GizBuildIt_SetStepTime(&buildit, NULL);
+                    if (buildit.linked_buildit == NULL && buildit.built_object_count < buildit.anim_object_count) {
+                        GAMEANIMOBJ_s *next_piece = buildit.anim_objects[buildit.built_object_count];
+                        NuSpecialSetVisibility(&next_piece->special, 1);
+                    }
+                    goto idle_wobble;
+                }
+
+                GameObject_s *builder = FindActiveBuilder(&buildit);
+                ADVANCE_BUILDIT_PIECE(false, builder);
             }
 #undef ADVANCE_BUILDIT_PIECE
         }

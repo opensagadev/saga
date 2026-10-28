@@ -170,7 +170,7 @@ static void GizTurrets_Update(void *context, void *system_ptr, float frame_time)
                                         (turret->controller->pad_gamepad->buttons_pressed & GAMEPAD_ACTION),
                                     1)) {
                                 f32 rapid_interval = turret->fire_interval * gizturret_rapid_fire_rate;
-                                if (__builtin_expect(!(turret->fire_cooldown <= rapid_interval), 0))
+                                if (!(turret->fire_cooldown <= rapid_interval))
                                     turret->fire_cooldown = rapid_interval;
                                 turret->rapid_fire_pending = 1;
                             }
@@ -242,14 +242,13 @@ static void GizTurrets_Update(void *context, void *system_ptr, float frame_time)
                                     goto autonomous_apply;
                             }
                             should_fire = bolt_type != NULL;
-                            if ((turret->behavior_flags & 0x200) && target_velocity != NULL && bolt_type != NULL) {
+                            if (!((turret->behavior_flags & 0x200) && target_velocity != NULL && bolt_type != NULL)) NuVecSub(&world_direction, target_position, reinterpret_cast<NUVEC *>(&reference->m30)); else {
                                 GizTurret_CalculateInterceptVector(reinterpret_cast<NUVEC *>(&reference->m30),
                                                                    primary_draw, target_position, target_velocity,
                                                                    bolt_type->field_10, &world_direction, NULL,
                                                                    turret->controller != NULL);
                                 should_fire = true;
-                            } else
-                                NuVecSub(&world_direction, target_position, reinterpret_cast<NUVEC *>(&reference->m30));
+                            }
                             if ((turret->behavior_flags & 0xc0) != 0xc0) {
                                 NuVecInvMtxRotate(&local_direction, &world_direction, reference);
                                 if (!(turret->behavior_flags & 0x80)) {
@@ -317,7 +316,7 @@ static void GizTurrets_Update(void *context, void *system_ptr, float frame_time)
                                     NuMtxPreRotateY(secondary_draw, turret->yaw);
                                 NuMtxMul(primary_draw, &turret->field_0xa4, secondary_draw);
                             }
-                            if (turret->pitch != 0 && !(turret->behavior_flags & 0x40))
+                            if (__builtin_expect(turret->pitch != 0 && !(turret->behavior_flags & 0x40), 1))
                                 NuMtxPreRotateX(primary_draw, turret->pitch);
                         }
                         if (turret->primary_anim_obj != NULL)
@@ -327,14 +326,14 @@ static void GizTurrets_Update(void *context, void *system_ptr, float frame_time)
                         NuSpecialUpdate(&turret->secondary_anim_obj->special);
                     if (turret->field_0x126 != -1 && __builtin_expect(player != NULL, 1)) {
                         bool nearby = WORLD->area != NULL && (WORLD->area->flags & 1);
-                        if (!nearby) {
+                        if (__builtin_expect(!nearby, 1)) {
                             NUVEC delta;
                             delta.x = reference->m30 - player->apiobj.collision_position.x;
                             delta.y = reference->m31 - player->apiobj.collision_position.y;
                             delta.z = reference->m32 - player->apiobj.collision_position.z;
                             nearby = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z < 9.0f &&
                                      player->apiobj.model_draw_result != 0;
-                            if (__builtin_expect(!nearby && player2 != NULL, 0)) {
+                            if (!nearby && player2 != NULL) {
                                 delta.x = reference->m30 - player2->apiobj.collision_position.x;
                                 delta.y = reference->m31 - player2->apiobj.collision_position.y;
                                 delta.z = reference->m32 - player2->apiobj.collision_position.z;
@@ -343,10 +342,10 @@ static void GizTurrets_Update(void *context, void *system_ptr, float frame_time)
                             }
                         }
                         // These are absolute differences of unsigned angles, not wrapped rotation differences.
-                        if (nearby && (abs(static_cast<i32>(static_cast<u16>(desired_pitch)) -
+                        if (__builtin_expect(nearby && (abs(static_cast<i32>(static_cast<u16>(desired_pitch)) -
                                            static_cast<i32>(static_cast<u16>(turret->pitch))) > 0x400 ||
                                        abs(static_cast<i32>(static_cast<u16>(desired_yaw)) -
-                                           static_cast<i32>(static_cast<u16>(turret->yaw))) > 0x400)) {
+                                           static_cast<i32>(static_cast<u16>(turret->yaw))) > 0x400), 1)) {
                             if (!rotation_sound_playing || IsSfxLooping(turret->field_0x126))
                                 GameAudio_PlaySfxById(turret->field_0x126, reinterpret_cast<NUVEC *>(&reference->m30),
                                                       0, 0);

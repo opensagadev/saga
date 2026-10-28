@@ -899,36 +899,41 @@ extern "C" {
         rigid_instance->rigids = reinterpret_cast<instNUGCUTRIGID_s *>(buf->void_ptr);
         buf->void_ptr = rigid_instance->rigids + rigid_system->count;
         memset(rigid_instance->rigids, 0, rigid_system->count * sizeof(instNUGCUTRIGID_s));
-        for (u32 i = 0; i < rigid_system->count; ++i) {
+        for (i32 i = 0; i < rigid_system->count; ++i) {
             NUGCUTRIGID_s *rigid = &rigid_system->rigids[i];
             instNUGCUTRIGID_s *inst_rigid = &rigid_instance->rigids[i];
-            if (scene == NULL || scene == rigid->scene) {
-                inst_rigid->scene = scene == NULL ? rigid->scene : scene;
-                if (inst_rigid->scene != NULL && inst_rigid->scene->display_list != NULL) {
-                    inst_rigid->special = NULL;
-                    inst_rigid->display_special = rigid->special_object;
-                } else {
-                    inst_rigid->special = rigid->special_object;
-                    inst_rigid->display_special = NULL;
-                }
-            } else if (rigid->special_object != NULL) {
+            if (scene == NULL) {
+                inst_rigid->scene = rigid->scene;
+            } else if (scene == rigid->scene) {
                 inst_rigid->scene = scene;
-                if (scene->display_list == NULL) {
-                    const usize offset = (reinterpret_cast<usize>(rigid->special_object) -
-                                          reinterpret_cast<usize>(rigid->scene->specials)) &
-                                         ~static_cast<usize>(3);
-                    inst_rigid->special = reinterpret_cast<u8 *>(scene->specials) + offset;
-                    inst_rigid->display_special = NULL;
-                } else {
-                    const usize offset = (reinterpret_cast<usize>(rigid->special_object) -
-                                          reinterpret_cast<usize>(rigid->scene->display_list->specials)) &
-                                         ~static_cast<usize>(0xf);
-                    inst_rigid->special = NULL;
-                    inst_rigid->display_special = reinterpret_cast<u8 *>(scene->display_list->specials) + offset;
+            } else {
+                if (rigid->special_object != NULL) {
+                    inst_rigid->scene = scene;
+                    if (scene->display_list == NULL) {
+                        const usize offset = (reinterpret_cast<usize>(rigid->special_object) -
+                                              reinterpret_cast<usize>(rigid->scene->specials)) &
+                                             ~static_cast<usize>(3);
+                        inst_rigid->special = reinterpret_cast<u8 *>(scene->specials) + offset;
+                        inst_rigid->display_special = NULL;
+                    } else {
+                        const usize offset = (reinterpret_cast<usize>(rigid->special_object) -
+                                              reinterpret_cast<usize>(rigid->scene->display_list->specials)) &
+                                             ~static_cast<usize>(0xf);
+                        inst_rigid->special = NULL;
+                        inst_rigid->display_special = reinterpret_cast<u8 *>(scene->display_list->specials) + offset;
+                    }
+                    if ((rigid->flags & 2) != 0) {
+                        inst_rigid->visible = rigid->flags & 1;
+                    }
                 }
-                if ((rigid->flags & 2) != 0) {
-                    inst_rigid->visible = rigid->flags & 1;
-                }
+                continue;
+            }
+            if (inst_rigid->scene != NULL && inst_rigid->scene->display_list != NULL) {
+                inst_rigid->special = NULL;
+                inst_rigid->display_special = rigid->special_object;
+            } else {
+                inst_rigid->special = rigid->special_object;
+                inst_rigid->display_special = NULL;
             }
         }
         return rigid_instance;
@@ -946,8 +951,8 @@ extern "C" {
         buf->void_ptr = character_instance->characters + character_system->character_count;
         memset(character_instance->characters, 0, character_system->character_count * sizeof(instNUGCUTCHAR_s));
         for (i32 i = 0; i < character_system->character_count; ++i) {
-            instNUGCUTCHAR_s *inst_character = &character_instance->characters[i];
             NUGCUTCHAR_s *character = &character_system->characters[i];
+            instNUGCUTCHAR_s *inst_character = &character_instance->characters[i];
             inst_character->field_16 = 0xff;
             inst_character->field_15 = 0xff;
             if ((character->flags & 2) != 0) {
@@ -974,27 +979,28 @@ extern "C" {
         memset(locator_instance->locators, 0, locator_system->locator_count * sizeof(instNUGCUTLOCATOR_s));
         for (i32 i = 0; i < locator_system->locator_count; ++i) {
             NUGCUTLOCATOR_s *locator = &locator_system->locators[i];
+            instNUGCUTLOCATOR_s *inst = &locator_instance->locators[i];
             NUGCUTLOCATORTYPE_s *type = &locator_system->types[locator->type_index];
             if ((type->flags & 1) != 0) {
                 if ((locator->flags & 0x20) != 0) {
-                    locator_instance->locators[i].effect_handle = -1;
+                    inst->effect_handle = -1;
                 }
             } else if ((type->flags & 2) != 0) {
             } else if ((type->flags & 0x10) != 0) {
-                locator_instance->locators[i].effect_handle = -1;
+                inst->effect_handle = -1;
             } else if ((type->flags & 8) != 0) {
                 buf->addr = ALIGN(buf->addr, 4);
                 void *effect = buf->void_ptr;
-                locator_instance->locators[i].effect_handle = static_cast<i32>(reinterpret_cast<usize>(effect));
+                inst->effect_handle = static_cast<i32>(reinterpret_cast<usize>(effect));
                 buf->addr += 0x18;
                 memset(effect, 0, 0x18);
                 if (locator->field_5b != 0) {
-                    *reinterpret_cast<NUGCUTLOCATOR_s **>(static_cast<u8 *>(effect) + 0x14) = locator;
+                    *reinterpret_cast<NUGCUTLOCATOR_s **>(reinterpret_cast<u8 *>(inst->effect_handle) + 0x14) = locator;
                 }
             } else if ((type->flags & 4) != 0) {
                 buf->addr = ALIGN(buf->addr, 0x10);
                 void *effect = buf->void_ptr;
-                locator_instance->locators[i].effect_handle = static_cast<i32>(reinterpret_cast<usize>(effect));
+                inst->effect_handle = static_cast<i32>(reinterpret_cast<usize>(effect));
                 buf->addr += 0x10;
                 memset(effect, 0, 0x10);
             }
@@ -1017,16 +1023,14 @@ extern "C" {
         instance->alpha = 1.0f;
         instance->field_c4 = scene;
         instance->field_c8 = extra;
-        if (cutscene->version > 1) {
-            const u8 cutscene_flags = static_cast<u8>(cutscene->flags);
-            if ((cutscene_flags & 1) != 0) {
-                instance->stream_buffer_1 = cutscene->stream_buffer_1;
-                instance->stream_buffer_0 = cutscene->stream_buffer_0;
-                instance->pending_stream_buffer = cutscene->stream_buffer_1;
-                instance->flags_8b &= ~0x10U;
-            }
-            instance->flags_8b = (instance->flags_8b & ~0x20U) | ((cutscene_flags & 9) != 0 ? 0x20 : 0);
+        if (cutscene->version > 1 && (cutscene->flags & 1) != 0) {
+            instance->stream_buffer_1 = cutscene->stream_buffer_1;
+            instance->stream_buffer_0 = cutscene->stream_buffer_0;
+            instance->pending_stream_buffer = cutscene->stream_buffer_1;
+            instance->flags_8b &= ~0x10U;
         }
+        const bool swap = cutscene->version > 1 && __builtin_expect((cutscene->flags & 9) != 0, 1);
+        instance->flags_8b = (instance->flags_8b & ~0x20U) | (swap ? 0x20 : 0);
         instance->cutscene = cutscene;
         instance->cutscene_copy = cutscene;
         if (name != NULL) {
@@ -1051,13 +1055,14 @@ extern "C" {
 
         if (cutscene->trigger_system != NULL && extra != NULL) {
             const usize state_size = static_cast<usize>(cutscene->trigger_system->event_count) * sizeof(u32);
-            buf->addr = ALIGN(buf->addr, 0x10);
-            instance->trigger_instance = reinterpret_cast<instNUGCUTTRIGGERSYS_s *>(buf->void_ptr);
-            buf->void_ptr = instance->trigger_instance + 1;
-            instance->trigger_instance->owner = extra;
-            instance->trigger_instance->event_states = reinterpret_cast<u32 *>(buf->void_ptr);
+            instNUGCUTTRIGGERSYS_s *trigger = reinterpret_cast<instNUGCUTTRIGGERSYS_s *>(ALIGN(buf->addr, 0x10));
+            buf->void_ptr = trigger + 1;
+            memset(trigger, 0, sizeof(*trigger));
+            trigger->owner = extra;
+            trigger->event_states = reinterpret_cast<u32 *>(buf->void_ptr);
             buf->addr += state_size;
-            memset(instance->trigger_instance->event_states, 0, state_size);
+            memset(trigger->event_states, 0, state_size);
+            instance->trigger_instance = trigger;
         }
 
         NUVEC *bounds = static_cast<NUVEC *>(instance->cutscene->bounds);
@@ -1073,7 +1078,7 @@ extern "C" {
         instance->rate = 1.0f;
 
         (*NuThreadDisableThreadSwap)();
-        if (__builtin_expect(flags != 0, 0)) {
+        if (__builtin_expect(flags != 0, 1)) {
             instance->next = background_cutscene_instances;
             if (background_cutscene_instances != NULL) {
                 background_cutscene_instances->previous = instance;

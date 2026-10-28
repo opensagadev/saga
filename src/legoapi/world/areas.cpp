@@ -622,7 +622,7 @@ void Area_Configure(i32 area, i32 param, EXTRAMODEL *models, i16 *s) {
         }
         APICHARACTERMODELLIST_s *player_models = reinterpret_cast<APICHARACTERMODELLIST_s *>(Area_PlayerModelList);
         for (i32 index = 0; index < count; ++index) {
-            if (Area_MissionModelCount < 0x30)
+            if (__builtin_expect(Area_MissionModelCount < 0x30, 0))
                 Area_MissionModelList[Area_MissionModelCount++] = {mission_characters[index], 1};
             if (Area_PlayerModelCount < 8)
                 player_models[Area_PlayerModelCount++] = {mission_characters[index], 1};
@@ -706,13 +706,13 @@ void Area_Configure(i32 area, i32 param, EXTRAMODEL *models, i16 *s) {
                             }
                         }
                     }
-                    if (counter->pickups[counter->pickup_count].level_index != -1)
+                    if (__builtin_expect(counter->pickups[counter->pickup_count].level_index != -1, 0))
                         ++counter->pickup_count;
                 } else if (NuStrICmp(fp->word_buf, "colour") == 0) {
                     counter->red = static_cast<u8>(NuFParGetInt(fp));
                     counter->green = static_cast<u8>(NuFParGetInt(fp));
                     counter->blue = static_cast<u8>(NuFParGetInt(fp));
-                } else if (NuStrICmp(fp->word_buf, "all_together") == 0) {
+                } else if (__builtin_expect(NuStrICmp(fp->word_buf, "all_together") == 0, 1)) {
                     counter->processed_flags |= 1;
                 }
             } else {
@@ -784,7 +784,7 @@ void Area_Configure(i32 area, i32 param, EXTRAMODEL *models, i16 *s) {
                     if (NuFParGetWord(fp) == 0)
                         continue;
                     Level_FindByName(fp->word_buf, &level_index);
-                    if (level_index == -1 || LDataList[level_index].area_index != area)
+                    if (__builtin_expect(level_index == -1 || LDataList[level_index].area_index != area, 1))
                         continue;
                     LevelLoad[LevelLoadCount].first_level = static_cast<i16>(level_index);
                     LevelLoad[LevelLoadCount].second_level = -1;

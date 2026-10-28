@@ -207,7 +207,7 @@ void UpdateExplosion_Generic(EXPLOSION *explosion) {
                     source = Player[1];
             }
             u16 hit_flags;
-            if ((explosion->field_0x24 & 0x200) != 0)
+            if (__builtin_expect((explosion->field_0x24 & 0x200) != 0, 0))
                 hit_flags = explosion->field_0x2e | 0x4200;
             else
                 hit_flags = explosion->field_0x2e | 0x200;

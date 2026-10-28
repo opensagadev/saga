@@ -444,7 +444,7 @@ giz_freeplay:
                             1)) {
                         if ((MiniCutCam == 0) && (CutSceneWaiting == 0)) {
                             if (GameMenu[GameMenuLevel].menu == -1) {
-                                if (Paused == 0) {
+                                if (__builtin_expect(Paused == 0, 0)) {
                                     if ((Player[0] != NULL) && Player[0]->apiobj.player_controlled) {
                                         pausePlayer = Player[0];
                                     } else if ((Player[1] != NULL) && Player[1]->apiobj.player_controlled) {

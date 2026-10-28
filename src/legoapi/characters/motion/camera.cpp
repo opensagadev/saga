@@ -654,7 +654,7 @@ mode_selected:
                                 is_player = true;
                             if (Player[6] != NULL && Player[6] == walker)
                                 is_player = true;
-                            if (Player[7] != NULL && Player[7] == walker)
+                            if (__builtin_expect(Player[7] != NULL && Player[7] == walker, 1))
                                 is_player = true;
                             landspeeder_lookahead = is_player ? 4.0f : 2.0f;
                             f32 distance = NuFsqrt(walker_distance_sq);
@@ -1207,14 +1207,14 @@ mode_selected:
         for (i32 i = 0; i < 2; i++) {
             GameObject_s *object = Player[i];
             if (object != NULL && static_cast<i8>(object->apiobj.flags_low) < 0) {
-                if (WORLD->current_level == DEATHSTARBATTLED_LDATA &&
-                    ObjInNarrowSock(object, WORLD->sock_sys, WORLD->level_idx)) {
+                if (__builtin_expect(WORLD->current_level == DEATHSTARBATTLED_LDATA &&
+                    ObjInNarrowSock(object, WORLD->sock_sys, WORLD->level_idx), 0)) {
                     camera_shake = 0.6f;
                     break;
                 }
                 object = Player[i];
-                if (object->camera_shake_strength > 0.0f && WORLD->area != NULL &&
-                    (WORLD->area == PODRACE_ADATA || WORLD->area == PODSPRINT_ADATA)) {
+                if (__builtin_expect(object->camera_shake_strength > 0.0f && WORLD->area != NULL &&
+                    (WORLD->area == PODRACE_ADATA || WORLD->area == PODSPRINT_ADATA), 0)) {
                     camera_shake = object->camera_shake_strength * 2.0f;
                     break;
                 }
@@ -1261,7 +1261,7 @@ mode_selected:
                         changed = true;
                     }
                 }
-                if (!changed && object->field_0xef0 < 0.3f) {
+                if (__builtin_expect(!changed && object->field_0xef0 < 0.3f, 0)) {
                     object->field_0xef0 += FRAMETIME;
                     if (!(object->field_0xef0 < 0.3f)) {
                         object->field_0xef0 = 0.3f;

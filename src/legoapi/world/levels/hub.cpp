@@ -3115,7 +3115,7 @@ void Hub_DrawPanel(WORLDINFO_s *) {
                 red_count += EpRedBrickCount;
                 red_total += EpRedBrickTotal;
             }
-            if (i == 0)
+            if (__builtin_expect(i == 0, 0))
                 both_true_jedi_bricks = BOTHTRUEJEDIGOLDBRICKS;
             stats_xscale = 0.8f;
             if (both_true_jedi_bricks) {
@@ -3173,7 +3173,7 @@ void Hub_DrawPanel(WORLDINFO_s *) {
                         if (save->area_complete)
                             ++gold_count;
                     }
-                } else if (!(area->flags & 4) && !(area->flags & 0x800)) {
+                } else if (__builtin_expect(!(area->flags & 4) && !(area->flags & 0x800), 0)) {
                     ++gold_total;
                     if (save->area_complete)
                         ++gold_count;
@@ -3187,7 +3187,7 @@ void Hub_DrawPanel(WORLDINFO_s *) {
                     }
                 }
             }
-            if (__builtin_expect(buildup_total, 0)) {
+            if (buildup_total) {
                 Hub_DrawImportantBrick(211, -0.20100002f, HUB_EPISODETITLEY, hub_episode_time, gold_count, gold_total);
                 DrawBuildUpBar(0.20100002f, HUB_EPISODETITLEY + PANEL_MINIKITY - PANEL_MINIKITCOUNTY, 100, 100,
                                NU_SIN_LUT(static_cast<i32>(16384.0f * hub_episode_time)), 1.0f, 1.0f, 0);
@@ -3197,7 +3197,7 @@ void Hub_DrawPanel(WORLDINFO_s *) {
                          static_cast<u8>(static_cast<i32>(128.0f * hub_episode_time)));
             } else {
                 f32 x = 0.0f;
-                if (Game.indy_unlocked) {
+                if (__builtin_expect(Game.indy_unlocked != 0, 1)) {
                     Hub_DrawImportantBrick(251, 0.1f, HUB_EPISODETITLEY - 0.225f, hub_episode_time, -1, -1);
                     x = -0.1f;
                 }
@@ -4170,7 +4170,7 @@ void Hub_Update(WORLDINFO_s *world) {
             for (i32 pack = 0; pack < 11; ++pack) {
                 if (Store_IsPackUnlocked(pack) == 0 && StorePack[pack].id != NULL) {
                     const i32 id = *StorePack[pack].id;
-                    if (id != -1) {
+                    if (__builtin_expect(id != -1, 1)) {
                         ++required;
                         if (APICharacterLoaded(id) != NULL) {
                             ++loaded;
@@ -4450,10 +4450,10 @@ void Hub_Update(WORLDINFO_s *world) {
     if (GameCam->sock_position.location.sock == 0) {
         NuSpecialSetVisibility(&LevHSpecial[16], Store_IsPackUnlocked(6));
     } else if (GameCam->sock_position.location.sock == 7) {
-        if (NuSpecialExistsFn(&LevHSpecial[6]) != 0) {
+        if (__builtin_expect(NuSpecialExistsFn(&LevHSpecial[6]) != 0, 0)) {
             NuSpecialSetVisibility(&LevHSpecial[6], missions_available == 0);
         }
-        if (NuSpecialExistsFn(&LevHSpecial[7]) != 0) {
+        if (__builtin_expect(NuSpecialExistsFn(&LevHSpecial[7]) != 0, 0)) {
             NuSpecialSetVisibility(&LevHSpecial[7], missions_available != 0);
         }
     }
@@ -4553,7 +4553,7 @@ void Hub_Update(WORLDINFO_s *world) {
         }
     }
     if (LevLock[4] != 0) {
-        if (minikit_candidate == -1) {
+        if (__builtin_expect(minikit_candidate == -1, 0)) {
             LevLock[4] = 0;
         }
     } else if (LevTime[4] > 0.0f) {
@@ -4595,7 +4595,7 @@ void Hub_Update(WORLDINFO_s *world) {
                 target = 1.0f;
             }
             hub_minikitarea_time = SeekLinearF(hub_minikitarea_time, target, FRAMETIME * 2.0f);
-            if (__builtin_expect(hub_minikitarea_opentime >= 1.0f, 0)) {
+            if (__builtin_expect(hub_minikitarea_opentime >= 1.0f, 1)) {
                 MakeMenuPacket();
                 Hint_CancelCurrent();
                 NewMenu(14, -1, -1);

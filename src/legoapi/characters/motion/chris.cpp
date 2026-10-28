@@ -789,7 +789,7 @@ static i32 ProcessStarFighter(starfighter_s *fighter, quickboltinfo *info) {
     if (__builtin_expect(Player[0] != NULL && Player[0]->sock_position.distance > 435.0f, 0))
         MissileDist = 2.0f;
     if (fighter->hit_count != 0) {
-        if (fighter->spline != NULL && static_cast<u32>(fighter->spline->id - 84) < 2)
+        if (__builtin_expect(fighter->spline != NULL && static_cast<u32>(fighter->spline->id - 84) < 2, 1))
             fighter->health = 0;
         else
             --fighter->health;
@@ -798,13 +798,13 @@ static i32 ProcessStarFighter(starfighter_s *fighter, quickboltinfo *info) {
             NUVEC_ALIGNED16 impulse;
             fighter->death_timer =
                 (fighter->spline != NULL && static_cast<u32>(fighter->spline->id - 84) < 2) ? 1.0f : 2.0f;
-            if (fighter->parent == NULL) {
-                impulse = v010;
-            } else {
+            if (!(fighter->parent == NULL)) {
                 impulse.x = fighter->matrix.m30 - fighter->parent->matrix.m30;
                 impulse.y = fighter->matrix.m31 - fighter->parent->matrix.m31;
                 impulse.z = fighter->matrix.m32 - fighter->parent->matrix.m32;
                 fighter->parent->target = *reinterpret_cast<NUVEC4 *>(&fighter->matrix.m30);
+            } else {
+                impulse = v010;
             }
             const f32 magnitude = NuVecMag(&impulse);
             if (magnitude != 0.0f) {
@@ -965,7 +965,7 @@ static i32 ProcessStarFighter(starfighter_s *fighter, quickboltinfo *info) {
         } else {
             starfighter_s *target = space->queued_fighters;
             fighter->target_id = -1;
-            while (target->active == 0 || target->object_id != target_id) {
+            while (__builtin_expect(target->active == 0 || target->object_id != target_id, 1)) {
                 if (__builtin_expect(++target == space->queued_fighters + 96, 0))
                     return 1;
             }
@@ -1106,7 +1106,7 @@ fire: {
             goto found;
     }
     for (slot = info->bolts; slot < bolt; ++slot) {
-        if (slot->duration == 0.0f)
+        if (__builtin_expect(slot->duration == 0.0f, 1))
             goto found;
     }
     fighter->fired = 1;

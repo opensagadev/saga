@@ -227,71 +227,45 @@ char *I64ToX(char *output, i64 value) {
     return output + 16;
 }
 
-i64 XToI64(char *input) {
-    char digit = input[0];
+static i32 HexDigitValue(char digit) {
     i32 decimal = digit - '0';
     i32 letter = digit - 'W';
-    i64 result = digit >= ':' ? letter : decimal;
-    digit = input[1];
-    decimal = digit - '0';
-    letter = digit - 'W';
-    result = (result << 4) | (digit >= ':' ? letter : decimal);
-    digit = input[2];
-    decimal = digit - '0';
-    letter = digit - 'W';
-    result = (result << 4) | (digit >= ':' ? letter : decimal);
-    digit = input[3];
-    decimal = digit - '0';
-    letter = digit - 'W';
-    result = (result << 4) | (digit >= ':' ? letter : decimal);
-    digit = input[4];
-    decimal = digit - '0';
-    letter = digit - 'W';
-    result = (result << 4) | (digit >= ':' ? letter : decimal);
-    digit = input[5];
-    decimal = digit - '0';
-    letter = digit - 'W';
-    result = (result << 4) | (digit >= ':' ? letter : decimal);
-    digit = input[6];
-    decimal = digit - '0';
-    letter = digit - 'W';
-    result = (result << 4) | (digit >= ':' ? letter : decimal);
-    digit = input[7];
-    decimal = digit - '0';
-    letter = digit - 'W';
-    result = (result << 4) | (digit >= ':' ? letter : decimal);
-    digit = input[8];
-    decimal = digit - '0';
-    letter = digit - 'W';
-    result = (result << 4) | (digit >= ':' ? letter : decimal);
-    digit = input[9];
-    decimal = digit - '0';
-    letter = digit - 'W';
-    result = (result << 4) | (digit >= ':' ? letter : decimal);
-    digit = input[10];
-    decimal = digit - '0';
-    letter = digit - 'W';
-    result = (result << 4) | (digit >= ':' ? letter : decimal);
-    digit = input[11];
-    decimal = digit - '0';
-    letter = digit - 'W';
-    result = (result << 4) | (digit >= ':' ? letter : decimal);
-    digit = input[12];
-    decimal = digit - '0';
-    letter = digit - 'W';
-    result = (result << 4) | (digit >= ':' ? letter : decimal);
-    digit = input[13];
-    decimal = digit - '0';
-    letter = digit - 'W';
-    result = (result << 4) | (digit >= ':' ? letter : decimal);
-    digit = input[14];
-    decimal = digit - '0';
-    letter = digit - 'W';
-    result = (result << 4) | (digit >= ':' ? letter : decimal);
-    digit = input[15];
-    decimal = digit - '0';
-    letter = digit - 'W';
-    result = (result << 4) | (digit >= ':' ? letter : decimal);
+    return digit >= ':' ? letter : decimal;
+}
+
+i64 XToI64(char *input) {
+    i64 result = 0;
+    result |= HexDigitValue(input[0]);
+    result <<= 4;
+    result |= HexDigitValue(input[1]);
+    result <<= 4;
+    result |= HexDigitValue(input[2]);
+    result <<= 4;
+    result |= HexDigitValue(input[3]);
+    result <<= 4;
+    result |= HexDigitValue(input[4]);
+    result <<= 4;
+    result |= HexDigitValue(input[5]);
+    result <<= 4;
+    result |= HexDigitValue(input[6]);
+    result <<= 4;
+    result |= HexDigitValue(input[7]);
+    result <<= 4;
+    result |= HexDigitValue(input[8]);
+    result <<= 4;
+    result |= HexDigitValue(input[9]);
+    result <<= 4;
+    result |= HexDigitValue(input[10]);
+    result <<= 4;
+    result |= HexDigitValue(input[11]);
+    result <<= 4;
+    result |= HexDigitValue(input[12]);
+    result <<= 4;
+    result |= HexDigitValue(input[13]);
+    result <<= 4;
+    result |= HexDigitValue(input[14]);
+    result <<= 4;
+    result |= HexDigitValue(input[15]);
     return result;
 }
 
@@ -1575,13 +1549,12 @@ void EvaluateSplineXZIntersection(nugspline_s *first, i32 first_looping, SPLINEP
 }
 
 i32 OutSideSplineArea(nuvec_s *position, nugspline_s *spline, nuvec_s *edge_end, nuvec_s *edge_start, i32 inside) {
-    if (__builtin_expect(spline == NULL || position == NULL, 0))
+    if (spline == NULL || position == NULL)
         return 0;
-    NUVEC ray_start = {position->x, -position->z, position->y};
-    NUVEC ray_end;
-    ray_end.x = position->x;
-    ray_end.y = 100000.0f;
-    ray_end.z = position->y;
+    NUVEC ray_end = {position->x, 100000.0f, position->y};
+    NUVEC ray_start = ray_end;
+    ray_start.y = -position->z;
+    ray_start.z = position->y;
     NUVEC end = spline->pts[0];
     f32 end_y = end.y;
     end.y = -end.z;
@@ -1595,39 +1568,54 @@ i32 OutSideSplineArea(nuvec_s *position, nugspline_s *spline, nuvec_s *edge_end,
         end.z = end_y;
         intersections += LineIntersectXY(&ray_start, &ray_end, &start, &end, NULL, NULL);
     }
-    if ((intersections & 1) != 0 ? inside == 0 : inside != 0)
+    i32 odd = intersections & 1;
+    if (!((odd == 0 && inside == 0) || (odd != 0 && inside != 0)))
         return 0;
     i32 closest_index = 0;
     NUVEC closest = spline->pts[0];
     f32 best = 1000000000.0f;
     for (i32 i = 0; i < spline->length - 1; ++i) {
-        f32 dx = spline->pts[i].x - position->x;
-        f32 dz = spline->pts[i].z - position->z;
+        NUVEC point = spline->pts[i];
+        f32 dx = point.x - position->x;
+        f32 dz = point.z - position->z;
         f32 distance = dx * dx + dz * dz;
-        if (__builtin_expect(distance < best, 1))
+        if (distance < best) {
             closest_index = i;
-        closest.x = distance < best ? spline->pts[i].x : closest.x;
-        closest.y = distance < best ? spline->pts[i].y : closest.y;
-        closest.z = distance < best ? spline->pts[i].z : closest.z;
-        best = distance < best ? distance : best;
+            closest = point;
+            best = distance;
+        }
     }
-    i32 previous = closest_index == 0 ? spline->length - 2 : closest_index - 1;
-    i32 next = closest_index == spline->length - 2 ? 0 : closest_index + 1;
-    f32 bx = spline->pts[previous].x - position->x;
-    f32 ax = spline->pts[next].x - position->x;
-    f32 az = spline->pts[next].z - position->z;
-    f32 bz = spline->pts[previous].z - position->z;
-    if (bx * bx + bz * bz > ax * ax + az * az) {
-        if (edge_end != NULL)
-            *edge_end = spline->pts[next];
-        if (edge_start != NULL)
-            *edge_start = closest;
+    i32 previous;
+    i32 next;
+    if (closest_index == 0) {
+        previous = spline->length - 2;
+        next = 1;
+    } else if (closest_index == spline->length - 2) {
+        previous = closest_index - 1;
+        next = 0;
     } else {
-        if (edge_end != NULL)
-            *edge_end = closest;
-        if (edge_start != NULL)
-            *edge_start = spline->pts[previous];
+        previous = closest_index - 1;
+        next = closest_index + 1;
     }
+    NUVEC next_pt = spline->pts[next];
+    NUVEC prev_pt = spline->pts[previous];
+    f32 ax = next_pt.x - position->x;
+    f32 az = next_pt.z - position->z;
+    f32 bx = prev_pt.x - position->x;
+    f32 bz = prev_pt.z - position->z;
+    NUVEC end_pt;
+    NUVEC start_pt;
+    if (bx * bx + bz * bz > ax * ax + az * az) {
+        end_pt = next_pt;
+        start_pt = closest;
+    } else {
+        end_pt = closest;
+        start_pt = prev_pt;
+    }
+    if (edge_end != NULL)
+        *edge_end = end_pt;
+    if (edge_start != NULL)
+        *edge_start = start_pt;
     return 1;
 }
 

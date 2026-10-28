@@ -1592,7 +1592,7 @@ void UpdatePushBlocks(void *world_ptr, void *, float) {
             if ((p->runtime_flags_0c8 & 3) == 1 && p->pushing_object)
                 GameAudio_PlaySfx(71, &p->pushing_object->apiobj.collision_position,
                                   GameAudio_GetPlrSfxBits(p->pushing_object), 0);
-            if (LEGOHINT_PUSHBLOCKS != -1 && p->pushing_object && (p->pushing_object->apiobj.flags_low & 0x81) == 0x81)
+            if (__builtin_expect(LEGOHINT_PUSHBLOCKS != -1 && p->pushing_object && (p->pushing_object->apiobj.flags_low & 0x81) == 0x81, 1))
                 Hint_SetComplete(LEGOHINT_PUSHBLOCKS);
         }
     }

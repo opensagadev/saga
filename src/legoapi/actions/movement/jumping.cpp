@@ -922,7 +922,7 @@ void JumpCode(GameObject_s *object, i32 jump_pressed, i32 jump_held, u32 animati
                 if (!(object->pad_gamepad->input_magnitude <= 0.0f) && (object->field_0xe22 & 0x20) != 0 &&
                     abs(RotDiff(object->apiobj.movement_facing_angle, object->current_input_angle)) > 0x6aaa)
                     force_flip = 1;
-            } else if (object->action_movement_state == 2) {
+            } else if (__builtin_expect(object->action_movement_state == 2, 0)) {
                 if (!(object->pad_gamepad->input_magnitude <= 0.0f) && (object->field_0xe22 & 0x20) != 0 &&
                     abs(RotDiff(object->apiobj.movement_facing_angle, object->current_input_angle)) < 0x1555)
                     force_flip = 1;
@@ -930,7 +930,30 @@ void JumpCode(GameObject_s *object, i32 jump_pressed, i32 jump_held, u32 animati
         }
         {
             if (object->action_movement_state != 3) {
-                if (object->action_movement_state != 4) {
+                if (!(object->action_movement_state != 4)) {
+                    if (LEGOCONTEXT_LAND_SLAM != -1 && LEGOACT_SLAMLAND != -1 &&
+                        object->apiobj.character_model->model_data_b[LEGOACT_SLAMLAND] != NULL) {
+                        GameCam_Judder(GameCam, 0.5f, 0, &object->apiobj.collision_position);
+                        NewRumble(object->pad_gamepad->pad, 0.75f, 0);
+                        object->slam_debris_effect = hit_effect;
+                        if (Slam_GetDebrisFn != NULL)
+                            object->slam_debris_effect = Slam_GetDebrisFn(object, hit_effect);
+                        object->character_context = LEGOCONTEXT_LAND_SLAM;
+                        object->context_animation = LEGOACT_SLAMLAND;
+                        const f32 duration = AnimDuration(object->id, LEGOACT_SLAMLAND, 0.0f, 0.0f, 1);
+                        object->context_animation_timer = duration <= 0.0f ? 0.75f : duration;
+                        object->jump_reentry_timer = 0.0f;
+                        if (!restart_jump) {
+                            ResetAnimPacket(&object->apiobj.anim_packet, -1);
+                            ResetMiniAnimPacket(&object->mini_animation, -1);
+                        }
+                        PlayLandSfx(object, 2, 0);
+                    } else {
+                        object->character_context = -1;
+                        object->jump_reentry_timer = 0.2f;
+                        PlayLandSfx(object, 0, 0);
+                    }
+                } else {
                     if (__builtin_expect(object->action_movement_state == 2 && LEGOCONTEXT_LAND_COMBOJUMP != -1 &&
                                              LEGOACT_COMBOLAND != -1 &&
                                              object->apiobj.character_model->model_data_b[LEGOACT_COMBOLAND] != NULL,
@@ -1060,29 +1083,6 @@ void JumpCode(GameObject_s *object, i32 jump_pressed, i32 jump_held, u32 animati
                             if (object->action_movement_state == 5)
                                 object->jump_chain_timer = 0.0f;
                         }
-                        PlayLandSfx(object, 0, 0);
-                    }
-                } else {
-                    if (LEGOCONTEXT_LAND_SLAM != -1 && LEGOACT_SLAMLAND != -1 &&
-                        object->apiobj.character_model->model_data_b[LEGOACT_SLAMLAND] != NULL) {
-                        GameCam_Judder(GameCam, 0.5f, 0, &object->apiobj.collision_position);
-                        NewRumble(object->pad_gamepad->pad, 0.75f, 0);
-                        object->slam_debris_effect = hit_effect;
-                        if (Slam_GetDebrisFn != NULL)
-                            object->slam_debris_effect = Slam_GetDebrisFn(object, hit_effect);
-                        object->character_context = LEGOCONTEXT_LAND_SLAM;
-                        object->context_animation = LEGOACT_SLAMLAND;
-                        const f32 duration = AnimDuration(object->id, LEGOACT_SLAMLAND, 0.0f, 0.0f, 1);
-                        object->context_animation_timer = duration <= 0.0f ? 0.75f : duration;
-                        object->jump_reentry_timer = 0.0f;
-                        if (!restart_jump) {
-                            ResetAnimPacket(&object->apiobj.anim_packet, -1);
-                            ResetMiniAnimPacket(&object->mini_animation, -1);
-                        }
-                        PlayLandSfx(object, 2, 0);
-                    } else {
-                        object->character_context = -1;
-                        object->jump_reentry_timer = 0.2f;
                         PlayLandSfx(object, 0, 0);
                     }
                 }

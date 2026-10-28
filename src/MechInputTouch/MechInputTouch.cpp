@@ -703,7 +703,7 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
         if (selected != NULL && !(selected_nonplayer && best != NULL && (flags & 0x1000))) {
             if (flags & 0x800 != 0)
                 selected_distance *= 0.25f;
-            if (best_distance > selected_distance) {
+            if (__builtin_expect(best_distance > selected_distance, 1)) {
                 best = selected->GetMechObjectInterface();
                 best_distance = selected_distance;
             }
