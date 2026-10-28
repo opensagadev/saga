@@ -3575,10 +3575,10 @@ void ConfigureComplexShadow(GameObject_s *object) {
 
 i32 GameDrawCharacterModel(CHARACTERMODEL_s *model, ANIMPACKET_s *animation, NUMTX *matrix, NUMTX *secondary_matrix,
                            NUMTX *reflection_matrix, NUMTX *auxiliary_matrix, GameObject_s *object, u32 flags) {
-    NUMTX special_matrix;
-    NUMTX scaled_matrix;
-    NUMTX scaled_reflection;
-    NUMTX output_matrices[256];
+    NUMTX_ALIGNED32 special_matrix;
+    NUMTX_ALIGNED32 scaled_matrix;
+    NUMTX_ALIGNED32 scaled_reflection;
+    NUMTX_ALIGNED32 output_matrices[256];
     i32 drag_bomb = 0;
     if (object != NULL && object->id == id_DRAGBOMB && Cheat_IsOn(5) && WORLD->lev_objs[0x135].active) {
         ResetShadowMapRendering();
@@ -3590,8 +3590,8 @@ i32 GameDrawCharacterModel(CHARACTERMODEL_s *model, ANIMPACKET_s *animation, NUM
             NuSpecialDrawAt(&WORLD->lev_objs[0x135].special, &special_matrix);
             NuRndrEndReflectionRender();
         }
-        scaled_matrix = *matrix;
         NUVEC scale = {0.5f, 0.5f, 0.5f};
+        scaled_matrix = *matrix;
         NuMtxPreScale(&scaled_matrix, &scale);
         matrix = &scaled_matrix;
         if (reflection_matrix != NULL) {
@@ -3631,25 +3631,25 @@ i32 GameDrawCharacterModel(CHARACTERMODEL_s *model, ANIMPACKET_s *animation, NUM
             for (i32 i = 0; i < 16; ++i) {
                 if (model->points_of_interest[i] != NULL) {
                     auxiliary_matrix[i] = object->apiobj.field_0xb8;
-                    auxiliary_matrix[i].m30 = object->apiobj.position.x;
-                    auxiliary_matrix[i].m31 = object->apiobj.position.y;
-                    auxiliary_matrix[i].m32 = object->apiobj.position.z;
+                    *NUMTX_GET_ROW_VEC(&auxiliary_matrix[i], 3) = object->apiobj.collision_position;
                     auxiliary_matrix[i].m31 -=
                         (object->character_bottom + object->character_top) * object->apiobj.field_0xa8 * 0.5f;
                 }
             }
         }
-    } else if (result != 0 && object != NULL && !object->hide_shadow &&
-               (object->apiobj.character_data->model_flags & 0x10000) == 0) {
+    } else if (result != 0 && (object == NULL ||
+                               (!object->hide_shadow && (object->apiobj.character_data->model_flags & 0x10000) == 0))) {
         draw_shadow = 1;
+    } else {
+        draw_shadow = 0;
     }
     if (g_lowEndLevelBehaviour != 0 && object != NULL && !object->apiobj.player_controlled)
         draw_shadow = 0;
 
     if (draw_shadow) {
         if (object != NULL && secondary_matrix != NULL) {
-            i32 level_alpha = static_cast<u8>(WORLD->current_level->blob_shadow_alpha);
-            if (level_alpha != 0 && object->shadow_opacity > 0.0f && object->surface_normal.y > 0.0f &&
+            if (WORLD->current_level->blob_shadow_alpha != 0 && object->shadow_opacity > 0.0f &&
+                object->surface_normal.y > 0.0f &&
                 (object->apiobj.water_height == -1.0f ||
                  (TerLayer[static_cast<i8>(object->apiobj.field_0x27f)].flags & 1) == 0)) {
                 if (object->id == id_MOUSEDROID && WORLD->lev_objs[0xa2].active) {
@@ -3659,8 +3659,8 @@ i32 GameDrawCharacterModel(CHARACTERMODEL_s *model, ANIMPACKET_s *animation, NUM
                 } else if (__builtin_expect(!!(CHARSHADOWS_ON), 1)) {
                     PLAYERCHARACTERCONFIG_s *config = object->apiobj.character_data->player_config;
                     i32 alpha = config->blob_shadow_alpha;
-                    if (alpha == 0xff)
-                        alpha = level_alpha;
+                    if (config->blob_shadow_alpha == 0xff)
+                        alpha = static_cast<u8>(WORLD->current_level->blob_shadow_alpha);
                     if (alpha > 0) {
                         f32 radius = config->shadow_radius;
                         if (!(radius < 99.0f))

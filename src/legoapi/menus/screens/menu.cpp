@@ -1333,7 +1333,7 @@ void UpdateGameMenu(GAMEPAD_s *pad, i32 a2) {
         both_pads = true;
     } else if (__builtin_expect(menu_id != -1 && WORLD->current_level == TITLES_LDATA, 1)) {
         both_pads = false;
-    } else if (__builtin_expect(menu_id == 0x1e && PlayerProgress[0].active != 0 && PlayerProgress[1].active != 0, 0)) {
+    } else if (menu_id == 0x1e && PlayerProgress[0].active != 0 && PlayerProgress[1].active != 0) {
         both_pads = true;
     } else if (Player[0] != NULL && Player[0]->apiobj.player_controlled && Player[1] != NULL &&
                Player[1]->apiobj.player_controlled) {
@@ -1347,9 +1347,10 @@ void UpdateGameMenu(GAMEPAD_s *pad, i32 a2) {
                 goto no_player;
             }
         } else if (Player[0] != NULL && Player[1] != NULL) {
-            const bool first_active =
-                (Player[0]->apiobj.field_0x1f4 & 0x40000) == 0 && Player[0]->apiobj.player_controlled;
-            if ((Player[1]->apiobj.field_0x1f4 & 0x40000) == 0 && Player[1]->apiobj.player_controlled) {
+            const u8 first_controlled = Player[0]->apiobj.player_controlled;
+            const u8 second_controlled = Player[1]->apiobj.player_controlled;
+            const bool first_active = (Player[0]->apiobj.field_0x1f4 & 0x40000) == 0 && first_controlled;
+            if ((Player[1]->apiobj.field_0x1f4 & 0x40000) == 0 && second_controlled) {
                 if (!first_active)
                     pad = Player[1]->pad_gamepad;
             } else if (__builtin_expect(!first_active, 1)) {
@@ -1370,7 +1371,7 @@ void UpdateGameMenu(GAMEPAD_s *pad, i32 a2) {
     // after the save loader has selected the destination level.
     if (!(FadeSys.fade > 0.0f) && NewMode == 0 && NewLData == NULL && editor_active == 0) {
         u32 held = 0, pressed = 0, alternate_held = 0, alternate_pressed = 0;
-        if (menu_id != 1 || GameTimer.time_elapsed >= 4.0f) {
+        if (menu_id != 1 || !(GameTimer.time_elapsed < 4.0f)) {
             if (both_pads) {
                 held = GamePad[0].unknown_04 | GamePad[1].unknown_04;
                 pressed = GamePad[0].buttons_down_08 | GamePad[1].buttons_down_08;
@@ -1392,7 +1393,7 @@ void UpdateGameMenu(GAMEPAD_s *pad, i32 a2) {
             (previous_item != menu->selected_item || previous_column != menu->selected_item_column) &&
             GetMenuID() == menu_id)
             GameAudio_PlaySfx(0x2f, NULL, 0, 0);
-        if (Paused != 0 && result == 1)
+        if (result == 1 && Paused != 0)
             ResumeGame(1, 1);
     }
     if (previous_menu != -1 && NewLData != NULL && menu_id != 0x1b && gone_through_door_to_new_level == 0)

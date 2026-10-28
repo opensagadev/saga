@@ -193,7 +193,7 @@ void ThingManager::AddThingAfterThis(BaseThing *thing) {
         i32 index = this->field_0x14 + 1;
         this->field_0x14 = index;
         index = index + this->count;
-        if (index < this->max_things) {
+        if (__builtin_expect(index < this->max_things, 1)) {
             this->things[index] = thing;
         }
     }

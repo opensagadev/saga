@@ -1180,7 +1180,7 @@ f32 RatioAlongLineXZ(nuvec_s *point, nuvec_s *start, nuvec_s *end) {
     f32 px = point->x - start->x;
     f32 pz = point->z - start->z;
     f32 along = pz * cosine - px * sine;
-    if (along <= 0.0f)
+    if (__builtin_expect(along <= 0.0f, 0))
         return 0.0f;
     f32 length = dz * cosine - dx * sine;
     if (along >= length)

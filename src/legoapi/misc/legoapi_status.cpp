@@ -1191,10 +1191,10 @@ void DrawStatusScreen(WORLDINFO_s *) {
     memset(KitPart, 0, sizeof(KitPart));
 
     if (GAMEDEMO != 0) {
-        if (GAMEDEMO != 1 || FadeSys.fade != 0.0f)
+        if (GAMEDEMO != 1 || __builtin_expect(FadeSys.fade != 0.0f, 1))
             return;
-        char *exit_text = TTab[tEXIT];
         char *freeplay_text = TTab[tFREEPLAY];
+        char *exit_text = TTab[tEXIT];
         f32 y = -0.75f - 0.5f * MENUDY;
         {
             const i32 option = 0;
@@ -1208,14 +1208,14 @@ void DrawStatusScreen(WORLDINFO_s *) {
                                              static_cast<u32>(MENUFLASH1G) * (1.0f - menu_pulsate));
                     blue = static_cast<i32>(static_cast<u32>(MENUFLASH0B) * menu_pulsate +
                                             static_cast<u32>(MENUFLASH1B) * (1.0f - menu_pulsate));
-                } else if (menu_flash != 0) {
-                    green = MENUFLASH0G;
-                    red = MENUFLASH0R;
-                    blue = MENUFLASH0B;
-                } else {
+                } else if (menu_flash == 0) {
                     blue = MENUFLASH1B;
                     green = MENUFLASH1G;
                     red = MENUFLASH1R;
+                } else {
+                    green = MENUFLASH0G;
+                    red = MENUFLASH0R;
+                    blue = MENUFLASH0B;
                 }
             } else if (menu_pulse > 0.0f) {
                 green = static_cast<i32>(static_cast<u32>(MENUFLASH0G) * menu_pulse +
@@ -1245,14 +1245,14 @@ void DrawStatusScreen(WORLDINFO_s *) {
                                            static_cast<u32>(MENUFLASH1R) * (1.0f - menu_pulsate));
                     blue = static_cast<i32>(static_cast<u32>(MENUFLASH0B) * menu_pulsate +
                                             static_cast<u32>(MENUFLASH1B) * (1.0f - menu_pulsate));
-                } else if (menu_flash != 0) {
-                    red = MENUFLASH0R;
-                    green = MENUFLASH0G;
-                    blue = MENUFLASH0B;
-                } else {
+                } else if (menu_flash == 0) {
                     green = MENUFLASH1G;
                     red = MENUFLASH1R;
                     blue = MENUFLASH1B;
+                } else {
+                    red = MENUFLASH0R;
+                    green = MENUFLASH0G;
+                    blue = MENUFLASH0B;
                 }
             } else if (menu_pulse > 0.0f) {
                 red = static_cast<i32>(static_cast<u32>(MENUFLASH0R) * menu_pulse +
@@ -1271,7 +1271,7 @@ void DrawStatusScreen(WORLDINFO_s *) {
         }
         return;
     }
-    if (!(FadeSys.fade <= 0.0f)) {
+    if (FadeSys.fade > 0.0f) {
         return;
     }
 
@@ -1282,8 +1282,8 @@ void DrawStatusScreen(WORLDINFO_s *) {
             status->draw_background_callback(status);
         }
 
-        i32 stage_index = 1;
-        for (STATUS_STAGE_s *stage = StatusStages; stage->type != -1; stage = StatusStages + stage_index++) {
+        for (i32 i = 0; StatusStages[i].type != -1; i++) {
+            STATUS_STAGE_s *stage = &StatusStages[i];
             if (stage->draw_callback != NULL) {
                 if (stage == status->stage)
                     stage->draw_callback(stage, status, 1);
@@ -1299,7 +1299,7 @@ void DrawStatusScreen(WORLDINFO_s *) {
         } else if (stage->type == 12) {
             alpha = 0.0f;
         } else if (stage->type == 10) {
-            alpha = !(stage->field_0x18 >= 1.0f) ? 1.0f - stage->field_0x18 : 0.0f;
+            alpha = stage->field_0x18 < 1.0f ? 1.0f - stage->field_0x18 : 0.0f;
         } else {
             alpha = 1.0f;
             if (stage->type == 19 && stage->field_0x14 != 0) {
@@ -1319,7 +1319,7 @@ void DrawStatusScreen(WORLDINFO_s *) {
             DrawStatusIcons(status, icon_y, iconalphaoverride >= 0.0f ? iconalphaoverride : alpha);
         }
     } else {
-        char time[256];
+        char time[256] __attribute__((aligned(16)));
         const f32 remaining = MAX(0.0f, 6.0f - GameTimer.time_elapsed);
         Text_MakeTime(remaining, 0, 0, 0, time);
         const f32 y_phase = NuFmod(GameTimer.time_elapsed, 0.5f);

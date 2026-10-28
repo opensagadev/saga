@@ -134,7 +134,9 @@ i32 (*collection_draw_IsValidFn)(COLLECTION_s *, i32);
 void (*Collection_GetSelectingPlayerIDsFn)(i16 *);
 
 static inline void Collection_AddNeighbourFlags(u32 *flags, i32 col, i32 row, i32 sx, i32 sy) {
-    if (sx == -1 || sy == -1)
+    if (sx == -1)
+        return;
+    if (sy == -1)
         return;
     if ((col == sx && (row == sy - 1 || row == sy + 1)) || (row == sy && (col == sx - 1 || col == sx + 1)))
         *flags |= 1;
@@ -664,7 +666,9 @@ void Collection_Draw(COLLECTION_s *collection, float x, float y, float scale, AP
         return;
     f32 dx = base_dx * scale;
     f32 size = base_size * scale;
-    const i32 rows = count % columns != 0 ? count / columns + 1 : count / columns;
+    i32 rows = count / columns;
+    if (count - rows * columns != 0)
+        rows++;
     if (Game_OptionsSave != NULL && Game_OptionsSave->field11_0xb != 0) {
         dx *= 0.75f;
         size *= 0.875f;
@@ -699,11 +703,11 @@ void Collection_Draw(COLLECTION_s *collection, float x, float y, float scale, AP
             const i32 index = row * columns + col;
             if (index >= count)
                 continue;
-            COLLECTID *entry = &collection->list[index];
-            i32 id = entry->id;
-            *reinterpret_cast<f32 *>(reinterpret_cast<u8 *>(entry) + 0x14) = px;
-            *reinterpret_cast<f32 *>(reinterpret_cast<u8 *>(entry) + 0x18) = py;
-            if (__builtin_expect(!(alpha > 0.0f), 0))
+            COLLECTID *list = collection->list;
+            list[index].grid_x = px;
+            list[index].grid_y = py;
+            i32 id = list[index].id;
+            if (__builtin_expect(alpha <= 0.0f, 0))
                 continue;
             i32 frame = LEGOOBJ_ICON_FRAME_NEUTRAL;
             f32 opacity = 1.0f;

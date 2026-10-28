@@ -149,7 +149,7 @@ NuFileDevice *NuFileDevice::GetDeviceByType(NuFileDeviceType type) {
         return sm_DefaultDevice;
     for (i32 i = 0; i < sm_NumDevices; ++i) {
         NuFileDevice *device = sm_Devices[i];
-        if (device && device->device_type == type)
+        if (__builtin_expect(device && device->device_type == type, 0))
             return device;
     }
     return NULL;

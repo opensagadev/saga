@@ -1798,7 +1798,7 @@ static void *Condition_AIOverrideControlInit(AISYS_s *system, char *name, AISCRI
 static f32 Condition_AIOverrideControl(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument) {
     APIOBJECT *object = static_cast<APIOBJECT *>(argument);
     if (object == NULL) {
-        if (packet != NULL)
+        if (__builtin_expect(packet != NULL, 0))
             object = reinterpret_cast<APIOBJECT *>(packet->owner);
     }
     return object != NULL && (object->flags_high & 1) != 0 ? 1.0f : 0.0f;
@@ -1813,7 +1813,7 @@ static void *Condition_IsOnScreenInit(AISYS_s *system, char *name, AISCRIPT_s *)
 static f32 Condition_IsOnScreen(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument) {
     APIOBJECT *object = static_cast<APIOBJECT *>(argument);
     if (object == NULL) {
-        if (packet != NULL)
+        if (__builtin_expect(packet != NULL, 0))
             object = reinterpret_cast<APIOBJECT *>(packet->owner);
     }
     return object != NULL && object->model_draw_result != 0 ? 1.0f : 0.0f;
@@ -2255,7 +2255,7 @@ static f32 Condition_TakeOverTargetInTriggerArea(AISYS *sys, AISCRIPTPROCESS *pr
         GameObject *object = packet->owner->apiobj.objptr;
         if (object != NULL) {
             GameObject *target = object->takeover_target;
-            if (sys->player_1 != NULL && target != NULL) {
+            if (__builtin_expect(sys->player_1 != NULL && target != NULL, 1)) {
                 u64 membership = target->apiobj.ai_area_mask;
                 if (((membership >> (index & 63)) & 1) != 0) {
                     return 1.0f;

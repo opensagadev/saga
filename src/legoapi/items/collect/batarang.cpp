@@ -487,7 +487,7 @@ void Batarangs_Update() {
             continue;
         }
         batarang->flight_time += FRAMETIME;
-        if (batarang->flight_time >= 2.0f && batarang->flight_time > 4.0f)
+        if (__builtin_expect(batarang->flight_time >= 2.0f && batarang->flight_time > 4.0f, 1))
             batarang->flight_time = 4.0f;
 
         while (batarang->targets[batarang->current_target].lost != 0 && batarang->current_target < batarang->active) {

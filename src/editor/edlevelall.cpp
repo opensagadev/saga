@@ -3492,7 +3492,7 @@ LevelEditorScene *LevelEditor::GetEdScene(i32 index) {
 void ClassEditor::cbEdClassSelectClassMenu(eduimenu_s *parent, eduiitem_s *item, u32) {
     eduimenu_s *menu = eduiMenuCreate(item->x + parent->width, item->y, 180, 250,
                                       reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)), cbEdLevelDestroy, NULL);
-    if (menu == NULL)
+    if (__builtin_expect(menu == NULL, 0))
         return;
     EDLEVEL_ADD_ACTIVE_SCENE(menu, 0);
     EDLEVEL_ADD_ACTIVE_SCENE(menu, 1);
@@ -3580,7 +3580,7 @@ void ClassEditor::cbEdFilterLED(eduimenu_s *, eduiitem_s *item, u32) {
 void ClassEditor::cbEdClassFileMenu(eduimenu_s *parent, eduiitem_s *item, u32) {
     eduimenu_s *menu = eduiMenuCreate(item->x + parent->width, item->y, 180, 250,
                                       reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)), cbEdLevelDestroy, NULL);
-    if (menu == NULL)
+    if (__builtin_expect(menu == NULL, 0))
         return;
     EDLEVEL_ADD_ACTIVE_SCENE(menu, 0);
     EDLEVEL_ADD_ACTIVE_SCENE(menu, 1);
@@ -9434,8 +9434,9 @@ i32 EdManipulator::SelectRotator(EdInputContext &input, VuVec &center, VuVec &pl
         VuVec far_point;
         VuVec near_point;
         VuVec normals[3];
-    } hits;
+    } hits __attribute__((aligned(16)));
     VuVec &near_point = hits.near_point;
+    VuVec chosen __attribute__((aligned(16)));
     f32 scale = Scale;
     i32 *selected_axis = reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(this) + 0x0c);
     i32 *start_angle = reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(this) + 0x60);
@@ -9450,10 +9451,9 @@ i32 EdManipulator::SelectRotator(EdInputContext &input, VuVec &center, VuVec &pl
         normals[0] = VuVec(1.0f, 0.0f, 0.0f, -center.x);
         normals[1] = VuVec(0.0f, 1.0f, 0.0f, -center.y);
         normals[2] = VuVec(0.0f, 0.0f, 1.0f, -center.z);
-        i32 axis = 0;
-        VuVec chosen;
-        f32 nearest_distance = __FLT_MAX__;
         i32 angle = 0;
+        i32 axis = 0;
+        f32 nearest_distance = __FLT_MAX__;
         if (LineToSphereIntersection(*reinterpret_cast<VuVec *>(input.reserved_00 + 0x20),
                                      *reinterpret_cast<VuVec *>(input.reserved_00 + 0x30), center, scale + 0.01f,
                                      &far_point, &near_point) != 0) {
@@ -9481,7 +9481,7 @@ i32 EdManipulator::SelectRotator(EdInputContext &input, VuVec &center, VuVec &pl
         f32 distance = NuVecMag(&difference.xyz);                                                                      \
         if (distance < 0.05f && distance < nearest_distance) {                                                         \
             nearest_distance = distance;                                                                               \
-            chosen = point;                                                                                            \
+            *reinterpret_cast<BezierVec4 *>(&chosen) = *reinterpret_cast<BezierVec4 *>(&point);                        \
             axis = candidate;                                                                                          \
         }                                                                                                              \
     }
@@ -9496,17 +9496,17 @@ i32 EdManipulator::SelectRotator(EdInputContext &input, VuVec &center, VuVec &pl
                 switch (axis) {
                     case 1:
                         plane = VuVec(1.0f, 0.0f, 0.0f, 1.0f);
-                        plane.w = -center.x;
+                        plane.w = -reinterpret_cast<f32 *>(&center)[0];
                         angle = NuAtan2DA(y, z);
                         break;
                     case 2:
                         plane = VuVec(0.0f, 1.0f, 0.0f, 1.0f);
-                        plane.w = -center.y;
+                        plane.w = -reinterpret_cast<f32 *>(&center)[1];
                         angle = NuAtan2DA(x, -z);
                         break;
                     case 3:
                         plane = VuVec(0.0f, 0.0f, 1.0f, 1.0f);
-                        plane.w = -center.z;
+                        plane.w = -reinterpret_cast<f32 *>(&center)[2];
                         angle = NuAtan2DA(x, y);
                         break;
                 }
@@ -9514,10 +9514,10 @@ i32 EdManipulator::SelectRotator(EdInputContext &input, VuVec &center, VuVec &pl
         }
         if (input.GetPress(3) != 0.0f) {
             *selected_axis = axis;
-            selected_plane->x = plane.x;
-            selected_plane->y = plane.y;
-            selected_plane->z = plane.z;
-            selected_plane->w = plane.w;
+            selected_plane->x = reinterpret_cast<f32 *>(&plane)[0];
+            selected_plane->y = reinterpret_cast<f32 *>(&plane)[1];
+            selected_plane->z = reinterpret_cast<f32 *>(&plane)[2];
+            selected_plane->w = reinterpret_cast<f32 *>(&plane)[3];
             *start_angle = angle;
             *last_angle = angle;
             *angle_delta = 0;
@@ -9525,10 +9525,10 @@ i32 EdManipulator::SelectRotator(EdInputContext &input, VuVec &center, VuVec &pl
         }
         *selected_axis = 0;
         *start_angle = 0;
+        *reinterpret_cast<BezierVec4Unaligned *>(selected_plane) = (BezierVec4){0.0f, 0.0f, 0.0f, 1.0f};
         *last_angle = 0;
         *angle_delta = 0;
-        *selected_plane = VuVec_Zero;
-        *secondary_plane = VuVec_Zero;
+        *reinterpret_cast<BezierVec4Unaligned *>(secondary_plane) = (BezierVec4){0.0f, 0.0f, 0.0f, 1.0f};
         return axis;
     }
     plane.x = selected_plane->x;
@@ -9536,15 +9536,14 @@ i32 EdManipulator::SelectRotator(EdInputContext &input, VuVec &center, VuVec &pl
     plane.y = selected_plane->y;
     plane.z = selected_plane->z;
     plane.w = selected_plane->w;
-    VuVec intersection;
     if (LineToPlaneIntersecion(*reinterpret_cast<VuVec *>(input.reserved_00 + 0x20),
-                               *reinterpret_cast<VuVec *>(input.reserved_00 + 0x30), plane, &intersection) == 0) {
+                               *reinterpret_cast<VuVec *>(input.reserved_00 + 0x30), plane, &chosen) == 0) {
         *angle_delta = 0;
         return axis;
     }
-    f32 x = intersection.x - center.x;
-    f32 y = intersection.y - center.y;
-    f32 z = intersection.z - center.z;
+    f32 x = chosen.x - center.x;
+    f32 y = chosen.y - center.y;
+    f32 z = chosen.z - center.z;
     i32 angle = 0;
     switch (axis) {
         case 1:

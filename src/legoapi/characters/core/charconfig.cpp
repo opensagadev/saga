@@ -3128,13 +3128,21 @@ void CharConfig_ConfigureAll(i32 permanent, NUFPCOMJMP *game_keywords) {
         NuStrCat(filename, ".txt");
         NuStrCpy(original_path, path);
         if (pak == NULL) {
-            VARIPTR *end = permanent != 0 ? &permbuffer_end : NULL;
-            VARIPTR *arena = permanent != 0 ? &permbuffer_ptr : NULL;
-            if (__builtin_expect(
-                    CharConfig(id, directory, filename, arena, end, permanent != 0, NULL, 0, 1, game_keywords) == 2,
-                    1)) {
+            VARIPTR *arena;
+            VARIPTR *end;
+            i32 perm;
+            if (permanent != 0) {
+                arena = &permbuffer_ptr;
+                end = &permbuffer_end;
+                perm = 1;
+            } else {
+                arena = NULL;
+                end = NULL;
+                perm = 0;
+            }
+            if (CharConfig(id, directory, filename, arena, end, perm, NULL, 0, 1, game_keywords) == 2) {
                 SecondCharConfigure = 1;
-                CharConfig(id, directory, filename, arena, end, permanent != 0, NULL, 0, 0, game_keywords);
+                CharConfig(id, directory, filename, arena, end, perm, NULL, 0, 0, game_keywords);
             }
             continue;
         }
@@ -3143,47 +3151,47 @@ void CharConfig_ConfigureAll(i32 permanent, NUFPCOMJMP *game_keywords) {
         i32 size;
         if (item == 0 || NuFilePakGetItemInfo(pak, item, &address, &size) == 0 || size < 1)
             continue;
-        char *text = static_cast<char *>(address);
-        char saved = text[size];
-        text[size] = 0;
-        i32 length = Text_StripComments(text, ConfigBuffer, 1);
-        text[size] = saved;
-        if (length < 1)
+        i32 end = size;
+        char saved = static_cast<char *>(address)[end];
+        static_cast<char *>(address)[end] = 0;
+        size = Text_StripComments(static_cast<char *>(address), ConfigBuffer, 1);
+        static_cast<char *>(address)[end] = saved;
+        if (size < 1)
             continue;
-        i32 redirected = RedirectTextFile(text, filename);
-        if (__builtin_expect(redirected != 0, 1)) {
+        i32 redirected = RedirectTextFile(static_cast<char *>(address), filename);
+        if (__builtin_expect(redirected != 0, 0)) {
             NuStrCat(filename, ".txt");
             NuStrCpy(path, directory);
             NuStrCat(path, filename);
             item = NuFilePakGetItem(pak, path);
-            if (item == 0 || NuFilePakGetItemInfo(pak, item, &address, &size) == 0) {
-                redirected = 0;
-            } else {
+            if (item != 0 && NuFilePakGetItemInfo(pak, item, &address, &size) != 0) {
                 if (size < 1)
                     continue;
-                text = static_cast<char *>(address);
-                saved = text[size];
-                text[size] = 0;
-                length = Text_StripComments(text, ConfigBuffer, 1);
-                text[size] = saved;
-                if (length < 1)
-                    continue;
+                end = size;
+                saved = static_cast<char *>(address)[end];
+                static_cast<char *>(address)[end] = 0;
+                size = Text_StripComments(static_cast<char *>(address), ConfigBuffer, 1);
+                static_cast<char *>(address)[end] = saved;
+            } else {
+                redirected = 0;
             }
         }
-        CharConfig(id, NULL, NULL, &permbuffer_ptr, &permbuffer_end, 1, ConfigBuffer, length, 0, game_keywords);
+        if (size < 1)
+            continue;
+        CharConfig(id, NULL, NULL, &permbuffer_ptr, &permbuffer_end, 1, ConfigBuffer, size, 0, game_keywords);
         if (redirected == 2) {
             item = NuFilePakGetItem(pak, original_path);
             if (item == 0 || NuFilePakGetItemInfo(pak, item, &address, &size) == 0 || size < 1)
                 continue;
-            text = static_cast<char *>(address);
-            saved = text[size];
-            text[size] = 0;
-            length = Text_StripComments(text, ConfigBuffer, 1);
-            text[size] = saved;
-            if (__builtin_expect(length > 0, 1)) {
-                SecondCharConfigure = 1;
-                CharConfig(id, NULL, NULL, &permbuffer_ptr, &permbuffer_end, 0, ConfigBuffer, length, 0, game_keywords);
-            }
+            end = size;
+            saved = static_cast<char *>(address)[end];
+            static_cast<char *>(address)[end] = 0;
+            size = Text_StripComments(static_cast<char *>(address), ConfigBuffer, 1);
+            static_cast<char *>(address)[end] = saved;
+            if (size < 1)
+                continue;
+            SecondCharConfigure = 1;
+            CharConfig(id, NULL, NULL, &permbuffer_ptr, &permbuffer_end, 0, ConfigBuffer, size, 0, game_keywords);
         }
     }
 }

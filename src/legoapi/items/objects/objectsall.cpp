@@ -4345,7 +4345,7 @@ void edpartDoInput(nupad_s *pad) {
         }
     }
 
-    if (__builtin_expect(edpart_snap_enabled != 0, 1))
+    if (edpart_snap_enabled)
         edcamGetPosAngSnap(&edpart_cam_pos, &edpart_cam_ax, &edpart_cam_ay);
     else
         edcamGetPosAng(&edpart_cam_pos, &edpart_cam_ax, &edpart_cam_ay);
@@ -4390,9 +4390,8 @@ void edpartDoInput(nupad_s *pad) {
                                                                       "Instance Filter"));
                 eduiMenuAddItem(edpart_opt_menu,
                                 eduiItemTextPickCreate(0, edblack, edpartChangeFilterName, "Filter String: "));
-                edui_textpicker_s *filter = static_cast<edui_textpicker_s *>(edui_last_item);
-                strcpy(filter->value, edpart_filter_string);
-                filter->max_length = 15;
+                strcpy(static_cast<edui_textpicker_s *>(edui_last_item)->value, edpart_filter_string);
+                static_cast<edui_textpicker_s *>(edui_last_item)->max_length = 15;
             }
             edpart_active_menu = edpart_opt_menu;
         }
@@ -4413,58 +4412,15 @@ void edpartDoInput(nupad_s *pad) {
         if (pad->digital_buttons_pressed & 0x10) {
             if (edpart_copy_mode)
                 edpartMultipleCopyClear();
-            else if (edpart_nearest != -1) {
-                edpartDestroy(edpart_nearest);
+            else {
+                if (edpart_nearest != -1)
+                    edpartDestroy(edpart_nearest);
                 edpart_nearest = -1;
             }
         }
     }
 
-    if (edpart_copy_mode == 0) {
-        if (edpart_dpad_mode == 1) {
-            if (pad->digital_buttons & 0x200)
-                edpart_roty = edpart_rotz = 0;
-            edpart_roty += pad->analog_left_pad_right - pad->analog_left_pad_left;
-            i32 rotation = edpart_rotz + pad->analog_left_pad_up;
-            if (rotation > 0)
-                rotation = 0;
-            rotation -= pad->analog_left_pad_down;
-            if (rotation < -0x8000)
-                rotation = -0x8000;
-            edpart_rotz = rotation;
-        } else if (edpart_dpad_mode == 0) {
-            if (pad->digital_buttons & 0x200)
-                edpart_emitrotx = edpart_emitroty = edpart_emitrotz = 0;
-            if (pad->digital_buttons & 0x400)
-                edpart_emitrotx = edpart_emitrotx + pad->analog_left_pad_right - pad->analog_left_pad_left;
-            else {
-                edpart_emitroty = edpart_emitroty + pad->analog_left_pad_right - pad->analog_left_pad_left;
-                i32 rotation = edpart_emitrotz + pad->analog_left_pad_up;
-                if (rotation > 0x8000)
-                    rotation = 0x8000;
-                rotation -= pad->analog_left_pad_down;
-                if (rotation < -0x8000)
-                    rotation = -0x8000;
-                edpart_emitrotz = rotation;
-            }
-        } else if (edpart_dpad_mode == 3) {
-            edpart_refroty = edpart_refroty + pad->analog_left_pad_right - pad->analog_left_pad_left;
-            i32 rotation = edpart_refrotz + pad->analog_left_pad_up;
-            if (rotation > 0)
-                rotation = 0;
-            rotation -= pad->analog_left_pad_down;
-            if (rotation < -0x8000)
-                rotation = -0x8000;
-            edpart_refrotz = rotation;
-        } else if (edpart_dpad_mode == 2) {
-            if (pad->analog_left_pad_up == 255 || (pad->digital_buttons_pressed & 0x1000))
-                edpart_offset += 0.01f;
-            if (pad->analog_left_pad_down == 255 || (pad->digital_buttons_pressed & 0x4000))
-                edpart_offset -= 0.01f;
-            if (edpart_offset < 0.0f)
-                edpart_offset = 0.0f;
-        }
-    } else {
+    if (edpart_copy_mode != 0) {
         f32 size = edpart_copy_size + static_cast<f32>(pad->analog_left_pad_up) / 5000.0f -
                    static_cast<f32>(pad->analog_left_pad_down) / 5000.0f;
         if (size < 0.05f)
@@ -4474,6 +4430,47 @@ void edpartDoInput(nupad_s *pad) {
         else
             edpart_copy_size = size;
         edpart_copyroty = edpart_copyroty + pad->analog_left_pad_right - pad->analog_left_pad_left;
+    } else {
+        if (edpart_dpad_mode == 1) {
+            if (pad->digital_buttons & 0x200)
+                edpart_roty = edpart_rotz = 0;
+            edpart_roty = edpart_roty + pad->analog_left_pad_right - pad->analog_left_pad_left;
+            edpart_rotz += pad->analog_left_pad_up;
+            if (edpart_rotz > 0)
+                edpart_rotz = 0;
+            edpart_rotz -= pad->analog_left_pad_down;
+            if (edpart_rotz < -0x8000)
+                edpart_rotz = -0x8000;
+        } else if (edpart_dpad_mode == 0) {
+            if (pad->digital_buttons & 0x200)
+                edpart_emitrotx = edpart_emitroty = edpart_emitrotz = 0;
+            if (pad->digital_buttons & 0x400)
+                edpart_emitrotx = edpart_emitrotx + pad->analog_left_pad_right - pad->analog_left_pad_left;
+            else {
+                edpart_emitroty = edpart_emitroty + pad->analog_left_pad_right - pad->analog_left_pad_left;
+                edpart_emitrotz += pad->analog_left_pad_up;
+                if (edpart_emitrotz > 0x8000)
+                    edpart_emitrotz = 0x8000;
+                edpart_emitrotz -= pad->analog_left_pad_down;
+                if (edpart_emitrotz < -0x8000)
+                    edpart_emitrotz = -0x8000;
+            }
+        } else if (edpart_dpad_mode == 3) {
+            edpart_refroty = edpart_refroty + pad->analog_left_pad_right - pad->analog_left_pad_left;
+            edpart_refrotz += pad->analog_left_pad_up;
+            if (edpart_refrotz > 0)
+                edpart_refrotz = 0;
+            edpart_refrotz -= pad->analog_left_pad_down;
+            if (edpart_refrotz < -0x8000)
+                edpart_refrotz = -0x8000;
+        } else if (edpart_dpad_mode == 2) {
+            if (pad->analog_left_pad_up == 255 || (pad->digital_buttons_pressed & 0x1000))
+                edpart_offset += 0.01f;
+            if (pad->analog_left_pad_down == 255 || (pad->digital_buttons_pressed & 0x4000))
+                edpart_offset -= 0.01f;
+            if (edpart_offset < 0.0f)
+                edpart_offset = 0.0f;
+        }
     }
 
     if (edpart_nearest == -1)
@@ -4487,7 +4484,7 @@ void edpartDoInput(nupad_s *pad) {
     i32 orphans = 0;
     for (i32 variant = 0; variant < 8; ++variant) {
         i16 effect = edpart_nearest_type->effect_ids[variant];
-        if (effect == 9999 || effect == -1)
+        if (effect == -1 || effect == 9999)
             continue;
         if (effect == 9998)
             ++orphans;
@@ -4793,15 +4790,17 @@ extern "C" {
         PART_s *parts = Part;
         for (i32 i = 0; i < MAXPARTS; ++i) {
             PART_s *part = &parts[i];
-            if ((part->active & 1) == 0)
+            u8 active = part->active;
+            if ((active & 1) == 0)
                 continue;
             memcpy(&part->previous_transform, &part->transform, sizeof(NUMTX));
             part->scale_time += time;
-            if ((part->active & 2) == 0) {
+            bool alive = true;
+            if ((active & 2) == 0) {
                 f32 movement_time = time;
                 if ((part->flags & 0x400) == 0) {
-                    if (!(time < part->elapsed)) {
-                        part->radius_state = !(part->target_radius <= part->radius) ? 1 : 0;
+                    if (time >= part->elapsed) {
+                        part->radius_state = part->target_radius > part->radius ? 1 : 0;
                         if ((part->active & 4) != 0) {
                             if ((part->flags & 0x80000) != 0 && (part->active & 0x10) != 0 && part_platimpactcnt < 4) {
                                 part_platimpactlist[part_platimpactcnt++] = part->field_200;
@@ -4832,8 +4831,7 @@ extern "C" {
                                         part->active |= 2;
                                         if (part->stop_callback != NULL)
                                             part->stop_callback(part);
-                                        if ((part->flags & 1) != 0 || (part->active & 0x10) != 0 ||
-                                            (part->render_flags & 1) != 0)
+                                        if ((part->flags & 1) != 0 || (part->active_render_flags & 0x110) != 0)
                                             KillPart(part, 0);
                                     } else if ((part->render_flags & 1) != 0) {
                                         KillPart(part, 0);
@@ -4935,14 +4933,15 @@ extern "C" {
                     NuMtxLookAtZ(&movement_orientation, &direction);
                     memmove(&part->transform, &movement_orientation, 0x30);
                 }
+                alive = (part->active & 1) != 0;
             }
-            if ((part->active & 1) != 0) {
+            if (alive) {
                 if ((part->flags & 2) != 0 && part->field_1bc != NULL)
                     part->field_1bc(part);
                 if (__builtin_expect((part->active & 1) != 0, 1)) {
                     if (part->field_1c4 != NULL)
                         part->field_1c4(part);
-                    if (!(part->field_100 <= 0.0f)) {
+                    if (part->field_100 > 0.0f) {
                         part->field_100 -= time;
                         if (__builtin_expect(part->field_100 <= 0.0f, 1))
                             KillPart(part, 0);

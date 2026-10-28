@@ -929,7 +929,7 @@ char *NuMusic::RemovePath(char *str) {
             c = *str_;
         } while (c != '\0');
 
-        if (last_sep != NULL) {
+        if (__builtin_expect(last_sep != NULL, 1)) {
             str = last_sep + 1;
         }
     }

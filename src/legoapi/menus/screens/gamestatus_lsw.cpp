@@ -1818,9 +1818,14 @@ void MiniKit_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current
                     DrawStatusMiniKit(0.0f, blend * -1.4f + 1.4f, 1.1f, 0.333f, 0.0f, currentminikit, packet, 0.0f);
                 else
                     DrawStatusMiniKit(0.0f, 0.0f, 1.1f, 0.333f, 0.0f, currentminikit, packet, 0.0f);
-                const i32 count = packet->new_minikits < 1 ? Game.area_save[packet->area->index].field_0x5[0]
-                                  : currentminikit < 0     ? 0
-                                                           : currentminikit;
+                i32 count;
+                if (packet->new_minikits < 1)
+                    count = Game.area_save[packet->area->index].field_0x5[0];
+                else {
+                    count = currentminikit;
+                    if (count < 0)
+                        count = 0;
+                }
                 DrawMiniKitCount(blend, 1.0f, count, packet->minikit_max);
                 break;
             }
@@ -1837,15 +1842,20 @@ void MiniKit_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current
                 } else
                     size = 0.333f;
                 DrawStatusMiniKit(0.0f, 0.0f, 1.1f, 0.333f, size, currentminikit + 1, packet, 0.0f);
-                const i32 count = packet->new_minikits < 1 ? Game.area_save[packet->area->index].field_0x5[0]
-                                  : currentminikit < 0     ? 0
-                                                           : currentminikit;
+                i32 count;
+                if (packet->new_minikits < 1)
+                    count = Game.area_save[packet->area->index].field_0x5[0];
+                else {
+                    count = currentminikit;
+                    if (count < 0)
+                        count = 0;
+                }
                 DrawMiniKitCount(1.0f, 1.0f, count, packet->minikit_max);
                 break;
             }
             case 3: {
                 f32 blend = 0.0f;
-                if (__builtin_expect(!(stage->field_0x1c - jibberlen >= stage->field_0x18), 0))
+                if (__builtin_expect(stage->field_0x18 > stage->field_0x1c - jibberlen, 0))
                     blend = (stage->field_0x18 - (stage->field_0x1c - jibberlen)) / jibberlen;
                 DrawStatusMiniKit(0.0f, 0.0f, 1.1f, 0.333f, 0.333f, currentminikit + 1, packet, blend);
                 i32 count =
@@ -1862,8 +1872,10 @@ void MiniKit_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current
             }
             case 4: {
                 title_alpha = 1.0f - stage->field_0x18;
-                f32 progress = 0.0f;
-                if (stage->field_0x1c != 0.0f && stage->field_0x18 != 0.0f)
+                f32 progress;
+                if ((stage->field_0x18 == 0.0f) | (stage->field_0x1c == 0.0f))
+                    progress = 0.0f;
+                else
                     progress = stage->field_0x18 / stage->field_0x1c;
                 const f32 blend =
                     1.0f -
@@ -1879,10 +1891,11 @@ void MiniKit_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current
             case 6: {
                 title_alpha = 1.0f - stage->field_0x18;
                 i32 angle = 0x2000;
-                if (!(stage->field_0x18 >= 1.0f))
+                if (stage->field_0x18 < 1.0f)
                     angle = (static_cast<i32>(title_alpha * 32768.0f + 16384.0f) >> 1) & 0x7fff;
-                if (__builtin_expect(stage->field_0x18 < stage->field_0x1c, 0)) {
-                    DrawMiniKitCount(1.0f - (NuTrigTable[angle] + 1.0f) * 0.5f, 1.0f,
+                const f32 trig = NuTrigTable[angle];
+                if (stage->field_0x18 < stage->field_0x1c) {
+                    DrawMiniKitCount(1.0f - (trig + 1.0f) * 0.5f, 1.0f,
                                      Game.area_save[packet->area->index].field_0x5[0], packet->minikit_max);
                     DrawStatusMiniKit(0.0f, 0.0f, 1.1f, 0.333f, 1.0f, Game.area_save[packet->area->index].field_0x5[0],
                                       packet, 0.0f);

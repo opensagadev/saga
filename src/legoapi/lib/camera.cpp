@@ -200,20 +200,20 @@ void GameCam_UpdateLookRot(GAMECAMERA_s *camera) {
                         vertical = look_pitch;
                 } else {
                     nupad_s *pad = Player[1]->pad_gamepad->pad;
-                    vertical = (static_cast<f32>(static_cast<u32>(pad->analog_left_y)) - 127.5f) * (1.0f / 127.5f) *
-                               look_pitch;
                     horizontal =
                         (static_cast<f32>(static_cast<u32>(pad->analog_left_x)) - 127.5f) * (1.0f / 127.5f) * look_yaw;
+                    vertical = (static_cast<f32>(static_cast<u32>(pad->analog_left_y)) - 127.5f) * (1.0f / 127.5f) *
+                               look_pitch;
                 }
-                camera->field_0x204 += vertical;
                 camera->field_0x208 += horizontal;
+                camera->field_0x204 += vertical;
             } else if (look_source == 1) {
             player1_right_look:
                 nupad_s *pad = Player[1]->pad_gamepad->pad;
                 f32 horizontal = static_cast<f32>(static_cast<u32>(pad->analog_right_x));
                 f32 vertical = static_cast<f32>(static_cast<u32>(pad->analog_right_y));
-                camera->field_0x208 += (horizontal - 127.5f) * (1.0f / 127.5f) * look_yaw;
                 camera->field_0x204 += (vertical - 127.5f) * (1.0f / 127.5f) * look_pitch;
+                camera->field_0x208 += (horizontal - 127.5f) * (1.0f / 127.5f) * look_yaw;
             }
             contributing_players += 1.0f;
         player1_look_done:;

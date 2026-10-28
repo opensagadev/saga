@@ -397,9 +397,9 @@ i32 Action_SpeederBeingChased(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_
                 break;
             }
             if (distance > speedervals[0].distance * 0.8f || processor->action_timer > 0.0f) {
-                if (speeder_hitpoints_lost <= 1) {
+                if (__builtin_expect(speeder_hitpoints_lost <= 1, 0)) {
                     processor->action_timer += elapsed;
-                    if (__builtin_expect(!(processor->action_timer > speeder_ahead_time), 1))
+                    if (!(processor->action_timer > speeder_ahead_time))
                         break;
                 }
                 set_speedermode = 1;
@@ -407,12 +407,18 @@ i32 Action_SpeederBeingChased(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_
                 processor->action_timer = 0.0f;
                 speeder_hitpoints_lost = 0;
                 speeder_mode_ahead_timer = 0.0f;
-                object->pad_gamepad->buttons_down_08 |= GAMEPAD_JUMP;
+                goto press_jump;
             }
             break;
         case 1:
-            if (__builtin_expect(players_going_forward == 0, 0))
-                goto reset_mode;
+            if (__builtin_expect(players_going_forward == 0, 0)) {
+                set_speedermode = 0;
+                processor->action_data_1 = 0;
+                processor->action_timer = 0.0f;
+                speeder_hitpoints_lost = 0;
+                speeder_mode_ahead_timer = 0.0f;
+                break;
+            }
             if (distance < 0.0f) {
                 set_speedermode = 2;
                 processor->action_data_1 = 2;
@@ -423,16 +429,26 @@ i32 Action_SpeederBeingChased(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_
                 if (processor->action_timer < -1.0f && player->character_context == 0x36) {
                     set_speedermode = 3;
                     processor->action_data_1 = 3;
-                    goto reset_timers;
+                reset_timers:
+                    processor->action_timer = 0.0f;
+                    speeder_hitpoints_lost = 0;
+                    speeder_mode_ahead_timer = 0.0f;
                 }
             } else if (processor->action_timer < 0.0f) {
                 processor->action_timer = 0.0f;
+            press_jump:
                 object->pad_gamepad->buttons_down_08 |= GAMEPAD_JUMP;
             }
             break;
         case 2:
-            if (players_going_forward == 0)
-                goto reset_mode;
+            if (players_going_forward == 0) {
+                set_speedermode = 0;
+                processor->action_data_1 = 0;
+                processor->action_timer = 0.0f;
+                speeder_hitpoints_lost = 0;
+                speeder_mode_ahead_timer = 0.0f;
+                break;
+            }
             if (player->character_context == 0x36) {
                 set_speedermode = 3;
                 processor->action_data_1 = 3;
@@ -457,10 +473,8 @@ i32 Action_SpeederBeingChased(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_
                 if (!(processor->action_timer > speeder_midrange_time))
                     break;
             }
-        reset_mode:
             set_speedermode = 0;
             processor->action_data_1 = 0;
-        reset_timers:
             processor->action_timer = 0.0f;
             speeder_hitpoints_lost = 0;
             speeder_mode_ahead_timer = 0.0f;

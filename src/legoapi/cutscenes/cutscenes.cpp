@@ -2233,7 +2233,6 @@ void CutScenePlayer_SetObjects(CUTINFO *cut) {
 }
 
 void CutScenes_Update(WORLDINFO_s *world, i32 paused) {
-    FADETYPE fade_type;
     i32 active_before[32];
     if (CutScenePlayer_Active() != 0 && CutStopInfo != NULL) {
         CutScenePlayer_SetObjects(static_cast<CUTINFO *>(CutStopInfo));
@@ -2265,10 +2264,10 @@ void CutScenes_Update(WORLDINFO_s *world, i32 paused) {
             continue;
         }
         if ((cut->flags & 1) != 0) {
-            CUTDRAWWORLD = cut->flags & 2;
-            CUTNOFOG = cut->flags & 4;
             CUTSTOPGAME = 1;
             CutStopInfo = cut;
+            CUTDRAWWORLD = cut->flags & 2;
+            CUTNOFOG = cut->flags & 4;
             stop_index = i;
             DebrisSetRenderGroup(cut->debris_render_group);
             ++CutFrame;
@@ -2373,7 +2372,7 @@ void CutScenes_Update(WORLDINFO_s *world, i32 paused) {
                 continue;
             }
             instNUGCUTSCENE_s *instance = static_cast<instNUGCUTSCENE_s *>(cut->instance);
-            if (!(instance->rate <= 0.0f)) {
+            if (instance->rate > 0.0f) {
                 for (i32 j = 0; j < 6; ++j) {
                     CUTSCENESFX *sfx = &cut->sfx[j];
                     if (sfx->id != -1 && cut->previous_frame < sfx->frame &&
@@ -2383,7 +2382,7 @@ void CutScenes_Update(WORLDINFO_s *world, i32 paused) {
                 }
             }
 
-            if ((i != stop_index || stop_index == -1) &&
+            if ((__builtin_expect(i != stop_index, 1) || stop_index == -1) &&
                 instNuGCutSceneIsFinished(static_cast<instNUGCUTSCENE_s *>(cut->instance)) != 0) {
                 if (CutScene_StoppedFn != NULL) {
                     CutScene_StoppedFn(cut);
@@ -2405,8 +2404,8 @@ void CutScenes_Update(WORLDINFO_s *world, i32 paused) {
     if (instNuGCutSceneIsFinished(static_cast<instNUGCUTSCENE_s *>(stop_cut->instance)) == 0) {
         return;
     }
+    FADETYPE fade_type;
     if (NewLData == NULL || NewLData == WORLD->current_level || NewLData != HUB_LDATA) {
-
         fade_type.type = FADE_TYPE_STILL_WIPE;
         FadeSys.SetFade(fade_type, 0);
     }
@@ -2446,15 +2445,15 @@ void CutScenes_Update(WORLDINFO_s *world, i32 paused) {
                 NewLevelFromMenu(HUB_LDATA, -1, -1, 1);
                 hub_from_cutsceneplayer = 1;
             } else if (WORLD->area != NULL && (WORLD->area->flags & 2) != 0) {
-                if (SuperStory == 0) {
-                    NewLData = CREDITS_LDATA;
-                } else {
+                if (SuperStory != 0) {
                     NewLData = STATUS_LDATA;
+                } else {
+                    NewLData = CREDITS_LDATA;
                 }
             }
         } else if (CutScenePlayer_Active() != 0 &&
                    ((NewLData->flags & (LEVEL_OUTRO | LEVEL_MIDTRO | LEVEL_INTRO)) == 0 &&
-                    (stop_cut->end_flags & 2) == 0)) {
+                    __builtin_expect((stop_cut->end_flags & 2) == 0, 1))) {
             NewLevelFromMenu(HUB_LDATA, -1, -1, 1);
             hub_from_cutsceneplayer = 1;
         }
@@ -2557,11 +2556,21 @@ static i32 CutScene_StartBody(WORLDINFO_s *world, CUTINFO *cut) {
     return 1;
 }
 
+static GameObject_s *FindPlayer(char *model_file) {
+    for (i32 p = 0; p < 8; ++p) {
+        GameObject_s *player = Player[p];
+        if (player != NULL && (player->apiobj.flags_low & 1) != 0 &&
+            NuStrICmp(player->apiobj.character_data->file, model_file) == 0) {
+            return player;
+        }
+    }
+    return NULL;
+}
+
 void CutScenes_Reset(WORLDINFO_s *world) {
     CUTSYS *system = world->cutscene_sys;
     if (system != NULL) {
-        auto system_count = system->count;
-        for (i32 i = 0; i < system_count; ++i) {
+        for (i32 i = 0; i < system->count; ++i) {
             CUTINFO *cut = system->cuts[i];
             instNUGCUTSCENE_s *instance = static_cast<instNUGCUTSCENE_s *>(cut->instance);
             if (instance == NULL)
@@ -2571,24 +2580,12 @@ void CutScenes_Reset(WORLDINFO_s *world) {
             if (characters == NULL || runtime == NULL)
                 continue;
             for (i32 j = 0; j < characters->character_count; ++j) {
+                NUGCUTCHAR_s *definition = &characters->characters[j];
                 instNUGCUTCHAR_s *character = &runtime->characters[j];
                 if (character->character != reinterpret_cast<void *>(1))
                     continue;
-                NUGCUTCHAR_s *definition = &characters->characters[j];
                 if ((character->field_14 & 2) == 0) {
-                    char *model_file = definition->model_file;
-                    i32 p;
-                    for (p = 0; p < 8; ++p) {
-                        GameObject_s *player = Player[p];
-                        if (player != NULL && (player->apiobj.flags_low & 1) != 0 &&
-                            NuStrICmp(player->apiobj.character_data->file, model_file) == 0) {
-                            character->character = player;
-                            break;
-                        }
-                    }
-                    if (p == 8) {
-                        character->character = NULL;
-                    }
+                    character->character = FindPlayer(definition->model_file);
                 } else {
                     character->character = NULL;
                 }

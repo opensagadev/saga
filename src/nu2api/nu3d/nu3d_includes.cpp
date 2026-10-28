@@ -15387,7 +15387,7 @@ extern "C" void NuRndrLine3dDbg(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, 
     vertex->z = z0;
     g_NuPrim_StreamBufferPtr->u8_ptr += sizeof(PrimVertexRaw);
     ++g_NuPrim_VertexCount;
-    if (g_NuPrim_NeedsOverbrightening)
+    if (__builtin_expect(g_NuPrim_NeedsOverbrightening != 0, 0))
         ((PrimVertexRaw *)g_NuPrim_StreamBufferPtr->void_ptr)->color = colour;
     else
         ((PrimVertexRaw *)g_NuPrim_StreamBufferPtr->void_ptr)->color =

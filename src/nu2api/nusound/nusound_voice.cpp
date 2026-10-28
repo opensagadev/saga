@@ -229,7 +229,7 @@ void NuSoundVoice::Stop(bool with_effects) {
     if (with_effects) {
         if (this->BeginStopEffects()) {
             // Stop effects were started; the voice stops once they finished.
-            if (!this->CheckStopEffects()) {
+            if (__builtin_expect(!this->CheckStopEffects(), 1)) {
                 return;
             }
         }

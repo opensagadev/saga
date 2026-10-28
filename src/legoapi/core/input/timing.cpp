@@ -424,18 +424,18 @@ void GameTiming(WORLDINFO_s *world, float *game_time) {
                         ResetTimer(&SuperStoryTimer, 36000.0f);
                 }
                 if (world->area != NULL && (world->area->flags & 0x10) != 0) {
-                    if (ChallengeMode == 1) {
-                        UpdateTimer(&ChallengeTimer);
-                        if (Game_AreaSave != NULL &&
-                            ChallengeTimer.time_elapsed >= Game_AreaSave[world->level_sub_id].challenge_trial_time)
-                            EndChallenge(3, 1);
-                    } else {
+                    if (ChallengeMode != 1) {
                         if (Mission_CurrentState(NULL) == 1) {
                             const f32 time_limit = static_cast<f32>(MissionSys->mission->time);
                             UpdateTimer(&MissionSys->timer);
                             if (time_limit <= MissionSys->timer.time_elapsed && netclient == 0)
                                 EndMission(MissionSys, 3, 1);
                         }
+                    } else {
+                        UpdateTimer(&ChallengeTimer);
+                        if (Game_AreaSave != NULL &&
+                            ChallengeTimer.time_elapsed >= Game_AreaSave[world->level_sub_id].challenge_trial_time)
+                            EndChallenge(3, 1);
                     }
                 }
             }

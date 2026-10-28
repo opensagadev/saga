@@ -855,44 +855,8 @@ extern "C" void NuShaderObjectGLSLSetupMaterial(NUSHADEROBJECT *shader, struct n
                 switch (semantic) {
                     default:
                         goto next_texture;
-                    case 0:
-                        BIND_MATERIAL_2D(mtl->shader_desc.diffuse_map_tex_id[0]);
-                        break;
-                    case 1:
-                        BIND_MATERIAL_2D(mtl->shader_desc.diffuse_map_tex_id[1]);
-                        break;
-                    case 2:
-                        BIND_MATERIAL_2D(mtl->shader_desc.diffuse_map_tex_id[2]);
-                        break;
-                    case 3:
-                        BIND_MATERIAL_2D(mtl->shader_desc.diffuse_map_tex_id[3]);
-                        break;
-                    case 4:
-                        BIND_MATERIAL_2D(mtl->shader_desc.specular_map_tid);
-                        break;
-                    case 5:
-                        BIND_MATERIAL_2D(mtl->shader_desc.lightmap_tex_id[0]);
-                        break;
-                    case 6:
-                        BIND_MATERIAL_2D(mtl->shader_desc.normal_map_tid);
-                        break;
-                    case 7:
-                        BIND_MATERIAL_2D(mtl->shader_desc.lightmap_tex_id[1]);
-                        break;
                     case 9:
                         BIND_MATERIAL_2D(mtl->shader_desc.vtf_height_map_tid);
-                        break;
-                    case 12:
-                        BIND_MATERIAL_2D(mtl->shader_desc.vtf_normal_map_tid);
-                        break;
-                    case 16:
-                        BIND_MATERIAL_2D(mtl->shader_desc.shine_map_ps2_tid);
-                        break;
-                    case 19:
-                        BIND_MATERIAL_2D(mtl->shader_desc.field_1e4);
-                        break;
-                    case 20:
-                        BIND_MATERIAL_2D(mtl->shader_desc.field_1e8);
                         break;
                     case 18:
                         if (__builtin_expect(NuWindCurrent(nuapi.wind) >= 0, 0)) {
@@ -900,23 +864,6 @@ extern "C" void NuShaderObjectGLSLSetupMaterial(NUSHADEROBJECT *shader, struct n
                             NuTexSetTextureWithStagePS(NuTexGetNative(NuWindCurrent(nuapi.wind)), texture_unit);
                         }
                         goto next_texture;
-                    case 13: {
-                        if (g_currentTexUnit != (static_cast<u16>(parameter.location) & 0x7ff)) {
-                            glActiveTexture(GL_TEXTURE0 + (static_cast<u16>(parameter.location) & 0x7ff));
-                            g_currentTexUnit = static_cast<u16>(parameter.location) & 0x7ff;
-                        }
-#define CUBE_TEXTURE_NAME()                                                                                            \
-    (mtl->shader_desc.unknown_198 != 0 ? NuTexGetNative(mtl->shader_desc.unknown_198)->platform.gl_tex : 0)
-                        const GLuint previous_texture =
-                            g_lastBoundCubeTexIds[static_cast<u16>(parameter.location) & 0x7ff];
-                        if (previous_texture != CUBE_TEXTURE_NAME()) {
-                            glBindTexture(GL_TEXTURE_CUBE_MAP, CUBE_TEXTURE_NAME());
-                            const u32 texture_unit = static_cast<u16>(parameter.location) & 0x7ff;
-                            g_lastBoundCubeTexIds[texture_unit] = CUBE_TEXTURE_NAME();
-                        }
-#undef CUBE_TEXTURE_NAME
-                        goto next_texture;
-                    }
                     case 14: {
                         if (g_currentTexUnit != (static_cast<u16>(parameter.location) & 0x7ff)) {
                             glActiveTexture(GL_TEXTURE0 + (static_cast<u16>(parameter.location) & 0x7ff));
@@ -937,6 +884,59 @@ extern "C" void NuShaderObjectGLSLSetupMaterial(NUSHADEROBJECT *shader, struct n
 #undef CUBE_TEXTURE_NAME
                         goto next_texture;
                     }
+                    case 1:
+                        BIND_MATERIAL_2D(mtl->shader_desc.diffuse_map_tex_id[1]);
+                        break;
+                    case 16:
+                        BIND_MATERIAL_2D(mtl->shader_desc.shine_map_ps2_tid);
+                        break;
+                    case 20:
+                        BIND_MATERIAL_2D(mtl->shader_desc.field_1e8);
+                        break;
+                    case 3:
+                        BIND_MATERIAL_2D(mtl->shader_desc.diffuse_map_tex_id[3]);
+                        break;
+                    case 6:
+                        BIND_MATERIAL_2D(mtl->shader_desc.normal_map_tid);
+                        break;
+                    case 19:
+                        BIND_MATERIAL_2D(mtl->shader_desc.field_1e4);
+                        break;
+                    case 13: {
+                        if (g_currentTexUnit != (static_cast<u16>(parameter.location) & 0x7ff)) {
+                            glActiveTexture(GL_TEXTURE0 + (static_cast<u16>(parameter.location) & 0x7ff));
+                            g_currentTexUnit = static_cast<u16>(parameter.location) & 0x7ff;
+                        }
+#define CUBE_TEXTURE_NAME()                                                                                            \
+    (mtl->shader_desc.unknown_198 != 0 ? NuTexGetNative(mtl->shader_desc.unknown_198)->platform.gl_tex : 0)
+                        const GLuint previous_texture =
+                            g_lastBoundCubeTexIds[static_cast<u16>(parameter.location) & 0x7ff];
+                        if (previous_texture != CUBE_TEXTURE_NAME()) {
+                            glBindTexture(GL_TEXTURE_CUBE_MAP, CUBE_TEXTURE_NAME());
+                            const u32 texture_unit = static_cast<u16>(parameter.location) & 0x7ff;
+                            g_lastBoundCubeTexIds[texture_unit] = CUBE_TEXTURE_NAME();
+                        }
+#undef CUBE_TEXTURE_NAME
+                        goto next_texture;
+                    }
+                    case 2:
+                        BIND_MATERIAL_2D(mtl->shader_desc.diffuse_map_tex_id[2]);
+                        break;
+                    case 5:
+                        BIND_MATERIAL_2D(mtl->shader_desc.lightmap_tex_id[0]);
+                        break;
+                    case 7:
+                        BIND_MATERIAL_2D(mtl->shader_desc.lightmap_tex_id[1]);
+                        break;
+                    case 4:
+                        BIND_MATERIAL_2D(mtl->shader_desc.specular_map_tid);
+                        break;
+                    case 0:
+                        BIND_MATERIAL_2D(mtl->shader_desc.diffuse_map_tex_id[0]);
+                        break;
+                    case 12:
+                        BIND_MATERIAL_2D(mtl->shader_desc.vtf_normal_map_tid);
+                        break;
                 }
 #undef BIND_MATERIAL_2D
                 glBindTexture(GL_TEXTURE_2D, texture_id != 0 ? NuTexGetNative(texture_id)->platform.gl_tex : 0);
@@ -959,12 +959,12 @@ extern "C" void NuShaderObjectGLSLSetupMaterial(NUSHADEROBJECT *shader, struct n
         auto nextSemantic = [usage](u32 start) {
             u32 word = start >> 5;
             u32 shift = start & 31;
-            u32 bits = usage->semantics[word] >> shift;
+            u32 bits = usage->semantics[word++] >> shift;
             while (!bits) {
-                bits = usage->semantics[++word];
+                bits = usage->semantics[word++];
                 start += 32 - shift;
                 shift = 0;
-                if (word == 3) {
+                if (word == 4) {
                     return 128u;
                 }
             }

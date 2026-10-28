@@ -2343,7 +2343,7 @@ static void cbPtlChangeZ(eduimenu_s *menu, eduiitem_s *item, u32) {
             if (effect->generator_type == 0 || effect->generator_type == 8 || effect->generator_type == 9 ||
                 effect->generator_type == 10)
                 effect->field_060 = static_cast<edui_slider_s *>(item)->value;
-            else if (effect->generator_type == 6 || effect->generator_type == 7 || effect->generator_type == 12)
+            else if (__builtin_expect(effect->generator_type == 6 || effect->generator_type == 7 || effect->generator_type == 12, 0))
                 effect->field_060 = static_cast<i32>((65536.0f / 360.0f) * static_cast<edui_slider_s *>(item)->value);
             else if (effect->generator_type == 11) {
                 effect->field_060 = static_cast<i32>((65536.0f / 360.0f) * static_cast<edui_slider_s *>(item)->value);
@@ -4781,7 +4781,7 @@ static void edptlcbSoundXMenu(eduimenu_s *parent, eduiitem_s *item, u32) {
         char title[16];
         sprintf(title, "Sound %d Menu", static_cast<i32>(item->data) + 1);
         edptl_soundx_menu = eduiMenuCreate(70, 70, 250, 300, ed_fnt, edptlcbCancelSoundXMenu, title);
-        if (edptl_soundx_menu == NULL)
+        if (__builtin_expect(edptl_soundx_menu == NULL, 0))
             return;
         eduiMenuAddItem(edptl_soundx_menu,
                         eduiItemSelCreate(item->data, colours, 0, 0, edptlcbSoundIDMenu, "Sound ID..."));

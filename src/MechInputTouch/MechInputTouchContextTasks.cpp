@@ -402,7 +402,7 @@ void MechTouchTaskAttack::Render() {
 
 bool MechTouchTaskAttack::Update() {
     GameObject_s *object = Player[controller->player_id];
-    if (object != NULL && target.Get() != NULL) {
+    if (__builtin_expect(object != NULL && target.Get() != NULL, 1)) {
         MechObjectInterface *opponent = target.Get();
         const f32 origin_z = object->apiobj.position.z;
         const f32 origin_y = object->apiobj.position.y;
@@ -437,8 +437,9 @@ bool MechTouchTaskAttack::Update() {
             attack_range_squared = 0.09f;
         }
         const bool in_range = distance_squared <= attack_range_squared;
-        if (in_range || nearby || (object->field_0xef8 & 4) != 0 || object->id == id_TRAININGREMOTE ||
-            (object->field_0xcc0 != NULL && TouchHacks::CanShoot(*object)) || VehicleArea != 0) {
+        if (in_range || __builtin_expect(nearby, 1) || (object->field_0xef8 & 4) != 0 ||
+            object->id == id_TRAININGREMOTE || (object->field_0xcc0 != NULL && TouchHacks::CanShoot(*object)) ||
+            VehicleArea != 0) {
             if (opponent->GetCharacterObject() != object) {
                 ForceNextShootTarget(*opponent);
             }
@@ -452,7 +453,7 @@ bool MechTouchTaskAttack::Update() {
                     controller->button_pressed[3] = 1;
                 }
             } else {
-                if (VehicleArea != 0) {
+                if (__builtin_expect(VehicleArea != 0, 0)) {
                     controller->button_pressed[3] = 1;
                 }
                 field_60 |= in_range;

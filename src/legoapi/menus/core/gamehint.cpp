@@ -424,8 +424,11 @@ static void DrawHint_LSWBody(HINT_s *hint, i32 max_lines) {
         hint->flags |= 0x40;
 
     f32 text_y = 0.0f;
-    if ((WORLD->current_level->flags & LEVEL_STATUS) == 0)
-        text_y = hint->control_mode_ids[0] == 0x164 ? -0.1f : -0.7f;
+    if ((WORLD->current_level->flags & LEVEL_STATUS) == 0) {
+        text_y = -0.7f;
+        if (__builtin_expect(hint->control_mode_ids[0] == 0x164, 0))
+            text_y = -0.1f;
+    }
 
     f32 text_x;
     i32 justify;
@@ -458,11 +461,14 @@ static void DrawHint_LSWBody(HINT_s *hint, i32 max_lines) {
         const i32 text_lines = max_lines == -1 ? 3 : max_lines;
         g_buttonFontScalePulse = CurrentHintButtonScale();
         const u8 text_alpha = static_cast<u8>(static_cast<i32>(alpha * 128.0f));
-        const f32 max_width = justify != 0 ? 2.0f - (1.0f + text_x) - 0.15f : 1.4f;
-        SmartTextEx(expanded, text_x, text_y, 1.0f, 0.5f, 0.5f, 0.5f, justify, colours[0], colours[1], colours[2],
-                    max_width, text_lines, NULL, 0, text_alpha);
-        if (justify == 0)
-            icon_x = -0.5f * smarttextex_longestwidth - 0.075f;
+        if (justify == 0) {
+            SmartTextEx(expanded, text_x, text_y, 1.0f, 0.5f, 0.5f, 0.5f, justify, colours[0], colours[1], colours[2],
+                        1.4f, text_lines, NULL, 0, text_alpha);
+            icon_x = -(smarttextex_longestwidth * 0.5f) - 0.075f;
+        } else {
+            SmartTextEx(expanded, text_x, text_y, 1.0f, 0.5f, 0.5f, 0.5f, justify, colours[0], colours[1], colours[2],
+                        2.0f - (1.0f + text_x) - 0.15f, text_lines, NULL, 0, text_alpha);
+        }
         g_buttonFontScalePulse = 1.0f;
     }
 
@@ -472,14 +478,15 @@ static void DrawHint_LSWBody(HINT_s *hint, i32 max_lines) {
 
     const i32 slide_angle = static_cast<i32>(alpha * 16384.0f);
     const f32 wave_x = (icon_x + 1.1f) * NU_SIN_LUT(slide_angle) - 1.1f;
-    if (!(hintIconPos.duration >= 0.0f) || hintIconPos.elapsed >= hintIconPos.duration + hintIconPos.delay)
+    if (__builtin_expect(hintIconPos.duration < 0.0f || hintIconPos.elapsed >= hintIconPos.duration + hintIconPos.delay,
+                         0))
         hintIconPos.value.x = wave_x;
 
     if ((hint->flags & HINT_DIRECT_DISPLAY) != 0) {
         const u16 rotation = static_cast<u16>((NuFmod(GameTimer.time_elapsed, 2.5f) / 2.5f) * 65536.0f);
         DrawPanel3DObjectNoAlpha(wave_x, text_y, 1.0f, 0.5f, 0.5f, 0.5f, 0, rotation, 0, &icon->special, 2);
     } else {
-        const f32 bounce_scale = TouchHacks::TouchControlsActive ? 0.2f : 0.8f;
+        const f32 bounce_scale = !TouchHacks::TouchControlsActive ? 0.8f : 0.2f;
         const u16 rotation = static_cast<u16>((NuFmod(GameTimer.time_elapsed, 2.5f) / 2.5f) * 65536.0f);
         const f32 bounce = NU_SIN_LUT(static_cast<i32>(hintYPop.value));
         const f32 scale = hintIconScale.value;
@@ -487,8 +494,9 @@ static void DrawHint_LSWBody(HINT_s *hint, i32 max_lines) {
                                  scale, scale, scale, 0, rotation, 0, &icon->special, 2);
     }
     if (justify == 0) {
+        LEVEL_OBJECT_RUNTIME *mirror = &WORLD->lev_objs[0xd4];
         const u16 mirrored_rotation = static_cast<u16>((NuFmod(GameTimer.time_elapsed, 2.5f) / 2.5f) * 65536.0f);
-        DrawPanel3DObjectNoAlpha(-wave_x, text_y, 1.0f, 0.5f, 0.5f, 0.5f, 0, mirrored_rotation, 0, &icon->special, 2);
+        DrawPanel3DObjectNoAlpha(-wave_x, text_y, 1.0f, 0.5f, 0.5f, 0.5f, 0, mirrored_rotation, 0, &mirror->special, 2);
     }
 }
 

@@ -918,9 +918,8 @@ void GizmoBlowupEarlyUpdate(void *world_ptr, void *, float) {
         }
 
         nuinstanim_s *animation = NuSpecialGetInstAnim(&blowup->type->animated_special);
-        bool requires_update = ((blowup->status_flags & 0x800001) == 0x800000) ||
-                               (blowup->state_flags & GIZMOBLOWUP_STATE_DELAY_ACTIVE) != 0;
-        if (requires_update) {
+        if (((blowup->status_flags & 0x800001) == 0x800000) ||
+            (blowup->state_flags & GIZMOBLOWUP_STATE_DELAY_ACTIVE) != 0) {
             if ((blowup->draw_flags & 0x400000) != 0) {
                 nuhspecial_s *special = blowup->override_special;
                 if (special == NULL || !NuSpecialExistsFn(special)) {
@@ -931,13 +930,13 @@ void GizmoBlowupEarlyUpdate(void *world_ptr, void *, float) {
                 blowup->transform = *NuSpecialGetInstanceMtx(special);
                 blowup->state_flags |= GIZMOBLOWUP_STATE_ACTIVE;
             }
-            if ((blowup->state_flags & GIZMOBLOWUP_STATE_ACTIVE) != 0) {
+            if (__builtin_expect((blowup->state_flags & GIZMOBLOWUP_STATE_ACTIVE) != 0, 0)) {
                 UpdateMidPos(blowup);
             }
             if (animation != NULL) {
                 const f32 end_frame = NuAnimEndFrameOld(
                     blowup->type->animated_special.scene->instance_animation_data[animation->anim_ix]);
-                if ((blowup->state_flags & GIZMOBLOWUP_STATE_REPEAT_ANIMATION) != 0) {
+                if (__builtin_expect((blowup->state_flags & GIZMOBLOWUP_STATE_REPEAT_ANIMATION) != 0, 1)) {
                     if ((blowup->type->animation_runtime_flags & GIZMOBLOWUPTYPE_ANIMATION_UPDATED) == 0 &&
                         ((blowup->type->animation_flags & GIZMOBLOWUPTYPE_ANIMATION_INCLUDES_INSTANCE_TRANSFORM) != 0 ||
                          (blowup->state_flags & GIZMOBLOWUP_STATE_REPEATING) != 0)) {
@@ -959,7 +958,7 @@ void GizmoBlowupEarlyUpdate(void *world_ptr, void *, float) {
                     blowup->mid_position.x = matrix.m30 + blowup->position.x;
                     blowup->mid_position.y = matrix.m31 + blowup->position.y;
                     blowup->mid_position.z = matrix.m32 + blowup->position.z;
-                    if (blowup->animation_time >= end_frame) {
+                    if (__builtin_expect(blowup->animation_time >= end_frame, 1)) {
                         if (!(animation->repeating != 0)) {
                             blowup->animation_time = blowup->type->animation_start_frame;
                             blowup->field_0x9f |= 1;
@@ -970,7 +969,7 @@ void GizmoBlowupEarlyUpdate(void *world_ptr, void *, float) {
                 }
             }
             if ((blowup->state_flags & 4) != 0) {
-                if (__builtin_expect(blowup->activation_delay > 0.0f, 1)) {
+                if (blowup->activation_delay > 0.0f) {
                     blowup->activation_delay -= FRAMETIME;
                     if (blowup->activation_delay <= 0.0f) {
                         if (animation == NULL || (blowup->state_flags & GIZMOBLOWUP_STATE_REPEAT_ANIMATION) != 0) {

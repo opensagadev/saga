@@ -1177,40 +1177,40 @@ void GizmoPushBlockInitAndReset(WORLDINFO_s *world, void *progress) {
         block->runtime_flags_0c9 &= 0x8f;
         nuinstanim_s *animation = NuSpecialGetInstAnim(&block->special);
         if (animation != NULL) {
-            i32 positions =
-                static_cast<i32>(NuAnimEndFrameOld(block->special.scene->instance_animation_data[animation->anim_ix])) &
-                7;
-            block->output_count = positions;
-            block->runtime_flags_0c9 = (block->runtime_flags_0c9 & 0x8f) | ((positions & 7) << 4);
+            const i32 end_frame =
+                static_cast<i32>(NuAnimEndFrameOld(block->special.scene->instance_animation_data[animation->anim_ix]));
+            block->output_count = end_frame & 7;
+            i32 positions = end_frame & 7;
+            block->snap_position_count = positions;
             const i32 required = world->push_block_position_count + positions;
-            if (!(required > world->current_level->max_push_block_end_pos)) {
-                if (positions != 0 && runoutofpostabspace == 0) {
-                    block->snap_positions = &world->push_block_positions[world->push_block_position_count];
-                    f32 animation_frame = 1.0f;
-                    for (i32 position = 0; position < ((block->runtime_flags_0c9 >> 4) & 7);
-                         ++position, animation_frame += 1.0f) {
-                        NUMTX evaluated;
-                        EvalAnim(&block->special, animation_frame, &evaluated, 0);
-                        block->snap_positions[position] = *reinterpret_cast<NUVEC *>(&evaluated.m30);
-                        evaluated = *NuSpecialGetMtx(&block->special);
-                        block->snap_positions[position].x += evaluated.m30;
-                        block->snap_positions[position].y += evaluated.m31;
-                        block->snap_positions[position].z += evaluated.m32;
-                        ++world->push_block_position_count;
-                    }
+            if (required > world->current_level->max_push_block_end_pos) {
+                if (runoutofpostabspace != 0)
+                    pushposincrease += positions;
+                else {
+                    runoutofpostabspace = 1;
+                    pushposincrease += required - world->current_level->max_push_block_end_pos;
                 }
-            } else {
-                pushposincrease +=
-                    runoutofpostabspace == 0 ? required - world->current_level->max_push_block_end_pos : positions;
-                runoutofpostabspace = 1;
+            }
+            if (positions != 0 && runoutofpostabspace == 0) {
+                block->snap_positions = &world->push_block_positions[world->push_block_position_count];
+                f32 animation_frame = 1.0f;
+                for (i32 position = 0; position < block->snap_position_count; ++position, animation_frame += 1.0f) {
+                    NUMTX evaluated;
+                    EvalAnim(&block->special, animation_frame, &evaluated, 0);
+                    block->snap_positions[position] = *reinterpret_cast<NUVEC *>(&evaluated.m30);
+                    evaluated = *NuSpecialGetMtx(&block->special);
+                    block->snap_positions[position].x += evaluated.m30;
+                    block->snap_positions[position].y += evaluated.m31;
+                    block->snap_positions[position].z += evaluated.m32;
+                    ++world->push_block_position_count;
+                }
             }
         }
         ResetSinglePushBlock(world, block, index);
     }
 
     block = world->push_blocks;
-    auto world_push_block_count = world->push_block_count;
-    for (i32 index = 0; index < world_push_block_count; ++index, ++block) {
+    for (i32 index = 0; index < world->push_block_count; ++index, ++block) {
         NUVEC centre = *block->position;
         block->velocity = v000;
         block->target_velocity = v000;
@@ -1220,17 +1220,18 @@ void GizmoPushBlockInitAndReset(WORLDINFO_s *world, void *progress) {
         const f32 right = fabsf(block->bounds_max.x) - 0.006f;
         const f32 back = fabsf(block->bounds_min.z) - 0.006f;
         const f32 front = fabsf(block->bounds_max.z) - 0.006f;
-        const f32 y = centre.y - fabsf(block->bounds_min.y) + 0.001f + 0.025f;
-        NUVEC corners[4] = {centre, centre, centre, centre};
-        corners[0].y = corners[1].y = corners[2].y = corners[3].y = y;
+        NUVEC corners[4];
+        corners[0] = corners[1] = corners[2] = centre;
+        corners[0].y = corners[1].y = corners[2].y = corners[3].y =
+            corners[0].y - fabsf(block->bounds_min.y) + 0.001f + 0.025f;
         corners[0].x -= left;
         corners[0].z -= back;
         corners[1].x += right;
         corners[1].z -= back;
         corners[2].x += right;
         corners[2].z += front;
-        corners[3].x -= left;
-        corners[3].z += front;
+        corners[3].x = corners[0].x;
+        corners[3].z = centre.z + front;
         PlatOnOff(block->platform_id, 0);
         NewTerrPlatformsOff();
         const f32 height0 = GameShadow(NULL, &corners[0], 0.1f, -1);
@@ -1250,7 +1251,7 @@ void GizmoPushBlockInitAndReset(WORLDINFO_s *world, void *progress) {
         block->extra_terrain_info[3] = static_cast<i8>(EShadowInfo());
         PlatOnOff(block->platform_id, 1);
 
-        if (height1 == height2 && height0 == height1 && height2 == height3) {
+        if (height2 == height1 && height1 == height0 && height3 == height2) {
             NewTerrPlatformsOff();
             centre.y = GameShadow(NULL, &centre, 5.0f, -1);
             if (centre.y == 2000000.0f) {

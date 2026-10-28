@@ -48,7 +48,7 @@ void Detonators_Draw() {
             if (WORLD->lev_objs[0xef].active)
                 detonator.draw_result = NuSpecialDrawAt(&WORLD->lev_objs[0xef].special, &matrix);
         } else {
-            if (WORLD->lev_objs[0xee].active)
+            if (__builtin_expect(WORLD->lev_objs[0xee].active != 0, 0))
                 detonator.draw_result = NuSpecialDrawAt(&WORLD->lev_objs[0xee].special, &matrix);
         }
     }
