@@ -2065,53 +2065,67 @@ void EdMatrixControl::cbChanged(eduimenu_s *, eduiitem_s *item, u32) {
                                          (65536.0f / 360.0f));
             NUANG y = static_cast<NUANG>(NuAToF(static_cast<edui_prop_s *>(control->components[4])->property_text) *
                                          (65536.0f / 360.0f));
-            f32 sine = NU_SIN_LUT(x), cosine = NU_COS_LUT(x);
-            f32 saved = rebuilt.m01;
-            rebuilt.m01 = saved * cosine - rebuilt.m02 * sine;
-            rebuilt.m02 = saved * sine + rebuilt.m02 * cosine;
-            saved = rebuilt.m11;
-            rebuilt.m11 = saved * cosine - rebuilt.m12 * sine;
-            rebuilt.m12 = saved * sine + rebuilt.m12 * cosine;
-            saved = rebuilt.m21;
-            rebuilt.m21 = saved * cosine - rebuilt.m22 * sine;
-            rebuilt.m22 = saved * sine + rebuilt.m22 * cosine;
-
-            sine = NU_SIN_LUT(y);
-            cosine = NU_COS_LUT(y);
-            saved = rebuilt.m00;
-            rebuilt.m00 = saved * cosine + rebuilt.m02 * sine;
-            rebuilt.m02 = rebuilt.m02 * cosine - saved * sine;
-            saved = rebuilt.m10;
-            rebuilt.m10 = saved * cosine + rebuilt.m12 * sine;
-            rebuilt.m12 = rebuilt.m12 * cosine - saved * sine;
-            saved = rebuilt.m20;
-            rebuilt.m20 = saved * cosine + rebuilt.m22 * sine;
-            rebuilt.m22 = rebuilt.m22 * cosine - saved * sine;
-
-            sine = NU_SIN_LUT(z);
-            cosine = NU_COS_LUT(z);
-            saved = rebuilt.m00;
-            rebuilt.m00 = saved * cosine - rebuilt.m01 * sine;
-            rebuilt.m01 = saved * sine + rebuilt.m01 * cosine;
-            saved = rebuilt.m10;
-            rebuilt.m10 = saved * cosine - rebuilt.m11 * sine;
-            rebuilt.m11 = saved * sine + rebuilt.m11 * cosine;
-            saved = rebuilt.m20;
-            rebuilt.m20 = saved * cosine - rebuilt.m21 * sine;
-            rebuilt.m21 = saved * sine + rebuilt.m21 * cosine;
+            f32 lm00 = rebuilt.m00;
+            f32 lm01 = rebuilt.m01;
+            f32 lm02 = rebuilt.m02;
+            f32 lm10 = rebuilt.m10;
+            f32 lm11 = rebuilt.m11;
+            f32 lm12 = rebuilt.m12;
+            f32 lm20 = rebuilt.m20;
+            f32 lm21 = rebuilt.m21;
+            f32 lm22 = rebuilt.m22;
+            {
+                f32 c = NU_COS_LUT(x);
+                f32 s = NU_SIN_LUT(x);
+                f32 saved_m01 = lm01;
+                lm01 = saved_m01 * c - lm02 * s;
+                lm02 = lm02 * c + saved_m01 * s;
+                f32 saved_m11 = lm11;
+                lm11 = saved_m11 * c - lm12 * s;
+                lm12 = lm12 * c + saved_m11 * s;
+                f32 saved_m21 = lm21;
+                lm21 = saved_m21 * c - lm22 * s;
+                lm22 = lm22 * c + saved_m21 * s;
+            }
+            {
+                f32 c = NU_COS_LUT(y);
+                f32 s = NU_SIN_LUT(y);
+                f32 saved_m00 = lm00;
+                lm00 = lm02 * s + saved_m00 * c;
+                lm02 = c * lm02 - saved_m00 * s;
+                f32 saved_m10 = lm10;
+                lm10 = lm12 * s + saved_m10 * c;
+                lm12 = c * lm12 - saved_m10 * s;
+                f32 saved_m20 = lm20;
+                lm20 = lm22 * s + saved_m20 * c;
+                lm22 = c * lm22 - saved_m20 * s;
+            }
+            {
+                f32 c = NU_COS_LUT(z);
+                f32 s = NU_SIN_LUT(z);
+                f32 saved_m00 = lm00;
+                lm00 = c * saved_m00 - lm01 * s;
+                lm01 = saved_m00 * s + lm01 * c;
+                f32 saved_m10 = lm10;
+                lm10 = c * saved_m10 - lm11 * s;
+                lm11 = saved_m10 * s + lm11 * c;
+                f32 saved_m20 = lm20;
+                lm20 = c * saved_m20 - lm21 * s;
+                lm21 = saved_m20 * s + lm21 * c;
+            }
+            matrix.m00 = lm00;
+            matrix.m01 = lm01;
+            matrix.m02 = lm02;
+            matrix.m03 = rebuilt.m03;
+            matrix.m10 = lm10;
+            matrix.m11 = lm11;
+            matrix.m12 = lm12;
+            matrix.m13 = rebuilt.m13;
+            matrix.m20 = lm20;
+            matrix.m21 = lm21;
+            matrix.m22 = lm22;
+            matrix.m23 = rebuilt.m23;
         }
-        matrix.m00 = rebuilt.m00;
-        matrix.m01 = rebuilt.m01;
-        matrix.m02 = rebuilt.m02;
-        matrix.m03 = rebuilt.m03;
-        matrix.m10 = rebuilt.m10;
-        matrix.m11 = rebuilt.m11;
-        matrix.m12 = rebuilt.m12;
-        matrix.m13 = rebuilt.m13;
-        matrix.m20 = rebuilt.m20;
-        matrix.m21 = rebuilt.m21;
-        matrix.m22 = rebuilt.m22;
-        matrix.m23 = rebuilt.m23;
     }
     matrix.m33 = 1.0f;
     control->reference->SetMemberData(control->object, EdType_VuMtx, &source, 0, nullptr);
@@ -7694,20 +7708,21 @@ f32 BezierLineLength(VuVec &start, VuVec &first_control, VuVec &end, VuVec &seco
 
 f32 BezierLineLength(VuVec &start, VuVec &first_control, VuVec &end, VuVec &second_control, f32 t) {
     f32 complement = 1.0f - t;
-    VuVec middle{second_control.x * complement + first_control.x * t,
-                 second_control.y * complement + first_control.y * t,
-                 second_control.z * complement + first_control.z * t, 0.0f};
-    VuVec first{first_control.x * complement + start.x * t, first_control.y * complement + start.y * t,
-                first_control.z * complement + start.z * t, 0.0f};
-    VuVec last{end.x * complement + second_control.x * t, end.y * complement + second_control.y * t,
-               end.z * complement + second_control.z * t, 0.0f};
-    VuVec first_middle{middle.x * complement + first.x * t, middle.y * complement + first.y * t,
-                       middle.z * complement + first.z * t, 0.0f};
-    VuVec middle_last{last.x * complement + middle.x * t, last.y * complement + middle.y * t,
-                      last.z * complement + middle.z * t, 0.0f};
-    VuVec point{middle_last.x * complement + first_middle.x * t, middle_last.y * complement + first_middle.y * t,
-                middle_last.z * complement + first_middle.z * t, 0.0f};
-    return BezierLineLength(start, first, point, first_middle);
+    VuVec points[6] = {};
+    points[0] =
+        VuVec(second_control.x * complement + first_control.x * t, second_control.y * complement + first_control.y * t,
+              second_control.z * complement + first_control.z * t, 0.0f);
+    points[1] = VuVec(first_control.x * complement + start.x * t, first_control.y * complement + start.y * t,
+                      first_control.z * complement + start.z * t, 0.0f);
+    points[2] = VuVec(end.x * complement + second_control.x * t, end.y * complement + second_control.y * t,
+                      end.z * complement + second_control.z * t, 0.0f);
+    points[3] = VuVec(points[0].x * complement + points[1].x * t, points[0].y * complement + points[1].y * t,
+                      points[0].z * complement + points[1].z * t, 0.0f);
+    points[4] = VuVec(points[2].x * complement + points[0].x * t, points[2].y * complement + points[0].y * t,
+                      points[2].z * complement + points[0].z * t, 0.0f);
+    points[5] = VuVec(points[4].x * complement + points[3].x * t, points[4].y * complement + points[3].y * t,
+                      points[4].z * complement + points[3].z * t, 0.0f);
+    return BezierLineLength(start, points[1], points[5], points[3]);
 }
 
 i32 BezierLinePos(VuVec &result, VuVec &start, VuVec &first_control, VuVec &end, VuVec &second_control, f32 distance) {
@@ -9296,44 +9311,66 @@ __attribute__((force_align_arg_pointer)) i32 EdManScale::Process(EdInputContext 
 }
 
 __attribute__((force_align_arg_pointer)) i32 EdManMove::Process(EdInputContext &input, ClassObjectList &selected) {
-    VuVec position;
     EdManipulator::Process(input, selected);
-    VuVec average;
-    if (selected.GetAveragePosition(average) == 0)
+    VuVec position;
+    if (selected.GetAveragePosition(position) == 0)
         return 0;
     VuVec first_axis;
     VuVec second_axis;
-    i32 axis = SelectAxis(input, average, first_axis, second_axis, NULL);
+    i32 axis = SelectAxis(input, position, first_axis, second_axis, NULL);
     theLevelEditor.field_0x2c = AxisColour[axis];
-    if (input.GetHold(3) == 0.0f && input.GetHold(38) == 0.0f)
+    if (input.GetHold(3) == 0.0f && __builtin_expect(input.GetHold(38) == 0.0f, 0))
         return axis != 0;
     const VuVec *delta = reinterpret_cast<VuVec const *>(reinterpret_cast<u8 *>(this) + 0x40);
     for (ClassObjectListEntry *entry = selected.first; entry != NULL; entry = entry->next) {
-        position = VuVec_Zero;
-        get_manipulator_attribute(entry, 8, EdType_VuVec, &position);
-        if (axis == 7) {
-            if (input.GetHold(38) == 0.0f)
-                continue;
-            memcpy(&position, theLevelEditor.background_colour, sizeof(position));
-        } else {
-            f32 amount = delta->x * first_axis.x + delta->y * first_axis.y + delta->z * first_axis.z;
-            if (amount != 0.0f) {
+        position = VuVec(0.0f, 0.0f, 0.0f, 1.0f);
+        if (entry->reference == NULL ||
+            !entry->reference->GetAttributeData(entry->object, 8, EdType_VuVec, &position, 0)) {
+            EdMember member;
+            if (__builtin_expect(entry->ed_class->FindMember(&member, entry->object, 8, 1) != 0, 1))
+                member.reference->GetAttributeData(member.object, 8, EdType_VuVec, &position, 0);
+        }
+        switch (axis) {
+            case 1:
+            case 2:
+            case 3: {
+                f32 amount = delta->x * first_axis.x + delta->y * first_axis.y + delta->z * first_axis.z;
+                if (amount == 0.0f)
+                    continue;
+                position.x += first_axis.x * amount;
                 position.y += first_axis.y * amount;
                 position.z += first_axis.z * amount;
-                position.x += first_axis.x * amount;
+                break;
             }
-            if (axis >= 4) {
+            case 4:
+            case 5:
+            case 6: {
+                i32 moved = 0;
+                f32 amount = delta->x * first_axis.x + delta->y * first_axis.y + delta->z * first_axis.z;
+                if (amount != 0.0f) {
+                    position.x += first_axis.x * amount;
+                    position.y += first_axis.y * amount;
+                    position.z += first_axis.z * amount;
+                    moved = 1;
+                }
                 f32 second_amount = delta->x * second_axis.x + delta->y * second_axis.y + delta->z * second_axis.z;
                 if (second_amount != 0.0f) {
-                    position.y += second_axis.y * second_amount;
                     position.x += second_axis.x * second_amount;
+                    position.y += second_axis.y * second_amount;
                     position.z += second_axis.z * second_amount;
-                } else if (amount == 0.0f) {
-                    continue;
                 }
-            } else if (amount == 0.0f) {
-                continue;
+                if (!moved && second_amount == 0.0f)
+                    continue;
+                break;
             }
+            case 7:
+                if (input.GetHold(38) == 0.0f)
+                    continue;
+                position = VuVec(theLevelEditor.background_colour[0], theLevelEditor.background_colour[1],
+                                 theLevelEditor.background_colour[2], theLevelEditor.background_colour[3]);
+                break;
+            default:
+                continue;
         }
         theClassEditor.SnapPoint(position);
         set_manipulator_attribute(entry, 8, EdType_VuVec, &position);

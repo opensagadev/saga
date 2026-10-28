@@ -649,7 +649,7 @@ static i32 GizSpinner_Load(void *world_ptr, void *) {
                     (&spinner->animation_points[1])[point] = -1.0f;
                 }
             }
-            if (version == 7) {
+            if (__builtin_expect(version == 7, 0)) {
                 initial_animation_point = animation_speed;
             } else {
                 spinner_field_98 = EdFileReadFloat();

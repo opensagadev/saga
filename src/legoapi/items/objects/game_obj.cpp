@@ -696,8 +696,8 @@ void ManageGameObjects() {
                 if (creature->activate_type == 1) {
                     i32 area = creature->activate_area - system->areas;
                     i64 mask = static_cast<i32>(1u << (area & 31));
-                    if (player == NULL || (player->apiobj.ai_area_mask & mask) == 0 ||
-                        Game.difficulty < creature->activation_difficulty) {
+                    if (__builtin_expect(player == NULL || (player->apiobj.ai_area_mask & mask) == 0 ||
+                        Game.difficulty < creature->activation_difficulty, 1)) {
                         if (creature->count > 1 && __builtin_expect(!(creature->start_stagger <= 0.0f), 0))
                             object->ai_spawn_delay = static_cast<f32>(static_cast<u32>(object->ai.group_member_index)) *
                                                      creature->start_stagger;
@@ -756,8 +756,8 @@ void ManageGameObjects() {
     remove_object:
         AIGROUP *group = object->ai.group;
         if (group != NULL) {
-            if (group->rows[0].is_alive == 0 && group->rows[1].is_alive == 0 && group->rows[2].is_alive == 0 &&
-                group->rows[3].is_alive == 0) {
+            if (__builtin_expect(group->rows[0].is_alive == 0 && group->rows[1].is_alive == 0 && group->rows[2].is_alive == 0 &&
+                group->rows[3].is_alive == 0, 1)) {
                 DestroyAIGroup(group);
             } else {
                 auto group_member_count = group->member_count;
@@ -784,53 +784,51 @@ void CollideGameObjects(WORLDINFO_s *world) {
     u32 vertical_movement_mask = 0;
     u32 player_slot_mask = 0;
 
-    i32 object_count = HIGHGAMEOBJECT;
-    GameObject_s *objects = Obj;
-    GameObject_s *object = objects;
-    for (i32 index = 0; index < object_count; ++index, ++object) {
-        const i32 flags = object->apiobj.flags_low;
+    GameObject_s *object = Obj;
+    GameObject_s *scan = object;
+    for (i32 index = 0; index < HIGHGAMEOBJECT; ++index, ++scan) {
+        const i32 flags = scan->apiobj.flags_low;
         if ((flags & APIOBJECT_FLAG_IN_USE) == 0) {
             continue;
         }
 
-        const u32 bit = static_cast<u32>(static_cast<u64>(1) << object->apiobj.field_0x289);
-        if (__builtin_expect(object->apiobj.field_0x27c != -1, 1)) {
+        const u32 bit = static_cast<u32>(static_cast<u64>(1) << scan->apiobj.field_0x289);
+        if (__builtin_expect(scan->apiobj.field_0x27c != -1, 1)) {
             player_slot_mask |= bit;
         }
-        GAMECHARACTERDATA *data = object->apiobj.character_data->game_character;
+        GAMECHARACTERDATA *data = scan->apiobj.character_data->game_character;
         if (!(data->field_0x28 > 0.0f)) {
             no_vertical_movement_mask |= bit;
         } else {
             vertical_movement_mask |= bit;
         }
-        if (((flags & APIOBJECT_FLAG_PLAYER_ACTIVE) != 0 || (object->field_0xf02 & 8) != 0) &&
+        if (((flags & APIOBJECT_FLAG_PLAYER_ACTIVE) != 0 || (scan->field_0xf02 & 8) != 0) &&
             (data->flags_090 & 0x40) == 0) {
             player_collision_mask |= bit;
         }
-        if (object->character_context == 0x3d && (flags & APIOBJECT_FLAG_PLAYER_ACTIVE) == 0) {
+        if (scan->character_context == 0x3d && (flags & APIOBJECT_FLAG_PLAYER_ACTIVE) == 0) {
             flattened_mask |= bit;
         }
         if (WORLD->current_level == SPEEDERCHASEA_LDATA && disable_narrow_socks == 0 &&
-            __builtin_expect(object->id == id_SPEEDERBIKE, 1) && object->apiobj.field_0x27c != -1) {
+            __builtin_expect(scan->id == id_SPEEDERBIKE, 1) && scan->apiobj.field_0x27c != -1) {
             narrow_speeder_mask |= bit;
         }
     }
 
     APIOBJECT *collision_objects[64];
-    NUVEC collision_maximums[64];
     NUVEC collision_minimums[64];
+    NUVEC collision_maximums[64];
     APIOBJECT **object_cursor = collision_objects;
     NUVEC *minimum_cursor = collision_minimums;
     NUVEC *maximum_cursor = collision_maximums;
     i32 collision_count = 0;
-    object = objects;
-    for (i32 index = 0; index < object_count; ++index, ++object) {
+    for (i32 index = 0; index < HIGHGAMEOBJECT; ++index, ++object) {
         if ((object->apiobj.field_0x1f8 & 0x1001) != 0x1001 || object->apiobj.field_0x287 != 0 ||
             object->apiobj.model_draw_result == 0 || object->use_model_origin <= 1) {
             continue;
         }
 
-        const i32 context = object->character_context;
+        const i8 context = object->character_context;
         if (__builtin_expect((CInfo[context].flags & 0x8000) != 0, 0) || context == 0x3b ||
             __builtin_expect(context == 0x3c, 0) || context == 0x0f || __builtin_expect(context == 0x39, 0)) {
             continue;
@@ -842,7 +840,7 @@ void CollideGameObjects(WORLDINFO_s *world) {
 
             GAMECHARACTERDATA *data = object->apiobj.character_data->game_character;
             if ((data->flags_090 & 0x8000) != 0 || (object->action_flags & 0x20) != 0 ||
-                (context == 0x47 && object->field_0x788 != NULL &&
+                (context == 0x47 &&
                  (*reinterpret_cast<u8 *>(static_cast<u8 *>(object->field_0x788) + 0x68) & 1) != 0)) {
                 continue;
             }
@@ -852,18 +850,17 @@ void CollideGameObjects(WORLDINFO_s *world) {
             *maximum_cursor++ = object->apiobj.collision_max;
             *object_cursor++ = &object->apiobj;
 
-            object->apiobj.collision_mask_low = 0;
-            object->apiobj.collision_mask_high = 0;
+            object->apiobj.collision_exclusion_mask = 0;
             if ((data->flags_090 & 0x1000) != 0) {
-                object->apiobj.collision_mask_low = flattened_mask;
+                object->apiobj.collision_exclusion_mask = flattened_mask;
             }
 
             if (object->field_0x107c != -1) {
-                object->apiobj.collision_mask_low |= player_collision_mask;
+                object->apiobj.collision_exclusion_mask |= player_collision_mask;
                 for (i32 player_index = 0; player_index < 8; ++player_index) {
                     GameObject_s *player = Player[player_index];
                     if (player == NULL || (player->apiobj.field_0x1f8 & 0x1001) != 0x1001 ||
-                        __builtin_expect(player == object, 0) || player->field_0xdc4 <= 0.0f ||
+                        __builtin_expect(player == object, 0) || !(player->field_0xdc4 > 0.0f) ||
                         player->apiobj.supporting_platform_id != object->field_0x107c ||
                         (object->field_0x107c == player->field_0x1078 &&
                          (player->apiobj.field_0x27d != 0 || GameObjectNearFloor(player, 3.0f, NULL) != 0))) {
@@ -881,21 +878,21 @@ void CollideGameObjects(WORLDINFO_s *world) {
                 const u64 bit = static_cast<u64>(1) << object->airborne_collision_target->apiobj.field_0x289;
                 object->apiobj.collision_exclusion_mask |= bit;
             }
-            if (WORLD->current_level == SPEEDERCHASEA_LDATA && disable_narrow_socks == 0 &&
-                object->id == id_SPEEDERBIKE && __builtin_expect(object->apiobj.field_0x27c != -1, 0)) {
-                object->apiobj.collision_mask_low |= narrow_speeder_mask;
+            LEVELDATA_s *const level = WORLD->current_level;
+            if (level == SPEEDERCHASEA_LDATA && disable_narrow_socks == 0 && object->id == id_SPEEDERBIKE &&
+                __builtin_expect(object->apiobj.field_0x27c != -1, 0)) {
+                object->apiobj.collision_exclusion_mask |= narrow_speeder_mask;
             }
 
-            if (VehicleArea != 0 && WORLD->current_level != BOUNTYHUNTERPURSUITA_LDATA &&
-                WORLD->current_level != DOGFIGHTA_LDATA) {
+            if (VehicleArea != 0 && level != BOUNTYHUNTERPURSUITA_LDATA && level != DOGFIGHTA_LDATA) {
                 data = object->apiobj.character_data->game_character;
                 if (object->apiobj.field_0x27c == -1 && data->field_0x28 != 0.0f) {
-                    object->apiobj.collision_mask_low |=
+                    object->apiobj.collision_exclusion_mask |=
                         (vertical_movement_mask & player_slot_mask) | no_vertical_movement_mask;
-                } else if (__builtin_expect(data->field_0x28 == 0.0f, 1)) {
-                    object->apiobj.collision_mask_low |= (~player_slot_mask) & vertical_movement_mask;
+                } else if (data->field_0x28 != 0.0f) {
+                    object->apiobj.collision_exclusion_mask |= vertical_movement_mask;
                 } else {
-                    object->apiobj.collision_mask_low |= vertical_movement_mask;
+                    object->apiobj.collision_exclusion_mask |= (~player_slot_mask) & vertical_movement_mask;
                 }
             }
         }
@@ -3025,10 +3022,7 @@ hurt:
 finish:
     if (attacker && (attacker->apiobj.player_controlled)) {
         if (!no_rumble) {
-            if (result == 2)
-                KillRumble(attacker);
-            else
-                HitRumble(attacker);
+            if (result != 2) HitRumble(attacker); else KillRumble(attacker);
         }
         if (__builtin_expect(!(flags & 0x4000), 0) && result == 2 &&
             static_cast<u8>(attacker->apiobj.field_0x27c) <= 1 && Arcade)

@@ -827,9 +827,9 @@ void MenuDrawStore(MENU_s *) {
     char line[256];
     char discount[256];
     product.description[0] = 0;
-    product.price = 0.0f;
     StoreIAP[0].x = 0.0f;
     StoreIAP[0].y = 0.65f;
+    product.price = 0.0f;
     char *selected_product = *reinterpret_cast<char **>(&StorePack[menu_i_pack].field1_0x4);
     if (NuIOS_GetInAppProductByID(selected_product, reinterpret_cast<NuIOS_InAppProduct *>(&product)) != 0) {
         NuStrCpy(StoreIAP[0].text, product.price_text);
@@ -837,17 +837,17 @@ void MenuDrawStore(MENU_s *) {
     sprintf(line, "%s ~0%.2f~~", TTab[StorePack[menu_i_pack].message_text_index], static_cast<double>(product.price));
     Text3DEx(line, 0.0f, 0.54999995f, 1.0f, 0.4f, 0.4f, 0.4f, 1, 255, 191, 0, static_cast<u8>(MenuA));
     StoreIAP[0].title_y = 0.54999995f;
+    StoreIAP[0].width = text3d_width;
     f32 y = 0.54999995f + text3d_height;
     StoreIAP[0].bottom_y = y;
-    StoreIAP[0].width = text3d_width;
     if (product.description[0] != 0) {
         SmartTextEx(product.description, 0.0f, y, 1.0f, 0.3f, 0.3f, 0.3f, 1, 255, 127, 0, 1.9f, 2, &text_box, 0, MenuA);
         y -= text_box.height;
-        if (!(StoreIAP[0].width >= text_box.width)) {
+        if (text_box.width > StoreIAP[0].width) {
             StoreIAP[0].width = text_box.width;
         }
+        StoreIAP[0].bottom_y = y;
     }
-    StoreIAP[0].bottom_y = y;
 
     i32 slot = 1;
     for (i32 bundle_index = 0; bundle_index < 3; ++bundle_index) {
@@ -869,6 +869,7 @@ void MenuDrawStore(MENU_s *) {
         i32 character_ids[11];
         i32 already_owned[11];
         i32 count = 0;
+        STORE_PRODUCT_s pack_product;
         for (i32 pack = 0; pack < 11; ++pack) {
             if ((StoreBundle[bundle_index].pack_mask & (1 << pack)) == 0)
                 continue;
@@ -877,11 +878,9 @@ void MenuDrawStore(MENU_s *) {
                 already_owned[count] = 1;
             } else {
                 already_owned[count] = 0;
-                STORE_PRODUCT_s pack_product;
                 char *pack_product_id = *reinterpret_cast<char **>(&StorePack[pack].field1_0x4);
-                if (__builtin_expect(NuIOS_GetInAppProductByID(
-                                         pack_product_id, reinterpret_cast<NuIOS_InAppProduct *>(&pack_product)) != 0,
-                                     1)) {
+                if (NuIOS_GetInAppProductByID(pack_product_id, reinterpret_cast<NuIOS_InAppProduct *>(&pack_product)) !=
+                    0) {
                     separate_price += pack_product.price;
                 }
             }
@@ -913,11 +912,11 @@ void MenuDrawStore(MENU_s *) {
                 static_cast<double>(bundle_price));
         Text3DEx(line, 0.0f, y, 1.0f, 0.4f, 0.4f, 0.4f, 1, 255, 191, 0, static_cast<u8>(MenuA));
         StoreIAP[slot].title_y = y;
-        y += text3d_height;
-        StoreIAP[slot].bottom_y = y;
         if (StoreIAP[slot].width < text3d_width) {
             StoreIAP[slot].width = text3d_width;
         }
+        y += text3d_height;
+        StoreIAP[slot].bottom_y = y;
         if (product.description[0] != 0) {
             SmartTextEx(product.description, 0.0f, y, 1.0f, 0.3f, 0.3f, 0.3f, 1, 255, 127, 0, 1.9f, 2, &text_box, 0,
                         MenuA);
@@ -928,8 +927,8 @@ void MenuDrawStore(MENU_s *) {
             }
         }
         sprintf(discount, "~0%.2f~~", static_cast<double>(separate_price - bundle_price));
-        const i16 save_text = StoreBundle[bundle_index].pack_mask == 0xffffffffu ? tSAVE_SUPERBUNDLE : tSAVE_BUNDLE;
-        sprintf(line, TTab[save_text], discount);
+        sprintf(line, TTab[StoreBundle[bundle_index].pack_mask == 0xffffffffu ? tSAVE_SUPERBUNDLE : tSAVE_BUNDLE],
+                discount);
         SmartTextEx(line, 0.0f, y, 1.0f, 0.3f, 0.3f, 0.3f, 1, 0, 191, 255, 1.9f, 1, &text_box, 0, MenuA);
         y += text3d_height;
         StoreIAP[slot].bottom_y = y;

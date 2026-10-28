@@ -161,7 +161,7 @@ void Detonator_MoveCode(GameObject_s *object) {
         object->context_animation_timer -= FRAMETIME;
         if (__builtin_expect(object->context_animation_timer <= 0.0f, 0)) {
             object->character_context = -1;
-            if (object->field_0x7a3 != 0) {
+            if (__builtin_expect(object->field_0x7a3 != 0, 0)) {
                 return;
             }
             // Expiry falls through to placement, including an unfinished pickup.
@@ -236,7 +236,7 @@ void Detonator_MoveCode(GameObject_s *object) {
         if (object->field_0xde0 >= 0.3f && object->field_0xde0 >= 1.0f) {
             oldest_time = -1.0f;
             DETONATOR_s *oldest = NULL;
-            if (__builtin_expect(Detonator[0].active != 0, 0)) {
+            if (__builtin_expect(Detonator[0].active != 0, 1)) {
                 oldest = &Detonator[0];
                 oldest_time = Detonator[0].timer;
                 if (!(oldest_time > -1.0f)) {

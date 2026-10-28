@@ -693,14 +693,16 @@ static inline i32 ComboJump(GameObject_s *object) {
     if (object->apiobj.character_model->model_data_b[0x12] == NULL)
         return 0;
     SetComboOpponent(object, 1.0f, 0, 1);
+    f32 jump_speed = object->apiobj.character_data->game_character->second_jump_speed;
     object->jump_flags &= ~1;
     object->context_animation_timer = 0.0f;
     object->delayed_turn_timer = 0.0f;
     object->airborne_input_timer = 0.0f;
+    u8 variant_flags = object->context_variant_flags;
     object->field_0xe22 |= 0x10;
     object->character_context = 0;
-    object->apiobj.velocity.y = object->apiobj.character_data->game_character->second_jump_speed;
-    object->context_variant_flags &= 0x4f;
+    object->apiobj.velocity.y = jump_speed;
+    object->context_variant_flags = variant_flags & 0x4f;
     object->action_movement_state = 2;
     object->context_animation = 0x12;
     object->apiobj.field_0x27d = 0;
@@ -734,10 +736,11 @@ static void FindIncomingThreats(GameObject_s *object) {
         }
     }
     object->incoming_melee = melee;
-    GameObject_s *special = NULL;
-    if (((object->apiobj.character_data->model_flags & 8) != 0 || object->id == id_BODYGUARD ||
-         object->id == id_IMPERIALGUARD) &&
+    if (__builtin_expect((object->apiobj.character_data->model_flags & 8) != 0 || object->id == id_BODYGUARD ||
+                             __builtin_expect(object->id == id_IMPERIALGUARD, 1),
+                         1) &&
         HAS_BLOCK_ANIMS(animations)) {
+        GameObject_s *special = NULL;
         GameObject_s *target = Obj;
         for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++target) {
             if (target != object && (target->apiobj.field_0x1f8 & 0x1000) != 0 && target->apiobj.field_0x287 == 0 &&
@@ -748,8 +751,9 @@ static void FindIncomingThreats(GameObject_s *object) {
                 break;
             }
         }
-    }
-    object->incoming_special = special;
+        object->incoming_special = special;
+    } else
+        object->incoming_special = NULL;
     if (object->incoming_bolt == NULL && melee == NULL) {
         if (object->apiobj.field_0x27c == -1 || !HAS_BLOCK_ANIMS(animations))
             object->incoming_part = NULL;
@@ -1493,26 +1497,30 @@ static void LightSabreStreakCode(GameObject_s *object, i32 blade, i32 effect) {
     points[1] = *NUMTX_GET_ROW_VEC(&object->joint_matrices[joint_b], 3);
     if (__builtin_expect((object->sabre_flags & 2) != 0, 1)) {
         i32 colour;
-        if (object->apiobj.field_0x27c != -1 && Cheat_IsOn(25))
+        if (__builtin_expect(object->apiobj.field_0x27c != -1, 1) && Cheat_IsOn(25)) {
+            object->blade_states[blade] = 0;
             colour = 0;
-        else if (object->apiobj.field_0x27c != -1 && __builtin_expect(Player_HasPurpleForce(object) != 0, 0))
+        } else if (object->apiobj.field_0x27c != -1 && __builtin_expect(Player_HasPurpleForce(object) != 0, 0)) {
+            object->blade_states[blade] = 3;
             colour = 3;
-        else if (object->id == id_GRIEVOUS && __builtin_expect((blade == 3 || blade == 0) != 0, 1))
+        } else if (object->id == id_GRIEVOUS && __builtin_expect((blade == 3 || blade == 0) != 0, 1)) {
+            object->blade_states[blade] = 2;
             colour = 2;
-        else if (AnakinGreenSabre(object) || (object->id == id_BOB && object->random_layer_variant))
+        } else if (AnakinGreenSabre(object) || (object->id == id_BOB && object->random_layer_variant)) {
+            object->blade_states[blade] = 1;
             colour = 1;
-        else
+        } else {
             colour = static_cast<i8>(GCDataList[object->id].field_0x117);
-        object->blade_states[blade] = colour;
+            object->blade_states[blade] = colour;
+        }
         const u8 *rgb = BladeTab[colour].colour;
         const u32 red = rgb[0], green = rgb[1], blue = rgb[2];
         if (object->apiobj.model_draw_result != 0) {
             const u32 packed = 0xff000000u | red | (green << 8) | (blue << 16);
             AddStreakPoints(points, 0.25f, packed, &object->sabre_streaks[blade][0], 0, object);
             if (__builtin_expect(object->field_0x1087 != 0 && object->field_0x1020 != 2000000.0f, 0)) {
-                f32 plane = object->field_0x1020;
-                if (WORLD->current_level->unknown_0cc != 2000000.0f)
-                    plane = WORLD->current_level->unknown_0cc;
+                const f32 level_plane = WORLD->current_level->unknown_0cc;
+                const f32 plane = level_plane != 2000000.0f ? level_plane : object->field_0x1020;
                 NUVEC reflected[2] = {{points[0].x, plane - (points[0].y - plane), points[0].z},
                                       {points[1].x, plane - (points[1].y - plane), points[1].z}};
                 AddStreakPoints(reflected, 0.25f, packed, &object->sabre_streaks[blade][1], 1, object);
@@ -1546,10 +1554,10 @@ static void LightSabreStreakCode(GameObject_s *object, i32 blade, i32 effect) {
     if ((object->sabre_flags & 4) != 0) {
         NUVEC direction;
         u16 angle;
-        if (object->character_context != 16)
-            angle = object->apiobj.field_0x276;
-        else
+        if (object->character_context == 16)
             angle = object->apiobj.field_0x276 + 0x8000;
+        else
+            angle = object->apiobj.field_0x276;
         NuVecRotateY(&direction, &v001, angle);
         NuVecScale(&difference, &direction, 0.2f);
         NuVecAdd(&points[0], &object->apiobj.collision_position, &difference);
@@ -1578,7 +1586,7 @@ static void LightSabreStreakCode(GameObject_s *object, i32 blade, i32 effect) {
         else if (object->apiobj.field_0x27c != -1 && Player_HasPurpleForce(object))
             effect = 4;
         else if (object->id == id_GRIEVOUS)
-            effect = (blade == 3 || blade == 0) ? 3 : 2;
+            effect = __builtin_expect(blade == 3 || blade == 0, 1) ? 3 : 2;
         GameObject_s *nearest = NULL;
         i32 nearest_point = 0;
         f32 nearest_distance = 1000000.0f;
@@ -5210,9 +5218,8 @@ static void BlockCode(GameObject_s *object, i32 pressed, i32 held, i32 jump_pres
             }
             return;
         }
-        if (__builtin_expect(pressed == 0 || (object->incoming_bolt == NULL && object->incoming_melee == NULL &&
-                                              object->incoming_special == NULL && object->incoming_part == NULL),
-                             1)) {
+        if (pressed == 0 || (object->incoming_bolt == NULL && object->incoming_melee == NULL &&
+                             object->incoming_special == NULL && object->incoming_part == NULL)) {
             if (held != 0 && object->incoming_bolt != NULL) {
                 object->context_animation_timer = 0.2f;
                 return;
@@ -6452,16 +6459,16 @@ static void ForcePushCodeBody(GameObject_s *object, i32 held) {
                 CurrentAnim(&target->apiobj.anim_packet) == target->context_animation)
                 object->context_animation_timer += FRAMETIME;
             NewRumble(object->pad_gamepad->pad, qrand() * 1.5259022e-05f * 0.4f, 0);
-            f32 duration = object->force_direct_target                                         ? 0.4f
-                           : ((object->field_0xe20 & 0x80) != 0 || object->force_choke_target) ? 1.2f
-                                                                                               : 0.8f;
+            f32 duration = 0.4f;
+            if (!object->force_direct_target)
+                duration = (object->action_flags & 0x180) != 0 ? 1.2f : 0.8f;
             object->field_0x7a3 = 0;
             bool throw_target = false;
             if ((object->apiobj.flags_low & 0x80) != 0 && (object->apiobj.field_0x1f4 & 0x40000) == 0 &&
-                ForcePush_Waft && (target->apiobj.flags_low & 0x80) == 0 && !(object->context_animation_timer < 0.2f) &&
+                ForcePush_Waft && (target->apiobj.flags_low & 0x80) == 0 && object->context_animation_timer >= 0.2f &&
                 object->pad_gamepad->input_magnitude > 0.0f &&
                 (!object->force_choke_target || (GetGameCharacterData(target)->flags_090 & 0x4000) == 0) &&
-                ((object->field_0xe20 & 0x80) != 0 || object->force_choke_target)) {
+                (object->action_flags & 0x180) != 0) {
                 object->field_0x7a3 = 1;
                 object->external_force.x = NU_SIN_LUT(object->apiobj.facing_angle) * 0.5f + object->apiobj.position.x;
                 object->external_force.y = (object->apiobj.collision_max.y - object->apiobj.collision_min.y) * 0.75f +
@@ -6470,15 +6477,15 @@ static void ForcePushCodeBody(GameObject_s *object, i32 held) {
                 u16 angle = NuAtan2D(target->apiobj.position.x - object->apiobj.position.x,
                                      target->apiobj.position.z - object->apiobj.position.z);
                 i32 difference = RotDiff(GamePad_InputAngle(object, object->pad_gamepad), angle);
-                if ((difference < 0 ? -difference : difference) < 0xaaa)
+                if (__builtin_expect(abs(difference) >= 0xaaa, 1)) {
+                    if (duration - 0.3f <= object->context_animation_timer)
+                        object->context_animation_timer = duration - 0.3f;
+                } else
                     throw_target = true;
-                else if (duration - 0.3f <= object->context_animation_timer)
-                    object->context_animation_timer = duration - 0.3f;
             }
             if (object->context_animation_timer >= duration ||
-                (((object->field_0xe20 & 0x80) == 0 && (object->field_0xe21 & 3) == 0) &&
-                 object->context_animation_timer >= 0.2f && initial_target->field_0x1084 != 0 &&
-                 NuFabs(initial_target->contact_normal.y) < NU_SIN_LUT(0x6aaa))) {
+                ((object->action_flags & 0x380) == 0 && object->context_animation_timer >= 0.2f &&
+                 initial_target->field_0x1084 != 0 && NuFabs(initial_target->contact_normal.y) < NU_SIN_LUT(0x6aaa))) {
                 if (throw_target) {
                     object->force_target = NULL;
                     object->character_context = -1;
@@ -6511,7 +6518,7 @@ static void ForcePushCodeBody(GameObject_s *object, i32 held) {
                     SetFlicker(target, 0.4f);
                 } else {
                     bool deactivate = true;
-                    if (object->force_direct_target) {
+                    if (__builtin_expect(object->force_direct_target, 1)) {
                         if (DeactivatePlayer(target, 5.0f, NULL)) {
                             target->action_movement_state = 1;
                             target->field_0x768 = qrand() * 1.5259022e-05f * 0.3f + 0.2f;
@@ -6522,19 +6529,22 @@ static void ForcePushCodeBody(GameObject_s *object, i32 held) {
                                ((target->apiobj.character_data->model_flags & 0x10) != 0 && target->hitpoints >= 2))
                         DeactivatePlayer(target, DEACTIVATEDTIME, NULL);
                     else {
-                        bool immune = FreePlay != 0 && object->force_choke_target &&
-                                      (GetGameCharacterData(target)->flags_090 & 0x4000) != 0;
+                        i32 immune = 0;
+                        if (FreePlay != 0 && object->force_choke_target &&
+                            (GetGameCharacterData(target)->flags_090 & 0x4000) != 0)
+                            immune = 1;
                         i32 damage = immune                             ? 0
                                      : target->apiobj.field_0x27c == -1 ? static_cast<i8>(target->current_hp)
                                                                         : 1;
-                        u16 flags =
+                        i32 flags =
                             WORLD->current_level == BLOCKADERUNNERB_LDATA ? (object->apiobj.field_0x1f4 >> 10) & 1 : 0;
                         if (ObjHitObj(object, target, damage, flags, 0, 1) != 2 && (object->field_0xe20 & 0x80) != 0 &&
-                            !immune)
+                            immune == 0)
                             target->fall_animation_timer = 0.2f;
-                        if (object->force_target != NULL) {
-                            object->force_target->force_target = NULL;
-                            EndForce(object->force_target, 0);
+                        GameObject_s *other = object->force_target;
+                        if (other != NULL) {
+                            other->force_target = NULL;
+                            EndForce(other, 0);
                         }
                         object->force_target = NULL;
                         object->pad_gamepad->allocated_5a &= ~0x10;
@@ -6557,14 +6567,14 @@ static void ForcePushCodeBody(GameObject_s *object, i32 held) {
                                                : 0.2f;
     } else if ((object->apiobj.field_0x1f4 & 0x40000) == 0) {
         object->airborne_action_duration -= FRAMETIME;
-        if (!(object->airborne_action_duration > 0.0f)) {
+        if (object->airborne_action_duration <= 0.0f) {
             target = object->force_target;
             if (object->context_animation_timer >= 0.4f) {
                 if (target == NULL) {
                     ReleaseForce(object, 0);
                     return;
                 }
-                if ((target->apiobj.field_0x1f8 & 1) != 0 && target->apiobj.field_0x287 == 0 &&
+                if ((target->apiobj.field_0x1f8 & 1) != 0 && __builtin_expect(target->apiobj.field_0x287 == 0, 0) &&
                     (GetGameCharacterData(target)->uses_weapon_action == 4 || target->id == id_BATTLEDROIDSECURITY ||
                      target->id == id_GONKDROID || target->id == id_PKDROID || target->id == id_PITDROID)) {
                     DeactivatePlayer(target, DEACTIVATEDTIME * 0.5f, NULL);
@@ -8031,7 +8041,7 @@ void GameObjectStuffAfterAnimation() {
                         object->context_flags |= 0x40;
                 }
             }
-            if ((object->field_0xe23 & 4) != 0)
+            if (__builtin_expect((object->field_0xe23 & 4) != 0, 1))
                 Torpedo_Shoot(object);
         }
         if (drawn && ((object->apiobj.character_data->model_flags & 8) != 0 || object->id == id_BODYGUARD ||
@@ -8131,7 +8141,7 @@ void GameObjectStuffAfterAnimation() {
             AddSlamDebris(object);
         if (object->pad_e3c[0] != 0)
             Batarang_Release(object, object->pad_e3c[0]);
-        if (static_cast<i8>(object->field_0xe22) < 0)
+        if (__builtin_expect(static_cast<i8>(object->field_0xe22) < 0, 1))
             SuperCarry_Throw(object, 0);
         if ((object->field_0xe20 & 0x10) != 0) {
             i32 joint =
@@ -8252,11 +8262,11 @@ void GameObjectStuffAfterAnimation() {
                         }
                     }
                 }
-                if (hit && sabrerubwait <= 0.0f && object->apiobj.anim_packet.blending == 0 &&
+                if (__builtin_expect(hit && sabrerubwait <= 0.0f && object->apiobj.anim_packet.blending == 0 &&
                     object->character_context != 5 && object->character_context != 16 &&
                     object->character_context != 13 && object->character_context != 14 &&
                     (CInfo[object->character_context].flags & 0x4000000) == 0 &&
-                    ((CInfo[object->character_context].flags & 0x8000000) == 0 || (object->jump_flags & 2) == 0)) {
+                    ((CInfo[object->character_context].flags & 0x8000000) == 0 || (object->jump_flags & 2) == 0), 1)) {
                     PlaySabreSfx(const_cast<char *>("SaberSparks"), object, &points[blade], 1);
                     sabrerubwait = 0.3f + 0.3f * (static_cast<f32>(qrand()) * (1.0f / 65535.0f));
                     if (GetMenuID() == -1)

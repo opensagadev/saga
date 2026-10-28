@@ -1086,7 +1086,7 @@ bool MechInputTouchGestureBasedController::OnClick(GameObject_s &object, TouchHo
             return true;
         }
         if (target != NULL && (target->GetObjectType() == 4 || target->GetObjectType() == 2)) {
-            if (__builtin_expect(TouchHacks::CanShoot(object) != 0, 1)) {
+            if (TouchHacks::CanShoot(object) != 0) {
                 ForceNextShootTarget(*target);
                 button_was_pressed[0] = 1;
                 return true;

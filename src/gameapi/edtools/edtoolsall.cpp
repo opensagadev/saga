@@ -1919,10 +1919,10 @@ extern "C" {
         picker->selected_point = -1;
         f32 closest = 1.0f;
         for (i32 point = 0; point < picker->graph->point_count; ++point) {
-            i32 py = plot_bottom - static_cast<i32>(picker->graph->y[point] * graph_height);
             i32 px = plot_x + static_cast<i32>(picker->graph->x[point] * graph_width);
+            i32 py = plot_bottom - static_cast<i32>(picker->graph->y[point] * graph_height);
             eduiDrawLine((px - 10) << 4, py << 3, (px + 10) << 4, py << 3, 0x80505050, uimtls[0]);
-            eduiDrawLine(px << 4, (py << 3) - 80, px << 4, (py << 3) + 80, 0x80505050, uimtls[0]);
+            eduiDrawLine(px << 4, (py - 10) << 3, px << 4, (py + 10) << 3, 0x80505050, uimtls[0]);
             f32 distance =
                 fabsf(picker->cursor_x - picker->graph->x[point]) + fabsf(picker->cursor_y - picker->graph->y[point]);
             if (distance < closest && distance < 0.05f) {
@@ -1935,25 +1935,28 @@ extern "C" {
                 eduiRenderGraphLine(picker->onion_skins[skin], plot_x, plot_y, graph_width, graph_height, 0x80402000);
         }
         eduiRenderGraphLine(picker->graph, plot_x, plot_y, graph_width, graph_height, 0x80800000);
-        if (picker->selected_point >= 0 && !edui_donotdraw) {
+        if (picker->selected_point >= 0) {
             i32 point = picker->selected_point;
-            NuRndrLineRect2di((plot_x + static_cast<i32>(picker->graph->x[point] * graph_width) - 6) << 4,
-                              ((plot_bottom - static_cast<i32>(picker->graph->y[point] * graph_height)) << 3) - 48, 192,
-                              96, 0x80ffffff, uimtls[ui_outmtl]);
+            f32 point_x = picker->graph->x[point];
+            f32 point_y = picker->graph->y[point];
+            eduiDrawLineRect((plot_x + static_cast<i32>(point_x * graph_width) - 6) << 4,
+                             ((plot_bottom - static_cast<i32>(point_y * graph_height)) << 3) - 48, 192, 96, 0x80ffffff,
+                             uimtls[ui_outmtl]);
         }
         if (show_x_scale_help || show_y_scale_help) {
-            i32 help_x = (plot_x + (graph_width >> 1)) << 4;
             eduiDrawFontSet(edui_font);
             i32 help_y = plot_y << 3;
             help_y += static_cast<i32>(NuQFntHeight(edui_font));
             eduiSetFontColour(edui_font, 0x80808080);
-            eduiFntPrintExCentre(edui_font, help_x, help_y, 64, "Scaling %c Axis", show_x_scale_help ? 'X' : 'Y');
+            eduiFntPrintExCentre(edui_font, (plot_x + (graph_width >> 1)) << 4, help_y, 64, "Scaling %c Axis",
+                                 show_x_scale_help ? 'X' : 'Y');
             help_y += static_cast<i32>(NuQFntHeight(edui_font));
-            eduiFntPrintExCentre(edui_font, help_x, help_y, 64, "%1.03f",
+            eduiFntPrintExCentre(edui_font, (plot_x + (graph_width >> 1)) << 4, help_y, 64, "%1.03f",
                                  show_x_scale_help ? picker->graph->x_scale : picker->graph->y_scale);
             help_y += static_cast<i32>(NuQFntHeight(edui_font));
         }
         i32 label_height = static_cast<i32>(NuQFntHeight(edui_font) * 1.125f) >> 3;
+        i32 result = total_height + label_height;
         i32 label_y = (y + total_height) << 3;
         f32 label_font_height = NuQFntHeight(edui_font);
         i32 label_baseline = static_cast<i32>(NuQFntBaseline(edui_font)) +
@@ -1972,7 +1975,7 @@ extern "C" {
                        "Cursor pos = %1.02f, %1.02f",
                        picker->cursor_x * picker->graph->x_scale * picker->graph->x_extent,
                        picker->cursor_y * picker->graph->y_scale * picker->graph->y_extent);
-        return total_height + label_height;
+        return result;
     }
 
     static __used__ i32 eduicbRenderFilePick(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width, i32) {
@@ -5084,11 +5087,13 @@ extern "C" {
             }
         }
         for (i32 depth = 0; depth < expander->depth; ++depth) {
-            if (__builtin_expect(!edui_donotdraw, 1)) {
-                const i32 guide_x =
-                    static_cast<i32>((item_x + (static_cast<f32>(depth) + 0.5f) * (row_height - 2.0f)) * 16.0f);
-                NuRndrLine2di(guide_x, static_cast<i32>(item_y * 8.0f), guide_x,
-                              static_cast<i32>((item_y + row_height) * 8.0f), 0xff000000, uimtls[0]);
+            const f32 guide_size = row_height - 2.0f;
+            const f32 guide_bottom = item_y + row_height;
+            NUMTL *material = uimtls[0];
+            if (!edui_donotdraw) {
+                const i32 guide_x = static_cast<i32>((item_x + (static_cast<f32>(depth) + 0.5f) * guide_size) * 16.0f);
+                NuRndrLine2di(guide_x, static_cast<i32>(item_y * 8.0f), guide_x, static_cast<i32>(guide_bottom * 8.0f),
+                              0xff000000, material);
             }
         }
         expander->button_size = row_height - 2.0f;

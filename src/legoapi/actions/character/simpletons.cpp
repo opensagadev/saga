@@ -428,10 +428,7 @@ void UpdateMiniSnowTroopers(WORLDINFO_s *world) {
         teams[team_index].fire_timer -= FRAMETIME;
         if (teams[team_index].fire_timer <= 0.0f) {
             shoot_due = teams[team_index].state_flags & 1;
-            if ((teams[team_index].team_flags & 2) != 0)
-                teams[team_index].fire_timer = 0.5f;
-            else
-                teams[team_index].fire_timer = 1.0f;
+            if ((teams[team_index].team_flags & 2) == 0) teams[team_index].fire_timer = 1.0f; else teams[team_index].fire_timer = 0.5f;
         }
 
         teams[team_index].origin_x = teams[team_index].route_point->x;
@@ -512,16 +509,7 @@ void UpdateMiniSnowTroopers(WORLDINFO_s *world) {
                     if (__builtin_expect(i == selected && shoot_due != 0, 1))
                         shot = TrooperShoot(world, &teams[team_index], trooper, &shot_angle, team_index);
 
-                    if (__builtin_expect(trooper->stopped != 0, 1)) {
-                        ++stopped_count;
-                        trooper->rotation =
-                            SeekRot(trooper->rotation, trooper->target_rotation, MiniTrooperTurnSpeed());
-                        if (__builtin_expect(static_cast<i32>(trooper->rotation) -
-                                                     static_cast<i32>(trooper->target_rotation) <=
-                                                 0x16c,
-                                             1))
-                            MiniTrooperSetWanderTarget(trooper, shot, &shot_angle);
-                    } else {
+                    if (__builtin_expect(!(trooper->stopped != 0), 0)) {
                         const minisnowtrooper_s *slot = &teams[team_index].troopers[trooper->formation_index];
                         const f32 target_x = teams[team_index].origin_x + slot->formation_x;
                         const f32 target_z = teams[team_index].origin_z + slot->formation_z;
@@ -531,6 +519,15 @@ void UpdateMiniSnowTroopers(WORLDINFO_s *world) {
                             trooper->stopped = 1;
                             ++stopped_count;
                         }
+                    } else {
+                        ++stopped_count;
+                        trooper->rotation =
+                            SeekRot(trooper->rotation, trooper->target_rotation, MiniTrooperTurnSpeed());
+                        if (__builtin_expect(static_cast<i32>(trooper->rotation) -
+                                                     static_cast<i32>(trooper->target_rotation) <=
+                                                 0x16c,
+                                             1))
+                            MiniTrooperSetWanderTarget(trooper, shot, &shot_angle);
                     }
                     if (trooper->stopped == 0) {
                         const minisnowtrooper_s *slot = &teams[team_index].troopers[trooper->formation_index];

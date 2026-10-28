@@ -663,10 +663,10 @@ static void NuShaderObjectGLSLSetCustomSetterParameters(nushaderobjectglsl_s *gl
                 break;
             }
             case 30: {
-                values30[2] = 0.0f;
-                values30[3] = 0.0f;
                 values30[0] = materialFloat(0x1b8);
                 values30[1] = materialFloat(0x1bc);
+                values30[2] = 0.0f;
+                values30[3] = 0.0f;
                 four_values = values30;
                 goto upload_four;
             }
@@ -736,9 +736,9 @@ static void NuShaderObjectGLSLSetCustomSetterParameters(nushaderobjectglsl_s *gl
                 break;
             case 45: {
                 values45[0] = 0.05f;
-                values45[1] = 0.32f * materialFloat(0x60);
                 values45[2] = 0.2f;
                 values45[3] = 0.8f;
+                values45[1] = 0.32f * materialFloat(0x60);
                 four_values = values45;
                 goto upload_four;
             }
@@ -756,10 +756,10 @@ static void NuShaderObjectGLSLSetCustomSetterParameters(nushaderobjectglsl_s *gl
                 break;
             }
             case 48: {
-                values48[2] = 0.0f;
-                values48[3] = 0.0f;
                 values48[0] = materialFloat(0x260);
                 values48[1] = materialFloat(0x264);
+                values48[2] = 0.0f;
+                values48[3] = 0.0f;
                 four_values = values48;
                 goto upload_four;
             }
@@ -790,28 +790,32 @@ static void NuShaderObjectGLSLSetCustomSetterParameters(nushaderobjectglsl_s *gl
                 // Original .L35 at 0x30a8d8.  GLES has no fixed-function
                 // alpha test, so generated shaders consume the current
                 // render-state comparison as (sign, adjusted reference).
-                const f32 alpha_ref = static_cast<f32>(g_alphaRef) * (1.0f / 255.0f);
-                if (g_alphaTestEnabled == 0) {
-                    values52[0] = 0.0f;
-                    values52[1] = -1.0f;
-                } else if (g_alphaFunc == 2) {
-                    values52[0] = -1.0f;
-                    values52[1] = static_cast<f32>(0u - g_alphaRef) * (1.0f / 255.0f) - (1.0f / 255.0f);
-                    if (values52[1] <= 0.0f) {
-                        values52[1] = 0.0f;
-                    }
-                } else if (__builtin_expect(g_alphaFunc == 3, 0)) {
-                    values52[0] = -1.0f;
-                    values52[1] = static_cast<f32>(0u - g_alphaRef) * (1.0f / 255.0f);
-                } else if (g_alphaFunc == 5) {
-                    values52[0] = 1.0f;
-                    values52[1] = alpha_ref;
-                } else if (__builtin_expect(g_alphaFunc == 6, 0)) {
-                    values52[0] = 1.0f;
-                    values52[1] = alpha_ref + (1.0f / 255.0f);
-                } else {
-                    values52[0] = 0.0f;
-                    values52[1] = -1.0f;
+                if (__builtin_expect(g_alphaTestEnabled == 0, 0)) {
+                    goto alpha_disabled;
+                }
+                switch (g_alphaFunc) {
+                    case 2:
+                        values52[0] = -1.0f;
+                        values52[1] = static_cast<f32>(0u - g_alphaRef) * (1.0f / 255.0f) - (1.0f / 255.0f);
+                        values52[1] = values52[1] > 0.0f ? values52[1] : 0.0f;
+                        break;
+                    case 3:
+                        values52[0] = -1.0f;
+                        values52[1] = static_cast<f32>(0u - g_alphaRef) * (1.0f / 255.0f);
+                        break;
+                    case 5:
+                        values52[0] = 1.0f;
+                        values52[1] = static_cast<f32>(g_alphaRef) * (1.0f / 255.0f);
+                        break;
+                    case 6:
+                        values52[0] = 1.0f;
+                        values52[1] = static_cast<f32>(g_alphaRef) * (1.0f / 255.0f) + (1.0f / 255.0f);
+                        break;
+                    default:
+                    alpha_disabled:
+                        values52[0] = 0.0f;
+                        values52[1] = -1.0f;
+                        break;
                 }
                 glUniform2fv(parameter.location, 1, values52);
                 break;

@@ -1904,7 +1904,7 @@ extern "C" {
             up_held = down_held = 0;
         if (left_held != 0 && right_held != 0)
             left_held = right_held = 0;
-        if (action_04_pressed != 0 && action_08_pressed != 0)
+        if (__builtin_expect(action_04_pressed != 0 && action_08_pressed != 0, 1))
             action_04_pressed = action_08_pressed = 0;
 
         menu->input_activity = 0;
@@ -1971,12 +1971,12 @@ extern "C" {
                     menu->selected_row = last_row;
                     row_clamped = true;
                 } else if (down_pressed != 0 && (wrap || menu->selected_row < last_row)) {
-                    if (__builtin_expect(!wrap, 0)) {
-                        ++menu->selected_row;
-                    } else {
+                    if (__builtin_expect(wrap, 1)) {
                         ++menu->selected_row;
                         if (menu->selected_row > last_row)
                             menu->selected_row = first_row;
+                    } else {
+                        ++menu->selected_row;
                     }
                 } else if (up_pressed != 0 && (wrap || menu->selected_row > first_row)) {
                     if (!wrap) {
@@ -1999,23 +1999,23 @@ extern "C" {
             previous_item = old_row;
             const bool column_navigation = menu->state == 1 || (menu->state == 2 && menu->selected_row == 0) ||
                                            (menu->state == 3 && menu->selected_row != last_row);
-            if (column_navigation) {
+            if (!(column_navigation)) {
+                item_time = menu->unk;
+            } else {
                 const i16 old_column = menu->selected_column;
                 previous_item = old_column;
                 if (menu->selected_column < first_column)
                     menu->selected_column = first_column;
                 else if (menu->selected_column > last_column)
                     menu->selected_column = last_column;
-                if (right_pressed != 0 && menu->selected_column < last_column)
+                if (__builtin_expect(right_pressed != 0 && menu->selected_column < last_column, 1))
                     ++menu->selected_column;
-                else if (left_pressed != 0 && menu->selected_column > first_column)
+                else if (__builtin_expect(left_pressed != 0 && menu->selected_column > first_column, 1))
                     --menu->selected_column;
                 if (menu->selected_column != old_column)
                     MenuSFX = MENUSFX_MENUMOVE;
                 else
                     item_time = menu->unk;
-            } else {
-                item_time = menu->unk;
             }
         }
         menu->selected_item = menu->selected_row;
@@ -2651,7 +2651,7 @@ extern "C" {
             NuQFntPushPrintMode(2);
         unsigned char decoded[512];
         TextDecode(text, decoded);
-        if (followon_line == 0)
+        if (__builtin_expect(followon_line == 0, 1))
             NuQFntSet(SmartTextFont != NULL ? SmartTextFont : QFont2D);
         draw_x_scale *= x_scale;
         draw_y_scale *= y_scale;
@@ -2712,7 +2712,7 @@ extern "C" {
         }
         if ((alignment & 4) != 0)
             draw_y -= height * 0.5f;
-        else if ((alignment & 1) != 0)
+        else if (__builtin_expect((alignment & 1) != 0, 0))
             draw_y += height * 0.5f;
         if ((alignment & 2) == 0)
             x -= (alignment & 8) != 0 ? width : width * 0.5f;
@@ -3144,7 +3144,7 @@ extern "C" {
             y_scale = saved_y_scale * y_scale;
             APITEXTSCALEX = 1.0f;
             APITEXTSCALEY = 1.0f;
-            if (__builtin_expect(smarttextex_drawmessagebox != 0, 1))
+            if (smarttextex_drawmessagebox != 0)
                 message_box = message_box != NULL ? message_box : &local_box;
             BoxGeometry *box = static_cast<BoxGeometry *>(message_box);
             x *= STCOORDSCALE;
@@ -3212,7 +3212,7 @@ extern "C" {
                     lines[line][length] = '\0';
                     Text3DStringEncode(reinterpret_cast<char *>(lines[line]), encoded);
                     const f32 line_width = NuQFntPrintLenW(SmartTextFont != NULL ? SmartTextFont : QFont2D, encoded);
-                    if (width < line_width) {
+                    if (__builtin_expect(width < line_width, 1)) {
                         widest_line = line;
                         width = line_width;
                     }
@@ -3222,58 +3222,7 @@ extern "C" {
                 last_line = explicit_breaks;
             } else if (last_line != 0) {
                 width = 0.0f;
-                if ((alignment & 10) != 0 && !constrained) {
-                    i32 end = 0;
-                    i32 begin = 0;
-                    i32 line = 0;
-                    do {
-                        while (decoded[begin] == ' ')
-                            ++begin;
-                        if (line == last_line) {
-                            end = bytes - 1;
-                        } else {
-                            i32 next = begin;
-                            if (available_width > 0.0f) {
-                                do {
-                                    end = next;
-                                    next = end + 1;
-                                    while (decoded[next] == ' ')
-                                        ++next;
-                                    if (next == bytes) {
-                                        end = bytes - 1;
-                                        break;
-                                    }
-                                    next = FindNextBreak(decoded, next);
-                                    if (static_cast<u8>(decoded[next] - ',') > 2) {
-                                        --next;
-                                        while (decoded[next] == ' ')
-                                            --next;
-                                    }
-                                    i32 length = next - begin + 1;
-                                    if (length > 511)
-                                        length = 511;
-                                    memcpy(candidate, decoded + begin, length);
-                                    candidate[length] = '\0';
-                                    Text3DStringEncode(reinterpret_cast<char *>(candidate), encoded);
-                                } while (NuQFntPrintLenW(SmartTextFont != NULL ? SmartTextFont : QFont2D, encoded) <
-                                         available_width);
-                            }
-                        }
-                        i32 length = end - begin + 1;
-                        if (length > 511)
-                            length = 511;
-                        memcpy(lines[line], decoded + begin, length);
-                        lines[line][length] = '\0';
-                        Text3DStringEncode(reinterpret_cast<char *>(lines[line]), encoded);
-                        const f32 line_width =
-                            NuQFntPrintLenW(SmartTextFont != NULL ? SmartTextFont : QFont2D, encoded);
-                        if (width < line_width) {
-                            widest_line = line;
-                            width = line_width;
-                        }
-                        begin = end + 1;
-                    } while (++line <= last_line);
-                } else {
+                if (!((alignment & 10) != 0 && !constrained)) {
                     const i32 count = last_line + 1;
                     i32 line = 0;
                     do {
@@ -3303,6 +3252,57 @@ extern "C" {
                             widest_line = line;
                             width = line_width;
                         }
+                    } while (++line <= last_line);
+                } else {
+                    i32 end = 0;
+                    i32 begin = 0;
+                    i32 line = 0;
+                    do {
+                        while (decoded[begin] == ' ')
+                            ++begin;
+                        if (line == last_line) {
+                            end = bytes - 1;
+                        } else {
+                            i32 next = begin;
+                            if (__builtin_expect(available_width > 0.0f, 1)) {
+                                do {
+                                    end = next;
+                                    next = end + 1;
+                                    while (decoded[next] == ' ')
+                                        ++next;
+                                    if (next == bytes) {
+                                        end = bytes - 1;
+                                        break;
+                                    }
+                                    next = FindNextBreak(decoded, next);
+                                    if (static_cast<u8>(decoded[next] - ',') > 2) {
+                                        --next;
+                                        while (decoded[next] == ' ')
+                                            --next;
+                                    }
+                                    i32 length = next - begin + 1;
+                                    if (length > 511)
+                                        length = 511;
+                                    memcpy(candidate, decoded + begin, length);
+                                    candidate[length] = '\0';
+                                    Text3DStringEncode(reinterpret_cast<char *>(candidate), encoded);
+                                } while (__builtin_expect(NuQFntPrintLenW(SmartTextFont != NULL ? SmartTextFont : QFont2D, encoded) <
+                                         available_width, 0));
+                            }
+                        }
+                        i32 length = end - begin + 1;
+                        if (length > 511)
+                            length = 511;
+                        memcpy(lines[line], decoded + begin, length);
+                        lines[line][length] = '\0';
+                        Text3DStringEncode(reinterpret_cast<char *>(lines[line]), encoded);
+                        const f32 line_width =
+                            NuQFntPrintLenW(SmartTextFont != NULL ? SmartTextFont : QFont2D, encoded);
+                        if (width < line_width) {
+                            widest_line = line;
+                            width = line_width;
+                        }
+                        begin = end + 1;
                     } while (++line <= last_line);
                 }
             }

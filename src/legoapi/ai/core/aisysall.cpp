@@ -15701,7 +15701,7 @@ extern "C" {
                      locator != NULL; locator = reinterpret_cast<EDLOCATOR_s *>(
                                           NuLinkedListGetNext(&aieditor->locators, &locator->link))) {
                     locator->runtime_index = 0xff;
-                    if (__builtin_expect(locator->path == NULL, 0)) {
+                    if (locator->path == NULL) {
                         continue;
                     }
                     locator->runtime_index = index;
@@ -15709,7 +15709,8 @@ extern "C" {
                     strcpy(runtime->name, locator->name);
                     runtime->position = locator->position;
                     runtime->direction = locator->direction;
-                    runtime->locator_flags = locator->path_angle;
+                    i32 angle = locator->path_angle;
+                    runtime->locator_flags = angle;
                     runtime->path_info.path = aieditor->ai_system->path_sys->paths[locator->path->draw_index];
                     runtime->path_info.dist = locator->path_fraction;
                     runtime->path_info.width = locator->path_width;
@@ -15719,18 +15720,16 @@ extern "C" {
                             AIPATHCNX *connection = &path->connections[connection_index];
                             i32 first = locator->first_node->index;
                             i32 second = locator->second_node->index;
-                            i32 angle = locator->path_angle;
-                            i32 magnitude = angle < 0 ? -angle : angle;
                             if (connection->node_indices[0] == first && connection->node_indices[1] == second) {
                                 runtime->path_info.connection = connection;
-                                runtime->path_info.direction = magnitude > 0x3fff;
+                                runtime->path_info.direction = (angle < 0 ? -angle : angle) > 0x3fff;
                                 break;
                             }
                             if (connection->node_indices[0] == second && connection->node_indices[1] == first) {
                                 runtime->path_info.connection = connection;
                                 runtime->path_info.dist = 1.0f - locator->path_fraction;
                                 runtime->path_info.width = -locator->path_width;
-                                runtime->path_info.direction = magnitude <= 0x3fff;
+                                runtime->path_info.direction = (angle < 0 ? -angle : angle) <= 0x3fff;
                                 break;
                             }
                         }
@@ -15758,7 +15757,10 @@ extern "C" {
                         AILOCATORSET *runtime = &aieditor->ai_system->locator_sets[index++];
                         strcpy(runtime->name, set->name);
                         runtime->locator_count = 0;
-                        for (i32 member = 0; member < 64 && set->locators[member] != NULL; ++member) {
+                        for (i32 member = 0; member < 64; ++member) {
+                            if (set->locators[member] == NULL) {
+                                break;
+                            }
                             if (set->locators[member]->runtime_index != 0xff) {
                                 ++runtime->locator_count;
                             }
@@ -15808,8 +15810,8 @@ extern "C" {
                     runtime->x_spacing = creature->x_spacing;
                     runtime->z_spacing = creature->z_spacing;
                     runtime->flags = creature->flags;
-                    runtime->pos = creature->position;
                     runtime->y_rot = creature->angle;
+                    runtime->pos = creature->position;
                     runtime->path_info.path =
                         aieditor->ai_system->path_sys->paths[creature->path_check.path->draw_index];
                     runtime->path_info.dist = creature->path_check.fraction;
@@ -15819,23 +15821,24 @@ extern "C" {
                     }
 
                     AIPATH *path = runtime->path_info.path;
-                    if (path != NULL && path->connection_count != 0) {
-                        for (i32 connection_index = 0; connection_index < path->connection_count; ++connection_index) {
+                    i32 connection_count;
+                    if (path != NULL && (connection_count = path->connection_count) != 0) {
+                        for (i32 connection_index = 0; connection_index < connection_count; ++connection_index) {
                             AIPATHCNX *connection = &path->connections[connection_index];
                             i32 first = creature->path_check.first->index;
-                            i32 angle = creature->path_check.angle;
                             i32 second = creature->path_check.second->index;
-                            i32 magnitude = angle < 0 ? -angle : angle;
                             if (connection->node_indices[0] == first && connection->node_indices[1] == second) {
+                                i32 angle = creature->path_check.angle;
                                 runtime->path_info.connection = connection;
-                                runtime->path_info.direction = magnitude > 0x3fff;
+                                runtime->path_info.direction = (angle < 0 ? -angle : angle) > 0x3fff;
                                 break;
                             }
                             if (connection->node_indices[0] == second && connection->node_indices[1] == first) {
+                                i32 angle = creature->path_check.angle;
                                 runtime->path_info.connection = connection;
                                 runtime->path_info.dist = 1.0f - creature->path_check.fraction;
                                 runtime->path_info.width = -creature->path_check.width;
-                                runtime->path_info.direction = magnitude <= 0x3fff;
+                                runtime->path_info.direction = (angle < 0 ? -angle : angle) <= 0x3fff;
                                 break;
                             }
                         }
@@ -15929,22 +15932,25 @@ extern "C" {
                 if (NuSpecialExistsFn(&runtime->special_handle)) {
                     runtime->has_special = 1;
                 }
-                runtime->min_y = node->position.y + node->lower_height;
-                runtime->min_y_offset = runtime->min_y - node->position.y;
-                runtime->max_y = node->position.y + node->upper_height;
-                runtime->max_y_offset = runtime->max_y - node->position.y;
                 runtime->special_position = node->special_position;
-                runtime->flags = node->flags;
                 runtime->rotation_offset = node->rotation_offset;
+                runtime->flags = node->flags;
+                f32 y = runtime->position.y;
+                f32 min_y = y + node->lower_height;
+                f32 max_y = y + node->upper_height;
+                runtime->min_y = min_y;
+                runtime->min_y_offset = min_y - y;
+                runtime->max_y = max_y;
+                runtime->max_y_offset = max_y - y;
                 runtime->base_radius = node->base_radius;
                 runtime->base_height = node->base_height;
                 runtime->type = node->type;
-                if (__builtin_expect(runtime->type == 1, 0)) {
-                    runtime->radius =
-                        runtime->base_radius > runtime->base_height ? runtime->base_radius : runtime->base_height;
-                } else if (runtime->type == 2) {
+                if (runtime->type == 2) {
                     runtime->radius = NuFsqrt(runtime->base_radius * runtime->base_radius +
                                               runtime->base_height * runtime->base_height);
+                } else if (runtime->type == 1) {
+                    runtime->radius =
+                        runtime->base_radius < runtime->base_height ? runtime->base_height : runtime->base_radius;
                 }
             }
         }
@@ -17097,7 +17103,7 @@ __attribute__((optimize("no-tree-vectorize"))) eduimenu_s *locatorEditor_Process
                 return menu;
             }
         }
-        memset(aieditor->pending_locator_name, 0, sizeof(aieditor->pending_locator_name));
+        memset(__builtin_assume_aligned(aieditor->pending_locator_name, 4), 0, sizeof(aieditor->pending_locator_name));
     }
     goto process_buttons;
 
@@ -17161,13 +17167,13 @@ process_buttons:
 
             if (aieditor->current_locator_set != nullptr && NuStrLen(aieditor->current_locator_set->name) != 0) {
                 NuStrCpy(base, aieditor->current_locator_set->name);
-            } else if (__builtin_expect(previous != nullptr, 0)) {
+            } else if (previous != nullptr) {
                 NuStrCpy(base, previous->name);
             } else {
                 NuStrCpy(base, "Locator");
             }
             char *suffix = strrchr(base, '_');
-            if (__builtin_expect(suffix != nullptr, 0)) {
+            if (suffix != nullptr) {
                 *suffix = 0;
             }
             AIEDITOR_RENDER_STATE *context = aieditor;
@@ -17197,10 +17203,10 @@ process_buttons:
                 locator = aieditor->current_locator;
                 memcpy(locator->path_check, reinterpret_cast<u8 *>(aieditor) + 0x48, 0x1c);
                 locator->path_angle = NuAngSub(locator->direction, locator->path_angle);
-                if (aieditor->current_locator_set != nullptr) {
-                    locator = aieditor->current_locator;
-                    EDLOCATOR_s *before = previous != locator ? previous : nullptr;
-                    AddLocatorToSet(aieditor->current_locator_set, locator, before);
+                if (previous != nullptr && aieditor->current_locator != previous) {
+                    AddLocatorToSet(aieditor->current_locator_set, aieditor->current_locator, previous);
+                } else {
+                    AddLocatorToSetAtEnd(aieditor->current_locator_set, aieditor->current_locator);
                 }
             }
         }
@@ -17216,37 +17222,24 @@ process_buttons:
     } else if ((pad->digital_buttons_pressed & 0x10) != 0) {
         // A delete press without a matching selected locator only refreshes hover state.
     } else if ((pad->digital_buttons & 0x100) != 0) {
-        EDLOCATOR_s *next = nullptr;
-        if ((pad->digital_buttons_pressed & (0x08 | 0x02)) != 0) {
+        if ((pad->digital_buttons_pressed & 0x08) != 0) {
             EDLOCATORSET_s *set = aieditor->current_locator_set;
             if (set != nullptr) {
-                i32 index = -1;
-                auto aieditor_current_locator = aieditor->current_locator;
-                for (i32 i = 0; i < 64; ++i) {
-                    if (set->locators[i] == aieditor_current_locator) {
-                        index = i;
-                        break;
-                    }
-                }
-                if ((pad->digital_buttons_pressed & 0x08) == 0) {
-                    if (__builtin_expect(aieditor->current_locator == nullptr, 0)) {
-                        next = set->locators[0];
-                    } else if (index > 0) {
-                        next = set->locators[index - 1];
-                    } else {
-                        for (i32 i = 63; i >= 0; --i) {
-                            if (set->locators[i] == nullptr) {
-                                continue;
-                            }
-                            next = set->locators[i];
+                EDLOCATOR_s *current = aieditor->current_locator;
+                EDLOCATOR_s *next = nullptr;
+                if (current != nullptr) {
+                    for (i32 i = 0; i < 64; ++i) {
+                        if (set->locators[i] == current && i < 63 && set->locators[i + 1] != nullptr) {
+                            next = set->locators[i + 1];
                             break;
                         }
                     }
-                } else {
-                    next = index < 0 || index >= 63 || set->locators[index + 1] == nullptr ? set->locators[0]
-                                                                                           : set->locators[index + 1];
                 }
-            } else if ((pad->digital_buttons_pressed & 0x08) != 0) {
+                if (next == nullptr) {
+                    next = set->locators[0];
+                }
+                aieditor->current_locator = next;
+            } else {
                 if (aieditor->current_locator != nullptr) {
                     EDLOCATOR_s *&selection = aieditor->current_locator;
                     selection = (EDLOCATOR_s *)NuLinkedListGetNext(&aieditor->locators, &selection->link);
@@ -17255,7 +17248,37 @@ process_buttons:
                     EDLOCATOR_s *&selection = aieditor->current_locator;
                     selection = (EDLOCATOR_s *)NuLinkedListGetHead(&aieditor->locators);
                 }
-                next = aieditor->current_locator;
+            }
+        } else if ((pad->digital_buttons_pressed & 0x02) != 0) {
+            EDLOCATORSET_s *set = aieditor->current_locator_set;
+            if (set != nullptr) {
+                EDLOCATOR_s *current = aieditor->current_locator;
+                EDLOCATOR_s *next = nullptr;
+                if (current == nullptr) {
+                    next = set->locators[0];
+                } else {
+                    i32 index = -1;
+                    for (i32 i = 0; i < 64; ++i) {
+                        if (set->locators[i] == current) {
+                            index = i;
+                            break;
+                        }
+                    }
+                    if (index > 0) {
+                        next = set->locators[index - 1];
+                    } else {
+                        for (i32 i = 63; i >= 0; --i) {
+                            if (set->locators[i] != nullptr) {
+                                next = set->locators[i];
+                                break;
+                            }
+                        }
+                        if (next == nullptr) {
+                            next = set->locators[0];
+                        }
+                    }
+                }
+                aieditor->current_locator = next;
             } else {
                 if (aieditor->current_locator != nullptr) {
                     EDLOCATOR_s *&selection = aieditor->current_locator;
@@ -17265,83 +17288,96 @@ process_buttons:
                     EDLOCATOR_s *&selection = aieditor->current_locator;
                     selection = (EDLOCATOR_s *)NuLinkedListGetTail(&aieditor->locators);
                 }
-                next = aieditor->current_locator;
             }
         } else {
             if ((pad->digital_buttons_pressed & 0x100) == 0) {
                 goto refresh_hover;
             }
-            next = locatorEditor_GetNearest(0);
+            aieditor->current_locator = locatorEditor_GetNearest(0);
         }
-        aieditor->current_locator = next;
+        EDLOCATOR_s *next = aieditor->current_locator;
         if (next != nullptr) {
             aieditor->current_path = next->path;
             edcamSetPos(&next->position);
         }
     } else if ((pad->digital_buttons & 0x2000) != 0) {
-        i32 &step = *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(aieditor) + 0x36934);
-        if (aieditor->current_locator != nullptr && aieditor->current_locator == aieditor->nearest_locator) {
-            aieditorsettings.area_rotation = aieditor->current_locator->direction;
+        {
+            i32 &step = *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(aieditor) + 0x36934);
+            if (aieditor->current_locator != nullptr && aieditor->current_locator == aieditor->nearest_locator) {
+                aieditorsettings.area_rotation = aieditor->current_locator->direction;
+            }
+            if ((pad->digital_buttons_pressed & 0x8000) != 0) {
+                step = 20;
+            } else {
+                step += 20;
+                if (step > 600) {
+                    step = 600;
+                }
+            }
+            aieditorsettings.area_rotation = NuAngAdd(aieditorsettings.area_rotation, step);
         }
-        step = (pad->digital_buttons_pressed & 0x8000) != 0 ? 20 : step + 20;
-        if (step > 600) {
-            step = 600;
-        }
-        aieditorsettings.area_rotation = NuAngAdd(aieditorsettings.area_rotation, step);
-        if (aieditor->current_locator != nullptr && aieditor->current_locator == aieditor->nearest_locator) {
-            aieditor->current_locator->direction = aieditorsettings.area_rotation;
-            aieditor->current_locator->path_angle =
-                NuAngSub(aieditor->current_locator->direction,
-                         *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(aieditor) + 0x60));
+    apply_rotation:
+        EDLOCATOR_s *current = aieditor->current_locator;
+        if (current != nullptr && aieditor->nearest_locator == current) {
+            current->direction = aieditorsettings.area_rotation;
+            current->path_angle =
+                NuAngSub(current->direction, *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(aieditor) + 0x60));
         }
     } else if ((pad->digital_buttons & 0x8000) != 0) {
         i32 &step = *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(aieditor) + 0x36934);
         if (aieditor->current_locator != nullptr && aieditor->current_locator == aieditor->nearest_locator) {
             aieditorsettings.area_rotation = aieditor->current_locator->direction;
         }
-        step = (pad->digital_buttons_pressed & 0x2000) != 0 ? 20 : step + 20;
-        if (step > 600) {
-            step = 600;
+        if ((pad->digital_buttons_pressed & 0x2000) != 0) {
+            step = 20;
+        } else {
+            step += 20;
+            if (step > 600) {
+                step = 600;
+            }
         }
         aieditorsettings.area_rotation = NuAngSub(aieditorsettings.area_rotation, step);
-        if (aieditor->current_locator != nullptr && aieditor->current_locator == aieditor->nearest_locator) {
-            aieditor->current_locator->direction = aieditorsettings.area_rotation;
-            aieditor->current_locator->path_angle =
-                NuAngSub(aieditor->current_locator->direction,
-                         *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(aieditor) + 0x60));
-        }
+        goto apply_rotation;
     } else if ((pad->digital_buttons & 0x4000) != 0) {
         i32 path_angle = *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(aieditor) + 0x60);
         i32 difference = NuAngSub(aieditorsettings.area_rotation, path_angle);
-        i32 quadrant = difference < 0 ? (difference + 0x3fff) >> 14 : difference >> 14;
         i32 remainder = difference % 0x4000;
+        i32 quadrant = difference / 0x4000;
         if (remainder > 0x2000) {
             ++quadrant;
-        } else {
-            if (remainder < -0x2000) {
-                --quadrant;
-            }
+        } else if (remainder < -0x2000) {
+            --quadrant;
         }
         aieditorsettings.area_rotation =
             NuAngAdd(quadrant << 14, *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(aieditor) + 0x60));
-        if (aieditor->current_locator != nullptr && aieditor->current_locator == aieditor->nearest_locator) {
-            aieditor->current_locator->direction = aieditorsettings.area_rotation;
-            aieditor->current_locator->path_angle =
-                NuAngSub(aieditor->current_locator->direction,
-                         *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(aieditor) + 0x60));
-        }
+        goto apply_rotation;
     } else if (__builtin_expect((pad->digital_buttons & 0x20) != 0 && aieditor->current_locator_set != nullptr &&
                                     (pad->digital_buttons_pressed & 0x20) != 0 && aieditor->nearest_locator != nullptr,
                                 0)) {
         EDLOCATORSET_s *set = aieditor->current_locator_set;
         EDLOCATOR_s *nearest = aieditor->nearest_locator;
-        for (i32 index = 0; index < 64 && set->locators[index] != nullptr; ++index) {
-            if (set->locators[index] == nearest) {
-                for (i32 move = index; move < 63; ++move) {
-                    set->locators[move] = set->locators[move + 1];
-                }
-                set->locators[63] = nullptr;
+        i32 contained = 0;
+        for (i32 index = 0; index < 64; ++index) {
+            if (set->locators[index] == nullptr) {
                 break;
+            }
+            if (set->locators[index] == nearest) {
+                contained = 1;
+                break;
+            }
+        }
+        if (contained) {
+            for (i32 index = 0; index < 64 && set->locators[index] != nullptr; ++index) {
+                if (set->locators[index] == nearest) {
+                    for (; index < 64; ++index) {
+                        if (index < 63) {
+                            set->locators[index] = set->locators[index + 1];
+                        } else {
+                            set->locators[index] = nullptr;
+                        }
+                    }
+                    break;
+                }
             }
         }
         EDLOCATOR_s *before = aieditor->current_locator;
@@ -18345,14 +18381,19 @@ __attribute__((force_align_arg_pointer)) eduimenu_s *creatureEditor_Process(nupa
                                                        creatureEditor_cbFlagsToggle,
                                                        const_cast<char *>("Not On LowEnd Device")));
         }
+        struct SFlags {
+            i8 b0 : 1, b1 : 1, b2 : 1, b3 : 1, b4 : 1, b5 : 1, b6 : 1, b7 : 1;
+        };
         const i32 toggle_offset = creature != nullptr ? 2 : 0;
-        eduiMenuAddItem(menu,
-                        eduiItemToggleCreate(1, attr, -i32(aieditorsettings.stop_platforms), 1 + toggle_offset,
-                                             aieditor_cbStopPlatformsToggle, const_cast<char *>("Stop Platforms")));
-        eduiMenuAddItem(menu,
-                        eduiItemToggleCreate(1, attr, -i32(aieditorsettings.snap_height_display), 2 + toggle_offset,
-                                             aieditor_cbSnapHeightToggle, const_cast<char *>("Snap Height")));
-        eduiMenuAddItem(menu, eduiItemToggleCreate(1, attr, -i32(aieditorsettings.show_creatures_set),
+        eduiMenuAddItem(menu, eduiItemToggleCreate(1, attr,
+                                                   reinterpret_cast<const SFlags *>(&aieditorsettings.path_flags)->b6,
+                                                   1 + toggle_offset, aieditor_cbStopPlatformsToggle,
+                                                   const_cast<char *>("Stop Platforms")));
+        eduiMenuAddItem(menu, eduiItemToggleCreate(
+                                  1, attr, reinterpret_cast<const SFlags *>(&aieditorsettings.path_flags)->b4,
+                                  2 + toggle_offset, aieditor_cbSnapHeightToggle, const_cast<char *>("Snap Height")));
+        eduiMenuAddItem(menu, eduiItemToggleCreate(1, attr,
+                                                   reinterpret_cast<const SFlags *>(&aieditorsettings.path_flags2)->b2,
                                                    3 + toggle_offset, aieditor_cbShowCreaturesSetToggle,
                                                    const_cast<char *>("Show Current Set")));
         return menu;
@@ -18368,10 +18409,10 @@ __attribute__((force_align_arg_pointer)) eduimenu_s *creatureEditor_Process(nupa
                         reinterpret_cast<EDAIPATHCHECK_s *>(reinterpret_cast<u8 *>(aieditor) + 0x48);
                     if (check->on_path != 0) {
                         selected->position = aieditor->camera_position;
-                        memcpy(selected->path_check, check, sizeof(selected->path_check));
-                        reinterpret_cast<EDAIPATHCHECK_s *>(selected->path_check)->angle =
-                            NuAngSub(selected->angle, check->angle);
-                        creatureEditor_Updated(reinterpret_cast<EDCREATURE_s *>(selected));
+                        EDAIPATHCHECK_s *dst = reinterpret_cast<EDAIPATHCHECK_s *>(selected->path_check);
+                        *dst = *check;
+                        dst->angle = NuAngSub(selected->angle, dst->angle);
+                        creatureEditor_Updated(reinterpret_cast<EDCREATURE_s *>(creatureEditor_Current()));
                     } else {
                         edcamSetPos(&selected->position);
                     }
@@ -18381,16 +18422,17 @@ __attribute__((force_align_arg_pointer)) eduimenu_s *creatureEditor_Process(nupa
                 aieditor->current_path = reinterpret_cast<EDAIPATH_s *>(nearest->path);
                 aieditorsettings.area_rotation = nearest->angle;
                 edcamSetPos(&nearest->position);
-                aieditorsettings.current_path_type = nearest->character_type;
-                aieditor_SetCurrentScript(nearest->script_name,
-                                          reinterpret_cast<const AIEditorScriptSelection *>(nearest));
+                CreatureEditorRecord *current = creatureEditor_Current();
+                aieditorsettings.current_path_type = current->character_type;
+                aieditor_SetCurrentScript(current->script_name,
+                                          reinterpret_cast<const AIEditorScriptSelection *>(current));
             }
         } else {
             if ((pad->digital_buttons_pressed & 0x40) != 0 &&
                 reinterpret_cast<EDAIPATHCHECK_s *>(reinterpret_cast<u8 *>(aieditor) + 0x48)->on_path != 0) {
                 CreatureEditorRecord *previous = creatureEditor_Current();
 
-                u8 set = 0;
+                i32 set = 0;
                 if (previous != nullptr) {
                     NuStrCpy(base_name, previous->name);
                     char *suffix = strrchr(base_name, '_');
@@ -18430,11 +18472,11 @@ __attribute__((force_align_arg_pointer)) eduimenu_s *creatureEditor_Process(nupa
                     created = creatureEditor_Current();
                     memcpy(created->script_params, aieditorsettings.current_script_params,
                            sizeof(created->script_params));
-                    created->path = aieditor->current_path;
                     created->flags = (created->flags & ~0x1eu) | aieditorsettings.current_script_flags;
-                    memcpy(created->path_check, reinterpret_cast<u8 *>(aieditor) + 0x48, sizeof(created->path_check));
-                    reinterpret_cast<EDAIPATHCHECK_s *>(created->path_check)->angle =
-                        NuAngSub(created->angle, *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(aieditor) + 0x60));
+                    created->path = aieditor->current_path;
+                    EDAIPATHCHECK_s *dst = reinterpret_cast<EDAIPATHCHECK_s *>(created->path_check);
+                    *dst = *reinterpret_cast<EDAIPATHCHECK_s *>(reinterpret_cast<u8 *>(aieditor) + 0x48);
+                    dst->angle = NuAngSub(created->angle, dst->angle);
                     creatureEditor_Current()->set = set;
                     creatureEditor_Updated(reinterpret_cast<EDCREATURE_s *>(creatureEditor_Current()));
                 }
@@ -18444,7 +18486,9 @@ __attribute__((force_align_arg_pointer)) eduimenu_s *creatureEditor_Process(nupa
         if (pad->digital_buttons_pressed & 0x10) {
             CreatureEditorRecord *selected = creatureEditor_Current();
             CreatureEditorRecord *nearest = *reinterpret_cast<CreatureEditorRecord **>(aieditor->unknown_3692c);
-            if (selected != nullptr && selected == nearest) {
+            if (selected == nullptr) {
+                aieditor->mode_selection_36930 = nullptr;
+            } else if (selected == nearest) {
                 eduimenu_s *menu = eduiMenuCreate(200, 70, 240, 270, ed_fnt, pathEditor_cbCancelDeleteCreatureMenu,
                                                   const_cast<char *>("Delete creature??"));
                 if (menu == nullptr)
@@ -18454,32 +18498,31 @@ __attribute__((force_align_arg_pointer)) eduimenu_s *creatureEditor_Process(nupa
                 eduiMenuAddItem(
                     menu, eduiItemSelCreate(1, attr, 0, 0, creatureEditor_cbDeleteCreature, const_cast<char *>("Yes")));
                 return menu;
-            }
-            EDLOCATOR_s *locator = aieditor->nearest_locator;
-            if (__builtin_expect(selected != nullptr && locator != nullptr, 0)) {
-                if (__builtin_expect(selected->respawn_locator == locator, 1))
+            } else {
+                EDLOCATOR_s *locator = aieditor->nearest_locator;
+                if (locator == nullptr)
+                    aieditor->mode_selection_36930 = nullptr;
+                else if (selected->respawn_locator == locator)
                     selected->respawn_locator = nullptr;
                 else if (selected->path == locator->path)
                     selected->respawn_locator = locator;
-            } else {
-                aieditor->mode_selection_36930 = nullptr;
             }
         } else if (pad->digital_buttons_pressed & 0x20) {
             CreatureEditorRecord *selected = creatureEditor_Current();
             EDLOCATOR_s *locator = aieditor->nearest_locator;
-            if (selected != nullptr && locator != nullptr) {
+            if (locator != nullptr && selected != nullptr) {
                 if (selected->locator == locator)
                     selected->locator = nullptr;
                 else if (selected->path == locator->path)
                     selected->locator = locator;
             }
         } else {
-            CreatureEditorRecord *selected = creatureEditor_Current();
             bool change_selection = false;
             if (__builtin_expect((pad->digital_buttons_pressed & 0x1000) == 0 &&
                                      !((pad->digital_buttons & 0x100) != 0 && (pad->digital_buttons_pressed & 8) != 0),
                                  0)) {
                 if ((pad->digital_buttons & 0x100) != 0 && (pad->digital_buttons_pressed & 2) != 0) {
+                    CreatureEditorRecord *selected = creatureEditor_Current();
                     if (selected != nullptr)
                         aieditor->mode_selection_36930 = reinterpret_cast<EditorNamedEntry *>(
                             NuLinkedListGetPrev(&aieditor->creatures, &selected->link));
@@ -18492,6 +18535,7 @@ __attribute__((force_align_arg_pointer)) eduimenu_s *creatureEditor_Process(nupa
                     change_selection = true;
                 }
             } else {
+                CreatureEditorRecord *selected = creatureEditor_Current();
                 if (__builtin_expect(selected != nullptr, 1))
                     aieditor->mode_selection_36930 = reinterpret_cast<EditorNamedEntry *>(
                         NuLinkedListGetNext(&aieditor->creatures, &selected->link));
@@ -18517,8 +18561,9 @@ __attribute__((force_align_arg_pointer)) eduimenu_s *creatureEditor_Process(nupa
                 if (pad->digital_buttons & 0x2000) {
                     rotate = true;
                     CreatureEditorRecord *hover = *reinterpret_cast<CreatureEditorRecord **>(aieditor->unknown_3692c);
-                    if (selected != nullptr && selected == hover)
-                        aieditorsettings.area_rotation = selected->angle;
+                    CreatureEditorRecord *current = creatureEditor_Current();
+                    if (current != nullptr && current == hover)
+                        aieditorsettings.area_rotation = current->angle;
                     i32 &step = *reinterpret_cast<i32 *>(aieditor->unknown_36934);
                     if (!!(pad->digital_buttons_pressed & 0x8000))
                         step = 0x14;
@@ -18530,8 +18575,9 @@ __attribute__((force_align_arg_pointer)) eduimenu_s *creatureEditor_Process(nupa
                 } else if (pad->digital_buttons & 0x8000) {
                     rotate = true;
                     CreatureEditorRecord *hover = *reinterpret_cast<CreatureEditorRecord **>(aieditor->unknown_3692c);
-                    if (selected != nullptr && selected == hover)
-                        aieditorsettings.area_rotation = selected->angle;
+                    CreatureEditorRecord *current = creatureEditor_Current();
+                    if (current != nullptr && current == hover)
+                        aieditorsettings.area_rotation = current->angle;
                     i32 &step = *reinterpret_cast<i32 *>(aieditor->unknown_36934);
                     if (pad->digital_buttons_pressed & 0x2000)
                         step = 0x14;
@@ -18553,7 +18599,7 @@ __attribute__((force_align_arg_pointer)) eduimenu_s *creatureEditor_Process(nupa
                                  reinterpret_cast<EDAIPATHCHECK_s *>(reinterpret_cast<u8 *>(aieditor) + 0x48)->angle);
                 }
                 if (rotate) {
-                    selected = creatureEditor_Current();
+                    CreatureEditorRecord *selected = creatureEditor_Current();
                     CreatureEditorRecord *hover = *reinterpret_cast<CreatureEditorRecord **>(aieditor->unknown_3692c);
                     if (selected != nullptr) {
                         if (selected == hover) {

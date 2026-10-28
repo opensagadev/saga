@@ -26,39 +26,72 @@ namespace nu2api {
         const NUSHADERMTLDESC *desc = filter->desc;
         const u8 *descBytes = reinterpret_cast<const u8 *>(desc);
 
-        // Fixed 104-byte hash input; zero-initialised then sparsely populated.
-        u8 block[0x68] = {};
-        block[0x14] = 1;
+        union KeyFlags {
+            struct {
+                u8 lightmapA : 1;
+                u8 lightmapB : 1;
+                u8 low : 4;
+                u8 clearedLo : 2;
+                u8 clearedHi : 1;
+                u8 mid : 3;
+                u8 forced : 1;
+                u8 extraMapA : 1;
+                u8 extraMapB : 1;
+                u8 bit15 : 1;
+                u8 bits16 : 4;
+                u8 lightmapSelect : 1;
+                u8 bits21 : 3;
+                u8 byte3;
+                u32 nibble : 4;
+                u32 rest : 28;
+            } bits;
+            i32 words[2];
+        };
 
-        u32 flagsWord = 0;
-        u8 nibble = 0;
+        // Fixed 104-byte hash input; zero-initialised then sparsely populated.
+        struct {
+            KeyFlags flags;
+            u8 block[0x68];
+        } keyData;
+        u8 *const block = keyData.block;
+        __builtin_memset(block, 0, 0x68);
+        block[0x14] = 1;
 
         for (i32 i = 0; i < 8; ++i)
             block[0x0c + i] = pixelStage ? 0 : uberShader2_md5[i];
+
+        KeyFlags &flags = keyData.flags;
         if (filter->variant == 0) {
-            flagsWord = *reinterpret_cast<const u32 *>(descBytes + 0x1b8) & 0xfffffe3fu;
-            nibble = descBytes[0x1bc];
+            flags = *reinterpret_cast<const KeyFlags *>(descBytes + 0x1b8);
+            flags.bits.clearedLo = 0;
+            flags.bits.clearedHi = 0;
         } else {
-            flagsWord = 0x1000;
-            nibble = 0;
+            flags.words[0] = 0;
+            flags.words[1] = 0;
+            flags.bits.forced = 1;
         }
 
         // Filtered flag word (bytes 0x04..0x07, nibble at 0x08, copy at 0x09..0x0b).
-        block[0x04] = static_cast<u8>(flagsWord);
-        block[0x05] = static_cast<u8>(flagsWord >> 8);
-        block[0x06] = static_cast<u8>(flagsWord >> 16);
-        block[0x07] = static_cast<u8>(flagsWord >> 24);
-        block[0x08] = nibble & 0xf;
-        block[0x09] = block[0x04];
-        block[0x0a] = block[0x05];
-        block[0x0b] = block[0x06];
+        const i32 word = flags.words[0];
+        i32 byte0 = word;
+        i32 byte1 = (word << 16) >> 24;
+        i32 byte2 = (word << 8) >> 24;
+        i32 byte3 = word >> 24;
+        block[0x04] = static_cast<u8>(byte0);
+        block[0x05] = static_cast<u8>(byte1);
+        block[0x06] = static_cast<u8>(byte2);
+        block[0x07] = static_cast<u8>(byte3);
+        block[0x08] = static_cast<u8>(flags.bits.nibble);
+        block[0x09] = static_cast<u8>(byte0);
+        block[0x0a] = static_cast<u8>(byte1);
+        block[0x0b] = static_cast<u8>(byte2);
 
         // Vertex flags
-        const u32 vtxFlags = filter->getVertexFlags();
+        const i32 vtxFlags = filter->getVertexFlags();
         block[0x00] = static_cast<u8>(vtxFlags);
         block[0x01] = static_cast<u8>(vtxFlags >> 8);
         block[0x02] = static_cast<u8>(vtxFlags >> 16);
-        block[0x03] = static_cast<u8>(vtxFlags >> 24);
+        block[0x03] = static_cast<u8>(static_cast<u32>(vtxFlags) >> 24);
 
         // Filter-derived booleans
         block[0x21] = filter->field_0x10 != 0;
@@ -67,15 +100,22 @@ namespace nu2api {
 
         // Auxiliary texture ids: selected only when the base flag / threshold says
         // the texture is actually bound.
+        u8 specularId;
         if (__builtin_expect(filter->variant == 0, 0)) {
-            const u8 baseFlag = descBytes[0x1b8];
-            block[0x15] = ((baseFlag & 1) || (baseFlag & 2)) ? descBytes[0xa9] : 0;
-            if (__builtin_expect(filter->texture_id_threshold < *reinterpret_cast<const i32 *>(descBytes + 0x48), 0)) {
-                block[0x16] = descBytes[0xaa];
+            const KeyFlags *descFlags = reinterpret_cast<const KeyFlags *>(&filter->desc->flagsbits_1b8);
+            if (__builtin_expect(descFlags->bits.lightmapA, 1)) {
+                block[0x15] = descBytes[0xa9];
+            } else if (descFlags->bits.lightmapB) {
+                block[0x15] = descBytes[0xa9];
             } else {
-                block[0x16] = 0;
+                block[0x15] = 0;
             }
+            specularId = filter->desc->specular_map_tid > filter->texture_id_threshold ? descBytes[0xaa] : 0;
+        } else {
+            block[0x15] = 0;
+            specularId = 0;
         }
+        block[0x16] = specularId;
 
         // Diffuse-map presence + ids
         block[0x17] = static_cast<u8>(filter->hasDiffuseMap(0));
@@ -84,12 +124,16 @@ namespace nu2api {
         block[0x1a] = filter->hasDiffuseMap(3) ? descBytes[0xad] : 0;
 
         // Optional extra map id (0xae)
+        u8 extraMap = 0;
         if (__builtin_expect(filter->variant == 0, 1)) {
-            const u8 b1 = descBytes[0x1b9];
-            if (__builtin_expect((b1 & 0x20) || (b1 & 0x40), 0)) {
-                block[0x1b] = descBytes[0xae];
+            const KeyFlags *descFlags = reinterpret_cast<const KeyFlags *>(&filter->desc->flagsbits_1b8);
+            if (__builtin_expect(descFlags->bits.extraMapA, 1)) {
+                extraMap = descBytes[0xae];
+            } else if (descFlags->bits.extraMapB) {
+                extraMap = descBytes[0xae];
             }
         }
+        block[0x1b] = extraMap;
 
         // Blend ops for layers 1..3
         block[0x1c] = filter->hasLayer(1) ? desc->blend_op2 : 0;
@@ -101,46 +145,54 @@ namespace nu2api {
         block[0x20] = 1;
 
         // Shadow / animation variant selectors
-        if (filter->variant == 0) {
-            const i32 thresholdA = *reinterpret_cast<const i32 *>(descBytes + 0x34);
-            const i32 thresholdB = *reinterpret_cast<const i32 *>(descBytes + 0x38);
-            const u8 baseFlag = descBytes[0x1b8];
-
-            u8 v24 = 0;
-            if (!((baseFlag & 1) != 0 && !(filter->texture_id_threshold >= thresholdB))) {
-                if ((baseFlag & 2) != 0) {
-                    v24 = filter->texture_id_threshold < thresholdB;
-                }
-            } else {
+        if (__builtin_expect(filter->variant == 0, 0)) {
+            const NUSHADERMTLDESC *d = filter->desc;
+            const KeyFlags *descFlags = reinterpret_cast<const KeyFlags *>(&d->flagsbits_1b8);
+            u8 v24;
+            if (descFlags->bits.lightmapA && d->lightmap_tex_id[1] > filter->texture_id_threshold) {
                 v24 = 2;
+            } else if (descFlags->bits.lightmapB) {
+                v24 = d->lightmap_tex_id[1] > filter->texture_id_threshold;
+            } else {
+                v24 = 0;
             }
             block[0x24] = v24;
 
-            const u8 b2 = descBytes[0x1ba];
-            if (!(b2 & 0x10)) {
-                block[0x25] = 0;
-            } else {
-                block[0x25] = static_cast<u8>((filter->texture_id_threshold < thresholdA) + 1);
-            }
+            block[0x25] = descFlags->bits.lightmapSelect
+                              ? static_cast<u8>((d->lightmap_tex_id[0] > filter->texture_id_threshold) + 1)
+                              : 0;
+        } else {
+            block[0x24] = 0;
+            block[0x25] = 0;
         }
 
-        block[0x26] = *reinterpret_cast<const i32 *>(descBytes + 0x1e4) > 0;
-        block[0x27] = *reinterpret_cast<const i32 *>(descBytes + 0x1e8) > 0;
+        block[0x26] = filter->desc->field_1e4 > 0;
+        block[0x27] = filter->desc->field_1e8 > 0;
 
         // Texcoord type heuristic over the material attribute bytes at mtl+0x40..0x42.
-        const u8 *mtlBytes = reinterpret_cast<const u8 *>(filter->mtl);
-        const u8 unitsLow = (mtlBytes[0x42] >> 4) & 7;
-        const u8 vtxType = mtlBytes[0x40] & 0xf;
+        struct MtlAttribBytes {
+            u8 alphaMode : 4;
+            u8 bits4 : 4;
+            u8 bits8 : 6;
+            u8 zMode : 2;
+            u8 bits16 : 4;
+            u8 alphaTest : 3;
+            u8 bit23 : 1;
+        };
+        const MtlAttribBytes *attr = reinterpret_cast<const MtlAttribBytes *>(&filter->mtl->attribs);
+        const i32 unitsLow = attr->alphaTest;
+        const u8 vtxType = attr->alphaMode;
 
-        bool texcoordIsLong = false;
-        if (unitsLow != 3 && unitsLow != 5) {
-            texcoordIsLong = (vtxType == 10) || ((unitsLow & 3) == 2);
-        } else {
+        bool texcoordIsLong;
+        if (unitsLow == 5 || unitsLow == 3) {
             texcoordIsLong = true;
+        } else {
+            texcoordIsLong = (vtxType == 10) | ((unitsLow & 3) == 2);
         }
-        const u8 attribC0 = mtlBytes[0x41] & 0xc0;
-        if (attribC0 == 0 || attribC0 == 0x80 || vtxType == 0 || vtxType == 10) {
-            block[0x28] = texcoordIsLong ? 1 : 0;
+        if (__builtin_expect(attr->zMode == 0, 1) || attr->zMode == 2 || vtxType == 0 || vtxType == 10) {
+            block[0x28] = texcoordIsLong;
+        } else {
+            block[0x28] = 0;
         }
 
         block[0x29] = desc->unknown_a8;

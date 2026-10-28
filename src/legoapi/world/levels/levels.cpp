@@ -2261,19 +2261,31 @@ void CalculateWorldSize(WORLDINFO *world) {
         NUVEC box_minimum = *(NUVEC *)first;
         if (scene->display_list != NULL &&
             (scene->display_list->render_buffer & NUDL_SCENE_RENDER_FLAG_CENTER_EXTENT_BOUNDS) != 0) {
-            box_minimum.z = first->z - second->z;
             box_minimum.x = first->x - second->x;
             box_minimum.y = first->y - second->y;
+            box_minimum.z = first->z - second->z;
             box_maximum.x = first->x + second->x;
-            box_maximum.y = first->y + second->y;
             box_maximum.z = first->z + second->z;
+            box_maximum.y = first->y + second->y;
         }
-        minimum.x = MIN(box_minimum.x, minimum.x);
-        minimum.y = MIN(box_minimum.y, minimum.y);
-        minimum.z = MIN(box_minimum.z, minimum.z);
-        maximum.x = MAX(box_maximum.x, maximum.x);
-        maximum.y = MAX(box_maximum.y, maximum.y);
-        maximum.z = MAX(box_maximum.z, maximum.z);
+        if (box_minimum.x < minimum.x) {
+            minimum.x = box_minimum.x;
+        }
+        if (box_minimum.y < minimum.y) {
+            minimum.y = box_minimum.y;
+        }
+        if (box_minimum.z < minimum.z) {
+            minimum.z = box_minimum.z;
+        }
+        if (box_maximum.x > maximum.x) {
+            maximum.x = box_maximum.x;
+        }
+        if (box_maximum.y > maximum.y) {
+            maximum.y = box_maximum.y;
+        }
+        if (box_maximum.z > maximum.z) {
+            maximum.z = box_maximum.z;
+        }
     }
 
     world->level_max[0] = maximum.x;
@@ -2299,10 +2311,12 @@ void WorldInfo_Load(WORLDINFO *world) {
 
     Level_LoadConfigFile(world);
 
-    if (abort_load != 0 || (world->config_count > 0 && (LevelConfig_BeforeLoad(world->current_level, ConfigBuffer,
-                                                                               Level_ConfigBeforeLoad_GameKeywords),
-                                                        abort_load != 0))) {
+    if (abort_load != 0)
         goto abort;
+    if (world->config_count > 0) {
+        LevelConfig_BeforeLoad(world->current_level, ConfigBuffer, Level_ConfigBeforeLoad_GameKeywords);
+        if (abort_load != 0)
+            goto abort;
     }
 
     if ((world->current_level->flags & LEVEL_UNKNOWN_FLAG_4) != 0) {
@@ -2407,7 +2421,7 @@ void WorldInfo_Load(WORLDINFO *world) {
             goto abort;
         goto after_area;
     }
-    if (__builtin_expect((world->current_level->flags & LEVEL_STATUS) != 0 && world->area->minikit_id != -1, 1)) {
+    if ((world->current_level->flags & LEVEL_STATUS) != 0 && world->area->minikit_id != -1) {
         MiniKit_Load(&world->minikit, (i32)(i16)world->area->minikit_id, &world->giz_buffer, &world->unknown_0108,
                      NULL);
         if (world->minikit.gscn != NULL) {

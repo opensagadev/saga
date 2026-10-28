@@ -676,7 +676,7 @@ void JediB_Update(WORLDINFO_s *world) {
         jedi_b.exclusion_mask = 0;
         // Not `timer >= 4.0f`: that form compares the other way round and is not
         // equivalent for NaN, and the original tests `4.0f > timer`.
-        if (jedi_b.timer < 4.0f) {
+        if (__builtin_expect(jedi_b.timer < 4.0f, 0)) {
             if (player != NULL) {
                 jedi_b.exclusion_mask = 1ULL << player->apiobj.field_0x289;
             }
@@ -748,7 +748,7 @@ void JediB_Update(WORLDINFO_s *world) {
                             while (jedi_b.baddies[index].in_wave != 0 || jedi_b.baddies[index].random_type == 0 ||
                                    jedi_b.baddies[index].id == id) {
                                 index++;
-                                if (__builtin_expect(index >= jedi_b.baddie_count, 0)) {
+                                if (index >= jedi_b.baddie_count) {
                                     index = 0;
                                 }
                             }
@@ -770,7 +770,7 @@ void JediB_Update(WORLDINFO_s *world) {
                     case 3:
                         for (JEDIB_PHASE_s *entry = phase_lists[jedi_b.phase - 1];
                              entry != NULL && entry->id != NULL && jedi_b.goody_count <= 7; entry++) {
-                            if (__builtin_expect(g_lowEndLevelBehaviour != 0 && jedi_b.goody_count == 5, 0)) {
+                            if (g_lowEndLevelBehaviour != 0 && jedi_b.goody_count == 5) {
                                 break;
                             }
 
@@ -877,7 +877,7 @@ void JediB_Update(WORLDINFO_s *world) {
                         if (__builtin_expect(boss == NULL, 0)) {
                             boss = FindGameObject(id_JANGOFETT, 1, 1, 0, 0);
                             jedi_b.boss = boss;
-                            if (__builtin_expect(boss == NULL, 0)) {
+                            if (__builtin_expect(boss == NULL, 1)) {
                                 break;
                             }
                         }
@@ -1563,21 +1563,7 @@ void KaminoC_Update(WORLDINFO_s *world) {
         if (old_state != kaminodisco.tile_state[kaminodisco.second_tile] &&
             __builtin_expect(kaminodisco.tile_state[kaminodisco.second_tile] == 2, 1))
             kaminoc_netpacket->sound_mask |= 1u << (kaminodisco.second_tile & 31);
-        if (first_occupied && second_occupied) {
-            kaminodisco.timer = 0.0f;
-            kaminodisco.tile_state[kaminodisco.first_tile] = 3;
-            kaminodisco.tile_state[kaminodisco.second_tile] = 3;
-            kaminodisco.first_tile = KaminoDiscoChooseTile(-1, 0);
-            kaminodisco.second_tile = KaminoDiscoChooseTile(kaminodisco.first_tile, 0);
-            if (!(kaminodisco.first_tile != -1 && kaminodisco.second_tile != -1)) {
-                kaminodisco.phase = 2;
-                for (i32 i = 0; i < kaminodisco.tile_count; ++i)
-                    kaminodisco.tile_state[i] = 0;
-            } else {
-                kaminodisco.tile_state[kaminodisco.first_tile] = 1;
-                kaminodisco.tile_state[kaminodisco.second_tile] = 1;
-            }
-        } else {
+        if (!(first_occupied && second_occupied)) {
             kaminodisco.timer += FRAMETIME;
             if (__builtin_expect(kaminodisco.timer > 2.5f, 1)) {
                 kaminodisco.timer = 0.0f;
@@ -1599,6 +1585,20 @@ void KaminoC_Update(WORLDINFO_s *world) {
                         SetGizAIMessage(gizaimessagesys, "NextDiscoTile", static_cast<f32>(kaminodisco.first_tile + 1),
                                         kaminodisco.next_tile_message);
                 }
+            }
+        } else {
+            kaminodisco.timer = 0.0f;
+            kaminodisco.tile_state[kaminodisco.first_tile] = 3;
+            kaminodisco.tile_state[kaminodisco.second_tile] = 3;
+            kaminodisco.first_tile = KaminoDiscoChooseTile(-1, 0);
+            kaminodisco.second_tile = KaminoDiscoChooseTile(kaminodisco.first_tile, 0);
+            if (kaminodisco.first_tile != -1 && kaminodisco.second_tile != -1) {
+                kaminodisco.tile_state[kaminodisco.first_tile] = 1;
+                kaminodisco.tile_state[kaminodisco.second_tile] = 1;
+            } else {
+                kaminodisco.phase = 2;
+                for (i32 i = 0; i < kaminodisco.tile_count; ++i)
+                    kaminodisco.tile_state[i] = 0;
             }
         }
     } else if (kaminodisco.phase == 2) {
@@ -1622,7 +1622,7 @@ void KaminoC_Update(WORLDINFO_s *world) {
             kaminodisco.timer = 0.0f;
             kaminodisco.first_tile = KaminoDiscoChooseTile(-1, 0);
             kaminodisco.second_tile = KaminoDiscoChooseTile(kaminodisco.first_tile, 0);
-            if (kaminodisco.first_tile != -1 && kaminodisco.second_tile != -1) {
+            if (__builtin_expect(kaminodisco.first_tile != -1 && kaminodisco.second_tile != -1, 1)) {
                 kaminodisco.tile_state[kaminodisco.first_tile] = 1;
                 kaminodisco.tile_state[kaminodisco.second_tile] = 1;
             }

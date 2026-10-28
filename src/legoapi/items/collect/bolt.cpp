@@ -166,7 +166,7 @@ void Bolt_Debris_LSW(BOLT_s *bolt, nuvec_s *points, i32 point, nuvec_s *, i32 no
         if (!(bolt->flags & 0x10000000) && Player_HasDoubleBoltDamage_FromBolt(bolt))
             AddGameDebris(world->debris_sys, effect, &points[1]);
     }
-    if (((bolt->flags & 0x40000200) == 0 && point == -1) || point == 2) {
+    if (__builtin_expect(((bolt->flags & 0x40000200) == 0 && point == -1) || point == 2, 1)) {
         AddGameDebris(world->debris_sys, effect, &points[2]);
         if (!(bolt->flags & 0x10000000) && Player_HasDoubleBoltDamage_FromBolt(bolt))
             AddGameDebris(world->debris_sys, effect, &points[2]);
@@ -179,8 +179,8 @@ void Bolt_Debris_LSW(BOLT_s *bolt, nuvec_s *points, i32 point, nuvec_s *, i32 no
         GameCam_NewShake(GameCam, 0.75f, 0.75f, 1.0f);
         NewRumbleAllPlayers(0.5f, 0.0f, 0, 0);
     }
-    if (no_explosion == 0 && bolt->owner != NULL && bolt->owner->apiobj.player_controlled && Cheat_IsOn(0x12) &&
-        (world->area == NULL || !(world->area->flags & 1))) {
+    if (no_explosion == 0 && bolt->owner != NULL && __builtin_expect(bolt->owner->apiobj.player_controlled, 0) &&
+        Cheat_IsOn(0x12) && (world->area == NULL || !(world->area->flags & 1))) {
         AddGameDebris(WORLD->debris_sys, 0x49, &bolt->position);
         NewRumble(bolt->owner->pad_gamepad->pad, 0.3f, 0);
         PlaySfx("exp_thermalDet", points);
@@ -190,8 +190,8 @@ void Bolt_Debris_LSW(BOLT_s *bolt, nuvec_s *points, i32 point, nuvec_s *, i32 no
             (bolt->owner == Player[0] || bolt->owner == Player[1]) &&
             (bolt->owner->apiobj.field_0x1f8 & 0x1001) == 0x1001 &&
             static_cast<u8>(bolt->owner->apiobj.field_0x27c) <= 1) {
-            explosion->object = bolt->owner;
             explosion->field_0x24 |= 0x10000;
+            explosion->object = bolt->owner;
         }
     }
 }

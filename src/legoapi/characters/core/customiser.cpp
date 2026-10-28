@@ -490,14 +490,15 @@ void Customiser_LoadAll(CUSTOMISER *customiser, WORLDINFO_s *world) {
             NuStrCat(path, piece_name);
 
             if (customiser->categories[category_index]->uses_special != 0) {
-                resource->scene = world->customiser_shared_scenes[category_index];
-                if (resource->scene == NULL) {
+                auto scene = world->customiser_shared_scenes[category_index];
+                if (scene == NULL) {
                     NuStrCat(path, ".gsc");
                     world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 0x40);
-                    resource->scene = NuGScnRead(&world->giz_buffer, world->unknown_0108, path);
+                    scene = NuGScnRead(&world->giz_buffer, world->unknown_0108, path);
                 }
-                if (__builtin_expect(resource->scene != NULL, 1)) {
-                    NuSpecialFind(resource->scene, &resource->special, piece_name, 1);
+                resource->scene = scene;
+                if (scene != NULL) {
+                    NuSpecialFind(scene, &resource->special, piece_name, 1);
                 }
                 continue;
             }
@@ -506,7 +507,8 @@ void Customiser_LoadAll(CUSTOMISER *customiser, WORLDINFO_s *world) {
                 continue;
             }
             PLATFORMS_SUPPORTED platform = NuPlatform::Get()->GetCurrentPlatform();
-            if (__builtin_expect(platform != IOS_PLATFORM && platform != ANDROID_ATITC_PLATFORM, 1)) {
+            if (__builtin_expect(platform != IOS_PLATFORM, 1) &&
+                __builtin_expect(platform != ANDROID_ATITC_PLATFORM, 1)) {
                 NuStrCat(path, ".pnt");
             }
 

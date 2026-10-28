@@ -895,17 +895,19 @@ pushblock_s *NearestFacingPushBlock(WORLDINFO_s *world, GameObject_s *object, fl
         NUVEC *pos = block->position;
         f32 top = pos->y + fabsf(block->bounds_max.y);
         f32 bottom = pos->y - fabsf(block->bounds_min.y);
+        f32 min_x = block->bounds_min.x;
         f32 min_z = block->bounds_min.z;
         f32 max_z = block->bounds_max.z;
-        f32 min_x = block->bounds_min.x;
         if (top > max_y && bottom > max_y)
             continue;
-        if (__builtin_expect(min_y > top, 0)) {
-            if (min_y > bottom)
-                continue;
-        }
-        f32 dx = pos->x - object->apiobj.collision_position.x;
-        f32 dz = pos->z - object->apiobj.collision_position.z;
+        if (min_y > top && min_y > bottom)
+            continue;
+        f32 px = pos->x;
+        f32 cx = object->apiobj.collision_position.x;
+        f32 pz = pos->z;
+        f32 cz = object->apiobj.collision_position.z;
+        f32 dx = px - cx;
+        f32 dz = pz - cz;
         f32 dy = pos->y - object->apiobj.collision_position.y;
         NUVEC delta;
         delta.x = dx;
@@ -922,11 +924,11 @@ pushblock_s *NearestFacingPushBlock(WORLDINFO_s *world, GameObject_s *object, fl
             goto mode1_geometry;
         }
     mode0_geometry: {
-        f32 block_min_z = min_z + pos->z - 0.01f;
-        f32 block_max_z = pos->z + max_z - 0.01f;
-        if (!(block_min_z < object->apiobj.collision_position.z))
+        f32 block_min_z = min_z + pz - 0.01f;
+        f32 block_max_z = pz + max_z - 0.01f;
+        if (block_min_z >= cz)
             continue;
-        if (object->apiobj.collision_position.z >= block_max_z)
+        if (cz >= block_max_z)
             continue;
         if ((block->flags_0ca & 0x20) != 0)
             continue;
@@ -936,39 +938,39 @@ pushblock_s *NearestFacingPushBlock(WORLDINFO_s *world, GameObject_s *object, fl
         goto have_gap;
     }
     mode1_geometry: {
-        f32 block_max_z = max_z + pos->z - 0.01f;
-        f32 block_min_z = pos->z + min_z - 0.01f;
-        if (object->apiobj.collision_position.z >= block_max_z)
+        f32 block_max_z = max_z + pz - 0.01f;
+        f32 block_min_z = pz + min_z - 0.01f;
+        if (cz >= block_max_z)
             continue;
-        if (block_min_z >= object->apiobj.collision_position.z)
+        if (block_min_z >= cz)
             continue;
         if ((block->flags_0ca & 0x20) != 0)
             continue;
-        if (__builtin_expect((block->flags_0ca & 0x50) == 0x50, 1))
+        if ((block->flags_0ca & 0x50) == 0x50)
             continue;
         gap = fabsf(dx) - block->bounds_max.x;
         goto have_gap;
     }
     mode3_geometry: {
-        f32 block_min_x = min_x + pos->x - 0.01f;
-        f32 block_max_x = pos->x + block->bounds_max.x - 0.01f;
-        if (block_min_x >= object->apiobj.collision_position.x)
+        f32 block_min_x = min_x + px - 0.01f;
+        f32 block_max_x = px + block->bounds_max.x - 0.01f;
+        if (block_min_x >= cx)
             continue;
-        if (object->apiobj.collision_position.x >= block_max_x)
+        if (cx >= block_max_x)
             continue;
         if ((block->flags_0ca & 0x10) != 0)
             continue;
-        if (__builtin_expect((block->flags_0ca & 0x60) == 0x60, 1))
+        if ((block->flags_0ca & 0x60) == 0x60)
             continue;
         gap = fabsf(dz) - max_z;
         goto have_gap;
     }
     mode2_geometry: {
-        f32 block_max_x = block->bounds_max.x + pos->x - 0.01f;
-        f32 block_min_x = pos->x + min_x - 0.01f;
-        if (object->apiobj.collision_position.x >= block_max_x)
+        f32 block_max_x = block->bounds_max.x + px - 0.01f;
+        f32 block_min_x = px + min_x - 0.01f;
+        if (cx >= block_max_x)
             continue;
-        if (block_min_x >= object->apiobj.collision_position.x)
+        if (block_min_x >= cx)
             continue;
         if ((block->flags_0ca & 0x10) != 0)
             continue;
@@ -978,7 +980,7 @@ pushblock_s *NearestFacingPushBlock(WORLDINFO_s *world, GameObject_s *object, fl
         goto have_gap;
     }
     have_gap: {
-        if (!(gap <= (object->apiobj.field_0x1dc + 0.01f) * 2.0f))
+        if (gap > (object->apiobj.field_0x1dc + 0.01f) * 2.0f)
             continue;
         i32 yaw = NuAtan2D(delta.x, delta.z);
         i32 rot = 0x4000 - (yaw & 0xffff);
@@ -994,7 +996,7 @@ pushblock_s *NearestFacingPushBlock(WORLDINFO_s *world, GameObject_s *object, fl
         if ((u16)pitch_diff > 0x4000)
             continue;
         f32 dist2 = dx * dx + dz * dz;
-        if (range <= dist2)
+        if (!(range > dist2))
             continue;
         if (!(nearest_dist > dist2))
             continue;

@@ -1446,7 +1446,7 @@ void SarlaccPitB_Update(WORLDINFO_s *world) {
                 break;
             case 1: {
                 sarlaccb_netpacket->disco_active = 0;
-                if (!ready) {
+                if (__builtin_expect(!ready, 0)) {
                     SarlaccPitB_Reset(world);
                     break;
                 }
@@ -1501,21 +1501,7 @@ void SarlaccPitB_Update(WORLDINFO_s *world) {
                         NUMTX_GET_ROW_VEC(NuSpecialGetDrawMtx(&sarlaccdisco.on[sarlaccdisco.second_panel]), 3);
                     sarlaccb_netpacket->sound_mask |= 1 << sarlaccdisco.second_panel;
                 }
-                if (first_occupied && second_occupied) {
-                    sarlaccdisco.timer = 0.0f;
-                    sarlaccdisco.panel_state[sarlaccdisco.first_panel] = 3;
-                    sarlaccdisco.panel_state[sarlaccdisco.second_panel] = 3;
-                    sarlaccdisco.first_panel = SarlaccDiscoPickPanel(0, -1);
-                    sarlaccdisco.second_panel = SarlaccDiscoPickPanel(0, sarlaccdisco.first_panel);
-                    if (sarlaccdisco.first_panel == -1 || sarlaccdisco.second_panel == -1) {
-                        sarlaccdisco.phase = 2;
-                        for (i32 index = 0; index < sarlaccdisco.count; ++index)
-                            sarlaccdisco.panel_state[index] = 4;
-                    } else {
-                        sarlaccdisco.panel_state[sarlaccdisco.first_panel] = 1;
-                        sarlaccdisco.panel_state[sarlaccdisco.second_panel] = 1;
-                    }
-                } else {
+                if (!(first_occupied && second_occupied)) {
                     sarlaccdisco.timer += FRAMETIME;
                     if (sarlaccdisco.timer > 2.5f) {
                         sarlaccdisco.timer = 0.0f;
@@ -1541,6 +1527,20 @@ void SarlaccPitB_Update(WORLDINFO_s *world) {
                                 LevelLocator->position.z = help_position->z;
                             }
                         }
+                    }
+                } else {
+                    sarlaccdisco.timer = 0.0f;
+                    sarlaccdisco.panel_state[sarlaccdisco.first_panel] = 3;
+                    sarlaccdisco.panel_state[sarlaccdisco.second_panel] = 3;
+                    sarlaccdisco.first_panel = SarlaccDiscoPickPanel(0, -1);
+                    sarlaccdisco.second_panel = SarlaccDiscoPickPanel(0, sarlaccdisco.first_panel);
+                    if (sarlaccdisco.first_panel == -1 || sarlaccdisco.second_panel == -1) {
+                        sarlaccdisco.phase = 2;
+                        for (i32 index = 0; index < sarlaccdisco.count; ++index)
+                            sarlaccdisco.panel_state[index] = 4;
+                    } else {
+                        sarlaccdisco.panel_state[sarlaccdisco.first_panel] = 1;
+                        sarlaccdisco.panel_state[sarlaccdisco.second_panel] = 1;
                     }
                 }
                 break;
@@ -1594,7 +1594,7 @@ void SarlaccPitB_Update(WORLDINFO_s *world) {
     if (LevFlag[0] != 0) {
         f32 base = lumppos.z;
         enginetimer -= FRAMETIME;
-        if (__builtin_expect(enginetimer <= 0.0f, 0))
+        if (enginetimer <= 0.0f)
             enginetimer = 0.1f;
         f32 offset = 1.0f - (NU_SIN_LUT(enginetimer * 10.0f * 32768.0f + 16384.0f) + 1.0f) * 0.5f;
         f32 z = base + (offset * 0.01f - 0.005f);

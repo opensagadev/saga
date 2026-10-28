@@ -1998,15 +1998,12 @@ void LevelObjects_InitForLevel(WORLDINFO_s *world) {
     }
 
     for (i32 object_index = 0; object_index < LEVELOBJECTCOUNT; ++object_index) {
-        LEVELOBJECT &object_type = ObjTabList[object_index];
-        LEVEL_OBJECT_RUNTIME &object = world->lev_objs[object_index];
-
-        if (NuStrICmp(object_type.name, "power_up") == 0) {
+        if (NuStrICmp(ObjTabList[object_index].name, "power_up") == 0) {
             KNOBS = object_index;
         }
 
         NUGSCN *scene = NULL;
-        switch (object_type.kind) {
+        switch (ObjTabList[object_index].kind) {
             case LEVEL_OBJECT_SCENE_LEVEL:
                 scene = world->current_gscn;
                 break;
@@ -2018,7 +2015,9 @@ void LevelObjects_InitForLevel(WORLDINFO_s *world) {
             case LEVEL_OBJECT_SCENE_CHARACTER_ICON:
                 for (i32 character_id = 0; character_id < CHARCOUNT; ++character_id) {
                     scene = IconScene_FindById(character_id);
-                    if (scene != NULL && NuSpecialFind(scene, &object.special, object_type.name, 1) != 0) {
+                    if (scene != NULL && __builtin_expect(NuSpecialFind(scene, &world->lev_objs[object_index].special,
+                                                                        ObjTabList[object_index].name, 1) != 0,
+                                                          0)) {
                         goto object_resolved;
                     }
                 }
@@ -2042,22 +2041,28 @@ void LevelObjects_InitForLevel(WORLDINFO_s *world) {
                 if (__builtin_expect(area_scene != NULL && world->area != NULL &&
                                          (world->area->flags & AREAFLAG_OVERRIDE_THINGS_SCENE) != 0,
                                      1)) {
-                    if (__builtin_expect(NuSpecialFind(area_scene, &object.special, object_type.name, 1) != 0, 0)) {
-                        goto object_resolved;
+                    if (__builtin_expect(NuSpecialFind(area_scene, &world->lev_objs[object_index].special,
+                                                       ObjTabList[object_index].name, 1) == 0,
+                                         0)) {
+                        NuSpecialFind(things_scene, &world->lev_objs[object_index].special,
+                                      ObjTabList[object_index].name, 1);
                     }
+                    goto object_resolved;
                 }
                 scene = things_scene;
                 break;
         }
 
-        if (scene != NULL) {
-            NuSpecialFind(scene, &object.special, object_type.name, 1);
+        if (__builtin_expect(scene == NULL, 0)) {
+            continue;
         }
+        NuSpecialFind(scene, &world->lev_objs[object_index].special, ObjTabList[object_index].name, 1);
 
     object_resolved:
-        object.active = static_cast<u8>(NuSpecialExistsFn(&object.special));
-        if (__builtin_expect(object.active != 0, 0)) {
-            NuSpecialSetVisibility(&object.special, 0);
+        world->lev_objs[object_index].active =
+            static_cast<u8>(NuSpecialExistsFn(&world->lev_objs[object_index].special));
+        if (__builtin_expect(world->lev_objs[object_index].active != 0, 0)) {
+            NuSpecialSetVisibility(&world->lev_objs[object_index].special, 0);
         }
     }
 }

@@ -1294,11 +1294,11 @@ i32 Action_CreatePod(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **
     float time_factor = 1.0f;
     i32 pacemaker = 0;
     i32 damaged = 0;
-    for (i32 i = 0; i != param_count; i++, ++params) {
-        char *value = NuStrIStr(*params, "spline_id=");
+    for (i32 i = 0; i != param_count; i++) {
+        char *value = NuStrIStr(params[i], "spline_id=");
         if (value != NULL) {
             spline_id = (i32)AIParamToFloat((AISCRIPTPROCESS *)packet, value + 10);
-        } else if ((value = NuStrIStr(*params, "type=")) != NULL) {
+        } else if ((value = NuStrIStr(params[i], "type=")) != NULL) {
             if (LevelCharacterTypeIDFn != NULL && LevelCharacterGlobalIDFn != NULL) {
                 u8 type = LevelCharacterTypeIDFn(value + 5);
                 if (type != 0xff)
@@ -1306,15 +1306,15 @@ i32 Action_CreatePod(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **
                 else
                     model_id = type;
             }
-        } else if (__builtin_expect((value = NuStrIStr(*params, "spline_start=")) != NULL, 1)) {
+        } else if (__builtin_expect((value = NuStrIStr(params[i], "spline_start=")) != NULL, 1)) {
             start = AIParamToFloat((AISCRIPTPROCESS *)packet, value + 13);
-        } else if ((value = NuStrIStr(*params, "spline_end=")) != NULL) {
+        } else if ((value = NuStrIStr(params[i], "spline_end=")) != NULL) {
             end = AIParamToFloat((AISCRIPTPROCESS *)packet, value + 11);
-        } else if ((value = NuStrIStr(*params, "time_factor=")) != NULL) {
+        } else if ((value = NuStrIStr(params[i], "time_factor=")) != NULL) {
             time_factor = AIParamToFloat((AISCRIPTPROCESS *)packet, value + 12);
-        } else if (NuStrICmp(*params, "pacemaker") == 0) {
+        } else if (NuStrICmp(params[i], "pacemaker") == 0) {
             pacemaker = 1;
-        } else if (NuStrICmp(*params, "damaged") == 0) {
+        } else if (NuStrICmp(params[i], "damaged") == 0) {
             damaged = 1;
         }
     }
@@ -1328,20 +1328,22 @@ i32 Action_CreatePod(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **
             break;
     }
 
-    if (__builtin_expect(start < 0.0f, 0))
+    if (start < 0.0f)
         start = 0.0f;
     else if (start > 1.0f)
         start = 1.0f;
-    if (__builtin_expect(end < 0.0f, 0))
+    if (end < 0.0f)
         end = 0.0f;
     else if (end > 1.0f)
         end = 1.0f;
     if (spline == NULL || spline->point_count == 0 || start == end)
         return 1;
 
-    i32 slot = 0;
-    while (slot < 16 && PodRace->lap_entries[slot].next != NULL)
-        slot++;
+    i32 slot;
+    for (slot = 0; slot < 16; slot++) {
+        if (PodRace->lap_entries[slot].next == NULL)
+            break;
+    }
     if (slot == 16)
         return 1;
     racepod_s *pod = &PodRace->lap_entries[slot];
@@ -1350,21 +1352,20 @@ i32 Action_CreatePod(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **
     pod->data = (u32 *)spline;
     pod->model_id = model_id;
 
-    float spline_length = spline->length;
+    float range = end - start;
     float duration = time_factor * PodRace->prev_lap_display;
-    pod->speed = !(duration <= 0.0f) ? ((end - start) * spline_length) / duration : 1.0f;
+    pod->speed = duration > 0.0f ? (range * spline->length) / duration : 1.0f;
 
     _vuv_s position __attribute__((aligned(16)));
     _vuv_s next_position __attribute__((aligned(16)));
-    CalcSplinePointFromDist(spline, &position, start * spline_length);
+    CalcSplinePointFromDist(spline, &position, start * spline->length);
     CalcSplinePointFromDist(spline, &next_position, (start + PODRACE_SPLINEINC) * spline->length);
     NuMtxSetIdentity(&pod->matrix);
-    pod->matrix.m30 = position.x;
-    pod->matrix.m31 = position.y;
-    pod->matrix.m32 = position.z;
-    pod->matrix.m33 = position.w;
-    _vuv_s direction __attribute__((aligned(16))) = {next_position.x - position.x, next_position.y - position.y,
-                                                     next_position.z - position.z, 0.0f};
+    *(_vuv_s *)&pod->matrix.m30 = position;
+    _vuv_s direction __attribute__((aligned(16)));
+    direction.x = next_position.x - position.x;
+    direction.y = next_position.y - position.y;
+    direction.z = next_position.z - position.z;
     RacePodAlign(pod, &direction, 1.0f);
     pod->previous_axis = {0.0f, 0.0f, 0.0f, 1.0f};
     pod->previous_position = position;

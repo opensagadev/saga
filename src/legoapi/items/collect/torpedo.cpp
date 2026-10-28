@@ -326,7 +326,7 @@ void TorpedoCode(GameObject_s *object, i32 fire, f32 fire_cooldown) {
 
     if (object->torpedo->field_08 < 0.8f) {
         object->torpedo->field_08 += FRAMETIME;
-        if (!(object->torpedo->field_08 < 0.8f))
+        if (__builtin_expect(object->torpedo->field_08 >= 0.8f, 0))
             object->torpedo->field_03 = 0;
     } else {
         if (Cheat_IsOn(42) != 0 && static_cast<i8>(object->apiobj.flags_low) < 0 &&
@@ -349,52 +349,51 @@ void TorpedoCode(GameObject_s *object, i32 fire, f32 fire_cooldown) {
                     object->torpedo->pickup_positions[object->torpedo->count] = machine->position;
                     ++object->torpedo->count;
                     machine->activation_time = 0.0f;
-                    object->torpedo->field_03 = 0;
                     object->torpedo->field_08 = 0.0f;
+                    object->torpedo->field_03 = 0;
                 }
             }
         }
     }
 
     Torpedo_UpdateJobbies(object);
-    if (object->torpedo->count == 0)
+    if (__builtin_expect(object->torpedo->count == 0, 0))
         return;
 
-    BOLTTYPE_s *type = BoltType_FindByID(
-        WORLD != NULL && WORLD->area != NULL && (WORLD->area->flags & AREAFLAG_BONUS_AREA) != 0 ? 16 : 15, WORLD);
-    u8 target_type = object->torpedo->target_type;
+    BOLTTYPE_s *type;
+    if (WORLD != NULL && WORLD->area != NULL && (WORLD->area->flags & AREAFLAG_BONUS_AREA) != 0)
+        type = BoltType_FindByID(16, WORLD);
+    else
+        type = BoltType_FindByID(15, WORLD);
+    const f32 range = type->field_10 * type->field_14;
+    void *target;
+    u8 target_type;
     if (__builtin_expect((object->torpedo->field_0x1 & 2) == 0, 0) || object->torpedo->target == NULL) {
-        const f32 range = type->field_14 * type->field_10;
-        void *target = FindNearestTorpTarget(WORLD, &object->apiobj.position, range * range, &target_type);
-        if (target != NULL) {
-            if (__builtin_expect(target == object->torpedo->target, 1)) {
-                object->torpedo_target_timer += FRAMETIME;
-                if (__builtin_expect(object->torpedo_target_timer > 0.25f, 0))
-                    object->torpedo_target_timer = 0.25f;
-            } else if (!(object->torpedo_target_timer > 0.0f) || object->torpedo->target == NULL) {
-                object->torpedo->target = target;
-                object->torpedo->target_type = target_type;
-                object->torpedo_target_timer = 0.0f;
-            } else {
-                const f32 timer = object->torpedo_target_timer - 2.0f * FRAMETIME;
-                if (timer < 0.0f) {
-                    object->torpedo_target_timer = 0.0f;
-                } else {
-                    object->torpedo_target_timer = timer;
-                }
-            }
-        } else if ((object->torpedo->field_0x1 & 6) == 0) {
-            if (__builtin_expect(object->torpedo_target_timer > 0.0f, 0)) {
-                const f32 timer = object->torpedo_target_timer - 2.0f * FRAMETIME;
-                object->torpedo_target_timer = timer < 0.0f ? 0.0f : timer;
-            } else {
-                object->torpedo->target = NULL;
-            }
-        }
+        target = FindNearestTorpTarget(WORLD, &object->apiobj.position, range * range, &target_type);
     } else {
-        object->torpedo_target_timer += FRAMETIME;
-        if (object->torpedo_target_timer > 0.25f)
-            object->torpedo_target_timer = 0.25f;
+        target = object->torpedo->target;
+        target_type = object->torpedo->target_type;
+    }
+    if (__builtin_expect(target != NULL, 1)) {
+        if (target == object->torpedo->target) {
+            object->torpedo_target_timer += FRAMETIME;
+            if (object->torpedo_target_timer > 0.25f)
+                object->torpedo_target_timer = 0.25f;
+        } else if (!(object->torpedo_target_timer > 0.0f) || object->torpedo->target == NULL) {
+            object->torpedo->target = target;
+            object->torpedo->target_type = target_type;
+            object->torpedo_target_timer = 0.0f;
+        } else {
+            const f32 timer = object->torpedo_target_timer - 2.0f * FRAMETIME;
+            object->torpedo_target_timer = !(timer < 0.0f) ? timer : 0.0f;
+        }
+    } else if ((object->torpedo->field_0x1 & 6) == 0) {
+        if (object->torpedo_target_timer > 0.0f) {
+            const f32 timer = object->torpedo_target_timer - 2.0f * FRAMETIME;
+            object->torpedo_target_timer = !(timer < 0.0f) ? timer : 0.0f;
+        } else {
+            object->torpedo->target = NULL;
+        }
     }
 
     if ((static_cast<i8>(object->apiobj.flags_low) < 0 && object->torpedo->target != NULL &&

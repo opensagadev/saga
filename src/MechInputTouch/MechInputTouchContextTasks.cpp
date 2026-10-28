@@ -759,73 +759,65 @@ void MechTouchTaskPlannedGoTo::BackgroundProcess() {
 void MechTouchTaskPlannedGoTo::GenerateWaypoints() {
     i32 current = 0;
     i32 waypoint_index = 0;
-    if (path_count <= 0 || path_points[1].y == -1000000000.0f) {
-        goto write_final_waypoint;
-    }
-    current = 1;
-    while (true) {
-        if (path_points[current].y > path_points[current - 1].y + 0.15f) {
-            waypoints[waypoint_index].active = 1;
-            const f32 previous_point_x = path_points[current - 1].x;
-            const f32 previous_point_y = path_points[current - 1].y;
-            const f32 previous_point_w = path_points[current - 1].w;
-            const f32 previous_point_z = path_points[current - 1].z;
-            waypoints[waypoint_index].position.x = previous_point_x;
-            waypoints[waypoint_index].position.y = previous_point_y;
-            waypoints[waypoint_index].position.z = previous_point_z;
-            waypoints[waypoint_index].position.w = previous_point_w;
-            waypoints[waypoint_index].field_14 = 0;
-            waypoints[waypoint_index].target_position.position.x = previous_point_x;
-            waypoints[waypoint_index].target_position.position.y = previous_point_y;
-            waypoints[waypoint_index].target_position.position.z = previous_point_z;
-            waypoints[waypoint_index].target_position.position.w = previous_point_w;
-            waypoints[waypoint_index + 1].active = 1;
-            const f32 current_point_x = path_points[current].x;
-            const f32 current_point_y = path_points[current].y;
-            const f32 current_point_z = path_points[current].z;
-            const f32 current_point_w = path_points[current].w;
-            waypoints[waypoint_index + 1].position.x = current_point_x;
-            waypoints[waypoint_index + 1].position.y = current_point_y;
-            waypoints[waypoint_index + 1].position.z = current_point_z;
-            waypoints[waypoint_index + 1].position.w = current_point_w;
-            waypoints[waypoint_index + 1].field_14 = 1;
-            waypoints[waypoint_index + 1].target_position.position.x = current_point_x;
-            waypoints[waypoint_index + 1].target_position.position.y = current_point_y;
-            waypoints[waypoint_index + 1].target_position.position.z = current_point_z;
-            waypoints[waypoint_index + 1].target_position.position.w = current_point_w;
-            if (__builtin_expect(current == path_count || path_points[current + 1].y == -1000000000.0f, 1)) {
+    if (path_count > 0 && path_points[1].y != -1000000000.0f) {
+        current = 1;
+        while (true) {
+            if (path_points[current].y > path_points[current - 1].y + 0.15f) {
+                MechTouchPlannedWaypoint *waypoint = &waypoints[waypoint_index];
+                waypoint->active = 1;
+                const VuVec previous_point = path_points[current - 1];
+                waypoint->position.x = previous_point.x;
+                waypoint->position.y = previous_point.y;
+                waypoint->position.z = previous_point.z;
+                waypoint->position.w = previous_point.w;
+                waypoint->field_14 = 0;
+                waypoint->target_position.position.x = previous_point.x;
+                waypoint->target_position.position.y = previous_point.y;
+                waypoint->target_position.position.z = previous_point.z;
+                waypoint->target_position.position.w = previous_point.w;
+                waypoint = &waypoints[waypoint_index + 1];
+                waypoint->active = 1;
+                const VuVec current_point = path_points[current];
+                waypoint->position.x = current_point.x;
+                waypoint->position.y = current_point.y;
+                waypoint->position.z = current_point.z;
+                waypoint->position.w = current_point.w;
+                waypoint->field_14 = 1;
+                waypoint->target_position.position.x = current_point.x;
+                waypoint->target_position.position.y = current_point.y;
+                waypoint->target_position.position.z = current_point.z;
+                waypoint->target_position.position.w = current_point.w;
+                if (current == path_count || path_points[current + 1].y == -1000000000.0f) {
+                    goto cleanup;
+                }
+                waypoint_index += 2;
+            }
+            const i32 next = current + 1;
+            if (next > path_count || waypoint_index > 30 || path_points[next].y == -1000000000.0f) {
                 break;
             }
-            waypoint_index += 2;
+            current = next;
         }
-        const i32 next = current + 1;
-        if (__builtin_expect(next > path_count || waypoint_index > 30 || path_points[next].y == -1000000000.0f, 0)) {
-            goto write_final_waypoint;
-        }
-        current = next;
     }
-    goto cleanup;
 
-write_final_waypoint: {
-    waypoints[waypoint_index].active = 1;
-    const f32 final_point_x = path_points[current].x;
-    const f32 final_point_y = path_points[current].y;
-    const f32 final_point_z = path_points[current].z;
-    const f32 final_point_w = path_points[current].w;
-    waypoints[waypoint_index].position.x = final_point_x;
-    waypoints[waypoint_index].position.y = final_point_y;
-    waypoints[waypoint_index].position.z = final_point_z;
-    waypoints[waypoint_index].position.w = final_point_w;
-    waypoints[waypoint_index].field_14 = 0;
-    waypoints[waypoint_index].target_position.position.x = final_point_x;
-    waypoints[waypoint_index].target_position.position.y = final_point_y;
-    waypoints[waypoint_index].target_position.position.z = final_point_z;
-    waypoints[waypoint_index].target_position.position.w = final_point_w;
-    target_position.position.x = final_point_x;
-    target_position.position.y = final_point_y;
-    target_position.position.z = final_point_z;
-    target_position.position.w = final_point_w;
-}
+    {
+        MechTouchPlannedWaypoint *waypoint = &waypoints[waypoint_index];
+        waypoint->active = 1;
+        const VuVec final_point = path_points[current];
+        waypoint->position.x = final_point.x;
+        waypoint->position.y = final_point.y;
+        waypoint->position.z = final_point.z;
+        waypoint->position.w = final_point.w;
+        waypoint->field_14 = 0;
+        waypoint->target_position.position.x = final_point.x;
+        waypoint->target_position.position.y = final_point.y;
+        waypoint->target_position.position.z = final_point.z;
+        waypoint->target_position.position.w = final_point.w;
+        target_position.position.x = final_point.x;
+        target_position.position.y = final_point.y;
+        target_position.position.z = final_point.z;
+        target_position.position.w = final_point.w;
+    }
 
 cleanup:
     if (__builtin_expect(field_6fd == 0, 0)) {

@@ -300,7 +300,7 @@ i32 Action_SpeederBeingChased(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_
         processor->action_data_2 = object->current_hp;
         speeder_hitpoints_lost = 0;
         speeder_mode_ahead_timer = 0.0f;
-    } else if (__builtin_expect(processor->action_data_1 > 4, 0)) {
+    } else if (processor->action_data_1 > 4) {
         processor->action_data_1 = 0;
     }
     const f32 base_speed = object->apiobj.character_data->game_character->run_speed;
@@ -335,7 +335,7 @@ i32 Action_SpeederBeingChased(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_
         else if (distance < length * -0.5f)
             distance += length;
         can_fire = distance < speederfirerange;
-        if (__builtin_expect(distance > speeder_kill_dist, 0)) {
+        if (distance > speeder_kill_dist) {
             KillGameObject(object, 4, 0);
             return 1;
         }

@@ -1590,7 +1590,7 @@ void HothBattleE_Panel(WORLDINFO_s *) {
         case 1:
         case 2:
             for (i32 index = 0; index < melee.waves[0].initial_count; ++index) {
-                if (__builtin_expect(index == (melee.waves[0].initial_count >> 1) + 1, 1)) {
+                if (__builtin_expect(index == (u8)(melee.waves[0].initial_count / 2) + 1, 1)) {
                     targets[count] = -1;
                     defeated[count] = 0;
                     ++count;
@@ -1624,12 +1624,15 @@ void HothBattleE_Panel(WORLDINFO_s *) {
             }
             break;
     }
-    for (i32 index = 0; index < count; ++index) {
-        if (!(targets[index] != -1 && defeated[index] != 0)) {
-            alpha[index] = 1.0f;
-        } else {
-            alpha[index] = SeekLinearF(alpha[index], 0.4f, 0.1f);
-        }
+    if (count > 0) {
+        i32 index = 0;
+        do {
+            if (!(targets[index] != -1 && defeated[index] != 0)) {
+                alpha[index] = 1.0f;
+            } else {
+                alpha[index] = SeekLinearF(alpha[index], 0.4f, 0.1f);
+            }
+        } while (++index != count);
     }
     DrawMeleeTargetsRows(targets, defeated, alpha, count);
 }
@@ -1935,10 +1938,10 @@ void HothBattleE_UpdateWave() {
     HothBattle_ManageBackgroundCreatures();
     if (__builtin_expect(
             melee.current_wave == 3 && melee.waves[0].creatures[0] != NULL && melee.waves[0].creatures[1] != NULL, 0)) {
-        AIANTINODE_s *node = AIAntinodeCreateSingleFrame(&melee.waves[0].creatures[0]->apiobj.collision_position,
+        AIANTINODE_s *node = AIAntinodeCreateSingleFrame(&melee.waves[0].creatures[0]->apiobj.position,
                                                          melee.waves[0].creatures[type]->apiobj.field_0x1dc * 3.0f);
         node->excluded_character_types = ~(1 << melee.waves[0].creatures[1]->apiobj.field_0x289);
-        node = AIAntinodeCreateSingleFrame(&melee.waves[0].creatures[1]->apiobj.collision_position,
+        node = AIAntinodeCreateSingleFrame(&melee.waves[0].creatures[1]->apiobj.position,
                                            melee.waves[0].creatures[type]->apiobj.field_0x1dc * 3.0f);
         node->excluded_character_types = ~(1 << melee.waves[0].creatures[0]->apiobj.field_0x289);
     }
@@ -1965,7 +1968,7 @@ void HothBattleE_UpdateWave() {
             pending = 1;
         }
     }
-    if (__builtin_expect((pending | MiniCutCam) == 0 && NOAICREATURES == 0 && melee.current_wave == melee.next_wave,
+    if (__builtin_expect((pending | MiniCutCam) == 0 && NOAICREATURES == 0 && melee.next_wave == melee.current_wave,
                          1)) {
         ++melee.next_wave;
     }

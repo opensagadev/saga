@@ -16461,10 +16461,11 @@ extern "C" void *TerrainInitEx(i32 level_num, void *buf, void *buf_end, i32 opti
     cursor->u8_ptr += sizeof(TERRSET);
 
     terrain->groups = reinterpret_cast<TERRAIN_GROUP *>(cursor->u8_ptr);
-    terrain->max_platforms = max_platforms;
     terrain->max_group_indices = max_group_indices;
     terrain->max_groups = max_groups;
-    cursor->u8_ptr += (max_groups + 0x80) * sizeof(TERRAIN_GROUP);
+    terrain->max_platforms = max_platforms;
+    const u32 group_slots = max_groups + 0x80;
+    cursor->u8_ptr += group_slots * sizeof(TERRAIN_GROUP);
     terrain->group_indices = reinterpret_cast<i16 *>(cursor->u8_ptr);
     cursor->u8_ptr += max_group_indices * sizeof(i16);
     terrain->platforms = reinterpret_cast<TERRAIN_PLATFORM *>(cursor->u8_ptr);
@@ -16485,8 +16486,10 @@ extern "C" void *TerrainInitEx(i32 level_num, void *buf, void *buf_end, i32 opti
         terrain->cells[cell].group_count = 0;
     }
 
-    for (i32 platform_index = 0; platform_index < static_cast<i32>(terrain->max_platforms); ++platform_index) {
-        TERRAIN_PLATFORM &platform = terrain->platforms[platform_index];
+    const i32 platform_limit = terrain->max_platforms;
+    TERRAIN_PLATFORM *cleared_platforms = terrain->platforms;
+    for (i32 platform_index = 0; platform_index < platform_limit; ++platform_index) {
+        TERRAIN_PLATFORM &platform = cleared_platforms[platform_index];
         platform.flags &= ~TERRAIN_PLATFORM_FLAG_DISPLAY_LIST_BACKED;
         platform.scene_object = NULL;
         platform.field_0x44 = 0;
@@ -16547,7 +16550,7 @@ extern "C" void *TerrainInitEx(i32 level_num, void *buf, void *buf_end, i32 opti
         while (batch->marker >= 0) {
             TERRAIN_SHAPE *shape = reinterpret_cast<TERRAIN_SHAPE *>(batch + 1);
             const i32 shape_count = batch->shape_count;
-            for (i32 shape_index = 0; shape_index < shape_count; ++shape_index, ++shape) {
+            for (i32 shape_index = shape_count; shape_index > 0; --shape_index, ++shape) {
                 NuVecCheckForSNANs(&shape->normals[0]);
                 NuVecCheckForSNANs(&shape->normals[1]);
 
@@ -16590,18 +16593,15 @@ extern "C" void *TerrainInitEx(i32 level_num, void *buf, void *buf_end, i32 opti
                 if (shape->max_z > max_z)
                     max_z = shape->max_z;
 
-                f32 current_minimum_height = static_cast<f32>(terrain->minimum_height);
                 for (i32 vector_index = 0; vector_index < 4; ++vector_index) {
-                    const NUVEC &vector = shape->vectors[vector_index];
-                    const f32 world_y = vector.y + group.origin.y;
-                    if (__builtin_expect(current_minimum_height > world_y, 1)) {
-                        terrain->minimum_height = static_cast<i32>(world_y);
-                        current_minimum_height = static_cast<f32>(terrain->minimum_height);
+                    if (static_cast<f32>(terrain->minimum_height) > shape->vectors[vector_index].y + group.origin.y) {
+                        terrain->minimum_height = static_cast<i32>(shape->vectors[vector_index].y + group.origin.y);
                     }
                 }
                 for (i32 vector_index = 0; vector_index < 4; ++vector_index) {
-                    const NUVEC &vector = shape->vectors[vector_index];
-                    const f32 length_squared = vector.x * vector.x + vector.y * vector.y + vector.z * vector.z;
+                    const f32 length_squared = shape->vectors[vector_index].x * shape->vectors[vector_index].x +
+                                               shape->vectors[vector_index].y * shape->vectors[vector_index].y +
+                                               shape->vectors[vector_index].z * shape->vectors[vector_index].z;
                     radius_squared = MAX(length_squared, radius_squared);
                 }
             }
@@ -16629,8 +16629,8 @@ extern "C" void *TerrainInitEx(i32 level_num, void *buf, void *buf_end, i32 opti
     }
 
     group_count = terrain->group_count;
-    f32 terrain_min_z = kBoundsMaximum;
     f32 terrain_min_x = kBoundsMaximum;
+    f32 terrain_min_z = kBoundsMaximum;
     f32 terrain_max_x = kBoundsMinimum;
     f32 terrain_max_z = kBoundsMinimum;
 
@@ -16642,18 +16642,10 @@ extern "C" void *TerrainInitEx(i32 level_num, void *buf, void *buf_end, i32 opti
 
         TERRAIN_SHAPE_BATCH *batch = static_cast<TERRAIN_SHAPE_BATCH *>(group.data);
         while (batch->marker >= 0) {
-            const f32 min_x = group.origin.x + batch->min_x;
-            const f32 max_x = group.origin.x + batch->max_x;
-            const f32 min_z = group.origin.z + batch->min_z;
-            const f32 max_z = group.origin.z + batch->max_z;
-            if (min_x < terrain_min_x)
-                terrain_min_x = min_x;
-            if (max_x > terrain_max_x)
-                terrain_max_x = max_x;
-            if (min_z < terrain_min_z)
-                terrain_min_z = min_z;
-            if (max_z > terrain_max_z)
-                terrain_max_z = max_z;
+            terrain_min_x = MIN(batch->min_x + group.origin.x, terrain_min_x);
+            terrain_max_x = MAX(batch->max_x + group.origin.x, terrain_max_x);
+            terrain_min_z = MIN(batch->min_z + group.origin.z, terrain_min_z);
+            terrain_max_z = MAX(batch->max_z + group.origin.z, terrain_max_z);
 
             batch = reinterpret_cast<TERRAIN_SHAPE_BATCH *>(reinterpret_cast<TERRAIN_SHAPE *>(batch + 1) +
                                                             batch->shape_count);
@@ -16667,34 +16659,25 @@ extern "C" void *TerrainInitEx(i32 level_num, void *buf, void *buf_end, i32 opti
             continue;
         }
 
-        f32 min_x = kBoundsMaximum;
-        f32 min_z = kBoundsMaximum;
-        f32 max_x = kBoundsMinimum;
-        f32 max_z = kBoundsMinimum;
+        group_min_x[group_index] = kBoundsMaximum;
+        group_min_z[group_index] = kBoundsMaximum;
+        group_max_x[group_index] = kBoundsMinimum;
+        group_max_z[group_index] = kBoundsMinimum;
         TERRAIN_SHAPE_BATCH *batch = static_cast<TERRAIN_SHAPE_BATCH *>(group.data);
         while (batch->marker >= 0) {
-            const f32 batch_min_x = group.origin.x + batch->min_x;
-            const f32 batch_max_x = group.origin.x + batch->max_x;
-            const f32 batch_min_z = group.origin.z + batch->min_z;
-            const f32 batch_max_z = group.origin.z + batch->max_z;
-            if (batch_min_x < min_x)
-                min_x = batch_min_x;
-            if (batch_max_x > max_x)
-                max_x = batch_max_x;
-            if (batch_min_z < min_z)
-                min_z = batch_min_z;
-            if (batch_max_z > max_z)
-                max_z = batch_max_z;
+            group_min_x[group_index] = MIN(batch->min_x + group.origin.x, group_min_x[group_index]);
+            group_max_x[group_index] = MAX(batch->max_x + group.origin.x, group_max_x[group_index]);
+            group_min_z[group_index] = MIN(batch->min_z + group.origin.z, group_min_z[group_index]);
+            group_max_z[group_index] = MAX(batch->max_z + group.origin.z, group_max_z[group_index]);
 
             batch = reinterpret_cast<TERRAIN_SHAPE_BATCH *>(reinterpret_cast<TERRAIN_SHAPE *>(batch + 1) +
                                                             batch->shape_count);
         }
 
-        group_min_x[group_index] = min_x;
-        group_min_z[group_index] = min_z;
-        group_max_x[group_index] = max_x;
-        group_max_z[group_index] = max_z;
-
+        const f32 min_x = group_min_x[group_index];
+        const f32 max_x = group_max_x[group_index];
+        const f32 min_z = group_min_z[group_index];
+        const f32 max_z = group_max_z[group_index];
         const i32 x_distance = static_cast<i32>((min_x + max_x) * 0.5f - terrain_min_x);
         i32 x_cell =
             static_cast<i32>(static_cast<f32>(x_distance * TERRAIN_GRID_WIDTH) / (terrain_max_x - terrain_min_x));
@@ -19447,10 +19430,11 @@ f32 NewCast(nuvec_s *position, f32 height_above, f32 roof_range) {
                     }
                 }
                 if (__builtin_expect(facing != 0, 1)) {
-                    if (plane != 0 && surface->normals[1].y == 0.0f) {
-                        plane = 0;
+                    if (plane != 0 && surface->normals[1].y != 0.0f) {
+                        record_hit(&surface->normals[1], &surface->vectors[3], facing);
+                    } else {
+                        record_hit(&surface->normals[0], &surface->vectors[0], facing);
                     }
-                    record_hit(&surface->normals[plane], &surface->vectors[plane * 3], facing);
                 }
             }
 #undef CAST_LINE
@@ -19478,7 +19462,12 @@ f32 NewCast(nuvec_s *position, f32 height_above, f32 roof_range) {
     }
 
     if (eroof_y < 2000000.0f && eroof_ny > 0.0f && roof_range + position->y > eroof_y) {
-        if (!(roof_y < 2000000.0f && roof_ny < 0.0f && roof_range + position->y > roof_y && eroof_y > roof_y)) {
+        if (roof_y < 2000000.0f && roof_ny < 0.0f && roof_range + position->y > roof_y && eroof_y > roof_y) {
+            eshadhit = 3;
+            EShadY = 2000000.0f;
+            EShadPoly = NULL;
+            EShadNorm.y = 1.0f;
+        } else {
             EShadY = eroof_y;
             EShadPoly = eroof_poly;
             EShadNorm.y = eroof_ny;
@@ -19486,11 +19475,6 @@ f32 NewCast(nuvec_s *position, f32 height_above, f32 roof_range) {
             EShadNorm.z = eroof_nz;
             eshadhit = 1;
             ecastnum = eroof_group;
-        } else {
-            eshadhit = 3;
-            EShadNorm.y = 1.0f;
-            EShadY = 2000000.0f;
-            EShadPoly = NULL;
         }
     } else if (efloor_y > -2000000.0f && !(floor_y > -2000000.0f && floor_y > efloor_y)) {
         eshadhit = 2;
@@ -21620,7 +21604,7 @@ i32 TerrainPlatformEmbedded(nuvec_s *movement_delta) {
         return 1;
     NUMTX *previous = &CurTerr->platforms[platform_index].previous_matrix;
     if (previous->m30 == matrix->m30 && previous->m31 == matrix->m31 && previous->m32 == matrix->m32) {
-        if (__builtin_expect(!(CurTerr->platforms[platform_index].flags & 1), 0))
+        if (!(CurTerr->platforms[platform_index].flags & 1))
             return 1;
         if (__builtin_expect(previous->m00 == matrix->m00 && previous->m01 == matrix->m01 && previous->m02 == matrix->m02 &&
             previous->m10 == matrix->m10 && previous->m11 == matrix->m11 && previous->m12 == matrix->m12 &&
@@ -21647,17 +21631,26 @@ i32 TerrainPlatformEmbedded(nuvec_s *movement_delta) {
     query->inverse_object_scale = old_query->inverse_object_scale;
     query->radius = old_query->radius;
     query->object_scale = old_query->object_scale;
-    query->movement.x = (previous->m30 - matrix->m30) * 1.73f;
-    query->movement.y = ((previous->m31 - matrix->m31) * 1.73f) * query->inverse_object_scale;
-    query->movement.z = (previous->m32 - matrix->m32) * 1.73f;
+    query->movement.x = (CurTerr->platforms[platform_index].previous_matrix.m30 -
+                         static_cast<NUMTX *>(CurTerr->platforms[platform_index].scene_object)->m30) *
+                        1.73f;
+    query->movement.y = ((CurTerr->platforms[platform_index].previous_matrix.m31 -
+                          static_cast<NUMTX *>(CurTerr->platforms[platform_index].scene_object)->m31) *
+                         1.73f) *
+                        query->inverse_object_scale;
+    query->movement.z = (CurTerr->platforms[platform_index].previous_matrix.m32 -
+                         static_cast<NUMTX *>(CurTerr->platforms[platform_index].scene_object)->m32) *
+                        1.73f;
     if (CurTerr->platforms[platform_index].flags & 1) {
-        NuMtxInvRSS(&tertempmat, previous);
-        tertempvec4.z = old_query->position.z - previous->m32;
-        tertempvec4.x = old_query->position.x - previous->m30;
-        tertempvec4.y = (old_query->position.y - query->collision_radius) * query->object_scale - previous->m31;
+        NuMtxInvRSS(&tertempmat, &CurTerr->platforms[platform_index].previous_matrix);
+        tertempvec4.x = old_query->position.x - CurTerr->platforms[platform_index].previous_matrix.m30;
+        tertempvec4.y = (old_query->position.y - query->collision_radius) * query->object_scale -
+                        CurTerr->platforms[platform_index].previous_matrix.m31;
+        tertempvec4.z = old_query->position.z - CurTerr->platforms[platform_index].previous_matrix.m32;
         tertempvec4.w = 1.0f;
         NuVec4MtxTransformVU0(&tertempvec4, &tertempvec4, &tertempmat);
-        NuVec4MtxTransformVU0(&tertempvec4, &tertempvec4, matrix);
+        NuVec4MtxTransformVU0(&tertempvec4, &tertempvec4,
+                              static_cast<NUMTX *>(CurTerr->platforms[platform_index].scene_object));
         query->movement.x = (old_query->position.x - tertempvec4.x) * 1.3f;
         query->movement.y =
             (old_query->position.y - (tertempvec4.y * query->inverse_object_scale + query->collision_radius)) * 1.3f;
@@ -21673,8 +21666,8 @@ i32 TerrainPlatformEmbedded(nuvec_s *movement_delta) {
     TERRAIN_SHAPE **cursor = reinterpret_cast<TERRAIN_SHAPE **>(query->scan_list_storage + 4);
     i32 transformed_count = 0;
     i32 count = 0;
-    TERRAIN_SHAPE_BATCH *batch =
-        static_cast<TERRAIN_SHAPE_BATCH *>(CurTerr->groups[old_query->terrain_group_index].data);
+    TERRAIN_GROUP *group = &CurTerr->groups[old_query->terrain_group_index];
+    TERRAIN_SHAPE_BATCH *batch = static_cast<TERRAIN_SHAPE_BATCH *>(group->data);
     if (query->object_scale == 1.0f) {
         if (CurTerr->platforms[platform_index].flags & 1) {
             while (batch->marker >= 0) {
@@ -21730,7 +21723,7 @@ i32 TerrainPlatformEmbedded(nuvec_s *movement_delta) {
                         surface->vectors[3].y = vertices[3].y;
                         surface->vectors[3].z = vertices[3].z;
                     }
-                    if (__builtin_expect(!quad, 0)) {
+                    if (!quad) {
                         surface->normals[1].y = 65536.0f;
                     } else {
                         vertices[0].x = surface->vectors[1].x - surface->vectors[3].x;
@@ -21892,7 +21885,6 @@ i32 TerrainPlatformEmbedded(nuvec_s *movement_delta) {
                 batch = reinterpret_cast<TERRAIN_SHAPE_BATCH *>(source);
             }
         } else {
-            auto query_object_scale = query->object_scale;
             while (batch->marker >= 0) {
                 i32 shape_count = batch->shape_count;
                 TERRAIN_SHAPE *source = reinterpret_cast<TERRAIN_SHAPE *>(batch + 1);
@@ -21903,50 +21895,42 @@ i32 TerrainPlatformEmbedded(nuvec_s *movement_delta) {
                     TERRAIN_SHAPE *surface = &ScaleTerrain[transformed_count];
                     memcpy(surface->material, source->material, 4);
                     surface->vectors[0].x = source->vectors[0].x;
-                    surface->vectors[0].y =
-                        (source->vectors[0].y + CurTerr->groups[old_query->terrain_group_index].origin.y) *
-                            query->inverse_object_scale -
-                        CurTerr->groups[old_query->terrain_group_index].origin.y;
                     surface->vectors[0].z = source->vectors[0].z;
+                    surface->vectors[0].y =
+                        (source->vectors[0].y + group->origin.y) * TerI->inverse_object_scale - group->origin.y;
                     surface->vectors[1].x = source->vectors[1].x;
-                    surface->vectors[1].y =
-                        (source->vectors[1].y + CurTerr->groups[old_query->terrain_group_index].origin.y) *
-                            query->inverse_object_scale -
-                        CurTerr->groups[old_query->terrain_group_index].origin.y;
                     surface->vectors[1].z = source->vectors[1].z;
+                    surface->vectors[1].y =
+                        (source->vectors[1].y + group->origin.y) * TerI->inverse_object_scale - group->origin.y;
                     surface->vectors[2].x = source->vectors[2].x;
-                    surface->vectors[2].y =
-                        (source->vectors[2].y + CurTerr->groups[old_query->terrain_group_index].origin.y) *
-                            query->inverse_object_scale -
-                        CurTerr->groups[old_query->terrain_group_index].origin.y;
                     surface->vectors[2].z = source->vectors[2].z;
+                    surface->vectors[2].y =
+                        (source->vectors[2].y + group->origin.y) * TerI->inverse_object_scale - group->origin.y;
                     if (quad) {
                         surface->vectors[3].x = source->vectors[3].x;
-                        surface->vectors[3].y =
-                            (source->vectors[3].y + CurTerr->groups[old_query->terrain_group_index].origin.y) *
-                                query->inverse_object_scale -
-                            CurTerr->groups[old_query->terrain_group_index].origin.y;
                         surface->vectors[3].z = source->vectors[3].z;
+                        surface->vectors[3].y =
+                            (source->vectors[3].y + group->origin.y) * TerI->inverse_object_scale - group->origin.y;
                     }
                     if (__builtin_expect(!!(quad), 0)) {
                         NUVEC *normal = &source->normals[1];
-                        f32 length = NuFsqrt(normal->x * normal->x + (normal->y * normal->y) * query->object_scale_sq +
+                        f32 length = NuFsqrt(normal->x * normal->x + (normal->y * normal->y) * TerI->object_scale_sq +
                                              normal->z * normal->z);
                         f32 inverse = length == 0.0f ? 0.0f : 1.0f / length;
                         surface = &ScaleTerrain[transformed_count];
-                        surface->normals[1].y = (normal->y * query_object_scale) * inverse;
+                        surface->normals[1].y = (normal->y * TerI->object_scale) * inverse;
                         surface->normals[1].x = normal->x * inverse;
                         surface->normals[1].z = normal->z * inverse;
                     } else {
                         surface->normals[1].y = 65536.0f;
                     }
                     f32 length = NuFsqrt(source->normals[0].x * source->normals[0].x +
-                                         (source->normals[0].y * source->normals[0].y) * query->object_scale_sq +
+                                         (source->normals[0].y * source->normals[0].y) * TerI->object_scale_sq +
                                          source->normals[0].z * source->normals[0].z);
                     f32 inverse = length == 0.0f ? 0.0f : 1.0f / length;
                     surface = &ScaleTerrain[transformed_count];
                     surface->normals[0].x = source->normals[0].x * inverse;
-                    surface->normals[0].y = (source->normals[0].y * query_object_scale) * inverse;
+                    surface->normals[0].y = (source->normals[0].y * TerI->object_scale) * inverse;
                     surface->normals[0].z = source->normals[0].z * inverse;
                     *cursor++ = surface;
                     ++count;

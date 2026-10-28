@@ -3461,26 +3461,26 @@ extern "C" PART_s *HitParts(GameObject_s *owner, NUVEC *positions, i32 count, f3
             NuMtxSetTranslation(&part->transform, params->position);
         }
         part->initial_position = part->position;
-        part->recipient = params->recipient;
         part->owner = params->owner;
+        part->recipient = params->recipient;
         part->velocity = *params->velocity;
         part->field_20b = -1;
         part->force_player_mask = -1;
-        part->field_100 = part->field_104 = params->field_a4;
         part->time_step = params->time_step;
+        part->field_100 = part->field_104 = params->field_a4;
         part->active = (part->active & ~0x60) | 0x21;
         part->scale_time = 0.0f;
         part->target_radius = params->field_14;
         part->radius = (params->time_step / PARTSCALEUPTIME) * params->field_14;
-        part->field_0e4 = params->field_18;
-        part->field_214 = params->field_c0;
         part->gravity = params->gravity;
         part->field_0ec = params->field_20;
         part->pickup_type = params->field_28;
+        part->field_0e4 = params->field_18;
         part->field_0f0 = params->field_88;
-        part->flags = params->flags;
-        part->active &= ~2;
         part->field_20a = params->field_c4;
+        part->active &= ~2;
+        part->field_214 = params->field_c0;
+        part->flags = params->flags;
         part->render_flags &= ~0x40;
         if (params->lighting != NULL) {
             part->lighting[0] = params->lighting->values[0];
@@ -3494,9 +3494,7 @@ extern "C" PART_s *HitParts(GameObject_s *owner, NUVEC *positions, i32 count, f3
         } else {
             part->active &= ~8;
             if (params->field_98 != 1.0f || params->field_9c != 1.0f || params->field_a0 != 1.0f) {
-                part->lighting[6].x = params->field_98;
-                part->lighting[6].y = params->field_9c;
-                part->lighting[6].z = params->field_a0;
+                part->lighting[6] = *reinterpret_cast<NUVEC *>(&params->field_98);
                 part->render_flags |= 0x20;
             } else {
                 part->render_flags &= ~0x20;
@@ -3543,22 +3541,22 @@ extern "C" PART_s *HitParts(GameObject_s *owner, NUVEC *positions, i32 count, f3
         } else {
             part->debris_key = params->debris_key;
         }
+        part->field_1e8 = params->field_68;
         part->field_1e0 = params->field_60;
         part->field_1e4 = params->field_64;
-        part->field_1e8 = params->field_68;
         part->field_1ec = params->field_6c;
-        part->field_1f8 = params->field_74;
         part->field_1f0 = params->field_70;
+        part->field_1f8 = params->field_74;
         part->field_1f4 = params->field_78;
         part->field_1fc = params->field_7c;
         part->previous_transform = part->transform;
+        part->field_204 = 1;
         part->field_208 = 1;
         part->force_flags = 0;
         part->field_21c = 0;
+        part->field_207 = params->field_90;
         part->render_flags |= 0x18;
         part->field_210 = 0.0f;
-        part->field_207 = params->field_90;
-        part->field_204 = 1;
         if ((part->flags & 0x2000) != 0 && params->lighting_template != NULL && PartRTL != NULL) {
             part->lighting_template = params->lighting_template;
             *params->lighting_template = rtlDynamicAllocTemplate(PartRTL, params->field_84);

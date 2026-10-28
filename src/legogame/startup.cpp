@@ -432,7 +432,7 @@ void LoadPerm(void) {
         } else {
             NuLanguageSet(device_language);
             Text_Language = static_cast<u32>(device_language);
-            if (__builtin_expect(language_index >= LANGUAGECOUNT, 1)) {
+            if (__builtin_expect(language_index >= LANGUAGECOUNT, 0)) {
                 LoadPerm_LanguageSelect = 0;
             }
         }
@@ -482,10 +482,10 @@ void LoadPerm(void) {
 
         if (legal_timer < 5.8f && LoadPerm_LanguageSelect == 3 && ready_timer >= 1.0f && loadlegal_done) {
             if (__builtin_expect(legal_timer != 0.0f, 0) || legal_mtl != nullptr) {
-                if (PermDataLoaded != 0 &&
+                if (__builtin_expect(PermDataLoaded != 0 &&
                     ((GamePad[0].buttons_down_08 &
                       (GAMEPAD_JUMP | GAMEPAD_START | GAMEPAD_SPECIAL | GAMEPAD_ACTION | GAMEPAD_TAG)) != 0 ||
-                     MechInputTouchMenuController::AnyTouchesThisFrame > 0)) {
+                     MechInputTouchMenuController::AnyTouchesThisFrame > 0), 1)) {
                     MechInputTouchMenuController::AnyTouchesThisFrame = 0;
                     if (legal_timer >= 0.3f && legal_timer < 5.3f) {
                         legal_timer = 5.3f;
@@ -497,7 +497,7 @@ void LoadPerm(void) {
                 }
             } else {
                 const i32 texture_id = legal_tid;
-                if (texture_id != 0) {
+                if (__builtin_expect(texture_id != 0, 0)) {
                     NUMTL *mtl = NuMtlCreate(1);
                     if (__builtin_expect(mtl != nullptr, 0)) {
                         mtl->diffuse_color = {1.0f, 1.0f, 1.0f};
@@ -564,7 +564,7 @@ void LoadPerm(void) {
                     alpha = legal_timer / 0.3f;
                 }
 
-                if (alpha > 0.0f) {
+                if (__builtin_expect(alpha > 0.0f, 1)) {
                     if (legal_timer < 0.0f) {
                         if (legal_timer >= -0.3f) {
                             alpha *= 1.0f - (legal_timer + 0.3f) / 0.3f;
@@ -585,12 +585,12 @@ void LoadPerm(void) {
                         const f32 aspect = NuIOS_GetAspectRatio();
                         f32 half_w;
                         f32 half_h;
-                        if (!(aspect > 1.7777778f)) {
-                            half_w = 0.5f;
-                            half_h = aspect * 0.5f / 1.7777778f;
-                        } else {
+                        if (aspect > 1.7777778f) {
                             half_h = 0.5f;
                             half_w = aspect * 0.5f / 1.7777778f;
+                        } else {
+                            half_w = 0.5f;
+                            half_h = aspect * 0.5f / 1.7777778f;
                         }
 
                         const i32 alpha_byte = static_cast<i32>(alpha * 255.0f);
@@ -635,7 +635,7 @@ void LoadPerm(void) {
                         } else {
                             vert->colour = (colour & 0xff000000u) | 0x404040u;
                         }
-                        if (__builtin_expect(!g_NuPrim_NeedsHalfUVs, 1)) {
+                        if (__builtin_expect(!g_NuPrim_NeedsHalfUVs, 0)) {
                             vert->full.u = 1.0f;
                             vert->full.v = 1.0f;
                         } else {

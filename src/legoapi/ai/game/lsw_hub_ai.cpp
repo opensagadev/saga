@@ -410,7 +410,7 @@ static void Hub_GoneThroughDoor(WORLDINFO_s *world) {
             break;
         }
     }
-    if (new_area == HUB_AREA_COUNT || new_area == hub_ai.area) {
+    if (__builtin_expect(new_area == HUB_AREA_COUNT || new_area == hub_ai.area, 0)) {
         return;
     }
 
@@ -482,7 +482,16 @@ static void Hub_GoneThroughDoor(WORLDINFO_s *world) {
     FIND_HUB_TABLE(4);
     FIND_HUB_TABLE(5);
     FIND_HUB_TABLE(6);
-    FIND_HUB_TABLE(7);
+    if (hub_ai.area != 0) {
+        sprintf(name, "Table%d_%d", hub_ai.area, 7);
+    } else {
+        sprintf(name, "Table_%d", 7);
+    }
+    hub_ai.table_locators[7] = AIPathFindLocator(world->ai_sys, name);
+    if (hub_ai.table_locators[7] == NULL) {
+        return;
+    }
+    ++hub_ai.table_count;
 #undef FIND_HUB_TABLE
 }
 

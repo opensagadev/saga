@@ -802,7 +802,7 @@ void Bolt_Init(void *storage, NetMessage &message) {
         hit_flags = ObjHitObj_Flags(owner);
     bolt->hit_flags = hit_flags | 0x80;
     u32 flags = type->field_60;
-    if (owner != NULL) {
+    if (__builtin_expect(owner != NULL, 1)) {
         if (__builtin_expect((owner->apiobj.flags_low & 0x80) != 0, 0)) {
             if (owner->apiobj.field_0x27c != 0)
                 flags |= owner->apiobj.field_0x27c == 1 ? 0x2a : 0x28;
@@ -822,14 +822,14 @@ void Bolt_Init(void *storage, NetMessage &message) {
                 speed = 0.0f;
             bolt->speed += speed;
         }
-        if (owner->field_0xcc0 != NULL)
+        if (__builtin_expect(owner->field_0xcc0 != NULL, 1))
             flags |= 0x40000;
         if (BoltInitSfxFn != NULL)
             addbolt_newsfx = BoltInitSfxFn(owner);
         if (addbolt_newsfx == -1)
             addbolt_newsfx = owner->apiobj.character_data->game_character->sfx_shoot;
     }
-    if (addbolt_newsfx == -1)
+    if (__builtin_expect(addbolt_newsfx == -1, 0))
         addbolt_newsfx = type->shoot_sfx_id;
     if (!no_sfx && addbolt_newsfx != -1)
         GameAudio_PlaySfxById(addbolt_newsfx, &position, 0, 0);
@@ -1371,7 +1371,8 @@ void Bolt_HitGameObjectRC(NetMessage &message) {
                 goto owner_feedback;
             objhitobj_bolt = bolt;
             ObjHitObj(owner, object, damage, bolt->hit_flags, 0, 0);
-            if ((bolt->flags & 0x800000) != 0 && (CInfo[object->character_context].flags & 0x10008000) == 0 &&
+            if ((bolt->flags & 0x800000) != 0 && (CInfo[object->character_context].flags & 0x10000000) == 0 &&
+                (CInfo[object->character_context].flags & 0x8000) == 0 &&
                 (object->apiobj.character_data->model_flags & 0x10) != 0 && LEGOACT_DEACTIVATED != -1 &&
                 object->apiobj.character_model->model_data_b[LEGOACT_DEACTIVATED] != NULL) {
                 DeactivatePlayer(object, DEACTIVATEDTIME, NULL);

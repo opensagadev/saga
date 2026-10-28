@@ -1643,26 +1643,24 @@ void CutScenes_ConfigureList(char *filename, variptr_u *buffer, variptr_u) {
                     }
 
                     i32 duplicate = 0;
-                    for (i32 i = 0; i < CUTCOUNT; ++i) {
-                        if (__builtin_expect(duplicate != 0, 0)) {
-                            break;
-                        }
+                    i32 i = 0;
+                    while (i < CUTCOUNT && duplicate == 0) {
                         if (NuStrICmp(directory, entries[i].directory) == 0 &&
                             NuStrICmp(file, entries[i].filename) == 0 && entries[CUTCOUNT].level == entries[i].level) {
                             duplicate = 1;
+                        } else {
+                            ++i;
                         }
                     }
                     if (duplicate == 0) {
                         entries[CUTCOUNT].directory = cursor;
                         NuStrCpy(cursor, directory);
-                        i32 directory_length = NuStrLen(directory);
-                        cursor[directory_length] = '\0';
-                        cursor += directory_length + 1;
+                        cursor += NuStrLen(directory);
+                        *cursor++ = '\0';
                         entries[CUTCOUNT].filename = cursor;
                         NuStrCpy(cursor, file);
-                        i32 file_length = NuStrLen(file);
-                        cursor[file_length] = '\0';
-                        cursor += file_length + 1;
+                        cursor += NuStrLen(file);
+                        *cursor++ = '\0';
                         ++CUTCOUNT;
                     }
                     break;
@@ -1691,7 +1689,7 @@ void CutScenes_ConfigureList(char *filename, variptr_u *buffer, variptr_u) {
         buffer->addr = ALIGN(reinterpret_cast<usize>(cursor), 4);
         CutList = reinterpret_cast<CutSceneListEntry *>(buffer->void_ptr);
         usize list_bytes = CUTCOUNT * sizeof(CutSceneListEntry);
-        memmove(buffer->void_ptr, entries, list_bytes);
+        memmove(CutList, entries, list_bytes);
         buffer->addr += list_bytes;
     }
 }

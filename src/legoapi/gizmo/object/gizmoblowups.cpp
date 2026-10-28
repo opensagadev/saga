@@ -769,17 +769,17 @@ i32 GizmoBlowupBlowup(GIZMOBLOWUP_s *blowup, i32 effects, i32 hit_type, i32 dama
     }
     if (damage == -1 || static_cast<i8>(blowup->saved_state_1) < 1) {
         blowup->saved_state_1 = 0;
-        if (__builtin_expect((type->animation_flags & 0x20) && (blowup->draw_flags & 0x800000), 1)) {
+        if (__builtin_expect((blowup->type->animation_flags & 0x20) && (blowup->draw_flags & 0x800000), 1)) {
             NuSpecialSetVisibility(&type->animated_special, 0);
         }
         blowup->output_flags |= 1;
-        blowup->field_0x9f &= ~1;
-        blowup->visibility_flags &= 0x3f;
         blowup->state_flags &= 0x73;
+        blowup->visibility_flags &= 0x3f;
+        blowup->field_0x9f &= ~1;
         blowup->animation_time = 1.0f;
         if (object != NULL) {
             if (blowup->saved_state_0 != 0 &&
-                (object->id != id_SPEEDERBIKE || (object->apiobj.flags_low & 0x80) == 0 ||
+                (object->id != id_SPEEDERBIKE || __builtin_expect((object->apiobj.flags_low & 0x80) == 0, 0) ||
                  WORLD->current_level != SPEEDERCHASEA_LDATA || disable_narrow_socks != 0)) {
                 ObjHitObj(NULL, object, blowup->saved_state_0, 1, 0, hit_context);
             }
@@ -803,11 +803,15 @@ i32 GizmoBlowupBlowup(GIZMOBLOWUP_s *blowup, i32 effects, i32 hit_type, i32 dama
             }
         }
         if (blowup->platform_id != -1) {
-            PlatOnOff(blowup->platform_id, 0);
-            if (has_burst && blowup->field_0x10c != -1) {
-                PlatOnOff(blowup->field_0x10c, 1);
+            if (has_burst) {
+                PlatOnOff(blowup->platform_id, 0);
+                if (blowup->field_0x10c != -1) {
+                    PlatOnOff(blowup->field_0x10c, 1);
+                }
+            } else {
+                PlatOnOff(blowup->platform_id, 0);
             }
-            if (__builtin_expect(type->animation_flags & 0x20 != 0, 1)) {
+            if (__builtin_expect((type->animation_flags & 0x20) != 0, 1)) {
                 NuSpecialSetVisibility(&type->animated_special, 0);
             }
         }
@@ -817,7 +821,7 @@ i32 GizmoBlowupBlowup(GIZMOBLOWUP_s *blowup, i32 effects, i32 hit_type, i32 dama
                 blowup->state_flags |= 2;
             }
         }
-        if (__builtin_expect(blowup->draw_flags & 0x800 != 0, 1)) {
+        if (__builtin_expect((blowup->draw_flags & 0x800) != 0, 0)) {
             GizmoBlowupCreateStuff(blowup);
         }
         if (GameBlowUpBlownUpFn != NULL) {

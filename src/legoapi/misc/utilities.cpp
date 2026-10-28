@@ -1359,6 +1359,7 @@ void MoveSplinePosition(SPLINEPOS_s *position, f32 distance) {
             NUVEC offset;
             if (distance >= 0.0f) {
                 while (distance > 0.0f) {
+                    spline = position->spline;
                     position->segment_distance += distance;
                     if (__builtin_expect(!(position->segment_distance >= position->segment_length), 0))
                         goto interpolate;
@@ -1384,11 +1385,11 @@ void MoveSplinePosition(SPLINEPOS_s *position, f32 distance) {
                     position->segment_length = NuVecDist(next, current, &offset);
                     if (distance == 0.0f)
                         position->position = *current;
-                    spline = position->spline;
                 }
                 goto update_along;
             } else if (position->segment >= 0 && distance < 0.0f) {
                 for (;;) {
+                    spline = position->spline;
                     position->segment_distance += distance;
                     if (__builtin_expect(position->segment_distance >= 0.0f, 0))
                         break;
@@ -1413,7 +1414,6 @@ void MoveSplinePosition(SPLINEPOS_s *position, f32 distance) {
                     position->segment_distance = position->segment_length;
                     if (distance == 0.0f)
                         position->position = *next;
-                    spline = position->spline;
                 }
             } else
                 goto update_along;

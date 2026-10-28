@@ -2252,24 +2252,25 @@ void Hub_DrawAreaStats(f32 phase, i32 area_index, i32 mode) {
                 subtitle = TTab[EDataList[i_episodes].text_id];
                 NuStrCpy(heading, TTab[EDataList[i_episodes].name_id]);
             }
-            if (__builtin_expect(lastepisodesmode == -1, 1)) {
+            if (lastepisodesmode == -1) {
                 fade = episodesmode == 2 && hub_new_level != -1 && LDataList[hub_new_level].episode_index != -1;
             } else {
                 fade = episodesmode != 1;
             }
         }
+        f32 fade_alpha = phase;
         if (fade && episodestime < episodesduration) {
-            phase = (episodestime / episodesduration) * phase;
+            fade_alpha = (episodestime / episodesduration) * phase;
         }
         if (subtitle != NULL) {
             SmartTextEx(subtitle, 0.0f, HUB_EPISODESUBTITLEY, 1.0f, HUB_EPISODESUBTITLESIZE, HUB_EPISODESUBTITLESIZE,
                         HUB_EPISODESUBTITLESIZE, 0, HUB_EPISODER, HUB_EPISODEG, HUB_EPISODEB, 1.7f, 1, NULL, 0,
-                        static_cast<i32>(128.0f * phase));
+                        static_cast<i32>(128.0f * fade_alpha));
         }
         if (heading[0] != '\0') {
             SmartTextEx(heading, 0.0f, HUB_EPISODETITLEY, 1.0f, HUB_EPISODETITLESIZE, HUB_EPISODETITLESIZE,
                         HUB_EPISODETITLESIZE, 0, HUB_EPISODER, HUB_EPISODEG, HUB_EPISODEB, 1.7f, 1, NULL, 0,
-                        static_cast<i32>(phase * 128.0f));
+                        static_cast<i32>(fade_alpha * 128.0f));
         }
         return;
     }
@@ -2284,87 +2285,87 @@ void Hub_DrawAreaStats(f32 phase, i32 area_index, i32 mode) {
                 HUB_EPISODESUBTITLESIZE, 0, HUB_EPISODER, HUB_EPISODEG, HUB_EPISODEB, 1.7f, 1, NULL, 0, alpha);
 
     const u16 flags = area->flags;
-    if ((flags & 0x10) != 0) {
-        if (Game.area_save[area_index].area_complete != 0 && (flags & 4) == 0) {
-            Episode_CountOpenAreas(static_cast<i8>(area->episode_index), area_index, Game.area_save);
-
-            if (BOTHTRUEJEDIGOLDBRICKS != 0) {
-                DrawBuildUpBar(HUB_AREAPANELX[1], HUB_EPISODETITLEY + PANEL_MINIKITY - PANEL_MINIKITCOUNTY, 100, 100,
-                               NU_SIN_LUT(static_cast<i32>(16384.0f * phase)), 1.0f, 1.0f, 0);
-                NuStrCpy(text, Game.area_save[area_index].true_hero_complete[0] ? "$" : "X");
-                Text3DEx(text, HUB_AREAPANELX[1], HUB_EPISODETITLEY, 1.0f, PANEL_MINIKITCOUNTSCALE,
-                         PANEL_MINIKITCOUNTSCALE, PANEL_MINIKITCOUNTSCALE, 0, 255, 0, 127, static_cast<u8>(alpha));
-                SmartTextEx(TTab[tSTORY], HUB_AREAPANELX[1], HUB_EPISODETITLEY + 0.235f, 1.0f, 0.45f, 0.45f, 0.45f, 0,
-                            255, 255, 255, 0.4f, 1, NULL, 0, static_cast<i32>(static_cast<f32>(TJTYPEA) * phase));
-
-                DrawBuildUpBar(HUB_AREAPANELX[4], HUB_EPISODETITLEY + PANEL_MINIKITY - PANEL_MINIKITCOUNTY, 100, 100,
-                               NU_SIN_LUT(static_cast<i32>(16384.0f * phase)), 1.0f, 1.0f, 0);
-                NuStrCpy(text, Game.area_save[area_index].true_hero_complete[1] ? "$" : "X");
-                Text3DEx(text, HUB_AREAPANELX[4], HUB_EPISODETITLEY, 1.0f, PANEL_MINIKITCOUNTSCALE,
-                         PANEL_MINIKITCOUNTSCALE, PANEL_MINIKITCOUNTSCALE, 0, 255, 0, 127, static_cast<u8>(alpha));
-                SmartTextEx(TTab[tFREEPLAY], HUB_AREAPANELX[4], HUB_EPISODETITLEY + 0.235f, 1.0f, 0.45f, 0.45f, 0.45f,
-                            0, 255, 255, 255, 0.4f, 1, NULL, 0, static_cast<i32>(static_cast<f32>(TJTYPEA) * phase));
-            } else {
-                DrawBuildUpBar(HUB_AREAPANELX[1], HUB_EPISODETITLEY + PANEL_MINIKITY - PANEL_MINIKITCOUNTY, 100, 100,
-                               NU_SIN_LUT(static_cast<i32>(16384.0f * phase)), 1.0f, 1.0f, 0);
-                NuStrCpy(text, (Game.area_save[area_index].true_hero_complete[0] ||
-                                Game.area_save[area_index].true_hero_complete[1])
-                                   ? "$"
-                                   : "X");
-                Text3DEx(text, HUB_AREAPANELX[1], HUB_EPISODETITLEY, 1.0f, PANEL_MINIKITCOUNTSCALE,
-                         PANEL_MINIKITCOUNTSCALE, PANEL_MINIKITCOUNTSCALE, 0, 255, 0, 127, static_cast<u8>(alpha));
-            }
-
-            if ((area->flags & 0x10) != 0) {
-                Hub_DrawMiniKitCount(HUB_AREAPANELX[0], HUB_EPISODETITLEY, Game.area_save[area_index].minikit_count, 10,
-                                     phase);
-            }
-            Hub_DrawImportantBrick(210, HUB_AREAPANELX[2], HUB_EPISODETITLEY, phase,
-                                   Game.area_save[area_index].red_brick_collected, 1);
-            Hub_DrawImportantBrick(211, HUB_AREAPANELX[3], HUB_EPISODETITLEY, phase, EpGoldBrickCount,
-                                   EpGoldBrickTotal);
-            if (Store_IsPackUnlocked(8)) {
-                hub_drawminikitcount_charkit = 1;
-                Hub_DrawMiniKitCount(HUB_AREAPANELX[5], HUB_EPISODETITLEY, EpCharKitCount, EpCharKitTotal, phase);
-            }
+    if ((flags & 0x10) == 0) {
+        if (Game.area_save[area_index].area_complete == 0) {
             return;
         }
 
-        if (static_cast<i8>(area->area_index) != -1 && (flags & 0x14) == 0x10) {
-            sprintf(text, "%s %i", TTab[tCHAPTER], static_cast<i8>(area->area_index) + 1);
-            SmartTextEx(text, 0.0f, HUB_EPISODETITLEY, 1.0f, HUB_EPISODETITLESIZE, HUB_EPISODETITLESIZE,
-                        HUB_EPISODETITLESIZE, 0, HUB_EPISODER, HUB_EPISODEG, HUB_EPISODEB, 1.7f, 1, NULL, 0, alpha);
+        f32 build_x = 0.0f;
+        if ((flags & 0x4000) != 0)
+            build_x = 0.20100002f;
+        if ((flags & 0x800) != 0) {
+            Hub_DrawImportantBrick(251, build_x, HUB_EPISODESUBTITLEY - 0.05f, phase, -1, -1);
+        } else if ((flags & 0x4000) == 0) {
+            Hub_DrawImportantBrick(211, -0.0f, HUB_EPISODESUBTITLEY + 0.05f, phase, -1, -1);
+        } else {
+            i32 gold_count = 1;
+            if (Game.area_save[area_index].true_hero_complete[0] || Game.area_save[area_index].true_hero_complete[1])
+                gold_count = 2;
+            Hub_DrawImportantBrick(211, -0.20100002f, HUB_EPISODETITLEY, phase, gold_count, 2);
+        }
+        if ((area->flags & 0x4000) == 0) {
+            return;
+        }
+        DrawBuildUpBar(build_x, HUB_EPISODETITLEY + PANEL_MINIKITY - PANEL_MINIKITCOUNTY, 100, 100,
+                       NU_SIN_LUT(static_cast<i32>(16384.0f * phase)), 1.0f, 1.0f, 0);
+        NuStrCpy(text,
+                 (Game.area_save[area_index].true_hero_complete[0] || Game.area_save[area_index].true_hero_complete[1])
+                     ? "$"
+                     : "X");
+        Text3DEx(text, build_x, HUB_EPISODETITLEY, 1.0f, PANEL_MINIKITCOUNTSCALE, PANEL_MINIKITCOUNTSCALE,
+                 PANEL_MINIKITCOUNTSCALE, 0, 255, 0, 127, static_cast<u8>(alpha));
+        return;
+    }
+
+    if (Game.area_save[area_index].area_complete != 0 && (flags & 4) == 0) {
+        Episode_CountOpenAreas(static_cast<i8>(area->episode_index), area_index, Game.area_save);
+
+        if (BOTHTRUEJEDIGOLDBRICKS != 0) {
+            DrawBuildUpBar(HUB_AREAPANELX[1], HUB_EPISODETITLEY + PANEL_MINIKITY - PANEL_MINIKITCOUNTY, 100, 100,
+                           NU_SIN_LUT(static_cast<i32>(16384.0f * phase)), 1.0f, 1.0f, 0);
+            NuStrCpy(text, Game.area_save[area_index].true_hero_complete[0] ? "$" : "X");
+            Text3DEx(text, HUB_AREAPANELX[1], HUB_EPISODETITLEY, 1.0f, PANEL_MINIKITCOUNTSCALE, PANEL_MINIKITCOUNTSCALE,
+                     PANEL_MINIKITCOUNTSCALE, 0, 255, 0, 127, static_cast<u8>(alpha));
+            SmartTextEx(TTab[tSTORY], HUB_AREAPANELX[1], HUB_EPISODETITLEY + 0.235f, 1.0f, 0.45f, 0.45f, 0.45f, 0, 255,
+                        255, 255, 0.4f, 1, NULL, 0, static_cast<i32>(static_cast<f32>(TJTYPEA) * phase));
+
+            DrawBuildUpBar(HUB_AREAPANELX[4], HUB_EPISODETITLEY + PANEL_MINIKITY - PANEL_MINIKITCOUNTY, 100, 100,
+                           NU_SIN_LUT(static_cast<i32>(16384.0f * phase)), 1.0f, 1.0f, 0);
+            NuStrCpy(text, Game.area_save[area_index].true_hero_complete[1] ? "$" : "X");
+            Text3DEx(text, HUB_AREAPANELX[4], HUB_EPISODETITLEY, 1.0f, PANEL_MINIKITCOUNTSCALE, PANEL_MINIKITCOUNTSCALE,
+                     PANEL_MINIKITCOUNTSCALE, 0, 255, 0, 127, static_cast<u8>(alpha));
+            SmartTextEx(TTab[tFREEPLAY], HUB_AREAPANELX[4], HUB_EPISODETITLEY + 0.235f, 1.0f, 0.45f, 0.45f, 0.45f, 0,
+                        255, 255, 255, 0.4f, 1, NULL, 0, static_cast<i32>(static_cast<f32>(TJTYPEA) * phase));
+        } else {
+            DrawBuildUpBar(HUB_AREAPANELX[1], HUB_EPISODETITLEY + PANEL_MINIKITY - PANEL_MINIKITCOUNTY, 100, 100,
+                           NU_SIN_LUT(static_cast<i32>(16384.0f * phase)), 1.0f, 1.0f, 0);
+            NuStrCpy(text, (Game.area_save[area_index].true_hero_complete[0] ||
+                            Game.area_save[area_index].true_hero_complete[1])
+                               ? "$"
+                               : "X");
+            Text3DEx(text, HUB_AREAPANELX[1], HUB_EPISODETITLEY, 1.0f, PANEL_MINIKITCOUNTSCALE, PANEL_MINIKITCOUNTSCALE,
+                     PANEL_MINIKITCOUNTSCALE, 0, 255, 0, 127, static_cast<u8>(alpha));
+        }
+
+        if ((area->flags & 0x10) != 0) {
+            Hub_DrawMiniKitCount(HUB_AREAPANELX[0], HUB_EPISODETITLEY, Game.area_save[area_index].minikit_count, 10,
+                                 phase);
+        }
+        Hub_DrawImportantBrick(210, HUB_AREAPANELX[2], HUB_EPISODETITLEY, phase,
+                               Game.area_save[area_index].red_brick_collected, 1);
+        Hub_DrawImportantBrick(211, HUB_AREAPANELX[3], HUB_EPISODETITLEY, phase, EpGoldBrickCount, EpGoldBrickTotal);
+        if (Store_IsPackUnlocked(8)) {
+            hub_drawminikitcount_charkit = 1;
+            Hub_DrawMiniKitCount(HUB_AREAPANELX[5], HUB_EPISODETITLEY, EpCharKitCount, EpCharKitTotal, phase);
         }
         return;
     }
 
-    if (__builtin_expect(Game.area_save[area_index].area_complete == 0, 1)) {
-        return;
+    if (static_cast<i8>(area->area_index) != -1 && (flags & 0x14) == 0x10) {
+        sprintf(text, "%s %i", TTab[tCHAPTER], static_cast<i8>(area->area_index) + 1);
+        SmartTextEx(text, 0.0f, HUB_EPISODETITLEY, 1.0f, HUB_EPISODETITLESIZE, HUB_EPISODETITLESIZE,
+                    HUB_EPISODETITLESIZE, 0, HUB_EPISODER, HUB_EPISODEG, HUB_EPISODEB, 1.7f, 1, NULL, 0, alpha);
     }
-
-    f32 build_x = 0.0f;
-    if ((flags & 0x4000) != 0)
-        build_x = 0.20100002f;
-    if ((flags & 0x800) != 0) {
-        Hub_DrawImportantBrick(251, build_x, HUB_EPISODESUBTITLEY - 0.05f, phase, -1, -1);
-    } else if ((flags & 0x4000) == 0) {
-        Hub_DrawImportantBrick(211, -0.0f, HUB_EPISODESUBTITLEY + 0.05f, phase, -1, -1);
-    } else {
-        const i32 gold_count =
-            1 + (Game.area_save[area_index].true_hero_complete[0] || Game.area_save[area_index].true_hero_complete[1]);
-        Hub_DrawImportantBrick(211, -0.20100002f, HUB_EPISODETITLEY, phase, gold_count, 2);
-    }
-    if ((area->flags & 0x4000) == 0) {
-        return;
-    }
-    DrawBuildUpBar(build_x, HUB_EPISODETITLEY + PANEL_MINIKITY - PANEL_MINIKITCOUNTY, 100, 100,
-                   NU_SIN_LUT(static_cast<i32>(16384.0f * phase)), 1.0f, 1.0f, 0);
-    NuStrCpy(text,
-             (Game.area_save[area_index].true_hero_complete[0] || Game.area_save[area_index].true_hero_complete[1])
-                 ? "$"
-                 : "X");
-    Text3DEx(text, build_x, HUB_EPISODETITLEY, 1.0f, PANEL_MINIKITCOUNTSCALE, PANEL_MINIKITCOUNTSCALE,
-             PANEL_MINIKITCOUNTSCALE, 0, 255, 0, 127, static_cast<u8>(alpha));
 }
 
 void Hub_DrawFreePlaySelect() {
@@ -3532,6 +3533,44 @@ void MenuInitEpisodes(MENU_s *) {
     }
 }
 
+static inline i32 ClipGridUp(i32 previous, i32 count) {
+    i32 next = previous - 7;
+    if (__builtin_expect(next < 0, 0)) {
+        next += (count / 7 + 1) * 7;
+        if (next >= count)
+            next -= 7;
+    }
+    return next;
+}
+
+static inline i32 ClipGridDown(i32 previous, i32 count) {
+    i32 next = previous + 7;
+    if (next >= count) {
+        const i32 rows = count / 7 + 1;
+        next = (next < rows * 7 ? previous + 14 : next) - rows * 7;
+    }
+    return next;
+}
+
+static inline i32 ClipGridLeft(i32 previous, i32 count) {
+    i32 column = previous % 7 - 1;
+    if (column < 0)
+        column += 7;
+    i32 next = column + previous / 7 * 7;
+    if (next >= count)
+        next = count - 1;
+    return next;
+}
+
+static inline i32 ClipGridRight(i32 previous, i32 count) {
+    i32 column = previous % 7 + 1;
+    if (column == 7)
+        column -= 7;
+    const i32 row = previous / 7 * 7;
+    const i32 next = row + column;
+    return next < count ? next : row;
+}
+
 void MenuUpdateEpisodes(MENU_s *) {
     if (FadeSys.fade > 0.0f || MainRenderTime > 0.0f)
         return;
@@ -3594,20 +3633,19 @@ void MenuUpdateEpisodes(MENU_s *) {
                     i_episodes -= 3;
                 else if (__builtin_expect(down && previous < 3, 0))
                     i_episodes += 3;
-                else if (__builtin_expect(left && previous % 3 > 0, 1))
+                else if (left && previous % 3 > 0)
                     --i_episodes;
                 else if (right && previous % 3 != 2)
                     ++i_episodes;
-                if (__builtin_expect(previous != i_episodes, 1))
+                if (previous != i_episodes)
                     GameAudio_PlaySfx(0x2f, NULL, 0, 0);
             }
             break;
         }
         case 1:
             episodestime = episodestime + elapsed;
-            if (episodestime < episodesduration)
-                return;
-            WipeBackToHub();
+            if (episodestime >= episodesduration)
+                WipeBackToHub();
             break;
         case 2: {
             const i32 all = hub_new_level == -1 || LDataList[hub_new_level].episode_index == -1;
@@ -3615,72 +3653,52 @@ void MenuUpdateEpisodes(MENU_s *) {
             if (i_clip[i_episodes] >= count)
                 i_clip[i_episodes] = count - 1;
             const i32 previous = i_clip[i_episodes];
-            bool confirm = false, cancel = false;
+            i32 confirm = 0, cancel = 0;
             if (MenuPacket.active_player[0]) {
                 if (GamePad[0].pad->digital_buttons_pressed & GAMEPAD_MENUSELECT) {
-                    confirm = true;
+                    confirm = 1;
                 } else if (GamePad[0].pad->digital_buttons_pressed & GAMEPAD_MENUCANCEL) {
-                    cancel = true;
+                    cancel = 1;
                 } else {
                     const u32 pressed = GamePad[0].buttons_pressed | GamePad[0].left_directions;
                     const u32 held = GamePad[0].buttons_held | GamePad[0].buttons_released;
-                    i32 up = pressed & GAMEPAD_DUP, down = pressed & GAMEPAD_DDOWN;
-                    i32 left = pressed & GAMEPAD_DLEFT, right = pressed & GAMEPAD_DRIGHT;
-                    i32 up_held = held & GAMEPAD_DUP, down_held = held & GAMEPAD_DDOWN;
-                    i32 left_held = held & GAMEPAD_DLEFT, right_held = held & GAMEPAD_DRIGHT;
-                    if (down && up)
+                    i32 up = pressed & GAMEPAD_DUP, up_held = held & GAMEPAD_DUP;
+                    i32 down = pressed & GAMEPAD_DDOWN, down_held = held & GAMEPAD_DDOWN;
+                    i32 left = pressed & GAMEPAD_DLEFT, left_held = held & GAMEPAD_DLEFT;
+                    i32 right = pressed & GAMEPAD_DRIGHT, right_held = held & GAMEPAD_DRIGHT;
+                    if (up && down)
                         down = up = 0;
-                    if (right && left)
+                    if (left && right)
                         right = left = 0;
-                    if (__builtin_expect(down_held && up_held, 1))
+                    if (up_held && down_held)
                         down_held = up_held = 0;
-                    if (right_held && left_held)
+                    if (left_held && right_held)
                         right_held = left_held = 0;
                     MenuRepeat(&up_held, &up, uprepeattime, uprepeatcount, 0.1f, FRAMETIME);
                     MenuRepeat(&down_held, &down, downrepeattime, downrepeatcount, 0.1f, FRAMETIME);
                     MenuRepeat(&left_held, &left, leftrepeattime, leftrepeatcount, 0.1f, FRAMETIME);
                     MenuRepeat(&right_held, &right, rightrepeattime, rightrepeatcount, 0.1f, FRAMETIME);
                     if (__builtin_expect(up, 1)) {
-                        i32 next = previous - 7;
-                        if (__builtin_expect(next < 0, 0)) {
-                            next += (count / 7 + 1) * 7;
-                            if (next >= count)
-                                next -= 7;
-                        }
-                        i_clip[i_episodes] = next;
+                        i_clip[i_episodes] = ClipGridUp(previous, count);
                     } else {
                         if (down) {
-                            i32 next = previous + 7;
-                            if (next >= count) {
-                                const i32 rows = count / 7 + 1;
-                                next = (next < rows * 7 ? previous + 14 : next) - rows * 7;
-                            }
-                            i_clip[i_episodes] = next;
+                            i_clip[i_episodes] = ClipGridDown(previous, count);
                         } else if (__builtin_expect(!!(left), 0)) {
-                            i32 column = previous % 7 - 1;
-                            if (column < 0)
-                                column += 7;
-                            i32 next = column + previous / 7 * 7;
-                            if (next >= count)
-                                next = count - 1;
-                            i_clip[i_episodes] = next;
+                            i_clip[i_episodes] = ClipGridLeft(previous, count);
                         } else if (right) {
-                            i32 column = previous % 7 + 1;
-                            if (column == 7)
-                                column -= 7;
-                            const i32 row = previous / 7 * 7;
-                            const i32 next = row + column;
-                            i_clip[i_episodes] = next < count ? next : row;
+                            i_clip[i_episodes] = ClipGridRight(previous, count);
                         }
                     }
                 }
             }
             if (menu->input_activity && menu->confirm_pressed) {
-                if (__builtin_expect(menu->selected_item == i_clip[i_episodes], 1))
-                    confirm = true;
+                if (menu->selected_item == i_clip[i_episodes])
+                    confirm = 1;
                 else
                     i_clip[i_episodes] = menu->selected_item;
             }
+            if (menu->cancel_pressed)
+                cancel = 1;
             if (confirm) {
                 if (CutScenePlayer_CanStart(clips[i_clip[i_episodes]])) {
                     GameAudio_PlaySfx(0x30, NULL, 0, 0);
@@ -3691,7 +3709,7 @@ void MenuUpdateEpisodes(MENU_s *) {
                 } else {
                     GameAudio_PlaySfx(0x32, NULL, 0, 0);
                 }
-            } else if (menu->cancel_pressed || cancel) {
+            } else if (cancel) {
                 GameAudio_PlaySfx(0x31, NULL, 0, 0);
                 episodestime = 0.0f;
                 lastepisodesmode = episodesmode;
@@ -3714,12 +3732,16 @@ void MenuUpdateEpisodes(MENU_s *) {
                 else if (GamePad[0].pad->digital_buttons_pressed & GAMEPAD_MENUCANCEL)
                     cancel = 1;
             }
-            if (confirm || menu->confirm_pressed) {
+            if (menu->confirm_pressed)
+                confirm = 1;
+            if (menu->cancel_pressed)
+                cancel = 1;
+            if (confirm) {
                 const i16 clip = clips[i_clip[i_episodes]];
                 GameAudio_PlaySfx(0x30, NULL, 0, 0);
                 CutScenePlayer_Start(clip, hub_new_level);
                 hub_goto_clipsmenu_episode = 99;
-            } else if (menu->cancel_pressed || cancel) {
+            } else if (cancel) {
                 GameAudio_PlaySfx(0x31, NULL, 0, 0);
                 lastepisodesmode = episodesmode;
                 episodestime = 0.0f;

@@ -593,11 +593,7 @@ GLuint NuIOS_CreateGLTexFromPVRInMemory(void *data, i32 *out_width, i32 *out_hei
                     }
                     BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nutex_ios_ex.cpp",
                                            0x31d);
-                    if (faces <= 1) {
-                        glActiveTexture(GL_TEXTURE0);
-                        g_currentTexUnit = 0;
-                        glBindTexture(GL_TEXTURE_2D, texture);
-                    } else {
+                    if (faces > 1) {
                         if (g_currentTexUnit != 0) {
                             glActiveTexture(GL_TEXTURE0);
                             g_currentTexUnit = 0;
@@ -606,6 +602,10 @@ GLuint NuIOS_CreateGLTexFromPVRInMemory(void *data, i32 *out_width, i32 *out_hei
                             glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
                             g_lastBoundCubeTexIds[0] = texture;
                         }
+                    } else {
+                        glActiveTexture(GL_TEXTURE0);
+                        g_currentTexUnit = 0;
+                        glBindTexture(GL_TEXTURE_2D, texture);
                     }
 
                     if (compressed) {

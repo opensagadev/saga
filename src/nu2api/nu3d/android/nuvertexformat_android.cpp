@@ -40,12 +40,12 @@ NuVertexFormatPS *NuGetVertexDeclaration(NUVERTEXDESCRIPTOR vtx_desc) {
     const u8 specular = b1 & 6;
     const u32 b3 = descriptor >> 24;
     i32 texture_mode, half_texture_mode;
-    if (!(b3 & 8)) {
-        texture_mode = texture_coordinates;
-        half_texture_mode = 0;
-    } else {
+    if (b3 & 8) {
         half_texture_mode = texture_coordinates;
         texture_mode = 0;
+    } else {
+        texture_mode = texture_coordinates;
+        half_texture_mode = 0;
     }
     const i32 weights = (b1 & 0x80) ? 2 : (b1 >> 6) & 1;
     const u8 b2 = descriptor >> 16;
@@ -144,7 +144,7 @@ NuVertexFormatPS *NuGetVertexDeclaration(NUVERTEXDESCRIPTOR vtx_desc) {
             VERTEX_ATTRIBUTE(11, 0x1401, 4, 0, 4);
             break;
     }
-    if (skinned) {
+    if (__builtin_expect(skinned != 0, 1)) {
         VERTEX_ATTRIBUTE(8, 0x1401, 4, 1, 4);
         VERTEX_ATTRIBUTE(9, 0x1401, 4, 1, 4);
     }

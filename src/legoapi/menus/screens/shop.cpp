@@ -1966,14 +1966,19 @@ void DrawTopShelf(i32) {
     const u16 item_angle = shelfang;
     if (__builtin_expect(NuSpecialExistsFn(&TopShelf[2].special) != 0, 0)) {
         NUMTX &matrix = item_matrix;
-        NUANGVEC rotation = {0, item_angle, 0};
-        NuMtxSetRotateXYZVU0(&matrix, &rotation);
         const f32 scale_value = item_scale * alpha_scale;
-        NUVEC scale = {scale_value, scale_value, scale_value};
+        NUANGVEC rotation;
+        rotation.y = item_angle;
+        rotation.x = 0;
+        rotation.z = 0;
+        NuMtxSetRotateXYZVU0(&matrix, &rotation);
+        NUVEC scale;
+        scale.x = scale.y = scale.z = scale_value;
         NuMtxScaleVU0(&matrix, &scale);
         matrix.m30 = ShelfPos[2].x;
-        matrix.m31 = item_push + 0.005f + ShelfPos[2].y;
+        matrix.m31 = ShelfPos[2].y;
         matrix.m32 = ShelfPos[2].z;
+        matrix.m31 += item_push + 0.005f;
         NuSpecialDrawAt(&TopShelf[2].special, &matrix);
     }
 
@@ -2003,7 +2008,7 @@ void DrawTopShelf(i32) {
     for (i32 shelf_index = 1; shelf_index <= 4; ++shelf_index) {
         const i32 menu_index = shelf_index - 1;
         if (shelf_index == 3) {
-            menu->item_width[menu_index] = 0.0f;
+            menu->item_width[2] = 0.0f;
             continue;
         }
 
@@ -2171,11 +2176,11 @@ void DrawSubItems() {
                         rotation = static_cast<i32>(NuFmod(GameTimer.time_elapsed, 4.0f) * 0.25f * 65536.0f);
                 }
                 const u16 angle = shelfang + (item->unlocked == 1 ? rotation : 0);
-                if (items[shelf_ids[slot]].unlocked != 1) {
+                if (items[shelf_ids[slot]].unlocked == 1) {
+                    DrawItem(&TopShelf[0].special, &position, scale, 1.0f, ypush, 0, angle, 0);
+                } else {
                     DrawItem(&infoblank, &position, scale, 1.0f, ypush, 0, angle, 0);
                     DrawItem(&TopShelf[3].special, &position, scale, 1.0f, ypush, 0, angle, 0);
-                } else {
-                    DrawItem(&TopShelf[0].special, &position, scale, 1.0f, ypush, 0, angle, 0);
                 }
                 break;
             }

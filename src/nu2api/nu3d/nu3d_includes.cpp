@@ -382,8 +382,7 @@ static inline NUVEC ShadowCross(const VuVec &a, const VuVec &b, const VuVec &ori
     return normal;
 }
 
-static inline VuVec WarpTransformPoint(const VuVec &point, const NUMTX &matrix) {
-    NUMTX copy;
+static inline void WarpTransformPoint(VuVec &output, NUMTX &copy, const VuVec &point, const NUMTX &matrix) {
     copy.m00 = matrix.m00;
     copy.m01 = matrix.m01;
     copy.m02 = matrix.m02;
@@ -400,13 +399,11 @@ static inline VuVec WarpTransformPoint(const VuVec &point, const NUMTX &matrix) 
     copy.m31 = matrix.m31;
     copy.m32 = matrix.m32;
     copy.m33 = matrix.m33;
-    VuVec output;
     NuVecMtxTransformH(&output.xyz, const_cast<NUVEC *>(&point.xyz), &copy);
-    return output;
 }
-static inline void WarpAccumulatePoint(const VuVec &point, const NUMTX &matrix, VuVec &output, f32 &min_z, f32 &min_y,
-                                       f32 &max_z, f32 &max_y) {
-    VuVec result = WarpTransformPoint(point, matrix);
+static inline void WarpAccumulatePoint(const VuVec &point, const NUMTX &matrix, VuVec &output, VuVec &result,
+                                       NUMTX &copy, f32 &min_z, f32 &min_y, f32 &max_z, f32 &max_y) {
+    WarpTransformPoint(result, copy, point, matrix);
     output.x = result.x;
     output.y = result.y;
     output.z = result.z;
@@ -430,7 +427,7 @@ static inline void WarpProjectBounds(VuVec &point, NUVEC &translation, f32 near_
         right = x;
     if (bottom > y)
         bottom = y;
-    else if (y > top)
+    else if (__builtin_expect(y > top, 0))
         top = y;
 }
 
@@ -2541,51 +2538,6 @@ extern "C" {
             } while (distance_sqr < scene->lod_ranges[selected_clip]);
         }
         return selected_clip;
-    }
-
-    static i32 DisplaySceneNextInstance(const NUDLDLISTSCENE *scene, i32 clip_index) {
-        while (scene->lod_ranges[clip_index] != 0.0f) {
-            ++clip_index;
-        }
-        return clip_index + 1;
-    }
-
-    static f32 DisplaySceneFarClip(const NUDLDLISTSCENE *scene, i32 instance_index, i32 clip_index) {
-        f32 far_clip = scene->far_clip_ranges[clip_index];
-        if (scene->fade_ranges == NULL ||
-            (scene->visibility_flags[instance_index] & NUDL_INSTANCE_FLAG_DISTANCE_FADE) == 0) {
-            return far_clip;
-        }
-
-        const f32 fade_start = scene->fade_ranges[instance_index * 2];
-        const f32 fade_end = scene->fade_ranges[instance_index * 2 + 1];
-        if (fade_end > fade_start) {
-            return fade_end;
-        }
-        return far_clip;
-    }
-
-    static f32 DisplaySceneDistanceFade(const NUDLDLISTSCENE *scene, i32 instance_index, f32 distance_sqr) {
-        if (scene->fade_ranges == NULL ||
-            (scene->visibility_flags[instance_index] & NUDL_INSTANCE_FLAG_DISTANCE_FADE) == 0) {
-            return 1.0f;
-        }
-
-        const f32 fade_start = scene->fade_ranges[instance_index * 2];
-        const f32 fade_end = scene->fade_ranges[instance_index * 2 + 1];
-        if (fade_end <= fade_start) {
-            if (fade_end * fade_end < distance_sqr) {
-                const f32 alpha = (NuFsqrt(distance_sqr) - fade_end) / (fade_start - fade_end);
-                return alpha < 1.0f ? alpha : 1.0f;
-            }
-            return 0.0f;
-        }
-
-        if (fade_start * fade_start < distance_sqr) {
-            const f32 alpha = (fade_end - NuFsqrt(distance_sqr)) / (fade_end - fade_start);
-            return alpha > 0.0f ? alpha : 0.0f;
-        }
-        return 1.0f;
     }
 
     extern nurenderscene_s currentScene;
@@ -5562,7 +5514,7 @@ void NuDynamicLight::computeWarpEffect(NuDynamicLight::RenderSet &set) {
     const NUVEC4 *source = set.corners;
     VuVec *destination = points;
     const NUVEC4 *end = source + 8;
-    while (__builtin_expect(source < end, 0)) {
+    while (source < end) {
         *destination++ = VuVec(source->x, source->y, source->z, source->w);
         ++source;
     }
@@ -5576,16 +5528,28 @@ void NuDynamicLight::computeWarpEffect(NuDynamicLight::RenderSet &set) {
     points[9].w = 0.0f;
     VuVec transformed[10];
     f32 min_z = FLT_MAX, min_y = FLT_MAX, max_z = -FLT_MAX, max_y = -FLT_MAX;
-    WarpAccumulatePoint(points[0], light_space, transformed[0], min_z, min_y, max_z, max_y);
-    WarpAccumulatePoint(points[1], light_space, transformed[1], min_z, min_y, max_z, max_y);
-    WarpAccumulatePoint(points[2], light_space, transformed[2], min_z, min_y, max_z, max_y);
-    WarpAccumulatePoint(points[3], light_space, transformed[3], min_z, min_y, max_z, max_y);
-    WarpAccumulatePoint(points[4], light_space, transformed[4], min_z, min_y, max_z, max_y);
-    WarpAccumulatePoint(points[5], light_space, transformed[5], min_z, min_y, max_z, max_y);
-    WarpAccumulatePoint(points[6], light_space, transformed[6], min_z, min_y, max_z, max_y);
-    WarpAccumulatePoint(points[7], light_space, transformed[7], min_z, min_y, max_z, max_y);
-    WarpAccumulatePoint(points[8], light_space, transformed[8], min_z, min_y, max_z, max_y);
-    WarpAccumulatePoint(points[9], light_space, transformed[9], min_z, min_y, max_z, max_y);
+    VuVec transformed_point;
+    NUMTX transform_copy;
+    WarpAccumulatePoint(points[0], light_space, transformed[0], transformed_point, transform_copy, min_z, min_y, max_z,
+                        max_y);
+    WarpAccumulatePoint(points[1], light_space, transformed[1], transformed_point, transform_copy, min_z, min_y, max_z,
+                        max_y);
+    WarpAccumulatePoint(points[2], light_space, transformed[2], transformed_point, transform_copy, min_z, min_y, max_z,
+                        max_y);
+    WarpAccumulatePoint(points[3], light_space, transformed[3], transformed_point, transform_copy, min_z, min_y, max_z,
+                        max_y);
+    WarpAccumulatePoint(points[4], light_space, transformed[4], transformed_point, transform_copy, min_z, min_y, max_z,
+                        max_y);
+    WarpAccumulatePoint(points[5], light_space, transformed[5], transformed_point, transform_copy, min_z, min_y, max_z,
+                        max_y);
+    WarpAccumulatePoint(points[6], light_space, transformed[6], transformed_point, transform_copy, min_z, min_y, max_z,
+                        max_y);
+    WarpAccumulatePoint(points[7], light_space, transformed[7], transformed_point, transform_copy, min_z, min_y, max_z,
+                        max_y);
+    WarpAccumulatePoint(points[8], light_space, transformed[8], transformed_point, transform_copy, min_z, min_y, max_z,
+                        max_y);
+    WarpAccumulatePoint(points[9], light_space, transformed[9], transformed_point, transform_copy, min_z, min_y, max_z,
+                        max_y);
     f32 fovy, aspect, camera_near, camera_far;
     NuMtxGetPerspectiveD3D(&cacheCameraProj, &fovy, &aspect, &camera_near, &camera_far);
     f32 depth = max_z - min_z;
@@ -7637,9 +7601,10 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint_EulerQuat(ani3_animheader_s *anim, f3
         f32 key = (frame - anim->first_frame) * static_cast<f32>(last) / static_cast<f32>(anim->frame_count - 1);
         key = key < 0.0f ? 0.0f : key;
         i32 whole;
-        if (__builtin_expect(static_cast<f32>(last) <= key, 0)) {
-            whole = last;
-            fraction = 0.0f;
+        if (static_cast<f32>(last) <= key) {
+            const f32 last_key = static_cast<f32>(last);
+            whole = static_cast<i32>(last_key);
+            fraction = last_key - static_cast<f32>(whole);
         } else {
             whole = static_cast<i32>(key);
             fraction = key - static_cast<f32>(whole);
@@ -7647,39 +7612,38 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint_EulerQuat(ani3_animheader_s *anim, f3
         quarter = static_cast<u32>(whole) & 3;
         key_offset = (whole / 4) * anim->key_stride;
     }
-    u8 *keys = anim->keys + key_offset;
     i32 key_stride = anim->key_stride;
-    const u16 *constants = reinterpret_cast<const u16 *>(anim->constants);
-    ani3_scalemin_s *scale_min = anim->scale_min;
+    nuanimbuffjoint_s *joint = buffer->joints;
     const u16 *curve_types = anim->curve_types;
+    ani3_scalemin_s *scale_min = anim->scale_min;
+    const u16 *constants = reinterpret_cast<const u16 *>(anim->constants);
+    u8 *keys = anim->keys + key_offset;
     i32 count = joint_count < anim->node_count ? joint_count : anim->node_count;
     const u8 *first_flags = node_flags + first_joint;
-    for (const u8 *skip_flags = node_flags; skip_flags < first_flags; ++skip_flags) {
-        if (__builtin_expect(*skip_flags & 2 != 0, 1)) {
+    u8 *joint_flags = buffer->joint_flags + first_joint;
+    for (; node_flags < first_flags; ++node_flags, ++joint, curve_types += 9) {
+        const u8 flags = *node_flags;
+        if (__builtin_expect((flags & 2) != 0, 1)) {
             SkipAni4V4Curve(curve_types[0], keys, scale_min);
             SkipAni4V4Curve(curve_types[1], keys, scale_min);
             SkipAni4V4Curve(curve_types[2], keys, scale_min);
         }
-        if (__builtin_expect(!!(*skip_flags & 1), 1)) {
+        if (__builtin_expect((flags & 1) != 0, 1)) {
             SkipAni4V4Curve(curve_types[3], keys, scale_min);
             SkipAni4V4Curve(curve_types[4], keys, scale_min);
             SkipAni4V4Curve(curve_types[5], keys, scale_min);
         }
-        if (__builtin_expect(*skip_flags & 8 != 0, 1)) {
+        if (__builtin_expect((flags & 8) != 0, 1)) {
             SkipAni4V4Curve(curve_types[6], keys, scale_min);
             SkipAni4V4Curve(curve_types[7], keys, scale_min);
             SkipAni4V4Curve(curve_types[8], keys, scale_min);
         }
-        curve_types += 9;
     }
-    node_flags += first_joint;
-    nuanimbuffjoint_s *joint = buffer->joints + first_joint;
-    const u8 *end_flags = node_flags + count;
-    u8 *joint_flags = buffer->joint_flags + first_joint;
-    for (; node_flags < end_flags; ++node_flags, ++joint) {
+    const u8 *end_flags = first_flags + count;
+    f32 *output = &joint->translation.x;
+    for (; node_flags < end_flags; ++node_flags) {
         const u8 flags = *node_flags;
         *joint_flags++ = flags;
-        f32 *output = &joint->translation.x;
         for (i32 group = 0; group < 3; ++group, curve_types += 3, output += 4) {
             if (!(flags & CurveGroupMasks[group])) {
                 if (group == 0) {
@@ -20143,49 +20107,101 @@ extern "C" NUMTL *NuMtlFindVariantMtl(NUMTL *source, NUMTL *original) {
         if (currentScene.unknown_3c != NULL) {
             if (visibility == NULL || (visibility->state & 1) == 0) {
                 i32 instance = 0;
-                for (i32 clip = 0; clip < scene->nclip_objects; ++instance) {
-                    if ((scene->visibility_flags[instance] & NUDL_INSTANCE_FLAG_CASTS_SHADOW) != 0) {
-                        NUCLIPBOUNDS &bounds = scene->clip_bounds[instance];
-                        if (scene->lod_ranges[clip] != 0.0f)
+                for (i32 clip = 0; clip < scene->nclip_objects; ++instance, ++clip) {
+                    if (scene->lod_ranges[clip] != 0.0f) {
+                        if ((scene->visibility_flags[instance] & NUDL_INSTANCE_FLAG_CASTS_SHADOW) != 0) {
+                            NUCLIPBOUNDS &bounds = scene->clip_bounds[instance];
                             clip = DisplaySceneSelectLod(scene, clip, DisplaySceneDistanceSqrToCamera(bounds));
+                            const i32 result = NuDynamicLightTestShadowExtrusionExtent(
+                                static_cast<NuDynamicLight *>(currentScene.unknown_3c), &bounds.center,
+                                reinterpret_cast<NUVEC *>(
+                                    &reinterpret_cast<NUVEC4 *>(scene->clip_bounds)[instance * 2 + 1]),
+                                currentScene.unknown_40);
+                            if (__builtin_expect(result != 0, 1))
+                                DisplaySceneSetClipResult(scene, clip, result);
+                        }
+                        while (scene->lod_ranges[clip] != 0.0f)
+                            ++clip;
+                    } else if ((scene->visibility_flags[instance] & NUDL_INSTANCE_FLAG_CASTS_SHADOW) != 0) {
+                        NUCLIPBOUNDS &bounds = scene->clip_bounds[instance];
                         const i32 result = NuDynamicLightTestShadowExtrusionExtent(
-                            static_cast<NuDynamicLight *>(currentScene.unknown_3c), &bounds.center, &bounds.extent,
+                            static_cast<NuDynamicLight *>(currentScene.unknown_3c), &bounds.center,
+                            reinterpret_cast<NUVEC *>(
+                                &reinterpret_cast<NUVEC4 *>(scene->clip_bounds)[instance * 2 + 1]),
                             currentScene.unknown_40);
-                        if (result != 0)
+                        if (__builtin_expect(result != 0, 1))
                             DisplaySceneSetClipResult(scene, clip, result);
                     }
-                    clip = DisplaySceneNextInstance(scene, clip);
                 }
             }
         } else if (visibility == NULL || (visibility->state & 1) == 0) {
             scene->alpha_values = NULL;
+            i32 fade_mask;
             if (scene->fade_ranges != NULL) {
-                VARIPTR *buffer = NuDisplayListGetBuffer();
-                scene->alpha_values = buffer->f32_ptr;
-                buffer->addr += static_cast<usize>(scene->nclip_objects) * sizeof(f32);
+                VARIPTR *buffer = display_list_buffer;
+                scene->alpha_values = reinterpret_cast<f32 *>(ALIGN(buffer->addr, 0x10));
+                buffer->f32_ptr = scene->alpha_values + scene->nclip_objects;
+                fade_mask = NUDL_INSTANCE_FLAG_DISTANCE_FADE;
+            } else {
+                fade_mask = 0;
             }
             i32 instance = 0;
-            for (i32 clip = 0; clip < scene->nclip_objects; ++instance) {
-                const u8 flags = scene->visibility_flags[instance];
-                bool visible = visibility == NULL || visibility->instance_tree_bits == NULL ||
-                               (visibility->instance_tree_bits[instance >> 3] & (1 << (instance & 7))) != 0;
+            for (i32 clip = 0; clip < scene->nclip_objects; ++instance, ++clip) {
+                i32 visible = 1;
+                if (visibility != NULL && visibility->instance_tree_bits != NULL)
+                    visible = (visibility->instance_tree_bits[instance >> 3] >> (instance & 7)) & 1;
+                const i8 flags = scene->visibility_flags[instance];
                 if (visibility != NULL && visibility->portal_marker != NULL && portals_enabled != 0) {
-                    visible = (flags & NUDL_INSTANCE_FLAG_NO_VISIBILITY_TEST) != 0 ||
-                              (visibility->portal_bits[instance >> 3] & (1 << (instance & 7))) != 0;
+                    if ((flags & NUDL_INSTANCE_FLAG_NO_VISIBILITY_TEST) != 0)
+                        visible = 1;
+                    else
+                        visible = (visibility->portal_bits[instance >> 3] >> (instance & 7)) & 1;
                 }
-                if (visible && (flags & NUDL_INSTANCE_FLAG_VISIBLE) != 0) {
+                if (visible == 1 && (flags & NUDL_INSTANCE_FLAG_VISIBLE) != 0) {
                     NUCLIPBOUNDS &bounds = scene->clip_bounds[instance];
                     const f32 distance_sqr = DisplaySceneDistanceSqrToCamera(bounds);
                     clip = DisplaySceneSelectLod(scene, clip, distance_sqr);
-                    const f32 far_clip = DisplaySceneFarClip(scene, instance, clip);
-                    const i32 result = NuCameraClipTestExtentsAxisAligned(&bounds.center, &bounds.extent, far_clip);
+                    f32 far_clip = scene->far_clip_ranges[clip];
+                    const i32 fade = flags & fade_mask;
+                    if (fade != 0) {
+                        const f32 fade_start = scene->fade_ranges[instance * 2];
+                        const f32 fade_end = scene->fade_ranges[instance * 2 + 1];
+                        if (fade_end > fade_start)
+                            far_clip = fade_end;
+                    }
+                    const i32 result = NuCameraClipTestExtentsAxisAligned(
+                        &bounds.center,
+                        reinterpret_cast<NUVEC *>(&reinterpret_cast<NUVEC4 *>(scene->clip_bounds)[instance * 2 + 1]),
+                        far_clip);
                     if (result != 0) {
-                        if (scene->alpha_values != NULL)
-                            scene->alpha_values[clip] = DisplaySceneDistanceFade(scene, instance, distance_sqr);
+                        if (scene->alpha_values != NULL) {
+                            f32 *alpha = &scene->alpha_values[clip];
+                            *alpha = 1.0f;
+                            if (fade != 0) {
+                                const f32 fade_start = scene->fade_ranges[instance * 2];
+                                const f32 fade_end = scene->fade_ranges[instance * 2 + 1];
+                                f32 value;
+                                if (fade_end > fade_start) {
+                                    if (fade_start * fade_start < distance_sqr) {
+                                        value = (fade_end - NuFsqrt(distance_sqr)) / (fade_end - fade_start);
+                                        value = value > 0.0f ? value : 0.0f;
+                                    } else {
+                                        value = 1.0f;
+                                    }
+                                } else if (fade_end * fade_end < distance_sqr) {
+                                    value = (NuFsqrt(distance_sqr) - fade_end) / (fade_start - fade_end);
+                                    value = value < 1.0f ? value : 1.0f;
+                                } else {
+                                    value = 0.0f;
+                                }
+                                *alpha = value;
+                            }
+                        }
                         DisplaySceneSetClipResult(scene, clip, result);
                     }
                 }
-                clip = DisplaySceneNextInstance(scene, clip);
+                while (scene->lod_ranges[clip] != 0.0f)
+                    ++clip;
             }
         }
         if (scene->nclip_objects != 0)
@@ -20198,11 +20214,12 @@ extern "C" NUMTL *NuMtlFindVariantMtl(NUMTL *source, NUMTL *original) {
             temporary_scene.display_list = scene;
             gscene = &temporary_scene;
         }
-        const bool portal_filter =
-            portal_special_objects != 0 && visibility->portal_marker != NULL && portals_enabled != 0;
+        nuhspecial_s handle = {gscene, NULL, NULL};
+        i32 portal_filter = 0;
+        if (portal_special_objects != 0 && visibility->portal_marker != NULL)
+            portal_filter = portals_enabled != 0;
         if ((scene->instance_visibility_enabled & NUDL_SCENE_INSTANCE_VISIBILITY_ENABLED) == 0 &&
             noscenespecials == 0) {
-            nuhspecial_s handle = {gscene, NULL, NULL};
             for (i32 index = 0; index < scene->nspecials; ++index) {
                 NUDISPLAYSPECIAL *special = &static_cast<NUDISPLAYSPECIAL *>(scene->specials)[index];
                 if ((special->flags & NUDISPLAYSPECIAL_FLAG_VISIBLE) == 0)
@@ -20213,10 +20230,13 @@ extern "C" NUMTL *NuMtlFindVariantMtl(NUMTL *source, NUMTL *original) {
                     (visibility->portal_bits[instance >> 3] & (1 << (instance & 7))) == 0)
                     continue;
                 NUMTX *draw_mtx = special->draw_mtx_ptr;
-                if (draw_mtx != reinterpret_cast<NUMTX *>(-1) && draw_mtx != NULL)
-                    NuDisplayListRndrSpecial(&handle, draw_mtx, 0, NULL, NULL);
-                else
-                    NuDisplayListRndrSpecial(&handle, &special->draw_mtx, 0, NULL, NULL);
+                if (draw_mtx != reinterpret_cast<NUMTX *>(-1)) {
+                    if (draw_mtx != NULL) {
+                        NuDisplayListRndrSpecial(&handle, draw_mtx, 0, NULL, NULL);
+                        continue;
+                    }
+                }
+                NuDisplayListRndrSpecial(&handle, &special->draw_mtx, 0, NULL, NULL);
             }
         }
     }

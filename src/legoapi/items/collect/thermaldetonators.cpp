@@ -231,24 +231,25 @@ void ThermalDetonator_Throw(GameObject_s *object) {
         };
 
         NuVecSub(&movement, NUMTX_GET_ROW_VEC(&matrix, 3), &origin);
-        blocked = GameRayCast(&origin, &movement, 0.0f, TERRAINMASK_NONWEAPON | 0x1f);
+        blocked = GameRayCast(&origin, &movement, 0.0f, TERRAINMASK_NONWEAPON | 0x1f) != 0;
     }
     NUVEC velocity;
     if (NextThermalTarget.Get() == NULL) {
         const u16 angle = object->apiobj.movement_facing_angle;
         velocity.x = NU_SIN_LUT(angle) + NU_SIN_LUT(angle) + object->apiobj.velocity.x;
         velocity.z = NU_COS_LUT(angle) + NU_COS_LUT(angle) + object->apiobj.velocity.z;
+        velocity.y = 2.0f;
     } else {
         VuVec target;
         NextThermalTarget->GetPos(target, -1);
         const VuVec origin(object->apiobj.position.x, object->apiobj.position.y, object->apiobj.position.z, 1.0f);
         const VuVec arc = TouchHacks::CalculateXZVelForArcToHitPoint(origin, target, 2.0f, -5.0f);
-        NextThermalTarget.Reset();
+        velocity = arc.xyz;
+        velocity.y = 2.0f;
+        NextThermalTarget = MechWeakPtr<MechObjectInterface, 4>();
         // The retail path clamps only X; Z retains the calculated arc velocity.
-        velocity.z = arc.z;
-        velocity.x = arc.x < 3.0f ? (arc.x < -3.0f ? -3.0f : arc.x) : 3.0f;
+        velocity.x = velocity.x < 3.0f ? (velocity.x < -3.0f ? -3.0f : velocity.x) : 3.0f;
     }
-    velocity.y = 2.0f;
     if (blocked) {
         const u16 angle = NuAtan2D(object->apiobj.collision_position.x - matrix.m30,
                                    object->apiobj.collision_position.z - matrix.m32);
@@ -260,9 +261,9 @@ void ThermalDetonator_Throw(GameObject_s *object) {
 
     params.matrix = &matrix;
     params.velocity = &velocity;
-    params.owner = object;
     NUVEC centre;
     NuSpecialGetRadius(&WORLD->lev_objs[0xe9].special, &centre, &params.field_14);
+    params.owner = object;
     params.field_18 = params.field_14;
     params.field_14 *= 0.75f;
     params.field_c4 = 1;
@@ -281,15 +282,14 @@ void ThermalDetonator_Throw(GameObject_s *object) {
     if (part != NULL) {
         part->force_flags = ObjHitObj_Flags(object) & 0xffff;
         part->force_player_mask = 0;
+        part->reflection_flags &= ~1;
         part->field_1c4 = PartUpdate_ThermalDetonator;
         part->reflection_height = 2000000.0f;
         part->render_flags &= ~0x80;
-        part->reflection_flags &= ~3;
+        part->reflection_flags &= ~2;
     }
     PlaySfx(const_cast<char *>("ThrowDet"), &object->apiobj.collision_position);
-    if (object->pad_gamepad != NULL) {
-        NewBuzzFrames(object->pad_gamepad->pad, 2, 0);
-    }
+    NewBuzzFrames(object->pad_gamepad->pad, 2, 0);
 }
 
 void ThermalDetonator_ThrowMom(GameObject_s *object, nuvec_s *velocity) {

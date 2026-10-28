@@ -2472,7 +2472,7 @@ void MovePlayer(GameObject_s *object) {
                         z = -z;
                     if (x * x + z * z < 1806.25f) {
                         x = z = 0.0f;
-                    } else if (x != 0.0f || z != 0.0f) {
+                    } else if (__builtin_expect(x != 0.0f || z != 0.0f, 1)) {
                         pad->input_mode = 2;
                     }
                 }
@@ -2503,7 +2503,7 @@ void MovePlayer(GameObject_s *object) {
                 // the AI path below uses the opposite component convention.
                 pad->input_direction_z = input.x;
                 pad->input_direction_x = input.z;
-                if (pad->input_magnitude > 0.0f)
+                if (__builtin_expect(pad->input_magnitude > 0.0f, 1))
                     pad->input_angle = NuAtan2D(input.x, input.z);
                 i32 waggle = GamePad_Waggle(object->pad_gamepad);
                 pad->waggled = waggle;

@@ -1113,8 +1113,8 @@ void SetLevelSfxBits(WORLDINFO *world) {
                 const i16 configured_sfx = game_character->sfx_die;
                 if (configured_sfx != -1) {
                     sfx_ids[sfx_count++] = configured_sfx;
-                } else if (__builtin_expect((character->model_flags & 0x44002010) == 0, 1)) {
-                    ADD_GAME_SFX((static_cast<i32>(game_character->flags_090 << 14) >> 31) + 0x1c);
+                } else if ((character->model_flags & 0x44002010) == 0) {
+                    ADD_GAME_SFX((game_character->flags_090 & 0x20000) ? 0x1b : 0x1c);
                 }
             }
             {
@@ -1122,15 +1122,15 @@ void SetLevelSfxBits(WORLDINFO *world) {
                 if (configured_sfx != -1) {
                     sfx_ids[sfx_count++] = configured_sfx;
                 } else if ((character->model_flags & 0x44002010) == 0) {
-                    ADD_GAME_SFX((static_cast<i32>(game_character->flags_090 << 14) >> 31) + 0x17);
+                    ADD_GAME_SFX((game_character->flags_090 & 0x20000) ? 0x16 : 0x17);
                 }
             }
             {
-                const i32 configured_sfx = game_character->sfx_grunt;
+                const i16 configured_sfx = game_character->sfx_grunt;
                 if (configured_sfx != -1) {
                     sfx_ids[sfx_count++] = configured_sfx;
-                } else if (__builtin_expect((character->model_flags & 0x44002010) == 0, 1)) {
-                    ADD_GAME_SFX((static_cast<i32>(game_character->flags_090 << 14) >> 31) + 0x15);
+                } else if ((character->model_flags & 0x44002010) == 0) {
+                    ADD_GAME_SFX((game_character->flags_090 & 0x20000) ? 0x14 : 0x15);
                 }
             }
             {

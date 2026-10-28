@@ -631,7 +631,7 @@ void Teleport_MoveCode(GameObject_s *object, i32 start_immediately) {
     }
     object->apiobj.position.y += progress * 0.0025f;
 
-    if (__builtin_expect(completed == 0, 0))
+    if (completed == 0)
         return;
     teleport = static_cast<TELEPORT_s *>(object->field_0x788);
     if ((teleport->flags & 4) != 0 || object->field_0x7a4 != 0) {

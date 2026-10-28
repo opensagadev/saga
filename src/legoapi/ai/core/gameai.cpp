@@ -900,9 +900,8 @@ void GameCreatureOpponentSelection(AISYS_s *system, i32 count, APIOBJECT_s **obj
                         baddy_id = baddy_object->id;
                     } else {
                         if (!(goody->character_data->model_flags & 0x80000)) {
-                            if (__builtin_expect(baddy_object->only_attack_players && goody->objptr != player &&
-                                                     goody->objptr != player2,
-                                                 1)) {
+                            if (baddy_object->only_attack_players && goody->objptr != player &&
+                                                     goody->objptr != player2) {
                                 baddy_object->ai_opponent_exclusion_mask |= (u64)1 << goody->field_0x289;
                             } else if (goody->objptr->id == id_DRAGBOMB && baddy_id != id_ATAT) {
                                 baddy_object->ai_opponent_exclusion_mask |= (u64)1 << goody->field_0x289;
@@ -1007,13 +1006,13 @@ void GameCreatureOpponentSelection(AISYS_s *system, i32 count, APIOBJECT_s **obj
                 if (__builtin_expect((goody->ai_awareness_mask >> baddy->field_0x289) & 1, 1)) {
                     if ((WORLD->api_object_sys->line_of_sight[goody->field_0x289] >> baddy->field_0x289) & 1)
                         goody->objptr->ai_seen_mask |= (u64)1 << baddy->field_0x289;
-                } else if (__builtin_expect((goody->objptr->ai_seen_mask >> baddy->field_0x289) & 1, 0)) {
+                } else if (__builtin_expect((goody->objptr->ai_seen_mask >> baddy->field_0x289) & 1, 1)) {
                     goody->objptr->ai_seen_mask &= ~((u64)1 << baddy->field_0x289);
                 }
                 if ((baddy->ai_awareness_mask >> goody->field_0x289) & 1) {
                     if ((WORLD->api_object_sys->line_of_sight[baddy->field_0x289] >> goody->field_0x289) & 1)
                         baddy->objptr->ai_seen_mask |= (u64)1 << goody->field_0x289;
-                } else if (__builtin_expect((baddy->objptr->ai_seen_mask >> goody->field_0x289) & 1, 1)) {
+                } else if (__builtin_expect((baddy->objptr->ai_seen_mask >> goody->field_0x289) & 1, 0)) {
                     baddy->objptr->ai_seen_mask &= ~((u64)1 << goody->field_0x289);
                 }
             }
