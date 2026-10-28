@@ -711,7 +711,7 @@ void MechSystems::Process(ThingProcessData *) {
 
 MechSystems *MechSystems::Get() {
     static MechSystems *instance = NULL;
-    if (instance == NULL) {
+    if (__builtin_expect(instance == NULL, 1)) {
         instance = new MechSystems();
     }
     return instance;

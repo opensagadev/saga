@@ -2920,18 +2920,17 @@ void DeflectPart(PART_s *part, GameObject_s *object, float speed, float gravity,
 
 static void PartCollide(PART_s *part, i32 three_dimensional) {
     const f32 radius = part->field_0e4;
-    NUVEC minimum = part->position;
-    NUVEC maximum = part->position;
-    minimum.x -= radius;
-    maximum.x += radius;
-    minimum.y -= radius;
-    maximum.y += radius;
-    minimum.z -= radius;
-    maximum.z += radius;
+    NUVEC minimum;
+    NUVEC maximum;
+    minimum.x = part->position.x - radius;
+    maximum.x = part->position.x + radius;
+    minimum.y = part->position.y - radius;
+    maximum.y = part->position.y + radius;
+    minimum.z = part->position.z - radius;
+    maximum.z = part->position.z + radius;
     GameObject_s *object = Obj;
-    i8 force_player_mask = part->force_player_mask;
-    auto part_pickup_type = part->pickup_type;
-    for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++object) {
+    i8 force_player_mask;
+    for (i32 i = 0; force_player_mask = part->force_player_mask, i < HIGHGAMEOBJECT; ++i, ++object) {
         APIOBJECT_s *api = &object->apiobj;
         if ((api->field_0x1f8 & 0x1001) != 0x1001 || api->field_0x287 != 0)
             continue;
@@ -2942,7 +2941,7 @@ static void PartCollide(PART_s *part, i32 three_dimensional) {
             if (part->owner == object) {
                 if (part->scale_time < 0.5f)
                     continue;
-            } else if (api->field_0x27c != -1 && __builtin_expect(part->scale_time < 0.25f, 0))
+            } else if (api->field_0x27c != -1 && part->scale_time < 0.25f)
                 continue;
         } else if ((part->flags & 0x8000) == 0 && part->owner == object)
             continue;
@@ -2965,8 +2964,10 @@ static void PartCollide(PART_s *part, i32 three_dimensional) {
             GAMECHARACTERDATA_s *character = static_cast<GAMECHARACTERDATA_s *>(api->character_data->field11_0x24);
             if ((character->flags_090 & 0x8000) != 0)
                 continue;
-            if (!SphereSphereOverlapScaleY(&part->position, part->field_0e4, part->field_0e4, &api->collision_position,
-                                           api->collision_radius, api->field_0x1e0))
+            if (__builtin_expect(!SphereSphereOverlapScaleY(&part->position, part->field_0e4, part->field_0e4,
+                                                            &api->collision_position, api->collision_radius,
+                                                            api->field_0x1e0),
+                                 0))
                 continue;
             if (!((part->active & 2) != 0 && (part->flags & 0x1000008) == 0x1000008))
                 KillPart(part, 1);
@@ -2997,7 +2998,7 @@ static void PartCollide(PART_s *part, i32 three_dimensional) {
             }
             if (api->field_0x287 != 0 || (api->flags_low & 2) != 0)
                 continue;
-            if (__builtin_expect((part->active & 1) == 0, 0)) {
+            if ((part->active & 1) == 0) {
                 f32 speed = static_cast<GAMECHARACTERDATA_s *>(api->character_data->field11_0x24)->run_speed;
                 if (api->scaled_radius > 1.0f)
                     speed /= api->scaled_radius;
@@ -3006,8 +3007,7 @@ static void PartCollide(PART_s *part, i32 three_dimensional) {
                 api->velocity.x += direction.x * speed;
                 api->velocity.z += direction.z * speed;
             }
-            if (__builtin_expect(
-                    (part->flags & 0x2000000) != 0 && ((part->flags & 0x4000000) == 0 || (part->active & 2) != 0), 1)) {
+            if ((part->flags & 0x2000000) != 0 && ((part->flags & 0x4000000) == 0 || (part->active & 2) != 0)) {
                 u16 angle = NuAtan2D(api->position.x - part->position.x, api->position.z - part->position.z);
                 f32 speed = static_cast<GAMECHARACTERDATA_s *>(api->character_data->field11_0x24)->run_speed;
                 api->field_0x1fc = NU_SIN_LUT(angle) * speed;
@@ -3016,7 +3016,7 @@ static void PartCollide(PART_s *part, i32 three_dimensional) {
         } else {
         collect_pickup:
             if ((part->active & 2) == 0) {
-                if (part_pickup_type == 0xcb) {
+                if (part->pickup_type == 0xcb) {
                     if (part->scale_time < 0.5f)
                         continue;
                     if (__builtin_expect(VehicleArea == 0, 0) &&
@@ -3026,14 +3026,14 @@ static void PartCollide(PART_s *part, i32 three_dimensional) {
                 } else if (!(part->scale_time >= 0.1f))
                     continue;
             }
-            if ((api->field_0x1f4 & 0x40000) != 0) {
+            if (__builtin_expect((api->field_0x1f4 & 0x40000) != 0, 0)) {
                 KillPart(part, 2);
                 continue;
             }
-            if (part_pickup_type == 0xcb) {
+            if (part->pickup_type == 0xcb) {
                 CollectHitPoint(object, &part->position, 1);
                 KillPart(part, 2);
-            } else if (part_pickup_type == 0xd0) {
+            } else if (part->pickup_type == 0xd0) {
                 CollectPowerUp(object, &part->position, part->rotation_y, 1);
                 KillPart(part, 2);
             } else if (force_player_mask == 3) {
@@ -3051,7 +3051,7 @@ static void PartCollide(PART_s *part, i32 three_dimensional) {
                 }
             } else {
                 GIZMOPICKUP_s pickup;
-                SetCoinType(part_pickup_type, &pickup);
+                SetCoinType(part->pickup_type, &pickup);
                 GizmoPickup_CollectCoin(WORLD, &part->position, pickup.type_index, pickup.model_variant, object, 1);
                 KillPart(part, 2);
             }
@@ -3335,7 +3335,7 @@ i32 CutScene_ReplaceCharacterModelFn_LSW(CUTINFO *cut, NUGCUTCHAR_s *character) 
         if (cut != game_cutscenes.podsprint_out_of_time && cut != game_cutscenes.podsprint_sebulba) {
             return -1;
         }
-        if (id_ANAKINSNEWPOD == -1 || NuStrICmp(apicharsys->char_data[id_ANAKINSNEWPOD].file, character->name) != 0) {
+        if (__builtin_expect(id_ANAKINSNEWPOD == -1 || NuStrICmp(apicharsys->char_data[id_ANAKINSNEWPOD].file, character->name) != 0, 1)) {
             return -1;
         }
         GameObject_s *vehicle = CutDeadVehiclePlayer != NULL ? CutDeadVehiclePlayer : player;

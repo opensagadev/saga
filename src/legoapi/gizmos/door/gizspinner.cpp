@@ -1313,11 +1313,11 @@ static i32 GizSpinner_BoltHitPlat(void *, void *spinner_ptr, BOLT *bolt, unsigne
         return 0;
     }
 
-    if ((spinner->flags & (GIZSPINNER_FLAG_HIDE_ARM | SPINNER_RUNTIME_ANIMATION_HIDDEN)) != 0 &&
-        spinner->platform_id == bolt->hit_platform) {
+    if (__builtin_expect((spinner->flags & (GIZSPINNER_FLAG_HIDE_ARM | SPINNER_RUNTIME_ANIMATION_HIDDEN)) != 0 &&
+        spinner->platform_id == bolt->hit_platform, 0)) {
         return 1;
     }
-    if (spinner->platform_id != bolt->hit_platform) {
+    if (__builtin_expect(spinner->platform_id != bolt->hit_platform, 1)) {
         const i32 arm_count = spinner->type;
         i32 arm;
         for (arm = 0; arm != arm_count; ++arm) {

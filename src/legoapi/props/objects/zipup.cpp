@@ -635,7 +635,7 @@ void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
                     NuVecSub(&delta, &object->zipup_swing_position, &object->zipup_start_position);
                     NuVecScale(&delta, &delta, fraction);
                     NuVecAdd(&api.position, &object->zipup_start_position, &delta);
-                    if (!(object->context_animation_timer < object->airborne_action_duration)) {
+                    if (object->context_animation_timer >= object->airborne_action_duration) {
                         object->field_0x7a3 = 2;
                         object->context_animation_timer = 0.0f;
                         object->context_animation = LEGOACT_WHIP_SWING_JUMP;
@@ -653,8 +653,9 @@ void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
                     NuVecScale(&delta, &delta, fraction);
                     NuVecAdd(&api.position, &object->zipup_swing_position, &delta);
                     if (object->context_animation_timer >= object->airborne_action_duration) {
-                        api.velocity.x = api.velocity.z = 0.0f;
+                        api.velocity.x = 0.0f;
                         api.velocity.y = -2.0f;
+                        api.velocity.z = 0.0f;
                         object->character_context = -1;
                         StartFallLand(object, LEGOACT_LAND);
                     }
@@ -673,7 +674,9 @@ void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
                 if (__builtin_expect((api.flags_low & 0x80) != 0, 1))
                     Hint_SetComplete(0x262);
                 u16 angle = NuAtan2D(destination->x - api.position.x, destination->z - api.position.z);
-                api.field_0x276 = api.facing_angle = api.movement_facing_angle = angle;
+                api.field_0x276 = angle;
+                api.facing_angle = angle;
+                api.movement_facing_angle = angle;
                 f32 speed =
                     NuVecXZDist(&api.position, destination, NULL) / api.character_data->game_character->jump_duration;
                 const u16 velocity_angle = api.movement_facing_angle;
@@ -710,12 +713,12 @@ void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
             if (difference < 0)
                 difference = -difference;
             i32 half = static_cast<i32>(difference * 0.5f);
-            NUVEC offset = zipup->rider_start_offset;
             u16 axis = start_angle > 0x8000 ? start_angle + half : start_angle - half;
+            NUVEC offset = zipup->rider_start_offset;
             NuVecRotateY(&offset, &offset, static_cast<u16>(-axis));
             f32 phase = object->context_animation_timer / 1.5f * 32768.0f;
             i32 pitch = static_cast<i32>((1.0f - (NU_SIN_LUT(static_cast<i32>(16384.0f + phase)) + 1.0f) * 0.5f) *
-                                         zipup->pitch_adjustment);
+                                         static_cast<u32>(zipup->pitch_adjustment));
             NuVecRotateX(&zipup->rider_target_position, &offset, pitch);
             NuVecRotateY(&zipup->rider_target_position, &zipup->rider_target_position, axis);
             zipup->rider_target_position.y *= 1.0f - (1.0f - NuTrigTable[0x1000]) * NU_SIN_LUT(static_cast<i32>(phase));
@@ -775,7 +778,7 @@ void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
             object->context_variant_flags |= 1;
         return;
     }
-    if (__builtin_expect((api.flags_low & 0x80) != 0, 1))
+    if ((api.flags_low & 0x80) != 0)
         Hint_SetComplete(0x262);
     object->field_0x788 = zipup;
     object->character_context = 0x47;
@@ -818,14 +821,24 @@ void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
     object->action_movement_state = 0;
     object->context_animation = 0x2a;
     NUVEC *hook = &zipup->hook_origin;
-    NUVEC *start = endpoint == 0 ? &zipup->lower_position : &zipup->upper_position;
-    NUVEC *destination = endpoint == 0 ? &zipup->upper_position : &zipup->lower_position;
+    NUVEC *start;
+    NUVEC *destination;
+    NUVEC *heading;
     if (endpoint == 0) {
         object->field_0x7a3 = 0;
+        start = &zipup->lower_position;
+        destination = &zipup->upper_position;
+        heading = zipup->lower_position.x == zipup->hook_origin.x && zipup->lower_position.z == zipup->hook_origin.z
+                      ? &zipup->upper_position
+                      : hook;
     } else {
         object->field_0x7a3 = 1;
+        start = &zipup->upper_position;
+        destination = &zipup->lower_position;
+        heading = zipup->upper_position.x == zipup->hook_origin.x && zipup->upper_position.z == zipup->hook_origin.z
+                      ? &zipup->lower_position
+                      : hook;
     }
-    NUVEC *heading = start->x == hook->x && start->z == hook->z ? destination : hook;
     api.movement_facing_angle = NuAtan2D(heading->x - start->x, heading->z - start->z);
     api.velocity.y = 0.0f;
     if (api.character_data->game_character->field275_0x116 == 2)
@@ -845,13 +858,13 @@ void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
     NUVEC end_offset;
     NuVecSub(&end_offset, destination, hook);
     end_offset.y += 0.5f;
-    zipup = static_cast<ZIPUP *>(object->field_0x788);
-    f32 rider_height = 0.5f * api.scaled_height;
-    zipup->rider_start_offset.y *= 0.9f;
-    zipup->rider_start_offset.y = rider_height + zipup->rider_start_offset.y;
-    zipup->rider_start_offset.x *= 0.9f;
-    zipup->rider_start_offset.z *= 0.9f;
-    i32 yaw = -static_cast<u16>(NuAtan2D(zipup->rider_start_offset.x, zipup->rider_start_offset.z));
+    static_cast<ZIPUP *>(object->field_0x788)->rider_start_offset.x *= 0.9f;
+    static_cast<ZIPUP *>(object->field_0x788)->rider_start_offset.y *= 0.9f;
+    static_cast<ZIPUP *>(object->field_0x788)->rider_start_offset.y =
+        0.5f * api.scaled_height + static_cast<ZIPUP *>(object->field_0x788)->rider_start_offset.y;
+    static_cast<ZIPUP *>(object->field_0x788)->rider_start_offset.z *= 0.9f;
+    i32 yaw = -static_cast<u16>(NuAtan2D(static_cast<ZIPUP *>(object->field_0x788)->rider_start_offset.x,
+                                         static_cast<ZIPUP *>(object->field_0x788)->rider_start_offset.z));
     zipup = static_cast<ZIPUP *>(object->field_0x788);
     NUVEC start_offset = zipup->rider_start_offset;
     NuVecRotateY(&start_offset, &start_offset, yaw);
@@ -863,6 +876,7 @@ void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
         static_cast<i16>(0x4000 - NuASin(start_offset.y * end_offset.y + start_offset.z * end_offset.z));
     zipup = static_cast<ZIPUP *>(object->field_0x788);
     zipup->rider_target_position = zipup->rider_start_offset;
+    zipup = static_cast<ZIPUP *>(object->field_0x788);
     NuVecAdd(&zipup->rider_target_position, hook, &zipup->rider_target_position);
 }
 

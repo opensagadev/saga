@@ -212,7 +212,7 @@ static void GizTorp_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *world_ptr,
                 AddGizmo(gizmo_sys, type_id, NULL, machine);
             }
             ++index;
-        } while (world->giz_torp_machine_sys->count > index);
+        } while (__builtin_expect(world->giz_torp_machine_sys->count > index, 1));
     }
 }
 

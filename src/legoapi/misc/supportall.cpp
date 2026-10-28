@@ -492,7 +492,7 @@ ThingManager::ThingManager(i32 max_things) {
     const usize need = static_cast<usize>(max_things) * sizeof(*things);
 
     BaseThing **array = NULL;
-    if (*theMemoryManager.end_cell - *theMemoryManager.cursor_cell > need) {
+    if (__builtin_expect(*theMemoryManager.end_cell - *theMemoryManager.cursor_cell > need, 1)) {
         const usize aligned = ALIGN(*theMemoryManager.cursor_cell, 0x10);
         *theMemoryManager.cursor_cell = aligned + need;
         array = reinterpret_cast<BaseThing **>(aligned);

@@ -614,14 +614,14 @@ void Store_HubInitFloorTargets(WORLDINFO_s *world) {
 }
 
 void MenuUpdateDebugStore(MENU_s *menu) {
-    if (menu->cancel_pressed == 0) {
+    if (__builtin_expect(menu->cancel_pressed == 0, 1)) {
         if (menu->confirm_pressed != 0) {
             if (menu->selected_item > 10) {
                 SuperOptions.store_pack_flags = 0xffff;
                 SuperOptions.store_bundle_flags = 0xff;
                 TriggerExtraDataSave();
                 BackupMenu();
-            } else if (__builtin_expect(Store_IsPackUnlocked(menu->selected_item), 1)) {
+            } else if (Store_IsPackUnlocked(menu->selected_item)) {
                 GameAudio_PlaySfx(0x32, NULL, 0, 0);
             } else {
                 Store_UnlockPack(menu->selected_item, true);

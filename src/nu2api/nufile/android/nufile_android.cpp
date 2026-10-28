@@ -65,7 +65,7 @@ NUPSFILE NuPSFileOpen(char *filepath, NUFILEMODE mode) {
     NuStrCpy(path, filepath);
 
     for (char *cursor = path; *cursor != '\0'; cursor++) {
-        if (*cursor == '\\') {
+        if (__builtin_expect(*cursor == '\\', 1)) {
             *cursor = '/';
         }
     }

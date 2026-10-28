@@ -383,7 +383,7 @@ i32 ObjInNarrowSock(GameObject_s *object, SOCKSYS *system, i32 level_index) {
         return 0;
     if (disable_narrow_socks || object->apiobj.field_0x27c == -1)
         return 0;
-    if (object->apiobj.player_controlled) {
+    if (__builtin_expect(object->apiobj.player_controlled != 0, 1)) {
         GameObject_s *other = NULL;
         if (object == Player[0])
             other = Player[1];

@@ -1248,7 +1248,7 @@ void PlayDieSfx(GameObject_s *object) {
                 }
             }
         }
-        if (sfx == -1) {
+        if (__builtin_expect(sfx == -1, 1)) {
             goto extra;
         }
     }
@@ -1453,7 +1453,7 @@ void NewAreaMusicChanges(void) {
 i32 ActionFromQuiet(i32 idx) {
     if (idx != -1) {
         for (i32 entry = 0; ActionPairTab[entry * 14] != -1; entry++) {
-            if (ActionPairTab[entry * 14] == idx) {
+            if (__builtin_expect(ActionPairTab[entry * 14] == idx, 0)) {
                 return ActionPairTab[entry * 14 + 1];
             }
         }
@@ -1464,7 +1464,7 @@ i32 ActionFromQuiet(i32 idx) {
 i32 AmbientFromQuiet(i32 idx) {
     if (idx != -1) {
         for (i32 entry = 0; AmbientPairTab[entry * 2] != -1; entry++) {
-            if (AmbientPairTab[entry * 2] == idx) {
+            if (__builtin_expect(AmbientPairTab[entry * 2] == idx, 0)) {
                 return AmbientPairTab[entry * 2 + 1];
             }
         }

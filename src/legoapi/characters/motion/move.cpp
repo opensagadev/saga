@@ -8723,7 +8723,7 @@ i32 DragBomb_UpdateHint(HINT_s *hint) {
         return 0;
     const i32 id = static_cast<GameObject_s *>(player->force_glow_candidate)->id;
     if (hint->control_mode_ids[0] != 0x5ee) {
-        if (hint->control_mode_ids[0] == 0x28e) {
+        if (__builtin_expect(hint->control_mode_ids[0] == 0x28e, 1)) {
             if (id != id_DRAGBOMB)
                 return 1;
         }
@@ -11737,7 +11737,7 @@ void PeriscodeCode(GameObject_s *object) {
                 target = 1.0f;
             } else {
                 f32 clearance = object->apiobj.field_0x220 - object->apiobj.water_height;
-                if (!(clearance > 0.0f) || !(clearance < 0.26f))
+                if (__builtin_expect(!(clearance > 0.0f) || !(clearance < 0.26f), 1))
                     target = 1.0f;
             }
         }
@@ -12389,7 +12389,7 @@ void CatchUpCode(GameObject_s *object, f32 divisor, f32 maximum, i32 mode) {
                 distance -= 1.0f;
             }
         }
-        if (distance < 0.0f) {
+        if (__builtin_expect(distance < 0.0f, 0)) {
             const f32 catchup = -distance / divisor;
             maximum = MIN(maximum, catchup);
             object->field_0xc38 = maximum;

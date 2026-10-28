@@ -35,8 +35,8 @@ AIPATHCNXHELPER_s *AIPathCnxHelperSys_Find(AIPATHCNXHELPERSYS_s *system, GameObj
     if (connection != NULL && system != NULL) {
         AIPATHCNXHELPER_s *helper = system->helpers;
         for (i32 index = 0; index < system->helper_count; ++index, ++helper) {
-            if (helper->connection == connection && (helper->direction == 0xff || helper->direction == direction) &&
-                helper->type == type && (filter == NULL || filter(helper, object, connection, direction, type) == 0)) {
+            if (__builtin_expect(helper->connection == connection && (helper->direction == 0xff || helper->direction == direction) &&
+                helper->type == type && (filter == NULL || filter(helper, object, connection, direction, type) == 0), 0)) {
                 return helper;
             }
         }
@@ -53,7 +53,7 @@ AIPATHCNXHELPER_s *AIPathCnxHelperSys_AddHelper(AIPATHCNXHELPERSYS_s *system, AI
     AIPATHCNXHELPER_s *helper = NULL;
     i16 helper_count = system->helper_count;
     if (helper_count < system->field_0x00) {
-        if (target == NULL || connection == NULL) {
+        if (__builtin_expect(target == NULL || connection == NULL, 0)) {
             return NULL;
         }
 

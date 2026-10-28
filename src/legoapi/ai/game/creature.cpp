@@ -1313,7 +1313,7 @@ GameObject_s *AddCreature(i32 id, i32 param) {
 }
 
 void InitAICreatures(AISYS_s *system) {
-    if (Mission_Active(NULL) != NULL || netclient != 0 || system == NULL) {
+    if (__builtin_expect(Mission_Active(NULL) != NULL || netclient != 0 || system == NULL, 0)) {
         return;
     }
 
@@ -4059,7 +4059,6 @@ static void DrawWeapons(GameObject_s *object, i32 reflection, f32 weapon_scale) 
     }
     i32 sabre = 0;
     u16 rotation = 0;
-    auto f0x1020 = object->field_0x1020;
     for (i32 hand = 0; hand < 4; ++hand) {
         data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
         const i32 joint = data->weapon_joints[hand];
@@ -4077,7 +4076,7 @@ static void DrawWeapons(GameObject_s *object, i32 reflection, f32 weapon_scale) 
                     rotation = 0xd1c8;
                 } else if (models[0] == 0x65 || models[0] == 0x67 || models[0] == 0x69 || models[0] == 0x6b) {
                     i32 red, green, blue, purple;
-                    if (object->apiobj.field_0x27c != -1 && Cheat_IsOn(25)) {
+                    if (object->apiobj.field_0x27c != -1 && __builtin_expect(Cheat_IsOn(25), 1)) {
                         red = 1;
                         green = blue = purple = 0;
                     } else if (object->apiobj.field_0x27c != -1 && Player_HasPurpleForce(object)) {
@@ -4117,7 +4116,7 @@ static void DrawWeapons(GameObject_s *object, i32 reflection, f32 weapon_scale) 
                             purple = 1;
                     }
                     if (__builtin_expect(red || green || blue || purple, 1)) {
-                        if (__builtin_expect(object->apiobj.field_0x27c != -1 && Cheat_IsOn(25), 1)) {
+                        if (__builtin_expect(object->apiobj.field_0x27c != -1, 0) && Cheat_IsOn(25)) {
                             red = 1;
                             green = blue = purple = 0;
                         } else if (object->apiobj.field_0x27c != -1 && Player_HasPurpleForce(object)) {
@@ -4127,6 +4126,8 @@ static void DrawWeapons(GameObject_s *object, i32 reflection, f32 weapon_scale) 
                             blue = 1;
                             green = 0;
                         }
+                    }
+                    if (red || green || blue || purple) {
                         DrawWeapon_SetSabreObjects(object, red, green, blue, purple, models, &hilt);
                         sabre = true;
                     }
@@ -4156,7 +4157,7 @@ static void DrawWeapons(GameObject_s *object, i32 reflection, f32 weapon_scale) 
                     hilt_scale_vec.y = hilt_scale_vec.x;
                     NuMtxPreScale(&hilt_matrix, &hilt_scale_vec);
                 }
-                if (__builtin_expect(rotation != 0, 0)) {
+                if (rotation != 0) {
                     NuMtxPreRotateX(&blade_matrix, rotation);
                 }
                 NuMtxPreScale(&blade_matrix, &scale);
@@ -4178,7 +4179,7 @@ static void DrawWeapons(GameObject_s *object, i32 reflection, f32 weapon_scale) 
                                     model = models[part];
                                 }
                                 NUMTX reflected;
-                                if (MatrixReflection(matrix, object->field_0x1087, f0x1020,
+                                if (MatrixReflection(matrix, object->field_0x1087, object->field_0x1020,
                                                      WORLD->current_level->unknown_0cc, &reflected)) {
                                     NuRndrStartReflectionRender(0);
                                     Draw3DObjectMtx(NULL, model, &reflected);
@@ -4187,7 +4188,7 @@ static void DrawWeapons(GameObject_s *object, i32 reflection, f32 weapon_scale) 
                             }
                         }
                     }
-                    if (side || object->id != id_DARTHMAUL || object->apiobj.field_0x27c == -1 ||
+                    if (__builtin_expect(side, 0) || object->id != id_DARTHMAUL || object->apiobj.field_0x27c == -1 ||
                         (!Cheat_IsOn(25) && (object->apiobj.field_0x27c == -1 || !Player_HasPurpleForce(object)))) {
                         break;
                     }

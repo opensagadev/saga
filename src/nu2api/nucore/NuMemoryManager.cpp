@@ -1091,7 +1091,7 @@ u32 NuMemoryManager::CalculateLargestFragmentSize() {
     u32 largest_frag_size;
     FreeHeader *largest_frag;
 
-    if ((m_flags & MEM_MANAGER_IN_ERROR_STATE) != 0) {
+    if (__builtin_expect((m_flags & MEM_MANAGER_IN_ERROR_STATE) != 0, 1)) {
         return 0;
     }
 

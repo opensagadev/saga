@@ -159,7 +159,7 @@ GAMEANTINODE_s *GameAntinode_RegisterAntiNode(GAMEANTINODESYS_s *system, NUVEC *
     GAMEANTINODE_s *node = system->free;
     if (node == NULL)
         return NULL;
-    if (position == NULL)
+    if (__builtin_expect(position == NULL, 1))
         position = &v000;
     node->position = *position;
     node->extent_x = extent_x;

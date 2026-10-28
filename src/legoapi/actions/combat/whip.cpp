@@ -22,11 +22,9 @@ void Whip_MoveCode(GameObject_s *object) {
     }
 
     if (object->character_context != LEGOCONTEXT_WHIP) {
-        if (__builtin_expect((object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) == 0 ||
-                                 object->apiobj.field_0x27d == 0 || ObjLandReady(object) == 0 ||
-                                 LEGOACT_WHIP_START == -1 ||
-                                 object->apiobj.character_model->model_data_b[LEGOACT_WHIP_START] == NULL,
-                             0)) {
+        if (__builtin_expect((object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) == 0, 0) ||
+            object->apiobj.field_0x27d == 0 || __builtin_expect(ObjLandReady(object) == 0, 1) ||
+            LEGOACT_WHIP_START == -1 || object->apiobj.character_model->model_data_b[LEGOACT_WHIP_START] == NULL) {
             return;
         }
 
@@ -76,44 +74,50 @@ void Whip_MoveCode(GameObject_s *object) {
             return;
         }
 
-        GIZMOBLOWUP_s *target = static_cast<GIZMOBLOWUP_s *>(object->field_0x788);
+        GIZMOBLOWUP_s *target;
         switch (object->field_0x7aa) {
-            case 2:
-                if (target != NULL && (target->status_flags & 0x804000) == 0x804000) {
-                    object->field_0x7a3 = 2;
-                    object->context_animation = LEGOACT_WHIP_BREAK;
-                    break;
-                }
-                goto crack_transition;
             case 3:
+                target = static_cast<GIZMOBLOWUP_s *>(object->field_0x788);
                 if (target != NULL && (target->status_flags & 0x804000) == 0x804000) {
-                    object->field_0x7a3 = 3;
                     object->context_animation = LEGOACT_WHIP_GRAB;
-                    break;
+                    object->field_0x7a3 = 3;
+                    object->context_animation_timer = 0.0f;
+                    object->airborne_action_duration = AnimDuration(object->id, LEGOACT_WHIP_GRAB, 0.0f, 0.0f, 1);
+                    object->context_flags &= ~0x40;
+                    target = static_cast<GIZMOBLOWUP_s *>(object->field_0x788);
+                    object->apiobj.movement_facing_angle = NuAtan2D(target->position.x - object->apiobj.position.x,
+                                                                    target->position.z - object->apiobj.position.z);
+                    return;
                 }
-            default:
-            crack_transition:
-                object->field_0x7aa = 1;
-                object->field_0x7a3 = 1;
-                object->context_animation_timer = 0.0f;
-                object->context_animation = LEGOACT_WHIP_CRACK;
-                object->airborne_action_duration = AnimDuration(object->id, LEGOACT_WHIP_CRACK, 0.0f, 0.0f, 1);
-                object->context_flags &= ~0x40;
-                return;
+                break;
+            case 2:
+                target = static_cast<GIZMOBLOWUP_s *>(object->field_0x788);
+                if (target != NULL && (target->status_flags & 0x804000) == 0x804000) {
+                    object->context_animation = LEGOACT_WHIP_BREAK;
+                    object->field_0x7a3 = 2;
+                    object->context_animation_timer = 0.0f;
+                    object->airborne_action_duration = AnimDuration(object->id, LEGOACT_WHIP_BREAK, 0.0f, 0.0f, 1);
+                    object->context_flags &= ~0x40;
+                    target = static_cast<GIZMOBLOWUP_s *>(object->field_0x788);
+                    object->apiobj.movement_facing_angle = NuAtan2D(target->position.x - object->apiobj.position.x,
+                                                                    target->position.z - object->apiobj.position.z);
+                    return;
+                }
+                break;
         }
 
+        object->field_0x7aa = 1;
+        object->field_0x7a3 = 1;
         object->context_animation_timer = 0.0f;
-        object->airborne_action_duration = AnimDuration(object->id, object->context_animation, 0.0f, 0.0f, 1);
+        object->context_animation = LEGOACT_WHIP_CRACK;
+        object->airborne_action_duration = AnimDuration(object->id, LEGOACT_WHIP_CRACK, 0.0f, 0.0f, 1);
         object->context_flags &= ~0x40;
-        target = static_cast<GIZMOBLOWUP_s *>(object->field_0x788);
-        object->apiobj.movement_facing_angle =
-            NuAtan2D(target->position.x - object->apiobj.position.x, target->position.z - object->apiobj.position.z);
         return;
     }
 
-    if (__builtin_expect((object->context_variant_flags & 1) != 0, 0)) {
+    if ((object->context_variant_flags & 1) != 0) {
         NUVEC *target_position = NULL;
-        if (object->field_0x788 != NULL) {
+        if (__builtin_expect(object->field_0x788 != NULL, 1)) {
             target_position = &static_cast<GIZMOBLOWUP_s *>(object->field_0x788)->position;
         } else if (object->force_target != NULL) {
             target_position = &object->force_target->apiobj.collision_position;
@@ -137,21 +141,20 @@ void Whip_MoveCode(GameObject_s *object) {
         }
         if (object->context_animation_timer >= object->airborne_action_duration) {
             object->character_context = -1;
-            if (__builtin_expect((object->context_flags & 0x40) == 0, 1)) {
+            if ((object->context_flags & 0x40) == 0) {
                 activate = 1;
             }
         }
 
         if (activate) {
-            GIZMOBLOWUP_s *target = static_cast<GIZMOBLOWUP_s *>(object->field_0x788);
             if (object->field_0x7a3 == 2) {
-                if (GizmoBlowupBlowup(target, 1, 1, 1, NULL, 1) != 0) {
+                if (GizmoBlowupBlowup(static_cast<GIZMOBLOWUP_s *>(object->field_0x788), 1, 1, 1, NULL, 1) != 0) {
                     NewBuzz(object->pad_gamepad->pad, 0.1f, 0);
                 }
                 NewRumble(object->pad_gamepad->pad, 0.5f, 0);
                 GameAudio_PlaySfx(77, &object->apiobj.collision_position, GameAudio_GetPlrSfxBits(object), 0);
             } else if (object->field_0x7a3 == 3) {
-                GizmoBlowupBlowup(target, 0, 7, -1, NULL, 1);
+                GizmoBlowupBlowup(static_cast<GIZMOBLOWUP_s *>(object->field_0x788), 0, 7, -1, NULL, 1);
                 GameAudio_PlaySfx(77, &object->apiobj.collision_position, GameAudio_GetPlrSfxBits(object), 0);
             } else {
                 GameAudio_PlaySfx(78, &object->apiobj.collision_position, GameAudio_GetPlrSfxBits(object), 0);

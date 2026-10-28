@@ -915,7 +915,7 @@ void NetworkObjectManager::PeerJoined(NetPeer const &peer) {
     if (theSession->status == 3 || theSession->status == 4) {
         if (!peer.local) {
             for (i32 i = 0; i < 2; i++) {
-                if (guid_peers[i] == NULL) {
+                if (__builtin_expect(guid_peers[i] == NULL, 0)) {
                     guid_peers[i] = &peer;
                     NetMessage message;
                     message.Write8(0);

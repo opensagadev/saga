@@ -3524,7 +3524,7 @@ static __used__ void pathEditor_cbNodeFlagsToggle(eduimenu_s *, eduiitem_s *item
         }
         node->flags = flags;
         node = aieditor->current_path->current_node;
-        if ((i8)node->flags < 0) {
+        if (__builtin_expect((i8)node->flags < 0, 0)) {
             node->platform.scene = nullptr;
             node->platform.special = nullptr;
             node->platform.display_special = nullptr;
@@ -4081,7 +4081,7 @@ static __used__ void creatureEditor_cbSelectLocator(eduimenu_s *parent, eduiitem
         CreatureEditorRecord *current = creatureEditor_Current();
         if (locator_path != current->path)
             continue;
-        if (current->locator == locator) {
+        if (__builtin_expect(current->locator == locator, 0)) {
             eduiMenuAddItem(menu, eduiItemCheckCreate(index, attr, 1, 1, creatureEditor_cbSetLocator, locator->name));
             menu->selected = edui_last_item;
         } else {
@@ -4856,7 +4856,7 @@ static void AISysCheckAntinode_Rectangle(APIOBJECT *object, AIANTINODE *antinode
         } else {
             object->ai->antinode_clockwise = 0;
         }
-        if ((antinode->game_flags & 2) == 0 && object->ai->antinode_timer < antinode_time) {
+        if (__builtin_expect((antinode->game_flags & 2) == 0 && object->ai->antinode_timer < antinode_time, 1)) {
             object->ai->antinode_timer = antinode_time;
         }
         i32 corner_angle = NuAtan2D(antinode->base_radius, antinode->base_height);
@@ -5465,7 +5465,7 @@ static f32 Condition_PlayerToLocator(AISYS *sys, AISCRIPTPROCESS *processor, AIP
             if (void_arg == NULL) {
                 void_arg = processor->unknown_a4;
             }
-            if (void_arg != NULL) {
+            if (__builtin_expect(void_arg != NULL, 0)) {
                 AILOCATOR *locator = static_cast<AILOCATOR *>(void_arg);
                 return NuVecDist(&sys->player_1->position, &locator->position, &difference);
             }
@@ -7561,7 +7561,7 @@ void AIScriptInitConditions(AISYS *sys) {
                 if (condition->def->init_fn != NULL) {
                     if (sys == NULL) {
                         condition->void_arg = (*condition->def->init_fn)(NULL, condition->arg, script);
-                    } else if (!sys->unknown_flag_4 || condition->void_arg == NULL) {
+                    } else if (__builtin_expect(!sys->unknown_flag_4 || condition->void_arg == NULL, 1)) {
                         condition->void_arg = (*condition->def->init_fn)(sys, condition->arg, script);
                     }
                 }
@@ -18830,7 +18830,7 @@ void locatorEditor_Render(i32 x, i32 y, float x_scale, float y_scale) {
     NuQFntSetScale(system_qfont, x_scale, y_scale);
     EDLOCATOR_s *display_locator =
         aieditor->current_locator != nullptr ? aieditor->current_locator : aieditor->nearest_locator;
-    if (display_locator != nullptr) {
+    if (__builtin_expect(display_locator != nullptr, 1)) {
         NUVEC delta;
         f32 distance = NuVecXZDist(&display_locator->position, &aieditor->camera_position, &delta);
         NuQFntPrintEx(system_qfont, text_x, (y + 15) * 8, 16, "\"%s\", xzrng=%.2f", display_locator->name,

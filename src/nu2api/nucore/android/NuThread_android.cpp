@@ -222,7 +222,7 @@ NuThread *NuThreadInitPS() {
 void NuThreadSleep(i32 seconds) {
     timespec time __attribute__((aligned(16)));
 
-    if (seconds < 1000) {
+    if (__builtin_expect(seconds < 1000, 0)) {
         time.tv_sec = 0;
     } else {
         time.tv_sec = seconds / 1000;

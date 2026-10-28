@@ -722,7 +722,7 @@ void Hint_ResetHint(i32 hint_id, i32 reset_completed) {
     }
 
     i32 control_mode = MechInputTouchSystem::s_baseControlMode;
-    while (hint->control_mode_ids[control_mode] != hint_id) {
+    while (__builtin_expect(hint->control_mode_ids[control_mode] != hint_id, 1)) {
         hint++;
         if (hint->control_mode_ids[0] == -1) {
             return;

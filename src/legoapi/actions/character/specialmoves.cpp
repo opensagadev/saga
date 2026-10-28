@@ -197,7 +197,7 @@ i32 SpecialMove_ReleaseVictim(GameObject_s *object) {
         ObjHitObj(target, victim, damage, 0x1000, 0, 1);
     }
     victim = static_cast<GameObject_s *>(object->field_0x780);
-    if (victim != NULL) {
+    if (__builtin_expect(victim != NULL, 1)) {
         victim->field_0x7a5 = 0xff;
     }
     return 1;

@@ -1271,7 +1271,7 @@ static void edpartDataMenu(eduimenu_s *menu, eduiitem_s *, u32) {
             eduiMenuAddItem(edpart_data_menu, eduiItemSelCreate(1, edblack, 0, 0, edpartCopyType, "Copy Type"));
             eduiMenuAddItem(edpart_data_menu, eduiItemSelCreate(1, edblack, 0, 0, edpartDeleteType, "Delete Type"));
             char *move_name;
-            if (part_types[edpart_create_type].field_b3)
+            if (__builtin_expect(part_types[edpart_create_type].field_b3 != 0, 1))
                 move_name = "Move Type to General List";
             else
                 move_name = "Move Type to Level List";
@@ -1989,7 +1989,7 @@ static void edpartThingsInstanceMenu(eduimenu_s *parent, eduiitem_s *, u32) {
                 }
             }
         }
-        if (edpart_filter && NuStrNCmp(edpart_filter_string, name, NuStrLen(edpart_filter_string)) != 0 && !included)
+        if (__builtin_expect(edpart_filter && NuStrNCmp(edpart_filter_string, name, NuStrLen(edpart_filter_string)) != 0 && !included, 0))
             continue;
         eduiitem_s *item = eduiItemToggleCreate(index, edblack, selected, group++, edpartSetInstanceType, name);
         eduiMenuAddItem(edpart_thingsinstance_menu, item);
@@ -2029,7 +2029,7 @@ static void edpartWorldInstanceMenu(eduimenu_s *parent, eduiitem_s *, u32) {
                 }
             }
         }
-        if (edpart_filter && NuStrNCmp(edpart_filter_string, name, NuStrLen(edpart_filter_string)) != 0 && !included)
+        if (__builtin_expect(edpart_filter && NuStrNCmp(edpart_filter_string, name, NuStrLen(edpart_filter_string)) != 0 && !included, 0))
             continue;
         eduiitem_s *item = eduiItemToggleCreate(index, edblack, selected, group++, edpartSetInstanceType, name);
         eduiMenuAddItem(edpart_worldinstance_menu, item);
@@ -3580,7 +3580,7 @@ extern "C" PART_s *HitParts(GameObject_s *owner, NUVEC *positions, i32 count, f3
     }
 
     PART_s *FindPart(NUVEC *position, i32 player, GameObject_s *owner) {
-        if (Part == NULL)
+        if (__builtin_expect(Part == NULL, 0))
             return NULL;
         PART_s *part = Part;
         f32 nearest = 1000000.0f;
@@ -3775,6 +3775,33 @@ void edpartLoadSingleType(part_typedesc_s *type, i32 version, i32 page) {
     if (version > 5) {
         for (i32 i = 0; i < 8; ++i)
             type->effect_pages[i] = EdFileReadChar();
+        for (i32 i = 0; i < 8; ++i) {
+            EdFileRead(type->object_names[i], 16);
+            type->effect_ids[i] = -1;
+            if (type->effect_pages[i] == 0) {
+                for (i32 scene = 0; scene < 32; ++scene) {
+                    if (part_scene_pageid[scene] == page) {
+                        type->effect_ids[i] = edpartLookupObjectInScene(type->object_names[i], part_scene[scene]);
+                    }
+                    if (type->effect_ids[i] != -1) {
+                        type->scene_indices[i] = scene;
+                        break;
+                    }
+                }
+            } else if (type->effect_pages[i] == 1) {
+                for (i32 scene = 0; scene < 32; ++scene) {
+                    if (part_scene_pageid[scene] == 0) {
+                        type->effect_ids[i] = edpartLookupObjectInScene(type->object_names[i], part_scene[scene]);
+                    }
+                    if (type->effect_ids[i] != -1) {
+                        type->scene_indices[i] = scene;
+                        break;
+                    }
+                }
+            }
+            if (type->effect_ids[i] == -1 && type->object_names[i][0] != 0)
+                type->effect_ids[i] = 9998;
+        }
     } else {
         if (!(version > 1)) {
             type->effect_pages[0] = 0;
@@ -3783,29 +3810,35 @@ void edpartLoadSingleType(part_typedesc_s *type, i32 version, i32 page) {
         }
         for (i32 i = 1; i < 8; ++i)
             type->effect_pages[i] = -1;
-    }
-    const i32 variants = version > 5 ? 8 : 1;
-    for (i32 i = 0; i < variants; ++i) {
-        EdFileRead(type->object_names[i], 16);
-        type->effect_ids[i] = -1;
-        if (__builtin_expect(type->effect_pages[i] == 0 || type->effect_pages[i] == 1, 1)) {
-            const i32 scene_page = type->effect_pages[i] == 0 ? page : 0;
+        EdFileRead(type->object_names[0], 16);
+        type->effect_ids[0] = -1;
+        if (__builtin_expect(type->effect_pages[0] == 0, 0)) {
             for (i32 scene = 0; scene < 32; ++scene) {
-                if (part_scene_pageid[scene] == scene_page) {
-                    type->effect_ids[i] = edpartLookupObjectInScene(type->object_names[i], part_scene[scene]);
+                if (part_scene_pageid[scene] == page) {
+                    type->effect_ids[0] = edpartLookupObjectInScene(type->object_names[0], part_scene[scene]);
                 }
-                if (type->effect_ids[i] != -1) {
-                    type->scene_indices[i] = scene;
+                if (type->effect_ids[0] != -1) {
+                    type->scene_indices[0] = scene;
+                    break;
+                }
+            }
+        } else if (type->effect_pages[0] == 1) {
+            for (i32 scene = 0; scene < 32; ++scene) {
+                if (part_scene_pageid[scene] == 0) {
+                    type->effect_ids[0] = edpartLookupObjectInScene(type->object_names[0], part_scene[scene]);
+                }
+                if (type->effect_ids[0] != -1) {
+                    type->scene_indices[0] = scene;
                     break;
                 }
             }
         }
-        if (type->effect_ids[i] == -1 && type->object_names[i][0] != 0)
-            type->effect_ids[i] = 9998;
+        if (type->effect_ids[0] == -1 && type->object_names[0][0] != 0)
+            type->effect_ids[0] = 9998;
     }
     type->variant_count = 0;
     for (i32 i = 0; i < 8; ++i) {
-        if (type->effect_ids[i] != 9999 && type->effect_ids[i] != -1)
+        if (type->effect_ids[i] != -1 && type->effect_ids[i] != 9999)
             ++type->variant_count;
     }
     type->variant_mode = version > 5 ? EdFileReadChar() : 0;

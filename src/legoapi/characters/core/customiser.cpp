@@ -374,7 +374,7 @@ void Customiser_DumpAccessories(CUSTOMISER *customiser) {
     if (customiser == NULL || Customiser_AccessoriesLoaded != 1)
         return;
 
-    if (apicharsys->playermodelids[customiser->character_ids[0]] != -1) {
+    if (__builtin_expect(apicharsys->playermodelids[customiser->character_ids[0]] != -1, 1)) {
         Customiser_DumpAccessory(customiser, 0, 0);
         Customiser_DumpAccessory(customiser, 0, 1);
         Customiser_DumpAccessory(customiser, 0, 2);
@@ -385,7 +385,7 @@ void Customiser_DumpAccessories(CUSTOMISER *customiser) {
         Customiser_DumpAccessory(customiser, 0, 7);
         Customiser_DumpAccessory(customiser, 0, 8);
     }
-    if (apicharsys->playermodelids[customiser->character_ids[1]] != -1) {
+    if (__builtin_expect(apicharsys->playermodelids[customiser->character_ids[1]] != -1, 1)) {
         Customiser_DumpAccessory(customiser, 1, 0);
         Customiser_DumpAccessory(customiser, 1, 1);
         Customiser_DumpAccessory(customiser, 1, 2);

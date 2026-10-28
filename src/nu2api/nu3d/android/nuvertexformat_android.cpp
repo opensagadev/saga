@@ -26,30 +26,32 @@ NuVertexFormatPS *NuGetVertexDeclaration(NUVERTEXDESCRIPTOR vtx_desc) {
     }
     if (static_cast<u32>(count) > 255)
         return NULL;
-    NuVertexFormatPoolEntryPS *record = &g_vertexFormatPool[count];
-    NuVertexFormatPS *format = &record->format;
+    NuVertexFormatPS *format = &g_vertexFormatPool[count].format;
     const u8 texture_coordinates = vtx_desc.tex_coord_mode;
     NUVERTEXDESCRIPTOR descriptor_copy = vtx_desc;
     descriptor_copy.tex_coord_mode = texture_coordinates;
     const u32 descriptor = descriptor_copy.flags;
     // Each optional stream is decoded first: 0 = absent, 1 = float, 2 = packed bytes.
-    const i32 normal = (descriptor & 0x880008) ? 2 : vtx_desc.has_normal;
-    const i32 tangent = (descriptor & 0x1000020) ? 2 : vtx_desc.has_tangent;
-    const i32 binormal = (descriptor & 0x2000080) ? 2 : vtx_desc.has_binormal;
-    const bool diffuse = vtx_desc.has_diffuse;
-    const bool specular = (descriptor & 0x600) != 0;
+    const i32 normal = (descriptor & 0x880008) ? 2 : ((u8)descriptor >> 2) & 1;
+    const i32 tangent = (descriptor & 0x1000020) ? 2 : ((u8)descriptor >> 4) & 1;
+    const i32 binormal = (descriptor & 0x2000080) ? 2 : ((u8)descriptor >> 6) & 1;
+    const u8 b1 = descriptor >> 8;
+    const u8 diffuse = b1 & 1;
+    const u8 specular = b1 & 6;
+    const u32 b3 = descriptor >> 24;
     i32 texture_mode, half_texture_mode;
-    if (!vtx_desc.has_half_uvs) {
-        texture_mode = vtx_desc.tex_coord_mode;
+    if (!(b3 & 8)) {
+        texture_mode = texture_coordinates;
         half_texture_mode = 0;
     } else {
-        half_texture_mode = vtx_desc.tex_coord_mode;
+        half_texture_mode = texture_coordinates;
         texture_mode = 0;
     }
-    const bool skinned = (descriptor & 0x4000000) != 0;
-    const i32 colour2 = (descriptor & 0x20000) ? 2 : (descriptor >> 16) & 1;
-    const i32 weights = (descriptor & 0x8000) ? 2 : (descriptor >> 14) & 1;
-    const bool instanced = (descriptor >> 22) & 1;
+    const i32 weights = (b1 & 0x80) ? 2 : (b1 >> 6) & 1;
+    const u8 b2 = descriptor >> 16;
+    const i32 colour2 = (b2 & 2) ? 2 : b2 & 1;
+    const bool instanced = ((u8)b2 >> 6) & 1;
+    const u8 skinned = (u8)b3 & 4;
     i16 offset = 0;
 #define VERTEX_ATTRIBUTE(slot, gl_type, components, normalize, bytes)                                                  \
     format->attribs[slot].unknown_0c = 0;                                                                              \
@@ -161,7 +163,7 @@ NuVertexFormatPS *NuGetVertexDeclaration(NUVERTEXDESCRIPTOR vtx_desc) {
         if (mask & (1u << i))
             format->attribs[i].stride = format->attribs[i].unknown_0c ? extra_stride : offset;
     }
-    record->key = vtx_desc.flags;
+    g_vertexFormatPool[count].key = descriptor;
     g_allocatedDescriptorCount = count + 1;
     return format;
 #undef VERTEX_ATTRIBUTE

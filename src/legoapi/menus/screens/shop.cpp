@@ -221,7 +221,7 @@ static NUVEC HubShopPos = {-26.3f, 0.0f, -49.5f};
 
 static i32 SubItemMenu(MENU_s *);
 
-static f32 ShopClamp01(f32 value) {
+static inline __attribute__((always_inline)) f32 ShopClamp01(f32 value) {
     return NuFmax(0.0f, NuFmin(value, 1.0f));
 }
 
@@ -531,7 +531,7 @@ i32 CodeMenu(MENU_s *) {
     static f32 timer;
     static __used__ i32 itemchanged;
     static i32 movesfxlock;
-    i32 down = 0, up = 0, left = 0, right = 0, confirm = 0, cancel = 0;
+    i32 left = 0, right = 0, up = 0, down = 0, confirm = 0, cancel = 0;
     SHOPINPUT input;
     Shop_GetInput(&input);
     if (slidetimer >= 0.0f)
@@ -553,13 +553,13 @@ i32 CodeMenu(MENU_s *) {
             left = 1;
         else if (input.right_held)
             right = 1;
-        else if (input.down_held) {
-            if (__builtin_expect(timer <= 0.0f, 1))
+        else if (__builtin_expect(!!(input.down_held), 0)) {
+            if (__builtin_expect(timer <= 0.0f, 0))
                 down = 1;
-            else if (__builtin_expect(!!(input.down_pressed), 0))
+            else if (__builtin_expect(!!(input.down_pressed), 1))
                 down = 1;
         } else if (input.up_held) {
-            if (timer <= 0.0f)
+            if (__builtin_expect(timer <= 0.0f, 0))
                 up = 1;
             else if (input.up_pressed)
                 up = 1;
@@ -595,11 +595,10 @@ i32 CodeMenu(MENU_s *) {
                 codechar = 0;
             else
                 for (i32 i = 0; i < 36; ++i) {
-                    if (usercode[col] != codechars[i]) {
-                        continue;
+                    if (usercode[col] == codechars[i]) {
+                        codechar = i;
+                        break;
                     }
-                    codechar = i;
-                    break;
                 }
             if (lastitem != col) {
                 slidetimer = 0.125f;
@@ -692,12 +691,18 @@ i32 CodeMenu(MENU_s *) {
     if (slidetimer >= 0.0f) {
         f32 factor = 1.0f - ShopSinePhase(1.0f - 8.0f * slidetimer);
         if (lastitem != -1) {
-            if (__builtin_expect(easesubin == 1, 0)) {
+            if (easesubin == 1) {
                 factor = ShopClamp01(factor);
                 codemenuscale[lastitem] =
                     codeshelfscale[lastitem] + (codebigscale[lastitem] - codeshelfscale[lastitem]) * factor;
                 factor = ShopClamp01(factor);
                 subpush[2] = SubNormCharPush + (SubBigCharPush - SubNormCharPush) * factor;
+            } else if (easesubin == -1) {
+                factor = ShopClamp01(factor);
+                codemenuscale[lastitem] =
+                    codebigscale[lastitem] + (codeshelfscale[lastitem] - codebigscale[lastitem]) * factor;
+                factor = ShopClamp01(factor);
+                subpush[2] = SubBigCharPush + (SubNormCharPush - SubBigCharPush) * factor;
             } else {
                 factor = ShopClamp01(factor);
                 codemenuscale[lastitem] =
@@ -707,7 +712,12 @@ i32 CodeMenu(MENU_s *) {
             }
         }
         if (col != -1) {
-            if (__builtin_expect(easesubin == -1, 0)) {
+            if (easesubin == 1) {
+                factor = ShopClamp01(factor);
+                codemenuscale[col] = codeshelfscale[col] + (codebigscale[col] - codeshelfscale[col]) * factor;
+                factor = ShopClamp01(factor);
+                subpush[1] = SubNormCharPush + (SubBigCharPush - SubNormCharPush) * factor;
+            } else if (__builtin_expect(easesubin == -1, 0)) {
                 factor = ShopClamp01(factor);
                 codemenuscale[col] = codebigscale[col] + (codeshelfscale[col] - codebigscale[col]) * factor;
                 factor = ShopClamp01(factor);

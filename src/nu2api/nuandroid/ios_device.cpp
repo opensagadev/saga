@@ -225,10 +225,10 @@ u32 NuIOS_YieldThread(void) {
             return sched_yield();
         }
         frequency = 8;
-    } else if (NuIOS_IsMidRangeDevice()) {
-        frequency = g_bgloadAsFastAsPossibleHack != 0 ? 8 : 2;
-    } else {
+    } else if (__builtin_expect(!(NuIOS_IsMidRangeDevice()), 0)) {
         frequency = g_bgloadAsFastAsPossibleHack != 0 ? 4 : 2;
+    } else {
+        frequency = g_bgloadAsFastAsPossibleHack != 0 ? 8 : 2;
     }
 
     if (__builtin_expect(++count % frequency == 0, 1)) {

@@ -525,7 +525,7 @@ void GoldBrick_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float e
                         nuvec_s position = {0.0f, 0.0375f, 1.0f};
                         const i16 id = reinterpret_cast<i16 *>(packet->field_0x12c)[i];
                         char *label;
-                        if (id == tTRUEJEDI) {
+                        if (__builtin_expect(id == tTRUEJEDI, 0)) {
                             NuStrCpy(text, TTab[id]);
                             if (BOTHTRUEJEDIGOLDBRICKS != 0) {
                                 NuStrCat(text, " - ");

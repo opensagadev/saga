@@ -1324,7 +1324,7 @@ i32 KillBoss(i32 character_id, i32 flag_index, float delay) {
     switch (flags[flag_index]) {
     case 0:
         if (BossKilled(character_id) != NULL) {
-            if (delay <= 0.0f) {
+            if (__builtin_expect(delay <= 0.0f, 1)) {
                 flags[flag_index] = 2;
                 return 1;
             }

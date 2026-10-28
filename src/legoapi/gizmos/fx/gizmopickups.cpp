@@ -1168,7 +1168,7 @@ void UpdateCoinPacket(COINPACKET_s *packet, i32 active, i32 player_index) {
             decrement = (decrement / 10) * 10;
             if (decrement < 10) {
                 decrement = 10;
-            } else if (packet->coins < decrement) {
+            } else if (__builtin_expect(packet->coins < decrement, 1)) {
                 packet->coins = 0;
                 return;
             }
@@ -1178,16 +1178,16 @@ void UpdateCoinPacket(COINPACKET_s *packet, i32 active, i32 player_index) {
     }
 
     packet->scale = SeekLinearF(packet->scale, 1.0f, 3.0f * FRAMETIME);
-    if (((DoubleScore >> player_index) & 1) != 0) {
+    if (((DoubleScore >> player_index) & 1) == 0) {
+        packet->double_score_timer = 0.0f;
+        packet->active = 1;
+    } else {
         if (packet->double_score_timer > 0.0f) {
             packet->double_score_timer -= FRAMETIME;
             if (packet->double_score_timer <= 0.0f) {
                 packet->active = 1;
             }
         }
-    } else {
-        packet->double_score_timer = 0.0f;
-        packet->active = 1;
     }
 }
 

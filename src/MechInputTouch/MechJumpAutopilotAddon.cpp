@@ -54,7 +54,7 @@ void MechJumpAutoPilotAddon::CalculateModifiedJumpTrajectory() {
     float first_time;
     float second_time;
     const float gravity = character->apiobj.character_data->game_character->gravity;
-    if (!TouchHacks::SolveRoot(gravity * 0.5f, field_34.y, -(field_84.y - field_24.y), first_time, second_time)) {
+    if (__builtin_expect(!TouchHacks::SolveRoot(gravity * 0.5f, field_34.y, -(field_84.y - field_24.y), first_time, second_time), 0)) {
         state = 6;
         return;
     }
@@ -100,7 +100,7 @@ void MechJumpAutoPilotAddon::LookForLandingPoint() {
         field_9d = false;
         if (LookForLandingSpotAroundPoint(field_74))
             state = 3;
-    } else if (field_9c) {
+    } else if (__builtin_expect(field_9c != 0, 0)) {
         field_9c = false;
         if (!LookForLandingSpotAroundPoint(field_64)) {
             state = 5;

@@ -730,7 +730,7 @@ static i32 SpecialRouteCharacterTypeID(char *name) {
     i32 route_index = 0;
     i32 skipped_count = 0;
     if (CurrentStoryCList != NULL) {
-        while (CurrentStoryCList[route_index].model_id != -1 && route_index < 64) {
+        while (__builtin_expect(CurrentStoryCList[route_index].model_id != -1 && route_index < 64, 1)) {
             char *character_name = apicharsys->char_data[CurrentStoryCList[route_index + skipped_count].model_id].file;
             bool skip = false;
             for (i32 skip_index = 0; skip_chars[skip_index] != NULL; ++skip_index) {

@@ -69,7 +69,7 @@ static void GizForceSFX_forcename(nufpar_s *parser) {
     char *name = parser->word_buf;
     GIZFORCESYS_s *system = GizForceSFX_worldinfo->giz_force_sys;
     GIZFORCE_s *force = NULL;
-    if (system != NULL) {
+    if (__builtin_expect(system != NULL, 1)) {
         force = system->forces;
         for (i32 i = 0; i < system->count; ++i, ++force) {
             if (force->anim_set != NULL) {
@@ -1675,12 +1675,10 @@ i32 GizForce_FindBestForceTarget(GIZFORCESYS_s *force_sys, GameObject_s *object)
     if (object == NULL || force_sys == NULL) {
         return 0;
     }
-    i32 super_force = 1;
-    if (SuperWeirdo(object) == 0) {
-        super_force = 0;
-        if (__builtin_expect((object->apiobj.flags_low & 0x80) != 0, 1))
-            super_force = Cheat_IsOn(25);
-    }
+    i32 super_force = 0;
+    if (SuperWeirdo(object) != 0 ||
+        (__builtin_expect((object->apiobj.flags_low & 0x80) != 0, 1) && Cheat_IsOn(25) != 0))
+        super_force = 1;
     object->gizforce_target = NULL;
     object->gizforce_target_object = NULL;
     const f32 facing_x = NU_SIN_LUT(object->apiobj.movement_facing_angle);
@@ -1744,13 +1742,13 @@ i32 GizForce_FindBestForceTarget(GIZFORCESYS_s *force_sys, GameObject_s *object)
             ++count;
         }
     }
+    GizForceLOSState_s *los = object->gizforce_los_info;
     if (count == 0)
         return 0;
-    GizForceLOSState_s *los = object->gizforce_los_info;
     if (los != NULL) {
         ForceTarget *oldest = NULL;
         f32 oldest_time = 1.0e9f;
-        for (i32 i = 0; i < count; ++i) {
+        for (i32 i = 0; i != count; ++i) {
             const u32 timestamp = los->words[possible_forcetargets[i].index + 12];
             const f32 time = static_cast<f32>(timestamp);
             if (time < oldest_time) {
@@ -1779,7 +1777,7 @@ i32 GizForce_FindBestForceTarget(GIZFORCESYS_s *force_sys, GameObject_s *object)
                         for (GAMEANIMOBJ_s *animation = oldest->force->anim_set->objects; animation != NULL;
                              animation = animation->next) {
                             const GIZFORCEANIMDATA_s *data = static_cast<GIZFORCEANIMDATA_s *>(animation->object_data);
-                            if (__builtin_expect(data->platform_id == TerrainPlatId(), 1)) {
+                            if (__builtin_expect(data->platform_id == TerrainPlatId(), 0)) {
                                 clear = 1;
                                 break;
                             }
@@ -1796,10 +1794,10 @@ i32 GizForce_FindBestForceTarget(GIZFORCESYS_s *force_sys, GameObject_s *object)
     f32 best_distance = 1.0e9f;
     ForceTarget *best = NULL;
     los = object->gizforce_los_info;
-    for (i32 i = 0; i < count; ++i) {
-        ForceTarget *target = &possible_forcetargets[i];
-        if (__builtin_expect(los != NULL && (target->force == NULL || (target->force->field_0xaa & 0x80) == 0) && target->index != -1 &&
-            (los->words[target->index >> 5] & (1u << (target->index & 31))) == 0, 0))
+    ForceTarget *target = possible_forcetargets;
+    for (i32 i = 0; i != count; ++i, ++target) {
+        if (los != NULL && (target->force == NULL || (target->force->field_0xaa & 0x80) == 0) && target->index != -1 &&
+            __builtin_expect((los->words[target->index >> 5] & (1u << (target->index & 31))) == 0, 0))
             continue;
         f32 distance = target->distance;
         if (object->force_glow_previous != NULL &&

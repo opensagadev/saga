@@ -1149,7 +1149,7 @@ void MenuUpdateFormatCancel(MENU_s *menu) {
             if (previous_id == 1000) {
                 BackupMenuNoFn();
                 NewMenu(1016, 1, -1);
-            } else if (previous_id == 1012) {
+            } else if (__builtin_expect(previous_id == 1012, 0)) {
                 BackupMenuNoFn();
                 NewMenu(1017, 1, -1);
             } else {
@@ -1159,7 +1159,7 @@ void MenuUpdateFormatCancel(MENU_s *menu) {
             BackupMenuNoFn();
             NewMenu(1006, 1, -1);
         }
-    } else if (menu->cancel_pressed != 0) {
+    } else if (__builtin_expect(menu->cancel_pressed != 0, 1)) {
         MenuSFX = MENUSFX_MENUSELECT;
         BackupMenuNoFn();
         NewMenu(1006, 1, -1);
@@ -1575,7 +1575,7 @@ void MenuUpdateSave(MENU_s *menu) {
             if (saveload_slotused[slot] != 0) {
                 memcard_slot = slot;
                 NewMenu(1008, 1, -1);
-            } else if (saveload_freespace >= SAVESIZE_ADDITIONAL) {
+            } else if (__builtin_expect(saveload_freespace >= SAVESIZE_ADDITIONAL, 1)) {
                 memcard_slot = slot;
                 MenuStartSave();
                 NewMenu(1009, 0, -1);
@@ -2406,7 +2406,7 @@ i32 getsaveload_status() {
 void Text3DStringEncodeFont(unsigned char *src, u16 *dst, void *font) {
     u16 character;
 
-    while (*src != 0) {
+    while (__builtin_expect(*src != 0, 1)) {
         src = NuUnicodeCharFromUTF8(&character, src);
         if (character == '~') {
             if (*src == 0)
@@ -4035,7 +4035,7 @@ extern "C" {
 
 void MatrixTextStringEncode(void *font, unsigned char *source, u16 *destination) {
     u16 character;
-    while (*source != '\0') {
+    while (__builtin_expect(*source != '\0', 1)) {
         source = NuUnicodeCharFromUTF8(&character, source);
         if (character == '~') {
             if (*source == '\0') {

@@ -45,7 +45,7 @@ i32 GizRandom_GetNumOutputs(GIZMO *gizmo) {
 
 void GizRandom_Activate(GIZMO *gizmo, i32 active) {
     GIZRANDOM *random = static_cast<GIZRANDOM *>(gizmo->object);
-    if (active == 0) {
+    if (__builtin_expect(active == 0, 1)) {
         random->flags &= ~GIZRANDOM_FLAG_ACTIVE;
         return;
     }

@@ -3380,7 +3380,7 @@ __used__ static i32 Action_SetAnimSpeedMul(AISYS *sys, AISCRIPTPROCESS *processo
     (void)param_6;
     GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
     if (object != NULL) {
-        if (param_4 == 0) {
+        if (__builtin_expect(param_4 == 0, 0)) {
             return 1;
         }
         f32 minimum = 0.0f;
@@ -3400,10 +3400,10 @@ __used__ static i32 Action_SetAnimSpeedMul(AISYS *sys, AISCRIPTPROCESS *processo
         }
         if (multiply_by != 1.0f) {
             f32 speed = object->animation_speed_multiplier * multiply_by;
-            if (!(speed > maximum)) {
-                object->animation_speed_multiplier = MAX(minimum, speed);
-            } else {
+            if (speed > maximum) {
                 object->animation_speed_multiplier = maximum;
+            } else {
+                object->animation_speed_multiplier = MAX(minimum, speed);
             }
         }
     }
@@ -4055,7 +4055,7 @@ __used__ static i32 Action_AddTorpedoPacket(AISYS *sys, AISCRIPTPROCESS *process
         i32 choices = 2;
         if (player != NULL && player->torpedo != NULL && player->torpedo->count != 0)
             choices = player->torpedo->count + player->torpedo->count;
-        if (NuRand(NULL) % choices != 0)
+        if (__builtin_expect(NuRand(NULL) % choices != 0, 1))
             return 1;
     }
 
@@ -4101,7 +4101,7 @@ __used__ static i32 Action_CreateRider(AISYS *sys, AISCRIPTPROCESS *processor, A
     (void)processor;
     (void)param_6;
     GameObject_s *vehicle = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
-    if (param_5 != 0) {
+    if (__builtin_expect(param_5 != 0, 1)) {
         if (param_4 > 0) {
             i32 model = -1;
             char *script = NULL;
@@ -6103,8 +6103,8 @@ static f32 Condition_EmptyTakeOver(AISYS_s *system, AISCRIPTPROCESS_s *, AIPACKE
     }
     GameObject_s *object = Obj;
     for (i32 index = 0; index < HIGHGAMEOBJECT; ++index, ++object) {
-        if ((object->apiobj.field_0x1f8 & 0x1001) == 0x1001 && (object->apiobj.field_0x1f4 & 0x400) != 0 &&
-            object->id == character) {
+        if (__builtin_expect((object->apiobj.field_0x1f8 & 0x1001) == 0x1001 && (object->apiobj.field_0x1f4 & 0x400) != 0 &&
+            object->id == character, 0)) {
             if (object->takeover_target == NULL || object->field_0xcc0 == NULL ||
                 object->field_0xcc0->character_context != 0x3b) {
                 return 1.0f;
@@ -6199,7 +6199,7 @@ static void *Condition_IAmAInit(AISYS *sys, char *arg, AISCRIPT *) {
 
 __used__ static i32 Action_SetCanTakeOver(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                           i32 param_4, i32 param_5, f32 param_6) {
-    if (param_5 != 0 && packet != NULL && packet->owner != NULL && packet->owner->apiobj.objptr != NULL) {
+    if (__builtin_expect(param_5 != 0 && packet != NULL && packet->owner != NULL && packet->owner->apiobj.objptr != NULL, 1)) {
         GameObject_s *object = packet->owner->apiobj.objptr;
         for (i32 index = 0; index < param_4; ++index) {
             if (NuStrICmp("True", params[index]) == 0) {
@@ -6301,7 +6301,7 @@ static i32 Action_SetMaxMovementRange(AISYS *, AISCRIPTPROCESS *processor, AIPAC
     GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
     if (object != NULL) {
         object->ai.movement_target_radius = range;
-        if (range > 0.0f)
+        if (__builtin_expect(range > 0.0f, 1))
             object->ai.movement_range_mode = range_type;
         else
             object->ai.movement_range_mode = 0;
@@ -7099,7 +7099,7 @@ __used__ static i32 Action_CnxController(AISYS *sys, AISCRIPTPROCESS *processor,
                                          i32 param_count, i32 first_time, f32 param_6) {
     (void)packet;
     (void)param_6;
-    if (first_time == 0) {
+    if (__builtin_expect(first_time == 0, 0)) {
         return 1;
     }
 
@@ -8360,8 +8360,8 @@ __used__ static i32 Action_TakeOver(AISYS *sys, AISCRIPTPROCESS *processor, AIPA
     }
 
     if (object != NULL && target != NULL && release == 0) {
-        if ((target->apiobj.character_data->model_flags & 0x40000000) != 0 &&
-            (target->character_context == 0x3e || target->character_context == 0x17)) {
+        if (__builtin_expect((target->apiobj.character_data->model_flags & 0x40000000) != 0 &&
+            (target->character_context == 0x3e || target->character_context == 0x17), 1)) {
             return 0;
         }
         PLAYERCHARACTERCONFIG_s *target_config = target->apiobj.character_data->player_config;
@@ -9813,7 +9813,7 @@ __used__ static i32 Action_TakeDamage(AISYS *sys, AISCRIPTPROCESS *processor, AI
                 object = GetNamedGameObject(sys, value + 10);
             } else if ((value = NuStrIStr(params[index], "hitter=")) != NULL) {
                 hitter = GetNamedGameObject(sys, value + 7);
-            } else if ((value = NuStrIStr(params[index], "damage=")) != NULL) {
+            } else if (__builtin_expect((value = NuStrIStr(params[index], "damage=")) != NULL, 1)) {
                 damage = static_cast<i32>(AIParamToFloat(processor, value + 7));
             } else if (NuStrIStr(params[index], "opponent") != NULL) {
                 if (packet != NULL && packet->opponent_object != NULL && packet->opponent_object->objptr != NULL) {
@@ -11460,7 +11460,7 @@ __used__ static i32 Action_CreateCreatures(AISYS *sys, AISCRIPTPROCESS *processo
     f32 delay = 0.0f;
     i32 offset_applied = 0;
     while (count != 0) {
-        if ((locator_count | zipup_count) == 0 && start_locator == 0 && rider == NULL)
+        if (!(locator_count | zipup_count) && !(start_locator | (rider != NULL)))
             break;
         if (__builtin_expect(model_count == 0, 0))
             break;
@@ -11493,7 +11493,13 @@ __used__ static i32 Action_CreateCreatures(AISYS *sys, AISCRIPTPROCESS *processo
             position = locator->position;
             yaw = locator->flags;
             offset_applied = 0;
-        } else if (zipup_count != 0) {
+        } else if (zipup_count == 0) {
+            if (rider != NULL) {
+                path = &rider->ai.path_info;
+                position = rider->ai.last_path_position;
+                yaw = rider->apiobj.field_0x276;
+            }
+        } else {
             i32 eligible = 0;
             for (i32 i = 0; i < zipup_count && i < 32; ++i) {
                 if (zipups[i] != NULL && (zipups[i]->flags & 0x40) != 0)
@@ -11509,10 +11515,6 @@ __used__ static i32 Action_CreateCreatures(AISYS *sys, AISCRIPTPROCESS *processo
             position = zipup->lower_position;
             path = NULL;
             surface = 0;
-        } else if (rider != NULL) {
-            path = &rider->ai.path_info;
-            position = rider->ai.last_path_position;
-            yaw = rider->apiobj.field_0x276;
         }
         if (offset_applied == 0 && (offset.x != 0.0f || offset.y != 0.0f || offset.z != 0.0f)) {
             NuVecRotateY(&offset, &offset, yaw);

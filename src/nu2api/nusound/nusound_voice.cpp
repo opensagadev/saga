@@ -517,7 +517,7 @@ void NuSoundVoice::UpdateEffects(f32 frametime, NuSoundEffect::EffectProcessStag
             effect->ProcessVoice(this, frametime);
         }
 
-        if (effect->state == 2 && !effect->keep_attached) {
+        if (__builtin_expect(effect->state == 2 && !effect->keep_attached, 1)) {
             this->RemoveEffect(effect);
         }
     }
@@ -607,17 +607,16 @@ f32 NuSoundVoice::CalculateFieldAngle(f32 distance) {
 #define NUSOUND_SPEAKER_COEFFICIENT(Index, Angle)                                                                      \
     {                                                                                                                  \
         if (gains[(Index)] == 0.0f && (Angle) > outer_start && (Angle) < outer_end) {                                  \
-            if ((Angle) > inner_start && (Angle) < inner_end) {                                                        \
-                gains[(Index)] = 1.0f;                                                                                 \
-            } else {                                                                                                   \
-                f32 outer = (Angle) - bearing >= 0.0f ? outer_end : outer_start;                                       \
+            f32 value = 1.0f;                                                                                          \
+            if (!((Angle) > inner_start && (Angle) < inner_end)) {                                                     \
                 f32 inner = (Angle) - bearing >= 0.0f ? inner_end : inner_start;                                       \
-                f32 value = NuFabs((outer - (Angle)) / (outer - inner));                                               \
-                gains[(Index)] = value;                                                                                \
-                if (!(gains[(Index)] < 1.0f)) {                                                                        \
-                    gains[(Index)] = 1.0f;                                                                             \
+                f32 outer = (Angle) - bearing >= 0.0f ? outer_end : outer_start;                                       \
+                f32 ratio = NuFabs((outer - (Angle)) / (outer - inner));                                               \
+                if (ratio < 1.0f) {                                                                                    \
+                    value = ratio;                                                                                     \
                 }                                                                                                      \
             }                                                                                                          \
+            gains[(Index)] = value;                                                                                    \
         }                                                                                                              \
     }
 
@@ -635,16 +634,12 @@ void NuSoundVoice::CalculatePositionalCoefficients(f32 *gains, VuVec const &posi
     f32 inner_start = NuFmod(bearing - speaker_field_angle_min, 360.0f);
     f32 inner_end = NuFmod(bearing + speaker_field_angle_min, 360.0f);
 
-    static const int channels[] = {1, 5, 7, 6, 4, 0};
-    for (int turn = -1; turn < 1; ++turn) {
-        f32 offset = turn * 360.0f;
-        NUSOUND_SPEAKER_COEFFICIENT(2, offset);
-        for (int i = 0; i < 6; ++i) {
-            f32 angle = offset + 30.0f + 60.0f * i;
-            NUSOUND_SPEAKER_COEFFICIENT(channels[i], angle);
-        }
+    static const int channels[] = {2, 1, 5, 7, 6, 4, 0, 2, 1, 5, 7, 6, 4, 0, 2};
+    static const f32 angles[] = {-360.0f, -330.0f, -270.0f, -210.0f, -150.0f, -90.0f, -30.0f, 0.0f,
+                                 30.0f,   90.0f,   150.0f,  210.0f,  270.0f,  330.0f, 360.0f};
+    for (int i = 0; i < 15; ++i) {
+        NUSOUND_SPEAKER_COEFFICIENT(channels[i], angles[i]);
     }
-    NUSOUND_SPEAKER_COEFFICIENT(2, 360.0f);
 }
 
 #undef NUSOUND_SPEAKER_COEFFICIENT

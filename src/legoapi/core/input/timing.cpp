@@ -366,7 +366,7 @@ void UpdatePickupFlicker() {
     i32 frames = static_cast<i32>(31.5f / FRAMETIME);
     i32 flicker_test;
 
-    if (frames > 30) {
+    if (__builtin_expect(frames > 30, 1)) {
         i32 flicker_frames = frames / 5;
         if (flicker_frames % 2 != 0) {
             ++flicker_frames;

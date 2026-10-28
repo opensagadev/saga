@@ -701,7 +701,7 @@ static void GizPanels_Reset(void *world_ptr, void *, void *progress_ptr) {
 static void GizPanel_Activate(GIZMO *gizmo, i32 active) {
     if (gizmo != NULL && gizmo->object != NULL) {
         GIZPANEL *panel = static_cast<GIZPANEL *>(gizmo->object);
-        if (active == 0) {
+        if (__builtin_expect(active == 0, 0)) {
             panel->flags = static_cast<GIZPANEL_FLAGS>(panel->flags & ~GIZPANEL_FLAG_TRACK_PLAYER);
             return;
         }

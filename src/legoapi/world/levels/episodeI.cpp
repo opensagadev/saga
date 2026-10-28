@@ -1827,6 +1827,53 @@ void PodSprintA_Reset(WORLDINFO_s *world) {
     ps->boulders = AISysFindArea(world->ai_sys, "Boulders");
 }
 
+static void PodSprintA_CheckLaps(WORLDINFO_s *world) {
+    PODSPRINT_s *ps = &podsprint;
+    if (ps->finish_line != NULL && ps->halfway != NULL) {
+        ps->field_0x88 += FRAMETIME;
+        if (ps->flags & 1) {
+            NUVEC *line = ps->finish_line->pts;
+            if ((Player[0] != NULL && pod_old_pos[0].x != -1.0f && pod_old_pos[0].y != -1.0f &&
+                 pod_old_pos[0].z != -1.0f &&
+                 XZLinesIntersect(&line[0], &line[1], &Player[0]->apiobj.position, &pod_old_pos[0], NULL, NULL)) ||
+                (Player[1] != NULL && pod_old_pos[1].x != -1.0f && pod_old_pos[1].y != -1.0f &&
+                 pod_old_pos[1].z != -1.0f &&
+                 XZLinesIntersect(&line[0], &line[1], &Player[1]->apiobj.position, &pod_old_pos[1], NULL, NULL))) {
+                ps->ai_index++;
+                ps->ai_state++;
+                ps->flags &= ~1u;
+                ps->field_0x88 = 0.0f;
+                if (ps->ai_state == 3) {
+                    ps->flags |= 8u;
+                    StoreLevelProgress(world);
+                    ResetLevel(world, "ep1_podsprint_sebulba", 1);
+                } else if ((i8)ps->ai_state > 3) {
+                    if (FreePlay != 0 || (NewCutScene(NULL, WORLD->cutscene_sys, "Ep1_Podrace_Outro1", 1) == 0 &&
+                                          NewCutScene(NULL, WORLD->cutscene_sys, "Ep1_Podsprint_Outro1", 1) == 0)) {
+                        CompleteLevel(world);
+                    }
+                }
+            }
+        } else {
+            NUVEC *line = ps->halfway->pts;
+            if ((Player[0] != NULL &&
+                 XZLinesIntersect(&line[0], &line[1], &Player[0]->apiobj.position, &pod_old_pos[0], NULL, NULL)) ||
+                (Player[1] != NULL &&
+                 XZLinesIntersect(&line[0], &line[1], &Player[1]->apiobj.position, &pod_old_pos[1], NULL, NULL))) {
+                ps->flags |= 1u;
+                ps->ai_index++;
+            }
+        }
+    }
+    if (Player[0] != NULL) {
+        pod_old_pos[0] = Player[0]->apiobj.position;
+    }
+    if (Player[1] != NULL) {
+        pod_old_pos[1] = Player[1]->apiobj.position;
+    }
+    ps->lap_msg->value = (float)(i8)ps->ai_state;
+}
+
 void PodSprintA_Update(WORLDINFO_s *world) {
     PODSPRINT_s *ps = &podsprint;
     VehicleAreaRememberSpeed = 1.0f;
@@ -1859,38 +1906,33 @@ speed_section:
         float v = ps->speed;
         if (FadeSys.fade == 0.0f)
             ps->speed -= FRAMETIME;
-        float remaining = ps->speed;
         if (__builtin_expect(Player[0] != NULL, 1)) {
-            if (remaining <= 0.0f) {
-                Player[0]->field_0xee0 = 1000000000.0f;
-            } else {
+            if (ps->speed > 0.0f) {
                 Player[0]->field_0xdc8 = 0.0f;
                 Player[0]->apiobj.velocity.z = 0.0f;
                 Player[0]->apiobj.velocity.x = 0.0f;
                 Player[0]->field_0xee0 = 0.0f;
+            } else {
+                Player[0]->field_0xee0 = 1000000000.0f;
             }
         }
         if (Player[1] != NULL) {
-            if (!(remaining > 0.0f)) {
-                Player[1]->field_0xee0 = 1000000000.0f;
-            } else {
+            if (ps->speed > 0.0f) {
                 Player[1]->field_0xdc8 = 0.0f;
                 Player[1]->apiobj.velocity.z = 0.0f;
                 Player[1]->apiobj.velocity.x = 0.0f;
                 Player[1]->field_0xee0 = 0.0f;
+            } else {
+                Player[1]->field_0xee0 = 1000000000.0f;
             }
         }
-        if (remaining < 2.9f && v >= 2.9f) {
+        if (ps->speed < 2.9f && v >= 2.9f)
             PlaySfx("PodX_EngStartup1", NULL);
-            remaining = ps->speed;
-        }
-        if (remaining < 1.5f && v >= 1.5f) {
+        if (ps->speed < 1.5f && v >= 1.5f)
             PlaySfx("PodX_EngStartup2", NULL);
-            remaining = ps->speed;
-        }
-        if (remaining <= 0.0f)
+        if (ps->speed <= 0.0f)
             PlaySfx("Pod_Race_Go", NULL);
-        else if ((i32)remaining != (i32)v)
+        else if ((i32)ps->speed != (i32)v)
             PlaySfx("Pod_Race_Light", NULL);
     } else {
         // ps->speed <= 0: pacemaker display.
@@ -1898,7 +1940,7 @@ speed_section:
             ps->field_0x78 = GetNamedGameObject(world->ai_sys, "SebulbasPod");
         GameObject_s *pacemaker = static_cast<GameObject_s *>(ps->field_0x78);
         if (pacemaker != NULL && (pacemaker->apiobj.field_0x1f8 & 0x1000) != 0 && pacemaker->apiobj.field_0x287 == 0) {
-            if (__builtin_expect(FadeSys.fade == 0.0f && pause_rndr_on == 0, 1)) {
+            if (FadeSys.fade == 0.0f && pause_rndr_on == 0) {
                 ps->field_0x80 = FRAMETIME * 2.0f + ps->field_0x80;
                 if (ps->field_0x80 > 1.0f)
                     ps->field_0x80 = 1.0f;
@@ -1924,61 +1966,9 @@ speed_section:
                 ps->field_0x80 = 0.0f;
             }
         }
-        if (__builtin_expect(netclient != 0, 1)) {
-            PodRaceSnipersUpdate();
-        } else {
-            if (ps->finish_line != NULL && ps->halfway != NULL) {
-                ps->field_0x88 += FRAMETIME;
-                if (ps->flags & 1) {
-                    NUVEC *line = ps->finish_line->pts;
-                    if ((Player[0] != NULL && pod_old_pos[0].x != -1.0f && pod_old_pos[0].y != -1.0f &&
-                         pod_old_pos[0].z != -1.0f &&
-                         XZLinesIntersect(&line[0], &line[1], &Player[0]->apiobj.position, &pod_old_pos[0], NULL,
-                                          NULL)) ||
-                        (Player[1] != NULL && pod_old_pos[1].x != -1.0f && pod_old_pos[1].y != -1.0f &&
-                         pod_old_pos[1].z != -1.0f &&
-                         XZLinesIntersect(&line[0], &line[1], &Player[1]->apiobj.position, &pod_old_pos[1], NULL,
-                                          NULL))) {
-                        ps->ai_index++;
-                        ps->ai_state++;
-                        ps->flags &= ~1u;
-                        ps->field_0x88 = 0.0f;
-                        if (ps->ai_state == 3) {
-                            ps->flags |= 8u;
-                            StoreLevelProgress(world);
-                            ResetLevel(world, "ep1_podsprint_sebulba", 1);
-                        } else if ((i8)ps->ai_state > 3) {
-                            if (FreePlay != 0 ||
-                                (NewCutScene(NULL, WORLD->cutscene_sys, "Ep1_Podrace_Outro1", 1) == 0 &&
-                                 NewCutScene(NULL, WORLD->cutscene_sys, "Ep1_Podsprint_Outro1", 1) == 0)) {
-                                CompleteLevel(world);
-                            }
-                        }
-                    }
-                } else {
-                    NUVEC *line = ps->halfway->pts;
-                    if ((Player[0] != NULL && XZLinesIntersect(&line[0], &line[1], &Player[0]->apiobj.position,
-                                                               &pod_old_pos[0], NULL, NULL)) ||
-                        (Player[1] != NULL && XZLinesIntersect(&line[0], &line[1], &Player[1]->apiobj.position,
-                                                               &pod_old_pos[1], NULL, NULL))) {
-                        ps->flags |= 1u;
-                        ps->ai_index++;
-                    }
-                }
-            }
-            if (Player[0] != NULL) {
-                pod_old_pos[0].x = Player[0]->apiobj.position.x;
-                pod_old_pos[0].y = Player[0]->apiobj.position.y;
-                pod_old_pos[0].z = Player[0]->apiobj.position.z;
-            }
-            if (Player[1] != NULL) {
-                pod_old_pos[1].x = Player[1]->apiobj.position.x;
-                pod_old_pos[1].y = Player[1]->apiobj.position.y;
-                pod_old_pos[1].z = Player[1]->apiobj.position.z;
-            }
-            ps->lap_msg->value = (float)(i8)ps->ai_state;
-            PodRaceSnipersUpdate();
-        }
+        if (netclient == 0)
+            PodSprintA_CheckLaps(world);
+        PodRaceSnipersUpdate();
     }
     // Object pool loop: ease each active pod vehicle's boulder offset.
     GameObject_s *obj = Obj;

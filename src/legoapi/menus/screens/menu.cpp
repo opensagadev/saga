@@ -565,7 +565,7 @@ void MenuDrawSelectControls(MENU_s *menu) {
 void MenuUpdateRestoreNewGame(MENU_s *menu) {
     startnewgame = 0;
 
-    if (startnewgame_initiated != 0 || saveload_autosave != -1) {
+    if (__builtin_expect(startnewgame_initiated != 0 || saveload_autosave != -1, 0)) {
         startnewgame_initiated = 0;
         startnewgame = 1;
     } else if (menu->confirm_pressed == 0) {

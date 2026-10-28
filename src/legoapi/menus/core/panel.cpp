@@ -181,12 +181,11 @@ i32 Tag_UpdateHint(HINT_s *hint) {
             }
             return 0;
         case 606:
-            for (i32 i = 0; i < 2; ++i) {
-                GameObject_s *object = Player[i];
-                if (object != NULL && object->apiobj.player_controlled && object->field_0xcc0 != NULL &&
-                    object->id != id_LUKESKYWALKERDAGOBAH)
-                    return WORLD->current_level != SPEEDERCHASEA_LDATA || disable_narrow_socks != 0;
-            }
+            if ((Player[0] != NULL && Player[0]->apiobj.player_controlled && Player[0]->field_0xcc0 != NULL &&
+                 Player[0]->id != id_LUKESKYWALKERDAGOBAH) ||
+                (Player[1] != NULL && Player[1]->apiobj.player_controlled && Player[1]->field_0xcc0 != NULL &&
+                 Player[1]->id != id_LUKESKYWALKERDAGOBAH))
+                return WORLD->current_level != SPEEDERCHASEA_LDATA || disable_narrow_socks != 0;
             return 0;
         case 647:
             return WORLD->current_level == SPEEDERCHASEA_LDATA &&
@@ -202,12 +201,10 @@ i32 Tag_UpdateHint(HINT_s *hint) {
             }
             return 0;
         case 651:
-            for (i32 i = 0; i < 2; ++i) {
-                if (Player[i] != NULL && static_cast<i8>(Player[i]->apiobj.flags_low) < 0 &&
-                    (Player[i]->id == id_GRABCONTROL || Player[i]->id == id_GRABR2CONTROL))
-                    return 1;
-            }
-            return 0;
+            return (Player[0] != NULL && static_cast<i8>(Player[0]->apiobj.flags_low) < 0 &&
+                    (Player[0]->id == id_GRABCONTROL || Player[0]->id == id_GRABR2CONTROL)) ||
+                   (Player[1] != NULL && static_cast<i8>(Player[1]->apiobj.flags_low) < 0 &&
+                    (Player[1]->id == id_GRABCONTROL || Player[1]->id == id_GRABR2CONTROL));
         case 654: {
             if (VehicleArea == 0)
                 return 0;
@@ -287,12 +284,12 @@ static void DrawHitPoints(GameObject_s *object, float x, float y, float scale, f
         hitpoints = 1;
         current_hp = 1;
     } else {
-        hitpoints = object->hitpoints;
         current_hp = static_cast<i8>(object->current_hp);
+        hitpoints = object->hitpoints;
         if ((PLAYERHITPOINTS_2HEARTSIN1 != 0 && object->apiobj.player_controlled) ||
             WORLD->current_level == BOUNTYHUNTERPURSUITE_LDATA || WORLD->current_level == VADERC_LDATA) {
-            hitpoints = hitpoints / 2 + (hitpoints & 1);
             current_hp = current_hp / 2 + (current_hp & 1);
+            hitpoints = (hitpoints & 1) ? hitpoints / 2 + 1 : hitpoints / 2;
         }
     }
     if (hitpoints <= 1 && two_rows == 1)
@@ -300,7 +297,7 @@ static void DrawHitPoints(GameObject_s *object, float x, float y, float scale, f
 
     i32 transitioning = 0;
     if (static_cast<u8>(object->apiobj.field_0x27c) <= 1 && hitpoints > 1 && object->apiobj.field_0x287 != 0 &&
-        object->field_0x101c > 0.0f && !(object->field_0x101c >= 1.0f)) {
+        object->field_0x101c > 0.0f && object->field_0x101c < 1.0f) {
         current_hp =
             static_cast<i32>(static_cast<float>(static_cast<i32>(object->hitpoints)) * (1.0f - object->field_0x101c));
         transitioning = 1;
@@ -324,8 +321,8 @@ static void DrawHitPoints(GameObject_s *object, float x, float y, float scale, f
     object_scale.z = scale;
     NUVEC translation;
     translation.y = y * PANEL3DMULY;
-    for (i32 i = 0; i < hitpoints; ++i) {
-        if (two_rows == 1 && i >= hitpoints / 2) {
+    for (i32 i = 1; i <= hitpoints; ++i) {
+        if (two_rows == 1 && i - 1 >= hitpoints / 2) {
             two_rows = 2;
             translation.y -= scale * 0.14f;
             draw_x = x;
@@ -334,23 +331,23 @@ static void DrawHitPoints(GameObject_s *object, float x, float y, float scale, f
         translation.z = 1.001f;
         object_scale.y = scale;
         object_scale.x = scale;
-        const i32 half_hp = (i + 1) * 2;
-        float draw_alpha = 0.5f;
-        if (i < current_hp) {
+        const i32 half_hp = i * 2;
+        float draw_alpha;
+        if (i <= current_hp) {
             draw_alpha = 1.0f;
-            if (PLAYERHITPOINTS_2HEARTSIN1 != 0 && object->apiobj.player_controlled && i == current_hp - 1 &&
+            if (PLAYERHITPOINTS_2HEARTSIN1 != 0 && object->apiobj.player_controlled && i == current_hp &&
                 static_cast<i8>(object->current_hp) < half_hp) {
                 draw_alpha = 0.75f;
             }
+        } else {
+            draw_alpha = 0.5f;
         }
-        if (transitioning == 0) {
-            if (current_hp > 0 && i == current_hp - 1) {
-                const float pulse = i == 0 && current_hp == 1 ? 0.5f : 0.2f;
-                const float pulse_scale = pulse - (NuFmod(GlobalTimer.time_elapsed, 0.5f) * 2.0f) * pulse + 1.0f;
-                translation.z = 0.999f;
-                object_scale.x *= pulse_scale;
-                object_scale.y *= pulse_scale;
-            }
+        if (transitioning == 0 && current_hp > 0 && __builtin_expect(i == current_hp, 0)) {
+            const float pulse = i == 1 && current_hp == 1 ? 0.5f : 0.2f;
+            const float pulse_scale = pulse - (NuFmod(GlobalTimer.time_elapsed, 0.5f) * 2.0f) * pulse + 1.0f;
+            translation.z = 0.999f;
+            object_scale.x *= pulse_scale;
+            object_scale.y *= pulse_scale;
         }
 
         NUMTX matrix;
@@ -406,10 +403,11 @@ void UpdateStats() {
         if (__builtin_expect(DrawMiniKitTime > 0.0f, 1))
             DrawMiniKitTime -= FRAMETIME;
         f32 target = 1.0f;
-        if (FadeSys.fade != 0.0f || CUTSTOPGAME != 0 || (Paused == 0 && NetPaused == 0 && DrawMiniKitTime <= 0.0f) ||
-            screendump != 0 || GetMenuID() == PANEL_MENU_SAVE || GetMenuID() == PANEL_MENU_LOAD ||
-            GetMenuID() == PANEL_MENU_EPISODE_I || GetMenuID() == PANEL_MENU_EPISODE_II ||
-            GetMenuID() == PANEL_MENU_EPISODE_III || GetMenuID() == PANEL_MENU_EPISODE_IV)
+        if (FadeSys.fade != 0.0f || CUTSTOPGAME != 0 ||
+            (__builtin_expect(Paused == 0, 1) && NetPaused == 0 && DrawMiniKitTime <= 0.0f) || screendump != 0 ||
+            GetMenuID() == PANEL_MENU_SAVE || GetMenuID() == PANEL_MENU_LOAD || GetMenuID() == PANEL_MENU_EPISODE_I ||
+            GetMenuID() == PANEL_MENU_EPISODE_II || GetMenuID() == PANEL_MENU_EPISODE_III ||
+            GetMenuID() == PANEL_MENU_EPISODE_IV)
             target = 0.0f;
         if (ChallengeMode != 0) {
             f32 hint_alpha = CurrentHintAlpha();
@@ -435,14 +433,14 @@ void UpdateStats() {
                                                       (WORLD->level_sub_id == -1 ||
                                                        !Game.area_save[WORLD->level_sub_id].red_brick_collected))) &&
                                   !(DrawRedBrickTime > 0.0f)) != 0,
-                                 1) ||
+                                 0) ||
                 screendump != 0 || GetMenuID() == PANEL_MENU_SAVE || GetMenuID() == PANEL_MENU_LOAD ||
                 GetMenuID() == PANEL_MENU_EPISODE_I || GetMenuID() == PANEL_MENU_EPISODE_II ||
                 GetMenuID() == PANEL_MENU_EPISODE_III || GetMenuID() == PANEL_MENU_EPISODE_IV)
                 target = 0.0f;
             redbrickslidetime = SeekLinearF(redbrickslidetime, target, FRAMETIME);
             RedBrickScale = SeekLinearF(RedBrickScale, 1.0f, 5.0f * FRAMETIME);
-            if (!(DrawBuildUpTime <= 0.0f))
+            if (DrawBuildUpTime > 0.0f)
                 DrawBuildUpTime -= FRAMETIME;
             target = 1.0f;
             if (FadeSys.fade != 0.0f || CUTSTOPGAME != 0 ||
@@ -463,16 +461,16 @@ void UpdateStats() {
                     goto buildup_finished;
                 }
                 {
-                    const u32 maximum = static_cast<u32>(freeplay != 0 ? WORLD->area->true_hero_targets[1]
-                                                                       : WORLD->area->true_hero_targets[0]);
+                    const u32 maximum = static_cast<u32>(WORLD->area->true_hero_targets[freeplay]);
                     if (maximum != 0) {
-                        if (__builtin_expect(BuildUpDone == 0, 0)) {
+                        if (BuildUpDone == 0) {
                             BuildUpTotal = 0;
+                            i32 total = 0;
                             if (Player[0] != NULL && Player[0]->coinpacket != NULL)
-                                BuildUpTotal = Player[0]->coinpacket->coins;
+                                BuildUpTotal = total = Player[0]->coinpacket->coins;
                             if (Player[1] != NULL && Player[1]->coinpacket != NULL)
-                                BuildUpTotal += Player[1]->coinpacket->coins;
-                            if (maximum <= static_cast<u32>(BuildUpTotal)) {
+                                BuildUpTotal = total += Player[1]->coinpacket->coins;
+                            if (maximum <= static_cast<u32>(total)) {
                                 BuildUpScale = 2.5f;
                                 BuildUpDone = 1;
                                 AddFancyMessage(TTab[tTRUEHERO], 0.0f, 0.0f, 1.0f, 1.0f, 1, 0);
@@ -487,12 +485,13 @@ void UpdateStats() {
     }
     if (SuperStory != 0 && (WORLD->current_level->flags & LEVEL_SHOW_COIN_TOTAL) != 0)
         DrawCoinTotalTime = 1.0f;
-    if (__builtin_expect(DrawCoinTotalTime > 0.0f, 0))
+    if (DrawCoinTotalTime > 0.0f)
         DrawCoinTotalTime -= FRAMETIME;
     f32 coin_target = 1.0f;
-    if (FadeSys.fade != 0.0f || CUTSTOPGAME != 0 || (Paused == 0 && NetPaused == 0 && !(DrawCoinTotalTime > 0.0f)) ||
-        screendump != 0 || MenuInMemoryCard() != 0 || GetMenuID() == PANEL_MENU_SAVE ||
-        GetMenuID() == PANEL_MENU_LOAD || GetMenuID() == PANEL_MENU_EPISODE_I || GetMenuID() == PANEL_MENU_EPISODE_II ||
+    if (FadeSys.fade != 0.0f || CUTSTOPGAME != 0 ||
+        (Paused == 0 && __builtin_expect(NetPaused == 0, 0) && !(DrawCoinTotalTime > 0.0f)) || screendump != 0 ||
+        MenuInMemoryCard() != 0 || GetMenuID() == PANEL_MENU_SAVE || GetMenuID() == PANEL_MENU_LOAD ||
+        GetMenuID() == PANEL_MENU_EPISODE_I || GetMenuID() == PANEL_MENU_EPISODE_II ||
         GetMenuID() == PANEL_MENU_EPISODE_III || GetMenuID() == PANEL_MENU_EPISODE_IV)
         coin_target = 0.0f;
     cointotaltime = SeekLinearF(cointotaltime, coin_target, FRAMETIME);
@@ -518,10 +517,11 @@ void UpdateStats() {
     }
     f32 target = Paused == 0 && Player[0] != NULL && Player[0]->timer_d5c <= 0.0f ? 1.0f : 0.0f;
     PowerUp_PanelPosMul[0] = SeekLinearF(PowerUp_PanelPosMul[0], target, FRAMETIME + FRAMETIME);
+    const f32 frametime = FRAMETIME;
     target = 0.0f;
     if (Paused == 0 && Player[1] != NULL && Player[1]->timer_d5c <= 0.0f)
         target = 1.0f;
-    PowerUp_PanelPosMul[1] = SeekLinearF(PowerUp_PanelPosMul[1], target, FRAMETIME + FRAMETIME);
+    PowerUp_PanelPosMul[1] = SeekLinearF(PowerUp_PanelPosMul[1], target, frametime + frametime);
 }
 
 void DrawPlayerIconPrompts(i32, i32, float, i32, i32, i32, i32, i32, i32, float, i32, i32, i32, i32) {

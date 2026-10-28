@@ -238,7 +238,11 @@ i32 DecompressHuffmanTrees(DEFLATECONTEXT *ctx) {
     memset(codeLengths, 0, sizeof(codeLengths));
 
     for (i32 i = 0; i < hclen; i++) {
-        i32 length = READBITS(ctx, 3);
+        if (ctx->num_bits_available < 3) {
+            FillBits(ctx);
+        }
+        i32 length = ctx->bit_buffer & 7;
+        DROPBITS(ctx, 3);
         codeLengths[LengthDeZigZag[i]] = length;
     }
 
@@ -253,15 +257,36 @@ i32 DecompressHuffmanTrees(DEFLATECONTEXT *ctx) {
 
     i32 i = 0;
     do {
-        i32 symbol = READHUFFMANSYMBOL(ctx, ctx->temp_code_length);
+        i32 symbol;
+        if (ctx->num_bits_available < 0x10) {
+            PEEKBITS(ctx, 0x10);
+        }
+        u32 bits = ctx->bit_buffer;
+        u32 lookupIndex = ctx->temp_code_length.fast_lookup[bits & 0x1ff];
+        if (__builtin_expect(lookupIndex == 0xffff, 1)) {
+            i32 rev = ReverseBits(bits);
+            i32 len = 10;
+            while (rev >= ctx->temp_code_length.base_code[len]) {
+                len++;
+            }
+            i32 index =
+                (rev >> (16 - len)) - ctx->temp_code_length.first_code[len] + ctx->temp_code_length.num_codes[len];
+            DROPBITS(ctx, len);
+            symbol = ctx->temp_code_length.symbol_index[index];
+        } else {
+            i32 symbolLength = ctx->temp_code_length.symbols[lookupIndex];
+            i32 symbolIndex = ctx->temp_code_length.symbol_index[lookupIndex];
+            DROPBITS(ctx, symbolLength);
+            symbol = symbolIndex;
+        }
 
-        if (symbol < 16) {
+        if (__builtin_expect(symbol < 16, 0)) {
             allCodeLengths[i++] = symbol;
         } else if (symbol == 16) {
             symbol = READBITS(ctx, 2) + 3;
             memset(allCodeLengths + i, allCodeLengths[i - 1], symbol);
             i += symbol;
-        } else if (__builtin_expect(symbol == 17, 0)) {
+        } else if (symbol == 17) {
             symbol = READBITS(ctx, 3) + 3;
             memset(allCodeLengths + i, 0, symbol);
             i += symbol;

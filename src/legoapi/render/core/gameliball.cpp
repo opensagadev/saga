@@ -4606,7 +4606,7 @@ static void cbPtlTorusMenu(eduimenu_s *parent, eduiitem_s *, u32) {
 
     const debinftype *effect = debtab[debkeydata[edpp_ptls[edpp_nearest].instance_id].effect_index];
     edptl_torus_menu = eduiMenuCreate(70, 70, 250, 250, ed_fnt, cbPtlCancelTorusMenu, "Collision Torus");
-    if (edptl_torus_menu == NULL)
+    if (__builtin_expect(edptl_torus_menu == NULL, 0))
         return;
 
     eduiMenuAddItem(edptl_torus_menu,
@@ -6877,7 +6877,7 @@ extern "C" {
     void RegisterSounds(SoundTable *table) {
         const char **names = table->names;
         memset(table->bits, 0, sizeof(table->bits));
-        if (names == NULL) {
+        if (__builtin_expect(names == NULL, 0)) {
             return;
         }
         for (const char **name = names; *name != NULL; ++name) {
@@ -7970,7 +7970,7 @@ extern "C" void SoundUpdate(float frame_time) {
             }
             if (Music.transition >= 1.0f) {
                 Music.transition = 1.0f;
-                if (static_cast<u16>(Music.state - 5) <= 1) {
+                if (__builtin_expect(static_cast<u16>(Music.state - 5) <= 1, 0)) {
                     NuSound3PauseStereoStream(1 - Music.primary_stream);
                 } else {
                     NuSound3StopStereoStream(1 - Music.primary_stream);
@@ -8439,7 +8439,7 @@ extern "C" {
         if (chunk == NULL) {
             return;
         }
-        while (chunk->next != NULL) {
+        while (__builtin_expect(chunk->next != NULL, 1)) {
             particlechunkrendertype_s *next = chunk->next;
             const u16 next_priority = static_cast<u16>(next->render_priority);
             const u16 priority = static_cast<u16>(chunk->render_priority);
@@ -11352,7 +11352,7 @@ extern "C" {
         for (i32 i = 0; i < maxdebkeys; ++i) {
             debkeydatatype_s *key = &debkeydata[i];
             if (key->effect_index == effect_index) {
-                if (key->allocated_chunk_count != 0 || active_only == 0) {
+                if (__builtin_expect(key->allocated_chunk_count != 0 || active_only == 0, 1)) {
                     i32 output_index = count - skip;
                     if (output_index >= 0) {
                         if (capacity > output_index) {
@@ -12927,7 +12927,7 @@ static void edanimRender() {
 
         if (edanim_particle_mode) {
             edanimRenderParticleEmitters(edanim_nearest_param_id);
-        } else if (edanim_sound_mode) {
+        } else if (__builtin_expect(edanim_sound_mode != 0, 1)) {
             edanimRenderSoundEmitters(edanim_nearest_param_id);
         }
     }
@@ -18270,7 +18270,7 @@ extern "C" void TerrDrawImpactPol(void) {
 }
 
     void DrawPlatform(i32 platform_index) {
-        if (CurTerr == NULL || platform_index < 0)
+        if (__builtin_expect(CurTerr == NULL || platform_index < 0, 0))
             return;
 
         TERRAIN_GROUP &group = CurTerr->groups[CurTerr->platforms[platform_index].terrain_group_index];
@@ -18719,7 +18719,7 @@ i16 InsidePolLines(f32 point_x, f32 point_y, f32 point_z, f32 edge_a_x, f32 edge
     }
 
     if (!(NuFabs(normal->y) <= NuFabs(normal->x)) || !(NuFabs(normal->z) <= NuFabs(normal->x))) {
-        if (0.0f > normal->z) {
+        if (__builtin_expect(0.0f > normal->z, 0)) {
             if (InsideLineF(point_y, point_x, 0.0f, 0.0f, edge_a_y, edge_a_x) == 0 ||
                 InsideLineF(point_y, point_x, edge_b_y, edge_b_x, 0.0f, 0.0f) == 0) {
                 return 0;
@@ -24840,7 +24840,7 @@ extern "C" {
 extern "C" i32 NewRayCastPlatForm(NUVEC *position, NUVEC *movement, f32 radius, f32 separation_epsilon,
                                   i32 platform_index, i32 terrain_mask) {
     ResetRayCastState();
-    if (CurTerr == NULL)
+    if (__builtin_expect(CurTerr == NULL, 0))
         return 0;
     TerI = static_cast<TerrainQuery_s *>(NuScratchAlloc32(sizeof(TerrainQuery_s)));
     TerrOverRideScan = NULL;
@@ -25033,7 +25033,7 @@ extern "C" {
     i32 PlatInstSkinRegisterEx(NUMTX *matrix, void *skin_data, void *matrix_data, f32 scale, i32 instance, i32 flags,
                                TERRSET *source) {
         TERRSET *terrain = CurTerr;
-        if (terrain == NULL || source == NULL)
+        if (__builtin_expect(terrain == NULL || source == NULL, 0))
             return -1;
         i32 group_index = terrain->group_count;
         if (group_index >= terrain->max_groups)

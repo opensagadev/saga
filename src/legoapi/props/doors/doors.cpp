@@ -84,7 +84,7 @@ static void D_spline(NUFPAR *parser) {
 
     for (i32 i = 0; i < D_worldinfo->door_count; i++) {
         DOOR_s *other = &D_worldinfo->doors[i];
-        if (other->spline == D_door->spline) {
+        if (__builtin_expect(other->spline == D_door->spline, 0)) {
             D_door->spline = NULL;
             D_door->name[0] = '\0';
             return;

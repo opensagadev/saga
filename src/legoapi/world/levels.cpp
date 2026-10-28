@@ -1045,7 +1045,7 @@ void PortalDoors_Update(WORLDINFO_s *world) {
                     NuPortalSetActive(world->current_gscn, door->portal_id, 0);
                     door->flags = static_cast<u16>((door->flags & ~PORTALDOOR_OPENED) | PORTALDOOR_CLOSED);
                 }
-            } else if ((flags & PORTALDOOR_OPENED) == 0) {
+            } else if (__builtin_expect((flags & PORTALDOOR_OPENED) == 0, 1)) {
                 NuPortalSetActive(world->current_gscn, door->portal_id, 1);
                 door->flags = static_cast<u16>((door->flags & ~PORTALDOOR_CLOSED) | PORTALDOOR_OPENED);
             }
@@ -1952,7 +1952,7 @@ void LevelObjects_InitForGame(LEVELOBJECT *tab, VARIPTR *buf, VARIPTR *buf_end, 
 
     const i32 object_range = LEVOBJREF_LASTOBJ - LEVOBJREF_FIRSTOBJ;
     const i32 reflection_range = LEVOBJREF_LASTREFOBJ - LEVOBJREF_FIRSTREFOBJ;
-    if (object_range > reflection_range) {
+    if (__builtin_expect(object_range > reflection_range, 1)) {
         LEVOBJREF_LASTOBJ = LEVOBJREF_FIRSTOBJ + reflection_range;
     } else if (object_range < reflection_range) {
         LEVOBJREF_LASTREFOBJ = LEVOBJREF_FIRSTREFOBJ + object_range;

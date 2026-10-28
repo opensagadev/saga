@@ -450,7 +450,7 @@ static i32 GizObstacles_BoltHitPlat(void *world_ptr, void *data, BOLT *bolt, uns
         return 0;
     }
     const i32 count = system->active_gizmo_count;
-    if (count == 0) {
+    if (__builtin_expect(count == 0, 0)) {
         return 0;
     }
 
@@ -914,7 +914,7 @@ static void GizObstacles_PostLoad(void *world_ptr, void *data) {
 
     for (i32 index = 0; index < obstacle_sys->count; ++index) {
         GIZOBSTACLE_s &obstacle = obstacle_sys->obstacles[index];
-        if ((obstacle.runtime_flags & GIZOBSTACLE_RUNTIME_FLAG_PENDING_BLOWUP_TYPE) != 0) {
+        if (__builtin_expect((obstacle.runtime_flags & GIZOBSTACLE_RUNTIME_FLAG_PENDING_BLOWUP_TYPE) != 0, 1)) {
             obstacle.blowup_type = static_cast<i16>(GizmoBlowupGetTypeFromNameTableId(world, obstacle.blowup_type));
             obstacle.runtime_flags &= static_cast<u8>(~GIZOBSTACLE_RUNTIME_FLAG_PENDING_BLOWUP_TYPE);
         }

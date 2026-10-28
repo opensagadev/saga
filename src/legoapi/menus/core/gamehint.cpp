@@ -244,8 +244,8 @@ static i32 updatehints_target_y[2];
 static f32 updatehints_current_y[2];
 
 static __used__ i32 Move_UpdateHint(HINT_s *hint) {
-    if (MechInputTouchSystem::s_baseControlMode == 0 || player == NULL || player->apiobj.field_0x27d == 0 ||
-        player->field_0x7a5 != 0xff || VehicleArea != 0 || !TouchHacks::TouchControlsActive)
+    if (__builtin_expect(MechInputTouchSystem::s_baseControlMode == 0 || player == NULL || player->apiobj.field_0x27d == 0 ||
+        player->field_0x7a5 != 0xff || VehicleArea != 0 || !TouchHacks::TouchControlsActive, 0))
         return 0;
     switch (hint->control_mode_ids[0]) {
         case 0x5f1:
@@ -261,7 +261,7 @@ static __used__ i32 PlayerButton_UpdateHint(HINT_s *hint) {
     if (WORLD == NULL || WORLD->area == HUB_ADATA || VehicleArea != 0)
         return 0;
     if (hint->control_mode_ids[0] == 0x5f4) {
-        if (FreePlay == 0)
+        if (__builtin_expect(FreePlay == 0, 0))
             return 1;
     } else if (hint->control_mode_ids[0] == 0x5f5) {
         if (FreePlay != 0)

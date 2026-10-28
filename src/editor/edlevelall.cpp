@@ -917,10 +917,10 @@ void EdControl::SetMenuItemAttr(i32 mask, eduiitem_s *menu_item, eduiiattr_s *se
             if (entry->object != object || entry->reference == NULL)
                 continue;
             ++subobject_count;
-            if (entry->reference == reference)
+            if (__builtin_expect(entry->reference == reference, 0))
                 goto use_unselected;
         }
-        if (subobject_count == 0)
+        if (__builtin_expect(subobject_count == 0, 1))
             goto use_unselected;
     }
     memcpy(menu_item->colours, selected, sizeof(*selected));
@@ -3605,7 +3605,7 @@ void ClassEditor::cbEdLevelDeselectAll(eduimenu_s *menu, eduiitem_s *, u32) {
 #define EDLEVEL_DESELECT_SCENE(index)                                                                                  \
     do {                                                                                                               \
         LevelEditorScene *scene = theLevelEditor.GetEdScene(index);                                                    \
-        if (scene != NULL && scene->active) {                                                                          \
+        if (__builtin_expect(scene != NULL && scene->active, 1)) {                                                                          \
             item = item->previous;                                                                                     \
             scene->editable = 0;                                                                                       \
             item->highlighted = 0;                                                                                     \
@@ -3629,7 +3629,7 @@ void ClassEditor::cbEdLevelSelectAll(eduimenu_s *menu, eduiitem_s *, u32) {
 #define EDLEVEL_SELECT_SCENE(index)                                                                                    \
     do {                                                                                                               \
         LevelEditorScene *scene = theLevelEditor.GetEdScene(index);                                                    \
-        if (scene != NULL && scene->active) {                                                                          \
+        if (__builtin_expect(scene != NULL && scene->active, 1)) {                                                                          \
             item = item->previous;                                                                                     \
             scene->editable = 1;                                                                                       \
             item->highlighted = 1;                                                                                     \
@@ -6006,7 +6006,7 @@ i32 EdClass::FindMember(EdMember *result, void *object, i32 attributes, i32 recu
             if (__builtin_expect(member->attributes >= 0 && (member->attributes & attributes) != 0, 0))
                 goto found;
             member = member->next;
-        } while (member != NULL);
+        } while (__builtin_expect(member != NULL, 1));
         return 0;
     }
     do {

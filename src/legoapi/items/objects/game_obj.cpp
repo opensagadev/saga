@@ -2270,8 +2270,8 @@ i32 KillGameObject(GameObject_s *object, i32 requested_reason, i32) {
                    object->id == id_TIEBOMBER || object->id == id_IMPERIALSHUTTLE || object->id == id_SLAVE1) {
             debris[0] = 34;
             if (__builtin_expect(WORLD->current_level == DEATHSTARRESCUEE_LDATA, 1) &&
-                object->apiobj.field_0x27c == -1) {
-                GameCam_Judder(GameCam, qrand() < 32768 ? -0.75f : 0.75f, 2, NULL);
+                __builtin_expect(object->apiobj.field_0x27c == -1, 1)) {
+                GameCam_Judder(GameCam, qrand() > 32767 ? 0.75f : -0.75f, 2, NULL);
                 NewRumbleAllPlayers(1.0f, 0.1f, 0, 0);
             }
         } else if (object->id == id_SPEEDERBIKESNOW) {
@@ -2333,10 +2333,10 @@ i32 KillGameObject(GameObject_s *object, i32 requested_reason, i32) {
             (WORLD->current_level == HOTHBATTLEA_LDATA || WORLD->current_level == GUNSHIPA_LDATA))
             GameCam_Blend(GameCam, 0.5f, 0.0f, 1);
     }
-    bool terminal_kill = false;
+    i32 terminal_kill = 0;
     bool kill_rider = false;
     if (reason == 4) {
-        terminal_kill = true;
+        terminal_kill = 1;
         reason = 2;
         kill_rider = true;
     } else if (WORLD->current_level == SPEEDERCHASEA_LDATA && object->ai.creature_set == 2) {
@@ -2502,20 +2502,23 @@ i32 KillGameObject(GameObject_s *object, i32 requested_reason, i32) {
         AICREATURE *creature = NULL;
         bool respawn = false;
         if (!remove) {
-            bool persistent = object->respawnable;
+            i32 persistent = object->respawnable;
             if ((object->apiobj.field_0x1f4 & 0x4400) == 0x4400) {
+                i32 at_origin = object->respawn_at_origin;
                 creature = &WORLD->ai_sys->creatures[object->ai.field_0x134];
                 if (__builtin_expect(persistent != 0, 0)) {
-                    respawn = object->respawn_at_origin;
+                    respawn = at_origin;
                 } else {
-                    u32 limit = object->ai_respawn_count + 1;
+                    u32 limit;
                     if (creature->max_respawn_count != -1 && object->ai.respawn_locator == NULL)
                         limit =
                             creature->min_respawn_count +
                             ((creature->max_respawn_count - creature->min_respawn_count) * (Game.difficulty - 1)) / 9 +
                             1;
-                    remove = limit <= object->ai_respawn_count;
-                    respawn = !remove;
+                    else
+                        limit = object->ai_respawn_count + 1;
+                    respawn = limit > object->ai_respawn_count;
+                    remove = !respawn;
                 }
             } else {
                 remove = !persistent;
@@ -2612,7 +2615,7 @@ void ObjHitShield(GameObject_s *attacker, GameObject_s *target, i32 damage, BOLT
     }
 
     if (MiniCutCam == 0 || !target->apiobj.player_controlled) {
-        if (target->field_0xe37 != 0 && damage > 0) {
+        if (__builtin_expect(target->field_0xe37 != 0 && damage > 0, 1)) {
             if (target->apiobj.player_controlled && Player_HasInvincibility(target)) {
                 damage = 0;
             }
@@ -2643,7 +2646,7 @@ void ObjHitShield(GameObject_s *attacker, GameObject_s *target, i32 damage, BOLT
             return;
         }
     }
-    if (attacker != NULL) {
+    if (__builtin_expect(attacker != NULL, 1)) {
         NewBuzz(attacker->pad_gamepad->pad, 0.1f, 0);
     }
 }

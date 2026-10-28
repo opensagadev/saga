@@ -1364,7 +1364,7 @@ void AutoWeaponOnOff(GameObject_s *object) {
     const ANIMPACKET_s &packet = object->apiobj.anim_packet;
     if ((flags & CHARACTER_ANIMATION_FLAG_GUN_OFF) != 0) {
         if (object->weapon_scale > 0.0f) {
-            if ((packet.flags & ANIMPACKET_FLAG_ANIMATION_CHANGED) != 0 && packet.blending != 0) {
+            if (__builtin_expect((packet.flags & ANIMPACKET_FLAG_ANIMATION_CHANGED) != 0 && packet.blending != 0, 0)) {
                 FastWeaponIn(object, 0);
             } else if ((packet.flags & ANIMPACKET_FLAG_ANIMATION_CHANGED) != 0 ||
                        object->weapon_scale_state != WEAPON_SCALE_RETRACTING) {

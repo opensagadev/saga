@@ -511,9 +511,9 @@ i32 ObjLandReady(GameObject_s *object) {
     if (object == NULL) {
         return 0;
     }
-    if ((CInfo[object->character_context].flags & 0x1004) != 0 &&
+    if (__builtin_expect((CInfo[object->character_context].flags & 0x1004) != 0 &&
         (LEGOCONTEXT_LAND_COMBATROLL == -1 || LEGOCONTEXT_LAND_COMBATROLL != object->character_context ||
-         object->field_0x7a3 != 0)) {
+         object->field_0x7a3 != 0), 0)) {
         if (LEGOCONTEXT_WALLSHUFFLE != -1 && LEGOCONTEXT_WALLSHUFFLE == object->character_context) {
             return 0;
         }

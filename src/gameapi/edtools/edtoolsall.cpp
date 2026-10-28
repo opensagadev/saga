@@ -1134,7 +1134,7 @@ extern "C" {
             if (!rep_timer || (pad->digital_buttons_pressed & 0x08)) {
                 f32 step = slider->granularity * accel;
                 f32 value = slider->value + step;
-                if (value > slider->minimum + slider->range)
+                if (__builtin_expect(value > slider->minimum + slider->range, 0))
                     value = slider->minimum + slider->range;
                 value = static_cast<i32>((value > 0.0f ? value + step * 0.5f : value - step * 0.5f) / step) * step;
                 slider->value = value;
@@ -4216,7 +4216,7 @@ extern "C" void eduiMenuDestroyItems(eduimenu_s *menu) {
             __attribute__((aligned(16))) = {0x800000c0u, 0x80ff0000, 0x80808080, 0x80404040};
         u32 colours[4] __attribute__((aligned(16)));
         memcpy(colours, initial_colours, sizeof(colours));
-        if (highlighted == 1)
+        if (__builtin_expect(highlighted == 1, 0))
             colours[0] = 0x8000c000u;
         edui_messagemenu =
             eduiMenuCreate(70, 70, 180, 250, parent->font, eduicbCancelMessageMenu, const_cast<char *>("Message"));
@@ -4918,7 +4918,7 @@ extern "C" {
         edui_gradient_pick_s *picker = reinterpret_cast<edui_gradient_pick_s *>(item->data_ptr);
         edui_gradient_node_s *stage = picker->selected_stage;
         if (stage != nullptr) {
-            if (item->type == 7) {
+            if (__builtin_expect(item->type == 7, 0)) {
                 cliph = stage->hue;
                 clips = stage->saturation;
                 clipv = stage->value;

@@ -109,7 +109,7 @@ i32 NuFileDevice::FormatName(char *output, i32 size, char const *path) const {
             relative_path[0] == '/' || relative_path[0] == '\\') {
             NuStrCat(relative, relative_path);
         } else {
-            if (length > 0 && current_dir[0] != '\\' && current_dir[0] != '/')
+            if (__builtin_expect(length > 0 && current_dir[0] != '\\' && current_dir[0] != '/', 1))
                 NuStrCat(relative, separator);
             NuStrCat(relative, current_dir);
             NuStrCat(relative, relative_path);

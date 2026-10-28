@@ -1163,7 +1163,7 @@ void DrawBonusTime(STATUSPACKET_s *packet, float position, i32 alpha) {
     const f32 y = -0.5f * position;
     char *title;
     i32 red, green;
-    if (packet->new_best_time != 0.0f) {
+    if (__builtin_expect(packet->new_best_time != 0.0f, 0)) {
         title = TTab[tNEWBESTTIME];
         red = 0;
         green = 255;

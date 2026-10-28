@@ -6954,7 +6954,7 @@ extern "C" void *NuAnimData2LoadBuffFromPAK(void *data, i32 file_size) {
 
     i32 NuAnimPushSetUseQuatsFlag(i32 enabled) {
         i32 previous = ForceEulerToQuat;
-        if (NumQuatPushes > 3) {
+        if (__builtin_expect(NumQuatPushes > 3, 0)) {
             return 0;
         }
         QuatPushes[NumQuatPushes++] = previous;
@@ -9996,7 +9996,7 @@ void NuQFntUTF8toQCode(NUQFNT *font, char *text, u16 *encoded) {
         NUWCHAR16 character __attribute__((aligned(16)));
         cursor = NuUnicodeCharFromUTF8(&character, cursor);
         *encoded = NuQFntEncodeUnicodeChar(font, character);
-        if (*encoded == 0xffff)
+        if (__builtin_expect(*encoded == 0xffff, 1))
             *encoded = NuQFntEncodeUnicodeChar(font, '?');
         encoded++;
     }
@@ -15982,7 +15982,26 @@ void OctreeRndr(u8 *visibility, nuoctreenode_s *root, i32 enabled) {
         i32 clip = NuCameraClipTestExtentsGeneric(&node->minimum, &node->maximum, &numtx_identity, node->far_clip, 1,
                                                   &minimum_depth);
         if (clip == 0) {
-        } else if (clip == 1) {
+        } else if (clip != 1) {
+            i32 *index = node->partially_visible_indices;
+            i32 *end = index + node->partially_visible_count;
+            if (__builtin_expect(node->partially_visible_count > 0, 1)) {
+                do {
+                    i32 value = *index++;
+                    visibility[value >> 2] |= 2 << ((value & 3) << 1);
+                } while (index != end);
+            }
+            if (__builtin_expect(node->child_count == 0 && draw_octree != 0, 1))
+                NuRndrBoundingBox(&node->minimum, &node->maximum, &numtx_identity, 0xff00ff00);
+
+            i32 child_index = stack[depth].child_index++;
+            if (child_index != node->child_count) {
+                ++depth;
+                stack[depth].child_index = 0;
+                stack[depth].node = node->children[child_index];
+                continue;
+            }
+        } else {
             if (draw_octree != 0)
                 NuRndrBoundingBox(&node->minimum, &node->maximum, &numtx_identity, 0xff0000ff);
             i32 *index = node->fully_visible_indices;
@@ -15992,25 +16011,6 @@ void OctreeRndr(u8 *visibility, nuoctreenode_s *root, i32 enabled) {
                     i32 value = *index++;
                     visibility[value >> 2] |= 1 << ((value & 3) << 1);
                 } while (index != end);
-            }
-        } else {
-            i32 *index = node->partially_visible_indices;
-            i32 *end = index + node->partially_visible_count;
-            if (node->partially_visible_count > 0) {
-                do {
-                    i32 value = *index++;
-                    visibility[value >> 2] |= 2 << ((value & 3) << 1);
-                } while (index != end);
-            }
-            if (node->child_count == 0 && draw_octree != 0)
-                NuRndrBoundingBox(&node->minimum, &node->maximum, &numtx_identity, 0xff00ff00);
-
-            i32 child_index = stack[depth].child_index++;
-            if (child_index != node->child_count) {
-                ++depth;
-                stack[depth].child_index = 0;
-                stack[depth].node = node->children[child_index];
-                continue;
             }
         }
         --depth;
@@ -17281,7 +17281,10 @@ extern "C" {
         record->nmtls = 0;
         NUSORTPRI *previous = NULL;
         NUSORTPRI *current = global_dlist_manager.sort_list;
-        if (current) {
+        if (!(current)) {
+            global_dlist_manager.sort_list = record;
+            record->sys_next = NULL;
+        } else {
             while (current && record->sort_pri > current->sort_pri) {
                 previous = current;
                 current = current->sys_next;
@@ -17293,9 +17296,6 @@ extern "C" {
                 record->sys_next = global_dlist_manager.sort_list;
                 global_dlist_manager.sort_list = record;
             }
-        } else {
-            global_dlist_manager.sort_list = record;
-            record->sys_next = NULL;
         }
         ++global_dlist_manager.nused_sort_pris;
         DisplayListCreateFxItemPS(item, type);

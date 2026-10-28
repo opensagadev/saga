@@ -32,7 +32,7 @@ bool MechEdgeStopAddon::OnProcess(MechAddon::ProcessStage stage, float delta_tim
             }
         }
         was_jumping = jumping;
-        if (stopped || stop_timer >= 0.0f)
+        if (__builtin_expect(stopped || stop_timer >= 0.0f, 1))
             ++character->edge_stop_requests;
     }
     return true;

@@ -1395,7 +1395,7 @@ static void CC_hair_layer_index(NUFPAR *parser) {
 static void CC_layer(NUFPAR *parser) {
     if ((charconfig.flags & 2) == 0 || charconfig.runtime->layer_count >= 32)
         return;
-    if (NuFParGetWord(parser) == 0 || NuStrLen(parser->word_buf) >= 24)
+    if (__builtin_expect(NuFParGetWord(parser) == 0 || NuStrLen(parser->word_buf) >= 24, 0))
         return;
     NuStrCpy(charconfig.runtime->layers[charconfig.runtime->layer_count].name, parser->word_buf);
     const u32 bit = NuFParGetInt(parser);
@@ -1403,7 +1403,7 @@ static void CC_layer(NUFPAR *parser) {
         return;
     GAMECHARACTERDATA_s *data = charconfig.runtime;
     for (i32 i = 0; i < data->layer_count; ++i) {
-        if (data->layers[i].mask_bit == static_cast<i32>(bit))
+        if (__builtin_expect(data->layers[i].mask_bit == static_cast<i32>(bit), 0))
             return;
     }
     GAMECHARACTERLAYER_s *layer = &data->layers[data->layer_count];

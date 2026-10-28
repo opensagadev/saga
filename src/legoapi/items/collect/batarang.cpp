@@ -197,7 +197,7 @@ static i32 Batarang_FindTarget(WORLDINFO_s *world, GameObject_s *object, i32 aut
     if (nearest_blowup != NULL && nearest_distance < selected_distance) {
         blowup = nearest_blowup;
     }
-    i16 platform = -1;
+    i32 platform = -1;
     if (blowup != NULL) {
         selected_position = blowup->mid_position;
         platform = blowup->platform_id;
@@ -214,7 +214,7 @@ static i32 Batarang_FindTarget(WORLDINFO_s *world, GameObject_s *object, i32 aut
     NUVEC ray;
     NuVecSub(&ray, &selected_position, &origin);
     if (GameRayCast(&origin, &ray, 0.0f, 0x1f) != 0) {
-        if (selected_type != 2 || platform == -1 || TerrainPlatId() != platform) {
+        if (platform == -1 || TerrainPlatId() != platform) {
             return 0;
         }
     }
@@ -361,7 +361,7 @@ i32 Batarang_SeekToTarget(BATARANG_s *batarang) {
         if (GameRayCast(&batarang->position, &travel, 0.1f, 0x1f) != 0) {
             i32 platform = TerrainPlatId();
             bool ricochet = batarang->field_0x7d != 0 && batarang->current_target >= batarang->active;
-            if (!ricochet) {
+            if (__builtin_expect(!ricochet, 1)) {
                 BATARANG_TARGET_s *current = &batarang->targets[batarang->current_target];
                 switch (current->type) {
                     case 0:
@@ -376,7 +376,7 @@ i32 Batarang_SeekToTarget(BATARANG_s *batarang) {
                         break;
                 }
             }
-            if (ricochet) {
+            if (__builtin_expect(ricochet != 0, 1)) {
                 NewRayCastGetImpactNormal(&travel);
                 Batarang_InitRicochet(batarang, &travel);
             }
