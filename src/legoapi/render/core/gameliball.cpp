@@ -5347,7 +5347,7 @@ static void cbPtlColMenu(eduimenu_s *parent, eduiitem_s *, u32) {
 
     const debinftype *effect = debtab[debkeydata[edpp_ptls[edpp_nearest].instance_id].effect_index];
     ptlcolmenu = eduiMenuCreate(70, 70, 250, 250, ed_fnt, cbPtlCancelColMenu, "Particle Colour");
-    if (ptlcolmenu == NULL)
+    if (__builtin_expect(ptlcolmenu == NULL, 0))
         return;
 
     eduiMenuAddItem(ptlcolmenu, eduiItemGradPickCreate(0, colours, cbPtlApplyGrad, "Colour Grad"));
@@ -5539,7 +5539,7 @@ static void cbPtlTypeMenu(eduimenu_s *parent, eduiitem_s *, u32) {
     char title[40];
     sprintf(title, "Particle Types (%d)", count);
     ptltypemenu = eduiMenuCreate(70, 70, 180, 250, ed_fnt, cbPtlCancelTypeMenu, title);
-    if (ptltypemenu == NULL)
+    if (__builtin_expect(ptltypemenu == NULL, 0))
         return;
 
     i32 found_selected = 0;
@@ -7571,7 +7571,7 @@ extern "C" {
     }
 
     void MusicPreSeekNow(i32 track) {
-        if (track < 0 || track >= SFX_MUSIC_COUNT) {
+        if (__builtin_expect(track < 0 || track >= SFX_MUSIC_COUNT, 1)) {
             return;
         }
 
@@ -11401,7 +11401,7 @@ extern "C" {
                                 NUVEC *direction, f32 *length, f32 *speed) {
         debkeydatatype_s *key = &debkeydata[handle];
         debinftype *effect = debtab[key->effect_index];
-        if (effect == NULL)
+        if (__builtin_expect(effect == NULL, 0))
             return 0;
         origin->x = key->position.x;
         origin->y = key->position.y;
@@ -12296,7 +12296,7 @@ void edanimRenderSoundEmitters(i32 parameter_index) {
     const NUVEC *base_position = NuSpecialGetPos(&special);
     for (i32 sound = 0; sound < AnimParams[parameter_index].sound_count; ++sound) {
         // The original skips sounds by their flags slot rather than the sound id.
-        if (AnimParams[parameter_index].sound_flags[sound] == -1) {
+        if (__builtin_expect(AnimParams[parameter_index].sound_flags[sound] == -1, 0)) {
             continue;
         }
         const i32 colour = edanim_sound_mode && edanim_nearest_sound == sound ? 0xffff0000 : 0xffffffff;
@@ -19105,12 +19105,12 @@ void NewScanRot(nuvec_s *position, i32 terrain_mask) {
                     TERRAIN_SHAPE *shapes = reinterpret_cast<TERRAIN_SHAPE *>(batch + 1);
                     const i32 count = batch->shape_count;
                     if (local_max_x >= batch->min_x && batch->max_x > local_min_x && !(local_max_z < batch->min_z) &&
-                        !(batch->max_z <= local_min_z)) {
+                        batch->max_z > local_min_z) {
                         TERRAIN_SHAPE *shape = shapes;
                         for (i32 remaining = count; remaining > 0; --remaining, ++shape) {
                             if (__builtin_expect(
-                                    !(shape->min_x > local_max_x) && !(local_min_x >= shape->max_x) &&
-                                        shape->min_z <= local_max_z && local_min_z < shape->max_z &&
+                                    local_max_x >= shape->min_x && shape->max_x > local_min_x &&
+                                        local_max_z >= shape->min_z && shape->max_z > local_min_z &&
                                         reinterpret_cast<u8 *>(writer.cursor) < writer.limit &&
                                         (shape->material[1] == 0 || (shape->material[1] & terrain_mask) != 0),
                                     1)) {
@@ -23989,7 +23989,7 @@ i16 *NewScanHandelFull(nuvec_s *position, nuvec_s *movement, f32 radius, i32 sca
                 const f32 y = ((bounds.min_y + bounds.max_y) * 0.5f - group.origin.y) * TerI->inverse_object_scale;
                 const f32 z = (bounds.min_z + bounds.max_z) * 0.5f - group.origin.z;
                 const f32 reach = scan_radius + group.radius;
-                if (group.chunk_type == -1 || !(reach * reach > x * x + y * y + z * z) || matrix == NULL)
+                if (matrix == NULL || group.chunk_type == -1 || !(reach * reach > x * x + y * y + z * z))
                     continue;
                 TERRAIN_SHAPE_BATCH *batch = static_cast<TERRAIN_SHAPE_BATCH *>(group.data);
                 while (batch->marker >= 0) {
@@ -24106,7 +24106,7 @@ i16 *NewScanHandelFull(nuvec_s *position, nuvec_s *movement, f32 radius, i32 sca
     TERRAIN_WALL_POINT **walls = reinterpret_cast<TERRAIN_WALL_POINT **>(writer.group_header + sizeof(void *));
     u8 *arena_end = static_cast<u8 *>(TempScanStack) + 0x2000;
     i32 wall_count = (CurTerr->spatial_nodes == NULL || wall_storage_full) ? 0 : WallSplCount / 2;
-    while (wall_count > 0 &&
+    while (__builtin_expect(wall_count > 0, 0) &&
            reinterpret_cast<u8 *>(walls + wall_count + 1) + wall_count * 2 * sizeof(TERRAIN_WALL_POINT) > arena_end)
         --wall_count;
     // A handle owns wall copies: subsequent scans reuse WallSplList.

@@ -212,7 +212,7 @@ static void LoadPermData(BGPROCINFO *proc) {
 
     // Font path depends on language.  `Text_Language == 0` is Japanese in the
     // original; everything else uses the Latin font.
-    if (Text_Language != 0) {
+    if (__builtin_expect(Text_Language != 0, 1)) {
         Text_LoadFont((char *)"stuff\\text\\starwars_font", &permbuffer_ptr, &permbuffer_end);
     } else {
         Text_LoadFont((char *)"stuff\\text\\starwars_font_j", &permbuffer_ptr, &permbuffer_end);
@@ -379,8 +379,8 @@ static void LoadPermData(BGPROCINFO *proc) {
 
 void LoadPerm(void) {
     SetBackgroundMusic(1);
-    WORLDINFO_s *saved_world = WORLD;
     PermDataLoaded = 0;
+    WORLDINFO_s *saved_world = WORLD;
     WORLD = nullptr;
 
     if (BGLOAD == 0 || LOADEROFF != 0) {
@@ -403,12 +403,14 @@ void LoadPerm(void) {
     InitPanel(Game.options_save.field11_0xb);
     NuQFntSetCoordinateSystem(static_cast<NUQFNT_CSMODE>(3));
 
-    NUMTX scale;
-    NUVEC scale_vec = {0.125f, 0.125f, 0.125f};
-    NuMtxSetScale(&scale, &scale_vec);
+    NUMTX scale __attribute__((aligned(16)));
+    NUVEC scale_vec[2];
+    scale_vec[1] = {0.0f, 0.0f, 0.0f};
+    scale_vec[0] = {0.125f, 0.125f, 0.125f};
+    NuMtxSetScale(&scale, scale_vec);
     scale.m32 = 1.0f;
 
-    if (PAL == 0) {
+    if (__builtin_expect(PAL == 0, 0)) {
         LoadPerm_LanguageSelect = 3;
     }
 
@@ -453,8 +455,8 @@ void LoadPerm(void) {
         UpdateTimer(&GlobalTimer);
         menu_flash = NuFmod(GlobalTimer.time_elapsed_mod_seconds, 0.2f) < 0.1f;
 
-        if (language_timer < 0.5f && __builtin_expect(Text_IsFontLoaded() != nullptr, 0)) {
-            if (LoadPerm_LanguageSelect == 0) {
+        if (__builtin_expect(language_timer < 0.5f && Text_IsFontLoaded() != nullptr, 0)) {
+            if (__builtin_expect(LoadPerm_LanguageSelect == 0, 0)) {
                 NewMenu(7, 0, -1);
                 LoadPerm_LanguageSelect = 1;
                 FadeSys.fade = -1.0f;
@@ -479,7 +481,7 @@ void LoadPerm(void) {
         }
 
         if (legal_timer < 5.8f && LoadPerm_LanguageSelect == 3 && ready_timer >= 1.0f && loadlegal_done) {
-            if (__builtin_expect(!(legal_timer == 0.0f && legal_mtl == nullptr), 1)) {
+            if (__builtin_expect(legal_timer != 0.0f, 0) || legal_mtl != nullptr) {
                 if (PermDataLoaded != 0 &&
                     ((GamePad[0].buttons_down_08 &
                       (GAMEPAD_JUMP | GAMEPAD_START | GAMEPAD_SPECIAL | GAMEPAD_ACTION | GAMEPAD_TAG)) != 0 ||
@@ -498,13 +500,14 @@ void LoadPerm(void) {
                 if (texture_id != 0) {
                     NUMTL *mtl = NuMtlCreate(1);
                     if (__builtin_expect(mtl != nullptr, 0)) {
-                        mtl->opacity = 1.0f;
                         mtl->diffuse_color = {1.0f, 1.0f, 1.0f};
+                        mtl->opacity = 1.0f;
+                        mtl->attribs.cull_mode = 2;
+                        mtl->attribs.z_mode = 3;
                         mtl->shader_desc.flags = 0x1000;
                         mtl->tex_id = static_cast<i16>(texture_id);
-                        u8 *attrib = reinterpret_cast<u8 *>(&mtl->attribs);
-                        attrib[1] = (attrib[1] & 0xcf) | 0xe0;
-                        attrib[0] = (attrib[0] & 0xc0) | 0x22;
+                        mtl->attribs.alpha_mode = 2;
+                        mtl->attribs.filter_mode = 2;
                         NuMtlUpdate(mtl);
                         legal_mtl = mtl;
                     } else {
@@ -590,8 +593,9 @@ void LoadPerm(void) {
                             half_w = aspect * 0.5f / 1.7777778f;
                         }
 
+                        const i32 alpha_byte = static_cast<i32>(alpha * 255.0f);
                         NuRndrClear(0xb00, 0, 1.0f);
-                        const u32 colour = SAGA_X86_F32_TO_U32(alpha * 255.0f) << 24;
+                        const u32 colour = (static_cast<u32>(alpha_byte) << 24) | 0x808080u;
                         NuPrimCSPos++;
                         NuPrimSetCoordinateSystem(NUPRIM_SCALEMODE_ABSOLUTE);
                         NuPrim2DBegin(4, 7, legal_mtl);
@@ -611,7 +615,11 @@ void LoadPerm(void) {
                         };
 
                         LegalVertex *vert = reinterpret_cast<LegalVertex *>(g_NuPrim_StreamBufferPtr->addr);
-                        vert->colour = colour | (g_NuPrim_NeedsOverbrightening ? 0x808080u : 0x404040u);
+                        if (__builtin_expect(g_NuPrim_NeedsOverbrightening, 0)) {
+                            vert->colour = colour;
+                        } else {
+                            vert->colour = (colour & 0xff000000u) | 0x404040u;
+                        }
                         if (!g_NuPrim_NeedsHalfUVs) {
                             vert->full.u = 0.0f;
                             vert->full.v = 0.0f;
@@ -622,7 +630,11 @@ void LoadPerm(void) {
                         NuPrim2DAddXYZ(0.5f - half_w, 0.5f - half_h, 0.0f);
 
                         vert = reinterpret_cast<LegalVertex *>(g_NuPrim_StreamBufferPtr->addr);
-                        vert->colour = colour | (g_NuPrim_NeedsOverbrightening ? 0x808080u : 0x404040u);
+                        if (__builtin_expect(g_NuPrim_NeedsOverbrightening, 0)) {
+                            vert->colour = colour;
+                        } else {
+                            vert->colour = (colour & 0xff000000u) | 0x404040u;
+                        }
                         if (__builtin_expect(!g_NuPrim_NeedsHalfUVs, 1)) {
                             vert->full.u = 1.0f;
                             vert->full.v = 1.0f;

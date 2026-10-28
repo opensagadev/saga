@@ -1284,45 +1284,45 @@ void DookuC_Update(WORLDINFO_s *world) {
                 AIPATHNODE_s *node1;
                 AIPATHNODE_s *node2;
                 AIPATHNODE_s *node3;
-                if ((node0 = static_cast<AIPATHNODE_s *>(LevAIPathNode[0])) != NULL &&
+                if (__builtin_expect((node0 = static_cast<AIPATHNODE_s *>(LevAIPathNode[0])) != NULL &&
                     (node1 = static_cast<AIPATHNODE_s *>(LevAIPathNode[1])) != NULL &&
                     (node2 = static_cast<AIPATHNODE_s *>(LevAIPathNode[2])) != NULL &&
-                    (node3 = static_cast<AIPATHNODE_s *>(LevAIPathNode[3])) != NULL) {
+                    (node3 = static_cast<AIPATHNODE_s *>(LevAIPathNode[3])) != NULL, 1)) {
                     if (LevGizForce[0] == group->forces[0]) {
                         node0->position = {3.76f, 0.01f, -1.59f};
-                        if (LevGizForce[1] != group->forces[1]) {
-                            node1->position = {4.42f, 0.56f, -1.46f};
-                            node2->position = {4.66f, 1.12f, -1.08f};
-                            node3->position = {4.41f, 1.69f, -1.04f};
-                        } else {
+                        if (!(LevGizForce[1] != group->forces[1])) {
                             node1->position = {4.29f, 0.56f, -1.50f};
                             node2->position = {4.05f, 1.12f, -1.12f};
                             node3->position = {4.46f, 1.69f, -0.97f};
+                        } else {
+                            node1->position = {4.42f, 0.56f, -1.46f};
+                            node2->position = {4.66f, 1.12f, -1.08f};
+                            node3->position = {4.41f, 1.69f, -1.04f};
                         }
                     } else if (LevGizForce[1] == group->forces[0]) {
                         node0->position = {3.60f, 0.01f, -0.96f};
-                        if (LevGizForce[0] != group->forces[1]) {
-                            node1->position = {4.06f, 0.56f, -0.98f};
-                            node2->position = {4.37f, 1.12f, -0.81f};
-                            node3->position = {4.30f, 1.69f, -1.30f};
-                        } else {
+                        if (!(LevGizForce[0] != group->forces[1])) {
                             node1->position = {4.06f, 0.56f, -0.98f};
                             node2->position = {4.20f, 1.12f, -1.28f};
                             node3->position = {4.41f, 1.69f, -1.04f};
+                        } else {
+                            node1->position = {4.06f, 0.56f, -0.98f};
+                            node2->position = {4.37f, 1.12f, -0.81f};
+                            node3->position = {4.30f, 1.69f, -1.30f};
                         }
                     } else if (LevGizForce[2] == group->forces[0]) {
                         node0->position = {4.28f, 0.01f, -0.41f};
-                        if (LevGizForce[0] != group->forces[1]) {
-                            node1->position = {4.53f, 0.56f, -0.77f};
-                            node2->position = {4.20f, 1.12f, -0.91f};
-                            node3->position = {4.43f, 1.69f, -1.28f};
-                        } else {
+                        if (!(LevGizForce[0] != group->forces[1])) {
                             node1->position = {4.66f, 0.56f, -0.98f};
                             node2->position = {4.50f, 1.12f, -1.35f};
                             node3->position = {4.38f, 1.69f, -1.08f};
+                        } else {
+                            node1->position = {4.53f, 0.56f, -0.77f};
+                            node2->position = {4.20f, 1.12f, -0.91f};
+                            node3->position = {4.43f, 1.69f, -1.28f};
                         }
                     }
-                    if (world->ai_sys->path_sys != NULL && world->ai_sys->path_sys->active_path != NULL) {
+                    if (__builtin_expect(world->ai_sys->path_sys != NULL && world->ai_sys->path_sys->active_path != NULL, 1)) {
                         AIPathNodeUpdatePos(world->ai_sys, world->ai_sys->path_sys->active_path,
                                             static_cast<AIPATHNODE_s *>(LevAIPathNode[0]));
                         AIPathNodeUpdatePos(world->ai_sys, world->ai_sys->path_sys->active_path,
@@ -2168,7 +2168,7 @@ void GunShip_DragBombSeekBlowUp(GameObject_s *object) {
             nearest = blowup;
         }
     }
-    if (nearest == NULL)
+    if (__builtin_expect(nearest == NULL, 0))
         return;
     NuVecNorm(&direction, &nearest_offset);
     f32 momentum = (1.0f - NuFsqrt(nearest_distance) / gunshipb_seekrange) * gunshipb_seekmom;

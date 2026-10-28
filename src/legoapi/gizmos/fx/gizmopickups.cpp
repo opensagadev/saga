@@ -406,7 +406,7 @@ static void GizmoPickup_Activate(GIZMO *gizmo, i32 activate) {
     } else {
         pickup->state_enabled = 1;
         SuperCounter_ActivateGizmoPickup(gizmo, pickup);
-        if (pickup->state_enabled) {
+        if (__builtin_expect(pickup->state_enabled != 0, 1)) {
             pickup->state_activated = 1;
             GIZMO_PICKUP_TYPE *type;
             if (!pickup->state_alternate_type || GizmoPickupSys->alternate_type == -1) {

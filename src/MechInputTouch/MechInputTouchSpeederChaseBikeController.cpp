@@ -122,7 +122,7 @@ void MechInputTouchSpeederChaseController::Update(NuInputTouchData const *) {
             }
         } else {
             stick_values[1] = -1.0f;
-            if (touch_holder->touch_position.y < -0.5f) {
+            if (__builtin_expect(touch_holder->touch_position.y < -0.5f, 0)) {
                 swipe_direction = false;
             }
         }

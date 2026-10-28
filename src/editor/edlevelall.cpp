@@ -3845,7 +3845,7 @@ void LevelEditor::DrawInfoText(char **lines, i32 count, i32 x, i32 y, i32 availa
     if (height < 1) {
         return;
     }
-    if (x < 0) {
+    if (__builtin_expect(x < 0, 0)) {
         x = available_width - width - 5;
     }
     if (y < 0) {
@@ -4534,21 +4534,21 @@ void ClassEditor::cbEdClassSetMode(eduimenu_s *menu, eduiitem_s *item, u32) {
 i32 ClassEditor::SelectObject(ClassObject &object, i32 mode) {
     i32 selected = 1;
     if (mode == 1) {
-        if (object.object == NULL) {
+        if (__builtin_expect(object.object == NULL, 0)) {
             selected = 0;
             goto update_property_selection;
         }
         for (ClassObjectListEntry *entry = selected_objects.first; entry != NULL; entry = entry->next) {
-            if (entry->object == object.object && entry->reference == object.reference) {
+            if (__builtin_expect(entry->object == object.object && entry->reference == object.reference, 0)) {
                 if (entry->next != NULL) {
                     entry->next->previous = entry->previous;
                 } else {
                     selected_objects.last = entry->previous;
                 }
-                if (entry->previous != NULL) {
-                    entry->previous->next = entry->next;
-                } else {
+                if (__builtin_expect(!(entry->previous != NULL), 0)) {
                     selected_objects.first = entry->next;
+                } else {
+                    entry->previous->next = entry->next;
                 }
                 entry->next = NULL;
                 entry->previous = NULL;
@@ -5611,7 +5611,7 @@ void EdClass::SerialiseObject(EdStream &stream, void *object) {
                         member->GetMemberData(object, member->type_id, data, sizeof(data));
                     }
                     type->serialise(stream, data, size);
-                    if (stream.mode == 1) {
+                    if (__builtin_expect(stream.mode == 1, 0)) {
                         member->SetMemberData(object, member->type_id, data, sizeof(data), NULL);
                     }
                 }

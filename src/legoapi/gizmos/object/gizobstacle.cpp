@@ -397,7 +397,7 @@ static i32 GizmoObstacle_ActivateRev(GIZMO *gizmo, i32 activate, i32 flags) {
     }
 
     if ((flags & GIZOBSTACLE_ACTIVATE_REVERSE_VALIDATE) == 0) {
-        if (activate == 0) {
+        if (__builtin_expect(activate == 0, 1)) {
             obstacle->control_flags &= static_cast<u8>(~GIZOBSTACLE_CONTROL_FLAG_REVERSE_ACTIVE);
             obstacle->progress_flags |= GIZOBSTACLE_PROGRESS_FLAG_ENABLED;
             return 1;
@@ -414,7 +414,7 @@ static i32 GizmoObstacle_ActivateRev(GIZMO *gizmo, i32 activate, i32 flags) {
             return 0;
         }
         const i32 visible = (obstacle->progress_flags & GIZOBSTACLE_PROGRESS_FLAG_VISIBLE) != 0 ? 1 : 0;
-        if (visible != activate) {
+        if (__builtin_expect(visible != activate, 1)) {
             return 0;
         }
     }
@@ -1208,12 +1208,12 @@ static void GizObstacleUpdate_Proximity(GIZOBSTACLE_s *obstacle) {
 
         const u8 initial_mode = obstacle->mode;
         if (__builtin_expect(static_cast<u8>(initial_mode - 1) < 2 || initial_mode == 5 || initial_mode == 6, 1)) {
-            if (__builtin_expect((initial_mode & 0xfb) == 1 && GameCam->mode != -1 &&
+            if (__builtin_expect((initial_mode & 0xfb) == 1, 1) && GameCam->mode != -1 &&
                 __builtin_expect(obstacle->trigger_mode == 0xff, 0) &&
                 (obstacle->config_flags &
                  (GIZOBSTACLE_CONFIG_INVERT_PROXIMITY | GIZOBSTACLE_CONFIG_EXCLUDE_NON_PLAYER |
                   GIZOBSTACLE_CONFIG_CHECK_SUPPORTING_PLATFORM | GIZOBSTACLE_CONFIG_REQUIRE_ACTIVE_PLAYER |
-                  GIZOBSTACLE_CONFIG_REQUIRE_LINKED_OBJECT | GIZOBSTACLE_CONFIG_REQUIRE_CHARACTER_DATA_FLAG_04)) == 0, 0)) {
+                  GIZOBSTACLE_CONFIG_REQUIRE_LINKED_OBJECT | GIZOBSTACLE_CONFIG_REQUIRE_CHARACTER_DATA_FLAG_04)) == 0) {
                 const f32 distance_squared = NuVecDistSqr(&GameCam->pos, &obstacle->secondary_position, NULL);
                 if (distance_squared < closest_distance_squared &&
                     (!OBSTACLE_USES_BOX_TRIGGER(obstacle) || GizObstacle_PosWithinBox(obstacle, &GameCam->pos) != 0)) {
@@ -1227,11 +1227,12 @@ static void GizObstacleUpdate_Proximity(GIZOBSTACLE_s *obstacle) {
                     const f32 distance_squared =
                         NuVecDistSqr(&obstacle->secondary_position, gizobstacletriggers[index], NULL);
                     if (distance_squared < closest_distance_squared) {
+                        NUVEC *trigger = gizobstacletriggers[index];
                         if (__builtin_expect(OBSTACLE_USES_BOX_TRIGGER(obstacle), 0) &&
-                            GizObstacle_PosWithinBox(obstacle, gizobstacletriggers[index]) == 0)
+                            GizObstacle_PosWithinBox(obstacle, trigger) == 0)
                             continue;
                         closest_distance_squared = distance_squared;
-                        closest_position = gizobstacletriggers[index];
+                        closest_position = trigger;
                     }
                 }
             }
@@ -1295,7 +1296,7 @@ static void GizObstacleUpdate_Proximity(GIZOBSTACLE_s *obstacle) {
                 if ((!OBSTACLE_USES_BOX_TRIGGER(obstacle) ||
                      GizObstacle_PosWithinBox(obstacle, &object->apiobj.collision_position) != 0) &&
                     GizObstacle_SatisfyingTerrainChecks(obstacle, object) != 0) {
-                    if (__builtin_expect(object->apiobj.field_0x27c != -1, 0)) {
+                    if (object->apiobj.field_0x27c != -1) {
                         players_not_satisfying_terrain &= ~(1u << object->apiobj.field_0x27c);
                     }
                     closest_distance_squared = distance_squared;
@@ -1325,7 +1326,16 @@ static void GizObstacleUpdate_Proximity(GIZOBSTACLE_s *obstacle) {
     }
 
     const GAMEANIMSET_STATE state = obstacle->anim_set->state;
-    if (state == GAMEANIMSET_STATE_AT_START) {
+    if (state != GAMEANIMSET_STATE_AT_START && state != GAMEANIMSET_STATE_AT_END) {
+        if (WORLD->current_level != BLOCKADERUNNERC_LDATA || LevGizObst[0] != obstacle ||
+            state != GAMEANIMSET_STATE_BETWEEN_ENDPOINTS) {
+            return;
+        }
+    } else if (state == GAMEANIMSET_STATE_AT_END) {
+        if (obstacle->state == 0) {
+            return;
+        }
+    } else {
         if (obstacle->proximity_output != 0 ||
             (obstacle->runtime_flags &
              (GIZOBSTACLE_RUNTIME_FLAG_AI_ACTIVE | GIZOBSTACLE_RUNTIME_FLAG_TRIGGER_LATCHED)) != 0) {
@@ -1334,13 +1344,7 @@ static void GizObstacleUpdate_Proximity(GIZOBSTACLE_s *obstacle) {
         }
         return;
     }
-
-    bool may_return = state == GAMEANIMSET_STATE_AT_END && obstacle->state != 0;
-    if (!may_return) {
-        may_return = WORLD->current_level == BLOCKADERUNNERC_LDATA && LevGizObst[0] == obstacle &&
-                     state == GAMEANIMSET_STATE_BETWEEN_ENDPOINTS;
-    }
-    if (!may_return || obstacle->proximity_output != 0 ||
+    if (obstacle->proximity_output != 0 ||
         (obstacle->runtime_flags & (GIZOBSTACLE_RUNTIME_FLAG_AI_ACTIVE | GIZOBSTACLE_RUNTIME_FLAG_TRIGGER_LATCHED)) !=
             0) {
         return;

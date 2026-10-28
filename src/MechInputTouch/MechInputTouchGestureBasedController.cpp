@@ -1112,8 +1112,8 @@ bool MechInputTouchGestureBasedController::OnClick(GameObject_s &object, TouchHo
             target = NULL;
         }
     }
-    holder.previous_target_object = target;
     holder.target_object = target;
+    holder.previous_target_object = target;
     if (target == NULL) {
         return false;
     }

@@ -410,15 +410,15 @@ LEVELDATA *Area_FindNextPlayLevel(i32 levelIdx) {
 
     if (areaIdx != -1) {
         AREADATA *area = &ADataList[areaIdx];
-        if (areaLevelIdx < area->level_count - 1) {
+        if (__builtin_expect(areaLevelIdx < area->level_count - 1, 1)) {
             LEVELDATA *result = &LDataList[area->levels[areaLevelIdx]];
-            if ((result->flags & (LEVEL_INTRO | LEVEL_MIDTRO | LEVEL_OUTRO)) == 0) {
+            if (__builtin_expect((result->flags & (LEVEL_INTRO | LEVEL_MIDTRO | LEVEL_OUTRO)) == 0, 0)) {
                 return result;
             }
             while (areaLevelIdx != area->level_count - 2) {
                 result = &LDataList[area->levels[areaLevelIdx + 1]];
                 ++areaLevelIdx;
-                if ((result->flags & (LEVEL_INTRO | LEVEL_MIDTRO | LEVEL_OUTRO)) == 0) {
+                if (__builtin_expect((result->flags & (LEVEL_INTRO | LEVEL_MIDTRO | LEVEL_OUTRO)) == 0, 0)) {
                     return result;
                 }
             }

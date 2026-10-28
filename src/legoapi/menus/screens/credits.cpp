@@ -239,14 +239,8 @@ void Credits_UpdateMenu(MENU_s *menu) {
             } else {
                 progress = CreditsTime;
             }
-        } else if (CreditsFlag == 2) {
-            if (CreditsTime >= 3.0f) {
-                CreditsFlag = 3;
-                CreditsTime = 0.0f;
-            }
-            progress = 1.0f;
-        } else {
-            if (CreditsTime >= 1.1f) {
+        } else if (CreditsFlag != 2) {
+            if (__builtin_expect(CreditsTime >= 1.1f, 0)) {
                 NewLData = HUB_LDATA;
                 FADETYPE fade_type = {FADE_TYPE_STILL};
                 FadeSys.SetFade(fade_type, 0);
@@ -255,6 +249,12 @@ void Credits_UpdateMenu(MENU_s *menu) {
             if (progress < 0.0f) {
                 progress = 0.0f;
             }
+        } else {
+            if (CreditsTime >= 3.0f) {
+                CreditsFlag = 3;
+                CreditsTime = 0.0f;
+            }
+            progress = 1.0f;
         }
         CreditsAlpha = NuTrigTable[(static_cast<i32>(progress * 16384.0f) >> 1) & 0x7fff];
     } else {

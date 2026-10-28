@@ -1289,23 +1289,23 @@ void DagobahA_Update(WORLDINFO_s *world) {
             node0->position.x = -16.31f;
             node0->position.y = 0.31f;
             node0->position.z = 15.13f;
-            if (group->forces[1] == first) {
-                node1->position.x = -16.31f;
-                node1->position.y = 0.67f;
-                node1->position.z = 14.82f;
-                node2->position.x = -16.17f;
-                node2->position.y = 1.31f;
-                node2->position.z = 14.65f;
-            } else {
+            if (__builtin_expect(!(group->forces[1] == first), 1)) {
                 node1->position.x = -16.31f;
                 node1->position.y = 0.67f;
                 node1->position.z = 14.82f;
                 node2->position.x = -16.36f;
                 node2->position.y = 1.33f;
                 node2->position.z = 14.54f;
+            } else {
+                node1->position.x = -16.31f;
+                node1->position.y = 0.67f;
+                node1->position.z = 14.82f;
+                node2->position.x = -16.17f;
+                node2->position.y = 1.31f;
+                node2->position.z = 14.65f;
             }
         } else if (selected == third) {
-            if (group->forces[1] != first) {
+            if (__builtin_expect(group->forces[1] != first, 1)) {
                 node0->position.x = -16.20f;
                 node0->position.y = 0.31f;
                 node0->position.z = 15.13f;

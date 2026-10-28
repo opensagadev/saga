@@ -860,8 +860,8 @@ static i32 ProcessConditionFlowBox(GIZFLOW_s *flow, FLOWBOX_s *box, u8) {
 }
 
 static i32 CheckOutputGizmoFlowBox(GIZFLOW_s *system, FLOWBOX_s *box, u8 output) {
-    if (((box->state_flags_high & 0x40) == 0 && FreePlay == 0) ||
-        ((box->state_flags_high & 0x20) == 0 && FreePlay != 0))
+    if (__builtin_expect(((box->state_flags_high & 0x40) == 0 && FreePlay == 0) ||
+        ((box->state_flags_high & 0x20) == 0 && FreePlay != 0), 0))
         return 1;
     FLOWBOXGIZMODATA_s *data = box->data;
     i32 result = 1;

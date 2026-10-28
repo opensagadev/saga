@@ -1085,7 +1085,7 @@ void EquivalentObjects_Configure(WORLDINFO_s *world, char *config) {
     world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 4);
     u8 *cursor = reinterpret_cast<u8 *>(world->giz_buffer.addr);
     world->equivalent_groups = reinterpret_cast<EQUIVALENTOBJECTGROUP_s *>(cursor);
-    while (NuFParGetLine(parser) != 0) {
+    while (__builtin_expect(NuFParGetLine(parser) != 0, 1)) {
         if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, const_cast<char *>("equivalentobjects")) == 0) {
 
             EQUIVALENTOBJECTGROUP_s *group = reinterpret_cast<EQUIVALENTOBJECTGROUP_s *>(cursor);

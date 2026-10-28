@@ -1488,7 +1488,7 @@ void ResetAdaptiveDifficulty() {
 
 void InitGameBeforeConfig(void) {
     f32 frame_time;
-    if (PAL != 0) {
+    if (__builtin_expect(PAL != 0, 1)) {
         NuStrCpy(prodcode, "BESLES-54221");
         frame_time = 0.02f;
     } else {
@@ -3087,10 +3087,10 @@ void PartKill_ForceThrow(PART_s *part, i32) {
     if (level == CLOUDCITYTRAPB_LDATA) {
         debris = 0x75;
         part_debris = 8;
-    } else if (level == MAULA_LDATA) {
+    } else if (__builtin_expect(level == MAULA_LDATA, 0)) {
         debris = 0x2d;
         part_debris = 9;
-    } else if (level == MAULF_LDATA) {
+    } else if (__builtin_expect(level == MAULF_LDATA, 0)) {
         i32 type = 11;
         if (NuSpecialExistsFn(&LevHSpecial[0]) && NuSpecialCompare(&LevHSpecial[0], &part->special))
             type = 11;

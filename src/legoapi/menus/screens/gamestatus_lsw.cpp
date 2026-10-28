@@ -1413,10 +1413,12 @@ void TrueHero_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active
 static void LevelComplete_LSW_DrawActive(STATUS_STAGE_s *stage, STATUSPACKET_s *packet) {
     char text[256];
     if (stage->field_0x14 > 0) {
-        f32 alpha = 1.0f;
+        f32 alpha;
         if (stage->field_0x18 < 0.5f)
             alpha = stage->field_0x18 + stage->field_0x18;
-        else if (!(stage->field_0x18 < 3.5f))
+        else if (stage->field_0x18 < 3.5f)
+            alpha = 1.0f;
+        else
             alpha = 1.0f - ((stage->field_0x18 - 3.5f) + (stage->field_0x18 - 3.5f));
         if (alpha > 0.0f) {
             const i32 opacity = alpha * 128.0f;
@@ -1431,13 +1433,13 @@ static void LevelComplete_LSW_DrawActive(STATUS_STAGE_s *stage, STATUSPACKET_s *
                     (BONUS_GUNSHIP_ADATA != NULL && packet->area == BONUS_GUNSHIP_ADATA)) {
                     SmartTextEx(TTab[tLEVELCOMPLETE], 0.0f, 0.0f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,
                                 STATUS_B, 1.7f, 1, NULL, 0, opacity);
-                } else if (FreePlayUnlocked()) {
+                } else if (!FreePlayUnlocked()) {
+                    SmartTextEx(TTab[tLEVELCOMPLETE], 0.0f, 0.0f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,
+                                STATUS_B, 1.7f, 1, NULL, 0, opacity);
+                } else {
                     SmartTextEx(TTab[tLEVELCOMPLETE], 0.0f, 0.1f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,
                                 STATUS_B, 1.7f, 1, NULL, 0, opacity);
                     SmartTextEx(TTab[tFREEPLAYUNLOCKED], 0.0f, -0.1f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,
-                                STATUS_B, 1.7f, 1, NULL, 0, opacity);
-                } else {
-                    SmartTextEx(TTab[tLEVELCOMPLETE], 0.0f, 0.0f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,
                                 STATUS_B, 1.7f, 1, NULL, 0, opacity);
                 }
             } else if (stage->type == 8) {
@@ -1481,16 +1483,20 @@ static void LevelComplete_LSW_DrawActive(STATUS_STAGE_s *stage, STATUSPACKET_s *
             }
         }
     }
-    if (stage->type != 23 && stage->type != 26)
-        return;
-    if (stage->field_0x14 == 0 || stage->field_0x18 < stage->field_0x1c - 0.5f)
+    if (stage->type != 23) {
+        if (stage->type != 26)
+            return;
+    }
+    if (stage->field_0x14 == 0)
+        iconalphaoverride = 0.0f;
+    else if (stage->field_0x18 < stage->field_0x1c - 0.5f)
         iconalphaoverride = 0.0f;
     else
         iconalphaoverride = (stage->field_0x18 - (stage->field_0x1c - 0.5f)) * 2.0f;
     if (stage->type == 26) {
         if (packet->mission_state != 2)
             return;
-        if (packet->previous_gold_bricks < Game.field_0x7c26[0])
+        if (Game.field_0x7c26[0] > packet->previous_gold_bricks)
             iconalphaoverride = 0.0f;
     } else if (stage->type != 23 || packet->challenge_state != 2) {
         return;
@@ -1499,16 +1505,14 @@ static void LevelComplete_LSW_DrawActive(STATUS_STAGE_s *stage, STATUSPACKET_s *
     if (stage->field_0x18 < 0.75f) {
         progress = 0.0f;
         slide = stage->field_0x18 / 0.7f;
-    } else if (!(stage->field_0x18 < stage->field_0x1c - 0.75f)) {
-        progress = 1.0f;
-        slide = 1.0f - (stage->field_0x18 - (stage->field_0x1c - 0.75f)) / 0.75f;
-    } else {
+    } else if (stage->field_0x18 < stage->field_0x1c - 0.75f) {
         progress = (stage->field_0x18 - 0.75f) / (stage->field_0x1c - 0.75f - 0.75f);
         slide = 1.0f;
+    } else {
+        progress = 1.0f;
+        slide = 1.0f - (stage->field_0x18 - (stage->field_0x1c - 0.75f)) / 0.75f;
     }
-    f32 coin_slide = slide;
-    if (!(stage->field_0x18 < 0.75f))
-        coin_slide = 1.0f;
+    const f32 coin_slide = stage->field_0x18 < 0.75f ? slide : 1.0f;
     u32 score = packet->original_score;
     IncreaseScore(&score,
                   static_cast<i64>(static_cast<i32>(static_cast<f32>(packet->reward_score - score) * progress)), 0);

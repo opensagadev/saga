@@ -542,7 +542,7 @@ void Hint_ExpandButtons(char *input, char *output) {
             token[token_length + 1] = '\0';
             token_length = NuStrLen(token);
             if (token_length > 0) {
-                if (Text_ExpandButtonString(token, expanded) != 0) {
+                if (__builtin_expect(Text_ExpandButtonString(token, expanded) != 0, 0)) {
                     char *character = expanded;
                     while (*character != '\0') {
                         *output = *character;
@@ -973,13 +973,13 @@ void Hint_LoadAllGameState() {
     }
 
     for (i32 index = 0; (index >> 5) < system->save_bit_count; ++index) {
-        if (HINT_COMPLETE(index) == 0) {
+        if (__builtin_expect(HINT_COMPLETE(index) == 0, 0)) {
             hint->completion_flags[MechInputTouchSystem::s_baseControlMode] = 0;
         } else {
             hint->completion_flags[MechInputTouchSystem::s_baseControlMode] = 1;
         }
         ++hint;
-        if (hint->control_mode_ids[0] == -1) {
+        if (__builtin_expect(hint->control_mode_ids[0] == -1, 0)) {
             return;
         }
     }

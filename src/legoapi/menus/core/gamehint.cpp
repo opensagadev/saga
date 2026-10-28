@@ -556,7 +556,7 @@ i32 HINT_COMPLETE(i32 hint_id) {
 }
 
 void MenuUpdateHints(MENU_s *menu) {
-    if (menu->input_activity != 0 && menu->confirm_pressed != 0) {
+    if (__builtin_expect(menu->input_activity != 0 && menu->confirm_pressed != 0, 1)) {
         if (menu->selected_item == 0)
             menu->up_pressed = 1;
         else

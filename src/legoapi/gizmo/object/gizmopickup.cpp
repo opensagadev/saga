@@ -358,7 +358,7 @@ void EndScoreMessage(GAMEMESSAGE_s *message) {
             IncreaseScore(&SuperStoryScore, data->score, 0);
         } else {
             WORLDINFO_s *world = WorldInfo_CurrentlyActive();
-            if (world->area != NULL && (world->area->flags & 0x100) != 0) {
+            if (__builtin_expect(world->area != NULL && (world->area->flags & 0x100) != 0, 1)) {
                 if (static_cast<u32>(BonusCoinTotal) < BonusCoinTarget) {
                     IncreaseScore(reinterpret_cast<u32 *>(&BonusCoinTotal), data->score, 0);
                     if (static_cast<u32>(BonusCoinTotal) >= BonusCoinTarget) {
@@ -637,7 +637,7 @@ void CollectPowerUp(GameObject_s *object, NUVEC *position, u16 rotation, i32) {
         message.player_index = object->apiobj.field_0x27c;
         message.duration = 1.0f;
         GAMEMESSAGE_s *game_message = AddGameMsg(&message);
-        if (game_message != NULL) {
+        if (__builtin_expect(game_message != NULL, 1)) {
             game_message->rotation_y = panel_rotation;
             PowerUp_PanelYRot[object->apiobj.field_0x27c] = panel_rotation;
         }
@@ -1032,7 +1032,7 @@ i32 ReleaseHearts() {
     }
 
     missing_hitpoints -= Game.save_version;
-    if (Game.save_version <= 5) {
+    if (__builtin_expect(Game.save_version <= 5, 0)) {
         missing_hitpoints += 8;
     } else {
         missing_hitpoints += 9;

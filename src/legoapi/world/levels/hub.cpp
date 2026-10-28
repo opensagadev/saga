@@ -732,25 +732,17 @@ static void Hub_DrawBonusModeMenu(int selected, float alpha) {
         for (i32 i = 0; i < 3; ++i) {
             i16 *label;
             memcpy(&label, reinterpret_cast<const u8 *>(&ArcadeItem) + i * 8, sizeof(label));
-            if (__builtin_expect(!!(label), 0))
+            if (label)
                 NuStrCpy(text[0], TTab[*label]);
             else
                 text[0][0] = 0;
             i32 opacity = full_opacity;
-            if (i != 1 && i != 2) {
-                if (text[0][0])
-                    NuStrCat(text[0], ": ");
-                area = *ArcadeLevel[ArcadeItem.level].area;
-                if (area && area->name_id != 0 && TTab[area->name_id])
-                    NuStrCat(text[0], TTab[area->name_id]);
-                else
-                    NuStrCat(text[0], "?");
-            } else if (__builtin_expect(i == 1, 1)) {
+            if (i == 1) {
                 if (text[0][0])
                     NuStrCat(text[0], ": ");
                 char *mode_text = TTab[*Arcade_Mode[static_cast<i8>(ArcadeItem.field_c_0xc)].text];
                 NuStrCat(text[0], mode_text ? mode_text : "?");
-                if (__builtin_expect(area && Game_LevelSave && area->levels[0] != -1, 0)) {
+                if (area && Game_LevelSave && area->levels[0] != -1) {
                     const i32 level = area->levels[0];
                     if ((reinterpret_cast<LEVELSAVE_s *>(Game_LevelSave)[level].arcade_flags &
                          (1u << (static_cast<i8>(ArcadeItem.field_c_0xc) & 31))) != 0)
@@ -764,8 +756,18 @@ static void Hub_DrawBonusModeMenu(int selected, float alpha) {
                                                  &WORLD->lev_objs[211].special, 2);
                     }
                 }
-            } else if (*ArcadeLevel[ArcadeItem.level].area == NULL)
-                opacity = full_opacity / 3;
+            } else if (i == 2) {
+                if (*ArcadeLevel[ArcadeItem.level].area == NULL)
+                    opacity = full_opacity / 3;
+            } else {
+                if (text[0][0])
+                    NuStrCat(text[0], ": ");
+                area = *ArcadeLevel[ArcadeItem.level].area;
+                if (area && area->name_id != 0 && TTab[area->name_id])
+                    NuStrCat(text[0], TTab[area->name_id]);
+                else
+                    NuStrCat(text[0], "?");
+            }
             i32 red, green, blue;
             if (selected && i == hub_bonusmode && TestForController()) {
                 if (menu_pulsate > 0.0f) {
@@ -2634,7 +2636,7 @@ void Hub_UpdateKit() {
                 index = AREACOUNT;
             if (++attempts >= AREACOUNT)
                 break;
-        } while ((ADataList[index].flags & 0x10) == 0);
+        } while (__builtin_expect((ADataList[index].flags & 0x10) == 0, 0));
         hub_minikitviewer_area = index;
     } else if (right && !left) {
         hub_minikitviewer_move = 1.0f;
@@ -2644,7 +2646,7 @@ void Hub_UpdateKit() {
             ++index;
             if (index >= AREACOUNT)
                 index = 0;
-            if (++attempts >= AREACOUNT)
+            if (__builtin_expect(++attempts >= AREACOUNT, 0))
                 break;
         } while ((ADataList[index].flags & 0x10) == 0);
         hub_minikitviewer_area = index;
@@ -2753,7 +2755,7 @@ __attribute__((optimize("O2", "tree-vectorize"))) i32 Percent_UpdateHint(HINT_s 
     object = Player[1];
     if (object != NULL && object->apiobj.player_controlled) {
         active_players++;
-        if (!(NuVecXZDistSqr(&object->apiobj.position, &PercentHint_TriggerPos, NULL) >= 4.0f))
+        if (__builtin_expect(!(NuVecXZDistSqr(&object->apiobj.position, &PercentHint_TriggerPos, NULL) >= 4.0f), 1))
             nearby_players++;
     }
     if (active_players <= 0 || active_players != nearby_players)
@@ -4118,7 +4120,7 @@ void Hub_ActivateDoorMenu(LEVELDATA_s **level) {
     i32 menu_id;
     if (area != -1 && (ADataList[area].flags & AREAFLAG_BONUS_AREA) != 0) {
         menu_id = ADataList[area].episode_index != 0xff ? HUB_DOOR_MENU_EPISODE_BONUS : HUB_DOOR_MENU_BONUS;
-    } else if (VEHICLES_ADATA != NULL && area == VEHICLES_ADATA->index) {
+    } else if (__builtin_expect(VEHICLES_ADATA != NULL && area == VEHICLES_ADATA->index, 1)) {
         // The original sizes this list for 340 vehicle ids.
         i16 vehicle_ids[340];
         i32 vehicle_count;

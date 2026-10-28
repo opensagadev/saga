@@ -210,7 +210,7 @@ static __attribute__((noinline)) void GizPanel_CreateTerrain(GIZPANEL *panel) {
     if (panel == NULL) {
         return;
     }
-    if (panel->platform_id != -1) {
+    if (__builtin_expect(panel->platform_id != -1, 1)) {
         DeletePlatinst(panel->platform_id);
     }
 
@@ -400,7 +400,7 @@ static void GizPanels_StoreProgress(void *world_ptr, void *, void *progress_ptr)
                 reinterpret_cast<u32 *>(&progress->state)[word_index] |= bit;
                 flags = panel->flags;
             }
-            if ((flags & GIZPANEL_FLAG_VISIBLE) == 0) {
+            if (__builtin_expect((flags & GIZPANEL_FLAG_VISIBLE) == 0, 1)) {
                 reinterpret_cast<u32 *>(&progress->baddie_state)[word_index] &= ~bit;
                 flags = panel->flags;
             }
@@ -409,7 +409,7 @@ static void GizPanels_StoreProgress(void *world_ptr, void *, void *progress_ptr)
             }
             ++index;
             ++panel;
-        } while (index != panel_sys_count && index != 32);
+        } while (__builtin_expect(index != panel_sys_count && index != 32, 1));
     }
 }
 
@@ -657,7 +657,7 @@ void GizPanel_Reset(GIZPANEL_s *panel) {
     floor_position->y = GameShadow(NULL, floor_position, 0.2f, -1);
     const f32 target_floor = GameShadow(NULL, &target_position, 0.2f, -1);
     panel->target_offset.y = target_floor;
-    if (target_floor != 2000000.0f) {
+    if (__builtin_expect(target_floor != 2000000.0f, 0)) {
         panel->target_offset.y = target_floor + GIZPANEL_PLAYERPOSLIFT;
         FindAnglesZX(&ShadNorm, &panel->target_pitch, &panel->target_roll);
     }

@@ -622,9 +622,9 @@ void NuMemoryManager::ReleaseUnreferencedPages() {
         Header *header = page->first_header;
         Page *prev = page->prev;
         Page *next = page->next;
-        if ((header->value & ALLOC_MASK) == 0 &&
+        if (__builtin_expect((header->value & ALLOC_MASK) == 0 &&
             reinterpret_cast<u8 *>(header) + BLOCK_SIZE(header->value) == reinterpret_cast<u8 *>(page->end) &&
-            !page->is_external) {
+            !page->is_external, 1)) {
             FreeHeader *free_header = reinterpret_cast<FreeHeader *>(header);
             BinUnlink(free_header);
             if (!(event_handler->ReleasePage(this, page->original_ptr, page->size))) {

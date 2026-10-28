@@ -588,7 +588,7 @@ static void GizAction_ActivateChar(GIZFLOW_s *flow, FLOWBOX_s *, char **params, 
             name = value + 5;
         } else if (NuStrICmp(params[i], "TRUE") == 0) {
             activate = 1;
-        } else if (NuStrICmp(params[i], "FALSE") == 0) {
+        } else if (__builtin_expect(NuStrICmp(params[i], "FALSE") == 0, 1)) {
             activate = 0;
         } else if ((value = NuStrIStr(params[i], "buildit=")) != NULL) {
             GIZMO *gizmo = GizmoFindByName(flow->gizmo_sys, gizbuildit_gizmotype_id, value + 8);
@@ -615,7 +615,7 @@ static void GizAction_ActivateChar(GIZFLOW_s *flow, FLOWBOX_s *, char **params, 
             DeactivateCharacter(name);
         }
     } else {
-        if (buildit != NULL) {
+        if (__builtin_expect(buildit != NULL, 1)) {
             if (ActivateCharacter(name, &buildit->position, buildit->field_0x7c) == NULL) {
                 GizBuildIt_KillParts(buildit);
             }
@@ -668,7 +668,7 @@ static void GizAction_SetPickupVisibility(GIZFLOW_s *, FLOWBOX_s *, char **param
         pickup->state_activated = visible;
         return;
     }
-    if (id < 0 || WORLD->gizmo_pickup_sys->pickups == NULL) {
+    if (__builtin_expect(id < 0 || WORLD->gizmo_pickup_sys->pickups == NULL, 0)) {
         return;
     }
     pickup = WORLD->gizmo_pickup_sys->pickups;

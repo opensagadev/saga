@@ -1551,8 +1551,8 @@ void GizForce_ResetLOS(GameObject_s *object) {
 i32 GizForce_UpdateHint(HINT_s *) {
     for (i32 i = 0; i < 2; ++i) {
         GameObject_s *object = Player[i];
-        if (object != NULL && (object->apiobj.flags_low & 0x80) != 0 && object->field_0xd80 > 0.0f &&
-            object->force_glow_object != NULL && object->force_glow_kind == 0)
+        if (__builtin_expect(object != NULL && (object->apiobj.flags_low & 0x80) != 0 && object->field_0xd80 > 0.0f &&
+            object->force_glow_object != NULL && object->force_glow_kind == 0, 0))
             return 1;
     }
     return 0;

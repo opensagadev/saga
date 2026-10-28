@@ -409,7 +409,7 @@ void ShoveSystemCheckGameObject(GameObject_s *object) {
         f32 dx = point.x - shove->position.x;
         f32 dz = point.z - shove->position.z;
         if (dx == 0.0f) {
-            if (dz == 0.0f) {
+            if (__builtin_expect(dz == 0.0f, 0)) {
                 object->apiobj.movement_direction.x = 2.0f;
                 object->apiobj.movement_direction.z = 0.0f;
                 object->field_0x107a = shove->character_id;

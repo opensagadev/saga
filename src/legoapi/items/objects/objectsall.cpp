@@ -1886,7 +1886,7 @@ static void edpartSoundControlMenu(eduimenu_s *menu, eduiitem_s *item, u32) {
 
 static void edpartInstanceMenu(eduimenu_s *menu, eduiitem_s *, u32) {
     edpart_instance_menu = eduiMenuCreate(70, 70, 250, 250, ed_fnt, edpartCancelInstanceMenu, "Instance Select");
-    if (edpart_instance_menu != NULL && edpart_nearest_type != NULL) {
+    if (__builtin_expect(edpart_instance_menu != NULL && edpart_nearest_type != NULL, 1)) {
         edpart_nullobject_highlight = eduiItemToggleCreate(9999, edblack, edpart_nearest_type->effect_ids[0] == 9999, 2,
                                                            edpartSetInstanceType, nullobjectname);
         eduiMenuAddItem(edpart_instance_menu, edpart_nullobject_highlight);
@@ -1921,8 +1921,8 @@ static void edpartLevelTypeMenu(eduimenu_s *menu, eduiitem_s *, u32) {
         else
             eduiMenuAddItem(edpart_leveltype_menu, eduiItemSelCreate(1, edgrey, 0, 0, NULL, "Add Type"));
         for (i32 index = 0; index < 128; ++index) {
-            if (part_types[index].name[0] != '\0' && part_types[index].field_b3 == 1) {
-                if (index == edpart_create_type) {
+            if (__builtin_expect(part_types[index].name[0] != '\0' && part_types[index].field_b3 == 1, 1)) {
+                if (__builtin_expect(index == edpart_create_type, 0)) {
                     eduiMenuAddItem(edpart_leveltype_menu,
                                     eduiItemCheckCreate(index, edblack, 1, 1, edpartSelType, part_types[index].name));
                     edpart_leveltype_menu->selected = edui_last_item;
@@ -1948,7 +1948,7 @@ static void edpartGeneralTypeMenu(eduimenu_s *menu, eduiitem_s *, u32) {
         else
             eduiMenuAddItem(edpart_generaltype_menu, eduiItemSelCreate(1, edgrey, 0, 0, NULL, "Add Type"));
         for (i32 index = 0; index < 128; ++index) {
-            if (part_types[index].name[0] != '\0' && part_types[index].field_b3 == 0) {
+            if (__builtin_expect(part_types[index].name[0] != '\0' && part_types[index].field_b3 == 0, 1)) {
                 if (index == edpart_create_type) {
                     eduiMenuAddItem(edpart_generaltype_menu,
                                     eduiItemCheckCreate(index, edblack, 1, 1, edpartSelType, part_types[index].name));
@@ -3198,7 +3198,7 @@ i32 edpartLookupObjectInScene(char *name, nugscn_s *scene) {
             if (__builtin_expect(NuSpecialExistsFn(&special) && NuStrNCmp(name, NuSpecialGetName(&special), 16) == 0, 0))
                 break;
         }
-        if (i < count)
+        if (__builtin_expect(i < count, 1))
             return i;
     }
     return -1;

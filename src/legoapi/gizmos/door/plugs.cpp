@@ -103,7 +103,7 @@ static NUVEC *Plug_GetPos(GIZMO *gizmo) {
 static void *Plugs_ReserveBufferSpace(void *world_ptr) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
     world->plug_sys = NULL;
-    if (world->current_level->max_plugs == 0) {
+    if (__builtin_expect(world->current_level->max_plugs == 0, 1)) {
         return NULL;
     }
 

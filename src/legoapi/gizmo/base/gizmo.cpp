@@ -650,7 +650,7 @@ void GizmoSysStoreProgress(GIZMOSYS_s *system, void *world, i32 progress_index) 
 }
 
 void GizmoSysReset(GIZMOSYS *gizmo_sys, void *world, i32 progress_index) {
-    if (gizmotypes != NULL && gizmo_sys != NULL) {
+    if (__builtin_expect(gizmotypes != NULL && gizmo_sys != NULL, 1)) {
         GIZMOTYPE *type = gizmotypes->types;
         GIZMOSET *set = gizmo_sys->sets;
 
@@ -948,7 +948,7 @@ GIZMO *GizmoFindByName(GIZMOSYS *gizmo_sys, i32 type_id, char *name) {
     GIZMOTYPE *type = gizmotypes->types;
     GIZMOSET *set = gizmo_sys->sets;
     for (i32 type_index = 0; type_index < gizmotypes->count; ++type_index, ++type, ++set) {
-        if (type->fns.get_gizmo_name_fn == NULL) {
+        if (__builtin_expect(type->fns.get_gizmo_name_fn == NULL, 0)) {
             continue;
         }
 

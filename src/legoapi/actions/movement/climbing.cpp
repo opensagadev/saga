@@ -862,7 +862,7 @@ void Climb_MoveCode(GameObject_s *object) {
         object->character_context = LEGOCONTEXT_CLIMB;
         object->field_0x7a6 = surface;
         object->airborne_action_duration = 0.25f;
-        if (surface == 5) {
+        if (__builtin_expect(surface == 5, 0)) {
             Climb_SetMagnetAction(object);
             Climb_SetMagnetDrawOffsetTarget(object, &object->zipup_swing_position);
         } else {
@@ -938,7 +938,7 @@ i32 Climb_SetTargetMom(GameObject_s *object, u16 input_angle) {
         if (object->apiobj.character_model->model_data_b[animation] != NULL)
             speed = fabsf(AnimSpeed(object->apiobj.character_model, animation));
     }
-    if (speed == 0.0f)
+    if (__builtin_expect(speed == 0.0f, 1))
         speed = 0.5f;
     u16 angle = object->apiobj.movement_facing_angle;
     object->target_velocity.x = NuTrigTable[static_cast<u16>(angle / 2)] * speed;
@@ -1012,7 +1012,7 @@ check_hang_jump:
 try_start_hang:
     if (object->apiobj.field_0x27d != 0)
         return;
-    if (object->field_0x1084 == 0)
+    if (__builtin_expect(object->field_0x1084 == 0, 1))
         return;
     if (CanClimbSurface(object, static_cast<i8>(object->field_0x6b0)) == 0)
         return;

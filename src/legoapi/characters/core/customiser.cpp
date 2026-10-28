@@ -200,7 +200,7 @@ void Customiser_DrawAccessories(CUSTOMISER *customiser, GameObject_s *object, nu
 i32 Customiser_NextPieceRight(CUSTOMISER *customiser, i32 index, i32 count, i32 unused, i32 category) {
     i32 found = 0;
     i32 attempts = 0;
-    if (customiser) {
+    if (__builtin_expect(customiser != 0, 1)) {
         while (attempts < count && !found) {
             ++index;
             if (index >= count)
@@ -223,10 +223,7 @@ i32 Customiser_NextPieceRight(CUSTOMISER *customiser, i32 index, i32 count, i32 
             if (available) {
                 if (!(customiser->piece_sets[category][index].availability_flags & 0x180) ||
                     Game_100PercentComplete()) {
-                    if (customiser->piece_available(&customiser->piece_sets[category][index]))
-                        found = 1;
-                    else
-                        ++attempts;
+                    if (!(customiser->piece_available(&customiser->piece_sets[category][index]))) ++attempts; else found = 1;
                 } else
                     ++attempts;
             } else
@@ -402,7 +399,7 @@ void Customiser_DumpAccessories(CUSTOMISER *customiser) {
 }
 
 void Customiser_DumpAll(CUSTOMISER *customiser, WORLDINFO_s *world) {
-    if (customiser == NULL) {
+    if (__builtin_expect(customiser == NULL, 0)) {
         return;
     }
     for (i32 category = 0; category < 9; ++category) {

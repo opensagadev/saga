@@ -587,7 +587,7 @@ void NuTouchInputButton::Update(NuInputTouchData const *data) {
         float ty = data->touch_events[i].unknown_08;
         float tx = data->touch_events[i].unknown_04;
         u32 touch_id = data->touch_events[i].unknown_14;
-        if (!released && !started && !active)
+        if (__builtin_expect(!released && !started && !active, 0))
             continue;
         float dy = ty - y;
         float ry = height * 0.5f;

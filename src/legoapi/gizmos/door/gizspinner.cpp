@@ -208,7 +208,7 @@ static void GizSpinner_StoreProgressData(void *world_ptr, void *, void *progress
         if (GameAnimSet_IsAnimationReset(spinner->anim_set) != 0) {
             entry->animation_position = 0.0f;
         }
-        if (spinner->anim_set->state == GAMEANIMSET_STATE_AT_END) {
+        if (__builtin_expect(spinner->anim_set->state == GAMEANIMSET_STATE_AT_END, 0)) {
             entry->animation_position = 1.0f;
         } else {
             entry->animation_position = GameAnimSet_GetAnimPos(spinner->primary_anim_obj);
@@ -1449,8 +1449,8 @@ GIZSPINNER_s *GizSpinner_Find(WORLDINFO_s *world, nuvec_s *position, i32 alterna
     f32 nearest_distance = 1.5625f;
     for (i32 index = 0; index < world->current_level->max_spinners; ++index) {
         GIZSPINNER_s *spinner = &world->spinners[index];
-        if ((spinner->flags & 0x27) == GIZSPINNER_FLAG_VALID &&
-            (alternate != 0 ? (spinner->state_flags & 8) != 0 : (spinner->state_flags & 8) == 0)) {
+        if (__builtin_expect((spinner->flags & 0x27) == GIZSPINNER_FLAG_VALID &&
+            (alternate != 0 ? (spinner->state_flags & 8) != 0 : (spinner->state_flags & 8) == 0), 1)) {
             NUVEC spinner_position;
             GizSpinner_GetSpinnerPos(spinner, &spinner_position);
             f32 distance = NuVecDistSqr(position, &spinner_position, NULL);

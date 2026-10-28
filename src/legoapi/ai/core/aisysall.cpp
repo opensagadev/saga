@@ -1013,7 +1013,7 @@ static void AISysLoadPathRoutes(AISYS *system, AIPATH *path, i32 version, char *
                     } else {
                         route->character_mask[0] = 0xffffffff;
                         route->character_mask[1] = 0xffffffff;
-                        route->character_mask[3] |= 0x80000000;
+                        route->character_masks[1] |= static_cast<u64>(1) << 63;
                     }
                 }
             }
@@ -1035,20 +1035,23 @@ static void AISysLoadPathRoutes(AISYS *system, AIPATH *path, i32 version, char *
 }
 
 static AIPATHSYS *AISysLoadPaths(AISYS *system, i32 version, NUGSCN *scene, char *name_buffer) {
+    VARIPTR *end = &system->storage_end;
+    VARIPTR *cursor = &system->storage_cursor;
     i32 path_count = EdFileReadInt();
     if (path_count == 0) {
         return NULL;
     }
 
-    AIPATHSYS *path_system = static_cast<AIPATHSYS *>(AISysLoadAlloc(system, sizeof(AIPATHSYS)));
+    AIPATHSYS *path_system = static_cast<AIPATHSYS *>(AISysBufferAlloc(cursor, end, sizeof(AIPATHSYS)));
     if (path_system == NULL) {
         return NULL;
     }
     path_system->path_count = static_cast<u8>(path_count);
-    path_system->paths = static_cast<AIPATH **>(AISysLoadAlloc(system, path_system->path_count * sizeof(AIPATH *)));
+    path_system->paths =
+        static_cast<AIPATH **>(AISysBufferAlloc(cursor, end, path_system->path_count * sizeof(AIPATH *)));
 
     for (i32 path_index = 0; path_index < path_system->path_count; ++path_index) {
-        path_system->paths[path_index] = static_cast<AIPATH *>(AISysLoadAlloc(system, sizeof(AIPATH)));
+        path_system->paths[path_index] = static_cast<AIPATH *>(AISysBufferAlloc(cursor, end, sizeof(AIPATH)));
         AIPATH *path = path_system->paths[path_index];
         EdFileRead(path->name, sizeof(path->name));
         path->node_count = static_cast<u8>(EdFileReadChar());
@@ -1062,7 +1065,7 @@ static AIPATHSYS *AISysLoadPaths(AISYS *system, i32 version, NUGSCN *scene, char
 
         if (path->connection_count != 0) {
             path->connections =
-                static_cast<AIPATHCNX *>(AISysLoadAlloc(system, path->connection_count * sizeof(AIPATHCNX)));
+                static_cast<AIPATHCNX *>(AISysBufferAlloc(cursor, end, path->connection_count * sizeof(AIPATHCNX)));
             for (i32 connection_index = 0; connection_index < path->connection_count; ++connection_index) {
                 AIPATHCNX *connection = &path->connections[connection_index];
                 connection->direction_a = static_cast<u8>(EdFileReadChar());
@@ -1091,12 +1094,13 @@ static AIPATHSYS *AISysLoadPaths(AISYS *system, i32 version, NUGSCN *scene, char
         if (version == 1)
             EdFileReadChar();
         if (path->node_count != 0) {
-            path->nodes = static_cast<AIPATHNODE *>(AISysLoadAlloc(system, path->node_count * sizeof(AIPATHNODE)));
+            path->nodes =
+                static_cast<AIPATHNODE *>(AISysBufferAlloc(cursor, end, path->node_count * sizeof(AIPATHNODE)));
             for (i32 node_index = 0; node_index < path->node_count; ++node_index) {
                 AIPATHNODE *node = &path->nodes[node_index];
                 const i32 name_length = EdFileReadInt();
                 if (name_length != 0) {
-                    node->name = static_cast<char *>(AISysLoadAlloc(system, name_length + 1));
+                    node->name = static_cast<char *>(AISysBufferAlloc(cursor, end, name_length + 1));
                     EdFileRead(node->name, name_length);
                 }
                 node->position.x = EdFileReadFloat();
@@ -1118,11 +1122,11 @@ static AIPATHSYS *AISysLoadPaths(AISYS *system, i32 version, NUGSCN *scene, char
                 EdFileReadChar();
                 node->runtime_flags = static_cast<u8>(EdFileReadChar()) & ~6u;
                 node->path_flags = EdFileReadShort();
-                if (version < 19) {
+                if (version > 18) {
+                    node->special_route_index = static_cast<u8>(EdFileReadChar());
+                } else {
                     EdFileReadChar();
                     node->special_route_index = 0xff;
-                } else {
-                    node->special_route_index = static_cast<u8>(EdFileReadChar());
                 }
 
                 char *special_name = name_buffer;
@@ -1137,8 +1141,8 @@ static AIPATHSYS *AISysLoadPaths(AISYS *system, i32 version, NUGSCN *scene, char
                 }
 
                 if (path->connections != NULL && node->connection_count != 0) {
-                    node->connections =
-                        static_cast<AIPATHCNX **>(AISysLoadAlloc(system, node->connection_count * sizeof(AIPATHCNX *)));
+                    node->connections = static_cast<AIPATHCNX **>(
+                        AISysBufferAlloc(cursor, end, node->connection_count * sizeof(AIPATHCNX *)));
                     for (i32 i = 0; i < node->connection_count; ++i) {
                         i16 connection_index = EdFileReadShort();
                         node->connections[i] = &path->connections[connection_index];
@@ -1161,16 +1165,16 @@ static AIPATHSYS *AISysLoadPaths(AISYS *system, i32 version, NUGSCN *scene, char
         AISysLoadPathRoutes(system, path, version, name_buffer);
     }
 
-    if (version < 19)
+    if (__builtin_expect(version < 19, 0))
         return path_system;
     path_system->special_route_count = EdFileReadShort();
-    if (path_system->special_route_count != 0) {
+    if (__builtin_expect(path_system->special_route_count != 0, 1)) {
         path_system->special_routes = static_cast<AIPATHSPECIALROUTE *>(
-            AISysLoadAlloc(system, path_system->special_route_count * sizeof(AIPATHSPECIALROUTE)));
+            AISysBufferAlloc(cursor, end, path_system->special_route_count * sizeof(AIPATHSPECIALROUTE)));
         for (i32 i = 0; i < path_system->special_route_count; ++i) {
             AIPATHSPECIALROUTE *route = &path_system->special_routes[i];
             route->path_count = static_cast<u8>(EdFileReadChar());
-            route->paths = static_cast<AIPATH **>(AISysLoadAlloc(system, route->path_count * sizeof(AIPATH *)));
+            route->paths = static_cast<AIPATH **>(AISysBufferAlloc(cursor, end, route->path_count * sizeof(AIPATH *)));
             for (i32 path_index = 0; path_index < route->path_count; ++path_index) {
                 const i32 read_path_index = EdFileReadChar();
                 route->paths[path_index] = path_system->paths[read_path_index];
@@ -1246,36 +1250,23 @@ static void AISysLoadAreas(AISYS *system, i32 version) {
     }
 
     system->areas = static_cast<AIAREA *>(AISysLoadAlloc(system, system->area_count * sizeof(AIAREA)));
-    if (version > 19) {
-        for (i32 index = 0; index < system->area_count; ++index) {
-            AIAREA *area = &system->areas[index];
-            EdFileRead(area->name, sizeof(area->name));
-            area->min_x = EdFileReadFloat();
-            area->min_y = EdFileReadFloat();
-            area->min_z = EdFileReadFloat();
-            area->max_x = EdFileReadFloat();
-            area->max_y = EdFileReadFloat();
-            area->max_z = EdFileReadFloat();
-            area->flags = EdFileReadShort();
-            area->system = system;
+    for (i32 index = 0; index < system->area_count; ++index) {
+        AIAREA *area = &system->areas[index];
+        EdFileRead(area->name, sizeof(area->name));
+        area->min_x = EdFileReadFloat();
+        area->min_y = EdFileReadFloat();
+        area->min_z = EdFileReadFloat();
+        area->max_x = EdFileReadFloat();
+        area->max_y = EdFileReadFloat();
+        area->max_z = EdFileReadFloat();
+        area->flags = EdFileReadShort();
+        area->system = system;
+        if (version > 19) {
             area->game_flags = static_cast<u8>(EdFileReadChar());
+        } else {
             EdFileReadChar();
         }
-    } else {
-        for (i32 index = 0; index < system->area_count; ++index) {
-            AIAREA *area = &system->areas[index];
-            EdFileRead(area->name, sizeof(area->name));
-            area->min_x = EdFileReadFloat();
-            area->min_y = EdFileReadFloat();
-            area->min_z = EdFileReadFloat();
-            area->max_x = EdFileReadFloat();
-            area->max_y = EdFileReadFloat();
-            area->max_z = EdFileReadFloat();
-            area->flags = EdFileReadShort();
-            area->system = system;
-            EdFileReadChar();
-            EdFileReadChar();
-        }
+        EdFileReadChar();
     }
 }
 
@@ -1307,12 +1298,12 @@ static void AISysLoadLocators(AISYS *system, i32 version) {
 }
 
 static void AISysLoadLocatorSets(AISYS *system, i32 version) {
-    if (version <= 17) {
+    if (__builtin_expect(version <= 17, 0)) {
         return;
     }
 
     system->locator_set_count = EdFileReadInt();
-    if (system->locator_set_count == 0) {
+    if (__builtin_expect(system->locator_set_count == 0, 0)) {
         return;
     }
 
@@ -1345,7 +1336,7 @@ static void AISysLoadCreatures(AISYS *system, i32 version, char *character_name,
         EdFileRead(creature->name, sizeof(creature->name));
         EdFileRead(creature->script_name, sizeof(creature->script_name));
 
-        if (creature->script_name[0] == '\0') {
+        if (__builtin_expect(creature->script_name[0] == '\0', 0)) {
             strcpy(creature->script_name, "default");
         }
         if (version < 14)
@@ -1375,14 +1366,14 @@ static void AISysLoadCreatures(AISYS *system, i32 version, char *character_name,
         u16 connection_index = static_cast<u16>(EdFileReadShort());
         creature->path_info.connection = &creature->path_info.path->connections[connection_index];
 
-        if (version > 2) {
+        if (__builtin_expect(version > 2, 0)) {
             creature->script_params[0] = EdFileReadFloat();
             creature->script_params[1] = EdFileReadFloat();
             creature->script_params[2] = EdFileReadFloat();
             creature->script_params[3] = EdFileReadFloat();
         }
 
-        if (version > 3) {
+        if (__builtin_expect(version > 3, 1)) {
             creature->area = AISysLoadAreaReference(system, area_name);
         }
         if (version > 5) {
@@ -1411,7 +1402,7 @@ static void AISysLoadCreatures(AISYS *system, i32 version, char *character_name,
         } else {
             creature->start_stagger = default_stagger_start;
         }
-        if (creature->activate_type == 1) {
+        if (__builtin_expect(creature->activate_type == 1, 0)) {
             EdFileRead(area_name, 16);
             creature->activate_area = AISysLoadFindArea(system, area_name);
         }
@@ -7094,7 +7085,7 @@ static void xConditions(NUFPAR *parser) {
                 cond->type = LT_EQ;
             } else if (NuStrICmp(parser->word_buf, ">=") == 0) {
                 cond->type = GT_EQ;
-            } else if (NuStrICmp(parser->word_buf, "!=") == 0) {
+            } else if (__builtin_expect(NuStrICmp(parser->word_buf, "!=") == 0, 1)) {
                 cond->type = NEQ;
             } else {
                 cond->arg = AIScriptCopyString(parser->word_buf, load_buff, load_endbuff);
@@ -7871,7 +7862,7 @@ __used__ static i32 Action_SetParam(AISYS *sys, AISCRIPTPROCESS *processor, AIPA
                     }
                 } else {
                     // Expressions use the packet's primary processor, even for a secondary action processor.
-                    if ((value = NuStrIStr(params[i], "inc=")) == NULL) {
+                    if (__builtin_expect((value = NuStrIStr(params[i], "inc=")) == NULL, 0)) {
                         if ((value = NuStrIStr(params[i], "dec=")) == NULL) {
                             processor->params[index] = AIParamToFloatEx(packet, &packet->script_process, params[i]);
                         } else {
@@ -11543,7 +11534,7 @@ extern "C" void AIFormationFollow(AIPACKET *packet) {
             f32 column_offset = ((column + 1) / 2) * group->x_spacing;
             offset.x = (column & 1) != 0 ? -column_offset : column_offset;
         }
-        if (group->is_reversed) {
+        if (__builtin_expect(group->is_reversed != 0, 0)) {
             offset.x = -offset.x;
         }
         offset.y = 0.0f;
@@ -12519,9 +12510,7 @@ void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *objec
         }
     }
     if (connection == NULL || path == NULL || destination_connection == NULL) {
-        packet->movement_destination.x = packet->owner->apiobj.position.x;
-        packet->movement_destination.y = packet->owner->apiobj.position.y;
-        packet->movement_destination.z = packet->owner->apiobj.position.z;
+        packet->movement_destination = packet->owner->apiobj.position;
         packet->movement_stopping_distance = 0.0f;
         return;
     }
@@ -12535,8 +12524,8 @@ void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *objec
             AISysCharacterSetPathCnx(packet, &object->position, target, direction);
         }
         if (packet->path_info.connection != packet->fallback_path_info.connection) {
-            direction = packet->path_info.direction;
             i32 goal_index = destination_connection->node_indices[0];
+            direction = packet->path_info.direction;
             f32 current_distance = packet->path_info.dist;
             if (current_distance > 1.0f) {
                 current_distance = 1.0f;
@@ -12837,9 +12826,9 @@ void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *objec
             return;
         }
     }
+    packet->movement_stopping_distance = 0.0f;
     packet->movement_destination =
         path->nodes[packet->path_info.connection->node_indices[packet->path_info.direction == 0]].position;
-    packet->movement_stopping_distance = 0.0f;
     NUVEC offset;
     if (NuVecDistSqr(&packet->movement_destination, &object->position, &offset) < 1.0f) {
         packet->movement_destination = object->position;
@@ -16759,7 +16748,7 @@ extern "C" {
             return;
         NULISTHDR *list = reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x42e94);
         EDANTINODE_s *head = reinterpret_cast<EDANTINODE_s *>(NuLinkedListGetHead(list));
-        if (head == nullptr) {
+        if (__builtin_expect(head == nullptr, 0)) {
             EdFileWriteInt(0);
             return;
         }

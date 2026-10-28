@@ -99,7 +99,7 @@ i32 AndroidOBBUtils::OpenFile(char const *name) {
     } else {
         return 0;
     }
-    if (ms_initializedPackage[type]) {
+    if (__builtin_expect(ms_initializedPackage[type] != 0, 1)) {
         return NuFileOpen(ms_packageName[type], NUFILE_READ);
     }
     return 0;

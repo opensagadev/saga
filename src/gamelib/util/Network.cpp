@@ -88,11 +88,11 @@ bool NetPredictor::AllowPush(EdClass const *object_class, void const *object, Re
         allowed = 1;
     } else if (now - *last_push > minimum_interval) {
         ReplicatorData prediction_data = data;
-        if (DoPrediction(object_class, const_cast<void *>(object), prediction_data, 1) != 0) {
+        if (__builtin_expect(DoPrediction(object_class, const_cast<void *>(object), prediction_data, 1) != 0, 0)) {
             *failed_predictions = 0;
             replication_group |= 1;
             allowed = 1;
-        } else if (*failed_predictions <= 2) {
+        } else if (__builtin_expect(*failed_predictions <= 2, 1)) {
             ++*failed_predictions;
             replication_group &= ~1;
             allowed = 1;
@@ -1070,7 +1070,7 @@ void NetworkObjectManager::Receive(NetMessage message, unsigned char, NetPeer co
         stop = 0;
         switch (type) {
             case 0:
-                if (active != 0 && IsPeerReady(peer) != 0) {
+                if (__builtin_expect(active != 0 && IsPeerReady(peer) != 0, 0)) {
                     message.Read32(guid_group);
                 } else {
                     stop = 1;

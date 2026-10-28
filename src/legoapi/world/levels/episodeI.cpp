@@ -330,7 +330,7 @@ static __used__ void PodRaceSnipersReset(void) {
                 dst->fire_timer = NuRandFloat() * PodRace_sniper_fire_time + half_time;
                 PodRace_snipers[PodRace_nsnipers++].state = 0.0f;
                 npts += 2;
-            } while (npts < spline->length && PodRace_nsnipers <= 9);
+            } while (__builtin_expect(npts < spline->length && PodRace_nsnipers <= 9, 1));
         }
     }
 }
@@ -2044,7 +2044,7 @@ void PodSprintA_Panel(WORLDINFO_s *world) {
 }
 
 void PodSprint_GetIAlongVals(nugspline_s *spline, i16 *out1, i16 *out2) {
-    if (spline == NULL)
+    if (__builtin_expect(spline == NULL, 0))
         return;
     PODSPRINT_s *ps = &podsprint;
     i32 idx = -1;
@@ -2058,7 +2058,7 @@ void PodSprint_GetIAlongVals(nugspline_s *spline, i16 *out1, i16 *out2) {
         idx = 3;
     else if (spline == ps->ai[4].spline)
         idx = 4;
-    else if (spline == ps->ai[5].spline)
+    else if (__builtin_expect(spline == ps->ai[5].spline, 0))
         idx = 5;
     else
         return;

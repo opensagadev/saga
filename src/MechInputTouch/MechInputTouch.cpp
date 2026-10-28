@@ -434,7 +434,7 @@ void MechInputTouchSystem::FindTargetForce(WORLDINFO_s *world, GameObject_s &obj
             continue;
         }
 
-        if (object.force_glow_object != force && keep_current_target) {
+        if (__builtin_expect(object.force_glow_object != force && keep_current_target, 0)) {
             continue;
         }
 

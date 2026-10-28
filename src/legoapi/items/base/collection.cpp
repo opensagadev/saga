@@ -777,7 +777,7 @@ void CollectAllCharacters(i32 only_story) {
     if (CollectCount <= 0)
         return;
 
-    if (only_story == 0) {
+    if (__builtin_expect(only_story == 0, 1)) {
         for (i32 i = 0; i < CollectCount; ++i) {
             if (CollectList[i].type != 8)
                 AddToCollection(CollectList[i].id);

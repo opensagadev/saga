@@ -193,7 +193,7 @@ void ResetStreaks() {
     STREAK_s *free_streaks = streaks_free;
 
     do {
-        while (header->streaks != NULL) {
+        while (__builtin_expect(header->streaks != NULL, 1)) {
             STREAK_s *streak = header->streaks;
             UnlinkStreak(&header->streaks, streak);
             streak->next = free_streaks;
@@ -201,7 +201,7 @@ void ResetStreaks() {
         }
 
         if (header->owner_slot != NULL) {
-            if (*header->owner_slot == header) {
+            if (__builtin_expect(*header->owner_slot == header, 1)) {
                 *header->owner_slot = NULL;
             }
             header->owner_slot = NULL;

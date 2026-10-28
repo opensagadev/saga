@@ -573,7 +573,7 @@ void MechTouchUIPlayerButton::TriggerTagNext() {
         i32 target_count = 0;
         for (i32 slot = 0; slot < 8; ++slot) {
             GameObject_s *target = Player[slot];
-            if (target != NULL && (static_cast<u16>(target->apiobj.field_0x1f8) & 0x1001) == 0x1001) {
+            if (__builtin_expect(target != NULL && (static_cast<u16>(target->apiobj.field_0x1f8) & 0x1001) == 0x1001, 1)) {
                 target_ids[target_count++] = target->id;
             }
         }
@@ -599,7 +599,7 @@ void MechTouchUIPlayerButton::TriggerTagNext() {
         if (target_ids[index] >= 0) {
             for (i32 slot = 0; slot < 8; ++slot) {
                 GameObject_s *target = Player[slot];
-                if (target != NULL) {
+                if (__builtin_expect(target != NULL, 1)) {
                     if (target->id == target_ids[index]) {
                         if (!(!TouchHacks::CanTagTo(*player, *target))) {
                             if (TagCode(player, target, 0, 0, 1) == 1) {
@@ -612,7 +612,7 @@ void MechTouchUIPlayerButton::TriggerTagNext() {
                 }
             }
         }
-        if (index == current_index) {
+        if (__builtin_expect(index == current_index, 0)) {
             return;
         }
         ++index;

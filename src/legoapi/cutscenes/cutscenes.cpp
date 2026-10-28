@@ -1403,7 +1403,7 @@ static void CutScene_RigidPostRender(NUGCUTRIGID_s *rigid, instNUGCUTRIGID_s *in
     }
 
     f32 ground = GameShadow(NULL, position, 5.0f, -1);
-    if (ground == 2000000.0f) {
+    if (__builtin_expect(ground == 2000000.0f, 0)) {
         return;
     }
     i32 surface = ShadowInfo();

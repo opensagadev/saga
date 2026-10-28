@@ -2547,7 +2547,7 @@ void DrawOffsetCode(GameObject_s *obj, i32 param) {
         (obj->movement_context_state & 0xffff00) == 0x54300) {
         target = obj->context_position_offset;
     }
-    if (param == 0) {
+    if (__builtin_expect(param == 0, 1)) {
         if (obj->render_offset.x == target.x && obj->render_offset.y == target.y && obj->render_offset.z == target.z) {
             return;
         }
@@ -2796,9 +2796,9 @@ f32 ForceTowardsMid(GameObject_s *object) {
             f32 ratio = (NuFsqrt(distance_squared) - inner) / (outer - inner);
             if (ratio > 3.0f)
                 ratio = 3.0f;
-            if (ratio >= 0.0f) {
+            if (__builtin_expect(ratio >= 0.0f, 1)) {
                 amount = ratio;
-                if (planar == 0 && sock->unknown_7c != 1.0f) {
+                if (__builtin_expect(planar == 0 && sock->unknown_7c != 1.0f, 1)) {
                     if (object->field_0x1086 == 4) {
                         NuVecInvMtxRotate(&delta, &delta, &object->vehicle_orientation);
                         delta.y *= 1.0f / sock->unknown_7c;
@@ -2825,7 +2825,7 @@ f32 ForceTowardsMid(GameObject_s *object) {
                 object->target_velocity.z += delta.z * speed;
             }
         }
-        if (planar == 0)
+        if (__builtin_expect(planar == 0, 1))
             return amount;
     }
     if ((sock->flags & 8) != 0 && object->apiobj.position.y >= object->sock_position.midpoint.y) {
@@ -3137,7 +3137,7 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
             api.field_0x276 = api.facing_angle;
         } else {
             f32 heading_seek_rate = 10.0f;
-            if (CarWashHack == object) {
+            if (object == CarWashHack) {
                 api.movement_facing_angle = 0x4000;
                 heading_seek_rate = 3.0f;
             } else if (requested_speed > 0.0f && object->character_context != 0x2a &&
@@ -3229,7 +3229,7 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
                         __builtin_expect(abs(RotDiff(normal_yaw, object->current_input_angle)) > 0x4000, 1)) {
                         i32 delta = RotDiff(normal_yaw, api.field_0x276);
                         if (abs(delta) > 0x4000) {
-                            i32 tangent = normal_yaw + (delta < 0 ? -0x4000 : 0x4000);
+                            i32 tangent = delta < 0 ? normal_yaw - 0x4000 : normal_yaw + 0x4000;
                             if (object->field_0xddc > 0.0f &&
                                 RotDiff(object->previous_boundary_angle, normal_yaw) > 0x2aaa &&
                                 abs(RotDiff(api.field_0x276, normal_yaw)) > 0x3fff) {
@@ -3261,9 +3261,9 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
                 }
             }
             if ((CInfo[object->character_context].flags & 1) != 0 && (object->id == id_STAP || object->id == id_STAP2))
-                api.field_0x276 = api.movement_facing_angle = api.facing_angle;
+                api.movement_facing_angle = api.field_0x276 = api.facing_angle;
             else
-                api.facing_angle = api.field_0x276 =
+                api.field_0x276 = api.facing_angle =
                     SeekRot(api.facing_angle, api.movement_facing_angle, heading_seek_rate);
         }
         f32 seek_rate = (PODSPRINT_ADATA != NULL && WORLD->area == PODSPRINT_ADATA)
@@ -3277,7 +3277,7 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
             object->target_velocity.x = api.movement_direction.x;
             object->target_velocity.z = api.movement_direction.z;
             api.movement_direction.x = api.movement_direction.z = 0.0f;
-        } else if (CarWashHack == object) {
+        } else if (object == CarWashHack) {
             object->target_velocity.x = carwash_delta.x * 3.0f;
             object->target_velocity.z = carwash_delta.z * 3.0f;
             seek_rate = 5.0f;
@@ -3441,7 +3441,7 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
         if (WORLD->current_level == SPEEDERCHASEA_LDATA && object->id == id_SPEEDERBIKE &&
             (MiniCutCam != 0 || (!disable_narrow_socks && (api.flags_low & 0x80) != 0 &&
                                  (other = GetOtherActivePlayer(object)) != NULL && other->apiobj.field_0x287 != 0)))
-            object->target_velocity.x = object->target_velocity.z = 0.0f;
+            object->target_velocity.z = object->target_velocity.x = 0.0f;
         api.velocity.x = SeekValF(api.velocity.x, object->target_velocity.x, seek_rate);
         api.velocity.z = SeekValF(api.velocity.z, object->target_velocity.z, seek_rate);
         if (in_tube) {
@@ -3463,7 +3463,7 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
             api.position.x = 11.805f;
             api.position.y = 3.0f;
             api.position.z = -26.105f;
-            object->target_velocity = api.velocity = v000;
+            api.velocity = object->target_velocity = v000;
         }
         if (special_lean != 0)
             object->movement_lean_angle = SeekRot(object->movement_lean_angle, special_lean, 3.0f);
@@ -3490,10 +3490,10 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
                 angular_speed = 8192;
             else {
                 angular_speed /= 4;
-                if (angular_speed < -8192)
-                    angular_speed = -8192;
-                else if (angular_speed > 8192)
+                if (angular_speed > 8192)
                     angular_speed = 8192;
+                else if (angular_speed < -8192)
+                    angular_speed = -8192;
             }
             object->movement_lean_angle = SeekRot(object->movement_lean_angle, angular_speed, rate);
         } else
@@ -7974,7 +7974,9 @@ void GameObjectStuffAfterAnimation() {
                         matrix = object->joint_matrices[joint];
                     else {
                         matrix = object->apiobj.field_0xb8;
-                        *NUMTX_GET_ROW_VEC(&matrix, 3) = object->apiobj.collision_position;
+                        matrix.m30 = object->apiobj.collision_position.x;
+                        matrix.m31 = object->apiobj.collision_position.y;
+                        matrix.m32 = object->apiobj.collision_position.z;
                     }
                     NUVEC velocity;
                     velocity.x = 0.0f;
@@ -8036,8 +8038,8 @@ void GameObjectStuffAfterAnimation() {
                                static_cast<u16>(object->context_animation - 46) <= 13) {
                         static const i32 first_blade[14] = {-1, -1, -1, 2, 2, 2, 2, 1, 3, 3, -1, -1, -1, -1};
                         static const i32 second_blade[14] = {0, 3, 3, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2};
-                        first = first_blade[object->context_animation - 46];
-                        second = second_blade[object->context_animation - 46];
+                        first = first_blade[static_cast<u16>(object->context_animation - 46)];
+                        second = second_blade[static_cast<u16>(object->context_animation - 46)];
                     }
                 }
                 u8 flags = streak | 1;
@@ -8082,7 +8084,7 @@ void GameObjectStuffAfterAnimation() {
                 LightSabreStreakCode(object, 0, effect);
         }
     after_shooting_and_streaks:
-        const i32 debris_joint = static_cast<i8>(object->pad_e3c[1]);
+        const i8 debris_joint = static_cast<i8>(object->pad_e3c[1]);
         if (debris_joint != -1)
             AddGameDebris(WORLD->debris_sys, (object->movement_runtime_flags & 1) != 0 ? 139 : 138,
                           NUMTX_GET_ROW_VEC(&object->joint_matrices[debris_joint], 3));
@@ -8113,7 +8115,9 @@ void GameObjectStuffAfterAnimation() {
             else {
                 NuMtxSetRotationX(&matrix, 0x1555);
                 NuMtxRotateY(&matrix, object->apiobj.field_0x276 + 0x8000);
-                *NUMTX_GET_ROW_VEC(&matrix, 3) = object->apiobj.collision_position;
+                matrix.m30 = object->apiobj.collision_position.x;
+                matrix.m31 = object->apiobj.collision_position.y;
+                matrix.m32 = object->apiobj.collision_position.z;
             }
             NUVEC velocity = {0.0f, 0.0f, -1.0f};
             NuVecMtxRotate(&velocity, &velocity, &matrix);
@@ -8261,7 +8265,7 @@ void GameObjectStuffAfterAnimation() {
                     f32 height = object->joint_matrices[2].m31 - object->apiobj.field_0x218;
                     if (height > 0.0f && height <= 0.2f) {
                         f32 amount = 25.0f;
-                        if (__builtin_expect(height >= 0.1f, 1))
+                        if (__builtin_expect(!(height < 0.1f), 1))
                             amount = (1.0f - (height - 0.1f) / 0.1f) * 25.0f;
                         if (static_cast<i32>(amount * ratio) > 0) {
                             NUVEC position = {object->joint_matrices[2].m30, object->apiobj.field_0x218,
@@ -8274,7 +8278,7 @@ void GameObjectStuffAfterAnimation() {
                     f32 height = object->joint_matrices[3].m31 - object->apiobj.field_0x218;
                     if (!(height <= 0.0f) && height <= 0.2f) {
                         f32 amount = 25.0f;
-                        if (height >= 0.1f)
+                        if (!(height < 0.1f))
                             amount = (1.0f - (height - 0.1f) / 0.1f) * 25.0f;
                         if (static_cast<i32>(amount * ratio) > 0) {
                             NUVEC position = {object->joint_matrices[3].m30, object->apiobj.field_0x218,
@@ -8287,7 +8291,7 @@ void GameObjectStuffAfterAnimation() {
                     f32 height = object->joint_matrices[4].m31 - object->apiobj.field_0x218;
                     if (height > 0.0f && height <= 0.2f) {
                         f32 amount = 25.0f;
-                        if (height >= 0.1f)
+                        if (!(height < 0.1f))
                             amount = (1.0f - (height - 0.1f) / 0.1f) * 25.0f;
                         if (static_cast<i32>(ratio * amount) > 0) {
                             NUVEC position = {object->joint_matrices[4].m30, object->apiobj.field_0x218,
@@ -8732,9 +8736,9 @@ i32 DragBomb_UpdateHint(HINT_s *hint) {
 
 i32 CanObjSlide(GameObject_s *object, i32) {
     const i8 surface = object->apiobj.field_0x281;
-    if (static_cast<u8>(surface) >= 32)
+    if (__builtin_expect(static_cast<u8>(surface) >= 32, 0))
         return 0;
-    if ((TerSurface[surface].flags & 0x400) != 0) {
+    if (__builtin_expect((TerSurface[surface].flags & 0x400) != 0, 0)) {
         if (surface == 5 && CanMagnetClimbFn != NULL) {
             if (CanMagnetClimbFn(object) == 0)
                 return 1;
@@ -8788,8 +8792,8 @@ void SlideCode(GameObject_s *object) {
 // Original 0x166f30, 403 bytes.
 i32 Slide_SetTargetMom(GameObject_s *object, u16 input_angle, float input_speed) {
     u16 direction;
-    if (object->apiobj.field_0x27d != 0 &&
-        (fabsf(object->surface_normal.x) > 0.001f || fabsf(object->surface_normal.z) > 0.001f))
+    if (__builtin_expect(object->apiobj.field_0x27d != 0 &&
+        (fabsf(object->surface_normal.x) > 0.001f || fabsf(object->surface_normal.z) > 0.001f), 1))
         direction = NuAtan2D(object->surface_normal.x, object->surface_normal.z);
     else
         direction = object->apiobj.movement_facing_angle;

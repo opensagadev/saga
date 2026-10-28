@@ -727,7 +727,7 @@ i32 SphereSphereOverlapScaleY(nuvec_s *position_a, float radius_a, float y_radiu
     f32 dx = position_b->x - position_a->x;
     f32 dz = position_b->z - position_a->z;
     f32 dy = position_b->y - position_a->y;
-    if (radius_b != y_radius_b || radius_a != y_radius_a) {
+    if (__builtin_expect(radius_b != y_radius_b || radius_a != y_radius_a, 0)) {
         dy *= (radius_b + radius_a) / (y_radius_b + y_radius_a);
     }
     f32 radius = radius_b + radius_a;

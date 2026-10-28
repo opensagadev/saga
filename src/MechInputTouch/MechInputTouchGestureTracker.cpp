@@ -42,12 +42,12 @@ void MechInputTouchGestureTrackingSystem::LookForClicks(GameObject_s &object) {
         if (first_recent && later_recent) {
             for (i32 priority = 0; priority < 10; ++priority) {
                 MechInputTouchGestureTracker *tracker = entries[priority].tracker;
-                if (!(tracker != NULL && tracker->OnDoubleClick(object, holder))) {
+                if (__builtin_expect(!(tracker != NULL && tracker->OnDoubleClick(object, holder)), 1)) {
                     continue;
                 }
                 break;
             }
-        } else if (first_recent || later_recent) {
+        } else if (__builtin_expect(first_recent || later_recent, 0)) {
             for (i32 priority = 0; priority < 10; ++priority) {
                 MechInputTouchGestureTracker *tracker = entries[priority].tracker;
                 if (!(tracker != NULL && tracker->OnClick(object, holder))) {
@@ -279,7 +279,7 @@ void MechInputTouchGestureTrackingSystem::UnregisterGestureTracker(MechInputTouc
     do {
         trackers[index] = trackers[index + 1];
         ++index;
-    } while (index != 9);
+    } while (__builtin_expect(index != 9, 0));
     trackers[9].tracker = NULL;
     trackers[9].priority = -1;
 }

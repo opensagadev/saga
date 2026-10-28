@@ -859,7 +859,7 @@ void MechTouchTaskPlannedGoTo::OnResume() {
         field_6fc = 0;
         return;
     }
-    if (field_6fc != 0) {
+    if (__builtin_expect(field_6fc != 0, 1)) {
         current_waypoint = 32;
         return;
     }

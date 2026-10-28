@@ -38,8 +38,8 @@ void ShaderMtlDescFilter::internalInit(nushadermtldesc_s const *material_desc, n
 }
 
 bool ShaderMtlDescFilter::hasLayer(i32 layer) const {
-    if (variant != 0) {
-        if (__builtin_expect(layer == 0, 0)) {
+    if (__builtin_expect(variant != 0, 1)) {
+        if (__builtin_expect(layer == 0, 1)) {
             return desc->unknown_1b4 & 1;
         }
         return false;

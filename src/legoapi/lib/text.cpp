@@ -764,7 +764,7 @@ void Text_ExpandAllButtonStrings(char *input, char *output) {
             token[token_length + 1] = '\0';
             token_length = NuStrLen(token);
             if (token_length > 0) {
-                if (Text_ExpandButtonString(token, expanded) != 0) {
+                if (__builtin_expect(Text_ExpandButtonString(token, expanded) != 0, 0)) {
                     char *character = expanded;
                     while (*character != '\0') {
                         *output = *character;

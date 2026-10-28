@@ -1128,7 +1128,7 @@ GLuint NuIOS_CreateGLTexFromPlatfomSpecificFile(const char *filename) {
         if (g_loadingCharacterInHub != 0 && bgProcIsBgThread() != 0) {
             NuIOS_YieldThread();
         }
-    } while (remaining != 0);
+    } while (__builtin_expect(remaining != 0, 1));
     NuFileOpenSize(file);
     NuFileClose(file);
 
@@ -1167,7 +1167,7 @@ GLuint NuIOS_CreateGLTexFromPlatfomSpecificForecPVR(const char *filename) {
         if (g_loadingCharacterInHub != 0 && bgProcIsBgThread() != 0) {
             NuIOS_YieldThread();
         }
-    } while (remaining != 0);
+    } while (__builtin_expect(remaining != 0, 1));
     NuFileOpenSize(file);
     NuFileClose(file);
 

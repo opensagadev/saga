@@ -341,7 +341,7 @@ i32 ReadPad(i32 port) {
         return result;
     }
 
-    if (input_mode == 3) {
+    if (__builtin_expect(input_mode == 3, 0)) {
         gamepad->buttons_down_08 |= pad->digital_buttons_pressed & GAMEPAD_START;
         return 3;
     }
@@ -356,7 +356,7 @@ i32 ReadPad(i32 port) {
     const f32 left_y = static_cast<f32>(pad->analog_left_y) - 127.5f;
     if (left_y < -85.0f) {
         gamepad->unknown_0c |= GAMEPAD_DUP;
-    } else if (left_y > 85.0f) {
+    } else if (__builtin_expect(left_y > 85.0f, 1)) {
         gamepad->unknown_0c |= GAMEPAD_DDOWN;
     }
     gamepad->unknown_10 = gamepad->unknown_0c & ~gamepad->unknown_14;
@@ -370,12 +370,12 @@ i32 ReadPad(i32 port) {
         gamepad->unknown_18 |= GAMEPAD_DRIGHT;
     }
     const f32 right_y = static_cast<f32>(pad->analog_right_y) - 127.5f;
-    if (!(right_y < -85.0f)) {
+    if (right_y < -85.0f) {
+        gamepad->unknown_18 |= GAMEPAD_DUP;
+    } else {
         if (right_y > 85.0f) {
             gamepad->unknown_18 |= GAMEPAD_DDOWN;
         }
-    } else {
-        gamepad->unknown_18 |= GAMEPAD_DUP;
     }
     gamepad->unknown_1c = gamepad->unknown_18 & ~gamepad->unknown_20;
     gamepad->unknown_20 = gamepad->unknown_18;

@@ -1245,7 +1245,7 @@ i32 InitCreature(GameObject_s *obj, i32 id, i32 param) {
         void **animation_table = obj->apiobj.character_model->model_data_b;
         if (animation_table[1] == NULL) {
             for (i32 i = 0; i < 0xe9; i++) {
-                if (animation_table[i] != NULL) {
+                if (__builtin_expect(animation_table[i] != NULL, 1)) {
                     obj->apiobj.anim_packet.animation_index = static_cast<u16>(i);
                     reset_animation = i;
                     break;

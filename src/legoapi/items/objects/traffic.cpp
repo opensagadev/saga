@@ -102,7 +102,7 @@ static void Traffic_vehicle(NUFPAR *parser) {
         vehicle_index = parse_trafficanimsys->vehicle_count++;
     }
 
-    if (vehicle_index != -1) {
+    if (__builtin_expect(vehicle_index != -1, 1)) {
         reference_trafficanim.vehicle_indices[reference_trafficanim.vehicle_count++] = vehicle_index;
     }
 }

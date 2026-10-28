@@ -341,12 +341,12 @@ void DeathStar2BattleD_Update(WORLDINFO_s *) {
         rtlDynamicSetRadii((*player)->dynamic_light_id, radius, radius + 5.0f);
         qrand();
         colour.x = 0.0f;
-        if (!(qrand() > 0x7fff)) {
-            colour.z = 2.0f;
-            colour.y = 2.0f;
-        } else {
+        if (qrand() > 0x7fff) {
             colour.y = 0.25f;
             colour.z = 0.25f;
+        } else {
+            colour.z = 2.0f;
+            colour.y = 2.0f;
         }
         rtlDynamicSetColours((*player)->dynamic_light_id, &colour, NULL);
         position.x = (*player)->apiobj.collision_position.x + delta.x * 0.5f;

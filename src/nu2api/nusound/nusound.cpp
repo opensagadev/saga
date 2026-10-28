@@ -60,7 +60,7 @@ NuSoundVoiceFactoryList::NuSoundVoiceFactoryList() {
     NuSoundVoiceFactory **replacement =
         static_cast<NuSoundVoiceFactory **>(NuMemoryGet()->GetThreadMem()->_BlockReAlloc(
             factories, 16 * sizeof(NuSoundVoiceFactory *), 4, 0x41, "", NUMEMORY_CATEGORY_NONE));
-    if (replacement != factories) {
+    if (__builtin_expect(replacement != factories, 1)) {
         u32 previous_capacity = capacity;
         for (u32 i = 0; i < previous_capacity; ++i) {
             replacement[i] = factories[i];

@@ -302,7 +302,8 @@ static void MakeWingFormation(_vuv_s *start, _vuv_s *target, f32 duration, i32 m
 #undef INIT_WING_FIGHTER
 }
 
-static __attribute__((noinline)) void StarFighterAlign(starfighter_s *fighter, _vuv_s *direction, f32 distance, i32 mode) {
+static __attribute__((noinline, noclone)) void StarFighterAlign(starfighter_s *fighter, _vuv_s *direction, f32 distance,
+                                                                i32 mode) {
     NUVEC4_ALIGNED16 local, up;
     NuVecInvMtxRotate(reinterpret_cast<NUVEC *>(&local), reinterpret_cast<NUVEC *>(direction), &fighter->matrix);
     const i16 yaw = static_cast<i16>(NuAtan2D(local.x, local.z));
@@ -1420,9 +1421,7 @@ static void ProcessSpaceLevel(spacelevel_s *space) {
             }
             if (space->unknown_337c == 1) {
                 formation_start = {0.0f, 0.0f, 300.0f, 1.0f};
-                formation_target.x = GameCam->render_mtx.m30;
-                formation_target.y = GameCam->render_mtx.m31;
-                formation_target.z = GameCam->render_mtx.m32;
+                *reinterpret_cast<NUVEC *>(&formation_target) = *reinterpret_cast<NUVEC *>(&GameCam->render_mtx.m30);
                 NuVecMtxTransform(reinterpret_cast<NUVEC *>(&formation_start),
                                   reinterpret_cast<NUVEC *>(&formation_start), &GameCam->render_mtx);
                 MakeWingFormation(reinterpret_cast<_vuv_s *>(&formation_start),
@@ -1446,7 +1445,7 @@ static void ProcessSpaceLevel(spacelevel_s *space) {
         }
         if (space->unknown_337c == 0) {
             space->action_timer -= FRAMETIME;
-            if (__builtin_expect(!(space->action_timer > 0.0f), 1))
+            if (__builtin_expect(!(space->action_timer > 0.0f), 0))
                 space->unknown_337c = 4;
         }
     }
@@ -1500,17 +1499,17 @@ static void ProcessSpaceLevel(spacelevel_s *space) {
             *reinterpret_cast<NUVEC *>(&group->target) = position;
         }
     }
-    if (info->count != 0) {
+    if (__builtin_expect(info->count != 0, 1)) {
         i32 valid0 = 0, valid1 = 0;
         f32 player0x, player0y, player0z;
         f32 player1x, player1y, player1z;
-        if (__builtin_expect(Player[0] != NULL && Player[0]->apiobj.player_controlled, 0)) {
+        if (Player[0] != NULL && __builtin_expect(Player[0]->apiobj.player_controlled, 1)) {
             player0x = Player[0]->apiobj.field_0xb8.m30;
             player0y = Player[0]->apiobj.field_0xb8.m31;
             player0z = Player[0]->apiobj.field_0xb8.m32;
             valid0 = 1;
         }
-        if (Player[1] != NULL && Player[1]->apiobj.player_controlled) {
+        if (Player[1] != NULL && __builtin_expect(Player[1]->apiobj.player_controlled, 1)) {
             player1x = Player[1]->apiobj.field_0xb8.m30;
             player1y = Player[1]->apiobj.field_0xb8.m31;
             player1z = Player[1]->apiobj.field_0xb8.m32;
@@ -1522,11 +1521,13 @@ static void ProcessSpaceLevel(spacelevel_s *space) {
                 continue;
             NUVEC *velocity = reinterpret_cast<NUVEC *>(&bolt->velocity);
             NUVEC *position = reinterpret_cast<NUVEC *>(&bolt->matrix.m30);
-            NUVEC movement = {velocity->x * FRAMETIME, velocity->y * FRAMETIME, velocity->z * FRAMETIME};
-            NUVEC next = {position->x + movement.x, position->y + movement.y, position->z + movement.z};
-            position->y = next.y;
-            position->z = next.z;
-            position->x = next.x;
+            const f32 frametime = FRAMETIME;
+            const f32 move_x = velocity->x * frametime;
+            const f32 move_y = velocity->y * frametime;
+            const f32 move_z = velocity->z * frametime;
+            position->x += move_x;
+            position->y += move_y;
+            position->z += move_z;
             if (Player[0] != NULL && valid0) {
                 const f32 dx = bolt->matrix.m30 - player0x;
                 const f32 dy = bolt->matrix.m31 - player0y;
@@ -1605,11 +1606,11 @@ static void ProcessSpaceLevel(spacelevel_s *space) {
                 fighter->speed = 50.0f;
                 if (spline->id == 87)
                     fighter->speed = 22.5f;
-                else if (__builtin_expect(spline->id == 86, 0))
+                else if (spline->id == 86)
                     fighter->speed = 22.5f;
-                else if (__builtin_expect(static_cast<u32>(spline->id - 84) < 2, 0))
+                else if (spline->id == 85 || spline->id == 84)
                     fighter->speed = 22.5f;
-                else if (__builtin_expect(spline->id == -307, 0))
+                else if (spline->id == -307)
                     fighter->speed = 33.0f;
                 if (spline->id == 54)
                     fighter->scale = 2.0f;
@@ -1631,47 +1632,16 @@ static void ProcessSpaceLevel(spacelevel_s *space) {
         if (space->queued_fighters[i].active != 0)
             ProcessStarFighter(&space->queued_fighters[i], info);
     }
-    i32 door_index = -1;
-#define DOOR_REACHED(player_index, door_index)                                                                         \
-    (Player[player_index]->field_0x68c > DogFightDoors.doors[door_index].distance)
-    if (__builtin_expect(Player[0] == NULL, 1)) {
-        if (Player[1] != NULL) {
-            if (__builtin_expect(!!(DOOR_REACHED(1, 6)), 0))
-                door_index = 6;
-            else if (DOOR_REACHED(1, 5))
-                door_index = 5;
-            else if (__builtin_expect(DOOR_REACHED(1, 4) != 0, 0))
-                door_index = 4;
-            else if (DOOR_REACHED(1, 3))
-                door_index = 3;
-            else if (__builtin_expect(!!(DOOR_REACHED(1, 2)), 0))
-                door_index = 2;
-            else if (DOOR_REACHED(1, 1))
-                door_index = 1;
-            else if (DOOR_REACHED(1, 0))
-                door_index = 0;
-        }
-    } else {
-        if (DOOR_REACHED(0, 6) || (Player[1] != NULL && DOOR_REACHED(1, 6)))
-            door_index = 6;
-        else if (DOOR_REACHED(0, 5) || (Player[1] != NULL && DOOR_REACHED(1, 5)))
-            door_index = 5;
-        else if (DOOR_REACHED(0, 4) || (Player[1] != NULL && DOOR_REACHED(1, 4)))
-            door_index = 4;
-        else if (DOOR_REACHED(0, 3) || (Player[1] != NULL && DOOR_REACHED(1, 3)))
-            door_index = 3;
-        else if (DOOR_REACHED(0, 2) || (Player[1] != NULL && DOOR_REACHED(1, 2)))
-            door_index = 2;
-        else if (DOOR_REACHED(0, 1) || (Player[1] != NULL && DOOR_REACHED(1, 1)))
-            door_index = 1;
-        else if (DOOR_REACHED(0, 0) || (Player[1] != NULL && DOOR_REACHED(1, 0)))
-            door_index = 0;
+    i32 door_index;
+    for (door_index = 6; door_index >= 0; --door_index) {
+        if ((Player[0] != NULL && Player[0]->field_0x68c > DogFightDoors.doors[door_index].distance) ||
+            (Player[1] != NULL && Player[1]->field_0x68c > DogFightDoors.doors[door_index].distance))
+            break;
     }
-#undef DOOR_REACHED
     if (door_index >= 0) {
         DOOR_s *door = WORLD->doors;
         for (i32 i = 0; i < WORLD->door_count; ++i, ++door) {
-            if (NuStrICmp(door->name, DogFightDoors.doors[door_index].name) == 0) {
+            if (__builtin_expect(NuStrICmp(door->name, DogFightDoors.doors[door_index].name) == 0, 0)) {
                 Doors_SetLastDoor(door);
                 break;
             }

@@ -1871,7 +1871,7 @@ static f32 Condition_EitherPlayerOnObject(AISYS *, AISCRIPTPROCESS *, AIPACKET *
     if (player2 != NULL && platform != -1 && (player2->apiobj.packed_contact_state & 0xffff00u) != 0 &&
         player2->apiobj.supporting_platform_id == platform) {
         NUMTX *transform = static_cast<NUMTX *>(CurTerr->platforms[platform].scene_object);
-        if (player2->apiobj.position.y >= transform->m31) {
+        if (__builtin_expect(player2->apiobj.position.y >= transform->m31, 0)) {
             return 1.0f;
         }
     }
@@ -1879,10 +1879,10 @@ static f32 Condition_EitherPlayerOnObject(AISYS *, AISCRIPTPROCESS *, AIPACKET *
 }
 
 static f32 Condition_OnObject(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char *, void *argument) {
-    if (packet != NULL && packet->owner != NULL) {
+    if (__builtin_expect(packet != NULL && packet->owner != NULL, 0)) {
         GameObject_s *object = packet->owner->apiobj.objptr;
         isize platform = reinterpret_cast<isize>(argument);
-        if (platform != -1 && object != NULL && (object->apiobj.packed_contact_state & 0xffff00) != 0) {
+        if (__builtin_expect(platform != -1 && object != NULL && (object->apiobj.packed_contact_state & 0xffff00) != 0, 1)) {
             f32 result = 0.0f;
             if (object->apiobj.supporting_platform_id == platform) {
                 NUMTX *transform = static_cast<NUMTX *>(CurTerr->platforms[platform].scene_object);
@@ -3646,7 +3646,7 @@ __used__ static i32 Action_WalkBackwards(AISYS *sys, AISCRIPTPROCESS *processor,
 
     GameObject_s *owner = packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
     GameObject_s *opponent = static_cast<GameObject_s *>(packet->opponent);
-    if (owner != NULL && opponent != NULL) {
+    if (__builtin_expect(owner != NULL && opponent != NULL, 1)) {
         AIMoveInstruction(packet, &opponent->ai.last_path_position, opponent->ai.mover_height, &opponent->ai.path_info,
                           AIPACKET_MOVEMENT_RETREAT, packet->movement_instruction_parameter);
         owner->field_0xefd |= 0x80;
@@ -5732,7 +5732,7 @@ i32 Action_UseTechno(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKET_s *
         return 1;
     if (!techno->visible)
         return 1;
-    if (techno->complete)
+    if (__builtin_expect(techno->complete != 0, 1))
         return 1;
     AIMoveInstruction(packet, &processor->action_pos, 0.0f, &processor->path_info, 1, 0.0f);
     if (GizTechno_CanUseTechno(object, techno) == 0) {
@@ -5807,9 +5807,9 @@ i32 Action_HelpWithTriggers(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s 
         return 0;
     GameObject_s *object = packet->owner->apiobj.objptr;
     u8 object_index = packet->owner->apiobj.field_0x289;
-    i32 trigger_index = system->field_0x42c0[object_index];
-    if (trigger_index == -1)
+    if (system->field_0x42c0[object_index] == -1)
         return 0;
+    i32 trigger_index = system->field_0x42c0[object_index];
     AITRIGGERSET_s *set = &system->sets[system->field_0x4280[object_index]];
     AITRIGGERSET_TARGET *target = &set->targets[trigger_index];
     GIZMO_s *gizmo = set->triggers[trigger_index];
@@ -5818,40 +5818,38 @@ i32 Action_HelpWithTriggers(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s 
     if (gizmo->type_id == spinner_gizmotype_id) {
         spinner_origin = &packet->owner->apiobj.collision_position;
         GIZSPINNER_s *spinner = static_cast<GIZSPINNER_s *>(gizmo->object);
-        f32 result =
-            GizSpinner_GetNearestTargetPoint(spinner, spinner_origin, &spinner_position, &spinner_direction, 1);
-        if (result == -1.0f)
-            result =
-                GizSpinner_GetNearestTargetPoint(spinner, spinner_origin, &spinner_position, &spinner_direction, 0);
-        if (result != -1.0f) {
+        if (GizSpinner_GetNearestTargetPoint(spinner, spinner_origin, &spinner_position, &spinner_direction, 1) !=
+                -1.0f ||
+            GizSpinner_GetNearestTargetPoint(spinner, spinner_origin, &spinner_position, &spinner_direction, 0) !=
+                -1.0f) {
             NuVecAddScale(&spinner_position, &spinner_position, &spinner_direction, 0.5f);
             AIMoveInstruction(packet, &spinner_position, 0.0f, &target->path, 1, 0.0f);
         }
-    } else if (__builtin_expect(!(gizmo->type_id == grapple_gizmotype_id), 0)) {
-        AIMoveInstruction(packet, &target->position, 0.0f, &target->path, 1, 0.0f);
     } else {
-        GRAPPLE *grapple = static_cast<GRAPPLE *>(gizmo->object);
-        if (object->character_context == LEGOCONTEXT_GRAPPLE && object->field_0x788 == grapple) {
-            object->field_0x1094 = 5;
-            GameObjectSetCanUse(object, grapple, 1, 50, 0.0f);
-            ClearSpecialMove(object);
-            for (i32 i = 0; i < 2; ++i) {
-                GameObject_s *other = Player[i];
-                if (other != NULL && __builtin_expect(other->character_context == 0x46, 1)) {
-                    for (i32 j = 0; j < set->trigger_count; ++j) {
-                        if (set->triggers[j] != NULL && set->triggers[j]->object == other->field_0x788) {
-                            if (player->apiobj.position.y > object->apiobj.position.y + 0.05f)
-                                object->field_0x107e = 1;
-                            else if (object->apiobj.position.y - 0.05f > player->apiobj.position.y)
-                                object->field_0x107e = 2;
-                            return 0;
+        if (__builtin_expect(gizmo->type_id == grapple_gizmotype_id, 1)) {
+            GRAPPLE *grapple = static_cast<GRAPPLE *>(gizmo->object);
+            if (object->character_context == LEGOCONTEXT_GRAPPLE && object->field_0x788 == grapple) {
+                object->field_0x1094 = 5;
+                GameObjectSetCanUse(object, grapple, 1, 50, 0.0f);
+                ClearSpecialMove(object);
+                for (i32 i = 0; i < 2; ++i) {
+                    GameObject_s *other = Player[i];
+                    if (other != NULL && __builtin_expect(other->character_context == 0x46, 1)) {
+                        for (i32 j = 0; j < set->trigger_count; ++j) {
+                            if (set->triggers[j] != NULL && set->triggers[j]->object == other->field_0x788) {
+                                if (player->apiobj.position.y > object->apiobj.position.y + 0.05f)
+                                    object->field_0x107e = 1;
+                                else if (object->apiobj.position.y - 0.05f > player->apiobj.position.y)
+                                    object->field_0x107e = 2;
+                                return 0;
+                            }
                         }
                     }
                 }
+                return 0;
             }
-            return 0;
+            GameObjectSetCanUse(object, grapple, 1, 50, 0.0f);
         }
-        GameObjectSetCanUse(object, grapple, 1, 50, 0.0f);
         AIMoveInstruction(packet, &target->position, 0.0f, &target->path, 1, 0.0f);
     }
     gizmo = set->triggers[trigger_index];
@@ -7825,7 +7823,7 @@ i32 Action_SetVisibility(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **pa
             visible = 0;
         }
     }
-    if (NuSpecialExistsFn(&special) != 0) {
+    if (__builtin_expect(NuSpecialExistsFn(&special) != 0, 1)) {
         NuSpecialSetVisibility(&special, visible);
     }
     return 1;
@@ -8701,7 +8699,7 @@ __used__ static i32 Action_AddPartDebris(AISYS *sys, AISCRIPTPROCESS *processor,
             char *value = NuStrIStr(params[i], "name");
             if (value != NULL)
                 type = PARTLookupType(value + 5);
-            else if ((value = NuStrIStr(params[i], "dx=")) != NULL)
+            else if (__builtin_expect((value = NuStrIStr(params[i], "dx=")) != NULL, 1))
                 offset.x = AIParamToFloat(processor, value + 3);
             else if ((value = NuStrIStr(params[i], "dy=")) != NULL)
                 offset.y = AIParamToFloat(processor, value + 3);

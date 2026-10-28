@@ -1079,7 +1079,7 @@ void GizBlowup_DeleteSingleTerrain(GIZMOBLOWUP_s *blowup) {
 
 void GizBlowup_DeleteTerrain() {
     GIZMOBLOWUP_s *blowup = WORLD->gizmo_blowups;
-    if (blowup != NULL) {
+    if (__builtin_expect(blowup != NULL, 0)) {
         for (i32 i = 0; i < WORLD->gizmo_blowup_count; ++i, ++blowup) {
             GizBlowup_DeleteSingleTerrain(blowup);
         }
@@ -2165,12 +2165,12 @@ i32 GizmoBlowupCheckProximity(WORLDINFO_s *world, GameObject_s *object) {
         if (blowup->field_0xb4 != 0.0f && !(x * x + y * y + z * z < blowup->field_0xb4 * blowup->field_0xb4))
             continue;
         i32 hit_type;
-        if (!special) {
-            blowup->output_flags |= 0x20;
-            hit_type = 4;
-        } else {
+        if (special) {
             blowup->output_flags |= 0x10;
             hit_type = 5;
+        } else {
+            blowup->output_flags |= 0x20;
+            hit_type = 4;
         }
         nuinstanim_s *animation = NuSpecialGetInstAnim(&blowup->type->animated_special);
         if (!(blowup->field_0xc0 > 0.0f)) {

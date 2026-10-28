@@ -319,7 +319,7 @@ void NewStatusRumbleBuzz(i32 player, float amount, float buzz, i32 priority) {
 }
 
 void NextStatusStage(STATUSPACKET_s *packet) {
-    if (packet->stage != NULL) {
+    if (__builtin_expect(packet->stage != NULL, 1)) {
         if (packet->stage->field_0x14 == -1 && packet->field_0x68 > packet->stage->field_0x18) {
             packet->field_0xb0 |= 2;
             return;
