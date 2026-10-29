@@ -1855,7 +1855,7 @@ void MiniKit_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current
             }
             case 3: {
                 f32 blend = 0.0f;
-                if (__builtin_expect(stage->field_0x18 > stage->field_0x1c - jibberlen, 0))
+                if (__builtin_expect(stage->field_0x18 > stage->field_0x1c - jibberlen, 1))
                     blend = (stage->field_0x18 - (stage->field_0x1c - jibberlen)) / jibberlen;
                 DrawStatusMiniKit(0.0f, 0.0f, 1.1f, 0.333f, 0.333f, currentminikit + 1, packet, blend);
                 i32 count =

@@ -497,7 +497,7 @@ void Customiser_LoadAll(CUSTOMISER *customiser, WORLDINFO_s *world) {
                     scene = NuGScnRead(&world->giz_buffer, world->unknown_0108, path);
                 }
                 resource->scene = scene;
-                if (scene != NULL) {
+                if (__builtin_expect(scene != NULL, 1)) {
                     NuSpecialFind(scene, &resource->special, piece_name, 1);
                 }
                 continue;

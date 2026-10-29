@@ -594,7 +594,7 @@ void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
         if (object->action_movement_state == 1) {
             void *info = api.character_model->model_data_b[object->context_animation];
             f32 *playing = NULL;
-            if (info == NULL || (playing = AnimPlaying(&api.anim_packet, object->context_animation, 1, 0)) != NULL) {
+            if (__builtin_expect(info == NULL || (playing = AnimPlaying(&api.anim_packet, object->context_animation, 1, 0)) != NULL, 0)) {
                 object->context_animation_timer += FRAMETIME;
                 if (object->context_animation_timer >= object->airborne_action_duration)
                     object->context_animation_timer = object->airborne_action_duration;
@@ -778,7 +778,7 @@ void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
             object->context_variant_flags |= 1;
         return;
     }
-    if ((api.flags_low & 0x80) != 0)
+    if (__builtin_expect((api.flags_low & 0x80) != 0, 1))
         Hint_SetComplete(0x262);
     object->field_0x788 = zipup;
     object->character_context = 0x47;

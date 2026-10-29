@@ -2416,8 +2416,8 @@ i32 KillGameObject(GameObject_s *object, i32 requested_reason, i32) {
                 for (u32 i = 0; i < member_count; ++i) {
                     if (group->members[i] != NULL) {
                         GameObject_s *candidate = group->members[i]->objptr;
-                        if (candidate != object && candidate != NULL &&
-                            (candidate->apiobj.field_0x1f8 & 0x1001) == 0x1001 && candidate->apiobj.field_0x287 == 0) {
+                        if (__builtin_expect(candidate != object && candidate != NULL &&
+                            (candidate->apiobj.field_0x1f8 & 0x1001) == 0x1001 && candidate->apiobj.field_0x287 == 0, 0)) {
                             group->leader = &candidate->apiobj;
                             break;
                         }

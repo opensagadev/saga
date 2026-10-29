@@ -2765,7 +2765,7 @@ static void instNuGCutLookAtLocatorUpdate(i32 *effect_handle, NUGCUTLOCATOR_s *l
             if (visible == 0) {
                 return;
             }
-            NUMTX_ALIGNED16 joints[256];
+            NUMTX joints[256] __attribute__((aligned(32)));
             NuHGobjEvalAnim2(reinterpret_cast<nuhgobj_s *>(scene),
                              reinterpret_cast<ani3_animheader_s *>(character->face_animation),
                              inst_character->animation_frame_a, 0, NULL, joints);
@@ -2775,10 +2775,13 @@ static void instNuGCutLookAtLocatorUpdate(i32 *effect_handle, NUGCUTLOCATOR_s *l
             NuMtxMulVU0(&head, &joint_matrix, &joints[state->joint_override_index - 1]);
             NuMtxMulVU0(&head, &head, &character_matrix);
             NUVEC4 direction;
-            direction.x = head.m30 - position_x;
-            direction.y = head.m31 - position_y;
-            direction.z = head.m32 - position_z;
+            const f32 dx = head.m30 - position_x;
+            const f32 dy = head.m31 - position_y;
+            const f32 dz = head.m32 - position_z;
             direction.w = 0.0f;
+            direction.x = dx;
+            direction.y = dy;
+            direction.z = dz;
             NUMTX inverse;
             NuMtxTranspose(&inverse, &head);
             NUVEC4 local;
@@ -2788,13 +2791,14 @@ static void instNuGCutLookAtLocatorUpdate(i32 *effect_handle, NUGCUTLOCATOR_s *l
                 look_x = local.x * 0.5f;
                 look_y = local.y * 0.5f;
             }
-            if (look_x > 0.24f) {
-                look_x = 0.24f;
-            } else if (look_x < -0.24f) {
-                look_x = -0.24f;
-            }
         }
         numtl_s *material = scene->mtls[state->secondary_material_index - 1];
+        if (look_x > 0.24f) {
+            look_x = 0.24f;
+        }
+        if (look_x < -0.24f) {
+            look_x = -0.24f;
+        }
         // The vertical range narrows as the eyes turn sideways.
         const f32 limit = (NU_COS_LUT(NuFabs(look_x) / 0.24f * 8192.0f) - 0.7f) * 0.18f / 0.3f;
         look_y = MIN(limit, look_y);
@@ -2807,15 +2811,15 @@ static void instNuGCutLookAtLocatorUpdate(i32 *effect_handle, NUGCUTLOCATOR_s *l
     if (state->texture_animation_index == 0) {
         return;
     }
-    if (blink != 0) {
-        state->lid_frame += instance->elapsed * 30.0f;
-        if (state->lid_frame > 3.0f) {
-            state->lid_frame = 3.0f;
-        }
-    } else {
+    if (blink == 0) {
         state->lid_frame -= instance->elapsed * 10.0f;
         if (state->lid_frame < 0.0f) {
             state->lid_frame = 0.0f;
+        }
+    } else {
+        state->lid_frame += instance->elapsed * 30.0f;
+        if (state->lid_frame > 3.0f) {
+            state->lid_frame = 3.0f;
         }
     }
     i32 lid = static_cast<i32>(state->lid_frame + 0.5f);
@@ -2854,7 +2858,7 @@ extern "C" {
             }
             i32 visible = NuGCutLocatorIsVisble(locator, frame, &time, &scale, &rate);
             if (__builtin_expect(visible != 0, 1) && scale < 0.0f && (locator->flags & 0x10) == 0) {
-                scale = static_cast<f32>(debtab[effect_index]->frequency) * -scale;
+                scale = static_cast<f32>(debtab[effect_index]->frequency) * (0.0f - scale);
             }
             if (visible != 0 && scale > 0.1f) {
                 if ((locator->flags & 0x10) != 0 && inst_locator->effect_handle != 0) {
@@ -2900,7 +2904,7 @@ extern "C" {
                 }
                 return;
             }
-            if (__builtin_expect((locator->flags & 0x20) != 0, 1)) {
+            if ((locator->flags & 0x20) != 0) {
                 if (inst_locator->effect_handle >= 0) {
                     DebFreeInstantly(&inst_locator->effect_handle);
                 }
@@ -2940,7 +2944,7 @@ extern "C" {
             if (locator->animation != NULL) {
                 NuAnimData2CalcTime(locator->animation, frame, &time);
             }
-            if (!(NuGCutLocatorIsVisble(locator, frame, &time, &opacity, NULL) == 0 || !(opacity > 0.1f))) {
+            if (NuGCutLocatorIsVisble(locator, frame, &time, &opacity, NULL) != 0 && opacity > 0.1f) {
                 // Retail realigns the frame and copies the locator matrix into the VFX matrix with movaps.
                 VuMtx vfx_matrix __attribute__((aligned(16)));
                 NUMTX locator_mtx __attribute__((aligned(16)));

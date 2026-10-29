@@ -140,8 +140,9 @@ u64 NuSoundDecoderOGG::Decode(NuSoundSource &source, NuSoundBuffer &buffer, bool
         for (i32 i = 0; i < source.GetNumInitialBuffers(); i++) {
             source.RequestBuffer(loop, NuSoundMakeWeakPtr<NuSoundBufferCallback>(this));
         }
-        this->locked_buffer = this->encoded_buffers[this->ring_read_pos % 4];
+        NuSoundBuffer *next = this->encoded_buffers[this->ring_read_pos % 4];
         __sync_fetch_and_add(&this->ring_read_pos, 1);
+        this->locked_buffer = next;
     }
 
     NuSoundBuffer::Context &context = buffer.GetCurrentContext();
@@ -174,8 +175,8 @@ u64 NuSoundDecoderOGG::Decode(NuSoundSource &source, NuSoundBuffer &buffer, bool
     u64 decoded = this->decoded_bytes;
     i64 chunk = rounded;
     if (!loop) {
-        i32 remaining = total - decoded;
-        chunk = remaining < rounded ? remaining : rounded;
+        i64 remaining = total - decoded;
+        chunk = (i32)remaining < rounded ? (i32)remaining : rounded;
     }
 
     u32 got = this->DecodeOggChunk(dest, (u32)chunk);

@@ -1487,23 +1487,24 @@ static __used__ void Hub_UpdateSelectMode() {
                         return;
                     }
                     if (hub_selectmode == 1 && Game.area_save[area].area_complete != 0 && freeplay_unlocked) {
-                        i32 first = -1, second = -1;
                         if ((ADataList[area].flags & 1) != 0) {
-
+                            i32 first, second;
                             const i32 count =
                                 Collection_GetIDList(&VehicleCollection, HUB_VEHICLE_COLLECTION_ALLOWED,
                                                      HUB_VEHICLE_COLLECTION_REQUIRED, ids, &first, &second, 0);
-                            if (__builtin_expect(count == 1, 1)) {
+                            if (count == 1) {
                                 selectmodetime = 0.0f;
                                 selectmodemode = 1;
                                 selectmodeduration = 0.6f;
-                                MenuPacket.player_model[0] = ids[0];
-                                MenuPacket.player_model[1] = ids[0];
+                                MenuPacket.player_model[0] = MenuPacket.player_model[1] = ids[0];
                                 return;
                             }
+                            hub_freeplaysource = 0;
+                            Hub_InitFreePlaySelect(area, first, second);
+                        } else {
+                            hub_freeplaysource = 0;
+                            Hub_InitFreePlaySelect(area, -1, -1);
                         }
-                        hub_freeplaysource = 0;
-                        Hub_InitFreePlaySelect(area, first, second);
                         NewMenu(17, -1, -1);
                         return;
                     }
@@ -1807,10 +1808,7 @@ void Hub_UpdateFreePlaySelect() {
         BigIconAlpha[0] = SeekLinearF(BigIconAlpha[0], 1.0f, FRAMETIME + FRAMETIME);
     else
         BigIconAlpha[0] = 0.0f;
-    if (freeplaymode == 1)
-        BigIconAlpha[1] = SeekLinearF(BigIconAlpha[1], 1.0f, FRAMETIME + FRAMETIME);
-    else
-        BigIconAlpha[1] = 0.0f;
+    if (freeplaymode != 1) BigIconAlpha[1] = 0.0f; else BigIconAlpha[1] = SeekLinearF(BigIconAlpha[1], 1.0f, FRAMETIME + FRAMETIME);
 }
 
 // The level callback carries the streaming-buffer arguments used by most
@@ -1959,32 +1957,32 @@ void Hub_UpdateMiniKits(WORLDINFO_s *world) {
             HUBMINIKITPIECES_s *pieces = world->minikit_pieces_buf[i];
             if (pieces == NULL)
                 continue;
-            count[i] = Game.area_save[i].minikit_count;
-            if (count[i] > pieces->piece_count)
-                count[i] = pieces->piece_count;
+            i32 c = Game.area_save[i].minikit_count;
+            count[i] = c;
+            if (c > pieces->piece_count)
+                count[i] = c = pieces->piece_count;
             kit->scale = 1.0f;
             f32 vx = (0.0f - kit->offset_x) * 5.0f;
             f32 vz = (0.0f - kit->offset_z) * 5.0f;
             kit->velocity_x = SeekValF(kit->velocity_x, vx, 10.0f);
             kit->velocity_z = SeekValF(kit->velocity_z, vz, 10.0f);
-            kit->offset_z += kit->velocity_z * FRAMETIME;
             kit->offset_x += kit->velocity_x * FRAMETIME;
+            kit->offset_z += kit->velocity_z * FRAMETIME;
             u16 old_rotation = kit->rotation;
             if (i == hub_minikitviewer_area) {
                 if (speed > 0.0f)
                     kit->target_rotation =
                         TurnRot(kit->target_rotation, angle + 0x8000, (u16)(32768.0f * kit->scale), NULL);
-                kit->target_piece_count = count[i];
-                if (viewer && count[i] >= pieces->piece_count &&
+                kit->target_piece_count = c;
+                if (viewer && c >= pieces->piece_count &&
                     ((MenuPacket.active_player[0] && (GamePad[0].buttons_held & GAMEPAD_ACTION)) ||
                      (MenuPacket.active_player[1] && (GamePad[1].buttons_held & GAMEPAD_ACTION))))
                     kit->target_piece_count = 1;
-            } else if (count[i] != 0)
-                kit->target_piece_count = count[i];
-            else {
+            } else if (c == 0) {
                 kit->target_piece_count = 0;
                 kit->displayed_piece_count = 0;
-            }
+            } else
+                kit->target_piece_count = c;
             kit->rotation = SeekRot(kit->rotation, kit->target_rotation, 3.0f);
             i32 rate = (i32)((f32)RotDiff(old_rotation, kit->rotation) / FRAMETIME);
             rate = (MAX(-65536, (MIN(65536, rate))));
@@ -2003,7 +2001,7 @@ void Hub_UpdateMiniKits(WORLDINFO_s *world) {
                 pieces->pieces[j].enabled = 0;
                 if (NuSpecialExistsFn(&pieces->pieces[j])) {
                     NuSpecialSetVisibility(&pieces->pieces[j], 0);
-                    if (j < count[i])
+                    if (j < c)
                         pieces->pieces[j].enabled = 1;
                 }
             }
@@ -2024,21 +2022,24 @@ void Hub_UpdateMiniKits(WORLDINFO_s *world) {
                 HUBMINIKIT_s *current = &world->hub_minikits[i];
                 HUBAREAINFO_s *info = Hub_FindAreaInfoByIndex(i);
                 CHARACTERDATA *data = &CDataList[model];
-                current->radius = data->collision_radius;
-                current->height_ratio = (data->bounds_max_y - data->bounds_min_y) / (data->collision_radius * 2.0f);
-                current->collision_center.x = current->position.x + current->offset_x;
-                current->collision_center.y = current->position.y + (data->bounds_max_y + data->bounds_min_y) * 0.5f;
+                f32 radius = data->collision_radius;
+                f32 min_y = data->bounds_min_y;
+                f32 max_y = data->bounds_max_y;
+                current->radius = radius;
+                current->height_ratio = (max_y - min_y) / (radius * 2.0f);
                 current->collision_center.z = current->position.z + current->offset_z;
+                current->collision_center.y = current->position.y + (max_y + min_y) * 0.5f;
+                current->collision_center.x = current->position.x + current->offset_x;
                 current->collision_center.y +=
                     (1.0f - (NU_SIN_LUT((i32)(32768.0f * current->scale + 16384.0f)) + 1.0f) * 0.5f) * 0.333f;
                 current->collision_center.y += 0.025f * NU_SIN_LUT(current->phase_rotation) * current->scale;
                 current->collision_center.y += info ? info->panel_offset : 0.0f;
                 current->bounds_min.x = current->collision_center.x - current->radius;
-                current->bounds_min.z = current->collision_center.z - current->radius;
+                current->bounds_max.x = current->collision_center.x + current->radius;
                 current->bounds_min.y = current->collision_center.y - current->radius * current->height_ratio;
                 current->bounds_max.y = current->collision_center.y + current->radius * current->height_ratio;
+                current->bounds_min.z = current->collision_center.z - current->radius;
                 current->bounds_max.z = current->collision_center.z + current->radius;
-                current->bounds_max.x = current->collision_center.x + current->radius;
             }
         }
         kit = world->hub_minikits;
@@ -2267,7 +2268,7 @@ void Hub_DrawAreaStats(f32 phase, i32 area_index, i32 mode) {
                         HUB_EPISODESUBTITLESIZE, 0, HUB_EPISODER, HUB_EPISODEG, HUB_EPISODEB, 1.7f, 1, NULL, 0,
                         static_cast<i32>(128.0f * fade_alpha));
         }
-        if (heading[0] != '\0') {
+        if (__builtin_expect(heading[0] != '\0', 1)) {
             SmartTextEx(heading, 0.0f, HUB_EPISODETITLEY, 1.0f, HUB_EPISODETITLESIZE, HUB_EPISODETITLESIZE,
                         HUB_EPISODETITLESIZE, 0, HUB_EPISODER, HUB_EPISODEG, HUB_EPISODEB, 1.7f, 1, NULL, 0,
                         static_cast<i32>(fade_alpha * 128.0f));
@@ -2361,7 +2362,7 @@ void Hub_DrawAreaStats(f32 phase, i32 area_index, i32 mode) {
         return;
     }
 
-    if (static_cast<i8>(area->area_index) != -1 && (flags & 0x14) == 0x10) {
+    if (__builtin_expect(static_cast<i8>(area->area_index) != -1 && (flags & 0x14) == 0x10, 1)) {
         sprintf(text, "%s %i", TTab[tCHAPTER], static_cast<i8>(area->area_index) + 1);
         SmartTextEx(text, 0.0f, HUB_EPISODETITLEY, 1.0f, HUB_EPISODETITLESIZE, HUB_EPISODETITLESIZE,
                     HUB_EPISODETITLESIZE, 0, HUB_EPISODER, HUB_EPISODEG, HUB_EPISODEB, 1.7f, 1, NULL, 0, alpha);
@@ -3447,17 +3448,17 @@ static void DrawEpisodesMenu(i32 selected, f32 alpha) {
                         green = menu_flash ? MENUFLASH0G : MENUFLASH1G;
                         blue = menu_flash ? MENUFLASH0B : MENUFLASH1B;
                     }
-                } else if (menu_pulse > 0.0f) {
+                } else if (menu_pulse <= 0.0f) {
+                    red = MENUENTRYR;
+                    green = MENUENTRYG;
+                    blue = MENUENTRYB;
+                } else {
                     red = static_cast<i32>(static_cast<u32>(MENUFLASH0R) * menu_pulse +
                                            static_cast<u32>(MENUNORMALR) * (1.0f - menu_pulse));
                     green = static_cast<i32>(static_cast<u32>(MENUFLASH0G) * menu_pulse +
                                              static_cast<u32>(MENUNORMALG) * (1.0f - menu_pulse));
                     blue = static_cast<i32>(static_cast<u32>(MENUFLASH0B) * menu_pulse +
                                             static_cast<u32>(MENUNORMALB) * (1.0f - menu_pulse));
-                } else {
-                    red = MENUENTRYR;
-                    green = MENUENTRYG;
-                    blue = MENUENTRYB;
                 }
                 f32 opacity = 1.0f;
                 if (Game_AreaSave != NULL && Game_AreaSave[EDataList[episode].area_ids[0]].complete == 0)
@@ -3621,13 +3622,7 @@ void MenuUpdateEpisodes(MENU_s *) {
                 } else {
                     GameAudio_PlaySfx(0x32, NULL, 0, 0);
                 }
-            } else if (cancel) {
-                GameAudio_PlaySfx(0x31, NULL, 0, 0);
-                episodestime = 0.0f;
-                lastepisodesmode = episodesmode;
-                episodesmode = 1;
-                episodesduration = 0.6f;
-            } else {
+            } else if (!(cancel)) {
                 const i8 previous = i_episodes;
                 if (up && previous >= 3)
                     i_episodes -= 3;
@@ -3637,8 +3632,14 @@ void MenuUpdateEpisodes(MENU_s *) {
                     --i_episodes;
                 else if (right && previous % 3 != 2)
                     ++i_episodes;
-                if (previous != i_episodes)
+                if (__builtin_expect(previous != i_episodes, 1))
                     GameAudio_PlaySfx(0x2f, NULL, 0, 0);
+            } else {
+                GameAudio_PlaySfx(0x31, NULL, 0, 0);
+                episodestime = 0.0f;
+                lastepisodesmode = episodesmode;
+                episodesmode = 1;
+                episodesduration = 0.6f;
             }
             break;
         }
@@ -3726,7 +3727,7 @@ void MenuUpdateEpisodes(MENU_s *) {
             const i32 all = hub_new_level == -1 || LDataList[hub_new_level].episode_index == -1;
             CutScenePlayer_CountEpisodeClips(i_episodes, all, clips);
             i32 confirm = 0, cancel = 0;
-            if (MenuPacket.active_player[0]) {
+            if (__builtin_expect(MenuPacket.active_player[0] != 0, 1)) {
                 if (GamePad[0].pad->digital_buttons_pressed & GAMEPAD_MENUSELECT)
                     confirm = 1;
                 else if (GamePad[0].pad->digital_buttons_pressed & GAMEPAD_MENUCANCEL)

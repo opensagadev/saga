@@ -821,7 +821,7 @@ i32 GizmoBlowupBlowup(GIZMOBLOWUP_s *blowup, i32 effects, i32 hit_type, i32 dama
                 blowup->state_flags |= 2;
             }
         }
-        if (__builtin_expect((blowup->draw_flags & 0x800) != 0, 0)) {
+        if (__builtin_expect((blowup->draw_flags & 0x800) != 0, 1)) {
             GizmoBlowupCreateStuff(blowup);
         }
         if (GameBlowUpBlownUpFn != NULL) {
@@ -985,13 +985,13 @@ void GizmoBlowupEarlyUpdate(void *world_ptr, void *, float) {
                     }
                 }
             } else if ((blowup->state_flags & GIZMOBLOWUP_STATE_DELAY_ACTIVE) != 0) {
-                if (blowup->animation_time > 0.0f) {
-                    blowup->animation_time -= FRAMETIME;
-                } else {
+                if (!(blowup->animation_time > 0.0f)) {
                     blowup->state_flags &= ~GIZMOBLOWUP_STATE_DELAY_ACTIVE;
+                } else {
+                    blowup->animation_time -= FRAMETIME;
                 }
             }
-            if ((blowup->field_0x9f & 1) != 0) {
+            if (__builtin_expect((blowup->field_0x9f & 1) != 0, 1)) {
                 GizmoBlowupBlowup(blowup, 1, -1, 1, NULL, 1);
             }
             if (blowup->type->particle_types[7] != -1) {
@@ -1936,9 +1936,11 @@ GIZMOBLOWUP_s *GizmoBlowUp_Hit(GameObject_s *object, NUVEC *points, i32 point_co
                                NUVEC *maximum, BOLT_s *bolt, u32 hit_type, u8 *flags) {
     const u32 exclude_flag_1 = EXBLOWUPFLAGS & 1;
     const u32 exclude_flag_2 = EXBLOWUPFLAGS & 2;
-    const bool airborne_damage =
-        object != NULL &&
-        static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->field_0x28 > 0.0f;
+    i32 airborne_damage = 0;
+    if (object != NULL) {
+        airborne_damage =
+            static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->field_0x28 > 0.0f;
+    }
     GIZMOBLOWUP_s *nearest = NULL;
     f32 nearest_distance = 1000000.0f;
     GIZMOBLOWUP_s *blowup = WORLD->gizmo_blowups;
@@ -1967,10 +1969,10 @@ GIZMOBLOWUP_s *GizmoBlowUp_Hit(GameObject_s *object, NUVEC *points, i32 point_co
             ((properties & 0x40) != 0) != (hit_type == 7)) {
             continue;
         }
-        const NUVEC &center = blowup->mid_position;
         const f32 extent = blowup->target_scale;
-        if (center.x - extent > maximum->x || minimum->x > center.x + extent || center.z - extent > maximum->z ||
-            minimum->z > center.z + extent || center.y - extent > maximum->y || minimum->y > center.y + extent) {
+        if (blowup->mid_position.x - extent > maximum->x || minimum->x > blowup->mid_position.x + extent ||
+            blowup->mid_position.z - extent > maximum->z || minimum->z > blowup->mid_position.z + extent ||
+            blowup->mid_position.y - extent > maximum->y || minimum->y > blowup->mid_position.y + extent) {
             continue;
         }
         for (i32 point = point_count - 1; point >= 0; --point) {

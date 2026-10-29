@@ -1864,7 +1864,7 @@ void oneAtOnce_MaintainArray() {
 
         for (i32 slot = 0; slot < AtOnce_maxAttackers; ++slot) {
             GameObject_s *attacker = AtOnce_attackingPlayer[player][slot].object;
-            if (attacker == NULL) {
+            if (__builtin_expect(attacker == NULL, 0)) {
                 break;
             }
             attacker->one_at_once_player = static_cast<u8>(player);

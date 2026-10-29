@@ -1118,7 +1118,7 @@ void Status_DrawPromptMenu(STATUSPACKET_s *packet, i32 selected, float alpha) {
     for (i32 i = 0; i < count; ++i) {
         i32 red, green, blue;
         if (selected != 0 && status_prompt == i && __builtin_expect(TestForController(), 1)) {
-            if (__builtin_expect(!(menu_pulsate <= 0.0f), 1)) {
+            if (!(menu_pulsate <= 0.0f)) {
                 const f32 inverse = 1.0f - menu_pulsate;
                 red = static_cast<u32>(MENUFLASH0R) * menu_pulsate + static_cast<u32>(MENUFLASH1R) * inverse;
                 green = static_cast<u32>(MENUFLASH0G) * menu_pulsate + static_cast<u32>(MENUFLASH1G) * inverse;
@@ -1300,13 +1300,13 @@ void DrawStatusScreen(WORLDINFO_s *) {
             alpha = 1.0f;
             if (stage->type == 19 && stage->field_0x14 != 0) {
                 const f32 time = stage->field_0x18;
-                if (time < 1.0f) {
-                    alpha = 1.0f - time;
-                } else {
+                if (time >= 1.0f) {
                     const f32 fade_start = stage->field_0x1c - 1.0f;
                     alpha = 0.0f;
                     if (time >= fade_start)
                         alpha = (time - fade_start) / (stage->field_0x1c - fade_start);
+                } else {
+                    alpha = 1.0f - time;
                 }
             }
         }

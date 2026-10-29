@@ -118,7 +118,7 @@ i32 Tag_UpdateHint(HINT_s *hint) {
                 return 0;
             return player2 == NULL || static_cast<i8>(player2->apiobj.flags_low) >= 0 || player2->field_0xcc0 == NULL;
         case 602: {
-            if (Tag_DoneFirst != 0) {
+            if (__builtin_expect(Tag_DoneFirst != 0, 0)) {
                 Hint_SetComplete(hint);
                 return 0;
             }
@@ -181,10 +181,10 @@ i32 Tag_UpdateHint(HINT_s *hint) {
             }
             return 0;
         case 606:
-            if ((Player[0] != NULL && Player[0]->apiobj.player_controlled && Player[0]->field_0xcc0 != NULL &&
+            if (__builtin_expect((Player[0] != NULL && Player[0]->apiobj.player_controlled && Player[0]->field_0xcc0 != NULL &&
                  Player[0]->id != id_LUKESKYWALKERDAGOBAH) ||
                 (Player[1] != NULL && Player[1]->apiobj.player_controlled && Player[1]->field_0xcc0 != NULL &&
-                 Player[1]->id != id_LUKESKYWALKERDAGOBAH))
+                 Player[1]->id != id_LUKESKYWALKERDAGOBAH), 1))
                 return WORLD->current_level != SPEEDERCHASEA_LDATA || disable_narrow_socks != 0;
             return 0;
         case 647:
@@ -485,7 +485,7 @@ void UpdateStats() {
     }
     if (SuperStory != 0 && (WORLD->current_level->flags & LEVEL_SHOW_COIN_TOTAL) != 0)
         DrawCoinTotalTime = 1.0f;
-    if (DrawCoinTotalTime > 0.0f)
+    if (__builtin_expect(DrawCoinTotalTime > 0.0f, 0))
         DrawCoinTotalTime -= FRAMETIME;
     f32 coin_target = 1.0f;
     if (FadeSys.fade != 0.0f || CUTSTOPGAME != 0 ||

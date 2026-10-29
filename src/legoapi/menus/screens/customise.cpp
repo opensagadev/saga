@@ -162,7 +162,7 @@ static u16 *Customiser_GetSelection(i32 side) {
             const u32 cape_mask = 1u << runtime->cape_layer;                                                           \
             layer_mask |= cape_mask;                                                                                   \
             CUSTOMPIECE *cape = &customiser->piece_sets[5][selection[5]];                                              \
-            if ((cape->layer_flags & 0x40) != 0)                                                                       \
+            if (__builtin_expect((cape->layer_flags & 0x40) != 0, 1))                                                  \
                 layer_mask &= ~cape_mask;                                                                              \
         }                                                                                                              \
         runtime->layer_mask_special = layer_mask;                                                                      \
@@ -664,7 +664,7 @@ void Customiser_Update(CUSTOMISER *customiser, WORLDINFO_s *world) {
             customiser->animation_packets[side].previous_animation =
                 customiser->animation_packets[side].animation_index;
             if (__builtin_expect(saber_colour == -1, 0)) {
-                if (customiser->animation_active[side] == 0)
+                if (__builtin_expect(customiser->animation_active[side] == 0, 0))
                     customiser->animation_packets[side].requested_animation = 0x62;
                 else
                     customiser->animation_packets[side].requested_animation = 0x63;

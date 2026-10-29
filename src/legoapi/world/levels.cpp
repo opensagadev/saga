@@ -2061,7 +2061,7 @@ void LevelObjects_InitForLevel(WORLDINFO_s *world) {
     object_resolved:
         world->lev_objs[object_index].active =
             static_cast<u8>(NuSpecialExistsFn(&world->lev_objs[object_index].special));
-        if (__builtin_expect(world->lev_objs[object_index].active != 0, 0)) {
+        if (__builtin_expect(world->lev_objs[object_index].active != 0, 1)) {
             NuSpecialSetVisibility(&world->lev_objs[object_index].special, 0);
         }
     }

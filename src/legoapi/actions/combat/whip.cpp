@@ -148,7 +148,7 @@ void Whip_MoveCode(GameObject_s *object) {
 
         if (activate) {
             if (object->field_0x7a3 == 2) {
-                if (GizmoBlowupBlowup(static_cast<GIZMOBLOWUP_s *>(object->field_0x788), 1, 1, 1, NULL, 1) != 0) {
+                if (__builtin_expect(GizmoBlowupBlowup(static_cast<GIZMOBLOWUP_s *>(object->field_0x788), 1, 1, 1, NULL, 1) != 0, 1)) {
                     NewBuzz(object->pad_gamepad->pad, 0.1f, 0);
                 }
                 NewRumble(object->pad_gamepad->pad, 0.5f, 0);

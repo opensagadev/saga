@@ -2199,7 +2199,7 @@ extern "C" {
                 saveloadASLoad(memcard_slot, memcard_savedatabuffer, memcard_savedatasize + 4);
                 memcard_loadneeded = 0;
                 memcard_loadcorrupt = 0;
-                if (saveload_status == 1) {
+                if (__builtin_expect(saveload_status == 1, 1)) {
                     memcard_loadstarted = 0;
                     memcard_loadfailed = 1;
                 } else {
@@ -2227,14 +2227,14 @@ extern "C" {
                         saveload_autosave = -1;
                     }
                 }
-                if (memcard_loadcorrupt == 0 && memcard_savedata != NULL) {
+                if (__builtin_expect(memcard_loadcorrupt == 0 && memcard_savedata != NULL, 1)) {
                     memmove(memcard_savedata, memcard_savedatabuffer, memcard_savedatasize);
                     if (memcard_extra_savedata != NULL && memcard_extra_savedatabuffer != NULL &&
                         memcard_extra_savedatasize >= 0)
                         memmove(memcard_extra_savedata, memcard_extra_savedatabuffer, memcard_extra_savedatasize);
                     MenuLoadOccurred = 1;
                 }
-            } else if (saveload_error == 0x80) {
+            } else if (__builtin_expect(saveload_error == 0x80, 1)) {
                 memcard_loadcorrupt = 1;
                 saveload_autosave = -1;
             } else {
@@ -2280,7 +2280,7 @@ extern "C" {
                 }
             }
         } else {
-            if (saveload_status == 1 && saveload_cardtype == 2 && saveload_cardformatted != 0) {
+            if (__builtin_expect(saveload_status == 1 && saveload_cardtype == 2 && saveload_cardformatted != 0, 0)) {
                 memcard_savemessage_delay = 1.5f;
                 if (memcard_savedatasize <= 0 || memcard_savedatabuffer == NULL || memcard_savedata == NULL) {
                     memcard_saveneeded = 0;
@@ -2333,10 +2333,7 @@ extern "C" {
             }
         } else if (memcard_formatting != 0 && saveload_status == 3) {
             memcard_formatting = 0;
-            if (saveload_error != 0)
-                memcard_formatfailed = 1;
-            else
-                memcard_justformatted = 1;
+            if (saveload_error == 0) memcard_justformatted = 1; else memcard_formatfailed = 1;
         }
     }
 

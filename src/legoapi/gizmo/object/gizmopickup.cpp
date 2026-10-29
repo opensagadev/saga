@@ -732,7 +732,7 @@ void GizmoPickup_CollectCoin(WORLDINFO_s *world, nuvec_s *position, i32 type_ind
         message.extra_position = reinterpret_cast<nuvec_s *>(&world->lev_objs[message.icon]);
         message.player_index = static_cast<i8>(player_index);
         message.score = type->score;
-        if (object != NULL && object->coinpacket != NULL) {
+        if (__builtin_expect(object != NULL && object->coinpacket != NULL, 1)) {
             if (__builtin_expect(((DoubleScore >> player_index) & 1) != 0, 0)) {
                 message.score *= 2;
             }

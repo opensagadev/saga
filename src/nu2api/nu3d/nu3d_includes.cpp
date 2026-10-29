@@ -337,23 +337,39 @@ NuCriticalSection criticalSection("Texture");
 static inline void PostBlurSetVertexParam(nushaderprogram_s *, u32, const f32 *, i32);
 
 static inline VuVec LightClipTransform(const VuVec &point, const NUMTX &matrix) {
+    const f32 m01 = matrix.m01;
+    const f32 m02 = matrix.m02;
+    const f32 m03 = matrix.m03;
+    const f32 m00 = matrix.m00;
+    const f32 m31 = matrix.m31;
+    const f32 m21 = matrix.m21;
+    const f32 m11 = matrix.m11;
+    const f32 m32 = matrix.m32;
+    const f32 m22 = matrix.m22;
+    const f32 m33 = matrix.m33;
+    const f32 m30 = matrix.m30;
+    const f32 m12 = matrix.m12;
+    const f32 m13 = matrix.m13;
+    const f32 m23 = matrix.m23;
+    const f32 m10 = matrix.m10;
+    const f32 m20 = matrix.m20;
     VuVec result;
-    result.x = point.x * matrix.m00;
-    result.x += point.y * matrix.m10;
-    result.x += point.z * matrix.m20;
-    result.x += matrix.m30;
-    result.y = point.x * matrix.m01;
-    result.y += point.y * matrix.m11;
-    result.y += point.z * matrix.m21;
-    result.y += matrix.m31;
-    result.z = point.x * matrix.m02;
-    result.z += point.y * matrix.m12;
-    result.z += point.z * matrix.m22;
-    result.z += matrix.m32;
-    result.w = point.x * matrix.m03;
-    result.w += point.y * matrix.m13;
-    result.w += point.z * matrix.m23;
-    result.w += matrix.m33;
+    result.x = point.x * m00;
+    result.x += point.y * m10;
+    result.x += point.z * m20;
+    result.x += m30;
+    result.y = point.x * m01;
+    result.y += point.y * m11;
+    result.y += point.z * m21;
+    result.y += m31;
+    result.z = point.x * m02;
+    result.z += point.y * m12;
+    result.z += point.z * m22;
+    result.z += m32;
+    result.w = point.x * m03;
+    result.w += point.y * m13;
+    result.w += point.z * m23;
+    result.w += m33;
     const f32 reciprocal = 1.0f / result.w;
     result.x *= reciprocal;
     result.y *= reciprocal;
@@ -646,8 +662,8 @@ static NUFRUSTRUM *allocateFrustrum(i16 plane_count, i16 room_id) {
     NUFRUSTRUM *frustum = reinterpret_cast<NUFRUSTRUM *>(ALIGN(fstack_top.addr, 16));
     frustum->planes = reinterpret_cast<NUPLANE *>(reinterpret_cast<u8 *>(frustum) + sizeof(NUFRUSTRUM));
     fstack_top.addr = reinterpret_cast<usize>(frustum->planes + plane_count);
-    frustum->room_id = room_id;
     frustum->plane_count = plane_count;
+    frustum->room_id = room_id;
     frustra[*nfrustra] = frustum;
     ++*nfrustra;
     return frustum;
@@ -689,30 +705,32 @@ static __attribute__((noinline, noclone, hot, section(".text"))) void drawClippe
 
 static NUFRUSTRUM *buildPortalFrustrum(NUPORTAL *portal, i16 room_id) {
     NUFRUSTRUM *frustum = allocateFrustrum(portal->vertex_count, room_id);
-    const f32 camera_side = planeDistance(portal->plane, world_campos);
     NUVEC camera_position = {
         local_inv_view_mtx.m30,
         local_inv_view_mtx.m31,
         local_inv_view_mtx.m32,
     };
+    const f32 camera_side = planeDistance(portal->plane, camera_position);
     for (i32 i = 0; i < portal->vertex_count; ++i) {
         NUVEC first;
         NUVEC second;
-        NUVEC normal;
         NuVecSub(&first, &camera_position, &portal->vertices[i]);
         NuVecSub(&second, &camera_position, &portal->vertices[(i + 1) % portal->vertex_count]);
-        NuVecCross(&normal, &first, &second);
-        NuVecNorm(&normal, &normal);
-        if (camera_side >= 0.0f) {
-            normal.x = -normal.x;
-            normal.y = -normal.y;
-            normal.z = -normal.z;
+        NuVecCross(&first, &first, &second);
+        NuVecNorm(&first, &first);
+        if (camera_side < 0.0f) {
+            frustum->planes[i].a = first.x;
+            frustum->planes[i].b = first.y;
+            frustum->planes[i].c = first.z;
+            frustum->planes[i].d =
+                -(first.x * camera_position.x + first.y * camera_position.y + first.z * camera_position.z);
+        } else {
+            frustum->planes[i].a = -first.x;
+            frustum->planes[i].b = -first.y;
+            frustum->planes[i].c = -first.z;
+            frustum->planes[i].d =
+                first.x * camera_position.x + first.y * camera_position.y + first.z * camera_position.z;
         }
-        frustum->planes[i].a = normal.x;
-        frustum->planes[i].b = normal.y;
-        frustum->planes[i].c = normal.z;
-        frustum->planes[i].d =
-            -(normal.x * camera_position.x + normal.y * camera_position.y + normal.z * camera_position.z);
     }
     computePortalExtents(&portal->vertices, &portal->vertex_count, &frustum->maximum, &frustum->minimum);
     transposeClipPlanes(frustum);
@@ -720,8 +738,16 @@ static NUFRUSTRUM *buildPortalFrustrum(NUPORTAL *portal, i16 room_id) {
 }
 
 static NUFRUSTRUM *copyFrustrum(NUFRUSTRUM *source, i16 room_id) {
-    NUFRUSTRUM *copy = allocateFrustrum(source->plane_count, room_id);
+    NUFRUSTRUM *copy = reinterpret_cast<NUFRUSTRUM *>(ALIGN(fstack_top.addr, 16));
+    copy->planes = reinterpret_cast<NUPLANE *>(reinterpret_cast<u8 *>(copy) + sizeof(NUFRUSTRUM));
+    fstack_top.addr = reinterpret_cast<usize>(copy->planes + source->plane_count);
+    copy->plane_count = source->plane_count;
+    frustra[*nfrustra] = copy;
+    ++*nfrustra;
     *copy = *source;
+    for (i32 i = 0; i < source->plane_count; ++i) {
+        copy->planes[i] = source->planes[i];
+    }
     copy->room_id = room_id;
     return copy;
 }
@@ -5628,8 +5654,8 @@ void NuDynamicLight::computeClippingPlanes(const VuMtx &matrix, bool zero_near, 
     } while (source != end);
     NUVEC near_up = LightClipEdge(corners[1], corners[0]);
     NUVEC depth_left = LightClipEdge(corners[4], corners[0]);
-    NUVEC near_right = LightClipEdge(corners[3], corners[0]);
     NUVEC far_left = LightClipEdge(corners[5], corners[6]);
+    NUVEC near_right = LightClipEdge(corners[3], corners[0]);
     NUVEC far_down = LightClipEdge(corners[7], corners[6]);
     NUVEC depth_right = LightClipEdge(corners[2], corners[6]);
     LightClipPlane(left, corners[0], near_up, depth_left);
@@ -7384,13 +7410,13 @@ i32 ANI_SimpleAni3PlayerV4Joint_Quat3(ani3_animheader_s *anim, f32 frame, nuanim
         f32 key = (frame - anim->first_frame) * static_cast<f32>(last) / static_cast<f32>(anim->frame_count - 1);
         key = key < 0.0f ? 0.0f : key;
         i32 whole;
-        if (!(static_cast<f32>(last) <= key)) {
-            whole = static_cast<i32>(key);
-            fraction = key - static_cast<f32>(whole);
-        } else {
+        if (static_cast<f32>(last) <= key) {
             const f32 final_key = static_cast<f32>(last);
             whole = static_cast<i32>(final_key);
             fraction = final_key - static_cast<f32>(whole);
+        } else {
+            whole = static_cast<i32>(key);
+            fraction = key - static_cast<f32>(whole);
         }
         quarter = static_cast<u32>(whole) & 3;
         key_offset = (whole / 4) * anim->key_stride;
@@ -7438,14 +7464,7 @@ i32 ANI_SimpleAni3PlayerV4Joint_Quat3(ani3_animheader_s *anim, f32 frame, nuanim
                 } else {
                     output[0] = output[1] = output[2] = 1.0f;
                 }
-            } else if (__builtin_expect(group != 1, 1)) {
-                output[0] = DecodeAni4Quat3ScalarRarelyLast(anim, key_stride, constants, *curve_types++, quarter,
-                                                            fraction, keys, scale_min);
-                output[1] = DecodeAni4Quat3ScalarRarelyLast(anim, key_stride, constants, *curve_types++, quarter,
-                                                            fraction, keys, scale_min);
-                output[2] = DecodeAni4Quat3ScalarRarelyLast(anim, key_stride, constants, *curve_types++, quarter,
-                                                            fraction, keys, scale_min);
-            } else {
+            } else if (__builtin_expect(group == 1, 0)) {
                 NUQUAT first, second;
                 DecodeAni4Quat3PairInline(anim, key_stride, constants, *curve_types++, quarter, keys, scale_min,
                                           first.x, second.x);
@@ -7475,6 +7494,13 @@ i32 ANI_SimpleAni3PlayerV4Joint_Quat3(ani3_animheader_s *anim, f32 frame, nuanim
                 output[1] = result.y * inverse_length;
                 output[2] = result.z * inverse_length;
                 output[3] = result.w * inverse_length;
+            } else {
+                output[0] = DecodeAni4Quat3ScalarRarelyLast(anim, key_stride, constants, *curve_types++, quarter,
+                                                            fraction, keys, scale_min);
+                output[1] = DecodeAni4Quat3ScalarRarelyLast(anim, key_stride, constants, *curve_types++, quarter,
+                                                            fraction, keys, scale_min);
+                output[2] = DecodeAni4Quat3ScalarRarelyLast(anim, key_stride, constants, *curve_types++, quarter,
+                                                            fraction, keys, scale_min);
             }
         }
     }
@@ -7490,7 +7516,7 @@ i32 ANI_SimpleAni3PlayerV4Joint_Quat3W(ani3_animheader_s *anim, f32 frame, nuani
     f32 fraction;
     u32 quarter;
     i32 key_offset;
-    if (anim->key_count == 1) {
+    if (__builtin_expect(anim->key_count == 1, 0)) {
         quarter = 0;
         fraction = 0.0f;
         key_offset = 0;
@@ -7499,7 +7525,7 @@ i32 ANI_SimpleAni3PlayerV4Joint_Quat3W(ani3_animheader_s *anim, f32 frame, nuani
         f32 key = (frame - anim->first_frame) * last_key / static_cast<f32>(anim->frame_count - 1);
         key = key < 0.0f ? 0.0f : key;
         i32 whole_key;
-        if (last_key <= key) {
+        if (__builtin_expect(last_key <= key, 0)) {
             whole_key = static_cast<i32>(last_key);
             fraction = last_key - static_cast<f32>(whole_key);
         } else {
@@ -7521,12 +7547,11 @@ i32 ANI_SimpleAni3PlayerV4Joint_Quat3W(ani3_animheader_s *anim, f32 frame, nuani
     for (; node_flags < first_flags; ++node_flags, ++joint) {
         for (i32 group = 0; group < 3; ++group) {
             i32 components = group == 1 ? 4 : 3;
-            if (*node_flags & CurveGroupMasks[group]) {
+            if (!(*node_flags & CurveGroupMasks[group])) curve_types += components; else {
                 for (i32 component = 0; component < components; ++component) {
                     SkipAni4V4Curve(*curve_types++, keys, scale_min);
                 }
-            } else
-                curve_types += components;
+            }
         }
     }
     const u8 *end_flags = first_flags + count;
@@ -7628,7 +7653,7 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint_EulerQuat(ani3_animheader_s *anim, f3
             SkipAni4V4Curve(curve_types[1], keys, scale_min);
             SkipAni4V4Curve(curve_types[2], keys, scale_min);
         }
-        if (__builtin_expect((flags & 1) != 0, 1)) {
+        if ((flags & 1) != 0) {
             SkipAni4V4Curve(curve_types[3], keys, scale_min);
             SkipAni4V4Curve(curve_types[4], keys, scale_min);
             SkipAni4V4Curve(curve_types[5], keys, scale_min);
@@ -7648,7 +7673,7 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint_EulerQuat(ani3_animheader_s *anim, f3
             if (!(flags & CurveGroupMasks[group])) {
                 if (group == 0) {
                     output[0] = output[1] = output[2] = 0.0f;
-                } else if (group == 1) {
+                } else if (__builtin_expect(group == 1, 1)) {
                     output[0] = output[1] = output[2] = 0.0f;
                     output[3] = 1.0f;
                 } else {
@@ -7868,7 +7893,7 @@ __attribute__((optimize("O2"))) i32 ANI_SimpleAni3PlayerV4Joint_Blend_Quat3(ani3
     if (first_joint != 0)
         root_translation = NULL;
     for (; node_flags < first_flags; ++node_flags, ++joint) {
-        if (*node_flags & 2) {
+        if (__builtin_expect(*node_flags & 2 != 0, 1)) {
             SkipAni4V4Curve(curve_types[0], keys, scale_min);
             SkipAni4V4Curve(curve_types[1], keys, scale_min);
             SkipAni4V4Curve(curve_types[2], keys, scale_min);
@@ -7917,27 +7942,7 @@ __attribute__((optimize("O2"))) i32 ANI_SimpleAni3PlayerV4Joint_Blend_Quat3(ani3
                     output[1] = output[1] * inverse_blend + blend;
                     output[2] = output[2] * inverse_blend + blend;
                 }
-            } else if (group != 1) {
-                f32 sampled = DecodeAni4Quat3Scalar(anim, key_stride, constants, curve_types[0], quarter, fraction,
-                                                    keys, scale_min);
-                f32 delta = sampled - output[0];
-                if (root_translation)
-                    root_translation->x = sampled;
-                output[0] += delta * blend;
-                sampled = DecodeAni4Quat3Scalar(anim, key_stride, constants, curve_types[1], quarter, fraction, keys,
-                                                scale_min);
-                delta = sampled - output[1];
-                if (root_translation)
-                    root_translation->y = sampled;
-                output[1] += delta * blend;
-                sampled = DecodeAni4Quat3Scalar(anim, key_stride, constants, curve_types[2], quarter, fraction, keys,
-                                                scale_min);
-                delta = sampled - output[2];
-                if (root_translation)
-                    root_translation->z = -sampled;
-                output[2] += delta * blend;
-                root_translation = NULL;
-            } else {
+            } else if (group == 1) {
                 NUQUAT first, second, result;
                 DecodeAni4BlendQuat3Pair(anim, key_stride, constants, curve_types[0], quarter, keys, scale_min, first.x,
                                          second.x);
@@ -7960,6 +7965,26 @@ __attribute__((optimize("O2"))) i32 ANI_SimpleAni3PlayerV4Joint_Blend_Quat3(ani3
                 result.y *= inverse_length;
                 result.z *= inverse_length;
                 VuQuatSlerpFast(reinterpret_cast<NUQUAT *>(output), reinterpret_cast<NUQUAT *>(output), &result, blend);
+            } else {
+                f32 sampled = DecodeAni4Quat3Scalar(anim, key_stride, constants, curve_types[0], quarter, fraction,
+                                                    keys, scale_min);
+                f32 delta = sampled - output[0];
+                if (root_translation)
+                    root_translation->x = sampled;
+                output[0] += delta * blend;
+                sampled = DecodeAni4Quat3Scalar(anim, key_stride, constants, curve_types[1], quarter, fraction, keys,
+                                                scale_min);
+                delta = sampled - output[1];
+                if (root_translation)
+                    root_translation->y = sampled;
+                output[1] += delta * blend;
+                sampled = DecodeAni4Quat3Scalar(anim, key_stride, constants, curve_types[2], quarter, fraction, keys,
+                                                scale_min);
+                delta = sampled - output[2];
+                if (root_translation)
+                    root_translation->z = -sampled;
+                output[2] += delta * blend;
+                root_translation = NULL;
             }
         }
     }
@@ -8132,7 +8157,7 @@ extern "C" __attribute__((optimize("O2"))) i32 ANI_SimpleAni3PlayerV4Joint_Blend
             SkipAni4V4Curve(curve_types[4], keys, scale_min);
             SkipAni4V4Curve(curve_types[5], keys, scale_min);
         }
-        if (*node_flags & 8) {
+        if (*node_flags & 8 != 0) {
             SkipAni4V4Curve(curve_types[6], keys, scale_min);
             SkipAni4V4Curve(curve_types[7], keys, scale_min);
             SkipAni4V4Curve(curve_types[8], keys, scale_min);
@@ -8246,28 +8271,34 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint_Blend(ani3_animheader_s *anim, f32 fr
                                                            root_translation);
     }
 
-    // Sampling advances a local cursor; the animation owns the unchanged table.
-    ani3_scalemin_s *scale_min = anim->scale_min;
-    const u16 *constants = reinterpret_cast<const u16 *>(anim->constants);
+    u8 *node_flags = anim->node_flags;
     const u16 key_stride = anim->key_stride;
     const f32 last_key = static_cast<f32>(anim->key_count - 1);
     f32 key = (frame - anim->first_frame) * last_key / static_cast<f32>(anim->frame_count - 1);
     if (key < 0.0f) {
         key = 0.0f;
     }
-    if (static_cast<f32>(anim->key_count) <= key) {
+    // Sampling advances a local cursor; the animation owns the unchanged table.
+    ani3_scalemin_s *scale_min = anim->scale_min;
+    if (key >= anim->key_count) {
         key = last_key;
     }
 
+    nuanimbuffjoint_s *joint = buffer->joints;
+    u8 *joint_flags = buffer->joint_flags + first_joint;
     const i32 whole_key = static_cast<i32>(key);
     const u32 quarter = static_cast<u32>(whole_key) & 3;
     const f32 fraction = key - static_cast<f32>(whole_key);
-    u8 *keys = anim->keys + (whole_key / 4) * key_stride;
     const u16 *curve_types = anim->curve_types;
+    const u16 *constants = reinterpret_cast<const u16 *>(anim->constants);
+    u8 *keys = anim->keys + (whole_key / 4) * key_stride;
+    const i32 decode_count = joint_count <= anim->node_count ? joint_count : anim->node_count;
+    root_translation = first_joint == 0 ? root_translation : NULL;
 
     // Advance all packed stream cursors to the first requested joint.
-    for (i32 joint = 0; joint < first_joint; ++joint) {
-        const u8 flags = anim->node_flags[joint];
+    u8 *skip_end = node_flags + first_joint;
+    for (; node_flags < skip_end; ++node_flags) {
+        const u8 flags = *node_flags;
         if (__builtin_expect((flags & NUANIMBUFF_JOINT_TRANSLATION) != 0, 1)) {
             SkipAni4V4Curve(curve_types[0], keys, scale_min);
             SkipAni4V4Curve(curve_types[1], keys, scale_min);
@@ -8284,51 +8315,52 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint_Blend(ani3_animheader_s *anim, f32 fr
             SkipAni4V4Curve(curve_types[8], keys, scale_min);
         }
         curve_types += 9;
+        ++joint;
     }
 
-    const i32 decode_count = joint_count <= anim->node_count ? joint_count : anim->node_count;
-    NUVEC *root = first_joint == 0 ? root_translation : NULL;
-    const i32 end_joint = first_joint + decode_count;
-    const f32 inverse_blend = 1.0f - blend;
+    u8 *end = node_flags + decode_count;
 
-    for (i32 joint_index = first_joint; joint_index < end_joint; ++joint_index) {
-        const u8 flags = anim->node_flags[joint_index];
-        buffer->joint_flags[joint_index] |= flags;
-        f32 *group_values = reinterpret_cast<f32 *>(&buffer->joints[joint_index]);
+    for (; node_flags < end; ++node_flags, curve_types += 9, ++joint) {
+        const u8 flags = *node_flags;
+        *joint_flags++ |= flags;
+        f32 *group_values = reinterpret_cast<f32 *>(joint);
+        const u16 *curves = curve_types;
+        const f32 inverse_blend = 1.0f - blend;
 
         for (i32 group = 0; group < 3; ++group) {
-            if ((flags & CurveGroupMasks[group]) != 0) {
-                f32 decoded = DecodeAni4Quat3Scalar(anim, key_stride, constants, curve_types[0], quarter, fraction,
-                                                    keys, scale_min);
+            if (__builtin_expect((flags & CurveGroupMasks[group]) != 0, 1)) {
+                f32 decoded =
+                    DecodeAni4Quat3Scalar(anim, key_stride, constants, curves[0], quarter, fraction, keys, scale_min);
                 f32 delta = decoded - group_values[0];
                 if (group == 1) {
                     delta = WrapAni4BlendRotation(delta);
                 }
-                if (root != NULL) {
-                    root->x = decoded;
+                if (root_translation != NULL) {
+                    root_translation->x = decoded;
                 }
                 group_values[0] += delta * blend;
 
-                decoded = DecodeAni4Quat3Scalar(anim, key_stride, constants, curve_types[1], quarter, fraction, keys,
-                                                scale_min);
+                decoded =
+                    DecodeAni4Quat3Scalar(anim, key_stride, constants, curves[1], quarter, fraction, keys, scale_min);
                 delta = decoded - group_values[1];
                 if (group == 1) {
                     delta = WrapAni4BlendRotation(delta);
                 }
-                if (root != NULL) {
-                    root->y = decoded;
+                if (root_translation != NULL) {
+                    root_translation->y = decoded;
                 }
                 group_values[1] += delta * blend;
 
-                decoded = DecodeAni4Quat3Scalar(anim, key_stride, constants, curve_types[2], quarter, fraction, keys,
-                                                scale_min);
+                decoded =
+                    DecodeAni4Quat3Scalar(anim, key_stride, constants, curves[2], quarter, fraction, keys, scale_min);
                 delta = decoded - group_values[2];
                 if (group == 1) {
                     delta = WrapAni4BlendRotation(delta);
                 }
-                if (root != NULL) {
-                    root->z = -decoded;
+                if (root_translation != NULL) {
+                    root_translation->z = -decoded;
                 }
+                root_translation = NULL;
                 group_values[2] += delta * blend;
             } else if (group == 2) {
                 group_values[0] = group_values[0] * inverse_blend + blend;
@@ -8338,17 +8370,14 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint_Blend(ani3_animheader_s *anim, f32 fr
                 group_values[0] *= inverse_blend;
                 group_values[1] *= inverse_blend;
                 group_values[2] *= inverse_blend;
-                if (__builtin_expect(root != NULL, 0)) {
-                    root->y = 0.0f;
-                    root->x = 0.0f;
-                    root->z = 0.0f;
+                if (root_translation != NULL) {
+                    root_translation->z = 0.0f;
+                    root_translation->y = 0.0f;
+                    root_translation->x = 0.0f;
+                    root_translation = NULL;
                 }
             }
-
-            if (group == 0) {
-                root = NULL;
-            }
-            curve_types += 3;
+            curves += 3;
             group_values += 4;
         }
     }
@@ -15436,19 +15465,17 @@ static void drawClippedPortal(NUPORTAL *portal, NUPLANE **planes, u8 *plane_coun
 }
 
 static void roomRecursive(NUGSCN *scene, NUFRUSTRUM *frustum, i16 room_id, i16 previous_room, i32 depth) {
-    if (depth >= 2) {
-        for (i32 i = 0; i < depth - 1; ++i) {
-            if (__builtin_expect(rooms_visited[i] != room_id, 0)) {
-                continue;
-            }
+    NUROOM *rooms = scene->rooms;
+    for (i32 i = 0; i < depth - 1; ++i) {
+        if (rooms_visited[i] == room_id) {
             return;
         }
     }
-    if (__builtin_expect(depth >= 16, 0)) {
+    if (depth >= 16) {
         return;
     }
 
-    NUROOM *room = &scene->rooms[room_id];
+    NUROOM *room = &rooms[room_id];
     rooms_visited[depth] = room_id;
     if (room_id != camera_roomid) {
         clipRoomAgainstFrustrum(scene, room, frustum);
@@ -15460,19 +15487,23 @@ static void roomRecursive(NUGSCN *scene, NUFRUSTRUM *frustum, i16 room_id, i16 p
         return;
     }
 
-    auto room_priority = room->priority;
-    for (i32 portal_index = 0; portal_index < room->portal_count; ++portal_index) {
+    for (u32 portal_index = 0; portal_index < room->portal_count; ++portal_index) {
         NUPORTAL *portal = &scene->portals[room->portal_indices[portal_index]];
-        i16 next_room = portal->front_room == room_id ? portal->back_room : portal->front_room;
+        i16 next_room = portal->front_room;
+        if (next_room == room_id) {
+            next_room = portal->back_room;
+        }
         if (next_room == previous_room || (portal->is_active & NUPORTAL_FLAG_ACTIVE) == 0) {
             continue;
         }
 
         NUROOM *next = &scene->rooms[next_room];
-        const f32 camera_side = planeDistance(portal->plane, world_campos);
-        if (next->priority > room_priority && ((room_id == portal->back_room && camera_side < 0.0f) ||
-                                               (room_id == portal->front_room && camera_side > 0.0f))) {
-            continue;
+        if (scene->rooms[room_id].priority < next->priority) {
+            const f32 camera_side = planeDistance(portal->plane, world_campos);
+            if ((room_id == static_cast<i16>(portal->back_room) && camera_side < 0.0f) ||
+                (room_id == static_cast<i16>(portal->front_room) && camera_side > 0.0f)) {
+                continue;
+            }
         }
 
         i32 inside_tests = 0;
@@ -15495,7 +15526,6 @@ static void roomRecursive(NUGSCN *scene, NUFRUSTRUM *frustum, i16 room_id, i16 p
             continue;
         }
 
-        NUFRUSTRUM *next_frustum = NULL;
         if (inside_tests != frustum->plane_count * portal->vertex_count) {
             i32 in_front = 0;
             for (i32 i = 0; i < portal->vertex_count; ++i) {
@@ -15507,27 +15537,26 @@ static void roomRecursive(NUGSCN *scene, NUFRUSTRUM *frustum, i16 room_id, i16 p
                 continue;
             }
             if (in_front != portal->vertex_count) {
-                next_frustum = copyFrustrum(frustum, next_room);
+                roomRecursive(scene, copyFrustrum(frustum, next_room), next_room, room_id, depth + 1);
             } else {
                 NUVEC portal_minimum;
                 NUVEC portal_maximum;
                 computePortalExtents(&portal->vertices, &portal->vertex_count, &portal_maximum, &portal_minimum);
-                if (__builtin_expect(
-                        !(frustum->minimum.x < portal_maximum.x) || frustum->minimum.y >= portal_maximum.y ||
-                            portal_minimum.x >= frustum->maximum.x || portal_minimum.y >= frustum->maximum.y,
-                        0)) {
+                if (frustum->minimum.x >= portal_maximum.x || frustum->minimum.y >= portal_maximum.y ||
+                    portal_minimum.x >= frustum->maximum.x || portal_minimum.y >= frustum->maximum.y) {
                     continue;
                 }
-                if (__builtin_expect(portal_minimum.x < frustum->minimum.x, 0))
+                if (!(portal_minimum.x > frustum->minimum.x))
                     portal_minimum.x = frustum->minimum.x;
-                if (portal_minimum.y < frustum->minimum.y)
+                if (!(portal_minimum.y > frustum->minimum.y))
                     portal_minimum.y = frustum->minimum.y;
-                if (portal_maximum.x > frustum->maximum.x)
+                if (!(portal_maximum.x < frustum->maximum.x))
                     portal_maximum.x = frustum->maximum.x;
-                if (portal_maximum.y > frustum->maximum.y)
+                if (!(portal_maximum.y < frustum->maximum.y))
                     portal_maximum.y = frustum->maximum.y;
                 drawClippedPortal(portal, &next->planes, &next->plane_count, &portal_minimum, &portal_maximum);
-                next_frustum = buildFrustrum(&portal_minimum, &portal_maximum, next_room);
+                roomRecursive(scene, buildFrustrum(&portal_minimum, &portal_maximum, next_room), next_room, room_id,
+                              depth + 1);
             }
         } else {
             if (draw_portals != 0) {
@@ -15559,9 +15588,8 @@ static void roomRecursive(NUGSCN *scene, NUFRUSTRUM *frustum, i16 room_id, i16 p
                 }
                 NuCameraRelock();
             }
-            next_frustum = buildPortalFrustrum(portal, next_room);
+            roomRecursive(scene, buildPortalFrustrum(portal, next_room), next_room, room_id, depth + 1);
         }
-        roomRecursive(scene, next_frustum, next_room, room_id, depth + 1);
     }
 }
 

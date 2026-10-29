@@ -991,8 +991,7 @@ static i32 GizForces_BoltHit(void *world_ptr, void *data, void *object_ptr, NUVE
     if (force_sys == NULL) {
         return 0;
     }
-    const u16 count = force_sys->hit_test_gizmo_count;
-    if (count == 0) {
+    if (force_sys->hit_test_gizmo_count == 0) {
         return 0;
     }
     GameObject_s *object = static_cast<GameObject_s *>(object_ptr);
@@ -1014,8 +1013,12 @@ static i32 GizForces_BoltHit(void *world_ptr, void *data, void *object_ptr, NUVE
             minimum->y > position.y + extent) {
             continue;
         }
-        for (i32 point = point_count - 1; point >= 0; --point) {
-            if (__builtin_expect(!SphereSphereOverlap(&force->position, extent, &points[point], radius), 0)) {
+        i32 point = point_count - 1;
+        if (point < 0) {
+            continue;
+        }
+        do {
+            if (__builtin_expect(!SphereSphereOverlap(&force->position, force->radius, &points[point], radius), 0)) {
                 continue;
             }
             NUVEC *origin = object != NULL ? &object->apiobj.collision_position : &points[point];
@@ -1025,8 +1028,8 @@ static i32 GizForces_BoltHit(void *world_ptr, void *data, void *object_ptr, NUVE
                 nearest = force;
             }
             break;
-        }
-    } while (++index < count);
+        } while (--point >= 0);
+    } while (force_sys->hit_test_gizmo_count > ++index);
     if (nearest == NULL) {
         return 0;
     }
@@ -1359,7 +1362,7 @@ static i32 GizForces_Load(void *world_ptr, void *data) {
         }
         force.blowup_type = -1;
 
-        if (version > 3) {
+        if (__builtin_expect(version > 3, 1)) {
             if (version == 4) {
                 force.blowup_type = EdFileReadShort();
                 force.pickup_count = EdFileReadShort();
@@ -1368,7 +1371,7 @@ static i32 GizForces_Load(void *world_ptr, void *data) {
                 EdFileReadNuVec(&force.effect_position);
             } else {
                 const i32 name_length = static_cast<i8>(EdFileReadChar());
-                if (name_length != 0) {
+                if (__builtin_expect(name_length != 0, 0)) {
                     EdFileRead(blowup_name, name_length);
                     force.blowup_type = static_cast<i16>(GizmoBlowupGetNameTableId(blowup_name));
                     if (force.blowup_type != -1) {
@@ -1761,7 +1764,9 @@ i32 GizForce_FindBestForceTarget(GIZFORCESYS_s *force_sys, GameObject_s *object)
         if (__builtin_expect(oldest != NULL, 1)) {
             i32 index = oldest->index;
             los->words[index + 12] = LevelTimer.update_count;
-            if ((oldest->force->config_flags & 0x800) != 0) {
+            if ((oldest->force->config_flags & 0x800) == 0) {
+                los->words[index >> 5] |= 1u << (index & 31);
+            } else {
                 los->words[index >> 5] &= ~(1u << (index & 31));
 
                 i32 clear = 0;
@@ -1772,7 +1777,7 @@ i32 GizForce_FindBestForceTarget(GIZFORCESYS_s *force_sys, GameObject_s *object)
                     if (!clear && TerrainPlatId() != -1)
                         clear = static_cast<GIZFORCEANIMDATA_s *>(oldest->animation->object_data)->platform_id ==
                                 TerrainPlatId();
-                } else if ((oldest->force->field_0xaa & 0x80) == 0) {
+                } else if (__builtin_expect((oldest->force->field_0xaa & 0x80) == 0, 0)) {
                     NuVecSub(&direction, &oldest->force->position, &object->apiobj.collision_position);
                     clear = GameRayCast(&object->apiobj.collision_position, &direction, 0.0f, 0) == 0;
                     if (!clear && (oldest->force->runtime_flags & 1) != 0 && TerrainPlatId() != -1) {
@@ -1786,10 +1791,8 @@ i32 GizForce_FindBestForceTarget(GIZFORCESYS_s *force_sys, GameObject_s *object)
                         }
                     }
                 }
-                if (__builtin_expect(clear != 0, 0))
+                if (clear != 0)
                     object->gizforce_los_info->words[index >> 5] |= 1u << (index & 31);
-            } else {
-                los->words[index >> 5] |= 1u << (index & 31);
             }
         }
     }
@@ -1798,8 +1801,8 @@ i32 GizForce_FindBestForceTarget(GIZFORCESYS_s *force_sys, GameObject_s *object)
     los = object->gizforce_los_info;
     ForceTarget *target = possible_forcetargets;
     for (i32 i = 0; i != count; ++i, ++target) {
-        if (los != NULL && (target->force == NULL || (target->force->field_0xaa & 0x80) == 0) && target->index != -1 &&
-            __builtin_expect((los->words[target->index >> 5] & (1u << (target->index & 31))) == 0, 0))
+        if (__builtin_expect(los != NULL && (target->force == NULL || (target->force->field_0xaa & 0x80) == 0) && target->index != -1 &&
+            __builtin_expect((los->words[target->index >> 5] & (1u << (target->index & 31))) == 0, 0), 0))
             continue;
         f32 distance = target->distance;
         if (object->force_glow_previous != NULL &&

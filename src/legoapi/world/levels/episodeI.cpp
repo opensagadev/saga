@@ -1306,7 +1306,7 @@ i32 Action_CreatePod(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **
                 else
                     model_id = type;
             }
-        } else if (__builtin_expect((value = NuStrIStr(params[i], "spline_start=")) != NULL, 1)) {
+        } else if ((value = NuStrIStr(params[i], "spline_start=")) != NULL) {
             start = AIParamToFloat((AISCRIPTPROCESS *)packet, value + 13);
         } else if ((value = NuStrIStr(params[i], "spline_end=")) != NULL) {
             end = AIParamToFloat((AISCRIPTPROCESS *)packet, value + 11);
@@ -1318,7 +1318,7 @@ i32 Action_CreatePod(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **
             damaged = 1;
         }
     }
-    if (__builtin_expect((u32)spline_id > 31 || model_id == -1, 0))
+    if ((u32)spline_id > 31 || model_id == -1)
         return 1;
 
     flightspline_s *spline = NULL;
@@ -1896,7 +1896,7 @@ void PodSprintA_Update(WORLDINFO_s *world) {
     if (__builtin_expect(!!(CutScene_PlayingOrRequested(NULL)), 0))
         return;
     if ((ps->flags & 0xc) != 0) {
-        if (!(ps->flags & 0x10)) {
+        if (__builtin_expect(!(ps->flags & 0x10), 0)) {
             ps->flags |= 0x10;
             ResetLevel(world, NULL, 1);
         }

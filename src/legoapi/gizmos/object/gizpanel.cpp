@@ -602,7 +602,7 @@ static void GizPanel_Draw(void *world_ptr, void *, float) {
             NUVEC target_position;
             GizPanel_GetAbsTargetPos(&panel, &target_position, 0);
             NuMtxSetRotationY(&base_matrix, target_spin);
-            if (panel.target_roll != 0) {
+            if (__builtin_expect(panel.target_roll != 0, 0)) {
                 NuMtxRotateZ(&base_matrix, panel.target_roll);
             }
             if (panel.target_pitch != 0) {
@@ -1027,23 +1027,24 @@ i32 GizPanel_UpdateHint(HINT_s *hint) {
             }
         }
     }
-    if (storm && (hint->control_mode_ids[0] == 0x269 || hint->control_mode_ids[0] == 0x260)) {
+    if (__builtin_expect(storm, 0) && (hint->control_mode_ids[0] == 0x260 || hint->control_mode_ids[0] == 0x269)) {
         if (__builtin_expect(AvailableToPlayer(0, 1, 5, 0) != 0, 1))
             return hint->control_mode_ids[0] == 0x260;
         return hint->control_mode_ids[0] == 0x269;
     }
-    if (bountyhunter && (hint->control_mode_ids[0] == 0x26a || hint->control_mode_ids[0] == 0x261)) {
+    if (bountyhunter && (hint->control_mode_ids[0] == 0x261 || hint->control_mode_ids[0] == 0x26a)) {
         if (AvailableToPlayer(0x1000000, -1, 6, 0) != 0)
             return hint->control_mode_ids[0] == 0x261;
         return hint->control_mode_ids[0] == 0x26a;
     }
-    if (droid) {
+    if (__builtin_expect(droid, 1)) {
         if (hint->control_mode_ids[0] == 0x624)
             return droid_type == 1 && FreePlay != 0 && AvailableToPlayer(0x30, -1, 0, 1) == 0;
-        if (hint->control_mode_ids[0] == 0x625)
+        if (hint->control_mode_ids[0] == 0x625 || hint->control_mode_ids[0] == 0x25f) {
+            if (hint->control_mode_ids[0] == 0x25f)
+                return LSW_HintConditions.tc14_present;
             return droid_type == 0 && FreePlay != 0 && AvailableToPlayer(0x50, -1, 0, 1) == 0;
-        if (hint->control_mode_ids[0] == 0x25f)
-            return LSW_HintConditions.tc14_present;
+        }
     }
     return 0;
 }

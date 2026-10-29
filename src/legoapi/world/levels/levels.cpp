@@ -2315,7 +2315,7 @@ void WorldInfo_Load(WORLDINFO *world) {
         goto abort;
     if (world->config_count > 0) {
         LevelConfig_BeforeLoad(world->current_level, ConfigBuffer, Level_ConfigBeforeLoad_GameKeywords);
-        if (abort_load != 0)
+        if (__builtin_expect(abort_load != 0, 1))
             goto abort;
     }
 

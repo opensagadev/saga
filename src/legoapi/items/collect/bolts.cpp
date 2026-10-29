@@ -1371,10 +1371,10 @@ void Bolt_HitGameObjectRC(NetMessage &message) {
                 goto owner_feedback;
             objhitobj_bolt = bolt;
             ObjHitObj(owner, object, damage, bolt->hit_flags, 0, 0);
-            if ((bolt->flags & 0x800000) != 0 && (CInfo[object->character_context].flags & 0x10000000) == 0 &&
+            if (__builtin_expect((bolt->flags & 0x800000) != 0 && (CInfo[object->character_context].flags & 0x10000000) == 0 &&
                 (CInfo[object->character_context].flags & 0x8000) == 0 &&
                 (object->apiobj.character_data->model_flags & 0x10) != 0 && LEGOACT_DEACTIVATED != -1 &&
-                object->apiobj.character_model->model_data_b[LEGOACT_DEACTIVATED] != NULL) {
+                object->apiobj.character_model->model_data_b[LEGOACT_DEACTIVATED] != NULL, 1)) {
                 DeactivatePlayer(object, DEACTIVATEDTIME, NULL);
                 if (bolt->owner != NULL)
                     NewBuzz(bolt->owner->pad_gamepad->pad, 0.1f, 0);
@@ -1425,13 +1425,17 @@ i32 Bolt_HitGameObject(BOLT_s *bolt, GameObject_s *object, NUVEC *points, NUVEC 
         if (message.swap_endianness)
             EdFileSwapEndianess16(destination);
         message.write_offset += 2;
-        destination = message.data->bytes + message.write_offset;
+    }
+    if (message.data != NULL) {
+        u8 *destination = message.data->bytes + message.write_offset;
         memcpy(destination, &object_index, 2);
         if (message.swap_endianness)
             EdFileSwapEndianess16(destination);
         message.write_offset += 2;
-        for (i32 i = 0; i < 3; ++i) {
-            destination = message.data->bytes + message.write_offset;
+    }
+    for (i32 i = 0; i < 3; ++i) {
+        if (message.data != NULL) {
+            u8 *destination = message.data->bytes + message.write_offset;
             memmove(destination, &points[i], 12);
             if (message.swap_endianness) {
                 EdFileSwapEndianess32(destination);
@@ -1440,12 +1444,16 @@ i32 Bolt_HitGameObject(BOLT_s *bolt, GameObject_s *object, NUVEC *points, NUVEC 
             }
             message.write_offset += 12;
         }
-        destination = message.data->bytes + message.write_offset;
+    }
+    if (message.data != NULL) {
+        u8 *destination = message.data->bytes + message.write_offset;
         memcpy(destination, &hit, 4);
         if (message.swap_endianness)
             EdFileSwapEndianess32(destination);
         message.write_offset += 4;
-        destination = message.data->bytes + message.write_offset;
+    }
+    if (message.data != NULL) {
+        u8 *destination = message.data->bytes + message.write_offset;
         memmove(destination, &netclient, 4);
         if (message.swap_endianness)
             EdFileSwapEndianess32(destination);
@@ -1520,7 +1528,7 @@ void Bolts_Update(WORLDINFO_s *world) {
                     f32 time = bolt->time;
                     f32 ray_time = bolt->ray_time;
                     bolt->lifetime = time + ray_time * NewRayCastGetTOFI();
-                    if (__builtin_expect(bolt->type->ricochet_callback != NULL, 0))
+                    if (__builtin_expect(bolt->type->ricochet_callback != NULL, 1))
                         bolt->type->ricochet_callback(bolt, &normal);
                 }
                 bolt->field_0xe8 = 2000000.0f;

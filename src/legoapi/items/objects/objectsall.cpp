@@ -334,7 +334,9 @@ static inline void edpartSavePath(char *path, char *backup, bool level) {
 }
 
 static inline void edpartSaveMessage(eduimenu_s *parent, const char *message, bool success) {
-    u32 colours[4] = {success ? 0x8000c000u : 0x800000c0u, 0x80ff0000, 0x80808080, 0x80404040};
+    u32 colours[4] = {0x800000c0u, 0x80ff0000, 0x80808080, 0x80404040};
+    if (success)
+        colours[0] = 0x8000c000u;
     edpart_message_menu = eduiMenuCreate(70, 70, 300, 250, ed_fnt, edpartCancelMessageMenu, "Message");
     if (edpart_message_menu != NULL) {
         eduiMenuAddItem(edpart_message_menu, eduiItemSelCreate(1, colours, 0, 0, NULL, const_cast<char *>(message)));
@@ -1588,7 +1590,7 @@ static void edpartInstanceFlagsMenu(eduimenu_s *menu, eduiitem_s *, u32) {
     }
 }
 
-__attribute__((optimize("O2"))) static void edpartInstanceOrphansMenu(eduimenu_s *parent, eduiitem_s *, u32) {
+static void edpartInstanceOrphansMenu(eduimenu_s *parent, eduiitem_s *, u32) {
     edpart_which_scene = 1;
     edpart_instanceorphans_menu =
         eduiMenuCreate(70, 70, 250, 250, ed_fnt, edpartCancelInstanceOrphansMenu, "Instance Orphans/Dupes");
@@ -1596,23 +1598,14 @@ __attribute__((optimize("O2"))) static void edpartInstanceOrphansMenu(eduimenu_s
         i32 group = 1;
         char effect_name[20];
         char label[38];
-#define EDPART_ORPHAN_ITEM(index)                                                                                      \
-    if (edpart_nearest_type->effect_ids[index] == 9998) {                                                              \
-        NuStrNCpy(effect_name, edpart_nearest_type->object_names[index], 17);                                          \
-        sprintf(label, "Remove - %s", effect_name);                                                                    \
-        eduiMenuAddItem(edpart_instanceorphans_menu,                                                                   \
-                        eduiItemSelCreate(index, edblack, 0, group, edpartDeleteInstanceOrphan, label));               \
-        ++group;                                                                                                       \
-    }
-        EDPART_ORPHAN_ITEM(0)
-        EDPART_ORPHAN_ITEM(1)
-        EDPART_ORPHAN_ITEM(2)
-        EDPART_ORPHAN_ITEM(3)
-        EDPART_ORPHAN_ITEM(4)
-        EDPART_ORPHAN_ITEM(5)
-        EDPART_ORPHAN_ITEM(6)
-        EDPART_ORPHAN_ITEM(7)
-#undef EDPART_ORPHAN_ITEM
+        for (i32 index = 0; index < 8; ++index) {
+            if (edpart_nearest_type->effect_ids[index] == 9998) {
+                NuStrNCpy(effect_name, edpart_nearest_type->object_names[index], 17);
+                sprintf(label, "Remove - %s", effect_name);
+                eduiMenuAddItem(edpart_instanceorphans_menu,
+                                eduiItemSelCreate(index, edblack, 0, group++, edpartDeleteInstanceOrphan, label));
+            }
+        }
         if (edpart_nearest_orphans) {
             eduiMenuAddItem(edpart_instanceorphans_menu,
                             eduiItemSelCreate(8, edblack, 0, 0, edpartDeleteAllInstanceOrphans, "Remove All Orphans"));
@@ -3052,10 +3045,10 @@ static void edpartFileSaveEffects(eduimenu_s *parent, eduiitem_s *, u32) {
     char path[256], backup[256];
     char general_directory[256], general_name[256], general_extension[256];
     char level_directory[256], level_name[256], level_extension[256];
-    if (edbits_general_save_directory[0])
-        strcpy(general_directory, edbits_general_save_directory);
-    else
+    if (!edbits_general_save_directory[0])
         __builtin_memcpy(general_directory, ".", 2);
+    else
+        strcpy(general_directory, edbits_general_save_directory);
     if (!edbits_general_save_name[0])
         __builtin_memcpy(general_name, "part", 5);
     else
@@ -3080,14 +3073,14 @@ static void edpartFileSaveEffects(eduimenu_s *parent, eduiitem_s *, u32) {
     sprintf(path, "%s\\%s.%s", general_directory, general_name, general_extension);
     sprintf(backup, "%s\\%s.%s.bak", general_directory, general_name, general_extension);
     bool general_backup = edbits_override_backups || EdFileBackup(path, backup);
-    i32 general_saved = edpartSaveEffects(path, 0);
+    bool general_saved = edpartSaveEffects(path, 0) != 0;
     sprintf(path, "%s\\%s.%s", level_directory, level_name, level_extension);
     sprintf(backup, "%s\\%s.%s.bak", level_directory, level_name, level_extension);
     i32 level_backup = 1;
-    if (__builtin_expect(!edbits_override_backups, 1))
+    if (__builtin_expect(!edbits_override_backups, 0))
         level_backup = EdFileBackup(path, backup);
-    bool level_saved = edpartSaveEffects(path, 1) != 0;
-    if (general_saved && general_backup && level_saved && level_backup) {
+    i32 level_saved = edpartSaveEffects(path, 1);
+    if (__builtin_expect(general_saved && general_backup && level_saved && level_backup, 0)) {
         edpartSaveMessage(parent, "Saved OK", true);
         return;
     }

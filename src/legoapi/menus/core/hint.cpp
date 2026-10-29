@@ -1028,8 +1028,9 @@ void Hint_Process(float elapsed) {
     hintsys.alpha = SeekLinearF(hintsys.alpha, target, 3.0f * FRAMETIME);
     HINT_s *hint = hintsys.active_hint;
     if (hint != NULL) {
+        const f32 duration = hint->display_duration;
         hintsys.display_elapsed += elapsed;
-        if ((hint->display_duration > 0.0f && !(hintsys.display_elapsed < hint->display_duration)) ||
+        if ((duration > 0.0f && hintsys.display_elapsed >= duration) ||
             MechSystems::Get()->PlayerButton().selector != NULL)
             hintsys.active_hint = NULL;
     }

@@ -7476,7 +7476,7 @@ void AIScriptLoadAllPakFile(void *pak, char *path, VARIPTR *buf, VARIPTR *buf_en
     AICONDITION *condition;
     i32 is_done;
 
-    if (__builtin_expect(sys != NULL, 0)) {
+    if (sys != NULL) {
         scripts = &sys->scripts;
     } else {
         scripts = &global_aiscripts;
@@ -7528,7 +7528,8 @@ void AIScriptLoadAllPakFile(void *pak, char *path, VARIPTR *buf, VARIPTR *buf_en
     }
 
     if (sys != NULL) {
-        do {
+        is_done = 0;
+        while (!is_done) {
             is_done = 1;
             script = (AISCRIPT *)NuLinkedListGetHead(&sys->scripts);
 
@@ -7539,7 +7540,7 @@ void AIScriptLoadAllPakFile(void *pak, char *path, VARIPTR *buf, VARIPTR *buf_en
 
                 script = (AISCRIPT *)NuLinkedListGetNext(&sys->scripts, &script->list_node);
             }
-        } while (!is_done);
+        }
     }
 }
 
@@ -8863,8 +8864,9 @@ static void pathEditorCreateSpecialRouteData(AIPATH_s *path, EDAIPATH_s *editor_
                 }
                 const i16 other_index = editor_connection->node->index;
                 const u16 connection_routes = editor_connection->route_mask;
+                AIPATHCNX_s **connections = runtime_node->connections;
                 for (i32 edge = 0; edge < runtime_node->connection_count; ++edge) {
-                    AIPATHCNX_s *connection = runtime_node->connections[edge];
+                    AIPATHCNX_s *connection = connections[edge];
                     if (connection->node_indices[0] != other_index && connection->node_indices[1] != other_index) {
                         continue;
                     }
@@ -8927,14 +8929,15 @@ static void pathEditorCreateSpecialRouteData(AIPATH_s *path, EDAIPATH_s *editor_
             }
             route->route_nodes = (u8 **)AISysBufferAlloc(cursor, end, route->route_count * sizeof(u8 *));
             memset(route->route_nodes, 0, route->route_count * sizeof(u8 *));
-            for (u32 source = 0; source < route->route_count; ++source) {
+            for (i32 source = 0; source < route->route_count; ++source) {
                 route->route_nodes[source] = (u8 *)AISysBufferAlloc(cursor, end, route->route_count);
                 memset(route->route_nodes[source], 0, route->route_count);
             }
             // The distance and full-node next-hop tables are temporary. Keep their
             // allocations beyond the persistent route data without advancing it.
             VARIPTR scratch = *cursor;
-            f32 **distances = pathEditorCalculateDistanceTable(path, 1ULL << route_index, &scratch, end);
+            i32 route_mask = 1ULL << route_index;
+            f32 **distances = pathEditorCalculateDistanceTable(path, route_mask, &scratch, end);
             if (distances == nullptr) {
                 continue;
             }
@@ -8944,33 +8947,35 @@ static void pathEditorCreateSpecialRouteData(AIPATH_s *path, EDAIPATH_s *editor_
                 next_hops[source] = (u8 *)AISysBufferAlloc(&scratch, end, path->node_count);
                 memset(next_hops[source], 0, path->node_count);
             }
-            for (i32 source = 0; source < path->node_count; ++source) {
-                for (i32 destination = 0; destination < path->node_count; ++destination) {
-                    next_hops[source][destination] = 0xff;
-                    if (source == destination) {
-                        continue;
-                    }
-                    f32 best = FLT_MAX;
+            if (distance_tables != nullptr && path->nodes != nullptr) {
+                for (i32 source = 0; source < path->node_count; ++source) {
                     AIPATHNODE_s *node = &path->nodes[source];
-                    for (u32 edge = 0; edge < node->connection_count; ++edge) {
-                        AIPATHCNX_s *connection = node->connections[edge];
-                        i32 direction = connection->node_indices[0] != source;
-                        if (__builtin_expect(!!(connection->traversal_flags[direction] & 0x40000000), 0)) {
+                    for (i32 destination = 0; destination < path->node_count; ++destination) {
+                        next_hops[source][destination] = 0xff;
+                        if (destination == source) {
                             continue;
                         }
-                        if (!(connection->route_mask & (1ULL << route_index))) {
-                            continue;
-                        }
-                        i32 neighbor = connection->node_indices[!direction];
-                        f32 distance = distances[source][neighbor] + distances[neighbor][destination];
-                        if (distance < best) {
-                            best = distance;
-                            next_hops[source][destination] = edge;
+                        f32 best = FLT_MAX;
+                        for (i32 edge = 0; edge < path->nodes[source].connection_count; ++edge) {
+                            AIPATHCNX_s *connection = node->connections[edge];
+                            i32 direction = connection->node_indices[0] != source;
+                            if (__builtin_expect(!!(connection->traversal_flags[direction] & 0x40000000), 0)) {
+                                continue;
+                            }
+                            if (route_mask != 0 && !(connection->route_mask & (1ULL << route_index))) {
+                                continue;
+                            }
+                            i32 neighbor = connection->node_indices[!direction];
+                            f32 distance = distances[source][neighbor] + distances[neighbor][destination];
+                            if (distance < best) {
+                                best = distance;
+                                next_hops[source][destination] = edge;
+                            }
                         }
                     }
                 }
             }
-            for (u32 source = 0; source < route->route_count; ++source) {
+            for (i32 source = 0; source < route->route_count; ++source) {
                 for (i32 destination = 0; destination < route->route_count; ++destination) {
                     route->route_nodes[source][destination] =
                         next_hops[route->node_directions[source]][route->node_directions[destination]];
@@ -11032,7 +11037,7 @@ static u32 AISysCharacterTestPathCnx(AISYS *system, APIOBJECT *object, AIPACKET 
     NuVecRotateY(&local, &delta, -connection->rotation);
     NUVEC radial;
     if (NuFabs(second_radius - first_radius) > connection->horizontal_distance) {
-        if (!(second_radius <= first_radius)) {
+        if (second_radius > first_radius) {
             first_radius = second_radius;
             first = second;
         }
@@ -11112,7 +11117,7 @@ static u32 AISysCharacterTestPathCnx(AISYS *system, APIOBJECT *object, AIPACKET 
             AISysCharacterSetPathCnx(packet, &object->position, connection, direction);
             packet->path_info.dist = local.z / connection->horizontal_distance;
             packet->path_info.width = local.x;
-            if (!(first_radius < distance)) {
+            if (first_radius >= distance) {
                 packet->last_path_position.x = object->position.x;
                 packet->last_path_position.z = object->position.z;
             } else {
@@ -11149,7 +11154,7 @@ static u32 AISysCharacterTestPathCnx(AISYS *system, APIOBJECT *object, AIPACKET 
             AISysCharacterSetPathCnx(packet, &object->position, connection, direction);
             packet->path_info.dist = local.z / connection->horizontal_distance;
             packet->path_info.width = local.x;
-            if (!(second_radius < distance)) {
+            if (second_radius >= distance) {
                 packet->last_path_position.x = object->position.x;
                 packet->last_path_position.z = object->position.z;
             } else {
@@ -15205,7 +15210,7 @@ void pathEditor_Enter(void) {
                     node->index = node_index;
                     if (source->name != nullptr)
                         strcpy(node->name, source->name);
-                    if (source->special_route_index < runtime_path->special_route_count) {
+                    if (__builtin_expect(source->special_route_index < runtime_path->special_route_count, 1)) {
                         AIPATHNODELINK_s *link = &runtime_path->special_routes[source->special_route_index];
                         if (shared_nodes[link->special_route_index] == nullptr) {
                             EDAISHAREDPATHNODE_s *created =
@@ -15222,7 +15227,7 @@ void pathEditor_Enter(void) {
                                 if (node->shared_node == shared)
                                     continue;
                                 --node->shared_node->reference_count;
-                                if (node->shared_node->reference_count <= 1)
+                                if (__builtin_expect(node->shared_node->reference_count <= 1, 0))
                                     pathEditor_DestroySharedNode(node->shared_node);
                             }
                             node->shared_node = shared;
@@ -15246,7 +15251,7 @@ void pathEditor_Enter(void) {
                                 for (free_node_slot = 0; free_node_slot < 8; ++free_node_slot) {
                                     if (node->connections[free_node_slot].node == nullptr) {
                                         for (free_other_slot = 0; free_other_slot < 8; ++free_other_slot) {
-                                            if (other->connections[free_other_slot].node == nullptr) {
+                                            if (__builtin_expect(other->connections[free_other_slot].node == nullptr, 0)) {
                                                 goto free_slots_found;
                                             }
                                         }
@@ -15262,7 +15267,7 @@ void pathEditor_Enter(void) {
                             }
                         refind:
                             connection_slot = find_connection(node, other);
-                            if (__builtin_expect(connection_slot == 8, 0))
+                            if (__builtin_expect(connection_slot == 8, 1))
                                 continue;
                             node->connections[connection_slot].flags = connection->original_traversal_flags[direction];
                             if (node->connections[connection_slot].flags & 0x10000000)

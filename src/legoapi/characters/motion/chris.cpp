@@ -1619,7 +1619,7 @@ static void ProcessSpaceLevel(spacelevel_s *space) {
         if (spline->field_0x40c == 0.0f)
             spline->spawn_time = -1.0f;
         else {
-            if (spline->field_0x514 != 0) {
+            if (__builtin_expect(spline->field_0x514 != 0, 1)) {
                 if (--spline->repeat_count == 0) {
                     spline->spawn_time = -1.0f;
                     continue;

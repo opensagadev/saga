@@ -1007,7 +1007,7 @@ bool MechInputTouchGestureBasedController::PerformCloseMechanic(GameObject_s &ob
         HATMACHINE_s *machine = HatMachine_FindNearest(WORLD, &object.apiobj.position, &object, &distance);
         if (machine != NULL) {
             f32 range = object.field_0x1008 + 0.2f;
-            if (distance <= range * range) {
+            if (__builtin_expect(distance <= range * range, 0)) {
                 StartNewTask(new MechTouchTaskHatMachine(*this, machine->GetMechObjectInterface(), position), holder,
                              true, true);
                 return true;

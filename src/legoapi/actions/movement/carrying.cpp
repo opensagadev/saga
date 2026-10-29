@@ -425,7 +425,7 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
                 }
             }
             object->context_animation_timer -= FRAMETIME;
-            if (__builtin_expect(object->context_animation_timer <= 0.0f, 1)) {
+            if (__builtin_expect(object->context_animation_timer <= 0.0f, 0)) {
                 object->field_0x7a3 = 2;
                 object->context_animation = LEGOACT_SUPERCARRY_IDLE;
                 if (__builtin_expect((object->context_flags & 0x40) == 0, 1))
@@ -491,7 +491,7 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
                         throw_object = true;
                     else
                         put_down = (object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) != 0;
-                } else if ((object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) != 0) {
+                } else if (__builtin_expect((object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) != 0, 1)) {
                     if (object->pad_gamepad->input_magnitude > 0.0f)
                         throw_object = true;
                     else
@@ -548,7 +548,7 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
                         object->context_flags &= static_cast<u8>(~0x40);
                         f32 duration = AnimDuration(object->id, object->context_animation, 0.0f, 0.0f, 1);
                         object->context_animation_timer = duration;
-                        if (duration <= 0.0f)
+                        if (__builtin_expect(duration <= 0.0f, 1))
                             object->context_animation_timer = 0.5f;
                         object->carried_object_drop_position.x = object->apiobj.lower_position.x;
                         object->carried_object_drop_position.y = object->apiobj.field_0x218;
@@ -673,7 +673,7 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
         }
         case 7:
             object->context_animation_timer -= FRAMETIME;
-            if (__builtin_expect(object->context_animation_timer <= 0.0f, 0))
+            if (__builtin_expect(object->context_animation_timer <= 0.0f, 1))
                 goto idle_or_walk;
             if (__builtin_expect(object->context_variant_flags >= 0 && object->pad_gamepad->input_magnitude > 0.0f, 1))
                 goto idle_or_walk;

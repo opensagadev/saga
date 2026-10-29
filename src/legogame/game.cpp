@@ -1635,7 +1635,7 @@ void InitGameAfterConfig(void) {
     GOLDBRICKFORSUPERSTORY = 0;
     GOLDBRICKFORCHALLENGE = 1;
 
-    if (EPISODECOUNT > 0) {
+    if (__builtin_expect(EPISODECOUNT > 0, 1)) {
         i32 p = (EPISODECOUNT - 1) * POINTS_PER_SUPERSTORY;
         COMPLETIONPOINTS = p + (POINTS_PER_SUPERSTORY + COMPLETIONPOINTS);
         CompletionPointInfo[0] = POINTS_PER_SUPERSTORY + CompletionPointInfo[0] + p;
@@ -1757,7 +1757,7 @@ void InitGameAfterConfig(void) {
                                 areaIndex = areaIndex + 1;
                                 bVar1 = pAVar2[(char)episode].episode_index;
                                 level->unknown_0ae = bVar1;
-                                if ((pAVar2[(char)episode].flags & 1) != 0) {
+                                if (__builtin_expect((pAVar2[(char)episode].flags & 1) != 0, 0)) {
                                     level->camera_judder_distance = 0x32;
                                     level->unknown_0da = 0x14;
                                 }
@@ -2939,7 +2939,7 @@ static void PartCollide(PART_s *part, i32 three_dimensional) {
             continue;
         if (force_player_mask == 0) {
             if (part->owner == object) {
-                if (part->scale_time < 0.5f)
+                if (__builtin_expect(part->scale_time < 0.5f, 1))
                     continue;
             } else if (api->field_0x27c != -1 && part->scale_time < 0.25f)
                 continue;
@@ -2947,7 +2947,7 @@ static void PartCollide(PART_s *part, i32 three_dimensional) {
             continue;
         if (context == 0x39 || context == 0x3b || __builtin_expect(context == 0x3c, 0))
             continue;
-        if ((part->flags & 0x4000) != 0 && part->field_207 == api->field_0x289)
+        if (__builtin_expect((part->flags & 0x4000) != 0 && part->field_207 == api->field_0x289, 0))
             continue;
         if ((part->flags & 4) != 0 && (api->flags_low & 0x80) == 0)
             continue;

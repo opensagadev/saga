@@ -2223,24 +2223,22 @@ void KeepOnScreen(GameObject_s *object) {
 
     if ((VehicleArea != 0 && (WORLD->area == NULL || WORLD->area != PODSPRINT_ADATA)) || KEEPONSCREEN_SIDESONLY == 0 ||
         (two_players && abs(RotDiff(0, GameCam->pitch)) > 0x2000)) {
-        PLAYPLANE_s *depth_plane = NULL;
+        i32 depth_index = -1;
         if (OnOrInsidePlane(&object->apiobj.collision_position, &PlayPlane[4].point, &PlayPlane[4].normal, NULL,
                             -object->apiobj.field_0x1e0, NULL) != 0) {
             // Crossing the lower screen plane pushes toward the depth plane
             // selected by the camera pitch.
-            depth_plane = !(GameCam->dir.y <= 0.0f) ? &PlayPlane[5] : &PlayPlane[0];
+            depth_index = GameCam->dir.y <= 0.0f ? 0 : 5;
         } else if (OnOrInsidePlane(&object->apiobj.collision_position, &PlayPlane[3].point, &PlayPlane[3].normal, NULL,
                                    -object->apiobj.field_0x1e0, NULL) != 0) {
-            // The upper screen plane uses the opposite depth response.  This
-            // distinction is important: using the same plane for both sides
-            // can cancel movement in the wrong world-space direction.
-            depth_plane = GameCam->dir.y > 0.0f ? &PlayPlane[0] : &PlayPlane[5];
+            // The upper screen plane uses the opposite depth response.
+            depth_index = GameCam->dir.y <= 0.0f ? 5 : 0;
         }
 
-        if (depth_plane != NULL) {
-            Surface_Deflect(&depth_plane->normal, &object->apiobj.velocity, &constrained_movement, 0);
-            constrained_movement.x += depth_plane->normal.x * push_distance;
-            constrained_movement.z += depth_plane->normal.z * push_distance;
+        if (depth_index >= 0) {
+            Surface_Deflect(&PlayPlane[depth_index].normal, &object->apiobj.velocity, &constrained_movement, 0);
+            constrained_movement.x += PlayPlane[depth_index].normal.x * push_distance;
+            constrained_movement.z += PlayPlane[depth_index].normal.z * push_distance;
             constrained = 1;
         }
     }

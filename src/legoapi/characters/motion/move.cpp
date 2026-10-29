@@ -4786,7 +4786,7 @@ static void PunchCode(GameObject_s *object, i32 pressed, i32 held, i32 require_t
         if (object->combo_input_latched == 0 && pressed != 0) {
             if (object->apiobj.player_controlled) {
                 if ((object->context_flags & 0x40) != 0 ||
-                    !(object->context_animation_timer > object->airborne_action_duration)) {
+                    object->context_animation_timer <= object->airborne_action_duration) {
                     object->combo_input_latched = 2;
                 } else {
                     object->combo_input_latched = 1;
@@ -4838,13 +4838,13 @@ static void PunchCode(GameObject_s *object, i32 pressed, i32 held, i32 require_t
                 if (__builtin_expect(
                         require_target == 0 || object->force_target != NULL || object->blowup_target != NULL, 0)) {
                     i32 alternate_animations[4];
-                    u8 combo_stage = object->combo_stage++;
+                    object->combo_stage++;
                     if ((object->context_flags & 1) != 0) {
                         alternate_animations[0] = -1;
                         alternate_animations[1] = -1;
                         alternate_animations[2] = -1;
                         alternate_animations[3] = -1;
-                        if (combo_stage != 0) {
+                        if (object->combo_stage != 1) {
                             if (object->combo_branch == 2) {
                                 object->combo_branch = (object->combo_input_latched == 2) + 5;
                             } else {
@@ -4876,7 +4876,7 @@ static void PunchCode(GameObject_s *object, i32 pressed, i32 held, i32 require_t
                             }
                         }
                     } else {
-                        if (combo_stage == 0) {
+                        if (object->combo_stage == 1) {
                             object->context_animation = 0x55;
                         } else {
                             object->context_animation = 0x56;
@@ -4955,7 +4955,7 @@ static void PunchCode(GameObject_s *object, i32 pressed, i32 held, i32 require_t
             }
         }
         if (ComboOpponent_Behind != 0) {
-            goto behind_attack;
+            goto behind_attack_reset;
         }
     } else {
         if (__builtin_expect(
@@ -4966,6 +4966,7 @@ static void PunchCode(GameObject_s *object, i32 pressed, i32 held, i32 require_t
 
 check_blowup_target:
     if (object->blowup_target != NULL && GizmoBlowUpOpponent_Behind != 0) {
+    behind_attack_reset:
         object->field_0x7a7 = -1;
     behind_attack:
         object->context_animation = 0x94;
@@ -4973,42 +4974,49 @@ check_blowup_target:
         object->context_flags |= 0x80;
     } else {
         object->field_0x7a7 = -1;
-        switch (object->attack_override) {
-            case 1:
-                object->context_animation = 0x51;
-                object->combo_stage = 2;
-                object->context_flags &= ~0x80;
-                break;
-            case 2:
-                object->context_animation = 0x55;
-                object->combo_stage = 2;
-                object->context_flags &= ~0x80;
-                break;
-            case 3:
-                object->context_animation = 0x56;
-                object->combo_stage = 2;
-                object->context_flags &= ~0x80;
-                break;
-            case 4:
-                goto behind_attack;
-            case 5:
-                object->context_animation = 0x64;
-                break;
-            case 6:
-                StartHold(object);
-                return;
-            case 7:
-                return;
-            default:
-                object->context_animation = 0x51;
-                object->combo_stage = 0;
-                object->context_flags &= ~0x80;
-                break;
+        if (object->attack_override == 0) {
+            object->context_animation = 0x51;
+            object->combo_stage = 0;
+            object->context_flags &= ~0x80;
+        } else {
+            switch (object->attack_override) {
+                case 1:
+                    object->context_animation = 0x51;
+                    object->combo_stage = 2;
+                    object->context_flags &= ~0x80;
+                    break;
+                case 2:
+                    object->context_animation = 0x55;
+                    object->combo_stage = 2;
+                    object->context_flags &= ~0x80;
+                    break;
+                case 3:
+                    object->context_animation = 0x56;
+                    object->combo_stage = 2;
+                    object->context_flags &= ~0x80;
+                    break;
+                case 4:
+                    goto behind_attack;
+                case 5:
+                    object->context_animation = 0x64;
+                    break;
+                case 6:
+                    StartHold(object);
+                    return;
+                case 7:
+                    return;
+                default:
+                    object->context_animation = 0x51;
+                    object->combo_stage = 0;
+                    object->context_flags &= ~0x80;
+                    break;
+            }
         }
     }
 
 start_attack:
-    object->context_flags &= ~1;
+    u8 *flags = &object->context_flags;
+    *flags &= ~1;
     if (require_target == 2 && object->force_target == NULL && object->blowup_target != NULL) {
         return;
     }
@@ -5032,10 +5040,10 @@ start_attack:
         }
         ResetAnimPacket(&object->apiobj.anim_packet, -1);
         if ((object->apiobj.character_data->game_character->flags_098[0] & 0x10) == 0) {
-            if ((AnimMiscFlags(object->apiobj.character_model, object->context_animation) & 4) == 0) {
-                PlaySfx(const_cast<char *>("Swipe"), &object->apiobj.collision_position);
-            } else {
+            if ((AnimMiscFlags(object->apiobj.character_model, object->context_animation) & 4) != 0) {
                 PlaySfx(const_cast<char *>("WhipSwish"), &object->apiobj.collision_position);
+            } else {
+                PlaySfx(const_cast<char *>("Swipe"), &object->apiobj.collision_position);
             }
         }
         if ((object->apiobj.character_data->game_character->flags_090 & 0x20) == 0) {
@@ -6622,31 +6630,30 @@ void FindForcePushTarget(GameObject_s *object, i32 activate, i32 target_filter) 
     i32 selected_direct;
     if ((object->pad_gamepad->allocated_5a & 0x10) != 0 && object->force_push_target != NULL) {
         best = object->force_push_target;
-        if (__builtin_expect(choke_style == 0 &&
-                                 object->apiobj.character_data->game_character->uses_weapon_action == 0x0c &&
-                                 (object->apiobj.character_data->model_flags & 8) != 0,
-                             0)) {
-            choke_style = best->id == id_GAMORREANGUARD;
+        selected_choke = choke_style;
+        if (selected_choke == 0 && object->apiobj.character_data->game_character->uses_weapon_action == 0x0c &&
+            (object->apiobj.character_data->model_flags & 8) != 0) {
+            selected_choke = best->id == id_GAMORREANGUARD;
         }
         i32 target_special = best->apiobj.character_data->model_flags & 0x10;
         i32 continuing_direct = 0;
         if (target_special == 0 && (best->apiobj.character_data->game_character->flags_090 & 0x40) != 0 &&
             best->apiobj.character_model->model_data_b[0x41] != NULL) {
             continuing_direct = 1;
-        } else if ((choke_style | second_style) != 0) {
+        } else if ((selected_choke | second_style) != 0) {
             if (second_style != 0) {
-                if (__builtin_expect(best->apiobj.character_model->model_data_b[0x54] == NULL, 0)) {
+                if (best->apiobj.character_model->model_data_b[0x54] == NULL) {
                     if (target_special == 0)
                         return;
-                    choke_style = 0;
+                    selected_choke = 0;
                     second_style = 0;
                 }
             } else if (best->apiobj.character_model->model_data_b[0x53] == NULL) {
-                if (__builtin_expect(target_special == 0, 0))
+                if (target_special == 0)
                     return;
-                choke_style = 0;
+                selected_choke = 0;
             }
-        } else if (target_special == 0) {
+        } else if ((best->apiobj.character_data->model_flags & 0x10) == 0) {
             if (best->apiobj.character_model->model_data_b[0x41] != NULL) {
                 continuing_direct = 1;
             } else if (best->apiobj.character_model->model_data_b[0x2b] == NULL) {
@@ -6656,7 +6663,6 @@ void FindForcePushTarget(GameObject_s *object, i32 activate, i32 target_filter) 
                    best->apiobj.character_model->model_data_b[5] == NULL) {
             return;
         }
-        selected_choke = choke_style;
         selected_second = second_style;
         selected_direct = continuing_direct;
     } else {
@@ -6687,16 +6693,17 @@ void FindForcePushTarget(GameObject_s *object, i32 activate, i32 target_filter) 
                 continue;
             }
             if (TouchHacks::CanForceTargetObj(*object, *candidate) &&
-                !(WORLD->area != NULL && WORLD->area == EMPERORFIGHT_ADATA &&
-                  (candidate->is_boss || candidate->apiobj.field_0x27c != -1)) &&
+                !__builtin_expect(WORLD->area != NULL && WORLD->area == EMPERORFIGHT_ADATA &&
+                                      (candidate->is_boss || candidate->apiobj.field_0x27c != -1),
+                                  0) &&
                 candidate->id != id_BODYGUARD) {
                 if (target_filter == 1) {
                     if (candidate->apiobj.field_0x27c != -1) {
                         goto reload_object_count;
                     }
                     if ((candidate->apiobj.field_0x1f4 & 5) != 0) {
-                        const u32 *mask = WORLD->api_object_sys->hostility_masks[object->apiobj.field_0x289];
-                        const u64 hostility = static_cast<u64>(mask[0]) | (static_cast<u64>(mask[1]) << 32);
+                        u64 hostility;
+                        memcpy(&hostility, WORLD->api_object_sys->hostility_masks[object->apiobj.field_0x289], 8);
                         if (((hostility >> (candidate->apiobj.field_0x289 & 63)) & 1) == 0) {
                             goto reload_object_count;
                         }
@@ -7660,7 +7667,7 @@ static i32 ShootCode(GameObject_s *object, i32 pressed, i32 special_pressed, i32
     if (object->quick_shoot_timer > 0.0f)
         object->quick_shoot_timer -= FRAMETIME;
     if (object->character_context == 0x0a) {
-        if (AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0) == NULL)
+        if (__builtin_expect(AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0) == NULL, 0))
             return 0;
         const bool ammunition = PlayerItem_GotAmmo(reinterpret_cast<PLAYERITEM_s *>(&object->field_0x7e4)) != 0;
         if (ammunition && pressed != 0 && object->quick_shoot_timer <= 0.0f && object->context_animation == 0x57 &&
@@ -7730,8 +7737,8 @@ static i32 ShootCode(GameObject_s *object, i32 pressed, i32 special_pressed, i32
             return 0;
         CHARACTERDATA *character = object->apiobj.character_data;
         GAMECHARACTERDATA *data = character->game_character;
-        if (weapon_mode != 0 && (object->field_0xe22 & 1) == 0) {
-            if (weapon_mode == 2) {
+        if (__builtin_expect(weapon_mode != 0 && (object->field_0xe22 & 1) == 0, 0)) {
+            if (__builtin_expect(weapon_mode == 2, 1)) {
                 SetWeaponOut(object);
             } else {
                 if (__builtin_expect(
@@ -7822,7 +7829,7 @@ static i32 ShootCode(GameObject_s *object, i32 pressed, i32 special_pressed, i32
                         SetGizmoBlowUpTarget(object, blowup);
                     } else {
                         PART_s *part = TargetPart(object, &position, &forward, range, range_squared, 1, bolt_id);
-                        if (part != NULL) {
+                        if (__builtin_expect(part != NULL, 0)) {
                             SetPartTarget(object, part);
                         } else {
                             target = TargetGameObject(object, &position, &forward, range, range_squared, 0x200, 1, 0,
@@ -7922,7 +7929,7 @@ static i32 ShootCode(GameObject_s *object, i32 pressed, i32 special_pressed, i32
 shoot_weapon_in:
     if (weapon_mode == 0)
         return 0;
-    if (__builtin_expect((object->pad_gamepad->allocated_5a & 4) == 0, 0) && special_pressed == 0)
+    if (__builtin_expect(__builtin_expect((object->pad_gamepad->allocated_5a & 4) == 0, 0) && special_pressed == 0, 0))
         return 0;
     if (__builtin_expect((object->field_0xe22 & 1) == 0 || object->weapon_scale_state != 0, 0))
         return 0;
@@ -12672,7 +12679,7 @@ void Move_VEHICLE(GameObject_s *object) {
     if ((object->apiobj.character_data->model_flags & 0x10000000) != 0 &&
         (object->apiobj.character_data->game_character->flags_094[0] & 8) == 0) {
         if (object->id == id_STAP || object->id == id_STAP2) {
-            if (__builtin_expect(object->apiobj.character_model->model_data_b[0x16] == NULL, 1)) {
+            if (__builtin_expect(object->apiobj.character_model->model_data_b[0x16] == NULL, 0)) {
                 FireCode(object, pad->buttons_pressed & GAMEPAD_ACTION, pad->buttons_held & GAMEPAD_ACTION, 0.25f, 1);
             } else {
                 ShootCode(object, object->pad_gamepad->buttons_pressed & GAMEPAD_ACTION, 0, 0, 0, 1);
@@ -12681,7 +12688,7 @@ void Move_VEHICLE(GameObject_s *object) {
             FireCode(object, pad->buttons_pressed & GAMEPAD_ACTION, pad->buttons_held & GAMEPAD_ACTION, 0.15f, 0);
         }
     }
-    if (__builtin_expect(WORLD->current_level == DOGFIGHTA_LDATA, 0)) {
+    if (WORLD->current_level == DOGFIGHTA_LDATA) {
         CatchUpCode(object, 0.01f, 2.0f, 0);
     }
     if (__builtin_expect((object->apiobj.character_data->game_character->flags_090 & 0x400) != 0, 1)) {
@@ -12792,11 +12799,11 @@ void Move_VEHICLE(GameObject_s *object) {
         }
     } else if ((object->pad_gamepad->buttons_held & GAMEPAD_SPECIAL) != 0) {
         object->combo_input_timer += FRAMETIME;
-        if (object->combo_input_timer >= 2.0f) {
+        if (!(object->combo_input_timer >= 2.0f)) {
+            TouchHacks().PlaySmartBombBuildupEffects(*object, object->combo_input_timer, 2.0f);
+        } else {
             object->combo_input_timer = 0.0f;
             TouchHacks().TriggerVehicleSmartBomb(*object);
-        } else {
-            TouchHacks().PlaySmartBombBuildupEffects(*object, object->combo_input_timer, 2.0f);
         }
     }
 
@@ -12823,7 +12830,7 @@ void Move_VEHICLE(GameObject_s *object) {
                     };
                     AddVariableShotDebrisEffect(effect, &position, 1, 0, 0);
                     count--;
-                } while (count != 0);
+                } while (__builtin_expect(count != 0, 1));
             }
         }
     }

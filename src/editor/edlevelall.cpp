@@ -3260,6 +3260,8 @@ i32 edGetPadDisabled() {
 
 void EdInputContext::Update(nucamera_s *camera, nupad_s *new_pad, float elapsed, bool) {
     static __used__ volatile u8 UseMouse;
+    f32 cursor_x = 0.5f;
+    f32 cursor_y = 0.5f;
     pad = new_pad;
 
     f32 *view = reinterpret_cast<f32 *>(reserved_00);
@@ -3273,19 +3275,21 @@ void EdInputContext::Update(nucamera_s *camera, nupad_s *new_pad, float elapsed,
     view[5] *= 1000.0f;
     view[6] *= 1000.0f;
 
-    f32 cursor_x = 0.5f;
-    f32 cursor_y = 0.5f;
     if (eduiUsedAlgPad(new_pad) > 0) {
-        eduiSetCursorCoords(cursor_x, cursor_y);
+        eduiSetCursorCoords(0.5f, 0.5f);
         UseMouse = 0;
+        cursor_x = cursor_y = 0.5f;
     } else {
         eduiGetCursorCoords(&cursor_x, &cursor_y);
     }
     NUVEC ray_end;
     NuCameraCalcRay(cursor_x, cursor_y, reinterpret_cast<NUVEC *>(reserved_00 + 0x20), &ray_end, camera);
-    view[12] = ray_end.x - view[8];
-    view[13] = ray_end.y - view[9];
-    view[14] = ray_end.z - view[10];
+    const f32 dir_z = ray_end.z - view[10];
+    const f32 dir_y = ray_end.y - view[9];
+    const f32 dir_x = ray_end.x - view[8];
+    view[12] = dir_x;
+    view[13] = dir_y;
+    view[14] = dir_z;
     view[15] = 0.0f;
     delta_time = elapsed;
 
@@ -3301,11 +3305,17 @@ void EdInputContext::Update(nucamera_s *camera, nupad_s *new_pad, float elapsed,
     const i32 shift_or_s = NuKeyboard(0x2a) | NuKeyboard(0x36) | NuKeyboard(0x1f);
     const i32 alt_or_space = NuKeyboard(0x38) | NuKeyboard(0xb8) | NuKeyboard(0x39);
     const i32 control_or_c = NuKeyboard(0x1d) | NuKeyboard(0x9d) | NuKeyboard(0x2e);
-    const i32 left_click = (NuMouseReadButtons() == 1 || (pad->digital_buttons & 0x800) != 0) && !alt_or_space;
+    bool left_click = false;
+    if (NuMouseReadButtons() == 1 || (pad->digital_buttons & 0x800) != 0)
+        left_click = !alt_or_space;
+    const bool not_alt = !alt_or_space;
+    i32 left_select = 0;
+    if (left_click)
+        left_select = control_or_c == 0;
     const f32 mouse_x = NuMouseReadXVel();
     const f32 mouse_y = NuMouseReadYVel();
     const f32 mouse_z = NuMouseReadZVel();
-    u32 square = 0;
+    i32 square = 0;
     i32 right_click;
     if (edGetPadDisabled() == 0) {
         if (eduiGetActiveMenu() == NULL) {
@@ -3320,8 +3330,11 @@ void EdInputContext::Update(nucamera_s *camera, nupad_s *new_pad, float elapsed,
     Set(0, mouse_x, elapsed);
     Set(1, mouse_y, elapsed);
     Set(2, mouse_z, elapsed);
-    Set(3, static_cast<i32>(left_click && !control_or_c), elapsed);
-    Set(4, static_cast<i32>(right_click && !alt_or_space && !control_or_c), elapsed);
+    Set(3, left_select, elapsed);
+    i32 right_select = 0;
+    if (right_click && not_alt)
+        right_select = control_or_c == 0;
+    Set(4, right_select, elapsed);
     Set(5, static_cast<f32>(NuKeyboard(0x10)), elapsed);
     Set(6, static_cast<f32>(NuKeyboard(0x11)), elapsed);
     Set(7, static_cast<f32>(NuKeyboard(0x12)), elapsed);
@@ -3342,7 +3355,10 @@ void EdInputContext::Update(nucamera_s *camera, nupad_s *new_pad, float elapsed,
     Set(22, static_cast<f32>(control_or_c), elapsed);
     Set(23, static_cast<i32>(NuKeyboard(0x1f) && control_or_c), elapsed);
     Set(24, static_cast<f32>(NuKeyboard(0x01)), elapsed);
-    Set(25, static_cast<i32>(left_click && control_or_c), elapsed);
+    i32 left_control = 0;
+    if (left_click)
+        left_control = control_or_c != 0;
+    Set(25, left_control, elapsed);
     Set(26, static_cast<f32>(NuKeyboard(2)), elapsed);
     Set(27, static_cast<f32>(NuKeyboard(3)), elapsed);
     Set(28, static_cast<f32>(NuKeyboard(4)), elapsed);
@@ -7728,27 +7744,38 @@ f32 BezierLineLength(VuVec &start, VuVec &first_control, VuVec &end, VuVec &seco
 i32 BezierLinePos(VuVec &result, VuVec &start, VuVec &first_control, VuVec &end, VuVec &second_control, f32 distance) {
     f32 t = 0.5f;
     f32 step = 0.25f;
+    VuVec points[6];
     for (i32 count = 256; count != 0; --count) {
         f32 complement = 1.0f - t;
-        VuVec middle{second_control.x * complement + first_control.x * t,
-                     second_control.y * complement + first_control.y * t,
-                     second_control.z * complement + first_control.z * t, 0.0f};
-        VuVec first{first_control.x * complement + start.x * t, first_control.y * complement + start.y * t,
-                    first_control.z * complement + start.z * t, 0.0f};
-        VuVec last{end.x * complement + second_control.x * t, end.y * complement + second_control.y * t,
-                   end.z * complement + second_control.z * t, 0.0f};
-        VuVec first_middle{middle.x * complement + first.x * t, middle.y * complement + first.y * t,
-                           middle.z * complement + first.z * t, 0.0f};
-        VuVec middle_last{last.x * complement + middle.x * t, last.y * complement + middle.y * t,
-                          last.z * complement + middle.z * t, 0.0f};
-        VuVec point{middle_last.x * complement + first_middle.x * t, middle_last.y * complement + first_middle.y * t,
-                    middle_last.z * complement + first_middle.z * t, 1.0f};
-        f32 length = BezierLineLength(start, first, point, first_middle);
+        points[0] = VuVec(second_control.x * complement + first_control.x * t,
+                          second_control.y * complement + first_control.y * t,
+                          second_control.z * complement + first_control.z * t, 0.0f);
+        points[1].x = first_control.x * complement + start.x * t;
+        points[1].y = first_control.y * complement + start.y * t;
+        points[1].z = first_control.z * complement + start.z * t;
+        points[1].w = 0.0f;
+        points[2].x = end.x * complement + second_control.x * t;
+        points[2].y = end.y * complement + second_control.y * t;
+        points[2].z = end.z * complement + second_control.z * t;
+        points[2].w = 0.0f;
+        points[3].x = points[0].x * complement + points[1].x * t;
+        points[3].y = points[0].y * complement + points[1].y * t;
+        points[3].z = points[0].z * complement + points[1].z * t;
+        points[3].w = 0.0f;
+        points[4].x = points[2].x * complement + points[0].x * t;
+        points[4].y = points[2].y * complement + points[0].y * t;
+        points[4].z = points[2].z * complement + points[0].z * t;
+        points[4].w = 0.0f;
+        points[5].x = points[4].x * complement + points[3].x * t;
+        points[5].y = points[4].y * complement + points[3].y * t;
+        points[5].z = points[4].z * complement + points[3].z * t;
+        points[5].w = 1.0f;
+        f32 length = BezierLineLength(start, points[1], points[5], points[3]);
         f32 difference = distance - length;
         if (difference < 0.0f)
             difference = -difference;
         if (!(difference > 0.01f)) {
-            *reinterpret_cast<BezierVec4Unaligned *>(&result) = *reinterpret_cast<BezierVec4 *>(&point);
+            *reinterpret_cast<BezierVec4Unaligned *>(&result) = *reinterpret_cast<BezierVec4 *>(&points[5]);
             return 1;
         }
         if (distance < length)
@@ -7756,11 +7783,8 @@ i32 BezierLinePos(VuVec &result, VuVec &start, VuVec &first_control, VuVec &end,
         else
             t -= step;
         step *= 0.5f;
-        if (count == 1) {
-            *reinterpret_cast<BezierVec4Unaligned *>(&result) = *reinterpret_cast<BezierVec4 *>(&point);
-            return 1;
-        }
     }
+    *reinterpret_cast<BezierVec4Unaligned *>(&result) = *reinterpret_cast<BezierVec4 *>(&points[5]);
     return 1;
 }
 

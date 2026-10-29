@@ -129,7 +129,7 @@ static void GizObstacles_Update(void *world_ptr, void *data, float) {
         }
 
         GAMEANIMSET_s *anim_set = obstacle->anim_set;
-        if (obstacle->mode == 7) {
+        if (__builtin_expect(obstacle->mode == 7, 0)) {
             if ((obstacle->progress_flags & GIZOBSTACLE_PROGRESS_FLAG_PUSH_CONTROL) != 0) {
                 obstacle->triggering_object = previous_triggering_object;
                 if (__builtin_expect(obstacle->animation_speed != 0.0f, 1)) {
@@ -167,7 +167,7 @@ static void GizObstacles_Update(void *world_ptr, void *data, float) {
         if ((anim_set->flags & 7) != 0) {
             GizObstacle_EvalAveragePosAndRadius(obstacle, 2);
 
-            if ((obstacle->runtime_flags & GIZOBSTACLE_RUNTIME_FLAG_ANIM_OBJECT_BIT_1) != 0) {
+            if (__builtin_expect((obstacle->runtime_flags & GIZOBSTACLE_RUNTIME_FLAG_ANIM_OBJECT_BIT_1) != 0, 1)) {
                 anim_set = obstacle->anim_set;
                 for (GAMEANIMOBJ_s *object = anim_set->objects; object != NULL; object = object->next) {
                     i16 *object_data = static_cast<i16 *>(object->object_data);
@@ -195,10 +195,10 @@ static void GizObstacles_Update(void *world_ptr, void *data, float) {
             obstacle->runtime_flags &= static_cast<u8>(~GIZOBSTACLE_RUNTIME_FLAG_TRIGGER_LATCHED);
         }
 
-        if ((obstacle->state == 0 || obstacle->state == 3 ||
+        if (__builtin_expect((obstacle->state == 0 || obstacle->state == 3 ||
              __builtin_expect((obstacle->config_flags & GIZOBSTACLE_CONFIG_RESET_AFTER_COMPLETION) != 0, 0)) &&
             ((anim_set->flags & GAMEANIMSET_FLAG_STOP_REQUESTED) != 0 || anim_set->animated_object_count == 0) &&
-            __builtin_expect(anim_set->state == GAMEANIMSET_STATE_AT_END, 0)) {
+            __builtin_expect(anim_set->state == GAMEANIMSET_STATE_AT_END, 0), 1)) {
             if (obstacle->blowup_type != -1 || obstacle->pickup_count != 0) {
                 if (obstacle->blowup_type != -1) {
                     if ((obstacle->config_flags & GIZOBSTACLE_CONFIG_BLOWUP_AT_ANIM_OBJECTS) == 0) {

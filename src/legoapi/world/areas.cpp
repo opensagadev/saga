@@ -106,6 +106,7 @@ AREADATA *Areas_ConfigureList(char *file, VARIPTR *bufferStart, VARIPTR *bufferE
 
     i32 in_area = 0;
     i32 area_count = 0;
+    i32 li;
     AREADATA *area_base = (AREADATA *)ALIGN((usize)bufferStart->void_ptr, 4);
     bufferStart->void_ptr = area_base;
     AREADATA *area = area_base;
@@ -135,28 +136,19 @@ AREADATA *Areas_ConfigureList(char *file, VARIPTR *bufferStart, VARIPTR *bufferE
                     if (area->level_count > 0xb || NuFParGetWord(fp) == 0) {
                         in_area = 1;
                     } else {
-                        i32 li;
                         Level_FindByName(fp->word_buf, &li);
                         in_area = 1;
                         if (li != -1) {
-                            in_area = area->level_count;
-                            if (in_area != 0) {
-                                i32 k;
-                                if (area->levels[0] != li) {
-                                    for (k = 1; k < in_area; k++) {
-                                        if (area->levels[k] == li)
-                                            break;
-                                    }
-                                    if (__builtin_expect(k == in_area, 1)) {
-                                        area->levels[in_area] = (i16)li;
-                                        area->level_count = (u8)(in_area + 1);
-                                    }
-                                }
-                            } else {
-                                area->levels[0] = (i16)li;
-                                area->level_count = 1;
+                            u8 n = area->level_count;
+                            i32 k;
+                            for (k = 0; k < n; k++) {
+                                if (__builtin_expect(area->levels[k] == li, 0))
+                                    break;
                             }
-                            in_area = 1;
+                            if (k == n) {
+                                area->levels[n] = (i16)li;
+                                area->level_count = (u8)(n + 1);
+                            }
                         }
                     }
                 } else if (NuStrICmp(fp->word_buf, "single_buffer") == 0) {
@@ -258,36 +250,25 @@ AREADATA *Areas_ConfigureList(char *file, VARIPTR *bufferStart, VARIPTR *bufferE
     }
 
     NuFParDestroy(fp);
-    if (__builtin_expect(area_count != 0, 1)) {
-        bufferStart->void_ptr = area;
-        if (countDest != NULL)
-            *countDest = area_count;
-        i32 j = 0;
-        if (0 < area_count) {
-            do {
-                while (true) {
-                    if (__builtin_expect(area_base[j].challenge_trial_time == 0, 1)) {
-                        if ((area_base[j].flags & AREAFLAG_SUPER_BONUS_AREA) == AREAFLAG_BONUS_AREA)
-                            area_base[j].challenge_trial_time = (i16)AREA_DEFAULTBONUSTIMETRIALTIME;
-                        else if ((area_base[j].flags & AREAFLAG_MINIKIT) != 0)
-                            area_base[j].challenge_trial_time = (i16)AREA_DEFAULTCHALLENGETIME;
-                    }
-                    if (area_base[j].cheat != 0xff)
-                        Cheat_SetArea((i32)(char)area_base[j].cheat, j);
-                    if (area_base[j].challenge_trial_time != 0 &&
-                        (area_base[j].flags & (AREAFLAG_SUPER_BONUS_AREA | AREAFLAG_MINIKIT)) == AREAFLAG_MINIKIT)
-                        break;
-                    j++;
-                    if (area_count <= j)
-                        return area_base;
-                }
-                area_base[j].challenge_trial_time = 1200;
-                j++;
-            } while (j < area_count);
-            return area_base;
+    if (area_count == 0)
+        return NULL;
+    bufferStart->void_ptr = area;
+    if (countDest != NULL)
+        *countDest = area_count;
+    for (li = 0; li < area_count; li++) {
+        if (area_base[li].challenge_trial_time == 0) {
+            if ((area_base[li].flags & AREAFLAG_SUPER_BONUS_AREA) == AREAFLAG_BONUS_AREA)
+                area_base[li].challenge_trial_time = (i16)AREA_DEFAULTBONUSTIMETRIALTIME;
+            else if ((area_base[li].flags & AREAFLAG_MINIKIT) != 0)
+                area_base[li].challenge_trial_time = (i16)AREA_DEFAULTCHALLENGETIME;
         }
+        if (area_base[li].cheat != 0xff)
+            Cheat_SetArea((i32)(char)area_base[li].cheat, li);
+        if (area_base[li].challenge_trial_time != 0 &&
+            (area_base[li].flags & (AREAFLAG_SUPER_BONUS_AREA | AREAFLAG_MINIKIT)) == AREAFLAG_MINIKIT)
+            area_base[li].challenge_trial_time = 1200;
     }
-    return NULL;
+    return area_base;
 }
 
 void Areas_ConfigureResidents(VARIPTR *buffer, VARIPTR *) {

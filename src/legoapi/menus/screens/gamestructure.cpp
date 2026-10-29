@@ -944,6 +944,7 @@ void MenuDrawStore(MENU_s *) {
 
 void MenuUpdateStore(MENU_s *menu) {
     char event[128];
+    NUVEC position;
     if (__builtin_expect(menu->cancel_pressed != 0 || StoreIAP[0].text[0] == 'x', 0)) {
         GameAudio_PlaySfx(0x31, NULL, 0, 0);
         GameCam_Blend(GameCam, 0.5f, 0.0f, 1);
@@ -958,21 +959,19 @@ void MenuUpdateStore(MENU_s *menu) {
         if (entry.text[0] == 0) {
             return;
         }
-        VuVec position __attribute__((aligned(16)));
         position.x = entry.x;
         position.y = entry.y;
         if (time < 8.0f) {
             const f32 trigger = 8.0f - (position.y + 1.0f) * 4.0f;
             if (time >= trigger && time - FRAMETIME < trigger) {
-                position.z = 1.0f;
-                position.w = 1.0f;
-                MechSystems::Get()->NewRadarPulse(position, false);
+                VuVec pulse __attribute__((aligned(16))) = VuVec(position.x, position.y, 1.0f, 1.0f);
+                MechSystems::Get()->NewRadarPulse(pulse, false);
             }
         }
         if (MenuAlpha >= 1.0f && MechInputTouchMenuController::AnyTouchesThisFrame > 0) {
             const f32 dx = MechInputTouchMenuController::LastTouchPos.x - position.x;
             const f32 dy = MechInputTouchMenuController::LastTouchPos.y - position.y;
-            if (__builtin_expect(dx * dx + dy * dy < 0.01f, 0)) {
+            if (dx * dx + dy * dy < 0.01f) {
                 goto store_touch_selected;
             }
         }
@@ -980,7 +979,7 @@ void MenuUpdateStore(MENU_s *menu) {
     return;
 
 store_touch_selected:
-    if (NuIOS_AreInAppPurchasesAvailable() != 0 && NuIOS_CanMakeInAppPurchases() != 0) {
+    if (__builtin_expect(NuIOS_AreInAppPurchasesAvailable() != 0, 0) && NuIOS_CanMakeInAppPurchases() != 0) {
         menu_storepurchase_iap_name = StoreIAP[hit].text;
         menu_i_bundle = StoreBundle_FindByName(menu_storepurchase_iap_name);
         NewMenu(LEGOMENU_STORE_PURCHASE, -1, -1);
@@ -989,13 +988,15 @@ store_touch_selected:
             sprintf(event, "bundle_%s_bought", StoreBundle[menu_i_bundle].name);
             NuIOS_RecordFlurryEvent(event);
         } else if (menu_i_pack != -1) {
-            sprintf(event, "pack_%s_bought", *reinterpret_cast<char **>(&StorePack[menu_i_pack].field1_0x4));
+            sprintf(event, "pack_%s_bought", StorePack[menu_i_pack].product_id);
             NuIOS_RecordFlurryEvent(event);
         }
         return;
     }
-    if (__builtin_expect(TTab[0x60f] != NULL, 0)) {
-        NUVEC position = {0.0f, -0.6f, 1.0f};
+    if (TTab[0x60f] != NULL) {
+        position.x = 0.0f;
+        position.y = -0.6f;
+        position.z = 1.0f;
         GAMEMESSAGE_s *message = static_cast<GAMEMESSAGE_s *>(
             AddGameMessage(TTab[0x60f], &position, 0.5f, &position, 0.55f, 255, 31, 31, 0x20, 2.5f));
         if (message != NULL) {

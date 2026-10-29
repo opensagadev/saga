@@ -1613,15 +1613,24 @@ extern "C" {
         i32 left = (x << 4) + static_cast<i32>(start * static_cast<f32>(width << 4));
         i32 band_width = static_cast<i32>(end * static_cast<f32>(width << 4)) -
                          static_cast<i32>(start * static_cast<f32>(width << 4));
-        i32 strip_height = (height << 3) / 8;
-        i32 first_red = first & 0xff;
-        i32 first_green = (first >> 8) & 0xff;
-        i32 first_blue = (first >> 16) & 0xff;
-        i32 first_alpha = static_cast<i32>(first >> 24) - 0x80;
-        i32 second_red = second & 0xff;
-        i32 second_green = (second >> 8) & 0xff;
-        i32 second_alpha = static_cast<i32>(second >> 24) - 0x80;
-        i32 second_blue = (second >> 16) & 0xff;
+        i32 strip_height = (height << 3) / edui_grad_steps;
+        u32 corners[4];
+        corners[0] = 0x80000000u;
+        corners[1] = 0x80000000u;
+        corners[2] = first;
+        corners[3] = second;
+        u8 *tl = reinterpret_cast<u8 *>(&corners[0]);
+        u8 *tr = reinterpret_cast<u8 *>(&corners[1]);
+        u8 *bl = reinterpret_cast<u8 *>(&corners[2]);
+        u8 *br = reinterpret_cast<u8 *>(&corners[3]);
+        i32 first_red = bl[0] - tl[0];
+        i32 first_green = bl[1] - tl[1];
+        i32 first_blue = bl[2] - tl[2];
+        i32 first_alpha = bl[3] - tl[3];
+        i32 second_red = br[0] - tr[0];
+        i32 second_green = br[1] - tr[1];
+        i32 second_alpha = br[3] - tr[3];
+        i32 second_blue = br[2] - tr[2];
         struct {
             i32 top_left;
             i32 top_right;
@@ -1642,15 +1651,15 @@ extern "C" {
         i32 second_green_step = second_green * (strip);                                                                \
         i32 second_blue_step = second_blue * (strip);                                                                  \
         i32 second_alpha_step = second_alpha * (strip);                                                                \
-        bottom_left[0] = first_red_step / edui_grad_steps;                                                                    \
-        bottom_left[1] = first_green_step / edui_grad_steps;                                                                  \
-        bottom_left[2] = first_blue_step / edui_grad_steps;                                                                   \
-        bottom_left[3] = 0x80 + first_alpha_step / edui_grad_steps;                                                           \
-        bottom_right[0] = second_red_step / edui_grad_steps;                                                                  \
-        bottom_right[1] = second_green_step / edui_grad_steps;                                                                \
-        bottom_right[2] = second_blue_step / edui_grad_steps;                                                                 \
-        bottom_right[3] = 0x80 + second_alpha_step / edui_grad_steps;                                                         \
-        eduiDrawGradRect(left, (y << 3) + (strip) * strip_height, band_width, strip_height,                            \
+        bottom_left[0] = tl[0] + first_red_step / edui_grad_steps;                                                     \
+        bottom_left[1] = tl[1] + first_green_step / edui_grad_steps;                                                   \
+        bottom_left[2] = tl[2] + first_blue_step / edui_grad_steps;                                                    \
+        bottom_left[3] = tl[3] + first_alpha_step / edui_grad_steps;                                                   \
+        bottom_right[0] = tr[0] + second_red_step / edui_grad_steps;                                                   \
+        bottom_right[1] = tr[1] + second_green_step / edui_grad_steps;                                                 \
+        bottom_right[2] = tr[2] + second_blue_step / edui_grad_steps;                                                  \
+        bottom_right[3] = tr[3] + second_alpha_step / edui_grad_steps;                                                 \
+        eduiDrawGradRect(left, (y << 3) + (strip) * (height << 3) / edui_grad_steps, band_width, strip_height,         \
                          reinterpret_cast<i32 *>(&colours), uimtls[ui_bgmtl]);                                         \
         colours.top_left = *reinterpret_cast<i32 *>(colours.bottom_left);                                              \
         colours.top_right = *reinterpret_cast<i32 *>(colours.bottom_right);                                            \
@@ -1686,10 +1695,10 @@ extern "C" {
         } else
             eduiFntPrintExCentre(edui_font, (width + x * 2) << 3, (y << 3) + baseline, 64, item->text);
 
-        i32 half_height = height >> 1;
         edui_gradient_node_s *stage = gradient->first_stage;
         if (!stage)
             return height;
+        i32 half_height = height >> 1;
         f32 stage_time = stage->time;
         u32 stage_colour = stage->colour;
         edui_gradient_node_s *next = stage->next;
@@ -1699,18 +1708,20 @@ extern "C" {
             i32 left = static_cast<i32>(stage_time * (width << 4));
             i32 right = static_cast<i32>(next->time * (width << 4));
             eduiDrawGradRectLikely((x << 4) + left, (y + half_height) << 3, right - left, half_height << 3, colours,
-                             uimtls[ui_bgmtl]);
+                                   uimtls[ui_bgmtl]);
             stage_time = next->time;
             stage_colour = next->colour;
             next = next->next;
         }
         for (edui_gradient_node_s *stage = gradient->first_stage; stage; stage = stage->next) {
-            i32 marker_x = (x - 2 + static_cast<i32>(stage->time * width)) << 4;
+            i32 marker_x = (x + static_cast<i32>(stage->time * width) - 2) << 4;
             i32 marker_y = ((y + half_height) << 3) - 16;
             i32 marker_height = (half_height << 3) + 16;
             eduiDrawRect(marker_x, marker_y, 80, marker_height, stage->colour, uimtls[0]);
-            u32 outline = gradient->selected_stage == stage ? 0x80ffffff : 0x80000000;
-            eduiDrawLineRect(marker_x, marker_y, 80, marker_height, outline, uimtls[ui_outmtl]);
+            if (gradient->selected_stage == stage)
+                eduiDrawLineRect(marker_x, marker_y, 80, marker_height, 0x80ffffff, uimtls[ui_outmtl]);
+            else
+                eduiDrawLineRect(marker_x, marker_y, 80, marker_height, 0x80000000, uimtls[ui_outmtl]);
         }
         return height;
     }

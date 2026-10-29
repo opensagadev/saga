@@ -836,7 +836,7 @@ pushblock_s *NearestFacingPushBlock(WORLDINFO_s *world, GameObject_s *object, fl
     } else {
         u16 angle16 = facing;
         i32 angle = facing;
-        if (angle > 0xfc72) {
+        if (__builtin_expect(angle > 0xfc72, 1)) {
             mode = 2;
         } else if (angle16 <= 0x38d) {
             mode = 2;
@@ -867,7 +867,7 @@ pushblock_s *NearestFacingPushBlock(WORLDINFO_s *world, GameObject_s *object, fl
         if (angle16 == 0xc000) {
             mode = 1;
             goto have_mode;
-        } else if (angle <= 0xbc72) {
+        } else if (__builtin_expect(angle <= 0xbc72, 0)) {
             return nearest;
         } else if (__builtin_expect(angle > 0xc38d, 0)) {
             return nearest;
@@ -954,7 +954,7 @@ pushblock_s *NearestFacingPushBlock(WORLDINFO_s *world, GameObject_s *object, fl
     mode3_geometry: {
         f32 block_min_x = min_x + px - 0.01f;
         f32 block_max_x = px + block->bounds_max.x - 0.01f;
-        if (block_min_x >= cx)
+        if (__builtin_expect(block_min_x >= cx, 1))
             continue;
         if (cx >= block_max_x)
             continue;

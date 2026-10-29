@@ -1333,7 +1333,7 @@ void UpdateGameMenu(GAMEPAD_s *pad, i32 a2) {
         both_pads = true;
     } else if (__builtin_expect(menu_id != -1 && WORLD->current_level == TITLES_LDATA, 1)) {
         both_pads = false;
-    } else if (menu_id == 0x1e && PlayerProgress[0].active != 0 && PlayerProgress[1].active != 0) {
+    } else if (__builtin_expect(menu_id == 0x1e && PlayerProgress[0].active != 0 && PlayerProgress[1].active != 0, 1)) {
         both_pads = true;
     } else if (Player[0] != NULL && Player[0]->apiobj.player_controlled && Player[1] != NULL &&
                Player[1]->apiobj.player_controlled) {
@@ -1396,7 +1396,7 @@ void UpdateGameMenu(GAMEPAD_s *pad, i32 a2) {
         if (result == 1 && Paused != 0)
             ResumeGame(1, 1);
     }
-    if (previous_menu != -1 && NewLData != NULL && menu_id != 0x1b && gone_through_door_to_new_level == 0)
+    if (__builtin_expect(previous_menu != -1 && NewLData != NULL && menu_id != 0x1b && gone_through_door_to_new_level == 0, 1))
         reset_area = 1;
 }
 

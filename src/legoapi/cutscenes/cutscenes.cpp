@@ -1635,7 +1635,7 @@ void CutScenes_ConfigureList(char *filename, variptr_u *buffer, variptr_u) {
                     if (__builtin_expect(directory[0] == '\0', 0)) {
                         break;
                     }
-                    if (file[0] == '\0') {
+                    if (__builtin_expect(file[0] == '\0', 0)) {
                         break;
                     }
                     if (entries[CUTCOUNT].level == -1) {
@@ -2464,7 +2464,7 @@ void CutScenes_Update(WORLDINFO_s *world, i32 paused) {
     }
     CUTNOFOG = 0;
 
-    if (CutInstEndCount < 4) {
+    if (__builtin_expect(CutInstEndCount < 4, 1)) {
         instNUGCUTSCENE_s *stop_instance = static_cast<instNUGCUTSCENE_s *>(stop_cut->instance);
         CutInstEndStop = CutInstEndCount;
         CutInstEnd[CutInstEndCount++] = stop_instance;

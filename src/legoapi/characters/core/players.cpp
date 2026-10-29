@@ -324,14 +324,14 @@ void Players_InitPositions(WORLDINFO *world) {
     // --- hub exit-door lookup ---
     if (HUB_ADATA != NULL && HUB_ADATA == world->area) {
         if (world->level_sub_id != last_area && hub_from_cutsceneplayer == 0) {
-            if (__builtin_expect(hub_from_superstory != -1, 1)) {
+            if (hub_from_superstory != -1) {
                 i32 area =
                     Episode_FindAreaFromFlags((EPISODEDATA *)((char *)EDataList + hub_from_superstory * 0x1c), 5, 5);
                 void *door = Door_FindByIndex(world, area, -1, NULL);
                 if (door != NULL) {
                     NuStrCpy(Door_ExitName, (char *)door);
                 }
-            } else if (hub_from_mission != -1) {
+            } else if (__builtin_expect(hub_from_mission != -1, 1)) {
                 void *door = Door_FindByName(world, const_cast<char *>("mission_door"));
                 if (door != NULL) {
                     NuStrCpy(Door_ExitName, (char *)door);
@@ -408,7 +408,7 @@ void Players_InitPositions(WORLDINFO *world) {
                     av != NULL && static_cast<CUTSCENEPLAYER_s *>(CutScenePlayer_Available())->return_door != -1, 1)) {
                 HubStartDoor = Door_FindByIndex(
                     world, -1, static_cast<CUTSCENEPLAYER_s *>(CutScenePlayer_Available())->return_door, NULL);
-                if (HubStartDoor != NULL) {
+                if (__builtin_expect(HubStartDoor != NULL, 0)) {
                     NUVEC v2;
                     f32 *vps = *(f32 **)((char *)(*(void **)((char *)HubStartDoor + 0xa0)) + 0x8);
                     PlayerStart[0].pos = (NUVEC *)&vps[12];
@@ -748,7 +748,7 @@ void Player_ToggleCharacter(GameObject_s *object, i32 direction, i32 sound) {
         }
         hold_time = object->input_toggle_hold_time;
     }
-    if (Player_ToggleSubCharacterFn != NULL) {
+    if (__builtin_expect(Player_ToggleSubCharacterFn != NULL, 1)) {
         if (Player_ToggleSubCharacterFn(object, left, sound) != 0) {
             return;
         }
@@ -843,7 +843,7 @@ void Player_ToggleCharacter(GameObject_s *object, i32 direction, i32 sound) {
         }
         object->input_toggle_hold_time = hold_time;
         if (sound != 0) {
-            if (left != 0) {
+            if (__builtin_expect(left != 0, 0)) {
                 GameAudio_PlaySfx(0x23, &object->apiobj.collision_position, 0, 0);
             } else if (__builtin_expect(right != 0, 0)) {
                 GameAudio_PlaySfx(0x24, &object->apiobj.collision_position, 0, 0);

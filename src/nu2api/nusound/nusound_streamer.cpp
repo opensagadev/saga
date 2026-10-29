@@ -253,7 +253,7 @@ i32 NuSoundStreamingSample::Open(f32 start_offset, bool loop, bool weak_flag) {
 
     this->file_loader = NuSoundSystem::CreateFileLoader(this->file_type);
     desc = this->file_loader->CreateHeader();
-    if (__builtin_expect(desc == NULL, 0)) {
+    if (desc == NULL) {
         NuSoundSystem::ReleaseFileLoader(this->file_loader);
         this->file_loader = NULL;
         return 3;
@@ -298,7 +298,7 @@ i32 NuSoundStreamingSample::Open(f32 start_offset, bool loop, bool weak_flag) {
     }
 
     LoadState new_state;
-    if (status == 1) {
+    if (__builtin_expect(status == 1, 0)) {
         error = 0;
         new_state = LoadState::STREAM_READY;
     } else {
