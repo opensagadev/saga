@@ -548,35 +548,33 @@ static __used__ void UpdatePodRaceMines(void) {
         return;
     }
 
-    {
-        CLIENTMINES_s *client = &client_mines;
-        for (u32 idx = 0; idx < 0x40; idx++) {
-            u32 mask = 1u << (idx & 0x1f);
-            // Retail widens the signed 32-bit mask, including its bit-31 quirk.
-            u32 high_mask = 0u - (mask >> 31);
-            if (((client->present_words[0] & mask) | (client->present_words[1] & high_mask)) == 0 ||
-                ((client->exploded_words[0] & mask) | (client->exploded_words[1] & high_mask)) != 0)
+    for (i32 idx = 0; idx < 0x40; idx++) {
+        i32 mask = (i32)(1u << (idx & 0x1f));
+        // Retail widens the signed 32-bit mask, including its bit-31 quirk.
+        i32 high_mask = mask >> 31;
+        if (((client_mines.present_words[0] & mask) | (client_mines.present_words[1] & high_mask)) == 0 ||
+            ((client_mines.exploded_words[0] & mask) | (client_mines.exploded_words[1] & high_mask)) != 0)
+            continue;
+        float radius = mines->mine_radius;
+        for (i32 i = 0; i < minecount; i++) {
+            GameObject_s *obj = minesarr[i];
+            if (obj == NULL)
                 continue;
-            float radius = mines->mine_radius;
-            for (i32 i = 0; i < minecount; i++) {
-                GameObject_s *obj = minesarr[i];
-                if (obj == NULL)
-                    continue;
-                delta.x = obj->apiobj.pos_x - client->positions[idx].x;
-                delta.z = obj->apiobj.pos_z - client->positions[idx].z;
-                float rr = obj->apiobj.field_0x1dc + radius;
-                if (!(rr * rr > delta.x * delta.x + delta.z * delta.z))
-                    continue;
-                if (mines->mine_debris != -1)
-                    AddGameDebris(WORLD->debris_sys, mines->mine_debris, &client->positions[idx]);
-                if (mines->mine_part != -1)
-                    AddFiniteShotPART(mines->mine_part, &client->positions[idx], 1);
-                GameCam_HitJudder();
-                GameCam_NewShake(NULL, 0.75f, 1.0f, 1.0f);
-                PlaySfx("Explode1", &obj->apiobj.collision_position);
-                client->exploded_words[0] |= mask;
-                client->exploded_words[1] |= high_mask;
-            }
+            delta.x = obj->apiobj.pos_x - client_mines.positions[idx].x;
+            delta.z = obj->apiobj.pos_z - client_mines.positions[idx].z;
+            float rr = obj->apiobj.field_0x1dc + radius;
+            if (!(rr * rr > delta.x * delta.x + delta.z * delta.z))
+                continue;
+            NUVEC *pos = &client_mines.positions[idx];
+            if (mines->mine_debris != -1)
+                AddGameDebris(WORLD->debris_sys, mines->mine_debris, pos);
+            if (mines->mine_part != -1)
+                AddFiniteShotPART(mines->mine_part, pos, 1);
+            GameCam_HitJudder();
+            GameCam_NewShake(NULL, 0.75f, 1.0f, 1.0f);
+            PlaySfx("Explode1", &obj->apiobj.collision_position);
+            client_mines.exploded_words[0] |= mask;
+            client_mines.exploded_words[1] |= high_mask;
         }
     }
 }
@@ -1673,9 +1671,9 @@ void PodDust(WORLDINFO_s *world, GameObject_s *object) {
             else
                 continue;
             NUMTX matrix;
-            matrix.m02 = joint->m02;
-            matrix.m01 = joint->m01;
             matrix.m00 = joint->m00;
+            matrix.m01 = joint->m01;
+            matrix.m02 = joint->m02;
             matrix.m03 = joint->m03;
             matrix.m10 = joint->m20;
             matrix.m11 = joint->m21;
@@ -1724,11 +1722,11 @@ void PodDust(WORLDINFO_s *world, GameObject_s *object) {
     NUVEC delta;
     NuVecSub(&delta, &object->apiobj.start_position, &object->apiobj.position);
     f32 rate = 100.0f * avg_currentspeed_mul;
-    rate *= 1.0f - (object->apiobj.collision_min.y - object->apiobj.field_0x218) * 0.5f;
+    f32 height = 1.0f - (object->apiobj.collision_min.y - object->apiobj.field_0x218) * 0.5f;
     for (i32 i = 0; i < count; ++i) {
         NuVecAdd(&previous[i], &positions[i], &delta);
-        i32 particles = ParticlesPerSecond(rate, FRAMETIME);
-        for (i32 j = 0; j < particles; ++j) {
+        i32 particles = ParticlesPerSecond(rate * height, FRAMETIME);
+        for (; particles > 0; --particles) {
             f32 fraction = qrand() * (1.0f / 65535.0f);
             NUVEC position;
             position.x = previous[i].x + (positions[i].x - previous[i].x) * fraction;
@@ -2107,7 +2105,7 @@ i32 Action_NewSebulba(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *
                     distance = second_distance - first_distance;
                     if (distance > sock_length * 0.5f)
                         distance -= sock_length;
-                    else if (__builtin_expect(distance < sock_length * -0.5f, 0))
+                    else if (__builtin_expect(distance < sock_length * -0.5f, 1))
                         distance += sock_length;
 
                     GameObject_s *lead_player;
@@ -2130,7 +2128,7 @@ i32 Action_NewSebulba(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *
                 else if (distance < sock_length * -0.5f)
                     distance += sock_length;
                 distance -= goal;
-                if (__builtin_expect(distance > 0.0f, 0)) {
+                if (__builtin_expect(distance > 0.0f, 1)) {
                     float ratio = distance / (sebulba_fallback_dist - goal);
                     float base = 0.0f;
                     if (ratio > 1.0f)
@@ -2146,7 +2144,7 @@ i32 Action_NewSebulba(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *
         catchup: {
             float ratio = distance / sebulba_catchup_dist;
             float base = 0.0f;
-            if (!(ratio <= 1.0f))
+            if (__builtin_expect(!(ratio <= 1.0f), 1))
                 ratio = 1.0f;
             else
                 base = 1.0f - ratio;

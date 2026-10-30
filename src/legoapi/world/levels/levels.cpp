@@ -1367,15 +1367,12 @@ i32 EffectOffProgress_Update(LEVEL_PROGRESS_s *progress, char *name, i32 visible
         return 0;
     i32 i;
     for (i = 0; i < 12; ++i) {
-        if (__builtin_expect(NuStrICmp(progress->disabled_effect_names[i], name) == 0, 0))
-            break;
-    }
-    if (i < 12) {
-        if (__builtin_expect(visible != 0, 0)) {
+        if (__builtin_expect(NuStrICmp(progress->disabled_effect_names[i], name) == 0, 0)) {
+            if (__builtin_expect(visible == 0, 0))
+                return 3;
             progress->disabled_effect_names[i][0] = '\0';
             return 2;
         }
-        return 3;
     }
     if (visible != 0)
         return 0;
@@ -2164,12 +2161,11 @@ void StoreLevelProgressFn(WORLDINFO_s *world, LEVEL_PROGRESS_s *progress, i32 ar
                 for (i32 k = 0; k < 4; ++k)
                     progress->scripts[j].params[k] = processor.processor.params[k];
                 break;
+            } else if (NuStrICmp(progress->scripts[j].name, processor.name) == 0) {
+                for (i32 k = 0; k < 4; ++k)
+                    progress->scripts[j].params[k] = processor.processor.params[k];
+                break;
             }
-            if (NuStrICmp(progress->scripts[j].name, processor.name) != 0) {
-                continue;
-            }
-            memcpy(progress->scripts[j].params, processor.processor.params, 16);
-            break;
         }
     }
 store_flags:

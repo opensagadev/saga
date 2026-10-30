@@ -1852,7 +1852,7 @@ void KaminoE_Update(WORLDINFO_s *world) {
         desired.z +=
             ((NuTrigTable[(static_cast<i32>((0.25f * degrees) * 182.04444885253906f) >> 1) & 0x7fff] + 1.0f) * 0.5f) *
             0.2f;
-        if (__builtin_expect(kamino_e.minicut_started != NULL && kamino_e.minicut_started->value > 0.0f, 1))
+        if (kamino_e.minicut_started != NULL && kamino_e.minicut_started->value > 0.0f)
             NuSpecialSetVisibility(&kamino_e.slave1, 1);
         if (kamino_e.departing)
             PlaySfx("Slave1_EngineLp", &kamino_e.position);

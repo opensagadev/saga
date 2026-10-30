@@ -404,16 +404,15 @@ void DoInput(WORLDINFO_s *world) {
     i32 player_state_changed = PlayersDropInOut();
 
     for (i32 player_index = 0; player_index < 2; ++player_index) {
-        nupad_s *pad = GamePad[player_index].pad;
         GameObject_s *player = Player[player_index];
+        nupad_s *pad = GamePad[player_index].pad;
         if (GamePads_IgnoreInputFn != NULL) {
             if (GamePads_IgnoreInputFn() != 0) {
                 continue;
             }
         }
         if (static_cast<u32>(input_result[player_index]) <= 1) {
-            if (player != NULL && player->apiobj.player_controlled && pad != NULL && MiniCutCam == 0 && world != NULL &&
-                world->current_level != NULL) {
+            if (player != NULL && player->apiobj.player_controlled && MiniCutCam == 0) {
                 PadOutPause(player_index, world);
             }
             continue;

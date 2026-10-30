@@ -41,6 +41,14 @@ void *GameAntnode_CreateSys(WORLDINFO_s *world, variptr_u *buf, variptr_u *buf_e
     return system;
 }
 
+static bool GameAntinode_IsOccupied(GAMEANTINODE_s *node) {
+    for (i32 x = node->grid_min_x; x <= node->grid_max_x; ++x)
+        for (i32 z = node->grid_min_z; z <= node->grid_max_z; ++z)
+            if ((static_cast<u32>(GameAntinode_grid[x] >> z) & 1) != 0)
+                return true;
+    return false;
+}
+
 void GameAntinode_Update(GAMEANTINODESYS_s *system) {
     if (system == NULL)
         return;
@@ -66,30 +74,24 @@ void GameAntinode_Update(GAMEANTINODESYS_s *system) {
         next = node->next;
         if (__builtin_expect(!(node->remaining_time <= 0.0f), 1)) {
             node->remaining_time -= FRAMETIME;
-            if (node->remaining_time <= 0.0f) {
+            if (__builtin_expect(node->remaining_time <= 0.0f, 0)) {
                 GameAntinode_UnregisterAntiNode(system, node);
                 continue;
             }
         }
-        for (i32 x = node->grid_min_x; x <= node->grid_max_x; ++x) {
-            for (i32 z = node->grid_min_z; z <= node->grid_max_z; ++z) {
-                if (((GameAntinode_grid[x] >> z) & 1) != 0) {
-                    AIANTINODE_s *active = AIAntinodeCreateSingleFrame(&node->position, node->radius);
-                    if (active != NULL) {
-                        active->base_radius = node->extent_x;
-                        active->base_height = node->extent_z;
-                        active->type = node->shape;
-                        active->height = node->min_y;
-                        active->max_height = node->max_y;
-                        active->flags = node->angle;
-                        active->user_data[0] = node->user_data[0];
-                        active->user_data[1] = node->user_data[1];
-                    }
-                    goto next_node;
-                }
+        if (GameAntinode_IsOccupied(node)) {
+            AIANTINODE_s *active = AIAntinodeCreateSingleFrame(&node->position, node->radius);
+            if (active != NULL) {
+                active->base_radius = node->extent_x;
+                active->base_height = node->extent_z;
+                active->type = node->shape;
+                active->height = node->min_y;
+                active->max_height = node->max_y;
+                active->flags = node->angle;
+                active->user_data[0] = node->user_data[0];
+                active->user_data[1] = node->user_data[1];
             }
         }
-    next_node:;
     }
 }
 

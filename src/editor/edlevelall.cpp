@@ -3089,7 +3089,7 @@ void EdDrawPolySector(VuVec const &center, float radius, i32 axis, i32 first_ang
 void EdDrawPolyCylinder(VuMtx const &transform, float half_length, float radius, float end_radius, i32 sides,
                         i32 colour, i32 cap_start, i32 cap_end) {
     const float taper = end_radius / radius;
-    i32 shaded_colour = colour & 0xff000000;
+    u32 shaded_colour = colour & 0xff000000;
     shaded_colour |= ((colour & 0xff) * 0xdc) >> 8;
     shaded_colour |= ((((colour >> 8) & 0xff) * 0xdc) & 0xff00) | (((((colour >> 16) & 0xff) * 0xdc) >> 8) << 16);
     VuVec first;
@@ -3121,7 +3121,7 @@ void EdDrawPolyCylinder(VuMtx const &transform, float half_length, float radius,
         const i32 first_angle = 0x10000 / sides;
         float previous_sine = NU_SIN_LUT(first_angle) * radius;
         float previous_cosine = NU_COS_LUT(first_angle) * radius;
-        for (i32 segment = 0; segment < sides - 2; ++segment) {
+        for (i32 segment = 0; segment + 2 < sides; ++segment) {
             const i32 angle = (segment + 2) * 0x10000 / sides;
             const float sine = NU_SIN_LUT(angle) * radius;
             const float cosine = NU_COS_LUT(angle) * radius;
@@ -7060,66 +7060,69 @@ void ClassEditor::Process(EdInputContext &input) {
 // The original realigns the incoming stack for its matrix and vector locals.
 __attribute__((force_align_arg_pointer)) i32 EdManRotate::RotateItem(EdInputContext &, ClassObjectList &objects,
                                                                      i32 angle, i32 axis) {
-    ClassObjectListEntry *first = objects.first;
+    ClassObjectListEntry *entry = objects.first;
     VuVec average;
     objects.GetAveragePosition(average);
-    if (angle == 0 || first == NULL)
+    if (angle == 0 || entry == NULL)
         return axis;
     i32 cosine_index = ((angle + 0x4000) >> 1) & 0x7fff;
     i32 sine_index = (angle >> 1) & 0x7fff;
-    for (ClassObjectListEntry *entry = first; entry != NULL; entry = entry->next) {
+    for (; entry != NULL; entry = entry->next) {
         NUMTX matrix;
         NuMtxSetIdentity(&matrix);
         i32 matrix_type = EdType_VuMtx;
         if (entry->reference == NULL ||
             entry->reference->GetAttributeData(entry->object, 0x10, matrix_type, &matrix, 0) == 0) {
             EdMember member;
-            if (__builtin_expect(entry->ed_class->FindMember(&member, entry->object, 0x10, 1) == 0 ||
-                member.reference->GetAttributeData(member.object, 0x10, matrix_type, &matrix, 0) == 0, 1))
+            if (__builtin_expect(entry->ed_class->FindMember(&member, entry->object, 0x10, 1) == 0, 1))
+                continue;
+            if (member.reference->GetAttributeData(member.object, 0x10, matrix_type, &matrix, 0) == 0)
                 continue;
         }
-        switch (axis) {
-            case 1: {
-                average = VuVec(matrix.m30, matrix.m31, matrix.m32, matrix.m33);
-                f32 cosine = NuTrigTable[cosine_index];
-                f32 sine = NuTrigTable[sine_index];
-                f32 m01 = matrix.m01, m11 = matrix.m11, m21 = matrix.m21;
-                matrix.m01 = cosine * m01 - sine * matrix.m02;
-                matrix.m02 = m01 * sine + matrix.m02 * cosine;
-                matrix.m11 = cosine * m11 - sine * matrix.m12;
-                matrix.m12 = m11 * sine + matrix.m12 * cosine;
-                matrix.m21 = cosine * m21 - sine * matrix.m22;
-                matrix.m22 = m21 * sine + matrix.m22 * cosine;
-                break;
-            }
-            case 2: {
-                average = VuVec(matrix.m30, matrix.m31, matrix.m32, matrix.m33);
-                f32 sine = NuTrigTable[sine_index];
-                f32 cosine = NuTrigTable[cosine_index];
-                f32 m00 = matrix.m00, m10 = matrix.m10, m20 = matrix.m20;
-                matrix.m00 = cosine * m00 + sine * matrix.m02;
-                matrix.m02 = matrix.m02 * cosine - m00 * sine;
-                matrix.m10 = cosine * m10 + sine * matrix.m12;
-                matrix.m12 = matrix.m12 * cosine - m10 * sine;
-                matrix.m20 = cosine * m20 + sine * matrix.m22;
-                matrix.m22 = matrix.m22 * cosine - m20 * sine;
-                break;
-            }
-            case 3: {
-                average = VuVec(matrix.m30, matrix.m31, matrix.m32, matrix.m33);
-                f32 sine = NuTrigTable[sine_index];
-                f32 cosine = NuTrigTable[cosine_index];
-                f32 m00 = matrix.m00, m10 = matrix.m10, m20 = matrix.m20;
-                matrix.m00 = cosine * m00 - sine * matrix.m01;
-                matrix.m01 = m00 * sine + matrix.m01 * cosine;
-                matrix.m10 = cosine * m10 - sine * matrix.m11;
-                matrix.m11 = m10 * sine + matrix.m11 * cosine;
-                matrix.m20 = cosine * m20 - sine * matrix.m21;
-                matrix.m21 = m20 * sine + matrix.m21 * cosine;
-                break;
-            }
-            default:
-                continue;
+        if (axis == 2) {
+            average = VuVec(matrix.m30, matrix.m31, matrix.m32, matrix.m33);
+            f32 cosine = NuTrigTable[cosine_index];
+            f32 sine = NuTrigTable[sine_index];
+            f32 m00 = matrix.m00, m10 = matrix.m10, m20 = matrix.m20;
+            f32 m02 = matrix.m02;
+            matrix.m00 = cosine * m00 + sine * m02;
+            matrix.m02 = m02 * cosine - m00 * sine;
+            f32 m12 = matrix.m12;
+            matrix.m10 = cosine * m10 + sine * m12;
+            matrix.m12 = m12 * cosine - m10 * sine;
+            f32 m22 = matrix.m22;
+            matrix.m20 = cosine * m20 + sine * m22;
+            matrix.m22 = m22 * cosine - m20 * sine;
+        } else if (axis == 3) {
+            average = VuVec(matrix.m30, matrix.m31, matrix.m32, matrix.m33);
+            f32 cosine = NuTrigTable[cosine_index];
+            f32 sine = NuTrigTable[sine_index];
+            f32 m00 = matrix.m00, m10 = matrix.m10, m20 = matrix.m20;
+            f32 m01 = matrix.m01;
+            matrix.m00 = cosine * m00 - sine * m01;
+            matrix.m01 = m00 * sine + m01 * cosine;
+            f32 m11 = matrix.m11;
+            matrix.m10 = cosine * m10 - sine * m11;
+            matrix.m11 = m10 * sine + m11 * cosine;
+            f32 m21 = matrix.m21;
+            matrix.m20 = cosine * m20 - sine * m21;
+            matrix.m21 = m20 * sine + m21 * cosine;
+        } else if (axis == 1) {
+            average = VuVec(matrix.m30, matrix.m31, matrix.m32, matrix.m33);
+            f32 cosine = NuTrigTable[cosine_index];
+            f32 sine = NuTrigTable[sine_index];
+            f32 m01 = matrix.m01, m11 = matrix.m11, m21 = matrix.m21;
+            f32 m02 = matrix.m02;
+            matrix.m01 = cosine * m01 - sine * m02;
+            matrix.m02 = m01 * sine + m02 * cosine;
+            f32 m12 = matrix.m12;
+            matrix.m11 = cosine * m11 - sine * m12;
+            matrix.m12 = m11 * sine + m12 * cosine;
+            f32 m22 = matrix.m22;
+            matrix.m21 = cosine * m21 - sine * m22;
+            matrix.m22 = m21 * sine + m22 * cosine;
+        } else {
+            continue;
         }
         matrix_type = EdType_VuMtx;
         if (entry->reference == NULL ||

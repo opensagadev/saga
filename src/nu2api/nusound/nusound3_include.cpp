@@ -1288,7 +1288,7 @@ void NuMusic::InitData(const char *file, VARIPTR *buffer_start, VARIPTR buffer_e
                     reinterpret_cast<Track *>(reinterpret_cast<char *>(album->tracks_source) + track_rebase);
             }
             ++album;
-        } while (__builtin_expect(album != end, 0));
+        } while (album != end);
         tracksPtr = this->tracks;
     }
 
@@ -1296,7 +1296,7 @@ LAB_003203e6:
     f32 *pfVar2 = this->indexes;
     f32 *__dest = (f32 *)ALIGN((usize)&tracksPtr[track_count].path, 4);
     i32 local_20;
-    if (pfVar2 == __dest) {
+    if (__builtin_expect(pfVar2 == __dest, 0)) {
         local_20 = this->index_count;
     } else {
         local_20 = 0;
@@ -1318,7 +1318,7 @@ LAB_003203e6:
                         reinterpret_cast<f32 *>(reinterpret_cast<char *>(tracksPtr->entry_times) + index_rebase);
                 }
                 tracksPtr = tracksPtr + 1;
-            } while (tracksPtr != pTVar3);
+            } while (__builtin_expect(tracksPtr != pTVar3, 0));
             __dest = this->indexes;
         }
     }
@@ -2408,33 +2408,31 @@ i32 NuMusic::StopTrack(u32 clazz, i32 fade) {
     }
 
     Track *tracks[6];
-    if (__builtin_expect(this->album->GetTracks(clazz, tracks) == 0, 0)) {
-        return 0;
-    }
-
     i32 result = 0;
-    for (i32 i = 0; i < 6; i++) {
-        Track *track = tracks[i];
-        if (track == NULL) {
-            continue;
-        }
-        Voice *voice = FindVoiceByTrack(track);
-        if (voice == NULL) {
-            continue;
-        }
-        if (__builtin_expect(static_cast<u32>(voice->status - VOICE_STATUS_STOPPING) <= 1, 0)) {
-            NuSound3StopStereoStream(voice->stream_index);
-            voice->SetStatusFn(VOICE_STATUS_NONE, 0x46a);
-            result = 1;
-        } else if (__builtin_expect(static_cast<u32>(voice->status - VOICE_STATUS_PLAYING) <= 1, 1)) {
-            if (!(fade & 1)) {
-                NuSound3StopStereoStream(voice->stream_index);
-                voice->SetStatusFn(VOICE_STATUS_NONE, 0x464);
-            } else {
-                voice->fade_rate = 2.0f;
-                voice->flags |= 1u;
+    if (this->album->GetTracks(clazz, tracks) != 0) {
+        for (i32 i = 0; i < 6; i++) {
+            Track *track = tracks[i];
+            if (track == NULL) {
+                continue;
             }
-            result = 1;
+            Voice *voice = FindVoiceByTrack(track);
+            if (voice == NULL) {
+                continue;
+            }
+            if (static_cast<u32>(voice->status - VOICE_STATUS_PLAYING) <= 1) {
+                if (!(fade & 1)) {
+                    NuSound3StopStereoStream(voice->stream_index);
+                    voice->SetStatusFn(VOICE_STATUS_NONE, 0x464);
+                } else {
+                    voice->fade_rate = 2.0f;
+                    voice->flags |= 1u;
+                }
+                result = 1;
+            } else if (static_cast<u32>(voice->status - VOICE_STATUS_STOPPING) <= 1) {
+                NuSound3StopStereoStream(voice->stream_index);
+                voice->SetStatusFn(VOICE_STATUS_NONE, 0x46a);
+                result = 1;
+            }
         }
     }
 

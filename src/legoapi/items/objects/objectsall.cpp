@@ -3077,7 +3077,7 @@ static void edpartFileSaveEffects(eduimenu_s *parent, eduiitem_s *, u32) {
     sprintf(path, "%s\\%s.%s", level_directory, level_name, level_extension);
     sprintf(backup, "%s\\%s.%s.bak", level_directory, level_name, level_extension);
     i32 level_backup = 1;
-    if (__builtin_expect(!edbits_override_backups, 0))
+    if (!edbits_override_backups)
         level_backup = EdFileBackup(path, backup);
     i32 level_saved = edpartSaveEffects(path, 1);
     if (__builtin_expect(general_saved && general_backup && level_saved && level_backup, 0)) {
@@ -3554,7 +3554,7 @@ extern "C" PART_s *HitParts(GameObject_s *owner, NUVEC *positions, i32 count, f3
             part->lighting_template = params->lighting_template;
             *params->lighting_template = rtlDynamicAllocTemplate(PartRTL, params->field_84);
         }
-        if (++i_part == MAXPARTS)
+        if (__builtin_expect(++i_part == MAXPARTS, 1))
             i_part = 0;
         return part;
     }
@@ -3794,7 +3794,7 @@ void edpartLoadSingleType(part_typedesc_s *type, i32 version, i32 page) {
                 type->effect_ids[i] = 9998;
         }
     } else {
-        if (!(version > 1)) {
+        if (__builtin_expect(!(version > 1), 0)) {
             type->effect_pages[0] = 0;
         } else {
             type->effect_pages[0] = EdFileReadChar();
@@ -3927,7 +3927,7 @@ void edpartLoadSingleType(part_typedesc_s *type, i32 version, i32 page) {
             type->sound_modes[i] = 0;
     }
     type->maximum_distance = version > 9 ? EdFileReadFloat() : 25.0f;
-    if (version > 14) {
+    if (__builtin_expect(version > 14, 0)) {
         type->field_160 = EdFileReadFloat();
     } else {
         type->field_160 = 1.0f;
@@ -4347,7 +4347,7 @@ void edpartDoInput(nupad_s *pad) {
             if (edpart_opt_menu != NULL) {
                 eduiMenuAddItem(edpart_opt_menu,
                                 eduiItemSelCreate(1, edblack, 0, 0, edpartTypeMenu, "Emitter Type..."));
-                if (edpart_nearest != -1) {
+                if (__builtin_expect(edpart_nearest != -1, 1)) {
                     eduiMenuAddItem(edpart_opt_menu,
                                     eduiItemSelCreate(1, edblack, 0, 0, edpartInstanceMenu, "Instance Select..."));
                     eduiMenuAddItem(edpart_opt_menu, eduiItemSelCreate(1, edblack, 0, 0, edpartInstanceSettingsMenu,
@@ -4391,13 +4391,13 @@ void edpartDoInput(nupad_s *pad) {
                 edpartCreate(&edpart_cam_pos, edpart_create_type);
         }
         if (pad->digital_buttons & 0x20) {
-            if (edpart_copy_mode)
+            if (__builtin_expect(edpart_copy_mode != 0, 1))
                 edpartMultipleCopyCopy();
-            else if (edpart_nearest != -1)
+            else if (__builtin_expect(edpart_nearest != -1, 1))
                 edpartPlace(edpart_nearest, &edpart_cam_pos);
         }
         if (pad->digital_buttons & 0x400) {
-            if (edpart_nearest != -1 && !edpart_copy_mode)
+            if (__builtin_expect(edpart_nearest != -1 && !edpart_copy_mode, 1))
                 edpartPlace(edpart_nearest, &edpart_cam_pos);
         }
         if (pad->digital_buttons_pressed & 0x10) {

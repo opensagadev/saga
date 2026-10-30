@@ -358,17 +358,18 @@ static void ResetSpaceLevel(WORLDINFO_s *world, spacelevel_s *space) {
     for (door_index = 6; door_index >= 0; --door_index) {
         if ((Player[0] != NULL && Player[0]->field_0x68c > DogFightDoors.doors[door_index].distance) ||
             (Player[1] != NULL && Player[1]->field_0x68c > DogFightDoors.doors[door_index].distance)) {
-            space->door_time = DogFightDoors.doors[door_index].timer;
-            space->door_countdown = space->door_time * 94.977417f / 59.449684f;
-            space->door_elapsed = (space->door_countdown - FRAMETIME) * 94.977417f / 59.449684f;
-            goto reset_space;
+            break;
         }
     }
-    space->door_countdown = 0.0f;
-    space->door_time = 0.0f;
-    space->door_elapsed = 0.0f;
-
-reset_space:
+    if (door_index < 0) {
+        space->door_countdown = 0.0f;
+        space->door_time = 0.0f;
+        space->door_elapsed = 0.0f;
+    } else {
+        space->door_time = DogFightDoors.doors[door_index].timer;
+        space->door_countdown = space->door_time * 94.977417f / 59.449684f;
+        space->door_elapsed = (space->door_countdown - FRAMETIME) * 94.977417f / 59.449684f;
+    }
 
     for (i32 i = 0; i < 8; i++) {
         for (i32 j = 0; j < 5; j++) {
@@ -381,10 +382,13 @@ reset_space:
         space->flight_groups[i].draw_target = 0;
     }
 
-    STARFIGHTERDRAWSCALE = {4.0f, 4.0f, 4.0f, 1.0f};
-    space->draw_scale = {-141.0f, -121.0f, -1034.0f, 1.0f};
-    if (__builtin_expect(world->current_level == DOGFIGHTA_LDATA, 1)) {
-        space->unknown_3370 = NULL;
+    typedef f32 SpaceScaleVec4 __attribute__((vector_size(16)));
+    const SpaceScaleVec4 draw_scale = {4.0f, 4.0f, 4.0f, 1.0f};
+    *reinterpret_cast<SpaceScaleVec4 *>(&STARFIGHTERDRAWSCALE) = draw_scale;
+    const SpaceScaleVec4 space_scale = {-141.0f, -121.0f, -1034.0f, 1.0f};
+    *reinterpret_cast<SpaceScaleVec4 *>(&space->draw_scale) = space_scale;
+    if (world->current_level == DOGFIGHTA_LDATA) {
+        space->actions = NULL;
     } else {
         space->unknown_3370 = &Actions_AnakinA;
     }
@@ -392,63 +396,63 @@ reset_space:
         memset(space->reset_buffer, 0, space->reset_buffer_count * 96);
         space->reset_buffer_used = 0;
     }
-    space->current_action = NULL;
     space->unknown_337c = 4;
-    space->unknown_338c = space;
+    space->current_action = NULL;
     space->unknown_3378 = 0;
-    space->value_one_b = 1.0f;
+    space->unknown_338c = space;
     space->value_one_a = 1.0f;
+    space->value_one_b = 1.0f;
 
-    space->player_colour = 0xffffff;
-    space->player_matrix_flags = 0;
-    space->player_matrix.m01 = 55.0f;
-    space->player_matrix.m00 = 80.0f;
-    space->player_matrix.m03 = 1.0f;
-    space->player_matrix.m02 = 200.0f;
-    space->player_matrix.m31 = 0.0f;
-    space->player_matrix.m30 = 0.0f;
-    space->player_matrix.m33 = 1.0f;
-    space->player_matrix.m32 = 0.0f;
-    space->player_matrix.m11 = 0.0f;
-    space->player_matrix.m10 = 0.0f;
-    space->player_matrix.m20 = 0.0f;
-    space->player_matrix.m13 = 1.0f;
-    space->player_matrix.m22 = 0.0f;
-    space->player_matrix.m21 = 0.0f;
-    space->player_matrix.m12 = 200.0f;
-    space->player_matrix.m23 = 1.0f;
     space->player_matrix_state = 0;
+    space->player_colour = 0xffffff;
+    space->player_matrix.m00 = 80.0f;
+    space->player_matrix.m01 = 55.0f;
+    space->player_matrix.m02 = 200.0f;
+    space->player_matrix.m03 = 1.0f;
+    space->player_matrix.m30 = 0.0f;
+    space->player_matrix.m31 = 0.0f;
+    space->player_matrix.m32 = 0.0f;
+    space->player_matrix.m33 = 1.0f;
+    space->player_matrix.m10 = 0.0f;
+    space->player_matrix.m11 = 0.0f;
+    space->player_matrix.m13 = 1.0f;
+    space->player_matrix.m20 = 0.0f;
+    space->player_matrix.m21 = 0.0f;
+    space->player_matrix.m22 = 0.0f;
+    space->player_matrix.m23 = 1.0f;
+    space->player_matrix.m12 = 200.0f;
+    space->player_matrix_flags = 0;
 
+    space->camera_matrix_state = 0;
     space->camera_matrix.m00 = 5.0f;
     space->camera_matrix.m01 = 80.0f;
     space->camera_matrix.m02 = 55.0f;
     space->camera_matrix.m03 = 200.0f;
-    space->camera_matrix.m30 = 0.0f;
+    space->camera_matrix.m10 = 1.0f;
     space->camera_matrix.m31 = 0.0f;
-    space->camera_matrix.m33 = 1.0f;
-    space->camera_matrix.m10 = 0.0f;
     space->camera_matrix.m32 = 0.0f;
-    space->camera_matrix.m11 = 0.0f;
-    space->camera_matrix.m13 = 1.0f;
-    space->camera_matrix.m20 = 0.0f;
-    space->camera_matrix.m21 = 0.0f;
-    space->camera_matrix.m23 = 1.0f;
-    space->camera_matrix.m12 = 200.0f;
-    space->camera_matrix.m22 = 0.0f;
-    space->camera_value = 5.0f;
+    space->camera_matrix.m33 = 0.0f;
     space->camera_matrix_w = 1.0f;
+    space->camera_matrix.m11 = 0.0f;
+    space->camera_matrix.m12 = 0.0f;
+    space->camera_matrix.m20 = 1.0f;
+    space->camera_matrix.m21 = 0.0f;
+    space->camera_matrix.m22 = 0.0f;
+    space->camera_matrix.m23 = 0.0f;
+    space->camera_matrix.m30 = 1.0f;
+    space->camera_matrix.m13 = 200.0f;
+    space->camera_value = 5.0f;
     space->camera_colour = 0xffffff;
     space->camera_matrix_flags = 0;
-    space->camera_matrix_state = 0;
 
-    for (i32 i = 0; i < 96; ++i) {
-        space->queued_fighters[i].active = 0;
-        space->queued_fighters[i].parent = NULL;
-        space->queued_fighters[i].spline = NULL;
+    for (starfighter_s *fighter = space->queued_fighters; fighter != space->queued_fighters + 96; ++fighter) {
+        fighter->active = 0;
+        fighter->parent = NULL;
+        fighter->spline = NULL;
     }
-    for (i32 i = 0; i < 256; ++i) {
-        space->large_records[i].saved_value = space->large_records[i].reset_value;
-        space->large_records[i].reset_state = space->large_records[i].saved_state;
+    for (spacelevel_large_record_s *record = space->large_records; record != space->large_records + 256; ++record) {
+        record->saved_value = record->reset_value;
+        record->reset_state = record->saved_state;
     }
     SpaceRumbleTimer = NuRandFloat() * 10.0f + 3.0f;
 }
@@ -1166,6 +1170,8 @@ void CalcSplinePointFromDist(flightspline_s *spline, _vuv_s *result, float dista
 
 void FlightSpline_Init(WORLDINFO_s *world, flightspline_s *splines, i32 capacity) {
     char filename[256];
+    _vuv_s previous, current, point_position;
+    NUVEC difference, segment;
     sprintf(filename, "%s%s", world->config_file, FSP_Extension);
     EdFileSetMedia(1);
     if (!EdFileOpen(filename, NUFILE_READ))
@@ -1209,8 +1215,6 @@ void FlightSpline_Init(WORLDINFO_s *world, flightspline_s *splines, i32 capacity
             spline->length = EdFileReadFloat();
             if (version == 4) {
                 f32 distance = 0.0f;
-                _vuv_s previous, current;
-                NUVEC difference;
                 for (i32 point = 0; point < spline->point_count; ++point) {
                     CalcSplinePoint(spline, &previous, static_cast<f32>(point) / spline->point_count);
                     for (i32 sample = 1; sample <= 10; ++sample) {
@@ -1233,22 +1237,23 @@ void FlightSpline_Init(WORLDINFO_s *world, flightspline_s *splines, i32 capacity
         for (i = 0; i < count; ++i) {
             flightspline_s *spline = &splines[i];
             f32 distance = 0.0f;
-            if (__builtin_expect(spline->point_count != 0, 1)) {
-                _vuv_s current;
-                CalcSplinePoint(spline, &current, 1.0f);
+            if (spline->point_count != 0) {
+                CalcSplinePoint(spline, &point_position, 1.0f);
                 f32 along = 1.0f;
-                do {
-                    const _vuv_s previous = current;
+                while (along > 0.0f) {
+                    const _vuv_s last = point_position;
                     if (PODRACE_ADATA != NULL && PODRACE_ADATA == WORLD->area)
                         along -= PODRACE_SPLINEINC;
                     else
                         along -= 0.01f;
                     if (along < 0.0f)
                         along = 0.0f;
-                    CalcSplinePoint(spline, &current, along);
-                    NUVEC difference{current.x - previous.x, current.y - previous.y, current.z - previous.z};
-                    distance += NuVecMag(&difference);
-                } while (along > 0.0f);
+                    CalcSplinePoint(spline, &point_position, along);
+                    segment.x = point_position.x - last.x;
+                    segment.y = point_position.y - last.y;
+                    segment.z = point_position.z - last.z;
+                    distance += NuVecMag(&segment);
+                }
             }
             spline->length = distance;
         }
@@ -1927,41 +1932,32 @@ static i32 CollideBoltStarFighter(BOLT_s *bolt, starfighter_s *fighter, _vuv_s *
 }
 
 i32 ChrisExtraBoltCollision(BOLT_s *bolt, nuvec_s *points) {
-    if (WORLD->has_level_specific_data == 0 || WORLD->space_level == NULL || (bolt->flags & 3) == 0)
-        return 0;
-    spacelevel_s *space = WORLD->space_level;
-    // Only the xyz parts of these aligned vectors are filled; the collision test ignores w.
-    NUVEC4_ALIGNED16 velocity;
-    NUVEC4_ALIGNED16 position;
-    *reinterpret_cast<NUVEC *>(&position) = points[1];
-    *reinterpret_cast<NUVEC *>(&velocity) = bolt->velocity;
-#define COLLIDE_SPACE_GROUP(group_index)                                                                               \
-    do {                                                                                                               \
-        if (space->flight_groups[group_index].active != 0) {                                                           \
-            for (i32 j = 0; j < 5; ++j) {                                                                              \
-                if (__builtin_expect(space->flight_groups[group_index].fighters[j].active != 0 &&                      \
-                                         CollideBoltStarFighter(bolt, &space->flight_groups[group_index].fighters[j],  \
-                                                                reinterpret_cast<_vuv_s *>(&position),                 \
-                                                                reinterpret_cast<_vuv_s *>(&velocity)) != 0,           \
-                                     0))                                                                               \
-                    return 1;                                                                                          \
-            }                                                                                                          \
-        }                                                                                                              \
-    } while (0)
-    COLLIDE_SPACE_GROUP(0);
-    COLLIDE_SPACE_GROUP(1);
-    COLLIDE_SPACE_GROUP(2);
-    COLLIDE_SPACE_GROUP(3);
-    COLLIDE_SPACE_GROUP(4);
-    COLLIDE_SPACE_GROUP(5);
-    COLLIDE_SPACE_GROUP(6);
-    COLLIDE_SPACE_GROUP(7);
-#undef COLLIDE_SPACE_GROUP
-    for (i32 i = 0; i != 96; ++i) {
-        if (space->queued_fighters[i].active != 0 &&
-            CollideBoltStarFighter(bolt, &space->queued_fighters[i], reinterpret_cast<_vuv_s *>(&position),
-                                   reinterpret_cast<_vuv_s *>(&velocity)) != 0)
-            return 1;
+    if (WORLD->has_level_specific_data != 0 && WORLD->space_level != NULL && (bolt->flags & 3) != 0) {
+        spacelevel_s *space = WORLD->space_level;
+        // Only the xyz parts of these aligned vectors are filled; the collision test ignores w.
+        NUVEC4_ALIGNED16 velocity;
+        NUVEC4_ALIGNED16 position;
+        *reinterpret_cast<NUVEC *>(&position) = points[1];
+        *reinterpret_cast<NUVEC *>(&velocity) = bolt->velocity;
+        for (i32 i = 0; i < 8; ++i) {
+            if (space->flight_groups[i].active == 0)
+                continue;
+            for (i32 j = 0; j < 5; ++j) {
+                if (space->flight_groups[i].fighters[j].active == 0)
+                    continue;
+                if (CollideBoltStarFighter(bolt, &space->flight_groups[i].fighters[j],
+                                           reinterpret_cast<_vuv_s *>(&position),
+                                           reinterpret_cast<_vuv_s *>(&velocity)) != 0)
+                    return 1;
+            }
+        }
+        for (i32 i = 0; i < 96; ++i) {
+            if (space->queued_fighters[i].active == 0)
+                continue;
+            if (CollideBoltStarFighter(bolt, &space->queued_fighters[i], reinterpret_cast<_vuv_s *>(&position),
+                                       reinterpret_cast<_vuv_s *>(&velocity)) != 0)
+                return 1;
+        }
     }
     return 0;
 }

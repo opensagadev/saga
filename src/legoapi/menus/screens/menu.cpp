@@ -534,7 +534,7 @@ void MenuDrawOptions(MENU_s *menu) {
     dme_sy = menu->item_scale;
     GameDrawMenuEntry(menu, text);
 
-    if (__builtin_expect(GAMEDEMO == 0, 1)) {
+    if (GAMEDEMO == 0) {
         sprintf(text, "%s: %s", TTab[tWIDESCREEN], TTab[TempOptions.field11_0xb != 0 ? tON : tOFF]);
         dme_sy = menu->item_scale;
         GameDrawMenuEntry(menu, text);
@@ -1041,7 +1041,7 @@ void MenuUpdateOptions(MENU_s *menu) {
             }
         } else if (menu->selected_item == row++) {
             menu->selected_item_column = TempOptions.master_volume;
-            if (menu->left_pressed != 0 && TempOptions.master_volume != 0)
+            if (__builtin_expect(menu->left_pressed != 0 && TempOptions.master_volume != 0, 0))
                 --TempOptions.master_volume;
             else if (menu->right_pressed != 0 && TempOptions.master_volume < 10)
                 ++TempOptions.master_volume;

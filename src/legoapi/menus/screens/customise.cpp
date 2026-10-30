@@ -564,17 +564,14 @@ void Customiser_Draw3D(CUSTOMISER *customiser) {
                 if (NuSpecialExistsFn(&resource->special) == 0)
                     continue;
                 CUSTOMPIECE *pieces = customiser->piece_sets[category];
-                bool preview = false;
+                i32 preview = 0;
                 if (GetMenuID() == 12 && customiser_quit == 0 && category == selected &&
                     (active_count == 2 || side == preview_side)) {
                     NuFmod(CustomiseMenuTime[side], 0.3f);
-                    preview = true;
+                    preview = 1;
                 }
-                if (!preview && category == 0) {
-                    CUSTOMPIECE *piece = &pieces[piece_index];
-                    if ((piece->layer_flags & 0x20) != 0)
-                        continue;
-                }
+                if (preview == 0 && category == 0 && (pieces[piece_index].layer_flags & 0x20) != 0)
+                    continue;
                 matrix = customiser->joint_matrices[side][helmet];
                 if (category == 0)
                     NuMtxPreTranslate(&matrix, &NoHatPos[side]);
@@ -582,7 +579,7 @@ void Customiser_Draw3D(CUSTOMISER *customiser) {
             }
         }
         if (customiser->piece_counts[2] > 0) {
-            const i8 hand = runtime->weapon_joints[0];
+            const i32 hand = runtime->weapon_joints[0];
             if (hand == -1 || model->points_of_interest[hand] == NULL)
                 continue;
             CUSTOMPIECE *weapon = &customiser->piece_sets[2][selection[2]];
@@ -594,9 +591,14 @@ void Customiser_Draw3D(CUSTOMISER *customiser) {
                 NuSpecialDrawAt(&object->special, &matrix);
                 i32 blade;
                 if (LightSabre_ColourFromObj(weapon->weapon_model, &blade) != -1) {
-                    if (blade != -1)
-                        NuSpecialDrawAt(&world->lev_objs[blade].special, &matrix);
-                    NuSpecialDrawAt(&world->lev_objs[17].special, &matrix);
+                    if (blade != -1) {
+                        LEVEL_OBJECT_RUNTIME_s *blade_object = &world->lev_objs[blade];
+                        if (blade_object != NULL)
+                            NuSpecialDrawAt(&blade_object->special, &matrix);
+                    }
+                    LEVEL_OBJECT_RUNTIME_s *glow = &world->lev_objs[17];
+                    if (glow != NULL)
+                        NuSpecialDrawAt(&glow->special, &matrix);
                 }
             }
         }

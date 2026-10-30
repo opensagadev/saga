@@ -1445,14 +1445,14 @@ i32 Bolt_HitGameObject(BOLT_s *bolt, GameObject_s *object, NUVEC *points, NUVEC 
             message.write_offset += 12;
         }
     }
-    if (message.data != NULL) {
+    if (__builtin_expect(message.data != NULL, 1)) {
         u8 *destination = message.data->bytes + message.write_offset;
         memcpy(destination, &hit, 4);
         if (message.swap_endianness)
             EdFileSwapEndianess32(destination);
         message.write_offset += 4;
     }
-    if (message.data != NULL) {
+    if (__builtin_expect(message.data != NULL, 1)) {
         u8 *destination = message.data->bytes + message.write_offset;
         memmove(destination, &netclient, 4);
         if (message.swap_endianness)

@@ -1346,7 +1346,8 @@ i32 BuyShopItem(shopitem_s *items, i32 index, i32 charge) {
 i32 SelectShopItem(shopitem_s *items, i32 index) {
     shopitem_s *item = &items[index];
     char event[128];
-    i32 id, area;
+    i32 id;
+    i8 area;
     switch (item->type) {
         case 0: {
             id = static_cast<u16>(item->item_id);
@@ -1379,7 +1380,7 @@ i32 SelectShopItem(shopitem_s *items, i32 index) {
             id = static_cast<u16>(item->item_id);
             if (__builtin_expect(item->unlocked == 1 || ((Game.extra_purchased_bits[id >> 5] >> (id & 31)) & 1), 1))
                 return 0;
-            area = static_cast<i8>(Cheat[id].area);
+            area = Cheat[id].area;
             if (area != -1 && !Game.area_save[area].red_brick_collected)
                 goto locked;
             if (!CheckCash(items, index))
@@ -1422,13 +1423,14 @@ i32 SelectShopItem(shopitem_s *items, i32 index) {
             oldcurrentdrawlevel = currentdrawlevel;
             oldpickedscale = topscale[5];
             oldpickedpush = toppush[5];
+            oldpicked = picked;
             menuptr = NULL;
             for (i32 i = 0; i < 3; ++i) {
                 drawparent[i] = NULL;
                 menuparent[i] = NULL;
             }
-            currentmenulevel = currentdrawlevel = 0;
-            oldpicked = picked;
+            currentmenulevel = 0;
+            currentdrawlevel = 0;
             SHOPACTIVE = 0;
             BuyShopItem(items, index, 0);
             TempGame.field30_0x7c2c = Game.field30_0x7c2c;

@@ -894,7 +894,7 @@ void TextCrawl_Draw(float dt, i32 paragraphs, float alpha, char *text) {
             if (EDataList[episode_index].text_id != -1) {
                 episode_text = TTab[EDataList[episode_index].text_id];
             }
-            if (area_index != -1) {
+            if (__builtin_expect(area_index != -1, 1)) {
                 if ((area->flags & AREAFLAG_BONUS_AREA) != 0) {
                     i16 *bonus_text = (area->flags & AREAFLAG_VEHICLE_AREA) != 0 ? s_crawlPtr->vehicle_bonus_text
                                                                                  : s_crawlPtr->character_bonus_text;
@@ -902,7 +902,7 @@ void TextCrawl_Draw(float dt, i32 paragraphs, float alpha, char *text) {
                         chapter_text = TTab[*bonus_text];
                     }
                 } else {
-                    if (s_crawlPtr->heading_text != NULL) {
+                    if (__builtin_expect(s_crawlPtr->heading_text != NULL, 1)) {
                         sprintf(chapter_buffer, "%s %i", TTab[*s_crawlPtr->heading_text], area_index + 1);
                         chapter_text = chapter_buffer;
                     }
@@ -982,7 +982,7 @@ void TextCrawl_Draw(float dt, i32 paragraphs, float alpha, char *text) {
         y += NuQFntHeight(QFont3DZ) * 1.5f;
     }
 
-    if (area_name != NULL) {
+    if (__builtin_expect(area_name != NULL, 1)) {
         NuQFntSetScale(QFont3DZ, x_scale, y_scale * 2.0f);
         Text3DStringEncode(area_name, encoded);
         NuQFntMove(QFont3DZ, -NuQFntPrintLenW(QFont3DZ, encoded) * 0.5f, y, 0.0f);

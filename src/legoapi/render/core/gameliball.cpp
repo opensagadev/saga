@@ -8535,55 +8535,38 @@ void AddChunkControlToStack(debris_chunk_control_s *control, debris_chunk_contro
 
 extern "C" {
     void DebReAlloc2(debkeydatatype_s *key) {
+        typedef dma_particle_chunk_s *__attribute__((may_alias)) DebChunkPtr;
+        debinftype *effect = debtab[key->effect_index];
         const i32 old_chunk_count = key->allocated_chunk_count;
         const i32 requested_chunk_count = key->previous_allocated_chunk_count;
-        debinftype *effect = debtab[key->effect_index];
         const i32 additional_chunks = requested_chunk_count - old_chunk_count;
         if (additional_chunks == 0) {
             return;
         }
 
-        const bool glass = effect->particle_type == 7;
         if (additional_chunks > 0) {
-            if (glass) {
+            if (effect->particle_type == 7) {
                 i32 &free_chunk_count = freedebchkptrg;
-                const i32 available_chunk_count = debrischunksglass;
-                dma_particle_chunk_s **free_chunks = freedebchunksglass;
-                if (available_chunk_count <= free_chunk_count + additional_chunks) {
+                if (additional_chunks + free_chunk_count >= debrischunksglass) {
                     return;
                 }
+                dma_particle_chunk_s **free_chunks = freedebchunksglass;
 
                 const i32 particles_per_chunk = 12;
                 for (i32 i = 0; i < additional_chunks; ++i) {
                     dma_particle_chunk_s *chunk = free_chunks[free_chunk_count + i];
-                    key->particle_chunks[old_chunk_count + i] = chunk;
-                    key->particle_chunks[old_chunk_count + i]->particles[0].start_time = 0.0f;
-                    key->particle_chunks[old_chunk_count + i]->particles[0].inverse_lifetime = 32768.0f;
-                    key->particle_chunks[old_chunk_count + i]->particles[1].start_time = 0.0f;
-                    key->particle_chunks[old_chunk_count + i]->particles[1].inverse_lifetime = 32768.0f;
-                    key->particle_chunks[old_chunk_count + i]->particles[2].start_time = 0.0f;
-                    key->particle_chunks[old_chunk_count + i]->particles[2].inverse_lifetime = 32768.0f;
-                    key->particle_chunks[old_chunk_count + i]->particles[3].start_time = 0.0f;
-                    key->particle_chunks[old_chunk_count + i]->particles[3].inverse_lifetime = 32768.0f;
-                    key->particle_chunks[old_chunk_count + i]->particles[4].start_time = 0.0f;
-                    key->particle_chunks[old_chunk_count + i]->particles[4].inverse_lifetime = 32768.0f;
-                    key->particle_chunks[old_chunk_count + i]->particles[5].start_time = 0.0f;
-                    key->particle_chunks[old_chunk_count + i]->particles[5].inverse_lifetime = 32768.0f;
-                    key->particle_chunks[old_chunk_count + i]->particles[6].start_time = 0.0f;
-                    key->particle_chunks[old_chunk_count + i]->particles[6].inverse_lifetime = 32768.0f;
-                    key->particle_chunks[old_chunk_count + i]->particles[7].start_time = 0.0f;
-                    key->particle_chunks[old_chunk_count + i]->particles[7].inverse_lifetime = 32768.0f;
-                    key->particle_chunks[old_chunk_count + i]->particles[8].start_time = 0.0f;
-                    key->particle_chunks[old_chunk_count + i]->particles[8].inverse_lifetime = 32768.0f;
-                    key->particle_chunks[old_chunk_count + i]->particles[9].start_time = 0.0f;
-                    key->particle_chunks[old_chunk_count + i]->particles[9].inverse_lifetime = 32768.0f;
-                    key->particle_chunks[old_chunk_count + i]->particles[10].start_time = 0.0f;
-                    key->particle_chunks[old_chunk_count + i]->particles[10].inverse_lifetime = 32768.0f;
-                    key->particle_chunks[old_chunk_count + i]->particles[11].start_time = 0.0f;
-                    key->particle_chunks[old_chunk_count + i]->particles[11].inverse_lifetime = 32768.0f;
+                    ((DebChunkPtr *)key->particle_chunks)[old_chunk_count + i] = chunk;
+                    for (i32 particle_index = 0; particle_index < particles_per_chunk; ++particle_index) {
+                        ((DebChunkPtr *)key->particle_chunks)[old_chunk_count + i]
+                            ->particles[particle_index]
+                            .start_time = 0.0f;
+                        ((DebChunkPtr *)key->particle_chunks)[old_chunk_count + i]
+                            ->particles[particle_index]
+                            .inverse_lifetime = 32768.0f;
+                    }
                 }
 
-                if (old_chunk_count == 0) {
+                if (key->allocated_chunk_count == 0) {
                     const i32 render_chunk_count = debrischunks + debrischunksglass;
                     particlechunkrendertype_s *render_chunk = NULL;
                     for (i32 i = 0; i < render_chunk_count; ++i) {
@@ -8612,23 +8595,26 @@ extern "C" {
                 LinkDmaParticalSets(key->particle_chunks, key->allocated_chunk_count);
             } else {
                 i32 &free_chunk_count = freedebchkptr;
-                const i32 available_chunk_count = debrischunks;
-                dma_particle_chunk_s **free_chunks = freedebchunks;
-                if (available_chunk_count <= free_chunk_count + additional_chunks) {
+                if (additional_chunks + free_chunk_count >= debrischunks) {
                     return;
                 }
+                dma_particle_chunk_s **free_chunks = freedebchunks;
 
                 const i32 particles_per_chunk = 32;
                 for (i32 i = 0; i < additional_chunks; ++i) {
                     dma_particle_chunk_s *chunk = free_chunks[free_chunk_count + i];
-                    key->particle_chunks[old_chunk_count + i] = chunk;
+                    ((DebChunkPtr *)key->particle_chunks)[old_chunk_count + i] = chunk;
                     for (i32 particle_index = 0; particle_index < particles_per_chunk; ++particle_index) {
-                        chunk->particles[particle_index].start_time = 0.0f;
-                        chunk->particles[particle_index].inverse_lifetime = 32768.0f;
+                        ((DebChunkPtr *)key->particle_chunks)[old_chunk_count + i]
+                            ->particles[particle_index]
+                            .start_time = 0.0f;
+                        ((DebChunkPtr *)key->particle_chunks)[old_chunk_count + i]
+                            ->particles[particle_index]
+                            .inverse_lifetime = 32768.0f;
                     }
                 }
 
-                if (old_chunk_count == 0) {
+                if (key->allocated_chunk_count == 0) {
                     const i32 render_chunk_count = debrischunks + debrischunksglass;
                     particlechunkrendertype_s *render_chunk = NULL;
                     for (i32 i = 0; i < render_chunk_count; ++i) {
@@ -8660,28 +8646,41 @@ extern "C" {
         }
 
         const i32 removed_chunk_count = -additional_chunks;
-        if ((debrischunks + debrischunksglass) * 2 < freechunkcontrolsptr + removed_chunk_count) {
+        if (freechunkcontrolsptr - additional_chunks > (debrischunks + debrischunksglass) * 2) {
             return;
         }
 
         DebrisGetControlStackLock();
-        for (i32 i = 0; i < removed_chunk_count; ++i) {
+        for (i32 i = additional_chunks; i != 0; ++i) {
+            freechunkcontrols[freechunkcontrolsptr]->particle_chunk =
+                key->particle_chunks[key->allocated_chunk_count + i];
+            if (effect->particle_type == 7) {
+                freechunkcontrols[freechunkcontrolsptr]->active = 7;
+            } else {
+                freechunkcontrols[freechunkcontrolsptr]->active = 0;
+            }
             debris_chunk_control_s *control = freechunkcontrols[freechunkcontrolsptr];
-            control->particle_chunk = key->particle_chunks[key->allocated_chunk_count + additional_chunks + i];
-            control->active = effect->particle_type == 7 ? 7 : 0;
-            const bool panel_time = effect->time_group == 4;
-            debinftype *current_effect = debtab[key->effect_index];
-            control->expiry_time = current_effect->particle_lifetime + (panel_time ? panelglobaltime : globaltime) +
-                                   static_cast<i8>(current_effect->trail_count) * current_effect->trail_time;
-            AddChunkControlToStack(control, &debris_chunk_control_stack[panel_time]);
+            i32 stack_index;
+            if (effect->time_group == 4) {
+                debinftype *current_effect = debtab[key->effect_index];
+                control->expiry_time = current_effect->particle_lifetime + panelglobaltime +
+                                       static_cast<i8>(current_effect->trail_count) * current_effect->trail_time;
+                stack_index = 1;
+            } else {
+                debinftype *current_effect = debtab[key->effect_index];
+                control->expiry_time = current_effect->particle_lifetime + globaltime +
+                                       static_cast<i8>(current_effect->trail_count) * current_effect->trail_time;
+                stack_index = 0;
+            }
+            AddChunkControlToStack(control, &debris_chunk_control_stack[stack_index]);
             ++freechunkcontrolsptr;
         }
         DebrisReleaseControlStackLock();
 
-        particlechunkrendertype_s *render_chunk = NULL;
-        if (removed_chunk_count != key->allocated_chunk_count) {
+        if (-key->allocated_chunk_count != additional_chunks) {
             LinkDmaParticalSets(&key->particle_chunks[key->allocated_chunk_count + additional_chunks],
                                 removed_chunk_count);
+            particlechunkrendertype_s *render_chunk = NULL;
             for (i32 i = 0; i < debrischunks + debrischunksglass; ++i) {
                 if (ParticleChunkToRender[i].particle_chunk == NULL) {
                     render_chunk = &ParticleChunkToRender[i];
@@ -8689,36 +8688,35 @@ extern "C" {
                 }
             }
             if (render_chunk != NULL) {
-                render_chunk->effect = debtab[key->effect_index];
                 render_chunk->particle_chunk = key->particle_chunks[key->allocated_chunk_count + additional_chunks];
+                render_chunk->effect = debtab[key->effect_index];
                 render_chunk->key = NULL;
                 render_chunk->effect_orientation = key->effect_orientation;
-                render_chunk->render_priority = key->render_priority;
                 render_chunk->position.x = key->position.x;
                 render_chunk->position.y = key->position.y;
                 render_chunk->position.z = key->position.z;
+                render_chunk->render_priority = key->render_priority;
                 if (key->field_2f6 != 0) {
                     AddChunkToRenderStack(render_chunk, &ParticleChunkRenderStack[render_chunk->effect->time_group]);
                 }
             }
-            render_chunk = NULL;
         } else {
+            particlechunkrendertype_s *render_chunk = NULL;
             for (i32 i = 0; i < debrischunks + debrischunksglass; ++i) {
                 if (ParticleChunkToRender[i].particle_chunk == key->particle_chunks[0]) {
                     render_chunk = &ParticleChunkToRender[i];
                     break;
                 }
             }
-        }
-
-        if (render_chunk != NULL) {
-            render_chunk->effect = debtab[key->effect_index];
-            render_chunk->key = NULL;
-            render_chunk->effect_orientation = key->effect_orientation;
-            render_chunk->position.x = key->position.x;
-            render_chunk->position.y = key->position.y;
-            render_chunk->position.z = key->position.z;
-            render_chunk->render_priority = key->render_priority;
+            if (render_chunk != NULL) {
+                render_chunk->effect = debtab[key->effect_index];
+                render_chunk->key = NULL;
+                render_chunk->effect_orientation = key->effect_orientation;
+                render_chunk->position.x = key->position.x;
+                render_chunk->position.y = key->position.y;
+                render_chunk->position.z = key->position.z;
+                render_chunk->render_priority = key->render_priority;
+            }
         }
 
         for (i32 i = additional_chunks; i < 0; ++i) {
@@ -8726,7 +8724,7 @@ extern "C" {
         }
         key->allocated_chunk_count = key->previous_allocated_chunk_count;
         key->particle_count = key->previous_particle_count;
-        if (__builtin_expect(key->previous_particle_count != 0, 0)) {
+        if (key->previous_particle_count != 0) {
             LinkDmaParticalSets(key->particle_chunks, key->previous_allocated_chunk_count);
         }
         return;
@@ -9790,7 +9788,7 @@ extern "C" {
             } else {
                 key = &debkeydata[effect->particle_keys[slot]];
                 if (effect->particle_type == 7) {
-                    if (key->particle_count + particle_count <= 0x180) {
+                    if (__builtin_expect(key->particle_count + particle_count <= 0x180, 1)) {
                         particle_key_slot = slot;
                         goto debris_key_found;
                     }
@@ -9901,7 +9899,7 @@ extern "C" {
                 key->emission_position.z = position->z;
                 key->emission_time = emission_time;
                 uv1deb *particle = key->generator(key, effect, emission_time);
-                if (__builtin_expect(effect->process_spheres != 0 && particle != NULL && i == 1, 0)) {
+                if (effect->process_spheres != 0 && particle != NULL && i == 1) {
                     DebrisProcessSpheres(particle, emission_time, effect, key, 1);
                 }
                 emission_time = key->emission_epoch + emission_interval;
@@ -9912,11 +9910,11 @@ extern "C" {
                 NuVecAddScale(&key->emission_position, position, position_delta, emission_time - end_time);
                 key->emission_time = emission_time;
                 uv1deb *particle = key->generator(key, effect, emission_time);
-                if (effect->process_spheres != 0 && particle != NULL && i == 1) {
+                if (__builtin_expect(effect->process_spheres != 0 && particle != NULL && i == 1, 1)) {
                     DebrisProcessSpheres(particle, emission_time, effect, key, 1);
                 }
                 emission_time = key->emission_epoch + emission_interval;
-            } while (emission_time <= end_time && ++i != 100);
+            } while (__builtin_expect(emission_time <= end_time && ++i != 100, 0));
         }
 
         DebrisGetControlStackLock();
@@ -18863,7 +18861,7 @@ void NewScan(nuvec_s *position, i32 terrain_mask, i32 scan_platforms) {
                 const f32 local_max_x = max_x - group.origin.x;
                 const f32 local_min_x = min_x - group.origin.x;
                 const f32 local_min_z = min_z - group.origin.z;
-                if (group.scene_index < 0)
+                if (__builtin_expect(group.scene_index < 0, 0))
                     TerrainSkinAllocate(reinterpret_cast<terrsitu_s *>(&group));
                 TERRAIN_SHAPE_BATCH *batch = static_cast<TERRAIN_SHAPE_BATCH *>(group.data);
                 while (batch->marker >= 0) {
@@ -18993,8 +18991,8 @@ void NewScan(nuvec_s *position, i32 terrain_mask, i32 scan_platforms) {
             TERRAIN_SHAPE_BATCH *batch = static_cast<TERRAIN_SHAPE_BATCH *>(group.data);
             while (batch->marker >= 0) {
                 TERRAIN_SHAPE *shapes = reinterpret_cast<TERRAIN_SHAPE *>(batch + 1);
-                if (local_max_x >= batch->min_x && batch->max_x > local_min_x && local_max_z >= batch->min_z &&
-                    batch->max_z > local_min_z) {
+                if (__builtin_expect(local_max_x >= batch->min_x && batch->max_x > local_min_x && local_max_z >= batch->min_z &&
+                    batch->max_z > local_min_z, 0)) {
                     TERRAIN_SHAPE *shape = shapes;
                     for (i32 remaining = batch->shape_count; remaining > 0; --remaining, ++shape) {
                         if (!(local_max_x >= shape->min_x && shape->max_x > local_min_x &&
@@ -19490,7 +19488,7 @@ f32 NewCast(nuvec_s *position, f32 height_above, f32 roof_range) {
         EShadNorm.y = 1.0f;
     }
 
-    if (roof_y < 2000000.0f && roof_ny < 0.0f && roof_range + position->y > roof_y) {
+    if (__builtin_expect(roof_y < 2000000.0f && roof_ny < 0.0f && roof_range + position->y > roof_y, 1)) {
         shadroofhit = 1;
         ShadRoofNorm.x = roof_nx;
         ShadRoofNorm.y = roof_ny;
@@ -19565,120 +19563,125 @@ extern "C" f32 NewShadowEx(NUVEC *position, i32, f32 height_above, f32 height_be
 }
 
 i32 CheckCylinder(i32 first_vertex, i32 second_vertex, i32 *vertex_mask, i32 remaining_vertex_mask) {
-    TerrainQuery_s *query = TerI;
 
     // Reject an edge when both endpoints lie outside the swept sphere's
     // expanded bounds. Once an edge is rejected this way, its endpoint bits
     // can be removed from the later vertex tests as well.
-    if ((query->transformed_vertices[first_vertex].x > query->collision_radius &&
-         query->transformed_vertices[second_vertex].x > query->collision_radius) ||
-        (query->transformed_vertices[first_vertex].x < -query->collision_radius &&
-         query->transformed_vertices[second_vertex].x < -query->collision_radius) ||
-        (query->transformed_vertices[first_vertex].y > query->collision_radius &&
-         query->transformed_vertices[second_vertex].y > query->collision_radius) ||
-        (query->transformed_vertices[first_vertex].y < -query->collision_radius &&
-         query->transformed_vertices[second_vertex].y < -query->collision_radius) ||
-        (query->transformed_vertices[first_vertex].z < -query->collision_radius &&
-         query->transformed_vertices[second_vertex].z < -query->collision_radius) ||
-        (query->transformed_vertices[first_vertex].z > query->movement_length + query->collision_radius &&
-         query->transformed_vertices[second_vertex].z > query->movement_length + query->collision_radius)) {
+    if ((TerI->transformed_vertices[first_vertex].x > TerI->collision_radius &&
+         TerI->transformed_vertices[second_vertex].x > TerI->collision_radius) ||
+        (TerI->transformed_vertices[first_vertex].x < -TerI->collision_radius &&
+         TerI->transformed_vertices[second_vertex].x < -TerI->collision_radius) ||
+        (TerI->transformed_vertices[first_vertex].y > TerI->collision_radius &&
+         TerI->transformed_vertices[second_vertex].y > TerI->collision_radius) ||
+        (TerI->transformed_vertices[first_vertex].y < -TerI->collision_radius &&
+         TerI->transformed_vertices[second_vertex].y < -TerI->collision_radius) ||
+        (TerI->transformed_vertices[first_vertex].z < -TerI->collision_radius &&
+         TerI->transformed_vertices[second_vertex].z < -TerI->collision_radius) ||
+        (TerI->transformed_vertices[first_vertex].z > TerI->movement_length + TerI->collision_radius &&
+         TerI->transformed_vertices[second_vertex].z > TerI->movement_length + TerI->collision_radius)) {
         *vertex_mask &= remaining_vertex_mask;
         return 0;
     }
 
-    NUVEC edge_direction = {
-        query->transformed_vertices[second_vertex].x - query->transformed_vertices[first_vertex].x,
-        query->transformed_vertices[second_vertex].y - query->transformed_vertices[first_vertex].y,
-        query->transformed_vertices[second_vertex].z - query->transformed_vertices[first_vertex].z,
-    };
+    NUVEC edge_direction;
+    edge_direction.x = TerI->transformed_vertices[second_vertex].x - TerI->transformed_vertices[first_vertex].x;
+    edge_direction.y = TerI->transformed_vertices[second_vertex].y - TerI->transformed_vertices[first_vertex].y;
     const f32 horizontal_length_sq = edge_direction.x * edge_direction.x + edge_direction.y * edge_direction.y;
 
     // An almost vertical edge has no stable radial cylinder in the XY plane.
     // It can only overlap the sphere at the start of the sweep when it crosses
     // z = 0.
     if (horizontal_length_sq < 1.0e-12f) {
-        if (!((query->transformed_vertices[first_vertex].z <= 0.0f &&
-               query->transformed_vertices[second_vertex].z >= 0.0f) ||
-              (query->transformed_vertices[first_vertex].z >= 0.0f &&
-               query->transformed_vertices[second_vertex].z <= 0.0f))) {
+        if (!((TerI->transformed_vertices[first_vertex].z <= 0.0f &&
+               TerI->transformed_vertices[second_vertex].z >= 0.0f) ||
+              (TerI->transformed_vertices[first_vertex].z >= 0.0f &&
+               TerI->transformed_vertices[second_vertex].z <= 0.0f))) {
             return 0;
         }
 
         const f32 distance_sq =
-            query->transformed_vertices[second_vertex].x * query->transformed_vertices[second_vertex].x +
-            query->transformed_vertices[second_vertex].y * query->transformed_vertices[second_vertex].y;
-        if (distance_sq > query->collision_radius_sq) {
+            TerI->transformed_vertices[second_vertex].x * TerI->transformed_vertices[second_vertex].x +
+            TerI->transformed_vertices[second_vertex].y * TerI->transformed_vertices[second_vertex].y;
+        if (!(distance_sq <= TerI->collision_radius_sq)) {
             return 0;
         }
 
         const f32 distance = NuFsqrt(distance_sq);
-        const f32 overlap_time = distance - query->collision_radius;
-        if (!(query->hit_time > overlap_time)) {
+        const f32 overlap_time = distance - TerI->collision_radius;
+        if (!(TerI->hit_time > overlap_time)) {
             return 0;
         }
 
         NUVEC local_normal;
-        local_normal.x = -query->transformed_vertices[second_vertex].x;
-        local_normal.y = -query->transformed_vertices[second_vertex].y;
+        local_normal.x = -TerI->transformed_vertices[second_vertex].x;
+        local_normal.y = -TerI->transformed_vertices[second_vertex].y;
         local_normal.z = 0.0f;
         RotateVec(&local_normal, &local_normal);
-        const NUVEC &surface_normal = query->working_surface->normals[0];
+        const NUVEC &surface_normal = TerI->working_surface->normals[0];
         if (!(local_normal.x * surface_normal.x + local_normal.y * surface_normal.y +
                   local_normal.z * surface_normal.z >
               0.0f)) {
             return 0;
         }
 
-        query = TerI;
-        query->hit_time = overlap_time;
+        TerI->hit_time = distance - TerI->collision_radius;
         f32 inverse_distance = 0.0f;
         if (__builtin_expect(distance != 0.0f, 1)) {
             inverse_distance = 1.0f / distance;
         }
-        query->hit_type = TERRAIN_HIT_TYPE_CYLINDER | TERRAIN_HIT_TYPE_SECOND_NORMAL;
-        query->movement_normal.x = -query->transformed_vertices[second_vertex].x * inverse_distance;
-        query->movement_normal.y = -query->transformed_vertices[second_vertex].y * inverse_distance;
-        query->movement_normal.z = 0.0f;
+        TerI->hit_type = TERRAIN_HIT_TYPE_CYLINDER | TERRAIN_HIT_TYPE_SECOND_NORMAL;
+        TerI->movement_normal.x = -TerI->transformed_vertices[second_vertex].x * inverse_distance;
+        TerI->movement_normal.y = -TerI->transformed_vertices[second_vertex].y * inverse_distance;
+        TerI->movement_normal.z = 0.0f;
         return 1;
     }
 
     // Squared radial distance from the movement axis to the infinite line
     // containing the edge. This avoids a square root for the common miss.
-    const f32 line_cross = query->transformed_vertices[first_vertex].x * edge_direction.y -
-                           query->transformed_vertices[first_vertex].y * edge_direction.x;
-    if (line_cross * line_cross > query->collision_radius_sq * horizontal_length_sq) {
+    const f32 line_cross = TerI->transformed_vertices[first_vertex].x * edge_direction.y -
+                           TerI->transformed_vertices[first_vertex].y * edge_direction.x;
+    if (line_cross * line_cross > TerI->collision_radius_sq * horizontal_length_sq) {
         *vertex_mask &= remaining_vertex_mask;
         return 0;
     }
 
-    f32 line_distance_sq = 0.0f;
-    if (horizontal_length_sq != 0.0f && line_cross != 0.0f) {
+    f32 line_distance_sq;
+    if (line_cross == 0.0f || horizontal_length_sq == 0.0f) {
+        line_distance_sq = 0.0f;
+    } else {
         line_distance_sq = line_cross * (line_cross / horizontal_length_sq);
     }
 
+    edge_direction.z = TerI->transformed_vertices[second_vertex].z - TerI->transformed_vertices[first_vertex].z;
     const f32 edge_length = NuFsqrt(horizontal_length_sq + edge_direction.z * edge_direction.z);
-    f32 inverse_edge_length = 0.0f;
-    if (__builtin_expect(edge_length != 0.0f, 1)) {
+    f32 inverse_edge_length;
+    if (edge_length == 0.0f) {
+        inverse_edge_length = 0.0f;
+    } else {
         inverse_edge_length = 1.0f / edge_length;
     }
     edge_direction.x *= inverse_edge_length;
     edge_direction.y *= inverse_edge_length;
     edge_direction.z *= inverse_edge_length;
 
+    NUVEC horizontal_perpendicular;
+    horizontal_perpendicular.x = -edge_direction.y;
+    horizontal_perpendicular.y = edge_direction.x;
+    const f32 horizontal_direction_sq = horizontal_perpendicular.x * horizontal_perpendicular.x +
+                                        horizontal_perpendicular.y * horizontal_perpendicular.y;
     NUVEC line_cross_vector = {
-        -query->transformed_vertices[first_vertex].x,
-        -query->transformed_vertices[first_vertex].y,
-        -query->transformed_vertices[first_vertex].z,
+        -TerI->transformed_vertices[first_vertex].x,
+        -TerI->transformed_vertices[first_vertex].y,
+        -TerI->transformed_vertices[first_vertex].z,
     };
     NuVecCross(&line_cross_vector, &line_cross_vector, &edge_direction);
 
-    NUVEC horizontal_perpendicular = {-edge_direction.y, edge_direction.x, 0.0f};
     const f32 height_numerator =
         line_cross_vector.x * horizontal_perpendicular.x + line_cross_vector.y * horizontal_perpendicular.y;
-    const f32 horizontal_direction_sq = horizontal_perpendicular.x * horizontal_perpendicular.x +
-                                        horizontal_perpendicular.y * horizontal_perpendicular.y;
-    f32 negative_closest_height = 0.0f;
-    if (horizontal_direction_sq != 0.0f && height_numerator != 0.0f) {
+    f32 negative_closest_height;
+    if (horizontal_direction_sq == 0.0f || height_numerator == 0.0f) {
+        negative_closest_height = 0.0f;
+    } else {
         negative_closest_height = height_numerator / horizontal_direction_sq;
     }
     const f32 closest_height = -negative_closest_height;
@@ -19692,69 +19695,65 @@ i32 CheckCylinder(i32 first_vertex, i32 second_vertex, i32 *vertex_mask, i32 rem
     // Preserve the cross product's subtraction before squaring its components.
     const f32 cylinder_side_length = NuFsqrt(cylinder_side_x * cylinder_side_x + cylinder_side_y * cylinder_side_y +
                                              cylinder_side_z * cylinder_side_z);
-    if (cylinder_side_length != 0.0f && cylinder_side_z != 0.0f) {
-        cylinder_side_z /= cylinder_side_length;
-    } else {
+    if (cylinder_side_z == 0.0f || cylinder_side_length == 0.0f) {
         cylinder_side_z = 0.0f;
+    } else {
+        cylinder_side_z /= cylinder_side_length;
     }
 
-    const f32 radial_extent = NuFsqrt(query->collision_radius_sq - line_distance_sq);
-    f32 height_offset = 0.0f;
-    if (radial_extent != 0.0f && cylinder_side_z != 0.0f) {
+    const f32 radial_extent = NuFsqrt(TerI->collision_radius_sq - line_distance_sq);
+    f32 height_offset;
+    if (radial_extent == 0.0f || cylinder_side_z == 0.0f) {
+        height_offset = 0.0f;
+    } else {
         height_offset = radial_extent / cylinder_side_z;
     }
 
     f32 hit_distance;
-    if (height_offset >= 0.0f) {
-        hit_distance = closest_height - height_offset;
-    } else {
+    if (height_offset < 0.0f) {
         hit_distance = height_offset - negative_closest_height;
+    } else {
+        hit_distance = closest_height - height_offset;
     }
-    if (!(hit_distance < 0.0f) && hit_distance <= query->movement_length) {
-        const f32 edge_parameter = (-query->transformed_vertices[first_vertex].y * edge_direction.y -
-                                    query->transformed_vertices[first_vertex].x * edge_direction.x) +
-                                   (hit_distance - query->transformed_vertices[first_vertex].z) * edge_direction.z;
+    if (hit_distance >= 0.0f && hit_distance <= TerI->movement_length) {
+        const f32 edge_parameter = (-TerI->transformed_vertices[first_vertex].y * edge_direction.y -
+                                    TerI->transformed_vertices[first_vertex].x * edge_direction.x) +
+                                   (hit_distance - TerI->transformed_vertices[first_vertex].z) * edge_direction.z;
         if (edge_parameter > 0.0f && edge_parameter <= edge_length) {
-            f32 hit_time = 0.0f;
-            if (hit_distance != 0.0f && query->movement_length != 0.0f) {
-                hit_time = hit_distance / query->movement_length;
-            }
-            if (__builtin_expect(query->hit_time <= hit_time, 0)) {
+            const bool zero_time = (hit_distance == 0.0f) | (TerI->movement_length == 0.0f);
+            if (TerI->hit_time > (zero_time ? 0.0f : hit_distance / TerI->movement_length)) {
+                TerI->hit_type = TERRAIN_HIT_TYPE_CYLINDER;
+                TerI->hit_time = zero_time ? 0.0f : hit_distance / TerI->movement_length;
+                TerI->movement_normal.x =
+                    -(TerI->transformed_vertices[first_vertex].x + edge_direction.x * edge_parameter);
+                TerI->movement_normal.y =
+                    -(TerI->transformed_vertices[first_vertex].y + edge_direction.y * edge_parameter);
+                TerI->movement_normal.z =
+                    hit_distance - (edge_parameter * edge_direction.z + TerI->transformed_vertices[first_vertex].z);
                 *vertex_mask &= remaining_vertex_mask;
-                return 0;
+                return 1;
             }
-
-            query->hit_type = TERRAIN_HIT_TYPE_CYLINDER;
-            query->hit_time = hit_time;
-            query->movement_normal.y =
-                -(query->transformed_vertices[first_vertex].y + edge_direction.y * edge_parameter);
-            query->movement_normal.z =
-                hit_distance - (edge_parameter * edge_direction.z + query->transformed_vertices[first_vertex].z);
-            query->movement_normal.x =
-                -(query->transformed_vertices[first_vertex].x + edge_direction.x * edge_parameter);
             *vertex_mask &= remaining_vertex_mask;
-            return 1;
+            return 0;
         }
     }
 
     // No forward-time hit was found. Test whether the sphere already overlaps
     // the finite edge at the start of the sweep.
-    if ((!(query->transformed_vertices[first_vertex].z >= -query->collision_radius) &&
-         !(query->transformed_vertices[second_vertex].z >= -query->collision_radius)) ||
-        (!(query->transformed_vertices[first_vertex].z <= query->collision_radius) &&
-         query->transformed_vertices[second_vertex].z > query->collision_radius)) {
+    if ((!(TerI->transformed_vertices[first_vertex].z >= -TerI->collision_radius) &&
+         !(TerI->transformed_vertices[second_vertex].z >= -TerI->collision_radius)) ||
+        (!(TerI->transformed_vertices[first_vertex].z <= TerI->collision_radius) &&
+         TerI->transformed_vertices[second_vertex].z > TerI->collision_radius)) {
         return 0;
     }
 
-    const f32 closest_parameter = -query->transformed_vertices[first_vertex].x * edge_direction.x -
-                                  query->transformed_vertices[first_vertex].y * edge_direction.y -
-                                  query->transformed_vertices[first_vertex].z * edge_direction.z;
+    const f32 closest_parameter = -TerI->transformed_vertices[first_vertex].x * edge_direction.x -
+                                  TerI->transformed_vertices[first_vertex].y * edge_direction.y -
+                                  TerI->transformed_vertices[first_vertex].z * edge_direction.z;
     const f32 edge_projection =
-        (query->transformed_vertices[second_vertex].x - query->transformed_vertices[first_vertex].x) *
-            edge_direction.x +
-        (query->transformed_vertices[second_vertex].y - query->transformed_vertices[first_vertex].y) *
-            edge_direction.y +
-        (query->transformed_vertices[second_vertex].z - query->transformed_vertices[first_vertex].z) * edge_direction.z;
+        (TerI->transformed_vertices[second_vertex].x - TerI->transformed_vertices[first_vertex].x) * edge_direction.x +
+        (TerI->transformed_vertices[second_vertex].y - TerI->transformed_vertices[first_vertex].y) * edge_direction.y +
+        (TerI->transformed_vertices[second_vertex].z - TerI->transformed_vertices[first_vertex].z) * edge_direction.z;
     if (closest_parameter < 0.0f || closest_parameter > edge_projection) {
         return 0;
     }
@@ -19762,37 +19761,33 @@ i32 CheckCylinder(i32 first_vertex, i32 second_vertex, i32 *vertex_mask, i32 rem
     // The normalized direction is no longer needed after the closest
     // parameter has been bounded, so reuse it for the closest point itself.
     edge_direction = {
-        query->transformed_vertices[first_vertex].x + edge_direction.x * closest_parameter,
-        query->transformed_vertices[first_vertex].y + edge_direction.y * closest_parameter,
-        query->transformed_vertices[first_vertex].z + edge_direction.z * closest_parameter,
+        TerI->transformed_vertices[first_vertex].x + edge_direction.x * closest_parameter,
+        TerI->transformed_vertices[first_vertex].y + edge_direction.y * closest_parameter,
+        TerI->transformed_vertices[first_vertex].z + edge_direction.z * closest_parameter,
     };
     const f32 distance_sq =
         edge_direction.x * edge_direction.x + edge_direction.y * edge_direction.y + edge_direction.z * edge_direction.z;
-    if (__builtin_expect(!(distance_sq < query->collision_radius_sq), 1)) {
+    if (__builtin_expect(!(distance_sq < TerI->collision_radius_sq), 1)) {
         return 0;
     }
 
     const f32 distance = NuFsqrt(distance_sq);
-    const f32 overlap_time = distance - query->collision_radius;
-    if (!(query->hit_time > overlap_time)) {
+    const f32 overlap_time = distance - TerI->collision_radius;
+    if (!(TerI->hit_time > overlap_time)) {
         return 0;
     }
 
     RotateVec(&edge_direction, &horizontal_perpendicular);
-    const NUVEC &surface_normal = query->working_surface->normals[0];
+    const NUVEC &surface_normal = TerI->working_surface->normals[0];
     if (horizontal_perpendicular.x * surface_normal.x + horizontal_perpendicular.y * surface_normal.y +
             horizontal_perpendicular.z * surface_normal.z <
         0.0f) {
-        query = TerI;
-        query->hit_time = overlap_time;
-        f32 inverse_distance = 0.0f;
-        if (__builtin_expect(distance != 0.0f, 0)) {
-            inverse_distance = 1.0f / distance;
-        }
-        query->hit_type = TERRAIN_HIT_TYPE_CYLINDER | TERRAIN_HIT_TYPE_SECOND_NORMAL;
-        query->movement_normal.x = -edge_direction.x * inverse_distance;
-        query->movement_normal.y = -edge_direction.y * inverse_distance;
-        query->movement_normal.z = -edge_direction.z * inverse_distance;
+        const f32 inverse_distance = 1.0f / distance;
+        TerI->hit_type = TERRAIN_HIT_TYPE_CYLINDER | TERRAIN_HIT_TYPE_SECOND_NORMAL;
+        TerI->hit_time = distance - TerI->collision_radius;
+        TerI->movement_normal.x = -edge_direction.x * inverse_distance;
+        TerI->movement_normal.y = -edge_direction.y * inverse_distance;
+        TerI->movement_normal.z = -edge_direction.z * inverse_distance;
         return 1;
     }
     return 0;
@@ -19928,45 +19923,33 @@ i32 HitPoly(f32 primary_start, f32 primary_end, f32 secondary_start, f32 seconda
     i32 test_primary_face = 0;
     if (primary_start > 0.0f && primary_end < 0.0f) {
         candidate_time = primary_start / (primary_start - primary_end);
-        contact_point.y = query->movement.y * candidate_time;
-        contact_point.x = query->movement.x * candidate_time;
-        contact_point.z = query->movement.z * candidate_time;
+        contact_point.x = query->movement.x * candidate_time + primary_base_x;
+        contact_point.y = query->movement.y * candidate_time + primary_base_y;
+        contact_point.z = query->movement.z * candidate_time + primary_base_z;
         test_primary_face = 1;
-    } else if (__builtin_expect(primary_start <= 0.0f && primary_end <= 0.0f && primary_end >= -radius &&
-                                    primary_start >= -radius,
-                                0)) {
+    } else if (primary_start <= 0.0f && primary_end <= 0.0f && primary_start >= -radius && primary_end >= -radius) {
         candidate_time = primary_start;
         const f32 projection_distance = -primary_start;
-        contact_point.y = primary_normal.y * projection_distance;
-        contact_point.x = primary_normal.x * projection_distance;
-        contact_point.z = primary_normal.z * projection_distance;
+        contact_point.x = primary_normal.x * projection_distance + primary_base_x;
+        contact_point.y = primary_normal.y * projection_distance + primary_base_y;
+        contact_point.z = primary_normal.z * projection_distance + primary_base_z;
         test_primary_face = 1;
     }
 
     if (test_primary_face != 0) {
-        const NUVEC edge_0_1 = {
-            surface->vectors[1].x - primary_origin.x,
-            surface->vectors[1].y - primary_origin.y,
-            surface->vectors[1].z - primary_origin.z,
-        };
-        const NUVEC edge_0_2 = {
-            surface->vectors[2].x - primary_origin.x,
-            surface->vectors[2].y - primary_origin.y,
-            surface->vectors[2].z - primary_origin.z,
-        };
-        if (InsidePolLines(contact_point.x + primary_base_x, contact_point.y + primary_base_y,
-                           contact_point.z + primary_base_z,
-                           edge_0_1.x, edge_0_1.y, edge_0_1.z, edge_0_2.x, edge_0_2.y, edge_0_2.z,
-                           &primary_normal) != 0 &&
+        if (InsidePolLines(contact_point.x, contact_point.y, contact_point.z, surface->vectors[1].x - primary_origin.x,
+                           surface->vectors[1].y - primary_origin.y, surface->vectors[1].z - primary_origin.z,
+                           surface->vectors[2].x - primary_origin.x, surface->vectors[2].y - primary_origin.y,
+                           surface->vectors[2].z - primary_origin.z, &primary_normal) != 0 &&
             candidate_time <= TerI->hit_time) {
             query = TerI;
-            query->shape_adjusted = (surface->normal_flags & TERRAIN_SHAPE_NORMAL_FLAG_FIRST_STEEP) != 0;
             query->hit_time = candidate_time;
             query->hit_type =
                 primary_start > 0.0f ? TERRAIN_HIT_TYPE_FACE : TERRAIN_HIT_TYPE_FACE | TERRAIN_HIT_TYPE_SECOND_NORMAL;
             query->movement_normal.x = primary_normal.x;
             query->movement_normal.y = primary_normal.y;
             query->movement_normal.z = primary_normal.z;
+            query->shape_adjusted = (surface->normal_flags & TERRAIN_SHAPE_NORMAL_FLAG_FIRST_STEEP) != 0;
             collision_found = 1;
         }
     }
@@ -19983,45 +19966,35 @@ i32 HitPoly(f32 primary_start, f32 primary_end, f32 secondary_start, f32 seconda
         i32 test_secondary_face = 0;
         if (secondary_start > 0.0f && secondary_end < 0.0f) {
             candidate_time = secondary_start / (secondary_start - secondary_end);
-            contact_point.x = query->movement.x * candidate_time;
-            contact_point.y = query->movement.y * candidate_time;
-            contact_point.z = query->movement.z * candidate_time;
+            contact_point.x = query->movement.x * candidate_time + secondary_base_x;
+            contact_point.y = query->movement.y * candidate_time + secondary_base_y;
+            contact_point.z = query->movement.z * candidate_time + secondary_base_z;
             test_secondary_face = 1;
-        } else if (__builtin_expect(secondary_start <= 0.0f && secondary_end <= 0.0f && secondary_start >= -radius &&
-                                        secondary_end >= -radius,
-                                    1)) {
+        } else if (secondary_start <= 0.0f && secondary_end <= 0.0f && secondary_start >= -radius &&
+                   secondary_end >= -radius) {
             candidate_time = secondary_start;
             const f32 projection_distance = -secondary_start;
-            contact_point.y = secondary_normal.y * projection_distance;
-            contact_point.x = secondary_normal.x * projection_distance;
-            contact_point.z = secondary_normal.z * projection_distance;
+            contact_point.x = secondary_normal.x * projection_distance + secondary_base_x;
+            contact_point.y = secondary_normal.y * projection_distance + secondary_base_y;
+            contact_point.z = secondary_normal.z * projection_distance + secondary_base_z;
             test_secondary_face = 1;
         }
 
         if (test_secondary_face != 0) {
-            const NUVEC edge_3_2 = {
-                surface->vectors[2].x - secondary_origin.x,
-                surface->vectors[2].y - secondary_origin.y,
-                surface->vectors[2].z - secondary_origin.z,
-            };
-            const NUVEC edge_3_1 = {
-                surface->vectors[1].x - secondary_origin.x,
-                surface->vectors[1].y - secondary_origin.y,
-                surface->vectors[1].z - secondary_origin.z,
-            };
-            if (InsidePolLines(
-                    contact_point.x + secondary_base_x, contact_point.y + secondary_base_y,
-                    contact_point.z + secondary_base_z,
-                    edge_3_2.x, edge_3_2.y, edge_3_2.z, edge_3_1.x, edge_3_1.y, edge_3_1.z, &secondary_normal) != 0 &&
+            if (InsidePolLines(contact_point.x, contact_point.y, contact_point.z,
+                               surface->vectors[2].x - secondary_origin.x, surface->vectors[2].y - secondary_origin.y,
+                               surface->vectors[2].z - secondary_origin.z, surface->vectors[1].x - secondary_origin.x,
+                               surface->vectors[1].y - secondary_origin.y, surface->vectors[1].z - secondary_origin.z,
+                               &secondary_normal) != 0 &&
                 candidate_time < TerI->hit_time) {
                 query = TerI;
+                query->hit_type = secondary_start > 0.0f ? TERRAIN_HIT_TYPE_FACE
+                                                         : TERRAIN_HIT_TYPE_FACE | TERRAIN_HIT_TYPE_SECOND_NORMAL;
                 query->hit_time = candidate_time;
                 query->movement_normal.x = secondary_normal.x;
                 query->movement_normal.y = secondary_normal.y;
                 query->movement_normal.z = secondary_normal.z;
                 query->shape_adjusted = (surface->normal_flags & TERRAIN_SHAPE_NORMAL_FLAG_SECOND_STEEP) != 0;
-                query->hit_type = secondary_start > 0.0f ? TERRAIN_HIT_TYPE_FACE
-                                                         : TERRAIN_HIT_TYPE_FACE | TERRAIN_HIT_TYPE_SECOND_NORMAL;
                 collision_found = 1;
             }
         }
@@ -20034,17 +20007,17 @@ i32 HitPoly(f32 primary_start, f32 primary_end, f32 secondary_start, f32 seconda
         i32 vertex_mask = 0xf;
         DeRotateTerrain(surface);
 
-        if (primary_start >= -radius) {
-            if (__builtin_expect(CheckCylinder(0, 1, &vertex_mask, 0xc) != 0, 0)) {
+        if (primary_start >= -TerI->collision_radius) {
+            if (CheckCylinder(0, 1, &vertex_mask, 0xc) != 0) {
                 query = TerI;
-                query->shape_adjusted = (surface->normal_flags & TERRAIN_SHAPE_NORMAL_FLAG_FIRST_STEEP) != 0;
                 query->hit_edge = TERRAIN_HIT_EDGE_0_1;
+                query->shape_adjusted = (surface->normal_flags & TERRAIN_SHAPE_NORMAL_FLAG_FIRST_STEEP) != 0;
                 collision_found = 1;
             }
             if (CheckCylinder(2, 0, &vertex_mask, 0xa) != 0) {
                 query = TerI;
-                query->shape_adjusted = (surface->normal_flags & TERRAIN_SHAPE_NORMAL_FLAG_FIRST_STEEP) != 0;
                 query->hit_edge = TERRAIN_HIT_EDGE_2_0;
+                query->shape_adjusted = (surface->normal_flags & TERRAIN_SHAPE_NORMAL_FLAG_FIRST_STEEP) != 0;
                 collision_found = 1;
             }
         }
@@ -20052,12 +20025,11 @@ i32 HitPoly(f32 primary_start, f32 primary_end, f32 secondary_start, f32 seconda
         if (CheckCylinder(1, 2, &vertex_mask, 0x9) != 0) {
             query = TerI;
             query->hit_edge = TERRAIN_HIT_EDGE_1_2;
-            query->shape_adjusted = (surface->normal_flags & (TERRAIN_SHAPE_NORMAL_FLAG_FIRST_STEEP |
-                                                              TERRAIN_SHAPE_NORMAL_FLAG_SECOND_STEEP)) != 0;
+            query->shape_adjusted = (surface->normal_flags & 1) | ((surface->normal_flags >> 1) & 1);
             collision_found = 1;
         }
 
-        if (secondary_normal.y < no_secondary_normal && secondary_start >= -radius) {
+        if (secondary_normal.y < no_secondary_normal && secondary_start >= -TerI->collision_radius) {
             if (CheckCylinder(1, 3, &vertex_mask, 0x5) != 0) {
                 query = TerI;
                 query->hit_edge = TERRAIN_HIT_EDGE_1_3;
@@ -20076,31 +20048,29 @@ i32 HitPoly(f32 primary_start, f32 primary_end, f32 secondary_start, f32 seconda
             }
         }
 
-        if (primary_start >= -radius) {
+        if (primary_start >= -TerI->collision_radius) {
             if ((vertex_mask & (1 << 0)) != 0 && CheckSphere(0) != 0) {
                 TerI->shape_adjusted = (surface->normal_flags & TERRAIN_SHAPE_NORMAL_FLAG_FIRST_STEEP) != 0;
                 collision_found = 1;
             }
             if ((vertex_mask & (1 << 1)) != 0 && CheckSphere(1) != 0) {
-                TerI->shape_adjusted = (surface->normal_flags & (TERRAIN_SHAPE_NORMAL_FLAG_FIRST_STEEP |
-                                                                 TERRAIN_SHAPE_NORMAL_FLAG_SECOND_STEEP)) != 0;
+                TerI->shape_adjusted = (surface->normal_flags & 1) | ((surface->normal_flags >> 1) & 1);
                 collision_found = 1;
             }
         }
 
         if ((vertex_mask & (1 << 2)) != 0 && CheckSphere(2) != 0) {
-            TerI->shape_adjusted = (surface->normal_flags & (TERRAIN_SHAPE_NORMAL_FLAG_FIRST_STEEP |
-                                                             TERRAIN_SHAPE_NORMAL_FLAG_SECOND_STEEP)) != 0;
+            TerI->shape_adjusted = (surface->normal_flags & 1) | ((surface->normal_flags >> 1) & 1);
             collision_found = 1;
         }
     }
 
     query = TerI;
-    if (collision_found != 0) {
+    if (__builtin_expect(collision_found != 0, 0)) {
         query->surface = surface;
     }
     query->unclamped_hit_time = query->hit_time;
-    if (__builtin_expect(query->hit_time < 0.0f, 0)) {
+    if (query->hit_time < 0.0f) {
         query->hit_time = 0.0f;
     }
     return collision_found;
@@ -21798,7 +21768,7 @@ i32 TerrainPlatformEmbedded(nuvec_s *movement_delta) {
                 TERRAIN_SHAPE *source = reinterpret_cast<TERRAIN_SHAPE *>(batch + 1);
                 i32 shape_count = batch->shape_count;
                 for (i32 remaining = shape_count; remaining > 0; --remaining, ++source) {
-                    if (source->material[1] != 0)
+                    if (__builtin_expect(source->material[1] != 0, 0))
                         continue;
                     *cursor++ = source;
                     ++count;
@@ -21969,7 +21939,7 @@ i32 TerrainPlatformEmbedded(nuvec_s *movement_delta) {
         }
     }
     i16 *header = reinterpret_cast<i16 *>(query->scan_list_storage);
-    if (count != 0) {
+    if (__builtin_expect(count != 0, 0)) {
         header[0] = count;
         header[1] = old_query->terrain_group_index;
         header = reinterpret_cast<i16 *>(cursor);
@@ -22001,7 +21971,7 @@ i32 TerrainPlatformEmbedded(nuvec_s *movement_delta) {
     if (TerI->hit_type >= 1 && TerI->hit_type <= 15) {
         query->start_position.y = ((TerI->movement.y * TerI->hit_time + query->start_position.y) + 0.001f) + 0.025f;
         TerI = old_query;
-        if (!(query->start_position.y >= 2000000.0f)) {
+        if (__builtin_expect(!(query->start_position.y >= 2000000.0f), 1)) {
             f32 delta = query->start_position.y - query->position.y;
             if (!(delta < -0.008f) &&
                 (delta < 0.01f || query->movement.x * query->movement.x + query->movement.z * query->movement.z >

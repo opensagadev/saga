@@ -5874,7 +5874,7 @@ i32 Action_HelpWithTriggers(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s 
         }
     } else if (gizmo->type_id == force_gizmotype_id) {
         GIZFORCE_s *force = static_cast<GIZFORCE_s *>(gizmo->object);
-        if ((force->config_flags & 0x10) != 0) {
+        if (__builtin_expect((force->config_flags & 0x10) != 0, 1)) {
             if (CharCategory_IsCategory(object, 1) == 0)
                 goto change_character;
         } else if (CharCategory_IsCategory(object, 0) == 0) {
@@ -11454,7 +11454,7 @@ __used__ static i32 Action_CreateCreatures(AISYS *sys, AISCRIPTPROCESS *processo
             count = minimum;
             if (g_lowEndLevelBehaviour == 0)
                 count += NuRand(NULL) % (maximum + 1 - minimum);
-        } else if (maximum == minimum)
+        } else if (__builtin_expect(maximum == minimum, 1))
             count = maximum;
     }
     f32 delay = 0.0f;
@@ -11603,9 +11603,9 @@ __used__ static i32 Action_CreateCreatures(AISYS *sys, AISCRIPTPROCESS *processo
                     if (locator != NULL)
                         SetBallooningHeight(object, locator->position.y);
                 }
-                if (add_capabilities != 0)
+                if (__builtin_expect(add_capabilities != 0, 1))
                     object->ai.capabilities |= static_cast<u32>(add_capabilities);
-                if (remove_capabilities != 0)
+                if (__builtin_expect(remove_capabilities != 0, 1))
                     object->ai.capabilities &= ~static_cast<u32>(remove_capabilities);
             }
         }

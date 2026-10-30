@@ -1030,9 +1030,10 @@ void MenuUpdateStoreRestoring(MENU_s *menu) {
         char *product = *reinterpret_cast<char **>(&StorePack[INDEX].field1_0x4);                                      \
         if (NuIOS_IsProductPurchased(product) != 0 && (restoring_pack_bits & (1u << INDEX)) == 0) {                    \
             restoring_wait = 3.0f;                                                                                     \
+            u8 n = restoring_pack_count;                                                                               \
             restoring_pack_bits |= 1u << INDEX;                                                                        \
-            restoring_pack_list[restoring_pack_count] = INDEX;                                                         \
-            ++restoring_pack_count;                                                                                    \
+            restoring_pack_list[n] = INDEX;                                                                            \
+            restoring_pack_count = n + 1;                                                                              \
         }                                                                                                              \
     } while (0)
     if (__builtin_expect(restoring_pack_count <= 10, 1)) {
@@ -1053,11 +1054,12 @@ void MenuUpdateStoreRestoring(MENU_s *menu) {
 #define CHECK_RESTORING_BUNDLE(INDEX)                                                                                  \
     do {                                                                                                               \
         if (__builtin_expect(NuIOS_IsProductPurchased(StoreBundle[INDEX].name) != 0, 1) &&                             \
-            __builtin_expect((restoring_bundle_bits & (1u << INDEX)) == 0, 0)) {                                       \
-            restoring_bundle_bits |= 1u << INDEX;                                                                      \
-            restoring_bundle_list[restoring_bundle_count] = INDEX;                                                     \
-            ++restoring_bundle_count;                                                                                  \
+            ((restoring_bundle_bits & (1u << INDEX)) == 0)) {                                                          \
             restoring_wait = 3.0f;                                                                                     \
+            u8 n = restoring_bundle_count;                                                                             \
+            restoring_bundle_bits |= 1u << INDEX;                                                                      \
+            restoring_bundle_list[n] = INDEX;                                                                          \
+            restoring_bundle_count = n + 1;                                                                            \
         }                                                                                                              \
     } while (0)
     if (__builtin_expect(restoring_bundle_count <= 2, 1)) {
@@ -1068,7 +1070,7 @@ void MenuUpdateStoreRestoring(MENU_s *menu) {
 #undef CHECK_RESTORING_BUNDLE
 
     if (menu->confirm_pressed != 0) {
-        if (__builtin_expect(restoring_wait <= 0.0f, 1)) {
+        if (restoring_wait <= 0.0f) {
             BackupMenu();
         }
     } else if (menu->cancel_pressed != 0) {

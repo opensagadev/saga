@@ -938,8 +938,8 @@ void UnlockTexturePS(u32 texID, void *pixels, i32 width, i32 height, i32 depth, 
                 mipWidth = width >> mip;
                 mipWidth = mipWidth > 0 ? mipWidth : 1;
 
-                i32 mipHeight = height >> mip;
-                hLimit = mipHeight > 0 ? mipHeight : 1;
+                hLimit = height >> mip;
+                hLimit = hLimit > 0 ? hLimit : 1;
 
                 i32 currentOffset = GetMipOffset(width, height, format, depth, isCubemap, mips, mip,
                                                  faceTarget - GL_TEXTURE_CUBE_MAP_POSITIVE_X);
@@ -1010,6 +1010,10 @@ void UnlockTexturePS(u32 texID, void *pixels, i32 width, i32 height, i32 depth, 
                         }
                         EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nutex_ios_ex.cpp",
                                              0x589);
+                        if (__builtin_expect(hLimit == 1 && mipWidth == 1, 0)) {
+                            break;
+                        }
+                        continue;
                     }
                 }
                 if (__builtin_expect(hLimit == 1 && mipWidth == 1, 0)) {

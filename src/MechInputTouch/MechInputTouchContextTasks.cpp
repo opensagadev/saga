@@ -273,9 +273,10 @@ bool MechTouchTaskJump::Update() {
             } else {
                 controller->stick_values[0] = stick.x;
                 controller->stick_values[1] = stick.y;
-                if (!(stick.x * stick.x + stick.y * stick.y >= 1.1920928955078125e-7f)) {
-                    player->apiobj.velocity.x = player->target_velocity.x = 0.0f;
-                    player->apiobj.velocity.z = player->target_velocity.z = 0.0f;
+                if (stick.x * stick.x + stick.y * stick.y < 1.1920928955078125e-7f) {
+                    NUVEC &obj_velocity = player->apiobj.velocity;
+                    obj_velocity.x = player->target_velocity.x = 0.0f;
+                    obj_velocity.z = player->target_velocity.z = 0.0f;
                 }
             }
         }
@@ -303,11 +304,13 @@ bool MechTouchTaskJump::Update() {
             if (player->character_context == LEGOCONTEXT_JUMP && !stationary &&
                 (player->GetAddons(false) == NULL ||
                  player->GetAddons(true)->Find(MechJumpAutoPilotAddon::s_hashId) == NULL)) {
-                f32 x = player->apiobj.velocity.x;
                 f32 z = player->apiobj.velocity.z;
+                f32 x = player->apiobj.velocity.x;
                 f32 length = NuFsqrt(x * x + z * z);
-                f32 scale = 0.0f;
-                if (length != 0.0f) {
+                f32 scale;
+                if (length == 0.0f) {
+                    scale = 0.0f;
+                } else {
                     scale = 1.0f / length;
                 }
                 x *= scale;
@@ -1172,9 +1175,17 @@ void MechTouchTaskPlannedDoubleClickGoTo::OnStart() {
     VuVec position;
     target.Get()->GetPos(position, -1);
     MoveToMarker *marker = MechSystems::Get()->FindMoveToMarkerAtPos(position, true);
-    move_to_marker = NuMechPtr<MoveToMarker, 4>(marker);
+    {
+        NuMechPtr<MoveToMarker, 4> found(marker);
+        if (&move_to_marker != &found) {
+            move_to_marker = found;
+        }
+    }
     if (move_to_marker.Get() == NULL) {
-        move_to_marker = NuMechPtr<MoveToMarker, 4>(MechSystems::Get()->NewMoveToMarker(*target.Get()));
+        NuMechPtr<MoveToMarker, 4> created(MechSystems::Get()->NewMoveToMarker(*target.Get()));
+        if (&move_to_marker != &created) {
+            move_to_marker = created;
+        }
     }
     marker = move_to_marker.Get();
     if (marker != NULL) {
@@ -1182,9 +1193,11 @@ void MechTouchTaskPlannedDoubleClickGoTo::OnStart() {
         marker->BlowUp();
     }
 
-    position.y -= player->apiobj.position.y;
+    const f32 player_y = player->apiobj.position.y;
+    const f32 player_z = player->apiobj.position.z;
+    position.y -= player_y;
     position.x -= player->apiobj.position.x;
-    position.z -= player->apiobj.position.z;
+    position.z -= player_z;
     const f32 distance_squared = position.x * position.x + position.z * position.z;
     if (distance_squared < 4.0f) {
         OnResume();
@@ -1192,12 +1205,14 @@ void MechTouchTaskPlannedDoubleClickGoTo::OnStart() {
     }
 
     const f32 distance = NuFsqrt(distance_squared);
-    const f32 offset_z = position.z / distance * 2.0f;
-    const f32 offset_x = position.x / distance * 2.0f;
+    const f32 direction_z = position.z / distance;
+    const f32 direction_x = position.x / distance;
+    position.z = direction_z * 2.0f;
+    position.x = direction_x * 2.0f;
     VuVec next_position;
     target.Get()->GetPos(next_position, -1);
-    position.x = next_position.x - offset_x;
-    position.z = next_position.z - offset_z;
+    position.x = next_position.x - position.x;
+    position.z = next_position.z - position.z;
     position.y = GameShadow(player, &position.xyz, 5.0f, -1);
     target_position.position.x = position.x;
     target_position.position.y = position.y;

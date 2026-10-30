@@ -2197,8 +2197,8 @@ void ReCalculateCompletionPoints() {
         }
 
         if (__builtin_expect((area->flags & AREAFLAG_MINIKIT) == 0, 0)) {
-            if ((area->flags & AREAFLAG_TRUE_JEDI) != 0 &&
-                (save->true_hero_complete[0] != 0 || save->true_hero_complete[1] != 0)) {
+            const u8 *hero = save->true_hero_complete;
+            if ((area->flags & AREAFLAG_TRUE_JEDI) != 0 && (hero[0] != 0 || hero[1] != 0)) {
                 AddToCompletionPoints(POINTS_PER_TRUEJEDI);
                 AddToGoldBricks();
             }
@@ -2244,7 +2244,7 @@ void ReCalculateCompletionPoints() {
         }
     }
 
-    if (__builtin_expect(MissionSys != NULL && MissionSys->count != 0, 1)) {
+    if (MissionSys != NULL) {
         for (i32 index = 0; index < MissionSys->count; ++index) {
             CompletionPointInfo_ReCalculate[3] += POINTS_PER_MISSION;
             if (Game.mission_save.completed[index] != 0) {
@@ -2256,7 +2256,7 @@ void ReCalculateCompletionPoints() {
 
     for (i32 index = 0; index < EPISODECOUNT; ++index) {
         CompletionPointInfo_ReCalculate[0] += POINTS_PER_SUPERSTORY;
-        if ((Game.episode_save[index].flags & SAVE_SUPERSTORY_COMPLETE) != 0) {
+        if (Game.episode_save[index].superstory_complete != 0) {
             AddToCompletionPoints(POINTS_PER_SUPERSTORY);
             if (GOLDBRICKFORSUPERSTORY != 0) {
                 AddToGoldBricks();
@@ -2277,14 +2277,14 @@ void ReCalculateCompletionPoints() {
             continue;
         }
         CompletionPointInfo_ReCalculate[5] += POINTS_PER_HINT;
-        if ((Game.shop_hint_purchased_bits[index >> 5] & (1U << (index & 31))) != 0) {
+        if ((Game.shop_hint_purchased_bits[index >> 5] & (1ULL << (index & 31))) != 0) {
             AddToCompletionPoints(POINTS_PER_HINT);
         }
     }
 
     for (i32 index = 0; index < SHOPGOLDBRICKS; ++index) {
         CompletionPointInfo_ReCalculate[6] += POINTS_PER_GOLDBRICK;
-        if ((Game.shop_gold_brick_purchased_bits & (1U << (index & 31))) != 0) {
+        if (((&Game.shop_gold_brick_purchased_bits)[index >> 5] & (1ULL << (index & 31))) != 0) {
             AddToCompletionPoints(POINTS_PER_GOLDBRICK);
             AddToGoldBricks();
         }

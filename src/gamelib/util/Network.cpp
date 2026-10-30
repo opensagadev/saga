@@ -1287,7 +1287,7 @@ void NetworkObjectManager::ReceiveReplicaMessage(NetMessage &message, NetPeer co
         return;
     }
 
-    if ((flags & 2) != 0) {
+    if (__builtin_expect((flags & 2) != 0, 0)) {
         replicator->replication_group |= 8;
     }
 

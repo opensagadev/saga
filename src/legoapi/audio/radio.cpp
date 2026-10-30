@@ -110,22 +110,25 @@ void PlayRadio(char *special_name, char *blowup_name, i32 play) {
         }
         for (i32 i = 0; i < 8; i++) {
             RadioEntry *radio = &radios[i];
-            if (radio->blowup != NULL && NuStrICmp(radio->blowup->name, blowup_name) == 0) {
+            if (radio->blowup == NULL || NuStrICmp(radio->blowup->name, blowup_name) != 0) {
+                if (special_name != NULL) {
+                    char *name = NuSpecialGetName(&radio->special);
+                    if (name != NULL) {
+                        if (__builtin_expect(NuStrICmp(name, special_name) == 0, 1)) {
+                            NUMTX *source = NuSpecialGetMtx(&radio->special);
+                            NUMTX *instance = NuSpecialGetInstanceMtx(&radio->special);
+                            *instance = *source;
+                            NuSpecialUpdate(&radio->special);
+                            memset(radio, 0, sizeof(*radio));
+                            return;
+                        }
+                    }
+                }
+            } else {
                 GizmoBlowupUpdateMatrix(radio->blowup);
                 radio->blowup->state_flags |= 1;
                 memset(radio, 0, sizeof(*radio));
                 return;
-            }
-            if (special_name != NULL) {
-                char *name = NuSpecialGetName(&radio->special);
-                if (__builtin_expect(name != NULL && NuStrICmp(name, special_name) == 0, 1)) {
-                    NUMTX *source = NuSpecialGetMtx(&radio->special);
-                    NUMTX *instance = NuSpecialGetInstanceMtx(&radio->special);
-                    *instance = *source;
-                    NuSpecialUpdate(&radio->special);
-                    memset(radio, 0, sizeof(*radio));
-                    return;
-                }
             }
         }
     }

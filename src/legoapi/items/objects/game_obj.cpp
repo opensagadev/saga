@@ -1701,8 +1701,8 @@ void UpdateGameObjects(WORLDINFO_s *world) {
             GizmoPickups_Collide(world, object, 1);
         }
         AddSurfaceRipples(object);
-        if ((object->apiobj.character_data->model_flags & 0x2000) != 0 && object->apiobj.field_0x287 == 0 &&
-            object->apiobj.model_draw_result != 0 && (object->field_0xe20 & 0x20) == 0) {
+        if (__builtin_expect((object->apiobj.character_data->model_flags & 0x2000) != 0 && object->apiobj.field_0x287 == 0 &&
+            object->apiobj.model_draw_result != 0 && (object->field_0xe20 & 0x20) == 0, 1)) {
             AddSurfaceDebris(object);
         }
         if (object->use_model_origin != 0xff) {
@@ -1770,7 +1770,7 @@ void UpdateGameObjects(WORLDINFO_s *world) {
 
     if (TimingBarSet == 2)
         TBOPENFN("rtl", 2);
-    if (TimingBarSet == 2)
+    if (__builtin_expect(TimingBarSet == 2, 0))
         TBOPENFN("Coll", 2);
     CollideGameObjects(world);
     if (TimingBarSet == 2)
@@ -1790,7 +1790,7 @@ void UpdateGameObjects(WORLDINFO_s *world) {
                 player_tag_from->hud_icon_timer = 2.0f;
             }
         }
-        if (__builtin_expect(result != 2, 0)) {
+        if (result != 2) {
             player_tag_to = NULL;
             player_tag_timer = 0.0f;
             player_tag_from = NULL;

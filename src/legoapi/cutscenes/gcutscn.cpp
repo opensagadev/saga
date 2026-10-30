@@ -1755,13 +1755,13 @@ extern "C" f32 *NuGCutLocatorCalcMtx(NUGCUTLOCATOR_s *locator, float frame, NUMT
 
 static void instNuGCutCamSysUpdate(instNUGCUTSCENE_s *instance, float frame) {
     NUMTX focus_matrix;
+    instNUGCUTSCENECAMERA_s *camera_instance = instance->camera_instance;
+    NUGCUTCAMERASYS_s *system = instance->cutscene->camera_system;
     cutscenecam_focusDistance = 0.0f;
     cutscenecam_focalLength = 0.0f;
     cutscenecam_usefocusloc = 0;
     cutscenecam_fstop = 0.0f;
 
-    instNUGCUTSCENECAMERA_s *camera_instance = instance->camera_instance;
-    NUGCUTCAMERASYS_s *system = instance->cutscene->camera_system;
     u8 focus_index;
     u8 next_camera_index;
     if ((instance->cutscene->version & 0xff) > 4 && system->focus_state_animation != NULL) {
@@ -2857,7 +2857,7 @@ extern "C" {
                 NuAnimData2CalcTime(locator->animation, frame, &time);
             }
             i32 visible = NuGCutLocatorIsVisble(locator, frame, &time, &scale, &rate);
-            if (__builtin_expect(visible != 0, 1) && scale < 0.0f && (locator->flags & 0x10) == 0) {
+            if (__builtin_expect(__builtin_expect(visible != 0, 1) && scale < 0.0f && (locator->flags & 0x10) == 0, 1)) {
                 scale = static_cast<f32>(debtab[effect_index]->frequency) * (0.0f - scale);
             }
             if (visible != 0 && scale > 0.1f) {
@@ -2944,7 +2944,12 @@ extern "C" {
             if (locator->animation != NULL) {
                 NuAnimData2CalcTime(locator->animation, frame, &time);
             }
-            if (NuGCutLocatorIsVisble(locator, frame, &time, &opacity, NULL) != 0 && opacity > 0.1f) {
+            if (!(NuGCutLocatorIsVisble(locator, frame, &time, &opacity, NULL) != 0 && opacity > 0.1f)) {
+                if (inst_locator->effect_handle >= 0) {
+                    ReleaseLocatorVfxFn(inst_locator->effect_handle);
+                }
+                inst_locator->effect_handle = -1;
+            } else {
                 // Retail realigns the frame and copies the locator matrix into the VFX matrix with movaps.
                 VuMtx vfx_matrix __attribute__((aligned(16)));
                 NUMTX locator_mtx __attribute__((aligned(16)));
@@ -2966,11 +2971,6 @@ extern "C" {
                 } else {
                     inst_locator->effect_handle = TriggerLocatorVfxFn(effect_index, &vfx_matrix);
                 }
-            } else {
-                if (inst_locator->effect_handle >= 0) {
-                    ReleaseLocatorVfxFn(inst_locator->effect_handle);
-                }
-                inst_locator->effect_handle = -1;
             }
         }
     }
@@ -3870,7 +3870,7 @@ extern "C" {
         NuPrimSetCoordinateSystem(NUPRIM_SCALEMODE_PS2);
         NuPrim2DBegin(4, 5, NULL);
 
-        if (__builtin_expect(DefragInstBaseMem == NULL, 0)) {
+        if (DefragInstBaseMem == NULL) {
             const u32 cut_span = static_cast<u32>(reinterpret_cast<usize>(DefragCutSceneEndMem) -
                                                   reinterpret_cast<usize>(DefragCutSceneBaseMem));
             const f32 cut_scale = 580.0f / static_cast<f32>(cut_span);

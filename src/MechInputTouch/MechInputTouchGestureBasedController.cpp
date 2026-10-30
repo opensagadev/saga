@@ -724,7 +724,10 @@ __attribute__((optimize("no-tree-slp-vectorize"))) bool MechInputTouchGestureBas
             } else if (character == &object) {
                 GameObject_s *nearby = FindNearestGameObject(&object.apiobj.position, &object, 0, 1.5f, 1.5f, -1, -1,
                                                              100, NULL, 0, NULL, false);
-                if (nearby == NULL) {
+                if (nearby != NULL) {
+                    StartNewTask(new MechTouchTaskAttack(*this, nearby->GetMechObjectInterface(), touch_position),
+                                 holder, false, true);
+                } else {
                     JumpTriggerPacket packet;
                     packet.type = 2;
                     packet.player = &object;
@@ -736,9 +739,6 @@ __attribute__((optimize("no-tree-slp-vectorize"))) bool MechInputTouchGestureBas
                     Hint_SetComplete(0x629);
                     object.field_0xf04 |= 0x10;
                     TriggerJumpTask(packet, false, false, false);
-                } else {
-                    StartNewTask(new MechTouchTaskAttack(*this, nearby->GetMechObjectInterface(), touch_position),
-                                 holder, false, true);
                 }
                 return true;
             } else {
@@ -758,7 +758,7 @@ __attribute__((optimize("no-tree-slp-vectorize"))) bool MechInputTouchGestureBas
             in_range = false;
         }
         if (__builtin_expect(in_range && (object.apiobj.character_data->model_flags & 8) != 0, 1)) {
-            if (attack_jump)
+            if (__builtin_expect(attack_jump != 0, 1))
                 object.field_0xf04 |= 0x10;
             object.field_0xf04 |= 0x20;
             target->GetPos(target_position, -1);
@@ -982,15 +982,19 @@ bool MechInputTouchGestureBasedController::PerformCloseMechanic(GameObject_s &ob
     }
 
     VuVec position(holder.down_position.x, holder.down_position.y, 0.0f, 1.0f);
-    if (TouchHacks::CanUseTeleport(object)) {
-        VuVec teleport_position;
-        if (__builtin_expect(Teleport_Find(&object, 0.05f * 0.05f, &teleport_position) != NULL, 1)) {
-            f32 dx = teleport_position.x - object.apiobj.position.x;
-            f32 dy = teleport_position.y - object.apiobj.position.y;
-            f32 dz = teleport_position.z - object.apiobj.position.z;
-            if (__builtin_expect(
-                    __builtin_fabsf(dy) < object.apiobj.scaled_height && !(dx * dx + dz * dz >= 0.35f * 0.35f), 0)) {
-                StartNewTask(new MechTouchTaskUseTeleport(*this, NULL, position), holder, true, true);
+    f32 distance = 1000000000.0f;
+    MechTouchTask *task;
+    VuVec delta;
+    if (TouchHacks::CanUseTeleport(object) && Teleport_Find(&object, 0.05f * 0.05f, &delta) != NULL) {
+        delta.x -= object.apiobj.position.x;
+        delta.y -= object.apiobj.position.y;
+        delta.z -= object.apiobj.position.z;
+        if (__builtin_fabsf(delta.y) < object.apiobj.scaled_height) {
+            delta.y = 0.0f;
+            if (delta.x * delta.x + delta.y * delta.y + delta.z * delta.z < 0.35f * 0.35f) {
+                task = new MechTouchTaskUseTeleport(*this, NULL, position);
+            start_task:
+                StartNewTask(task, holder, true, true);
                 return true;
             }
         }
@@ -1002,28 +1006,25 @@ bool MechInputTouchGestureBasedController::PerformCloseMechanic(GameObject_s &ob
         return true;
     }
 
-    f32 distance = 1000000000.0f;
     if (TouchHacks::CanUseHatMachine(object)) {
         HATMACHINE_s *machine = HatMachine_FindNearest(WORLD, &object.apiobj.position, &object, &distance);
         if (machine != NULL) {
             f32 range = object.field_0x1008 + 0.2f;
-            if (__builtin_expect(distance <= range * range, 0)) {
-                StartNewTask(new MechTouchTaskHatMachine(*this, machine->GetMechObjectInterface(), position), holder,
-                             true, true);
-                return true;
+            if (distance <= range * range) {
+                task = new MechTouchTaskHatMachine(*this, machine->GetMechObjectInterface(), position);
+                goto start_task;
             }
         }
     }
 
-    distance = 1000000000.0f;
     if (TouchHacks::CanUseLever(object)) {
+        distance = 1000000000.0f;
         LEVER_s *lever = Lever_FindNearest(WORLD, &object.apiobj.position, &object, &distance);
         if (lever != NULL) {
             f32 range = object.field_0x1008 + 0.2f;
             if (distance <= range * range) {
-                StartNewTask(new MechTouchTaskPullLever(*this, lever->GetMechObjectInterface(), position), holder, true,
-                             true);
-                return true;
+                task = new MechTouchTaskPullLever(*this, lever->GetMechObjectInterface(), position);
+                goto start_task;
             }
         }
     }
@@ -1033,11 +1034,12 @@ bool MechInputTouchGestureBasedController::PerformCloseMechanic(GameObject_s &ob
     if (panel != NULL && GizPanel_CanUsePanel(&object, panel)) {
         f32 range = object.field_0x1008 + 0.2f;
         if (distance <= range * range) {
-            StartNewTask(new MechTouchTaskPanel(*this, panel->GetMechObjectInterface(), position), holder, true, true);
-            return true;
+            task = new MechTouchTaskPanel(*this, panel->GetMechObjectInterface(), position);
+            goto start_task;
         }
     }
 
+    distance = 1000000000.0f;
     f32 range = object.field_0x1008 * 4.0f;
     GameObject_s *candidate =
         FindNearestGameObject(&object.apiobj.position, &object, 0, range, range, -1, -1, 100, NULL, 0, NULL, false);

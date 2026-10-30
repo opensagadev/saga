@@ -2345,7 +2345,7 @@ extern "C" {
                 slider->normalized_value = (slider->value - slider->minimum) / slider->range;
                 slider->change_timer = 60;
                 if (slider->changed)
-                    slider->changed(menu, item, pad->digital_buttons);
+                    slider->changed(menu, item, *(volatile u32 *)&pad->digital_buttons);
             }
             rep_timer = 30;
         } else if ((pad->digital_buttons & 0x03) == 0x03) {
@@ -2354,7 +2354,7 @@ extern "C" {
                 slider->normalized_value = (slider->value - slider->minimum) / slider->range;
                 slider->change_timer = 60;
                 if (slider->changed)
-                    slider->changed(menu, item, pad->digital_buttons);
+                    slider->changed(menu, item, *(volatile u32 *)&pad->digital_buttons);
             }
             rep_timer = 30;
         } else if (pad->digital_buttons & 0x04) {
@@ -2371,7 +2371,7 @@ extern "C" {
                 slider->normalized_value = (slider->value - slider->minimum) / slider->range;
                 slider->change_timer = 60;
                 if (slider->changed)
-                    slider->changed(menu, item, pad->digital_buttons);
+                    slider->changed(menu, item, *(volatile u32 *)&pad->digital_buttons);
             }
         } else if (pad->digital_buttons & 0x08) {
             if (rep_timer > 0)
@@ -2387,47 +2387,44 @@ extern "C" {
                 slider->normalized_value = (slider->value - slider->minimum) / slider->range;
                 slider->change_timer = 60;
                 if (slider->changed)
-                    slider->changed(menu, item, pad->digital_buttons);
+                    slider->changed(menu, item, *(volatile u32 *)&pad->digital_buttons);
             }
         } else {
             rep_timer = 30;
+            f32 value;
             if (pad->analog_l2) {
-                f32 scale;
-                if (!pad->unknown_a9) {
-                    dynascale = 1.627604291343232e-7f;
-                    scale = 1.627604251552839e-5f;
-                } else {
+                f32 delta;
+                if (pad->unknown_a9) {
                     dynascale *= 1.05f;
-                    scale = dynascale;
+                    delta = static_cast<u32>(pad->analog_l2) * dynascale;
+                } else {
+                    dynascale = 1.627604291343232e-7f;
+                    delta = static_cast<u32>(pad->analog_l2) * 1.627604251552839e-5f;
                 }
-                f32 value = slider->normalized_value - static_cast<u32>(pad->analog_l2) * scale;
+                value = slider->normalized_value - delta;
                 if (value < 0.0f)
                     value = 0.0f;
-                slider->normalized_value = value;
-                slider->value = value * slider->range + slider->minimum;
-                slider->change_timer = 60;
-                if (slider->changed)
-                    slider->changed(menu, item, pad->digital_buttons);
             } else if (pad->analog_r2) {
-                f32 scale;
-                if (!pad->unknown_a9) {
-                    dynascale = 1.627604291343232e-7f;
-                    scale = 1.627604251552839e-5f;
-                } else {
+                f32 delta;
+                if (pad->unknown_a9) {
                     dynascale *= 1.05f;
-                    scale = dynascale;
+                    delta = static_cast<u32>(pad->analog_r2) * dynascale;
+                } else {
+                    dynascale = 1.627604291343232e-7f;
+                    delta = static_cast<u32>(pad->analog_r2) * 1.627604251552839e-5f;
                 }
-                f32 value = slider->normalized_value + static_cast<u32>(pad->analog_r2) * scale;
+                value = slider->normalized_value + delta;
                 if (value > 1.0f)
                     value = 1.0f;
-                slider->value = value * slider->range + slider->minimum;
-                slider->change_timer = 60;
-                slider->normalized_value = value;
-                if (slider->changed)
-                    slider->changed(menu, item, pad->digital_buttons);
             } else {
                 dynascale = 1.627604291343232e-7f;
+                return 0;
             }
+            slider->normalized_value = value;
+            slider->value = value * slider->range + slider->minimum;
+            slider->change_timer = 60;
+            if (slider->changed)
+                slider->changed(menu, item, *(volatile u32 *)&pad->digital_buttons);
         }
         return 0;
     }
@@ -6624,12 +6621,12 @@ static void RenderFileSel3Body(i32 draw_title) {
         const f32 box_height = height * 17.0f / 16.0f + 6.0f;
         const f32 box_width = full_width + 4.0f;
         NuRndrRect2d(x, y, 0.0f, box_width, box_height, 0xff808080, NULL);
-        FS_W = box_width;
-        FS_H = box_height;
         x += 2.0f;
         y += 1.0f;
-        const f32 title_height = height / 16.0f;
+        FS_W = box_width;
+        FS_H = box_height;
         text_x = (x + 4.0f) * 16.0f;
+        const f32 title_height = height / 16.0f;
         NuRndrRect2d(x, y, 0.0f, full_width, title_height, 0xff404040, NULL);
         NuRndrLine3dDbg(x, y, 0.0f, width + x, y, 0.0f, 0xff808080);
         const f32 title_y = y * 16.0f + baseline;
@@ -6642,11 +6639,11 @@ static void RenderFileSel3Body(i32 draw_title) {
         const f32 box_height = height * 16.0f / 16.0f + 4.0f;
         const f32 box_width = full_width + 4.0f;
         NuRndrRect2d(x, y, 0.0f, box_width, box_height, 0xff808080, NULL);
+        x += 2.0f;
+        y += 1.0f;
         FS_W = box_width;
         FS_H = box_height;
-        x += 2.0f;
         text_x = (x + 4.0f) * 16.0f;
-        y += 1.0f;
     }
 
     const f32 line_height = height / 16.0f;
@@ -6660,7 +6657,7 @@ static void RenderFileSel3Body(i32 draw_title) {
         text = FS_Path;
         const f32 available = full_width - 8.0f;
         f32 length = NuQFntPrintLenU(system_qfont, text) / 16.0f;
-        if (length > available) {
+        if (__builtin_expect(length > available, 0)) {
             f32 scale = available / length;
             if (__builtin_expect(scale < 0.5f, 0)) {
                 // Too long even at half width: keep the drive and first
@@ -6705,8 +6702,8 @@ static void RenderFileSel3Body(i32 draw_title) {
     NuQFntPrintU(system_qfont, text);
     NuQFntSetPointSize(system_qfont, 1.0f, 1.0f);
 
-    y += line_height + 2.0f;
     const f32 list_height = height * 14.0f;
+    y += line_height + 2.0f;
     const f32 list_box_height = list_height / 16.0f;
     NuRndrRect2d(x, y, 0.0f, width, list_box_height, 0x20202020, NULL);
     if (FS_NumFiles > 14) {

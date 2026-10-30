@@ -684,8 +684,8 @@ void MechTouchUIPlayerButton::SetupTargetIds() {
 
             if (VehicleArea != 0) {
                 const u32 model_flags = CDataList[id].model_flags;
-                if ((model_flags & 0x2000) == 0 && !(BonusArea != 0 && (model_flags & 0x4000000) != 0) &&
-                    static_cast<i32>(GCDataList[id].flags_090) >= 0 && !IsCheatBonusChar(id)) {
+                if (__builtin_expect((model_flags & 0x2000) == 0 && !(BonusArea != 0 && (model_flags & 0x4000000) != 0) &&
+                    static_cast<i32>(GCDataList[id].flags_090) >= 0 && !IsCheatBonusChar(id), 0)) {
                     continue;
                 }
 
@@ -699,7 +699,7 @@ void MechTouchUIPlayerButton::SetupTargetIds() {
                         continue;
                     }
                 }
-            } else if ((CDataList[id].model_flags & 0x2000) != 0 || (GCDataList[id].flags_090 & 0x40) != 0) {
+            } else if (__builtin_expect((CDataList[id].model_flags & 0x2000) != 0 || (GCDataList[id].flags_090 & 0x40) != 0, 1)) {
                 continue;
             }
 

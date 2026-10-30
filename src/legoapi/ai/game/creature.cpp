@@ -1393,13 +1393,12 @@ void Players_Init(void) {
         i16 *list;
         i16 list0;
 
-        if (__builtin_expect(FreePlay == 0 &&
+        if (FreePlay == 0 &&
                                  (Hub_UsePlayerList == 0 || HUB_ADATA == NULL || HUB_ADATA != WORLD->area) &&
                                  (UsePlayerList != 1 ||
                                   (PlayerList[0] != -1 &&
                                    (apicharsys->playermodelids[PlayerList[0]] == -1 ||
-                                    (PlayerList[1] != -1 && apicharsys->playermodelids[PlayerList[1]] == -1)))),
-                             1)) {
+                                    (PlayerList[1] != -1 && apicharsys->playermodelids[PlayerList[1]] == -1))))) {
             list = Area_PlayerIDList;
             list0 = Area_PlayerIDList[0];
         } else {
@@ -3761,13 +3760,13 @@ void UpdateCharacterLoad() {
         candidates[candidate_count++] = id_CANTINABAND;
     } else if (id_WEIRDO1 != -1 && APICharacterLoaded(id_WEIRDO1) == NULL) {
         candidates[candidate_count++] = id_WEIRDO1;
-    } else if (id_WEIRDO2 != -1 && APICharacterLoaded(id_WEIRDO2) == NULL) {
+    } else if (__builtin_expect(id_WEIRDO2 != -1, 0) && APICharacterLoaded(id_WEIRDO2) == NULL) {
         candidates[candidate_count++] = id_WEIRDO2;
-    } else if (id_JABBA != -1 && APICharacterLoaded(id_JABBA) == NULL) {
+    } else if (__builtin_expect(id_JABBA != -1, 0) && APICharacterLoaded(id_JABBA) == NULL) {
         candidates[candidate_count++] = id_JABBA;
-    } else if (id_MOSEISLEYCITIZEN != -1 && APICharacterLoaded(id_MOSEISLEYCITIZEN) == NULL) {
+    } else if (__builtin_expect(id_MOSEISLEYCITIZEN != -1, 0) && APICharacterLoaded(id_MOSEISLEYCITIZEN) == NULL) {
         candidates[candidate_count++] = id_MOSEISLEYCITIZEN;
-    } else if (id_CANTINAALIEN != -1 && APICharacterLoaded(id_CANTINAALIEN) == NULL) {
+    } else if (__builtin_expect(id_CANTINAALIEN != -1, 0) && APICharacterLoaded(id_CANTINAALIEN) == NULL) {
         candidates[candidate_count++] = id_CANTINAALIEN;
     } else if (id_WOMPRAT != -1 && APICharacterLoaded(id_WOMPRAT) == NULL) {
         candidates[candidate_count++] = id_WOMPRAT;
@@ -3950,7 +3949,7 @@ u32 AdjustLayerBits(u32 mask, GameObject_s *object) {
             mask = (mask & ~(hair | cape)) | SpecialLayer[27].mask;
             if (__builtin_expect((mask & SpecialLayer[30].mask) != 0, 0))
                 mask = (mask & ~SpecialLayer[30].mask) | SpecialLayer[39].mask;
-            else if ((mask & SpecialLayer[31].mask) != 0)
+            else if (__builtin_expect((mask & SpecialLayer[31].mask) != 0, 0))
                 mask = (mask & ~SpecialLayer[31].mask) | SpecialLayer[40].mask;
             else if ((mask & SpecialLayer[32].mask) != 0)
                 mask = (mask & ~SpecialLayer[32].mask) | SpecialLayer[41].mask;
@@ -3958,7 +3957,7 @@ u32 AdjustLayerBits(u32 mask, GameObject_s *object) {
             mask = (mask & ~cape) | SpecialLayer[26].mask;
             if (__builtin_expect((mask & SpecialLayer[30].mask) != 0, 0))
                 mask = (mask & ~SpecialLayer[30].mask) | SpecialLayer[36].mask;
-            else if ((mask & SpecialLayer[31].mask) != 0)
+            else if (__builtin_expect((mask & SpecialLayer[31].mask) != 0, 0))
                 mask = (mask & ~SpecialLayer[31].mask) | SpecialLayer[37].mask;
             else if ((mask & SpecialLayer[32].mask) != 0)
                 mask = (mask & ~SpecialLayer[32].mask) | SpecialLayer[38].mask;
@@ -4095,7 +4094,7 @@ static void DrawWeapons(GameObject_s *object, i32 reflection, f32 weapon_scale) 
                 } else {
                     i32 red = 0, green = 0, blue = 0, purple = 0;
                     if (object->id == id_BOB) {
-                        if (object->field_0xefd & 2)
+                        if (__builtin_expect(object->field_0xefd & 2 != 0, 1))
                             green = 1;
                         else
                             blue = 1;
@@ -4114,7 +4113,7 @@ static void DrawWeapons(GameObject_s *object, i32 reflection, f32 weapon_scale) 
                             purple = 1;
                     }
                     if (__builtin_expect(red || green || blue || purple, 1)) {
-                        if (__builtin_expect(object->apiobj.field_0x27c != -1, 0) && Cheat_IsOn(25)) {
+                        if (__builtin_expect(__builtin_expect(object->apiobj.field_0x27c != -1, 0) && Cheat_IsOn(25), 1)) {
                             red = 1;
                             green = blue = purple = 0;
                         } else if (object->apiobj.field_0x27c != -1 && Player_HasPurpleForce(object)) {
@@ -4144,7 +4143,7 @@ static void DrawWeapons(GameObject_s *object, i32 reflection, f32 weapon_scale) 
                 NUMTX blade_matrix = object->joint_matrices[joint];
                 NUMTX hilt_matrix;
                 NUVEC scale = {weapon_scale, weapon_scale, weapon_scale};
-                if (__builtin_expect(hilt != -1, 1)) {
+                if (hilt != -1) {
 
                     hilt_scale_vec.x = weapon_scale + weapon_scale;
                     hilt_matrix = blade_matrix;

@@ -550,9 +550,10 @@ NuSoundDecoder *NuSoundSystem::CreateDecoder(NuSoundSource *source) {
     }
 
     const u16 appended_length = static_cast<u16>(name_length + 8);
-    if (appended_length > name_capacity || decoded_name == theEmptyString) {
+    const char *empty_string = theEmptyString;
+    if (decoded_name == empty_string || appended_length > name_capacity) {
         name_capacity = static_cast<u16>((appended_length + 3) & 0xfffc);
-        if (__builtin_expect(decoded_name == theEmptyString, 1)) {
+        if (decoded_name == empty_string) {
             decoded_name = static_cast<char *>(
                 NU_ALLOC(name_capacity, 4, 5,
                          "i:/SagaTouch-Android_9176564/nu2api.saga/../nu2api.2013/numemory/NuMemory.h:328", 0));

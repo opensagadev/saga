@@ -1193,7 +1193,7 @@ void GizmoPushBlockInitAndReset(WORLDINFO_s *world, void *progress) {
                     pushposincrease += required - world->current_level->max_push_block_end_pos;
                 }
             }
-            if (positions != 0 && runoutofpostabspace == 0) {
+            if (__builtin_expect(positions != 0 && runoutofpostabspace == 0, 1)) {
                 block->snap_positions = &world->push_block_positions[world->push_block_position_count];
                 f32 animation_frame = 1.0f;
                 for (i32 position = 0; position < block->snap_position_count; ++position, animation_frame += 1.0f) {

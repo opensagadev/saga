@@ -90,23 +90,25 @@ void MenuDrawMissions(MENU_s *menu) {
     for (i32 i = 0; i < MissionSys->count; ++i) {
         f32 size = MissionIconScale[i] * 0.075f + 0.125f;
         f32 x = MissionIconX[i];
-        if (!(fabsf(x) <= 1.0f))
-            size = 0.0f;
+        f32 opacity;
+        if (fabsf(x) > 1.0f)
+            opacity = 0.0f;
         else {
-            f32 opacity = (MissionIconScale[i] * 0.3f + 0.7f) * alpha;
+            opacity = (MissionIconScale[i] * 0.3f + 0.7f) * alpha;
             if (fabsf(x) > 0.5f)
                 opacity *= 1.0f - (fabsf(x) - 0.5f) * 2.0f;
             if (opacity > 0.0f)
                 DrawCharIcon(MissionSys->missions[i].find_char, x, -0.725f, 0.0f, size,
                              Game.mission_save.completed[i] >= 1 ? 168 : 167, opacity,
                              (i == hub_mission && menu_flash ? 0.7f : 1.0f) * opacity, 1, NULL);
-            if (__builtin_expect(opacity == 0.0f, 0))
-                size = 0.0f;
         }
-        menu->item_x[i] = x;
+        if (__builtin_expect(opacity == 0.0f, 0))
+            size = 0.0f;
+        const f32 height = size / GetAspectRatio();
+        menu->item_x[i] = MissionIconX[i];
         menu->item_y[i] = -0.725f;
         menu->item_width[i] = size;
-        menu->item_height[i] = size / GetAspectRatio();
+        menu->item_height[i] = height;
         menu->item_column[i] = i;
         menu->item_row[i] = 0;
     }

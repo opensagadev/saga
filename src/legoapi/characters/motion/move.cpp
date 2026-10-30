@@ -4113,8 +4113,8 @@ void TurnCode(GameObject_s *object, i32 mode, GAMEPAD_s *pad) {
             return;
         }
 
-        u8 player_active = 0;
         GameObject_s *other = NULL;
+        u8 player_active = 0;
         if (object->apiobj.player_controlled) {
             other = GetOtherActivePlayer(object);
             player_active = object->apiobj.flags_low & 0x80;
@@ -4127,7 +4127,7 @@ void TurnCode(GameObject_s *object, i32 mode, GAMEPAD_s *pad) {
 
         if (player_active != 0 && object->delayed_turn_timer <= 0.0f && object->in_narrow_socket) {
             if (!((object->character_context != 0x36 || finish_turn) && other != NULL)) {
-                if (other != NULL && (other->character_context == 0x36 || other->character_context == 0x2a ||
+                if (other != NULL && (other->character_context == 0x2a || other->character_context == 0x36 ||
                                       other->character_context == 0x3a)) {
                     return;
                 }
@@ -4147,13 +4147,13 @@ void TurnCode(GameObject_s *object, i32 mode, GAMEPAD_s *pad) {
                         other = NULL;
                     }
                 }
-                if (other != NULL && (other->character_context == 0x36 || other->character_context == 0x2a ||
+                if (other != NULL && (other->character_context == 0x2a || other->character_context == 0x36 ||
                                       other->character_context == 0x3a)) {
                     return;
                 }
             }
         } else if (object->in_narrow_socket && other != NULL &&
-                   (other->character_context == 0x36 || other->character_context == 0x2a ||
+                   (other->character_context == 0x2a || other->character_context == 0x36 ||
                     other->character_context == 0x3a)) {
             return;
         }
@@ -4172,10 +4172,11 @@ void TurnCode(GameObject_s *object, i32 mode, GAMEPAD_s *pad) {
             if (object->in_narrow_socket) {
                 i32 turn = 0;
                 if (object->delayed_turn_timer <= 0.0f) {
-                    if (abs(RotDiff(object->yrot, object->apiobj.movement_facing_angle)) <= 0x4000) {
-                        turn = abs(RotDiff(object->yrot, input_angle)) > 0x6000;
+                    const u16 yrot = object->yrot;
+                    if (abs(RotDiff(yrot, object->apiobj.movement_facing_angle)) <= 0x4000) {
+                        turn = abs(RotDiff(yrot, input_angle)) > 0x6000;
                     } else {
-                        turn = abs(RotDiff(object->yrot, input_angle)) < 0x2000;
+                        turn = abs(RotDiff(yrot, input_angle)) < 0x2000;
                     }
                 }
 
@@ -4242,8 +4243,8 @@ void TurnCode(GameObject_s *object, i32 mode, GAMEPAD_s *pad) {
         const u16 angle = object->apiobj.facing_angle + 0x8000;
         object->field_0xe24 &= ~2;
         object->character_context = -1;
-        object->apiobj.movement_facing_angle = angle;
         object->apiobj.field_0x276 = angle;
+        object->apiobj.movement_facing_angle = angle;
         object->apiobj.facing_angle = angle;
 
         TORPEDOPACKET *packet = object->torpedo;
@@ -4254,11 +4255,11 @@ void TurnCode(GameObject_s *object, i32 mode, GAMEPAD_s *pad) {
             }
         }
 
+        object->field_0xe24 &= ~4;
         object->secondary_lean_angle = 0;
         object->movement_lean_angle = 0;
         object->field_0xdc8 = 1.0f;
         object->tertiary_lean_angle = 0;
-        object->field_0xe24 &= ~4;
         return;
     }
 
@@ -4883,7 +4884,7 @@ static void PunchCode(GameObject_s *object, i32 pressed, i32 held, i32 require_t
                         }
                     }
 
-                    if (object->apiobj.character_model->model_data_b[object->context_animation] != NULL) {
+                    if (__builtin_expect(object->apiobj.character_model->model_data_b[object->context_animation] != NULL, 0)) {
                         f32 duration = AnimDuration(object->id, object->context_animation, 0.0f, 0.0f, 0);
                         if (duration > 0.0f) {
                             object->character_context = 0x26;
@@ -5023,7 +5024,7 @@ start_attack:
     if (__builtin_expect(object->apiobj.character_model->model_data_b[object->context_animation] == NULL, 0)) {
         return;
     }
-    if (require_target != 0 && object->force_target == NULL && object->blowup_target == NULL) {
+    if (__builtin_expect(require_target != 0 && object->force_target == NULL && object->blowup_target == NULL, 0)) {
         return;
     }
 
@@ -5048,7 +5049,7 @@ start_attack:
         }
         if ((object->apiobj.character_data->game_character->flags_090 & 0x20) == 0) {
             bool weapon_out = true;
-            if (__builtin_expect((object->field_0xe22 & 1) == 0, 1)) {
+            if (__builtin_expect((object->field_0xe22 & 1) == 0, 0)) {
                 weapon_out = object->field_0xe32 == 1;
             }
             object->weapon_out = weapon_out;
@@ -5180,17 +5181,7 @@ finished:
 static void BlockCode(GameObject_s *object, i32 pressed, i32 held, i32 jump_pressed, i32 allow_start) {
     if ((object->field_0xe22 & 1) != 0 && object->weapon_scale_state == 0)
         FindIncomingThreats(object);
-    if (!(object->character_context == 0xc)) {
-        if (object->block_cooldown > 0.0f) {
-            object->block_cooldown -= FRAMETIME;
-            return;
-        }
-        if (!allow_start || !pressed || object->apiobj.field_0x27d == 0 ||
-            (CInfo[object->character_context].flags & 0x20) != 0 || (object->field_0xef8 & 2) == 0 ||
-            (object->incoming_bolt == NULL && object->incoming_melee == NULL && object->incoming_special == NULL &&
-             object->incoming_part == NULL))
-            return;
-    } else {
+    if (object->character_context == 0xc) {
         GameObject_s *attacker = object->block_attacker;
         if (__builtin_expect(attacker != NULL, 1)) {
             if (jump_pressed != 0 && ComboJump(object))
@@ -5198,10 +5189,10 @@ static void BlockCode(GameObject_s *object, i32 pressed, i32 held, i32 jump_pres
             if (object->block_latch == 0 && object->blocked_attack_stage != 0) {
                 if ((attacker->apiobj.field_0x1f8 & 0x1000) != 0 && attacker->apiobj.field_0x287 == 0) {
                     if (object->blocked_special) {
-                        if (attacker->character_context == 0x26 &&
+                        if (__builtin_expect(attacker->character_context == 0x26 &&
                             attacker->context_animation == object->blocked_attack_stage &&
                             (attacker->id != id_GAMORREANGUARD || attacker->context_animation != 0x56 ||
-                             (attacker->context_flags & 0x40) == 0))
+                             (attacker->context_flags & 0x40) == 0), 1))
                             return;
                     } else if (attacker->character_context == 5 && attacker->combo_stage < object->blocked_attack_stage)
                         return;
@@ -5247,6 +5238,16 @@ static void BlockCode(GameObject_s *object, i32 pressed, i32 held, i32 jump_pres
             return;
         }
         if (!TouchHacks::ShouldBlock(*object))
+            return;
+    } else {
+        if (object->block_cooldown > 0.0f) {
+            object->block_cooldown -= FRAMETIME;
+            return;
+        }
+        if (!allow_start || !pressed || object->apiobj.field_0x27d == 0 ||
+            (CInfo[object->character_context].flags & 0x20) != 0 || (object->field_0xef8 & 2) == 0 ||
+            (object->incoming_bolt == NULL && object->incoming_melee == NULL && object->incoming_special == NULL &&
+             object->incoming_part == NULL))
             return;
     }
     if (!NewBlockAction(object)) {
@@ -5359,17 +5360,7 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
     if (object->character_context == CHARACTER_CONTEXT_COMBO) {
         object->field_0xef9 |= 8;
         if ((object->context_flags & 4) != 0) {
-            if ((action_pressed == 0 && object->combo_input_latched == 0) || object->combo_stage > 1) {
-                object->combo_input_timer -= FRAMETIME;
-                if (object->combo_input_timer <= 0.0f) {
-                    object->character_context = CHARACTER_CONTEXT_NONE;
-                    object->context_flags |= 2;
-                    if (action_held != 0)
-                        StartHold(object);
-                } else if (object->combo_stage < 2 && jump_pressed != 0) {
-                    ComboJump(object);
-                }
-            } else {
+            if (!((action_pressed == 0 && object->combo_input_latched == 0) || object->combo_stage > 1)) {
                 if (object->combo_stage == 1) {
                     SetComboOpponent(object, 1.0f, 1, 0);
                     object->context_flags &= ~4;
@@ -5427,6 +5418,16 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
                     object->combo_input_latched = 0;
                     object->field_0xe20 |= 0x40;
                     object->context_flags &= ~0x50;
+                }
+            } else {
+                object->combo_input_timer -= FRAMETIME;
+                if (object->combo_input_timer <= 0.0f) {
+                    object->character_context = CHARACTER_CONTEXT_NONE;
+                    object->context_flags |= 2;
+                    if (action_held != 0)
+                        StartHold(object);
+                } else if (object->combo_stage < 2 && jump_pressed != 0) {
+                    ComboJump(object);
                 }
             }
             goto combo_finished;
@@ -5526,7 +5527,7 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
             object->character_context == 0x30 || object->character_context == 0x3d ||
             object->character_context == 0x43 || object->character_context == 0x4a ||
             object->character_context == 0x61 || object->character_context == 0x4b) {
-            if (__builtin_expect(
+            if (
                     ((object->pad_gamepad->allocated_5a & 4) != 0 || buttons_pressed != 0) &&
                         (object->field_0xe22 & GAMEOBJECT_E22_FLAG_WEAPON_ANIMATION) != 0 &&
                         object->weapon_scale_state == WEAPON_SCALE_IDLE && object->character_context != 6 &&
@@ -5537,8 +5538,7 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
                         object->character_context != 46 && (object->field_0xe23 & 1) == 0 &&
                         (CInfo[object->character_context].flags & 0x4000000) == 0 &&
                         ((CInfo[object->character_context].flags & 0x8000000) == 0 || (object->jump_flags & 2) == 0) &&
-                        object->character_context != 8,
-                    1)) {
+                        object->character_context != 8) {
                 if (object->apiobj.field_0x27d != 0 && object->pad_gamepad->input_magnitude == 0.0f &&
                     object->apiobj.character_model
                             ->model_data_b[GetGameCharacterData(object)->field275_0x116 == 0 &&
@@ -5569,11 +5569,11 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
             }
             return;
         }
-        if ((object->field_0xe20 & 4) != 0 || (!player_active && object->weapon_scale_state != 0) ||
+        if (__builtin_expect((object->field_0xe20 & 4) != 0 || (!player_active && object->weapon_scale_state != 0) ||
             object->apiobj.field_0x27d == 0 ||
             (object->character_context != 1 && object->character_context != -1 && object->character_context != 2 &&
              object->character_context != 4 && object->character_context != 3 && object->character_context != 6 &&
-             object->character_context != 7))
+             object->character_context != 7), 1))
             goto combo_finished;
         SetWeaponOut(object);
         if (object->incoming_bolt != NULL || object->incoming_melee != NULL || object->incoming_special != NULL ||
@@ -5604,7 +5604,7 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
                 object->blocked_bolt = NULL;
                 object->blocked_part = NULL;
                 object->context_animation_timer = 0.1f;
-                if (object->incoming_special != NULL) {
+                if (__builtin_expect(object->incoming_special != NULL, 0)) {
                     object->blocked_attack_stage = object->incoming_special->context_animation;
                     object->field_0xe23 |= 0x20;
                     object->block_attacker = object->incoming_special;
@@ -6349,13 +6349,12 @@ static void ForceDeflectCode(GameObject_s *object, i32 pressed, i32 held) {
         PART_s *part;
         if (__builtin_expect(waiting, 0))
             part = object->force_part;
-        else if (__builtin_expect(assist != NULL, 1))
+        else if (assist != NULL)
             part = assist;
         else {
             f32 range = TouchHacks::GetIncomingPartRange();
-            f32 radius = object->apiobj.field_0x1e0;
-            if (radius <= object->apiobj.field_0x1dc)
-                radius = object->apiobj.field_0x1dc;
+            f32 radius = object->apiobj.field_0x1e0 > object->apiobj.field_0x1dc ? object->apiobj.field_0x1e0
+                                                                                 : object->apiobj.field_0x1dc;
             part = FindIncomingPart(object, &object->apiobj.collision_position, radius, 0x800a, range);
         }
         if (part == NULL)
@@ -6364,7 +6363,7 @@ static void ForceDeflectCode(GameObject_s *object, i32 pressed, i32 held) {
         object->force_glow_candidate = part;
         object->force_glow_candidate_kind = 3;
         SetHeadTarget(object, &part->position, 2, 1.0f, 0.0f, 0.0f);
-        if (assist == NULL && pressed == 0 && !waiting)
+        if (__builtin_expect(assist == NULL && pressed == 0 && !waiting, 0))
             return;
         object->force_part = part;
         part->flags |= 0x10000;
@@ -6384,15 +6383,17 @@ static void ForceDeflectCode(GameObject_s *object, i32 pressed, i32 held) {
     }
     object->field_0xe22 |= 2;
     object->context_animation_timer += FRAMETIME;
-    if (__builtin_expect((object->apiobj.flags_low & 0x80) != 0, 1))
+    if ((object->apiobj.flags_low & 0x80) != 0)
         NewRumble(object->pad_gamepad->pad, qrand() * 1.5259022e-05f * 0.6f, 0);
     if (object->force_part != NULL) {
+        object->force_part->carried_blowup =
+            reinterpret_cast<GIZMOBLOWUP_s *>(reinterpret_cast<usize>(object->force_part->carried_blowup) | 1);
         PART_s *part = object->force_part;
-        part->force_flags |= 1;
         part->flags &= ~0x4000;
-        if (__builtin_expect(object->context_animation_timer < 0.2f, 0))
+        if (__builtin_expect(object->context_animation_timer < 0.2f, 0)) {
             part->velocity.y = SeekValF(part->velocity.y, 2.0f, 6.0f);
-        part = object->force_part;
+            part = object->force_part;
+        }
         NUVEC direction;
         if (part->owner == NULL || part->owner->apiobj.field_0x27c != -1)
             NuVecRotateY(&direction, &v001, object->apiobj.facing_angle);
@@ -6722,9 +6723,9 @@ void FindForcePushTarget(GameObject_s *object, i32 activate, i32 target_filter) 
                     (object->apiobj.character_data->model_flags & 8) != 0) {
                     candidate_choke = candidate->id == id_GAMORREANGUARD;
                 }
-                if ((candidate->apiobj.character_data->model_flags & 0x10) == 0 &&
+                if (__builtin_expect((candidate->apiobj.character_data->model_flags & 0x10) == 0 &&
                     (candidate->apiobj.character_data->game_character->flags_090 & 0x40) != 0 &&
-                    candidate->apiobj.character_model->model_data_b[0x41] != NULL) {
+                    candidate->apiobj.character_model->model_data_b[0x41] != NULL, 1)) {
                     candidate_direct = 1;
                 } else if ((candidate_choke | second_style) != 0) {
                     if (super_weirdo != 0 && qrand() <= 0x7fff &&
@@ -6738,7 +6739,7 @@ void FindForcePushTarget(GameObject_s *object, i32 activate, i32 target_filter) 
                             candidate_choke = 0;
                             candidate_second = 0;
                         }
-                    } else if (candidate->apiobj.character_model->model_data_b[0x53] == NULL) {
+                    } else if (__builtin_expect(candidate->apiobj.character_model->model_data_b[0x53] == NULL, 0)) {
                         if ((candidate->apiobj.character_data->model_flags & 0x10) == 0)
                             goto reload_object_count;
                         candidate_choke = 0;
@@ -11172,9 +11173,13 @@ void Move_WEIRDO(GameObject_s *object) {
     u32 jump_animations;
     if (!has_sabre) {
         hit_effect = -1;
-        jump_animations = SuperWeirdo(object) ? 0x109 : 0x208;
+        jump_animations = 8;
     } else
-        jump_animations = SuperWeirdo(object) ? 0x11b : 0x1b;
+        jump_animations = 0x1b;
+    if (SuperWeirdo(object))
+        jump_animations |= 0x101;
+    else if (!has_sabre)
+        jump_animations |= 0x200;
     JumpCode(object, jump_pressed, jump_held, jump_animations, action_pressed, action_held, hit_effect);
     GizPanel_MoveCode(WORLD, object, special_pressed);
     HatMachine_MoveCode(WORLD, object, special_pressed);
@@ -11212,7 +11217,7 @@ void Move_WEIRDO(GameObject_s *object) {
     HoldCode(object);
     Attracto_MoveCode(WORLD, object);
     SecurityDoor_MoveCode(WORLD, object);
-    if (__builtin_expect(has_sabre != 0, 1)) {
+    if (has_sabre) {
         BlockCode(object, action_pressed, action_held, jump_pressed, 0);
         SwipeCode(object, action_pressed, action_held);
         if (detonator_used == 1)
@@ -11257,10 +11262,10 @@ void Move_WEIRDO(GameObject_s *object) {
     }
     if (object->character_context == -1 && object->field_0xe31 == 0 && object->apiobj.field_0x27d != 0 &&
         object->apiobj.field_0x27e == 0 &&
-        ((object->movement_runtime_flags & 4) != 0 ||
-         (object->fall_animation_timer >= 0.2f &&
-          (object->pad_gamepad->input_magnitude == 0.0f ||
-           (!object->apiobj.player_controlled && object->apiobj.character_model->model_data_b[0x59] != NULL)))))
+        (object->fall_animation_timer >= 0.2f
+             ? (object->movement_runtime_flags & 4) != 0 || object->pad_gamepad->input_magnitude == 0.0f ||
+                   (!object->apiobj.player_controlled && object->apiobj.character_model->model_data_b[0x59] != NULL)
+             : (object->movement_runtime_flags & 4) != 0))
         StartFallLand(object, -1);
     if (object->apiobj.field_0x27d != 0)
         object->movement_runtime_flags &= ~4;

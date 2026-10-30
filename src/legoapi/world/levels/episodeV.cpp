@@ -160,7 +160,7 @@ static inline void HothBattle_AssignSpawnLocator(GameObject_s *object, AILOCATOR
         if (entry != locator) {
             continue;
         }
-        object->ai.locator = entry;
+        object->ai.locator = locator;
         set->assigned[index] = object->apiobj.field_0x289;
         break;
     }

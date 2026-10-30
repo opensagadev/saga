@@ -334,9 +334,11 @@ alloc_error:
             this->sound_buffers[0]->Free();
         }
 
-        this->sound_buffers[0]->~NuSoundBuffer();
-
-        NU_FREE(this->sound_buffers[0]);
+        NuSoundBuffer *buffer = this->sound_buffers[0];
+        if (buffer != NULL) {
+            buffer->~NuSoundBuffer();
+            NU_FREE(buffer);
+        }
 
         this->sound_buffers[0] = NULL;
     }
@@ -346,9 +348,11 @@ alloc_error:
             this->sound_buffers[1]->Free();
         }
 
-        this->sound_buffers[1]->~NuSoundBuffer();
-
-        NU_FREE(this->sound_buffers[1]);
+        NuSoundBuffer *buffer = this->sound_buffers[1];
+        if (buffer != NULL) {
+            buffer->~NuSoundBuffer();
+            NU_FREE(buffer);
+        }
 
         this->sound_buffers[1] = NULL;
     }

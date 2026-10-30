@@ -1990,7 +1990,7 @@ void Hub_UpdateMiniKits(WORLDINFO_s *world) {
             rate = (MAX(-4551, (MIN(4551, rate))));
             kit->rotation_velocity = SeekRot(kit->rotation_velocity, rate, 8.0f);
             i32 tilt = 0;
-            if (__builtin_expect(i == hub_minikitviewer_area && speed > 0.0f, 0)) {
+            if (i == hub_minikitviewer_area && speed > 0.0f) {
                 i32 diff = RotDiff(old_rotation, kit->rotation);
                 f32 angular_speed = (f32)(diff < 0 ? -diff : diff) / FRAMETIME;
                 if (angular_speed < 32768.0f)

@@ -487,7 +487,7 @@ static void HatMachine_Draw(void *world_ptr, void *, float) {
                     machine->state_duration = 2.0f;
                 }
                 animation_frame = machine->animation_time * anims[0]->tfactor * 60.0f;
-                if (end_frames[0] <= animation_frame) {
+                if (__builtin_expect(end_frames[0] <= animation_frame, 0)) {
                     animation_frame = end_frames[0];
                 }
             }

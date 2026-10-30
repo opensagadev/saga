@@ -1023,7 +1023,7 @@ extern "C" void NuShaderObjectGLSLSetupTextureStates(NUSHADEROBJECT *shader, num
                 NuCheckGLErrorsFL(source, 0x4b5);
                 break;
             case 18:
-                if (__builtin_expect(NuWindCurrent(nuapi.wind) >= 0, 1)) {
+                if (NuWindCurrent(nuapi.wind) >= 0) {
                     const u32 unit = static_cast<u16>(parameter.location) & 0x7ff;
                     NuTexSetTextureWithStagePS(NuTexGetNative(NuWindCurrent(nuapi.wind)), unit);
                     REPEAT_STATE();
