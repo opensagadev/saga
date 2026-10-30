@@ -1086,58 +1086,54 @@ static void GizSpinner_ResetAll(void *world_ptr, void *, void *progress_ptr) {
         return;
     }
 
-    i32 index = 0;
-    if (world->current_level->max_spinners != 0) {
-        do {
-            GIZSPINNER_s &spinner = world->spinners[index];
-            if ((spinner.flags & GIZSPINNER_FLAG_VALID) != 0) {
-                if (entry != NULL && (entry->flags & SPINNER_PROGRESS_VALID) != 0) {
-                    spinner.rotation = entry->rotation;
-                    if (entry->animation_position != 1.0f) {
-                        GameAnimSet_JumpToAnimPos(spinner.anim_set, entry->animation_position);
-                    } else {
-                        GameAnimSet_JumpToEnd(spinner.anim_set);
-                    }
-
-                    if ((entry->flags & SPINNER_PROGRESS_ARM_VISIBLE) != 0) {
-                        spinner.flags &= static_cast<u8>(~GIZSPINNER_FLAG_HIDE_ARM);
-                    } else {
-                        spinner.flags |= GIZSPINNER_FLAG_HIDE_ARM;
-                    }
-                    if ((entry->flags & SPINNER_PROGRESS_BASE_VISIBLE) != 0) {
-                        spinner.flags &= static_cast<u8>(~GIZSPINNER_FLAG_HIDE_BASE);
-                    } else {
-                        spinner.flags |= GIZSPINNER_FLAG_HIDE_BASE;
-                    }
+    for (i32 index = 0; index < world->current_level->max_spinners; ++index, ++entry) {
+        GIZSPINNER_s &spinner = world->spinners[index];
+        if ((spinner.flags & GIZSPINNER_FLAG_VALID) != 0) {
+            if (__builtin_expect(entry != NULL && (entry->flags & SPINNER_PROGRESS_VALID) != 0, 0)) {
+                spinner.rotation = entry->rotation;
+                if (__builtin_expect(entry->animation_position != 1.0f, 0)) {
+                    GameAnimSet_JumpToAnimPos(spinner.anim_set, entry->animation_position);
                 } else {
-                    spinner.rotation = spinner.initial_rotation;
-                    GameAnimSet_JumpToAnimPos(spinner.anim_set, 0.0f);
+                    GameAnimSet_JumpToEnd(spinner.anim_set);
                 }
 
-                spinner.field_0x090 = 0.0f;
-                spinner.room_index = -1;
-                spinner.target_rotation = spinner.rotation;
-                spinner.previous_rotation = spinner.rotation;
-                spinner.state = static_cast<u8>(GizSpinner_GetState(&spinner));
-                spinner.state_flags = (spinner.state_flags & ~0x300u) | GIZSPINNER_STATE_RESET;
-
-                NuMtxSetRotationY(&spinner.matrix, spinner.initial_rotation);
-                NuMtxTranslate(&spinner.matrix, &spinner.position);
-                NewTerrPlatformsOff();
-
-                if (NuSpecialGetMtx(&spinner.special) != NULL) {
-                    NUMTX *special_matrix = NuSpecialGetMtx(&spinner.special);
-                    spinner.ground_height = GameShadow(NULL, NUMTX_GET_ROW_VEC(special_matrix, 3), 5.0f, -1);
-                    if (spinner.ground_height != 2000000.0f && ShadowInfo() == 2) {
-                        spinner.state_flags |= GIZSPINNER_STATE_SHADOW_PLATFORM;
-                    }
+                if (__builtin_expect((entry->flags & SPINNER_PROGRESS_ARM_VISIBLE) != 0, 1)) {
+                    spinner.flags &= static_cast<u8>(~GIZSPINNER_FLAG_HIDE_ARM);
                 } else {
-                    spinner.ground_height = 2000000.0f;
+                    spinner.flags |= GIZSPINNER_FLAG_HIDE_ARM;
                 }
+                if (__builtin_expect((entry->flags & SPINNER_PROGRESS_BASE_VISIBLE) != 0, 1)) {
+                    spinner.flags &= static_cast<u8>(~GIZSPINNER_FLAG_HIDE_BASE);
+                } else {
+                    spinner.flags |= GIZSPINNER_FLAG_HIDE_BASE;
+                }
+            } else {
+                spinner.rotation = spinner.initial_rotation;
+                GameAnimSet_JumpToAnimPos(spinner.anim_set, 0.0f);
             }
-            ++index;
-            ++entry;
-        } while (world->current_level->max_spinners > index);
+
+            spinner.field_0x090 = 0.0f;
+            spinner.room_index = -1;
+            spinner.target_rotation = spinner.rotation;
+            spinner.previous_rotation = spinner.rotation;
+            spinner.state = static_cast<u8>(GizSpinner_GetState(&spinner));
+            spinner.state_flags &= ~0x300u;
+            spinner.state_flags |= GIZSPINNER_STATE_RESET;
+
+            NuMtxSetRotationY(&spinner.matrix, spinner.initial_rotation);
+            NuMtxTranslate(&spinner.matrix, &spinner.position);
+            NewTerrPlatformsOff();
+
+            if (NuSpecialGetMtx(&spinner.special) != NULL) {
+                NUMTX *special_matrix = NuSpecialGetMtx(&spinner.special);
+                spinner.ground_height = GameShadow(NULL, NUMTX_GET_ROW_VEC(special_matrix, 3), 5.0f, -1);
+                if (spinner.ground_height != 2000000.0f && ShadowInfo() == 2) {
+                    spinner.state_flags |= GIZSPINNER_STATE_SHADOW_PLATFORM;
+                }
+            } else {
+                spinner.ground_height = 2000000.0f;
+            }
+        }
     }
 
     GizSpinners_Update(world, NULL, FRAMETIME);

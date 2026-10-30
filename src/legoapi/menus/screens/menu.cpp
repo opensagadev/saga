@@ -510,17 +510,17 @@ void MenuDrawOptions(MENU_s *menu) {
     dme_sy = 1.0f;
 
     if (TestForController() != 0) {
-        DrawMenuEntryEx(menu, TTab[tCONTROLLERCONNECTED], MenuA / 2);
+        DrawMenuEntryEx(menu, TTab[tCONTROLLERCONNECTED], static_cast<u8>(MenuA / 2));
     } else {
         NuStrCpy(text, TTab[tCONTROLS]);
         NuStrCat(text, ": ");
-        NuStrCat(text, TTab[MechInputTouchSystem::s_baseControlMode == 0 ? tCONSOLE : tTOUCH]);
+        NuStrCat(text, MechInputTouchSystem::s_baseControlMode != 0 ? TTab[tTOUCH] : TTab[tCONSOLE]);
         GameDrawMenuEntry(menu, text);
     }
 
     NuStrCpy(text, TTab[tSURROUNDSOUND]);
     NuStrCat(text, ": ");
-    NuStrCat(text, TTab[TempOptions.field2_0x2 != 0 ? tON : tOFF]);
+    NuStrCat(text, TempOptions.field2_0x2 != 0 ? TTab[tON] : TTab[tOFF]);
     dme_sy = menu->item_scale;
     GameDrawMenuEntry(menu, text);
 
@@ -530,12 +530,12 @@ void MenuDrawOptions(MENU_s *menu) {
 
     NuStrCpy(text, TTab[tMUSIC]);
     NuStrCat(text, ": ");
-    NuStrCat(text, TTab[TempOptions.field6_0x6 != 0 ? tON : tOFF]);
+    NuStrCat(text, TempOptions.field6_0x6 != 0 ? TTab[tON] : TTab[tOFF]);
     dme_sy = menu->item_scale;
     GameDrawMenuEntry(menu, text);
 
     if (GAMEDEMO == 0) {
-        sprintf(text, "%s: %s", TTab[tWIDESCREEN], TTab[TempOptions.field11_0xb != 0 ? tON : tOFF]);
+        sprintf(text, "%s: %s", TTab[tWIDESCREEN], TempOptions.field11_0xb != 0 ? TTab[tON] : TTab[tOFF]);
         dme_sy = menu->item_scale;
         GameDrawMenuEntry(menu, text);
     }
@@ -543,7 +543,7 @@ void MenuDrawOptions(MENU_s *menu) {
     if (__builtin_expect(memcmp(&TempOptions, &Game.options_save, sizeof(TempOptions)) == 0, 0)) {
         NuStrCpy(text, TTab[tBACK]);
     } else {
-        if (menu->selected_item != menu->draw_item && menu_flash != 0) {
+        if (menu->selected_row != menu->draw_item && menu_flash != 0) {
             text[0] = '\0';
         } else {
             NuStrCpy(text, TTab[tACCEPT]);
@@ -1006,13 +1006,17 @@ void MenuUpdateOptions(MENU_s *menu) {
         legoSetMusicVolume(SuperOptions.music_enabled != 0 ? GameGetMusicVolume(&TempOptions) : 0.0f);
 
     i32 preview = 0;
-    opts_sfx_wait -= FRAMETIME;
-    if (!(opts_sfx_wait > 0.0f)) {
-        opts_sfx_i = static_cast<i32>(static_cast<u32>(opts_sfx_i) + 1);
-        opts_sfx_wait += 1.5f;
-        if (__builtin_expect(opts_sfx_i == 1, 1))
+    f32 wait = opts_sfx_wait - FRAMETIME;
+    if (wait <= 0.0f) {
+        i32 next = static_cast<i32>(static_cast<u32>(opts_sfx_i) + 1);
+        opts_sfx_wait = wait + 1.5f;
+        if (next == 1)
             opts_sfx_i = 0;
+        else
+            opts_sfx_i = next;
         preview = 1;
+    } else {
+        opts_sfx_wait = wait;
     }
 
     if (menu->cancel_pressed != 0) {
@@ -1032,7 +1036,7 @@ void MenuUpdateOptions(MENU_s *menu) {
                 TempOptions.surround_sound = TempOptions.surround_sound == 0;
                 MenuSFX = GameAudio_GetSfxId(0x30);
             } else if (preview != 0 && TempOptions.surround_sound != 0) {
-                i32 angle = static_cast<i32>(NuFmod(GlobalTimer.time_elapsed, 8.0f) * 0.125f * 65536.0f) & 0xffff;
+                i32 angle = static_cast<u16>(NuFmod(GlobalTimer.time_elapsed, 8.0f) * 0.125f * 65536.0f);
                 NUVEC position;
                 position.x = GameCam->pos.x + NU_SIN_LUT(angle) * nusound_fade_start;
                 position.y = GameCam->pos.y;

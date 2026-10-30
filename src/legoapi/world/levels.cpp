@@ -1876,31 +1876,27 @@ void LevelSplines_InitForLevel(WORLDINFO_s *world) {
 
     for (i32 i = 0; i < LEVELSPLINECOUNT; ++i) {
         LEVELSPLINE *entry = &LevSplList[i];
-        if (__builtin_expect((entry->area != -1 && world->level_sub_id != entry->area) ||
-            (entry->level != -1 && world->level_idx != entry->level), 0)) {
+        if ((entry->area != -1 && world->level_sub_id != entry->area) ||
+            (entry->level != -1 && world->level_idx != entry->level)) {
             continue;
         }
 
         NUGSCN *scene = *(entry->scene != NULL ? entry->scene : &world->current_gscn);
         if (scene != NULL) {
-            NUGSPLINE *spline = NuSplineFind(scene, const_cast<char *>(entry->name));
-            world->portal_places[i] = reinterpret_cast<PORTALPOS *>(spline);
-            if (spline != NULL) {
-                const i32 point_count = spline->length;
-                if (__builtin_expect((entry->min_points != 0 && point_count < entry->min_points) ||
-                    (entry->max_points != 0 && entry->min_points <= entry->max_points &&
-                     point_count > entry->max_points), 1)) {
+            world->portal_places[i] =
+                reinterpret_cast<PORTALPOS *>(NuSplineFind(scene, const_cast<char *>(entry->name)));
+            if (world->portal_places[i] != NULL) {
+                NUGSPLINE *spline = reinterpret_cast<NUGSPLINE *>(world->portal_places[i]);
+                if (LevSplList[i].min_points != 0 && spline->length < LevSplList[i].min_points) {
+                    world->portal_places[i] = NULL;
+                } else if (LevSplList[i].max_points != 0 && LevSplList[i].min_points <= LevSplList[i].max_points &&
+                           spline->length > LevSplList[i].max_points) {
                     world->portal_places[i] = NULL;
                 }
             }
         }
 
-        if (scene == NULL) {
-            continue;
-        }
-
-        if (levspl_i_start >= 0 && levspl_i_start < LEVELSPLINECOUNT) {
-
+        if (levspl_i_start != -1) {
             name[0] = '\0';
             if (Mission_Active(NULL) != NULL) {
                 NuStrCpy(name, "bounty_start");
@@ -1916,7 +1912,7 @@ void LevelSplines_InitForLevel(WORLDINFO_s *world) {
                 NUGSPLINE *start = NuSplineFind(scene, name);
                 if (start != NULL && start->length > 1) {
                     world->portal_places[levspl_i_start] = reinterpret_cast<PORTALPOS *>(start);
-                    if (levspl_i_startcam >= 0 && levspl_i_startcam < LEVELSPLINECOUNT) {
+                    if (levspl_i_startcam != -1) {
                         world->portal_places[levspl_i_startcam] = NULL;
                     }
                 }

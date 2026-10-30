@@ -308,6 +308,12 @@ ADDGIZMOTYPE *Attractos_RegisterGizmo(i32 type_id) {
 void Attracto_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
     NUVEC position;
     char text[32];
+    NUVEC ray;
+    NUVEC origin;
+    NUVEC target;
+    NUVEC delta;
+    i32 red, green, blue;
+    f32 distance;
     i32 available = 0;
     if (__builtin_expect((object->apiobj.flags_low & 0x80) != 0, 1) && __builtin_expect(object->suit != NULL, 1) &&
         __builtin_expect((static_cast<SUIT_s *>(object->suit)->flags & 0x80) != 0, 1)) {
@@ -344,7 +350,15 @@ void Attracto_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
                         return;
                 }
             }
-            goto begin_suction;
+            object->character_context = 0x52;
+            object->context_animation = 0x9a;
+            object->context_animation_timer = 0.0f;
+            object->airborne_action_duration = 0.2f;
+            object->external_force.x = object->camera_screen_position.x;
+            object->external_force.y = object->camera_screen_position.y;
+            object->external_force.z = 1.0f;
+            object->launch_origin = v000;
+            return;
         }
         object->airborne_action_duration -= FRAMETIME;
         if (object->airborne_action_duration <= 0.0f)
@@ -358,9 +372,10 @@ void Attracto_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
         }
         if (object->apiobj.character_model->model_data_b[object->context_animation] == NULL ||
             AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0) != NULL) {
-            object->context_animation_timer += FRAMETIME;
+            f32 timer = object->context_animation_timer + FRAMETIME;
             f32 x = object->pad_gamepad->input_direction_z * 1.25f;
             f32 y = object->pad_gamepad->input_direction_x * 1.25f;
+            object->context_animation_timer = timer;
             if (object->context_animation_timer < 0.25f) {
                 f32 ramp = object->context_animation_timer * 4.0f;
                 x *= ramp;
@@ -379,7 +394,6 @@ void Attracto_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
                         !(fabsf(shard->screen_position.x - object->external_force.x) < 0.2f) ||
                         !(fabsf(shard->screen_position.y - object->external_force.y) < 0.2f))
                         continue;
-                    NUVEC delta;
                     f32 distance = NuVecDistSqr(&shard->position, &object->apiobj.collision_position, &delta);
                     if (!(distance < best))
                         continue;
@@ -388,17 +402,19 @@ void Attracto_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
                 }
             }
             if (nearest != NULL) {
-                NUVEC origin = {object->apiobj.pos_x, (object->apiobj.pos_y + object->apiobj.field_0x194) * 0.5f,
-                                object->apiobj.pos_z};
-                NUVEC target = {0.0f, 0.05f, 0.0f};
+                origin.x = object->apiobj.pos_x;
+                origin.y = (object->apiobj.pos_y + object->apiobj.field_0x194) * 0.5f;
+                origin.z = object->apiobj.pos_z;
+                target.z = 0.0f;
+                target.x = 0.0f;
+                target.y = 0.05f;
                 if (nearest->angle_z != 0)
                     NuVecRotateZ(&target, &target, nearest->angle_z);
                 if (nearest->angle_x != 0)
                     NuVecRotateX(&target, &target, nearest->angle_x);
                 NuVecAdd(&target, &target, &nearest->position);
-                NUVEC delta;
-                NuVecSub(&delta, &target, &origin);
-                if (__builtin_expect(GameRayCast(&origin, &delta, 0.0f, 0x1f) == 0, 1)) {
+                NuVecSub(&ray, &target, &origin);
+                if (__builtin_expect(GameRayCast(&origin, &ray, 0.0f, 0x1f) == 0, 1)) {
                     object->apiobj.movement_facing_angle = NuAtan2D(nearest->position.x - object->apiobj.pos_x,
                                                                     nearest->position.z - object->apiobj.pos_z);
                     if (ParticlesPerSecond(3.0f, FRAMETIME) > 0)
@@ -411,16 +427,15 @@ void Attracto_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
             }
         }
         KeepPointOnScreen(&object->external_force, &object->launch_origin);
-        i32 red, green, blue;
         Batarang_GetSightInfo(object->id, &red, &green, &blue, NULL);
         AddGameMessage("[  ]", &object->external_force, 1.0f, NULL, 0.0f, red, green, blue, 0x1080, 0.0f);
         return;
     }
     if (available && object->apiobj.field_0x27d != 0 && ObjLandReady(object)) {
         f32 radius = object->apiobj.field_0x1dc + 0.25f;
-        f32 distance;
+        radius *= radius;
         ATTRACTO_s *attracto = Attracto_FindNearest(world, &object->apiobj.lower_position, object, &distance);
-        if (attracto != NULL && radius * radius > distance && object->field_0x106e != 0 &&
+        if (attracto != NULL && radius > distance && object->field_0x106e != 0 &&
             (object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) != 0) {
             object->character_context = 0x53;
             object->field_0x788 = attracto;
@@ -435,15 +450,14 @@ void Attracto_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
     } else {
         return;
     }
-begin_suction:
     object->character_context = 0x52;
     object->context_animation = 0x9a;
     object->context_animation_timer = 0.0f;
+    object->airborne_action_duration = 0.2f;
     object->external_force.x = object->camera_screen_position.x;
     object->external_force.y = object->camera_screen_position.y;
     object->external_force.z = 1.0f;
     object->launch_origin = v000;
-    object->airborne_action_duration = 0.2f;
 }
 
 void Attracto_GetPos_Top(ATTRACTO_s *attracto, NUVEC *position) {

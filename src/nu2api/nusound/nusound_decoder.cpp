@@ -290,29 +290,27 @@ void NuSoundDecodeThread::ThreadFunc(void *self_) {
         entry.~Loader();
         __sync_fetch_and_add(&self->head_index, 1);
 
-        NuSoundDecoder *decoder = request.decoder;
-        NuSoundBuffer *buffer = request.buffer;
-        bool loop = request.loop;
-
         // libTTapp.so 0x31f4d3: an empty request is the shutdown marker; the
         // request copy is still released at the end of the iteration.
-        if (decoder == NULL) {
+        if (request.decoder == NULL) {
             NuSoundDecodeThread::sShutdownSemaphore.Signal();
             running = false;
         } else {
-            if (decoder->closing == false) {
+            if (request.decoder->closing == false) {
                 // Decode owns the destination buffer lock. ThreadFunc in the
                 // target dispatches directly through the decoder vtable here;
                 // it does not take a second NuSoundBuffer lock around that call.
-                decoder->Decode(*decoder->GetEncodedSource(), *buffer, loop);
-                decoder->buffers_started++;
+                request.decoder->Decode(*request.decoder->GetEncodedSource(), *request.buffer, request.loop);
+                request.decoder->buffers_started++;
 
                 NuSoundWeakPtrListNode::sPtrAccessLock.Lock();
                 NuSoundBufferCallback *callback = (NuSoundBufferCallback *)request.callback.obj;
-                if (__builtin_expect(callback != NULL, 0)) {
-                    callback->SubmitBuffer(buffer);
+                if (callback != NULL) {
+                    callback->SubmitBuffer(request.buffer);
+                    NuSoundWeakPtrListNode::sPtrAccessLock.Unlock();
+                } else {
+                    NuSoundWeakPtrListNode::sPtrAccessLock.Unlock();
                 }
-                NuSoundWeakPtrListNode::sPtrAccessLock.Unlock();
             }
 
             // libTTapp.so 0x31f1c8: the request is complete; drop the pending
@@ -320,7 +318,8 @@ void NuSoundDecodeThread::ThreadFunc(void *self_) {
             // flag through the decoder's decode-sync pair (mutex +0xdc,
             // cond +0xe0, done flag +0xe4). This never touches the decoder's
             // lifetime lock mutex, which the owning voice holds.
-            __sync_fetch_and_sub(&decoder->field_0xd4, 1);
+            __sync_fetch_and_sub(&request.decoder->field_0xd4, 1);
+            NuSoundDecoder *decoder = request.decoder;
             NuSoundMutexLock(&decoder->decode_mutex);
             if (decoder->decode_done == false) {
                 decoder->decode_done = true;

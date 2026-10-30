@@ -463,10 +463,10 @@ void MechInputTouchGestureBasedController::ProcessDragMovement(GameObject_s &obj
     f32 origin_x = field_90->down_position.x;
     f32 origin_y = field_90->down_position.y;
     if (object.id != id_GRABCONTROL && stick_mode.value == 0) {
-        const f32 screen_x = object.camera_screen_position.x;
-        const f32 screen_y = object.camera_screen_position.y;
-        origin_x = MAX(-0.6f, (MIN(screen_x, 0.6f)));
-        origin_y = MAX(-0.6f, (MIN(screen_y, 0.6f)));
+        origin_x = object.camera_screen_position.x;
+        origin_y = object.camera_screen_position.y;
+        origin_x = MAX(-0.6f, (MIN(origin_x, 0.6f)));
+        origin_y = MAX(-0.6f, (MIN(origin_y, 0.6f)));
     }
     NuVec2 drag = {origin_x - field_90->touch_position.x, origin_y - field_90->touch_position.y};
     if (field_94 != NULL) {
@@ -475,10 +475,11 @@ void MechInputTouchGestureBasedController::ProcessDragMovement(GameObject_s &obj
             drag = other_drag;
         }
     }
-    const f32 distance = NuFsqrt(drag.y * drag.y + drag.x * drag.x);
+    const f32 distance = NuFsqrt(drag.x * drag.x + drag.y * drag.y);
     bool moving = distance > 0.05f;
-    const NuVec2 down_drag = {field_90->down_position.x - field_90->touch_position.x,
-                              field_90->down_position.y - field_90->touch_position.y};
+    NuVec2 down_drag;
+    down_drag.y = field_90->down_position.y - field_90->touch_position.y;
+    down_drag.x = field_90->down_position.x - field_90->touch_position.x;
     if (field_90->target_object.Get() == NULL && isBucking) {
         moving = true;
     }
@@ -497,15 +498,15 @@ void MechInputTouchGestureBasedController::ProcessDragMovement(GameObject_s &obj
         moving = false;
     }
     const i32 context = object.character_context;
-    if (context == 0x2b || context == 0x0f || context == 0x36 || context == 0x2a || context == 0x4a ||
-        context == 0x47 || context == 0x22 || context == 0x61 || context == 0x3c || tag_button.Get() != NULL ||
+    if (context == 0x0f || context == 0x2b || context == 0x2a || context == 0x36 || context == 0x47 ||
+        context == 0x4a || context == 0x61 || context == 0x22 || context == 0x3c || tag_button.Get() != NULL ||
         !moving) {
         field_9c = 0.0f;
         return;
     }
-    if (!(object.touch_task != NULL && (object.touch_task->flags & 4) != 0) && context != 0x27 && context != 0x33 &&
-        context != 0x18 && context != 0x0c && context != LEGOCONTEXT_TUBE && context != LEGOCONTEXT_PUSHSPINNER &&
-        context != LEGOCONTEXT_JUMP && context != LEGOCONTEXT_BIGJUMP) {
+    if (!(object.touch_task != NULL && (object.touch_task->flags & 4) != 0) && context != 0x33 && context != 0x27 &&
+        context != 0x18 && __builtin_expect(context != 0x0c, 0) && context != LEGOCONTEXT_TUBE &&
+        context != LEGOCONTEXT_PUSHSPINNER && context != LEGOCONTEXT_JUMP && context != LEGOCONTEXT_BIGJUMP) {
         object.character_context = -1;
     }
     field_a5 = 1;
@@ -521,12 +522,14 @@ void MechInputTouchGestureBasedController::ProcessDragMovement(GameObject_s &obj
     const f32 sine = NU_SIN_LUT(angle);
     const f32 cosine = NU_COS_LUT(angle);
     const f32 strength = (MAX(0.0f, (MIN((distance - 0.05f) * 4.0f, 1.0f)))) * 1.4f;
-    const f32 stick_y = strength * cosine;
-    const f32 stick_x = -(strength * sine);
-    stick_values[0] = MAX(-1.0f, (MIN(stick_x, 1.0f)));
-    stick_values[1] = MAX(-1.0f, (MIN(stick_y, 1.0f)));
+    f32 stick_y = strength * cosine;
+    f32 stick_x = -(strength * sine);
+    stick_x = MAX(-1.0f, (MIN(stick_x, 1.0f)));
+    stick_values[0] = stick_x;
+    stick_y = MAX(-1.0f, (MIN(stick_y, 1.0f)));
+    stick_values[1] = stick_y;
     field_9c += FRAMETIME;
-    if (__builtin_expect(field_9c > 1.0f, 0)) {
+    if (__builtin_expect(field_9c > 1.0f, 1)) {
         Hint_SetComplete(0x5f3);
     }
     if (field_94 != NULL) {

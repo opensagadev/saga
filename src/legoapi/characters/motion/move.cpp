@@ -1072,28 +1072,29 @@ extern AICONDITIONDEF lego_aiconditiondefs[178];
 static void MoveAnim_Manage(GameObject_s *object, f32 movement_speed, i32 allow_tiptoe, i32 weapon_variant) {
     GAMECHARACTERDATA *game_character = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
 
+    i16 *requested = &object->apiobj.anim_packet.requested_animation;
     CHARACTER_ANIMATION animation;
     if (allow_tiptoe != 0 && movement_speed <= (game_character->tiptoe_speed + game_character->walk_speed) * 0.5f) {
         if (weapon_variant != 0 &&
             (object->weapon_scale == 1.0f || object->weapon_scale_state == WEAPON_SCALE_EXTENDING) &&
             object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_SABER_TIPTOE] != NULL) {
-            object->apiobj.anim_packet.requested_animation = animation = CHARACTER_ANIMATION_SABER_TIPTOE;
+            *requested = animation = CHARACTER_ANIMATION_SABER_TIPTOE;
         } else {
-            object->apiobj.anim_packet.requested_animation = animation = CHARACTER_ANIMATION_TIPTOE;
+            *requested = animation = CHARACTER_ANIMATION_TIPTOE;
         }
     } else if (movement_speed <= (game_character->walk_speed + game_character->run_speed) * 0.5f) {
         if (weapon_variant != 0 &&
             (object->weapon_scale == 1.0f || object->weapon_scale_state == WEAPON_SCALE_EXTENDING) &&
             object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_SABER_WALK] != NULL) {
-            object->apiobj.anim_packet.requested_animation = animation = CHARACTER_ANIMATION_SABER_WALK;
+            *requested = animation = CHARACTER_ANIMATION_SABER_WALK;
         } else if (object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_BACKWARDS] != NULL &&
                    (object->field_0xefd & GAMEOBJECT_MOVEMENT_FLAG_BACKWARDS) != 0) {
-            object->apiobj.anim_packet.requested_animation = animation = CHARACTER_ANIMATION_BACKWARDS;
+            *requested = animation = CHARACTER_ANIMATION_BACKWARDS;
         } else {
-            object->apiobj.anim_packet.requested_animation = animation = CHARACTER_ANIMATION_WALK;
+            *requested = animation = CHARACTER_ANIMATION_WALK;
         }
     } else {
-        object->apiobj.anim_packet.requested_animation = animation =
+        *requested = animation =
             weapon_variant != 0 &&
                     (object->weapon_scale == 1.0f || object->weapon_scale_state == WEAPON_SCALE_EXTENDING) &&
                     object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_SABER_RUN] != NULL
@@ -1106,13 +1107,13 @@ static void MoveAnim_Manage(GameObject_s *object, f32 movement_speed, i32 allow_
         (object->movement_context_state & 0x00ffff00) != 0x00054300) {
         if (animation == CHARACTER_ANIMATION_TIPTOE &&
             object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_SUIT_TIPTOE] != NULL) {
-            object->apiobj.anim_packet.requested_animation = animation = CHARACTER_ANIMATION_SUIT_TIPTOE;
+            *requested = animation = CHARACTER_ANIMATION_SUIT_TIPTOE;
         } else if (animation == CHARACTER_ANIMATION_WALK &&
                    object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_SUIT_WALK] != NULL) {
-            object->apiobj.anim_packet.requested_animation = animation = CHARACTER_ANIMATION_SUIT_WALK;
+            *requested = animation = CHARACTER_ANIMATION_SUIT_WALK;
         } else if (animation == CHARACTER_ANIMATION_RUN &&
                    object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_SUIT_RUN] != NULL) {
-            object->apiobj.anim_packet.requested_animation = animation = CHARACTER_ANIMATION_SUIT_RUN;
+            *requested = animation = CHARACTER_ANIMATION_SUIT_RUN;
         }
     }
 
@@ -1120,36 +1121,48 @@ static void MoveAnim_Manage(GameObject_s *object, f32 movement_speed, i32 allow_
     // the passes explicit preserves its finite walk/run alternation when a
     // model supplies none of the ordinary locomotion clips.
     if (object->apiobj.character_model->model_data_b[animation] == NULL) {
-        if (__builtin_expect(animation == CHARACTER_ANIMATION_TIPTOE, 0)) {
-            object->apiobj.anim_packet.requested_animation = animation = CHARACTER_ANIMATION_WALK;
-        } else if (animation == CHARACTER_ANIMATION_WALK) {
-            object->apiobj.anim_packet.requested_animation = animation = CHARACTER_ANIMATION_RUN;
-        } else if (animation == CHARACTER_ANIMATION_RUN) {
-            object->apiobj.anim_packet.requested_animation = animation = CHARACTER_ANIMATION_WALK;
-        } else {
-            return;
+        switch (animation) {
+            case CHARACTER_ANIMATION_TIPTOE:
+                *requested = animation = CHARACTER_ANIMATION_WALK;
+                break;
+            case CHARACTER_ANIMATION_WALK:
+                *requested = animation = CHARACTER_ANIMATION_RUN;
+                break;
+            case CHARACTER_ANIMATION_RUN:
+                *requested = animation = CHARACTER_ANIMATION_WALK;
+                break;
+            default:
+                return;
         }
     }
     if (object->apiobj.character_model->model_data_b[animation] == NULL) {
-        if (animation == CHARACTER_ANIMATION_TIPTOE) {
-            object->apiobj.anim_packet.requested_animation = animation = CHARACTER_ANIMATION_WALK;
-        } else if (animation == CHARACTER_ANIMATION_WALK) {
-            object->apiobj.anim_packet.requested_animation = animation = CHARACTER_ANIMATION_RUN;
-        } else if (__builtin_expect(animation == CHARACTER_ANIMATION_RUN, 1)) {
-            object->apiobj.anim_packet.requested_animation = animation = CHARACTER_ANIMATION_WALK;
-        } else {
-            return;
+        switch (animation) {
+            case CHARACTER_ANIMATION_TIPTOE:
+                *requested = animation = CHARACTER_ANIMATION_WALK;
+                break;
+            case CHARACTER_ANIMATION_WALK:
+                *requested = animation = CHARACTER_ANIMATION_RUN;
+                break;
+            case CHARACTER_ANIMATION_RUN:
+                *requested = animation = CHARACTER_ANIMATION_WALK;
+                break;
+            default:
+                return;
         }
     }
     if (object->apiobj.character_model->model_data_b[animation] == NULL) {
-        if (animation == CHARACTER_ANIMATION_TIPTOE) {
-            object->apiobj.anim_packet.requested_animation = animation = CHARACTER_ANIMATION_WALK;
-        } else if (animation == CHARACTER_ANIMATION_WALK) {
-            object->apiobj.anim_packet.requested_animation = animation = CHARACTER_ANIMATION_RUN;
-        } else if (animation == CHARACTER_ANIMATION_RUN) {
-            object->apiobj.anim_packet.requested_animation = animation = CHARACTER_ANIMATION_WALK;
-        } else {
-            return;
+        switch (animation) {
+            case CHARACTER_ANIMATION_TIPTOE:
+                *requested = animation = CHARACTER_ANIMATION_WALK;
+                break;
+            case CHARACTER_ANIMATION_WALK:
+                *requested = animation = CHARACTER_ANIMATION_RUN;
+                break;
+            case CHARACTER_ANIMATION_RUN:
+                *requested = animation = CHARACTER_ANIMATION_WALK;
+                break;
+            default:
+                return;
         }
     }
 }
@@ -10292,7 +10305,7 @@ __attribute__((optimize("O2", "tree-vectorize"))) void Animate_BEAST(GameObject_
             const bool has_walk = object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_WALK] != NULL;
             const bool has_run = object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_RUN] != NULL;
             if (!has_run) {
-                if (has_walk) {
+                if (__builtin_expect(has_walk != 0, 0)) {
                     packet.requested_animation = CHARACTER_ANIMATION_WALK;
                 }
             } else if (!has_walk) {
@@ -10301,7 +10314,7 @@ __attribute__((optimize("O2", "tree-vectorize"))) void Animate_BEAST(GameObject_
                 const GAMECHARACTERDATA *character =
                     static_cast<const GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
                 const f32 threshold = (character->walk_speed + character->run_speed) * 0.5f;
-                if (!(threshold >= object->pad_gamepad->input_magnitude)) {
+                if (__builtin_expect(!(threshold >= object->pad_gamepad->input_magnitude), 1)) {
                     packet.requested_animation = CHARACTER_ANIMATION_RUN;
                 } else {
                     packet.requested_animation = CHARACTER_ANIMATION_WALK;
@@ -12208,7 +12221,7 @@ void Move_DROIDEKA(GameObject_s *object) {
     DeactivatedCode(object);
     ShootCode(object, action_pressed, special_pressed, 0, 0, 0);
 
-    if (object->character_context == 0x32) {
+    if (__builtin_expect(object->character_context == 0x32, 0)) {
         if (object->pad_gamepad->input_magnitude >= object->apiobj.character_data->game_character->run_speed - 0.1f) {
             object->character_context = 0x31;
             object->context_animation = 3;
@@ -12233,7 +12246,7 @@ void Move_DROIDEKA(GameObject_s *object) {
             }
         }
     } else if (object->character_context == -1 && object->apiobj.field_0x27d != 0) {
-        if (__builtin_expect(object->pad_gamepad->input_magnitude >= object->apiobj.character_data->game_character->run_speed - 0.1f, 1)) {
+        if (__builtin_expect(object->pad_gamepad->input_magnitude >= object->apiobj.character_data->game_character->run_speed - 0.1f, 0)) {
             object->character_context = 0x31;
             object->context_animation = 3;
         } else if (CurrentAnim(&object->apiobj.anim_packet) == 5 &&

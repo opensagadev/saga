@@ -61,13 +61,13 @@ void NuSoundStreamer::RequestCue(NuSoundStreamingSample *streaming_sample, bool 
 void NuSoundStreamer::RequestFill(NuSoundStreamingSample *sample, NuSoundBuffer *buffer, bool loop,
                                   NuSoundWeakPtr<NuSoundBufferCallback> callback) {
     QueueElement element;
-    element.message = QueueElement::Message::FILL_STREAM_BUFFER;
-    element.sample = sample;
-    element.loop = loop;
     element.start_offset = 0.0f;
+    element.sample = sample;
     element.buffer = buffer;
-    element.weak_ptr.Assign((NuSoundBufferCallback *)callback.obj);
+    element.loop = loop;
     element.weak_flag = false;
+    element.message = QueueElement::Message::FILL_STREAM_BUFFER;
+    element.weak_ptr.Assign((NuSoundBufferCallback *)callback.obj);
 
     this->queue2.Push(element);
 

@@ -521,7 +521,11 @@ void Torpedo_Ricochet(BOLT_s *bolt, TORPEDOPACKET_s *packet) {
             NuMtxSetIdentity(&matrix);
             f32 lengths = NuVecMag(&packet->ricochet_position) * NuVecMag(&bolt->velocity);
             f32 dot = NuVecDot(&packet->ricochet_position, &bolt->velocity);
-            f32 cosine = lengths == 0.0f || dot == 0.0f ? 0.0f : dot / lengths;
+            f32 cosine;
+            if (lengths == 0.0f || dot == 0.0f)
+                cosine = 0.0f;
+            else
+                cosine = dot / lengths;
             f32 absolute = NuFabs(cosine);
             f32 root = NuFsqrt(1.0f - cosine * cosine);
             f32 smaller = MIN(root, absolute);
@@ -539,7 +543,7 @@ void Torpedo_Ricochet(BOLT_s *bolt, TORPEDOPACKET_s *packet) {
             angle_radians += (-0.0446429f * cube) * fourth;
             angle_radians += (-0.0303819f * fourth) * (square * cube);
             i16 angle = 0x4000 - static_cast<i32>(angle_radians * 10430.4f);
-            NuMtxSetRotationAxis(&matrix, 0x8000 - 2 * angle, &axis);
+            NuMtxSetRotationAxis(&matrix, 0x8000u - 2 * angle, &axis);
             NuVecMtxRotate(&bolt->velocity, &bolt->velocity, &matrix);
             NuVecScale(&bolt->velocity, &bolt->velocity, 0.8f);
             bolt->speed *= 0.8f;

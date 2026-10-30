@@ -239,23 +239,23 @@ void Customiser_LoadAccessories(CUSTOMISER *customiser, APICHARACTERMODELLIST_s 
     }
 
     Customiser_AccessoriesLoaded = 1;
-    for (; models->model_id != -1; ++models) {
-        i32 side = 0;
-        if (models->model_id != customiser->character_ids[0]) {
-            if (models->model_id != customiser->character_ids[1]) {
-                continue;
-            }
+    i32 model_id;
+    for (; (model_id = models->model_id) != -1; ++models) {
+        i32 side;
+        if (model_id == customiser->character_ids[0]) {
+            side = 0;
+        } else if (model_id == customiser->character_ids[1]) {
             side = 1;
+        } else {
+            continue;
         }
 
-        const i16 slot = apicharsys->playermodelids[models->model_id];
-        CHARACTERMODEL_s *character_model = &apicharsys->models[slot];
-        for (i32 category_index = 0; category_index < 9; ++category_index) {
-            CUSTOMPIECERESOURCE *resource = &Accessory[side][category_index];
+        CHARACTERMODEL_s *character_model = &apicharsys->models[apicharsys->playermodelids[model_id]];
+        CUSTOMPIECERESOURCE *resource = Accessory[side];
+        for (i32 category_index = 0; category_index < 9; ++category_index, ++resource) {
             memset(resource, 0, sizeof(*resource));
 
-            CUSTOMPIECECATEGORY *category = customiser->categories[category_index];
-            if (category->name == NULL || customiser->piece_counts[category_index] <= 0) {
+            if (customiser->categories[category_index]->name == NULL || customiser->piece_counts[category_index] <= 0) {
                 continue;
             }
 
@@ -266,18 +266,18 @@ void Customiser_LoadAccessories(CUSTOMISER *customiser, APICHARACTERMODELLIST_s 
             char path[0x80];
             NuStrCpy(piece_name, piece->name);
             NuStrCpy(path, "chars\\weirdo\\");
-            NuStrCat(path, category->name);
+            NuStrCat(path, customiser->categories[category_index]->name);
             NuStrCat(path, "\\");
             NuStrCat(path, piece_name);
 
-            if (category->uses_special != 0) {
+            if (customiser->categories[category_index]->uses_special != 0) {
                 NuStrCat(path, ".gsc");
                 resource->scene = NuGScnRead(&characterbuffer_ptr, characterbuffer_end, path);
                 if (resource->scene != NULL) {
                     NuSpecialFind(resource->scene, &resource->special, piece_name, 1);
                 }
             } else {
-                if (category->material_tag == -1) {
+                if (customiser->categories[category_index]->material_tag == -1) {
                     continue;
                 }
                 NuStrCat(path, ".pnt");
@@ -286,11 +286,10 @@ void Customiser_LoadAccessories(CUSTOMISER *customiser, APICHARACTERMODELLIST_s 
                     continue;
                 }
 
-                nuhgobj_s *hierarchy = character_model->hierarchy;
-                auto hierarchy_material_count = hierarchy->material_count;
-                for (i32 material_index = 0; material_index < hierarchy_material_count; ++material_index) {
-                    NUMTL *material = hierarchy->materials[material_index];
-                    if (material->unknown_9a[0] != category->material_tag) {
+                for (i32 material_index = 0; material_index < character_model->hierarchy->material_count;
+                     ++material_index) {
+                    NUMTL *material = character_model->hierarchy->materials[material_index];
+                    if (material->unknown_9a[0] != customiser->categories[category_index]->material_tag) {
                         continue;
                     }
                     resource->material_index = material_index;

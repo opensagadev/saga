@@ -4827,10 +4827,39 @@ bool OccluderSet::IsOccludedSphere(nuvec_s const *center, float radius) {
 bool OccluderSet::IsOccludedOBB(nuvec_s const *minimum, nuvec_s const *maximum, numtx_s const *matrix) {
     if (!queries_prepared)
         return false;
-    NUVEC4 corners[8] = {{minimum->x, maximum->y, minimum->z, 1.0f}, {minimum->x, maximum->y, maximum->z, 1.0f},
-                         {maximum->x, maximum->y, maximum->z, 1.0f}, {maximum->x, maximum->y, minimum->z, 1.0f},
-                         {minimum->x, minimum->y, minimum->z, 1.0f}, {minimum->x, minimum->y, maximum->z, 1.0f},
-                         {maximum->x, minimum->y, maximum->z, 1.0f}, {maximum->x, minimum->y, minimum->z, 1.0f}};
+    NUVEC4 corners[8];
+    corners[0].x = minimum->x;
+    corners[0].y = maximum->y;
+    corners[0].z = minimum->z;
+    corners[0].w = 1.0f;
+    corners[1].x = minimum->x;
+    corners[1].y = maximum->y;
+    corners[1].z = maximum->z;
+    corners[1].w = 1.0f;
+    corners[2].x = maximum->x;
+    corners[2].y = maximum->y;
+    corners[2].z = maximum->z;
+    corners[2].w = 1.0f;
+    corners[3].x = maximum->x;
+    corners[3].y = maximum->y;
+    corners[3].z = minimum->z;
+    corners[3].w = 1.0f;
+    corners[4].x = minimum->x;
+    corners[4].y = minimum->y;
+    corners[4].z = minimum->z;
+    corners[4].w = 1.0f;
+    corners[5].x = minimum->x;
+    corners[5].y = minimum->y;
+    corners[5].z = maximum->z;
+    corners[5].w = 1.0f;
+    corners[6].x = maximum->x;
+    corners[6].y = minimum->y;
+    corners[6].z = maximum->z;
+    corners[6].w = 1.0f;
+    corners[7].x = maximum->x;
+    corners[7].y = minimum->y;
+    corners[7].z = minimum->z;
+    corners[7].w = 1.0f;
     NUMTX transform;
     if (__builtin_expect(matrix != 0, 1))
         NuMtxMulH(&transform, const_cast<NUMTX *>(matrix), &projection_matrix);
@@ -14931,7 +14960,7 @@ extern "C" i32 NuRndrHighResScreenGrab(char *prefix, f32 scale, f32 a, f32 b, f3
     } else {
         f32 n = scale / 0.75f;
         tiles = static_cast<f32>(static_cast<i32>(n));
-        if (__builtin_expect(!(n <= tiles), 0))
+        if (__builtin_expect(n > tiles, 0))
             tiles += 1.0f;
     }
     yTiles = tiles;
@@ -14945,8 +14974,11 @@ extern "C" i32 NuRndrHighResScreenGrab(char *prefix, f32 scale, f32 a, f32 b, f3
         else {
             sprintf(path, "%s.bmp", prefix);
             i32 index = 0;
-            while (NuFileSize(path) > 0)
+            for (;;) {
+                if (NuFileSize(path) <= 0)
+                    break;
                 sprintf(path, "%s%03d.bmp", prefix, index++);
+            }
         }
         struct __attribute__((packed)) BitmapHeader {
             u16 type;
@@ -14988,8 +15020,8 @@ extern "C" i32 NuRndrHighResScreenGrab(char *prefix, f32 scale, f32 a, f32 b, f3
         delay = 3;
         xOffsetHack = 0;
         xPos = yPos = 0.0f;
-        f32 w = static_cast<f32>(PS2_VREZ_W), h = static_cast<f32>(PS2_VREZ_H);
-        f32 sx = w * 0.0f * 0.75f, sy = h * 0.0f * 0.75f;
+        f32 h = static_cast<f32>(PS2_VREZ_H), w = static_cast<f32>(PS2_VREZ_W);
+        f32 sy = h * 0.0f * 0.75f, sx = w * 0.0f * 0.75f;
         NuVpSetRegions((sx + -0.125f * w) / scale, (sy + -0.125f * h) / scale, (w + sx + -0.125f * w) / scale,
                        (h + sy + -0.125f * h) / scale, 0, 0, w, h);
         return 1;
@@ -15027,58 +15059,60 @@ extern "C" i32 NuRndrHighResScreenGrab(char *prefix, f32 scale, f32 a, f32 b, f3
         }
     }
     f32 w = static_cast<f32>(PS2_REZ_W), h = static_cast<f32>(PS2_REZ_H);
-    f32 full_height = scale * h;
+    f32 tile_h = 0.75f * h;
     i32 width = static_cast<i32>(xPos != xTiles - 1.0f ? 0.75f * w : scale * w - ((xTiles - 1.0f) * 0.75f) * w);
-    i32 height = static_cast<i32>(yPos != yTiles - 1.0f ? 0.75f * h : full_height - ((yTiles - 1.0f) * 0.75f) * h);
+    i32 height;
+    if (yPos != yTiles - 1.0f)
+        height = static_cast<i32>(tile_h);
+    else
+        height = static_cast<i32>(scale * h - ((yTiles - 1.0f) * 0.75f) * h);
     u8 *data = pixels + static_cast<u32>(((static_cast<f32>(static_cast<i32>(params.width)) * 3.0f) * 0.125f) * h) +
                static_cast<u32>((0.125f * w) * 3.0f) +
                static_cast<u32>(((static_cast<f32>(xOffsetHack * 3) * w) / static_cast<f32>(PS2_VREZ_W)) * scale);
     if (yPos == yTiles - 1.0f)
-        data += static_cast<u32>(((0.75f * h - static_cast<f32>(height)) * w) * 3.0f);
+        data += static_cast<u32>(((tile_h - static_cast<f32>(height)) * w) * 3.0f);
     i64 offset = static_cast<i64>(header_size) +
-                 static_cast<i32>((((full_height - (0.75f * yPos) * h) * w) * scale) * 3.0f) +
+                 static_cast<i32>((((scale * h - (0.75f * yPos) * h) * w) * scale) * 3.0f) +
                  static_cast<i32>(((0.75f * xPos) * w) * 3.0f) -
                  static_cast<i32>((static_cast<f32>(height * PS2_REZ_W) * scale) * 3.0f);
-    if (height > 0) {
-        i32 y = 0;
-        do {
-            NuFileSeek(fh, offset, static_cast<NUFILESEEK>(0));
-            offset += static_cast<i32>((static_cast<f32>(PS2_REZ_W) * scale) * 3.0f);
-            NuFileWrite(fh, data, width * 3);
-            data += params.width * 3;
-        } while (++y != height);
+    for (i32 y = 0; y < height; y++) {
+        NuFileSeek(fh, offset, static_cast<NUFILESEEK>(0));
+        offset += static_cast<i32>((static_cast<f32>(PS2_REZ_W) * scale) * 3.0f);
+        NuFileWrite(fh, data, width * 3);
+        data += params.width * 3;
     }
     NuRndrScreenGrabTileEnd(&tile);
     ++dump_state;
-    if (!(static_cast<f32>(dump_state) < yTiles * xTiles)) {
-        NuRndrScreenGrabTileDeInit(&params);
-        dump_state = -1;
-        NuFileClose(fh);
-        yPos = xPos = yTiles = xTiles = 0.0f;
-        NuVpResetRegions();
-        NuRndrDoingScreenGrab = 0;
-        return 0;
+    if (static_cast<f32>(dump_state) < yTiles * xTiles) {
+        xPos += 1.0f;
+        if (xPos >= xTiles) {
+            xPos = 0.0f;
+            yPos += 1.0f;
+        }
+        w = static_cast<f32>(PS2_VREZ_W);
+        f32 x = (xPos * w) * 0.75f;
+        f32 left = (-0.125f * w + x) / scale;
+        f32 right = (x + w + -0.125f * w) / scale;
+        i32 hack = 0;
+        if (right > w) {
+            hack = static_cast<i32>(right - w);
+            left -= static_cast<f32>(hack);
+            right = w;
+        }
+        xOffsetHack = hack;
+        h = static_cast<f32>(PS2_VREZ_H);
+        f32 y = (yPos * h) * 0.75f;
+        NuVpSetRegions(left, (y + -0.125f * h) / scale, right, (h + y + -0.125f * h) / scale, 0, 0, w, h);
+        delay = 3;
+        return 1;
     }
-    xPos += 1.0f;
-    if (xPos >= xTiles) {
-        xPos = 0.0f;
-        yPos += 1.0f;
-    }
-    w = static_cast<f32>(PS2_VREZ_W);
-    h = static_cast<f32>(PS2_VREZ_H);
-    f32 x = (xPos * w) * 0.75f;
-    f32 left = (-0.125f * w + x) / scale;
-    f32 right = (x + w + -0.125f * w) / scale;
-    xOffsetHack = 0;
-    if (__builtin_expect(right > w, 1)) {
-        xOffsetHack = static_cast<i32>(right - w);
-        left -= static_cast<f32>(xOffsetHack);
-        right = w;
-    }
-    f32 y = (yPos * h) * 0.75f;
-    NuVpSetRegions(left, (y + -0.125f * h) / scale, right, (h + y + -0.125f * h) / scale, 0, 0, w, h);
-    delay = 3;
-    return 1;
+    NuRndrScreenGrabTileDeInit(&params);
+    dump_state = -1;
+    NuFileClose(fh);
+    yPos = xPos = yTiles = xTiles = 0.0f;
+    NuVpResetRegions();
+    NuRndrDoingScreenGrab = 0;
+    return 0;
 }
 
 extern "C" void NuRndrSolidTri(NUVEC *a, NUVEC *b, NUVEC *c, i32 colour) {

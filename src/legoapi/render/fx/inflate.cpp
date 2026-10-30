@@ -206,7 +206,7 @@ i32 DecodeDeflatedBlock(DEFLATECONTEXT *ctx) {
             *ctx->current_pos++ = symbol;
         } else {
             if (symbol == 256) {
-                return 1;
+                break;
             }
             symbol -= 257;
 
@@ -227,6 +227,7 @@ i32 DecodeDeflatedBlock(DEFLATECONTEXT *ctx) {
             }
         }
     }
+    return 1;
 }
 
 i32 DecompressHuffmanTrees(DEFLATECONTEXT *ctx) {

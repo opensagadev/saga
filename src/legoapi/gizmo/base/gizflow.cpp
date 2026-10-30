@@ -907,7 +907,7 @@ static u8 getNextLoopChecksum() {
 static i32 Loop_CountLoopingInputs(FLOWBOX_s *box) {
     u8 checksum = getNextLoopChecksum();
     i32 count = 0;
-    for (u32 child = 0; child < box->child_count; ++child) {
+    for (i32 child = 0; child < box->child_count; ++child) {
         count = Loop_CountLoopingInputsEx(box, box->children[child], count, checksum);
     }
     return count;
@@ -972,15 +972,14 @@ void ResetGizFlow(GIZFLOW_s *system, GIZFLOWPROGRESS_s *progress) {
     ResetGizFlowPointers(system);
     for (i32 i = 0; i < system->flowbox_count; ++i, ++box) {
         box->last_process_frame = 0;
-        box->state_flags_low &= ~0x20;
+        box->state_low_bit5 = 0;
         if (progress != NULL && progress->valid != 0) {
             i32 word = i >> 5;
             u32 bit = 1u << (i & 31);
             box->active = (progress->active[word] & bit) != 0;
             const u8 completed = static_cast<u8>((progress->completed[word] & bit) != 0);
             box->completed = completed;
-            const u8 latched = static_cast<u8>((progress->latched[word] & bit) != 0);
-            box->state_flags_low |= latched << 5;
+            box->state_low_bit5 = (progress->latched[word] & bit) != 0;
             const u8 output_state = static_cast<u8>((progress->output_state[word] & bit) != 0);
             box->output_state = output_state;
             if (box->type == 1 && box->condition_data[0] == 4) {
@@ -993,20 +992,23 @@ void ResetGizFlow(GIZFLOW_s *system, GIZFLOWPROGRESS_s *progress) {
         if (box->type == 1 && box->condition_data[0] == 4) {
             box->loop_parent_count = Loop_CountLoopingInputs(box);
             box->state_flags_high |= 4;
-            if (__builtin_expect(box->parent_count == box->loop_parent_count, 1)) {
+            if (box->parent_count == box->loop_parent_count) {
                 box->state_flags_high |= 8;
                 box->state_flags_low |= 1;
             } else
                 box->state_flags_low &= ~1;
         } else {
-            box->active = box->parent_count == 0;
+            if (box->parent_count != 0)
+                box->state_flags_low &= ~1;
+            else
+                box->state_flags_low |= 1;
         }
 
         if (flowboxtypes[box->type].reset != NULL && (box->state_flags_high & 0x10) == 0)
             flowboxtypes[box->type].reset(system, box);
         if (box->type == 0) {
             if (((box->state_flags_high & 0x40) == 0 && FreePlay == 0) ||
-                ((box->state_flags_high & 0x20) == 0 && FreePlay != 0)) {
+                (__builtin_expect((box->state_flags_high & 0x20) == 0, 0) && FreePlay != 0)) {
                 FLOWBOXGIZMODATA_s *data = box->data;
                 for (i32 gizmo = 0; gizmo < data->gizmo_count; ++gizmo)
                     GizmoSetVisibility(system->gizmo_sys, data->gizmos[gizmo]->gizmo, 0, 1);

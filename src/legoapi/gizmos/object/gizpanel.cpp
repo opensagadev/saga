@@ -771,7 +771,7 @@ GIZPANEL_s *GizPanel_FindNearest(WORLDINFO_s *world, nuvec_s *position, GameObje
         if (object != NULL) {
             if (panel->reserved_flag == 0 && panel->state == 0 && panel->visible && panel->track_player &&
                 panel->floor_position.y != 2000000.0f &&
-                (check_eligibility == 0 || GizPanel_CanUsePanel(object, panel) != 0)) {
+                (check_eligibility == 0 || __builtin_expect(GizPanel_CanUsePanel(object, panel) != 0, 0))) {
                 NUVEC target;
                 GizPanel_GetAbsTargetPos(panel, &target, 0);
                 const f32 distance = NuVecDistSqr(position, &target, NULL);

@@ -508,34 +508,33 @@ void ChrisAnakinCReset() {
     anakin_door_s *door = AnakinC;
     i32 count = 0;
     for (anakin_door_setup_s *setup = DoorSetupList; count < 12; ++setup) {
-        if (__builtin_expect(setup->name == NULL, 0)) {
-            for (; count < 12; ++count, ++door)
-                door->active = 0;
-            return;
-        }
-        if (!NuSpecialFind(WORLD->current_gscn, &door->special, setup->name, 1) || !NuSpecialExistsFn(&door->special))
-            continue;
+        if (__builtin_expect(setup->name == NULL, 0))
+            break;
+        if (__builtin_expect(NuSpecialFind(WORLD->current_gscn, &door->special, setup->name, 1), 0) &&
+            NuSpecialExistsFn(&door->special)) {
+            if (NuSpecialFind(WORLD->current_gscn, &door->secondary_special, setup->secondary_name, 1))
+                door->has_secondary = static_cast<i16>(NuSpecialExistsFn(&door->secondary_special));
 
-        if (NuSpecialFind(WORLD->current_gscn, &door->secondary_special, setup->secondary_name, 1))
-            door->has_secondary = static_cast<i16>(NuSpecialExistsFn(&door->secondary_special));
-
-        NuMtxSetIdentity(&door->original_matrix);
-        door->matrix = door->original_matrix = *NuSpecialGetMtx(&door->special);
-        if (__builtin_expect(door->has_secondary != 0, 0)) {
-            NuMtxSetIdentity(&door->original_secondary_matrix);
-            door->secondary_matrix = door->original_secondary_matrix = *NuSpecialGetMtx(&door->secondary_special);
+            NuMtxSetIdentity(&door->original_matrix);
+            door->matrix = door->original_matrix = *NuSpecialGetMtx(&door->special);
+            if (__builtin_expect(door->has_secondary != 0, 0)) {
+                NuMtxSetIdentity(&door->original_secondary_matrix);
+                door->secondary_matrix = door->original_secondary_matrix = *NuSpecialGetMtx(&door->secondary_special);
+            }
+            door->platform_id = static_cast<i16>(FindPlatInst(NuSpecialGetInstanceix(&door->special)));
+            door->active = 1;
+            door->flags = static_cast<u8>(setup->flags);
+            door->direction = setup->direction;
+            door->offset = setup->initial_offset;
+            door->speed = setup->speed;
+            door->minimum_offset = setup->minimum_offset;
+            door->unknown_134 = setup->unknown_20;
+            ++door;
+            ++count;
         }
-        door->platform_id = static_cast<i16>(FindPlatInst(NuSpecialGetInstanceix(&door->special)));
-        door->active = 1;
-        door->flags = static_cast<u8>(setup->flags);
-        door->direction = setup->direction;
-        door->offset = setup->initial_offset;
-        door->speed = setup->speed;
-        door->minimum_offset = setup->minimum_offset;
-        door->unknown_134 = setup->unknown_20;
-        ++door;
-        ++count;
     }
+    for (; count < 12; ++count, ++door)
+        door->active = 0;
 }
 
 void ChrisAnakinCInit() {

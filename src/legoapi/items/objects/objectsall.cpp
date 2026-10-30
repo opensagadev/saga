@@ -2259,14 +2259,17 @@ static void edpartPartIndexMenu(eduimenu_s *menu) {
     eduiMenuAddItem(edpart_partindex_menu, eduiItemCheckCreate(static_cast<usize>(-1), edblack, selected == -1, 1,
                                                                edpartChangePartIndex, "None"));
     for (i32 index = 0; index < 128; ++index) {
-        if (__builtin_expect(part_types[index].name[0] == '\0' || part_types[index].field_b3 != edpart_part_list, 1))
+        if (part_types[index].name[0] == '\0' ||
+            static_cast<signed char>(part_types[index].field_b3) != edpart_part_list)
             continue;
-        bool current_type = index == edpart_nearest_emit->effect_id;
-        eduiitem_s *item = eduiItemCheckCreate(index, current_type ? edgrey : edblack,
-                                               !current_type && index == selected, current_type ? 0 : 1,
-                                               current_type ? NULL : edpartChangePartIndex, part_types[index].name);
-        eduiMenuAddItem(edpart_partindex_menu, item);
-        if (index == selected)
+        i32 is_selected = index == selected;
+        if (index == edpart_nearest_emit->effect_id)
+            eduiMenuAddItem(edpart_partindex_menu,
+                            eduiItemCheckCreate(index, edgrey, 0, 0, NULL, part_types[index].name));
+        else
+            eduiMenuAddItem(edpart_partindex_menu, eduiItemCheckCreate(index, edblack, is_selected, 1,
+                                                                       edpartChangePartIndex, part_types[index].name));
+        if (is_selected == 1)
             edpart_partindex_menu->selected = edui_last_item;
     }
     eduiMenuAttach(menu, edpart_partindex_menu);
@@ -3109,10 +3112,36 @@ static void edpartFileSaveEffects(eduimenu_s *parent, eduiitem_s *, u32) {
 
 static void edpartFileSaveEffectsLevel(eduimenu_s *parent, eduiitem_s *, u32) {
     char path[256], backup[256];
-    edpartSavePath(path, backup, true);
-    bool backed_up = edbits_override_backups || EdFileBackup(path, backup);
+    char directory[256], name[256], extension[256];
+    if (!edbits_level_save_directory[0])
+        __builtin_memcpy(directory, ".", 2);
+    else
+        strcpy(directory, edbits_level_save_directory);
+    if (!edbits_level_save_name[0])
+        __builtin_memcpy(name, "part", 5);
+    else
+        strcpy(name, edbits_level_save_name);
+    if (!edbits_level_save_extension[0])
+        __builtin_memcpy(extension, "par", 4);
+    else
+        strcpy(extension, edbits_level_save_extension);
+    sprintf(path, "%s\\%s.%s", directory, name, extension);
+    sprintf(backup, "%s\\%s.%s.bak", directory, name, extension);
+    bool backed_up = true;
+    if (!edbits_override_backups)
+        backed_up = EdFileBackup(path, backup) != 0;
     bool saved = edpartSaveEffects(path, 1) != 0;
-    if (__builtin_expect(!saved, 1)) {
+    if (__builtin_expect(saved && backed_up, 0)) {
+        u32 colours[4] = {0x800000c0u, 0x80ff0000, 0x80808080, 0x80404040};
+        colours[0] = 0x8000c000u;
+        edpart_message_menu = eduiMenuCreate(70, 70, 300, 250, ed_fnt, edpartCancelMessageMenu, "Message");
+        if (edpart_message_menu != NULL) {
+            eduiMenuAddItem(edpart_message_menu, eduiItemSelCreate(1, colours, 0, 0, NULL, "Saved OK"));
+            eduiMenuAttach(parent, edpart_message_menu);
+            edpart_message_menu->x = parent->x + 10;
+            edpart_message_menu->y = parent->y + 40;
+        }
+    } else if (!saved) {
         u32 colours[4] = {0x800000c0u, 0x80ff0000, 0x80808080, 0x80404040};
         edpart_message_menu = eduiMenuCreate(70, 70, 300, 250, ed_fnt, edpartCancelMessageMenu, "Message");
         if (edpart_message_menu != NULL) {
@@ -3121,20 +3150,11 @@ static void edpartFileSaveEffectsLevel(eduimenu_s *parent, eduiitem_s *, u32) {
             edpart_message_menu->x = parent->x + 10;
             edpart_message_menu->y = parent->y + 40;
         }
-    } else if (!backed_up) {
+    } else {
         u32 colours[4] = {0x800000c0u, 0x80ff0000, 0x80808080, 0x80404040};
         edpart_message_menu = eduiMenuCreate(70, 70, 300, 250, ed_fnt, edpartCancelMessageMenu, "Message");
         if (edpart_message_menu != NULL) {
             eduiMenuAddItem(edpart_message_menu, eduiItemSelCreate(1, colours, 0, 0, NULL, "Saved OK - Backup Failed"));
-            eduiMenuAttach(parent, edpart_message_menu);
-            edpart_message_menu->x = parent->x + 10;
-            edpart_message_menu->y = parent->y + 40;
-        }
-    } else {
-        u32 colours[4] = {0x8000c000u, 0x80ff0000, 0x80808080, 0x80404040};
-        edpart_message_menu = eduiMenuCreate(70, 70, 300, 250, ed_fnt, edpartCancelMessageMenu, "Message");
-        if (edpart_message_menu != NULL) {
-            eduiMenuAddItem(edpart_message_menu, eduiItemSelCreate(1, colours, 0, 0, NULL, "Saved OK"));
             eduiMenuAttach(parent, edpart_message_menu);
             edpart_message_menu->x = parent->x + 10;
             edpart_message_menu->y = parent->y + 40;
@@ -3144,10 +3164,36 @@ static void edpartFileSaveEffectsLevel(eduimenu_s *parent, eduiitem_s *, u32) {
 
 static void edpartFileSaveEffectsGeneral(eduimenu_s *parent, eduiitem_s *, u32) {
     char path[256], backup[256];
-    edpartSavePath(path, backup, false);
-    bool backed_up = edbits_override_backups || EdFileBackup(path, backup);
+    char directory[256], name[256], extension[256];
+    if (!edbits_general_save_directory[0])
+        __builtin_memcpy(directory, ".", 2);
+    else
+        strcpy(directory, edbits_general_save_directory);
+    if (!edbits_general_save_name[0])
+        __builtin_memcpy(name, "part", 5);
+    else
+        strcpy(name, edbits_general_save_name);
+    if (!edbits_general_save_extension[0])
+        __builtin_memcpy(extension, "par", 4);
+    else
+        strcpy(extension, edbits_general_save_extension);
+    sprintf(path, "%s\\%s.%s", directory, name, extension);
+    sprintf(backup, "%s\\%s.%s.bak", directory, name, extension);
+    bool backed_up = true;
+    if (!edbits_override_backups)
+        backed_up = EdFileBackup(path, backup) != 0;
     bool saved = edpartSaveEffects(path, 0) != 0;
-    if (__builtin_expect(!saved, 1)) {
+    if (__builtin_expect(saved && backed_up, 0)) {
+        u32 colours[4] = {0x800000c0u, 0x80ff0000, 0x80808080, 0x80404040};
+        colours[0] = 0x8000c000u;
+        edpart_message_menu = eduiMenuCreate(70, 70, 300, 250, ed_fnt, edpartCancelMessageMenu, "Message");
+        if (edpart_message_menu != NULL) {
+            eduiMenuAddItem(edpart_message_menu, eduiItemSelCreate(1, colours, 0, 0, NULL, "Saved OK"));
+            eduiMenuAttach(parent, edpart_message_menu);
+            edpart_message_menu->x = parent->x + 10;
+            edpart_message_menu->y = parent->y + 40;
+        }
+    } else if (!saved) {
         u32 colours[4] = {0x800000c0u, 0x80ff0000, 0x80808080, 0x80404040};
         edpart_message_menu = eduiMenuCreate(70, 70, 300, 250, ed_fnt, edpartCancelMessageMenu, "Message");
         if (edpart_message_menu != NULL) {
@@ -3156,20 +3202,11 @@ static void edpartFileSaveEffectsGeneral(eduimenu_s *parent, eduiitem_s *, u32) 
             edpart_message_menu->x = parent->x + 10;
             edpart_message_menu->y = parent->y + 40;
         }
-    } else if (!backed_up) {
+    } else {
         u32 colours[4] = {0x800000c0u, 0x80ff0000, 0x80808080, 0x80404040};
         edpart_message_menu = eduiMenuCreate(70, 70, 300, 250, ed_fnt, edpartCancelMessageMenu, "Message");
         if (edpart_message_menu != NULL) {
             eduiMenuAddItem(edpart_message_menu, eduiItemSelCreate(1, colours, 0, 0, NULL, "Saved OK - Backup Failed"));
-            eduiMenuAttach(parent, edpart_message_menu);
-            edpart_message_menu->x = parent->x + 10;
-            edpart_message_menu->y = parent->y + 40;
-        }
-    } else {
-        u32 colours[4] = {0x8000c000u, 0x80ff0000, 0x80808080, 0x80404040};
-        edpart_message_menu = eduiMenuCreate(70, 70, 300, 250, ed_fnt, edpartCancelMessageMenu, "Message");
-        if (edpart_message_menu != NULL) {
-            eduiMenuAddItem(edpart_message_menu, eduiItemSelCreate(1, colours, 0, 0, NULL, "Saved OK"));
             eduiMenuAttach(parent, edpart_message_menu);
             edpart_message_menu->x = parent->x + 10;
             edpart_message_menu->y = parent->y + 40;

@@ -456,11 +456,12 @@ void NuMemoryManager::BlockFree(void *ptr, u32 flags) {
             header->value = header_value;
             *END_TAG(header, header_value * 4) = header_value;
 
+            header_value = header->value;
             if ((m_flags & MEM_MANAGER_DEBUG) != 0) {
-                manager->stats.bytes_alloc_by_category[((DebugHeader *)header)->category] -= BLOCK_SIZE(header->value);
+                manager->stats.bytes_alloc_by_category[((DebugHeader *)header)->category] -= BLOCK_SIZE(header_value);
             }
 
-            right = (Header *)((usize)header + BLOCK_SIZE(header->value));
+            right = (Header *)((usize)header + BLOCK_SIZE(header_value));
             if ((right->value & ALLOC_MASK) == 0) {
                 manager->MergeBlocks(header, right, "BlockFree[R]");
             }
@@ -469,11 +470,25 @@ void NuMemoryManager::BlockFree(void *ptr, u32 flags) {
 
             left_end = *(u32 *)((usize)header - 4);
             if ((left_end & HEADER_MGR_HI_MASK) == 0) {
-                final = (FreeHeader *)((usize)header - BLOCK_SIZE(left_end));
-                manager->ValidateBlockEndTags(&final->block_header, "BlockFree[L]");
-                manager->BinUnlink(final);
-                final->block_header.value = (BLOCK_SIZE(final->block_header.value) + BLOCK_SIZE(header->value)) / 4;
-                *END_TAG(final, BLOCK_SIZE(final->block_header.value)) = final->block_header.value;
+                FreeHeader *left = (FreeHeader *)((usize)header - BLOCK_SIZE(left_end));
+                manager->ValidateBlockEndTags(&left->block_header, "BlockFree[L]");
+                manager->BinUnlink(left);
+                u32 left_value = left->block_header.value;
+                u32 new_value = ((left_value & BLOCK_SIZE_MASK) + (header->value & BLOCK_SIZE_MASK)) & 0x3fffffff |
+                                (left_value & ALLOC_MASK);
+                u32 size_value = new_value & BLOCK_SIZE_MASK;
+                left->block_header.value = new_value;
+                u32 manager_idx = manager->idx;
+                usize *final_end = END_TAG(left, size_value * 4);
+                if ((new_value & ALLOC_MASK) == 0) {
+                    *final_end = size_value;
+                } else if (manager_idx > 29) {
+                    *final_end = new_value | HEADER_MGR_HI_MASK;
+                    *END_TAG_HI(left, BLOCK_SIZE(left->block_header.value)) = manager_idx;
+                } else {
+                    *final_end = ((manager_idx + 1) << 0x1b) | size_value;
+                }
+                final = left;
             }
 
             manager->BinLink(final, false);
@@ -801,36 +816,24 @@ bool NuMemoryManager::PopContext(NuMemoryManager::PopDebugMode debug_mode) {
             const char *block_name;
 
             strcpy(stranded_dump_path, this->name);
+            strcat(stranded_dump_path, "_");
+            strcat(stranded_dump_path, this->cur_ctx->name);
+            strcat(stranded_dump_path, "_");
+            strcat(stranded_dump_path, "stranded.txt");
 
             len = strlen(stranded_dump_path);
-
-            stranded_dump_path[len] = '_';
-            stranded_dump_path[len + 1] = '\0';
-
-            strcpy(stranded_dump_path + len + 1, this->cur_ctx->name);
-
-            len = strlen(stranded_dump_path);
-
-            strncpy(stranded_dump_path + len, STRANDED_DUMP_SUFFIX, strlen(STRANDED_DUMP_SUFFIX) + 1);
-
-            if (__builtin_expect(len != -strlen(STRANDED_DUMP_SUFFIX), 1)) {
-                char *cursor = stranded_dump_path;
-
-                do {
-                    if (*cursor == '/' || __builtin_expect(*cursor == '\\', 0) || *cursor == ':' ||
-                        __builtin_expect(*cursor == ' ', 1)) {
-                        *cursor = '_';
-                    }
-
-                    cursor++;
-                } while (cursor != stranded_dump_path + len + strlen(STRANDED_DUMP_SUFFIX));
+            for (usize i = 0; i < len; i++) {
+                char c = stranded_dump_path[i];
+                if (c == '/' || __builtin_expect(c == '\\', 0) || c == ':' || __builtin_expect(c == ' ', 1)) {
+                    stranded_dump_path[i] = '_';
+                }
             }
 
             Dump(0x38, stranded_dump_path);
 
-            strcpy(ctx_name, this->cur_ctx->name);
-
             largest_stranded_dbg = (DebugHeader *)largest_stranded;
+
+            strcpy(ctx_name, this->cur_ctx->name);
 
             block_name = largest_stranded_dbg->name;
             if (block_name != NULL) {
@@ -843,15 +846,20 @@ bool NuMemoryManager::PopContext(NuMemoryManager::PopDebugMode debug_mode) {
 
             if ((largest_stranded_dbg->flags.alloc_flags & MEM_ALLOC_UNKNOWN_4) != 0) {
                 u32 value_len;
-                i32 i;
+                u32 i;
+                char *value;
 
-                value_len = MIN(BLOCK_SIZE(largest_stranded->value) - m_headerSize - 4, 0x100);
+                value = (char *)largest_stranded + m_headerSize;
+                value_len = BLOCK_SIZE(largest_stranded->value) - m_headerSize - 4;
+                if (value_len > 0x100) {
+                    value_len = 0x100;
+                }
 
                 for (i = 0; i != value_len; i++) {
                     char byte;
 
                     if ((u8)((u8)largest_leak[i] - 0x41) < 0x1a || (u8)((u8)largest_leak[i] - 0x30) < 10) {
-                        byte = *(char *)((usize)largest_stranded + m_headerSize + i);
+                        byte = value[i];
                     } else {
                         byte = '_';
                     }
@@ -888,17 +896,17 @@ bool NuMemoryManager::PopContext(NuMemoryManager::PopDebugMode debug_mode) {
         if (stranded_block_count != 0) {
             pthread_mutex_lock(&this->error_mutex);
 
-            if (leak_value[0] == '\0') {
-                snprintf(this->error_msg, sizeof(this->error_msg),
-                         "%u stranded memory blocks(s) [%u bytes] detected popping context %s\nReport dumped "
-                         "[%s]\nLargest leak [%s]\n",
-                         stranded_block_count, stranded_bytes_count, ctx_name, stranded_dump_path, largest_leak);
-            } else {
+            if (leak_value[0] != '\0') {
                 snprintf(this->error_msg, sizeof(this->error_msg),
                          "%u stranded memory blocks(s) [%u bytes] detected popping context %s\nReport dumped "
                          "[%s]\nLargest leak [%s]\nValue [%s]\n",
                          stranded_block_count, stranded_bytes_count, ctx_name, stranded_dump_path, largest_leak,
                          leak_value);
+            } else {
+                snprintf(this->error_msg, sizeof(this->error_msg),
+                         "%u stranded memory blocks(s) [%u bytes] detected popping context %s\nReport dumped "
+                         "[%s]\nLargest leak [%s]\n",
+                         stranded_block_count, stranded_bytes_count, ctx_name, stranded_dump_path, largest_leak);
             }
 
             this->error_handler->HandleError(this, MEM_ERROR_LEAK_DETECTED, this->error_msg);

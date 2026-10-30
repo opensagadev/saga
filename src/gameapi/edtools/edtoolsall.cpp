@@ -2279,14 +2279,7 @@ extern "C" {
         bool handled = false;
         if (__builtin_expect(edui_cursor_buttons & EDUI_CURSOR_PRIMARY, 0)) {
             if (!(property_flags & 0x0a)) {
-                if (__builtin_expect(property_flags & 1, 0)) {
-                    if (edui_cursor_x >= interact->x + property->label_width + 1.0f && edui_cursor_y >= interact->y &&
-                        edui_cursor_x < property->button_x && edui_cursor_y < interact->y + interact->height) {
-                        eduiPropTextPos = -1;
-                        property_flags |= 1;
-                        handled = true;
-                    }
-                } else {
+                if (!(property_flags & 1)) {
                     if (__builtin_expect(edui_cursor_x >= interact->x, 0) && edui_cursor_y >= interact->y &&
                         edui_cursor_x < interact->x + property->label_width - 1.0f &&
                         edui_cursor_y < interact->y + interact->height && property->selected) {
@@ -2318,6 +2311,13 @@ extern "C" {
                         property->button(menu, property, 0);
                         if (property_flags & 0x20)
                             handled = true;
+                    }
+                } else {
+                    if (edui_cursor_x >= interact->x + property->label_width + 1.0f && edui_cursor_y >= interact->y &&
+                        edui_cursor_x < property->button_x && edui_cursor_y < interact->y + interact->height) {
+                        eduiPropTextPos = -1;
+                        property_flags |= 1;
+                        handled = true;
                     }
                 }
             }

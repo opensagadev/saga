@@ -7253,53 +7253,56 @@ static void fnAudioSample(nufpar_s *fpar) {
             g_soundInfo[NumSfxInst].pitch = NuFParGetInt(fpar);
         } else if (NuStrICmp(fpar->word_buf, "pan") == 0) {
             f32 pan = NuFParGetFloat(fpar);
-            g_soundInfo[NumSfxInst].pan = pan < -1.0f ? -1.0f : pan > 1.0f ? 1.0f : pan;
+            pan = pan < -1.0f ? -1.0f : pan > 1.0f ? 1.0f : pan;
+            g_soundInfo[NumSfxInst].pan = pan;
         } else if (NuStrICmp(fpar->word_buf, "pri") == 0) {
             i32 priority = NuFParGetInt(fpar);
-            g_soundInfo[NumSfxInst].priority = priority < -128 ? -128 : priority > 127 ? 127 : priority;
+            i8 p = priority < -128 ? -128 : priority > 127 ? 127 : priority;
+            g_soundInfo[NumSfxInst].priority = p;
         } else if (NuStrICmp(fpar->word_buf, "loop") == 0) {
             g_soundInfo[NumSfxInst].loop = 1;
         } else if (NuStrICmp(fpar->word_buf, "pitch_rnd") == 0) {
             f32 pitch_rnd = NuFParGetFloat(fpar);
-            g_soundInfo[NumSfxInst].pitch_rnd = pitch_rnd < 0.0f ? 0.0f : pitch_rnd > 1.0f ? 1.0f : pitch_rnd;
+            pitch_rnd = pitch_rnd < 0.0f ? 0.0f : pitch_rnd > 1.0f ? 1.0f : pitch_rnd;
+            g_soundInfo[NumSfxInst].pitch_rnd = pitch_rnd;
         } else if (NuStrICmp(fpar->word_buf, "volume") == 0) {
             i32 volume = NuFParGetInt(fpar);
-            g_soundInfo[NumSfxInst].volume = volume < 0 ? 0 : volume > 0x3fff ? 0x3fff : volume;
+            i16 v = volume < 0 ? 0 : volume > 0x3fff ? 0x3fff : volume;
+            g_soundInfo[NumSfxInst].volume = v;
         } else if (NuStrICmp(fpar->word_buf, "nofade") == 0) {
             g_soundInfo[NumSfxInst].nofade = 1;
         } else if (NuStrICmp(fpar->word_buf, "volume_rnd") == 0) {
             f32 volume_rnd = NuFParGetFloat(fpar);
-            g_soundInfo[NumSfxInst].volume_rnd = !(volume_rnd >= -1.0f) ? -1.0f : volume_rnd > 0.0f ? 0.0f : volume_rnd;
+            volume_rnd = volume_rnd < -1.0f ? -1.0f : volume_rnd > 0.0f ? 0.0f : volume_rnd;
+            g_soundInfo[NumSfxInst].volume_rnd = volume_rnd;
         } else if (NuStrICmp(fpar->word_buf, "near") == 0) {
             f32 falloff_near = NuFParGetFloat(fpar);
-            g_soundInfo[NumSfxInst].falloff_near = falloff_near < 0.0f     ? 0.0f
-                                                   : falloff_near > 250.0f ? 250.0f
-                                                                           : falloff_near;
+            falloff_near = falloff_near < 0.0f ? 0.0f : falloff_near > 250.0f ? 250.0f : falloff_near;
+            g_soundInfo[NumSfxInst].falloff_near = falloff_near;
         } else if (NuStrICmp(fpar->word_buf, "far") == 0) {
             f32 falloff_far = NuFParGetFloat(fpar);
-            g_soundInfo[NumSfxInst].falloff_far = falloff_far < 0.0f     ? 0.0f
-                                                  : falloff_far > 250.0f ? 250.0f
-                                                                         : falloff_far;
+            falloff_far = falloff_far < 0.0f ? 0.0f : falloff_far > 250.0f ? 250.0f : falloff_far;
+            g_soundInfo[NumSfxInst].falloff_far = falloff_far;
         } else if (NuStrICmp(fpar->word_buf, "global") == 0) {
             g_soundInfo[NumSfxInst].global = 1;
         } else if (NuStrICmp(fpar->word_buf, "rumble") == 0) {
             f32 buzz_timer = NuFParGetFloat(fpar);
             i32 rumble_strength = NuFParGetInt(fpar);
-            g_soundInfo[NumSfxInst].buzz_timer = buzz_timer < 0.0f ? 0.0f : buzz_timer > 5.0f ? 5.0f : buzz_timer;
+            buzz_timer = buzz_timer < 0.0f ? 0.0f : buzz_timer > 5.0f ? 5.0f : buzz_timer;
+            g_soundInfo[NumSfxInst].buzz_timer = buzz_timer;
             g_soundInfo[NumSfxInst].rumble_strength = rumble_strength < 0      ? 0
                                                       : rumble_strength > 0xff ? 0xff
                                                                                : rumble_strength;
             f32 rumble_sustain = NuFParGetFloat(fpar);
-            g_soundInfo[NumSfxInst].rumble_sustain = rumble_sustain < 0.0f   ? 0.0f
-                                                     : rumble_sustain > 5.0f ? 5.0f
-                                                                             : rumble_sustain;
+            rumble_sustain = rumble_sustain < 0.0f ? 0.0f : rumble_sustain > 5.0f ? 5.0f : rumble_sustain;
+            g_soundInfo[NumSfxInst].rumble_sustain = rumble_sustain;
             f32 rumble_release = NuFParGetFloat(fpar);
-            g_soundInfo[NumSfxInst].rumble_release = rumble_release < 0.0f   ? 0.0f
-                                                     : rumble_release > 5.0f ? 5.0f
-                                                                             : rumble_release;
+            rumble_release = rumble_release < 0.0f ? 0.0f : rumble_release > 5.0f ? 5.0f : rumble_release;
+            g_soundInfo[NumSfxInst].rumble_release = rumble_release;
         } else if (NuStrICmp(fpar->word_buf, "fcat") == 0) {
             i32 category = NuFParGetInt(fpar);
-            g_soundInfo[NumSfxInst].category = category < 0 ? 0 : category > 0xffff ? 0xffff : category;
+            u16 c = category < 0 ? 0 : category > 0xffff ? 0xffff : category;
+            g_soundInfo[NumSfxInst].category = c;
         }
 
         if (finfo != NULL) {
@@ -10402,7 +10405,7 @@ void DebrisProcessControlChunks(i32 panel_time) {
             control->expiry_time += 0.1f;
             if (control->active == 0)
                 control->active = 2;
-            else if (control->active == 7)
+            else if (__builtin_expect(control->active == 7, 0))
                 control->active = 9;
             AddChunkControlToStack(control, &debris_chunk_control_stack[panel_time]);
             continue;
@@ -10497,7 +10500,7 @@ void DebrisProcessControlChunks(i32 panel_time) {
                 }
                 {
                     const i16 key_index = effect->particle_keys[5];
-                    if (key_index != -1 && &debkeydata[key_index] == control->owner) {
+                    if (__builtin_expect(key_index != -1 && &debkeydata[key_index] == control->owner, 1)) {
                         control->owner->effect_index = 0;
                         control->owner->allocation_index = -1;
                         --freedebkeyptr;
@@ -23523,7 +23526,7 @@ void edanimDoInput(nupad_s *pad) {
                 } else {
                     edanimDetermineNearestAnim(-1.0f);
                 }
-                if (edanim_nearest != -1) {
+                if (__builtin_expect(edanim_nearest != -1, 1)) {
                     nuhspecial_s special;
                     NuGScnGetSpecial(&special, edbits_base_scene, edanim_nearest);
                     edcamSetPos(NuSpecialGetPos(&special));
@@ -23567,9 +23570,9 @@ void edanimDoInput(nupad_s *pad) {
 
     if (edanim_nearest_param_id != -1) {
         for (i32 effect = 0; effect < AnimParams[edanim_nearest_param_id].effect_count;) {
-            if ((AnimParams[edanim_nearest_param_id].effect_ids[effect] == -1 ||
+            if (__builtin_expect((AnimParams[edanim_nearest_param_id].effect_ids[effect] == -1 ||
                  debtab[AnimParams[edanim_nearest_param_id].effect_ids[effect]] == nullptr) &&
-                AnimParams[edanim_nearest_param_id].effect_names[effect][0] != '\0') {
+                AnimParams[edanim_nearest_param_id].effect_names[effect][0] != '\0', 1)) {
                 AnimParams[edanim_nearest_param_id].effect_ids[effect] =
                     LookupDebrisEffect(AnimParams[edanim_nearest_param_id].effect_names[effect]);
                 if (AnimParams[edanim_nearest_param_id].effect_ids[effect] == -1) {
@@ -24933,23 +24936,23 @@ void SkinPlatformSize(i32 group_index, unsigned char *buffer, PLATSKININFO *info
             const i32 shape_count = input->shape_count;
             TERRAIN_SHAPE *source = reinterpret_cast<TERRAIN_SHAPE *>(input + 1);
             TERRAIN_SHAPE *destination = reinterpret_cast<TERRAIN_SHAPE *>(output + 1);
-            for (i32 i = 0; i < shape_count; ++i, ++source, ++destination) {
+            for (i32 i = shape_count; i > 0; --i, ++source, ++destination) {
                 i32 last_vertex = source->normals[1].y > 65535.0f ? 2 : 3;
                 *destination = *source;
-                for (i32 vertex = last_vertex; vertex >= 0; --vertex) {
-                    NUVEC &v = destination->vectors[vertex];
-                    v = TerrainSkin(info, &source->vectors[SkinFlipTab[vertex + info->mirrored * 4]], -1.0f,
-                                    info->flags);
-                    v.x -= info->matrix->m30;
-                    v.y -= info->matrix->m31;
-                    v.z -= info->matrix->m32;
-                    min_x = MIN(v.x, min_x);
-                    max_x = MAX(v.x, max_x);
-                    min_y = MIN(v.y, min_y);
-                    max_y = MAX(v.y, max_y);
-                    min_z = MIN(v.z, min_z);
-                    max_z = MAX(v.z, max_z);
-                    radius_squared = MAX((v.x * v.x + v.y * v.y) + v.z * v.z, radius_squared);
+                NUVEC *v = &destination->vectors[last_vertex];
+                for (i32 vertex = last_vertex; vertex >= 0; --vertex, --v) {
+                    destination->vectors[vertex] = TerrainSkin(
+                        info, &source->vectors[SkinFlipTab[vertex + info->mirrored * 4]], -1.0f, info->flags);
+                    v->x -= info->matrix->m30;
+                    v->y -= info->matrix->m31;
+                    v->z -= info->matrix->m32;
+                    min_x = MIN(v->x, min_x);
+                    max_x = MAX(v->x, max_x);
+                    min_y = MIN(v->y, min_y);
+                    max_y = MAX(v->y, max_y);
+                    min_z = MIN(v->z, min_z);
+                    max_z = MAX(v->z, max_z);
+                    radius_squared = MAX((v->x * v->x + v->y * v->y) + v->z * v->z, radius_squared);
                 }
                 if (source->normals[1].y < 65535.0f) {
                     NUVEC a, b;
@@ -24959,13 +24962,14 @@ void SkinPlatformSize(i32 group_index, unsigned char *buffer, PLATSKININFO *info
                     b.x = destination->vectors[2].x - destination->vectors[3].x;
                     b.y = destination->vectors[2].y - destination->vectors[3].y;
                     b.z = destination->vectors[2].z - destination->vectors[3].z;
-                    NUVEC &n = destination->normals[1];
-                    n = TerCrossProduct(&a, &b);
-                    f32 squared = (n.x * n.x + n.y * n.y) + n.z * n.z;
+                    destination->normals[1] = TerCrossProduct(&a, &b);
+                    f32 squared = (destination->normals[1].x * destination->normals[1].x +
+                                   destination->normals[1].y * destination->normals[1].y) +
+                                  destination->normals[1].z * destination->normals[1].z;
                     f32 inverse = squared == 0.0f ? 0.0f : 1.0f / NuFsqrt(squared);
-                    n.y *= inverse;
-                    n.x *= inverse;
-                    n.z *= inverse;
+                    destination->normals[1].x *= inverse;
+                    destination->normals[1].y *= inverse;
+                    destination->normals[1].z *= inverse;
                 }
                 {
                     NUVEC a, b;
@@ -24975,31 +24979,32 @@ void SkinPlatformSize(i32 group_index, unsigned char *buffer, PLATSKININFO *info
                     b.x = destination->vectors[1].x - destination->vectors[0].x;
                     b.y = destination->vectors[1].y - destination->vectors[0].y;
                     b.z = destination->vectors[1].z - destination->vectors[0].z;
-                    NUVEC &n = destination->normals[0];
-                    n = TerCrossProduct(&a, &b);
-                    f32 squared = (n.x * n.x + n.y * n.y) + n.z * n.z;
+                    destination->normals[0] = TerCrossProduct(&a, &b);
+                    f32 squared = (destination->normals[0].x * destination->normals[0].x +
+                                   destination->normals[0].y * destination->normals[0].y) +
+                                  destination->normals[0].z * destination->normals[0].z;
                     f32 inverse = squared == 0.0f ? 0.0f : 1.0f / NuFsqrt(squared);
-                    n.y *= inverse;
-                    n.x *= inverse;
-                    n.z = inverse * n.z;
+                    destination->normals[0].x *= inverse;
+                    destination->normals[0].y *= inverse;
+                    destination->normals[0].z = inverse * destination->normals[0].z;
                 }
             }
             input = reinterpret_cast<TERRAIN_SHAPE_BATCH *>(source);
             output = reinterpret_cast<TERRAIN_SHAPE_BATCH *>(destination);
         }
+        output->marker = -1;
         output->shape_count = -1;
         bytes = reinterpret_cast<unsigned char *>(input) + 4 - static_cast<unsigned char *>(group->data);
-        output->marker = -1;
     }
     group->origin.x = info->matrix->m30;
     group->origin.z = info->matrix->m32;
     group->origin.y = info->matrix->m31;
+    group->bounds_min.z = (min_z - 0.1f) + info->matrix->m32;
     group->bounds_min.y = (min_y - 0.1f) + info->matrix->m31;
     group->bounds_min.x = (min_x - 0.1f) + info->matrix->m30;
-    group->bounds_min.z = (min_z - 0.1f) + info->matrix->m32;
-    group->bounds_max.x = (max_x + 0.1f) + info->matrix->m30;
     group->bounds_max.z = (max_z + 0.1f) + info->matrix->m32;
     group->bounds_max.y = (max_y + 0.1f) + info->matrix->m31;
+    group->bounds_max.x = (max_x + 0.1f) + info->matrix->m30;
     group->radius = NuFsqrt(radius_squared);
     if (bytes > PlatSkinMaxSize)
         PlatSkinMaxSize = bytes;

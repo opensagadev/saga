@@ -3014,15 +3014,15 @@ void EdDrawPolySector(VuVec const &center, float radius, i32 axis, i32 first_ang
         step = 0x10000 / segments;
     i32 angle = first_angle;
     i32 remaining;
-    if (first_angle < last_angle) {
-        remaining = (last_angle - first_angle) & 0xffff;
-        if (remaining >= 0x8000)
-            return;
-    } else {
+    if (first_angle >= last_angle) {
         remaining = (first_angle - last_angle) & 0xffff;
         if (remaining >= 0x8000)
             return;
         angle = last_angle;
+    } else {
+        remaining = (last_angle - first_angle) & 0xffff;
+        if (remaining >= 0x8000)
+            return;
     }
     if (__builtin_expect(remaining <= 0, 0))
         return;
@@ -4013,18 +4013,18 @@ void EdManipulator::GetAxisLocators(VuVec &origin, VuVec *points, VuMtx *matrix)
     points[6].w = 0.0f;
     if (matrix != NULL) {
         for (i32 index = 0; index < 8; ++index) {
-            VuVec &point = points[index];
-            // The original reads the matrix rows as vectors, so they are reloaded after each locator store.
+            // The locator is written through a float view, so every store may alias the matrix rows.
+            f32 *point = &points[index].x;
             const VuVec *rows = reinterpret_cast<const VuVec *>(&matrix->matrix);
-            const f32 x = point.x;
-            const f32 y = point.y;
-            const f32 z = point.z;
+            const f32 x = point[0];
+            const f32 y = point[1];
+            const f32 z = point[2];
             const f32 transformed_x = x * rows[0].x + y * rows[1].x + z * rows[2].x;
             const f32 transformed_y = x * rows[0].y + y * rows[1].y + z * rows[2].y;
             const f32 transformed_z = x * rows[0].z + y * rows[1].z + z * rows[2].z;
-            point.x = transformed_x;
-            point.y = transformed_y;
-            point.z = transformed_z;
+            point[0] = transformed_x;
+            point[1] = transformed_y;
+            point[2] = transformed_z;
         }
     }
     for (i32 index = 0; index < 8; ++index) {
@@ -7356,7 +7356,7 @@ void EdRegistry::SerialiseObjects(EdStream &stream, EdRegistry *source_registry)
         stream.SerialiseBuffer(&count, sizeof(count), 1);
         for (i32 index = 0; index < class_count; ++index) {
             EdClass *object_class = &classes[index];
-            if (object_class->interface == NULL)
+            if (__builtin_expect(object_class->interface == NULL, 0))
                 continue;
             if (stream.flags & 0x400000) {
                 if (object_class->flags & 0x400000)
@@ -7379,7 +7379,7 @@ void EdRegistry::SerialiseObjects(EdStream &stream, EdRegistry *source_registry)
                 } else if (filter_flags & 0x10000000) {
                     continue;
                 }
-                if (group != stream.unknown_10)
+                if (__builtin_expect(group != stream.unknown_10, 0))
                     continue;
                 ++object_count;
             }
@@ -7817,22 +7817,22 @@ void BezierLineEval(VuVec &result, VuVec &start, VuVec &first_control, VuVec &en
 void DrawBezierLine(VuVec &start, VuVec &start_control, VuVec &end, VuVec &end_control, numtl_s *material, i32 colour) {
     static i32 bezier_draw_depth;
 
-    const f32 camera_y = global_camera.mtx.m31;
     const f32 camera_x = global_camera.mtx.m30;
+    const f32 camera_y = global_camera.mtx.m31;
     const f32 camera_z = global_camera.mtx.m32;
+    const f32 start_x = start.x - camera_x;
     const f32 start_y = start.y - camera_y;
     const f32 start_z = start.z - camera_z;
-    const f32 start_x = start.x - camera_x;
     const f32 start_distance = start_x * start_x + start_y * start_y + start_z * start_z;
     const f32 end_x = end.x - camera_x;
     const f32 end_y = end.y - camera_y;
     const f32 end_z = end.z - camera_z;
     const f32 end_distance = end_x * end_x + end_y * end_y + end_z * end_z;
-    const f32 distance = end_distance < start_distance ? end_distance : start_distance;
+    const f32 distance = start_distance < end_distance ? start_distance : end_distance;
     const f32 threshold = distance < 5.5f ? 5.5f * 0.001f : distance * 0.001f;
 
-    const f32 chord_y = end.y - start.y;
     const f32 chord_x = end.x - start.x;
+    const f32 chord_y = end.y - start.y;
     const f32 chord_z = end.z - start.z;
     if (__builtin_expect(
             !(chord_x * chord_x + chord_y * chord_y + chord_z * chord_z > threshold) || bezier_draw_depth > 15, 1)) {
@@ -7841,22 +7841,38 @@ void DrawBezierLine(VuVec &start, VuVec &start_control, VuVec &end, VuVec &end_c
     }
 
     ++bezier_draw_depth;
-    const f32 end_control_x = end_control.x;
-    const f32 end_control_y = end_control.y;
     const f32 control_x = start_control.x;
+    const f32 end_control_x = end_control.x;
+    const f32 control_y = start_control.y;
+    const f32 end_control_y = end_control.y;
+    const f32 control_z = start_control.z;
     const f32 end_control_z = end_control.z;
-    VuVec second = {(control_x + end_control_x) * 0.5f, (end_control_y + start_control.y) * 0.5f,
-                    (end_control_z + start_control.z) * 0.5f, 0.0f};
-    VuVec first = {(start.x + control_x) * 0.5f, (start.y + start_control.y) * 0.5f, (start_control.z + start.z) * 0.5f,
-                   0.0f};
-    VuVec third = {(end.x + end_control_x) * 0.5f, (end.y + end_control_y) * 0.5f, (end.z + end_control_z) * 0.5f,
-                   0.0f};
-    VuVec fourth = {(first.x + second.x) * 0.5f, (first.y + second.y) * 0.5f, (first.z + second.z) * 0.5f, 0.0f};
-    VuVec fifth = {(third.x + second.x) * 0.5f, (third.y + second.y) * 0.5f, (third.z + second.z) * 0.5f, 0.0f};
-    VuVec midpoint = {(fifth.x + fourth.x) * 0.5f, (fifth.y + fourth.y) * 0.5f, (fifth.z + fourth.z) * 0.5f, 0.0f};
+    VuVec points[6];
+    const f32 second_x = (control_x + end_control_x) * 0.5f;
+    const f32 second_y = (end_control_y + control_y) * 0.5f;
+    const f32 second_z = (end_control_z + control_z) * 0.5f;
+    points[0] = VuVec(second_x, second_y, second_z, 0.0f);
+    const f32 first_x = (start.x + control_x) * 0.5f;
+    const f32 first_y = (start.y + control_y) * 0.5f;
+    const f32 first_z = (control_z + start.z) * 0.5f;
+    points[1] = VuVec(first_x, first_y, first_z, 0.0f);
+    points[2].x = (end.x + end_control_x) * 0.5f;
+    points[2].y = (end.y + end_control_y) * 0.5f;
+    points[2].z = (end.z + end_control_z) * 0.5f;
+    points[2].w = 0.0f;
+    points[3].x = (points[1].x + points[0].x) * 0.5f;
+    points[3].y = (points[1].y + points[0].y) * 0.5f;
+    points[3].z = (points[1].z + points[0].z) * 0.5f;
+    points[3].w = 0.0f;
+    points[4].x = (points[2].x + points[0].x) * 0.5f;
+    points[4].y = (points[2].y + points[0].y) * 0.5f;
+    points[4].z = (points[2].z + points[0].z) * 0.5f;
+    points[4].w = 0.0f;
+    points[5] = VuVec((points[4].x + points[3].x) * 0.5f, (points[4].y + points[3].y) * 0.5f,
+                      (points[4].z + points[3].z) * 0.5f, 0.0f);
 
-    DrawBezierLine(start, first, midpoint, fourth, material, colour);
-    DrawBezierLine(midpoint, fifth, end, third, material, colour);
+    DrawBezierLine(start, points[1], points[5], points[3], material, colour);
+    DrawBezierLine(points[5], points[4], end, points[2], material, colour);
     --bezier_draw_depth;
 }
 
@@ -8935,13 +8951,13 @@ void EdRefKnot::SetMemberData(void *object, i32 type, void *data, i32 data_size,
             knot->position.x += dx;
             knot->position.z += dz;
             knot->position.w = 1.0f;
-            if (!theClassEditor.IsSelectedObject(knot, theKnotHelper.in_tangent_ref)) {
+            if (__builtin_expect(!theClassEditor.IsSelectedObject(knot, theKnotHelper.in_tangent_ref), 0)) {
                 knot->in_tangent.x += dx;
                 knot->in_tangent.y += dy;
                 knot->in_tangent.z += dz;
                 theClassEditor.SnapPoint(knot->in_tangent);
             }
-            if (!theClassEditor.IsSelectedObject(knot, theKnotHelper.out_tangent_ref)) {
+            if (__builtin_expect(!theClassEditor.IsSelectedObject(knot, theKnotHelper.out_tangent_ref), 0)) {
                 knot->out_tangent.x += dx;
                 knot->out_tangent.y += dy;
                 knot->out_tangent.z += dz;

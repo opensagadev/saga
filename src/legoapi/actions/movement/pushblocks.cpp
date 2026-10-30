@@ -1033,12 +1033,13 @@ pushblock_s *BlockInBlock(WORLDINFO_s *world, pushblock_s *block, i32 excluded, 
             continue;
         f32 x = position->x - other->position->x, y = position->y - other->position->y,
             z = position->z - other->position->z;
-        bool overlapx = x > (other->bounds_min.x - block->bounds_max.x) + 0.01f &&
-                        x < (other->bounds_max.x - block->bounds_min.x) - 0.01f;
-        f32 ymax = other->bounds_max.y - block->bounds_min.y;
-        bool overlapz = z > (other->bounds_min.z - block->bounds_max.z) + 0.01f &&
-                        z < (other->bounds_max.z - block->bounds_min.z) - 0.01f;
-        bool overlapy = y > other->bounds_min.y - block->bounds_max.y && y < ymax;
+        f32 xmin = other->bounds_min.x - block->bounds_max.x, xmax = other->bounds_max.x - block->bounds_min.x;
+        f32 ymin = other->bounds_min.y - block->bounds_max.y, ymax = other->bounds_max.y - block->bounds_min.y;
+        f32 zmin = other->bounds_min.z - block->bounds_max.z, zmax = other->bounds_max.z - block->bounds_min.z;
+        bool overlapx = x > xmin + 0.01f && x < xmax - 0.01f;
+        bool overlapy = y > ymin && y < ymax;
+        bool overlapz = z > zmin + 0.01f && z < zmax - 0.01f;
+        bool inside = overlapx && overlapy && overlapz;
         if (support && overlapz && overlapx && y - ymax > 0.0f) {
             if (!*support)
                 *support = other;
@@ -1048,7 +1049,7 @@ pushblock_s *BlockInBlock(WORLDINFO_s *world, pushblock_s *block, i32 excluded, 
                 *support = other;
             }
         }
-        if (overlapx && overlapy && overlapz)
+        if (inside)
             return other;
     }
     return NULL;

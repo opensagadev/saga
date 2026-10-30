@@ -449,9 +449,14 @@ static i32 IsTextBreak(unsigned char *text, i32 index) {
     const u8 ch = text[index];
     if (ch == ' ') {
         const u8 next = text[index + 1];
-        if (next == '?' || next == '!' || next == ';' || next == ':') {
+        if (next == '?')
             return 0;
-        }
+        if (next == '!')
+            return 0;
+        if (next == ';')
+            return 0;
+        if (next == ':')
+            return 0;
         return 1;
     }
     if (ch == '.') {

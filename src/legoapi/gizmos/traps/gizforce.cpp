@@ -1152,6 +1152,7 @@ static void GizForces_Reset(void *world_ptr, void *data, void *progress_ptr) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
     GIZFORCESYS_s *force_sys = static_cast<GIZFORCESYS_s *>(data);
     GIZFORCEPROGRESS_s *progress = static_cast<GIZFORCEPROGRESS_s *>(progress_ptr);
+    NUVEC offset;
     memset(force_sys->groups, 0, sizeof(force_sys->groups));
     GIZFORCE_s *force = force_sys->forces;
     for (i32 index = 0; index < force_sys->count; ++index, ++force) {
@@ -1177,8 +1178,10 @@ static void GizForces_Reset(void *world_ptr, void *data, void *progress_ptr) {
             for (GAMEANIMOBJ_s *object = force->anim_set->objects; object != NULL; object = object->next) {
                 GIZFORCEANIMDATA_s *object_data = static_cast<GIZFORCEANIMDATA_s *>(object->object_data);
                 object_data->platform_id = -1;
-                if (world->terrain != NULL && (object_data->flags & 1) == 0 &&
-                    NuSpecialExistsFn(&object->special) != 0) {
+                if (world->terrain == NULL || (object_data->flags & 1) != 0) {
+                    continue;
+                }
+                if (NuSpecialExistsFn(&object->special) != 0) {
                     object_data->platform_id = FindPlatInst(NuSpecialGetInstanceix(&object->special));
                     if (__builtin_expect(object_data->platform_id != -1, 1)) {
                         force->runtime_flags |= GIZFORCE_RUNTIME_HAS_PLATFORM;
@@ -1232,7 +1235,6 @@ static void GizForces_Reset(void *world_ptr, void *data, void *progress_ptr) {
                     GizForce_AddToGroup(&force);
                 }
 
-                NUVEC offset;
                 offset.x = 0.0f;
                 offset.y = GameAnimSet_GetCompletionRatio(force.anim_set) * force.group->combined_height;
                 offset.z = 0.0f;

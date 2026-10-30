@@ -124,64 +124,80 @@ bool MechInputTouchMenuController::OnRelease(GameObject_s &, TouchHolder &holder
         return false;
     }
 
-    const NuVec2 down = holder.down_position;
-    const NuVec2 touch = holder.touch_position;
-    const f32 dy = touch.y - down.y;
-    const f32 dx = touch.x - down.x;
+    const f32 down_y = holder.down_position.y;
+    const f32 down_x = holder.down_position.x;
+    const f32 touch_y = holder.touch_position.y;
+    const f32 touch_x = holder.touch_position.x;
+    const f32 dy = touch_y - down_y;
+    const f32 dx = touch_x - down_x;
     LastTouchTime = GlobalTimer.time_elapsed;
-    LastTouchPos = touch;
+    LastTouchPos.x = touch_x;
+    LastTouchPos.y = touch_y;
     AnyTouchesThisFrame = 3;
     MENU &menu = GameMenu[GameMenuLevel];
+    NUVEC delta;
+    NUVEC item_delta;
 
     if (GetMenuID() == 12) {
         if (field_78 == 0) {
             field_70 = NULL;
             return false;
         }
-        CUSTOMISER *customiser = CharacterCustomiser;
         if (dx > 0.1f || dx < -0.1f) {
-            customiser->field_0xd16 = 1;
+            CharacterCustomiser->field_0xd16 = 1;
             return true;
         }
         if (dy > 0.1f) {
-            customiser->field_0xd12 = 1;
+            CharacterCustomiser->field_0xd12 = 1;
             return true;
         }
         if (dy < -0.1f) {
-            customiser->field_0xd13 = 1;
+            CharacterCustomiser->field_0xd13 = 1;
             return true;
         }
+        CUSTOMISER *customiser = CharacterCustomiser;
 
 #define CUSTOMISER_HIT(index)                                                                                          \
     {                                                                                                                  \
         const f32 width = customiser->touch_widths[index];                                                             \
         if (width > 0.0f) {                                                                                            \
-            const f32 x = down.x - customiser->touch_positions[index].x;                                               \
+            const f32 x = down_x - customiser->touch_positions[index].x;                                               \
             const f32 centre_y = customiser->touch_positions[index].y;                                                 \
             const f32 height = customiser->touch_heights[index];                                                       \
             const f32 half_width = fabsf(0.5f * width);                                                                \
             if (x > -half_width && x < half_width) {                                                                   \
-                const f32 y = down.y - centre_y;                                                                       \
+                const f32 y = down_y - centre_y;                                                                       \
                 const f32 half_height = fabsf(0.5f * height);                                                          \
                 if (y > -half_height && __builtin_expect(y < half_height, 0)) {                                        \
-                    customiser->touch_requests[index] = 1;                                                             \
-                    return true;                                                                                       \
+                    hit = index;                                                                                       \
+                    break;                                                                                             \
                 }                                                                                                      \
             }                                                                                                          \
         }                                                                                                              \
     }
-        CUSTOMISER_HIT(0);
-        CUSTOMISER_HIT(1);
-        CUSTOMISER_HIT(2);
-        CUSTOMISER_HIT(3);
-        CUSTOMISER_HIT(4);
-        CUSTOMISER_HIT(5);
+        i32 hit = -1;
+        do {
+            CUSTOMISER_HIT(0);
+            CUSTOMISER_HIT(1);
+            CUSTOMISER_HIT(2);
+            CUSTOMISER_HIT(3);
+            CUSTOMISER_HIT(4);
+            CUSTOMISER_HIT(5);
+        } while (0);
 #undef CUSTOMISER_HIT
+        if (hit >= 0) {
+            customiser->touch_requests[hit] = 1;
+            return true;
+        }
     }
 
     if (GetMenuID() == 17) {
         GetFreePlayCollection(hub_freeplay_area);
-        NUVEC delta = {touch.x - menu.item_x[0], touch.y - menu.item_y[0], 0.0f};
+        const f32 y = touch_y - menu.item_y[0];
+        const f32 x = touch_x - menu.item_x[0];
+        delta.x = x;
+        delta.y = y;
+        delta.z = 0.0f;
         delta.x /= GetAspectRatio();
         if (NuVecMag(&delta) < menu.item_width[0]) {
             menu.queued_item = 9999;
@@ -191,16 +207,17 @@ bool MechInputTouchMenuController::OnRelease(GameObject_s &, TouchHolder &holder
     }
 
     if (GameMenuLevel <= 0) {
-        field_74 = NULL;
         field_70 = NULL;
+        field_74 = NULL;
         return false;
     }
-    bool same_menu = field_74 == &menu;
+    if (field_74 != &menu) {
+        field_70 = NULL;
+        field_74 = NULL;
+        return false;
+    }
     field_70 = NULL;
     field_74 = NULL;
-    if (!same_menu) {
-        return false;
-    }
 
     if (dx > 0.1f) {
         menu.horizontal_scroll_distance = dx;
@@ -229,12 +246,14 @@ bool MechInputTouchMenuController::OnRelease(GameObject_s &, TouchHolder &holder
             continue;
         }
         const f32 height = menu.item_height[index];
-        const f32 x = down.x - menu.item_x[index];
-        const f32 y = down.y - menu.item_y[index];
+        const f32 y = down_y - menu.item_y[index];
+        const f32 x = down_x - menu.item_x[index];
+        item_delta.x = x;
+        item_delta.y = y;
+        item_delta.z = 0.0f;
         if (height == 0.0f) {
-            NUVEC delta = {x, y, 0.0f};
-            delta.x /= GetAspectRatio();
-            if (__builtin_expect(!(NuVecMag(&delta) < width), 1)) {
+            item_delta.x /= GetAspectRatio();
+            if (__builtin_expect(!(NuVecMag(&item_delta) < width), 1)) {
                 continue;
             }
         } else {

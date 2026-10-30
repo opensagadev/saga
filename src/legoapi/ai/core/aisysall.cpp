@@ -6926,7 +6926,7 @@ static __used__ void creatureEditor_cbSelectScript(eduimenu_s *parent, eduiitem_
         return;
     for (i32 index = 0;; ++index) {
         char *name = AIScriptNameFromIx(aieditor->ai_system, index);
-        if (name == nullptr)
+        if (__builtin_expect(name == nullptr, 1))
             break;
         if (NuStrICmp(name, "Level") == 0)
             continue;
@@ -9397,10 +9397,7 @@ extern "C" void *AISysLoad(void *buf, void *buf_end, i32 size, void *gscn, char 
         {
             AIGROUP *group = &system->groups[14];
             if (group->is_used) {
-                if (group->member_is_alive == 0)
-                    group->can_respawn = 1;
-                else
-                    group->can_respawn = 0;
+                if (!(group->member_is_alive == 0)) group->can_respawn = 0; else group->can_respawn = 1;
             }
         }
         {
@@ -11306,13 +11303,12 @@ extern "C" {
             AIPATHNODE &first_node = path->nodes[current_connection->node_indices[current_direction]];
             for (i32 connection_index = 0; connection_index < first_node.connection_count; ++connection_index) {
                 AIPATHCNX *candidate = first_node.connections[connection_index];
-                if (__builtin_expect(
-                        candidate != current_connection &&
-                            AISysCharacterTestPathCnx(system, object, packet, candidate,
-                                                      candidate->node_indices[0] !=
-                                                          current_connection->node_indices[current_direction],
-                                                      &nearest_distance_squared) != 0,
-                        1))
+                if (candidate == current_connection)
+                    continue;
+                if (AISysCharacterTestPathCnx(system, object, packet, candidate,
+                                              candidate->node_indices[0] !=
+                                                  current_connection->node_indices[current_direction],
+                                              &nearest_distance_squared) != 0)
                     return;
             }
 
@@ -11321,21 +11317,20 @@ extern "C" {
             AIPATHNODE &second_node = path->nodes[current_connection->node_indices[other_direction]];
             for (i32 connection_index = 0; connection_index < second_node.connection_count; ++connection_index) {
                 AIPATHCNX *candidate = second_node.connections[connection_index];
-                if (__builtin_expect(
-                        candidate != current_connection &&
-                            AISysCharacterTestPathCnx(system, object, packet, candidate,
-                                                      candidate->node_indices[0] !=
-                                                          current_connection->node_indices[other_direction],
-                                                      &nearest_distance_squared) != 0,
-                        0))
+                if (candidate == current_connection)
+                    continue;
+                if (AISysCharacterTestPathCnx(system, object, packet, candidate,
+                                              candidate->node_indices[0] !=
+                                                  current_connection->node_indices[other_direction],
+                                              &nearest_distance_squared) != 0)
                     return;
             }
         }
 
         path = packet->path_info.path;
         if ((packet->navigation_flags & AIPACKET_NAVIGATION_FLAG_SEARCH_ALL_PATHS) == 0) {
-            i32 remaining_checks = path->node_count < checks ? path->node_count : checks;
-            while (remaining_checks-- > 0) {
+            for (i32 remaining_checks = path->node_count < checks ? path->node_count : checks; remaining_checks > 0;
+                 --remaining_checks) {
                 AIPATHNODE &node = path->nodes[packet->path_info.next_check];
                 for (i32 connection_index = 0; connection_index < node.connection_count; ++connection_index) {
                     if (AISysCharacterTestPathCnx(system, object, packet, node.connections[connection_index], -1,
@@ -15336,20 +15331,21 @@ void locatorEditor_Enter(void) {
     if ((*state)->ai_system != nullptr) {
         for (i32 index = 0; index < (*state)->ai_system->locator_count; ++index) {
             AILOCATOR *source = &(*state)->ai_system->locators[index];
+            i32 direction = source->direction;
             EDLOCATOR_s *locator = (EDLOCATOR_s *)NuLinkedListGetHead(&(*state)->free_locators);
             if (locator != nullptr) {
                 NuLinkedListRemove(&(*state)->free_locators, &locator->link);
                 NuLinkedListAppend(&(*state)->locators, &locator->link);
                 locator->position = source->position;
-                locator->direction = source->direction;
+                locator->direction = direction;
             }
             strcpy(locator->name, source->name);
             EDAIPATH_s *path = pathEditor_GetPath((const char *)source->path_info.path);
-            f32 tolerance = 0.0f;
-            do {
+            for (f32 tolerance = 0.0f;; tolerance += 0.01f) {
                 pathEditor_OnPathCheck(&locator->position, (EDAIPATHCHECK_s *)locator->path_check, path, tolerance);
-                tolerance += 0.01f;
-            } while (__builtin_expect(!locator->on_path, 0));
+                if (locator->on_path)
+                    break;
+            }
             locator->path_angle = NuAngSub(locator->direction, locator->path_angle);
         }
         for (i32 index = 0; index < (*state)->ai_system->locator_set_count; ++index) {
@@ -15361,9 +15357,11 @@ void locatorEditor_Enter(void) {
             NuLinkedListRemove(&(*state)->free_locator_sets, &set->link);
             memset(set, 0, sizeof(*set));
             NuLinkedListAppend(&(*state)->locator_sets, &set->link);
-            strcpy(set->name, source->name);
-            for (i32 member = 0; member < source->locator_count; ++member) {
-                set->locators[member] = &(*state)->locator_pool[source->locator_entries[member]];
+            if (source != nullptr) {
+                strcpy(set->name, source->name);
+                for (i32 member = 0; member < source->locator_count; ++member) {
+                    set->locators[member] = &(*state)->locator_pool[source->locator_entries[member]];
+                }
             }
         }
     }
@@ -15376,8 +15374,9 @@ void locatorEditor_Enter(void) {
         return;
     }
     EDLOCATORSET_s *set = (EDLOCATORSET_s *)NuLinkedListGetHead(&context->locator_sets);
-    while (set != nullptr && NuStrICmp(aieditorsettings.current_route_name, set->name) != 0) {
-        set = (EDLOCATORSET_s *)NuLinkedListGetNext(&(*state)->locator_sets, &set->link);
+    for (; set != nullptr; set = (EDLOCATORSET_s *)NuLinkedListGetNext(&(*state)->locator_sets, &set->link)) {
+        if (NuStrICmp(aieditorsettings.current_route_name, set->name) == 0)
+            break;
     }
     context->current_locator_set = set;
 }
@@ -17493,19 +17492,53 @@ void creatureEditor_Enter() {
                         creature->script_params[p] = script->params[p].default_val;
                 }
             }
-            if (source->area != nullptr)
-                creature->trigger_area = FindCreatureArea(source->area->name);
-            if (source->locator != nullptr)
-                creature->locator = FindCreatureLocator(source->locator->name);
-            if (source->respawn_locator != nullptr)
-                creature->respawn_locator = FindCreatureLocator(source->respawn_locator->name);
+            if (source->area != nullptr) {
+                EditorNamedEntry *area = (EditorNamedEntry *)NuLinkedListGetHead(
+                    reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x37a40));
+                while (area != nullptr) {
+                    if (NuStrICmp(area->name, source->area->name) == 0) {
+                        creature->trigger_area = area;
+                        break;
+                    }
+                    area = (EditorNamedEntry *)NuLinkedListGetNext(
+                        reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x37a40), &area->link);
+                }
+            }
+            if (source->locator != nullptr) {
+                EDLOCATOR_s *locator = (EDLOCATOR_s *)NuLinkedListGetHead(&aieditor->locators);
+                while (locator != nullptr) {
+                    if (NuStrICmp(locator->name, source->locator->name) == 0) {
+                        creature->locator = locator;
+                        break;
+                    }
+                    locator = (EDLOCATOR_s *)NuLinkedListGetNext(&aieditor->locators, &locator->link);
+                }
+            }
+            if (source->respawn_locator != nullptr) {
+                EDLOCATOR_s *locator = (EDLOCATOR_s *)NuLinkedListGetHead(&aieditor->locators);
+                while (locator != nullptr) {
+                    if (NuStrICmp(locator->name, source->respawn_locator->name) == 0) {
+                        creature->respawn_locator = locator;
+                        break;
+                    }
+                    locator = (EDLOCATOR_s *)NuLinkedListGetNext(&aieditor->locators, &locator->link);
+                }
+            }
             creature->activation = source->activate_type;
             if (source->activate_type == 1) {
                 creature->activation = 0;
                 if (source->activate_area != nullptr) {
-                    creature->activation_area = FindCreatureArea(source->activate_area->name);
-                    if (creature->activation_area != nullptr)
-                        creature->activation = 1;
+                    EditorNamedEntry *area = (EditorNamedEntry *)NuLinkedListGetHead(
+                        reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x37a40));
+                    while (area != nullptr) {
+                        if (NuStrICmp(area->name, source->activate_area->name) == 0) {
+                            creature->activation_area = area;
+                            creature->activation = 1;
+                            break;
+                        }
+                        area = (EditorNamedEntry *)NuLinkedListGetNext(
+                            reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x37a40), &area->link);
+                    }
                 }
             }
             creature->difficulty = source->activation_difficulty;

@@ -981,12 +981,13 @@ i32 NetworkObjectManager::Push(NetworkObject const *object, NetReplicator *repli
 
     NetOutputStream stream;
     i16 object_id = object->id;
-    i32 class_id = theRegistry.GetClassId(object->object_class);
+    i16 class_id = static_cast<i16>(theRegistry.GetClassId(object->object_class));
     i16 flags = object->flags;
+    i16 replicator_id = replicator->id;
     message->Write8(2);
     message->Write16(object_id);
-    message->Write16(static_cast<i16>(class_id));
-    message->Write16(replicator->id);
+    message->Write16(class_id);
+    message->Write16(replicator_id);
     message->Write16(flags);
 
     i32 initial_size = message->data != NULL ? message->write_offset - message->read_offset : 0;
@@ -1259,10 +1260,10 @@ void NetworkObjectManager::ReceiveReleaseMessage(NetMessage &message, NetPeer co
 }
 
 void NetworkObjectManager::ReceiveReplicaMessage(NetMessage &message, NetPeer const &peer) {
+    i16 replicator_id;
     i16 id;
     NetInputStream stream;
     i16 class_id;
-    i16 replicator_id;
     i16 flags;
     message.Read16(id);
     message.Read16(class_id);
@@ -1273,31 +1274,35 @@ void NetworkObjectManager::ReceiveReplicaMessage(NetMessage &message, NetPeer co
     NetworkObject *object = &objects[id];
     object->flags = static_cast<u16>(flags | 8);
 
-    NetReplicator *replicator = replicators[class_id].head;
+    NetReplicator *replicator;
     i32 data_offset = 0;
-    while (replicator != NULL && replicator->id != replicator_id) {
+    for (replicator = replicators[class_id].head; replicator != NULL; replicator = replicator->next) {
+        if (replicator_id == replicator->id) {
+            break;
+        }
         data_offset += replicator->data_size;
-        replicator = replicator->next;
     }
 
     if (object->object == NULL || object->object_class != object_class) {
+        u16 message_size = replicator->message_size;
         if (message.data != NULL) {
-            message.read_offset += replicator->message_size;
+            message.read_offset += message_size;
         }
         return;
     }
 
-    if (__builtin_expect((flags & 2) != 0, 0)) {
+    if ((flags & 2) != 0) {
         replicator->replication_group |= 8;
     }
 
+    u16 data_size = replicator->data_size;
     ReplicatorData data;
     data.start = static_cast<u8 *>(object->replicator_data) + data_offset;
     data.cursor = data.start;
-    data.end = data.start + replicator->data_size;
-    replicator->AllowPush(object_class, object->object, data, 1, 0);
+    data.end = data.start + data_size;
+    replicator->AllowPush(object->object_class, object->object, data, 1, 0);
     stream.message = &message;
-    replicator->SerialiseObject(stream, const_cast<NetPeer *>(&peer), object_class, object->object, data,
+    replicator->SerialiseObject(stream, const_cast<NetPeer *>(&peer), object->object_class, object->object, data,
                                 reinterpret_cast<i16 *>(object));
 }
 

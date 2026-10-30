@@ -1616,7 +1616,8 @@ i32 instNuGCutSceneSwapBuffers(instNUGCUTSCENE_s *instance, i32 force) {
 
 extern "C" {
     void instNuGCutSceneServiceLoad(void) {
-        if (cutscene_load_instance == NULL || cutscene_load_instance->cutscene == NULL) {
+        if (cutscene_load_instance == NULL ||
+            *reinterpret_cast<NUGCUTSCENE_s *volatile *>(&cutscene_load_instance->cutscene) == NULL) {
             return;
         }
 
@@ -1626,10 +1627,12 @@ extern "C" {
         char *dot = strchr(path, '.');
         NuStrCpy(extension, dot);
 
-        if ((cutscene_load_instance->stream_index + 1) / 10 != 0) {
-            *dot++ = static_cast<char>('0' + (cutscene_load_instance->stream_index + 1) / 10);
+        i32 tens = (*reinterpret_cast<volatile u8 *>(&cutscene_load_instance->stream_index) + 1) / 10;
+        i32 ones = (cutscene_load_instance->stream_index + 1) % 10;
+        if (tens != 0) {
+            *dot++ = static_cast<char>('0' + tens);
         }
-        *dot++ = static_cast<char>('0' + (cutscene_load_instance->stream_index + 1) % 10);
+        *dot++ = static_cast<char>('0' + ones);
         NuStrCpy(dot, extension);
 
         // Retail realigns the frame (and esp,-16) and keeps both buffer cursors in 16-byte aligned slots.
@@ -1645,20 +1648,20 @@ extern "C" {
         buffer_end.addr = buffer.addr + cutscene_load_instance->cutscene->stream_buffer_size;
         NuGCutSceneLoad(path, &buffer, &buffer_end, 1);
         cutscene_load_instance->stream_loaded = 1;
-        const bool swap_buffers =
-            cutscene_load_instance->stream_index == 0 && (cutscene_load_instance->cutscene->flags & 8) != 0;
+        const bool swap_buffers = *reinterpret_cast<volatile u8 *>(&cutscene_load_instance->stream_index) == 0 &&
+                                  (cutscene_load_instance->cutscene->flags & 8) != 0;
         if (swap_buffers) {
             instNuGCutSceneSwapBuffers(cutscene_load_instance, 1);
+            NUGCUTSCENE_s *source = static_cast<NUGCUTSCENE_s *>(cutscene_load_instance->cutscene->stream_buffer_1);
             if (NumCommonStreamingBuffers > 1) {
                 cutscene_load_instance->stream_common_copy = 1;
                 NewCopyAnims(cutscene_load_instance);
             } else {
-                copyAnims(cutscene_load_instance->cutscene,
-                          static_cast<NUGCUTSCENE_s *>(cutscene_load_instance->cutscene->stream_buffer_1));
+                copyAnims(*reinterpret_cast<NUGCUTSCENE_s *volatile *>(&cutscene_load_instance->cutscene), source);
             }
             cutscene_load_instance->cutscene->swap_on_first_stream = 0;
             cutscene_load_instance->stream_loaded = 0;
-            cutscene_load_instance->stream_index = 1;
+            *reinterpret_cast<volatile u8 *>(&cutscene_load_instance->stream_index) = 1;
         }
         cutscene_load_instance->stream_loading = 0;
         cutscene_load_instance = NULL;
@@ -3402,10 +3405,10 @@ extern "C" void NuGCutSceneSysRender(i32 paused) {
                 NUGCUTCHARSYS_s *system = cutscene->character_system;
                 if (NuCutSceneCharacterRender != NULL) {
                     for (i32 i = 0; i < system->character_count; ++i) {
+                        NUGCUTCHAR_s *system_character = &system->characters[i];
                         instNUGCUTCHAR_s *character = &character_instance->characters[i];
                         if (character->character_model != NULL) {
-                            NuCutSceneCharacterRender(instance, cutscene, character, &system->characters[i], frame,
-                                                      paused);
+                            NuCutSceneCharacterRender(instance, cutscene, character, system_character, frame, paused);
                         }
                     }
                 }
@@ -3447,10 +3450,10 @@ extern "C" void NuGCutSceneSysRender(i32 paused) {
                 NUGCUTCHARSYS_s *system = cutscene->character_system;
                 if (NuCutSceneCharacterRender != NULL) {
                     for (i32 i = 0; i < system->character_count; ++i) {
+                        NUGCUTCHAR_s *system_character = &system->characters[i];
                         instNUGCUTCHAR_s *character = &character_instance->characters[i];
                         if (character->character_model != NULL) {
-                            NuCutSceneCharacterRender(instance, cutscene, character, &system->characters[i], frame,
-                                                      paused);
+                            NuCutSceneCharacterRender(instance, cutscene, character, system_character, frame, paused);
                         }
                     }
                 }
@@ -3874,7 +3877,12 @@ extern "C" {
             const u32 cut_span = static_cast<u32>(reinterpret_cast<usize>(DefragCutSceneEndMem) -
                                                   reinterpret_cast<usize>(DefragCutSceneBaseMem));
             const f32 cut_scale = 580.0f / static_cast<f32>(cut_span);
-            CUT_MEMORY_VERTEX(30.0f, 206.0f, 0x40000040u, 0x40000080u);
+            if (g_NuPrim_NeedsOverbrightening != 0) {
+                g_NuPrim_StreamBufferPtr->u32_ptr[3] = 0x40000080u;
+            } else {
+                g_NuPrim_StreamBufferPtr->u32_ptr[3] = 0x40000040u;
+            }
+            NuPrim2DAddXYZ(30.0f, 206.0f, 0.0f);
             CUT_MEMORY_VERTEX(610.0f, 210.0f, 0x40000040u, 0x40000080u);
 
             CutSceneCleanUpEntry *const list_end = DefragCutSceneListBase + DefragCutSceneListSize;
@@ -3887,24 +3895,29 @@ extern "C" {
                 const u32 scene_start =
                     static_cast<u32>(reinterpret_cast<usize>(scene) - reinterpret_cast<usize>(DefragCutSceneBaseMem));
                 const u32 scene_end = scene_start + scene->loaded_size;
-                const f32 scene_start_x = static_cast<f32>(scene_start) * cut_scale + 30.0f;
-                const f32 scene_end_x = static_cast<f32>(scene_end) * cut_scale + 30.0f;
-                CUT_MEMORY_VERTEX(scene_start_x, 206.0f, 0x40004040u, 0x40008080u);
-                CUT_MEMORY_VERTEX(scene_end_x, 210.0f, 0x40004040u, 0x40008080u);
+                const f32 scene_start_x = static_cast<f32>(scene_start) * cut_scale;
+                const f32 scene_end_x = static_cast<f32>(scene_end) * cut_scale;
+                CUT_MEMORY_VERTEX(scene_start_x + 30.0f, 206.0f, 0x40004040u, 0x40008080u);
+                CUT_MEMORY_VERTEX(scene_end_x + 30.0f, 210.0f, 0x40004040u, 0x40008080u);
 
                 const u32 inst_start = static_cast<u32>(reinterpret_cast<usize>(instance) -
                                                         reinterpret_cast<usize>(DefragCutSceneBaseMem));
                 const u32 inst_end = inst_start + instance->allocation_size;
-                const f32 inst_start_x = static_cast<f32>(inst_start) * cut_scale + 30.0f;
-                const f32 inst_end_x = static_cast<f32>(inst_end) * cut_scale + 30.0f;
-                CUT_MEMORY_VERTEX(inst_start_x, 206.0f, 0x40400040u, 0x40800080u);
-                CUT_MEMORY_VERTEX(inst_end_x, 210.0f, 0x40400040u, 0x40800080u);
+                const f32 inst_start_x = static_cast<f32>(inst_start) * cut_scale;
+                const f32 inst_end_x = static_cast<f32>(inst_end) * cut_scale;
+                CUT_MEMORY_VERTEX(inst_start_x + 30.0f, 206.0f, 0x40400040u, 0x40800080u);
+                CUT_MEMORY_VERTEX(inst_end_x + 30.0f, 210.0f, 0x40400040u, 0x40800080u);
             }
         } else {
             const u32 cut_span = static_cast<u32>(reinterpret_cast<usize>(DefragCutSceneEndMem) -
                                                   reinterpret_cast<usize>(DefragCutSceneBaseMem));
             const f32 cut_scale = 580.0f / static_cast<f32>(cut_span);
-            CUT_MEMORY_VERTEX(30.0f, 206.0f, 0x40000040u, 0x40000080u);
+            if (g_NuPrim_NeedsOverbrightening != 0) {
+                g_NuPrim_StreamBufferPtr->u32_ptr[3] = 0x40000080u;
+            } else {
+                g_NuPrim_StreamBufferPtr->u32_ptr[3] = 0x40000040u;
+            }
+            NuPrim2DAddXYZ(30.0f, 206.0f, 0.0f);
             CUT_MEMORY_VERTEX(610.0f, 208.0f, 0x40000040u, 0x40000080u);
 
             CutSceneCleanUpEntry *const list_end = DefragCutSceneListBase + DefragCutSceneListSize;
@@ -3917,10 +3930,10 @@ extern "C" {
                 const u32 start =
                     static_cast<u32>(reinterpret_cast<usize>(scene) - reinterpret_cast<usize>(DefragCutSceneBaseMem));
                 const u32 end = start + scene->loaded_size;
-                const f32 start_x = static_cast<f32>(start) * cut_scale + 30.0f;
-                const f32 end_x = static_cast<f32>(end) * cut_scale + 30.0f;
-                CUT_MEMORY_VERTEX(start_x, 206.0f, 0x40004040u, 0x40008080u);
-                CUT_MEMORY_VERTEX(end_x, 208.0f, 0x40004040u, 0x40008080u);
+                const f32 start_x = static_cast<f32>(start) * cut_scale;
+                const f32 end_x = static_cast<f32>(end) * cut_scale;
+                CUT_MEMORY_VERTEX(start_x + 30.0f, 206.0f, 0x40004040u, 0x40008080u);
+                CUT_MEMORY_VERTEX(end_x + 30.0f, 208.0f, 0x40004040u, 0x40008080u);
             }
 
             const u32 inst_span = static_cast<u32>(reinterpret_cast<usize>(DefragInstEndMem) -
@@ -3937,10 +3950,10 @@ extern "C" {
                 const u32 start =
                     static_cast<u32>(reinterpret_cast<usize>(instance) - reinterpret_cast<usize>(DefragInstBaseMem));
                 const u32 end = start + instance->allocation_size;
-                const f32 start_x = static_cast<f32>(start) * inst_scale + 30.0f;
-                const f32 end_x = static_cast<f32>(end) * inst_scale + 30.0f;
-                CUT_MEMORY_VERTEX(start_x, 209.0f, 0x40400040u, 0x40800080u);
-                CUT_MEMORY_VERTEX(end_x, 211.0f, 0x40400040u, 0x40800080u);
+                const f32 start_x = static_cast<f32>(start) * inst_scale;
+                const f32 end_x = static_cast<f32>(end) * inst_scale;
+                CUT_MEMORY_VERTEX(start_x + 30.0f, 209.0f, 0x40400040u, 0x40800080u);
+                CUT_MEMORY_VERTEX(end_x + 30.0f, 211.0f, 0x40400040u, 0x40800080u);
             }
         }
 
@@ -3949,5 +3962,4 @@ extern "C" {
 
 #undef CUT_MEMORY_VERTEX
     }
-
 }

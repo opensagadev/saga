@@ -311,25 +311,28 @@ void AddStreakPoints(nuvec_s *points, float duration, u32 colour, void **handle,
     NuVecScale(&header->streaks->end_tangent, &header->streaks->end_tangent, 1.0f / 3.0f);
     streak = header->streaks;
     older = streak->next;
+    STREAK_s *oldest = older->next;
 
-    if (older->next == NULL) {
+    if (oldest == NULL) {
         NuVecSub(&older->start_tangent, &older->position, &streak->position);
-        NuVecSub(&older->end_tangent, &older->previous_position, &streak->previous_position);
+        NuVecSub(&header->streaks->next->end_tangent, &header->streaks->next->previous_position,
+                 &header->streaks->previous_position);
         NuVecScale(&header->streaks->next->start_tangent, &header->streaks->next->start_tangent, 1.0f / 3.0f);
         NuVecScale(&header->streaks->next->end_tangent, &header->streaks->next->end_tangent, 1.0f / 3.0f);
     } else {
-
         NuVecSub(&incoming, &older->position, &streak->position);
-        NuVecSub(&outgoing, &older->next->position, &older->position);
-        NuVecAddScale(&older->start_tangent, &incoming, &outgoing, 0.5f);
-        NuVecSub(&incoming, &older->previous_position, &streak->previous_position);
-        NuVecSub(&outgoing, &older->next->previous_position, &older->previous_position);
-        NuVecAddScale(&older->end_tangent, &incoming, &outgoing, 0.5f);
+        NuVecSub(&outgoing, &oldest->position, &older->position);
+        NuVecAddScale(&header->streaks->next->start_tangent, &incoming, &outgoing, 0.5f);
+        streak = header->streaks;
+        older = streak->next;
+        NUVEC *older_previous = &older->previous_position;
+        NUVEC *oldest_previous = &older->next->previous_position;
+        NuVecSub(&incoming, older_previous, &streak->previous_position);
+        NuVecSub(&outgoing, oldest_previous, older_previous);
+        NuVecAddScale(&header->streaks->next->end_tangent, &incoming, &outgoing, 0.5f);
         NuVecScale(&header->streaks->next->start_tangent, &header->streaks->next->start_tangent, 1.0f / 3.0f);
         NuVecScale(&header->streaks->next->end_tangent, &header->streaks->next->end_tangent, 1.0f / 3.0f);
-        older = header->streaks->next;
-        if (older->next != NULL && older->next->segment_count > 1)
-            CalculateStreakSegment(header, 1);
+        CalculateStreakSegment(header, 1);
     }
 
     streak = header->streaks;
@@ -340,11 +343,15 @@ void AddStreakPoints(nuvec_s *points, float duration, u32 colour, void **handle,
     NuVecNorm(&edge_a, &edge_a);
     NuVecNorm(&edge_b, &edge_b);
 
-    header->streaks->next->segment_count = static_cast<i32>(60.0f * FRAMETIME + 60.0f * FRAMETIME);
-    if (header->streaks->next->segment_count >= 8)
-        header->streaks->next->segment_count = 8;
-    if (header->streaks->next->segment_count < 2)
-        return;
+    STREAK_s *segment = header->streaks->next;
+    i32 count = static_cast<i32>(60.0f * FRAMETIME + 60.0f * FRAMETIME);
+    if (count < 8) {
+        segment->segment_count = count;
+        if (count < 2)
+            return;
+    } else {
+        segment->segment_count = 8;
+    }
     CalculateStreakSegment(header, 0);
 }
 

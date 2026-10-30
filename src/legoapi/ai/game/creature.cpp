@@ -201,22 +201,24 @@ u8 CharClipToBlobShadows;
 static inline void DrawSetRotationY(NUMTX *matrix, NUANG angle) {
     const f32 cosine = NU_COS_LUT(angle);
     const f32 sine = NU_SIN_LUT(angle);
-    matrix->m11 = 1.0f;
-    matrix->m33 = 1.0f;
-    matrix->m00 = cosine;
-    matrix->m01 = 0.0f;
-    matrix->m02 = -sine;
-    matrix->m03 = 0.0f;
-    matrix->m10 = 0.0f;
-    matrix->m12 = 0.0f;
-    matrix->m13 = 0.0f;
-    matrix->m20 = sine;
-    matrix->m21 = 0.0f;
-    matrix->m22 = cosine;
-    matrix->m23 = 0.0f;
-    matrix->m30 = 0.0f;
-    matrix->m31 = 0.0f;
-    matrix->m32 = 0.0f;
+    typedef f32 __attribute__((may_alias)) af32;
+    af32 *m = reinterpret_cast<af32 *>(matrix);
+    m[5] = 1.0f;
+    m[15] = 1.0f;
+    m[0] = cosine;
+    m[1] = 0.0f;
+    m[2] = -sine;
+    m[3] = 0.0f;
+    m[4] = 0.0f;
+    m[6] = 0.0f;
+    m[7] = 0.0f;
+    m[8] = sine;
+    m[9] = 0.0f;
+    m[10] = cosine;
+    m[11] = 0.0f;
+    m[12] = 0.0f;
+    m[13] = 0.0f;
+    m[14] = 0.0f;
 }
 
 extern i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
@@ -3435,8 +3437,8 @@ i32 DrawGameObjectsProcess() {
                     DrawSetRotationY(&orientation, NUANG_180DEG);
                     if (object->apiobj.pitch_angle != 0)
                         ShopRotateX(&orientation, object->apiobj.pitch_angle);
-                    if (object->apiobj.field_0x276 != 0)
-                        ShopRotateY(&orientation, object->apiobj.field_0x276);
+                    if (const NUANG yaw = object->apiobj.field_0x276)
+                        ShopRotateY(&orientation, yaw);
                     if (object->apiobj.roll_angle != 0)
                         ShopRotateZ(&orientation, object->apiobj.roll_angle);
                     NuMtxMulVU0(&matrix, &matrix, &orientation);
@@ -3467,8 +3469,8 @@ i32 DrawGameObjectsProcess() {
                         ShopRotateZ(&orientation, object->apiobj.roll_angle);
                     if (object->apiobj.pitch_angle != 0)
                         ShopRotateX(&orientation, object->apiobj.pitch_angle);
-                    if (object->apiobj.field_0x276 != 0)
-                        ShopRotateY(&orientation, object->apiobj.field_0x276);
+                    if (const NUANG yaw = object->apiobj.field_0x276)
+                        ShopRotateY(&orientation, yaw);
                     NuMtxMulVU0(&matrix, &matrix, &orientation);
                     NuMtxTranslate(&matrix, &position);
                     break;

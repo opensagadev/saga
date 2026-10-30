@@ -80,15 +80,17 @@ MechInputTouchVirtualConsoleController::~MechInputTouchVirtualConsoleController(
 void VirtualControlDPad::Render() {
     MechTouchUITexButton::Render();
 
-    const f32 centre_x = (position.x + 1.0f) * 0.5f;
-    const f32 centre_y = (1.0f - position.y) * 0.5f;
+    f32 centre_x = position.x + 1.0f;
+    f32 centre_y = 1.0f - position.y;
+    centre_x = 0.5f * centre_x;
+    centre_y = 0.5f * centre_y;
     const f32 scaled_x = radius_x * scale;
     const f32 scaled_y = radius_y * scale;
     const bool all_active =
         (GetMenuID() == 25 && owner != NULL) || MechInputTouchVirtualConsoleController::s_noInputTimer < 0.0f;
 
     const f32 bottom_factor = stick_values.y > 0.2f || all_active ? 0.75f : 0.5f;
-    const f32 arrow_radius = NuIOS_IsSmallScreen() ? 0.07f : 0.035f;
+    const f32 arrow_radius = !NuIOS_IsSmallScreen() ? 0.035f : 0.07f;
     numtl_s *arrow = arrow_material;
     i32 colour = (static_cast<i32>(128.0f * alpha * bottom_factor) << 24) | 0x808080;
     f32 arrow_height = arrow_radius * scale;
@@ -120,13 +122,13 @@ void VirtualControlDPad::Render() {
 
     if (GetMenuID() == 25 && controller->button_mover != NULL) {
         MechTouchUITexButton *button_mover = static_cast<MechTouchUITexButton *>(controller->button_mover);
-        mover.position = position;
-        mover.radius_x = button_mover->radius_x;
-        mover.radius_y = button_mover->radius_y;
-        mover.scale = mover.scale_to = button_mover->scale;
+        typedef f32 DPadPosVec4 __attribute__((vector_size(16), aligned(4)));
+        *reinterpret_cast<NuVec2 *>(&mover.radius_x) = *reinterpret_cast<const NuVec2 *>(&button_mover->radius_x);
+        *reinterpret_cast<DPadPosVec4 *>(&mover.position) = *reinterpret_cast<const DPadPosVec4 *>(&position);
+        mover.scale_to = mover.scale = button_mover->scale;
         mover.scale_elapsed = mover.scale_duration;
         if (owner != NULL) {
-            mover.scale = mover.scale_to = 1.1f;
+            mover.scale_to = mover.scale = 1.1f;
         }
         mover.MechTouchUITexButton::Render();
     }

@@ -201,7 +201,30 @@ bool MechJumpAutoPilotAddon::OnProcess(MechAddon::ProcessStage, float delta_time
     const bool is_jumping = character->character_context == LEGOCONTEXT_JUMP;
     if (!is_jumping && started)
         return false;
-    if (state != 0) {
+    if (state == 0) {
+        elapsed_time += delta_time;
+        if (__builtin_expect(character->character_context == LEGOCONTEXT_JUMP, 0) && !started) {
+            field_24 =
+                VuVec(character->apiobj.position.x, character->apiobj.position.y, character->apiobj.position.z, 1.0f);
+            field_34 =
+                VuVec(character->apiobj.velocity.x, character->apiobj.velocity.y, character->apiobj.velocity.z, 1.0f);
+            field_44.x = field_24.x;
+            field_44.y = field_24.y;
+            field_44.z = field_24.z;
+            field_44.w = 1.0f;
+            field_54.x = field_34.x;
+            field_54.y = field_34.y;
+            field_54.z = field_34.z;
+            field_54.w = 1.0f;
+            state = 1;
+            field_9c = false;
+            field_9d = false;
+
+            const float gravity = character->apiobj.character_data->game_character->gravity;
+            field_94 = field_24.y + (-(field_34.y * field_34.y)) / (gravity + gravity);
+            elapsed_time = 0.0f;
+        }
+    } else {
         GameObject_s *jump_character = character;
         const float x_speed = field_34.x * speed_scale;
         const float z_speed = field_34.z * speed_scale;
@@ -232,38 +255,8 @@ bool MechJumpAutoPilotAddon::OnProcess(MechAddon::ProcessStage, float delta_time
             default:
                 break;
         }
-        goto update_started;
     }
 
-    elapsed_time += delta_time;
-    if (__builtin_expect(character->character_context == LEGOCONTEXT_JUMP && !started, 0)) {
-        field_24.y = character->apiobj.position.y;
-        field_24.x = character->apiobj.position.x;
-        field_24.w = 1.0f;
-        field_24.z = character->apiobj.position.z;
-        field_34.y = character->apiobj.velocity.y;
-        field_34.x = character->apiobj.velocity.x;
-        field_34.z = character->apiobj.velocity.z;
-        field_34.w = 1.0f;
-        field_44.x = field_24.x;
-        field_44.z = field_24.z;
-        field_44.y = field_24.y;
-        field_44.w = 1.0f;
-        field_54.x = field_34.x;
-        field_54.y = field_34.y;
-        field_54.z = field_34.z;
-        field_54.w = 1.0f;
-        field_9c = false;
-        field_9d = false;
-        state = 1;
-        elapsed_time = 0.0f;
-
-        const float gravity = character->apiobj.character_data->game_character->gravity;
-        const float vy = character->apiobj.velocity.y;
-        field_94 = character->apiobj.position.y + (-(vy * vy)) / (gravity + gravity);
-    }
-
-update_started:
     started |= character->character_context == LEGOCONTEXT_JUMP;
     return true;
 }

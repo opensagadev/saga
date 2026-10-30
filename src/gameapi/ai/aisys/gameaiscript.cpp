@@ -3327,7 +3327,7 @@ static i32 Action_SetAIOverrideControl(AISYS *system, AISCRIPTPROCESS *processor
         object = packet != NULL ? reinterpret_cast<APIOBJECT *>(packet->owner) : NULL;
         for (i32 index = 0; index < param_count; ++index) {
             char *value = NuStrIStr(params[index], "character");
-            if (value != NULL) {
+            if (__builtin_expect(value != NULL, 1)) {
                 if (GetNamedAPIObjectFn != NULL)
                     object = GetNamedAPIObjectFn(system, value + 10);
             } else if (NuStrICmp("FALSE", params[index]) == 0) {
@@ -9159,7 +9159,7 @@ __used__ static i32 Action_Kill(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET
             continue;
         }
         value = NuStrIStr(params[index], "area=");
-        if (value != NULL) {
+        if (__builtin_expect(value != NULL, 1)) {
             area = AISysFindArea(WORLD->ai_sys, value + 5);
         }
     }
@@ -9222,7 +9222,7 @@ __used__ static i32 Action_Kill(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET
             if (!check_if_dead || (candidate->apiobj.field_0x287 == 0 && candidate->field_0x101c <= 0.0f)) {
                 candidate->respawnable = respawn;
                 candidate->respawn_at_origin = respawn_at_origin;
-                if (parts_on)
+                if (__builtin_expect(parts_on != 0, 0))
                     KillParts(candidate, -1, -1, 1, 0.0f, 0, NULL);
                 if (__builtin_expect(debris, 0))
                     KillGameObject(candidate, 2, 0);

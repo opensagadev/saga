@@ -152,7 +152,10 @@ bool MechTouchTaskGoTo::Update() {
     }
     if (move_to_marker.Get() != NULL && GetHashId().value == HashId.value) {
         move_to_marker.Get()->FadeOut();
-        move_to_marker = NuMechPtr<MoveToMarker, 4>();
+        NuMechPtr<MoveToMarker, 4> empty;
+        if (&move_to_marker != &empty) {
+            move_to_marker = empty;
+        }
     }
     return false;
 }
@@ -587,19 +590,20 @@ bool MechTouchTaskUseForce::Update() {
     GIZFORCE_s *force = object->GetGizForce();
     bool within_range = false;
     if (force != NULL) {
+        const f32 dx = position.x;
         const f32 dz = position.z;
         const f32 radius = force->interaction_radius;
-        if (TouchHacks::CanUseGizForce(*player, *force)) {
-            if (object->GetTgtVoidPtr() == player->force_glow_object) {
+        if (__builtin_expect(TouchHacks::CanUseGizForce(*player, *force), 1)) {
+            if (__builtin_expect(object->GetTgtVoidPtr() == player->force_glow_object, 0)) {
                 controller->button_was_pressed[3] = 1;
                 return true;
             }
             const f32 range = radius * 0.9f;
-            within_range = position.x * position.x + dz * dz < range * range;
+            within_range = dx * dx + dz * dz < range * range;
         } else {
             return false;
         }
-    } else if (object->GetTgtVoidPtr() == player->force_glow_object) {
+    } else if (__builtin_expect(object->GetTgtVoidPtr() == player->force_glow_object, 1)) {
         controller->button_was_pressed[3] = 1;
         return true;
     }

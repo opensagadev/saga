@@ -69,17 +69,15 @@ int NuSoundDecoderOGG::OGGReadCallbacksDecoder::GetPosition() const {
 int NuSoundDecoderOGG::OGGReadCallbacksDecoder::Read(void *dest, unsigned int size) {
     memset(dest, 0, size);
     this->decoder->GetEncodedSource();
-    if (__builtin_expect(size == 0, 0)) {
-        return 0;
-    }
-
-    u32 remaining = size;
     u8 *cursor = (u8 *)dest;
+    u32 remaining = size;
     u32 copied = 0;
-    while (__builtin_expect(remaining != 0, 1)) {
+    u32 result = 0;
+    while (remaining != 0) {
         if (this->decoder->locked_buffer == NULL) {
             memset(cursor, 0, remaining);
-            return (int)remaining;
+            result = remaining;
+            break;
         }
 
         this->decoder->locked_buffer->Lock();
@@ -100,11 +98,13 @@ int NuSoundDecoderOGG::OGGReadCallbacksDecoder::Read(void *dest, unsigned int si
 
         this->decoder->locked_buffer->Unlock();
         if (__builtin_expect(remaining == 0 || ((context.flags & 2) != 0 && !this->decoder->ogg_loop), 0)) {
-            return (int)copied;
+            result = copied;
+            break;
         }
 
         if (__builtin_expect(context.size3 != 0 && context.size3 < context.read_size, 0)) {
             context.size3 = 0;
+            result = copied;
             break;
         }
 
@@ -115,18 +115,20 @@ int NuSoundDecoderOGG::OGGReadCallbacksDecoder::Read(void *dest, unsigned int si
         if (__builtin_expect(this->decoder->ring_read_pos == this->decoder->ring_write_pos, 0)) {
             this->decoder->locked_buffer->Lock();
             this->position = 0;
-            return (int)copied;
+            result = copied;
+            break;
         }
 
-        this->decoder->locked_buffer = this->decoder->encoded_buffers[this->decoder->ring_read_pos % 4];
+        NuSoundBuffer *next = this->decoder->encoded_buffers[this->decoder->ring_read_pos % 4];
         __sync_fetch_and_add(&this->decoder->ring_read_pos, 1);
+        this->decoder->locked_buffer = next;
 
         this->decoder->source->RequestBuffer(false, NuSoundMakeWeakPtr<NuSoundBufferCallback>(this->decoder));
 
         this->decoder->locked_buffer->Lock();
         this->position = 0;
     }
-    return (int)copied;
+    return (int)result;
 }
 
 // libTTapp.so 0x32e730: decode the next chunk of the stream into the given
