@@ -1094,8 +1094,8 @@ void MakeBaddiesForgetAboutParty(i32 check_hostility) {
         }
     }
     for (i32 i = 0; i < baddie_count; ++i) {
-        APIOBJECT *baddie = &baddies[i]->apiobj;
         for (i32 j = 0; j < party_count; ++j) {
+            APIOBJECT *baddie = &baddies[i]->apiobj;
             u64 mask = ~(u64(1) << baddie->field_0x289);
             APIOBJECT *member = &party[j]->apiobj;
             member->field387_0x2a0 &= static_cast<u32>(mask);
@@ -1137,10 +1137,12 @@ void MakeBaddiesForgetAboutParty(i32 check_hostility) {
         if (player == NULL || (player->apiobj.field_0x1f8 & 0x1001) != 0x1001 || player->apiobj.field_0x287 != 0 ||
             player->not_with_party)
             continue;
-        if (player->field_0x108e == 5 ||
-            ((FreePlay != 0 || WORLD->current_level == HUB_LDATA) &&
-             (player->apiobj.character_data->model_flags & 0x204) != 0 && player->field_0xcc0 == NULL)) {
+        if (player->field_0x108e == 5) {
             party_under_cover = 1;
+        } else if ((FreePlay != 0 || WORLD->current_level == HUB_LDATA) &&
+                   (player->apiobj.character_data->model_flags & 0x204) != 0) {
+            if (player->field_0xcc0 == NULL)
+                party_under_cover = 1;
         }
         if ((player->apiobj.character_data->model_flags & 0x80000) == 0)
             all_under_cover = 0;
@@ -1176,7 +1178,7 @@ void GameAISysStartFrame(AISYS_s *system) {
         // shared endpoint is transformed only once this frame.
         for (i32 path_index = 0; path_index < system->path_sys->path_count; ++path_index) {
             AIPATH *path = system->path_sys->paths[path_index];
-            for (u32 connection_index = 0; connection_index < path->connection_count; ++connection_index) {
+            for (i32 connection_index = 0; connection_index < path->connection_count; ++connection_index) {
                 AIPATHCNX *connection = &path->connections[connection_index];
                 AIPATHNODE *node = &path->nodes[connection->direction_a];
                 if (node->has_special != 0) {
@@ -1215,32 +1217,31 @@ void GameAISysStartFrame(AISYS_s *system) {
             NUVEC local_position;
             NuVecSub(&local_position, &object->apiobj.position, &area->position);
             NuVecRotateY(&local_position, &local_position, -area->rotation);
-            const bool is_inside = local_position.x >= -area->half_width && local_position.y >= -0.1f &&
-                                   local_position.z >= -area->half_depth && local_position.x <= area->half_width &&
-                                   local_position.y <= area->height && !(local_position.z > area->half_depth);
-            if (!is_inside) {
-                // Outside removal addresses the full 64-bit area bit.
-                const u64 area_bit = 1ULL << area_index;
-                object->apiobj.ai_area_mask_low &= ~static_cast<u32>(area_bit);
-                object->apiobj.ai_area_mask_high &= ~static_cast<u32>(area_bit >> 32);
+            if (local_position.x >= -area->half_width && local_position.y >= -0.1f &&
+                local_position.z >= -area->half_depth && local_position.x <= area->half_width &&
+                local_position.y <= area->height && local_position.z <= area->half_depth) {
+                // Inside occupancy uses the signed, wrapping 32-bit area bit.
+                const i64 inside_area_bit = static_cast<i32>(1u << (area_index & 31));
+                object->apiobj.ai_area_mask_low |= static_cast<u32>(inside_area_bit);
+                object->apiobj.ai_area_mask_high |= static_cast<u32>(inside_area_bit >> 32);
+                if ((object->apiobj.flags_low & APIOBJECT_FLAG_PLAYER_ACTIVE) != 0) {
+                    area->runtime_flags |= AIAREA_RUNTIME_PLAYER_PRESENT;
+                }
+                if (object->apiobj.field_0x27c != -1) {
+                    area->runtime_flags |= AIAREA_RUNTIME_CHARACTER_SLOT_SEEN;
+                }
+                if ((object->apiobj.field_0x1f4 & 1) != 0) {
+                    area->runtime_flags |= AIAREA_RUNTIME_OBJECT_STATE_SET;
+                } else if (__builtin_expect((object->apiobj.field_0x1f4 & 4) == 0, 1)) {
+                    area->runtime_flags |= AIAREA_RUNTIME_OBJECT_STATE_CLEAR;
+                }
                 continue;
             }
 
-            // Inside occupancy uses the signed, wrapping 32-bit area bit.
-            const i64 inside_area_bit = static_cast<i32>(1u << (area_index & 31));
-            object->apiobj.ai_area_mask_low |= static_cast<u32>(inside_area_bit);
-            object->apiobj.ai_area_mask_high |= static_cast<u32>(inside_area_bit >> 32);
-            if ((object->apiobj.flags_low & APIOBJECT_FLAG_PLAYER_ACTIVE) != 0) {
-                area->runtime_flags |= AIAREA_RUNTIME_PLAYER_PRESENT;
-            }
-            if (object->apiobj.field_0x27c != -1) {
-                area->runtime_flags |= AIAREA_RUNTIME_CHARACTER_SLOT_SEEN;
-            }
-            if ((object->apiobj.field_0x1f4 & 1) != 0) {
-                area->runtime_flags |= AIAREA_RUNTIME_OBJECT_STATE_SET;
-            } else if (__builtin_expect((object->apiobj.field_0x1f4 & 4) == 0, 1)) {
-                area->runtime_flags |= AIAREA_RUNTIME_OBJECT_STATE_CLEAR;
-            }
+            // Outside removal addresses the full 64-bit area bit.
+            const u64 area_bit = 1ULL << area_index;
+            object->apiobj.ai_area_mask_low &= ~static_cast<u32>(area_bit);
+            object->apiobj.ai_area_mask_high &= ~static_cast<u32>(area_bit >> 32);
         }
 
         ++system->next_area_check;

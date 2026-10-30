@@ -3293,7 +3293,8 @@ void Hub_Init(WORLDINFO_s *world) {
     }
 
     for (HUBEPISODEINFO_s *info = HubEpisodeInfo; info->episode != -1; ++info) {
-        info->data = info->episode >= 0 && info->episode < EPISODECOUNT ? &EDataList[info->episode] : NULL;
+        i32 ep = info->episode;
+        info->data = ep >= 0 && ep < EPISODECOUNT ? &EDataList[ep] : NULL;
         info->door = GizmoFindByName(world->gizmo_sys, -1, const_cast<char *>(info->door_name));
         Hub_FindSpecial(world, &info->lock_on, info->lock_on_name);
         Hub_FindSpecial(world, &info->lock_off, info->lock_off_name);

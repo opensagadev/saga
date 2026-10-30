@@ -821,11 +821,14 @@ extern "C" void NewMenu(i32 menu_id, i32 menu_y, i32 param3) {
         return;
     }
 
-    if (GameMenuLevel + 1 < 10) {
-        ++GameMenuLevel;
+    i32 level = GameMenuLevel;
+    i32 next = level + 1;
+    if (next < 10) {
+        GameMenuLevel = next;
+        level = next;
     }
 
-    MENU *menu = &GameMenu[GameMenuLevel];
+    MENU *menu = &GameMenu[level];
     menu->menu_time = 0.0f;
     menu->unk = 0.0f;
     menu->menu = static_cast<i16>(menu_index);
@@ -858,16 +861,16 @@ extern "C" void NewMenu(i32 menu_id, i32 menu_y, i32 param3) {
     if (MenuInfo[menu->menu].memory_x != -1) {
         menu->selected_column = MenuInfo[menu->menu].memory_x;
     }
-    if (__builtin_expect(menu->selected_column < menu->first_column, 1)) {
+    if (menu->selected_column < menu->first_column) {
         menu->selected_column = menu->first_column;
-    } else if (__builtin_expect(menu->selected_column > menu->last_column, 0)) {
+    } else if (menu->selected_column > menu->last_column) {
         menu->selected_column = menu->last_column;
     }
     if (menu_y < menu->first_row || menu_y > menu->last_row) {
         if (MenuInfo[menu->menu].memory_y != -1) {
             menu->selected_row = MenuInfo[menu->menu].memory_y;
         }
-        if (menu->selected_row < menu->first_row) {
+        if (__builtin_expect(menu->selected_row < menu->first_row, 0)) {
             menu->selected_row = menu->first_row;
         } else if (menu->selected_row > menu->last_row) {
             menu->selected_row = menu->last_row;

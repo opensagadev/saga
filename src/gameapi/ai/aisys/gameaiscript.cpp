@@ -208,16 +208,16 @@ static inline void ActionApplySide(AISYS *system, GameObject_s *object, i32 side
     const u32 new_state = object->apiobj.field_0x1f4;
 
     object->ai.capabilities &=
-        ~(static_cast<u32>(LEGO_AIPATHCNX_FORGOODIES) | static_cast<u32>(LEGO_AIPATHCNX_FORBADDIES));
+        ~(static_cast<u32>(LEGO_AIPATHCNX_FORBADDIES) | static_cast<u32>(LEGO_AIPATHCNX_FORGOODIES));
     if ((new_state & 1) != 0) {
         object->ai.capabilities |= LEGO_AIPATHCNX_FORBADDIES;
     } else if ((new_state & 4) == 0) {
         object->ai.capabilities |= LEGO_AIPATHCNX_FORGOODIES;
     }
 
-    if ((old_state & new_state & 0x10005) == 0) {
-        object->ai.field_0x1e5 &= static_cast<u8>(~8u);
+    if (__builtin_expect((old_state & new_state & 0x10005) == 0, 0)) {
         object->ai.opponent = NULL;
+        object->ai.field_0x1e5 &= static_cast<u8>(~8u);
         object->alert_target = NULL;
         object->alert_target_timer = 0.0f;
     }
@@ -9694,10 +9694,11 @@ __used__ static i32 Action_SetSide(AISYS *sys, AISCRIPTPROCESS *processor, AIPAC
         return 1;
     }
 
-    GameObject_s *object =
-        packet != NULL && packet->owner != NULL && (packet->owner->apiobj.field_0x1f8 & APIOBJECT_FLAG_IN_USE) != 0
-            ? packet->owner->apiobj.objptr
-            : NULL;
+    GameObject_s *object = NULL;
+    if (packet != NULL && packet->owner != NULL &&
+        __builtin_expect((packet->owner->apiobj.field_0x1f8 & APIOBJECT_FLAG_IN_USE) != 0, 0)) {
+        object = packet->owner->apiobj.objptr;
+    }
     i32 side = 0;
     f32 range_squared = 0.0f;
     i32 type_ids[10];
@@ -9716,7 +9717,7 @@ __used__ static i32 Action_SetSide(AISYS *sys, AISCRIPTPROCESS *processor, AIPAC
             side = 3;
         } else if (char *value = NuStrIStr(params[index], "type")) {
             if (LevelCharacterTypeIDFn != NULL && LevelCharacterGlobalIDFn != NULL) {
-                const u8 local_type = static_cast<u8>(LevelCharacterTypeIDFn(value + 5));
+                const i32 local_type = static_cast<u8>(LevelCharacterTypeIDFn(value + 5));
                 if (local_type != 0xff) {
                     const i32 global_type = LevelCharacterGlobalIDFn(local_type);
                     if (global_type != -1) {

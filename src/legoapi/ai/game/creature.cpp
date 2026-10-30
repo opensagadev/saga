@@ -3322,6 +3322,7 @@ void AnimatePlayer(GameObject_s *object) {
     packet.previous_animation = packet.animation_index;
     object->mini_animation.previous_animation = object->mini_animation.animation_index;
     CHARACTERMODEL_s *model = object->apiobj.character_model;
+    GAMEPAD_s *pad = object->pad_gamepad;
 
     if ((object->apiobj.field_0x1f4 & APIOBJECT_STATE_FLAG_IGNORE_DOORS) == 0) {
         object->apiobj.character_data->animate_fn(object);
@@ -3342,7 +3343,7 @@ void AnimatePlayer(GameObject_s *object) {
     const f32 direction = (object->field_0xefd & GAMEOBJECT_MOVEMENT_FLAG_BACKWARDS) != 0 ? -1.0f : 1.0f;
     f32 movement_speed;
     if (__builtin_expect(object->apiobj.character_model->model_data_b[1] != NULL, 1)) {
-        movement_speed = object->pad_gamepad->animation_input_magnitude;
+        movement_speed = pad->animation_input_magnitude;
         if (movement_speed > 0.0f && object->id == id_GONKDROID && Cheat_IsOn(8) == 0)
             movement_speed = object->apiobj.character_data->game_character->walk_speed;
     } else if (__builtin_expect((object->apiobj.character_data->game_character->flags_090 &
@@ -3352,7 +3353,7 @@ void AnimatePlayer(GameObject_s *object) {
                                   object->apiobj.velocity.z * object->facing_direction.z;
         movement_speed = !(forward_speed >= 0.0f) ? 0.0f : forward_speed;
     } else {
-        movement_speed = object->pad_gamepad->input_magnitude;
+        movement_speed = pad->input_magnitude;
     }
 
     // The original passes signed movement into UpdateAnimPacket.  Clips with
@@ -3365,8 +3366,8 @@ void AnimatePlayer(GameObject_s *object) {
     UpdateAnimPacket(model, &packet, (FRAMETIME * 30.0f) * time_multiplier, movement_speed * direction,
                      time_multiplier * FRAMETIME,
                      object->apiobj.character_data->game_character->backwards_speed_multiplier);
-    if ((packet.flags & ANIMPACKET_FLAG_ANIMATION_CHANGED) != 0 &&
-        __builtin_expect((packet.blending != 0 ? packet.blend_animation_b : packet.animation_index) == 0x5f, 1)) {
+    if (__builtin_expect((packet.flags & ANIMPACKET_FLAG_ANIMATION_CHANGED) != 0, 1) &&
+        __builtin_expect((packet.blending != 0 ? packet.blend_animation_b : packet.animation_index) == 0x5f, 0)) {
         f32 *time = packet.blending != 0 ? &packet.blend_target_time : &packet.current_time;
         const f32 duration = AnimDuration(object->id, 0x5f, 0.0f, 0.0f, 0);
         i32 count = static_cast<i32>(duration / 0.3f);

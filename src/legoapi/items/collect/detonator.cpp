@@ -65,8 +65,9 @@ static inline void Detonator_Update(DETONATOR_s *detonator) {
     } else if (detonator->field_0x34 != NULL) {
         DetonatorHitData *hit_data = static_cast<DetonatorHitData *>(detonator->field_0x34);
         if (!(detonator->timer >= 10.0f) &&
-            (detonator->object == NULL || detonator->object->apiobj.field_0x287 != 0 ||
-             !(detonator->object->field_0xde0 >= 0.3f))) {
+            __builtin_expect(detonator->object == NULL || detonator->object->apiobj.field_0x287 != 0 ||
+                                 !(detonator->object->field_0xde0 >= 0.3f),
+                             1)) {
             hit_data->field_0x0c = 0.08f;
         } else {
             hit_data->field_0x0c = 0.75f;

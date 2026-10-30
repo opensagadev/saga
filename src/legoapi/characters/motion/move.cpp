@@ -1965,8 +1965,22 @@ static void ForceThrowCode(GameObject_s *object, i32 pressed) {
         if (part == NULL) {
             GIZFORCE_s *force = object->gizforce_target;
             if (force != NULL) {
-                object->field_0xe22 |= 2;
-                if ((object->context_flags & 0x40) == 0) {
+                if ((object->context_flags & 0x40) != 0) {
+                    object->field_0xe22 |= 2;
+                    if (force->anim_set != NULL && force->anim_set->object_count == 1) {
+                        part = Part_FindFromHSpecial(&force->anim_set->objects->special);
+                        if (part != NULL) {
+                            object->force_glow_candidate = part;
+                            object->force_glow_candidate_kind = 3;
+                            SetHeadTarget(object, &part->position, 2, 1.0f, 0.0f, 0.0f);
+                            object->force_heading = NuAtan2D(part->position.x - object->apiobj.position.x,
+                                                             part->position.z - object->apiobj.position.z);
+                            object->force_glow_object = object->force_glow_candidate;
+                            object->force_glow_kind = object->force_glow_candidate_kind;
+                        }
+                    }
+                } else {
+                    object->field_0xe22 |= 2;
                     if (object->gizforce_target_object == NULL) {
                         object->force_glow_candidate = force;
                         object->force_glow_candidate_kind = 0;
@@ -1980,17 +1994,6 @@ static void ForceThrowCode(GameObject_s *object, i32 pressed) {
                     }
                     SetHeadTarget(object, &force->file_position, 1, 2.0f, 5.0f, 10.0f);
                     object->force_heading = GizForces_AngleToForce(&object->apiobj.position, object->gizforce_target);
-                } else if (force->anim_set != NULL && force->anim_set->object_count == 1) {
-                    part = Part_FindFromHSpecial(&force->anim_set->objects->special);
-                    if (part != NULL) {
-                        object->force_glow_candidate = part;
-                        object->force_glow_candidate_kind = 3;
-                        SetHeadTarget(object, &part->position, 2, 1.0f, 0.0f, 0.0f);
-                        object->force_heading = NuAtan2D(part->position.x - object->apiobj.position.x,
-                                                         part->position.z - object->apiobj.position.z);
-                        object->force_glow_object = object->force_glow_candidate;
-                        object->force_glow_kind = object->force_glow_candidate_kind;
-                    }
                 }
             }
         } else if ((part->active & 1) == 0)
@@ -1998,7 +2001,7 @@ static void ForceThrowCode(GameObject_s *object, i32 pressed) {
         else {
             object->force_heading =
                 NuAtan2D(part->position.x - object->apiobj.position.x, part->position.z - object->apiobj.position.z);
-            SetHeadTarget(object, &part->position, 2, 1.0f, 0.0f, 0.0f);
+            SetHeadTarget(object, &static_cast<PART_s *>(object->field_0x788)->position, 2, 1.0f, 0.0f, 0.0f);
         }
         if (!(previous_time > 1.0f) || !(object->context_animation_timer <= 1.0f))
             return;
@@ -5166,7 +5169,7 @@ static u8 SetComboOpponent(GameObject_s *object, f32 range, i32 update_heading, 
         }
     }
     result = 0;
-    if (__builtin_expect(!searched, 1)) {
+    if (__builtin_expect(!searched, 0)) {
         object->force_target = ObjOpponent(object, range, 0.0f, 0, 0, 1);
         result = object->force_target != NULL;
     }
@@ -10564,7 +10567,7 @@ void Animate_JEDI(GameObject_s *object) {
     }
 
     i32 sound;
-    if (__builtin_expect(object->id == id_BODYGUARD, 0)) {
+    if (object->id == id_BODYGUARD) {
         sound = GetSfxId("Grv_GuardWeaponLp");
     } else if ((object->apiobj.character_data->model_flags & CHARACTER_MODEL_FLAG_JEDI_BADDIE) != 0) {
         sound = GetSfxId("SaberLoopB");
@@ -10706,7 +10709,7 @@ static void DeactivatedCode(GameObject_s *object) {
             if (object->character_context == 0x17)
                 ActivatePlayer(object);
         } else {
-            if (object->character_context != 0x2b && object->character_context != 0x3e) {
+            if (object->character_context != 0x3e && object->character_context != 0x2b) {
                 if (object->character_context == 0x17)
                     object->context_animation_timer = 1.0e9f;
                 else
@@ -10772,12 +10775,14 @@ static void DeactivatedCode(GameObject_s *object) {
     for (i32 i = 0; i < HIGHGAMEOBJECT && count < 10; ++i, ++candidate) {
         GameObject_s *target = candidate;
         if (kind != 1) {
-            if (!ZapTarget(target) || target == object || target->apiobj.field_0x27c != -1 ||
-                target->is_boss || CannotKill(target) ||
-                (static_cast<GAMECHARACTERDATA *>(target->apiobj.character_data->field11_0x24)->flags_090 & 0x8040) !=
+            if (!ZapTarget(target) || target == object || target->apiobj.field_0x27c != -1 || target->is_boss ||
+                CannotKill(target) ||
+                (static_cast<GAMECHARACTERDATA *>(target->apiobj.character_data->field11_0x24)->flags_090 & 0x40) !=
                     0 ||
                 target->character_context == 0x0f || target->character_context == 0x3c ||
-                target->character_context == 0x47 || target->character_context == 0x46)
+                target->character_context == 0x47 || target->character_context == 0x46 ||
+                (static_cast<GAMECHARACTERDATA *>(target->apiobj.character_data->field11_0x24)->flags_090 & 0x8000) !=
+                    0)
                 continue;
         } else {
             if ((target->apiobj.field_0x1f8 & 0x1001) != 0x1001 || target->apiobj.field_0x287 != 0 ||
@@ -10795,10 +10800,10 @@ static void DeactivatedCode(GameObject_s *object) {
                 (static_cast<GAMECHARACTERDATA *>(target->apiobj.character_data->field11_0x24)->flags_094[1] & 2) != 0)
                 continue;
         }
-        if (!(NuVecDistSqr(&target->apiobj.collision_position, &object->apiobj.collision_position, NULL) >= range))
+        if (NuVecDistSqr(&target->apiobj.collision_position, &object->apiobj.collision_position, NULL) < range)
             targets[count++] = target;
     }
-    i32 selected = count == 1 ? 0 : count > 1 ? qrand() / (0xffff / count + 1) : -1;
+    i32 selected = count > 1 ? qrand() / (0xffff / count + 1) : count == 1 ? 0 : -1;
     if (selected == -1)
         return;
     GameObject_s *target = targets[selected];
@@ -11184,7 +11189,7 @@ void Move_WEIRDO(GameObject_s *object) {
     GizPanel_MoveCode(WORLD, object, special_pressed);
     HatMachine_MoveCode(WORLD, object, special_pressed);
     ZipUp_MoveCode(object, special_pressed);
-    if ((object->apiobj.character_data->model_flags & 0x100000) != 0)
+    if (__builtin_expect((object->apiobj.character_data->model_flags & 0x100000) != 0, 0))
         Grapple_MoveCode(object);
     BuildIt_MoveCode(object);
     if (has_sabre || SuperWeirdo(object)) {
@@ -11260,12 +11265,12 @@ void Move_WEIRDO(GameObject_s *object) {
                ((object->apiobj.character_data->model_flags & 0x1000000) != 0 || object->field_0x108e == 6)) {
         FireBountyHunterRocket(object);
     }
-    if (object->character_context == -1 && object->field_0xe31 == 0 && object->apiobj.field_0x27d != 0 &&
+    if (__builtin_expect(object->character_context == -1 && object->field_0xe31 == 0 && object->apiobj.field_0x27d != 0 &&
         object->apiobj.field_0x27e == 0 &&
         (object->fall_animation_timer >= 0.2f
              ? (object->movement_runtime_flags & 4) != 0 || object->pad_gamepad->input_magnitude == 0.0f ||
                    (!object->apiobj.player_controlled && object->apiobj.character_model->model_data_b[0x59] != NULL)
-             : (object->movement_runtime_flags & 4) != 0))
+             : (object->movement_runtime_flags & 4) != 0), 1))
         StartFallLand(object, -1);
     if (object->apiobj.field_0x27d != 0)
         object->movement_runtime_flags &= ~4;
@@ -11386,7 +11391,7 @@ void Move_CHARACTER(GameObject_s *object) {
     }
     if (object->character_context == 0x14) {
         f32 *frame = AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0);
-        if (__builtin_expect(frame != NULL, 1)) {
+        if (frame != NULL) {
             if ((object->field_0xe22 & 4) == 0) {
                 f32 event = AnimListFrame(object->apiobj.character_model, object->context_animation, 0);
                 if (event >= 1.0f && event <= *frame) {
@@ -11405,10 +11410,10 @@ void Move_CHARACTER(GameObject_s *object) {
     }
     if (object->character_context == -1 && object->field_0xe31 == 0 && object->apiobj.field_0x27d != 0 &&
         object->apiobj.field_0x27e == 0) {
-        if ((object->movement_runtime_flags & 4) != 0 ||
+        if (__builtin_expect((object->movement_runtime_flags & 4) != 0 ||
             (object->fall_animation_timer >= 0.2f &&
              (object->pad_gamepad->input_magnitude == 0.0f ||
-              (!object->apiobj.player_controlled && object->apiobj.character_model->model_data_b[0x59] != NULL))))
+              (!object->apiobj.player_controlled && object->apiobj.character_model->model_data_b[0x59] != NULL))), 1))
             StartFallLand(object, -1);
     }
     if (object->apiobj.field_0x27d != 0)

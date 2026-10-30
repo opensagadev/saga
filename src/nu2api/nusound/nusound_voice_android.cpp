@@ -506,16 +506,17 @@ void NuVoiceAndroid::UpdateSamplePlaybackCount() {
         return;
     }
 
-    NuSoundStreamDesc *desc = this->sound_source->GetStreamDesc();
+    NuSoundSource *source = this->sound_source;
+    NuSoundStreamDesc *desc = source->GetStreamDesc();
     i32 rate = (i32)desc->GetSampleRate();
     u32 position = (u32)(rate / 1000) * millisec;
 
-    if (this->sound_source->feed_type != NuSoundSource::FeedType::STREAMING) {
+    if (source->feed_type != NuSoundSource::FeedType::STREAMING) {
         this->playback_samples = position;
         return;
     }
 
-    u64 max_buffer_size = (u64)(i64)(i32)this->sound_source->GetMaxBufferSize();
+    u64 max_buffer_size = (u64)(i64)(i32)source->GetMaxBufferSize();
     u64 block_size = (u64)(i64)(i32)desc->GetBlockSize();
     u64 block_samples = max_buffer_size / block_size;
     u64 relative_position = (u64)(u32)position % block_samples;
@@ -542,10 +543,10 @@ void NuVoiceAndroid::UpdateSamplePlaybackCount() {
     sprintf(debug + strlen(debug), "%12d ", (u64)(u32)position);
     sprintf(debug + strlen(debug), "%12d ", relative_position);
     sprintf(debug + strlen(debug), "%12d ", block_samples);
-    sprintf(debug + strlen(debug), "%12d ", wraps);
-    sprintf(debug + strlen(debug), "%12d ", wrapped_position);
+    sprintf(debug + strlen(debug), "%12d ", this->block_wraps);
+    sprintf(debug + strlen(debug), "%12d ", block_samples * this->block_wraps);
     sprintf(debug + strlen(debug), "%12d ", estimated_position);
-    strcpy(debug + strlen(debug), player_position ? "PLAYER" : "ESTIMATED");
+    strcpy(debug + strlen(debug), __builtin_expect(player_position, 1) ? "PLAYER" : "ESTIMATED");
 }
 
 u64 NuVoiceAndroid::GetPlaybackPositionSamples() {

@@ -373,29 +373,28 @@ static i32 Collide2Objects(APIOBJECT *first, APIOBJECT *second) {
     i32 collision_result = ForcePushed_SuperPush_Occurring(first_object, second_object);
     if (collision_result != 0) {
         collision_result =
-            (second_object->apiobj.collision_identity_mask & first_object->apiobj.collision_contact_mask) != 0 ||
-                    (first_object->apiobj.collision_identity_mask & second_object->apiobj.collision_contact_mask) != 0
-                ? 1
-                : 2;
+            ((first_object->apiobj.collision_contact_mask & second_object->apiobj.collision_identity_mask) != 0)   ? 1
+            : ((second_object->apiobj.collision_contact_mask & first_object->apiobj.collision_identity_mask) != 0) ? 1
+                                                                                                                   : 2;
         first->collision_contact_mask |= second->collision_identity_mask;
         second->collision_contact_mask |= first->collision_identity_mask;
         return collision_result;
     }
-    if (WORLD->current_level == DOGFIGHTA_LDATA) {
+    if (__builtin_expect(WORLD->current_level == DOGFIGHTA_LDATA, 0)) {
         collision_result = APIObjectCollision(first, second);
     } else {
         collision_result = APIObjectCollision2D(first, second);
     }
 
     if (__builtin_expect(collision_result == 2 && VehicleArea == 0, 0)) {
-        GAMECHARACTERDATA *second_data =
-            static_cast<GAMECHARACTERDATA *>(second_object->apiobj.character_data->field11_0x24);
         GAMECHARACTERDATA *first_data =
             static_cast<GAMECHARACTERDATA *>(first_object->apiobj.character_data->field11_0x24);
         if ((first_data->flags_090 & 0x1000) != 0 &&
             first->horizontal_velocity_magnitude > first_data->movement_speed * 0.5f) {
             StartFlatten(first_object, second_object);
         } else {
+            GAMECHARACTERDATA *second_data =
+                static_cast<GAMECHARACTERDATA *>(second_object->apiobj.character_data->field11_0x24);
             if ((second_data->flags_090 & 0x1000) != 0 &&
                 second->horizontal_velocity_magnitude > second_data->movement_speed * 0.5f) {
                 StartFlatten(second_object, first_object);

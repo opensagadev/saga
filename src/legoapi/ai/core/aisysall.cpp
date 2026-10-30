@@ -55,8 +55,7 @@
 static i32 iterator_count;
 static f32 ***distance_tables;
 
-static __used__ f32 **pathEditorCalculateDistanceTable(AIPATH_s *path, i32 route_mask, variptr_u *cursor,
-                                                       variptr_u *end);
+static f32 **pathEditorCalculateDistanceTable(AIPATH_s *path, i32 route_mask, variptr_u *cursor, variptr_u *end);
 
 #if defined(__i386__)
 #define AIPATHBUILD_CLONE_ATTR2 __attribute__((noinline, noclone, regparm(2)))
@@ -1766,20 +1765,13 @@ static inline void DestroyAIPathNode(EDAIPATHNODE_s *node, EDAIPATH_s *path) {
 }
 extern "C" AIEDITORPATHNODECALLBACK *AIPathNodeMovedFn;
 
-static inline __attribute__((always_inline)) void pathEditor_DisconnectNodes(EDAIPATHNODE_s *node,
-                                                                           EDAIPATHNODE_s *other) {
+static inline void pathEditor_DisconnectNodes(EDAIPATHNODE_s *node, EDAIPATHNODE_s *other) {
     for (i32 i = 0; i < 8; ++i) {
-        if (node->connections[i].node == other) {
+        if (__builtin_expect(node->connections[i].node == other, 0)) {
             for (i32 j = 0; j < 8; ++j) {
-                if (other->connections[j].node == node) {
-                    node->connections[i].node = NULL;
-                    node->connections[i].flags = 0;
-                    node->connections[i].route_mask = 0;
-                    node->connections[i].unknown_0a = 0;
-                    other->connections[j].node = NULL;
-                    other->connections[j].flags = 0;
-                    other->connections[j].route_mask = 0;
-                    other->connections[j].unknown_0a = 0;
+                if (__builtin_expect(other->connections[j].node == node, 0)) {
+                    memset(&node->connections[i], 0, sizeof(node->connections[i]));
+                    memset(&other->connections[j], 0, sizeof(other->connections[j]));
                     return;
                 }
             }
@@ -4427,7 +4419,7 @@ static __used__ i32 RowMoveWander(AIGROUP *group, AIROW *row, AIROW *previous, A
             f32 distance =
                 NuInfiniteLineToPointDistSqr(&nodes[row->next_connection->node_indices[0]].position,
                                              &nodes[row->next_connection->node_indices[1]].position, &centre);
-            if (group->radius * group->radius >= distance)
+            if (__builtin_expect(group->radius * group->radius >= distance, 0))
                 row->is_turning = 1;
         } else {
             AIPATHNODE *end =
@@ -4465,7 +4457,7 @@ static __used__ i32 RowMoveWander(AIGROUP *group, AIROW *row, AIROW *previous, A
     }
     if (__builtin_expect(row->is_turning != 0, 1)) {
         i32 angle = row->next_connection->rotation;
-        if (row->next_direction != 0)
+        if (__builtin_expect(row->next_direction != 0, 0))
             angle = NuAngAdd(angle, 0x8000);
         i32 difference = NuAngSub(angle, row->y_rot);
         i32 step = group->rotation_speed;
@@ -7077,7 +7069,7 @@ eduimenu_s *areaEditor_Process(nupad_s *pad) {
                 EDAIAREA_s *&selection = area_selected();
                 selection = reinterpret_cast<EDAIAREA_s *>(NuLinkedListGetNext(area_list(), &selection->link));
             }
-            if (area_selected() == NULL) {
+            if (__builtin_expect(area_selected() == NULL, 1)) {
                 EDAIAREA_s *&selection = area_selected();
                 selection = area_head();
             }
@@ -8812,8 +8804,7 @@ extern "C" {
 
 }
 
-static __used__ f32 **pathEditorCalculateDistanceTable(AIPATH_s *path, i32 route_mask, variptr_u *cursor,
-                                                       variptr_u *end) {
+static f32 **pathEditorCalculateDistanceTable(AIPATH_s *path, i32 route_mask, variptr_u *cursor, variptr_u *end) {
     if (distance_tables == 0 || path == nullptr || path->nodes == nullptr) {
         return nullptr;
     }
@@ -12986,7 +12977,10 @@ void AIRetreatFromDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *
     }
     AIPATH *path = packet->path_info.path;
     AIPATHCNX *destination_connection = packet->fallback_path_info.connection;
-    if (__builtin_expect(connection != destination_connection, 1)) {
+    if (__builtin_expect(connection == destination_connection, 0)) {
+        AISysCharacterSetPathCnx(packet, &object->position, connection,
+                                 packet->fallback_path_info.dist > packet->path_info.dist);
+    } else {
         f32 length = connection->distance;
         f32 parameter = packet->path_info.dist;
         if (parameter > 1.0f) {
@@ -13006,8 +13000,8 @@ void AIRetreatFromDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *
                 destination_a = FLT_MAX;
             }
             node = &path->nodes[destination_connection->node_indices[1]];
-            if ((static_cast<u64>(node->route_membership_mask & ~node->route_boundary_mask) >> packet->current_route) &
-                1) {
+            if (__builtin_expect((static_cast<u64>(node->route_membership_mask & ~node->route_boundary_mask) >> packet->current_route) &
+                1 != 0, 1)) {
                 destination_b = FLT_MAX;
             }
         }
@@ -13054,9 +13048,6 @@ void AIRetreatFromDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *
             connection = packet->path_info.connection;
         }
         AISysCharacterSetPathCnx(packet, &object->position, connection, direction);
-    } else {
-        AISysCharacterSetPathCnx(packet, &object->position, connection,
-                                 packet->fallback_path_info.dist > packet->path_info.dist);
     }
 
     connection = packet->path_info.connection;

@@ -892,30 +892,33 @@ static i32 *GizForces_GetBestBoltTarget(GIZMOSET *set, float *result_distance, N
         return NULL;
     }
     GIZFORCESYS_s *system = static_cast<GIZFORCESYS_s *>(set->unknown);
-    if (system == NULL || bolt_type == NULL) {
+    if (system == NULL) {
+        return NULL;
+    }
+    if (bolt_type == NULL) {
         return NULL;
     }
 
     NUVEC aim = *direction;
     const float min_x = position->x - radius;
     const float min_z = position->z - radius;
-    const float max_z = position->z + radius;
     const float max_x = position->x + radius;
+    const float max_z = position->z + radius;
     if (directional != 0 && (bolt_type->field_60 & 0x20000) != 0) {
         aim.y = 0.0f;
         NuVecNorm(&aim, &aim);
         system = static_cast<GIZFORCESYS_s *>(set->unknown);
     }
-    u16 hit_test_gizmo_count = system->hit_test_gizmo_count;
-    if (hit_test_gizmo_count == 0) {
+    if (system->hit_test_gizmo_count == 0) {
         return NULL;
     }
 
     GameObject_s *object = static_cast<GameObject_s *>(object_ptr);
     GIZMO *best = NULL, *previous = NULL;
+    i32 i = 0;
     NUVEC *best_position = NULL, *previous_position = NULL;
     float nearest_distance = 100000000.0f;
-    for (i32 i = 0; i < hit_test_gizmo_count; ++i) {
+    do {
         GIZMO *gizmo = system->hit_test_gizmos[i];
         GIZFORCE_s *force = static_cast<GIZFORCE_s *>(gizmo->object);
         if ((force->progress_flags & GIZFORCE_PROGRESS_VISIBLE) == 0)
@@ -926,7 +929,7 @@ static i32 *GizForces_GetBestBoltTarget(GIZMOSET *set, float *result_distance, N
             continue;
         NUVEC *target_position = &force->position;
         if (target_position->x < min_x || target_position->x > max_x || target_position->z < min_z ||
-            !(target_position->z <= max_z)) {
+            target_position->z > max_z) {
             continue;
         }
 
@@ -952,25 +955,24 @@ static i32 *GizForces_GetBestBoltTarget(GIZMOSET *set, float *result_distance, N
         } else {
             angle = far_angle;
         }
-        if (!(dot > NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff]) || !(nearest_distance > distance)) {
-            continue;
+        if (dot > NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff] && nearest_distance > distance) {
+            if (object != NULL && object->attack_gizmo_target == gizmo) {
+                previous = gizmo;
+                previous_position = target_position;
+            } else {
+                nearest_distance = distance;
+                best = gizmo;
+                best_position = target_position;
+            }
         }
-        if (object != NULL && object->attack_gizmo_target == gizmo) {
-            previous = gizmo;
-            previous_position = target_position;
-        } else {
-            nearest_distance = distance;
-            best = gizmo;
-            best_position = target_position;
-        }
-    }
+    } while (system->hit_test_gizmo_count > ++i);
 
     if (best != NULL) {
         *result_position = *best_position;
         *result_distance = nearest_distance;
+        result_velocity->x = 0.0f;
         result_velocity->y = 0.0f;
         result_velocity->z = 0.0f;
-        result_velocity->x = 0.0f;
         return reinterpret_cast<i32 *>(best);
     }
     if (previous == NULL) {

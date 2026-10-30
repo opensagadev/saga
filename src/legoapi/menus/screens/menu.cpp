@@ -431,9 +431,9 @@ static __used__ void MenuDrawPauseExit(MENU *menu) {
         if (warning != NULL) {
             const u16 angle = static_cast<u16>(NuFmod(GlobalTimer.time_elapsed_mod_seconds, 0.5f) * 2.0f * 65536.0f);
             const f32 blend = NuTrigTable[static_cast<u16>(angle / 2)] * 0.5f + 0.5f;
-            const u8 r = static_cast<u8>(MENULOSTR1 + (MENULOSTR2 - MENULOSTR1) * blend);
-            const u8 b = static_cast<u8>(MENULOSTB1 + (MENULOSTB2 - MENULOSTB1) * blend);
-            const u8 g = static_cast<u8>(MENULOSTG1 + (MENULOSTG2 - MENULOSTG1) * blend);
+            const i32 r = static_cast<i32>(MENULOSTR1 + (MENULOSTR2 - MENULOSTR1) * blend);
+            const i32 g = static_cast<i32>(MENULOSTG1 + (MENULOSTG2 - MENULOSTG1) * blend);
+            const i32 b = static_cast<i32>(MENULOSTB1 + (MENULOSTB2 - MENULOSTB1) * blend);
             const i32 a = static_cast<i32>(static_cast<i32>(MENULOSTA1 + (MENULOSTA2 - MENULOSTA1) * blend) *
                                            (static_cast<f32>(MenuA) * 0.0078125f));
             SmartTextEx(warning, PauseMenus_X,
@@ -921,7 +921,7 @@ void MenuUpdateSelectControls(MENU_s *menu) {
 
 static i32 UpdateTitleSequence(MENU *menu) {
     f32 music_volume = 0.0f;
-    if (SuperOptions.music_enabled != 0) {
+    if (__builtin_expect(SuperOptions.music_enabled != 0, 1)) {
         music_volume = GameGetMusicVolume(&TempOptions);
     }
 
@@ -965,7 +965,7 @@ static i32 UpdateTitleSequence(MENU *menu) {
                 GamePlayMusic(WORLD->current_level, 0, &Game.options_save);
             }
         }
-    } else if (newgamefade == 2) {
+    } else if (__builtin_expect(newgamefade == 2, 1)) {
         newgamealpha -= FRAMETIME * 2.0f;
         if (newgamealpha <= 0.0f) {
             newgamealpha = 0.0f;

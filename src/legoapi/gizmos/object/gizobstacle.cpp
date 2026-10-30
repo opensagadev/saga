@@ -594,15 +594,16 @@ static i32 GizObstacles_BoltHit(void *world, void *data, void *attacker_ptr, NUV
             continue;
         const NUVEC &position = obstacle->evaluated_position;
         const f32 obstacle_radius = obstacle->field_0x58;
-        if (__builtin_expect(
-                position.x - obstacle_radius > maximum->x || !(minimum->x <= position.x + obstacle_radius) ||
-                    position.z - obstacle_radius > maximum->z || minimum->z > position.z + obstacle_radius ||
-                    position.y - obstacle_radius > maximum->y || minimum->y > position.y + obstacle_radius,
-                1)) {
+        if (__builtin_expect(__builtin_expect(position.x - obstacle_radius > maximum->x, 0) ||
+                                 minimum->x > position.x + obstacle_radius ||
+                                 position.z - obstacle_radius > maximum->z ||
+                                 minimum->z > position.z + obstacle_radius ||
+                                 position.y - obstacle_radius > maximum->y || minimum->y > position.y + obstacle_radius,
+                             1)) {
             continue;
         }
-        for (i32 point_index = point_count - 1; point_index >= 0; --point_index) {
-            NUVEC *point = &points[point_index];
+        NUVEC *point = &points[point_count - 1];
+        for (i32 point_index = point_count - 1; point_index >= 0; --point_index, --point) {
             if (SphereSphereOverlap(&obstacle->evaluated_position, obstacle->field_0x58, point, radius) != 0) {
                 if (attacker != NULL) {
                     point = &attacker->apiobj.collision_position;

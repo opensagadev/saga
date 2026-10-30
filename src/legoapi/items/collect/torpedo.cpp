@@ -119,11 +119,9 @@ void Torpedo_UpdateJobbies(GameObject_s *object) {
     TORPEDOPACKET *packet = object->torpedo;
 
     if (packet->steal_timer > 0.0f) {
-        const f32 timer = packet->steal_timer - FRAMETIME;
-        if (timer < 0.0f) {
+        packet->steal_timer -= FRAMETIME;
+        if (packet->steal_timer < 0.0f) {
             packet->steal_timer = 0.0f;
-        } else {
-            packet->steal_timer = timer;
         }
     }
 
@@ -131,16 +129,16 @@ void Torpedo_UpdateJobbies(GameObject_s *object) {
         u16 target_z_rotation;
         u16 target_y_rotation;
 
-        const f32 distance =
-            1.5f * object->apiobj.field_0x1dc + static_cast<f32>(index) * object->apiobj.field_0x1dc * 1.25f;
         const i32 y_rotation = packet->pickup_flags[index];
         const i32 z_rotation = packet->pickup_data[index];
+        const f32 distance =
+            1.5f * object->apiobj.field_0x1dc + static_cast<f32>(index) * object->apiobj.field_0x1dc * 1.25f;
         NUVEC position;
         position.x = NU_SIN_LUT(z_rotation) * NU_COS_LUT(y_rotation) * distance + object->apiobj.collision_position.x;
         position.y = NU_SIN_LUT(y_rotation) * distance + object->apiobj.collision_position.y;
         position.z = NU_COS_LUT(z_rotation) * NU_COS_LUT(y_rotation) * distance + object->apiobj.collision_position.z;
 
-        if (!(packet->field_08 >= 0.8f) && index + 1 == packet->count) {
+        if (packet->field_08 < 0.8f && index + 1 == packet->count) {
             NUVEC direction;
             NuVecSub(&direction, &position, &packet->pickup_positions[index]);
             packet = object->torpedo;
@@ -166,8 +164,8 @@ void Torpedo_UpdateJobbies(GameObject_s *object) {
         packet = object->torpedo;
         packet->pickup_flags[index] = SeekRot(static_cast<u16>(packet->pickup_flags[index]), target_y_rotation, 5.0f);
 
-        packet = object->torpedo;
         if (index != 0) {
+            packet = object->torpedo;
             NUVEC direction;
             NuVecSub(&direction, &packet->pickup_positions[index], &packet->pickup_positions[index - 1]);
             GetRotationAngles(&direction, &target_z_rotation, &target_y_rotation);
@@ -176,6 +174,7 @@ void Torpedo_UpdateJobbies(GameObject_s *object) {
                 WORLD->debris_sys->entries[129].effect, &packet->pickup_positions[index - 1], 90, FRAMETIME,
                 static_cast<i16>(target_z_rotation), static_cast<i16>(target_y_rotation), NULL);
         } else {
+            packet = object->torpedo;
             AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[129].effect, &object->apiobj.position, 90,
                                               FRAMETIME, static_cast<i16>(packet->pickup_flags[0] - NUANG_90DEG),
                                               static_cast<i16>(packet->pickup_data[0] - NUANG_90DEG), NULL);
@@ -205,18 +204,18 @@ void Torpedo_UpdateJobbies(GameObject_s *object) {
     }
 
     if (player_index != -1) {
+        GameObject_s *player = Player[player_index];
+        const i32 destination = player->torpedo->count;
         packet = object->torpedo;
-        TORPEDOPACKET *player_packet = Player[player_index]->torpedo;
-        const i32 destination = player_packet->count;
         const i32 source = packet->count - 1;
-        player_packet->pickup_positions[destination] = packet->pickup_positions[source];
-        player_packet->pickup_data[destination] = packet->pickup_data[source];
-        player_packet->pickup_flags[destination] = packet->pickup_flags[source];
-        ++player_packet->count;
-        player_packet->field_08 = 0.0f;
-        player_packet->field_03 = 1;
-        --packet->count;
-        player_packet->steal_timer = steal_torpedo_timer;
+        player->torpedo->pickup_positions[destination] = packet->pickup_positions[source];
+        player->torpedo->pickup_data[destination] = packet->pickup_data[source];
+        player->torpedo->pickup_flags[destination] = packet->pickup_flags[source];
+        player->torpedo->count = destination + 1;
+        player->torpedo->field_08 = 0.0f;
+        player->torpedo->field_03 = 1;
+        object->torpedo->count--;
+        player->torpedo->steal_timer = steal_torpedo_timer;
     }
 }
 

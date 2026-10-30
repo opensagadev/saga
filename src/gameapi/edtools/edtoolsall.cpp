@@ -1380,42 +1380,36 @@ extern "C" {
         y = MIN(1.0f, (MAX(0.0f, y)));
         graph_item->cursor_y = y;
 
-        u32 left = pad->analog_l2;
-        u32 right = pad->analog_r2;
-        if (left) {
-            if (right) {
-                show_x_scale_help = 60;
-                graph_item->graph->x_scale = 1.0f;
-                return 1;
-            }
-            if (left > 55) {
-                show_x_scale_help = 60;
-                f32 scale = graph_item->graph->x_scale - left * 0.02f / 255.0f;
-                graph_item->graph->x_scale = scale < 0.01f ? 0.01f : scale;
-                return 1;
-            }
-        } else if (__builtin_expect(right > 55, 1)) {
+        if (pad->analog_l2 && pad->analog_r2) {
             show_x_scale_help = 60;
-            graph_item->graph->x_scale = right * 0.02f / 255.0f + graph_item->graph->x_scale;
+            graph_item->graph->x_scale = 1.0f;
             return 1;
         }
-        left = pad->analog_l1;
-        right = pad->analog_r1;
-        if (left) {
-            if (__builtin_expect(!!(right), 0)) {
-                graph_item->graph->y_scale = 1.0f;
-                show_y_scale_help = 60;
-                return 1;
-            }
-            if (__builtin_expect(!!(left), 0)) {
-                show_y_scale_help = 60;
-                f32 scale = graph_item->graph->y_scale - left * 0.02f / 255.0f;
-                graph_item->graph->y_scale = scale < 0.01f ? 0.01f : scale;
-                return 1;
-            }
-        } else if (right) {
+        if (pad->analog_l2 > 55) {
+            show_x_scale_help = 60;
+            f32 scale = graph_item->graph->x_scale - (u32)pad->analog_l2 * 0.02f / 255.0f;
+            graph_item->graph->x_scale = scale < 0.01f ? 0.01f : scale;
+            return 1;
+        }
+        if (pad->analog_r2 > 55) {
+            show_x_scale_help = 60;
+            graph_item->graph->x_scale = (u32)pad->analog_r2 * 0.02f / 255.0f + graph_item->graph->x_scale;
+            return 1;
+        }
+        if (pad->analog_l1 && pad->analog_r1) {
+            graph_item->graph->y_scale = 1.0f;
             show_y_scale_help = 60;
-            graph_item->graph->y_scale = right * 0.02f / 255.0f + graph_item->graph->y_scale;
+            return 1;
+        }
+        if (pad->analog_l1) {
+            show_y_scale_help = 60;
+            f32 scale = graph_item->graph->y_scale - (u32)pad->analog_l1 * 0.02f / 255.0f;
+            graph_item->graph->y_scale = scale < 0.01f ? 0.01f : scale;
+            return 1;
+        }
+        if (pad->analog_r1) {
+            show_y_scale_help = 60;
+            graph_item->graph->y_scale = (u32)pad->analog_r1 * 0.02f / 255.0f + graph_item->graph->y_scale;
             return 1;
         }
         u32 pressed = pad->digital_buttons_pressed;
@@ -2374,7 +2368,7 @@ extern "C" {
                     slider->changed(menu, item, *(volatile u32 *)&pad->digital_buttons);
             }
         } else if (pad->digital_buttons & 0x08) {
-            if (rep_timer > 0)
+            if (__builtin_expect(rep_timer > 0, 1))
                 --rep_timer;
             else
                 rep_timer = 0;
@@ -2406,7 +2400,7 @@ extern "C" {
                     value = 0.0f;
             } else if (pad->analog_r2) {
                 f32 delta;
-                if (pad->unknown_a9) {
+                if (__builtin_expect(pad->unknown_a9 != 0, 1)) {
                     dynascale *= 1.05f;
                     delta = static_cast<u32>(pad->analog_r2) * dynascale;
                 } else {
@@ -5226,11 +5220,17 @@ extern "C" {
                 return 0;
         }
         u32 buttons = pad->digital_buttons;
-        u32 pressed = pad->digital_buttons_pressed;
-        u32 up_button = (menu->flags & 2) ? 0x8000 : 0x1000;
-        u32 down_button = (menu->flags & 2) ? 0x2000 : 0x4000;
+        u32 up_button;
+        u32 down_button;
+        if (menu->flags & 2) {
+            up_button = 0x8000;
+            down_button = 0x2000;
+        } else {
+            up_button = 0x1000;
+            down_button = 0x4000;
+        }
         i32 up = 0;
-        if (pressed & up_button) {
+        if (pad->digital_buttons_pressed & up_button) {
             up_rept = 1.0f / 3.0f;
             up = 1;
         }
@@ -5256,7 +5256,7 @@ extern "C" {
             }
         }
         i32 down = 0;
-        if (pressed & down_button) {
+        if (pad->digital_buttons_pressed & down_button) {
             down_rept = 1.0f / 3.0f;
             down = 1;
         }
@@ -5267,16 +5267,18 @@ extern "C" {
                 down = 1;
             }
         }
-        i32 to_first = up && (buttons & 1);
-        i32 page_up = up && (buttons & 2);
-        i32 page_down = down && (buttons & 2);
-        i32 to_last = down && (buttons & 1);
+        i32 to_first = up ? buttons & 1 : 0;
+        i32 to_last = down ? buttons & 1 : 0;
+        u32 page_up = up ? (buttons >> 1) & 1 : 0;
+        u32 page_down = down ? (buttons >> 1) & 1 : 0;
         if (page_down && menu->field_10) {
             i32 count = 1;
             for (eduiitem_s *item = menu->field_0c; item && item != menu->field_10; item = item->next)
                 ++count;
-            while (menu->selected->next && count--) {
+            while (menu->selected->next) {
                 menu->selected = menu->selected->next;
+                if (!--count)
+                    break;
             }
             return 0;
         }
@@ -5285,9 +5287,11 @@ extern "C" {
             for (eduiitem_s *item = menu->field_0c; item && item != menu->field_10; item = item->next)
                 ++count;
             menu->selected = menu->field_0c;
-            while (__builtin_expect(menu->selected->previous && count--, 0)) {
+            while (menu->selected->previous) {
                 menu->selected = menu->selected->previous;
                 menu->field_0c = menu->selected;
+                if (!--count)
+                    break;
             }
             return 0;
         }
@@ -5314,8 +5318,11 @@ extern "C" {
                 for (eduiitem_s *item = menu->field_0c; item && item != menu->field_10; item = item->next)
                     ++count;
                 menu->field_0c = menu->selected;
-                while (__builtin_expect(menu->field_0c->previous && count--, 0))
+                while (menu->field_0c->previous) {
                     menu->field_0c = menu->field_0c->previous;
+                    if (!--count)
+                        break;
+                }
             }
             return 0;
         }
@@ -7084,12 +7091,16 @@ void FS_GetDirList(char *path, char *filter, char *filter_out) {
     NuStrCpy(FS_FileList + 7, "..");
     ++FS_NumFiles;
 
-    char *volatile next;
+    char *next;
     char entry[0x118] __attribute__((aligned(16)));
     volatile char header[7];
-    if (__builtin_expect(directory != 0, 1)) {
-        next = FS_FileList + 10;
-        while (i32 name_length = NuFileReadDir(directory, entry)) {
+    next = FS_FileList + 10;
+    if (directory != 0) {
+        for (;;) {
+            i32 name_length = NuFileReadDir(directory, entry);
+            if (__builtin_expect(name_length == 0, 0)) {
+                break;
+            }
             char *name = entry + 0x18;
             if (__builtin_expect(*reinterpret_cast<u16 *>(name) == '.' ||
                                      (*reinterpret_cast<u32 *>(name) & 0xffffff) == 0x2e2e || !(entry[0] & 8),
@@ -7108,26 +7119,33 @@ void FS_GetDirList(char *path, char *filter, char *filter_out) {
             u8 encoded_year = static_cast<u8>(entry[14]) - 123;
             header[6] = encoded_year;
             __builtin_memcpy(next, const_cast<const char *>(header), 6);
-            next[6] = encoded_year;
+            next[6] = header[6];
             char *name_dest = next + 7;
             NuStrCpy(name_dest, name);
-            name_dest[name_length] = '\0';
-            next = name_dest + name_length + 1;
+            char *name_end = name_dest + name_length;
+            *name_end = '\0';
+            next = name_end + 1;
             ++FS_NumFiles;
         }
-        FS_SortStrings(FS_FileList + 10, next, FS_SortMode);
+    }
+    FS_SortStrings(FS_FileList + 10, next, FS_SortMode);
+    if (directory != 0) {
         NuFileCloseDir(directory);
-    } else {
-        next = FS_FileList + 10;
-        FS_SortStrings(next, next, FS_SortMode);
     }
 
     char *file_begin = next;
     directory = NuFileOpenDir(path);
-    if (__builtin_expect(directory != 0, 1)) {
-        while (i32 name_length = NuFileReadDir(directory, entry)) {
+    if (directory != 0) {
+        for (;;) {
+            i32 name_length = NuFileReadDir(directory, entry);
+            if (__builtin_expect(name_length == 0, 0)) {
+                break;
+            }
             char *name = entry + 0x18;
-            if (__builtin_expect((entry[0] & 8) || !FS_FileNameFilter(name), 1)) {
+            if (entry[0] & 8) {
+                continue;
+            }
+            if (!FS_FileNameFilter(name)) {
                 continue;
             }
             if (next + name_length + 8 >= FS_FileList + sizeof(FS_FileList)) {
@@ -7142,17 +7160,18 @@ void FS_GetDirList(char *path, char *filter, char *filter_out) {
             u8 encoded_year = static_cast<u8>(entry[22]) - 123;
             header[6] = encoded_year;
             __builtin_memcpy(next, const_cast<const char *>(header), 6);
-            next[6] = encoded_year;
+            next[6] = header[6];
             char *name_dest = next + 7;
             NuStrCpy(name_dest, name);
-            name_dest[name_length] = '\0';
-            next = name_dest + name_length + 1;
+            char *name_end = name_dest + name_length;
+            *name_end = '\0';
+            next = name_end + 1;
             ++FS_NumFiles;
         }
-        FS_SortStrings(file_begin, next, FS_SortMode);
+    }
+    FS_SortStrings(file_begin, next, FS_SortMode);
+    if (directory != 0) {
         NuFileCloseDir(directory);
-    } else {
-        FS_SortStrings(file_begin, file_begin, FS_SortMode);
     }
     FS_FileListEnd = next;
 }

@@ -6513,30 +6513,27 @@ void ClassEditor::UpdateSelectedObjects(EdInputContext &input) {
     if (__builtin_expect(selected_objects.first == NULL, 0))
         return;
     ClassObjectListEntry *entry = selected_objects.first;
-    EdClassInterface *interface = entry->ed_class->interface;
     void *object = NULL;
-    if (input.GetPress(19) != 0.0f) {
-        object = interface->GetNextObject(entry->object);
-        if (object == NULL)
-            object = interface->GetNextObject(NULL);
-        for (i32 remaining = 4096; remaining != 0; --remaining) {
-            if (Editable(object, entry->ed_class, -1))
+    if (__builtin_expect(input.GetPress(19) != 0.0f, 1)) {
+        object = entry->object;
+        i32 remaining = 4096;
+        do {
+            object = entry->ed_class->interface->GetNextObject(object);
+            if (__builtin_expect(object == NULL, 0))
+                object = entry->ed_class->interface->GetNextObject(NULL);
+            if (__builtin_expect(Editable(object, entry->ed_class, -1) != 0, 1))
                 break;
-            object = interface->GetNextObject(object);
-            if (object == NULL)
-                object = interface->GetNextObject(NULL);
-        }
+        } while (--remaining != 0);
     }
     if (input.GetPress(20) != 0.0f) {
         void *current = entry->object;
         void *previous = NULL;
-        auto entry_ed_class = entry->ed_class;
         for (i32 remaining = 4096; remaining != 0; --remaining) {
-            if (Editable(current, entry_ed_class, -1))
+            if (Editable(current, entry->ed_class, -1))
                 previous = current;
-            current = interface->GetNextObject(current);
-            if (__builtin_expect(current == NULL, 1))
-                current = interface->GetNextObject(NULL);
+            current = entry->ed_class->interface->GetNextObject(current);
+            if (__builtin_expect(current == NULL, 0))
+                current = entry->ed_class->interface->GetNextObject(NULL);
             if (current == entry->object)
                 break;
         }
@@ -7136,14 +7133,15 @@ __attribute__((force_align_arg_pointer)) i32 EdManRotate::RotateItem(EdInputCont
 }
 
 void ClassEditor::DrawObjectSphere(ClassObject &selected, i32 colour) {
-    if (__builtin_expect(selected.object == NULL, 1))
+    if (selected.object == NULL)
         return;
     f32 radius;
     EdMember member;
     i32 radius_type = EdType_Float;
     if (selected.reference == NULL ||
-        selected.reference->GetAttributeData(selected.object, 0x40, radius_type, &radius, 0) == 0) {
-        if (selected.ed_class->FindMember(&member, selected.object, 0x40, 1) == 0 ||
+        __builtin_expect(selected.reference->GetAttributeData(selected.object, 0x40, radius_type, &radius, 0) == 0,
+                         1)) {
+        if (__builtin_expect(selected.ed_class->FindMember(&member, selected.object, 0x40, 1) == 0, 1) ||
             member.reference->GetAttributeData(member.object, 0x40, radius_type, &radius, 0) == 0) {
             radius = 1.0f;
         }
@@ -7157,14 +7155,14 @@ void ClassEditor::DrawObjectSphere(ClassObject &selected, i32 colour) {
          member.reference->GetAttributeData(member.object, 0x10, matrix_type, &transform, 0) == 0)) {
         VuVec position;
         i32 position_type = EdType_VuVec;
-        if ((selected.reference != NULL &&
-             selected.reference->GetAttributeData(selected.object, 8, position_type, &position, 0) != 0) ||
-            (selected.ed_class->FindMember(&member, selected.object, 8, 1) != 0 &&
-             member.reference->GetAttributeData(member.object, 8, position_type, &position, 0) != 0)) {
-            EdDrawBegin(0);
-            EdDrawLineSphere(position, radius, 1.0f, colour);
-            EdDrawEnd();
-        }
+        if ((selected.reference == NULL ||
+             selected.reference->GetAttributeData(selected.object, 8, position_type, &position, 0) == 0) &&
+            (__builtin_expect(selected.ed_class->FindMember(&member, selected.object, 8, 1) == 0, 0) ||
+             member.reference->GetAttributeData(member.object, 8, position_type, &position, 0) == 0))
+            return;
+        EdDrawBegin(0);
+        EdDrawLineSphere(position, radius, 1.0f, colour);
+        EdDrawEnd();
         return;
     }
 
@@ -7239,26 +7237,31 @@ void ClassEditor::Render() {
     }
 
     for (i32 index = 0; index < theRegistry.class_count; ++index) {
-        EdClass *ed_class = theRegistry.GetClass(index);
-        if (!Editable(NULL, ed_class, index) || ed_class->interface == NULL || (ed_class->flags & 0x08000080) == 0)
+        selected.ed_class = theRegistry.GetClass(index);
+        if (!Editable(NULL, selected.ed_class, index))
+            continue;
+        if (selected.ed_class->interface == NULL)
+            continue;
+        if ((selected.ed_class->flags & 0x08000080) == 0)
             continue;
 
-        for (void *object = ed_class->interface->GetNextObject(NULL); object != NULL;
-             object = ed_class->interface->GetNextObject(object)) {
-            if (!Editable(object, ed_class, -1))
+        for (selected.object = selected.ed_class->interface->GetNextObject(NULL); selected.object != NULL;
+             selected.object = selected.ed_class->interface->GetNextObject(selected.object)) {
+            if (!Editable(selected.object, selected.ed_class, -1))
                 continue;
 
-            selected.ed_class = ed_class;
-            selected.object = object;
-            if ((ed_class->flags & 0x08000000) != 0 && selected_objects.IsInList(selected) == 0)
-                theRegistry.ClassIFaceRender(ed_class, object, 0);
-            if ((ed_class->flags & 0x80) != 0 && selected_objects.IsInList(selected) != 0 &&
-                object != current_object.object)
-                DrawObjectSphere(selected, 0xff000080);
+            if ((selected.ed_class->flags & 0x08000000) != 0) {
+                if (__builtin_expect(selected_objects.IsInList(selected) == 0, 0))
+                    theRegistry.ClassIFaceRender(selected.ed_class, selected.object, 0);
+            }
+            if ((selected.ed_class->flags & 0x80) != 0) {
+                if (selected_objects.IsInList(selected) != 0 && selected.object != current_object.object)
+                    DrawObjectSphere(selected, 0xff000080);
+            }
         }
     }
 
-    if (__builtin_expect(menu != NULL, 0))
+    if (menu != NULL)
         eduiMenuRender(menu);
 }
 
@@ -8394,7 +8397,7 @@ void LevelEditor::ProcessEvenWhenPaused(ThingProcessData *data) {
         edLevelDestroyThisMenu2 = NULL;
     }
     if (edLevelNextMenu != NULL) {
-        if (edLevelActiveMenu != NULL) {
+        if (__builtin_expect(edLevelActiveMenu != NULL, 1)) {
             eduiMenuDestroy(edLevelActiveMenu);
         }
         eduimenu_s *next_menu = edLevelNextMenu;

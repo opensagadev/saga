@@ -1251,17 +1251,17 @@ void Prompt_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elap
                                     (packet->next_area == -1 || (packet->area->flags & 2) != 0 ||
                                      Game.area_save[packet->next_area].complete != 0)) ||
                                    (packet->mode_flags & 1) != 0 || packet->challenge_state != 0 ||
-                                   __builtin_expect(packet->mission_state != 0, 1)) {
-                            if (status_prompt < 1) {
-                                if (__builtin_expect(((buttons | pad->left_directions) & GAMEPAD_DDOWN) != 0, 1)) {
+                                   packet->mission_state != 0) {
+                            if (status_prompt > 0) {
+                                if (__builtin_expect(((buttons | pad->left_directions) & GAMEPAD_DUP) != 0, 1)) {
                                     GameAudio_PlaySfx(0x2f, NULL, 0, 0);
-                                    ++status_prompt;
-                                    moved_down = 1;
+                                    --status_prompt;
+                                    moved_up = 1;
                                 }
-                            } else if (__builtin_expect(((buttons | pad->left_directions) & GAMEPAD_DUP) != 0, 1)) {
+                            } else if (__builtin_expect(((buttons | pad->left_directions) & GAMEPAD_DDOWN) != 0, 1)) {
                                 GameAudio_PlaySfx(0x2f, NULL, 0, 0);
-                                --status_prompt;
-                                moved_up = 1;
+                                ++status_prompt;
+                                moved_down = 1;
                             }
                         }
                     }

@@ -1305,8 +1305,12 @@ u16 NuMemoryManager::DumpBlock(u32 dump_id, NuSymbolQuery *, Header *header, u32
     u32 data_bytes = total_bytes - (m_headerSize - 4) * count;
     u32 block_size = BLOCK_SIZE(header->value);
     usize *end_tag = END_TAG(header, block_size);
-    u32 encoded_index = *end_tag >> 27;
-    u32 manager_index = encoded_index == 31 ? *(end_tag - 1) : encoded_index - 1;
+    u32 manager_index = *end_tag >> 27;
+    if (manager_index != 31) {
+        --manager_index;
+    } else {
+        manager_index = *(end_tag - 1);
+    }
     if (manager_index >= 30)
         data_bytes -= 4;
 
@@ -1327,7 +1331,6 @@ u16 NuMemoryManager::DumpBlock(u32 dump_id, NuSymbolQuery *, Header *header, u32
         } else {
             strcpy(category_text, "        ");
         }
-        u8 *data = reinterpret_cast<u8 *>(header) + m_headerSize;
         const bool flag_a = (debug->flags.alloc_flags & 2) != 0;
         const bool flag_s = (debug->flags.alloc_flags & 4) != 0;
         const bool flag_c = (debug->flags.alloc_flags & 8) != 0;
@@ -1337,23 +1340,36 @@ u16 NuMemoryManager::DumpBlock(u32 dump_id, NuSymbolQuery *, Header *header, u32
                      flag_a ? 'X' : '-', flag_s ? 'X' : '-', flag_c ? 'X' : '-', category_text, debug_name);
         } else if (__builtin_expect((debug->flags.alloc_flags & 4) != 0, 1)) {
             char value[257];
-            block_size = BLOCK_SIZE(header->value);
-            end_tag = END_TAG(header, block_size);
-            encoded_index = *end_tag >> 27;
-            manager_index = encoded_index == 31 ? *(end_tag - 1) : encoded_index - 1;
+            u8 *data = reinterpret_cast<u8 *>(header) + m_headerSize;
+            u32 size = BLOCK_SIZE(header->value);
+            u32 avail = size - m_headerSize;
+            usize *tag = END_TAG(header, size);
+            u32 index = *tag >> 27;
+            if (index != 31) {
+                --index;
+            } else {
+                index = *(tag - 1);
+            }
 
-            u32 length = block_size - m_headerSize - (manager_index >= 30 ? 8 : 4);
+            u32 length;
+            if (index < 30)
+                length = avail - 4;
+            else
+                length = avail - 8;
             if (length > 256)
                 length = 256;
-            memcpy(value, data, length);
-            for (u32 i = 0; i < length; ++i) {
-                if (value[i] == '\0' || value[i] == '\n' || value[i] == '\t')
-                    value[i] = 0x7f;
+            u32 i;
+            for (i = 0; i < length; ++i) {
+                char c = data[i];
+                if (c == '\0' || c == '\n' || c == '\t')
+                    c = 0x7f;
+                value[i] = c;
             }
-            value[length] = '\0';
+            value[i] = '\0';
             snprintf(line, sizeof(line), "| %s | %10u | %s | %c%c%c | %s | %s [%s]\r\n", address_text, count, size_text,
                      flag_a ? 'X' : '-', flag_s ? 'X' : '-', flag_c ? 'X' : '-', category_text, debug_name, value);
         } else {
+            u8 *data = reinterpret_cast<u8 *>(header) + m_headerSize;
             snprintf(line, sizeof(line),
                      "| %s | %10u | %s | %c%c%c | %s | %s [%02X %02X %02X %02X %02X %02X %02X %02X ...]\r\n",
                      address_text, count, size_text, flag_a ? 'X' : '-', flag_s ? 'X' : '-', flag_c ? 'X' : '-',

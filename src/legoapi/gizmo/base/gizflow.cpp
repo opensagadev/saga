@@ -757,12 +757,14 @@ void *LoadGizFlow(void *, GIZMOSYS_s *system, char *path, VARIPTR *buffer, VARIP
 static i32 ProcessConditionFlowBox(GIZFLOW_s *flow, FLOWBOX_s *box, u8) {
     u8 *condition = reinterpret_cast<u8 *>(box->data);
     if (condition == NULL) {
-        u8 *outputs = box->output_indices;
-        FLOWBOX_s **parents = box->parents;
-        for (i32 i = 0; i < box->parent_count; ++i) {
-            FLOWBOX_s *parent = parents[i];
-            if (flowboxtypes[parent->type].check_output(flow, parent, outputs[i]) == 0) {
-                return 0;
+        if (box->parent_count != 0) {
+            FLOWBOX_s **parents = box->parents;
+            u8 *outputs = box->output_indices;
+            for (i32 i = 0; i < box->parent_count; ++i) {
+                FLOWBOX_s *parent = parents[i];
+                if (flowboxtypes[parent->type].check_output(flow, parent, outputs[i]) == 0) {
+                    return 0;
+                }
             }
         }
         return 1;
@@ -813,14 +815,16 @@ static i32 ProcessConditionFlowBox(GIZFLOW_s *flow, FLOWBOX_s *box, u8) {
             count = 0;
             for (i32 i = 0; i < box->parent_count; ++i) {
                 FLOWBOX_s *parent = parents[i];
-                count += flowboxtypes[parent->type].check_output(flow, parent, outputs[i]) != 0;
+                if (flowboxtypes[parent->type].check_output(flow, parent, outputs[i]) != 0)
+                    count++;
             }
         }
         count_done:
             if (condition[0] == 5) {
-                return count == required;
-            }
-            if (count < required) {
+                if (count != required) {
+                    return 0;
+                }
+            } else if (count < required) {
                 return 0;
             }
             break;
@@ -835,7 +839,8 @@ static i32 ProcessConditionFlowBox(GIZFLOW_s *flow, FLOWBOX_s *box, u8) {
                 i32 count = 0;
                 for (i32 i = 0; i < box->parent_count; ++i) {
                     FLOWBOX_s *parent = parents[i];
-                    count += flowboxtypes[parent->type].check_output(flow, parent, outputs[i]) != 0;
+                    if (flowboxtypes[parent->type].check_output(flow, parent, outputs[i]) != 0)
+                        count++;
                 }
                 if (count < required) {
                     return 0;

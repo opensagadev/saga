@@ -102,7 +102,6 @@ void NetStats::Draw(float x, float y, float width, float height, volatile NetSma
         packet_maximum = static_cast<float>(visible_maximum.values[3]);
     }
     const float packet_scale = height / packet_maximum;
-    const float graph_end = x + graph_width;
 
     ++NuPrimCSPos;
     NuPrimSetCoordinateSystem(NUPRIM_SCALEMODE_NORMALISED);
@@ -113,6 +112,7 @@ void NetStats::Draw(float x, float y, float width, float height, volatile NetSma
     const float graph_bottom = y - height;
     NuRndrPrimPosition(x, graph_bottom, 0.0f);
     NuRndrPrimSetColour(0x80000080);
+    const float graph_end = x + graph_width;
     NuRndrPrimPosition(graph_end, graph_bottom, 0.0f);
     NuPrim2DEnd();
 
@@ -133,9 +133,9 @@ void NetStats::Draw(float x, float y, float width, float height, volatile NetSma
         }
         const float sample_x = x + static_cast<float>(i) * x_step;
         if (info == static_cast<NetSmallStats::eInfo>(0)) {
-            sample_y = graph_bottom + static_cast<float>(samples[sample].values[0]) * byte_scale;
-        } else if (info == static_cast<NetSmallStats::eInfo>(1)) {
-            sample_y = graph_bottom + static_cast<float>(samples[sample].values[2]) * packet_scale;
+            sample_y = graph_bottom + static_cast<float>((samples + sample)->values[0]) * byte_scale;
+        } else if (__builtin_expect(info == static_cast<NetSmallStats::eInfo>(1), 1)) {
+            sample_y = graph_bottom + static_cast<float>((samples + sample)->values[2]) * packet_scale;
         }
         NuRndrPrimSetColour(0x80008000);
         NuRndrPrimPosition(sample_x, sample_y, 0.0f);
@@ -151,9 +151,9 @@ void NetStats::Draw(float x, float y, float width, float height, volatile NetSma
         }
         const float sample_x = x + static_cast<float>(i) * x_step;
         if (info == static_cast<NetSmallStats::eInfo>(0)) {
-            sample_y = graph_bottom + static_cast<float>(samples[sample].values[1]) * byte_scale;
-        } else if (info == static_cast<NetSmallStats::eInfo>(1)) {
-            sample_y = graph_bottom + static_cast<float>(samples[sample].values[3]) * packet_scale;
+            sample_y = graph_bottom + static_cast<float>((samples + sample)->values[1]) * byte_scale;
+        } else if (__builtin_expect(info == static_cast<NetSmallStats::eInfo>(1), 1)) {
+            sample_y = graph_bottom + static_cast<float>((samples + sample)->values[3]) * packet_scale;
         }
         NuRndrPrimSetColour(0x80008080);
         NuRndrPrimPosition(sample_x, sample_y, 0.0f);
@@ -177,12 +177,14 @@ void NetStats::Draw(float x, float y, float width, float height, volatile NetSma
     char text[128];
     y += font_height;
     NuQFntMove(font, graph_end, y, 0.0f);
-    sprintf(text, "bps %d : %d", samples[sample_index].values[0], samples[sample_index].values[1]);
+    const NetSample *current = samples + sample_index;
+    sprintf(text, "bps %d : %d", current->values[0], current->values[1]);
     NuQFntPrintU(font, text);
 
     y += font_height;
     NuQFntMove(font, graph_end, y, 0.0f);
-    sprintf(text, "pps %d : %d", samples[sample_index].values[2], samples[sample_index].values[3]);
+    current = samples + sample_index;
+    sprintf(text, "pps %d : %d", current->values[2], current->values[3]);
     NuQFntPrintU(font, text);
 
     y += font_height;

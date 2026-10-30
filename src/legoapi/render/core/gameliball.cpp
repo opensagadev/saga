@@ -6969,7 +6969,7 @@ extern "C" void PlaySfxByIdEx(i32 sfx_id, nuvec_s *position, f32 volume, f32 pit
         return;
     }
 
-    i8 priority = g_soundInfo[sfx_id].priority;
+    i32 priority = g_soundInfo[sfx_id].priority;
     if (g_soundInfo[sfx_id].group != -1) {
         sfx_id = GroupBuffer_GetSample(g_soundInfo[sfx_id].group, g_soundInfo[sfx_id].seq);
         if (sfx_id == -1) {
@@ -6979,7 +6979,7 @@ extern "C" void PlaySfxByIdEx(i32 sfx_id, nuvec_s *position, f32 volume, f32 pit
 
     i32 sample_index = g_soundInfo[sfx_id].index;
     f32 pan = g_soundInfo[sfx_id].pan;
-    u8 loop = static_cast<u8>(g_soundInfo[sfx_id].loop);
+    i32 loop = g_soundInfo[sfx_id].loop;
     f32 buzz_timer = g_soundInfo[sfx_id].buzz_timer;
     f32 rumble_sustain = g_soundInfo[sfx_id].rumble_sustain;
     i32 rumble_strength = g_soundInfo[sfx_id].rumble_strength;
@@ -7023,13 +7023,13 @@ extern "C" void PlaySfxByIdEx(i32 sfx_id, nuvec_s *position, f32 volume, f32 pit
     }
 
     f32 volume_scale;
-    if (__builtin_expect(volume != 1.0f, 1)) {
+    if (volume == 1.0f) {
+        volume_scale = static_cast<f32>(g_soundInfo[sfx_id].volume);
+    } else {
         if (volume > 1.0f) {
             volume = 1.0f;
         }
         volume_scale = static_cast<f32>(g_soundInfo[sfx_id].volume) * volume;
-    } else {
-        volume_scale = static_cast<f32>(g_soundInfo[sfx_id].volume);
     }
 
     if (g_soundInfo[sfx_id].nofade == 0) {
@@ -7040,11 +7040,11 @@ extern "C" void PlaySfxByIdEx(i32 sfx_id, nuvec_s *position, f32 volume, f32 pit
 
     if (g_soundInfo[sfx_id].pitch_rnd != 0.0f) {
         f32 pitch_variation = NuRandFloatSeeded(&seed) * g_soundInfo[sfx_id].pitch_rnd;
-        if (__builtin_expect((NuRandIntSeeded(&seed) & 1) == 0, 1)) {
+        if (NuRandIntSeeded(&seed) & 1) {
+            pitch_variation = 1.0f + pitch_variation;
+        } else {
             pitch_variation *= 0.5f;
             pitch_variation = 1.0f - pitch_variation;
-        } else {
-            pitch_variation = 1.0f + pitch_variation;
         }
         pitch = pitch_variation * pitch;
     }
@@ -7055,7 +7055,18 @@ extern "C" void PlaySfxByIdEx(i32 sfx_id, nuvec_s *position, f32 volume, f32 pit
     }
 
     if (static_cast<u32>(sample_index) <= 1599) {
-        if (position == NULL) {
+        if (position != NULL) {
+            if (loop) {
+                NuSound3Play3dLoopSfx(position, sample_index, falloff_near, falloff_far, voice_volume, voice_volume,
+                                      pitch, buzz_timer, rumble_strength, rumble_sustain, rumble_release);
+            } else if (priority != 0) {
+                NuSound3Play3dPri(position, sample_index, falloff_near, falloff_far, voice_volume, voice_volume, pitch,
+                                  buzz_timer, rumble_strength, rumble_sustain, rumble_release, priority);
+            } else {
+                NuSound3Play3d(position, sample_index, falloff_near, falloff_far, voice_volume, voice_volume, pitch,
+                               buzz_timer, rumble_strength, rumble_sustain, rumble_release);
+            }
+        } else {
             i32 volume_left =
                 pan < 0.0f ? voice_volume : static_cast<i32>((1.0f - pan) * static_cast<f32>(voice_volume));
             i32 volume_right =
@@ -7063,30 +7074,17 @@ extern "C" void PlaySfxByIdEx(i32 sfx_id, nuvec_s *position, f32 volume, f32 pit
 
             if (loop) {
                 listener = reinterpret_cast<const NUMTX *>(NuSound3GetListener());
-                pos.x = listener->m30;
-                pos.y = listener->m31;
-                pos.z = listener->m32;
+                pos = *reinterpret_cast<const nuvec_s *>(&listener->m30);
                 nuvec_s *forward = reinterpret_cast<nuvec_s *>(const_cast<f32 *>(&listener->m20));
                 NuVecAdd(&pos, &pos, forward);
                 NuSound3Play3dLoopSfx(&pos, sample_index, falloff_near, falloff_far, volume_left, volume_right, pitch,
                                       buzz_timer, rumble_strength, rumble_sustain, rumble_release);
-            } else if (priority == 0) {
-                NuSound3Play(sample_index, volume_left, volume_right, pitch, buzz_timer, rumble_strength,
-                             rumble_sustain, rumble_release);
-            } else {
+            } else if (priority != 0) {
                 NuSound3PlayPri(sample_index, volume_left, volume_right, pitch, buzz_timer, rumble_strength,
                                 rumble_sustain, rumble_release, priority);
-            }
-        } else {
-            if (loop) {
-                NuSound3Play3dLoopSfx(position, sample_index, falloff_near, falloff_far, voice_volume, voice_volume,
-                                      pitch, buzz_timer, rumble_strength, rumble_sustain, rumble_release);
-            } else if (priority == 0) {
-                NuSound3Play3d(position, sample_index, falloff_near, falloff_far, voice_volume, voice_volume, pitch,
-                               buzz_timer, rumble_strength, rumble_sustain, rumble_release);
             } else {
-                NuSound3Play3dPri(position, sample_index, falloff_near, falloff_far, voice_volume, voice_volume, pitch,
-                                  buzz_timer, rumble_strength, rumble_sustain, rumble_release, priority);
+                NuSound3Play(sample_index, volume_left, volume_right, pitch, buzz_timer, rumble_strength,
+                             rumble_sustain, rumble_release);
             }
         }
     }
@@ -8545,55 +8543,7 @@ extern "C" {
         }
 
         if (additional_chunks > 0) {
-            if (effect->particle_type == 7) {
-                i32 &free_chunk_count = freedebchkptrg;
-                if (additional_chunks + free_chunk_count >= debrischunksglass) {
-                    return;
-                }
-                dma_particle_chunk_s **free_chunks = freedebchunksglass;
-
-                const i32 particles_per_chunk = 12;
-                for (i32 i = 0; i < additional_chunks; ++i) {
-                    dma_particle_chunk_s *chunk = free_chunks[free_chunk_count + i];
-                    ((DebChunkPtr *)key->particle_chunks)[old_chunk_count + i] = chunk;
-                    for (i32 particle_index = 0; particle_index < particles_per_chunk; ++particle_index) {
-                        ((DebChunkPtr *)key->particle_chunks)[old_chunk_count + i]
-                            ->particles[particle_index]
-                            .start_time = 0.0f;
-                        ((DebChunkPtr *)key->particle_chunks)[old_chunk_count + i]
-                            ->particles[particle_index]
-                            .inverse_lifetime = 32768.0f;
-                    }
-                }
-
-                if (key->allocated_chunk_count == 0) {
-                    const i32 render_chunk_count = debrischunks + debrischunksglass;
-                    particlechunkrendertype_s *render_chunk = NULL;
-                    for (i32 i = 0; i < render_chunk_count; ++i) {
-                        if (ParticleChunkToRender[i].particle_chunk == NULL) {
-                            render_chunk = &ParticleChunkToRender[i];
-                            break;
-                        }
-                    }
-                    if (render_chunk != NULL) {
-                        render_chunk->particle_chunk = key->particle_chunks[0];
-                        render_chunk->key = key;
-                        render_chunk->effect = effect;
-                        render_chunk->render_priority = key->render_priority;
-                        if (key->field_2f6 != 0) {
-                            AddChunkToRenderStack(render_chunk, &ParticleChunkRenderStack[effect->time_group]);
-                        }
-                    }
-                }
-
-                key->allocated_chunk_count += additional_chunks;
-                if (key->allocated_chunk_count == key->previous_allocated_chunk_count)
-                    key->particle_count = key->previous_particle_count;
-                else
-                    key->particle_count += 12;
-                free_chunk_count += additional_chunks;
-                LinkDmaParticalSets(key->particle_chunks, key->allocated_chunk_count);
-            } else {
+            if (!(effect->particle_type == 7)) {
                 i32 &free_chunk_count = freedebchkptr;
                 if (additional_chunks + free_chunk_count >= debrischunks) {
                     return;
@@ -8639,6 +8589,54 @@ extern "C" {
                     key->particle_count = key->previous_particle_count;
                 else
                     key->particle_count += 32;
+                free_chunk_count += additional_chunks;
+                LinkDmaParticalSets(key->particle_chunks, key->allocated_chunk_count);
+            } else {
+                i32 &free_chunk_count = freedebchkptrg;
+                if (additional_chunks + free_chunk_count >= debrischunksglass) {
+                    return;
+                }
+                dma_particle_chunk_s **free_chunks = freedebchunksglass;
+
+                const i32 particles_per_chunk = 12;
+                for (i32 i = 0; i < additional_chunks; ++i) {
+                    dma_particle_chunk_s *chunk = free_chunks[free_chunk_count + i];
+                    ((DebChunkPtr *)key->particle_chunks)[old_chunk_count + i] = chunk;
+                    for (i32 particle_index = 0; particle_index < particles_per_chunk; ++particle_index) {
+                        ((DebChunkPtr *)key->particle_chunks)[old_chunk_count + i]
+                            ->particles[particle_index]
+                            .start_time = 0.0f;
+                        ((DebChunkPtr *)key->particle_chunks)[old_chunk_count + i]
+                            ->particles[particle_index]
+                            .inverse_lifetime = 32768.0f;
+                    }
+                }
+
+                if (key->allocated_chunk_count == 0) {
+                    const i32 render_chunk_count = debrischunks + debrischunksglass;
+                    particlechunkrendertype_s *render_chunk = NULL;
+                    for (i32 i = 0; i < render_chunk_count; ++i) {
+                        if (ParticleChunkToRender[i].particle_chunk == NULL) {
+                            render_chunk = &ParticleChunkToRender[i];
+                            break;
+                        }
+                    }
+                    if (render_chunk != NULL) {
+                        render_chunk->particle_chunk = key->particle_chunks[0];
+                        render_chunk->key = key;
+                        render_chunk->effect = effect;
+                        render_chunk->render_priority = key->render_priority;
+                        if (key->field_2f6 != 0) {
+                            AddChunkToRenderStack(render_chunk, &ParticleChunkRenderStack[effect->time_group]);
+                        }
+                    }
+                }
+
+                key->allocated_chunk_count += additional_chunks;
+                if (key->allocated_chunk_count == key->previous_allocated_chunk_count)
+                    key->particle_count = key->previous_particle_count;
+                else
+                    key->particle_count += 12;
                 free_chunk_count += additional_chunks;
                 LinkDmaParticalSets(key->particle_chunks, key->allocated_chunk_count);
             }
@@ -12385,6 +12383,11 @@ extern "C" void edbitsDrawCross(f32 x, f32 y, f32 z, f32 radius, i32 colour, num
             }
             if (animation != NULL) {
                 switch (AnimParams[index].field_00c) {
+                    case 3:
+                        animation->repeating = 1;
+                        if (AnimParams[index].field_010 != -1 && object_switches[AnimParams[index].field_010] != 0)
+                            animation->playing = 1;
+                        break;
                     case 1:
                         animation->playing = 0;
                         if (AnimParams[index].field_010 != -1 && object_switches[AnimParams[index].field_010] != 0)
@@ -12400,20 +12403,18 @@ extern "C" void edbitsDrawCross(f32 x, f32 y, f32 z, f32 radius, i32 colour, num
                             animation->waiting = 0;
                         }
                         break;
-                    case 3:
-                        animation->repeating = 1;
-                        if (AnimParams[index].field_010 != -1 && object_switches[AnimParams[index].field_010] != 0)
-                            animation->playing = 1;
-                        break;
                     case 4: {
                         const f32 distance = edanimPlayerAnimDistance(index);
-                        animation->playing = !(AnimParams[index].field_014 <= distance);
+                        if (AnimParams[index].field_014 > distance)
+                            animation->playing = 1;
+                        else
+                            animation->playing = 0;
                         break;
                     }
                     case 5: {
                         animation->repeating = 0;
                         const f32 distance = edanimPlayerAnimDistance(index);
-                        if (!(AnimParams[index].field_014 <= distance) && !animation->playing) {
+                        if (AnimParams[index].field_014 > distance && !animation->playing) {
                             animation->playing = 1;
                             animation->backwards = 0;
                             animation->ltime = 1.0f;
@@ -12424,7 +12425,7 @@ extern "C" void edbitsDrawCross(f32 x, f32 y, f32 z, f32 radius, i32 colour, num
                     case 6: {
                         animation->repeating = 1;
                         const f32 distance = edanimPlayerAnimDistance(index);
-                        if (__builtin_expect(AnimParams[index].field_014 > distance, 1))
+                        if (AnimParams[index].field_014 > distance)
                             animation->playing = 1;
                         break;
                     }
@@ -12444,12 +12445,12 @@ extern "C" void edbitsDrawCross(f32 x, f32 y, f32 z, f32 radius, i32 colour, num
                     animation->ltime = 1.0f;
             }
             if (NuSpecialGetVisibilityFn(&special) != NULL) {
-                i32 particle_index = 0;
-                while (particle_index < AnimParams[index].effect_count) {
+                i32 particle_index;
+                for (particle_index = 0; particle_index < AnimParams[index].effect_count; ++particle_index) {
                     i32 effect = AnimParams[index].effect_ids[particle_index];
-                    if (__builtin_expect(effect != -1 && debtab[effect] != NULL, 0)) {
-                        if (__builtin_expect(AnimParams[index].effect_flags[particle_index] == 0 ||
-                            (animation != NULL && animation->playing), 0)) {
+                    if (effect != -1 && debtab[effect] != NULL) {
+                        if (AnimParams[index].effect_flags[particle_index] == 0 ||
+                            (animation != NULL && animation->playing)) {
                             NUMTX matrix;
                             NuMtxInvRSS(&matrix, NuSpecialGetMtx(&special));
                             NuMtxMul(&matrix, &matrix, NuSpecialGetDrawMtx(&special));
@@ -12468,10 +12469,9 @@ extern "C" void edbitsDrawCross(f32 x, f32 y, f32 z, f32 radius, i32 colour, num
                             LookupDebrisEffect(AnimParams[index].effect_names[particle_index]);
                         if (AnimParams[index].effect_ids[particle_index] == -1) {
                             edanimParticleDestroy(index, particle_index);
-                            continue;
+                            --particle_index;
                         }
                     }
-                    ++particle_index;
                 }
                 for (i32 sound_index = 0; sound_index < AnimParams[index].sound_count; ++sound_index) {
                     i32 sound = AnimParams[index].sound_ids[sound_index];
@@ -12511,8 +12511,12 @@ extern "C" void edbitsDrawCross(f32 x, f32 y, f32 z, f32 radius, i32 colour, num
                     }
                 }
             }
-            if (animation != NULL)
-                AnimParams[index].field_17c = animation->oscillate ? -animation->ltime : animation->ltime;
+            if (animation != NULL) {
+                if (animation->oscillate)
+                    AnimParams[index].field_17c = -animation->ltime;
+                else
+                    AnimParams[index].field_17c = animation->ltime;
+            }
         }
         localframecount += static_cast<i32>(elapsed);
     }
@@ -19740,10 +19744,10 @@ i32 CheckCylinder(i32 first_vertex, i32 second_vertex, i32 *vertex_mask, i32 rem
 
     // No forward-time hit was found. Test whether the sphere already overlaps
     // the finite edge at the start of the sweep.
-    if ((!(TerI->transformed_vertices[first_vertex].z >= -TerI->collision_radius) &&
+    if (__builtin_expect((!(TerI->transformed_vertices[first_vertex].z >= -TerI->collision_radius) &&
          !(TerI->transformed_vertices[second_vertex].z >= -TerI->collision_radius)) ||
         (!(TerI->transformed_vertices[first_vertex].z <= TerI->collision_radius) &&
-         TerI->transformed_vertices[second_vertex].z > TerI->collision_radius)) {
+         TerI->transformed_vertices[second_vertex].z > TerI->collision_radius), 0)) {
         return 0;
     }
 
@@ -19970,8 +19974,8 @@ i32 HitPoly(f32 primary_start, f32 primary_end, f32 secondary_start, f32 seconda
             contact_point.y = query->movement.y * candidate_time + secondary_base_y;
             contact_point.z = query->movement.z * candidate_time + secondary_base_z;
             test_secondary_face = 1;
-        } else if (secondary_start <= 0.0f && secondary_end <= 0.0f && secondary_start >= -radius &&
-                   secondary_end >= -radius) {
+        } else if (__builtin_expect(secondary_start <= 0.0f && secondary_end <= 0.0f && secondary_start >= -radius &&
+                   secondary_end >= -radius, 0)) {
             candidate_time = secondary_start;
             const f32 projection_distance = -secondary_start;
             contact_point.x = secondary_normal.x * projection_distance + secondary_base_x;
@@ -20131,7 +20135,7 @@ i32 HitWallSpline() {
         f32 dx = WallSplList[i].position.x - query->position.x;
         f32 dz = WallSplList[i].position.z - query->position.z;
         const f32 reach = radius + 0.005f + query->horizontal_movement_length;
-        if (!(64.0f > fabsf(dx) && 64.0f > fabsf(dz)))
+        if (__builtin_expect(!(64.0f > fabsf(dx) && 64.0f > fabsf(dz)), 0))
             continue;
         if (!(reach * reach > dx * dx + dz * dz))
             continue;
@@ -20142,25 +20146,25 @@ i32 HitWallSpline() {
         dx = WallSplList[i].position.x - TerI->position.x;
         dz = WallSplList[i].position.z - TerI->position.z;
         const f32 along = edge.x * dx + edge.z * dz;
-        if (along < 0.0f) {
-            const f32 pdx = WallSplList[i].position.x - TerI->position.x;
-            const f32 pdz = WallSplList[i].position.z - TerI->position.z;
-            const f32 distance_sq = pdx * pdx + pdz * pdz;
-            const f32 padded_radius = TerI->collision_radius + 0.0005f;
-            if (!(padded_radius * padded_radius >= distance_sq))
-                continue;
-            normal.x = TerI->position.x - WallSplList[i].position.x;
-            normal.z = TerI->position.z - WallSplList[i].position.z;
-            NuVecNorm(&normal, &normal);
-            TerI->hit_type = 0x11;
-            TerI->hit_time = (NuFsqrt(distance_sq) - TerI->collision_radius) - 0.0005f;
-        } else {
+        if (along >= 0.0f) {
             const f32 side_x = WallSplList[i].position.x - (edge.x * along + TerI->position.x);
             const f32 side_z = WallSplList[i].position.z - (edge.z * along + TerI->position.z);
             const f32 padded_radius = TerI->collision_radius + 0.0005f;
             const f32 side_x_sq = side_x * side_x;
             const f32 side_z_sq = side_z * side_z;
-            if (side_x_sq + side_z_sq <= padded_radius * padded_radius) {
+            if (side_x_sq + side_z_sq > padded_radius * padded_radius) {
+                const f32 pdx = WallSplList[i].position.x - TerI->position.x;
+                const f32 pdz = WallSplList[i].position.z - TerI->position.z;
+                const f32 distance_sq = pdx * pdx + pdz * pdz;
+                const f32 padded_radius = TerI->collision_radius + 0.0005f;
+                if (!(padded_radius * padded_radius >= distance_sq))
+                    continue;
+                normal.x = TerI->position.x - WallSplList[i].position.x;
+                normal.z = TerI->position.z - WallSplList[i].position.z;
+                NuVecNorm(&normal, &normal);
+                TerI->hit_type = 0x11;
+                TerI->hit_time = (NuFsqrt(distance_sq) - TerI->collision_radius) - 0.0005f;
+            } else {
                 const f32 distance =
                     along - NuFsqrt((TerI->collision_radius * TerI->collision_radius - side_x_sq) - side_z_sq);
                 if (distance >= -0.0005f &&
@@ -20185,7 +20189,7 @@ i32 HitWallSpline() {
                     const f32 pdz = WallSplList[i].position.z - TerI->position.z;
                     const f32 distance_sq = pdx * pdx + pdz * pdz;
                     const f32 padded_radius = TerI->collision_radius + 0.0005f;
-                    if (!(padded_radius * padded_radius >= distance_sq))
+                    if (__builtin_expect(!(padded_radius * padded_radius >= distance_sq), 1))
                         continue;
                     normal.x = TerI->position.x - WallSplList[i].position.x;
                     normal.z = TerI->position.z - WallSplList[i].position.z;
@@ -20193,19 +20197,19 @@ i32 HitWallSpline() {
                     TerI->hit_type = 0x11;
                     TerI->hit_time = (NuFsqrt(distance_sq) - TerI->collision_radius) - 0.0005f;
                 }
-            } else {
-                const f32 pdx = WallSplList[i].position.x - TerI->position.x;
-                const f32 pdz = WallSplList[i].position.z - TerI->position.z;
-                const f32 distance_sq = pdx * pdx + pdz * pdz;
-                const f32 padded_radius = TerI->collision_radius + 0.0005f;
-                if (!(padded_radius * padded_radius >= distance_sq))
-                    continue;
-                normal.x = TerI->position.x - WallSplList[i].position.x;
-                normal.z = TerI->position.z - WallSplList[i].position.z;
-                NuVecNorm(&normal, &normal);
-                TerI->hit_type = 0x11;
-                TerI->hit_time = (NuFsqrt(distance_sq) - TerI->collision_radius) - 0.0005f;
             }
+        } else {
+            const f32 pdx = WallSplList[i].position.x - TerI->position.x;
+            const f32 pdz = WallSplList[i].position.z - TerI->position.z;
+            const f32 distance_sq = pdx * pdx + pdz * pdz;
+            const f32 padded_radius = TerI->collision_radius + 0.0005f;
+            if (__builtin_expect(!(padded_radius * padded_radius >= distance_sq), 0))
+                continue;
+            normal.x = TerI->position.x - WallSplList[i].position.x;
+            normal.z = TerI->position.z - WallSplList[i].position.z;
+            NuVecNorm(&normal, &normal);
+            TerI->hit_type = 0x11;
+            TerI->hit_time = (NuFsqrt(distance_sq) - TerI->collision_radius) - 0.0005f;
         }
         query = TerI;
         query->movement_normal.x = normal.x;
@@ -22631,7 +22635,7 @@ extern "C" void NewTerrainScaleYMask(NUVEC *position, NUVEC *movement, u8 *hit_f
     }
     ScanTerrain(1, terrain_mask, scan_flags);
 
-    if (hit_flags[1] != 0 && radius > fabsf(movement->x) && radius > fabsf(movement->y) &&
+    if (hit_flags[1] != 0 && __builtin_expect(radius > fabsf(movement->x), 0) && radius > fabsf(movement->y) &&
         radius > fabsf(movement->z) && platinrange == 0) {
         NuScratchRelease();
         TerrFlush();
@@ -22673,7 +22677,7 @@ extern "C" void NewTerrainScaleYMask(NUVEC *position, NUVEC *movement, u8 *hit_f
 
         if (__builtin_expect(TerI->hit_type != TERRAIN_HIT_TYPE_NONE, 0)) {
             const i16 group_index = TerI->terrain_group_index;
-            if (__builtin_expect(group_index >= 0, 1)) {
+            if (group_index >= 0) {
                 ShadNorm = TerI->impact_normal;
 
                 f32 slope = 0.707f;
@@ -22692,19 +22696,19 @@ extern "C" void NewTerrainScaleYMask(NUVEC *position, NUVEC *movement, u8 *hit_f
                     }
                 } else {
                     wall_limit = 1.1f;
-                    if (__builtin_expect(TerI->shape_adjusted == 0, 1)) {
+                    if (__builtin_expect(TerI->shape_adjusted == 0, 0)) {
                         wall_limit = -1.1f;
                     }
                 }
 
-                if (wallover != 0.0f) {
-                    wall_limit = wallover;
-                }
-                if (__builtin_expect(hit_class != TERRAIN_HIT_TYPE_FACE, 0)) {
+                wall_limit = wallover != 0.0f ? wallover : wall_limit;
+                if (hit_class != TERRAIN_HIT_TYPE_FACE) {
                     wall_limit = 0.707f;
                 }
                 if (TerI->surface != NULL &&
-                    (TerI->surface->normal_flags & TERRAIN_SURFACE_CLASS_MASK) == TERRAIN_SURFACE_CLASS_WALL_OVERRIDE) {
+                    __builtin_expect((TerI->surface->normal_flags & TERRAIN_SURFACE_CLASS_MASK) ==
+                                         TERRAIN_SURFACE_CLASS_WALL_OVERRIDE,
+                                     0)) {
                     TerI->position.x += TerI->movement_normal.x * 0.001f;
                     TerI->position.z += TerI->movement_normal.z * 0.001f;
                     wall_limit = 1.1f;
@@ -22718,7 +22722,7 @@ extern "C" void NewTerrainScaleYMask(NUVEC *position, NUVEC *movement, u8 *hit_f
             }
         }
 
-        if (__builtin_expect(TerrShapeAdjCnt != 0, 0)) {
+        if (TerrShapeAdjCnt != 0) {
             if (TerrShapeSideStep(position, movement, hit_flags) != 0) {
                 TerrainImpact(position, movement, hit_flags);
             }

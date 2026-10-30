@@ -639,42 +639,46 @@ bool MechInputTouchGestureBasedController::OnSwipe(GameObject_s &object, TouchHo
         MechSystems::Get()->NewSwipeMarker(holder, index, static_cast<SwipeDecalRenderer::Style>(0));
         return true;
     }
-    if (object.id == id_GRABCONTROL) {
-        if (IsDownSwipe(holder.swipe_samples[index].position, holder.touch_position)) {
-            button_was_pressed[0] = 1;
-            MechSystems::Get()->NewSwipeMarker(holder, index, static_cast<SwipeDecalRenderer::Style>(0));
-            return true;
-        }
-    }
-    if (WORLD->current_level == HOTHESCAPEB_LDATA && object.id == id_SNOWMOB && DoBuckStart(&object)) {
+    if (object.id == id_GRABCONTROL && IsDownSwipe(holder.swipe_samples[index].position, holder.touch_position)) {
+        button_was_pressed[0] = 1;
+        MechSystems::Get()->NewSwipeMarker(holder, index, static_cast<SwipeDecalRenderer::Style>(0));
         return true;
+    }
+    if (WORLD->current_level == HOTHESCAPEB_LDATA && object.id == id_SNOWMOB) {
+        if (static_cast<u8>(DoBuckStart(&object)) != 0)
+            return true;
     }
     if (object.field_0xe31 == 1 && IsDownSwipe(holder.swipe_samples[index].position, holder.touch_position)) {
         StartJetPackFall(&object, 0);
         return false;
     }
     if (object.character_context == LEGOCONTEXT_JUMP) {
-        if (object.touch_task == NULL || object.touch_task->GetHashId().value != MechTouchTaskJump::HashId.value) {
+        if (object.touch_task == NULL)
+            return false;
+        if (object.touch_task->GetHashId().value == MechTouchTaskJump::HashId.value) {
+            if (__builtin_expect(TouchHacks::CanLunge(object) || __builtin_expect(TouchHacks::CanSlam(object), 0), 1) &&
+                IsDownSwipe(holder.swipe_samples[index].position, holder.touch_position) &&
+                !TouchHacks::CheckForAboutToRunIntoKillTerrain(object, 0.1f)) {
+                if (object.jump_sequence > 1)
+                    MechSystems::Get()->NewSwipeMarker(holder, index, static_cast<SwipeDecalRenderer::Style>(2));
+                else
+                    MechSystems::Get()->NewSwipeMarker(holder, index, static_cast<SwipeDecalRenderer::Style>(1));
+                object.field_0xf04 |= 0x20;
+                return false;
+            }
+            MechSystems::Get()->NewSwipeMarker(holder, index, static_cast<SwipeDecalRenderer::Style>(0));
+            object.field_0xf04 |= 0x10;
             return false;
         }
-        if ((TouchHacks::CanLunge(object) || TouchHacks::CanSlam(object)) &&
-            IsDownSwipe(holder.swipe_samples[index].position, holder.touch_position) &&
-            !TouchHacks::CheckForAboutToRunIntoKillTerrain(object, 0.1f)) {
-            const i32 style = object.jump_sequence > 1 ? 2 : 1;
-            MechSystems::Get()->NewSwipeMarker(holder, index, static_cast<SwipeDecalRenderer::Style>(style));
-            object.field_0xf04 |= 0x20;
-            return false;
-        }
-        MechSystems::Get()->NewSwipeMarker(holder, index, static_cast<SwipeDecalRenderer::Style>(0));
-        object.field_0xf04 |= 0x10;
-        return false;
     }
+    if (object.character_context == LEGOCONTEXT_JUMP)
+        return false;
 
     MechSystems::Get()->NewSwipeMarker(holder, index, static_cast<SwipeDecalRenderer::Style>(0));
     JumpTriggerPacket packet;
     packet.player = &object;
-    packet.type = 3;
     packet.touch_holder = &holder;
+    packet.type = 3;
     packet.start = holder.swipe_samples[index].position;
     packet.velocity.x = VuVec_Zero.x;
     packet.velocity.y = VuVec_Zero.y;
@@ -860,49 +864,46 @@ void MechInputTouchGestureBasedController::ProcessAutoJumpWhenStuck(GameObject_s
     }
     if (object.character_context != -1 || object.pad_gamepad == NULL ||
         (object.apiobj.character_data->model_flags & 0x2000) != 0) {
-        field_a6 = 0;
         field_98 = 0.0f;
+        field_a6 = 0;
         return;
     }
-    NUVEC movement;
-    movement.x = object.apiobj.velocity.x;
+    NUVEC movement = object.apiobj.velocity;
     movement.y = 0.0f;
-    movement.z = object.apiobj.velocity.z;
     const f32 movement_sq = NuVecMagSqr(&movement);
     const f32 intended_speed = object.pad_gamepad->input_magnitude * 0.5f;
     if (!(movement_sq < intended_speed * intended_speed)) {
-        field_98 = 0.0f;
         field_a6 = 0;
+        field_98 = 0.0f;
         return;
     }
     field_98 += FRAMETIME;
     if (!(field_98 > 0.2f) || field_a6 != 0) {
         return;
     }
+    VuVec probe(object.apiobj.position.x, object.apiobj.position.y, object.apiobj.position.z, 1.0f);
     field_a6 = 1;
-    NUVEC probe;
-    probe.x = object.apiobj.position.x;
-    probe.y = object.apiobj.position.y;
-    probe.z = object.apiobj.position.z;
     VuVec intended(object.target_velocity.x, object.target_velocity.y, object.target_velocity.z, 1.0f);
     NuVecNorm(&intended.xyz, &intended.xyz);
     probe.x += intended.x * 0.5f;
     probe.y += 1.0f;
     probe.z += intended.z * 0.5f;
-    if (!(GameShadow(player, &probe, 2.0f, -1) > player->apiobj.position.y + 0.1f)) {
+    if (!(GameShadow(player, &probe.xyz, 2.0f, -1) > player->apiobj.position.y + 0.1f)) {
         return;
     }
     f32 speed = *reinterpret_cast<f32 *>(reinterpret_cast<u8 *>(player->apiobj.character_data->player_config) + 0x18);
-    NUVEC velocity = {intended.x * speed, intended.y * speed, intended.z * speed};
+    intended.x *= speed;
+    intended.y *= speed;
+    intended.z *= speed;
     NUVEC previous_velocity = player->apiobj.velocity;
     NUVEC previous_target_velocity = player->target_velocity;
-    player->apiobj.velocity = velocity;
-    player->target_velocity = velocity;
+    player->apiobj.velocity = intended.xyz;
+    player->target_velocity = intended.xyz;
     JumpTriggerPacket packet;
-    packet.type = 1;
     packet.player = &object;
     packet.touch_holder = holder;
-    packet.velocity = VuVec(velocity.x, velocity.y, velocity.z, 1.0f);
+    packet.type = 1;
+    packet.velocity = VuVec(intended.x, intended.y, intended.z, intended.w);
     if (!TriggerJumpTask(packet, false, true, true)) {
         player->apiobj.velocity = previous_velocity;
         player->target_velocity = previous_target_velocity;

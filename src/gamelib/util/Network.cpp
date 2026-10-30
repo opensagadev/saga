@@ -854,13 +854,13 @@ i32 NetworkObjectManager::ObjectCall(void *instance, i32 call_id, NetMessage mes
     i16 object_id = object->id;
     NetMessage outgoing(message);
     PrependObjectCallHeader(outgoing, object_id, class_id, call_id);
-    if (peer == NULL) {
-        theNetwork.ReliableBroadcast(outgoing, 3);
-        reinterpret_cast<void (*)(void *, NetMessage &)>(registered_calls[call_id - 1].callback)(instance, message);
-    } else if (peer->local != 0) {
-        reinterpret_cast<void (*)(void *, NetMessage &)>(registered_calls[call_id - 1].callback)(instance, message);
-    } else {
+    if (peer != NULL && peer->local == 0) {
         theNetwork.ReliableSend(outgoing, 3, *const_cast<NetPeer *>(peer), NULL, 0);
+    } else {
+        if (peer == NULL) {
+            theNetwork.ReliableBroadcast(outgoing, 3);
+        }
+        reinterpret_cast<void (*)(void *, NetMessage &)>(registered_calls[call_id - 1].callback)(instance, message);
     }
     return 1;
 }

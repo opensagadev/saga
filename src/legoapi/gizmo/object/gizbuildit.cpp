@@ -1087,22 +1087,24 @@ static void GizmoBuildit_SetVisibility(GIZMO *gizmo, i32 visible) {
 }
 
 void GizBuildit_Reset(GIZBUILDIT_s *buildit, void *world_ptr) {
-    buildit->field_0x83 &= static_cast<u8>(~GIZBUILDIT_RUNTIME_REWARD_RELEASED);
     buildit->availability_flags |= GIZBUILDIT_AVAILABILITY_ACTIVE | GIZBUILDIT_AVAILABILITY_VISIBLE;
+    buildit->field_0x83 &= static_cast<u8>(~GIZBUILDIT_RUNTIME_REWARD_RELEASED);
 
-    buildit->start_position.x = buildit->file_position.x;
-    buildit->start_position.y = buildit->file_position.y;
-    buildit->start_position.z = buildit->file_position.z;
-    buildit->position.x = buildit->file_position.x;
-    buildit->position.y = buildit->file_position.y;
-    buildit->position.z = buildit->file_position.z;
+    buildit->position = buildit->file_position;
+    buildit->start_position = buildit->position;
     buildit->bounds_radius = NuTrigTable[0x3000];
 
     if (buildit->anim_set != NULL && buildit->anim_set->objects != NULL) {
-        NUVEC start_max = {-1000000000.0f, -1000000000.0f, -1000000000.0f};
-        NUVEC start_min = {1000000000.0f, 1000000000.0f, 1000000000.0f};
-        NUVEC end_min = start_min;
-        NUVEC end_max = start_max;
+        NUVEC start_min;
+        NUVEC start_max;
+        NUVEC end_min;
+        NUVEC end_max;
+        start_min.x = end_min.x = 1000000000.0f;
+        start_max.x = end_max.x = -1000000000.0f;
+        start_min.y = end_min.y = 1000000000.0f;
+        start_max.y = end_max.y = -1000000000.0f;
+        start_min.z = end_min.z = 1000000000.0f;
+        start_max.z = end_max.z = -1000000000.0f;
 
         for (GAMEANIMOBJ_s *object = buildit->anim_set->objects; object != NULL; object = object->next) {
             GIZBUILDITANIMDATA_s *data = static_cast<GIZBUILDITANIMDATA_s *>(object->object_data);
@@ -1136,45 +1138,45 @@ void GizBuildit_Reset(GIZBUILDIT_s *buildit, void *world_ptr) {
 
             if (data->start_mtx.m30 < start_min.x)
                 start_min.x = data->start_mtx.m30;
-            if (data->start_mtx.m31 < start_min.y)
-                start_min.y = data->start_mtx.m31;
-            if (data->start_mtx.m32 < start_min.z)
-                start_min.z = data->start_mtx.m32;
             if (data->start_mtx.m30 > start_max.x)
                 start_max.x = data->start_mtx.m30;
+            if (data->start_mtx.m31 < start_min.y)
+                start_min.y = data->start_mtx.m31;
             if (data->start_mtx.m31 > start_max.y)
                 start_max.y = data->start_mtx.m31;
+            if (data->start_mtx.m32 < start_min.z)
+                start_min.z = data->start_mtx.m32;
             if (data->start_mtx.m32 > start_max.z)
                 start_max.z = data->start_mtx.m32;
 
             if (data->end_mtx.m30 < end_min.x)
                 end_min.x = data->end_mtx.m30;
-            if (data->end_mtx.m31 < end_min.y)
-                end_min.y = data->end_mtx.m31;
-            if (data->end_mtx.m32 < end_min.z)
-                end_min.z = data->end_mtx.m32;
             if (data->end_mtx.m30 > end_max.x)
                 end_max.x = data->end_mtx.m30;
+            if (data->end_mtx.m31 < end_min.y)
+                end_min.y = data->end_mtx.m31;
             if (data->end_mtx.m31 > end_max.y)
                 end_max.y = data->end_mtx.m31;
+            if (data->end_mtx.m32 < end_min.z)
+                end_min.z = data->end_mtx.m32;
             if (data->end_mtx.m32 > end_max.z)
                 end_max.z = data->end_mtx.m32;
 
             data->wobble_time = 0.2f;
         }
 
-        buildit->start_position.x = (start_min.x + start_max.x) * 0.5f;
-        buildit->start_position.y = (start_min.y + start_max.y) * 0.5f;
-        buildit->start_position.z = (start_min.z + start_max.z) * 0.5f;
-        buildit->position.x = (end_min.x + end_max.x) * 0.5f;
-        buildit->position.z = (end_min.z + end_max.z) * 0.5f;
-        buildit->position.y = (end_min.y + end_max.y) * 0.5f;
-
+        buildit->start_position.x = (start_max.x + start_min.x) * 0.5f;
+        buildit->start_position.y = (start_max.y + start_min.y) * 0.5f;
+        buildit->start_position.z = (start_max.z + start_min.z) * 0.5f;
         f32 span = start_max.x - start_min.x;
         if (span < start_max.z - start_min.z) {
             span = start_max.z - start_min.z;
         }
-        buildit->bounds_radius = span * NuTrigTable[0x3000];
+        buildit->bounds_radius = span;
+        buildit->bounds_radius *= NuTrigTable[0x3000];
+        buildit->position.x = (end_max.x + end_min.x) * 0.5f;
+        buildit->position.y = (end_max.y + end_min.y) * 0.5f;
+        buildit->position.z = (end_max.z + end_min.z) * 0.5f;
     }
 
     if (buildit->field_0x5c != 0) {

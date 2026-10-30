@@ -152,11 +152,14 @@ void DrawSnakeBody(GameObject_s *object) {
         const i32 segment_index = (index);                                                                             \
         NUMTX matrix;                                                                                                  \
         NUANGVEC angles;                                                                                               \
+        NUVEC scale;                                                                                                   \
         angles.y = NuAngAdd(object->snake_body->segments[segment_index].yaw, 0x8000);                                  \
         angles.x = object->snake_body->segments[segment_index].pitch;                                                  \
         NuMtxSetRotationXYVU0(&matrix, &angles);                                                                       \
         if (object->snake_body->scale != 1.0f) {                                                                       \
-            NUVEC scale = {object->snake_body->scale, object->snake_body->scale, object->snake_body->scale};           \
+            scale.z = object->snake_body->scale;                                                                       \
+            scale.y = object->snake_body->scale;                                                                       \
+            scale.x = object->snake_body->scale;                                                                       \
             NuMtxPreScale(&matrix, &scale);                                                                            \
         }                                                                                                              \
         matrix.m30 += object->snake_body->segments[segment_index].position.x;                                          \
@@ -176,11 +179,11 @@ void DrawSnakeBody(GameObject_s *object) {
             part.gravity = -5.0f;                                                                                      \
             part.special = special;                                                                                    \
             part.flags = 0x90;                                                                                         \
+            part.lighting = reinterpret_cast<PARTLIGHTSOURCE_s *>(&object->light_data);                                \
+            part.time_step = FRAMETIME;                                                                                \
             part.stop_fn = PartStop_Flickerer;                                                                         \
             part.draw_fn = PartDraw_Flickerer;                                                                         \
             part.field_3c = PartImpact_Brick;                                                                          \
-            part.time_step = FRAMETIME;                                                                                \
-            part.lighting = reinterpret_cast<PARTLIGHTSOURCE_s *>(&object->light_data);                                \
             AddPart(&part);                                                                                            \
         }                                                                                                              \
     } while (0)
@@ -194,7 +197,8 @@ void BlowUpSnakeBody(GameObject_s *object) {
 }
 
 void SnakeBeenHit(GameObject_s *object) {
-    if (__builtin_expect(object != NULL && object->snake_body != NULL && object->snake_body->segment_count > 2, 1)) {
+    if (__builtin_expect(object != NULL, 1) && __builtin_expect(object->snake_body != NULL, 1) &&
+        __builtin_expect(object->snake_body->segment_count > 2, 1)) {
         ADD_SNAKE_SEGMENT_DEBRIS(object->snake_body->segment_count - 1);
         ADD_SNAKE_SEGMENT_DEBRIS(object->snake_body->segment_count - 2);
         object->snake_body->segment_count -= 2;

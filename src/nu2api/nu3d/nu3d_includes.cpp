@@ -875,7 +875,7 @@ template <typename T> static T *CloneSceneAllocate(VARIPTR *buffer, usize count,
 
 static i32 MtlSortKey(const NUMTL *mtl) {
     // Original: ((char)(u16)mtl[0] >> 4) * 0x20000 + sort_pri
-    return mtl->renderplane * 0x20000 + mtl->sort_pri;
+    return mtl->sort_pri + mtl->renderplane * 0x20000;
 }
 
 static inline i32 DynMtlFind(const NUMTL *mtl) {
@@ -981,8 +981,10 @@ extern "C" {
         return (sign << 15) | ((exponent & 31) << 10) | (mantissa >> 13);
     }
     static inline void NuLgtVertex(NUVEC4 *position, i32 colour, f32 u, f32 v) {
-        g_NuPrim_StreamBufferPtr->u32_ptr[3] =
-            g_NuPrim_NeedsOverbrightening ? colour : ((colour >> 1) & 0x7f7f7f) | (colour & 0xff000000);
+        if (__builtin_expect(g_NuPrim_NeedsOverbrightening, 0))
+            g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;
+        else
+            g_NuPrim_StreamBufferPtr->u32_ptr[3] = ((colour >> 1) & 0x7f7f7f) | (colour & 0xff000000);
         if (g_NuPrim_NeedsHalfUVs) {
             ((u16 *)g_NuPrim_StreamBufferPtr->u8_ptr)[8] = NuLgtHalf(u);
             ((u16 *)g_NuPrim_StreamBufferPtr->u8_ptr)[9] = NuLgtHalf(v);
@@ -4830,7 +4832,7 @@ bool OccluderSet::IsOccludedOBB(nuvec_s const *minimum, nuvec_s const *maximum, 
                          {minimum->x, minimum->y, minimum->z, 1.0f}, {minimum->x, minimum->y, maximum->z, 1.0f},
                          {maximum->x, minimum->y, maximum->z, 1.0f}, {maximum->x, minimum->y, minimum->z, 1.0f}};
     NUMTX transform;
-    if (matrix)
+    if (__builtin_expect(matrix != 0, 1))
         NuMtxMulH(&transform, const_cast<NUMTX *>(matrix), &projection_matrix);
     else
         transform = projection_matrix;
@@ -7733,7 +7735,7 @@ extern "C" __attribute__((optimize("O2"))) i32 ANI_SimpleAni3PlayerV4Joint(ani3_
             key = 0.0f;
         }
         i32 whole_key;
-        if (__builtin_expect(!(last_key <= key), 1)) {
+        if (!(last_key <= key)) {
             whole_key = static_cast<i32>(key);
             fraction = key - static_cast<f32>(whole_key);
         } else {
@@ -10799,7 +10801,7 @@ extern "C" void NuTexAnimEnvProc(nutexanimenv_s *env) {
                 material->tex_id = env->texture_ids[env->texture_index];
                 material->shader_desc.diffuse_map_tex_id[0] = env->texture_ids[env->texture_index] & 0x7fff;
                 env->wait_remaining += env->wait_base;
-                if (__builtin_expect(env->wait_random != 0, 0))
+                if (__builtin_expect(env->wait_random != 0, 1))
                     env->wait_remaining += NuRand(&texanim_rand) % env->wait_random;
                 break;
             }
@@ -10840,12 +10842,12 @@ extern "C" void NuTexAnimEnvProc(nutexanimenv_s *env) {
                 env->loop_starts[env->loop_depth++] = env->instruction_index;
                 continue;
             case 14:
-                if (env->loop_counts[env->loop_depth - 1] == 0) {
-                    --env->loop_depth;
-                    ++env->instruction_index;
-                } else {
+                if (!(env->loop_counts[env->loop_depth - 1] == 0)) {
                     env->instruction_index = env->loop_starts[env->loop_depth - 1];
                     --env->loop_counts[env->loop_depth - 1];
+                } else {
+                    --env->loop_depth;
+                    ++env->instruction_index;
                 }
                 continue;
             case 15:
@@ -16435,8 +16437,8 @@ extern "C" {
             return;
         }
         u32 saved_seed = NuLgtSeed;
-        f32 v1 = NuLgtArcMtl[0].v1;
         f32 v0 = NuLgtArcMtl[0].v0;
+        f32 v1 = NuLgtArcMtl[0].v1;
         // Four strip corners, two projected endpoints, and two clipped world endpoints.
         NUVEC4 *vertices = (NUVEC4 *)NuScratchAlloc32(0x80);
         NUMTX clip_matrix;
@@ -16458,19 +16460,22 @@ extern "C" {
                 continue;
             i32 red, green, blue, alpha;
             if (vertices[4].w < 0.5f) {
-                f32 numerator = vertices[5].w - 0.5f;
-                f32 denominator = vertices[5].w - vertices[4].w;
                 if (!laser->arc) {
+                    red = laser->colour & 0xff;
                     green = (laser->colour >> 8) & 0xff;
                     blue = (laser->colour >> 16) & 0xff;
-                    red = laser->colour & 0xff;
                     alpha = (laser->colour >> 24) & 0xff;
                 } else {
-                    red = (i32)((f32)(laser->colour & 0xff) * numerator / denominator);
-                    green = (i32)((f32)((laser->colour >> 8) & 0xff) * numerator / denominator);
-                    blue = (i32)((f32)((laser->colour >> 16) & 0xff) * numerator / denominator);
-                    alpha = (i32)((f32)((laser->colour >> 24) & 0xff) * numerator / denominator);
+                    red = (i32)((f32)(laser->colour & 0xff) * (vertices[5].w - 0.5f) / (vertices[5].w - vertices[4].w));
+                    green = (i32)((f32)((laser->colour >> 8) & 0xff) * (vertices[5].w - 0.5f) /
+                                  (vertices[5].w - vertices[4].w));
+                    blue = (i32)((f32)((laser->colour >> 16) & 0xff) * (vertices[5].w - 0.5f) /
+                                 (vertices[5].w - vertices[4].w));
+                    alpha = (i32)((f32)((laser->colour >> 24) & 0xff) * (vertices[5].w - 0.5f) /
+                                  (vertices[5].w - vertices[4].w));
                 }
+                f32 numerator = vertices[5].w - 0.5f;
+                f32 denominator = vertices[5].w - vertices[4].w;
                 vertices[6].x = (laser->start.x - laser->end.x) * numerator / denominator + laser->end.x;
                 vertices[6].y = (laser->start.y - laser->end.y) * numerator / denominator + laser->end.y;
                 vertices[6].z = (laser->start.z - laser->end.z) * numerator / denominator + laser->end.z;
@@ -16540,7 +16545,7 @@ extern "C" {
             NuVec4MtxTransformVU0(&vertices[4], &vertices[4], &clip_matrix);
             f32 width_scale = 1.0f / vertices[4].w;
             NuVec4ScaleXYZVU0(&vertices[4], &vertices[4], width_scale);
-            if (__builtin_expect(laser->length > remaining, 1)) {
+            if (laser->length > remaining) {
                 if (__builtin_expect(remaining < 0.0f, 0))
                     width_scale *= laser->end_width_ratio;
                 else
@@ -16566,7 +16571,7 @@ extern "C" {
                     vertices[5].y = next_fraction * vertices[7].y + vertices[6].y;
                     vertices[5].z = next_fraction * vertices[7].z + vertices[6].z;
                 } else {
-                    if (__builtin_expect(!!(laser->arc), 0))
+                    if (laser->arc)
                         end_alpha = 0;
                     vertices[5].x = vertices[6].x + vertices[7].x;
                     vertices[5].y = vertices[6].y + vertices[7].y;
@@ -16600,17 +16605,17 @@ extern "C" {
                 NuPrimSetCoordinateSystem(NUPRIM_SCALEMODE_NORMALISED);
                 NuPrim2DBegin(1, 7, NuLgtArcMtl[0].material);
                 NuLgtVertex(&vertices[0],
-                            ((red & 255) | ((green & 255) << 8) | ((blue & 255) << 16)) | ((u32)end_alpha << 24), u0,
+                            (((u32)end_alpha << 24) | (red & 255) | (((green & 255) << 8) | ((blue & 255) << 16))), u0,
                             v0);
                 NuLgtVertex(&vertices[1],
-                            ((red & 255) | ((green & 255) << 8) | ((blue & 255) << 16)) | ((u32)start_alpha << 24), u1,
-                            v0);
+                            (((u32)start_alpha << 24) | (red & 255) | (((green & 255) << 8) | ((blue & 255) << 16))),
+                            u1, v0);
                 NuLgtVertex(&vertices[2],
-                            ((red & 255) | ((green & 255) << 8) | ((blue & 255) << 16)) | ((u32)end_alpha << 24), u0,
+                            (((u32)end_alpha << 24) | (red & 255) | (((green & 255) << 8) | ((blue & 255) << 16))), u0,
                             v1);
                 NuLgtVertex(&vertices[3],
-                            ((red & 255) | ((green & 255) << 8) | ((blue & 255) << 16)) | ((u32)start_alpha << 24), u1,
-                            v1);
+                            (((u32)start_alpha << 24) | (red & 255) | (((green & 255) << 8) | ((blue & 255) << 16))),
+                            u1, v1);
                 NuPrim2DEnd();
                 NuPrimSetCoordinateSystem(NuPrimCoordSystemStack[--NuPrimCSPos]);
                 vertices[1].x = vertices[0].x;
@@ -16931,14 +16936,14 @@ void DisplayListLinkDynamicMtls(void) {
                     sp_idx = j;
             }
         }
-        nusortpri_s *sp = &mgr->dyn_mtl_dlist.sort_pris[sp_idx];
         nudisplaylistitem_s *mtl_item = mtl->display_list->mtl_item;
 
         {
-            if (!(sp->items == mtl_item)) {
-                for (i32 j = 0; j < sp->nmtls; ++j) {
+            if (!(mgr->dyn_mtl_dlist.sort_pris[sp_idx].items == mtl_item)) {
+                for (i32 j = 0; j < mgr->dyn_mtl_dlist.sort_pris[sp_idx].nmtls; ++j) {
                     nudisplaylistitem_s *prev =
-                        mgr->dyn_mtl_dlist.mtls[sp->mtl_first + j]->display_list->mtl_item;
+                        mgr->dyn_mtl_dlist.mtls[mgr->dyn_mtl_dlist.sort_pris[sp_idx].mtl_first + j]
+                            ->display_list->mtl_item;
                     if (mtl_item == prev[7].next) {
                         prev[7].next = mtl_item[7].next;
                         mtl_item[7].type = kItemType_Terminator;
@@ -16948,7 +16953,7 @@ void DisplayListLinkDynamicMtls(void) {
                     }
                 }
             } else {
-                sp->items = static_cast<nudisplaylistitem_s *>(mtl_item[7].next);
+                mgr->dyn_mtl_dlist.sort_pris[sp_idx].items = static_cast<nudisplaylistitem_s *>(mtl_item[7].next);
                 mtl_item[7].type = kItemType_Terminator;
                 mtl_item[7].id = kItemId_Ret;
                 mtl_item[7].next = nullptr;
@@ -16966,20 +16971,20 @@ void DisplayListLinkDynamicMtls(void) {
         }
 
         {
-            sp->nmtls--;
-            if (sp->nmtls == 0) {
+            mgr->dyn_mtl_dlist.sort_pris[sp_idx].nmtls--;
+            if (mgr->dyn_mtl_dlist.sort_pris[sp_idx].nmtls == 0) {
                 // Unlink empty sortpri.
-                if (mgr->sort_list != sp) {
+                if (mgr->sort_list != &mgr->dyn_mtl_dlist.sort_pris[sp_idx]) {
                     nusortpri_s *cur = mgr->sort_list;
-                    while (cur->sys_next != sp)
+                    while (cur->sys_next != &mgr->dyn_mtl_dlist.sort_pris[sp_idx])
                         cur = cur->sys_next;
-                    cur->sys_next = sp->sys_next;
+                    cur->sys_next = mgr->dyn_mtl_dlist.sort_pris[sp_idx].sys_next;
                 } else {
-                    mgr->sort_list = sp->sys_next;
+                    mgr->sort_list = mgr->dyn_mtl_dlist.sort_pris[sp_idx].sys_next;
                 }
                 --mgr->nused_sort_pris;
                 for (i32 j = sp_idx; j < mgr->dyn_mtl_dlist.nsort_pris - 1; ++j) {
-                    mgr->dyn_mtl_dlist.sort_pris[j] = mgr->dyn_mtl_dlist.sort_pris[j + 1];
+                    memcpy(&mgr->dyn_mtl_dlist.sort_pris[j], &mgr->dyn_mtl_dlist.sort_pris[j + 1], sizeof(nusortpri_s));
                 }
                 --mgr->dyn_mtl_dlist.nsort_pris;
             }
@@ -17102,10 +17107,10 @@ void DisplayListLinkDynamicMtls(void) {
         nudisplaylistitem_s *items = NuDisplayListCreateMtlDlist(dl->mtl_item, mtl, &buf_ptr, mgr->mtlbuffend);
 
         mgr->dyn_mtl_dlist.mtls[insert] = mtl;
-        dl->dyn_geom = items + 6;
-        dl->dlist = &mgr->dyn_mtl_dlist;
-        dl->mtl_item = items;
-        dl->mtl_id = insert;
+        mtl->display_list->dyn_geom = items + 6;
+        mtl->display_list->dlist = &mgr->dyn_mtl_dlist;
+        mtl->display_list->mtl_item = items;
+        mtl->display_list->mtl_id = insert;
 
         nusortpri_s *sp;
         if (sp_idx == -1) {
@@ -17135,9 +17140,7 @@ void DisplayListLinkDynamicMtls(void) {
             }
             ++mgr->nused_sort_pris;
             ++mgr->dyn_mtl_dlist.nsort_pris;
-            sp->nmtls = 1;
         } else {
-            sp = &mgr->dyn_mtl_dlist.sort_pris[sp_idx];
             if (__builtin_expect(insert != 0 && MtlSortKey(mgr->dyn_mtl_dlist.mtls[insert - 1]) == key, 0)) {
                 // Splice after previous material's block.
                 auto *anchor = mgr->dyn_mtl_dlist.mtls[insert - 1]->display_list->mtl_item;
@@ -17148,13 +17151,15 @@ void DisplayListLinkDynamicMtls(void) {
                 anchor[7].next = items;
             } else {
                 // Head of chain.
+                items[7].next = mgr->dyn_mtl_dlist.sort_pris[sp_idx].items;
                 items[7].type = kItemType_Link;
                 items[7].id = kItemId_Next;
-                items[7].next = sp->items;
-                sp->items = items;
+                mgr->dyn_mtl_dlist.sort_pris[sp_idx].items = items;
             }
-            ++sp->nmtls;
+            sp = &mgr->dyn_mtl_dlist.sort_pris[sp_idx];
         }
+        // New sortpri arm folds its nmtls = 0 store into this increment.
+        ++sp->nmtls;
 
         {
             u32 total = 0;
@@ -17803,7 +17808,7 @@ extern "C" void NuDisplayListSwapBuffersEndFrame(void) {
         for (i32 m = 0; m < sp->nmtls; ++m) {
             i32 mi = sp->mtl_first + m;
             NUDISPLAYLIST *dl = sc->dlist_mtls[mi];
-            if (__builtin_expect(dl->mtl_item->id != kItemId_Cnt, 0))
+            if (dl->mtl_item->id != kItemId_Cnt)
                 continue;
 
             NUMTL *mtl = sc->mtls[mi];
@@ -18680,7 +18685,7 @@ void NuLgtArcLaserDraw(i32 paused) {
         vertices[5].z = laser->end.z;
         vertices[5].w = 1.0f;
         NuVec4MtxTransformVU0(&vertices[5], &vertices[5], clip);
-        if (__builtin_expect(!(vertices[4].w >= 0.5f) && !(vertices[5].w >= 0.5f), 0))
+        if (!(vertices[4].w >= 0.5f) && !(vertices[5].w >= 0.5f))
             continue;
         if (vertices[4].w < 0.5f) {
             f32 numerator = vertices[5].w - 0.5f;
@@ -18699,7 +18704,7 @@ void NuLgtArcLaserDraw(i32 paused) {
         f32 dy = vertices[6].y - laser->end.y;
         f32 dz = vertices[6].z - laser->end.z;
         sqrt((double)(dx * dx + dy * dy + dz * dz));
-        if (__builtin_expect(vertices[5].w < 0.5f, 1)) {
+        if (vertices[5].w < 0.5f) {
             f32 denominator = vertices[4].w - vertices[5].w;
             f32 numerator = vertices[4].w - 0.5f;
             vertices[7].x = (laser->end.x - laser->start.x) * numerator / denominator + laser->start.x;
@@ -18810,7 +18815,7 @@ void NuLgtArcLaserDraw(i32 paused) {
     NuRndrEndSceneEx(0);
     NuLgtArcLaserOldCnt = NuLgtArcLaserCnt;
     NuLgtArcLaserCnt = 0;
-    if (!paused)
+    if (__builtin_expect(!paused, 0))
         ++NuLgtArcLaserFrame;
     NuScratchRelease();
 }
@@ -20854,7 +20859,10 @@ void DrawAlphaImage(i32 rows, i32 cols, numtl_s *material, i32 use_pixel_offsets
 
             f32 brightness = direction.y;
             i32 colour;
-            if (!(cache_row > 0)) {
+            if (cache_row > 0) {
+                colour = (cacheValues[col] << 24) | 0x808080;
+                NuRndrPrimSetColour(colour);
+            } else {
                 brightness = brightness * 0.5f + 0.5f;
                 if (brightness <= near_angle)
                     brightness = near_scale * parameters->intensity;
@@ -20883,9 +20891,6 @@ void DrawAlphaImage(i32 rows, i32 cols, numtl_s *material, i32 use_pixel_offsets
                     }
                 }
                 colour = (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 24) | 0x808080;
-                NuRndrPrimSetColour(colour);
-            } else {
-                colour = (cacheValues[col] << 24) | 0x808080;
                 NuRndrPrimSetColour(colour);
             }
             NuRndrPrimUV(static_cast<f32>(row) * inv_row + pixelOffsetX,

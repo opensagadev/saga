@@ -142,8 +142,7 @@ static void BuildRegisterIndexToUniformLocationMapping(NUSHADERPROGRAM *result, 
         result->parameters = NULL;
     }
     i32 removed = 0;
-    auto result_parameter_count = result->parameter_count;
-    for (i32 i = 0; i < result_parameter_count; ++i) {
+    for (i32 i = 0; i < result->parameter_count; ++i) {
         GLint count;
         GLenum type;
         glGetActiveUniform(result->program, i, sizeof(build_uniform_name), NULL, &count, &type, uniformName);
@@ -182,6 +181,35 @@ static void BuildRegisterIndexToUniformLocationMapping(NUSHADERPROGRAM *result, 
     g_uniformParameterRecordAllocator -= removed;
 }
 
+static inline NUSHADERPROGRAM *AllocShaderProgram() {
+    i32 slot;
+    for (slot = programPool.next; slot < 64; ++slot) {
+        if ((programPool.occupied[slot >> 3] & (1 << (slot & 7))) == 0) {
+            programPool.occupied[slot >> 3] |= 1 << (slot & 7);
+            programPool.next = (slot + 1) % 64;
+            return &programPool.programs[slot];
+        }
+    }
+    for (slot = 0; slot < programPool.next; ++slot) {
+        if ((programPool.occupied[slot >> 3] & (1 << (slot & 7))) == 0) {
+            programPool.occupied[slot >> 3] |= 1 << (slot & 7);
+            programPool.next = (slot + 1) % 64;
+            return &programPool.programs[slot];
+        }
+    }
+    return NULL;
+}
+
+static inline bool CheckShaderCompiled(GLuint shader) {
+    GLint compiled = 0;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
+    if (compiled == 0) {
+        glDeleteShader(shader);
+        return false;
+    }
+    return true;
+}
+
 extern "C" NUSHADERPROGRAM *NuShaderProgramCreateIOS(const char *vertex_source, const char *fragment_source) {
     const char *vertex_text = vertex_source;
     GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
@@ -192,21 +220,14 @@ extern "C" NUSHADERPROGRAM *NuShaderProgramCreateIOS(const char *vertex_source, 
     }
     glShaderSource(vertex_shader, 1, &vertex_text, NULL);
     glCompileShader(vertex_shader);
-    GLint compiled = 0;
-    glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &compiled);
-    if (__builtin_expect(compiled == 0, 1)) {
-        glDeleteShader(vertex_shader);
-    }
+    CheckShaderCompiled(vertex_shader);
 
     const char *fragment_text = fragment_source;
     GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
     NuStrLen(fragment_text);
     glShaderSource(fragment_shader, 1, &fragment_text, NULL);
     glCompileShader(fragment_shader);
-    compiled = 0;
-    glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &compiled);
-    if (__builtin_expect(compiled == 0, 0)) {
-        glDeleteShader(fragment_shader);
+    if (!CheckShaderCompiled(fragment_shader)) {
         return NULL;
     }
 
@@ -215,30 +236,7 @@ extern "C" NUSHADERPROGRAM *NuShaderProgramCreateIOS(const char *vertex_source, 
     glAttachShader(program, fragment_shader);
     LinkShaderProgram(program);
     NuShaderObjectBindAttributeLocationsGLSL(program);
-    NUSHADERPROGRAM *result = NULL;
-    const i32 start = programPool.next;
-    if (__builtin_expect(start <= 63, 1)) {
-        i32 slot = start;
-        do {
-            if ((programPool.occupied[slot >> 3] & (1 << (slot & 7))) == 0) {
-                programPool.occupied[slot >> 3] |= 1 << (slot & 7);
-                programPool.next = (slot + 1) % 64;
-                result = &programPool.programs[slot];
-                break;
-            }
-        } while (++slot != 64);
-    }
-    if (result == NULL && start > 0) {
-        i32 slot = 0;
-        do {
-            if ((programPool.occupied[slot >> 3] & (1 << (slot & 7))) == 0) {
-                programPool.occupied[slot >> 3] |= 1 << (slot & 7);
-                programPool.next = (slot + 1) % 64;
-                result = &programPool.programs[slot];
-                break;
-            }
-        } while (++slot != start);
-    }
+    NUSHADERPROGRAM *result = AllocShaderProgram();
     result->vertex_shader = vertex_shader;
     result->fragment_shader = fragment_shader;
     result->program = program;

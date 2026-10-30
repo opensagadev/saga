@@ -407,8 +407,8 @@ static void BlockadeRunnerD_EjectCreature(i32 eject_index) {
             if (LevGameObject[i] != NULL) {
                 LevGameObject[i]->ai.animation_override_from = 0xe9;
                 LevGameObject[i]->ai.animation_override_to = 5;
-                LevGameObject[i]->dont_move = 1;
                 LevGameObject[i]->field_0xf00 = (LevGameObject[i]->field_0xf00 & ~0x20) | ((test_tb & 1) << 5);
+                LevGameObject[i]->dont_move = 1;
                 LevGameObject[i]->hide_shadow = 1;
 
                 ADDPART_s params = Default_ADDPART;
@@ -1347,9 +1347,10 @@ void DeathStarBattleDUpdate(WORLDINFO_s *world) {
                 timer = 5.0f;
 #define SPAWN_TRENCH_SHIP(slot, model, ox, oy, oz)                                                                     \
     do {                                                                                                               \
-        NUVEC_ALIGNED16 spawn = {player->apiobj.collision_position.x + trench_spawn_distance,                          \
-                                 player->apiobj.collision_position.y + trench_spawn_height,                            \
-                                 player->apiobj.collision_position.z};                                                 \
+        NUVEC_ALIGNED16 spawn;                                                                                         \
+        spawn.z = player->apiobj.collision_position.z;                                                                 \
+        spawn.x = player->apiobj.collision_position.x + trench_spawn_distance;                                         \
+        spawn.y = player->apiobj.collision_position.y + trench_spawn_height;                                           \
         NUVEC_ALIGNED16 offset = {ox, oy, oz};                                                                         \
         NuVecAdd(&spawn, &spawn, &offset);                                                                             \
         GameObject_s *ship = AddDynamicCreature(model, &spawn, 0xc000, "TrenchBaddie", &player->ai.path_info, NULL, 0, \

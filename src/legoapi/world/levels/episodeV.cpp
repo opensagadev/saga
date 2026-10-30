@@ -1680,8 +1680,8 @@ __attribute__((optimize("O2", "tree-vectorize"))) i32 SpawnMeleeCreatureType(i32
         }
     }
 
-    while (melee.waves[type].field_0x18 > melee.waves[type].reserved_1a) {
-        if (melee.waves[type].reserved_1a > 3)
+    while (melee.waves[type].field_0x18 > active_count) {
+        if (active_count > 3)
             break;
 
         i32 slot = -1;
@@ -1694,18 +1694,20 @@ __attribute__((optimize("O2", "tree-vectorize"))) i32 SpawnMeleeCreatureType(i32
         if (slot == -1)
             return 0;
 
-        if (melee.waves[type].character_id == id_ATAT && melee.waves[type].reserved_1a == 0) {
+        if (melee.waves[type].character_id == id_ATAT && active_count == 0) {
             GameObject_s *named = GetNamedGameObject(WORLD->ai_sys, "ATAT_EDIT");
             melee.waves[type].creatures[slot] = named;
             if (named != NULL && named->apiobj.field_0x287 == 0 && (named->apiobj.field_0x1f8 & 0x1000) != 0) {
-                ++melee.waves[type].reserved_1a;
+                active_count = ++melee.waves[type].reserved_1a;
                 continue;
             }
             melee.waves[type].creatures[slot] = NULL;
         }
 
-        AILOCATOR *locator = NULL;
-        for (i32 attempts = 50; attempts > 0; --attempts) {
+        AILOCATOR *locator;
+        i32 attempts = 50;
+        do {
+            --attempts;
             locator = getSpawnLocator(5.0f, "spawn");
             if (locator != NULL) {
                 if (__builtin_expect(OnOrInsidePlane(&locator->position, &PlayPlane[1].point, &PlayPlane[1].normal,
@@ -1713,16 +1715,15 @@ __attribute__((optimize("O2", "tree-vectorize"))) i32 SpawnMeleeCreatureType(i32
                                      0) ||
                     OnOrInsidePlane(&locator->position, &PlayPlane[2].point, &PlayPlane[2].normal, NULL, 0.5f, NULL) ==
                         0) {
-                    if (__builtin_expect(OnOrInsidePlane(&locator->position, &PlayPlane[1].point, &PlayPlane[1].normal,
-                                                         NULL, 2.5f, NULL) != 0 ||
-                                             OnOrInsidePlane(&locator->position, &PlayPlane[2].point,
-                                                             &PlayPlane[2].normal, NULL, 2.5f, NULL) != 0,
-                                         0))
+                    if (OnOrInsidePlane(&locator->position, &PlayPlane[1].point, &PlayPlane[1].normal, NULL, 2.5f,
+                                        NULL) != 0 ||
+                        OnOrInsidePlane(&locator->position, &PlayPlane[2].point, &PlayPlane[2].normal, NULL, 2.5f,
+                                        NULL) != 0)
                         break;
                 }
                 locator = NULL;
             }
-        }
+        } while (attempts > 0);
         if (locator == NULL)
             return 0;
 
@@ -1742,7 +1743,7 @@ __attribute__((optimize("O2", "tree-vectorize"))) i32 SpawnMeleeCreatureType(i32
             return 0;
         melee.waves[type].creatures[slot] = object;
         object->ai.locator = locator;
-        ++melee.waves[type].reserved_1a;
+        active_count = ++melee.waves[type].reserved_1a;
     }
     return 1;
 }

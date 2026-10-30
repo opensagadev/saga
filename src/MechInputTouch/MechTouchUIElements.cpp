@@ -167,26 +167,10 @@ static inline void TexQuadSubmit(NUVEC const &point, i32 colour, i32 u, i32 v) {
     NuPrim2DAddXYZ(static_cast<f32>(PS2_VREZ_W) * point.x, static_cast<f32>(PS2_VREZ_H) * point.y, 0.0f);
 }
 
-static inline void TexQuadSubmit3D(f32 x, f32 y, i32 colour, i32 u, i32 v) {
-    VARIPTR *stream = g_NuPrim_StreamBufferPtr;
-    TexQuadVertex *vertex = static_cast<TexQuadVertex *>(stream->void_ptr);
-    if (g_NuPrim_NeedsOverbrightening == 0) {
-        vertex->colour = ((colour >> 1) & 0x7f7f7f) | (colour & 0xff000000);
-    } else {
-        vertex->colour = colour;
-    }
-    if (g_NuPrim_NeedsHalfUVs == 0) {
-        vertex->uv[0] = static_cast<f32>(u);
-        vertex->uv[1] = static_cast<f32>(v);
-    } else {
-        vertex->half_uv[0] = u != 0 ? 0x3c00 : 0;
-        vertex->half_uv[1] = v != 0 ? 0x3c00 : 0;
-    }
-    vertex->x = x;
-    vertex->y = y;
-    vertex->z = 0.0f;
-    stream->u8_ptr += sizeof(TexQuadVertex);
-    ++g_NuPrim_VertexCount;
+static inline void TexQuadSubmit3D(f32 x, f32 y, u32 colour, f32 u, f32 v) {
+    NuRndrPrimSetColour(colour);
+    NuRndrPrimUV(u, v);
+    NuRndrPrimPosition(x, y, 0.0f);
 }
 
 extern i16 id_GAMORREANGUARD;
@@ -488,33 +472,25 @@ void MechTouchUIPartySelector_OnRelease_Callback(MechTouchUIElement &element, To
         Hint_SetComplete(0x5f5);
         NewPlayerCharacter(player, icon.character_id, player->id, 1);
         GameAudio_PlaySfx(0x24, NULL, 0, 0);
-        player->pause_input_state = 0;
-        return;
-    }
-
-    Hint_SetComplete(0x5f4);
-    GameObject_s *target = NULL;
-    for (i32 i = 0; i < 8; ++i) {
-        if (Player[i] != NULL && Player[i]->id == icon.character_id) {
-            target = Player[i];
-            break;
-        }
-    }
-    if (target != NULL) {
-        bool tagged = false;
-        if (__builtin_expect((target->field_0xf00 & 2) == 0, 1)) {
-            if (TagCode(player, target, 0, 0, 1) == 1) {
-                Tag_NewTransfer(player, target);
-                tagged = true;
+    } else {
+        Hint_SetComplete(0x5f4);
+        for (i32 i = 0; i < 8; ++i) {
+            GameObject_s *target = Player[i];
+            if (target != NULL && target->id == icon.character_id) {
+                if (target->field_0xf00 & 2) {
+                    TakeOver2GetIn(target, player);
+                    GameAudio_PlaySfx(0x21, NULL, 0, 0);
+                } else {
+                    GameObject_s *p = player;
+                    if (TagCode(p, target, 0, 0, 1) == 1) {
+                        Tag_NewTransfer(p, target);
+                        GameAudio_PlaySfx(0x21, NULL, 0, 0);
+                    }
+                }
+                Player[i]->pause_input_state = 0;
+                break;
             }
-        } else {
-            TakeOver2GetIn(target, player);
-            tagged = true;
         }
-        if (tagged) {
-            GameAudio_PlaySfx(0x21, NULL, 0, 0);
-        }
-        target->pause_input_state = 0;
     }
     player->pause_input_state = 0;
 }

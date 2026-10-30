@@ -1689,7 +1689,7 @@ static inline i32 SubItemMenu(MENU_s *menu) {
                 confirm = 1;
             else {
                 moveitems = menu->selected_column - 3;
-                if (__builtin_expect(moveitems < 0, 0))
+                if (moveitems < 0)
                     left = 1;
                 else if (moveitems > 0)
                     right = 1;
@@ -1727,7 +1727,7 @@ static inline i32 SubItemMenu(MENU_s *menu) {
             pos = SubShelfPos[6];
             pos.y += ypush;
             AddGameDebris(WORLD->debris_sys, qrand() / 10923 + 76, &pos);
-            if (moveitems == 0)
+            if (__builtin_expect(moveitems == 0, 1))
                 moveitems = -1;
             slidetimer = 0.125f;
             hintdrawwait = 0.2f;
@@ -1745,7 +1745,7 @@ static inline i32 SubItemMenu(MENU_s *menu) {
             pos = SubShelfPos[0];
             pos.y += ypush;
             AddGameDebris(WORLD->debris_sys, qrand() / 10923 + 76, &pos);
-            if (moveitems == 0)
+            if (__builtin_expect(moveitems == 0, 1))
                 moveitems = 1;
             slidetimer = 0.125f;
             hintdrawwait = 0.2f;

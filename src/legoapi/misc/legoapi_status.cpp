@@ -935,47 +935,45 @@ void DrawStatusMiniKit(float x, float y, float z, float built_scale, float new_s
                 const f32 oscillation = NuTrigTable[piece_angle];
                 const HUBMINIKITPIECE_s *animated_pieces = static_cast<HUBMINIKITPIECE_s *>(WORLD->minikit.field_0x4);
                 const HUBMINIKITPIECE_s &animated_piece = animated_pieces[i];
-                if (__builtin_expect(animated_piece.direction <= 5, 1)) {
-                    switch (animated_piece.direction) {
-                        case 0:
-                            matrix.m30 -=
-                                (static_cast<f32>(static_cast<i32>(animated_piece.direction_index)) * 0.025f + 0.25f) *
-                                oscillation;
-                            break;
-                        case 1:
-                            matrix.m30 +=
-                                (static_cast<f32>(static_cast<i32>(animated_piece.direction_index)) * 0.025f + 0.25f) *
-                                oscillation;
-                            break;
-                        case 2:
-                            matrix.m31 -=
-                                (static_cast<f32>(static_cast<i32>(animated_piece.direction_index)) * 0.025f + 0.25f) *
-                                oscillation;
-                            break;
-                        case 3:
-                            matrix.m31 +=
-                                (static_cast<f32>(static_cast<i32>(animated_piece.direction_index)) * 0.025f + 0.25f) *
-                                oscillation;
-                            break;
-                        case 4:
-                            matrix.m32 +=
-                                (static_cast<f32>(static_cast<i32>(animated_piece.direction_index)) * 0.025f + 0.25f) *
-                                oscillation;
-                            break;
-                        case 5:
-                            matrix.m32 -=
-                                (static_cast<f32>(static_cast<i32>(animated_piece.direction_index)) * 0.025f + 0.25f) *
-                                oscillation;
-                            break;
-                    }
+                switch (animated_piece.direction) {
+                    case 0:
+                        matrix.m30 -=
+                            (static_cast<f32>(static_cast<i32>(animated_piece.direction_index)) * 0.025f + 0.25f) *
+                            oscillation;
+                        break;
+                    case 1:
+                        matrix.m30 +=
+                            (static_cast<f32>(static_cast<i32>(animated_piece.direction_index)) * 0.025f + 0.25f) *
+                            oscillation;
+                        break;
+                    case 2:
+                        matrix.m31 -=
+                            (static_cast<f32>(static_cast<i32>(animated_piece.direction_index)) * 0.025f + 0.25f) *
+                            oscillation;
+                        break;
+                    case 3:
+                        matrix.m31 +=
+                            (static_cast<f32>(static_cast<i32>(animated_piece.direction_index)) * 0.025f + 0.25f) *
+                            oscillation;
+                        break;
+                    case 4:
+                        matrix.m32 +=
+                            (static_cast<f32>(static_cast<i32>(animated_piece.direction_index)) * 0.025f + 0.25f) *
+                            oscillation;
+                        break;
+                    case 5:
+                        matrix.m32 -=
+                            (static_cast<f32>(static_cast<i32>(animated_piece.direction_index)) * 0.025f + 0.25f) *
+                            oscillation;
+                        break;
                 }
             } else {
                 NuMtxScale(&matrix, &built_size);
             }
             if (i <= currentminikit) {
-                matrix.m32 += offset.z;
-                matrix.m31 += offset.y;
                 matrix.m30 += offset.x;
+                matrix.m31 += offset.y;
+                matrix.m32 += offset.z;
             }
 
             NuMtxRotateYInline(&matrix,
@@ -987,9 +985,9 @@ void DrawStatusMiniKit(float x, float y, float z, float built_scale, float new_s
                 static_cast<u16>(static_cast<i32>(NuFmod(GameTimer.time_elapsed, 1.87f) / 1.87f * 65536.0f));
             NuMtxRotateXInline(&matrix, static_cast<u16>(static_cast<i32>(2730.0f * NU_SIN_LUT(x_phase) - 5461.0f)));
 
+            matrix.m30 += x * PANEL3DMULX;
             matrix.m31 += y * PANEL3DMULY;
             matrix.m32 += z;
-            matrix.m30 += x * PANEL3DMULX;
 
             if (i < 10) {
                 KitPart[i].matrix = matrix;
@@ -1033,8 +1031,8 @@ void AddStatusMiniKitParts() {
         part.velocity = &velocity;
         part.flags = 0x480;
         part.gravity = 0.0f;
-        part.special = KitPart[i].special;
         part.lighting = reinterpret_cast<PARTLIGHTSOURCE_s *>(&KitPartRTL);
+        part.special = KitPart[i].special;
         part.time_step = FRAMETIME;
         AddPart(&part);
 
@@ -1044,17 +1042,17 @@ void AddStatusMiniKitParts() {
             position.y = (static_cast<f32>(qrand()) * (1.0f / 65535.0f)) * 0.1f;
             position.z = 1.0f;
             NuVecRotateZ(&position, &position, qrand());
-            ADDGAMEMSG_ALIGNED16 message = AddGameMsg_Default;
+            ADDGAMEMSG message = AddGameMsg_Default;
             message.position = &position;
             message.target_scale = 0.75f;
             message.player_index = qrand() / 0x8000;
             target_position.x = cointotal_x[message.player_index];
-            message.target_position = &target_position;
             message.target_scale = COINTOTAL_COINSIZE;
             message.icon = static_cast<i16>(GizmoPickupType[2].first_model_id);
             message.special = &WORLD->lev_objs[message.icon].special;
             message.flags = 0x112d;
             message.duration = COINMSGTIME;
+            message.target_position = &target_position;
             message.score = GizmoPickupType[2].score;
             message.end_fn = EndScoreMessage;
             message.field_0x20 = delay;

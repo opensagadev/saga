@@ -562,10 +562,11 @@ void CalcSplinePoint(flightspline_s *spline, _vuv_s *result, float along) {
     const f32 scaled = (spline->point_count - 1) * along;
     i32 index = static_cast<i32>(scaled);
     const f32 fraction = scaled - index;
-    // The endpoint vectors occupy aligned stack slots in the retail evaluator.
-    _vuv_s first __attribute__((aligned(16)));
-    _vuv_s last __attribute__((aligned(16)));
-    NUVEC_ALIGNED16 direction;
+    // Retail keeps both endpoints and the direction in one aligned stack array.
+    _vuv_s ends[3] __attribute__((aligned(16)));
+    _vuv_s &first = ends[0];
+    _vuv_s &last = ends[1];
+    NUVEC &direction = *reinterpret_cast<NUVEC *>(&ends[2]);
     _vuv_s *previous;
     if (!(index <= 0)) {
         // Retail retains the pre-clamp fraction and permits index == count;
@@ -631,7 +632,7 @@ void CalcSplinePoint(flightspline_s *spline, _vuv_s *result, float along) {
 }
 
 static void FlightSpline_Draw(flightspline_s *spline) {
-    _vuv_s points[512];
+    _vuv_s points[512] __attribute__((aligned(16)));
     _vuv_s direction;
     _vuv_s axis;
     _vuv_s plus;
@@ -642,15 +643,17 @@ static void FlightSpline_Draw(flightspline_s *spline) {
     points[0] = spline->points[0];
     f32 along = step;
     for (i32 i = 1; i < last; ++i) {
-        CalcSplinePoint(spline, &points[i], along);
+        CalcSplinePoint(spline, points + i, along);
         along += step;
     }
     points[last] = spline->points[spline->point_count - 1];
     for (i32 i = 1; i < count; ++i) {
-        DrawLine_Now(&points[i], &points[i - 1], 0xffffff, 1);
-        direction.x = points[i].x - points[i - 1].x;
-        direction.y = points[i].y - points[i - 1].y;
-        direction.z = points[i].z - points[i - 1].z;
+        _vuv_s *cur = &points[i];
+        _vuv_s *prev = &points[i - 1];
+        DrawLine_Now(cur, prev, 0xffffff, 1);
+        direction.x = cur->x - prev->x;
+        direction.y = cur->y - prev->y;
+        direction.z = cur->z - prev->z;
         const i16 yaw = static_cast<i16>(NuAtan2D(direction.x, direction.z));
         NuVecRotateY(reinterpret_cast<NUVEC *>(&axis), reinterpret_cast<NUVEC *>(&direction), -yaw);
         const i16 pitch = static_cast<i16>(NuAtan2D(axis.y, axis.z));
@@ -662,14 +665,14 @@ static void FlightSpline_Draw(flightspline_s *spline) {
                      static_cast<i16>(static_cast<i32>(points[i].w)));
         NuVecRotateX(reinterpret_cast<NUVEC *>(&axis), reinterpret_cast<NUVEC *>(&axis), -pitch);
         NuVecRotateY(reinterpret_cast<NUVEC *>(&axis), reinterpret_cast<NUVEC *>(&axis), yaw);
-        plus.x = points[i].x + axis.x;
-        plus.y = points[i].y + axis.y;
-        plus.z = points[i].z + axis.z;
-        minus.x = points[i].x - axis.x;
-        minus.y = points[i].y - axis.y;
-        minus.z = points[i].z - axis.z;
-        DrawLine_Now(&plus, &points[i], 0x800080, 1);
-        DrawLine_Now(&points[i], &minus, 0x808080, 1);
+        plus.x = cur->x + axis.x;
+        plus.y = cur->y + axis.y;
+        plus.z = cur->z + axis.z;
+        minus.x = cur->x - axis.x;
+        minus.y = cur->y - axis.y;
+        minus.z = cur->z - axis.z;
+        DrawLine_Now(&plus, cur, 0x800080, 1);
+        DrawLine_Now(cur, &minus, 0x808080, 1);
     }
     for (i32 i = 0; i < spline->point_count; ++i) {
         i32 from = static_cast<i32>(static_cast<f32>(i * count) / static_cast<f32>(spline->point_count - 1) - 0.5f);
@@ -684,9 +687,11 @@ static void FlightSpline_Draw(flightspline_s *spline) {
                 to = last;
             }
         }
-        direction.x = points[to].x - points[from].x;
-        direction.y = points[to].y - points[from].y;
-        direction.z = points[to].z - points[from].z;
+        _vuv_s *pto = &points[to];
+        _vuv_s *pfrom = &points[from];
+        direction.x = pto->x - pfrom->x;
+        direction.y = pto->y - pfrom->y;
+        direction.z = pto->z - pfrom->z;
         const i16 yaw = static_cast<i16>(NuAtan2D(direction.x, direction.z));
         NuVecRotateY(reinterpret_cast<NUVEC *>(&axis), reinterpret_cast<NUVEC *>(&direction), -yaw);
         const i16 pitch = static_cast<i16>(NuAtan2D(axis.y, axis.z));
@@ -698,12 +703,13 @@ static void FlightSpline_Draw(flightspline_s *spline) {
                      static_cast<i16>(static_cast<i32>(spline->points[i].w)));
         NuVecRotateX(reinterpret_cast<NUVEC *>(&axis), reinterpret_cast<NUVEC *>(&axis), -pitch);
         NuVecRotateY(reinterpret_cast<NUVEC *>(&axis), reinterpret_cast<NUVEC *>(&axis), yaw);
-        plus.x = spline->points[i].x + axis.x;
-        plus.y = spline->points[i].y + axis.y;
-        plus.z = spline->points[i].z + axis.z;
-        minus.x = spline->points[i].x - axis.x;
-        minus.y = spline->points[i].y - axis.y;
-        minus.z = spline->points[i].z - axis.z;
+        _vuv_s *ctrl = &spline->points[i];
+        plus.x = ctrl->x + axis.x;
+        plus.y = ctrl->y + axis.y;
+        plus.z = ctrl->z + axis.z;
+        minus.x = ctrl->x - axis.x;
+        minus.y = ctrl->y - axis.y;
+        minus.z = ctrl->z - axis.z;
         DrawLine_Now(&plus, &minus, 0xff0000, 1);
     }
 }
