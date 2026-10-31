@@ -406,7 +406,7 @@ static void GizmoPickup_Activate(GIZMO *gizmo, i32 activate) {
     } else {
         pickup->state_enabled = 1;
         SuperCounter_ActivateGizmoPickup(gizmo, pickup);
-        if (pickup->state_enabled) {
+        if (__builtin_expect(pickup->state_enabled != 0, 1)) {
             pickup->state_activated = 1;
             GIZMO_PICKUP_TYPE *type;
             if (!pickup->state_alternate_type || GizmoPickupSys->alternate_type == -1) {
@@ -778,35 +778,40 @@ void SetAreaPickupGravity(i32 area, i32 level) {
 
 static i32 GizmoPickups_Load(void *world_ptr, void *) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
-    GIZMOPICKUPRUNTIMESYS_s *pickup_sys = world->gizmo_pickup_sys;
-    if (pickup_sys->pickup_count != 0) {
+    if (world->gizmo_pickup_sys->pickup_count != 0) {
         return 0;
     }
 
     const i32 version = EdFileReadInt();
-    pickup_sys->pickup_count = EdFileReadInt();
+    world->gizmo_pickup_sys->pickup_count = EdFileReadInt();
     if (version >= 3) {
-        pickup_sys->total_score = EdFileReadInt();
+        world->gizmo_pickup_sys->total_score = EdFileReadInt();
     }
+    f32 scale;
     if (version >= 5) {
-        pickup_sys->draw_distance = EdFileReadFloat();
-        pickup_sys->pickup_scale = EdFileReadFloat();
-        if (__builtin_expect(version == 5, 1)) {
-            pickup_sys->pickup_scale = UpdateAreaPickupScale(world);
+        world->gizmo_pickup_sys->draw_distance = EdFileReadFloat();
+        world->gizmo_pickup_sys->pickup_scale = EdFileReadFloat();
+        if (version == 5) {
+            scale = UpdateAreaPickupScale(world);
+        } else {
+            scale = world->gizmo_pickup_sys->pickup_scale;
+            AreaPickupScale = scale;
         }
-        AreaPickupScale = pickup_sys->pickup_scale;
     } else {
-        pickup_sys->pickup_scale = 1.0f;
         AreaPickupScale = 1.0f;
+        scale = 1.0f;
     }
-
-    if (version < 6 && __builtin_expect(!(pickup_sys->draw_distance >= 10.0f), 0)) {
-        pickup_sys->draw_distance = 10.0f;
-    }
-    if (version <= 6 && world->level_sub_id >= 0 && world->level_sub_id < AREACOUNT &&
-        __builtin_expect((ADataList[world->level_sub_id].flags & AREAFLAG_VEHICLE_AREA) != 0, 0) &&
-        pickup_sys->draw_distance < 100.0f) {
-        pickup_sys->draw_distance = 100.0f;
+    GIZMOPICKUPRUNTIMESYS_s *pickup_sys = world->gizmo_pickup_sys;
+    pickup_sys->pickup_scale = scale;
+    if (version < 7) {
+        if (version < 6 && pickup_sys->draw_distance < 10.0f) {
+            pickup_sys->draw_distance = 10.0f;
+        }
+        if (world->level_sub_id >= 0 && __builtin_expect(world->level_sub_id < AREACOUNT, 1) &&
+            __builtin_expect((ADataList[world->level_sub_id].flags & AREAFLAG_VEHICLE_AREA) != 0, 1) &&
+            __builtin_expect(pickup_sys->draw_distance < 100.0f, 1)) {
+            pickup_sys->draw_distance = 100.0f;
+        }
     }
     SetAreaPickupGravity(world->level_sub_id, world->level_idx);
 
@@ -1168,7 +1173,7 @@ void UpdateCoinPacket(COINPACKET_s *packet, i32 active, i32 player_index) {
             decrement = (decrement / 10) * 10;
             if (decrement < 10) {
                 decrement = 10;
-            } else if (packet->coins < decrement) {
+            } else if (__builtin_expect(packet->coins < decrement, 1)) {
                 packet->coins = 0;
                 return;
             }
@@ -1178,16 +1183,16 @@ void UpdateCoinPacket(COINPACKET_s *packet, i32 active, i32 player_index) {
     }
 
     packet->scale = SeekLinearF(packet->scale, 1.0f, 3.0f * FRAMETIME);
-    if (((DoubleScore >> player_index) & 1) != 0) {
+    if (((DoubleScore >> player_index) & 1) == 0) {
+        packet->double_score_timer = 0.0f;
+        packet->active = 1;
+    } else {
         if (packet->double_score_timer > 0.0f) {
             packet->double_score_timer -= FRAMETIME;
             if (packet->double_score_timer <= 0.0f) {
                 packet->active = 1;
             }
         }
-    } else {
-        packet->double_score_timer = 0.0f;
-        packet->active = 1;
     }
 }
 
@@ -1221,7 +1226,7 @@ void SpecialMiniKits_Configure(WORLDINFO_s *world, char *config) {
     world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 4);
     SPECIALMINIKIT_s *items = static_cast<SPECIALMINIKIT_s *>(world->giz_buffer.void_ptr);
     SPECIALMINIKIT_s *next = items;
-    i32 count = 0;
+    i32 count __attribute__((aligned(16))) = 0;
 
     while (NuFParGetLine(parser) != 0 && NuFParGetWord(parser) != 0) {
         if (NuStrICmp(parser->word_buf, const_cast<char *>("specialminikit")) != 0) {
@@ -1262,24 +1267,21 @@ void SpecialMiniKits_Configure(WORLDINFO_s *world, char *config) {
         if (item.pickup_name[0] == '\0') {
             continue;
         }
-        if ((item.flags & 0x20) != 0) {
-            if (__builtin_expect(item.special_name[0] == '\0', 0)) {
-                continue;
-            }
-        } else if (NuSpecialExistsFn(&item.special) == 0) {
+        if ((item.flags & 0x20) == 0 && NuSpecialExistsFn(&item.special) != 0) {
+        } else if ((item.flags & 0x20) == 0 || item.special_name[0] == '\0') {
             continue;
         }
 
         if (NuSpecialExistsFn(&item.special) != 0) {
             item.inst_anim = NuSpecialGetInstAnim(&item.special);
-            if (item.inst_anim != NULL) {
+            if (__builtin_expect(item.inst_anim != NULL, 0)) {
                 nuinstanim_s *animation = static_cast<nuinstanim_s *>(item.inst_anim);
                 item.anim_data = item.special.scene->instance_animation_data[animation->anim_ix];
                 item.end_frame = NuAnimEndFrameOld(item.anim_data);
             }
         }
-        ++next;
         ++count;
+        ++next;
     }
     NuFParDestroy(parser);
 
@@ -1287,10 +1289,10 @@ void SpecialMiniKits_Configure(WORLDINFO_s *world, char *config) {
         return;
     }
     world->giz_buffer.addr = reinterpret_cast<usize>(next);
-    SPECIALMINIKITSYS_s *system = static_cast<SPECIALMINIKITSYS_s *>(world->giz_buffer.void_ptr);
+    SPECIALMINIKITSYS_s *system = reinterpret_cast<SPECIALMINIKITSYS_s *>(next);
+    world->special_minikits = system;
     system->items = items;
     system->count = count;
-    world->special_minikits = system;
     world->giz_buffer.addr = ALIGN(world->giz_buffer.addr + sizeof(*system), 4);
 }
 
@@ -1330,8 +1332,7 @@ void SpecialMiniKits_Draw(WORLDINFO_s *world) {
     }
 
     const u16 y_rotation = static_cast<u16>(static_cast<i32>(NuFmod(GameTimer.time_elapsed, 4.0f) * 0.25f * 65536.0f));
-    const u16 x_rotation =
-        static_cast<u16>(static_cast<i32>(NuTrigTable[static_cast<i32>(y_rotation) & 0x7fff] * 1820.0f));
+    const u16 x_rotation = static_cast<u16>(static_cast<i32>(NuTrigTable[y_rotation & 0x7fff] * 1820.0f));
 
     SPECIALMINIKIT_s *item = world->special_minikits->items;
     for (i32 index = 0; index < world->special_minikits->count; ++index, ++item) {
@@ -1339,11 +1340,8 @@ void SpecialMiniKits_Draw(WORLDINFO_s *world) {
         NUVEC *position;
 
         if ((item->flags & 0x20) != 0) {
-            if (item->special_gizmo == NULL || GizmoGetVisibility(world->gizmo_sys, item->special_gizmo) == 0) {
-                continue;
-            }
-            position = GizmoGetPos(world->gizmo_sys, item->special_gizmo);
-            if (__builtin_expect(position == NULL, 1)) {
+            if (item->special_gizmo == NULL || GizmoGetVisibility(world->gizmo_sys, item->special_gizmo) == 0 ||
+                (position = GizmoGetPos(world->gizmo_sys, item->special_gizmo)) == NULL) {
                 continue;
             }
             NuMtxSetScale(&matrix, &scale);
@@ -1353,18 +1351,15 @@ void SpecialMiniKits_Draw(WORLDINFO_s *world) {
                 continue;
             }
 
-            nuinstanim_s *animation = static_cast<nuinstanim_s *>(item->inst_anim);
-            bool draw = (item->flags & 1) != 0 || animation == NULL || item->anim_data == NULL;
-            if (__builtin_expect(!draw && (animation->flags & NUINSTANIM_FLAG_REPEATING) == 0, 1)) {
-                draw = ((item->flags & 2) != 0 && animation->ltime <= 1.0f) ||
-                       ((item->flags & 8) != 0 && item->end_frame <= animation->ltime);
-            }
-            if (!draw && (item->flags & 4) != 0 &&
-                __builtin_expect((animation->flags & NUINSTANIM_FLAG_PLAYING) != 0, 0)) {
-                draw = true;
-            }
-            if (__builtin_expect(!draw, 0)) {
-                continue;
+            if ((item->flags & 1) == 0 && item->inst_anim != NULL && item->anim_data != NULL) {
+                nuinstanim_s *animation = static_cast<nuinstanim_s *>(item->inst_anim);
+                if ((item->flags & 2) != 0 && (animation->flags & NUINSTANIM_FLAG_REPEATING) == 0 &&
+                    animation->ltime <= 1.0f) {
+                } else if ((item->flags & 8) != 0 && (animation->flags & NUINSTANIM_FLAG_REPEATING) == 0 &&
+                           item->end_frame <= animation->ltime) {
+                } else if ((item->flags & 4) == 0 || (animation->flags & NUINSTANIM_FLAG_PLAYING) == 0) {
+                    continue;
+                }
             }
 
             position = NuSpecialGetDrawPos(&item->special);
@@ -1377,20 +1372,24 @@ void SpecialMiniKits_Draw(WORLDINFO_s *world) {
 
         if (item->pickup_gizmo != NULL) {
             GIZMOPICKUP_s *pickup = static_cast<GIZMOPICKUP_s *>(item->pickup_gizmo->object);
-            i32 type_index = pickup->type_index;
-            if (__builtin_expect((pickup->state_flags & GIZMOPICKUP_STATE_ALTERNATE_TYPE) != 0, 0) &&
+            GIZMO_PICKUP_TYPE *type;
+            if (__builtin_expect((pickup->state_flags & GIZMOPICKUP_STATE_ALTERNATE_TYPE) != 0, 1) &&
                 GizmoPickupSys->alternate_type != -1) {
-                type_index = GizmoPickupSys->alternate_type;
+                type = &GizmoPickupSys->types[GizmoPickupSys->alternate_type];
+            } else {
+                type = &GizmoPickupSys->types[pickup->type_index];
+            }
+            if (type == NULL) {
+                continue;
             }
 
-            if (__builtin_expect((item->flags & 0x10) == 0, 0)) {
+            if ((item->flags & 0x10) == 0) {
                 NuMtxSetScale(&matrix, &scale);
                 NuMtxRotateY(&matrix, y_rotation);
                 NuMtxRotateX(&matrix, x_rotation);
                 NuMtxTranslate(&matrix, position);
             }
-            NuSpecialDrawAt(
-                &world->lev_objs[static_cast<i16>(GizmoPickupSys->types[type_index].first_model_id)].special, &matrix);
+            NuSpecialDrawAt(&world->lev_objs[static_cast<i16>(type->first_model_id)].special, &matrix);
         }
     }
 }

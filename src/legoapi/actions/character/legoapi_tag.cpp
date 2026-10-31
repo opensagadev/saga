@@ -266,145 +266,147 @@ i32 TagCode(GameObject_s *source, GameObject_s *destination, i32 takeover, i32 b
     i8 source_hp = source->current_hp;
     u8 source_player = source->apiobj.player_controlled;
     u8 destination_player = destination->apiobj.player_controlled;
-    TAGSCRIPTSTATE source_script, destination_script;
-    u8 source_set, destination_set;
-    i32 source_ai = 0, destination_ai = 0;
-    if (takeover != 0) {
-        memcpy(&source_script, &source->ai, sizeof(source_script));
-        source_set = source->ai.creature_set;
-        memcpy(&destination_script, &destination->ai, sizeof(destination_script));
-        source_ai = source->apiobj.script_enabled;
-        destination_ai = destination->apiobj.script_enabled;
-        destination_set = destination->ai.creature_set;
-    }
-    ResetForceGlow(reinterpret_cast<PLAYERPACKET_s *>(source->player_packet));
-    ResetForceGlow(reinterpret_cast<PLAYERPACKET_s *>(destination->player_packet));
-    destination->pad_gamepad = source_pad;
-    source->pad_gamepad = destination_pad;
-    source->apiobj.player_controlled = destination_player;
-    destination->apiobj.player_controlled = source_player;
-    source->field_0xda8 = destination->field_0xda8;
-    destination->field_0xda8 = source_da8;
-    COINPACKET *coins = source->coinpacket;
-    source->coinpacket = destination->coinpacket;
-    destination->coinpacket = coins;
-    u8 player_index = source->apiobj.field_0x27c;
-    source->apiobj.field_0x27c = destination->apiobj.field_0x27c;
-    destination->apiobj.field_0x27c = player_index;
-    f32 dec = source->field_0xdec;
-    source->field_0xdec = destination->field_0xdec;
-    destination->field_0xdec = dec;
-    GizForceLOSState_s *los = source->gizforce_los_info;
-    source->gizforce_los_info = destination->gizforce_los_info;
-    destination->gizforce_los_info = los;
-    source->KillTasks();
-    destination->KillTasks();
-    GizForce_ResetLOS(source);
-    GizForce_ResetLOS(destination);
-    u32 mask = takeover == 0 ? 0x46f8 : 0x146fd;
-    u32 source_state = source->apiobj.field_0x1f4;
-    source->apiobj.field_0x1f4 &= ~mask;
-    source->apiobj.field_0x1f4 |= destination->apiobj.field_0x1f4 & mask;
-    destination->apiobj.field_0x1f4 = (destination->apiobj.field_0x1f4 & ~mask) | (source_state & mask);
-    f32 protection = source->spawn_protection_timer;
-    source->spawn_protection_timer = destination->spawn_protection_timer;
-    destination->spawn_protection_timer = protection;
-    void (*eb4)(GameObject_s *) = source->field_0xeb4;
-    source->field_0xeb4 = destination->field_0xeb4;
-    destination->field_0xeb4 = eb4;
-    AICreatureResumeScript(source);
-    if (takeover != 0) {
-        if (static_cast<i8>(source->apiobj.field_0x27c) != -1)
-            Player[static_cast<i8>(source->apiobj.field_0x27c)] = source;
-        if (static_cast<i8>(destination->apiobj.field_0x27c) != -1)
-            Player[static_cast<i8>(destination->apiobj.field_0x27c)] = destination;
-    } else {
-        source->hud_icon_timer = 0.0f;
-        source->field_0xef0 = 0;
-        source->pause_context_state = 0;
-        source->input_toggle_hold_time = TOGGLEHOLDTIME;
-        source->reset_lighting = 1;
-        source->field_0xefe &= ~0x18;
-        destination->hud_icon_timer = 2.0f;
-        destination->input_toggle_hold_time = TOGGLEHOLDTIME;
-        destination->reset_lighting = 1;
-        NewBuzzFrames(destination->pad_gamepad->pad, 2, 0);
-        if (static_cast<i8>(source->apiobj.field_0x27c) != -1) {
-            Player[static_cast<i8>(source->apiobj.field_0x27c)] = source;
-            if (source->field_0xcc0 != NULL)
+    {
+        TAGSCRIPTSTATE source_script, destination_script;
+        u8 source_set, destination_set;
+        i32 source_ai = 0, destination_ai = 0;
+        if (takeover != 0) {
+            memcpy(&source_script, &source->ai, sizeof(source_script));
+            source_set = source->ai.creature_set;
+            memcpy(&destination_script, &destination->ai, sizeof(destination_script));
+            source_ai = source->apiobj.script_enabled;
+            destination_ai = destination->apiobj.script_enabled;
+            destination_set = destination->ai.creature_set;
+        }
+        ResetForceGlow(reinterpret_cast<PLAYERPACKET_s *>(source->player_packet));
+        ResetForceGlow(reinterpret_cast<PLAYERPACKET_s *>(destination->player_packet));
+        destination->pad_gamepad = source_pad;
+        source->pad_gamepad = destination_pad;
+        source->apiobj.player_controlled = destination_player;
+        destination->apiobj.player_controlled = source_player;
+        source->field_0xda8 = destination->field_0xda8;
+        destination->field_0xda8 = source_da8;
+        COINPACKET *coins = source->coinpacket;
+        source->coinpacket = destination->coinpacket;
+        destination->coinpacket = coins;
+        u8 player_index = source->apiobj.field_0x27c;
+        source->apiobj.field_0x27c = destination->apiobj.field_0x27c;
+        destination->apiobj.field_0x27c = player_index;
+        f32 dec = source->field_0xdec;
+        source->field_0xdec = destination->field_0xdec;
+        destination->field_0xdec = dec;
+        GizForceLOSState_s *los = source->gizforce_los_info;
+        source->gizforce_los_info = destination->gizforce_los_info;
+        destination->gizforce_los_info = los;
+        source->KillTasks();
+        destination->KillTasks();
+        GizForce_ResetLOS(source);
+        GizForce_ResetLOS(destination);
+        u32 mask = takeover == 0 ? 0x46f8 : 0x146fd;
+        u32 source_state = source->apiobj.field_0x1f4;
+        source->apiobj.field_0x1f4 &= ~mask;
+        source->apiobj.field_0x1f4 |= destination->apiobj.field_0x1f4 & mask;
+        destination->apiobj.field_0x1f4 = (destination->apiobj.field_0x1f4 & ~mask) | (source_state & mask);
+        f32 protection = source->spawn_protection_timer;
+        source->spawn_protection_timer = destination->spawn_protection_timer;
+        destination->spawn_protection_timer = protection;
+        void (*eb4)(GameObject_s *) = source->field_0xeb4;
+        source->field_0xeb4 = destination->field_0xeb4;
+        destination->field_0xeb4 = eb4;
+        AICreatureResumeScript(source);
+        if (takeover != 0) {
+            if (static_cast<i8>(source->apiobj.field_0x27c) != -1)
+                Player[static_cast<i8>(source->apiobj.field_0x27c)] = source;
+            if (static_cast<i8>(destination->apiobj.field_0x27c) != -1)
+                Player[static_cast<i8>(destination->apiobj.field_0x27c)] = destination;
+        } else {
+            source->hud_icon_timer = 0.0f;
+            source->field_0xef0 = 0;
+            source->pause_context_state = 0;
+            source->input_toggle_hold_time = TOGGLEHOLDTIME;
+            source->reset_lighting = 1;
+            source->field_0xefe &= ~0x18;
+            destination->hud_icon_timer = 2.0f;
+            destination->input_toggle_hold_time = TOGGLEHOLDTIME;
+            destination->reset_lighting = 1;
+            NewBuzzFrames(destination->pad_gamepad->pad, 2, 0);
+            if (static_cast<i8>(source->apiobj.field_0x27c) != -1) {
+                Player[static_cast<i8>(source->apiobj.field_0x27c)] = source;
+                if (source->field_0xcc0 != NULL)
+                    source->hitpoints =
+                        static_cast<GAMECHARACTERDATA *>(source->apiobj.character_data->field11_0x24)->hitpoints;
+                else if (WORLD->current_level != VADERC_LDATA)
+                    source->hitpoints = DEFAULT_PLAYERHITPOINTS;
+            } else
                 source->hitpoints =
                     static_cast<GAMECHARACTERDATA *>(source->apiobj.character_data->field11_0x24)->hitpoints;
-            else if (WORLD->current_level != VADERC_LDATA)
-                source->hitpoints = DEFAULT_PLAYERHITPOINTS;
-        } else
-            source->hitpoints =
-                static_cast<GAMECHARACTERDATA *>(source->apiobj.character_data->field11_0x24)->hitpoints;
-        if (static_cast<i8>(destination->apiobj.field_0x27c) != -1) {
-            Player[static_cast<i8>(destination->apiobj.field_0x27c)] = destination;
-            if (destination->field_0xcc0 != NULL)
+            if (static_cast<i8>(destination->apiobj.field_0x27c) != -1) {
+                Player[static_cast<i8>(destination->apiobj.field_0x27c)] = destination;
+                if (destination->field_0xcc0 != NULL)
+                    destination->hitpoints =
+                        static_cast<GAMECHARACTERDATA *>(destination->apiobj.character_data->field11_0x24)->hitpoints;
+                else if (WORLD->current_level != VADERC_LDATA)
+                    destination->hitpoints = DEFAULT_PLAYERHITPOINTS;
+                GameCam_Blend(GameCam, 0.5f, 0.0f, 1);
+            } else
                 destination->hitpoints =
                     static_cast<GAMECHARACTERDATA *>(destination->apiobj.character_data->field11_0x24)->hitpoints;
-            else if (WORLD->current_level != VADERC_LDATA)
-                destination->hitpoints = DEFAULT_PLAYERHITPOINTS;
-            GameCam_Blend(GameCam, 0.5f, 0.0f, 1);
-        } else
-            destination->hitpoints =
-                static_cast<GAMECHARACTERDATA *>(destination->apiobj.character_data->field11_0x24)->hitpoints;
-        if (source_hp > destination->hitpoints)
-            source_hp = destination->hitpoints;
-        destination->current_hp = source_hp;
-        if (destination->current_hp == 0 && destination->hitpoints != 0)
-            destination->current_hp = 1;
-        if (WORLD->current_level == VADERC_LDATA || source->apiobj.player_controlled)
-            source->current_hp = destination_hp;
-        else if ((source->apiobj.character_data->model_flags & 0x20) != 0)
-            source->current_hp = source->field_0xe38;
-        else
-            source->current_hp = source->hitpoints;
-    }
-    destination->field_0xefe &= ~0x18;
-    destination->field_0xef0 = 0;
-    destination->pause_context_state = 0;
-    destination->tag_cooldown = 1.0f;
-    if (source == player_tag_to && destination != player_tag_from) {
-        player_tag_to = NULL;
-        player_tag_timer = 0.0f;
-        player_tag_from = NULL;
-        do_player_tag = 0;
-    }
-    if (takeover != 0) {
-        AISCRIPTPROCESS *processor = reinterpret_cast<AISCRIPTPROCESS *>(&destination->ai);
-        if (__builtin_expect(AIScriptSetBaseScriptStateByName(processor, const_cast<char *>("JustBeenTakenOver")) != 0, 1))
-            AIScriptProcess(WORLD->ai_sys, &destination->apiobj, &destination->ai, processor, FRAMETIME);
-        destination_script.processor.unknown_b0 = destination_set;
-        memcpy(&source->ai, &destination_script, sizeof(destination_script));
-        source_script.processor.unknown_b0 = source_set;
-        memcpy(&destination->ai, &source_script, sizeof(source_script));
-        source->ai.creature_set = source_set;
-        destination->ai.creature_set = destination_set;
-        AICreatureResumeScript(source);
-        source->apiobj.script_enabled = destination_ai;
-        destination->apiobj.script_enabled = source_ai;
-        ReleaseForce(source, 0);
-        ReleaseBuildIt(source, 0);
-        ReleasePush(source);
-        Player_ResetContexts(reinterpret_cast<PLAYERPACKET_s *>(source->player_packet));
-        if (__builtin_expect((source->field_0xef8 & 0x10) == 0, 1))
-            SetWeaponIn(source);
-        source->field_0xcc0 = destination;
-        source->takeover_target = NULL;
-        destination->field_0xcc0 = source;
-        source->takeover_source = destination;
-        destination->takeover_target = NULL;
-        source->character_context = 0x3b;
-        TakeOver_SetAction(source, source->field_0xcc0);
-        source->external_force = source->apiobj.position;
-        source->takeover_timer = 1.0f;
-        if (blend_camera != 0)
-            GameCam_Blend(GameCam, 0.5f, 0.0f, 1);
-        if (static_cast<GAMECHARACTERDATA *>(destination->apiobj.character_data->field11_0x24)->field_0x28 > 0.0f)
-            destination->apiobj.velocity.y -=
-                0.5f * static_cast<GAMECHARACTERDATA *>(source->apiobj.character_data->field11_0x24)->jump_speed;
+            destination->current_hp = source_hp;
+            if (source_hp > destination->hitpoints)
+                destination->current_hp = source_hp = destination->hitpoints;
+            if (destination->current_hp == 0 && destination->hitpoints != 0)
+                destination->current_hp = 1;
+            if (WORLD->current_level == VADERC_LDATA || source->apiobj.player_controlled)
+                source->current_hp = destination_hp;
+            else if ((source->apiobj.character_data->model_flags & 0x20) != 0)
+                source->current_hp = source->field_0xe38;
+            else
+                source->current_hp = source->hitpoints;
+        }
+        destination->field_0xefe &= ~0x18;
+        destination->field_0xef0 = 0;
+        destination->pause_context_state = 0;
+        destination->tag_cooldown = 1.0f;
+        if (source == player_tag_to && destination != player_tag_from) {
+            player_tag_to = NULL;
+            player_tag_timer = 0.0f;
+            player_tag_from = NULL;
+            do_player_tag = 0;
+        }
+        if (takeover != 0) {
+            AISCRIPTPROCESS *processor = reinterpret_cast<AISCRIPTPROCESS *>(&destination->ai);
+            if (AIScriptSetBaseScriptStateByName(processor, const_cast<char *>("JustBeenTakenOver")) != 0)
+                AIScriptProcess(WORLD->ai_sys, &destination->apiobj, &destination->ai, processor, FRAMETIME);
+            destination_script.processor.unknown_b0 = destination_set;
+            memcpy(&source->ai, &destination_script, sizeof(destination_script));
+            source_script.processor.unknown_b0 = source_set;
+            memcpy(&destination->ai, &source_script, sizeof(source_script));
+            source->ai.creature_set = source_set;
+            destination->ai.creature_set = destination_set;
+            AICreatureResumeScript(source);
+            source->apiobj.script_enabled = destination_ai;
+            destination->apiobj.script_enabled = source_ai;
+            ReleaseForce(source, 0);
+            ReleaseBuildIt(source, 0);
+            ReleasePush(source);
+            Player_ResetContexts(reinterpret_cast<PLAYERPACKET_s *>(source->player_packet));
+            if ((source->field_0xef8 & 0x10) == 0)
+                SetWeaponIn(source);
+            source->field_0xcc0 = destination;
+            source->takeover_target = NULL;
+            destination->field_0xcc0 = source;
+            source->takeover_source = destination;
+            destination->takeover_target = NULL;
+            source->character_context = 0x3b;
+            TakeOver_SetAction(source, source->field_0xcc0);
+            source->external_force = source->apiobj.position;
+            source->takeover_timer = 1.0f;
+            if (blend_camera != 0)
+                GameCam_Blend(GameCam, 0.5f, 0.0f, 1);
+            if (static_cast<GAMECHARACTERDATA *>(destination->apiobj.character_data->field11_0x24)->field_0x28 > 0.0f)
+                destination->apiobj.velocity.y -=
+                    0.5f * static_cast<GAMECHARACTERDATA *>(source->apiobj.character_data->field11_0x24)->jump_speed;
+        }
     }
     return 1;
 }
@@ -464,39 +466,37 @@ void GetTakeOverPos(GameObject_s *object, nuvec_s *position) {
     }
 }
 
-void ReleaseTakeOver(GameObject_s *object, i32) {
-    GameObject_s *rider = object->field_0xcc0;
+void ReleaseTakeOver(GameObject_s *self, i32) {
+    GameObject_s *rider = self->field_0xcc0;
     if (rider == NULL)
         return;
-    if (object->character_context == 0x3b) {
-        GameObject_s *vehicle = rider;
-        rider = object;
-        object = vehicle;
+    GameObject_s *object = self;
+    if (self->character_context == 0x3b) {
+        object = rider;
+        rider = self;
     }
     struct ScriptSnapshot {
         AISCRIPTPROCESS process;
         void *field_c8;
     } rider_script, object_script;
     DECOMP_ASSERT(sizeof(ScriptSnapshot) == 0xcc, "Takeover script snapshot ABI");
-    memcpy(&rider_script.process, &rider->ai.script_process, sizeof(rider_script.process));
-    rider_script.field_c8 = rider->ai.field_0xc8;
+    memcpy(&rider_script, &rider->ai, sizeof(rider_script));
     u8 rider_set = rider->ai.creature_set;
-    memcpy(&object_script.process, &object->ai.script_process, sizeof(object_script.process));
-    object_script.field_c8 = object->ai.field_0xc8;
-    u16 rider_flag = rider->apiobj.field_0x1f8 & 0x100;
-    u16 object_flag = object->apiobj.field_0x1f8 & 0x100;
+    memcpy(&object_script, &object->ai, sizeof(object_script));
     u8 object_set = object->ai.creature_set;
-    if ((rider->field_0xf00 & 2) == 0 && TagCode(rider, object, 1, 0, 0) == 0)
+    u8 rider_flag = rider->apiobj.script_enabled;
+    u8 object_flag = object->apiobj.script_enabled;
+    if ((rider->field_0xf00 & 2) == 0 && __builtin_expect(TagCode(rider, object, 1, 0, 0) == 0, 0))
         return;
-    memcpy(&rider->ai.script_process, &object_script.process, sizeof(object_script.process));
-    rider->ai.field_0xc8 = object_script.field_c8;
-    memcpy(&object->ai.script_process, &rider_script.process, sizeof(rider_script.process));
-    object->ai.field_0xc8 = rider_script.field_c8;
+    object_script.process.creature_set = object_set;
+    memcpy(&rider->ai, &object_script, sizeof(object_script));
+    rider_script.process.creature_set = rider_set;
+    memcpy(&object->ai, &rider_script, sizeof(rider_script));
     rider->ai.creature_set = rider_set;
     object->ai.creature_set = object_set;
     AICreatureResumeScript(object);
-    rider->apiobj.field_0x1f8 = (rider->apiobj.field_0x1f8 & ~0x100) | object_flag;
-    object->apiobj.field_0x1f8 = (object->apiobj.field_0x1f8 & ~0x100) | rider_flag;
+    rider->apiobj.script_enabled = object_flag;
+    object->apiobj.script_enabled = rider_flag;
     if (rider->field_0xcc0 != NULL) {
         GetTakeOverPos(rider->field_0xcc0, &rider->apiobj.position);
         rider->apiobj.pitch_angle = 0;
@@ -635,39 +635,27 @@ void Tag_Check(GameObject_s *object) {
     GameObject_s *target = NULL;
     i32 result = 0;
     const i32 arcade = Arcade;
-    const bool disabled = (object->tag_flags & 1) != 0 || object->character_context == 0x51;
-    if (disabled) {
-        object->field_0xefe &= ~0x18;
-        object->hud_icon_timer = 0.0f;
-        object->field_0xef0 = 0.0f;
-        object->pause_context_state = 0.0f;
-        if (arcade == 0)
-            return;
-    } else if (arcade != 0) {
-        object->field_0xef0 = 0.0f;
-        object->pause_context_state = 0.0f;
-        object->field_0xefe &= ~0x18;
+    if (arcade != 0 || (object->tag_flags & 1) != 0 || object->character_context == 0x51) {
+        if ((object->tag_flags & 1) != 0 || object->character_context == 0x51) {
+            object->field_0xefe &= ~0x18;
+            object->hud_icon_timer = 0.0f;
+            object->field_0xef0 = 0.0f;
+            object->pause_context_state = 0.0f;
+            if (arcade == 0)
+                return;
+        } else {
+            object->field_0xef0 = 0.0f;
+            object->pause_context_state = 0.0f;
+            object->field_0xefe &= ~0x18;
+        }
     }
     if (object->apiobj.field_0x27c == -1)
         return;
-    if ((object->tag_flags & 4) != 0) {
-        object->tag_cooldown -= FRAMETIME;
-        if (object->tag_cooldown > 0.0f && object->pending_tag_target != NULL) {
-            target = object->pending_tag_target;
-            if ((target->apiobj.field_0x1f8 & 0x1001) != 0x1001) {
-                object->pending_tag_target = NULL;
-            } else {
-                result = (object->field_0xf00 & 2) != 0 ? TakeOverYoda(object, target, 0, 1)
-                                                        : TagCode(object, target, (object->tag_flags >> 3) & 1, 0, 1);
-            }
-        }
-        if (result == 0)
-            object->tag_flags &= ~4;
-    } else {
+    if ((object->tag_flags & 4) == 0) {
         object->tag_player_index = -1;
         if (object->apiobj.player_controlled && object->apiobj.field_0x287 == 0 &&
             (CInfo[object->character_context].flags & 0x800) == 0 && !object->apiobj.script_enabled &&
-            !(object->tag_cooldown > 0.0f)) {
+            object->tag_cooldown <= 0.0f) {
             if (VehicleArea != 0) {
                 if ((object->pad_gamepad->buttons_pressed & GAMEPAD_TAG) != 0)
                     object->hud_icon_timer = 2.0f;
@@ -689,10 +677,10 @@ void Tag_Check(GameObject_s *object) {
                         }
                         if (pack_index != -1) {
                             STOREPACK *pack = &StorePack[pack_index];
-                            NUVEC position = pack->custodian_position;
-                            position.y += CDataList[*pack->id].field16_0x38 + 0.075f;
+                            difference = pack->custodian_position;
+                            difference.y += CDataList[*pack->id].field16_0x38 + 0.075f;
                             ADDGAMEMSG message = AddGameMsg_Default;
-                            message.position = &position;
+                            message.position = &difference;
                             message.red = 255;
                             message.text = TTab[pack->message_text_index];
                             message.green = 191;
@@ -790,6 +778,19 @@ void Tag_Check(GameObject_s *object) {
                 }
             }
         }
+    } else {
+        object->tag_cooldown -= FRAMETIME;
+        if (object->tag_cooldown > 0.0f && object->pending_tag_target != NULL) {
+            target = object->pending_tag_target;
+            if ((target->apiobj.field_0x1f8 & 0x1001) != 0x1001) {
+                object->pending_tag_target = NULL;
+            } else {
+                result = (object->field_0xf00 & 2) != 0 ? TakeOverYoda(object, target, 0, 1)
+                                                        : TagCode(object, target, (object->tag_flags >> 3) & 1, 0, 1);
+            }
+        }
+        if (result == 0)
+            object->tag_flags &= ~4;
     }
     if (result == 1) {
         object->tag_flags &= ~4;
@@ -804,7 +805,7 @@ void Tag_Check(GameObject_s *object) {
         if (static_cast<u8>(object->apiobj.field_0x27c) < 2 && static_cast<u8>(target->apiobj.field_0x27c) < 2)
             ResetTimer(&JoinInTimer, 0.0f);
     }
-    if (__builtin_expect(Tag_DrawIconFn != NULL, 0))
+    if (Tag_DrawIconFn != NULL)
         Tag_DrawIconFn(object);
 }
 
@@ -817,6 +818,7 @@ void TakeOverGameObject(GameObject_s *rider, GameObject_s *vehicle, i32 blend_ca
 
 __attribute__((force_align_arg_pointer)) void TakeOverCode(GameObject_s *object, i32 tag_pressed) {
     APIOBJECT &api = object->apiobj;
+    NUVEC destination;
     if (object->character_context == 0x3c) {
         GameObject_s *target = object->takeover_entry_target;
         if (target == NULL) {
@@ -827,7 +829,7 @@ __attribute__((force_align_arg_pointer)) void TakeOverCode(GameObject_s *object,
         if (object->context_animation_timer >= object->airborne_action_duration) {
             object->character_context = -1;
             if (api.player_controlled) {
-                if (target->id == id_GRABCONTROL || target->id == id_GRABR2CONTROL) {
+                if (target->id == id_GRABCONTROL || __builtin_expect(target->id == id_GRABR2CONTROL, 0)) {
                     Hint_SetComplete(0x28a);
                 } else if (target->apiobj.character_data->move_fn == Move_BEAST) {
                     Hint_SetComplete(0x263);
@@ -848,14 +850,13 @@ __attribute__((force_align_arg_pointer)) void TakeOverCode(GameObject_s *object,
             return;
         }
         const f32 fraction = object->context_animation_timer / object->airborne_action_duration;
-        NUVEC destination;
         GetTakeOverPos(target, &destination);
         api.position.x = (destination.x - object->external_force.x) * fraction + object->external_force.x;
         api.position.y = (destination.y - object->external_force.y) * fraction + object->external_force.y;
         api.position.z = (destination.z - object->external_force.z) * fraction + object->external_force.z;
         target = object->takeover_entry_target;
         f32 height = target->apiobj.field_0x1e0;
-        if (object->context_animation == 0xc9 || object->context_animation == 6) {
+        if (object->context_animation == 6 || object->context_animation == 0xc9) {
             const f32 jump_height = api.character_data->game_character->field_0x34;
             height = jump_height > height ? jump_height : height;
         }
@@ -913,7 +914,7 @@ __attribute__((force_align_arg_pointer)) void TakeOverCode(GameObject_s *object,
         return;
     }
     if (MiniCutCam != 0 || !api.player_controlled || api.field_0x287 != 0 ||
-        __builtin_expect(!(object->takeover_timer <= 0.0f), 0) ||
+        __builtin_expect(!(object->takeover_timer <= 0.0f), 0) || object->character_context == 0x2b ||
         (object->character_context != -1 && (object->character_context != 0 || object->action_movement_state == 3 ||
                                              object->action_movement_state == 4)) ||
         api.field_0x27d == 0) {
@@ -921,19 +922,19 @@ __attribute__((force_align_arg_pointer)) void TakeOverCode(GameObject_s *object,
     }
     f32 nearest_distance = 9.0f;
     GameObject_s *nearest = NULL;
-    for (i32 i = 0; i < HIGHGAMEOBJECT; ++i) {
-        GameObject_s *candidate = &Obj[i];
+    GameObject_s *candidate = Obj;
+    for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++candidate) {
         const APIOBJECT &other = candidate->apiobj;
         if (__builtin_expect((other.field_0x1f8 & 0x1001) != 0x1001 || other.field_0x287 != 0 ||
                                  other.field_0x27c != -1 || (CInfo[candidate->character_context].flags & 0x8000) != 0 ||
                                  candidate->field_0xcc0 != NULL ||
                                  (other.character_data->game_character->flags_090 & 0x40) == 0 ||
                                  ((other.character_data->model_flags & 0x40000000) != 0 &&
-                                  (candidate->character_context == 0x3e || candidate->character_context == 0x17)) ||
+                                  (candidate->character_context == 0x17 || candidate->character_context == 0x3e)) ||
                                  (candidate->tag_flags & 2) != 0,
                              1))
             continue;
-        if (candidate->id == id_ATAT && WORLD->current_level == SPEEDERCHASEA_LDATA) {
+        if (__builtin_expect(candidate->id == id_ATAT && WORLD->current_level == SPEEDERCHASEA_LDATA, 1)) {
             if (api.field_0x281 == 0x13)
                 nearest = candidate;
             continue;
@@ -941,22 +942,23 @@ __attribute__((force_align_arg_pointer)) void TakeOverCode(GameObject_s *object,
         if (__builtin_expect(api.collision_min.y > other.collision_max.y || other.collision_min.y > api.collision_max.y,
                              1))
             continue;
-        const f32 dz = other.collision_position.z - api.collision_position.z;
-        const f32 dx = other.collision_position.x - api.collision_position.x;
+        destination.x = other.collision_position.x - api.collision_position.x;
+        destination.z = other.collision_position.z - api.collision_position.z;
         const f32 range = (other.field_0x1dc + other.field_0x1dc) + api.field_0x1dc;
-        const f32 distance = dx * dx + dz * dz;
-        if (object->facing_direction.x * dx + object->facing_direction.z * dz > 0.0f && range * range > distance &&
-            nearest_distance > distance) {
-            nearest_distance = distance;
+        const f32 range_sq = range * range;
+        if (object->facing_direction.x * destination.x + object->facing_direction.z * destination.z > 0.0f &&
+            range_sq > destination.x * destination.x + destination.z * destination.z &&
+            nearest_distance > destination.x * destination.x + destination.z * destination.z) {
+            nearest_distance = destination.x * destination.x + destination.z * destination.z;
             nearest = candidate;
         }
     }
     if (nearest != NULL) {
-        if (tag_pressed != 0 || (nearest->id == id_ATAT && WORLD->current_level == SPEEDERCHASEA_LDATA)) {
-            TakeOver2GetIn(object, nearest);
-        } else {
+        if (!(tag_pressed != 0 || (nearest->id == id_ATAT && WORLD->current_level == SPEEDERCHASEA_LDATA))) {
             object->tag_flags |= 1;
             nearest->tag_highlighted = 1;
+        } else {
+            TakeOver2GetIn(object, nearest);
         }
     }
 }

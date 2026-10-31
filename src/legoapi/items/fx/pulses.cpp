@@ -104,7 +104,7 @@ void Pulses_Configure(WORLDINFO_s *world, char *config) {
                     pulse_sys.sfx_turn_on = static_cast<i16>(GetSfxId(parser->word_buf));
                 } else if (NuStrICmp(parser->word_buf, "sfx_turnoff") == 0 && NuFParGetWord(parser) != 0) {
                     pulse_sys.sfx_turn_off = static_cast<i16>(GetSfxId(parser->word_buf));
-                } else if (NuStrICmp(parser->word_buf, "sfx_hitplayer") == 0 && NuFParGetWord(parser) != 0) {
+                } else if (__builtin_expect(NuStrICmp(parser->word_buf, "sfx_hitplayer") == 0 && NuFParGetWord(parser) != 0, 1)) {
                     pulse_sys.sfx_hit_player = static_cast<i16>(GetSfxId(parser->word_buf));
                 } else if (NuStrICmp(parser->word_buf, "collide_radius") == 0) {
                     pulse_sys.collide_radius = NuFParGetFloat(parser);
@@ -180,18 +180,14 @@ void Pulses_Update(PULSESYS_s *pulse_sys) {
         hit_direction.z = pulse_sys->hit_direction_radius_origin;
         NuVecRotateY(&hit_direction, &hit_direction, 0x4000);
 
-        auto pulse_sys_radial_hit_direction = pulse_sys->radial_hit_direction;
         for (i32 i = 0; i < pulse_sys->pulse_count; ++i) {
-            PULSE_s *pulse = &pulse_sys->pulses[i];
-            if (pulse->gizmo != NULL) {
-                i32 visible = GizmoGetVisibility(world->gizmo_sys, pulse->gizmo);
-                pulse = &pulse_sys->pulses[i];
-                if (visible == 0) {
-                    pulse->disabled = 1;
-                    NuSpecialSetVisibility(&pulse->special, 0);
-                    pulse = &pulse_sys->pulses[i];
+            if (pulse_sys->pulses[i].gizmo != NULL) {
+                if (GizmoGetVisibility(world->gizmo_sys, pulse_sys->pulses[i].gizmo) == 0) {
+                    pulse_sys->pulses[i].disabled = 1;
+                    NuSpecialSetVisibility(&pulse_sys->pulses[i].special, 0);
                 }
             }
+            PULSE_s *pulse = &pulse_sys->pulses[i];
             if (pulse->disabled != 0) {
                 continue;
             }
@@ -226,11 +222,16 @@ void Pulses_Update(PULSESYS_s *pulse_sys) {
             }
 
             f32 collide_radius = pulse_sys->collide_radius;
-            NUVEC direction = {hit_direction.x, 0.0f, hit_direction.z};
-            if (pulse_sys_radial_hit_direction != 0) {
+            NUVEC direction;
+            if (pulse_sys->radial_hit_direction != 0) {
                 direction.x = pulse_position->x - hit_direction.x;
+                direction.y = 0.0f;
                 direction.z = pulse_position->z - hit_direction.z;
                 NuVecNorm(&direction, &direction);
+            } else {
+                direction.x = hit_direction.x;
+                direction.y = 0.0f;
+                direction.z = hit_direction.z;
             }
 
             for (i32 player_index = 0; player_index < 2; ++player_index) {
@@ -243,19 +244,19 @@ void Pulses_Update(PULSESYS_s *pulse_sys) {
                 }
 
                 NuVecSub(&offset, &player->apiobj.collision_position, pulse_position);
-                f32 distance = direction.x * offset.x + direction.z * offset.z;
-                if (pulse_sys_radial_hit_direction == 1) {
+                f32 distance = offset.x * direction.x + offset.z * direction.z;
+                if (pulse_sys->radial_hit_direction == 1) {
                     if (distance < 0.0f) {
                         continue;
                     }
                     NuVecRotateY(&offset, &offset, 0x4000);
-                    distance = direction.x * offset.x + direction.z * offset.z;
+                    distance = offset.x * direction.x + offset.z * direction.z;
                 }
 
                 if (!(NuFabs(distance) < collide_radius)) {
                     continue;
                 }
-                if (pulse_sys_radial_hit_direction == 0 &&
+                if (pulse_sys->radial_hit_direction == 0 &&
                     offset.x * pulse_sys->hit_direction_line + offset.z * pulse_sys->hit_direction_radius_origin <
                         0.0f) {
                     continue;
@@ -268,9 +269,9 @@ void Pulses_Update(PULSESYS_s *pulse_sys) {
                 }
 
                 TakeHitRumble(player, 0.7f);
+                player->flicker_kind = distance < 0.0f ? 3 : 4;
                 player->apiobj.velocity.x = 0.0f;
                 player->apiobj.velocity.z = 0.0f;
-                player->flicker_kind = distance >= 0.0f ? 4 : 3;
 
                 i32 debris_handle = -1;
                 AddFiniteShotDebrisEffect(&debris_handle,

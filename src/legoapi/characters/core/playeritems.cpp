@@ -246,7 +246,7 @@ void PlayerItemTypes_Init(PLAYERITEMTYPE_s *types) {
             do {
                 types++;
                 count++;
-            } while (types->id != -1);
+            } while (__builtin_expect(types->id != -1, 1));
             PLAYERITEMTYPECOUNT = count;
         } else {
             PlayerItemType = NULL;

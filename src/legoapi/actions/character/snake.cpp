@@ -56,61 +56,67 @@ static inline f32 SnakeMin(f32 a, f32 b) {
 void UpdateSnakeBody(GameObject_s *object) {
     if (object == NULL || object->snake_body == NULL)
         return;
+    SNAKEBODY_s *body = object->snake_body;
 
-    object->field_0x1004 = object->snake_body->scale;
+    object->field_0x1004 = body->scale;
     NUVEC position = object->apiobj.lower_position;
-    position.y += object->snake_body->scale * 0.15f;
-    if (object->snake_body->segment_count == 0)
-        return;
-
-    i32 segment_index = 0;
-    do {
-        object->snake_body->segments[segment_index].position = position;
-        u16 target_yaw = segment_index == 0 ? object->apiobj.field_0x276
-                                            : static_cast<u16>(object->snake_body->segments[segment_index - 1].yaw);
-        object->snake_body->segments[segment_index].yaw =
-            SeekRot(static_cast<u16>(object->snake_body->segments[segment_index].yaw), target_yaw, 5.0f);
-        object->snake_body->segments[segment_index].pitch = 0;
-        NUVEC offset = {0.0f, 0.0f, -(object->snake_body->scale * 0.15f)};
-        NuVecRotateY(&offset, &offset, static_cast<NUANG>(object->snake_body->segments[segment_index].yaw));
+    position.y += body->scale * 0.15f;
+    for (i32 segment_index = 0; segment_index < body->segment_count; ++segment_index) {
+        body->segments[segment_index].position = position;
+        i32 target_yaw = segment_index != 0 ? body->segments[segment_index - 1].yaw : object->apiobj.field_0x276;
+        body->segments[segment_index].yaw =
+            SeekRot(static_cast<u16>(body->segments[segment_index].yaw), static_cast<u16>(target_yaw), 5.0f);
+        NUVEC offset;
+        offset.x = 0.0f;
+        offset.y = 0.0f;
+        body = object->snake_body;
+        offset.z = -(object->snake_body->scale * 0.15f);
+        body->segments[segment_index].pitch = 0;
+        NuVecRotateY(&offset, &offset, static_cast<NUANG>(body->segments[segment_index].yaw));
         NuVecAdd(&position, &object->snake_body->segments[segment_index].position, &offset);
 
         f32 ground = GameShadow(NULL, &position, 5.0f, 0x1f);
+        body = object->snake_body;
         if (ground == 2000000.0f)
-            ground = object->snake_body->segments[segment_index].position.y;
-        if (object->snake_body->segments[segment_index].ground_height == 1000000000.0f)
-            object->snake_body->segments[segment_index].ground_height = ground;
-        else
-            object->snake_body->segments[segment_index].ground_height =
-                SeekValF(object->snake_body->segments[segment_index].ground_height, ground, 10.0f);
+            ground = body->segments[segment_index].position.y;
+        if (body->segments[segment_index].ground_height == 1000000000.0f)
+            body->segments[segment_index].ground_height = ground;
+        else {
+            body->segments[segment_index].ground_height =
+                SeekValF(body->segments[segment_index].ground_height, ground, 10.0f);
+            body = object->snake_body;
+            ground = body->segments[segment_index].ground_height;
+        }
         if (ground == 2000000.0f)
             continue;
 
         position.y = ground;
-        f32 length = NuVecDist(&position, &object->snake_body->segments[segment_index].position, &offset);
+        f32 length = NuVecDist(&position, &body->segments[segment_index].position, &offset);
         NuVecScale(&offset, &offset, object->snake_body->scale * 0.15f / length);
         NuVecAdd(&position, &object->snake_body->segments[segment_index].position, &offset);
 
-        f32 vertical = -offset.y / (object->snake_body->scale * 0.15f);
+        body = object->snake_body;
+        f32 vertical = -offset.y / (body->scale * 0.15f);
         f32 absolute = __builtin_fabsf(vertical);
         f32 curved = SnakeMin(NuFsqrt(1.0f - vertical * vertical), absolute);
         f32 side = (absolute - 0.7071067690849304f) * 3.402820018375656e+38f;
-        f32 sign = vertical * 3.402820018375656e+38f;
         side = MAX(MIN(side, 1.0f), 0.0f);
-        sign = MAX(MIN(sign, 1.0f), 0.0f);
-        f32 t = curved * side;
+        f32 sign = vertical * 3.402820018375656e+38f;
+        sign = sign < 1.0f ? MAX(sign, 0.0f) : 1.0f;
+        f32 octant = side * sign;
+        f32 t = curved * octant;
         f32 t2 = t * t;
         f32 t3 = t * t2;
         f32 t4 = t2 * t2;
         f32 t5 = t2 * t3;
-        f32 angle = (side + sign) * 0.785398006439209f - t;
+        f32 angle = (octant + sign) * 0.785398006439209f - t;
         angle += (-0.16666699945926666f * t) * t2;
         angle += (-0.07500000298023224f * t2) * t3;
         angle += (-0.04464289918541908f * t3) * t4;
         angle += (-0.03038189932703972f * t4) * t5;
-        object->snake_body->segments[segment_index].pitch =
-            static_cast<i16>(static_cast<i32>(angle * 10430.400390625f));
-    } while (object->snake_body->segment_count > ++segment_index);
+        body->segments[segment_index].pitch = static_cast<i16>(static_cast<i32>(angle * 10430.400390625f));
+        body = object->snake_body;
+    }
 }
 
 void DrawSnakeBody(GameObject_s *object) {
@@ -138,7 +144,7 @@ void DrawSnakeBody(GameObject_s *object) {
         nuhspecial_s *special = &snake_hspecials[special_index];
         if (NuSpecialExistsFn(special))
             NuSpecialDrawAt(special, &matrix);
-    } while (object->snake_body->segment_count > ++segment_index);
+    } while (__builtin_expect(object->snake_body->segment_count > ++segment_index, 1));
 }
 
 #define ADD_SNAKE_SEGMENT_DEBRIS(index)                                                                                \
@@ -146,11 +152,14 @@ void DrawSnakeBody(GameObject_s *object) {
         const i32 segment_index = (index);                                                                             \
         NUMTX matrix;                                                                                                  \
         NUANGVEC angles;                                                                                               \
+        NUVEC scale;                                                                                                   \
         angles.y = NuAngAdd(object->snake_body->segments[segment_index].yaw, 0x8000);                                  \
         angles.x = object->snake_body->segments[segment_index].pitch;                                                  \
         NuMtxSetRotationXYVU0(&matrix, &angles);                                                                       \
         if (object->snake_body->scale != 1.0f) {                                                                       \
-            NUVEC scale = {object->snake_body->scale, object->snake_body->scale, object->snake_body->scale};           \
+            scale.z = object->snake_body->scale;                                                                       \
+            scale.y = object->snake_body->scale;                                                                       \
+            scale.x = object->snake_body->scale;                                                                       \
             NuMtxPreScale(&matrix, &scale);                                                                            \
         }                                                                                                              \
         matrix.m30 += object->snake_body->segments[segment_index].position.x;                                          \
@@ -170,11 +179,11 @@ void DrawSnakeBody(GameObject_s *object) {
             part.gravity = -5.0f;                                                                                      \
             part.special = special;                                                                                    \
             part.flags = 0x90;                                                                                         \
+            part.lighting = reinterpret_cast<PARTLIGHTSOURCE_s *>(&object->light_data);                                \
+            part.time_step = FRAMETIME;                                                                                \
             part.stop_fn = PartStop_Flickerer;                                                                         \
             part.draw_fn = PartDraw_Flickerer;                                                                         \
             part.field_3c = PartImpact_Brick;                                                                          \
-            part.time_step = FRAMETIME;                                                                                \
-            part.lighting = reinterpret_cast<PARTLIGHTSOURCE_s *>(&object->light_data);                                \
             AddPart(&part);                                                                                            \
         }                                                                                                              \
     } while (0)
@@ -188,7 +197,8 @@ void BlowUpSnakeBody(GameObject_s *object) {
 }
 
 void SnakeBeenHit(GameObject_s *object) {
-    if (__builtin_expect(object != NULL && object->snake_body != NULL && object->snake_body->segment_count > 2, 1)) {
+    if (__builtin_expect(object != NULL, 1) && __builtin_expect(object->snake_body != NULL, 1) &&
+        __builtin_expect(object->snake_body->segment_count > 2, 1)) {
         ADD_SNAKE_SEGMENT_DEBRIS(object->snake_body->segment_count - 1);
         ADD_SNAKE_SEGMENT_DEBRIS(object->snake_body->segment_count - 2);
         object->snake_body->segment_count -= 2;

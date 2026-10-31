@@ -60,7 +60,7 @@ void DropInOutCode(GameObject_s *object) {
         object->apiobj.position = other->apiobj.position;
     }
     object->character_context = -1;
-    if ((object->apiobj.character_data->model_flags & 0x2000) == 0) {
+    if (__builtin_expect((object->apiobj.character_data->model_flags & 0x2000) == 0, 0)) {
         object->apiobj.field_0x27d = 0;
         object->apiobj.velocity.y = -0.1f;
     }

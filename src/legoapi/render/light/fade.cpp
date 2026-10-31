@@ -228,7 +228,7 @@ i32 FadeSystem::AddFade(FadeBase *o) {
 
 SCALAR_FN i32 FadeSystem::SetFade(FADETYPE const &t, u32 frames) {
     FADETYPE_VALUE type = t.type;
-    if (type != FADE_TYPE_NONE && fades[type] != NULL) {
+    if (__builtin_expect(type != FADE_TYPE_NONE && fades[type] != NULL, 1)) {
         direction = frames;
         pending_type = type;
         return 1;

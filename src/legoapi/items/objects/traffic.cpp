@@ -102,7 +102,7 @@ static void Traffic_vehicle(NUFPAR *parser) {
         vehicle_index = parse_trafficanimsys->vehicle_count++;
     }
 
-    if (vehicle_index != -1) {
+    if (__builtin_expect(vehicle_index != -1, 1)) {
         reference_trafficanim.vehicle_indices[reference_trafficanim.vehicle_count++] = vehicle_index;
     }
 }
@@ -221,14 +221,16 @@ void TrafficAnimSys_Reset(TRAFFICANIMSYS_s *system) {
         return;
     }
 
-    system->free_instances.head = NULL;
-    system->free_instances.tail = NULL;
-    system->active_instances.head = NULL;
-    system->active_instances.tail = NULL;
+    NULISTHDR *free_list = &system->free_instances;
+    free_list->head = NULL;
+    free_list->tail = NULL;
+    NULISTHDR *active_list = &system->active_instances;
+    active_list->head = NULL;
+    active_list->tail = NULL;
     memset(system->instances, 0, sizeof(system->instances));
 
     for (i32 i = 0; i < 500; ++i) {
-        NuLinkedListAppend(&system->free_instances, &system->instances[i].link);
+        NuLinkedListAppend(free_list, &system->instances[i].link);
     }
 
     if (g_lowEndLevelBehaviour != 0) {
@@ -238,23 +240,20 @@ void TrafficAnimSys_Reset(TRAFFICANIMSYS_s *system) {
     TRAFFICANIM_s *animation = system->animations;
     for (i32 animation_index = 0; animation_index < system->animation_count; ++animation_index, ++animation) {
         f32 frame = 0.0f;
-        if (__builtin_expect(animation->end_frame > 0.0f && animation->vehicle_count != 0, 1)) {
-            while (frame < animation->end_frame && animation->vehicle_count != 0) {
-                TRAFFICANIMINSTANCE_s *instance =
-                    reinterpret_cast<TRAFFICANIMINSTANCE_s *>(NuLinkedListGetHead(&system->free_instances));
-                if (instance == NULL) {
-                    break;
-                }
-
-                NuLinkedListRemove(&system->free_instances, &instance->link);
-                NuLinkedListAppend(&system->active_instances, &instance->link);
-                instance->frame = frame;
-                i32 random = qrand();
-                instance->animation = animation;
-                instance->vehicle_index = random / (0xffff / static_cast<i32>(animation->vehicle_count) + 1);
-                frame += animation->frame_interval - animation->random_interval +
-                         animation->random_interval * 2.0f * NuRandFloat();
+        while (__builtin_expect(frame < animation->end_frame, 1) && animation->vehicle_count != 0) {
+            TRAFFICANIMINSTANCE_s *instance = reinterpret_cast<TRAFFICANIMINSTANCE_s *>(NuLinkedListGetHead(free_list));
+            if (instance == NULL) {
+                break;
             }
+
+            NuLinkedListRemove(free_list, &instance->link);
+            NuLinkedListAppend(active_list, &instance->link);
+            instance->frame = frame;
+            i32 vehicle_index = qrand() / (0xffff / static_cast<i32>(animation->vehicle_count) + 1);
+            instance->animation = animation;
+            instance->vehicle_index = vehicle_index;
+            frame += animation->frame_interval - animation->random_interval +
+                     animation->random_interval * 2.0f * NuRandFloat();
         }
 
         animation->next_spawn_time =
@@ -286,7 +285,7 @@ void TrafficAnimSys_Update(TRAFFICANIMSYS_s *system) {
     for (i32 animation_index = 0; animation_index < system->animation_count; ++animation_index, ++animation) {
         animation->next_spawn_time -= animation->tfactor * FRAMETIME * 60.0f;
         if (animation->next_spawn_time <= 0.0f) {
-            if (animation->vehicle_count > 0) {
+            if (animation->vehicle_count != 0 && animation != NULL) {
                 instance = reinterpret_cast<TRAFFICANIMINSTANCE_s *>(NuLinkedListGetHead(&system->free_instances));
                 if (__builtin_expect(instance != NULL, 1)) {
                     NuLinkedListRemove(&system->free_instances, &instance->link);

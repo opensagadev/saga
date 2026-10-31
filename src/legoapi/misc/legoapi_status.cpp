@@ -319,7 +319,7 @@ void NewStatusRumbleBuzz(i32 player, float amount, float buzz, i32 priority) {
 }
 
 void NextStatusStage(STATUSPACKET_s *packet) {
-    if (packet->stage != NULL) {
+    if (__builtin_expect(packet->stage != NULL, 1)) {
         if (packet->stage->field_0x14 == -1 && packet->field_0x68 > packet->stage->field_0x18) {
             packet->field_0xb0 |= 2;
             return;
@@ -519,10 +519,7 @@ void InitStatusScreen(WORLDINFO_s *world) {
                     p.time_reward_score = *p.score;
                 } else {
                     f32 new_time = p.superstory_time;
-                    if (new_time < p.previous_best_time)
-                        Game.episode_save[episode].superstory_time_limit = new_time;
-                    else
-                        new_time = 0.0f;
+                    if (new_time >= p.previous_best_time) new_time = 0.0f; else Game.episode_save[episode].superstory_time_limit = new_time;
                     p.new_best_time = new_time;
                     u32 new_score = p.superstory_score;
                     if (new_score > previous_score)
@@ -584,14 +581,14 @@ void InitStatusScreen(WORLDINFO_s *world) {
             }
             if ((p.mode_flags & 2) == 0) {
                 AddStatusStage(&p, 20, 0);
-                if (p.elapsed_time < p.previous_best_time)
+                if (__builtin_expect(p.elapsed_time < p.previous_best_time, 0))
                     AddStatusStage(&p, 3, 0);
             } else {
                 if (Game.area_save[p.area_id].area_complete == 0) {
                     Game.area_save[p.area_id].area_complete = 1;
                     AddToCompletionPoints(POINTS_PER_SUPERBONUSCOMPLETE);
                     p.newly_completed = 1;
-                    if (GOLDBRICKFORSUPERBONUS != 0)
+                    if (__builtin_expect(GOLDBRICKFORSUPERBONUS != 0, 0))
                         gold = AddGoldBrickMessage(&p, tLEVELCOMPLETE);
                 }
                 AddStatusStage(&p, 22, gold);
@@ -602,7 +599,7 @@ void InitStatusScreen(WORLDINFO_s *world) {
                 AddStatusStage(&p, 19, 0);
             AddStatusStage(&p, 9, 0);
             AddStatusStage(&p, 10, 0);
-            if (netclient == 0)
+            if (__builtin_expect(netclient == 0, 1))
                 AddStatusStage(&p, 11, 0);
             AddStatusStage(&p, 12, 0);
             p.current_gold_brick = -1;
@@ -657,7 +654,7 @@ void InitStatusScreen(WORLDINFO_s *world) {
                     if (__builtin_expect(GOLDBRICKFORCHALLENGE != 0, 1))
                         gold = AddGoldBrickMessage(&p, tCHALLENGECOMPLETE);
                     Game.area_save[p.area_id].field_0x5[2] = 1;
-                    if (p.episode_id != -1 && p.chapter != -1) {
+                    if (__builtin_expect(p.episode_id != -1 && p.chapter != -1, 1)) {
                         sprintf(event, "challenge_ep%i_ch%i_complete", p.episode_id + 1, p.chapter + 1);
                         NuIOS_RecordFlurryEvent(event);
                     }
@@ -699,7 +696,7 @@ void InitStatusScreen(WORLDINFO_s *world) {
         }
         p.area_time = AreaTimer.time_elapsed;
         const u64 total = static_cast<u64>(p.coins_remaining[0]) + p.coins_remaining[1];
-        if (__builtin_expect(total >= 4000000000ULL, 0))
+        if (total >= 4000000000ULL)
             p.collected_score = 4000000000.0f;
         else
             p.collected_score = static_cast<f32>(p.coins_remaining[0] + p.coins_remaining[1]);
@@ -935,47 +932,45 @@ void DrawStatusMiniKit(float x, float y, float z, float built_scale, float new_s
                 const f32 oscillation = NuTrigTable[piece_angle];
                 const HUBMINIKITPIECE_s *animated_pieces = static_cast<HUBMINIKITPIECE_s *>(WORLD->minikit.field_0x4);
                 const HUBMINIKITPIECE_s &animated_piece = animated_pieces[i];
-                if (__builtin_expect(animated_piece.direction <= 5, 1)) {
-                    switch (animated_piece.direction) {
-                        case 0:
-                            matrix.m30 -=
-                                (static_cast<f32>(static_cast<i32>(animated_piece.direction_index)) * 0.025f + 0.25f) *
-                                oscillation;
-                            break;
-                        case 1:
-                            matrix.m30 +=
-                                (static_cast<f32>(static_cast<i32>(animated_piece.direction_index)) * 0.025f + 0.25f) *
-                                oscillation;
-                            break;
-                        case 2:
-                            matrix.m31 -=
-                                (static_cast<f32>(static_cast<i32>(animated_piece.direction_index)) * 0.025f + 0.25f) *
-                                oscillation;
-                            break;
-                        case 3:
-                            matrix.m31 +=
-                                (static_cast<f32>(static_cast<i32>(animated_piece.direction_index)) * 0.025f + 0.25f) *
-                                oscillation;
-                            break;
-                        case 4:
-                            matrix.m32 +=
-                                (static_cast<f32>(static_cast<i32>(animated_piece.direction_index)) * 0.025f + 0.25f) *
-                                oscillation;
-                            break;
-                        case 5:
-                            matrix.m32 -=
-                                (static_cast<f32>(static_cast<i32>(animated_piece.direction_index)) * 0.025f + 0.25f) *
-                                oscillation;
-                            break;
-                    }
+                switch (animated_piece.direction) {
+                    case 0:
+                        matrix.m30 -=
+                            (static_cast<f32>(static_cast<i32>(animated_piece.direction_index)) * 0.025f + 0.25f) *
+                            oscillation;
+                        break;
+                    case 1:
+                        matrix.m30 +=
+                            (static_cast<f32>(static_cast<i32>(animated_piece.direction_index)) * 0.025f + 0.25f) *
+                            oscillation;
+                        break;
+                    case 2:
+                        matrix.m31 -=
+                            (static_cast<f32>(static_cast<i32>(animated_piece.direction_index)) * 0.025f + 0.25f) *
+                            oscillation;
+                        break;
+                    case 3:
+                        matrix.m31 +=
+                            (static_cast<f32>(static_cast<i32>(animated_piece.direction_index)) * 0.025f + 0.25f) *
+                            oscillation;
+                        break;
+                    case 4:
+                        matrix.m32 +=
+                            (static_cast<f32>(static_cast<i32>(animated_piece.direction_index)) * 0.025f + 0.25f) *
+                            oscillation;
+                        break;
+                    case 5:
+                        matrix.m32 -=
+                            (static_cast<f32>(static_cast<i32>(animated_piece.direction_index)) * 0.025f + 0.25f) *
+                            oscillation;
+                        break;
                 }
             } else {
                 NuMtxScale(&matrix, &built_size);
             }
             if (i <= currentminikit) {
-                matrix.m32 += offset.z;
-                matrix.m31 += offset.y;
                 matrix.m30 += offset.x;
+                matrix.m31 += offset.y;
+                matrix.m32 += offset.z;
             }
 
             NuMtxRotateYInline(&matrix,
@@ -987,9 +982,9 @@ void DrawStatusMiniKit(float x, float y, float z, float built_scale, float new_s
                 static_cast<u16>(static_cast<i32>(NuFmod(GameTimer.time_elapsed, 1.87f) / 1.87f * 65536.0f));
             NuMtxRotateXInline(&matrix, static_cast<u16>(static_cast<i32>(2730.0f * NU_SIN_LUT(x_phase) - 5461.0f)));
 
+            matrix.m30 += x * PANEL3DMULX;
             matrix.m31 += y * PANEL3DMULY;
             matrix.m32 += z;
-            matrix.m30 += x * PANEL3DMULX;
 
             if (i < 10) {
                 KitPart[i].matrix = matrix;
@@ -1033,8 +1028,8 @@ void AddStatusMiniKitParts() {
         part.velocity = &velocity;
         part.flags = 0x480;
         part.gravity = 0.0f;
-        part.special = KitPart[i].special;
         part.lighting = reinterpret_cast<PARTLIGHTSOURCE_s *>(&KitPartRTL);
+        part.special = KitPart[i].special;
         part.time_step = FRAMETIME;
         AddPart(&part);
 
@@ -1044,17 +1039,17 @@ void AddStatusMiniKitParts() {
             position.y = (static_cast<f32>(qrand()) * (1.0f / 65535.0f)) * 0.1f;
             position.z = 1.0f;
             NuVecRotateZ(&position, &position, qrand());
-            ADDGAMEMSG_ALIGNED16 message = AddGameMsg_Default;
+            ADDGAMEMSG message = AddGameMsg_Default;
             message.position = &position;
             message.target_scale = 0.75f;
             message.player_index = qrand() / 0x8000;
             target_position.x = cointotal_x[message.player_index];
-            message.target_position = &target_position;
             message.target_scale = COINTOTAL_COINSIZE;
             message.icon = static_cast<i16>(GizmoPickupType[2].first_model_id);
             message.special = &WORLD->lev_objs[message.icon].special;
             message.flags = 0x112d;
             message.duration = COINMSGTIME;
+            message.target_position = &target_position;
             message.score = GizmoPickupType[2].score;
             message.end_fn = EndScoreMessage;
             message.field_0x20 = delay;
@@ -1087,24 +1082,20 @@ void Status_DrawPromptMenu(STATUSPACKET_s *packet, i32 selected, float alpha) {
                                 0)) {
         labels[0] = tMAP;
     } else {
-        labels[0] = tFINISHSTORY;
-        if ((packet->field_0xb0 & 8) != 0) {
-            if (packet->next_area != -1 && (ADataList[packet->next_area].flags & 2) == 0 &&
-                Game.area_save[packet->next_area].complete == 0) {
-                labels[0] = tMAP;
-                const i16 text =
-                    ADataList[packet->next_area].area_index == 5 ? tFINALCHAPTERLOCKED : tNEXTCHAPTERLOCKED;
-                SmartTextEx(TTab[text], 0.0f, 0.325f, 1.0f, 0.5f, 0.5f, 0.5f, 0, 255, 63, 0, 1.7f, 1, NULL, 0,
-                            static_cast<i32>(alpha * 128.0f));
-                locked = true;
-            } else {
-                if (__builtin_expect(packet->next_area == -1 || (ADataList[packet->next_area].flags & 2) == 0, 1)) {
-                    labels[0] = tCONTINUESTORY;
-                }
+        const i32 chapter = packet->field_0xb0 & 8;
+        if (chapter && packet->next_area != -1 && (ADataList[packet->next_area].flags & 2) == 0 &&
+            Game.area_save[packet->next_area].complete == 0) {
+            labels[0] = tMAP;
+            SmartTextEx(TTab[ADataList[packet->next_area].area_index == 5 ? tFINALCHAPTERLOCKED : tNEXTCHAPTERLOCKED],
+                        0.0f, 0.325f, 1.0f, 0.5f, 0.5f, 0.5f, 0, 255, 63, 0, 1.7f, 1, NULL, 0,
+                        static_cast<i32>(alpha * 128.0f));
+            locked = true;
+        } else {
+            labels[0] = (packet->next_area == -1 || (ADataList[packet->next_area].flags & 2) == 0) ? tCONTINUESTORY
+                                                                                                   : tFINISHSTORY;
+            if (chapter) {
                 labels[1] = tMAP;
             }
-        } else if (packet->next_area == -1 || (ADataList[packet->next_area].flags & 2) == 0) {
-            labels[0] = tCONTINUESTORY;
         }
     }
     const i32 count = labels[1] == -1 ? 1 : 2;
@@ -1121,13 +1112,13 @@ void Status_DrawPromptMenu(STATUSPACKET_s *packet, i32 selected, float alpha) {
     }
     for (i32 i = 0; i < count; ++i) {
         i32 red, green, blue;
-        if (selected != 0 && status_prompt == i && TestForController()) {
-            if (__builtin_expect(!(menu_pulsate <= 0.0f), 1)) {
+        if (selected != 0 && status_prompt == i && __builtin_expect(TestForController(), 1)) {
+            if (!(menu_pulsate <= 0.0f)) {
                 const f32 inverse = 1.0f - menu_pulsate;
                 red = static_cast<u32>(MENUFLASH0R) * menu_pulsate + static_cast<u32>(MENUFLASH1R) * inverse;
                 green = static_cast<u32>(MENUFLASH0G) * menu_pulsate + static_cast<u32>(MENUFLASH1G) * inverse;
                 blue = static_cast<u32>(MENUFLASH0B) * menu_pulsate + static_cast<u32>(MENUFLASH1B) * inverse;
-            } else if (__builtin_expect(menu_flash == 0, 1)) {
+            } else if (__builtin_expect(menu_flash == 0, 0)) {
                 red = MENUFLASH1R;
                 blue = MENUFLASH1B;
                 green = MENUFLASH1G;
@@ -1136,15 +1127,15 @@ void Status_DrawPromptMenu(STATUSPACKET_s *packet, i32 selected, float alpha) {
                 blue = MENUFLASH0B;
                 green = MENUFLASH0G;
             }
-        } else if (menu_pulse > 0.0f) {
+        } else if (__builtin_expect(menu_pulse > 0.0f, 1)) {
             const f32 inverse = 1.0f - menu_pulse;
             red = static_cast<u32>(MENUFLASH0R) * menu_pulse + static_cast<u32>(MENUNORMALR) * inverse;
             green = static_cast<u32>(MENUFLASH0G) * menu_pulse + static_cast<u32>(MENUNORMALG) * inverse;
             blue = static_cast<u32>(MENUFLASH0B) * menu_pulse + static_cast<u32>(MENUNORMALB) * inverse;
         } else {
             red = MENUENTRYR;
-            green = MENUENTRYG;
             blue = MENUENTRYB;
+            green = MENUENTRYG;
         }
         smarttextex_drawmessagebox = 1;
         SmartTextEx(TTab[labels[i]], 0.0f, y, 1.0f, 0.7f, 0.7f, 0.7f, 0, red, green, blue, 1.7f, 1, NULL, 0,
@@ -1163,7 +1154,7 @@ void DrawBonusTime(STATUSPACKET_s *packet, float position, i32 alpha) {
     const f32 y = -0.5f * position;
     char *title;
     i32 red, green;
-    if (packet->new_best_time != 0.0f) {
+    if (__builtin_expect(packet->new_best_time != 0.0f, 0)) {
         title = TTab[tNEWBESTTIME];
         red = 0;
         green = 255;
@@ -1191,10 +1182,10 @@ void DrawStatusScreen(WORLDINFO_s *) {
     memset(KitPart, 0, sizeof(KitPart));
 
     if (GAMEDEMO != 0) {
-        if (GAMEDEMO != 1 || FadeSys.fade != 0.0f)
+        if (GAMEDEMO != 1 || __builtin_expect(FadeSys.fade != 0.0f, 1))
             return;
-        char *exit_text = TTab[tEXIT];
         char *freeplay_text = TTab[tFREEPLAY];
+        char *exit_text = TTab[tEXIT];
         f32 y = -0.75f - 0.5f * MENUDY;
         {
             const i32 option = 0;
@@ -1208,14 +1199,14 @@ void DrawStatusScreen(WORLDINFO_s *) {
                                              static_cast<u32>(MENUFLASH1G) * (1.0f - menu_pulsate));
                     blue = static_cast<i32>(static_cast<u32>(MENUFLASH0B) * menu_pulsate +
                                             static_cast<u32>(MENUFLASH1B) * (1.0f - menu_pulsate));
-                } else if (menu_flash != 0) {
-                    green = MENUFLASH0G;
-                    red = MENUFLASH0R;
-                    blue = MENUFLASH0B;
-                } else {
+                } else if (menu_flash == 0) {
                     blue = MENUFLASH1B;
                     green = MENUFLASH1G;
                     red = MENUFLASH1R;
+                } else {
+                    green = MENUFLASH0G;
+                    red = MENUFLASH0R;
+                    blue = MENUFLASH0B;
                 }
             } else if (menu_pulse > 0.0f) {
                 green = static_cast<i32>(static_cast<u32>(MENUFLASH0G) * menu_pulse +
@@ -1245,14 +1236,14 @@ void DrawStatusScreen(WORLDINFO_s *) {
                                            static_cast<u32>(MENUFLASH1R) * (1.0f - menu_pulsate));
                     blue = static_cast<i32>(static_cast<u32>(MENUFLASH0B) * menu_pulsate +
                                             static_cast<u32>(MENUFLASH1B) * (1.0f - menu_pulsate));
-                } else if (menu_flash != 0) {
-                    red = MENUFLASH0R;
-                    green = MENUFLASH0G;
-                    blue = MENUFLASH0B;
-                } else {
+                } else if (menu_flash == 0) {
                     green = MENUFLASH1G;
                     red = MENUFLASH1R;
                     blue = MENUFLASH1B;
+                } else {
+                    red = MENUFLASH0R;
+                    green = MENUFLASH0G;
+                    blue = MENUFLASH0B;
                 }
             } else if (menu_pulse > 0.0f) {
                 red = static_cast<i32>(static_cast<u32>(MENUFLASH0R) * menu_pulse +
@@ -1271,7 +1262,7 @@ void DrawStatusScreen(WORLDINFO_s *) {
         }
         return;
     }
-    if (!(FadeSys.fade <= 0.0f)) {
+    if (FadeSys.fade > 0.0f) {
         return;
     }
 
@@ -1282,8 +1273,8 @@ void DrawStatusScreen(WORLDINFO_s *) {
             status->draw_background_callback(status);
         }
 
-        i32 stage_index = 1;
-        for (STATUS_STAGE_s *stage = StatusStages; stage->type != -1; stage = StatusStages + stage_index++) {
+        for (i32 i = 0; StatusStages[i].type != -1; i++) {
+            STATUS_STAGE_s *stage = &StatusStages[i];
             if (stage->draw_callback != NULL) {
                 if (stage == status->stage)
                     stage->draw_callback(stage, status, 1);
@@ -1299,18 +1290,18 @@ void DrawStatusScreen(WORLDINFO_s *) {
         } else if (stage->type == 12) {
             alpha = 0.0f;
         } else if (stage->type == 10) {
-            alpha = !(stage->field_0x18 >= 1.0f) ? 1.0f - stage->field_0x18 : 0.0f;
+            alpha = stage->field_0x18 < 1.0f ? 1.0f - stage->field_0x18 : 0.0f;
         } else {
             alpha = 1.0f;
             if (stage->type == 19 && stage->field_0x14 != 0) {
                 const f32 time = stage->field_0x18;
-                if (time < 1.0f) {
-                    alpha = 1.0f - time;
-                } else {
+                if (time >= 1.0f) {
                     const f32 fade_start = stage->field_0x1c - 1.0f;
                     alpha = 0.0f;
                     if (time >= fade_start)
                         alpha = (time - fade_start) / (stage->field_0x1c - fade_start);
+                } else {
+                    alpha = 1.0f - time;
                 }
             }
         }
@@ -1319,7 +1310,7 @@ void DrawStatusScreen(WORLDINFO_s *) {
             DrawStatusIcons(status, icon_y, iconalphaoverride >= 0.0f ? iconalphaoverride : alpha);
         }
     } else {
-        char time[256];
+        char time[256] __attribute__((aligned(16)));
         const f32 remaining = MAX(0.0f, 6.0f - GameTimer.time_elapsed);
         Text_MakeTime(remaining, 0, 0, 0, time);
         const f32 y_phase = NuFmod(GameTimer.time_elapsed, 0.5f);
@@ -1401,7 +1392,7 @@ void UpdateStatusScreen(WORLDINFO_s *) {
                 }
                 if ((GamePad[player].buttons_pressed & GAMEPAD_MENUSELECT) != 0) {
                     GameAudio_PlaySfx(0x30, NULL, 0, 0);
-                    if (gamedemo_option == 0) {
+                    if (__builtin_expect(gamedemo_option == 0, 1)) {
                         GAMEDEMO = 2;
                         NewLData = HUB_LDATA;
                         new_level_from_menu = 1;
@@ -1428,8 +1419,8 @@ void UpdateStatusScreen(WORLDINFO_s *) {
                 }
                 return;
             }
-        } else if (__builtin_expect(GAMEDEMO == 2, 1)) {
-            if (GameTimer.time_elapsed >= 8.0f) {
+        } else if (GAMEDEMO == 2) {
+            if (__builtin_expect(GameTimer.time_elapsed >= 8.0f, 0)) {
                 EndOfDemo(0);
             }
         }

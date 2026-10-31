@@ -540,7 +540,7 @@ void Store_UnlockPack(i32, bool save) {
 }
 
 void Store_RestorePurchases() {
-    if (WORLD != NULL && HUB_LDATA != NULL && WORLD->current_level == HUB_LDATA) {
+    if (__builtin_expect(WORLD != NULL && HUB_LDATA != NULL && WORLD->current_level == HUB_LDATA, 1)) {
         TriggerExtraDataSave();
         TriggerAutoSave();
     } else {
@@ -584,11 +584,15 @@ bool Store_IsPackAvailable(i32, char *reason) {
 
 i32 Store_FindPack(i32 id, char *name) {
     for (i32 i = 0; i < 11; ++i) {
-        if (id != -1 && StorePack[i].id != NULL && *StorePack[i].id == id) {
-            return i;
+        if (id != -1 && StorePack[i].id != NULL) {
+            if (*StorePack[i].id == id) {
+                return i;
+            }
         }
-        if (name != NULL && NuStrCmp(StorePack[i].name, name) == 0) {
-            return i;
+        if (name != NULL) {
+            if (NuStrCmp(StorePack[i].name, name) == 0) {
+                return i;
+            }
         }
     }
     return -1;
@@ -614,14 +618,14 @@ void Store_HubInitFloorTargets(WORLDINFO_s *world) {
 }
 
 void MenuUpdateDebugStore(MENU_s *menu) {
-    if (menu->cancel_pressed == 0) {
+    if (__builtin_expect(menu->cancel_pressed == 0, 1)) {
         if (menu->confirm_pressed != 0) {
             if (menu->selected_item > 10) {
                 SuperOptions.store_pack_flags = 0xffff;
                 SuperOptions.store_bundle_flags = 0xff;
                 TriggerExtraDataSave();
                 BackupMenu();
-            } else if (__builtin_expect(Store_IsPackUnlocked(menu->selected_item), 1)) {
+            } else if (Store_IsPackUnlocked(menu->selected_item)) {
                 GameAudio_PlaySfx(0x32, NULL, 0, 0);
             } else {
                 Store_UnlockPack(menu->selected_item, true);
@@ -662,20 +666,21 @@ void Store_HubDrawFloorTargets(WORLDINFO_s *world) {
         }
 
         const i32 object_id = CDataList[*StorePack[i].id].field20_0x42;
-        if (__builtin_expect(object_id == -1, 1)) {
+        if (object_id == -1) {
             continue;
         }
 
         NUVEC position;
+        const i32 phase = i * 0x2000;
         position.x = StorePack[i].custodian_position.x;
         position.x +=
-            NU_SIN_LUT(static_cast<u16>(NuFmod(GameTimer.time_elapsed, 2.3f) / 2.3f * 65536.0f) + i * 0x2000) * 0.01f;
+            NU_SIN_LUT(static_cast<u16>(NuFmod(GameTimer.time_elapsed, 2.3f) / 2.3f * 65536.0f) + phase) * 0.01f;
         position.y = CDataList[*StorePack[i].id].bounds_max_y * 0.75f + StorePack[i].custodian_position.y - 0.01f;
         position.y +=
             NU_SIN_LUT(static_cast<u16>(NuFmod(GameTimer.time_elapsed, 2.0f) * 0.5f * 65536.0f) + i * 0x2aaa) * 0.01f;
         position.z = StorePack[i].custodian_position.z;
         position.z +=
-            NU_SIN_LUT(static_cast<u16>(NuFmod(GameTimer.time_elapsed, 2.4f) / 2.4f * 65536.0f) + i * 0x2000 + 0x4000) *
+            NU_SIN_LUT(static_cast<u16>(NuFmod(GameTimer.time_elapsed, 2.4f) / 2.4f * 65536.0f) + phase + 0x4000) *
             0.01f;
 
         const u16 facing = NuAtan2D(position.x - GameCam->pos.x, position.z - GameCam->pos.z);
@@ -827,9 +832,9 @@ void MenuDrawStore(MENU_s *) {
     char line[256];
     char discount[256];
     product.description[0] = 0;
-    product.price = 0.0f;
     StoreIAP[0].x = 0.0f;
     StoreIAP[0].y = 0.65f;
+    product.price = 0.0f;
     char *selected_product = *reinterpret_cast<char **>(&StorePack[menu_i_pack].field1_0x4);
     if (NuIOS_GetInAppProductByID(selected_product, reinterpret_cast<NuIOS_InAppProduct *>(&product)) != 0) {
         NuStrCpy(StoreIAP[0].text, product.price_text);
@@ -837,17 +842,17 @@ void MenuDrawStore(MENU_s *) {
     sprintf(line, "%s ~0%.2f~~", TTab[StorePack[menu_i_pack].message_text_index], static_cast<double>(product.price));
     Text3DEx(line, 0.0f, 0.54999995f, 1.0f, 0.4f, 0.4f, 0.4f, 1, 255, 191, 0, static_cast<u8>(MenuA));
     StoreIAP[0].title_y = 0.54999995f;
+    StoreIAP[0].width = text3d_width;
     f32 y = 0.54999995f + text3d_height;
     StoreIAP[0].bottom_y = y;
-    StoreIAP[0].width = text3d_width;
     if (product.description[0] != 0) {
         SmartTextEx(product.description, 0.0f, y, 1.0f, 0.3f, 0.3f, 0.3f, 1, 255, 127, 0, 1.9f, 2, &text_box, 0, MenuA);
         y -= text_box.height;
-        if (!(StoreIAP[0].width >= text_box.width)) {
+        if (text_box.width > StoreIAP[0].width) {
             StoreIAP[0].width = text_box.width;
         }
+        StoreIAP[0].bottom_y = y;
     }
-    StoreIAP[0].bottom_y = y;
 
     i32 slot = 1;
     for (i32 bundle_index = 0; bundle_index < 3; ++bundle_index) {
@@ -869,6 +874,7 @@ void MenuDrawStore(MENU_s *) {
         i32 character_ids[11];
         i32 already_owned[11];
         i32 count = 0;
+        STORE_PRODUCT_s pack_product;
         for (i32 pack = 0; pack < 11; ++pack) {
             if ((StoreBundle[bundle_index].pack_mask & (1 << pack)) == 0)
                 continue;
@@ -877,11 +883,9 @@ void MenuDrawStore(MENU_s *) {
                 already_owned[count] = 1;
             } else {
                 already_owned[count] = 0;
-                STORE_PRODUCT_s pack_product;
                 char *pack_product_id = *reinterpret_cast<char **>(&StorePack[pack].field1_0x4);
-                if (__builtin_expect(NuIOS_GetInAppProductByID(
-                                         pack_product_id, reinterpret_cast<NuIOS_InAppProduct *>(&pack_product)) != 0,
-                                     1)) {
+                if (NuIOS_GetInAppProductByID(pack_product_id, reinterpret_cast<NuIOS_InAppProduct *>(&pack_product)) !=
+                    0) {
                     separate_price += pack_product.price;
                 }
             }
@@ -913,11 +917,11 @@ void MenuDrawStore(MENU_s *) {
                 static_cast<double>(bundle_price));
         Text3DEx(line, 0.0f, y, 1.0f, 0.4f, 0.4f, 0.4f, 1, 255, 191, 0, static_cast<u8>(MenuA));
         StoreIAP[slot].title_y = y;
-        y += text3d_height;
-        StoreIAP[slot].bottom_y = y;
         if (StoreIAP[slot].width < text3d_width) {
             StoreIAP[slot].width = text3d_width;
         }
+        y += text3d_height;
+        StoreIAP[slot].bottom_y = y;
         if (product.description[0] != 0) {
             SmartTextEx(product.description, 0.0f, y, 1.0f, 0.3f, 0.3f, 0.3f, 1, 255, 127, 0, 1.9f, 2, &text_box, 0,
                         MenuA);
@@ -928,8 +932,8 @@ void MenuDrawStore(MENU_s *) {
             }
         }
         sprintf(discount, "~0%.2f~~", static_cast<double>(separate_price - bundle_price));
-        const i16 save_text = StoreBundle[bundle_index].pack_mask == 0xffffffffu ? tSAVE_SUPERBUNDLE : tSAVE_BUNDLE;
-        sprintf(line, TTab[save_text], discount);
+        sprintf(line, TTab[StoreBundle[bundle_index].pack_mask == 0xffffffffu ? tSAVE_SUPERBUNDLE : tSAVE_BUNDLE],
+                discount);
         SmartTextEx(line, 0.0f, y, 1.0f, 0.3f, 0.3f, 0.3f, 1, 0, 191, 255, 1.9f, 1, &text_box, 0, MenuA);
         y += text3d_height;
         StoreIAP[slot].bottom_y = y;
@@ -945,6 +949,7 @@ void MenuDrawStore(MENU_s *) {
 
 void MenuUpdateStore(MENU_s *menu) {
     char event[128];
+    NUVEC position;
     if (__builtin_expect(menu->cancel_pressed != 0 || StoreIAP[0].text[0] == 'x', 0)) {
         GameAudio_PlaySfx(0x31, NULL, 0, 0);
         GameCam_Blend(GameCam, 0.5f, 0.0f, 1);
@@ -959,21 +964,19 @@ void MenuUpdateStore(MENU_s *menu) {
         if (entry.text[0] == 0) {
             return;
         }
-        VuVec position __attribute__((aligned(16)));
         position.x = entry.x;
         position.y = entry.y;
         if (time < 8.0f) {
             const f32 trigger = 8.0f - (position.y + 1.0f) * 4.0f;
             if (time >= trigger && time - FRAMETIME < trigger) {
-                position.z = 1.0f;
-                position.w = 1.0f;
-                MechSystems::Get()->NewRadarPulse(position, false);
+                VuVec pulse __attribute__((aligned(16))) = VuVec(position.x, position.y, 1.0f, 1.0f);
+                MechSystems::Get()->NewRadarPulse(pulse, false);
             }
         }
         if (MenuAlpha >= 1.0f && MechInputTouchMenuController::AnyTouchesThisFrame > 0) {
             const f32 dx = MechInputTouchMenuController::LastTouchPos.x - position.x;
             const f32 dy = MechInputTouchMenuController::LastTouchPos.y - position.y;
-            if (__builtin_expect(dx * dx + dy * dy < 0.01f, 0)) {
+            if (dx * dx + dy * dy < 0.01f) {
                 goto store_touch_selected;
             }
         }
@@ -981,7 +984,7 @@ void MenuUpdateStore(MENU_s *menu) {
     return;
 
 store_touch_selected:
-    if (NuIOS_AreInAppPurchasesAvailable() != 0 && NuIOS_CanMakeInAppPurchases() != 0) {
+    if (__builtin_expect(NuIOS_AreInAppPurchasesAvailable() != 0, 0) && NuIOS_CanMakeInAppPurchases() != 0) {
         menu_storepurchase_iap_name = StoreIAP[hit].text;
         menu_i_bundle = StoreBundle_FindByName(menu_storepurchase_iap_name);
         NewMenu(LEGOMENU_STORE_PURCHASE, -1, -1);
@@ -990,13 +993,15 @@ store_touch_selected:
             sprintf(event, "bundle_%s_bought", StoreBundle[menu_i_bundle].name);
             NuIOS_RecordFlurryEvent(event);
         } else if (menu_i_pack != -1) {
-            sprintf(event, "pack_%s_bought", *reinterpret_cast<char **>(&StorePack[menu_i_pack].field1_0x4));
+            sprintf(event, "pack_%s_bought", StorePack[menu_i_pack].product_id);
             NuIOS_RecordFlurryEvent(event);
         }
         return;
     }
-    if (__builtin_expect(TTab[0x60f] != NULL, 0)) {
-        NUVEC position = {0.0f, -0.6f, 1.0f};
+    if (TTab[0x60f] != NULL) {
+        position.x = 0.0f;
+        position.y = -0.6f;
+        position.z = 1.0f;
         GAMEMESSAGE_s *message = static_cast<GAMEMESSAGE_s *>(
             AddGameMessage(TTab[0x60f], &position, 0.5f, &position, 0.55f, 255, 31, 31, 0x20, 2.5f));
         if (message != NULL) {
@@ -1030,9 +1035,10 @@ void MenuUpdateStoreRestoring(MENU_s *menu) {
         char *product = *reinterpret_cast<char **>(&StorePack[INDEX].field1_0x4);                                      \
         if (NuIOS_IsProductPurchased(product) != 0 && (restoring_pack_bits & (1u << INDEX)) == 0) {                    \
             restoring_wait = 3.0f;                                                                                     \
+            u8 n = restoring_pack_count;                                                                               \
             restoring_pack_bits |= 1u << INDEX;                                                                        \
-            restoring_pack_list[restoring_pack_count] = INDEX;                                                         \
-            ++restoring_pack_count;                                                                                    \
+            restoring_pack_list[n] = INDEX;                                                                            \
+            restoring_pack_count = n + 1;                                                                              \
         }                                                                                                              \
     } while (0)
     if (__builtin_expect(restoring_pack_count <= 10, 1)) {
@@ -1053,11 +1059,12 @@ void MenuUpdateStoreRestoring(MENU_s *menu) {
 #define CHECK_RESTORING_BUNDLE(INDEX)                                                                                  \
     do {                                                                                                               \
         if (__builtin_expect(NuIOS_IsProductPurchased(StoreBundle[INDEX].name) != 0, 1) &&                             \
-            __builtin_expect((restoring_bundle_bits & (1u << INDEX)) == 0, 0)) {                                       \
-            restoring_bundle_bits |= 1u << INDEX;                                                                      \
-            restoring_bundle_list[restoring_bundle_count] = INDEX;                                                     \
-            ++restoring_bundle_count;                                                                                  \
+            ((restoring_bundle_bits & (1u << INDEX)) == 0)) {                                                          \
             restoring_wait = 3.0f;                                                                                     \
+            u8 n = restoring_bundle_count;                                                                             \
+            restoring_bundle_bits |= 1u << INDEX;                                                                      \
+            restoring_bundle_list[n] = INDEX;                                                                          \
+            restoring_bundle_count = n + 1;                                                                            \
         }                                                                                                              \
     } while (0)
     if (__builtin_expect(restoring_bundle_count <= 2, 1)) {
@@ -1068,7 +1075,7 @@ void MenuUpdateStoreRestoring(MENU_s *menu) {
 #undef CHECK_RESTORING_BUNDLE
 
     if (menu->confirm_pressed != 0) {
-        if (__builtin_expect(restoring_wait <= 0.0f, 1)) {
+        if (restoring_wait <= 0.0f) {
             BackupMenu();
         }
     } else if (menu->cancel_pressed != 0) {
@@ -1089,23 +1096,24 @@ void MenuDrawStoreRestoring(MENU_s *menu) {
     const f32 phase = NuFmod(GlobalTimer.time_elapsed_mod_seconds, 0.5f);
     const i32 angle = static_cast<i32>((phase + phase) * 65536.0f);
     const i32 alpha = static_cast<i32>((NuTrigTable[(angle >> 1) & 0x7fff] * 0.2f + 0.8f) * pulse_alpha);
-    char *title = TTab[0x626] != NULL ? TTab[0x626] : const_cast<char *>("Restoring Purchases");
-    SmartTextEx(title, 0.0f, 0.5f, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 0, 255, 159, 0, 1.9f, 1, NULL, 0,
-                alpha);
+    SmartTextEx(TTab[0x626] != NULL ? TTab[0x626] : const_cast<char *>("Restoring Purchases"), 0.0f, 0.5f, 1.0f,
+                MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 0, 255, 159, 0, 1.9f, 1, NULL, 0, alpha);
 
     f32 y = 0.5f + text3d_height;
     STORE_PRODUCT_s product;
     for (i32 i = 0; i < restoring_pack_count; ++i) {
-        char *product_id = *reinterpret_cast<char **>(&StorePack[restoring_pack_list[i]].field1_0x4);
+        char *product_id = StorePack[restoring_pack_list[i]].product_id;
         if (NuIOS_GetInAppProductByID(product_id, reinterpret_cast<NuIOS_InAppProduct *>(&product)) != 0) {
-            SmartTextEx(product.name, 0.0f, y, 1.0f, 0.3f, 0.3f, 0.3f, 0, 255, 255, 255, 1.9f, 1, NULL, 0, MenuA);
+            SmartTextEx(product.description, 0.0f, y, 1.0f, 0.3f, 0.3f, 0.3f, 0, 255, 255, 255, 1.9f, 1, NULL, 0,
+                        MenuA);
             y += text3d_height;
         }
     }
-    for (u32 i = 0; i < restoring_bundle_count; ++i) {
+    for (i32 i = 0; i < restoring_bundle_count; ++i) {
         if (NuIOS_GetInAppProductByID(StoreBundle[restoring_bundle_list[i]].name,
                                       reinterpret_cast<NuIOS_InAppProduct *>(&product)) != 0) {
-            SmartTextEx(product.name, 0.0f, y, 1.0f, 0.3f, 0.3f, 0.3f, 0, 255, 255, 255, 1.9f, 1, NULL, 0, MenuA);
+            SmartTextEx(product.description, 0.0f, y, 1.0f, 0.3f, 0.3f, 0.3f, 0, 255, 255, 255, 1.9f, 1, NULL, 0,
+                        MenuA);
             y += text3d_height;
         }
     }

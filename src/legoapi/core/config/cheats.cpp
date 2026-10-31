@@ -533,7 +533,7 @@ i32 Cheat_FindByName(char *name) {
 void Cheats_SetFlags() {
     i32 count = CheatSystem.cheats_count;
     CheatSystem.flags = 0;
-    if (count > 0) {
+    if (__builtin_expect(count > 0, 1)) {
         CHEAT *cheats = CheatSystem.cheats;
         i32 flags = 0;
         f32 powerup_time = Cheat_PowerUpTime;

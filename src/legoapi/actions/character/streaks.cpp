@@ -193,7 +193,7 @@ void ResetStreaks() {
     STREAK_s *free_streaks = streaks_free;
 
     do {
-        while (header->streaks != NULL) {
+        while (__builtin_expect(header->streaks != NULL, 1)) {
             STREAK_s *streak = header->streaks;
             UnlinkStreak(&header->streaks, streak);
             streak->next = free_streaks;
@@ -201,7 +201,7 @@ void ResetStreaks() {
         }
 
         if (header->owner_slot != NULL) {
-            if (*header->owner_slot == header) {
+            if (__builtin_expect(*header->owner_slot == header, 1)) {
                 *header->owner_slot = NULL;
             }
             header->owner_slot = NULL;
@@ -311,25 +311,28 @@ void AddStreakPoints(nuvec_s *points, float duration, u32 colour, void **handle,
     NuVecScale(&header->streaks->end_tangent, &header->streaks->end_tangent, 1.0f / 3.0f);
     streak = header->streaks;
     older = streak->next;
+    STREAK_s *oldest = older->next;
 
-    if (older->next == NULL) {
+    if (oldest == NULL) {
         NuVecSub(&older->start_tangent, &older->position, &streak->position);
-        NuVecSub(&older->end_tangent, &older->previous_position, &streak->previous_position);
+        NuVecSub(&header->streaks->next->end_tangent, &header->streaks->next->previous_position,
+                 &header->streaks->previous_position);
         NuVecScale(&header->streaks->next->start_tangent, &header->streaks->next->start_tangent, 1.0f / 3.0f);
         NuVecScale(&header->streaks->next->end_tangent, &header->streaks->next->end_tangent, 1.0f / 3.0f);
     } else {
-
         NuVecSub(&incoming, &older->position, &streak->position);
-        NuVecSub(&outgoing, &older->next->position, &older->position);
-        NuVecAddScale(&older->start_tangent, &incoming, &outgoing, 0.5f);
-        NuVecSub(&incoming, &older->previous_position, &streak->previous_position);
-        NuVecSub(&outgoing, &older->next->previous_position, &older->previous_position);
-        NuVecAddScale(&older->end_tangent, &incoming, &outgoing, 0.5f);
+        NuVecSub(&outgoing, &oldest->position, &older->position);
+        NuVecAddScale(&header->streaks->next->start_tangent, &incoming, &outgoing, 0.5f);
+        streak = header->streaks;
+        older = streak->next;
+        NUVEC *older_previous = &older->previous_position;
+        NUVEC *oldest_previous = &older->next->previous_position;
+        NuVecSub(&incoming, older_previous, &streak->previous_position);
+        NuVecSub(&outgoing, oldest_previous, older_previous);
+        NuVecAddScale(&header->streaks->next->end_tangent, &incoming, &outgoing, 0.5f);
         NuVecScale(&header->streaks->next->start_tangent, &header->streaks->next->start_tangent, 1.0f / 3.0f);
         NuVecScale(&header->streaks->next->end_tangent, &header->streaks->next->end_tangent, 1.0f / 3.0f);
-        older = header->streaks->next;
-        if (older->next != NULL && older->next->segment_count > 1)
-            CalculateStreakSegment(header, 1);
+        CalculateStreakSegment(header, 1);
     }
 
     streak = header->streaks;
@@ -340,11 +343,15 @@ void AddStreakPoints(nuvec_s *points, float duration, u32 colour, void **handle,
     NuVecNorm(&edge_a, &edge_a);
     NuVecNorm(&edge_b, &edge_b);
 
-    header->streaks->next->segment_count = static_cast<i32>(60.0f * FRAMETIME + 60.0f * FRAMETIME);
-    if (header->streaks->next->segment_count >= 8)
-        header->streaks->next->segment_count = 8;
-    if (header->streaks->next->segment_count < 2)
-        return;
+    STREAK_s *segment = header->streaks->next;
+    i32 count = static_cast<i32>(60.0f * FRAMETIME + 60.0f * FRAMETIME);
+    if (count < 8) {
+        segment->segment_count = count;
+        if (count < 2)
+            return;
+    } else {
+        segment->segment_count = 8;
+    }
     CalculateStreakSegment(header, 0);
 }
 
@@ -356,7 +363,8 @@ void DrawStreaks() {
         const u32 endpoint_colour = header->colour;
 
         while (streak != NULL && vertex_count < 254) {
-            const f32 fade = streak->remaining_time < 0.0f ? 0.0f : streak->remaining_time;
+            const f32 time = streak->remaining_time;
+            const f32 fade = time < 0.0f ? 0.0f : time;
             i32 alpha = static_cast<i32>(static_cast<f32>(endpoint_colour >> 24) * fade * 2.0f);
             if (alpha > 255)
                 alpha = 255;
@@ -382,17 +390,17 @@ void DrawStreaks() {
             if (segment_count < 2)
                 continue;
 
-            for (i32 index = 0; index < segment_count - 1; ++index) {
-                const f32 segment_fade = MAX(fade, 0.0f);
+            for (i32 index = 1; index < segment_count; ++index) {
+                const f32 segment_fade = MAX(time, 0.0f);
                 i32 segment_alpha = static_cast<i32>(static_cast<f32>(header->colour >> 24) * segment_fade * 2.0f);
                 if (segment_alpha > 255)
                     segment_alpha = 255;
                 const u32 segment_colour = (header->colour & 0x00ffffff) | (static_cast<u32>(segment_alpha) << 24);
 
-                vertices[vertex_count].position = streak->positions[index];
+                vertices[vertex_count].position = streak->positions[index - 1];
                 vertices[vertex_count].u = 0.01f;
                 vertices[vertex_count].colour = segment_colour;
-                vertices[vertex_count + 1].position = streak->tangents[index];
+                vertices[vertex_count + 1].position = streak->tangents[index - 1];
                 vertices[vertex_count + 1].colour = segment_colour;
                 vertices[vertex_count + 1].u = 1.01f;
                 vertex_count += 2;
@@ -405,6 +413,6 @@ void DrawStreaks() {
             vertices[index + 1].v = v;
         }
 
-        NuRndrTriStrip3dClip(vertices, vertex_count, NULL, header->flags == 0 ? streakmtl : streakmtl_ref);
+        NuRndrTriStrip3dClip(vertices, vertex_count, NULL, header->flags != 0 ? streakmtl_ref : streakmtl);
     }
 }

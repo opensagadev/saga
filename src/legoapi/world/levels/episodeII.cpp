@@ -434,18 +434,20 @@ void UpdatePaintPuzzle(WORLDINFO_s *world) {
                 }
             }
             if (used == 2) {
-                if ((paintsused[1] == 1 && paintsused[0] == 0) || (paintsused[1] == 0 && paintsused[0] == 1)) {
-                    paintmixed = 3;
-                } else if ((paintsused[0] == 2 && paintsused[1] == 1) || (paintsused[1] == 2 && paintsused[0] == 1)) {
-                    paintmixed = 4;
-                } else if (__builtin_expect((paintsused[1] == 2 && paintsused[0] == 0) ||
-                                                (paintsused[0] == 2 && paintsused[1] == 0),
-                                            0)) {
-                    paintmixed = 5;
+                i32 a = paintsused[0];
+                i32 b = paintsused[1];
+                i32 mixed;
+                if (__builtin_expect(a == 0 && b == 1, 1) || (a == 1 && b == 0)) {
+                    mixed = 3;
+                } else if ((b == 1 && a == 2) || (a == 1 && b == 2)) {
+                    mixed = 4;
+                } else if ((a == 0 && b == 2) || (b == 0 && a == 2)) {
+                    mixed = 5;
                 } else {
-                    paintmixed = -1;
+                    mixed = -1;
                 }
                 PAINTPUZZLESTAGE = 3;
+                paintmixed = mixed;
             } else {
                 for (i32 index = 0; index < 3; ++index) {
                     if (GizmoGetOutput(world->gizmo_sys, paintpanel[index], 0, 0) &&
@@ -466,17 +468,17 @@ void UpdatePaintPuzzle(WORLDINFO_s *world) {
                     GAMEANIMSET_STATE_AT_END) {
                     if (paintmixed == painttarget) {
                         ++painttry;
-                        if (painttry != 3) {
-                            PAINTPUZZLESTAGE = 0;
-                        } else {
+                        if (__builtin_expect(painttry == 3, 0)) {
                             PAINTPUZZLESTAGE = 4;
+                        } else {
+                            PAINTPUZZLESTAGE = 0;
                         }
                     } else {
                         randpaints[0] = qrand() / 21846;
                         do {
                             randpaints[1] = qrand() / 21846;
-                        } while (__builtin_expect(randpaints[1] == randpaints[0], 0));
-                        randpaints[2] = 3 - randpaints[0] - randpaints[1];
+                        } while (randpaints[1] == randpaints[0]);
+                        randpaints[2] = 3 - (randpaints[0] + randpaints[1]);
                         PAINTPUZZLESTAGE = 0;
                         painttry = 0;
                     }
@@ -676,7 +678,7 @@ void JediB_Update(WORLDINFO_s *world) {
         jedi_b.exclusion_mask = 0;
         // Not `timer >= 4.0f`: that form compares the other way round and is not
         // equivalent for NaN, and the original tests `4.0f > timer`.
-        if (jedi_b.timer < 4.0f) {
+        if (__builtin_expect(jedi_b.timer < 4.0f, 0)) {
             if (player != NULL) {
                 jedi_b.exclusion_mask = 1ULL << player->apiobj.field_0x289;
             }
@@ -748,7 +750,7 @@ void JediB_Update(WORLDINFO_s *world) {
                             while (jedi_b.baddies[index].in_wave != 0 || jedi_b.baddies[index].random_type == 0 ||
                                    jedi_b.baddies[index].id == id) {
                                 index++;
-                                if (__builtin_expect(index >= jedi_b.baddie_count, 0)) {
+                                if (index >= jedi_b.baddie_count) {
                                     index = 0;
                                 }
                             }
@@ -770,7 +772,7 @@ void JediB_Update(WORLDINFO_s *world) {
                     case 3:
                         for (JEDIB_PHASE_s *entry = phase_lists[jedi_b.phase - 1];
                              entry != NULL && entry->id != NULL && jedi_b.goody_count <= 7; entry++) {
-                            if (__builtin_expect(g_lowEndLevelBehaviour != 0 && jedi_b.goody_count == 5, 0)) {
+                            if (g_lowEndLevelBehaviour != 0 && jedi_b.goody_count == 5) {
                                 break;
                             }
 
@@ -1284,45 +1286,45 @@ void DookuC_Update(WORLDINFO_s *world) {
                 AIPATHNODE_s *node1;
                 AIPATHNODE_s *node2;
                 AIPATHNODE_s *node3;
-                if ((node0 = static_cast<AIPATHNODE_s *>(LevAIPathNode[0])) != NULL &&
+                if (__builtin_expect((node0 = static_cast<AIPATHNODE_s *>(LevAIPathNode[0])) != NULL &&
                     (node1 = static_cast<AIPATHNODE_s *>(LevAIPathNode[1])) != NULL &&
                     (node2 = static_cast<AIPATHNODE_s *>(LevAIPathNode[2])) != NULL &&
-                    (node3 = static_cast<AIPATHNODE_s *>(LevAIPathNode[3])) != NULL) {
+                    (node3 = static_cast<AIPATHNODE_s *>(LevAIPathNode[3])) != NULL, 1)) {
                     if (LevGizForce[0] == group->forces[0]) {
                         node0->position = {3.76f, 0.01f, -1.59f};
-                        if (LevGizForce[1] != group->forces[1]) {
-                            node1->position = {4.42f, 0.56f, -1.46f};
-                            node2->position = {4.66f, 1.12f, -1.08f};
-                            node3->position = {4.41f, 1.69f, -1.04f};
-                        } else {
+                        if (!(LevGizForce[1] != group->forces[1])) {
                             node1->position = {4.29f, 0.56f, -1.50f};
                             node2->position = {4.05f, 1.12f, -1.12f};
                             node3->position = {4.46f, 1.69f, -0.97f};
+                        } else {
+                            node1->position = {4.42f, 0.56f, -1.46f};
+                            node2->position = {4.66f, 1.12f, -1.08f};
+                            node3->position = {4.41f, 1.69f, -1.04f};
                         }
                     } else if (LevGizForce[1] == group->forces[0]) {
                         node0->position = {3.60f, 0.01f, -0.96f};
-                        if (LevGizForce[0] != group->forces[1]) {
-                            node1->position = {4.06f, 0.56f, -0.98f};
-                            node2->position = {4.37f, 1.12f, -0.81f};
-                            node3->position = {4.30f, 1.69f, -1.30f};
-                        } else {
+                        if (!(LevGizForce[0] != group->forces[1])) {
                             node1->position = {4.06f, 0.56f, -0.98f};
                             node2->position = {4.20f, 1.12f, -1.28f};
                             node3->position = {4.41f, 1.69f, -1.04f};
+                        } else {
+                            node1->position = {4.06f, 0.56f, -0.98f};
+                            node2->position = {4.37f, 1.12f, -0.81f};
+                            node3->position = {4.30f, 1.69f, -1.30f};
                         }
                     } else if (LevGizForce[2] == group->forces[0]) {
                         node0->position = {4.28f, 0.01f, -0.41f};
-                        if (LevGizForce[0] != group->forces[1]) {
-                            node1->position = {4.53f, 0.56f, -0.77f};
-                            node2->position = {4.20f, 1.12f, -0.91f};
-                            node3->position = {4.43f, 1.69f, -1.28f};
-                        } else {
+                        if (!(LevGizForce[0] != group->forces[1])) {
                             node1->position = {4.66f, 0.56f, -0.98f};
                             node2->position = {4.50f, 1.12f, -1.35f};
                             node3->position = {4.38f, 1.69f, -1.08f};
+                        } else {
+                            node1->position = {4.53f, 0.56f, -0.77f};
+                            node2->position = {4.20f, 1.12f, -0.91f};
+                            node3->position = {4.43f, 1.69f, -1.28f};
                         }
                     }
-                    if (world->ai_sys->path_sys != NULL && world->ai_sys->path_sys->active_path != NULL) {
+                    if (__builtin_expect(world->ai_sys->path_sys != NULL && world->ai_sys->path_sys->active_path != NULL, 1)) {
                         AIPathNodeUpdatePos(world->ai_sys, world->ai_sys->path_sys->active_path,
                                             static_cast<AIPATHNODE_s *>(LevAIPathNode[0]));
                         AIPathNodeUpdatePos(world->ai_sys, world->ai_sys->path_sys->active_path,
@@ -1521,85 +1523,49 @@ void KaminoC_Reset(WORLDINFO_s *world) {
 
 void KaminoC_Update(WORLDINFO_s *world) {
     KaminoProgressGizmo_s *progress = static_cast<KaminoProgressGizmo_s *>(LevGizmo[0]->object);
-    if (GizmoGetOutput(world->gizmo_sys, LevGizmo[0], 0, 0)) {
+    if (GizmoGetOutput(world->gizmo_sys, LevGizmo[0], 0, 0) ||
+        (__builtin_expect(!(progress->flags & 1), 0) && (GizmoActivate(world->gizmo_sys, LevGizmo[1], 1, 1),
+                                                         GizmoGetOutput(world->gizmo_sys, gizTurrets[0], 0, 0) &&
+                                                             GizmoGetOutput(world->gizmo_sys, gizTurrets[1], 0, 0))))
         GizmoSetVisibility(world->gizmo_sys, LevGizmo[1], 0, 1);
-    } else if (__builtin_expect(!(progress->flags & 1), 1)) {
-        GizmoActivate(world->gizmo_sys, LevGizmo[1], 1, 1);
-        if (GizmoGetOutput(world->gizmo_sys, gizTurrets[0], 0, 0) &&
-            GizmoGetOutput(world->gizmo_sys, gizTurrets[1], 0, 0))
-            GizmoSetVisibility(world->gizmo_sys, LevGizmo[1], 0, 1);
-    }
     kaminoc_netpacket->sound_mask = 0;
     SetGizAIMessage(gizaimessagesys, "NextDiscoTile", 0.0f, kaminodisco.next_tile_message);
     SetGizAIMessage(gizaimessagesys, "DiscoComplete", 0.0f, kaminodisco.complete_message);
-    switch (kaminodisco.phase) {
-        case 0:
-            if (KaminoDiscoPlayerInArea(world)) {
-                kaminoc_netpacket->complete = 0;
-                kaminodisco.phase = 1;
-                kaminodisco.timer = 0.0f;
-                kaminodisco.first_tile = KaminoDiscoChooseTile(-1, 0);
-                kaminodisco.second_tile = KaminoDiscoChooseTile(kaminodisco.first_tile, 0);
-                if (kaminodisco.first_tile != -1 && kaminodisco.second_tile != -1) {
-                    kaminodisco.tile_state[kaminodisco.first_tile] = 1;
-                    kaminodisco.tile_state[kaminodisco.second_tile] = 1;
-                }
+    if (kaminodisco.phase == 1) {
+        i32 occupied_by_player = -1;
+        i32 first_occupied = 0;
+        i32 second_occupied = 0;
+        u8 old_state = kaminodisco.tile_state[kaminodisco.first_tile];
+        kaminodisco.tile_state[kaminodisco.first_tile] = 1;
+        NUVEC *position = NuSpecialGetPos(&kaminodisco.pending[kaminodisco.first_tile]);
+        for (i32 i = 0; i < 8 && !first_occupied; ++i) {
+            GameObject_s *object = Player[i];
+            if (__builtin_expect(!!(KaminoDiscoOccupied(object, position)), 0)) {
+                first_occupied = 1;
+                if (object == player)
+                    occupied_by_player = kaminodisco.first_tile;
+                kaminodisco.tile_state[kaminodisco.first_tile] = 2;
             }
-            break;
-        case 1: {
-            i32 occupied_by_player = -1;
-            bool first_occupied = false;
-            bool second_occupied = false;
-            u8 old_state = kaminodisco.tile_state[kaminodisco.first_tile];
-            kaminodisco.tile_state[kaminodisco.first_tile] = 1;
-            NUVEC *position = NuSpecialGetPos(&kaminodisco.pending[kaminodisco.first_tile]);
-            for (i32 i = 0; i < 8; ++i) {
-                GameObject_s *object = Player[i];
-                if (__builtin_expect(!!(KaminoDiscoOccupied(object, position)), 0)) {
-                    first_occupied = true;
-                    if (object == player)
-                        occupied_by_player = kaminodisco.first_tile;
-                    kaminodisco.tile_state[kaminodisco.first_tile] = 2;
-                    break;
-                }
+        }
+        if (old_state != kaminodisco.tile_state[kaminodisco.first_tile] &&
+            __builtin_expect(kaminodisco.tile_state[kaminodisco.first_tile] == 2, 1))
+            kaminoc_netpacket->sound_mask |= 1u << (kaminodisco.first_tile & 31);
+        old_state = kaminodisco.tile_state[kaminodisco.second_tile];
+        kaminodisco.tile_state[kaminodisco.second_tile] = 1;
+        position = NuSpecialGetPos(&kaminodisco.pending[kaminodisco.second_tile]);
+        for (i32 i = 0; i < 8 && !second_occupied; ++i) {
+            GameObject_s *object = Player[i];
+            if (__builtin_expect(!!(KaminoDiscoOccupied(object, position)), 0)) {
+                second_occupied = 1;
+                if (__builtin_expect(!!(object == player), 1))
+                    occupied_by_player = kaminodisco.second_tile;
+                kaminodisco.tile_state[kaminodisco.second_tile] = 2;
             }
-            if (old_state != kaminodisco.tile_state[kaminodisco.first_tile] &&
-                kaminodisco.tile_state[kaminodisco.first_tile] == 2)
-                kaminoc_netpacket->sound_mask |= 1u << (kaminodisco.first_tile & 31);
-            old_state = kaminodisco.tile_state[kaminodisco.second_tile];
-            kaminodisco.tile_state[kaminodisco.second_tile] = 1;
-            position = NuSpecialGetPos(&kaminodisco.pending[kaminodisco.second_tile]);
-            for (i32 i = 0; i < 8; ++i) {
-                GameObject_s *object = Player[i];
-                if (__builtin_expect(!!(KaminoDiscoOccupied(object, position)), 0)) {
-                    second_occupied = true;
-                    if (object == player)
-                        occupied_by_player = kaminodisco.second_tile;
-                    kaminodisco.tile_state[kaminodisco.second_tile] = 2;
-                    break;
-                }
-            }
-            if (old_state != kaminodisco.tile_state[kaminodisco.second_tile] &&
-                kaminodisco.tile_state[kaminodisco.second_tile] == 2)
-                kaminoc_netpacket->sound_mask |= 1u << (kaminodisco.second_tile & 31);
-            if (first_occupied) {
-                if (second_occupied) {
-                    kaminodisco.timer = 0.0f;
-                    kaminodisco.tile_state[kaminodisco.first_tile] = 3;
-                    kaminodisco.tile_state[kaminodisco.second_tile] = 3;
-                    kaminodisco.first_tile = KaminoDiscoChooseTile(-1, 0);
-                    kaminodisco.second_tile = KaminoDiscoChooseTile(kaminodisco.first_tile, 0);
-                    if (!(kaminodisco.first_tile != -1 && kaminodisco.second_tile != -1)) {
-                        kaminodisco.phase = 2;
-                        for (i32 i = 0; i < kaminodisco.tile_count; ++i)
-                            kaminodisco.tile_state[i] = 0;
-                    } else {
-                        kaminodisco.tile_state[kaminodisco.first_tile] = 1;
-                        kaminodisco.tile_state[kaminodisco.second_tile] = 1;
-                    }
-                    break;
-                }
-            }
+        }
+        if (old_state != kaminodisco.tile_state[kaminodisco.second_tile] &&
+            __builtin_expect(kaminodisco.tile_state[kaminodisco.second_tile] == 2, 1))
+            kaminoc_netpacket->sound_mask |= 1u << (kaminodisco.second_tile & 31);
+        if (!(first_occupied && second_occupied)) {
             kaminodisco.timer += FRAMETIME;
             if (__builtin_expect(kaminodisco.timer > 2.5f, 1)) {
                 kaminodisco.timer = 0.0f;
@@ -1622,26 +1588,50 @@ void KaminoC_Update(WORLDINFO_s *world) {
                                         kaminodisco.next_tile_message);
                 }
             }
-            break;
+        } else {
+            kaminodisco.timer = 0.0f;
+            kaminodisco.tile_state[kaminodisco.first_tile] = 3;
+            kaminodisco.tile_state[kaminodisco.second_tile] = 3;
+            kaminodisco.first_tile = KaminoDiscoChooseTile(-1, 0);
+            kaminodisco.second_tile = KaminoDiscoChooseTile(kaminodisco.first_tile, 0);
+            if (kaminodisco.first_tile != -1 && kaminodisco.second_tile != -1) {
+                kaminodisco.tile_state[kaminodisco.first_tile] = 1;
+                kaminodisco.tile_state[kaminodisco.second_tile] = 1;
+            } else {
+                kaminodisco.phase = 2;
+                for (i32 i = 0; i < kaminodisco.tile_count; ++i)
+                    kaminodisco.tile_state[i] = 0;
+            }
         }
-        case 2:
-            SetGizAIMessage(gizaimessagesys, "DiscoComplete", 1.0f, kaminodisco.complete_message);
-            kaminoc_netpacket->complete = 1;
-            if (!KaminoDiscoPlayerInArea(world)) {
-                KaminoC_Reset(world);
-                return;
+    } else if (kaminodisco.phase == 2) {
+        SetGizAIMessage(gizaimessagesys, "DiscoComplete", 1.0f, kaminodisco.complete_message);
+        kaminoc_netpacket->complete = 1;
+        if (!KaminoDiscoPlayerInArea(world)) {
+            KaminoC_Reset(world);
+            return;
+        }
+        for (i32 i = 0; i < kaminodisco.tile_count; ++i)
+            kaminodisco.tile_state[i] = 4;
+        kaminodisco.timer += FRAMETIME;
+        if (__builtin_expect(kaminodisco.timer > 20.0f, 1)) {
+            KaminoC_Reset(world);
+            return;
+        }
+    } else if (kaminodisco.phase == 0) {
+        if (__builtin_expect(KaminoDiscoPlayerInArea(world), 0)) {
+            kaminoc_netpacket->complete = 0;
+            kaminodisco.phase = 1;
+            kaminodisco.timer = 0.0f;
+            kaminodisco.first_tile = KaminoDiscoChooseTile(-1, 0);
+            kaminodisco.second_tile = KaminoDiscoChooseTile(kaminodisco.first_tile, 0);
+            if (__builtin_expect(kaminodisco.first_tile != -1 && kaminodisco.second_tile != -1, 1)) {
+                kaminodisco.tile_state[kaminodisco.first_tile] = 1;
+                kaminodisco.tile_state[kaminodisco.second_tile] = 1;
             }
-            for (i32 i = 0; i < kaminodisco.tile_count; ++i)
-                kaminodisco.tile_state[i] = 4;
-            kaminodisco.timer += FRAMETIME;
-            if (__builtin_expect(kaminodisco.timer > 20.0f, 0)) {
-                KaminoC_Reset(world);
-                return;
-            }
-            break;
+        }
     }
-    kaminoc_netpacket->off_mask = 0;
     kaminoc_netpacket->final_mask = 0;
+    kaminoc_netpacket->off_mask = 0;
     kaminoc_netpacket->pending_mask = 0;
     kaminoc_netpacket->occupied_mask = 0;
     kaminoc_netpacket->complete_mask = 0;
@@ -1671,7 +1661,7 @@ void KaminoC_Update(WORLDINFO_s *world) {
         NuSpecialSetVisibility(&kaminodisco.occupied[i], kaminoc_netpacket->occupied_mask & bit);
         NuSpecialSetVisibility(&kaminodisco.final[i], kaminoc_netpacket->final_mask & bit);
         NuSpecialSetVisibility(&kaminodisco.complete[i], kaminoc_netpacket->complete_mask & bit);
-        if (kaminoc_netpacket->sound_mask & bit)
+        if ((kaminoc_netpacket->sound_mask >> i) & 1)
             PlaySfx("Kam_DiscoFloorPanelOn",
                     reinterpret_cast<NUVEC *>(&NuSpecialGetDrawMtx(&kaminodisco.complete[i])->m30));
     }
@@ -1864,7 +1854,7 @@ void KaminoE_Update(WORLDINFO_s *world) {
         desired.z +=
             ((NuTrigTable[(static_cast<i32>((0.25f * degrees) * 182.04444885253906f) >> 1) & 0x7fff] + 1.0f) * 0.5f) *
             0.2f;
-        if (__builtin_expect(kamino_e.minicut_started != NULL && kamino_e.minicut_started->value > 0.0f, 1))
+        if (kamino_e.minicut_started != NULL && kamino_e.minicut_started->value > 0.0f)
             NuSpecialSetVisibility(&kamino_e.slave1, 1);
         if (kamino_e.departing)
             PlaySfx("Slave1_EngineLp", &kamino_e.position);
@@ -2180,7 +2170,7 @@ void GunShip_DragBombSeekBlowUp(GameObject_s *object) {
             nearest = blowup;
         }
     }
-    if (nearest == NULL)
+    if (__builtin_expect(nearest == NULL, 0))
         return;
     NuVecNorm(&direction, &nearest_offset);
     f32 momentum = (1.0f - NuFsqrt(nearest_distance) / gunshipb_seekrange) * gunshipb_seekmom;

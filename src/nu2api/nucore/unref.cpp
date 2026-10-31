@@ -5,7 +5,7 @@
 i32 unref(unsigned char *source, unsigned char *destination) {
     unsigned char *output_start = destination;
     unsigned char *match;
-    i32 first;
+    unsigned char first;
     unsigned char second;
     unsigned char third;
     unsigned char fourth;
@@ -41,7 +41,7 @@ i32 unref(unsigned char *source, unsigned char *destination) {
             run = first & 3;
             while (run--)
                 *destination++ = *source++;
-            match = destination - 1 - (((first & 0x10) << 12) + (second << 8) + third);
+            match = destination - 1 - (((first << 12) & 0x10000) + (second << 8) + third);
             run = ((first & 0x0c) << 6) + fourth + 5 - 1;
             do {
                 *destination++ = *match++;
@@ -51,12 +51,13 @@ i32 unref(unsigned char *source, unsigned char *destination) {
             if (run <= 0x70) {
                 while (run--)
                     *destination++ = *source++;
-            } else {
-                run = first & 3;
-                while (run--)
-                    *destination++ = *source++;
-                return destination - output_start;
+                continue;
             }
+            break;
         }
     }
+    run = first & 3;
+    while (run--)
+        *destination++ = *source++;
+    return destination - output_start;
 }

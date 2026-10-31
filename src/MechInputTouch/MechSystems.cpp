@@ -711,7 +711,7 @@ void MechSystems::Process(ThingProcessData *) {
 
 MechSystems *MechSystems::Get() {
     static MechSystems *instance = NULL;
-    if (instance == NULL) {
+    if (__builtin_expect(instance == NULL, 1)) {
         instance = new MechSystems();
     }
     return instance;
@@ -770,8 +770,20 @@ void SwipeDecalRenderer::Render() {
     NuRndrPrimSetColour(colour);
     SWIPE_PRIM_UV(0.0f, uv_height);
     NuPrim2DAddXYZ(static_cast<f32>(PS2_VREZ_W) * vertices[2].x, static_cast<f32>(PS2_VREZ_H) * vertices[2].y, 0.0f);
-    NuRndrPrimSetColour(colour);
-    SWIPE_PRIM_UV(1.0f, uv_height);
+    {
+        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);
+        if (__builtin_expect(g_NuPrim_NeedsOverbrightening, 0))
+            vertex->color = colour;
+        else
+            vertex->color = ((static_cast<i32>(colour) >> 1) & 0x007f7f7f) | (colour & 0xff000000);
+        if (__builtin_expect(!g_NuPrim_NeedsHalfUVs, 1)) {
+            vertex->float_uv[0] = 1.0f;
+            vertex->float_uv[1] = uv_height;
+        } else {
+            vertex->half_uv[0] = NuRndrFloatToHalf(1.0f);
+            vertex->half_uv[1] = NuRndrFloatToHalf(uv_height);
+        }
+    }
     NuPrim2DAddXYZ(static_cast<f32>(PS2_VREZ_W) * vertices[3].x, static_cast<f32>(PS2_VREZ_H) * vertices[3].y, 0.0f);
     NuPrim2DEnd();
 }

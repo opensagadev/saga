@@ -156,8 +156,8 @@ static inline void TexQuadSubmit(NUVEC const &point, i32 colour, i32 u, i32 v) {
     if (!g_NuPrim_NeedsOverbrightening)
         vertex->colour = ((colour >> 1) & 0x7f7f7f) | (colour & 0xff000000);
     else
-        vertex->colour = colour;
-    if (g_NuPrim_NeedsHalfUVs) {
+        *reinterpret_cast<i32 *>(&vertex->colour) = colour;
+    if (__builtin_expect(g_NuPrim_NeedsHalfUVs, 0)) {
         vertex->half_uv[0] = u ? 0x3c00 : 0;
         vertex->half_uv[1] = v ? 0x3c00 : 0;
     } else {
@@ -167,26 +167,10 @@ static inline void TexQuadSubmit(NUVEC const &point, i32 colour, i32 u, i32 v) {
     NuPrim2DAddXYZ(static_cast<f32>(PS2_VREZ_W) * point.x, static_cast<f32>(PS2_VREZ_H) * point.y, 0.0f);
 }
 
-static inline void TexQuadSubmit3D(f32 x, f32 y, i32 colour, i32 u, i32 v) {
-    VARIPTR *stream = g_NuPrim_StreamBufferPtr;
-    TexQuadVertex *vertex = static_cast<TexQuadVertex *>(stream->void_ptr);
-    if (g_NuPrim_NeedsOverbrightening == 0) {
-        vertex->colour = ((colour >> 1) & 0x7f7f7f) | (colour & 0xff000000);
-    } else {
-        vertex->colour = colour;
-    }
-    if (g_NuPrim_NeedsHalfUVs == 0) {
-        vertex->uv[0] = static_cast<f32>(u);
-        vertex->uv[1] = static_cast<f32>(v);
-    } else {
-        vertex->half_uv[0] = u != 0 ? 0x3c00 : 0;
-        vertex->half_uv[1] = v != 0 ? 0x3c00 : 0;
-    }
-    vertex->x = x;
-    vertex->y = y;
-    vertex->z = 0.0f;
-    stream->u8_ptr += sizeof(TexQuadVertex);
-    ++g_NuPrim_VertexCount;
+static inline void TexQuadSubmit3D(f32 x, f32 y, u32 colour, f32 u, f32 v) {
+    NuRndrPrimSetColour(colour);
+    NuRndrPrimUV(u, v);
+    NuRndrPrimPosition(x, y, 0.0f);
 }
 
 extern i16 id_GAMORREANGUARD;
@@ -372,23 +356,28 @@ void MechTouchUITagButton::Render() {
         return;
     }
 
-    const f32 circle_x = (position.x + 1.0f) * 0.5f;
     const f32 circle_y = (1.0f - position.y) * 0.5f;
-    f32 pulse = 1.3f;
-    if (__builtin_expect(hovered == 0, 1)) {
-        pulse = (1.0f + NuTrigTable[(static_cast<i32>(timer_animation.value) >> 1) & 0x7fff]) * 0.5f;
+    const f32 circle_x = (position.x + 1.0f) * 0.5f;
+    f32 circle_radius = radius_x * RadMult;
+    f32 icon_size = TagButtonSize;
+    if (hovered != 0) {
+        circle_radius *= 1.3f;
+        icon_size *= 1.3f;
+    } else {
+        f32 pulse = (1.0f + NuTrigTable[(static_cast<i32>(timer_animation.value) >> 1) & 0x7fff]) * 0.5f;
         pulse = pulse * (static_cast<i8>(tag_state) > 0 ? 0.7f : 0.35f) + 0.9f;
+        circle_radius *= pulse;
+        icon_size *= pulse;
     }
-    const f32 circle_radius = radius_x * RadMult * pulse;
-    DrawCharIcon(target->id, position.x, position.y, position.z, TagButtonSize * pulse, 0xa6, first_fade.value,
+    DrawCharIcon(target->id, position.x, position.y, position.z, icon_size, 0xa6, first_fade.value,
                  hover_animation.value * first_fade.value, 1, NULL);
 
     numtl_s *material = MechSystems::Get()->tag_hold_background_material;
     const f32 circle_alpha = second_fade.value;
     const f32 depth = 0.002f + position.z;
     const f32 colour_alpha = first_fade.value * size_animation.value * 128.0f;
-    const f32 aspect = GetAspectRatio();
     const i32 colour = (static_cast<i32>(colour_alpha) << 24) | 0x808080;
+    const f32 aspect = GetAspectRatio();
     RndrUnfilledCircle(circle_x, circle_y, circle_radius, BorderWidth, aspect, colour, circle_alpha, depth, material);
 }
 
@@ -488,33 +477,25 @@ void MechTouchUIPartySelector_OnRelease_Callback(MechTouchUIElement &element, To
         Hint_SetComplete(0x5f5);
         NewPlayerCharacter(player, icon.character_id, player->id, 1);
         GameAudio_PlaySfx(0x24, NULL, 0, 0);
-        player->pause_input_state = 0;
-        return;
-    }
-
-    Hint_SetComplete(0x5f4);
-    GameObject_s *target = NULL;
-    for (i32 i = 0; i < 8; ++i) {
-        if (Player[i] != NULL && Player[i]->id == icon.character_id) {
-            target = Player[i];
-            break;
-        }
-    }
-    if (target != NULL) {
-        bool tagged = false;
-        if (__builtin_expect((target->field_0xf00 & 2) == 0, 1)) {
-            if (TagCode(player, target, 0, 0, 1) == 1) {
-                Tag_NewTransfer(player, target);
-                tagged = true;
+    } else {
+        Hint_SetComplete(0x5f4);
+        for (i32 i = 0; i < 8; ++i) {
+            GameObject_s *target = Player[i];
+            if (target != NULL && target->id == icon.character_id) {
+                if (target->field_0xf00 & 2) {
+                    TakeOver2GetIn(target, player);
+                    GameAudio_PlaySfx(0x21, NULL, 0, 0);
+                } else {
+                    GameObject_s *p = player;
+                    if (TagCode(p, target, 0, 0, 1) == 1) {
+                        Tag_NewTransfer(p, target);
+                        GameAudio_PlaySfx(0x21, NULL, 0, 0);
+                    }
+                }
+                Player[i]->pause_input_state = 0;
+                break;
             }
-        } else {
-            TakeOver2GetIn(target, player);
-            tagged = true;
         }
-        if (tagged) {
-            GameAudio_PlaySfx(0x21, NULL, 0, 0);
-        }
-        target->pause_input_state = 0;
     }
     player->pause_input_state = 0;
 }
@@ -573,7 +554,7 @@ void MechTouchUIPlayerButton::TriggerTagNext() {
         i32 target_count = 0;
         for (i32 slot = 0; slot < 8; ++slot) {
             GameObject_s *target = Player[slot];
-            if (target != NULL && (static_cast<u16>(target->apiobj.field_0x1f8) & 0x1001) == 0x1001) {
+            if (__builtin_expect(target != NULL && (static_cast<u16>(target->apiobj.field_0x1f8) & 0x1001) == 0x1001, 1)) {
                 target_ids[target_count++] = target->id;
             }
         }
@@ -599,7 +580,7 @@ void MechTouchUIPlayerButton::TriggerTagNext() {
         if (target_ids[index] >= 0) {
             for (i32 slot = 0; slot < 8; ++slot) {
                 GameObject_s *target = Player[slot];
-                if (target != NULL) {
+                if (__builtin_expect(target != NULL, 1)) {
                     if (target->id == target_ids[index]) {
                         if (!(!TouchHacks::CanTagTo(*player, *target))) {
                             if (TagCode(player, target, 0, 0, 1) == 1) {
@@ -612,7 +593,7 @@ void MechTouchUIPlayerButton::TriggerTagNext() {
                 }
             }
         }
-        if (index == current_index) {
+        if (__builtin_expect(index == current_index, 0)) {
             return;
         }
         ++index;
@@ -628,6 +609,24 @@ void PlayerButton_OnClick_Callback_NextButton(MechTouchUIElement &element, Touch
     } else {
         GameAudio_PlaySfx(0x32, NULL, 0, 0);
     }
+}
+
+static bool IsCheatBonusChar(i32 id) {
+    return VehicleArea != 0 && BonusArea != 0 && Cheats_CheckFlags(0x100) != 0 &&
+           (GCDataList[id].flags_094[3] & 2) != 0;
+}
+
+static i32 IsCharUnlocked(i32 id, i32 collected) {
+    if (static_cast<i32>(GCDataList[id].flags_090) < 0) {
+        return Cheats_CheckFlags(0x100);
+    }
+    if (collected == -1) {
+        return GCDataList[id].flags_094[3] & 1;
+    }
+    if (GCDataList[id].flags_094[3] & 1) {
+        return 1;
+    }
+    return Collection_Got(id);
 }
 
 void MechTouchUIPlayerButton::SetupTargetIds() {
@@ -662,16 +661,12 @@ void MechTouchUIPlayerButton::SetupTargetIds() {
         const i32 id = model.model_id;
         const i32 collected = InCollectList_Index(id, NULL, 0);
         if (!(collected == -1 && static_cast<i32>(GCDataList[id].flags_090) >= 0 &&
-              (GCDataList[id].flags_094[3] & 1) == 0 &&
-              !(VehicleArea != 0 && BonusArea != 0 && Cheats_CheckFlags(0x100) != 0 &&
-                (GCDataList[id].flags_094[3] & 2) != 0))) {
+              (GCDataList[id].flags_094[3] & 1) == 0 && !IsCheatBonusChar(id))) {
 
             if (VehicleArea != 0) {
                 const u32 model_flags = CDataList[id].model_flags;
-                if ((model_flags & 0x2000) == 0 && !(BonusArea != 0 && (model_flags & 0x4000000) != 0) &&
-                    static_cast<i32>(GCDataList[id].flags_090) >= 0 &&
-                    !(VehicleArea != 0 && BonusArea != 0 && Cheats_CheckFlags(0x100) != 0 &&
-                      (GCDataList[id].flags_094[3] & 2) != 0)) {
+                if (__builtin_expect((model_flags & 0x2000) == 0 && !(BonusArea != 0 && (model_flags & 0x4000000) != 0) &&
+                    static_cast<i32>(GCDataList[id].flags_090) >= 0 && !IsCheatBonusChar(id), 0)) {
                     continue;
                 }
 
@@ -681,32 +676,21 @@ void MechTouchUIPlayerButton::SetupTargetIds() {
                         if (Game_AreaSave == NULL || Game_AreaSave[area].minikit_complete == 0) {
                             continue;
                         }
-                    } else if (static_cast<i32>(GCDataList[id].flags_090) >= 0 &&
-                               !(VehicleArea != 0 && BonusArea != 0 && Cheats_CheckFlags(0x100) != 0 &&
-                                 (GCDataList[id].flags_094[3] & 2) != 0)) {
+                    } else if (static_cast<i32>(GCDataList[id].flags_090) >= 0 && !IsCheatBonusChar(id)) {
                         continue;
                     }
                 }
-            } else if ((CDataList[id].model_flags & 0x2000) == 0 && (GCDataList[id].flags_090 & 0x40) == 0) {
+            } else if (__builtin_expect((CDataList[id].model_flags & 0x2000) != 0 || (GCDataList[id].flags_090 & 0x40) != 0, 1)) {
+                continue;
+            }
 
-                if (BonusArea == 0 || VehicleArea == 0) {
-                    if (!(static_cast<i32>(GCDataList[id].flags_090) < 0)) {
-                        if ((GCDataList[id].flags_094[3] & 1) == 0) {
-                            if (collected == -1 || Collection_Got(id) == 0) {
-                                continue;
-                            }
-                        }
-                    } else {
-                        if (Cheats_CheckFlags(0x100) == 0) {
-                            continue;
-                        }
-                    }
-                }
+            if ((BonusArea == 0 || VehicleArea == 0) && !IsCharUnlocked(id, collected)) {
+                continue;
+            }
 
-                free_play_target_ids[free_play_count++] = id;
-                if (free_play_count == 32) {
-                    return;
-                }
+            free_play_target_ids[free_play_count++] = id;
+            if (free_play_count == 32) {
+                return;
             }
         }
     }

@@ -255,8 +255,18 @@ __attribute__((optimize("O2", "tree-vectorize"))) void Tag_DrawIcon_Batman(GameO
     ADDGAMEMSG_ALIGNED16 message = AddGameMsg_Default;
     const f32 pulse_alpha = (game_pulse * 0.2f + 0.8f) * 128.0f;
     const u8 index = static_cast<u8>(object->apiobj.field_0x27c);
-    const u8 third_color = index < 1 ? 255 : 0;
-    const u8 first_color = index < 1 ? 127 : 255;
+    u8 red;
+    u8 first_color;
+    u8 third_color;
+    if (index < 1) {
+        red = 0;
+        first_color = 127;
+        third_color = 255;
+    } else {
+        red = 63;
+        first_color = 255;
+        third_color = 0;
+    }
     const u8 alpha = static_cast<u8>(static_cast<i32>(pulse_alpha * object->pause_context_state));
 
     NUVEC_ALIGNED16 position;
@@ -272,22 +282,16 @@ __attribute__((optimize("O2", "tree-vectorize"))) void Tag_DrawIcon_Batman(GameO
         f32 x_sum = 0.0f;
         f32 z_sum = 0.0f;
         count = 0;
-        if (__builtin_expect(model->points_of_interest[0] != NULL, 1)) {
-            const f32 x = object->joint_matrices[0].m30;
-            count = 1;
-            const f32 y = object->joint_matrices[0].m31;
-            x_sum += x;
-            max_y = MAX(max_y, y);
-            z_sum += object->joint_matrices[0].m32;
-        }
 #define TAG_INCLUDE_POI(index)                                                                                         \
-    if (model->points_of_interest[index] != NULL) {                                                                    \
-        const f32 y = object->joint_matrices[index].m31;                                                               \
-        ++count;                                                                                                       \
-        x_sum += object->joint_matrices[index].m30;                                                                    \
-        z_sum += object->joint_matrices[index].m32;                                                                    \
-        max_y = y > max_y ? y : max_y;                                                                                 \
+    if (__builtin_expect(model->points_of_interest[index] != NULL, 1)) {                                               \
+        NUMTX *m = &object->joint_matrices[index];                                                                     \
+        count++;                                                                                                       \
+        x_sum += m->m30;                                                                                               \
+        z_sum += m->m32;                                                                                               \
+        if (m->m31 > max_y)                                                                                            \
+            max_y = m->m31;                                                                                            \
     }
+        TAG_INCLUDE_POI(0)
         TAG_INCLUDE_POI(1)
         TAG_INCLUDE_POI(2)
         TAG_INCLUDE_POI(3)
@@ -303,22 +307,25 @@ __attribute__((optimize("O2", "tree-vectorize"))) void Tag_DrawIcon_Batman(GameO
         TAG_INCLUDE_POI(13)
         TAG_INCLUDE_POI(14)
         TAG_INCLUDE_POI(15)
-        if (__builtin_expect(count != 0, 0)) {
+        if (count != 0) {
             const f32 inv_count = 1.0f / static_cast<f32>(count);
-            position.x = (x_sum * inv_count + position.x) * 0.5f;
+            position.x = (inv_count * x_sum + position.x) * 0.5f;
             position.y = ((max_y + 0.05f) + position.y) * 0.5f;
-            position.z = (z_sum * inv_count + position.z) * 0.5f;
+            position.z = (inv_count * z_sum + position.z) * 0.5f;
         }
     }
 
     message = AddGameMsg_Default;
     message.position = &position;
-    message.red = first_color;
+    message.red = red;
     message.green = first_color;
     message.blue = third_color;
     message.alpha = alpha;
-    message.field_0x34 = index == 1 ? 0.002f : 0.0f;
     message.field_0x4e = 2;
+    message.field_0x34 = 0.0f;
+    if (__builtin_expect(index == 1, 0)) {
+        message.field_0x34 = 0.002f;
+    }
     message.text = ASCII_DOWN;
     message.flags = 0x1087;
     message.scale = 2.0f;
@@ -332,7 +339,7 @@ __attribute__((optimize("O2", "tree-vectorize"))) void Tag_DrawIcon_Batman(GameO
     message.extra_position = reinterpret_cast<NUVEC *>(&WORLD->lev_objs[message.icon]);
     AddGameMsg(&message);
 
-    message.icon = index < 1 ? 0xa6 : 0xa5;
+    message.icon = static_cast<u8>(object->apiobj.field_0x27c) < 1 ? 0xa6 : 0xa5;
     message.extra_position = reinterpret_cast<NUVEC *>(&WORLD->lev_objs[message.icon]);
     AddGameMsg(&message);
 }

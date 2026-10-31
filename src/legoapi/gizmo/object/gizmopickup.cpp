@@ -358,7 +358,7 @@ void EndScoreMessage(GAMEMESSAGE_s *message) {
             IncreaseScore(&SuperStoryScore, data->score, 0);
         } else {
             WORLDINFO_s *world = WorldInfo_CurrentlyActive();
-            if (world->area != NULL && (world->area->flags & 0x100) != 0) {
+            if (__builtin_expect(world->area != NULL && (world->area->flags & 0x100) != 0, 1)) {
                 if (static_cast<u32>(BonusCoinTotal) < BonusCoinTarget) {
                     IncreaseScore(reinterpret_cast<u32 *>(&BonusCoinTotal), data->score, 0);
                     if (static_cast<u32>(BonusCoinTotal) >= BonusCoinTarget) {
@@ -460,7 +460,7 @@ static void Pup_UpdatePurpleCoin(WORLDINFO_s *, GIZMOPICKUP_s *pickup) {
         return;
     }
     f32 rate = 5.0f;
-    if (WORLD->area != NULL && (WORLD->area->flags & 0x104) == 4) {
+    if (__builtin_expect(WORLD->area != NULL && (WORLD->area->flags & 0x104) == 4, 1)) {
         rate = 2.5f;
     }
     i32 count = ParticlesPerSecond(rate, FRAMETIME);
@@ -543,7 +543,7 @@ static void Pup_UpdateBlueCoin(WORLDINFO_s *, GIZMOPICKUP_s *pickup) {
         return;
     }
     f32 rate = 5.0f;
-    if (WORLD->area != NULL && (WORLD->area->flags & 0x104) == 4) {
+    if (__builtin_expect(WORLD->area != NULL && (WORLD->area->flags & 0x104) == 4, 1)) {
         rate = 2.5f;
     }
     i32 count = ParticlesPerSecond(rate, FRAMETIME);
@@ -637,7 +637,7 @@ void CollectPowerUp(GameObject_s *object, NUVEC *position, u16 rotation, i32) {
         message.player_index = object->apiobj.field_0x27c;
         message.duration = 1.0f;
         GAMEMESSAGE_s *game_message = AddGameMsg(&message);
-        if (game_message != NULL) {
+        if (__builtin_expect(game_message != NULL, 1)) {
             game_message->rotation_y = panel_rotation;
             PowerUp_PanelYRot[object->apiobj.field_0x27c] = panel_rotation;
         }
@@ -667,10 +667,10 @@ void PowerUp_Update(GameObject_s *object) {
 void GizmoPickup_CollectCoin(WORLDINFO_s *world, nuvec_s *position, i32 type_index, i32 model_variant,
                              GameObject_s *object, i32) {
     i32 player_index;
-    if (object != NULL) {
+    if (__builtin_expect(object != NULL, 1)) {
         player_index = object->apiobj.field_0x27c;
     } else {
-        i32 player0_active = Player[0] == NULL ? 0 : Player[0]->apiobj.player_controlled;
+        i32 player0_active = __builtin_expect(Player[0] == NULL, 0) ? 0 : Player[0]->apiobj.player_controlled != 0;
         if (__builtin_expect(Player[1] == NULL || !Player[1]->apiobj.player_controlled, 0)) {
             if (__builtin_expect(player0_active == 0, 0)) {
                 return;
@@ -686,15 +686,20 @@ void GizmoPickup_CollectCoin(WORLDINFO_s *world, nuvec_s *position, i32 type_ind
         return;
     }
 
-    if ((type_index == 2 || type_index == 3) && object != NULL) {
-        if (world->area != NULL && (world->area->flags & AREAFLAG_SUPER_BONUS_AREA) == AREAFLAG_BONUS_AREA) {
-            NewBuzzFrames(object->pad_gamepad->pad, 1, 0);
-        } else {
-            NewBuzz(object->pad_gamepad->pad, 0.1f, 0);
-        }
+    switch (type_index) {
+        case 2:
+        case 3:
+            if (object != NULL) {
+                if (world->area != NULL &&
+                    __builtin_expect((world->area->flags & AREAFLAG_SUPER_BONUS_AREA) == AREAFLAG_BONUS_AREA, 0)) {
+                    NewBuzzFrames(object->pad_gamepad->pad, 1, 0);
+                } else {
+                    NewBuzz(object->pad_gamepad->pad, 0.1f, 0);
+                }
+            }
     }
 
-    if (!(DoubleScoreTime <= 0.0f) || type_index == 2 || type_index == 3) {
+    if (DoubleScoreTime > 0.0f || type_index == 2 || type_index == 3) {
         PlaySfx(const_cast<char *>("PickupCoinB"), position);
     } else {
         PlaySfx(const_cast<char *>("PickupCoin"), position);
@@ -703,7 +708,7 @@ void GizmoPickup_CollectCoin(WORLDINFO_s *world, nuvec_s *position, i32 type_ind
     i32 main_total;
     NUVEC target_position;
     f32 target_scale;
-    if (CoinsGoToMainTotal() != 0) {
+    if (__builtin_expect(CoinsGoToMainTotal() != 0, 1)) {
         main_total = 1;
         target_position.x = cointotal_x[player_index];
         target_position.y = STATSPOSY;
@@ -720,33 +725,32 @@ void GizmoPickup_CollectCoin(WORLDINFO_s *world, nuvec_s *position, i32 type_ind
 
     GIZMO_PICKUP_TYPE *type = &GizmoPickupType[type_index];
     const i32 model_id = static_cast<i16>(type->first_model_id) + model_variant;
-    if (__builtin_expect(model_id != -1 && world->lev_objs[model_id].active != 0, 0)) {
+    if (model_id != -1 && world->lev_objs[model_id].active != 0) {
 
         ADDGAMEMSG message = AddGameMsg_Default;
-        message.target_scale = target_scale;
-        u32 score = type->score;
-        if (object != NULL && object->coinpacket != NULL) {
-            if (((DoubleScore >> player_index) & 1) != 0) {
-                score *= 2;
+        message.icon = static_cast<i16>(model_id);
+        message.extra_position = reinterpret_cast<nuvec_s *>(&world->lev_objs[message.icon]);
+        message.player_index = static_cast<i8>(player_index);
+        message.score = type->score;
+        if (__builtin_expect(object != NULL && object->coinpacket != NULL, 1)) {
+            if (__builtin_expect(((DoubleScore >> player_index) & 1) != 0, 0)) {
+                message.score *= 2;
             }
             if (object->field_0xdec > 0.0f) {
-                score *= 2;
+                message.score *= 2;
             }
         }
-
-        message.target_position = &target_position;
-        message.position = position;
-        message.scale = PANEL_COINSCALE_START * AreaPickupScale;
-        message.flags = 0x2012d;
-        message.duration = COINMSGTIME;
-        message.icon = static_cast<i16>(model_id);
-        message.extra_position = reinterpret_cast<nuvec_s *>(&world->lev_objs[model_id]);
-        message.score = score;
         if (main_total != 0) {
             message.update_fn = GameMsg_DrawAdjustNewPos_CoinToTotal;
         }
+        message.flags = 0x2012d;
+        message.target_scale = target_scale;
+        message.position = position;
+        message.scale = PANEL_COINSCALE_START * AreaPickupScale;
+        message.target_position = &target_position;
         message.end_fn = EndScoreMessage;
-        message.player_index = static_cast<i8>(player_index);
+        message.duration = COINMSGTIME;
+
         AddGameMsg(&message);
     }
 }
@@ -973,7 +977,7 @@ void CollectHitPoint(GameObject_s *object, NUVEC *position, i32) {
         if (static_cast<i8>(object->current_hp) > object->hitpoints)
             object->current_hp = object->hitpoints;
     }
-    if (object->field_0xe38 < 4) {
+    if (__builtin_expect(object->field_0xe38 < 4, 1)) {
         object->field_0xe38 += TouchHacks::TouchControlsActive ? 2 : 1;
         if (object->field_0xe38 == 5)
             object->field_0xe38 = 4;
@@ -1032,7 +1036,7 @@ i32 ReleaseHearts() {
     }
 
     missing_hitpoints -= Game.save_version;
-    if (Game.save_version <= 5) {
+    if (__builtin_expect(Game.save_version <= 5, 0)) {
         missing_hitpoints += 8;
     } else {
         missing_hitpoints += 9;
@@ -1075,7 +1079,7 @@ static __used__ void PartStolen_Coin(PART_s *part) {
         return;
     GameObject_s *recipient = Player[0];
     i32 first_active = recipient != NULL && static_cast<i8>(recipient->apiobj.flags_low) < 0;
-    if (Player[1] != NULL && static_cast<i8>(Player[1]->apiobj.flags_low) < 0) {
+    if (__builtin_expect(Player[1] != NULL && static_cast<i8>(Player[1]->apiobj.flags_low) < 0, 0)) {
         recipient = Player[1];
         if (first_active)
             recipient = Player[qrand() / 0x8000];
@@ -1156,12 +1160,14 @@ void AddCoinsToPanel(i32 coins, nuvec_s *position, i32 player, float, GameObject
             player = -1;
         NUVEC target;
         target.x = player == 1 ? PANEL_COINX : -PANEL_COINX;
-        i32 main_total = CoinsGoToMainTotal() != 0;
+        i32 main_total;
         f32 target_scale;
-        if (__builtin_expect(main_total != 0, 0)) {
+        if (CoinsGoToMainTotal()) {
+            main_total = 1;
             target.y = STATSPOSY;
             target_scale = COINTOTAL_COINSIZE;
         } else {
+            main_total = 0;
             target.y = STATSPOSY + PANEL_COINY;
             target_scale = PANEL_COINSCALE_END;
         }
@@ -1179,19 +1185,19 @@ void AddCoinsToPanel(i32 coins, nuvec_s *position, i32 player, float, GameObject
                 if (world->lev_objs[model].active == 0 || __builtin_expect(player == -1, 0))
                     continue;
                 ADDGAMEMSG_ALIGNED16 message = AddGameMsg_Default;
-                message.position = position;
-                message.target_position = &target;
-                message.target_scale = target_scale;
                 message.icon = model;
+                message.position = position;
                 message.extra_position = reinterpret_cast<NUVEC *>(&world->lev_objs[message.icon]);
-                message.end_fn = EndScoreMessage;
                 message.score = type->score;
+                message.target_scale = target_scale;
                 message.player_index = player;
-                message.field_0x4d = 1;
+                message.duration = COINMSGTIME;
                 message.field_0x20 = AddCoinDelay[player];
+                message.target_position = &target;
                 message.flags = 0x12d;
                 message.scale = 1.0f;
-                message.duration = COINMSGTIME;
+                message.field_0x4d = 1;
+                message.end_fn = EndScoreMessage;
                 if (main_total) {
                     message.update_fn = GameMsg_DrawAdjustNewPos_CoinToTotal;
                     message.field_0x4e = 1;
@@ -1212,6 +1218,7 @@ void AddPickups(i32 coins, i32 hearts, i32 torpedoes, i32 powerups, nuvec_s *pos
     if ((arcade_flags & 0x40) != 0)
         coins = torpedoes = 0;
     i32 to_panel;
+    AREADATA_s *area = world->area;
     if ((world->current_level->flags & LEVEL_PICKUPS_TO_PANEL) != 0) {
         to_panel = 1;
         if (__builtin_expect(player_id == -1, 0)) {
@@ -1222,13 +1229,16 @@ void AddPickups(i32 coins, i32 hearts, i32 torpedoes, i32 powerups, nuvec_s *pos
             else
                 player_id = 1;
         }
-    } else if (world->area != NULL && (world->area->flags & 0x100) != 0) {
+    } else if (area != NULL && (area->flags & 0x100) != 0) {
         player_id = qrand() / 32768;
         to_panel = 1;
     } else {
         to_panel = player_id == -1 ? 0 : panel;
     }
-    coins = ChallengeMode != 0 || Mission_Active(NULL) != NULL ? 0 : coins;
+    if (ChallengeMode != 0)
+        coins = 0;
+    else if (Mission_Active(NULL) != NULL)
+        coins = 0;
     if (speed == 1.0f)
         speed = scale;
     u8 counts[10] = {};

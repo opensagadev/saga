@@ -449,9 +449,14 @@ static i32 IsTextBreak(unsigned char *text, i32 index) {
     const u8 ch = text[index];
     if (ch == ' ') {
         const u8 next = text[index + 1];
-        if (next == '?' || next == '!' || next == ';' || next == ':') {
+        if (next == '?')
             return 0;
-        }
+        if (next == '!')
+            return 0;
+        if (next == ';')
+            return 0;
+        if (next == ':')
+            return 0;
         return 1;
     }
     if (ch == '.') {
@@ -681,7 +686,7 @@ void MenuInitialiseEx(MENUFNINFO *menu_info, i32 menu_id_count, i32 language_cou
     // record for menu_id_count - 1.
     for (i32 i = 0; i < menu_ids_used; i++) {
         MenuInfo[RESERVED_MENUS_COUNT + i] = menu_info[i];
-        if (!(menu_info[i].id >= menu_ids_used - 1)) {
+        if (__builtin_expect(!(menu_info[i].id >= menu_ids_used - 1), 1)) {
             continue;
         }
         break;
@@ -821,11 +826,14 @@ extern "C" void NewMenu(i32 menu_id, i32 menu_y, i32 param3) {
         return;
     }
 
-    if (GameMenuLevel + 1 < 10) {
-        ++GameMenuLevel;
+    i32 level = GameMenuLevel;
+    i32 next = level + 1;
+    if (next < 10) {
+        GameMenuLevel = next;
+        level = next;
     }
 
-    MENU *menu = &GameMenu[GameMenuLevel];
+    MENU *menu = &GameMenu[level];
     menu->menu_time = 0.0f;
     menu->unk = 0.0f;
     menu->menu = static_cast<i16>(menu_index);
@@ -858,16 +866,16 @@ extern "C" void NewMenu(i32 menu_id, i32 menu_y, i32 param3) {
     if (MenuInfo[menu->menu].memory_x != -1) {
         menu->selected_column = MenuInfo[menu->menu].memory_x;
     }
-    if (__builtin_expect(menu->selected_column < menu->first_column, 1)) {
+    if (menu->selected_column < menu->first_column) {
         menu->selected_column = menu->first_column;
-    } else if (__builtin_expect(menu->selected_column > menu->last_column, 0)) {
+    } else if (menu->selected_column > menu->last_column) {
         menu->selected_column = menu->last_column;
     }
     if (menu_y < menu->first_row || menu_y > menu->last_row) {
         if (MenuInfo[menu->menu].memory_y != -1) {
             menu->selected_row = MenuInfo[menu->menu].memory_y;
         }
-        if (menu->selected_row < menu->first_row) {
+        if (__builtin_expect(menu->selected_row < menu->first_row, 0)) {
             menu->selected_row = menu->first_row;
         } else if (menu->selected_row > menu->last_row) {
             menu->selected_row = menu->last_row;
@@ -1067,7 +1075,7 @@ void MenuUpdateDeleting(MENU_s *) {
             memcard_deleteresult_delay = 1.5f;
             return;
         }
-        if (memcard_deleteresult_delay <= 0.0f)
+        if (__builtin_expect(memcard_deleteresult_delay <= 0.0f, 1))
             BackupMenu();
         return;
     }
@@ -1149,7 +1157,7 @@ void MenuUpdateFormatCancel(MENU_s *menu) {
             if (previous_id == 1000) {
                 BackupMenuNoFn();
                 NewMenu(1016, 1, -1);
-            } else if (previous_id == 1012) {
+            } else if (__builtin_expect(previous_id == 1012, 0)) {
                 BackupMenuNoFn();
                 NewMenu(1017, 1, -1);
             } else {
@@ -1159,7 +1167,7 @@ void MenuUpdateFormatCancel(MENU_s *menu) {
             BackupMenuNoFn();
             NewMenu(1006, 1, -1);
         }
-    } else if (menu->cancel_pressed != 0) {
+    } else if (__builtin_expect(menu->cancel_pressed != 0, 1)) {
         MenuSFX = MENUSFX_MENUSELECT;
         BackupMenuNoFn();
         NewMenu(1006, 1, -1);
@@ -1229,7 +1237,7 @@ void MenuUpdateAutoSaveWarning(MENU_s *menu) {
 }
 
 void MenuUpdateSaving(MENU_s *) {
-    if (memcard_saveneeded != 0) {
+    if (__builtin_expect(memcard_saveneeded != 0, 1)) {
         memcard_savemessage_delay = 1.0f;
         memcard_saveresult_delay = 1.0f;
         if (saveload_cardtype == -1 || memcard_cardchanged != 0) {
@@ -1575,7 +1583,7 @@ void MenuUpdateSave(MENU_s *menu) {
             if (saveload_slotused[slot] != 0) {
                 memcard_slot = slot;
                 NewMenu(1008, 1, -1);
-            } else if (saveload_freespace >= SAVESIZE_ADDITIONAL) {
+            } else if (__builtin_expect(saveload_freespace >= SAVESIZE_ADDITIONAL, 1)) {
                 memcard_slot = slot;
                 MenuStartSave();
                 NewMenu(1009, 0, -1);
@@ -1904,7 +1912,7 @@ extern "C" {
             up_held = down_held = 0;
         if (left_held != 0 && right_held != 0)
             left_held = right_held = 0;
-        if (action_04_pressed != 0 && action_08_pressed != 0)
+        if (__builtin_expect(action_04_pressed != 0 && action_08_pressed != 0, 1))
             action_04_pressed = action_08_pressed = 0;
 
         menu->input_activity = 0;
@@ -1971,12 +1979,12 @@ extern "C" {
                     menu->selected_row = last_row;
                     row_clamped = true;
                 } else if (down_pressed != 0 && (wrap || menu->selected_row < last_row)) {
-                    if (__builtin_expect(!wrap, 0)) {
-                        ++menu->selected_row;
-                    } else {
+                    if (__builtin_expect(wrap, 1)) {
                         ++menu->selected_row;
                         if (menu->selected_row > last_row)
                             menu->selected_row = first_row;
+                    } else {
+                        ++menu->selected_row;
                     }
                 } else if (up_pressed != 0 && (wrap || menu->selected_row > first_row)) {
                     if (!wrap) {
@@ -1999,23 +2007,23 @@ extern "C" {
             previous_item = old_row;
             const bool column_navigation = menu->state == 1 || (menu->state == 2 && menu->selected_row == 0) ||
                                            (menu->state == 3 && menu->selected_row != last_row);
-            if (column_navigation) {
+            if (!(column_navigation)) {
+                item_time = menu->unk;
+            } else {
                 const i16 old_column = menu->selected_column;
                 previous_item = old_column;
                 if (menu->selected_column < first_column)
                     menu->selected_column = first_column;
                 else if (menu->selected_column > last_column)
                     menu->selected_column = last_column;
-                if (right_pressed != 0 && menu->selected_column < last_column)
+                if (__builtin_expect(right_pressed != 0 && menu->selected_column < last_column, 1))
                     ++menu->selected_column;
-                else if (left_pressed != 0 && menu->selected_column > first_column)
+                else if (__builtin_expect(left_pressed != 0 && menu->selected_column > first_column, 1))
                     --menu->selected_column;
                 if (menu->selected_column != old_column)
                     MenuSFX = MENUSFX_MENUMOVE;
                 else
                     item_time = menu->unk;
-            } else {
-                item_time = menu->unk;
             }
         }
         menu->selected_item = menu->selected_row;
@@ -2199,7 +2207,7 @@ extern "C" {
                 saveloadASLoad(memcard_slot, memcard_savedatabuffer, memcard_savedatasize + 4);
                 memcard_loadneeded = 0;
                 memcard_loadcorrupt = 0;
-                if (saveload_status == 1) {
+                if (__builtin_expect(saveload_status == 1, 1)) {
                     memcard_loadstarted = 0;
                     memcard_loadfailed = 1;
                 } else {
@@ -2227,14 +2235,14 @@ extern "C" {
                         saveload_autosave = -1;
                     }
                 }
-                if (memcard_loadcorrupt == 0 && memcard_savedata != NULL) {
+                if (__builtin_expect(memcard_loadcorrupt == 0 && memcard_savedata != NULL, 1)) {
                     memmove(memcard_savedata, memcard_savedatabuffer, memcard_savedatasize);
                     if (memcard_extra_savedata != NULL && memcard_extra_savedatabuffer != NULL &&
                         memcard_extra_savedatasize >= 0)
                         memmove(memcard_extra_savedata, memcard_extra_savedatabuffer, memcard_extra_savedatasize);
                     MenuLoadOccurred = 1;
                 }
-            } else if (saveload_error == 0x80) {
+            } else if (__builtin_expect(saveload_error == 0x80, 1)) {
                 memcard_loadcorrupt = 1;
                 saveload_autosave = -1;
             } else {
@@ -2280,7 +2288,7 @@ extern "C" {
                 }
             }
         } else {
-            if (saveload_status == 1 && saveload_cardtype == 2 && saveload_cardformatted != 0) {
+            if (__builtin_expect(saveload_status == 1 && saveload_cardtype == 2 && saveload_cardformatted != 0, 0)) {
                 memcard_savemessage_delay = 1.5f;
                 if (memcard_savedatasize <= 0 || memcard_savedatabuffer == NULL || memcard_savedata == NULL) {
                     memcard_saveneeded = 0;
@@ -2333,10 +2341,7 @@ extern "C" {
             }
         } else if (memcard_formatting != 0 && saveload_status == 3) {
             memcard_formatting = 0;
-            if (saveload_error != 0)
-                memcard_formatfailed = 1;
-            else
-                memcard_justformatted = 1;
+            if (saveload_error == 0) memcard_justformatted = 1; else memcard_formatfailed = 1;
         }
     }
 
@@ -2406,7 +2411,7 @@ i32 getsaveload_status() {
 void Text3DStringEncodeFont(unsigned char *src, u16 *dst, void *font) {
     u16 character;
 
-    while (*src != 0) {
+    while (__builtin_expect(*src != 0, 1)) {
         src = NuUnicodeCharFromUTF8(&character, src);
         if (character == '~') {
             if (*src == 0)
@@ -2541,7 +2546,7 @@ extern "C" {
         i32 dest_pos = 0;
         const unsigned char *text = reinterpret_cast<unsigned char *>(source);
         do {
-            if (text[source_pos] == '\0')
+            if (__builtin_expect(text[source_pos] == '\0', 0))
                 break;
             if (text[source_pos] == '[' && text[source_pos + 1] == '[') {
                 source_pos += 2;
@@ -2561,32 +2566,41 @@ extern "C" {
 
             // Wide CJK punctuation is followed by a space so that lines can break after it.
             if (text[source_pos] == 0xe3 && text[source_pos + 1] == 0x80) {
-                switch (text[source_pos + 2]) {
-                    case 0x80:
-                        dest[dest_pos++] = ' ';
-                        source_pos += 3;
-                        continue;
-                    case 0x81:
-                    case 0x82:
-                    case 0x85:
-                        dest[dest_pos] = 0xe3;
-                        dest[dest_pos + 1] = text[source_pos + 1];
-                        dest[dest_pos + 2] = text[source_pos + 2];
-                        dest[dest_pos + 3] = ' ';
-                        dest_pos += 4;
-                        source_pos += 3;
-                        continue;
+                if (text[source_pos + 2] == 0x80) {
+                    dest[dest_pos++] = ' ';
+                    source_pos += 3;
+                    continue;
                 }
-            } else if (text[source_pos] == 0xef && text[source_pos + 1] == 0xbc) {
+                if (text[source_pos + 2] == 0x81) {
+                    dest[dest_pos++] = text[source_pos++];
+                    dest[dest_pos++] = text[source_pos++];
+                    dest[dest_pos++] = text[source_pos++];
+                    dest[dest_pos++] = ' ';
+                    continue;
+                }
+                if (text[source_pos + 2] == 0x82) {
+                    dest[dest_pos++] = text[source_pos++];
+                    dest[dest_pos++] = text[source_pos++];
+                    dest[dest_pos++] = text[source_pos++];
+                    dest[dest_pos++] = ' ';
+                    continue;
+                }
+                if (text[source_pos + 2] == 0x85) {
+                    dest[dest_pos++] = text[source_pos++];
+                    dest[dest_pos++] = text[source_pos++];
+                    dest[dest_pos++] = text[source_pos++];
+                    dest[dest_pos++] = ' ';
+                    continue;
+                }
+            }
+            if (text[source_pos] == 0xef && text[source_pos + 1] == 0xbc) {
                 switch (text[source_pos + 2]) {
                     case 0x81:
                     case 0x9f:
-                        dest[dest_pos] = 0xef;
-                        dest[dest_pos + 1] = text[source_pos + 1];
-                        dest[dest_pos + 2] = text[source_pos + 2];
-                        dest[dest_pos + 3] = ' ';
-                        dest_pos += 4;
-                        source_pos += 3;
+                        dest[dest_pos++] = text[source_pos++];
+                        dest[dest_pos++] = text[source_pos++];
+                        dest[dest_pos++] = text[source_pos++];
+                        dest[dest_pos++] = ' ';
                         continue;
                 }
             }
@@ -2594,7 +2608,7 @@ extern "C" {
             dest[dest_pos++] = text[source_pos++];
             while (static_cast<u8>(text[source_pos] + 0x80) < 0x40)
                 dest[dest_pos++] = text[source_pos++];
-        } while (dest_pos < 0x1e0);
+        } while (__builtin_expect(dest_pos < 0x1e0, 1));
         dest[dest_pos] = 0;
     }
 
@@ -2651,7 +2665,7 @@ extern "C" {
             NuQFntPushPrintMode(2);
         unsigned char decoded[512];
         TextDecode(text, decoded);
-        if (followon_line == 0)
+        if (__builtin_expect(followon_line == 0, 1))
             NuQFntSet(SmartTextFont != NULL ? SmartTextFont : QFont2D);
         draw_x_scale *= x_scale;
         draw_y_scale *= y_scale;
@@ -2712,7 +2726,7 @@ extern "C" {
         }
         if ((alignment & 4) != 0)
             draw_y -= height * 0.5f;
-        else if ((alignment & 1) != 0)
+        else if (__builtin_expect((alignment & 1) != 0, 0))
             draw_y += height * 0.5f;
         if ((alignment & 2) == 0)
             x -= (alignment & 8) != 0 ? width : width * 0.5f;
@@ -2841,8 +2855,8 @@ void APIMenuDrawMemCardSlots(MENU *menu, f32 y) {
         }
         const f32 right_offset = slideright * 0.5f / 10.0f;
         const f32 left_offset = slideleft * 0.5f / 10.0f;
-        last = slideright != 0 ? menu->selected_column + 2 : menu->selected_column + 1;
-        first = slideleft != 0 ? menu->selected_column - 2 : menu->selected_column - 1;
+        last = slideright == 0 ? menu->selected_column + 1 : menu->selected_column + 2;
+        first = slideleft == 0 ? menu->selected_column - 1 : menu->selected_column - 2;
         if (count > 6) {
             count = memcard_slotsused;
         }
@@ -2898,14 +2912,14 @@ void APIMenuDrawMemCardSlots(MENU *menu, f32 y) {
             red = MenuSlotColourLerp(MENUFLASH0R, MENUFLASH1R, menu_pulsate);
             green = MenuSlotColourLerp(MENUFLASH0G, MENUFLASH1G, menu_pulsate);
             blue = MenuSlotColourLerp(MENUFLASH0B, MENUFLASH1B, menu_pulsate);
-        } else if (__builtin_expect(menu_flash != 0, 0)) {
+        } else if (menu_flash != 0) {
             red = MENUFLASH0R;
-            blue = MENUFLASH0B;
             green = MENUFLASH0G;
+            blue = MENUFLASH0B;
         } else {
             red = MENUFLASH1R;
-            blue = MENUFLASH1B;
             green = MENUFLASH1G;
+            blue = MENUFLASH1B;
         }
     } else if (__builtin_expect(menu_pulse > 0.0f, 1)) {
         red = MenuSlotColourLerp(MENUFLASH0R, MENUNORMALR, menu_pulse);
@@ -3144,7 +3158,7 @@ extern "C" {
             y_scale = saved_y_scale * y_scale;
             APITEXTSCALEX = 1.0f;
             APITEXTSCALEY = 1.0f;
-            if (__builtin_expect(smarttextex_drawmessagebox != 0, 1))
+            if (smarttextex_drawmessagebox != 0)
                 message_box = message_box != NULL ? message_box : &local_box;
             BoxGeometry *box = static_cast<BoxGeometry *>(message_box);
             x *= STCOORDSCALE;
@@ -3212,7 +3226,7 @@ extern "C" {
                     lines[line][length] = '\0';
                     Text3DStringEncode(reinterpret_cast<char *>(lines[line]), encoded);
                     const f32 line_width = NuQFntPrintLenW(SmartTextFont != NULL ? SmartTextFont : QFont2D, encoded);
-                    if (width < line_width) {
+                    if (__builtin_expect(width < line_width, 1)) {
                         widest_line = line;
                         width = line_width;
                     }
@@ -3222,58 +3236,7 @@ extern "C" {
                 last_line = explicit_breaks;
             } else if (last_line != 0) {
                 width = 0.0f;
-                if ((alignment & 10) != 0 && !constrained) {
-                    i32 end = 0;
-                    i32 begin = 0;
-                    i32 line = 0;
-                    do {
-                        while (decoded[begin] == ' ')
-                            ++begin;
-                        if (line == last_line) {
-                            end = bytes - 1;
-                        } else {
-                            i32 next = begin;
-                            if (available_width > 0.0f) {
-                                do {
-                                    end = next;
-                                    next = end + 1;
-                                    while (decoded[next] == ' ')
-                                        ++next;
-                                    if (next == bytes) {
-                                        end = bytes - 1;
-                                        break;
-                                    }
-                                    next = FindNextBreak(decoded, next);
-                                    if (static_cast<u8>(decoded[next] - ',') > 2) {
-                                        --next;
-                                        while (decoded[next] == ' ')
-                                            --next;
-                                    }
-                                    i32 length = next - begin + 1;
-                                    if (length > 511)
-                                        length = 511;
-                                    memcpy(candidate, decoded + begin, length);
-                                    candidate[length] = '\0';
-                                    Text3DStringEncode(reinterpret_cast<char *>(candidate), encoded);
-                                } while (NuQFntPrintLenW(SmartTextFont != NULL ? SmartTextFont : QFont2D, encoded) <
-                                         available_width);
-                            }
-                        }
-                        i32 length = end - begin + 1;
-                        if (length > 511)
-                            length = 511;
-                        memcpy(lines[line], decoded + begin, length);
-                        lines[line][length] = '\0';
-                        Text3DStringEncode(reinterpret_cast<char *>(lines[line]), encoded);
-                        const f32 line_width =
-                            NuQFntPrintLenW(SmartTextFont != NULL ? SmartTextFont : QFont2D, encoded);
-                        if (width < line_width) {
-                            widest_line = line;
-                            width = line_width;
-                        }
-                        begin = end + 1;
-                    } while (++line <= last_line);
-                } else {
+                if (!((alignment & 10) != 0 && !constrained)) {
                     const i32 count = last_line + 1;
                     i32 line = 0;
                     do {
@@ -3303,6 +3266,57 @@ extern "C" {
                             widest_line = line;
                             width = line_width;
                         }
+                    } while (++line <= last_line);
+                } else {
+                    i32 end = 0;
+                    i32 begin = 0;
+                    i32 line = 0;
+                    do {
+                        while (decoded[begin] == ' ')
+                            ++begin;
+                        if (line == last_line) {
+                            end = bytes - 1;
+                        } else {
+                            i32 next = begin;
+                            if (__builtin_expect(available_width > 0.0f, 1)) {
+                                do {
+                                    end = next;
+                                    next = end + 1;
+                                    while (decoded[next] == ' ')
+                                        ++next;
+                                    if (next == bytes) {
+                                        end = bytes - 1;
+                                        break;
+                                    }
+                                    next = FindNextBreak(decoded, next);
+                                    if (static_cast<u8>(decoded[next] - ',') > 2) {
+                                        --next;
+                                        while (decoded[next] == ' ')
+                                            --next;
+                                    }
+                                    i32 length = next - begin + 1;
+                                    if (length > 511)
+                                        length = 511;
+                                    memcpy(candidate, decoded + begin, length);
+                                    candidate[length] = '\0';
+                                    Text3DStringEncode(reinterpret_cast<char *>(candidate), encoded);
+                                } while (__builtin_expect(NuQFntPrintLenW(SmartTextFont != NULL ? SmartTextFont : QFont2D, encoded) <
+                                         available_width, 0));
+                            }
+                        }
+                        i32 length = end - begin + 1;
+                        if (length > 511)
+                            length = 511;
+                        memcpy(lines[line], decoded + begin, length);
+                        lines[line][length] = '\0';
+                        Text3DStringEncode(reinterpret_cast<char *>(lines[line]), encoded);
+                        const f32 line_width =
+                            NuQFntPrintLenW(SmartTextFont != NULL ? SmartTextFont : QFont2D, encoded);
+                        if (width < line_width) {
+                            widest_line = line;
+                            width = line_width;
+                        }
+                        begin = end + 1;
                     } while (++line <= last_line);
                 }
             }
@@ -4035,7 +4049,7 @@ extern "C" {
 
 void MatrixTextStringEncode(void *font, unsigned char *source, u16 *destination) {
     u16 character;
-    while (*source != '\0') {
+    while (__builtin_expect(*source != '\0', 1)) {
         source = NuUnicodeCharFromUTF8(&character, source);
         if (character == '~') {
             if (*source == '\0') {
@@ -4109,20 +4123,22 @@ extern "C" {
     }
 
     void FixUpButtonsInFont(VUFNT *game_font, VUFNT *button_font) {
-        if (game_font == nullptr)
-            game_font = QFont2D;
-        if (button_font == nullptr)
-            button_font = QFont2DButtons;
-        if (game_font != nullptr && button_font != nullptr) {
-            f32 scale = game_font->height / button_font->height;
-            for (i32 i = 0; i < button_font->glyph_count; i++) {
-                for (i32 j = 0; j < game_font->glyph_count; j++) {
-                    if (__builtin_expect(button_font->unicode_map[i].unicode != game_font->unicode_map[j].unicode, 0)) {
-                        continue;
-                    }
-                    if (button_font->unicode_map[i].unicode >= 0x531 && button_font->unicode_map[i].unicode <= 0x53f) {
-                        game_font->glyphs[game_font->unicode_map[j].index].width =
-                            button_font->glyphs[button_font->unicode_map[i].index].width * scale;
+        VUFNT *gf = game_font;
+        VUFNT *bf = button_font;
+        if (gf == nullptr)
+            gf = QFont2D;
+        if (bf == nullptr)
+            bf = QFont2DButtons;
+        if (gf == nullptr)
+            return;
+        if (bf == nullptr)
+            return;
+        f32 scale = gf->height / bf->height;
+        for (i32 i = 0; i < bf->glyph_count; i++) {
+            for (i32 j = 0; j < gf->glyph_count; j++) {
+                if (gf->unicode_map[j].unicode == bf->unicode_map[i].unicode) {
+                    if (bf->unicode_map[i].unicode >= 0x531 && bf->unicode_map[i].unicode <= 0x53f) {
+                        gf->glyphs[gf->unicode_map[j].index].width = bf->glyphs[bf->unicode_map[i].index].width * scale;
                     }
                     break;
                 }
@@ -4140,5 +4156,4 @@ extern "C" {
         }
         return QFont2DButtons;
     }
-
 }

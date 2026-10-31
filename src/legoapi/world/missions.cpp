@@ -119,7 +119,7 @@ MISSIONSYS *Missions_Configure(char *file, VARIPTR *bufferStart, VARIPTR *buffer
 void Mission_Clear(MISSIONSYS *ms) {
     if (ms == NULL) {
         ms = MissionSys;
-        if (ms == NULL) {
+        if (__builtin_expect(ms == NULL, 1)) {
             return;
         }
     }
@@ -225,7 +225,7 @@ i32 Missions_PickupsOff(MISSIONSYS *ms) {
     if (ms == NULL) {
         ms = MissionSys;
     }
-    if (ms == NULL) {
+    if (__builtin_expect(ms == NULL, 0)) {
         return 0;
     }
     if (ms->field8_0x1d == 0) {

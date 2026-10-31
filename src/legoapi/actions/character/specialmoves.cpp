@@ -121,7 +121,7 @@ void SpecialMoves_Configure(char *filename, variptr_u *buffer, variptr_u *) {
 
     buffer->addr = ALIGN(buffer->addr, 4);
     SpecialMove = reinterpret_cast<SPECIALMOVE_s *>(buffer->addr);
-    while (NuFParGetLine(parser)) {
+    while (__builtin_expect(NuFParGetLine(parser) != 0, 1)) {
         if (!NuFParGetWord(parser) || NuStrICmp(parser->word_buf, "specialmove_start") != 0)
             continue;
 
@@ -143,7 +143,7 @@ void SpecialMoves_Configure(char *filename, variptr_u *buffer, variptr_u *) {
                 else if (NuStrICmp(parser->word_buf, "victim") == 0)
                     SpecialMove_ConfigParticipant(parser, &move->victim_id, &move->victim_action_type,
                                                   &move->victim_animation);
-                else if (NuStrICmp(parser->word_buf, "distance_apart") == 0)
+                else if (__builtin_expect(NuStrICmp(parser->word_buf, "distance_apart") == 0, 1))
                     move->distance = NuFParGetFloat(parser);
                 else if (NuStrICmp(parser->word_buf, "kill_victim_at_end") == 0)
                     move->flags |= 2;
@@ -197,7 +197,7 @@ i32 SpecialMove_ReleaseVictim(GameObject_s *object) {
         ObjHitObj(target, victim, damage, 0x1000, 0, 1);
     }
     victim = static_cast<GameObject_s *>(object->field_0x780);
-    if (victim != NULL) {
+    if (__builtin_expect(victim != NULL, 1)) {
         victim->field_0x7a5 = 0xff;
     }
     return 1;

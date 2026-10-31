@@ -197,7 +197,7 @@ static i32 Batarang_FindTarget(WORLDINFO_s *world, GameObject_s *object, i32 aut
     if (nearest_blowup != NULL && nearest_distance < selected_distance) {
         blowup = nearest_blowup;
     }
-    i16 platform = -1;
+    i32 platform = -1;
     if (blowup != NULL) {
         selected_position = blowup->mid_position;
         platform = blowup->platform_id;
@@ -214,7 +214,7 @@ static i32 Batarang_FindTarget(WORLDINFO_s *world, GameObject_s *object, i32 aut
     NUVEC ray;
     NuVecSub(&ray, &selected_position, &origin);
     if (GameRayCast(&origin, &ray, 0.0f, 0x1f) != 0) {
-        if (selected_type != 2 || platform == -1 || TerrainPlatId() != platform) {
+        if (platform == -1 || TerrainPlatId() != platform) {
             return 0;
         }
     }
@@ -361,7 +361,7 @@ i32 Batarang_SeekToTarget(BATARANG_s *batarang) {
         if (GameRayCast(&batarang->position, &travel, 0.1f, 0x1f) != 0) {
             i32 platform = TerrainPlatId();
             bool ricochet = batarang->field_0x7d != 0 && batarang->current_target >= batarang->active;
-            if (!ricochet) {
+            if (__builtin_expect(!ricochet, 1)) {
                 BATARANG_TARGET_s *current = &batarang->targets[batarang->current_target];
                 switch (current->type) {
                     case 0:
@@ -376,7 +376,7 @@ i32 Batarang_SeekToTarget(BATARANG_s *batarang) {
                         break;
                 }
             }
-            if (ricochet) {
+            if (__builtin_expect(ricochet != 0, 1)) {
                 NewRayCastGetImpactNormal(&travel);
                 Batarang_InitRicochet(batarang, &travel);
             }
@@ -487,7 +487,7 @@ void Batarangs_Update() {
             continue;
         }
         batarang->flight_time += FRAMETIME;
-        if (batarang->flight_time >= 2.0f && batarang->flight_time > 4.0f)
+        if (__builtin_expect(batarang->flight_time >= 2.0f && batarang->flight_time > 4.0f, 1))
             batarang->flight_time = 4.0f;
 
         while (batarang->targets[batarang->current_target].lost != 0 && batarang->current_target < batarang->active) {
@@ -563,10 +563,7 @@ void Batarang_GetSightInfo(i32 character, i32 *red, i32 *green, i32 *blue, char 
 
 void Batarang_MoveCode(GameObject_s *object) {
     i32 colour[3];
-    BATARANG_s *batarang = static_cast<BATARANG_s *>(object->batarang);
-    if (__builtin_expect(batarang == NULL || batarang->field_0x7d != 0, 0)) {
-        return;
-    }
+    BATARANG_s *batarang;
     if (object->character_context == 0x50) {
         object->field_0xe22 |= 0x40;
         if (object->hold_timer >= 0.25f) {
@@ -592,28 +589,28 @@ void Batarang_MoveCode(GameObject_s *object) {
         return;
     }
     if (object->character_context != 0x4d) {
-        GAMECHARACTERDATA *runtime = object->apiobj.character_data->game_character;
-        if (__builtin_expect(!object->apiobj.player_controlled || (runtime->flags_090 & 0x20000000) == 0 ||
-            object->use_model_origin == 0 || (object->field_0xe24 & 8) == 0 || object->apiobj.model_draw_result == 0 ||
-            !(object->field_0xc54 > 0.0f) || !(object->hold_timer >= 0.25f) || object->apiobj.field_0x27d == 0 ||
-            ObjLandReady(object) == 0, 1)) {
-            return;
+        if (object->apiobj.player_controlled &&
+            (object->apiobj.character_data->game_character->flags_090 & 0x20000000) != 0 &&
+            (batarang = static_cast<BATARANG_s *>(object->batarang)) != NULL && batarang->field_0x7d == 0 &&
+            object->use_model_origin != 0 && (object->field_0xe24 & 8) != 0 && object->apiobj.model_draw_result != 0 &&
+            object->field_0xc54 > 0.0f && object->hold_timer >= 0.25f && object->apiobj.field_0x27d != 0 &&
+            ObjLandReady(object) != 0) {
+            object->field_0xe22 |= 0x40;
+            if (__builtin_expect(0.25f > object->hold_timer - FRAMETIME, 0)) {
+                Batarang_StartTargetting(object);
+            }
         }
-        object->field_0xe22 |= 0x40;
-        if (!(0.25f > object->hold_timer - FRAMETIME)) {
-            return;
-        }
-        Batarang_StartTargetting(object);
         return;
     }
     if (object->field_0x7a3 == 0) {
+        GAMEPAD_s *pad = object->pad_gamepad;
         object->field_0xe22 |= 0x40;
         object->jump_flags |= 2;
-        if (__builtin_expect((object->pad_gamepad->buttons_pressed & GAMEPAD_JUMP) != 0, 0)) {
+        if (__builtin_expect((pad->buttons_pressed & GAMEPAD_JUMP) != 0, 0)) {
             StartJump(object, 0);
             return;
         }
-        if ((object->pad_gamepad->buttons_held & GAMEPAD_ACTION) == 0 && !(object->context_animation_timer < 0.3f)) {
+        if ((pad->buttons_held & GAMEPAD_ACTION) == 0 && !(object->context_animation_timer < 0.3f)) {
             if (static_cast<BATARANG_s *>(object->batarang)->active != 0) {
                 object->jump_flags &= ~2U;
                 object->field_0x7a3 = 1;
@@ -621,7 +618,10 @@ void Batarang_MoveCode(GameObject_s *object) {
                 f32 duration = AnimDuration(object->id, 0x65, 0.0f, 0.0f, 1);
                 object->context_animation_timer = 0.0f;
                 object->context_flags &= ~0x40U;
-                object->airborne_action_duration = duration <= 0.0f ? 0.5f : duration;
+                if (0.0f >= duration) {
+                    duration = 0.5f;
+                }
+                object->airborne_action_duration = duration;
                 if (object->apiobj.character_model->model_data_b[object->context_animation] == NULL ||
                     AnimListFrame(object->apiobj.character_model, object->context_animation, 0) != 0.0f) {
                     object->pad_e3c[0] = 1;
@@ -636,10 +636,11 @@ void Batarang_MoveCode(GameObject_s *object) {
             if (object->apiobj.character_model->model_data_b[object->context_animation] == NULL ||
                 AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0) != NULL) {
                 GAMEPAD_s *pad = object->pad_gamepad;
-                object->context_animation_timer += FRAMETIME;
+                f32 timer = object->context_animation_timer + FRAMETIME;
                 f32 x = pad->input_direction_z * 1.25f;
                 f32 y = 1.25f * pad->input_direction_x;
-                if (!(object->context_animation_timer >= 0.25f)) {
+                object->context_animation_timer = timer;
+                if (0.25f > timer) {
                     const f32 ramp = object->context_animation_timer * 4.0f;
                     x *= ramp;
                     y *= ramp;
@@ -662,28 +663,29 @@ void Batarang_MoveCode(GameObject_s *object) {
             Batarang_GetSightInfo(object->id, &colour[0], &colour[1], &colour[2], text);
             ADDGAMEMSG message;
             memcpy(&message, &AddGameMsg_Default, sizeof(message));
+            message.red = static_cast<u8>(colour[0]);
+            message.green = static_cast<u8>(colour[1]);
+            message.blue = static_cast<u8>(colour[2]);
+            message.text = text;
             message.position = &static_cast<BATARANG_s *>(object->batarang)->sight_position;
             message.flags = 0x1080;
             message.scale = 1.0f;
-            message.green = static_cast<u8>(colour[1]);
-            message.red = static_cast<u8>(colour[0]);
             message.alpha = static_cast<i32>((0.2f * game_pulse + 0.8f) * 128.0f);
-            message.blue = static_cast<u8>(colour[2]);
-            message.text = text;
             AddGameMsg(&message);
             message.flags = 0x87;
             message.field_0x4f = 4;
             message.scale = 3.0f;
             message.text = ASCII_DOWN;
             message.alpha = static_cast<i32>(128.0f * (0.8f - 0.2f * game_pulse));
-            batarang = static_cast<BATARANG_s *>(object->batarang);
-            for (i32 i = 0; i < batarang->active; ++i) {
+            if (static_cast<BATARANG_s *>(object->batarang)->active != 0) {
                 NUVEC position;
-                if (Batarang_GetTargetPos(batarang, i, &position) != 0) {
-                    message.position = &position;
-                    AddGameMsg(&message);
-                }
-                batarang = static_cast<BATARANG_s *>(object->batarang);
+                i32 i = 0;
+                do {
+                    if (Batarang_GetTargetPos(static_cast<BATARANG_s *>(object->batarang), i, &position) != 0) {
+                        message.position = &position;
+                        AddGameMsg(&message);
+                    }
+                } while (static_cast<BATARANG_s *>(object->batarang)->active > ++i);
             }
         }
     } else if (object->field_0x7a3 == 1) {
@@ -715,6 +717,9 @@ void Batarang_MoveCode(GameObject_s *object) {
             if ((object->context_flags & 0x40) != 0) {
                 return;
             }
+            object->pad_e3c[0] = 1;
+            object->context_flags |= 0x40;
+            return;
         } else {
             if ((object->context_flags & 0x40) != 0) {
                 return;

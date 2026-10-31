@@ -722,26 +722,22 @@ static __used__ void rtlCalcLights(nuvec_s *position, numtx_s *rotation, f32 sca
                     lighting_data->direction[slot] = lighting_data->directional_lights[slot]->direction;
                     break;
                 case 2:
-                    if (position == NULL)
-                        invalid = 1;
-                    else {
+                    if (position != NULL) {
                         lighting_data->directional_lights[slot]->ambient =
                             lighting_data->directional_lights[slot]->ambient;
                         NuVecSub(&lighting_data->direction[slot], &lighting_data->directional_lights[slot]->position,
                                  position);
                         NuVecNorm(&lighting_data->direction[slot], &lighting_data->direction[slot]);
-                    }
+                    } else invalid = 1;
                     break;
                 case 3:
                 case 6:
                 case 8:
-                    if (position == NULL)
-                        invalid = 1;
-                    else {
+                    if (position != NULL) {
                         NuVecSub(&lighting_data->direction[slot], &lighting_data->directional_lights[slot]->position,
                                  position);
                         NuVecNorm(&lighting_data->direction[slot], &lighting_data->direction[slot]);
-                    }
+                    } else invalid = 1;
                     break;
             }
             if (invalid)

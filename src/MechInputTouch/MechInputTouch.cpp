@@ -434,7 +434,7 @@ void MechInputTouchSystem::FindTargetForce(WORLDINFO_s *world, GameObject_s &obj
             continue;
         }
 
-        if (object.force_glow_object != force && keep_current_target) {
+        if (__builtin_expect(object.force_glow_object != force && keep_current_target, 0)) {
             continue;
         }
 
@@ -703,7 +703,7 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
         if (selected != NULL && !(selected_nonplayer && best != NULL && (flags & 0x1000))) {
             if (flags & 0x800 != 0)
                 selected_distance *= 0.25f;
-            if (best_distance > selected_distance) {
+            if (__builtin_expect(best_distance > selected_distance, 1)) {
                 best = selected->GetMechObjectInterface();
                 best_distance = selected_distance;
             }

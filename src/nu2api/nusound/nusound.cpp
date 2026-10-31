@@ -60,7 +60,7 @@ NuSoundVoiceFactoryList::NuSoundVoiceFactoryList() {
     NuSoundVoiceFactory **replacement =
         static_cast<NuSoundVoiceFactory **>(NuMemoryGet()->GetThreadMem()->_BlockReAlloc(
             factories, 16 * sizeof(NuSoundVoiceFactory *), 4, 0x41, "", NUMEMORY_CATEGORY_NONE));
-    if (replacement != factories) {
+    if (__builtin_expect(replacement != factories, 1)) {
         u32 previous_capacity = capacity;
         for (u32 i = 0; i < previous_capacity; ++i) {
             replacement[i] = factories[i];
@@ -550,9 +550,10 @@ NuSoundDecoder *NuSoundSystem::CreateDecoder(NuSoundSource *source) {
     }
 
     const u16 appended_length = static_cast<u16>(name_length + 8);
-    if (appended_length > name_capacity || decoded_name == theEmptyString) {
+    const char *empty_string = theEmptyString;
+    if (decoded_name == empty_string || appended_length > name_capacity) {
         name_capacity = static_cast<u16>((appended_length + 3) & 0xfffc);
-        if (__builtin_expect(decoded_name == theEmptyString, 1)) {
+        if (decoded_name == empty_string) {
             decoded_name = static_cast<char *>(
                 NU_ALLOC(name_capacity, 4, 5,
                          "i:/SagaTouch-Android_9176564/nu2api.saga/../nu2api.2013/numemory/NuMemory.h:328", 0));
@@ -886,31 +887,27 @@ void NuSoundSystem::Update(f32 frametime) {
 
 NuSoundVoice *NuSoundSystem::CreateVoice(NuSoundSource *source, bool loop) {
     NuSoundVoice *voice;
-    if (!SourceRequiresDecoder(source)) {
-        if (__builtin_expect(!source->IsStreamOpen(), 1)) {
-            return NULL;
-        }
-        NuSoundStreamDesc *desc = source->GetStreamDesc();
-        NuSoundVoiceFactory *factory = factory_list.GetFactory(desc->GetDecodedDataFormat());
-        voice = factory->CreateVoice(source, loop);
-        if (__builtin_expect(voice == NULL, 1)) {
-            return NULL;
-        }
-    } else {
-        NuSoundDecoder *decoder = CreateDecoder(source);
+    NuSoundDecoder *decoder = NULL;
+    if (SourceRequiresDecoder(source)) {
+        decoder = CreateDecoder(source);
         decoder->OpenStream(loop);
-        if (!decoder->IsStreamOpen()) {
+        source = decoder;
+    }
+    if (!source->IsStreamOpen()) {
+        if (decoder != NULL) {
             ReleaseDecoder(decoder);
-            return NULL;
         }
-        NuSoundStreamDesc *desc = decoder->GetStreamDesc();
-        NuSoundVoiceFactory *factory = factory_list.GetFactory(desc->GetDecodedDataFormat());
-        voice = factory->CreateVoice(decoder, loop);
-        if (voice == NULL) {
+        return NULL;
+    }
+    NuSoundStreamDesc *desc = source->GetStreamDesc();
+    NuSoundVoiceFactory *factory = factory_list.GetFactory(desc->GetDecodedDataFormat());
+    voice = factory->CreateVoice(source, loop);
+    if (voice == NULL) {
+        if (decoder != NULL) {
             decoder->CloseStream();
             ReleaseDecoder(decoder);
-            return NULL;
         }
+        return NULL;
     }
 
     mutex.Lock();

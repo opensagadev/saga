@@ -207,15 +207,15 @@ void AITriggerSetSysProcess(AITRIGGERSETSYS_s *system) {
                 }
             } else if (gizmo->type_id == obstacle_gizmotype_id) {
                 GIZOBSTACLE_s *obstacle = static_cast<GIZOBSTACLE_s *>(gizmo->object);
-                if (obstacle->triggering_object == player ||
-                    (player2 != NULL && obstacle->triggering_object == player2)) {
+                if (__builtin_expect(obstacle->triggering_object == player ||
+                    (player2 != NULL && obstacle->triggering_object == player2), 0)) {
                     set->field_0x20e |= 1u << index;
                 } else if ((set->field_0x20e >> index) & 1) {
                     if (__builtin_expect(obstacle->anim_set != NULL, 0) &&
                         (obstacle->anim_set->state == 3 || obstacle->anim_set->state == 0 ||
                          obstacle->anim_set->state == 4))
                         set->field_0x20e &= ~(1u << index);
-                } else if ((obstacle->progress_flags & 3) != 3) {
+                } else if (__builtin_expect((obstacle->progress_flags & 3) != 3, 1)) {
                     release = true;
                 }
             } else if (gizmo->type_id == spinner_gizmotype_id) {
@@ -223,10 +223,9 @@ void AITriggerSetSysProcess(AITRIGGERSETSYS_s *system) {
                 if ((spinner->flags & 6) || ((spinner->flags & 8) && !ShadowMode) || spinner->field_70 == 1.0f ||
                     (spinner->state_flags & 0x20)) {
                     set->field_0x20e &= ~(1u << index);
-                } else if (__builtin_expect((player->character_context == 0x28 && player->field_0x788 == spinner) ||
+                } else if ((player->character_context == 0x28 && player->field_0x788 == spinner) ||
                                                 (player2 != NULL && player2->character_context == 0x28 &&
-                                                 player2->field_0x788 == spinner),
-                                            1)) {
+                                                 player2->field_0x788 == spinner)) {
                     set->field_0x20e |= 1u << index;
                 } else if (((set->field_0x20e >> index) & 1) && spinner->room_index == -1) {
                     set->field_0x20e &= ~(1u << index);
@@ -360,7 +359,7 @@ void AITriggerSetSysProcess(AITRIGGERSETSYS_s *system) {
                         system->field_0x42c0[best] = index;
                     }
                 }
-                if (__builtin_expect(set->trigger_indices[index] != -1, 1))
+                if (set->trigger_indices[index] != -1)
                     ++assigned_count;
             }
         } else if (has_assignments) {

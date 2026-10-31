@@ -902,16 +902,30 @@ extern "C" {
 
     void APILoadCharacterModels(APICHARACTERMODELLIST_s *list, i32 area_animation, VARIPTR *buf, VARIPTR buf_end,
                                 i32 area_models) {
-        char legacy_animation_extension[] = ".ani";
-        char animation_extension[] = ".an3";
-        char deformation_extension[] = ".bsa";
-        char animation_path[0x200];
+        char legacy_animation_extension[10];
+        char animation_extension[10];
+        char deformation_extension[10];
+        strcpy(legacy_animation_extension, ".ani");
+        strcpy(animation_extension, ".an3");
+        strcpy(deformation_extension, ".bsa");
+        char animation_path[0x100];
         APICHARACTERMODEL *model;
+        CHARACTERANIM_s *animations;
+        i32 model_index;
+        i32 animation_id;
+        i32 model_loaded;
+        void *pak;
+        ani3_animheader_s *joint_animation;
+        i32 pointer_block;
+        i32 model_id;
+        CHARACTERDATA *character;
+        i32 pak_alignment;
+        i32 item;
         if (apiloadcharactermodels_append == 0) {
             APIResetCharacterRemap();
             model = apicharsys->models;
-            for (i32 model_index = 0; model_index < apicharsys->permanent_model_count; ++model_index, ++model) {
-                for (i32 animation_id = 0; animation_id < apicharsys->model_id_capacity; ++animation_id) {
+            for (model_index = 0; model_index < apicharsys->permanent_model_count; ++model_index, ++model) {
+                for (animation_id = 0; animation_id < apicharsys->model_id_capacity; ++animation_id) {
                     if ((model->model_data_b[animation_id] != NULL || model->model_data_c[animation_id] != NULL) &&
                         (static_cast<CHARACTERANIM_s *>(model->model_data_a[animation_id])->flags & 1) == 0) {
                         model->model_data_a[animation_id] = NULL;
@@ -920,7 +934,7 @@ extern "C" {
                     }
                 }
             }
-            for (i32 model_index = apicharsys->permanent_model_count; model_index < apicharsys->model_capacity;
+            for (model_index = apicharsys->permanent_model_count; model_index < apicharsys->model_capacity;
                  ++model_index, ++model) {
                 model->hierarchy = NULL;
             }
@@ -931,34 +945,38 @@ extern "C" {
         if (list == NULL) {
             return;
         }
-        i32 model_id;
         while ((model_id = list->model_id) != -1 && apicharsys->loaded_model_count < apicharsys->model_capacity) {
-            CHARACTERDATA &character = apicharsys->char_data[model_id];
+            character = &apicharsys->char_data[model_id];
 
             char directory[0x40];
             NuStrCpy(directory, "chars\\");
-            NuStrCat(directory, character.dir);
+            NuStrCat(directory, character->dir);
             NuStrCat(directory, "\\");
 
-            char directory_pack_path[0x100];
             char model_pack_path[0x100];
-            i32 model_loaded = 0;
+            char directory_pack_path[0x100];
+            model_loaded = 0;
             if (apicharsys->playermodelids[model_id] != -1) {
                 NuStrCpy(directory_pack_path, directory);
-                NuStrCat(directory_pack_path, character.dir);
+                NuStrCat(directory_pack_path, character->dir);
                 NuStrCat(directory_pack_path, ".fpk");
                 NuStrCpy(model_pack_path, directory);
-                NuStrCat(model_pack_path, character.file);
+                NuStrCat(model_pack_path, character->file);
                 NuStrCat(model_pack_path, ".fpk");
                 model = &apicharsys->models[apicharsys->playermodelids[model_id]];
             } else {
+                do {
+                    if (area_models != 0) {
+                        break;
+                    }
+                } while (0);
                 model = &apicharsys->models[apicharsys->loaded_model_count];
                 APICharacterModelReset(model);
 
                 NuStrCpy(animation_path, directory);
                 NuStrCpy(directory_pack_path, directory);
-                NuStrCat(animation_path, character.file);
-                NuStrCat(directory_pack_path, character.dir);
+                NuStrCat(animation_path, character->file);
+                NuStrCat(directory_pack_path, character->dir);
                 NuStrCpy(model_pack_path, animation_path);
                 NuStrCat(model_pack_path, ".fpk");
                 NuStrCat(directory_pack_path, ".fpk");
@@ -969,27 +987,26 @@ extern "C" {
                     ++list;
                     continue;
                 }
-                for (i32 poi = 0; poi < 16; ++poi) {
-                    model->points_of_interest[poi] = NuHGobjGetPOI(model->hierarchy, poi);
+                for (model_index = 0; model_index < 16; ++model_index) {
+                    model->points_of_interest[model_index] = NuHGobjGetPOI(model->hierarchy, model_index);
                 }
                 model_loaded = 1;
             }
 
-            CHARACTERANIM_s *animations;
             if (area_models != 0 && list->count != 0) {
                 animations = apicharsys->char_data[model_id].animations;
             } else {
                 animations = NULL;
             }
-            void *pak;
             if (apiloadcharactermodels_nopakfile != 0) {
                 pak = NULL;
             } else {
-                i32 pak_alignment = 0x10;
-                NuStrCpy(animation_path, directory_pack_path);
-                pak = NuFilePakLoad(animation_path, buf, buf_end, pak_alignment);
+                pak_alignment = 0x10;
+                char pak_path[0x100];
+                NuStrCpy(pak_path, directory_pack_path);
+                pak = NuFilePakLoad(pak_path, buf, buf_end, pak_alignment);
                 if (pak == NULL) {
-                    NuStrCpy(animation_path, model_pack_path);
+                    NuStrCpy(pak_path, model_pack_path);
                     pak = NuFilePakLoad(model_pack_path, buf, buf_end, pak_alignment);
                 }
             }
@@ -999,7 +1016,7 @@ extern "C" {
                     if ((animations->flags & 0x8000) == 0 && ((area_animation != 0 && (animations->flags & 1) != 0) ||
                                                               (area_animation == 0 && (animations->flags & 1) == 0))) {
                         if ((animations->flags & 4) != 0 && model->model_data_b[animations->animation_id] == NULL) {
-                            i32 item = 0;
+                            item = 0;
                             if (RedirectAnimFn == NULL ||
                                 RedirectAnimFn(RedirectAnimDir, RedirectAnimList, animations, animation_path) == 0) {
                                 NuStrCpy(animation_path, directory);
@@ -1012,7 +1029,7 @@ extern "C" {
                             }
                         }
                         if ((animations->flags & 8) != 0 && model->model_data_c[animations->animation_id] == NULL) {
-                            i32 item = 0;
+                            item = 0;
                             if (RedirectAnimFn == NULL ||
                                 RedirectAnimFn(RedirectAnimDir, RedirectAnimList, animations, animation_path) == 0) {
                                 NuStrCpy(animation_path, directory);
@@ -1037,7 +1054,7 @@ extern "C" {
                     if ((animations->flags & 0x8000) == 0 && ((area_animation != 0 && (animations->flags & 1) != 0) ||
                                                               (area_animation == 0 && (animations->flags & 1) == 0))) {
                         if ((animations->flags & 4) != 0 && model->model_data_b[animations->animation_id] == NULL) {
-                            i32 item = 0;
+                            item = 0;
                             if (RedirectAnimFn == NULL ||
                                 RedirectAnimFn(RedirectAnimDir, RedirectAnimList, animations, animation_path) == 0) {
                                 NuStrCpy(animation_path, directory);
@@ -1049,11 +1066,10 @@ extern "C" {
                             i32 size;
                             if (item != 0) {
                                 if (NuFilePakGetItemInfo(pak, item, &data, &size) != 0) {
-                                    i32 pointer_block = 0;
+                                    pointer_block = 0;
                                     if (static_cast<i32 *>(data)[1] > static_cast<i32>(0x414e4934)) {
                                         pointer_block = 1;
                                     }
-                                    ani3_animheader_s *joint_animation;
                                     if (pointer_block) {
                                         joint_animation =
                                             reinterpret_cast<ani3_animheader_s *>(static_cast<u8 *>(data) + 4);
@@ -1074,7 +1090,7 @@ extern "C" {
                             }
                         }
                         if ((animations->flags & 8) != 0 && model->model_data_c[animations->animation_id] == NULL) {
-                            i32 item = 0;
+                            item = 0;
                             if (RedirectAnimFn == NULL ||
                                 RedirectAnimFn(RedirectAnimDir, RedirectAnimList, animations, animation_path) == 0) {
                                 NuStrCpy(animation_path, directory);
@@ -1143,11 +1159,11 @@ extern "C" {
 
             if (model_loaded) {
                 model->model_id = model_id;
-                model->flags = (model->flags & ~1) | (area_models != 0 && list->count != 0 ? 1 : 0);
+                model->flag_0 = area_models != 0 && list->count != 0 ? 1 : 0;
                 apicharsys->playermodelids[model_id] = apicharsys->loaded_model_count;
                 if (area_animation != 0) {
                     ++apicharsys->permanent_model_count;
-                    character.model_flags |= 2;
+                    character->model_flags |= 2;
                 }
                 ++apicharsys->loaded_model_count;
             }
@@ -2175,11 +2191,24 @@ extern "C" {
     void AddAnimEffects(CHARACTERMODEL_s *model, CHARACTERDATA *, ANIMPACKET_s *packet, NUMTX *locator_matrices,
                         GameObject_s *object, CHARACTER_EFFECT_s *effects, i32 paused, f32 frame_time,
                         void (*footprint_callback)(void *, GameObject_s *, i32, i32), APIDEBRISSYS_s *debris_sys) {
-        NUVEC locator_positions[16];
         if (paused == 0 && effects != NULL) {
-
+            // CHARACTER_EFFECT_s viewed with frame_1/frame_2 as an array indexed by event.
+            struct CHARACTER_EFFECT_FRAMES_s {
+                i16 ids[4];
+                f32 frame[2];
+            };
+            NUVEC locator_positions[16];
+            i32 count;
+            i32 i;
+            i32 j;
+            i32 position_count;
+            i32 locator_count;
             i32 animation_id;
+            i32 active;
             f32 animation_time;
+            u16 y_rotation;
+            u16 z_rotation;
+            NUVEC position;
             if (packet->blending != 0 && packet->blend_animation_b >= 0 &&
                 packet->blend_animation_b < apicharsys->model_id_capacity &&
                 model->model_data_b[packet->blend_animation_b] != NULL) {
@@ -2200,7 +2229,10 @@ extern "C" {
             }
 
             for (; effects->character_id != -1; ++effects) {
-                if (effects->character_id != model->model_id || effects->action_id != animation_id) {
+                if (model->model_id != effects->character_id) {
+                    continue;
+                }
+                if (effects->action_id != animation_id) {
                     continue;
                 }
 
@@ -2222,13 +2254,13 @@ extern "C" {
                     }
                     if ((effects->flags & 0x03000000) != 0 &&
                         (object->apiobj.model_draw_result == 0 || ((i8)object->apiobj.field_0x27d & 2) == 0)) {
-                        continue;
+                        goto next_effect;
                     }
                 } else if ((effects->flags & 0x03000000) != 0) {
                     continue;
                 }
 
-                i32 active = 0;
+                active = 0;
                 if ((effects->flags & 0x4) != 0) {
                     active = 1;
                 } else if ((effects->flags & 0x8) != 0) {
@@ -2242,14 +2274,14 @@ extern "C" {
                         active = 1;
                     }
                 } else {
-                    for (i32 event = 0; event <= 1; ++event) {
-                        // frame_1 and frame_2 are the two event frames, indexed by event.
-                        if ((&effects->frame_1)[event] <= 1.0f) {
+                    for (i = 0; i <= 1; ++i) {
+                        // frame_1 and frame_2 are the two event frames, indexed by i.
+                        if (((CHARACTER_EFFECT_FRAMES_s *)effects)->frame[i] <= 1.0f) {
                             continue;
                         }
                         if ((packet->flags & ANIMPACKET_FLAG_PLAYING_REVERSED) == 0) {
-                            if (animation_time > (&effects->frame_1)[event]) {
-                                if (packet->previous_time <= (&effects->frame_1)[event]) {
+                            if (animation_time > ((CHARACTER_EFFECT_FRAMES_s *)effects)->frame[i]) {
+                                if (packet->previous_time <= ((CHARACTER_EFFECT_FRAMES_s *)effects)->frame[i]) {
                                     active = 1;
                                 } else if ((packet->flags & ANIMPACKET_FLAG_LOOPED) != 0 &&
                                            packet->previous_time > animation_time) {
@@ -2257,193 +2289,204 @@ extern "C" {
                                 }
                             } else if ((packet->flags & ANIMPACKET_FLAG_LOOPED) != 0 &&
                                        packet->previous_time > animation_time &&
-                                       packet->previous_time <= (&effects->frame_1)[event]) {
+                                       packet->previous_time <= ((CHARACTER_EFFECT_FRAMES_s *)effects)->frame[i]) {
                                 active = 1;
                             }
-                        } else if ((&effects->frame_1)[event] > animation_time) {
-                            if (packet->previous_time >= (&effects->frame_1)[event]) {
+                        } else if (((CHARACTER_EFFECT_FRAMES_s *)effects)->frame[i] > animation_time) {
+                            if (packet->previous_time >= ((CHARACTER_EFFECT_FRAMES_s *)effects)->frame[i]) {
                                 active = 1;
                             }
                         } else if ((packet->flags & ANIMPACKET_FLAG_LOOPED) != 0 &&
                                    packet->previous_time < animation_time &&
-                                   packet->previous_time >= (&effects->frame_1)[event]) {
+                                   packet->previous_time >= ((CHARACTER_EFFECT_FRAMES_s *)effects)->frame[i]) {
                             active = 1;
                         }
                     }
                 }
-                if (active == 0) {
-                    continue;
-                }
+                if (active != 0) {
+                    position.x = 0.0f;
+                    position.y = 0.0f;
+                    position.z = 0.0f;
 
-                NUVEC position = {0.0f, 0.0f, 0.0f};
-
-                i32 locator_indices[16];
-                i32 locator_count = 0;
-                i32 position_count = 0;
-                for (i32 locator = 0; locator < 16; ++locator) {
-                    if ((effects->locators & (1 << locator)) != 0 && model->points_of_interest[locator] != NULL) {
-                        locator_indices[locator_count] = locator;
-                        locator_positions[locator_count] = *NUMTX_GET_ROW_VEC(&locator_matrices[locator], 3);
-                        if (locator_count == 0 || (effects->flags & 0x800) != 0) {
-                            NuVecAdd(&position, &position, NUMTX_GET_ROW_VEC(&locator_matrices[locator], 3));
-                        }
-                        ++locator_count;
-                    }
-                }
-                if (locator_count > 0 && (effects->flags & 0x800) != 0) {
-                    NuVecScale(&position, &position, 1.0f / static_cast<f32>(locator_count));
-                }
-                position_count = locator_count;
-                if ((effects->flags & 0x1000) != 0 && object != NULL) {
-                    position.x = object->apiobj.position.x;
-                    position.y = object->apiobj.collision_min.y;
-                    position.z = object->apiobj.position.z;
-                    position_count = 1;
+                    i32 locator_indices[16];
+                    position_count = 0;
                     locator_count = 0;
-                }
-                if (object != NULL) {
-                    if (position_count == 0) {
-                        locator_positions[0] = object->apiobj.position;
-                        position = locator_positions[0];
-                        position_count = 1;
-                        if ((effects->flags & 0x2000) != 0 && object->apiobj.field_0x218 != 2000000.0f) {
-                            position.y = object->apiobj.field_0x218;
-                        } else if ((effects->flags & 0x4000) != 0 && object->apiobj.water_height != 2000000.0f) {
-                            position.y = object->apiobj.water_height;
-                        }
-                    } else if ((effects->flags & 0x2000) != 0 && object->apiobj.field_0x218 != 2000000.0f) {
-                        for (i32 i = 0; i < locator_count; ++i) {
-                            locator_positions[i].y = object->apiobj.field_0x218;
-                        }
-                    } else if ((effects->flags & 0x4000) != 0 && object->apiobj.water_height != 2000000.0f) {
-                        for (i32 i = 0; i < locator_count; ++i) {
-                            locator_positions[i].y = object->apiobj.water_height;
+                    for (i = 0; i < 16; ++i) {
+                        if ((effects->locators & (1 << i)) != 0 && model->points_of_interest[i] != NULL) {
+                            locator_indices[locator_count] = i;
+                            locator_positions[locator_count] = *NUMTX_GET_ROW_VEC(&locator_matrices[i], 3);
+                            if (locator_count == 0 || (effects->flags & 0x800) != 0) {
+                                NuVecAdd(&position, &position, NUMTX_GET_ROW_VEC(&locator_matrices[i], 3));
+                            }
+                            ++locator_count;
                         }
                     }
-                }
+                    if (locator_count > 0 && (effects->flags & 0x800) != 0) {
+                        NuVecScale(&position, &position, 1.0f / static_cast<f32>(locator_count));
+                    }
+                    position_count = locator_count;
+                    if ((effects->flags & 0x1000) != 0 && object != NULL) {
+                        position.x = object->apiobj.position.x;
+                        position.y = object->apiobj.collision_min.y;
+                        position.z = object->apiobj.position.z;
+                        position_count = 1;
+                        locator_count = 0;
+                    }
+                    if (object != NULL) {
+                        if (position_count == 0) {
+                            position = locator_positions[0] = object->apiobj.position;
+                            position_count = 1;
+                            if ((effects->flags & 0x2000) != 0 && object->apiobj.field_0x218 != 2000000.0f) {
+                                position.y = object->apiobj.field_0x218;
+                            } else if ((effects->flags & 0x4000) != 0 && object->apiobj.water_height != 2000000.0f) {
+                                position.y = object->apiobj.water_height;
+                            }
+                        } else if ((effects->flags & 0x2000) != 0 && object->apiobj.field_0x218 != 2000000.0f) {
+                            for (i = 0; i < locator_count; ++i) {
+                                locator_positions[i].y = object->apiobj.field_0x218;
+                            }
+                        } else if ((effects->flags & 0x4000) != 0 && object->apiobj.water_height != 2000000.0f) {
+                            for (i = 0; i < locator_count; ++i) {
+                                locator_positions[i].y = object->apiobj.water_height;
+                            }
+                        }
+                    }
 
-                if (footprint_callback != NULL && locator_count == 0 && (effects->flags & 0x03000000) != 0) {
-                    footprint_callback(&object->apiobj.position, object, effects->flags & 0x01000000, 1);
-                } else if (footprint_callback != NULL && position_count > 0 && (effects->flags & 0x03000000) != 0) {
-                    for (i32 i = 0; i < locator_count; ++i) {
-                        const i32 locator = locator_indices[i];
-                        if (object->apiobj.character_model->points_of_interest[locator] == NULL) {
+                    if (footprint_callback != NULL && locator_count == 0 && (effects->flags & 0x03000000) != 0) {
+                        footprint_callback(&object->apiobj.position, object, effects->flags & 0x01000000, 1);
+                    } else if (footprint_callback != NULL && position_count > 0 && (effects->flags & 0x03000000) != 0) {
+                        for (i = 0; i < locator_count; ++i) {
+                            j = locator_indices[i];
+                            if (object->apiobj.character_model->points_of_interest[j] == NULL) {
+                                continue;
+                            }
+                            footprint_callback(&locator_matrices[j], object, effects->flags & 0x01000000, 0);
+                        }
+                    }
+
+                    if (object != NULL) {
+                        if (effects->bits_on != 0) {
+                            object->apiobj.field_0x285 |= effects->bits_on;
+                        }
+                        if (effects->bits_off != 0) {
+                            object->apiobj.field_0x285 &= ~effects->bits_off;
+                        }
+                    }
+                    if (position_count > 0 && object != NULL) {
+                        if ((effects->flags & 0x40) != 0 && object->apiobj.is_underwater != 0) {
                             continue;
                         }
-                        footprint_callback(&locator_matrices[locator], object, effects->flags & 0x01000000, 0);
-                    }
-                }
-
-                if (object != NULL) {
-                    if (effects->bits_on != 0) {
-                        object->apiobj.field_0x285 |= effects->bits_on;
-                    }
-                    if (effects->bits_off != 0) {
-                        object->apiobj.field_0x285 &= ~effects->bits_off;
-                    }
-                }
-                if (position_count > 0 && object != NULL &&
-                    (((effects->flags & 0x40) != 0 && object->apiobj.is_underwater != 0) ||
-                     ((effects->flags & 0x20) != 0 && object->apiobj.is_underwater == 0))) {
-                    continue;
-                }
-
-                do {
-                    if (object != NULL) {
-                        if ((effects->flags & 0x100000) != 0) {
-                            if (effects->minimum > object->apiobj.velocity_magnitude) {
-                                break;
-                            }
-                        } else if ((effects->flags & 0x40000) != 0) {
-                            if (effects->minimum > object->apiobj.horizontal_velocity_magnitude) {
-                                break;
-                            }
-                        }
-                        if ((effects->flags & 0x200000) != 0) {
-                            if (object->apiobj.velocity_magnitude > effects->maximum) {
-                                break;
-                            }
-                        } else if ((effects->flags & 0x80000) != 0) {
-                            if (object->apiobj.horizontal_velocity_magnitude > effects->maximum) {
-                                break;
-                            }
+                        if ((effects->flags & 0x20) != 0 && object->apiobj.is_underwater == 0) {
+                            continue;
                         }
                     }
 
-                    if (position_count > 0 && effects->debris_id != -1 && effects->debris_id < debris_sys->capacity) {
-                        if ((effects->flags & 1) != 0) {
-                            i32 count = effects->particle_rate > 0.0f
-                                            ? ((effects->flags & 0x800000) != 0
-                                                   ? ParticlesPerSecond(effects->particle_rate, frame_time)
-                                                   : ParticlesPerFrame(effects->particle_rate, frame_time))
-                                            : effects->particle_count;
-                            if (count < 0) {
-                                count = 1;
+                    do {
+                        if (object != NULL) {
+                            if ((effects->flags & 0x100000) != 0) {
+                                if (object->apiobj.velocity_magnitude < effects->minimum) {
+                                    break;
+                                }
+                            } else if ((effects->flags & 0x40000) != 0) {
+                                if (object->apiobj.horizontal_velocity_magnitude < effects->minimum) {
+                                    break;
+                                }
                             }
-                            if (count > 0 && (effects->random == 0 || (NuRandInt() >> 16) <= (effects->random << 8))) {
-                                if ((effects->flags & 0x1000) != 0) {
-                                    if ((effects->flags & 0x400000) != 0 && object != NULL) {
-                                        AddGameDebrisMom(debris_sys, effects->debris_id, &position, count,
-                                                         &object->apiobj.velocity);
+                            if ((effects->flags & 0x200000) != 0) {
+                                if (object->apiobj.velocity_magnitude > effects->maximum) {
+                                    break;
+                                }
+                            } else if ((effects->flags & 0x80000) != 0) {
+                                if (object->apiobj.horizontal_velocity_magnitude > effects->maximum) {
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (position_count != 0 && effects->debris_id != -1 &&
+                            effects->debris_id < debris_sys->capacity) {
+                            if ((effects->flags & 1) != 0) {
+                                if (effects->particle_rate > 0.0f) {
+                                    if ((effects->flags & 0x800000) != 0) {
+                                        count = ParticlesPerSecond(effects->particle_rate, frame_time);
                                     } else {
-                                        AddGameDebrisRot(debris_sys, effects->debris_id, &position, count, 0, 0);
+                                        count = ParticlesPerFrame(effects->particle_rate, frame_time);
                                     }
                                 } else {
-                                    u16 y_rotation = 0;
-                                    u16 z_rotation = y_rotation;
-                                    if ((effects->flags & 0x800) != 0) {
+                                    count = effects->particle_count;
+                                }
+                                if (count < 0) {
+                                    count = 1;
+                                }
+                                if (count > 0 &&
+                                    (effects->random == 0 || (NuRandInt() >> 16) <= (effects->random << 8))) {
+                                    if ((effects->flags & 0x1000) != 0) {
                                         if ((effects->flags & 0x400000) != 0 && object != NULL) {
                                             AddGameDebrisMom(debris_sys, effects->debris_id, &position, count,
                                                              &object->apiobj.velocity);
                                         } else {
-                                            AddGameDebrisRot(debris_sys, effects->debris_id, &position, count,
-                                                             z_rotation, y_rotation);
-                                        }
-                                    } else if (locator_count != 0) {
-                                        for (i32 i = 0; i < locator_count; ++i) {
-                                            if ((effects->flags & 0x400000) != 0 && object != NULL) {
-                                                NUVEC velocity;
-                                                NuVecSub(&velocity, &object->apiobj.position,
-                                                         &object->apiobj.start_position);
-                                                NuVecScale(&velocity, &velocity, 1.0f / frame_time);
-                                                AddGameDebrisMom(debris_sys, effects->debris_id, &locator_positions[i],
-                                                                 count, &velocity);
-                                            } else if ((effects->flags & 0x4000000) != 0) {
-                                                AddGameDebrisMtx(debris_sys, effects->debris_id, &locator_positions[i],
-                                                                 count, &locator_matrices[i]);
-                                            } else {
-                                                AddGameDebrisRot(debris_sys, effects->debris_id, &locator_positions[i],
-                                                                 count, z_rotation, y_rotation);
-                                            }
+                                            AddGameDebrisRot(debris_sys, effects->debris_id, &position, count, 0, 0);
                                         }
                                     } else {
-                                        if ((effects->flags & 0x400000) != 0 && object != NULL) {
-                                            AddGameDebrisMom(debris_sys, effects->debris_id, &position, count,
-                                                             &object->apiobj.velocity);
+                                        y_rotation = 0;
+                                        z_rotation = y_rotation;
+                                        if ((effects->flags & 0x800) != 0) {
+                                            if ((effects->flags & 0x400000) != 0 && object != NULL) {
+                                                AddGameDebrisMom(debris_sys, effects->debris_id, &position, count,
+                                                                 &object->apiobj.velocity);
+                                            } else {
+                                                AddGameDebrisRot(debris_sys, effects->debris_id, &position, count,
+                                                                 z_rotation, y_rotation);
+                                            }
+                                        } else if (locator_count != 0) {
+                                            for (j = 0; j < locator_count; ++j) {
+                                                if ((effects->flags & 0x400000) != 0 && object != NULL) {
+                                                    NUVEC velocity;
+                                                    NuVecSub(&velocity, &object->apiobj.position,
+                                                             &object->apiobj.start_position);
+                                                    NuVecScale(&velocity, &velocity, 1.0f / frame_time);
+                                                    AddGameDebrisMom(debris_sys, effects->debris_id,
+                                                                     &locator_positions[j], count, &velocity);
+                                                } else if ((effects->flags & 0x4000000) != 0) {
+                                                    AddGameDebrisMtx(debris_sys, effects->debris_id,
+                                                                     &locator_positions[j], count,
+                                                                     &locator_matrices[j]);
+                                                } else {
+                                                    AddGameDebrisRot(debris_sys, effects->debris_id,
+                                                                     &locator_positions[j], count, z_rotation,
+                                                                     y_rotation);
+                                                }
+                                            }
                                         } else {
-                                            AddGameDebrisRot(debris_sys, effects->debris_id, &position, count,
-                                                             z_rotation, y_rotation);
+                                            if ((effects->flags & 0x400000) != 0 && object != NULL) {
+                                                AddGameDebrisMom(debris_sys, effects->debris_id, &position, count,
+                                                                 &object->apiobj.velocity);
+                                            } else {
+                                                AddGameDebrisRot(debris_sys, effects->debris_id, &position, count,
+                                                                 z_rotation, y_rotation);
+                                            }
                                         }
                                     }
                                 }
+                            } else if ((effects->flags & 0x1000) != 0) {
+                                AddGameDebris(debris_sys, effects->debris_id, &position);
+                            } else if ((effects->flags & 0x800) != 0) {
+                                AddGameDebris(debris_sys, effects->debris_id, &position);
+                            } else if (locator_count != 0) {
+                                for (j = 0; j < position_count; ++j) {
+                                    AddGameDebris(debris_sys, effects->debris_id, &locator_positions[j]);
+                                }
+                            } else {
+                                AddGameDebris(debris_sys, effects->debris_id, &position);
                             }
-                        } else if ((effects->flags & 0x1000) != 0) {
-                            AddGameDebris(debris_sys, effects->debris_id, &position);
-                        } else if ((effects->flags & 0x800) != 0) {
-                            AddGameDebris(debris_sys, effects->debris_id, &position);
-                        } else if (locator_count != 0) {
-                            for (i32 i = 0; i < position_count; ++i) {
-                                AddGameDebris(debris_sys, effects->debris_id, &locator_positions[i]);
-                            }
-                        } else {
-                            AddGameDebris(debris_sys, effects->debris_id, &position);
                         }
+                    } while (0);
+                    if (APIObjPlaySfxByIdFn != NULL && object != NULL && effects->sound_id != -1) {
+                        APIObjPlaySfxByIdFn(effects->sound_id,
+                                            (effects->flags & 0x8000) != 0 ? &object->apiobj.collision_position : NULL);
                     }
-                } while (0);
-                if (APIObjPlaySfxByIdFn != NULL && object != NULL && effects->sound_id != -1) {
-                    APIObjPlaySfxByIdFn(effects->sound_id,
-                                        (effects->flags & 0x8000) != 0 ? &object->apiobj.collision_position : NULL);
                 }
+            next_effect:;
             }
         }
     }

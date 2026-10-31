@@ -451,8 +451,6 @@ void RegisterGizmoTypes(VARIPTR *buffer, VARIPTR *buffer_end, REGISTERGIZMOTYPEF
     ADDGIZMOTYPE *addgizmo;
     GIZMOTYPES *types;
     GIZMOTYPE *gizmo;
-    void *pvVar4;
-    VARIPTR *pvVar3;
     i32 i;
 
     if (gizmotypes != NULL || register_gizmo_type_fns == NULL || *register_gizmo_type_fns == NULL) {
@@ -482,20 +480,14 @@ void RegisterGizmoTypes(VARIPTR *buffer, VARIPTR *buffer_end, REGISTERGIZMOTYPEF
     for (i32 n = 0; n < gizmotypes->count; n++, gizmo++) {
         addgizmo = register_gizmo_type_fns[n](n);
 
-        if (*addgizmo->prefix != '\0' && n != 0) {
-            i = 0;
-            do {
-                while (gizmotypes->types[i].prefix[0] == '\0') {
-                    i = i + 1;
-                    if (i == n)
-                        goto copy_data;
+        if (*addgizmo->prefix != '\0') {
+            for (i = 0; i < n; i++) {
+                if (gizmotypes->types[i].prefix[0] != '\0') {
+                    NuStrICmp(addgizmo->prefix, gizmotypes->types[i].prefix);
                 }
-                NuStrICmp(addgizmo->prefix, gizmotypes->types[i].prefix);
-                i = i + 1;
-            } while (__builtin_expect(i != n, 0));
+            }
         }
 
-    copy_data:
         NuStrCpy(gizmo->name, addgizmo->name);
         NuStrNCpy(gizmo->prefix, addgizmo->prefix, sizeof(gizmo->prefix));
         gizmo->fns.unknown1 = addgizmo->fns.unknown1;
@@ -527,21 +519,11 @@ void RegisterGizmoTypes(VARIPTR *buffer, VARIPTR *buffer_end, REGISTERGIZMOTYPEF
         gizmo->fns.post_load_fn = addgizmo->fns.post_load_fn;
         gizmo->fns.add_level_sfx_fn = addgizmo->fns.add_level_sfx_fn;
 
-        pvVar4 = (void *)addgizmo->fns.allocate_progress_data_fn;
-
-        if (pvVar4 != NULL && gizmotypes->unknown != 0) {
-            pvVar3 = GizmoBufferAlloc(buffer, buffer_end, gizmotypes->unknown * sizeof(VARIPTR));
-            gizmo->buffer = pvVar3;
-            if (pvVar3 != NULL && gizmotypes->unknown > 0) {
-                i = 0;
-                auto gizmo_buffer = gizmo->buffer;
-                while (1) {
-                    void *pvVar5 = gizmo->fns.allocate_progress_data_fn(buffer, buffer_end);
-                    pvVar3[i].void_ptr = pvVar5;
-                    i = i + 1;
-                    if (__builtin_expect(gizmotypes->unknown <= i, 0))
-                        break;
-                    pvVar3 = gizmo_buffer;
+        if (addgizmo->fns.allocate_progress_data_fn != NULL && gizmotypes->unknown != 0) {
+            gizmo->buffer = GizmoBufferAlloc(buffer, buffer_end, gizmotypes->unknown * sizeof(VARIPTR));
+            if (gizmo->buffer != NULL) {
+                for (i = 0; i < gizmotypes->unknown; i++) {
+                    gizmo->buffer[i].void_ptr = gizmo->fns.allocate_progress_data_fn(buffer, buffer_end);
                 }
             }
         }
@@ -650,7 +632,7 @@ void GizmoSysStoreProgress(GIZMOSYS_s *system, void *world, i32 progress_index) 
 }
 
 void GizmoSysReset(GIZMOSYS *gizmo_sys, void *world, i32 progress_index) {
-    if (gizmotypes != NULL && gizmo_sys != NULL) {
+    if (__builtin_expect(gizmotypes != NULL && gizmo_sys != NULL, 1)) {
         GIZMOTYPE *type = gizmotypes->types;
         GIZMOSET *set = gizmo_sys->sets;
 
@@ -948,7 +930,7 @@ GIZMO *GizmoFindByName(GIZMOSYS *gizmo_sys, i32 type_id, char *name) {
     GIZMOTYPE *type = gizmotypes->types;
     GIZMOSET *set = gizmo_sys->sets;
     for (i32 type_index = 0; type_index < gizmotypes->count; ++type_index, ++type, ++set) {
-        if (type->fns.get_gizmo_name_fn == NULL) {
+        if (__builtin_expect(type->fns.get_gizmo_name_fn == NULL, 0)) {
             continue;
         }
 

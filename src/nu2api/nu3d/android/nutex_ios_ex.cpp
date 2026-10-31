@@ -593,11 +593,7 @@ GLuint NuIOS_CreateGLTexFromPVRInMemory(void *data, i32 *out_width, i32 *out_hei
                     }
                     BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nutex_ios_ex.cpp",
                                            0x31d);
-                    if (faces <= 1) {
-                        glActiveTexture(GL_TEXTURE0);
-                        g_currentTexUnit = 0;
-                        glBindTexture(GL_TEXTURE_2D, texture);
-                    } else {
+                    if (faces > 1) {
                         if (g_currentTexUnit != 0) {
                             glActiveTexture(GL_TEXTURE0);
                             g_currentTexUnit = 0;
@@ -606,6 +602,10 @@ GLuint NuIOS_CreateGLTexFromPVRInMemory(void *data, i32 *out_width, i32 *out_hei
                             glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
                             g_lastBoundCubeTexIds[0] = texture;
                         }
+                    } else {
+                        glActiveTexture(GL_TEXTURE0);
+                        g_currentTexUnit = 0;
+                        glBindTexture(GL_TEXTURE_2D, texture);
                     }
 
                     if (compressed) {
@@ -715,108 +715,116 @@ void GetNativeTextureFormat(NUTEXFORMAT inFormat, i32 &outBpp, u32 &outInternalF
         }
     }
 
+    bool check = false;
+
     switch (inFormat) {
-        case NUTEX_DXT1:                                         // 1
-            outInternalFormat = GL_COMPRESSED_RGB_S3TC_DXT1_EXT; // 0x83F0
+        case NUTEX_DXT1:
+            outInternalFormat = GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
+            outIsCompressed = true;
+            check = true;
+            outFormat = GL_RGB;
             outType = GL_UNSIGNED_BYTE;
-            outIsCompressed = true; // 0x1907
-            outFormat = GL_RGB;     // 0x1401
             break;
 
-        case NUTEX_DX1A:                                          // 2
-            outInternalFormat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT; // 0x83F1
+        case NUTEX_DX1A:
+            outInternalFormat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+            outIsCompressed = true;
+            check = true;
             outFormat = GL_RGBA;
-            outType = GL_UNSIGNED_BYTE; // 0x1908
-            outIsCompressed = true;     // 0x1401
+            outType = GL_UNSIGNED_BYTE;
             break;
 
-        case NUTEX_DXT5:                 // 6
-            outInternalFormat = GL_RGBA; // 0x1908
+        case NUTEX_DXT5:
+            outInternalFormat = GL_RGBA;
+            outIsCompressed = true;
+            check = true;
+            outFormat = GL_RGBA;
             outType = GL_UNSIGNED_BYTE;
-            outFormat = GL_RGBA;    // 0x1908
-            outIsCompressed = true; // 0x1401
             break;
 
         case 0x10:
-            outInternalFormat = GL_LUMINANCE; // 0x1909
+            outInternalFormat = GL_LUMINANCE;
+            outBpp = 8;
+            outFormat = GL_LUMINANCE;
             outType = GL_UNSIGNED_BYTE;
-            outFormat = GL_LUMINANCE; // 0x1909
-            outBpp = 8;               // 0x1401
-            outFormatEnum = inFormat;
-            return;
-
-        case NUTEX_ETC1:                          // 0x11
-            outInternalFormat = GL_ETC1_RGB8_OES; // 0x8D64
-            outFormat = GL_RGB;
-            outType = GL_UNSIGNED_BYTE; // 0x1907
-            outIsCompressed = true;     // 0x1401
             break;
 
-        case NUTEX_PVRTC2:                                          // 0x14
-            outInternalFormat = GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG; // 0x8C01
+        case NUTEX_ETC1:
+            outInternalFormat = GL_ETC1_RGB8_OES;
             outIsCompressed = true;
-            outFormat = GL_RGB;         // 0x1907
-            outType = GL_UNSIGNED_BYTE; // 0x1401
-            break;
-
-        case NUTEX_PVRTC2A:                                          // 0x15
-            outInternalFormat = GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG; // 0x8C03
+            check = true;
+            outFormat = GL_RGB;
             outType = GL_UNSIGNED_BYTE;
-            outIsCompressed = true; // 0x1908
-            outFormat = GL_RGBA;    // 0x1401
             break;
 
-        case NUTEX_PVRTC4:                                          // 0x16
-            outInternalFormat = GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG; // 0x8C00
-            outFormat = GL_RGB;
-            outIsCompressed = true;     // 0x1907
-            outType = GL_UNSIGNED_BYTE; // 0x1401
-            break;
-
-        case NUTEX_PVRTC4A:                                          // 0x17
-            outInternalFormat = GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG; // 0x8C02
+        case NUTEX_PVRTC2:
+            outInternalFormat = GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG;
             outIsCompressed = true;
-            outFormat = GL_RGBA;        // 0x1908
-            outType = GL_UNSIGNED_BYTE; // 0x1401
+            check = true;
+            outFormat = GL_RGB;
+            outType = GL_UNSIGNED_BYTE;
             break;
 
-        case NUTEX_ATCA:                                            // 0x18
-            outInternalFormat = GL_ATC_RGBA_INTERPOLATED_ALPHA_AMD; // 0x87EE
+        case NUTEX_PVRTC2A:
+            outInternalFormat = GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG;
+            outIsCompressed = true;
+            check = true;
             outFormat = GL_RGBA;
-            outIsCompressed = true;     // 0x1908
-            outType = GL_UNSIGNED_BYTE; // 0x1401
+            outType = GL_UNSIGNED_BYTE;
             break;
 
-        case NUTEX_ATC:                         // 0x19
-            outInternalFormat = GL_ATC_RGB_AMD; // 0x8C92
+        case NUTEX_PVRTC4:
+            outInternalFormat = GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG;
+            outIsCompressed = true;
+            check = true;
             outFormat = GL_RGB;
-            outIsCompressed = true;     // 0x1907
-            outType = GL_UNSIGNED_BYTE; // 0x1401
+            outType = GL_UNSIGNED_BYTE;
+            break;
+
+        case NUTEX_PVRTC4A:
+            outInternalFormat = GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG;
+            outIsCompressed = true;
+            check = true;
+            outFormat = GL_RGBA;
+            outType = GL_UNSIGNED_BYTE;
+            break;
+
+        case NUTEX_ATCA:
+            outInternalFormat = GL_ATC_RGBA_INTERPOLATED_ALPHA_AMD;
+            outIsCompressed = true;
+            check = true;
+            outFormat = GL_RGBA;
+            outType = GL_UNSIGNED_BYTE;
+            break;
+
+        case NUTEX_ATC:
+            outInternalFormat = GL_ATC_RGB_AMD;
+            outIsCompressed = true;
+            check = true;
+            outFormat = GL_RGB;
+            outType = GL_UNSIGNED_BYTE;
             break;
 
         case 0x66:
-            outInternalFormat = GL_RGB; // 0x1907
-            outFormat = GL_RGB;         // 0x18
-            outType = GL_UNSIGNED_BYTE; // 0x1907
-            outBpp = 24;                // 0x1401
-            outFormatEnum = inFormat;
-            return;
+            outInternalFormat = GL_RGB;
+            outBpp = 24;
+            outFormat = GL_RGB;
+            outType = GL_UNSIGNED_BYTE;
+            break;
 
         case 0x69:
         case 0x72:
-            outFormatEnum = inFormat;
-            return;
+            break;
 
         default:
             outInternalFormat = GL_RGBA;
-            outType = GL_UNSIGNED_BYTE;
-            outFormat = GL_RGBA;
-            outFormatEnum = inFormat;
             outBpp = 32;
-            return;
+            outFormat = GL_RGBA;
+            outType = GL_UNSIGNED_BYTE;
+            break;
     }
 
-    if (__builtin_expect(!NuIOS_TextureFormatSupported(formatToCheck), 1)) {
+    if (check && __builtin_expect(!NuIOS_TextureFormatSupported(formatToCheck), 0)) {
         while (true) {
         }
     }
@@ -938,8 +946,8 @@ void UnlockTexturePS(u32 texID, void *pixels, i32 width, i32 height, i32 depth, 
                 mipWidth = width >> mip;
                 mipWidth = mipWidth > 0 ? mipWidth : 1;
 
-                i32 mipHeight = height >> mip;
-                hLimit = mipHeight > 0 ? mipHeight : 1;
+                hLimit = height >> mip;
+                hLimit = hLimit > 0 ? hLimit : 1;
 
                 i32 currentOffset = GetMipOffset(width, height, format, depth, isCubemap, mips, mip,
                                                  faceTarget - GL_TEXTURE_CUBE_MAP_POSITIVE_X);
@@ -1010,6 +1018,10 @@ void UnlockTexturePS(u32 texID, void *pixels, i32 width, i32 height, i32 depth, 
                         }
                         EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nutex_ios_ex.cpp",
                                              0x589);
+                        if (__builtin_expect(hLimit == 1 && mipWidth == 1, 0)) {
+                            break;
+                        }
+                        continue;
                     }
                 }
                 if (__builtin_expect(hLimit == 1 && mipWidth == 1, 0)) {
@@ -1128,7 +1140,7 @@ GLuint NuIOS_CreateGLTexFromPlatfomSpecificFile(const char *filename) {
         if (g_loadingCharacterInHub != 0 && bgProcIsBgThread() != 0) {
             NuIOS_YieldThread();
         }
-    } while (remaining != 0);
+    } while (__builtin_expect(remaining != 0, 1));
     NuFileOpenSize(file);
     NuFileClose(file);
 
@@ -1167,7 +1179,7 @@ GLuint NuIOS_CreateGLTexFromPlatfomSpecificForecPVR(const char *filename) {
         if (g_loadingCharacterInHub != 0 && bgProcIsBgThread() != 0) {
             NuIOS_YieldThread();
         }
-    } while (remaining != 0);
+    } while (__builtin_expect(remaining != 0, 1));
     NuFileOpenSize(file);
     NuFileClose(file);
 

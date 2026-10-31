@@ -109,17 +109,13 @@ static void GizObstacles_Update(void *world_ptr, void *data, float) {
         return;
     }
 
-    GIZMOSET &gizmo_set = world->gizmo_sys->sets[obstacle_gizmotype_id];
     obstacle_sys->active_gizmo_count = 0;
+    GIZMOSET &gizmo_set = world->gizmo_sys->sets[obstacle_gizmotype_id];
 
     GIZMO *gizmo = gizmo_set.gizmos;
     i32 count = gizmo_set.count;
     for (i32 index = 0; index < count; ++index, ++gizmo) {
         GIZOBSTACLE_s *obstacle = static_cast<GIZOBSTACLE_s *>(gizmo->object);
-        if (obstacle == NULL) {
-            continue;
-        }
-
         GameObject_s *previous_triggering_object = obstacle->triggering_object;
         obstacle->triggering_object = NULL;
         if (__builtin_expect((obstacle->progress_flags & GIZOBSTACLE_PROGRESS_FLAG_VISIBLE) == 0 ||
@@ -133,7 +129,7 @@ static void GizObstacles_Update(void *world_ptr, void *data, float) {
         }
 
         GAMEANIMSET_s *anim_set = obstacle->anim_set;
-        if (obstacle->mode == 7) {
+        if (__builtin_expect(obstacle->mode == 7, 0)) {
             if ((obstacle->progress_flags & GIZOBSTACLE_PROGRESS_FLAG_PUSH_CONTROL) != 0) {
                 obstacle->triggering_object = previous_triggering_object;
                 if (__builtin_expect(obstacle->animation_speed != 0.0f, 1)) {
@@ -171,11 +167,11 @@ static void GizObstacles_Update(void *world_ptr, void *data, float) {
         if ((anim_set->flags & 7) != 0) {
             GizObstacle_EvalAveragePosAndRadius(obstacle, 2);
 
-            if ((obstacle->runtime_flags & GIZOBSTACLE_RUNTIME_FLAG_ANIM_OBJECT_BIT_1) != 0) {
+            if (__builtin_expect((obstacle->runtime_flags & GIZOBSTACLE_RUNTIME_FLAG_ANIM_OBJECT_BIT_1) != 0, 1)) {
                 anim_set = obstacle->anim_set;
                 for (GAMEANIMOBJ_s *object = anim_set->objects; object != NULL; object = object->next) {
                     i16 *object_data = static_cast<i16 *>(object->object_data);
-                    if (object_data != NULL && (object_data[0] & 2) != 0) {
+                    if ((object_data[0] & 2) != 0) {
                         AddShoveObject(&object->special, object_data[1]);
                     }
                 }
@@ -199,40 +195,38 @@ static void GizObstacles_Update(void *world_ptr, void *data, float) {
             obstacle->runtime_flags &= static_cast<u8>(~GIZOBSTACLE_RUNTIME_FLAG_TRIGGER_LATCHED);
         }
 
-        const bool completion_mode = obstacle->state == 0 || obstacle->state == 3 ||
-                                     (obstacle->config_flags & GIZOBSTACLE_CONFIG_RESET_AFTER_COMPLETION) != 0;
-        const bool animation_finished =
+        if (__builtin_expect((obstacle->state == 0 || obstacle->state == 3 ||
+             __builtin_expect((obstacle->config_flags & GIZOBSTACLE_CONFIG_RESET_AFTER_COMPLETION) != 0, 0)) &&
             ((anim_set->flags & GAMEANIMSET_FLAG_STOP_REQUESTED) != 0 || anim_set->animated_object_count == 0) &&
-            anim_set->state == GAMEANIMSET_STATE_AT_END;
-        if (__builtin_expect(completion_mode && animation_finished &&
-                                 (obstacle->blowup_type != -1 || obstacle->pickup_count != 0),
-                             1)) {
-            if (obstacle->blowup_type != -1) {
-                if ((obstacle->config_flags & GIZOBSTACLE_CONFIG_BLOWUP_AT_ANIM_OBJECTS) == 0) {
-                    GizmoBlowUpTypeBlowUp(world, obstacle->blowup_type, &obstacle->evaluated_position);
-                } else {
-                    for (GAMEANIMOBJ_s *object = anim_set->objects; object != NULL; object = object->next) {
-                        NUVEC *draw_position = NuSpecialGetDrawPos(&object->special);
-                        if (draw_position != NULL) {
-                            GizmoBlowUpTypeBlowUp(world, obstacle->blowup_type, draw_position);
+            __builtin_expect(anim_set->state == GAMEANIMSET_STATE_AT_END, 0), 1)) {
+            if (obstacle->blowup_type != -1 || obstacle->pickup_count != 0) {
+                if (obstacle->blowup_type != -1) {
+                    if ((obstacle->config_flags & GIZOBSTACLE_CONFIG_BLOWUP_AT_ANIM_OBJECTS) == 0) {
+                        GizmoBlowUpTypeBlowUp(world, obstacle->blowup_type, &obstacle->evaluated_position);
+                    } else {
+                        for (GAMEANIMOBJ_s *object = anim_set->objects; object != NULL; object = object->next) {
+                            NUVEC *draw_position = NuSpecialGetDrawPos(&object->special);
+                            if (draw_position != NULL) {
+                                GizmoBlowUpTypeBlowUp(world, obstacle->blowup_type, draw_position);
+                            }
                         }
                     }
+                    GameAnimSet_SetVisibility(obstacle->anim_set, 0);
+                    obstacle->runtime_flags |= GIZOBSTACLE_RUNTIME_FLAG_DESTROYED;
                 }
-                GameAnimSet_SetVisibility(obstacle->anim_set, 0);
-                obstacle->runtime_flags |= GIZOBSTACLE_RUNTIME_FLAG_DESTROYED;
-            }
 
-            if (obstacle->pickup_count != 0 &&
-                ((obstacle->runtime_flags & GIZOBSTACLE_RUNTIME_FLAG_PICKUPS_SPAWNED) == 0 ||
-                 (obstacle->config_flags & GIZOBSTACLE_CONFIG_RESET_AFTER_COMPLETION) != 0)) {
-                NUVEC pickup_position;
-                NUVEC pickup_direction;
-                NuVecAdd(&pickup_position, &obstacle->evaluated_position, &obstacle->pickup_offset);
-                NuVecRotateX(&pickup_direction, &v010, static_cast<u16>(obstacle->pickup_direction_x));
-                NuVecRotateY(&pickup_direction, &pickup_direction, static_cast<u16>(obstacle->pickup_direction_y));
-                AddPickups(static_cast<u16>(obstacle->pickup_count), 0, 0, 0, &pickup_position, &pickup_direction, 2.0f,
-                           -1, obstacle->pickup_scatter_height, 2000000.0f, NULL, 1, 0, true);
-                obstacle->runtime_flags |= GIZOBSTACLE_RUNTIME_FLAG_PICKUPS_SPAWNED;
+                if (obstacle->pickup_count != 0 &&
+                    ((obstacle->runtime_flags & GIZOBSTACLE_RUNTIME_FLAG_PICKUPS_SPAWNED) == 0 ||
+                     (obstacle->config_flags & GIZOBSTACLE_CONFIG_RESET_AFTER_COMPLETION) != 0)) {
+                    NUVEC pickup_position;
+                    NUVEC pickup_direction;
+                    NuVecAdd(&pickup_position, &obstacle->evaluated_position, &obstacle->pickup_offset);
+                    NuVecRotateX(&pickup_direction, &v010, static_cast<u16>(obstacle->pickup_direction_x));
+                    NuVecRotateY(&pickup_direction, &pickup_direction, static_cast<u16>(obstacle->pickup_direction_y));
+                    AddPickups(static_cast<u16>(obstacle->pickup_count), 0, 0, 0, &pickup_position, &pickup_direction,
+                               2.0f, -1, obstacle->pickup_scatter_height, 2000000.0f, NULL, 1, 0, true);
+                    obstacle->runtime_flags |= GIZOBSTACLE_RUNTIME_FLAG_PICKUPS_SPAWNED;
+                }
             }
 
             if (__builtin_expect(obstacle->state == 3, 1)) {
@@ -397,7 +391,7 @@ static i32 GizmoObstacle_ActivateRev(GIZMO *gizmo, i32 activate, i32 flags) {
     }
 
     if ((flags & GIZOBSTACLE_ACTIVATE_REVERSE_VALIDATE) == 0) {
-        if (activate == 0) {
+        if (__builtin_expect(activate == 0, 1)) {
             obstacle->control_flags &= static_cast<u8>(~GIZOBSTACLE_CONTROL_FLAG_REVERSE_ACTIVE);
             obstacle->progress_flags |= GIZOBSTACLE_PROGRESS_FLAG_ENABLED;
             return 1;
@@ -414,7 +408,7 @@ static i32 GizmoObstacle_ActivateRev(GIZMO *gizmo, i32 activate, i32 flags) {
             return 0;
         }
         const i32 visible = (obstacle->progress_flags & GIZOBSTACLE_PROGRESS_FLAG_VISIBLE) != 0 ? 1 : 0;
-        if (visible != activate) {
+        if (__builtin_expect(visible != activate, 1)) {
             return 0;
         }
     }
@@ -450,7 +444,7 @@ static i32 GizObstacles_BoltHitPlat(void *world_ptr, void *data, BOLT *bolt, uns
         return 0;
     }
     const i32 count = system->active_gizmo_count;
-    if (count == 0) {
+    if (__builtin_expect(count == 0, 0)) {
         return 0;
     }
 
@@ -486,8 +480,10 @@ static i32 *GizObstacles_GetBestBoltTarget(GIZMOSET *set, float *result_distance
     if (set == NULL) {
         return NULL;
     }
-    GIZOBSTACLESYS_s *system = static_cast<GIZOBSTACLESYS_s *>(set->unknown);
-    if (__builtin_expect(system == NULL || bolt_type == NULL, 0)) {
+    if (set->unknown == NULL) {
+        return NULL;
+    }
+    if (bolt_type == NULL) {
         return NULL;
     }
 
@@ -500,15 +496,15 @@ static i32 *GizObstacles_GetBestBoltTarget(GIZMOSET *set, float *result_distance
         aim.y = 0.0f;
         NuVecNorm(&aim, &aim);
     }
-    const i32 active_count = system->active_gizmo_count;
-    if (active_count == 0) {
+    GIZOBSTACLESYS_s *system = static_cast<GIZOBSTACLESYS_s *>(set->unknown);
+    if (system->active_gizmo_count == 0) {
         return NULL;
     }
 
     GameObject_s *object = static_cast<GameObject_s *>(object_ptr);
-    GIZMO *best = NULL, *previous = NULL;
-    NUVEC *best_position = NULL, *previous_position = NULL;
     float nearest_distance = 100000000.0f;
+    NUVEC *best_position = NULL, *previous_position = NULL;
+    GIZMO *best = NULL, *previous = NULL;
     i32 i = 0;
     do {
         GIZMO *gizmo = system->active_gizmos[i];
@@ -526,8 +522,8 @@ static i32 *GizObstacles_GetBestBoltTarget(GIZMOSET *set, float *result_distance
         }
 
         NUVEC delta;
-        float distance = planar != 0 ? NuVecXZDistSqr(target_position, position, &delta)
-                                     : NuVecDistSqr(target_position, position, &delta);
+        float distance = planar == 0 ? NuVecDistSqr(target_position, position, &delta)
+                                     : NuVecXZDistSqr(target_position, position, &delta);
         if (!(range_squared > distance)) {
             continue;
         }
@@ -547,18 +543,20 @@ static i32 *GizObstacles_GetBestBoltTarget(GIZMOSET *set, float *result_distance
         } else {
             angle = far_angle;
         }
-        if (!(dot > NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff]) || !(nearest_distance > distance)) {
+        if (!(dot > NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff])) {
             continue;
         }
-        if (object != NULL && object->attack_gizmo_target == gizmo) {
-            previous = gizmo;
-            previous_position = target_position;
-        } else {
-            nearest_distance = distance;
-            best = gizmo;
-            best_position = target_position;
+        if (nearest_distance > distance) {
+            if (object != NULL && object->attack_gizmo_target == gizmo) {
+                previous = gizmo;
+                previous_position = target_position;
+            } else {
+                nearest_distance = distance;
+                best = gizmo;
+                best_position = target_position;
+            }
         }
-    } while (++i < active_count);
+    } while (system->active_gizmo_count > ++i);
 
     if (best != NULL) {
         *result_position = *best_position;
@@ -600,15 +598,16 @@ static i32 GizObstacles_BoltHit(void *world, void *data, void *attacker_ptr, NUV
             continue;
         const NUVEC &position = obstacle->evaluated_position;
         const f32 obstacle_radius = obstacle->field_0x58;
-        if (__builtin_expect(
-                position.x - obstacle_radius > maximum->x || !(minimum->x <= position.x + obstacle_radius) ||
-                    position.z - obstacle_radius > maximum->z || minimum->z > position.z + obstacle_radius ||
-                    position.y - obstacle_radius > maximum->y || minimum->y > position.y + obstacle_radius,
-                1)) {
+        if (__builtin_expect(__builtin_expect(position.x - obstacle_radius > maximum->x, 0) ||
+                                 minimum->x > position.x + obstacle_radius ||
+                                 position.z - obstacle_radius > maximum->z ||
+                                 minimum->z > position.z + obstacle_radius ||
+                                 position.y - obstacle_radius > maximum->y || minimum->y > position.y + obstacle_radius,
+                             1)) {
             continue;
         }
-        for (i32 point_index = point_count - 1; point_index >= 0; --point_index) {
-            NUVEC *point = &points[point_index];
+        NUVEC *point = &points[point_count - 1];
+        for (i32 point_index = point_count - 1; point_index >= 0; --point_index, --point) {
             if (SphereSphereOverlap(&obstacle->evaluated_position, obstacle->field_0x58, point, radius) != 0) {
                 if (attacker != NULL) {
                     point = &attacker->apiobj.collision_position;
@@ -894,7 +893,7 @@ static void Gizobstacle_ReadAnimSetData(GAMEANIMOBJ_s *object, unsigned char ver
 
     u16 fallback_data = 0;
     u16 *object_data = static_cast<u16 *>(object->object_data);
-    if (object_data == NULL) {
+    if (__builtin_expect(object_data == NULL, 0)) {
         object_data = &fallback_data;
     }
 
@@ -914,7 +913,7 @@ static void GizObstacles_PostLoad(void *world_ptr, void *data) {
 
     for (i32 index = 0; index < obstacle_sys->count; ++index) {
         GIZOBSTACLE_s &obstacle = obstacle_sys->obstacles[index];
-        if ((obstacle.runtime_flags & GIZOBSTACLE_RUNTIME_FLAG_PENDING_BLOWUP_TYPE) != 0) {
+        if (__builtin_expect((obstacle.runtime_flags & GIZOBSTACLE_RUNTIME_FLAG_PENDING_BLOWUP_TYPE) != 0, 1)) {
             obstacle.blowup_type = static_cast<i16>(GizmoBlowupGetTypeFromNameTableId(world, obstacle.blowup_type));
             obstacle.runtime_flags &= static_cast<u8>(~GIZOBSTACLE_RUNTIME_FLAG_PENDING_BLOWUP_TYPE);
         }
@@ -1076,7 +1075,7 @@ GIZOBSTACLE_s *GizObstacle_FindNearest(GIZOBSTACLESYS_s *system, NUVEC *position
         if ((obstacle->runtime_flags & GIZOBSTACLE_RUNTIME_FLAG_DESTROYED) != 0)
             continue;
         f32 distance;
-        if (object != NULL && obstacle->anim_set != NULL) {
+        if (object != NULL && __builtin_expect(obstacle->anim_set != NULL, 1)) {
             NUVEC average;
             // Retail requires a set with a contributing animated object here.
             GameAnimSet_GetAveragePos(obstacle->anim_set, &average, 2, 1, 0);
@@ -1208,12 +1207,12 @@ static void GizObstacleUpdate_Proximity(GIZOBSTACLE_s *obstacle) {
 
         const u8 initial_mode = obstacle->mode;
         if (__builtin_expect(static_cast<u8>(initial_mode - 1) < 2 || initial_mode == 5 || initial_mode == 6, 1)) {
-            if (__builtin_expect((initial_mode & 0xfb) == 1 && GameCam->mode != -1 &&
+            if (__builtin_expect((initial_mode & 0xfb) == 1, 1) && GameCam->mode != -1 &&
                 __builtin_expect(obstacle->trigger_mode == 0xff, 0) &&
                 (obstacle->config_flags &
                  (GIZOBSTACLE_CONFIG_INVERT_PROXIMITY | GIZOBSTACLE_CONFIG_EXCLUDE_NON_PLAYER |
                   GIZOBSTACLE_CONFIG_CHECK_SUPPORTING_PLATFORM | GIZOBSTACLE_CONFIG_REQUIRE_ACTIVE_PLAYER |
-                  GIZOBSTACLE_CONFIG_REQUIRE_LINKED_OBJECT | GIZOBSTACLE_CONFIG_REQUIRE_CHARACTER_DATA_FLAG_04)) == 0, 0)) {
+                  GIZOBSTACLE_CONFIG_REQUIRE_LINKED_OBJECT | GIZOBSTACLE_CONFIG_REQUIRE_CHARACTER_DATA_FLAG_04)) == 0) {
                 const f32 distance_squared = NuVecDistSqr(&GameCam->pos, &obstacle->secondary_position, NULL);
                 if (distance_squared < closest_distance_squared &&
                     (!OBSTACLE_USES_BOX_TRIGGER(obstacle) || GizObstacle_PosWithinBox(obstacle, &GameCam->pos) != 0)) {
@@ -1227,11 +1226,12 @@ static void GizObstacleUpdate_Proximity(GIZOBSTACLE_s *obstacle) {
                     const f32 distance_squared =
                         NuVecDistSqr(&obstacle->secondary_position, gizobstacletriggers[index], NULL);
                     if (distance_squared < closest_distance_squared) {
+                        NUVEC *trigger = gizobstacletriggers[index];
                         if (__builtin_expect(OBSTACLE_USES_BOX_TRIGGER(obstacle), 0) &&
-                            GizObstacle_PosWithinBox(obstacle, gizobstacletriggers[index]) == 0)
+                            GizObstacle_PosWithinBox(obstacle, trigger) == 0)
                             continue;
                         closest_distance_squared = distance_squared;
-                        closest_position = gizobstacletriggers[index];
+                        closest_position = trigger;
                     }
                 }
             }
@@ -1274,11 +1274,11 @@ static void GizObstacleUpdate_Proximity(GIZOBSTACLE_s *obstacle) {
                 (object->field_0xf03 & GAMEOBJECT_F03_FLAG_OBSTACLE_TERRAIN_VALID) == 0 && object->field_0xe31 != 1;
             if (__builtin_expect(!!(requires_obstacle_platform), 1)) {
                 bool on_obstacle_platform = false;
-                if (__builtin_expect(obstacle->anim_set != NULL, 0)) {
+                if (__builtin_expect(obstacle->anim_set != NULL, 1)) {
                     for (GAMEANIMOBJ_s *anim_object = obstacle->anim_set->objects; anim_object != NULL;
                          anim_object = anim_object->next) {
                         i16 *object_data = static_cast<i16 *>(anim_object->object_data);
-                        if (object_data[1] != -1 && object_data[1] == object->apiobj.supporting_platform_id) {
+                        if (__builtin_expect(object_data[1] != -1 && object_data[1] == object->apiobj.supporting_platform_id, 0)) {
                             on_obstacle_platform = true;
                             break;
                         }
@@ -1295,7 +1295,7 @@ static void GizObstacleUpdate_Proximity(GIZOBSTACLE_s *obstacle) {
                 if ((!OBSTACLE_USES_BOX_TRIGGER(obstacle) ||
                      GizObstacle_PosWithinBox(obstacle, &object->apiobj.collision_position) != 0) &&
                     GizObstacle_SatisfyingTerrainChecks(obstacle, object) != 0) {
-                    if (__builtin_expect(object->apiobj.field_0x27c != -1, 0)) {
+                    if (object->apiobj.field_0x27c != -1) {
                         players_not_satisfying_terrain &= ~(1u << object->apiobj.field_0x27c);
                     }
                     closest_distance_squared = distance_squared;
@@ -1325,7 +1325,16 @@ static void GizObstacleUpdate_Proximity(GIZOBSTACLE_s *obstacle) {
     }
 
     const GAMEANIMSET_STATE state = obstacle->anim_set->state;
-    if (state == GAMEANIMSET_STATE_AT_START) {
+    if (state != GAMEANIMSET_STATE_AT_START && state != GAMEANIMSET_STATE_AT_END) {
+        if (__builtin_expect(WORLD->current_level != BLOCKADERUNNERC_LDATA || LevGizObst[0] != obstacle ||
+            state != GAMEANIMSET_STATE_BETWEEN_ENDPOINTS, 1)) {
+            return;
+        }
+    } else if (state == GAMEANIMSET_STATE_AT_END) {
+        if (obstacle->state == 0) {
+            return;
+        }
+    } else {
         if (obstacle->proximity_output != 0 ||
             (obstacle->runtime_flags &
              (GIZOBSTACLE_RUNTIME_FLAG_AI_ACTIVE | GIZOBSTACLE_RUNTIME_FLAG_TRIGGER_LATCHED)) != 0) {
@@ -1334,13 +1343,7 @@ static void GizObstacleUpdate_Proximity(GIZOBSTACLE_s *obstacle) {
         }
         return;
     }
-
-    bool may_return = state == GAMEANIMSET_STATE_AT_END && obstacle->state != 0;
-    if (!may_return) {
-        may_return = WORLD->current_level == BLOCKADERUNNERC_LDATA && LevGizObst[0] == obstacle &&
-                     state == GAMEANIMSET_STATE_BETWEEN_ENDPOINTS;
-    }
-    if (!may_return || obstacle->proximity_output != 0 ||
+    if (obstacle->proximity_output != 0 ||
         (obstacle->runtime_flags & (GIZOBSTACLE_RUNTIME_FLAG_AI_ACTIVE | GIZOBSTACLE_RUNTIME_FLAG_TRIGGER_LATCHED)) !=
             0) {
         return;

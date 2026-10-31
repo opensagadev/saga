@@ -61,13 +61,13 @@ void NuSoundStreamer::RequestCue(NuSoundStreamingSample *streaming_sample, bool 
 void NuSoundStreamer::RequestFill(NuSoundStreamingSample *sample, NuSoundBuffer *buffer, bool loop,
                                   NuSoundWeakPtr<NuSoundBufferCallback> callback) {
     QueueElement element;
-    element.message = QueueElement::Message::FILL_STREAM_BUFFER;
-    element.sample = sample;
-    element.loop = loop;
     element.start_offset = 0.0f;
+    element.sample = sample;
     element.buffer = buffer;
-    element.weak_ptr.Assign((NuSoundBufferCallback *)callback.obj);
+    element.loop = loop;
     element.weak_flag = false;
+    element.message = QueueElement::Message::FILL_STREAM_BUFFER;
+    element.weak_ptr.Assign((NuSoundBufferCallback *)callback.obj);
 
     this->queue2.Push(element);
 
@@ -253,7 +253,7 @@ i32 NuSoundStreamingSample::Open(f32 start_offset, bool loop, bool weak_flag) {
 
     this->file_loader = NuSoundSystem::CreateFileLoader(this->file_type);
     desc = this->file_loader->CreateHeader();
-    if (__builtin_expect(desc == NULL, 0)) {
+    if (desc == NULL) {
         NuSoundSystem::ReleaseFileLoader(this->file_loader);
         this->file_loader = NULL;
         return 3;
@@ -298,7 +298,7 @@ i32 NuSoundStreamingSample::Open(f32 start_offset, bool loop, bool weak_flag) {
     }
 
     LoadState new_state;
-    if (status == 1) {
+    if (__builtin_expect(status == 1, 0)) {
         error = 0;
         new_state = LoadState::STREAM_READY;
     } else {
@@ -334,9 +334,11 @@ alloc_error:
             this->sound_buffers[0]->Free();
         }
 
-        this->sound_buffers[0]->~NuSoundBuffer();
-
-        NU_FREE(this->sound_buffers[0]);
+        NuSoundBuffer *buffer = this->sound_buffers[0];
+        if (buffer != NULL) {
+            buffer->~NuSoundBuffer();
+            NU_FREE(buffer);
+        }
 
         this->sound_buffers[0] = NULL;
     }
@@ -346,9 +348,11 @@ alloc_error:
             this->sound_buffers[1]->Free();
         }
 
-        this->sound_buffers[1]->~NuSoundBuffer();
-
-        NU_FREE(this->sound_buffers[1]);
+        NuSoundBuffer *buffer = this->sound_buffers[1];
+        if (buffer != NULL) {
+            buffer->~NuSoundBuffer();
+            NU_FREE(buffer);
+        }
 
         this->sound_buffers[1] = NULL;
     }
@@ -444,7 +448,7 @@ stream_error:
 }
 
 bool NuSoundStreamingSample::IsLocked() const {
-    if (this->sound_buffers[0] != NULL && this->sound_buffers[0]->IsLocked()) {
+    if (__builtin_expect(this->sound_buffers[0] != NULL && this->sound_buffers[0]->IsLocked(), 0)) {
         return true;
     }
     if (this->sound_buffers[1] != NULL && this->sound_buffers[1]->IsLocked()) {

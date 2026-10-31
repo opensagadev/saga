@@ -36,12 +36,12 @@ NuSoundBus::~NuSoundBus() {
 }
 
 bool NuSoundBus::AddEffect(NuSoundEffect *effect) {
-    if (effects.Contains(effect)) {
+    if (__builtin_expect(effects.Contains(effect) != 0, 0)) {
         return false;
     }
 
     bool attached = effect->AttachBus(this);
-    if (attached) {
+    if (__builtin_expect(attached != 0, 1)) {
         NuSoundMemory::PushNuListNode(effects, effect);
     }
     return attached;

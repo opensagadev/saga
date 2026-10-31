@@ -283,7 +283,7 @@ void PadOutPause(i32 port, WORLDINFO_s *world) {
     if (Paused != 0 || NoPad(port, 1) == 0 || NewMode != 0 || NewLData != NULL || FadeSys.fade != 0.0f) {
         return;
     }
-    if (GamePads_IgnoreInputFn != NULL && GamePads_IgnoreInputFn() != 0) {
+    if (__builtin_expect(GamePads_IgnoreInputFn != NULL && GamePads_IgnoreInputFn() != 0, 1)) {
         return;
     }
     if (MiniCutCam != 0 || (world->area != NULL && (world->area->flags & AREAFLAG_ENDING_AREA) != 0) ||
@@ -341,7 +341,7 @@ i32 ReadPad(i32 port) {
         return result;
     }
 
-    if (input_mode == 3) {
+    if (__builtin_expect(input_mode == 3, 0)) {
         gamepad->buttons_down_08 |= pad->digital_buttons_pressed & GAMEPAD_START;
         return 3;
     }
@@ -356,7 +356,7 @@ i32 ReadPad(i32 port) {
     const f32 left_y = static_cast<f32>(pad->analog_left_y) - 127.5f;
     if (left_y < -85.0f) {
         gamepad->unknown_0c |= GAMEPAD_DUP;
-    } else if (left_y > 85.0f) {
+    } else if (__builtin_expect(left_y > 85.0f, 1)) {
         gamepad->unknown_0c |= GAMEPAD_DDOWN;
     }
     gamepad->unknown_10 = gamepad->unknown_0c & ~gamepad->unknown_14;
@@ -370,12 +370,12 @@ i32 ReadPad(i32 port) {
         gamepad->unknown_18 |= GAMEPAD_DRIGHT;
     }
     const f32 right_y = static_cast<f32>(pad->analog_right_y) - 127.5f;
-    if (!(right_y < -85.0f)) {
+    if (right_y < -85.0f) {
+        gamepad->unknown_18 |= GAMEPAD_DUP;
+    } else {
         if (right_y > 85.0f) {
             gamepad->unknown_18 |= GAMEPAD_DDOWN;
         }
-    } else {
-        gamepad->unknown_18 |= GAMEPAD_DUP;
     }
     gamepad->unknown_1c = gamepad->unknown_18 & ~gamepad->unknown_20;
     gamepad->unknown_20 = gamepad->unknown_18;
@@ -404,16 +404,15 @@ void DoInput(WORLDINFO_s *world) {
     i32 player_state_changed = PlayersDropInOut();
 
     for (i32 player_index = 0; player_index < 2; ++player_index) {
-        nupad_s *pad = GamePad[player_index].pad;
         GameObject_s *player = Player[player_index];
+        nupad_s *pad = GamePad[player_index].pad;
         if (GamePads_IgnoreInputFn != NULL) {
             if (GamePads_IgnoreInputFn() != 0) {
                 continue;
             }
         }
         if (static_cast<u32>(input_result[player_index]) <= 1) {
-            if (player != NULL && player->apiobj.player_controlled && pad != NULL && MiniCutCam == 0 && world != NULL &&
-                world->current_level != NULL) {
+            if (player != NULL && player->apiobj.player_controlled && MiniCutCam == 0) {
                 PadOutPause(player_index, world);
             }
             continue;
@@ -432,8 +431,8 @@ void DoInput(WORLDINFO_s *world) {
             continue;
         }
 
-        if (Paused == 0) {
-            if (GameMenu[GameMenuLevel].menu == -1 && CutSceneWaiting == 0) {
+        if (__builtin_expect(Paused == 0, 1)) {
+            if (__builtin_expect(GameMenu[GameMenuLevel].menu == -1 && CutSceneWaiting == 0, 1)) {
                 if ((CUTSTOPGAME == 0 || CutScene_IsSkippable(static_cast<CUTINFO *>(CutStopInfo))) &&
                     MiniCutCam == 0 && memcard_autosavestarted == 0 && !(memcard_autosavepostdelay > 0.0f) &&
                     !(memcard_autosavepredelay > 0.0f) && GameTimer.update_count != 0) {

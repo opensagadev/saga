@@ -410,52 +410,30 @@ extern "C" void NuShaderObjectGLSLProbeSemantics(NUSHADEROBJECT *shader) {
     GLint uniform_count;
     glGetProgramiv(shader->glsl.program, GL_ACTIVE_UNIFORMS, &uniform_count);
     i32 sampler_count = 0;
-    GLint i = 0;
-    if (uniform_count > 0) {
-        do {
-            GLint array_size;
-            GLenum type;
-            glGetActiveUniform(shader->glsl.program, i, sizeof(uniformName), NULL, &array_size, &type, uniformName);
-            char *array_suffix = strchr(uniformName, '[');
-            if (array_suffix != NULL) {
-                *array_suffix = '\0';
-            }
+    for (GLint i = 0; i < uniform_count; i++) {
+        GLint array_size;
+        GLenum type;
+        glGetActiveUniform(shader->glsl.program, i, sizeof(uniformName), NULL, &array_size, &type, uniformName);
+        char *array_suffix = strchr(uniformName, '[');
+        if (array_suffix != NULL) {
+            *array_suffix = '\0';
+        }
 
-            nushaderuniform_e uniform;
-            const i32 semantic = NuShaderObjectGLSLGetSemanticIndex(uniformName, uniform);
-            if (semantic == -1) {
-                if (__builtin_expect(type == GL_SAMPLER_2D, 0)) {
-                    i32 lightmap_unit = -1;
-                    if (__builtin_expect(NuStrCmp(uniformName, "_lightmap0") == 0, 0)) {
-                        lightmap_unit = 0;
-                    } else if (NuStrCmp(uniformName, "_lightmap1") == 0) {
-                        lightmap_unit = 1;
-                    } else if (NuStrCmp(uniformName, "_lightmap2") == 0) {
-                        lightmap_unit = 2;
-                    }
-                    if (lightmap_unit >= 0) {
-                        const GLint location = glGetUniformLocation(shader->glsl.program, uniformName);
-                        glUseProgram(shader->glsl.program);
-                        glUniform1i(location, lightmap_unit);
-                        glUseProgram(0);
-                        g_boundShader = 0;
-                    }
-                }
-                continue;
-            }
-
+        nushaderuniform_e uniform;
+        const i32 semantic = NuShaderObjectGLSLGetSemanticIndex(uniformName, uniform);
+        if (semantic != -1) {
             GLSLParameter &parameter = *NuShaderObjectGLSLAllocateParameter(shader, semantic);
             parameter.element_count = 1;
             usage_mask.semantics[semantic >> 5] |= 1u << (semantic & 31);
 
             const GLSLTypeInfo *type_info = GetGLSLTypeInfo(type);
-            if (__builtin_expect(type_info != NULL, 1)) {
+            if (type_info != NULL) {
                 parameter.parameter_type = type_info->parameter_type;
                 parameter.setter_class = type_info->setter_class;
                 parameter.element_count = type_info->element_count;
             }
 
-            if (__builtin_expect(parameter.parameter_type == 4, 0)) {
+            if (parameter.parameter_type == 4) {
                 const GLint location = glGetUniformLocation(shader->glsl.program, uniformName);
                 glUseProgram(shader->glsl.program);
                 glUniform1i(location, sampler_count + 3);
@@ -467,12 +445,28 @@ extern "C" void NuShaderObjectGLSLProbeSemantics(NUSHADEROBJECT *shader) {
             }
             parameter.array_size = array_size;
             parameter.element_count *= array_size;
-        } while (++i < uniform_count);
+        } else if (type == GL_SAMPLER_2D) {
+            i32 lightmap_unit = -1;
+            if (__builtin_expect(NuStrCmp(uniformName, "_lightmap0") == 0, 0)) {
+                lightmap_unit = 0;
+            } else if (__builtin_expect(NuStrCmp(uniformName, "_lightmap1") == 0, 0)) {
+                lightmap_unit = 1;
+            } else if (NuStrCmp(uniformName, "_lightmap2") == 0) {
+                lightmap_unit = 2;
+            }
+            if (lightmap_unit >= 0) {
+                const GLint location = glGetUniformLocation(shader->glsl.program, uniformName);
+                glUseProgram(shader->glsl.program);
+                glUniform1i(location, lightmap_unit);
+                glUseProgram(0);
+                g_boundShader = 0;
+            }
+        }
     }
 
     shader->usage_mask = GetUsageMask(&usage_mask);
     EndCriticalSectionGL(source_path, 676);
-    if (__builtin_expect(!!(bgProcIsBgThread()), 0)) {
+    if (bgProcIsBgThread()) {
         NuIOS_YieldThread();
     }
 }
@@ -663,10 +657,10 @@ static void NuShaderObjectGLSLSetCustomSetterParameters(nushaderobjectglsl_s *gl
                 break;
             }
             case 30: {
-                values30[2] = 0.0f;
-                values30[3] = 0.0f;
                 values30[0] = materialFloat(0x1b8);
                 values30[1] = materialFloat(0x1bc);
+                values30[2] = 0.0f;
+                values30[3] = 0.0f;
                 four_values = values30;
                 goto upload_four;
             }
@@ -736,9 +730,9 @@ static void NuShaderObjectGLSLSetCustomSetterParameters(nushaderobjectglsl_s *gl
                 break;
             case 45: {
                 values45[0] = 0.05f;
-                values45[1] = 0.32f * materialFloat(0x60);
                 values45[2] = 0.2f;
                 values45[3] = 0.8f;
+                values45[1] = 0.32f * materialFloat(0x60);
                 four_values = values45;
                 goto upload_four;
             }
@@ -756,10 +750,10 @@ static void NuShaderObjectGLSLSetCustomSetterParameters(nushaderobjectglsl_s *gl
                 break;
             }
             case 48: {
-                values48[2] = 0.0f;
-                values48[3] = 0.0f;
                 values48[0] = materialFloat(0x260);
                 values48[1] = materialFloat(0x264);
+                values48[2] = 0.0f;
+                values48[3] = 0.0f;
                 four_values = values48;
                 goto upload_four;
             }
@@ -790,28 +784,32 @@ static void NuShaderObjectGLSLSetCustomSetterParameters(nushaderobjectglsl_s *gl
                 // Original .L35 at 0x30a8d8.  GLES has no fixed-function
                 // alpha test, so generated shaders consume the current
                 // render-state comparison as (sign, adjusted reference).
-                const f32 alpha_ref = static_cast<f32>(g_alphaRef) * (1.0f / 255.0f);
-                if (g_alphaTestEnabled == 0) {
-                    values52[0] = 0.0f;
-                    values52[1] = -1.0f;
-                } else if (g_alphaFunc == 2) {
-                    values52[0] = -1.0f;
-                    values52[1] = static_cast<f32>(0u - g_alphaRef) * (1.0f / 255.0f) - (1.0f / 255.0f);
-                    if (values52[1] <= 0.0f) {
-                        values52[1] = 0.0f;
-                    }
-                } else if (__builtin_expect(g_alphaFunc == 3, 0)) {
-                    values52[0] = -1.0f;
-                    values52[1] = static_cast<f32>(0u - g_alphaRef) * (1.0f / 255.0f);
-                } else if (g_alphaFunc == 5) {
-                    values52[0] = 1.0f;
-                    values52[1] = alpha_ref;
-                } else if (__builtin_expect(g_alphaFunc == 6, 0)) {
-                    values52[0] = 1.0f;
-                    values52[1] = alpha_ref + (1.0f / 255.0f);
-                } else {
-                    values52[0] = 0.0f;
-                    values52[1] = -1.0f;
+                if (__builtin_expect(g_alphaTestEnabled == 0, 0)) {
+                    goto alpha_disabled;
+                }
+                switch (g_alphaFunc) {
+                    case 2:
+                        values52[0] = -1.0f;
+                        values52[1] = static_cast<f32>(0u - g_alphaRef) * (1.0f / 255.0f) - (1.0f / 255.0f);
+                        values52[1] = values52[1] > 0.0f ? values52[1] : 0.0f;
+                        break;
+                    case 3:
+                        values52[0] = -1.0f;
+                        values52[1] = static_cast<f32>(0u - g_alphaRef) * (1.0f / 255.0f);
+                        break;
+                    case 5:
+                        values52[0] = 1.0f;
+                        values52[1] = static_cast<f32>(g_alphaRef) * (1.0f / 255.0f);
+                        break;
+                    case 6:
+                        values52[0] = 1.0f;
+                        values52[1] = static_cast<f32>(g_alphaRef) * (1.0f / 255.0f) + (1.0f / 255.0f);
+                        break;
+                    default:
+                    alpha_disabled:
+                        values52[0] = 0.0f;
+                        values52[1] = -1.0f;
+                        break;
                 }
                 glUniform2fv(parameter.location, 1, values52);
                 break;
@@ -855,44 +853,8 @@ extern "C" void NuShaderObjectGLSLSetupMaterial(NUSHADEROBJECT *shader, struct n
                 switch (semantic) {
                     default:
                         goto next_texture;
-                    case 0:
-                        BIND_MATERIAL_2D(mtl->shader_desc.diffuse_map_tex_id[0]);
-                        break;
-                    case 1:
-                        BIND_MATERIAL_2D(mtl->shader_desc.diffuse_map_tex_id[1]);
-                        break;
-                    case 2:
-                        BIND_MATERIAL_2D(mtl->shader_desc.diffuse_map_tex_id[2]);
-                        break;
-                    case 3:
-                        BIND_MATERIAL_2D(mtl->shader_desc.diffuse_map_tex_id[3]);
-                        break;
-                    case 4:
-                        BIND_MATERIAL_2D(mtl->shader_desc.specular_map_tid);
-                        break;
-                    case 5:
-                        BIND_MATERIAL_2D(mtl->shader_desc.lightmap_tex_id[0]);
-                        break;
-                    case 6:
-                        BIND_MATERIAL_2D(mtl->shader_desc.normal_map_tid);
-                        break;
-                    case 7:
-                        BIND_MATERIAL_2D(mtl->shader_desc.lightmap_tex_id[1]);
-                        break;
                     case 9:
                         BIND_MATERIAL_2D(mtl->shader_desc.vtf_height_map_tid);
-                        break;
-                    case 12:
-                        BIND_MATERIAL_2D(mtl->shader_desc.vtf_normal_map_tid);
-                        break;
-                    case 16:
-                        BIND_MATERIAL_2D(mtl->shader_desc.shine_map_ps2_tid);
-                        break;
-                    case 19:
-                        BIND_MATERIAL_2D(mtl->shader_desc.field_1e4);
-                        break;
-                    case 20:
-                        BIND_MATERIAL_2D(mtl->shader_desc.field_1e8);
                         break;
                     case 18:
                         if (__builtin_expect(NuWindCurrent(nuapi.wind) >= 0, 0)) {
@@ -900,23 +862,6 @@ extern "C" void NuShaderObjectGLSLSetupMaterial(NUSHADEROBJECT *shader, struct n
                             NuTexSetTextureWithStagePS(NuTexGetNative(NuWindCurrent(nuapi.wind)), texture_unit);
                         }
                         goto next_texture;
-                    case 13: {
-                        if (g_currentTexUnit != (static_cast<u16>(parameter.location) & 0x7ff)) {
-                            glActiveTexture(GL_TEXTURE0 + (static_cast<u16>(parameter.location) & 0x7ff));
-                            g_currentTexUnit = static_cast<u16>(parameter.location) & 0x7ff;
-                        }
-#define CUBE_TEXTURE_NAME()                                                                                            \
-    (mtl->shader_desc.unknown_198 != 0 ? NuTexGetNative(mtl->shader_desc.unknown_198)->platform.gl_tex : 0)
-                        const GLuint previous_texture =
-                            g_lastBoundCubeTexIds[static_cast<u16>(parameter.location) & 0x7ff];
-                        if (previous_texture != CUBE_TEXTURE_NAME()) {
-                            glBindTexture(GL_TEXTURE_CUBE_MAP, CUBE_TEXTURE_NAME());
-                            const u32 texture_unit = static_cast<u16>(parameter.location) & 0x7ff;
-                            g_lastBoundCubeTexIds[texture_unit] = CUBE_TEXTURE_NAME();
-                        }
-#undef CUBE_TEXTURE_NAME
-                        goto next_texture;
-                    }
                     case 14: {
                         if (g_currentTexUnit != (static_cast<u16>(parameter.location) & 0x7ff)) {
                             glActiveTexture(GL_TEXTURE0 + (static_cast<u16>(parameter.location) & 0x7ff));
@@ -937,6 +882,59 @@ extern "C" void NuShaderObjectGLSLSetupMaterial(NUSHADEROBJECT *shader, struct n
 #undef CUBE_TEXTURE_NAME
                         goto next_texture;
                     }
+                    case 1:
+                        BIND_MATERIAL_2D(mtl->shader_desc.diffuse_map_tex_id[1]);
+                        break;
+                    case 16:
+                        BIND_MATERIAL_2D(mtl->shader_desc.shine_map_ps2_tid);
+                        break;
+                    case 20:
+                        BIND_MATERIAL_2D(mtl->shader_desc.field_1e8);
+                        break;
+                    case 3:
+                        BIND_MATERIAL_2D(mtl->shader_desc.diffuse_map_tex_id[3]);
+                        break;
+                    case 6:
+                        BIND_MATERIAL_2D(mtl->shader_desc.normal_map_tid);
+                        break;
+                    case 19:
+                        BIND_MATERIAL_2D(mtl->shader_desc.field_1e4);
+                        break;
+                    case 13: {
+                        if (g_currentTexUnit != (static_cast<u16>(parameter.location) & 0x7ff)) {
+                            glActiveTexture(GL_TEXTURE0 + (static_cast<u16>(parameter.location) & 0x7ff));
+                            g_currentTexUnit = static_cast<u16>(parameter.location) & 0x7ff;
+                        }
+#define CUBE_TEXTURE_NAME()                                                                                            \
+    (mtl->shader_desc.unknown_198 != 0 ? NuTexGetNative(mtl->shader_desc.unknown_198)->platform.gl_tex : 0)
+                        const GLuint previous_texture =
+                            g_lastBoundCubeTexIds[static_cast<u16>(parameter.location) & 0x7ff];
+                        if (previous_texture != CUBE_TEXTURE_NAME()) {
+                            glBindTexture(GL_TEXTURE_CUBE_MAP, CUBE_TEXTURE_NAME());
+                            const u32 texture_unit = static_cast<u16>(parameter.location) & 0x7ff;
+                            g_lastBoundCubeTexIds[texture_unit] = CUBE_TEXTURE_NAME();
+                        }
+#undef CUBE_TEXTURE_NAME
+                        goto next_texture;
+                    }
+                    case 2:
+                        BIND_MATERIAL_2D(mtl->shader_desc.diffuse_map_tex_id[2]);
+                        break;
+                    case 5:
+                        BIND_MATERIAL_2D(mtl->shader_desc.lightmap_tex_id[0]);
+                        break;
+                    case 7:
+                        BIND_MATERIAL_2D(mtl->shader_desc.lightmap_tex_id[1]);
+                        break;
+                    case 4:
+                        BIND_MATERIAL_2D(mtl->shader_desc.specular_map_tid);
+                        break;
+                    case 0:
+                        BIND_MATERIAL_2D(mtl->shader_desc.diffuse_map_tex_id[0]);
+                        break;
+                    case 12:
+                        BIND_MATERIAL_2D(mtl->shader_desc.vtf_normal_map_tid);
+                        break;
                 }
 #undef BIND_MATERIAL_2D
                 glBindTexture(GL_TEXTURE_2D, texture_id != 0 ? NuTexGetNative(texture_id)->platform.gl_tex : 0);
@@ -959,12 +957,12 @@ extern "C" void NuShaderObjectGLSLSetupMaterial(NUSHADEROBJECT *shader, struct n
         auto nextSemantic = [usage](u32 start) {
             u32 word = start >> 5;
             u32 shift = start & 31;
-            u32 bits = usage->semantics[word] >> shift;
+            u32 bits = usage->semantics[word++] >> shift;
             while (!bits) {
-                bits = usage->semantics[++word];
+                bits = usage->semantics[word++];
                 start += 32 - shift;
                 shift = 0;
-                if (word == 3) {
+                if (word == 4) {
                     return 128u;
                 }
             }
@@ -1025,7 +1023,7 @@ extern "C" void NuShaderObjectGLSLSetupTextureStates(NUSHADEROBJECT *shader, num
                 NuCheckGLErrorsFL(source, 0x4b5);
                 break;
             case 18:
-                if (__builtin_expect(NuWindCurrent(nuapi.wind) >= 0, 1)) {
+                if (NuWindCurrent(nuapi.wind) >= 0) {
                     const u32 unit = static_cast<u16>(parameter.location) & 0x7ff;
                     NuTexSetTextureWithStagePS(NuTexGetNative(NuWindCurrent(nuapi.wind)), unit);
                     REPEAT_STATE();

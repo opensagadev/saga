@@ -376,14 +376,9 @@ extern "C" {
 extern "C" void NuMtlSetRenderStatesPS(numtl_s *mtl) {
     bool isDebris = (mtl->shader_desc.vtx_desc.flags & 0x100000) != 0;
 
-    if (isDebris) {
-        // Debris materials force a minimal alpha-test.
-        g_alphaTestEnabled = 1;
-        g_alphaFunc = 6;
-        g_alphaRef = 2;
-    } else {
-        u32 alphaSel = (u32)(mtl->attribs.alpha_test & 7); // (bytes[0x42]>>4)&7
-        if (__builtin_expect(alphaSel > 1, 1)) {
+    if (!(isDebris)) {
+        u32 alphaSel = mtl->attribs.alpha_test; // (bytes[0x42]>>4)&7
+        if (__builtin_expect(alphaSel > 1, 0)) {
             if (__builtin_expect(alphaSel != 5, 0)) {
                 g_alphaTestEnabled = 1; // GREATER
                 g_alphaFunc = 6;
@@ -396,14 +391,36 @@ extern "C" void NuMtlSetRenderStatesPS(numtl_s *mtl) {
         } else if (g_alphaTestEnabled != 0) {
             g_alphaTestEnabled = 0;
         }
+    } else {
+        // Debris materials force a minimal alpha-test.
+        g_alphaTestEnabled = 1;
+        g_alphaFunc = 6;
+        g_alphaRef = 2;
     }
 
+    u32 alphaRef = mtl->attribs.alpha_ref;
     u32 blend = mtl->attribs.alpha_mode & 0xf; // bytes[0x40] & 0xf
-    NuSetBlendState(blend, [mtl]() { return mtl->attribs.alpha_ref; });
+    NuSetBlendState(blend, [alphaRef]() { return alphaRef; });
 
     NuIOS_SetCullMode(mtl->attribs.cull_mode);
 }
 
+}
+
+static inline void MtlSetVertexParamfv(NUSHADERPROGRAM *program, u32 register_index, const void *values,
+                                       i32 component_count) {
+    for (i32 i = 0; i < program->parameter_count; ++i) {
+        NUSHADERPROGRAMPARAMETER *parameter = &program->parameters[i];
+        if (parameter->register_index == register_index) {
+            g_glConstantSetterTable[parameter->setter](parameter->location, (component_count + 3) / 4, values);
+            break;
+        }
+    }
+}
+
+static inline void MtlSetFragmentParamfv(NUSHADERPROGRAM *program, u32 register_index, const void *values,
+                                         i32 component_count) {
+    MtlSetVertexParamfv(program, register_index | 0x8000, values, component_count);
 }
 
 // original 0x29c480 — per-material display-list callback.  Selects the GL
@@ -438,58 +455,26 @@ void NuIOSDLMtlCallback(void *arg) {
                 NuIOSDLMtlCallback_refractionRT = NuTexGenTexture(&NuIOSDLMtlCallback_nativeRefractionTex);
                 memset(&NuIOSDLMtlCallback_nativeRefractionTex, 0, 8);
             }
-            if (NuApiFrameCount() != NuIOSDLMtlCallback_lastFrameCount) {
+            if (nuapi.frame_count != NuIOSDLMtlCallback_lastFrameCount) {
                 NuIOS_CopyBackbufferToTexture(&NuIOSDLMtlCallback_nativeRefractionTex, true);
                 NuIOSDLMtlCallback_lastFrameCount = NuApiFrameCount();
             }
         }
 
+        g_boundVertexFormat = g_nuDebrisVertexFormat;
         NUSHADERPROGRAM *program =
             DebrisGlassSelector(mtl) == kGlassDebrisMarker ? g_debrisGlassProgram : g_debrisProgram;
 
-        g_boundVertexFormat = g_nuDebrisVertexFormat;
         NuShaderManagerBindShader(0);
 
         g_boundShader = program != nullptr ? program->program : 0;
         glUseProgram(g_boundShader);
         g_currentShaderProgram = program;
 
-        for (i32 index = 0; index < program->parameter_count; ++index) {
-            const NUSHADERPROGRAMPARAMETER *parameter = &program->parameters[index];
-            if (parameter->register_index == static_cast<u16>(kParamViewProj)) {
-                const u32 location = parameter->location;
-                const u32 setter = parameter->setter;
-                g_glConstantSetterTable[setter](location, 4, g_renderContext_viewProj);
-                break;
-            }
-        }
-        for (i32 index = 0; index < program->parameter_count; ++index) {
-            const NUSHADERPROGRAMPARAMETER *parameter = &program->parameters[index];
-            if (parameter->register_index == static_cast<u16>(kParamView)) {
-                const u32 location = parameter->location;
-                const u32 setter = parameter->setter;
-                g_glConstantSetterTable[setter](location, 4, g_renderContext_view);
-                break;
-            }
-        }
-        for (i32 index = 0; index < program->parameter_count; ++index) {
-            const NUSHADERPROGRAMPARAMETER *parameter = &program->parameters[index];
-            if (parameter->register_index == static_cast<u16>(kParamKonstColourA)) {
-                const u32 location = parameter->location;
-                const u32 setter = parameter->setter;
-                g_glConstantSetterTable[setter](location, 1, nu2api::g_shaderUniforms[72].data.values);
-                break;
-            }
-        }
-        for (i32 index = 0; index < program->parameter_count; ++index) {
-            const NUSHADERPROGRAMPARAMETER *parameter = &program->parameters[index];
-            if (parameter->register_index == static_cast<u16>(kParamTerminator)) {
-                const u32 location = parameter->location;
-                const u32 setter = parameter->setter;
-                g_glConstantSetterTable[setter](location, 1, nu2api::g_shaderUniforms[71].data.values);
-                break;
-            }
-        }
+        MtlSetVertexParamfv(program, kParamViewProj, g_renderContext_viewProj, 16);
+        MtlSetVertexParamfv(program, kParamView, g_renderContext_view, 16);
+        MtlSetVertexParamfv(program, kParamKonstColourA, nu2api::g_shaderUniforms[72].data.values, 4);
+        MtlSetFragmentParamfv(program, 0, nu2api::g_shaderUniforms[71].data.values, 4);
 
         if (DebrisGlassSelector(mtl) == kGlassDebrisMarker) {
             glActiveTexture(GL_TEXTURE0);
@@ -507,10 +492,18 @@ void NuIOSDLMtlCallback(void *arg) {
         g_boundVertexFormat = g_nuFaceOnVertexFormat;
 
         char decalSel = FaceOnDecalSelector(mtl);
-        NUSHADERPROGRAM *program = (decalSel == '\0') ? g_faceonProgram : g_faceonDecalProgram;
+        NUSHADERPROGRAM *program;
+        GLuint glProgram;
+        if (decalSel != '\0') {
+            program = g_faceonDecalProgram;
+            glProgram = program != nullptr ? program->program : 0;
+        } else {
+            program = g_faceonProgram;
+            glProgram = program != nullptr ? program->program : 0;
+        }
 
-        g_boundShader = program != nullptr ? program->program : 0;
-        glUseProgram(g_boundShader);
+        g_boundShader = glProgram;
+        glUseProgram(glProgram);
         g_currentShaderProgram = program;
 
         NUNATIVETEX *tex = NuTexGetNative(mtl->tex_id);

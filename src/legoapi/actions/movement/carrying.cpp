@@ -398,7 +398,7 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
             message.green = PlayerRGB[player][1];
             message.blue = PlayerRGB[player][2];
             const u16 angle = static_cast<u16>(NuFmod(GameTimer.time_elapsed_mod_seconds, 0.5f) * 2.0f * 65536.0f);
-            message.alpha = static_cast<u8>(80.0f + 48.0f * NuTrigTable[angle >> 1]);
+            message.alpha = static_cast<u8>(80.0f + 48.0f * NU_SIN_LUT(angle));
             AddGameMsg(&message);
         }
         if ((object->pad_gamepad->buttons_held & GAMEPAD_SPECIAL) != 0)
@@ -413,7 +413,7 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
     }
     switch (object->field_0x7a3) {
         case 0: {
-            bool event = false;
+            i32 event = 0;
             if ((object->context_flags & 0x40) == 0) {
                 GIZMOBLOWUP_s *blowup = static_cast<GIZMOBLOWUP_s *>(object->field_0x788);
                 object->apiobj.movement_facing_angle =
@@ -425,7 +425,7 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
                 }
             }
             object->context_animation_timer -= FRAMETIME;
-            if (__builtin_expect(!(object->context_animation_timer > 0.0f), 1)) {
+            if (__builtin_expect(object->context_animation_timer <= 0.0f, 0)) {
                 object->field_0x7a3 = 2;
                 object->context_animation = LEGOACT_SUPERCARRY_IDLE;
                 if (__builtin_expect((object->context_flags & 0x40) == 0, 1))
@@ -439,7 +439,7 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
             return;
         }
         case 1: {
-            bool event = false;
+            i32 event = 0;
             if (__builtin_expect((object->context_flags & 0x40) == 0, 1)) {
                 if (frame == NULL) {
                     event = SuperCarry_PutDownDrop != 0;
@@ -457,8 +457,8 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
             if (event) {
                 object->context_flags |= 0x40;
                 NewBuzzFrames(object->pad_gamepad->pad, 1, 0);
-                GIZMOBLOWUP_s *blowup = static_cast<GIZMOBLOWUP_s *>(object->field_0x788);
                 if (SuperCarry_PutDownDrop != 0) {
+                    GIZMOBLOWUP_s *blowup = static_cast<GIZMOBLOWUP_s *>(object->field_0x788);
                     blowup->state_flags |= 0x80;
                     blowup->visibility_flags |= 0x40;
                     GizBlowup_Respawn(blowup);
@@ -474,7 +474,8 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
                         SuperCarry_Throw(object, 2);
                     }
                 } else {
-                    SuperCarry_TurnBlowupBackOn(blowup, &object->carried_object_drop_position,
+                    SuperCarry_TurnBlowupBackOn(static_cast<GIZMOBLOWUP_s *>(object->field_0x788),
+                                                &object->carried_object_drop_position,
                                                 object->carried_object_angle + object->apiobj.movement_facing_angle, 0);
                 }
             }
@@ -490,9 +491,11 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
                         throw_object = true;
                     else
                         put_down = (object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) != 0;
-                } else if ((object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) != 0) {
-                    throw_object = object->pad_gamepad->input_magnitude > 0.0f;
-                    put_down = !throw_object;
+                } else if (__builtin_expect((object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) != 0, 1)) {
+                    if (object->pad_gamepad->input_magnitude > 0.0f)
+                        throw_object = true;
+                    else
+                        put_down = true;
                 }
                 if (__builtin_expect(throw_object || put_down, 1)) {
                     if (__builtin_expect((throw_object || SuperCarry_UseActionButton == 0) && SuperCarry_Bash != 0 &&
@@ -512,7 +515,7 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
                             object->context_flags &= static_cast<u8>(~0x40);
                             f32 duration = AnimDuration(object->id, object->context_animation, 0.0f, 0.0f, 1);
                             object->context_animation_timer = duration;
-                            if (!(duration > 0.0f))
+                            if (duration <= 0.0f)
                                 object->context_animation_timer = 0.5f;
                             return;
                         }
@@ -545,7 +548,7 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
                         object->context_flags &= static_cast<u8>(~0x40);
                         f32 duration = AnimDuration(object->id, object->context_animation, 0.0f, 0.0f, 1);
                         object->context_animation_timer = duration;
-                        if (!(duration > 0.0f))
+                        if (__builtin_expect(duration <= 0.0f, 1))
                             object->context_animation_timer = 0.5f;
                         object->carried_object_drop_position.x = object->apiobj.lower_position.x;
                         object->carried_object_drop_position.y = object->apiobj.field_0x218;
@@ -583,7 +586,7 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
                 object->character_context = -1;
                 return;
             }
-            bool event = false;
+            i32 event = 0;
             if (frame != NULL && (object->context_flags & 0x40) == 0) {
                 f32 marker = AnimListFrame(object->apiobj.character_model, object->context_animation, 0);
                 event = marker >= 1.0f && *frame >= marker;
@@ -607,7 +610,7 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
                 object->character_context = -1;
                 return;
             }
-            bool event = false;
+            i32 event = 0;
             if (frame != NULL && (object->context_flags & 0x40) == 0) {
                 f32 marker = AnimListFrame(object->apiobj.character_model, object->context_animation, 0);
                 event = marker >= 1.0f && *frame >= marker;
@@ -670,7 +673,7 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
         }
         case 7:
             object->context_animation_timer -= FRAMETIME;
-            if (__builtin_expect(object->context_animation_timer <= 0.0f, 0))
+            if (__builtin_expect(object->context_animation_timer <= 0.0f, 1))
                 goto idle_or_walk;
             if (__builtin_expect(object->context_variant_flags >= 0 && object->pad_gamepad->input_magnitude > 0.0f, 1))
                 goto idle_or_walk;
@@ -832,43 +835,49 @@ void ReStoreStatusTakeOverObjectSys(i32 restore_progress) {
     }
     i32 level = static_cast<i8>(WORLD->current_level->area_level_index);
     for (i32 index = 0; index < num_takeoverobjects; ++index) {
-        TAKEOVEROBJECT_s *record = &takeoverobjects[index];
-        if (restore_progress != 0 || record->current_level != level) {
-            record->object = NULL;
+        if (restore_progress != 0 || takeoverobjects[index].current_level != level) {
+            takeoverobjects[index].object = NULL;
         }
-        if (record->contact_index != 0xff) {
-            record->current_level = static_cast<u8>(level);
+        if (takeoverobjects[index].contact_index != 0xff) {
+            takeoverobjects[index].current_level = static_cast<u8>(level);
         }
-        if (record->registered_level == level) {
-            if (record->object == NULL) {
-                if (record->source_creature != 0xff) {
-                    for (i32 object_index = 0; object_index < HIGHGAMEOBJECT; ++object_index) {
-                        if (Obj[object_index].ai.field_0x134 == record->source_creature) {
-                            record->object = &Obj[object_index];
+        if (takeoverobjects[index].registered_level == level) {
+            if (takeoverobjects[index].object == NULL) {
+                if (takeoverobjects[index].source_creature == 0xff) {
+                    if (takeoverobjects[index].current_level == level) {
+                        takeoverobjects[index].object = AddDynamicCreature(
+                            takeoverobjects[index].character_id, &takeoverobjects[index].last_safe_position,
+                            takeoverobjects[index].heading, takeoverobjects[index].script_name, NULL, NULL, 1, NULL,
+                            NULL, 0, 0);
+                    }
+                } else {
+                    GameObject_s *candidate = Obj;
+                    for (i32 object_index = 0; object_index < HIGHGAMEOBJECT; ++object_index, ++candidate) {
+                        if (candidate->ai.field_0x134 == takeoverobjects[index].source_creature) {
+                            takeoverobjects[index].object = candidate;
                             break;
                         }
                     }
-                } else if (record->current_level == level) {
-                    record->object =
-                        AddDynamicCreature(record->character_id, &record->last_safe_position, record->heading,
-                                           record->script_name, NULL, NULL, 1, NULL, NULL, 0, 0);
                 }
             }
-            if (record->object != NULL && record->current_level != level) {
-                KillGameObject(record->object, 5, 0);
-                record->object = NULL;
+            if (takeoverobjects[index].object != NULL && takeoverobjects[index].current_level != level) {
+                KillGameObject(takeoverobjects[index].object, 5, 0);
+                takeoverobjects[index].object = NULL;
                 continue;
             }
-        } else if (record->current_level == level && record->object == NULL) {
-            record->object = AddDynamicCreature(record->character_id, &record->last_safe_position, record->heading,
-                                                record->script_name, NULL, NULL, 1, NULL, NULL, 0, 0);
+        } else if (takeoverobjects[index].current_level == level && takeoverobjects[index].object == NULL) {
+            takeoverobjects[index].object = AddDynamicCreature(
+                takeoverobjects[index].character_id, &takeoverobjects[index].last_safe_position,
+                takeoverobjects[index].heading, takeoverobjects[index].script_name, NULL, NULL, 1, NULL, NULL, 0, 0);
         }
-        GameObject_s *object = record->object;
+        GameObject_s *object = takeoverobjects[index].object;
         if (object != NULL) {
-            object->current_hp = record->hitpoints;
+            object->current_hp = takeoverobjects[index].hitpoints;
             GameObject_s *controller;
-            if (!(record->contact_index != 0xff && (controller = Player[record->contact_index]) != NULL)) {
-                SnapCreaturePos(record->object, &record->last_safe_position, record->heading, NULL, 1);
+            if (!(takeoverobjects[index].contact_index != 0xff &&
+                  (controller = Player[takeoverobjects[index].contact_index]) != NULL)) {
+                SnapCreaturePos((takeoverobjects + index)->object, &takeoverobjects[index].last_safe_position,
+                                takeoverobjects[index].heading, NULL, 1);
             } else {
                 object->apiobj.flags_high |= 0x10;
                 object->apiobj.flags_low |= 1;
@@ -877,7 +886,7 @@ void ReStoreStatusTakeOverObjectSys(i32 restore_progress) {
                 SnapCreaturePos(object, &controller->apiobj.position, controller->apiobj.field_0x276,
                                 &controller->ai.path_info, 1);
                 InitPlayerAI(controller);
-                TakeOverGameObject(controller, record->object, 0, 1);
+                TakeOverGameObject(controller, takeoverobjects[index].object, 0, 1);
             }
         }
     }

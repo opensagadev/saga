@@ -1105,7 +1105,7 @@ static void CC_hand_locators(NUFPAR *parser) {
     charconfig.runtime->hand_locators[0] = -1;
     if (NuFParGetWord(parser) != 0) {
         const i32 locator = NuAToI(parser->word_buf);
-        if (static_cast<u32>(locator) < 16) {
+        if (__builtin_expect(static_cast<u32>(locator) < 16, 0)) {
             charconfig.runtime->hand_locators[0] = static_cast<i8>(locator);
         }
     }
@@ -1395,7 +1395,7 @@ static void CC_hair_layer_index(NUFPAR *parser) {
 static void CC_layer(NUFPAR *parser) {
     if ((charconfig.flags & 2) == 0 || charconfig.runtime->layer_count >= 32)
         return;
-    if (NuFParGetWord(parser) == 0 || NuStrLen(parser->word_buf) >= 24)
+    if (__builtin_expect(NuFParGetWord(parser) == 0 || NuStrLen(parser->word_buf) >= 24, 0))
         return;
     NuStrCpy(charconfig.runtime->layers[charconfig.runtime->layer_count].name, parser->word_buf);
     const u32 bit = NuFParGetInt(parser);
@@ -1403,7 +1403,7 @@ static void CC_layer(NUFPAR *parser) {
         return;
     GAMECHARACTERDATA_s *data = charconfig.runtime;
     for (i32 i = 0; i < data->layer_count; ++i) {
-        if (data->layers[i].mask_bit == static_cast<i32>(bit))
+        if (__builtin_expect(data->layers[i].mask_bit == static_cast<i32>(bit), 0))
             return;
     }
     GAMECHARACTERLAYER_s *layer = &data->layers[data->layer_count];
@@ -2967,24 +2967,20 @@ static i32 CharConfig(i32 character_id, char *directory, char *filename, VARIPTR
     char redirected_name[64];
     char path[128];
     i32 redirected = 0;
+    char *buffer;
+    i32 length;
     if (text == NULL) {
-        if (directory == NULL) {
-            SecondCharConfigure = 0;
-            return 0;
-        }
+        if (directory == NULL)
+            goto done;
         NuStrCpy(path, directory);
         NuStrCat(path, filename);
         i32 size = NuFileLoadBuffer(path, MiniBuffer, sizeof(MiniBuffer));
-        if (__builtin_expect(size < 1, 0)) {
-            SecondCharConfigure = 0;
-            return 0;
-        }
+        if (__builtin_expect(size < 1, 0))
+            goto done;
         MiniBuffer[size] = 0;
-        text_length = Text_StripComments(MiniBuffer, MiniBuffer, 1);
-        if (text_length < 1) {
-            SecondCharConfigure = 0;
-            return 0;
-        }
+        length = Text_StripComments(MiniBuffer, MiniBuffer, 1);
+        if (length < 1)
+            goto done;
         if (redirect != 0) {
             if ((redirected = RedirectTextFile(MiniBuffer, redirected_name)) != 0) {
                 NuStrCpy(path, directory);
@@ -2992,16 +2988,20 @@ static i32 CharConfig(i32 character_id, char *directory, char *filename, VARIPTR
                 NuStrCat(path, ".txt");
                 size = NuFileLoadBuffer(path, MiniBuffer, sizeof(MiniBuffer));
                 if (size < 1) {
-                    SecondCharConfigure = 0;
-                    return 0;
+                    redirected = 0;
+                    goto done;
                 }
                 MiniBuffer[size] = 0;
-                text_length = Text_StripComments(MiniBuffer, MiniBuffer, 1);
+                length = Text_StripComments(MiniBuffer, MiniBuffer, 1);
             }
         }
-        text = MiniBuffer;
+        buffer = MiniBuffer;
+    } else {
+        buffer = text;
+        length = text_length;
     }
-    if (text_length < 1) {
+    if (length < 1) {
+    done:
         SecondCharConfigure = 0;
         return redirected;
     }
@@ -3011,28 +3011,28 @@ static i32 CharConfig(i32 character_id, char *directory, char *filename, VARIPTR
     memset(&charconfig, 0, sizeof(charconfig));
     charconfig.character_id = static_cast<i16>(character_id);
     charconfig.character = character;
-    charconfig.flags = (permanent & 1) << 6;
     charconfig.runtime = static_cast<GAMECHARACTERDATA_s *>(character->field11_0x24);
+    charconfig.flags_bit6 = permanent;
     charconfig.effect_scratch = effects;
     charconfig.arena = arena;
     charconfig.arena_end = arena_end;
     charconfig.layer_scratch = layers;
     memset(effects, 0, sizeof(effects));
     GAMECHARACTERDATA_s *data = charconfig.runtime;
-    if (__builtin_expect(
-            data->layers == NULL && (character->model_flags & 1) == 0 && arena != NULL && arena_end != NULL, 0)) {
+    if (data->layers == NULL && (character->model_flags & 1) == 0 && arena != NULL &&
+        __builtin_expect(arena_end != NULL, 1)) {
         data->layers = layers;
         data->layer_count = 0;
         charconfig.flags |= 2;
     } else if (data->layer_count != 0) {
         charconfig.named_layers = 1;
     }
-    if (character->animations == NULL && arena != NULL && arena_end != NULL) {
+    if (character->animations == NULL && arena != NULL && __builtin_expect(arena_end != NULL, 1)) {
         arena->addr = ALIGN(arena->addr, 4);
         character->animations = static_cast<CHARACTERANIM_s *>(arena->void_ptr);
         charconfig.flags |= 0x20;
     }
-    NUFPAR *parser = NuFParCreateMem("character", text, 0xffff);
+    NUFPAR *parser = NuFParCreateMem("character", buffer, 0xffff);
     if (parser != NULL) {
         NuFParPushCom2(parser, ConfigChar_Keywords, game_keywords);
         while (NuFParGetLine(parser) != 0) {
@@ -3060,9 +3060,10 @@ static i32 CharConfig(i32 character_id, char *directory, char *filename, VARIPTR
                                   &charconfig.runtime->second_jump_duration, &charconfig.runtime->second_jump_height);
     if ((charconfig.flags & 0x20) != 0) {
         CHARACTERANIM_s *sentinel = &charconfig.character->animations[charconfig.animation_count];
-        charconfig.character->field5_0x14 = charconfig.animation_count++;
+        charconfig.character->field5_0x14 = charconfig.animation_count;
         sentinel->name = NULL;
         sentinel->action_id = -1;
+        charconfig.animation_count++;
         charconfig.arena->void_ptr = character->animations + charconfig.animation_count;
         for (i32 i = 0; i < charconfig.animation_count - 1; ++i) {
             NuStrCpy(static_cast<char *>(charconfig.arena->void_ptr), charconfig.animation_names[i]);
@@ -3128,13 +3129,21 @@ void CharConfig_ConfigureAll(i32 permanent, NUFPCOMJMP *game_keywords) {
         NuStrCat(filename, ".txt");
         NuStrCpy(original_path, path);
         if (pak == NULL) {
-            VARIPTR *end = permanent != 0 ? &permbuffer_end : NULL;
-            VARIPTR *arena = permanent != 0 ? &permbuffer_ptr : NULL;
-            if (__builtin_expect(
-                    CharConfig(id, directory, filename, arena, end, permanent != 0, NULL, 0, 1, game_keywords) == 2,
-                    1)) {
+            VARIPTR *arena;
+            VARIPTR *end;
+            i32 perm;
+            if (permanent != 0) {
+                arena = &permbuffer_ptr;
+                end = &permbuffer_end;
+                perm = 1;
+            } else {
+                arena = NULL;
+                end = NULL;
+                perm = 0;
+            }
+            if (CharConfig(id, directory, filename, arena, end, perm, NULL, 0, 1, game_keywords) == 2) {
                 SecondCharConfigure = 1;
-                CharConfig(id, directory, filename, arena, end, permanent != 0, NULL, 0, 0, game_keywords);
+                CharConfig(id, directory, filename, arena, end, perm, NULL, 0, 0, game_keywords);
             }
             continue;
         }
@@ -3143,47 +3152,47 @@ void CharConfig_ConfigureAll(i32 permanent, NUFPCOMJMP *game_keywords) {
         i32 size;
         if (item == 0 || NuFilePakGetItemInfo(pak, item, &address, &size) == 0 || size < 1)
             continue;
-        char *text = static_cast<char *>(address);
-        char saved = text[size];
-        text[size] = 0;
-        i32 length = Text_StripComments(text, ConfigBuffer, 1);
-        text[size] = saved;
-        if (length < 1)
+        i32 end = size;
+        char saved = static_cast<char *>(address)[end];
+        static_cast<char *>(address)[end] = 0;
+        size = Text_StripComments(static_cast<char *>(address), ConfigBuffer, 1);
+        static_cast<char *>(address)[end] = saved;
+        if (size < 1)
             continue;
-        i32 redirected = RedirectTextFile(text, filename);
-        if (__builtin_expect(redirected != 0, 1)) {
+        i32 redirected = RedirectTextFile(static_cast<char *>(address), filename);
+        if (__builtin_expect(redirected != 0, 0)) {
             NuStrCat(filename, ".txt");
             NuStrCpy(path, directory);
             NuStrCat(path, filename);
             item = NuFilePakGetItem(pak, path);
-            if (item == 0 || NuFilePakGetItemInfo(pak, item, &address, &size) == 0) {
-                redirected = 0;
-            } else {
+            if (item != 0 && NuFilePakGetItemInfo(pak, item, &address, &size) != 0) {
                 if (size < 1)
                     continue;
-                text = static_cast<char *>(address);
-                saved = text[size];
-                text[size] = 0;
-                length = Text_StripComments(text, ConfigBuffer, 1);
-                text[size] = saved;
-                if (length < 1)
-                    continue;
+                end = size;
+                saved = static_cast<char *>(address)[end];
+                static_cast<char *>(address)[end] = 0;
+                size = Text_StripComments(static_cast<char *>(address), ConfigBuffer, 1);
+                static_cast<char *>(address)[end] = saved;
+            } else {
+                redirected = 0;
             }
         }
-        CharConfig(id, NULL, NULL, &permbuffer_ptr, &permbuffer_end, 1, ConfigBuffer, length, 0, game_keywords);
+        if (size < 1)
+            continue;
+        CharConfig(id, NULL, NULL, &permbuffer_ptr, &permbuffer_end, 1, ConfigBuffer, size, 0, game_keywords);
         if (redirected == 2) {
             item = NuFilePakGetItem(pak, original_path);
             if (item == 0 || NuFilePakGetItemInfo(pak, item, &address, &size) == 0 || size < 1)
                 continue;
-            text = static_cast<char *>(address);
-            saved = text[size];
-            text[size] = 0;
-            length = Text_StripComments(text, ConfigBuffer, 1);
-            text[size] = saved;
-            if (__builtin_expect(length > 0, 1)) {
-                SecondCharConfigure = 1;
-                CharConfig(id, NULL, NULL, &permbuffer_ptr, &permbuffer_end, 0, ConfigBuffer, length, 0, game_keywords);
-            }
+            end = size;
+            saved = static_cast<char *>(address)[end];
+            static_cast<char *>(address)[end] = 0;
+            size = Text_StripComments(static_cast<char *>(address), ConfigBuffer, 1);
+            static_cast<char *>(address)[end] = saved;
+            if (size < 1)
+                continue;
+            SecondCharConfigure = 1;
+            CharConfig(id, NULL, NULL, &permbuffer_ptr, &permbuffer_end, 0, ConfigBuffer, size, 0, game_keywords);
         }
     }
 }

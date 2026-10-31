@@ -639,7 +639,7 @@ void Text_InitTable(TEXTENTRY *entry, i32 first, i32 last) {
             if (index >= first && index <= last)
                 *entry->text_id = entry->value;
         } else {
-            if (index >= first && index <= last) {
+            if (__builtin_expect(index >= first && index <= last, 1)) {
                 entry->value = index;
                 *entry->text_id = index;
                 Text_StringBits[index / 32] |= 1U << (index & 0x1f);
@@ -764,7 +764,7 @@ void Text_ExpandAllButtonStrings(char *input, char *output) {
             token[token_length + 1] = '\0';
             token_length = NuStrLen(token);
             if (token_length > 0) {
-                if (Text_ExpandButtonString(token, expanded) != 0) {
+                if (__builtin_expect(Text_ExpandButtonString(token, expanded) != 0, 0)) {
                     char *character = expanded;
                     while (*character != '\0') {
                         *output = *character;
@@ -894,7 +894,7 @@ void TextCrawl_Draw(float dt, i32 paragraphs, float alpha, char *text) {
             if (EDataList[episode_index].text_id != -1) {
                 episode_text = TTab[EDataList[episode_index].text_id];
             }
-            if (area_index != -1) {
+            if (__builtin_expect(area_index != -1, 1)) {
                 if ((area->flags & AREAFLAG_BONUS_AREA) != 0) {
                     i16 *bonus_text = (area->flags & AREAFLAG_VEHICLE_AREA) != 0 ? s_crawlPtr->vehicle_bonus_text
                                                                                  : s_crawlPtr->character_bonus_text;
@@ -902,7 +902,7 @@ void TextCrawl_Draw(float dt, i32 paragraphs, float alpha, char *text) {
                         chapter_text = TTab[*bonus_text];
                     }
                 } else {
-                    if (s_crawlPtr->heading_text != NULL) {
+                    if (__builtin_expect(s_crawlPtr->heading_text != NULL, 1)) {
                         sprintf(chapter_buffer, "%s %i", TTab[*s_crawlPtr->heading_text], area_index + 1);
                         chapter_text = chapter_buffer;
                     }
@@ -982,7 +982,7 @@ void TextCrawl_Draw(float dt, i32 paragraphs, float alpha, char *text) {
         y += NuQFntHeight(QFont3DZ) * 1.5f;
     }
 
-    if (area_name != NULL) {
+    if (__builtin_expect(area_name != NULL, 1)) {
         NuQFntSetScale(QFont3DZ, x_scale, y_scale * 2.0f);
         Text3DStringEncode(area_name, encoded);
         NuQFntMove(QFont3DZ, -NuQFntPrintLenW(QFont3DZ, encoded) * 0.5f, y, 0.0f);
@@ -1044,10 +1044,9 @@ void MenuDrawViewTextStrings(MENU_s *menu) {
     menu->draw_y = static_cast<f32>(-menu->selected_row) * menu->centre_offset;
 
     char text[2048];
-    auto menu_item_scale = menu->item_scale;
     for (i32 i = 0; i < Text_MaxStrings_Overall; ++i) {
-        dme_sy = menu_item_scale;
         dme_sx = 0.6f;
+        dme_sy = menu->item_scale;
         dme_align = 0;
         GameDrawMenuEntry(menu, const_cast<char *>(" "));
 
@@ -1109,7 +1108,7 @@ void MenuDrawViewTextStrings(MENU_s *menu) {
                 blue = 0;
             } else {
                 red = 255;
-                if (menu_flash < 1) {
+                if (menu_flash == 0) {
                     green = 191;
                     blue = 0;
                 } else {

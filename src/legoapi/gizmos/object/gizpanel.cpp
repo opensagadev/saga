@@ -210,7 +210,7 @@ static __attribute__((noinline)) void GizPanel_CreateTerrain(GIZPANEL *panel) {
     if (panel == NULL) {
         return;
     }
-    if (panel->platform_id != -1) {
+    if (__builtin_expect(panel->platform_id != -1, 1)) {
         DeletePlatinst(panel->platform_id);
     }
 
@@ -372,7 +372,7 @@ static void GizPanel_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *world_ptr
             }
             panel_sys = world->giz_panel_sys;
             ++index;
-        } while (panel_sys->count > index);
+        } while (__builtin_expect(panel_sys->count > index, 1));
     }
 }
 
@@ -400,7 +400,7 @@ static void GizPanels_StoreProgress(void *world_ptr, void *, void *progress_ptr)
                 reinterpret_cast<u32 *>(&progress->state)[word_index] |= bit;
                 flags = panel->flags;
             }
-            if ((flags & GIZPANEL_FLAG_VISIBLE) == 0) {
+            if (__builtin_expect((flags & GIZPANEL_FLAG_VISIBLE) == 0, 1)) {
                 reinterpret_cast<u32 *>(&progress->baddie_state)[word_index] &= ~bit;
                 flags = panel->flags;
             }
@@ -409,7 +409,7 @@ static void GizPanels_StoreProgress(void *world_ptr, void *, void *progress_ptr)
             }
             ++index;
             ++panel;
-        } while (index != panel_sys_count && index != 32);
+        } while (__builtin_expect(index != panel_sys_count && index != 32, 1));
     }
 }
 
@@ -602,7 +602,7 @@ static void GizPanel_Draw(void *world_ptr, void *, float) {
             NUVEC target_position;
             GizPanel_GetAbsTargetPos(&panel, &target_position, 0);
             NuMtxSetRotationY(&base_matrix, target_spin);
-            if (panel.target_roll != 0) {
+            if (__builtin_expect(panel.target_roll != 0, 0)) {
                 NuMtxRotateZ(&base_matrix, panel.target_roll);
             }
             if (panel.target_pitch != 0) {
@@ -657,7 +657,7 @@ void GizPanel_Reset(GIZPANEL_s *panel) {
     floor_position->y = GameShadow(NULL, floor_position, 0.2f, -1);
     const f32 target_floor = GameShadow(NULL, &target_position, 0.2f, -1);
     panel->target_offset.y = target_floor;
-    if (target_floor != 2000000.0f) {
+    if (__builtin_expect(target_floor != 2000000.0f, 0)) {
         panel->target_offset.y = target_floor + GIZPANEL_PLAYERPOSLIFT;
         FindAnglesZX(&ShadNorm, &panel->target_pitch, &panel->target_roll);
     }
@@ -701,7 +701,7 @@ static void GizPanels_Reset(void *world_ptr, void *, void *progress_ptr) {
 static void GizPanel_Activate(GIZMO *gizmo, i32 active) {
     if (gizmo != NULL && gizmo->object != NULL) {
         GIZPANEL *panel = static_cast<GIZPANEL *>(gizmo->object);
-        if (active == 0) {
+        if (__builtin_expect(active == 0, 0)) {
             panel->flags = static_cast<GIZPANEL_FLAGS>(panel->flags & ~GIZPANEL_FLAG_TRACK_PLAYER);
             return;
         }
@@ -771,7 +771,7 @@ GIZPANEL_s *GizPanel_FindNearest(WORLDINFO_s *world, nuvec_s *position, GameObje
         if (object != NULL) {
             if (panel->reserved_flag == 0 && panel->state == 0 && panel->visible && panel->track_player &&
                 panel->floor_position.y != 2000000.0f &&
-                (check_eligibility == 0 || GizPanel_CanUsePanel(object, panel) != 0)) {
+                (check_eligibility == 0 || __builtin_expect(GizPanel_CanUsePanel(object, panel) != 0, 0))) {
                 NUVEC target;
                 GizPanel_GetAbsTargetPos(panel, &target, 0);
                 const f32 distance = NuVecDistSqr(position, &target, NULL);
@@ -1027,23 +1027,24 @@ i32 GizPanel_UpdateHint(HINT_s *hint) {
             }
         }
     }
-    if (storm && (hint->control_mode_ids[0] == 0x269 || hint->control_mode_ids[0] == 0x260)) {
+    if (__builtin_expect(storm, 0) && (hint->control_mode_ids[0] == 0x260 || hint->control_mode_ids[0] == 0x269)) {
         if (__builtin_expect(AvailableToPlayer(0, 1, 5, 0) != 0, 1))
             return hint->control_mode_ids[0] == 0x260;
         return hint->control_mode_ids[0] == 0x269;
     }
-    if (bountyhunter && (hint->control_mode_ids[0] == 0x26a || hint->control_mode_ids[0] == 0x261)) {
+    if (bountyhunter && (hint->control_mode_ids[0] == 0x261 || hint->control_mode_ids[0] == 0x26a)) {
         if (AvailableToPlayer(0x1000000, -1, 6, 0) != 0)
             return hint->control_mode_ids[0] == 0x261;
         return hint->control_mode_ids[0] == 0x26a;
     }
-    if (droid) {
+    if (__builtin_expect(droid, 1)) {
         if (hint->control_mode_ids[0] == 0x624)
             return droid_type == 1 && FreePlay != 0 && AvailableToPlayer(0x30, -1, 0, 1) == 0;
-        if (hint->control_mode_ids[0] == 0x625)
+        if (hint->control_mode_ids[0] == 0x625 || hint->control_mode_ids[0] == 0x25f) {
+            if (hint->control_mode_ids[0] == 0x25f)
+                return LSW_HintConditions.tc14_present;
             return droid_type == 0 && FreePlay != 0 && AvailableToPlayer(0x50, -1, 0, 1) == 0;
-        if (hint->control_mode_ids[0] == 0x25f)
-            return LSW_HintConditions.tc14_present;
+        }
     }
     return 0;
 }

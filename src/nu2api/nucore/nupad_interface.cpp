@@ -464,28 +464,30 @@ extern "C" {
                     nearest = i;
                 }
             }
-            if (!(nearest_distance <= 0.04f)) {
+            if (nearest_distance > 0.04f) {
                 memset(data->touch_events, 0, sizeof(data->touch_events));
                 data->touch_count = 0;
                 memset(used_touch_IDs, 0, sizeof(used_touch_IDs));
                 return;
             }
             used_touch_IDs[data->touch_events[nearest].unknown_14] = false;
-            NuInputTouch *source = &data->touch_events[nearest + 1];
+            NuInputTouch *dest = &data->touch_events[nearest];
+            NuInputTouch *source = dest + 1;
             for (i32 i = nearest + 1; i < count; ++i) {
-                NuPadCopyTouchFields(source - 1, source);
-                ++source;
+                NuPadCopyTouchFields(dest, source);
+                dest++;
+                source++;
             }
-            NuInputTouch *last = &data->touch_events[count - 1];
-            last->unknown_04 = 0.0f;
-            last->unknown_08 = 0.0f;
-            last->unknown_0c = 0.0f;
-            last->unknown_10 = 0.0f;
-            last->unknown_00 = 0;
-            last->unknown_01 = 0;
-            last->unknown_02 = 0;
-            last->unknown_14 = 0;
-            data->touch_count = count - 1;
+            count--;
+            data->touch_events[count].unknown_04 = 0.0f;
+            data->touch_events[count].unknown_08 = 0.0f;
+            data->touch_events[count].unknown_0c = 0.0f;
+            data->touch_events[count].unknown_10 = 0.0f;
+            data->touch_events[count].unknown_00 = 0;
+            data->touch_events[count].unknown_01 = 0;
+            data->touch_events[count].unknown_02 = 0;
+            data->touch_events[count].unknown_14 = 0;
+            data->touch_count = count;
             return;
         }
 
@@ -499,15 +501,14 @@ extern "C" {
             for (i32 i = 0; i < 10; ++i) {
                 if (!data->touch_events[i].unknown_00 && !data->touch_events[i].unknown_01 &&
                     !data->touch_events[i].unknown_02) {
-                    NuInputTouch *touch = &data->touch_events[i];
-                    touch->unknown_04 = new_x;
-                    touch->unknown_00 = 0;
-                    touch->unknown_08 = new_y;
-                    touch->unknown_01 = 0;
-                    touch->unknown_0c = 0.0f;
-                    touch->unknown_10 = 0.0f;
-                    touch->unknown_02 = 1;
-                    touch->unknown_14 = free_id;
+                    data->touch_events[i].unknown_04 = new_x;
+                    data->touch_events[i].unknown_00 = 0;
+                    data->touch_events[i].unknown_08 = new_y;
+                    data->touch_events[i].unknown_01 = 0;
+                    data->touch_events[i].unknown_0c = 0.0f;
+                    data->touch_events[i].unknown_10 = 0.0f;
+                    data->touch_events[i].unknown_02 = 1;
+                    data->touch_events[i].unknown_14 = free_id;
                     used_touch_IDs[free_id] = true;
                     ++data->touch_count;
                     return;
@@ -528,20 +529,22 @@ extern "C" {
                 }
             }
             used_touch_IDs[data->touch_events[selected].unknown_14] = false;
+            i32 count = data->touch_count;
             NuInputTouch *source = &data->touch_events[selected + 1];
-            for (i32 i = selected + 1; i < static_cast<i32>(data->touch_count); ++i) {
+            for (i32 i = selected + 1; i < count; ++i) {
                 NuPadCopyTouchFields(source - 1, source);
                 ++source;
             }
-            NuInputTouch *last = &data->touch_events[--data->touch_count];
-            last->unknown_01 = 0;
-            last->unknown_00 = 0;
-            last->unknown_02 = 0;
-            last->unknown_04 = 0.0f;
-            last->unknown_08 = 0.0f;
-            last->unknown_0c = 0.0f;
-            last->unknown_10 = 0.0f;
-            last->unknown_14 = 0;
+            count--;
+            data->touch_count = count;
+            data->touch_events[count].unknown_04 = 0.0f;
+            data->touch_events[count].unknown_08 = 0.0f;
+            data->touch_events[count].unknown_0c = 0.0f;
+            data->touch_events[count].unknown_10 = 0.0f;
+            data->touch_events[count].unknown_00 = 0;
+            data->touch_events[count].unknown_01 = 0;
+            data->touch_events[count].unknown_02 = 0;
+            data->touch_events[count].unknown_14 = 0;
             return;
         }
 
@@ -555,14 +558,13 @@ extern "C" {
                     break;
                 }
             }
-            NuInputTouch *touch = &data->touch_events[selected];
-            touch->unknown_00 = 1;
-            touch->unknown_01 = 0;
-            touch->unknown_02 = 0;
-            touch->unknown_04 = new_x;
-            touch->unknown_08 = new_y;
-            touch->unknown_0c = old_x;
-            touch->unknown_10 = old_y;
+            data->touch_events[selected].unknown_04 = new_x;
+            data->touch_events[selected].unknown_08 = new_y;
+            data->touch_events[selected].unknown_0c = old_x;
+            data->touch_events[selected].unknown_10 = old_y;
+            data->touch_events[selected].unknown_00 = 1;
+            data->touch_events[selected].unknown_01 = 0;
+            data->touch_events[selected].unknown_02 = 0;
         }
     }
 
@@ -587,7 +589,7 @@ void NuTouchInputButton::Update(NuInputTouchData const *data) {
         float ty = data->touch_events[i].unknown_08;
         float tx = data->touch_events[i].unknown_04;
         u32 touch_id = data->touch_events[i].unknown_14;
-        if (!released && !started && !active)
+        if (__builtin_expect(!released && !started && !active, 0))
             continue;
         float dy = ty - y;
         float ry = height * 0.5f;

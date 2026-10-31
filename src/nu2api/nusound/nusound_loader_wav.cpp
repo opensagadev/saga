@@ -65,7 +65,7 @@ u32 NuSoundLoaderWAV::FindChunks(i32 file, NuSoundStreamDesc *desc, ChunkReadReq
     }
 
     u32 end_mask = (1 << count) - 1;
-    if (end_mask == 0) {
+    if (__builtin_expect(end_mask == 0, 0)) {
         return 0;
     }
 
@@ -97,7 +97,7 @@ u32 NuSoundLoaderWAV::FindChunks(i32 file, NuSoundStreamDesc *desc, ChunkReadReq
             }
         }
 
-        if (found_mask == end_mask) {
+        if (__builtin_expect(found_mask == end_mask, 0)) {
             return found_mask;
         }
 

@@ -108,7 +108,7 @@ GIZAIMESSAGE_s *CheckGizAIMessage(GIZAIMESSAGESYS_s *sys, char const *name, GIZA
             }
 
             char local[0x20];
-            if (NuStrIStr((char *)name, gizaimessage_prefix) != NULL) {
+            if (__builtin_expect(NuStrIStr((char *)name, gizaimessage_prefix) != NULL, 1)) {
                 strcpy(local, name);
             } else {
                 if (NuStrLen(name) + NuStrLen(gizaimessage_prefix) > 0x1e) {
@@ -126,7 +126,7 @@ GIZAIMESSAGE_s *CheckGizAIMessage(GIZAIMESSAGESYS_s *sys, char const *name, GIZA
             }
 
             NULISTLNK *node = NuLinkedListGetHead(&sys->free_list);
-            if (node == NULL) {
+            if (__builtin_expect(node == NULL, 1)) {
                 return NULL;
             }
             NuLinkedListRemove(&sys->free_list, node);

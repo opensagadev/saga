@@ -42,15 +42,17 @@ static i32 CreditCount;
 
 static inline void InitCredit(CREDIT_s *credit, char *text, f32 x, f32 y, f32 scale, u8 red, u8 green, u8 blue,
                               u8 alpha, u8 alignment, VARIPTR *buffer, VARIPTR *buffer_end) {
-    char *copy = NULL;
     if (text != NULL) {
+        char *copy = NULL;
         i32 length = NuStrLen(text);
         if (length != 0) {
             copy = static_cast<char *>(GameBufferAlloc(buffer, buffer_end, length + 1));
             NuStrCpy(copy, text);
         }
+        credit->text = copy;
+    } else {
+        credit->text = NULL;
     }
-    credit->text = copy;
     credit->x = x;
     credit->y = y;
     credit->scale = scale;
@@ -73,14 +75,14 @@ void Credits_Init(WORLDINFO_s *) {
 }
 
 void Credits_Load(WORLDINFO_s *, VARIPTR *buffer, VARIPTR *buffer_end) {
+    CreditsSize = 0.0f;
+    Credits_Duration = 120.0f;
     for (i32 i = 0; i < 5; ++i) {
+        CreditType[i].type = i;
         for (i32 component = 0; component < 4; ++component) {
             CreditType[i].colour[component] = CreditType[i].default_colour[component];
         }
-        CreditType[i].type = i;
     }
-    CreditsSize = 0.0f;
-    Credits_Duration = 120.0f;
     char filename[256];
     NuStrCpy(filename, "stuff\\text\\");
     NuStrCat(filename, "english");
@@ -114,16 +116,18 @@ void Credits_Load(WORLDINFO_s *, VARIPTR *buffer, VARIPTR *buffer_end) {
                         style_index = 2;
                     else if (__builtin_expect(NuStrICmp(CreditType[3].name, style_word) == 0, 0))
                         style_index = 3;
-                    else if (__builtin_expect(NuStrICmp(CreditType[4].name, style_word) != 0, 1))
-                        style_index = -1;
-                    else
+                    else if (__builtin_expect(NuStrICmp(CreditType[4].name, style_word) == 0, 0))
                         style_index = 4;
+                    else
+                        style_index = -1;
                     CREDIT_TYPE_s *type = style_index == -1 ? NULL : &CreditType[style_index];
                     if (type != NULL) {
-                        char *text = NULL;
-                        if (NuFParGetWord(parser) != 0) {
+                        char *text;
+                        if (NuFParGetWord(parser) == 0) {
+                            text = NULL;
+                        } else {
                             text = parser->word_buf;
-                            if (__builtin_expect(NuStrICmp(text, "colour") == 0, 1)) {
+                            if (__builtin_expect(text != NULL && NuStrICmp(text, "colour") == 0, 1)) {
                                 for (i32 component = 0; component < 4; ++component) {
                                     if (NuFParGetWord(parser)) {
                                         f32 value = NuAToF(parser->word_buf);
@@ -239,14 +243,8 @@ void Credits_UpdateMenu(MENU_s *menu) {
             } else {
                 progress = CreditsTime;
             }
-        } else if (CreditsFlag == 2) {
-            if (CreditsTime >= 3.0f) {
-                CreditsFlag = 3;
-                CreditsTime = 0.0f;
-            }
-            progress = 1.0f;
-        } else {
-            if (CreditsTime >= 1.1f) {
+        } else if (CreditsFlag != 2) {
+            if (__builtin_expect(CreditsTime >= 1.1f, 0)) {
                 NewLData = HUB_LDATA;
                 FADETYPE fade_type = {FADE_TYPE_STILL};
                 FadeSys.SetFade(fade_type, 0);
@@ -255,6 +253,12 @@ void Credits_UpdateMenu(MENU_s *menu) {
             if (progress < 0.0f) {
                 progress = 0.0f;
             }
+        } else {
+            if (CreditsTime >= 3.0f) {
+                CreditsFlag = 3;
+                CreditsTime = 0.0f;
+            }
+            progress = 1.0f;
         }
         CreditsAlpha = NuTrigTable[(static_cast<i32>(progress * 16384.0f) >> 1) & 0x7fff];
     } else {

@@ -148,145 +148,133 @@ static void GizBombGens_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *, void
     }
 }
 
+static void GizBombGens_Reset(GIZBOMBGENSYS *system) {
+    GIZBOMBGENPROGRESS *progress = static_cast<GIZBOMBGENPROGRESS *>(system->progress);
+    const bool has_progress = progress != NULL;
+
+    GIZBOMBGEN *bomb_generator = system->bomb_generators;
+    for (i32 index = 0; index < system->count; ++index, ++bomb_generator) {
+        bomb_generator->flags |= GIZBOMBGEN_FLAG_ACTIVE | GIZBOMBGEN_FLAG_VISIBLE;
+        if (bomb_generator->anim_set != NULL) {
+            GameAnimSet_EvaluateState(bomb_generator->anim_set);
+        }
+
+        GameObject_s *bomb = bomb_generator->generated_bomb;
+        if (bomb != NULL && system->kill_bombs_on_reset &&
+            (bomb->apiobj.field_0x1f8 & (APIOBJECT_FLAG_CHARACTER | APIOBJECT_FLAG_IN_USE)) ==
+                (APIOBJECT_FLAG_CHARACTER | APIOBJECT_FLAG_IN_USE)) {
+            KillGameObject(bomb, 4, 0);
+        }
+        bomb_generator->generated_bomb = NULL;
+
+        if (index < 96 && has_progress) {
+            const i32 word_index = index >> 5;
+            const u32 mask = 1u << (index & 31);
+            bomb_generator->visible = (progress->visible_masks[word_index] & mask) != 0;
+            bomb_generator->active = (progress->active_masks[word_index] & mask) != 0;
+        }
+    }
+
+    const bool players_share_bomb =
+        BombGenerator_PlayerBomb[0] != NULL && BombGenerator_PlayerBomb[0] == BombGenerator_PlayerBomb[1];
+    if (__builtin_expect(netclient == 0, 1)) {
+        if (Player[0] != NULL) {
+            if (BombGenerator_PlayerBomb[0] != NULL && Player[0]->cable != NULL && Player[0]->cable->target != NULL &&
+                __builtin_expect(Player[0]->cable->target->id == id_DRAGBOMB, 0)) {
+                KillGameObject(Player[0]->cable->target, 4, 0);
+                __builtin_memset(&Player[0]->cable, 0, sizeof(void *));
+            }
+
+            if (Player[0] != NULL && Player[0]->apiobj.player_controlled && BombGenerator_PlayerBomb[0] != NULL &&
+                __builtin_expect(Player[0]->cable == NULL, 0)) {
+                NUVEC bomb_position = {0.0f, 0.0f, -2.0f};
+                NuVecRotateY(&bomb_position, &bomb_position, Player[0]->apiobj.field_0x276);
+                NuVecAdd(&bomb_position, &bomb_position, &Player[0]->apiobj.collision_position);
+                GameObject_s *bomb = AddDynamicCreature(id_DRAGBOMB, &bomb_position, 0, const_cast<char *>("dragbomb"),
+                                                        NULL, NULL, 0, NULL, NULL, 0, 0);
+                if (bomb != NULL) {
+                    Player[0]->cable = CreateCable(Player[0], bomb, 0);
+                    if (Player[0]->cable != NULL) {
+                        Player[0]->cable->max_length = 1000000000.0f;
+                    }
+                }
+            }
+        }
+
+        if (netclient == 0 && Player[1] != NULL) {
+            if (BombGenerator_PlayerBomb[1] != NULL && Player[1]->cable != NULL && Player[1]->cable->target != NULL &&
+                __builtin_expect(Player[1]->cable->target->id == id_DRAGBOMB, 0)) {
+                KillGameObject(Player[1]->cable->target, 4, 0);
+                __builtin_memset(&Player[1]->cable, 0, sizeof(void *));
+            }
+
+            if (Player[1] != NULL && Player[1]->apiobj.player_controlled && BombGenerator_PlayerBomb[1] != NULL &&
+                __builtin_expect(Player[1]->cable == NULL, 1)) {
+                GameObject_s *bomb;
+                if (players_share_bomb && Player[0]->cable != NULL && Player[0]->cable->target != NULL &&
+                    Player[0]->cable->target->id == id_DRAGBOMB) {
+                    bomb = Player[0]->cable->target;
+                } else {
+                    NUVEC bomb_position = {0.0f, 0.0f, -2.0f};
+                    NuVecRotateY(&bomb_position, &bomb_position, Player[1]->apiobj.field_0x276);
+                    NuVecAdd(&bomb_position, &bomb_position, &Player[1]->apiobj.collision_position);
+                    bomb = AddDynamicCreature(id_DRAGBOMB, &bomb_position, 0, const_cast<char *>("dragbomb"), NULL,
+                                              NULL, 0, NULL, NULL, 0, 0);
+                }
+                if (bomb != NULL) {
+                    Player[1]->cable = CreateCable(Player[1], bomb, 0);
+                    if (Player[1]->cable != NULL) {
+                        Player[1]->cable->max_length = 1000000000.0f;
+                    }
+                }
+            }
+        }
+    }
+    system->reset = 0;
+}
+
 static void GizBombGens_Update(void *world_ptr, void *system_ptr, float) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
     GIZBOMBGENSYS *system = static_cast<GIZBOMBGENSYS *>(system_ptr);
-    GameObject_s **players = Player;
-    GameObject_s **player_bombs = BombGenerator_PlayerBomb;
-    i16 *bomb_model_id = &id_DRAGBOMB;
 
     if (__builtin_expect(system != NULL, 1)) {
-        if (__builtin_expect((system->flags & GIZBOMBGENSYS_FLAG_RESET) != 0, 0)) {
-            GIZBOMBGENPROGRESS *progress = static_cast<GIZBOMBGENPROGRESS *>(system->progress);
-            const bool has_progress = progress != NULL;
+        if (__builtin_expect(system->reset, 0)) {
+            GizBombGens_Reset(system);
+        }
 
-            GIZBOMBGEN *bomb_generator = system->bomb_generators;
-            for (i32 index = 0; index < system->count; ++index, ++bomb_generator) {
-                bomb_generator->flags |= GIZBOMBGEN_FLAG_ACTIVE | GIZBOMBGEN_FLAG_VISIBLE;
-                if (bomb_generator->anim_set != NULL) {
-                    GameAnimSet_EvaluateState(bomb_generator->anim_set);
-                }
+        GIZBOMBGEN *bomb_generator = system->bomb_generators;
+        for (i32 index = 0; index < system->count; ++index, ++bomb_generator) {
+            if ((bomb_generator->flags & GIZBOMBGEN_FLAG_VISIBLE) == 0) {
+                continue;
+            }
+            if ((bomb_generator->flags & GIZBOMBGEN_FLAG_ACTIVE) == 0) {
+                continue;
+            }
+            if (bomb_generator->anim_set == NULL) {
+                continue;
+            }
 
+            if (bomb_generator->generated_bomb != NULL) {
+                GameAnimSet_SetVisibility(bomb_generator->anim_set, 0);
                 GameObject_s *bomb = bomb_generator->generated_bomb;
-                if (bomb != NULL && (system->flags & GIZBOMBGENSYS_FLAG_KILL_BOMBS_ON_RESET) != 0 &&
-                    (bomb->apiobj.field_0x1f8 & (APIOBJECT_FLAG_CHARACTER | APIOBJECT_FLAG_IN_USE)) ==
-                        (APIOBJECT_FLAG_CHARACTER | APIOBJECT_FLAG_IN_USE)) {
-                    KillGameObject(bomb, 4, 0);
+                if (bomb->apiobj.field_0x287 != 0 || (bomb->apiobj.flags_high & APIOBJECT_HIGH_FLAG_CHARACTER) == 0) {
+                    bomb_generator->generated_bomb = NULL;
+                    GameAnimSet_Reset(bomb_generator->anim_set);
+                    GameAnimSet_EvalAnim(bomb_generator->anim_set);
+                    GameAnimSet_SetVisibility(bomb_generator->anim_set, 1);
                 }
-                bomb_generator->generated_bomb = NULL;
-
-                if (index < 96 && has_progress) {
-                    const i32 word_index = index >> 5;
-                    const u32 mask = 1u << (index & 31);
-                    bomb_generator->flags = static_cast<u8>((bomb_generator->flags & ~GIZBOMBGEN_FLAG_VISIBLE) |
-                                                            (((progress->visible_masks[word_index] & mask) != 0) << 1));
-                    bomb_generator->flags = static_cast<u8>((bomb_generator->flags & ~GIZBOMBGEN_FLAG_ACTIVE) |
-                                                            ((progress->active_masks[word_index] & mask) != 0));
-                }
-            }
-
-            const bool players_share_bomb = player_bombs[0] != NULL && player_bombs[0] == player_bombs[1];
-            if (netclient == 0) {
-                GameObject_s *player = players[0];
-                if (player != NULL) {
-                    if (player_bombs[0] != NULL && player->cable != NULL && player->cable->target != NULL &&
-                        player->cable->target->id == *bomb_model_id) {
-                        KillGameObject(player->cable->target, 4, 0);
-                        player = players[0];
-                        if (player != NULL)
-                            player->cable = NULL;
-                    }
-
-                    if (__builtin_expect(player != NULL && player->apiobj.player_controlled &&
-                                             player_bombs[0] != NULL && player->cable == NULL,
-                                         1)) {
-                        NUVEC bomb_position = {0.0f, 0.0f, -2.0f};
-                        NuVecRotateY(&bomb_position, &bomb_position, player->apiobj.field_0x276);
-                        NuVecAdd(&bomb_position, &bomb_position, &players[0]->apiobj.collision_position);
-                        GameObject_s *bomb =
-                            AddDynamicCreature(*bomb_model_id, &bomb_position, 0, const_cast<char *>("dragbomb"), NULL,
-                                               NULL, 0, NULL, NULL, 0, 0);
-                        player = players[0];
-                        if (bomb != NULL && player != NULL) {
-                            player->cable = CreateCable(player, bomb, 0);
-                            if (players[0]->cable != NULL) {
-                                players[0]->cable->max_length = 1000000000.0f;
-                            }
-                        }
-                    }
-                }
-
-                if (netclient == 0 && (player = players[1]) != NULL) {
-                    if (player_bombs[1] != NULL && player->cable != NULL && player->cable->target != NULL &&
-                        player->cable->target->id == *bomb_model_id) {
-                        KillGameObject(player->cable->target, 4, 0);
-                        player = players[1];
-                        if (player != NULL)
-                            player->cable = NULL;
-                    }
-
-                    if (player != NULL && player->apiobj.player_controlled && player_bombs[1] != NULL &&
-                        player->cable == NULL) {
-                        GameObject_s *bomb = NULL;
-                        if (players_share_bomb && players[0]->cable != NULL &&
-                            __builtin_expect(players[0]->cable->target != NULL, 0) &&
-                            players[0]->cable->target->id == *bomb_model_id) {
-                            bomb = players[0]->cable->target;
-                        } else {
-                            NUVEC bomb_position = {0.0f, 0.0f, -2.0f};
-                            NuVecRotateY(&bomb_position, &bomb_position, player->apiobj.field_0x276);
-                            NuVecAdd(&bomb_position, &bomb_position, &players[1]->apiobj.collision_position);
-                            bomb = AddDynamicCreature(*bomb_model_id, &bomb_position, 0, const_cast<char *>("dragbomb"),
-                                                      NULL, NULL, 0, NULL, NULL, 0, 0);
-                        }
-                        player = players[1];
-                        if (bomb != NULL && player != NULL) {
-                            player->cable = CreateCable(player, bomb, 0);
-                            if (players[1]->cable != NULL) {
-                                players[1]->cable->max_length = 1000000000.0f;
-                            }
-                        }
-                    }
-                }
-            }
-            system->flags &= static_cast<u8>(~GIZBOMBGENSYS_FLAG_RESET);
-        }
-        {
-            GIZBOMBGEN *bomb_generator = system->bomb_generators;
-            for (i32 index = 0; index < system->count; ++index, ++bomb_generator) {
-                if ((bomb_generator->flags & GIZBOMBGEN_FLAG_VISIBLE) == 0) {
-                    continue;
-                }
-                if ((bomb_generator->flags & GIZBOMBGEN_FLAG_ACTIVE) == 0) {
-                    continue;
-                }
-                if (bomb_generator->anim_set == NULL) {
-                    continue;
-                }
-
-                if (bomb_generator->generated_bomb != NULL) {
-                    GameAnimSet_SetVisibility(bomb_generator->anim_set, 0);
-                    GameObject_s *bomb = bomb_generator->generated_bomb;
-                    if (bomb->apiobj.field_0x287 != 0 ||
-                        (bomb->apiobj.flags_high & APIOBJECT_HIGH_FLAG_CHARACTER) == 0) {
-                        bomb_generator->generated_bomb = NULL;
-                        GameAnimSet_Reset(bomb_generator->anim_set);
-                        GameAnimSet_EvalAnim(bomb_generator->anim_set);
-                        GameAnimSet_SetVisibility(bomb_generator->anim_set, 1);
-                    }
-                } else {
-                    GameAnimSet_Play(bomb_generator->anim_set, 1.0f, 1);
-                    if (bomb_generator->anim_set->state == GAMEANIMSET_STATE_AT_END) {
-                        NUVEC bomb_position;
-                        GameAnimSet_GetAveragePos(bomb_generator->anim_set, &bomb_position, 2, 1, 1);
-                        if (netclient == 0) {
-                            bomb_generator->generated_bomb =
-                                AddDynamicCreature(*bomb_model_id, &bomb_position, 0, const_cast<char *>("dragbomb"),
-                                                   NULL, NULL, 1, NULL, NULL, 0, 0);
-                            if (Cheat_IsOn(5) != 0) {
-                                AddGameDebris(world->debris_sys, 0x7d, &bomb_position);
-                                AddGameDebris(world->debris_sys, 0x7e, &bomb_position);
-                            }
+            } else {
+                GameAnimSet_Play(bomb_generator->anim_set, 1.0f, 1);
+                if (bomb_generator->anim_set->state == GAMEANIMSET_STATE_AT_END) {
+                    NUVEC bomb_position;
+                    GameAnimSet_GetAveragePos(bomb_generator->anim_set, &bomb_position, 2, 1, 1);
+                    if (__builtin_expect(netclient == 0, 1)) {
+                        bomb_generator->generated_bomb =
+                            AddDynamicCreature(id_DRAGBOMB, &bomb_position, 0, const_cast<char *>("dragbomb"), NULL,
+                                               NULL, 1, NULL, NULL, 0, 0);
+                        if (Cheat_IsOn(5) != 0) {
+                            AddGameDebris(world->debris_sys, 0x7d, &bomb_position);
+                            AddGameDebris(world->debris_sys, 0x7e, &bomb_position);
                         }
                     }
                 }
@@ -294,16 +282,18 @@ static void GizBombGens_Update(void *world_ptr, void *system_ptr, float) {
         }
     }
 
-    player_bombs[0] = NULL;
-    const i16 model_id = *bomb_model_id;
-    if (players[0] != NULL && players[0]->cable != NULL && players[0]->cable->target != NULL &&
-        __builtin_expect(players[0]->cable->target->id == model_id, 1)) {
-        player_bombs[0] = players[0]->cable->target;
+    BombGenerator_PlayerBomb[0] = NULL;
+    GameObject_s *player = Player[0];
+    const i16 model_id = id_DRAGBOMB;
+    if (player != NULL && player->cable != NULL && player->cable->target != NULL &&
+        __builtin_expect(player->cable->target->id == model_id, 0)) {
+        BombGenerator_PlayerBomb[0] = player->cable->target;
     }
-    player_bombs[1] = NULL;
-    if (players[1] != NULL && players[1]->cable != NULL && players[1]->cable->target != NULL &&
-        __builtin_expect(players[1]->cable->target->id == model_id, 0)) {
-        player_bombs[1] = players[1]->cable->target;
+    BombGenerator_PlayerBomb[1] = NULL;
+    player = Player[1];
+    if (player != NULL && player->cable != NULL && player->cable->target != NULL &&
+        __builtin_expect(player->cable->target->id == model_id, 0)) {
+        BombGenerator_PlayerBomb[1] = player->cable->target;
     }
 }
 

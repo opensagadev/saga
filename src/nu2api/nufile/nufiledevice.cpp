@@ -109,7 +109,7 @@ i32 NuFileDevice::FormatName(char *output, i32 size, char const *path) const {
             relative_path[0] == '/' || relative_path[0] == '\\') {
             NuStrCat(relative, relative_path);
         } else {
-            if (length > 0 && current_dir[0] != '\\' && current_dir[0] != '/')
+            if (__builtin_expect(length > 0 && current_dir[0] != '\\' && current_dir[0] != '/', 1))
                 NuStrCat(relative, separator);
             NuStrCat(relative, current_dir);
             NuStrCat(relative, relative_path);
@@ -149,7 +149,7 @@ NuFileDevice *NuFileDevice::GetDeviceByType(NuFileDeviceType type) {
         return sm_DefaultDevice;
     for (i32 i = 0; i < sm_NumDevices; ++i) {
         NuFileDevice *device = sm_Devices[i];
-        if (device && device->device_type == type)
+        if (__builtin_expect(device && device->device_type == type, 0))
             return device;
     }
     return NULL;
@@ -163,10 +163,16 @@ NuFileDevice *NuFileDevice::GetDeviceFromPath(char const *path) {
     const char drive = path[0] & ~0x20;
     if (drive >= 'A' && drive <= 'Z') {
         if (path[1] == ':') {
-            if (path[2] == '/' || path[2] == '\\')
+            if (path[2] == '\\' || path[2] == '/')
                 return sm_DefaultDevice;
-        } else if (path[0] == 'h' && path[1] == 'o' && path[2] == 's' && path[3] == 't' && path[4] == ':') {
-            return sm_HostDevice;
+        } else {
+            i32 i;
+            for (i = 0; i < 5; ++i) {
+                if (path[i] != "host:"[i])
+                    break;
+            }
+            if (i == 5)
+                return sm_HostDevice;
         }
     }
 
@@ -182,8 +188,9 @@ NuFileDevice *NuFileDevice::GetDeviceFromPath(char const *path) {
     if (labelled) {
         for (i32 i = 0; i < sm_NumDevices; ++i) {
             NuFileDevice *candidate = sm_Devices[i];
-            if (candidate && *candidate->label &&
-                NuStrNICmp(path, candidate->label, NuStrLen(candidate->label)) == 0) {
+            if (candidate == NULL || *candidate->label == '\0')
+                continue;
+            if (NuStrNICmp(path, candidate->label, NuStrLen(candidate->label)) == 0) {
                 device = candidate;
                 break;
             }

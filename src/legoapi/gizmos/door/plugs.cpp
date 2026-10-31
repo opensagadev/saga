@@ -103,7 +103,7 @@ static NUVEC *Plug_GetPos(GIZMO *gizmo) {
 static void *Plugs_ReserveBufferSpace(void *world_ptr) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
     world->plug_sys = NULL;
-    if (world->current_level->max_plugs == 0) {
+    if (__builtin_expect(world->current_level->max_plugs == 0, 1)) {
         return NULL;
     }
 
@@ -189,7 +189,7 @@ static void Plugs_StoreProgress(void *world_ptr, void *, void *progress_ptr) {
         if ((plug->flags & PLUG_FLAG_ACTIVE) == 0) {
             progress->active_mask[word] &= ~bit;
         }
-        if ((plug->flags & PLUG_FLAG_PLUGGED) != 0) {
+        if (__builtin_expect((plug->flags & PLUG_FLAG_PLUGGED) != 0, 1)) {
             // This is how the original encodes the state, despite having a
             // separately initialized plugged mask in the progress record.
             progress->active_mask[word] |= bit;

@@ -193,7 +193,7 @@ void ThingManager::AddThingAfterThis(BaseThing *thing) {
         i32 index = this->field_0x14 + 1;
         this->field_0x14 = index;
         index = index + this->count;
-        if (index < this->max_things) {
+        if (__builtin_expect(index < this->max_things, 1)) {
             this->things[index] = thing;
         }
     }
@@ -214,7 +214,7 @@ void ThingManager::RemoveTemporaryThings() {
 i32 ThingManager::RemoveDependanciesThings(ThingRemoveData *data) {
     i32 removed = 1;
     for (i32 i = 0; i < this->count; ++i) {
-        if (this->things[i] == NULL || (this->things[i]->flags & THING_FLAG_SKIP_REMOVE_DEPENDANCIES) != 0) {
+        if (__builtin_expect(this->things[i] == NULL || (this->things[i]->flags & THING_FLAG_SKIP_REMOVE_DEPENDANCIES) != 0, 1)) {
             continue;
         }
         removed &= this->things[i]->RemoveDependancies(data);
@@ -224,7 +224,7 @@ i32 ThingManager::RemoveDependanciesThings(ThingRemoveData *data) {
 
 void ThingManager::EnterLevelThings(ThingLevelData *data) {
     for (i32 i = 0; i < this->count; ++i) {
-        if (this->things[i] == NULL || (this->things[i]->flags & THING_FLAG_SKIP_ENTER_LEVEL) != 0) {
+        if (__builtin_expect(this->things[i] == NULL || (this->things[i]->flags & THING_FLAG_SKIP_ENTER_LEVEL) != 0, 1)) {
             continue;
         }
         this->things[i]->EnterLevel(data);
@@ -233,7 +233,7 @@ void ThingManager::EnterLevelThings(ThingLevelData *data) {
 
 void ThingManager::ExitLevelThings(ThingLevelData *data) {
     for (i32 i = 0; i < this->count; ++i) {
-        if (this->things[i] == NULL || (this->things[i]->flags & THING_FLAG_SKIP_EXIT_LEVEL) != 0) {
+        if (__builtin_expect(this->things[i] == NULL || (this->things[i]->flags & THING_FLAG_SKIP_EXIT_LEVEL) != 0, 1)) {
             continue;
         }
         this->things[i]->ExitLevel(data);
@@ -492,7 +492,7 @@ ThingManager::ThingManager(i32 max_things) {
     const usize need = static_cast<usize>(max_things) * sizeof(*things);
 
     BaseThing **array = NULL;
-    if (*theMemoryManager.end_cell - *theMemoryManager.cursor_cell > need) {
+    if (__builtin_expect(*theMemoryManager.end_cell - *theMemoryManager.cursor_cell > need, 1)) {
         const usize aligned = ALIGN(*theMemoryManager.cursor_cell, 0x10);
         *theMemoryManager.cursor_cell = aligned + need;
         array = reinterpret_cast<BaseThing **>(aligned);

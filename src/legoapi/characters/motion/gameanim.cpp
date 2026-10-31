@@ -159,7 +159,7 @@ void Animate_POD(GameObject_s *object) {
 normal_animation:
     if (PodSprint_InStartCountdown(WORLD) > 0.0f || PodRace_InStartCountdown(WORLD) != 0) {
         packet.requested_animation = 1;
-    } else if (object->camera_shake_strength > 0.0f) {
+    } else if (__builtin_expect(object->camera_shake_strength > 0.0f, 1)) {
         packet.requested_animation = 0x17;
     } else if (__builtin_expect(!object->apiobj.player_controlled, 0)) {
         packet.requested_animation = 3;
@@ -874,7 +874,7 @@ i32 GameAnimSet_GetAveragePos(GAMEANIMSET_s *set, NUVEC *position, i32 frame_sel
                 f32 frame;
                 if (frame_selection == 0)
                     frame = object->start_frame;
-                else if (frame_selection == 1)
+                else if (__builtin_expect(frame_selection == 1, 0))
                     frame = object->end_frame;
                 else
                     frame = object->instance_animation->ltime;
@@ -914,7 +914,7 @@ i32 GameAnimSet_GetAveragePos(GAMEANIMSET_s *set, NUVEC *position, i32 frame_sel
             object = object->next;
         } while (object != NULL);
     }
-    if (count == 0)
+    if (__builtin_expect(count == 0, 0))
         return 0;
     NuVecScale(position, &sum, 1.0f / static_cast<f32>(count));
     return 1;
@@ -978,10 +978,10 @@ i32 GameAnimSet_GetCentreAndRadius(GAMEANIMSET_s *set, NUVEC *centre, f32 *radiu
             object_centre.y + object_radius,
             object_centre.z + object_radius,
         };
-        if (object_minimum.x < minimum.x) {
+        if (__builtin_expect(object_minimum.x < minimum.x, 0)) {
             minimum.x = object_minimum.x;
         }
-        if (object_minimum.y < minimum.y) {
+        if (__builtin_expect(object_minimum.y < minimum.y, 0)) {
             minimum.y = object_minimum.y;
         }
         if (object_minimum.z < minimum.z) {
@@ -1127,7 +1127,7 @@ i32 GameAnimSet_Stop(GAMEANIMSET_s *set) {
     }
 
     GAMEANIMSET_STATE state = static_cast<GAMEANIMSET_STATE>(set->state & ~GAMEANIMSET_STATE_AT_END);
-    if (state != GAMEANIMSET_STATE_ACTIVE_FORWARD) {
+    if (__builtin_expect(state != GAMEANIMSET_STATE_ACTIVE_FORWARD, 0)) {
         return 1;
     }
 
@@ -1287,7 +1287,7 @@ f32 GameAnimSet_GetCompletionRatio(GAMEANIMSET_s *set) {
     }
     for (GAMEANIMOBJ_s *object = set->objects; object != NULL; object = object->next) {
         if (object->instance_animation != NULL) {
-            if (object->start_frame == object->end_frame) {
+            if (__builtin_expect(object->start_frame == object->end_frame, 1)) {
                 return 1.0f;
             }
             f32 ratio =

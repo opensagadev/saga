@@ -341,12 +341,12 @@ void DeathStar2BattleD_Update(WORLDINFO_s *) {
         rtlDynamicSetRadii((*player)->dynamic_light_id, radius, radius + 5.0f);
         qrand();
         colour.x = 0.0f;
-        if (!(qrand() > 0x7fff)) {
-            colour.z = 2.0f;
-            colour.y = 2.0f;
-        } else {
+        if (qrand() > 0x7fff) {
             colour.y = 0.25f;
             colour.z = 0.25f;
+        } else {
+            colour.z = 2.0f;
+            colour.y = 2.0f;
         }
         rtlDynamicSetColours((*player)->dynamic_light_id, &colour, NULL);
         position.x = (*player)->apiobj.collision_position.x + delta.x * 0.5f;
@@ -780,15 +780,14 @@ void EmperorFightA_Update(WORLDINFO_s *world) {
         LevGameObject[0]->ai.movement_look_target = &locator->position;
         packet = emperorfighta_netpacket;
     }
-    bool floor_active = false;
+    i32 floor_active = 0;
     if (__builtin_expect(hspecial_efloor != NULL && packet->player_floor_mask, 1)) {
         for (i32 floor = 0; floor < 20; ++floor) {
             nuinstanim_s *animation = NuSpecialGetInstAnim(&hspecial_efloor[floor]);
             if (__builtin_expect(animation == NULL, 0) || !(animation->ltime > 1.0f))
                 continue;
             NUVEC *floor_position = NuSpecialGetDrawPos(&hspecial_efloor[floor]);
-            floor_active = true;
-            auto floor_position_z = floor_position->z;
+            floor_active = 1;
             for (i32 i = 0; i < 2; ++i) {
                 GameObject_s *player = Player[i];
                 if (player->apiobj.field_0x287 || !(player->field_0x101c <= 0.0f) ||
@@ -802,14 +801,14 @@ void EmperorFightA_Update(WORLDINFO_s *world) {
                 f32 dx = player->apiobj.position.x - floor_position->x;
                 if (!(dx < 0.35f && dx > -0.35f))
                     continue;
-                f32 dz = player->apiobj.position.z - floor_position_z;
+                f32 dz = player->apiobj.position.z - floor_position->z;
                 if (!(dz < 0.35f && dz > -0.35f))
                     continue;
                 player->character_context = 0x42;
                 if (!(player->apiobj.field_0x1f4 & 0x40000))
                     ObjHitObj(NULL, player, 1, 0, 0, 1);
                 player = Player[i];
-                if (!(dx <= 0.0f))
+                if (dx > 0.0f)
                     player->apiobj.velocity.x += 0.2f;
                 else
                     player->apiobj.velocity.x -= 0.2f;
@@ -829,10 +828,10 @@ void EmperorFightA_Update(WORLDINFO_s *world) {
                 floor_end.z = Player[i]->apiobj.collision_position.z;
                 random = NuRandFloat();
                 floor_end.z = (0.2f - (random + random) * 0.2f) + floor_end.z;
-                if (floor_end.z > floor_position_z + 0.35f)
-                    floor_end.z = floor_position_z + 0.35f;
-                else if (floor_position_z - 0.35f > floor_end.z)
-                    floor_end.z = floor_position_z - 0.35f;
+                if (floor_end.z > floor_position->z + 0.35f)
+                    floor_end.z = floor_position->z + 0.35f;
+                else if (floor_position->z - 0.35f > floor_end.z)
+                    floor_end.z = floor_position->z - 0.35f;
                 player = Player[i];
                 player_end.x = player->apiobj.collision_position.x;
                 f32 height = player->apiobj.upper_position.y - player->apiobj.lower_position.y;
@@ -849,8 +848,18 @@ void EmperorFightA_Update(WORLDINFO_s *world) {
             }
         }
         if (floor_active) {
-            for (i32 i = 0; i < 2; ++i) {
-                GameObject_s *player = Player[i];
+            {
+                GameObject_s *player = Player[0];
+                if (!player->apiobj.field_0x287 && player->field_0x101c <= 0.0f && LevArea[0] != NULL &&
+                    (player->apiobj.ai_area_mask & EmperorFloorAreaMask(world)) &&
+                    player->apiobj.collision_position.x < 1.5f) {
+                    player->apiobj.last_safe_position.x = 1.5f;
+                    player->field_0xf00 |= 4;
+                    player->apiobj.respawn_position.x = 1.5f;
+                }
+            }
+            {
+                GameObject_s *player = Player[1];
                 if (!player->apiobj.field_0x287 && player->field_0x101c <= 0.0f && LevArea[0] != NULL &&
                     (player->apiobj.ai_area_mask & EmperorFloorAreaMask(world)) &&
                     player->apiobj.collision_position.x < 1.5f) {
@@ -874,8 +883,9 @@ void EmperorFightA_Update(WORLDINFO_s *world) {
         }
         if (__builtin_expect(update_routes != 0, 1)) {
             AIPATH *path = world->ai_sys->path_sys->active_path;
-            for (i32 i = 0; i < path->connection_count; ++i) {
-                AIPATHCNX *connection = &path->connections[i];
+            i32 count = path->connection_count;
+            AIPATHCNX *connection = path->connections;
+            for (i32 i = 0; i < count; ++i, ++connection) {
                 if (connection->route_mask & static_cast<u32>(routemask_efloor_on)) {
                     if (floor_route_on) {
                         connection->traversal_flags[0] &= 0x7fffffff;
@@ -1436,7 +1446,7 @@ void SarlaccPitB_Update(WORLDINFO_s *world) {
                 break;
             case 1: {
                 sarlaccb_netpacket->disco_active = 0;
-                if (!ready) {
+                if (__builtin_expect(!ready, 0)) {
                     SarlaccPitB_Reset(world);
                     break;
                 }
@@ -1491,23 +1501,9 @@ void SarlaccPitB_Update(WORLDINFO_s *world) {
                         NUMTX_GET_ROW_VEC(NuSpecialGetDrawMtx(&sarlaccdisco.on[sarlaccdisco.second_panel]), 3);
                     sarlaccb_netpacket->sound_mask |= 1 << sarlaccdisco.second_panel;
                 }
-                if (first_occupied && second_occupied) {
-                    sarlaccdisco.timer = 0.0f;
-                    sarlaccdisco.panel_state[sarlaccdisco.first_panel] = 3;
-                    sarlaccdisco.panel_state[sarlaccdisco.second_panel] = 3;
-                    sarlaccdisco.first_panel = SarlaccDiscoPickPanel(0, -1);
-                    sarlaccdisco.second_panel = SarlaccDiscoPickPanel(0, sarlaccdisco.first_panel);
-                    if (sarlaccdisco.first_panel == -1 || sarlaccdisco.second_panel == -1) {
-                        sarlaccdisco.phase = 2;
-                        for (i32 index = 0; index < sarlaccdisco.count; ++index)
-                            sarlaccdisco.panel_state[index] = 4;
-                    } else {
-                        sarlaccdisco.panel_state[sarlaccdisco.first_panel] = 1;
-                        sarlaccdisco.panel_state[sarlaccdisco.second_panel] = 1;
-                    }
-                } else {
+                if (!(first_occupied && second_occupied)) {
                     sarlaccdisco.timer += FRAMETIME;
-                    if (sarlaccdisco.timer > 2.5f) {
+                    if (__builtin_expect(sarlaccdisco.timer > 2.5f, 1)) {
                         sarlaccdisco.timer = 0.0f;
                         for (i32 pass = 0; pass < 2; ++pass) {
                             i32 selected = SarlaccDiscoPickPanel(3, -1);
@@ -1531,6 +1527,20 @@ void SarlaccPitB_Update(WORLDINFO_s *world) {
                                 LevelLocator->position.z = help_position->z;
                             }
                         }
+                    }
+                } else {
+                    sarlaccdisco.timer = 0.0f;
+                    sarlaccdisco.panel_state[sarlaccdisco.first_panel] = 3;
+                    sarlaccdisco.panel_state[sarlaccdisco.second_panel] = 3;
+                    sarlaccdisco.first_panel = SarlaccDiscoPickPanel(0, -1);
+                    sarlaccdisco.second_panel = SarlaccDiscoPickPanel(0, sarlaccdisco.first_panel);
+                    if (sarlaccdisco.first_panel == -1 || sarlaccdisco.second_panel == -1) {
+                        sarlaccdisco.phase = 2;
+                        for (i32 index = 0; index < sarlaccdisco.count; ++index)
+                            sarlaccdisco.panel_state[index] = 4;
+                    } else {
+                        sarlaccdisco.panel_state[sarlaccdisco.first_panel] = 1;
+                        sarlaccdisco.panel_state[sarlaccdisco.second_panel] = 1;
                     }
                 }
                 break;
@@ -1584,7 +1594,7 @@ void SarlaccPitB_Update(WORLDINFO_s *world) {
     if (LevFlag[0] != 0) {
         f32 base = lumppos.z;
         enginetimer -= FRAMETIME;
-        if (__builtin_expect(enginetimer <= 0.0f, 0))
+        if (enginetimer <= 0.0f)
             enginetimer = 0.1f;
         f32 offset = 1.0f - (NU_SIN_LUT(enginetimer * 10.0f * 32768.0f + 16384.0f) + 1.0f) * 0.5f;
         f32 z = base + (offset * 0.01f - 0.005f);
@@ -1965,7 +1975,7 @@ void NewTown_Update(WORLDINFO_s *world) {
     }
     if (onTaunTaun == 0)
         changedTaunTaun = prevOnTaunTaun;
-    if (onFireTruck == 0)
+    if (__builtin_expect(onFireTruck == 0, 1))
         changedFireTruck = prevOnFireTruck;
     if (onLifeBoat == 0)
         changedLifeBoat = prevOnLifeBoat;

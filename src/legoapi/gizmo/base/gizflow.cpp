@@ -589,30 +589,25 @@ DECOMP_ASSERT(sizeof(flowboxtypes) == 0x24, "Flow-box callback table ABI");
 
 static void ProcessFlowBox(GIZFLOW_s *system, FLOWBOX_s *box, u8 frame) {
     if (box->state_flags_high & 1) {
-        bool parents_ready = true;
+        FLOWBOXGIZMODATA_s *data = box->data;
         for (i32 i = 0; i < box->parent_count; ++i) {
             FLOWBOX_s *parent = box->parents[i];
-            if (!(!flowboxtypes[parent->type].check_output(system, parent, box->output_indices[0]))) {
-                continue;
+            if (!flowboxtypes[parent->type].check_output(system, parent, box->output_indices[0])) {
+                for (i32 j = 0; j < data->gizmo_count; ++j)
+                    GizmoActivateReverse(system->gizmo_sys, data->gizmos[j]->gizmo, 1, box->state_flags_low >> 7, 1);
+                goto reverse_done;
             }
-            parents_ready = false;
-            break;
         }
-        FLOWBOXGIZMODATA_s *data = box->data;
-        if (parents_ready) {
-            for (i32 j = 0; j < data->gizmo_count; ++j)
-                GizmoActivateReverse(system->gizmo_sys, data->gizmos[j]->gizmo, 0, box->state_flags_low >> 7, 1);
-        } else {
-            for (i32 j = 0; j < data->gizmo_count; ++j)
-                GizmoActivateReverse(system->gizmo_sys, data->gizmos[j]->gizmo, 1, box->state_flags_low >> 7, 1);
-        }
+        for (i32 j = 0; j < data->gizmo_count; ++j)
+            GizmoActivateReverse(system->gizmo_sys, data->gizmos[j]->gizmo, 0, box->state_flags_low >> 7, 1);
     }
+reverse_done:
     if ((box->state_flags_low & 1) == 0)
         return;
     if (!flowboxtypes[box->type].process(system, box, frame))
         return;
 
-    if ((box->state_flags_high & 0xc) == 0xc)
+    if (__builtin_expect((box->state_flags_high & 0xc) == 0xc, 1))
         box->state_flags_high &= ~4;
     box->state_flags_high |= 8;
     box->state_flags_low = (box->state_flags_low & ~1) | 2;
@@ -628,14 +623,13 @@ static void ProcessFlowBox(GIZFLOW_s *system, FLOWBOX_s *box, u8 frame) {
                             GizmoActivate(system->gizmo_sys, data->gizmos[i]->gizmo, 0, 1);
                     }
                 } else {
-                    auto data_gizmo_count = data->gizmo_count;
-                    for (i32 i = 0; i < data_gizmo_count; ++i)
+                    for (i32 i = 0; i < data->gizmo_count; ++i)
                         GizmoSetVisibility(system->gizmo_sys, data->gizmos[i]->gizmo, 0, 1);
                 }
                 box->state_flags_low &= ~0x20;
             }
         }
-        if (box->state_flags_low & 0xc0) {
+        if (__builtin_expect(box->state_flags_low & 0xc0, 1)) {
             box->state_flags_low |= 0x20;
             box->state_flags_high |= 1;
             FLOWBOX_s **parents = box->parents;
@@ -652,7 +646,7 @@ static void ProcessFlowBox(GIZFLOW_s *system, FLOWBOX_s *box, u8 frame) {
     }
     if (box->type != 0)
         CheckIfParentsFinished(system, box);
-    i32 child_count = box->child_count;
+    u8 child_count = box->child_count;
     for (i32 i = 0; i < child_count; ++i) {
         FLOWBOX_s **child = &box->children[i];
         (*child)->state_flags_low |= 1;
@@ -731,7 +725,7 @@ void *LoadGizFlow(void *, GIZMOSYS_s *system, char *path, VARIPTR *buffer, VARIP
         }
         if (load_nflowboxes != 0) {
             parser = NuFParOpen(file);
-            if (parser != NULL) {
+            if (__builtin_expect(parser != NULL, 1)) {
                 flow = reinterpret_cast<GIZFLOW_s *>(GizmoBufferAlloc(load_buff, load_endbuff, sizeof(GIZFLOW_s)));
                 if (flow != NULL) {
                     flow->flowbox_count = load_nflowboxes;
@@ -763,12 +757,14 @@ void *LoadGizFlow(void *, GIZMOSYS_s *system, char *path, VARIPTR *buffer, VARIP
 static i32 ProcessConditionFlowBox(GIZFLOW_s *flow, FLOWBOX_s *box, u8) {
     u8 *condition = reinterpret_cast<u8 *>(box->data);
     if (condition == NULL) {
-        u8 *outputs = box->output_indices;
-        FLOWBOX_s **parents = box->parents;
-        for (i32 i = 0; i < box->parent_count; ++i) {
-            FLOWBOX_s *parent = parents[i];
-            if (flowboxtypes[parent->type].check_output(flow, parent, outputs[i]) == 0) {
-                return 0;
+        if (box->parent_count != 0) {
+            FLOWBOX_s **parents = box->parents;
+            u8 *outputs = box->output_indices;
+            for (i32 i = 0; i < box->parent_count; ++i) {
+                FLOWBOX_s *parent = parents[i];
+                if (flowboxtypes[parent->type].check_output(flow, parent, outputs[i]) == 0) {
+                    return 0;
+                }
             }
         }
         return 1;
@@ -819,14 +815,16 @@ static i32 ProcessConditionFlowBox(GIZFLOW_s *flow, FLOWBOX_s *box, u8) {
             count = 0;
             for (i32 i = 0; i < box->parent_count; ++i) {
                 FLOWBOX_s *parent = parents[i];
-                count += flowboxtypes[parent->type].check_output(flow, parent, outputs[i]) != 0;
+                if (flowboxtypes[parent->type].check_output(flow, parent, outputs[i]) != 0)
+                    count++;
             }
         }
         count_done:
             if (condition[0] == 5) {
-                return count == required;
-            }
-            if (count < required) {
+                if (__builtin_expect(count != required, 0)) {
+                    return 0;
+                }
+            } else if (count < required) {
                 return 0;
             }
             break;
@@ -841,7 +839,8 @@ static i32 ProcessConditionFlowBox(GIZFLOW_s *flow, FLOWBOX_s *box, u8) {
                 i32 count = 0;
                 for (i32 i = 0; i < box->parent_count; ++i) {
                     FLOWBOX_s *parent = parents[i];
-                    count += flowboxtypes[parent->type].check_output(flow, parent, outputs[i]) != 0;
+                    if (flowboxtypes[parent->type].check_output(flow, parent, outputs[i]) != 0)
+                        count++;
                 }
                 if (count < required) {
                     return 0;
@@ -860,8 +859,8 @@ static i32 ProcessConditionFlowBox(GIZFLOW_s *flow, FLOWBOX_s *box, u8) {
 }
 
 static i32 CheckOutputGizmoFlowBox(GIZFLOW_s *system, FLOWBOX_s *box, u8 output) {
-    if (((box->state_flags_high & 0x40) == 0 && FreePlay == 0) ||
-        ((box->state_flags_high & 0x20) == 0 && FreePlay != 0))
+    if (__builtin_expect(((box->state_flags_high & 0x40) == 0 && FreePlay == 0) ||
+        ((box->state_flags_high & 0x20) == 0 && FreePlay != 0), 0))
         return 1;
     FLOWBOXGIZMODATA_s *data = box->data;
     i32 result = 1;
@@ -908,7 +907,7 @@ static u8 getNextLoopChecksum() {
 static i32 Loop_CountLoopingInputs(FLOWBOX_s *box) {
     u8 checksum = getNextLoopChecksum();
     i32 count = 0;
-    for (u32 child = 0; child < box->child_count; ++child) {
+    for (i32 child = 0; child < box->child_count; ++child) {
         count = Loop_CountLoopingInputsEx(box, box->children[child], count, checksum);
     }
     return count;
@@ -973,15 +972,14 @@ void ResetGizFlow(GIZFLOW_s *system, GIZFLOWPROGRESS_s *progress) {
     ResetGizFlowPointers(system);
     for (i32 i = 0; i < system->flowbox_count; ++i, ++box) {
         box->last_process_frame = 0;
-        box->state_flags_low &= ~0x20;
+        box->state_low_bit5 = 0;
         if (progress != NULL && progress->valid != 0) {
             i32 word = i >> 5;
             u32 bit = 1u << (i & 31);
             box->active = (progress->active[word] & bit) != 0;
             const u8 completed = static_cast<u8>((progress->completed[word] & bit) != 0);
             box->completed = completed;
-            const u8 latched = static_cast<u8>((progress->latched[word] & bit) != 0);
-            box->state_flags_low |= latched << 5;
+            box->state_low_bit5 = (progress->latched[word] & bit) != 0;
             const u8 output_state = static_cast<u8>((progress->output_state[word] & bit) != 0);
             box->output_state = output_state;
             if (box->type == 1 && box->condition_data[0] == 4) {
@@ -994,20 +992,23 @@ void ResetGizFlow(GIZFLOW_s *system, GIZFLOWPROGRESS_s *progress) {
         if (box->type == 1 && box->condition_data[0] == 4) {
             box->loop_parent_count = Loop_CountLoopingInputs(box);
             box->state_flags_high |= 4;
-            if (__builtin_expect(box->parent_count == box->loop_parent_count, 1)) {
+            if (box->parent_count == box->loop_parent_count) {
                 box->state_flags_high |= 8;
                 box->state_flags_low |= 1;
             } else
                 box->state_flags_low &= ~1;
         } else {
-            box->active = box->parent_count == 0;
+            if (box->parent_count != 0)
+                box->state_flags_low &= ~1;
+            else
+                box->state_flags_low |= 1;
         }
 
         if (flowboxtypes[box->type].reset != NULL && (box->state_flags_high & 0x10) == 0)
             flowboxtypes[box->type].reset(system, box);
         if (box->type == 0) {
             if (((box->state_flags_high & 0x40) == 0 && FreePlay == 0) ||
-                ((box->state_flags_high & 0x20) == 0 && FreePlay != 0)) {
+                (__builtin_expect((box->state_flags_high & 0x20) == 0, 0) && FreePlay != 0)) {
                 FLOWBOXGIZMODATA_s *data = box->data;
                 for (i32 gizmo = 0; gizmo < data->gizmo_count; ++gizmo)
                     GizmoSetVisibility(system->gizmo_sys, data->gizmos[gizmo]->gizmo, 0, 1);

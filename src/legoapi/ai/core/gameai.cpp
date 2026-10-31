@@ -563,7 +563,7 @@ static void GlobalCharacterRender(NUVEC *position, i16 angle, i32 character, i32
     i16 layers[32];
     if (character < CHARCOUNT) {
         i16 model_id = apicharsys->playermodelids[character];
-        if (model_id != -1) {
+        if (__builtin_expect(model_id != -1, 1)) {
             CHARACTERMODEL_s *model = &apicharsys->models[model_id];
 
             i32 layer_count = GCDataList[model->model_id].make_layer_list(
@@ -730,7 +730,7 @@ static i32 SpecialRouteCharacterTypeID(char *name) {
     i32 route_index = 0;
     i32 skipped_count = 0;
     if (CurrentStoryCList != NULL) {
-        while (CurrentStoryCList[route_index].model_id != -1 && route_index < 64) {
+        while (__builtin_expect(CurrentStoryCList[route_index].model_id != -1 && route_index < 64, 1)) {
             char *character_name = apicharsys->char_data[CurrentStoryCList[route_index + skipped_count].model_id].file;
             bool skip = false;
             for (i32 skip_index = 0; skip_chars[skip_index] != NULL; ++skip_index) {
@@ -900,9 +900,8 @@ void GameCreatureOpponentSelection(AISYS_s *system, i32 count, APIOBJECT_s **obj
                         baddy_id = baddy_object->id;
                     } else {
                         if (!(goody->character_data->model_flags & 0x80000)) {
-                            if (__builtin_expect(baddy_object->only_attack_players && goody->objptr != player &&
-                                                     goody->objptr != player2,
-                                                 1)) {
+                            if (baddy_object->only_attack_players && goody->objptr != player &&
+                                                     goody->objptr != player2) {
                                 baddy_object->ai_opponent_exclusion_mask |= (u64)1 << goody->field_0x289;
                             } else if (goody->objptr->id == id_DRAGBOMB && baddy_id != id_ATAT) {
                                 baddy_object->ai_opponent_exclusion_mask |= (u64)1 << goody->field_0x289;
@@ -1007,13 +1006,13 @@ void GameCreatureOpponentSelection(AISYS_s *system, i32 count, APIOBJECT_s **obj
                 if (__builtin_expect((goody->ai_awareness_mask >> baddy->field_0x289) & 1, 1)) {
                     if ((WORLD->api_object_sys->line_of_sight[goody->field_0x289] >> baddy->field_0x289) & 1)
                         goody->objptr->ai_seen_mask |= (u64)1 << baddy->field_0x289;
-                } else if (__builtin_expect((goody->objptr->ai_seen_mask >> baddy->field_0x289) & 1, 0)) {
+                } else if (__builtin_expect((goody->objptr->ai_seen_mask >> baddy->field_0x289) & 1, 1)) {
                     goody->objptr->ai_seen_mask &= ~((u64)1 << baddy->field_0x289);
                 }
                 if ((baddy->ai_awareness_mask >> goody->field_0x289) & 1) {
                     if ((WORLD->api_object_sys->line_of_sight[baddy->field_0x289] >> goody->field_0x289) & 1)
                         baddy->objptr->ai_seen_mask |= (u64)1 << goody->field_0x289;
-                } else if (__builtin_expect((baddy->objptr->ai_seen_mask >> goody->field_0x289) & 1, 1)) {
+                } else if (__builtin_expect((baddy->objptr->ai_seen_mask >> goody->field_0x289) & 1, 0)) {
                     baddy->objptr->ai_seen_mask &= ~((u64)1 << goody->field_0x289);
                 }
             }
@@ -1095,8 +1094,8 @@ void MakeBaddiesForgetAboutParty(i32 check_hostility) {
         }
     }
     for (i32 i = 0; i < baddie_count; ++i) {
-        APIOBJECT *baddie = &baddies[i]->apiobj;
         for (i32 j = 0; j < party_count; ++j) {
+            APIOBJECT *baddie = &baddies[i]->apiobj;
             u64 mask = ~(u64(1) << baddie->field_0x289);
             APIOBJECT *member = &party[j]->apiobj;
             member->field387_0x2a0 &= static_cast<u32>(mask);
@@ -1138,10 +1137,12 @@ void MakeBaddiesForgetAboutParty(i32 check_hostility) {
         if (player == NULL || (player->apiobj.field_0x1f8 & 0x1001) != 0x1001 || player->apiobj.field_0x287 != 0 ||
             player->not_with_party)
             continue;
-        if (player->field_0x108e == 5 ||
-            ((FreePlay != 0 || WORLD->current_level == HUB_LDATA) &&
-             (player->apiobj.character_data->model_flags & 0x204) != 0 && player->field_0xcc0 == NULL)) {
+        if (player->field_0x108e == 5) {
             party_under_cover = 1;
+        } else if ((FreePlay != 0 || WORLD->current_level == HUB_LDATA) &&
+                   (player->apiobj.character_data->model_flags & 0x204) != 0) {
+            if (player->field_0xcc0 == NULL)
+                party_under_cover = 1;
         }
         if ((player->apiobj.character_data->model_flags & 0x80000) == 0)
             all_under_cover = 0;
@@ -1177,7 +1178,7 @@ void GameAISysStartFrame(AISYS_s *system) {
         // shared endpoint is transformed only once this frame.
         for (i32 path_index = 0; path_index < system->path_sys->path_count; ++path_index) {
             AIPATH *path = system->path_sys->paths[path_index];
-            for (u32 connection_index = 0; connection_index < path->connection_count; ++connection_index) {
+            for (i32 connection_index = 0; connection_index < path->connection_count; ++connection_index) {
                 AIPATHCNX *connection = &path->connections[connection_index];
                 AIPATHNODE *node = &path->nodes[connection->direction_a];
                 if (node->has_special != 0) {
@@ -1216,32 +1217,31 @@ void GameAISysStartFrame(AISYS_s *system) {
             NUVEC local_position;
             NuVecSub(&local_position, &object->apiobj.position, &area->position);
             NuVecRotateY(&local_position, &local_position, -area->rotation);
-            const bool is_inside = local_position.x >= -area->half_width && local_position.y >= -0.1f &&
-                                   local_position.z >= -area->half_depth && local_position.x <= area->half_width &&
-                                   local_position.y <= area->height && !(local_position.z > area->half_depth);
-            if (!is_inside) {
-                // Outside removal addresses the full 64-bit area bit.
-                const u64 area_bit = 1ULL << area_index;
-                object->apiobj.ai_area_mask_low &= ~static_cast<u32>(area_bit);
-                object->apiobj.ai_area_mask_high &= ~static_cast<u32>(area_bit >> 32);
+            if (local_position.x >= -area->half_width && local_position.y >= -0.1f &&
+                local_position.z >= -area->half_depth && local_position.x <= area->half_width &&
+                local_position.y <= area->height && local_position.z <= area->half_depth) {
+                // Inside occupancy uses the signed, wrapping 32-bit area bit.
+                const i64 inside_area_bit = static_cast<i32>(1u << (area_index & 31));
+                object->apiobj.ai_area_mask_low |= static_cast<u32>(inside_area_bit);
+                object->apiobj.ai_area_mask_high |= static_cast<u32>(inside_area_bit >> 32);
+                if ((object->apiobj.flags_low & APIOBJECT_FLAG_PLAYER_ACTIVE) != 0) {
+                    area->runtime_flags |= AIAREA_RUNTIME_PLAYER_PRESENT;
+                }
+                if (object->apiobj.field_0x27c != -1) {
+                    area->runtime_flags |= AIAREA_RUNTIME_CHARACTER_SLOT_SEEN;
+                }
+                if ((object->apiobj.field_0x1f4 & 1) != 0) {
+                    area->runtime_flags |= AIAREA_RUNTIME_OBJECT_STATE_SET;
+                } else if (__builtin_expect((object->apiobj.field_0x1f4 & 4) == 0, 1)) {
+                    area->runtime_flags |= AIAREA_RUNTIME_OBJECT_STATE_CLEAR;
+                }
                 continue;
             }
 
-            // Inside occupancy uses the signed, wrapping 32-bit area bit.
-            const i64 inside_area_bit = static_cast<i32>(1u << (area_index & 31));
-            object->apiobj.ai_area_mask_low |= static_cast<u32>(inside_area_bit);
-            object->apiobj.ai_area_mask_high |= static_cast<u32>(inside_area_bit >> 32);
-            if ((object->apiobj.flags_low & APIOBJECT_FLAG_PLAYER_ACTIVE) != 0) {
-                area->runtime_flags |= AIAREA_RUNTIME_PLAYER_PRESENT;
-            }
-            if (object->apiobj.field_0x27c != -1) {
-                area->runtime_flags |= AIAREA_RUNTIME_CHARACTER_SLOT_SEEN;
-            }
-            if ((object->apiobj.field_0x1f4 & 1) != 0) {
-                area->runtime_flags |= AIAREA_RUNTIME_OBJECT_STATE_SET;
-            } else if (__builtin_expect((object->apiobj.field_0x1f4 & 4) == 0, 1)) {
-                area->runtime_flags |= AIAREA_RUNTIME_OBJECT_STATE_CLEAR;
-            }
+            // Outside removal addresses the full 64-bit area bit.
+            const u64 area_bit = 1ULL << area_index;
+            object->apiobj.ai_area_mask_low &= ~static_cast<u32>(area_bit);
+            object->apiobj.ai_area_mask_high &= ~static_cast<u32>(area_bit >> 32);
         }
 
         ++system->next_area_check;
@@ -1472,7 +1472,6 @@ AIPATHCNXCONTROLLER_s *AIPathCnxControllerCreate(AIPATHCNXCONTROLSYS_s *control_
             AIPATHCNX *connection = static_cast<AIPATHCNX *>(AIPAthFindPathCnx(ai_system, path, from, to, &direction));
             void *target = NULL;
             if (connection != NULL) {
-                i32 gizmo_type;
                 switch (target_type) {
                     case 0:
                         if (target_name != NULL) {
@@ -1488,19 +1487,23 @@ AIPATHCNXCONTROLLER_s *AIPathCnxControllerCreate(AIPATHCNXCONTROLSYS_s *control_
                     case 3:
                         target = GizmoFindByName(WORLD->gizmo_sys, -1, target_name);
                         break;
-                    case 4:
-                        gizmo_type = blowup_gizmotype_id;
-                        goto find_typed_gizmo;
-                    case 7:
-                        gizmo_type = force_gizmotype_id;
-                        goto find_typed_gizmo;
-                    case 8:
-                        gizmo_type = obstacle_gizmotype_id;
-                        goto find_typed_gizmo;
+                    case 4: {
+                        GIZMO *gizmo = GizmoFindByName(WORLD->gizmo_sys, blowup_gizmotype_id, target_name);
+                        target = gizmo != NULL ? gizmo->object : NULL;
+                        break;
+                    }
+                    case 7: {
+                        GIZMO *gizmo = GizmoFindByName(WORLD->gizmo_sys, force_gizmotype_id, target_name);
+                        target = gizmo != NULL ? gizmo->object : NULL;
+                        break;
+                    }
+                    case 8: {
+                        GIZMO *gizmo = GizmoFindByName(WORLD->gizmo_sys, obstacle_gizmotype_id, target_name);
+                        target = gizmo != NULL ? gizmo->object : NULL;
+                        break;
+                    }
                     case 9: {
-                        gizmo_type = zipup_gizmotype_id;
-                    find_typed_gizmo:
-                        GIZMO *gizmo = GizmoFindByName(WORLD->gizmo_sys, gizmo_type, target_name);
+                        GIZMO *gizmo = GizmoFindByName(WORLD->gizmo_sys, zipup_gizmotype_id, target_name);
                         target = gizmo != NULL ? gizmo->object : NULL;
                         break;
                     }
@@ -1524,10 +1527,8 @@ AIPATHCNXCONTROLLER_s *AIPathCnxControllerCreate(AIPATHCNXCONTROLSYS_s *control_
 
                     controller = reinterpret_cast<AIPATHCNXCONTROLLER_s *>(node);
                     AIPATHSYS *path_system = ai_system->path_sys;
-                    const i32 path_count = path_system->path_count;
-                    AIPATH **path_cursor = path_system->paths;
-                    for (u8 index = 0; index < path_count; ++index, ++path_cursor) {
-                        if (*path_cursor == path) {
+                    for (u8 index = 0; index != path_system->path_count; ++index) {
+                        if (path_system->paths[index] == path) {
                             controller->path_index = index;
                             break;
                         }
@@ -1648,8 +1649,8 @@ void AIPathCnxControlSysUpdate(AIPATHCNXCONTROLSYS_s *system) {
             }
             case 1: {
                 const u8 *instance = static_cast<const u8 *>(controller->target);
-                i32 frame = static_cast<i32>(*reinterpret_cast<const f32 *>(instance + 0x90));
                 float end = *reinterpret_cast<f32 *>(*reinterpret_cast<u8 *const *>(instance + 0x58) + 8);
+                i32 frame = static_cast<i32>(*reinterpret_cast<const f32 *>(instance + 0x90));
                 if (frame > 0) {
                     i32 end_frame = static_cast<i32>(end);
                     frame = frame < end_frame ? frame : end_frame;
@@ -1667,11 +1668,13 @@ void AIPathCnxControlSysUpdate(AIPATHCNXCONTROLSYS_s *system) {
                     on = 0;
                 break;
             case 3:
-                on = GizmoGetOutput(WORLD->gizmo_sys, static_cast<GIZMO *>(controller->target),
-                                    controller->gizmo_output, 1) != 0;
+                if (GizmoGetOutput(WORLD->gizmo_sys, static_cast<GIZMO *>(controller->target), controller->gizmo_output,
+                                   1) == 0)
+                    on = 0;
                 break;
             case 4:
-                on = (static_cast<GIZMOBLOWUP_s *>(controller->target)->status_flags & 1) == 0;
+                if ((static_cast<GIZMOBLOWUP_s *>(controller->target)->status_flags & 1) != 0)
+                    on = 0;
                 break;
             case 5: {
                 float end = fakeanimendframe[controller->fake_animation_id];
@@ -1792,8 +1795,8 @@ void oneAtOnce_SetInitDistPerRow(float distance) {
 
 void oneAtOnce_MaintainArray() {
     GameObject_s *previous_attackers[8][4];
-    i32 previous_count[8] = {};
     i32 attacker_count[8] = {};
+    i32 previous_count[8] = {};
 
     for (i32 index = 0; index < HIGHGAMEOBJECT; ++index) {
         GameObject_s *object = &Obj[index];
@@ -1803,7 +1806,7 @@ void oneAtOnce_MaintainArray() {
             continue;
         }
 
-        if (__builtin_expect(object->one_at_once_player != 0xff, 1)) {
+        if (object->one_at_once_player != 0xff) {
             previous_attackers[object->one_at_once_player][previous_count[object->one_at_once_player]] = object;
             ++previous_count[object->one_at_once_player];
         }
@@ -1812,11 +1815,13 @@ void oneAtOnce_MaintainArray() {
         APIOBJECT *opponent_api = static_cast<APIOBJECT *>(object->ai.opponent);
         GameObject_s *opponent = opponent_api != NULL ? opponent_api->objptr : NULL;
         i32 player_index = -1;
+        GameObject_s *target = NULL;
         for (i32 player = 0; player < 8; ++player) {
             if (Player[player] != opponent) {
                 continue;
             }
             player_index = player;
+            target = Player[player];
             break;
         }
         if (player_index < 0) {
@@ -1826,7 +1831,7 @@ void oneAtOnce_MaintainArray() {
         const i32 slot = attacker_count[player_index];
         AtOnce_attackingPlayer[player_index][slot].object = object;
         AtOnce_attackingPlayer[player_index][slot].distance =
-            NuVecDistSqr(&opponent->apiobj.collision_position, &object->apiobj.collision_position, NULL);
+            NuVecDistSqr(&target->apiobj.collision_position, &object->apiobj.collision_position, NULL);
         ++attacker_count[player_index];
     }
 
@@ -1841,36 +1846,32 @@ void oneAtOnce_MaintainArray() {
             continue;
         }
         for (i32 slot = 0; AtOnce_attackingPlayer[player][slot].object != NULL; ++slot) {
-            if (AtOnce_attackingPlayer[player][slot].object == previous_attackers[player][0]) {
-                AtOnce_attackingPlayer[player][slot].distance *= 0.75f;
+            for (i32 previous = 0; previous < 4; ++previous) {
+                if (AtOnce_attackingPlayer[player][slot].object == previous_attackers[player][previous]) {
+                    AtOnce_attackingPlayer[player][slot].distance *= 0.75f;
+                }
             }
-            if (AtOnce_attackingPlayer[player][slot].object == previous_attackers[player][1]) {
-                AtOnce_attackingPlayer[player][slot].distance *= 0.75f;
-            }
-            if (AtOnce_attackingPlayer[player][slot].object == previous_attackers[player][2]) {
-                AtOnce_attackingPlayer[player][slot].distance *= 0.75f;
-            }
-            if (__builtin_expect(AtOnce_attackingPlayer[player][slot].object == previous_attackers[player][3], 0)) {
-                AtOnce_attackingPlayer[player][slot].distance *= 0.75f;
-            }
-            for (i32 adjacent = 1; adjacent <= attacker_count[player] - slot; ++adjacent) {
-                if (__builtin_expect(AtOnce_attackingPlayer[player][adjacent].distance <
-                                         AtOnce_attackingPlayer[player][adjacent - 1].distance,
-                                     1)) {
-                    GameObject_s *object = AtOnce_attackingPlayer[player][adjacent - 1].object;
-                    const f32 distance = AtOnce_attackingPlayer[player][adjacent - 1].distance;
-                    AtOnce_attackingPlayer[player][adjacent - 1].object =
-                        AtOnce_attackingPlayer[player][adjacent].object;
-                    AtOnce_attackingPlayer[player][adjacent - 1].distance =
-                        AtOnce_attackingPlayer[player][adjacent].distance;
-                    AtOnce_attackingPlayer[player][adjacent].object = object;
-                    AtOnce_attackingPlayer[player][adjacent].distance = distance;
+            for (i32 adjacent = 0; adjacent < attacker_count[player] - slot; ++adjacent) {
+                if (AtOnce_attackingPlayer[player][adjacent + 1].distance <
+                    AtOnce_attackingPlayer[player][adjacent].distance) {
+                    GameObject_s *object = AtOnce_attackingPlayer[player][adjacent].object;
+                    const f32 distance = AtOnce_attackingPlayer[player][adjacent].distance;
+                    AtOnce_attackingPlayer[player][adjacent].object =
+                        AtOnce_attackingPlayer[player][adjacent + 1].object;
+                    AtOnce_attackingPlayer[player][adjacent].distance =
+                        AtOnce_attackingPlayer[player][adjacent + 1].distance;
+                    AtOnce_attackingPlayer[player][adjacent + 1].object = object;
+                    AtOnce_attackingPlayer[player][adjacent + 1].distance = distance;
                 }
             }
         }
 
-        for (i32 slot = 0; slot < AtOnce_maxAttackers && AtOnce_attackingPlayer[player][slot].object != NULL; ++slot) {
-            AtOnce_attackingPlayer[player][slot].object->one_at_once_player = static_cast<u8>(player);
+        for (i32 slot = 0; slot < AtOnce_maxAttackers; ++slot) {
+            GameObject_s *attacker = AtOnce_attackingPlayer[player][slot].object;
+            if (__builtin_expect(attacker == NULL, 0)) {
+                break;
+            }
+            attacker->one_at_once_player = static_cast<u8>(player);
         }
     }
 }
@@ -2670,9 +2671,8 @@ GameObject_s *AddDynamicCreature(i32 model, nuvec_s *position, i32 angle, char *
         object->apiobj.position = spline_point;
     } else {
         object->apiobj.position = *position;
-        object->apiobj.movement_facing_angle = static_cast<u16>(angle);
-        object->apiobj.facing_angle = static_cast<u16>(angle);
-        object->apiobj.field_0x276 = static_cast<u16>(angle);
+        object->apiobj.movement_facing_angle = object->apiobj.facing_angle = object->apiobj.field_0x276 =
+            static_cast<u16>(angle);
         if (group != NULL) {
             AddToAIGroup(group, &object->apiobj);
             offset.x = ((object->ai.group_column + 1) / 2) * group->x_spacing;
@@ -2686,7 +2686,7 @@ GameObject_s *AddDynamicCreature(i32 model, nuvec_s *position, i32 angle, char *
     }
 
     ResetPlayerMoves(object);
-    plr_lastpos = object->apiobj.start_position = object->apiobj.collision_position = object->apiobj.initial_position =
+    object->apiobj.start_position = plr_lastpos = object->apiobj.collision_position = object->apiobj.initial_position =
         object->apiobj.position;
     object->apiobj.velocity = v000;
 
@@ -2724,12 +2724,13 @@ GameObject_s *AddDynamicCreature(i32 model, nuvec_s *position, i32 angle, char *
         object->field_0xe38 = 4;
     }
 
-    object->apiobj.field_0x1f4 &= ~0x100u;
-    object->apiobj.field_0x1f8 &= static_cast<u16>(~4u);
+    object->apiobj.field_0x1f4 |= 0x100u;
+    object->apiobj.flags_low &= static_cast<u8>(~4u);
     object->field_0x1004 = 1.0f;
     object->apiobj.field_0x287 = 0;
     object->field_0x7a5 = 0xff;
     object->apiobj.field_0x285 = 0;
+    object->apiobj.field_0x1f4 ^= 0x100u;
     memset(&object->ai.path_info, 0, sizeof(object->ai.path_info));
     object->ai.field_0x124 = -1;
     object->ai.field_0x138 = 0xff;
@@ -2758,9 +2759,9 @@ GameObject_s *AddDynamicCreature(i32 model, nuvec_s *position, i32 angle, char *
         if (object->ai.group_column == 0) {
             row->pos = object->apiobj.position;
             row->path_info = object->ai.path_info;
-            row->next_connection = NULL;
             row->y_rot = object->apiobj.field_0x276;
             row->is_turning = 0;
+            row->next_connection = NULL;
         }
     }
     PreResetCode(object);

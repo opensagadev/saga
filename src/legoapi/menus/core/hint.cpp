@@ -542,7 +542,7 @@ void Hint_ExpandButtons(char *input, char *output) {
             token[token_length + 1] = '\0';
             token_length = NuStrLen(token);
             if (token_length > 0) {
-                if (Text_ExpandButtonString(token, expanded) != 0) {
+                if (__builtin_expect(Text_ExpandButtonString(token, expanded) != 0, 0)) {
                     char *character = expanded;
                     while (*character != '\0') {
                         *output = *character;
@@ -722,7 +722,7 @@ void Hint_ResetHint(i32 hint_id, i32 reset_completed) {
     }
 
     i32 control_mode = MechInputTouchSystem::s_baseControlMode;
-    while (hint->control_mode_ids[control_mode] != hint_id) {
+    while (__builtin_expect(hint->control_mode_ids[control_mode] != hint_id, 1)) {
         hint++;
         if (hint->control_mode_ids[0] == -1) {
             return;
@@ -973,13 +973,13 @@ void Hint_LoadAllGameState() {
     }
 
     for (i32 index = 0; (index >> 5) < system->save_bit_count; ++index) {
-        if (HINT_COMPLETE(index) == 0) {
+        if (__builtin_expect(HINT_COMPLETE(index) == 0, 0)) {
             hint->completion_flags[MechInputTouchSystem::s_baseControlMode] = 0;
         } else {
             hint->completion_flags[MechInputTouchSystem::s_baseControlMode] = 1;
         }
         ++hint;
-        if (hint->control_mode_ids[0] == -1) {
+        if (__builtin_expect(hint->control_mode_ids[0] == -1, 0)) {
             return;
         }
     }
@@ -1028,8 +1028,9 @@ void Hint_Process(float elapsed) {
     hintsys.alpha = SeekLinearF(hintsys.alpha, target, 3.0f * FRAMETIME);
     HINT_s *hint = hintsys.active_hint;
     if (hint != NULL) {
+        const f32 duration = hint->display_duration;
         hintsys.display_elapsed += elapsed;
-        if ((hint->display_duration > 0.0f && !(hintsys.display_elapsed < hint->display_duration)) ||
+        if ((duration > 0.0f && hintsys.display_elapsed >= duration) ||
             MechSystems::Get()->PlayerButton().selector != NULL)
             hintsys.active_hint = NULL;
     }

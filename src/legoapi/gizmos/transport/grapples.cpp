@@ -338,10 +338,10 @@ static void Grapples_DrawList(WORLDINFO *world, GRAPPLE *grapples, i32 grapple_c
             }
 
             NuMtxSetRotationY(&matrix, target_rotation);
-            if (grapple->ground_z_rotation != 0) {
+            if (__builtin_expect(grapple->ground_z_rotation != 0, 1)) {
                 NuMtxRotateZ(&matrix, grapple->ground_z_rotation);
             }
-            if (grapple->ground_x_rotation != 0) {
+            if (__builtin_expect(grapple->ground_x_rotation != 0, 1)) {
                 NuMtxRotateX(&matrix, grapple->ground_x_rotation);
             }
             NuMtxScaleU(&matrix, 0.8f);
@@ -475,7 +475,7 @@ static void Grapples_Reset(void *world_ptr, void *, void *progress_ptr) {
     }
 
     GRAPPLE *grapple = world->grapples;
-    if (grapple != NULL) {
+    if (__builtin_expect(grapple != NULL, 1)) {
         for (i32 index = 0; index < world->grapple_count; ++index, ++grapple) {
             GRAPPLE *rope_grapple = &world->grapples[index];
             Grapple_ResetRope(rope_grapple);

@@ -79,7 +79,7 @@ void MenuDrawMissions(MENU_s *menu) {
     const f32 alpha = MenuAlpha;
     SmartTextEx(TTab[MissionSys->missions[hub_mission].name_id], 0.0f, -0.525f, 1.0f, 0.625f, 0.625f, 0.625f, 0, 255,
                 191, 0, 1.7f, 1, 0, 0, static_cast<i32>(255.0f * MissionsAlpha * alpha));
-    if (Game.mission_save.completed[hub_mission] != 0 && alpha * MissionsAlpha > 0.0f) {
+    if (__builtin_expect(Game.mission_save.completed[hub_mission] != 0 && alpha * MissionsAlpha > 0.0f, 1)) {
         const f32 opacity = alpha * MissionsAlpha;
         Hub_DrawImportantBrick(211, -0.15f, HUB_EPISODETITLEY + 0.1f, opacity, -1, -1);
         char time[64], text[64];
@@ -90,23 +90,25 @@ void MenuDrawMissions(MENU_s *menu) {
     for (i32 i = 0; i < MissionSys->count; ++i) {
         f32 size = MissionIconScale[i] * 0.075f + 0.125f;
         f32 x = MissionIconX[i];
-        if (!(fabsf(x) <= 1.0f))
-            size = 0.0f;
+        f32 opacity;
+        if (fabsf(x) > 1.0f)
+            opacity = 0.0f;
         else {
-            f32 opacity = (MissionIconScale[i] * 0.3f + 0.7f) * alpha;
+            opacity = (MissionIconScale[i] * 0.3f + 0.7f) * alpha;
             if (fabsf(x) > 0.5f)
                 opacity *= 1.0f - (fabsf(x) - 0.5f) * 2.0f;
             if (opacity > 0.0f)
                 DrawCharIcon(MissionSys->missions[i].find_char, x, -0.725f, 0.0f, size,
                              Game.mission_save.completed[i] >= 1 ? 168 : 167, opacity,
                              (i == hub_mission && menu_flash ? 0.7f : 1.0f) * opacity, 1, NULL);
-            if (__builtin_expect(opacity == 0.0f, 0))
-                size = 0.0f;
         }
-        menu->item_x[i] = x;
+        if (__builtin_expect(opacity == 0.0f, 0))
+            size = 0.0f;
+        const f32 height = size / GetAspectRatio();
+        menu->item_x[i] = MissionIconX[i];
         menu->item_y[i] = -0.725f;
         menu->item_width[i] = size;
-        menu->item_height[i] = size / GetAspectRatio();
+        menu->item_height[i] = height;
         menu->item_column[i] = i;
         menu->item_row[i] = 0;
     }
@@ -122,14 +124,14 @@ void MenuDrawMissions(MENU_s *menu) {
         select[1] = tSELECT;
         cancel[1] = tEXIT;
         status[1] = tSELECTING;
-        if (!(MenuPacket.reserved_1[0])) {
-            select[0] = tSELECT;
-            cancel[0] = tEXIT;
-            status[0] = tSELECTING;
-        } else {
+        if (MenuPacket.reserved_1[0]) {
             select[0] = -1;
             cancel[0] = tCANCEL;
             status[0] = tSELECTED;
+        } else {
+            select[0] = tSELECT;
+            cancel[0] = tEXIT;
+            status[0] = tSELECTING;
         }
     }
     DrawPlayerIconPrompts(MenuPacket.active_player[0], select[0], 1.0f, -1, cancel[0], -1, status[0],

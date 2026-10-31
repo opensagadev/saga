@@ -929,7 +929,7 @@ char *NuMusic::RemovePath(char *str) {
             c = *str_;
         } while (c != '\0');
 
-        if (last_sep != NULL) {
+        if (__builtin_expect(last_sep != NULL, 1)) {
             str = last_sep + 1;
         }
     }
@@ -1203,8 +1203,7 @@ void NuMusic::BuildSoundTable(variptr_u *buffer_start, variptr_u buffer_end) {
 void NuMusic::InitData(const char *file, VARIPTR *buffer_start, VARIPTR buffer_end) {
     VARIPTR buffer_original = *buffer_start;
 
-    this->string_pool_start = buffer_start->char_ptr;
-    this->string_pool_end = this->string_pool_start;
+    this->string_pool_start = this->string_pool_end = buffer_start->char_ptr;
     buffer_start->addr += 0x10000;
 
     this->albums = reinterpret_cast<Album *>(ALIGN(buffer_start->addr, 4));
@@ -1220,7 +1219,7 @@ void NuMusic::InitData(const char *file, VARIPTR *buffer_start, VARIPTR buffer_e
 
     NuFParSetInterpreterErrorHandler(0);
     nufpar_s *fpar = NuFParCreate(const_cast<char *>(file));
-    if (__builtin_expect(fpar != NULL, 1)) {
+    if (fpar != NULL) {
         NuFParPushComCTX(fpar, top_jmp_tab);
 
         while (NuFParGetLine(fpar), *fpar->line_buf != '\0') {
@@ -1234,8 +1233,7 @@ void NuMusic::InitData(const char *file, VARIPTR *buffer_start, VARIPTR buffer_e
     LOG_DEBUG("Loaded %d albums, %d tracks, %d indexes", this->album_count, this->track_count, this->index_count);
     LOG_DEBUG("this->albums=%p, this->tracks=%p, this->indexes=%p", this->albums, this->tracks, this->indexes);
 
-    i32 count = this->album_count;
-    if (__builtin_expect(count == 0 || (track_count = this->track_count, track_count == 0), 0)) {
+    if (this->album_count == 0 || this->track_count == 0) {
         *buffer_start = buffer_original;
         this->albums = NULL;
         this->album_count = 0;
@@ -1246,84 +1244,47 @@ void NuMusic::InitData(const char *file, VARIPTR *buffer_start, VARIPTR buffer_e
 
     // Compact the parse workspace down to just what was filled in, and rebase
     // the intra-pool pointers (album->tracks_source, track->entry_times).
-    Track *tracksPtr;
-    Track *alloced;
-    Track *pTVar3;
-
-    Album *albumPtr = this->albums;
-    Album *album = (Album *)ALIGN((usize)this->string_pool_end, 4);
-    if (__builtin_expect(albumPtr == album, 0)) {
-        tracksPtr = this->tracks;
-        alloced = (Track *)ALIGN((usize)&albumPtr[count].name, 4);
-        pTVar3 = tracksPtr;
-        if (tracksPtr == alloced)
-            goto LAB_003203e6;
-    LAB_003204e0:
-        memmove(alloced, pTVar3, track_count * sizeof(Track));
-        track_count = this->track_count;
-        count = this->album_count;
-        tracksPtr = alloced;
-    } else {
-        memmove(album, albumPtr, count * sizeof(Album));
-        count = this->album_count;
-        this->albums = album;
-        track_count = this->track_count;
-        pTVar3 = this->tracks;
-        tracksPtr = (Track *)(album + count);
-        if (pTVar3 == tracksPtr)
-            goto LAB_003203e6;
-        alloced = tracksPtr;
-        if (__builtin_expect(track_count != 0, 0))
-            goto LAB_003204e0;
+    Album *new_albums = reinterpret_cast<Album *>(ALIGN((usize)this->string_pool_end, 4));
+    if (this->albums != new_albums) {
+        if (this->album_count != 0) {
+            memmove(new_albums, this->albums, this->album_count * sizeof(Album));
+        }
+        this->albums = new_albums;
     }
 
-    this->tracks = tracksPtr;
-    if (0 < count) {
-        const isize track_rebase = reinterpret_cast<char *>(tracksPtr) - reinterpret_cast<char *>(pTVar3);
-        Album *album = this->albums;
-        Album *end = album + count;
-        do {
-            if (album->tracks_source != NULL) {
-                album->tracks_source =
-                    reinterpret_cast<Track *>(reinterpret_cast<char *>(album->tracks_source) + track_rebase);
+    Track *new_tracks = reinterpret_cast<Track *>(ALIGN((usize)(this->albums + this->album_count), 4));
+    if (this->tracks != new_tracks) {
+        Track *old_tracks = this->tracks;
+        if (__builtin_expect(this->track_count != 0, 0)) {
+            memmove(new_tracks, old_tracks, this->track_count * sizeof(Track));
+        }
+        const isize track_rebase = reinterpret_cast<char *>(new_tracks) - reinterpret_cast<char *>(old_tracks);
+        this->tracks = new_tracks;
+        for (i32 i = 0; i < this->album_count; i++) {
+            if (this->albums[i].tracks_source != NULL) {
+                this->albums[i].tracks_source =
+                    reinterpret_cast<Track *>(reinterpret_cast<char *>(this->albums[i].tracks_source) + track_rebase);
             }
-            ++album;
-        } while (__builtin_expect(album != end, 0));
-        tracksPtr = this->tracks;
+        }
     }
 
-LAB_003203e6:
-    f32 *pfVar2 = this->indexes;
-    f32 *__dest = (f32 *)ALIGN((usize)&tracksPtr[track_count].path, 4);
-    i32 local_20;
-    if (pfVar2 == __dest) {
-        local_20 = this->index_count;
-    } else {
-        local_20 = 0;
-
+    f32 *new_indexes = reinterpret_cast<f32 *>(ALIGN((usize)(this->tracks + this->track_count), 4));
+    if (this->indexes != new_indexes) {
+        f32 *old_indexes = this->indexes;
         if (__builtin_expect(this->index_count != 0, 0)) {
-            memmove(__dest, pfVar2, this->index_count << 2);
-            track_count = this->track_count;
-            local_20 = this->index_count;
+            memmove(new_indexes, old_indexes, this->index_count * sizeof(f32));
         }
-        this->indexes = __dest;
-
-        if (0 < track_count) {
-            const isize index_rebase = reinterpret_cast<char *>(__dest) - reinterpret_cast<char *>(pfVar2);
-            tracksPtr = this->tracks;
-            pTVar3 = tracksPtr + track_count;
-            do {
-                if (tracksPtr->entry_times != NULL) {
-                    tracksPtr->entry_times =
-                        reinterpret_cast<f32 *>(reinterpret_cast<char *>(tracksPtr->entry_times) + index_rebase);
-                }
-                tracksPtr = tracksPtr + 1;
-            } while (tracksPtr != pTVar3);
-            __dest = this->indexes;
+        const isize index_rebase = reinterpret_cast<char *>(new_indexes) - reinterpret_cast<char *>(old_indexes);
+        this->indexes = new_indexes;
+        for (i32 i = 0; i < this->track_count; i++) {
+            if (this->tracks[i].entry_times != NULL) {
+                this->tracks[i].entry_times =
+                    reinterpret_cast<f32 *>(reinterpret_cast<char *>(this->tracks[i].entry_times) + index_rebase);
+            }
         }
     }
 
-    buffer_start->void_ptr = __dest + local_20;
+    buffer_start->void_ptr = this->indexes + this->index_count;
     LOG_DEBUG("this->albums=%p, this->tracks=%p, this->indexes=%p", this->albums, this->tracks, this->indexes);
     for (i32 i = 0; i < this->album_count; i++) {
         this->albums[i].Initialise();
@@ -1611,11 +1572,11 @@ extern "C" void NuSound3StopVoice(NuSoundVoice *voice) {
     NuSound3Voice *entry = NULL;
     for (NuSound3Voice *it = g_NuSoundVoicesActive.Front(); it != g_NuSoundVoicesActive.End() && entry == NULL;
          it = it->intrusive_next) {
-        if (it->weak_ptr.obj == reinterpret_cast<NuSoundWeakPtrObj<NuSoundVoice> *>(voice)) {
+        if (__builtin_expect(it->weak_ptr.obj == reinterpret_cast<NuSoundWeakPtrObj<NuSoundVoice> *>(voice), 0)) {
             entry = it;
         }
     }
-    if (entry == NULL) {
+    if (__builtin_expect(entry == NULL, 0)) {
         return;
     }
 
@@ -1754,8 +1715,8 @@ i32 NuMusic::PauseTrack(u32 clazz) {
                 continue;
             }
             Voice *voice = FindVoiceByTrack(track);
-            if (voice != NULL && static_cast<u32>(voice->status - VOICE_STATUS_PLAYING) <= 1 &&
-                (voice->flags & 2) == 0) {
+            if (__builtin_expect(voice != NULL && static_cast<u32>(voice->status - VOICE_STATUS_PLAYING) <= 1 &&
+                (voice->flags & 2) == 0, 1)) {
                 NuSound3PauseStereoStream(voice->stream_index);
                 voice->flags |= 2u;
                 result = 1;
@@ -1788,8 +1749,8 @@ i32 NuMusic::ResumeTrack(u32 clazz) {
                 continue;
             }
             Voice *voice = FindVoiceByTrack(track);
-            if (voice != NULL && static_cast<u32>(voice->status - VOICE_STATUS_PLAYING) <= 1 &&
-                (voice->flags & 2) != 0) {
+            if (__builtin_expect(voice != NULL && static_cast<u32>(voice->status - VOICE_STATUS_PLAYING) <= 1 &&
+                (voice->flags & 2) != 0, 1)) {
                 NuSound3ResumeStereoStream(voice->stream_index);
                 voice->flags &= ~2u;
                 result = 1;
@@ -2408,33 +2369,31 @@ i32 NuMusic::StopTrack(u32 clazz, i32 fade) {
     }
 
     Track *tracks[6];
-    if (__builtin_expect(this->album->GetTracks(clazz, tracks) == 0, 0)) {
-        return 0;
-    }
-
     i32 result = 0;
-    for (i32 i = 0; i < 6; i++) {
-        Track *track = tracks[i];
-        if (track == NULL) {
-            continue;
-        }
-        Voice *voice = FindVoiceByTrack(track);
-        if (voice == NULL) {
-            continue;
-        }
-        if (__builtin_expect(static_cast<u32>(voice->status - VOICE_STATUS_STOPPING) <= 1, 0)) {
-            NuSound3StopStereoStream(voice->stream_index);
-            voice->SetStatusFn(VOICE_STATUS_NONE, 0x46a);
-            result = 1;
-        } else if (__builtin_expect(static_cast<u32>(voice->status - VOICE_STATUS_PLAYING) <= 1, 1)) {
-            if (!(fade & 1)) {
-                NuSound3StopStereoStream(voice->stream_index);
-                voice->SetStatusFn(VOICE_STATUS_NONE, 0x464);
-            } else {
-                voice->fade_rate = 2.0f;
-                voice->flags |= 1u;
+    if (this->album->GetTracks(clazz, tracks) != 0) {
+        for (i32 i = 0; i < 6; i++) {
+            Track *track = tracks[i];
+            if (track == NULL) {
+                continue;
             }
-            result = 1;
+            Voice *voice = FindVoiceByTrack(track);
+            if (voice == NULL) {
+                continue;
+            }
+            if (static_cast<u32>(voice->status - VOICE_STATUS_PLAYING) <= 1) {
+                if (!(fade & 1)) {
+                    NuSound3StopStereoStream(voice->stream_index);
+                    voice->SetStatusFn(VOICE_STATUS_NONE, 0x464);
+                } else {
+                    voice->fade_rate = 2.0f;
+                    voice->flags |= 1u;
+                }
+                result = 1;
+            } else if (static_cast<u32>(voice->status - VOICE_STATUS_STOPPING) <= 1) {
+                NuSound3StopStereoStream(voice->stream_index);
+                voice->SetStatusFn(VOICE_STATUS_NONE, 0x46a);
+                result = 1;
+            }
         }
     }
 

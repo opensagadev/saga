@@ -283,7 +283,10 @@ void ChallangeCash_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 draw)
 }
 
 void ChallangeCash_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed) {
-    NUVEC target = {0.0f, STATSPOSY, 1.0f};
+    NUVEC target;
+    target.x = 0.0f;
+    target.y = STATSPOSY;
+    target.z = 1.0f;
     switch (stage->field_0x14) {
         case 0:
             stage->field_0x1c = 4.0f;
@@ -294,9 +297,9 @@ void ChallangeCash_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float e
             f32 previous = stage->field_0x18;
             stage->field_0x18 += elapsed;
             if (stage->field_0x18 >= 1.5f && FindGameMsgsWithID(1, 0, -1, NULL) == 0) {
+                stage->field_0x18 = 0.0f;
                 stage->field_0x14 = 2;
                 stage->field_0x1c = 1.0f;
-                stage->field_0x18 = 0.0f;
                 break;
             }
             if (previous < 1.0f && stage->field_0x18 >= 1.0f) {
@@ -525,7 +528,7 @@ void GoldBrick_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float e
                         nuvec_s position = {0.0f, 0.0375f, 1.0f};
                         const i16 id = reinterpret_cast<i16 *>(packet->field_0x12c)[i];
                         char *label;
-                        if (id == tTRUEJEDI) {
+                        if (__builtin_expect(id == tTRUEJEDI, 0)) {
                             NuStrCpy(text, TTab[id]);
                             if (BOTHTRUEJEDIGOLDBRICKS != 0) {
                                 NuStrCat(text, " - ");
@@ -816,23 +819,32 @@ static void SuperStoryScore_LSW_DrawBody(STATUS_STAGE_s *stage, STATUSPACKET_s *
         const f32 time = stage->field_0x18;
         f32 alpha;
         if (!(time < 0.5f)) {
-            alpha = 1.0f;
-            if (time >= 4.5f)
+            if (__builtin_expect(time < 4.5f, 1))
+                alpha = 1.0f;
+            else
                 alpha = coin_progress = 1.0f - ((time - 4.5f) + (time - 4.5f));
         } else {
             alpha = time + time;
         }
         const i32 opacity = static_cast<i32>(alpha * 128.0f);
-        const bool new_best = packet->new_best_score != 0;
-        SmartTextEx(TTab[new_best ? tNEWHIGHSCORE : tNONEWHIGHSCORE], 0.0f, 0.2f, 1.0f, 0.7f, 0.7f, 0.7f, 0,
-                    new_best ? 0 : 255, new_best ? 255 : 0, 0, 1.7f, 1, NULL, 0, opacity);
+        char *heading;
+        i32 red, green;
+        if (packet->new_best_score != 0) {
+            heading = TTab[tNEWHIGHSCORE];
+            red = 0;
+            green = 255;
+        } else {
+            heading = TTab[tNONEWHIGHSCORE];
+            red = 255;
+            green = 0;
+        }
+        SmartTextEx(heading, 0.0f, 0.2f, 1.0f, 0.7f, 0.7f, 0.7f, 0, red, green, 0, 1.7f, 1, NULL, 0, opacity);
         const f32 draw_time = stage->field_0x18;
         f32 blend = 0.0f;
         if (!(draw_time < 0.5f))
             blend = draw_time < 4.0f ? (draw_time - 0.5f) / 3.5f : 1.0f;
         const u32 score = packet->superstory_score;
-        const f32 interpolated_score =
-            (static_cast<f32>(score >> 16) * 65536.0f + static_cast<f32>(score & 0xffff)) * blend;
+        const f32 interpolated_score = static_cast<f32>(score) * blend;
         // The reference's unsigned SSE conversion wraps the f32-rounded 2^32
         // endpoint to zero. Avoid an out-of-range float-to-integer conversion.
         const u32 displayed_score = !(interpolated_score >= 4294967296.0f) ? static_cast<u32>(interpolated_score) : 0;
@@ -842,7 +854,8 @@ static void SuperStoryScore_LSW_DrawBody(STATUS_STAGE_s *stage, STATUSPACKET_s *
         NuStrCpy(previous, "(");
         NuStrCat(previous, text);
         NuStrCat(previous, ")");
-        Text3DEx(previous, 0.0f, -0.2f, 1.0f, 0.7f, 0.7f, 0.7f, 0, 255, 255, 255, static_cast<u8>(opacity / 2));
+        Text3DEx(previous, 0.0f, -0.2f, 1.0f, 0.7f, 0.7f, 0.7f, 0, 255, 255, 255,
+                 static_cast<u8>((opacity + static_cast<i32>(static_cast<u32>(opacity) >> 31)) >> 1));
     }
     CoinTotal_Draw(*packet->score,
                    (STATSPOSY - STATSPOS2Y) * NuTrigTable[(static_cast<i32>(coin_progress * 16384.0f) >> 1) & 0x7fff] +
@@ -1010,32 +1023,44 @@ static void SuperStoryTime_LSW_DrawBody(STATUS_STAGE_s *stage, STATUSPACKET_s *p
     char text[256], previous[256];
     const f32 time = stage->field_0x18;
     f32 alpha, coin_progress;
-    if (time >= 0.5f) {
+    if (time < 0.5f) {
+        coin_progress = alpha = time + time;
+    } else if (time < 4.5f) {
         alpha = coin_progress = 1.0f;
-        if (time >= 4.5f)
-            alpha = 1.0f - ((time - 4.5f) + (time - 4.5f));
     } else {
-        alpha = coin_progress = time + time;
+        coin_progress = 1.0f;
+        alpha = 1.0f - ((time - 4.5f) + (time - 4.5f));
     }
     const i32 opacity = static_cast<i32>(alpha * 128.0f);
     CoinTotal_Draw(*packet->score,
                    (STATSPOSY - STATSPOS2Y) * NuTrigTable[(static_cast<i32>(coin_progress * 16384.0f) >> 1) & 0x7fff] +
                        STATSPOS2Y,
                    CoinTotalScale, 1, 1.0f, 255, 191, 0);
-    const bool new_best = packet->new_best_time != 0.0f;
-    SmartTextEx(TTab[new_best ? tNEWBESTTIME : tNONEWBESTTIME], 0.0f, 0.2f, 1.0f, 0.7f, 0.7f, 0.7f, 0,
-                new_best ? 0 : 255, new_best ? 255 : 0, 0, 1.7f, 1, NULL, 0, opacity);
-    f32 displayed_time;
-    if (packet->new_best_time == 0.0f) {
-        displayed_time = packet->superstory_time;
+    char *label;
+    i32 green, blue;
+    if (packet->new_best_time != 0.0f) {
+        label = TTab[tNEWBESTTIME];
+        green = 0;
+        blue = 255;
     } else {
+        label = TTab[tNONEWBESTTIME];
+        green = 255;
+        blue = 0;
+    }
+    SmartTextEx(label, 0.0f, 0.2f, 1.0f, 0.7f, 0.7f, 0.7f, 0, green, blue, 0, 1.7f, 1, NULL, 0, opacity);
+    f32 displayed_time;
+    if (packet->new_best_time != 0.0f) {
         const f32 draw_time = stage->field_0x18;
-        f32 blend = 0.0f;
-        if (draw_time < 0.5f)
+        f32 blend;
+        if (__builtin_expect(draw_time < 0.5f, 1))
             blend = 0.0f;
+        else if (draw_time < 4.0f)
+            blend = (draw_time - 0.5f) / 3.5f;
         else
-            blend = draw_time < 4.0f ? (draw_time - 0.5f) / 3.5f : 1.0f;
+            blend = 1.0f;
         displayed_time = (packet->new_best_time - packet->previous_best_time) * blend + packet->previous_best_time;
+    } else {
+        displayed_time = packet->superstory_time;
     }
     Text_MakeTime(displayed_time, 1, 1, 1, text);
     Text3DEx(text, 0.0f, 0.0f, 1.0f, 0.7f, 0.7f, 0.7f, 0, 255, 255, 255, static_cast<u8>(opacity));
@@ -1229,17 +1254,17 @@ void Prompt_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elap
                                     (packet->next_area == -1 || (packet->area->flags & 2) != 0 ||
                                      Game.area_save[packet->next_area].complete != 0)) ||
                                    (packet->mode_flags & 1) != 0 || packet->challenge_state != 0 ||
-                                   __builtin_expect(packet->mission_state != 0, 1)) {
-                            if (status_prompt < 1) {
-                                if (__builtin_expect(((buttons | pad->left_directions) & GAMEPAD_DDOWN) != 0, 1)) {
+                                   packet->mission_state != 0) {
+                            if (status_prompt > 0) {
+                                if (__builtin_expect(((buttons | pad->left_directions) & GAMEPAD_DUP) != 0, 1)) {
                                     GameAudio_PlaySfx(0x2f, NULL, 0, 0);
-                                    ++status_prompt;
-                                    moved_down = 1;
+                                    --status_prompt;
+                                    moved_up = 1;
                                 }
-                            } else if (__builtin_expect(((buttons | pad->left_directions) & GAMEPAD_DUP) != 0, 1)) {
+                            } else if (__builtin_expect(((buttons | pad->left_directions) & GAMEPAD_DDOWN) != 0, 1)) {
                                 GameAudio_PlaySfx(0x2f, NULL, 0, 0);
-                                --status_prompt;
-                                moved_up = 1;
+                                ++status_prompt;
+                                moved_down = 1;
                             }
                         }
                     }
@@ -1413,10 +1438,12 @@ void TrueHero_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active
 static void LevelComplete_LSW_DrawActive(STATUS_STAGE_s *stage, STATUSPACKET_s *packet) {
     char text[256];
     if (stage->field_0x14 > 0) {
-        f32 alpha = 1.0f;
+        f32 alpha;
         if (stage->field_0x18 < 0.5f)
             alpha = stage->field_0x18 + stage->field_0x18;
-        else if (!(stage->field_0x18 < 3.5f))
+        else if (stage->field_0x18 < 3.5f)
+            alpha = 1.0f;
+        else
             alpha = 1.0f - ((stage->field_0x18 - 3.5f) + (stage->field_0x18 - 3.5f));
         if (alpha > 0.0f) {
             const i32 opacity = alpha * 128.0f;
@@ -1431,13 +1458,13 @@ static void LevelComplete_LSW_DrawActive(STATUS_STAGE_s *stage, STATUSPACKET_s *
                     (BONUS_GUNSHIP_ADATA != NULL && packet->area == BONUS_GUNSHIP_ADATA)) {
                     SmartTextEx(TTab[tLEVELCOMPLETE], 0.0f, 0.0f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,
                                 STATUS_B, 1.7f, 1, NULL, 0, opacity);
-                } else if (FreePlayUnlocked()) {
+                } else if (!FreePlayUnlocked()) {
+                    SmartTextEx(TTab[tLEVELCOMPLETE], 0.0f, 0.0f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,
+                                STATUS_B, 1.7f, 1, NULL, 0, opacity);
+                } else {
                     SmartTextEx(TTab[tLEVELCOMPLETE], 0.0f, 0.1f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,
                                 STATUS_B, 1.7f, 1, NULL, 0, opacity);
                     SmartTextEx(TTab[tFREEPLAYUNLOCKED], 0.0f, -0.1f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,
-                                STATUS_B, 1.7f, 1, NULL, 0, opacity);
-                } else {
-                    SmartTextEx(TTab[tLEVELCOMPLETE], 0.0f, 0.0f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G,
                                 STATUS_B, 1.7f, 1, NULL, 0, opacity);
                 }
             } else if (stage->type == 8) {
@@ -1481,16 +1508,20 @@ static void LevelComplete_LSW_DrawActive(STATUS_STAGE_s *stage, STATUSPACKET_s *
             }
         }
     }
-    if (stage->type != 23 && stage->type != 26)
-        return;
-    if (stage->field_0x14 == 0 || stage->field_0x18 < stage->field_0x1c - 0.5f)
+    if (stage->type != 23) {
+        if (stage->type != 26)
+            return;
+    }
+    if (stage->field_0x14 == 0)
+        iconalphaoverride = 0.0f;
+    else if (stage->field_0x18 < stage->field_0x1c - 0.5f)
         iconalphaoverride = 0.0f;
     else
         iconalphaoverride = (stage->field_0x18 - (stage->field_0x1c - 0.5f)) * 2.0f;
     if (stage->type == 26) {
         if (packet->mission_state != 2)
             return;
-        if (packet->previous_gold_bricks < Game.field_0x7c26[0])
+        if (Game.field_0x7c26[0] > packet->previous_gold_bricks)
             iconalphaoverride = 0.0f;
     } else if (stage->type != 23 || packet->challenge_state != 2) {
         return;
@@ -1499,16 +1530,14 @@ static void LevelComplete_LSW_DrawActive(STATUS_STAGE_s *stage, STATUSPACKET_s *
     if (stage->field_0x18 < 0.75f) {
         progress = 0.0f;
         slide = stage->field_0x18 / 0.7f;
-    } else if (!(stage->field_0x18 < stage->field_0x1c - 0.75f)) {
-        progress = 1.0f;
-        slide = 1.0f - (stage->field_0x18 - (stage->field_0x1c - 0.75f)) / 0.75f;
-    } else {
+    } else if (stage->field_0x18 < stage->field_0x1c - 0.75f) {
         progress = (stage->field_0x18 - 0.75f) / (stage->field_0x1c - 0.75f - 0.75f);
         slide = 1.0f;
+    } else {
+        progress = 1.0f;
+        slide = 1.0f - (stage->field_0x18 - (stage->field_0x1c - 0.75f)) / 0.75f;
     }
-    f32 coin_slide = slide;
-    if (!(stage->field_0x18 < 0.75f))
-        coin_slide = 1.0f;
+    const f32 coin_slide = stage->field_0x18 < 0.75f ? slide : 1.0f;
     u32 score = packet->original_score;
     IncreaseScore(&score,
                   static_cast<i64>(static_cast<i32>(static_cast<f32>(packet->reward_score - score) * progress)), 0);
@@ -1652,10 +1681,7 @@ void Coins_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active) {
                 f32 ratio = stage->field_0x18 / stage->field_0x1c;
                 const f32 blend =
                     1.0f - (NuTrigTable[(static_cast<i32>(ratio * 32768.0f + 16384.0f) >> 1) & 0x7fff] + 1.0f) * 0.5f;
-                if (stage->field_0x1c == 0.0f || stage->field_0x18 == 0.0f) {
-                    ratio = 0.0f;
-                }
-                icon_y = StatusIconsOnOff(ratio);
+                icon_y = StatusIconsOnOff(((stage->field_0x18 == 0.0f) | (stage->field_0x1c == 0.0f)) ? 0.0f : ratio);
                 total_y = (0.3f - STATSPOS2Y) * blend + STATSPOS2Y;
                 coin_y = (STATSPOSY - STATSPOS2Y) * blend + STATSPOS2Y;
                 break;
@@ -1682,22 +1708,23 @@ void Coins_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active) {
         if (stage->field_0x14 >= 1) {
             const f32 player_alpha = packet->player_active[0] == 0 ? DROPINALPHA : 1.0f;
             const u32 coins = packet->coins_remaining[0];
+            const f32 coin_x = PANEL_COINX;
             const f32 score_x = -PANEL_SCOREX;
             const i32 object_index = coins > 999 ? 0xc3 : coins > 99 ? 0xbb : 0xb3;
             if (__builtin_expect(WORLD->lev_objs[object_index].active != 0, 0)) {
-                DrawPanel3DObject(-PANEL_COINX, coin_y, 1.0f, PANEL_COINSCALE_END, PANEL_COINSCALE_END, PANEL_COINSCALE_END,
+                DrawPanel3DObject(-coin_x, coin_y, 1.0f, PANEL_COINSCALE_END, PANEL_COINSCALE_END, PANEL_COINSCALE_END,
                                   0, 0, 0, &WORLD->lev_objs[object_index].special, 0, player_alpha);
             }
             char text[256];
             Text_MakeScore(packet->coins_remaining[0], text);
             Text3DEx(text, score_x, coin_y, 1.0f, PANEL_SCORESCALE, PANEL_SCORESCALE, PANEL_SCORESCALE, 2, 255, 191, 0,
-                     static_cast<u8>(static_cast<i32>(player_alpha * 128.0f)));
+                     static_cast<u8>(player_alpha * 128.0f));
             CoinTotal_Draw(*packet->score, total_y, scale, 1, 1.0f, 255, 191, 0);
         }
-        alpha = !(alpha >= 0.0f) ? 0.0f : alpha > 1.0f ? 1.0f : alpha;
+        alpha = alpha < 0.0f ? 0.0f : alpha > 1.0f ? 1.0f : alpha;
         Text3DEx(TTab[tCOINTOTAL], 0.0f, STATUS_TITLE_Y, 1.0f, 0.5f, 0.5f, 0.5f, 0, 255, 255, 255,
                  static_cast<u8>(static_cast<i32>(alpha * 128.0f)));
-    } else if (__builtin_expect(stage->field_0x12 != 0, 1)) {
+    } else if (stage->field_0x12 != 0) {
         const f32 alpha = getFinishedStatusAlpha(packet);
         CoinTotal_Draw(*packet->score,
                        (STATSPOSY - STATSPOS2Y) * NuTrigTable[(static_cast<i32>(alpha * 16384.0f) >> 1) & 0x7fff] +
@@ -1814,9 +1841,14 @@ void MiniKit_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current
                     DrawStatusMiniKit(0.0f, blend * -1.4f + 1.4f, 1.1f, 0.333f, 0.0f, currentminikit, packet, 0.0f);
                 else
                     DrawStatusMiniKit(0.0f, 0.0f, 1.1f, 0.333f, 0.0f, currentminikit, packet, 0.0f);
-                const i32 count = packet->new_minikits < 1 ? Game.area_save[packet->area->index].field_0x5[0]
-                                  : currentminikit < 0     ? 0
-                                                           : currentminikit;
+                i32 count;
+                if (packet->new_minikits < 1)
+                    count = Game.area_save[packet->area->index].field_0x5[0];
+                else {
+                    count = currentminikit;
+                    if (count < 0)
+                        count = 0;
+                }
                 DrawMiniKitCount(blend, 1.0f, count, packet->minikit_max);
                 break;
             }
@@ -1833,15 +1865,20 @@ void MiniKit_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current
                 } else
                     size = 0.333f;
                 DrawStatusMiniKit(0.0f, 0.0f, 1.1f, 0.333f, size, currentminikit + 1, packet, 0.0f);
-                const i32 count = packet->new_minikits < 1 ? Game.area_save[packet->area->index].field_0x5[0]
-                                  : currentminikit < 0     ? 0
-                                                           : currentminikit;
+                i32 count;
+                if (packet->new_minikits < 1)
+                    count = Game.area_save[packet->area->index].field_0x5[0];
+                else {
+                    count = currentminikit;
+                    if (count < 0)
+                        count = 0;
+                }
                 DrawMiniKitCount(1.0f, 1.0f, count, packet->minikit_max);
                 break;
             }
             case 3: {
                 f32 blend = 0.0f;
-                if (__builtin_expect(!(stage->field_0x1c - jibberlen >= stage->field_0x18), 0))
+                if (__builtin_expect(stage->field_0x18 > stage->field_0x1c - jibberlen, 1))
                     blend = (stage->field_0x18 - (stage->field_0x1c - jibberlen)) / jibberlen;
                 DrawStatusMiniKit(0.0f, 0.0f, 1.1f, 0.333f, 0.333f, currentminikit + 1, packet, blend);
                 i32 count =
@@ -1858,8 +1895,10 @@ void MiniKit_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current
             }
             case 4: {
                 title_alpha = 1.0f - stage->field_0x18;
-                f32 progress = 0.0f;
-                if (stage->field_0x1c != 0.0f && stage->field_0x18 != 0.0f)
+                f32 progress;
+                if ((stage->field_0x18 == 0.0f) | (stage->field_0x1c == 0.0f))
+                    progress = 0.0f;
+                else
                     progress = stage->field_0x18 / stage->field_0x1c;
                 const f32 blend =
                     1.0f -
@@ -1875,10 +1914,11 @@ void MiniKit_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current
             case 6: {
                 title_alpha = 1.0f - stage->field_0x18;
                 i32 angle = 0x2000;
-                if (!(stage->field_0x18 >= 1.0f))
+                if (stage->field_0x18 < 1.0f)
                     angle = (static_cast<i32>(title_alpha * 32768.0f + 16384.0f) >> 1) & 0x7fff;
-                if (__builtin_expect(stage->field_0x18 < stage->field_0x1c, 0)) {
-                    DrawMiniKitCount(1.0f - (NuTrigTable[angle] + 1.0f) * 0.5f, 1.0f,
+                const f32 trig = NuTrigTable[angle];
+                if (stage->field_0x18 < stage->field_0x1c) {
+                    DrawMiniKitCount(1.0f - (trig + 1.0f) * 0.5f, 1.0f,
                                      Game.area_save[packet->area->index].field_0x5[0], packet->minikit_max);
                     DrawStatusMiniKit(0.0f, 0.0f, 1.1f, 0.333f, 1.0f, Game.area_save[packet->area->index].field_0x5[0],
                                       packet, 0.0f);

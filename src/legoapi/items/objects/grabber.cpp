@@ -275,8 +275,11 @@ void Grabber_Reset(WORLDINFO_s *world) {
     if (Grab_grabber->action_switch && !Grab_grabber->action_switch->anim_set)
         Grab_grabber->action_switch = NULL;
     handle = GizmoFindByName(world->gizmo_sys, obstacle_gizmotype_id, (char *)"pad_n");
-    Grab_grabber->direction_switches[0] = handle ? (GIZOBSTACLE_s *)handle->object : NULL;
-    if (__builtin_expect(Grab_grabber->direction_switches[0] && !Grab_grabber->direction_switches[0]->anim_set, 1))
+    if (handle)
+        Grab_grabber->direction_switches[0] = (GIZOBSTACLE_s *)handle->object;
+    else
+        Grab_grabber->direction_switches[0] = NULL;
+    if (Grab_grabber->direction_switches[0] && !Grab_grabber->direction_switches[0]->anim_set)
         Grab_grabber->direction_switches[0] = NULL;
     handle = GizmoFindByName(world->gizmo_sys, obstacle_gizmotype_id, (char *)"pad_s");
     if (handle)
@@ -286,22 +289,31 @@ void Grabber_Reset(WORLDINFO_s *world) {
     if (Grab_grabber->direction_switches[1] && !Grab_grabber->direction_switches[1]->anim_set)
         Grab_grabber->direction_switches[1] = NULL;
     handle = GizmoFindByName(world->gizmo_sys, obstacle_gizmotype_id, (char *)"pad_e");
-    Grab_grabber->direction_switches[2] = handle ? (GIZOBSTACLE_s *)handle->object : NULL;
+    if (handle)
+        Grab_grabber->direction_switches[2] = (GIZOBSTACLE_s *)handle->object;
+    else
+        Grab_grabber->direction_switches[2] = NULL;
     if (Grab_grabber->direction_switches[2] && !Grab_grabber->direction_switches[2]->anim_set)
         Grab_grabber->direction_switches[2] = NULL;
     handle = GizmoFindByName(world->gizmo_sys, obstacle_gizmotype_id, (char *)"pad_w");
-    Grab_grabber->direction_switches[3] = handle ? (GIZOBSTACLE_s *)handle->object : NULL;
+    if (handle)
+        Grab_grabber->direction_switches[3] = (GIZOBSTACLE_s *)handle->object;
+    else
+        Grab_grabber->direction_switches[3] = NULL;
     if (Grab_grabber->direction_switches[3] && !Grab_grabber->direction_switches[3]->anim_set)
         Grab_grabber->direction_switches[3] = NULL;
-    g->grab_position.y = g->initial_position.y;
     LEVEL_PROGRESS_s *progress = world->level_progress;
+    g->grab_position.y = g->initial_position.y;
+    f32 x, z;
     if (progress && progress->grabber_field_0x484 != 2000000.0f) {
-        g->grab_position.x = progress->grabber_field_0x48c;
-        g->grab_position.z = progress->grabber_field_0x494;
+        x = progress->grabber_field_0x48c;
+        z = progress->grabber_field_0x494;
     } else {
-        g->grab_position.x = g->initial_position.x;
-        g->grab_position.z = g->initial_position.z;
+        x = g->initial_position.x;
+        z = g->initial_position.z;
     }
+    g->grab_position.z = z;
+    g->grab_position.x = x;
     g->shadow_height = 2000000.0f;
     g->floor_height = 2000000.0f;
     ResetAnimPacket(&g->animation, -1);
@@ -312,8 +324,10 @@ void Grabber_Reset(WORLDINFO_s *world) {
     }
     g->victim = NULL;
     g->carried_blowup = NULL;
-    NUVEC_ALIGNED16 query = g->grab_position;
-    query.y += 0.25f;
+    NUVEC_ALIGNED16 query;
+    query.x = g->grab_position.x;
+    query.y = g->grab_position.y + 0.25f;
+    query.z = g->grab_position.z;
     if (WORLD->current_level != CLOUDCITYTRAPA_LDATA)
         NewTerrPlatformsOff();
     f32 height = GameShadow(NULL, &query, 5.0f, -1);
@@ -322,15 +336,18 @@ void Grabber_Reset(WORLDINFO_s *world) {
         if (__builtin_expect((u32)surface <= 31 && (TerSurface[surface].flags & 0x200), 1)) {
             g->shadow_height = height;
             FindAnglesZX(&ShadNorm, &g->shadow_z_angle, &g->shadow_x_angle);
-            g->floor_height = (TerSurface[surface].flags & 2) ? height : 2000000.0f;
+            if (TerSurface[surface].flags & 2)
+                g->floor_height = height;
+            else
+                g->floor_height = 2000000.0f;
         }
     }
     g->flags_559 &= 0xfa;
     g->target_yaw = 0;
     g->yaw = 0;
     g->velocity.x = 0;
-    g->target_velocity.z = g->target_velocity.y = g->target_velocity.x = 0;
-    g->velocity.y = g->velocity.z = 0;
+    g->target_velocity.x = g->target_velocity.y = g->target_velocity.z = 0;
+    g->velocity.z = g->velocity.y = 0;
     g->platform_contact_timer = 0;
     if (world->terrain)
         g->platform_id = FindPlatInst(NuSpecialGetInstanceix(&g->special));
@@ -353,10 +370,8 @@ static void Grabber_Drop(GRABBER_s *grabber, NUVEC *previous_position) {
         ADDPART_s params = Default_ADDPART;
         NUMTX matrix = grabber->carried_matrix;
         NUVEC velocity;
-        NUVEC position = *Grabber_GetGrabPos(grabber, NULL);
-        matrix.m30 = position.x;
-        matrix.m31 = position.y + grabber->carried_height_offset;
-        matrix.m32 = position.z;
+        *(NUVEC *)&matrix.m30 = *Grabber_GetGrabPos(grabber, NULL);
+        matrix.m31 += grabber->carried_height_offset;
         velocity.x = ((grabber->grab_position.x - previous_position->x) / FRAMETIME) * 0.5f;
         velocity.y = -0.1f;
         velocity.z = ((grabber->grab_position.z - previous_position->z) / FRAMETIME) * 0.5f;
@@ -760,10 +775,10 @@ void Grabber_Draw(WORLDINFO_s *world) {
                 const NUANG x_angle = g->shadow_x_angle;
                 reflection.m00 = reflection.m11 = NU_COS_LUT(x_angle);
                 reflection.m01 = NU_SIN_LUT(x_angle);
-                reflection.m10 = -reflection.m01;
                 reflection.m22 = 1.0f;
                 reflection.m02 = reflection.m12 = reflection.m03 = reflection.m23 = reflection.m20 = reflection.m21 =
                     reflection.m13 = reflection.m30 = reflection.m31 = reflection.m32 = 0.0f;
+                reflection.m10 = -reflection.m01;
                 reflection.m33 = 1.0f;
                 NuMtxRotateXInline(&reflection, g->shadow_z_angle);
                 NuMtxTranslate(&reflection, &position);
@@ -796,11 +811,9 @@ void Grabber_Draw(WORLDINFO_s *world) {
     } else if ((u8)Reflections_On && g->floor_height != 2000000.0f)
         NuSpecialDrawAt(&g->special, &reflection);
     if (g->carried_blowup && grab_position) {
-        memcpy(&matrix, &g->carried_matrix, sizeof(matrix));
-        matrix.m30 = grab_position->x;
-        matrix.m31 = grab_position->y;
+        matrix = g->carried_matrix;
+        *(NUVEC *)&matrix.m30 = *grab_position;
         matrix.m31 += g->carried_height_offset;
-        matrix.m32 = grab_position->z;
         NuSpecialDrawAt(&g->carried_blowup->type->special, &matrix);
         if ((u8)Reflections_On && g->floor_height != 2000000.0f &&
             MatrixReflection(&matrix, 2, g->floor_height, WORLD->current_level->unknown_0cc, &reflection))

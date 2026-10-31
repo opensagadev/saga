@@ -156,11 +156,10 @@ static void *GizTorps_ReserveBufferSpace(void *world_ptr) {
 
 static void GizTorp_Draw(void *world_ptr, void *, float) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
-    if (__builtin_expect(world == NULL || world->giz_torp_machine_sys == NULL ||
-                             world->giz_torp_machine_sys->count == 0 ||
-                             world->lev_objs[GIZTORP_LEVEL_OBJECT_PRIMARY].active == 0 ||
-                             world->lev_objs[GIZTORP_LEVEL_OBJECT_ALTERNATE].active == 0,
-                         0)) {
+    if (world == NULL || __builtin_expect(world->giz_torp_machine_sys == NULL, 0) ||
+        __builtin_expect(world->giz_torp_machine_sys->count == 0, 0) ||
+        world->lev_objs[GIZTORP_LEVEL_OBJECT_PRIMARY].active == 0 ||
+        world->lev_objs[GIZTORP_LEVEL_OBJECT_ALTERNATE].active == 0) {
         return;
     }
 
@@ -212,7 +211,7 @@ static void GizTorp_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *world_ptr,
                 AddGizmo(gizmo_sys, type_id, NULL, machine);
             }
             ++index;
-        } while (world->giz_torp_machine_sys->count > index);
+        } while (__builtin_expect(world->giz_torp_machine_sys->count > index, 1));
     }
 }
 

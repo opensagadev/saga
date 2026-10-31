@@ -162,7 +162,7 @@ static u16 *Customiser_GetSelection(i32 side) {
             const u32 cape_mask = 1u << runtime->cape_layer;                                                           \
             layer_mask |= cape_mask;                                                                                   \
             CUSTOMPIECE *cape = &customiser->piece_sets[5][selection[5]];                                              \
-            if ((cape->layer_flags & 0x40) != 0)                                                                       \
+            if (__builtin_expect((cape->layer_flags & 0x40) != 0, 1))                                                  \
                 layer_mask &= ~cape_mask;                                                                              \
         }                                                                                                              \
         runtime->layer_mask_special = layer_mask;                                                                      \
@@ -564,17 +564,14 @@ void Customiser_Draw3D(CUSTOMISER *customiser) {
                 if (NuSpecialExistsFn(&resource->special) == 0)
                     continue;
                 CUSTOMPIECE *pieces = customiser->piece_sets[category];
-                bool preview = false;
+                i32 preview = 0;
                 if (GetMenuID() == 12 && customiser_quit == 0 && category == selected &&
                     (active_count == 2 || side == preview_side)) {
                     NuFmod(CustomiseMenuTime[side], 0.3f);
-                    preview = true;
+                    preview = 1;
                 }
-                if (!preview && category == 0) {
-                    CUSTOMPIECE *piece = &pieces[piece_index];
-                    if ((piece->layer_flags & 0x20) != 0)
-                        continue;
-                }
+                if (preview == 0 && category == 0 && (pieces[piece_index].layer_flags & 0x20) != 0)
+                    continue;
                 matrix = customiser->joint_matrices[side][helmet];
                 if (category == 0)
                     NuMtxPreTranslate(&matrix, &NoHatPos[side]);
@@ -582,7 +579,7 @@ void Customiser_Draw3D(CUSTOMISER *customiser) {
             }
         }
         if (customiser->piece_counts[2] > 0) {
-            const i8 hand = runtime->weapon_joints[0];
+            const i32 hand = runtime->weapon_joints[0];
             if (hand == -1 || model->points_of_interest[hand] == NULL)
                 continue;
             CUSTOMPIECE *weapon = &customiser->piece_sets[2][selection[2]];
@@ -594,9 +591,14 @@ void Customiser_Draw3D(CUSTOMISER *customiser) {
                 NuSpecialDrawAt(&object->special, &matrix);
                 i32 blade;
                 if (LightSabre_ColourFromObj(weapon->weapon_model, &blade) != -1) {
-                    if (blade != -1)
-                        NuSpecialDrawAt(&world->lev_objs[blade].special, &matrix);
-                    NuSpecialDrawAt(&world->lev_objs[17].special, &matrix);
+                    if (blade != -1) {
+                        LEVEL_OBJECT_RUNTIME_s *blade_object = &world->lev_objs[blade];
+                        if (blade_object != NULL)
+                            NuSpecialDrawAt(&blade_object->special, &matrix);
+                    }
+                    LEVEL_OBJECT_RUNTIME_s *glow = &world->lev_objs[17];
+                    if (glow != NULL)
+                        NuSpecialDrawAt(&glow->special, &matrix);
                 }
             }
         }
@@ -630,10 +632,10 @@ void Customiser_Update(CUSTOMISER *customiser, WORLDINFO_s *world) {
             UpdateCustomPieceAnim(&ArmsAnim[side], 0x1555, 0x4000);
             UpdateCustomPieceAnim(&LegsAnim[side], 0xe000, 0x4000);
             const u16 *selection = Customiser_GetSelection(side);
-            CUSTOMPIECE *head = &customiser->piece_sets[0][static_cast<u16>(selection[0])];
             CUSTOMPIECE *torso = &customiser->piece_sets[1][static_cast<u16>(selection[1])];
             f32 no_hat = 0.0f;
             if ((torso->availability_flags & 1) != 0) {
+                CUSTOMPIECE *head = &customiser->piece_sets[0][static_cast<u16>(selection[0])];
                 if (__builtin_expect((torso->availability_flags & 4) == 0, 1))
                     no_hat = (head->availability_flags & 8) != 0 ? 0.168f : 0.126f;
                 else
@@ -646,12 +648,13 @@ void Customiser_Update(CUSTOMISER *customiser, WORLDINFO_s *world) {
                 continue;
             CUSTOMPIECE *weapon = &customiser->piece_sets[2][static_cast<u16>(selection[2])];
             const i32 saber_colour = LightSabre_ColourFromObj(weapon->weapon_model, NULL);
-            if (__builtin_expect(customiser->animation_state[side] != 0, 0))
+            if (customiser->animation_state[side] != 0)
                 --customiser->animation_state[side];
-            const i32 intro = saber_colour == -1 ? 0x62 : 0x61;
-            if (customiser->animation_active[side] == 0 && model->model_data_b[intro] != NULL) {
+            if (customiser->animation_active[side] == 0 &&
+                model->model_data_b[saber_colour == -1 ? 0x62 : 0x61] != NULL) {
                 if (__builtin_expect(customiser->animation_values[side] == 0.0f, 0)) {
-                    customiser->animation_values[side] = AnimDuration(model->model_id, intro, 0.0f, 0.0f, 1);
+                    customiser->animation_values[side] =
+                        AnimDuration(model->model_id, saber_colour == -1 ? 0x62 : 0x61, 0.0f, 0.0f, 1);
                 } else {
                     customiser->animation_values[side] -= FRAMETIME;
                     if (customiser->animation_values[side] <= 0.0f)
@@ -662,25 +665,28 @@ void Customiser_Update(CUSTOMISER *customiser, WORLDINFO_s *world) {
             }
             customiser->animation_packets[side].previous_animation =
                 customiser->animation_packets[side].animation_index;
-            if (__builtin_expect(saber_colour == -1, 0))
-                customiser->animation_packets[side].requested_animation =
-                    customiser->animation_active[side] == 0 ? 0x62 : 0x63;
-            else
-                customiser->animation_packets[side].requested_animation =
-                    customiser->animation_active[side] == 0 ? 0x61 : 0xbe;
+            if (__builtin_expect(saber_colour == -1, 0)) {
+                if (__builtin_expect(customiser->animation_active[side] == 0, 0))
+                    customiser->animation_packets[side].requested_animation = 0x62;
+                else
+                    customiser->animation_packets[side].requested_animation = 0x63;
+            } else {
+                if (__builtin_expect(customiser->animation_active[side] == 0, 1))
+                    customiser->animation_packets[side].requested_animation = 0x61;
+                else
+                    customiser->animation_packets[side].requested_animation = 0xbe;
+            }
             UpdateAnimPacket(model, &customiser->animation_packets[side], FRAMETIME * 30.0f, 0.0f, FRAMETIME, 0.0f);
             const u16 angle = CustomiseYRot[side] + 0xc000;
             for (i32 category = 0; category < 9; ++category) {
                 const i32 selected = CustomiseMenuY[side];
-                const i32 locator = customiser->locator_indices[category];
                 if (__builtin_expect(selected == category && GetMenuID() == 12 && customiser_quit == 0 &&
                                          (active_count == 2 || side == preview_side) && control_side != -1 &&
-                                         __builtin_expect(locator != -1, 0) &&
-                                         model->points_of_interest[locator] != NULL,
+                                         __builtin_expect(customiser->locator_indices[category] != -1, 0) &&
+                                         model->points_of_interest[customiser->locator_indices[category]] != NULL,
                                      0)) {
-                    NUVEC position = {customiser->joint_matrices[side][locator].m30,
-                                      customiser->joint_matrices[side][locator].m31,
-                                      customiser->joint_matrices[side][locator].m32};
+                    const i32 locator = customiser->locator_indices[category];
+                    NUVEC position = *reinterpret_cast<NUVEC *>(&customiser->joint_matrices[side][locator].m30);
                     const f32 offset = customiser->locator_x_offsets[category];
                     if (offset != 0.0f) {
                         position.x += offset * NU_SIN_LUT(angle);
@@ -763,7 +769,7 @@ i32 Customiser_MenuAvailable(CUSTOMISER *customiser) {
     if (first_animation != 99 && first_animation != 190) {
         return 0;
     }
-    if (APICharacterLoaded(customiser->character_ids[1]) == NULL) {
+    if (__builtin_expect(APICharacterLoaded(customiser->character_ids[1]) == NULL, 1)) {
         return 0;
     }
     const i16 second_animation = customiser->animation_packets[1].requested_animation;
@@ -790,7 +796,7 @@ void CustomiserMenu_Draw(MENU_s *) {
         i32 side, active_count;
         if (!(Customise_NameAlpha <= 0.0f)) {
             Customiser_GetActiveWeirdoIndex(&side, &active_count);
-            if (active_count == 1 && __builtin_expect(MenuPacket.customise_other_player[side] != 0, 0))
+            if (active_count == 1 && MenuPacket.customise_other_player[side] != 0)
                 side = side == 0;
             for (i32 index = 0; index < active_count; ++index, ++side) {
                 const i32 blue = side == 0 ? 255 : 0;
@@ -805,12 +811,41 @@ void CustomiserMenu_Draw(MENU_s *) {
                     char letter[2];
                     letter[0] = 0;
                     letter[1] = 0;
-                    const f32 half_width = Game.options_save.widescreen == 0 ? 0.367499977350235f : 0.2939999997615814f;
-                    const f32 gap = Game.options_save.widescreen == 0 ? 0.05249999836087227f : 0.041999999433755875f;
+                    const f32 half_width = Game.options_save.widescreen != 0 ? 0.2939999997615814f : 0.367499977350235f;
+                    const f32 gap = Game.options_save.widescreen != 0 ? 0.041999999433755875f : 0.05249999836087227f;
                     i32 length;
-                    for (length = 15; length != 0; --length)
-                        if (Game.customizer[side].name[length - 1] != ' ')
-                            break;
+                    if (Game.customizer[side].name[14] != ' ')
+                        length = 15;
+                    else if (Game.customizer[side].name[13] != ' ')
+                        length = 14;
+                    else if (Game.customizer[side].name[12] != ' ')
+                        length = 13;
+                    else if (Game.customizer[side].name[11] != ' ')
+                        length = 12;
+                    else if (Game.customizer[side].name[10] != ' ')
+                        length = 11;
+                    else if (Game.customizer[side].name[9] != ' ')
+                        length = 10;
+                    else if (Game.customizer[side].name[8] != ' ')
+                        length = 9;
+                    else if (Game.customizer[side].name[7] != ' ')
+                        length = 8;
+                    else if (Game.customizer[side].name[6] != ' ')
+                        length = 7;
+                    else if (Game.customizer[side].name[5] != ' ')
+                        length = 6;
+                    else if (Game.customizer[side].name[4] != ' ')
+                        length = 5;
+                    else if (Game.customizer[side].name[3] != ' ')
+                        length = 4;
+                    else if (Game.customizer[side].name[2] != ' ')
+                        length = 3;
+                    else if (Game.customizer[side].name[1] != ' ')
+                        length = 2;
+                    else if (Game.customizer[side].name[0] != ' ')
+                        length = 1;
+                    else
+                        length = 0;
                     f32 x = CustomiseScreenPos[side].x - half_width;
                     if (active_count == 2)
                         x += side == 0 ? -0.06f : 0.06f;
@@ -823,8 +858,7 @@ void CustomiserMenu_Draw(MENU_s *) {
                             letter_green = green;
                             letter_blue = blue;
                             scale = 1.0f;
-                            if (__builtin_expect(CustomiseNameX[side] < column && length <= column && letter[0] == ' ',
-                                                 1))
+                            if (CustomiseNameX[side] < column && length <= column && letter[0] == ' ')
                                 letter[0] = '.';
                         } else {
                             letter[0] = CustomiseLetter[CustomiseNameY[side]];
@@ -889,12 +923,12 @@ void CustomiserMenu_Draw(MENU_s *) {
                 const f32 height = width / GetAspectRatio();
                 const i32 colour = menu_flash == 0 ? 255 : 191;
                 f32 toggle_x;
-                if (side == 0) {
-                    toggle_x = x + 0.2f;
-                    Text3D(">", toggle_x, -0.6f, 1.0f, pulse, pulse, pulse, 0, colour, colour, colour);
-                } else {
+                if (side != 0) {
                     toggle_x = x - 0.2f;
                     Text3D("<", toggle_x, -0.6f, 1.0f, pulse, pulse, pulse, 0, colour, colour, colour);
+                } else {
+                    toggle_x = x + 0.2f;
+                    Text3D(">", toggle_x, -0.6f, 1.0f, pulse, pulse, pulse, 0, colour, colour, colour);
                 }
                 customiser->touch_positions[5].x = toggle_x;
                 customiser->touch_positions[5].y = -0.6f;
@@ -959,7 +993,7 @@ void CustomiserMenu_Update(MENU_s *) {
         CustomiseNameBoardTMul[1] = CustomiseMode[1] == 1 ? 1.0f : 0.0f;
         CustomiseNameBoardMul[1] = SeekLinearF(CustomiseNameBoardMul[1], CustomiseNameBoardTMul[1], 4.0f * FRAMETIME);
         CustomiseNameLetterBlipScale[1] = SeekLinearF(CustomiseNameLetterBlipScale[1], 1.0f, 5.0f * FRAMETIME);
-        if (MenuPacket.active_player[1] != 0) {
+        if (__builtin_expect(MenuPacket.active_player[1] != 0, 1)) {
             if ((GamePad[1].buttons_pressed & GAMEPAD_MENUSELECT) != 0)
                 select[1] = 1;
             else if ((GamePad[1].buttons_pressed & GAMEPAD_MENUCANCEL) != 0)

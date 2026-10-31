@@ -14,7 +14,7 @@
 EPISODEDATA *EDataList = NULL;
 
 static bool Episode_HasArea(const EPISODEDATA *episode, i32 area_index) {
-    for (i32 i = 0; i < episode->area_count; i++) {
+    for (u32 i = 0; i < episode->area_count; i++) {
         if (episode->area_ids[i] == area_index) {
             return true;
         }

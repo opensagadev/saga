@@ -316,7 +316,7 @@ void NuMemoryPool::ReleaseUnreferencedPages_OLD() {
         }
 
         Page *next_page = page->next;
-        if (previous != NULL) {
+        if (__builtin_expect(previous != NULL, 1)) {
             previous->next = next_page;
         } else {
             pages = next_page;

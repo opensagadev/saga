@@ -90,7 +90,7 @@ void *AndroidMain(void *) {
         char *end = strchr(package + 2, '/');
         if (end != NULL) {
             usize length = end - begin;
-            if (length < sizeof(g_activityName)) {
+            if (__builtin_expect(length < sizeof(g_activityName), 1)) {
                 memcpy(g_activityName, begin, length);
                 g_activityName[length] = '\0';
             }

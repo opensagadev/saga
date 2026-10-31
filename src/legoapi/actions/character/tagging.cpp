@@ -286,7 +286,6 @@ void Tag_UpdateTransfers(i32 effect0, i32 effect1, i32 count) {
             Tag_Transfer[0].position[0] = position;
         }
         {
-            phase = NU_SIN_LUT(static_cast<i32>(phase * 16384.0f));
             GameObject_s *source = Tag_Transfer[0].source;
             GameObject_s *target = Player[0];
             const f32 height = Tag_Transfer[0].height[1];
@@ -296,15 +295,15 @@ void Tag_UpdateTransfers(i32 effect0, i32 effect1, i32 count) {
                      source->apiobj.collision_min.y;
             to.y = (target->apiobj.collision_max.y - target->apiobj.collision_min.y) * height +
                    target->apiobj.collision_min.y;
-            position.y = (to.y - from.y) * phase + from.y;
+            phase = NU_SIN_LUT(static_cast<i32>(phase * 16384.0f));
             position.x = (to.x - from.x) * phase + from.x;
+            position.y = (to.y - from.y) * phase + from.y;
             position.z = (to.z - from.z) * phase + from.z;
             position.y += 0.005f * NU_SIN_LUT(static_cast<i32>(phase * 65536.0f));
             AddVariableShotDebrisEffectTimed1(effect0, &position, count, FRAMETIME, 0, 0, NULL);
             Tag_Transfer[0].position[1] = position;
         }
         {
-            phase = 1.0f - NU_SIN_LUT(static_cast<i32>(phase * 16384.0f + 16384.0f));
             GameObject_s *source = Tag_Transfer[0].source;
             GameObject_s *target = Player[0];
             const f32 height = Tag_Transfer[0].height[2];
@@ -314,6 +313,7 @@ void Tag_UpdateTransfers(i32 effect0, i32 effect1, i32 count) {
                      source->apiobj.collision_min.y;
             to.y = (target->apiobj.collision_max.y - target->apiobj.collision_min.y) * height +
                    target->apiobj.collision_min.y;
+            phase = 1.0f - NU_SIN_LUT(static_cast<i32>(phase * 16384.0f + 16384.0f));
             position.x = (to.x - from.x) * phase + from.x;
             position.y = (to.y - from.y) * phase + from.y;
             position.z = (to.z - from.z) * phase + from.z;
@@ -329,7 +329,7 @@ second_player:
         if (!(Tag_Transfer[1].time < Tag_TransferResetTimer))
             return;
         Tag_Transfer[1].time += FRAMETIME;
-        if (!(Tag_Transfer[1].time <= Tag_TransferResetTimer)) {
+        if (Tag_Transfer[1].time > Tag_TransferResetTimer) {
             Tag_Transfer[1].time = Tag_TransferResetTimer;
             return;
         }
@@ -352,7 +352,6 @@ second_player:
                 Tag_Transfer[1].position[0] = position;
             }
             {
-                phase = NU_SIN_LUT(static_cast<i32>(phase * 16384.0f));
                 GameObject_s *source = Tag_Transfer[1].source;
                 GameObject_s *target = Player[1];
                 const f32 height = Tag_Transfer[1].height[1];
@@ -362,6 +361,7 @@ second_player:
                          source->apiobj.collision_min.y;
                 to.y = (target->apiobj.collision_max.y - target->apiobj.collision_min.y) * height +
                        target->apiobj.collision_min.y;
+                phase = NU_SIN_LUT(static_cast<i32>(phase * 16384.0f));
                 position.x = (to.x - from.x) * phase + from.x;
                 position.y = (to.y - from.y) * phase + from.y;
                 position.z = (to.z - from.z) * phase + from.z;
@@ -370,7 +370,6 @@ second_player:
                 Tag_Transfer[1].position[1] = position;
             }
             {
-                phase = 1.0f - NU_SIN_LUT(static_cast<i32>(phase * 16384.0f + 16384.0f));
                 GameObject_s *target = Player[1];
                 GameObject_s *source = Tag_Transfer[1].source;
                 const f32 height = Tag_Transfer[1].height[2];
@@ -380,6 +379,7 @@ second_player:
                          source->apiobj.collision_min.y;
                 to.y = (target->apiobj.collision_max.y - target->apiobj.collision_min.y) * height +
                        target->apiobj.collision_min.y;
+                phase = 1.0f - NU_SIN_LUT(static_cast<i32>(phase * 16384.0f + 16384.0f));
                 position.x = (to.x - from.x) * phase + from.x;
                 position.y = (to.y - from.y) * phase + from.y;
                 position.z = (to.z - from.z) * phase + from.z;

@@ -917,10 +917,10 @@ void EdControl::SetMenuItemAttr(i32 mask, eduiitem_s *menu_item, eduiiattr_s *se
             if (entry->object != object || entry->reference == NULL)
                 continue;
             ++subobject_count;
-            if (entry->reference == reference)
+            if (__builtin_expect(entry->reference == reference, 0))
                 goto use_unselected;
         }
-        if (subobject_count == 0)
+        if (__builtin_expect(subobject_count == 0, 1))
             goto use_unselected;
     }
     memcpy(menu_item->colours, selected, sizeof(*selected));
@@ -2065,53 +2065,67 @@ void EdMatrixControl::cbChanged(eduimenu_s *, eduiitem_s *item, u32) {
                                          (65536.0f / 360.0f));
             NUANG y = static_cast<NUANG>(NuAToF(static_cast<edui_prop_s *>(control->components[4])->property_text) *
                                          (65536.0f / 360.0f));
-            f32 sine = NU_SIN_LUT(x), cosine = NU_COS_LUT(x);
-            f32 saved = rebuilt.m01;
-            rebuilt.m01 = saved * cosine - rebuilt.m02 * sine;
-            rebuilt.m02 = saved * sine + rebuilt.m02 * cosine;
-            saved = rebuilt.m11;
-            rebuilt.m11 = saved * cosine - rebuilt.m12 * sine;
-            rebuilt.m12 = saved * sine + rebuilt.m12 * cosine;
-            saved = rebuilt.m21;
-            rebuilt.m21 = saved * cosine - rebuilt.m22 * sine;
-            rebuilt.m22 = saved * sine + rebuilt.m22 * cosine;
-
-            sine = NU_SIN_LUT(y);
-            cosine = NU_COS_LUT(y);
-            saved = rebuilt.m00;
-            rebuilt.m00 = saved * cosine + rebuilt.m02 * sine;
-            rebuilt.m02 = rebuilt.m02 * cosine - saved * sine;
-            saved = rebuilt.m10;
-            rebuilt.m10 = saved * cosine + rebuilt.m12 * sine;
-            rebuilt.m12 = rebuilt.m12 * cosine - saved * sine;
-            saved = rebuilt.m20;
-            rebuilt.m20 = saved * cosine + rebuilt.m22 * sine;
-            rebuilt.m22 = rebuilt.m22 * cosine - saved * sine;
-
-            sine = NU_SIN_LUT(z);
-            cosine = NU_COS_LUT(z);
-            saved = rebuilt.m00;
-            rebuilt.m00 = saved * cosine - rebuilt.m01 * sine;
-            rebuilt.m01 = saved * sine + rebuilt.m01 * cosine;
-            saved = rebuilt.m10;
-            rebuilt.m10 = saved * cosine - rebuilt.m11 * sine;
-            rebuilt.m11 = saved * sine + rebuilt.m11 * cosine;
-            saved = rebuilt.m20;
-            rebuilt.m20 = saved * cosine - rebuilt.m21 * sine;
-            rebuilt.m21 = saved * sine + rebuilt.m21 * cosine;
+            f32 lm00 = rebuilt.m00;
+            f32 lm01 = rebuilt.m01;
+            f32 lm02 = rebuilt.m02;
+            f32 lm10 = rebuilt.m10;
+            f32 lm11 = rebuilt.m11;
+            f32 lm12 = rebuilt.m12;
+            f32 lm20 = rebuilt.m20;
+            f32 lm21 = rebuilt.m21;
+            f32 lm22 = rebuilt.m22;
+            {
+                f32 c = NU_COS_LUT(x);
+                f32 s = NU_SIN_LUT(x);
+                f32 saved_m01 = lm01;
+                lm01 = saved_m01 * c - lm02 * s;
+                lm02 = lm02 * c + saved_m01 * s;
+                f32 saved_m11 = lm11;
+                lm11 = saved_m11 * c - lm12 * s;
+                lm12 = lm12 * c + saved_m11 * s;
+                f32 saved_m21 = lm21;
+                lm21 = saved_m21 * c - lm22 * s;
+                lm22 = lm22 * c + saved_m21 * s;
+            }
+            {
+                f32 c = NU_COS_LUT(y);
+                f32 s = NU_SIN_LUT(y);
+                f32 saved_m00 = lm00;
+                lm00 = lm02 * s + saved_m00 * c;
+                lm02 = c * lm02 - saved_m00 * s;
+                f32 saved_m10 = lm10;
+                lm10 = lm12 * s + saved_m10 * c;
+                lm12 = c * lm12 - saved_m10 * s;
+                f32 saved_m20 = lm20;
+                lm20 = lm22 * s + saved_m20 * c;
+                lm22 = c * lm22 - saved_m20 * s;
+            }
+            {
+                f32 c = NU_COS_LUT(z);
+                f32 s = NU_SIN_LUT(z);
+                f32 saved_m00 = lm00;
+                lm00 = c * saved_m00 - lm01 * s;
+                lm01 = saved_m00 * s + lm01 * c;
+                f32 saved_m10 = lm10;
+                lm10 = c * saved_m10 - lm11 * s;
+                lm11 = saved_m10 * s + lm11 * c;
+                f32 saved_m20 = lm20;
+                lm20 = c * saved_m20 - lm21 * s;
+                lm21 = saved_m20 * s + lm21 * c;
+            }
+            matrix.m00 = lm00;
+            matrix.m01 = lm01;
+            matrix.m02 = lm02;
+            matrix.m03 = rebuilt.m03;
+            matrix.m10 = lm10;
+            matrix.m11 = lm11;
+            matrix.m12 = lm12;
+            matrix.m13 = rebuilt.m13;
+            matrix.m20 = lm20;
+            matrix.m21 = lm21;
+            matrix.m22 = lm22;
+            matrix.m23 = rebuilt.m23;
         }
-        matrix.m00 = rebuilt.m00;
-        matrix.m01 = rebuilt.m01;
-        matrix.m02 = rebuilt.m02;
-        matrix.m03 = rebuilt.m03;
-        matrix.m10 = rebuilt.m10;
-        matrix.m11 = rebuilt.m11;
-        matrix.m12 = rebuilt.m12;
-        matrix.m13 = rebuilt.m13;
-        matrix.m20 = rebuilt.m20;
-        matrix.m21 = rebuilt.m21;
-        matrix.m22 = rebuilt.m22;
-        matrix.m23 = rebuilt.m23;
     }
     matrix.m33 = 1.0f;
     control->reference->SetMemberData(control->object, EdType_VuMtx, &source, 0, nullptr);
@@ -2513,20 +2527,20 @@ void EdMatrixControl::AddMenuItem(eduimenu_s *menu, EdRef *member, void *target)
                                                     cbChanged, cbButton, 2, const_cast<char *>(label), value);         \
     control->components[index]->unknown_10 = index % 3 + 1;                                                            \
     eduiItemExpanderAddChild(static_cast<edui_expander_s *>(control->item), control->components[index])
-    // These enabled groups are the common path in the original block layout.
-    if (__builtin_expect(member->attributes & 8, 1)) {
+    // The "> 0" tests reproduce the original branch prediction and block layout.
+    if ((member->attributes & 8) > 0) {
         ADD_MATRIX_COMPONENT(0, "pos x", matrix.matrix.m30);
         ADD_MATRIX_COMPONENT(1, "pos y", matrix.matrix.m31);
         ADD_MATRIX_COMPONENT(2, "pos z", matrix.matrix.m32);
     }
-    if (__builtin_expect(member->attributes & 0x10, 1)) {
+    if ((member->attributes & 0x10) > 0) {
         NUANG x, y, z;
         NuMtxGetEulerXYZ(&matrix.matrix, &x, &y, &z);
         ADD_MATRIX_COMPONENT(3, "rot x", static_cast<f32>(x) * (360.0f / 65536.0f));
         ADD_MATRIX_COMPONENT(4, "rot y", static_cast<f32>(y) * (360.0f / 65536.0f));
         ADD_MATRIX_COMPONENT(5, "rot z", static_cast<f32>(z) * (360.0f / 65536.0f));
     }
-    if (__builtin_expect((member->attributes & 0x20) != 0, 1)) {
+    if ((member->attributes & 0x20) > 0) {
         f32 x = NuVecMag(reinterpret_cast<NUVEC *>(&matrix.matrix.m00));
         f32 y = NuVecMag(reinterpret_cast<NUVEC *>(&matrix.matrix.m10));
         f32 z = NuVecMag(reinterpret_cast<NUVEC *>(&matrix.matrix.m20));
@@ -3000,15 +3014,15 @@ void EdDrawPolySector(VuVec const &center, float radius, i32 axis, i32 first_ang
         step = 0x10000 / segments;
     i32 angle = first_angle;
     i32 remaining;
-    if (first_angle < last_angle) {
-        remaining = (last_angle - first_angle) & 0xffff;
-        if (remaining >= 0x8000)
-            return;
-    } else {
+    if (first_angle >= last_angle) {
         remaining = (first_angle - last_angle) & 0xffff;
         if (remaining >= 0x8000)
             return;
         angle = last_angle;
+    } else {
+        remaining = (last_angle - first_angle) & 0xffff;
+        if (remaining >= 0x8000)
+            return;
     }
     if (__builtin_expect(remaining <= 0, 0))
         return;
@@ -3075,7 +3089,7 @@ void EdDrawPolySector(VuVec const &center, float radius, i32 axis, i32 first_ang
 void EdDrawPolyCylinder(VuMtx const &transform, float half_length, float radius, float end_radius, i32 sides,
                         i32 colour, i32 cap_start, i32 cap_end) {
     const float taper = end_radius / radius;
-    i32 shaded_colour = colour & 0xff000000;
+    u32 shaded_colour = colour & 0xff000000;
     shaded_colour |= ((colour & 0xff) * 0xdc) >> 8;
     shaded_colour |= ((((colour >> 8) & 0xff) * 0xdc) & 0xff00) | (((((colour >> 16) & 0xff) * 0xdc) >> 8) << 16);
     VuVec first;
@@ -3107,7 +3121,7 @@ void EdDrawPolyCylinder(VuMtx const &transform, float half_length, float radius,
         const i32 first_angle = 0x10000 / sides;
         float previous_sine = NU_SIN_LUT(first_angle) * radius;
         float previous_cosine = NU_COS_LUT(first_angle) * radius;
-        for (i32 segment = 0; segment < sides - 2; ++segment) {
+        for (i32 segment = 0; segment + 2 < sides; ++segment) {
             const i32 angle = (segment + 2) * 0x10000 / sides;
             const float sine = NU_SIN_LUT(angle) * radius;
             const float cosine = NU_COS_LUT(angle) * radius;
@@ -3174,7 +3188,7 @@ void EdDrawPolyArrow(VuVec const &start, VuVec const &end, i32 sides, i32 colour
         return;
     const float inverse_length = 1.0f / length;
     VuVec direction(displacement.x * inverse_length, displacement.y * inverse_length, displacement.z * inverse_length,
-                    0.0f);
+                    displacement.w);
     const float half_length = length * 0.4f;
     const float minimum_radius = radius_factor * half_length + radius_offset;
 
@@ -3223,16 +3237,16 @@ void eduiSetPinnedMenu(eduimenu_s *menu) {
 void ClassEditor::cbEdClassSetPinned(eduimenu_s *menu, eduiitem_s *item, u32) {
     item->highlighted = !item->highlighted;
     menu->flags ^= 4;
-    if (menu->flags & 4) {
-        eduiMenuDetach(menu);
-        eduiSetPinnedMenu(menu);
-    } else {
+    if (!(menu->flags & 4)) {
         eduiMenuDetach(menu);
         eduiMenuDestroy(menu);
         if (edLevelActiveMenu == menu) {
             edLevelActiveMenu = NULL;
         }
         eduiSetPinnedMenu(NULL);
+    } else {
+        eduiMenuDetach(menu);
+        eduiSetPinnedMenu(menu);
     }
 }
 
@@ -3246,6 +3260,8 @@ i32 edGetPadDisabled() {
 
 void EdInputContext::Update(nucamera_s *camera, nupad_s *new_pad, float elapsed, bool) {
     static __used__ volatile u8 UseMouse;
+    f32 cursor_x = 0.5f;
+    f32 cursor_y = 0.5f;
     pad = new_pad;
 
     f32 *view = reinterpret_cast<f32 *>(reserved_00);
@@ -3259,19 +3275,21 @@ void EdInputContext::Update(nucamera_s *camera, nupad_s *new_pad, float elapsed,
     view[5] *= 1000.0f;
     view[6] *= 1000.0f;
 
-    f32 cursor_x = 0.5f;
-    f32 cursor_y = 0.5f;
     if (eduiUsedAlgPad(new_pad) > 0) {
-        eduiSetCursorCoords(cursor_x, cursor_y);
+        eduiSetCursorCoords(0.5f, 0.5f);
         UseMouse = 0;
+        cursor_x = cursor_y = 0.5f;
     } else {
         eduiGetCursorCoords(&cursor_x, &cursor_y);
     }
     NUVEC ray_end;
     NuCameraCalcRay(cursor_x, cursor_y, reinterpret_cast<NUVEC *>(reserved_00 + 0x20), &ray_end, camera);
-    view[12] = ray_end.x - view[8];
-    view[13] = ray_end.y - view[9];
-    view[14] = ray_end.z - view[10];
+    const f32 dir_z = ray_end.z - view[10];
+    const f32 dir_y = ray_end.y - view[9];
+    const f32 dir_x = ray_end.x - view[8];
+    view[12] = dir_x;
+    view[13] = dir_y;
+    view[14] = dir_z;
     view[15] = 0.0f;
     delta_time = elapsed;
 
@@ -3287,11 +3305,17 @@ void EdInputContext::Update(nucamera_s *camera, nupad_s *new_pad, float elapsed,
     const i32 shift_or_s = NuKeyboard(0x2a) | NuKeyboard(0x36) | NuKeyboard(0x1f);
     const i32 alt_or_space = NuKeyboard(0x38) | NuKeyboard(0xb8) | NuKeyboard(0x39);
     const i32 control_or_c = NuKeyboard(0x1d) | NuKeyboard(0x9d) | NuKeyboard(0x2e);
-    const i32 left_click = (NuMouseReadButtons() == 1 || (pad->digital_buttons & 0x800) != 0) && !alt_or_space;
+    bool left_click = false;
+    if (NuMouseReadButtons() == 1 || (pad->digital_buttons & 0x800) != 0)
+        left_click = !alt_or_space;
+    const bool not_alt = !alt_or_space;
+    i32 left_select = 0;
+    if (left_click)
+        left_select = control_or_c == 0;
     const f32 mouse_x = NuMouseReadXVel();
     const f32 mouse_y = NuMouseReadYVel();
     const f32 mouse_z = NuMouseReadZVel();
-    u32 square = 0;
+    i32 square = 0;
     i32 right_click;
     if (edGetPadDisabled() == 0) {
         if (eduiGetActiveMenu() == NULL) {
@@ -3306,8 +3330,11 @@ void EdInputContext::Update(nucamera_s *camera, nupad_s *new_pad, float elapsed,
     Set(0, mouse_x, elapsed);
     Set(1, mouse_y, elapsed);
     Set(2, mouse_z, elapsed);
-    Set(3, static_cast<i32>(left_click && !control_or_c), elapsed);
-    Set(4, static_cast<i32>(right_click && !alt_or_space && !control_or_c), elapsed);
+    Set(3, left_select, elapsed);
+    i32 right_select = 0;
+    if (right_click && not_alt)
+        right_select = control_or_c == 0;
+    Set(4, right_select, elapsed);
     Set(5, static_cast<f32>(NuKeyboard(0x10)), elapsed);
     Set(6, static_cast<f32>(NuKeyboard(0x11)), elapsed);
     Set(7, static_cast<f32>(NuKeyboard(0x12)), elapsed);
@@ -3328,7 +3355,10 @@ void EdInputContext::Update(nucamera_s *camera, nupad_s *new_pad, float elapsed,
     Set(22, static_cast<f32>(control_or_c), elapsed);
     Set(23, static_cast<i32>(NuKeyboard(0x1f) && control_or_c), elapsed);
     Set(24, static_cast<f32>(NuKeyboard(0x01)), elapsed);
-    Set(25, static_cast<i32>(left_click && control_or_c), elapsed);
+    i32 left_control = 0;
+    if (left_click)
+        left_control = control_or_c != 0;
+    Set(25, left_control, elapsed);
     Set(26, static_cast<f32>(NuKeyboard(2)), elapsed);
     Set(27, static_cast<f32>(NuKeyboard(3)), elapsed);
     Set(28, static_cast<f32>(NuKeyboard(4)), elapsed);
@@ -3492,7 +3522,7 @@ LevelEditorScene *LevelEditor::GetEdScene(i32 index) {
 void ClassEditor::cbEdClassSelectClassMenu(eduimenu_s *parent, eduiitem_s *item, u32) {
     eduimenu_s *menu = eduiMenuCreate(item->x + parent->width, item->y, 180, 250,
                                       reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)), cbEdLevelDestroy, NULL);
-    if (menu == NULL)
+    if (__builtin_expect(menu == NULL, 0))
         return;
     EDLEVEL_ADD_ACTIVE_SCENE(menu, 0);
     EDLEVEL_ADD_ACTIVE_SCENE(menu, 1);
@@ -3580,7 +3610,7 @@ void ClassEditor::cbEdFilterLED(eduimenu_s *, eduiitem_s *item, u32) {
 void ClassEditor::cbEdClassFileMenu(eduimenu_s *parent, eduiitem_s *item, u32) {
     eduimenu_s *menu = eduiMenuCreate(item->x + parent->width, item->y, 180, 250,
                                       reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)), cbEdLevelDestroy, NULL);
-    if (menu == NULL)
+    if (__builtin_expect(menu == NULL, 0))
         return;
     EDLEVEL_ADD_ACTIVE_SCENE(menu, 0);
     EDLEVEL_ADD_ACTIVE_SCENE(menu, 1);
@@ -3605,7 +3635,7 @@ void ClassEditor::cbEdLevelDeselectAll(eduimenu_s *menu, eduiitem_s *, u32) {
 #define EDLEVEL_DESELECT_SCENE(index)                                                                                  \
     do {                                                                                                               \
         LevelEditorScene *scene = theLevelEditor.GetEdScene(index);                                                    \
-        if (scene != NULL && scene->active) {                                                                          \
+        if (__builtin_expect(scene != NULL && scene->active, 1)) {                                                                          \
             item = item->previous;                                                                                     \
             scene->editable = 0;                                                                                       \
             item->highlighted = 0;                                                                                     \
@@ -3629,7 +3659,7 @@ void ClassEditor::cbEdLevelSelectAll(eduimenu_s *menu, eduiitem_s *, u32) {
 #define EDLEVEL_SELECT_SCENE(index)                                                                                    \
     do {                                                                                                               \
         LevelEditorScene *scene = theLevelEditor.GetEdScene(index);                                                    \
-        if (scene != NULL && scene->active) {                                                                          \
+        if (__builtin_expect(scene != NULL && scene->active, 1)) {                                                                          \
             item = item->previous;                                                                                     \
             scene->editable = 1;                                                                                       \
             item->highlighted = 1;                                                                                     \
@@ -3845,7 +3875,7 @@ void LevelEditor::DrawInfoText(char **lines, i32 count, i32 x, i32 y, i32 availa
     if (height < 1) {
         return;
     }
-    if (x < 0) {
+    if (__builtin_expect(x < 0, 0)) {
         x = available_width - width - 5;
     }
     if (y < 0) {
@@ -3983,18 +4013,18 @@ void EdManipulator::GetAxisLocators(VuVec &origin, VuVec *points, VuMtx *matrix)
     points[6].w = 0.0f;
     if (matrix != NULL) {
         for (i32 index = 0; index < 8; ++index) {
-            VuVec &point = points[index];
-            // The original reads the matrix rows as vectors, so they are reloaded after each locator store.
+            // The locator is written through a float view, so every store may alias the matrix rows.
+            f32 *point = &points[index].x;
             const VuVec *rows = reinterpret_cast<const VuVec *>(&matrix->matrix);
-            const f32 x = point.x;
-            const f32 y = point.y;
-            const f32 z = point.z;
+            const f32 x = point[0];
+            const f32 y = point[1];
+            const f32 z = point[2];
             const f32 transformed_x = x * rows[0].x + y * rows[1].x + z * rows[2].x;
             const f32 transformed_y = x * rows[0].y + y * rows[1].y + z * rows[2].y;
             const f32 transformed_z = x * rows[0].z + y * rows[1].z + z * rows[2].z;
-            point.x = transformed_x;
-            point.y = transformed_y;
-            point.z = transformed_z;
+            point[0] = transformed_x;
+            point[1] = transformed_y;
+            point[2] = transformed_z;
         }
     }
     for (i32 index = 0; index < 8; ++index) {
@@ -4516,7 +4546,7 @@ void ClassEditor::SetMode(i32 new_mode) {
 }
 
 void ClassEditor::cbEdPadSetManipulatorMode(eduimenu_s *, eduiitem_s *, u32) {
-    if (theClassEditor.mode == 4) {
+    if (__builtin_expect(theClassEditor.mode == 4, 0)) {
         theClassEditor.mode = 5;
     } else if (theClassEditor.mode == 5) {
         theClassEditor.mode = 3;
@@ -4534,21 +4564,21 @@ void ClassEditor::cbEdClassSetMode(eduimenu_s *menu, eduiitem_s *item, u32) {
 i32 ClassEditor::SelectObject(ClassObject &object, i32 mode) {
     i32 selected = 1;
     if (mode == 1) {
-        if (object.object == NULL) {
+        if (__builtin_expect(object.object == NULL, 0)) {
             selected = 0;
             goto update_property_selection;
         }
         for (ClassObjectListEntry *entry = selected_objects.first; entry != NULL; entry = entry->next) {
-            if (entry->object == object.object && entry->reference == object.reference) {
+            if (__builtin_expect(entry->object == object.object && entry->reference == object.reference, 0)) {
                 if (entry->next != NULL) {
                     entry->next->previous = entry->previous;
                 } else {
                     selected_objects.last = entry->previous;
                 }
-                if (entry->previous != NULL) {
-                    entry->previous->next = entry->next;
-                } else {
+                if (__builtin_expect(!(entry->previous != NULL), 0)) {
                     selected_objects.first = entry->next;
+                } else {
+                    entry->previous->next = entry->next;
                 }
                 entry->next = NULL;
                 entry->previous = NULL;
@@ -4748,7 +4778,7 @@ void PropertyTool::BringToFront(PropertyMenu *menu) {
             last_menu->next = menu;
         }
         last_menu = menu;
-        if (active_menu == NULL) {
+        if (__builtin_expect(active_menu == NULL, 1)) {
             active_menu = menu;
         }
     } else {
@@ -5544,7 +5574,7 @@ void EdRegistry::DefunctObject(EdClassInterface *interface, void *object, i32, i
             defunct_objects.last->next = entry;
         }
         defunct_objects.last = entry;
-        if (!defunct_objects.first) {
+        if (__builtin_expect(!defunct_objects.first, 0)) {
             defunct_objects.first = entry;
         }
         ++defunct_objects.count;
@@ -5611,7 +5641,7 @@ void EdClass::SerialiseObject(EdStream &stream, void *object) {
                         member->GetMemberData(object, member->type_id, data, sizeof(data));
                     }
                     type->serialise(stream, data, size);
-                    if (stream.mode == 1) {
+                    if (__builtin_expect(stream.mode == 1, 0)) {
                         member->SetMemberData(object, member->type_id, data, sizeof(data), NULL);
                     }
                 }
@@ -6006,7 +6036,7 @@ i32 EdClass::FindMember(EdMember *result, void *object, i32 attributes, i32 recu
             if (__builtin_expect(member->attributes >= 0 && (member->attributes & attributes) != 0, 0))
                 goto found;
             member = member->next;
-        } while (member != NULL);
+        } while (__builtin_expect(member != NULL, 1));
         return 0;
     }
     do {
@@ -6483,30 +6513,27 @@ void ClassEditor::UpdateSelectedObjects(EdInputContext &input) {
     if (__builtin_expect(selected_objects.first == NULL, 0))
         return;
     ClassObjectListEntry *entry = selected_objects.first;
-    EdClassInterface *interface = entry->ed_class->interface;
     void *object = NULL;
-    if (input.GetPress(19) != 0.0f) {
-        object = interface->GetNextObject(entry->object);
-        if (object == NULL)
-            object = interface->GetNextObject(NULL);
-        for (i32 remaining = 4096; remaining != 0; --remaining) {
-            if (Editable(object, entry->ed_class, -1))
+    if (__builtin_expect(input.GetPress(19) != 0.0f, 1)) {
+        object = entry->object;
+        i32 remaining = 4096;
+        do {
+            object = entry->ed_class->interface->GetNextObject(object);
+            if (__builtin_expect(object == NULL, 0))
+                object = entry->ed_class->interface->GetNextObject(NULL);
+            if (__builtin_expect(Editable(object, entry->ed_class, -1) != 0, 1))
                 break;
-            object = interface->GetNextObject(object);
-            if (object == NULL)
-                object = interface->GetNextObject(NULL);
-        }
+        } while (--remaining != 0);
     }
     if (input.GetPress(20) != 0.0f) {
         void *current = entry->object;
         void *previous = NULL;
-        auto entry_ed_class = entry->ed_class;
         for (i32 remaining = 4096; remaining != 0; --remaining) {
-            if (Editable(current, entry_ed_class, -1))
+            if (Editable(current, entry->ed_class, -1))
                 previous = current;
-            current = interface->GetNextObject(current);
-            if (__builtin_expect(current == NULL, 1))
-                current = interface->GetNextObject(NULL);
+            current = entry->ed_class->interface->GetNextObject(current);
+            if (__builtin_expect(current == NULL, 0))
+                current = entry->ed_class->interface->GetNextObject(NULL);
             if (current == entry->object)
                 break;
         }
@@ -6520,39 +6547,39 @@ void ClassEditor::UpdateSelectedObjects(EdInputContext &input) {
 }
 
 i32 ClassEditor::FindNearestObject(VuVec &point, ClassObject &result, ClassObject &after, i32 filter) {
-    EdMember member;
     EdClass *candidate_classes[16] = {};
     void *candidate_objects[16] = {};
     i32 candidate_count = 0;
     for (i32 class_index = 0; class_index < theRegistry.class_count; ++class_index) {
         EdClass *ed_class = &theRegistry.classes[class_index];
-        if (!Editable(NULL, ed_class, class_index) || (ed_class->flags & 8) == 0)
+        if (!Editable(NULL, ed_class, class_index))
             continue;
-        for (void *object = ed_class->interface->GetNextObject(NULL); object != NULL;
-             object = ed_class->interface->GetNextObject(object)) {
-            if (!Editable(object, ed_class, -1))
-                continue;
-
-            if (!ed_class->FindMember(&member, object, 8, 1))
-                continue;
-            VuVec position;
-            member.reference->GetAttributeData(member.object, 8, EdType_VuVec, &position, 0);
-            f32 dx = position.x - point.x;
-            f32 dy = position.y - point.y;
-            f32 dz = position.z - point.z;
-            f32 distance_squared = dx * dx + dy * dy + dz * dz;
-            // The original keeps the radius in a 16-byte aligned slot.
-            f32 radius __attribute__((aligned(16))) = 1.0f;
-            if (ed_class->FindMember(&member, object, 0x40, 1))
-                member.reference->GetAttributeData(member.object, 0x40, EdType_Float, &radius, 0);
-            if (distance_squared < radius * radius && candidate_count < 16) {
-                candidate_objects[candidate_count] = object;
-                candidate_classes[candidate_count] = ed_class;
-                ++candidate_count;
+        if ((ed_class->flags & 8) == 0)
+            continue;
+        void *object = ed_class->interface->GetNextObject(NULL);
+        while (object != NULL) {
+            // Scoped to the whole body so the vectorizer does not force a 16-byte slot.
+            EdMember member;
+            if (Editable(object, ed_class, -1) && ed_class->FindMember(&member, object, 8, 1)) {
+                VuVec position;
+                member.reference->GetAttributeData(member.object, 8, EdType_VuVec, &position, 0);
+                f32 dx = position.x - point.x;
+                f32 dy = position.y - point.y;
+                f32 dz = position.z - point.z;
+                f32 distance_squared = dx * dx + dy * dy + dz * dz;
+                f32 radius = 1.0f;
+                if (__builtin_expect(ed_class->FindMember(&member, object, 0x40, 1), 0))
+                    member.reference->GetAttributeData(member.object, 0x40, EdType_Float, &radius, 0);
+                if (distance_squared < radius * radius && candidate_count < 16) {
+                    candidate_objects[candidate_count] = object;
+                    candidate_classes[candidate_count] = ed_class;
+                    ++candidate_count;
+                }
             }
+            object = ed_class->interface->GetNextObject(object);
         }
     }
-    if (candidate_objects[0] == NULL)
+    if (__builtin_expect(candidate_objects[0] == NULL, 0))
         return 0;
     for (i32 index = 0; index <= candidate_count; ++index) {
         if (candidate_objects[index] == after.object) {
@@ -6854,6 +6881,33 @@ i32 PropertyTool::ProcessMenu(EdInputContext &input) {
             menu->next = NULL;
             menu->previous = NULL;
             --menu_count;
+            PropertyMenu *position;
+            for (position = first; position != NULL; position = position->next) {
+                if (position->order > menu->order)
+                    break;
+            }
+            if (position != NULL) {
+                menu->previous = position->previous;
+                menu->next = position;
+                if (position->previous != NULL) {
+                    position->previous->next = menu;
+                } else {
+                    first = menu;
+                }
+                position->previous = menu;
+                ++count;
+                continue;
+            }
+            menu->next = NULL;
+            menu->previous = last;
+            if (last != NULL) {
+                last->next = menu;
+            }
+            if (first == NULL) {
+                first = menu;
+            }
+            last = menu;
+            ++count;
         } else {
             menu = FindItemMenu(first, reinterpret_cast<ClassItem *>(entry));
             if (menu != NULL) {
@@ -6867,34 +6921,34 @@ i32 PropertyTool::ProcessMenu(EdInputContext &input) {
                                         reinterpret_cast<PropertyMenuList *>(&active_menu));
             ediMenuRetrieveMetrics(menu->menu);
             menu->order = -1;
-        }
-
-        PropertyMenu *position;
-        for (position = first; position != NULL; position = position->next) {
-            if (position->order > menu->order)
-                break;
-        }
-        if (position != NULL) {
-            menu->next = position;
-            menu->previous = position->previous;
-            if (position->previous != NULL) {
-                position->previous->next = menu;
-            } else {
+            PropertyMenu *position;
+            for (position = first; position != NULL; position = position->next) {
+                if (position->order > menu->order)
+                    break;
+            }
+            if (position != NULL) {
+                menu->previous = position->previous;
+                menu->next = position;
+                if (position->previous != NULL) {
+                    position->previous->next = menu;
+                } else {
+                    first = menu;
+                }
+                position->previous = menu;
+                ++count;
+                continue;
+            }
+            menu->next = NULL;
+            menu->previous = last;
+            if (last != NULL) {
+                last->next = menu;
+            }
+            if (first == NULL) {
                 first = menu;
             }
-            position->previous = menu;
+            last = menu;
             ++count;
-            continue;
         }
-        menu->previous = last;
-        if (last != NULL) {
-            last->next = menu;
-        }
-        if (first == NULL) {
-            first = menu;
-        }
-        last = menu;
-        ++count;
     }
     while (active_menu != NULL) {
         PropertyMenu *menu = active_menu;
@@ -7030,66 +7084,69 @@ void ClassEditor::Process(EdInputContext &input) {
 // The original realigns the incoming stack for its matrix and vector locals.
 __attribute__((force_align_arg_pointer)) i32 EdManRotate::RotateItem(EdInputContext &, ClassObjectList &objects,
                                                                      i32 angle, i32 axis) {
-    ClassObjectListEntry *first = objects.first;
+    ClassObjectListEntry *entry = objects.first;
     VuVec average;
     objects.GetAveragePosition(average);
-    if (angle == 0 || first == NULL)
+    if (angle == 0 || entry == NULL)
         return axis;
     i32 cosine_index = ((angle + 0x4000) >> 1) & 0x7fff;
     i32 sine_index = (angle >> 1) & 0x7fff;
-    for (ClassObjectListEntry *entry = first; entry != NULL; entry = entry->next) {
+    for (; entry != NULL; entry = entry->next) {
         NUMTX matrix;
         NuMtxSetIdentity(&matrix);
         i32 matrix_type = EdType_VuMtx;
         if (entry->reference == NULL ||
             entry->reference->GetAttributeData(entry->object, 0x10, matrix_type, &matrix, 0) == 0) {
             EdMember member;
-            if (__builtin_expect(entry->ed_class->FindMember(&member, entry->object, 0x10, 1) == 0 ||
-                member.reference->GetAttributeData(member.object, 0x10, matrix_type, &matrix, 0) == 0, 1))
+            if (__builtin_expect(entry->ed_class->FindMember(&member, entry->object, 0x10, 1) == 0, 1))
+                continue;
+            if (member.reference->GetAttributeData(member.object, 0x10, matrix_type, &matrix, 0) == 0)
                 continue;
         }
-        switch (axis) {
-            case 1: {
-                average = VuVec(matrix.m30, matrix.m31, matrix.m32, matrix.m33);
-                f32 cosine = NuTrigTable[cosine_index];
-                f32 sine = NuTrigTable[sine_index];
-                f32 m01 = matrix.m01, m11 = matrix.m11, m21 = matrix.m21;
-                matrix.m01 = cosine * m01 - sine * matrix.m02;
-                matrix.m02 = m01 * sine + matrix.m02 * cosine;
-                matrix.m11 = cosine * m11 - sine * matrix.m12;
-                matrix.m12 = m11 * sine + matrix.m12 * cosine;
-                matrix.m21 = cosine * m21 - sine * matrix.m22;
-                matrix.m22 = m21 * sine + matrix.m22 * cosine;
-                break;
-            }
-            case 2: {
-                average = VuVec(matrix.m30, matrix.m31, matrix.m32, matrix.m33);
-                f32 sine = NuTrigTable[sine_index];
-                f32 cosine = NuTrigTable[cosine_index];
-                f32 m00 = matrix.m00, m10 = matrix.m10, m20 = matrix.m20;
-                matrix.m00 = cosine * m00 + sine * matrix.m02;
-                matrix.m02 = matrix.m02 * cosine - m00 * sine;
-                matrix.m10 = cosine * m10 + sine * matrix.m12;
-                matrix.m12 = matrix.m12 * cosine - m10 * sine;
-                matrix.m20 = cosine * m20 + sine * matrix.m22;
-                matrix.m22 = matrix.m22 * cosine - m20 * sine;
-                break;
-            }
-            case 3: {
-                average = VuVec(matrix.m30, matrix.m31, matrix.m32, matrix.m33);
-                f32 sine = NuTrigTable[sine_index];
-                f32 cosine = NuTrigTable[cosine_index];
-                f32 m00 = matrix.m00, m10 = matrix.m10, m20 = matrix.m20;
-                matrix.m00 = cosine * m00 - sine * matrix.m01;
-                matrix.m01 = m00 * sine + matrix.m01 * cosine;
-                matrix.m10 = cosine * m10 - sine * matrix.m11;
-                matrix.m11 = m10 * sine + matrix.m11 * cosine;
-                matrix.m20 = cosine * m20 - sine * matrix.m21;
-                matrix.m21 = m20 * sine + matrix.m21 * cosine;
-                break;
-            }
-            default:
-                continue;
+        if (axis == 2) {
+            average = VuVec(matrix.m30, matrix.m31, matrix.m32, matrix.m33);
+            f32 cosine = NuTrigTable[cosine_index];
+            f32 sine = NuTrigTable[sine_index];
+            f32 m00 = matrix.m00, m10 = matrix.m10, m20 = matrix.m20;
+            f32 m02 = matrix.m02;
+            matrix.m00 = cosine * m00 + sine * m02;
+            matrix.m02 = m02 * cosine - m00 * sine;
+            f32 m12 = matrix.m12;
+            matrix.m10 = cosine * m10 + sine * m12;
+            matrix.m12 = m12 * cosine - m10 * sine;
+            f32 m22 = matrix.m22;
+            matrix.m20 = cosine * m20 + sine * m22;
+            matrix.m22 = m22 * cosine - m20 * sine;
+        } else if (axis == 3) {
+            average = VuVec(matrix.m30, matrix.m31, matrix.m32, matrix.m33);
+            f32 cosine = NuTrigTable[cosine_index];
+            f32 sine = NuTrigTable[sine_index];
+            f32 m00 = matrix.m00, m10 = matrix.m10, m20 = matrix.m20;
+            f32 m01 = matrix.m01;
+            matrix.m00 = cosine * m00 - sine * m01;
+            matrix.m01 = m00 * sine + m01 * cosine;
+            f32 m11 = matrix.m11;
+            matrix.m10 = cosine * m10 - sine * m11;
+            matrix.m11 = m10 * sine + m11 * cosine;
+            f32 m21 = matrix.m21;
+            matrix.m20 = cosine * m20 - sine * m21;
+            matrix.m21 = m20 * sine + m21 * cosine;
+        } else if (axis == 1) {
+            average = VuVec(matrix.m30, matrix.m31, matrix.m32, matrix.m33);
+            f32 cosine = NuTrigTable[cosine_index];
+            f32 sine = NuTrigTable[sine_index];
+            f32 m01 = matrix.m01, m11 = matrix.m11, m21 = matrix.m21;
+            f32 m02 = matrix.m02;
+            matrix.m01 = cosine * m01 - sine * m02;
+            matrix.m02 = m01 * sine + m02 * cosine;
+            f32 m12 = matrix.m12;
+            matrix.m11 = cosine * m11 - sine * m12;
+            matrix.m12 = m11 * sine + m12 * cosine;
+            f32 m22 = matrix.m22;
+            matrix.m21 = cosine * m21 - sine * m22;
+            matrix.m22 = m21 * sine + m22 * cosine;
+        } else {
+            continue;
         }
         matrix_type = EdType_VuMtx;
         if (entry->reference == NULL ||
@@ -7103,14 +7160,15 @@ __attribute__((force_align_arg_pointer)) i32 EdManRotate::RotateItem(EdInputCont
 }
 
 void ClassEditor::DrawObjectSphere(ClassObject &selected, i32 colour) {
-    if (__builtin_expect(selected.object == NULL, 1))
+    if (selected.object == NULL)
         return;
     f32 radius;
     EdMember member;
     i32 radius_type = EdType_Float;
     if (selected.reference == NULL ||
-        selected.reference->GetAttributeData(selected.object, 0x40, radius_type, &radius, 0) == 0) {
-        if (selected.ed_class->FindMember(&member, selected.object, 0x40, 1) == 0 ||
+        __builtin_expect(selected.reference->GetAttributeData(selected.object, 0x40, radius_type, &radius, 0) == 0,
+                         1)) {
+        if (__builtin_expect(selected.ed_class->FindMember(&member, selected.object, 0x40, 1) == 0, 1) ||
             member.reference->GetAttributeData(member.object, 0x40, radius_type, &radius, 0) == 0) {
             radius = 1.0f;
         }
@@ -7124,14 +7182,14 @@ void ClassEditor::DrawObjectSphere(ClassObject &selected, i32 colour) {
          member.reference->GetAttributeData(member.object, 0x10, matrix_type, &transform, 0) == 0)) {
         VuVec position;
         i32 position_type = EdType_VuVec;
-        if ((selected.reference != NULL &&
-             selected.reference->GetAttributeData(selected.object, 8, position_type, &position, 0) != 0) ||
-            (selected.ed_class->FindMember(&member, selected.object, 8, 1) != 0 &&
-             member.reference->GetAttributeData(member.object, 8, position_type, &position, 0) != 0)) {
-            EdDrawBegin(0);
-            EdDrawLineSphere(position, radius, 1.0f, colour);
-            EdDrawEnd();
-        }
+        if ((selected.reference == NULL ||
+             selected.reference->GetAttributeData(selected.object, 8, position_type, &position, 0) == 0) &&
+            (__builtin_expect(selected.ed_class->FindMember(&member, selected.object, 8, 1) == 0, 0) ||
+             member.reference->GetAttributeData(member.object, 8, position_type, &position, 0) == 0))
+            return;
+        EdDrawBegin(0);
+        EdDrawLineSphere(position, radius, 1.0f, colour);
+        EdDrawEnd();
         return;
     }
 
@@ -7206,26 +7264,31 @@ void ClassEditor::Render() {
     }
 
     for (i32 index = 0; index < theRegistry.class_count; ++index) {
-        EdClass *ed_class = theRegistry.GetClass(index);
-        if (!Editable(NULL, ed_class, index) || ed_class->interface == NULL || (ed_class->flags & 0x08000080) == 0)
+        selected.ed_class = theRegistry.GetClass(index);
+        if (!Editable(NULL, selected.ed_class, index))
+            continue;
+        if (selected.ed_class->interface == NULL)
+            continue;
+        if ((selected.ed_class->flags & 0x08000080) == 0)
             continue;
 
-        for (void *object = ed_class->interface->GetNextObject(NULL); object != NULL;
-             object = ed_class->interface->GetNextObject(object)) {
-            if (!Editable(object, ed_class, -1))
+        for (selected.object = selected.ed_class->interface->GetNextObject(NULL); selected.object != NULL;
+             selected.object = selected.ed_class->interface->GetNextObject(selected.object)) {
+            if (!Editable(selected.object, selected.ed_class, -1))
                 continue;
 
-            selected.ed_class = ed_class;
-            selected.object = object;
-            if ((ed_class->flags & 0x08000000) != 0 && selected_objects.IsInList(selected) == 0)
-                theRegistry.ClassIFaceRender(ed_class, object, 0);
-            if ((ed_class->flags & 0x80) != 0 && selected_objects.IsInList(selected) != 0 &&
-                object != current_object.object)
-                DrawObjectSphere(selected, 0xff000080);
+            if ((selected.ed_class->flags & 0x08000000) != 0) {
+                if (__builtin_expect(selected_objects.IsInList(selected) == 0, 0))
+                    theRegistry.ClassIFaceRender(selected.ed_class, selected.object, 0);
+            }
+            if ((selected.ed_class->flags & 0x80) != 0) {
+                if (selected_objects.IsInList(selected) != 0 && selected.object != current_object.object)
+                    DrawObjectSphere(selected, 0xff000080);
+            }
         }
     }
 
-    if (__builtin_expect(menu != NULL, 0))
+    if (menu != NULL)
         eduiMenuRender(menu);
 }
 
@@ -7276,6 +7339,15 @@ void EdRegistry::SerialiseObjects(EdStream &stream, EdRegistry *source_registry)
         if (object_class->FindMember(&member, object, attribute, 1))
             member.reference->GetAttributeData(member.object, attribute, type, data, size);
     };
+    auto is_filtered = [&](i32 object_group, i32 stream_group) -> bool {
+        if (stream.flags & 0x400000) {
+            if (filter_flags & 0x400000)
+                return true;
+        } else if (filter_flags & 0x10000000) {
+            return true;
+        }
+        return object_group != stream_group;
+    };
     auto read_objects = [&](EdClass *object_class, EdClass *source_class) {
         i32 count;
         stream.SerialiseBuffer(&count, sizeof(count), 1);
@@ -7309,10 +7381,11 @@ void EdRegistry::SerialiseObjects(EdStream &stream, EdRegistry *source_registry)
             EdClass *object_class = &classes[index];
             if (object_class->interface == NULL)
                 continue;
+            u32 class_flags = object_class->flags;
             if (stream.flags & 0x400000) {
-                if (__builtin_expect(object_class->flags & 0x400000 != 0, 0))
+                if (class_flags & 0x400000)
                     continue;
-            } else if (object_class->flags & 0x10000000) {
+            } else if (class_flags & 0x10000000) {
                 continue;
             }
             ++count;
@@ -7320,12 +7393,13 @@ void EdRegistry::SerialiseObjects(EdStream &stream, EdRegistry *source_registry)
         stream.SerialiseBuffer(&count, sizeof(count), 1);
         for (i32 index = 0; index < class_count; ++index) {
             EdClass *object_class = &classes[index];
-            if (object_class->interface == NULL)
+            if (__builtin_expect(object_class->interface == NULL, 0))
                 continue;
+            u32 class_flags = object_class->flags;
             if (stream.flags & 0x400000) {
-                if (object_class->flags & 0x400000)
+                if (class_flags & 0x400000)
                     continue;
-            } else if (__builtin_expect(object_class->flags & 0x10000000 != 0, 1)) {
+            } else if (__builtin_expect((class_flags & 0x10000000) != 0, 1)) {
                 continue;
             }
             stream.BeginBlock("ObjectList");
@@ -7337,13 +7411,7 @@ void EdRegistry::SerialiseObjects(EdStream &stream, EdRegistry *source_registry)
                 filter_flags = 0;
                 get_attribute(object_class, object, 1, EdType_Int, &filter_flags, 0);
                 get_attribute(object_class, object, 0x100, EdType_Short, &group, 0);
-                if (stream.flags & 0x400000) {
-                    if (filter_flags & 0x400000)
-                        continue;
-                } else if (filter_flags & 0x10000000) {
-                    continue;
-                }
-                if (group != stream.unknown_10)
+                if (is_filtered(group, stream.unknown_10))
                     continue;
                 ++object_count;
             }
@@ -7354,13 +7422,7 @@ void EdRegistry::SerialiseObjects(EdStream &stream, EdRegistry *source_registry)
                 filter_flags = 0;
                 get_attribute(object_class, object, 1, EdType_Int, &filter_flags, 0);
                 get_attribute(object_class, object, 0x100, EdType_Short, &group, 0);
-                if (stream.flags & 0x400000) {
-                    if (filter_flags & 0x400000)
-                        continue;
-                } else if (filter_flags & 0x10000000) {
-                    continue;
-                }
-                if (__builtin_expect(group != stream.unknown_10, 0))
+                if (is_filtered(group, stream.unknown_10))
                     continue;
                 i32 object_flags = 0;
                 get_attribute(object_class, object, 1, EdType_Int, &object_flags, 0);
@@ -7541,14 +7603,12 @@ SceneObject::SceneObject() {
 
 void SceneObjectHelper::PreLoadInitialisation(MemoryBuffer *, MemoryBuffer *) {
     for (i32 level = 0; level < 10; ++level) {
-        i32 *count_slot = &scene_counts[level];
-        SceneObject **scene_slot = &scenes[level];
         nugscn_s *scene = theLevelEditor.GetScene(level);
-        if (scene != NULL && *count_slot == 0) {
-            *count_slot = NuGScnNumSpecials(scene);
-            const usize bytes = *count_slot * sizeof(SceneObject);
+        if (scene != NULL && __builtin_expect(scene_counts[level] == 0, 1)) {
+            scene_counts[level] = NuGScnNumSpecials(scene);
+            const usize bytes = scene_counts[level] * sizeof(SceneObject);
             SceneObject *objects = NULL;
-            if (__builtin_expect(bytes < *theMemoryManager.end_cell - *theMemoryManager.cursor_cell, 0)) {
+            if (__builtin_expect(bytes < *theMemoryManager.end_cell - *theMemoryManager.cursor_cell, 1)) {
                 const usize aligned = ALIGN(*theMemoryManager.cursor_cell, 0x10);
                 *theMemoryManager.cursor_cell = aligned + bytes;
                 objects = reinterpret_cast<SceneObject *>(aligned);
@@ -7557,19 +7617,18 @@ void SceneObjectHelper::PreLoadInitialisation(MemoryBuffer *, MemoryBuffer *) {
                 theMemoryManager.remaining -= bytes;
                 theMemoryManager.high_water = *theMemoryManager.cursor_cell;
             }
-            *scene_slot = objects;
-            for (i32 index = 0; index < *count_slot; ++index)
-                new (&(*scene_slot)[index]) SceneObject();
+            scenes[level] = objects;
+            for (i32 index = 0; index < scene_counts[level]; ++index)
+                new (&scenes[level][index]) SceneObject();
         }
     }
 
     scene_object_count = 0;
-    i32 *count_slot = scene_counts;
-    for (i32 level = 0; level < 10; ++level, ++count_slot) {
-        SceneObject *object = *reinterpret_cast<SceneObject **>(count_slot - 10);
+    for (i32 level = 0; level < 10; ++level) {
+        SceneObject *object = scenes[level];
         nugscn_s *scene = theLevelEditor.GetScene(level);
         if (scene != NULL) {
-            const i32 count = *count_slot;
+            const i32 count = scene_counts[level];
             for (i32 index = 0; index < count; ++index) {
                 NuGScnGetSpecial(&object->special, scene, index);
                 object->led_file = level;
@@ -7649,42 +7708,37 @@ void EdSpecialObjectControl::AddMenuItem(eduimenu_s *parent, EdRef *member, void
 }
 
 f32 BezierLineLength(VuVec &start, VuVec &first_control, VuVec &end, VuVec &second_control) {
-    VuVec first;
-    first.x = (start.x + first_control.x) * 0.5f;
-    first.y = (start.y + first_control.y) * 0.5f;
-    first.z = (start.z + first_control.z) * 0.5f;
-    first.w = 0.0f;
-    VuVec middle;
-    middle.x = (first_control.x + second_control.x) * 0.5f;
-    middle.y = (first_control.y + second_control.y) * 0.5f;
-    middle.z = (first_control.z + second_control.z) * 0.5f;
-    middle.w = 0.0f;
-    VuVec last;
-    last.x = (second_control.x + end.x) * 0.5f;
-    last.y = (second_control.y + end.y) * 0.5f;
-    last.z = (second_control.z + end.z) * 0.5f;
-    last.w = 0.0f;
-    VuVec first_middle;
-    first_middle.x = (first.x + middle.x) * 0.5f;
-    first_middle.y = (first.y + middle.y) * 0.5f;
-    first_middle.z = (first.z + middle.z) * 0.5f;
-    first_middle.w = 0.0f;
-    VuVec middle_last;
-    middle_last.x = (middle.x + last.x) * 0.5f;
-    middle_last.y = (middle.y + last.y) * 0.5f;
-    middle_last.z = (middle.z + last.z) * 0.5f;
-    middle_last.w = 0.0f;
-    VuVec midpoint;
-    midpoint.x = (first_middle.x + middle_last.x) * 0.5f;
-    midpoint.y = (first_middle.y + middle_last.y) * 0.5f;
-    midpoint.z = (first_middle.z + middle_last.z) * 0.5f;
-    midpoint.w = 0.0f;
-    NUVEC error{(start.x + end.x) * 0.5f - midpoint.x, (start.y + end.y) * 0.5f - midpoint.y,
-                (start.z + end.z) * 0.5f - midpoint.z};
+    VuVec points[6];
+    points[0].x = (first_control.x + second_control.x) * 0.5f;
+    points[0].y = (first_control.y + second_control.y) * 0.5f;
+    points[0].z = (first_control.z + second_control.z) * 0.5f;
+    points[0].w = 0.0f;
+    points[1].x = (first_control.x + start.x) * 0.5f;
+    points[1].y = (first_control.y + start.y) * 0.5f;
+    points[1].z = (first_control.z + start.z) * 0.5f;
+    points[1].w = 0.0f;
+    points[2].x = (end.x + second_control.x) * 0.5f;
+    points[2].y = (end.y + second_control.y) * 0.5f;
+    points[2].z = (end.z + second_control.z) * 0.5f;
+    points[2].w = 0.0f;
+    points[3].x = (points[0].x + points[1].x) * 0.5f;
+    points[3].y = (points[0].y + points[1].y) * 0.5f;
+    points[3].z = (points[0].z + points[1].z) * 0.5f;
+    points[3].w = 0.0f;
+    points[4].x = (points[2].x + points[0].x) * 0.5f;
+    points[4].y = (points[2].y + points[0].y) * 0.5f;
+    points[4].z = (points[2].z + points[0].z) * 0.5f;
+    points[4].w = 0.0f;
+    points[5].x = (points[4].x + points[3].x) * 0.5f;
+    points[5].y = (points[4].y + points[3].y) * 0.5f;
+    points[5].z = (points[4].z + points[3].z) * 0.5f;
+    points[5].w = 0.0f;
+    NUVEC error{(start.x + end.x) * 0.5f - points[5].x, (start.y + end.y) * 0.5f - points[5].y,
+                (start.z + end.z) * 0.5f - points[5].z};
     if (!(NuVecMag(&error) < 0.01f) && bezierline_depth < 2) {
         ++bezierline_depth;
-        f32 first_length = BezierLineLength(start, first, midpoint, first_middle);
-        f32 second_length = BezierLineLength(midpoint, middle_last, end, last);
+        f32 first_length = BezierLineLength(start, points[1], points[5], points[3]);
+        f32 second_length = BezierLineLength(points[5], points[4], end, points[2]);
         --bezierline_depth;
         return first_length + second_length;
     }
@@ -7694,46 +7748,58 @@ f32 BezierLineLength(VuVec &start, VuVec &first_control, VuVec &end, VuVec &seco
 
 f32 BezierLineLength(VuVec &start, VuVec &first_control, VuVec &end, VuVec &second_control, f32 t) {
     f32 complement = 1.0f - t;
-    VuVec middle{second_control.x * complement + first_control.x * t,
-                 second_control.y * complement + first_control.y * t,
-                 second_control.z * complement + first_control.z * t, 0.0f};
-    VuVec first{first_control.x * complement + start.x * t, first_control.y * complement + start.y * t,
-                first_control.z * complement + start.z * t, 0.0f};
-    VuVec last{end.x * complement + second_control.x * t, end.y * complement + second_control.y * t,
-               end.z * complement + second_control.z * t, 0.0f};
-    VuVec first_middle{middle.x * complement + first.x * t, middle.y * complement + first.y * t,
-                       middle.z * complement + first.z * t, 0.0f};
-    VuVec middle_last{last.x * complement + middle.x * t, last.y * complement + middle.y * t,
-                      last.z * complement + middle.z * t, 0.0f};
-    VuVec point{middle_last.x * complement + first_middle.x * t, middle_last.y * complement + first_middle.y * t,
-                middle_last.z * complement + first_middle.z * t, 0.0f};
-    return BezierLineLength(start, first, point, first_middle);
+    VuVec points[6] = {};
+    points[0] =
+        VuVec(second_control.x * complement + first_control.x * t, second_control.y * complement + first_control.y * t,
+              second_control.z * complement + first_control.z * t, 0.0f);
+    points[1] = VuVec(first_control.x * complement + start.x * t, first_control.y * complement + start.y * t,
+                      first_control.z * complement + start.z * t, 0.0f);
+    points[2] = VuVec(end.x * complement + second_control.x * t, end.y * complement + second_control.y * t,
+                      end.z * complement + second_control.z * t, 0.0f);
+    points[3] = VuVec(points[0].x * complement + points[1].x * t, points[0].y * complement + points[1].y * t,
+                      points[0].z * complement + points[1].z * t, 0.0f);
+    points[4] = VuVec(points[2].x * complement + points[0].x * t, points[2].y * complement + points[0].y * t,
+                      points[2].z * complement + points[0].z * t, 0.0f);
+    points[5] = VuVec(points[4].x * complement + points[3].x * t, points[4].y * complement + points[3].y * t,
+                      points[4].z * complement + points[3].z * t, 0.0f);
+    return BezierLineLength(start, points[1], points[5], points[3]);
 }
 
 i32 BezierLinePos(VuVec &result, VuVec &start, VuVec &first_control, VuVec &end, VuVec &second_control, f32 distance) {
     f32 t = 0.5f;
     f32 step = 0.25f;
+    VuVec points[6];
     for (i32 count = 256; count != 0; --count) {
         f32 complement = 1.0f - t;
-        VuVec middle{second_control.x * complement + first_control.x * t,
-                     second_control.y * complement + first_control.y * t,
-                     second_control.z * complement + first_control.z * t, 0.0f};
-        VuVec first{first_control.x * complement + start.x * t, first_control.y * complement + start.y * t,
-                    first_control.z * complement + start.z * t, 0.0f};
-        VuVec last{end.x * complement + second_control.x * t, end.y * complement + second_control.y * t,
-                   end.z * complement + second_control.z * t, 0.0f};
-        VuVec first_middle{middle.x * complement + first.x * t, middle.y * complement + first.y * t,
-                           middle.z * complement + first.z * t, 0.0f};
-        VuVec middle_last{last.x * complement + middle.x * t, last.y * complement + middle.y * t,
-                          last.z * complement + middle.z * t, 0.0f};
-        VuVec point{middle_last.x * complement + first_middle.x * t, middle_last.y * complement + first_middle.y * t,
-                    middle_last.z * complement + first_middle.z * t, 1.0f};
-        f32 length = BezierLineLength(start, first, point, first_middle);
+        points[0] = VuVec(second_control.x * complement + first_control.x * t,
+                          second_control.y * complement + first_control.y * t,
+                          second_control.z * complement + first_control.z * t, 0.0f);
+        points[1].x = first_control.x * complement + start.x * t;
+        points[1].y = first_control.y * complement + start.y * t;
+        points[1].z = first_control.z * complement + start.z * t;
+        points[1].w = 0.0f;
+        points[2].x = end.x * complement + second_control.x * t;
+        points[2].y = end.y * complement + second_control.y * t;
+        points[2].z = end.z * complement + second_control.z * t;
+        points[2].w = 0.0f;
+        points[3].x = points[0].x * complement + points[1].x * t;
+        points[3].y = points[0].y * complement + points[1].y * t;
+        points[3].z = points[0].z * complement + points[1].z * t;
+        points[3].w = 0.0f;
+        points[4].x = points[2].x * complement + points[0].x * t;
+        points[4].y = points[2].y * complement + points[0].y * t;
+        points[4].z = points[2].z * complement + points[0].z * t;
+        points[4].w = 0.0f;
+        points[5].x = points[4].x * complement + points[3].x * t;
+        points[5].y = points[4].y * complement + points[3].y * t;
+        points[5].z = points[4].z * complement + points[3].z * t;
+        points[5].w = 1.0f;
+        f32 length = BezierLineLength(start, points[1], points[5], points[3]);
         f32 difference = distance - length;
         if (difference < 0.0f)
             difference = -difference;
         if (!(difference > 0.01f)) {
-            *reinterpret_cast<BezierVec4Unaligned *>(&result) = *reinterpret_cast<BezierVec4 *>(&point);
+            *reinterpret_cast<BezierVec4Unaligned *>(&result) = *reinterpret_cast<BezierVec4 *>(&points[5]);
             return 1;
         }
         if (distance < length)
@@ -7741,11 +7807,8 @@ i32 BezierLinePos(VuVec &result, VuVec &start, VuVec &first_control, VuVec &end,
         else
             t -= step;
         step *= 0.5f;
-        if (count == 1) {
-            *reinterpret_cast<BezierVec4Unaligned *>(&result) = *reinterpret_cast<BezierVec4 *>(&point);
-            return 1;
-        }
     }
+    *reinterpret_cast<BezierVec4Unaligned *>(&result) = *reinterpret_cast<BezierVec4 *>(&points[5]);
     return 1;
 }
 
@@ -7772,22 +7835,22 @@ void BezierLineEval(VuVec &result, VuVec &start, VuVec &first_control, VuVec &en
 void DrawBezierLine(VuVec &start, VuVec &start_control, VuVec &end, VuVec &end_control, numtl_s *material, i32 colour) {
     static i32 bezier_draw_depth;
 
-    const f32 camera_y = global_camera.mtx.m31;
     const f32 camera_x = global_camera.mtx.m30;
+    const f32 camera_y = global_camera.mtx.m31;
     const f32 camera_z = global_camera.mtx.m32;
+    const f32 start_x = start.x - camera_x;
     const f32 start_y = start.y - camera_y;
     const f32 start_z = start.z - camera_z;
-    const f32 start_x = start.x - camera_x;
     const f32 start_distance = start_x * start_x + start_y * start_y + start_z * start_z;
     const f32 end_x = end.x - camera_x;
     const f32 end_y = end.y - camera_y;
     const f32 end_z = end.z - camera_z;
     const f32 end_distance = end_x * end_x + end_y * end_y + end_z * end_z;
-    const f32 distance = end_distance < start_distance ? end_distance : start_distance;
+    const f32 distance = start_distance < end_distance ? start_distance : end_distance;
     const f32 threshold = distance < 5.5f ? 5.5f * 0.001f : distance * 0.001f;
 
-    const f32 chord_y = end.y - start.y;
     const f32 chord_x = end.x - start.x;
+    const f32 chord_y = end.y - start.y;
     const f32 chord_z = end.z - start.z;
     if (__builtin_expect(
             !(chord_x * chord_x + chord_y * chord_y + chord_z * chord_z > threshold) || bezier_draw_depth > 15, 1)) {
@@ -7796,22 +7859,38 @@ void DrawBezierLine(VuVec &start, VuVec &start_control, VuVec &end, VuVec &end_c
     }
 
     ++bezier_draw_depth;
-    const f32 end_control_x = end_control.x;
-    const f32 end_control_y = end_control.y;
     const f32 control_x = start_control.x;
+    const f32 end_control_x = end_control.x;
+    const f32 control_y = start_control.y;
+    const f32 end_control_y = end_control.y;
+    const f32 control_z = start_control.z;
     const f32 end_control_z = end_control.z;
-    VuVec second = {(control_x + end_control_x) * 0.5f, (end_control_y + start_control.y) * 0.5f,
-                    (end_control_z + start_control.z) * 0.5f, 0.0f};
-    VuVec first = {(start.x + control_x) * 0.5f, (start.y + start_control.y) * 0.5f, (start_control.z + start.z) * 0.5f,
-                   0.0f};
-    VuVec third = {(end.x + end_control_x) * 0.5f, (end.y + end_control_y) * 0.5f, (end.z + end_control_z) * 0.5f,
-                   0.0f};
-    VuVec fourth = {(first.x + second.x) * 0.5f, (first.y + second.y) * 0.5f, (first.z + second.z) * 0.5f, 0.0f};
-    VuVec fifth = {(third.x + second.x) * 0.5f, (third.y + second.y) * 0.5f, (third.z + second.z) * 0.5f, 0.0f};
-    VuVec midpoint = {(fifth.x + fourth.x) * 0.5f, (fifth.y + fourth.y) * 0.5f, (fifth.z + fourth.z) * 0.5f, 0.0f};
+    VuVec points[6];
+    const f32 second_x = (control_x + end_control_x) * 0.5f;
+    const f32 second_y = (end_control_y + control_y) * 0.5f;
+    const f32 second_z = (end_control_z + control_z) * 0.5f;
+    points[0] = VuVec(second_x, second_y, second_z, 0.0f);
+    const f32 first_x = (start.x + control_x) * 0.5f;
+    const f32 first_y = (start.y + control_y) * 0.5f;
+    const f32 first_z = (control_z + start.z) * 0.5f;
+    points[1] = VuVec(first_x, first_y, first_z, 0.0f);
+    points[2].x = (end.x + end_control_x) * 0.5f;
+    points[2].y = (end.y + end_control_y) * 0.5f;
+    points[2].z = (end.z + end_control_z) * 0.5f;
+    points[2].w = 0.0f;
+    points[3].x = (points[1].x + points[0].x) * 0.5f;
+    points[3].y = (points[1].y + points[0].y) * 0.5f;
+    points[3].z = (points[1].z + points[0].z) * 0.5f;
+    points[3].w = 0.0f;
+    points[4].x = (points[2].x + points[0].x) * 0.5f;
+    points[4].y = (points[2].y + points[0].y) * 0.5f;
+    points[4].z = (points[2].z + points[0].z) * 0.5f;
+    points[4].w = 0.0f;
+    points[5] = VuVec((points[4].x + points[3].x) * 0.5f, (points[4].y + points[3].y) * 0.5f,
+                      (points[4].z + points[3].z) * 0.5f, 0.0f);
 
-    DrawBezierLine(start, first, midpoint, fourth, material, colour);
-    DrawBezierLine(midpoint, fifth, end, third, material, colour);
+    DrawBezierLine(start, points[1], points[5], points[3], material, colour);
+    DrawBezierLine(points[5], points[4], end, points[2], material, colour);
     --bezier_draw_depth;
 }
 
@@ -8306,6 +8385,7 @@ void LevelEditor::ProcessEvenWhenPaused(ThingProcessData *data) {
     if (!editors_entered) {
         return;
     }
+    f32 t = data->t;
     nupad_s *pad = data->pads[0];
     text_length = 0;
     memset(info_text, 0, sizeof(info_text));
@@ -8352,7 +8432,7 @@ void LevelEditor::ProcessEvenWhenPaused(ThingProcessData *data) {
         edLevelDestroyThisMenu2 = NULL;
     }
     if (edLevelNextMenu != NULL) {
-        if (edLevelActiveMenu != NULL) {
+        if (__builtin_expect(edLevelActiveMenu != NULL, 1)) {
             eduiMenuDestroy(edLevelActiveMenu);
         }
         eduimenu_s *next_menu = edLevelNextMenu;
@@ -8363,7 +8443,7 @@ void LevelEditor::ProcessEvenWhenPaused(ThingProcessData *data) {
     if (field_0x28 != 0) {
         camera = edmainGetCamera();
     }
-    input.Update(camera, pad, data->t, thePropertyTool.HasActiveMenu());
+    input.Update(camera, pad, t, thePropertyTool.HasActiveMenu());
     if (edmainGetCursorEnabled()) {
         eduiProcessCursor(0.0f, pad);
     }
@@ -8390,7 +8470,7 @@ void LevelEditor::ProcessEvenWhenPaused(ThingProcessData *data) {
     if (edLevelActiveMenu != NULL) {
         NuFntSet(EdLevelFnt);
         NuFntScale(EdLevelFntScale, EdLevelFntScale);
-        if (eduiMenuProcess(edLevelActiveMenu, data->t, pad) != 0) {
+        if (eduiMenuProcess(edLevelActiveMenu, t, pad) != 0) {
             input.Clear(3);
         } else if (edLevelActiveMenu != edLevelPinnedMenu) {
             if (__builtin_expect(input.GetPress(3) != 0.0f, 0)) {
@@ -8408,7 +8488,7 @@ void LevelEditor::ProcessEvenWhenPaused(ThingProcessData *data) {
     } else if (edLevelPinnedMenu != NULL && !thePropertyTool.HasActiveMenu()) {
         NuFntSet(EdLevelFnt);
         NuFntScale(EdLevelFntScale, EdLevelFntScale);
-        if (eduiMenuProcess(edLevelPinnedMenu, data->t, pad) != 0) {
+        if (eduiMenuProcess(edLevelPinnedMenu, t, pad) != 0) {
             return;
         }
     }
@@ -8503,7 +8583,8 @@ void SceneObjectHelper::Initialise() {
     }
     thePlaceableHelper.RegisterObjectType("Scene Object", this);
     theEdSystem.RegisterSubSystem(this);
-    memset(scene_counts, 0, sizeof(scene_counts));
+    for (i32 i = 0; i < 10; i++)
+        scene_counts[i] = 0;
 }
 
 void EdSystem::Initalise(variptr_u &buffer, variptr_u &buffer_end, i32 flags) {
@@ -8890,13 +8971,13 @@ void EdRefKnot::SetMemberData(void *object, i32 type, void *data, i32 data_size,
             knot->position.x += dx;
             knot->position.z += dz;
             knot->position.w = 1.0f;
-            if (!theClassEditor.IsSelectedObject(knot, theKnotHelper.in_tangent_ref)) {
+            if (__builtin_expect(!theClassEditor.IsSelectedObject(knot, theKnotHelper.in_tangent_ref), 0)) {
                 knot->in_tangent.x += dx;
                 knot->in_tangent.y += dy;
                 knot->in_tangent.z += dz;
                 theClassEditor.SnapPoint(knot->in_tangent);
             }
-            if (!theClassEditor.IsSelectedObject(knot, theKnotHelper.out_tangent_ref)) {
+            if (__builtin_expect(!theClassEditor.IsSelectedObject(knot, theKnotHelper.out_tangent_ref), 0)) {
                 knot->out_tangent.x += dx;
                 knot->out_tangent.y += dy;
                 knot->out_tangent.z += dz;
@@ -9066,14 +9147,14 @@ __attribute__((force_align_arg_pointer)) i32 EdManipulator::SelectAxis(EdInputCo
                                                                        VuVec &first_axis, VuVec &second_axis,
                                                                        VuMtx *matrix) {
     VuVec locators[8];
-    first_axis.y = 0.0f;
-    first_axis.z = 0.0f;
-    first_axis.x = 0.0f;
-    first_axis.w = 1.0f;
     second_axis.x = 0.0f;
     second_axis.y = 0.0f;
-    second_axis.w = 1.0f;
     second_axis.z = 0.0f;
+    second_axis.w = 1.0f;
+    first_axis.x = 0.0f;
+    first_axis.y = 0.0f;
+    first_axis.z = 0.0f;
+    first_axis.w = 1.0f;
     GetAxisLocators(origin, locators, matrix);
 
     VuVec *ray_direction = reinterpret_cast<VuVec *>(input.reserved_00 + 0x30);
@@ -9117,9 +9198,6 @@ __attribute__((force_align_arg_pointer)) i32 EdManipulator::SelectAxis(EdInputCo
             second_axis = VuVec(0.0f, 0.0f, 1.0f, 1.0f);
             break;
         case 6:
-            first_axis = VuVec(0.0f, 1.0f, 0.0f, 1.0f);
-            second_axis = VuVec(0.0f, 0.0f, 1.0f, 1.0f);
-            break;
         case 7:
             first_axis = VuVec(0.0f, 1.0f, 0.0f, 1.0f);
             second_axis = VuVec(0.0f, 0.0f, 1.0f, 1.0f);
@@ -9128,17 +9206,26 @@ __attribute__((force_align_arg_pointer)) i32 EdManipulator::SelectAxis(EdInputCo
             break;
     }
     if (matrix != NULL) {
-        const NUMTX &transform = matrix->matrix;
+        const f32 *transform = reinterpret_cast<const f32 *>(matrix);
         f32 first_x = first_axis.x;
-        first_axis.z = first_x * transform.m02 + first_axis.y * transform.m12 + first_axis.z * transform.m22;
-        first_axis.y = first_x * transform.m01 + first_axis.y * transform.m11 + first_axis.z * transform.m21;
-        first_axis.x = first_x * transform.m00 + first_axis.y * transform.m10 + first_axis.z * transform.m20;
+        f32 first_y = first_axis.y;
+        f32 first_z = first_axis.z;
+        f32 result_x = first_x * transform[0] + first_y * transform[4] + first_z * transform[8];
+        f32 result_y = first_x * transform[1] + first_y * transform[5] + first_z * transform[9];
+        f32 result_z = first_x * transform[2] + first_y * transform[6] + first_z * transform[10];
+        first_axis.x = result_x;
+        first_axis.y = result_y;
+        first_axis.z = result_z;
 
         f32 second_x = second_axis.x;
+        f32 second_y = second_axis.y;
         f32 second_z = second_axis.z;
-        second_axis.y = second_x * transform.m01 + second_axis.y * transform.m11 + second_z * transform.m21;
-        second_axis.z = second_x * transform.m02 + second_axis.y * transform.m12 + second_z * transform.m22;
-        second_axis.x = second_x * transform.m00 + second_axis.y * transform.m10 + second_z * transform.m20;
+        result_x = second_x * transform[0] + second_y * transform[4] + second_z * transform[8];
+        result_y = second_x * transform[1] + second_y * transform[5] + second_z * transform[9];
+        result_z = second_x * transform[2] + second_y * transform[6] + second_z * transform[10];
+        second_axis.x = result_x;
+        second_axis.y = result_y;
+        second_axis.z = result_z;
 
         NuVecNorm(reinterpret_cast<NUVEC *>(&first_axis), reinterpret_cast<NUVEC *>(&first_axis));
         NuVecNorm(reinterpret_cast<NUVEC *>(&second_axis), reinterpret_cast<NUVEC *>(&second_axis));
@@ -9159,9 +9246,9 @@ __attribute__((force_align_arg_pointer)) i32 EdManipulator::SelectAxis(EdInputCo
         nearest = *selected_axis;
         const VuVec *selected_first = reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(this) + 0x10);
         const VuVec *selected_second = reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(this) + 0x20);
-        first_axis.z = selected_first->z;
-        first_axis.y = selected_first->y;
         first_axis.x = selected_first->x;
+        first_axis.y = selected_first->y;
+        first_axis.z = selected_first->z;
         first_axis.w = selected_first->w;
         second_axis.x = selected_second->x;
         second_axis.y = selected_second->y;
@@ -9296,44 +9383,66 @@ __attribute__((force_align_arg_pointer)) i32 EdManScale::Process(EdInputContext 
 }
 
 __attribute__((force_align_arg_pointer)) i32 EdManMove::Process(EdInputContext &input, ClassObjectList &selected) {
-    VuVec position;
     EdManipulator::Process(input, selected);
-    VuVec average;
-    if (selected.GetAveragePosition(average) == 0)
+    VuVec position;
+    if (selected.GetAveragePosition(position) == 0)
         return 0;
     VuVec first_axis;
     VuVec second_axis;
-    i32 axis = SelectAxis(input, average, first_axis, second_axis, NULL);
+    i32 axis = SelectAxis(input, position, first_axis, second_axis, NULL);
     theLevelEditor.field_0x2c = AxisColour[axis];
-    if (input.GetHold(3) == 0.0f && input.GetHold(38) == 0.0f)
+    if (input.GetHold(3) == 0.0f && __builtin_expect(input.GetHold(38) == 0.0f, 0))
         return axis != 0;
     const VuVec *delta = reinterpret_cast<VuVec const *>(reinterpret_cast<u8 *>(this) + 0x40);
     for (ClassObjectListEntry *entry = selected.first; entry != NULL; entry = entry->next) {
-        position = VuVec_Zero;
-        get_manipulator_attribute(entry, 8, EdType_VuVec, &position);
-        if (axis == 7) {
-            if (input.GetHold(38) == 0.0f)
-                continue;
-            memcpy(&position, theLevelEditor.background_colour, sizeof(position));
-        } else {
-            f32 amount = delta->x * first_axis.x + delta->y * first_axis.y + delta->z * first_axis.z;
-            if (amount != 0.0f) {
+        position = VuVec(0.0f, 0.0f, 0.0f, 1.0f);
+        if (entry->reference == NULL ||
+            !entry->reference->GetAttributeData(entry->object, 8, EdType_VuVec, &position, 0)) {
+            EdMember member;
+            if (__builtin_expect(entry->ed_class->FindMember(&member, entry->object, 8, 1) != 0, 1))
+                member.reference->GetAttributeData(member.object, 8, EdType_VuVec, &position, 0);
+        }
+        switch (axis) {
+            case 1:
+            case 2:
+            case 3: {
+                f32 amount = delta->x * first_axis.x + delta->y * first_axis.y + delta->z * first_axis.z;
+                if (amount == 0.0f)
+                    continue;
+                position.x += first_axis.x * amount;
                 position.y += first_axis.y * amount;
                 position.z += first_axis.z * amount;
-                position.x += first_axis.x * amount;
+                break;
             }
-            if (axis >= 4) {
+            case 4:
+            case 5:
+            case 6: {
+                i32 moved = 0;
+                f32 amount = delta->x * first_axis.x + delta->y * first_axis.y + delta->z * first_axis.z;
+                if (amount != 0.0f) {
+                    position.x += first_axis.x * amount;
+                    position.y += first_axis.y * amount;
+                    position.z += first_axis.z * amount;
+                    moved = 1;
+                }
                 f32 second_amount = delta->x * second_axis.x + delta->y * second_axis.y + delta->z * second_axis.z;
                 if (second_amount != 0.0f) {
-                    position.y += second_axis.y * second_amount;
                     position.x += second_axis.x * second_amount;
+                    position.y += second_axis.y * second_amount;
                     position.z += second_axis.z * second_amount;
-                } else if (amount == 0.0f) {
-                    continue;
                 }
-            } else if (amount == 0.0f) {
-                continue;
+                if (!moved && second_amount == 0.0f)
+                    continue;
+                break;
             }
+            case 7:
+                if (input.GetHold(38) == 0.0f)
+                    continue;
+                position = VuVec(theLevelEditor.background_colour[0], theLevelEditor.background_colour[1],
+                                 theLevelEditor.background_colour[2], theLevelEditor.background_colour[3]);
+                break;
+            default:
+                continue;
         }
         theClassEditor.SnapPoint(position);
         set_manipulator_attribute(entry, 8, EdType_VuVec, &position);
@@ -9398,19 +9507,22 @@ i32 LineToSphereIntersection(VuVec &origin, VuVec &direction, VuVec &center, f32
     f32 qy = (origin.y + direction.y) - origin.y;
     f32 qz = (origin.z + direction.z) - origin.z;
     f32 a = (qx * qx + qy * qy) + qz * qz;
+    f32 cx = center.x;
+    f32 cy = center.y;
+    f32 cz = center.z;
     if (NuFabs(a) < 1.1920928955078125e-7f)
         return 0;
-    f32 dx = origin.x - center.x;
-    f32 dy = origin.y - center.y;
-    f32 dz = origin.z - center.z;
+    f32 dx = origin.x - cx;
+    f32 dy = origin.y - cy;
+    f32 dz = origin.z - cz;
     f32 projection = (dx * qx + dy * qy) + dz * qz;
     f32 b = projection + projection;
-    f32 center_squared = (center.x * center.x + center.y * center.y) + center.z * center.z;
+    f32 center_squared = (cx * cx + cy * cy) + cz * cz;
     f32 origin_squared = (origin.x * origin.x + origin.y * origin.y) + origin.z * origin.z;
-    f32 origin_center = (origin.x * center.x + origin.y * center.y) + origin.z * center.z;
+    f32 origin_center = (origin.x * cx + origin.y * cy) + origin.z * cz;
     f32 c = ((center_squared + origin_squared) - (origin_center + origin_center)) - radius * radius;
     f32 discriminant = b * b - (4.0f * a) * c;
-    if (!(discriminant >= 0.0f))
+    if (discriminant < 0.0f)
         return 0;
     f32 far_root = NuFsqrt(discriminant);
     f32 denominator = a + a;
@@ -9421,7 +9533,7 @@ i32 LineToSphereIntersection(VuVec &origin, VuVec &direction, VuVec &center, f32
         *far_intersection =
             VuVec(origin.x + direction.x * far_t, origin.y + direction.y * far_t, origin.z + direction.z * far_t, 0.0f);
     }
-    if (__builtin_expect(near_intersection != NULL, 1)) {
+    if (near_intersection != NULL) {
         *near_intersection = VuVec(origin.x + direction.x * near_t, origin.y + direction.y * near_t,
                                    origin.z + direction.z * near_t, 0.0f);
     }
@@ -9434,8 +9546,9 @@ i32 EdManipulator::SelectRotator(EdInputContext &input, VuVec &center, VuVec &pl
         VuVec far_point;
         VuVec near_point;
         VuVec normals[3];
-    } hits;
+    } hits __attribute__((aligned(16)));
     VuVec &near_point = hits.near_point;
+    VuVec chosen __attribute__((aligned(16)));
     f32 scale = Scale;
     i32 *selected_axis = reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(this) + 0x0c);
     i32 *start_angle = reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(this) + 0x60);
@@ -9450,10 +9563,9 @@ i32 EdManipulator::SelectRotator(EdInputContext &input, VuVec &center, VuVec &pl
         normals[0] = VuVec(1.0f, 0.0f, 0.0f, -center.x);
         normals[1] = VuVec(0.0f, 1.0f, 0.0f, -center.y);
         normals[2] = VuVec(0.0f, 0.0f, 1.0f, -center.z);
-        i32 axis = 0;
-        VuVec chosen;
-        f32 nearest_distance = __FLT_MAX__;
         i32 angle = 0;
+        i32 axis = 0;
+        f32 nearest_distance = __FLT_MAX__;
         if (LineToSphereIntersection(*reinterpret_cast<VuVec *>(input.reserved_00 + 0x20),
                                      *reinterpret_cast<VuVec *>(input.reserved_00 + 0x30), center, scale + 0.01f,
                                      &far_point, &near_point) != 0) {
@@ -9481,7 +9593,7 @@ i32 EdManipulator::SelectRotator(EdInputContext &input, VuVec &center, VuVec &pl
         f32 distance = NuVecMag(&difference.xyz);                                                                      \
         if (distance < 0.05f && distance < nearest_distance) {                                                         \
             nearest_distance = distance;                                                                               \
-            chosen = point;                                                                                            \
+            *reinterpret_cast<BezierVec4 *>(&chosen) = *reinterpret_cast<BezierVec4 *>(&point);                        \
             axis = candidate;                                                                                          \
         }                                                                                                              \
     }
@@ -9496,17 +9608,17 @@ i32 EdManipulator::SelectRotator(EdInputContext &input, VuVec &center, VuVec &pl
                 switch (axis) {
                     case 1:
                         plane = VuVec(1.0f, 0.0f, 0.0f, 1.0f);
-                        plane.w = -center.x;
+                        plane.w = -reinterpret_cast<f32 *>(&center)[0];
                         angle = NuAtan2DA(y, z);
                         break;
                     case 2:
                         plane = VuVec(0.0f, 1.0f, 0.0f, 1.0f);
-                        plane.w = -center.y;
+                        plane.w = -reinterpret_cast<f32 *>(&center)[1];
                         angle = NuAtan2DA(x, -z);
                         break;
                     case 3:
                         plane = VuVec(0.0f, 0.0f, 1.0f, 1.0f);
-                        plane.w = -center.z;
+                        plane.w = -reinterpret_cast<f32 *>(&center)[2];
                         angle = NuAtan2DA(x, y);
                         break;
                 }
@@ -9514,10 +9626,10 @@ i32 EdManipulator::SelectRotator(EdInputContext &input, VuVec &center, VuVec &pl
         }
         if (input.GetPress(3) != 0.0f) {
             *selected_axis = axis;
-            selected_plane->x = plane.x;
-            selected_plane->y = plane.y;
-            selected_plane->z = plane.z;
-            selected_plane->w = plane.w;
+            selected_plane->x = reinterpret_cast<f32 *>(&plane)[0];
+            selected_plane->y = reinterpret_cast<f32 *>(&plane)[1];
+            selected_plane->z = reinterpret_cast<f32 *>(&plane)[2];
+            selected_plane->w = reinterpret_cast<f32 *>(&plane)[3];
             *start_angle = angle;
             *last_angle = angle;
             *angle_delta = 0;
@@ -9525,10 +9637,10 @@ i32 EdManipulator::SelectRotator(EdInputContext &input, VuVec &center, VuVec &pl
         }
         *selected_axis = 0;
         *start_angle = 0;
+        *reinterpret_cast<BezierVec4Unaligned *>(selected_plane) = (BezierVec4){0.0f, 0.0f, 0.0f, 1.0f};
         *last_angle = 0;
         *angle_delta = 0;
-        *selected_plane = VuVec_Zero;
-        *secondary_plane = VuVec_Zero;
+        *reinterpret_cast<BezierVec4Unaligned *>(secondary_plane) = (BezierVec4){0.0f, 0.0f, 0.0f, 1.0f};
         return axis;
     }
     plane.x = selected_plane->x;
@@ -9536,15 +9648,14 @@ i32 EdManipulator::SelectRotator(EdInputContext &input, VuVec &center, VuVec &pl
     plane.y = selected_plane->y;
     plane.z = selected_plane->z;
     plane.w = selected_plane->w;
-    VuVec intersection;
     if (LineToPlaneIntersecion(*reinterpret_cast<VuVec *>(input.reserved_00 + 0x20),
-                               *reinterpret_cast<VuVec *>(input.reserved_00 + 0x30), plane, &intersection) == 0) {
+                               *reinterpret_cast<VuVec *>(input.reserved_00 + 0x30), plane, &chosen) == 0) {
         *angle_delta = 0;
         return axis;
     }
-    f32 x = intersection.x - center.x;
-    f32 y = intersection.y - center.y;
-    f32 z = intersection.z - center.z;
+    f32 x = chosen.x - center.x;
+    f32 y = chosen.y - center.y;
+    f32 z = chosen.z - center.z;
     i32 angle = 0;
     switch (axis) {
         case 1:

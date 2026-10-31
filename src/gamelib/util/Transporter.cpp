@@ -141,7 +141,7 @@ void NetTransporter::RemoveListener(NetListenerInterface *listener, unsigned cha
     } else {
         last_listener = binding->previous;
     }
-    if (binding->previous != NULL) {
+    if (__builtin_expect(binding->previous != NULL, 1)) {
         binding->previous->next = binding->next;
     } else {
         first_listener = binding->next;

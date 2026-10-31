@@ -307,7 +307,7 @@ i32 StartBigJump(GameObject_s *object, NUVEC *destination, i32 mode, f32 height,
         return 0;
     Player_ClearContext(object, 0);
     GameObject_s *carried = object->field_0xcc0;
-    if (carried == NULL || carried->id != id_YODA || WORLD->current_level != DAGOBAHE_LDATA)
+    if (__builtin_expect(carried == NULL || carried->id != id_YODA || WORLD->current_level != DAGOBAHE_LDATA, 1))
         carried = NULL;
     Player_ResetContexts(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));
     object->field_0xcc0 = carried;
@@ -453,8 +453,8 @@ void BigJumpCode(GameObject_s *object) {
             } else {
                 PlayLandSfx(object, 0, 0);
             }
-            object->external_force = object->apiobj.position;
             object->apiobj.velocity.x = object->apiobj.velocity.y = object->apiobj.velocity.z = 0.0f;
+            object->external_force = object->apiobj.position;
             if ((object->field_0xefd & 0x20) != 0) {
                 NUVEC origin;
                 FindSlamOrigin(object, &origin, NULL);
@@ -477,14 +477,15 @@ void BigJumpCode(GameObject_s *object) {
                         arc = 0.0f - rise / 3.0f;
                 }
             }
-            f32 sine = NU_SIN_LUT(static_cast<i32>(fraction * 32768.0f));
+            GAMECHARACTERDATA_s *game_character = object->apiobj.character_data->game_character;
             object->apiobj.position.x =
                 object->external_force.x + (object->launch_origin.x - object->external_force.x) * horizontal;
-            object->apiobj.position.y =
-                object->external_force.y + (object->launch_origin.y - object->external_force.y) * fraction + arc * sine;
+            object->apiobj.position.y = object->external_force.y +
+                                        (object->launch_origin.y - object->external_force.y) * fraction +
+                                        arc * NU_SIN_LUT(static_cast<i32>(fraction * 32768.0f));
             object->apiobj.position.z =
                 object->external_force.z + (object->launch_origin.z - object->external_force.z) * horizontal;
-            f32 height = sine * object->apiobj.character_data->game_character->second_jump_height;
+            f32 height = NU_SIN_LUT(static_cast<i32>(fraction * 32768.0f)) * game_character->second_jump_height;
             object->apiobj.position.y += (height + height) * object->big_jump_height;
             NuVecSub(&object->apiobj.velocity, &object->apiobj.position, &object->apiobj.start_position);
             NuVecScale(&object->apiobj.velocity, &object->apiobj.velocity, 1.0f / FRAMETIME);
@@ -511,9 +512,9 @@ i32 ObjLandReady(GameObject_s *object) {
     if (object == NULL) {
         return 0;
     }
-    if ((CInfo[object->character_context].flags & 0x1004) != 0 &&
+    if (__builtin_expect((CInfo[object->character_context].flags & 0x1004) != 0 &&
         (LEGOCONTEXT_LAND_COMBATROLL == -1 || LEGOCONTEXT_LAND_COMBATROLL != object->character_context ||
-         object->field_0x7a3 != 0)) {
+         object->field_0x7a3 != 0), 0)) {
         if (LEGOCONTEXT_WALLSHUFFLE != -1 && LEGOCONTEXT_WALLSHUFFLE == object->character_context) {
             return 0;
         }
@@ -820,10 +821,10 @@ void JumpCode(GameObject_s *object, i32 jump_pressed, i32 jump_held, u32 animati
         if (!landed) {
             GAMECHARACTERDATA *game_character =
                 static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
-            if ((touch_action || action_pressed != 0) && (vertical_speed > -1.25f || touch_action) &&
+            if (__builtin_expect((touch_action || action_pressed != 0) && (vertical_speed > -1.25f || touch_action) &&
                 (game_character->field275_0x116 != 0 || (object->apiobj.character_data->model_flags & 8) != 0) &&
                 movement_state == 0 && variant_flags >= 0 && object->jump_sequence < 2 && LEGOACT_LUNGE != -1 &&
-                object->apiobj.character_model->model_data_b[LEGOACT_LUNGE] != NULL) {
+                object->apiobj.character_model->model_data_b[LEGOACT_LUNGE] != NULL, 0)) {
                 object->field_0x780 = NULL;
                 object->blowup_target = NULL;
                 StartLunge(object, 0.0f, object->apiobj.field_0x1e0);
@@ -922,7 +923,7 @@ void JumpCode(GameObject_s *object, i32 jump_pressed, i32 jump_held, u32 animati
                 if (!(object->pad_gamepad->input_magnitude <= 0.0f) && (object->field_0xe22 & 0x20) != 0 &&
                     abs(RotDiff(object->apiobj.movement_facing_angle, object->current_input_angle)) > 0x6aaa)
                     force_flip = 1;
-            } else if (object->action_movement_state == 2) {
+            } else if (__builtin_expect(object->action_movement_state == 2, 0)) {
                 if (!(object->pad_gamepad->input_magnitude <= 0.0f) && (object->field_0xe22 & 0x20) != 0 &&
                     abs(RotDiff(object->apiobj.movement_facing_angle, object->current_input_angle)) < 0x1555)
                     force_flip = 1;
@@ -930,7 +931,30 @@ void JumpCode(GameObject_s *object, i32 jump_pressed, i32 jump_held, u32 animati
         }
         {
             if (object->action_movement_state != 3) {
-                if (object->action_movement_state != 4) {
+                if (!(object->action_movement_state != 4)) {
+                    if (LEGOCONTEXT_LAND_SLAM != -1 && LEGOACT_SLAMLAND != -1 &&
+                        object->apiobj.character_model->model_data_b[LEGOACT_SLAMLAND] != NULL) {
+                        GameCam_Judder(GameCam, 0.5f, 0, &object->apiobj.collision_position);
+                        NewRumble(object->pad_gamepad->pad, 0.75f, 0);
+                        object->slam_debris_effect = hit_effect;
+                        if (Slam_GetDebrisFn != NULL)
+                            object->slam_debris_effect = Slam_GetDebrisFn(object, hit_effect);
+                        object->character_context = LEGOCONTEXT_LAND_SLAM;
+                        object->context_animation = LEGOACT_SLAMLAND;
+                        const f32 duration = AnimDuration(object->id, LEGOACT_SLAMLAND, 0.0f, 0.0f, 1);
+                        object->context_animation_timer = duration <= 0.0f ? 0.75f : duration;
+                        object->jump_reentry_timer = 0.0f;
+                        if (!restart_jump) {
+                            ResetAnimPacket(&object->apiobj.anim_packet, -1);
+                            ResetMiniAnimPacket(&object->mini_animation, -1);
+                        }
+                        PlayLandSfx(object, 2, 0);
+                    } else {
+                        object->character_context = -1;
+                        object->jump_reentry_timer = 0.2f;
+                        PlayLandSfx(object, 0, 0);
+                    }
+                } else {
                     if (__builtin_expect(object->action_movement_state == 2 && LEGOCONTEXT_LAND_COMBOJUMP != -1 &&
                                              LEGOACT_COMBOLAND != -1 &&
                                              object->apiobj.character_model->model_data_b[LEGOACT_COMBOLAND] != NULL,
@@ -1062,29 +1086,6 @@ void JumpCode(GameObject_s *object, i32 jump_pressed, i32 jump_held, u32 animati
                         }
                         PlayLandSfx(object, 0, 0);
                     }
-                } else {
-                    if (LEGOCONTEXT_LAND_SLAM != -1 && LEGOACT_SLAMLAND != -1 &&
-                        object->apiobj.character_model->model_data_b[LEGOACT_SLAMLAND] != NULL) {
-                        GameCam_Judder(GameCam, 0.5f, 0, &object->apiobj.collision_position);
-                        NewRumble(object->pad_gamepad->pad, 0.75f, 0);
-                        object->slam_debris_effect = hit_effect;
-                        if (Slam_GetDebrisFn != NULL)
-                            object->slam_debris_effect = Slam_GetDebrisFn(object, hit_effect);
-                        object->character_context = LEGOCONTEXT_LAND_SLAM;
-                        object->context_animation = LEGOACT_SLAMLAND;
-                        const f32 duration = AnimDuration(object->id, LEGOACT_SLAMLAND, 0.0f, 0.0f, 1);
-                        object->context_animation_timer = duration <= 0.0f ? 0.75f : duration;
-                        object->jump_reentry_timer = 0.0f;
-                        if (!restart_jump) {
-                            ResetAnimPacket(&object->apiobj.anim_packet, -1);
-                            ResetMiniAnimPacket(&object->mini_animation, -1);
-                        }
-                        PlayLandSfx(object, 2, 0);
-                    } else {
-                        object->character_context = -1;
-                        object->jump_reentry_timer = 0.2f;
-                        PlayLandSfx(object, 0, 0);
-                    }
                 }
             } else {
                 if (!(LEGOCONTEXT_LAND_LUNGE != -1 && LEGOACT_LUNGELAND != -1 &&
@@ -1185,7 +1186,7 @@ void JumpCode(GameObject_s *object, i32 jump_pressed, i32 jump_held, u32 animati
                         Hint_SetComplete(0x604);
                 }
             } else {
-                if (flip_kind == 1 && StartBackFlip(object))
+                if (__builtin_expect(flip_kind == 1 && StartBackFlip(object), 1))
                     return;
                 object->action_movement_state = 1;
                 object->context_animation = LEGOACT_FLIP;

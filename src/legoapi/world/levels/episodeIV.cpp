@@ -348,10 +348,7 @@ static __used__ void TrenchMove(GameObject_s *object) {
     f32 target_x;
     if (object->character_context == 0x2a) {
         const f32 phase = object->context_animation_timer / TURNTIME;
-        if (api.movement_facing_angle > 0x8000)
-            target_x = phase * 10.0f + (1.0f - phase) * -10.0f + trenchrun.position.x;
-        else
-            target_x = phase * -10.0f + (1.0f - phase) * 10.0f + trenchrun.position.x;
+        if (api.movement_facing_angle <= 0x8000) target_x = phase * -10.0f + (1.0f - phase) * 10.0f + trenchrun.position.x; else target_x = phase * 10.0f + (1.0f - phase) * -10.0f + trenchrun.position.x;
     } else if (api.movement_facing_angle > 0x8000) {
         target_x = trenchrun.position.x + 10.0f;
     } else {
@@ -410,8 +407,8 @@ static void BlockadeRunnerD_EjectCreature(i32 eject_index) {
             if (LevGameObject[i] != NULL) {
                 LevGameObject[i]->ai.animation_override_from = 0xe9;
                 LevGameObject[i]->ai.animation_override_to = 5;
-                LevGameObject[i]->dont_move = 1;
                 LevGameObject[i]->field_0xf00 = (LevGameObject[i]->field_0xf00 & ~0x20) | ((test_tb & 1) << 5);
+                LevGameObject[i]->dont_move = 1;
                 LevGameObject[i]->hide_shadow = 1;
 
                 ADDPART_s params = Default_ADDPART;
@@ -739,29 +736,29 @@ void MosEisleyB_Update(WORLDINFO_s *world) {
     } while (0)
 
         GIZFORCE_s *selected = group->forces[0];
-        if (selected != first) {
-            if (selected == second) {
-                node0->position.x = 22.75f;
-                node0->position.z = -15.12f;
-                if (group->forces[1] == first)
-                    SET_STACK_NODE_POSITIONS(23.27f, -14.93f, 23.72f, -14.78f, 23.32f, -14.61f);
-                else
-                    SET_STACK_NODE_POSITIONS(23.27f, -14.93f, 23.27f, -14.62f, 23.66f, -14.73f);
-            } else if (selected == third) {
-                node0->position.x = 22.79f;
-                node0->position.z = -14.62f;
-                if (group->forces[1] == first)
-                    SET_STACK_NODE_POSITIONS(23.29f, -14.58f, 23.73f, -14.70f, 23.34f, -14.87f);
-                else
-                    SET_STACK_NODE_POSITIONS(23.29f, -14.58f, 23.27f, -14.85f, 23.63f, -14.76f);
-            }
-        } else {
+        if (selected == first) {
             node0->position.x = 24.12f;
             node0->position.z = -14.69f;
             if (group->forces[1] == second)
                 SET_STACK_NODE_POSITIONS(23.75f, -14.78f, 23.32f, -14.91f, 23.32f, -14.63f);
             else
                 SET_STACK_NODE_POSITIONS(23.75f, -14.78f, 23.34f, -14.57f, 23.34f, -14.84f);
+        } else {
+            if (selected == second) {
+                node0->position.x = 22.75f;
+                node0->position.z = -15.12f;
+                if (__builtin_expect(group->forces[1] == first, 0))
+                    SET_STACK_NODE_POSITIONS(23.27f, -14.93f, 23.72f, -14.78f, 23.32f, -14.61f);
+                else
+                    SET_STACK_NODE_POSITIONS(23.27f, -14.93f, 23.27f, -14.62f, 23.66f, -14.73f);
+            } else if (selected == third) {
+                node0->position.x = 22.79f;
+                node0->position.z = -14.62f;
+                if (__builtin_expect(group->forces[1] == first, 0))
+                    SET_STACK_NODE_POSITIONS(23.29f, -14.58f, 23.73f, -14.70f, 23.34f, -14.87f);
+                else
+                    SET_STACK_NODE_POSITIONS(23.29f, -14.58f, 23.27f, -14.85f, 23.63f, -14.76f);
+            }
         }
 #undef SET_STACK_NODE_POSITIONS
 
@@ -1179,7 +1176,7 @@ __attribute__((force_align_arg_pointer)) void DeathStarEscapeB_Update(WORLDINFO_
     nuinstanim_s *animation1 = NuSpecialGetInstAnim(&LevHSpecial[1]);
     if (animation1 != NULL)
         data1 = LevHSpecial[1].scene->instance_animation_data[animation1->anim_ix];
-    if (data0 == NULL || data1 == NULL)
+    if (__builtin_expect(data0 == NULL || data1 == NULL, 0))
         return;
 
     if (NuSpecialGetVisibilityFn(&LevHSpecial[0])) {
@@ -1287,8 +1284,8 @@ i32 DeathStarShieldDown() {
     if (blowup->output_flags & 1)
         return 1;
     if (__builtin_expect(static_cast<i8>(blowup->state_flags) < 0, 1)) {
-        if (Player[0] != NULL && (WORLD->current_level != DEATHSTARBATTLED_LDATA ||
-                                  !ObjInNarrowSock(Player[0], WORLD->sock_sys, WORLD->level_idx))) {
+        if (__builtin_expect(Player[0] != NULL && (WORLD->current_level != DEATHSTARBATTLED_LDATA ||
+                                  !ObjInNarrowSock(Player[0], WORLD->sock_sys, WORLD->level_idx)), 1)) {
             TORPEDOPACKET_s *packet = Player[0]->torpedo;
             if (packet != NULL && (packet->count != 0 || (packet->field_0x1 & 2) != 0))
                 return 1;
@@ -1350,9 +1347,10 @@ void DeathStarBattleDUpdate(WORLDINFO_s *world) {
                 timer = 5.0f;
 #define SPAWN_TRENCH_SHIP(slot, model, ox, oy, oz)                                                                     \
     do {                                                                                                               \
-        NUVEC_ALIGNED16 spawn = {player->apiobj.collision_position.x + trench_spawn_distance,                          \
-                                 player->apiobj.collision_position.y + trench_spawn_height,                            \
-                                 player->apiobj.collision_position.z};                                                 \
+        NUVEC_ALIGNED16 spawn;                                                                                         \
+        spawn.z = player->apiobj.collision_position.z;                                                                 \
+        spawn.x = player->apiobj.collision_position.x + trench_spawn_distance;                                         \
+        spawn.y = player->apiobj.collision_position.y + trench_spawn_height;                                           \
         NUVEC_ALIGNED16 offset = {ox, oy, oz};                                                                         \
         NuVecAdd(&spawn, &spawn, &offset);                                                                             \
         GameObject_s *ship = AddDynamicCreature(model, &spawn, 0xc000, "TrenchBaddie", &player->ai.path_info, NULL, 0, \

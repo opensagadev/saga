@@ -48,7 +48,7 @@ void Detonators_Draw() {
             if (WORLD->lev_objs[0xef].active)
                 detonator.draw_result = NuSpecialDrawAt(&WORLD->lev_objs[0xef].special, &matrix);
         } else {
-            if (WORLD->lev_objs[0xee].active)
+            if (__builtin_expect(WORLD->lev_objs[0xee].active != 0, 0))
                 detonator.draw_result = NuSpecialDrawAt(&WORLD->lev_objs[0xee].special, &matrix);
         }
     }
@@ -65,8 +65,9 @@ static inline void Detonator_Update(DETONATOR_s *detonator) {
     } else if (detonator->field_0x34 != NULL) {
         DetonatorHitData *hit_data = static_cast<DetonatorHitData *>(detonator->field_0x34);
         if (!(detonator->timer >= 10.0f) &&
-            (detonator->object == NULL || detonator->object->apiobj.field_0x287 != 0 ||
-             !(detonator->object->field_0xde0 >= 0.3f))) {
+            __builtin_expect(detonator->object == NULL || detonator->object->apiobj.field_0x287 != 0 ||
+                                 !(detonator->object->field_0xde0 >= 0.3f),
+                             1)) {
             hit_data->field_0x0c = 0.08f;
         } else {
             hit_data->field_0x0c = 0.75f;
@@ -159,14 +160,7 @@ void Detonator_MoveCode(GameObject_s *object) {
             return;
         }
         object->context_animation_timer -= FRAMETIME;
-        if (__builtin_expect(object->context_animation_timer <= 0.0f, 0)) {
-            object->character_context = -1;
-            if (object->field_0x7a3 != 0) {
-                return;
-            }
-            // Expiry falls through to placement, including an unfinished pickup.
-            object->field_0x7a3 = 1;
-        } else {
+        if (__builtin_expect(!(object->context_animation_timer <= 0.0f), 1)) {
             if (object->field_0x7a3 != 0) {
                 return;
             }
@@ -193,9 +187,16 @@ void Detonator_MoveCode(GameObject_s *object) {
                 }
                 return;
             }
+        } else {
+            object->character_context = -1;
+            if (__builtin_expect(object->field_0x7a3 != 0, 0)) {
+                return;
+            }
+            // Expiry falls through to placement, including an unfinished pickup.
+            object->field_0x7a3 = 1;
         }
         const i32 slot = DetonatorPlacementSlot(object);
-        if (slot < 0) {
+        if (__builtin_expect(slot < 0, 1)) {
             GameAudio_PlaySfx(0x32, NULL, 0, 0);
             return;
         }
@@ -236,7 +237,7 @@ void Detonator_MoveCode(GameObject_s *object) {
         if (object->field_0xde0 >= 0.3f && object->field_0xde0 >= 1.0f) {
             oldest_time = -1.0f;
             DETONATOR_s *oldest = NULL;
-            if (__builtin_expect(Detonator[0].active != 0, 0)) {
+            if (__builtin_expect(Detonator[0].active != 0, 1)) {
                 oldest = &Detonator[0];
                 oldest_time = Detonator[0].timer;
                 if (!(oldest_time > -1.0f)) {

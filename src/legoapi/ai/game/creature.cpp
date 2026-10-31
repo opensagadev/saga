@@ -201,22 +201,24 @@ u8 CharClipToBlobShadows;
 static inline void DrawSetRotationY(NUMTX *matrix, NUANG angle) {
     const f32 cosine = NU_COS_LUT(angle);
     const f32 sine = NU_SIN_LUT(angle);
-    matrix->m11 = 1.0f;
-    matrix->m33 = 1.0f;
-    matrix->m00 = cosine;
-    matrix->m01 = 0.0f;
-    matrix->m02 = -sine;
-    matrix->m03 = 0.0f;
-    matrix->m10 = 0.0f;
-    matrix->m12 = 0.0f;
-    matrix->m13 = 0.0f;
-    matrix->m20 = sine;
-    matrix->m21 = 0.0f;
-    matrix->m22 = cosine;
-    matrix->m23 = 0.0f;
-    matrix->m30 = 0.0f;
-    matrix->m31 = 0.0f;
-    matrix->m32 = 0.0f;
+    typedef f32 __attribute__((may_alias)) af32;
+    af32 *m = reinterpret_cast<af32 *>(matrix);
+    m[5] = 1.0f;
+    m[15] = 1.0f;
+    m[0] = cosine;
+    m[1] = 0.0f;
+    m[2] = -sine;
+    m[3] = 0.0f;
+    m[4] = 0.0f;
+    m[6] = 0.0f;
+    m[7] = 0.0f;
+    m[8] = sine;
+    m[9] = 0.0f;
+    m[10] = cosine;
+    m[11] = 0.0f;
+    m[12] = 0.0f;
+    m[13] = 0.0f;
+    m[14] = 0.0f;
 }
 
 extern i16 id_ANAKINJEDISCARRED, id_WOOKIEE, id_TWOFACE;
@@ -962,53 +964,52 @@ void SetHitPoints(GameObject_s *obj, i32 hp) {
 }
 
 i32 MakePlayerList(i32 count) {
-    i32 player_count = 0;
+    u32 player_count = 0;
 
     for (i32 i = 0; i < count; i++) {
         GameObject_s *player = Player[i];
-        if (player == NULL) {
-            if (makeplayerlist_freeplay == 1 && player_count == 1 && WORLD != NULL &&
-                WORLD->current_level == HUB_LDATA && HUB_LDATA != NewLData) {
-                PlayerList[1] = FreePlayModelList[i].model_id;
-                PlayerProgress[1].active = 0;
-                player_count = 2;
+        if (player != NULL) {
+            if (makeplayerlist_freeplay == 1) {
+                PlayerList[player_count] = FreePlayModelList[i].model_id;
+            } else if (makeplayerlist_freeplay != 2) {
+                PlayerList[player_count] = player->id;
             }
-            continue;
-        }
 
-        if (makeplayerlist_freeplay == 1) {
-            PlayerList[player_count] = FreePlayModelList[i].model_id;
-        } else if (makeplayerlist_freeplay != 2) {
-            PlayerList[player_count] = player->id;
-        }
+            PlayerProgress[player_count].active = player->apiobj.player_controlled;
 
-        PlayerProgress[player_count].active = player->apiobj.player_controlled;
-
-        bool unavailable = false;
-        if (player->field_0x7a5 != 6 && player->field_0xe32 != 2) {
-            unavailable = true;
-            if ((player->field_0xe22 & 1) == 0) {
-                unavailable = player->field_0xe32 != 0;
+            bool unavailable = false;
+            if (player->field_0x7a5 != 6 && player->field_0xe32 != 2) {
+                unavailable = true;
+                if ((player->field_0xe22 & 1) == 0) {
+                    unavailable = player->field_0xe32 != 0;
+                }
             }
-        }
-        PlayerProgress[player_count].field_0x7 = unavailable;
-        PlayerProgress[player_count].coins = player->coinpacket != NULL ? player->coinpacket->coins : 0;
-        PlayerProgress[player_count].field_0xb = player->field_0xe31 == 1;
+            PlayerProgress[player_count].field_0x7 = unavailable;
+            u32 coins = player->coinpacket != NULL ? player->coinpacket->coins : 0;
+            PLAYERPROGRESS *p = &PlayerProgress[player_count];
+            p->coins = coins;
+            p->field_0xb = player->field_0xe31 == 1;
 
-        if (player->apiobj.field_0x287 != 0) {
-            PlayerProgress[player_count].hitpoints = player->hitpoints;
-            PlayerProgress[player_count].field_0x9 = 4;
-        } else {
-            PlayerProgress[player_count].hitpoints = player->current_hp;
-            PlayerProgress[player_count].field_0x9 = player->field_0xe38;
-        }
-        PlayerProgress[player_count].field_0xa = player->field_0x108e;
-        PlayerProgress[player_count].field_0x4 = player->field_0x106e;
-        PlayerProgress[player_count].field_0xc = player->field_0xdec;
+            if (player->apiobj.field_0x287 != 0) {
+                p->hitpoints = player->hitpoints;
+                p->field_0x9 = 4;
+            } else {
+                p->hitpoints = player->current_hp;
+                p->field_0x9 = player->field_0xe38;
+            }
+            PlayerProgress[player_count].field_0xa = player->field_0x108e;
+            PlayerProgress[player_count].field_0x4 = player->field_0x106e;
+            PlayerProgress[player_count].field_0xc = player->field_0xdec;
 
-        PlayerSuit[player_count] = player->suit;
-        PlayerTorpedoCount[player_count] = player->torpedo != NULL ? player->torpedo->count : 0;
-        player_count++;
+            PlayerSuit[player_count] = player->suit;
+            PlayerTorpedoCount[player_count] = player->torpedo != NULL ? player->torpedo->count : 0;
+            player_count++;
+        } else if (makeplayerlist_freeplay == 1 && player_count == 1 && WORLD != NULL &&
+                   WORLD->current_level == HUB_LDATA && HUB_LDATA != NewLData) {
+            PlayerList[1] = FreePlayModelList[i].model_id;
+            PlayerProgress[1].active = 0;
+            player_count = 2;
+        }
     }
 
     for (i32 i = player_count; i < 8; i++) {
@@ -1245,7 +1246,7 @@ i32 InitCreature(GameObject_s *obj, i32 id, i32 param) {
         void **animation_table = obj->apiobj.character_model->model_data_b;
         if (animation_table[1] == NULL) {
             for (i32 i = 0; i < 0xe9; i++) {
-                if (animation_table[i] != NULL) {
+                if (__builtin_expect(animation_table[i] != NULL, 1)) {
                     obj->apiobj.anim_packet.animation_index = static_cast<u16>(i);
                     reset_animation = i;
                     break;
@@ -1313,7 +1314,7 @@ GameObject_s *AddCreature(i32 id, i32 param) {
 }
 
 void InitAICreatures(AISYS_s *system) {
-    if (Mission_Active(NULL) != NULL || netclient != 0 || system == NULL) {
+    if (__builtin_expect(Mission_Active(NULL) != NULL || netclient != 0 || system == NULL, 0)) {
         return;
     }
 
@@ -1393,13 +1394,12 @@ void Players_Init(void) {
         i16 *list;
         i16 list0;
 
-        if (__builtin_expect(FreePlay == 0 &&
+        if (FreePlay == 0 &&
                                  (Hub_UsePlayerList == 0 || HUB_ADATA == NULL || HUB_ADATA != WORLD->area) &&
                                  (UsePlayerList != 1 ||
                                   (PlayerList[0] != -1 &&
                                    (apicharsys->playermodelids[PlayerList[0]] == -1 ||
-                                    (PlayerList[1] != -1 && apicharsys->playermodelids[PlayerList[1]] == -1)))),
-                             1)) {
+                                    (PlayerList[1] != -1 && apicharsys->playermodelids[PlayerList[1]] == -1))))) {
             list = Area_PlayerIDList;
             list0 = Area_PlayerIDList[0];
         } else {
@@ -1797,30 +1797,30 @@ i32 NewPlayerCharacter(GameObject_s *object, i32 id, i32 old_id, i32) {
     LoseHelmet(object, 0, 1);
     DestroySnakeBody(object);
     object->id = id;
+    u8 saved_flags = object->apiobj.respawn_enabled;
     u8 health = object->current_hp;
     NUVEC velocity = object->apiobj.velocity;
     u8 hitpoints = object->hitpoints;
-    u8 saved_flags = (object->apiobj.flags_high >> 5) & 1;
     object->apiobj.character_model = &apicharsys->models[apicharsys->playermodelids[id]];
     object->apiobj.character_data = &apicharsys->char_data[id];
     object->takeover_source = NULL;
     object->suit = Suit_GetDefault(id);
+    u32 frame_state = object->ai.frame_state;
     u32 saved_f14 = object->field_0xf14;
     u32 saved_f20 = object->field_0xf20;
     u8 saved_efe = object->field_0xefe_bit5;
     u8 route = object->ai.current_route;
     u8 next_route = object->ai.next_route;
     AIPATHINFO path = object->ai.path_info;
-    u32 frame_state = object->ai.frame_state;
     InitPlayerAI(object);
     object->field_0xefe_bit5 = saved_efe;
     object->field_0xf20 = saved_f20;
     object->ai.next_route = next_route;
-    object->ai.path_info = path;
     object->field_0xf14 = saved_f14;
     object->field_0x1004 = 1.0f;
     object->ai.current_route = route;
     object->ai.frame_state = frame_state;
+    object->ai.path_info = path;
     GAMECHARACTERDATA *data = object->apiobj.character_data->game_character;
     object->field_0x1054 = data->layer_mask;
     object->field_0xe37 = data->field_0xf5;
@@ -1860,11 +1860,16 @@ i32 NewPlayerCharacter(GameObject_s *object, i32 id, i32 old_id, i32) {
     if (lean_enabled && (object->apiobj.character_data->model_flags & 0x2000) != 0)
         object->movement_lean_angle = lean;
     data = apicharsys->char_data[object->id].game_character;
-    object->apiobj.viewdistance = data->viewdistance;
-    object->apiobj.heardistance = data->heardistance;
-    object->apiobj.maxviewheight = data->maxviewheight;
-    object->apiobj.minviewheight = data->minviewheight;
-    object->is_female = (object->apiobj.character_data->game_character->flags_090 >> 17) & 1;
+    f32 viewdistance = data->viewdistance;
+    f32 heardistance = data->heardistance;
+    f32 maxviewheight = data->maxviewheight;
+    f32 minviewheight = data->minviewheight;
+    u32 flags = object->apiobj.character_data->game_character->flags_090;
+    object->apiobj.viewdistance = viewdistance;
+    object->apiobj.heardistance = heardistance;
+    object->apiobj.maxviewheight = maxviewheight;
+    object->apiobj.minviewheight = minviewheight;
+    object->is_female = (flags >> 17) & 1;
     if (object->id == id_MOSEISLEYCITIZEN) {
         SetLayers_MOSEISLEYCITIZEN(&object->field_0x1054);
     } else if (object->id == id_CANTINAALIEN) {
@@ -2223,24 +2228,22 @@ void KeepOnScreen(GameObject_s *object) {
 
     if ((VehicleArea != 0 && (WORLD->area == NULL || WORLD->area != PODSPRINT_ADATA)) || KEEPONSCREEN_SIDESONLY == 0 ||
         (two_players && abs(RotDiff(0, GameCam->pitch)) > 0x2000)) {
-        PLAYPLANE_s *depth_plane = NULL;
+        i32 depth_index = -1;
         if (OnOrInsidePlane(&object->apiobj.collision_position, &PlayPlane[4].point, &PlayPlane[4].normal, NULL,
                             -object->apiobj.field_0x1e0, NULL) != 0) {
             // Crossing the lower screen plane pushes toward the depth plane
             // selected by the camera pitch.
-            depth_plane = !(GameCam->dir.y <= 0.0f) ? &PlayPlane[5] : &PlayPlane[0];
+            depth_index = GameCam->dir.y <= 0.0f ? 0 : 5;
         } else if (OnOrInsidePlane(&object->apiobj.collision_position, &PlayPlane[3].point, &PlayPlane[3].normal, NULL,
                                    -object->apiobj.field_0x1e0, NULL) != 0) {
-            // The upper screen plane uses the opposite depth response.  This
-            // distinction is important: using the same plane for both sides
-            // can cancel movement in the wrong world-space direction.
-            depth_plane = GameCam->dir.y > 0.0f ? &PlayPlane[0] : &PlayPlane[5];
+            // The upper screen plane uses the opposite depth response.
+            depth_index = GameCam->dir.y <= 0.0f ? 5 : 0;
         }
 
-        if (depth_plane != NULL) {
-            Surface_Deflect(&depth_plane->normal, &object->apiobj.velocity, &constrained_movement, 0);
-            constrained_movement.x += depth_plane->normal.x * push_distance;
-            constrained_movement.z += depth_plane->normal.z * push_distance;
+        if (depth_index >= 0) {
+            Surface_Deflect(&PlayPlane[depth_index].normal, &object->apiobj.velocity, &constrained_movement, 0);
+            constrained_movement.x += PlayPlane[depth_index].normal.x * push_distance;
+            constrained_movement.z += PlayPlane[depth_index].normal.z * push_distance;
             constrained = 1;
         }
     }
@@ -2472,7 +2475,7 @@ void MovePlayer(GameObject_s *object) {
                         z = -z;
                     if (x * x + z * z < 1806.25f) {
                         x = z = 0.0f;
-                    } else if (x != 0.0f || z != 0.0f) {
+                    } else if (__builtin_expect(x != 0.0f || z != 0.0f, 1)) {
                         pad->input_mode = 2;
                     }
                 }
@@ -2503,7 +2506,7 @@ void MovePlayer(GameObject_s *object) {
                 // the AI path below uses the opposite component convention.
                 pad->input_direction_z = input.x;
                 pad->input_direction_x = input.z;
-                if (pad->input_magnitude > 0.0f)
+                if (__builtin_expect(pad->input_magnitude > 0.0f, 1))
                     pad->input_angle = NuAtan2D(input.x, input.z);
                 i32 waggle = GamePad_Waggle(object->pad_gamepad);
                 pad->waggled = waggle;
@@ -3325,6 +3328,7 @@ void AnimatePlayer(GameObject_s *object) {
     packet.previous_animation = packet.animation_index;
     object->mini_animation.previous_animation = object->mini_animation.animation_index;
     CHARACTERMODEL_s *model = object->apiobj.character_model;
+    GAMEPAD_s *pad = object->pad_gamepad;
 
     if ((object->apiobj.field_0x1f4 & APIOBJECT_STATE_FLAG_IGNORE_DOORS) == 0) {
         object->apiobj.character_data->animate_fn(object);
@@ -3345,7 +3349,7 @@ void AnimatePlayer(GameObject_s *object) {
     const f32 direction = (object->field_0xefd & GAMEOBJECT_MOVEMENT_FLAG_BACKWARDS) != 0 ? -1.0f : 1.0f;
     f32 movement_speed;
     if (__builtin_expect(object->apiobj.character_model->model_data_b[1] != NULL, 1)) {
-        movement_speed = object->pad_gamepad->animation_input_magnitude;
+        movement_speed = pad->animation_input_magnitude;
         if (movement_speed > 0.0f && object->id == id_GONKDROID && Cheat_IsOn(8) == 0)
             movement_speed = object->apiobj.character_data->game_character->walk_speed;
     } else if (__builtin_expect((object->apiobj.character_data->game_character->flags_090 &
@@ -3355,7 +3359,7 @@ void AnimatePlayer(GameObject_s *object) {
                                   object->apiobj.velocity.z * object->facing_direction.z;
         movement_speed = !(forward_speed >= 0.0f) ? 0.0f : forward_speed;
     } else {
-        movement_speed = object->pad_gamepad->input_magnitude;
+        movement_speed = pad->input_magnitude;
     }
 
     // The original passes signed movement into UpdateAnimPacket.  Clips with
@@ -3368,8 +3372,8 @@ void AnimatePlayer(GameObject_s *object) {
     UpdateAnimPacket(model, &packet, (FRAMETIME * 30.0f) * time_multiplier, movement_speed * direction,
                      time_multiplier * FRAMETIME,
                      object->apiobj.character_data->game_character->backwards_speed_multiplier);
-    if ((packet.flags & ANIMPACKET_FLAG_ANIMATION_CHANGED) != 0 &&
-        __builtin_expect((packet.blending != 0 ? packet.blend_animation_b : packet.animation_index) == 0x5f, 1)) {
+    if (__builtin_expect((packet.flags & ANIMPACKET_FLAG_ANIMATION_CHANGED) != 0, 1) &&
+        __builtin_expect((packet.blending != 0 ? packet.blend_animation_b : packet.animation_index) == 0x5f, 0)) {
         f32 *time = packet.blending != 0 ? &packet.blend_target_time : &packet.current_time;
         const f32 duration = AnimDuration(object->id, 0x5f, 0.0f, 0.0f, 0);
         i32 count = static_cast<i32>(duration / 0.3f);
@@ -3437,8 +3441,8 @@ i32 DrawGameObjectsProcess() {
                     DrawSetRotationY(&orientation, NUANG_180DEG);
                     if (object->apiobj.pitch_angle != 0)
                         ShopRotateX(&orientation, object->apiobj.pitch_angle);
-                    if (object->apiobj.field_0x276 != 0)
-                        ShopRotateY(&orientation, object->apiobj.field_0x276);
+                    if (const NUANG yaw = object->apiobj.field_0x276)
+                        ShopRotateY(&orientation, yaw);
                     if (object->apiobj.roll_angle != 0)
                         ShopRotateZ(&orientation, object->apiobj.roll_angle);
                     NuMtxMulVU0(&matrix, &matrix, &orientation);
@@ -3469,8 +3473,8 @@ i32 DrawGameObjectsProcess() {
                         ShopRotateZ(&orientation, object->apiobj.roll_angle);
                     if (object->apiobj.pitch_angle != 0)
                         ShopRotateX(&orientation, object->apiobj.pitch_angle);
-                    if (object->apiobj.field_0x276 != 0)
-                        ShopRotateY(&orientation, object->apiobj.field_0x276);
+                    if (const NUANG yaw = object->apiobj.field_0x276)
+                        ShopRotateY(&orientation, yaw);
                     NuMtxMulVU0(&matrix, &matrix, &orientation);
                     NuMtxTranslate(&matrix, &position);
                     break;
@@ -3575,10 +3579,10 @@ void ConfigureComplexShadow(GameObject_s *object) {
 
 i32 GameDrawCharacterModel(CHARACTERMODEL_s *model, ANIMPACKET_s *animation, NUMTX *matrix, NUMTX *secondary_matrix,
                            NUMTX *reflection_matrix, NUMTX *auxiliary_matrix, GameObject_s *object, u32 flags) {
-    NUMTX special_matrix;
-    NUMTX scaled_matrix;
-    NUMTX scaled_reflection;
-    NUMTX output_matrices[256];
+    NUMTX_ALIGNED32 special_matrix;
+    NUMTX_ALIGNED32 scaled_matrix;
+    NUMTX_ALIGNED32 scaled_reflection;
+    NUMTX_ALIGNED32 output_matrices[256];
     i32 drag_bomb = 0;
     if (object != NULL && object->id == id_DRAGBOMB && Cheat_IsOn(5) && WORLD->lev_objs[0x135].active) {
         ResetShadowMapRendering();
@@ -3590,8 +3594,8 @@ i32 GameDrawCharacterModel(CHARACTERMODEL_s *model, ANIMPACKET_s *animation, NUM
             NuSpecialDrawAt(&WORLD->lev_objs[0x135].special, &special_matrix);
             NuRndrEndReflectionRender();
         }
-        scaled_matrix = *matrix;
         NUVEC scale = {0.5f, 0.5f, 0.5f};
+        scaled_matrix = *matrix;
         NuMtxPreScale(&scaled_matrix, &scale);
         matrix = &scaled_matrix;
         if (reflection_matrix != NULL) {
@@ -3631,25 +3635,25 @@ i32 GameDrawCharacterModel(CHARACTERMODEL_s *model, ANIMPACKET_s *animation, NUM
             for (i32 i = 0; i < 16; ++i) {
                 if (model->points_of_interest[i] != NULL) {
                     auxiliary_matrix[i] = object->apiobj.field_0xb8;
-                    auxiliary_matrix[i].m30 = object->apiobj.position.x;
-                    auxiliary_matrix[i].m31 = object->apiobj.position.y;
-                    auxiliary_matrix[i].m32 = object->apiobj.position.z;
+                    *NUMTX_GET_ROW_VEC(&auxiliary_matrix[i], 3) = object->apiobj.collision_position;
                     auxiliary_matrix[i].m31 -=
                         (object->character_bottom + object->character_top) * object->apiobj.field_0xa8 * 0.5f;
                 }
             }
         }
-    } else if (result != 0 && object != NULL && !object->hide_shadow &&
-               (object->apiobj.character_data->model_flags & 0x10000) == 0) {
+    } else if (result != 0 && (object == NULL ||
+                               (!object->hide_shadow && (object->apiobj.character_data->model_flags & 0x10000) == 0))) {
         draw_shadow = 1;
+    } else {
+        draw_shadow = 0;
     }
     if (g_lowEndLevelBehaviour != 0 && object != NULL && !object->apiobj.player_controlled)
         draw_shadow = 0;
 
     if (draw_shadow) {
         if (object != NULL && secondary_matrix != NULL) {
-            i32 level_alpha = static_cast<u8>(WORLD->current_level->blob_shadow_alpha);
-            if (level_alpha != 0 && object->shadow_opacity > 0.0f && object->surface_normal.y > 0.0f &&
+            if (WORLD->current_level->blob_shadow_alpha != 0 && object->shadow_opacity > 0.0f &&
+                object->surface_normal.y > 0.0f &&
                 (object->apiobj.water_height == -1.0f ||
                  (TerLayer[static_cast<i8>(object->apiobj.field_0x27f)].flags & 1) == 0)) {
                 if (object->id == id_MOUSEDROID && WORLD->lev_objs[0xa2].active) {
@@ -3659,8 +3663,8 @@ i32 GameDrawCharacterModel(CHARACTERMODEL_s *model, ANIMPACKET_s *animation, NUM
                 } else if (__builtin_expect(!!(CHARSHADOWS_ON), 1)) {
                     PLAYERCHARACTERCONFIG_s *config = object->apiobj.character_data->player_config;
                     i32 alpha = config->blob_shadow_alpha;
-                    if (alpha == 0xff)
-                        alpha = level_alpha;
+                    if (config->blob_shadow_alpha == 0xff)
+                        alpha = static_cast<u8>(WORLD->current_level->blob_shadow_alpha);
                     if (alpha > 0) {
                         f32 radius = config->shadow_radius;
                         if (!(radius < 99.0f))
@@ -3763,13 +3767,13 @@ void UpdateCharacterLoad() {
         candidates[candidate_count++] = id_CANTINABAND;
     } else if (id_WEIRDO1 != -1 && APICharacterLoaded(id_WEIRDO1) == NULL) {
         candidates[candidate_count++] = id_WEIRDO1;
-    } else if (id_WEIRDO2 != -1 && APICharacterLoaded(id_WEIRDO2) == NULL) {
+    } else if (__builtin_expect(id_WEIRDO2 != -1, 0) && APICharacterLoaded(id_WEIRDO2) == NULL) {
         candidates[candidate_count++] = id_WEIRDO2;
-    } else if (id_JABBA != -1 && APICharacterLoaded(id_JABBA) == NULL) {
+    } else if (__builtin_expect(id_JABBA != -1, 0) && APICharacterLoaded(id_JABBA) == NULL) {
         candidates[candidate_count++] = id_JABBA;
-    } else if (id_MOSEISLEYCITIZEN != -1 && APICharacterLoaded(id_MOSEISLEYCITIZEN) == NULL) {
+    } else if (__builtin_expect(id_MOSEISLEYCITIZEN != -1, 0) && APICharacterLoaded(id_MOSEISLEYCITIZEN) == NULL) {
         candidates[candidate_count++] = id_MOSEISLEYCITIZEN;
-    } else if (id_CANTINAALIEN != -1 && APICharacterLoaded(id_CANTINAALIEN) == NULL) {
+    } else if (__builtin_expect(id_CANTINAALIEN != -1, 0) && APICharacterLoaded(id_CANTINAALIEN) == NULL) {
         candidates[candidate_count++] = id_CANTINAALIEN;
     } else if (id_WOMPRAT != -1 && APICharacterLoaded(id_WOMPRAT) == NULL) {
         candidates[candidate_count++] = id_WOMPRAT;
@@ -3952,7 +3956,7 @@ u32 AdjustLayerBits(u32 mask, GameObject_s *object) {
             mask = (mask & ~(hair | cape)) | SpecialLayer[27].mask;
             if (__builtin_expect((mask & SpecialLayer[30].mask) != 0, 0))
                 mask = (mask & ~SpecialLayer[30].mask) | SpecialLayer[39].mask;
-            else if ((mask & SpecialLayer[31].mask) != 0)
+            else if (__builtin_expect((mask & SpecialLayer[31].mask) != 0, 0))
                 mask = (mask & ~SpecialLayer[31].mask) | SpecialLayer[40].mask;
             else if ((mask & SpecialLayer[32].mask) != 0)
                 mask = (mask & ~SpecialLayer[32].mask) | SpecialLayer[41].mask;
@@ -3960,7 +3964,7 @@ u32 AdjustLayerBits(u32 mask, GameObject_s *object) {
             mask = (mask & ~cape) | SpecialLayer[26].mask;
             if (__builtin_expect((mask & SpecialLayer[30].mask) != 0, 0))
                 mask = (mask & ~SpecialLayer[30].mask) | SpecialLayer[36].mask;
-            else if ((mask & SpecialLayer[31].mask) != 0)
+            else if (__builtin_expect((mask & SpecialLayer[31].mask) != 0, 0))
                 mask = (mask & ~SpecialLayer[31].mask) | SpecialLayer[37].mask;
             else if ((mask & SpecialLayer[32].mask) != 0)
                 mask = (mask & ~SpecialLayer[32].mask) | SpecialLayer[38].mask;
@@ -4059,7 +4063,6 @@ static void DrawWeapons(GameObject_s *object, i32 reflection, f32 weapon_scale) 
     }
     i32 sabre = 0;
     u16 rotation = 0;
-    auto f0x1020 = object->field_0x1020;
     for (i32 hand = 0; hand < 4; ++hand) {
         data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
         const i32 joint = data->weapon_joints[hand];
@@ -4077,7 +4080,7 @@ static void DrawWeapons(GameObject_s *object, i32 reflection, f32 weapon_scale) 
                     rotation = 0xd1c8;
                 } else if (models[0] == 0x65 || models[0] == 0x67 || models[0] == 0x69 || models[0] == 0x6b) {
                     i32 red, green, blue, purple;
-                    if (object->apiobj.field_0x27c != -1 && Cheat_IsOn(25)) {
+                    if (object->apiobj.field_0x27c != -1 && __builtin_expect(Cheat_IsOn(25), 1)) {
                         red = 1;
                         green = blue = purple = 0;
                     } else if (object->apiobj.field_0x27c != -1 && Player_HasPurpleForce(object)) {
@@ -4098,7 +4101,7 @@ static void DrawWeapons(GameObject_s *object, i32 reflection, f32 weapon_scale) 
                 } else {
                     i32 red = 0, green = 0, blue = 0, purple = 0;
                     if (object->id == id_BOB) {
-                        if (object->field_0xefd & 2)
+                        if (__builtin_expect(object->field_0xefd & 2 != 0, 1))
                             green = 1;
                         else
                             blue = 1;
@@ -4117,7 +4120,7 @@ static void DrawWeapons(GameObject_s *object, i32 reflection, f32 weapon_scale) 
                             purple = 1;
                     }
                     if (__builtin_expect(red || green || blue || purple, 1)) {
-                        if (__builtin_expect(object->apiobj.field_0x27c != -1 && Cheat_IsOn(25), 1)) {
+                        if (__builtin_expect(__builtin_expect(object->apiobj.field_0x27c != -1, 0) && Cheat_IsOn(25), 1)) {
                             red = 1;
                             green = blue = purple = 0;
                         } else if (object->apiobj.field_0x27c != -1 && Player_HasPurpleForce(object)) {
@@ -4127,6 +4130,8 @@ static void DrawWeapons(GameObject_s *object, i32 reflection, f32 weapon_scale) 
                             blue = 1;
                             green = 0;
                         }
+                    }
+                    if (red || green || blue || purple) {
                         DrawWeapon_SetSabreObjects(object, red, green, blue, purple, models, &hilt);
                         sabre = true;
                     }
@@ -4145,7 +4150,7 @@ static void DrawWeapons(GameObject_s *object, i32 reflection, f32 weapon_scale) 
                 NUMTX blade_matrix = object->joint_matrices[joint];
                 NUMTX hilt_matrix;
                 NUVEC scale = {weapon_scale, weapon_scale, weapon_scale};
-                if (__builtin_expect(hilt != -1, 1)) {
+                if (hilt != -1) {
 
                     hilt_scale_vec.x = weapon_scale + weapon_scale;
                     hilt_matrix = blade_matrix;
@@ -4156,7 +4161,7 @@ static void DrawWeapons(GameObject_s *object, i32 reflection, f32 weapon_scale) 
                     hilt_scale_vec.y = hilt_scale_vec.x;
                     NuMtxPreScale(&hilt_matrix, &hilt_scale_vec);
                 }
-                if (__builtin_expect(rotation != 0, 0)) {
+                if (rotation != 0) {
                     NuMtxPreRotateX(&blade_matrix, rotation);
                 }
                 NuMtxPreScale(&blade_matrix, &scale);
@@ -4178,7 +4183,7 @@ static void DrawWeapons(GameObject_s *object, i32 reflection, f32 weapon_scale) 
                                     model = models[part];
                                 }
                                 NUMTX reflected;
-                                if (MatrixReflection(matrix, object->field_0x1087, f0x1020,
+                                if (MatrixReflection(matrix, object->field_0x1087, object->field_0x1020,
                                                      WORLD->current_level->unknown_0cc, &reflected)) {
                                     NuRndrStartReflectionRender(0);
                                     Draw3DObjectMtx(NULL, model, &reflected);
@@ -4187,7 +4192,7 @@ static void DrawWeapons(GameObject_s *object, i32 reflection, f32 weapon_scale) 
                             }
                         }
                     }
-                    if (side || object->id != id_DARTHMAUL || object->apiobj.field_0x27c == -1 ||
+                    if (__builtin_expect(side, 0) || object->id != id_DARTHMAUL || object->apiobj.field_0x27c == -1 ||
                         (!Cheat_IsOn(25) && (object->apiobj.field_0x27c == -1 || !Player_HasPurpleForce(object)))) {
                         break;
                     }

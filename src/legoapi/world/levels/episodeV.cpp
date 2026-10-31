@@ -160,7 +160,7 @@ static inline void HothBattle_AssignSpawnLocator(GameObject_s *object, AILOCATOR
         if (entry != locator) {
             continue;
         }
-        object->ai.locator = entry;
+        object->ai.locator = locator;
         set->assigned[index] = object->apiobj.field_0x289;
         break;
     }
@@ -554,10 +554,7 @@ void ResetTrooperCannons(WORLDINFO_s *world, i32 trooper_id) {
         }
 
         if (troopercannons[cannon_index].buildit != NULL && troopercannons[cannon_index].object != NULL) {
-            if ((world->level_progress->destroyed_trooper_cannon_mask & (1u << (number - 1))) != 0) {
-                GizBuildIt_SetToStart(troopercannons[cannon_index].buildit, 0, 0);
-                troopercannons[cannon_index].rebuilding = 1;
-            } else {
+            if ((world->level_progress->destroyed_trooper_cannon_mask & (1u << (number - 1))) == 0) {
                 if (troopercannons[cannon_index].base != NULL) {
                     GizmoSetVisibility(world->gizmo_sys, troopercannons[cannon_index].base, 1, 1);
                     GizObstacle_PlayBackwards(static_cast<GIZOBSTACLE_s *>(troopercannons[cannon_index].base->object));
@@ -571,8 +568,11 @@ void ResetTrooperCannons(WORLDINFO_s *world, i32 trooper_id) {
                     AddDynamicCreature(trooper_id, &troopercannons[cannon_index].object->apiobj.collision_position,
                                        troopercannons[cannon_index].object->apiobj.field_0x276, "CannonTrooper",
                                        &troopercannons[cannon_index].object->ai.path_info, NULL, 0, NULL, NULL, 0, 0);
-                if (__builtin_expect(trooper != NULL, 1))
+                if (trooper != NULL)
                     TakeOverGameObject(trooper, troopercannons[cannon_index].object, 0, 1);
+            } else {
+                GizBuildIt_SetToStart(troopercannons[cannon_index].buildit, 0, 0);
+                troopercannons[cannon_index].rebuilding = 1;
             }
         }
         ++cannon_index;
@@ -1289,23 +1289,23 @@ void DagobahA_Update(WORLDINFO_s *world) {
             node0->position.x = -16.31f;
             node0->position.y = 0.31f;
             node0->position.z = 15.13f;
-            if (group->forces[1] == first) {
-                node1->position.x = -16.31f;
-                node1->position.y = 0.67f;
-                node1->position.z = 14.82f;
-                node2->position.x = -16.17f;
-                node2->position.y = 1.31f;
-                node2->position.z = 14.65f;
-            } else {
+            if (__builtin_expect(!(group->forces[1] == first), 1)) {
                 node1->position.x = -16.31f;
                 node1->position.y = 0.67f;
                 node1->position.z = 14.82f;
                 node2->position.x = -16.36f;
                 node2->position.y = 1.33f;
                 node2->position.z = 14.54f;
+            } else {
+                node1->position.x = -16.31f;
+                node1->position.y = 0.67f;
+                node1->position.z = 14.82f;
+                node2->position.x = -16.17f;
+                node2->position.y = 1.31f;
+                node2->position.z = 14.65f;
             }
         } else if (selected == third) {
-            if (group->forces[1] != first) {
+            if (__builtin_expect(group->forces[1] != first, 1)) {
                 node0->position.x = -16.20f;
                 node0->position.y = 0.31f;
                 node0->position.z = 15.13f;
@@ -1590,7 +1590,7 @@ void HothBattleE_Panel(WORLDINFO_s *) {
         case 1:
         case 2:
             for (i32 index = 0; index < melee.waves[0].initial_count; ++index) {
-                if (__builtin_expect(index == (melee.waves[0].initial_count >> 1) + 1, 1)) {
+                if (__builtin_expect(index == (u8)(melee.waves[0].initial_count / 2) + 1, 1)) {
                     targets[count] = -1;
                     defeated[count] = 0;
                     ++count;
@@ -1624,12 +1624,15 @@ void HothBattleE_Panel(WORLDINFO_s *) {
             }
             break;
     }
-    for (i32 index = 0; index < count; ++index) {
-        if (!(targets[index] != -1 && defeated[index] != 0)) {
-            alpha[index] = 1.0f;
-        } else {
-            alpha[index] = SeekLinearF(alpha[index], 0.4f, 0.1f);
-        }
+    if (count > 0) {
+        i32 index = 0;
+        do {
+            if (!(targets[index] != -1 && defeated[index] != 0)) {
+                alpha[index] = 1.0f;
+            } else {
+                alpha[index] = SeekLinearF(alpha[index], 0.4f, 0.1f);
+            }
+        } while (++index != count);
     }
     DrawMeleeTargetsRows(targets, defeated, alpha, count);
 }
@@ -1677,8 +1680,8 @@ __attribute__((optimize("O2", "tree-vectorize"))) i32 SpawnMeleeCreatureType(i32
         }
     }
 
-    while (melee.waves[type].field_0x18 > melee.waves[type].reserved_1a) {
-        if (melee.waves[type].reserved_1a > 3)
+    while (melee.waves[type].field_0x18 > active_count) {
+        if (active_count > 3)
             break;
 
         i32 slot = -1;
@@ -1691,35 +1694,36 @@ __attribute__((optimize("O2", "tree-vectorize"))) i32 SpawnMeleeCreatureType(i32
         if (slot == -1)
             return 0;
 
-        if (melee.waves[type].character_id == id_ATAT && melee.waves[type].reserved_1a == 0) {
+        if (melee.waves[type].character_id == id_ATAT && active_count == 0) {
             GameObject_s *named = GetNamedGameObject(WORLD->ai_sys, "ATAT_EDIT");
             melee.waves[type].creatures[slot] = named;
             if (named != NULL && named->apiobj.field_0x287 == 0 && (named->apiobj.field_0x1f8 & 0x1000) != 0) {
-                ++melee.waves[type].reserved_1a;
+                active_count = ++melee.waves[type].reserved_1a;
                 continue;
             }
             melee.waves[type].creatures[slot] = NULL;
         }
 
-        AILOCATOR *locator = NULL;
-        for (i32 attempts = 50; attempts > 0; --attempts) {
+        AILOCATOR *locator;
+        i32 attempts = 50;
+        do {
+            --attempts;
             locator = getSpawnLocator(5.0f, "spawn");
             if (locator != NULL) {
-                if (__builtin_expect(OnOrInsidePlane(&locator->position, &PlayPlane[1].point, &PlayPlane[1].normal,
+                if (__builtin_expect(__builtin_expect(OnOrInsidePlane(&locator->position, &PlayPlane[1].point, &PlayPlane[1].normal,
                                                      NULL, 0.5f, NULL) == 0,
                                      0) ||
                     OnOrInsidePlane(&locator->position, &PlayPlane[2].point, &PlayPlane[2].normal, NULL, 0.5f, NULL) ==
-                        0) {
-                    if (__builtin_expect(OnOrInsidePlane(&locator->position, &PlayPlane[1].point, &PlayPlane[1].normal,
-                                                         NULL, 2.5f, NULL) != 0 ||
-                                             OnOrInsidePlane(&locator->position, &PlayPlane[2].point,
-                                                             &PlayPlane[2].normal, NULL, 2.5f, NULL) != 0,
-                                         0))
+                        0, 1)) {
+                    if (OnOrInsidePlane(&locator->position, &PlayPlane[1].point, &PlayPlane[1].normal, NULL, 2.5f,
+                                        NULL) != 0 ||
+                        OnOrInsidePlane(&locator->position, &PlayPlane[2].point, &PlayPlane[2].normal, NULL, 2.5f,
+                                        NULL) != 0)
                         break;
                 }
                 locator = NULL;
             }
-        }
+        } while (attempts > 0);
         if (locator == NULL)
             return 0;
 
@@ -1739,7 +1743,7 @@ __attribute__((optimize("O2", "tree-vectorize"))) i32 SpawnMeleeCreatureType(i32
             return 0;
         melee.waves[type].creatures[slot] = object;
         object->ai.locator = locator;
-        ++melee.waves[type].reserved_1a;
+        active_count = ++melee.waves[type].reserved_1a;
     }
     return 1;
 }
@@ -1935,10 +1939,10 @@ void HothBattleE_UpdateWave() {
     HothBattle_ManageBackgroundCreatures();
     if (__builtin_expect(
             melee.current_wave == 3 && melee.waves[0].creatures[0] != NULL && melee.waves[0].creatures[1] != NULL, 0)) {
-        AIANTINODE_s *node = AIAntinodeCreateSingleFrame(&melee.waves[0].creatures[0]->apiobj.collision_position,
+        AIANTINODE_s *node = AIAntinodeCreateSingleFrame(&melee.waves[0].creatures[0]->apiobj.position,
                                                          melee.waves[0].creatures[type]->apiobj.field_0x1dc * 3.0f);
         node->excluded_character_types = ~(1 << melee.waves[0].creatures[1]->apiobj.field_0x289);
-        node = AIAntinodeCreateSingleFrame(&melee.waves[0].creatures[1]->apiobj.collision_position,
+        node = AIAntinodeCreateSingleFrame(&melee.waves[0].creatures[1]->apiobj.position,
                                            melee.waves[0].creatures[type]->apiobj.field_0x1dc * 3.0f);
         node->excluded_character_types = ~(1 << melee.waves[0].creatures[0]->apiobj.field_0x289);
     }
@@ -1965,7 +1969,7 @@ void HothBattleE_UpdateWave() {
             pending = 1;
         }
     }
-    if (__builtin_expect((pending | MiniCutCam) == 0 && NOAICREATURES == 0 && melee.current_wave == melee.next_wave,
+    if (__builtin_expect((pending | MiniCutCam) == 0 && NOAICREATURES == 0 && melee.next_wave == melee.current_wave,
                          1)) {
         ++melee.next_wave;
     }

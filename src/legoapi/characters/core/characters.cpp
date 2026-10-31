@@ -272,7 +272,7 @@ void HeadMovement(GameObject_s *object) {
             }
             if (object->head_target != NULL) {
                 object->head_target_timer -= FRAMETIME;
-                if (object->head_target_timer < 0.0f) {
+                if (__builtin_expect(object->head_target_timer < 0.0f, 1)) {
                     object->head_target_timer = 0.0f;
                     object->head_target_delay = 0.0f;
                     object->head_target = NULL;
@@ -380,7 +380,7 @@ void HeadMovement(GameObject_s *object) {
         }
         if (object->head_target != NULL) {
             object->head_target_timer -= FRAMETIME;
-            if (object->head_target_timer < 0.0f) {
+            if (__builtin_expect(object->head_target_timer < 0.0f, 1)) {
                 object->head_target_timer = 0.0f;
                 object->head_target_delay = 0.0f;
                 object->head_target = NULL;
@@ -488,7 +488,7 @@ void HeadMovement(GameObject_s *object) {
             }
             if (object->head_target != NULL) {
                 object->head_target_timer -= FRAMETIME;
-                if (object->head_target_timer < 0.0f) {
+                if (__builtin_expect(object->head_target_timer < 0.0f, 1)) {
                     object->head_target_timer = 0.0f;
                     object->head_target_delay = 0.0f;
                     object->head_target = NULL;
@@ -728,7 +728,7 @@ void CharScenes_AreaLoad(APICHARACTERMODELLIST_s *list, variptr_u *buf, variptr_
 
             sprintf(path, "chars\\%s\\%s.gsc", CDataList[model_id].dir, CDataList[model_id].file);
             entry.scene = NuGScnRead(buf, buf_end, path);
-            if (entry.scene != NULL) {
+            if (__builtin_expect(entry.scene != NULL, 1)) {
                 NuSpecialFind(entry.scene, &entry.special_scene, CDataList[model_id].file, 1);
             }
         }
@@ -825,7 +825,7 @@ void IconScenes_Load(APICHARACTERMODELLIST_s *list, i32, variptr_u *buf, variptr
         NuStrCat(path, LevelObject_FindNameFromIndex(object_index));
         NuStrCat(path, ".gsc");
         IconScene[character_id] = NuGScnRead(buf, *buf_end, path);
-        if (IconScene[character_id] != NULL && IconScene[character_id]->display_list != NULL) {
+        if (__builtin_expect(IconScene[character_id] != NULL && IconScene[character_id]->display_list != NULL, 1)) {
             IconScene[character_id]->display_list->flags |= NU_DISPLAYSCENE_FLAG_NEEDS_BUILD;
         }
     }

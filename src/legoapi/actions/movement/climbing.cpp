@@ -139,7 +139,7 @@ struct CLIMBOBJECT_s;
 
 f32 MAGNETOFFSET;
 
-static __used__ void ClimbObject_FindNormal(CLIMBOBJECT_s *object);
+static void ClimbObject_FindNormal(CLIMBOBJECT_s *object);
 
 f32 LEDGETERRAINLOOKAHEAD = 0.02f;
 i32 LedgeTerrain_CheckAnims = 1;
@@ -555,43 +555,29 @@ extern "C" {
 // Game-specific pre-load limits. These must be applied before WorldInfo
 // reserves each level's fixed-size gameplay systems.
 
-static __used__ void ClimbObject_FindNormal(CLIMBOBJECT_s *object) {
-    AIPATHNODE *second = &object->path->nodes[object->connection->node_indices[1]];
-    AIPATHNODE *node = !(second->position.y <= object->path->nodes[object->connection->node_indices[0]].position.y)
-                           ? &object->path->nodes[object->connection->node_indices[0]]
-                           : second;
+static void ClimbObject_FindNormal(CLIMBOBJECT_s *object) {
+    AIPATHNODE *node = &object->path->nodes[object->connection->node_indices[1]];
+    if (node->position.y > object->path->nodes[object->connection->node_indices[0]].position.y)
+        node = &object->path->nodes[object->connection->node_indices[0]];
     NUVEC displacement, origin;
-#define PROBE_CLIMB_NORMAL(angle)                                                                                      \
-    do {                                                                                                               \
-        displacement.x = node->radius + 0.5f;                                                                          \
-        displacement.y = 0.0f;                                                                                         \
-        displacement.z = 0.0f;                                                                                         \
-        NuVecRotateY(&displacement, &displacement, angle);                                                             \
-        origin.x = node->position.x;                                                                                   \
-        origin.y = (node->max_height + node->min_height) * 0.5f;                                                       \
-        origin.z = node->position.z;                                                                                   \
-        if (__builtin_expect(                                                                                          \
-                GameRayCast(&origin, &displacement, 0.0f, TERRAINMASK_NONWEAPON | TERRAINMASK_NONDROID | 0x5f) != 0 && \
-                    (TerSurface[static_cast<i8>(NewRayCastGetImpactTerrainType())].flags & 0x10000) != 0,              \
-                0)) {                                                                                                  \
-            goto found_normal;                                                                                         \
-        }                                                                                                              \
-    } while (0)
-    PROBE_CLIMB_NORMAL(0);
-    PROBE_CLIMB_NORMAL(0x4000);
-    PROBE_CLIMB_NORMAL(0x8000);
-    PROBE_CLIMB_NORMAL(0xc000);
-    PROBE_CLIMB_NORMAL(0x10000);
-    PROBE_CLIMB_NORMAL(0x14000);
-    PROBE_CLIMB_NORMAL(0x18000);
-    PROBE_CLIMB_NORMAL(0x1c000);
-#undef PROBE_CLIMB_NORMAL
+    for (NUANG angle = 0; angle < 0x20000; angle += 0x4000) {
+        displacement.x = node->radius + 0.5f;
+        displacement.y = 0.0f;
+        displacement.z = 0.0f;
+        NuVecRotateY(&displacement, &displacement, angle);
+        origin.x = node->position.x;
+        origin.y = (node->max_height + node->min_height) * 0.5f;
+        origin.z = node->position.z;
+        if (GameRayCast(&origin, &displacement, 0.0f, TERRAINMASK_NONWEAPON | TERRAINMASK_NONDROID | 0x5f) != 0 &&
+            __builtin_expect((TerSurface[static_cast<i8>(NewRayCastGetImpactTerrainType())].flags & 0x10000) != 0, 0))
+            goto found_normal;
+    }
     return;
 found_normal:
     object->flags |= 1;
+    object->normal = ShadNorm;
     object->impact_x = origin.x + displacement.x;
     object->impact_z = origin.z + displacement.z;
-    object->normal = ShadNorm;
 }
 
 // Retail keeps the tail of LedgeTerrain_Attach split out by partial inlining;
@@ -608,8 +594,8 @@ static LEDGE_ATTACH_PART_ATTR i32 LedgeTerrain_AttachPart(GameObject_s *object, 
 static inline i32 LedgeTerrain_Attach(GameObject_s *object, u16 facing, NUVEC *position, u16 *wall_angle) {
     if (!object->field_0x1084)
         return 0;
-    u8 surface = object->field_0x6b0;
-    if (surface < 32 && (TerSurface[surface].flags & 0x581))
+    i32 surface = static_cast<i8>(object->field_0x6b0);
+    if (static_cast<u32>(surface) < 32 && (TerSurface[surface].flags & 0x581))
         return 0;
     if (object->apiobj.collision_position.y - 0.05f >= object->contact_position.y ||
         fabsf(object->contact_normal.y) > NuTrigTable[0x3000])
@@ -660,7 +646,7 @@ void LedgeTerrain_MoveCode(GameObject_s *object) {
                     NuFsqrt(-2.0f * object->apiobj.character_data->game_character->gravity * height);
             return;
         }
-        if (__builtin_expect(object->apiobj.field_0x27d & 2 != 0, 0)) {
+        if (__builtin_expect((object->apiobj.field_0x27d & 2) != 0, 0)) {
             object->character_context = -1;
             return;
         }
@@ -676,14 +662,12 @@ void LedgeTerrain_MoveCode(GameObject_s *object) {
             f32 z = object->external_force.z;
             object->apiobj.movement_facing_angle = wall_angle + 0x8000;
             object->external_force.y = position.y;
-            object->launch_origin.x = position.x;
+            object->launch_origin = position;
             object->external_force.x = object->apiobj.position.x;
             object->external_force.z = object->apiobj.position.z;
             object->airborne_action_duration = 0.25f;
-            object->launch_origin.y = position.y;
-            object->launch_origin.z = position.z;
-            z = object->apiobj.position.z - z;
             x = object->apiobj.position.x - x;
+            z = object->apiobj.position.z - z;
             travelled = NuFsqrt(x * x + z * z);
         } else {
             object->airborne_action_duration -= FRAMETIME;
@@ -862,7 +846,7 @@ void Climb_MoveCode(GameObject_s *object) {
         object->character_context = LEGOCONTEXT_CLIMB;
         object->field_0x7a6 = surface;
         object->airborne_action_duration = 0.25f;
-        if (surface == 5) {
+        if (__builtin_expect(surface == 5, 0)) {
             Climb_SetMagnetAction(object);
             Climb_SetMagnetDrawOffsetTarget(object, &object->zipup_swing_position);
         } else {
@@ -938,7 +922,7 @@ i32 Climb_SetTargetMom(GameObject_s *object, u16 input_angle) {
         if (object->apiobj.character_model->model_data_b[animation] != NULL)
             speed = fabsf(AnimSpeed(object->apiobj.character_model, animation));
     }
-    if (speed == 0.0f)
+    if (__builtin_expect(speed == 0.0f, 1))
         speed = 0.5f;
     u16 angle = object->apiobj.movement_facing_angle;
     object->target_velocity.x = NuTrigTable[static_cast<u16>(angle / 2)] * speed;
@@ -1012,7 +996,7 @@ check_hang_jump:
 try_start_hang:
     if (object->apiobj.field_0x27d != 0)
         return;
-    if (object->field_0x1084 == 0)
+    if (__builtin_expect(object->field_0x1084 == 0, 1))
         return;
     if (CanClimbSurface(object, static_cast<i8>(object->field_0x6b0)) == 0)
         return;
@@ -1241,10 +1225,11 @@ void WeaponOutCode(GameObject_s *object) {
         if ((object->field_0xe22 & GAMEOBJECT_E22_FLAG_WEAPON_ANIMATION) == 0 && object->character_context != 7) {
             if (object->weapon_scale_state == WEAPON_SCALE_IDLE && object->apiobj.field_0x27d != 0 &&
                 object->pad_gamepad->input_magnitude == 0.0f) {
+                void **models = object->apiobj.character_model->model_data_b;
                 i32 action = 17;
                 if (object->apiobj.character_data->game_character->field275_0x116 == 0)
                     action = (object->apiobj.character_data->model_flags & 0x80) != 0 ? 127 : 17;
-                if (object->apiobj.character_model->model_data_b[action] != NULL &&
+                if (models[action] != NULL &&
                     (object->character_context == -1 || (CInfo[object->character_context].flags & 4) != 0)) {
                     SlowWeaponOut(object);
                     goto after_weapon_touch;
@@ -1259,9 +1244,8 @@ void WeaponOutCode(GameObject_s *object) {
 after_weapon_touch:
     if (LEGOCONTEXT_WEAPONOUT == -1 || object->character_context != LEGOCONTEXT_WEAPONOUT)
         return;
-    if (__builtin_expect(object->pad_gamepad->input_magnitude > 0.0f &&
-                             (object->apiobj.character_data->game_character->field_0x94 & 0x1000) == 0,
-                         0)) {
+    if (object->pad_gamepad->input_magnitude > 0.0f &&
+        (object->apiobj.character_data->game_character->field_0x94 & 0x1000) == 0) {
         if (object->weapon_scale == 0.0f && object->weapon_scale_state != WEAPON_SCALE_EXTENDING) {
             FastWeaponOut(object, 0);
         }
@@ -1269,8 +1253,9 @@ after_weapon_touch:
         return;
     }
     ANIMPACKET_s &packet = object->apiobj.anim_packet;
-    const i16 animation = packet.blending ? packet.blend_animation_b : packet.animation_index;
-    if (animation != object->context_animation) {
+    const i16 context_animation = object->context_animation;
+    if ((packet.blending && packet.blend_animation_b != context_animation) ||
+        (!packet.blending && packet.animation_index != context_animation)) {
         object->weapon_scale = 0.0f;
         return;
     }
@@ -1284,7 +1269,7 @@ after_weapon_touch:
         if (object->weapon_scale != 0.0f || object->weapon_scale_state == WEAPON_SCALE_EXTENDING ||
             packet.requested_animation != object->context_animation)
             return;
-        const f32 time = packet.blending ? packet.blend_target_time : packet.current_time;
+        const f32 time = *(packet.blending ? &packet.blend_target_time : &packet.current_time);
         if (!(time >= start))
             return;
     }
@@ -1364,7 +1349,7 @@ void AutoWeaponOnOff(GameObject_s *object) {
     const ANIMPACKET_s &packet = object->apiobj.anim_packet;
     if ((flags & CHARACTER_ANIMATION_FLAG_GUN_OFF) != 0) {
         if (object->weapon_scale > 0.0f) {
-            if ((packet.flags & ANIMPACKET_FLAG_ANIMATION_CHANGED) != 0 && packet.blending != 0) {
+            if (__builtin_expect((packet.flags & ANIMPACKET_FLAG_ANIMATION_CHANGED) != 0 && packet.blending != 0, 0)) {
                 FastWeaponIn(object, 0);
             } else if ((packet.flags & ANIMPACKET_FLAG_ANIMATION_CHANGED) != 0 ||
                        object->weapon_scale_state != WEAPON_SCALE_RETRACTING) {

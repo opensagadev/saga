@@ -561,9 +561,9 @@ void GameCameraMakeMiniCut3(u32 flags, float distance, i32 pitch, i32 yaw, i32 r
             GameCameraMakeMiniCut2(&MiniCam.position, &MiniCam.target, target_guid, start_time, 1000000000.0f,
                                    blend_in_time, 0.0f, 1, 1, MiniCam.reserved_384);
         } else {
+            MiniCam.focus = &MiniCam.target;
             MiniCam.target = v000;
             MiniCam.focus_offset = v000;
-            MiniCam.focus = &MiniCam.target;
             MiniCam.position = *position;
             GameCameraMakeMiniCut2(&MiniCam.position, NULL, target_guid, start_time, 1000000000.0f, blend_in_time, 0.0f,
                                    0, 1, MiniCam.reserved_384);

@@ -42,12 +42,12 @@ void MechInputTouchGestureTrackingSystem::LookForClicks(GameObject_s &object) {
         if (first_recent && later_recent) {
             for (i32 priority = 0; priority < 10; ++priority) {
                 MechInputTouchGestureTracker *tracker = entries[priority].tracker;
-                if (!(tracker != NULL && tracker->OnDoubleClick(object, holder))) {
+                if (__builtin_expect(!(tracker != NULL && tracker->OnDoubleClick(object, holder)), 1)) {
                     continue;
                 }
                 break;
             }
-        } else if (first_recent || later_recent) {
+        } else if (__builtin_expect(first_recent || later_recent, 0)) {
             for (i32 priority = 0; priority < 10; ++priority) {
                 MechInputTouchGestureTracker *tracker = entries[priority].tracker;
                 if (!(tracker != NULL && tracker->OnClick(object, holder))) {
@@ -122,17 +122,16 @@ void MechInputTouchGestureTrackingSystem::LookForSwipe(GameObject_s &object) {
         f32 elapsed = 0.0f;
         f32 squared_path = 0.0f;
         i32 previous_index = 0;
-        for (i32 sample_index = 0; sample_index < 20; ++sample_index) {
-            TouchSwipeSample &sample = holder.swipe_samples[sample_index];
-            if (!(sample.time >= 0.0f)) {
-                break;
-            }
+        for (i32 sample_index = 0; sample_index < 20 && holder.swipe_samples[sample_index].time >= 0.0f;
+             ++sample_index) {
             if (sample_index > 0 && elapsed < 0.2f) {
-                previous_index = sample_index - 1;
-                elapsed += holder.swipe_samples[previous_index].time - sample.time;
-                f32 dy = sample.position.y - holder.swipe_samples[previous_index].position.y;
-                f32 dx = sample.position.x - holder.swipe_samples[previous_index].position.x;
+                elapsed += holder.swipe_samples[sample_index - 1].time - holder.swipe_samples[sample_index].time;
+                NuVec2 current = holder.swipe_samples[sample_index].position;
+                NuVec2 previous = holder.swipe_samples[sample_index - 1].position;
+                f32 dy = current.y - previous.y;
+                f32 dx = current.x - previous.x;
                 squared_path += dx * dx + dy * dy;
+                previous_index = sample_index;
             }
         }
         if (squared_path > 0.05f) {
@@ -244,30 +243,28 @@ void MechInputTouchGestureTrackingSystem::ReadData(GameObject_s &object, NuInput
 }
 
 void MechInputTouchGestureTrackingSystem::RegisterGestureTracker(MechInputTouchGestureTracker &tracker, i32 priority) {
-    GestureTrackerRegistration *entries = trackers;
-
     bool has_vacancy = false;
-    for (i32 index = 0; index < 9; ++index) {
-        has_vacancy |= entries[index].tracker == NULL;
+    for (i32 index = 0; index < 10; ++index) {
+        has_vacancy |= trackers[index].tracker == NULL;
     }
-    if (!has_vacancy && entries[9].tracker != NULL) {
+    if (!has_vacancy) {
         return;
     }
 
     i32 insertion_index;
     for (insertion_index = 0; insertion_index < 9; ++insertion_index) {
-        if (entries[insertion_index].tracker == NULL || priority < entries[insertion_index].priority) {
+        if (trackers[insertion_index].tracker == NULL || priority < trackers[insertion_index].priority) {
             break;
         }
     }
-    if (__builtin_expect(insertion_index == 9, 1)) {
+    if (insertion_index == 9) {
         return;
     }
-    for (GestureTrackerRegistration *entry = &entries[9]; entry != &entries[insertion_index]; --entry) {
-        entry[0] = entry[-1];
+    for (i32 index = 9; index != insertion_index; --index) {
+        trackers[index] = trackers[index - 1];
     }
-    entries[insertion_index].tracker = &tracker;
-    entries[insertion_index].priority = priority;
+    trackers[insertion_index].tracker = &tracker;
+    trackers[insertion_index].priority = priority;
 }
 
 void MechInputTouchGestureTrackingSystem::UnregisterGestureTracker(MechInputTouchGestureTracker &tracker) {
@@ -279,7 +276,7 @@ void MechInputTouchGestureTrackingSystem::UnregisterGestureTracker(MechInputTouc
     do {
         trackers[index] = trackers[index + 1];
         ++index;
-    } while (index != 9);
+    } while (__builtin_expect(index != 9, 0));
     trackers[9].tracker = NULL;
     trackers[9].priority = -1;
 }

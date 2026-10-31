@@ -26,7 +26,7 @@ void ShaderMtlDescFilter::internalInit(nushadermtldesc_s const *material_desc, n
     field_0x14 =
         variant == 0 && (flags & 0x20) != 0 && (vertex_descriptor[2] & 4) == 0 && (material_bytes[0x41] & 0x40) == 0;
     layer_count = variant == 0 ? 1 : 0;
-    if (field_0x10 != 0 || (variant == 0 && (desc->flagsbits_1ba & 1) != 0)) {
+    if (__builtin_expect(field_0x10 != 0 || (variant == 0 && (desc->flagsbits_1ba & 1) != 0), 1)) {
         ++layer_count;
     }
     if (field_0x18 != 0) {
@@ -38,8 +38,8 @@ void ShaderMtlDescFilter::internalInit(nushadermtldesc_s const *material_desc, n
 }
 
 bool ShaderMtlDescFilter::hasLayer(i32 layer) const {
-    if (variant != 0) {
-        if (__builtin_expect(layer == 0, 0)) {
+    if (__builtin_expect(variant != 0, 1)) {
+        if (__builtin_expect(layer == 0, 1)) {
             return desc->unknown_1b4 & 1;
         }
         return false;
@@ -83,7 +83,7 @@ u32 ShaderMtlDescFilter::getVertexFlags() const {
     if ((attribute_flags & 3) != 0 && (attribute_flags & 0x40) == 0) {
         flags |= 2;
     }
-    if (variant == 0 || desc->unknown_1b4 != 0) {
+    if (__builtin_expect(variant == 0 || desc->unknown_1b4 != 0, 0)) {
         const u8 texture_count = desc->vtx_desc.unknown_1_2_4;
         if (texture_count != 0) {
             flags |= 4;

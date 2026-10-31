@@ -1026,9 +1026,9 @@ void VaderC_Update(WORLDINFO_s *world) {
     extern TERRSET *CurTerr;
     extern i32 obstacle_gizmotype_id;
 
-    GIZAIMESSAGE_s *final_fight = vader_c.final_fight_message;
-    if (netclient == 0 && final_fight != NULL && ChallengeMode == 0 && final_fight->value == 0.0f &&
-        vader_c.big_jump_locator != NULL && player != NULL && player->apiobj.supporting_platform_id != -1) {
+    if (netclient == 0 && vader_c.final_fight_message != NULL && ChallengeMode == 0 &&
+        vader_c.final_fight_message->value == 0.0f && vader_c.big_jump_locator != NULL && player != NULL &&
+        player->apiobj.supporting_platform_id != -1) {
         vader_c.big_jump_locator->position = player->apiobj.lower_position;
 
         u8 progress = vader_c.field_0x94;
@@ -1052,7 +1052,7 @@ void VaderC_Update(WORLDINFO_s *world) {
         }
 
         if (progress == 3) {
-            final_fight->value = 1.0f;
+            vader_c.final_fight_message->value = 1.0f;
             DOOR_s *door = Door_FindByName(world, "door_fight");
             if (door != NULL)
                 Door_GoThrough(world, door, 1);
@@ -1075,15 +1075,12 @@ void VaderC_Update(WORLDINFO_s *world) {
     }
 
     if (vader_c.field_0x95 == 0) {
-        GameObject_s *second_player = Player[1];
-        GameObject_s *first_player = Player[0];
-        if (((first_player != NULL && first_player->apiobj.player_controlled &&
-              first_player->apiobj.field_0x287 != 0 && (first_player->apiobj.field_0x1f4 & 0x40000) == 0) ||
-             (second_player != NULL && (second_player->apiobj.field_0x1f8 & 0x80) != 0 &&
-              second_player->apiobj.field_0x287 != 0 && (second_player->apiobj.field_0x1f4 & 0x40000) == 0)) &&
-            (static_cast<u8 *>(vaderc_netpacket)[0] == 0 || first_player == NULL ||
-             !first_player->apiobj.player_controlled || second_player == NULL ||
-             !second_player->apiobj.player_controlled) &&
+        if (((Player[0] != NULL && Player[0]->apiobj.player_controlled && Player[0]->apiobj.field_0x287 != 0 &&
+              (Player[0]->apiobj.field_0x1f4 & 0x40000) == 0) ||
+             (Player[1] != NULL && Player[1]->apiobj.player_controlled && Player[1]->apiobj.field_0x287 != 0 &&
+              (Player[1]->apiobj.field_0x1f4 & 0x40000) == 0)) &&
+            (static_cast<u8 *>(vaderc_netpacket)[0] == 0 || Player[0] == NULL || !Player[0]->apiobj.player_controlled ||
+             Player[1] == NULL || !Player[1]->apiobj.player_controlled) &&
             (ChallengeMode == 0 || AreaGlobals.values.field_0x1c <= 9)) {
             vader_c.field_0x95 = 1;
             if (vader_c.final_fight_message->value == 0.0f)

@@ -117,7 +117,8 @@ void ShaderManagerOpenGL::adaptShaderMaterialForShaderVersion(NUSHADERMTLDESC *d
     }
 
     u8 &mobile_capabilities = reinterpret_cast<u8 *>(&desc->field_1bc)[0];
-    mobile_capabilities = (mobile_capabilities & 0xfb) | ((NuIOS_IsLowEndDevice() == 0) << 2);
+    const u32 high_end = NuIOS_IsLowEndDevice() == 0;
+    mobile_capabilities = (mobile_capabilities & 0xfb) | (high_end << 2);
 }
 
 bool ShaderManagerOpenGL::createShader(ShaderMtlDescFilter &filter, bool pixelStage, NuShaderObject *object, i32 id) {

@@ -54,7 +54,7 @@ void MechJumpAutoPilotAddon::CalculateModifiedJumpTrajectory() {
     float first_time;
     float second_time;
     const float gravity = character->apiobj.character_data->game_character->gravity;
-    if (!TouchHacks::SolveRoot(gravity * 0.5f, field_34.y, -(field_84.y - field_24.y), first_time, second_time)) {
+    if (__builtin_expect(!TouchHacks::SolveRoot(gravity * 0.5f, field_34.y, -(field_84.y - field_24.y), first_time, second_time), 0)) {
         state = 6;
         return;
     }
@@ -100,7 +100,7 @@ void MechJumpAutoPilotAddon::LookForLandingPoint() {
         field_9d = false;
         if (LookForLandingSpotAroundPoint(field_74))
             state = 3;
-    } else if (field_9c) {
+    } else if (__builtin_expect(field_9c != 0, 0)) {
         field_9c = false;
         if (!LookForLandingSpotAroundPoint(field_64)) {
             state = 5;
@@ -124,30 +124,12 @@ bool MechJumpAutoPilotAddon::LookForLandingSpotAroundPoint(VuVec const &point) {
     offsets[0].y = VuVec_Zero.y;
     offsets[0].z = VuVec_Zero.z;
     offsets[0].w = VuVec_Zero.w;
-    offsets[1].x = NuTrigTable[0x1000] * 0.2f;
-    offsets[1].y = 0.0f;
-    offsets[1].z = NuTrigTable[0x3000] * 0.2f;
-    offsets[2].x = NuTrigTable[0x2000] * 0.5f;
-    offsets[2].y = 0.0f;
-    offsets[2].z = NuTrigTable[0x4000] * 0.5f;
-    offsets[3].x = NuTrigTable[0x3000] * 0.2f;
-    offsets[3].y = 0.0f;
-    offsets[3].z = NuTrigTable[0x5000] * 0.2f;
-    offsets[4].x = NuTrigTable[0x4000] * 0.5f;
-    offsets[4].y = 0.0f;
-    offsets[4].z = NuTrigTable[0x6000] * 0.5f;
-    offsets[5].x = NuTrigTable[0x5000] * 0.2f;
-    offsets[5].y = 0.0f;
-    offsets[5].z = NuTrigTable[0x7000] * 0.2f;
-    offsets[6].x = NuTrigTable[0x6000] * 0.5f;
-    offsets[6].y = 0.0f;
-    offsets[6].z = NuTrigTable[0x0000] * 0.5f;
-    offsets[7].x = NuTrigTable[0x7000] * 0.2f;
-    offsets[7].y = 0.0f;
-    offsets[7].z = NuTrigTable[0x1000] * 0.2f;
-    offsets[8].x = NuTrigTable[0x0000] * 0.5f;
-    offsets[8].y = 0.0f;
-    offsets[8].z = NuTrigTable[0x2000] * 0.5f;
+    for (int i = 1; i < 9; i++) {
+        const f32 radius = (i & 1) ? 0.2f : 0.5f;
+        offsets[i].x = NU_SIN_LUT(i * 0x2000) * radius;
+        offsets[i].y = 0.0f;
+        offsets[i].z = NU_COS_LUT(i * 0x2000) * radius;
+    }
 
     bool found = false;
     f32 best_score = -1000000000.0f;
@@ -155,161 +137,23 @@ bool MechJumpAutoPilotAddon::LookForLandingSpotAroundPoint(VuVec const &point) {
     const f32 ray_length = -sweep_height;
     const f32 ray_offset = sweep_height - 1.0f;
 
-    {
+    for (int i = 0; i < 9; i++) {
         VuVec ray(0.0f, ray_length, 0.0f, 1.0f);
+        const VuVec &offset = offsets[i];
         VuVec origin;
+        origin.x = point.x + offset.x;
+        origin.z = point.z + offset.z;
         origin.y = field_24.y + ray_offset;
-        origin.z = point.z + offsets[0].z;
-        origin.x = point.x + offsets[0].x;
         if (GameRayCast(&origin.xyz, &ray.xyz, 0.0f, 0)) {
-            const VuVec hit(origin.x + ray.x, origin.y + ray.y, origin.z + ray.z, 0.0f);
+            VuVec hit;
+            hit.x = origin.x + ray.x;
+            hit.z = origin.z + ray.z;
+            hit.y = origin.y + ray.y;
+            hit.w = 0.0f;
             const f32 dx = hit.x - field_24.x;
             const f32 dz = hit.z - field_24.z;
-            const f32 score = (hit.y - field_24.y + 0.1f) * (dx * dx + dz * dz);
-            if (score > best_score) {
-                best_score = score;
-                *reinterpret_cast<LandingSpotVec4 *>(&field_84) = (LandingSpotVec4){hit.x, hit.y, hit.z, hit.w};
-            }
-            found = true;
-        }
-    }
-    {
-        VuVec ray(0.0f, ray_length, 0.0f, 1.0f);
-        VuVec origin;
-        origin.y = field_24.y + ray_offset;
-        origin.x = point.x + offsets[1].x;
-        origin.z = point.z + offsets[1].z;
-        if (GameRayCast(&origin.xyz, &ray.xyz, 0.0f, 0)) {
-            const VuVec hit(origin.x + ray.x, origin.y + ray.y, origin.z + ray.z, 0.0f);
-            const f32 dx = hit.x - field_24.x;
-            const f32 dz = hit.z - field_24.z;
-            const f32 score = (hit.y - field_24.y + 0.1f) * (dx * dx + dz * dz);
-            if (score > best_score) {
-                best_score = score;
-                *reinterpret_cast<LandingSpotVec4 *>(&field_84) = (LandingSpotVec4){hit.x, hit.y, hit.z, hit.w};
-            }
-            found = true;
-        }
-    }
-    {
-        VuVec ray(0.0f, ray_length, 0.0f, 1.0f);
-        VuVec origin;
-        origin.x = point.x + offsets[2].x;
-        origin.y = field_24.y + ray_offset;
-        origin.z = point.z + offsets[2].z;
-        if (GameRayCast(&origin.xyz, &ray.xyz, 0.0f, 0)) {
-            const VuVec hit(origin.x + ray.x, origin.y + ray.y, origin.z + ray.z, 0.0f);
-            const f32 dx = hit.x - field_24.x;
-            const f32 dz = hit.z - field_24.z;
-            const f32 score = (hit.y - field_24.y + 0.1f) * (dx * dx + dz * dz);
-            if (score > best_score) {
-                best_score = score;
-                *reinterpret_cast<LandingSpotVec4 *>(&field_84) = (LandingSpotVec4){hit.x, hit.y, hit.z, hit.w};
-            }
-            found = true;
-        }
-    }
-    {
-        VuVec ray(0.0f, ray_length, 0.0f, 1.0f);
-        VuVec origin;
-        origin.x = point.x + offsets[3].x;
-        origin.y = field_24.y + ray_offset;
-        origin.z = point.z + offsets[3].z;
-        if (GameRayCast(&origin.xyz, &ray.xyz, 0.0f, 0)) {
-            const VuVec hit(origin.x + ray.x, origin.y + ray.y, origin.z + ray.z, 0.0f);
-            const f32 dx = hit.x - field_24.x;
-            const f32 dz = hit.z - field_24.z;
-            const f32 score = (hit.y - field_24.y + 0.1f) * (dx * dx + dz * dz);
-            if (score > best_score) {
-                best_score = score;
-                *reinterpret_cast<LandingSpotVec4 *>(&field_84) = (LandingSpotVec4){hit.x, hit.y, hit.z, hit.w};
-            }
-            found = true;
-        }
-    }
-    {
-        VuVec ray(0.0f, ray_length, 0.0f, 1.0f);
-        VuVec origin;
-        origin.x = point.x + offsets[4].x;
-        origin.y = field_24.y + ray_offset;
-        origin.z = point.z + offsets[4].z;
-        if (GameRayCast(&origin.xyz, &ray.xyz, 0.0f, 0)) {
-            const VuVec hit(origin.x + ray.x, origin.y + ray.y, origin.z + ray.z, 0.0f);
-            const f32 dx = hit.x - field_24.x;
-            const f32 dz = hit.z - field_24.z;
-            const f32 score = (hit.y - field_24.y + 0.1f) * (dx * dx + dz * dz);
-            if (score > best_score) {
-                best_score = score;
-                *reinterpret_cast<LandingSpotVec4 *>(&field_84) = (LandingSpotVec4){hit.x, hit.y, hit.z, hit.w};
-            }
-            found = true;
-        }
-    }
-    {
-        VuVec ray(0.0f, ray_length, 0.0f, 1.0f);
-        VuVec origin;
-        origin.x = point.x + offsets[5].x;
-        origin.y = field_24.y + ray_offset;
-        origin.z = point.z + offsets[5].z;
-        if (GameRayCast(&origin.xyz, &ray.xyz, 0.0f, 0)) {
-            const VuVec hit(origin.x + ray.x, origin.y + ray.y, origin.z + ray.z, 0.0f);
-            const f32 dx = hit.x - field_24.x;
-            const f32 dz = hit.z - field_24.z;
-            const f32 score = (hit.y - field_24.y + 0.1f) * (dx * dx + dz * dz);
-            if (score > best_score) {
-                best_score = score;
-                *reinterpret_cast<LandingSpotVec4 *>(&field_84) = (LandingSpotVec4){hit.x, hit.y, hit.z, hit.w};
-            }
-            found = true;
-        }
-    }
-    {
-        VuVec ray(0.0f, ray_length, 0.0f, 1.0f);
-        VuVec origin;
-        origin.x = point.x + offsets[6].x;
-        origin.y = field_24.y + ray_offset;
-        origin.z = point.z + offsets[6].z;
-        if (GameRayCast(&origin.xyz, &ray.xyz, 0.0f, 0)) {
-            const VuVec hit(origin.x + ray.x, origin.y + ray.y, origin.z + ray.z, 0.0f);
-            const f32 dx = hit.x - field_24.x;
-            const f32 dz = hit.z - field_24.z;
-            const f32 score = (hit.y - field_24.y + 0.1f) * (dx * dx + dz * dz);
-            if (score > best_score) {
-                best_score = score;
-                *reinterpret_cast<LandingSpotVec4 *>(&field_84) = (LandingSpotVec4){hit.x, hit.y, hit.z, hit.w};
-            }
-            found = true;
-        }
-    }
-    {
-        VuVec ray(0.0f, ray_length, 0.0f, 1.0f);
-        VuVec origin;
-        origin.x = point.x + offsets[7].x;
-        origin.y = field_24.y + ray_offset;
-        origin.z = point.z + offsets[7].z;
-        if (GameRayCast(&origin.xyz, &ray.xyz, 0.0f, 0)) {
-            const VuVec hit(origin.x + ray.x, origin.y + ray.y, origin.z + ray.z, 0.0f);
-            const f32 dx = hit.x - field_24.x;
-            const f32 dz = hit.z - field_24.z;
-            const f32 score = (hit.y - field_24.y + 0.1f) * (dx * dx + dz * dz);
-            if (score > best_score) {
-                best_score = score;
-                *reinterpret_cast<LandingSpotVec4 *>(&field_84) = (LandingSpotVec4){hit.x, hit.y, hit.z, hit.w};
-            }
-            found = true;
-        }
-    }
-    {
-        VuVec ray(0.0f, ray_length, 0.0f, 1.0f);
-        VuVec origin;
-        origin.x = point.x + offsets[8].x;
-        origin.y = field_24.y + ray_offset;
-        origin.z = point.z + offsets[8].z;
-        if (GameRayCast(&origin.xyz, &ray.xyz, 0.0f, 0)) {
-            const VuVec hit(origin.x + ray.x, origin.y + ray.y, origin.z + ray.z, 0.0f);
-            const f32 dx = hit.x - field_24.x;
-            const f32 dz = hit.z - field_24.z;
-            const f32 score = (hit.y - field_24.y + 0.1f) * (dx * dx + dz * dz);
+            const f32 dy = hit.y - field_24.y + 0.1f;
+            const f32 score = dy * (dx * dx + dz * dz);
             if (score > best_score) {
                 best_score = score;
                 *reinterpret_cast<LandingSpotVec4 *>(&field_84) = (LandingSpotVec4){hit.x, hit.y, hit.z, hit.w};
@@ -357,7 +201,30 @@ bool MechJumpAutoPilotAddon::OnProcess(MechAddon::ProcessStage, float delta_time
     const bool is_jumping = character->character_context == LEGOCONTEXT_JUMP;
     if (!is_jumping && started)
         return false;
-    if (state != 0) {
+    if (state == 0) {
+        elapsed_time += delta_time;
+        if (__builtin_expect(character->character_context == LEGOCONTEXT_JUMP, 0) && !started) {
+            field_24 =
+                VuVec(character->apiobj.position.x, character->apiobj.position.y, character->apiobj.position.z, 1.0f);
+            field_34 =
+                VuVec(character->apiobj.velocity.x, character->apiobj.velocity.y, character->apiobj.velocity.z, 1.0f);
+            field_44.x = field_24.x;
+            field_44.y = field_24.y;
+            field_44.z = field_24.z;
+            field_44.w = 1.0f;
+            field_54.x = field_34.x;
+            field_54.y = field_34.y;
+            field_54.z = field_34.z;
+            field_54.w = 1.0f;
+            state = 1;
+            field_9c = false;
+            field_9d = false;
+
+            const float gravity = character->apiobj.character_data->game_character->gravity;
+            field_94 = field_24.y + (-(field_34.y * field_34.y)) / (gravity + gravity);
+            elapsed_time = 0.0f;
+        }
+    } else {
         GameObject_s *jump_character = character;
         const float x_speed = field_34.x * speed_scale;
         const float z_speed = field_34.z * speed_scale;
@@ -388,38 +255,8 @@ bool MechJumpAutoPilotAddon::OnProcess(MechAddon::ProcessStage, float delta_time
             default:
                 break;
         }
-        goto update_started;
     }
 
-    elapsed_time += delta_time;
-    if (__builtin_expect(character->character_context == LEGOCONTEXT_JUMP && !started, 0)) {
-        field_24.y = character->apiobj.position.y;
-        field_24.x = character->apiobj.position.x;
-        field_24.w = 1.0f;
-        field_24.z = character->apiobj.position.z;
-        field_34.y = character->apiobj.velocity.y;
-        field_34.x = character->apiobj.velocity.x;
-        field_34.z = character->apiobj.velocity.z;
-        field_34.w = 1.0f;
-        field_44.x = field_24.x;
-        field_44.z = field_24.z;
-        field_44.y = field_24.y;
-        field_44.w = 1.0f;
-        field_54.x = field_34.x;
-        field_54.y = field_34.y;
-        field_54.z = field_34.z;
-        field_54.w = 1.0f;
-        field_9c = false;
-        field_9d = false;
-        state = 1;
-        elapsed_time = 0.0f;
-
-        const float gravity = character->apiobj.character_data->game_character->gravity;
-        const float vy = character->apiobj.velocity.y;
-        field_94 = character->apiobj.position.y + (-(vy * vy)) / (gravity + gravity);
-    }
-
-update_started:
     started |= character->character_context == LEGOCONTEXT_JUMP;
     return true;
 }

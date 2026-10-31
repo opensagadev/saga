@@ -84,7 +84,7 @@ static void D_spline(NUFPAR *parser) {
 
     for (i32 i = 0; i < D_worldinfo->door_count; i++) {
         DOOR_s *other = &D_worldinfo->doors[i];
-        if (other->spline == D_door->spline) {
+        if (__builtin_expect(other->spline == D_door->spline, 0)) {
             D_door->spline = NULL;
             D_door->name[0] = '\0';
             return;
@@ -598,19 +598,19 @@ DOOR_s *Door_FindByIndex(WORLDINFO_s *world, i32 area, i32 level, NUVEC *positio
     DOOR_s *door = world->doors;
     if (door == NULL || world->door_count <= 0)
         return NULL;
-    DOOR_s *best = NULL;
     f32 best_distance = 1000000.0f;
+    DOOR_s *best = NULL;
     for (i32 i = 0; i < world->door_count; ++i, ++door) {
-        if (__builtin_expect((door->flags & 4) != 0 || door->level == -1, 0))
+        if ((door->flags & 4) != 0 || __builtin_expect(door->level == -1, 0))
             continue;
-        if ((area != -1 && LDataList[door->level].area_index == area) || (level != -1 && door->level == level)) {
-            if (position == NULL)
-                return door;
-            f32 distance = NuVecDistSqr(position, &door->pos, NULL);
-            if (distance < best_distance) {
-                best_distance = distance;
-                best = door;
-            }
+        if ((level == -1 || door->level != level) && (area == -1 || LDataList[door->level].area_index != area))
+            continue;
+        if (position == NULL)
+            return door;
+        f32 distance = NuVecDistSqr(position, &door->pos, NULL);
+        if (distance < best_distance) {
+            best_distance = distance;
+            best = door;
         }
     }
     return best;

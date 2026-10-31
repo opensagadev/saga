@@ -158,49 +158,50 @@ void Customiser_DrawAccessories(CUSTOMISER *customiser, GameObject_s *object, nu
     NUMTX_ALIGNED16 reflection;
     NUMTX_ALIGNED16 matrix;
     const i32 joint = object->apiobj.character_data->player_config->helmet_locator;
-    if (customiser == NULL || joint == -1 || object->apiobj.character_model->points_of_interest[joint] == NULL)
-        return;
-
-    const i32 side = object->id != customiser->character_ids[0];
-    i32 next_category = 0;
-    CUSTOMPIECERESOURCE *next_resource = Accessory[side];
-    do {
-        CUSTOMPIECERESOURCE *resource = next_resource++;
-        const i32 category = next_category++;
-        if (__builtin_expect(customiser->piece_counts[category] <= 0 || category == 2, 0))
-            continue;
-        if (category == 0) {
-            const u16 *pieces = customiser->save[side].pieces;
-            if ((customiser->piece_sets[0][static_cast<u16>(pieces[0])].layer_flags & 0x20) != 0 ||
-                (customiser->piece_sets[1][static_cast<u16>(pieces[1])].layer_flags & 1) != 0 ||
-                object->field_0x108e != 0)
+    if (__builtin_expect(customiser != NULL && joint != -1 &&
+                             object->apiobj.character_model->points_of_interest[joint] != NULL,
+                         1)) {
+        const i32 side = object->id != customiser->character_ids[0];
+        i32 next_category = 0;
+        CUSTOMPIECERESOURCE *next_resource = Accessory[side];
+        do {
+            CUSTOMPIECERESOURCE *resource = next_resource++;
+            const i32 category = next_category++;
+            if (__builtin_expect(customiser->piece_counts[category] <= 0 || category == 2, 0))
                 continue;
-        }
+            if (category == 0) {
+                const u16 *pieces = customiser->save[side].pieces;
+                if ((customiser->piece_sets[0][static_cast<u16>(pieces[0])].layer_flags & 0x20) != 0 ||
+                    (customiser->piece_sets[1][static_cast<u16>(pieces[1])].layer_flags & 1) != 0 ||
+                    object->field_0x108e != 0)
+                    continue;
+            }
 
-        nuhspecial_s *special = &resource->special;
-        if (__builtin_expect(!NuSpecialExistsFn(special), 0))
-            continue;
+            nuhspecial_s *special = &resource->special;
+            if (__builtin_expect(!NuSpecialExistsFn(special), 0))
+                continue;
 
-        // Retail keeps both draw matrices on a 16-byte-aligned stack.
+            // Retail keeps both draw matrices on a 16-byte-aligned stack.
 
-        if (__builtin_expect(matrices != NULL, 1))
-            matrix = matrices[joint];
-        else
-            matrix = object->joint_matrices[joint];
-        NuSpecialDrawAt(special, &matrix);
-        if (object->field_0x1088 != 0 && MatrixReflection(&matrix, object->field_0x1087, object->field_0x1020,
-                                                          WORLD->current_level->unknown_0cc, &reflection)) {
-            NuRndrStartReflectionRender(0);
-            NuSpecialDrawAt(special, &reflection);
-            NuRndrEndReflectionRender();
-        }
-    } while (next_category != 9);
+            if (__builtin_expect(matrices != NULL, 1))
+                matrix = matrices[joint];
+            else
+                matrix = object->joint_matrices[joint];
+            NuSpecialDrawAt(special, &matrix);
+            if (object->field_0x1088 != 0 && MatrixReflection(&matrix, object->field_0x1087, object->field_0x1020,
+                                                              WORLD->current_level->unknown_0cc, &reflection)) {
+                NuRndrStartReflectionRender(0);
+                NuSpecialDrawAt(special, &reflection);
+                NuRndrEndReflectionRender();
+            }
+        } while (next_category != 9);
+    }
 }
 
 i32 Customiser_NextPieceRight(CUSTOMISER *customiser, i32 index, i32 count, i32 unused, i32 category) {
     i32 found = 0;
     i32 attempts = 0;
-    if (customiser) {
+    if (__builtin_expect(customiser != 0, 1)) {
         while (attempts < count && !found) {
             ++index;
             if (index >= count)
@@ -223,10 +224,7 @@ i32 Customiser_NextPieceRight(CUSTOMISER *customiser, i32 index, i32 count, i32 
             if (available) {
                 if (!(customiser->piece_sets[category][index].availability_flags & 0x180) ||
                     Game_100PercentComplete()) {
-                    if (customiser->piece_available(&customiser->piece_sets[category][index]))
-                        found = 1;
-                    else
-                        ++attempts;
+                    if (!(customiser->piece_available(&customiser->piece_sets[category][index]))) ++attempts; else found = 1;
                 } else
                     ++attempts;
             } else
@@ -242,23 +240,23 @@ void Customiser_LoadAccessories(CUSTOMISER *customiser, APICHARACTERMODELLIST_s 
     }
 
     Customiser_AccessoriesLoaded = 1;
-    for (; models->model_id != -1; ++models) {
-        i32 side = 0;
-        if (models->model_id != customiser->character_ids[0]) {
-            if (models->model_id != customiser->character_ids[1]) {
-                continue;
-            }
+    i32 model_id;
+    for (; (model_id = models->model_id) != -1; ++models) {
+        i32 side;
+        if (model_id == customiser->character_ids[0]) {
+            side = 0;
+        } else if (model_id == customiser->character_ids[1]) {
             side = 1;
+        } else {
+            continue;
         }
 
-        const i16 slot = apicharsys->playermodelids[models->model_id];
-        CHARACTERMODEL_s *character_model = &apicharsys->models[slot];
-        for (i32 category_index = 0; category_index < 9; ++category_index) {
-            CUSTOMPIECERESOURCE *resource = &Accessory[side][category_index];
+        CHARACTERMODEL_s *character_model = &apicharsys->models[apicharsys->playermodelids[model_id]];
+        CUSTOMPIECERESOURCE *resource = Accessory[side];
+        for (i32 category_index = 0; category_index < 9; ++category_index, ++resource) {
             memset(resource, 0, sizeof(*resource));
 
-            CUSTOMPIECECATEGORY *category = customiser->categories[category_index];
-            if (category->name == NULL || customiser->piece_counts[category_index] <= 0) {
+            if (customiser->categories[category_index]->name == NULL || customiser->piece_counts[category_index] <= 0) {
                 continue;
             }
 
@@ -269,18 +267,18 @@ void Customiser_LoadAccessories(CUSTOMISER *customiser, APICHARACTERMODELLIST_s 
             char path[0x80];
             NuStrCpy(piece_name, piece->name);
             NuStrCpy(path, "chars\\weirdo\\");
-            NuStrCat(path, category->name);
+            NuStrCat(path, customiser->categories[category_index]->name);
             NuStrCat(path, "\\");
             NuStrCat(path, piece_name);
 
-            if (category->uses_special != 0) {
+            if (customiser->categories[category_index]->uses_special != 0) {
                 NuStrCat(path, ".gsc");
                 resource->scene = NuGScnRead(&characterbuffer_ptr, characterbuffer_end, path);
                 if (resource->scene != NULL) {
                     NuSpecialFind(resource->scene, &resource->special, piece_name, 1);
                 }
             } else {
-                if (category->material_tag == -1) {
+                if (customiser->categories[category_index]->material_tag == -1) {
                     continue;
                 }
                 NuStrCat(path, ".pnt");
@@ -289,11 +287,10 @@ void Customiser_LoadAccessories(CUSTOMISER *customiser, APICHARACTERMODELLIST_s 
                     continue;
                 }
 
-                nuhgobj_s *hierarchy = character_model->hierarchy;
-                auto hierarchy_material_count = hierarchy->material_count;
-                for (i32 material_index = 0; material_index < hierarchy_material_count; ++material_index) {
-                    NUMTL *material = hierarchy->materials[material_index];
-                    if (material->unknown_9a[0] != category->material_tag) {
+                for (i32 material_index = 0; material_index < character_model->hierarchy->material_count;
+                     ++material_index) {
+                    NUMTL *material = character_model->hierarchy->materials[material_index];
+                    if (material->unknown_9a[0] != customiser->categories[category_index]->material_tag) {
                         continue;
                     }
                     resource->material_index = material_index;
@@ -377,7 +374,7 @@ void Customiser_DumpAccessories(CUSTOMISER *customiser) {
     if (customiser == NULL || Customiser_AccessoriesLoaded != 1)
         return;
 
-    if (apicharsys->playermodelids[customiser->character_ids[0]] != -1) {
+    if (__builtin_expect(apicharsys->playermodelids[customiser->character_ids[0]] != -1, 1)) {
         Customiser_DumpAccessory(customiser, 0, 0);
         Customiser_DumpAccessory(customiser, 0, 1);
         Customiser_DumpAccessory(customiser, 0, 2);
@@ -388,7 +385,7 @@ void Customiser_DumpAccessories(CUSTOMISER *customiser) {
         Customiser_DumpAccessory(customiser, 0, 7);
         Customiser_DumpAccessory(customiser, 0, 8);
     }
-    if (apicharsys->playermodelids[customiser->character_ids[1]] != -1) {
+    if (__builtin_expect(apicharsys->playermodelids[customiser->character_ids[1]] != -1, 1)) {
         Customiser_DumpAccessory(customiser, 1, 0);
         Customiser_DumpAccessory(customiser, 1, 1);
         Customiser_DumpAccessory(customiser, 1, 2);
@@ -402,7 +399,7 @@ void Customiser_DumpAccessories(CUSTOMISER *customiser) {
 }
 
 void Customiser_DumpAll(CUSTOMISER *customiser, WORLDINFO_s *world) {
-    if (customiser == NULL) {
+    if (__builtin_expect(customiser == NULL, 0)) {
         return;
     }
     for (i32 category = 0; category < 9; ++category) {
@@ -493,14 +490,15 @@ void Customiser_LoadAll(CUSTOMISER *customiser, WORLDINFO_s *world) {
             NuStrCat(path, piece_name);
 
             if (customiser->categories[category_index]->uses_special != 0) {
-                resource->scene = world->customiser_shared_scenes[category_index];
-                if (resource->scene == NULL) {
+                auto scene = world->customiser_shared_scenes[category_index];
+                if (scene == NULL) {
                     NuStrCat(path, ".gsc");
                     world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 0x40);
-                    resource->scene = NuGScnRead(&world->giz_buffer, world->unknown_0108, path);
+                    scene = NuGScnRead(&world->giz_buffer, world->unknown_0108, path);
                 }
-                if (__builtin_expect(resource->scene != NULL, 1)) {
-                    NuSpecialFind(resource->scene, &resource->special, piece_name, 1);
+                resource->scene = scene;
+                if (__builtin_expect(scene != NULL, 1)) {
+                    NuSpecialFind(scene, &resource->special, piece_name, 1);
                 }
                 continue;
             }
@@ -509,7 +507,8 @@ void Customiser_LoadAll(CUSTOMISER *customiser, WORLDINFO_s *world) {
                 continue;
             }
             PLATFORMS_SUPPORTED platform = NuPlatform::Get()->GetCurrentPlatform();
-            if (__builtin_expect(platform != IOS_PLATFORM && platform != ANDROID_ATITC_PLATFORM, 1)) {
+            if (__builtin_expect(platform != IOS_PLATFORM, 1) &&
+                __builtin_expect(platform != ANDROID_ATITC_PLATFORM, 1)) {
                 NuStrCat(path, ".pnt");
             }
 

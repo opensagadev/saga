@@ -947,26 +947,26 @@ void AddLevSfx(WORLDINFO_s *world, nuvec_s *position, char *name, i32 sfx) {
     }
 
     const i32 count = world->level_sfx_count;
-    i32 index;
-    LEVELSFXENTRY_s *entry = world->level_sfx;
-    for (index = 0; index < count; ++index, ++entry) {
-        if (entry->id == sfx)
+    i32 found = -1;
+    for (i32 index = 0; index < count; ++index) {
+        if (world->level_sfx[index].id == sfx) {
+            found = index;
             break;
+        }
     }
-    if (index == count) {
-        if (__builtin_expect(index >= 64, 0)) {
-            return;
+    if (found == -1) {
+        if (count < 64) {
+            if (position == NULL) {
+                world->level_sfx[count].position = nuvec_zero;
+            } else {
+                world->level_sfx[count].position = *position;
+            }
+            world->level_sfx[count].id = static_cast<i16>(sfx);
+            world->level_sfx[count].references = 1;
+            world->level_sfx_count = count + 1;
         }
-        if (position != NULL) {
-            world->level_sfx[index].position = *position;
-        } else {
-            world->level_sfx[index].position = nuvec_zero;
-        }
-        world->level_sfx[index].id = static_cast<i16>(sfx);
-        world->level_sfx[index].references = 1;
-        world->level_sfx_count = index + 1;
-    } else if (world->level_sfx[index].references != -1) {
-        ++world->level_sfx[index].references;
+    } else if (world->level_sfx[found].references != -1) {
+        ++world->level_sfx[found].references;
     }
 }
 
@@ -1083,7 +1083,7 @@ void PlayLandSfx(GameObject_s *object, i32 type, i32) {
             if (type != 0) {
                 return;
             }
-            if (alternate != 0) {
+            if (__builtin_expect(alternate != 0, 1)) {
                 sfx = GameAudio->sfx_ids[8];
             } else {
                 sfx = GameAudio->sfx_ids[7];
@@ -1096,7 +1096,7 @@ void PlayLandSfx(GameObject_s *object, i32 type, i32) {
             }
         }
     }
-    if (sfx != -1) {
+    if (__builtin_expect(sfx != -1, 1)) {
         if (static_cast<i8>(object->apiobj.flags_low) < 0 || object->is_boss) {
             GameAudio_PlaySfxById(sfx, &object->apiobj.lower_position, 0, 1);
         } else {
@@ -1119,7 +1119,7 @@ void PlayFootStepSfx(GameObject_s *object) {
         sfx = object->apiobj.character_data->game_character->sfx_footstep;
     } else {
         sfx = -1;
-        if (GameAudio->override_footstep_fn != NULL) {
+        if (__builtin_expect(GameAudio->override_footstep_fn != NULL, 1)) {
             sfx = GameAudio->override_footstep_fn(object, on_platform);
         }
         if (sfx == -1) {
@@ -1248,7 +1248,7 @@ void PlayDieSfx(GameObject_s *object) {
                 }
             }
         }
-        if (sfx == -1) {
+        if (__builtin_expect(sfx == -1, 1)) {
             goto extra;
         }
     }
@@ -1453,7 +1453,7 @@ void NewAreaMusicChanges(void) {
 i32 ActionFromQuiet(i32 idx) {
     if (idx != -1) {
         for (i32 entry = 0; ActionPairTab[entry * 14] != -1; entry++) {
-            if (ActionPairTab[entry * 14] == idx) {
+            if (__builtin_expect(ActionPairTab[entry * 14] == idx, 0)) {
                 return ActionPairTab[entry * 14 + 1];
             }
         }
@@ -1464,7 +1464,7 @@ i32 ActionFromQuiet(i32 idx) {
 i32 AmbientFromQuiet(i32 idx) {
     if (idx != -1) {
         for (i32 entry = 0; AmbientPairTab[entry * 2] != -1; entry++) {
-            if (AmbientPairTab[entry * 2] == idx) {
+            if (__builtin_expect(AmbientPairTab[entry * 2] == idx, 0)) {
                 return AmbientPairTab[entry * 2 + 1];
             }
         }
