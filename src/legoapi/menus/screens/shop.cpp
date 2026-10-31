@@ -341,10 +341,11 @@ i32 ItemMenu(MENU_s *menu) {
     i32 selection = -1;
     i32 cancel = 0;
     if (menu->confirm_pressed != 0 && menu->selected_row == 0) {
-        candidate = static_cast<i32>(menu->selected_column) + 1;
-        if (__builtin_expect(candidate == entry_picked, 0)) {
+        const i32 column = static_cast<i32>(menu->selected_column) + 1;
+        if (column == picked)
             input.value[8] = 1;
-        }
+        else
+            candidate = column;
     }
 
     itemchanged = 0;
@@ -381,21 +382,21 @@ i32 ItemMenu(MENU_s *menu) {
     }
 
     if (candidate != entry_picked) {
+        SubMenu = 0;
         lastitem = picked;
         picked = candidate;
         if (picked < 1)
             picked = 1;
         else if (picked > 5)
             picked = 5;
-        SubMenu = 0;
 
         slidetimer = 0.125f;
         if (movesfxlock == 0) {
             movesfxlock = 1;
             GameAudio_PlaySfx(0x2f, reinterpret_cast<nuvec_s *>(SubShelfPos) + 5, 0, 0);
         }
-        GameCam_Blend(GameCam, 0.3f, 0.0f, 1);
         ShopNameAlpha = 0.0f;
+        GameCam_Blend(GameCam, 0.3f, 0.0f, 1);
     }
 
     if (selection != -1) {
@@ -407,9 +408,9 @@ i32 ItemMenu(MENU_s *menu) {
             }
             ShopNameAlpha = 0.0f;
         }
+        slidetimer = 0.125f;
         lastitem = picked;
         picked = -1;
-        slidetimer = 0.125f;
         SubMenu = 1;
         GameAudio_PlaySfx(0x30, NULL, 0, 0);
         GameCam_Blend(GameCam, 0.6f, 0.0f, 1);
@@ -431,7 +432,7 @@ i32 ItemMenu(MENU_s *menu) {
         f32 old_factor = 1.0f - ShopSinePhase(1.0f - reverse_phase);
         f32 forward_factor = 1.0f - ShopSinePhase(reverse_phase);
 
-        if (__builtin_expect(lastitem != -1, 1)) {
+        if (lastitem != -1) {
             old_factor = ShopClamp01(old_factor);
             topscale[lastitem] = TopBigScale[lastitem] + (TopShelfScale[lastitem] - TopBigScale[lastitem]) * old_factor;
             forward_factor = ShopClamp01(forward_factor);
@@ -446,49 +447,44 @@ i32 ItemMenu(MENU_s *menu) {
         }
     }
 
-    if (SubMenu == 0) {
-        if (ExitMenu && __builtin_expect(slidetimer < 0.0f, 0)) {
-            menuptr = nullptr;
-            return 5;
+    if (SubMenu != 0 && slidetimer <= 0.0f) {
+        picked = lastitem;
+        SubMenu = 0;
+        if (__builtin_expect(TopShelf[lastitem].type == 3, 0)) {
+            lastitem = -1;
+            easesubin = 1;
+            inoutscale = 0.0f;
+            cheatname = 0;
+            slidetimer = 0.125f;
+            shopmenu = 11;
+            col = 0;
+
+            ++currentmenulevel;
+            menuparent[currentmenulevel] = menuptr;
+            menuptr = CodeMenu;
+            memcpy(usercode, "AAAAAA", 6);
+
+            ++currentdrawlevel;
+            drawparent[currentdrawlevel] = drawpanelptr;
+            drawpanelptr = DrawCodeMenu;
+            drawptr = DrawCodeMenu3D;
+        } else {
+            easesubin = 1;
+            ++currentmenulevel;
+            inoutscale = 0.0f;
+            menuparent[currentmenulevel] = menuptr;
+            menuptr = SubItemMenu;
+
+            ++currentdrawlevel;
+            slidetimer = 0.125f;
+            drawparent[currentdrawlevel] = drawpanelptr;
+            drawpanelptr = DrawSubItemMenu2D;
+            drawptr = DrawSubItemMenu3D;
         }
-        return 7;
     }
-
-    if (!(slidetimer <= 0.0f))
-        return 7;
-
-    picked = lastitem;
-    SubMenu = 0;
-    if (__builtin_expect(TopShelf[lastitem].type == 3, 0)) {
-        lastitem = -1;
-        easesubin = 1;
-        inoutscale = 0.0f;
-        cheatname = 0;
-        slidetimer = 0.125f;
-        shopmenu = 11;
-        col = 0;
-
-        ++currentmenulevel;
-        menuparent[currentmenulevel] = menuptr;
-        menuptr = CodeMenu;
-        memcpy(usercode, "AAAAAA", 6);
-
-        ++currentdrawlevel;
-        drawparent[currentdrawlevel] = drawpanelptr;
-        drawpanelptr = DrawCodeMenu;
-        drawptr = DrawCodeMenu3D;
-    } else {
-        easesubin = 1;
-        ++currentmenulevel;
-        inoutscale = 0.0f;
-        menuparent[currentmenulevel] = menuptr;
-        menuptr = SubItemMenu;
-
-        ++currentdrawlevel;
-        slidetimer = 0.125f;
-        drawparent[currentdrawlevel] = drawpanelptr;
-        drawpanelptr = DrawSubItemMenu2D;
-        drawptr = DrawSubItemMenu3D;
+    if (ExitMenu && slidetimer < 0.0f) {
+        menuptr = nullptr;
+        return 5;
     }
     return 7;
 }

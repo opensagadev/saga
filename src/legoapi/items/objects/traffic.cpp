@@ -286,7 +286,7 @@ void TrafficAnimSys_Update(TRAFFICANIMSYS_s *system) {
     for (i32 animation_index = 0; animation_index < system->animation_count; ++animation_index, ++animation) {
         animation->next_spawn_time -= animation->tfactor * FRAMETIME * 60.0f;
         if (animation->next_spawn_time <= 0.0f) {
-            if (animation->vehicle_count > 0) {
+            if (animation->vehicle_count != 0 && animation != NULL) {
                 instance = reinterpret_cast<TRAFFICANIMINSTANCE_s *>(NuLinkedListGetHead(&system->free_instances));
                 if (__builtin_expect(instance != NULL, 1)) {
                     NuLinkedListRemove(&system->free_instances, &instance->link);

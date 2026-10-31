@@ -242,20 +242,20 @@ static void MakeWingFormation(_vuv_s *start, _vuv_s *target, f32 duration, i32 m
     spacelevel_s *space = WORLD->space_level;
     if (space == NULL)
         return;
-    i32 index = 0;
-    while (space->flight_groups[index].active != 0) {
-        if (++index == 8)
-            return;
+    spacelevel_flight_group_s *group = NULL;
+    for (i32 index = 0; index < 8; index++) {
+        if (space->flight_groups[index].active == 0) {
+            group = &space->flight_groups[index];
+            break;
+        }
     }
-    spacelevel_flight_group_s *group = &space->flight_groups[index];
+    if (group == NULL)
+        return;
     group->active = 1;
     group->draw_target = 0;
     NuMtxSetIdentity(&group->matrix);
-    group->matrix = GameCam->render_mtx;
-    group->matrix.m30 = start->x;
-    group->matrix.m31 = start->y;
-    group->matrix.m32 = start->z;
-    group->matrix.m33 = start->w;
+    memcpy(&group->matrix, &GameCam->render_mtx, sizeof(NUMTX));
+    *reinterpret_cast<_vuv_s *>(&group->matrix.m30) = *start;
     if (mode != 0) {
         group->state = 0;
         NuMtxPreRotateY(&group->matrix, 32768);
@@ -281,11 +281,11 @@ static void MakeWingFormation(_vuv_s *start, _vuv_s *target, f32 duration, i32 m
     do {                                                                                                               \
         starfighter_s *fighter = &group->fighters[index];                                                              \
         NuVecRotateZ(reinterpret_cast<NUVEC *>(&fighter->parent_offset), reinterpret_cast<NUVEC *>(&offset), angle);   \
-        fighter->shoot_timer = 2.0f;                                                                                   \
+        fighter->scale = 2.0f;                                                                                         \
         fighter->active = 1;                                                                                           \
         fighter->parent = group;                                                                                       \
         fighter->health = 1;                                                                                           \
-        fighter->delete_when_done = 0;                                                                                 \
+        fighter->hit_count = 0;                                                                                        \
         fighter->spline = NULL;                                                                                        \
         fighter->model_id = 54;                                                                                        \
         fighter->draw_flags = 1;                                                                                       \

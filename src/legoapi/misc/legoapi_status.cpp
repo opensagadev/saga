@@ -1395,7 +1395,7 @@ void UpdateStatusScreen(WORLDINFO_s *) {
                 }
                 if ((GamePad[player].buttons_pressed & GAMEPAD_MENUSELECT) != 0) {
                     GameAudio_PlaySfx(0x30, NULL, 0, 0);
-                    if (gamedemo_option == 0) {
+                    if (__builtin_expect(gamedemo_option == 0, 1)) {
                         GAMEDEMO = 2;
                         NewLData = HUB_LDATA;
                         new_level_from_menu = 1;
@@ -1422,8 +1422,8 @@ void UpdateStatusScreen(WORLDINFO_s *) {
                 }
                 return;
             }
-        } else if (__builtin_expect(GAMEDEMO == 2, 1)) {
-            if (GameTimer.time_elapsed >= 8.0f) {
+        } else if (GAMEDEMO == 2) {
+            if (__builtin_expect(GameTimer.time_elapsed >= 8.0f, 0)) {
                 EndOfDemo(0);
             }
         }

@@ -820,10 +820,10 @@ void JumpCode(GameObject_s *object, i32 jump_pressed, i32 jump_held, u32 animati
         if (!landed) {
             GAMECHARACTERDATA *game_character =
                 static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
-            if ((touch_action || action_pressed != 0) && (vertical_speed > -1.25f || touch_action) &&
+            if (__builtin_expect((touch_action || action_pressed != 0) && (vertical_speed > -1.25f || touch_action) &&
                 (game_character->field275_0x116 != 0 || (object->apiobj.character_data->model_flags & 8) != 0) &&
                 movement_state == 0 && variant_flags >= 0 && object->jump_sequence < 2 && LEGOACT_LUNGE != -1 &&
-                object->apiobj.character_model->model_data_b[LEGOACT_LUNGE] != NULL) {
+                object->apiobj.character_model->model_data_b[LEGOACT_LUNGE] != NULL, 0)) {
                 object->field_0x780 = NULL;
                 object->blowup_target = NULL;
                 StartLunge(object, 0.0f, object->apiobj.field_0x1e0);
@@ -1185,7 +1185,7 @@ void JumpCode(GameObject_s *object, i32 jump_pressed, i32 jump_held, u32 animati
                         Hint_SetComplete(0x604);
                 }
             } else {
-                if (flip_kind == 1 && StartBackFlip(object))
+                if (__builtin_expect(flip_kind == 1 && StartBackFlip(object), 1))
                     return;
                 object->action_movement_state = 1;
                 object->context_animation = LEGOACT_FLIP;

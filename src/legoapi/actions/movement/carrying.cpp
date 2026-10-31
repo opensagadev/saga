@@ -835,43 +835,49 @@ void ReStoreStatusTakeOverObjectSys(i32 restore_progress) {
     }
     i32 level = static_cast<i8>(WORLD->current_level->area_level_index);
     for (i32 index = 0; index < num_takeoverobjects; ++index) {
-        TAKEOVEROBJECT_s *record = &takeoverobjects[index];
-        if (restore_progress != 0 || record->current_level != level) {
-            record->object = NULL;
+        if (restore_progress != 0 || takeoverobjects[index].current_level != level) {
+            takeoverobjects[index].object = NULL;
         }
-        if (record->contact_index != 0xff) {
-            record->current_level = static_cast<u8>(level);
+        if (takeoverobjects[index].contact_index != 0xff) {
+            takeoverobjects[index].current_level = static_cast<u8>(level);
         }
-        if (record->registered_level == level) {
-            if (record->object == NULL) {
-                if (record->source_creature != 0xff) {
-                    for (i32 object_index = 0; object_index < HIGHGAMEOBJECT; ++object_index) {
-                        if (Obj[object_index].ai.field_0x134 == record->source_creature) {
-                            record->object = &Obj[object_index];
+        if (takeoverobjects[index].registered_level == level) {
+            if (takeoverobjects[index].object == NULL) {
+                if (takeoverobjects[index].source_creature == 0xff) {
+                    if (takeoverobjects[index].current_level == level) {
+                        takeoverobjects[index].object = AddDynamicCreature(
+                            takeoverobjects[index].character_id, &takeoverobjects[index].last_safe_position,
+                            takeoverobjects[index].heading, takeoverobjects[index].script_name, NULL, NULL, 1, NULL,
+                            NULL, 0, 0);
+                    }
+                } else {
+                    GameObject_s *candidate = Obj;
+                    for (i32 object_index = 0; object_index < HIGHGAMEOBJECT; ++object_index, ++candidate) {
+                        if (candidate->ai.field_0x134 == takeoverobjects[index].source_creature) {
+                            takeoverobjects[index].object = candidate;
                             break;
                         }
                     }
-                } else if (record->current_level == level) {
-                    record->object =
-                        AddDynamicCreature(record->character_id, &record->last_safe_position, record->heading,
-                                           record->script_name, NULL, NULL, 1, NULL, NULL, 0, 0);
                 }
             }
-            if (record->object != NULL && record->current_level != level) {
-                KillGameObject(record->object, 5, 0);
-                record->object = NULL;
+            if (takeoverobjects[index].object != NULL && takeoverobjects[index].current_level != level) {
+                KillGameObject(takeoverobjects[index].object, 5, 0);
+                takeoverobjects[index].object = NULL;
                 continue;
             }
-        } else if (record->current_level == level && record->object == NULL) {
-            record->object = AddDynamicCreature(record->character_id, &record->last_safe_position, record->heading,
-                                                record->script_name, NULL, NULL, 1, NULL, NULL, 0, 0);
+        } else if (takeoverobjects[index].current_level == level && takeoverobjects[index].object == NULL) {
+            takeoverobjects[index].object = AddDynamicCreature(
+                takeoverobjects[index].character_id, &takeoverobjects[index].last_safe_position,
+                takeoverobjects[index].heading, takeoverobjects[index].script_name, NULL, NULL, 1, NULL, NULL, 0, 0);
         }
-        GameObject_s *object = record->object;
+        GameObject_s *object = takeoverobjects[index].object;
         if (object != NULL) {
-            object->current_hp = record->hitpoints;
+            object->current_hp = takeoverobjects[index].hitpoints;
             GameObject_s *controller;
-            if (!(record->contact_index != 0xff && (controller = Player[record->contact_index]) != NULL)) {
-                SnapCreaturePos(record->object, &record->last_safe_position, record->heading, NULL, 1);
+            if (!(takeoverobjects[index].contact_index != 0xff &&
+                  (controller = Player[takeoverobjects[index].contact_index]) != NULL)) {
+                SnapCreaturePos((takeoverobjects + index)->object, &takeoverobjects[index].last_safe_position,
+                                takeoverobjects[index].heading, NULL, 1);
             } else {
                 object->apiobj.flags_high |= 0x10;
                 object->apiobj.flags_low |= 1;
@@ -880,7 +886,7 @@ void ReStoreStatusTakeOverObjectSys(i32 restore_progress) {
                 SnapCreaturePos(object, &controller->apiobj.position, controller->apiobj.field_0x276,
                                 &controller->ai.path_info, 1);
                 InitPlayerAI(controller);
-                TakeOverGameObject(controller, record->object, 0, 1);
+                TakeOverGameObject(controller, takeoverobjects[index].object, 0, 1);
             }
         }
     }

@@ -2303,16 +2303,21 @@ __attribute__((optimize("O2"))) static void edpartDebrisIndexMenu(eduimenu_s *me
     else if (edpart_set_debris == 4)
         selected = edpart_nearest_type->kill_effect;
     i32 found_selected = 0;
-    for (i32 index = 1; index < EDPP_MAX_TYPES; ++index) {
+    i32 count = EDPP_MAX_TYPES;
+    for (i32 index = 1; index < count; ++index) {
         debinftype *type = debtab[index];
         if (__builtin_expect(type == NULL || static_cast<i8>(type->category) != edpart_particle_list, 0))
             continue;
-        eduiitem_s *item =
-            eduiItemCheckCreate(index, edblack, index == selected, 1, edpartChangeDebrisIndex, type->name);
-        eduiMenuAddItem(edpart_debrisindex_menu, item);
-        if (__builtin_expect(index == selected, 1)) {
+        if (index == selected) {
+            eduiMenuAddItem(edpart_debrisindex_menu,
+                            eduiItemCheckCreate(index, edblack, 1, 1, edpartChangeDebrisIndex, type->name));
+            count = EDPP_MAX_TYPES;
             edpart_debrisindex_menu->selected = edui_last_item;
             found_selected = 1;
+        } else {
+            eduiMenuAddItem(edpart_debrisindex_menu,
+                            eduiItemCheckCreate(index, edblack, 0, 1, edpartChangeDebrisIndex, type->name));
+            count = EDPP_MAX_TYPES;
         }
     }
     eduiMenuSortItemsByTxt(edpart_debrisindex_menu);
@@ -4555,9 +4560,10 @@ extern "C" {
 }
 
 void UpdatePartEmits(f32 time) {
+    i32 i;
     i32 switch_changes[32][2];
     i32 last_switch_change = -1;
-    for (i32 i = 0; i < 40; ++i) {
+    for (i = 0; i < 40; ++i) {
         part_emit_s *emitter = &part_emits[i];
         if (part_page_on[emitter->page] == 0 || emitter->effect_id == -1)
             continue;
@@ -4566,20 +4572,19 @@ void UpdatePartEmits(f32 time) {
             continue;
         f32 interval = 1.0f / type->emission_rate;
         if (emitter->field_44 == 1 && emitter->field_3d != 2 && emitter->field_46 != -1) {
-            i32 state = object_switches[emitter->field_46];
-            switch (state) {
+            switch (object_switches[emitter->field_46]) {
                 case 0:
                     emitter->field_3d = 0;
                     break;
                 case 1:
                     emitter->field_3d = 1;
                     break;
-                case 2:
                 case 3: {
                     last_switch_change = (last_switch_change + 1) & 31;
                     emitter->field_3d = 2;
                     switch_changes[last_switch_change][0] = emitter->field_46;
-                    switch_changes[last_switch_change][1] = state == 2 ? 4 : 0;
+                    switch_changes[last_switch_change][1] = 0;
+                start_offset:
                     PARTStartOffset(i, 0.0f);
                     f32 shift = emitter->time_24 - partglobaltime;
                     emitter->time_20 = partglobaltime - interval;
@@ -4587,6 +4592,12 @@ void UpdatePartEmits(f32 time) {
                     emitter->time_28 -= shift;
                     break;
                 }
+                case 2:
+                    last_switch_change = (last_switch_change + 1) & 31;
+                    emitter->field_3d = 2;
+                    switch_changes[last_switch_change][0] = emitter->field_46;
+                    switch_changes[last_switch_change][1] = 4;
+                    goto start_offset;
                 case 4:
                     last_switch_change = (last_switch_change + 1) & 31;
                     switch_changes[last_switch_change][0] = emitter->field_46;
@@ -4603,7 +4614,7 @@ void UpdatePartEmits(f32 time) {
             PART_EMIT_SOUND_ON(3);
         }
         if ((type->flags & 0x400000) != 0) {
-            if (!(type->maximum_distance <= emitter->camera_distance) && previous_distance >= type->maximum_distance) {
+            if (type->maximum_distance > emitter->camera_distance && previous_distance >= type->maximum_distance) {
                 emitter->time_24 = partglobaltime;
                 emitter->time_20 = partglobaltime - interval + 0.001f;
                 emitter->time_28 = partglobaltime - 1.0f;
@@ -4686,16 +4697,19 @@ void UpdatePartEmits(f32 time) {
                         variant = static_cast<i32>(NuRandFloatSeeded(&partseed) * 65535.0f) % type->variant_count;
                     else if (type->variant_mode == 1) {
                         i8 next = static_cast<i8>(emitter->field_33 + 1);
-                        if (type->variant_count > next)
+                        if (type->variant_count > next) {
                             variant = next;
-                        emitter->field_33 = variant;
+                            emitter->field_33 = next;
+                        } else
+                            emitter->field_33 = 0;
                     }
                 }
-                params.field_28 = type->effect_ids[variant];
+                i16 effect = type->effect_ids[variant];
+                params.field_28 = effect;
                 nuhspecial_s special;
-                if (static_cast<u16>(params.field_28 - 9998) <= 1)
+                if (static_cast<u16>(effect - 9998) <= 1)
                     params.special = NULL;
-                else if (params.field_28 != -1) {
+                else if (effect != -1) {
                     params.special = &special;
                     NuGScnGetSpecial(&special, part_scene[type->scene_indices[variant]], params.field_28);
                 }
@@ -4712,10 +4726,10 @@ void UpdatePartEmits(f32 time) {
                 f32 rotation_z = static_cast<f32>(type->rotation[2]);
                 f32 random_z = NuRandFloatSeeded(&partseed);
                 f32 range_z = static_cast<f32>(type->rotation_random[2]);
-                for (i32 axis = 0; axis < 3; ++axis) {
+                for (i32 axis = 0; axis < 3; ++axis)
                     params.field_a8[axis] = type->rotation[axis];
+                for (i32 axis = 0; axis < 3; ++axis)
                     params.field_a8[axis + 3] = type->rotation_random[axis];
-                }
                 NuMtxRotateX(&matrix, static_cast<i16>(
                                           static_cast<i32>((random_x + random_x) * range_x + rotation_x - range_x)));
                 NuMtxRotateY(&matrix, static_cast<i16>(
@@ -4763,7 +4777,7 @@ void UpdatePartEmits(f32 time) {
             emission_time += interval;
         }
     }
-    for (i32 i = 0; i <= last_switch_change; ++i)
+    for (i = 0; i <= last_switch_change; ++i)
         object_switches[switch_changes[i][0]] = switch_changes[i][1];
 }
 

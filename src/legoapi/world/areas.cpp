@@ -605,7 +605,7 @@ void Area_Configure(i32 area, i32 param, EXTRAMODEL *models, i16 *s) {
         for (i32 index = 0; index < count; ++index) {
             if (__builtin_expect(Area_MissionModelCount < 0x30, 0))
                 Area_MissionModelList[Area_MissionModelCount++] = {mission_characters[index], 1};
-            if (Area_PlayerModelCount < 8)
+            if (__builtin_expect(Area_PlayerModelCount < 8, 0))
                 player_models[Area_PlayerModelCount++] = {mission_characters[index], 1};
         }
         if (Area_MissionModelCount < 0x30)
@@ -741,14 +741,14 @@ void Area_Configure(i32 area, i32 param, EXTRAMODEL *models, i16 *s) {
                         LevelLoad[LevelLoadCount].flags = (LevelLoad[LevelLoadCount].flags & ~2) | 1;
                         story_token = NuFParGetWord(fp) != 0;
                     }
-                    if (NuStrICmp(fp->word_buf, "freeplay_only") == 0) {
-                        LevelLoad[LevelLoadCount].flags = (LevelLoad[LevelLoadCount].flags & ~1) | 2;
-                        if (NuFParGetWord(fp) == 0 && !story_token)
-                            continue;
-                    } else {
+                    if (NuStrICmp(fp->word_buf, "freeplay_only") != 0) {
                         // The reference applies both bits after a lone story_only
                         // token; retain that sequential token-processing behavior.
                         LevelLoad[LevelLoadCount].flags |= 3;
+                    } else {
+                        LevelLoad[LevelLoadCount].flags = (LevelLoad[LevelLoadCount].flags & ~1) | 2;
+                        if (NuFParGetWord(fp) == 0 && !story_token)
+                            continue;
                     }
                     i32 level_index;
                     Level_FindByName(fp->word_buf, &level_index);

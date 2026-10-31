@@ -101,22 +101,30 @@ void AddSurfaceDebris(GameObject_s *object) {
         PodDust(world, object);
         return;
     }
-    i32 effect;
     f32 height;
-    f32 rate;
     f32 minimum_rate;
+    f32 rate;
+    i32 effect;
+    f32 speed;
+    f32 run_speed;
     if (object->id == id_LANDSPEEDER) {
+        speed = object->apiobj.horizontal_velocity_magnitude;
+        run_speed = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->run_speed;
         effect = 102;
         rate = 20.0f;
         minimum_rate = 0.0f;
         height = 0.0f;
     } else if (WORLD->area != NULL && WORLD->area == HOTHBATTLE_ADATA) {
+        speed = object->apiobj.horizontal_velocity_magnitude;
+        run_speed = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->run_speed;
         effect = 86;
         rate = 100.0f;
         minimum_rate = 10.0f;
         height = 3.0f;
     } else if ((BONUS_GUNSHIP_ADATA != NULL && world->area == BONUS_GUNSHIP_ADATA) ||
                (GUNSHIP_ADATA != NULL && world->area == GUNSHIP_ADATA)) {
+        speed = object->apiobj.horizontal_velocity_magnitude;
+        run_speed = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->run_speed;
         effect = 141;
         rate = 75.0f;
         minimum_rate = 0.0f;
@@ -124,12 +132,10 @@ void AddSurfaceDebris(GameObject_s *object) {
     } else {
         return;
     }
-    f32 speed = object->apiobj.horizontal_velocity_magnitude;
-    f32 run_speed = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->run_speed;
-    if (world->debris_sys->entries[effect].effect == -1 || run_speed <= 0.0f)
+    if (__builtin_expect(world->debris_sys->entries[effect].effect == -1, 0) || __builtin_expect(run_speed <= 0.0f, 0))
         return;
     f32 height_scale = 1.0f;
-    if (!(height <= 0.0f)) {
+    if (height > 0.0f) {
         height_scale = 1.0f - (object->apiobj.collision_min.y - surface_y) * (1.0f / height);
         if (height_scale <= 0.0f)
             return;
@@ -137,7 +143,7 @@ void AddSurfaceDebris(GameObject_s *object) {
             height_scale = 1.0f;
     }
     f32 emission_rate = (speed / run_speed) * rate;
-    if (!(emission_rate >= minimum_rate))
+    if (emission_rate < minimum_rate)
         emission_rate = minimum_rate;
     emission_rate *= height_scale;
     NUVEC current = {object->apiobj.position.x, surface_y, object->apiobj.position.z};

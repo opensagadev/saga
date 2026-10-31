@@ -964,53 +964,52 @@ void SetHitPoints(GameObject_s *obj, i32 hp) {
 }
 
 i32 MakePlayerList(i32 count) {
-    i32 player_count = 0;
+    u32 player_count = 0;
 
     for (i32 i = 0; i < count; i++) {
         GameObject_s *player = Player[i];
-        if (player == NULL) {
-            if (makeplayerlist_freeplay == 1 && player_count == 1 && WORLD != NULL &&
-                WORLD->current_level == HUB_LDATA && HUB_LDATA != NewLData) {
-                PlayerList[1] = FreePlayModelList[i].model_id;
-                PlayerProgress[1].active = 0;
-                player_count = 2;
+        if (player != NULL) {
+            if (makeplayerlist_freeplay == 1) {
+                PlayerList[player_count] = FreePlayModelList[i].model_id;
+            } else if (makeplayerlist_freeplay != 2) {
+                PlayerList[player_count] = player->id;
             }
-            continue;
-        }
 
-        if (makeplayerlist_freeplay == 1) {
-            PlayerList[player_count] = FreePlayModelList[i].model_id;
-        } else if (makeplayerlist_freeplay != 2) {
-            PlayerList[player_count] = player->id;
-        }
+            PlayerProgress[player_count].active = player->apiobj.player_controlled;
 
-        PlayerProgress[player_count].active = player->apiobj.player_controlled;
-
-        bool unavailable = false;
-        if (player->field_0x7a5 != 6 && player->field_0xe32 != 2) {
-            unavailable = true;
-            if ((player->field_0xe22 & 1) == 0) {
-                unavailable = player->field_0xe32 != 0;
+            bool unavailable = false;
+            if (player->field_0x7a5 != 6 && player->field_0xe32 != 2) {
+                unavailable = true;
+                if ((player->field_0xe22 & 1) == 0) {
+                    unavailable = player->field_0xe32 != 0;
+                }
             }
-        }
-        PlayerProgress[player_count].field_0x7 = unavailable;
-        PlayerProgress[player_count].coins = player->coinpacket != NULL ? player->coinpacket->coins : 0;
-        PlayerProgress[player_count].field_0xb = player->field_0xe31 == 1;
+            PlayerProgress[player_count].field_0x7 = unavailable;
+            u32 coins = player->coinpacket != NULL ? player->coinpacket->coins : 0;
+            PLAYERPROGRESS *p = &PlayerProgress[player_count];
+            p->coins = coins;
+            p->field_0xb = player->field_0xe31 == 1;
 
-        if (player->apiobj.field_0x287 != 0) {
-            PlayerProgress[player_count].hitpoints = player->hitpoints;
-            PlayerProgress[player_count].field_0x9 = 4;
-        } else {
-            PlayerProgress[player_count].hitpoints = player->current_hp;
-            PlayerProgress[player_count].field_0x9 = player->field_0xe38;
-        }
-        PlayerProgress[player_count].field_0xa = player->field_0x108e;
-        PlayerProgress[player_count].field_0x4 = player->field_0x106e;
-        PlayerProgress[player_count].field_0xc = player->field_0xdec;
+            if (player->apiobj.field_0x287 != 0) {
+                p->hitpoints = player->hitpoints;
+                p->field_0x9 = 4;
+            } else {
+                p->hitpoints = player->current_hp;
+                p->field_0x9 = player->field_0xe38;
+            }
+            PlayerProgress[player_count].field_0xa = player->field_0x108e;
+            PlayerProgress[player_count].field_0x4 = player->field_0x106e;
+            PlayerProgress[player_count].field_0xc = player->field_0xdec;
 
-        PlayerSuit[player_count] = player->suit;
-        PlayerTorpedoCount[player_count] = player->torpedo != NULL ? player->torpedo->count : 0;
-        player_count++;
+            PlayerSuit[player_count] = player->suit;
+            PlayerTorpedoCount[player_count] = player->torpedo != NULL ? player->torpedo->count : 0;
+            player_count++;
+        } else if (makeplayerlist_freeplay == 1 && player_count == 1 && WORLD != NULL &&
+                   WORLD->current_level == HUB_LDATA && HUB_LDATA != NewLData) {
+            PlayerList[1] = FreePlayModelList[i].model_id;
+            PlayerProgress[1].active = 0;
+            player_count = 2;
+        }
     }
 
     for (i32 i = player_count; i < 8; i++) {
@@ -1798,30 +1797,30 @@ i32 NewPlayerCharacter(GameObject_s *object, i32 id, i32 old_id, i32) {
     LoseHelmet(object, 0, 1);
     DestroySnakeBody(object);
     object->id = id;
+    u8 saved_flags = object->apiobj.respawn_enabled;
     u8 health = object->current_hp;
     NUVEC velocity = object->apiobj.velocity;
     u8 hitpoints = object->hitpoints;
-    u8 saved_flags = (object->apiobj.flags_high >> 5) & 1;
     object->apiobj.character_model = &apicharsys->models[apicharsys->playermodelids[id]];
     object->apiobj.character_data = &apicharsys->char_data[id];
     object->takeover_source = NULL;
     object->suit = Suit_GetDefault(id);
+    u32 frame_state = object->ai.frame_state;
     u32 saved_f14 = object->field_0xf14;
     u32 saved_f20 = object->field_0xf20;
     u8 saved_efe = object->field_0xefe_bit5;
     u8 route = object->ai.current_route;
     u8 next_route = object->ai.next_route;
     AIPATHINFO path = object->ai.path_info;
-    u32 frame_state = object->ai.frame_state;
     InitPlayerAI(object);
     object->field_0xefe_bit5 = saved_efe;
     object->field_0xf20 = saved_f20;
     object->ai.next_route = next_route;
-    object->ai.path_info = path;
     object->field_0xf14 = saved_f14;
     object->field_0x1004 = 1.0f;
     object->ai.current_route = route;
     object->ai.frame_state = frame_state;
+    object->ai.path_info = path;
     GAMECHARACTERDATA *data = object->apiobj.character_data->game_character;
     object->field_0x1054 = data->layer_mask;
     object->field_0xe37 = data->field_0xf5;
@@ -1861,11 +1860,16 @@ i32 NewPlayerCharacter(GameObject_s *object, i32 id, i32 old_id, i32) {
     if (lean_enabled && (object->apiobj.character_data->model_flags & 0x2000) != 0)
         object->movement_lean_angle = lean;
     data = apicharsys->char_data[object->id].game_character;
-    object->apiobj.viewdistance = data->viewdistance;
-    object->apiobj.heardistance = data->heardistance;
-    object->apiobj.maxviewheight = data->maxviewheight;
-    object->apiobj.minviewheight = data->minviewheight;
-    object->is_female = (object->apiobj.character_data->game_character->flags_090 >> 17) & 1;
+    f32 viewdistance = data->viewdistance;
+    f32 heardistance = data->heardistance;
+    f32 maxviewheight = data->maxviewheight;
+    f32 minviewheight = data->minviewheight;
+    u32 flags = object->apiobj.character_data->game_character->flags_090;
+    object->apiobj.viewdistance = viewdistance;
+    object->apiobj.heardistance = heardistance;
+    object->apiobj.maxviewheight = maxviewheight;
+    object->apiobj.minviewheight = minviewheight;
+    object->is_female = (flags >> 17) & 1;
     if (object->id == id_MOSEISLEYCITIZEN) {
         SetLayers_MOSEISLEYCITIZEN(&object->field_0x1054);
     } else if (object->id == id_CANTINAALIEN) {

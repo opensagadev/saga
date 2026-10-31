@@ -1160,12 +1160,14 @@ void AddCoinsToPanel(i32 coins, nuvec_s *position, i32 player, float, GameObject
             player = -1;
         NUVEC target;
         target.x = player == 1 ? PANEL_COINX : -PANEL_COINX;
-        i32 main_total = CoinsGoToMainTotal() != 0;
+        i32 main_total;
         f32 target_scale;
-        if (__builtin_expect(main_total != 0, 0)) {
+        if (CoinsGoToMainTotal()) {
+            main_total = 1;
             target.y = STATSPOSY;
             target_scale = COINTOTAL_COINSIZE;
         } else {
+            main_total = 0;
             target.y = STATSPOSY + PANEL_COINY;
             target_scale = PANEL_COINSCALE_END;
         }
@@ -1183,19 +1185,19 @@ void AddCoinsToPanel(i32 coins, nuvec_s *position, i32 player, float, GameObject
                 if (world->lev_objs[model].active == 0 || __builtin_expect(player == -1, 0))
                     continue;
                 ADDGAMEMSG_ALIGNED16 message = AddGameMsg_Default;
-                message.position = position;
-                message.target_position = &target;
-                message.target_scale = target_scale;
                 message.icon = model;
+                message.position = position;
                 message.extra_position = reinterpret_cast<NUVEC *>(&world->lev_objs[message.icon]);
-                message.end_fn = EndScoreMessage;
                 message.score = type->score;
+                message.target_scale = target_scale;
                 message.player_index = player;
-                message.field_0x4d = 1;
+                message.duration = COINMSGTIME;
                 message.field_0x20 = AddCoinDelay[player];
+                message.target_position = &target;
                 message.flags = 0x12d;
                 message.scale = 1.0f;
-                message.duration = COINMSGTIME;
+                message.field_0x4d = 1;
+                message.end_fn = EndScoreMessage;
                 if (main_total) {
                     message.update_fn = GameMsg_DrawAdjustNewPos_CoinToTotal;
                     message.field_0x4e = 1;

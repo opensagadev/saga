@@ -18062,24 +18062,30 @@ void TerrDrawSitu(tertype *terrain, terrsitu_s *situation) {
 void TerrDrawPlat(tertype *terrain, i16 index) {
     TERRAIN_DEBUG_RECORD *record = reinterpret_cast<TERRAIN_DEBUG_RECORD *>(terrain);
     TERRAIN_PLATFORM *platform = &CurTerr->platforms[CurTerr->groups[index].scene_index];
-    if (__builtin_expect(platform->scene_transform != NULL, 1)) {
-        if (platform->flags & TERRAIN_PLATFORM_FLAG_DISPLAY_LIST_BACKED) {
-            if (!(*static_cast<u8 *>(platform->scene_transform) & 2))
+    if (platform->scene_transform != NULL) {
+        if (!(platform->flags & TERRAIN_PLATFORM_FLAG_DISPLAY_LIST_BACKED)) {
+            if (!(*static_cast<u8 *>(platform->scene_transform) & 1))
                 return;
-        } else if (!(*static_cast<u8 *>(platform->scene_transform) & 1))
+        } else if (!(*static_cast<u8 *>(platform->scene_transform) & 2))
             return;
     }
     NUVEC4 points[5];
+    points[0].x = record->vertices[0].x;
+    points[0].y = record->vertices[0].y;
+    points[0].z = record->vertices[0].z;
+    points[0].w = 0.0f;
+    points[1].x = record->vertices[1].x;
+    points[1].y = record->vertices[1].y;
+    points[1].z = record->vertices[1].z;
+    points[1].w = 0.0f;
+    points[2].x = record->vertices[2].x;
+    points[2].y = record->vertices[2].y;
+    points[2].z = record->vertices[2].z;
+    points[2].w = 0.0f;
     points[3].x = record->vertices[3].x;
     points[3].y = record->vertices[3].y;
     points[3].z = record->vertices[3].z;
     points[3].w = 0.0f;
-    for (i32 i = 0; i < 3; ++i) {
-        points[i].x = record->vertices[i].x;
-        points[i].y = record->vertices[i].y;
-        points[i].z = record->vertices[i].z;
-        points[i].w = 0.0f;
-    }
     NUVEC4 &normal = points[4];
     normal.x = record->normals[0].x * 0.4f;
     normal.y = record->normals[0].y * 0.4f;
@@ -18145,7 +18151,7 @@ void TerrDrawPlat(tertype *terrain, i16 index) {
     f32 z = origin->z + points[0].z;
     f32 y = origin->y + points[0].y;
     f32 x = origin->x + points[0].x;
-    colour = static_cast<i8>(index & 0xf0) + static_cast<i8>(index * 16) * 256;
+    colour = static_cast<i8>(index * 16) * 256 + static_cast<i8>(index & 0xf0);
     NuRndrLine3dDbg(x, y, z, x + normal.x, y + normal.y, z + normal.z, colour);
 }
 
@@ -18423,38 +18429,36 @@ void SkinPlatform(terrsitu_s *terrain_group, unsigned char *buffer, PLATSKININFO
         return;
     TERRAIN_SHAPE_BATCH *input = static_cast<TERRAIN_SHAPE_BATCH *>(group->data);
     TERRAIN_SHAPE_BATCH *output = reinterpret_cast<TERRAIN_SHAPE_BATCH *>(buffer);
-    while (__builtin_expect(input->marker >= 0, 1)) {
-        output->shape_count = input->shape_count;
+    while (input->marker >= 0) {
         output->marker = input->marker;
-        TERRAIN_SHAPE *destination = reinterpret_cast<TERRAIN_SHAPE *>(output + 1);
+        output->shape_count = input->shape_count;
+        const i32 shape_count = input->shape_count;
         TERRAIN_SHAPE *source = reinterpret_cast<TERRAIN_SHAPE *>(input + 1);
+        TERRAIN_SHAPE *destination = reinterpret_cast<TERRAIN_SHAPE *>(output + 1);
         f32 min_x = 123456792.0f, min_z = 123456792.0f;
         f32 max_x = -123456792.0f, max_z = -123456792.0f;
-        TERRAIN_SHAPE *const first_shape = source;
-        const i32 shape_count = input->shape_count;
-        TERRAIN_SHAPE *const end_shape = shape_count > 0 ? source + shape_count : source;
-        for (; source != end_shape; ++source, ++destination) {
+        for (i32 i = shape_count; i > 0; --i, ++source, ++destination) {
             i32 last_vertex = source->normals[1].y > 65535.0f ? 2 : 3;
             *destination = *source;
             f32 shape_min_x = 123456792.0f, shape_min_y = 123456792.0f, shape_min_z = 123456792.0f;
             f32 shape_max_x = -123456792.0f, shape_max_y = -123456792.0f, shape_max_z = -123456792.0f;
-            for (i32 vertex = last_vertex; vertex >= 0; --vertex) {
+            NUVEC *v = &destination->vectors[last_vertex];
+            for (i32 vertex = last_vertex; vertex >= 0; --vertex, --v) {
                 i32 source_vertex = SkinFlipTab[vertex + info->mirrored * 4];
-                NUVEC &v = destination->vectors[vertex];
-                v = TerrainSkin(info, &source->vectors[source_vertex], -1.0f, info->flags);
-                v.x -= info->matrix->m30;
-                v.y -= info->matrix->m31;
-                v.z -= info->matrix->m32;
-                min_x = MIN(v.x, min_x);
-                max_x = MAX(v.x, max_x);
-                min_z = MIN(v.z, min_z);
-                max_z = MAX(v.z, max_z);
-                shape_min_x = MIN(v.x, shape_min_x);
-                shape_min_y = MIN(v.y, shape_min_y);
-                shape_min_z = MIN(v.z, shape_min_z);
-                shape_max_x = MAX(v.x, shape_max_x);
-                shape_max_y = MAX(v.y, shape_max_y);
-                shape_max_z = MAX(v.z, shape_max_z);
+                destination->vectors[vertex] = TerrainSkin(info, &source->vectors[source_vertex], -1.0f, info->flags);
+                v->x -= info->matrix->m30;
+                v->y -= info->matrix->m31;
+                v->z -= info->matrix->m32;
+                min_x = MIN(v->x, min_x);
+                max_x = MAX(v->x, max_x);
+                min_z = MIN(v->z, min_z);
+                max_z = MAX(v->z, max_z);
+                shape_min_x = MIN(v->x, shape_min_x);
+                shape_max_x = MAX(v->x, shape_max_x);
+                shape_min_y = MIN(v->y, shape_min_y);
+                shape_max_y = MAX(v->y, shape_max_y);
+                shape_min_z = MIN(v->z, shape_min_z);
+                shape_max_z = MAX(v->z, shape_max_z);
             }
             destination->min_x = shape_min_x - 0.05f;
             destination->min_y = shape_min_y - 0.05f;
@@ -18462,7 +18466,7 @@ void SkinPlatform(terrsitu_s *terrain_group, unsigned char *buffer, PLATSKININFO
             destination->max_x = shape_max_x + 0.05f;
             destination->max_y = shape_max_y + 0.05f;
             destination->max_z = shape_max_z + 0.05f;
-            if (__builtin_expect(source->normals[1].y < 65535.0f, 0)) {
+            if (source->normals[1].y < 65535.0f) {
                 NUVEC a, b;
                 a.x = destination->vectors[1].x - destination->vectors[3].x;
                 a.y = destination->vectors[1].y - destination->vectors[3].y;
@@ -18470,41 +18474,37 @@ void SkinPlatform(terrsitu_s *terrain_group, unsigned char *buffer, PLATSKININFO
                 b.x = destination->vectors[2].x - destination->vectors[3].x;
                 b.y = destination->vectors[2].y - destination->vectors[3].y;
                 b.z = destination->vectors[2].z - destination->vectors[3].z;
-                NUVEC &n = destination->normals[1];
-                n = TerCrossProduct(&a, &b);
-                f32 length = NuFsqrt((n.x * n.x + n.y * n.y) + n.z * n.z);
+                destination->normals[1] = TerCrossProduct(&a, &b);
+                f32 length = NuFsqrt((destination->normals[1].x * destination->normals[1].x +
+                                      destination->normals[1].y * destination->normals[1].y) +
+                                     destination->normals[1].z * destination->normals[1].z);
                 f32 inverse = length == 0.0f ? 0.0f : 1.0f / length;
-                n.x *= inverse;
-                n.y *= inverse;
-                n.z = inverse * n.z;
+                destination->normals[1].x *= inverse;
+                destination->normals[1].y *= inverse;
+                destination->normals[1].z = inverse * destination->normals[1].z;
             }
             {
                 NUVEC a, b;
                 a.x = destination->vectors[2].x - destination->vectors[0].x;
                 a.y = destination->vectors[2].y - destination->vectors[0].y;
-                b.x = destination->vectors[1].x - destination->vectors[0].x;
                 a.z = destination->vectors[2].z - destination->vectors[0].z;
+                b.x = destination->vectors[1].x - destination->vectors[0].x;
                 b.y = destination->vectors[1].y - destination->vectors[0].y;
                 b.z = destination->vectors[1].z - destination->vectors[0].z;
-                NUVEC &n = destination->normals[0];
-                n = TerCrossProduct(&a, &b);
-                f32 length = NuFsqrt((n.x * n.x + n.y * n.y) + n.z * n.z);
+                destination->normals[0] = TerCrossProduct(&a, &b);
+                f32 length = NuFsqrt((destination->normals[0].x * destination->normals[0].x +
+                                      destination->normals[0].y * destination->normals[0].y) +
+                                     destination->normals[0].z * destination->normals[0].z);
                 f32 inverse = length == 0.0f ? 0.0f : 1.0f / length;
-                n.x *= inverse;
-                n.y *= inverse;
-                n.z = inverse * n.z;
+                destination->normals[0].x *= inverse;
+                destination->normals[0].y *= inverse;
+                destination->normals[0].z = inverse * destination->normals[0].z;
             }
         }
-        if (source != first_shape) {
-            min_z -= 0.05f;
-            min_x -= 0.05f;
-            max_x += 0.05f;
-            max_z += 0.05f;
-        }
-        output->min_x = min_x;
-        output->max_x = max_x;
-        output->min_z = min_z;
-        output->max_z = max_z;
+        output->min_x = min_x - 0.05f;
+        output->max_x = max_x + 0.05f;
+        output->min_z = min_z - 0.05f;
+        output->max_z = max_z + 0.05f;
         input = reinterpret_cast<TERRAIN_SHAPE_BATCH *>(source);
         output = reinterpret_cast<TERRAIN_SHAPE_BATCH *>(destination);
     }
@@ -22078,20 +22078,18 @@ i32 PlatformChecks(i32 count, nuvec_s *movement) {
         return count;
     TerrainQuery_s *query = static_cast<TerrainQuery_s *>(NuScratchAlloc32(sizeof(TerrainQuery_s)));
     TerI = query;
-    u8 *input = static_cast<u8 *>(old_query->scan_list);
     u8 *output = query->scan_list_storage;
+    u8 *input = static_cast<u8 *>(old_query->scan_list);
     while (*reinterpret_cast<i16 *>(input) > 0) {
         i16 *input_header = reinterpret_cast<i16 *>(input);
         i16 *output_header = reinterpret_cast<i16 *>(output);
         i32 shape_count = input_header[0];
         output_header[0] = input_header[0];
         output_header[1] = input_header[1];
-        TERRAIN_SHAPE **input_shapes = reinterpret_cast<TERRAIN_SHAPE **>(input) + 1;
-        TERRAIN_SHAPE **output_shapes = reinterpret_cast<TERRAIN_SHAPE **>(output) + 1;
         // The packed scan list is copied in 16-bit words, including both halves
         // of each target pointer. Preserve the full pointer on wider diagnostic hosts.
-        i16 *input_words = reinterpret_cast<i16 *>(input_shapes);
-        i16 *output_words = reinterpret_cast<i16 *>(output_shapes);
+        i16 *input_words = input_header + sizeof(TERRAIN_SHAPE *) / sizeof(i16);
+        i16 *output_words = output_header + sizeof(TERRAIN_SHAPE *) / sizeof(i16);
         for (i32 remaining = shape_count; remaining != 0; --remaining) {
             for (u32 word = 0; word < sizeof(TERRAIN_SHAPE *) / sizeof(i16); ++word)
                 output_words[word] = input_words[word];
@@ -22140,9 +22138,9 @@ i32 PlatformChecks(i32 count, nuvec_s *movement) {
     TerI->platform_normal = TerI->platform_position;
     TerI->position = TerI->platform_position;
     TerI->movement.x = 0.0f;
-    TerI->movement.y = TerConTol * -2.0f;
     TerI->movement.z = 0.0f;
     TerI->position.y += TerConTol;
+    TerI->movement.y = TerConTol * -2.0f;
     DerotateMovementVector();
     f32 saved_epsilon = TerI->separation_epsilon;
     TerI->separation_epsilon = 0.0f;
@@ -22163,66 +22161,61 @@ i32 PlatformChecks(i32 count, nuvec_s *movement) {
         NuScratchRelease();
         return count;
     }
-    TERRAIN_GROUP *group = &CurTerr->groups[query->terrain_group_index];
+    i16 group_index = query->terrain_group_index;
+    TERRAIN_GROUP *group = &CurTerr->groups[group_index];
     i32 platform_index = group->scene_index;
+    TERRAIN_PLATFORM *platforms = CurTerr->platforms;
     if (movement->y > TerConTol * 0.5f) {
-        TERRAIN_PLATFORM *platform = &CurTerr->platforms[platform_index];
+        TERRAIN_PLATFORM *platform = &platforms[platform_index];
         NUMTX *matrix = static_cast<NUMTX *>(platform->scene_object);
-        if (__builtin_expect(movement->y > (TerConTol * 0.5f + matrix->m31) - platform->previous_matrix.m31, 0)) {
+        if (movement->y > (TerConTol * 0.5f + matrix->m31) - platform->previous_matrix.m31) {
             NuScratchRelease();
             return count;
         }
     }
-    if (!(query->movement_normal.y < 0.707f) && query->terrain_group_index >= 0 && group->chunk_type == 1)
-        CurTerr->platforms[platform_index].flags |= 2;
+    if (query->movement_normal.y >= 0.707f && group_index >= 0 && group->chunk_type == 1)
+        platforms[platform_index].flags |= 2;
     old_query->platform_position.x = query->platform_position.x;
-    old_query->platform_position.y = query->platform_position.y + old_query->collision_radius;
-    if (!(CurTerr->platforms[CurTrackInfo->platform_index].flags & 1))
-        old_query->platform_position.y += 0.0025f;
+    f32 platform_y = query->platform_position.y + old_query->collision_radius;
+    if (!(platforms[CurTrackInfo->platform_index].flags & 1))
+        platform_y += 0.0025f;
+    old_query->platform_position.y = platform_y;
     old_query->platform_position.z = query->platform_position.z;
     NUVEC direction = {old_query->platform_position.x - old_query->position.x,
                        old_query->platform_position.y - old_query->position.y,
                        old_query->platform_position.z - old_query->position.z};
     f32 distance = NuFsqrt(direction.x * direction.x + direction.y * direction.y + direction.z * direction.z);
-    if (distance == 0.0f || direction.x == 0.0f) {
+    f32 component_x = direction.x;
+    if (distance == 0.0f || component_x == 0.0f) {
         direction.x = 0.0f;
     } else {
-        direction.x = direction.x / distance;
+        direction.x = component_x / distance;
     }
-    if (distance == 0.0f || direction.y == 0.0f) {
+    f32 component_y = direction.y;
+    if (distance == 0.0f || component_y == 0.0f) {
         direction.y = 0.0f;
     } else {
-        direction.y = direction.y / distance;
+        direction.y = component_y / distance;
     }
-    if (distance == 0.0f || direction.z == 0.0f) {
+    f32 component_z = direction.z;
+    if (distance == 0.0f || component_z == 0.0f) {
         direction.z = 0.0f;
     } else {
-        direction.z = direction.z / distance;
+        direction.z = component_z / distance;
     }
     NUVEC previous_position = TerI->position;
     i32 clear = TerrainPlatformMoveCheck(&TerI->platform_position, &TerI->platform_normal, platform_index, 1, 0);
-    bool opposing_contact = false;
     if (TerI->hit_type != 0 && TerI->terrain_group_index >= 0) {
         TERRAIN_GROUP *hit_group = &CurTerr->groups[TerI->terrain_group_index];
         if (__builtin_expect(hit_group->chunk_type == 1, 0))
             CurTrackInfo->platform_index = hit_group->scene_index;
         f32 dot = direction.x * TerI->platform_normal.x + direction.y * TerI->platform_normal.y +
                   direction.z * TerI->platform_normal.z;
-        opposing_contact = dot < -0.7f;
+        if (dot < -0.7f)
+            clear = 1;
     }
-    if (opposing_contact || clear != 0) {
-        TerrPoly = query->surface;
-        TerI->position = TerI->platform_position;
-        if (movement->y >= 0.0f) {
-            TerI->movement.y *= 0.75f;
-        } else {
-            FullDeflect(&ShadNorm, &TerI->movement, &TerI->movement);
-            FullDeflect(&ShadNorm, movement, movement);
-        }
-        TerI->hit_flags[1] = 1;
-        PlatformConnect(reinterpret_cast<char *>(old_query->hit_flags), &old_query->movement, movement,
-                        CurTerr->groups[query->terrain_group_index].scene_index);
-    } else if (count - 1 > 0) {
+    count--;
+    if (clear == 0 && count > 0) {
         f32 travelled = (TerI->position.x - previous_position.x) * direction.x +
                         (TerI->position.y - previous_position.y) * direction.y +
                         (TerI->position.z - previous_position.z) * direction.z;
@@ -22238,10 +22231,22 @@ i32 PlatformChecks(i32 count, nuvec_s *movement) {
                 }
             }
         }
+    } else if (__builtin_expect(clear != 0, 1)) {
+        TerrPoly = query->surface;
+        TerI->position = TerI->platform_position;
+        if (movement->y < 0.0f) {
+            FullDeflect(&ShadNorm, &TerI->movement, &TerI->movement);
+            FullDeflect(&ShadNorm, movement, movement);
+        } else {
+            TerI->movement.y *= 0.75f;
+        }
+        TerI->hit_flags[1] = 1;
+        PlatformConnect(reinterpret_cast<char *>(old_query->hit_flags), &old_query->movement, movement,
+                        CurTerr->groups[query->terrain_group_index].scene_index);
     }
     NuScratchRelease();
     TerI = old_query;
-    return count - 1;
+    return count;
 }
 
 extern "C" {

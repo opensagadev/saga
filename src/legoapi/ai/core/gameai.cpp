@@ -2668,9 +2668,8 @@ GameObject_s *AddDynamicCreature(i32 model, nuvec_s *position, i32 angle, char *
         object->apiobj.position = spline_point;
     } else {
         object->apiobj.position = *position;
-        object->apiobj.movement_facing_angle = static_cast<u16>(angle);
-        object->apiobj.facing_angle = static_cast<u16>(angle);
-        object->apiobj.field_0x276 = static_cast<u16>(angle);
+        object->apiobj.movement_facing_angle = object->apiobj.facing_angle = object->apiobj.field_0x276 =
+            static_cast<u16>(angle);
         if (group != NULL) {
             AddToAIGroup(group, &object->apiobj);
             offset.x = ((object->ai.group_column + 1) / 2) * group->x_spacing;
@@ -2684,7 +2683,7 @@ GameObject_s *AddDynamicCreature(i32 model, nuvec_s *position, i32 angle, char *
     }
 
     ResetPlayerMoves(object);
-    plr_lastpos = object->apiobj.start_position = object->apiobj.collision_position = object->apiobj.initial_position =
+    object->apiobj.start_position = plr_lastpos = object->apiobj.collision_position = object->apiobj.initial_position =
         object->apiobj.position;
     object->apiobj.velocity = v000;
 
@@ -2722,12 +2721,13 @@ GameObject_s *AddDynamicCreature(i32 model, nuvec_s *position, i32 angle, char *
         object->field_0xe38 = 4;
     }
 
-    object->apiobj.field_0x1f4 &= ~0x100u;
-    object->apiobj.field_0x1f8 &= static_cast<u16>(~4u);
+    object->apiobj.field_0x1f4 |= 0x100u;
+    object->apiobj.flags_low &= static_cast<u8>(~4u);
     object->field_0x1004 = 1.0f;
     object->apiobj.field_0x287 = 0;
     object->field_0x7a5 = 0xff;
     object->apiobj.field_0x285 = 0;
+    object->apiobj.field_0x1f4 ^= 0x100u;
     memset(&object->ai.path_info, 0, sizeof(object->ai.path_info));
     object->ai.field_0x124 = -1;
     object->ai.field_0x138 = 0xff;
@@ -2756,9 +2756,9 @@ GameObject_s *AddDynamicCreature(i32 model, nuvec_s *position, i32 angle, char *
         if (object->ai.group_column == 0) {
             row->pos = object->apiobj.position;
             row->path_info = object->ai.path_info;
-            row->next_connection = NULL;
             row->y_rot = object->apiobj.field_0x276;
             row->is_turning = 0;
+            row->next_connection = NULL;
         }
     }
     PreResetCode(object);

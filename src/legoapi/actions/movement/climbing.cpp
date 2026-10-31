@@ -139,7 +139,7 @@ struct CLIMBOBJECT_s;
 
 f32 MAGNETOFFSET;
 
-static __used__ void ClimbObject_FindNormal(CLIMBOBJECT_s *object);
+static void ClimbObject_FindNormal(CLIMBOBJECT_s *object);
 
 f32 LEDGETERRAINLOOKAHEAD = 0.02f;
 i32 LedgeTerrain_CheckAnims = 1;
@@ -555,43 +555,29 @@ extern "C" {
 // Game-specific pre-load limits. These must be applied before WorldInfo
 // reserves each level's fixed-size gameplay systems.
 
-static __used__ void ClimbObject_FindNormal(CLIMBOBJECT_s *object) {
-    AIPATHNODE *second = &object->path->nodes[object->connection->node_indices[1]];
-    AIPATHNODE *node = !(second->position.y <= object->path->nodes[object->connection->node_indices[0]].position.y)
-                           ? &object->path->nodes[object->connection->node_indices[0]]
-                           : second;
+static void ClimbObject_FindNormal(CLIMBOBJECT_s *object) {
+    AIPATHNODE *node = &object->path->nodes[object->connection->node_indices[1]];
+    if (node->position.y > object->path->nodes[object->connection->node_indices[0]].position.y)
+        node = &object->path->nodes[object->connection->node_indices[0]];
     NUVEC displacement, origin;
-#define PROBE_CLIMB_NORMAL(angle)                                                                                      \
-    do {                                                                                                               \
-        displacement.x = node->radius + 0.5f;                                                                          \
-        displacement.y = 0.0f;                                                                                         \
-        displacement.z = 0.0f;                                                                                         \
-        NuVecRotateY(&displacement, &displacement, angle);                                                             \
-        origin.x = node->position.x;                                                                                   \
-        origin.y = (node->max_height + node->min_height) * 0.5f;                                                       \
-        origin.z = node->position.z;                                                                                   \
-        if (__builtin_expect(                                                                                          \
-                GameRayCast(&origin, &displacement, 0.0f, TERRAINMASK_NONWEAPON | TERRAINMASK_NONDROID | 0x5f) != 0 && \
-                    (TerSurface[static_cast<i8>(NewRayCastGetImpactTerrainType())].flags & 0x10000) != 0,              \
-                0)) {                                                                                                  \
-            goto found_normal;                                                                                         \
-        }                                                                                                              \
-    } while (0)
-    PROBE_CLIMB_NORMAL(0);
-    PROBE_CLIMB_NORMAL(0x4000);
-    PROBE_CLIMB_NORMAL(0x8000);
-    PROBE_CLIMB_NORMAL(0xc000);
-    PROBE_CLIMB_NORMAL(0x10000);
-    PROBE_CLIMB_NORMAL(0x14000);
-    PROBE_CLIMB_NORMAL(0x18000);
-    PROBE_CLIMB_NORMAL(0x1c000);
-#undef PROBE_CLIMB_NORMAL
+    for (NUANG angle = 0; angle < 0x20000; angle += 0x4000) {
+        displacement.x = node->radius + 0.5f;
+        displacement.y = 0.0f;
+        displacement.z = 0.0f;
+        NuVecRotateY(&displacement, &displacement, angle);
+        origin.x = node->position.x;
+        origin.y = (node->max_height + node->min_height) * 0.5f;
+        origin.z = node->position.z;
+        if (GameRayCast(&origin, &displacement, 0.0f, TERRAINMASK_NONWEAPON | TERRAINMASK_NONDROID | 0x5f) != 0 &&
+            __builtin_expect((TerSurface[static_cast<i8>(NewRayCastGetImpactTerrainType())].flags & 0x10000) != 0, 0))
+            goto found_normal;
+    }
     return;
 found_normal:
     object->flags |= 1;
+    object->normal = ShadNorm;
     object->impact_x = origin.x + displacement.x;
     object->impact_z = origin.z + displacement.z;
-    object->normal = ShadNorm;
 }
 
 // Retail keeps the tail of LedgeTerrain_Attach split out by partial inlining;

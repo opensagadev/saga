@@ -3916,19 +3916,19 @@ i32 MovePlayer_POD(GameObject_s *object) {
         return 0;
     if (object->current_speed_mul == 0.0f)
         return 1;
-    i32 index = object->apiobj.field_0x27c;
-    if (index != -1 && WORLD->current_level == PODRACEB_LDATA && podrace_section != 1 &&
+    if (object->apiobj.field_0x27c != -1 && WORLD->current_level == PODRACEB_LDATA && podrace_section != 1 &&
         (FadeSys.fade != 0.0f || MiniCutCam != 0) && object->sock_position.location.sock != -1 &&
         object->sock_position.distance < 20.0f)
         input = -0.625f;
-    if (__builtin_expect(index <= 1, 1)) {
+    i32 index = object->apiobj.field_0x27c;
+    if (index <= 1) {
         pod_roll_target[index] = SeekLinearF(pod_roll_target[index], input, (6.0f * FRAMETIME) * fabsf(input));
         pod_roll_target[index] = SeekLinearF(pod_roll_target[index], 0.0f, 3.0f * FRAMETIME);
         pod_roll[index] = SeekValF(pod_roll[index], pod_roll_target[index], 8.0f);
     }
     object->field_0x1086 = 2;
     u16 heading = object->sock_position.location.sock == -1 ? 0 : object->sock_angles.y;
-    u16 pitch = 0, roll = 0;
+    i32 pitch = 0, roll = 0;
     if (object->apiobj.field_0x218 != 2000000.0f) {
         f32 height = object->apiobj.collision_min.y - object->apiobj.field_0x218;
         f32 blend;
@@ -3941,19 +3941,20 @@ i32 MovePlayer_POD(GameObject_s *object) {
         FindAnglesZX(&object->surface_normal, NULL, NULL);
         i32 x = RotDiff(0, temp_xrot);
         i32 z = RotDiff(0, temp_zrot);
-        pitch = static_cast<u16>(static_cast<i32>((f32)x * blend));
-        roll = static_cast<u16>(static_cast<i32>((f32)z * blend));
+        pitch = static_cast<i16>(static_cast<i32>((f32)x * blend));
+        roll = static_cast<i16>(static_cast<i32>((f32)z * blend));
     }
     object->apiobj.pitch_angle = SeekRot(object->apiobj.pitch_angle, pitch, 8.0f);
     object->apiobj.roll_angle = SeekRot(object->apiobj.roll_angle, roll, 8.0f);
     if (object->field_0xe20 & 0x20) {
         MoveInactiveVehicle(object, 1, NULL);
     } else {
-        object->target_velocity = {0.0f, 0.0f, 0.0f};
+        object->target_velocity.x = object->target_velocity.y = object->target_velocity.z = 0.0f;
         if (object->sock_position.location.sock != -1) {
-            object->target_velocity.x = index <= 1
-                                            ? pod_roll[index] * object->apiobj.character_data->game_character->run_speed
-                                            : input * pad->input_magnitude;
+            if (index <= 1)
+                object->target_velocity.x = pod_roll[index] * object->apiobj.character_data->game_character->run_speed;
+            else
+                object->target_velocity.x = input * pad->input_magnitude;
         }
         KeepVehicleOnScreen(object, 1, 1, 1);
         if (object->target_velocity.x != 0.0f || object->target_velocity.y != 0.0f || object->target_velocity.z != 0.0f)
@@ -3965,8 +3966,8 @@ i32 MovePlayer_POD(GameObject_s *object) {
         object->apiobj.velocity.z = SeekValF(object->apiobj.velocity.z, object->target_velocity.z, seek_rate);
     }
     object->apiobj.movement_facing_angle = NuAtan2D(object->target_velocity.x, object->target_velocity.z);
-    object->apiobj.facing_angle = SeekRot(object->apiobj.facing_angle, object->apiobj.movement_facing_angle, 2.0f);
-    object->apiobj.field_0x276 = object->apiobj.facing_angle;
+    object->apiobj.facing_angle = object->apiobj.field_0x276 =
+        SeekRot(object->apiobj.facing_angle, object->apiobj.movement_facing_angle, 2.0f);
     return 1;
 }
 
@@ -6118,42 +6119,38 @@ static void ForceCode(GameObject_s *object, i32 pressed, i32 held) {
     object->force_repeat_requested = 0;
     if (object->character_context == 8) {
         if ((held || (object->pad_gamepad->allocated_5a & 4) != 0) && object->gizforce_target != NULL) {
-            if ((dagobah_training == 0 || object->field_0xcc0 != NULL || FreePlay != 0) &&
-                !GizForce_Complete(object->gizforce_target) &&
-                !GizForce_StoodOnForce(object->gizforce_target, object)) {
+            bool usable = (dagobah_training == 0 || object->field_0xcc0 != NULL || FreePlay != 0) &&
+                          !GizForce_Complete(object->gizforce_target) &&
+                          !GizForce_StoodOnForce(object->gizforce_target, object);
+            AlertSurroundingCreatures(object, &object->apiobj.collision_position);
+            if (usable &&
+                (WORLD->current_level == VADERC_LDATA || !object->apiobj.player_controlled ||
+                 object->apiobj.model_draw_result == 0 || !(object->field_0xc54 > 0.0f) ||
+                 !(object->head_target_facing < -0.85f || object->head_target_facing > 0.85f)) &&
+                !(WORLD->current_level == DAGOBAHC_LDATA && object->id == id_LUKESKYWALKERDAGOBAH &&
+                  LevGizmo[0] != NULL && object->gizforce_target == LevGizmo[0]->object &&
+                  GameAnimSet_GetCompletionRatio(object->gizforce_target->anim_set) > 0.5f)) {
+                GIZFORCE_s *force = object->gizforce_target;
+                force->using_object = object;
+                object->force_heading = GizForces_AngleToForce(&object->apiobj.position, force);
                 AlertSurroundingCreatures(object, &object->apiobj.collision_position);
-                if ((WORLD->current_level == VADERC_LDATA || !object->apiobj.player_controlled ||
-                     object->apiobj.model_draw_result == 0 || !(object->field_0xc54 > 0.0f) ||
-                     !(object->head_target_facing < -0.85f || object->head_target_facing > 0.85f)) &&
-                    !(WORLD->current_level == DAGOBAHC_LDATA && object->id == id_LUKESKYWALKERDAGOBAH &&
-                      LevGizmo[0] != NULL && object->gizforce_target == LevGizmo[0]->object &&
-                      GameAnimSet_GetCompletionRatio(object->gizforce_target->anim_set) > 0.5f)) {
-                    GIZFORCE_s *force = object->gizforce_target;
-                    force->using_object = object;
-                    object->force_heading = GizForces_AngleToForce(&object->apiobj.position, force);
-                    AlertSurroundingCreatures(object, &object->apiobj.collision_position);
-                    object->field_0xe22 |= 2;
-                    force = object->gizforce_target;
-                    if (object->gizforce_target_object == NULL) {
-                        object->force_glow_candidate = force;
-                        object->force_glow_candidate_kind = 0;
-                        if (force != NULL)
-                            SetHeadTarget(object, &force->file_position, 1, 2.0f, 5.0f, 10.0f);
-                    } else {
-                        object->force_glow_candidate = object->gizforce_target_object;
-                        object->force_glow_candidate_kind = 1;
-                        object->field_0xd8c = force == NULL ? 1.0f : force->horizontal_range;
-                        SetHeadTarget(object, NuSpecialGetDrawPos(&object->gizforce_target_object->special), 1, 2.0f,
-                                      5.0f, 10.0f);
-                    }
+                object->field_0xe22 |= 2;
+                force = object->gizforce_target;
+                if (object->gizforce_target_object == NULL) {
+                    object->force_glow_candidate = force;
+                    object->force_glow_candidate_kind = 0;
                     if (force != NULL)
                         SetHeadTarget(object, &force->file_position, 1, 2.0f, 5.0f, 10.0f);
                 } else {
-                    object->character_context = -1;
-                    object->gizforce_target = NULL;
+                    object->force_glow_candidate = object->gizforce_target_object;
+                    object->force_glow_candidate_kind = 1;
+                    object->field_0xd8c = force == NULL ? 1.0f : force->horizontal_range;
+                    SetHeadTarget(object, NuSpecialGetDrawPos(&object->gizforce_target_object->special), 1, 2.0f, 5.0f,
+                                  10.0f);
                 }
+                if (force != NULL)
+                    SetHeadTarget(object, &force->file_position, 1, 2.0f, 5.0f, 10.0f);
             } else {
-                AlertSurroundingCreatures(object, &object->apiobj.collision_position);
                 object->character_context = -1;
                 object->gizforce_target = NULL;
             }
@@ -6174,8 +6171,8 @@ static void ForceCode(GameObject_s *object, i32 pressed, i32 held) {
             (held && previous_force))
             start = true;
     }
-    if (start) {
-        if ((object->pad_gamepad->allocated_5a & 4) == 0 || object->gizforce_target == NULL) {
+    if (__builtin_expect(start, 0)) {
+        if (__builtin_expect((object->pad_gamepad->allocated_5a & 4) == 0, 1) || object->gizforce_target == NULL) {
             GizForce_FindBestForceTarget(WORLD->giz_force_sys, object);
         }
         if (object->gizforce_target != NULL) {
@@ -6192,21 +6189,22 @@ static void ForceCode(GameObject_s *object, i32 pressed, i32 held) {
                 LSW_HintConditions.force_used = 1;
             }
         }
-    } else if (object->apiobj.is_player)
+    } else if (__builtin_expect((object->apiobj.flags_low & 0x80) != 0, 0))
         GizForce_FindBestForceTarget(WORLD->giz_force_sys, object);
     GIZFORCE_s *force = object->gizforce_target;
     if (force != NULL && __builtin_expect(static_cast<signed char>(object->apiobj.flags_low) < 0, 1) &&
         __builtin_expect((object->field_0xe22 & 2) == 0, 1) && __builtin_expect(object->apiobj.field_0x27d != 0, 1)) {
+        GAMEANIMOBJ_s *target_object = object->gizforce_target_object;
         object->field_0xe22 |= 2;
-        if (__builtin_expect(object->gizforce_target_object == NULL, 1)) {
+        if (target_object != NULL) {
+            object->force_glow_candidate_kind = 1;
+            object->force_glow_candidate = target_object;
+            object->field_0xd8c = force->horizontal_range;
+            SetHeadTarget(object, NuSpecialGetDrawPos(&target_object->special), 1, 2.0f, 5.0f, 10.0f);
+        } else {
             object->force_glow_candidate = force;
             object->force_glow_candidate_kind = 0;
             SetHeadTarget(object, &force->file_position, 1, 2.0f, 5.0f, 10.0f);
-        } else {
-            object->force_glow_candidate_kind = 1;
-            object->force_glow_candidate = object->gizforce_target_object;
-            object->field_0xd8c = force->horizontal_range;
-            SetHeadTarget(object, NuSpecialGetDrawPos(&object->gizforce_target_object->special), 1, 2.0f, 5.0f, 10.0f);
         }
         SetHeadTarget(object, &force->file_position, 1, 2.0f, 5.0f, 10.0f);
     }
@@ -6249,19 +6247,20 @@ void ForceLightning_Origin(GameObject_s *object, NUVEC *primary, NUVEC *secondar
 }
 
 static void DrawLightningBolts(GameObject_s *object, GameObject_s *target, i32 lightning_index) {
-    NUVEC reflected_origin;
     NUVEC primary;
     NUVEC secondary;
     NUVEC target_position;
+    NUVEC reflected_origin;
+    NUVEC reflected_target;
     NUVEC delta;
     ForceLightning_Origin(object, &primary, &secondary);
 
+    target_position.x = target->apiobj.collision_position.x;
+    target_position.z = target->apiobj.collision_position.z;
+    f32 height = target->apiobj.field_0x194 - target->apiobj.lower_position.y;
     if (primary.y != 1000000000.0f) {
-        target_position.x = target->apiobj.collision_position.x;
-        target_position.z = target->apiobj.collision_position.z;
-        f32 height = target->apiobj.field_0x194 - target->apiobj.lower_position.y;
         target_position.y =
-            target->apiobj.lower_position.y + height * 0.25f + height * (1.0f / 17.0f) * qrand() * 1.5259022e-05f;
+            target->apiobj.lower_position.y + height * 0.25f + height * (1.0f / 17.0f) * (qrand() * 1.5259022e-05f);
         f32 distance = NuVecDist(&target_position, &primary, &delta);
         NuLgtLaser(lightning_type, lightning_sizew[lightning_index], lightning_sizel[lightning_index],
                    lightning_sizewab[lightning_index], &primary, &delta, lightning_col[lightning_index],
@@ -6271,27 +6270,23 @@ static void DrawLightningBolts(GameObject_s *object, GameObject_s *target, i32 l
         if (object->field_0x1088 != 0 && object->field_0x1087 == 2 && NuIOS_IsLowEndDevice() == 0 &&
             lightning_type != 0) {
             reflected_origin = primary;
-            NUVEC reflected_target = target_position;
+            reflected_target = target_position;
             f32 plane = WORLD->current_level->unknown_0cc;
             if (plane == 2000000.0f)
                 plane = object->field_0x1020;
             reflected_origin.y = plane - (reflected_origin.y - plane);
             reflected_target.y = plane - (reflected_target.y - plane);
             distance = NuVecDist(&reflected_target, &reflected_origin, &delta);
-            NuLgtLaser(lightning_type, lightning_sizew[lightning_index], lightning_sizel[lightning_index],
-                       lightning_sizewab[lightning_index], &reflected_origin, &delta, lightning_col[lightning_index],
-                       lightning_endw[lightning_index], distance);
+            NuLgtLaser(lightning_type, lightning_sizew[1], lightning_sizel[1], lightning_sizewab[1], &reflected_origin,
+                       &delta, lightning_col[1], lightning_endw[1], distance);
         }
     }
 
     if (secondary.y == 1000000000.0f) {
         return;
     }
-    target_position.x = target->apiobj.collision_position.x;
-    target_position.z = target->apiobj.collision_position.z;
-    f32 height = target->apiobj.field_0x194 - target->apiobj.lower_position.y;
     target_position.y =
-        target->apiobj.lower_position.y + height * 0.25f + height * (1.0f / 17.0f) * qrand() * 1.5259022e-05f;
+        target->apiobj.lower_position.y + height * 0.25f + height * (1.0f / 17.0f) * (qrand() * 1.5259022e-05f);
     f32 distance = NuVecDist(&target_position, &secondary, &delta);
     NuLgtLaser(lightning_type, lightning_sizew[lightning_index], lightning_sizel[lightning_index],
                lightning_sizewab[lightning_index], &secondary, &delta, lightning_col[lightning_index],
@@ -6300,17 +6295,16 @@ static void DrawLightningBolts(GameObject_s *object, GameObject_s *target, i32 l
 
     if (object->field_0x1088 != 0 && object->field_0x1087 == 2 && NuIOS_IsLowEndDevice() == 0) {
         if (lightning_type != 0) {
-            NUVEC reflected_origin = secondary;
-            NUVEC reflected_target = target_position;
+            reflected_origin = secondary;
+            reflected_target = target_position;
             f32 plane = WORLD->current_level->unknown_0cc;
             if (plane == 2000000.0f)
                 plane = object->field_0x1020;
             reflected_origin.y = plane - (reflected_origin.y - plane);
             reflected_target.y = plane - (reflected_target.y - plane);
             distance = NuVecDist(&reflected_target, &reflected_origin, &delta);
-            NuLgtLaser(lightning_type, lightning_sizew[lightning_index], lightning_sizel[lightning_index],
-                       lightning_sizewab[lightning_index], &reflected_origin, &delta, lightning_col[lightning_index],
-                       lightning_endw[lightning_index], distance);
+            NuLgtLaser(lightning_type, lightning_sizew[1], lightning_sizel[1], lightning_sizewab[1], &reflected_origin,
+                       &delta, lightning_col[1], lightning_endw[1], distance);
         }
     }
 }

@@ -11234,6 +11234,9 @@ AILOCATOR_s *LocalGetNearestLocator(AILOCATOR_s **locators, i32 count, f32 clip_
         }
         candidates[candidate_count++] = i;
     }
+    if (candidate_count == 0) {
+        return NULL;
+    }
     i32 nearest = -1;
     for (i32 i = 0; i < candidate_count; ++i) {
         NUVEC delta;
@@ -11241,7 +11244,7 @@ AILOCATOR_s *LocalGetNearestLocator(AILOCATOR_s **locators, i32 count, f32 clip_
         if (min_delta_y != 1000000000.0f && min_delta_y > delta.y) {
             continue;
         }
-        if (max_delta_y != 1000000000.0f && !(delta.y <= max_delta_y)) {
+        if (max_delta_y != 1000000000.0f && delta.y > max_delta_y) {
             continue;
         }
         if (!(nearest_distance > distance)) {

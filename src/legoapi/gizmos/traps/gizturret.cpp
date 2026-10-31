@@ -143,55 +143,7 @@ static void GizTurrets_Update(void *context, void *system_ptr, float frame_time)
                     i32 desired_pitch = 0, desired_yaw = base_yaw;
                     should_fire = false;
                     GameObject_s *autoaim_target = NULL;
-                    if (turret->controller != NULL) {
-                        GameObject_s *controller = turret->controller;
-                        if (controller->field_0xcc0 != NULL && controller->apiobj.player_controlled) {
-                            GAMEPAD_s *pad = controller->pad_gamepad;
-                            f32 pitch_rate = -pad->input_direction_x * turret->pitch_turn_speed;
-                            if (pitch_rate < 0.0f) {
-                                desired_pitch = turret->field_0x58;
-                                pitch_rate = -pitch_rate;
-                            } else if (pitch_rate > 0.0f)
-                                desired_pitch = turret->field_0x5c;
-                            else
-                                desired_pitch = turret->pitch;
-                            f32 yaw_rate = -pad->input_direction_z * turret->yaw_turn_speed;
-                            if (yaw_rate < 0.0f) {
-                                desired_yaw = turret->field_0x64;
-                                yaw_rate = -yaw_rate;
-                            } else if (yaw_rate > 0.0f)
-                                desired_yaw = turret->field_0x68;
-                            else
-                                desired_yaw = turret->yaw;
-                            turret->pitch = SeekRot(turret->pitch, desired_pitch, pitch_rate);
-                            turret->yaw = SeekRot(turret->yaw, desired_yaw, yaw_rate);
-                            if (__builtin_expect(
-                                    turret->fire_cooldown > 0.0f &&
-                                        (turret->controller->pad_gamepad->buttons_pressed & GAMEPAD_ACTION),
-                                    1)) {
-                                f32 rapid_interval = turret->fire_interval * gizturret_rapid_fire_rate;
-                                if (!(turret->fire_cooldown <= rapid_interval))
-                                    turret->fire_cooldown = rapid_interval;
-                                turret->rapid_fire_pending = 1;
-                            }
-                            if (turret->fire_cooldown == 0.0f &&
-                                (__builtin_expect(!!(turret->controller->pad_gamepad->buttons_held & GAMEPAD_ACTION),
-                                                  0) ||
-                                 (turret->rapid_fire_pending))) {
-                                turret->fire_cooldown = turret->fire_interval;
-                                if (turret->rapid_fire_pending)
-                                    turret->fire_cooldown *= gizturret_rapid_fire_rate;
-                                turret->rapid_fire_pending = 0;
-                                if (turret->behavior_flags & 0x200)
-                                    autoaim_target = GizTurret_GetTgt(turret, primary_draw);
-                                should_fire = bolt_type != NULL;
-                            }
-                        } else {
-                            turret->pitch = SeekRot(turret->pitch, 0, turret->pitch_turn_speed);
-                            turret->yaw = SeekRot(turret->yaw, home_yaw, turret->yaw_turn_speed);
-                            turret->rapid_fire_pending = 0;
-                        }
-                    } else {
+                    if (!(turret->controller != NULL)) {
                         if (__builtin_expect(!!(turret->aim_locked), 0))
                             goto autonomous_apply;
                         if (__builtin_expect(!!(turret->aim_at_fixed_angles), 0)) {
@@ -302,6 +254,54 @@ static void GizTurrets_Update(void *context, void *system_ptr, float frame_time)
                         } else {
                             turret->pitch = SeekRot(turret->pitch, desired_pitch, turret->pitch_turn_speed);
                             turret->yaw = SeekRot(turret->yaw, desired_yaw, turret->yaw_turn_speed);
+                        }
+                    } else {
+                        GameObject_s *controller = turret->controller;
+                        if (controller->field_0xcc0 != NULL && controller->apiobj.player_controlled) {
+                            GAMEPAD_s *pad = controller->pad_gamepad;
+                            f32 pitch_rate = -pad->input_direction_x * turret->pitch_turn_speed;
+                            if (pitch_rate < 0.0f) {
+                                desired_pitch = turret->field_0x58;
+                                pitch_rate = -pitch_rate;
+                            } else if (pitch_rate > 0.0f)
+                                desired_pitch = turret->field_0x5c;
+                            else
+                                desired_pitch = turret->pitch;
+                            f32 yaw_rate = -pad->input_direction_z * turret->yaw_turn_speed;
+                            if (yaw_rate < 0.0f) {
+                                desired_yaw = turret->field_0x64;
+                                yaw_rate = -yaw_rate;
+                            } else if (yaw_rate > 0.0f)
+                                desired_yaw = turret->field_0x68;
+                            else
+                                desired_yaw = turret->yaw;
+                            turret->pitch = SeekRot(turret->pitch, desired_pitch, pitch_rate);
+                            turret->yaw = SeekRot(turret->yaw, desired_yaw, yaw_rate);
+                            if (__builtin_expect(
+                                    turret->fire_cooldown > 0.0f &&
+                                        (turret->controller->pad_gamepad->buttons_pressed & GAMEPAD_ACTION),
+                                    1)) {
+                                f32 rapid_interval = turret->fire_interval * gizturret_rapid_fire_rate;
+                                if (!(turret->fire_cooldown <= rapid_interval))
+                                    turret->fire_cooldown = rapid_interval;
+                                turret->rapid_fire_pending = 1;
+                            }
+                            if (turret->fire_cooldown == 0.0f &&
+                                (__builtin_expect(!!(turret->controller->pad_gamepad->buttons_held & GAMEPAD_ACTION),
+                                                  0) ||
+                                 (turret->rapid_fire_pending))) {
+                                turret->fire_cooldown = turret->fire_interval;
+                                if (turret->rapid_fire_pending)
+                                    turret->fire_cooldown *= gizturret_rapid_fire_rate;
+                                turret->rapid_fire_pending = 0;
+                                if (turret->behavior_flags & 0x200)
+                                    autoaim_target = GizTurret_GetTgt(turret, primary_draw);
+                                should_fire = bolt_type != NULL;
+                            }
+                        } else {
+                            turret->pitch = SeekRot(turret->pitch, 0, turret->pitch_turn_speed);
+                            turret->yaw = SeekRot(turret->yaw, home_yaw, turret->yaw_turn_speed);
+                            turret->rapid_fire_pending = 0;
                         }
                     }
                     if (turret->primary_anim_obj != NULL) {

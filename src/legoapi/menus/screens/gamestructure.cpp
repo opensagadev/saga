@@ -584,11 +584,15 @@ bool Store_IsPackAvailable(i32, char *reason) {
 
 i32 Store_FindPack(i32 id, char *name) {
     for (i32 i = 0; i < 11; ++i) {
-        if (id != -1 && StorePack[i].id != NULL && *StorePack[i].id == id) {
-            return i;
+        if (id != -1 && StorePack[i].id != NULL) {
+            if (*StorePack[i].id == id) {
+                return i;
+            }
         }
-        if (name != NULL && NuStrCmp(StorePack[i].name, name) == 0) {
-            return i;
+        if (name != NULL) {
+            if (NuStrCmp(StorePack[i].name, name) == 0) {
+                return i;
+            }
         }
     }
     return -1;

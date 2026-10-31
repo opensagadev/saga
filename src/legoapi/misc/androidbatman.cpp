@@ -66,7 +66,7 @@ static void SystemPauseCallback(const NuPhoneOSMessageData *) {
         GameObject_s *player = Player[player_index];
         if (__builtin_expect(
                 !(Paused == 0 && GameTimer.update_count != 0 && !(memcard_autosavepredelay > 0.0f) && NewMode == 0 &&
-                  player != NULL && static_cast<i8>(player->apiobj.field_0x1f8) < 0 &&
+                  player != NULL && __builtin_expect(static_cast<i8>(player->apiobj.field_0x1f8) < 0, 1) &&
                   (LEGOCONTEXT_DROPIN == -1 || LEGOCONTEXT_DROPIN != static_cast<i8>(player->field_0x7a5)) &&
                   NewLData == NULL && FadeSys.fade == 0.0f && editor_active == 0 && GameTimer.time_elapsed > 0.0f &&
                   world != NULL && world->current_level != TITLES_LDATA && GameMenu[GameMenuLevel].menu == -1 &&

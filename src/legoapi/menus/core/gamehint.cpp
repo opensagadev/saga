@@ -633,9 +633,10 @@ void MenuDrawHints(MENU_s *menu) {
         if ((hint->flags & 0x2c) != 0)
             continue;
         const i32 mode = MechInputTouchSystem::s_baseControlMode;
-        if ((hint->flags & 0x10) != 0 && mode == 0)
-            continue;
-        if (hint->control_mode_ids[1] == -1 && mode != 0)
+        if ((hint->flags & 0x10) == 0) {
+            if (hint->control_mode_ids[1] == -1 && mode != 0)
+                continue;
+        } else if (__builtin_expect(mode == 0, 1) || hint->control_mode_ids[1] == -1)
             continue;
         const i32 text_id = hint->control_mode_ids[mode];
         if (TTab[text_id] == NULL)

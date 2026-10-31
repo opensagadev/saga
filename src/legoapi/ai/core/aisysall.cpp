@@ -8374,7 +8374,7 @@ extern "C" {
             if (NuLinkedListGetHead(&reference->conditions) != NULL &&
                 AIScriptProcessStateConditions(system, &reference->conditions, packet, processor, 1) == NULL) {
                 processor->active_ref_count = index;
-                if (__builtin_expect(index == 0, 1)) {
+                if (index == 0) {
                     AICREATURE *creature = packet->field_0x134 != 0xff ? &system->creatures[packet->field_0x134] : NULL;
                     AIScriptProcessorInit(system, packet, processor, creature, NULL, NULL, 0, processor->base_script,
                                           reference->return_state);
@@ -8386,8 +8386,8 @@ extern "C" {
             }
         }
 
-        if (__builtin_expect(processor->next_state == NULL, 0)) {
-            if (processor->active_ref_count != 0 && processor->state == processor->script->base_state) {
+        if (processor->active_ref_count != 0 && processor->next_state == NULL) {
+            if (processor->state == processor->script->base_state) {
                 const i32 completed_index = processor->active_ref_count - 1;
                 AIREFSCRIPT *completed_reference = processor->active_refs[completed_index];
                 processor->active_ref_count = completed_index;
@@ -8402,7 +8402,7 @@ extern "C" {
                 }
             }
         }
-        if (processor->next_state != NULL) {
+        if (__builtin_expect(processor->next_state != NULL, 1)) {
             AIScriptSetState(processor, processor->next_state);
             processor->next_state = NULL;
         } else if (processor->state == NULL) {
@@ -8428,12 +8428,13 @@ extern "C" {
                         memset(&processor->path_info, 0, sizeof(processor->path_info));
 
                         if (packet != NULL) {
+                            SCRIPTPROCESSFIRSTTIMEACTION *first_time_fn = ScriptProcessFirstTimeActionFn;
                             packet->goal_path_node = NULL;
                             packet->goal_speed_mode = 0;
                             packet->movement_instruction_parameter = 0.0f;
                             packet->frame_flags = 0;
-                            if (ScriptProcessFirstTimeActionFn != NULL) {
-                                ScriptProcessFirstTimeActionFn(system, packet, processor);
+                            if (first_time_fn != NULL) {
+                                first_time_fn(system, packet, processor);
                             }
                         }
 
@@ -8457,14 +8458,14 @@ extern "C" {
                     if (!action_completed) {
                         break;
                     }
+                    if (processor->is_first_time_action) {
+                        continue;
+                    }
                 } else {
                     processor->is_first_time_action = 0;
                 }
 
                 NULISTLNK *action_node = processor->action_node;
-                if (processor->is_first_time_action) {
-                    continue;
-                }
                 if (action_node != NULL) {
                     action_node = NuLinkedListGetNext(&processor->state->actions, action_node);
                 } else {
@@ -8477,7 +8478,7 @@ extern "C" {
             }
         }
 
-        if (system != NULL && processor->script != NULL && processor->active_ref_count < 4) {
+        if (__builtin_expect(system != NULL, 1) && processor->script != NULL && processor->active_ref_count < 4) {
             NULISTHDR *references = &processor->script->ref_scripts;
             for (AIREFSCRIPT *reference = reinterpret_cast<AIREFSCRIPT *>(NuLinkedListGetHead(references));
                  reference != NULL; reference = reinterpret_cast<AIREFSCRIPT *>(
@@ -8485,10 +8486,8 @@ extern "C" {
                 processor->param_stack[1].is_first_time_state = 1;
                 processor->param_stack[1].force_complex_eval = 1;
 
-                if (__builtin_expect(NuLinkedListGetHead(&reference->conditions) != NULL &&
-                                         AIScriptProcessStateConditions(system, &reference->conditions, packet,
-                                                                        processor, 1) == NULL,
-                                     1)) {
+                if (NuLinkedListGetHead(&reference->conditions) != NULL &&
+                    AIScriptProcessStateConditions(system, &reference->conditions, packet, processor, 1) == NULL) {
                     continue;
                 }
                 if (reference->script == NULL) {
@@ -8520,7 +8519,7 @@ extern "C" {
                     if (__builtin_expect(NuLinkedListGetHead(&reference->conditions) != NULL &&
                                              AIScriptProcessStateConditions(system, &reference->conditions, packet,
                                                                             processor, 1) == NULL,
-                                         1)) {
+                                         0)) {
                         continue;
                     }
                     if (reference->script == NULL) {
@@ -13310,6 +13309,7 @@ extern "C" {
                                i32 use_three_dimensions, i32 process_ai) {
         AISCRIPTPROCESS *primary_processor = &packet->script_process;
         AISCRIPTPROCESS *processor = packet->alternate_script_process;
+        NUVEC delta;
         if (processor == NULL) {
             processor = primary_processor;
         }
@@ -13350,28 +13350,32 @@ extern "C" {
                     AIScriptProcess(system, object, packet, processor, elapsed);
                 }
 
+                const u8 script_runtime_flags = packet->field_0x1e6;
                 packet->navigation_flags &= static_cast<u8>(~AIPACKET_NAVIGATION_FLAG_TRANSIENT);
                 packet->frame_state = 0;
-                packet->field_0x1e6 &= 0x0f;
+                packet->field_0x1e6 = script_runtime_flags & 0x0f;
 
                 const u8 source_flags = packet->field_0x1e7;
                 packet->field_0x1e7 = source_flags & 0x3f;
                 if ((source_flags & AIPACKET_MOVEMENT_SOURCE_ACTIVE) != 0) {
-                    const u8 source = (source_flags & AIPACKET_MOVEMENT_SOURCE_MASK) >> 2;
-                    if (source == 1) {
-                        if (packet->field_0x134 != 0xff) {
-                            AICREATURE *creature = &system->creatures[packet->field_0x134];
-                            AIMoveInstruction(packet, &creature->pos, 0.0f, &creature->path_info,
-                                              AIPACKET_MOVEMENT_TO_DESTINATION, 0.0f);
-                        }
-                    } else if (source == 2) {
-                        if (packet->locator != NULL) {
-                            AIPATHINFO *locator_path = &packet->locator->path_info;
-                            AIMoveInstruction(packet, &packet->locator->position, 0.0f, locator_path,
-                                              AIPACKET_MOVEMENT_TO_DESTINATION, 0.0f);
-                        }
-                    } else {
-                        packet->field_0x1e7 = source_flags & 0x2f;
+                    switch ((packet->field_0x1e7 >> 2) & 3) {
+                        case 1:
+                            if (packet->field_0x134 != 0xff) {
+                                AICREATURE *creature = &system->creatures[packet->field_0x134];
+                                AIMoveInstruction(packet, &creature->pos, 0.0f, &creature->path_info,
+                                                  AIPACKET_MOVEMENT_TO_DESTINATION, 0.0f);
+                            }
+                            break;
+                        case 2:
+                            if (packet->locator != NULL) {
+                                AIPATHINFO *locator_path = &packet->locator->path_info;
+                                AIMoveInstruction(packet, &packet->locator->position, 0.0f, locator_path,
+                                                  AIPACKET_MOVEMENT_TO_DESTINATION, 0.0f);
+                            }
+                            break;
+                        default:
+                            packet->field_0x1e7 = source_flags & 0x2f;
+                            break;
                     }
                 }
 
@@ -13381,7 +13385,7 @@ extern "C" {
                     packet->movement_target_radius > 0.0f &&
                     (object->field_0x1f4 & APIOBJECT_MOTION_FLAG_AI_CONTROLLED) != 0) {
                     NUVEC *source_position = NULL;
-                    const u8 source = (packet->field_0x1e7 & AIPACKET_MOVEMENT_SOURCE_MASK) >> 2;
+                    const u8 source = (packet->field_0x1e7 >> 2) & 3;
                     if (source == 1 && packet->field_0x134 != 0xff) {
                         source_position = &system->creatures[packet->field_0x134].pos;
                     } else if (source == 2 && packet->locator != NULL) {
@@ -13389,29 +13393,28 @@ extern "C" {
                     }
 
                     if (source_position != NULL) {
-                        NUVEC source_delta;
-                        const f32 distance_squared = NuVecXZDistSqr(source_position, &object->position, &source_delta);
+                        const f32 distance_squared = NuVecXZDistSqr(source_position, &object->position, &delta);
                         const f32 radius = packet->movement_target_radius;
                         const u8 current_source_flags = packet->field_0x1e7;
-                        if (__builtin_expect((current_source_flags & AIPACKET_MOVEMENT_SOURCE_ACTIVE) == 0, 0)) {
-                            if (distance_squared > radius * radius) {
-                                const f32 release_radius = radius + 0.5f;
-                                if (distance_squared > release_radius * release_radius) {
-                                    packet->field_0x1e7 = current_source_flags | AIPACKET_MOVEMENT_SOURCE_ACTIVE;
-                                } else {
-                                    NUVEC movement_delta;
-                                    movement_delta.x = packet->movement_destination.x - object->position.x;
-                                    movement_delta.y = 0.0f;
-                                    movement_delta.z = packet->movement_destination.z - object->position.z;
-                                    if (NuVecDot(&movement_delta, &source_delta) < 0.0f) {
-                                        packet->movement_destination = object->position;
-                                        packet->movement_stopping_distance = 0.0f;
-                                    }
+                        if ((current_source_flags & AIPACKET_MOVEMENT_SOURCE_ACTIVE) != 0) {
+                            if (distance_squared < radius * radius) {
+                                packet->field_0x1e7 =
+                                    current_source_flags & static_cast<u8>(~AIPACKET_MOVEMENT_SOURCE_ACTIVE);
+                            }
+                        } else if (distance_squared > radius * radius) {
+                            const f32 release_radius = radius + 0.5f;
+                            if (distance_squared > release_radius * release_radius) {
+                                packet->field_0x1e7 = current_source_flags | AIPACKET_MOVEMENT_SOURCE_ACTIVE;
+                            } else {
+                                NUVEC movement_delta;
+                                movement_delta.x = packet->movement_destination.x - object->position.x;
+                                movement_delta.y = 0.0f;
+                                movement_delta.z = packet->movement_destination.z - object->position.z;
+                                if (NuVecDot(&movement_delta, &delta) < 0.0f) {
+                                    packet->movement_destination = object->position;
+                                    packet->movement_stopping_distance = 0.0f;
                                 }
                             }
-                        } else if (__builtin_expect(!(distance_squared >= radius * radius), 0)) {
-                            packet->field_0x1e7 =
-                                current_source_flags & static_cast<u8>(~AIPACKET_MOVEMENT_SOURCE_ACTIVE);
                         }
                     }
                 }
@@ -13419,34 +13422,31 @@ extern "C" {
         }
 
         f32 clearance = 0.0f;
-        if (__builtin_expect(packet->movement_stopping_distance != 0.0f, 0)) {
+        if (packet->movement_stopping_distance != 0.0f) {
             clearance = packet->mover_height;
         }
 
-        NUVEC delta;
-        if (use_three_dimensions == 0) {
-            const f32 distance = NuVecXZDist(&packet->movement_destination, &object->position, &delta);
+        if (use_three_dimensions != 0) {
+            const f32 distance = NuVecDist(&packet->movement_destination, &object->position, &delta);
             const f32 stopping_clearance = clearance + packet->movement_stopping_distance;
             if (distance > packet->mover_height + clearance + packet->movement_stopping_distance) {
-                const f32 scale =
-                    distance != 0.0f && packet->mover_height != 0.0f ? packet->mover_height / distance : 0.0f;
+                const f32 scale = NuFdiv(packet->mover_height, distance);
                 NuVecScale(&delta, &delta, scale);
                 NuVecAdd(&packet->movement_position, &object->position, &delta);
             } else {
-                const f32 scale = distance != 0.0f && stopping_clearance != 0.0f ? stopping_clearance / distance : 0.0f;
+                const f32 scale = NuFdiv(stopping_clearance, distance);
                 NuVecScale(&delta, &delta, scale);
                 NuVecSub(&packet->movement_position, &packet->movement_destination, &delta);
             }
         } else {
-            const f32 distance = NuVecDist(&packet->movement_destination, &object->position, &delta);
+            const f32 distance = NuVecXZDist(&packet->movement_destination, &object->position, &delta);
             const f32 stopping_clearance = clearance + packet->movement_stopping_distance;
             if (distance > packet->mover_height + clearance + packet->movement_stopping_distance) {
-                const f32 scale =
-                    distance != 0.0f && packet->mover_height != 0.0f ? packet->mover_height / distance : 0.0f;
+                const f32 scale = NuFdiv(packet->mover_height, distance);
                 NuVecScale(&delta, &delta, scale);
                 NuVecAdd(&packet->movement_position, &object->position, &delta);
             } else {
-                const f32 scale = distance != 0.0f && stopping_clearance != 0.0f ? stopping_clearance / distance : 0.0f;
+                const f32 scale = NuFdiv(stopping_clearance, distance);
                 NuVecScale(&delta, &delta, scale);
                 NuVecSub(&packet->movement_position, &packet->movement_destination, &delta);
             }
@@ -16631,25 +16631,67 @@ static __used__ void
 locatorEditor_cbAddLocatorsByNameYesNo(eduimenu_s *, eduiitem_s *item, u32) {
     if (item != nullptr && item->data != 0 && NuStrLen(aieditor->pending_locator_name) != 0 &&
         aieditor->current_locator_set != nullptr) {
-        EDLOCATORSET_s *set = aieditor->current_locator_set;
         EDLOCATOR_s *locator = (EDLOCATOR_s *)NuLinkedListGetHead(&aieditor->locators);
         while (locator != nullptr) {
-            if (__builtin_expect(NuStrNICmp(aieditor->pending_locator_name, locator->name, -1) == 0, 0)) {
-                EDLOCATOR_s *before = nullptr;
-                for (i32 index = 0; index < 64 && set->locators[index] != nullptr; ++index) {
-                    if (NuStrICmp(set->locators[index]->name, locator->name) > 0) {
-                        if (NuStrLen(set->locators[index]->name) < NuStrLen(locator->name)) {
-                            continue;
+            if (NuStrNICmp(aieditor->pending_locator_name, locator->name, -1) == 0) {
+                for (i32 index = 0; index < 64; ++index) {
+                    if (aieditor->current_locator_set->locators[index] == nullptr) {
+                        EDLOCATORSET_s *set = aieditor->current_locator_set;
+                        if (set->locators[63] == nullptr &&
+                            (set->locators[0] == nullptr || set->locators[0]->path == locator->path)) {
+                            for (i32 slot = 0; slot < 64; ++slot) {
+                                if (set->locators[slot] == nullptr) {
+                                    break;
+                                }
+                                if (set->locators[slot] == locator) {
+                                    for (i32 move = 0; move < 64 && set->locators[move] != nullptr; ++move) {
+                                        if (set->locators[move] == locator) {
+                                            for (; move < 64; ++move) {
+                                                if (move < 63) {
+                                                    set->locators[move] = set->locators[move + 1];
+                                                } else {
+                                                    set->locators[move] = nullptr;
+                                                }
+                                            }
+                                            break;
+                                        }
+                                    }
+                                    break;
+                                }
+                            }
+                            for (i32 slot = 0; slot < 64; ++slot) {
+                                if (set->locators[slot] == nullptr) {
+                                    set->locators[slot] = locator;
+                                    if (slot < 63) {
+                                        set->locators[slot + 1] = nullptr;
+                                    }
+                                    break;
+                                }
+                            }
                         }
-                        before = set->locators[index];
+                        break;
+                    }
+                    if (NuStrICmp(aieditor->current_locator_set->locators[index]->name, locator->name) > 0 &&
+                        NuStrLen(aieditor->current_locator_set->locators[index]->name) >= NuStrLen(locator->name)) {
+                        EDLOCATORSET_s *set = aieditor->current_locator_set;
+                        EDLOCATOR_s *before = set->locators[index];
+                        if (set->locators[63] == nullptr &&
+                            (set->locators[0] == nullptr || set->locators[0]->path == locator->path)) {
+                            AddLocatorToSetBody(set, locator, before);
+                            set = aieditor->current_locator_set;
+                            before = set->locators[index];
+                        }
+                        if (before != nullptr && set->locators[63] == nullptr &&
+                            (set->locators[0] == nullptr || set->locators[0]->path == before->path)) {
+                            AddLocatorToSetBody(set, before, locator);
+                        }
                         break;
                     }
                 }
-                AddLocatorToSet(set, locator, before);
             }
             locator = (EDLOCATOR_s *)NuLinkedListGetNext(&aieditor->locators, &locator->link);
         }
-        aieditor->current_locator = set->locators[0];
+        aieditor->current_locator = aieditor->current_locator_set->locators[0];
         if (aieditor->current_locator != nullptr) {
             aieditor->current_path = aieditor->current_locator->path;
             edcamSetPos(&aieditor->current_locator->position);

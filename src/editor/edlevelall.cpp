@@ -6881,6 +6881,33 @@ i32 PropertyTool::ProcessMenu(EdInputContext &input) {
             menu->next = NULL;
             menu->previous = NULL;
             --menu_count;
+            PropertyMenu *position;
+            for (position = first; position != NULL; position = position->next) {
+                if (position->order > menu->order)
+                    break;
+            }
+            if (position != NULL) {
+                menu->previous = position->previous;
+                menu->next = position;
+                if (position->previous != NULL) {
+                    position->previous->next = menu;
+                } else {
+                    first = menu;
+                }
+                position->previous = menu;
+                ++count;
+                continue;
+            }
+            menu->next = NULL;
+            menu->previous = last;
+            if (last != NULL) {
+                last->next = menu;
+            }
+            if (first == NULL) {
+                first = menu;
+            }
+            last = menu;
+            ++count;
         } else {
             menu = FindItemMenu(first, reinterpret_cast<ClassItem *>(entry));
             if (menu != NULL) {
@@ -6894,34 +6921,34 @@ i32 PropertyTool::ProcessMenu(EdInputContext &input) {
                                         reinterpret_cast<PropertyMenuList *>(&active_menu));
             ediMenuRetrieveMetrics(menu->menu);
             menu->order = -1;
-        }
-
-        PropertyMenu *position;
-        for (position = first; position != NULL; position = position->next) {
-            if (position->order > menu->order)
-                break;
-        }
-        if (position != NULL) {
-            menu->next = position;
-            menu->previous = position->previous;
-            if (position->previous != NULL) {
-                position->previous->next = menu;
-            } else {
+            PropertyMenu *position;
+            for (position = first; position != NULL; position = position->next) {
+                if (position->order > menu->order)
+                    break;
+            }
+            if (position != NULL) {
+                menu->previous = position->previous;
+                menu->next = position;
+                if (position->previous != NULL) {
+                    position->previous->next = menu;
+                } else {
+                    first = menu;
+                }
+                position->previous = menu;
+                ++count;
+                continue;
+            }
+            menu->next = NULL;
+            menu->previous = last;
+            if (last != NULL) {
+                last->next = menu;
+            }
+            if (first == NULL) {
                 first = menu;
             }
-            position->previous = menu;
+            last = menu;
             ++count;
-            continue;
         }
-        menu->previous = last;
-        if (last != NULL) {
-            last->next = menu;
-        }
-        if (first == NULL) {
-            first = menu;
-        }
-        last = menu;
-        ++count;
     }
     while (active_menu != NULL) {
         PropertyMenu *menu = active_menu;
@@ -7685,42 +7712,37 @@ void EdSpecialObjectControl::AddMenuItem(eduimenu_s *parent, EdRef *member, void
 }
 
 f32 BezierLineLength(VuVec &start, VuVec &first_control, VuVec &end, VuVec &second_control) {
-    VuVec first;
-    first.x = (start.x + first_control.x) * 0.5f;
-    first.y = (start.y + first_control.y) * 0.5f;
-    first.z = (start.z + first_control.z) * 0.5f;
-    first.w = 0.0f;
-    VuVec middle;
-    middle.x = (first_control.x + second_control.x) * 0.5f;
-    middle.y = (first_control.y + second_control.y) * 0.5f;
-    middle.z = (first_control.z + second_control.z) * 0.5f;
-    middle.w = 0.0f;
-    VuVec last;
-    last.x = (second_control.x + end.x) * 0.5f;
-    last.y = (second_control.y + end.y) * 0.5f;
-    last.z = (second_control.z + end.z) * 0.5f;
-    last.w = 0.0f;
-    VuVec first_middle;
-    first_middle.x = (first.x + middle.x) * 0.5f;
-    first_middle.y = (first.y + middle.y) * 0.5f;
-    first_middle.z = (first.z + middle.z) * 0.5f;
-    first_middle.w = 0.0f;
-    VuVec middle_last;
-    middle_last.x = (middle.x + last.x) * 0.5f;
-    middle_last.y = (middle.y + last.y) * 0.5f;
-    middle_last.z = (middle.z + last.z) * 0.5f;
-    middle_last.w = 0.0f;
-    VuVec midpoint;
-    midpoint.x = (first_middle.x + middle_last.x) * 0.5f;
-    midpoint.y = (first_middle.y + middle_last.y) * 0.5f;
-    midpoint.z = (first_middle.z + middle_last.z) * 0.5f;
-    midpoint.w = 0.0f;
-    NUVEC error{(start.x + end.x) * 0.5f - midpoint.x, (start.y + end.y) * 0.5f - midpoint.y,
-                (start.z + end.z) * 0.5f - midpoint.z};
+    VuVec points[6];
+    points[0].x = (first_control.x + second_control.x) * 0.5f;
+    points[0].y = (first_control.y + second_control.y) * 0.5f;
+    points[0].z = (first_control.z + second_control.z) * 0.5f;
+    points[0].w = 0.0f;
+    points[1].x = (first_control.x + start.x) * 0.5f;
+    points[1].y = (first_control.y + start.y) * 0.5f;
+    points[1].z = (first_control.z + start.z) * 0.5f;
+    points[1].w = 0.0f;
+    points[2].x = (end.x + second_control.x) * 0.5f;
+    points[2].y = (end.y + second_control.y) * 0.5f;
+    points[2].z = (end.z + second_control.z) * 0.5f;
+    points[2].w = 0.0f;
+    points[3].x = (points[0].x + points[1].x) * 0.5f;
+    points[3].y = (points[0].y + points[1].y) * 0.5f;
+    points[3].z = (points[0].z + points[1].z) * 0.5f;
+    points[3].w = 0.0f;
+    points[4].x = (points[2].x + points[0].x) * 0.5f;
+    points[4].y = (points[2].y + points[0].y) * 0.5f;
+    points[4].z = (points[2].z + points[0].z) * 0.5f;
+    points[4].w = 0.0f;
+    points[5].x = (points[4].x + points[3].x) * 0.5f;
+    points[5].y = (points[4].y + points[3].y) * 0.5f;
+    points[5].z = (points[4].z + points[3].z) * 0.5f;
+    points[5].w = 0.0f;
+    NUVEC error{(start.x + end.x) * 0.5f - points[5].x, (start.y + end.y) * 0.5f - points[5].y,
+                (start.z + end.z) * 0.5f - points[5].z};
     if (!(NuVecMag(&error) < 0.01f) && bezierline_depth < 2) {
         ++bezierline_depth;
-        f32 first_length = BezierLineLength(start, first, midpoint, first_middle);
-        f32 second_length = BezierLineLength(midpoint, middle_last, end, last);
+        f32 first_length = BezierLineLength(start, points[1], points[5], points[3]);
+        f32 second_length = BezierLineLength(points[5], points[4], end, points[2]);
         --bezierline_depth;
         return first_length + second_length;
     }
@@ -9127,14 +9149,14 @@ __attribute__((force_align_arg_pointer)) i32 EdManipulator::SelectAxis(EdInputCo
                                                                        VuVec &first_axis, VuVec &second_axis,
                                                                        VuMtx *matrix) {
     VuVec locators[8];
-    first_axis.y = 0.0f;
-    first_axis.z = 0.0f;
-    first_axis.x = 0.0f;
-    first_axis.w = 1.0f;
     second_axis.x = 0.0f;
     second_axis.y = 0.0f;
-    second_axis.w = 1.0f;
     second_axis.z = 0.0f;
+    second_axis.w = 1.0f;
+    first_axis.x = 0.0f;
+    first_axis.y = 0.0f;
+    first_axis.z = 0.0f;
+    first_axis.w = 1.0f;
     GetAxisLocators(origin, locators, matrix);
 
     VuVec *ray_direction = reinterpret_cast<VuVec *>(input.reserved_00 + 0x30);
@@ -9178,9 +9200,6 @@ __attribute__((force_align_arg_pointer)) i32 EdManipulator::SelectAxis(EdInputCo
             second_axis = VuVec(0.0f, 0.0f, 1.0f, 1.0f);
             break;
         case 6:
-            first_axis = VuVec(0.0f, 1.0f, 0.0f, 1.0f);
-            second_axis = VuVec(0.0f, 0.0f, 1.0f, 1.0f);
-            break;
         case 7:
             first_axis = VuVec(0.0f, 1.0f, 0.0f, 1.0f);
             second_axis = VuVec(0.0f, 0.0f, 1.0f, 1.0f);
@@ -9189,17 +9208,26 @@ __attribute__((force_align_arg_pointer)) i32 EdManipulator::SelectAxis(EdInputCo
             break;
     }
     if (matrix != NULL) {
-        const NUMTX &transform = matrix->matrix;
+        const f32 *transform = reinterpret_cast<const f32 *>(matrix);
         f32 first_x = first_axis.x;
-        first_axis.z = first_x * transform.m02 + first_axis.y * transform.m12 + first_axis.z * transform.m22;
-        first_axis.y = first_x * transform.m01 + first_axis.y * transform.m11 + first_axis.z * transform.m21;
-        first_axis.x = first_x * transform.m00 + first_axis.y * transform.m10 + first_axis.z * transform.m20;
+        f32 first_y = first_axis.y;
+        f32 first_z = first_axis.z;
+        f32 result_x = first_x * transform[0] + first_y * transform[4] + first_z * transform[8];
+        f32 result_y = first_x * transform[1] + first_y * transform[5] + first_z * transform[9];
+        f32 result_z = first_x * transform[2] + first_y * transform[6] + first_z * transform[10];
+        first_axis.x = result_x;
+        first_axis.y = result_y;
+        first_axis.z = result_z;
 
         f32 second_x = second_axis.x;
+        f32 second_y = second_axis.y;
         f32 second_z = second_axis.z;
-        second_axis.y = second_x * transform.m01 + second_axis.y * transform.m11 + second_z * transform.m21;
-        second_axis.z = second_x * transform.m02 + second_axis.y * transform.m12 + second_z * transform.m22;
-        second_axis.x = second_x * transform.m00 + second_axis.y * transform.m10 + second_z * transform.m20;
+        result_x = second_x * transform[0] + second_y * transform[4] + second_z * transform[8];
+        result_y = second_x * transform[1] + second_y * transform[5] + second_z * transform[9];
+        result_z = second_x * transform[2] + second_y * transform[6] + second_z * transform[10];
+        second_axis.x = result_x;
+        second_axis.y = result_y;
+        second_axis.z = result_z;
 
         NuVecNorm(reinterpret_cast<NUVEC *>(&first_axis), reinterpret_cast<NUVEC *>(&first_axis));
         NuVecNorm(reinterpret_cast<NUVEC *>(&second_axis), reinterpret_cast<NUVEC *>(&second_axis));
@@ -9220,9 +9248,9 @@ __attribute__((force_align_arg_pointer)) i32 EdManipulator::SelectAxis(EdInputCo
         nearest = *selected_axis;
         const VuVec *selected_first = reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(this) + 0x10);
         const VuVec *selected_second = reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(this) + 0x20);
-        first_axis.z = selected_first->z;
-        first_axis.y = selected_first->y;
         first_axis.x = selected_first->x;
+        first_axis.y = selected_first->y;
+        first_axis.z = selected_first->z;
         first_axis.w = selected_first->w;
         second_axis.x = selected_second->x;
         second_axis.y = selected_second->y;

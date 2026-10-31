@@ -3364,8 +3364,10 @@ void CutScenePlayer_DrawGrid(COLLECTION_s *collection, i16 *ids, float x, float 
     const f32 scale = ICONSIZE * 1.2f;
     NUVEC minimum, maximum;
     NuSpecialGetBounds(&WORLD->lev_objs[167].special, &minimum, &maximum);
-    const f32 dx = (maximum.x - minimum.x) * scale / PANEL3DMULX;
-    const f32 dy = -(maximum.y - minimum.y) * scale / PANEL3DMULY;
+    f32 dx = (maximum.x - minimum.x) * scale;
+    f32 dy = -(maximum.y - minimum.y) * scale;
+    dx /= PANEL3DMULX;
+    dy /= PANEL3DMULY;
     y -= rows * dy * 0.5f;
     const f32 first_x = x - (collection->count_x - 1) * dx * 0.5f;
     CUTSCENEPLAYER_s *player = static_cast<CUTSCENEPLAYER_s *>(CutScenePlayer_Available());
@@ -4458,14 +4460,14 @@ void Hub_Update(WORLDINFO_s *world) {
             }
             if (GizmoGetOutput(world->gizmo_sys, HubAreaInfo[i].bonus_gizmo, 0, 0) != 0) {
                 const u32 bit = 1U << (buildit_index & 31);
-                if ((Game.field_0x7c26[2] & bit) == 0) {
+                if (__builtin_expect((Game.field_0x7c26[2] & bit) == 0, 1)) {
                     Game.field_0x7c26[2] = static_cast<u8>(Game.field_0x7c26[2] | bit);
                     TriggerAutoSave();
                 }
             }
             ++buildit_index;
         }
-        if (hub_episode_time == 0.0f) {
+        if (__builtin_expect(hub_episode_time == 0.0f, 1)) {
             hub_episode = selected_episode;
         }
         const f32 target = hub_episode != -1 && hub_episode == selected_episode ? 1.0f : 0.0f;

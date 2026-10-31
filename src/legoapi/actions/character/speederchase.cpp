@@ -163,7 +163,7 @@ void SpeederChaseA_Update(WORLDINFO_s *world) {
     UpdateTrooperCannons(world);
 
     if (netclient == 0) {
-        if (LevAIMessage[4] != NULL && LevAIMessage[4]->value == 1.0f) {
+        if (LevAIMessage[4] != NULL && __builtin_expect(LevAIMessage[4]->value == 1.0f, 1)) {
             players_cannot_exit_speeder = 1;
         } else {
             players_cannot_exit_speeder = 0;

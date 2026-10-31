@@ -309,8 +309,10 @@ void NuSoundVoice::CalculatePositionalMix() {
         NuSoundListener *focus_listener =
             NuSoundSystem::GetNearestFocusListener(*this->listeners, CopySoundPosition(this->position), focus_distance);
 
-        if (real_listener == NULL || !(focus_listener->GetSensitivity() > 0.0f) ||
-            !(this->falloff_b > focus_distance)) {
+        if (real_listener == NULL) {
+            return;
+        }
+        if (!(focus_listener->GetSensitivity() > 0.0f) || !(this->falloff_b > focus_distance)) {
             return;
         }
 

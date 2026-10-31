@@ -2460,7 +2460,7 @@ extern "C" {
             !pick->dragging_saturation) {
             pick->cursor_x = (edui_cursor_x - interact->x) / interact->width;
             pick->cursor_y = (edui_cursor_y - interact->y) / (interact->height * 0.75f);
-            pick->dragging_colour = (edui_cursor_buttons & EDUI_CURSOR_PRIMARY) != 0;
+            pick->dragging_colour = static_cast<i32>(edui_cursor_buttons & EDUI_CURSOR_PRIMARY) > 0;
         }
         if (((edui_cursor_x >= interact->x && edui_cursor_y >= interact->y + interact->height * 0.75f &&
               edui_cursor_x < interact->x + interact->width &&
@@ -2479,7 +2479,7 @@ extern "C" {
         if (edui_cursor_x >= interact->x &&
             edui_cursor_y >= interact->y + interact->height * 0.75f + interact->height * 0.125f &&
             edui_cursor_x < interact->x + interact->width && edui_cursor_y < interact->y + interact->height &&
-            (edui_cursor_buttons_db & EDUI_CURSOR_PRIMARY)) {
+            __builtin_expect(edui_cursor_buttons_db & EDUI_CURSOR_PRIMARY, 0)) {
             pick->dragging_colour = 0;
             pick->dragging_saturation = 0;
             pick->confirm = 1;
@@ -3639,81 +3639,71 @@ extern "C" {
     }
 
     static i32 eduicbProcessPropKeyboard(eduimenu_s *menu, edui_prop_s *property) {
-        u32 modifiers = 0;
+        u32 modifiers;
         if (!(property->unknown_property_flags & 1))
             return 0;
         i32 length = NuStrLen(eduiPropTextEdit);
         if (eduiPropTextPos < 0)
             eduiPropTextPos = 0;
-        if (eduiPropTextPos > length)
+        if (length < eduiPropTextPos)
             eduiPropTextPos = length;
         i32 key = NuKeyGet(&modifiers);
-        if (key == -1)
-            return 0;
-        if (key == 0x1c) {
-            eduiItemPropSetText(property, eduiPropTextEdit);
-            if (property->changed)
-                property->changed(menu, property, 0);
-            property->unknown_property_flags &= ~1;
-            eduiPropTextPos = -1;
-            return 0;
-        }
-        if (key < 0x1d) {
-            if (key == 1) {
+        switch (key) {
+            default: {
+                char letter = NuKeyToAscii(key, modifiers & 1);
+                if (letter) {
+                    eduiPropTextEdit[length + 1] = '\0';
+                    char *insertion = eduiPropTextEdit + eduiPropTextPos;
+                    char *cursor = eduiPropTextEdit + length;
+                    for (; cursor > insertion; --cursor)
+                        *cursor = cursor[-1];
+                    *cursor = letter;
+                    ++eduiPropTextPos;
+                }
+                return 0;
+            }
+            case -1:
+                return 0;
+            case 0x1c:
+                eduiItemPropSetText(property, eduiPropTextEdit);
+                if (property->changed)
+                    property->changed(menu, property, 0);
+            case 1:
                 property->unknown_property_flags &= ~1;
                 eduiPropTextPos = -1;
                 return 0;
-            }
-            if (key == 0xe) {
+            case 0xe:
                 if (eduiPropTextPos < 1)
                     return 0;
-                char *cursor = eduiPropTextEdit + eduiPropTextPos - 1;
-                --eduiPropTextPos;
-                char character = *cursor;
-                while (character) {
-                    character = cursor[1];
-                    *cursor++ = character;
+                {
+                    --eduiPropTextPos;
+                    char *cursor = &eduiPropTextEdit[eduiPropTextPos];
+                    while (*cursor) {
+                        *cursor = cursor[1];
+                        cursor++;
+                    }
                 }
                 return 0;
-            }
-        } else {
-            if (key == 0xcd) {
+            case 0xcd:
                 if (eduiPropTextPos < length)
                     ++eduiPropTextPos;
                 return 0;
-            }
-            if (key == 0xd3) {
+            case 0xd3:
                 if (eduiPropTextPos >= length)
                     return 0;
-                char *cursor = eduiPropTextEdit + eduiPropTextPos;
-                char character = *cursor;
-                while (character) {
-                    character = cursor[1];
-                    *cursor++ = character;
+                {
+                    char *cursor = &eduiPropTextEdit[eduiPropTextPos];
+                    while (*cursor) {
+                        *cursor = cursor[1];
+                        cursor++;
+                    }
                 }
                 return 0;
-            }
-            if (key == 0xcb) {
+            case 0xcb:
                 if (eduiPropTextPos > 0)
                     --eduiPropTextPos;
                 return 0;
-            }
         }
-        char letter = NuKeyToAscii(key, modifiers & 1);
-        if (letter) {
-            eduiPropTextEdit[length + 1] = '\0';
-            char *insertion = eduiPropTextEdit + eduiPropTextPos;
-            char *cursor = eduiPropTextEdit + length;
-            if (insertion < cursor) {
-                do {
-                    *cursor = cursor[-1];
-                    --cursor;
-                } while (cursor != insertion);
-            }
-            *cursor = letter;
-            ++eduiPropTextPos;
-        }
-        return 0;
     }
 
     static __used__ i32 eduicbProcessProp(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad) {
@@ -5989,7 +5979,7 @@ extern "C" {
 
             if (buttons == 2 || buttons == 5) {
                 if (camera->freedoms & EDCAM_FREEDOM_DISTANCE) {
-                    if (mouse_y != 0.0f || mouse_x != 0.0f)
+                    if (mouse_x != 0.0f || mouse_y != 0.0f)
                         TargetAng = static_cast<i16>(NuAtan2D(-mouse_x, -mouse_y));
                     u16 angle = static_cast<u16>(TargetAng);
                     i32 difference = static_cast<u16>(angle - MouseOldAng);
@@ -6003,10 +5993,10 @@ extern "C" {
 
                     f32 sine = NU_SIN_LUT(static_cast<u16>(angle) + 0x2000);
                     if (NuFabs(sine) > 0.1f) {
-                        if (sine <= 0.0f)
-                            sine += 0.1f;
-                        else
+                        if (sine > 0.0f)
                             sine -= 0.1f;
+                        else
+                            sine += 0.1f;
                         f32 distance = NuFsqrt(mouse_x * mouse_x + mouse_y * mouse_y) * sine *
                                            (zoom_scale * camera->distance_speed) * camera->mouse_move_speed +
                                        camera->distance;
@@ -6014,19 +6004,17 @@ extern "C" {
                         camera->distance = MIN(minimum, distance);
                     }
                 }
-            } else if (buttons == 3 || buttons == 4) {
-                movement.x += mouse_x * 0.0078125f;
-                movement.y -= mouse_y * 0.0078125f;
-            } else if (__builtin_expect(buttons == 1, 0)) {
+            } else if (buttons == 1) {
                 if (camera->freedoms & EDCAM_FREEDOM_PITCH) {
                     camera->pitch -= static_cast<i32>(mouse_y * 16.0f);
-                    if (__builtin_expect(camera->pitch > 0x4000, 0))
-                        camera->pitch = 0x4000;
-                    if (camera->pitch < -0x4000)
-                        camera->pitch = -0x4000;
+                    i32 pitch = camera->pitch > 0x4000 ? 0x4000 : camera->pitch;
+                    camera->pitch = pitch < -0x4000 ? -0x4000 : pitch;
                 }
                 if (camera->freedoms & EDCAM_FREEDOM_YAW)
                     camera->yaw -= static_cast<i32>(mouse_x * 16.0f);
+            } else if (buttons == 3 || buttons == 4) {
+                movement.x += mouse_x * 0.0078125f;
+                movement.y -= mouse_y * 0.0078125f;
             }
 
             const f32 distance = camera->distance - zoom_scale * camera->distance_speed * mouse_z;

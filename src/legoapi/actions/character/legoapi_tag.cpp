@@ -820,6 +820,7 @@ void TakeOverGameObject(GameObject_s *rider, GameObject_s *vehicle, i32 blend_ca
 
 __attribute__((force_align_arg_pointer)) void TakeOverCode(GameObject_s *object, i32 tag_pressed) {
     APIOBJECT &api = object->apiobj;
+    NUVEC destination;
     if (object->character_context == 0x3c) {
         GameObject_s *target = object->takeover_entry_target;
         if (target == NULL) {
@@ -830,7 +831,7 @@ __attribute__((force_align_arg_pointer)) void TakeOverCode(GameObject_s *object,
         if (object->context_animation_timer >= object->airborne_action_duration) {
             object->character_context = -1;
             if (api.player_controlled) {
-                if (target->id == id_GRABCONTROL || target->id == id_GRABR2CONTROL) {
+                if (target->id == id_GRABCONTROL || __builtin_expect(target->id == id_GRABR2CONTROL, 0)) {
                     Hint_SetComplete(0x28a);
                 } else if (target->apiobj.character_data->move_fn == Move_BEAST) {
                     Hint_SetComplete(0x263);
@@ -851,14 +852,13 @@ __attribute__((force_align_arg_pointer)) void TakeOverCode(GameObject_s *object,
             return;
         }
         const f32 fraction = object->context_animation_timer / object->airborne_action_duration;
-        NUVEC destination;
         GetTakeOverPos(target, &destination);
         api.position.x = (destination.x - object->external_force.x) * fraction + object->external_force.x;
         api.position.y = (destination.y - object->external_force.y) * fraction + object->external_force.y;
         api.position.z = (destination.z - object->external_force.z) * fraction + object->external_force.z;
         target = object->takeover_entry_target;
         f32 height = target->apiobj.field_0x1e0;
-        if (object->context_animation == 0xc9 || object->context_animation == 6) {
+        if (object->context_animation == 6 || object->context_animation == 0xc9) {
             const f32 jump_height = api.character_data->game_character->field_0x34;
             height = jump_height > height ? jump_height : height;
         }
@@ -916,7 +916,7 @@ __attribute__((force_align_arg_pointer)) void TakeOverCode(GameObject_s *object,
         return;
     }
     if (MiniCutCam != 0 || !api.player_controlled || api.field_0x287 != 0 ||
-        __builtin_expect(!(object->takeover_timer <= 0.0f), 0) ||
+        __builtin_expect(!(object->takeover_timer <= 0.0f), 0) || object->character_context == 0x2b ||
         (object->character_context != -1 && (object->character_context != 0 || object->action_movement_state == 3 ||
                                              object->action_movement_state == 4)) ||
         api.field_0x27d == 0) {
@@ -924,15 +924,15 @@ __attribute__((force_align_arg_pointer)) void TakeOverCode(GameObject_s *object,
     }
     f32 nearest_distance = 9.0f;
     GameObject_s *nearest = NULL;
-    for (i32 i = 0; i < HIGHGAMEOBJECT; ++i) {
-        GameObject_s *candidate = &Obj[i];
+    GameObject_s *candidate = Obj;
+    for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++candidate) {
         const APIOBJECT &other = candidate->apiobj;
         if (__builtin_expect((other.field_0x1f8 & 0x1001) != 0x1001 || other.field_0x287 != 0 ||
                                  other.field_0x27c != -1 || (CInfo[candidate->character_context].flags & 0x8000) != 0 ||
                                  candidate->field_0xcc0 != NULL ||
                                  (other.character_data->game_character->flags_090 & 0x40) == 0 ||
                                  ((other.character_data->model_flags & 0x40000000) != 0 &&
-                                  (candidate->character_context == 0x3e || candidate->character_context == 0x17)) ||
+                                  (candidate->character_context == 0x17 || candidate->character_context == 0x3e)) ||
                                  (candidate->tag_flags & 2) != 0,
                              1))
             continue;
@@ -944,13 +944,14 @@ __attribute__((force_align_arg_pointer)) void TakeOverCode(GameObject_s *object,
         if (__builtin_expect(api.collision_min.y > other.collision_max.y || other.collision_min.y > api.collision_max.y,
                              1))
             continue;
-        const f32 dz = other.collision_position.z - api.collision_position.z;
-        const f32 dx = other.collision_position.x - api.collision_position.x;
+        destination.x = other.collision_position.x - api.collision_position.x;
+        destination.z = other.collision_position.z - api.collision_position.z;
         const f32 range = (other.field_0x1dc + other.field_0x1dc) + api.field_0x1dc;
-        const f32 distance = dx * dx + dz * dz;
-        if (object->facing_direction.x * dx + object->facing_direction.z * dz > 0.0f && range * range > distance &&
-            nearest_distance > distance) {
-            nearest_distance = distance;
+        const f32 range_sq = range * range;
+        if (object->facing_direction.x * destination.x + object->facing_direction.z * destination.z > 0.0f &&
+            range_sq > destination.x * destination.x + destination.z * destination.z &&
+            nearest_distance > destination.x * destination.x + destination.z * destination.z) {
+            nearest_distance = destination.x * destination.x + destination.z * destination.z;
             nearest = candidate;
         }
     }

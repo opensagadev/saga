@@ -2024,14 +2024,15 @@ void KillParts(GameObject_s *object, i32 animation, i32 excluded_layer, i32 mode
             NUVEC momentum;
             SetKillPartMom(&momentum);
             NuVecScale(&momentum, &momentum, 3.0f);
+            momentum.y += 5.0f;
             momentum.x += object->apiobj.velocity.x * 0.75f;
-            momentum.y = 5.0f + momentum.y + object->apiobj.velocity.y * 0.75f;
+            momentum.y += object->apiobj.velocity.y * 0.75f;
             momentum.z += object->apiobj.velocity.z * 0.75f;
             ADDPART_s params = Default_ADDPART;
             params.matrix = &matrix;
             params.field_14 = 0.2f;
-            params.velocity = &momentum;
             params.special = &pieces->pieces[i].special;
+            params.velocity = &momentum;
             params.field_18 = 0.2f;
             params.gravity = -10.0f;
             params.lighting = Cheats_CheckFlags(1) ? reinterpret_cast<PARTLIGHTSOURCE_s *>(ZeroRTL)
@@ -2092,8 +2093,9 @@ void KillParts(GameObject_s *object, i32 animation, i32 excluded_layer, i32 mode
                     NuMtxMul(&matrix, &joint_matrices[joint], &object->apiobj.field_0xb8);
                     SetKillPartMom(&momentum);
                     NuVecScale(&momentum, &momentum, 4.0f);
+                    momentum.y += 6.0f;
                     momentum.x += object->apiobj.velocity.x * 0.75f;
-                    momentum.y = 6.0f + momentum.y + object->apiobj.velocity.y * 0.75f;
+                    momentum.y += object->apiobj.velocity.y * 0.75f;
                     momentum.z += object->apiobj.velocity.z * 0.75f;
                     params = Default_ADDPART;
                     params.field_14 = 0.4f;
@@ -2160,12 +2162,13 @@ void KillParts(GameObject_s *object, i32 animation, i32 excluded_layer, i32 mode
             NUVEC momentum;
             SetKillPartMom(&momentum);
             NuVecScale(&momentum, &momentum, 4.0f);
+            momentum.y += 6.0f;
             momentum.x += object->apiobj.velocity.x * 0.75f;
-            momentum.y = 6.0f + momentum.y + object->apiobj.velocity.y * 0.75f;
+            momentum.y += object->apiobj.velocity.y * 0.75f;
             momentum.z += object->apiobj.velocity.z * 0.75f;
             ADDPART_s params = Default_ADDPART;
-            params.velocity = &momentum;
             params.matrix = &matrix;
+            params.velocity = &momentum;
             params.special = special;
             params.field_14 = 0.8f;
             params.field_18 = 0.4f;

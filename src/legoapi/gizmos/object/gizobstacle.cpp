@@ -1075,7 +1075,7 @@ GIZOBSTACLE_s *GizObstacle_FindNearest(GIZOBSTACLESYS_s *system, NUVEC *position
         if ((obstacle->runtime_flags & GIZOBSTACLE_RUNTIME_FLAG_DESTROYED) != 0)
             continue;
         f32 distance;
-        if (object != NULL && obstacle->anim_set != NULL) {
+        if (object != NULL && __builtin_expect(obstacle->anim_set != NULL, 1)) {
             NUVEC average;
             // Retail requires a set with a contributing animated object here.
             GameAnimSet_GetAveragePos(obstacle->anim_set, &average, 2, 1, 0);

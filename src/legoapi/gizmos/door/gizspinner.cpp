@@ -1167,6 +1167,7 @@ i32 GizSpinner_Push(GIZSPINNER_s *spinner, i32 context) {
         i32 at_start = GameAnimSet_IsAnimationReset(spinner->anim_set);
         bool at_end = spinner->anim_set->state == GAMEANIMSET_STATE_AT_END;
         u32 flags = spinner->state_flags;
+        u32 locked = flags & 0x400;
         i32 clear_context = 0;
 
         if (context != 0x1e) {
@@ -1182,58 +1183,64 @@ i32 GizSpinner_Push(GIZSPINNER_s *spinner, i32 context) {
                 }
                 goto stop_at_endpoint;
             }
-            if ((flags & 0x400) == 0 || !at_end) {
+            if (!at_end || locked == 0) {
                 goto rotate;
             }
             clear_context = 1;
-            goto stop_at_endpoint;
+
+        stop_at_endpoint:
+            flags &= ~0x40u;
+            flags = (flags & 2) == 0 ? flags | 0x100u : flags | 0x200u;
+            spinner->state_flags = flags;
+            if (clear_context != 0) {
+                context = -1;
+            }
+            goto finalize;
+
+        rotate:
+            if ((flags & 2) != 0) {
+                spinner->rotation -= rotation_step;
+            } else {
+                spinner->rotation += rotation_step;
+            }
+            spinner->state_flags = flags | 0x40;
+            result = 1;
         } else {
             if ((flags & 4) != 0) {
                 if (at_start != 0) {
                     if (spinner->anim_set->object_count == 0) {
-                        goto rotate;
+                        goto rotate_rev;
                     }
-                    goto stop_at_endpoint;
+                    goto stop_at_endpoint_rev;
                 }
-                if ((flags & 0x400) == 0 || !at_end) {
-                    goto rotate;
+                if (!at_end || locked == 0) {
+                    goto rotate_rev;
                 }
                 clear_context = 1;
-                goto stop_at_endpoint;
+                goto stop_at_endpoint_rev;
             }
-            if (__builtin_expect(!at_end || spinner->anim_set->object_count == 0, 1)) {
-                goto rotate;
+            if (!at_end || spinner->anim_set->object_count == 0) {
+                goto rotate_rev;
             }
-            goto stop_at_endpoint;
-        }
 
-    stop_at_endpoint:
-        flags &= ~0x40u;
-        if (context == 0x1e) {
-            flags = (flags & 2) != 0 ? flags | 0x100u : flags | 0x200u;
-        } else {
-            flags = (flags & 2) != 0 ? flags | 0x200u : flags | 0x100u;
-        }
-        spinner->state_flags = flags;
-        if (clear_context != 0) {
-            context = -1;
-        }
-        goto finalize;
+        stop_at_endpoint_rev:
+            flags &= ~0x40u;
+            flags = (flags & 2) == 0 ? flags | 0x200u : flags | 0x100u;
+            spinner->state_flags = flags;
+            if (clear_context != 0) {
+                context = -1;
+            }
+            goto finalize;
 
-    rotate:
-        if (context == 0x1e) {
+        rotate_rev:
             if ((flags & 2) != 0) {
                 spinner->rotation += rotation_step;
             } else {
                 spinner->rotation -= rotation_step;
             }
-        } else if (__builtin_expect((flags & 2) != 0, 0)) {
-            spinner->rotation -= rotation_step;
-        } else {
-            spinner->rotation += rotation_step;
+            spinner->state_flags = flags | 0x40;
+            result = 1;
         }
-        spinner->state_flags = flags | 0x40;
-        result = 1;
     }
 
 finalize:

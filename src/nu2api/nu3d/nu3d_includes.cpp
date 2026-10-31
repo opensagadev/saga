@@ -11652,11 +11652,11 @@ extern "C" void NuRndrSetDebBox(NUVEC *range) {
         (((size.x * cammtx.m01) * -0.5f + cammtx.m31) + (size.y * cammtx.m11) * 0.5f) + (size.z * cammtx.m21) * 0.8f,
         (((size.x * cammtx.m02) * -0.5f + cammtx.m32) + (size.y * cammtx.m12) * 0.5f) + (size.z * cammtx.m22) * 0.8f};
     minimum.x = corner6.x < minimum.x ? corner6.x : minimum.x;
-    minimum.z = corner6.z < minimum.z ? corner6.z : minimum.z;
     minimum.y = corner6.y < minimum.y ? corner6.y : minimum.y;
     maximum.x = corner6.x > maximum.x ? corner6.x : maximum.x;
     maximum.y = corner6.y > maximum.y ? corner6.y : maximum.y;
     maximum.z = corner6.z > maximum.z ? corner6.z : maximum.z;
+    minimum.z = corner6.z < minimum.z ? corner6.z : minimum.z;
     NUVEC corner7 = {
         (((size.x * cammtx.m00) * 0.5f + cammtx.m30) + (size.y * cammtx.m10) * 0.5f) + (size.z * cammtx.m20) * 0.8f,
         (((size.x * cammtx.m01) * 0.5f + cammtx.m31) + (size.y * cammtx.m11) * 0.5f) + (size.z * cammtx.m21) * 0.8f,
@@ -17454,7 +17454,7 @@ extern "C" void NuDisplaySceneDestroy(NUDLDLISTSCENE *scene) {
         if (delta == 0) {
             return scene;
         }
-        if (__builtin_expect(old_base == NULL || size == 0, 0)) {
+        if (old_base == NULL || size == 0) {
             return NULL;
         }
 
@@ -17712,73 +17712,76 @@ extern "C" void NuDisplayListSwapBuffersEndFrame(void) {
     DisplayListSwapBuffersPS();
     DisplayListMaterialClipUpdate(&mgr->dyn_mtl_dlist);
 
+    auto updateClip = [](nudisplayscene_s *sc) {
+        // Clip-word diff: 2 bits per object, 16 objects per u32 word.
+        u8 buf = NuDisplaySceneCurrentBuffer(sc);
+        const u16 *counts = sc->clip_counts;
+        const u8 *cur_words = sc->clip_used[buf];
+        const u32 *other_words = reinterpret_cast<const u32 *>(sc->clip_used[buf ^ 1]);
+        i32 words = (sc->nclip_objects + 15) / 16;
+        i32 obj = 0;
+
+        for (i32 w = 0; w < words; ++w, cur_words += 4) {
+            if (*reinterpret_cast<const u32 *>(cur_words) == other_words[w]) {
+                obj += 16;
+                continue;
+            }
+            for (i32 b = 0; b < 4; ++b) {
+                i32 byte_val = cur_words[b];
+                for (i32 shift = 0; shift != 8; shift += 2) {
+                    i32 *indices = sc->clip_objects[obj].indices;
+                    switch ((byte_val >> shift) & 3) {
+                        case 0:
+                            for (i32 j = 0; j < counts[obj]; ++j) {
+                                NUDISPLAYLISTITEM *item = &sc->items[indices[j]];
+                                item->id = kItemId_Cnt;
+                                item[-1].id = kItemId_Cnt;
+                            }
+                            break;
+                        case 1:
+                            for (i32 j = 0; j < counts[obj]; ++j) {
+                                NUDISPLAYLISTITEM *item = &sc->items[indices[j]];
+                                item->id = kItemId_Call;
+                                item[-1].id = kItemId_Call;
+                            }
+                            break;
+                        default:
+                            for (i32 j = 0; j < counts[obj]; ++j) {
+                                NUDISPLAYLISTITEM *item = &sc->items[indices[j]];
+                                item->id = kItemId_Call;
+                                item[-1].id = kItemId_Call;
+                            }
+                            break;
+                    }
+                    if (++obj >= sc->nclip_objects) {
+                        goto clip_done;
+                    }
+                }
+            }
+        }
+    clip_done:
+        counts = sc->clip_counts;
+
+        // Alpha fade — patch alpha into every 0x82 geom item.
+        if (__builtin_expect(sc->alpha_values != nullptr, 1)) {
+            for (i32 o = 0; o < sc->nclip_objects; ++o) {
+                i32 *indices = sc->clip_objects[o].indices;
+                for (i32 j = 0; j < counts[o]; ++j) {
+                    auto *item = &sc->items[indices[j]];
+                    if (item->id != kItemId_Cnt && item->type == 0x82) {
+                        DisplayListSetAlphaPS(item - 1, item, sc->alpha_values[o]);
+                    }
+                }
+            }
+        }
+    };
+
     for (i32 i = 0; i < mgr->ndisplay_lists; ++i) {
         nudisplayscene_s *sc = mgr->dlists[i];
         u8 flags = sc->flags;
 
-        if (__builtin_expect((flags & 4) != 0, 1)) {
-            // Clip-word diff: 2 bits per object, 16 objects per u32 word.
-            u8 buf = NuDisplaySceneCurrentBuffer(sc);
-            const u16 *counts = sc->clip_counts;
-            const u8 *cur_words = sc->clip_used[buf];
-            const u32 *other_words = reinterpret_cast<const u32 *>(sc->clip_used[buf ^ 1]);
-            i32 words = (sc->nclip_objects + 15) / 16;
-            i32 obj = 0;
-
-            for (i32 w = 0; w < words; ++w, cur_words += 4) {
-                if (*reinterpret_cast<const u32 *>(cur_words) == other_words[w]) {
-                    obj += 16;
-                    continue;
-                }
-                for (i32 b = 0; b < 4; ++b) {
-                    i32 byte_val = cur_words[b];
-                    for (i32 shift = 0; shift != 8; shift += 2) {
-                        i32 *indices = sc->clip_objects[obj].indices;
-                        switch ((byte_val >> shift) & 3) {
-                            case 0:
-                                for (i32 j = 0; j < counts[obj]; ++j) {
-                                    NUDISPLAYLISTITEM *item = &sc->items[indices[j]];
-                                    item->id = kItemId_Cnt;
-                                    item[-1].id = kItemId_Cnt;
-                                }
-                                break;
-                            case 1:
-                                for (i32 j = 0; j < counts[obj]; ++j) {
-                                    NUDISPLAYLISTITEM *item = &sc->items[indices[j]];
-                                    item->id = kItemId_Call;
-                                    item[-1].id = kItemId_Call;
-                                }
-                                break;
-                            default:
-                                for (i32 j = 0; j < counts[obj]; ++j) {
-                                    NUDISPLAYLISTITEM *item = &sc->items[indices[j]];
-                                    item->id = kItemId_Call;
-                                    item[-1].id = kItemId_Call;
-                                }
-                                break;
-                        }
-                        if (++obj >= sc->nclip_objects) {
-                            goto clip_done;
-                        }
-                    }
-                }
-            }
-        clip_done:
-
-            // Alpha fade — patch alpha into every 0x82 geom item.
-            if (__builtin_expect(sc->alpha_values && sc->nclip_objects > 0, 0)) {
-                for (i32 o = 0; o < sc->nclip_objects; ++o) {
-                    i32 *indices = sc->clip_objects[o].indices;
-                    u16 cnt = sc->clip_counts[o];
-                    for (i32 j = 0; j < cnt; ++j) {
-                        auto *item = &sc->items[indices[j]];
-                        if (__builtin_expect(item->id != kItemId_Cnt && item->type == 0x82, 0)) {
-                            DisplayListSetAlphaPS(item - 1, item, sc->alpha_values[o]);
-                            cnt = sc->clip_counts[o];
-                        }
-                    }
-                }
-            }
+        if ((flags & 4) != 0) {
+            updateClip(sc);
             flags = sc->flags;
         }
         if (__builtin_expect((flags & 6) != 0, 0)) {
@@ -17810,8 +17813,8 @@ extern "C" void NuDisplayListSwapBuffersEndFrame(void) {
         if (dl->scene_first[dl->scene_buffer] != dl->scene_next) {
             dl->dyn_geom->next = dl->scene_first[dl->scene_buffer];
             dl->scene_next->type = kItemType_Link;
-            dl->scene_next->next = dl->dyn_geom + 1;
             dl->scene_next->id = kItemId_Next;
+            dl->scene_next->next = dl->dyn_geom + 1;
         } else {
             dl->dyn_geom->next = dl->dyn_geom + 1;
         }
@@ -17824,10 +17827,10 @@ extern "C" void NuDisplayListSwapBuffersEndFrame(void) {
         } else if (dl->scene_first[dl->scene_buffer] != dl->scene_next) {
             dl->mtl_last->next = dl->scene_first[dl->scene_buffer];
             dl->scene_next->type = kItemType_Link;
-            dl->scene_next->next = dl->dyn_geom + 1;
             dl->scene_next->id = kItemId_Next;
+            dl->scene_next->next = dl->dyn_geom + 1;
         }
-        dl->mtl_last = first;
+        dl->mtl_last = dl->first;
     };
 
     for (nusortpri_s *sp = mgr->sort_list; sp; sp = sp->sys_next) {
@@ -17836,7 +17839,7 @@ extern "C" void NuDisplayListSwapBuffersEndFrame(void) {
             RndrStateUpdateFx(&tmp_state, sp->items);
             continue;
         }
-        if ((sc->flags & 6) == 0 || sp->nmtls == 0)
+        if ((sc->flags & 6) == 0)
             continue;
 
         for (i32 m = 0; m < sp->nmtls; ++m) {
@@ -17873,10 +17876,7 @@ extern "C" void NuDisplayListSwapBuffersEndFrame(void) {
                 ((static_cast<u8>(scene_flags >> 5) & static_cast<u8>(MTL_ATTRIB_DWORD1(mtl) >> 0xe)) != 0), 1)) {
                 dl->mtl_item->id = kItemId_Next;
                 i32 mid = dl->mtl_id;
-                i32 word = (mid >= 0) ? mid >> 3 : (mid + 7) >> 3;
-                i32 bit = mid % 8;
-                u8 *mu = sc->mtl_used[NuDisplaySceneCurrentBuffer(sc)];
-                mu[word] &= static_cast<u8>(~(1U << (static_cast<u32>(bit) & 31)));
+                sc->mtl_used[NuDisplaySceneCurrentBuffer(sc)][mid / 8] &= ~(1 << (mid % 8));
             }
         }
     }
@@ -21417,7 +21417,7 @@ f32 NuQFntPrintJustifiedRSW(RNDRSTREAM *stream, void *font_ptr, u16 *text, f32 x
     f32 line_height = NuQFntHeight(font);
     const u16 hyphen = NuQFntEncodeUnicodeChar(font, '-');
     i32 line_number = 0;
-    do {
+    for (;;) {
         NuQFntSetICGap(font, saved_ic_gap);
         NuQFntSetScaleRS(stream, font, sx, sy);
         u16 line[256] __attribute__((aligned(16)));
@@ -21437,9 +21437,15 @@ f32 NuQFntPrintJustifiedRSW(RNDRSTREAM *stream, void *font_ptr, u16 *text, f32 x
                     }
                     ++length;
                 } else {
-                    const i32 following = next[1];
-                    if (following != '?' && following != '!' && following != '.' && following != ',')
-                        break;
+                    const u16 following = next[1];
+                    if (following != '?') {
+                        if (following != '!') {
+                            if (following != '.') {
+                                if (following != ',')
+                                    break;
+                            }
+                        }
+                    }
                     ++extra_spaces;
                 }
                 ++next;
@@ -21481,14 +21487,16 @@ f32 NuQFntPrintJustifiedRSW(RNDRSTREAM *stream, void *font_ptr, u16 *text, f32 x
             }
         }
         line[length] = 0;
-        const f32 spaces = words - 1 + punctuation_spaces;
+        f32 spaces;
         f32 scale;
         if (*next == 0) {
+            spaces = words - 1 + punctuation_spaces;
             const f32 ratio = width / (printed_space_width * spaces + words_width);
             scale = 1.0f < ratio ? 1.0f : ratio;
         } else if (words == 1) {
             scale = width / words_width;
         } else {
+            spaces = words - 1 + punctuation_spaces;
             const f32 ratio = width / (printed_space_width * spaces + words_width);
             scale = justify_stretch < ratio ? justify_stretch : ratio;
         }
@@ -21503,10 +21511,15 @@ f32 NuQFntPrintJustifiedRSW(RNDRSTREAM *stream, void *font_ptr, u16 *text, f32 x
                                               (scale * printed_space_width * spaces));
         }
         NuQFntMoveRS(stream, font, x, y + line_number * line_height * line_spacing, z);
-        NuQFntPrintRSW(stream, font, line, mtx == NULL ? 0 : 4);
+        if (mtx != NULL)
+            NuQFntPrintRSW(stream, font, line, 4);
+        else
+            NuQFntPrintRSW(stream, font, line, 0);
         ++line_number;
+        if (*next == 0)
+            break;
         text = next;
-    } while (*text != 0);
+    }
 
     NuQFntSetSpaceWidth(font, saved_space_width);
     NuQFntSetICGap(font, saved_ic_gap);

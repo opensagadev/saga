@@ -1482,23 +1482,22 @@ u32 NuMemoryManager::FindAndTouchMatchingBlocks(DebugHeader *reference, u32 *tot
             if (__builtin_expect(header != &reference->block_header && (header->value & ALLOC_MASK) != 0, 0)) {
                 DebugHeader *candidate = reinterpret_cast<DebugHeader *>(header);
                 u32 block_size = BLOCK_SIZE(header->value);
-                u32 reference_context = reference->flags.ctx_id;
-                u32 candidate_flags = candidate->flags.alloc_flags;
-                u32 candidate_context = candidate->flags.ctx_id;
-                u32 reference_flags = reference->flags.alloc_flags;
-                u16 reference_category = reference->category;
                 u16 candidate_category = candidate->category;
+                u16 reference_category = reference->category;
                 if (candidate->name != NULL && reference->name != NULL &&
-                    strcmp(candidate->name, reference->name) == 0 && candidate_context == reference_context &&
-                    candidate_flags == reference_flags && candidate_category == reference_category) {
+                    strcmp(candidate->name, reference->name) == 0 &&
+                    candidate->flags.ctx_id == reference->flags.ctx_id &&
+                    candidate->flags.alloc_flags == reference->flags.alloc_flags &&
+                    candidate_category == reference_category) {
                     bool equal = true;
                     if ((options & 0x20) != 0 && (m_flags & MEM_MANAGER_EXTENDED_DEBUG) != 0) {
                         ExtendedDebugHeader *left = reinterpret_cast<ExtendedDebugHeader *>(candidate);
                         ExtendedDebugHeader *right = reinterpret_cast<ExtendedDebugHeader *>(reference);
-                        equal = left->backtrace_count == right->backtrace_count;
-                        if (equal) {
-                            for (u32 i = 0; i < left->backtrace_count; ++i) {
-                                if (left->extended_info.unknown[i] != right->extended_info.unknown[i])
+                        equal = false;
+                        if (right->backtrace_count == left->backtrace_count) {
+                            equal = true;
+                            for (u32 i = 0; i < right->backtrace_count; ++i) {
+                                if (right->extended_info.unknown[i] != left->extended_info.unknown[i])
                                     equal = false;
                             }
                         }

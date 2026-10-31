@@ -122,17 +122,16 @@ void MechInputTouchGestureTrackingSystem::LookForSwipe(GameObject_s &object) {
         f32 elapsed = 0.0f;
         f32 squared_path = 0.0f;
         i32 previous_index = 0;
-        for (i32 sample_index = 0; sample_index < 20; ++sample_index) {
-            TouchSwipeSample &sample = holder.swipe_samples[sample_index];
-            if (!(sample.time >= 0.0f)) {
-                break;
-            }
+        for (i32 sample_index = 0; sample_index < 20 && holder.swipe_samples[sample_index].time >= 0.0f;
+             ++sample_index) {
             if (sample_index > 0 && elapsed < 0.2f) {
-                previous_index = sample_index - 1;
-                elapsed += holder.swipe_samples[previous_index].time - sample.time;
-                f32 dy = sample.position.y - holder.swipe_samples[previous_index].position.y;
-                f32 dx = sample.position.x - holder.swipe_samples[previous_index].position.x;
+                elapsed += holder.swipe_samples[sample_index - 1].time - holder.swipe_samples[sample_index].time;
+                NuVec2 current = holder.swipe_samples[sample_index].position;
+                NuVec2 previous = holder.swipe_samples[sample_index - 1].position;
+                f32 dy = current.y - previous.y;
+                f32 dx = current.x - previous.x;
                 squared_path += dx * dx + dy * dy;
+                previous_index = sample_index;
             }
         }
         if (squared_path > 0.05f) {

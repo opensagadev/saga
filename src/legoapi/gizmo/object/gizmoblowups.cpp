@@ -636,25 +636,24 @@ void GizmoBlowUp_AddEffects(nuvec_s *position, GIZMOBLOWUP_s *blowup, i32 offset
         NewRumbleAllPlayers(1.0f, 0.1f, 0, 0);
     }
     if (static_cast<i32>(blowup->draw_flags) < 0 || static_cast<i8>(blowup->saved_state_1) <= 0) {
-        auto f0xf6 = blowup->field_0xf6;
         for (i32 i = 0; i < 4; ++i) {
             if (!NuSpecialExistsFn(&type->alternate_specials[i]))
                 continue;
             for (i32 j = 0; j < type->field_0xfa; ++j) {
                 NUMTX_ALIGNED16 matrix;
                 NuMtxSetIdentity(&matrix);
-                matrix.m30 = position->x;
-                matrix.m31 = position->y;
-                matrix.m32 = position->z;
+                *reinterpret_cast<NUVEC *>(&matrix.m30) = *position;
                 NUVEC velocity = v010;
+                i32 angle = static_cast<u16>(blowup->field_0xf6);
                 f32 range = (MAXBLOWUPRANDSPANG << 16) / 360;
-                i32 random = static_cast<i16>(qrand() * (1.0f / 65535.0f) * range -
-                                              ((static_cast<i32>(MAXBLOWUPRANDSPANG * 0.5f) << 16) / 360));
-                NuVecRotateX(&velocity, &velocity, static_cast<u16>(f0xf6) + random);
+                NuVecRotateX(&velocity, &velocity,
+                             angle + static_cast<i16>(qrand() * (1.0f / 65535.0f) * range -
+                                                      ((static_cast<i32>(MAXBLOWUPRANDSPANG * 0.5f) << 16) / 360)));
+                angle = static_cast<u16>(blowup->field_0xf8);
                 range = (MAXBLOWUPRANDSPANG << 16) / 360;
-                random = static_cast<i16>(qrand() * (1.0f / 65535.0f) * range -
-                                          ((static_cast<i32>(MAXBLOWUPRANDSPANG * 0.5f) << 16) / 360));
-                NuVecRotateY(&velocity, &velocity, static_cast<u16>(blowup->field_0xf8) + random);
+                NuVecRotateY(&velocity, &velocity,
+                             angle + static_cast<i16>(qrand() * (1.0f / 65535.0f) * range -
+                                                      ((static_cast<i32>(MAXBLOWUPRANDSPANG * 0.5f) << 16) / 360)));
                 NuVecScale(&velocity, &velocity, type->field_0x98);
                 if (object != NULL) {
                     velocity.x += 0.75f * object->apiobj.velocity.x;
@@ -1279,14 +1278,14 @@ void GizmoBlowupBurstDraw(void *world_ptr, void *, float) {
                         NuCameraTransformScreenClip(&blowup->screen_position, &blowup->position, 1, NULL);
                     }
                 } else {
-                    f32 end_frame =
-                        NuAnimEndFrameOld(animated_special->scene->instance_animation_data[animation->anim_ix]);
-                    f32 frame = type->animation_base_frame + blowup->animation_offset;
+                    f32 end_frame = NuAnimEndFrameOld(
+                        blowup->type->animated_special.scene->instance_animation_data[animation->anim_ix]);
+                    f32 frame = blowup->type->animation_base_frame + blowup->animation_offset;
                     if (frame > end_frame) {
                         frame = frame - end_frame + animation->tfirst;
                     }
 
-                    if ((type->animation_flags & GIZMOBLOWUPTYPE_ANIMATION_INCLUDES_INSTANCE_TRANSFORM) != 0) {
+                    if ((blowup->type->animation_flags & GIZMOBLOWUPTYPE_ANIMATION_INCLUDES_INSTANCE_TRANSFORM) != 0) {
                         EvalAnim(animated_special, frame, &animated_matrix, 1);
                     } else {
                         if ((blowup->state_flags & GIZMOBLOWUP_STATE_REPEATING) == 0) {
@@ -1307,15 +1306,14 @@ void GizmoBlowupBurstDraw(void *world_ptr, void *, float) {
                 }
 
                 ResetShadowMapRendering();
-                u32 draw_flags = blowup->draw_flags;
                 if ((blowup->status_flags & GIZMOBLOWUP_DRAW_STATUS_TRANSFORM_READY) ==
                         GIZMOBLOWUP_DRAW_STATUS_TRANSFORM_READY &&
-                    (draw_flags & GIZMOBLOWUP_DRAW_CUSTOM_TRANSFORM) != 0 && GizmoBlowup_TransformDrawFn != NULL) {
+                    (blowup->draw_flags & GIZMOBLOWUP_DRAW_CUSTOM_TRANSFORM) != 0 &&
+                    GizmoBlowup_TransformDrawFn != NULL) {
                     GizmoBlowup_TransformDrawFn(blowup);
-                    draw_flags = blowup->draw_flags;
                 }
 
-                if ((draw_flags & GIZMOBLOWUP_DRAW_REFLECTION) != 0 &&
+                if ((blowup->draw_flags & GIZMOBLOWUP_DRAW_REFLECTION) != 0 &&
                     MatrixReflection(&draw_matrix, 2, draw_matrix.m31 + blowup->reflection_height,
                                      blowup->reflection_height, &draw_matrix) != 0) {
                     NuRndrStartReflectionRender(0);
@@ -1338,11 +1336,11 @@ void GizmoBlowupBurstDraw(void *world_ptr, void *, float) {
             if (NuSpecialExistsFn(&type->shadow_special) != 0) {
                 for (i32 instance_index = 0; instance_index < type->instance_count; ++instance_index) {
                     GIZMOBLOWUP_s *blowup = &type_instances[instance_index];
-                    if (__builtin_expect((blowup->state_flags & GIZMOBLOWUP_STATE_ACTIVATED) != 0 &&
-                                             (blowup->draw_flags & GIZMOBLOWUP_DRAW_RESET_SHADOW_MAP) == 0,
-                                         1)) {
+                    if ((blowup->state_flags & GIZMOBLOWUP_STATE_ACTIVATED) != 0 &&
+                        (blowup->draw_flags & GIZMOBLOWUP_DRAW_RESET_SHADOW_MAP) == 0) {
+                        // The original checks shadow_special but draws decal_special here.
                         GizmoBlowupGenShadowMatrix(blowup, &animated_matrix);
-                        NuSpecialDrawAt(&type->shadow_special, &animated_matrix);
+                        NuSpecialDrawAt(&type->decal_special, &animated_matrix);
                     }
                 }
             }

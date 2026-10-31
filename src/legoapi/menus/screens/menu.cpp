@@ -145,7 +145,10 @@ static bool MenuCheatAvailable(i32 cheat) {
         return false;
     }
     const u32 *unlocked = reinterpret_cast<const u32 *>(Game.field_0x7c00);
-    return (unlocked[cheat >> 5] & (1u << (cheat & 31))) != 0;
+    if (cheat < 8) {
+        return (unlocked[0] & (1u << cheat)) != 0;
+    }
+    return ((unlocked[cheat >> 5] >> (cheat & 31)) & 1) != 0;
 }
 
 static void MenuDrawTitles(MENU *);
@@ -606,8 +609,10 @@ void MenuDrawExtras(MENU_s *menu) {
         bool locked = false;
 
         if (MenuCheatAvailable(cheat)) {
-            NuStrCpy(value, TTab[Cheat_IsOn(cheat) != 0 ? tON : tOFF]);
-            if (BonusArea == 0 || Cheat_CheckFlags(cheat, 0x200000) == 0) {
+            NuStrCpy(value, Cheat_IsOn(cheat) != 0 ? TTab[tON] : TTab[tOFF]);
+            if (BonusArea != 0 && Cheat_CheckFlags(cheat, 0x200000) != 0) {
+                alpha = 0.5f;
+            } else {
                 alpha = 1.0f;
             }
         } else if (cheat < 8 || static_cast<i8>(Cheat[cheat].area) == -1 ||

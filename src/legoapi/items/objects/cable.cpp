@@ -601,13 +601,13 @@ void DrawCables() {
             if (ground_start == 2000000.0f) {
                 ground_start = endpoint.y;
             }
-            for (i32 segment = 0; segment < cable.point_count - 1; ++segment) {
+            for (i32 segment = 0; segment + 1 < cable.point_count; ++segment) {
                 NUVEC previous = endpoint;
-                endpoint.x = cable.points[segment + 1].x;
-                endpoint.y = cable.points[segment + 1].y;
-                endpoint.z = cable.points[segment + 1].z;
-                endpoint.y = NuFdiv(distance_along + cable.segment_lengths[segment], cable.total_length) * y_span +
-                             cable.points[0].y;
+                const f32 endpoint_y =
+                    NuFdiv(distance_along + cable.segment_lengths[segment], cable.total_length) * y_span +
+                    cable.points[0].y;
+                endpoint = cable.points[segment + 1];
+                endpoint.y = endpoint_y;
                 f32 ground_end = GameShadow(NULL, &endpoint, 5.0f, -1);
                 if (ground_end == 2000000.0f) {
                     ground_end = endpoint.y;
@@ -625,8 +625,8 @@ void DrawCables() {
                 while (local_distance + half_step < cable.segment_lengths[segment]) {
                     start = cursor;
                     const f32 global_distance = distance_along + local_distance;
-                    start.y -= cable.slack *
-                               NU_SIN_LUT(static_cast<i32>(NuFdiv(global_distance, cable.total_length) * 32768.0f));
+                    const i32 start_angle = static_cast<i32>(NuFdiv(global_distance, cable.total_length) * 32768.0f);
+                    start.y -= cable.slack * NU_SIN_LUT(start_angle);
                     const f32 start_fraction = NuFdiv(local_distance, cable.segment_lengths[segment]);
                     const f32 start_floor =
                         start_fraction * ground_end + (1.0f - start_fraction) * ground_start + 0.05f;
