@@ -44,57 +44,55 @@ void TTNetwork::Display(ThingRenderData *) {
     }
 
     NetSmallStats *stats = NULL;
-    switch (field_2150) {
-        case 1:
-            stats = &theNuNetEmu.packet_stats;
-            break;
-        case 2:
-            stats = &theNuNetEmu.raw_stats;
-            break;
-        case 3:
-            stats = &reinterpret_cast<V2SessionManager *>(session)->stats;
-            break;
+    if (field_2150 == 1) {
+        stats = &theNuNetEmu.packet_stats;
+    }
+    if (field_2150 == 2) {
+        stats = &theNuNetEmu.raw_stats;
+    }
+    if (__builtin_expect(field_2150 == 3, 1)) {
+        stats = &reinterpret_cast<V2SessionManager *>(session)->stats;
     }
 
-    if (__builtin_expect(stats == NULL, 1)) {
-        i32 display_index = 4;
+    i32 display_index = 4;
+    if (stats == NULL) {
         NetPeer *peer = reinterpret_cast<V2SessionManager *>(session)->first_peer;
         while (peer != NULL) {
-            if (__builtin_expect(field_2150 == display_index++, 1)) {
+            if (field_2150 == display_index++) {
                 stats = &peer->stats;
                 break;
             }
             peer = peer->next;
         }
+    }
 
-        if (stats == NULL) {
-            for (i32 i = 0; i < theRegistry.class_count; ++i) {
-                EdClass *object_class = theRegistry.GetClass(i);
-                if (object_class->interface != NULL) {
-                    if (field_2150 == display_index++) {
-                        stats = network_objects.class_stats[i];
-                        break;
-                    }
-                }
-            }
-        }
-
-        if (stats == NULL) {
-            NetListenerBinding *binding = first_listener;
-            while (binding != NULL) {
-                if (field_2150 == display_index) {
-                    stats = &binding->stats;
+    if (stats == NULL) {
+        for (i32 i = 0; i < theRegistry.class_count; ++i) {
+            EdClass *object_class = theRegistry.GetClass(i);
+            if (object_class->interface != NULL) {
+                if (field_2150 == display_index++) {
+                    stats = network_objects.class_stats[i];
                     break;
                 }
-                ++display_index;
-                binding = binding->next;
             }
         }
+    }
 
-        if (stats == NULL) {
-            field_2150 = 1;
-            return;
+    if (stats == NULL) {
+        NetListenerBinding *binding = first_listener;
+        while (binding != NULL) {
+            if (field_2150 == display_index) {
+                stats = &binding->stats;
+                break;
+            }
+            ++display_index;
+            binding = binding->next;
         }
+    }
+
+    if (stats == NULL) {
+        field_2150 = 1;
+        return;
     }
 
     stats->Draw(field_2154, field_2158, field_215c, field_2160, static_cast<NetSmallStats::eInfo>(0));

@@ -1081,7 +1081,7 @@ extern "C" {
         }
         if (pad->digital_buttons_pressed & 0x80)
             pick->selected_corner = corner != 1;
-        if ((pad->digital_buttons_pressed & 0x40) && pick->changed)
+        if (__builtin_expect((pad->digital_buttons_pressed & 0x40) && pick->changed, 1))
             pick->changed(menu, item, pad->digital_buttons);
         return 0;
     }
@@ -5314,7 +5314,7 @@ extern "C" {
             i32 count = 1;
             for (eduiitem_s *item = menu->field_0c; item && item != menu->field_10; item = item->next)
                 ++count;
-            while (menu->selected->next) {
+            while (__builtin_expect(menu->selected->next != 0, 1)) {
                 menu->selected = menu->selected->next;
                 if (!--count)
                     break;
@@ -5326,7 +5326,7 @@ extern "C" {
             for (eduiitem_s *item = menu->field_0c; item && item != menu->field_10; item = item->next)
                 ++count;
             menu->selected = menu->field_0c;
-            while (menu->selected->previous) {
+            while (__builtin_expect(menu->selected->previous != 0, 0)) {
                 menu->selected = menu->selected->previous;
                 menu->field_0c = menu->selected;
                 if (!--count)
@@ -5352,12 +5352,12 @@ extern "C" {
                     item = item->next;
                 menu->selected = item;
             } while (menu->selected->next && to_last);
-            if (__builtin_expect(!!(to_last), 0)) {
+            if (__builtin_expect(!!(to_last), 1)) {
                 i32 count = 1;
                 for (eduiitem_s *item = menu->field_0c; item && item != menu->field_10; item = item->next)
                     ++count;
                 menu->field_0c = menu->selected;
-                while (menu->field_0c->previous) {
+                while (__builtin_expect(menu->field_0c->previous != 0, 1)) {
                     menu->field_0c = menu->field_0c->previous;
                     if (!--count)
                         break;
@@ -5595,8 +5595,9 @@ extern "C" {
         if (edui_cursor_locked)
             return;
         NuPrim2DBegin(0, 7, uimtls[0]);
+        u32 colour = edui_cursor_colour;
 #define EDUI_CURSOR_VERTEX(xoff, yoff)                                                                                 \
-    NuRndrPrimSetColour(edui_cursor_colour);                                                                           \
+    NuRndrPrimSetColour(colour);                                                                                       \
     NuRndrPrimUV(0.0f, 0.0f);                                                                                          \
     NuPrim2DAddXYZ(edui_cursor_x + (xoff), edui_cursor_y + (yoff), 0.0f)
         EDUI_CURSOR_VERTEX(0.0f, 0.0f);

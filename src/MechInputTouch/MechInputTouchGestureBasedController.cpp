@@ -920,6 +920,12 @@ void MechInputTouchGestureBasedController::ProcessAutoJumpWhenStuck(GameObject_s
     }
 }
 
+static inline void AssignMechPtr(NuMechPtr<MechTouchUIElement, 4> &dst, const NuMechPtr<MechTouchUIElement, 4> &src) {
+    if (&dst != &src) {
+        dst = src;
+    }
+}
+
 void MechInputTouchGestureBasedController::Update(NuInputTouchData const *data) {
     if (player != NULL && NewMode == 0 && NewLData == NULL && FadeSys.fade == 0.0f && Paused == 0 && CUTSTOPGAME == 0 &&
         !MenuDisable() && TouchHacks::TouchControlsActive && GetMenuID() == -1 && MiniCutCam != 2 &&
@@ -981,7 +987,7 @@ void MechInputTouchGestureBasedController::Update(NuInputTouchData const *data) 
             }
         }
         if (tag_button.Get() != NULL && tag_button.Get()->on_click != NULL) {
-            tag_button = NuMechPtr<MechTouchUIElement, 4>();
+            AssignMechPtr(tag_button, NuMechPtr<MechTouchUIElement, 4>(static_cast<MechTouchUIElement *>(NULL)));
         }
     }
     UpdateButtons();

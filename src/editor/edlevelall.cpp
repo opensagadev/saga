@@ -2527,20 +2527,20 @@ void EdMatrixControl::AddMenuItem(eduimenu_s *menu, EdRef *member, void *target)
                                                     cbChanged, cbButton, 2, const_cast<char *>(label), value);         \
     control->components[index]->unknown_10 = index % 3 + 1;                                                            \
     eduiItemExpanderAddChild(static_cast<edui_expander_s *>(control->item), control->components[index])
-    // These enabled groups are the common path in the original block layout.
-    if (__builtin_expect(member->attributes & 8, 1)) {
+    // The "> 0" tests reproduce the original branch prediction and block layout.
+    if ((member->attributes & 8) > 0) {
         ADD_MATRIX_COMPONENT(0, "pos x", matrix.matrix.m30);
         ADD_MATRIX_COMPONENT(1, "pos y", matrix.matrix.m31);
         ADD_MATRIX_COMPONENT(2, "pos z", matrix.matrix.m32);
     }
-    if (__builtin_expect(member->attributes & 0x10, 1)) {
+    if ((member->attributes & 0x10) > 0) {
         NUANG x, y, z;
         NuMtxGetEulerXYZ(&matrix.matrix, &x, &y, &z);
         ADD_MATRIX_COMPONENT(3, "rot x", static_cast<f32>(x) * (360.0f / 65536.0f));
         ADD_MATRIX_COMPONENT(4, "rot y", static_cast<f32>(y) * (360.0f / 65536.0f));
         ADD_MATRIX_COMPONENT(5, "rot z", static_cast<f32>(z) * (360.0f / 65536.0f));
     }
-    if (__builtin_expect((member->attributes & 0x20) != 0, 1)) {
+    if ((member->attributes & 0x20) > 0) {
         f32 x = NuVecMag(reinterpret_cast<NUVEC *>(&matrix.matrix.m00));
         f32 y = NuVecMag(reinterpret_cast<NUVEC *>(&matrix.matrix.m10));
         f32 z = NuVecMag(reinterpret_cast<NUVEC *>(&matrix.matrix.m20));
@@ -6547,39 +6547,39 @@ void ClassEditor::UpdateSelectedObjects(EdInputContext &input) {
 }
 
 i32 ClassEditor::FindNearestObject(VuVec &point, ClassObject &result, ClassObject &after, i32 filter) {
-    EdMember member;
     EdClass *candidate_classes[16] = {};
     void *candidate_objects[16] = {};
     i32 candidate_count = 0;
     for (i32 class_index = 0; class_index < theRegistry.class_count; ++class_index) {
         EdClass *ed_class = &theRegistry.classes[class_index];
-        if (!Editable(NULL, ed_class, class_index) || (ed_class->flags & 8) == 0)
+        if (!Editable(NULL, ed_class, class_index))
             continue;
-        for (void *object = ed_class->interface->GetNextObject(NULL); object != NULL;
-             object = ed_class->interface->GetNextObject(object)) {
-            if (!Editable(object, ed_class, -1))
-                continue;
-
-            if (!ed_class->FindMember(&member, object, 8, 1))
-                continue;
-            VuVec position;
-            member.reference->GetAttributeData(member.object, 8, EdType_VuVec, &position, 0);
-            f32 dx = position.x - point.x;
-            f32 dy = position.y - point.y;
-            f32 dz = position.z - point.z;
-            f32 distance_squared = dx * dx + dy * dy + dz * dz;
-            // The original keeps the radius in a 16-byte aligned slot.
-            f32 radius __attribute__((aligned(16))) = 1.0f;
-            if (ed_class->FindMember(&member, object, 0x40, 1))
-                member.reference->GetAttributeData(member.object, 0x40, EdType_Float, &radius, 0);
-            if (distance_squared < radius * radius && candidate_count < 16) {
-                candidate_objects[candidate_count] = object;
-                candidate_classes[candidate_count] = ed_class;
-                ++candidate_count;
+        if ((ed_class->flags & 8) == 0)
+            continue;
+        void *object = ed_class->interface->GetNextObject(NULL);
+        while (object != NULL) {
+            // Scoped to the whole body so the vectorizer does not force a 16-byte slot.
+            EdMember member;
+            if (Editable(object, ed_class, -1) && ed_class->FindMember(&member, object, 8, 1)) {
+                VuVec position;
+                member.reference->GetAttributeData(member.object, 8, EdType_VuVec, &position, 0);
+                f32 dx = position.x - point.x;
+                f32 dy = position.y - point.y;
+                f32 dz = position.z - point.z;
+                f32 distance_squared = dx * dx + dy * dy + dz * dz;
+                f32 radius = 1.0f;
+                if (__builtin_expect(ed_class->FindMember(&member, object, 0x40, 1), 0))
+                    member.reference->GetAttributeData(member.object, 0x40, EdType_Float, &radius, 0);
+                if (distance_squared < radius * radius && candidate_count < 16) {
+                    candidate_objects[candidate_count] = object;
+                    candidate_classes[candidate_count] = ed_class;
+                    ++candidate_count;
+                }
             }
+            object = ed_class->interface->GetNextObject(object);
         }
     }
-    if (candidate_objects[0] == NULL)
+    if (__builtin_expect(candidate_objects[0] == NULL, 0))
         return 0;
     for (i32 index = 0; index <= candidate_count; ++index) {
         if (candidate_objects[index] == after.object) {
@@ -7603,14 +7603,12 @@ SceneObject::SceneObject() {
 
 void SceneObjectHelper::PreLoadInitialisation(MemoryBuffer *, MemoryBuffer *) {
     for (i32 level = 0; level < 10; ++level) {
-        i32 *count_slot = &scene_counts[level];
-        SceneObject **scene_slot = &scenes[level];
         nugscn_s *scene = theLevelEditor.GetScene(level);
-        if (scene != NULL && *count_slot == 0) {
-            *count_slot = NuGScnNumSpecials(scene);
-            const usize bytes = *count_slot * sizeof(SceneObject);
+        if (scene != NULL && __builtin_expect(scene_counts[level] == 0, 1)) {
+            scene_counts[level] = NuGScnNumSpecials(scene);
+            const usize bytes = scene_counts[level] * sizeof(SceneObject);
             SceneObject *objects = NULL;
-            if (__builtin_expect(bytes < *theMemoryManager.end_cell - *theMemoryManager.cursor_cell, 0)) {
+            if (__builtin_expect(bytes < *theMemoryManager.end_cell - *theMemoryManager.cursor_cell, 1)) {
                 const usize aligned = ALIGN(*theMemoryManager.cursor_cell, 0x10);
                 *theMemoryManager.cursor_cell = aligned + bytes;
                 objects = reinterpret_cast<SceneObject *>(aligned);
@@ -7619,19 +7617,18 @@ void SceneObjectHelper::PreLoadInitialisation(MemoryBuffer *, MemoryBuffer *) {
                 theMemoryManager.remaining -= bytes;
                 theMemoryManager.high_water = *theMemoryManager.cursor_cell;
             }
-            *scene_slot = objects;
-            for (i32 index = 0; index < *count_slot; ++index)
-                new (&(*scene_slot)[index]) SceneObject();
+            scenes[level] = objects;
+            for (i32 index = 0; index < scene_counts[level]; ++index)
+                new (&scenes[level][index]) SceneObject();
         }
     }
 
     scene_object_count = 0;
-    i32 *count_slot = scene_counts;
-    for (i32 level = 0; level < 10; ++level, ++count_slot) {
-        SceneObject *object = *reinterpret_cast<SceneObject **>(count_slot - 10);
+    for (i32 level = 0; level < 10; ++level) {
+        SceneObject *object = scenes[level];
         nugscn_s *scene = theLevelEditor.GetScene(level);
         if (scene != NULL) {
-            const i32 count = *count_slot;
+            const i32 count = scene_counts[level];
             for (i32 index = 0; index < count; ++index) {
                 NuGScnGetSpecial(&object->special, scene, index);
                 object->led_file = level;

@@ -1634,7 +1634,7 @@ void NetworkObjectManager::Update() {
                 message_limit = static_cast<i32>(message_limit * theNuNetEmu.packet_stats.pack_ratio);
             }
 
-            while (object_index < object_count && message_limit < theNuNetEmu.field_00) {
+            while (message_limit < theNuNetEmu.field_00 && __builtin_expect(object_index < object_count, 1)) {
                 NetworkObject *object = local_objects[object_index++];
                 if (__builtin_expect(object == NULL || object->object == NULL, 0)) {
                     continue;

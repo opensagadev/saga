@@ -8380,13 +8380,13 @@ extern "C" {
             if (NuLinkedListGetHead(&reference->conditions) != NULL &&
                 AIScriptProcessStateConditions(system, &reference->conditions, packet, processor, 1) == NULL) {
                 processor->active_ref_count = index;
-                if (index == 0) {
+                if (index != 0) {
+                    AIScriptProcessorInit(system, packet, processor, NULL, NULL, NULL, 0,
+                                          processor->active_refs[index - 1]->script, reference->return_state);
+                } else {
                     AICREATURE *creature = packet->field_0x134 != 0xff ? &system->creatures[packet->field_0x134] : NULL;
                     AIScriptProcessorInit(system, packet, processor, creature, NULL, NULL, 0, processor->base_script,
                                           reference->return_state);
-                } else {
-                    AIScriptProcessorInit(system, packet, processor, NULL, NULL, NULL, 0,
-                                          processor->active_refs[index - 1]->script, reference->return_state);
                 }
                 break;
             }
@@ -11338,13 +11338,12 @@ extern "C" {
         }
 
         if (search_all_paths != 0) {
-            path = info->path;
-            if (path == NULL) {
-                path = system->path_sys->paths[0];
+            if (info->path == NULL) {
+                info->path = system->path_sys->paths[0];
                 info->connection = NULL;
-                info->path = path;
                 info->next_check = 0;
             }
+            path = info->path;
         } else {
             if (path == NULL) {
                 path = system->path_sys->active_path;
@@ -11355,7 +11354,7 @@ extern "C" {
                 info->next_check = 0;
             }
         }
-        AISysResetPathSearchConnectionChecks(path);
+        AISysResetPathSearchConnectionChecks(info->path);
 
         AIPATHCNX *current = info->connection;
         if (current != NULL) {
@@ -15473,7 +15472,7 @@ extern "C" {
                             for (i32 edge = 0; edge < node->connection_count; ++edge) {
                                 AIPATHCNX_s *connection = node->connections[edge];
                                 bool direction = connection->node_indices[0] != source;
-                                if (__builtin_expect(!!(connection->traversal_flags[direction] & 0x40000000), 0)) {
+                                if (!!(connection->traversal_flags[direction] & 0x40000000)) {
                                     continue;
                                 }
                                 i32 neighbor = connection->node_indices[!direction];
@@ -15511,9 +15510,8 @@ extern "C" {
                         node->runtime_flags &= ~u8(1);
                     }
                 }
-                if (__builtin_expect(!(path->flags & 2) || distance_tables == nullptr ||
-                                         distance_tables[path_index] == nullptr,
-                                     0)) {
+                if (!(path->flags & 2) || distance_tables == nullptr ||
+                                         distance_tables[path_index] == nullptr) {
                     continue;
                 }
                 for (i32 node_index = 0; node_index < path->node_count; ++node_index) {
@@ -15611,7 +15609,7 @@ extern "C" {
                             AIPATHCNX *connection = &path->connections[connection_index];
                             i32 first = locator->first_node->index;
                             i32 second = locator->second_node->index;
-                            if (connection->node_indices[0] == first && connection->node_indices[1] == second) {
+                            if (__builtin_expect(connection->node_indices[0] == first && connection->node_indices[1] == second, 0)) {
                                 runtime->path_info.connection = connection;
                                 runtime->path_info.direction = (angle < 0 ? -angle : angle) > 0x3fff;
                                 break;
@@ -15758,7 +15756,7 @@ extern "C" {
                         for (i32 locator_index = 0; locator_index < aieditor->ai_system->locator_count;
                              ++locator_index) {
                             AILOCATOR *locator = &aieditor->ai_system->locators[locator_index];
-                            if (NuStrICmp(creature->respawn_locator->name, locator->name) == 0) {
+                            if (__builtin_expect(NuStrICmp(creature->respawn_locator->name, locator->name) == 0, 0)) {
                                 runtime->respawn_locator = locator;
                                 break;
                             }
@@ -18009,18 +18007,18 @@ extern "C" {
 static __used__ void pathEditor_cbDisconnectPathNode(eduimenu_s *, eduiitem_s *item, u32) {
     if (item != nullptr && item->data != 0) {
         EDAIPATHNODE_s *node = aieditor->current_path->current_node;
-        EDAIPATHNODE_s *other = aieditor->current_path->other_node;
-        if (node != nullptr && other != nullptr && node != other) {
+        EDAIPATHNODE_s *other;
+        if (node != nullptr && (other = aieditor->current_path->other_node) != nullptr && node != other) {
             i32 i;
             i32 j;
             for (i = 0; i < 8; ++i) {
                 if (node->connections[i].node == other) {
                     for (j = 0; j < 8; ++j) {
-                        if (other->connections[j].node == node) {
+                        if (other->connections[j].node == aieditor->current_path->current_node) {
                             break;
                         }
                     }
-                    if (j < 8) {
+                    if (__builtin_expect(j < 8, 1)) {
                         break;
                     }
                 }
@@ -18724,6 +18722,41 @@ void routeEditor_Render(i32 x, i32 y, float xscale, float yscale) {
     antinodeEditorDrawAntinodes();
 }
 
+static void pathEditorDrawRoute() {
+    if (aieditor->cached_path_system == nullptr)
+        return;
+    AIPATH_s *runtime_path = aieditor->cached_path_system->paths[0];
+    if (runtime_path != nullptr) {
+        EDAIPATH_s *edpath = aieditor->current_path;
+        i32 current = edpath->runtime_start;
+        i32 end;
+        if (current >= 0 && current < runtime_path->node_count && (end = edpath->runtime_end) >= 0 &&
+            end < runtime_path->node_count && end != current) {
+            AIPATHNODE_s *node = &runtime_path->nodes[current];
+            u8 edge = runtime_path->route_matrix[current][end];
+            while (edge != 0xff) {
+                AIPATHCNX_s *connection = node->connections[edge];
+                current =
+                    connection->node_indices[0] != current ? connection->node_indices[0] : connection->node_indices[1];
+                AIPATHNODE_s *next_node = &runtime_path->nodes[current];
+                NURND_VERTEX3D vertices[2];
+                vertices[0].position = node->position;
+                vertices[1].position = next_node->position;
+                vertices[0].position.y += 0.1f;
+                vertices[1].position.y += 0.1f;
+                vertices[0].colour = 0xff0000ff;
+                vertices[1].colour = 0xff0000ff;
+                AiRndrLine3d(vertices, nullptr, nullptr);
+                end = aieditor->current_path->runtime_end;
+                if (current == end)
+                    break;
+                node = &runtime_path->nodes[current];
+                edge = runtime_path->route_matrix[current][end];
+            }
+        }
+    }
+}
+
 void pathEditor_Render(i32 x, i32 y, float x_scale, float y_scale) {
     EDAIPATH_s *path = aieditor->current_path;
     if (path != nullptr) {
@@ -18758,7 +18791,6 @@ void pathEditor_Render(i32 x, i32 y, float x_scale, float y_scale) {
             }
             NuQFntPrintEx(system_qfont, (x + 10) * 16, (y + 30) * 8, 16, "SQR - Sub menu");
             NuQFntPrintEx(system_qfont, (x + 10) * 16, (y + 45) * 8, 16, "SELECT - Select nearest");
-            path = aieditor->current_path;
             if (aieditor->flags & 1) {
                 NuQFntPrintEx(system_qfont, (x + 10) * 16, (y + 60) * 8, 16, "X - Move selected");
                 NuQFntPrintEx(system_qfont, (x + 10) * 16, (y + 75) * 8, 16, "TRI - Delete selected");
@@ -18770,14 +18802,14 @@ void pathEditor_Render(i32 x, i32 y, float x_scale, float y_scale) {
                     NuQFntPrintEx(system_qfont, (x + 10) * 16, (y + 105) * 8, 16, "LRIGHT - Increase radius");
                 }
                 NuQFntPrintEx(system_qfont, (x + 10) * 16, (y + 120) * 8, 16, "LLEFT - Decrease radius");
-            } else if (path->nearest_node != nullptr) {
+            } else if (aieditor->current_path->nearest_node != nullptr) {
                 NuQFntPrintEx(system_qfont, (x + 10) * 16, (y + 60) * 8, 16, "X - Select");
                 NuQFntPrintEx(system_qfont, (x + 10) * 16, (y + 90) * 8, 16, "O - Link/unlink to selected");
                 if (EdGetCnxFlagNames != nullptr) {
                     path = aieditor->current_path;
-                    if (path->nearest_node != nullptr && path->current_node != nullptr) {
-                        EDAIPATHNODE_s *nearest = path->nearest_node;
-                        EDAIPATHNODE_s *current = path->current_node;
+                    EDAIPATHNODE_s *nearest = path->nearest_node;
+                    EDAIPATHNODE_s *current = path->current_node;
+                    if (nearest != nullptr && current != nullptr) {
                         i32 index;
                         for (index = 0; index < 8; ++index) {
                             if (current->connections[index].node == nearest)
@@ -18798,39 +18830,8 @@ void pathEditor_Render(i32 x, i32 y, float x_scale, float y_scale) {
             }
         }
     }
-    if (aieditorsettings.unknown_060_bit0 && aieditor->cached_path_system != nullptr &&
-        aieditor->current_path != nullptr) {
-        AIPATH_s *runtime_path = aieditor->cached_path_system->paths[0];
-        if (runtime_path != nullptr) {
-            i32 current = aieditor->current_path->runtime_start;
-            i32 end = aieditor->current_path->runtime_end;
-            if (__builtin_expect(current >= 0 && current < runtime_path->node_count && end >= 0 &&
-                                     end < runtime_path->node_count && current != end,
-                                 1)) {
-                AIPATHNODE_s *node = &runtime_path->nodes[current];
-                u8 edge = runtime_path->route_matrix[current][end];
-                while (edge != 0xff) {
-                    AIPATHCNX_s *connection = node->connections[edge];
-                    i32 next = connection->node_indices[0] != current ? connection->node_indices[0]
-                                                                      : connection->node_indices[1];
-                    AIPATHNODE_s *next_node = &runtime_path->nodes[next];
-                    NURND_VERTEX3D vertices[2];
-                    vertices[0].position = node->position;
-                    vertices[1].position = next_node->position;
-                    vertices[0].position.y += 0.1f;
-                    vertices[1].position.y += 0.1f;
-                    vertices[0].colour = 0xff0000ff;
-                    vertices[1].colour = 0xff0000ff;
-                    AiRndrLine3d(vertices, nullptr, nullptr);
-                    current = next;
-                    end = aieditor->current_path->runtime_end;
-                    if (current == end)
-                        break;
-                    node = &runtime_path->nodes[current];
-                    edge = runtime_path->route_matrix[current][end];
-                }
-            }
-        }
+    if (aieditorsettings.unknown_060_bit0) {
+        pathEditorDrawRoute();
     }
     pathEditorDrawPaths();
     if (aieditorsettings.show_creatures_display) {

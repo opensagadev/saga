@@ -1385,7 +1385,7 @@ i32 Action_CreatePod(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **
     return 1;
 }
 
-i32 Action_Sebulba(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **, i32, i32 first_time, float) {
+i32 Action_Sebulba(AISYS_s *, AISCRIPTPROCESS_s *process, AIPACKET_s *packet, char **, i32, i32 first_time, float) {
     if (packet == NULL || packet->owner == NULL || packet->owner->apiobj.objptr == NULL)
         return 1;
 
@@ -1401,24 +1401,25 @@ i32 Action_Sebulba(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **, 
 
     GameObject_s *target = player;
     if (target != NULL && player2 != NULL) {
-        float x2 = object->apiobj.position.x - player2->apiobj.position.x;
-        float z2 = object->apiobj.position.z - player2->apiobj.position.z;
         float x1 = object->apiobj.position.x - target->apiobj.position.x;
         float z1 = object->apiobj.position.z - target->apiobj.position.z;
-        if (!(x2 * x2 + z2 * z2 > x1 * x1 + z1 * z1))
+        float d1 = x1 * x1 + z1 * z1;
+        float x2 = object->apiobj.position.x - player2->apiobj.position.x;
+        float z2 = object->apiobj.position.z - player2->apiobj.position.z;
+        float d2 = x2 * x2 + z2 * z2;
+        if (!(d2 > d1))
             target = player2;
     }
 
-    SOCKSYS *sock = WORLD->sock_sys;
     SOCKPOSITION ahead;
-    MoveSockPosition(sock, &object->sock_position, sockstep, &ahead);
+    MoveSockPosition(WORLD->sock_sys, &object->sock_position, sockstep, &ahead);
     NUVEC goal;
     if (target != NULL) {
-        float target_distance = MidDistanceFromSockStart(sock, &target->sock_position);
-        float object_distance = MidDistanceFromSockStart(sock, &object->sock_position);
+        float target_distance = MidDistanceFromSockStart(WORLD->sock_sys, &target->sock_position);
+        float object_distance = MidDistanceFromSockStart(WORLD->sock_sys, &object->sock_position);
         float difference = target_distance - object_distance;
-        (void)MidDistanceFromSockStart(sock, &object->sock_position);
-        (void)MidDistanceFromSockStart(sock, &target->sock_position);
+        (void)MidDistanceFromSockStart(WORLD->sock_sys, &object->sock_position);
+        (void)MidDistanceFromSockStart(WORLD->sock_sys, &target->sock_position);
         float wanted = ((difference + 25.0f) / test_factor + 1.0f) * avg_currentspeed_mul;
         float speed = SeekLinearF(object->current_speed_multiplier, wanted, test_seek_rate);
         object->current_speed_multiplier = speed;
@@ -1437,20 +1438,19 @@ i32 Action_Sebulba(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **, 
         goal.y = 0.0f;
         NuVecAdd(&goal, &goal, &ahead.midpoint);
 
-        packet->script_process.action_timer += FRAMETIME;
-        if (packet->script_process.action_timer > 1.0f) {
+        process->action_timer += FRAMETIME;
+        if (process->action_timer > 1.0f) {
             if (do_mine != 0) {
                 if (CreatePodRaceMine(&object->apiobj.lower_position) != NULL)
-                    packet->script_process.action_timer = 0.0f;
+                    process->action_timer = 0.0f;
             } else if (__builtin_expect(NuSpecialExistsFn(&special) != 0, 0)) {
+                NUVEC throw_velocity;
+                NUVEC target_delta;
                 NUVEC origin;
                 origin.x = object->apiobj.position.x;
-                origin.y = object->apiobj.position.y;
+                origin.y = object->apiobj.position.y + 1.0f;
                 origin.z = object->apiobj.position.z;
-                origin.y += 1.0f;
-                NUVEC target_delta;
-                NuVecSub(&target_delta, &target->apiobj.velocity, &target->apiobj.collision_position);
-                NUVEC throw_velocity;
+                NuVecSub(&target_delta, &target->apiobj.velocity, &object->apiobj.velocity);
                 MakeThrowVector(&throw_velocity, &origin, &target->apiobj.collision_position, &target_delta, 20.0f,
                                 -10.0f);
                 NuVecAdd(&throw_velocity, &throw_velocity, &object->apiobj.velocity);
@@ -1463,16 +1463,16 @@ i32 Action_Sebulba(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **, 
                 part.field_14 = 0.1f;
                 part.field_18 = 0.1f;
                 part.gravity = -10.0f;
-                part.field_28 = 0x29b;
+                part.flags = 0x29b;
                 part.field_40 = PartCollide_3D;
                 part.time_step = FRAMETIME;
                 AddPart(&part);
-                packet->script_process.action_timer = 0.0f;
+                process->action_timer = 0.0f;
             }
         }
     } else {
-        goal = ahead.midpoint;
         object->current_speed_multiplier = 1.0f;
+        goal = ahead.midpoint;
     }
 
     AIMoveInstruction(packet, &goal, 0.0f, NULL, 1, 0.0f);

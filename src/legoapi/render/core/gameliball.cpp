@@ -8211,34 +8211,34 @@ extern "C" {
         const i32 regular_chunks = debrischunks;
         const i32 glass_chunks = debrischunksglass;
         const i32 total_chunks = regular_chunks + glass_chunks;
-        debris_chunk_controls = reinterpret_cast<debris_chunk_control_s *>(buffer->addr);
-        buffer->addr += static_cast<usize>(total_chunks) * 2 * sizeof(debris_chunk_control_s);
-        freechunkcontrols = reinterpret_cast<debris_chunk_control_s **>(buffer->addr);
-        buffer->addr += static_cast<usize>(total_chunks) * 2 * sizeof(debris_chunk_control_s *);
-        freedebchunks = reinterpret_cast<dma_particle_chunk_s **>(buffer->addr);
-        buffer->addr += static_cast<usize>(regular_chunks) * sizeof(dma_particle_chunk_s *);
-        freedebchunksglass = reinterpret_cast<dma_particle_chunk_s **>(buffer->addr);
-        buffer->addr += static_cast<usize>(glass_chunks) * sizeof(dma_particle_chunk_s *);
-        ParticleChunkToRender = reinterpret_cast<particlechunkrendertype_s *>(buffer->addr);
-        buffer->addr += static_cast<usize>(total_chunks) * sizeof(particlechunkrendertype_s);
+        debris_chunk_controls = reinterpret_cast<debris_chunk_control_s *>(buffer->u8_ptr);
+        buffer->u8_ptr += static_cast<usize>(total_chunks) * 2 * sizeof(debris_chunk_control_s);
+        freechunkcontrols = reinterpret_cast<debris_chunk_control_s **>(buffer->u8_ptr);
+        buffer->u8_ptr += static_cast<usize>(total_chunks) * 2 * sizeof(debris_chunk_control_s *);
+        freedebchunks = reinterpret_cast<dma_particle_chunk_s **>(buffer->u8_ptr);
+        buffer->u8_ptr += static_cast<usize>(regular_chunks) * sizeof(dma_particle_chunk_s *);
+        freedebchunksglass = reinterpret_cast<dma_particle_chunk_s **>(buffer->u8_ptr);
+        buffer->u8_ptr += static_cast<usize>(glass_chunks) * sizeof(dma_particle_chunk_s *);
+        ParticleChunkToRender = reinterpret_cast<particlechunkrendertype_s *>(buffer->u8_ptr);
+        buffer->u8_ptr += static_cast<usize>(total_chunks) * sizeof(particlechunkrendertype_s);
 
         buffer->addr = ALIGN(buffer->addr, 0x10);
-        debkeydata = reinterpret_cast<debkeydatatype_s *>(buffer->addr);
-        buffer->addr += static_cast<usize>(maxdebkeys) * sizeof(debkeydatatype_s);
-        freedebkeys = reinterpret_cast<i16 *>(buffer->addr);
-        buffer->addr += static_cast<usize>(maxdebkeys) * sizeof(i16);
-        effecttypes = reinterpret_cast<debinftype *>(buffer->addr);
-        buffer->addr += static_cast<usize>(EDPP_MAX_TYPES) * sizeof(debinftype);
-        debtab = reinterpret_cast<debinftype **>(buffer->addr);
-        buffer->addr += static_cast<usize>(EDPP_MAX_TYPES) * sizeof(debinftype *);
-        DmaDebTypes = reinterpret_cast<PartHeader **>(buffer->addr);
-        buffer->addr += static_cast<usize>(EDPP_MAX_DMADEBTYPES) * sizeof(PartHeader *);
-        spherecolldata = reinterpret_cast<u32 *>(buffer->addr);
-        buffer->addr += static_cast<usize>(maxdebkeys) * 2 * sizeof(u32);
-        toruscolldata = reinterpret_cast<u32 *>(buffer->addr);
-        buffer->addr += static_cast<usize>(maxdebkeys) * 2 * sizeof(u32);
-        debscale = reinterpret_cast<debscale_s *>(buffer->addr);
-        buffer->addr += static_cast<usize>(EDPP_SCALE_TYPES) * sizeof(debscale_s);
+        debkeydata = reinterpret_cast<debkeydatatype_s *>(buffer->u8_ptr);
+        buffer->u8_ptr += static_cast<usize>(maxdebkeys) * sizeof(debkeydatatype_s);
+        freedebkeys = reinterpret_cast<i16 *>(buffer->u8_ptr);
+        buffer->u8_ptr += static_cast<usize>(maxdebkeys) * sizeof(i16);
+        effecttypes = reinterpret_cast<debinftype *>(buffer->u8_ptr);
+        buffer->u8_ptr += static_cast<usize>(EDPP_MAX_TYPES) * sizeof(debinftype);
+        debtab = reinterpret_cast<debinftype **>(buffer->u8_ptr);
+        buffer->u8_ptr += static_cast<usize>(EDPP_MAX_TYPES) * sizeof(debinftype *);
+        DmaDebTypes = reinterpret_cast<PartHeader **>(buffer->u8_ptr);
+        buffer->u8_ptr += static_cast<usize>(EDPP_MAX_DMADEBTYPES) * sizeof(PartHeader *);
+        spherecolldata = reinterpret_cast<u32 *>(buffer->u8_ptr);
+        buffer->u8_ptr += static_cast<usize>(maxdebkeys) * 2 * sizeof(u32);
+        toruscolldata = reinterpret_cast<u32 *>(buffer->u8_ptr);
+        buffer->u8_ptr += static_cast<usize>(maxdebkeys) * 2 * sizeof(u32);
+        debscale = reinterpret_cast<debscale_s *>(buffer->u8_ptr);
+        buffer->u8_ptr += static_cast<usize>(EDPP_SCALE_TYPES) * sizeof(debscale_s);
 
         memset(freedebkeys, 0, static_cast<usize>(maxdebkeys) * sizeof(i16));
         memset(debkeydata, 0, static_cast<usize>(maxdebkeys) * sizeof(debkeydatatype_s));
@@ -8307,15 +8307,18 @@ extern "C" {
         NuMtlUpdate(glass);
         DebMat[8] = CreateCopyMat(DebMat[0], 0, 6, 0, 1);
 
-        for (debinftype **entry = debtab; *entry != NULL; ++entry) {
+        for (i32 i = 0; debtab[i] != NULL; ++i) {
+            debinftype **entry = &debtab[i];
+            if ((*entry)->field_0ab == 0)
+                (*entry)->field_0ab = 1;
             debinftype *effect = *entry;
-            if (effect->field_0ab == 0)
-                effect->field_0ab = 1;
             f32 frame_rate = static_cast<f32>((effect->field_0a8 * 60) / static_cast<i8>(effect->field_0ab));
             u32 packed;
             memcpy(&packed, &frame_rate, sizeof(packed));
-            packed = (packed & 0xfffff800) + ((effect->field_0a8 * (static_cast<i8>(effect->field_0aa) - 1)) & 0x3ff);
-            memcpy(&effect->field_0ac, &packed, sizeof(packed));
+            packed = ((effect->field_0a8 * (static_cast<i8>(effect->field_0aa) - 1)) & 0x3ff) + (packed & 0xfffff800);
+            f32 packed_value;
+            memcpy(&packed_value, &packed, sizeof(packed));
+            effect->field_0ac = packed_value;
             effect->alpha_keys[0].value /= effect->particle_lifetime;
             effect->texture_u0 += 524288.0f;
             effect->texture_u1 += 524288.0f;
@@ -10397,7 +10400,7 @@ void DebrisProcessControlChunks(i32 panel_time) {
             control->expiry_time += 0.1f;
             if (control->active == 0)
                 control->active = 2;
-            else if (__builtin_expect(control->active == 7, 0))
+            else if (__builtin_expect(control->active == 7, 1))
                 control->active = 9;
         } else if (control->active == 1) {
             debinftype *effect = debtab[control->owner->effect_index];
@@ -10507,7 +10510,7 @@ void DebrisProcessControlChunks(i32 panel_time) {
                 }
                 {
                     const i16 key_index = effect->particle_keys[7];
-                    if (__builtin_expect(key_index != -1 && &debkeydata[key_index] == control->owner, 1)) {
+                    if (key_index != -1 && &debkeydata[key_index] == control->owner) {
                         control->owner->effect_index = 0;
                         control->owner->allocation_index = -1;
                         --freedebkeyptr;
@@ -11223,14 +11226,13 @@ extern "C" {
                     }
                 }
                 i32 visible = 1;
-                if (!assigned && effect->sound_range > 0.0f && effect->use_explicit_clip_box == 0 &&
-                    !(key->cutoff_distance <= effect->sound_range))
-                    visible = 0;
+                if (!assigned && effect->sound_range > 0.0f && effect->use_explicit_clip_box == 0)
+                    visible = !(key->cutoff_distance > effect->sound_range);
                 if (key->field_2f7 == 0)
                     continue;
                 if (visible && pass != 4 && effect->generator_type == 0 && effect->use_explicit_clip_box == 0 &&
                     !assigned) {
-                    if (key->clip_radius == 0.0f || *edbits_editor_enabled != 0)
+                    if (key->clip_radius == 0.0f || __builtin_expect(*edbits_editor_enabled != 0, 0))
                         DebrisDrawCalculateClipBoxes(effect, key);
                     if (edbits_editmode == 0 && key->gscene != NULL && key->field_2f2 != -1)
                         visible = NuPortalClipTest(key->gscene, &key->position, key->clip_radius, key->field_2f2) != 0;
@@ -11272,17 +11274,19 @@ extern "C" {
             else
                 NuRndrSetParticleRotation(NULL);
             NuMtxPreScaleX(&matrix, 1.0f);
-            i32 mode;
             if (effect->particle_type == 7)
-                mode = 4;
-            else if (__builtin_expect(effect->use_explicit_clip_box != 0, 1)) {
+                NuRndrParticleGroup(reinterpret_cast<uv1debdata *>(chunk->particle_chunk), chunk->effect->native_data,
+                                    DebMat[static_cast<i8>(chunk->effect->particle_type)], render_time, &matrix, 4,
+                                    effect->field_140, effect->field_144, effect->clip_extent, effect->field_044);
+            else if (effect->use_explicit_clip_box != 0) {
                 NuRndrSetDebBox(reinterpret_cast<NUVEC *>(effect->fields_2f8));
-                mode = 6;
+                NuRndrParticleGroup(reinterpret_cast<uv1debdata *>(chunk->particle_chunk), chunk->effect->native_data,
+                                    DebMat[static_cast<i8>(chunk->effect->particle_type)], render_time, &matrix, 6,
+                                    effect->field_140, effect->field_144, effect->clip_extent, effect->field_044);
             } else
-                mode = 0;
-            NuRndrParticleGroup(reinterpret_cast<uv1debdata *>(chunk->particle_chunk), chunk->effect->native_data,
-                                DebMat[static_cast<i8>(chunk->effect->particle_type)], render_time, &matrix, mode,
-                                effect->field_140, effect->field_144, effect->clip_extent, effect->field_044);
+                NuRndrParticleGroup(reinterpret_cast<uv1debdata *>(chunk->particle_chunk), chunk->effect->native_data,
+                                    DebMat[static_cast<i8>(chunk->effect->particle_type)], render_time, &matrix, 0,
+                                    effect->field_140, effect->field_144, effect->clip_extent, effect->field_044);
             drawn = 1;
         }
         if (drawn != 0)
@@ -13701,7 +13705,7 @@ void edgraCalculatePage(char page, i32 calculate_vectors) {
                         static_cast<i32>(static_cast<NUVEC *>(GrassClumps[clump_index].vector_buffer)[element].x));
                 }
                 NuMtxScale(element_matrix, &scale);
-                if (terrain_enabled)
+                if (__builtin_expect(terrain_enabled != 0, 1))
                     position.y =
                         terrain_height + static_cast<NUVEC *>(GrassClumps[clump_index].vector_buffer)[element].y;
                 NuMtxTranslate(element_matrix, &position);
@@ -13722,7 +13726,7 @@ void edgraCalculatePage(char page, i32 calculate_vectors) {
                         static_cast<i32>(static_cast<NUVEC *>(GrassClumps[clump_index].vector_buffer)[element].x));
                 }
                 NuMtxScale(element_matrix, &scale);
-                if (terrain_enabled)
+                if (__builtin_expect(terrain_enabled != 0, 1))
                     position.y =
                         terrain_height + static_cast<NUVEC *>(GrassClumps[clump_index].vector_buffer)[element].y;
                 NuMtxTranslate(element_matrix, &position);
@@ -20169,8 +20173,8 @@ i32 HitWallSpline() {
             } else {
                 const f32 distance =
                     along - NuFsqrt((TerI->collision_radius * TerI->collision_radius - side_x_sq) - side_z_sq);
-                if (distance >= -0.0005f &&
-                    TerI->movement.x * TerI->movement.x + TerI->movement.z * TerI->movement.z >= distance * distance) {
+                if (__builtin_expect(distance >= -0.0005f &&
+                    TerI->movement.x * TerI->movement.x + TerI->movement.z * TerI->movement.z >= distance * distance, 0)) {
                     const f32 movement_sq = TerI->movement.x * TerI->movement.x + TerI->movement.z * TerI->movement.z;
                     const f32 length = NuFsqrt(movement_sq);
                     f32 time = 0.0f;
@@ -20191,7 +20195,7 @@ i32 HitWallSpline() {
                     const f32 pdz = WallSplList[i].position.z - TerI->position.z;
                     const f32 distance_sq = pdx * pdx + pdz * pdz;
                     const f32 padded_radius = TerI->collision_radius + 0.0005f;
-                    if (__builtin_expect(!(padded_radius * padded_radius >= distance_sq), 1))
+                    if (!(padded_radius * padded_radius >= distance_sq))
                         continue;
                     normal.x = TerI->position.x - WallSplList[i].position.x;
                     normal.z = TerI->position.z - WallSplList[i].position.z;
@@ -22167,7 +22171,7 @@ i32 PlatformChecks(i32 count, nuvec_s *movement) {
     if (movement->y > TerConTol * 0.5f) {
         TERRAIN_PLATFORM *platform = &platforms[platform_index];
         NUMTX *matrix = static_cast<NUMTX *>(platform->scene_object);
-        if (movement->y > (TerConTol * 0.5f + matrix->m31) - platform->previous_matrix.m31) {
+        if (__builtin_expect(movement->y > (TerConTol * 0.5f + matrix->m31) - platform->previous_matrix.m31, 0)) {
             NuScratchRelease();
             return count;
         }
@@ -22684,7 +22688,7 @@ extern "C" void NewTerrainScaleYMask(NUVEC *position, NUVEC *movement, u8 *hit_f
 
         if (__builtin_expect(TerI->hit_type != TERRAIN_HIT_TYPE_NONE, 0)) {
             const i16 group_index = TerI->terrain_group_index;
-            if (group_index >= 0) {
+            if (__builtin_expect(group_index >= 0, 1)) {
                 ShadNorm = TerI->impact_normal;
 
                 f32 slope = 0.707f;
@@ -22730,7 +22734,7 @@ extern "C" void NewTerrainScaleYMask(NUVEC *position, NUVEC *movement, u8 *hit_f
         }
 
         if (TerrShapeAdjCnt != 0) {
-            if (TerrShapeSideStep(position, movement, hit_flags) != 0) {
+            if (__builtin_expect(TerrShapeSideStep(position, movement, hit_flags) != 0, 0)) {
                 TerrainImpact(position, movement, hit_flags);
             }
         } else {
@@ -23597,7 +23601,7 @@ void edanimDoInput(nupad_s *pad) {
                 edanimParticleCreate(&edanim_cam_pos);
             } else if (edanim_sound_mode != 0) {
                 edanimSoundCreate(&edanim_cam_pos);
-            } else if (edanim_nearest != -1 && edanim_nearest_param_id == -1) {
+            } else if (__builtin_expect(edanim_nearest != -1 && edanim_nearest_param_id == -1, 1)) {
                 edanim_nearest_param_id = edanimParamCreate(edanim_nearest);
             }
         }

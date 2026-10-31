@@ -390,7 +390,7 @@ i32 ThermalDetonator_MoveCode(GameObject_s *object) {
 
     start_throw:
         object->character_context = 0x2e;
-        if (object->field_0xe31 == 1) {
+        if (__builtin_expect(object->field_0xe31 == 1, 0)) {
             object->context_animation = 0x6f;
         } else if (__builtin_expect((object->field_0xe22 & 1) != 0, 1)) {
             object->context_animation = 0x6e;
@@ -428,10 +428,10 @@ i32 ThermalDetonator_MoveCode(GameObject_s *object) {
     } else if ((object->context_flags & 0x40) == 0) {
         if (object->apiobj.character_model->model_data_b[object->context_animation] != NULL) {
             const f32 release_frame = AnimListFrame(object->apiobj.character_model, object->context_animation, 2);
-            if (frame != NULL && !(*frame <= 0.0f) && *frame >= release_frame) {
+            if (frame != NULL && *frame > 0.0f && *frame >= release_frame) {
                 object->movement_runtime_flags |= 0x40;
             }
-        } else if (__builtin_expect(!(object->context_animation_timer >= 0.5f), 1)) {
+        } else if (object->context_animation_timer < 0.5f) {
             object->movement_runtime_flags |= 0x40;
         }
     }

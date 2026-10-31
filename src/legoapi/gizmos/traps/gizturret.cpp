@@ -716,8 +716,8 @@ static i32 GizTurrets_BoltHit(void *world, void *system_ptr, void *object_ptr, N
             centre->y - extent > maximum->y || minimum->y > centre->y + extent) {
             continue;
         }
-        for (i32 point = point_count; point > 0;) {
-            --point;
+        i32 point = point_count;
+        while (point-- > 0) {
             if (SphereSphereOverlap(centre, extent, &points[point], radius) != 0) {
                 NUVEC *origin = object != NULL ? &object->apiobj.collision_position : &points[point];
                 f32 distance = NuVecDistSqr(origin, centre, NULL);
@@ -732,7 +732,7 @@ static i32 GizTurrets_BoltHit(void *world, void *system_ptr, void *object_ptr, N
     if (nearest == NULL) {
         return 0;
     }
-    if (__builtin_expect(hit_type != 7 && hit_type != 2 && bolt != NULL, 1)) {
+    if (__builtin_expect(hit_type != 2 && hit_type != 7 && bolt != NULL, 1)) {
         BoltType_FindByID(bolt->type_id, WORLD);
         Cheats_CheckFlags(2);
     }

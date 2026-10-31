@@ -2990,9 +2990,8 @@ static void instNuGCutRigidSysRender(instNUGCUTSCENE_s *instance, float frame, i
     NUGCUTRIGIDSYS_s *system = cutscene->rigid_system;
     instNUGCUTRIGIDSYS_s *rigid_instance = instance->rigid_instance;
     u8 visible;
-    const i32 count = system->count;
 
-    for (i32 i = 0; i < count; ++i) {
+    for (i32 i = 0; i < system->count; ++i) {
         NUGCUTRIGID_s *rigid = &system->rigids[i];
         instNUGCUTRIGID_s *inst_rigid = &rigid_instance->rigids[i];
         if ((rigid->flags & 2) == 0) {
@@ -3023,15 +3022,15 @@ static void instNuGCutRigidSysRender(instNUGCUTSCENE_s *instance, float frame, i
         } else {
             NuSpecialDrawAtAlpha(inst_rigid, &matrix, instance->alpha);
         }
-        if (NuCutSceneRigidPostRender != NULL && (rigid->flags & 0x18) != 0) {
+        if (NuCutSceneRigidPostRender != NULL && __builtin_expect((rigid->flags & 0x18) != 0, 0)) {
             NuCutSceneRigidPostRender(rigid, inst_rigid, &matrix);
         }
         if (NuCutSceneRigidCollisionCheck != NULL) {
             NuCutSceneRigidCollisionCheck(rigid, &matrix);
         }
-        if (__builtin_expect(rigid->locator_index != 0xff, 0)) {
-            NUGCUTLOCATORSYS_s *locator_system = cutscene->locator_system;
+        if (rigid->locator_index != 0xff) {
             instNUGCUTLOCATORSYS_s *locator_instance = instance->locator_instance;
+            NUGCUTLOCATORSYS_s *locator_system = cutscene->locator_system;
             for (i32 locator_offset = 0; locator_offset < rigid->locator_count; ++locator_offset) {
                 i32 locator_index = rigid->locator_index + locator_offset;
                 instNuGCutLocatorUpdate(instance, locator_system, &locator_instance->locators[locator_index],

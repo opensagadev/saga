@@ -4152,28 +4152,51 @@ void NuPostFilterGen::blur7x7Separate(nueffecttex_s *source, i32 source_lod, nue
     }
     for (i32 lod = 0; lod < levels; ++lod) {
         i32 level = first_lod + lod;
-        nueffecttex_s *input = level == first_lod ? source : (mip_chain ? textures : textures + level - 1);
-        i32 input_lod = level == first_lod ? source_lod : (mip_chain ? level - 1 : 0);
-        nueffecttex_s *output = mip_chain ? textures : textures + level;
-        i32 output_lod = mip_chain ? level : 0;
+        nueffecttex_s *input;
+        i32 input_lod;
+        if (level == first_lod) {
+            input = source;
+            input_lod = source_lod;
+        } else if (mip_chain) {
+            input = textures;
+            input_lod = level - 1;
+        } else {
+            input = textures + level - 1;
+            input_lod = 0;
+        }
+        nueffecttex_s *output;
+        i32 output_lod;
+        if (mip_chain) {
+            output = textures;
+            output_lod = level;
+        } else {
+            output = textures + level;
+            output_lod = 0;
+        }
         for (i32 pass = 0; pass < iterations; ++pass) {
             i32 width, height, out_width, out_height;
             NuEffectTexGetDimension(input, input_lod, &width, &height);
             NuEffectTexGetDimension(output, output_lod, &out_width, &out_height);
             f32 dx = radius / width;
             f32 dy = radius / height;
-            VuVec horizontal[7] = {
-                {dx * 0.0f, 0.0f, .34f, 0.0f},  {dx * 1.0f, 0.0f, .18f, 0.0f},  {dx * 2.0f, 0.0f, .10f, 0.0f},
-                {dx * 3.0f, 0.0f, .05f, 0.0f},  {dx * -1.0f, 0.0f, .18f, 0.0f}, {dx * -2.0f, 0.0f, .10f, 0.0f},
-                {dx * -3.0f, 0.0f, .05f, 0.0f},
-            };
-            VuVec vertical[7] = {
-                {0.0f, dy * 0.0f, .34f, 0.0f},  {0.0f, dy * 1.0f, .18f, 0.0f},  {0.0f, dy * 2.0f, .10f, 0.0f},
-                {0.0f, dy * 3.0f, .05f, 0.0f},  {0.0f, dy * -1.0f, .18f, 0.0f}, {0.0f, dy * -2.0f, .10f, 0.0f},
-                {0.0f, dy * -3.0f, .05f, 0.0f},
-            };
+            VuVec horizontal[7], vertical[7];
+            horizontal[0] = VuVec(dx * 0.0f, 0.0f, .34f, 0.0f);
+            vertical[0] = VuVec(0.0f, dy * 0.0f, .34f, 0.0f);
+            horizontal[1] = VuVec(dx * 1.0f, 0.0f, .18f, 0.0f);
+            vertical[1] = VuVec(0.0f, dy * 1.0f, .18f, 0.0f);
+            horizontal[2] = VuVec(dx * 2.0f, 0.0f, .10f, 0.0f);
+            vertical[2] = VuVec(0.0f, dy * 2.0f, .10f, 0.0f);
+            horizontal[3] = VuVec(dx * 3.0f, 0.0f, .05f, 0.0f);
+            vertical[3] = VuVec(0.0f, dy * 3.0f, .05f, 0.0f);
+            horizontal[4] = VuVec(dx * -1.0f, 0.0f, .18f, 0.0f);
+            vertical[4] = VuVec(0.0f, dy * -1.0f, .18f, 0.0f);
+            horizontal[5] = VuVec(dx * -2.0f, 0.0f, .10f, 0.0f);
+            vertical[5] = VuVec(0.0f, dy * -2.0f, .10f, 0.0f);
+            horizontal[6] = VuVec(dx * -3.0f, 0.0f, .05f, 0.0f);
+            vertical[6] = VuVec(0.0f, dy * -3.0f, .05f, 0.0f);
             VuVec bias(1, 1, 0.0f / width, 0.0f / height);
-            VuVec output_bias;
+            VuVec output_bias(static_cast<f32>(out_width) / work_width, static_cast<f32>(out_height) / work_height,
+                              0.0f / work_width, 0.0f / work_height);
             nueffecttex_s *work = NuPostFilterGen::workTex;
             NuFramebufferAttachTex2D(NuPostFilterGen::blurFbo, 0, work, 0);
             NuFramebufferBind(NuPostFilterGen::blurFbo);
@@ -4211,10 +4234,6 @@ void NuPostFilterGen::blur7x7Separate(nueffecttex_s *source, i32 source_lod, nue
                 glUseProgram(g_boundShader);
                 g_currentShaderProgram = bound;
             }
-            output_bias.x = static_cast<f32>(out_width) / work_width;
-            output_bias.y = static_cast<f32>(out_height) / work_height;
-            output_bias.z = 0.0f / work_width;
-            output_bias.w = 0.0f / work_height;
             PostBlurSetVertexParam(program, 0xa0, &vertical[0].x, 28);
             PostBlurSetVertexParam(program, 0xad, &output_bias.x, 4);
             PostBlurDrawQuad();
@@ -7067,7 +7086,7 @@ void NuAnimBuffEvaluate_3_QuatB(numtx_s *base, nuanimbuff_s *buffer, nugscn_s *s
         for (i32 index = 0; AnimBuffEvalData[index]; ++index) {
             i32 mapped = AnimBuffEvalJoint[index];
             if (mapped >= 0 && mapped < object->joint_override_map_count) {
-                u8 joint_index = object->joint_override_map[mapped];
+                i32 joint_index = object->joint_override_map[mapped];
                 if (joint_index != 255)
                     callback_data[joint_index] = AnimBuffEvalData[index];
             }
@@ -7076,26 +7095,28 @@ void NuAnimBuffEvaluate_3_QuatB(numtx_s *base, nuanimbuff_s *buffer, nugscn_s *s
     // Slot255 and the root/nonroot scale selection follow the original evaluator.
     NUVEC root_scale;
     if (base) {
-        root_scale = NuMtxGetScale(base);
+        const NUVEC tmp = NuMtxGetScale(base);
+        root_scale = tmp;
         NuMtxToQuat(base, &quaternions[255]);
     } else {
         root_scale.x = root_scale.y = root_scale.z = 1.0f;
         quaternions[255] = NUQUAT{0, 0, 0, 1};
     }
-    nuanimbuffjoint_s *joint = buffer->joints;
     NUVEC root_values = {0, 0, 0};
+    nuanimbuffjoint_s *joint = buffer->joints;
     NUQUAT *rotation = quaternions;
     NUMTX *matrix = matrices;
     NUVEC *scale = scales;
     const u8 *joint_flags = buffer->joint_flags;
-    for (i32 index = 0; index < count; ++index, ++joint, ++rotation, ++matrix, ++scale) {
+    nuhgobjjoint_s *hjoint = object->joints;
+    for (i32 index = 0; index < count; ++index, ++joint, ++rotation, ++matrix, ++scale, ++hjoint) {
+        i32 parent = hjoint->parent_index;
         u8 flags = *joint_flags++;
-        u8 parent = object->joints[index].parent_index;
         if (flags & 1)
             *rotation = *reinterpret_cast<NUQUAT *>(&joint->rotation);
         else
             *rotation = NUQUAT{0, 0, 0, 1};
-        NUVEC *parent_scale;
+        NUVEC *parent_scale = &scales[parent];
         if (parent != 255) {
             const NUQUAT q = *rotation, p = quaternions[parent];
             rotation->z = (p.w * q.z + q.w * p.z + p.x * q.y) - q.x * p.y;
@@ -7103,8 +7124,7 @@ void NuAnimBuffEvaluate_3_QuatB(numtx_s *base, nuanimbuff_s *buffer, nugscn_s *s
             rotation->y = (p.w * q.y + q.w * p.y + p.z * q.x) - p.x * q.z;
             rotation->w = ((p.w * q.w - q.x * p.x) - q.y * p.y) - q.z * p.z;
             parent_scale = &root_scale;
-        } else
-            parent_scale = &scales[parent];
+        }
         NuQuatToMtx(rotation, matrix);
         if (flags & 8) {
             scale->x = joint->scale.x * parent_scale->x;
@@ -7123,11 +7143,8 @@ void NuAnimBuffEvaluate_3_QuatB(numtx_s *base, nuanimbuff_s *buffer, nugscn_s *s
                 NuVecMtxTransform(reinterpret_cast<NUVEC *>(&matrix->m30), &joint->translation, &matrices[parent]);
             else if (base)
                 NuVecMtxTransform(reinterpret_cast<NUVEC *>(&matrix->m30), &joint->translation, base);
-            else {
-                matrix->m30 = joint->translation.x;
-                matrix->m31 = joint->translation.y;
-                matrix->m32 = joint->translation.z;
-            }
+            else
+                *reinterpret_cast<NUVEC *>(&matrix->m30) = joint->translation;
         } else if (parent != 255) {
             matrix->m30 = matrices[parent].m30;
             matrix->m31 = matrices[parent].m31;
@@ -7150,8 +7167,10 @@ void NuAnimBuffEvaluate_3_QuatB(numtx_s *base, nuanimbuff_s *buffer, nugscn_s *s
             AnimBuffEvalCB(matrix, callback_data[index], rotation);
     }
     // Callbacks observe the engine coordinates; reflect the completed hierarchy afterward.
-    for (i32 index = 0; index < count; ++index) {
-        NUMTX *matrix = &matrices[index];
+    i32 index;
+    NUMTX *out = matrices;
+    for (index = 0; index < count; ++index, ++out) {
+        NUMTX *matrix = out;
         matrix->m02 = -matrix->m02;
         matrix->m12 = -matrix->m12;
         matrix->m20 = -matrix->m20;
@@ -7159,8 +7178,8 @@ void NuAnimBuffEvaluate_3_QuatB(numtx_s *base, nuanimbuff_s *buffer, nugscn_s *s
         matrix->m23 = -matrix->m23;
         matrix->m32 = -matrix->m32;
     }
-    for (i32 index = count; index < object->joint_count; ++index)
-        NuMtxSetIdentity(&matrices[index]);
+    for (; index < object->joint_count; ++index, ++out)
+        NuMtxSetIdentity(out);
     AnimBuffEvalData = NULL;
     AnimBuffEvalCB = NULL;
     AnimBuffEvalJoint = NULL;
@@ -7271,7 +7290,7 @@ extern "C" {
             local_matrix->m23 = -local_matrix->m23;
             local_matrix->m32 = -local_matrix->m32;
 
-            if (root_fn != NULL) {
+            if (__builtin_expect(root_fn != NULL, 1)) {
                 root_fn(local_matrix, root_data, &root_values, &root_values, root_translation, 0.0f);
             }
 
@@ -15077,10 +15096,7 @@ extern "C" i32 NuRndrHighResScreenGrab(char *prefix, f32 scale, f32 a, f32 b, f3
     f32 tile_h = 0.75f * h;
     i32 width = static_cast<i32>(xPos != xTiles - 1.0f ? 0.75f * w : scale * w - ((xTiles - 1.0f) * 0.75f) * w);
     i32 height;
-    if (yPos != yTiles - 1.0f)
-        height = static_cast<i32>(tile_h);
-    else
-        height = static_cast<i32>(scale * h - ((yTiles - 1.0f) * 0.75f) * h);
+    if (yPos == yTiles - 1.0f) height = static_cast<i32>(scale * h - ((yTiles - 1.0f) * 0.75f) * h); else height = static_cast<i32>(tile_h);
     u8 *data = pixels + static_cast<u32>(((static_cast<f32>(static_cast<i32>(params.width)) * 3.0f) * 0.125f) * h) +
                static_cast<u32>((0.125f * w) * 3.0f) +
                static_cast<u32>(((static_cast<f32>(xOffsetHack * 3) * w) / static_cast<f32>(PS2_VREZ_W)) * scale);
@@ -16613,26 +16629,26 @@ extern "C" {
             for (;;) {
                 f32 next_fraction = fraction + step;
                 i32 end_alpha = start_alpha;
-                if (next_fraction < 1.0f) {
-                    if (laser->arc)
-                        end_alpha = (i32)((1.0f - fraction - step) * (f32)alpha);
-                    vertices[5].x = next_fraction * vertices[7].x + vertices[6].x;
-                    vertices[5].y = next_fraction * vertices[7].y + vertices[6].y;
-                    vertices[5].z = next_fraction * vertices[7].z + vertices[6].z;
-                } else {
+                if (next_fraction >= 1.0f) {
                     if (laser->arc)
                         end_alpha = 0;
                     vertices[5].x = vertices[6].x + vertices[7].x;
                     vertices[5].y = vertices[6].y + vertices[7].y;
                     vertices[5].z = vertices[6].z + vertices[7].z;
                     u0 = NuLgtArcMtl[0].u1 + (1.0f - fraction) * (NuLgtArcMtl[0].u0 - NuLgtArcMtl[0].u1) / step;
+                } else {
+                    if (laser->arc)
+                        end_alpha = (i32)((1.0f - fraction - step) * (f32)alpha);
+                    vertices[5].x = next_fraction * vertices[7].x + vertices[6].x;
+                    vertices[5].y = next_fraction * vertices[7].y + vertices[6].y;
+                    vertices[5].z = next_fraction * vertices[7].z + vertices[6].z;
                 }
                 vertices[5].w = 1.0f;
                 NuVec4MtxTransformVU0(&vertices[5], &vertices[5], &clip_matrix);
                 width_scale = 1.0f / vertices[5].w;
                 NuVec4ScaleXYZVU0(&vertices[5], &vertices[5], width_scale);
                 if (laser->length > remaining) {
-                    if (__builtin_expect(remaining < 0.0f, 0))
+                    if (remaining < 0.0f)
                         width_scale *= laser->end_width_ratio;
                     else
                         width_scale += (width_scale * laser->end_width_ratio - width_scale) *
@@ -16964,7 +16980,7 @@ void DisplayListLinkDynamicMtls(void) {
     // ── Removal pass ──
     for (i32 di = 0; di < mgr->ndel_materials; ++di) {
         NUMTL *mtl = mgr->del_materials[di];
-        if (!mtl->display_list)
+        if (__builtin_expect(!mtl->display_list, 0))
             continue;
 
         // Locate slot.
@@ -16988,7 +17004,7 @@ void DisplayListLinkDynamicMtls(void) {
         nudisplaylistitem_s *mtl_item = mtl->display_list->mtl_item;
 
         {
-            if (!(mgr->dyn_mtl_dlist.sort_pris[sp_idx].items == mtl_item)) {
+            if (__builtin_expect(!(mgr->dyn_mtl_dlist.sort_pris[sp_idx].items == mtl_item), 1)) {
                 for (i32 j = 0; j < mgr->dyn_mtl_dlist.sort_pris[sp_idx].nmtls; ++j) {
                     nudisplaylistitem_s *prev =
                         mgr->dyn_mtl_dlist.mtls[mgr->dyn_mtl_dlist.sort_pris[sp_idx].mtl_first + j]
@@ -17023,7 +17039,7 @@ void DisplayListLinkDynamicMtls(void) {
             mgr->dyn_mtl_dlist.sort_pris[sp_idx].nmtls--;
             if (mgr->dyn_mtl_dlist.sort_pris[sp_idx].nmtls == 0) {
                 // Unlink empty sortpri.
-                if (mgr->sort_list != &mgr->dyn_mtl_dlist.sort_pris[sp_idx]) {
+                if (__builtin_expect(mgr->sort_list != &mgr->dyn_mtl_dlist.sort_pris[sp_idx], 1)) {
                     nusortpri_s *cur = mgr->sort_list;
                     while (cur->sys_next != &mgr->dyn_mtl_dlist.sort_pris[sp_idx])
                         cur = cur->sys_next;
@@ -17837,7 +17853,7 @@ extern "C" void NuDisplayListSwapBuffersEndFrame(void) {
 
     auto copyMaterialGeometry = [&](NUDISPLAYLIST *dl, nudisplaylistitem_s *first, nudisplayscene_s *sc) {
         *dl->dyn_geom = *first;
-        if (__builtin_expect((sc->flags & 4) == 0, 0)) {
+        if ((sc->flags & 4) == 0) {
             dl->mtl_last->next = dl->mtl_item->next;
         } else if (dl->scene_first[dl->scene_buffer] != dl->scene_next) {
             dl->mtl_last->next = dl->scene_first[dl->scene_buffer];
@@ -17850,7 +17866,7 @@ extern "C" void NuDisplayListSwapBuffersEndFrame(void) {
 
     for (nusortpri_s *sp = mgr->sort_list; sp; sp = sp->sys_next) {
         nudisplayscene_s *sc = sp->display_scene;
-        if (!sc) {
+        if (__builtin_expect(!sc, 0)) {
             RndrStateUpdateFx(&tmp_state, sp->items);
             continue;
         }
@@ -21298,6 +21314,7 @@ extern "C" void NuTimeBarSetRender(i32 set) {
                 NuQFntSetColour(system_qfont, 0xe0e0e0e0);
 
                 const i32 text_width = PS2_VREZ_W;
+                const i32 column_x = column_index * 3;
                 NuQFntBaseline(system_qfont);
                 if (timebar->field_18[slot] != 0) {
                     i32 value = static_cast<i32>(timebar_unsigned_float(static_cast<u32>(timebar->field_18[slot])) *
@@ -21305,47 +21322,48 @@ extern "C" void NuTimeBarSetRender(i32 set) {
                     i32 text_y = static_cast<i32>(static_cast<f32>(PS2_VREZ_H) * 0.05f) * 16;
                     if (value > 9999)
                         value = 9999;
-                    text_y += static_cast<i32>(NuQFntHeight(system_qfont)) * (value > 999 ? 5 : 4);
+                    if (value > 999)
+                        text_y += static_cast<i32>(NuQFntHeight(system_qfont)) * 5;
+                    else
+                        text_y += static_cast<i32>(NuQFntHeight(system_qfont)) * 4;
                     const f32 column = static_cast<f32>(text_width) * 0.025f;
                     // Retail stacks three digits bottom-up, plus a fourth for
                     // values >= 1000; the final height query occurs either way.
                     for (i32 digit = 0; digit < 3; ++digit) {
                         text_y -= static_cast<i32>(NuQFntHeight(system_qfont));
-                        const i32 text_x =
-                            (static_cast<i32>(column) * (column_index * 3) + static_cast<i32>(column * 0.5f)) * 16;
+                        const i32 text_x = (static_cast<i32>(column) * column_x + static_cast<i32>(column * 0.5f)) * 16;
                         NuQFntPrintEx(system_qfont, text_x, text_y, 0x40, "%d", value % 10);
                         value /= 10;
                     }
                     const f32 last_height = NuQFntHeight(system_qfont);
                     if (value != 0) {
                         text_y -= static_cast<i32>(last_height);
-                        const i32 text_x =
-                            (static_cast<i32>(column) * (column_index * 3) + static_cast<i32>(column * 0.5f)) * 16;
+                        const i32 text_x = (static_cast<i32>(column) * column_x + static_cast<i32>(column * 0.5f)) * 16;
                         NuQFntPrintEx(system_qfont, text_x, text_y, 0x40, "%d", value % 10);
                     }
                 }
                 if (timebar->field_14[slot] != 0) {
                     const f32 column = static_cast<f32>(PS2_VREZ_W) * 0.025f;
-                    const i32 text_x =
-                        (static_cast<i32>(column) * (column_index * 3) + static_cast<i32>(column * 0.5f)) * 16;
+                    const i32 text_x = static_cast<i32>(column) * column_x + static_cast<i32>(column * 0.5f);
                     i32 text_y = PS2_VREZ_H * 16;
                     text_y -= static_cast<i32>(NuQFntHeight(system_qfont)) * 2;
                     text_y += static_cast<i32>(NuQFntBaseline(system_qfont));
                     if ((slot & 1) != 0)
                         text_y -= 320;
-                    NuQFntPrintEx(system_qfont, text_x, text_y, 0x40, "%d",
+                    NuQFntPrintEx(system_qfont, text_x * 16, text_y, 0x40, "%d",
                                   static_cast<i32>(timebar_unsigned_float(static_cast<u32>(timebar->field_14[slot])) *
                                                    15734.0f / 1000000.0f));
                 }
-                if (__builtin_expect(timebar->slot_names[slot] != NULL, 1)) {
+                if (timebar->slot_names[slot] != NULL) {
                     const f32 column = static_cast<f32>(PS2_VREZ_W) * 0.025f;
-                    const i32 text_x =
-                        (static_cast<i32>(column) * (column_index * 3) + static_cast<i32>(column * 0.5f)) * 16;
+                    const i32 text_x = static_cast<i32>(column) * column_x + static_cast<i32>(column * 0.5f);
                     i32 text_y = PS2_VREZ_H * 16;
                     text_y -= static_cast<i32>(NuQFntHeight(system_qfont));
                     text_y += static_cast<i32>(NuQFntBaseline(system_qfont));
-                    text_y -= (slot & 1) != 0 ? 640 : 320;
-                    NuQFntPrintEx(system_qfont, text_x, text_y, 0x40, timebar->slot_names[slot]);
+                    text_y -= 320;
+                    if ((slot & 1) != 0)
+                        text_y -= 320;
+                    NuQFntPrintEx(system_qfont, text_x * 16, text_y, 0x40, timebar->slot_names[slot]);
                 }
                 NuQFntPopPrintMode();
                 NuQFntPopCoordinateSystem();
@@ -21415,7 +21433,7 @@ f32 NuQFntPrintJustifiedRSW(RNDRSTREAM *stream, void *font_ptr, u16 *text, f32 x
     NuQFntSetScaleRS(stream, font, sx, sy);
     NuQFntSetSpaceWidth(font, space_width);
     f32 printed_space_width = NuQFntPrintLenW(font, encoded_space);
-    if (mtx != NULL)
+    if (__builtin_expect(mtx != NULL, 1))
         NuQFntSetMtx(font, mtx);
     f32 line_height = NuQFntHeight(font);
     const u16 hyphen = NuQFntEncodeUnicodeChar(font, '-');
@@ -21514,7 +21532,7 @@ f32 NuQFntPrintJustifiedRSW(RNDRSTREAM *stream, void *font_ptr, u16 *text, f32 x
                                               (scale * printed_space_width * spaces));
         }
         NuQFntMoveRS(stream, font, x, y + line_number * line_height * line_spacing, z);
-        if (mtx != NULL)
+        if (__builtin_expect(mtx != NULL, 1))
             NuQFntPrintRSW(stream, font, line, 4);
         else
             NuQFntPrintRSW(stream, font, line, 0);

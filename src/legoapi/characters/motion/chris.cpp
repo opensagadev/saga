@@ -1894,15 +1894,14 @@ static i32 CollideBoltStarFighter(BOLT_s *bolt, starfighter_s *fighter, _vuv_s *
         if (!(time <= (root - b) / (a + a)))
             return 0;
         const f32 enter = (-b - root) / (a + a);
-        if (!(enter <= 0.0f))
+        if (__builtin_expect(!(enter <= 0.0f), 0))
             return 0;
-        if (time <= enter)
-            time = enter;
+        time = time > enter ? time : enter;
         position->x += vx * time;
         position->y += vy * time;
         position->z += vz * time;
     } else {
-        if (c > 0.0f)
+        if (__builtin_expect(c > 0.0f, 0))
             return 0;
     }
     if (fighter->spline == NULL || static_cast<u32>(fighter->spline->id - 84) > 1) {

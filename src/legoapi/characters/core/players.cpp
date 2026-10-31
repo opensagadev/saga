@@ -553,7 +553,7 @@ void Player_ResetContexts(PLAYERPACKET_s *packet) {
     packet->secondary_flags &= static_cast<u8>(~0x04);
     packet->field_0x648 = 0;
 
-    const i32 random_context = qrand();
+    packet->random_context = static_cast<u8>(qrand() / 0x8000);
     packet->field_0x6a0 = 0;
     packet->field_0x6a4 = 0;
     packet->field_0x674 = 0;
@@ -567,7 +567,6 @@ void Player_ResetContexts(PLAYERPACKET_s *packet) {
     packet->movement_angle_0 = -1;
     packet->context_mode = 0;
     packet->movement_angle_2 = -1;
-    packet->random_context = static_cast<u8>(random_context / 0x8000);
     packet->movement_angle_3 = -1;
     packet->field_0x77d = 0;
     packet->linked_object = NULL;

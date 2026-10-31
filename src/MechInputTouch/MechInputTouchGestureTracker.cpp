@@ -243,30 +243,28 @@ void MechInputTouchGestureTrackingSystem::ReadData(GameObject_s &object, NuInput
 }
 
 void MechInputTouchGestureTrackingSystem::RegisterGestureTracker(MechInputTouchGestureTracker &tracker, i32 priority) {
-    GestureTrackerRegistration *entries = trackers;
-
     bool has_vacancy = false;
-    for (i32 index = 0; index < 9; ++index) {
-        has_vacancy |= entries[index].tracker == NULL;
+    for (i32 index = 0; index < 10; ++index) {
+        has_vacancy |= trackers[index].tracker == NULL;
     }
-    if (!has_vacancy && entries[9].tracker != NULL) {
+    if (!has_vacancy) {
         return;
     }
 
     i32 insertion_index;
     for (insertion_index = 0; insertion_index < 9; ++insertion_index) {
-        if (entries[insertion_index].tracker == NULL || priority < entries[insertion_index].priority) {
+        if (trackers[insertion_index].tracker == NULL || priority < trackers[insertion_index].priority) {
             break;
         }
     }
-    if (__builtin_expect(insertion_index == 9, 1)) {
+    if (insertion_index == 9) {
         return;
     }
-    for (GestureTrackerRegistration *entry = &entries[9]; entry != &entries[insertion_index]; --entry) {
-        entry[0] = entry[-1];
+    for (i32 index = 9; index != insertion_index; --index) {
+        trackers[index] = trackers[index - 1];
     }
-    entries[insertion_index].tracker = &tracker;
-    entries[insertion_index].priority = priority;
+    trackers[insertion_index].tracker = &tracker;
+    trackers[insertion_index].priority = priority;
 }
 
 void MechInputTouchGestureTrackingSystem::UnregisterGestureTracker(MechInputTouchGestureTracker &tracker) {

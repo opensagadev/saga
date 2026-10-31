@@ -1198,19 +1198,22 @@ static i32 Bolt_HitPlat(BOLT_s *bolt, u8 *hit_flags) {
     if ((bolt->hit_flags & 0x800) != 0 && GizmoSys_BoltHitPlat(WORLD->gizmo_sys, WORLD, bolt, hit_flags))
         return 1;
     GIZMOBLOWUP_s *blowup = GizmoBlowUp_FindFromPlatID(WORLD, bolt->hit_platform);
-    if (blowup != NULL && __builtin_expect((blowup->draw_flags & 0x8000) != 0, 1)) {
-        GameObject_s *owner = bolt->owner;
-        if (owner != NULL && (blowup->draw_flags & 0x80000) != 0) {
-            if ((exclude & 1) != 0 && !(owner->apiobj.character_data->game_character->field_0x28 <= 0.0f))
+    i32 found = 0;
+    if (blowup != NULL) {
+        if ((blowup->draw_flags & 0x8000) != 0) {
+            GameObject_s *owner = bolt->owner;
+            f32 hp =
+                (exclude & 1) != 0 && owner != NULL ? owner->apiobj.character_data->game_character->field_0x28 : 0.0f;
+            if (owner != NULL && __builtin_expect((blowup->draw_flags & 0x80000) != 0, 0) &&
+                (__builtin_expect(hp > 0.0f, 0) || owner->field_0xcc0 == NULL))
                 return 0;
-            if (owner->field_0xcc0 == NULL)
-                return 0;
+            if (GizmoBlowupBlowup(blowup, 1, 3, bolt->type->field_3c, NULL, 1) != 0 && bolt->owner != NULL)
+                NewRumble(bolt->owner->pad_gamepad->pad, 0.4f, 0);
+            return 1;
         }
-        if (GizmoBlowupBlowup(blowup, 1, 3, bolt->type->field_3c, NULL, 1) != 0 && bolt->owner != NULL)
-            NewRumble(bolt->owner->pad_gamepad->pad, 0.4f, 0);
-        return 1;
+        found = 1;
     }
-    if (bolt->field_0x104 != -1 && ((TerSurface[bolt->field_0x104].flags & 0x1800) != 0 || blowup != NULL)) {
+    if (bolt->field_0x104 != -1 && ((TerSurface[bolt->field_0x104].flags & 0x1800) != 0 || found)) {
         GameAudio_PlaySfx(41, &bolt->position, 0, 0);
         Bolt_AddDeflectedBolt(bolt, &bolt->field_0xac, &bolt->hit_normal, hit_flags);
         if (bolt->owner != NULL && (bolt->owner->apiobj.flags_low & 0x80) != 0) {

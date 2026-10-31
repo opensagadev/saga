@@ -65,15 +65,13 @@
 
 struct GAMECAMERA_s;
 
-static inline void MakePlayCorner(GAMECAMERA_s *camera, f32 screen_x, f32 screen_y, NUVEC *near_corner,
-                                  NUVEC *far_corner) {
-    NUVEC ray = {screen_x, screen_y, 1.0f};
-    NuVecMtxRotate(&ray, &ray, &camera->target_mtx);
-    NuVecAdd(near_corner, &ray, &camera->pos);
-    NuVecNorm(&ray, &ray);
-    far_corner->y = near_corner->y + ray.y * 5.0f;
-    far_corner->z = near_corner->z + ray.z * 5.0f;
-    far_corner->x = near_corner->x + ray.x * 5.0f;
+static inline void MakePlayCorner(GAMECAMERA_s *camera, NUVEC *ray, NUVEC *near_corner, NUVEC *far_corner) {
+    NuVecMtxRotate(ray, ray, &camera->target_mtx);
+    NuVecAdd(near_corner, ray, &camera->pos);
+    NuVecNorm(ray, ray);
+    far_corner->x = near_corner->x + ray->x * 5.0f;
+    far_corner->y = near_corner->y + ray->y * 5.0f;
+    far_corner->z = near_corner->z + ray->z * 5.0f;
 }
 
 static inline void SetPlayPlane(PLAYPLANE_s *plane, NUVEC *a, NUVEC *b, NUVEC *c, NUVEC *d, NUVEC *edge_a0,
@@ -81,8 +79,8 @@ static inline void SetPlayPlane(PLAYPLANE_s *plane, NUVEC *a, NUVEC *b, NUVEC *c
     plane->point.x = (a->x + b->x + c->x + d->x) * 0.25f;
     plane->point.y = (a->y + b->y + c->y + d->y) * 0.25f;
     plane->point.z = (a->z + b->z + c->z + d->z) * 0.25f;
-    NUVEC second_edge;
     NUVEC first_edge;
+    NUVEC second_edge;
     NuVecSub(&first_edge, edge_a0, edge_a1);
     NuVecSub(&second_edge, edge_b0, edge_b1);
     NuVecCross(&plane->normal, &first_edge, &second_edge);
@@ -231,26 +229,38 @@ void GameCam_UpdateLookRot(GAMECAMERA_s *camera) {
 }
 
 void MakePlayPlanes(GAMECAMERA_s *camera) {
-    NUVEC far_corner[4];
-    NUVEC near_corner[4];
-    MakePlayCorner(camera, -0.85f * PANEL3DMULX, 0.85f * PANEL3DMULY, &near_corner[0], &far_corner[0]);
-    MakePlayCorner(camera, 0.85f * PANEL3DMULX, 0.85f * PANEL3DMULY, &near_corner[1], &far_corner[1]);
-    MakePlayCorner(camera, -0.85f * PANEL3DMULX, -0.85f * PANEL3DMULY, &near_corner[2], &far_corner[2]);
-    MakePlayCorner(camera, 0.85f * PANEL3DMULX, -0.85f * PANEL3DMULY, &near_corner[3], &far_corner[3]);
+    NUVEC corner[4][2];
+    NUVEC ray;
+    ray.x = -0.85f * PANEL3DMULX;
+    ray.y = 0.85f * PANEL3DMULY;
+    ray.z = 1.0f;
+    MakePlayCorner(camera, &ray, &corner[0][0], &corner[0][1]);
+    ray.x = 0.85f * PANEL3DMULX;
+    ray.y = 0.85f * PANEL3DMULY;
+    ray.z = 1.0f;
+    MakePlayCorner(camera, &ray, &corner[1][0], &corner[1][1]);
+    ray.x = -0.85f * PANEL3DMULX;
+    ray.y = -0.85f * PANEL3DMULY;
+    ray.z = 1.0f;
+    MakePlayCorner(camera, &ray, &corner[2][0], &corner[2][1]);
+    ray.x = 0.85f * PANEL3DMULX;
+    ray.y = -0.85f * PANEL3DMULY;
+    ray.z = 1.0f;
+    MakePlayCorner(camera, &ray, &corner[3][0], &corner[3][1]);
 
     // Plane order is near, left, right, top, bottom, far.
-    SetPlayPlane(&PlayPlane[1], &near_corner[0], &far_corner[0], &far_corner[2], &near_corner[2], &far_corner[0],
-                 &near_corner[0], &far_corner[2], &near_corner[0]);
-    SetPlayPlane(&PlayPlane[2], &far_corner[1], &near_corner[1], &near_corner[3], &far_corner[3], &near_corner[1],
-                 &far_corner[1], &near_corner[3], &far_corner[1]);
-    SetPlayPlane(&PlayPlane[3], &near_corner[0], &near_corner[1], &far_corner[1], &far_corner[0], &near_corner[1],
-                 &near_corner[0], &far_corner[1], &near_corner[0]);
-    SetPlayPlane(&PlayPlane[4], &near_corner[2], &far_corner[2], &far_corner[3], &near_corner[3], &far_corner[2],
-                 &near_corner[2], &far_corner[3], &near_corner[2]);
-    SetPlayPlane(&PlayPlane[0], &near_corner[0], &near_corner[2], &near_corner[3], &near_corner[1], &near_corner[2],
-                 &near_corner[0], &near_corner[3], &near_corner[0]);
-    SetPlayPlane(&PlayPlane[5], &far_corner[0], &far_corner[1], &far_corner[3], &far_corner[2], &far_corner[1],
-                 &far_corner[0], &far_corner[3], &far_corner[0]);
+    SetPlayPlane(&PlayPlane[1], &corner[0][0], &corner[0][1], &corner[2][1], &corner[2][0], &corner[0][1],
+                 &corner[0][0], &corner[2][1], &corner[0][0]);
+    SetPlayPlane(&PlayPlane[2], &corner[1][1], &corner[1][0], &corner[3][0], &corner[3][1], &corner[1][0],
+                 &corner[1][1], &corner[3][0], &corner[1][1]);
+    SetPlayPlane(&PlayPlane[3], &corner[0][0], &corner[1][0], &corner[1][1], &corner[0][1], &corner[1][0],
+                 &corner[0][0], &corner[1][1], &corner[0][0]);
+    SetPlayPlane(&PlayPlane[4], &corner[2][0], &corner[2][1], &corner[3][1], &corner[3][0], &corner[2][1],
+                 &corner[2][0], &corner[3][1], &corner[2][0]);
+    SetPlayPlane(&PlayPlane[0], &corner[0][0], &corner[2][0], &corner[3][0], &corner[1][0], &corner[2][0],
+                 &corner[0][0], &corner[3][0], &corner[0][0]);
+    SetPlayPlane(&PlayPlane[5], &corner[0][1], &corner[1][1], &corner[3][1], &corner[2][1], &corner[1][1],
+                 &corner[0][1], &corner[3][1], &corner[0][1]);
 }
 
 void GameCam_NewShake(GAMECAMERA_s *camera, float amount, float duration, float speed) {

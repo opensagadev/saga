@@ -370,10 +370,8 @@ static void Grabber_Drop(GRABBER_s *grabber, NUVEC *previous_position) {
         ADDPART_s params = Default_ADDPART;
         NUMTX matrix = grabber->carried_matrix;
         NUVEC velocity;
-        NUVEC position = *Grabber_GetGrabPos(grabber, NULL);
-        matrix.m30 = position.x;
-        matrix.m31 = position.y + grabber->carried_height_offset;
-        matrix.m32 = position.z;
+        *(NUVEC *)&matrix.m30 = *Grabber_GetGrabPos(grabber, NULL);
+        matrix.m31 += grabber->carried_height_offset;
         velocity.x = ((grabber->grab_position.x - previous_position->x) / FRAMETIME) * 0.5f;
         velocity.y = -0.1f;
         velocity.z = ((grabber->grab_position.z - previous_position->z) / FRAMETIME) * 0.5f;
