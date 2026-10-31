@@ -4040,12 +4040,14 @@ extern "C" {
     i32 edpartLoadPageEx(char *path, i8 mode, nugscn_s **scenes, i32 scene_count) {
         i32 page = 0;
         if (mode != 0) {
-            for (page = 1; page < 8; ++page) {
-                if (part_page_used[page] == 0)
+            i32 p;
+            for (p = 1; p < 8; ++p) {
+                if (part_page_used[p] == 0)
                     break;
             }
-            if (page == 8)
+            if (p == 8)
                 return -1;
+            page = p;
         }
         i32 scene_slot = 0;
         for (i32 i = 0; i < scene_count; ++i) {
@@ -4075,7 +4077,7 @@ extern "C" {
         }
         i32 type_slot = 0;
         for (i32 i = 0; i < type_count; ++i) {
-            while (__builtin_expect(part_types[type_slot].name[0] != 0, 0))
+            while (part_types[type_slot].name[0] != 0)
                 ++type_slot;
             edpartLoadSingleType(&part_types[type_slot], version, page);
             if (part_types[type_slot].name[0] != 0) {
@@ -4088,7 +4090,7 @@ extern "C" {
         for (i32 i = 0; i < skipped_types; ++i)
             edpartLoadSingleType(&discarded_type, version, page);
         i32 emitter_count = EdFileReadInt();
-        if (emitter_count + part_emits_used > 40)
+        if (__builtin_expect(emitter_count + part_emits_used > 40, 0))
             emitter_count = 40 - part_emits_used;
         CheckPartCount();
         i32 emitter_slot = 0;
@@ -4132,10 +4134,14 @@ extern "C" {
         part_page_used[page] = 1;
         if (page == 0)
             part_page_on[0] = 1;
-        if (mode == 0)
+        if (mode == 0) {
             edbits_part_general_page = page;
-        else if (__builtin_expect(mode == 1, 1))
+            return page;
+        }
+        if (mode == 1) {
             edbits_part_level_page = page;
+            return page;
+        }
         return page;
     }
 

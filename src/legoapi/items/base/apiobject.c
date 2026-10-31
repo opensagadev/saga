@@ -902,16 +902,30 @@ extern "C" {
 
     void APILoadCharacterModels(APICHARACTERMODELLIST_s *list, i32 area_animation, VARIPTR *buf, VARIPTR buf_end,
                                 i32 area_models) {
-        char legacy_animation_extension[] = ".ani";
-        char animation_extension[] = ".an3";
-        char deformation_extension[] = ".bsa";
-        char animation_path[0x200];
+        char legacy_animation_extension[10];
+        char animation_extension[10];
+        char deformation_extension[10];
+        strcpy(legacy_animation_extension, ".ani");
+        strcpy(animation_extension, ".an3");
+        strcpy(deformation_extension, ".bsa");
+        char animation_path[0x100];
         APICHARACTERMODEL *model;
+        CHARACTERANIM_s *animations;
+        i32 model_index;
+        i32 animation_id;
+        i32 model_loaded;
+        void *pak;
+        ani3_animheader_s *joint_animation;
+        i32 pointer_block;
+        i32 model_id;
+        CHARACTERDATA *character;
+        i32 pak_alignment;
+        i32 item;
         if (apiloadcharactermodels_append == 0) {
             APIResetCharacterRemap();
             model = apicharsys->models;
-            for (i32 model_index = 0; model_index < apicharsys->permanent_model_count; ++model_index, ++model) {
-                for (i32 animation_id = 0; animation_id < apicharsys->model_id_capacity; ++animation_id) {
+            for (model_index = 0; model_index < apicharsys->permanent_model_count; ++model_index, ++model) {
+                for (animation_id = 0; animation_id < apicharsys->model_id_capacity; ++animation_id) {
                     if ((model->model_data_b[animation_id] != NULL || model->model_data_c[animation_id] != NULL) &&
                         (static_cast<CHARACTERANIM_s *>(model->model_data_a[animation_id])->flags & 1) == 0) {
                         model->model_data_a[animation_id] = NULL;
@@ -920,7 +934,7 @@ extern "C" {
                     }
                 }
             }
-            for (i32 model_index = apicharsys->permanent_model_count; model_index < apicharsys->model_capacity;
+            for (model_index = apicharsys->permanent_model_count; model_index < apicharsys->model_capacity;
                  ++model_index, ++model) {
                 model->hierarchy = NULL;
             }
@@ -931,34 +945,38 @@ extern "C" {
         if (list == NULL) {
             return;
         }
-        i32 model_id;
         while ((model_id = list->model_id) != -1 && apicharsys->loaded_model_count < apicharsys->model_capacity) {
-            CHARACTERDATA &character = apicharsys->char_data[model_id];
+            character = &apicharsys->char_data[model_id];
 
             char directory[0x40];
             NuStrCpy(directory, "chars\\");
-            NuStrCat(directory, character.dir);
+            NuStrCat(directory, character->dir);
             NuStrCat(directory, "\\");
 
-            char directory_pack_path[0x100];
             char model_pack_path[0x100];
-            i32 model_loaded = 0;
+            char directory_pack_path[0x100];
+            model_loaded = 0;
             if (apicharsys->playermodelids[model_id] != -1) {
                 NuStrCpy(directory_pack_path, directory);
-                NuStrCat(directory_pack_path, character.dir);
+                NuStrCat(directory_pack_path, character->dir);
                 NuStrCat(directory_pack_path, ".fpk");
                 NuStrCpy(model_pack_path, directory);
-                NuStrCat(model_pack_path, character.file);
+                NuStrCat(model_pack_path, character->file);
                 NuStrCat(model_pack_path, ".fpk");
                 model = &apicharsys->models[apicharsys->playermodelids[model_id]];
             } else {
+                do {
+                    if (area_models != 0) {
+                        break;
+                    }
+                } while (0);
                 model = &apicharsys->models[apicharsys->loaded_model_count];
                 APICharacterModelReset(model);
 
                 NuStrCpy(animation_path, directory);
                 NuStrCpy(directory_pack_path, directory);
-                NuStrCat(animation_path, character.file);
-                NuStrCat(directory_pack_path, character.dir);
+                NuStrCat(animation_path, character->file);
+                NuStrCat(directory_pack_path, character->dir);
                 NuStrCpy(model_pack_path, animation_path);
                 NuStrCat(model_pack_path, ".fpk");
                 NuStrCat(directory_pack_path, ".fpk");
@@ -969,27 +987,26 @@ extern "C" {
                     ++list;
                     continue;
                 }
-                for (i32 poi = 0; poi < 16; ++poi) {
-                    model->points_of_interest[poi] = NuHGobjGetPOI(model->hierarchy, poi);
+                for (model_index = 0; model_index < 16; ++model_index) {
+                    model->points_of_interest[model_index] = NuHGobjGetPOI(model->hierarchy, model_index);
                 }
                 model_loaded = 1;
             }
 
-            CHARACTERANIM_s *animations;
             if (area_models != 0 && list->count != 0) {
                 animations = apicharsys->char_data[model_id].animations;
             } else {
                 animations = NULL;
             }
-            void *pak;
             if (apiloadcharactermodels_nopakfile != 0) {
                 pak = NULL;
             } else {
-                i32 pak_alignment = 0x10;
-                NuStrCpy(animation_path, directory_pack_path);
-                pak = NuFilePakLoad(animation_path, buf, buf_end, pak_alignment);
+                pak_alignment = 0x10;
+                char pak_path[0x100];
+                NuStrCpy(pak_path, directory_pack_path);
+                pak = NuFilePakLoad(pak_path, buf, buf_end, pak_alignment);
                 if (pak == NULL) {
-                    NuStrCpy(animation_path, model_pack_path);
+                    NuStrCpy(pak_path, model_pack_path);
                     pak = NuFilePakLoad(model_pack_path, buf, buf_end, pak_alignment);
                 }
             }
@@ -999,7 +1016,7 @@ extern "C" {
                     if ((animations->flags & 0x8000) == 0 && ((area_animation != 0 && (animations->flags & 1) != 0) ||
                                                               (area_animation == 0 && (animations->flags & 1) == 0))) {
                         if ((animations->flags & 4) != 0 && model->model_data_b[animations->animation_id] == NULL) {
-                            i32 item = 0;
+                            item = 0;
                             if (RedirectAnimFn == NULL ||
                                 RedirectAnimFn(RedirectAnimDir, RedirectAnimList, animations, animation_path) == 0) {
                                 NuStrCpy(animation_path, directory);
@@ -1012,7 +1029,7 @@ extern "C" {
                             }
                         }
                         if ((animations->flags & 8) != 0 && model->model_data_c[animations->animation_id] == NULL) {
-                            i32 item = 0;
+                            item = 0;
                             if (RedirectAnimFn == NULL ||
                                 RedirectAnimFn(RedirectAnimDir, RedirectAnimList, animations, animation_path) == 0) {
                                 NuStrCpy(animation_path, directory);
@@ -1037,7 +1054,7 @@ extern "C" {
                     if ((animations->flags & 0x8000) == 0 && ((area_animation != 0 && (animations->flags & 1) != 0) ||
                                                               (area_animation == 0 && (animations->flags & 1) == 0))) {
                         if ((animations->flags & 4) != 0 && model->model_data_b[animations->animation_id] == NULL) {
-                            i32 item = 0;
+                            item = 0;
                             if (RedirectAnimFn == NULL ||
                                 RedirectAnimFn(RedirectAnimDir, RedirectAnimList, animations, animation_path) == 0) {
                                 NuStrCpy(animation_path, directory);
@@ -1049,11 +1066,10 @@ extern "C" {
                             i32 size;
                             if (item != 0) {
                                 if (NuFilePakGetItemInfo(pak, item, &data, &size) != 0) {
-                                    i32 pointer_block = 0;
+                                    pointer_block = 0;
                                     if (static_cast<i32 *>(data)[1] > static_cast<i32>(0x414e4934)) {
                                         pointer_block = 1;
                                     }
-                                    ani3_animheader_s *joint_animation;
                                     if (pointer_block) {
                                         joint_animation =
                                             reinterpret_cast<ani3_animheader_s *>(static_cast<u8 *>(data) + 4);
@@ -1074,7 +1090,7 @@ extern "C" {
                             }
                         }
                         if ((animations->flags & 8) != 0 && model->model_data_c[animations->animation_id] == NULL) {
-                            i32 item = 0;
+                            item = 0;
                             if (RedirectAnimFn == NULL ||
                                 RedirectAnimFn(RedirectAnimDir, RedirectAnimList, animations, animation_path) == 0) {
                                 NuStrCpy(animation_path, directory);
@@ -1143,11 +1159,11 @@ extern "C" {
 
             if (model_loaded) {
                 model->model_id = model_id;
-                model->flags = (model->flags & ~1) | (area_models != 0 && list->count != 0 ? 1 : 0);
+                model->flag_0 = area_models != 0 && list->count != 0 ? 1 : 0;
                 apicharsys->playermodelids[model_id] = apicharsys->loaded_model_count;
                 if (area_animation != 0) {
                     ++apicharsys->permanent_model_count;
-                    character.model_flags |= 2;
+                    character->model_flags |= 2;
                 }
                 ++apicharsys->loaded_model_count;
             }

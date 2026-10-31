@@ -376,15 +376,10 @@ extern "C" {
 extern "C" void NuMtlSetRenderStatesPS(numtl_s *mtl) {
     bool isDebris = (mtl->shader_desc.vtx_desc.flags & 0x100000) != 0;
 
-    if (isDebris) {
-        // Debris materials force a minimal alpha-test.
-        g_alphaTestEnabled = 1;
-        g_alphaFunc = 6;
-        g_alphaRef = 2;
-    } else {
+    if (!(isDebris)) {
         u32 alphaSel = mtl->attribs.alpha_test; // (bytes[0x42]>>4)&7
         if (__builtin_expect(alphaSel > 1, 0)) {
-            if (alphaSel != 5) {
+            if (__builtin_expect(alphaSel != 5, 0)) {
                 g_alphaTestEnabled = 1; // GREATER
                 g_alphaFunc = 6;
                 g_alphaRef = 0;
@@ -396,6 +391,11 @@ extern "C" void NuMtlSetRenderStatesPS(numtl_s *mtl) {
         } else if (g_alphaTestEnabled != 0) {
             g_alphaTestEnabled = 0;
         }
+    } else {
+        // Debris materials force a minimal alpha-test.
+        g_alphaTestEnabled = 1;
+        g_alphaFunc = 6;
+        g_alphaRef = 2;
     }
 
     u32 alphaRef = mtl->attribs.alpha_ref;

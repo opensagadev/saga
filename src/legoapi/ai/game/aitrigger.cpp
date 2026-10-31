@@ -215,7 +215,7 @@ void AITriggerSetSysProcess(AITRIGGERSETSYS_s *system) {
                         (obstacle->anim_set->state == 3 || obstacle->anim_set->state == 0 ||
                          obstacle->anim_set->state == 4))
                         set->field_0x20e &= ~(1u << index);
-                } else if ((obstacle->progress_flags & 3) != 3) {
+                } else if (__builtin_expect((obstacle->progress_flags & 3) != 3, 1)) {
                     release = true;
                 }
             } else if (gizmo->type_id == spinner_gizmotype_id) {
@@ -359,7 +359,7 @@ void AITriggerSetSysProcess(AITRIGGERSETSYS_s *system) {
                         system->field_0x42c0[best] = index;
                     }
                 }
-                if (__builtin_expect(set->trigger_indices[index] != -1, 1))
+                if (set->trigger_indices[index] != -1)
                     ++assigned_count;
             }
         } else if (has_assignments) {

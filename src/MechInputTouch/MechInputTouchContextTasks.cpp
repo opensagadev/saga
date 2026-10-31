@@ -904,30 +904,29 @@ void MechTouchTaskPlannedGoTo::SetupForAnalysis() {
         path_count = estimated_points;
     }
     path_points = new VuVec[path_count + 1];
-    const volatile VuVec &zero = VuVec_Zero;
-    const f32 zero_x = zero.x;
-    const f32 zero_y = zero.y;
-    const f32 zero_z = zero.z;
-    const f32 zero_w = zero.w;
     for (i32 i = 0; i <= path_count; ++i) {
-        path_points[i].y = zero_y;
-        path_points[i].x = zero_x;
-        path_points[i].z = zero_z;
+        VuVec *point = &path_points[i];
+        point->x = VuVec_Zero.x;
+        point->y = VuVec_Zero.y;
+        point->z = VuVec_Zero.z;
+        point->w = VuVec_Zero.w;
         path_points[i].y = -1000000000.0f;
-        path_points[i].w = zero_w;
     }
     path_points[0] = origin;
     start_position = origin;
     path_index = 1;
-    step_x = dx / static_cast<f32>(path_count);
-    step_z = dz / static_cast<f32>(path_count);
+    const f32 sx = dx / static_cast<f32>(path_count);
+    const f32 sz = dz / static_cast<f32>(path_count);
+    const GAMECHARACTERDATA *character = player->apiobj.character_data->game_character;
+    const f32 height =
+        -(character->jump_speed * character->jump_speed) / (character->gravity + character->gravity) * 1.5f + 0.01f;
     last_index = -1;
     field_20 = 0;
     analysis_state = 0;
     field_6ff = 1;
-    const GAMECHARACTERDATA *character = player->apiobj.character_data->game_character;
-    step_y =
-        -(character->jump_speed * character->jump_speed) / (character->gravity + character->gravity) * 1.5f + 0.01f;
+    step_x = sx;
+    step_z = sz;
+    step_y = height;
     start_position.y += step_y;
     if (completion != NULL) {
         *completion = true;

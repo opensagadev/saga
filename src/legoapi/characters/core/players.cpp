@@ -767,7 +767,7 @@ void Player_ToggleCharacter(GameObject_s *object, i32 direction, i32 sound) {
             if (__builtin_expect(--index == -1, 0)) {
                 index = apicharsys->loaded_model_count - 1;
             }
-        } else if (++index == apicharsys->loaded_model_count) {
+        } else if (__builtin_expect(++index == apicharsys->loaded_model_count, 0)) {
             index = 0;
         }
         id = apicharsys->models[index].model_id;

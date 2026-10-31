@@ -1391,16 +1391,6 @@ void DebrisProcessAllocation();
 
 static i32 control_stack_lock;
 
-static particlechunkrendertype_s *FindParticleRenderChunk(dma_particle_chunk_s *particle_chunk) {
-    const i32 count = debrischunks + debrischunksglass;
-    for (i32 i = 0; i < count; ++i) {
-        if (ParticleChunkToRender[i].particle_chunk == particle_chunk) {
-            return &ParticleChunkToRender[i];
-        }
-    }
-    return NULL;
-}
-
 static void ReleaseChunkControl(debris_chunk_control_s *control) {
     --freechunkcontrolsptr;
     freechunkcontrols[freechunkcontrolsptr] = control;
@@ -10297,7 +10287,7 @@ void DebrisProcessControlChunks(i32 panel_time) {
             const f32 time = control->collision_time;
             const f32 old_y = particle->momentum.y;
             const f32 gravity_velocity = 2.0f * (time * effect->field_0a0);
-            const f32 new_y = -control->restitution * (gravity_velocity + old_y) - gravity_velocity;
+            const f32 new_y = -control->restitution * (old_y + gravity_velocity) - gravity_velocity;
             particle->momentum.y = new_y;
             particle->position.y -= time * new_y - time * old_y;
             f32 first, second;
@@ -10393,25 +10383,23 @@ void DebrisProcessControlChunks(i32 panel_time) {
         }
 
         if (control->active == 0 || control->active == 7) {
-            particlechunkrendertype_s *render = FindParticleRenderChunk(control->particle_chunk);
-            if (render != NULL) {
-                const i32 render_index = render - ParticleChunkToRender;
-                RemoveChunkFromRenderStack(render, &ParticleChunkRenderStack[render->effect->time_group]);
-                render = &ParticleChunkToRender[render_index];
-                render->particle_chunk = NULL;
-                render->effect = NULL;
-                render->key = NULL;
+            const i32 render_count = debrischunks + debrischunksglass;
+            for (i32 i = 0; i < render_count; ++i) {
+                if (ParticleChunkToRender[i].particle_chunk == control->particle_chunk) {
+                    RemoveChunkFromRenderStack(&ParticleChunkToRender[i],
+                                               &ParticleChunkRenderStack[ParticleChunkToRender[i].effect->time_group]);
+                    ParticleChunkToRender[i].particle_chunk = NULL;
+                    ParticleChunkToRender[i].effect = NULL;
+                    ParticleChunkToRender[i].key = NULL;
+                    break;
+                }
             }
             control->expiry_time += 0.1f;
             if (control->active == 0)
                 control->active = 2;
             else if (__builtin_expect(control->active == 7, 0))
                 control->active = 9;
-            AddChunkControlToStack(control, &debris_chunk_control_stack[panel_time]);
-            continue;
-        }
-
-        if (control->active == 1) {
+        } else if (control->active == 1) {
             debinftype *effect = debtab[control->owner->effect_index];
             i32 chunk_index = 0;
             for (i32 i = 0; i < control->owner->allocated_chunk_count; ++i) {
@@ -10421,11 +10409,10 @@ void DebrisProcessControlChunks(i32 panel_time) {
                 }
             }
 
-            const i32 old_chunk_count = control->owner->allocated_chunk_count;
-            for (i32 i = chunk_index; i + 1 < old_chunk_count; ++i) {
-                control->owner->particle_chunks[i] = control->owner->particle_chunks[i + 1];
+            for (i32 i = chunk_index; i < control->owner->allocated_chunk_count - 1; ++i) {
+                ((void **)control->owner->particle_chunks)[i] = ((void **)control->owner->particle_chunks)[i + 1];
             }
-            control->owner->particle_chunks[old_chunk_count - 1] = NULL;
+            (*(void *(*)[32])control->owner->particle_chunks)[control->owner->allocated_chunk_count - 1] = NULL;
             --control->owner->previous_allocated_chunk_count;
             --control->owner->controlled_chunk_count;
             --control->owner->allocated_chunk_count;
@@ -10440,7 +10427,7 @@ void DebrisProcessControlChunks(i32 panel_time) {
                 } else {
                     control->owner->particle_count -= 32;
                     control->owner->previous_particle_count -= 32;
-                    if (__builtin_expect(control->owner->field_18a > (chunk_index + 1) * 32, 1)) {
+                    if (control->owner->field_18a > (chunk_index + 1) * 32) {
                         control->owner->field_18a -= 32;
                     }
                 }
@@ -10500,7 +10487,7 @@ void DebrisProcessControlChunks(i32 panel_time) {
                 }
                 {
                     const i16 key_index = effect->particle_keys[5];
-                    if (__builtin_expect(key_index != -1 && &debkeydata[key_index] == control->owner, 1)) {
+                    if (key_index != -1 && &debkeydata[key_index] == control->owner) {
                         control->owner->effect_index = 0;
                         control->owner->allocation_index = -1;
                         --freedebkeyptr;
@@ -10532,15 +10519,17 @@ void DebrisProcessControlChunks(i32 panel_time) {
             }
 
             if (chunk_index == 0) {
-                particlechunkrendertype_s *render_chunk = FindParticleRenderChunk(control->particle_chunk);
-                if (render_chunk != NULL) {
-                    render_chunk->particle_chunk = control->owner->particle_chunks[0];
-                    if (control->owner->allocated_chunk_count == 0) {
-                        const i32 render_index = render_chunk - ParticleChunkToRender;
-                        RemoveChunkFromRenderStack(render_chunk, &ParticleChunkRenderStack[effect->time_group]);
-                        render_chunk = &ParticleChunkToRender[render_index];
-                        render_chunk->effect = NULL;
-                        render_chunk->key = NULL;
+                const i32 render_count = debrischunks + debrischunksglass;
+                for (i32 i = 0; i < render_count; ++i) {
+                    if (ParticleChunkToRender[i].particle_chunk == control->particle_chunk) {
+                        ParticleChunkToRender[i].particle_chunk = control->owner->particle_chunks[0];
+                        if (control->owner->allocated_chunk_count == 0) {
+                            RemoveChunkFromRenderStack(&ParticleChunkToRender[i],
+                                                       &ParticleChunkRenderStack[effect->time_group]);
+                            ParticleChunkToRender[i].effect = NULL;
+                            ParticleChunkToRender[i].key = NULL;
+                        }
+                        break;
                     }
                 }
             }
@@ -10551,11 +10540,11 @@ void DebrisProcessControlChunks(i32 panel_time) {
             } else {
                 control->active = 2;
             }
-            AddChunkControlToStack(control, &debris_chunk_control_stack[panel_time]);
+        } else {
+            // Unrecognized control states are removed from the active stack in the original.
             continue;
         }
-
-        // Unrecognized control states are removed from the active stack in the original.
+        AddChunkControlToStack(control, &debris_chunk_control_stack[panel_time]);
     }
     DebrisReleaseControlStackLock();
 }
@@ -13552,8 +13541,7 @@ void edgraCalculatePage(char page, i32 calculate_vectors) {
         edgra_page_on[page_index])
         return;
     NUMTX *matrix = edgra_page_matrix_stack[page_index];
-    i32 max_clumps = EDGRA_MAX_CLUMPS;
-    for (i32 clump_index = 0; clump_index < max_clumps; ++clump_index) {
+    for (i32 clump_index = 0; clump_index < EDGRA_MAX_CLUMPS; ++clump_index) {
         const i32 count = GrassClumps[clump_index].element_count;
         if (count == 0 || static_cast<i8>(GrassClumps[clump_index].page) != page)
             continue;
@@ -13579,7 +13567,7 @@ void edgraCalculatePage(char page, i32 calculate_vectors) {
 
                 switch (static_cast<i8>(GrassClumps[clump_index].unknown_25)) {
                     case 1: {
-                        u32 angle = NuRandIntSeeded(&seed) & 0xffff;
+                        i32 angle = NuRandIntSeeded(&seed) & 0xffff;
                         f32 radius = NuRandFloatSeeded(&seed) * GrassClumps[clump_index].size;
                         offset.y = 0.0f;
                         offset.x = NU_SIN_LUT(angle) * radius;
@@ -13590,7 +13578,7 @@ void edgraCalculatePage(char page, i32 calculate_vectors) {
                         break;
                     }
                     case 2: {
-                        u32 angle = NuRandIntSeeded(&seed) & 0xffff;
+                        i32 angle = NuRandIntSeeded(&seed) & 0xffff;
                         f32 radius = NuRandFloatSeeded(&seed) * GrassClumps[clump_index].size;
                         offset.y = 0.0f;
                         offset.x = radius * NU_SIN_LUT(angle);
@@ -13599,8 +13587,8 @@ void edgraCalculatePage(char page, i32 calculate_vectors) {
                         break;
                     }
                     case 3:
-                        offset.y = 0.0f;
                         offset.x = (NuRandFloatSeeded(&seed) * 2.0f - 1.0f) * GrassClumps[clump_index].size;
+                        offset.y = 0.0f;
                         offset.z = (NuRandFloatSeeded(&seed) * 2.0f - 1.0f) * GrassClumps[clump_index].size;
                         sample.w = NuFsqrt(offset.x * offset.x + offset.z * offset.z);
                         break;
@@ -13622,15 +13610,16 @@ void edgraCalculatePage(char page, i32 calculate_vectors) {
                 }
                 NuVecRotateZ(&offset, &offset, GrassClumps[clump_index].rotation_z);
                 NuVecRotateY(&offset, &offset, GrassClumps[clump_index].rotation_y);
-                sample.z = offset.z;
                 sample.x = offset.x;
                 sample.y = offset.y;
+                sample.z = offset.z;
             }
         translate_sample:
-            sample.x += GrassClumps[clump_index].position.x;
-            sample.y += GrassClumps[clump_index].position.y;
-            sample.z += GrassClumps[clump_index].position.z;
-            if (GrassClumps[clump_index].kind == 3) {
+            const bool individual_kind = GrassClumps[clump_index].kind == 3;
+            samples[element].x += GrassClumps[clump_index].position.x;
+            samples[element].y += GrassClumps[clump_index].position.y;
+            samples[element].z += GrassClumps[clump_index].position.z;
+            if (individual_kind) {
                 edgra_individual_s *individual = GetIndGrassClump(GrassClumps[clump_index].individual_index, element);
                 sample.w =
                     (GrassClumps[clump_index].field_30 - GrassClumps[clump_index].field_2c) * individual->field_0c +
@@ -13663,8 +13652,8 @@ void edgraCalculatePage(char page, i32 calculate_vectors) {
                         f32 limited =
                             sample.w < GrassClumps[clump_index].size ? sample.w : GrassClumps[clump_index].size;
                         i32 angle = static_cast<i32>((limited / GrassClumps[clump_index].size) * 16384.0f);
-                        sample.w = (GrassClumps[clump_index].field_30 - GrassClumps[clump_index].field_2c) *
-                                       NU_COS_LUT(angle) +
+                        sample.w = NU_COS_LUT(angle) *
+                                       (GrassClumps[clump_index].field_30 - GrassClumps[clump_index].field_2c) +
                                    GrassClumps[clump_index].field_2c;
                         break;
                     }
@@ -13685,9 +13674,11 @@ void edgraCalculatePage(char page, i32 calculate_vectors) {
             position.z = sample.z;
             position.y = sample.y;
             if (GrassClumps[clump_index].kind == 3) {
-                if (terrain_enabled && calculate_vectors)
-                    static_cast<NUVEC *>(GrassClumps[clump_index].vector_buffer)[element] =
-                        NuFadeObjGetAngleTerrainValues(&position);
+                if (terrain_enabled) {
+                    if (calculate_vectors)
+                        static_cast<NUVEC *>(GrassClumps[clump_index].vector_buffer)[element] =
+                            NuFadeObjGetAngleTerrainValues(&position);
+                }
                 NuMtxSetIdentity(element_matrix);
                 NuMtxRotateZ(element_matrix,
                              GetIndGrassClump(GrassClumps[clump_index].individual_index, element)->field_10);
@@ -13707,9 +13698,11 @@ void edgraCalculatePage(char page, i32 calculate_vectors) {
                         terrain_height + static_cast<NUVEC *>(GrassClumps[clump_index].vector_buffer)[element].y;
                 NuMtxTranslate(element_matrix, &position);
             } else {
-                if (terrain_enabled && calculate_vectors)
-                    static_cast<NUVEC *>(GrassClumps[clump_index].vector_buffer)[element] =
-                        NuFadeObjGetAngleTerrainValues(&position);
+                if (terrain_enabled) {
+                    if (calculate_vectors)
+                        static_cast<NUVEC *>(GrassClumps[clump_index].vector_buffer)[element] =
+                            NuFadeObjGetAngleTerrainValues(&position);
+                }
                 NuMtxSetIdentity(element_matrix);
                 NuMtxPreRotateY(element_matrix, static_cast<u16>(NuRandIntSeeded(&seed)));
                 if (terrain_rotation) {
@@ -13725,12 +13718,11 @@ void edgraCalculatePage(char page, i32 calculate_vectors) {
                     position.y =
                         terrain_height + static_cast<NUVEC *>(GrassClumps[clump_index].vector_buffer)[element].y;
                 NuMtxTranslate(element_matrix, &position);
-                if (__builtin_expect(GrassClumps[clump_index].kind == 1, 0))
+                if (GrassClumps[clump_index].kind == 1)
                     element_matrix->m33 = GrassClumps[clump_index].field_18 * sample.w;
             }
             ++element_matrix;
         }
-        max_clumps = EDGRA_MAX_CLUMPS;
         matrix += element;
         GrassClumps[clump_index].matrices = matrix_start;
     }
@@ -20765,10 +20757,10 @@ void ScanTerrain(i32 scan_type, i32 terrain_mask, i32 scan_flags) {
                 }
                 if (!(rotating)) {
                     TERRAIN_SHAPE_BATCH *batch = static_cast<TERRAIN_SHAPE_BATCH *>(group.data);
-                    while (batch->marker >= 0) {
+                    while (__builtin_expect(batch->marker >= 0, 1)) {
                         TERRAIN_SHAPE *shapes = reinterpret_cast<TERRAIN_SHAPE *>(batch + 1);
-                        if ((local_max_x >= batch->min_x && batch->max_x > local_min_x && local_max_z >= batch->min_z &&
-                             batch->max_z > local_min_z)) {
+                        if (__builtin_expect((local_max_x >= batch->min_x && batch->max_x > local_min_x && local_max_z >= batch->min_z &&
+                             batch->max_z > local_min_z) != 0, 0)) {
                             for (i32 i = 0; i < batch->shape_count; ++i) {
                                 TERRAIN_SHAPE *shape = &shapes[i];
                                 if (!(local_max_x >= shape->min_x && shape->max_x > local_min_x &&

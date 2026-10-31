@@ -467,11 +467,14 @@ static void GizAction_SetAIMessage(GIZFLOW_s *, FLOWBOX_s *, char **params, int 
 
 static void GizAction_ChangeTechnoTgt(GIZFLOW_s *, FLOWBOX_s *, char **params, int count) {
     if (!(count <= 0)) {
-        char *target_name = NULL;
         char *techno_name = NULL;
+        char *target_name = NULL;
+        i32 index = 0;
         i32 target_kind = 0;
         u8 movement = 0xff;
-        for (i32 index = 0; index < count; ++index) {
+        char old_name[16];
+        GameObject_s *operator_object;
+        for (; index < count; ++index) {
             char *value = NuStrIStr(params[index], "techno=");
             if (value != NULL) {
                 techno_name = value + NuStrLen("techno=");
@@ -495,7 +498,7 @@ static void GizAction_ChangeTechnoTgt(GIZFLOW_s *, FLOWBOX_s *, char **params, i
                 target_kind = -1;
             }
         }
-        if (techno_name == NULL || (target_kind != -1 && target_name == NULL)) {
+        if (techno_name == NULL || (target_name == NULL && target_kind != -1)) {
             return;
         }
         i32 type_id = GizmoGetTypeIDByName(WORLD->gizmo_sys, "Techno");
@@ -508,7 +511,7 @@ static void GizAction_ChangeTechnoTgt(GIZFLOW_s *, FLOWBOX_s *, char **params, i
             techno->enabled = movement;
         }
         if (target_kind == -1) {
-            GameObject_s *operator_object = NULL;
+            operator_object = NULL;
             Techno_FindOperator(techno->controlled_object, NULL, &operator_object);
             techno->controlled_object = NULL;
             NuStrCpy(techno->target_name, "");
@@ -518,10 +521,9 @@ static void GizAction_ChangeTechnoTgt(GIZFLOW_s *, FLOWBOX_s *, char **params, i
                 operator_object->character_context = -1;
             }
         }
-        char old_name[16];
+        void *old_controlled = techno->controlled_object;
         NuStrCpy(old_name, techno->target_name);
         i32 old_complete = (techno->flags & TECHNO_FLAG_COMPLETE) != 0;
-        void *old_controlled = techno->controlled_object;
         techno->controlled_object = NULL;
         NuStrNCpy(techno->target_name, target_name, 16);
         techno->target_mode = static_cast<u8>(target_kind);

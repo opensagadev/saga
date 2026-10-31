@@ -983,7 +983,7 @@ static i32 ProcessStarFighter(starfighter_s *fighter, quickboltinfo *info) {
             fighter->target_id = target_id;
         }
     }
-    if (fighter->model_id == -307)
+    if (__builtin_expect(fighter->model_id == -307, 1))
         return 1;
     if (fighter->fired != 0 && fighter->aim_bias > 0.0f)
         fighter->aim_bias -= FRAMETIME + FRAMETIME;

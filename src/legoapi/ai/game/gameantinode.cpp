@@ -74,14 +74,14 @@ void GameAntinode_Update(GAMEANTINODESYS_s *system) {
         next = node->next;
         if (__builtin_expect(!(node->remaining_time <= 0.0f), 1)) {
             node->remaining_time -= FRAMETIME;
-            if (__builtin_expect(node->remaining_time <= 0.0f, 0)) {
+            if (node->remaining_time <= 0.0f) {
                 GameAntinode_UnregisterAntiNode(system, node);
                 continue;
             }
         }
         if (GameAntinode_IsOccupied(node)) {
             AIANTINODE_s *active = AIAntinodeCreateSingleFrame(&node->position, node->radius);
-            if (active != NULL) {
+            if (__builtin_expect(active != NULL, 0)) {
                 active->base_radius = node->extent_x;
                 active->base_height = node->extent_z;
                 active->type = node->shape;

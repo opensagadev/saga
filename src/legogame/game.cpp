@@ -2941,7 +2941,7 @@ static void PartCollide(PART_s *part, i32 three_dimensional) {
             if (part->owner == object) {
                 if (__builtin_expect(part->scale_time < 0.5f, 1))
                     continue;
-            } else if (api->field_0x27c != -1 && part->scale_time < 0.25f)
+            } else if (__builtin_expect(api->field_0x27c != -1 && part->scale_time < 0.25f, 0))
                 continue;
         } else if ((part->flags & 0x8000) == 0 && part->owner == object)
             continue;
@@ -3007,7 +3007,7 @@ static void PartCollide(PART_s *part, i32 three_dimensional) {
                 api->velocity.x += direction.x * speed;
                 api->velocity.z += direction.z * speed;
             }
-            if ((part->flags & 0x2000000) != 0 && ((part->flags & 0x4000000) == 0 || (part->active & 2) != 0)) {
+            if (__builtin_expect((part->flags & 0x2000000) != 0 && ((part->flags & 0x4000000) == 0 || (part->active & 2) != 0), 1)) {
                 u16 angle = NuAtan2D(api->position.x - part->position.x, api->position.z - part->position.z);
                 f32 speed = static_cast<GAMECHARACTERDATA_s *>(api->character_data->field11_0x24)->run_speed;
                 api->field_0x1fc = NU_SIN_LUT(angle) * speed;

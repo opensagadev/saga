@@ -389,16 +389,20 @@ void UpdateRippleSet(ripple_set_s *set) {
 
 void DrawRipple(ripple_node_s *node) {
     NURND_VERTEX3D vertices[4];
-    vertices[0].position = {0.0f, node->size, 0.0f};
-    vertices[1].position = {-node->size, 0.0f, 0.0f};
-    vertices[2].position = {node->size, -0.0f, 0.0f};
-    vertices[3].position = {-0.0f, -node->size, 0.0f};
+    f32 p0[3] = {0.0f, node->size, 0.0f};
+    f32 p1[3] = {-node->size, 0.0f, 0.0f};
+    f32 p3[3] = {-0.0f, -node->size, 0.0f};
+    f32 p2[3] = {node->size, -0.0f, 0.0f};
+    memcpy(&vertices[0].position, p0, sizeof(NUVEC));
     vertices[0].u = 1.0f;
     vertices[0].v = 0.0f;
+    memcpy(&vertices[1].position, p1, sizeof(NUVEC));
     vertices[1].u = 0.0f;
     vertices[1].v = 0.0f;
+    memcpy(&vertices[2].position, p2, sizeof(NUVEC));
     vertices[2].u = 1.0f;
     vertices[2].v = 1.0f;
+    memcpy(&vertices[3].position, p3, sizeof(NUVEC));
     vertices[3].u = 1.0f;
     vertices[3].v = 0.0f;
     vertices[0].colour = node->color.value;

@@ -697,7 +697,7 @@ void ManageGameObjects() {
                     i64 mask = static_cast<i32>(1u << (area & 31));
                     if (__builtin_expect(player == NULL || (player->apiobj.ai_area_mask & mask) == 0 ||
                         Game.difficulty < creature->activation_difficulty, 1)) {
-                        if (creature->count > 1 && __builtin_expect(!(creature->start_stagger <= 0.0f), 0))
+                        if (__builtin_expect(creature->count > 1 && __builtin_expect(!(creature->start_stagger <= 0.0f), 0), 1))
                             object->ai_spawn_delay = static_cast<f32>(static_cast<u32>(object->ai.group_member_index)) *
                                                      creature->start_stagger;
                         continue;

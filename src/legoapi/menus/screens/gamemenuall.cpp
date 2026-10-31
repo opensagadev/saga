@@ -2546,7 +2546,7 @@ extern "C" {
         i32 dest_pos = 0;
         const unsigned char *text = reinterpret_cast<unsigned char *>(source);
         do {
-            if (text[source_pos] == '\0')
+            if (__builtin_expect(text[source_pos] == '\0', 0))
                 break;
             if (text[source_pos] == '[' && text[source_pos + 1] == '[') {
                 source_pos += 2;
@@ -2566,32 +2566,41 @@ extern "C" {
 
             // Wide CJK punctuation is followed by a space so that lines can break after it.
             if (text[source_pos] == 0xe3 && text[source_pos + 1] == 0x80) {
-                switch (text[source_pos + 2]) {
-                    case 0x80:
-                        dest[dest_pos++] = ' ';
-                        source_pos += 3;
-                        continue;
-                    case 0x81:
-                    case 0x82:
-                    case 0x85:
-                        dest[dest_pos] = 0xe3;
-                        dest[dest_pos + 1] = text[source_pos + 1];
-                        dest[dest_pos + 2] = text[source_pos + 2];
-                        dest[dest_pos + 3] = ' ';
-                        dest_pos += 4;
-                        source_pos += 3;
-                        continue;
+                if (text[source_pos + 2] == 0x80) {
+                    dest[dest_pos++] = ' ';
+                    source_pos += 3;
+                    continue;
                 }
-            } else if (text[source_pos] == 0xef && text[source_pos + 1] == 0xbc) {
+                if (text[source_pos + 2] == 0x81) {
+                    dest[dest_pos++] = text[source_pos++];
+                    dest[dest_pos++] = text[source_pos++];
+                    dest[dest_pos++] = text[source_pos++];
+                    dest[dest_pos++] = ' ';
+                    continue;
+                }
+                if (text[source_pos + 2] == 0x82) {
+                    dest[dest_pos++] = text[source_pos++];
+                    dest[dest_pos++] = text[source_pos++];
+                    dest[dest_pos++] = text[source_pos++];
+                    dest[dest_pos++] = ' ';
+                    continue;
+                }
+                if (text[source_pos + 2] == 0x85) {
+                    dest[dest_pos++] = text[source_pos++];
+                    dest[dest_pos++] = text[source_pos++];
+                    dest[dest_pos++] = text[source_pos++];
+                    dest[dest_pos++] = ' ';
+                    continue;
+                }
+            }
+            if (text[source_pos] == 0xef && text[source_pos + 1] == 0xbc) {
                 switch (text[source_pos + 2]) {
                     case 0x81:
                     case 0x9f:
-                        dest[dest_pos] = 0xef;
-                        dest[dest_pos + 1] = text[source_pos + 1];
-                        dest[dest_pos + 2] = text[source_pos + 2];
-                        dest[dest_pos + 3] = ' ';
-                        dest_pos += 4;
-                        source_pos += 3;
+                        dest[dest_pos++] = text[source_pos++];
+                        dest[dest_pos++] = text[source_pos++];
+                        dest[dest_pos++] = text[source_pos++];
+                        dest[dest_pos++] = ' ';
                         continue;
                 }
             }
@@ -2846,8 +2855,8 @@ void APIMenuDrawMemCardSlots(MENU *menu, f32 y) {
         }
         const f32 right_offset = slideright * 0.5f / 10.0f;
         const f32 left_offset = slideleft * 0.5f / 10.0f;
-        last = slideright != 0 ? menu->selected_column + 2 : menu->selected_column + 1;
-        first = slideleft != 0 ? menu->selected_column - 2 : menu->selected_column - 1;
+        last = slideright == 0 ? menu->selected_column + 1 : menu->selected_column + 2;
+        first = slideleft == 0 ? menu->selected_column - 1 : menu->selected_column - 2;
         if (count > 6) {
             count = memcard_slotsused;
         }
@@ -2903,14 +2912,14 @@ void APIMenuDrawMemCardSlots(MENU *menu, f32 y) {
             red = MenuSlotColourLerp(MENUFLASH0R, MENUFLASH1R, menu_pulsate);
             green = MenuSlotColourLerp(MENUFLASH0G, MENUFLASH1G, menu_pulsate);
             blue = MenuSlotColourLerp(MENUFLASH0B, MENUFLASH1B, menu_pulsate);
-        } else if (__builtin_expect(menu_flash != 0, 0)) {
+        } else if (menu_flash != 0) {
             red = MENUFLASH0R;
-            blue = MENUFLASH0B;
             green = MENUFLASH0G;
+            blue = MENUFLASH0B;
         } else {
             red = MENUFLASH1R;
-            blue = MENUFLASH1B;
             green = MENUFLASH1G;
+            blue = MENUFLASH1B;
         }
     } else if (__builtin_expect(menu_pulse > 0.0f, 1)) {
         red = MenuSlotColourLerp(MENUFLASH0R, MENUNORMALR, menu_pulse);
@@ -4114,20 +4123,22 @@ extern "C" {
     }
 
     void FixUpButtonsInFont(VUFNT *game_font, VUFNT *button_font) {
-        if (game_font == nullptr)
-            game_font = QFont2D;
-        if (button_font == nullptr)
-            button_font = QFont2DButtons;
-        if (game_font != nullptr && button_font != nullptr) {
-            f32 scale = game_font->height / button_font->height;
-            for (i32 i = 0; i < button_font->glyph_count; i++) {
-                for (i32 j = 0; j < game_font->glyph_count; j++) {
-                    if (__builtin_expect(button_font->unicode_map[i].unicode != game_font->unicode_map[j].unicode, 0)) {
-                        continue;
-                    }
-                    if (button_font->unicode_map[i].unicode >= 0x531 && button_font->unicode_map[i].unicode <= 0x53f) {
-                        game_font->glyphs[game_font->unicode_map[j].index].width =
-                            button_font->glyphs[button_font->unicode_map[i].index].width * scale;
+        VUFNT *gf = game_font;
+        VUFNT *bf = button_font;
+        if (gf == nullptr)
+            gf = QFont2D;
+        if (bf == nullptr)
+            bf = QFont2DButtons;
+        if (gf == nullptr)
+            return;
+        if (bf == nullptr)
+            return;
+        f32 scale = gf->height / bf->height;
+        for (i32 i = 0; i < bf->glyph_count; i++) {
+            for (i32 j = 0; j < gf->glyph_count; j++) {
+                if (gf->unicode_map[j].unicode == bf->unicode_map[i].unicode) {
+                    if (bf->unicode_map[i].unicode >= 0x531 && bf->unicode_map[i].unicode <= 0x53f) {
+                        gf->glyphs[gf->unicode_map[j].index].width = bf->glyphs[bf->unicode_map[i].index].width * scale;
                     }
                     break;
                 }
@@ -4145,5 +4156,4 @@ extern "C" {
         }
         return QFont2DButtons;
     }
-
 }

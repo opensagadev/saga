@@ -7203,36 +7203,41 @@ extern "C" {
             animation->node_count < object->joint_count ? animation->node_count : object->joint_count;
         scale_array[0xff] = {1.0f, 1.0f, 1.0f};
         NUVEC root_values = {0.0f, 0.0f, 0.0f};
-        for (i32 joint_index = 0; joint_index < evaluated_count; ++joint_index) {
-            const nuanimbuffjoint_s &joint = buffer->joints[joint_index];
-            const u8 flags = buffer->joint_flags[joint_index];
-            const u8 parent_index = object->joints[joint_index].parent_index;
+        nuanimbuffjoint_s *joint = buffer->joints;
+        const u8 *joint_flags = buffer->joint_flags;
+        nuhgobjjoint_s *object_joint = object->joints;
+        NUMTX *local_matrix = matrices;
+        NUVEC *scale = scale_array;
+        void **data = callback_data;
+        for (i32 joint_index = 0; joint_index < evaluated_count;
+             ++joint_index, ++joint, ++object_joint, ++local_matrix, ++scale, ++data) {
+            const u8 flags = *joint_flags++;
+            const u8 parent_index = object_joint->parent_index;
 
-            NUMTX &local_matrix = matrices[joint_index];
             if ((flags & NUANIMBUFF_JOINT_ROTATION) != 0) {
                 NUANGVEC angles = {
-                    static_cast<NUANG>(joint.rotation.x * 10430.378f),
-                    static_cast<NUANG>(joint.rotation.y * 10430.378f),
-                    static_cast<NUANG>(joint.rotation.z * 10430.378f),
+                    static_cast<NUANG>(joint->rotation.x * 10430.378f),
+                    static_cast<NUANG>(joint->rotation.y * 10430.378f),
+                    static_cast<NUANG>(joint->rotation.z * 10430.378f),
                 };
-                NuMtxSetRotateXYZVU0(&local_matrix, &angles);
+                NuMtxSetRotateXYZVU0(local_matrix, &angles);
                 if ((flags & NUANIMBUFF_JOINT_BIND_MATRIX) != 0) {
-                    NuMtxMulRVU0(&local_matrix, &local_matrix, &object->joints[joint_index].animation_bind_matrix);
+                    NuMtxMulRVU0(local_matrix, local_matrix, &object_joint->animation_bind_matrix);
                 }
             } else if ((flags & NUANIMBUFF_JOINT_BIND_MATRIX) != 0) {
-                local_matrix = object->joints[joint_index].animation_bind_matrix;
+                *local_matrix = object_joint->animation_bind_matrix;
             } else {
-                NuMtxSetIdentity(&local_matrix);
+                NuMtxSetIdentity(local_matrix);
             }
 
             if ((flags & NUANIMBUFF_JOINT_SCALE) != 0) {
-                scale_array[joint_index] = joint.scale;
-                NuMtxPreScaleVU0(&local_matrix, &scale_array[joint_index]);
-                scale_array[joint_index].x *= scale_array[parent_index].x;
-                scale_array[joint_index].y *= scale_array[parent_index].y;
-                scale_array[joint_index].z *= scale_array[parent_index].z;
+                *scale = joint->scale;
+                NuMtxPreScaleVU0(local_matrix, scale);
+                scale->x *= scale_array[parent_index].x;
+                scale->y *= scale_array[parent_index].y;
+                scale->z *= scale_array[parent_index].z;
             } else {
-                scale_array[joint_index] = scale_array[object->joints[joint_index].parent_index];
+                *scale = scale_array[object->joints[joint_index].parent_index];
             }
 
             if ((flags & NUANIMBUFF_JOINT_CANCEL_PARENT_SCALE) != 0) {
@@ -7240,43 +7245,45 @@ extern "C" {
                 NUVEC inverse_parent_scale;
                 if (parent_scale.x != 0.0f && parent_scale.y != 0.0f && parent_scale.z != 0.0f) {
                     inverse_parent_scale = {1.0f / parent_scale.x, 1.0f / parent_scale.y, 1.0f / parent_scale.z};
-                    scale_array[joint_index].x *= inverse_parent_scale.x;
-                    scale_array[joint_index].y *= inverse_parent_scale.y;
-                    scale_array[joint_index].z *= inverse_parent_scale.z;
+                    scale->x *= inverse_parent_scale.x;
+                    scale->y *= inverse_parent_scale.y;
+                    scale->z *= inverse_parent_scale.z;
                 } else {
                     inverse_parent_scale = {0.0f, 0.0f, 0.0f};
-                    scale_array[joint_index] = {0.0f, 0.0f, 0.0f};
+                    scale->x = scale->y = scale->z = 0.0f;
                 }
-                NuMtxScaleVU0(&local_matrix, &inverse_parent_scale);
+                NuMtxScaleVU0(local_matrix, &inverse_parent_scale);
             }
 
             if ((flags & NUANIMBUFF_JOINT_TRANSLATION) != 0) {
-                NUVEC translation = joint.translation;
-                root_values = joint.translation;
-                root_values.z = -root_values.z;
-                NuMtxTranslate(&local_matrix, &translation);
+                NUVEC translation;
+                translation.x = root_values.x = joint->translation.x;
+                translation.y = root_values.y = joint->translation.y;
+                translation.z = joint->translation.z;
+                root_values.z = -translation.z;
+                NuMtxTranslate(local_matrix, &translation);
             }
 
-            local_matrix.m02 = -local_matrix.m02;
-            local_matrix.m12 = -local_matrix.m12;
-            local_matrix.m20 = -local_matrix.m20;
-            local_matrix.m21 = -local_matrix.m21;
-            local_matrix.m23 = -local_matrix.m23;
-            local_matrix.m32 = -local_matrix.m32;
+            local_matrix->m02 = -local_matrix->m02;
+            local_matrix->m12 = -local_matrix->m12;
+            local_matrix->m20 = -local_matrix->m20;
+            local_matrix->m21 = -local_matrix->m21;
+            local_matrix->m23 = -local_matrix->m23;
+            local_matrix->m32 = -local_matrix->m32;
 
             if (root_fn != NULL) {
-                root_fn(&local_matrix, root_data, &root_values, &root_values, root_translation, 0.0f);
+                root_fn(local_matrix, root_data, &root_values, &root_values, root_translation, 0.0f);
             }
 
             if (parent_index == 0xff) {
                 if ((flags & 0x40) != 0) {
-                    scale_array[joint_index] = {1.0f, 1.0f, 1.0f};
+                    scale->x = scale->y = scale->z = 1.0f;
                 }
             } else {
-                NuMtxMulVU0(&matrices[joint_index], &local_matrix, &matrices[parent_index]);
+                NuMtxMulVU0(local_matrix, local_matrix, &matrices[parent_index]);
             }
-            if (AnimBuffEvalCB != NULL && callback_data[joint_index] != NULL) {
-                AnimBuffEvalCB(&matrices[joint_index], callback_data[joint_index], 0);
+            if (AnimBuffEvalCB != NULL && *data != NULL) {
+                AnimBuffEvalCB(local_matrix, *data, 0);
             }
             root_fn = NULL;
         }
@@ -7529,7 +7536,7 @@ i32 ANI_SimpleAni3PlayerV4Joint_Quat3W(ani3_animheader_s *anim, f32 frame, nuani
         f32 key = (frame - anim->first_frame) * last_key / static_cast<f32>(anim->frame_count - 1);
         key = key < 0.0f ? 0.0f : key;
         i32 whole_key;
-        if (__builtin_expect(last_key <= key, 0)) {
+        if (last_key <= key) {
             whole_key = static_cast<i32>(last_key);
             fraction = last_key - static_cast<f32>(whole_key);
         } else {
@@ -7551,7 +7558,7 @@ i32 ANI_SimpleAni3PlayerV4Joint_Quat3W(ani3_animheader_s *anim, f32 frame, nuani
     for (; node_flags < first_flags; ++node_flags, ++joint) {
         for (i32 group = 0; group < 3; ++group) {
             i32 components = group == 1 ? 4 : 3;
-            if (!(*node_flags & CurveGroupMasks[group])) curve_types += components; else {
+            if (__builtin_expect(!(*node_flags & CurveGroupMasks[group]), 1)) curve_types += components; else {
                 for (i32 component = 0; component < components; ++component) {
                     SkipAni4V4Curve(*curve_types++, keys, scale_min);
                 }
@@ -7575,7 +7582,7 @@ i32 ANI_SimpleAni3PlayerV4Joint_Quat3W(ani3_animheader_s *anim, f32 frame, nuani
                     output[0] = output[1] = output[2] = 1.0f;
                 }
                 curve_types += 3;
-            } else if (group != 1) {
+            } else if (__builtin_expect(group != 1, 1)) {
                 output[0] = DecodeAni4Quat3Scalar(anim, key_stride, constants, *curve_types++, quarter, fraction, keys,
                                                   scale_min);
                 output[1] = DecodeAni4Quat3Scalar(anim, key_stride, constants, *curve_types++, quarter, fraction, keys,
@@ -8161,7 +8168,7 @@ extern "C" __attribute__((optimize("O2"))) i32 ANI_SimpleAni3PlayerV4Joint_Blend
             SkipAni4V4Curve(curve_types[4], keys, scale_min);
             SkipAni4V4Curve(curve_types[5], keys, scale_min);
         }
-        if (*node_flags & 8 != 0) {
+        if (__builtin_expect(*node_flags & 8 != 0, 1)) {
             SkipAni4V4Curve(curve_types[6], keys, scale_min);
             SkipAni4V4Curve(curve_types[7], keys, scale_min);
             SkipAni4V4Curve(curve_types[8], keys, scale_min);
@@ -18936,38 +18943,24 @@ __attribute__((optimize("O2"))) NuDynamicLight *NuDynamicLight::clone(variptr_u 
         CloneLightVector(destination.capsule_center, source.capsule_center);
         CloneLightVector(destination.capsule_end, source.capsule_end);
         destination.capsule_radius = source.capsule_radius;
-        destination.display_lists[0] = source.display_lists[0];
-        destination.display_lists[1] = source.display_lists[1];
-        {
-            nurndrstate_s *second = source.render_states[1];
-            nurndrstate_s *first = source.render_states[0];
-            destination.render_states[1] = second;
-            destination.render_states[0] = first;
-        }
-        {
-            NUDISPLAYLISTITEM *second = source.list_items[1];
-            NUDISPLAYLISTITEM *first = source.list_items[0];
-            destination.list_items[1] = second;
-            destination.list_items[0] = first;
-        }
-        {
-            NUDISPLAYLISTITEM *second = source.scene_cursor[1];
-            NUDISPLAYLISTITEM *first = source.scene_cursor[0];
-            destination.scene_cursor[1] = second;
-            destination.scene_cursor[0] = first;
-        }
-        {
-            NUDISPLAYLISTITEM *second = source.scene_first[1];
-            NUDISPLAYLISTITEM *first = source.scene_first[0];
-            destination.scene_first[1] = second;
-            destination.scene_first[0] = first;
-        }
-        {
-            NUDISPLAYLISTITEM *first = source.scene_end[0];
-            NUDISPLAYLISTITEM *second = source.scene_end[1];
-            destination.scene_end[1] = second;
-            destination.scene_end[0] = first;
-        }
+        struct DisplayListPair {
+            NUDISPLAYLIST lists[2];
+        };
+        *reinterpret_cast<DisplayListPair *>(destination.display_lists) =
+            *reinterpret_cast<const DisplayListPair *>(source.display_lists);
+        struct PointerPair {
+            void *pointers[2];
+        };
+        *reinterpret_cast<PointerPair *>(destination.render_states) =
+            *reinterpret_cast<const PointerPair *>(source.render_states);
+        *reinterpret_cast<PointerPair *>(destination.list_items) =
+            *reinterpret_cast<const PointerPair *>(source.list_items);
+        *reinterpret_cast<PointerPair *>(destination.scene_cursor) =
+            *reinterpret_cast<const PointerPair *>(source.scene_cursor);
+        *reinterpret_cast<PointerPair *>(destination.scene_first) =
+            *reinterpret_cast<const PointerPair *>(source.scene_first);
+        *reinterpret_cast<PointerPair *>(destination.scene_end) =
+            *reinterpret_cast<const PointerPair *>(source.scene_end);
         destination.reserved_33c[0] = source.reserved_33c[0];
         destination.reserved_33c[1] = source.reserved_33c[1];
         destination.reserved_33c[2] = source.reserved_33c[2];
@@ -18980,31 +18973,15 @@ __attribute__((optimize("O2"))) NuDynamicLight *NuDynamicLight::clone(variptr_u 
         ++source_ptr;
         ++destination_ptr;
     } while (destination_ptr != copy->render_sets + 2);
-    copy->reserved_6c0[0] = reserved_6c0[0];
-    copy->reserved_6c0[1] = reserved_6c0[1];
-    copy->reserved_6c0[2] = reserved_6c0[2];
-    copy->render_set_capacity = render_set_capacity;
-    copy->active_render_set_count = active_render_set_count;
-    copy->reserved_6d4[0] = reserved_6d4[0];
-    copy->reserved_6d4[1] = reserved_6d4[1];
-    copy->reserved_6d4[2] = reserved_6d4[2];
-    copy->reserved_6d4[3] = reserved_6d4[3];
-    copy->reserved_6d4[4] = reserved_6d4[4];
-    copy->reserved_6d4[5] = reserved_6d4[5];
-    copy->reserved_6d4[6] = reserved_6d4[6];
-    copy->reserved_6d4[7] = reserved_6d4[7];
-    copy->reserved_6d4[8] = reserved_6d4[8];
-    copy->reserved_6d4[9] = reserved_6d4[9];
-    copy->reserved_6d4[10] = reserved_6d4[10];
-    copy->reserved_6d4[11] = reserved_6d4[11];
-    copy->reserved_6d4[12] = reserved_6d4[12];
-    copy->reserved_6d4[13] = reserved_6d4[13];
-    copy->reserved_6d4[14] = reserved_6d4[14];
-    copy->reserved_6d4[15] = reserved_6d4[15];
-    copy->reserved_6d4[16] = reserved_6d4[16];
-    copy->reserved_6d4[17] = reserved_6d4[17];
-    copy->reserved_6d4[18] = reserved_6d4[18];
-    copy->reserved_6d4[19] = reserved_6d4[19];
+    struct Reserved6c0 {
+        u32 words[5];
+    };
+    *reinterpret_cast<Reserved6c0 *>(copy->reserved_6c0) = *reinterpret_cast<const Reserved6c0 *>(reserved_6c0);
+    CloneLightVector(copy->split_planes[0], split_planes[0]);
+    CloneLightVector(copy->split_planes[1], split_planes[1]);
+    CloneLightVector(copy->camera_position, camera_position);
+    CloneLightVector(copy->camera_forward, camera_forward);
+    CloneLightVector(copy->reserved_714, reserved_714);
     copy->direction.x = direction.x;
     copy->direction.y = direction.y;
     copy->direction.z = direction.z;
@@ -19016,7 +18993,10 @@ __attribute__((optimize("O2"))) NuDynamicLight *NuDynamicLight::clone(variptr_u 
     copy->reserved_7bc = reserved_7bc;
     copy->reserved_7c0[0] = reserved_7c0[0];
     copy->reserved_7c0[1] = reserved_7c0[1];
-    CloneLightVector(copy->reserved_7c8, reserved_7c8);
+    copy->parameter_7c8 = parameter_7c8;
+    copy->parameter_7cc = parameter_7cc;
+    copy->parameter_7d0 = parameter_7d0;
+    copy->parameter_7d4 = parameter_7d4;
     copy->used_on_specials = used_on_specials;
     for (i32 i = 0; i < render_set_capacity; ++i) {
         RenderSet &set = render_sets[i];
@@ -20324,7 +20304,7 @@ void NuDynamicLight::addShadowCasterScene(nugscn_s *scene) {
     if (render_set_capacity > 0) {
         RenderSet *current = render_sets;
         RenderSet *end = render_sets + render_set_capacity;
-        do {
+        for (; current != end; ++current) {
             RenderSet &set = *current;
             set.scene_cursor[0] = NULL;
             set.scene_first[0] = NULL;
@@ -20332,77 +20312,79 @@ void NuDynamicLight::addShadowCasterScene(nugscn_s *scene) {
             set.scene_cursor[1] = NULL;
             set.scene_first[1] = NULL;
             set.scene_end[1] = NULL;
-        } while (++current != end);
+        }
     }
     NUDLDLISTSCENE *dl = scene->display_list;
     i32 instance = 0;
-    for (i32 lod = 0; lod < dl->nclip_objects; ++instance, ++lod) {
-        if ((dl->visibility_flags[instance] & 0x21) == 0x21) {
-            f32 dx = global_camera.mtx.m30 - dl->clip_bounds[instance].center.x;
-            f32 dy = global_camera.mtx.m31 - dl->clip_bounds[instance].center.y;
-            f32 dz = global_camera.mtx.m32 - dl->clip_bounds[instance].center.z;
-            f32 distance = dx * dx + dy * dy + dz * dz;
-            if (dl->lod_ranges[lod] != 0.0f) {
-                while (__builtin_expect(dl->lod_ranges[lod] > distance, 1))
-                    ++lod;
+    for (i32 lod = 0; lod < dl->nclip_objects; ++lod, ++instance) {
+        if ((dl->visibility_flags[instance] & 0x21) != 0x21) {
+            while (dl->lod_ranges[lod] != 0.0f)
+                ++lod;
+            continue;
+        }
+        f32 dx = global_camera.mtx.m30 - dl->clip_bounds[instance].center.x;
+        f32 dy = global_camera.mtx.m31 - dl->clip_bounds[instance].center.y;
+        f32 dz = global_camera.mtx.m32 - dl->clip_bounds[instance].center.z;
+        f32 distance = dx * dx + dy * dy + dz * dz;
+        if (dl->lod_ranges[lod] != 0.0f) {
+            while (__builtin_expect(dl->lod_ranges[lod] > distance, 1))
+                ++lod;
+        }
+        NUCLIPOBJECT *object = &dl->clip_objects[lod];
+        for (i32 i = 0; i < render_set_capacity; ++i) {
+            RenderSet &set = render_sets[i];
+            NUPORTALBOX &box = scene->portal_boxes[instance];
+            f32 sx = set.capsule_end.x - set.capsule_center.x;
+            f32 sy = set.capsule_end.y - set.capsule_center.y;
+            f32 sz = set.capsule_end.z - set.capsule_center.z;
+            f32 radius = set.capsule_radius + box.first_w;
+            f32 ox = box.first.x - set.capsule_center.x;
+            f32 length = sy * sy + sx * sx + sz * sz;
+            f32 oy = box.first.y - set.capsule_center.y;
+            f32 oz = box.first.z - set.capsule_center.z;
+            f32 dot = sx * ox + sy * oy + sz * oz;
+            f32 projection = (1.0f / length) * dot;
+            f32 positive = (0.0f < projection ? 1.0f : 0.0f) * projection;
+            f32 t = (positive <= 1.0f ? 1.0f : 0.0f) * positive + (1.0f < positive ? 1.0f : 0.0f);
+            f32 distance = (ox * ox + oy * oy + oz * oz) + (length * t) * t - (dot + dot) * t;
+            if (__builtin_expect(distance > radius * radius, 0))
+                continue;
+            VuVec minimum, maximum;
+            minimum.x = box.first.x - box.second.x;
+            minimum.z = box.first.z - box.second.z;
+            minimum.y = box.first.y - box.second.y;
+            maximum.x = box.first.x + box.second.x;
+            maximum.y = box.first.y + box.second.y;
+            maximum.z = box.first.z + box.second.z;
+            if (!testShadowExtrusion(minimum, maximum, i)) {
+                continue;
             }
-            NUCLIPOBJECT *object = &dl->clip_objects[lod];
-            for (i32 i = 0; i < render_set_capacity; ++i) {
-                RenderSet &set = render_sets[i];
-                NUPORTALBOX &box = scene->portal_boxes[instance];
-                f32 sx = set.capsule_end.x - set.capsule_center.x;
-                f32 sy = set.capsule_end.y - set.capsule_center.y;
-                f32 sz = set.capsule_end.z - set.capsule_center.z;
-                f32 radius = set.capsule_radius + box.first_w;
-                f32 ox = box.first.x - set.capsule_center.x;
-                f32 length = sy * sy + sx * sx + sz * sz;
-                f32 oy = box.first.y - set.capsule_center.y;
-                f32 oz = box.first.z - set.capsule_center.z;
-                f32 dot = sx * ox + sy * oy + sz * oz;
-                f32 projection = (1.0f / length) * dot;
-                f32 positive = (0.0f < projection ? 1.0f : 0.0f) * projection;
-                f32 t = (positive <= 1.0f ? 1.0f : 0.0f) * positive + (1.0f < positive ? 1.0f : 0.0f);
-                f32 distance = (ox * ox + oy * oy + oz * oz) + (length * t) * t - (dot + dot) * t;
-                if (__builtin_expect(distance > radius * radius, 0))
-                    continue;
-                VuVec minimum, maximum;
-                minimum.x = box.first.x - box.second.x;
-                minimum.z = box.first.z - box.second.z;
-                minimum.y = box.first.y - box.second.y;
-                maximum.x = box.first.x + box.second.x;
-                maximum.y = box.first.y + box.second.y;
-                maximum.z = box.first.z + box.second.z;
-                if (!!!testShadowExtrusion(minimum, maximum, i)) {
-                    continue;
+            for (i32 j = 0; j < object->nmaterials; ++j) {
+                NUMTL *material = scene->mtls[object->material_ids[j]];
+                NUDISPLAYLIST *list = material->shader_desc.unknown_1b4 ? &set.display_lists[1] : &set.display_lists[0];
+                i32 channel = list - render_sets[i].display_lists;
+                NUDISPLAYLISTITEM *end = set.scene_end[channel];
+                if ((usize)set.scene_cursor[channel] >= (usize)end) {
+                    NUDISPLAYLISTITEM *cursor = (NUDISPLAYLISTITEM *)((display_list_buffer->addr + 15) & ~(usize)15);
+                    set.scene_cursor[channel] = cursor;
+                    display_list_buffer->addr = (usize)(cursor + 49);
+                    if (end) {
+                        end->next = cursor;
+                        end->type = 0x8d;
+                        end->id = 1;
+                    } else
+                        set.scene_first[channel] = cursor;
+                    set.scene_end[channel] = (NUDISPLAYLISTITEM *)display_list_buffer->addr - 1;
+                    material = scene->mtls[object->material_ids[j]];
                 }
-                for (i32 j = 0; j < object->nmaterials; ++j) {
-                    NUMTL *material = scene->mtls[object->material_ids[j]];
-                    NUDISPLAYLIST *list =
-                        material->shader_desc.unknown_1b4 ? &set.display_lists[1] : &set.display_lists[0];
-                    i32 channel = list - set.display_lists;
-                    if ((usize)set.scene_cursor[channel] >= (usize)set.scene_end[channel]) {
-                        NUDISPLAYLISTITEM *cursor =
-                            (NUDISPLAYLISTITEM *)((display_list_buffer->addr + 15) & ~(usize)15);
-                        set.scene_cursor[channel] = cursor;
-                        display_list_buffer->addr = (usize)(cursor + 49);
-                        if (set.scene_end[channel]) {
-                            set.scene_end[channel]->next = cursor;
-                            set.scene_end[channel]->id = 1;
-                            set.scene_end[channel]->type = 0x8d;
-                        } else
-                            set.scene_first[channel] = cursor;
-                        set.scene_end[channel] = cursor + 48;
-                        material = scene->mtls[object->material_ids[j]];
-                    }
-                    set.scene_cursor[channel][0].id = 3;
-                    set.scene_cursor[channel][0].type = 0x80;
-                    set.scene_cursor[channel][0].next = material;
-                    set.scene_cursor[channel][1] = dl->items[object->indices[j] - 1];
-                    set.scene_cursor[channel][2] = dl->items[object->indices[j]];
-                    set.scene_cursor[channel][1].id = 3;
-                    set.scene_cursor[channel][2].id = 3;
-                    set.scene_cursor[channel] += 3;
-                }
+                set.scene_cursor[channel][0].id = 3;
+                set.scene_cursor[channel][0].type = 0x80;
+                set.scene_cursor[channel][0].next = material;
+                set.scene_cursor[channel][1] = dl->items[object->indices[j] - 1];
+                set.scene_cursor[channel][2] = dl->items[object->indices[j]];
+                set.scene_cursor[channel][1].id = 3;
+                set.scene_cursor[channel][2].id = 3;
+                set.scene_cursor[channel] += 3;
             }
         }
         while (dl->lod_ranges[lod] != 0.0f)
@@ -20415,9 +20397,9 @@ void NuDynamicLight::addShadowCasterScene(nugscn_s *scene) {
             NUDISPLAYLIST *list = &set.display_lists[0];
             NuDisplayListLinkItems(list, 1);
             NUMTL *material = scene->mtls[0];
+            list->items->type = 0x80;
             list->items->id = 3;
             list->items->next = material;
-            list->items->type = 0x80;
             ++list->items;
             NuDisplayListLinkList(list, set.scene_first[0], set.scene_cursor[0]);
         }

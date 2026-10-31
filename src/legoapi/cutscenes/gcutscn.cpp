@@ -111,11 +111,14 @@ typedef isize __attribute__((may_alias)) NuGCutWord;
     (NUGCUT_WORD(field) = NUGCUT_WORD(field) != 0 ? NUGCUT_WORD(field) + (delta) : 0)
 #define NUGCUT_RELOCATE_PTR(field, delta)                                                                              \
     ((field) = (field) != NULL ? reinterpret_cast<__typeof__(field)>(reinterpret_cast<isize>(field) + (delta)) : NULL)
-#define NUGCUT_RELOCATE_LIKELY(field, delta)                                                                           \
-    (NUGCUT_WORD(field) = __builtin_expect(NUGCUT_WORD(field) != 0, 1) ? NUGCUT_WORD(field) + (delta) : 0)
+#define NUGCUT_RELOCATE_NONNULL(field, delta) (NUGCUT_WORD(field) = (field) != NULL ? NUGCUT_WORD(field) + (delta) : 0)
+#define NUGCUT_RELOCATE_PTR_LIKELY(field, delta)                                                                       \
+    ((field) = __builtin_expect(NUGCUT_WORD(field) != 0, 1)                                                            \
+                   ? reinterpret_cast<__typeof__(field)>(NUGCUT_WORD(field) + (delta))                                 \
+                   : NULL)
 
 static inline __attribute__((always_inline)) void NuGCutSceneFixPtrs_Title(NUGCUTSCENE_s *cutscene, isize anim_delta) {
-    NUGCUT_RELOCATE_LIKELY(cutscene->strings, cutscene->string_delta);
+    NUGCUT_RELOCATE_NONNULL(cutscene->strings, cutscene->string_delta);
     if (cutscene->camera_system != NULL) {
         NUGCUT_WORD(cutscene->camera_system) += cutscene->string_delta;
         NUGCUTCAMERASYS_s *system = cutscene->camera_system;
@@ -148,7 +151,7 @@ static inline __attribute__((always_inline)) void NuGCutSceneFixPtrs_Title(NUGCU
                 }
             }
         }
-        NUGCUT_RELOCATE_LIKELY(system->types, cutscene->string_delta);
+        NUGCUT_RELOCATE_PTR_LIKELY(system->types, cutscene->string_delta);
         if (system->types != NULL) {
             for (i32 i = 0; i < system->type_count; ++i) {
                 if (system->types[i].name != NULL) {
@@ -159,9 +162,10 @@ static inline __attribute__((always_inline)) void NuGCutSceneFixPtrs_Title(NUGCU
         }
     }
     if (cutscene->rigid_system != NULL) {
-        NUGCUT_WORD(cutscene->rigid_system) += cutscene->string_delta;
+        cutscene->rigid_system = reinterpret_cast<NUGCUTRIGIDSYS_s *>(reinterpret_cast<isize>(cutscene->rigid_system) +
+                                                                      cutscene->string_delta);
         NUGCUTRIGIDSYS_s *system = cutscene->rigid_system;
-        NUGCUT_RELOCATE_PTR(system->rigids, cutscene->string_delta);
+        NUGCUT_RELOCATE_PTR_LIKELY(system->rigids, cutscene->string_delta);
         if (system->rigids != NULL) {
             for (i32 i = 0; i < system->count; ++i) {
                 NUGCUTRIGID_s *rigid = &system->rigids[i];
@@ -181,7 +185,8 @@ static inline __attribute__((always_inline)) void NuGCutSceneFixPtrs_Title(NUGCU
     }
     if (cutscene->character_system != NULL) {
         const isize delta = cutscene->string_delta;
-        NUGCUT_WORD(cutscene->character_system) += delta;
+        cutscene->character_system =
+            reinterpret_cast<NUGCUTCHARSYS_s *>(reinterpret_cast<isize>(cutscene->character_system) + delta);
         NUGCUTCHARSYS_s *system = cutscene->character_system;
         NUGCUT_RELOCATE(system->characters, delta);
         if (system->characters != NULL) {
@@ -208,7 +213,7 @@ static inline __attribute__((always_inline)) void NuGCutSceneFixPtrs_Title(NUGCU
             }
         }
         if ((cutscene->version & 0xff) > 3) {
-            NUGCUT_RELOCATE_PTR(cutscene->character_animations, delta);
+            NUGCUT_RELOCATE_PTR_LIKELY(cutscene->character_animations, delta);
             if (system->characters != NULL && cutscene->character_animations != NULL) {
                 for (i32 i = 0; i < system->character_count; ++i) {
                     NUGCUTCHARANIM_s *animation = &cutscene->character_animations[i];
@@ -224,7 +229,7 @@ static inline __attribute__((always_inline)) void NuGCutSceneFixPtrs_Title(NUGCU
         const isize delta = cutscene->string_delta;
         NUGCUT_WORD(cutscene->trigger_system) += delta;
         NUGCUTTRIGGERSYS_s *system = cutscene->trigger_system;
-        NUGCUT_RELOCATE_PTR(system->events, delta);
+        NUGCUT_RELOCATE_PTR_LIKELY(system->events, delta);
         if (system->events != NULL) {
             for (i32 i = 0; i < system->event_count; ++i) {
                 NUGCUTTRIGGEREVENT_s *event = &system->events[i];
@@ -233,7 +238,7 @@ static inline __attribute__((always_inline)) void NuGCutSceneFixPtrs_Title(NUGCU
             }
         }
     }
-    NUGCUT_RELOCATE_LIKELY(cutscene->bounds, cutscene->string_delta);
+    NUGCUT_RELOCATE_NONNULL(cutscene->bounds, cutscene->string_delta);
 }
 
 #if defined(__i386__)
@@ -2638,14 +2643,14 @@ extern "C" {
                     *animation_index = character->animation_index;
                 }
                 if (animation_start_frame != NULL) {
-                    if (*animation_index != 0 && *animation_index != 0xff) {
-                        if (static_cast<i16>(character->animation->curve_count) > 10) {
-                            *animation_start_frame = NUGCUT_CURVE_VALUE(10);
-                        } else {
-                            *animation_start_frame = static_cast<f32>(character->animation_start_frame);
-                        }
-                    } else {
+                    if (*animation_index == 0) {
                         *animation_start_frame = 0.0f;
+                    } else if (*animation_index == 0xff) {
+                        *animation_start_frame = 0.0f;
+                    } else if (static_cast<i16>(character->animation->curve_count) > 10) {
+                        *animation_start_frame = NUGCUT_CURVE_VALUE(10);
+                    } else {
+                        *animation_start_frame = static_cast<f32>(character->animation_start_frame);
                     }
                 }
             } else if (animation_start_frame != NULL) {

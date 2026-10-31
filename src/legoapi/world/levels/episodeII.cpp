@@ -877,7 +877,7 @@ void JediB_Update(WORLDINFO_s *world) {
                         if (__builtin_expect(boss == NULL, 0)) {
                             boss = FindGameObject(id_JANGOFETT, 1, 1, 0, 0);
                             jedi_b.boss = boss;
-                            if (__builtin_expect(boss == NULL, 1)) {
+                            if (__builtin_expect(boss == NULL, 0)) {
                                 break;
                             }
                         }

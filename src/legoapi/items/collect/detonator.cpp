@@ -160,14 +160,7 @@ void Detonator_MoveCode(GameObject_s *object) {
             return;
         }
         object->context_animation_timer -= FRAMETIME;
-        if (__builtin_expect(object->context_animation_timer <= 0.0f, 0)) {
-            object->character_context = -1;
-            if (__builtin_expect(object->field_0x7a3 != 0, 0)) {
-                return;
-            }
-            // Expiry falls through to placement, including an unfinished pickup.
-            object->field_0x7a3 = 1;
-        } else {
+        if (__builtin_expect(!(object->context_animation_timer <= 0.0f), 1)) {
             if (object->field_0x7a3 != 0) {
                 return;
             }
@@ -194,9 +187,16 @@ void Detonator_MoveCode(GameObject_s *object) {
                 }
                 return;
             }
+        } else {
+            object->character_context = -1;
+            if (__builtin_expect(object->field_0x7a3 != 0, 0)) {
+                return;
+            }
+            // Expiry falls through to placement, including an unfinished pickup.
+            object->field_0x7a3 = 1;
         }
         const i32 slot = DetonatorPlacementSlot(object);
-        if (slot < 0) {
+        if (__builtin_expect(slot < 0, 1)) {
             GameAudio_PlaySfx(0x32, NULL, 0, 0);
             return;
         }

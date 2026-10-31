@@ -1203,8 +1203,7 @@ void NuMusic::BuildSoundTable(variptr_u *buffer_start, variptr_u buffer_end) {
 void NuMusic::InitData(const char *file, VARIPTR *buffer_start, VARIPTR buffer_end) {
     VARIPTR buffer_original = *buffer_start;
 
-    this->string_pool_start = buffer_start->char_ptr;
-    this->string_pool_end = this->string_pool_start;
+    this->string_pool_start = this->string_pool_end = buffer_start->char_ptr;
     buffer_start->addr += 0x10000;
 
     this->albums = reinterpret_cast<Album *>(ALIGN(buffer_start->addr, 4));
@@ -1220,7 +1219,7 @@ void NuMusic::InitData(const char *file, VARIPTR *buffer_start, VARIPTR buffer_e
 
     NuFParSetInterpreterErrorHandler(0);
     nufpar_s *fpar = NuFParCreate(const_cast<char *>(file));
-    if (__builtin_expect(fpar != NULL, 1)) {
+    if (fpar != NULL) {
         NuFParPushComCTX(fpar, top_jmp_tab);
 
         while (NuFParGetLine(fpar), *fpar->line_buf != '\0') {
@@ -1234,8 +1233,7 @@ void NuMusic::InitData(const char *file, VARIPTR *buffer_start, VARIPTR buffer_e
     LOG_DEBUG("Loaded %d albums, %d tracks, %d indexes", this->album_count, this->track_count, this->index_count);
     LOG_DEBUG("this->albums=%p, this->tracks=%p, this->indexes=%p", this->albums, this->tracks, this->indexes);
 
-    i32 count = this->album_count;
-    if (__builtin_expect(count == 0 || (track_count = this->track_count, track_count == 0), 0)) {
+    if (this->album_count == 0 || this->track_count == 0) {
         *buffer_start = buffer_original;
         this->albums = NULL;
         this->album_count = 0;
@@ -1246,84 +1244,47 @@ void NuMusic::InitData(const char *file, VARIPTR *buffer_start, VARIPTR buffer_e
 
     // Compact the parse workspace down to just what was filled in, and rebase
     // the intra-pool pointers (album->tracks_source, track->entry_times).
-    Track *tracksPtr;
-    Track *alloced;
-    Track *pTVar3;
-
-    Album *albumPtr = this->albums;
-    Album *album = (Album *)ALIGN((usize)this->string_pool_end, 4);
-    if (__builtin_expect(albumPtr == album, 0)) {
-        tracksPtr = this->tracks;
-        alloced = (Track *)ALIGN((usize)&albumPtr[count].name, 4);
-        pTVar3 = tracksPtr;
-        if (tracksPtr == alloced)
-            goto LAB_003203e6;
-    LAB_003204e0:
-        memmove(alloced, pTVar3, track_count * sizeof(Track));
-        track_count = this->track_count;
-        count = this->album_count;
-        tracksPtr = alloced;
-    } else {
-        memmove(album, albumPtr, count * sizeof(Album));
-        count = this->album_count;
-        this->albums = album;
-        track_count = this->track_count;
-        pTVar3 = this->tracks;
-        tracksPtr = (Track *)(album + count);
-        if (pTVar3 == tracksPtr)
-            goto LAB_003203e6;
-        alloced = tracksPtr;
-        if (__builtin_expect(track_count != 0, 0))
-            goto LAB_003204e0;
+    Album *new_albums = reinterpret_cast<Album *>(ALIGN((usize)this->string_pool_end, 4));
+    if (this->albums != new_albums) {
+        if (this->album_count != 0) {
+            memmove(new_albums, this->albums, this->album_count * sizeof(Album));
+        }
+        this->albums = new_albums;
     }
 
-    this->tracks = tracksPtr;
-    if (0 < count) {
-        const isize track_rebase = reinterpret_cast<char *>(tracksPtr) - reinterpret_cast<char *>(pTVar3);
-        Album *album = this->albums;
-        Album *end = album + count;
-        do {
-            if (album->tracks_source != NULL) {
-                album->tracks_source =
-                    reinterpret_cast<Track *>(reinterpret_cast<char *>(album->tracks_source) + track_rebase);
+    Track *new_tracks = reinterpret_cast<Track *>(ALIGN((usize)(this->albums + this->album_count), 4));
+    if (this->tracks != new_tracks) {
+        Track *old_tracks = this->tracks;
+        if (__builtin_expect(this->track_count != 0, 0)) {
+            memmove(new_tracks, old_tracks, this->track_count * sizeof(Track));
+        }
+        const isize track_rebase = reinterpret_cast<char *>(new_tracks) - reinterpret_cast<char *>(old_tracks);
+        this->tracks = new_tracks;
+        for (i32 i = 0; i < this->album_count; i++) {
+            if (this->albums[i].tracks_source != NULL) {
+                this->albums[i].tracks_source =
+                    reinterpret_cast<Track *>(reinterpret_cast<char *>(this->albums[i].tracks_source) + track_rebase);
             }
-            ++album;
-        } while (album != end);
-        tracksPtr = this->tracks;
+        }
     }
 
-LAB_003203e6:
-    f32 *pfVar2 = this->indexes;
-    f32 *__dest = (f32 *)ALIGN((usize)&tracksPtr[track_count].path, 4);
-    i32 local_20;
-    if (__builtin_expect(pfVar2 == __dest, 0)) {
-        local_20 = this->index_count;
-    } else {
-        local_20 = 0;
-
+    f32 *new_indexes = reinterpret_cast<f32 *>(ALIGN((usize)(this->tracks + this->track_count), 4));
+    if (this->indexes != new_indexes) {
+        f32 *old_indexes = this->indexes;
         if (__builtin_expect(this->index_count != 0, 0)) {
-            memmove(__dest, pfVar2, this->index_count << 2);
-            track_count = this->track_count;
-            local_20 = this->index_count;
+            memmove(new_indexes, old_indexes, this->index_count * sizeof(f32));
         }
-        this->indexes = __dest;
-
-        if (0 < track_count) {
-            const isize index_rebase = reinterpret_cast<char *>(__dest) - reinterpret_cast<char *>(pfVar2);
-            tracksPtr = this->tracks;
-            pTVar3 = tracksPtr + track_count;
-            do {
-                if (tracksPtr->entry_times != NULL) {
-                    tracksPtr->entry_times =
-                        reinterpret_cast<f32 *>(reinterpret_cast<char *>(tracksPtr->entry_times) + index_rebase);
-                }
-                tracksPtr = tracksPtr + 1;
-            } while (__builtin_expect(tracksPtr != pTVar3, 0));
-            __dest = this->indexes;
+        const isize index_rebase = reinterpret_cast<char *>(new_indexes) - reinterpret_cast<char *>(old_indexes);
+        this->indexes = new_indexes;
+        for (i32 i = 0; i < this->track_count; i++) {
+            if (this->tracks[i].entry_times != NULL) {
+                this->tracks[i].entry_times =
+                    reinterpret_cast<f32 *>(reinterpret_cast<char *>(this->tracks[i].entry_times) + index_rebase);
+            }
         }
     }
 
-    buffer_start->void_ptr = __dest + local_20;
+    buffer_start->void_ptr = this->indexes + this->index_count;
     LOG_DEBUG("this->albums=%p, this->tracks=%p, this->indexes=%p", this->albums, this->tracks, this->indexes);
     for (i32 i = 0; i < this->album_count; i++) {
         this->albums[i].Initialise();

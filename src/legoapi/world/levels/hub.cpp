@@ -1331,61 +1331,37 @@ void ResetIconWibble() {
 
 void Hub_InitFreePlaySelect(i32 area, i32 first_model, i32 second_model) {
     COLLECTION_s *collection = GetFreePlayCollection(area);
+    i32 first = -1;
+    i32 second = -1;
     if (collection == &VehicleCollection) {
-        if (first_model == -1)
-            first_model = VehicleCollection.list[0].id;
-        if (second_model == -1) {
-            second_model = VehicleCollection.list[1].id;
-            goto make_default_pair;
-        }
-        goto make_selected_pair;
+        first = first_model == -1 ? VehicleCollection.list[0].id : first_model;
+        second = second_model == -1 ? VehicleCollection.list[1].id : second_model;
+    } else if (collection == &MiniKitCollection) {
+        first = first_model == -1 ? MiniKitCollection.list[0].id : first_model;
+        second = second_model == -1 ? MiniKitCollection.list[1].id : second_model;
     }
-    if (collection == &MiniKitCollection) {
-        if (first_model == -1)
-            first_model = MiniKitCollection.list[0].id;
-        if (__builtin_expect(second_model == -1, 1)) {
-            second_model = MiniKitCollection.list[1].id;
-            goto make_default_pair;
+    Hub_MakeFreePlayList(first, second);
+    if (first != -1) {
+        if (second != -1) {
+            MenuPacket.player_model[0] = static_cast<i16>(first);
+            MenuPacket.player_model[1] = static_cast<i16>(second);
+            goto done;
         }
-        goto make_selected_pair;
     }
-    Hub_MakeFreePlayList(-1, -1);
-    goto use_player_models;
-
-make_selected_pair:
-    Hub_MakeFreePlayList(first_model, second_model);
-    if (first_model == -1)
-        goto use_player_models;
-    goto store_model_pair;
-
-make_default_pair:
-    Hub_MakeFreePlayList(first_model, second_model);
-    if (first_model == -1 || second_model == -1)
-        goto use_player_models;
-
-store_model_pair:
-    MenuPacket.player_model[0] = static_cast<i16>(first_model);
-    MenuPacket.player_model[1] = static_cast<i16>(second_model);
-    goto initialize_selection;
-
-use_player_models:
     MenuPacket.player_model[0] = Player[0] != NULL ? Player[0]->id : -1;
     MenuPacket.player_model[1] = Player[1] != NULL ? Player[1]->id : -1;
-
-initialize_selection:
+done:
     freeplaytime = 0.0f;
     freeplaymode = 0;
     freeplayduration = 1.0f;
     freeplay_selected[0] = 0;
     freeplay_selected[1] = 0;
-    uprepeattime[0] = 0.0f;
-    rightrepeattime[0] = 0.0f;
-    uprepeattime[1] = 0.0f;
-    rightrepeattime[1] = 0.0f;
-    downrepeattime[0] = 0.0f;
-    leftrepeattime[0] = 0.0f;
-    downrepeattime[1] = 0.0f;
-    leftrepeattime[1] = 0.0f;
+    for (i32 i = 0; i < 2; i++) {
+        uprepeattime[i] = 0.0f;
+        rightrepeattime[i] = 0.0f;
+        downrepeattime[i] = 0.0f;
+        leftrepeattime[i] = 0.0f;
+    }
     ResetIconWibble();
     hub_freeplay_area = area;
 }
@@ -3083,7 +3059,7 @@ void Hub_DrawPanel(WORLDINFO_s *) {
             alpha = (newgamecamtime - 2.0f) * 2.0f;
         else if (newgamecamtime < 7.5f)
             alpha = 1.0f;
-        else if (!(newgamecamtime >= 8.0f))
+        else if (__builtin_expect(!(newgamecamtime >= 8.0f), 0))
             alpha = 1.0f - (newgamecamtime - 7.5f) * 2.0f;
         if (alpha > 0.0f)
             SmartTextEx(TTab[tMAP], 0.0f, (HUB_EPISODETITLEY + HUB_EPISODESUBTITLEY) * 0.5f, 1.0f, 0.8f, 0.8f, 0.8f, 0,
@@ -3108,7 +3084,7 @@ void Hub_DrawPanel(WORLDINFO_s *) {
                 buildup_count += EpBuildUpCount;
                 buildup_total += EpBuildUpTotal;
                 both_true_jedi_bricks = BOTHTRUEJEDIGOLDBRICKS;
-                if (both_true_jedi_bricks) {
+                if (__builtin_expect(both_true_jedi_bricks != 0, 1)) {
                     story_total += EpStoryBuildUpTotal;
                     story_count += EpStoryBuildUpCount;
                     free_count += EpFreePlayBuildUpCount;
@@ -3233,7 +3209,7 @@ void Hub_DrawPanel(WORLDINFO_s *) {
             if (area->flags & 0x100) {
                 Hub_DrawSuperBonusStats(area, hub_area_time);
             } else if (area->flags & 4) {
-                if (SENATE_ADATA && SENATE_ADATA->index == hub_area)
+                if (__builtin_expect(SENATE_ADATA && SENATE_ADATA->index == hub_area, 1))
                     Hub_DrawArcadeStats(hub_area_time);
                 else
                     Hub_DrawBonusStats(hub_area_time, hub_area, -1);

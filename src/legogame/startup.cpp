@@ -482,10 +482,10 @@ void LoadPerm(void) {
 
         if (legal_timer < 5.8f && LoadPerm_LanguageSelect == 3 && ready_timer >= 1.0f && loadlegal_done) {
             if (__builtin_expect(legal_timer != 0.0f, 0) || legal_mtl != nullptr) {
-                if (__builtin_expect(PermDataLoaded != 0 &&
+                if (PermDataLoaded != 0 &&
                     ((GamePad[0].buttons_down_08 &
                       (GAMEPAD_JUMP | GAMEPAD_START | GAMEPAD_SPECIAL | GAMEPAD_ACTION | GAMEPAD_TAG)) != 0 ||
-                     MechInputTouchMenuController::AnyTouchesThisFrame > 0), 1)) {
+                     MechInputTouchMenuController::AnyTouchesThisFrame > 0)) {
                     MechInputTouchMenuController::AnyTouchesThisFrame = 0;
                     if (legal_timer >= 0.3f && legal_timer < 5.3f) {
                         legal_timer = 5.3f;

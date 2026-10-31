@@ -1724,11 +1724,12 @@ static void JediLightCode(GameObject_s *object) {
     if (__builtin_expect(object->dynamic_light_id != -1, 1)) {
         NUVEC colour;
         NUVEC position;
-        if (object->character_context == 0x1b && (object->field_0xe21 & 5) == 1 && object->force_target != NULL) {
+        GameObject_s *target;
+        if (object->character_context == 0x1b && (object->field_0xe21 & 5) == 1 &&
+            (target = object->force_target) != NULL) {
             rtlDynamicEnable(object->dynamic_light_id, 1);
             NUVEC delta;
-            f32 distance =
-                NuVecDist(&object->force_target->apiobj.collision_position, &object->apiobj.collision_position, &delta);
+            f32 distance = NuVecDist(&target->apiobj.collision_position, &object->apiobj.collision_position, &delta);
             rtlDynamicSetRadii(object->dynamic_light_id, distance * 0.5f, distance * 0.5f + 0.5f);
             colour.x = 0.0f;
             colour.y = qrand() < 0x8000 ? 2.0f : 0.25f;
@@ -1743,10 +1744,10 @@ static void JediLightCode(GameObject_s *object) {
         if (__builtin_expect(!(object->weapon_scale > 0.0f) || object->sabre_flags == 0, 0))
             return;
         position = v000;
-        if (__builtin_expect(object->apiobj.field_0x288 == 0, 0))
-            return;
         i32 point_count = 0;
         for (i32 blade = 0; blade < 4; ++blade) {
+            if (object->apiobj.field_0x288 == 0)
+                break;
             if (object->drawn_last_frame) {
                 GAMECHARACTERDATA *data = GetGameCharacterData(object);
                 i32 first = data->streak_joints[blade][0];
@@ -1759,8 +1760,6 @@ static void JediLightCode(GameObject_s *object) {
                     }
                 }
             }
-            if (object->apiobj.field_0x288 == 0)
-                break;
         }
         if (point_count == 0)
             return;
@@ -1772,7 +1771,7 @@ static void JediLightCode(GameObject_s *object) {
         i32 blade = -1;
         if (object->apiobj.field_0x27c != -1 && Cheat_IsOn(0x19))
             blade = 0;
-        else if (object->apiobj.field_0x27c != -1 && Player_HasPurpleForce(object))
+        else if (__builtin_expect(object->apiobj.field_0x27c != -1 && Player_HasPurpleForce(object), 1))
             blade = 3;
         else if (object->id == id_GRIEVOUS) {
             colour.x = static_cast<f32>(static_cast<u32>(BladeTab[1].colour[0]));
@@ -1782,11 +1781,15 @@ static void JediLightCode(GameObject_s *object) {
             other.x = static_cast<f32>(static_cast<u32>(BladeTab[2].colour[0]));
             other.y = static_cast<f32>(static_cast<u32>(BladeTab[2].colour[1]));
             other.z = static_cast<f32>(static_cast<u32>(BladeTab[2].colour[2]));
-            f32 phase =
-                (1.0f + NU_SIN_LUT(static_cast<i32>(NuFmod(GameTimer.time_elapsed, 2.0f) * 0.5f * 65536.0f))) * 0.5f;
-            colour.x = ((other.x - colour.x) * phase + colour.x) * brightness;
-            colour.y = ((other.y - colour.y) * phase + colour.y) * brightness;
-            colour.z = ((other.z - colour.z) * phase + colour.z) * brightness;
+            f32 phase = (1.0f + NU_SIN_LUT(static_cast<u16>(
+                                    static_cast<i32>(NuFmod(GameTimer.time_elapsed, 2.0f) * 0.5f * 65536.0f)))) *
+                        0.5f;
+            f32 red = ((other.x - colour.x) * phase + colour.x) * brightness;
+            f32 green = ((other.y - colour.y) * phase + colour.y) * brightness;
+            f32 blue = ((other.z - colour.z) * phase + colour.z) * brightness;
+            colour.x = red;
+            colour.y = green;
+            colour.z = blue;
         } else
             blade = static_cast<i8>(GetGameCharacterData(object)->field_0x117);
         if (blade != -1) {
@@ -5188,7 +5191,7 @@ static u8 SetComboOpponent(GameObject_s *object, f32 range, i32 update_heading, 
         result = object->force_target != NULL;
     }
 finished:
-    if (update_heading != 0 && object->force_target == NULL && !(object->pad_gamepad->input_magnitude <= 0.0f) &&
+    if (update_heading != 0 && object->force_target == NULL && object->pad_gamepad->input_magnitude > 0.0f &&
         (object->field_0xe22 & 0x20) != 0) {
         object->apiobj.movement_facing_angle = object->current_input_angle;
     }
@@ -9473,12 +9476,12 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
                         case 0x47: {
                             if (object->action_movement_state != 1) {
                                 ZIPUP *zipup = static_cast<ZIPUP *>(object->field_0x788);
-                                if ((zipup->flags & 1) != 0) {
-                                    SeekVec(&api.position, &api.position, &zipup->rider_target_position, 8.0f);
-                                } else {
+                                if ((zipup->flags & 1) == 0) {
                                     NuVecSub(&object->target_velocity, &zipup->hook_origin, &api.position);
                                     NuVecNorm(&object->target_velocity, &object->target_velocity);
                                     NuVecScale(&object->target_velocity, &object->target_velocity, 2.0f);
+                                } else {
+                                    SeekVec(&api.position, &api.position, &zipup->rider_target_position, 8.0f);
                                 }
                             } else {
                                 object->target_velocity = v000;
@@ -12827,10 +12830,10 @@ void Move_VEHICLE(GameObject_s *object) {
     AwkwardShapeCode(object);
     EngineNoiseCode(object, object->character_context == 0x17);
 
-    if (((object->apiobj.player_controlled && object->current_hp == 1) ||
+    if (__builtin_expect(((object->apiobj.player_controlled && object->current_hp == 1) ||
          ((object->apiobj.flags_low & 0x80) == 0 && object->current_hp <= 1)) &&
         object->apiobj.character_data->game_character->uses_weapon_action == 10 &&
-        (object->apiobj.character_data->model_flags & 0x04000000) == 0) {
+        (object->apiobj.character_data->model_flags & 0x04000000) == 0, 1)) {
         const i32 effect = WORLD->debris_sys->entries[96].effect;
         if (effect != -1) {
             i32 count = ParticlesPerSecond(50.0f, FRAMETIME);

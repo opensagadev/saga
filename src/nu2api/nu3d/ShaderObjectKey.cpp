@@ -184,7 +184,7 @@ namespace nu2api {
         const u8 vtxType = attr->alpha_mode;
 
         bool texcoordIsLong;
-        if (unitsLow == 5 || unitsLow == 3) {
+        if (__builtin_expect(unitsLow == 5 || unitsLow == 3, 0)) {
             texcoordIsLong = true;
         } else {
             texcoordIsLong = (vtxType == 10) | ((unitsLow & 3) == 2);

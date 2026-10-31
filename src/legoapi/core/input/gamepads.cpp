@@ -431,8 +431,8 @@ void DoInput(WORLDINFO_s *world) {
             continue;
         }
 
-        if (Paused == 0) {
-            if (GameMenu[GameMenuLevel].menu == -1 && CutSceneWaiting == 0) {
+        if (__builtin_expect(Paused == 0, 1)) {
+            if (__builtin_expect(GameMenu[GameMenuLevel].menu == -1 && CutSceneWaiting == 0, 1)) {
                 if ((CUTSTOPGAME == 0 || CutScene_IsSkippable(static_cast<CUTINFO *>(CutStopInfo))) &&
                     MiniCutCam == 0 && memcard_autosavestarted == 0 && !(memcard_autosavepostdelay > 0.0f) &&
                     !(memcard_autosavepredelay > 0.0f) && GameTimer.update_count != 0) {

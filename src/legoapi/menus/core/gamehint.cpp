@@ -630,7 +630,7 @@ void MenuDrawHints(MENU_s *menu) {
 
     i32 row = 0;
     for (HINT_s *hint = Hints_LSW; hint->control_mode_ids[0] != -1; ++hint) {
-        if ((hint->flags & 0x2c) != 0)
+        if (__builtin_expect((hint->flags & 0x2c) != 0, 0))
             continue;
         const i32 mode = MechInputTouchSystem::s_baseControlMode;
         if ((hint->flags & 0x10) == 0) {

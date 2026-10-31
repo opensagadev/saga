@@ -156,8 +156,8 @@ static inline void TexQuadSubmit(NUVEC const &point, i32 colour, i32 u, i32 v) {
     if (!g_NuPrim_NeedsOverbrightening)
         vertex->colour = ((colour >> 1) & 0x7f7f7f) | (colour & 0xff000000);
     else
-        vertex->colour = colour;
-    if (g_NuPrim_NeedsHalfUVs) {
+        *reinterpret_cast<i32 *>(&vertex->colour) = colour;
+    if (__builtin_expect(g_NuPrim_NeedsHalfUVs, 0)) {
         vertex->half_uv[0] = u ? 0x3c00 : 0;
         vertex->half_uv[1] = v ? 0x3c00 : 0;
     } else {
@@ -356,23 +356,28 @@ void MechTouchUITagButton::Render() {
         return;
     }
 
-    const f32 circle_x = (position.x + 1.0f) * 0.5f;
     const f32 circle_y = (1.0f - position.y) * 0.5f;
-    f32 pulse = 1.3f;
-    if (__builtin_expect(hovered == 0, 1)) {
-        pulse = (1.0f + NuTrigTable[(static_cast<i32>(timer_animation.value) >> 1) & 0x7fff]) * 0.5f;
+    const f32 circle_x = (position.x + 1.0f) * 0.5f;
+    f32 circle_radius = radius_x * RadMult;
+    f32 icon_size = TagButtonSize;
+    if (hovered != 0) {
+        circle_radius *= 1.3f;
+        icon_size *= 1.3f;
+    } else {
+        f32 pulse = (1.0f + NuTrigTable[(static_cast<i32>(timer_animation.value) >> 1) & 0x7fff]) * 0.5f;
         pulse = pulse * (static_cast<i8>(tag_state) > 0 ? 0.7f : 0.35f) + 0.9f;
+        circle_radius *= pulse;
+        icon_size *= pulse;
     }
-    const f32 circle_radius = radius_x * RadMult * pulse;
-    DrawCharIcon(target->id, position.x, position.y, position.z, TagButtonSize * pulse, 0xa6, first_fade.value,
+    DrawCharIcon(target->id, position.x, position.y, position.z, icon_size, 0xa6, first_fade.value,
                  hover_animation.value * first_fade.value, 1, NULL);
 
     numtl_s *material = MechSystems::Get()->tag_hold_background_material;
     const f32 circle_alpha = second_fade.value;
     const f32 depth = 0.002f + position.z;
     const f32 colour_alpha = first_fade.value * size_animation.value * 128.0f;
-    const f32 aspect = GetAspectRatio();
     const i32 colour = (static_cast<i32>(colour_alpha) << 24) | 0x808080;
+    const f32 aspect = GetAspectRatio();
     RndrUnfilledCircle(circle_x, circle_y, circle_radius, BorderWidth, aspect, colour, circle_alpha, depth, material);
 }
 

@@ -594,8 +594,8 @@ static LEDGE_ATTACH_PART_ATTR i32 LedgeTerrain_AttachPart(GameObject_s *object, 
 static inline i32 LedgeTerrain_Attach(GameObject_s *object, u16 facing, NUVEC *position, u16 *wall_angle) {
     if (!object->field_0x1084)
         return 0;
-    u8 surface = object->field_0x6b0;
-    if (surface < 32 && (TerSurface[surface].flags & 0x581))
+    i32 surface = static_cast<i8>(object->field_0x6b0);
+    if (static_cast<u32>(surface) < 32 && (TerSurface[surface].flags & 0x581))
         return 0;
     if (object->apiobj.collision_position.y - 0.05f >= object->contact_position.y ||
         fabsf(object->contact_normal.y) > NuTrigTable[0x3000])
@@ -646,7 +646,7 @@ void LedgeTerrain_MoveCode(GameObject_s *object) {
                     NuFsqrt(-2.0f * object->apiobj.character_data->game_character->gravity * height);
             return;
         }
-        if (__builtin_expect(object->apiobj.field_0x27d & 2 != 0, 0)) {
+        if (__builtin_expect((object->apiobj.field_0x27d & 2) != 0, 0)) {
             object->character_context = -1;
             return;
         }
@@ -662,14 +662,12 @@ void LedgeTerrain_MoveCode(GameObject_s *object) {
             f32 z = object->external_force.z;
             object->apiobj.movement_facing_angle = wall_angle + 0x8000;
             object->external_force.y = position.y;
-            object->launch_origin.x = position.x;
+            object->launch_origin = position;
             object->external_force.x = object->apiobj.position.x;
             object->external_force.z = object->apiobj.position.z;
             object->airborne_action_duration = 0.25f;
-            object->launch_origin.y = position.y;
-            object->launch_origin.z = position.z;
-            z = object->apiobj.position.z - z;
             x = object->apiobj.position.x - x;
+            z = object->apiobj.position.z - z;
             travelled = NuFsqrt(x * x + z * z);
         } else {
             object->airborne_action_duration -= FRAMETIME;

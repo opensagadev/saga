@@ -652,10 +652,9 @@ void UpdateMiniSnowTroopers(WORLDINFO_s *world) {
                     } else {
                         trooper->rotation =
                             SeekRot(trooper->rotation, trooper->target_rotation, MiniTrooperTurnSpeed());
-                        if (__builtin_expect(static_cast<i32>(trooper->rotation) -
+                        if (static_cast<i32>(trooper->rotation) -
                                                      static_cast<i32>(trooper->target_rotation) <=
-                                                 0x16c,
-                                             1)) {
+                                                 0x16c) {
                             if (shot != 0)
                                 trooper->target_rotation = static_cast<u16>(qrand() / 73 + shot_angle);
                             else

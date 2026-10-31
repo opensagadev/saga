@@ -1588,8 +1588,9 @@ static inline i32 SubItemMenu(MENU_s *menu) {
         ShopNameAlpha = 0.0f;
 
     shopitem_s *items = NULL;
-    i32 *ids = NULL, *count = NULL;
+    i32 *ids = NULL;
     NUVEC *positions = NULL;
+    i32 *count = NULL;
     f32 ypush = 0.0f;
     if (picked == 0) {
         items = HintItems;
@@ -1627,9 +1628,9 @@ static inline i32 SubItemMenu(MENU_s *menu) {
         count = &SHOPCUTCOUNT;
         ypush = SubNormCharPush;
     }
-    if (__builtin_expect(slidetimer >= 0.0f, 1)) {
+    if (slidetimer >= 0.0f) {
         slidetimer -= FRAMETIME;
-        if (__builtin_expect(slidetimer < 0.0f, 1))
+        if (slidetimer < 0.0f)
             ShopNameAlpha = 0.0f;
     }
     if (easesubin != 0) {
@@ -1655,7 +1656,7 @@ static inline i32 SubItemMenu(MENU_s *menu) {
             moved = MoveSubItemsRight(ids, positions, *count);
             right = moveitems != 0 && previous != moveitems;
         }
-        if (__builtin_expect(moved && items != NULL, 0)) {
+        if (moved && __builtin_expect(items != NULL, 0)) {
             shopitem_s *selected = &items[ids[3]];
             if (selected->type == 0) {
                 if (selected->unlocked == 1)
@@ -1665,7 +1666,7 @@ static inline i32 SubItemMenu(MENU_s *menu) {
     } else
         movesfxlock = 0;
 
-    i32 cancel = 0, confirm = 0;
+    i32 confirm = 0, cancel = 0;
     if (slidetimer < 0.0f) {
         easesubin = 0;
         if (input.left_held)
@@ -1712,11 +1713,11 @@ static inline i32 SubItemMenu(MENU_s *menu) {
     if (!ExitMenu) {
         if (left) {
             scaleoverride[0] = 0.0f;
+            scaleoverride[6] = 1.0f;
             scaleoverride[1] = 0.4f;
             scaleoverride[2] = 0.8f;
             scaleoverride[4] = 0.8f;
             scaleoverride[5] = 0.4f;
-            scaleoverride[6] = 1.0f;
             NUVEC pos = SubShelfPos[0];
             pos.y += ypush;
             AddGameDebris(WORLD->debris_sys, qrand() / 10923 + 76, &pos);
@@ -1730,11 +1731,11 @@ static inline i32 SubItemMenu(MENU_s *menu) {
             scrolling = 1;
         } else if (right) {
             scaleoverride[0] = 1.0f;
+            scaleoverride[6] = 0.0f;
             scaleoverride[1] = 0.4f;
             scaleoverride[2] = 0.8f;
             scaleoverride[4] = 0.8f;
             scaleoverride[5] = 0.4f;
-            scaleoverride[6] = 0.0f;
             NUVEC pos = SubShelfPos[6];
             pos.y += ypush;
             AddGameDebris(WORLD->debris_sys, qrand() / 10923 + 76, &pos);
@@ -2031,7 +2032,7 @@ void DrawSubItems() {
     NUMTX_ALIGNED16 item_matrix_a;
     NUMTX_ALIGNED16 item_matrix_b;
     f32 alpha = 1.0f;
-    if (__builtin_expect(GetMenuID() == 13 && !TestForController(), 0)) {
+    if (__builtin_expect(GetMenuID() == 13 && !TestForController(), 1)) {
         const f32 since_touch = GlobalTimer.time_elapsed - (LastTouchTime + 2.64f);
         if (__builtin_expect(since_touch > 4.0f, 1)) {
             const f32 phase = NuFmod(since_touch, 4.0f);
@@ -2103,7 +2104,7 @@ void DrawSubItems() {
         i32 slot = index;
         if (__builtin_expect(index == 6, 0)) {
             slot = 3;
-        } else if (__builtin_expect(index >= 3, 1)) {
+        } else if (index >= 3) {
             slot = index - 1;
         }
 

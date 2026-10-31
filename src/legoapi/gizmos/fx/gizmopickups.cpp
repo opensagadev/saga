@@ -1226,7 +1226,7 @@ void SpecialMiniKits_Configure(WORLDINFO_s *world, char *config) {
     world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 4);
     SPECIALMINIKIT_s *items = static_cast<SPECIALMINIKIT_s *>(world->giz_buffer.void_ptr);
     SPECIALMINIKIT_s *next = items;
-    i32 count = 0;
+    i32 count __attribute__((aligned(16))) = 0;
 
     while (NuFParGetLine(parser) != 0 && NuFParGetWord(parser) != 0) {
         if (NuStrICmp(parser->word_buf, const_cast<char *>("specialminikit")) != 0) {
@@ -1267,24 +1267,21 @@ void SpecialMiniKits_Configure(WORLDINFO_s *world, char *config) {
         if (item.pickup_name[0] == '\0') {
             continue;
         }
-        if ((item.flags & 0x20) != 0) {
-            if (__builtin_expect(item.special_name[0] == '\0', 0)) {
-                continue;
-            }
-        } else if (NuSpecialExistsFn(&item.special) == 0) {
+        if ((item.flags & 0x20) == 0 && NuSpecialExistsFn(&item.special) != 0) {
+        } else if ((item.flags & 0x20) == 0 || item.special_name[0] == '\0') {
             continue;
         }
 
         if (NuSpecialExistsFn(&item.special) != 0) {
             item.inst_anim = NuSpecialGetInstAnim(&item.special);
-            if (item.inst_anim != NULL) {
+            if (__builtin_expect(item.inst_anim != NULL, 0)) {
                 nuinstanim_s *animation = static_cast<nuinstanim_s *>(item.inst_anim);
                 item.anim_data = item.special.scene->instance_animation_data[animation->anim_ix];
                 item.end_frame = NuAnimEndFrameOld(item.anim_data);
             }
         }
-        ++next;
         ++count;
+        ++next;
     }
     NuFParDestroy(parser);
 
@@ -1292,10 +1289,10 @@ void SpecialMiniKits_Configure(WORLDINFO_s *world, char *config) {
         return;
     }
     world->giz_buffer.addr = reinterpret_cast<usize>(next);
-    SPECIALMINIKITSYS_s *system = static_cast<SPECIALMINIKITSYS_s *>(world->giz_buffer.void_ptr);
+    SPECIALMINIKITSYS_s *system = reinterpret_cast<SPECIALMINIKITSYS_s *>(next);
+    world->special_minikits = system;
     system->items = items;
     system->count = count;
-    world->special_minikits = system;
     world->giz_buffer.addr = ALIGN(world->giz_buffer.addr + sizeof(*system), 4);
 }
 

@@ -1057,22 +1057,20 @@ extern "C" {
         i32 corner = pick->selected_corner;
         x = pick->uv_x[corner] + x / (8192.0f * pick->zoom);
         y = pick->uv_y[corner] + y / (8192.0f * pick->zoom);
-        x = MIN(1.0f, (MAX(0.0f, x)));
-        y = MIN(1.0f, (MAX(0.0f, y)));
-        pick->uv_x[corner] = x;
-        pick->uv_y[corner] = y;
-        i32 left = pad->analog_l1 ? pad->analog_l1 : pad->analog_l2;
-        i32 right = pad->analog_r1 ? pad->analog_r1 : pad->analog_r2;
+        pick->uv_x[corner] = MIN(1.0f, (MAX(0.0f, x)));
+        pick->uv_y[corner] = MIN(1.0f, (MAX(0.0f, y)));
+        i32 left = pad->analog_l2;
+        i32 right = pad->analog_r2;
+        if (pad->analog_l1)
+            left = pad->analog_l1;
+        if (pad->analog_r1)
+            right = pad->analog_r1;
         if (left) {
             f32 zoom = pick->zoom - left / 4192.0f;
-            if (!(zoom < 1.0f)) {
-                pick->zoom = zoom;
-            } else {
-                pick->zoom = 1.0f;
-            }
+            pick->zoom = zoom < 1.0f ? 1.0f : zoom;
             return 1;
         }
-        if (__builtin_expect(!!(right), 1)) {
+        if (right) {
             f32 zoom = pick->zoom + right / 4192.0f;
             pick->zoom = zoom > 16.0f ? 16.0f : zoom;
             return 1;
@@ -1451,8 +1449,12 @@ extern "C" {
 
     static __used__ i32 eduicbProcessGreyPick(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad) {
         edui_colour_pick_s *pick = static_cast<edui_colour_pick_s *>(item);
-        i32 left = pad->analog_l1 ? pad->analog_l1 : pad->analog_l2;
-        i32 right = pad->analog_r1 ? pad->analog_r1 : pad->analog_r2;
+        i32 left = pad->analog_l2;
+        i32 right = pad->analog_r2;
+        if (pad->analog_l1)
+            left = pad->analog_l1;
+        if (pad->analog_r1)
+            right = pad->analog_r1;
         if (left) {
             f32 value = pick->value - left / 4192.0f;
             pick->value = value < 0.0f ? 0.0f : value;
@@ -5328,7 +5330,7 @@ extern "C" {
         i32 result = 0;
         if (__builtin_expect(!!(edmainGetCursorEnabled()), 0)) {
             if (eduiInteractLocked) {
-                if (__builtin_expect((!eduiInteractLocked->menu || !eduiInteractLocked->item) && eduiInteractLocked->field_20, 0))
+                if ((!eduiInteractLocked->menu || !eduiInteractLocked->item) && eduiInteractLocked->field_20)
                     eduiInteractLocked = NULL;
             }
             if (eduiInteractLocked) {
@@ -5346,13 +5348,15 @@ extern "C" {
                         edui_cursor_y < interact->y + interact->height) {
                         if (menu && interact->item && interact->item->type != 0x12)
                             menu->selected = interact->item;
-                        if (interact->field_20 || (interact->buttons & edui_cursor_buttons)) {
-                            if (!interact->field_20 && eduiGetActiveMenu() != menu)
-                                eduiSetActiveMenu(menu);
-                            if (interact->callback && interact->callback(interact))
-                                eduiInteractLocked = interact;
-                        }
                         result = 1;
+                        if (__builtin_expect(!interact->field_20, 0)) {
+                            if (!(interact->buttons & edui_cursor_buttons))
+                                break;
+                            if (eduiGetActiveMenu() != menu)
+                                eduiSetActiveMenu(menu);
+                        }
+                        if (interact->callback && interact->callback(interact))
+                            eduiInteractLocked = interact;
                         break;
                     }
                 }

@@ -540,20 +540,25 @@ static void ZipUps_Draw(void *world_ptr, void *, float) {
 }
 
 static bool ZipUp_CanUse(ZIPUP *zipup, GameObject_s *object) {
-    if ((zipup->flags & 0xc0) != 0xc0)
-        return false;
-    if ((zipup->flags & 0x20) != 0)
-        return (object->apiobj.character_data->game_character->flags_094[3] & 0x20) != 0;
-    if ((object->apiobj.character_data->game_character->flags_094[3] & 0x20) != 0)
-        return false;
-    if ((zipup->flags & 2) == 0 && object->apiobj.field_0x27c != -1)
-        return false;
-    return true;
+    if ((zipup->flags & 0xc0) == 0xc0) {
+        if ((zipup->flags & 0x20) != 0) {
+            if ((object->apiobj.character_data->game_character->flags_094[3] & 0x20) != 0)
+                return true;
+        } else if ((object->apiobj.character_data->game_character->flags_094[3] & 0x20) == 0) {
+            if ((zipup->flags & 2) != 0)
+                return true;
+            if (object->apiobj.field_0x27c == -1)
+                return true;
+        }
+    }
+    return false;
 }
 
 ZIPUP *ZipUp_FindNearest(WORLDINFO_s *world, nuvec_s *position, float radius, float *distance, i32 *endpoint,
                          GameObject_s *object, bool touch) {
-    if (world == NULL || object == NULL || object->apiobj.character_data == NULL ||
+    if (world == NULL)
+        return NULL;
+    if (object == NULL || object->apiobj.character_data == NULL ||
         object->apiobj.character_data->game_character == NULL)
         return NULL;
     if (touch && !TouchHacks::CanUseZipup(*object))

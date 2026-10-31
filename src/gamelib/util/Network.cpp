@@ -193,6 +193,7 @@ void NetPredictor2::PredictValue(EdClass const *, void *, NetPredictor::Predicto
 i32 NetPredictor::SerialiseObject(EdStream &stream, NetPeer *peer, EdClass const *object_class, void *object,
                                   ReplicatorData &data, NetPredictor::PredictorTime *time, i16 *class_mapping) {
     u8 member_data[256];
+    u16 continuity_break = replication_group & 8;
     for (EdRef *member = object_class->members; member != NULL; member = member->next) {
         if (member->attributes < 0) {
             EdClass *member_class = theRegistry.GetClass(member->type_id);
@@ -218,7 +219,7 @@ i32 NetPredictor::SerialiseObject(EdStream &stream, NetPeer *peer, EdClass const
                 member->GetMemberData(object, member->type_id, member_data, sizeof(member_data));
             }
             type->serialise(stream, member_data, size);
-            if (stream.mode == 1 && time->sample_count <= 2 && (replication_group & 8) == 0) {
+            if (stream.mode == 1 && time->sample_count <= 2 && continuity_break == 0) {
                 member->SetMemberData(object, member->type_id, member_data, sizeof(member_data), class_mapping);
             }
 
@@ -889,14 +890,14 @@ i32 NetworkObjectManager::ObjectOwnerCall(void *instance, i32 call_id, NetMessag
     }
     if (object->owner->local != 0) {
         reinterpret_cast<void (*)(void *, NetMessage &)>(registered_calls[call_id - 1].callback)(instance, message);
-        return 1;
+    } else {
+        i16 class_id = static_cast<i16>(theRegistry.GetClassId(object->object_class));
+        i16 object_id = object->id;
+        NetMessage outgoing(message);
+        NetPeer &peer = *reinterpret_cast<NetPeer *>(&object->owner);
+        PrependObjectCallHeader(outgoing, object_id, class_id, call_id);
+        theNetwork.ReliableSend(outgoing, 3, peer, NULL, 0);
     }
-
-    i16 class_id = static_cast<i16>(theRegistry.GetClassId(object->object_class));
-    i16 object_id = object->id;
-    NetMessage outgoing(message);
-    PrependObjectCallHeader(outgoing, object_id, class_id, call_id);
-    theNetwork.ReliableSend(outgoing, 3, *reinterpret_cast<NetPeer *>(&object->owner), NULL, 0);
     return 1;
 }
 

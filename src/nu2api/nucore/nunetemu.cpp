@@ -332,31 +332,34 @@ void NuNetEmu::EmuPacket::AddPayload(void *data, i32 size) {
     payload_size = payload_size + size + 2;
 }
 
+static inline bool EmuDropPacket(NuNetEmu *emu) {
+    if (emu->field_24 == 1) {
+        f32 random = NuRandFloat();
+        return emu->field_34 > random;
+    } else if (emu->field_24 == 2) {
+        if (emu->field_30 == 0) {
+            f32 random = NuRandFloat();
+            if (emu->field_34 > random) {
+                f32 range = static_cast<f32>(emu->field_2c - emu->field_28);
+                f32 random = NuRandFloat();
+                emu->field_30 = static_cast<i32>(random * range) + emu->field_28;
+            }
+        }
+        if (emu->field_30 > 0) {
+            emu->field_30--;
+            return true;
+        }
+    }
+    return false;
+}
+
 i32 NuNetEmu::SendTo(void *data, i32 size, nunetaddr_s *address, i32) {
     if (field_10 == 0) {
         return NuNetSessionSendTo(data, size, address);
     }
 
-    if (field_24 != 1) {
-        if (field_24 == 2) {
-            if (field_30 == 0) {
-                f32 random = NuRandFloat();
-                if (field_34 > random) {
-                    f32 range = static_cast<f32>(field_2c - field_28);
-                    f32 random = NuRandFloat();
-                    field_30 = static_cast<i32>(random * range) + field_28;
-                }
-            }
-            if (field_30 > 0) {
-                field_30--;
-                return size;
-            }
-        }
-    } else {
-        f32 random = NuRandFloat();
-        if (__builtin_expect(field_34 > random, 1)) {
-            return size;
-        }
+    if (EmuDropPacket(this)) {
+        return size;
     }
 
     if (field_0c >= field_17c8) {
@@ -370,7 +373,7 @@ i32 NuNetEmu::SendTo(void *data, i32 size, nunetaddr_s *address, i32) {
         if (field_18 > 0) {
             f32 range = static_cast<f32>(field_18 - field_14);
             f32 random = NuRandFloat();
-            packet->send_time = now + (static_cast<u32>(static_cast<i32>(random * range)) + static_cast<u32>(field_14));
+            packet->send_time = static_cast<i32>(random * range) + field_14 + now;
         } else {
             packet->send_time = 0;
         }

@@ -254,13 +254,13 @@ void PushCode(GameObject_s *object, i32 allow_push) {
             if (object->field_0xdc4 >= 0.25f)
                 object->field_0xdc4 = 0.4f;
         }
-    } else if (!(object->pad_gamepad->input_magnitude > 0.0f ||
-                 (LEGOCONTEXT_PUSHOBSTACLE != -1 && object->character_context == LEGOCONTEXT_PUSHOBSTACLE))) {
-        object->field_0xdc4 = 0.0f;
-    } else {
+    } else if (object->pad_gamepad->input_magnitude > 0.0f ||
+                 (LEGOCONTEXT_PUSHOBSTACLE != -1 && object->character_context == LEGOCONTEXT_PUSHOBSTACLE)) {
         object->field_0xdc4 -= FRAMETIME;
-        if (object->field_0xdc4 < 0.0f)
+        if (__builtin_expect(object->field_0xdc4 < 0.0f, 0))
             object->field_0xdc4 = 0.0f;
+    } else {
+        object->field_0xdc4 = 0.0f;
     }
 
     if ((CInfo[object->character_context].flags & 0x2000) != 0) {
@@ -437,7 +437,7 @@ maintain:
             }
             if (stopped && ParticlesPerSecond(3.0f, FRAMETIME) > 0) {
                 NewBuzzFrames(object->pad_gamepad->pad, 1, 0);
-            } else if (moving) {
+            } else if (__builtin_expect(moving != 0, 1)) {
                 f32 strength = QRAND_FLOAT() * 0.3f;
                 NewRumble(object->pad_gamepad->pad, strength, 0);
             }

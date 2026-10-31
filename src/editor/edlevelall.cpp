@@ -7339,6 +7339,15 @@ void EdRegistry::SerialiseObjects(EdStream &stream, EdRegistry *source_registry)
         if (object_class->FindMember(&member, object, attribute, 1))
             member.reference->GetAttributeData(member.object, attribute, type, data, size);
     };
+    auto is_filtered = [&](i32 object_group, i32 stream_group) -> bool {
+        if (stream.flags & 0x400000) {
+            if (filter_flags & 0x400000)
+                return true;
+        } else if (filter_flags & 0x10000000) {
+            return true;
+        }
+        return object_group != stream_group;
+    };
     auto read_objects = [&](EdClass *object_class, EdClass *source_class) {
         i32 count;
         stream.SerialiseBuffer(&count, sizeof(count), 1);
@@ -7372,10 +7381,11 @@ void EdRegistry::SerialiseObjects(EdStream &stream, EdRegistry *source_registry)
             EdClass *object_class = &classes[index];
             if (object_class->interface == NULL)
                 continue;
+            u32 class_flags = object_class->flags;
             if (stream.flags & 0x400000) {
-                if (__builtin_expect(object_class->flags & 0x400000 != 0, 0))
+                if (class_flags & 0x400000)
                     continue;
-            } else if (object_class->flags & 0x10000000) {
+            } else if (class_flags & 0x10000000) {
                 continue;
             }
             ++count;
@@ -7385,10 +7395,11 @@ void EdRegistry::SerialiseObjects(EdStream &stream, EdRegistry *source_registry)
             EdClass *object_class = &classes[index];
             if (__builtin_expect(object_class->interface == NULL, 0))
                 continue;
+            u32 class_flags = object_class->flags;
             if (stream.flags & 0x400000) {
-                if (object_class->flags & 0x400000)
+                if (class_flags & 0x400000)
                     continue;
-            } else if (__builtin_expect(object_class->flags & 0x10000000 != 0, 1)) {
+            } else if (__builtin_expect((class_flags & 0x10000000) != 0, 1)) {
                 continue;
             }
             stream.BeginBlock("ObjectList");
@@ -7400,13 +7411,7 @@ void EdRegistry::SerialiseObjects(EdStream &stream, EdRegistry *source_registry)
                 filter_flags = 0;
                 get_attribute(object_class, object, 1, EdType_Int, &filter_flags, 0);
                 get_attribute(object_class, object, 0x100, EdType_Short, &group, 0);
-                if (stream.flags & 0x400000) {
-                    if (filter_flags & 0x400000)
-                        continue;
-                } else if (filter_flags & 0x10000000) {
-                    continue;
-                }
-                if (__builtin_expect(group != stream.unknown_10, 0))
+                if (is_filtered(group, stream.unknown_10))
                     continue;
                 ++object_count;
             }
@@ -7417,13 +7422,7 @@ void EdRegistry::SerialiseObjects(EdStream &stream, EdRegistry *source_registry)
                 filter_flags = 0;
                 get_attribute(object_class, object, 1, EdType_Int, &filter_flags, 0);
                 get_attribute(object_class, object, 0x100, EdType_Short, &group, 0);
-                if (stream.flags & 0x400000) {
-                    if (filter_flags & 0x400000)
-                        continue;
-                } else if (filter_flags & 0x10000000) {
-                    continue;
-                }
-                if (__builtin_expect(group != stream.unknown_10, 0))
+                if (is_filtered(group, stream.unknown_10))
                     continue;
                 i32 object_flags = 0;
                 get_attribute(object_class, object, 1, EdType_Int, &object_flags, 0);
@@ -8389,6 +8388,7 @@ void LevelEditor::ProcessEvenWhenPaused(ThingProcessData *data) {
     if (!editors_entered) {
         return;
     }
+    f32 t = data->t;
     nupad_s *pad = data->pads[0];
     text_length = 0;
     memset(info_text, 0, sizeof(info_text));
@@ -8446,7 +8446,7 @@ void LevelEditor::ProcessEvenWhenPaused(ThingProcessData *data) {
     if (field_0x28 != 0) {
         camera = edmainGetCamera();
     }
-    input.Update(camera, pad, data->t, thePropertyTool.HasActiveMenu());
+    input.Update(camera, pad, t, thePropertyTool.HasActiveMenu());
     if (edmainGetCursorEnabled()) {
         eduiProcessCursor(0.0f, pad);
     }
@@ -8473,7 +8473,7 @@ void LevelEditor::ProcessEvenWhenPaused(ThingProcessData *data) {
     if (edLevelActiveMenu != NULL) {
         NuFntSet(EdLevelFnt);
         NuFntScale(EdLevelFntScale, EdLevelFntScale);
-        if (eduiMenuProcess(edLevelActiveMenu, data->t, pad) != 0) {
+        if (eduiMenuProcess(edLevelActiveMenu, t, pad) != 0) {
             input.Clear(3);
         } else if (edLevelActiveMenu != edLevelPinnedMenu) {
             if (__builtin_expect(input.GetPress(3) != 0.0f, 0)) {
@@ -8491,7 +8491,7 @@ void LevelEditor::ProcessEvenWhenPaused(ThingProcessData *data) {
     } else if (edLevelPinnedMenu != NULL && !thePropertyTool.HasActiveMenu()) {
         NuFntSet(EdLevelFnt);
         NuFntScale(EdLevelFntScale, EdLevelFntScale);
-        if (eduiMenuProcess(edLevelPinnedMenu, data->t, pad) != 0) {
+        if (eduiMenuProcess(edLevelPinnedMenu, t, pad) != 0) {
             return;
         }
     }

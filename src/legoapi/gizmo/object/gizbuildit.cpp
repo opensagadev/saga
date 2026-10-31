@@ -482,8 +482,8 @@ void GizDrawBuildItPiece(GameObject_s *player, i32 draw_reflection) {
     NUMTX_ALIGNED16 matrix = data->start_mtx;
     if (progress > 0.0f) {
         NUMTX_ALIGNED16 start = data->start_mtx;
-        NUMTX_ALIGNED16 end = data->end_mtx;
         start.m30 = start.m31 = start.m32 = 0.0f;
+        NUMTX_ALIGNED16 end = data->end_mtx;
         end.m30 = end.m31 = end.m32 = 0.0f;
         NUQUAT from, to, rotation;
         NuMtxToQuat(&start, &from);
@@ -494,8 +494,9 @@ void GizDrawBuildItPiece(GameObject_s *player, i32 draw_reflection) {
         const f32 x = matrix.m30 + (data->end_mtx.m30 - matrix.m30) * progress;
         const f32 y = matrix.m31 + (data->end_mtx.m31 - matrix.m31) * progress;
         const f32 z = matrix.m32 + (data->end_mtx.m32 - matrix.m32) * progress;
+        const f32 bob = 0.1f * NU_SIN_LUT(static_cast<i32>(32768.0f * progress));
         interpolated.m30 = x;
-        interpolated.m31 = y + 0.1f * NU_SIN_LUT(static_cast<i32>(32768.0f * progress));
+        interpolated.m31 = y + bob;
         interpolated.m32 = z;
         matrix = interpolated;
     }

@@ -895,7 +895,7 @@ void UpdateMidPos(GIZMOBLOWUP_s *blowup) {
 }
 
 void GizmoBlowupEarlyUpdate(void *world_ptr, void *, float) {
-    if (world_ptr == NULL) {
+    if (__builtin_expect(world_ptr == NULL, 0)) {
         return;
     }
 
@@ -945,7 +945,7 @@ void GizmoBlowupEarlyUpdate(void *world_ptr, void *, float) {
                          (blowup->state_flags & GIZMOBLOWUP_STATE_REPEATING) != 0)) {
                         blowup->type->animation_base_frame += FRAMETIME * 60.0f * animation->tfactor;
                         blowup->state_flags |= GIZMOBLOWUP_STATE_ACTIVE;
-                        if (blowup->type->animation_base_frame >= end_frame) {
+                        if (__builtin_expect(blowup->type->animation_base_frame >= end_frame, 0)) {
                             if (animation->repeating != 0) {
                                 blowup->type->animation_base_frame = 1.0f;
                             } else {
@@ -1096,7 +1096,7 @@ static void Blowups_Reset(void *world_ptr, void *, void *progress_ptr) {
     if (__builtin_expect(world->gizmo_blowups != NULL && world->gizmo_blowup_count > 0, 1)) {
         const bool has_progress = progress != NULL;
         GIZMOBLOWUP_s *blowup = world->gizmo_blowups;
-        for (i32 index = 0; index < world->gizmo_blowup_count; ++index, ++blowup) {
+        for (i32 index = 0; index < world->gizmo_blowup_count; blowup++, index++) {
             blowup->visibility_flags |= GIZMOBLOWUP_VISIBLE;
             blowup->state_flags |= GIZMOBLOWUP_STATE_ACTIVATED;
             blowup->output_flags &= ~GIZMOBLOWUP_OUTPUT_BLOWN_UP;
@@ -1107,7 +1107,7 @@ static void Blowups_Reset(void *world_ptr, void *, void *progress_ptr) {
 
             nuinstanim_s *animation = NuSpecialGetInstAnim(&blowup->type->animated_special);
             u8 state_flags;
-            if (animation != NULL) {
+            if (__builtin_expect(animation != NULL, 1)) {
                 state_flags = blowup->state_flags;
                 if (animation->playing != 0) {
                     const u8 previous_state_flags = state_flags;
@@ -1132,9 +1132,8 @@ static void Blowups_Reset(void *world_ptr, void *, void *progress_ptr) {
 
             u8 output_flags;
             if (index <= 511 && has_progress) {
-                u32 bit = 1;
-                bit <<= (index & 31);
                 const i32 word = index >> 5;
+                const u32 bit = 1u << (index & 31);
 
                 const u8 blown_up = (progress->blown_up[word] & bit) != 0;
                 output_flags = (blowup->output_flags & ~GIZMOBLOWUP_OUTPUT_BLOWN_UP) | blown_up;
@@ -1147,20 +1146,18 @@ static void Blowups_Reset(void *world_ptr, void *, void *progress_ptr) {
                 if ((old_visibility & GIZMOBLOWUP_VISIBLE) != 0) {
                     if (__builtin_expect((blowup->visibility_flags & GIZMOBLOWUP_VISIBLE) == 0, 0)) {
                         GizBlowup_DeleteSingleTerrain(blowup);
-                        state_flags = blowup->state_flags;
                         output_flags = blowup->output_flags;
                     }
                 } else {
                     if ((blowup->visibility_flags & GIZMOBLOWUP_VISIBLE) != 0) {
                         GizBlowup_InitSingleTerrain(blowup);
-                        state_flags = blowup->state_flags;
                         output_flags = blowup->output_flags;
                     }
                 }
 
                 u8 activated = (progress->activated[word] & bit) != 0;
                 activated <<= 7;
-                blowup->state_flags = (state_flags & ~GIZMOBLOWUP_STATE_ACTIVATED) | activated;
+                blowup->state_flags = (blowup->state_flags & ~GIZMOBLOWUP_STATE_ACTIVATED) | activated;
 
                 u8 secondary_output = (progress->secondary_output[word] & bit) != 0;
                 secondary_output <<= 4;

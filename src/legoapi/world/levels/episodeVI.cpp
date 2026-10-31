@@ -1503,7 +1503,7 @@ void SarlaccPitB_Update(WORLDINFO_s *world) {
                 }
                 if (!(first_occupied && second_occupied)) {
                     sarlaccdisco.timer += FRAMETIME;
-                    if (sarlaccdisco.timer > 2.5f) {
+                    if (__builtin_expect(sarlaccdisco.timer > 2.5f, 1)) {
                         sarlaccdisco.timer = 0.0f;
                         for (i32 pass = 0; pass < 2; ++pass) {
                             i32 selected = SarlaccDiscoPickPanel(3, -1);

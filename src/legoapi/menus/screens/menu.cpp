@@ -1128,74 +1128,69 @@ void MenuUpdateNewGame(MENU *menu) {
     }
 
     startnewgame = 0;
-    if (__builtin_expect(startnewgame_initiated != 0 || saveload_autosave != -1, 0)) {
+    if (startnewgame_initiated != 0 || saveload_autosave != -1) {
         startnewgame_initiated = 0;
-        startnewgame = 0;
-        const i32 save_occurred = MenuSaveOccurred;
-        NewGame();
-        MenuSaveOccurred = save_occurred;
-        NewLData = NEWGAME_LDATA;
-        UsePlayerList = 2;
-        newgamecam = 1;
-        newgamecamtime = 0.0f;
-        return;
-    }
+    } else {
+        if (menu->confirm_pressed == 0) {
+            return;
+        }
 
-    if (menu->confirm_pressed == 0) {
-        return;
-    }
-
-    switch (menu->selected_item) {
-        case 0:
-            MenuSFX = GameAudio_GetSfxId(0x30);
-            if (PlayerProgress[0].active == 0 && PlayerProgress[1].active == 0) {
-                PlayerProgress[0].active = 1;
-            }
-            if (TestForController()) {
-                NewMenu(1000, -1, -1);
-            } else {
-                NewMenu(33, -1, -1);
-            }
-            NuIOS_RecordFlurryEvent("mainmenu_newgame");
-            break;
-
-        case 1:
-            MenuSFX = GameAudio_GetSfxId(0x30);
-            NewMenu(1012, -1, -1);
-            NuIOS_RecordFlurryEvent("mainmenu_loadgame");
-            break;
-
-        case 2:
-            if (TestForController()) {
-                MenuSFX = GameAudio_GetSfxId(0x32);
-            } else {
+        switch (menu->selected_item) {
+            case 0:
                 MenuSFX = GameAudio_GetSfxId(0x30);
-                ++SuperOptions.touch_controls;
-                if (SuperOptions.touch_controls > 1) {
-                    SuperOptions.touch_controls = 0;
+                if (PlayerProgress[0].active == 0 && PlayerProgress[1].active == 0) {
+                    PlayerProgress[0].active = 1;
                 }
+                if (TestForController()) {
+                    NewMenu(1000, -1, -1);
+                } else {
+                    NewMenu(33, -1, -1);
+                }
+                NuIOS_RecordFlurryEvent("mainmenu_newgame");
+                break;
+
+            case 1:
                 MenuSFX = GameAudio_GetSfxId(0x30);
-                MechSystems::Get()->input_touch_system.control_mode = SuperOptions.touch_controls != 0 ? 2 : 1;
-                TriggerExtraDataSave();
-            }
-            break;
+                NewMenu(1012, -1, -1);
+                NuIOS_RecordFlurryEvent("mainmenu_loadgame");
+                break;
 
-        case 3:
-            NuIOS_RecordFlurryEvent("mainmenu_restore");
-            NuIOS_RestoreInAppPurchases();
-            NewMenu(22, -1, -1);
-            break;
+            case 2:
+                if (TestForController()) {
+                    MenuSFX = GameAudio_GetSfxId(0x32);
+                } else {
+                    MenuSFX = GameAudio_GetSfxId(0x30);
+                    ++SuperOptions.touch_controls;
+                    if (SuperOptions.touch_controls > 1) {
+                        SuperOptions.touch_controls = 0;
+                    }
+                    MenuSFX = GameAudio_GetSfxId(0x30);
+                    const i32 mode = SuperOptions.touch_controls != 0 ? 2 : 1;
+                    MechSystems::Get()->input_touch_system.control_mode = mode;
+                    TriggerExtraDataSave();
+                }
+                break;
+
+            case 3:
+                NuIOS_RecordFlurryEvent("mainmenu_restore");
+                NuIOS_RestoreInAppPurchases();
+                NewMenu(22, -1, -1);
+                break;
+        }
+
+        if (__builtin_expect(startnewgame == 0, 1)) {
+            return;
+        }
     }
 
-    if (startnewgame != 0) {
-        const i32 save_occurred = MenuSaveOccurred;
-        NewGame();
-        MenuSaveOccurred = save_occurred;
-        NewLData = NEWGAME_LDATA;
-        UsePlayerList = 2;
-        newgamecam = 1;
-        newgamecamtime = 0.0f;
-    }
+    startnewgame = 0;
+    const i32 save_occurred = MenuSaveOccurred;
+    NewGame();
+    MenuSaveOccurred = save_occurred;
+    NewLData = NEWGAME_LDATA;
+    UsePlayerList = 2;
+    newgamecam = 1;
+    newgamecamtime = 0.0f;
 }
 
 void DrawGameState(float x, float y, i32 highlight, i32 slot) {

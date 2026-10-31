@@ -381,7 +381,7 @@ void NuPostFilter::initSharedResources(i32, i32) {
     u16 *index = indices;
     for (i32 y = 0; y < rows; ++y) {
         for (i32 x = 0; x < 16; ++x) {
-            const i32 vertex = y * 17 + x;
+            const u16 vertex = y * 17 + x;
             index[0] = vertex;
             index[1] = vertex + 1;
             index[2] = vertex + 17;

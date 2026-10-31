@@ -1078,24 +1078,25 @@ void ResetSinglePushBlockHeight(WORLDINFO_s *world, pushblock_s *block, i32 inde
     }
 }
 
-__attribute__((optimize("O2", "tree-vectorize"))) void MoveBlocksOverBlock(WORLDINFO_s *world, pushblock_s *block, i32 excluded, nuvec_s *velocity) {
+void MoveBlocksOverBlock(WORLDINFO_s *world, pushblock_s *block, i32 excluded, nuvec_s *velocity) {
     if (block->runtime_flags_0c9 & 4)
         return;
-    f32 xmin = block->bounds_min.x + block->position->x, xmax = block->position->x + block->bounds_max.x;
-    f32 zmin = block->bounds_min.z + block->position->z, zmax = block->position->z + block->bounds_max.z;
+    NUVEC *block_position = block->position;
+    f32 xmin = block->bounds_min.x + block_position->x, zmin = block->bounds_min.z + block_position->z;
+    f32 xmax = block_position->x + block->bounds_max.x, zmax = block_position->z + block->bounds_max.z;
     for (i32 i = 0; i < world->push_block_count; ++i) {
-        if (__builtin_expect(i == excluded, 0))
+        if (i == excluded)
             continue;
         pushblock_s *other = &world->push_blocks[i];
         if ((other->flags_0cb & 4) || !(other->flags_0ca & 4))
             continue;
         NUVEC *position = other->position;
-        if (block->position->y >= position->y)
+        if (block_position->y >= position->y)
             continue;
-        if (!(position->x >= (xmin - other->bounds_max.x) + 0.01f &&
-              position->x <= (xmax - other->bounds_min.x) - 0.01f &&
-              position->z >= (zmin - other->bounds_max.z) + 0.01f &&
-              position->z <= (zmax - other->bounds_min.z) - 0.01f))
+        f32 other_min_x = other->bounds_min.x, other_max_x = other->bounds_max.x;
+        f32 other_min_z = other->bounds_min.z, other_max_z = other->bounds_max.z;
+        if (!(position->x >= (xmin - other_max_x) + 0.01f && position->x <= (xmax - other_min_x) - 0.01f &&
+              position->z >= (zmin - other_max_z) + 0.01f && position->z <= (zmax - other_min_z) - 0.01f))
             continue;
         other->snap_origin = *position;
         position->x += velocity->x;

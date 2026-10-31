@@ -1472,7 +1472,6 @@ AIPATHCNXCONTROLLER_s *AIPathCnxControllerCreate(AIPATHCNXCONTROLSYS_s *control_
             AIPATHCNX *connection = static_cast<AIPATHCNX *>(AIPAthFindPathCnx(ai_system, path, from, to, &direction));
             void *target = NULL;
             if (connection != NULL) {
-                i32 gizmo_type;
                 switch (target_type) {
                     case 0:
                         if (target_name != NULL) {
@@ -1488,19 +1487,23 @@ AIPATHCNXCONTROLLER_s *AIPathCnxControllerCreate(AIPATHCNXCONTROLSYS_s *control_
                     case 3:
                         target = GizmoFindByName(WORLD->gizmo_sys, -1, target_name);
                         break;
-                    case 4:
-                        gizmo_type = blowup_gizmotype_id;
-                        goto find_typed_gizmo;
-                    case 7:
-                        gizmo_type = force_gizmotype_id;
-                        goto find_typed_gizmo;
-                    case 8:
-                        gizmo_type = obstacle_gizmotype_id;
-                        goto find_typed_gizmo;
+                    case 4: {
+                        GIZMO *gizmo = GizmoFindByName(WORLD->gizmo_sys, blowup_gizmotype_id, target_name);
+                        target = gizmo != NULL ? gizmo->object : NULL;
+                        break;
+                    }
+                    case 7: {
+                        GIZMO *gizmo = GizmoFindByName(WORLD->gizmo_sys, force_gizmotype_id, target_name);
+                        target = gizmo != NULL ? gizmo->object : NULL;
+                        break;
+                    }
+                    case 8: {
+                        GIZMO *gizmo = GizmoFindByName(WORLD->gizmo_sys, obstacle_gizmotype_id, target_name);
+                        target = gizmo != NULL ? gizmo->object : NULL;
+                        break;
+                    }
                     case 9: {
-                        gizmo_type = zipup_gizmotype_id;
-                    find_typed_gizmo:
-                        GIZMO *gizmo = GizmoFindByName(WORLD->gizmo_sys, gizmo_type, target_name);
+                        GIZMO *gizmo = GizmoFindByName(WORLD->gizmo_sys, zipup_gizmotype_id, target_name);
                         target = gizmo != NULL ? gizmo->object : NULL;
                         break;
                     }
@@ -1524,10 +1527,8 @@ AIPATHCNXCONTROLLER_s *AIPathCnxControllerCreate(AIPATHCNXCONTROLSYS_s *control_
 
                     controller = reinterpret_cast<AIPATHCNXCONTROLLER_s *>(node);
                     AIPATHSYS *path_system = ai_system->path_sys;
-                    const i32 path_count = path_system->path_count;
-                    AIPATH **path_cursor = path_system->paths;
-                    for (u8 index = 0; index < path_count; ++index, ++path_cursor) {
-                        if (*path_cursor == path) {
+                    for (u8 index = 0; index != path_system->path_count; ++index) {
+                        if (path_system->paths[index] == path) {
                             controller->path_index = index;
                             break;
                         }

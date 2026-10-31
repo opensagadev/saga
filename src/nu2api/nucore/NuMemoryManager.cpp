@@ -1399,7 +1399,7 @@ u16 NuMemoryManager::DumpBlock(u32 dump_id, NuSymbolQuery *, Header *header, u32
 }
 
 void NuMemoryManager::DumpBlocksForContext(u32 dump_id, NuSymbolQuery *query, Context *context, u32 flags) {
-    char line[512] __attribute__((aligned(16)));
+    char line[512];
     char size_text[14];
 
     error_handler->Dump(this, dump_id,
@@ -1416,32 +1416,33 @@ void NuMemoryManager::DumpBlocksForContext(u32 dump_id, NuSymbolQuery *query, Co
         this, dump_id,
         "+------------+------------+---------------+-----+---------------------------------------------------\r\n");
 
-    u32 category_bytes[128] = {};
+    u32 category_bytes[128] __attribute__((aligned(16))) = {};
     u32 total_bytes = 0;
     u32 total_blocks = 0;
 
     auto context_id = context->id;
     for (Page *page = pages; page != NULL; page = page->next) {
+        Header *header = page->first_header;
         Header *end = reinterpret_cast<Header *>(page->end);
-        for (Header *header = page->first_header; header != end;) {
-            u32 block_size = BLOCK_SIZE(header->value);
+        while (header != end) {
             if ((header->value & ALLOC_MASK) != 0) {
                 if ((m_flags & MEM_MANAGER_DEBUG) != 0) {
                     DebugHeader *debug = reinterpret_cast<DebugHeader *>(header);
-                    if ((debug->flags.unknown & 1) == 0 && debug->flags.ctx_id == context_id &&
+                    if ((reinterpret_cast<u8 *>(&debug->flags)[1] & 0x10) == 0 && debug->flags.ctx_id == context_id &&
                         ((flags & 2) == 0 || (debug->flags.alloc_flags & 4) != 0)) {
+                        u32 block_size = BLOCK_SIZE(header->value);
                         u32 count = 1;
                         if ((flags & 0x10) != 0)
                             count += FindAndTouchMatchingBlocks(debug, &block_size, flags);
                         debug->flags.unknown |= 1;
                         u16 category = DumpBlock(dump_id, query, header, count, block_size, flags);
                         category_bytes[category] += block_size;
-                        total_blocks += count;
                         total_bytes += block_size;
+                        total_blocks += count;
                     }
                 } else {
-                    u16 category = DumpBlock(dump_id, query, header, 1, block_size, flags);
-                    block_size = BLOCK_SIZE(header->value);
+                    u16 category = DumpBlock(dump_id, query, header, 1, BLOCK_SIZE(header->value), flags);
+                    u32 block_size = BLOCK_SIZE(header->value);
                     category_bytes[category] += block_size;
                     total_bytes += block_size;
                     ++total_blocks;

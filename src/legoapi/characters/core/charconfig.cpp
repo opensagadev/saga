@@ -2967,24 +2967,20 @@ static i32 CharConfig(i32 character_id, char *directory, char *filename, VARIPTR
     char redirected_name[64];
     char path[128];
     i32 redirected = 0;
+    char *buffer;
+    i32 length;
     if (text == NULL) {
-        if (directory == NULL) {
-            SecondCharConfigure = 0;
-            return 0;
-        }
+        if (directory == NULL)
+            goto done;
         NuStrCpy(path, directory);
         NuStrCat(path, filename);
         i32 size = NuFileLoadBuffer(path, MiniBuffer, sizeof(MiniBuffer));
-        if (__builtin_expect(size < 1, 0)) {
-            SecondCharConfigure = 0;
-            return 0;
-        }
+        if (__builtin_expect(size < 1, 0))
+            goto done;
         MiniBuffer[size] = 0;
-        text_length = Text_StripComments(MiniBuffer, MiniBuffer, 1);
-        if (text_length < 1) {
-            SecondCharConfigure = 0;
-            return 0;
-        }
+        length = Text_StripComments(MiniBuffer, MiniBuffer, 1);
+        if (length < 1)
+            goto done;
         if (redirect != 0) {
             if ((redirected = RedirectTextFile(MiniBuffer, redirected_name)) != 0) {
                 NuStrCpy(path, directory);
@@ -2992,16 +2988,20 @@ static i32 CharConfig(i32 character_id, char *directory, char *filename, VARIPTR
                 NuStrCat(path, ".txt");
                 size = NuFileLoadBuffer(path, MiniBuffer, sizeof(MiniBuffer));
                 if (size < 1) {
-                    SecondCharConfigure = 0;
-                    return 0;
+                    redirected = 0;
+                    goto done;
                 }
                 MiniBuffer[size] = 0;
-                text_length = Text_StripComments(MiniBuffer, MiniBuffer, 1);
+                length = Text_StripComments(MiniBuffer, MiniBuffer, 1);
             }
         }
-        text = MiniBuffer;
+        buffer = MiniBuffer;
+    } else {
+        buffer = text;
+        length = text_length;
     }
-    if (text_length < 1) {
+    if (length < 1) {
+    done:
         SecondCharConfigure = 0;
         return redirected;
     }
@@ -3011,28 +3011,28 @@ static i32 CharConfig(i32 character_id, char *directory, char *filename, VARIPTR
     memset(&charconfig, 0, sizeof(charconfig));
     charconfig.character_id = static_cast<i16>(character_id);
     charconfig.character = character;
-    charconfig.flags = (permanent & 1) << 6;
     charconfig.runtime = static_cast<GAMECHARACTERDATA_s *>(character->field11_0x24);
+    charconfig.flags_bit6 = permanent;
     charconfig.effect_scratch = effects;
     charconfig.arena = arena;
     charconfig.arena_end = arena_end;
     charconfig.layer_scratch = layers;
     memset(effects, 0, sizeof(effects));
     GAMECHARACTERDATA_s *data = charconfig.runtime;
-    if (__builtin_expect(
-            data->layers == NULL && (character->model_flags & 1) == 0 && arena != NULL && arena_end != NULL, 0)) {
+    if (data->layers == NULL && (character->model_flags & 1) == 0 && arena != NULL &&
+        __builtin_expect(arena_end != NULL, 1)) {
         data->layers = layers;
         data->layer_count = 0;
         charconfig.flags |= 2;
     } else if (data->layer_count != 0) {
         charconfig.named_layers = 1;
     }
-    if (character->animations == NULL && arena != NULL && arena_end != NULL) {
+    if (character->animations == NULL && arena != NULL && __builtin_expect(arena_end != NULL, 1)) {
         arena->addr = ALIGN(arena->addr, 4);
         character->animations = static_cast<CHARACTERANIM_s *>(arena->void_ptr);
         charconfig.flags |= 0x20;
     }
-    NUFPAR *parser = NuFParCreateMem("character", text, 0xffff);
+    NUFPAR *parser = NuFParCreateMem("character", buffer, 0xffff);
     if (parser != NULL) {
         NuFParPushCom2(parser, ConfigChar_Keywords, game_keywords);
         while (NuFParGetLine(parser) != 0) {
@@ -3060,9 +3060,10 @@ static i32 CharConfig(i32 character_id, char *directory, char *filename, VARIPTR
                                   &charconfig.runtime->second_jump_duration, &charconfig.runtime->second_jump_height);
     if ((charconfig.flags & 0x20) != 0) {
         CHARACTERANIM_s *sentinel = &charconfig.character->animations[charconfig.animation_count];
-        charconfig.character->field5_0x14 = charconfig.animation_count++;
+        charconfig.character->field5_0x14 = charconfig.animation_count;
         sentinel->name = NULL;
         sentinel->action_id = -1;
+        charconfig.animation_count++;
         charconfig.arena->void_ptr = character->animations + charconfig.animation_count;
         for (i32 i = 0; i < charconfig.animation_count - 1; ++i) {
             NuStrCpy(static_cast<char *>(charconfig.arena->void_ptr), charconfig.animation_names[i]);

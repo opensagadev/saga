@@ -267,7 +267,11 @@ void NuSoundDecodeThread::RequestDecode(NuSoundDecoder &decoder, NuSoundBuffer &
                                         NuSoundWeakPtr<NuSoundBufferCallback> callback, bool loop) {
     __sync_fetch_and_add(&decoder.field_0xd4, 1);
 
-    Loader request{&decoder, &buffer, callback, loop};
+    Loader request;
+    request.decoder = &decoder;
+    request.buffer = &buffer;
+    request.callback = callback;
+    request.loop = loop;
     LoaderSlot &slot = this->loaders[(i32)this->tail_index % 128];
     new (&slot) Loader(request);
     __sync_fetch_and_add(&this->tail_index, 1);

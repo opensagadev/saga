@@ -4502,8 +4502,8 @@ static __used__ i32 RowMoveTowards(AIGROUP *group, AIROW *row, AIROW *previous, 
     AIPATHCNX *connection = row->path_info.connection;
     if (connection == NULL)
         return 0;
-    u8 node_index = connection->node_indices[row->path_info.direction == 0];
-    i32 direction_node = node_index;
+    i32 direction_node = connection->node_indices[row->path_info.direction == 0];
+    u8 node_index = direction_node;
     if (row->next_connection == NULL) {
         if (previous != NULL) {
             row->next_connection = previous->path_info.connection == connection ? previous->next_connection
@@ -4511,7 +4511,8 @@ static __used__ i32 RowMoveTowards(AIGROUP *group, AIROW *row, AIROW *previous, 
         } else if (group->leader != NULL) {
             AIPATHINFO *destination = &group->leader->ai->script_process.path_info;
             if (__builtin_expect(destination->path == row->path_info.path, 0)) {
-                i32 destination_node = destination->connection->node_indices[destination->dist > 0.5f];
+                i32 destination_node = destination->dist > 0.5f ? destination->connection->node_indices[1]
+                                                                : destination->connection->node_indices[0];
                 direction_node = destination_node;
                 u8 connection_index = destination->path->route_matrix[node_index][destination_node];
                 if (connection_index != 0xff) {
@@ -4523,23 +4524,28 @@ static __used__ i32 RowMoveTowards(AIGROUP *group, AIROW *row, AIROW *previous, 
         }
         AIPATHCNX *next = row->next_connection;
         if (next != NULL && next->traversal_flags[direction_node != next->node_indices[0]] == 0) {
-            i32 current_angle = connection->rotation;
+            i32 current_angle;
             if (row->path_info.direction != 0)
-                current_angle = NuAngAdd(0x8000, current_angle);
+                current_angle = NuAngAdd(0x8000, row->path_info.connection->rotation);
+            else
+                current_angle = row->path_info.connection->rotation;
             i32 next_angle;
-            if (connection->node_indices[row->path_info.direction == 0] == next->node_indices[0]) {
+            if (row->path_info.connection->node_indices[row->path_info.direction == 0] == next->node_indices[0]) {
                 row->next_direction = 0;
                 next_angle = next->rotation;
             } else {
                 row->next_direction = 1;
                 next_angle = NuAngAdd(0x8000, next->rotation);
             }
-            row->is_clockwise = NuAngSub(next_angle, current_angle) < 0;
+            if (NuAngSub(next_angle, current_angle) < 0)
+                row->is_clockwise = 1;
+            else
+                row->is_clockwise = 0;
         }
     }
     if (row->next_connection == NULL) {
         if (row->path_info.direction != 0) {
-            if (!(row->path_info.dist >= 0.0f))
+            if (row->path_info.dist < 0.0f)
                 return 1;
         } else if (row->path_info.dist > 1.0f) {
             return 1;
@@ -10667,10 +10673,10 @@ extern "C" i32 WithinConnection(AISYS *system, NUVEC *position, AIPATH *path, AI
     else
         narrow = 1;
     f32 second_radius = second->radius;
-    if (second_radius <= radius + 0.05f)
-        narrow = 1;
-    else
+    if (second_radius > radius + 0.05f)
         second_radius -= radius;
+    else
+        narrow = 1;
 
     if (first->has_special != 0 &&
         (path->updated_node_bits[connection->node_indices[0] / 8] & (1 << (connection->node_indices[0] % 8))) == 0)
@@ -10701,10 +10707,10 @@ extern "C" i32 WithinConnection(AISYS *system, NUVEC *position, AIPATH *path, AI
             width = -width;
         if (__builtin_expect(width > first_radius && width > second_radius, 0))
             return 0;
-        if (local.z < -first_radius || !(local.z <= connection->horizontal_distance + second_radius))
+        if (local.z < -first_radius || local.z > connection->horizontal_distance + second_radius)
             return 0;
-        NUVEC wall = local;
         const i32 angle = AISysPathIntersectionAngle((second_radius - first_radius) / connection->horizontal_distance);
+        NUVEC wall = local;
         if (wall.x < 0.0f)
             wall.x = -wall.x;
         NuVecRotateY(&wall, &wall, -angle);
@@ -10712,7 +10718,7 @@ extern "C" i32 WithinConnection(AISYS *system, NUVEC *position, AIPATH *path, AI
         if (wall.z < 0.0f) {
             if (first->min_height > position->y || position->y > first->max_height)
                 return 0;
-            if (!(first_radius * first_radius >= NuVecXZDistSqr(position, &first->position, &radial)))
+            if (!(NuVecXZDistSqr(position, &first->position, &radial) <= first_radius * first_radius))
                 return 0;
         } else if (!(wall.z > NU_COS_LUT(angle) * connection->horizontal_distance)) {
             f32 minimum, maximum;
@@ -10726,15 +10732,15 @@ extern "C" i32 WithinConnection(AISYS *system, NUVEC *position, AIPATH *path, AI
                 const f32 fraction =
                     (local.z - first_radius) / (connection->horizontal_distance - (first_radius + second_radius));
                 const f32 inverse = 1.0f - fraction;
-                minimum = second->min_height * fraction + first->min_height * inverse;
-                maximum = second->max_height * fraction + first->max_height * inverse;
+                minimum = first->min_height * inverse + second->min_height * fraction;
+                maximum = first->max_height * inverse + second->max_height * fraction;
             }
             if (minimum > position->y || position->y > maximum || !(first_radius > wall.x))
                 return 0;
         } else {
             if (second->min_height > position->y || position->y > second->max_height)
                 return 0;
-            if (!(second_radius * second_radius >= NuVecXZDistSqr(position, &second->position, &radial)))
+            if (!(NuVecXZDistSqr(position, &second->position, &radial) <= second_radius * second_radius))
                 return 0;
         }
     }

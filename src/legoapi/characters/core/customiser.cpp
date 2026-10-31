@@ -158,43 +158,44 @@ void Customiser_DrawAccessories(CUSTOMISER *customiser, GameObject_s *object, nu
     NUMTX_ALIGNED16 reflection;
     NUMTX_ALIGNED16 matrix;
     const i32 joint = object->apiobj.character_data->player_config->helmet_locator;
-    if (customiser == NULL || joint == -1 || object->apiobj.character_model->points_of_interest[joint] == NULL)
-        return;
-
-    const i32 side = object->id != customiser->character_ids[0];
-    i32 next_category = 0;
-    CUSTOMPIECERESOURCE *next_resource = Accessory[side];
-    do {
-        CUSTOMPIECERESOURCE *resource = next_resource++;
-        const i32 category = next_category++;
-        if (__builtin_expect(customiser->piece_counts[category] <= 0 || category == 2, 0))
-            continue;
-        if (category == 0) {
-            const u16 *pieces = customiser->save[side].pieces;
-            if ((customiser->piece_sets[0][static_cast<u16>(pieces[0])].layer_flags & 0x20) != 0 ||
-                (customiser->piece_sets[1][static_cast<u16>(pieces[1])].layer_flags & 1) != 0 ||
-                object->field_0x108e != 0)
+    if (__builtin_expect(customiser != NULL && joint != -1 &&
+                             object->apiobj.character_model->points_of_interest[joint] != NULL,
+                         1)) {
+        const i32 side = object->id != customiser->character_ids[0];
+        i32 next_category = 0;
+        CUSTOMPIECERESOURCE *next_resource = Accessory[side];
+        do {
+            CUSTOMPIECERESOURCE *resource = next_resource++;
+            const i32 category = next_category++;
+            if (__builtin_expect(customiser->piece_counts[category] <= 0 || category == 2, 0))
                 continue;
-        }
+            if (category == 0) {
+                const u16 *pieces = customiser->save[side].pieces;
+                if ((customiser->piece_sets[0][static_cast<u16>(pieces[0])].layer_flags & 0x20) != 0 ||
+                    (customiser->piece_sets[1][static_cast<u16>(pieces[1])].layer_flags & 1) != 0 ||
+                    object->field_0x108e != 0)
+                    continue;
+            }
 
-        nuhspecial_s *special = &resource->special;
-        if (__builtin_expect(!NuSpecialExistsFn(special), 0))
-            continue;
+            nuhspecial_s *special = &resource->special;
+            if (__builtin_expect(!NuSpecialExistsFn(special), 0))
+                continue;
 
-        // Retail keeps both draw matrices on a 16-byte-aligned stack.
+            // Retail keeps both draw matrices on a 16-byte-aligned stack.
 
-        if (__builtin_expect(matrices != NULL, 1))
-            matrix = matrices[joint];
-        else
-            matrix = object->joint_matrices[joint];
-        NuSpecialDrawAt(special, &matrix);
-        if (object->field_0x1088 != 0 && MatrixReflection(&matrix, object->field_0x1087, object->field_0x1020,
-                                                          WORLD->current_level->unknown_0cc, &reflection)) {
-            NuRndrStartReflectionRender(0);
-            NuSpecialDrawAt(special, &reflection);
-            NuRndrEndReflectionRender();
-        }
-    } while (next_category != 9);
+            if (__builtin_expect(matrices != NULL, 1))
+                matrix = matrices[joint];
+            else
+                matrix = object->joint_matrices[joint];
+            NuSpecialDrawAt(special, &matrix);
+            if (object->field_0x1088 != 0 && MatrixReflection(&matrix, object->field_0x1087, object->field_0x1020,
+                                                              WORLD->current_level->unknown_0cc, &reflection)) {
+                NuRndrStartReflectionRender(0);
+                NuSpecialDrawAt(special, &reflection);
+                NuRndrEndReflectionRender();
+            }
+        } while (next_category != 9);
+    }
 }
 
 i32 Customiser_NextPieceRight(CUSTOMISER *customiser, i32 index, i32 count, i32 unused, i32 category) {
