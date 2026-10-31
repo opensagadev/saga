@@ -5381,7 +5381,28 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
         object->field_0xef9 |= 8;
         if ((object->context_flags & 4) != 0) {
             if (!((action_pressed == 0 && object->combo_input_latched == 0) || object->combo_stage > 1)) {
-                if (object->combo_stage == 1) {
+                if (!(object->combo_stage == 1)) {
+                    SetComboOpponent(object, 1.0f, 1, 0);
+                    object->context_flags &= ~4;
+                    object->combo_stage = 1;
+                    if (object->id != id_IMPERIALGUARD)
+                        PlaySabreSfx(NULL, object, NULL, 1);
+                    if ((object->field_0xe20 & 0x40) != 0 &&
+                        object->apiobj.character_model->model_data_b[object->queued_context_animation + 2] != NULL) {
+                        object->combo_branch = 2;
+                        NewRumble(object->pad_gamepad->pad, 0.5f, 0);
+                        if (object->id != id_IMPERIALGUARD)
+                            PlaySabreSfx("ComboSaber2", object, &object->apiobj.collision_position, 0);
+                    } else {
+                        object->field_0xe20 &= ~0x40;
+                        object->combo_branch = 1;
+                        NewRumble(object->pad_gamepad->pad, 0.35f, 0);
+                    }
+                    object->context_animation = object->queued_context_animation + object->combo_branch;
+                    object->combo_input_latched = 0;
+                    object->field_0xe20 |= 0x40;
+                    object->context_flags &= ~0x50;
+                } else {
                     SetComboOpponent(object, 1.0f, 1, 0);
                     object->context_flags &= ~4;
                     object->combo_stage = 2;
@@ -5412,27 +5433,6 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
                                 PlaySabreSfx("ComboSaber1", object, &object->apiobj.collision_position, 0);
                             }
                         }
-                    }
-                    object->context_animation = object->queued_context_animation + object->combo_branch;
-                    object->combo_input_latched = 0;
-                    object->field_0xe20 |= 0x40;
-                    object->context_flags &= ~0x50;
-                } else {
-                    SetComboOpponent(object, 1.0f, 1, 0);
-                    object->context_flags &= ~4;
-                    object->combo_stage = 1;
-                    if (object->id != id_IMPERIALGUARD)
-                        PlaySabreSfx(NULL, object, NULL, 1);
-                    if ((object->field_0xe20 & 0x40) != 0 &&
-                        object->apiobj.character_model->model_data_b[object->queued_context_animation + 2] != NULL) {
-                        object->combo_branch = 2;
-                        NewRumble(object->pad_gamepad->pad, 0.5f, 0);
-                        if (object->id != id_IMPERIALGUARD)
-                            PlaySabreSfx("ComboSaber2", object, &object->apiobj.collision_position, 0);
-                    } else {
-                        object->field_0xe20 &= ~0x40;
-                        object->combo_branch = 1;
-                        NewRumble(object->pad_gamepad->pad, 0.35f, 0);
                     }
                     object->context_animation = object->queued_context_animation + object->combo_branch;
                     object->combo_input_latched = 0;
@@ -10480,24 +10480,18 @@ void Animate_JEDI(GameObject_s *object) {
         packet.requested_animation = CHARACTER_ANIMATION_FALL;
 
         if (object->field_0x7a5 != CHARACTER_CONTEXT_DOOMED) {
-            bool use_default_idle = object->apiobj.field_0x27d != 0;
-            if (!use_default_idle) {
-                const bool has_fall_animation =
-                    object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] != NULL;
-                // Original 0x16c978/0x16c9ce joins the character-data check
-                // at 0x16c7bc even when the ground-contact timer has expired.
-                if (__builtin_expect(object->ground_contact_grace_timer > 0.0f || !has_fall_animation ||
-                                         (object->fall_animation_timer < 0.2f &&
-                                          object->nearby_floor_distance != 2000000.0f &&
-                                          object->nearby_floor_distance < 0.25f && object->apiobj.velocity.y < 0.0f),
-                                     0)) {
-                    const GAMECHARACTERDATA *game_character =
-                        static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
-                    use_default_idle = !(game_character->field_0x28 > 0.0f) || !has_fall_animation;
-                }
-            }
-            if (use_default_idle) {
+            if (object->apiobj.field_0x27d != 0) {
                 packet.requested_animation = static_cast<i16>(GetDefaultIdle(object));
+            } else if (object->ground_contact_grace_timer > 0.0f ||
+                       object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] == NULL ||
+                       (object->fall_animation_timer < 0.2f && object->nearby_floor_distance != 2000000.0f &&
+                        object->nearby_floor_distance < 0.25f && object->apiobj.velocity.y < 0.0f)) {
+                const GAMECHARACTERDATA *game_character =
+                    static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
+                if (!(game_character->field_0x28 > 0.0f) ||
+                    object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] == NULL) {
+                    packet.requested_animation = static_cast<i16>(GetDefaultIdle(object));
+                }
             }
         }
 
@@ -11824,8 +11818,8 @@ void PeriscodeCode(GameObject_s *object) {
 }
 
 void Move_DROIDGENERIC(GameObject_s *object) {
-    const i32 jump_held = GAMEPAD_JUMP & object->pad_gamepad->buttons_held;
     const i32 jump_pressed = GAMEPAD_JUMP & object->pad_gamepad->buttons_pressed;
+    const i32 jump_held = GAMEPAD_JUMP & object->pad_gamepad->buttons_held;
     i32 zap_pressed = (GAMEPAD_ACTION | GAMEPAD_SPECIAL) & object->pad_gamepad->buttons_pressed;
     if ((object->apiobj.character_data->model_flags & 0x40) != 0) {
         if (Cheat[32].enabled != 0)
@@ -11873,29 +11867,11 @@ zap:
         PunchCode(object, GAMEPAD_ACTION & object->pad_gamepad->buttons_pressed, 0, 0, 1, 0.0f);
     ZapCode(object, zap_pressed, 0);
     DeactivatedCode(object);
-    if (object->character_context == -1 && object->field_0xe31 == 0 && object->apiobj.field_0x27d != 0 &&
-        object->apiobj.field_0x27e == 0 &&
-        ((object->movement_runtime_flags & 4) != 0 ||
-         (object->fall_animation_timer >= 0.2f && (object->pad_gamepad->input_magnitude == 0.0f ||
-                                                   (static_cast<i8>(object->apiobj.flags_low) >= 0 &&
-                                                    object->apiobj.character_model->model_data_b[0x59] != NULL)))))
-        StartFallLand(object, -1);
-    if (__builtin_expect(object->apiobj.field_0x27d != 0, 0))
-        object->movement_runtime_flags &= ~4;
+    CheckFallLand(object);
     if ((object->apiobj.character_data->model_flags & 0x10) != 0) {
         if ((object->apiobj.character_data->model_flags & 0x40) == 0) {
-            if (VehicleArea == 0) {
-                if (object->character_context == -1 && object->field_0xe31 == 0 && object->apiobj.field_0x27d != 0 &&
-                    object->apiobj.field_0x27e == 0 &&
-                    ((object->movement_runtime_flags & 4) != 0 ||
-                     (object->fall_animation_timer >= 0.2f &&
-                      (object->pad_gamepad->input_magnitude == 0.0f ||
-                       (!object->apiobj.player_controlled &&
-                        object->apiobj.character_model->model_data_b[0x59] != NULL)))))
-                    StartFallLand(object, -1);
-                if (object->apiobj.field_0x27d != 0)
-                    object->movement_runtime_flags &= ~4;
-            }
+            if (VehicleArea == 0)
+                CheckFallLand(object);
             if (object->id == id_NAFFDROID1 || object->id == id_NAFFDROID2 || object->id == id_NAFFDROID4 ||
                 object->id == id_MOUSEDROID) {
                 if (__builtin_expect(object->apiobj.field_0x27d != 0 && object->character_context == -1 &&

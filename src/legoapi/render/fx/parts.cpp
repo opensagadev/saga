@@ -68,13 +68,13 @@ void InitPartTable(char **names) {
 void *InitPartDebris(VARIPTR *buf, VARIPTR *, i32 capacity, i32 named_count, char **names, i32 page) {
     PARTDEBSYS_s *system = static_cast<PARTDEBSYS_s *>(BUFFER_ALLOC(buf, sizeof(PARTDEBSYS_s), 16));
     if (system == NULL)
-        return system;
+        return NULL;
     system->entries = NULL;
     system->capacity = capacity;
     system->named_count = named_count;
     system->entries = static_cast<PARTDEBENTRY_s *>(BUFFER_ALLOC(buf, capacity * sizeof(PARTDEBENTRY_s), 16));
     if (system->entries == NULL)
-        return NULL;
+        return system->entries;
     memset(system->entries, -1, capacity * sizeof(PARTDEBENTRY_s));
     i32 i = 0;
     if (names != NULL) {
@@ -84,9 +84,9 @@ void *InitPartDebris(VARIPTR *buf, VARIPTR *, i32 capacity, i32 named_count, cha
             system->entries[i].type_id = PARTLookupTypePageOnly(system->entries[i].name, page);
         }
     }
-    for (i32 type = 0; type < 128 && i < system->capacity; ++type) {
+    for (i32 type = 0; i < system->capacity && type < 128; ++type) {
         system->entries[i].type_id = -1;
-        if (__builtin_expect(part_types[type].variant_count > 0, 1)) {
+        if (part_types[type].variant_count > 0) {
             NuStrCpy(system->entries[i].name, part_types[type].name);
             system->entries[i].type_id = PARTLookupTypePageOnly(system->entries[i].name, page);
             ++i;

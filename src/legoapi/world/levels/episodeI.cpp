@@ -568,7 +568,7 @@ static __used__ void UpdatePodRaceMines(void) {
             NUVEC *pos = &client_mines.positions[idx];
             if (mines->mine_debris != -1)
                 AddGameDebris(WORLD->debris_sys, mines->mine_debris, pos);
-            if (mines->mine_part != -1)
+            if (__builtin_expect(mines->mine_part != -1, 1))
                 AddFiniteShotPART(mines->mine_part, pos, 1);
             GameCam_HitJudder();
             GameCam_NewShake(NULL, 0.75f, 1.0f, 1.0f);
@@ -1556,14 +1556,14 @@ void PodRaceAReset(WORLDINFO_s *world) {
             break;
     }
     pod_pacemaker = 0;
+    clients_mines_bitfield[0] = 0;
+    clients_mines_bitfield[1] = 0;
+    pod_mines_bitfield[0] = 0;
+    pod_mines_bitfield[1] = 0;
     memset(minesys.mines, 0, sizeof(minesys.mines));
     memset(&client_mines, 0, sizeof(client_mines));
     minesys.spawn_timer = 1000000000.0f;
-    clients_mines_bitfield[0] = 0;
-    clients_mines_bitfield[1] = 0;
     minesys.update_timer = 0.0f;
-    pod_mines_bitfield[0] = 0;
-    pod_mines_bitfield[1] = 0;
     mine_count = 0;
     if (Lap == 3 && nethost == 0 && netclient == 0)
         NewCutScene(NULL, world->cutscene_sys, "ep1_podrace_sebulba", 1);

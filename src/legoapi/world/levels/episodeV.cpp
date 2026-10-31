@@ -1710,11 +1710,11 @@ __attribute__((optimize("O2", "tree-vectorize"))) i32 SpawnMeleeCreatureType(i32
             --attempts;
             locator = getSpawnLocator(5.0f, "spawn");
             if (locator != NULL) {
-                if (__builtin_expect(OnOrInsidePlane(&locator->position, &PlayPlane[1].point, &PlayPlane[1].normal,
+                if (__builtin_expect(__builtin_expect(OnOrInsidePlane(&locator->position, &PlayPlane[1].point, &PlayPlane[1].normal,
                                                      NULL, 0.5f, NULL) == 0,
                                      0) ||
                     OnOrInsidePlane(&locator->position, &PlayPlane[2].point, &PlayPlane[2].normal, NULL, 0.5f, NULL) ==
-                        0) {
+                        0, 1)) {
                     if (OnOrInsidePlane(&locator->position, &PlayPlane[1].point, &PlayPlane[1].normal, NULL, 2.5f,
                                         NULL) != 0 ||
                         OnOrInsidePlane(&locator->position, &PlayPlane[2].point, &PlayPlane[2].normal, NULL, 2.5f,

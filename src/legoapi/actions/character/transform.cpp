@@ -76,19 +76,18 @@ void Transform_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
             object->force_glow_kind = 4;
             object->force_glow_position = nearest->mid_position;
             object->force_glow_object = nearest;
-            object->field_0xd8c = nearest->target_scale;
             object->field_0xd80 = 1.0f;
+            object->field_0xd8c = nearest->target_scale;
             if ((object->pad_gamepad->buttons_held & GAMEPAD_SPECIAL) != 0) {
                 object->field_0x788 = nearest;
                 object->context_animation_timer = 0.0f;
                 object->character_context = 86;
                 object->context_animation = 160;
                 object->context_flags &= ~0x40;
-                f32 duration = AnimDuration(object->id, 160, 0.0f, 0.0f, 1);
-                if (duration <= 0.0f) {
-                    duration = 1.0f;
+                object->airborne_action_duration = AnimDuration(object->id, 160, 0.0f, 0.0f, 1);
+                if (object->airborne_action_duration <= 0.0f) {
+                    object->airborne_action_duration = 1.0f;
                 }
-                object->airborne_action_duration = duration;
                 GIZMOBLOWUP_s *target = static_cast<GIZMOBLOWUP_s *>(object->field_0x788);
                 object->apiobj.movement_facing_angle =
                     NuAtan2D(target->mid_position.x - object->apiobj.collision_position.x,
@@ -98,11 +97,9 @@ void Transform_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
     } else {
         i32 trigger = 0;
         f32 *frame = NULL;
-        if (object->apiobj.character_model->model_data_b[object->context_animation] != NULL) {
-            frame = AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0);
-            if (frame == NULL) {
-                return;
-            }
+        if (object->apiobj.character_model->model_data_b[object->context_animation] != NULL &&
+            (frame = AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0)) == NULL) {
+            return;
         }
         GIZMOBLOWUP_s *target = static_cast<GIZMOBLOWUP_s *>(object->field_0x788);
         object->apiobj.movement_facing_angle = NuAtan2D(target->mid_position.x - object->apiobj.collision_position.x,

@@ -807,8 +807,10 @@ i32 Collection_GetIDList(COLLECTION_s *collection, u32 model_flag_mask, u32 requ
     i32 result_count = 0;
     for (i32 index = 0; index < collection->count_y; ++index) {
         const i16 id = collection->list[index].id;
-        if (__builtin_expect(
-                (CDataList[id].model_flags & model_flag_mask) != required_model_flags || Collection_Got(id) == 0, 1)) {
+        if ((CDataList[id].model_flags & model_flag_mask) != required_model_flags) {
+            continue;
+        }
+        if (Collection_Got(id) == 0) {
             continue;
         }
 

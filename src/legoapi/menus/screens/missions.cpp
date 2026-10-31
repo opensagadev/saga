@@ -79,7 +79,7 @@ void MenuDrawMissions(MENU_s *menu) {
     const f32 alpha = MenuAlpha;
     SmartTextEx(TTab[MissionSys->missions[hub_mission].name_id], 0.0f, -0.525f, 1.0f, 0.625f, 0.625f, 0.625f, 0, 255,
                 191, 0, 1.7f, 1, 0, 0, static_cast<i32>(255.0f * MissionsAlpha * alpha));
-    if (Game.mission_save.completed[hub_mission] != 0 && alpha * MissionsAlpha > 0.0f) {
+    if (__builtin_expect(Game.mission_save.completed[hub_mission] != 0 && alpha * MissionsAlpha > 0.0f, 1)) {
         const f32 opacity = alpha * MissionsAlpha;
         Hub_DrawImportantBrick(211, -0.15f, HUB_EPISODETITLEY + 0.1f, opacity, -1, -1);
         char time[64], text[64];
@@ -124,14 +124,14 @@ void MenuDrawMissions(MENU_s *menu) {
         select[1] = tSELECT;
         cancel[1] = tEXIT;
         status[1] = tSELECTING;
-        if (!(MenuPacket.reserved_1[0])) {
-            select[0] = tSELECT;
-            cancel[0] = tEXIT;
-            status[0] = tSELECTING;
-        } else {
+        if (MenuPacket.reserved_1[0]) {
             select[0] = -1;
             cancel[0] = tCANCEL;
             status[0] = tSELECTED;
+        } else {
+            select[0] = tSELECT;
+            cancel[0] = tEXIT;
+            status[0] = tSELECTING;
         }
     }
     DrawPlayerIconPrompts(MenuPacket.active_player[0], select[0], 1.0f, -1, cancel[0], -1, status[0],

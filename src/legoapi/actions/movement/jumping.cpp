@@ -453,8 +453,8 @@ void BigJumpCode(GameObject_s *object) {
             } else {
                 PlayLandSfx(object, 0, 0);
             }
-            object->external_force = object->apiobj.position;
             object->apiobj.velocity.x = object->apiobj.velocity.y = object->apiobj.velocity.z = 0.0f;
+            object->external_force = object->apiobj.position;
             if ((object->field_0xefd & 0x20) != 0) {
                 NUVEC origin;
                 FindSlamOrigin(object, &origin, NULL);
@@ -477,14 +477,15 @@ void BigJumpCode(GameObject_s *object) {
                         arc = 0.0f - rise / 3.0f;
                 }
             }
-            f32 sine = NU_SIN_LUT(static_cast<i32>(fraction * 32768.0f));
+            GAMECHARACTERDATA_s *game_character = object->apiobj.character_data->game_character;
             object->apiobj.position.x =
                 object->external_force.x + (object->launch_origin.x - object->external_force.x) * horizontal;
-            object->apiobj.position.y =
-                object->external_force.y + (object->launch_origin.y - object->external_force.y) * fraction + arc * sine;
+            object->apiobj.position.y = object->external_force.y +
+                                        (object->launch_origin.y - object->external_force.y) * fraction +
+                                        arc * NU_SIN_LUT(static_cast<i32>(fraction * 32768.0f));
             object->apiobj.position.z =
                 object->external_force.z + (object->launch_origin.z - object->external_force.z) * horizontal;
-            f32 height = sine * object->apiobj.character_data->game_character->second_jump_height;
+            f32 height = NU_SIN_LUT(static_cast<i32>(fraction * 32768.0f)) * game_character->second_jump_height;
             object->apiobj.position.y += (height + height) * object->big_jump_height;
             NuVecSub(&object->apiobj.velocity, &object->apiobj.position, &object->apiobj.start_position);
             NuVecScale(&object->apiobj.velocity, &object->apiobj.velocity, 1.0f / FRAMETIME);

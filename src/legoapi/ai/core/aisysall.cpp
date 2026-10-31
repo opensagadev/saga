@@ -5332,15 +5332,7 @@ eduimenu_s *antinodeEditor_Process(nupad_s *pad) {
         } else {
             if (antinodeEditor_SelectedIsNearest()) {
                 EDANTINODE_s *selected = antinode_selected();
-                if ((pressed & 0x100) && NuSpecialExistsFn(&selected->special)) {
-                    NUVEC *platform_position = NuSpecialGetDrawPos(&aieditor->cursor_platform);
-                    if (__builtin_expect(platform_position != nullptr, 0)) {
-                        antinode_selected()->position.x = platform_position->x;
-                        antinode_selected()->position.z = platform_position->z;
-                        antinodeEditor_AntinodeMoved(antinode_selected());
-                        edcamSetPos(&antinode_selected()->position);
-                    }
-                } else {
+                if (!((pressed & 0x100) && NuSpecialExistsFn(&selected->special))) {
                     antinode_selected()->position = aieditor->camera_position;
                     antinodeEditor_AntinodeMoved(antinode_selected());
                     selected = antinode_selected();
@@ -5358,6 +5350,14 @@ eduimenu_s *antinodeEditor_Process(nupad_s *pad) {
                             if (selected->base_height < 0.05f)
                                 selected->base_height = 0.05f;
                         }
+                    }
+                } else {
+                    NUVEC *platform_position = NuSpecialGetDrawPos(&aieditor->cursor_platform);
+                    if (__builtin_expect(platform_position != nullptr, 0)) {
+                        antinode_selected()->position.x = platform_position->x;
+                        antinode_selected()->position.z = platform_position->z;
+                        antinodeEditor_AntinodeMoved(antinode_selected());
+                        edcamSetPos(&antinode_selected()->position);
                     }
                 }
             }
@@ -5487,7 +5487,7 @@ eduimenu_s *antinodeEditor_Process(nupad_s *pad) {
                 selected->radius *= 1.01f;
             }
         }
-    } else if (pad->digital_buttons & 0x1000) {
+    } else if (__builtin_expect(pad->digital_buttons & 0x1000 != 0, 0)) {
         if (aieditorsettings.solid_antinode_display) {
             if (antinodeEditor_SelectedIsNearest()) {
                 EDANTINODE_s *selected = antinode_selected();
@@ -7521,7 +7521,7 @@ void AIScriptLoadAllPakFile(void *pak, char *path, VARIPTR *buf, VARIPTR *buf_en
         i = 0;
 
         if (parser != NULL) {
-            while (NuFParGetLine(parser) != 0) {
+            while (__builtin_expect(NuFParGetLine(parser) != 0, 1)) {
                 NuFParGetWord(parser);
                 NuStrLen(parser->word_buf);
                 NuStrCpy(script_files[i], parser->word_buf);
@@ -9273,192 +9273,54 @@ extern "C" void *AISysLoad(void *buf, void *buf_end, i32 size, void *gscn, char 
             }
         }
 
-        {
-            AIGROUP *group = &system->groups[0];
-            if (group->is_used) {
-                if (group->member_is_alive == 0)
-                    group->can_respawn = 1;
-                else
-                    group->can_respawn = 0;
-            }
-        }
-        {
-            AIGROUP *group = &system->groups[1];
-            if (group->is_used) {
-                if (group->member_is_alive == 0)
-                    group->can_respawn = 1;
-                else
-                    group->can_respawn = 0;
-            }
-        }
-        {
-            AIGROUP *group = &system->groups[2];
-            if (group->is_used) {
-                if (group->member_is_alive == 0)
-                    group->can_respawn = 1;
-                else
-                    group->can_respawn = 0;
-            }
-        }
-        {
-            AIGROUP *group = &system->groups[3];
-            if (group->is_used) {
-                if (group->member_is_alive == 0)
-                    group->can_respawn = 1;
-                else
-                    group->can_respawn = 0;
-            }
-        }
-        {
-            AIGROUP *group = &system->groups[4];
-            if (group->is_used) {
-                if (group->member_is_alive == 0)
-                    group->can_respawn = 1;
-                else
-                    group->can_respawn = 0;
-            }
-        }
-        {
-            AIGROUP *group = &system->groups[5];
-            if (group->is_used) {
-                if (group->member_is_alive == 0)
-                    group->can_respawn = 1;
-                else
-                    group->can_respawn = 0;
-            }
-        }
-        {
-            AIGROUP *group = &system->groups[6];
-            if (group->is_used) {
-                if (group->member_is_alive == 0)
-                    group->can_respawn = 1;
-                else
-                    group->can_respawn = 0;
-            }
-        }
-        {
-            AIGROUP *group = &system->groups[7];
-            if (group->is_used) {
-                if (group->member_is_alive == 0)
-                    group->can_respawn = 1;
-                else
-                    group->can_respawn = 0;
-            }
-        }
-        {
-            AIGROUP *group = &system->groups[8];
-            if (group->is_used) {
-                if (group->member_is_alive == 0)
-                    group->can_respawn = 1;
-                else
-                    group->can_respawn = 0;
-            }
-        }
-        {
-            AIGROUP *group = &system->groups[9];
-            if (group->is_used) {
-                if (group->member_is_alive == 0)
-                    group->can_respawn = 1;
-                else
-                    group->can_respawn = 0;
-            }
-        }
-        {
-            AIGROUP *group = &system->groups[10];
-            if (group->is_used) {
-                if (group->member_is_alive == 0)
-                    group->can_respawn = 1;
-                else
-                    group->can_respawn = 0;
-            }
-        }
-        {
-            AIGROUP *group = &system->groups[11];
-            if (group->is_used) {
-                if (group->member_is_alive == 0)
-                    group->can_respawn = 1;
-                else
-                    group->can_respawn = 0;
-            }
-        }
-        {
-            AIGROUP *group = &system->groups[12];
-            if (group->is_used) {
-                if (group->member_is_alive == 0)
-                    group->can_respawn = 1;
-                else
-                    group->can_respawn = 0;
-            }
-        }
-        {
-            AIGROUP *group = &system->groups[13];
-            if (group->is_used) {
-                if (group->member_is_alive == 0)
-                    group->can_respawn = 1;
-                else
-                    group->can_respawn = 0;
-            }
-        }
-        {
-            AIGROUP *group = &system->groups[14];
-            if (group->is_used) {
-                if (!(group->member_is_alive == 0)) group->can_respawn = 0; else group->can_respawn = 1;
-            }
-        }
-        {
-            AIGROUP *group = &system->groups[15];
-            if (__builtin_expect(group->is_used != 0, 1)) {
-                if (!(group->member_is_alive == 0))
-                    group->can_respawn = 0;
-                else
-                    group->can_respawn = 1;
-            }
-        }
-
         AILOCATOR *locator = system->locators;
         for (i32 index = 0; index < system->locator_count; ++index, ++locator) {
             AIPATHNODE *start = &locator->path_info.path->nodes[locator->path_info.connection->node_indices[0]];
-            if (__builtin_expect(
-                    (start->runtime_flags & AIPATHNODE_RUNTIME_POSITION_CHANGED) == 0 &&
-                        (locator->path_info.path->nodes[locator->path_info.connection->node_indices[1]].runtime_flags &
-                         AIPATHNODE_RUNTIME_POSITION_CHANGED) == 0,
-                    0)) {
-                continue;
-            }
+            if ((start->runtime_flags & AIPATHNODE_RUNTIME_POSITION_CHANGED) != 0 ||
+                (locator->path_info.path->nodes[locator->path_info.connection->node_indices[1]].runtime_flags &
+                 AIPATHNODE_RUNTIME_POSITION_CHANGED) != 0) {
+                AIPATHNODE *end = &locator->path_info.path->nodes[locator->path_info.connection->node_indices[1]];
+                NUVEC delta;
+                NUVEC direction;
+                NuVecSub(&delta, &end->position, &start->position);
+                NuVecNorm(&direction, &delta);
 
-            NUVEC delta;
-            NUVEC direction;
-            NuVecSub(&delta, &locator->path_info.path->nodes[locator->path_info.connection->node_indices[1]].position,
-                     &start->position);
-            NuVecNorm(&direction, &delta);
-
-            const f32 position_on_connection = locator->path_info.dist;
-            f32 radius;
-            if (!(position_on_connection > 1.0f)) {
-                if (position_on_connection < 0.0f) {
-                    radius = start->radius;
+                const f32 position_on_connection = locator->path_info.dist;
+                f32 radius;
+                if (!(position_on_connection > 1.0f)) {
+                    if (position_on_connection < 0.0f) {
+                        radius = start->radius;
+                    } else {
+                        radius = end->radius * position_on_connection + (1.0f - position_on_connection) * start->radius;
+                    }
                 } else {
-                    radius = locator->path_info.path->nodes[locator->path_info.connection->node_indices[1]].radius *
-                                 position_on_connection +
-                             (1.0f - position_on_connection) * start->radius;
+                    radius = end->radius;
                 }
-            } else {
-                radius = locator->path_info.path->nodes[locator->path_info.connection->node_indices[1]].radius;
+
+                const f32 direction_x = direction.x;
+                direction.x = direction.z * radius;
+                direction.z = -direction_x * radius;
+                locator->position = start->position;
+
+                NUVEC offset;
+                NuVecScale(&offset, &delta, position_on_connection);
+                NuVecAdd(&locator->position, &locator->position, &offset);
+                NuVecScale(&offset, &direction, locator->path_info.width);
+                NuVecAdd(&locator->position, &locator->position, &offset);
+
+                const i32 path_angle = static_cast<i32>(NuAtan2(delta.x, delta.z) * 10430.378f);
+                locator->flags = NuAngAdd(path_angle, locator->locator_flags);
             }
+        }
 
-            const f32 direction_x = direction.x;
-            direction.x = direction.z * radius;
-            direction.z = -direction_x * radius;
-            locator->position = start->position;
-
-            NUVEC offset;
-            NuVecScale(&offset, &delta, position_on_connection);
-            NuVecAdd(&locator->position, &locator->position, &offset);
-            NuVecScale(&offset, &direction, locator->path_info.width);
-            NuVecAdd(&locator->position, &locator->position, &offset);
-
-            const i32 path_angle = static_cast<i32>(NuAtan2(delta.x, delta.z) * 10430.378f);
-            locator->flags = NuAngAdd(path_angle, locator->locator_flags);
+        for (i32 index = 0; index < 16; ++index) {
+            AIGROUP *group = &system->groups[index];
+            if (group->is_used) {
+                if (group->member_is_alive != 0)
+                    group->can_respawn = 0;
+                else
+                    group->can_respawn = 1;
+            }
         }
     }
 
@@ -11151,9 +11013,7 @@ static u32 AISysCharacterTestPathCnx(AISYS *system, APIOBJECT *object, AIPACKET 
         if (second->min_height > packet->terrain_origin.y || packet->terrain_origin.y > second->max_height) {
             clearance = distance - second_radius;
             clearance = height_distance > clearance ? height_distance : clearance;
-        } else if (second_radius < distance) {
-            clearance = distance - second_radius;
-        } else {
+        } else if (second_radius >= distance) {
             packet->path_info.on_path = 1;
             packet->path_info.narrow_path = narrow;
             AISysCharacterSetPathCnx(packet, &object->position, connection, direction);
@@ -11164,6 +11024,8 @@ static u32 AISysCharacterTestPathCnx(AISYS *system, APIOBJECT *object, AIPACKET 
             path->inside_node_bits[node_index / 8] |= 1 << (node_index % 8);
             packet->inside_path_node = connection->node_indices[1];
             return 1;
+        } else {
+            clearance = distance - second_radius;
         }
         if (*nearest_distance > clearance) {
             *nearest_distance = clearance;
@@ -11246,7 +11108,7 @@ static u32 AISysCharacterTestPathCnx(AISYS *system, APIOBJECT *object, AIPACKET 
             } else {
                 wall.x = first_radius;
                 NuVecRotateY(&wall, &wall, angle);
-                if (local.x < 0.0f) {
+                if (__builtin_expect(local.x < 0.0f, 1)) {
                     wall.x = -wall.x;
                 }
                 NuVecRotateY(&wall, &wall, connection->rotation);
@@ -14657,7 +14519,10 @@ void pathEditorDrawConnectionInfo(nuvec_s *position, float radius, nuvec_s *othe
         vertices[1].position.x -= radius * direction.z * 0.25f;
         vertices[1].position.z += radius * direction.x * 0.25f;
         AiRndrLine3d(vertices, nullptr, nullptr);
-    } else if (flags & 0x20000000) {
+    } else {
+        if (!(flags & 0x20000000)) {
+            return;
+        }
         NUVEC centre = vertices[0].position;
         NuVecScale(&vertices[0].position, &direction, radius);
         vertices[0].position.y = 0.0f;
@@ -15155,7 +15020,7 @@ void pathEditor_Enter(void) {
             return 5;
         if (node->connections[6].node == other)
             return 6;
-        if (__builtin_expect(node->connections[7].node == other, 0))
+        if (node->connections[7].node == other)
             return 7;
         return 8;
     };
@@ -15180,7 +15045,7 @@ void pathEditor_Enter(void) {
     AIPATHSYS_s *runtime_system = aieditor->ai_system != nullptr ? aieditor->ai_system->path_sys : nullptr;
     if (aieditor->cached_path_system != runtime_system) {
         aieditor->cached_path_system = runtime_system;
-        if (runtime_system != nullptr) {
+        if (__builtin_expect(runtime_system != nullptr, 1)) {
             i32 node_storage_start = 0;
             for (i32 path_index = 0; path_index < aieditor->cached_path_system->path_count; ++path_index) {
                 AIPATH_s *runtime_path = aieditor->cached_path_system->paths[path_index];
@@ -15206,7 +15071,7 @@ void pathEditor_Enter(void) {
                     continue;
                 for (i32 node_index = 0; node_index < runtime_path->node_count; ++node_index) {
                     AIPATHNODE_s *source = &runtime_path->nodes[node_index];
-                    if (path->node_count >= 254) {
+                    if (__builtin_expect(path->node_count >= 254, 0)) {
                         continue;
                     }
                     EDAIPATHNODE_s *node = (EDAIPATHNODE_s *)NuLinkedListGetHead(&aieditor->free_path_nodes);
@@ -15262,7 +15127,7 @@ void pathEditor_Enter(void) {
                         EDAIPATHNODE_s *other = &aieditor->node_storage[node_storage_start + other_index];
                         if (node != nullptr && other != nullptr) {
                             i32 connection_slot = find_connection(node, other);
-                            if (__builtin_expect(connection_slot == 8, 1)) {
+                            if (connection_slot == 8) {
                                 i32 free_node_slot;
                                 i32 free_other_slot;
                                 for (free_node_slot = 0; free_node_slot < 8; ++free_node_slot) {
@@ -15307,7 +15172,7 @@ void pathEditor_Enter(void) {
             path->flags |= 1;
         }
     }
-    if (__builtin_expect(aieditorsettings.current_path_name[0] != '\0', 0)) {
+    if (__builtin_expect(aieditorsettings.current_path_name[0] != '\0', 1)) {
         aieditor->current_path = pathEditor_GetPath(aieditorsettings.current_path_name);
     } else {
         aieditor->current_path = (EDAIPATH_s *)NuLinkedListGetHead(&aieditor->paths);
@@ -15320,7 +15185,7 @@ void pathEditor_Enter(void) {
             break;
         path->current_route = &path->routes[index];
     }
-    if (path->current_route != nullptr && !(path->current_route->flags & 1))
+    if (__builtin_expect(path->current_route != nullptr && !(path->current_route->flags & 1), 1))
         path->current_route = nullptr;
 }
 
@@ -18281,8 +18146,7 @@ __attribute__((force_align_arg_pointer)) i32 creatureEditor_CalculatePos(EDCREAT
 }
 
 void creatureEditor_Render(i32 x, i32 y, float xscale, float yscale) {
-    char set_name[32];
-    nuvec_s displacement;
+    char set_name[16];
     if (GlobalCharacterRenderFn == nullptr)
         return;
     i32 count = NuLinkedListCheck(&aieditor->creatures);
@@ -18294,8 +18158,8 @@ void creatureEditor_Render(i32 x, i32 y, float xscale, float yscale) {
     u8 *display = reinterpret_cast<u8 *>(aieditor->mode_selection_36930);
     if (display == nullptr)
         display = *reinterpret_cast<u8 **>(aieditor->unknown_3692c);
-    if (display != nullptr) {
-
+    if (__builtin_expect(display != nullptr, 1)) {
+        nuvec_s displacement;
         f32 distance =
             NuVecXZDist(reinterpret_cast<nuvec_s *>(display + 0x28), &aieditor->camera_position, &displacement);
         if (*reinterpret_cast<u32 *>(display + 0x68) & 0x20) {
@@ -18324,35 +18188,34 @@ void creatureEditor_Render(i32 x, i32 y, float xscale, float yscale) {
             NuQFntPrintEx(system_qfont, text_x, y * 8 + 480, 16, "Locator = \"%s\"", locator->name);
     }
     NuQFntPrintEx(system_qfont, text_x, y * 8 + 600, 16, "SQR - Options");
-    u8 *nearest_for_menu = *reinterpret_cast<u8 **>(aieditor->unknown_3692c);
-    if (nearest_for_menu == nullptr) {
-        NuQFntPrintEx(system_qfont, text_x, y * 8 + 720, 16, "X - Create creature");
+    i32 menu_y = y * 8 + 720;
+    if (*reinterpret_cast<u8 **>(aieditor->unknown_3692c) == nullptr) {
+        NuQFntPrintEx(system_qfont, text_x, menu_y, 16, "X - Create creature");
         if (aieditor->mode_selection_36930 != nullptr)
             NuQFntPrintEx(system_qfont, text_x, y * 8 + 840, 16, "TRI - Deselect selected");
         NuQFntPrintEx(system_qfont, text_x, y * 8 + 960, 16, "LLEFT/LRight - Rotate");
-    } else if (nearest_for_menu != reinterpret_cast<u8 *>(aieditor->mode_selection_36930)) {
-        NuQFntPrintEx(system_qfont, text_x, y * 8 + 720, 16, "X - Select creature");
+    } else if (*reinterpret_cast<u8 **>(aieditor->unknown_3692c) !=
+               reinterpret_cast<u8 *>(aieditor->mode_selection_36930)) {
+        NuQFntPrintEx(system_qfont, text_x, menu_y, 16, "X - Select creature");
     } else {
-        NuQFntPrintEx(system_qfont, text_x, y * 8 + 720, 16, "X - Move selected");
+        NuQFntPrintEx(system_qfont, text_x, menu_y, 16, "X - Move selected");
         NuQFntPrintEx(system_qfont, text_x, y * 8 + 840, 16, "TRI - Delete selected");
         NuQFntPrintEx(system_qfont, text_x, y * 8 + 960, 16, "LLEFT/LRight - Rotate");
     }
     if (aieditor->mode_selection_36930 != nullptr && aieditor->nearest_locator != nullptr)
-        NuQFntPrintEx(system_qfont, text_x, y * 8 + 720, 16, "O - Set locator.");
+        NuQFntPrintEx(system_qfont, text_x, menu_y, 16, "O - Set locator.");
 
     for (NULISTLNK *link = NuLinkedListGetHead(&aieditor->creatures); link != nullptr;
          link = NuLinkedListGetNext(&aieditor->creatures, link)) {
         u8 *record = reinterpret_cast<u8 *>(link);
         EDCREATURE_s *creature = reinterpret_cast<EDCREATURE_s *>(record);
-        u8 *nearest_for_render = *reinterpret_cast<u8 **>(aieditor->unknown_3692c);
-        i32 render_colour = record == reinterpret_cast<u8 *>(aieditor->mode_selection_36930)
-                                ? (record == nearest_for_render ? 0xff0000ff : 0x800000ff)
-                                : (record == nearest_for_render ? -1 : 0);
+        i32 render_colour =
+            record == reinterpret_cast<u8 *>(aieditor->mode_selection_36930)
+                ? (record == *reinterpret_cast<u8 **>(aieditor->unknown_3692c) ? 0xff0000ff : 0x800000ff)
+                : (record == *reinterpret_cast<u8 **>(aieditor->unknown_3692c) ? -1 : 0);
         for (i32 group = 0; group < record[0x5b]; ++group, render_colour = 0) {
             u32 valid_positions = *reinterpret_cast<u32 *>(record + 0x54);
-            if (__builtin_expect(!((static_cast<u64>(valid_positions) >> (group & 63)) & 1) ||
-                                     !creatureEditor_IsSelectable(creature),
-                                 0)) {
+            if (!((static_cast<u64>(valid_positions) >> group) & 1) || !creatureEditor_IsSelectable(creature)) {
                 continue;
             }
             nuvec_s position;
@@ -18363,21 +18226,21 @@ void creatureEditor_Render(i32 x, i32 y, float xscale, float yscale) {
             EDLOCATOR_s *locator = *reinterpret_cast<EDLOCATOR_s **>(record + 0x84);
             if (locator != nullptr) {
                 NURND_VERTEX3D line[2];
-                line[0].position = *reinterpret_cast<nuvec_s *>(record + 0x28);
-                line[1].position = locator->position;
                 line[0].colour = render_colour;
                 line[1].colour = render_colour;
+                line[0].position = *reinterpret_cast<nuvec_s *>(record + 0x28);
+                line[1].position = locator->position;
                 AiRndrLine3d(line, nullptr, nullptr);
             }
             EDLOCATOR_s *respawn = *reinterpret_cast<EDLOCATOR_s **>(record + 0x88);
             if (respawn != nullptr) {
                 NURND_VERTEX3D line[2];
+                line[0].colour = render_colour + 0x8000;
+                line[1].colour = render_colour + 0x8000;
                 line[0].position = *reinterpret_cast<nuvec_s *>(record + 0x28);
                 line[1].position = respawn->position;
                 line[0].position.y += 0.1f;
                 line[1].position.y += 0.1f;
-                line[0].colour = render_colour + 0x8000;
-                line[1].colour = render_colour + 0x8000;
                 AiRndrLine3d(line, nullptr, nullptr);
             }
         }
@@ -18456,7 +18319,7 @@ __attribute__((force_align_arg_pointer)) eduimenu_s *creatureEditor_Process(nupa
         eduiMenuAddItem(menu, eduiItemSelCreate(1, attr, 0, 0, creatureEditor_cbSelectType,
                                                 const_cast<char *>("Select Creature Type")));
         CreatureEditorRecord *creature = creatureEditor_Current();
-        if (__builtin_expect(creature != nullptr, 1)) {
+        if (creature != nullptr) {
             if (AIScriptNameFromIx(aieditor->ai_system, 0) != nullptr) {
                 eduiMenuAddItem(menu, eduiItemSelCreate(1, attr, 0, 0, creatureEditor_cbSelectScript,
                                                         const_cast<char *>("Select Script")));
@@ -18512,7 +18375,7 @@ __attribute__((force_align_arg_pointer)) eduimenu_s *creatureEditor_Process(nupa
                 if (previous != nullptr) {
                     NuStrCpy(base_name, previous->name);
                     char *suffix = strrchr(base_name, '_');
-                    if (suffix != nullptr)
+                    if (__builtin_expect(suffix != nullptr, 0))
                         *suffix = 0;
                     base_name[12] = 0;
                     set = creatureEditor_Current()->set;
@@ -18627,7 +18490,7 @@ __attribute__((force_align_arg_pointer)) eduimenu_s *creatureEditor_Process(nupa
                     if (selected != nullptr)
                         aieditor->mode_selection_36930 = reinterpret_cast<EditorNamedEntry *>(
                             NuLinkedListGetPrev(&aieditor->creatures, &selected->link));
-                    if (creatureEditor_Current() == nullptr)
+                    if (__builtin_expect(creatureEditor_Current() == nullptr, 1))
                         aieditor->mode_selection_36930 =
                             reinterpret_cast<EditorNamedEntry *>(NuLinkedListGetTail(&aieditor->creatures));
                     change_selection = true;
@@ -18699,7 +18562,7 @@ __attribute__((force_align_arg_pointer)) eduimenu_s *creatureEditor_Process(nupa
                         NuAngAdd(quarter_turns << 14,
                                  reinterpret_cast<EDAIPATHCHECK_s *>(reinterpret_cast<u8 *>(aieditor) + 0x48)->angle);
                 }
-                if (rotate) {
+                if (__builtin_expect(rotate != 0, 1)) {
                     CreatureEditorRecord *selected = creatureEditor_Current();
                     CreatureEditorRecord *hover = *reinterpret_cast<CreatureEditorRecord **>(aieditor->unknown_3692c);
                     if (selected != nullptr) {

@@ -1649,8 +1649,8 @@ void AIPathCnxControlSysUpdate(AIPATHCNXCONTROLSYS_s *system) {
             }
             case 1: {
                 const u8 *instance = static_cast<const u8 *>(controller->target);
-                i32 frame = static_cast<i32>(*reinterpret_cast<const f32 *>(instance + 0x90));
                 float end = *reinterpret_cast<f32 *>(*reinterpret_cast<u8 *const *>(instance + 0x58) + 8);
+                i32 frame = static_cast<i32>(*reinterpret_cast<const f32 *>(instance + 0x90));
                 if (frame > 0) {
                     i32 end_frame = static_cast<i32>(end);
                     frame = frame < end_frame ? frame : end_frame;
@@ -1668,11 +1668,13 @@ void AIPathCnxControlSysUpdate(AIPATHCNXCONTROLSYS_s *system) {
                     on = 0;
                 break;
             case 3:
-                on = GizmoGetOutput(WORLD->gizmo_sys, static_cast<GIZMO *>(controller->target),
-                                    controller->gizmo_output, 1) != 0;
+                if (GizmoGetOutput(WORLD->gizmo_sys, static_cast<GIZMO *>(controller->target), controller->gizmo_output,
+                                   1) == 0)
+                    on = 0;
                 break;
             case 4:
-                on = (static_cast<GIZMOBLOWUP_s *>(controller->target)->status_flags & 1) == 0;
+                if ((static_cast<GIZMOBLOWUP_s *>(controller->target)->status_flags & 1) != 0)
+                    on = 0;
                 break;
             case 5: {
                 float end = fakeanimendframe[controller->fake_animation_id];

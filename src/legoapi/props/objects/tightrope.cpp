@@ -246,8 +246,9 @@ static void TightRopes_Draw(void *world_info, void *, float) {
             }
             break;
         }
-        for (i32 pass = 0; pass < count - 1; ++pass) {
-            for (i32 point = 0; point < count - 1; ++point) {
+        i32 last = count - 1;
+        for (i32 pass = 0; pass < last; ++pass) {
+            for (i32 point = 0; point < last; ++point) {
                 if (distances[point] > distances[point + 1]) {
                     NUVEC *position = positions[point];
                     positions[point] = positions[point + 1];
@@ -261,7 +262,7 @@ static void TightRopes_Draw(void *world_info, void *, float) {
 
         vertices[0].position = rope->start;
         NURND_VERTEX3D *vertex = &vertices[1];
-        for (NUVEC **position = positions; position < positions + count; ++position, ++vertex) {
+        for (NUVEC **position = positions; position != positions + count; ++position, ++vertex) {
             vertex->position = **position;
         }
         vertices[count + 1].position = rope->end;

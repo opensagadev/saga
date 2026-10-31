@@ -2522,11 +2522,11 @@ static i32 CutScene_StartBody(WORLDINFO_s *world, CUTINFO *cut) {
     }
     Panel_Clear();
     CutFrame = 0;
-    for (i32 i = 0; i < world->cutscene_sys->count; ++i) {
+    for (u32 i = 0; (i32)i < world->cutscene_sys->count; ++i) {
         CUTINFO *other = world->cutscene_sys->cuts[i];
         instNUGCUTSCENE_s *other_instance = static_cast<instNUGCUTSCENE_s *>(other->instance);
         if ((other_instance->flags_88 & 2) != 0) {
-            if (other == cut || (other->flags & 1) == 0) {
+            if (cut == other || (other->flags & 1) == 0) {
                 other_instance->rate = 0.0f;
                 instNuGCutScenePause(static_cast<instNUGCUTSCENE_s *>(world->cutscene_sys->cuts[i]->instance), 1);
             } else {
@@ -2536,9 +2536,9 @@ static i32 CutScene_StartBody(WORLDINFO_s *world, CUTINFO *cut) {
         }
     }
     CUTSTOPGAME = 1;
-    CUTNOFOG = cut->flags & 4;
-    CUTDRAWWORLD = cut->flags & 2;
     CutStopInfo = cut;
+    CUTDRAWWORLD = cut->flags & 2;
+    CUTNOFOG = cut->flags & 4;
     DebrisSetRenderGroup(cut->debris_render_group);
     LevelNameTime = 0.0f;
     LevelNameMul = 0.0f;
@@ -2546,9 +2546,9 @@ static i32 CutScene_StartBody(WORLDINFO_s *world, CUTINFO *cut) {
     CutBorderScale = 1.0f;
     cut_waiting_for_new_level = 0;
     GameFog_Reset();
-    for (CUTSCENETEXANIM &animation : cut->texture_animations) {
-        if (animation.index != -1) {
-            texanimbits &= ~(1U << (animation.index & 0x1f));
+    for (i32 i = 0; i < 4; ++i) {
+        if (cut->texture_animations[i].index != -1) {
+            texanimbits &= ~(1U << cut->texture_animations[i].index);
         }
     }
     return 1;

@@ -1722,20 +1722,18 @@ extern "C" f32 *NuGCutLocatorCalcMtx(NUGCUTLOCATOR_s *locator, float frame, NUMT
         *mtx = locator->base_matrix;
         return NULL;
     }
-    if (__builtin_expect(*reinterpret_cast<u32 *>(locator->animation) + 0xbeb1b6ccU < 2, 0)) {
+    if (*reinterpret_cast<u32 *>(locator->animation) + 0xbeb1b6ccU < 2) {
         return NuGCutLocatorCalcMtx_3(locator, mtx, frame);
     }
     nuanimdata2_s *animation = locator->animation;
-    u8 *curve_types = animation->curve_types;
     nuanimcurve2_s *curves = animation->curves;
+    u8 *curve_types = animation->curve_types;
     auto evaluate = [&](u32 curve) {
         const i8 type = static_cast<i8>(curve_types[curve]);
         return type == 0 ? curves[curve].data.constant
                          : NuAnimCurve2CalcValEx(&curves[curve], time, static_cast<u32>(type));
     };
-    if ((*animation->node_flags & 1) == 0) {
-        NuMtxSetIdentity(mtx);
-    } else {
+    if (__builtin_expect((*animation->node_flags & 1) != 0, 1)) {
         const f32 rotation_x = evaluate(3);
         const f32 rotation_y = evaluate(4);
         const f32 rotation_z = evaluate(5);
@@ -1745,6 +1743,8 @@ extern "C" f32 *NuGCutLocatorCalcMtx(NUGCUTLOCATOR_s *locator, float frame, NUMT
             static_cast<NUANG>(rotation_z * 10430.378f),
         };
         NuMtxSetRotateXYZ(mtx, &angles);
+    } else {
+        NuMtxSetIdentity(mtx);
     }
     NUVEC translation = {evaluate(0), evaluate(1), evaluate(2)};
     NuMtxTranslate(mtx, &translation);
@@ -1773,8 +1773,8 @@ static void instNuGCutCamSysUpdate(instNUGCUTSCENE_s *instance, float frame) {
     u8 focus_index;
     u8 next_camera_index;
     if ((instance->cutscene->version & 0xff) > 4 && system->focus_state_animation != NULL) {
-        if (StateAnimEvaluate(system->focus_state_animation, &camera_instance->focus_state_index, &focus_index,
-                              frame) != 0) {
+        if (__builtin_expect(StateAnimEvaluate(system->focus_state_animation, &camera_instance->focus_state_index, &focus_index,
+                              frame) != 0, 1)) {
             if (focus_index == 0xff) {
                 camera_instance->focus_index = -1;
             } else {
@@ -1874,7 +1874,7 @@ static void instNuGCutCamSysUpdate(instNUGCUTSCENE_s *instance, float frame) {
         }
     }
 
-    if (__builtin_expect(static_cast<i8>(instance->flags_88) < 0, 0)) {
+    if (__builtin_expect(static_cast<i8>(instance->flags_88) < 0, 1)) {
         NuMtxMul(&cutscenecammtx, &cutscenecammtx, &instance->matrix);
     }
     set_cutscenecammtx = 1;
@@ -3716,7 +3716,7 @@ NUGCUTSCENE_s *RelocateCutScene(NUGCUTSCENE_s *source, variptr_u *buffer) {
             cutscene->character_system =
                 reinterpret_cast<NUGCUTCHARSYS_s *>(reinterpret_cast<isize>(cutscene->character_system) + data_delta);
             NUGCUTCHARSYS_s *system = cutscene->character_system;
-            if (system->characters != NULL) {
+            if (__builtin_expect(system->characters != NULL, 1)) {
                 system->characters =
                     reinterpret_cast<NUGCUTCHAR_s *>(reinterpret_cast<isize>(system->characters) + data_delta);
             } else {
@@ -3745,7 +3745,7 @@ NUGCUTSCENE_s *RelocateCutScene(NUGCUTSCENE_s *source, variptr_u *buffer) {
             }
             if ((cutscene->version & 0xff) > 3) {
                 NUGCUTCHARANIM_s *animations = cutscene->character_animations;
-                if (animations != NULL) {
+                if (__builtin_expect(animations != NULL, 1)) {
                     animations = reinterpret_cast<NUGCUTCHARANIM_s *>(reinterpret_cast<isize>(animations) + data_delta);
                     cutscene->character_animations = animations;
                 } else {

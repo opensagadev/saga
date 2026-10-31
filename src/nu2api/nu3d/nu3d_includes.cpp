@@ -6210,12 +6210,12 @@ extern "C" {
                 u8 *first = key_data + (key + key_offset + 1) * 4;
                 f32 first_time = static_cast<f32>(static_cast<u32>(first[3]));
                 f32 span = static_cast<f32>(static_cast<u32>(first[7])) - first_time;
-                f32 inverse_span = span == 0.0f ? 0.0f : 1.0f / span;
+                f32 inverse_span = __builtin_expect(span == 0.0f, 0) ? 0.0f : 1.0f / span;
+                f32 t = ((time->time - 1.0f) - first_time) * inverse_span;
                 f32 tangent1 = static_cast<f32>(*reinterpret_cast<i8 *>(first + 6)) * header[0] * span;
                 f32 tangent0 = static_cast<f32>(*reinterpret_cast<i8 *>(first + 2)) * header[0] * span;
                 f32 value0 = static_cast<f32>(*reinterpret_cast<i16 *>(first)) * header[1];
                 f32 value_delta = value0 - static_cast<f32>(*reinterpret_cast<i16 *>(first + 4)) * header[1];
-                f32 t = ((time->time - 1.0f) - first_time) * inverse_span;
                 result = (((((value_delta * 2.0f + tangent0 + tangent1) * t - value_delta * 3.0f) - tangent0 * 2.0f) -
                            tangent1) *
                               t +
@@ -6241,13 +6241,13 @@ extern "C" {
                     next_time = first_time + 1.0f;
                 }
                 f32 span = next_time - first_time;
-                f32 tangent0 = static_cast<f32>(*reinterpret_cast<i8 *>(first + 2)) * header_0 * span;
+                f32 inverse_span = 1.0f / span;
+                f32 t = ((time->time - 1.0f) - first_time) * inverse_span;
                 f32 tangent1 = static_cast<f32>(*reinterpret_cast<i8 *>(first + 6)) * header_0 * span;
+                f32 tangent0 = static_cast<f32>(*reinterpret_cast<i8 *>(first + 2)) * header_0 * span;
                 f32 value0 = static_cast<f32>(*reinterpret_cast<i16 *>(first)) * header_1 + header_2;
                 f32 value_delta =
                     value0 - (static_cast<f32>(*reinterpret_cast<i16 *>(first + 4)) * header_1 + header_2);
-                f32 inverse_span = 1.0f / span;
-                f32 t = ((time->time - 1.0f) - first_time) * inverse_span;
                 result = (((((value_delta * 2.0f + tangent0 + tangent1) * t - value_delta * 3.0f) - tangent0 * 2.0f) -
                            tangent1) *
                               t +
@@ -6266,11 +6266,11 @@ extern "C" {
                 f32 first_time = static_cast<f32>(static_cast<u32>(static_cast<u16>(first[2])));
                 f32 span = static_cast<f32>(static_cast<u32>(static_cast<u16>(first[5]))) - first_time;
                 f32 tangent0 = static_cast<f32>(static_cast<i8>(first[1])) * header_0 * span;
-                f32 value0 = static_cast<f32>(first[0]) * header_1 + header_2;
                 f32 tangent1 = static_cast<f32>(static_cast<i8>(first[4])) * header_0 * span;
-                f32 value_delta = value0 - (static_cast<f32>(first[3]) * header_1 + header_2);
                 f32 inverse_span = 1.0f / span;
                 f32 t = ((time->time - 1.0f) - first_time) * inverse_span;
+                f32 value0 = static_cast<f32>(first[0]) * header_1 + header_2;
+                f32 value_delta = value0 - (static_cast<f32>(first[3]) * header_1 + header_2);
                 result = (((((value_delta * 2.0f + tangent0 + tangent1) * t - value_delta * 3.0f) - tangent0 * 2.0f) -
                            tangent1) *
                               t +
@@ -6279,7 +6279,7 @@ extern "C" {
                          value0;
                 break;
             }
-            default:
+            case 0:
                 break;
         }
         return result;
@@ -8621,29 +8621,33 @@ extern "C" __attribute__((optimize("O2"))) void ANI_Ani3ExtractAllNodeCurves(ani
         u8 flags = override_anim ? override_anim->flags : 0;
         u8 rotate = flags & 1, rescale = flags & 4, translate = flags & 2;
         NUANGVEC angles;
-        NUVEC r0, r1, s0, s1, translation, temporary;
+        f32 r0[3], r1[3];
+        NUVEC s0, s1, temporary;
+        f32 translation[3];
         if ((first->flags & 1) || (second->flags & 1) || rotate) {
             for (i32 component = 0; component < 3; ++component) {
-                reinterpret_cast<f32 *>(&r0)[component] =
-                    first->curves[component + 3] ? NuAnimCurveCalcVal2(first->curves[component + 3], first_time)
-                                                 : first->constants[component + 3];
-                reinterpret_cast<f32 *>(&r1)[component] =
-                    second->curves[component + 3] ? NuAnimCurveCalcVal2(second->curves[component + 3], second_time)
-                                                  : second->constants[component + 3];
+                if (first->curves[component + 3])
+                    r0[component] = NuAnimCurveCalcVal2(first->curves[component + 3], first_time);
+                else
+                    r0[component] = first->constants[component + 3];
+                if (second->curves[component + 3])
+                    r1[component] = NuAnimCurveCalcVal2(second->curves[component + 3], second_time);
+                else
+                    r1[component] = second->constants[component + 3];
             }
-            r0.x -= r0.x - r1.x > 3.1415927410125732f ? 6.2831854820251465f : 0.0f;
-            r1.x -= r1.x - r0.x > 3.1415927410125732f ? 6.2831854820251465f : 0.0f;
-            r0.y -= r0.y - r1.y > 3.1415927410125732f ? 6.2831854820251465f : 0.0f;
-            r1.y -= r1.y - r0.y > 3.1415927410125732f ? 6.2831854820251465f : 0.0f;
-            r0.z -= r0.z - r1.z > 3.1415927410125732f ? 6.2831854820251465f : 0.0f;
-            r1.z -= r1.z - r0.z > 3.1415927410125732f ? 6.2831854820251465f : 0.0f;
-            r0.x = r0.x * inverse_blend + r1.x * blend;
-            r0.z = r0.z * inverse_blend + r1.z * blend;
-            r0.y = r0.y * inverse_blend + r1.y * blend;
+            r0[0] -= r0[0] - r1[0] > 3.1415927410125732f ? 6.2831854820251465f : 0.0f;
+            r1[0] -= r1[0] - r0[0] > 3.1415927410125732f ? 6.2831854820251465f : 0.0f;
+            r0[1] -= r0[1] - r1[1] > 3.1415927410125732f ? 6.2831854820251465f : 0.0f;
+            r1[1] -= r1[1] - r0[1] > 3.1415927410125732f ? 6.2831854820251465f : 0.0f;
+            r0[2] -= r0[2] - r1[2] > 3.1415927410125732f ? 6.2831854820251465f : 0.0f;
+            r1[2] -= r1[2] - r0[2] > 3.1415927410125732f ? 6.2831854820251465f : 0.0f;
+            r0[0] = r0[0] * inverse_blend + r1[0] * blend;
+            r0[1] = r0[1] * inverse_blend + r1[1] * blend;
+            r0[2] = r0[2] * inverse_blend + r1[2] * blend;
             if (rotate) {
-                angles.z = static_cast<i32>((r0.z + override_anim->rotation.z) * 10430.3779296875f);
-                angles.y = static_cast<i32>((r0.y + override_anim->rotation.y) * 10430.3779296875f);
-                angles.x = static_cast<i32>((r0.x + override_anim->rotation.x) * 10430.3779296875f);
+                angles.y = static_cast<i32>((r0[1] + override_anim->rotation.y) * 10430.3779296875f);
+                angles.z = static_cast<i32>((r0[2] + override_anim->rotation.z) * 10430.3779296875f);
+                angles.x = static_cast<i32>((r0[0] + override_anim->rotation.x) * 10430.3779296875f);
                 if (flags & 8) {
                     angles.x &= 0xffff;
                     if (angles.x > 32767)
@@ -8672,9 +8676,9 @@ extern "C" __attribute__((optimize("O2"))) void ANI_Ani3ExtractAllNodeCurves(ani
                         angles.z = override_anim->rotation_limit_end[2];
                 }
             } else {
-                angles.x = static_cast<i32>(r0.x * 10430.3779296875f);
-                angles.z = static_cast<i32>(r0.z * 10430.3779296875f);
-                angles.y = static_cast<i32>(r0.y * 10430.3779296875f);
+                angles.x = static_cast<i32>(r0[0] * 10430.3779296875f);
+                angles.y = static_cast<i32>(r0[1] * 10430.3779296875f);
+                angles.z = static_cast<i32>(r0[2] * 10430.3779296875f);
             }
             NuMtxSetRotateXYZVU0(matrix, &angles);
         } else
@@ -8683,12 +8687,16 @@ extern "C" __attribute__((optimize("O2"))) void ANI_Ani3ExtractAllNodeCurves(ani
             NuMtxMulRVU0(matrix, matrix, &joint->animation_bind_matrix);
         if ((first->flags & 8) || (second->flags & 8) || rescale) {
             for (i32 component = 0; component < 3; ++component) {
-                reinterpret_cast<f32 *>(&s0)[component] =
-                    first->curves[component + 6] ? NuAnimCurveCalcVal2(first->curves[component + 6], first_time)
-                                                 : first->constants[component + 6];
-                reinterpret_cast<f32 *>(&s1)[component] =
-                    second->curves[component + 6] ? NuAnimCurveCalcVal2(second->curves[component + 6], second_time)
-                                                  : second->constants[component + 6];
+                if (first->curves[component + 6])
+                    reinterpret_cast<f32 *>(&s0)[component] =
+                        NuAnimCurveCalcVal2(first->curves[component + 6], first_time);
+                else
+                    reinterpret_cast<f32 *>(&s0)[component] = first->constants[component + 6];
+                if (second->curves[component + 6])
+                    reinterpret_cast<f32 *>(&s1)[component] =
+                        NuAnimCurveCalcVal2(second->curves[component + 6], second_time);
+                else
+                    reinterpret_cast<f32 *>(&s1)[component] = second->constants[component + 6];
             }
             scale->x = blend * s0.x + inverse_blend * s1.x;
             scale->y = blend * s0.y + inverse_blend * s1.y;
@@ -8717,21 +8725,21 @@ extern "C" __attribute__((optimize("O2"))) void ANI_Ani3ExtractAllNodeCurves(ani
             scale->z *= temporary.z;
         }
         for (i32 component = 0; component < 3; ++component) {
-            reinterpret_cast<f32 *>(&translation)[component] =
-                (first->curves[component] ? NuAnimCurveCalcVal2(first->curves[component], first_time)
-                                          : first->constants[component]) *
-                inverse_blend;
-            reinterpret_cast<f32 *>(&translation)[component] +=
-                (second->curves[component] ? NuAnimCurveCalcVal2(second->curves[component], second_time)
-                                           : second->constants[component]) *
-                blend;
+            if (first->curves[component])
+                translation[component] = NuAnimCurveCalcVal2(first->curves[component], first_time) * inverse_blend;
+            else
+                translation[component] = first->constants[component] * inverse_blend;
+            if (second->curves[component])
+                translation[component] += NuAnimCurveCalcVal2(second->curves[component], second_time) * blend;
+            else
+                translation[component] += second->constants[component] * blend;
         }
         if (translate) {
-            translation.x += override_anim->translation.x;
-            translation.y += override_anim->translation.y;
-            translation.z += override_anim->translation.z;
+            translation[0] += override_anim->translation.x;
+            translation[1] += override_anim->translation.y;
+            translation[2] += override_anim->translation.z;
         }
-        NuMtxTranslate(matrix, &translation);
+        NuMtxTranslate(matrix, reinterpret_cast<NUVEC *>(translation));
         if (joint->data_0x51[0] & 8) {
             NUVEC *pivot = reinterpret_cast<NUVEC *>(joint->data_0x40);
             NuMtxPreTranslate(matrix, pivot);
@@ -15455,7 +15463,7 @@ static void drawClippedPortal(NUPORTAL *portal, NUPLANE **planes, u8 *plane_coun
 static void roomRecursive(NUGSCN *scene, NUFRUSTRUM *frustum, i16 room_id, i16 previous_room, i32 depth) {
     NUROOM *rooms = scene->rooms;
     for (i32 i = 0; i < depth - 1; ++i) {
-        if (rooms_visited[i] == room_id) {
+        if (__builtin_expect(rooms_visited[i] == room_id, 0)) {
             return;
         }
     }
@@ -15505,7 +15513,7 @@ static void roomRecursive(NUGSCN *scene, NUFRUSTRUM *frustum, i16 room_id, i16 p
                     ++inside_tests;
                 }
             }
-            if (outside_vertices == portal->vertex_count) {
+            if (__builtin_expect(outside_vertices == portal->vertex_count, 0)) {
                 rejected = true;
                 break;
             }
@@ -19193,8 +19201,11 @@ extern "C" NUDLDLISTSCENE *NuDisplaySceneClone(NUDLDLISTSCENE *source, VARIPTR *
     NuThreadCriticalSectionBegin(global_dlist_manager.loading_critical_section);
     NUDLDLISTSCENE *scene = CloneSceneAllocate<NUDLDLISTSCENE>(buffer, 1);
     *scene = *source;
-    scene->items = CloneSceneAllocate<NUDISPLAYLISTITEM>(buffer, source->nitems);
-    memcpy(scene->items, source->items, sizeof(NUDISPLAYLISTITEM) * source->nitems);
+    NUDISPLAYLISTITEM *items = reinterpret_cast<NUDISPLAYLISTITEM *>((buffer->addr + 3) & ~static_cast<usize>(3));
+    scene->items = items;
+    const usize items_size = sizeof(NUDISPLAYLISTITEM) * source->nitems;
+    buffer->addr = reinterpret_cast<usize>(items) + items_size;
+    memcpy(items, source->items, items_size);
     const i32 clip_pairs = ((source->nclip_objects + 7) / 8) << 1;
     u32 clip_bytes = static_cast<u32>(clip_pairs / 16 * 16) + 16;
     const usize clip_base = (buffer->addr + 15) & ~static_cast<usize>(15);
@@ -19224,19 +19235,21 @@ extern "C" NUDLDLISTSCENE *NuDisplaySceneClone(NUDLDLISTSCENE *source, VARIPTR *
     for (i32 i = 0; i < static_cast<i32>(source->nmtls); ++i, ++lists, ++states, ++heads) {
         scene->dlist_mtls[i] = lists;
         memcpy(scene->dlist_mtls[i], source->dlist_mtls[i], sizeof(NUDISPLAYLIST));
-        scene->dlist_mtls[i]->dlist = scene;
-        scene->dlist_mtls[i]->state = states;
-        scene->dlist_mtls[i]->mtl_item = scene->items + (source->dlist_mtls[i]->mtl_item - source->items);
-        scene->dlist_mtls[i]->dyn_geom = scene->items + (source->dlist_mtls[i]->dyn_geom - source->items);
-        scene->dlist_mtls[i]->first = heads;
-        scene->dlist_mtls[i]->mtl_last = scene->dlist_mtls[i]->first;
+        NUDISPLAYLIST **dst = &scene->dlist_mtls[i];
+        (*dst)->dlist = scene;
+        (*dst)->state = states;
+        NUDISPLAYLIST **src = &source->dlist_mtls[i];
+        (*dst)->mtl_item = scene->items + ((*src)->mtl_item - source->items);
+        (*dst)->dyn_geom = scene->items + ((*src)->dyn_geom - source->items);
+        (*dst)->first = heads;
+        (*dst)->mtl_last = (*dst)->first;
         const usize scene_first_base = (buffer->addr + 15) & ~static_cast<usize>(15);
-        scene->dlist_mtls[i]->scene_first[0] = reinterpret_cast<NUDISPLAYLISTITEM *>(scene_first_base);
+        (*dst)->scene_first[0] = reinterpret_cast<NUDISPLAYLISTITEM *>(scene_first_base);
         buffer->addr = scene_first_base;
-        buffer->addr += sizeof(NUDISPLAYLISTITEM) * static_cast<usize>(source->dlist_mtls[i]->nscene_items);
-        scene->dlist_mtls[i]->scene_first[1] = reinterpret_cast<NUDISPLAYLISTITEM *>(buffer->addr);
-        buffer->addr += sizeof(NUDISPLAYLISTITEM) * static_cast<usize>(source->dlist_mtls[i]->nscene_items);
-        NUDISPLAYLISTITEM *first = scene->dlist_mtls[i]->first;
+        buffer->addr += sizeof(NUDISPLAYLISTITEM) * static_cast<usize>((*src)->nscene_items);
+        (*dst)->scene_first[1] = reinterpret_cast<NUDISPLAYLISTITEM *>(buffer->addr);
+        buffer->addr += sizeof(NUDISPLAYLISTITEM) * static_cast<usize>((*src)->nscene_items);
+        NUDISPLAYLISTITEM *first = (*dst)->first;
         first->type = 0x8d;
         first->next = NULL;
         first->id = 1;
@@ -19257,8 +19270,9 @@ extern "C" NUDLDLISTSCENE *NuDisplaySceneClone(NUDLDLISTSCENE *source, VARIPTR *
     }
     NUSORTPRI *sort_pris = reinterpret_cast<NUSORTPRI *>((buffer->addr + 3) & ~static_cast<usize>(3));
     scene->sort_pris = sort_pris;
-    buffer->addr = reinterpret_cast<usize>(sort_pris + source->nsort_pris);
-    memcpy(scene->sort_pris, source->sort_pris, sizeof(NUSORTPRI) * source->nsort_pris);
+    const usize sort_pris_size = sizeof(NUSORTPRI) * source->nsort_pris;
+    buffer->addr = reinterpret_cast<usize>(sort_pris) + sort_pris_size;
+    memcpy(sort_pris, source->sort_pris, sort_pris_size);
     for (i32 i = 0; i < source->nsort_pris; ++i) {
         scene->sort_pris[i].display_scene = scene;
         scene->sort_pris[i].items = scene->items + (source->sort_pris[i].items - source->items);
@@ -19267,28 +19281,35 @@ extern "C" NUDLDLISTSCENE *NuDisplaySceneClone(NUDLDLISTSCENE *source, VARIPTR *
     auto source_nitems = source->nitems;
     for (i32 i = 0; i < source_nitems; ++i) {
         NUDISPLAYLISTITEM *item = &scene->items[i];
-        if (item->type == 0x80) {
-            for (i32 j = 0; j < static_cast<i32>(source->nmtls); ++j) {
-                if (source->items[i].next == source->mtls[j]) {
-                    item->next = scene->mtls[j];
-                    break;
+        switch (item->type) {
+            case 0x80:
+                for (i32 j = 0; j < static_cast<i32>(source->nmtls); ++j) {
+                    if (source->items[i].next == source->mtls[j]) {
+                        item->next = scene->mtls[j];
+                        break;
+                    }
                 }
-            }
-        } else if (item->type == 0x85) {
-            item->next = scene->items + (static_cast<NUDISPLAYLISTITEM *>(source->items[i].next) - source->items);
+                break;
+            case 0x85:
+                item->next = scene->items + (static_cast<NUDISPLAYLISTITEM *>(source->items[i].next) - source->items);
+                break;
         }
     }
     if (__builtin_expect(source->material_animations != NULL, 1)) {
-        scene->material_animations = CloneSceneAllocate<NUMTLANIMSET>(buffer, 1);
-        *scene->material_animations = *source->material_animations;
-        scene->material_animations->next = global_dlist_manager.mtlanim_list;
+        NUMTLANIMSET *anims = reinterpret_cast<NUMTLANIMSET *>((buffer->addr + 3) & ~static_cast<usize>(3));
+        scene->material_animations = anims;
+        buffer->addr = reinterpret_cast<usize>(anims + 1);
+        *anims = *source->material_animations;
         scene->material_animations->scene = scene;
+        scene->material_animations->next = global_dlist_manager.mtlanim_list;
         global_dlist_manager.mtlanim_list = scene->material_animations;
     } else {
         scene->material_animations = NULL;
     }
-    scene->local_state = CloneSceneAllocate<NUGLOBALRNDRSTATE>(buffer, 1);
-    memset(scene->local_state, 0, sizeof(NUGLOBALRNDRSTATE));
+    NUGLOBALRNDRSTATE *local_state = reinterpret_cast<NUGLOBALRNDRSTATE *>((buffer->addr + 3) & ~static_cast<usize>(3));
+    scene->local_state = local_state;
+    buffer->addr = reinterpret_cast<usize>(local_state + 1);
+    memset(local_state, 0, sizeof(NUGLOBALRNDRSTATE));
     NuDisplaySceneClonePS(source, scene, buffer);
     global_dlist_manager.dlists[global_dlist_manager.ndisplay_lists++] = scene;
     DisplayListBeforeFrameReset(scene);

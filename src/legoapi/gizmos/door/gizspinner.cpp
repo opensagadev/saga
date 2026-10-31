@@ -1233,7 +1233,7 @@ i32 GizSpinner_Push(GIZSPINNER_s *spinner, i32 context) {
             goto finalize;
 
         rotate_rev:
-            if ((flags & 2) != 0) {
+            if (__builtin_expect((flags & 2) != 0, 0)) {
                 spinner->rotation += rotation_step;
             } else {
                 spinner->rotation -= rotation_step;

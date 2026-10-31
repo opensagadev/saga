@@ -821,7 +821,7 @@ static i32 ProcessConditionFlowBox(GIZFLOW_s *flow, FLOWBOX_s *box, u8) {
         }
         count_done:
             if (condition[0] == 5) {
-                if (count != required) {
+                if (__builtin_expect(count != required, 0)) {
                     return 0;
                 }
             } else if (count < required) {

@@ -198,7 +198,10 @@ void MechTouchTaskGoTo::UpdateStuck() {
 }
 
 bool MechTouchTaskGoTo::UpdateTarget(MechObjectInterface &object) {
-    target = NuMechPtr<MechObjectInterface, 4>(&object);
+    NuMechPtr<MechObjectInterface, 4> ptr(&object);
+    if (&target != &ptr) {
+        target = ptr;
+    }
     return true;
 }
 
@@ -686,12 +689,18 @@ bool MechTouchTaskHatMachine::Update() {
 
 void MechTouchTaskPlannedGoTo::AnalysePath() {
     VuVec position = start_position;
-    const i32 end = path_index + (MIN(2, path_count - path_index));
+    i32 remaining = path_count - path_index;
+    if (remaining > 2) {
+        remaining = 2;
+    }
+    const i32 end = path_index + remaining;
+    bool failed = false;
     for (; path_index <= end;) {
-        position.z += step_z;
         position.x += step_x;
+        position.z += step_z;
         const f32 ground_height = GameShadow(player, &position.xyz, 0.0f, -1);
         if (ground_height > position.y) {
+            failed = true;
             break;
         }
         path_points[path_index].x = position.x;
@@ -702,6 +711,7 @@ void MechTouchTaskPlannedGoTo::AnalysePath() {
             path_points[path_index].y = path_points[path_index - 1].y;
             ++field_20;
             if (field_20 > 1) {
+                failed = true;
                 break;
             }
         } else {
@@ -734,7 +744,7 @@ void MechTouchTaskPlannedGoTo::AnalysePath() {
         position.y = path_points[path_index].y + step_y;
         ++path_index;
     }
-    if (__builtin_expect(path_index <= end, 0)) {
+    if (failed) {
         if (last_index > 0) {
             for (i32 i = last_index + 1; i <= path_count; ++i) {
                 path_points[i].y = -1000000000.0f;
@@ -745,7 +755,8 @@ void MechTouchTaskPlannedGoTo::AnalysePath() {
         if (completion != NULL) {
             *completion = false;
         }
-    } else if (path_index >= path_count) {
+    }
+    if (path_index >= path_count) {
         analysis_state = 1;
     }
 }

@@ -435,10 +435,11 @@ void Signal_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
         object->context_animation_timer += FRAMETIME;
         bool exchange = false;
         if (object->context_animation_timer >= object->airborne_action_duration) {
-            u8 exchanged = object->context_flags & 0x40;
+            if ((object->context_flags & 0x40) == 0) {
+                exchange = true;
+            }
             object->character_context = CHARACTER_CONTEXT_NONE;
             StartEndOfJump(object);
-            exchange = exchanged == 0;
         } else {
             if ((object->context_flags & 0x40) != 0) {
                 return;
@@ -455,10 +456,10 @@ void Signal_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
             SUIT_s *old_suit = static_cast<SUIT_s *>(object->suit);
             object->context_flags |= 0x40;
             SUIT_s *new_suit = signal->suit;
+            u32 old_flags = old_suit->character_flags;
             object->suit = new_suit;
             signal->suit = old_suit;
-            object->ai.capabilities =
-                (object->ai.capabilities & ~old_suit->character_flags) | new_suit->character_flags;
+            object->ai.capabilities = (object->ai.capabilities & ~old_flags) | new_suit->character_flags;
             for (i32 i = 0; i < 10; ++i) {
                 if (new_suit == &Suit[i]) {
                     areaSuitBits |= 1 << i;

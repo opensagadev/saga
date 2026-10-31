@@ -2608,7 +2608,7 @@ extern "C" {
             dest[dest_pos++] = text[source_pos++];
             while (static_cast<u8>(text[source_pos] + 0x80) < 0x40)
                 dest[dest_pos++] = text[source_pos++];
-        } while (dest_pos < 0x1e0);
+        } while (__builtin_expect(dest_pos < 0x1e0, 1));
         dest[dest_pos] = 0;
     }
 

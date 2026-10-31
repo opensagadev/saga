@@ -1225,10 +1225,11 @@ void WeaponOutCode(GameObject_s *object) {
         if ((object->field_0xe22 & GAMEOBJECT_E22_FLAG_WEAPON_ANIMATION) == 0 && object->character_context != 7) {
             if (object->weapon_scale_state == WEAPON_SCALE_IDLE && object->apiobj.field_0x27d != 0 &&
                 object->pad_gamepad->input_magnitude == 0.0f) {
+                void **models = object->apiobj.character_model->model_data_b;
                 i32 action = 17;
                 if (object->apiobj.character_data->game_character->field275_0x116 == 0)
                     action = (object->apiobj.character_data->model_flags & 0x80) != 0 ? 127 : 17;
-                if (object->apiobj.character_model->model_data_b[action] != NULL &&
+                if (models[action] != NULL &&
                     (object->character_context == -1 || (CInfo[object->character_context].flags & 4) != 0)) {
                     SlowWeaponOut(object);
                     goto after_weapon_touch;
@@ -1243,9 +1244,8 @@ void WeaponOutCode(GameObject_s *object) {
 after_weapon_touch:
     if (LEGOCONTEXT_WEAPONOUT == -1 || object->character_context != LEGOCONTEXT_WEAPONOUT)
         return;
-    if (__builtin_expect(object->pad_gamepad->input_magnitude > 0.0f &&
-                             (object->apiobj.character_data->game_character->field_0x94 & 0x1000) == 0,
-                         0)) {
+    if (object->pad_gamepad->input_magnitude > 0.0f &&
+        (object->apiobj.character_data->game_character->field_0x94 & 0x1000) == 0) {
         if (object->weapon_scale == 0.0f && object->weapon_scale_state != WEAPON_SCALE_EXTENDING) {
             FastWeaponOut(object, 0);
         }
@@ -1253,8 +1253,9 @@ after_weapon_touch:
         return;
     }
     ANIMPACKET_s &packet = object->apiobj.anim_packet;
-    const i16 animation = packet.blending ? packet.blend_animation_b : packet.animation_index;
-    if (animation != object->context_animation) {
+    const i16 context_animation = object->context_animation;
+    if ((packet.blending && packet.blend_animation_b != context_animation) ||
+        (!packet.blending && packet.animation_index != context_animation)) {
         object->weapon_scale = 0.0f;
         return;
     }
@@ -1268,7 +1269,7 @@ after_weapon_touch:
         if (object->weapon_scale != 0.0f || object->weapon_scale_state == WEAPON_SCALE_EXTENDING ||
             packet.requested_animation != object->context_animation)
             return;
-        const f32 time = packet.blending ? packet.blend_target_time : packet.current_time;
+        const f32 time = *(packet.blending ? &packet.blend_target_time : &packet.current_time);
         if (!(time >= start))
             return;
     }

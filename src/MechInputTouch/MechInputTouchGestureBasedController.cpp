@@ -546,32 +546,37 @@ bool MechInputTouchGestureBasedController::StartJumpUsingAIPath(JumpTriggerPacke
         return false;
     }
 
-    const i32 direction = jump->direction;
     AIPATHCNX *connection = jump->connection;
+    const i32 direction = jump->direction;
     AIPATHNODE &node = jump->path->nodes[connection->node_indices[direction == 0]];
-    GameObject_s *object = Player[player_id];
     const u32 flags = connection->traversal_flags[direction];
-    bool complete_success_hint;
+    bool skip_fail_hint;
     i32 animation;
     const u32 high_jump = flags & (LEGO_AIPATHCNX_HIGH_JUMP | 0x800000);
-    if (high_jump != 0 && (object->ai.capabilities & high_jump) != 0) {
+    if (high_jump != 0 && (Player[player_id]->ai.capabilities & high_jump) != 0) {
         animation = 3;
-        complete_success_hint = true;
+        skip_fail_hint = false;
     } else {
         const u32 double_jump = flags & (LEGO_AIPATHCNX_DOUBLE_JUMP | 0x400000);
-        if (double_jump == 0) {
-            animation = 1;
-            complete_success_hint = false;
+        if (double_jump != 0) {
+            const u32 capable = Player[player_id]->ai.capabilities & double_jump;
+            if (capable != 0) {
+                animation = 2;
+                skip_fail_hint = false;
+            } else {
+                animation = 1;
+                skip_fail_hint = true;
+            }
         } else {
-            const bool capable = (object->ai.capabilities & double_jump) != 0;
-            animation = capable ? 2 : 1;
-            complete_success_hint = capable;
+            animation = 1;
+            skip_fail_hint = true;
         }
     }
 
-    if (LEGOACT_FLIP != -1 && object->apiobj.character_model->model_data_b[LEGOACT_FLIP] != NULL) {
-        const u16 desired = connection->route_mask - (direction != 0 ? 0x8000 : 0);
-        const i32 difference = RotDiff(object->apiobj.facing_angle, desired);
+    if (LEGOACT_FLIP != -1 && Player[player_id]->apiobj.character_model->model_data_b[LEGOACT_FLIP] != NULL) {
+        const u16 rotation = connection->rotation;
+        const u16 desired = direction != 0 ? rotation - 0x8000 : rotation;
+        const i32 difference = RotDiff(Player[player_id]->apiobj.facing_angle, desired);
         const i32 absolute_difference = difference < 0 ? -difference : difference;
         if (absolute_difference >= 0x6aab) {
             animation = 4;
@@ -581,11 +586,13 @@ bool MechInputTouchGestureBasedController::StartJumpUsingAIPath(JumpTriggerPacke
     TouchHolder *holder = packet.touch_holder;
     MechTouchTaskBigJump *task = new MechTouchTaskBigJump(*this, node.position, static_cast<i8>(animation));
     StartNewTask(task, *holder, false, false);
-    MechAutoJumpSetIsUsing(*object, *jump);
-    if (complete_success_hint) {
+    MechAutoJumpSetIsUsing(*Player[player_id], *jump);
+    if (skip_fail_hint) {
         Hint_SetComplete(id_HINT_LSW_AUTOJUMP);
+    } else {
+        Hint_SetComplete(id_HINT_LSW_AUTOJUMP);
+        Hint_SetComplete(id_HINT_LSW_AUTOJUMP_FAIL);
     }
-    Hint_SetComplete(id_HINT_LSW_AUTOJUMP_FAIL);
     return true;
 }
 

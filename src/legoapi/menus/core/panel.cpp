@@ -774,8 +774,10 @@ void DrawMeleeTargetsNumber(i16 *targets, u8 *counts, i32 count, u8 reset, nuhsp
 
             i32 red = 255;
             i32 green = 0;
-            if (__builtin_expect(counts[i] != meleeTarg_localCount[i], 1) ||
-                __builtin_expect(meleeTarg_flashTime[i] != 0.0f, 0)) {
+            if (__builtin_expect(counts[i] == meleeTarg_localCount[i], 0) && meleeTarg_flashTime[i] == 0.0f) {
+                red = 255;
+                green = 0;
+            } else {
                 if (meleeTarg_flashTime[i] == 0.0f)
                     meleeTarg_flashTime[i] = 0.01f;
                 meleeTarg_flashTime[i] += FRAMETIME;
@@ -790,7 +792,7 @@ void DrawMeleeTargetsNumber(i16 *targets, u8 *counts, i32 count, u8 reset, nuhsp
                         meleeTarg_localCount[i] = counts[i];
                         red = 0;
                         green = 255;
-                    } else if (!(meleeTarg_flashTime[i] >= 1.0f)) {
+                    } else if (meleeTarg_flashTime[i] < 1.0f) {
                         const f32 phase = (meleeTarg_flashTime[i] - 0.5f) * 2.0f * 255.0f;
                         red = static_cast<i32>(phase);
                         green = static_cast<i32>(255.0f - phase);

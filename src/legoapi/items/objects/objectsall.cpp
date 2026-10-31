@@ -4449,7 +4449,7 @@ void edpartDoInput(nupad_s *pad) {
                 edpartPlace(edpart_nearest, &edpart_cam_pos);
         }
         if (pad->digital_buttons_pressed & 0x10) {
-            if (edpart_copy_mode)
+            if (__builtin_expect(edpart_copy_mode != 0, 0))
                 edpartMultipleCopyClear();
             else {
                 if (edpart_nearest != -1)

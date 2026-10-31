@@ -466,39 +466,37 @@ void GetTakeOverPos(GameObject_s *object, nuvec_s *position) {
     }
 }
 
-void ReleaseTakeOver(GameObject_s *object, i32) {
-    GameObject_s *rider = object->field_0xcc0;
+void ReleaseTakeOver(GameObject_s *self, i32) {
+    GameObject_s *rider = self->field_0xcc0;
     if (rider == NULL)
         return;
-    if (object->character_context == 0x3b) {
-        GameObject_s *vehicle = rider;
-        rider = object;
-        object = vehicle;
+    GameObject_s *object = self;
+    if (self->character_context == 0x3b) {
+        object = rider;
+        rider = self;
     }
     struct ScriptSnapshot {
         AISCRIPTPROCESS process;
         void *field_c8;
     } rider_script, object_script;
     DECOMP_ASSERT(sizeof(ScriptSnapshot) == 0xcc, "Takeover script snapshot ABI");
-    memcpy(&rider_script.process, &rider->ai.script_process, sizeof(rider_script.process));
-    rider_script.field_c8 = rider->ai.field_0xc8;
+    memcpy(&rider_script, &rider->ai, sizeof(rider_script));
     u8 rider_set = rider->ai.creature_set;
-    memcpy(&object_script.process, &object->ai.script_process, sizeof(object_script.process));
-    object_script.field_c8 = object->ai.field_0xc8;
-    u16 rider_flag = rider->apiobj.field_0x1f8 & 0x100;
-    u16 object_flag = object->apiobj.field_0x1f8 & 0x100;
+    memcpy(&object_script, &object->ai, sizeof(object_script));
     u8 object_set = object->ai.creature_set;
-    if ((rider->field_0xf00 & 2) == 0 && TagCode(rider, object, 1, 0, 0) == 0)
+    u8 rider_flag = rider->apiobj.script_enabled;
+    u8 object_flag = object->apiobj.script_enabled;
+    if ((rider->field_0xf00 & 2) == 0 && __builtin_expect(TagCode(rider, object, 1, 0, 0) == 0, 0))
         return;
-    memcpy(&rider->ai.script_process, &object_script.process, sizeof(object_script.process));
-    rider->ai.field_0xc8 = object_script.field_c8;
-    memcpy(&object->ai.script_process, &rider_script.process, sizeof(rider_script.process));
-    object->ai.field_0xc8 = rider_script.field_c8;
+    object_script.process.creature_set = object_set;
+    memcpy(&rider->ai, &object_script, sizeof(object_script));
+    rider_script.process.creature_set = rider_set;
+    memcpy(&object->ai, &rider_script, sizeof(rider_script));
     rider->ai.creature_set = rider_set;
     object->ai.creature_set = object_set;
     AICreatureResumeScript(object);
-    rider->apiobj.field_0x1f8 = (rider->apiobj.field_0x1f8 & ~0x100) | object_flag;
-    object->apiobj.field_0x1f8 = (object->apiobj.field_0x1f8 & ~0x100) | rider_flag;
+    rider->apiobj.script_enabled = object_flag;
+    object->apiobj.script_enabled = rider_flag;
     if (rider->field_0xcc0 != NULL) {
         GetTakeOverPos(rider->field_0xcc0, &rider->apiobj.position);
         rider->apiobj.pitch_angle = 0;
@@ -936,7 +934,7 @@ __attribute__((force_align_arg_pointer)) void TakeOverCode(GameObject_s *object,
                                  (candidate->tag_flags & 2) != 0,
                              1))
             continue;
-        if (candidate->id == id_ATAT && WORLD->current_level == SPEEDERCHASEA_LDATA) {
+        if (__builtin_expect(candidate->id == id_ATAT && WORLD->current_level == SPEEDERCHASEA_LDATA, 1)) {
             if (api.field_0x281 == 0x13)
                 nearest = candidate;
             continue;
@@ -956,11 +954,11 @@ __attribute__((force_align_arg_pointer)) void TakeOverCode(GameObject_s *object,
         }
     }
     if (nearest != NULL) {
-        if (tag_pressed != 0 || (nearest->id == id_ATAT && WORLD->current_level == SPEEDERCHASEA_LDATA)) {
-            TakeOver2GetIn(object, nearest);
-        } else {
+        if (!(tag_pressed != 0 || (nearest->id == id_ATAT && WORLD->current_level == SPEEDERCHASEA_LDATA))) {
             object->tag_flags |= 1;
             nearest->tag_highlighted = 1;
+        } else {
+            TakeOver2GetIn(object, nearest);
         }
     }
 }

@@ -251,22 +251,24 @@ void InitRipples(ripple_set_s **result, variptr_u *buf, variptr_u *, i32 count) 
 
 void AddRipple(ripple_set_s *set, numtx_s *matrix, float size, float growth, float lifetime, float delay,
                RGBA start_color, RGBA end_color, i32 flags, numtl_s *material, nuvec_s *velocity) {
-    if (material == NULL)
+    if (__builtin_expect(material == NULL, 0))
         return;
-    if (set == NULL)
+    if (__builtin_expect(set == NULL, 0))
         return;
     ripple_node_s *newest = set->newest;
     u16 active_count = set->active_count;
+    u16 count = set->count;
     ripple_node_s *node = set->free_head;
-    if (__builtin_expect(!(active_count < set->count), 0)) {
+    if (__builtin_expect(!(active_count < count), 0)) {
         node = set->oldest;
-        set->oldest = node->next;
         set->newest = node;
+        set->oldest = node->next;
     } else {
         ripple_node_s *next_free;
-        if (node != node->next) {
-            node->next->previous = node->previous;
-            node->previous->next = node->next;
+        ripple_node_s *unlink_next = node->next;
+        if (node != unlink_next) {
+            unlink_next->previous = node->previous;
+            node->previous->next = unlink_next;
             next_free = node->next;
         } else {
             next_free = NULL;
@@ -285,7 +287,7 @@ void AddRipple(ripple_set_s *set, numtx_s *matrix, float size, float growth, flo
         ++active_count;
         set->active_count = active_count;
         set->newest = node;
-        if (active_count == set->count)
+        if (count == active_count)
             set->free_head = NULL;
         if (__builtin_expect(set->oldest == NULL, 0))
             set->oldest = node;
@@ -316,7 +318,7 @@ void UpdateRippleSet(ripple_set_s *set) {
         if (node == NULL)
             continue;
         ripple_node_s *next = node->next;
-        if (node->lifetime >= node->age) {
+        if (node->age <= node->lifetime) {
             if (!(node->delay > 0.0f)) {
                 f32 ratio = node->age / node->lifetime;
                 if ((node->flags & 1) != 0)
@@ -355,9 +357,10 @@ void UpdateRippleSet(ripple_set_s *set) {
         if (node != NULL) {
             if (node == set->oldest)
                 set->oldest = node->next;
-            if (__builtin_expect(set->active_count != 0, 1)) {
-                ripple_node_s *newest = set->newest;
-                ripple_node_s *free_head = set->free_head;
+            u16 count = set->active_count;
+            ripple_node_s *newest = set->newest;
+            ripple_node_s *free_head = set->free_head;
+            if (__builtin_expect(count != 0, 1)) {
                 if (node->previous != NULL)
                     node->previous->next = node->next;
                 else
@@ -373,10 +376,11 @@ void UpdateRippleSet(ripple_set_s *set) {
                     free_head->next = node;
                     node->next->previous = node;
                 }
+                --count;
+                set->active_count = count;
                 set->free_head = node;
-                --set->active_count;
                 set->newest = newest;
-                if (set->active_count == 0) {
+                if (count == 0) {
                     set->newest = NULL;
                     set->oldest = NULL;
                 }

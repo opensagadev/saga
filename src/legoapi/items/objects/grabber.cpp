@@ -777,10 +777,10 @@ void Grabber_Draw(WORLDINFO_s *world) {
                 const NUANG x_angle = g->shadow_x_angle;
                 reflection.m00 = reflection.m11 = NU_COS_LUT(x_angle);
                 reflection.m01 = NU_SIN_LUT(x_angle);
-                reflection.m10 = -reflection.m01;
                 reflection.m22 = 1.0f;
                 reflection.m02 = reflection.m12 = reflection.m03 = reflection.m23 = reflection.m20 = reflection.m21 =
                     reflection.m13 = reflection.m30 = reflection.m31 = reflection.m32 = 0.0f;
+                reflection.m10 = -reflection.m01;
                 reflection.m33 = 1.0f;
                 NuMtxRotateXInline(&reflection, g->shadow_z_angle);
                 NuMtxTranslate(&reflection, &position);
@@ -813,11 +813,9 @@ void Grabber_Draw(WORLDINFO_s *world) {
     } else if ((u8)Reflections_On && g->floor_height != 2000000.0f)
         NuSpecialDrawAt(&g->special, &reflection);
     if (g->carried_blowup && grab_position) {
-        memcpy(&matrix, &g->carried_matrix, sizeof(matrix));
-        matrix.m30 = grab_position->x;
-        matrix.m31 = grab_position->y;
+        matrix = g->carried_matrix;
+        *(NUVEC *)&matrix.m30 = *grab_position;
         matrix.m31 += g->carried_height_offset;
-        matrix.m32 = grab_position->z;
         NuSpecialDrawAt(&g->carried_blowup->type->special, &matrix);
         if ((u8)Reflections_On && g->floor_height != 2000000.0f &&
             MatrixReflection(&matrix, 2, g->floor_height, WORLD->current_level->unknown_0cc, &reflection))

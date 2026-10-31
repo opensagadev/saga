@@ -405,7 +405,10 @@ static __used__ void MenuDrawPauseExit(MENU *menu) {
         spacing = 2.0f;
     } else {
         spacing = 1.5f;
-        if (GAMEDEMO == 0) {
+        if (GAMEDEMO != 0) {
+            title = TTab[tRESTARTDEMO2];
+            warning = TTab[tALLLEVELPROGRESSWILLBELOST];
+        } else {
             if (WORLD->current_level == HUB_LDATA) {
                 title = TTab[tQUITGAME];
                 warning = TTab[tGAMEPROGRESSWILLBELOST];
@@ -423,9 +426,6 @@ static __used__ void MenuDrawPauseExit(MENU *menu) {
                     }
                 }
             }
-        } else {
-            title = TTab[tRESTARTDEMO2];
-            warning = TTab[tALLLEVELPROGRESSWILLBELOST];
         }
     }
     if (MenuStopDraw == 0) {

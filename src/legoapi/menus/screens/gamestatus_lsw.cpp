@@ -283,7 +283,10 @@ void ChallangeCash_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 draw)
 }
 
 void ChallangeCash_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed) {
-    NUVEC target = {0.0f, STATSPOSY, 1.0f};
+    NUVEC target;
+    target.x = 0.0f;
+    target.y = STATSPOSY;
+    target.z = 1.0f;
     switch (stage->field_0x14) {
         case 0:
             stage->field_0x1c = 4.0f;
@@ -294,9 +297,9 @@ void ChallangeCash_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float e
             f32 previous = stage->field_0x18;
             stage->field_0x18 += elapsed;
             if (stage->field_0x18 >= 1.5f && FindGameMsgsWithID(1, 0, -1, NULL) == 0) {
+                stage->field_0x18 = 0.0f;
                 stage->field_0x14 = 2;
                 stage->field_0x1c = 1.0f;
-                stage->field_0x18 = 0.0f;
                 break;
             }
             if (previous < 1.0f && stage->field_0x18 >= 1.0f) {
@@ -1721,7 +1724,7 @@ void Coins_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active) {
         alpha = alpha < 0.0f ? 0.0f : alpha > 1.0f ? 1.0f : alpha;
         Text3DEx(TTab[tCOINTOTAL], 0.0f, STATUS_TITLE_Y, 1.0f, 0.5f, 0.5f, 0.5f, 0, 255, 255, 255,
                  static_cast<u8>(static_cast<i32>(alpha * 128.0f)));
-    } else if (__builtin_expect(stage->field_0x12 != 0, 1)) {
+    } else if (stage->field_0x12 != 0) {
         const f32 alpha = getFinishedStatusAlpha(packet);
         CoinTotal_Draw(*packet->score,
                        (STATSPOSY - STATSPOS2Y) * NuTrigTable[(static_cast<i32>(alpha * 16384.0f) >> 1) & 0x7fff] +

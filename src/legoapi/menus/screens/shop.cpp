@@ -1901,14 +1901,17 @@ void DrawCodeMenu3D() {
     } else
         pickedbing = 0.0f;
     for (i32 i = 0; i < 6; ++i) {
-        f32 scale = 0.95f * codemenuscale[i] * inoutscale;
-        f32 push = SubNormCharPush;
+        f32 scale;
+        f32 push;
         if (col == i) {
-            scale += bing * 0.5f;
+            scale = 0.95f * codemenuscale[i] * inoutscale + bing * 0.5f;
             push = subpush[1];
         } else if (lastitem == i) {
-            scale += bing * 0.5f;
+            scale = 0.95f * codemenuscale[i] * inoutscale + bing * 0.5f;
             push = subpush[2];
+        } else {
+            scale = 0.95f * codemenuscale[i] * inoutscale;
+            push = SubNormCharPush;
         }
         DrawItem(&codeblank, &CodePos[i], scale, 1.0f, push, 0, angle, 0);
         DrawItem(&atoz0to9icon[letters[i]], &CodePos[i], scale, 1.0f, push, 0, angle, 0);
@@ -2323,43 +2326,46 @@ void DrawShopPrompts() {
         select = tSELECT;
         back = tEXIT;
     } else if (menuptr == SubItemMenu) {
-        back = tBACK;
         select = picked == 5 ? tPLAY : tBUY;
-        alpha = 0.25f;
+        bool ok = false;
         switch (picked) {
             case 0: {
                 shopitem_s *item = &HintItems[HintShelfIds[3]];
                 if (item->price <= Game.coins && item->unlocked != 1)
-                    alpha = 1.0f;
+                    ok = true;
                 break;
             }
             case 1: {
                 shopitem_s *item = &CharItems[CharShelfIds[3]];
                 if (item->price <= Game.coins && CollectIDUnlocked(static_cast<u16>(item->item_id)) &&
                     item->unlocked != 1)
-                    alpha = 1.0f;
+                    ok = true;
                 break;
             }
             case 2: {
                 shopitem_s *item = &ExtraItems[ExtraShelfIds[3]];
-                u16 id = item->item_id;
-                i8 area = static_cast<i8>(Cheat[id].area);
-                if (item->price <= Game.coins && (id <= 7 || area == -1 || Game.area_save[area].red_brick_collected) &&
-                    !(Game.extra_purchased_bits[id >> 5] >> (id & 31) & 1) && item->unlocked != 1)
-                    alpha = 1.0f;
+                if (item->price <= Game.coins) {
+                    i32 id = static_cast<u16>(item->item_id);
+                    if ((id <= 7 || static_cast<i8>(Cheat[id].area) == -1 ||
+                         Game.area_save[static_cast<i8>(Cheat[id].area)].red_brick_collected) &&
+                        !(Game.extra_purchased_bits[id >> 5] >> (id & 31) & 1) && item->unlocked != 1)
+                        ok = true;
+                }
                 break;
             }
             case 4: {
                 i32 id = BrickShelfIds[3];
                 if (BrickItems[id].price <= Game.coins && !(static_cast<f32>(id * 3600) > Game.field30_0x7c2c))
-                    alpha = 1.0f;
+                    ok = true;
                 break;
             }
             case 5:
                 if (CutScenePlayer_CanStart(CutShelfIds[3]))
-                    alpha = 1.0f;
+                    ok = true;
                 break;
         }
+        alpha = ok ? 1.0f : 0.25f;
+        back = tBACK;
     } else if (menuptr == CodeMenu) {
         select = tSELECT;
         back = tBACK;

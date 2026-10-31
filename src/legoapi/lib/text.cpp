@@ -1044,10 +1044,9 @@ void MenuDrawViewTextStrings(MENU_s *menu) {
     menu->draw_y = static_cast<f32>(-menu->selected_row) * menu->centre_offset;
 
     char text[2048];
-    auto menu_item_scale = menu->item_scale;
     for (i32 i = 0; i < Text_MaxStrings_Overall; ++i) {
-        dme_sy = menu_item_scale;
         dme_sx = 0.6f;
+        dme_sy = menu->item_scale;
         dme_align = 0;
         GameDrawMenuEntry(menu, const_cast<char *>(" "));
 
@@ -1109,7 +1108,7 @@ void MenuDrawViewTextStrings(MENU_s *menu) {
                 blue = 0;
             } else {
                 red = 255;
-                if (menu_flash < 1) {
+                if (menu_flash == 0) {
                     green = 191;
                     blue = 0;
                 } else {

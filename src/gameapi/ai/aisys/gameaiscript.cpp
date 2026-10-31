@@ -8571,9 +8571,9 @@ __used__ static i32 Action_PlaySfx(AISYS *sys, AISCRIPTPROCESS *processor, AIPAC
 
     NUVEC *position_ptr = NULL;
     char *name = NULL;
-    char play_count = 1;
-    f32 repeat_delay = 0.0f;
     f32 start_delay = 0.0f;
+    f32 repeat_delay = 0.0f;
+    char play_count = 1;
 
     i32 index = 0;
     do {
@@ -8619,8 +8619,8 @@ __used__ static i32 Action_PlaySfx(AISYS *sys, AISCRIPTPROCESS *processor, AIPAC
         }
     } while (++index < param_4);
 
-    if (position_ptr == NULL && position.x != 1.0e9f && position.y != 1.0e9f && position.z != 1.0e9f) {
-        position_ptr = &position;
+    if (position_ptr == NULL) {
+        position_ptr = position.x != 1.0e9f && position.y != 1.0e9f && position.z != 1.0e9f ? &position : NULL;
     }
     if (name != NULL) {
         PlayRepeatSfx(name, -1, start_delay, play_count, repeat_delay, position_ptr);
@@ -9497,7 +9497,7 @@ __used__ static i32 Action_EngageOpponent(AISYS *sys, AISCRIPTPROCESS *processor
         }
         if (opponent == NULL) {
             APIOBJECT *api_opponent = static_cast<APIOBJECT *>(packet->opponent);
-            if (__builtin_expect(api_opponent == NULL || api_opponent->ai == NULL || api_opponent->objptr == NULL, 1))
+            if (api_opponent == NULL || api_opponent->ai == NULL || __builtin_expect(api_opponent->objptr == NULL, 1))
                 return 0;
             opponent = api_opponent->objptr;
         }
@@ -9538,14 +9538,12 @@ __used__ static i32 Action_EngageOpponent(AISYS *sys, AISCRIPTPROCESS *processor
             const f32 stopping_distance = MIN(goal_range, opponent->ai.mover_height);
             if (!object->head_turn_restricted)
                 processor->action_data_1 &= static_cast<u8>(~0x10u);
-            const u32 character_flags = object->apiobj.character_data->game_character->flags_090 & 0x100;
-            const f32 near_range = goal_range - aitol;
-            const f32 far_range = goal_range + aitol;
-            if (object->head_turn_restricted && character_flags != 0) {
+            if (object->head_turn_restricted &&
+                (object->apiobj.character_data->game_character->flags_090 & 0x100) != 0) {
                 if ((processor->action_data_1 & 0x10) != 0) {
-                    if (distance_squared > far_range * far_range)
+                    if (distance_squared > (goal_range + aitol) * (goal_range + aitol))
                         processor->action_data_1 &= static_cast<u8>(~0x10u);
-                } else if (distance_squared < near_range * near_range) {
+                } else if (distance_squared < (goal_range - aitol) * (goal_range - aitol)) {
                     processor->action_data_1 |= 0x10;
                 }
                 if ((processor->action_data_1 & 0x10) != 0) {
@@ -9558,17 +9556,20 @@ __used__ static i32 Action_EngageOpponent(AISYS *sys, AISCRIPTPROCESS *processor
                                       AIPACKET_MOVEMENT_TO_DESTINATION, 0.01f);
                     packet->goal_speed_mode = 0;
                 }
-            } else if (character_flags != 0 && distance_squared < near_range * near_range) {
+            } else if ((object->apiobj.character_data->game_character->flags_090 & 0x100) != 0 &&
+                       distance_squared < (goal_range - aitol) * (goal_range - aitol)) {
                 AIMoveInstruction(packet, &opponent->ai.last_path_position, stopping_distance, &opponent->ai.path_info,
                                   AIPACKET_MOVEMENT_RETREAT, goal_range);
                 packet->goal_speed_mode = 1;
                 if ((object->apiobj.character_data->game_character->flags_090 & 0x100) != 0)
                     object->field_0xefd |= 0x80;
-            } else if ((processor->action_data_1 & 0x20) != 0 && distance_squared < near_range * near_range) {
+            } else if ((processor->action_data_1 & 0x20) != 0 &&
+                       distance_squared < (goal_range - aitol) * (goal_range - aitol)) {
                 AIMoveInstruction(packet, &opponent->ai.last_path_position, stopping_distance, &opponent->ai.path_info,
                                   AIPACKET_MOVEMENT_RETREAT, goal_range);
                 packet->goal_speed_mode = 1;
-            } else if (distance_squared > far_range * far_range && (processor->action_data_1 & 2) == 0) {
+            } else if (distance_squared > (goal_range + aitol) * (goal_range + aitol) &&
+                       (processor->action_data_1 & 2) == 0) {
                 AIMoveInstruction(packet, &opponent->ai.last_path_position, stopping_distance, &opponent->ai.path_info,
                                   AIPACKET_MOVEMENT_TO_DESTINATION, goal_range);
                 packet->goal_speed_mode = 0;
@@ -9576,7 +9577,7 @@ __used__ static i32 Action_EngageOpponent(AISYS *sys, AISCRIPTPROCESS *processor
                 AIMoveInstruction(packet, &opponent->ai.last_path_position, stopping_distance, &opponent->ai.path_info,
                                   AIPACKET_MOVEMENT_CIRCLE, goal_range);
                 packet->goal_speed_mode = 0;
-            } else if (character_flags == 0) {
+            } else if ((object->apiobj.character_data->game_character->flags_090 & 0x100) == 0) {
                 packet->movement_look_target = &opponent->apiobj.position;
             }
         }
@@ -9605,7 +9606,7 @@ __used__ static i32 Action_EngageOpponent(AISYS *sys, AISCRIPTPROCESS *processor
                 const f32 interval = processor->action_data_5;
                 const f32 random = NuRandFloat();
                 processor->action_timer = 0.5f * interval + random * interval;
-                if (__builtin_expect(!PartyMemberInWay(object, opponent), 1)) {
+                if (!PartyMemberInWay(object, opponent)) {
                     if (oneAtOnce_CanAttack(object, opponent))
                         object->pad_gamepad->buttons_pressed |= GAMEPAD_ACTION;
                 }

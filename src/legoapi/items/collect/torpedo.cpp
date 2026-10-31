@@ -472,12 +472,12 @@ void HomeNearestTorpTarget(BOLT_s *bolt, TORPEDOPACKET_s *packet) {
             NuVecNorm(&delta, &delta);
             FindAnglesXY(&delta, &target_x, &target_y);
             f32 seek = (1.0f + NU_SIN_LUT(bolt->time / type->field_14 * 16384.0f + 32768.0f + 16384.0f)) * 15.0f;
-            target_x = SeekRot(current_x, target_x, seek);
+            u16 new_x = SeekRot(current_x, target_x, seek);
             target_y = SeekRot(current_y, target_y, seek);
             NUMTX_ALIGNED16 matrix;
             NuMtxSetIdentity(&matrix);
             NUANGVEC angles;
-            angles.x = target_x;
+            angles.x = new_x;
             angles.y = target_y;
             NuMtxSetRotationXYVU0(&matrix, &angles);
             NuVecMtxRotate(&bolt->velocity, &bolt->velocity, &matrix);

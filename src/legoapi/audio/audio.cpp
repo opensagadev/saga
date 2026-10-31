@@ -947,26 +947,26 @@ void AddLevSfx(WORLDINFO_s *world, nuvec_s *position, char *name, i32 sfx) {
     }
 
     const i32 count = world->level_sfx_count;
-    i32 index;
-    LEVELSFXENTRY_s *entry = world->level_sfx;
-    for (index = 0; index < count; ++index, ++entry) {
-        if (entry->id == sfx)
+    i32 found = -1;
+    for (i32 index = 0; index < count; ++index) {
+        if (world->level_sfx[index].id == sfx) {
+            found = index;
             break;
+        }
     }
-    if (index == count) {
-        if (__builtin_expect(index >= 64, 0)) {
-            return;
+    if (found == -1) {
+        if (count < 64) {
+            if (position == NULL) {
+                world->level_sfx[count].position = nuvec_zero;
+            } else {
+                world->level_sfx[count].position = *position;
+            }
+            world->level_sfx[count].id = static_cast<i16>(sfx);
+            world->level_sfx[count].references = 1;
+            world->level_sfx_count = count + 1;
         }
-        if (position != NULL) {
-            world->level_sfx[index].position = *position;
-        } else {
-            world->level_sfx[index].position = nuvec_zero;
-        }
-        world->level_sfx[index].id = static_cast<i16>(sfx);
-        world->level_sfx[index].references = 1;
-        world->level_sfx_count = index + 1;
-    } else if (world->level_sfx[index].references != -1) {
-        ++world->level_sfx[index].references;
+    } else if (world->level_sfx[found].references != -1) {
+        ++world->level_sfx[found].references;
     }
 }
 

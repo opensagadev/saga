@@ -1450,7 +1450,7 @@ extern "C" {
     // Relative difference between a requested scale and an existing effect scale.
     static inline f32 ScaledEffectDistance(f32 requested_scale, f32 scale) {
         const f32 ratio = requested_scale / scale;
-        return ratio > 1.0f ? ratio - 1.0f : 1.0f - ratio;
+        return ratio <= 1.0f ? 1.0f - ratio : ratio - 1.0f;
     }
 } // extern "C"
 
@@ -10569,7 +10569,7 @@ void DebrisTimeSlip(i32 group) {
         globaltime = renderglobaltime;
         for (debris_chunk_control_s *control = debris_chunk_control_stack[0]; control != NULL; control = control->next)
             control->expiry_time -= 800.0f;
-    } else if (__builtin_expect(group == 1, 0)) {
+    } else if (group == 1) {
         panelglobaltime = renderpanelglobaltime;
         for (debris_chunk_control_s *control = debris_chunk_control_stack[1]; control != NULL; control = control->next)
             control->expiry_time -= 800.0f;
@@ -10577,22 +10577,30 @@ void DebrisTimeSlip(i32 group) {
     for (i32 i = 0; i < maxdebkeys; ++i) {
         debkeydatatype_s *key = &debkeydata[i];
         debinftype *effect = debtab[key->effect_index];
-        if (__builtin_expect(effect->time_group == 4, 1)) {
+        if (effect->time_group == 4) {
             if (group != 1)
                 continue;
         } else if (group != 0) {
             continue;
         }
+        const u8 type = effect->particle_type;
         key->last_update_time -= 800.0f;
         key->emission_epoch -= 800.0f;
         key->emission_time -= 800.0f;
         key->previous_emission_time -= 800.0f;
         key->field_1e4 -= 800.0f;
-        const i32 count = effect->particle_type == 7 ? 12 : 32;
+        typedef f32 __attribute__((may_alias)) af32;
         for (i32 chunk = 0; chunk < 32; ++chunk) {
-            if (key->particle_chunks[chunk] != NULL) {
-                for (i32 particle = 0; particle < count; ++particle)
-                    key->particle_chunks[chunk]->particles[particle].start_time -= 800.0f;
+            if (key->particle_chunks[chunk] == NULL)
+                continue;
+            switch (type != 7) {
+                case 1:
+                    for (i32 particle = 0; particle < 32; ++particle)
+                        *(af32 *)&key->particle_chunks[chunk]->particles[particle].start_time -= 800.0f;
+                    break;
+                default:
+                    for (i32 particle = 0; particle < 12; ++particle)
+                        *(af32 *)&key->particle_chunks[chunk]->particles[particle].start_time -= 800.0f;
             }
         }
     }
@@ -10600,10 +10608,10 @@ void DebrisTimeSlip(i32 group) {
         debinftype *effect = debtab[i];
         if (effect == NULL)
             continue;
-        if (effect->time_group == 4) {
-            if (group != 1)
+        if (effect->time_group != 4) {
+            if (group != 0)
                 continue;
-        } else if (group != 0) {
+        } else if (group != 1) {
             continue;
         }
         effect->last_render_time -= 800.0f;
@@ -10709,7 +10717,7 @@ extern "C" {
             return -1;
         }
 
-        if (__builtin_expect(debtab[effect_index]->scale != 1.0f, 1)) {
+        if (debtab[effect_index]->scale != 1.0f) {
             effect_index = debtab[effect_index]->unscaled_effect_index;
             if (debtab[effect_index] == NULL) {
                 return -1;
@@ -10765,7 +10773,7 @@ extern "C" {
             }
         }
         // Without a free effect slot, fall back to the closest existing scale.
-        if (scaled_index != 0) {
+        if (scaled_index > 0) {
             debtab[scaled_index] = &effecttypes[scaled_index];
             memcpy(debtab[scaled_index], debtab[effect_index], sizeof(debinftype));
             debtab[scaled_index]->native_data = NULL;
@@ -17905,11 +17913,10 @@ extern "C" void TerrainPlatformNewUpdate(void) {
         TERRAIN_GROUP &group = CurTerr->groups[*group_index];
         TERRAIN_PLATFORM &platform = CurTerr->platforms[group.scene_index];
         if (platform.scene_transform != NULL) {
-            const u8 visibility = *static_cast<u8 *>(platform.scene_transform);
-            if ((platform.flags & TERRAIN_PLATFORM_FLAG_DISPLAY_LIST_BACKED) != 0) {
-                if ((visibility & 2) == 0)
+            if ((platform.flags & TERRAIN_PLATFORM_FLAG_DISPLAY_LIST_BACKED) == 0) {
+                if ((*static_cast<u8 *>(platform.scene_transform) & 1) == 0)
                     continue;
-            } else if ((visibility & 1) == 0)
+            } else if ((*static_cast<u8 *>(platform.scene_transform) & 2) == 0)
                 continue;
         }
         if (group.chunk_type == 0)
@@ -21767,7 +21774,7 @@ i32 TerrainPlatformEmbedded(nuvec_s *movement_delta) {
                 TERRAIN_SHAPE *source = reinterpret_cast<TERRAIN_SHAPE *>(batch + 1);
                 i32 shape_count = batch->shape_count;
                 for (i32 remaining = shape_count; remaining > 0; --remaining, ++source) {
-                    if (__builtin_expect(source->material[1] != 0, 0))
+                    if (source->material[1] != 0)
                         continue;
                     *cursor++ = source;
                     ++count;

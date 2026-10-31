@@ -3188,7 +3188,7 @@ void EdDrawPolyArrow(VuVec const &start, VuVec const &end, i32 sides, i32 colour
         return;
     const float inverse_length = 1.0f / length;
     VuVec direction(displacement.x * inverse_length, displacement.y * inverse_length, displacement.z * inverse_length,
-                    0.0f);
+                    displacement.w);
     const float half_length = length * 0.4f;
     const float minimum_radius = radius_factor * half_length + radius_offset;
 
@@ -8586,7 +8586,8 @@ void SceneObjectHelper::Initialise() {
     }
     thePlaceableHelper.RegisterObjectType("Scene Object", this);
     theEdSystem.RegisterSubSystem(this);
-    memset(scene_counts, 0, sizeof(scene_counts));
+    for (i32 i = 0; i < 10; i++)
+        scene_counts[i] = 0;
 }
 
 void EdSystem::Initalise(variptr_u &buffer, variptr_u &buffer_end, i32 flags) {
@@ -9509,19 +9510,22 @@ i32 LineToSphereIntersection(VuVec &origin, VuVec &direction, VuVec &center, f32
     f32 qy = (origin.y + direction.y) - origin.y;
     f32 qz = (origin.z + direction.z) - origin.z;
     f32 a = (qx * qx + qy * qy) + qz * qz;
+    f32 cx = center.x;
+    f32 cy = center.y;
+    f32 cz = center.z;
     if (NuFabs(a) < 1.1920928955078125e-7f)
         return 0;
-    f32 dx = origin.x - center.x;
-    f32 dy = origin.y - center.y;
-    f32 dz = origin.z - center.z;
+    f32 dx = origin.x - cx;
+    f32 dy = origin.y - cy;
+    f32 dz = origin.z - cz;
     f32 projection = (dx * qx + dy * qy) + dz * qz;
     f32 b = projection + projection;
-    f32 center_squared = (center.x * center.x + center.y * center.y) + center.z * center.z;
+    f32 center_squared = (cx * cx + cy * cy) + cz * cz;
     f32 origin_squared = (origin.x * origin.x + origin.y * origin.y) + origin.z * origin.z;
-    f32 origin_center = (origin.x * center.x + origin.y * center.y) + origin.z * center.z;
+    f32 origin_center = (origin.x * cx + origin.y * cy) + origin.z * cz;
     f32 c = ((center_squared + origin_squared) - (origin_center + origin_center)) - radius * radius;
     f32 discriminant = b * b - (4.0f * a) * c;
-    if (!(discriminant >= 0.0f))
+    if (discriminant < 0.0f)
         return 0;
     f32 far_root = NuFsqrt(discriminant);
     f32 denominator = a + a;
@@ -9532,7 +9536,7 @@ i32 LineToSphereIntersection(VuVec &origin, VuVec &direction, VuVec &center, f32
         *far_intersection =
             VuVec(origin.x + direction.x * far_t, origin.y + direction.y * far_t, origin.z + direction.z * far_t, 0.0f);
     }
-    if (__builtin_expect(near_intersection != NULL, 1)) {
+    if (near_intersection != NULL) {
         *near_intersection = VuVec(origin.x + direction.x * near_t, origin.y + direction.y * near_t,
                                    origin.z + direction.z * near_t, 0.0f);
     }

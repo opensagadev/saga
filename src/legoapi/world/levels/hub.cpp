@@ -905,7 +905,7 @@ static void Hub_DrawMiniKitCount(f32 x, f32 y, i32 count, i32 total, f32 alpha) 
 
 static void Hub_DrawSelectModeMenu(int selected, float alpha) {
     const i32 area = LDataList[hub_new_level].area_index;
-    const i32 complete = Game.area_save[area].area_complete;
+    const u8 complete = Game.area_save[area].area_complete;
     i32 lost_temple = 0;
     if (__builtin_expect(LOSTTEMPLE_ADATA != NULL, 1))
         lost_temple = area == LOSTTEMPLE_ADATA->index;
@@ -923,7 +923,8 @@ static void Hub_DrawSelectModeMenu(int selected, float alpha) {
         opacity[count++] = 128;
         if ((ADataList[area].flags & 0x1000) == 0) {
             text_ids[count] = tFREEPLAY;
-            opacity[count++] = complete && unlocked ? 128 : 48;
+            const i32 opacity_freeplay = complete ? 128 : 48;
+            opacity[count++] = unlocked ? opacity_freeplay : 48;
             if ((ADataList[area].flags & 0x10) != 0 && Store_IsPackUnlocked(8)) {
                 text_ids[count] = tCHALLENGE;
                 opacity[count++] = complete && Store_IsPackUnlocked(8) ? 128 : 48;
@@ -936,7 +937,7 @@ static void Hub_DrawSelectModeMenu(int selected, float alpha) {
     MENU *menu = &GameMenu[GameMenuLevel];
     for (i32 i = 0; i < count; ++i) {
         i32 red, green, blue;
-        if (selected && i == hub_selectmode && TestForController()) {
+        if (selected && hub_selectmode == i && TestForController()) {
             if (__builtin_expect(menu_pulsate > 0.0f, 1)) {
                 red = static_cast<i32>(static_cast<u32>(MENUFLASH0R) * menu_pulsate +
                                        static_cast<u32>(MENUFLASH1R) * (1.0f - menu_pulsate));
@@ -1073,27 +1074,27 @@ static void Hub_DrawIconCursors(COLLECTION_s *collection, f32 scale) {
         return;
     if (Collection_Got(model) == 0)
         model = -1;
-    if (MenuPacket.active_player[player] == 0) {
+    if (MenuPacket.active_player[player] != 0) {
+        f32 size = Game_OptionsSave != NULL && __builtin_expect(Game_OptionsSave->widescreen != 0, 0) ? 0.14f : 0.16f;
+        size *= collection->field_10 / 0.675f;
+        if (!(freeplay_time[player] > 0.0f)) {
+            if (freeplay_selected[player] != 0)
+                size = 0.0f;
+        } else {
+            f32 progress = freeplay_time[player] / 0.75f;
+            if (freeplay_selected[player] == 0)
+                progress = 1.0f - progress;
+            size *= 1.0f - (NU_SIN_LUT(static_cast<i32>(progress * 32768.0f + 16384.0f)) + 1.0f) * 0.5f;
+        }
+        if (size * scale > 0.0f) {
+            const f32 offset = (collection->field_10 / 0.675f) * 0.01f;
+            DrawCharIcon(model, collection->list[index].grid_x + offset * NU_SIN_LUT(hub_iconang[player * 2]),
+                         collection->list[index].grid_y + NU_SIN_LUT(hub_iconang[player * 2 + 1]) * offset, -0.0025f,
+                         size * scale, 0xa6, alpha, alpha, 1, NULL);
+        }
+    } else {
         DrawCharIcon(model, collection->list[index].grid_x, collection->list[index].grid_y, 0.0f,
                      collection->field_10 * ICONSIZE * scale, 0xa6, alpha, alpha, 1, NULL);
-        return;
-    }
-    f32 size = Game_OptionsSave != NULL && Game_OptionsSave->widescreen != 0 ? 0.14f : 0.16f;
-    size *= collection->field_10 / 0.675f;
-    if (!(freeplay_time[player] > 0.0f)) {
-        if (freeplay_selected[player] != 0)
-            size = 0.0f;
-    } else {
-        f32 progress = freeplay_time[player] / 0.75f;
-        if (freeplay_selected[player] == 0)
-            progress = 1.0f - progress;
-        size *= 1.0f - (NU_SIN_LUT(static_cast<i32>(progress * 32768.0f + 16384.0f)) + 1.0f) * 0.5f;
-    }
-    if (size * scale > 0.0f) {
-        const f32 offset = (collection->field_10 / 0.675f) * 0.01f;
-        DrawCharIcon(model, collection->list[index].grid_x + offset * NU_SIN_LUT(hub_iconang[player * 2]),
-                     collection->list[index].grid_y + NU_SIN_LUT(hub_iconang[player * 2 + 1]) * offset, -0.0025f,
-                     size * scale, 0xa6, alpha, alpha, 1, NULL);
     }
 }
 

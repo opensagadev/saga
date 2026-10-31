@@ -1096,23 +1096,24 @@ void MenuDrawStoreRestoring(MENU_s *menu) {
     const f32 phase = NuFmod(GlobalTimer.time_elapsed_mod_seconds, 0.5f);
     const i32 angle = static_cast<i32>((phase + phase) * 65536.0f);
     const i32 alpha = static_cast<i32>((NuTrigTable[(angle >> 1) & 0x7fff] * 0.2f + 0.8f) * pulse_alpha);
-    char *title = TTab[0x626] != NULL ? TTab[0x626] : const_cast<char *>("Restoring Purchases");
-    SmartTextEx(title, 0.0f, 0.5f, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 0, 255, 159, 0, 1.9f, 1, NULL, 0,
-                alpha);
+    SmartTextEx(TTab[0x626] != NULL ? TTab[0x626] : const_cast<char *>("Restoring Purchases"), 0.0f, 0.5f, 1.0f,
+                MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 0, 255, 159, 0, 1.9f, 1, NULL, 0, alpha);
 
     f32 y = 0.5f + text3d_height;
     STORE_PRODUCT_s product;
     for (i32 i = 0; i < restoring_pack_count; ++i) {
-        char *product_id = *reinterpret_cast<char **>(&StorePack[restoring_pack_list[i]].field1_0x4);
+        char *product_id = StorePack[restoring_pack_list[i]].product_id;
         if (NuIOS_GetInAppProductByID(product_id, reinterpret_cast<NuIOS_InAppProduct *>(&product)) != 0) {
-            SmartTextEx(product.name, 0.0f, y, 1.0f, 0.3f, 0.3f, 0.3f, 0, 255, 255, 255, 1.9f, 1, NULL, 0, MenuA);
+            SmartTextEx(product.description, 0.0f, y, 1.0f, 0.3f, 0.3f, 0.3f, 0, 255, 255, 255, 1.9f, 1, NULL, 0,
+                        MenuA);
             y += text3d_height;
         }
     }
-    for (u32 i = 0; i < restoring_bundle_count; ++i) {
+    for (i32 i = 0; i < restoring_bundle_count; ++i) {
         if (NuIOS_GetInAppProductByID(StoreBundle[restoring_bundle_list[i]].name,
                                       reinterpret_cast<NuIOS_InAppProduct *>(&product)) != 0) {
-            SmartTextEx(product.name, 0.0f, y, 1.0f, 0.3f, 0.3f, 0.3f, 0, 255, 255, 255, 1.9f, 1, NULL, 0, MenuA);
+            SmartTextEx(product.description, 0.0f, y, 1.0f, 0.3f, 0.3f, 0.3f, 0, 255, 255, 255, 1.9f, 1, NULL, 0,
+                        MenuA);
             y += text3d_height;
         }
     }

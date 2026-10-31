@@ -2153,7 +2153,7 @@ void StoreLevelProgressFn(WORLDINFO_s *world, LEVEL_PROGRESS_s *progress, i32 ar
         if (progress == NULL)
             continue;
         LEVELSCRIPTPROCESS &processor = world->processors[i];
-        if (NuStrLen(processor.name) == 0)
+        if (__builtin_expect(NuStrLen(processor.name) == 0, 0))
             continue;
         for (i32 j = 0; j < 32; ++j) {
             if (NuStrLen(progress->scripts[j].name) == 0) {

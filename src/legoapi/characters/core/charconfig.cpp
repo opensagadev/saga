@@ -3132,14 +3132,14 @@ void CharConfig_ConfigureAll(i32 permanent, NUFPCOMJMP *game_keywords) {
             VARIPTR *arena;
             VARIPTR *end;
             i32 perm;
-            if (permanent == 0) {
-                arena = NULL;
-                end = NULL;
-                perm = 0;
-            } else {
+            if (permanent != 0) {
                 arena = &permbuffer_ptr;
                 end = &permbuffer_end;
                 perm = 1;
+            } else {
+                arena = NULL;
+                end = NULL;
+                perm = 0;
             }
             if (CharConfig(id, directory, filename, arena, end, perm, NULL, 0, 1, game_keywords) == 2) {
                 SecondCharConfigure = 1;

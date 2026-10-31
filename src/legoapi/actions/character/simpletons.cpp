@@ -710,10 +710,9 @@ void DrawMiniSnowTroopers(WORLDINFO_s *world) {
     }
 
     minitrooperteam_s *teams = static_cast<minitrooperteam_s *>(world->mini_trooper_teams);
-    const i32 trooper_count = teams[0].trooper_count;
-    const i32 matrix_count = trooper_count * trooperteamcount;
     NUMTX *matrices[3];
     matrices[0] = static_cast<NUMTX *>(world->mini_trooper_storage);
+    const i32 matrix_count = teams[0].trooper_count * trooperteamcount;
     matrices[1] = matrices[0] + matrix_count;
     matrices[2] = matrices[1] + matrix_count;
 
@@ -730,8 +729,8 @@ void DrawMiniSnowTroopers(WORLDINFO_s *world) {
             continue;
         }
 
-        team->height = 0.0f;
         minisnowtrooper_s *trooper = team->troopers;
+        team->height = 0.0f;
         for (i32 i = 0; i < team->trooper_count; ++i, ++trooper) {
 
             position.x = trooper->shot_position.x;
@@ -743,23 +742,25 @@ void DrawMiniSnowTroopers(WORLDINFO_s *world) {
                 if (ground == 2000000.0f) {
                     position.y = 10.0f;
                     ground = GameShadow(NULL, &position, 5.0f, -1);
+                    trooper->shot_position.y = ground;
+                } else {
+                    trooper->shot_position.y = ground;
                 }
-                trooper->shot_position.y = ground;
             } else {
                 ground = trooper->shot_position.y;
             }
             team->height += ground;
 
             const i32 frame = TrooperStepFrames[trooper->step_frame];
-            const u16 draw_rotation = static_cast<u16>(trooper->rotation + 0x8000);
+            const i32 draw_rotation = trooper->rotation + 0x8000;
             NUMTX *matrix = next[frame];
             const f32 cosine = NU_COS_LUT(draw_rotation);
-            const f32 sine = NU_SIN_LUT(draw_rotation);
+            const f32 sine = NU_SIN_LUT(static_cast<u16>(draw_rotation));
             NUMTX rotation = {cosine, 0.0f, -sine,  0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
                               sine,   0.0f, cosine, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f};
             *matrix = rotation;
 
-            const u16 frame_phase = static_cast<u16>(static_cast<u8>(trooper->state_flags >> 2) << 14);
+            const u16 frame_phase = static_cast<u16>(trooper->step_frame << 14);
             const f32 step_time = 1.0f / static_cast<f32>(static_cast<i32>(trooper->speed_divisor));
             const f32 step =
                 1.0f -
@@ -778,10 +779,13 @@ void DrawMiniSnowTroopers(WORLDINFO_s *world) {
         team->height /= static_cast<f32>(static_cast<i32>(team->trooper_count));
     }
 
+    next[0] = matrices[0];
+    next[1] = matrices[1];
+    next[2] = matrices[2];
     NUMTX *second_side[3];
     for (i32 frame = 0; frame < 3; ++frame) {
-        NuSpecialBurstDrawAt(&hothtroopers[frame], first_side_counts[frame], matrices[frame], 1);
-        second_side[frame] = matrices[frame] + first_side_counts[frame];
+        NuSpecialBurstDrawAt(&hothtroopers[frame], first_side_counts[frame], next[frame], 1);
+        second_side[frame] = next[frame] + first_side_counts[frame];
     }
     for (i32 frame = 0; frame < 3; ++frame) {
         NuSpecialBurstDrawAt(&hothtroopers[frame + 3], counts[frame] - first_side_counts[frame], second_side[frame], 1);

@@ -434,18 +434,20 @@ void UpdatePaintPuzzle(WORLDINFO_s *world) {
                 }
             }
             if (used == 2) {
-                if ((paintsused[1] == 1 && paintsused[0] == 0) || (paintsused[1] == 0 && paintsused[0] == 1)) {
-                    paintmixed = 3;
-                } else if ((paintsused[0] == 2 && paintsused[1] == 1) || (paintsused[1] == 2 && paintsused[0] == 1)) {
-                    paintmixed = 4;
-                } else if (__builtin_expect((paintsused[1] == 2 && paintsused[0] == 0) ||
-                                                (paintsused[0] == 2 && paintsused[1] == 0),
-                                            0)) {
-                    paintmixed = 5;
+                i32 a = paintsused[0];
+                i32 b = paintsused[1];
+                i32 mixed;
+                if (__builtin_expect(a == 0 && b == 1, 1) || (a == 1 && b == 0)) {
+                    mixed = 3;
+                } else if ((b == 1 && a == 2) || (a == 1 && b == 2)) {
+                    mixed = 4;
+                } else if ((a == 0 && b == 2) || (b == 0 && a == 2)) {
+                    mixed = 5;
                 } else {
-                    paintmixed = -1;
+                    mixed = -1;
                 }
                 PAINTPUZZLESTAGE = 3;
+                paintmixed = mixed;
             } else {
                 for (i32 index = 0; index < 3; ++index) {
                     if (GizmoGetOutput(world->gizmo_sys, paintpanel[index], 0, 0) &&
@@ -466,17 +468,17 @@ void UpdatePaintPuzzle(WORLDINFO_s *world) {
                     GAMEANIMSET_STATE_AT_END) {
                     if (paintmixed == painttarget) {
                         ++painttry;
-                        if (painttry != 3) {
-                            PAINTPUZZLESTAGE = 0;
-                        } else {
+                        if (__builtin_expect(painttry == 3, 0)) {
                             PAINTPUZZLESTAGE = 4;
+                        } else {
+                            PAINTPUZZLESTAGE = 0;
                         }
                     } else {
                         randpaints[0] = qrand() / 21846;
                         do {
                             randpaints[1] = qrand() / 21846;
-                        } while (__builtin_expect(randpaints[1] == randpaints[0], 0));
-                        randpaints[2] = 3 - randpaints[0] - randpaints[1];
+                        } while (randpaints[1] == randpaints[0]);
+                        randpaints[2] = 3 - (randpaints[0] + randpaints[1]);
                         PAINTPUZZLESTAGE = 0;
                         painttry = 0;
                     }

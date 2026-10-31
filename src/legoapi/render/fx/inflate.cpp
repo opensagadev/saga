@@ -380,40 +380,43 @@ i32 DecodeDeflated(DEFLATECONTEXT *ctx) {
     ctx->num_bits_available = 0;
     ctx->bit_buffer = 0;
 
-    do {
+    for (;;) {
         is_final_block = READBITS(ctx, 1);
         type = READBITS(ctx, 2);
 
-        switch (type) {
-            default:
-                if (!DecompressHuffmanTrees(ctx)) {
-                    return 0;
-                }
+        if (__builtin_expect(type == BLOCK_UNCOMPRESSED, 0)) {
+            if (!DecodeUncompressedBlock(ctx)) {
+                return 0;
+            }
+            if (is_final_block) {
                 break;
-            case BLOCK_FIXED_HUFFMAN:
-                if (DefaultDistances[0x1f] == '\0') {
-                    InitHuffmanDefaults();
-                }
+            }
+            continue;
+        } else if (type == BLOCK_FIXED_HUFFMAN) {
+            if (DefaultDistances[0x1f] == '\0') {
+                InitHuffmanDefaults();
+            }
 
-                if (!BuildHuffmanTree(&ctx->length_tree, DefaultLengths, 0x120)) {
-                    return 0;
-                }
+            if (!BuildHuffmanTree(&ctx->length_tree, DefaultLengths, 0x120)) {
+                return 0;
+            }
 
-                if (!BuildHuffmanTree(&ctx->distance_tree, DefaultDistances, 0x20)) {
-                    return 0;
-                }
-                break;
-            case BLOCK_UNCOMPRESSED:
-                if (__builtin_expect(!DecodeUncompressedBlock(ctx), 0)) {
-                    return 0;
-                }
-                continue;
+            if (!BuildHuffmanTree(&ctx->distance_tree, DefaultDistances, 0x20)) {
+                return 0;
+            }
+        } else {
+            if (!DecompressHuffmanTrees(ctx)) {
+                return 0;
+            }
         }
 
         if (!DecodeDeflatedBlock(ctx)) {
             return 0;
         }
-    } while (!is_final_block);
+        if (is_final_block) {
+            break;
+        }
+    }
 
     return 1;
 }
