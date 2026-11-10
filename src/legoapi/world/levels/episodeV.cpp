@@ -401,53 +401,51 @@ static void Asteroids_Reset(WORLDINFO_s *world) {
     if (special_count == 0)
         return;
 
-    if (special_count > 0) {
-        for (i32 special_index = 0; special_index < special_count; ++special_index) {
-            for (i32 type_index = 0; type_index < world->gizmo_blowup_type_count; ++type_index) {
-                NuSpecialCompare(&world->gizmo_blowup_types[type_index].special, &specials[special_index]);
-            }
-
-            if (NuSpecialGetVisibilityFn(&specials[special_index]) != 0) {
-                ASTEROID_s *asteroid = &asteroids[nasteroids];
-                asteroid->special = specials[special_index];
-
-                char *name = NuSpecialGetName(&asteroid->special);
-                i32 asteroid_type;
-                if (name == NULL || NuStrIStr(name, "asteroid_a") != NULL || NuStrIStr(name, "asteroid_pop") != NULL) {
+    for (i32 special_index = 0; special_index < special_count; ++special_index) {
+        for (i32 type_index = 0; type_index < world->gizmo_blowup_type_count; ++type_index)
+            NuSpecialCompare(&world->gizmo_blowup_types[type_index].special, &specials[special_index]);
+        if (NuSpecialGetVisibilityFn(&specials[special_index]) != 0) {
+            ASTEROID_s *asteroid = &asteroids[nasteroids];
+            asteroid->special = specials[special_index];
+            char *name = NuSpecialGetName(&asteroid->special);
+            i32 asteroid_type = 0;
+            if (name != NULL) {
+                if (NuStrIStr(name, "asteroid_a") != NULL)
                     asteroid_type = 0;
-                } else if (NuStrIStr(name, "asteroid_b") != NULL) {
+                else if (NuStrIStr(name, "asteroid_pop") != NULL)
+                    asteroid_type = 0;
+                else if (NuStrIStr(name, "asteroid_b") != NULL)
                     asteroid_type = 1;
-                } else if (NuStrIStr(name, "asteroid_c") != NULL) {
+                else if (NuStrIStr(name, "asteroid_c") != NULL)
                     asteroid_type = 2;
-                } else {
-                    asteroid_type = 0;
-                }
-
-                i32 max_speed = maxrotspd[asteroid_type];
-                asteroid->rotation_speed_x = static_cast<i16>(qrand() / ~(0xffff / (max_speed * 2)) + max_speed);
-                asteroid->rotation_speed_y = static_cast<i16>(qrand() / ~(0xffff / (max_speed * 2)) + max_speed);
-                ++nasteroids;
             }
+            i32 max_speed = maxrotspd[asteroid_type];
+            asteroid->rotation_speed_x = static_cast<i16>(max_speed - qrand() / (0xffff / (max_speed * 2) + 1));
+            asteroid->rotation_speed_y = static_cast<i16>(max_speed - qrand() / (0xffff / (max_speed * 2) + 1));
+            ++nasteroids;
         }
     }
 
     for (i32 blowup_index = 0; blowup_index < world->gizmo_blowup_count; ++blowup_index) {
+        GIZMOBLOWUP_s *blowup = &world->gizmo_blowups[blowup_index];
         ASTEROID_s *asteroid = &asteroids[nasteroids];
-        char *name = world->gizmo_blowups[blowup_index].name;
-        i32 asteroid_type;
-        if (name == NULL || NuStrIStr(name, "asteroid_a") != NULL || NuStrIStr(name, "asteroid_pop") != NULL) {
-            asteroid_type = 0;
-        } else if (NuStrIStr(name, "asteroid_mid") != NULL) {
-            asteroid_type = 1;
-        } else {
-            continue;
+        char *name = blowup->name;
+        i32 asteroid_type = 0;
+        if (name != NULL) {
+            if (NuStrIStr(name, "asteroid_a") != NULL)
+                asteroid_type = 0;
+            else if (NuStrIStr(name, "asteroid_pop") != NULL)
+                asteroid_type = 0;
+            else if (NuStrIStr(name, "asteroid_mid") != NULL)
+                asteroid_type = 1;
+            else
+                continue;
         }
-
-        asteroid->blowup = &world->gizmo_blowups[blowup_index];
+        asteroid->blowup = blowup;
         i32 max_speed = maxrotspd[asteroid_type];
-        asteroid->rotation_speed_x = static_cast<i16>(qrand() / ~(0xffff / (max_speed * 2)) + max_speed);
-        asteroid->rotation_speed_y = static_cast<i16>(qrand() / ~(0xffff / (max_speed * 2)) + max_speed);
-        asteroid->rotation_speed_z = static_cast<i16>(qrand() / ~(0xffff / (max_speed * 2)) + max_speed);
+        asteroid->rotation_speed_x = static_cast<i16>(max_speed - qrand() / (0xffff / (max_speed * 2) + 1));
+        asteroid->rotation_speed_y = static_cast<i16>(max_speed - qrand() / (0xffff / (max_speed * 2) + 1));
+        asteroid->rotation_speed_z = static_cast<i16>(max_speed - qrand() / (0xffff / (max_speed * 2) + 1));
         ++nasteroids;
     }
 }

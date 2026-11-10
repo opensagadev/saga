@@ -4164,17 +4164,14 @@ extern "C" {
 }
 
 static __used__ void creatureEditor_cbRenameCreatureMenu(eduimenu_s *parent, eduiitem_s *, unsigned int) {
-    CreatureEditorRecord *creature = creatureEditor_Current();
-    if (creature == nullptr)
+    if (creatureEditor_Current() == nullptr)
         return;
     eduimenu_s *menu = eduiMenuCreate(240, 90, 240, 250, ed_fnt, creatureEditor_cbCancelMenu, "Rename Creature");
     if (menu == nullptr)
         return;
-    eduiitem_s *item = eduiItemTextPickCreate(0, attr, creatureEditor_cbRenameCreature, "Creature Name");
-    eduiMenuAddItem(menu, item);
-    edui_textpicker_s *picker = reinterpret_cast<edui_textpicker_s *>(item);
-    strcpy(picker->value, creature->name);
-    picker->max_length = 15;
+    eduiMenuAddItem(menu, eduiItemTextPickCreate(0, attr, creatureEditor_cbRenameCreature, "Creature Name"));
+    strcpy(reinterpret_cast<edui_textpicker_s *>(edui_last_item)->value, creatureEditor_Current()->name);
+    reinterpret_cast<edui_textpicker_s *>(edui_last_item)->max_length = 15;
     eduiMenuAttach(parent, menu);
     menu->x = parent->x + 10;
     menu->y = parent->y + 40;
@@ -13803,24 +13800,23 @@ i32 NuSpecialFindByPlatformID(nugscn_s *scene, nuhspecial_s *result, i32 platfor
 
     void aieditor_Render(f32 x_scale, f32 y_scale) {
         NUCAMERA *camera = edmainGetCamera();
-        if (near_clip_at_cursor == 0) {
-            camera->near_clip = 0.15f;
-        } else {
+        if (near_clip_at_cursor != 0) {
             camera->near_clip =
                 NuVecDist(&aieditor->cursor_position, reinterpret_cast<NUVEC *>(&camera->mtx.m30), nullptr) - 5.0f;
+        } else {
+            camera->near_clip = 0.15f;
         }
         edcamSet();
 
-        f32 cursor_radius = 0.5f;
-        i32 cursor_colour = -1;
         if (aieditorsettings.snap_height_display) {
             edbitsDrawCross(aieditor->cursor_position.x, aieditor->cursor_position.y, aieditor->cursor_position.z, 0.5f,
                             -1, aieditorsettings.path_material);
-            cursor_radius = 0.25f;
-            cursor_colour = 0xff00ff00;
+            edbitsDrawCross(aieditor->camera_position.x, aieditor->camera_position.y, aieditor->camera_position.z,
+                            0.25f, 0xff00ff00, aieditorsettings.path_material);
+        } else {
+            edbitsDrawCross(aieditor->camera_position.x, aieditor->camera_position.y, aieditor->camera_position.z, 0.5f,
+                            -1, aieditorsettings.path_material);
         }
-        edbitsDrawCross(aieditor->camera_position.x, aieditor->camera_position.y, aieditor->camera_position.z,
-                        cursor_radius, cursor_colour, aieditorsettings.path_material);
         NuRndrRect2di(0x1680, 0x9b0, 0x1180, 0x488, 0x80808080, aieditorsettings.overlay_material);
         NuRndrRect2di(0x1670, 0x8f0, 0x11a0, 0xc0, 0x80000000, aieditorsettings.overlay_material);
         NuRndrLine2di(0x1670, 0x9b0, 0x1670, 0xe40, 0x80000000, aieditorsettings.overlay_material);
@@ -14101,6 +14097,8 @@ extern "C" void areaEditorDrawAreas() {
                 set = (EDLOCATORSET_s *)NuLinkedListGetNext(&aieditor->locator_sets, &set->link);
             }
             EdFileWriteInt(set_count);
+            if (set_count == 0)
+                return;
             set = (EDLOCATORSET_s *)NuLinkedListGetHead(&aieditor->locator_sets);
             while (set != nullptr) {
                 i32 member_count = 0;
@@ -16649,50 +16647,51 @@ extern "C" {
     }
 
     void antinodeEditorSaveData(void) {
+        i32 count = 0;
         if (aidata_version <= 12)
             return;
         NULISTHDR *list = reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x42e94);
-        EDANTINODE_s *head = reinterpret_cast<EDANTINODE_s *>(NuLinkedListGetHead(list));
-        if (head == nullptr) {
-            EdFileWriteInt(0);
-            return;
-        }
-        i32 count = 0;
-        for (EDANTINODE_s *node = head; node != nullptr;
+        for (EDANTINODE_s *node = reinterpret_cast<EDANTINODE_s *>(NuLinkedListGetHead(list)); node != nullptr;
              node = reinterpret_cast<EDANTINODE_s *>(NuLinkedListGetNext(
                  reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x42e94), &node->link)))
             ++count;
         EdFileWriteInt(count);
+        if (count == 0)
+            return;
         for (EDANTINODE_s *node = reinterpret_cast<EDANTINODE_s *>(
                  NuLinkedListGetHead(reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x42e94)));
              node != nullptr;
              node = reinterpret_cast<EDANTINODE_s *>(NuLinkedListGetNext(
                  reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x42e94), &node->link))) {
-            if (node->type == 2)
+            char *name;
+            if (node->type == 2) {
                 node->radius = NuFsqrt(node->base_radius * node->base_radius + node->base_height * node->base_height);
-            else if (node->type == 1)
-                node->radius = node->base_radius > node->base_height ? node->base_radius : node->base_height;
+            } else if (node->type == 1) {
+                if (node->base_radius > node->base_height)
+                    node->radius = node->base_radius;
+                else
+                    node->radius = node->base_height;
+            }
             EdFileWriteFloat(node->position.x);
             EdFileWriteFloat(node->position.y);
             EdFileWriteFloat(node->position.z);
             EdFileWriteFloat(node->radius);
-            EdFileWriteFloat(node->position.y + node->lower_height);
-            EdFileWriteFloat(node->position.y + node->upper_height);
+            EdFileWriteFloat(node->lower_height + node->position.y);
+            EdFileWriteFloat(node->upper_height + node->position.y);
             if (aidata_version > 14) {
                 EdFileWriteInt(node->flags);
                 EdFileWriteFloat(node->base_radius);
                 EdFileWriteFloat(node->base_height);
                 EdFileWriteChar(node->type);
+                EdFileWriteChar(0);
+                EdFileWriteChar(0);
             } else {
+                EdFileWriteChar(0);
+                EdFileWriteChar(0);
                 EdFileWriteChar(0);
             }
-            EdFileWriteChar(0);
-            EdFileWriteChar(0);
             EdFileWriteChar(node->game_flags);
-            char *name = NuSpecialExistsFn(&node->special) ? NuSpecialGetName(&node->special) : nullptr;
-            if (name == nullptr) {
-                EdFileWriteChar(0);
-            } else {
+            if (NuSpecialExistsFn(&node->special) && (name = NuSpecialGetName(&node->special)) != nullptr) {
                 i32 length = strlen(name) + 1;
                 EdFileWriteChar(length);
                 EdFileWrite(name, length);
@@ -16701,6 +16700,8 @@ extern "C" {
                 EdFileWriteFloat(node->special_position.z);
                 if (aidata_version > 14)
                     EdFileWriteInt(node->rotation_offset);
+            } else {
+                EdFileWriteChar(0);
             }
         }
     }
@@ -18881,42 +18882,51 @@ void areaEditor_Render(i32 x, i32 y, f32, f32) {
     i32 text_x = (x + 10) * 16;
     NuQFntPrintEx(system_qfont, text_x, y * 8 - 40, 16, "Area Editor");
     NuQFntSetColour(system_qfont, 0x80000000);
-    EDAIAREA_s *focus = area_selected() != NULL ? area_selected() : area_hovered();
+    EDAIAREA_s *focus;
+    if (area_selected() != NULL)
+        focus = area_selected();
+    else if (area_hovered() != NULL)
+        focus = area_hovered();
+    else
+        focus = NULL;
     if (focus != NULL) {
         NUVEC delta;
         f32 range = NuVecXZDist(&focus->position, &aieditor->camera_position, &delta);
         y += 15;
         NuQFntPrintEx(system_qfont, text_x, y * 8, 16, "\"%s\", xzrng=%.2f", focus->name, static_cast<f64>(range));
     }
-    NuQFntPrintEx(system_qfont, text_x, (y + 15) * 8, 16, "SQR - Options");
+    y += 15;
+    NuQFntPrintEx(system_qfont, text_x, y * 8, 16, "SQR - Options");
+    y += 15;
     if (area_hovered() != NULL) {
-        if (area_hovered() != area_selected()) {
-            NuQFntPrintEx(system_qfont, text_x, (y + 30) * 8, 16, "X - Select area");
-            NuQFntPrintEx(system_qfont, text_x, (y + 45) * 8, 16, "SELECT - Select nearest");
-        } else {
-            NuQFntPrintEx(system_qfont, text_x, (y + 30) * 8, 16, "X - Move selected/Adjust size");
+        if (area_selected() == area_hovered()) {
+            NuQFntPrintEx(system_qfont, text_x, y * 8, 16, "X - Move selected/Adjust size");
             if ((aieditor->pad_buttons & 0x40) != 0) {
                 if (area_hovered()->flags & 1) {
-                    NuQFntPrintEx(system_qfont, text_x, (y + 45) * 8, 16, "LRIGHT/LLEFT - Adjust Radius");
+                    NuQFntPrintEx(system_qfont, text_x, (y + 15) * 8, 16, "LRIGHT/LLEFT - Adjust Radius");
                 } else {
-                    NuQFntPrintEx(system_qfont, text_x, (y + 45) * 8, 16, "LRIGHT/LLEFT - Adjust X size");
-                    NuQFntPrintEx(system_qfont, text_x, (y + 60) * 8, 16, "LUP/LDOWN - Adjust Z size");
+                    y += 15;
+                    NuQFntPrintEx(system_qfont, text_x, y * 8, 16, "LRIGHT/LLEFT - Adjust X size");
+                    NuQFntPrintEx(system_qfont, text_x, (y + 15) * 8, 16, "LUP/LDOWN - Adjust Z size");
                 }
             } else {
-                i32 next_line = y + 45;
-                NuQFntPrintEx(system_qfont, text_x, next_line * 8, 16, "TRI - Delete selected");
-                next_line += 15;
+                y += 15;
+                NuQFntPrintEx(system_qfont, text_x, y * 8, 16, "TRI - Delete selected");
                 if ((area_hovered()->flags & 1) == 0) {
-                    NuQFntPrintEx(system_qfont, text_x, next_line * 8, 16, "LLEFT/LRIGHT - Rotate");
-                    next_line += 15;
+                    y += 15;
+                    NuQFntPrintEx(system_qfont, text_x, y * 8, 16, "LLEFT/LRIGHT - Rotate");
                 }
-                NuQFntPrintEx(system_qfont, text_x, next_line * 8, 16, "LUP - Increase height");
-                NuQFntPrintEx(system_qfont, text_x, (next_line + 15) * 8, 16, "LDOWN - Decrease height");
+                y += 15;
+                NuQFntPrintEx(system_qfont, text_x, y * 8, 16, "LUP - Increase height");
+                NuQFntPrintEx(system_qfont, text_x, (y + 15) * 8, 16, "LDOWN - Decrease height");
             }
+        } else {
+            NuQFntPrintEx(system_qfont, text_x, y * 8, 16, "X - Select area");
+            NuQFntPrintEx(system_qfont, text_x, (y + 15) * 8, 16, "SELECT - Select nearest");
         }
     } else {
-        NuQFntPrintEx(system_qfont, text_x, (y + 30) * 8, 16, "X - Create area");
-        NuQFntPrintEx(system_qfont, text_x, (y + 45) * 8, 16, "SELECT - Select nearest");
+        NuQFntPrintEx(system_qfont, text_x, y * 8, 16, "X - Create area");
+        NuQFntPrintEx(system_qfont, text_x, (y + 15) * 8, 16, "SELECT - Select nearest");
     }
     areaEditorDrawAreas();
     pathEditorDrawPaths();

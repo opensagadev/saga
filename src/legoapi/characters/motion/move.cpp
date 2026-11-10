@@ -1937,15 +1937,13 @@ static __attribute__((noinline)) void ForcePushed_MoveCode(GameObject_s *object)
                     0 ||
                 (static_cast<GAMECHARACTERDATA *>(target->apiobj.character_data->field11_0x24)->flags_094[1] & 2) != 0)
                 continue;
+            if (target->id == id_GONKDROID && target->character_context == 0x17)
+                continue;
+            if ((target->apiobj.collision_identity_mask & object->apiobj.collision_contact_mask) == 0)
+                continue;
             if (target->id == id_GONKDROID) {
-                if (target->character_context == 0x17)
-                    continue;
-                if ((target->apiobj.collision_identity_mask & object->apiobj.collision_contact_mask) == 0)
-                    continue;
                 DeactivatePlayer(target, DEACTIVATEDTIME, NULL);
             } else {
-                if ((target->apiobj.collision_identity_mask & object->apiobj.collision_contact_mask) == 0)
-                    continue;
                 i16 angle =
                     NuAtan2D(target->apiobj.pos_x - object->apiobj.pos_x, target->apiobj.pos_z - object->apiobj.pos_z);
                 objhitobj_killparts_yrot = &angle;
@@ -3543,20 +3541,16 @@ i32 TwistLevel(LEVELDATA_s *level) {
 void AveragePlayerCurrentSpeedMul() {
     i32 count = 0;
     avg_currentspeed_mul = 0.0f;
-    f32 total = 0.0f;
     if (Player[0] != NULL && Player[0]->apiobj.player_controlled) {
-        total += Player[0]->current_speed_mul;
+        avg_currentspeed_mul = Player[0]->current_speed_mul + 0.0f;
         count = 1;
     }
-    if (Player[1] == NULL || !Player[1]->apiobj.player_controlled) {
-        avg_currentspeed_mul = total;
-    } else {
-        total += Player[1]->current_speed_mul;
-        avg_currentspeed_mul = total;
-        if (count == 1) {
-            avg_currentspeed_mul = total * 0.5f;
-        }
+    if (Player[1] != NULL && Player[1]->apiobj.player_controlled) {
+        avg_currentspeed_mul = Player[1]->current_speed_mul + avg_currentspeed_mul;
+        ++count;
     }
+    if (count > 1)
+        avg_currentspeed_mul = (1.0f / count) * avg_currentspeed_mul;
 }
 
 f32 ForceAlongSock(GameObject_s *object) {
@@ -8753,17 +8747,13 @@ i32 DragBomb_UpdateHint(HINT_s *hint) {
 
 i32 CanObjSlide(GameObject_s *object, i32) {
     const i8 surface = object->apiobj.field_0x281;
-    if (static_cast<u8>(surface) >= 32)
+    if (surface < 0)
         return 0;
-    if ((TerSurface[surface].flags & 0x400) != 0) {
-        if (surface == 5 && CanMagnetClimbFn != NULL) {
-            if (CanMagnetClimbFn(object) == 0)
-                return 1;
-        } else {
-            return 1;
-        }
-    }
-    return 0;
+    if (surface >= 32 || (TerSurface[surface].flags & 0x400) == 0)
+        return 0;
+    if (surface == 5 && CanMagnetClimbFn != NULL && CanMagnetClimbFn(object) != 0)
+        return 0;
+    return 1;
 }
 
 i32 StartSlide(GameObject_s *object, i32 check_contact) {
@@ -9964,31 +9954,20 @@ void Disorientate(GameObject_s *object, nuvec_s *) {
 }
 
 void DisorientateCode(GameObject_s *object, nuvec_s *target, f32 distance) {
-    if (target == NULL) {
-        goto continue_disorientation;
+    if (target != NULL) {
+        if (object->character_context != 0x40)
+            object->context_animation_timer = 0.0f;
+        object->character_context = 0x40;
+        object->disorientation_destination = *target;
     }
-    if (object->character_context != 0x40) {
-        object->context_animation_timer = 0.0f;
-    }
-    object->character_context = 0x40;
-    object->disorientation_destination = *target;
-
-disorientate:
+    if (object->character_context != 0x40)
+        return;
     Disorientate(object, &object->disorientation_destination);
     object->context_animation_timer += FRAMETIME;
-    if (NuVecDistSqr(&object->apiobj.collision_position, &object->disorientation_destination, NULL) > distance * 1.5f &&
-        (object->context_animation_timer > 3.0f)) {
-        goto start_turn;
-    }
-    return;
-
-continue_disorientation:
-    if (object->character_context != 0x40) {
+    if (!(NuVecDistSqr(&object->apiobj.collision_position, &object->disorientation_destination, NULL) >
+          distance * 1.5f) ||
+        !(object->context_animation_timer > 3.0f))
         return;
-    }
-    goto disorientate;
-
-start_turn:
     object->character_context = -1;
     StartTurn(object);
 }

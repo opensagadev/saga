@@ -2584,7 +2584,6 @@ GameObject_s *AddDynamicCreature(i32 model, nuvec_s *position, i32 angle, char *
                                  i32 spline_mode, i32 creature_set) {
     u16 yaw, pitch;
     NUVEC offset, spline_point;
-    const bool has_no_spline = spline == NULL;
     if (position == NULL && spline == NULL) {
         return NULL;
     }
@@ -2705,7 +2704,7 @@ GameObject_s *AddDynamicCreature(i32 model, nuvec_s *position, i32 angle, char *
     object->apiobj.field_0x288 = 0;
     object->field_0xefe &= ~4u;
 
-    if (has_no_spline) {
+    if (spline == NULL) {
         InitSurfaceInfo(object);
         if (set_on_surface != 0) {
             SetObjOnSurface(object, 0);
@@ -2730,7 +2729,7 @@ GameObject_s *AddDynamicCreature(i32 model, nuvec_s *position, i32 angle, char *
     object->ai.field_0x124 = -1;
     object->ai.field_0x138 = 0xff;
     object->ai.field_0x139 = 0;
-    if (has_no_spline) {
+    if (spline == NULL) {
         if (path_info != NULL) {
             AISysCharacterSetPath(&object->ai, path_info->path);
             AISysCharacterSetPathCnx(&object->ai, &object->apiobj.position, path_info->connection,
