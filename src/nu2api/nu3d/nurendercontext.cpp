@@ -158,7 +158,7 @@ extern "C" {
     }
 
     void NuRenderContextSetAlphaBlend(i32 blend, i32 alpha_reference) {
-        NuSetBlendState(blend, [alpha_reference]() { return alpha_reference; });
+        NuSetBlendState(blend, alpha_reference);
     }
 
     void NuRenderContext360BeginGameTime(void) {

@@ -400,7 +400,7 @@ extern "C" void NuMtlSetRenderStatesPS(numtl_s *mtl) {
 
     u32 alphaRef = mtl->attribs.alpha_ref;
     u32 blend = mtl->attribs.alpha_mode & 0xf; // bytes[0x40] & 0xf
-    NuSetBlendState(blend, [alphaRef]() { return alphaRef; });
+    NuSetBlendState(blend, alphaRef);
 
     NuIOS_SetCullMode(mtl->attribs.cull_mode);
 }

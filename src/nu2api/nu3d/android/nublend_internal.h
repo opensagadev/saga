@@ -3,8 +3,7 @@
 #include <GLES2/gl2.h>
 #include "nu2api/nu3d/android/nurndr_android.h"
 
-template <typename AlphaReference>
-static inline void NuSetBlendState(u32 blend, AlphaReference alpha_reference) {
+static inline void NuSetBlendState(u32 blend, u32 alpha_reference) {
     switch (blend) {
         case 1:
             glEnable(GL_BLEND);
@@ -28,11 +27,11 @@ static inline void NuSetBlendState(u32 blend, AlphaReference alpha_reference) {
             glDisable(GL_BLEND);
             g_alphaTestEnabled = 1;
             g_alphaFunc = 5;
-            g_alphaRef = alpha_reference() & 0xff;
+            g_alphaRef = alpha_reference & 0xff;
             break;
         default:
             break;
     }
     g_lastAlphaBlend = blend;
-    g_lastAlphaRef = alpha_reference();
+    g_lastAlphaRef = alpha_reference;
 }

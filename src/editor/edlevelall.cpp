@@ -7282,6 +7282,34 @@ void *EdClass::FindObject(char *object_name) {
     return NULL;
 }
 
+static inline void ReadRegistryObjects(EdStream &stream, EdClass *object_class, EdClass *source_class,
+                                       EdRegistry *source_registry, char *object_name) {
+    i32 count;
+    stream.SerialiseBuffer(&count, sizeof(count), 1);
+    for (i32 index = 0; index < count; ++index) {
+        i32 object_flags;
+        stream.SerialiseBuffer(&object_flags, sizeof(object_flags), 1);
+        void *object;
+        if (object_flags & 0x02000000) {
+            stream.SerialiseString(object_name, 256);
+            object = object_class->FindObject(object_name);
+        } else if (object_class->flags & 0x04000000) {
+            stream.SerialiseString(object_name, 256);
+            void *original = object_class->FindObject(object_name);
+            if (original == NULL) {
+                object_class->SerialiseObject(stream, NULL, source_class, source_registry);
+                continue;
+            }
+            object = theRegistry.CreateObject(object_class->interface, original, 4, 0, 2);
+        } else {
+            object = theRegistry.CreateObject(object_class->interface, NULL, 4, 0, 2);
+        }
+        object_class->SerialiseObject(stream, object, source_class, source_registry);
+        if (object != NULL)
+            theRegistry.NotifyCreateObject(object, object_class, NULL, 0, 0, 0);
+    }
+}
+
 static inline void GetObjectAttribute(EdClass *object_class, void *object, i32 attribute, i32 type, void *data,
                                       i32 size) {
     EdMember member;
@@ -7302,32 +7330,6 @@ void EdRegistry::SerialiseObjects(EdStream &stream, EdRegistry *source_registry)
             return true;
         }
         return object_group != stream_group;
-    };
-    auto read_objects = [&](EdClass *object_class, EdClass *source_class) {
-        i32 count;
-        stream.SerialiseBuffer(&count, sizeof(count), 1);
-        for (i32 index = 0; index < count; ++index) {
-            i32 object_flags;
-            stream.SerialiseBuffer(&object_flags, sizeof(object_flags), 1);
-            void *object;
-            if (object_flags & 0x02000000) {
-                stream.SerialiseString(object_name, sizeof(object_name));
-                object = object_class->FindObject(object_name);
-            } else if (object_class->flags & 0x04000000) {
-                stream.SerialiseString(object_name, sizeof(object_name));
-                void *original = object_class->FindObject(object_name);
-                if (original == NULL) {
-                    object_class->SerialiseObject(stream, NULL, source_class, source_registry);
-                    continue;
-                }
-                object = theRegistry.CreateObject(object_class->interface, original, 4, 0, 2);
-            } else {
-                object = theRegistry.CreateObject(object_class->interface, NULL, 4, 0, 2);
-            }
-            object_class->SerialiseObject(stream, object, source_class, source_registry);
-            if (object != NULL)
-                theRegistry.NotifyCreateObject(object, object_class, NULL, 0, 0, 0);
-        }
     };
 
     if (stream.mode == 2) {
@@ -7403,7 +7405,7 @@ void EdRegistry::SerialiseObjects(EdStream &stream, EdRegistry *source_registry)
                     EdClass *source_class = source_registry->GetClass(class_name);
                     EdClass *object_class = GetClass(MapName(source_class->name));
                     if (object_class != NULL && object_class->interface != NULL)
-                        read_objects(object_class, source_class);
+                        ReadRegistryObjects(stream, object_class, source_class, source_registry, object_name);
                 }
                 stream.EndBlock();
             }
@@ -7413,7 +7415,7 @@ void EdRegistry::SerialiseObjects(EdStream &stream, EdRegistry *source_registry)
                 EdClass *object_class = GetClass(MapName(source_class->name));
                 if (object_class != NULL && object_class->interface != NULL) {
                     if (stream.BeginBlock("ObjectList") != NULL)
-                        read_objects(object_class, source_class);
+                        ReadRegistryObjects(stream, object_class, source_class, source_registry, object_name);
                     stream.EndBlock();
                 }
             }

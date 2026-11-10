@@ -17723,15 +17723,7 @@ extern "C" void NuSpecialSetDrawPos(nuhspecial_s *special, NUVEC *pos) {
 // End-of-frame
 // ──────────────────────────────────────────────────────────────────────────────
 
-extern "C" void NuDisplayListSwapBuffersEndFrame(void) {
-    NUDLIST_MANAGER *mgr = &global_dlist_manager;
-
-    NuThreadCriticalSectionBegin(mgr->loading_critical_section);
-    DisplayListLinkDynamicMtls();
-    DisplayListSwapBuffersPS();
-    DisplayListMaterialClipUpdate(&mgr->dyn_mtl_dlist);
-
-    auto updateClip = [](nudisplayscene_s *sc) {
+    static inline void DisplaySceneUpdateClip(nudisplayscene_s *sc) {
         // Clip-word diff: 2 bits per object, 16 objects per u32 word.
         u8 buf = NuDisplaySceneCurrentBuffer(sc);
         const u16 *counts = sc->clip_counts;
@@ -17793,14 +17785,47 @@ extern "C" void NuDisplayListSwapBuffersEndFrame(void) {
                 }
             }
         }
-    };
+    }
+
+    static inline void DisplayListLinkSceneGeometry(NUDISPLAYLIST *dl) {
+        if (dl->scene_first[dl->scene_buffer] != dl->scene_next) {
+            dl->dyn_geom->next = dl->scene_first[dl->scene_buffer];
+            dl->scene_next->type = kItemType_Link;
+            dl->scene_next->id = kItemId_Next;
+            dl->scene_next->next = dl->dyn_geom + 1;
+        } else {
+            dl->dyn_geom->next = dl->dyn_geom + 1;
+        }
+    }
+
+    static inline void DisplayListCopyMaterialGeometry(NUDISPLAYLIST *dl, nudisplaylistitem_s *first,
+                                                       nudisplayscene_s *sc) {
+        *dl->dyn_geom = *first;
+        if ((sc->flags & 4) == 0) {
+            dl->mtl_last->next = dl->mtl_item->next;
+        } else if (dl->scene_first[dl->scene_buffer] != dl->scene_next) {
+            dl->mtl_last->next = dl->scene_first[dl->scene_buffer];
+            dl->scene_next->type = kItemType_Link;
+            dl->scene_next->id = kItemId_Next;
+            dl->scene_next->next = dl->dyn_geom + 1;
+        }
+        dl->mtl_last = dl->first;
+    }
+
+extern "C" void NuDisplayListSwapBuffersEndFrame(void) {
+    NUDLIST_MANAGER *mgr = &global_dlist_manager;
+
+    NuThreadCriticalSectionBegin(mgr->loading_critical_section);
+    DisplayListLinkDynamicMtls();
+    DisplayListSwapBuffersPS();
+    DisplayListMaterialClipUpdate(&mgr->dyn_mtl_dlist);
 
     for (i32 i = 0; i < mgr->ndisplay_lists; ++i) {
         nudisplayscene_s *sc = mgr->dlists[i];
         u8 flags = sc->flags;
 
         if ((flags & 4) != 0) {
-            updateClip(sc);
+            DisplaySceneUpdateClip(sc);
             flags = sc->flags;
         }
         if ((flags & 6) != 0) {
@@ -17827,30 +17852,6 @@ extern "C" void NuDisplayListSwapBuffersEndFrame(void) {
     tmp_state.fog_id = -1;
     tmp_state.reflection_id = -1;
     nuglobalrndrstate_s *last_local = nullptr;
-
-    auto linkSceneGeometry = [](NUDISPLAYLIST *dl) {
-        if (dl->scene_first[dl->scene_buffer] != dl->scene_next) {
-            dl->dyn_geom->next = dl->scene_first[dl->scene_buffer];
-            dl->scene_next->type = kItemType_Link;
-            dl->scene_next->id = kItemId_Next;
-            dl->scene_next->next = dl->dyn_geom + 1;
-        } else {
-            dl->dyn_geom->next = dl->dyn_geom + 1;
-        }
-    };
-
-    auto copyMaterialGeometry = [&](NUDISPLAYLIST *dl, nudisplaylistitem_s *first, nudisplayscene_s *sc) {
-        *dl->dyn_geom = *first;
-        if ((sc->flags & 4) == 0) {
-            dl->mtl_last->next = dl->mtl_item->next;
-        } else if (dl->scene_first[dl->scene_buffer] != dl->scene_next) {
-            dl->mtl_last->next = dl->scene_first[dl->scene_buffer];
-            dl->scene_next->type = kItemType_Link;
-            dl->scene_next->id = kItemId_Next;
-            dl->scene_next->next = dl->dyn_geom + 1;
-        }
-        dl->mtl_last = dl->first;
-    };
 
     for (nusortpri_s *sp = mgr->sort_list; sp; sp = sp->sys_next) {
         nudisplayscene_s *sc = sp->display_scene;
@@ -17882,9 +17883,9 @@ extern "C" void NuDisplayListSwapBuffersEndFrame(void) {
                 last_local = nullptr;
             }
             if (dl->mtl_last == dl->first) {
-                linkSceneGeometry(dl);
+                DisplayListLinkSceneGeometry(dl);
             } else {
-                copyMaterialGeometry(dl, dl->first, sc);
+                DisplayListCopyMaterialGeometry(dl, dl->first, sc);
             }
 
             RndrStateUpdate(&tmp_state, mtl, dl->mtl_item);
