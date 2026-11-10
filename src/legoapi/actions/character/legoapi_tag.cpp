@@ -414,31 +414,22 @@ i32 TagCode(GameObject_s *source, GameObject_s *destination, i32 takeover, i32 b
     return 1;
 }
 
+static inline i32 TagAvailable(GameObject_s *candidate, GameObject_s *source) {
+    return candidate != NULL && (candidate->apiobj.field_0x1f8 & 0x1001) == 0x1001 && candidate != source &&
+           candidate->apiobj.field_0x287 == 0 && !candidate->apiobj.player_controlled &&
+           (candidate->tag_context_flags & 2) == 0;
+}
+
 i32 TagCharacter(GameObject_s *source, GameObject_s *target, i32 mode) {
-    const auto available = [source](GameObject_s *candidate) {
-        return candidate != NULL && (candidate->apiobj.field_0x1f8 & 0x1001) == 0x1001 && candidate != source &&
-               candidate->apiobj.field_0x287 == 0 && !candidate->apiobj.player_controlled &&
-               (candidate->tag_context_flags & 2) == 0;
-    };
-    if (!available(target)) {
-        if (available(Player[0]))
-            target = Player[0];
-        else if (available(Player[1]))
-            target = Player[1];
-        else if (available(Player[2]))
-            target = Player[2];
-        else if (available(Player[3]))
-            target = Player[3];
-        else if (available(Player[4]))
-            target = Player[4];
-        else if (available(Player[5]))
-            target = Player[5];
-        else if (available(Player[6]) != 0)
-            target = Player[6];
-        else if (available(Player[7]))
-            target = Player[7];
-        else
+    if (!TagAvailable(target, source)) {
+        i32 i;
+        for (i = 0; i < 8; ++i) {
+            if (TagAvailable(Player[i], source))
+                break;
+        }
+        if (i == 8)
             return 0;
+        target = Player[i];
     }
     const u8 target_active = target->apiobj.flags_low >> 7;
     const u8 source_active = source->apiobj.flags_low >> 7;

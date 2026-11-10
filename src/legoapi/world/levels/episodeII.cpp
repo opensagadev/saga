@@ -1264,23 +1264,18 @@ void DookuC_Update(WORLDINFO_s *world) {
         }
     }
     DrawForceBackEffect(&dooku_c.node);
-#define SET_DOOKU_CONNECTION(index, operation)                                                                         \
-    do {                                                                                                               \
-        AIPATHCNX_s *connection = static_cast<AIPATHCNX_s *>(LevPathCnx[index]);                                       \
-        if (connection != NULL) {                                                                                      \
-            connection->traversal_flags[0] operation;                                                                  \
-            connection->traversal_flags[1] operation;                                                                  \
-        }                                                                                                              \
-    } while (0)
     if (LevGizForce[0] != NULL && LevGizForce[1] != NULL && LevGizForce[2] != NULL) {
         GIZFORCEGROUP_s *group = LevGizForce[0]->group;
         if (group != NULL && (group->field_0x24 & 2) != 0) {
             if (dookuC_nodesNeedUpdating == 0) {
                 dookuC_nodesNeedUpdating = 1;
-                SET_DOOKU_CONNECTION(0, &= 0x7fffffff);
-                SET_DOOKU_CONNECTION(1, &= 0x7fffffff);
-                SET_DOOKU_CONNECTION(2, &= 0x7fffffff);
-                SET_DOOKU_CONNECTION(3, &= 0x7fffffff);
+                for (i32 index = 0; index < 4; ++index) {
+                    AIPATHCNX_s *connection = static_cast<AIPATHCNX_s *>(LevPathCnx[index]);
+                    if (connection != NULL) {
+                        connection->traversal_flags[0] &= 0x7fffffff;
+                        connection->traversal_flags[1] &= 0x7fffffff;
+                    }
+                }
                 AIPATHNODE_s *node0;
                 AIPATHNODE_s *node1;
                 AIPATHNODE_s *node2;
@@ -1337,13 +1332,15 @@ void DookuC_Update(WORLDINFO_s *world) {
             }
         } else if (dookuC_nodesNeedUpdating != 0) {
             dookuC_nodesNeedUpdating = 0;
-            SET_DOOKU_CONNECTION(0, |= 0x80000000);
-            SET_DOOKU_CONNECTION(1, |= 0x80000000);
-            SET_DOOKU_CONNECTION(2, |= 0x80000000);
-            SET_DOOKU_CONNECTION(3, |= 0x80000000);
+            for (i32 index = 0; index < 4; ++index) {
+                AIPATHCNX_s *connection = static_cast<AIPATHCNX_s *>(LevPathCnx[index]);
+                if (connection != NULL) {
+                    connection->traversal_flags[0] |= 0x80000000;
+                    connection->traversal_flags[1] |= 0x80000000;
+                }
+            }
         }
     }
-#undef SET_DOOKU_CONNECTION
 }
 
 void DookuC_DrawPanel(WORLDINFO_s *) {

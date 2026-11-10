@@ -277,29 +277,19 @@ static void MakeWingFormation(_vuv_s *start, _vuv_s *target, f32 duration, i32 m
     NUVEC4_ALIGNED16 offset = {-5.0f, 0.0f, 0.0f, 0.0f};
     i16 angle = static_cast<i16>(qrand());
     const i16 step = static_cast<i16>(qrand() / 21) + 0x2666;
-#define INIT_WING_FIGHTER(index)                                                                                       \
-    do {                                                                                                               \
-        starfighter_s *fighter = &group->fighters[index];                                                              \
-        NuVecRotateZ(reinterpret_cast<NUVEC *>(&fighter->parent_offset), reinterpret_cast<NUVEC *>(&offset), angle);   \
-        fighter->scale = 2.0f;                                                                                         \
-        fighter->active = 1;                                                                                           \
-        fighter->parent = group;                                                                                       \
-        fighter->health = 1;                                                                                           \
-        fighter->hit_count = 0;                                                                                        \
-        fighter->spline = NULL;                                                                                        \
-        fighter->model_id = 54;                                                                                        \
-        fighter->draw_flags = 1;                                                                                       \
-    } while (0)
-    INIT_WING_FIGHTER(0);
-    angle = static_cast<i16>(angle + step);
-    INIT_WING_FIGHTER(1);
-    angle = static_cast<i16>(angle + step);
-    INIT_WING_FIGHTER(2);
-    angle = static_cast<i16>(angle + step);
-    INIT_WING_FIGHTER(3);
-    angle = static_cast<i16>(angle + step);
-    INIT_WING_FIGHTER(4);
-#undef INIT_WING_FIGHTER
+    for (i32 index = 0; index < 5; ++index) {
+        starfighter_s *fighter = &group->fighters[index];
+        NuVecRotateZ(reinterpret_cast<NUVEC *>(&fighter->parent_offset), reinterpret_cast<NUVEC *>(&offset), angle);
+        fighter->scale = 2.0f;
+        fighter->active = 1;
+        fighter->parent = group;
+        fighter->health = 1;
+        fighter->hit_count = 0;
+        fighter->spline = NULL;
+        fighter->model_id = 54;
+        fighter->draw_flags = 1;
+        angle = static_cast<i16>(angle + step);
+    }
 }
 
 static __attribute__((noinline, noclone)) void StarFighterAlign(starfighter_s *fighter, _vuv_s *direction, f32 distance,
@@ -1487,15 +1477,10 @@ static void ProcessSpaceLevel(spacelevel_s *space) {
             }
         }
         i32 active = 0;
-#define PROCESS_WING_FIGHTER(index)                                                                                    \
-    if (group->fighters[index].active != 0)                                                                            \
-    active |= ProcessStarFighter(&group->fighters[index], info)
-        PROCESS_WING_FIGHTER(0);
-        PROCESS_WING_FIGHTER(1);
-        PROCESS_WING_FIGHTER(2);
-        PROCESS_WING_FIGHTER(3);
-        PROCESS_WING_FIGHTER(4);
-#undef PROCESS_WING_FIGHTER
+        for (i32 index = 0; index < 5; ++index) {
+            if (group->fighters[index].active != 0)
+                active |= ProcessStarFighter(&group->fighters[index], info);
+        }
         if (active == 0)
             group->draw_target = 1;
         if (active == 0 || group->draw_target != 0) {

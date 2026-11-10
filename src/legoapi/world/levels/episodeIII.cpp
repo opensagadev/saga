@@ -462,21 +462,12 @@ void CruiserDInit(WORLDINFO_s *world) {
     cruiserd_netpacket = static_cast<CRUISERDNETPACKET_s *>(SetLevelHack(12));
 
     char name[16] __attribute__((aligned(16)));
-#define FIND_CRUISER_D_TUBE(NUMBER)                                                                                    \
-    sprintf(name, "Tube%d", NUMBER);                                                                                   \
-    if (TUBE *tube = Tube_FindByName(world, name))                                                                     \
-    tube->flags |= TUBE_FLAG_TOUCH_RADIUS
-    FIND_CRUISER_D_TUBE(1);
-    FIND_CRUISER_D_TUBE(2);
-    FIND_CRUISER_D_TUBE(3);
-    FIND_CRUISER_D_TUBE(4);
-    FIND_CRUISER_D_TUBE(5);
-    FIND_CRUISER_D_TUBE(6);
-    FIND_CRUISER_D_TUBE(7);
-    FIND_CRUISER_D_TUBE(8);
-    FIND_CRUISER_D_TUBE(9);
-    FIND_CRUISER_D_TUBE(10);
-#undef FIND_CRUISER_D_TUBE
+    for (i32 index = 1; index < 11; ++index) {
+        sprintf(name, "Tube%d", index);
+        TUBE *tube = Tube_FindByName(world, name);
+        if (tube != NULL)
+            tube->flags |= TUBE_FLAG_TOUCH_RADIUS;
+    }
 }
 
 void CruiserDReset(WORLDINFO_s *) {
@@ -880,22 +871,10 @@ void VaderA_Update(WORLDINFO_s *) {
     if (netclient == 0) {
         if (vader_a.collapse_started != 0) {
             vader_a.collapse_started = 0;
-            if (Player[0] != NULL && (Player[0]->apiobj.field_0x1f8 & 1) != 0)
-                SetObjOnSurface(Player[0], 1);
-            if (Player[1] != NULL && (Player[1]->apiobj.field_0x1f8 & 1) != 0)
-                SetObjOnSurface(Player[1], 1);
-            if (Player[2] != NULL && (Player[2]->apiobj.field_0x1f8 & 1) != 0)
-                SetObjOnSurface(Player[2], 1);
-            if (Player[3] != NULL && (Player[3]->apiobj.field_0x1f8 & 1) != 0)
-                SetObjOnSurface(Player[3], 1);
-            if (Player[4] != NULL && (Player[4]->apiobj.field_0x1f8 & 1) != 0)
-                SetObjOnSurface(Player[4], 1);
-            if (Player[5] != NULL && (Player[5]->apiobj.field_0x1f8 & 1) != 0)
-                SetObjOnSurface(Player[5], 1);
-            if (Player[6] != NULL && (Player[6]->apiobj.field_0x1f8 & 1) != 0)
-                SetObjOnSurface(Player[6], 1);
-            if (Player[7] != NULL && (Player[7]->apiobj.field_0x1f8 & 1) != 0)
-                SetObjOnSurface(Player[7], 1);
+            for (i32 i = 0; i < 8; ++i) {
+                if (Player[i] != NULL && (Player[i]->apiobj.field_0x1f8 & 1) != 0)
+                    SetObjOnSurface(Player[i], 1);
+            }
         }
 
         if (vader_a.big_jump_locator != NULL && player != NULL && player->apiobj.supporting_platform_id != -1)

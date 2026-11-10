@@ -402,17 +402,6 @@ extern "C" {
 
 }
 
-// The original repeats the per-sound emitter checks for each of the four sound slots.
-#define PART_EMIT_SOUND_ON(slot)                                                                                       \
-    if (type->sounds[slot] != -1) {                                                                                    \
-        SetSfxBit_On(type->sounds[slot]);                                                                              \
-        if (type->sound_modes[slot] == 4)                                                                              \
-            PlaySfxById(type->sounds[slot], &emitter->position);                                                       \
-    }
-#define PART_EMIT_SOUND(slot, mode)                                                                                    \
-    if (type->sounds[slot] != -1 && type->sound_modes[slot] == (mode))                                                 \
-        PlaySfxById(type->sounds[slot], &emitter->position);
-
 extern "C" {
     extern u32 edblack[4];
     extern char edbits_general_save_directory[256];
@@ -2919,34 +2908,25 @@ i32 edpartSaveEffects(char *filename, char page) {
         EdFileWriteChar(part_types[index].effect_pages[5]);
         EdFileWriteChar(part_types[index].effect_pages[6]);
         EdFileWriteChar(part_types[index].effect_pages[7]);
-#define WRITE_PART_OBJECT_NAME(variant)                                                                                \
-    do {                                                                                                               \
-        i16 effect_id = part_types[index].effect_ids[variant];                                                         \
-        if (effect_id == -1)                                                                                           \
-            EdFileWrite(empty_name, 16);                                                                               \
-        else if (effect_id == 9999)                                                                                    \
-            EdFileWrite(null_instance_name, 16);                                                                       \
-        else if (effect_id == 9998)                                                                                    \
-            EdFileWrite(part_types[index].object_names[variant], 16);                                                  \
-        else if (part_types[index].effect_pages[variant] == 0) {                                                       \
-            nuhspecial_s special;                                                                                      \
-            NuGScnGetSpecial(&special, edbits_base_scene, effect_id);                                                  \
-            EdFileWrite(NuSpecialGetName(&special), 16);                                                               \
-        } else if (part_types[index].effect_pages[variant] == 1) {                                                     \
-            nuhspecial_s special;                                                                                      \
-            NuGScnGetSpecial(&special, edbits_things_scene, effect_id);                                                \
-            EdFileWrite(NuSpecialGetName(&special), 16);                                                               \
-        } else                                                                                                         \
-            EdFileWrite(empty_name, 16);                                                                               \
-    } while (0)
-        WRITE_PART_OBJECT_NAME(0);
-        WRITE_PART_OBJECT_NAME(1);
-        WRITE_PART_OBJECT_NAME(2);
-        WRITE_PART_OBJECT_NAME(3);
-        WRITE_PART_OBJECT_NAME(4);
-        WRITE_PART_OBJECT_NAME(5);
-        WRITE_PART_OBJECT_NAME(6);
-        WRITE_PART_OBJECT_NAME(7);
+        for (i32 variant = 0; variant < 8; ++variant) {
+            i16 effect_id = part_types[index].effect_ids[variant];
+            if (effect_id == -1)
+                EdFileWrite(empty_name, 16);
+            else if (effect_id == 9999)
+                EdFileWrite(null_instance_name, 16);
+            else if (effect_id == 9998)
+                EdFileWrite(part_types[index].object_names[variant], 16);
+            else if (part_types[index].effect_pages[variant] == 0) {
+                nuhspecial_s special;
+                NuGScnGetSpecial(&special, edbits_base_scene, effect_id);
+                EdFileWrite(NuSpecialGetName(&special), 16);
+            } else if (part_types[index].effect_pages[variant] == 1) {
+                nuhspecial_s special;
+                NuGScnGetSpecial(&special, edbits_things_scene, effect_id);
+                EdFileWrite(NuSpecialGetName(&special), 16);
+            } else
+                EdFileWrite(empty_name, 16);
+        }
         EdFileWriteChar(part_types[index].variant_mode);
         EdFileWriteFloat(part_types[index].particle_scale);
         EdFileWriteFloat(part_types[index].effect_scale);
@@ -4153,18 +4133,10 @@ static void edpartFileLoadEffects(eduimenu_s *parent, eduiitem_s *, u32) {
     ResetParts();
     memset(part_types, 0, sizeof(part_types));
     for (i32 type = 0; type < 128; ++type) {
-#define EDPART_INIT_EFFECT(variant)                                                                                    \
-    part_types[type].effect_ids[variant] = -1;                                                                         \
-    part_types[type].effect_pages[variant] = -1;
-        EDPART_INIT_EFFECT(0)
-        EDPART_INIT_EFFECT(1)
-        EDPART_INIT_EFFECT(2)
-        EDPART_INIT_EFFECT(3)
-        EDPART_INIT_EFFECT(4)
-        EDPART_INIT_EFFECT(5)
-        EDPART_INIT_EFFECT(6)
-        EDPART_INIT_EFFECT(7)
-#undef EDPART_INIT_EFFECT
+        for (i32 variant = 0; variant < 8; ++variant) {
+            part_types[type].effect_ids[variant] = -1;
+            part_types[type].effect_pages[variant] = -1;
+        }
     }
     part_types_used = 0;
     memset(part_emits, 0, 40 * sizeof(part_emit_s));
@@ -4612,10 +4584,13 @@ void UpdatePartEmits(f32 time) {
         f32 previous_distance = emitter->camera_distance;
         emitter->camera_distance = CameraEmitterDistance(&emitter->position);
         if (emitter->field_3c != 0) {
-            PART_EMIT_SOUND_ON(0);
-            PART_EMIT_SOUND_ON(1);
-            PART_EMIT_SOUND_ON(2);
-            PART_EMIT_SOUND_ON(3);
+            for (i32 slot = 0; slot < 4; ++slot) {
+                if (type->sounds[slot] != -1) {
+                    SetSfxBit_On(type->sounds[slot]);
+                    if (type->sound_modes[slot] == 4)
+                        PlaySfxById(type->sounds[slot], &emitter->position);
+                }
+            }
         }
         if ((type->flags & 0x400000) != 0) {
             if (type->maximum_distance > emitter->camera_distance && previous_distance >= type->maximum_distance) {
@@ -4637,10 +4612,10 @@ void UpdatePartEmits(f32 time) {
                     f32 end = emitter->time_24 + type->emission_period;
                     emitter->time_28 = end + NuRandFloatSeeded(&partseed) * type->emission_period_random;
                     if (emitter->field_3c != 0 && emitter->field_3d != 0) {
-                        PART_EMIT_SOUND(0, 1);
-                        PART_EMIT_SOUND(1, 1);
-                        PART_EMIT_SOUND(2, 1);
-                        PART_EMIT_SOUND(3, 1);
+                        for (i32 slot = 0; slot < 4; ++slot) {
+                            if (type->sounds[slot] != -1 && type->sound_modes[slot] == 1)
+                                PlaySfxById(type->sounds[slot], &emitter->position);
+                        }
                     }
                     if (emitter->shots_remaining != 0) {
                         if (--emitter->shots_remaining == 0) {
@@ -4657,10 +4632,10 @@ void UpdatePartEmits(f32 time) {
                     if (emitter->field_3d == 2)
                         emitter->field_3d = 0;
                     if (emitter->field_3c != 0 && emitter->field_3d != 0) {
-                        PART_EMIT_SOUND(0, 2);
-                        PART_EMIT_SOUND(1, 2);
-                        PART_EMIT_SOUND(2, 2);
-                        PART_EMIT_SOUND(3, 2);
+                        for (i32 slot = 0; slot < 4; ++slot) {
+                            if (type->sounds[slot] != -1 && type->sound_modes[slot] == 2)
+                                PlaySfxById(type->sounds[slot], &emitter->position);
+                        }
                     }
                 }
             }
@@ -4770,10 +4745,10 @@ void UpdatePartEmits(f32 time) {
                 params.field_78 = type->kill_effect;
                 AddPart(&params);
                 if (emitter->field_3c != 0) {
-                    PART_EMIT_SOUND(0, 3);
-                    PART_EMIT_SOUND(1, 3);
-                    PART_EMIT_SOUND(2, 3);
-                    PART_EMIT_SOUND(3, 3);
+                    for (i32 slot = 0; slot < 4; ++slot) {
+                        if (type->sounds[slot] != -1 && type->sound_modes[slot] == 3)
+                            PlaySfxById(type->sounds[slot], &emitter->position);
+                    }
                 }
                 type->last_used_time = emission_time;
             }

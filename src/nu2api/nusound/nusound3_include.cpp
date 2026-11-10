@@ -1985,36 +1985,32 @@ void NuMusic::Debug(i32, i32 y) {
     NuQFntSetScale(system_qfont, 0.8f, 0.8f);
     NuQFntSetColour(system_qfont, 0x80ffffff);
 
-#define DEBUG_MUSIC_VOICE(i)                                                                                           \
-    do {                                                                                                               \
-        Voice *voice = &voices[i];                                                                                     \
-        NuSound3GetStreamInfo(voice->stream_index, &stream_info);                                                      \
-        NuQFntPrintEx(system_qfont, 4800, y, 0x10, "VOICE:%d", i);                                                     \
-        y += (i32)NuQFntHeight(system_qfont);                                                                          \
-        if (voice->tracks[voice->track_index] == NULL) {                                                               \
-            NuQFntPrintEx(system_qfont, 4800, y, 0x10, "TRACK:NONE");                                                  \
-            y += (i32)NuQFntHeight(system_qfont);                                                                      \
-            NuQFntPrintEx(system_qfont, 4800, y, 0x10, "CLASS:NONE");                                                  \
-        } else {                                                                                                       \
-            NuQFntPrintEx(system_qfont, 4800, y, 0x10, "TRACK:%s",                                                     \
-                          voice->tracks[voice->track_index]->filenames[voice->track_sub[voice->track_index]]);         \
-            y += (i32)NuQFntHeight(system_qfont);                                                                      \
-            NuQFntPrintEx(system_qfont, 4800, y, 0x10, "CLASS:%s",                                                     \
-                          class_names[ClassToIX(voice->tracks[voice->track_index]->clazz) + 1]);                       \
-        }                                                                                                              \
-        y += (i32)NuQFntHeight(system_qfont);                                                                          \
-        NuQFntPrintEx(system_qfont, 4800, y, 0x10, "STATUS:%s", voice_status_txt[voice->status]);                      \
-        y += (i32)NuQFntHeight(system_qfont);                                                                          \
-        NuQFntPrintEx(system_qfont, 4800, y, 0x10, "VOLUME:%f (%f)", voice->gain, voice->last_volume);                 \
-        y += (i32)NuQFntHeight(system_qfont);                                                                          \
-        NuQFntPrintEx(system_qfont, 4800, y, 0x10, "FADE:%f", voice->fade_rate);                                       \
-        y += (i32)NuQFntHeight(system_qfont);                                                                          \
-        NuQFntPrintEx(system_qfont, 4800, y, 0x10, "POS:%f", stream_info.playback_position);                           \
-        y += (i32)NuQFntHeight(system_qfont);                                                                          \
-    } while (0)
-    DEBUG_MUSIC_VOICE(0);
-    DEBUG_MUSIC_VOICE(1);
-#undef DEBUG_MUSIC_VOICE
+    for (i32 i = 0; i < 2; ++i) {
+        Voice *voice = &voices[i];
+        NuSound3GetStreamInfo(voice->stream_index, &stream_info);
+        NuQFntPrintEx(system_qfont, 4800, y, 0x10, "VOICE:%d", i);
+        y += (i32)NuQFntHeight(system_qfont);
+        if (voice->tracks[voice->track_index] == NULL) {
+            NuQFntPrintEx(system_qfont, 4800, y, 0x10, "TRACK:NONE");
+            y += (i32)NuQFntHeight(system_qfont);
+            NuQFntPrintEx(system_qfont, 4800, y, 0x10, "CLASS:NONE");
+        } else {
+            NuQFntPrintEx(system_qfont, 4800, y, 0x10, "TRACK:%s",
+                          voice->tracks[voice->track_index]->filenames[voice->track_sub[voice->track_index]]);
+            y += (i32)NuQFntHeight(system_qfont);
+            NuQFntPrintEx(system_qfont, 4800, y, 0x10, "CLASS:%s",
+                          class_names[ClassToIX(voice->tracks[voice->track_index]->clazz) + 1]);
+        }
+        y += (i32)NuQFntHeight(system_qfont);
+        NuQFntPrintEx(system_qfont, 4800, y, 0x10, "STATUS:%s", voice_status_txt[voice->status]);
+        y += (i32)NuQFntHeight(system_qfont);
+        NuQFntPrintEx(system_qfont, 4800, y, 0x10, "VOLUME:%f (%f)", voice->gain, voice->last_volume);
+        y += (i32)NuQFntHeight(system_qfont);
+        NuQFntPrintEx(system_qfont, 4800, y, 0x10, "FADE:%f", voice->fade_rate);
+        y += (i32)NuQFntHeight(system_qfont);
+        NuQFntPrintEx(system_qfont, 4800, y, 0x10, "POS:%f", stream_info.playback_position);
+        y += (i32)NuQFntHeight(system_qfont);
+    }
     NuQFntPopPrintMode();
 }
 

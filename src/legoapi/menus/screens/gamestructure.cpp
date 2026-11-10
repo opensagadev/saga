@@ -700,38 +700,25 @@ void MenuDrawDebugStore(MENU_s *menu) {
     char line[64];
     f32 total = 0.0f;
     f32 unlocked_total = 0.0f;
-#define DRAW_DEBUG_PACK(INDEX)                                                                                         \
-    do {                                                                                                               \
-        product.price = 0.0f;                                                                                          \
-        char *product_id = *reinterpret_cast<char **>(&StorePack[INDEX].field1_0x4);                                   \
-        if (NuIOS_GetInAppProductByID(product_id, reinterpret_cast<NuIOS_InAppProduct *>(&product)) != 0) {            \
-            total += product.price;                                                                                    \
-        }                                                                                                              \
-        if (!(Store_IsPackUnlocked(INDEX))) {                                                                                                       \
-            dme_g = 31;                                                                                                \
-            dme_r = 255;                                                                                               \
-        } else {                                                                             \
-            unlocked_total += product.price;                                                                           \
-            dme_g = 255;                                                                                               \
-            dme_r = 31;                                                                                                \
-        }                                                                                                              \
-        dme_rgb = 1;                                                                                                   \
-        sprintf(line, "%s ~0%.2f~~", StorePack[INDEX].name, static_cast<double>(product.price));                       \
-        dme_sy = menu->item_scale;                                                                                     \
-        GameDrawMenuEntry(menu, line);                                                                                 \
-    } while (0)
-    DRAW_DEBUG_PACK(0);
-    DRAW_DEBUG_PACK(1);
-    DRAW_DEBUG_PACK(2);
-    DRAW_DEBUG_PACK(3);
-    DRAW_DEBUG_PACK(4);
-    DRAW_DEBUG_PACK(5);
-    DRAW_DEBUG_PACK(6);
-    DRAW_DEBUG_PACK(7);
-    DRAW_DEBUG_PACK(8);
-    DRAW_DEBUG_PACK(9);
-    DRAW_DEBUG_PACK(10);
-#undef DRAW_DEBUG_PACK
+    for (i32 index = 0; index < 11; ++index) {
+        product.price = 0.0f;
+        char *product_id = *reinterpret_cast<char **>(&StorePack[index].field1_0x4);
+        if (NuIOS_GetInAppProductByID(product_id, reinterpret_cast<NuIOS_InAppProduct *>(&product)) != 0) {
+            total += product.price;
+        }
+        if (!(Store_IsPackUnlocked(index))) {
+            dme_g = 31;
+            dme_r = 255;
+        } else {
+            unlocked_total += product.price;
+            dme_g = 255;
+            dme_r = 31;
+        }
+        dme_rgb = 1;
+        sprintf(line, "%s ~0%.2f~~", StorePack[index].name, static_cast<double>(product.price));
+        dme_sy = menu->item_scale;
+        GameDrawMenuEntry(menu, line);
+    }
 
     dme_r = 191;
     dme_g = 255;

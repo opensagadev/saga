@@ -1092,24 +1092,9 @@ static void GizForces_StoreProgress(void *, void *data, void *progress_ptr) {
     CLEAR_FORCE_PROGRESS_FIELD(runtime_flag_7, 0);
     CLEAR_FORCE_PROGRESS_FIELD(field_aa_flag_0, 0);
 #undef CLEAR_FORCE_PROGRESS_FIELD
-#define CLEAR_FORCE_GROUP_WORD(word) progress->group_member_words[word] = 0xffffffff
-    CLEAR_FORCE_GROUP_WORD(0);
-    CLEAR_FORCE_GROUP_WORD(1);
-    CLEAR_FORCE_GROUP_WORD(2);
-    CLEAR_FORCE_GROUP_WORD(3);
-    CLEAR_FORCE_GROUP_WORD(4);
-    CLEAR_FORCE_GROUP_WORD(5);
-    CLEAR_FORCE_GROUP_WORD(6);
-    CLEAR_FORCE_GROUP_WORD(7);
-    CLEAR_FORCE_GROUP_WORD(8);
-    CLEAR_FORCE_GROUP_WORD(9);
-    CLEAR_FORCE_GROUP_WORD(10);
-    CLEAR_FORCE_GROUP_WORD(11);
-    CLEAR_FORCE_GROUP_WORD(12);
-    CLEAR_FORCE_GROUP_WORD(13);
-    CLEAR_FORCE_GROUP_WORD(14);
-    CLEAR_FORCE_GROUP_WORD(15);
-#undef CLEAR_FORCE_GROUP_WORD
+    for (i32 word = 0; word < 16; ++word) {
+        progress->group_member_words[word] = 0xffffffff;
+    }
     GIZFORCE_s *force = force_sys->forces;
     for (i32 index = 0; index < force_sys->count && index != GIZFORCE_PROGRESS_CAPACITY; ++index, ++force) {
         const i32 word = index >> 5;

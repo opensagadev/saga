@@ -2488,37 +2488,11 @@ void InitGameMode() {
         MenuReset();
     }
 
-    GameObject_s *player = Player[0];
-    if (player != NULL && !player->not_with_party) {
-        ResetPlayer(player, 1, NULL, 1);
-    }
-    player = Player[1];
-    if (player != NULL && !player->not_with_party) {
-        ResetPlayer(player, 1, NULL, 1);
-    }
-    player = Player[2];
-    if (player != NULL && !player->not_with_party) {
-        ResetPlayer(player, 1, NULL, 1);
-    }
-    player = Player[3];
-    if (player != NULL && !player->not_with_party) {
-        ResetPlayer(player, 1, NULL, 1);
-    }
-    player = Player[4];
-    if (player != NULL && !player->not_with_party) {
-        ResetPlayer(player, 1, NULL, 1);
-    }
-    player = Player[5];
-    if (player != NULL && !player->not_with_party) {
-        ResetPlayer(player, 1, NULL, 1);
-    }
-    player = Player[6];
-    if (player != NULL && !player->not_with_party) {
-        ResetPlayer(player, 1, NULL, 1);
-    }
-    player = Player[7];
-    if (player != NULL && !player->not_with_party) {
-        ResetPlayer(player, 1, NULL, 1);
+    for (i32 i = 0; i < 8; ++i) {
+        GameObject_s *player = Player[i];
+        if (player != NULL && !player->not_with_party) {
+            ResetPlayer(player, 1, NULL, 1);
+        }
     }
 
     f32 remember_speed = GetVehicleAreaRememberSpeed();
@@ -2762,22 +2736,10 @@ void CheckResetBits() {
     AITriggerSetSysReset(WORLD->ai_trigger_set_sys);
     AITriggerSysAutoSetUp(WORLD, WORLD->ai_trigger_set_sys);
     if ((ResetBits & 0x10) != 0) {
-        if (Player[0] != NULL)
-            ResetPlayer(Player[0], 1, NULL, 0);
-        if (Player[1] != NULL)
-            ResetPlayer(Player[1], 1, NULL, 0);
-        if (Player[2] != NULL)
-            ResetPlayer(Player[2], 1, NULL, 0);
-        if (Player[3] != NULL)
-            ResetPlayer(Player[3], 1, NULL, 0);
-        if (Player[4] != NULL)
-            ResetPlayer(Player[4], 1, NULL, 0);
-        if (Player[5] != NULL)
-            ResetPlayer(Player[5], 1, NULL, 0);
-        if (Player[6] != NULL)
-            ResetPlayer(Player[6], 1, NULL, 0);
-        if (Player[7] != NULL)
-            ResetPlayer(Player[7], 1, NULL, 0);
+        for (i32 i = 0; i < 8; ++i) {
+            if (Player[i] != NULL)
+                ResetPlayer(Player[i], 1, NULL, 0);
+        }
         VehicleAreaRememberSpeed = GetVehicleAreaRememberSpeed();
     }
 

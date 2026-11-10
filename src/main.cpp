@@ -498,14 +498,9 @@ giz_freeplay:
                     ProcessMusicChanges(world->current_level, &Game.options_save);
                 }
 
-                windObjs[0] = Player[0] != NULL ? (NUVEC *)&Player[0]->apiobj.field_0x19c : NULL;
-                windObjs[1] = Player[1] != NULL ? (NUVEC *)&Player[1]->apiobj.field_0x19c : NULL;
-                windObjs[2] = Player[2] != NULL ? (NUVEC *)&Player[2]->apiobj.field_0x19c : NULL;
-                windObjs[3] = Player[3] != NULL ? (NUVEC *)&Player[3]->apiobj.field_0x19c : NULL;
-                windObjs[4] = Player[4] != NULL ? (NUVEC *)&Player[4]->apiobj.field_0x19c : NULL;
-                windObjs[5] = Player[5] != NULL ? (NUVEC *)&Player[5]->apiobj.field_0x19c : NULL;
-                windObjs[6] = Player[6] != NULL ? (NUVEC *)&Player[6]->apiobj.field_0x19c : NULL;
-                windObjs[7] = Player[7] != NULL ? (NUVEC *)&Player[7]->apiobj.field_0x19c : NULL;
+                for (i32 i = 0; i < 8; ++i) {
+                    windObjs[i] = Player[i] != NULL ? (NUVEC *)&Player[i]->apiobj.field_0x19c : NULL;
+                }
 
                 if (!(((Paused == 0) || (screendump != 0)) || ((c = IsGrabbingScreen(), c != 0)))) {
                     NuMtlAnimateSetSpeedScale(0.0f);
@@ -586,37 +581,11 @@ giz_freeplay:
                     }
 
                     if (CUTSTOPGAME != 0) {
-                        if ((Player[0] != NULL) && Player[0]->apiobj.player_controlled &&
-                            (Player[0]->pad_gamepad->pad != NULL)) {
-                            UpdateRumble(&Player[0]->pad_gamepad->rumble_packet);
-                        }
-                        if ((Player[1] != NULL) && Player[1]->apiobj.player_controlled &&
-                            (Player[1]->pad_gamepad->pad != NULL)) {
-                            UpdateRumble(&Player[1]->pad_gamepad->rumble_packet);
-                        }
-                        if ((Player[2] != NULL) && Player[2]->apiobj.player_controlled &&
-                            (Player[2]->pad_gamepad->pad != NULL)) {
-                            UpdateRumble(&Player[2]->pad_gamepad->rumble_packet);
-                        }
-                        if ((Player[3] != NULL) && Player[3]->apiobj.player_controlled &&
-                            (Player[3]->pad_gamepad->pad != NULL)) {
-                            UpdateRumble(&Player[3]->pad_gamepad->rumble_packet);
-                        }
-                        if ((Player[4] != NULL) && Player[4]->apiobj.player_controlled &&
-                            (Player[4]->pad_gamepad->pad != NULL)) {
-                            UpdateRumble(&Player[4]->pad_gamepad->rumble_packet);
-                        }
-                        if ((Player[5] != NULL) && Player[5]->apiobj.player_controlled &&
-                            (Player[5]->pad_gamepad->pad != NULL)) {
-                            UpdateRumble(&Player[5]->pad_gamepad->rumble_packet);
-                        }
-                        if ((Player[6] != NULL) && Player[6]->apiobj.player_controlled &&
-                            (Player[6]->pad_gamepad->pad != NULL)) {
-                            UpdateRumble(&Player[6]->pad_gamepad->rumble_packet);
-                        }
-                        if ((Player[7] != NULL) && Player[7]->apiobj.player_controlled &&
-                            (Player[7]->pad_gamepad->pad != NULL)) {
-                            UpdateRumble(&Player[7]->pad_gamepad->rumble_packet);
+                        for (i32 i = 0; i < 8; ++i) {
+                            if ((Player[i] != NULL) && Player[i]->apiobj.player_controlled &&
+                                (Player[i]->pad_gamepad->pad != NULL)) {
+                                UpdateRumble(&Player[i]->pad_gamepad->rumble_packet);
+                            }
                         }
                     } else {
                         ManageGameObjects();

@@ -57,34 +57,23 @@ extern "C" i16 id_LANDSPEEDER;
 
 void DebrisKillPlayers() {
     DebrisPreCheckCollisions(&GameCam->pos, 50.0f);
-#define CHECK_DEBRIS_PLAYER(player_index)                                                                              \
-    do {                                                                                                               \
-        GameObject_s *player = Player[player_index];                                                                   \
-        if (player != NULL && (player->apiobj.flags_high & 0x10) != 0 && player->apiobj.field_0x287 == 0 &&            \
-            player->field_0x1024 <= 0.0f && !(player->spawn_protection_timer > 0.0f) &&                               \
-            (player->field_0xefe & 0x40) == 0 && CannotKill(player) == 0 && Player_HasInvincibility(player) == 0 &&    \
-            (player->apiobj.character_data->game_character->flags_090 & 0x04008000) == 0) {                            \
-            if (DebrisCollisionCheckScaleY(&player->apiobj.collision_position, player->apiobj.collision_radius,        \
-                                           player->collision_y_scale) != -1) {                                         \
-                ObjHitObj(NULL, player, 1, 0, 0, 1);                                                                   \
-            }                                                                                                          \
-            if (DebrisTorusCollisionCheckScaleY(&player->apiobj.collision_position, player->apiobj.collision_radius,   \
-                                                player->collision_y_scale) != -1) {                                    \
-                ObjHitObj(NULL, player, 1, 0, 0, 1);                                                                   \
-            }                                                                                                          \
-        }                                                                                                              \
-    } while (0)
 
-    CHECK_DEBRIS_PLAYER(0);
-    CHECK_DEBRIS_PLAYER(1);
-    CHECK_DEBRIS_PLAYER(2);
-    CHECK_DEBRIS_PLAYER(3);
-    CHECK_DEBRIS_PLAYER(4);
-    CHECK_DEBRIS_PLAYER(5);
-    CHECK_DEBRIS_PLAYER(6);
-    CHECK_DEBRIS_PLAYER(7);
-
-#undef CHECK_DEBRIS_PLAYER
+    for (i32 player_index = 0; player_index < 8; ++player_index) {
+        GameObject_s *player = Player[player_index];
+        if (player != NULL && (player->apiobj.flags_high & 0x10) != 0 && player->apiobj.field_0x287 == 0 &&
+            player->field_0x1024 <= 0.0f && !(player->spawn_protection_timer > 0.0f) &&
+            (player->field_0xefe & 0x40) == 0 && CannotKill(player) == 0 && Player_HasInvincibility(player) == 0 &&
+            (player->apiobj.character_data->game_character->flags_090 & 0x04008000) == 0) {
+            if (DebrisCollisionCheckScaleY(&player->apiobj.collision_position, player->apiobj.collision_radius,
+                                           player->collision_y_scale) != -1) {
+                ObjHitObj(NULL, player, 1, 0, 0, 1);
+            }
+            if (DebrisTorusCollisionCheckScaleY(&player->apiobj.collision_position, player->apiobj.collision_radius,
+                                                player->collision_y_scale) != -1) {
+                ObjHitObj(NULL, player, 1, 0, 0, 1);
+            }
+        }
+    }
 }
 
 void AddSurfaceDebris(GameObject_s *object) {

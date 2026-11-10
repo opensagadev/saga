@@ -281,31 +281,16 @@ void Tag_DrawIcon_Batman(GameObject_s *object) {
         f32 x_sum = 0.0f;
         f32 z_sum = 0.0f;
         count = 0;
-#define TAG_INCLUDE_POI(index)                                                                                         \
-    if (model->points_of_interest[index] != NULL) {                                                                    \
-        NUMTX *m = &object->joint_matrices[index];                                                                     \
-        count++;                                                                                                       \
-        x_sum += m->m30;                                                                                               \
-        z_sum += m->m32;                                                                                               \
-        if (m->m31 > max_y)                                                                                            \
-            max_y = m->m31;                                                                                            \
-    }
-        TAG_INCLUDE_POI(0)
-        TAG_INCLUDE_POI(1)
-        TAG_INCLUDE_POI(2)
-        TAG_INCLUDE_POI(3)
-        TAG_INCLUDE_POI(4)
-        TAG_INCLUDE_POI(5)
-        TAG_INCLUDE_POI(6)
-        TAG_INCLUDE_POI(7)
-        TAG_INCLUDE_POI(8)
-        TAG_INCLUDE_POI(9)
-        TAG_INCLUDE_POI(10)
-        TAG_INCLUDE_POI(11)
-        TAG_INCLUDE_POI(12)
-        TAG_INCLUDE_POI(13)
-        TAG_INCLUDE_POI(14)
-        TAG_INCLUDE_POI(15)
+        for (i32 poi = 0; poi < 16; ++poi) {
+            if (model->points_of_interest[poi] != NULL) {
+                NUMTX *m = &object->joint_matrices[poi];
+                count++;
+                x_sum += m->m30;
+                z_sum += m->m32;
+                if (m->m31 > max_y)
+                    max_y = m->m31;
+            }
+        }
         if (count != 0) {
             const f32 inv_count = 1.0f / static_cast<f32>(count);
             position.x = (inv_count * x_sum + position.x) * 0.5f;

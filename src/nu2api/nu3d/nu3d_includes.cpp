@@ -3607,18 +3607,11 @@ void NuMotionFilterGen::render() {
     f32 ratio = maximum / scale;
     f32 params[4] = {ratio, 0.5f, 0, 0};
     f32 weights[7][4];
-#define MOTION_SAMPLE(index)                                                                                           \
-    weights[index][0] = (NuPow(static_cast<f32>(index + 1) / 7.0f, falloff) - 0.5f) * ratio;                           \
-    weights[index][1] = weights[index][0];                                                                             \
-    weights[index][2] = weights[index][3] = 0.0f;
-    MOTION_SAMPLE(0)
-    MOTION_SAMPLE(1)
-    MOTION_SAMPLE(2)
-    MOTION_SAMPLE(3)
-    MOTION_SAMPLE(4)
-    MOTION_SAMPLE(5)
-    MOTION_SAMPLE(6)
-#undef MOTION_SAMPLE
+    for (i32 index = 0; index < 7; ++index) {
+        weights[index][0] = (NuPow(static_cast<f32>(index + 1) / 7.0f, falloff) - 0.5f) * ratio;
+        weights[index][1] = weights[index][0];
+        weights[index][2] = weights[index][3] = 0.0f;
+    }
     PostBlurSetVertexParam(programs[0], 0x808a, params, 4);
     PostBlurSetVertexParam(programs[0], 0x808b, &weights[0][0], 28);
     NuFramebufferBind(output);

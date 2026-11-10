@@ -277,24 +277,19 @@ GIZMOBLOWUP_s *DeathStar2BattleD_InZapRange(GameObject_s *object) {
             nearest = NULL;
     } else
         nearest = NULL;
-#define CHECK_ZAP_RANGE(index)                                                                                         \
-    if (LevGizmo[index] != NULL) {                                                                                     \
-        GIZMOBLOWUP_s *blowup = static_cast<GIZMOBLOWUP_s *>(LevGizmo[index]->object);                                 \
-        if (blowup != NULL && (blowup->status_flags & 0x800001) == 0x800000 && LevGizObst[index] != NULL &&            \
-            LevGizObst[index]->anim_set->state != 0) {                                                                 \
-            f32 distance = NuVecDistSqr(&object->apiobj.collision_position, &blowup->mid_position, NULL);              \
-            if (distance < nearest_distance) {                                                                         \
-                nearest = blowup;                                                                                      \
-                nearest_distance = distance;                                                                           \
-            }                                                                                                          \
-        }                                                                                                              \
+    for (i32 index = 2; index < 7; ++index) {
+        if (LevGizmo[index] != NULL) {
+            GIZMOBLOWUP_s *blowup = static_cast<GIZMOBLOWUP_s *>(LevGizmo[index]->object);
+            if (blowup != NULL && (blowup->status_flags & 0x800001) == 0x800000 && LevGizObst[index] != NULL &&
+                LevGizObst[index]->anim_set->state != 0) {
+                f32 distance = NuVecDistSqr(&object->apiobj.collision_position, &blowup->mid_position, NULL);
+                if (distance < nearest_distance) {
+                    nearest = blowup;
+                    nearest_distance = distance;
+                }
+            }
+        }
     }
-    CHECK_ZAP_RANGE(2);
-    CHECK_ZAP_RANGE(3);
-    CHECK_ZAP_RANGE(4);
-    CHECK_ZAP_RANGE(5);
-    CHECK_ZAP_RANGE(6);
-#undef CHECK_ZAP_RANGE
     return nearest;
 }
 
@@ -1654,40 +1649,20 @@ void SarlaccPitC_Reset(WORLDINFO_s *world) {
         UpdateMidPos(static_cast<GIZMOBLOWUP_s *>(gizmo->object));
     }
 
-#define FIND_SHOT(index, format, number)                                                                               \
-    sprintf(name, format, number);                                                                                     \
-    NuSpecialFind(world->current_gscn, &LevHSpecial[index], name, 1)
-    FIND_SHOT(0, "shot_0%d", 1);
-    FIND_SHOT(1, "shot_0%d", 2);
-    FIND_SHOT(2, "shot_0%d", 3);
-    FIND_SHOT(3, "shot_0%d", 4);
-    FIND_SHOT(4, "shot_0%d", 5);
-    FIND_SHOT(5, "shot_0%d", 6);
-    FIND_SHOT(6, "shot_0%d", 7);
-    FIND_SHOT(7, "shot_0%d", 8);
-    FIND_SHOT(8, "shot_0%da", 1);
-    FIND_SHOT(9, "shot_0%da", 2);
-    FIND_SHOT(10, "shot_0%da", 3);
-    FIND_SHOT(11, "shot_0%da", 4);
-    FIND_SHOT(12, "shot_0%da", 5);
-    FIND_SHOT(13, "shot_0%da", 6);
-    FIND_SHOT(14, "shot_0%da", 7);
-    FIND_SHOT(15, "shot_0%da", 8);
-#undef FIND_SHOT
+    for (i32 index = 0; index < 8; ++index) {
+        sprintf(name, "shot_0%d", index + 1);
+        NuSpecialFind(world->current_gscn, &LevHSpecial[index], name, 1);
+    }
+    for (i32 index = 0; index < 8; ++index) {
+        sprintf(name, "shot_0%da", index + 1);
+        NuSpecialFind(world->current_gscn, &LevHSpecial[index + 8], name, 1);
+    }
 
     LevGizmo[0] = GizmoFindByName(world->gizmo_sys, gizpanel_gizmotype_id, "panel2");
-#define RESET_SHOT(index, level)                                                                                       \
-    NuSpecialSetVisibility(&LevHSpecial[index], power <= level);                                                       \
-    NuSpecialSetVisibility(&LevHSpecial[(index) + 8], power > level)
-    RESET_SHOT(0, 0);
-    RESET_SHOT(1, 1);
-    RESET_SHOT(2, 2);
-    RESET_SHOT(3, 3);
-    RESET_SHOT(4, 4);
-    RESET_SHOT(5, 5);
-    RESET_SHOT(6, 6);
-    RESET_SHOT(7, 7);
-#undef RESET_SHOT
+    for (i32 index = 0; index < 8; ++index) {
+        NuSpecialSetVisibility(&LevHSpecial[index], power <= index);
+        NuSpecialSetVisibility(&LevHSpecial[index + 8], power > index);
+    }
 }
 
 void SarlaccPitC_Update(WORLDINFO_s *world) {

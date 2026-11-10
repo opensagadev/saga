@@ -103,12 +103,11 @@ i32 Tag_UpdateHint(HINT_s *hint) {
         return 0;
     const i16 tc14_id = id_TC14;
     i32 tc14 = LSW_HintConditions.tc14_present;
-    auto check_tc14 = [&](GameObject_s *object) {
+    for (i32 i = 0; i < 8; ++i) {
+        GameObject_s *object = Player[i];
         if (object != NULL && (object->apiobj.field_0x1f8 & 0x1080) == 0x1080 && tc14_id == object->id)
             tc14 = 1;
-    };
-    for (i32 i = 0; i < 8; ++i)
-        check_tc14(Player[i]);
+    }
     LSW_HintConditions.tc14_present = tc14;
     switch (hint->control_mode_ids[0]) {
         case 600:
