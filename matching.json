@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 85.19295,
+    "fuzzy_match_percent": 85.220245,
     "total_code": "4722419",
-    "matched_code": "714607",
-    "matched_code_percent": 15.132223,
+    "matched_code": "714451",
+    "matched_code_percent": 15.12892,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 7264,
-    "matched_functions_percent": 53.97132,
+    "matched_functions": 7263,
+    "matched_functions_percent": 53.963886,
     "total_units": 1
   },
   "text": {
@@ -38079,7 +38079,7 @@
           "address": 4013840,
           "offset": 3123872,
           "size": 538,
-          "match_percent": 58.23649
+          "match_percent": 60.182434
         },
         {
           "name": "_ZL29Condition_OpponentToLocatorXZP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
@@ -38095,7 +38095,7 @@
           "address": 4014496,
           "offset": 3124528,
           "size": 106,
-          "match_percent": 99.5
+          "match_percent": 99.96875
         },
         {
           "name": "_ZL36antinodeEditor_cbAntiNodeFlagsToggleP10eduimenu_sP10eduiitem_sj",
@@ -38119,7 +38119,7 @@
           "address": 4014928,
           "offset": 3124960,
           "size": 167,
-          "match_percent": 99.5
+          "match_percent": 99.741936
         },
         {
           "name": "_ZL34creatureEditor_cbSetAreaActivationP10eduimenu_sP10eduiitem_sj",
@@ -38143,7 +38143,7 @@
           "address": 4015440,
           "offset": 3125472,
           "size": 167,
-          "match_percent": 99.5
+          "match_percent": 99.741936
         },
         {
           "name": "_ZL23pathEditor_cbRenameNodeP10eduimenu_sP10eduiitem_sj",
@@ -38759,7 +38759,7 @@
           "address": 4044064,
           "offset": 3154096,
           "size": 156,
-          "match_percent": 52.18182
+          "match_percent": 51.909092
         },
         {
           "name": "_ZL23pathEditor_cbRenamePathP10eduimenu_sP10eduiitem_sj",
@@ -38767,7 +38767,7 @@
           "address": 4044224,
           "offset": 3154256,
           "size": 156,
-          "match_percent": 100.0
+          "match_percent": 99.72727
         },
         {
           "name": "_ZL32locatorEditor_cbRenameLocatorSetP10eduimenu_sP10eduiitem_sj",
@@ -38775,7 +38775,7 @@
           "address": 4044384,
           "offset": 3154416,
           "size": 200,
-          "match_percent": 99.98245
+          "match_percent": 99.7193
         },
         {
           "name": "_ZL29locatorEditor_cbRenameLocatorP10eduimenu_sP10eduiitem_sj",
@@ -39610,12 +39610,20 @@
           "match_percent": 100.0
         },
         {
+          "name": "_ZL32pathEditorCalculateDistanceTableP8AIPATH_siP9variptr_uS2_",
+          "demangled_name": "pathEditorCalculateDistanceTable(AIPATH_s*, int, variptr_u*, variptr_u*)",
+          "address": 4087888,
+          "offset": 3197920,
+          "size": 354,
+          "match_percent": 97.5534
+        },
+        {
           "name": "_ZL32pathEditorCreateSpecialRouteDataP8AIPATH_siP10EDAIPATH_sP9variptr_uS4_.isra.81",
           "demangled_name": "pathEditorCreateSpecialRouteData(AIPATH_s*, int, EDAIPATH_s*, variptr_u*, variptr_u*) [clone .isra.81]",
           "address": 4088256,
           "offset": 3198288,
           "size": 9576,
-          "match_percent": 89.946815
+          "match_percent": 96.49846
         },
         {
           "name": "AISysSetLevelPath",
@@ -40847,7 +40855,7 @@
           "address": 4201504,
           "offset": 3311536,
           "size": 4142,
-          "match_percent": 71.30105
+          "match_percent": 78.447296
         },
         {
           "name": "AISYSRebuildFromEditorData",
@@ -40855,7 +40863,7 @@
           "address": 4205648,
           "offset": 3315680,
           "size": 3761,
-          "match_percent": 68.903
+          "match_percent": 69.168
         },
         {
           "name": "aieditor_Leave",
@@ -126607,14 +126615,6 @@
       "match_percent": 0.0
     },
     {
-      "name": "_ZL32pathEditorCalculateDistanceTableP8AIPATH_siP9variptr_uS2_",
-      "demangled_name": "pathEditorCalculateDistanceTable(AIPATH_s*, int, variptr_u*, variptr_u*)",
-      "address": 4087888,
-      "offset": 3197920,
-      "size": 354,
-      "match_percent": 0.0
-    },
-    {
       "name": "_ZL5TBENDii.part.0",
       "demangled_name": "TBEND(int, int) [clone .part.0]",
       "address": 4751360,
@@ -128882,8 +128882,8 @@
   "summary": {
     "bazel_units": 361,
     "functions": 13454,
-    "assigned_functions": 12869,
+    "assigned_functions": 12870,
     "ambiguous_functions": 260,
-    "unassigned_functions": 325
+    "unassigned_functions": 324
   }
 }

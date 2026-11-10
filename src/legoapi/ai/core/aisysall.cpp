@@ -55,7 +55,7 @@
 static i32 iterator_count;
 static f32 ***distance_tables;
 
-static f32 **pathEditorCalculateDistanceTable(AIPATH_s *path, i32 route_mask, variptr_u *cursor, variptr_u *end);
+static __attribute__((noinline, noclone)) f32 **pathEditorCalculateDistanceTable(AIPATH_s *path, i32 route_mask, variptr_u *cursor, variptr_u *end);
 
 #if defined(__i386__)
 #define AIPATHBUILD_CLONE_ATTR2 __attribute__((noinline, noclone, regparm(2)))
@@ -8807,7 +8807,7 @@ extern "C" {
 
 }
 
-static f32 **pathEditorCalculateDistanceTable(AIPATH_s *path, i32 route_mask, variptr_u *cursor, variptr_u *end) {
+static __attribute__((noinline, noclone)) f32 **pathEditorCalculateDistanceTable(AIPATH_s *path, i32 route_mask, variptr_u *cursor, variptr_u *end) {
     if (distance_tables == 0 || path == nullptr || path->nodes == nullptr) {
         return nullptr;
     }
