@@ -630,32 +630,13 @@ void MechSystems::ProcessEvenWhenPaused(ThingProcessData *data) {
     if (initialized == 0) {
         Init();
     }
-    if (radar_pulses[0] != NULL) {
-        radar_pulses[0]->Process(FRAMETIME);
-        if (radar_pulses[0]->IsFinished()) {
-            delete radar_pulses[0];
-            radar_pulses[0] = NULL;
-        }
-    }
-    if (radar_pulses[1] != NULL) {
-        radar_pulses[1]->Process(FRAMETIME);
-        if (radar_pulses[1]->IsFinished()) {
-            delete radar_pulses[1];
-            radar_pulses[1] = NULL;
-        }
-    }
-    if (radar_pulses[2] != NULL) {
-        radar_pulses[2]->Process(FRAMETIME);
-        if (radar_pulses[2]->IsFinished()) {
-            delete radar_pulses[2];
-            radar_pulses[2] = NULL;
-        }
-    }
-    if (radar_pulses[3] != NULL) {
-        radar_pulses[3]->Process(FRAMETIME);
-        if (radar_pulses[3]->IsFinished()) {
-            delete radar_pulses[3];
-            radar_pulses[3] = NULL;
+    for (i32 i = 0; i < 4; ++i) {
+        if (radar_pulses[i] != NULL) {
+            radar_pulses[i]->Process(FRAMETIME);
+            if (radar_pulses[i]->IsFinished()) {
+                delete radar_pulses[i];
+                radar_pulses[i] = NULL;
+            }
         }
     }
     input_touch_system.ProcessEvenWhenPaused(data);

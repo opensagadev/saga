@@ -47,54 +47,22 @@ void MechInputTouchMainController::UpdateButtons() {
     const f32 frame_time = FRAMETIME;
     const f32 tap_frequency = s_mechTouchTapFrequency;
 
-    button_repeats[0] = button_was_pressed[0];
-    if (button_was_pressed[0] == 0 && button_pressed[0] != 0) {
-        if ((buttons_repeat_timers[0] -= frame_time) <= 0.0f) {
-            buttons_repeat_timers[0] = tap_frequency;
-            button_repeats[0] = 1;
+    for (i32 i = 0; i < 4; ++i) {
+        button_repeats[i] = button_was_pressed[i];
+        if (button_was_pressed[i] == 0 && button_pressed[i] != 0) {
+            if ((buttons_repeat_timers[i] -= frame_time) <= 0.0f) {
+                buttons_repeat_timers[i] = tap_frequency;
+                button_repeats[i] = 1;
+            }
+        } else {
+            buttons_repeat_timers[i] = 0.0f;
         }
-    } else {
-        buttons_repeat_timers[0] = 0.0f;
     }
 
-    button_repeats[1] = button_was_pressed[1];
-    if (button_was_pressed[1] == 0 && button_pressed[1] != 0) {
-        if ((buttons_repeat_timers[1] -= frame_time) <= 0.0f) {
-            buttons_repeat_timers[1] = tap_frequency;
-            button_repeats[1] = 1;
-        }
-    } else {
-        buttons_repeat_timers[1] = 0.0f;
+    for (i32 i = 0; i < 4; ++i) {
+        button_pressed[i] = 0;
+        button_was_pressed[i] = 0;
     }
-
-    button_repeats[2] = button_was_pressed[2];
-    if (button_was_pressed[2] == 0 && button_pressed[2] != 0) {
-        if ((buttons_repeat_timers[2] -= frame_time) <= 0.0f) {
-            buttons_repeat_timers[2] = tap_frequency;
-            button_repeats[2] = 1;
-        }
-    } else {
-        buttons_repeat_timers[2] = 0.0f;
-    }
-
-    button_repeats[3] = button_was_pressed[3];
-    if (button_was_pressed[3] == 0 && button_pressed[3] != 0) {
-        if ((buttons_repeat_timers[3] -= frame_time) <= 0.0f) {
-            buttons_repeat_timers[3] = tap_frequency;
-            button_repeats[3] = 1;
-        }
-    } else {
-        buttons_repeat_timers[3] = 0.0f;
-    }
-
-    button_pressed[0] = 0;
-    button_was_pressed[0] = 0;
-    button_pressed[1] = 0;
-    button_was_pressed[1] = 0;
-    button_pressed[2] = 0;
-    button_was_pressed[2] = 0;
-    button_pressed[3] = 0;
-    button_was_pressed[3] = 0;
 }
 
 void MechInputTouchMainController::RemoveUnpressedButtons(NuInputTouchData &output, NuInputTouchData const &input) {

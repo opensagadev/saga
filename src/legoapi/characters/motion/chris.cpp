@@ -755,14 +755,9 @@ static void DrawSpaceLevel(spacelevel_s *space) {
         DrawCross_Now(reinterpret_cast<_vuv_s *>(&space->crosses[1].world_position), space->crosses[1].scale,
                       space->crosses[1].colour, 1);
     }
-    DrawSpaceGroup(&space->flight_groups[0]);
-    DrawSpaceGroup(&space->flight_groups[1]);
-    DrawSpaceGroup(&space->flight_groups[2]);
-    DrawSpaceGroup(&space->flight_groups[3]);
-    DrawSpaceGroup(&space->flight_groups[4]);
-    DrawSpaceGroup(&space->flight_groups[5]);
-    DrawSpaceGroup(&space->flight_groups[6]);
-    DrawSpaceGroup(&space->flight_groups[7]);
+    for (i32 i = 0; i < 8; ++i) {
+        DrawSpaceGroup(&space->flight_groups[i]);
+    }
     for (i32 i = 0; i != 96; ++i) {
         if (space->queued_fighters[i].active != 0)
             DrawStarFighter(&space->queued_fighters[i]);

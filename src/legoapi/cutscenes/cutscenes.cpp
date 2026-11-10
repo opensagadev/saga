@@ -1631,55 +1631,58 @@ void CutScenes_ConfigureList(char *filename, variptr_u *buffer, variptr_u) {
             file[0] = '\0';
             entries[CUTCOUNT].level = -1;
             while (NuFParGetLine(parser) != 0 && NuFParGetWord(parser) != 0) {
-                if (NuStrICmp(parser->word_buf, "cutscene_end") == 0) {
-                    if (directory[0] == '\0') {
-                        break;
-                    }
-                    if (file[0] == '\0') {
-                        break;
-                    }
-                    if (entries[CUTCOUNT].level == -1) {
-                        break;
-                    }
-
-                    i32 duplicate = 0;
-                    i32 i = 0;
-                    while (i < CUTCOUNT && duplicate == 0) {
-                        if (NuStrICmp(directory, entries[i].directory) == 0 &&
-                            NuStrICmp(file, entries[i].filename) == 0 && entries[CUTCOUNT].level == entries[i].level) {
-                            duplicate = 1;
-                        } else {
-                            ++i;
+                if (NuStrICmp(parser->word_buf, "cutscene_end") != 0) {
+                    if (NuStrICmp(parser->word_buf, "dir") == 0 || NuStrICmp(parser->word_buf, "path") == 0) {
+                        if (NuFParGetWord(parser) != 0 && NuStrLen(parser->word_buf) <= 127) {
+                            NuStrCpy(directory, parser->word_buf);
+                        }
+                    } else if (NuStrICmp(parser->word_buf, "file") == 0 ||
+                               NuStrICmp(parser->word_buf, "filename") == 0) {
+                        if (NuFParGetWord(parser) != 0 && NuStrLen(parser->word_buf) <= 63) {
+                            NuStrCpy(file, parser->word_buf);
+                        }
+                    } else if (NuStrICmp(parser->word_buf, "level") == 0 ||
+                               NuStrICmp(parser->word_buf, "in_level") == 0) {
+                        if (NuFParGetWord(parser) != 0) {
+                            i32 level;
+                            Level_FindByName(parser->word_buf, &level);
+                            entries[CUTCOUNT].level = static_cast<i16>(level);
                         }
                     }
-                    if (duplicate == 0) {
-                        entries[CUTCOUNT].directory = cursor;
-                        NuStrCpy(cursor, directory);
-                        cursor += NuStrLen(directory);
-                        *cursor++ = '\0';
-                        entries[CUTCOUNT].filename = cursor;
-                        NuStrCpy(cursor, file);
-                        cursor += NuStrLen(file);
-                        *cursor++ = '\0';
-                        ++CUTCOUNT;
-                    }
+                    continue;
+                }
+                if (directory[0] == '\0') {
                     break;
                 }
-                if (NuStrICmp(parser->word_buf, "dir") == 0 || NuStrICmp(parser->word_buf, "path") == 0) {
-                    if (NuFParGetWord(parser) != 0 && NuStrLen(parser->word_buf) <= 127) {
-                        NuStrCpy(directory, parser->word_buf);
-                    }
-                } else if (NuStrICmp(parser->word_buf, "file") == 0 || NuStrICmp(parser->word_buf, "filename") == 0) {
-                    if (NuFParGetWord(parser) != 0 && NuStrLen(parser->word_buf) <= 63) {
-                        NuStrCpy(file, parser->word_buf);
-                    }
-                } else if (NuStrICmp(parser->word_buf, "level") == 0 || NuStrICmp(parser->word_buf, "in_level") == 0) {
-                    if (NuFParGetWord(parser) != 0) {
-                        i32 level;
-                        Level_FindByName(parser->word_buf, &level);
-                        entries[CUTCOUNT].level = static_cast<i16>(level);
+                if (file[0] == '\0') {
+                    break;
+                }
+                if (entries[CUTCOUNT].level == -1) {
+                    break;
+                }
+
+                i32 duplicate = 0;
+                i32 i = 0;
+                while (i < CUTCOUNT && duplicate == 0) {
+                    if (NuStrICmp(directory, entries[i].directory) == 0 && NuStrICmp(file, entries[i].filename) == 0 &&
+                        entries[CUTCOUNT].level == entries[i].level) {
+                        duplicate = 1;
+                    } else {
+                        ++i;
                     }
                 }
+                if (duplicate == 0) {
+                    entries[CUTCOUNT].directory = cursor;
+                    NuStrCpy(cursor, directory);
+                    cursor += NuStrLen(directory);
+                    *cursor++ = '\0';
+                    entries[CUTCOUNT].filename = cursor;
+                    NuStrCpy(cursor, file);
+                    cursor += NuStrLen(file);
+                    *cursor++ = '\0';
+                    ++CUTCOUNT;
+                }
+                break;
             }
         }
     }
