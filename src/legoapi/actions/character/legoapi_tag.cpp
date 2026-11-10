@@ -136,6 +136,14 @@ static i32 Tag_FindNextPlayer(GameObject_s *object) {
     return -1;
 }
 
+static inline i32 GetBundlePackProduct(STOREBUNDLE *bundle, i32 pack, NuIOS_InAppProduct *product) {
+    if (Store_IsPackUnlocked(pack))
+        return 0;
+    if ((bundle->pack_mask & (1u << pack)) == 0)
+        return 0;
+    return NuIOS_GetInAppProductByID(StorePack[pack].product_id, product);
+}
+
 static void DrawPackButton(GAMEMESSAGE_s *message, nuvec_s *position, float scale) {
     struct InAppProductData {
         u8 field_0x0[0x300];
@@ -163,20 +171,16 @@ static void DrawPackButton(GAMEMESSAGE_s *message, nuvec_s *position, float scal
                  message->blue, alpha & 0xff);
 
         const f32 savings_height = text3d_height;
-        uintptr_t cursor = reinterpret_cast<uintptr_t>(&StoreBundle[0].pack_mask);
-        for (i32 count = 3; count != 0; --count, cursor += sizeof(STOREBUNDLE)) {
-            u32 *bundle_mask = reinterpret_cast<u32 *>(cursor);
-            if ((*bundle_mask & (1 << static_cast<i8>(message->field_0xfe))) == 0)
+        STOREBUNDLE *bundle = StoreBundle;
+        for (i32 count = 3; count != 0; --count, ++bundle) {
+            if ((bundle->pack_mask & (1 << static_cast<i8>(message->field_0xfe))) == 0)
                 continue;
             product.price = 0.0f;
-            NuIOS_GetInAppProductByID(reinterpret_cast<STOREBUNDLE *>(cursor - offsetof(STOREBUNDLE, pack_mask))->name,
-                                      reinterpret_cast<NuIOS_InAppProduct *>(&product));
+            NuIOS_GetInAppProductByID(bundle->name, reinterpret_cast<NuIOS_InAppProduct *>(&product));
             const f32 bundle_price = product.price;
             f32 pack_total = 0.0f;
             for (i32 index = 0; index < 11; ++index) {
-                if ((Store_IsPackUnlocked(index)) == 0 && ((*bundle_mask & (1u << index)) != 0) &&
-                    NuIOS_GetInAppProductByID(StorePack[index].product_id,
-                                              reinterpret_cast<NuIOS_InAppProduct *>(&product)))
+                if (GetBundlePackProduct(bundle, index, reinterpret_cast<NuIOS_InAppProduct *>(&product)))
                     pack_total += product.price;
             }
             if (!(pack_total > bundle_price))

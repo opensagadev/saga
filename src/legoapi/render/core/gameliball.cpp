@@ -20145,25 +20145,14 @@ i32 HitWallSpline() {
         dx = WallSplList[i].position.x - TerI->position.x;
         dz = WallSplList[i].position.z - TerI->position.z;
         const f32 along = edge.x * dx + edge.z * dz;
+        bool swept = false;
         if (along >= 0.0f) {
             const f32 side_x = WallSplList[i].position.x - (edge.x * along + TerI->position.x);
             const f32 side_z = WallSplList[i].position.z - (edge.z * along + TerI->position.z);
             const f32 padded_radius = TerI->collision_radius + 0.0005f;
             const f32 side_x_sq = side_x * side_x;
             const f32 side_z_sq = side_z * side_z;
-            if (side_x_sq + side_z_sq > padded_radius * padded_radius) {
-                const f32 pdx = WallSplList[i].position.x - TerI->position.x;
-                const f32 pdz = WallSplList[i].position.z - TerI->position.z;
-                const f32 distance_sq = pdx * pdx + pdz * pdz;
-                const f32 padded_radius = TerI->collision_radius + 0.0005f;
-                if (!(padded_radius * padded_radius >= distance_sq))
-                    continue;
-                normal.x = TerI->position.x - WallSplList[i].position.x;
-                normal.z = TerI->position.z - WallSplList[i].position.z;
-                NuVecNorm(&normal, &normal);
-                TerI->hit_type = 0x11;
-                TerI->hit_time = (NuFsqrt(distance_sq) - TerI->collision_radius) - 0.0005f;
-            } else {
+            if (!(side_x_sq + side_z_sq > padded_radius * padded_radius)) {
                 const f32 distance =
                     along - NuFsqrt((TerI->collision_radius * TerI->collision_radius - side_x_sq) - side_z_sq);
                 if (distance >= -0.0005f &&
@@ -20183,21 +20172,11 @@ i32 HitWallSpline() {
                     NuVecNorm(&normal, &normal);
                     TerI->hit_type = 1;
                     TerI->hit_time = time;
-                } else {
-                    const f32 pdx = WallSplList[i].position.x - TerI->position.x;
-                    const f32 pdz = WallSplList[i].position.z - TerI->position.z;
-                    const f32 distance_sq = pdx * pdx + pdz * pdz;
-                    const f32 padded_radius = TerI->collision_radius + 0.0005f;
-                    if (!(padded_radius * padded_radius >= distance_sq))
-                        continue;
-                    normal.x = TerI->position.x - WallSplList[i].position.x;
-                    normal.z = TerI->position.z - WallSplList[i].position.z;
-                    NuVecNorm(&normal, &normal);
-                    TerI->hit_type = 0x11;
-                    TerI->hit_time = (NuFsqrt(distance_sq) - TerI->collision_radius) - 0.0005f;
+                    swept = true;
                 }
             }
-        } else {
+        }
+        if (!swept) {
             const f32 pdx = WallSplList[i].position.x - TerI->position.x;
             const f32 pdz = WallSplList[i].position.z - TerI->position.z;
             const f32 distance_sq = pdx * pdx + pdz * pdz;

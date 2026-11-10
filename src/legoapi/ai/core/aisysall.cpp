@@ -11696,6 +11696,7 @@ __used__ static i32 Action_GoToLocator(AISYS *sys, AISCRIPTPROCESS *processor, A
                 continue;
             }
 
+            char *value;
             if (NuStrIStr(params[index], "name") != NULL || NuStrIStr(params[index], "teleport") != NULL) {
                 ++index;
                 if (index < param_count) {
@@ -11721,46 +11722,22 @@ __used__ static i32 Action_GoToLocator(AISYS *sys, AISCRIPTPROCESS *processor, A
                     packet->owner->apiobj.position.z = locator->position.z;
                     return 1;
                 }
-                continue;
-            }
-
-            if (NuStrIStr(params[index], "personal") != NULL) {
+            } else if (NuStrIStr(params[index], "personal") != NULL) {
                 use_personal_name = 1;
-                continue;
-            }
-            if (NuStrIStr(params[index], "indexed") != NULL) {
+            } else if (NuStrIStr(params[index], "indexed") != NULL) {
                 use_indexed_name = 1;
-                continue;
-            }
-
-            char *value = NuStrIStr(params[index], "random");
-            if (value != NULL) {
+            } else if ((value = NuStrIStr(params[index], "random")) != NULL) {
                 random_locator_count = AIParamToFloatEx(packet, processor, value + NuStrLen("random") + 1);
-                continue;
-            }
-            value = NuStrIStr(params[index], "waittime");
-            if (value != NULL) {
+            } else if ((value = NuStrIStr(params[index], "waittime")) != NULL) {
                 processor->action_timer = AIParamToFloatEx(packet, processor, value + NuStrLen("waittime") + 1);
-                continue;
-            }
-            value = NuStrIStr(params[index], "mintime");
-            if (value != NULL) {
+            } else if ((value = NuStrIStr(params[index], "mintime")) != NULL) {
                 minimum_time = AIParamToFloatEx(packet, processor, value + NuStrLen("mintime") + 1);
-                continue;
-            }
-            value = NuStrIStr(params[index], "maxtime");
-            if (value != NULL) {
+            } else if ((value = NuStrIStr(params[index], "maxtime")) != NULL) {
                 maximum_time = AIParamToFloatEx(packet, processor, value + NuStrLen("maxtime") + 1);
-                continue;
-            }
-            value = NuStrIStr(params[index], "goalrange");
-            if (value != NULL) {
+            } else if ((value = NuStrIStr(params[index], "goalrange")) != NULL) {
                 packet->movement_instruction_parameter =
                     AIParamToFloatEx(packet, processor, value + NuStrLen("goalrange") + 1);
-                continue;
-            }
-
-            if (NuStrICmp(params[index], "on_ground") == 0) {
+            } else if (NuStrICmp(params[index], "on_ground") == 0) {
                 processor->action_data_1 |= GO_TO_LOCATOR_ON_GROUND;
             } else if (NuStrICmp(params[index], "xz_rangecheck") == 0) {
                 processor->action_data_1 |= GO_TO_LOCATOR_XZ_RANGE_CHECK;

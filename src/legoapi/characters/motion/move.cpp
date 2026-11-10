@@ -1738,67 +1738,67 @@ static void JediLightCode(GameObject_s *object) {
             position.y = 0.5f * delta.y + object->apiobj.pos_y;
             position.z = 0.5f * delta.z + object->apiobj.pos_z;
             rtlDynamicSetPos(object->dynamic_light_id, &position);
-            return;
-        }
-        if (!(object->weapon_scale > 0.0f) || object->sabre_flags == 0)
-            return;
-        position = v000;
-        i32 point_count = 0;
-        for (i32 blade = 0; blade < 4; ++blade) {
-            if (object->apiobj.field_0x288 == 0)
-                break;
-            if (object->drawn_last_frame != 0) {
-                GAMECHARACTERDATA *data = GetGameCharacterData(object);
-                i32 first = data->streak_joints[blade][0];
-                if (first != -1 && object->apiobj.character_model->points_of_interest[first] != NULL) {
-                    i32 second = data->streak_joints[blade][1];
-                    if (second != -1 && object->apiobj.character_model->points_of_interest[second] != NULL) {
-                        point_count += 2;
-                        NuVecAdd(&position, &position, reinterpret_cast<NUVEC *>(&object->joint_matrices[first].m30));
-                        NuVecAdd(&position, &position, reinterpret_cast<NUVEC *>(&object->joint_matrices[second].m30));
+        } else if (object->weapon_scale > 0.0f && object->sabre_flags != 0) {
+            position = v000;
+            i32 point_count = 0;
+            for (i32 blade = 0; blade < 4; ++blade) {
+                if (object->apiobj.field_0x288 == 0)
+                    break;
+                if (object->drawn_last_frame != 0) {
+                    GAMECHARACTERDATA *data = GetGameCharacterData(object);
+                    i32 first = data->streak_joints[blade][0];
+                    if (first != -1 && object->apiobj.character_model->points_of_interest[first] != NULL) {
+                        i32 second = data->streak_joints[blade][1];
+                        if (second != -1 && object->apiobj.character_model->points_of_interest[second] != NULL) {
+                            point_count += 2;
+                            NuVecAdd(&position, &position,
+                                     reinterpret_cast<NUVEC *>(&object->joint_matrices[first].m30));
+                            NuVecAdd(&position, &position,
+                                     reinterpret_cast<NUVEC *>(&object->joint_matrices[second].m30));
+                        }
                     }
                 }
             }
+            if (point_count == 0)
+                return;
+            NuVecScale(&position, &position, 1.0f / point_count);
+            rtlDynamicEnable(object->dynamic_light_id, 1);
+            f32 radius = 3.0f * object->sabre_collision_radius * object->weapon_scale * object->apiobj.field_0xa8;
+            rtlDynamicSetRadii(object->dynamic_light_id, radius + 0.25f, radius + 0.5f);
+            f32 brightness = qrand() < 0x8000 ? 0.003921569f : 0.007843138f;
+            i32 blade = -1;
+            if (object->apiobj.field_0x27c != -1 && Cheat_IsOn(0x19))
+                blade = 0;
+            else if (object->apiobj.field_0x27c != -1 && Player_HasPurpleForce(object))
+                blade = 3;
+            else if (object->id == id_GRIEVOUS) {
+                colour.x = static_cast<f32>(static_cast<u32>(BladeTab[1].colour[0]));
+                colour.y = static_cast<f32>(static_cast<u32>(BladeTab[1].colour[1]));
+                colour.z = static_cast<f32>(static_cast<u32>(BladeTab[1].colour[2]));
+                NUVEC other;
+                other.x = static_cast<f32>(static_cast<u32>(BladeTab[2].colour[0]));
+                other.y = static_cast<f32>(static_cast<u32>(BladeTab[2].colour[1]));
+                other.z = static_cast<f32>(static_cast<u32>(BladeTab[2].colour[2]));
+                f32 phase = (1.0f + NU_SIN_LUT(static_cast<u16>(
+                                        static_cast<i32>(NuFmod(GameTimer.time_elapsed, 2.0f) * 0.5f * 65536.0f)))) *
+                            0.5f;
+                f32 red = ((other.x - colour.x) * phase + colour.x) * brightness;
+                f32 green = ((other.y - colour.y) * phase + colour.y) * brightness;
+                f32 blue = ((other.z - colour.z) * phase + colour.z) * brightness;
+                colour.x = red;
+                colour.y = green;
+                colour.z = blue;
+            } else
+                blade = static_cast<i8>(GetGameCharacterData(object)->field_0x117);
+            if (blade != -1) {
+                colour.x = static_cast<f32>(static_cast<u32>(BladeTab[blade].colour[0])) * brightness;
+                colour.y = static_cast<f32>(static_cast<u32>(BladeTab[blade].colour[1])) * brightness;
+                colour.z = static_cast<f32>(static_cast<u32>(BladeTab[blade].colour[2])) * brightness;
+            }
+            rtlDynamicSetColours(object->dynamic_light_id, &colour, NULL);
+            rtlDynamicSetColours(object->dynamic_light_id, &colour, NULL);
+            rtlDynamicSetPos(object->dynamic_light_id, &position);
         }
-        if (point_count == 0)
-            return;
-        NuVecScale(&position, &position, 1.0f / point_count);
-        rtlDynamicEnable(object->dynamic_light_id, 1);
-        f32 radius = 3.0f * object->sabre_collision_radius * object->weapon_scale * object->apiobj.field_0xa8;
-        rtlDynamicSetRadii(object->dynamic_light_id, radius + 0.25f, radius + 0.5f);
-        f32 brightness = qrand() < 0x8000 ? 0.003921569f : 0.007843138f;
-        i32 blade = -1;
-        if (object->apiobj.field_0x27c != -1 && Cheat_IsOn(0x19))
-            blade = 0;
-        else if (object->apiobj.field_0x27c != -1 && Player_HasPurpleForce(object))
-            blade = 3;
-        else if (object->id == id_GRIEVOUS) {
-            colour.x = static_cast<f32>(static_cast<u32>(BladeTab[1].colour[0]));
-            colour.y = static_cast<f32>(static_cast<u32>(BladeTab[1].colour[1]));
-            colour.z = static_cast<f32>(static_cast<u32>(BladeTab[1].colour[2]));
-            NUVEC other;
-            other.x = static_cast<f32>(static_cast<u32>(BladeTab[2].colour[0]));
-            other.y = static_cast<f32>(static_cast<u32>(BladeTab[2].colour[1]));
-            other.z = static_cast<f32>(static_cast<u32>(BladeTab[2].colour[2]));
-            f32 phase = (1.0f + NU_SIN_LUT(static_cast<u16>(
-                                    static_cast<i32>(NuFmod(GameTimer.time_elapsed, 2.0f) * 0.5f * 65536.0f)))) *
-                        0.5f;
-            f32 red = ((other.x - colour.x) * phase + colour.x) * brightness;
-            f32 green = ((other.y - colour.y) * phase + colour.y) * brightness;
-            f32 blue = ((other.z - colour.z) * phase + colour.z) * brightness;
-            colour.x = red;
-            colour.y = green;
-            colour.z = blue;
-        } else
-            blade = static_cast<i8>(GetGameCharacterData(object)->field_0x117);
-        if (blade != -1) {
-            colour.x = static_cast<f32>(static_cast<u32>(BladeTab[blade].colour[0])) * brightness;
-            colour.y = static_cast<f32>(static_cast<u32>(BladeTab[blade].colour[1])) * brightness;
-            colour.z = static_cast<f32>(static_cast<u32>(BladeTab[blade].colour[2])) * brightness;
-        }
-        rtlDynamicSetColours(object->dynamic_light_id, &colour, NULL);
-        rtlDynamicSetColours(object->dynamic_light_id, &colour, NULL);
-        rtlDynamicSetPos(object->dynamic_light_id, &position);
     }
 }
 
@@ -6143,14 +6143,10 @@ static void ForceCode(GameObject_s *object, i32 pressed, i32 held) {
     if ((static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->flags_094[1] & 0x80) != 0 ||
         object->field_0xe23_bit0 || object->character_context == 0x12)
         return;
-    bool start = false;
     if (object->apiobj.field_0x27d != 0 &&
-        (object->character_context == -1 || (CInfo[object->character_context].flags & 4) != 0)) {
-        if ((object->apiobj.is_player && pressed) || (object->pad_gamepad->allocated_5a & 4) != 0 ||
-            (held && previous_force))
-            start = true;
-    }
-    if (start) {
+        (object->character_context == -1 || (CInfo[object->character_context].flags & 4) != 0) &&
+        ((object->apiobj.is_player && pressed) || (object->pad_gamepad->allocated_5a & 4) != 0 ||
+         (held && previous_force))) {
         if (((object->pad_gamepad->allocated_5a & 4) == 0) || object->gizforce_target == NULL) {
             GizForce_FindBestForceTarget(WORLD->giz_force_sys, object);
         }
