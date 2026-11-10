@@ -7515,60 +7515,49 @@ extern "C" {
     }
 
     static inline void MusicPlayStream(i32 stream, i32 track, f32 seek_offset) {
-        NuSound3StopStereoStream(stream);
-        NuSound3PlayStereoV(NUSOUNDPLAYTOK_STEREOSTREAM, stream, NUSOUNDPLAYTOK_SAMPLE, track, NUSOUNDPLAYTOK_VOL, 0,
-                            NUSOUNDPLAYTOK_STARTOFFSET, static_cast<f64>(seek_offset), NUSOUNDPLAYTOK_ONESHOT,
-                            NUSOUNDPLAYTOK_END);
+        if (NOSOUND == 0 && NOMUSIC == 0) {
+            NuSound3StopStereoStream(stream);
+            NuSound3PlayStereoV(NUSOUNDPLAYTOK_STEREOSTREAM, stream, NUSOUNDPLAYTOK_SAMPLE, track, NUSOUNDPLAYTOK_VOL,
+                                0, NUSOUNDPLAYTOK_STARTOFFSET, static_cast<f64>(seek_offset), NUSOUNDPLAYTOK_ONESHOT,
+                                NUSOUNDPLAYTOK_END);
+            Music.secondary_stream = static_cast<i16>(stream);
+            Music.transition_frames = 0;
+        }
     }
 
     void MusicPreSeek(i32 track) {
-        if (NOSOUND != 0 || NOMUSIC != 0 || track < 0 || track >= SFX_MUSIC_COUNT) {
+        if (NOSOUND != 0 || NOMUSIC != 0 || track < 0) {
             return;
         }
-
-        const MusicPlaybackState state = Music.state;
-        if ((state & ~MUSIC_PLAYBACK_ACTIVE) == MUSIC_PLAYBACK_STOPPED &&
-            (track != Music.requested_track || Music.pause_requested)) {
-            const i16 transition_frames = Music.transition_frames;
-            const i32 primary_stream = Music.primary_stream;
+        if (track <= SFX_MUSIC_COUNT - 1 &&
+            (Music.state == MUSIC_PLAYBACK_ACTIVE || Music.state == MUSIC_PLAYBACK_STOPPED) &&
+            (Music.requested_track != track || Music.pause_requested)) {
             Music.resume_track = static_cast<i16>(track);
             Music.queued_track = static_cast<i16>(track);
             Music.requested_track = static_cast<i16>(track);
-            reinterpret_cast<u8 *>(&Music)[primary_stream + 0x12] = 0;
-            if (state == MUSIC_PLAYBACK_STOPPED || transition_frames >= 64) {
-                Music.pause_requested = false;
-                const f32 seek_offset = Music.seek_offset;
-                const i32 stream = 1 - primary_stream;
-                MusicPlayStream(stream, track, seek_offset);
-                Music.secondary_stream = static_cast<i16>(stream);
-                Music.transition_frames = 0;
-                Music.seek_offset = 0.0f;
-                if (track >= SFX_MUSIC_COUNT) {
-                    return;
-                }
-            } else {
+            reinterpret_cast<u8 *>(&Music)[Music.primary_stream + 0x12] = 0;
+            if (Music.transition_frames < 64 && Music.state != MUSIC_PLAYBACK_STOPPED) {
                 Music.pause_requested = true;
+            } else {
+                Music.pause_requested = false;
+                MusicPlayStream(1 - Music.primary_stream, track, Music.seek_offset);
+                Music.seek_offset = 0.0f;
             }
         }
-
-        if (static_cast<u16>(Music.state - MUSIC_PLAYBACK_DUAL_STREAM) < 3 &&
-            (track != Music.current_track || Music.pause_requested)) {
-            const i32 primary_stream = Music.primary_stream;
-            const i16 transition_frames = Music.transition_frames;
+        if (track <= SFX_MUSIC_COUNT - 1 &&
+            (Music.state == MUSIC_PLAYBACK_DUAL_STREAM || Music.state == 12 ||
+             Music.state == MUSIC_PLAYBACK_DUAL_STREAM_PENDING) &&
+            (Music.current_track != track || Music.pause_requested)) {
             Music.current_track = static_cast<i16>(track);
             Music.queued_track = static_cast<i16>(track);
             Music.requested_track = static_cast<i16>(track);
             Music.state = MUSIC_PLAYBACK_DUAL_STREAM;
-            reinterpret_cast<u8 *>(&Music)[primary_stream + 0x12] = 0;
-            if (transition_frames >= 64) {
+            reinterpret_cast<u8 *>(&Music)[Music.primary_stream + 0x12] = 0;
+            if (Music.transition_frames >= 64) {
                 Music.pause_requested = false;
-                const f32 seek_offset = Music.seek_offset;
-                if (NOSOUND == 0 && NOMUSIC == 0) {
-                    MusicPlayStream(primary_stream, track, seek_offset);
-                }
-                Music.secondary_stream = static_cast<i16>(primary_stream);
-                Music.transition_frames = 0;
+                MusicPlayStream(Music.primary_stream, track, Music.seek_offset);
                 Music.seek_offset = 0.0f;
+                Music.transition_frames = 0;
             } else {
                 Music.pause_requested = true;
             }
@@ -8375,37 +8364,40 @@ extern "C" {
 }
 
 void AddChunkToRenderStack(particlechunkrendertype_s *chunk, particlechunkrendertype_s **stack) {
+    particlechunkrendertype_s *current, *next;
     chunk->next = NULL;
     chunk->previous = NULL;
-
-    particlechunkrendertype_s *current = *stack;
-    if (current != NULL) {
-        const u16 priority = static_cast<u16>(chunk->render_priority);
-        const u16 current_priority = static_cast<u16>(current->render_priority);
-        if (priority <= current_priority &&
-            (priority != current_priority || chunk->effect->particle_type > current->effect->particle_type)) {
-            particlechunkrendertype_s *next = current->next;
-            while (next != NULL) {
-                const u16 next_priority = static_cast<u16>(next->render_priority);
-                if (next_priority <= priority &&
-                    (priority != next_priority || chunk->effect->particle_type <= next->effect->particle_type)) {
-                    break;
-                }
-                current = next;
-                next = next->next;
-            }
-            current->next = chunk;
-            chunk->previous = current;
-            chunk->next = next;
-            if (next != NULL) {
-                next->previous = chunk;
-            }
-            return;
-        }
+    current = *stack;
+    if (current == NULL) {
+        *stack = chunk;
+        return;
+    }
+    next = current->next;
+    if (static_cast<u16>(chunk->render_priority) > static_cast<u16>(current->render_priority)) {
         chunk->next = current;
         current->previous = chunk;
+        *stack = chunk;
+        return;
     }
-    *stack = chunk;
+    if (static_cast<u16>(chunk->render_priority) == static_cast<u16>(current->render_priority) &&
+        chunk->effect->particle_type <= current->effect->particle_type) {
+        chunk->next = current;
+        current->previous = chunk;
+        *stack = chunk;
+        return;
+    }
+    while (next != NULL && (static_cast<u16>(chunk->render_priority) < static_cast<u16>(next->render_priority) ||
+                            (static_cast<u16>(chunk->render_priority) == static_cast<u16>(next->render_priority) &&
+                             chunk->effect->particle_type > next->effect->particle_type))) {
+        current = next;
+        next = next->next;
+    }
+    current->next = chunk;
+    chunk->previous = current;
+    if (next != NULL) {
+        chunk->next = next;
+        next->previous = chunk;
+    }
 }
 
 void RemoveChunkFromRenderStack(particlechunkrendertype_s *chunk, particlechunkrendertype_s **stack) {

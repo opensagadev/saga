@@ -376,8 +376,8 @@ static void GizAction_SetAIState(GIZFLOW_s *, FLOWBOX_s *, char **params, int co
             named_object = GetNamedGameObject(WORLD->ai_sys, value + 10);
         }
         if ((value = NuStrIStr(params[index], "range")) != NULL) {
-            f32 range = NuAToF(value + 6);
-            range_squared = range * range;
+            range_squared = NuAToF(value + 6);
+            range_squared *= range_squared;
         } else if ((value = NuStrIStr(params[index], "type")) != NULL) {
             if (LevelCharacterTypeIDFn != NULL && LevelCharacterGlobalIDFn != NULL) {
                 const i32 local_type = static_cast<u8>(LevelCharacterTypeIDFn(value + 5));
@@ -393,7 +393,7 @@ static void GizAction_SetAIState(GIZFLOW_s *, FLOWBOX_s *, char **params, int co
         }
     }
 
-    if (state_name == NULL || (type_count == 0 && !(range_squared > 0.0f))) {
+    if (state_name == NULL || (type_count <= 0 && !(range_squared > 0.0f))) {
         if (named_object != NULL) {
             named_object->ai.script_process.next_state =
                 AIStateFind(state_name, named_object->ai.script_process.script);
@@ -415,20 +415,18 @@ static void GizAction_SetAIState(GIZFLOW_s *, FLOWBOX_s *, char **params, int co
         NUVEC difference;
         NuVecSub(&difference, &origin, &object->apiobj.position);
         f32 distance_squared = difference.x * difference.x + difference.y * difference.y + difference.z * difference.z;
-        if (type_count == 0) {
-            if (range_squared > distance_squared) {
-                object->ai.script_process.next_state = AIStateFind(state_name, object->ai.script_process.script);
-            }
-        } else {
+        if (type_count != 0) {
             for (i32 type_index = 0; type_index < type_count; ++type_index) {
                 if (object->id == types[type_index]) {
                     matching_type = 1;
                 }
             }
-            if (matching_type != 0 && (range_squared > distance_squared)) {
+            if (matching_type != 0 && range_squared > distance_squared) {
                 object->ai.script_process.next_state =
                     AIStateFind(state_name, object->apiobj.ai->script_process.script);
             }
+        } else if (range_squared > distance_squared) {
+            object->ai.script_process.next_state = AIStateFind(state_name, object->ai.script_process.script);
         }
     }
 }
@@ -511,7 +509,6 @@ static void GizAction_ChangeTechnoTgt(GIZFLOW_s *, FLOWBOX_s *, char **params, i
             techno->enabled = movement;
         }
         if (target_kind == -1) {
-            operator_object = NULL;
             Techno_FindOperator(techno->controlled_object, NULL, &operator_object);
             techno->controlled_object = NULL;
             NuStrCpy(techno->target_name, "");
@@ -523,7 +520,7 @@ static void GizAction_ChangeTechnoTgt(GIZFLOW_s *, FLOWBOX_s *, char **params, i
         }
         void *old_controlled = techno->controlled_object;
         NuStrCpy(old_name, techno->target_name);
-        i32 old_complete = (techno->flags & TECHNO_FLAG_COMPLETE) != 0;
+        u8 old_complete = (techno->flags >> 3) & 1;
         techno->controlled_object = NULL;
         NuStrNCpy(techno->target_name, target_name, 16);
         techno->target_mode = static_cast<u8>(target_kind);
@@ -533,9 +530,9 @@ static void GizAction_ChangeTechnoTgt(GIZFLOW_s *, FLOWBOX_s *, char **params, i
             techno->target_mode = 0;
             if (Technos_FindTgt(techno) == NULL) {
                 NuStrCpy(techno->target_name, old_name);
-                techno->controlled_object = old_controlled;
-                techno->target_mode = static_cast<u8>(target_kind);
                 techno->flags = (techno->flags & ~TECHNO_FLAG_COMPLETE) | (old_complete << 3);
+                techno->target_mode = static_cast<u8>(target_kind);
+                techno->controlled_object = old_controlled;
             }
         }
     }

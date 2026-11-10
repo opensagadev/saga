@@ -3632,12 +3632,12 @@ static __used__ CREATURE_EDITOR_REGPARM2 void *CreateCreature(i32 type, nuvec_s 
     if (type == -1) {
         return nullptr;
     }
-    NULISTHDR *free_creatures = reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x3691c);
-    CreatureEditorRecord *creature = (CreatureEditorRecord *)NuLinkedListGetHead(free_creatures);
+    CreatureEditorRecord *creature = (CreatureEditorRecord *)NuLinkedListGetHead(
+        reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x3691c));
     if (creature == nullptr) {
         return nullptr;
     }
-    NuLinkedListRemove(free_creatures, &creature->link);
+    NuLinkedListRemove(reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x3691c), &creature->link);
     NuLinkedListAppend(&aieditor->creatures, &creature->link);
     creature->character_type = type;
     creature->set = 0;
@@ -15136,67 +15136,74 @@ void pathEditor_Enter(void) {
         path->current_route = nullptr;
 }
 
+static EDLOCATORSET_s *locatorEditor_FindLocatorSet(char *name) {
+    EDLOCATORSET_s *set;
+    for (set = (EDLOCATORSET_s *)NuLinkedListGetHead(&aieditor->locator_sets); set != nullptr;
+         set = (EDLOCATORSET_s *)NuLinkedListGetNext(&aieditor->locator_sets, &set->link)) {
+        if (NuStrICmp(name, set->name) == 0)
+            return set;
+    }
+    return nullptr;
+}
+
 void locatorEditor_Enter(void) {
-    AIEDITOR_RENDER_STATE *const *state = &aieditor;
-    memset(&(*state)->locators, 0, 0x48);
-    for (i32 index = 0; index < 256; ++index) {
-        NuLinkedListAppend(&(*state)->free_locators, &(*state)->locator_pool[index].link);
-    }
-    memset(&(*state)->locator_sets, 0, 0x118);
-    for (i32 index = 0; index < 64; ++index) {
-        NuLinkedListAppend(&(*state)->free_locator_sets, &(*state)->locator_set_pool[index].link);
-    }
-    if ((*state)->ai_system != nullptr) {
-        for (i32 index = 0; index < (*state)->ai_system->locator_count; ++index) {
-            AILOCATOR *source = &(*state)->ai_system->locators[index];
-            i32 direction = source->direction;
-            EDLOCATOR_s *locator = (EDLOCATOR_s *)NuLinkedListGetHead(&(*state)->free_locators);
+    AILOCATOR *source;
+    AILOCATORSET *source_set;
+    EDLOCATOR_s *locator;
+    EDLOCATORSET_s *set;
+    EDAIPATH_s *path;
+    f32 offset;
+    i32 direction;
+    i32 i;
+    i32 member;
+    memset(&aieditor->locators, 0, 0x48);
+    for (i = 0; i < 256; ++i)
+        NuLinkedListAppend(&aieditor->free_locators, &aieditor->locator_pool[i].link);
+    memset(&aieditor->locator_sets, 0, 0x118);
+    for (i = 0; i < 64; ++i)
+        NuLinkedListAppend(&aieditor->free_locator_sets, &aieditor->locator_set_pool[i].link);
+    if (aieditor->ai_system != nullptr) {
+        for (i = 0; i < aieditor->ai_system->locator_count; ++i) {
+            source = &aieditor->ai_system->locators[i];
+            direction = source->direction;
+            locator = (EDLOCATOR_s *)NuLinkedListGetHead(&aieditor->free_locators);
             if (locator != nullptr) {
-                NuLinkedListRemove(&(*state)->free_locators, &locator->link);
-                NuLinkedListAppend(&(*state)->locators, &locator->link);
+                NuLinkedListRemove(&aieditor->free_locators, &locator->link);
+                NuLinkedListAppend(&aieditor->locators, &locator->link);
                 locator->position = source->position;
                 locator->direction = direction;
             }
             strcpy(locator->name, source->name);
-            EDAIPATH_s *path = pathEditor_GetPath((const char *)source->path_info.path);
-            for (f32 tolerance = 0.0f;; tolerance += 0.01f) {
-                pathEditor_OnPathCheck(&locator->position, (EDAIPATHCHECK_s *)locator->path_check, path, tolerance);
-                if (locator->on_path)
-                    break;
+            path = pathEditor_GetPath((const char *)source->path_info.path);
+            offset = 0.0f;
+            pathEditor_OnPathCheck(&locator->position, (EDAIPATHCHECK_s *)locator->path_check, path, offset);
+            while (!locator->on_path) {
+                offset += 0.01f;
+                pathEditor_OnPathCheck(&locator->position, (EDAIPATHCHECK_s *)locator->path_check, path, offset);
             }
             locator->path_angle = NuAngSub(locator->direction, locator->path_angle);
         }
-        for (i32 index = 0; index < (*state)->ai_system->locator_set_count; ++index) {
-            AILOCATORSET *source = &(*state)->ai_system->locator_sets[index];
-            EDLOCATORSET_s *set = (EDLOCATORSET_s *)NuLinkedListGetHead(&(*state)->free_locator_sets);
-            if (set == nullptr) {
-                continue;
+        for (i = 0; i < aieditor->ai_system->locator_set_count; ++i) {
+            source_set = &aieditor->ai_system->locator_sets[i];
+            set = (EDLOCATORSET_s *)NuLinkedListGetHead(&aieditor->free_locator_sets);
+            if (set != nullptr) {
+                NuLinkedListRemove(&aieditor->free_locator_sets, &set->link);
+                memset(set, 0, sizeof(*set));
+                NuLinkedListAppend(&aieditor->locator_sets, &set->link);
             }
-            NuLinkedListRemove(&(*state)->free_locator_sets, &set->link);
-            memset(set, 0, sizeof(*set));
-            NuLinkedListAppend(&(*state)->locator_sets, &set->link);
-            if (source != nullptr) {
-                strcpy(set->name, source->name);
-                for (i32 member = 0; member < source->locator_count; ++member) {
-                    set->locators[member] = &(*state)->locator_pool[source->locator_entries[member]];
-                }
+            if (source_set != nullptr && set != nullptr) {
+                strcpy(set->name, source_set->name);
+                for (member = 0; member < source_set->locator_count; ++member)
+                    set->locators[member] = &aieditor->locator_pool[source_set->locator_entries[member]];
             }
         }
     }
-    AIEDITOR_RENDER_STATE *context = *state;
-    if (context->current_locator_set != nullptr) {
-        strcpy(aieditorsettings.current_route_name, context->current_locator_set->name);
-    }
-    if (aieditorsettings.current_route_name[0] == 0) {
-        context->current_locator_set = nullptr;
-        return;
-    }
-    EDLOCATORSET_s *set = (EDLOCATORSET_s *)NuLinkedListGetHead(&context->locator_sets);
-    for (; set != nullptr; set = (EDLOCATORSET_s *)NuLinkedListGetNext(&(*state)->locator_sets, &set->link)) {
-        if (NuStrICmp(aieditorsettings.current_route_name, set->name) == 0)
-            break;
-    }
-    context->current_locator_set = set;
+    if (aieditor->current_locator_set != nullptr)
+        strcpy(aieditorsettings.current_route_name, aieditor->current_locator_set->name);
+    if (strlen(aieditorsettings.current_route_name) != 0)
+        aieditor->current_locator_set = locatorEditor_FindLocatorSet(aieditorsettings.current_route_name);
+    else
+        aieditor->current_locator_set = nullptr;
 }
 
 extern "C" {

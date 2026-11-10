@@ -417,35 +417,32 @@ void Batarangs_Draw() {
 
 void Batarangs_CheckLostData(void *data) {
     BATARANG_s *batarang = Batarang;
-    BATARANG_s *end = Batarang + 8;
-    do {
+    i32 i, j, k;
+    for (i = 0; i < 8; ++i, ++batarang) {
         if (batarang->owner == data) {
-        reset:
             batarang->field_0x7d = 0;
             batarang->active = 0;
             batarang->owner = NULL;
             batarang->cooldown = 0x32;
-        } else {
-            BATARANG_TARGET_s *target_data = batarang->targets;
-            for (i32 target = 0; target < batarang->active; ++target, ++target_data) {
-                if (target_data->object != data) {
+        } else if (batarang->active > 0) {
+            for (j = 0; j < batarang->active; ++j) {
+                if (batarang->targets[j].object != data)
                     continue;
+                if (data == batarang->owner) {
+                    batarang->field_0x7d = 0;
+                    batarang->active = 0;
+                    batarang->owner = NULL;
+                    batarang->cooldown = 0x32;
+                } else if (batarang->field_0x7d != 0) {
+                    batarang->targets[j].lost = 1;
+                } else {
+                    for (k = j; k < batarang->active - 1; ++k)
+                        batarang->targets[k] = batarang->targets[k + 1];
+                    --batarang->active;
                 }
-                if (batarang->owner == data) {
-                    goto reset;
-                }
-                if (batarang->field_0x7d != 0) {
-                    target_data->lost = 1;
-                    continue;
-                }
-                for (i32 move = target + 1; move < batarang->active; ++move) {
-                    batarang->targets[move - 1] = batarang->targets[move];
-                }
-                --batarang->active;
             }
         }
-        ++batarang;
-    } while (batarang != end);
+    }
 }
 
 i32 Batarang_GetObjectFromCharID(i32 character) {

@@ -6818,67 +6818,41 @@ __used__ static i32 Action_AddGameMsgCount(AISYS *sys, AISCRIPTPROCESS *processo
                                            i32 param_4, i32 param_5, f32 param_6) {
     (void)sys;
     (void)param_6;
+    GameObject_s *object;
+    NUVEC *position;
+    i32 count = 0;
+    i32 total = 0;
+    u8 red = 0;
+    u8 green = 0;
+    u8 blue = 0;
+    i32 index;
+    char *value;
+    GIZAIMESSAGE_s *message;
+    position = NULL;
+    object = NULL;
     if (param_5 != 0) {
-        GameObject_s *object = NULL;
-        if (packet != NULL && packet->owner != NULL) {
+        if (packet != NULL && packet->owner != NULL && packet->owner->apiobj.objptr != NULL)
             object = packet->owner->apiobj.objptr;
+        for (index = 0; index < param_4; ++index) {
+            if (NuStrICmp("mypos", params[index]) == 0 && object != NULL)
+                position = &object->apiobj.collision_position;
+            else if ((value = NuStrIStr(params[index], "total=")) != NULL)
+                total = static_cast<i32>(AIParamToFloat(processor, value + 6));
+            else if ((value = NuStrIStr(params[index], "count=")) != NULL)
+                count = static_cast<i32>(AIParamToFloat(processor, value + 6));
+            else if ((value = NuStrIStr(params[index], "messageval=")) != NULL) {
+                message = CheckGizAIMessage(gizaimessagesys, value + 11, NULL);
+                if (message != NULL)
+                    total = static_cast<i32>(message->value);
+            } else if ((value = NuStrIStr(params[index], "Red=")) != NULL)
+                red = static_cast<u8>(AIParamToFloat(processor, value + 4));
+            else if ((value = NuStrIStr(params[index], "Green=")) != NULL)
+                green = static_cast<u8>(AIParamToFloat(processor, value + 6));
+            else if ((value = NuStrIStr(params[index], "Blue=")) != NULL)
+                blue = static_cast<u8>(AIParamToFloat(processor, value + 5));
         }
-        if (param_4 > 0) {
-            NUVEC *position = NULL;
-            i32 total = 0;
-            i32 count = 0;
-            u8 red = 0;
-            u8 green = 0;
-            u8 blue = 0;
-
-            for (i32 index = 0; index < param_4; ++index) {
-                if (NuStrICmp("mypos", params[index]) == 0) {
-                    if (object != NULL) {
-                        position = &object->apiobj.collision_position;
-                    }
-                } else {
-                    char *value = NuStrIStr(params[index], "total=");
-                    if (value != NULL) {
-                        total = static_cast<i32>(AIParamToFloat(processor, value + 6));
-                    } else {
-                        value = NuStrIStr(params[index], "count=");
-                        if (value != NULL) {
-                            count = static_cast<i32>(AIParamToFloat(processor, value + 6));
-                        } else {
-                            value = NuStrIStr(params[index], "messageval=");
-                            if (value != NULL) {
-                                GIZAIMESSAGE_s *message = CheckGizAIMessage(gizaimessagesys, value + 11, NULL);
-                                if (message != NULL) {
-                                    total = static_cast<i32>(message->value);
-                                }
-                            } else {
-                                value = NuStrIStr(params[index], "Red=");
-                                if (value != NULL) {
-                                    red = static_cast<u8>(AIParamToFloat(processor, value + 4));
-                                } else {
-                                    value = NuStrIStr(params[index], "Green=");
-                                    if (value != NULL) {
-                                        green = static_cast<u8>(AIParamToFloat(processor, value + 6));
-                                    } else {
-                                        value = NuStrIStr(params[index], "Blue=");
-                                        if (value != NULL) {
-                                            blue = static_cast<u8>(AIParamToFloat(processor, value + 5));
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            if (count > total) {
-                return 1;
-            }
-            if (count == 0) {
-                return 1;
-            }
+        if (count != 0 && count <= total)
             AddGameMsgCount(position, count, total, red, green, blue, 0.75f);
-        }
     }
     return 1;
 }

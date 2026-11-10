@@ -572,25 +572,27 @@ void GizmoSwapBlowups(GIZMOBLOWUP_s *first, GIZMOBLOWUP_s *second) {
 }
 
 void GizmoSortBlowups(WORLDINFO_s *world) {
-    i32 blowup_index = 0;
+    i32 blowup_index = 0, type_index;
     GIZMOBLOWUPTYPE_s *type = world->gizmo_blowup_types;
-    auto world_gizmo_blowup_type_count = world->gizmo_blowup_type_count;
-    for (i32 type_index = 0; type_index < world_gizmo_blowup_type_count; ++type_index, ++type) {
+    GIZMOBLOWUP_s *blowup, *candidate, *end;
+    for (type_index = 0; type_index < world->gizmo_blowup_type_count; ++type_index, ++type) {
         while (blowup_index < world->gizmo_blowup_count) {
-            GIZMOBLOWUP_s *blowup = &world->gizmo_blowups[blowup_index];
+            blowup = &world->gizmo_blowups[blowup_index];
             if (blowup->type != type) {
-                GIZMOBLOWUP_s *candidate = blowup + 1;
-                GIZMOBLOWUP_s *end = world->gizmo_blowups + world->gizmo_blowup_count;
-                while (candidate != end && candidate->type != type) {
+                candidate = blowup + 1;
+                end = world->gizmo_blowups + world->gizmo_blowup_count;
+                for (;;) {
+                    if (candidate == end)
+                        goto next_type;
+                    if (candidate->type == type)
+                        break;
                     ++candidate;
-                }
-                if (candidate == end) {
-                    break;
                 }
                 GizmoSwapBlowups(blowup, candidate);
             }
             ++blowup_index;
         }
+    next_type:;
     }
 }
 

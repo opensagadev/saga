@@ -1998,7 +1998,9 @@ void LevelObjects_InitForLevel(WORLDINFO_s *world) {
             KNOBS = object_index;
         }
 
-        NUGSCN *scene = NULL;
+        NUGSCN *scene;
+        i32 found = 0;
+        i32 area_override = 0;
         switch (ObjTabList[object_index].kind) {
             case LEVEL_OBJECT_SCENE_LEVEL:
                 scene = world->current_gscn;
@@ -2009,12 +2011,15 @@ void LevelObjects_InitForLevel(WORLDINFO_s *world) {
                 break;
 
             case LEVEL_OBJECT_SCENE_CHARACTER_ICON:
-                for (i32 character_id = 0; character_id < CHARCOUNT; ++character_id) {
+                for (i32 character_id = 0; !found && character_id < CHARCOUNT; ++character_id) {
                     scene = IconScene_FindById(character_id);
-                    if (scene != NULL && (NuSpecialFind(scene, &world->lev_objs[object_index].special,
-                                                        ObjTabList[object_index].name, 1) != 0)) {
-                        goto object_resolved;
+                    if (scene != NULL && NuSpecialFind(scene, &world->lev_objs[object_index].special,
+                                                       ObjTabList[object_index].name, 1) != 0) {
+                        found = 1;
                     }
+                }
+                if (found) {
+                    goto object_resolved;
                 }
                 scene = big_icon_scene != NULL ? big_icon_scene : world->icons_gscn;
                 break;
@@ -2033,23 +2038,23 @@ void LevelObjects_InitForLevel(WORLDINFO_s *world) {
 
             case LEVEL_OBJECT_SCENE_THINGS:
             default:
-                if (area_scene != NULL && world->area != NULL &&
+                scene = area_scene;
+                if (scene != NULL && world->area != NULL &&
                     (world->area->flags & AREAFLAG_OVERRIDE_THINGS_SCENE) != 0) {
-                    if (NuSpecialFind(area_scene, &world->lev_objs[object_index].special, ObjTabList[object_index].name,
-                                      1) == 0) {
-                        NuSpecialFind(things_scene, &world->lev_objs[object_index].special,
-                                      ObjTabList[object_index].name, 1);
-                    }
-                    goto object_resolved;
+                    area_override = 1;
+                } else {
+                    scene = things_scene;
                 }
-                scene = things_scene;
                 break;
         }
 
         if (scene == NULL) {
             continue;
         }
-        NuSpecialFind(scene, &world->lev_objs[object_index].special, ObjTabList[object_index].name, 1);
+        if (NuSpecialFind(scene, &world->lev_objs[object_index].special, ObjTabList[object_index].name, 1) == 0 &&
+            area_override != 0) {
+            NuSpecialFind(things_scene, &world->lev_objs[object_index].special, ObjTabList[object_index].name, 1);
+        }
 
     object_resolved:
         world->lev_objs[object_index].active =

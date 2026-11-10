@@ -575,52 +575,48 @@ void Collection_GetPos(COLLECTION_s *collection, i32 id, float *x, float *y) {
 }
 
 COLLECTID *CollectIDUnlocked(i32 id) {
+    COLLECTID *entry;
     i32 index = InCollectList_Index(id, CollectList, CollectCount);
-    if (index == -1) {
-        return NULL;
-    }
-    if (Game_CharacterSave == NULL || (Game_CharacterSave[id] & SAVE_CHARACTER_UNLOCKED) == 0) {
-        COLLECTID *entry = &CollectList[index];
-        switch (entry->type) {
-            case 0:
-                break;
-            case 2:
-                if (static_cast<i8>(entry->field2_0x3) == -1 ||
-                    Game_AreaSave[static_cast<i8>(entry->field2_0x3)].area_complete == 0) {
-                    return NULL;
-                }
-                break;
-            case 3:
-                if (Episodes_Completed() != EPISODECOUNT) {
-                    return NULL;
-                }
-                break;
-            case 4:
-                if (AllMiniKitsDone(Game_AreaSave) == 0) {
-                    return NULL;
-                }
-                break;
-            case 6:
-                if (Game_CompletionSave == NULL ||
-                    reinterpret_cast<STATUSCOLLECT_s *>(Game_CompletionSave)->gold_bricks < entry->field6_0xa) {
-                    return NULL;
-                }
-                break;
-            case 7:
-                if (Game_100PercentComplete() == 0) {
-                    return NULL;
-                }
-                break;
-            case 8:
-                if (!Store_IsPackUnlocked(static_cast<i8>(entry->field2_0x3))) {
-                    return NULL;
-                }
-                break;
-            default:
-                return NULL;
+    i32 unlocked = 0;
+    i32 area;
+    if (index != -1) {
+        if (Game_CharacterSave != NULL && (Game_CharacterSave[id] & SAVE_CHARACTER_UNLOCKED) != 0) {
+            unlocked = 1;
+        } else {
+            entry = &CollectList[index];
+            switch (entry->type) {
+                case 0:
+                    unlocked = 1;
+                    break;
+                case 2:
+                    area = static_cast<i8>(entry->field2_0x3);
+                    if (area != -1 && Game_AreaSave[area].area_complete != 0)
+                        unlocked = 1;
+                    break;
+                case 3:
+                    if (Episodes_Completed() == EPISODECOUNT)
+                        unlocked = 1;
+                    break;
+                case 6:
+                    if (Game_CompletionSave != NULL &&
+                        reinterpret_cast<STATUSCOLLECT_s *>(Game_CompletionSave)->gold_bricks >= entry->field6_0xa)
+                        unlocked = 1;
+                    break;
+                case 7:
+                    unlocked = Game_100PercentComplete();
+                    break;
+                case 4:
+                    unlocked = AllMiniKitsDone(Game_AreaSave);
+                    break;
+                case 8:
+                    unlocked = Store_IsPackUnlocked(static_cast<i8>(entry->field2_0x3));
+                    break;
+            }
         }
+        if (unlocked != 0)
+            return &CollectList[index];
     }
-    return &CollectList[index];
+    return NULL;
 }
 
 i32 Collection_Got(i32 id) {

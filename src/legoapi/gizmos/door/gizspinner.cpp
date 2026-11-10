@@ -438,25 +438,32 @@ void GizSpinner_SetVisibility(GIZMO *gizmo, i32 visible) {
 i32 GizSpinner_UsingSpecial(GIZMO **results, void *world_ptr, i32 capacity, char *name) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
     i32 count = 0;
-    if (world != NULL && results != NULL && world->spinners != NULL) {
-        nuhspecial_s special;
-        NuSpecialFind(world->current_gscn, &special, name, 0);
-        if (NuSpecialExistsFn(&special) != 0) {
-            i32 type_id = -1;
-            GIZSPINNER_s *spinners = world->spinners;
-            for (i32 index = 0; index < world->current_level->max_spinners && count < capacity; ++index) {
-                if ((world->spinners[index].flags & GIZSPINNER_FLAG_VALID) == 0) {
-                    continue;
-                }
-                for (GAMEANIMOBJ_s *object = spinners[index].anim_set->objects; object != NULL; object = object->next) {
-                    if (NuSpecialCompare(&special, &object->special) != 0) {
-                        GIZMO *gizmo = GizmoFindByName(world->gizmo_sys, type_id, name);
-                        if (gizmo != NULL) {
-                            results[count++] = gizmo;
-                            type_id = gizmo->type_id;
-                            break;
-                        }
-                    }
+    i32 type_id = -1;
+    i32 index;
+    nuhspecial_s special;
+    GIZSPINNER_s *cached_spinner;
+    if (results == NULL || world == NULL || world->spinners == NULL)
+        return 0;
+    NuSpecialFind(world->current_gscn, &special, name, 0);
+    if (NuSpecialExistsFn(&special) == 0)
+        return 0;
+    cached_spinner = world->spinners;
+    for (index = 0; index < world->current_level->max_spinners; ++index, ++cached_spinner) {
+        GAMEANIMOBJ_s *object;
+        i32 searching;
+        if (count >= capacity)
+            break;
+        if ((world->spinners[index].flags & GIZSPINNER_FLAG_VALID) == 0)
+            continue;
+        object = cached_spinner->anim_set->objects;
+        searching = 1;
+        for (; object != NULL && searching != 0; object = object->next) {
+            if (NuSpecialCompare(&special, &object->special) != 0) {
+                GIZMO *gizmo = GizmoFindByName(world->gizmo_sys, type_id, name);
+                if (gizmo != NULL) {
+                    type_id = gizmo->type_id;
+                    results[count++] = gizmo;
+                    searching = 0;
                 }
             }
         }
