@@ -268,43 +268,33 @@ static void GizPanel_Update(void *world_ptr, void *, float delta_time) {
         if ((panel.flags & GIZPANEL_FLAG_TRACK_PLAYER) != 0) {
             const f32 maximum_distance = (panel.flags & GIZPANEL_FLAG_PLAYER_NEAR) != 0 ? 1.1f * 1.1f : 0.9f * 0.9f;
             f32 nearest_distance = 1000000000.0f;
-#define CONSIDER_PANEL_PLAYER(player_index)                                                                            \
-    do {                                                                                                               \
-        GameObject_s *candidate = players[player_index];                                                               \
-        if (candidate != NULL && (candidate->apiobj.flags_high & 0x10) != 0 && (candidate->apiobj.field_0x287 == 0)) { \
-            panel_position = panel.position;                                                                           \
-            if (panel.model_variant == 2) {                                                                            \
-                panel_position.y += 0.245f;                                                                            \
-                panel_position.z -= 0.19f;                                                                             \
-            } else if (panel.model_variant == 3) {                                                                     \
-                panel_position.y += 0.34f;                                                                             \
-                panel_position.z -= 0.17f;                                                                             \
-            }                                                                                                          \
-            const f32 distance = NuVecDistSqr(&panel_position, &candidate->apiobj.collision_position, &direction);     \
-            if (distance < nearest_distance && distance < maximum_distance) {                                          \
-                nearest_distance = distance;                                                                           \
-                player_direction = direction;                                                                          \
-                nearest_player = players[player_index];                                                                \
-            } else if (player_index == 0) {                                                                            \
-                nearest_player = NULL;                                                                                 \
-                nearest_distance = 1000000000.0f;                                                                      \
-            }                                                                                                          \
-        } else if (player_index == 0) {                                                                                \
-            nearest_player = NULL;                                                                                     \
-            nearest_distance = 1000000000.0f;                                                                          \
-        }                                                                                                              \
-    } while (0)
-
-            CONSIDER_PANEL_PLAYER(0);
-            CONSIDER_PANEL_PLAYER(1);
-            CONSIDER_PANEL_PLAYER(2);
-            CONSIDER_PANEL_PLAYER(3);
-            CONSIDER_PANEL_PLAYER(4);
-            CONSIDER_PANEL_PLAYER(5);
-            CONSIDER_PANEL_PLAYER(6);
-            CONSIDER_PANEL_PLAYER(7);
-
-#undef CONSIDER_PANEL_PLAYER
+            for (i32 player_index = 0; player_index < 8; ++player_index) {
+                GameObject_s *candidate = players[player_index];
+                if (candidate != NULL && (candidate->apiobj.flags_high & 0x10) != 0 &&
+                    candidate->apiobj.field_0x287 == 0) {
+                    panel_position = panel.position;
+                    if (panel.model_variant == 2) {
+                        panel_position.y += 0.245f;
+                        panel_position.z -= 0.19f;
+                    } else if (panel.model_variant == 3) {
+                        panel_position.y += 0.34f;
+                        panel_position.z -= 0.17f;
+                    }
+                    const f32 distance =
+                        NuVecDistSqr(&panel_position, &candidate->apiobj.collision_position, &direction);
+                    if (distance < nearest_distance && distance < maximum_distance) {
+                        nearest_distance = distance;
+                        player_direction = direction;
+                        nearest_player = players[player_index];
+                    } else if (player_index == 0) {
+                        nearest_player = NULL;
+                        nearest_distance = 1000000000.0f;
+                    }
+                } else if (player_index == 0) {
+                    nearest_player = NULL;
+                    nearest_distance = 1000000000.0f;
+                }
+            }
         }
 
         if (nearest_player == NULL) {
