@@ -671,12 +671,14 @@ void ProcessGizFlow(GIZFLOW_s *system, float) {
 }
 
 static i32 ProcessGizmoFlowBox(GIZFLOW_s *system, FLOWBOX_s *box, u8) {
-    FLOWBOX_s **parents = box->parents;
-    u8 *outputs = box->output_indices;
-    for (i32 i = 0; i < box->parent_count; ++i) {
-        FLOWBOX_s *parent = parents[i];
-        if (!flowboxtypes[parent->type].check_output(system, parent, outputs[i]))
-            return 0;
+    if (box->parent_count != 0) {
+        FLOWBOX_s **parents = box->parents;
+        u8 *outputs = box->output_indices;
+        for (i32 i = 0; i < box->parent_count; ++i, ++parents, ++outputs) {
+            FLOWBOX_s *parent = *parents;
+            if (!flowboxtypes[parent->type].check_output(system, parent, *outputs))
+                return 0;
+        }
     }
     CheckIfParentsFinished(system, box);
     if ((box->state_flags_high & 0x10) != 0 || ((box->state_flags_high & 0x40) == 0 && FreePlay == 0) ||
@@ -689,12 +691,14 @@ static i32 ProcessGizmoFlowBox(GIZFLOW_s *system, FLOWBOX_s *box, u8) {
 }
 
 static i32 ProcessActionFlowBox(GIZFLOW_s *system, FLOWBOX_s *box, u8) {
-    u8 *outputs = box->output_indices;
-    FLOWBOX_s **parents = box->parents;
-    for (i32 i = 0; i < box->parent_count; ++i) {
-        FLOWBOX_s *parent = parents[i];
-        if (!flowboxtypes[parent->type].check_output(system, parent, outputs[i]))
-            return 0;
+    if (box->parent_count != 0) {
+        FLOWBOX_s **parents = box->parents;
+        u8 *outputs = box->output_indices;
+        for (i32 i = 0; i < box->parent_count; ++i, ++parents, ++outputs) {
+            FLOWBOX_s *parent = *parents;
+            if (!flowboxtypes[parent->type].check_output(system, parent, *outputs))
+                return 0;
+        }
     }
     PerformActionFlowBox(system, box);
     return 1;

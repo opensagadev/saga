@@ -5047,13 +5047,12 @@ extern "C" {
     __attribute__((visibility("hidden"))) void tpentPropOnEnter(eduimenu_s *menu, eduiitem_s *item,
                                                                 unsigned int buttons) {
         void *original = *(void **)((char *)item + 0x0c);
+        NuStrCpy(*(char **)((char *)original + 0x64), (char *)item + 0x4c);
         void (*callback)(void *, void *, unsigned int) =
             *(void (**)(void *, void *, unsigned int))((char *)original + 0x78);
-        eduimenu_s *parent = *(eduimenu_s **)((char *)menu + 0x40);
-
-        NuStrCpy(*(char **)((char *)original + 0x64), (char *)item + 0x4c);
         if (callback)
-            callback(parent, original, buttons);
+            callback(*(eduimenu_s **)((char *)menu + 0x40), original, buttons);
+        eduimenu_s *parent = *(eduimenu_s **)((char *)menu + 0x40);
         eduiMenuDetach(menu);
         eduiMenuDestroy(menu);
         if (parent)
@@ -5062,13 +5061,11 @@ extern "C" {
 
     __attribute__((visibility("hidden"))) void tpentOnEnter(eduimenu_s *menu, eduiitem_s *item, unsigned int buttons) {
         void *original = *(void **)((char *)item + 0x0c);
+        NuStrCpy((char *)original + 0x4c, (char *)item + 0x4c);
         void (*callback)(void *, void *, unsigned int) =
             *(void (**)(void *, void *, unsigned int))((char *)original + 0x15c);
-        void *parent = *(void **)((char *)menu + 0x40);
-
-        NuStrCpy((char *)original + 0x4c, (char *)item + 0x4c);
         if (callback)
-            callback(parent, original, buttons);
+            callback(*(void **)((char *)menu + 0x40), original, buttons);
         eduiMenuDetach(menu);
         eduiMenuDestroy(menu);
     }
@@ -6389,15 +6386,16 @@ i32 EdFileClose() {
         EdFileFlushBuffer();
     }
 
-    if (edfile_media != 1) {
-        return 0;
+    switch (edfile_media) {
+        case 0:
+            return 0;
+        case 1:
+            NuFileClose(edfile_handle);
+            edfile_handle = -1;
+            edfile_media = 0;
+            return 1;
     }
-
-    NuFileClose(edfile_handle);
-    edfile_handle = -1;
-    edfile_media = 0;
-
-    return 1;
+    return 0;
 }
 
 void EdFileWrite(void *data, i32 len) {
@@ -6589,7 +6587,7 @@ i32 EdFileBackup(char *source, char *destination) {
     if (remaining > 0) {
         NUFILE output = NuFileOpen(destination, NUFILE_WRITE);
         NUFILE input = NuFileOpen(source, NUFILE_READ);
-        if (output > 0 && input > 0) {
+        if (input > 0 && output > 0) {
             while (remaining > 0) {
                 i32 size = MIN(static_cast<i32>(remaining), 0x1000);
                 NuFileRead(input, edfile_buffer, size);
@@ -6600,10 +6598,10 @@ i32 EdFileBackup(char *source, char *destination) {
             NuFileClose(output);
             return 1;
         }
-        if (output > 0)
-            NuFileClose(output);
         if (input > 0)
             NuFileClose(input);
+        if (output > 0)
+            NuFileClose(output);
     }
     return 0;
 }

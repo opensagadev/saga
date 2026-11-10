@@ -64,10 +64,8 @@ static void SuperCarry_PartImpact(PART_s *part) {
         intensity = 1.0f;
     else
         intensity *= 0.25f;
-    if (intensity > 0.0f) {
-        const i32 axis = qrand() > 0x7fff ? 2 : 0;
-        GameCam_Judder(NULL, intensity * 0.3f, axis, &part->position);
-    }
+    if (intensity > 0.0f)
+        GameCam_Judder(NULL, intensity * 0.3f, qrand() < 0x8000 ? 0 : 2, &part->position);
 }
 
 // Original 0x4fabc0, 347 bytes. The original returns an integer.

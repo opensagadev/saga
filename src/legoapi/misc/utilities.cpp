@@ -1174,18 +1174,20 @@ f32 RatioBetweenEdgesXZ(nuvec_s *point, nuvec_s *edge_a0, nuvec_s *edge_a1, nuve
 }
 
 i32 LineIntersectXY(nuvec_s *a, nuvec_s *b, nuvec_s *c, nuvec_s *d, nuvec_s *first, nuvec_s *second) {
-    const f32 ax = a->x, ay = a->y;
-    const f32 dx = b->x - ax, dy = b->y - ay;
-    const f32 ex = d->x - c->x, ey = d->y - c->y;
-    const f32 denominator = ey * dx - ex * dy;
-    if (denominator == 0.0f)
+    f32 t_numerator = (d->x - c->x) * (a->y - c->y) - (d->y - c->y) * (a->x - c->x);
+    f32 t_denominator = (d->y - c->y) * (b->x - a->x) - (d->x - c->x) * (b->y - a->y);
+    f32 u_numerator = (b->x - a->x) * (a->y - c->y) - (b->y - a->y) * (a->x - c->x);
+    f32 u_denominator = (d->y - c->y) * (b->x - a->x) - (d->x - c->x) * (b->y - a->y);
+
+    if (t_numerator == 0.0f && t_denominator == 0.0f && u_numerator == 0.0f && u_denominator == 0.0f)
         return 0;
-    const f32 ox = ax - c->x, oy = ay - c->y;
-    const f32 t = (ex * oy - ey * ox) / denominator;
-    const f32 u = (oy * dx - ox * dy) / denominator;
+    if (t_denominator == 0.0f || u_denominator == 0.0f)
+        return 0;
+    f32 t = t_numerator / t_denominator;
+    f32 u = u_numerator / u_denominator;
     if (first != NULL) {
-        first->x = dx * t + ax;
-        first->y = dy * t + ay;
+        first->x = (b->x - a->x) * t + a->x;
+        first->y = (b->y - a->y) * t + a->y;
     }
     if (second != NULL) {
         second->x = (d->x - c->x) * u + c->x;

@@ -888,11 +888,11 @@ static void GizObstacles_PostLoad(void *world_ptr, void *data) {
         return;
     }
 
-    for (i32 index = 0; index < obstacle_sys->count; ++index) {
-        GIZOBSTACLE_s &obstacle = obstacle_sys->obstacles[index];
-        if ((obstacle.runtime_flags & GIZOBSTACLE_RUNTIME_FLAG_PENDING_BLOWUP_TYPE) != 0) {
-            obstacle.blowup_type = static_cast<i16>(GizmoBlowupGetTypeFromNameTableId(world, obstacle.blowup_type));
-            obstacle.runtime_flags &= static_cast<u8>(~GIZOBSTACLE_RUNTIME_FLAG_PENDING_BLOWUP_TYPE);
+    GIZOBSTACLE_s *obstacle = obstacle_sys->obstacles;
+    for (i32 index = 0; index < obstacle_sys->count; ++index, ++obstacle) {
+        if ((obstacle->runtime_flags & GIZOBSTACLE_RUNTIME_FLAG_PENDING_BLOWUP_TYPE) != 0) {
+            obstacle->blowup_type = static_cast<i16>(GizmoBlowupGetTypeFromNameTableId(world, obstacle->blowup_type));
+            obstacle->runtime_flags &= static_cast<u8>(~GIZOBSTACLE_RUNTIME_FLAG_PENDING_BLOWUP_TYPE);
         }
     }
 }
@@ -980,12 +980,12 @@ static i32 GizObstacle_PosWithinBox(GIZOBSTACLE_s *obstacle, NUVEC *position) {
 
     NUVEC local_position;
     NuVecSub(&local_position, position, &obstacle->secondary_position);
-    NuVecRotateY(&local_position, &local_position, -obstacle->trigger_box_yaw);
-    return local_position.x >= -obstacle->trigger_box_half_extents.x &&
-           local_position.x <= obstacle->trigger_box_half_extents.x && local_position.y >= 0.0f &&
-           local_position.y <= obstacle->trigger_box_half_extents.y &&
-           local_position.z >= -obstacle->trigger_box_half_extents.z &&
-           local_position.z <= obstacle->trigger_box_half_extents.z;
+    NuVecRotateY(&local_position, &local_position, -static_cast<u16>(obstacle->trigger_box_yaw));
+    return local_position.x <= obstacle->trigger_box_half_extents.x &&
+           local_position.x >= -obstacle->trigger_box_half_extents.x &&
+           local_position.y <= obstacle->trigger_box_half_extents.y && local_position.y >= 0.0f &&
+           local_position.z <= obstacle->trigger_box_half_extents.z &&
+           local_position.z >= -obstacle->trigger_box_half_extents.z;
 }
 
 void GizObstacle_Stop(GIZOBSTACLE_s *obstacle) {

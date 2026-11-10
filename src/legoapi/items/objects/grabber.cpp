@@ -234,9 +234,9 @@ static void Grabber_SetVictimPos(GRABBER_s *grabber) {
         GameObject_s *victim = grabber->victim;
         if (grabber->character_id == id_GRABMAGNET) {
             f32 fraction = victim->context_animation_timer / victim->airborne_action_duration;
+            NUVEC start = victim->external_force;
             if (fraction > 1.0f)
                 fraction = 1.0f;
-            NUVEC start = victim->external_force;
             victim->apiobj.position.x = start.x + (position.x - start.x) * fraction;
             victim->apiobj.position.y = start.y + (position.y - start.y) * fraction;
             victim->apiobj.position.z = start.z + (position.z - start.z) * fraction;

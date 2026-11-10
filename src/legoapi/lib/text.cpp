@@ -654,23 +654,24 @@ void Text_InitTable(TEXTENTRY *entry, i32 first, i32 last) {
 }
 
 void Text_InsertCommasIntoNumber(char *number, char *text, i32 length) {
-    char separator;
+    char separator = ',';
+    i32 count;
     if (Text_Language == 2) {
         separator = ' ';
-    } else if (Text_Language == 1 || Text_Language == 18 || Text_Language == 0) {
-        separator = ',';
-    } else {
+    } else if (Text_Language != 1 && Text_Language != 18 && Text_Language != 0) {
         separator = '.';
     }
 
     if (length < 0) {
-        length = NuStrLen(number);
+        count = NuStrLen(number);
+    } else {
+        count = length;
     }
 
     i32 output = 0;
-    for (i32 digit = 0; digit < length; ++digit) {
+    for (i32 digit = 0; digit < count; ++digit) {
+        const i32 remaining = count - digit - 1;
         text[output++] = number[digit];
-        const i32 remaining = length - digit - 1;
         if (remaining != 0 && remaining % 3 == 0) {
             text[output++] = separator;
         }
@@ -789,24 +790,26 @@ void Text_ExpandAllButtonStrings(char *input, char *output) {
 }
 
 i32 Text_StripComments(char *text, char *dest, i32 param) {
+    i32 count = 0;
     char *end = text + NuStrLen(text);
-    char *out = dest;
+
     while (text <= end) {
         char c = *text;
-        if (c == '#' || c == ';' || (c == '/' && (c = *++text) == '/')) {
-            c = *++text;
-            while (c != '\r' && c != '\0' && c != '\n') {
-                c = *++text;
+        if (c == ';' || c == '#' || (c == '/' && *++text == '/')) {
+            ++text;
+            while ((c = *text) != '\r' && c != '\n' && c != '\0') {
+                ++text;
             }
         }
-        if (param != 0 && (c == ',' || c == '=')) {
+        c = *text++;
+        if (param != 0 && (c == '=' || c == ',')) {
             c = ' ';
         }
-        *out++ = c;
-        text++;
+        *dest++ = c;
+        ++count;
     }
-    *out = '\0';
-    return (i32)(out - dest);
+    *dest = '\0';
+    return count;
 }
 
 void IntroText_SetTextID(i32 id) {

@@ -286,12 +286,11 @@ void Minicam_ClearDeltas() {
 void Minicam_ResetForNextCommand() {
     Minicam_ClearDeltas();
 
-    i32 count = 0;
-    for (i32 i = MiniCam.current_command + 1; i < MiniCam.command_count; ++i) {
-        MiniCam.commands[count++] = MiniCam.commands[i];
+    i32 i;
+    for (i = 0; MiniCam.current_command + i + 1 < MiniCam.command_count; i++) {
+        MiniCam.commands[i] = MiniCam.commands[MiniCam.current_command + i + 1];
     }
-
-    MiniCam.command_count = static_cast<u8>(count);
+    MiniCam.command_count = static_cast<u8>(i);
     memset(&MiniCam.commands[MiniCam.command_count], 0,
            static_cast<usize>(32 - MiniCam.command_count) * sizeof(MINICAMCOMMAND_s));
     MiniCam.current_command = 0;

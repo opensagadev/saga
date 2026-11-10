@@ -3077,31 +3077,27 @@ static void pftaEnd(nufpar_s *parser) {
 }
 
 static void transposeClipPlanes(NUFRUSTRUM *frustum) {
-    f32 cam_a = cam_plane.a;
-    frustum->transposed_planes[3] = cam_a;
-    f32 cam_d = cam_plane.d;
-    f32 cam_c = cam_plane.c;
-    f32 cam_b = cam_plane.b;
     NUPLANE *planes = frustum->planes;
-    frustum->transposed_planes[7] = cam_b;
-    frustum->transposed_planes[11] = cam_c;
-    frustum->transposed_planes[15] = cam_d;
-    frustum->transposed_planes[16] = cam_a;
-    frustum->transposed_planes[20] = cam_b;
-    frustum->transposed_planes[24] = cam_c;
-    frustum->transposed_planes[28] = cam_d;
-    frustum->transposed_planes[17] = cam_a;
-    frustum->transposed_planes[21] = cam_b;
-    frustum->transposed_planes[25] = cam_c;
-    frustum->transposed_planes[29] = cam_d;
-    frustum->transposed_planes[18] = cam_a;
-    frustum->transposed_planes[22] = cam_b;
-    frustum->transposed_planes[26] = cam_c;
-    frustum->transposed_planes[30] = cam_d;
-    frustum->transposed_planes[19] = cam_a;
-    frustum->transposed_planes[23] = cam_b;
-    frustum->transposed_planes[27] = cam_c;
-    frustum->transposed_planes[31] = cam_d;
+    frustum->transposed_planes[3] = cam_plane.a;
+    frustum->transposed_planes[7] = cam_plane.b;
+    frustum->transposed_planes[11] = cam_plane.c;
+    frustum->transposed_planes[15] = cam_plane.d;
+    frustum->transposed_planes[16] = cam_plane.a;
+    frustum->transposed_planes[20] = cam_plane.b;
+    frustum->transposed_planes[24] = cam_plane.c;
+    frustum->transposed_planes[28] = cam_plane.d;
+    frustum->transposed_planes[17] = cam_plane.a;
+    frustum->transposed_planes[21] = cam_plane.b;
+    frustum->transposed_planes[25] = cam_plane.c;
+    frustum->transposed_planes[29] = cam_plane.d;
+    frustum->transposed_planes[18] = cam_plane.a;
+    frustum->transposed_planes[22] = cam_plane.b;
+    frustum->transposed_planes[26] = cam_plane.c;
+    frustum->transposed_planes[30] = cam_plane.d;
+    frustum->transposed_planes[19] = cam_plane.a;
+    frustum->transposed_planes[23] = cam_plane.b;
+    frustum->transposed_planes[27] = cam_plane.c;
+    frustum->transposed_planes[31] = cam_plane.d;
 
     frustum->transposed_planes[0] = planes[0].a;
     frustum->transposed_planes[4] = planes[0].b;
@@ -3115,35 +3111,35 @@ static void transposeClipPlanes(NUFRUSTRUM *frustum) {
     frustum->transposed_planes[6] = planes[2].b;
     frustum->transposed_planes[10] = planes[2].c;
     frustum->transposed_planes[14] = planes[2].d;
-    if (frustum->plane_count <= 3) {
+    if (frustum->plane_count < 4) {
         return;
     }
     frustum->transposed_planes[3] = planes[3].a;
     frustum->transposed_planes[7] = planes[3].b;
     frustum->transposed_planes[11] = planes[3].c;
     frustum->transposed_planes[15] = planes[3].d;
-    if (frustum->plane_count == 4) {
+    if (frustum->plane_count < 5) {
         return;
     }
     frustum->transposed_planes[16] = planes[4].a;
     frustum->transposed_planes[20] = planes[4].b;
     frustum->transposed_planes[24] = planes[4].c;
     frustum->transposed_planes[28] = planes[4].d;
-    if (frustum->plane_count == 5) {
+    if (frustum->plane_count < 6) {
         return;
     }
     frustum->transposed_planes[17] = planes[5].a;
     frustum->transposed_planes[21] = planes[5].b;
     frustum->transposed_planes[25] = planes[5].c;
     frustum->transposed_planes[29] = planes[5].d;
-    if (frustum->plane_count == 6) {
+    if (frustum->plane_count < 7) {
         return;
     }
     frustum->transposed_planes[18] = planes[6].a;
     frustum->transposed_planes[22] = planes[6].b;
     frustum->transposed_planes[26] = planes[6].c;
     frustum->transposed_planes[30] = planes[6].d;
-    if (frustum->plane_count == 7) {
+    if (frustum->plane_count < 8) {
         return;
     }
     frustum->transposed_planes[19] = planes[7].a;
@@ -10011,10 +10007,9 @@ void NuQFntUTF8toQCode(NUQFNT *font, char *text, u16 *encoded) {
     if (font == NULL)
         return;
 
-    NUWCHAR8 *cursor = reinterpret_cast<NUWCHAR8 *>(text);
-    while (*cursor != '\0') {
+    while (*text != '\0') {
         NUWCHAR16 character __attribute__((aligned(16)));
-        cursor = NuUnicodeCharFromUTF8(&character, cursor);
+        text = reinterpret_cast<char *>(NuUnicodeCharFromUTF8(&character, reinterpret_cast<NUWCHAR8 *>(text)));
         *encoded = NuQFntEncodeUnicodeChar(font, character);
         if (*encoded == 0xffff)
             *encoded = NuQFntEncodeUnicodeChar(font, '?');
@@ -10556,17 +10551,21 @@ extern "C" void NuTexAnimProgAssembleEnd(nutexanimprog_s *program) {
     while (index < program->instruction_count) {
         switch (program->instructions[index]) {
             case 0:
-            case 1:
-            case 17:
                 index += 2;
+                break;
+            case 1:
+                index += 2;
+                break;
+            case 2:
+                index += 4;
                 break;
             case 3:
                 index += 5;
                 break;
             case 4:
+                index += 3;
+                break;
             case 7:
-            case 13:
-            case 15:
                 index += 3;
                 break;
             case 9:
@@ -10581,13 +10580,23 @@ extern "C" void NuTexAnimProgAssembleEnd(nutexanimprog_s *program) {
                 program->instructions[index + 3] = nta_labels[program->instructions[index + 3]];
                 index += 4;
                 break;
-            case 2:
-                index += 4;
-                break;
             case 12:
+                ++index;
+                break;
+            case 13:
+                index += 3;
+                break;
             case 14:
+                ++index;
+                break;
+            case 15:
+                index += 3;
+                break;
             case 16:
                 ++index;
+                break;
+            case 17:
+                index += 2;
                 break;
         }
     }
@@ -16254,16 +16263,14 @@ extern "C" __attribute__((force_align_arg_pointer)) i32 NuRndrCircle(f32 x, f32 
 
 void NuWindInitialise(NUWIND *wind) {
     if (wind != NULL) {
+        for (i32 i = 0; i < 8; ++i)
+            wind->unk0[i] = -1;
         wind->unk2.x = 1.0f;
         wind->unk2.y = 1.0f;
+        wind->unk1 = -1;
         wind->unk2.z = 0.0f;
         wind->unk2.w = 0.0f;
         wind->unk3 = 0.0f;
-        wind->unk1 = -1;
-
-        for (usize i = 0; i < 8; ++i) {
-            wind->unk0[i] = -1;
-        }
     }
 }
 

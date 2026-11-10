@@ -73,7 +73,7 @@ static i32 Tube_ActivateRev(GIZMO *gizmo, i32 reverse, i32 check_only) {
 
     TUBE *tube = static_cast<TUBE *>(gizmo->object);
     if ((check_only & 1) != 0) {
-        return ((tube->flags & TUBE_FLAG_REVERSED) != 0) != (reverse != 0);
+        return reverse != (static_cast<u8>(tube->flags >> 3) & 1);
     }
 
     if (reverse != 0) {

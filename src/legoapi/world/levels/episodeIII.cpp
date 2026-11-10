@@ -943,11 +943,9 @@ void VaderA_Update(WORLDINFO_s *) {
 }
 
 void VaderA_DrawPanel(WORLDINFO_s *) {
-    if (vader_a.count <= 2) {
-        if (vader_a.count != 0) {
-            DrawTimer((i32)vader_a.timer + 1, vader_a.subtitle, 0);
-            vader_a.subtitle = 0;
-        }
+    if (vader_a.count != 0 && static_cast<i16>(vader_a.count) < 3) {
+        DrawTimer((i32)vader_a.timer + 1, vader_a.subtitle, 0);
+        vader_a.subtitle = 0;
     }
 }
 

@@ -1363,12 +1363,12 @@ void SarlaccPitB_Reset(WORLDINFO_s *world) {
     LevelBuildits[1] = GizBuildIt_Find(world, "buildit4");
     LevelLocator = AIPathFindLocator(world->ai_sys, "DiscoHelp");
 
+    if (NuSpecialExistsFn(&LevSpecial[3]))
+        NuSpecialSetVisibility(&LevSpecial[3], 0);
     if (NuSpecialExistsFn(&LevSpecial[0]))
         NuSpecialSetVisibility(&LevSpecial[0], 0);
     if (NuSpecialExistsFn(&LevSpecial[1]))
         NuSpecialSetVisibility(&LevSpecial[1], 0);
-    if (NuSpecialExistsFn(&LevSpecial[2]))
-        NuSpecialSetVisibility(&LevSpecial[2], 0);
     if (GizForce_Complete(static_cast<GIZFORCE_s *>(forceMirrorBall->object)))
         GizObstacle_Stop(static_cast<GIZOBSTACLE_s *>(obstMirrorBall->object));
 }

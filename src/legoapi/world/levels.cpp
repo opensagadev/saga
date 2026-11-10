@@ -992,7 +992,8 @@ void PortalDoors_Configure(WORLDINFO_s *world, char *config) {
     world->portal_doors = portal_door;
 
     while (NuFParGetLine(parser) != 0) {
-        if (NuFParGetWord(parser) == 0 || NuStrICmp(parser->word_buf, const_cast<char *>("portaldoor")) != 0) {
+        NuFParGetWord(parser);
+        if (NuStrICmp(parser->word_buf, const_cast<char *>("portaldoor")) != 0) {
             continue;
         }
 
@@ -1009,16 +1010,15 @@ void PortalDoors_Configure(WORLDINFO_s *world, char *config) {
             }
         }
 
-        ++portal_door;
         ++world->portal_door_count;
+        ++portal_door;
     }
 
     NuFParDestroy(parser);
-    if (world->portal_door_count == 0) {
+    if (world->portal_door_count > 0)
+        world->giz_buffer.addr = ALIGN(reinterpret_cast<usize>(portal_door), 16);
+    else
         world->portal_doors = NULL;
-        return;
-    }
-    world->giz_buffer.addr = ALIGN(reinterpret_cast<usize>(portal_door), 16);
 }
 
 void PortalDoors_Update(WORLDINFO_s *world) {

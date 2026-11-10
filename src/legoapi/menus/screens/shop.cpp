@@ -1072,14 +1072,11 @@ void InitAlphaList() {
 }
 
 void UpdateCharacterIDs() {
-    const u16 count = ShopCollection.count_y;
-    if (count) {
-        COLLECTID *collect = ShopCollection.list;
-        shopitem_s *item = CharItems;
-        for (i32 i = 0; i < count; ++i, ++item, ++collect) {
-            item->price = collect->field3_0x4;
-            item->item_id = collect->id;
-        }
+    for (i32 i = 0; i < ShopCollection.count_y; ++i) {
+        COLLECTID *collect = &ShopCollection.list[i];
+        i32 price = collect->field3_0x4;
+        CharItems[i].item_id = collect->id;
+        CharItems[i].price = price;
     }
 }
 

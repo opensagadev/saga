@@ -495,16 +495,13 @@ static void GizmoTurret_Activate(GIZMO *gizmo, i32 active) {
 }
 
 static i32 GizmoTurret_ActivateRev(GIZMO *gizmo, i32 active, i32 reverse) {
-    if (gizmo == NULL) {
+    if (gizmo == NULL || gizmo->object == NULL) {
         return 0;
     }
     GIZTURRET_s *turret = static_cast<GIZTURRET_s *>(gizmo->object);
-    if (turret == NULL) {
-        return 0;
-    }
     if ((reverse & 1) != 0) {
         if ((turret->flags & GIZTURRET_FLAG_ACTIVE) != 0) {
-            return 0;
+            return active;
         }
         turret->flags &= ~0x10;
         return active == 0;

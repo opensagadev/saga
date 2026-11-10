@@ -1197,22 +1197,22 @@ static void edpartCancelTypeMenu(eduimenu_s *, eduimenu_s *) {
 static void edpartInit() {
     edpart_first_time_this_level = 1;
     edpart_mtl = NuMtlCreate3D(1);
-    edpart_mtl->opacity = 1.0f;
     edpart_mtl->diffuse_color.r = 0.5f;
     edpart_mtl->diffuse_color.g = 0.5f;
     edpart_mtl->diffuse_color.b = 0.5f;
-    edpart_mtl->attribs.alpha_mode = 0;
     edpart_mtl->attribs.cull_mode = 2;
     edpart_mtl->attribs.z_mode = 0;
+    edpart_mtl->opacity = 1.0f;
+    edpart_mtl->attribs.alpha_mode = 0;
     NuMtlUpdate(edpart_mtl);
     edpart_boxmtl = NuMtlCreate(1);
-    edpart_boxmtl->opacity = 1.0f;
     edpart_boxmtl->diffuse_color.r = 0.5f;
     edpart_boxmtl->diffuse_color.g = 0.5f;
     edpart_boxmtl->diffuse_color.b = 0.5f;
-    edpart_boxmtl->attribs.alpha_mode = 0;
     edpart_boxmtl->attribs.cull_mode = 2;
     edpart_boxmtl->attribs.z_mode = 3;
+    edpart_boxmtl->opacity = 1.0f;
+    edpart_boxmtl->attribs.alpha_mode = 0;
     NuMtlUpdate(edpart_boxmtl);
     edpart_nearest = -1;
     edpart_curr = -1;
